@@ -1,0 +1,39 @@
+Language: Cpp
+BasedOnStyle: LLVM
+UseTab: Never
+IndentWidth: 4
+ColumnLimit: 120
+TabWidth: 4
+#BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterControlStatement: false
+  AfterFunction: false
+  AfterClass: true
+  AfterEnum: true
+  BeforeElse: false
+ReflowComments: false
+AlignAfterOpenBracket: Align # If true, horizontally aligns arguments after an open bracket.
+AlignConsecutiveAssignments: true #  This will align the assignment operators of consecutive lines
+AlignConsecutiveDeclarations: true # This will align the declaration names of consecutive lines
+AlignTrailingComments: true
+AllowAllParametersOfDeclarationOnNextLine: false
+AllowShortBlocksOnASingleLine: false
+AllowShortFunctionsOnASingleLine: false
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+#AlwaysBreakAfterReturnType: TopLevel
+AlwaysBreakTemplateDeclarations: true #  If true, always break after the template<...> of a template declaration
+BinPackArguments: false
+BinPackParameters: false
+BreakBeforeBinaryOperators: NonAssignment
+BreakConstructorInitializersBeforeComma: true # Always break constructor initializers before commas and align the commas with the colon.
+ExperimentalAutoDetectBinPacking: false
+KeepEmptyLinesAtTheStartOfBlocks: false
+MaxEmptyLinesToKeep: 4
+PenaltyBreakBeforeFirstCallParameter: 200
+PenaltyExcessCharacter: 10
+PointerAlignment: Middle
+SpaceAfterCStyleCast: false
+SpaceBeforeAssignmentOperators: true
+SpacesInCStyleCastParentheses: false
+SpacesInParentheses: false
