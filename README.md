@@ -109,9 +109,13 @@ The schematic from Juergen which this is based off is:
 **Notes:**\
 *Optionally I've also added 2 polyfuses between the EMS and the Inductors which are not shown in the layout or schematics above.*
 
-Here's an example circuit using an NodeMCU2 with the additional LEDs and buck converter. The inputs from the EMS are not shown but there are at J60 and J58 at the bottom left.
+Here's a pretty rough example circuit using a NodeMcu2 with the additional LEDs and buck converter. The inputs from the EMS are not shown but there are at J60 and J58 at the bottom left.
 
-![|Breadboard](doc/schematics/breadboard.JPG)
+![Breadboard](doc/schematics/breadboard.png)
+
+The nicest solution ultimately is to purchase a ready made circuit from [Kees](http://www.domoticz.com/forum/memberlist.php?mode=viewprofile&u=1736). Here's an example of one working with a Wemos D1 Mini:
+
+![WemosD1](doc/schematics/wemos_kees.png)
 
 ## Known Issues
 
