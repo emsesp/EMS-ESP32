@@ -58,7 +58,7 @@ I've tested the code and circuit with a Wemos D1 Mini, Wemos D1 Mini Pro, Nodemc
 ## Getting Started
 
 1. Build the circuit (or purchase a ready built one from Kees via his [GitHub](https://github.com/bbqkees/Nefit-Buderus-EMS-bus-Arduino-Domoticz) page or the [Domoticz forum](http://www.domoticz.com/forum/viewtopic.php?f=22&t=22079&start=20)).
-2. Connect the EMS to the circuit and the RX/TX to the ESP8266 on pins D7 and D8. The EMS connection can either be the 12-15V AC direct from the EMS (split from the Thermostat if you have one) or from the Service Jack at the front. Again Kees has a nice explanation [here](https://github.com/bbqkees/Nefit-Buderus-EMS-bus-Arduino-Domoticz/tree/master/Documentation).
+2. Connect the EMS to the circuit and the RX/TX to the ESP8266 on pins D7 and D8. The EMS connection can either be the 12-15V AC direct from the EMS (split from the Thermostat if you have one) or from the Service Jack at the front. Again bbqkees has a nice explanation [here](https://github.com/bbqkees/Nefit-Buderus-EMS-bus-Arduino-Domoticz/tree/master/Documentation).
 3. Optionally connect the three LEDs to show RX and TX traffic and Error codes to pins D1, D2, D3 respectively. I use 220 Ohm pull-down resistors. The pins are configurable in ``boiler.ino``. See the explanation below in the **code** section.
 3. Build and upload the firmware to an ESP8266 device. Make sure you set the MQTT and WiFi credentials. If you're not using MQTT leave the MQTT_IP blank. The firmware supports OTA too and the default hostname is 'boiler' or 'boiler.' depending on the mdns resolve.
 4. Power the ESP from an external 5V supply, either via USB or direct into the 5v vin pin.
@@ -74,7 +74,7 @@ For example:
 
 ![Telnet](doc/telnet/telnet_example.JPG)
 
-If you hit 'q' and Enter, it will toggle verbose logging and you will see more details. I use ANSI colours with white text for info messages, green for well formatted telegram packages which the correct CRC, Red for corrupt packages and Yellow for send responses.
+If you hit 'q' and Enter, it will toggle verbose logging and you will see more details. I use ANSI colors with white text for info messages, green for well formatted telegram packages which the correct CRC, Red for corrupt packages and Yellow for send responses.
 
 ![Telnet](doc/telnet/telnet_verbose.JPG)
 
@@ -125,17 +125,17 @@ The nicest solution ultimately is to purchase a ready made circuit from [Kees](h
 
 ## Known Issues
 
-* Sometimes the first write command is not sent, probably due to a collision somewhere in the uart code. The retries in the code fix that but it is annoying nevertheless.
-* Sometimes you get duplicate telegrams being processed. Again not an issue, but annoying. This is a bug somewhere in the code.
+* Sometimes the first write command is not sent, probably due to a collision somewhere in the UART code. The retries in the code fix that but it is annoying nevertheless.
+* Sometimes you get duplicate telegrams being processed. Again, not an issue but annoying nevertheless. This is a bug somewhere in the code.
 
 ## To Do
 
-Here's still things to do on my todo list:
+Here's my top things I'm still working on:
 
-* Make an ESPurna version. ESPurna takes care of the wifi, mqtt, web, telnet and does a better job that my ESPHelper code.
+* Make an ESPurna version. ESPurna takes care of the WiFi, MQTT, web server, telnet & debugging and does a better job that my modified ESPHelper code.
 * Complete the ESP32 version. It's surprisingly a lot easier doing the UART code on an ESP32 with the ESP-IDF framework. The first beta version is working.
 * Find a better way to control the 3-way valve to switch the warm water off quickly rather than adjusting the temperature.
-* Find a stable way of powering the ESP8266 from the EMS 12V using a buck step-down converter. This does work reasonably ok on a breakboard but there is noise.
+* Find a stable way of powering the ESP8266 from the EMS 12V using a buck step-down converter. This does work reasonably fine on a breadboard but there is noise.
 
 
 ## How the EMS works
@@ -159,7 +159,7 @@ Our device has a special ID of 0x0B which is a reserved ID for a Service tool. N
 ### 1. EMS Polling
 The bus master (boiler) sends out a poll request every second by sending out a sequential list of all possible IDs as a single byte followed by a break signal. The ID has its 7th bit set so it's `[dest|0x80] <BRK>`.
 
-Any connected device can respond to a Polling call with an acknowledging by sending back a single byte with its own ID. For example in our case we would listen for a `[0x8B] <BRK>` (us) and then send back `[0x0B] <BRK>` to say we're alive and ready.
+Any connected device can respond to a Polling call with an acknowledging by sending back a single byte with its own ID. For example, in our case we would listen for a `[0x8B] <BRK>` (us) and then send back `[0x0B] <BRK>` to say we're alive and ready.
 
 Polling is also the key to start transmitting any packages queued for sending.
 
@@ -226,6 +226,8 @@ When doing a write request, the 7th bit is masked in the ``[dest]``. After a wri
 ### MQTT
 
 When the ESP8266 boots it will send a start signal via MQTT. This is picked up by Home Assistant it sends me a notification informing me that the device has booted. Useful for knowing when the ESP gets reset - it can happen.
+
+I run Mosquitto on my Raspberry PI 3.
 
 The temperature values of the thermostat are sent as a JSON object using
  `home/boiler/thermostat` and payload for example of `{"currtemp":"22.30","seltemp":"20.00"}`
@@ -411,7 +413,7 @@ restart your PC to pick up the new PATH settings and start Visual Studio Code. I
 
 and hit **reload** to activate them all.
 
-Next download espurna by cloning the git repository from https://github.com/xoseperez/espurna.git. Either from a terminla using 'git clone' or the GUI interface. From VSC open the folder ``espurna\code``
+Next download espurna by cloning the git repository from https://github.com/xoseperez/espurna.git. Either from a terminal using 'git clone' or the GUI interface. From VSC open the folder ``espurna\code``
  - open a terminal window (ctrl-`) 
  - Install the node modules: ``npm install --only=dev``
  - Build the web interface:  ``node node_modules/gulp/bin/gulp.js``
