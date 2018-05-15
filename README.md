@@ -1,6 +1,6 @@
 # EMS-ESP-Boiler
 
-Boiler is an implementation of the EMS bridge (Energy Management System) for Buderus/Bosch/Nefit boilers specifically using an ESP8266. With the code and circuit you'll be able to read values and write commands to the Boilr and any connected devices like a Thermostat. And the data is collected and sent via MQTT to Home Assistant or another server.
+EMS-ESP-Boiler is an implementation of the EMS bridge protocol (Energy Management System) used in Buderus/Bosch/Nefit boilers running on an ESP8266 microcontroller. With the code and circuit design you'll be able to read values and write commands to the Boiler and any connected devices such as a thermostat. The data is collected and sent via MQTT to home automation server such as Home Assistant or Domoticz.
 
 [![version](https://img.shields.io/badge/version-1.0-brightgreen.svg)](CHANGELOG.md)
 [![branch](https://img.shields.io/badge/branch-dev-orange.svg)](https://github.org/xoseperez/espurna/tree/dev/)
@@ -8,8 +8,9 @@ Boiler is an implementation of the EMS bridge (Energy Management System) for Bud
 
 - [EMS-ESP-Boiler](#ems-esp-boiler)
   - [Introduction](#introduction)
+  - [Which Boilers are supported?](#which-boilers-are-supported)
   - [Acknowledgments](#acknowledgments)
-  - [ESP8266 device Compatibility](#esp8266-device-compatibility)
+  - [ESP8266 device compatibility](#esp8266-device-compatibility)
   - [Getting Started](#getting-started)
   - [Debugging](#debugging)
   - [Building the Circuit](#building-the-circuit)
@@ -27,32 +28,36 @@ Boiler is an implementation of the EMS bridge (Energy Management System) for Bud
     - [Using pre-built firmware's](#using-pre-built-firmwares)
     - [Using PlatformIO](#using-platformio)
     - [Using ESPurna](#using-espurna)
-    - [Your comments and feeback](#your-comments-and-feeback)
+    - [Your comments and feedback](#your-comments-and-feedback)
 
 
 ## Introduction
 
-I wanted to build my own Thermostat (similar to an Nefit Easy) and control it via Home Assistant and MQTT messages. The other driver for this project is that I wanted to know how long my two teenage daughters where taking showers and build in a timer that sends a short warning shot of cold water after a specific time *\<evil laugh\>*. 
+I originally started this project with the intention to build my own smart thermostat for my Nefit Trendline boiler and control it via Home Assistant. When I started deciphering the boiler EMS codes I began adding new features such as timing how long the shower was running for and triggering an alarm (actually a shot of cold water!) after a certain duration. This to the delight of my two teenage daughters :-)
+
+## Which Boilers are supported?
+
+Most Bosch branded boilers that support the Logamatic EMS (and EMS+) bus protocols which are Nefit, Buderus, Worcester and Junkers.
 
 ## Acknowledgments
 
 First, a big thanks and appreciation to the following people and their projects for giving me inspiration and code snippets:
 
- **bbqkees** - Kees built an Arduino version to read from the EMS for Domoticz, including a circuit which you can purchase. Check out https://github.com/bbqkees/Nefit-Buderus-EMS-bus-Arduino-Domoticz
+ **bbqkees** - Kees built a circuit and sample Arduino code to read from the EMS and push to Domoticz. His SMD circuit is available for purchase. Check it out at https://github.com/bbqkees/Nefit-Buderus-EMS-bus-Arduino-Domoticz
 
- **susisstrolch** - A working version of the EMS bridge and circuit for the ESP8266. https://github.com/susisstrolch/EMS-ESP12
+ **susisstrolch** - Probably the first working version of the EMS bridge circuit designed for the ESP8266. I borrowed his schematic and code logic. https://github.com/susisstrolch/EMS-ESP12
 
- **EMS Wiki** - A reference for decoding the EMS telegrams (but I found not always 100% accurate). https://emswiki.thefischer.net/doku.php?id=wiki:ems:telegramme
+ **EMS Wiki** - A reference for decoding the EMS telegrams (which I found not always 100% accurate). https://emswiki.thefischer.net/doku.php?id=wiki:ems:telegramme. Use Google Translate if you can't read German.
 
 
-## ESP8266 device Compatibility
+## ESP8266 device compatibility
 
 I've tested the code and circuit with a Wemos D1 Mini, Wemos D1 Mini Pro, Nodemcu0.9 and Nodemcu2 development boards.
 
 
 ## Getting Started
 
-1. Build the circuit (or purchase a ready built one from Kees via his [GitHub](https://github.com/bbqkees/Nefit-Buderus-EMS-bus-Arduino-Domoticz) page or the [Domoticz forum](http://www.domoticz.com/forum/viewtopic.php?f=22&t=22079&start=20))
+1. Build the circuit (or purchase a ready built one from Kees via his [GitHub](https://github.com/bbqkees/Nefit-Buderus-EMS-bus-Arduino-Domoticz) page or the [Domoticz forum](http://www.domoticz.com/forum/viewtopic.php?f=22&t=22079&start=20)).
 2. Connect the EMS to the circuit and the RX/TX to the ESP8266 on pins D7 and D8. The EMS connection can either be the 12-15V AC direct from the EMS (split from the Thermostat if you have one) or from the Service Jack at the front. Again Kees has a nice explanation [here](https://github.com/bbqkees/Nefit-Buderus-EMS-bus-Arduino-Domoticz/tree/master/Documentation).
 3. Optionally connect the three LEDs to show RX and TX traffic and Error codes to pins D1, D2, D3 respectively. I use 220 Ohm pull-down resistors. The pins are configurable in ``boiler.ino``. See the explanation below in the **code** section.
 3. Build and upload the firmware to an ESP8266 device. Make sure you set the MQTT and WiFi credentials. If you're not using MQTT leave the MQTT_IP blank. The firmware supports OTA too and the default hostname is 'boiler' or 'boiler.' depending on the mdns resolve.
@@ -62,17 +67,18 @@ I've tested the code and circuit with a Wemos D1 Mini, Wemos D1 Mini Pro, Nodemc
 
 ## Debugging
 
+Because the Rx and Tx of the MCU is occupied with communicating to the EMS
 Use the telnet client to inform you of all activity and errors if they happen. Note, if you're unable to to connect start the ESP with serial mode and look for connection errors in the serial out window.
 
-The telnet will show for example:
+For example:
 
 ![Telnet](doc/telnet/telnet_example.JPG)
 
-If you hit 'q' and Enter, it will toggle verbose logging and you will see more details:
+If you hit 'q' and Enter, it will toggle verbose logging and you will see more details. I use ANSI colours with white text for info messages, green for well formatted telegram packages which the correct CRC, Red for corrupt packages and Yellow for send responses.
 
 ![Telnet](doc/telnet/telnet_verbose.JPG)
 
-To see the current values of the Boiler type 's' and hit Enter:
+To see the current values of the Boiler and its parameters type 's' and hit Enter. Here it will tell you how many unsuccessful telegram packets it has received (#CrcErrors). 
 
 ![Telnet](doc/telnet/telnet_stats.JPG)
 
@@ -127,7 +133,7 @@ The nicest solution ultimately is to purchase a ready made circuit from [Kees](h
 Here's still things to do on my todo list:
 
 * Make an ESPurna version. ESPurna takes care of the wifi, mqtt, web, telnet and does a better job that my ESPHelper code.
-* Complete the ESP32 version. It's surprisingly a lot easier doing the UART code on an ESP32. The first beta version is working.
+* Complete the ESP32 version. It's surprisingly a lot easier doing the UART code on an ESP32 with the ESP-IDF framework. The first beta version is working.
 * Find a better way to control the 3-way valve to switch the warm water off quickly rather than adjusting the temperature.
 * Find a stable way of powering the ESP8266 from the EMS 12V using a buck step-down converter. This does work reasonably ok on a breakboard but there is noise.
 
@@ -192,33 +198,81 @@ When doing a write request, the 7th bit is masked in the ``[dest]``. After a wri
 
  ## The Code
 
- This code here is really for reference only, I don't expect anyone to use as is since it's highly tailored to my environment and my needs. Most of the code is self explanatory with comments here and there, however if you wish to make some changes start with the ``defines`` and ``const`` sections at the top of ``boiler.ino``. 
+ Disclaimer: This code here is really for reference only, I don't expect anyone to use as is since it's highly tailored to my environment and my needs. Most of the code however is self explanatory with comments here and there. If you wish to make some changes start with the ``defines`` and ``const`` sections at the top of ``boiler.ino``.
 
- `emsuart.cpp` handles the low level UART read and write logic. You shouldn't need to touch this. All receive commands from the EMS bus are handled asynchronously using a circular buffer via an interrupt. A seperate call processes the buffer and extracts the telegrams. Since we don't send many Write commands this is done sequentially.
+ The code is built on the Arduino framework as opposed to the ESP-IDF.
+
+ These external libraries are used:
+ * Time http://playground.arduino.cc/code/time
+ * PubSubClient http://pubsubclient.knolleary.net
+ * ArduinoJson https://github.com/bblanchon/ArduinoJson
+ * Ticker https://github.com/sstaub/Ticker
+
+ `src\emsuart.cpp` handles the low level UART read and write logic. You shouldn't need to touch this. All receive commands from the EMS bus are handled asynchronously using a circular buffer via an interrupt. A separate function processes the buffer and extracts the telegrams. Since we don't send many Write commands this is done sequentially.
  
- `ems.cpp` is the logic to read the EMS packets (telegrams) and process them. If you have another thermostat type this is where you will configure it. The logic is roughly:
+ `src\ems.cpp` is the logic to read the EMS packets (telegrams), validates them and process them based on the type. If you have another thermostat type this is where you will configure it.
 
- `boiler.ino` is the Arduino code for the ESP8266 that kicks it all off. This is where we have specific logic such as the code to monitor and alert on the Shower timer.
+ `src\boiler.ino` is the Arduino code for the ESP8266 that kicks it all off. This is where we have specific logic such as the code to monitor and alert on the Shower timer and light up the LEDs.
+
+ `lib\ESPHelper` is my customized version of [ESPHelper](https://github.com/ItKindaWorks/ESPHelper) with added Telnet support and some other tweaking.
 
  ### Customizing
 
- Most of the changes will be done in ``boiler.ino``. 
- * To add new handlers for data types, create a callback function and add to the EMS_Types at the top of the file ``ems.cpp`` and the defines in ``ems.h``
- * To change your thermostat type set ``EMS_ID_THERMOSTAT`` in ``ems.h``. The default is 0x17 for an RC20.
- * The DEFINES ``BOILER_THERMOSTAT_ENABLED``, ``BOILER_SHOWER_ENABLED`` and ``BOILER_SHOWER_TIMER`` enabled the Thermostat logic, the shower logic and the shower timer alert logic respectively. 1 is on and 0 is off.
+ Most of the changes will be done in `boiler.ino` and `ems.cpp`. 
+ * To add new handlers for data types, create a callback function and add to the EMS_Types at the top of the file `ems.cpp` and the new DEFINES in `ems.h`
+ * To change your thermostat type set `EMS_ID_THERMOSTAT` in `ems.h`. The default is 0x17 for an RC20.
+ * The DEFINES `BOILER_THERMOSTAT_ENABLED`, `BOILER_SHOWER_ENABLED` and `BOILER_SHOWER_TIMER` enabled the thermostat logic, the shower logic and the shower timer alert logic respectively. 1 is on and 0 is off.
 
 ### MQTT
 
-When the ESP8266 boots it will send a start signal via MQTT to the broker. I use this to mark the boot time for the device and send out a notification. This is useful to monitor when the ESP8266 crashes and reboots.
+When the ESP8266 boots it will send a start signal via MQTT. This is picked up by Home Assistant it sends me a notification informing me that the device has booted. Useful for knowing when the ESP gets reset - it can happen.
 
-The temperatures of the thermostat are sent as a JSON object using
- ``home/boiler/thermostat`` and payload for example of ``{"currtemp":"22.30","seltemp":"20.00"}``
+The temperature values of the thermostat are sent as a JSON object using
+ `home/boiler/thermostat` and payload for example of `{"currtemp":"22.30","seltemp":"20.00"}`
 
- This can be also be configured in the ``TOPIC_*`` defines in ``boiler.ino``.
+The topics can be configured in the `TOPIC_*` defines in `boiler.ino`. Make sure you change the HA configuration too.
 
 ## Home Assistant Configuration
 
-Assuming you've setup up MQTT correctly, here is my HA configuration:
+Assuming you've setup up MQTT as I did, this is what my HA configuration looks like:
+
+**configuration.yaml**
+
+
+    automation: !include automations.yaml
+    input_number: !include input_number.yaml
+    group: !include groups.yaml
+    sensor: !include sensors.yaml
+
+
+**sensors.yaml**
+
+    - platform: mqtt
+      state_topic: 'home/boiler/thermostat'
+      name: 'Boiler Thermostat Current Temperature'
+      unit_of_measurement: '°C'
+      value_template: '{{ value_json.currtemp }}'
+
+    - platform: mqtt
+      state_topic: 'home/boiler/thermostat'
+      name: 'Boiler Thermostat Set Temperature'
+      unit_of_measurement: '°C'
+      value_template: '{{ value_json.seltemp }}'
+
+    - platform: template
+      sensors:
+        boiler_boottime:
+          value_template: '{{ as_timestamp(states.automation.see_if_boiler_restarts.attributes.last_triggered) | timestamp_custom("%H:%M:%S %d/%m/%y") }}'
+
+    - platform: mqtt
+      state_topic: 'home/boiler/showertime'
+      name: 'Last shower duration'
+      force_update: true
+
+    - platform: template
+      sensors:
+        showertime_time:
+          value_template: '{{ as_timestamp(states.sensor.last_shower_duration.last_updated) | int | timestamp_custom("%-I:%M %P on %a %-d %b") }}'
 
 **automations.yaml**
 
@@ -270,7 +324,23 @@ Assuming you've setup up MQTT correctly, here is my HA configuration:
         - sensor.boiler_thermostat_set_temperature
         - input_number.thermostat_temp
 
-And looks like:
+**customize.yaml**
+
+     sensor.boiler_boottime:
+       friendly_name: Boot time
+       icon: mdi:clock-start
+
+     sensor.showertime_time:
+       friendly_name: 'Last shower'
+       icon: mdi:timelapse
+
+     sensor.boiler_thermostat_current_temperature:
+       friendly_name: 'Current room temperature'
+
+     sensor.boiler_thermostat_set_temperature:
+       friendly_name: 'Set thermostat temperature'
+
+And in Home Assistant looks like:
 
  ![Home Assistant panel)](doc/ha/ha.JPG) 
 
@@ -279,22 +349,24 @@ And looks like:
 
 ### Using pre-built firmware's
 
-In the `/firmware` folder, if there are pre-built versions you can upload using esptool (https://github.com/espressif/esptool) bootloader. Follow these instructions for Windows:
+In the `/firmware` folder, if there are pre-built versions you can upload using esptool (https://github.com/espressif/esptool) bootloader. On Windows, follow these instructions:
 
-1. Check if you have python 2.7 installed. If not download it from https://www.python.org/downloads/ and make sure you add Python to the windows PATH so it'll recognize .py files
-2. Install the ESPTool (https://github.com/espressif/esptool) by running `pip install esptool` from a command prompt.
-3. Connect the ESP via USB, figure out the COM port
-4. do `esptool.py -p <com> write_flash 0x00000 <firmware>` where firmware is the .bin file and com is the com port, e.g. COM3
+1. Check if you have python 2.7 installed. If not [download it](https://www.python.org/downloads/) and make sure you add Python to the windows PATH so it'll recognize .py files.
+2. Install the ESPTool by running `pip install esptool` from a command prompt.
+3. Connect the ESP via USB, figure out the COM port.
+4. run `esptool.py -p <com> write_flash 0x00000 <firmware>` where firmware is the .bin file and \<com\> is the com port, e.g. COM3
 
 ### Using PlatformIO
 
-There are two ways to compile and build the firmware.
+There are two ways to compile and build the firmware yourself.
 
 The first method is a standalone version which uses a modified version of [ESPHelper](https://github.com/ItKindaWorks/ESPHelper) for the WiFi, OTA and MQTT handling. I've added some code to add a Telnet server which is useful for debugging since you can't use the serial port because UART is configured to use different pins.
 
-To compile, using PlatformIO and modify the `platformio.ini` adding these build flags:
+To compile, using PlatformIO create a project and modify your `platformio.ini` to include these build flags:
 
 `WIFI_SSID, WIFI_PASSWORD, MQTT_IP, MQTT_USER, MQTT_PASS`
+
+If you're not using MQTT keep MQTT_IP empty (`MQTT_IP=""`)
 
 Here's an example `platformio.ini` file:
 
@@ -332,21 +404,23 @@ If you're using Windows follow these steps. We'll be using the free Visual Studi
 - Visual Studio Code (VSC): https://code.visualstudio.com/docs/?dv=win
 - Install node.js and npm (LTS version): https://nodejs.org/en/download
 
-restart your PC just in case and start Visual Studio Code. It should detect Git. Now go and search for and install these visual studio code extensions:
+restart your PC to pick up the new PATH settings and start Visual Studio Code. It should now detect Git. Now go and search for and install these following VSC extensions:
 
 - PlatformIO IDE
 - GitLens
 
 and hit **reload** to activate them all.
 
-Next download espurna by cloning the git repository from https://github.com/xoseperez/espurna.git, start VSC and open the folder ``espurna\code``
+Next download espurna by cloning the git repository from https://github.com/xoseperez/espurna.git. Either from a terminla using 'git clone' or the GUI interface. From VSC open the folder ``espurna\code``
  - open a terminal window (ctrl-`) 
  - Install the node modules: ``npm install --only=dev``
  - Build the web interface:  ``node node_modules/gulp/bin/gulp.js``
+
+PlatformIO should detect and set some things up for you. Build and Deploy as you normally would in PlatformIO.
  	
-If you run into issues refer to proper ESPurnas setup instructions [here](https://github.com/xoseperez/espurna/wiki/Build-and-update-from-Visual-Studio-Code-using-PlatformIO).
+If you run into issues refer to official ESPurnas setup instructions [here](https://github.com/xoseperez/espurna/wiki/Build-and-update-from-Visual-Studio-Code-using-PlatformIO).
 	
-### Your comments and feeback
+### Your comments and feedback
 
 Any comments or suggestions are very welcome. You can contact me at **dev** at **derbyshire** dot **nl** or via an *Issue* in GitHub	
 
