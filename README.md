@@ -91,8 +91,7 @@ You can issue commands directly to the bus using 'r' and some other examples I p
 * **T** to toggle thermostat reading on/off
 * **S** to toggle the Shower Timer functionality on/off
 
-*Disclaimer: be careful when sending values to the boiler. If in doubt you can always reset the boiler to its original factory settings by following the instructions in the user guide. On my Nefit Trendline HRC30 its pressing the Home and Menu buttons at the same time, selecting factory settings from the scroll menu and pressing the button Reset. ***Yes, I learned the hard way!***
-
+*Disclaimer: be careful when sending values to the boiler. If in doubt you can always reset the boiler to its original factory settings by following the instructions in the user guide. On my **Nefit Trendline HRC30** that is done by pressing the Home and Menu buttons simultaneously, selecting factory settings from the scroll menu and pressing the Reset button.
 
 ## Building the Circuit
 
@@ -140,36 +139,38 @@ Here's my top things I'm still working on:
 
 ## How the EMS works
 
-Packages are sent on the EMS "bus" from the Boiler and any other compatible connected device. The protocol is 9600 baud, 8N1 (8 bytes, no parity, 1 stop bit). Each package is terminated with a Break signal depicted as <BRK> which is a 11 bit long low signal (zeros).
+Packages are sent to the EMS "bus" from the Boiler and any other compatible connected device via serial transmission. The protocol is 9600 baud, 8N1 (8 bytes, no parity, 1 stop bit). Each package is terminated with a break signal `<BRK>` which is a 11-bit long low signal of zeros.
 
-A package can be a single byte (see Polling below) or an actual data telegram. A telegram is always in the format:
+A package can be a single byte (see Polling below) or a string of 6 or more bytes making up an actual data telegram. A telegram is always in the format:
 
 ``[src] [dest] [type] [offset] [data] [crc] <BRK>``
+
+I reference the first 4 bytes as the *header* in this document.
 
 **IDs**
 
 Each device has a unique ID.
 
-The Boiler (MC10) has an ID of 0x08 and is referred to as the Bus Master.
+The Boiler (MC10) has an ID of 0x08 and also referred to as the Bus Master.
 
 My thermostat, which is a Moduline 300 uses the RC20 format and has an ID 0x17. If you're using an RC30 or RC35 type thermostat use 0x10 and make adjustments in the code as appropriate. Kees did a nice write-up on his github page [here](https://github.com/bbqkees/Nefit-Buderus-EMS-bus-Arduino-Domoticz/blob/master/README.md).
 
-Our device has a special ID of 0x0B which is a reserved ID for a Service tool. Nice and handy.
+Our circuit acts as a service device and uses a special reserved ID of 0x0B (called a service key).
 
 ### 1. EMS Polling
-The bus master (boiler) sends out a poll request every second by sending out a sequential list of all possible IDs as a single byte followed by a break signal. The ID has its 7th bit set so it's `[dest|0x80] <BRK>`.
+The bus master (boiler) sends out a poll request every second by sending out a sequential list of all possible IDs as a single byte followed by a break signal. The ID always has its high 7th bit set so in the code we're looking for `[dest|0x80] <BRK>`.
 
-Any connected device can respond to a Polling call with an acknowledging by sending back a single byte with its own ID. For example, in our case we would listen for a `[0x8B] <BRK>` (us) and then send back `[0x0B] <BRK>` to say we're alive and ready.
+Any connected device can respond to a Polling call with an acknowledging by sending back a single byte with its own ID. For example, in our case we would listen for a `[0x8B] <BRK>` (meaning us) and then send back `[0x0B] <BRK>` to say we're alive and ready.
 
-Polling is also the key to start transmitting any packages queued for sending.
+Polling is also the trigger to start transmitting any packages queued for sending. It must be done within 200ms or the bus master will time out.
 
 ## 2. EMS Broadcasting
 
-When a device is broadcasting to everyone there is no specific destination needed so the [dest] is always 0x00.
+When a device is broadcasting to everyone there is no specific destination needed. `[dest]` is always 0x00.
 
 The Boiler (ID 0x08) will send out these broadcast telegrams regularly:
 
-Type | Description | Data length | Frequency
+Type | Description (see [here](https://emswiki.thefischer.net/doku.php?id=wiki:ems:telegramme)) | Data length (excluding header) | Frequency
 --- | --- | --- | --- |
 0x34 | UBAMonitorWWMessage | 19 bytes | 10 seconds
 0x18 | UBAMonitorFast | 25 bytes | 10 seconds
@@ -177,7 +178,7 @@ Type | Description | Data length | Frequency
 0x1c | UBAWartungsmelding | 27 bytes | every minute
 0x2a | status, specific to boiler type | - | 10 seconds
 
-And a thermostat (id 0x17 for a RC20) these:
+And a thermostat (ID 0x17 for a RC20) would broadcast these messages regularly:
 
 Type | Description 
 --- | --- | 
@@ -186,7 +187,7 @@ Type | Description
 0xA3 | thermostat temperatures
 0x91 | set point room temperature x 2, room temperature x 10
 
-Refer to the code in ``ems.cpp`` for further explanation on how to parse these messages or the EMS Wiki (link above) for a detailed explanation.
+Refer to the code in ``ems.cpp`` for further explanation on how to parse these message types and also reference the EMS Wiki.
 
 ### 3. EMS Sending
 
@@ -198,7 +199,7 @@ When doing a write request, the 7th bit is masked in the ``[dest]``. After a wri
 
  ## The Code
 
- Disclaimer: This code here is really for reference only, I don't expect anyone to use as is since it's highly tailored to my environment and my needs. Most of the code however is self explanatory with comments here and there. If you wish to make some changes start with the ``defines`` and ``const`` sections at the top of ``boiler.ino``.
+ *Disclaimer*: This code here is really for reference only, I don't expect anyone to use as is since it's highly tailored to my environment and my needs. Most of the code however is self explanatory with comments here and there. If you wish to make some changes start with the ``defines`` and ``const`` sections at the top of ``boiler.ino``.
 
  The code is built on the Arduino framework as opposed to the ESP-IDF.
 
@@ -208,13 +209,13 @@ When doing a write request, the 7th bit is masked in the ``[dest]``. After a wri
  * ArduinoJson https://github.com/bblanchon/ArduinoJson
  * Ticker https://github.com/sstaub/Ticker
 
- `src\emsuart.cpp` handles the low level UART read and write logic. You shouldn't need to touch this. All receive commands from the EMS bus are handled asynchronously using a circular buffer via an interrupt. A separate function processes the buffer and extracts the telegrams. Since we don't send many Write commands this is done sequentially.
+ `src\emsuart.cpp` handles the low level UART read and write logic. You shouldn't need to touch this. All receive commands from the EMS bus are handled asynchronously using a circular buffer via an interrupt. A separate function processes the buffer and extracts the telegrams. Since we don't send many Write commands this is done sequentially. I couldn't use the standard Arduino Serial implementation because of the 11-bit break signal causes a frame-error which gets ignored. 
  
- `src\ems.cpp` is the logic to read the EMS packets (telegrams), validates them and process them based on the type. If you have another thermostat type this is where you will configure it.
+ `src\ems.cpp` is the logic to read the EMS packets (telegrams), validates them and process them based on the type. If you have another thermostat this is where you will configure it.
 
  `src\boiler.ino` is the Arduino code for the ESP8266 that kicks it all off. This is where we have specific logic such as the code to monitor and alert on the Shower timer and light up the LEDs.
 
- `lib\ESPHelper` is my customized version of [ESPHelper](https://github.com/ItKindaWorks/ESPHelper) with added Telnet support and some other tweaking.
+ `lib\ESPHelper` is my customized version of [ESPHelper](https://github.com/ItKindaWorks/ESPHelper) with added Telnet support and some other minor tweaking.
 
  ### Customizing
 
