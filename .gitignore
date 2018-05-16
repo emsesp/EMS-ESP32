@@ -13,3 +13,6 @@ lib/readme.txt
 .vscode/BROWSE.VC.DB-wal
 .vscode/BROWSE.VC.DB-shm
 lib/readme.txt
+extra_script.py
+.travis.yml
+.clang-format
