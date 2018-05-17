@@ -356,7 +356,7 @@ And in Home Assistant looks like:
 
 ![Home Assistant panel)](doc/ha/ha.png) 
 
-![Home Assistant iPhone notify)](doc/ha/ha_notify.JPG) 
+![Home Assistant iPhone notify)](doc/ha/ha_notify.jpg) 
 
 
 # Building the Firmware
