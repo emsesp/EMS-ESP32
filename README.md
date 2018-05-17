@@ -33,7 +33,7 @@ EMS-ESP-Boiler is an implementation of the EMS bridge protocol (Energy Managemen
 
 ## Introduction
 
-I originally started this project with the intention to build my own smart thermostat for my Nefit Trendline boiler and control it via Home Assistant. When I started deciphering the boiler EMS codes I began adding new features such as timing how long the shower was running for and triggering an alarm (actually a shot of cold water!) after a certain duration. This to the delight of my two teenage daughters :-)
+I originally started this project with the intention to build my own smart thermostat for my Nefit Trendline boiler and control it via [Home Assistant](https://www.home-assistant.io/). When I started deciphering the boiler EMS codes I began adding new features such as timing how long the shower was running for and triggering an alarm (actually a shot of cold water!) after a certain duration. This to the delight of my two teenage daughters :-)
 
 ## Which Boilers are supported?
 
@@ -45,7 +45,7 @@ First, a big thanks and appreciation to the following people and their projects 
 
  **bbqkees** - Kees built a circuit and sample Arduino code to read from the EMS and push to Domoticz. His SMD circuit is available for purchase. Check it out at https://github.com/bbqkees/Nefit-Buderus-EMS-bus-Arduino-Domoticz
 
- **susisstrolch** - Probably the first working version of the EMS bridge circuit designed for the ESP8266. I borrowed his schematic and code logic. https://github.com/susisstrolch/EMS-ESP12
+ **susisstrolch** - Probably the first working version of the EMS bridge circuit designed for the ESP8266. I borrowed Juergen's schematic and code logic. https://github.com/susisstrolch/EMS-ESP12
 
  **EMS Wiki** - A reference for decoding the EMS telegrams (which I found not always 100% accurate). https://emswiki.thefischer.net/doku.php?id=wiki:ems:telegramme. Use Google Translate if you can't read German.
 
@@ -57,7 +57,7 @@ I've tested the code and circuit with a Wemos D1 Mini, Wemos D1 Mini Pro, Nodemc
 
 ## Getting Started
 
-1. Build the circuit (or purchase a ready built one from Kees via his [GitHub](https://github.com/bbqkees/Nefit-Buderus-EMS-bus-Arduino-Domoticz) page or the [Domoticz forum](http://www.domoticz.com/forum/viewtopic.php?f=22&t=22079&start=20)).
+1. Build the circuit (or purchase a ready built one from bbqkees via his [GitHub](https://github.com/bbqkees/Nefit-Buderus-EMS-bus-Arduino-Domoticz) page or the [Domoticz forum](http://www.domoticz.com/forum/viewtopic.php?f=22&t=22079&start=20)).
 2. Connect the EMS to the circuit and the RX/TX to the ESP8266 on pins D7 and D8. The EMS connection can either be the 12-15V AC direct from the EMS (split from the Thermostat if you have one) or from the Service Jack at the front. Again bbqkees has a nice explanation [here](https://github.com/bbqkees/Nefit-Buderus-EMS-bus-Arduino-Domoticz/tree/master/Documentation).
 3. Optionally connect the three LEDs to show RX and TX traffic and Error codes to pins D1, D2, D3 respectively. I use 220 Ohm pull-down resistors. The pins are configurable in ``boiler.ino``. See the explanation below in the **code** section.
 3. Build and upload the firmware to an ESP8266 device. Make sure you set the MQTT and WiFi credentials. If you're not using MQTT leave the MQTT_IP blank. The firmware supports OTA too and the default hostname is 'boiler' or 'boiler.' depending on the mdns resolve.
@@ -95,7 +95,7 @@ You can issue commands directly to the bus using 'r' and some other examples I p
 
 ## Building the Circuit
 
-The EMS circuit is really all credit to the hard work many people have done before me, noticeably Juergen with his ESP8266 [version](https://github.com/susisstrolch/EMS-ESP8266_12-PCB/tree/newmaster/Schematics/EMS-ESP8266-12).
+The EMS circuit is really all credit to the hard work many people have done before me, noticeably *susisstrolch* with his ESP8266 [version](https://github.com/susisstrolch/EMS-ESP8266_12-PCB/tree/newmaster/Schematics/EMS-ESP8266-12).
 
 I've included a prototype boards you can build yourself on a breadboard. One for only Reading values from the Boiler and a second with the inclusion of the Write logic to send commands.
 
@@ -118,7 +118,7 @@ Here's a pretty rough example circuit using a NodeMcu2 with the additional LEDs 
 
 ![Breadboard](doc/schematics/breadboard.png)
 
-The nicest solution ultimately is to purchase a ready made circuit from [Kees](http://www.domoticz.com/forum/memberlist.php?mode=viewprofile&u=1736). Here's an example of one working with a Wemos D1 Mini:
+The nicest solution ultimately is to purchase a ready made circuit from [bbqkees](http://www.domoticz.com/forum/memberlist.php?mode=viewprofile&u=1736). Here's an example of one working with a Wemos D1 Mini:
 
 ![WemosD1](doc/schematics/wemos_kees.png)
 
@@ -153,7 +153,7 @@ Each device has a unique ID.
 
 The Boiler (MC10) has an ID of 0x08 and also referred to as the Bus Master.
 
-My thermostat, which is a Moduline 300 uses the RC20 format and has an ID 0x17. If you're using an RC30 or RC35 type thermostat use 0x10 and make adjustments in the code as appropriate. Kees did a nice write-up on his github page [here](https://github.com/bbqkees/Nefit-Buderus-EMS-bus-Arduino-Domoticz/blob/master/README.md).
+My thermostat, which is a Moduline 300 uses the RC20 format and has an ID 0x17. If you're using an RC30 or RC35 type thermostat use 0x10 and make adjustments in the code as appropriate. bbqkees did a nice write-up on his github page [here](https://github.com/bbqkees/Nefit-Buderus-EMS-bus-Arduino-Domoticz/blob/master/README.md).
 
 Our circuit acts as a service device and uses a special reserved ID of 0x0B (called a service key).
 
@@ -228,6 +228,8 @@ When doing a write request, the 7th bit is masked in the ``[dest]``. After a wri
 
 When the ESP8266 boots it will send a start signal via MQTT. This is picked up by Home Assistant it sends me a notification informing me that the device has booted. Useful for knowing when the ESP gets reset - it can happen.
 
+I'm using the standard PubSubClient client so make sure you set -DMQTT_MAX_PACKET_SIZE=512 as the default package size is 128 and our JSON messages are around 220 bytes.
+
 I run Mosquitto on my Raspberry PI 3.
 
 The temperature values of the thermostat are sent as a JSON object using
@@ -251,16 +253,14 @@ Assuming you've setup up MQTT as I did, this is what my HA configuration looks l
 **sensors.yaml**
 
     - platform: mqtt
-      state_topic: 'home/boiler/thermostat'
+      state_topic: 'home/boiler/thermostat_currtemp'
       name: 'Boiler Thermostat Current Temperature'
       unit_of_measurement: '°C'
-      value_template: '{{ value_json.currtemp }}'
 
     - platform: mqtt
-      state_topic: 'home/boiler/thermostat'
+      state_topic: 'home/boiler/thermostat_seltemp'
       name: 'Boiler Thermostat Set Temperature'
       unit_of_measurement: '°C'
-      value_template: '{{ value_json.seltemp }}'
 
     - platform: template
       sensors:
@@ -276,6 +276,12 @@ Assuming you've setup up MQTT as I did, this is what my HA configuration looks l
       sensors:
         showertime_time:
           value_template: '{{ as_timestamp(states.sensor.last_shower_duration.last_updated) | int | timestamp_custom("%-I:%M %P on %a %-d %b") }}'
+
+    - platform: mqtt
+      state_topic: 'home/boiler/boiler_data'
+      name: 'Warm Water current temperature'
+      unit_of_measurement: '°C'
+      value_template: '{{ value_json.wWCurTmp }}' 
 
 **automations.yaml**
 
@@ -319,33 +325,33 @@ Assuming you've setup up MQTT as I did, this is what my HA configuration looks l
 
 **groups.yaml**
 
+    boiler:
+    name: Boiler
+    view: no
+    entities:
+       - sensor.boiler_boottime
+       - sensor.warm_water_current_temperature
+
+    shower:
+    name: Shower
+    view: no
+    entities:
+       - sensor.last_shower_duration
+       - sensor.showertime_time
+
     thermostat:
       name: Thermostat
       view: no
       entities:
-        - sensor.boiler_thermostat_current_temperature
-        - sensor.boiler_thermostat_set_temperature
+        - sensor.thermostat_current_temperature
+        - sensor.thermostat_set_temperature
         - input_number.thermostat_temp
-
-**customize.yaml**
-
-     sensor.boiler_boottime:
-       friendly_name: Boot time
-       icon: mdi:clock-start
-
-     sensor.showertime_time:
-       friendly_name: 'Last shower'
-       icon: mdi:timelapse
-
-     sensor.boiler_thermostat_current_temperature:
-       friendly_name: 'Current room temperature'
-
-     sensor.boiler_thermostat_set_temperature:
-       friendly_name: 'Set thermostat temperature'
 
 And in Home Assistant looks like:
 
- ![Home Assistant panel)](doc/ha/ha.JPG) 
+![Home Assistant panel)](doc/ha/ha.png) 
+
+![Home Assistant iPhone notify)](doc/ha/ha_notify.JPG) 
 
 
 # Building the Firmware

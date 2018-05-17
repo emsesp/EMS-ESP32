@@ -51,9 +51,13 @@ void _showerColdShotStop();
 #define MQTT_BOILER MQTT_BASE HOSTNAME "/"
 #define TOPIC_START MQTT_BOILER MQTT_TOPIC_START
 
-#define TOPIC_THERMOSTAT MQTT_BOILER "thermostat"
-#define TOPIC_SHOWERTIME MQTT_BOILER "showertime"
-#define TOPIC_THERMOSTAT_TEMP MQTT_BOILER "thermostat_temp"
+#define TOPIC_THERMOSTAT_TEMP MQTT_BOILER "thermostat_temp"         // for received thermostat temp changes
+#define TOPIC_THERMOSTAT_CURRTEMP MQTT_BOILER "thermostat_currtemp" // current temperature
+#define TOPIC_THERMOSTAT_SELTEMP MQTT_BOILER "thermostat_seltemp"   // selected temperature
+
+#define TOPIC_BOILER_DATA MQTT_BOILER "boiler_data" // for sending boiler values
+#define TOPIC_SHOWERTIME MQTT_BOILER "showertime"   // for sending shower time results
+
 
 // all on
 #define BOILER_THERMOSTAT_ENABLED 1
@@ -190,11 +194,11 @@ void showInfo() {
     myDebug("  Current flow temperature: %s C\n", _float_to_char(s, EMS_Boiler.curFlowTemp));
     myDebug("  Return temperature: %s C\n", _float_to_char(s, EMS_Boiler.retTemp));
 
-    myDebug("  Gas: %s\n", EMS_Boiler.burnGas ? "on" : "off");              // 0 -gas on
-    myDebug("  Circulating pump: %s\n", EMS_Boiler.heatPmp ? "on" : "off"); // 5 - boiler circuit pump on
-    myDebug("  Fan: %s\n", EMS_Boiler.fanWork ? "on" : "off");              // 2
-    myDebug("  Ignition: %s\n", EMS_Boiler.ignWork ? "on" : "off");         // 3
-    myDebug("  Circulation pump: %s\n", EMS_Boiler.wWCirc ? "on" : "off");  // 7
+    myDebug("  Gas: %s\n", EMS_Boiler.burnGas ? "on" : "off");
+    myDebug("  Circulating pump: %s\n", EMS_Boiler.heatPmp ? "on" : "off");
+    myDebug("  Fan: %s\n", EMS_Boiler.fanWork ? "on" : "off");
+    myDebug("  Ignition: %s\n", EMS_Boiler.ignWork ? "on" : "off");
+    myDebug("  Circulation pump: %s\n", EMS_Boiler.wWCirc ? "on" : "off");
     myDebug("  Burner max power: %d %%\n", EMS_Boiler.selBurnPow);
     myDebug("  Burner current power: %d %%\n", EMS_Boiler.curBurnPow);
     myDebug("  Flame current: %s uA\n", _float_to_char(s, EMS_Boiler.flameCurr));
@@ -244,22 +248,40 @@ void showInfo() {
 
 // send values to HA via MQTT
 void publishValues() {
-    // only send values if we actually have them
-    if (((int)EMS_Thermostat.curr_roomTemp == (int)0) || ((int)EMS_Thermostat.setpoint_roomTemp == (int)0)) {
-        return;
-    }
-
     myDebug("Publishing data to MQTT topics\n");
 
-    // build a JSON with the current temp and selected temp from the Thermostat
-    StaticJsonBuffer<200> jsonBuffer;
+    // Boiler values as one JSON object
+    StaticJsonBuffer<512> jsonBuffer;
+    char                  data[512];
+    char                  s[20];
     JsonObject &          root = jsonBuffer.createObject();
-    root["currtemp"]           = (String)EMS_Thermostat.curr_roomTemp;
-    root["seltemp"]            = (String)EMS_Thermostat.setpoint_roomTemp;
+    root["wWCurTmp"]           = _float_to_char(s, EMS_Boiler.wWCurTmp);
+    root["wWHeat"]             = EMS_Boiler.wWHeat ? "on" : "off";
+    root["curFlowTemp"]        = _float_to_char(s, EMS_Boiler.curFlowTemp);
+    root["retTemp"]            = _float_to_char(s, EMS_Boiler.retTemp);
+    root["burnGas"]            = EMS_Boiler.burnGas ? "on" : "off";
+    root["heatPmp"]            = EMS_Boiler.heatPmp ? "on" : "off";
+    root["fanWork"]            = EMS_Boiler.fanWork ? "on" : "off";
+    root["ignWork"]            = EMS_Boiler.ignWork ? "on" : "off";
+    root["wWCirc"]             = EMS_Boiler.wWCirc ? "on" : "off";
+    root["selBurnPow"]         = (String)EMS_Boiler.selBurnPow;
+    root["curBurnPow"]         = (String)EMS_Boiler.curBurnPow;
+    root["sysPress"]           = _float_to_char(s, EMS_Boiler.sysPress);
+    root["boilTemp"]           = _float_to_char(s, EMS_Boiler.boilTemp);
+    root["pumpMod"]            = (String)EMS_Boiler.pumpMod;
 
-    char data[100];
     root.printTo(data, root.measureLength() + 1);
-    myESP.publish(TOPIC_THERMOSTAT, data);
+    myESP.publish(TOPIC_BOILER_DATA, data);
+
+    if (EMS_Sys_Status.emsThermostatEnabled) {
+        // only send thermostat values if we actually have them
+        if (((int)EMS_Thermostat.curr_roomTemp == (int)0) || ((int)EMS_Thermostat.setpoint_roomTemp == (int)0)) {
+            return;
+        }
+
+        myESP.publish(TOPIC_THERMOSTAT_CURRTEMP, _float_to_char(s, EMS_Thermostat.curr_roomTemp));
+        myESP.publish(TOPIC_THERMOSTAT_SELTEMP, _float_to_char(s, EMS_Thermostat.setpoint_roomTemp));
+    }
 }
 
 
@@ -386,11 +408,11 @@ void setup() {
 
     // set up Wifi, MQTT, Telnet
     myESP.setWifiCallback(WIFIcallback);
+
     myESP.setMQTTCallback(MQTTcallback);
     myESP.addSubscription(TOPIC_START);
-    myESP.addSubscription(TOPIC_THERMOSTAT);
     myESP.addSubscription(TOPIC_THERMOSTAT_TEMP);
-    myESP.addSubscription(TOPIC_SHOWERTIME);
+
     myESP.consoleSetHelpProjectsCmds(PROJECT_CMDS);
     myESP.consoleSetCallBackProjectCmds(myDebugCallback);
     myESP.begin(HOSTNAME);

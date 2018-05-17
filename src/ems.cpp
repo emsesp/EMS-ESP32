@@ -428,8 +428,8 @@ void _processType(uint8_t * telegram, uint8_t length) {
  */
 bool _process_UBAParameterWW(uint8_t * data, uint8_t length) {
     EMS_Boiler.wWSelTemp     = data[2];
-    EMS_Boiler.wWActivated   = (data[1] == 0xFF);
-    EMS_Boiler.wWCircPump    = (data[6] == 0xFF);
+    EMS_Boiler.wWActivated   = (data[1] == 0xFF); // 0xFF means on
+    EMS_Boiler.wWCircPump    = (data[6] == 0xFF); // 0xFF means on
     EMS_Boiler.wWDesiredTemp = data[8];
 
     return true;
@@ -487,6 +487,8 @@ bool _process_UBAMonitorSlow(uint8_t * data, uint8_t length) {
     EMS_Boiler.burnStarts  = _toLong(10, data);
     EMS_Boiler.burnWorkMin = _toLong(13, data);
     EMS_Boiler.heatWorkMin = _toLong(19, data);
+
+    EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back to Home Assistant via MQTT
 
     return true;
 }
