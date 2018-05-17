@@ -15,15 +15,17 @@
 #define EMS_ID_ME 0x0B     // Fixed - our device, hardcoded as "Service Key"
 
 // EMS Telegram Types
-#define EMS_TYPE_NONE 0x00                // none
-#define EMS_TYPE_UBAMonitorFast 0x18      // is an automatic monitor broadcast
-#define EMS_TYPE_UBAMonitorSlow 0x19      // is an automatic monitor broadcast
-#define EMS_TYPE_UBAMonitorWWMessage 0x34 // is an automatic monitor broadcast
-#define EMS_TYPE_UBAParameterWW 0x33      // is an automatic monitor broadcast
+#define EMS_TYPE_NONE 0x00                        // none
+
+#define EMS_TYPE_UBAMonitorFast 0x18              // is an automatic monitor broadcast
+#define EMS_TYPE_UBAMonitorSlow 0x19              // is an automatic monitor broadcast
+#define EMS_TYPE_UBAMonitorWWMessage 0x34         // is an automatic monitor broadcast
+#define EMS_TYPE_UBAMaintenanceStatusMessage 0x1c // is an automatic monitor broadcast
+#define EMS_TYPE_UBAParameterWW 0x33
+
 #define EMS_TYPE_UBATotalUptimeMessage 0x14
 #define EMS_TYPE_UBAMaintenanceSettingsMessage 0x15
 #define EMS_TYPE_UBAParametersMessage 0x16
-#define EMS_TYPE_UBAMaintenanceStatusMessage 0x1c
 
 // EMS Telegram types from Thermostat
 // types 1A and 35 and used for errors from Thermostat

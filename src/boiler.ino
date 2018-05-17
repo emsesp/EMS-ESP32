@@ -58,8 +58,7 @@ void _showerColdShotStop();
 #define TOPIC_BOILER_DATA MQTT_BOILER "boiler_data" // for sending boiler values
 #define TOPIC_SHOWERTIME MQTT_BOILER "showertime"   // for sending shower time results
 
-
-// all on
+// thermostat support, shower timing and shower alert all enabled
 #define BOILER_THERMOSTAT_ENABLED 1
 #define BOILER_SHOWER_ENABLED 1
 #define BOILER_SHOWER_TIMER 0
@@ -70,10 +69,6 @@ const unsigned long SHOWER_MIN_DURATION  = 120000; // 2 minutes, before recogniz
 const unsigned long SHOWER_MAX_DURATION  = 420000; // 7 minutes, before trigger a shot of cold water
 const unsigned long SHOWER_OFF_DURATION  = 3000;   // 3 seconds long for cold water
 const uint8_t       SHOWER_BURNPOWER_MIN = 80;
-
-// for debugging...
-//const unsigned long SHOWER_MIN_DURATION = 10000; // 10 seconds
-//const unsigned long SHOWER_MAX_DURATION = 15000; // 15 seconds
 
 typedef struct {
     bool wifi_connected;
@@ -96,8 +91,7 @@ netInfo homeNet = {.mqttHost = MQTT_IP,
                    .mqttPass = MQTT_PASS,
                    .mqttPort = 1883,
                    .ssid     = WIFI_SSID,
-                   .pass     = WIFI_PASSWORD
-                  };
+                   .pass     = WIFI_PASSWORD};
 
 ESPHelper myESP(&homeNet);
 
@@ -176,6 +170,7 @@ void showInfo() {
     }
 
     myDebug("\nBoiler stats:\n");
+
     // UBAMonitorWWMessage & UBAParameterWW
     myDebug("  Warm Water activated: %s\n", (EMS_Boiler.wWActivated ? "yes" : "no"));
     myDebug("  Warm Water selected temperature: %d C\n", EMS_Boiler.wWSelTemp);
@@ -195,7 +190,7 @@ void showInfo() {
     myDebug("  Return temperature: %s C\n", _float_to_char(s, EMS_Boiler.retTemp));
 
     myDebug("  Gas: %s\n", EMS_Boiler.burnGas ? "on" : "off");
-    myDebug("  Circulating pump: %s\n", EMS_Boiler.heatPmp ? "on" : "off");
+    myDebug("  Boiler pump: %s\n", EMS_Boiler.heatPmp ? "on" : "off");
     myDebug("  Fan: %s\n", EMS_Boiler.fanWork ? "on" : "off");
     myDebug("  Ignition: %s\n", EMS_Boiler.ignWork ? "on" : "off");
     myDebug("  Circulation pump: %s\n", EMS_Boiler.wWCirc ? "on" : "off");
@@ -233,8 +228,8 @@ void showInfo() {
                 _float_to_char(s, EMS_Thermostat.curr_roomTemp));
     }
 
+    // show the Shower Info
     if (Boiler_Status.shower_enabled) {
-        // show the Shower Info
         myDebug("Shower stats:\n  Shower is %s\n", (Boiler_Shower.showerOn ? "on" : "off"));
         char    s[70];
         uint8_t sec = (uint8_t)((Boiler_Shower.duration / 1000) % 60);
@@ -250,10 +245,11 @@ void showInfo() {
 void publishValues() {
     myDebug("Publishing data to MQTT topics\n");
 
+    char s[20]; // for formatting strings
+
     // Boiler values as one JSON object
     StaticJsonBuffer<512> jsonBuffer;
     char                  data[512];
-    char                  s[20];
     JsonObject &          root = jsonBuffer.createObject();
     root["wWCurTmp"]           = _float_to_char(s, EMS_Boiler.wWCurTmp);
     root["wWHeat"]             = EMS_Boiler.wWHeat ? "on" : "off";
@@ -283,7 +279,6 @@ void publishValues() {
         myESP.publish(TOPIC_THERMOSTAT_SELTEMP, _float_to_char(s, EMS_Thermostat.setpoint_roomTemp));
     }
 }
-
 
 // extra commands options for telnet debug window
 void myDebugCallback() {
@@ -369,13 +364,12 @@ void WIFIcallback() {
     emsuart_init();
 }
 
-
+// Initialize the boiler settings
 void _initBoiler() {
     // default settings
     ems_setThermostatEnabled(BOILER_THERMOSTAT_ENABLED);
     Boiler_Status.shower_enabled = BOILER_SHOWER_ENABLED;
     Boiler_Status.shower_timer   = BOILER_SHOWER_TIMER;
-
 
     // init boiler
     Boiler_Status.wifi_connected = false;
@@ -427,7 +421,7 @@ void setup() {
     enableHeartbeat(ems_getLogVerbose());
 }
 
-// flash ERR LEDs
+// flash LEDs
 // Using a faster way to write to pins as digitalWrite does a lot of overhead like pin checking & disabling interrupts
 void showLEDs() {
     // update Ticker
@@ -466,6 +460,7 @@ void heartbeat() {
 }
 
 // enables or disables the heartbeat LED
+// using the Ticker library
 void enableHeartbeat(bool on) {
     heartbeat_state = (on) ? LOW : HIGH;
     heartbeat();
@@ -503,8 +498,6 @@ void _showerColdShotStop() {
 // Main loop
 //
 void loop() {
-    // my myESP to maintain the wifi, mqtt and debugging
-    yield();
     connectionStatus = myESP.loop();
     timestamp        = millis();
 
@@ -558,7 +551,7 @@ void loop() {
                 } else {
                     // check if the shower has been on too long
                     if ((((timestamp - Boiler_Shower.timerStart) > SHOWER_MAX_DURATION) && !Boiler_Shower.isColdShot)
-                            && Boiler_Status.shower_timer) {
+                        && Boiler_Status.shower_timer) {
                         _showerColdShotStart();
                         showerResetTimer.start(); // start the timer for n seconds which will reset the water back to hot
                     }

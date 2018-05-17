@@ -1,7 +1,7 @@
 
 /*
  * ems.cpp
- * handles all the EMS messages
+ * handles all the processing of the EMS messages
  * Paul Derbyshire - https://github.com/proddy/EMS-ESP-Boiler
  */
 
@@ -32,7 +32,6 @@ const _EMS_Types EMS_Types[MAX_TYPECALLBACK] =
     {EMS_ID_THERMOSTAT, EMS_TYPE_RC20Temperature, "RC20Temperature", 10, _process_RC20Temperature}
 };
 
-
 // reserve space for the data we collect from the Boiler and Thermostat
 _EMS_Boiler     EMS_Boiler;
 _EMS_Thermostat EMS_Thermostat;
@@ -55,8 +54,7 @@ const uint8_t ems_crc_table[] =
     0xF7, 0xE9, 0xEB, 0xED, 0xEF, 0xE1, 0xE3, 0xE5, 0xE7
 };
 
-extern ESPHelper myESP;
-
+extern ESPHelper myESP; // needed for the DEBUG statements below
 #define myDebug(x, ...) myESP.printf(x, ##__VA_ARGS__);
 
 // constants timers
@@ -79,7 +77,7 @@ void ems_init() {
     EMS_Sys_Status.emsRefreshed = false;
 
     EMS_Sys_Status.emsPollEnabled       = false; // start up with Poll disabled
-    EMS_Sys_Status.emsThermostatEnabled = true;  // there is a RCxx thermostat active
+    EMS_Sys_Status.emsThermostatEnabled = true;  // there is a RCxx thermostat active as default
     EMS_Sys_Status.emsLogVerbose        = false; // Verbose logging is off
 
     EMS_Thermostat.hour   = 0;
@@ -89,9 +87,10 @@ void ems_init() {
     EMS_Thermostat.month  = 0;
     EMS_Thermostat.year   = 0;
 
+    // UBAParameterWW
     EMS_Boiler.wWActivated   = false; // Warm Water activated
     EMS_Boiler.wWSelTemp     = 0;     // Warm Water selected temperature
-    EMS_Boiler.wWCircPump    = false; // Warm Water circulation pump Available
+    EMS_Boiler.wWCircPump    = false; // Warm Water circulation pump available
     EMS_Boiler.wWDesiredTemp = 0;     // Warm Water desired temperature
 
     // UBAMonitorFast
@@ -101,7 +100,7 @@ void ems_init() {
     EMS_Boiler.burnGas     = false; // Gas on/off
     EMS_Boiler.fanWork     = false; // Fan on/off
     EMS_Boiler.ignWork     = false; // Ignition on/off
-    EMS_Boiler.heatPmp     = false; // Circulating pump on/off
+    EMS_Boiler.heatPmp     = false; // Boiler pump on/off
     EMS_Boiler.wWHeat      = false; // 3-way valve on WW
     EMS_Boiler.wWCirc      = false; // Circulation on/off
     EMS_Boiler.selBurnPow  = 0;     // Burner max power
