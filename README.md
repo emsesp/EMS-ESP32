@@ -114,18 +114,24 @@ The schematic from Juergen which this is based off is:
 **Notes:**\
 *Optionally I've also added 2 polyfuses between the EMS and the Inductors which are not shown in the layout or schematics above.*
 
-Here's a pretty rough example circuit using a NodeMcu2 with the additional LEDs and buck converter. The inputs from the EMS are not shown but there are at J60 and J58 at the bottom left.
+Below is a prototype circuit using a NodeMcu2 with the additional LEDs and 5v buck converter. The inputs from the EMS are not shown but there are at J60 and J58 at the bottom left. If you don't want to build the circuit [bbqkees](http://www.domoticz.com/forum/memberlist.php?mode=viewprofile&u=1736) has one you can purchase, shown here using a Wemos D1 Mini:
 
-![Breadboard](doc/schematics/breadboard.png)
+![Breadboard](doc/schematics/breadboard.png) | ![WemosD1](doc/schematics/wemos_kees.png)
 
-The nicest solution ultimately is to purchase a ready made circuit from [bbqkees](http://www.domoticz.com/forum/memberlist.php?mode=viewprofile&u=1736). Here's an example of one working with a Wemos D1 Mini:
 
-![WemosD1](doc/schematics/wemos_kees.png)
+
+
 
 ## Known Issues
 
-* Sometimes the first write command is not sent, probably due to a collision somewhere in the UART code. The retries in the code fix that but it is annoying nevertheless.
-* Sometimes you get duplicate telegrams being processed. Again, not an issue but annoying nevertheless. This is a bug somewhere in the code.
+In the code:
+
+* Very infrequently an EMS write command is not sent, probably due to a collision somewhere in the UART code waiting for a Poll. The retries in the code fix that but it is annoying nevertheless and needs fixing.
+* I've seen a few duplicate telegrams being processed. Again, it's harmless and not a big issue.
+
+In the circuit:
+
+* Powering the circuit of the ESP's 3v3 line is stable when there is a steady 5v going to VIN. There is stability issues and noise when using a buck step-down converter to power the ESP from the EMS bus line (which is around 15V AC)
 
 ## To Do
 
@@ -134,7 +140,6 @@ Here's my top things I'm still working on:
 * Make an ESPurna version. ESPurna takes care of the WiFi, MQTT, web server, telnet & debugging and does a better job that my modified ESPHelper code.
 * Complete the ESP32 version. It's surprisingly a lot easier doing the UART code on an ESP32 with the ESP-IDF framework. The first beta version is working.
 * Find a better way to control the 3-way valve to switch the warm water off quickly rather than adjusting the temperature.
-* Find a stable way of powering the ESP8266 from the EMS 12V using a buck step-down converter. This does work reasonably fine on a breadboard but there is noise.
 
 
 ## How the EMS works
