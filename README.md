@@ -19,7 +19,7 @@ There are 3 parts to this project, first the design of the circuit, second the c
   - [Known Issues](#known-issues)
   - [To Do](#to-do)
   - [How the EMS works](#how-the-ems-works)
-    - [**IDs**](#ids)
+    - [IDs](#ids)
     - [1. EMS Polling](#1-ems-polling)
     - [2. EMS Broadcasting](#2-ems-broadcasting)
     - [3. EMS Sending](#3-ems-sending)
@@ -113,9 +113,9 @@ The schematic (designed by [susisstrolch](https://github.com/susisstrolch/EMS-ES
 
 ![Schematic](doc/schematics/circuit.png)
 
-*Optionally I've also added 2 polyfuses between the EMS and the Inductors which are not shown in the layout or schematics above.*
+*Optionally I've also added 2 polyfuses between the EMS and the two inductors which are not shown in the layout or schematics above.*
 
-Below is an early messy prototype circuit using a NodeMcu2 with the additional LEDs and 5v buck converter. The inputs from the EMS are not shown but there are at J60 and J58 at the bottom left. If you don't want to build the circuit [bbqkees](http://www.domoticz.com/forum/memberlist.php?mode=viewprofile&u=1736) can sell you one which looks like the photo below running on a Wemos D1 Mini:
+Below is an early messy prototype circuit using a NodeMcu2 with the additional LEDs and 5v buck converter. The inputs from the EMS are not shown but there are at J60 and J58 at the top left. If you don't want to build the circuit [bbqkees](http://www.domoticz.com/forum/memberlist.php?mode=viewprofile&u=1736) can sell you one which looks like the photo below running on a Wemos D1 Mini:
 
 ![Breadboard](doc/schematics/breadboard.png) | ![WemosD1](doc/schematics/wemos_kees.png)
 
@@ -151,7 +151,7 @@ A package can be a single byte (see Polling below) or a string of 6 or more byte
 
 I reference the first 4 bytes as the *header* in this document.
 
-### **IDs**
+### IDs
 
 Each device has a unique ID.
 
