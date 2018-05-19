@@ -27,8 +27,9 @@ There are 3 parts to this project, first the design of the circuit, second the c
     - [Supported EMS Types](#supported-ems-types)
     - [Customizing](#customizing)
     - [MQTT](#mqtt)
+    - [Shower Logic](#shower-logic)
   - [Home Assistant Configuration](#home-assistant-configuration)
-- [Building the Firmware](#building-the-firmware)
+- [Building the firmware](#building-the-firmware)
     - [Using pre-built firmware's](#using-pre-built-firmwares)
     - [Using PlatformIO](#using-platformio)
     - [Using ESPurna](#using-espurna)
@@ -37,43 +38,41 @@ There are 3 parts to this project, first the design of the circuit, second the c
 
 ## Introduction
 
-I originally started this project with the intention to build my own smart thermostat for my Nefit Trendline boiler and then have it controlled it via [Home Assistant](https://www.home-assistant.io/) on my phone. When I started deciphering the boiler EMS codes I began adding new features such as timing how long the shower was running for and triggering an alarm (actually a shot of cold water!) after a certain duration. This of course to the delight of my two teenage daughters :-)
+My original intention for this home project with to build my own smart thermostat for my Nefit Trendline boiler and then have it controlled via [Home Assistant](https://www.home-assistant.io/) on my mobile phone. I had a few ESP32s and ESP8266s lying around from previous IoT projects and building a specific circuit to decode the EMS messages was a nice challenge into more complex electronic circuits. I then began adding new features such as timing how long the shower was running for and triggering an alarm (actually a shot of cold water!) after a certain duration.
 
 ## Supported boilers
 
-Most Bosch branded boilers that support the Logamatic EMS (and EMS+) bus protocols which are Nefit, Buderus, Worcester and Junkers.
+Most Bosch branded boilers that support the Logamatic EMS (and EMS+) bus protocols work with this design. Which are Nefit, Buderus, Worcester and Junkers.
 
 ## Acknowledgments
 
-First, a big thanks and appreciation to the following people and their own similar projects for giving me inspiration and code snippets:
+First a big thanks and my appreciation to the following people for their own open source related projects:
 
- **bbqkees** - Kees built a circuit and sample Arduino code to read from the EMS and push to Domoticz. His SMD circuit is actually available for purchase. Check it out at https://github.com/bbqkees/Nefit-Buderus-EMS-bus-Arduino-Domoticz
+ **susisstrolch** - Probably the first working version of the EMS bridge circuit I could find designed for the ESP8266. I borrowed Juergen's schematic and parts of his code logic. https://github.com/susisstrolch/EMS-ESP12
 
- **susisstrolch** - Probably the first working version of the EMS bridge circuit I could find designed for the ESP8266. I borrowed Juergen's schematic and code logic. https://github.com/susisstrolch/EMS-ESP12
+ **bbqkees** - Kees built a circuit and wrote some sample Arduino code to read from the EMS and push messages to Domoticz. His SMD board is also available to purchase from him directly. https://github.com/bbqkees/Nefit-Buderus-EMS-bus-Arduino-Domoticz
 
- **EMS Wiki** - A comprehensive reference for decoding the EMS telegrams, which unfortunately I found not always 100% accurate. https://emswiki.thefischer.net/doku.php?id=wiki:ems:telegramme. (Google Translate is handy).
+ **EMS Wiki** - A comprehensive reference for decoding the EMS telegrams, which I found not always to be 100% accurate. https://emswiki.thefischer.net/doku.php?id=wiki:ems:telegramme. It's in German but Google Translate can help there.
 
 
 ## ESP8266 device compatibility
 
-I've tested the code and circuit with a few ESP8266 development boards such as a Wemos D1 Mini, Wemos D1 Mini Pro, Nodemcu0.9 and the latest Nodemcu2 boards.
+I've tested the code and circuit with a few ESP8266 development boards such as the Wemos D1 Mini, Wemos D1 Mini Pro, Nodemcu0.9 and Nodemcu2 boards.
 
 
 ## Getting Started
 
-1. Build the circuit below, or purchase a ready built one from bbqkees via his [GitHub](https://github.com/bbqkees/Nefit-Buderus-EMS-bus-Arduino-Domoticz) page or the [Domoticz forum](http://www.domoticz.com/forum/viewtopic.php?f=22&t=22079&start=20).
-2. Connect the EMS lines from the boiler to the circuit and the Rx/Tx out to pins D7 and D8 on the ESP. The EMS connection can either be the 12-15V AC direct from the EMS (split from the thermostat if you have one) or from the 3.5" Service Jack at the front. Again bbqkees has a nice explanation [here](https://github.com/bbqkees/Nefit-Buderus-EMS-bus-Arduino-Domoticz/tree/master/Documentation).
-3. Optionally connect the three LEDs to show Rx and Tx traffic and Error codes to pins D1, D2, D3 respectively. I use 220 Ohm pull-down resistors. These pins are configurable in ``boiler.ino``. See the explanation below in the **code** section.
-3. Build and upload the firmware to an ESP8266 device. Make sure you set the MQTT and WiFi credentials. If you're not using MQTT leave the MQTT_IP blank. The firmware supports OTA too and the default hostname is 'boiler' or 'boiler.' depending on your OS and how the mdns resolves hostnames.
-4. Power the ESP from an external 5V supply, either via USB or direct into the 5v vin pin from a power supply.
-5. Attach the 3v3 on the ESP8266 to the DC power line. It will also work with 5v.
-6. When it has booted, telnet (port 23) to the IP of the ESP8266. If everything is working you should see the messages appear in the window as shown in the next section. I use a Telnet client that comes with Linux distro on Windows 10 but you can also use [putty](https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html) for example.
+1. Either build the circuit below or purchase a ready built board from bbqkees via his [GitHub](https://github.com/bbqkees/Nefit-Buderus-EMS-bus-Arduino-Domoticz) page or the [Domoticz forum](http://www.domoticz.com/forum/viewtopic.php?f=22&t=22079&start=20).
+2. Get an ESP8266 dev board and connect the 2 EMS output lines from the boiler to the circuit and the Rx/Tx out to pins D7 and D8 on the ESP. The EMS connection can either be the 12-15V AC direct from the thermostat bus line or from the 3.5" Service Jack at the front. Again bbqkees has a nice explanation [here](https://github.com/bbqkees/Nefit-Buderus-EMS-bus-Arduino-Domoticz/tree/master/Documentation).
+3. Optionally connect the three LEDs to show Rx and Tx traffic and Error codes to pins D1, D2, D3 respectively. I use 220 Ohm pull-down resistors. These pins are configurable in ``boiler.ino``. This is furtherr explained in the **code** section below.
+3. Build and upload the firmware to the ESP8266 device. I used Platformio with Visual Studio. Do make sure you set the MQTT and WiFi credentials correctly and if you're not using MQTT leave the MQTT_IP blank. The firmware supports OTA too with the default hostname as 'boiler' (or 'boiler.' depending on your OS and how the mdns resolves hostnames).
+4. Power the ESP either via USB or direct into the 5v vin pin from an external power 5V volts supply with min 400mA.
+5. Attach the 3v3 out on the ESP8266 to the DC power line on the EMS circuit as indicated in the schematics.
+6. When your ESP device has booted, telnet (port 23) to the IP. If using DHCP figure the IP out or use USB and the serial terminal on the COM port to see. If everything is working you should see the messages appear in the window as shown in the next section. I use a Telnet client that comes with Linux distro on Windows 10 in developer mode but you can also use [putty](https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html) or any other software.
 
 ## Debugging
 
-Because the Rx and Tx of the MCU are occupied with communicating to the EMS serial out will not work in the IDE terminal. Instead use a telnet client to inform you of all activity and errors real-time. Note, if you're unable to to connect fist time probably the WiFi is dodgy. In this case do connect to a serial terminal and look at the messages without the EMS attached.
-
-This is an example of the telnet output:
+Use the telnet client to inform you of all activity and errors real-time. This is an example of the telnet output:
 
 ![Telnet](doc/telnet/telnet_example.JPG)
 
@@ -85,12 +84,12 @@ To see the current values of the Boiler and its parameters type 's' and hit Ente
 
 ![Telnet](doc/telnet/telnet_stats.JPG)
 
-You can issue commands directly to the EMS bus typing in a letter, an optional paramete followed by Enter. Supported commands are:
+Commands can be issued directly to the EMS bus typing in a letter followed by an optional parameter and pressing Enter. Supported commands are:
 * **r** to send a read command to all devices to fetch values. The 2nd parameter is the type. For example 'r 33' will request type UBAParameterWW and bring back the Warm Water temperatures (not the heating) from the Boiler
 * **t** set the thermostat temperature to the given value
 * **w** to adjust the temperature of the warm water from the boiler
 * **a** to turn the warm water on and off
-* **p** to toggle the Polling response on/off. It's not necessary to have Polling enabled to work, but its the proper way
+* **p** to toggle the Polling response on/off. It's not necessary to have Polling enabled to work
 * **T** to toggle thermostat reading on/off
 * **S** to toggle the Shower Timer functionality on/off
 
@@ -100,9 +99,9 @@ You can issue commands directly to the EMS bus typing in a letter, an optional p
 
 The EMS circuit is really all credit to the hard work many people have done before me, noticeably *susisstrolch* with his ESP8266 [version](https://github.com/susisstrolch/EMS-ESP8266_12-PCB/tree/newmaster/Schematics/EMS-ESP8266-12).
 
-I've included a prototype boards you can build yourself on a breadboard. One part for only reading values from the Boiler and an extension with the write logic so you can send commands.
+I've included a prototype boards you can build yourself on a breadboard. One part for only reading values from the Boiler and an extension with the write logic so you can also send commands.
 
-We need the Rx/Tx of the ESP8266 for flashing, so the code in ``emsuart.cpp`` switches the UART pins to use RX1 and TX1 (GPIO13/D7 and GPIO15/D8 respectively). This also prevents any bogus stack data being sent to EMS bus when the ESP8266 decides to crash after a Watch Dog Reset.
+We need the Rx/Tx of the ESP8266 for flashing, so the code in ``emsuart.cpp`` switches the UART pins to use RX1 and TX1 (GPIO13/D7 and GPIO15/D8 respectively). This also prevents any bogus stack data being sent to EMS bus when the ESP8266 decides to crash like after a Watch Dog Reset.
 
 The breadboard layout was done using [DIY Layout Creator](https://github.com/bancika/diy-layout-creator) and sources files are included in the repo.
 
@@ -110,7 +109,7 @@ Read Only | Both Read and Write
 --- | --- 
 ![Read only](doc/schematics/readonly.JPG) | ![Read and Write)](doc/schematics/readwrite.JPG)
 
-The schematic from Juergen which this is based off is:
+The schematic (designed by [susisstrolch](https://github.com/susisstrolch/EMS-ESP8266_12-PCB)):
 
 ![Schematic](doc/schematics/circuit.png)
 
@@ -127,7 +126,7 @@ Below is an early messy prototype circuit using a NodeMcu2 with the additional L
 In the source code:
 
 * Very infrequently an EMS write command is not sent, probably due to a collision somewhere in the UART between an incoming Rx and a Poll. The retries in the code fix that but it is annoying nevertheless and does need fixing.
-* I've seen a few duplicate telegrams being processed. Again, it's harmless and not a big issue. But a bug.
+* I've seen a few duplicate telegrams being processed. Again, it's harmless and not a big issue. But its still a bug.
 
 In the circuit:
 
@@ -139,12 +138,12 @@ Here's my top things I'm still working on:
 
 * Make an ESPurna version. ESPurna is a lovely framework that takes care of the WiFi, MQTT, web server, telnet & debugging.
 * Complete the ESP32 version. It's surprisingly a lot easier doing the UART code on an ESP32 with the ESP-IDF framework. The first beta version is working.
-* Find a better way to control the 3-way valve to switch the warm water off quickly rather than adjusting the temperature.
+* Find a better way to control the 3-way valve to switch the warm water off quickly rather than deactivating the warm water heater.
 
 
 ## How the EMS works
 
-Packages are sent to the EMS "bus" from the Boiler (or UBA as its also called) and any other compatible connected devices via serial TTL transmission. The protocol is 9600 baud, 8N1 (8 bytes, no parity, 1 stop bit). Each package is terminated with a break signal `<BRK>`, a 11-bit long low signal of zeros.
+Packages are sent to the EMS "bus" from the Boiler and any other compatible connected devices via serial TTL transmission. The protocol is 9600 baud, 8N1 (8 bytes, no parity, 1 stop bit). Each package is terminated with a break signal `<BRK>`, a 11-bit long low signal of zeros.
 
 A package can be a single byte (see Polling below) or a string of 6 or more bytes making up an actual data telegram. A telegram is always in the format:
 
@@ -156,14 +155,14 @@ I reference the first 4 bytes as the *header* in this document.
 
 Each device has a unique ID.
 
-The Boiler has an ID of 0x08 (type MC10) and also referred to as the Bus Master.
+The Boiler has an ID of 0x08 (type MC10) and also referred to as the Bus Master or UBA.
 
 My thermostat, which is a* Moduline 300* uses the RC20 protocol and has an ID 0x17. If you're using an RC30 or RC35 type thermostat such as the newer Moduline 300s or 400s use 0x10 and make adjustments in the code as appropriate. bbqkees did a nice write-up on his github page [here](https://github.com/bbqkees/Nefit-Buderus-EMS-bus-Arduino-Domoticz/blob/master/README.md).
 
-Our circuit acts as a service device (called a service key in the official doc) and uses the reserved ID 0x0B.
+Our circuit acts as a service key and thus uses an ID 0x0B. This ID is reserved for special devices intended for installation engineers for maintenance work. 
 
 ### 1. EMS Polling
-The bus master (boiler) sends out a poll request every second by sending out a sequential list of all possible IDs as a single byte followed by the break signal. The ID always has its high 7th bit set so in the code we're looking for 1 byte messages with the format `[dest|0x80] <BRK>`.
+The bus master (boiler) sends out a poll request every second by sending out a sequential list of all possible IDs as a single byte followed by the break signal. The ID always has its high 7th bit set so in the code we're looking for 1 byte messages matching the format `[dest|0x80] <BRK>`.
 
 Any connected device can respond to a Polling call with an acknowledging by sending back a single byte with its own ID. In our case we would listen for a `[0x8B] <BRK>` (meaning us) and then send back `[0x0B] <BRK>` to say we're alive and ready.
 
@@ -189,31 +188,30 @@ Type | Description
 --- | --- | 
 0x06 | time on thermostat Y,M,H,D,M,S,wd
 
-Refer to the code in ``ems.cpp`` for further explanation on how to parse these message types and also reference the EMS Wiki.
+Refer to the code in `ems.cpp` for further explanation on how to parse these message types and also reference the EMS Wiki.
 
 ### 3. EMS Sending
 
-Telegram packets can only be sent after the Boiler sends a poll to the sending device. The response can be a read command to request data or a write command to send data. At the end of the transmission a poll response is sent from the client (e.g. ``<ID> <BRK>``) to say we're all done and free up the bus for other clients.
+Telegram packets can only be sent after the Boiler sends a poll to the sending device. The response can be a read command to request data or a write command to send data. At the end of the transmission a poll response is sent from the client (`<ID> <BRK>`) to say we're all done and free up the bus for other clients.
 
-When doing a request to read data the ``[src]`` is our device (0x0B) and the ``[dest]`` has it's 7-bit set. Say we were requesting data from the thermostat we would use ``[dest] = 0x97`` since RC20 has an ID of 0x17.
+When doing a request to read data the `[src]` is our device (0x0B) and the `[dest]` has it's 7-bit set. Say we were requesting data from the thermostat we would use `[dest] = 0x97` since RC20 has an ID of 0x17.
 
-When doing a write request, the 7th bit is masked in the ``[dest]``. After this write request the destination device will send either a single byte 0x01 for success or 0x04 for fail back.
+When doing a write request, the 7th bit is masked in the `[dest]`. After this write request the destination device will send either a single byte 0x01 for success or 0x04 for fail.
 
 Every telegram sent is echo'd back to Rx.
 
  ## The Code
 
- *Disclaimer*: This code here is really for reference only, I don't expect anyone to use as is since it's highly tailored to my environment and my needs. Most of the code however is self explanatory with comments here and there. If you wish to make some changes start with the ``defines`` and ``const`` sections at the top of ``boiler.ino``.
+ *Disclaimer*: This code here is really for reference only, I don't expect anyone to use as is since it's highly tailored to my environment and my needs. Most of the code however is self explanatory with comments here and there. If you wish to make some changes start with the `defines` and `const` sections at the top of `boiler.ino`.
 
- The code is built on the Arduino framework as opposed to the ESP-IDF.
+ The code is built on the Arduino framework and is dependent on these external libraries:
 
- These external libraries are used:
  * Time http://playground.arduino.cc/code/time
  * PubSubClient http://pubsubclient.knolleary.net
  * ArduinoJson https://github.com/bblanchon/ArduinoJson
  * Ticker https://github.com/sstaub/Ticker
 
- `src\emsuart.cpp` handles the low level UART read and write logic. You shouldn't need to touch this. All receive commands from the EMS bus are handled asynchronously using a circular buffer via an interrupt. A separate function processes the buffer and extracts the telegrams. Since we don't send many Write commands this is done sequentially. I couldn't use the standard Arduino Serial implementation because of the 11-bit break signal causes a frame-error which gets ignored. 
+ `src\emsuart.cpp` handles the low level UART read and write logic. You shouldn't need to touch this. All receive commands from the EMS bus are handled asynchronously using a circular buffer via an interrupt. A separate function processes the buffer and extracts the telegrams. Since we don't send too many write commands this is done sequentially. I couldn't use the standard Arduino Serial implementation because of the 11-bit break signal causes a frame-error which gets ignored. 
  
  `src\ems.cpp` is the logic to read the EMS packets (telegrams), validates them and process them based on the type.
 
@@ -226,48 +224,54 @@ Every telegram sent is echo'd back to Rx.
 `ems.cpp` defines callback functions that handle all the broadcast types plus these extra types:
 
 Device |  Type | Description | What
-- | - | - | - |
+--- | --- | --- | --- |
 Boiler (0x08) | 0x33 | UBAParameterWW | selected & desired warm water temp
-Boiler (0x08) | 0x14 | UBATotalUptimeMessage | -
-Boiler (0x08) | 0x15 | UBAMaintenanceSettingsMessage | -
-Boiler (0x08) | 0x16 | UBAParametersMessage | -
+Boiler (0x08) | 0x14 | UBATotalUptimeMessage | 
+Boiler (0x08) | 0x15 | UBAMaintenanceSettingsMessage | 
+Boiler (0x08) | 0x16 | UBAParametersMessage | 
 Thermostat (0x17) | 0xA8 | RC20Temperature | setting temperature and operating modes
-Thermostat (0x17) | 0xA3 | RCOutdoorTempMessage | - 
+Thermostat (0x17) | 0xA3 | RCOutdoorTempMessage |  
 Thermostat (0x17) | 0x91 | RC20StatusMessage | set & current room temperatures
 
  ### Customizing
 
  Most of the changes will be done in `boiler.ino` and `ems.cpp`. 
- * To add new handlers for data types, create a callback function and add to the EMS_Types at the top of the file `ems.cpp` and the new DEFINES in `ems.h`
+ * To add new handlers for data types, create a callback function and add to the `EMS_Types` at the top of the file `ems.cpp` and the DEFINES in `ems.h`
  * To change your thermostat type set `EMS_ID_THERMOSTAT` in `ems.h`. The default is 0x17 for an RC20.
  * The DEFINES `BOILER_THERMOSTAT_ENABLED`, `BOILER_SHOWER_ENABLED` and `BOILER_SHOWER_TIMER` enabled the thermostat logic, the shower logic and the shower timer alert logic respectively. 1 is on and 0 is off.
 
 ### MQTT
 
-When the ESP8266 boots it will send a start signal via MQTT. This is picked up by Home Assistant it sends me a notification informing me that the device has booted. Useful for knowing when the ESP gets reset - it can happen.
+When the ESP8266 boots it will send a start signal via MQTT. This is picked up by Home Assistant and sends a notification informing me that the device has booted. Useful for knowing when the ESP gets reset.
 
-I'm using the standard PubSubClient client so make sure you set -DMQTT_MAX_PACKET_SIZE=300 as the default package size is 128 and our JSON messages are around 220 bytes.
+I'm using the standard PubSubClient client so make sure you set `-DMQTT_MAX_PACKET_SIZE=300` as the default package size is 128 and our JSON messages are around 220 bytes.
 
-I run Mosquitto on my Raspberry PI 3.
+I run Mosquitto on my Raspberry PI 3 as the MQTT broker.
 
 The boiler data is collected and sent as a single JSON object to MQTT TOPIC `home/boiler/boiler_data`. Example payload:
 
 `{"wWCurTmp":"43.0","wWHeat":"on","curFlowTemp":"51.7","retTemp":"48.0","burnGas":"off","heatPmp":"off","fanWork":"off","ignWork":"off","wWCirc":"off","selBurnPow":"0","curBurnPow":"0","sysPress":"1.6","boilTemp":"54.7","pumpMod":"4"}`
 home/boiler/boiler_data
 
-The temperature values of the thermostat as two seperate TOPICS `home/boiler/thermostat_currtemp` and `home/boiler/thermostat_seltemp`
+The temperature values of the thermostat as two separate topics `home/boiler/thermostat_currtemp` and `home/boiler/thermostat_seltemp`
 
 Values sent from HA to set the temperature come in via the subscribed topic `home/boiler/thermostat_temp`
 
 These topics can be configured in the `TOPIC_*` defines in `boiler.ino`. Make sure you change the HA configuration too to match.
 
+### Shower Logic
+
+Checking whether the shower is running was tricky. We know when the warm water is on and being heated but need to distinguish between the central heating, shower, hot tap and bath. I found via trial and error the Selected Burner Max Power is between 80% and 115% when the shower is running and fixed at 75% if the central heating is on. Furthermore the Selected Flow Impulsion is 80 C for the heating.
+
+There is other logic in the code to compensate for ramp up and whether the shower is turned off and back on again quickly within a 10 second window.
+
 ## Home Assistant Configuration
 
-Assuming you've setup up MQTT as I did, this is what my HA configuration looks like:
+This is what my HA configuration looks like:
 
 **configuration.yaml**
 
-
+    ...
     automation: !include automations.yaml
     input_number: !include input_number.yaml
     group: !include groups.yaml
@@ -286,11 +290,6 @@ Assuming you've setup up MQTT as I did, this is what my HA configuration looks l
       name: 'Boiler Thermostat Set Temperature'
       unit_of_measurement: '°C'
 
-    - platform: template
-      sensors:
-        boiler_boottime:
-          value_template: '{{ as_timestamp(states.automation.see_if_boiler_restarts.attributes.last_triggered) | timestamp_custom("%H:%M:%S %d/%m/%y") }}'
-
     - platform: mqtt
       state_topic: 'home/boiler/showertime'
       name: 'Last shower duration'
@@ -305,7 +304,9 @@ Assuming you've setup up MQTT as I did, this is what my HA configuration looks l
       state_topic: 'home/boiler/boiler_data'
       name: 'Warm Water current temperature'
       unit_of_measurement: '°C'
-      value_template: '{{ value_json.wWCurTmp }}' 
+      value_template: '{{ value_json.wWCurTmp }}'
+
+      ..etc..etc 
 
 **automations.yaml**
 
@@ -327,10 +328,6 @@ Assuming you've setup up MQTT as I did, this is what my HA configuration looks l
         platform: mqtt
         topic: home/boiler/showertime
       action:
-        - service: notify.pushbullet
-          data_template:
-            title: 'Shower duration was {{trigger.payload}} at {states.sensor.time.state}}'
-            message: 'Boiler'
         - service: notify.boiler_notify
           data_template:
             title: "Shower finished!"
@@ -355,6 +352,7 @@ Assuming you've setup up MQTT as I did, this is what my HA configuration looks l
     entities:
        - sensor.boiler_boottime
        - sensor.warm_water_current_temperature
+       ..etc..etc..
 
     shower:
     name: Shower
@@ -378,7 +376,7 @@ And in Home Assistant looks like:
 ![Home Assistant iPhone notify)](doc/ha/ha_notify.jpg) 
 
 
-# Building the Firmware
+# Building the firmware
 
 ### Using pre-built firmware's
 
@@ -393,7 +391,7 @@ In the `/firmware` folder, if there are pre-built versions you can upload using 
 
 There are two ways to compile and build the firmware yourself.
 
-The first method is a standalone version which uses a modified version of [ESPHelper](https://github.com/ItKindaWorks/ESPHelper) for the WiFi, OTA and MQTT handling. I've added some code to add a Telnet server which is useful for debugging since you can't use the serial port because UART is configured to use different pins.
+The first method is a standalone version which uses a modified version of [ESPHelper](https://github.com/ItKindaWorks/ESPHelper) for the WiFi, OTA and MQTT handling with the Telnet server code.
 
 To compile, using PlatformIO create a project and modify your `platformio.ini` to include these build flags:
 
@@ -401,26 +399,20 @@ To compile, using PlatformIO create a project and modify your `platformio.ini` t
 
 If you're not using MQTT keep MQTT_IP empty (`MQTT_IP=""`)
 
-Here's an example `platformio.ini` file:
+Here's an example part from `platformio.ini`:
 
 ```
-[platformio]
-
-[common]
+[env:nodemcuv2]
+board = nodemcuv2
+platform = espressif8266
 framework = arduino
 lib_deps =
   Time
   PubSubClient
   ArduinoJson
   Ticker
-
-[env:nodemcuv2]
-board = nodemcuv2
-platform = espressif8266
-framework = arduino
-lib_deps = ${common.lib_deps}
 upload_speed = 921600
-build_flags = '-DWIFI_SSID="<my_ssid>"' '-DWIFI_PASSWORD="<my_password>"' '-DMQTT_IP="<broker_ip>"' '-DMQTT_USER="<broker_username>"' '-DMQTT_PASS="<broker_password>"'
+build_flags = '-DWIFI_SSID="<my_ssid>"' '-DWIFI_PASSWORD="<my_password>"' '-DMQTT_IP="<broker_ip>"' '-DMQTT_USER="<broker_username>"' '-DMQTT_PASS="<broker_password>"' -DMQTT_MAX_PACKET_SIZE=300
 ; comment out next line if using USB and not OTA
 upload_port = "boiler."
 ```
