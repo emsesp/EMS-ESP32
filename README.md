@@ -449,5 +449,5 @@ Next copy the files custom.h, index.html, boiler.ino and the esp*.cpp/h files fr
 	
 ### Your comments and feedback
 
-Any comments or suggestions are very welcome. You can contact me at **dev** at **derbyshire** dot **nl** or via an *Issue* in GitHub	
+Any comments or suggestions are very welcome. You can contact me at **dev** at **derbyshire** dot **nl** or creating a GitHub issue.	
 
