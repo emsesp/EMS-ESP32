@@ -103,21 +103,23 @@ I've included a prototype boards you can build yourself on a breadboard. One par
 
 We need the Rx/Tx of the ESP8266 for flashing, so the code in ``emsuart.cpp`` switches the UART pins to use RX1 and TX1 (GPIO13/D7 and GPIO15/D8 respectively). This also prevents any bogus stack data being sent to EMS bus when the ESP8266 decides to crash like after a Watch Dog Reset.
 
-The breadboard layout was done using [DIY Layout Creator](https://github.com/bancika/diy-layout-creator) and sources files are included in the repo.
+The breadboard layout was done using [DIY Layout Creator](https://github.com/bancika/diy-layout-creator) and sources files are included in this repo.
 
-Read Only | Both Read and Write 
---- | --- 
-![Read only](doc/schematics/readonly.JPG) | ![Read and Write)](doc/schematics/readwrite.JPG)
+![Breadboard Circuit](doc/schematics/breadboard.png)
 
-The schematic (designed by [susisstrolch](https://github.com/susisstrolch/EMS-ESP8266_12-PCB)):
+The schematic used (as designed by [susisstrolch](https://github.com/susisstrolch/EMS-ESP8266_12-PCB)):
 
 ![Schematic](doc/schematics/circuit.png)
 
-*Optionally I've also added 2 polyfuses between the EMS and the two inductors which are not shown in the layout or schematics above.*
+*Optionally I've also added 2 polyfuses between the EMS and the two inductors*
 
-Below is an early messy prototype circuit using a NodeMcu2 with the additional LEDs and 5v buck converter. The inputs from the EMS are not shown but there are at J60 and J58 at the top left. If you don't want to build the circuit [bbqkees](http://www.domoticz.com/forum/memberlist.php?mode=viewprofile&u=1736) can sell you one which looks like the photo below running on a Wemos D1 Mini:
+And here's an early prototype circuit using a NodeMcu2 with the additional LEDs added and 5v buck converter to power the ESP8266 also from the EMS line.
 
-![Breadboard](doc/schematics/breadboard.png) | ![WemosD1](doc/schematics/wemos_kees.png)
+![Breadboard](doc/schematics/breadboard_example.png)
+
+And lastly if you don't fancy building the circuit [bbqkees](http://www.domoticz.com/forum/memberlist.php?mode=viewprofile&u=1736) can sell you one which looks like the photo below running on a Wemos D1 Mini:
+
+![WemosD1](doc/schematics/wemos_kees.png)
 
 
 

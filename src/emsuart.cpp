@@ -134,7 +134,7 @@ void ICACHE_FLASH_ATTR emsuart_init() {
     ETS_UART_INTR_ATTACH(emsuart_rx_intr_handler, NULL);
     ETS_UART_INTR_ENABLE();
 
-    // when all ready swap Rx and Tx pins (to use GPIO13 (D7) and GPIO15 (D8) )
+    // swap Rx and Tx pins to use GPIO13 (D7) and GPIO15 (D8) respectively
     system_uart_swap();
 }
 

@@ -359,6 +359,8 @@ void _processType(uint8_t * telegram, uint8_t length) {
         strcpy(src_s, "Boiler");
     } else if (src == EMS_ID_THERMOSTAT) {
         strcpy(src_s, "Thermostat");
+    } else {
+        strcpy(src_s, "<unknown>");
     }
 
     // was it sent specifically to us?
