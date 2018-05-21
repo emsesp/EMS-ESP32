@@ -16,6 +16,7 @@ There are 3 parts to this project, first the design of the circuit, second the c
   - [Getting Started](#getting-started)
   - [Debugging](#debugging)
   - [Building the Circuit](#building-the-circuit)
+  - [Powering the circuit](#powering-the-circuit)
   - [Known Issues](#known-issues)
   - [To Do](#to-do)
   - [How the EMS works](#how-the-ems-works)
@@ -113,26 +114,28 @@ The schematic used (as designed by [susisstrolch](https://github.com/susisstrolc
 
 *Optionally I've also added 2 0.5A/72V polyfuses between the EMS and the two inductors L1 and L2 for extra protection.*
 
-And here's an early prototype circuit using a NodeMcu2 with the additional LEDs added and 5v buck converter to power the ESP8266 also from the EMS line.
 
-![Breadboard](doc/schematics/breadboard_example.png)
+
 
 And lastly if you don't fancy building the circuit [bbqkees](http://www.domoticz.com/forum/memberlist.php?mode=viewprofile&u=1736) can sell you one which looks like the photo below running on a Wemos D1 Mini:
 
 ![WemosD1](doc/schematics/wemos_kees.png)
 
+## Powering the circuit
 
+The circuit will work with both 3.3V and 5V. It's easiest to power it direct from the ESP's 3V3 line.
+
+Powering the ESP can be either via a USB and PC or external 5V power supply or from the EMS itself using a buck step-down converter. The EMS provides about 15V AC current. It's tidier to run it from the EMS and I use a [Pololu D24C22F5](https://www.pololu.com/product/2858) which is 5V/2A buck step-down module. It is slightly overkill for what we need. The additional part of the circuit is shown below along with a working prototype on a breadboard using a NodeMCU2 with the additional LEDs:
+
+Power circuit | Example |
+--- | --- 
+![Power circuit](doc\schematics\power.png) | ![Breadboard](doc/schematics/breadboard_example.png) |
 
 ## Known Issues
-
-In the source code:
 
 * Very infrequently an EMS write command is not sent, probably due to a collision somewhere in the UART between an incoming Rx and a Poll. The retries in the code fix that but it is annoying nevertheless and does need fixing.
 * I've seen a few duplicate telegrams being processed. Again, it's harmless and not a big issue. But its still a bug.
 
-In the circuit:
-
-* Powering the circuit of the ESP's 3v3 line is very stable when there is a steady 5v going to VIN. There are stability issues and some noise when using a buck step-down converter to power the ESP from the EMS bus line (which is around 15V AC).
 
 ## To Do
 
