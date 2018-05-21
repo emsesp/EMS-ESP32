@@ -223,9 +223,8 @@ void showInfo() {
                 EMS_Thermostat.month,
                 EMS_Thermostat.year + 2000);
 
-        myDebug("  Setpoint room temperature is %s C and current room temperature is %s C\n",
-                _float_to_char(s, EMS_Thermostat.setpoint_roomTemp),
-                _float_to_char(s, EMS_Thermostat.curr_roomTemp));
+        myDebug("  Setpoint room temperature is %s C\n", _float_to_char(s, EMS_Thermostat.setpoint_roomTemp));
+        myDebug("  Current room temperature is %s C\n", _float_to_char(s, EMS_Thermostat.curr_roomTemp));
     }
 
     // show the Shower Info

@@ -111,7 +111,7 @@ The schematic used (as designed by [susisstrolch](https://github.com/susisstrolc
 
 ![Schematic](doc/schematics/circuit.png)
 
-*Optionally I've also added 2 polyfuses between the EMS and the two inductors*
+*Optionally I've also added 2 0.5A/72V polyfuses between the EMS and the two inductors L1 and L2 for extra protection.*
 
 And here's an early prototype circuit using a NodeMcu2 with the additional LEDs added and 5v buck converter to power the ESP8266 also from the EMS line.
 
