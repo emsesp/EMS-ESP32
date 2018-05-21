@@ -126,7 +126,7 @@ Powering the ESP can be either via a USB and PC or external 5V power supply or f
 
 Power circuit | Example |
 --- | --- 
-![Power circuit](doc/schematics/power.png) | ![Breadboard](doc/schematics/breadboard_example.png) |
+![Power circuit](doc/schematics/power.PNG) | ![Breadboard](doc/schematics/breadboard_example.png) |
 
 ## Known Issues
 
