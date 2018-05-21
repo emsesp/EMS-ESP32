@@ -114,9 +114,6 @@ The schematic used (as designed by [susisstrolch](https://github.com/susisstrolc
 
 *Optionally I've also added 2 0.5A/72V polyfuses between the EMS and the two inductors L1 and L2 for extra protection.*
 
-
-
-
 And lastly if you don't fancy building the circuit [bbqkees](http://www.domoticz.com/forum/memberlist.php?mode=viewprofile&u=1736) can sell you one which looks like the photo below running on a Wemos D1 Mini:
 
 ![WemosD1](doc/schematics/wemos_kees.png)
@@ -129,7 +126,7 @@ Powering the ESP can be either via a USB and PC or external 5V power supply or f
 
 Power circuit | Example |
 --- | --- 
-![Power circuit](doc\schematics\power.png) | ![Breadboard](doc/schematics/breadboard_example.png) |
+![Power circuit](doc/schematics/power.png) | ![Breadboard](doc/schematics/breadboard_example.png) |
 
 ## Known Issues
 
