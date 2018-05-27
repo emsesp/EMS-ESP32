@@ -1,4 +1,4 @@
-/*    
+/*
     Based off :
     1) ESPHelper.cpp - Copyright (c) 2017 ItKindaWorks Inc All right reserved. github.com/ItKindaWorks
     2) https://github.com/JoaoLopesF/ESP8266-RemoteDebug-Telnet
@@ -750,29 +750,13 @@ void ESPHelper::consoleShowHelp() {
 
     help.concat("*\n\r* Remote Debug for ESP8266/ESP32\n\r");
     help.concat("* Device hostname: ");
-#if defined(ESP8266)
     help.concat(WiFi.hostname());
-#else
-    help.concat(WiFi.getHostname());
-#endif
     help.concat(", IP: ");
     help.concat(WiFi.localIP().toString());
     help.concat(", MAC address: ");
     help.concat(WiFi.macAddress());
     help.concat("\n\r* Connected to WiFi AP: ");
     help.concat(WiFi.SSID());
-
-#if defined(ESP32)
-    esp_chip_info_t chip_info;
-    esp_chip_info(&chip_info);
-    sprintf(s,
-            "\n* ESP32 chip with %d CPU cores, WiFi%s%s, silicon revision %d\n",
-            chip_info.cores,
-            (chip_info.features & CHIP_FEATURE_BT) ? "/BT" : "",
-            (chip_info.features & CHIP_FEATURE_BLE) ? "/BLE" : "",
-            chip_info.revision);
-    help.concat(s);
-#endif
 
     help.concat("\n\r* Boot time: ");
     help.concat(_boottime);

@@ -23,21 +23,12 @@
 #define __ESP_HELPER_H
 
 #include <ArduinoOTA.h>
+#include <ESP8266WiFi.h> //https://github.com/esp8266/Arduino
+#include <ESP8266mDNS.h>
 #include <Print.h>
 #include <PubSubClient.h>
 #include <WiFiClientSecure.h>
 #include <WiFiUdp.h>
-
-#if defined(ESP8266)
-#include <ESP8266WiFi.h> //https://github.com/esp8266/Arduino
-#include <ESP8266mDNS.h>
-#elif defined(ESP32)
-#include "esp_system.h"
-#include <ESPmDNS.h>
-#include <WiFi.h>
-#else
-#error Only for ESP8266 or ESP32
-#endif
 
 // MQTT stuff
 #define DEFAULT_QOS 1 //at least once - devices are guarantee to get a message.
@@ -170,12 +161,7 @@ class ESPHelper : public Print {
     void (*_wifiCallback)();
     bool _wifiCallbackSet = false;
 
-#ifdef ESP8266
     std::function<void(char *, uint8_t *, uint8_t)> _mqttCallback;
-#endif
-#ifdef ESP32
-    void (*_mqttCallback)(char *, uint8_t *, uint8_t);
-#endif
 
     bool         _mqttCallbackSet  = false;
     uint8_t      _connectionStatus = NO_CONNECTION;
