@@ -159,7 +159,7 @@ bool ESPHelper::begin(const char * hostname) {
         //initially attempt to connect to wifi when we begin (but only block for 2 seconds before timing out)
         uint8_t timeout = 0; //counter for begin connection attempts
         while (((!client.connected() && _mqttSet) || WiFi.status() != WL_CONNECTED)
-               && timeout < 200) { //max 2 sec before timeout
+                && timeout < 200) { //max 2 sec before timeout
             reconnect();
             timeout++;
         }
@@ -445,7 +445,7 @@ uint8_t ESPHelper::setConnectionStatus() {
         //if connected to wifi set the mode to wifi only and run the callback if needed
         if (WiFi.status() == WL_CONNECTED) {
             if (_connectionStatus < WIFI_ONLY
-                && _wifiCallbackSet) { //if the wifi previously wasn't connected but now is, run the callback
+                    && _wifiCallbackSet) { //if the wifi previously wasn't connected but now is, run the callback
                 _wifiCallback();
             }
             returnVal = WIFI_ONLY;

@@ -6,11 +6,9 @@
  */
 
 // local libraries
+#include "ESPHelper.h"
 #include "ems.h"
 #include "emsuart.h"
-
-// private libraries
-#include <ESPHelper.h>
 
 // public libraries
 #include <ArduinoJson.h>

@@ -187,7 +187,7 @@ The Boiler (ID 0x08) will send out these broadcast telegrams regularly:
 And a thermostat (ID 0x17 for a RC20) would broadcast these messages regularly:
 
 | Type | Description |
-| ---- | ----------- | undefined |undefined |undefined |undefined |undefined |
+| ---- | ----------- | undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |
 | 0x06 | time on thermostat Y,M,H,D,M,S,wd |
 
 Refer to the code in `ems.cpp` for further explanation on how to parse these message types and also reference the EMS Wiki.
@@ -212,13 +212,13 @@ Every telegram sent is echo'd back to Rx.
  * PubSubClient http://pubsubclient.knolleary.net
  * ArduinoJson https://github.com/bblanchon/ArduinoJson
 
- `src\emsuart.cpp` handles the low level UART read and write logic. You shouldn't need to touch this. All receive commands from the EMS bus are handled asynchronously using a circular buffer via an interrupt. A separate function processes the buffer and extracts the telegrams. Since we don't send too many write commands this is done sequentially. I couldn't use the standard Arduino Serial implementation because of the 11-bit break signal causes a frame-error which gets ignored. 
+ `emsuart.cpp` handles the low level UART read and write logic. You shouldn't need to touch this. All receive commands from the EMS bus are handled asynchronously using a circular buffer via an interrupt. A separate function processes the buffer and extracts the telegrams. Since we don't send too many write commands this is done sequentially. I couldn't use the standard Arduino Serial implementation because of the 11-bit break signal causes a frame-error which gets ignored. 
  
- `src\ems.cpp` is the logic to read the EMS packets (telegrams), validates them and process them based on the type.
+ `ems.cpp` is the logic to read the EMS packets (telegrams), validates them and process them based on the type.
 
- `src\boiler.ino` is the Arduino code for the ESP8266 that kicks it all off. This is where we have specific logic such as the code to monitor and alert on the Shower timer and light up the LEDs.
+ `boiler.ino` is the Arduino code for the ESP8266 that kicks it all off. This is where we have specific logic such as the code to monitor and alert on the Shower timer and light up the LEDs.
 
- `lib\ESPHelper` is my customized version of [ESPHelper](https://github.com/ItKindaWorks/ESPHelper) with added Telnet support and some other minor tweaking.
+ `ESPHelper.cpp` is my customized version of [ESPHelper](https://github.com/ItKindaWorks/ESPHelper) with added Telnet support and some other minor tweaking.
 
  ### Supported EMS Types
 
@@ -438,7 +438,7 @@ Porting to the Arduino is tricky and messy (which is one of the reasons I don't 
 * Add the ESP8266 boards (from Preferences add Additional Board URL http://arduino.esp8266.com/stable/package_esp8266com_index.json)
 * Go to Boards Manager and install ESP8266 2.4.x platform
 * Select your ESP8266 from Tools->Boards and the correct port with Tools->Port
-* From the Library Manager install ArduinoJson 5.13.x, PubSubClient 2.6.0
+* From the Library Manager install ArduinoJson 5.13.x, PubSubClient 2.6.x
 * The Arduino IDE doesn't have a common way to set build flags (ugh!) so you'll need to uncomment these lines in `boiler.ino`:
 ```
 #define WIFI_SSID "<my_ssid>"
@@ -448,7 +448,6 @@ Porting to the Arduino is tricky and messy (which is one of the reasons I don't 
 #define MQTT_PASS "<broker_password>" 
 ```
 * Put all the files in a single sketch folder (`ESPHelper.*, boiler.ino, ems.*, emsuart.*`)
-* Possibly change some the #includes to use the local files, replacing `<lib>` with `"lib"`
 * cross your fingers and CTRL-R to compile...
 	
 # Your comments and feedback

@@ -19,8 +19,8 @@
     along with ESPHelper.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef __ESP_HELPER_H
-#define __ESP_HELPER_H
+#ifndef __ESPHelper_H
+#define __ESPHelper_H
 
 #include <ArduinoOTA.h>
 #include <ESP8266WiFi.h> //https://github.com/esp8266/Arduino

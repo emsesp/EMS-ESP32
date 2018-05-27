@@ -1,10 +1,10 @@
 [platformio]
 env_default = nodemcuv2
-#env_default = d1_mini
+; env_default = d1_mini
 
 [common]
 platform = espressif8266
-build_flags = -g -DMQTT_MAX_PACKET_SIZE=300
+build_flags = -DMQTT_MAX_PACKET_SIZE=300
 build_flags_custom = '-DWIFI_SSID="my_ssid"' '-DWIFI_PASSWORD="my_password"' '-DMQTT_IP="my_broker_ip"' '-DMQTT_USER="my_broker_username"' '-DMQTT_PASS="my_broker_password"' 
 lib_deps =
   Time
