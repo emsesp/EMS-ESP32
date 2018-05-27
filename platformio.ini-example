@@ -10,7 +10,6 @@ lib_deps =
   Time
   PubSubClient
   ArduinoJson
-  Ticker
 
 [env:nodemcuv2]
 board = nodemcuv2

@@ -1,7 +1,7 @@
 /*
  * Boiler Project
  * Paul Derbyshire - May 2018 - https://github.com/proddy/EMS-ESP-Boiler
- * 
+ *
  * See Readme for Acknowledgments
  */
 
@@ -14,7 +14,14 @@
 
 // public libraries
 #include <ArduinoJson.h>
-#include <Ticker.h> // https://github.com/sstaub/Ticker
+#include <Ticker.h> // https://github.com/esp8266/Arduino/tree/master/libraries/Ticker
+
+// these are set as -D build flags. If you're not using PlatformIO hard code them
+//#define WIFI_SSID "<my_ssid>"
+//#define WIFI_PASSWORD "<my_password>"
+//#define MQTT_IP "<broker_ip>"
+//#define MQTT_USER "<broker_username>"
+//#define MQTT_PASS "<broker_password>"
 
 // private function prototypes
 void heartbeat();
@@ -22,13 +29,16 @@ void systemCheck();
 void publishValues();
 void _showerColdShotStart();
 void _showerColdShotStop();
+void _toggleHeartbeat();
 
-// these are set as -D build flags. If you're not using PlatformIO hard code them
-//#define WIFI_SSID "<my_ssid>"
-//#define WIFI_PASSWORD "<my_password>"
-//#define MQTT_IP "<broker_ip>"
-//#define MQTT_USER "<broker_username>"
-//#define MQTT_PASS "<broker_password>" 
+// timers
+Ticker publishValuesTimer;
+Ticker systemCheckTimer;
+Ticker heartbeatTimer;
+Ticker showerResetTimer;
+#define publishValuesTime 300 // every 5 mins post HA values
+#define systemCheckTime 10    // every 10 seconds check if Boiler is online
+#define heartbeatTime 1       // every second blink heartbeat LED
 
 // hostname is also used as the MQTT topic identifier (home/<hostname>)
 #define HOSTNAME "boiler"
@@ -96,7 +106,7 @@ typedef struct {
 netInfo homeNet = {.mqttHost = MQTT_IP,
                    .mqttUser = MQTT_USER,
                    .mqttPass = MQTT_PASS,
-                   .mqttPort = 1883,
+                   .mqttPort = 1883, // this is the default, change if using another port
                    .ssid     = WIFI_SSID,
                    .pass     = WIFI_PASSWORD};
 
@@ -110,12 +120,8 @@ _Boiler_Shower Boiler_Shower;
 #define myDebug(x, ...) myESP.printf(x, ##__VA_ARGS__);
 
 // Timers
-Ticker updateHATimer(publishValues, 300000);                          // every 5 mins (300000) post HA values
-Ticker hearbeatTimer(heartbeat, 500);                                 // changing onboard heartbeat led every 500ms
-Ticker systemCheckTimer(systemCheck, 10000);                          // every 10 seconds check if Boiler is online
-Ticker showerResetTimer(_showerColdShotStop, SHOWER_OFF_DURATION, 1); // timer for how long we turn off the hot water
 const unsigned long POLL_TIMEOUT_ERR = 10000; // if no signal from boiler for last 10 seconds, assume its offline
-bool                heartbeat_state  = false;
+bool                heartbeatEnabled = false;
 
 const unsigned long TX_HOLD_LED_TIME = 2000; // how long to hold the Tx LED because its so quick
 
@@ -312,16 +318,13 @@ void myDebugCallback() {
         ems_setWarmWaterTemp((uint8_t)strtol(&cmd[2], 0, 10));
         break;
     case 'q': // quiet
-        b = !ems_getLogVerbose();
-        ems_setLogVerbose(b);
-        enableHeartbeat(b);
+        _toggleHeartbeat();
         break;
     case 'a': // set ww activate on or off
-        if ((cmd[2] - '0') == 1) {
+        if ((cmd[2] - '0') == 1)
             ems_setWarmWaterActivated(true);
-        } else if ((cmd[2] - '0') == 0) {
+        else if ((cmd[2] - '0') == 0)
             ems_setWarmWaterActivated(false);
-        }
         break;
     case 'T': // toggle Thermostat
         b = !ems_getThermostatEnabled();
@@ -335,6 +338,14 @@ void myDebugCallback() {
         myDebug("Unknown command '%c'. Use ? for help.\n", cmd[0]);
         break;
     }
+}
+
+// toggle heartbeat LED
+void _toggleHeartbeat() {
+    bool b = !ems_getLogVerbose();
+    ems_setLogVerbose(b);
+    heartbeatEnabled = b;
+    digitalWrite(LED_BUILTIN, (b) ? LOW : HIGH); // set the LED
 }
 
 // MQTT Callback to handle incoming/outgoing changes
@@ -403,8 +414,9 @@ void setup() {
     digitalWrite(LED_ERR, HIGH);
 
     // Timers
-    updateHATimer.start();
-    systemCheckTimer.start();
+    publishValuesTimer.attach(publishValuesTime, publishValues); // every 5 mins (300000) post HA values
+    systemCheckTimer.attach(systemCheckTime, systemCheck);       // every 10 seconds check if Boiler is online
+    heartbeatTimer.attach(heartbeatTime, heartbeat);             //  every second blink heartbeat LED
 
     // set up Wifi, MQTT, Telnet
     myESP.setWifiCallback(WIFIcallback);
@@ -424,21 +436,12 @@ void setup() {
     _initBoiler();
 
     // heartbeat, only if setting is enabled
-    enableHeartbeat(ems_getLogVerbose());
+    heartbeatEnabled = ems_getLogVerbose();
 }
 
 // flash LEDs
 // Using a faster way to write to pins as digitalWrite does a lot of overhead like pin checking & disabling interrupts
 void showLEDs() {
-    // update Ticker
-    hearbeatTimer.update();
-
-    // hearbeat timer, using internal LED on board
-    if (hearbeatTimer.counter() == 20)
-        hearbeatTimer.interval(200);
-    if (hearbeatTimer.counter() == 80)
-        hearbeatTimer.interval(1000);
-
     if (ems_getLogVerbose()) {
         // ERR LED
         if (!Boiler_Status.boiler_online) {
@@ -461,19 +464,10 @@ void showLEDs() {
 
 // heartbeat callback to light up the LED, called via Ticker
 void heartbeat() {
-    digitalWrite(LED_BUILTIN, heartbeat_state);
-    heartbeat_state = !heartbeat_state;
-}
-
-// enables or disables the heartbeat LED
-// using the Ticker library
-void enableHeartbeat(bool on) {
-    heartbeat_state = (on) ? LOW : HIGH;
-    heartbeat();
-    if (on)
-        hearbeatTimer.resume();
-    else
-        hearbeatTimer.pause();
+    if (heartbeatEnabled) {
+        int state = digitalRead(LED_BUILTIN);
+        digitalWrite(LED_BUILTIN, !state);
+    }
 }
 
 // do a healthcheck every now and then to see if we connections
@@ -497,6 +491,7 @@ void _showerColdShotStop() {
         myDebug("Shower: turning back hot shower water.\n");
         ems_setWarmWaterActivated(true);
         Boiler_Shower.isColdShot = false;
+        showerResetTimer.detach();
     }
 }
 
@@ -506,10 +501,6 @@ void _showerColdShotStop() {
 void loop() {
     connectionStatus = myESP.loop();
     timestamp        = millis();
-
-    // Timers
-    updateHATimer.update();
-    systemCheckTimer.update();
 
     // update the Rx Tx and ERR LEDs
     showLEDs();
@@ -537,11 +528,10 @@ void loop() {
      * Shower Logic
      */
     if (Boiler_Status.shower_enabled) {
-        showerResetTimer.update(); // update Ticker
-
         // if already in cold mode, ignore all this logic until we're out of the cold blast
         if (!Boiler_Shower.isColdShot) {
-            // these values come from UBAMonitorFast - type 0x18) which is broadcasted every second so we're pretty accurate
+            // these values come from UBAMonitorFast - type 0x18) which is broadcasted every second so our timings are accurate enough
+            // and no need to fetch the values from the boiler
             Boiler_Shower.showerOn =
                 ((EMS_Boiler.selBurnPow >= SHOWER_BURNPOWER_MIN) && (EMS_Boiler.selFlowTemp == 0) && EMS_Boiler.burnGas);
 
@@ -559,7 +549,8 @@ void loop() {
                     if ((((timestamp - Boiler_Shower.timerStart) > SHOWER_MAX_DURATION) && !Boiler_Shower.isColdShot)
                         && Boiler_Status.shower_timer) {
                         _showerColdShotStart();
-                        showerResetTimer.start(); // start the timer for n seconds which will reset the water back to hot
+                        // start the timer for n seconds which will reset the water back to hot
+                        showerResetTimer.attach(SHOWER_OFF_DURATION, _showerColdShotStop);
                     }
                 }
             } else { // shower is off
@@ -594,6 +585,5 @@ void loop() {
     }
 
     // yield to prevent watchdog from timing out
-    // if using delay() this is not needed, but confuses the Ticker library
     yield();
 }

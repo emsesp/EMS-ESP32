@@ -119,13 +119,9 @@ bool ESPHelper::begin(const char * hostname) {
         if (_mqttSet) {
             //make mqtt client use either the secure or non-secure wifi client depending on the setting
             if (_useSecureClient) {
-                client = PubSubClient(_currentNet.mqttHost,
-                                      _currentNet.mqttPort,
-                                      wifiClientSecure);
+                client = PubSubClient(_currentNet.mqttHost, _currentNet.mqttPort, wifiClientSecure);
             } else {
-                client = PubSubClient(_currentNet.mqttHost,
-                                      _currentNet.mqttPort,
-                                      wifiClient);
+                client = PubSubClient(_currentNet.mqttHost, _currentNet.mqttPort, wifiClient);
             }
 
             //set the mqtt message callback if needed
@@ -139,13 +135,9 @@ bool ESPHelper::begin(const char * hostname) {
             //make mqtt client use either the secure or non-secure wifi client depending on the setting
             //(this shouldnt be needed if making a dummy connection since the idea would be that there wont be mqtt in this case)
             if (_useSecureClient) {
-                client = PubSubClient("192.168.1.255",
-                                      _currentNet.mqttPort,
-                                      wifiClientSecure);
+                client = PubSubClient("192.168.1.255", _currentNet.mqttPort, wifiClientSecure);
             } else {
-                client = PubSubClient("192.168.1.255",
-                                      _currentNet.mqttPort,
-                                      wifiClient);
+                client = PubSubClient("192.168.1.255", _currentNet.mqttPort, wifiClient);
             }
         }
 
@@ -161,8 +153,7 @@ bool ESPHelper::begin(const char * hostname) {
                 timeout++;
             }
         });
-        ArduinoOTA.onProgress([](unsigned int progress,
-                                 unsigned int total) { /* ota progress code */ });
+        ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) { /* ota progress code */ });
         ArduinoOTA.onError([](ota_error_t error) { /* ota error code */ });
 
         //initially attempt to connect to wifi when we begin (but only block for 2 seconds before timing out)
@@ -229,8 +220,7 @@ void ESPHelper::end() {
 int ESPHelper::loop() {
     if (_ssidSet) {
         //check for good connections and attempt a reconnect if needed
-        if (((_mqttSet && !client.connected()) || setConnectionStatus() < WIFI_ONLY)
-            && _connectionStatus != BROADCAST) {
+        if (((_mqttSet && !client.connected()) || setConnectionStatus() < WIFI_ONLY) && _connectionStatus != BROADCAST) {
             reconnect();
         }
 
@@ -355,8 +345,7 @@ void ESPHelper::setWifiCallback(void (*callback)()) {
 void ESPHelper::reconnect() {
     static uint8_t tryCount = 0;
 
-    if (_connectionStatus != BROADCAST
-        && setConnectionStatus() != FULL_CONNECTION) {
+    if (_connectionStatus != BROADCAST && setConnectionStatus() != FULL_CONNECTION) {
         logger(LOG_CONSOLE, "Attempting WiFi Connection...");
         //attempt to connect to the wifi if connection is lost
         if (WiFi.status() != WL_CONNECTED) {
@@ -385,8 +374,7 @@ void ESPHelper::reconnect() {
 
             //attempt to connect to mqtt when we finally get connected to WiFi
             if (_mqttSet) {
-                static uint8_t timeout =
-                    0; //allow a max of 5 mqtt connection attempts before timing out
+                static uint8_t timeout = 0; //allow a max of 5 mqtt connection attempts before timing out
                 if (!client.connected() && timeout < 5) {
                     logger(LOG_CONSOLE, "Attempting MQTT connection...");
 
@@ -394,9 +382,7 @@ void ESPHelper::reconnect() {
 
                     //connect to mqtt with user/pass
                     if (_mqttUserSet) {
-                        connected = client.connect(_clientName,
-                                                   _currentNet.mqttUser,
-                                                   _currentNet.mqttPass);
+                        connected = client.connect(_clientName, _currentNet.mqttUser, _currentNet.mqttPass);
                     }
 
                     //connect to mqtt without credentials
@@ -621,7 +607,7 @@ void ESPHelper::consoleHandle() {
 
         // Set client
         telnetClient.setNoDelay(true); // faster
-        telnetClient.flush(); // clear input buffer, to prevent strange characters
+        telnetClient.flush();          // clear input buffer, to prevent strange characters
 
         _lastTimeCommand = millis(); // To mark time for inactivity
 
@@ -836,8 +822,7 @@ void ESPHelper::consoleProcessCommand() {
     uint8_t cmd      = _command[0];
 
     if (!_verboseMessages) {
-        telnetClient.println(
-            "Warning, verbose messaging is off. Use v to toggle.");
+        telnetClient.println("Warning, verbose messaging is off. Use v to toggle.");
     }
 
     // Process the command
@@ -853,8 +838,7 @@ void ESPHelper::consoleProcessCommand() {
         resetESP();
     } else if (cmd == '&') {
         _verboseMessages = !_verboseMessages; // toggle
-        telnetClient.printf("Verbose messaging is %s\n",
-                            _verboseMessages ? "on" : "off");
+        telnetClient.printf("Verbose messaging is %s\n", _verboseMessages ? "on" : "off");
     } else {
         // custom Project commands
         if (_consoleCallbackProjectCmds) {
@@ -874,9 +858,7 @@ void ESPHelper::logger(log_level_t level, const char * message) {
         telnetClient.flush();
     } else if (level == LOG_HA) {
         char s[100];
-        sprintf(s,
-                "%s: %s\n",
-                _hostname,
+        sprintf(s, "%s: %s\n", _hostname,
                 message); // add new line, for the debug telnet printer
         publish(MQTT_NOTIFICATION, s, false);
     }

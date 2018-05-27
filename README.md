@@ -125,9 +125,9 @@ My circuit will work with both 3.3V and 5V. It's easiest though to power directl
 
 Powering the ESP89266 can be either via the USB from a PC or external 5V power supply or from the EMS line itself using a buck step-down converter. The EMS provides about 15V AC current. The advantage of using the EMS is obviously less power cables and it's neater to place inline with the thermostat. I use a [Pololu D24C22F5](https://www.pololu.com/product/2858) which is 5V/2A buck step-down module and probably slightly overkill for what we need. The additional part of the circuit is shown below along with an earlier breadboard prototype using a NodeMCU2 (with the additional LEDs):
 
-Power circuit | Example |
---- | --- 
-![Power circuit](doc/schematics/power.PNG) | ![Breadboard](doc/schematics/breadboard_example.png) |
+| Power circuit                              | Example                                              |
+| ------------------------------------------ | ---------------------------------------------------- |
+| ![Power circuit](doc/schematics/power.PNG) | ![Breadboard](doc/schematics/breadboard_example.png) |
 
 ## Known Issues and ToDo's
 
@@ -176,19 +176,19 @@ When a device is broadcasting to everyone there is no specific destination neede
 
 The Boiler (ID 0x08) will send out these broadcast telegrams regularly:
 
-Type | Description (see [here](https://emswiki.thefischer.net/doku.php?id=wiki:ems:telegramme)) | Data length (excluding header) | Frequency
---- | --- | --- | --- |
-0x34 | UBAMonitorWWMessage | 19 bytes | 10 seconds
-0x18 | UBAMonitorFast | 25 bytes | 10 seconds
-0x19 | UBAMonitorSlow | 22 bytes | every minute
-0x1C | UBAWartungsmelding | 27 bytes | every minute
-0x2A | status, specific to boiler type | - | 10 seconds
+| Type | Description (see [here](https://emswiki.thefischer.net/doku.php?id=wiki:ems:telegramme)) | Data length (excluding header) | Frequency    |
+| ---- | ---------------------------------------------------------------------------------------- | ------------------------------ | ------------ |
+| 0x34 | UBAMonitorWWMessage                                                                      | 19 bytes                       | 10 seconds   |
+| 0x18 | UBAMonitorFast                                                                           | 25 bytes                       | 10 seconds   |
+| 0x19 | UBAMonitorSlow                                                                           | 22 bytes                       | every minute |
+| 0x1C | UBAWartungsmelding                                                                       | 27 bytes                       | every minute |
+| 0x2A | status, specific to boiler type                                                          | -                              | 10 seconds   |
 
 And a thermostat (ID 0x17 for a RC20) would broadcast these messages regularly:
 
-Type | Description 
---- | --- | 
-0x06 | time on thermostat Y,M,H,D,M,S,wd
+| Type | Description |
+| ---- | ----------- | undefined |undefined |undefined |undefined |undefined |
+| 0x06 | time on thermostat Y,M,H,D,M,S,wd |
 
 Refer to the code in `ems.cpp` for further explanation on how to parse these message types and also reference the EMS Wiki.
 
@@ -211,7 +211,6 @@ Every telegram sent is echo'd back to Rx.
  * Time http://playground.arduino.cc/code/time
  * PubSubClient http://pubsubclient.knolleary.net
  * ArduinoJson https://github.com/bblanchon/ArduinoJson
- * Ticker https://github.com/sstaub/Ticker
 
  `src\emsuart.cpp` handles the low level UART read and write logic. You shouldn't need to touch this. All receive commands from the EMS bus are handled asynchronously using a circular buffer via an interrupt. A separate function processes the buffer and extracts the telegrams. Since we don't send too many write commands this is done sequentially. I couldn't use the standard Arduino Serial implementation because of the 11-bit break signal causes a frame-error which gets ignored. 
  
@@ -225,15 +224,15 @@ Every telegram sent is echo'd back to Rx.
 
 `ems.cpp` defines callback functions that handle all the broadcast types listed above (e.g. 0x34, 0x18, 0x19 etc) plus these extra types:
 
-Device |  Type | Description | What
---- | --- | --- | --- |
-Boiler (0x08) | 0x33 | UBAParameterWW | reads selected & desired warm water temp
-Boiler (0x08) | 0x14 | UBATotalUptimeMessage | 
-Boiler (0x08) | 0x15 | UBAMaintenanceSettingsMessage | 
-Boiler (0x08) | 0x16 | UBAParametersMessage | 
-Thermostat (0x17) | 0xA8 | RC20Temperature | sets temperature and operating modes
-Thermostat (0x17) | 0xA3 | RCOutdoorTempMessage |  
-Thermostat (0x17) | 0x91 | RC20StatusMessage | reads set & current room temperatures
+| Device            | Type | Description                   | What                                     |
+| ----------------- | ---- | ----------------------------- | ---------------------------------------- |
+| Boiler (0x08)     | 0x33 | UBAParameterWW                | reads selected & desired warm water temp |
+| Boiler (0x08)     | 0x14 | UBATotalUptimeMessage         |                                          |
+| Boiler (0x08)     | 0x15 | UBAMaintenanceSettingsMessage |                                          |
+| Boiler (0x08)     | 0x16 | UBAParametersMessage          |                                          |
+| Thermostat (0x17) | 0xA8 | RC20Temperature               | sets temperature and operating modes     |
+| Thermostat (0x17) | 0xA3 | RCOutdoorTempMessage          |                                          |
+| Thermostat (0x17) | 0x91 | RC20StatusMessage             | reads set & current room temperatures    |
 
 Note the thermostat types are based on a RC20 model thermostat. If using an RC30/RC35 use types 0x3E and 0x48 to read the values.
 
@@ -427,10 +426,10 @@ Next copy the files custom.h, index.html, boiler.ino and the esp*.cpp/h files fr
 
 I will eventually put pre-built version based on ESPurna in the directory `/firmware` which you can upload using esptool (https://github.com/espressif/esptool) bootloader. On Windows, follow these instructions:
 
-1. Check if you have python 2.7 installed. If not [download it](https://www.python.org/downloads/) and make sure you add Python to the windows PATH so it'll recognize .py files.
+1. Check if you have python 2.7 installed. If not [download it](https://www.python.org/downloads/) and make sure you select the option to add Python to the windows PATH.
 2. Install the ESPTool by running `pip install esptool` from a command prompt.
 3. Connect the ESP via USB, figure out the COM port.
-4. run `esptool.py -p <com> write_flash 0x00000 <firmware>` where firmware is the .bin file and \<com\> is the com port, e.g. COM3
+4. run `esptool.py -p <com> write_flash 0x00000 <firmware>` where firmware is the `.bin` file and \<com\> is the COM port, e.g. `COM3`
 
 
 ## Using Arduino IDE (*unsupported!*)
@@ -449,7 +448,6 @@ Porting to the Arduino is tricky and messy (which is one of the reasons I don't 
 #define MQTT_PASS "<broker_password>" 
 ```
 * Put all the files in a single sketch folder (`ESPHelper.*, boiler.ino, ems.*, emsuart.*`)
-* Download the new and improved Ticker library from https://github.com/sstaub/Ticker copying the .cpp and .h files to the same folder you just created
 * Possibly change some the #includes to use the local files, replacing `<lib>` with `"lib"`
 * cross your fingers and CTRL-R to compile...
 	
