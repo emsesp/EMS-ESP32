@@ -31,10 +31,12 @@ There are 3 parts to this project, first the design of the circuit, second the c
     - [Shower Logic](#shower-logic)
   - [Home Assistant Configuration](#home-assistant-configuration)
 - [Building the firmware](#building-the-firmware)
-    - [Using pre-built firmware's](#using-pre-built-firmwares)
-    - [Using PlatformIO](#using-platformio)
+  - [Using PlatformIO](#using-platformio)
+    - [Standalone](#standalone)
     - [Using ESPurna](#using-espurna)
-    - [Your comments and feedback](#your-comments-and-feedback)
+    - [Using my pre-built firmware's](#using-my-pre-built-firmwares)
+  - [Using Arduino IDE (*unsupported!*)](#using-arduino-ide-unsupported)
+- [Your comments and feedback](#your-comments-and-feedback)
 
 
 ## Introduction
@@ -181,8 +183,8 @@ Type | Description (see [here](https://emswiki.thefischer.net/doku.php?id=wiki:e
 0x34 | UBAMonitorWWMessage | 19 bytes | 10 seconds
 0x18 | UBAMonitorFast | 25 bytes | 10 seconds
 0x19 | UBAMonitorSlow | 22 bytes | every minute
-0x1c | UBAWartungsmelding | 27 bytes | every minute
-0x2a | status, specific to boiler type | - | 10 seconds
+0x1C | UBAWartungsmelding | 27 bytes | every minute
+0x2A | status, specific to boiler type | - | 10 seconds
 
 And a thermostat (ID 0x17 for a RC20) would broadcast these messages regularly:
 
@@ -223,17 +225,19 @@ Every telegram sent is echo'd back to Rx.
 
  ### Supported EMS Types
 
-`ems.cpp` defines callback functions that handle all the broadcast types plus these extra types:
+`ems.cpp` defines callback functions that handle all the broadcast types listed above (e.g. 0x34, 0x18, 0x19 etc) plus these extra types:
 
 Device |  Type | Description | What
 --- | --- | --- | --- |
-Boiler (0x08) | 0x33 | UBAParameterWW | selected & desired warm water temp
+Boiler (0x08) | 0x33 | UBAParameterWW | reads selected & desired warm water temp
 Boiler (0x08) | 0x14 | UBATotalUptimeMessage | 
 Boiler (0x08) | 0x15 | UBAMaintenanceSettingsMessage | 
 Boiler (0x08) | 0x16 | UBAParametersMessage | 
-Thermostat (0x17) | 0xA8 | RC20Temperature | setting temperature and operating modes
+Thermostat (0x17) | 0xA8 | RC20Temperature | sets temperature and operating modes
 Thermostat (0x17) | 0xA3 | RCOutdoorTempMessage |  
-Thermostat (0x17) | 0x91 | RC20StatusMessage | set & current room temperatures
+Thermostat (0x17) | 0x91 | RC20StatusMessage | reads set & current room temperatures
+
+Note the thermostat types are based on a RC20 model thermostat. If using an RC30/RC35 use types 0x3E and 0x48 to read the values.
 
  ### Customizing
 
@@ -380,44 +384,16 @@ And in Home Assistant looks like:
 
 # Building the firmware
 
-### Using pre-built firmware's
+## Using PlatformIO
 
-In the `/firmware` folder, if there are pre-built versions you can upload using esptool (https://github.com/espressif/esptool) bootloader. On Windows, follow these instructions:
+There are two ways to compile and build the firmware yourself using PlatformIO. This is my preferred way.
 
-1. Check if you have python 2.7 installed. If not [download it](https://www.python.org/downloads/) and make sure you add Python to the windows PATH so it'll recognize .py files.
-2. Install the ESPTool by running `pip install esptool` from a command prompt.
-3. Connect the ESP via USB, figure out the COM port.
-4. run `esptool.py -p <com> write_flash 0x00000 <firmware>` where firmware is the .bin file and \<com\> is the com port, e.g. COM3
-
-### Using PlatformIO
-
-There are two ways to compile and build the firmware yourself.
+### Standalone
 
 The first method is a standalone version which uses a modified version of [ESPHelper](https://github.com/ItKindaWorks/ESPHelper) for the WiFi, OTA and MQTT handling with the Telnet server code.
 
-To compile, using PlatformIO create a project and modify your `platformio.ini` to include these build flags:
-
-`WIFI_SSID, WIFI_PASSWORD, MQTT_IP, MQTT_USER, MQTT_PASS`
-
-If you're not using MQTT keep MQTT_IP empty (`MQTT_IP=""`)
-
-Here's an example part from `platformio.ini`:
-
-```
-[env:nodemcuv2]
-board = nodemcuv2
-platform = espressif8266
-framework = arduino
-lib_deps =
-  Time
-  PubSubClient
-  ArduinoJson
-  Ticker
-upload_speed = 921600
-build_flags = '-DWIFI_SSID="<my_ssid>"' '-DWIFI_PASSWORD="<my_password>"' '-DMQTT_IP="<broker_ip>"' '-DMQTT_USER="<broker_username>"' '-DMQTT_PASS="<broker_password>"' -DMQTT_MAX_PACKET_SIZE=300
-; comment out next line if using USB and not OTA
-upload_port = "boiler."
-```
+Rename the `platformio.ini-example` to `platformio.ini` making the necessary changes for your WiFi and MQTT credentials. The build flags are `WIFI_SSID, WIFI_PASSWORD, MQTT_IP, MQTT_USER, MQTT_PASS`. 
+If you're not using MQTT leave MQTT_IP empty (`MQTT_IP=""`)
 	
 ### Using ESPurna
 
@@ -448,8 +424,38 @@ PlatformIO should detect and set some things up for you. Build and Deploy as you
 If you run into issues refer to official ESPurnas setup instructions [here](https://github.com/xoseperez/espurna/wiki/Build-and-update-from-Visual-Studio-Code-using-PlatformIO).
 
 Next copy the files custom.h, index.html, boiler.ino and the esp*.cpp/h files from the espurna directory to the code directory and build.
+
+### Using my pre-built firmware's
+
+I will eventually put pre-built version based on ESPurna in the directory `/firmware` which you can upload using esptool (https://github.com/espressif/esptool) bootloader. On Windows, follow these instructions:
+
+1. Check if you have python 2.7 installed. If not [download it](https://www.python.org/downloads/) and make sure you add Python to the windows PATH so it'll recognize .py files.
+2. Install the ESPTool by running `pip install esptool` from a command prompt.
+3. Connect the ESP via USB, figure out the COM port.
+4. run `esptool.py -p <com> write_flash 0x00000 <firmware>` where firmware is the .bin file and \<com\> is the com port, e.g. COM3
+
+
+## Using Arduino IDE (*unsupported!*)
+
+Porting to the Arduino is tricky and messy (which is one of the reasons I don't use it). I haven't personally tried this and there is no guarantee it will compile at all. Basically the steps you need to follow is along the lines of:
+* Add the ESP8266 boards (from Preferences add Additional Board URL http://arduino.esp8266.com/stable/package_esp8266com_index.json)
+* Go to Boards Manager and install ESP8266 2.4.x platform
+* Select your ESP8266 from Tools->Boards and the correct port with Tools->Port
+* From the Library Manager install ArduinoJson 5.13.x, PubSubClient 2.6.0
+* The Arduino IDE doesn't have a common way to set build flags (ugh!) so you'll need to uncomment these lines in `boiler.ino`:
+```
+#define WIFI_SSID "<my_ssid>"
+#define WIFI_PASSWORD "<my_password>"
+#define MQTT_IP "<broker_ip>"
+#define MQTT_USER "<broker_username>"
+#define MQTT_PASS "<broker_password>" 
+```
+* Put all the files in a single sketch folder (`ESPHelper.*, boiler.ino, ems.*, emsuart.*`)
+* Download the new and improved Ticker library from https://github.com/sstaub/Ticker copying the .cpp and .h files to the same folder you just created
+* Possibly change some the #includes to use the local files, replacing `<lib>` with `"lib"`
+* cross your fingers and CTRL-R to compile...
 	
-### Your comments and feedback
+# Your comments and feedback
 
 Any comments or suggestions are very welcome. You can contact me at **dev** at **derbyshire** dot **nl** or creating a GitHub issue.	
 

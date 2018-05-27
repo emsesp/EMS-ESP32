@@ -533,7 +533,7 @@ bool _process_RC20Time(uint8_t * data, uint8_t length) {
     EMS_Thermostat.month  = data[1];
     EMS_Thermostat.year   = data[0];
 
-    // now we have the time, set our ESP code to it - wil be replaced with NTP
+    // we can optional set the time based on the Thermostat's time if we want
     setTime(EMS_Thermostat.hour,
             EMS_Thermostat.minute,
             EMS_Thermostat.second,

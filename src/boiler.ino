@@ -1,8 +1,8 @@
 /*
  * Boiler Project
  * Paul Derbyshire - May 2018 - https://github.com/proddy/EMS-ESP-Boiler
- *
- * Acknowledgments too https://github.com/susisstrolch/EMS-ESP12 and https://github.com/jeelabs/esp-link
+ * 
+ * See Readme for Acknowledgments
  */
 
 // local libraries
@@ -22,6 +22,13 @@ void systemCheck();
 void publishValues();
 void _showerColdShotStart();
 void _showerColdShotStop();
+
+// these are set as -D build flags. If you're not using PlatformIO hard code them
+//#define WIFI_SSID "<my_ssid>"
+//#define WIFI_PASSWORD "<my_password>"
+//#define MQTT_IP "<broker_ip>"
+//#define MQTT_USER "<broker_username>"
+//#define MQTT_PASS "<broker_password>" 
 
 // hostname is also used as the MQTT topic identifier (home/<hostname>)
 #define HOSTNAME "boiler"

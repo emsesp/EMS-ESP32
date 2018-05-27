@@ -1,6 +1,6 @@
 /*
  * emsuart.cpp
- * The low level UART code for ESP8266
+ * The low level UART code for ESP8266 to read and write to the EMS bus via uart
  * Paul Derbyshire - https://github.com/proddy/EMS-ESP-Boiler
  */
 
@@ -51,7 +51,6 @@ static void emsuart_rx_intr_handler(void * para) {
 
         // copy data into transfer buffer
         pEMSRxBuf->writePtr = length;
-
         os_memcpy((void *)pEMSRxBuf->buffer, (void *)&uart_buffer, length);
 
         // set the status flag stating BRK has been received and we can start a new package
@@ -81,8 +80,7 @@ static void ICACHE_FLASH_ATTR emsuart_recvTask(os_event_t * events) {
 }
 
 /*
- * init UART0
- * This is low level ESP8266 code to manually configure the UART driver
+ * init UART0 driver
  */
 void ICACHE_FLASH_ATTR emsuart_init() {
     ETS_UART_INTR_DISABLE();
