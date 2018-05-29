@@ -187,7 +187,7 @@ The Boiler (ID 0x08) will send out these broadcast telegrams regularly:
 And a thermostat (ID 0x17 for a RC20) would broadcast these messages regularly:
 
 | Type | Description |
-| ---- | ----------- | undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |
+| ---- | ----------- | undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |
 | 0x06 | time on thermostat Y,M,H,D,M,S,wd |
 
 Refer to the code in `ems.cpp` for further explanation on how to parse these message types and also reference the EMS Wiki.
@@ -285,12 +285,12 @@ This is what my HA configuration looks like:
 
     - platform: mqtt
       state_topic: 'home/boiler/thermostat_currtemp'
-      name: 'Boiler Thermostat Current Temperature'
+      name: 'Current Room Temperature'
       unit_of_measurement: '°C'
 
     - platform: mqtt
       state_topic: 'home/boiler/thermostat_seltemp'
-      name: 'Boiler Thermostat Set Temperature'
+      name: 'Current Set Temperature'
       unit_of_measurement: '°C'
 
     - platform: mqtt
@@ -368,8 +368,8 @@ This is what my HA configuration looks like:
       name: Thermostat
       view: no
       entities:
-        - sensor.thermostat_current_temperature
-        - sensor.thermostat_set_temperature
+        - sensor.current_room_temperature
+        - sensor.current_set_temperature
         - input_number.thermostat_temp
 
 And in Home Assistant looks like:
