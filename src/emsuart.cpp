@@ -1,5 +1,6 @@
 /*
  * emsuart.cpp
+ *
  * The low level UART code for ESP8266 to read and write to the EMS bus via uart
  * Paul Derbyshire - https://github.com/proddy/EMS-ESP-Boiler
  */
@@ -32,7 +33,7 @@ static void emsuart_rx_intr_handler(void * para) {
         length                     = 0;
     }
 
-    // fill IRQ buffer, by emptying Rx FIFO 
+    // fill IRQ buffer, by emptying Rx FIFO
     if (U0IS & ((1 << UIFF) | (1 << UITO) | (1 << UIBD))) {
         while ((USS(EMSUART_UART) >> USRXC) & 0xFF) {
             uart_buffer[length++] = USF(EMSUART_UART);
@@ -157,7 +158,7 @@ void ICACHE_FLASH_ATTR emsuart_tx_brk() {
 }
 
 /*
- * Send to Tx, ending with a BRK
+ * Send to Tx, ending with a <BRK>
  */
 void ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
     for (uint8_t i = 0; i < len; i++) {

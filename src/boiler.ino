@@ -52,7 +52,7 @@ Ticker showerResetTimer;
     "*  S=toggle Shower Timer on/off\n\r"                                                                              \
     "*  r [n] to request for data from EMS "                                                                           \
     "(33=UBAParameterWW, 18=UBAMonitorFast, 19=UBAMonitorSlow, "                                                       \
-    "34=UBAMonitorWWMessage, 91=RC20StatusMessage, 6=RC20Time)\n\r"                                                    \
+    "34=UBAMonitorWWMessage, 91=RC20StatusMessage, 6=RC20Time, 2=Version)\n\r"                                         \
     "*  t [n] set thermostat temperature to n\n\r"                                                                     \
     "*  w [n] set boiler warm water temperature to n (min 30)\n\r"                                                     \
     "*  a [n] activate boiler warm water on (n=1) or off (n=0)"

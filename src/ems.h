@@ -1,5 +1,7 @@
 /*
  * Header file for EMS.cpp
+ *
+ * You shouldn't need to change much in this file
  */
 
 #ifndef __EMS_H
@@ -8,31 +10,12 @@
 #include <Arduino.h>
 
 // EMS IDs
-#define EMS_ID_THERMOSTAT 0x17 // x17=RC20, x10=RC30 (Moduline 300)
-
 #define EMS_ID_NONE 0x00   // Fixed - used as a dest in broadcast messages
 #define EMS_ID_BOILER 0x08 // Fixed - also known as MC10.
 #define EMS_ID_ME 0x0B     // Fixed - our device, hardcoded as "Service Key"
 
-// EMS Telegram Types
+// Special EMS Telegram Types
 #define EMS_TYPE_NONE 0x00 // none
-
-#define EMS_TYPE_UBAMonitorFast 0x18              // is an automatic monitor broadcast
-#define EMS_TYPE_UBAMonitorSlow 0x19              // is an automatic monitor broadcast
-#define EMS_TYPE_UBAMonitorWWMessage 0x34         // is an automatic monitor broadcast
-#define EMS_TYPE_UBAMaintenanceStatusMessage 0x1c // is an automatic monitor broadcast
-#define EMS_TYPE_UBAParameterWW 0x33
-
-#define EMS_TYPE_UBATotalUptimeMessage 0x14
-#define EMS_TYPE_UBAMaintenanceSettingsMessage 0x15
-#define EMS_TYPE_UBAParametersMessage 0x16
-
-// EMS Telegram types from Thermostat
-// types 1A and 35 and used for errors from Thermostat
-#define EMS_TYPE_RC20StatusMessage 0x91
-#define EMS_TYPE_RC20Time 0x06 // is an automatic monitor broadcast
-#define EMS_TYPE_RC20Temperature 0xA8
-#define EMS_TYPE_RCOutdoorTempMessage 0xa3 // we can ignore
 
 #define EMS_TX_MAXBUFFERSIZE 128 // max size of the buffer. packets are 32 bits
 
@@ -86,7 +69,6 @@ typedef struct {
 /*
  * Telegram package defintions
  */
-
 typedef struct {
     // UBAParameterWW
     bool    wWActivated;   // Warm Water activated
@@ -169,15 +151,6 @@ void    _processType(uint8_t * telegram, uint8_t length);
 void    _initTxBuffer();
 void    _buildTxTelegram(uint8_t data_value);
 void    _debugPrintPackage(const char * prefix, uint8_t * data, uint8_t len, const char * color);
-
-// callbacks per type
-bool _process_UBAMonitorFast(uint8_t * data, uint8_t length);
-bool _process_UBAMonitorSlow(uint8_t * data, uint8_t length);
-bool _process_UBAMonitorWWMessage(uint8_t * data, uint8_t length);
-bool _process_UBAParameterWW(uint8_t * data, uint8_t length);
-bool _process_RC20StatusMessage(uint8_t * data, uint8_t length);
-bool _process_RC20Time(uint8_t * data, uint8_t length);
-bool _process_RC20Temperature(uint8_t * data, uint8_t length);
 
 // helper functions
 float    _toFloat(uint8_t i, uint8_t * data);

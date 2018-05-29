@@ -15,8 +15,41 @@
 _EMS_Sys_Status EMS_Sys_Status; // EMS Status
 _EMS_TxTelegram EMS_TxTelegram; // Empty buffer for sending telegrams
 
-// call back for handling Types
-#define MAX_TYPECALLBACK 11
+// define here the Thermostat type
+#define EMS_ID_THERMOSTAT 0x17 // x17=RC20, x10=RC30 (Moduline 300)
+
+// define here the EMS telegram types you need
+// Boiler...
+#define EMS_TYPE_UBAMonitorFast 0x18              // is an automatic monitor broadcast
+#define EMS_TYPE_UBAMonitorSlow 0x19              // is an automatic monitor broadcast
+#define EMS_TYPE_UBAMonitorWWMessage 0x34         // is an automatic monitor broadcast
+#define EMS_TYPE_UBAMaintenanceStatusMessage 0x1c // is an automatic monitor broadcast
+#define EMS_TYPE_UBAParameterWW 0x33
+
+#define EMS_TYPE_UBATotalUptimeMessage 0x14
+#define EMS_TYPE_UBAMaintenanceSettingsMessage 0x15
+#define EMS_TYPE_UBAParametersMessage 0x16
+
+// Thermostat...
+#define EMS_TYPE_RC20StatusMessage 0x91
+#define EMS_TYPE_RC20Time 0x06 // is an automatic monitor broadcast
+#define EMS_TYPE_RC20Temperature 0xA8
+#define EMS_TYPE_RCOutdoorTempMessage 0xa3 // we can ignore
+#define EMS_TYPE_Version 0x02              // version of the controller
+
+// and call backs
+#define MAX_TYPECALLBACK 12 // make sure it matches the #types you have
+// callbacks per type
+bool _process_UBAMonitorFast(uint8_t * data, uint8_t length);
+bool _process_UBAMonitorSlow(uint8_t * data, uint8_t length);
+bool _process_UBAMonitorWWMessage(uint8_t * data, uint8_t length);
+bool _process_UBAParameterWW(uint8_t * data, uint8_t length);
+bool _process_RC20StatusMessage(uint8_t * data, uint8_t length);
+bool _process_RC20Time(uint8_t * data, uint8_t length);
+bool _process_RC20Temperature(uint8_t * data, uint8_t length);
+bool _process_RC20Temperature(uint8_t * data, uint8_t length);
+bool _process_Version(uint8_t * data, uint8_t length);
+
 const _EMS_Types EMS_Types[MAX_TYPECALLBACK] =
 {   {EMS_ID_BOILER, EMS_TYPE_UBAMonitorFast, "UBAMonitorFast", 36, _process_UBAMonitorFast},
     {EMS_ID_BOILER, EMS_TYPE_UBAMonitorSlow, "UBAMonitorSlow", 28, _process_UBAMonitorSlow},
@@ -29,7 +62,8 @@ const _EMS_Types EMS_Types[MAX_TYPECALLBACK] =
 
     {EMS_ID_THERMOSTAT, EMS_TYPE_RC20StatusMessage, "RC20StatusMessage", 3, _process_RC20StatusMessage},
     {EMS_ID_THERMOSTAT, EMS_TYPE_RC20Time, "RC20Time", 20, _process_RC20Time},
-    {EMS_ID_THERMOSTAT, EMS_TYPE_RC20Temperature, "RC20Temperature", 10, _process_RC20Temperature}
+    {EMS_ID_THERMOSTAT, EMS_TYPE_RC20Temperature, "RC20Temperature", 10, _process_RC20Temperature},
+    {EMS_ID_THERMOSTAT, EMS_TYPE_Version, "Version", 2, _process_Version}
 };
 
 // reserve space for the data we collect from the Boiler and Thermostat
@@ -168,7 +202,7 @@ void ems_setLogVerbose(bool b) {
 }
 
 /*
- * Calculate CRC checksum using lookup table
+ * Calculate CRC checksum using lookup table for speed
  * len is length of data in bytes (including the CRC byte at end)
  */
 uint8_t _crcCalculator(uint8_t * data, uint8_t len) {
@@ -238,7 +272,7 @@ void _ems_sendTelegram() {
  * When we receive a Poll Request we need to send quickly
  */
 void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
-    // if we're waiting on a reponse from a read and it hasn't come, try again
+    // if we're waiting on a response from a previous read and it hasn't come, try again
     if ((EMS_Sys_Status.emsTxStatus != EMS_TX_PENDING)
             && ((EMS_TxTelegram.action == EMS_TX_READ) || (EMS_TxTelegram.action == EMS_TX_VALIDATE))
             && ((millis() - EMS_Sys_Status.emsLastTx) > RX_READ_TIMEOUT)) {
@@ -325,6 +359,7 @@ void _processType(uint8_t * telegram, uint8_t length) {
     // if its an echo of ourselves from the master, ignore
     if (src == EMS_ID_ME) {
         _debugPrintTelegram("Telegram echo:", telegram, length, COLOR_BLUE);
+        return;
     }
 
     // header
@@ -338,7 +373,8 @@ void _processType(uint8_t * telegram, uint8_t length) {
     char src_s[20];
     char dest_s[20];
 
-    // scan through known types
+    // scan through known types we understand
+    // set typeFound if we found a match
     int  i         = 0;
     bool typeFound = false;
     while (i < MAX_TYPECALLBACK) {
@@ -370,7 +406,7 @@ void _processType(uint8_t * telegram, uint8_t length) {
 
         // did we actually ask for it from an earlier read/write request?
         // note when we issue a read command the responder (dest) has to return a telegram back immediately
-        if ((EMS_TxTelegram.action == EMS_TX_READ) && (EMS_TxTelegram.type == type) && typeFound) {
+        if ((EMS_TxTelegram.action == EMS_TX_READ) && (EMS_TxTelegram.type == type)) {
             // yes we were expecting this one one
             EMS_Sys_Status.emsRxPgks++; // increment rx counter
             EMS_Sys_Status.emsLastRx = millis();
@@ -518,6 +554,18 @@ bool _process_RC20Temperature(uint8_t * data, uint8_t length) {
 
         EMS_Sys_Status.emsRefreshed = true; // set the updated flag to trigger a send back to HA
     }
+
+    return true;
+}
+
+/*
+ * Version - type 0x02 - get the version of the Thermostat
+ */
+bool _process_Version(uint8_t * data, uint8_t length) {
+    uint8_t major = data[1];
+    uint8_t minor = data[2];
+
+    // TODO: finish this
 
     return true;
 }

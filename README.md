@@ -187,7 +187,7 @@ The Boiler (ID 0x08) will send out these broadcast telegrams regularly:
 And a thermostat (ID 0x17 for a RC20) would broadcast these messages regularly:
 
 | Type | Description |
-| ---- | ----------- | undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |
+| ---- | ----------- | undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |
 | 0x06 | time on thermostat Y,M,H,D,M,S,wd |
 
 Refer to the code in `ems.cpp` for further explanation on how to parse these message types and also reference the EMS Wiki.
@@ -233,14 +233,15 @@ Every telegram sent is echo'd back to Rx.
 | Thermostat (0x17) | 0xA8 | RC20Temperature               | sets temperature and operating modes     |
 | Thermostat (0x17) | 0xA3 | RCOutdoorTempMessage          |                                          |
 | Thermostat (0x17) | 0x91 | RC20StatusMessage             | reads set & current room temperatures    |
+| Thermostat (0x17) | 0x02 | Version                       | reads Version major/minor                |
 
 Note the thermostat types are based on a RC20 model thermostat. If using an RC30/RC35 use types 0x3E and 0x48 to read the values.
 
  ### Customizing
 
  Most of the changes will be done in `boiler.ino` and `ems.cpp`. 
- * To add new handlers for data types, create a callback function and add to the `EMS_Types` at the top of the file `ems.cpp` and the DEFINES in `ems.h`
- * To change your thermostat type set `EMS_ID_THERMOSTAT` in `ems.h`. The default is 0x17 for an RC20.
+ * To add new handlers for data types, create a callback function and add to the `EMS_Types` at the top of the file `ems.cpp`
+ * To change your thermostat type set `EMS_ID_THERMOSTAT` in `ems.cpp`. The default is 0x17 for an RC20.
  * The DEFINES `BOILER_THERMOSTAT_ENABLED`, `BOILER_SHOWER_ENABLED` and `BOILER_SHOWER_TIMER` enabled the thermostat logic, the shower logic and the shower timer alert logic respectively. 1 is on and 0 is off.
 
 ### MQTT
