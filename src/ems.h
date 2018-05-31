@@ -21,6 +21,33 @@
 
 #define EMS_TX_MAXBUFFERSIZE 128 // max size of the buffer. packets are 32 bits
 
+// define here the Thermostat type
+#define EMS_ID_THERMOSTAT 0x17 // x17=RC20 (Moduline300), x10=RC30/RC35 (Moduline 400)
+
+// define here the EMS telegram types you need
+// Boiler...
+#define EMS_TYPE_UBAMonitorFast 0x18              // is an automatic monitor broadcast
+#define EMS_TYPE_UBAMonitorSlow 0x19              // is an automatic monitor broadcast
+#define EMS_TYPE_UBAMonitorWWMessage 0x34         // is an automatic monitor broadcast
+#define EMS_TYPE_UBAMaintenanceStatusMessage 0x1C // is an automatic monitor broadcast
+#define EMS_TYPE_UBAParameterWW 0x33
+#define EMS_TYPE_UBATotalUptimeMessage 0x14
+#define EMS_TYPE_UBAMaintenanceSettingsMessage 0x15
+#define EMS_TYPE_UBAParametersMessage 0x16
+
+// Thermostat...
+#define EMS_TYPE_RC20StatusMessage 0x91 // is an automatic thermostat broadcast
+#define EMS_TYPE_RC20Time 0x06          // is an automatic thermostat broadcast
+#define EMS_TYPE_RC20Temperature 0xA8
+#define EMS_TYPE_RCOutdoorTempMessage 0xA3
+#define EMS_TYPE_Version 0x02 // version of the controller
+
+// Offsets for specific values in a telegram, per type, used for validation
+#define EMS_OFFSET_RC20Temperature_temp 0x1C       // thermostat set temp
+#define EMS_OFFSET_RC20Temperature_mode 0x17       // thermostat mode
+#define EMS_OFFSET_UBAParameterWW_wwtemp 0x02      // WW Temperature
+#define EMS_OFFSET_UBAParameterWW_wwactivated 0x01 // WW Activated
+
 /* EMS UART transfer status */
 typedef enum {
     EMS_RX_IDLE,

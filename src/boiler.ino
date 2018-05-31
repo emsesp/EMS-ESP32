@@ -35,7 +35,7 @@ Ticker systemCheckTimer;
 Ticker heartbeatTimer;
 Ticker showerResetTimer;
 #define publishValuesTime 300 // every 5 mins post HA values
-#define systemCheckTime 10    // every 10 seconds check if Boiler is online
+#define systemCheckTime 30    // every 30 seconds check if Boiler is online and execute other requests
 #define heartbeatTime 1       // every second blink heartbeat LED
 
 // hostname is also used as the MQTT topic identifier (home/<hostname>)
@@ -89,6 +89,7 @@ const uint8_t       SHOWER_BURNPOWER_MIN = 80;
 typedef struct {
     bool wifi_connected;
     bool boiler_online;
+    bool thermostat_enabled;
     bool shower_enabled; // true if we want to report back on shower times
     bool shower_timer;   // true if we want the cold water reminder
 } _Boiler_Status;
@@ -227,7 +228,7 @@ void showInfo() {
             EMS_Boiler.heatWorkMin % 60);
 
     // Thermostat stats
-    if (EMS_Sys_Status.emsThermostatEnabled) {
+    if (Boiler_Status.thermostat_enabled) {
         myDebug("Thermostat stats:\n  Thermostat time is %02d:%02d:%02d %d/%d/%d\n",
                 EMS_Thermostat.hour,
                 EMS_Thermostat.minute,
@@ -342,6 +343,7 @@ void myDebugCallback() {
     case 'T': // toggle Thermostat
         b = !ems_getThermostatEnabled();
         ems_setThermostatEnabled(b);
+        Boiler_Status.thermostat_enabled = b;
         break;
     case 'S': // toggle Shower timer support
         Boiler_Status.shower_enabled = !Boiler_Status.shower_enabled;
@@ -397,9 +399,10 @@ void WIFIcallback() {
 // Initialize the boiler settings
 void _initBoiler() {
     // default settings
-    ems_setThermostatEnabled(BOILER_THERMOSTAT_ENABLED);
-    Boiler_Status.shower_enabled = BOILER_SHOWER_ENABLED;
-    Boiler_Status.shower_timer   = BOILER_SHOWER_TIMER;
+    Boiler_Status.shower_enabled     = BOILER_SHOWER_ENABLED;
+    Boiler_Status.shower_timer       = BOILER_SHOWER_TIMER;
+    Boiler_Status.thermostat_enabled = BOILER_THERMOSTAT_ENABLED;
+    ems_setThermostatEnabled(Boiler_Status.thermostat_enabled);
 
     // init boiler
     Boiler_Status.wifi_connected = false;
@@ -427,9 +430,9 @@ void setup() {
     digitalWrite(LED_ERR, HIGH);
 
     // Timers
-    publishValuesTimer.attach(publishValuesTime, publishValues); // every 5 mins (300000) post HA values
-    systemCheckTimer.attach(systemCheckTime, systemCheck);       // every 10 seconds check if Boiler is online
-    heartbeatTimer.attach(heartbeatTime, heartbeat);             //  every second blink heartbeat LED
+    publishValuesTimer.attach(publishValuesTime, publishValues); // post HA values
+    systemCheckTimer.attach(systemCheckTime, systemCheck);       // check if Boiler is online
+    heartbeatTimer.attach(heartbeatTime, heartbeat);             // blink heartbeat LED
 
     // set up Wifi, MQTT, Telnet
     myESP.setWifiCallback(WIFIcallback);
@@ -484,10 +487,16 @@ void heartbeat() {
 }
 
 // do a healthcheck every now and then to see if we connections
+// also this is place to send requests to the EMS
 void systemCheck() {
     Boiler_Status.boiler_online = ((timestamp - EMS_Sys_Status.emsLastPoll) < POLL_TIMEOUT_ERR);
     if (!Boiler_Status.boiler_online) {
         myDebug("Error! Boiler unreachable. Please check connection. Retrying in 10 seconds.\n");
+    }
+
+    // send any custom requests here
+    if (Boiler_Status.thermostat_enabled) {
+        ems_doReadCommand(EMS_TYPE_RC20Temperature); // get the thermostat mode
     }
 }
 

@@ -15,34 +15,6 @@
 _EMS_Sys_Status EMS_Sys_Status; // EMS Status
 _EMS_TxTelegram EMS_TxTelegram; // Empty buffer for sending telegrams
 
-// define here the Thermostat type
-#define EMS_ID_THERMOSTAT 0x17 // x17=RC20, x10=RC30 (Moduline 300)
-
-// define here the EMS telegram types you need
-// Boiler...
-#define EMS_TYPE_UBAMonitorFast 0x18              // is an automatic monitor broadcast
-#define EMS_TYPE_UBAMonitorSlow 0x19              // is an automatic monitor broadcast
-#define EMS_TYPE_UBAMonitorWWMessage 0x34         // is an automatic monitor broadcast
-#define EMS_TYPE_UBAMaintenanceStatusMessage 0x1c // is an automatic monitor broadcast
-#define EMS_TYPE_UBAParameterWW 0x33
-
-#define EMS_TYPE_UBATotalUptimeMessage 0x14
-#define EMS_TYPE_UBAMaintenanceSettingsMessage 0x15
-#define EMS_TYPE_UBAParametersMessage 0x16
-
-// Thermostat...
-#define EMS_TYPE_RC20StatusMessage 0x91
-#define EMS_TYPE_RC20Time 0x06 // is an automatic monitor broadcast
-#define EMS_TYPE_RC20Temperature 0xA8
-#define EMS_TYPE_RCOutdoorTempMessage 0xa3 // we can ignore
-#define EMS_TYPE_Version 0x02              // version of the controller
-
-// Offsets for specific values in a telegram, per type, used for validation
-#define EMS_OFFSET_RC20Temperature_temp 0x1C       // thermostat set temp
-#define EMS_OFFSET_RC20Temperature_mode 0x17       // thermostat mode
-#define EMS_OFFSET_UBAParameterWW_wwtemp 0x02      // WW Temperature
-#define EMS_OFFSET_UBAParameterWW_wwactivated 0x01 // WW Activated
-
 // and call backs
 #define MAX_TYPECALLBACK 12 // make sure it matches the #types you have
 // callbacks per type
@@ -65,7 +37,7 @@ const _EMS_Types EMS_Types[MAX_TYPECALLBACK] =
      {EMS_ID_BOILER, EMS_TYPE_UBAParametersMessage, "UBAParametersMessage", 30, NULL},
      {EMS_ID_BOILER, EMS_TYPE_UBAMaintenanceStatusMessage, "UBAMaintenanceStatusMessage", 30, NULL},
 
-     {EMS_ID_THERMOSTAT, EMS_TYPE_RC20StatusMessage, "RC20StatusMessage", 3, _process_RC20StatusMessage},
+     {EMS_ID_THERMOSTAT, EMS_TYPE_RC20StatusMessage, "RC20StatusMessage", 19, _process_RC20StatusMessage},
      {EMS_ID_THERMOSTAT, EMS_TYPE_RC20Time, "RC20Time", 20, _process_RC20Time},
      {EMS_ID_THERMOSTAT, EMS_TYPE_RC20Temperature, "RC20Temperature", 27, _process_RC20Temperature},
      {EMS_ID_THERMOSTAT, EMS_TYPE_Version, "Version", 2, _process_Version}};
@@ -586,8 +558,8 @@ bool _process_RC20Temperature(uint8_t * data, uint8_t length) {
 }
 
 /*
-    * Version - type 0x02 - get the version of the Thermostat firmware
-    */
+ * Version - type 0x02 - get the version of the Thermostat firmware
+ */
 bool _process_Version(uint8_t * data, uint8_t length) {
     uint8_t major = data[1];
     uint8_t minor = data[2];
@@ -598,8 +570,8 @@ bool _process_Version(uint8_t * data, uint8_t length) {
 }
 
 /*
-    * process_RC20Time - type 0x06 - date and time from the RC20 thermostat (0x17) - 14 bytes long
-    */
+ * process_RC20Time - type 0x06 - date and time from the RC20 thermostat (0x17) - 14 bytes long
+ */
 bool _process_RC20Time(uint8_t * data, uint8_t length) {
     EMS_Thermostat.hour   = data[2];
     EMS_Thermostat.minute = data[4];
@@ -620,8 +592,8 @@ bool _process_RC20Time(uint8_t * data, uint8_t length) {
 }
 
 /*
-    *  Build the telegram, which includes a single byte followed by the CRC at the end
-    */
+ *  Build the telegram, which includes a single byte followed by the CRC at the end
+ */
 void _buildTxTelegram(uint8_t data_value) {
     // header
     EMS_TxTelegram.data[0] = EMS_ID_ME;             // src
@@ -640,10 +612,10 @@ void _buildTxTelegram(uint8_t data_value) {
 
 
 /*
-    * Send a command to Tx to Read from another device
-    * Read commands when sent must to responded too by the destination (target) immediately
-    * usually within a 10ms window
-    */
+ * Send a command to Tx to Read from another device
+ * Read commands when sent must to responded too by the destination (target) immediately
+ * usually within a 10ms window
+ */
 void ems_doReadCommand(uint8_t type) {
     if (type == EMS_TYPE_NONE)
         return; // not a valid type, quit
@@ -686,8 +658,8 @@ void ems_doReadCommand(uint8_t type) {
 }
 
 /*
-    * Set the temperature of the thermostat
-    */
+ * Set the temperature of the thermostat
+ */
 void ems_setThermostatTemp(float temperature) {
     if (_checkWriteQueueFull())
         return; // check if there is already something in the queue
@@ -708,8 +680,8 @@ void ems_setThermostatTemp(float temperature) {
 }
 
 /*
-    * Set the thermostat working mode (0=low, 1=manual, 2=clock/auto)
-    */
+ * Set the thermostat working mode (0=low, 1=manual, 2=clock/auto)
+ */
 void ems_setThermostatMode(uint8_t mode) {
     if (_checkWriteQueueFull())
         return; // check if there is already something in the queue
@@ -729,8 +701,8 @@ void ems_setThermostatMode(uint8_t mode) {
 }
 
 /*
-    * Set the warm water temperature
-    */
+ * Set the warm water temperature
+ */
 void ems_setWarmWaterTemp(uint8_t temperature) {
     if (_checkWriteQueueFull())
         return; // check if there is already something in the queue
@@ -749,9 +721,9 @@ void ems_setWarmWaterTemp(uint8_t temperature) {
 }
 
 /*
-    * Activate / De-activate the Warm Water
-    * true = on, false = off
-    */
+ * Activate / De-activate the Warm Water
+ * true = on, false = off
+ */
 void ems_setWarmWaterActivated(bool activated) {
     if (_checkWriteQueueFull())
         return; // check if there is already something in the queue
@@ -772,8 +744,8 @@ void ems_setWarmWaterActivated(bool activated) {
 
 
 /*
-    * Helper functions for formatting and converting floats
-    */
+ * Helper functions for formatting and converting floats
+ */
 
 // function to turn a telegram int (2 bytes) to a float
 float _toFloat(uint8_t i, uint8_t * data) {

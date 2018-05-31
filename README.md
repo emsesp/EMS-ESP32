@@ -187,9 +187,10 @@ The Boiler (ID 0x08) will send out these broadcast telegrams regularly:
 
 And a thermostat (ID 0x17 for a RC20) would broadcast these messages regularly:
 
-| Type | Description |
-| ---- | ----------- | undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |
-| 0x06 | time on thermostat Y,M,H,D,M,S,wd |
+| Type | Description                                       | Frequency    |
+| ---- | ------------------------------------------------- | ------------ |
+| 0x06 | RC20Time - time on thermostat Y M H D M S weekday | every minute |
+| 0x91 | RC20StatusMessage -                               | every minute |
 
 Refer to the code in `ems.cpp` for further explanation on how to parse these message types and also reference the EMS Wiki.
 
