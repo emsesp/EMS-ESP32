@@ -17,6 +17,8 @@
 // Special EMS Telegram Types
 #define EMS_TYPE_NONE 0x00 // none
 
+#define EMS_MIN_TELEGRAM_LENGTH 6 // minimal length for a validation telegram, including CRC
+
 #define EMS_TX_MAXBUFFERSIZE 128 // max size of the buffer. packets are 32 bits
 
 /* EMS UART transfer status */
@@ -108,8 +110,9 @@ typedef struct {
 
 // RC20 data
 typedef struct {
-    float   setpoint_roomTemp;
-    float   curr_roomTemp;
+    float   setpoint_roomTemp; // current set temp
+    float   curr_roomTemp;     // current room temp
+    uint8_t mode;              // 0=low, 1=manual, 2=clock/auto
     uint8_t hour;
     uint8_t minute;
     uint8_t second;
@@ -135,6 +138,7 @@ extern void ems_parseTelegram(uint8_t * telegram, uint8_t len);
 void        ems_init();
 void        ems_doReadCommand(uint8_t type);
 void        ems_setThermostatTemp(float temp);
+void        ems_setThermostatMode(uint8_t mode);
 void        ems_setWarmWaterTemp(uint8_t temperature);
 void        ems_setWarmWaterActivated(bool activated);
 

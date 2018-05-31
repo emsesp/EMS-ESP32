@@ -46,14 +46,15 @@ Ticker showerResetTimer;
 #define PROJECT_CMDS                                                                                                   \
     "s=show statistics\n\r"                                                                                            \
     "*  q=toggle Verbose telegram logging\n\r"                                                                         \
-    "*  m=publish stats to MQTT\n\r"                                                                                   \
-    "*  p=toggle Poll response\n\r"                                                                                    \
+    "*  P=publish stats to MQTT\n\r"                                                                                   \
+    "*  p=toggle Poll response (for debugging)\n\r"                                                                    \
     "*  T=toggle Thermostat suport on/off\n\r"                                                                         \
     "*  S=toggle Shower Timer on/off\n\r"                                                                              \
-    "*  r [n] to request for data from EMS "                                                                           \
-    "(33=UBAParameterWW, 18=UBAMonitorFast, 19=UBAMonitorSlow, "                                                       \
-    "34=UBAMonitorWWMessage, 91=RC20StatusMessage, 6=RC20Time, 2=Version)\n\r"                                         \
+    "*  r [n] to request for data from EMS, some examples:\n\r"                                                        \
+    "*     from Boiler: 33=UBAParameterWW, 18=UBAMonitorFast, 19=UBAMonitorSlow, 34=UBAMonitorWWMessage\n\r"           \
+    "*     from Thermostat: 91=RC20StatusMessage, A8=RC20Temperature, 6=RC20Time, 2=Version\n\r"                       \
     "*  t [n] set thermostat temperature to n\n\r"                                                                     \
+    "*  m [n] set thermostat mode (0=low, 1=manual, 2=clock)\n\r"                                                      \
     "*  w [n] set boiler warm water temperature to n (min 30)\n\r"                                                     \
     "*  a [n] activate boiler warm water on (n=1) or off (n=0)"
 
@@ -106,7 +107,8 @@ netInfo homeNet = {.mqttHost = MQTT_IP,
                    .mqttPass = MQTT_PASS,
                    .mqttPort = 1883, // this is the default, change if using another port
                    .ssid     = WIFI_SSID,
-                   .pass     = WIFI_PASSWORD};
+                   .pass     = WIFI_PASSWORD
+                  };
 
 ESPHelper myESP(&homeNet);
 
@@ -236,6 +238,16 @@ void showInfo() {
 
         myDebug("  Setpoint room temperature is %s C\n", _float_to_char(s, EMS_Thermostat.setpoint_roomTemp));
         myDebug("  Current room temperature is %s C\n", _float_to_char(s, EMS_Thermostat.curr_roomTemp));
+        myDebug("  Mode is set to ");
+        if (EMS_Thermostat.mode == 0) {
+            myDebug("low\n");
+        } else if (EMS_Thermostat.mode == 1) {
+            myDebug("manual\n");
+        } else if (EMS_Thermostat.mode == 2) {
+            myDebug("clock/auto\n");
+        } else {
+            myDebug("<unknown>\n");
+        }
     }
 
     // show the Shower Info
@@ -303,7 +315,7 @@ void myDebugCallback() {
         b = !ems_getPoll();
         ems_setPoll(b);
         break;
-    case 'm':
+    case 'P':
         publishValues();
         break;
     case 'r': // read command for Boiler or Thermostat
@@ -311,6 +323,9 @@ void myDebugCallback() {
         break;
     case 't': // set thermostat temp
         ems_setThermostatTemp(strtof(&cmd[2], 0));
+        break;
+    case 'm': // set thermostat mode
+        ems_setThermostatMode(cmd[2] - '0');
         break;
     case 'w': // set warm water temp
         ems_setWarmWaterTemp((uint8_t)strtol(&cmd[2], 0, 10));
@@ -545,7 +560,7 @@ void loop() {
                 } else {
                     // check if the shower has been on too long
                     if ((((timestamp - Boiler_Shower.timerStart) > SHOWER_MAX_DURATION) && !Boiler_Shower.isColdShot)
-                        && Boiler_Status.shower_timer) {
+                            && Boiler_Status.shower_timer) {
                         _showerColdShotStart();
                         // start the timer for n seconds which will reset the water back to hot
                         showerResetTimer.attach(SHOWER_OFF_DURATION, _showerColdShotStop);

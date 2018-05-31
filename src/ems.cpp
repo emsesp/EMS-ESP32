@@ -37,6 +37,12 @@ _EMS_TxTelegram EMS_TxTelegram; // Empty buffer for sending telegrams
 #define EMS_TYPE_RCOutdoorTempMessage 0xa3 // we can ignore
 #define EMS_TYPE_Version 0x02              // version of the controller
 
+// Offsets for specific values in a telegram, per type, used for validation
+#define EMS_OFFSET_RC20Temperature_temp 0x1C       // thermostat set temp
+#define EMS_OFFSET_RC20Temperature_mode 0x17       // thermostat mode
+#define EMS_OFFSET_UBAParameterWW_wwtemp 0x02      // WW Temperature
+#define EMS_OFFSET_UBAParameterWW_wwactivated 0x01 // WW Activated
+
 // and call backs
 #define MAX_TYPECALLBACK 12 // make sure it matches the #types you have
 // callbacks per type
@@ -47,24 +53,22 @@ bool _process_UBAParameterWW(uint8_t * data, uint8_t length);
 bool _process_RC20StatusMessage(uint8_t * data, uint8_t length);
 bool _process_RC20Time(uint8_t * data, uint8_t length);
 bool _process_RC20Temperature(uint8_t * data, uint8_t length);
-bool _process_RC20Temperature(uint8_t * data, uint8_t length);
 bool _process_Version(uint8_t * data, uint8_t length);
 
 const _EMS_Types EMS_Types[MAX_TYPECALLBACK] =
-{   {EMS_ID_BOILER, EMS_TYPE_UBAMonitorFast, "UBAMonitorFast", 36, _process_UBAMonitorFast},
-    {EMS_ID_BOILER, EMS_TYPE_UBAMonitorSlow, "UBAMonitorSlow", 28, _process_UBAMonitorSlow},
-    {EMS_ID_BOILER, EMS_TYPE_UBAMonitorWWMessage, "UBAMonitorWWMessage", 10, _process_UBAMonitorWWMessage},
-    {EMS_ID_BOILER, EMS_TYPE_UBAParameterWW, "UBAParameterWW", 10, _process_UBAParameterWW},
-    {EMS_ID_BOILER, EMS_TYPE_UBATotalUptimeMessage, "UBATotalUptimeMessage", 30, NULL},
-    {EMS_ID_BOILER, EMS_TYPE_UBAMaintenanceSettingsMessage, "UBAMaintenanceSettingsMessage", 30, NULL},
-    {EMS_ID_BOILER, EMS_TYPE_UBAParametersMessage, "UBAParametersMessage", 30, NULL},
-    {EMS_ID_BOILER, EMS_TYPE_UBAMaintenanceStatusMessage, "UBAMaintenanceStatusMessage", 30, NULL},
+    {{EMS_ID_BOILER, EMS_TYPE_UBAMonitorFast, "UBAMonitorFast", 36, _process_UBAMonitorFast},
+     {EMS_ID_BOILER, EMS_TYPE_UBAMonitorSlow, "UBAMonitorSlow", 28, _process_UBAMonitorSlow},
+     {EMS_ID_BOILER, EMS_TYPE_UBAMonitorWWMessage, "UBAMonitorWWMessage", 10, _process_UBAMonitorWWMessage},
+     {EMS_ID_BOILER, EMS_TYPE_UBAParameterWW, "UBAParameterWW", 10, _process_UBAParameterWW},
+     {EMS_ID_BOILER, EMS_TYPE_UBATotalUptimeMessage, "UBATotalUptimeMessage", 30, NULL},
+     {EMS_ID_BOILER, EMS_TYPE_UBAMaintenanceSettingsMessage, "UBAMaintenanceSettingsMessage", 30, NULL},
+     {EMS_ID_BOILER, EMS_TYPE_UBAParametersMessage, "UBAParametersMessage", 30, NULL},
+     {EMS_ID_BOILER, EMS_TYPE_UBAMaintenanceStatusMessage, "UBAMaintenanceStatusMessage", 30, NULL},
 
-    {EMS_ID_THERMOSTAT, EMS_TYPE_RC20StatusMessage, "RC20StatusMessage", 3, _process_RC20StatusMessage},
-    {EMS_ID_THERMOSTAT, EMS_TYPE_RC20Time, "RC20Time", 20, _process_RC20Time},
-    {EMS_ID_THERMOSTAT, EMS_TYPE_RC20Temperature, "RC20Temperature", 10, _process_RC20Temperature},
-    {EMS_ID_THERMOSTAT, EMS_TYPE_Version, "Version", 2, _process_Version}
-};
+     {EMS_ID_THERMOSTAT, EMS_TYPE_RC20StatusMessage, "RC20StatusMessage", 3, _process_RC20StatusMessage},
+     {EMS_ID_THERMOSTAT, EMS_TYPE_RC20Time, "RC20Time", 20, _process_RC20Time},
+     {EMS_ID_THERMOSTAT, EMS_TYPE_RC20Temperature, "RC20Temperature", 27, _process_RC20Temperature},
+     {EMS_ID_THERMOSTAT, EMS_TYPE_Version, "Version", 2, _process_Version}};
 
 // reserve space for the data we collect from the Boiler and Thermostat
 _EMS_Boiler     EMS_Boiler;
@@ -72,21 +76,20 @@ _EMS_Thermostat EMS_Thermostat;
 
 // CRC lookup table with poly 12 for faster checking
 const uint8_t ems_crc_table[] =
-{   0x00, 0x02, 0x04, 0x06, 0x08, 0x0A, 0x0C, 0x0E, 0x10, 0x12, 0x14, 0x16, 0x18, 0x1A, 0x1C, 0x1E, 0x20, 0x22, 0x24,
-    0x26, 0x28, 0x2A, 0x2C, 0x2E, 0x30, 0x32, 0x34, 0x36, 0x38, 0x3A, 0x3C, 0x3E, 0x40, 0x42, 0x44, 0x46, 0x48, 0x4A,
-    0x4C, 0x4E, 0x50, 0x52, 0x54, 0x56, 0x58, 0x5A, 0x5C, 0x5E, 0x60, 0x62, 0x64, 0x66, 0x68, 0x6A, 0x6C, 0x6E, 0x70,
-    0x72, 0x74, 0x76, 0x78, 0x7A, 0x7C, 0x7E, 0x80, 0x82, 0x84, 0x86, 0x88, 0x8A, 0x8C, 0x8E, 0x90, 0x92, 0x94, 0x96,
-    0x98, 0x9A, 0x9C, 0x9E, 0xA0, 0xA2, 0xA4, 0xA6, 0xA8, 0xAA, 0xAC, 0xAE, 0xB0, 0xB2, 0xB4, 0xB6, 0xB8, 0xBA, 0xBC,
-    0xBE, 0xC0, 0xC2, 0xC4, 0xC6, 0xC8, 0xCA, 0xCC, 0xCE, 0xD0, 0xD2, 0xD4, 0xD6, 0xD8, 0xDA, 0xDC, 0xDE, 0xE0, 0xE2,
-    0xE4, 0xE6, 0xE8, 0xEA, 0xEC, 0xEE, 0xF0, 0xF2, 0xF4, 0xF6, 0xF8, 0xFA, 0xFC, 0xFE, 0x19, 0x1B, 0x1D, 0x1F, 0x11,
-    0x13, 0x15, 0x17, 0x09, 0x0B, 0x0D, 0x0F, 0x01, 0x03, 0x05, 0x07, 0x39, 0x3B, 0x3D, 0x3F, 0x31, 0x33, 0x35, 0x37,
-    0x29, 0x2B, 0x2D, 0x2F, 0x21, 0x23, 0x25, 0x27, 0x59, 0x5B, 0x5D, 0x5F, 0x51, 0x53, 0x55, 0x57, 0x49, 0x4B, 0x4D,
-    0x4F, 0x41, 0x43, 0x45, 0x47, 0x79, 0x7B, 0x7D, 0x7F, 0x71, 0x73, 0x75, 0x77, 0x69, 0x6B, 0x6D, 0x6F, 0x61, 0x63,
-    0x65, 0x67, 0x99, 0x9B, 0x9D, 0x9F, 0x91, 0x93, 0x95, 0x97, 0x89, 0x8B, 0x8D, 0x8F, 0x81, 0x83, 0x85, 0x87, 0xB9,
-    0xBB, 0xBD, 0xBF, 0xB1, 0xB3, 0xB5, 0xB7, 0xA9, 0xAB, 0xAD, 0xAF, 0xA1, 0xA3, 0xA5, 0xA7, 0xD9, 0xDB, 0xDD, 0xDF,
-    0xD1, 0xD3, 0xD5, 0xD7, 0xC9, 0xCB, 0xCD, 0xCF, 0xC1, 0xC3, 0xC5, 0xC7, 0xF9, 0xFB, 0xFD, 0xFF, 0xF1, 0xF3, 0xF5,
-    0xF7, 0xE9, 0xEB, 0xED, 0xEF, 0xE1, 0xE3, 0xE5, 0xE7
-};
+    {0x00, 0x02, 0x04, 0x06, 0x08, 0x0A, 0x0C, 0x0E, 0x10, 0x12, 0x14, 0x16, 0x18, 0x1A, 0x1C, 0x1E, 0x20, 0x22, 0x24,
+     0x26, 0x28, 0x2A, 0x2C, 0x2E, 0x30, 0x32, 0x34, 0x36, 0x38, 0x3A, 0x3C, 0x3E, 0x40, 0x42, 0x44, 0x46, 0x48, 0x4A,
+     0x4C, 0x4E, 0x50, 0x52, 0x54, 0x56, 0x58, 0x5A, 0x5C, 0x5E, 0x60, 0x62, 0x64, 0x66, 0x68, 0x6A, 0x6C, 0x6E, 0x70,
+     0x72, 0x74, 0x76, 0x78, 0x7A, 0x7C, 0x7E, 0x80, 0x82, 0x84, 0x86, 0x88, 0x8A, 0x8C, 0x8E, 0x90, 0x92, 0x94, 0x96,
+     0x98, 0x9A, 0x9C, 0x9E, 0xA0, 0xA2, 0xA4, 0xA6, 0xA8, 0xAA, 0xAC, 0xAE, 0xB0, 0xB2, 0xB4, 0xB6, 0xB8, 0xBA, 0xBC,
+     0xBE, 0xC0, 0xC2, 0xC4, 0xC6, 0xC8, 0xCA, 0xCC, 0xCE, 0xD0, 0xD2, 0xD4, 0xD6, 0xD8, 0xDA, 0xDC, 0xDE, 0xE0, 0xE2,
+     0xE4, 0xE6, 0xE8, 0xEA, 0xEC, 0xEE, 0xF0, 0xF2, 0xF4, 0xF6, 0xF8, 0xFA, 0xFC, 0xFE, 0x19, 0x1B, 0x1D, 0x1F, 0x11,
+     0x13, 0x15, 0x17, 0x09, 0x0B, 0x0D, 0x0F, 0x01, 0x03, 0x05, 0x07, 0x39, 0x3B, 0x3D, 0x3F, 0x31, 0x33, 0x35, 0x37,
+     0x29, 0x2B, 0x2D, 0x2F, 0x21, 0x23, 0x25, 0x27, 0x59, 0x5B, 0x5D, 0x5F, 0x51, 0x53, 0x55, 0x57, 0x49, 0x4B, 0x4D,
+     0x4F, 0x41, 0x43, 0x45, 0x47, 0x79, 0x7B, 0x7D, 0x7F, 0x71, 0x73, 0x75, 0x77, 0x69, 0x6B, 0x6D, 0x6F, 0x61, 0x63,
+     0x65, 0x67, 0x99, 0x9B, 0x9D, 0x9F, 0x91, 0x93, 0x95, 0x97, 0x89, 0x8B, 0x8D, 0x8F, 0x81, 0x83, 0x85, 0x87, 0xB9,
+     0xBB, 0xBD, 0xBF, 0xB1, 0xB3, 0xB5, 0xB7, 0xA9, 0xAB, 0xAD, 0xAF, 0xA1, 0xA3, 0xA5, 0xA7, 0xD9, 0xDB, 0xDD, 0xDF,
+     0xD1, 0xD3, 0xD5, 0xD7, 0xC9, 0xCB, 0xCD, 0xCF, 0xC1, 0xC3, 0xC5, 0xC7, 0xF9, 0xFB, 0xFD, 0xFF, 0xF1, 0xF3, 0xF5,
+     0xF7, 0xE9, 0xEB, 0xED, 0xEF, 0xE1, 0xE3, 0xE5, 0xE7};
 
 extern ESPHelper myESP; // needed for the DEBUG statements below
 #define myDebug(x, ...) myESP.printf(x, ##__VA_ARGS__);
@@ -95,9 +98,10 @@ extern ESPHelper myESP; // needed for the DEBUG statements below
 const uint64_t RX_READ_TIMEOUT       = 5000; // in ms. 5 seconds timeout for read replies
 const uint8_t  RX_READ_TIMEOUT_COUNT = 4;    // 4 retries before timeout
 
-uint8_t emsLastRxCount = 0;
+uint8_t emsLastRxCount; // used for retries when sending failed
 
 // init stats and counters and buffers
+// uses -1 or 255 for values that haven't been set yet
 void ems_init() {
     // overall status
     EMS_Sys_Status.emsRxPgks    = 0;
@@ -120,6 +124,7 @@ void ems_init() {
     EMS_Thermostat.day    = 0;
     EMS_Thermostat.month  = 0;
     EMS_Thermostat.year   = 0;
+    EMS_Thermostat.mode   = 255; // dummy value
 
     // UBAParameterWW
     EMS_Boiler.wWActivated   = false; // Warm Water activated
@@ -274,8 +279,8 @@ void _ems_sendTelegram() {
 void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
     // if we're waiting on a response from a previous read and it hasn't come, try again
     if ((EMS_Sys_Status.emsTxStatus != EMS_TX_PENDING)
-            && ((EMS_TxTelegram.action == EMS_TX_READ) || (EMS_TxTelegram.action == EMS_TX_VALIDATE))
-            && ((millis() - EMS_Sys_Status.emsLastTx) > RX_READ_TIMEOUT)) {
+        && ((EMS_TxTelegram.action == EMS_TX_READ) || (EMS_TxTelegram.action == EMS_TX_VALIDATE))
+        && ((millis() - EMS_Sys_Status.emsLastTx) > RX_READ_TIMEOUT)) {
         if (emsLastRxCount++ >= RX_READ_TIMEOUT_COUNT) {
             // give up
             myDebug("Error! no send acknowledgement. Giving up.\n");
@@ -461,6 +466,18 @@ void _processType(uint8_t * telegram, uint8_t length) {
 }
 
 /*
+ * Report back true if there is a package pending a write in the queue
+ */
+bool _checkWriteQueueFull() {
+    if (EMS_Sys_Status.emsTxStatus == EMS_TX_PENDING) { // send is already pending
+        myDebug("Cannot write - already a telegram pending send.\n");
+        return true;
+    }
+
+    return false; // nothing queue, we can do a write command
+}
+
+/*
  * UBAParameterWW - type 0x33 - warm water parameters
  */
 bool _process_UBAParameterWW(uint8_t * data, uint8_t length) {
@@ -544,35 +561,45 @@ bool _process_RC20StatusMessage(uint8_t * data, uint8_t length) {
 }
 
 /*
- * RC20Temperature - type 0xa8 - set temp value from the RC20 thermostat (0x17)
- * Special case as we only want to store the value after a write command
+ * RC20Temperature - type 0xa8 - for set temp value and mode from the RC20 thermostat (0x17)
  */
 bool _process_RC20Temperature(uint8_t * data, uint8_t length) {
-    // only interested in the single byte response we send to validate a temp change
-    if (length == 6) {
-        EMS_Thermostat.setpoint_roomTemp = ((float)data[0]) / (float)2;
+    // check if this was called specifically to validate a single value
+    // which is always stored in data[0] because we request only 1 byte
+    if (length == EMS_MIN_TELEGRAM_LENGTH) {
+        if (EMS_TxTelegram.type_validate == EMS_OFFSET_RC20Temperature_temp) {
+            // validate the set temp
+            EMS_Thermostat.setpoint_roomTemp = ((float)data[0]) / (float)2;
+        } else if (EMS_TxTelegram.type_validate == EMS_OFFSET_RC20Temperature_mode) {
+            // validate the mode
+            EMS_Thermostat.mode = data[0];
+        }
 
-        EMS_Sys_Status.emsRefreshed = true; // set the updated flag to trigger a send back to HA
+        // and send the values back to HA (Home Assistant MQTT)
+        EMS_Sys_Status.emsRefreshed = true;
+    } else {
+        // Process the whole telegram package
+        EMS_Thermostat.mode = data[EMS_OFFSET_RC20Temperature_mode]; // get the mode
     }
 
     return true;
 }
 
 /*
- * Version - type 0x02 - get the version of the Thermostat
- */
+    * Version - type 0x02 - get the version of the Thermostat firmware
+    */
 bool _process_Version(uint8_t * data, uint8_t length) {
     uint8_t major = data[1];
     uint8_t minor = data[2];
 
-    // TODO: finish this
+    myDebug("Version %d.%d\n", major, minor); // TODO: finish this
 
     return true;
 }
 
 /*
- * process_RC20Time - type 0x06 - date and time from the RC20 thermostat (0x17) - 14 bytes long
- */
+    * process_RC20Time - type 0x06 - date and time from the RC20 thermostat (0x17) - 14 bytes long
+    */
 bool _process_RC20Time(uint8_t * data, uint8_t length) {
     EMS_Thermostat.hour   = data[2];
     EMS_Thermostat.minute = data[4];
@@ -581,7 +608,7 @@ bool _process_RC20Time(uint8_t * data, uint8_t length) {
     EMS_Thermostat.month  = data[1];
     EMS_Thermostat.year   = data[0];
 
-    // we can optional set the time based on the Thermostat's time if we want
+    // we can optional set the time based on the thermostat's time if we want
     setTime(EMS_Thermostat.hour,
             EMS_Thermostat.minute,
             EMS_Thermostat.second,
@@ -593,8 +620,8 @@ bool _process_RC20Time(uint8_t * data, uint8_t length) {
 }
 
 /*
- *  Build the telegram, which includes a single byte followed by the CRC at the end
- */
+    *  Build the telegram, which includes a single byte followed by the CRC at the end
+    */
 void _buildTxTelegram(uint8_t data_value) {
     // header
     EMS_TxTelegram.data[0] = EMS_ID_ME;             // src
@@ -613,19 +640,16 @@ void _buildTxTelegram(uint8_t data_value) {
 
 
 /*
- * Send a command to Tx to Read from another device
- * Read commands when sent must to responded too by the destination (target) immediately
- * usually within a 10ms window
- */
+    * Send a command to Tx to Read from another device
+    * Read commands when sent must to responded too by the destination (target) immediately
+    * usually within a 10ms window
+    */
 void ems_doReadCommand(uint8_t type) {
     if (type == EMS_TYPE_NONE)
         return; // not a valid type, quit
 
-    // check if there is already something in the queue
-    if (EMS_Sys_Status.emsTxStatus == EMS_TX_PENDING) { // send is already pending
-        myDebug("Cannot write - already a telegram pending send.\n");
-        return;
-    }
+    if (_checkWriteQueueFull())
+        return; // check if there is already something in the queue
 
     uint8_t dest, size;
 
@@ -652,102 +676,109 @@ void ems_doReadCommand(uint8_t type) {
         myDebug("Requesting type %s(0x%02x) from dest 0x%02x for %d bytes\n", EMS_Types[i].typeString, type, dest, size);
     }
 
-    EMS_TxTelegram.action = EMS_TX_READ; // read command
-    EMS_TxTelegram.dest   = dest | 0x80; // set 7th bit to indicate a read
-    EMS_TxTelegram.offset = 0;           // 0 for all data
-    EMS_TxTelegram.length = 6;           // is always 6 bytes long (including CRC at end)
+    EMS_TxTelegram.action = EMS_TX_READ;             // read command
+    EMS_TxTelegram.dest   = dest | 0x80;             // set 7th bit to indicate a read
+    EMS_TxTelegram.offset = 0;                       // 0 for all data
+    EMS_TxTelegram.length = EMS_MIN_TELEGRAM_LENGTH; // is always 6 bytes long (including CRC at end)
     EMS_TxTelegram.type   = type;
 
     _buildTxTelegram(size); // we send the # bytes we want back
 }
 
 /*
- * Set the temperature of the thermostat
- */
+    * Set the temperature of the thermostat
+    */
 void ems_setThermostatTemp(float temperature) {
-    // check if there is already something in the queue
-    if (EMS_Sys_Status.emsTxStatus == EMS_TX_PENDING) { // send is already pending
-        myDebug("Cannot write - already a telegram pending send.\n");
-        return;
-    }
+    if (_checkWriteQueueFull())
+        return; // check if there is already something in the queue
+
     char s[10];
     myDebug("Setting thermostat temperature to %s C\n", _float_to_char(s, temperature));
 
-    EMS_TxTelegram.action     = EMS_TX_WRITE; // write command
+    EMS_TxTelegram.action     = EMS_TX_WRITE;
     EMS_TxTelegram.dest       = EMS_ID_THERMOSTAT;
     EMS_TxTelegram.type       = EMS_TYPE_RC20Temperature;
-    EMS_TxTelegram.offset     = 0x1C;                                     // manual setpoint temperature
-    EMS_TxTelegram.length     = 6;                                        // includes CRC
+    EMS_TxTelegram.offset     = EMS_OFFSET_RC20Temperature_temp;
+    EMS_TxTelegram.length     = EMS_MIN_TELEGRAM_LENGTH;
     EMS_TxTelegram.checkValue = (uint8_t)((float)temperature * (float)2); // value to compare against. must be a single int
 
-    // post call is RC20StatusMessage to fetch temps and send to HA
-    EMS_TxTelegram.type_validate = EMS_TYPE_RC20Temperature;
-
+    // post call is back to EMS_TYPE_RC20Temperature to fetch temps and send to HA
+    EMS_TxTelegram.type_validate = EMS_OFFSET_RC20Temperature_temp;
     _buildTxTelegram(EMS_TxTelegram.checkValue);
 }
 
 /*
- * Set the warm water temperature
- */
+    * Set the thermostat working mode (0=low, 1=manual, 2=clock/auto)
+    */
+void ems_setThermostatMode(uint8_t mode) {
+    if (_checkWriteQueueFull())
+        return; // check if there is already something in the queue
+
+    myDebug("Setting thermostat mode to %d\n", mode);
+
+    EMS_TxTelegram.action     = EMS_TX_WRITE;
+    EMS_TxTelegram.dest       = EMS_ID_THERMOSTAT;
+    EMS_TxTelegram.type       = EMS_TYPE_RC20Temperature;
+    EMS_TxTelegram.offset     = EMS_OFFSET_RC20Temperature_mode;
+    EMS_TxTelegram.length     = EMS_MIN_TELEGRAM_LENGTH;
+    EMS_TxTelegram.checkValue = mode; // value to compare against. must be a single int
+
+    // post call is back to EMS_TYPE_RC20Temperature to fetch temps and send to HA
+    EMS_TxTelegram.type_validate = EMS_OFFSET_RC20Temperature_mode;
+    _buildTxTelegram(EMS_TxTelegram.checkValue);
+}
+
+/*
+    * Set the warm water temperature
+    */
 void ems_setWarmWaterTemp(uint8_t temperature) {
-    // check if there is already something in the queue
-    if (EMS_Sys_Status.emsTxStatus == EMS_TX_PENDING) { // send is already pending
-        myDebug("Cannot write - already a telegram pending send.\n");
-        return;
-    }
+    if (_checkWriteQueueFull())
+        return; // check if there is already something in the queue
 
     myDebug("Setting boiler warm water temperature to %d C\n", temperature);
 
-    EMS_TxTelegram.action     = EMS_TX_WRITE; // write command
-    EMS_TxTelegram.dest       = EMS_ID_BOILER;
-    EMS_TxTelegram.type       = EMS_TYPE_UBAParameterWW;
-    EMS_TxTelegram.offset     = 0x02;        // Temperature
-    EMS_TxTelegram.length     = 6;           // includes CRC
-    EMS_TxTelegram.checkValue = temperature; // value to compare against. must be a single int
-
-    EMS_TxTelegram.type_validate = EMS_ID_NONE; // this means don't send and we'll pick up the data from the next broadcast
+    EMS_TxTelegram.action        = EMS_TX_WRITE;
+    EMS_TxTelegram.dest          = EMS_ID_BOILER;
+    EMS_TxTelegram.type          = EMS_TYPE_UBAParameterWW;
+    EMS_TxTelegram.offset        = EMS_OFFSET_UBAParameterWW_wwtemp;
+    EMS_TxTelegram.length        = EMS_MIN_TELEGRAM_LENGTH;
+    EMS_TxTelegram.checkValue    = temperature; // value to compare against. must be a single int
+    EMS_TxTelegram.type_validate = EMS_ID_NONE; // don't force a send to check the value but do it during next broadcast
 
     _buildTxTelegram(temperature);
 }
 
 /*
- * Activate / De-activate the Warm Water
- * true = on, false = off
- */
+    * Activate / De-activate the Warm Water
+    * true = on, false = off
+    */
 void ems_setWarmWaterActivated(bool activated) {
-    // check if there is already something in the queue
-    if (EMS_Sys_Status.emsTxStatus == EMS_TX_PENDING) { // send is already pending
-        myDebug("Cannot write - already a telegram pending send.\n");
-        return;
-    }
+    if (_checkWriteQueueFull())
+        return; // check if there is already something in the queue
 
     myDebug("Setting boiler warm water to %s\n", activated ? "on" : "off");
 
-    EMS_TxTelegram.action        = EMS_TX_WRITE; // write command
+    EMS_TxTelegram.action        = EMS_TX_WRITE;
     EMS_TxTelegram.dest          = EMS_ID_BOILER;
     EMS_TxTelegram.type          = EMS_TYPE_UBAParameterWW;
-    EMS_TxTelegram.offset        = 0x01;        // WW activation
-    EMS_TxTelegram.length        = 6;           // includes CRC
-    EMS_TxTelegram.type_validate = EMS_ID_NONE; // this means don't send and we'll pick up the data from the next broadcast
+    EMS_TxTelegram.offset        = EMS_OFFSET_UBAParameterWW_wwactivated;
+    EMS_TxTelegram.length        = EMS_MIN_TELEGRAM_LENGTH;
+    EMS_TxTelegram.type_validate = EMS_ID_NONE; // don't force a send to check the value but do it during next broadcast
 
-    if (activated) {
-        EMS_TxTelegram.checkValue = 0xFF; // the EMS value for on
-        _buildTxTelegram(0xFF);
-    } else {
-        EMS_TxTelegram.checkValue = 0x00; // the EMS value for off
-        _buildTxTelegram(0x00);
-    }
+    // 0xFF is on, 0x00 is off
+    EMS_TxTelegram.checkValue = (activated ? 0xFF : 0x00);
+    _buildTxTelegram(EMS_TxTelegram.checkValue);
 }
 
 
 /*
- * Helper functions for formatting and converting floats
- */
+    * Helper functions for formatting and converting floats
+    */
 
 // function to turn a telegram int (2 bytes) to a float
 float _toFloat(uint8_t i, uint8_t * data) {
     if ((data[i] == 0x80) && (data[i + 1] == 0)) // 0x8000 is used when sensor is missing
-        return (float)-1;
+        return (float)-1;                        // return -1 to indicate that is unknown
 
     return ((float)(((data[i] << 8) + data[i + 1]))) / 10;
 }
@@ -762,7 +793,7 @@ char * _float_to_char(char * a, float f, uint8_t precision) {
     long p[] = {0, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000};
 
     char * ret = a;
-    // check for 0x8000 (sensor missing)
+    // check for 0x8000 (sensor missing), which has a -1 value
     if (f == -1) {
         strcpy(ret, "<n/a>");
     } else {

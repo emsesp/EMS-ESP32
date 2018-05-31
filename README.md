@@ -76,22 +76,23 @@ I've tested the code and circuit with a few ESP8266 development boards such as t
 
 Use the telnet client to inform you of all activity and errors real-time. This is an example of the telnet output:
 
-![Telnet](doc/telnet/telnet_example.JPG)
+![Telnet](doc/telnet/telnet_example.PNG)
 
 If you hit 'q' and Enter, it will toggle verbose logging showing you more detailed messages. I use ANSI colors with white text for info messages, green for well formatted telegram packages (which have validated CRC checks), red for corrupt packages and yellow for send responses.
 
-![Telnet](doc/telnet/telnet_verbose.JPG)
+![Telnet](doc/telnet/telnet_verbose.PNG)
 
 To see the current values of the Boiler and its parameters type 's' and hit Enter. Watch out for unsuccessful telegram packets in the #CrcErrors line. 
 
-![Telnet](doc/telnet/telnet_stats.JPG)
+![Telnet](doc/telnet/telnet_stats.PNG)
 
 Commands can be issued directly to the EMS bus typing in a letter followed by an optional parameter and pressing Enter. Supported commands are:
 * **r** to send a read command to all devices to fetch values. The 2nd parameter is the type. For example 'r 33' will request type UBAParameterWW and bring back the Warm Water temperatures (not the heating) from the Boiler
 * **t** set the thermostat temperature to the given value
 * **w** to adjust the temperature of the warm water from the boiler
 * **a** to turn the warm water on and off
-* **p** to toggle the Polling response on/off. It's not necessary to have Polling enabled to work
+* **p** to toggle the Polling response on/off. It's not necessary to have Polling enabled to work. I use this for debugging purposes.
+* **m** to set the thermostat mode from low, manual and clock/auto.
 * **T** to toggle thermostat reading on/off
 * **S** to toggle the Shower Timer functionality on/off
 
@@ -187,7 +188,7 @@ The Boiler (ID 0x08) will send out these broadcast telegrams regularly:
 And a thermostat (ID 0x17 for a RC20) would broadcast these messages regularly:
 
 | Type | Description |
-| ---- | ----------- | undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |
+| ---- | ----------- | undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |
 | 0x06 | time on thermostat Y,M,H,D,M,S,wd |
 
 Refer to the code in `ems.cpp` for further explanation on how to parse these message types and also reference the EMS Wiki.
