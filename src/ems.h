@@ -17,7 +17,8 @@
 // Special EMS Telegram Types
 #define EMS_TYPE_NONE 0x00 // none
 
-#define EMS_MIN_TELEGRAM_LENGTH 6 // minimal length for a validation telegram, including CRC
+#define EMS_MIN_TELEGRAM_LENGTH 6  // minimal length for a validation telegram, including CRC
+#define EMS_MAX_TELEGRAM_LENGTH 99 // max length of a telegram, including CRC
 
 #define EMS_TX_MAXBUFFERSIZE 128 // max size of the buffer. packets are 32 bits
 
@@ -153,10 +154,10 @@ typedef bool (*EMS_processType_cb)(uint8_t * data, uint8_t length);
 
 // Definition for each type, including the relative callback function
 typedef struct {
-    uint8_t            src;
-    uint8_t            type;
-    const char         typeString[50];
-    uint8_t            size; // size of telegram, excluding the 4-byte header and crc
+    uint8_t    src;
+    uint8_t    type;
+    const char typeString[50];
+    //uint8_t            size; // size of telegram, excluding the 4-byte header and crc
     EMS_processType_cb processType_cb;
 } _EMS_Types;
 

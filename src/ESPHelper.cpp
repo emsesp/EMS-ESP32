@@ -579,7 +579,7 @@ bool ESPHelper::isCRLF(char character) {
 
 // handler for Telnet
 void ESPHelper::consoleHandle() {
-    // look for Client connect trial
+    // look for Client
     if (telnetServer.hasClient()) {
         if (telnetClient && telnetClient.connected()) {
             // Verify if the IP is same than actual connection
@@ -614,7 +614,7 @@ void ESPHelper::consoleHandle() {
         // Show the initial message
         consoleShowHelp();
 
-        // Empty buffer in
+        // Empty buffer
         while (telnetClient.available()) {
             telnetClient.read();
         }
@@ -625,7 +625,7 @@ void ESPHelper::consoleHandle() {
 
     // Get command over telnet
     if (_telnetConnected) {
-        char last = ' '; // To avoid process two times the "\r\n"
+        char last = ' '; // To avoid processing double "\r\n"
 
         while (telnetClient.available()) { // get data from Client
 
@@ -663,7 +663,7 @@ void ESPHelper::consoleHandle() {
     }
 }
 
-// Set help for commands over telnet setted by sketch
+// Set help for commands over telnet
 void ESPHelper::consoleSetHelpProjectsCmds(String help) {
     _helpProjectCmds = help;
 }
@@ -767,7 +767,7 @@ void ESPHelper::consoleShowHelp() {
                 "&=toggle verbose messages");
 
     if (_helpProjectCmds != "" && (_consoleCallbackProjectCmds)) {
-        help.concat("\n\r*  ");
+        help.concat("\n\r");
         help.concat(_helpProjectCmds);
     }
     help.concat("\n\r");

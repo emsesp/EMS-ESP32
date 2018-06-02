@@ -124,7 +124,7 @@ And lastly if you don't fancy building the circuit, [bbqkees](http://www.domotic
 
 My circuit will work with both 3.3V and 5V. It's easiest though to power directly from the ESP's 3V3 line.
 
-Powering the ESP89266 can be either via the USB from a PC or external 5V power supply or from the EMS line itself using a buck step-down converter. The EMS provides about 15V AC current. The advantage of using the EMS is obviously less power cables and it's neater to place inline with the thermostat. I use a [Pololu D24C22F5](https://www.pololu.com/product/2858) which is 5V/2A buck step-down module and probably slightly overkill for what we need. The additional part of the circuit is shown below along with an earlier breadboard prototype using a NodeMCU2 (with the additional LEDs):
+Powering the ESP89266 can be either via the USB from a PC or external 5V power supply or from the EMS itself using a buck step-down converter. The EMS provides about a 15V AC current direct from the EMS line, or around 12V from the 3.5" service jack. The advantage of using the EMS for power is obviously the exclusion of an external power adapter and you can place the small circuit in line with the thermostat tucked away close to the boiler. The circuit's bridge rectifier will produce about 14.5V DC at UEMS (see schematic). I use a [Pololu D24C22F5](https://www.pololu.com/product/2858) which is 5V/2A buck step-down module and probably slightly overkill for what we need. The additional part of the circuit is shown below along with an earlier breadboard prototype using a NodeMCU2 (with the additional LEDs):
 
 | Power circuit                              | Example                                              |
 | ------------------------------------------ | ---------------------------------------------------- |
@@ -218,7 +218,7 @@ Every telegram sent is echo'd back to Rx.
  
  `ems.cpp` is the logic to read the EMS packets (telegrams), validates them and process them based on the type.
 
- `boiler.ino` is the Arduino code for the ESP8266 that kicks it all off. This is where we have specific logic such as the code to monitor and alert on the Shower timer and light up the LEDs.
+ `boiler.ino` is the Arduino code for the ESP8266 that kicks it all off. This is where we have specific logic such as the code to monitor and alert on the Shower timer and light up the LEDs. LED support is enabled by setting the -DUSE_LED build flag.
 
  `ESPHelper.cpp` is my customized version of [ESPHelper](https://github.com/ItKindaWorks/ESPHelper) with added Telnet support and some other minor tweaking.
 
@@ -242,7 +242,7 @@ Note the thermostat types are based on a RC20 model thermostat. If using an RC30
  ### Customizing
 
  Most of the changes will be done in `boiler.ino` and `ems.cpp`. 
- * To add new handlers for data types, create a callback function and add to the `EMS_Types` at the top of the file `ems.cpp`
+ * To add new handlers for data types, create a callback function and add to the `EMS_Types` at the top of the file `ems.cpp` and modify `ems.h`
  * To change your thermostat type set `EMS_ID_THERMOSTAT` in `ems.cpp`. The default is 0x17 for an RC20.
  * The DEFINES `BOILER_THERMOSTAT_ENABLED`, `BOILER_SHOWER_ENABLED` and `BOILER_SHOWER_TIMER` enabled the thermostat logic, the shower logic and the shower timer alert logic respectively. 1 is on and 0 is off.
 
