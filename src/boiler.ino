@@ -27,7 +27,6 @@ void systemCheck();
 void publishValues();
 void _showerColdShotStart();
 void _showerColdShotStop();
-void _toggleHeartbeat();
 
 // timers
 Ticker publishValuesTimer;
@@ -44,12 +43,12 @@ Ticker showerResetTimer;
 // Project commands for telnet
 // Note: ?, *, $, ! and & are reserved
 #define PROJECT_CMDS                                                                                                   \
-    "s=show statistics\n\r"                                                                                            \
-    "*  q=toggle Verbose telegram logging\n\r"                                                                         \
+    "*  s=show statistics\n\r"                                                                                         \
     "*  P=publish stats to MQTT\n\r"                                                                                   \
-    "*  p=toggle Poll response (for debugging)\n\r"                                                                    \
-    "*  T=toggle Thermostat suport on/off\n\r"                                                                         \
-    "*  S=toggle Shower Timer on/off\n\r"                                                                              \
+    "*  v=Verbose mode on/off\n\r"                                                                                     \
+    "*  p=Poll response on/off\n\r"                                                                                    \
+    "*  T=Thermostat Support on/off\n\r"                                                                               \
+    "*  S=Shower Timer on/off\n\r"                                                                                     \
     "*  r [n] to request for data from EMS, some examples:\n\r"                                                        \
     "*     from Boiler: 33=UBAParameterWW, 18=UBAMonitorFast, 19=UBAMonitorSlow, 34=UBAMonitorWWMessage\n\r"           \
     "*     from Thermostat: 91=RC20StatusMessage, A8=RC20Temperature, 6=RC20Time, 2=Version\n\r"                       \
@@ -59,9 +58,10 @@ Ticker showerResetTimer;
     "*  a [n] activate boiler warm water on (n=1) or off (n=0)"
 
 // GPIOs
-#define LED_RX D1  // (GPIO5 on nodemcu)
-#define LED_TX D2  // (GPIO4 on nodemcu)
-#define LED_ERR D3 // (GPIO0 on nodemcu)
+#define LED_RX D1                 // (GPIO5 on nodemcu)
+#define LED_TX D2                 // (GPIO4 on nodemcu)
+#define LED_ERR D3                // (GPIO0 on nodemcu)
+#define LED_HEARTBEAT LED_BUILTIN // onboard LED
 
 // app specific - do not change
 #define MQTT_BOILER MQTT_BASE HOSTNAME "/"
@@ -120,11 +120,9 @@ _Boiler_Shower Boiler_Shower;
 // Debugger to telnet
 #define myDebug(x, ...) myESP.printf(x, ##__VA_ARGS__);
 
-// Timers
+// Times
 const unsigned long POLL_TIMEOUT_ERR = 10000; // if no signal from boiler for last 10 seconds, assume its offline
-bool                heartbeatEnabled = false;
-
-const unsigned long TX_HOLD_LED_TIME = 2000; // how long to hold the Tx LED because its so quick
+const unsigned long TX_HOLD_LED_TIME = 2000;  // how long to hold the Tx LED because its so quick
 
 unsigned long timestamp; // for internal timings, via millis()
 static int    connectionStatus = NO_CONNECTION;
@@ -331,8 +329,9 @@ void myDebugCallback() {
     case 'w': // set warm water temp
         ems_setWarmWaterTemp((uint8_t)strtol(&cmd[2], 0, 10));
         break;
-    case 'q': // quiet
-        _toggleHeartbeat();
+    case 'v': // verbose
+        b = !ems_getLogVerbose();
+        ems_setLogVerbose(b);
         break;
     case 'a': // set ww activate on or off
         if ((cmd[2] - '0') == 1)
@@ -353,14 +352,6 @@ void myDebugCallback() {
         myDebug("Unknown command '%c'. Use ? for help.\n", cmd[0]);
         break;
     }
-}
-
-// toggle heartbeat LED
-void _toggleHeartbeat() {
-    bool b = !ems_getLogVerbose();
-    ems_setLogVerbose(b);
-    heartbeatEnabled = b;
-    digitalWrite(LED_BUILTIN, (b) ? LOW : HIGH); // set the LED
 }
 
 // MQTT Callback to handle incoming/outgoing changes
@@ -387,10 +378,13 @@ void MQTTcallback(char * topic, byte * payload, uint8_t length) {
 void WIFIcallback() {
     Boiler_Status.wifi_connected = true;
 
+#ifdef USE_LED
     // turn off the LEDs since we've finished the boot loading
     digitalWrite(LED_RX, LOW);
     digitalWrite(LED_TX, LOW);
     digitalWrite(LED_ERR, LOW);
+    digitalWrite(LED_HEARTBEAT, HIGH);
+#endif
 
     // when finally we're all set up, we can fire up the uart (this will enable the interrupts)
     emsuart_init();
@@ -421,18 +415,22 @@ void _initBoiler() {
 //
 void setup() {
     // set pin for LEDs - start up with all lit up while we sort stuff out
+
+#ifdef USE_LED
     pinMode(LED_RX, OUTPUT);
     pinMode(LED_TX, OUTPUT);
     pinMode(LED_ERR, OUTPUT);
-    pinMode(LED_BUILTIN, OUTPUT);
+    pinMode(LED_HEARTBEAT, OUTPUT);
     digitalWrite(LED_RX, HIGH);
     digitalWrite(LED_TX, HIGH);
     digitalWrite(LED_ERR, HIGH);
+    digitalWrite(LED_HEARTBEAT, HIGH);               // onboard LED is off
+    heartbeatTimer.attach(heartbeatTime, heartbeat); // blink heartbeat LED
+#endif
 
     // Timers
     publishValuesTimer.attach(publishValuesTime, publishValues); // post HA values
     systemCheckTimer.attach(systemCheckTime, systemCheck);       // check if Boiler is online
-    heartbeatTimer.attach(heartbeatTime, heartbeat);             // blink heartbeat LED
 
     // set up Wifi, MQTT, Telnet
     myESP.setWifiCallback(WIFIcallback);
@@ -450,40 +448,33 @@ void setup() {
 
     // init Boiler specific params
     _initBoiler();
-
-    // heartbeat, only if setting is enabled
-    heartbeatEnabled = ems_getLogVerbose();
 }
 
 // flash LEDs
 // Using a faster way to write to pins as digitalWrite does a lot of overhead like pin checking & disabling interrupts
 void showLEDs() {
-    if (ems_getLogVerbose()) {
-        // ERR LED
-        if (!Boiler_Status.boiler_online) {
-            WRITE_PERI_REG(PERIPHS_GPIO_BASEADDR + 4, (1 << LED_ERR)); // turn on
-            EMS_Sys_Status.emsRxStatus = EMS_RX_IDLE;
-            EMS_Sys_Status.emsTxStatus = EMS_TX_IDLE;
-        } else {
-            WRITE_PERI_REG(PERIPHS_GPIO_BASEADDR + 8, (1 << LED_ERR)); // turn off
-        }
-
-        // Rx LED
-        WRITE_PERI_REG(PERIPHS_GPIO_BASEADDR + ((EMS_Sys_Status.emsRxStatus == EMS_RX_IDLE) ? 8 : 4), (1 << LED_RX));
-
-        // Tx LED
-        // because sends are quick, if we did a recent send show the LED for a short while
-        uint64_t t = (timestamp - EMS_Sys_Status.emsLastTx);
-        WRITE_PERI_REG(PERIPHS_GPIO_BASEADDR + ((t < TX_HOLD_LED_TIME) ? 4 : 8), (1 << LED_TX));
+    // ERR LED
+    if (!Boiler_Status.boiler_online) {
+        WRITE_PERI_REG(PERIPHS_GPIO_BASEADDR + 4, (1 << LED_ERR)); // turn on
+        EMS_Sys_Status.emsRxStatus = EMS_RX_IDLE;
+        EMS_Sys_Status.emsTxStatus = EMS_TX_IDLE;
+    } else {
+        WRITE_PERI_REG(PERIPHS_GPIO_BASEADDR + 8, (1 << LED_ERR)); // turn off
     }
+
+    // Rx LED
+    WRITE_PERI_REG(PERIPHS_GPIO_BASEADDR + ((EMS_Sys_Status.emsRxStatus == EMS_RX_IDLE) ? 8 : 4), (1 << LED_RX));
+
+    // Tx LED
+    // because sends are quick, if we did a recent send show the LED for a short while
+    uint64_t t = (timestamp - EMS_Sys_Status.emsLastTx);
+    WRITE_PERI_REG(PERIPHS_GPIO_BASEADDR + ((t < TX_HOLD_LED_TIME) ? 4 : 8), (1 << LED_TX));
 }
 
 // heartbeat callback to light up the LED, called via Ticker
 void heartbeat() {
-    if (heartbeatEnabled) {
-        int state = digitalRead(LED_BUILTIN);
-        digitalWrite(LED_BUILTIN, !state);
-    }
+    int state = digitalRead(LED_HEARTBEAT);
+    digitalWrite(LED_HEARTBEAT, !state);
 }
 
 // do a healthcheck every now and then to see if we connections
@@ -524,8 +515,10 @@ void loop() {
     connectionStatus = myESP.loop();
     timestamp        = millis();
 
-    // update the Rx Tx and ERR LEDs
+// update the Rx Tx and ERR LEDs
+#ifdef USE_LED
     showLEDs();
+#endif
 
     // do not continue unless we have a wifi connection
     if (connectionStatus < WIFI_ONLY) {
