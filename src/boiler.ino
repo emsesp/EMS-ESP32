@@ -37,9 +37,6 @@ Ticker showerResetTimer;
 #define systemCheckTime 30    // every 30 seconds check if Boiler is online and execute other requests
 #define heartbeatTime 1       // every second blink heartbeat LED
 
-// hostname is also used as the MQTT topic identifier (home/<hostname>)
-#define HOSTNAME "boiler"
-
 // Project commands for telnet
 // Note: ?, *, $, ! and & are reserved
 #define PROJECT_CMDS                                                                                                   \
@@ -63,6 +60,9 @@ Ticker showerResetTimer;
 #define LED_ERR D3                // (GPIO0 on nodemcu)
 #define LED_HEARTBEAT LED_BUILTIN // onboard LED
 
+// hostname is also used as the MQTT topic identifier (home/<hostname>)
+#define HOSTNAME "boiler"
+
 // app specific - do not change
 #define MQTT_BOILER MQTT_BASE HOSTNAME "/"
 #define TOPIC_START MQTT_BOILER MQTT_TOPIC_START
@@ -75,10 +75,12 @@ Ticker showerResetTimer;
 #define TOPIC_BOILER_DATA MQTT_BOILER "boiler_data" // for sending boiler values
 #define TOPIC_SHOWERTIME MQTT_BOILER "showertime"   // for sending shower time results
 
+// default values
 // thermostat support, shower timing and shower alert all enabled
 #define BOILER_THERMOSTAT_ENABLED 1
 #define BOILER_SHOWER_ENABLED 1
 #define BOILER_SHOWER_TIMER 0
+#define BOILER_HEARBEAT EMS_SYS_LOGGING_VERBOSE
 
 // shower settings
 const unsigned long SHOWER_PAUSE_TIME    = 15000;  // 15 seconds, max time if water is switched off & on during a shower
@@ -128,22 +130,39 @@ unsigned long timestamp; // for internal timings, via millis()
 static int    connectionStatus = NO_CONNECTION;
 bool          startMQTTsent    = false;
 
+// toggle for heartbeat LED
+bool heartbeatEnabled;
+
 // Show command - display stats on an 's' command
 void showInfo() {
     char s[10]; // for formatting floats using the _float_to_char() function
 
     // General stats from EMS bus
-    myDebug("EMS Bus stats:\n");
-    myDebug("  Thermostat is %s, Poll is %s, Shower is %s, Shower timer is %s, RxPgks=%d, TxPkgs=%d, #CrcErrors=%d",
+    myDebug("EMS-ESP-Boiler Info:\n");
+    myDebug("  System Logging is set to ");
+    _EMS_SYS_LOGGING sysLog = ems_getLogging();
+    myDebug(COLOR_BOLD_ON);
+    if (sysLog == EMS_SYS_LOGGING_BASIC) {
+        myDebug("Basic");
+    } else if (sysLog == EMS_SYS_LOGGING_VERBOSE) {
+        myDebug("Verbose");
+    } else {
+        myDebug("None");
+    }
+    myDebug(COLOR_BOLD_OFF);
+
+    myDebug("\n  Thermostat is %s, Poll is %s, Shower is %s, Shower timer is %s\n",
             ((Boiler_Status.thermostat_enabled) ? "enabled" : "disabled"),
             ((EMS_Sys_Status.emsPollEnabled) ? "enabled" : "disabled"),
             ((Boiler_Status.shower_enabled) ? "enabled" : "disabled"),
-            ((Boiler_Status.shower_timer) ? "enabled" : "disabled"),
+            ((Boiler_Status.shower_timer) ? "enabled" : "disabled"));
+
+    myDebug("  EMS Bus Stats: RxPgks=%d, TxPkgs=%d, #CrcErrors=%d, ",
             EMS_Sys_Status.emsRxPgks,
             EMS_Sys_Status.emsTxPkgs,
             EMS_Sys_Status.emxCrcErr);
 
-    myDebug(", RxStatus=");
+    myDebug("RxStatus=");
     switch (EMS_Sys_Status.emsRxStatus) {
     case EMS_RX_IDLE:
         myDebug("idle");
@@ -182,7 +201,7 @@ void showInfo() {
         break;
     }
 
-    myDebug("\nBoiler stats:\n");
+    myDebug("\nBoiler Stats:\n");
 
     // UBAMonitorWWMessage & UBAParameterWW
     myDebug("  Warm Water activated: %s\n", (EMS_Boiler.wWActivated ? "yes" : "no"));
@@ -342,6 +361,7 @@ void myDebugCallback() {
         break;
     case 'v': // verbose
         ems_setLogging((_EMS_SYS_LOGGING)(cmd[2] - '0'));
+        updateHeartbeat();
         break;
     case 'a': // set ww activate on or off
         if ((cmd[2] - '0') == 1)
@@ -400,6 +420,18 @@ void WIFIcallback() {
     emsuart_init();
 }
 
+// Sets the LED heartbeat depending on the logging setting
+void updateHeartbeat() {
+    _EMS_SYS_LOGGING logSetting = ems_getLogging();
+    if (logSetting == EMS_SYS_LOGGING_VERBOSE) {
+        heartbeatEnabled = true;
+    } else {
+        heartbeatEnabled = false;
+        // ...and turn off LED
+        digitalWrite(LED_HEARTBEAT, HIGH);
+    }
+}
+
 // Initialize the boiler settings
 void _initBoiler() {
     // default settings
@@ -417,6 +449,10 @@ void _initBoiler() {
     Boiler_Shower.timerPause = 0;
     Boiler_Shower.duration   = 0;
     Boiler_Shower.isColdShot = false;
+
+    // heartbeat only if verbose logging
+    ems_setLogging(BOILER_HEARBEAT);
+    updateHeartbeat();
 }
 
 //
@@ -424,9 +460,8 @@ void _initBoiler() {
 // Note: we don't init the UART here as we should wait until everything is loaded first. It's done in loop()
 //
 void setup() {
-    // set pin for LEDs - start up with all lit up while we sort stuff out
-
 #ifdef USE_LED
+    // set pin for LEDs - start up with all lit up while we sort stuff out
     pinMode(LED_RX, OUTPUT);
     pinMode(LED_TX, OUTPUT);
     pinMode(LED_ERR, OUTPUT);
@@ -434,7 +469,7 @@ void setup() {
     digitalWrite(LED_RX, HIGH);
     digitalWrite(LED_TX, HIGH);
     digitalWrite(LED_ERR, HIGH);
-    digitalWrite(LED_HEARTBEAT, HIGH);               // onboard LED is off
+    digitalWrite(LED_HEARTBEAT, LOW);                // onboard LED is on
     heartbeatTimer.attach(heartbeatTime, heartbeat); // blink heartbeat LED
 #endif
 
@@ -483,8 +518,10 @@ void showLEDs() {
 
 // heartbeat callback to light up the LED, called via Ticker
 void heartbeat() {
-    int state = digitalRead(LED_HEARTBEAT);
-    digitalWrite(LED_HEARTBEAT, !state);
+    if (heartbeatEnabled) {
+        int state = digitalRead(LED_HEARTBEAT);
+        digitalWrite(LED_HEARTBEAT, !state);
+    }
 }
 
 // do a healthcheck every now and then to see if we connections
