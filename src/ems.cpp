@@ -1,4 +1,3 @@
-
 /*
  * ems.cpp
  * handles all the processing of the EMS messages
@@ -6,11 +5,22 @@
  */
 
 #include "ems.h"
-#include "ESPHelper.h"
 #include "emsuart.h"
 
 #include <Arduino.h>
 #include <TimeLib.h>
+
+// Check for ESPurna vs ESPHelper (standalone)
+#ifdef USE_CUSTOM_H
+#include "debug.h"
+extern void debugSend(const char * format, ...);
+#define myDebug(...) debugSend(__VA_ARGS__)
+// #define myDebug(x, ...) DEBUG_MSG(x, ##__VA_ARGS__)
+#else
+#include <ESPHelper.h>
+extern ESPHelper myESP;
+#define myDebug(x, ...) myESP.printf(x, ##__VA_ARGS__)
+#endif
 
 _EMS_Sys_Status EMS_Sys_Status; // EMS Status
 _EMS_TxTelegram EMS_TxTelegram; // Empty buffer for sending telegrams
@@ -28,20 +38,19 @@ bool _process_RC20Temperature(uint8_t * data, uint8_t length);
 bool _process_Version(uint8_t * data, uint8_t length);
 
 const _EMS_Types EMS_Types[MAX_TYPECALLBACK] =
-{   {EMS_ID_BOILER, EMS_TYPE_UBAMonitorFast, "UBAMonitorFast", _process_UBAMonitorFast},
-    {EMS_ID_BOILER, EMS_TYPE_UBAMonitorSlow, "UBAMonitorSlow", _process_UBAMonitorSlow},
-    {EMS_ID_BOILER, EMS_TYPE_UBAMonitorWWMessage, "UBAMonitorWWMessage", _process_UBAMonitorWWMessage},
-    {EMS_ID_BOILER, EMS_TYPE_UBAParameterWW, "UBAParameterWW", _process_UBAParameterWW},
-    {EMS_ID_BOILER, EMS_TYPE_UBATotalUptimeMessage, "UBATotalUptimeMessage", NULL},
-    {EMS_ID_BOILER, EMS_TYPE_UBAMaintenanceSettingsMessage, "UBAMaintenanceSettingsMessage", NULL},
-    {EMS_ID_BOILER, EMS_TYPE_UBAParametersMessage, "UBAParametersMessage", NULL},
-    {EMS_ID_BOILER, EMS_TYPE_UBAMaintenanceStatusMessage, "UBAMaintenanceStatusMessage", NULL},
+    {{EMS_ID_BOILER, EMS_TYPE_UBAMonitorFast, "UBAMonitorFast", _process_UBAMonitorFast},
+     {EMS_ID_BOILER, EMS_TYPE_UBAMonitorSlow, "UBAMonitorSlow", _process_UBAMonitorSlow},
+     {EMS_ID_BOILER, EMS_TYPE_UBAMonitorWWMessage, "UBAMonitorWWMessage", _process_UBAMonitorWWMessage},
+     {EMS_ID_BOILER, EMS_TYPE_UBAParameterWW, "UBAParameterWW", _process_UBAParameterWW},
+     {EMS_ID_BOILER, EMS_TYPE_UBATotalUptimeMessage, "UBATotalUptimeMessage", NULL},
+     {EMS_ID_BOILER, EMS_TYPE_UBAMaintenanceSettingsMessage, "UBAMaintenanceSettingsMessage", NULL},
+     {EMS_ID_BOILER, EMS_TYPE_UBAParametersMessage, "UBAParametersMessage", NULL},
+     {EMS_ID_BOILER, EMS_TYPE_UBAMaintenanceStatusMessage, "UBAMaintenanceStatusMessage", NULL},
 
-    {EMS_ID_THERMOSTAT, EMS_TYPE_RC20StatusMessage, "RC20StatusMessage", _process_RC20StatusMessage},
-    {EMS_ID_THERMOSTAT, EMS_TYPE_RC20Time, "RC20Time", _process_RC20Time},
-    {EMS_ID_THERMOSTAT, EMS_TYPE_RC20Temperature, "RC20Temperature", _process_RC20Temperature},
-    {EMS_ID_THERMOSTAT, EMS_TYPE_Version, "Version", _process_Version}
-};
+     {EMS_ID_THERMOSTAT, EMS_TYPE_RC20StatusMessage, "RC20StatusMessage", _process_RC20StatusMessage},
+     {EMS_ID_THERMOSTAT, EMS_TYPE_RC20Time, "RC20Time", _process_RC20Time},
+     {EMS_ID_THERMOSTAT, EMS_TYPE_RC20Temperature, "RC20Temperature", _process_RC20Temperature},
+     {EMS_ID_THERMOSTAT, EMS_TYPE_Version, "Version", _process_Version}};
 
 // reserve space for the data we collect from the Boiler and Thermostat
 _EMS_Boiler     EMS_Boiler;
@@ -49,24 +58,20 @@ _EMS_Thermostat EMS_Thermostat;
 
 // CRC lookup table with poly 12 for faster checking
 const uint8_t ems_crc_table[] =
-{   0x00, 0x02, 0x04, 0x06, 0x08, 0x0A, 0x0C, 0x0E, 0x10, 0x12, 0x14, 0x16, 0x18, 0x1A, 0x1C, 0x1E, 0x20, 0x22, 0x24,
-    0x26, 0x28, 0x2A, 0x2C, 0x2E, 0x30, 0x32, 0x34, 0x36, 0x38, 0x3A, 0x3C, 0x3E, 0x40, 0x42, 0x44, 0x46, 0x48, 0x4A,
-    0x4C, 0x4E, 0x50, 0x52, 0x54, 0x56, 0x58, 0x5A, 0x5C, 0x5E, 0x60, 0x62, 0x64, 0x66, 0x68, 0x6A, 0x6C, 0x6E, 0x70,
-    0x72, 0x74, 0x76, 0x78, 0x7A, 0x7C, 0x7E, 0x80, 0x82, 0x84, 0x86, 0x88, 0x8A, 0x8C, 0x8E, 0x90, 0x92, 0x94, 0x96,
-    0x98, 0x9A, 0x9C, 0x9E, 0xA0, 0xA2, 0xA4, 0xA6, 0xA8, 0xAA, 0xAC, 0xAE, 0xB0, 0xB2, 0xB4, 0xB6, 0xB8, 0xBA, 0xBC,
-    0xBE, 0xC0, 0xC2, 0xC4, 0xC6, 0xC8, 0xCA, 0xCC, 0xCE, 0xD0, 0xD2, 0xD4, 0xD6, 0xD8, 0xDA, 0xDC, 0xDE, 0xE0, 0xE2,
-    0xE4, 0xE6, 0xE8, 0xEA, 0xEC, 0xEE, 0xF0, 0xF2, 0xF4, 0xF6, 0xF8, 0xFA, 0xFC, 0xFE, 0x19, 0x1B, 0x1D, 0x1F, 0x11,
-    0x13, 0x15, 0x17, 0x09, 0x0B, 0x0D, 0x0F, 0x01, 0x03, 0x05, 0x07, 0x39, 0x3B, 0x3D, 0x3F, 0x31, 0x33, 0x35, 0x37,
-    0x29, 0x2B, 0x2D, 0x2F, 0x21, 0x23, 0x25, 0x27, 0x59, 0x5B, 0x5D, 0x5F, 0x51, 0x53, 0x55, 0x57, 0x49, 0x4B, 0x4D,
-    0x4F, 0x41, 0x43, 0x45, 0x47, 0x79, 0x7B, 0x7D, 0x7F, 0x71, 0x73, 0x75, 0x77, 0x69, 0x6B, 0x6D, 0x6F, 0x61, 0x63,
-    0x65, 0x67, 0x99, 0x9B, 0x9D, 0x9F, 0x91, 0x93, 0x95, 0x97, 0x89, 0x8B, 0x8D, 0x8F, 0x81, 0x83, 0x85, 0x87, 0xB9,
-    0xBB, 0xBD, 0xBF, 0xB1, 0xB3, 0xB5, 0xB7, 0xA9, 0xAB, 0xAD, 0xAF, 0xA1, 0xA3, 0xA5, 0xA7, 0xD9, 0xDB, 0xDD, 0xDF,
-    0xD1, 0xD3, 0xD5, 0xD7, 0xC9, 0xCB, 0xCD, 0xCF, 0xC1, 0xC3, 0xC5, 0xC7, 0xF9, 0xFB, 0xFD, 0xFF, 0xF1, 0xF3, 0xF5,
-    0xF7, 0xE9, 0xEB, 0xED, 0xEF, 0xE1, 0xE3, 0xE5, 0xE7
-};
-
-extern ESPHelper myESP; // needed for the DEBUG statements below
-#define myDebug(x, ...) myESP.printf(x, ##__VA_ARGS__);
+    {0x00, 0x02, 0x04, 0x06, 0x08, 0x0A, 0x0C, 0x0E, 0x10, 0x12, 0x14, 0x16, 0x18, 0x1A, 0x1C, 0x1E, 0x20, 0x22, 0x24,
+     0x26, 0x28, 0x2A, 0x2C, 0x2E, 0x30, 0x32, 0x34, 0x36, 0x38, 0x3A, 0x3C, 0x3E, 0x40, 0x42, 0x44, 0x46, 0x48, 0x4A,
+     0x4C, 0x4E, 0x50, 0x52, 0x54, 0x56, 0x58, 0x5A, 0x5C, 0x5E, 0x60, 0x62, 0x64, 0x66, 0x68, 0x6A, 0x6C, 0x6E, 0x70,
+     0x72, 0x74, 0x76, 0x78, 0x7A, 0x7C, 0x7E, 0x80, 0x82, 0x84, 0x86, 0x88, 0x8A, 0x8C, 0x8E, 0x90, 0x92, 0x94, 0x96,
+     0x98, 0x9A, 0x9C, 0x9E, 0xA0, 0xA2, 0xA4, 0xA6, 0xA8, 0xAA, 0xAC, 0xAE, 0xB0, 0xB2, 0xB4, 0xB6, 0xB8, 0xBA, 0xBC,
+     0xBE, 0xC0, 0xC2, 0xC4, 0xC6, 0xC8, 0xCA, 0xCC, 0xCE, 0xD0, 0xD2, 0xD4, 0xD6, 0xD8, 0xDA, 0xDC, 0xDE, 0xE0, 0xE2,
+     0xE4, 0xE6, 0xE8, 0xEA, 0xEC, 0xEE, 0xF0, 0xF2, 0xF4, 0xF6, 0xF8, 0xFA, 0xFC, 0xFE, 0x19, 0x1B, 0x1D, 0x1F, 0x11,
+     0x13, 0x15, 0x17, 0x09, 0x0B, 0x0D, 0x0F, 0x01, 0x03, 0x05, 0x07, 0x39, 0x3B, 0x3D, 0x3F, 0x31, 0x33, 0x35, 0x37,
+     0x29, 0x2B, 0x2D, 0x2F, 0x21, 0x23, 0x25, 0x27, 0x59, 0x5B, 0x5D, 0x5F, 0x51, 0x53, 0x55, 0x57, 0x49, 0x4B, 0x4D,
+     0x4F, 0x41, 0x43, 0x45, 0x47, 0x79, 0x7B, 0x7D, 0x7F, 0x71, 0x73, 0x75, 0x77, 0x69, 0x6B, 0x6D, 0x6F, 0x61, 0x63,
+     0x65, 0x67, 0x99, 0x9B, 0x9D, 0x9F, 0x91, 0x93, 0x95, 0x97, 0x89, 0x8B, 0x8D, 0x8F, 0x81, 0x83, 0x85, 0x87, 0xB9,
+     0xBB, 0xBD, 0xBF, 0xB1, 0xB3, 0xB5, 0xB7, 0xA9, 0xAB, 0xAD, 0xAF, 0xA1, 0xA3, 0xA5, 0xA7, 0xD9, 0xDB, 0xDD, 0xDF,
+     0xD1, 0xD3, 0xD5, 0xD7, 0xC9, 0xCB, 0xCD, 0xCF, 0xC1, 0xC3, 0xC5, 0xC7, 0xF9, 0xFB, 0xFD, 0xFF, 0xF1, 0xF3, 0xF5,
+     0xF7, 0xE9, 0xEB, 0xED, 0xEF, 0xE1, 0xE3, 0xE5, 0xE7};
 
 // constants timers
 const uint64_t RX_READ_TIMEOUT       = 5000; // in ms. 5 seconds timeout for read replies
@@ -88,9 +93,9 @@ void ems_init() {
     EMS_Sys_Status.emsLastTx    = 0;
     EMS_Sys_Status.emsRefreshed = false;
 
-    EMS_Sys_Status.emsPollEnabled       = false; // start up with Poll disabled
-    EMS_Sys_Status.emsThermostatEnabled = true;  // there is a RCxx thermostat active as default
-    EMS_Sys_Status.emsLogVerbose        = false; // Verbose logging is off
+    EMS_Sys_Status.emsPollEnabled       = false;                // start up with Poll disabled
+    EMS_Sys_Status.emsThermostatEnabled = true;                 // there is a RCxx thermostat active as default
+    EMS_Sys_Status.emsLogging           = EMS_SYS_LOGGING_NONE; // Verbose logging is off
 
     EMS_Thermostat.hour   = 0;
     EMS_Thermostat.minute = 0;
@@ -155,7 +160,7 @@ void _initTxBuffer() {
 // Getters and Setters for parameters
 void ems_setPoll(bool b) {
     EMS_Sys_Status.emsPollEnabled = b;
-    myDebug("EMS Bus Poll is %s\n", EMS_Sys_Status.emsPollEnabled ? "enabled" : "disabled");
+    myDebug("EMS Bus Poll is set to %s\n", EMS_Sys_Status.emsPollEnabled ? "enabled" : "disabled");
 }
 
 bool ems_getPoll() {
@@ -168,16 +173,18 @@ bool ems_getThermostatEnabled() {
 
 void ems_setThermostatEnabled(bool b) {
     EMS_Sys_Status.emsThermostatEnabled = b;
-    myDebug("Thermostat is %s\n", EMS_Sys_Status.emsThermostatEnabled ? "enabled" : "disabled");
+    myDebug("Thermostat is set to %s\n", EMS_Sys_Status.emsThermostatEnabled ? "enabled" : "disabled");
 }
 
-bool ems_getLogVerbose() {
-    return EMS_Sys_Status.emsLogVerbose;
+_EMS_SYS_LOGGING ems_getLogging() {
+    return EMS_Sys_Status.emsLogging;
 }
 
-void ems_setLogVerbose(bool b) {
-    EMS_Sys_Status.emsLogVerbose = b;
-    myDebug("Verbose logging is %s.\n", EMS_Sys_Status.emsLogVerbose ? "on" : "off");
+void ems_setLogging(_EMS_SYS_LOGGING loglevel) {
+    if (loglevel <= 2) {
+        EMS_Sys_Status.emsLogging = loglevel;
+        myDebug("Logging is set to %d\n", EMS_Sys_Status.emsLogging);
+    }
 }
 
 /*
@@ -199,12 +206,12 @@ uint8_t _crcCalculator(uint8_t * data, uint8_t len) {
 // debug print a telegram to telnet console
 // len is length in bytes including the CRC
 void _debugPrintTelegram(const char * prefix, uint8_t * data, uint8_t len, const char * color) {
-    if (!EMS_Sys_Status.emsLogVerbose)
+    if (EMS_Sys_Status.emsLogging != EMS_SYS_LOGGING_VERBOSE)
         return;
 
     bool crcok = (data[len - 1] == _crcCalculator(data, len));
     if (crcok) {
-        myDebug(color)
+        myDebug(color);
     } else {
         myDebug(COLOR_RED);
     }
@@ -253,8 +260,8 @@ void _ems_sendTelegram() {
 void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
     // if we're waiting on a response from a previous read and it hasn't come, try again
     if ((EMS_Sys_Status.emsTxStatus != EMS_TX_PENDING)
-            && ((EMS_TxTelegram.action == EMS_TX_READ) || (EMS_TxTelegram.action == EMS_TX_VALIDATE))
-            && ((millis() - EMS_Sys_Status.emsLastTx) > RX_READ_TIMEOUT)) {
+        && ((EMS_TxTelegram.action == EMS_TX_READ) || (EMS_TxTelegram.action == EMS_TX_VALIDATE))
+        && ((millis() - EMS_Sys_Status.emsLastTx) > RX_READ_TIMEOUT)) {
         if (emsLastRxCount++ >= RX_READ_TIMEOUT_COUNT) {
             // give up
             myDebug("Error! no send acknowledgement. Giving up.\n");
@@ -346,12 +353,6 @@ void _processType(uint8_t * telegram, uint8_t length) {
     uint8_t   type = telegram[2];
     uint8_t * data = telegram + 4; // data block starts at position 5
 
-    // for building a debug message
-    char s[100];
-    char color_s[20];
-    char src_s[20];
-    char dest_s[20];
-
     // scan through known types we understand
     // set typeFound if we found a match
     int  i         = 0;
@@ -370,21 +371,12 @@ void _processType(uint8_t * telegram, uint8_t length) {
         i++;
     }
 
-    if (src == EMS_ID_BOILER) {
-        strcpy(src_s, "Boiler");
-    } else if (src == EMS_ID_THERMOSTAT) {
-        strcpy(src_s, "Thermostat");
-    } else {
-        strcpy(src_s, "<unknown>");
-    }
-
-    // was it sent specifically to us?
+    // did we actually ask for it from an earlier read/write request?
+    // note when we issue a read command the responder (dest) has to return a telegram back immediately
     if (dest == EMS_ID_ME) {
-        strcpy(dest_s, "telegram for us");
-        strcpy(color_s, COLOR_YELLOW);
+        // send Acknowledgement back to free the bus
+        emsaurt_tx_poll();
 
-        // did we actually ask for it from an earlier read/write request?
-        // note when we issue a read command the responder (dest) has to return a telegram back immediately
         if ((EMS_TxTelegram.action == EMS_TX_READ) && (EMS_TxTelegram.type == type)) {
             // yes we were expecting this one one
             EMS_Sys_Status.emsRxPgks++; // increment rx counter
@@ -392,23 +384,44 @@ void _processType(uint8_t * telegram, uint8_t length) {
             EMS_TxTelegram.action    = EMS_TX_NONE;
             emsLastRxCount           = 0; // reset retry count
         }
-        // send Acknowledgement back to free the bus
-        emsaurt_tx_poll();
-    } else if (dest == EMS_ID_NONE) {
-        // it's probably just a broadcast
-        strcpy(dest_s, "broadcast");
-        strcpy(color_s, COLOR_GREEN);
-    } else {
-        // for someone else
-        strcpy(dest_s, "(not for us)");
-        strcpy(color_s, COLOR_MAGENTA);
     }
 
-    // debug print
-    sprintf(s, "%s %s, type 0x%02x", src_s, dest_s, type);
-    _debugPrintTelegram(s, telegram, length, color_s);
-    if (typeFound) {
-        myDebug("--> %s(0x%02x) received.\n", EMS_Types[i].typeString, type);
+    // print debug messages
+    if (EMS_Sys_Status.emsLogging != EMS_SYS_LOGGING_NONE) {
+        char color_s[20];
+        char src_s[20];
+        char dest_s[20];
+        char s[100];
+
+        // set source string
+        if (src == EMS_ID_BOILER) {
+            strcpy(src_s, "Boiler");
+        } else if (src == EMS_ID_THERMOSTAT) {
+            strcpy(src_s, "Thermostat");
+        } else {
+            strcpy(src_s, "<unknown>");
+        }
+
+        // set destination string
+        if (dest == EMS_ID_ME) {
+            strcpy(dest_s, "telegram for us");
+            strcpy(color_s, COLOR_YELLOW);
+        } else if (dest == EMS_ID_NONE) {
+            // it's probably just a broadcast
+            strcpy(dest_s, "broadcast");
+            strcpy(color_s, COLOR_GREEN);
+        } else {
+            // for someone else
+            strcpy(dest_s, "(not for us)");
+            strcpy(color_s, COLOR_MAGENTA);
+        }
+
+        // and print
+        sprintf(s, "%s %s, type 0x%02x", src_s, dest_s, type);
+        _debugPrintTelegram(s, telegram, length, color_s);
+        if (typeFound) {
+            myDebug("--> %s(0x%02x) received.\n", EMS_Types[i].typeString, type);
+        }
     }
 
     // check to see if we're waiting on a specific value, either from a recent read or by chance a broadcast
@@ -511,7 +524,7 @@ bool _process_UBAMonitorFast(uint8_t * data, uint8_t length) {
 bool _process_UBAMonitorSlow(uint8_t * data, uint8_t length) {
     EMS_Boiler.extTemp     = _toFloat(0, data); // 0x8000 if not available
     EMS_Boiler.boilTemp    = _toFloat(2, data); // 0x8000 if not available
-    EMS_Boiler.pumpMod     = data[13];
+    EMS_Boiler.pumpMod     = data[9];
     EMS_Boiler.burnStarts  = _toLong(10, data);
     EMS_Boiler.burnWorkMin = _toLong(13, data);
     EMS_Boiler.heatWorkMin = _toLong(19, data);
@@ -584,12 +597,15 @@ bool _process_RC20Time(uint8_t * data, uint8_t length) {
     EMS_Thermostat.year   = data[0];
 
     // we can optional set the time based on the thermostat's time if we want
+    // commented out because we use NTP to get time
+    /*
     setTime(EMS_Thermostat.hour,
             EMS_Thermostat.minute,
             EMS_Thermostat.second,
             EMS_Thermostat.day,
             EMS_Thermostat.month,
             EMS_Thermostat.year + 2000);
+    */
 
     return true;
 }
@@ -614,7 +630,6 @@ void _buildTxTelegram(uint8_t data_value) {
 
     EMS_Sys_Status.emsTxStatus = EMS_TX_PENDING; // armed and ready to send
 }
-
 
 /*
  * Send a command to Tx to Read from another device
@@ -744,7 +759,6 @@ void ems_setWarmWaterActivated(bool activated) {
     EMS_TxTelegram.checkValue = (activated ? 0xFF : 0x00);
     _buildTxTelegram(EMS_TxTelegram.checkValue);
 }
-
 
 /*
  * Helper functions for formatting and converting floats
