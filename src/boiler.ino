@@ -45,7 +45,7 @@ Ticker showerResetTimer;
 #define PROJECT_CMDS                                                                                                   \
     "*  s=show statistics\n\r"                                                                                         \
     "*  P=publish stats to MQTT\n\r"                                                                                   \
-    "*  v=Verbose mode on/off\n\r"                                                                                     \
+    "*  v [n] set logging to 0=none, 1=basic, 2=verbose\n\r"                                                           \
     "*  p=Poll response on/off\n\r"                                                                                    \
     "*  T=Thermostat Support on/off\n\r"                                                                               \
     "*  S=Shower Timer on/off\n\r"                                                                                     \
@@ -70,6 +70,7 @@ Ticker showerResetTimer;
 #define TOPIC_THERMOSTAT_TEMP MQTT_BOILER "thermostat_temp"         // for received thermostat temp changes
 #define TOPIC_THERMOSTAT_CURRTEMP MQTT_BOILER "thermostat_currtemp" // current temperature
 #define TOPIC_THERMOSTAT_SELTEMP MQTT_BOILER "thermostat_seltemp"   // selected temperature
+#define TOPIC_THERMOSTAT_MODE MQTT_BOILER "thermostat_mode"         // selected temperature
 
 #define TOPIC_BOILER_DATA MQTT_BOILER "boiler_data" // for sending boiler values
 #define TOPIC_SHOWERTIME MQTT_BOILER "showertime"   // for sending shower time results
@@ -108,8 +109,7 @@ netInfo homeNet = {.mqttHost = MQTT_IP,
                    .mqttPass = MQTT_PASS,
                    .mqttPort = 1883, // this is the default, change if using another port
                    .ssid     = WIFI_SSID,
-                   .pass     = WIFI_PASSWORD
-                  };
+                   .pass     = WIFI_PASSWORD};
 
 ESPHelper myESP(&homeNet);
 
@@ -134,7 +134,8 @@ void showInfo() {
 
     // General stats from EMS bus
     myDebug("EMS Bus stats:\n");
-    myDebug("  Poll is %s, Shower is %s, Shower timer is %s, RxPgks=%d, TxPkgs=%d, #CrcErrors=%d",
+    myDebug("  Thermostat is %s, Poll is %s, Shower is %s, Shower timer is %s, RxPgks=%d, TxPkgs=%d, #CrcErrors=%d",
+            ((Boiler_Status.thermostat_enabled) ? "enabled" : "disabled"),
             ((EMS_Sys_Status.emsPollEnabled) ? "enabled" : "disabled"),
             ((Boiler_Status.shower_enabled) ? "enabled" : "disabled"),
             ((Boiler_Status.shower_timer) ? "enabled" : "disabled"),
@@ -298,6 +299,16 @@ void publishValues() {
 
         myESP.publish(TOPIC_THERMOSTAT_CURRTEMP, _float_to_char(s, EMS_Thermostat.curr_roomTemp));
         myESP.publish(TOPIC_THERMOSTAT_SELTEMP, _float_to_char(s, EMS_Thermostat.setpoint_roomTemp));
+
+        // send mode 0=low, 1=manual, 2=clock/auto
+        if (EMS_Thermostat.mode == 0) {
+            myESP.publish(TOPIC_THERMOSTAT_MODE, "low");
+        } else if (EMS_Thermostat.mode == 1) {
+            myESP.publish(TOPIC_THERMOSTAT_MODE, "manual");
+        } else {
+            myESP.publish(TOPIC_THERMOSTAT_MODE, "auto");
+        }
+        myESP.publish(TOPIC_THERMOSTAT_SELTEMP, _float_to_char(s, EMS_Thermostat.setpoint_roomTemp));
     }
 }
 
@@ -330,8 +341,7 @@ void myDebugCallback() {
         ems_setWarmWaterTemp((uint8_t)strtol(&cmd[2], 0, 10));
         break;
     case 'v': // verbose
-        b = !ems_getLogVerbose();
-        ems_setLogVerbose(b);
+        ems_setLogging((_EMS_SYS_LOGGING)(cmd[2] - '0'));
         break;
     case 'a': // set ww activate on or off
         if ((cmd[2] - '0') == 1)
@@ -562,7 +572,7 @@ void loop() {
                 } else {
                     // check if the shower has been on too long
                     if ((((timestamp - Boiler_Shower.timerStart) > SHOWER_MAX_DURATION) && !Boiler_Shower.isColdShot)
-                            && Boiler_Status.shower_timer) {
+                        && Boiler_Status.shower_timer) {
                         _showerColdShotStart();
                         // start the timer for n seconds which will reset the water back to hot
                         showerResetTimer.attach(SHOWER_OFF_DURATION, _showerColdShotStop);
