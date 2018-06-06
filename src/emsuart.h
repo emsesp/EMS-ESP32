@@ -3,8 +3,7 @@
  * Header file for emsuart.cpp
  * Paul Derbyshire - https://github.com/proddy/EMS-ESP-Boiler
  */
-#ifndef __EMSUART_H
-#define __EMSUART_H
+#pragma once
 
 #include <Arduino.h>
 
@@ -32,5 +31,3 @@ void ICACHE_FLASH_ATTR emsuart_init();
 void ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len);
 void ICACHE_FLASH_ATTR emsaurt_tx_poll();
 void ICACHE_FLASH_ATTR emsuart_tx_brk();
-
-#endif

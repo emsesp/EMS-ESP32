@@ -18,9 +18,7 @@
     You should have received a copy of the GNU General Public License
     along with ESPHelper.  If not, see <http://www.gnu.org/licenses/>.
 */
-
-#ifndef __ESPHelper_H
-#define __ESPHelper_H
+#pragma once
 
 #include <ArduinoOTA.h>
 #include <ESP8266WiFi.h> //https://github.com/esp8266/Arduino
@@ -208,5 +206,3 @@ class ESPHelper : public Print {
 
     char bufferPrint[BUFFER_PRINT];
 };
-
-#endif

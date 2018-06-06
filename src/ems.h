@@ -4,8 +4,7 @@
  * You shouldn't need to change much in this file
  */
 
-#ifndef __EMS_H
-#define __EMS_H
+#pragma once
 
 #include <Arduino.h>
 
@@ -68,20 +67,23 @@ typedef enum {
     EMS_TX_VALIDATE // do a validate after a write
 } _EMS_TX_ACTION;
 
+/* EMS UART logging */
+typedef enum { EMS_SYS_LOGGING_NONE, EMS_SYS_LOGGING_BASIC, EMS_SYS_LOGGING_VERBOSE } _EMS_SYS_LOGGING;
+
 // status/counters since last power on
 typedef struct {
-    _EMS_RX_STATUS emsRxStatus;
-    _EMS_TX_STATUS emsTxStatus;
-    uint16_t       emsRxPgks;            // received
-    uint16_t       emsTxPkgs;            // sent
-    uint16_t       emxCrcErr;            // CRC errors
-    bool           emsPollEnabled;       // flag enable the response to poll messages
-    bool           emsThermostatEnabled; // if there is a RCxx thermostat active
-    bool           emsLogVerbose;        // Verbose logging
-    unsigned long  emsLastPoll;          // in ms, last time we received a poll
-    unsigned long  emsLastRx;            // timings
-    unsigned long  emsLastTx;            // timings
-    bool           emsRefreshed;         // fresh data, needs to be pushed out to MQTT
+    _EMS_RX_STATUS   emsRxStatus;
+    _EMS_TX_STATUS   emsTxStatus;
+    uint16_t         emsRxPgks;            // received
+    uint16_t         emsTxPkgs;            // sent
+    uint16_t         emxCrcErr;            // CRC errors
+    bool             emsPollEnabled;       // flag enable the response to poll messages
+    bool             emsThermostatEnabled; // if there is a RCxx thermostat active
+    _EMS_SYS_LOGGING emsLogging;           // logging
+    unsigned long    emsLastPoll;          // in ms, last time we received a poll
+    unsigned long    emsLastRx;            // timings
+    unsigned long    emsLastTx;            // timings
+    bool             emsRefreshed;         // fresh data, needs to be pushed out to MQTT
 } _EMS_Sys_Status;
 
 // The Tx send package
@@ -161,6 +163,17 @@ typedef struct {
     EMS_processType_cb processType_cb;
 } _EMS_Types;
 
+// ANSI Colors
+#define COLOR_RESET "\x1B[0m"
+#define COLOR_BLACK "\x1B[0;30m"
+#define COLOR_RED "\x1B[0;31m"
+#define COLOR_GREEN "\x1B[0;32m"
+#define COLOR_YELLOW "\x1B[0;33m"
+#define COLOR_BLUE "\x1B[0;34m"
+#define COLOR_MAGENTA "\x1B[0;35m"
+#define COLOR_CYAN "\x1B[0;36m"
+#define COLOR_WHITE "\x1B[0;37m"
+
 // function definitions
 extern void ems_parseTelegram(uint8_t * telegram, uint8_t len);
 void        ems_init();
@@ -170,12 +183,12 @@ void        ems_setThermostatMode(uint8_t mode);
 void        ems_setWarmWaterTemp(uint8_t temperature);
 void        ems_setWarmWaterActivated(bool activated);
 
-void ems_setPoll(bool b);
-bool ems_getPoll();
-bool ems_getThermostatEnabled();
-void ems_setThermostatEnabled(bool b);
-bool ems_getLogVerbose();
-void ems_setLogVerbose(bool b);
+void             ems_setPoll(bool b);
+bool             ems_getPoll();
+bool             ems_getThermostatEnabled();
+void             ems_setThermostatEnabled(bool b);
+_EMS_SYS_LOGGING ems_getLogging();
+void             ems_setLogging(_EMS_SYS_LOGGING loglevel);
 
 // private functions
 uint8_t _crcCalculator(uint8_t * data, uint8_t len);
@@ -194,5 +207,3 @@ extern _EMS_Sys_Status EMS_Sys_Status;
 extern _EMS_TxTelegram EMS_TxTelegram;
 extern _EMS_Boiler     EMS_Boiler;
 extern _EMS_Thermostat EMS_Thermostat;
-
-#endif
