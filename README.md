@@ -382,28 +382,46 @@ Roughly these are the steps needed when running Windows:
 
 ### Using ESPurna
 
-*Note: This is still work in progress. The ESPurna code for the HTML config is still to be added.*
-[ESPurna](https://github.com/xoseperez/espurna/wiki) is framework that handles most of the tedious tasks of building IoT devices so you can focus on the functionality you need. This replaces my ESPHelper code in the standalone version above. ESPurna is built on PlatformIO and Visual Studio Code too. Follow these steps:
+[ESPurna](https://github.com/xoseperez/espurna/wiki) is framework that handles most of the tedious tasks of building IoT devices so you can focus on the functionality you need. This replaces my ESPHelper code in the standalone version above. ESPurna is natively built on PlatformIO and Visual Studio Code too which is nice. So if you're brave, follow these steps:
 
-- Download and install [NodeJS and npm](https://nodejs.org/en/download). Choose the LTS version.
-- Download espurna by cloning the ESPurna git repository from `https://github.com/xoseperez/espurna.git`.
-- Restart VSC. PlatformIO should detect and set some things up for you automagically.
-- From VSC open the folder ``espurna\code``
-- open a terminal window (ctrl-`)
-- Install the node modules: ``npm install --only=dev``
-- Build the web interface:  ``node node_modules/gulp/bin/gulp.js``
-- Finally copy the files `custom.h, index.html, boiler.ino and the esp*.cpp/h` files from the `espurna` directory in this repo to the code directory and build.
+1. Download and install [NodeJS](https://nodejs.org/en/download). This gives you npm. Choose the LTS version
+2. Download ESPurna by cloning the ESPurna git repository from `https://github.com/xoseperez/espurna.git`
+3. Restart VSC. PlatformIO should detect and set some things up for you automagically
+4. From VSC open the folder `espurna\code`
+5. open a terminal window (*ctrl-`*)
+6. Install the node modules: `npm install --only=dev`
+7. Build the web interface:  `node node_modules/gulp/bin/gulp.js`. This will create a compressed `code/espurna/static/index.html.gz.h`
+8. First time users build the filesystem by *ctrl-alt-t* and run the task 'uploadfs'
+9. Copy the files from this repo's *espurna* directory to where you installed ESPurna
 
-If you run into issues refer to official ESPurnas setup instructions [here](https://github.com/xoseperez/espurna/wiki/Build-and-update-from-Visual-Studio-Code-using-PlatformIO).
+```
+code/html/index.html
+code/config/custom.h
+code/espurna/boiler-espurna.ino
+code/espurna/ems*.*
+```
+
+10. Now build and upload as you usually would. Look at my version of platformio.ini as an example.
+
+If you run into issues refer to ESPurna's official setup instructions [here](https://github.com/xoseperez/espurna/wiki/Build-and-update-from-Visual-Studio-Code-using-PlatformIO).
+
+
+This is what ESPurna looks like with the custom boiler code:
+
+![Example running in ESPurna](doc/espurna/example.PNG)
 
 ### Using the pre-built firmware's
 
-I will eventually put pre-built version based on ESPurna in the directory `/firmware` which you can upload using [esptool](https://github.com/espressif/esptool) bootloader. On Windows, follow these instructions:
+pre-baked firmwares for some ESP8266 devices based on ESPurna are available in the directory `/firmware` which you can upload yourself using [esptool](https://github.com/espressif/esptool) bootloader. On Windows, follow these instructions:
 
-1. Check if you have python 2.7 installed. If not [download it](https://www.python.org/downloads/) and make sure you select the option to add Python to the windows PATH.
-2. Install the ESPTool by running `pip install esptool` from a command prompt.
-3. Connect the ESP via USB, figure out the COM port.
+1. Check if you have **python 2.7** installed. If not [download it](https://www.python.org/downloads/) and make sure you select the option to add Python to the windows PATH
+2. Install the ESPTool by running `pip install esptool` from a command prompt
+3. Connect the ESP via USB, figure out the COM port
 4. run `esptool.py -p <com> write_flash 0x00000 <firmware>` where firmware is the `.bin` file and \<com\> is the COM port, e.g. `COM3`
+5. Connect using WiFi from a phone or PC to the "**ESPURNA_XXXXXX**" network. Pasword is '**fibonacci**'
+6. Once connected browse to "http://192.168.4.1" and setup your wifi, mqtt etc
+
+Again, if you run into problems read [this](https://github.com/xoseperez/espurna/wiki/Configuration) from ESPurna's configuation help page.
 
 ### Using the Arduino IDE
 
@@ -435,7 +453,6 @@ Some annoying issues that need fixing:
 
 Here's my top things I'm still working on:
 
-- Make an ESPurna version. ESPurna is a lovely framework that takes care of the WiFi, MQTT, web server, telnet & debugging.
 - Complete the ESP32 version. It's surprisingly a lot easier doing the UART handling on an ESP32 with the ESP-IDF SDK. I have a first version beta that is working.
 - Find a better way to control the 3-way valve to switch the warm water off quickly rather than deactivating the warm water heater each time. There is an unsupported call to do this, but I think its too risky and experimental. I'd love to get my hands on an Nefit Easy, sniff the packets being sent and reverse engineer the logic. Anyone help?
 

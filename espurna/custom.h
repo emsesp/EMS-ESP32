@@ -1,0 +1,28 @@
+//  export PLATFORMIO_BUILD_FLAGS="'-DUSE_CUSTOM_H'"
+// e.g.
+// build_flags = -g -DMQTT_MAX_PACKET_SIZE=400 ${env.ESPURNA_FLAGS} -DPIO_FRAMEWORK_ARDUINO_LWIP_HIGHER_BANDWIDTH -DUSE_CUSTOM_H -DUSE_EXTRA
+
+#undef EMBEDDED_WEB
+#define EMBEDDED_WEB 1
+
+#undef NTP_SERVER
+#define NTP_SERVER "nl.pool.ntp.org"
+
+//#undef MQTT_TOPIC
+//#define MQTT_TOPIC "/{identifier}"
+// default is  "{hostname}"
+
+#undef ENABLE_DOMOTICZ
+#define ENABLE_DOMOTICZ 0
+
+#undef THINGSPEAK_SUPPORT
+#define THINGSPEAK_SUPPORT 0
+
+#undef SCHEDULER_SUPPORT
+#define SCHEDULER_SUPPORT 0
+
+#undef ENABLE_FAUXMO
+#define ENABLE_FAUXMO 0
+
+#undef DEBUG_SERIAL_SUPPORT
+#define DEBUG_SERIAL_SUPPORT 0
