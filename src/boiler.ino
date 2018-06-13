@@ -621,7 +621,6 @@ void systemCheck() {
 // number of calls is defined in MAX_MANUAL_CALLS
 void regularUpdates() {
     uint8_t cycle = (regularUpdatesCount++ % MAX_MANUAL_CALLS);
-    myDebug("cycle: %d\n", cycle);
 
     if ((cycle == 0) && Boiler_Status.thermostat_enabled) {
         ems_doReadCommand(EMS_TYPE_RC20Temperature); // to get the thermostat mode which is not broadcasted
