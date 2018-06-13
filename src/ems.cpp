@@ -80,7 +80,7 @@ const uint8_t  RX_READ_TIMEOUT_COUNT = 4;    // 4 retries before timeout
 uint8_t emsLastRxCount; // used for retries when sending failed
 
 // init stats and counters and buffers
-// uses -1 or 255 for values that haven't been set yet
+// uses -1 or 255 for values that haven't been set yet (EMS_VALUE_INT_NOTSET and EMS_VALUE_FLOAT_NOTSET)
 void ems_init() {
     // overall status
     EMS_Sys_Status.emsRxPgks    = 0;
@@ -106,39 +106,39 @@ void ems_init() {
     EMS_Thermostat.mode   = 255; // dummy value
 
     // UBAParameterWW
-    EMS_Boiler.wWActivated   = false; // Warm Water activated
-    EMS_Boiler.wWSelTemp     = 0;     // Warm Water selected temperature
-    EMS_Boiler.wWCircPump    = false; // Warm Water circulation pump available
-    EMS_Boiler.wWDesiredTemp = 0;     // Warm Water desired temperature
+    EMS_Boiler.wWActivated   = EMS_VALUE_INT_NOTSET; // Warm Water activated
+    EMS_Boiler.wWSelTemp     = EMS_VALUE_INT_NOTSET; // Warm Water selected temperature
+    EMS_Boiler.wWCircPump    = EMS_VALUE_INT_NOTSET; // Warm Water circulation pump available
+    EMS_Boiler.wWDesiredTemp = EMS_VALUE_INT_NOTSET; // Warm Water desired temperature
 
     // UBAMonitorFast
-    EMS_Boiler.selFlowTemp = 0;     // Selected flow temperature
-    EMS_Boiler.curFlowTemp = -1;    // Current flow temperature
-    EMS_Boiler.retTemp     = -1;    // Return temperature
-    EMS_Boiler.burnGas     = false; // Gas on/off
-    EMS_Boiler.fanWork     = false; // Fan on/off
-    EMS_Boiler.ignWork     = false; // Ignition on/off
-    EMS_Boiler.heatPmp     = false; // Boiler pump on/off
-    EMS_Boiler.wWHeat      = false; // 3-way valve on WW
-    EMS_Boiler.wWCirc      = false; // Circulation on/off
-    EMS_Boiler.selBurnPow  = 0;     // Burner max power
-    EMS_Boiler.curBurnPow  = 0;     // Burner current power
-    EMS_Boiler.flameCurr   = -1;    // Flame current in micro amps
-    EMS_Boiler.sysPress    = -1;    // System pressure
+    EMS_Boiler.selFlowTemp = EMS_VALUE_INT_NOTSET;   // Selected flow temperature
+    EMS_Boiler.curFlowTemp = EMS_VALUE_FLOAT_NOTSET; // Current flow temperature
+    EMS_Boiler.retTemp     = EMS_VALUE_FLOAT_NOTSET; // Return temperature
+    EMS_Boiler.burnGas     = EMS_VALUE_INT_NOTSET;   // Gas on/off
+    EMS_Boiler.fanWork     = EMS_VALUE_INT_NOTSET;   // Fan on/off
+    EMS_Boiler.ignWork     = EMS_VALUE_INT_NOTSET;   // Ignition on/off
+    EMS_Boiler.heatPmp     = EMS_VALUE_INT_NOTSET;   // Boiler pump on/off
+    EMS_Boiler.wWHeat      = EMS_VALUE_INT_NOTSET;   // 3-way valve on WW
+    EMS_Boiler.wWCirc      = EMS_VALUE_INT_NOTSET;   // Circulation on/off
+    EMS_Boiler.selBurnPow  = EMS_VALUE_INT_NOTSET;   // Burner max power
+    EMS_Boiler.curBurnPow  = EMS_VALUE_INT_NOTSET;   // Burner current power
+    EMS_Boiler.flameCurr   = EMS_VALUE_FLOAT_NOTSET; // Flame current in micro amps
+    EMS_Boiler.sysPress    = EMS_VALUE_FLOAT_NOTSET; // System pressure
 
     // UBAMonitorSlow
-    EMS_Boiler.extTemp     = -1; // Outside temperature
-    EMS_Boiler.boilTemp    = -1; // Boiler temperature
-    EMS_Boiler.pumpMod     = 0;  // Pump modulation
-    EMS_Boiler.burnStarts  = 0;  // # burner restarts
-    EMS_Boiler.burnWorkMin = 0;  // Total burner operating time
-    EMS_Boiler.heatWorkMin = 0;  // Total heat operating time
+    EMS_Boiler.extTemp     = EMS_VALUE_FLOAT_NOTSET; // Outside temperature
+    EMS_Boiler.boilTemp    = EMS_VALUE_FLOAT_NOTSET; // Boiler temperature
+    EMS_Boiler.pumpMod     = EMS_VALUE_INT_NOTSET;   // Pump modulation
+    EMS_Boiler.burnStarts  = EMS_VALUE_INT_NOTSET;   // # burner restarts
+    EMS_Boiler.burnWorkMin = EMS_VALUE_INT_NOTSET;   // Total burner operating time
+    EMS_Boiler.heatWorkMin = EMS_VALUE_INT_NOTSET;   // Total heat operating time
 
     // UBAMonitorWWMessage
-    EMS_Boiler.wWCurTmp  = -1;    // Warm Water current temperature:
-    EMS_Boiler.wWStarts  = 0;     // Warm Water # starts
-    EMS_Boiler.wWWorkM   = 0;     // Warm Water # minutes
-    EMS_Boiler.wWOneTime = false; // Warm Water one time function on/off
+    EMS_Boiler.wWCurTmp  = EMS_VALUE_FLOAT_NOTSET; // Warm Water current temperature:
+    EMS_Boiler.wWStarts  = EMS_VALUE_INT_NOTSET;   // Warm Water # starts
+    EMS_Boiler.wWWorkM   = EMS_VALUE_INT_NOTSET;   // Warm Water # minutes
+    EMS_Boiler.wWOneTime = EMS_VALUE_INT_NOTSET;   // Warm Water one time function on/off
 
     // init the Tx package
     _initTxBuffer();
@@ -473,6 +473,8 @@ bool _process_UBAParameterWW(uint8_t * data, uint8_t length) {
     EMS_Boiler.wWCircPump    = (data[6] == 0xFF); // 0xFF means on
     EMS_Boiler.wWDesiredTemp = data[8];
 
+    EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back to Home Assistant via MQTT
+
     return true;
 }
 
@@ -541,8 +543,7 @@ bool _process_RC20StatusMessage(uint8_t * data, uint8_t length) {
     EMS_Thermostat.setpoint_roomTemp = ((float)data[1]) / (float)2;
     EMS_Thermostat.curr_roomTemp     = _toFloat(2, data);
 
-    // set the updated flag to trigger a send back to HA
-    EMS_Sys_Status.emsRefreshed = true;
+    EMS_Sys_Status.emsRefreshed = true; // set the updated flag to trigger a send back to HA
 
     return true;
 }
@@ -682,8 +683,7 @@ void ems_setThermostatTemp(float temperature) {
     if (_checkWriteQueueFull())
         return; // check if there is already something in the queue
 
-    char s[10];
-    myDebug("Setting thermostat temperature to %s C\n", _float_to_char(s, temperature));
+    myDebug("Setting new thermostat temperature\n");
 
     EMS_TxTelegram.action     = EMS_TX_WRITE;
     EMS_TxTelegram.dest       = EMS_ID_THERMOSTAT;
@@ -760,10 +760,6 @@ void ems_setWarmWaterActivated(bool activated) {
     _buildTxTelegram(EMS_TxTelegram.checkValue);
 }
 
-/*
- * Helper functions for formatting and converting floats
- */
-
 // function to turn a telegram int (2 bytes) to a float
 float _toFloat(uint8_t i, uint8_t * data) {
     if ((data[i] == 0x80) && (data[i + 1] == 0)) // 0x8000 is used when sensor is missing
@@ -775,24 +771,4 @@ float _toFloat(uint8_t i, uint8_t * data) {
 // function to turn a telegram long (3 bytes) to a long int
 uint16_t _toLong(uint8_t i, uint8_t * data) {
     return (((data[i]) << 16) + ((data[i + 1]) << 8) + (data[i + 2]));
-}
-
-// convert float to char
-char * _float_to_char(char * a, float f, uint8_t precision) {
-    long p[] = {0, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000};
-
-    char * ret = a;
-    // check for 0x8000 (sensor missing), which has a -1 value
-    if (f == -1) {
-        strcpy(ret, "<n/a>");
-    } else {
-        long whole = (long)f;
-        itoa(whole, a, 10);
-        while (*a != '\0')
-            a++;
-        *a++         = '.';
-        long decimal = abs((long)((f - whole) * p[precision]));
-        itoa(decimal, a, 10);
-    }
-    return ret;
 }
