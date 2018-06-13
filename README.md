@@ -4,7 +4,7 @@ EMS-ESP-Boiler is an controller running on an ESP8266 to communicate with EMS (E
 
 There are 3 parts to this project, first the design of the circuit, second the code to deploy to an ESP8266 based microcontroller and lastly settings for Home Assistant to monitor data and issue direct commands via MQTT.
 
-[![version](https://img.shields.io/badge/version-1.0-brightgreen.svg)](CHANGELOG.md)
+[![version](https://img.shields.io/badge/version-1.0.1-brightgreen.svg)](CHANGELOG.md)
 [![branch](https://img.shields.io/badge/branch-dev-orange.svg)](https://github.org/xoseperez/espurna/tree/dev/)
 [![license](https://img.shields.io/github/license/xoseperez/espurna.svg)](LICENSE)
 
@@ -21,16 +21,16 @@ There are 3 parts to this project, first the design of the circuit, second the c
     - [EMS Polling](#ems-polling)
     - [EMS Broadcasting](#ems-broadcasting)
     - [EMS Reading and Writing](#ems-reading-and-writing)
-  - [The Code](#the-code)
-    - [The supported EMS Types](#the-supported-ems-types)
-    - [Customizing](#customizing)
+  - [The source code](#the-source-code)
+    - [Supported EMS Types](#supported-ems-types)
+    - [Customizing the code](#customizing-the-code)
     - [Using MQTT](#using-mqtt)
-    - [The basic Shower logic](#the-basic-shower-logic)
+    - [The basic shower logic](#the-basic-shower-logic)
   - [Home Assistant Configuration](#home-assistant-configuration)
     - [configuration.yaml](#configurationyaml)
     - [sensors.yaml](#sensorsyaml)
     - [automations.yaml](#automationsyaml)
-    - [input_number.yaml](#input-numberyaml)
+    - [input_number.yaml](#input_numberyaml)
     - [groups.yaml](#groupsyaml)
   - [Building the firmware](#building-the-firmware)
     - [Using PlatformIO Standalone](#using-platformio-standalone)
@@ -394,7 +394,7 @@ Roughly these are the steps needed when running Windows:
 6. Install the node modules: `npm install --only=dev`
 7. Build the web interface:  `node node_modules/gulp/bin/gulp.js`. This will create a compressed `code/espurna/static/index.html.gz.h`
 8. First time users build the filesystem by *ctrl-alt-t* and run the task 'uploadfs'
-9. Copy the files from this repo's *espurna* directory to where you installed ESPurna
+9. Copy these files from this repo's *espurna* directory to where you installed ESPurna
 
 ```
 code/html/index.html
