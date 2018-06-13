@@ -68,7 +68,8 @@ I've tested the code and circuit with a few ESP8266 development boards such as t
 4. Build and upload the firmware to the ESP8266 device. I used Platformio with Visual Studio. Do make sure you set the MQTT and WiFi credentials correctly and if you're not using MQTT leave the MQTT_IP blank. The firmware supports OTA too with the default hostname as 'boiler' (or 'boiler.' depending on your OS and how the mdns resolves hostnames).
 5. Power the ESP either via USB or direct into the 5v vin pin from an external power 5V volts supply with min 400mA.
 6. Attach the 3v3 out on the ESP8266 to the DC power line on the EMS circuit as indicated in the schematics.
-7. When your ESP device has booted, telnet (port 23) to the IP. If using DHCP figure the IP out or use USB and the serial terminal on the COM port to see. If everything is working you should see the messages appear in the window as shown in the next section. I use a Telnet client that comes with Linux distro on Windows 10 in developer mode but you can also use [putty](https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html) or any other software.
+7. The WiFi connects via DHCP. Find the IP by looking at your router and then telnet (port 23) to it. I use the telnet client that comes with my Linux distro on Windows 10 (in developer mode) but you can also use [putty](https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html) or anything similar. If everything is working you should see the messages appear in the window as shown in the next section. However if you're unable to locate the IP of the ESP then probably the WiFi failed to instantiate. In this case add -DUSE_SERIAL to the build options, connect at USB, build, upload and then use a terminal to connect to the serial port to see the debug messages. A word of warning, do not use both a USB and power from the EMS at the same time.
+
 
 ## Debugging the output
 
@@ -172,10 +173,10 @@ The Boiler (ID 0x08) will send out these broadcast telegrams regularly:
 
 And a thermostat (ID 0x17 for a RC20) would broadcast these messages regularly:
 
-| Type | Description                                       | Frequency    |
-| ---- | ------------------------------------------------- | ------------ |
-| 0x06 | RC20Time - time on thermostat Y M H D M S weekday | every minute |
-| 0x91 | RC20StatusMessage -                               | every minute |
+| Type | Description       | Comment                     | Frequency    |
+| ---- | ----------------- | --------------------------- | ------------ |
+| 0x06 | RC20Time          | time and date on thermostat | every minute |  |
+| 0x91 | RC20StatusMessage | thermostat mode             | every minute |
 
 Refer to the code in `ems.cpp` for further explanation on how to parse these message types and also reference the EMS Wiki.
 
@@ -189,7 +190,7 @@ When doing a write request, the 7th bit is masked in the `[dest]`. After this wr
 
 Every telegram sent is echo'd back to Rx.
 
-## The Code
+## The source code
 
 *Disclaimer*: This code here is really for reference only, I don't expect anyone to use as is since it's highly tailored to my environment and my needs. Most of the code however is self explanatory with comments here and there. If you wish to make some changes start with the `defines` and `const` sections at the top of `boiler.ino`.
 
@@ -207,11 +208,11 @@ The code is built on the Arduino framework and is dependent on these external li
 
 `ESPHelper.cpp` is my customized version of [ESPHelper](https://github.com/ItKindaWorks/ESPHelper) with added Telnet support and some other minor tweaking.
 
-### The supported EMS Types
+### Supported EMS Types
 
 `ems.cpp` defines callback functions that handle all the broadcast types listed above (e.g. 0x34, 0x18, 0x19 etc) plus these extra types:
 
-| Device            | Type | Description                   | What                                     |
+| Device (ID)       | Type | Description                   | What                                     |
 | ----------------- | ---- | ----------------------------- | ---------------------------------------- |
 | Boiler (0x08)     | 0x33 | UBAParameterWW                | reads selected & desired warm water temp |
 | Boiler (0x08)     | 0x14 | UBATotalUptimeMessage         |                                          |
@@ -219,12 +220,13 @@ The code is built on the Arduino framework and is dependent on these external li
 | Boiler (0x08)     | 0x16 | UBAParametersMessage          |                                          |
 | Thermostat (0x17) | 0xA8 | RC20Temperature               | sets temperature and operating modes     |
 | Thermostat (0x17) | 0xA3 | RCOutdoorTempMessage          |                                          |
-| Thermostat (0x17) | 0x91 | RC20StatusMessage             | reads set & current room temperatures    |
 | Thermostat (0x17) | 0x02 | Version                       | reads Version major/minor                |
+
+In `boiler.ino` you can make calls to automatically send these read commands. See the function *regularUpdates()*
 
 Note the thermostat types are based on a RC20 model thermostat. If using an RC30/RC35 use types 0x3E and 0x48 to read the values.
 
-### Customizing
+### Customizing the code
 
 Most of the changes will be done in `boiler.ino` and `ems.cpp`.
 
@@ -250,7 +252,7 @@ Values sent from HA to set the temperature come in via the subscribed topic `hom
 
 These topics can be configured in the `TOPIC_*` defines in `boiler.ino`. Make sure you change the HA configuration too to match.
 
-### The basic Shower logic
+### The basic shower logic
 
 Checking whether the shower is running was tricky. We know when the warm water is on and being heated but need to distinguish between the central heating, shower, hot tap and bath. I found via trial and error the Selected Burner Max Power is between 80% and 115% when the shower is running and fixed at 75% if the central heating is on. Furthermore the Selected Flow Impulsion is 80 C for the heating.
 
@@ -258,7 +260,7 @@ There is other logic in the code to compensate for ramp up and whether the showe
 
 ## Home Assistant Configuration
 
-This is what my HA configuration looks like:
+This is what my HA configuration currently looks like:
 
 ### configuration.yaml
 
@@ -359,7 +361,7 @@ This is what my HA configuration looks like:
         - sensor.current_set_temperature
         - input_number.thermostat_temp
 
-And in Home Assistant looks like:
+And within Home Assistant it renders as:
 
 ![Home Assistant panel)](doc/ha/ha.png)
 
@@ -402,6 +404,8 @@ code/espurna/ems*.*
 ```
 
 10. Now build and upload as you usually would. Look at my version of platformio.ini as an example.
+
+The Telnet functions are `BOILER.READ`, `BOILER.INFO` and a few others for reference. `HELP` will list them. Add your own functions to expand the functionality by calling the EMS* functions as in the examples.
 
 If you run into issues refer to ESPurna's official setup instructions [here](https://github.com/xoseperez/espurna/wiki/Build-and-update-from-Visual-Studio-Code-using-PlatformIO).
 
