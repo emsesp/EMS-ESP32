@@ -186,7 +186,7 @@ class ESPHelper : public Print {
     void         resubscribe();
     uint8_t      setConnectionStatus();
 
-    char _boottime[20];
+    char _boottime[50];
 
     // console/telnet specific
     WiFiClient telnetClient;
