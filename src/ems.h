@@ -48,6 +48,12 @@
 #define EMS_OFFSET_UBAParameterWW_wwtemp 0x02      // WW Temperature
 #define EMS_OFFSET_UBAParameterWW_wwactivated 0x01 // WW Activated
 
+// default values
+#define EMS_VALUE_INT_ON 1        // boolean true
+#define EMS_VALUE_INT_OFF 0       // boolean false
+#define EMS_VALUE_INT_NOTSET 0xFF // for 8-bit ints
+#define EMS_VALUE_FLOAT_NOTSET -1 // float unset
+
 /* EMS UART transfer status */
 typedef enum {
     EMS_RX_IDLE,
@@ -103,21 +109,21 @@ typedef struct {
  */
 typedef struct {
     // UBAParameterWW
-    bool    wWActivated;   // Warm Water activated
+    uint8_t wWActivated;   // Warm Water activated
     uint8_t wWSelTemp;     // Warm Water selected temperature
-    bool    wWCircPump;    // Warm Water circulation pump Available
+    uint8_t wWCircPump;    // Warm Water circulation pump Available
     uint8_t wWDesiredTemp; // Warm Water desired temperature
 
     // UBAMonitorFast
     uint8_t selFlowTemp; // Selected flow temperature
     float   curFlowTemp; // Current flow temperature
     float   retTemp;     // Return temperature
-    bool    burnGas;     // Gas on/off
-    bool    fanWork;     // Fan on/off
-    bool    ignWork;     // Ignition on/off
-    bool    heatPmp;     // Circulating pump on/off
-    bool    wWHeat;      // 3-way valve on WW
-    bool    wWCirc;      // Circulation on/off
+    uint8_t burnGas;     // Gas on/off
+    uint8_t fanWork;     // Fan on/off
+    uint8_t ignWork;     // Ignition on/off
+    uint8_t heatPmp;     // Circulating pump on/off
+    uint8_t wWHeat;      // 3-way valve on WW
+    uint8_t wWCirc;      // Circulation on/off
     uint8_t selBurnPow;  // Burner max power
     uint8_t curBurnPow;  // Burner current power
     float   flameCurr;   // Flame current in micro amps
@@ -135,7 +141,7 @@ typedef struct {
     float    wWCurTmp;  // Warm Water current temperature:
     uint32_t wWStarts;  // Warm Water # starts
     uint32_t wWWorkM;   // Warm Water # minutes
-    bool     wWOneTime; // Warm Water one time function on/off
+    uint8_t  wWOneTime; // Warm Water one time function on/off
 } _EMS_Boiler;
 
 // RC20 data
@@ -173,8 +179,8 @@ typedef struct {
 #define COLOR_MAGENTA "\x1B[0;35m"
 #define COLOR_CYAN "\x1B[0;36m"
 #define COLOR_WHITE "\x1B[0;37m"
-#define COLOR_BOLD_ON "\x1B[1m"   // 1
-#define COLOR_BOLD_OFF "\x1B[21m" // 21
+#define COLOR_BOLD_ON "\x1B[1m"
+#define COLOR_BOLD_OFF "\x1B[21m"
 
 // function definitions
 extern void ems_parseTelegram(uint8_t * telegram, uint8_t len);
@@ -185,12 +191,14 @@ void        ems_setThermostatMode(uint8_t mode);
 void        ems_setWarmWaterTemp(uint8_t temperature);
 void        ems_setWarmWaterActivated(bool activated);
 
-void             ems_setPoll(bool b);
-bool             ems_getPoll();
-bool             ems_getThermostatEnabled();
-void             ems_setThermostatEnabled(bool b);
-_EMS_SYS_LOGGING ems_getLogging();
+void ems_setPoll(bool b);
+bool ems_getPoll();
+
+bool ems_getThermostatEnabled();
+void ems_setThermostatEnabled(bool b);
+
 void             ems_setLogging(_EMS_SYS_LOGGING loglevel);
+_EMS_SYS_LOGGING ems_getLogging();
 
 // private functions
 uint8_t _crcCalculator(uint8_t * data, uint8_t len);
@@ -202,7 +210,6 @@ void    _debugPrintPackage(const char * prefix, uint8_t * data, uint8_t len, con
 // helper functions
 float    _toFloat(uint8_t i, uint8_t * data);
 uint16_t _toLong(uint8_t i, uint8_t * data);
-char *   _float_to_char(char * a, float f, uint8_t precision = 1);
 
 // global so can referenced in other classes
 extern _EMS_Sys_Status EMS_Sys_Status;
