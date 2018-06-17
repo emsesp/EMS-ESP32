@@ -619,11 +619,12 @@ void systemCheck() {
 
 // calls to get data from EMS for the types that aren't sent as broadcasts
 // number of calls is defined in MAX_MANUAL_CALLS
+// it's done sequentially with a count since we don't queue sends (there's really no point)
 void regularUpdates() {
     uint8_t cycle = (regularUpdatesCount++ % MAX_MANUAL_CALLS);
 
     if ((cycle == 0) && Boiler_Status.thermostat_enabled) {
-        ems_doReadCommand(EMS_TYPE_RC20Temperature); // to get the thermostat mode which is not broadcasted
+        ems_doReadCommand(EMS_TYPE_RC20Temperature); // to force get the thermostat mode which is not broadcasted
     } else if (cycle == 1) {
         ems_doReadCommand(EMS_TYPE_UBAParameterWW); // get Warm Water values
     }

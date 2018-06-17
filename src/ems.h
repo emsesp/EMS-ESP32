@@ -38,8 +38,8 @@
 // Thermostat...
 #define EMS_TYPE_RC20StatusMessage 0x91 // is an automatic thermostat broadcast
 #define EMS_TYPE_RC20Time 0x06          // is an automatic thermostat broadcast
+#define EMS_TYPE_RCTempMessage 0xA3     // is an automatic thermostat broadcast
 #define EMS_TYPE_RC20Temperature 0xA8
-#define EMS_TYPE_RCOutdoorTempMessage 0xA3
 #define EMS_TYPE_Version 0x02 // version of the controller
 
 // Offsets for specific values in a telegram, per type, used for validation
@@ -206,10 +206,6 @@ void    _processType(uint8_t * telegram, uint8_t length);
 void    _initTxBuffer();
 void    _buildTxTelegram(uint8_t data_value);
 void    _debugPrintPackage(const char * prefix, uint8_t * data, uint8_t len, const char * color);
-
-// helper functions
-float    _toFloat(uint8_t i, uint8_t * data);
-uint16_t _toLong(uint8_t i, uint8_t * data);
 
 // global so can referenced in other classes
 extern _EMS_Sys_Status EMS_Sys_Status;

@@ -26,7 +26,7 @@ _EMS_Sys_Status EMS_Sys_Status; // EMS Status
 _EMS_TxTelegram EMS_TxTelegram; // Empty buffer for sending telegrams
 
 // and call backs
-#define MAX_TYPECALLBACK 12 // make sure it matches the #types you have
+#define MAX_TYPECALLBACK 13 // make sure it matches the #types you have
 // callbacks per type
 bool _process_UBAMonitorFast(uint8_t * data, uint8_t length);
 bool _process_UBAMonitorSlow(uint8_t * data, uint8_t length);
@@ -35,6 +35,7 @@ bool _process_UBAParameterWW(uint8_t * data, uint8_t length);
 bool _process_RC20StatusMessage(uint8_t * data, uint8_t length);
 bool _process_RC20Time(uint8_t * data, uint8_t length);
 bool _process_RC20Temperature(uint8_t * data, uint8_t length);
+bool _process_RCTempMessage(uint8_t * data, uint8_t length);
 bool _process_Version(uint8_t * data, uint8_t length);
 
 const _EMS_Types EMS_Types[MAX_TYPECALLBACK] =
@@ -50,6 +51,7 @@ const _EMS_Types EMS_Types[MAX_TYPECALLBACK] =
      {EMS_ID_THERMOSTAT, EMS_TYPE_RC20StatusMessage, "RC20StatusMessage", _process_RC20StatusMessage},
      {EMS_ID_THERMOSTAT, EMS_TYPE_RC20Time, "RC20Time", _process_RC20Time},
      {EMS_ID_THERMOSTAT, EMS_TYPE_RC20Temperature, "RC20Temperature", _process_RC20Temperature},
+     {EMS_ID_THERMOSTAT, EMS_TYPE_RCTempMessage, "RCTempMessage", _process_RCTempMessage},
      {EMS_ID_THERMOSTAT, EMS_TYPE_Version, "Version", _process_Version}};
 
 // reserve space for the data we collect from the Boiler and Thermostat
@@ -201,6 +203,19 @@ uint8_t _crcCalculator(uint8_t * data, uint8_t len) {
     }
 
     return crc;
+}
+
+// function to turn a telegram int (2 bytes) to a float
+float _toFloat(uint8_t i, uint8_t * data) {
+    if ((data[i] == 0x80) && (data[i + 1] == 0)) // 0x8000 is used when sensor is missing
+        return (float)-1;                        // return -1 to indicate that is unknown
+
+    return ((float)(((data[i] << 8) + data[i + 1]))) / 10;
+}
+
+// function to turn a telegram long (3 bytes) to a long int
+uint16_t _toLong(uint8_t i, uint8_t * data) {
+    return (((data[i]) << 16) + ((data[i + 1]) << 8) + (data[i + 2]));
 }
 
 // debug print a telegram to telnet console
@@ -574,6 +589,16 @@ bool _process_RC20Temperature(uint8_t * data, uint8_t length) {
 }
 
 /*
+ * RC20OutdoorTempMessage - type 0xa3 - for external temp settings from the the RC* thermostats
+ */
+bool _process_RCTempMessage(uint8_t * data, uint8_t length) {
+    // add support here if you're reading external sensors
+
+    return true;
+}
+
+
+/*
  * Version - type 0x02 - get the version of the Thermostat firmware
  * We don't bother storing these values anywhere
  */
@@ -758,17 +783,4 @@ void ems_setWarmWaterActivated(bool activated) {
     // 0xFF is on, 0x00 is off
     EMS_TxTelegram.checkValue = (activated ? 0xFF : 0x00);
     _buildTxTelegram(EMS_TxTelegram.checkValue);
-}
-
-// function to turn a telegram int (2 bytes) to a float
-float _toFloat(uint8_t i, uint8_t * data) {
-    if ((data[i] == 0x80) && (data[i + 1] == 0)) // 0x8000 is used when sensor is missing
-        return (float)-1;                        // return -1 to indicate that is unknown
-
-    return ((float)(((data[i] << 8) + data[i + 1]))) / 10;
-}
-
-// function to turn a telegram long (3 bytes) to a long int
-uint16_t _toLong(uint8_t i, uint8_t * data) {
-    return (((data[i]) << 16) + ((data[i + 1]) << 8) + (data[i + 2]));
 }

@@ -173,10 +173,11 @@ The Boiler (ID 0x08) will send out these broadcast telegrams regularly:
 
 And a thermostat (ID 0x17 for a RC20) would broadcast these messages regularly:
 
-| Type | Description       | Comment                     | Frequency    |
-| ---- | ----------------- | --------------------------- | ------------ |
-| 0x06 | RC20Time          | time and date on thermostat | every minute |  |
-| 0x91 | RC20StatusMessage | thermostat mode             | every minute |
+| Type | Description            | Comment                     | Frequency    |
+| ---- | ---------------------- | --------------------------- | ------------ |
+| 0x06 | RC20Time               | time and date on thermostat | every minute |
+| 0x91 | RC20StatusMessage      | thermostat mode             | every minute |
+| 0xA3 | RC20OutdoorTempMessage | external sensors            | every minute |
 
 Refer to the code in `ems.cpp` for further explanation on how to parse these message types and also reference the EMS Wiki.
 
@@ -219,12 +220,11 @@ The code is built on the Arduino framework and is dependent on these external li
 | Boiler (0x08)     | 0x15 | UBAMaintenanceSettingsMessage |                                          |
 | Boiler (0x08)     | 0x16 | UBAParametersMessage          |                                          |
 | Thermostat (0x17) | 0xA8 | RC20Temperature               | sets temperature and operating modes     |
-| Thermostat (0x17) | 0xA3 | RCOutdoorTempMessage          |                                          |
 | Thermostat (0x17) | 0x02 | Version                       | reads Version major/minor                |
 
 In `boiler.ino` you can make calls to automatically send these read commands. See the function *regularUpdates()*
 
-Note the thermostat types are based on a RC20 model thermostat. If using an RC30/RC35 use types 0x3E and 0x48 to read the values.
+Note when reading the temperature values from a non RC20 thermostat like the RC30 or RC35 you will need to query types 0x3E (Monitor HC1) and 0x48 (Monitor HC2) instead of from 0xA8. This is because they have two heating circuits and this will give you the current room selected temperature and specific values for summer, holiday, pause and day modes. Furthermore to get more information on those actual temperature settings and modes use WorkingMode types 0x3D and 0x47 respectively. Consult the wiki documentation for the data format.
 
 ### Customizing the code
 
