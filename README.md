@@ -44,7 +44,7 @@ There are 3 parts to this project, first the design of the circuit, second the c
 
 My original intention for this home project with to build my own smart thermostat for my Nefit Trendline boiler and then have it controlled via [Home Assistant](https://www.home-assistant.io/) on my mobile phone. I had a few ESP32s and ESP8266s lying around from previous IoT projects and building a specific circuit to decode the EMS messages was a nice challenge into more complex electronic circuits. I then began adding new features such as timing how long the shower was running for and triggering an alarm (actually a shot of cold water!) after a certain duration.
 
-Acknowledgments and muchos kudos to the following people and their open-sourced projects:
+Acknowledgments and kudos to the following people and their open-sourced projects:
 
  **susisstrolch** - Probably the first working version of the EMS bridge circuit I could find designed for the ESP8266. I borrowed Juergen's [schematic](https://github.com/susisstrolch/EMS-ESP12) and parts of his code logic.
 
@@ -64,7 +64,7 @@ I've tested the code and circuit with a few ESP8266 development boards such as t
 
 1. Either build the circuit below or purchase a ready built board from bbqkees via his [GitHub](https://github.com/bbqkees/Nefit-Buderus-EMS-bus-Arduino-Domoticz) page or the [Domoticz forum](http://www.domoticz.com/forum/viewtopic.php?f=22&t=22079&start=20).
 2. Get an ESP8266 dev board and connect the 2 EMS output lines from the boiler to the circuit and the Rx/Tx out to pins D7 and D8 on the ESP. The EMS connection can either be the 12-15V AC direct from the thermostat bus line or from the 3.5" Service Jack at the front. Again bbqkees has a nice explanation [here](https://github.com/bbqkees/Nefit-Buderus-EMS-bus-Arduino-Domoticz/tree/master/Documentation).
-3. Optionally connect the three LEDs to show Rx and Tx traffic and Error codes to pins D1, D2, D3 respectively. I use 220 Ohm pull-down resistors. These pins are configurable in ``boiler.ino``. This is furtherr explained in the **code** section below.
+3. Optionally connect the three LEDs to show Rx and Tx traffic and Error codes to pins D1, D2, D3 respectively. I use 220 Ohm pull-down resistors. These pins are configurable in ``boiler.ino``. This is further explained in the **code** section below.
 4. Build and upload the firmware to the ESP8266 device. I used Platformio with Visual Studio. Do make sure you set the MQTT and WiFi credentials correctly and if you're not using MQTT leave the MQTT_IP blank. The firmware supports OTA too with the default hostname as 'boiler' (or 'boiler.' depending on your OS and how the mdns resolves hostnames).
 5. Power the ESP either via USB or direct into the 5v vin pin from an external power 5V volts supply with min 400mA.
 6. Attach the 3v3 out on the ESP8266 to the DC power line on the EMS circuit as indicated in the schematics.
@@ -161,23 +161,23 @@ Polling is also the trigger to start transmitting any packages queued for sendin
 
 When a device is broadcasting to everyone there is no specific destination needed. `[dest]` is always 0x00.
 
-The Boiler (ID 0x08) will send out these broadcast telegrams regularly:
+The tables below shows which types are broadcasted regularly by the boiler (ID 0x08) and thermostat (ID 0x17). The **data length** is excluding the 4 byte header and CRC and the **Name** references those in the [ems wiki](https://emswiki.thefischer.net/doku.php?id=wiki:ems:telegramme).
 
-| Type | Description (see [here](https://emswiki.thefischer.net/doku.php?id=wiki:ems:telegramme)) | Data length (excluding header) | Frequency    |
-| ---- | ---------------------------------------------------------------------------------------- | ------------------------------ | ------------ |
-| 0x34 | UBAMonitorWWMessage                                                                      | 19 bytes                       | 10 seconds   |
-| 0x18 | UBAMonitorFast                                                                           | 25 bytes                       | 10 seconds   |
-| 0x19 | UBAMonitorSlow                                                                           | 22 bytes                       | every minute |
-| 0x1C | UBAWartungsmelding                                                                       | 27 bytes                       | every minute |
-| 0x2A | status, specific to boiler type                                                          | -                              | 10 seconds   |
+| Source (ID)   | Type ID | Name                | Description                            | Data length | Frequency  |
+| ------------- | ------- | ------------------- | -------------------------------------- | ----------- | ---------- |
+| Boiler (0x08) | 0x34    | UBAMonitorWWMessage | warm water temperature                 | 19 bytes    | 10 seconds |
+| Boiler (0x08) | 0x18    | UBAMonitorFast      | boiler temps, power, gas/pump switches | 25 bytes    | 10 seconds |
+| Boiler (0x08) | 0x19    | UBAMonitorSlow      | boiler temp and timings                | 22 bytes    | 60 seconds |
+| Boiler (0x08) | 0x1C    | UBAWartungsmelding  | maintenance messages                   | 27 bytes    | 60 seconds |
+| Boiler (0x08) | 0x2A    | n/a                 | status, specific to boiler type        | 21 bytes    | 10 seconds |
+| Boiler (0x08) | 0x07    | n/a                 | ?                                      | 21 bytes    | 30 seconds |
 
-And a thermostat (ID 0x17 for a RC20) would broadcast these messages regularly:
 
-| Type | Description            | Comment                     | Frequency    |
-| ---- | ---------------------- | --------------------------- | ------------ |
-| 0x06 | RC20Time               | time and date on thermostat | every minute |
-| 0x91 | RC20StatusMessage      | thermostat mode             | every minute |
-| 0xA3 | RC20OutdoorTempMessage | external sensors            | every minute |
+| Source (ID)       | Type ID | Name              | Description                                         | Frequency  |
+| ----------------- | ------- | ----------------- | --------------------------------------------------- | ---------- |
+| Thermostat (0x17) | 0x06    | RC20Time          | returns time and date on the thermostat             | 60 seconds |
+| Thermostat (0x17) | 0x91    | RC20StatusMessage | returns current and set temperatures                | 60 seconds |
+| Thermostat (0x17) | 0xA3    | RCTempMessage     | returns temp values from external (outdoor) sensors | 60 seconds |
 
 Refer to the code in `ems.cpp` for further explanation on how to parse these message types and also reference the EMS Wiki.
 
@@ -213,14 +213,14 @@ The code is built on the Arduino framework and is dependent on these external li
 
 `ems.cpp` defines callback functions that handle all the broadcast types listed above (e.g. 0x34, 0x18, 0x19 etc) plus these extra types:
 
-| Device (ID)       | Type | Description                   | What                                     |
-| ----------------- | ---- | ----------------------------- | ---------------------------------------- |
-| Boiler (0x08)     | 0x33 | UBAParameterWW                | reads selected & desired warm water temp |
-| Boiler (0x08)     | 0x14 | UBATotalUptimeMessage         |                                          |
-| Boiler (0x08)     | 0x15 | UBAMaintenanceSettingsMessage |                                          |
-| Boiler (0x08)     | 0x16 | UBAParametersMessage          |                                          |
-| Thermostat (0x17) | 0xA8 | RC20Temperature               | sets temperature and operating modes     |
-| Thermostat (0x17) | 0x02 | Version                       | reads Version major/minor                |
+| Source (ID)       | Type ID | Name                          | Description                              |
+| ----------------- | ------- | ----------------------------- | ---------------------------------------- |
+| Boiler (0x08)     | 0x33    | UBAParameterWW                | reads selected & desired warm water temp |
+| Boiler (0x08)     | 0x14    | UBATotalUptimeMessage         |                                          |
+| Boiler (0x08)     | 0x15    | UBAMaintenanceSettingsMessage |                                          |
+| Boiler (0x08)     | 0x16    | UBAParametersMessage          |                                          |
+| Thermostat (0x17) | 0xA8    | RC20Temperature               | sets operating modes                     |
+| Thermostat (0x17) | 0x02    | Version                       | reads Version major/minor                |
 
 In `boiler.ino` you can make calls to automatically send these read commands. See the function *regularUpdates()*
 
@@ -422,10 +422,10 @@ pre-baked firmwares for some ESP8266 devices based on ESPurna are available in t
 2. Install the ESPTool by running `pip install esptool` from a command prompt
 3. Connect the ESP via USB, figure out the COM port
 4. run `esptool.py -p <com> write_flash 0x00000 <firmware>` where firmware is the `.bin` file and \<com\> is the COM port, e.g. `COM3`
-5. Connect using WiFi from a phone or PC to the "**ESPURNA_XXXXXX**" network. Pasword is '**fibonacci**'
+5. Connect using WiFi from a phone or PC to the "**ESPURNA_XXXXXX**" network. Password is '**fibonacci**'
 6. Once connected browse to "http://192.168.4.1" and setup your wifi, mqtt etc
 
-Again, if you run into problems read [this](https://github.com/xoseperez/espurna/wiki/Configuration) from ESPurna's configuation help page.
+Again, if you run into problems read [this](https://github.com/xoseperez/espurna/wiki/Configuration) from ESPurna's configuration help page.
 
 ### Using the Arduino IDE
 
