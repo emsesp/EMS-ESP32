@@ -30,3 +30,6 @@ build_flags = ${common.build_flags} ${common.build_flags_custom}
 upload_speed = 921600
 ; comment out next line if using USB and not OTA
 upload_port = "boiler."
+;upload_port = "boiler"
+;upload_port = "boiler.local"
+
