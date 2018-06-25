@@ -23,6 +23,7 @@ There are 3 parts to this project, first the design of the circuit, second the c
     - [EMS Reading and Writing](#ems-reading-and-writing)
   - [The source code](#the-source-code)
     - [Supported EMS Types](#supported-ems-types)
+      - [Support for RC35 type Thermostats](#support-for-rc35-type-thermostats)
     - [Customizing the code](#customizing-the-code)
     - [Using MQTT](#using-mqtt)
     - [The basic shower logic](#the-basic-shower-logic)
@@ -30,7 +31,7 @@ There are 3 parts to this project, first the design of the circuit, second the c
     - [configuration.yaml](#configurationyaml)
     - [sensors.yaml](#sensorsyaml)
     - [automations.yaml](#automationsyaml)
-    - [input_number.yaml](#input_numberyaml)
+    - [input_number.yaml](#inputnumberyaml)
     - [groups.yaml](#groupsyaml)
   - [Building the firmware](#building-the-firmware)
     - [Using PlatformIO Standalone](#using-platformio-standalone)
@@ -224,7 +225,13 @@ The code is built on the Arduino framework and is dependent on these external li
 
 In `boiler.ino` you can make calls to automatically send these read commands. See the function *regularUpdates()*
 
-Note when reading the temperature values from a non RC20 thermostat like the RC30 or RC35 you will need to query types 0x3E (Monitor HC1) and 0x48 (Monitor HC2) instead of from 0xA8. This is because they have two heating circuits and this will give you the current room selected temperature and specific values for summer, holiday, pause and day modes. Furthermore to get more information on those actual temperature settings and modes use WorkingMode types 0x3D and 0x47 respectively. Consult the wiki documentation for the data format.
+#### Support for RC35 type Thermostats
+
+An RC35 thermostat has 4 heating circuits. To read the values use the Monitor type IDs (e.g. 0x3E, 0x48, etc). The mode (0=night, 1=day, 2=holiday) is the first byte of the telegram and the temperature is the value of the 2nd byte divided by 2.
+
+Then to set temperature values use the Working Mode with type IDs (0x3D, 0x47,0x51 and 0x5B) respectively. Set the offset (byte 4 of the header) to determine which temperature you're changing; 1 for night, 2 for day and 3 for holiday. The data value is the desired temperature multiplied by 2 as a single byte.
+
+Consult the wiki documentation for the data format.
 
 ### Customizing the code
 
