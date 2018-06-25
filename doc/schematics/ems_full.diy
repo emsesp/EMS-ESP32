@@ -1320,7 +1320,7 @@
     <org.diylc.components.semiconductors.TransistorTO92>
       <name>T2</name>
       <alpha>127</alpha>
-      <value>BC547N</value>
+      <value>BC547B</value>
       <orientation>_180</orientation>
       <controlPoints>
         <java.awt.Point x="1.2" y="1.9"/>
@@ -1892,23 +1892,23 @@
       <font>
         <attributes>
           <entry>
-            <awt-text-attribute>superscript</awt-text-attribute>
-            <null/>
+            <awt-text-attribute>size</awt-text-attribute>
+            <float>14.0</float>
           </entry>
           <entry>
             <awt-text-attribute>width</awt-text-attribute>
             <null/>
           </entry>
           <entry>
-            <awt-text-attribute>size</awt-text-attribute>
-            <float>14.0</float>
+            <awt-text-attribute>posture</awt-text-attribute>
+            <null/>
           </entry>
           <entry>
             <awt-text-attribute>transform</awt-text-attribute>
             <null/>
           </entry>
           <entry>
-            <awt-text-attribute>posture</awt-text-attribute>
+            <awt-text-attribute>superscript</awt-text-attribute>
             <null/>
           </entry>
           <entry>
@@ -1938,23 +1938,23 @@
       <font>
         <attributes>
           <entry>
-            <awt-text-attribute>superscript</awt-text-attribute>
-            <null/>
+            <awt-text-attribute>size</awt-text-attribute>
+            <float>14.0</float>
           </entry>
           <entry>
             <awt-text-attribute>width</awt-text-attribute>
             <null/>
           </entry>
           <entry>
-            <awt-text-attribute>size</awt-text-attribute>
-            <float>14.0</float>
+            <awt-text-attribute>posture</awt-text-attribute>
+            <null/>
           </entry>
           <entry>
             <awt-text-attribute>transform</awt-text-attribute>
             <null/>
           </entry>
           <entry>
-            <awt-text-attribute>posture</awt-text-attribute>
+            <awt-text-attribute>superscript</awt-text-attribute>
             <null/>
           </entry>
           <entry>
@@ -1989,23 +1989,23 @@
       <font>
         <attributes>
           <entry>
-            <awt-text-attribute>superscript</awt-text-attribute>
-            <null/>
+            <awt-text-attribute>size</awt-text-attribute>
+            <float>14.0</float>
           </entry>
           <entry>
             <awt-text-attribute>width</awt-text-attribute>
             <null/>
           </entry>
           <entry>
-            <awt-text-attribute>size</awt-text-attribute>
-            <float>14.0</float>
+            <awt-text-attribute>posture</awt-text-attribute>
+            <null/>
           </entry>
           <entry>
             <awt-text-attribute>transform</awt-text-attribute>
             <null/>
           </entry>
           <entry>
-            <awt-text-attribute>posture</awt-text-attribute>
+            <awt-text-attribute>superscript</awt-text-attribute>
             <null/>
           </entry>
           <entry>
@@ -2040,23 +2040,23 @@
       <font>
         <attributes>
           <entry>
-            <awt-text-attribute>superscript</awt-text-attribute>
-            <null/>
+            <awt-text-attribute>size</awt-text-attribute>
+            <float>14.0</float>
           </entry>
           <entry>
             <awt-text-attribute>width</awt-text-attribute>
             <null/>
           </entry>
           <entry>
-            <awt-text-attribute>size</awt-text-attribute>
-            <float>14.0</float>
+            <awt-text-attribute>posture</awt-text-attribute>
+            <null/>
           </entry>
           <entry>
             <awt-text-attribute>transform</awt-text-attribute>
             <null/>
           </entry>
           <entry>
-            <awt-text-attribute>posture</awt-text-attribute>
+            <awt-text-attribute>superscript</awt-text-attribute>
             <null/>
           </entry>
           <entry>
@@ -2091,23 +2091,23 @@
       <font>
         <attributes>
           <entry>
-            <awt-text-attribute>superscript</awt-text-attribute>
-            <null/>
+            <awt-text-attribute>size</awt-text-attribute>
+            <float>14.0</float>
           </entry>
           <entry>
             <awt-text-attribute>width</awt-text-attribute>
             <null/>
           </entry>
           <entry>
-            <awt-text-attribute>size</awt-text-attribute>
-            <float>14.0</float>
+            <awt-text-attribute>posture</awt-text-attribute>
+            <null/>
           </entry>
           <entry>
             <awt-text-attribute>transform</awt-text-attribute>
             <null/>
           </entry>
           <entry>
-            <awt-text-attribute>posture</awt-text-attribute>
+            <awt-text-attribute>superscript</awt-text-attribute>
             <null/>
           </entry>
           <entry>
@@ -2142,24 +2142,24 @@
       <font>
         <attributes>
           <entry>
-            <awt-text-attribute>superscript</awt-text-attribute>
-            <null/>
+            <awt-text-attribute>size</awt-text-attribute>
+            <float>14.0</float>
           </entry>
           <entry>
             <awt-text-attribute>width</awt-text-attribute>
             <null/>
           </entry>
           <entry>
-            <awt-text-attribute>size</awt-text-attribute>
-            <float>14.0</float>
+            <awt-text-attribute>posture</awt-text-attribute>
+            <float>0.2</float>
           </entry>
           <entry>
             <awt-text-attribute>transform</awt-text-attribute>
             <null/>
           </entry>
           <entry>
-            <awt-text-attribute>posture</awt-text-attribute>
-            <float>0.2</float>
+            <awt-text-attribute>superscript</awt-text-attribute>
+            <null/>
           </entry>
           <entry>
             <awt-text-attribute>family</awt-text-attribute>
@@ -2193,24 +2193,24 @@
       <font>
         <attributes>
           <entry>
-            <awt-text-attribute>superscript</awt-text-attribute>
-            <null/>
+            <awt-text-attribute>size</awt-text-attribute>
+            <float>14.0</float>
           </entry>
           <entry>
             <awt-text-attribute>width</awt-text-attribute>
             <null/>
           </entry>
           <entry>
-            <awt-text-attribute>size</awt-text-attribute>
-            <float>14.0</float>
+            <awt-text-attribute>posture</awt-text-attribute>
+            <float>0.2</float>
           </entry>
           <entry>
             <awt-text-attribute>transform</awt-text-attribute>
             <null/>
           </entry>
           <entry>
-            <awt-text-attribute>posture</awt-text-attribute>
-            <float>0.2</float>
+            <awt-text-attribute>superscript</awt-text-attribute>
+            <null/>
           </entry>
           <entry>
             <awt-text-attribute>family</awt-text-attribute>
@@ -2244,23 +2244,23 @@
   <font>
     <attributes>
       <entry>
-        <awt-text-attribute>superscript</awt-text-attribute>
-        <null/>
+        <awt-text-attribute>size</awt-text-attribute>
+        <float>14.0</float>
       </entry>
       <entry>
         <awt-text-attribute>width</awt-text-attribute>
         <null/>
       </entry>
       <entry>
-        <awt-text-attribute>size</awt-text-attribute>
-        <float>14.0</float>
+        <awt-text-attribute>posture</awt-text-attribute>
+        <null/>
       </entry>
       <entry>
         <awt-text-attribute>transform</awt-text-attribute>
         <null/>
       </entry>
       <entry>
-        <awt-text-attribute>posture</awt-text-attribute>
+        <awt-text-attribute>superscript</awt-text-attribute>
         <null/>
       </entry>
       <entry>
