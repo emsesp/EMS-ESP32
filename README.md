@@ -28,11 +28,6 @@ There are 3 parts to this project, first the design of the circuit, second the c
     - [Using MQTT](#using-mqtt)
     - [The basic shower logic](#the-basic-shower-logic)
   - [Home Assistant Configuration](#home-assistant-configuration)
-    - [configuration.yaml](#configurationyaml)
-    - [sensors.yaml](#sensorsyaml)
-    - [automations.yaml](#automationsyaml)
-    - [input_number.yaml](#inputnumberyaml)
-    - [groups.yaml](#groupsyaml)
   - [Building the firmware](#building-the-firmware)
     - [Using PlatformIO Standalone](#using-platformio-standalone)
     - [Using ESPurna](#using-espurna)
@@ -77,7 +72,7 @@ Use the telnet client to inform you of all activity and errors real-time. This i
 
 ![Telnet](doc/telnet/telnet_example.PNG)
 
-If you hit 'q' and Enter, it will toggle verbose logging showing you more detailed messages. I use ANSI colors with white text for info messages, green for well formatted telegram packages (which have validated CRC checks), red for corrupt packages and yellow for send responses.
+If you type 'v 2' and Enter, it will toggle verbose logging showing you more detailed messages. I use ANSI colors with white text for info messages, green for well formatted telegram packages (which have validated CRC checks), red for corrupt packages and yellow for send responses.
 
 ![Telnet](doc/telnet/telnet_verbose.PNG)
 
@@ -95,7 +90,7 @@ Commands can be issued directly to the EMS bus typing in a letter followed by an
 - **T** to toggle thermostat reading on/off
 - **S** to toggle the Shower Timer functionality on/off
 
-**Disclaimer: be careful when sending values to the boiler. If in doubt you can always reset the boiler to its original factory settings by following the instructions in the user guide. On my **Nefit Trendline HRC30** that is done by pressing the Home and Menu buttons simultaneously, selecting factory settings from the scroll menu and lastly pressing the Reset button.**
+**Disclaimer: be careful when sending values to the boiler. If in doubt you can always reset the boiler to its original factory settings by following the instructions in the user guide. On my **Nefit Trendline HRC30** that is done by holding down the Home and Menu buttons simultaneously for a few seconds, selecting factory settings from the scroll menu and lastly pressing the Reset button.**
 
 ## Building the circuit
 
@@ -200,6 +195,7 @@ The code is built on the Arduino framework and is dependent on these external li
 - Time http://playground.arduino.cc/code/time
 - PubSubClient http://pubsubclient.knolleary.net
 - ArduinoJson https://github.com/bblanchon/ArduinoJson
+- CRC32 https://github.com/bakercp/CRC32
 
 `emsuart.cpp` handles the low level UART read and write logic. You shouldn't need to touch this. All receive commands from the EMS bus are handled asynchronously using a circular buffer via an interrupt. A separate function processes the buffer and extracts the telegrams. Since we don't send too many write commands this is done sequentially. I couldn't use the standard Arduino Serial implementation because of the 11-bit break signal causes a frame-error which gets ignored.
 
@@ -248,7 +244,7 @@ I'm using the standard PubSubClient client so make sure you set `-DMQTT_MAX_PACK
 
 I run Mosquitto on my Raspberry PI 3 as the MQTT broker.
 
-The boiler data is collected and sent as a single JSON object to MQTT TOPIC `home/boiler/boiler_data`. Example payload:
+The boiler data is collected and sent as a single JSON object to MQTT TOPIC `home/boiler/boiler_data`. A hash is generated (CRC32 based) to determine if the payload has changed, otherwise don't send it. An example payload looks like:
 
 `{"wWCurTmp":"43.0","wWHeat":"on","curFlowTemp":"51.7","retTemp":"48.0","burnGas":"off","heatPmp":"off","fanWork":"off","ignWork":"off","wWCirc":"off","selBurnPow":"0","curBurnPow":"0","sysPress":"1.6","boilTemp":"54.7","pumpMod":"4"}`
 
@@ -266,112 +262,15 @@ There is other logic in the code to compensate for ramp up and whether the showe
 
 ## Home Assistant Configuration
 
-This is what my HA configuration currently looks like:
-
-### configuration.yaml
-
-    ...
-    automation: !include automations.yaml
-    input_number: !include input_number.yaml
-    group: !include groups.yaml
-    sensor: !include sensors.yaml
-
-### sensors.yaml
-
-    - platform: mqtt
-      state_topic: 'home/boiler/thermostat_currtemp'
-      name: 'Current Room Temperature'
-      unit_of_measurement: '°C'
-
-    - platform: mqtt
-      state_topic: 'home/boiler/thermostat_seltemp'
-      name: 'Current Set Temperature'
-      unit_of_measurement: '°C'
-
-    - platform: mqtt
-      state_topic: 'home/boiler/showertime'
-      name: 'Last shower duration'
-      force_update: true
-
-    - platform: template
-      sensors:
-        showertime_time:
-          value_template: '{{ as_timestamp(states.sensor.last_shower_duration.last_updated) | int | timestamp_custom("%-I:%M %P on %a %-d %b") }}'
-
-    - platform: mqtt
-      state_topic: 'home/boiler/boiler_data'
-      name: 'Warm Water current temperature'
-      unit_of_measurement: '°C'
-      value_template: '{{ value_json.wWCurTmp }}'
-
-      ..etc..etc
-
-### automations.yaml
-
-    - id: thermostat_temp
-      alias: 'Adjust Thermostat Temperature'
-      trigger:
-        platform: state
-        entity_id: input_number.thermostat_temp
-      action:
-        service: mqtt.publish
-        data_template:
-          topic: 'home/boiler/thermostat_temp'
-          payload: >
-            {{ states.input_number.thermostat_temp.state }}
-
-    - id: boiler_shower
-      alias: Alert shower time
-      trigger:
-        platform: mqtt
-        topic: home/boiler/showertime
-      action:
-        - service: notify.boiler_notify
-          data_template:
-            title: "Shower finished!"
-            message: 'Shower duration was {{trigger.payload}} at {{states.sensor.time.state}}'
-
-### input_number.yaml
-
-    thermostat_temp:
-      name: Set thermostat temperature
-      icon: mdi:temperature-celsius
-      min: 10
-      max: 25
-      step: 0.5
-      unit_of_measurement: "°C"
-      mode: slider
-
-### groups.yaml
-
-    boiler:
-    name: Boiler
-    view: no
-    entities:
-       - sensor.boiler_boottime
-       - sensor.warm_water_current_temperature
-       ..etc..etc..
-
-    shower:
-    name: Shower
-    view: no
-    entities:
-       - sensor.last_shower_duration
-       - sensor.showertime_time
-
-    thermostat:
-      name: Thermostat
-      view: no
-      entities:
-        - sensor.current_room_temperature
-        - sensor.current_set_temperature
-        - input_number.thermostat_temp
-
-And within Home Assistant it renders as:
+Within Home Assistant it renders as:
 
 ![Home Assistant panel)](doc/ha/ha.png)
 
+and the alerts on an iPhone/Android using PushBullet, PushOver or any notification service would look like:
+
 ![Home Assistant iPhone notify)](doc/ha/ha_notify.jpg)
+
+You can find the .yaml configuration files under `doc/ha`
 
 ## Building the firmware
 
@@ -440,7 +339,7 @@ Porting to the Arduino IDE can be a little tricky but it is possible.
 - Add the ESP8266 boards (from Preferences add Additional Board URL `http://arduino.esp8266.com/stable/package_esp8266com_index.json`)
 - Go to Boards Manager and install ESP8266 2.4.x platform
 - Select your ESP8266 from Tools->Boards and the correct port with Tools->Port
-- From the Library Manager install ArduinoJson 5.13.x, PubSubClient 2.6.x and Time
+- From the Library Manager install ArduinoJson 5.13.x, PubSubClient 2.6.x, CRC32 and Time
 - The Arduino IDE doesn't have a common way to set build flags (ugh!) so you'll need to un-comment these lines in `boiler.ino`:
 
 ```c
