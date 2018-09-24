@@ -713,7 +713,7 @@ void ems_doReadCommand(uint8_t type) {
     uint8_t dest = (i == -1 ? EMS_ID_BOILER : EMS_Types[i].src); // default is Boiler
 
     if (ems_getLogging() != EMS_SYS_LOGGING_NONE) {
-        if (i != -1) {
+        if (i == -1) {
             myDebug("Requesting type (0x%02x) from dest 0x%02x\n", type, dest);
         } else {
             myDebug("Requesting type %s(0x%02x) from dest 0x%02x\n", EMS_Types[i].typeString, type, dest);
