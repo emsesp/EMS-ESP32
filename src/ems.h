@@ -25,6 +25,7 @@
 #define EMS_ID_THERMOSTAT 0x17 // x17=RC20 (Moduline300), x10=RC30/RC35 (Moduline 400)
 
 // define here the EMS telegram types you need
+
 // Boiler...
 #define EMS_TYPE_UBAMonitorFast 0x18              // is an automatic monitor broadcast
 #define EMS_TYPE_UBAMonitorSlow 0x19              // is an automatic monitor broadcast
@@ -40,7 +41,7 @@
 #define EMS_TYPE_RC20Time 0x06          // is an automatic thermostat broadcast
 #define EMS_TYPE_RCTempMessage 0xA3     // is an automatic thermostat broadcast
 #define EMS_TYPE_RC20Temperature 0xA8
-#define EMS_TYPE_Version 0x02 // version of the controller
+#define EMS_TYPE_Version 0x02 // version of the UBA controller
 
 // Offsets for specific values in a telegram, per type, used for validation
 #define EMS_OFFSET_RC20Temperature_temp 0x1C       // thermostat set temp
@@ -190,6 +191,7 @@ void        ems_setThermostatTemp(float temp);
 void        ems_setThermostatMode(uint8_t mode);
 void        ems_setWarmWaterTemp(uint8_t temperature);
 void        ems_setWarmWaterActivated(bool activated);
+void        ems_setExperimental(uint8_t value);
 
 void ems_setPoll(bool b);
 bool ems_getPoll();
