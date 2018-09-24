@@ -70,14 +70,14 @@ I've tested the code and circuit with a few ESP8266 development boards such as t
 
 Use the telnet client to inform you of all activity and errors real-time. This is an example of the telnet output:
 
-![Telnet](doc/telnet/telnet_example.PNG)
+![Telnet](doc/telnet/telnet_example.png)
 
 If you type 'v 2' and Enter, it will toggle verbose logging showing you more detailed messages. I use ANSI colors with white text for info messages, green for well formatted telegram packages (which have validated CRC checks), red for corrupt packages and yellow for send responses.
 
-![Telnet](doc/telnet/telnet_verbose.PNG)
+![Telnet](doc/telnet/telnet_verbose.png)
 
 To see the current values of the Boiler and its parameters type 's' and hit Enter. Watch out for unsuccessful telegram packets in the #CrcErrors line.
-![Telnet](doc/telnet/telnet_stats.PNG)
+![Telnet](doc/telnet/telnet_stats.png)
 
 Commands can be issued directly to the EMS bus typing in a letter followed by an optional parameter and pressing Enter. Supported commands are:
 
