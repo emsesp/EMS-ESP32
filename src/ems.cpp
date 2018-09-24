@@ -15,7 +15,6 @@
 #include "debug.h"
 extern void debugSend(const char * format, ...);
 #define myDebug(...) debugSend(__VA_ARGS__)
-// #define myDebug(x, ...) DEBUG_MSG(x, ##__VA_ARGS__)
 #else
 #include <ESPHelper.h>
 extern ESPHelper myESP;
@@ -183,9 +182,16 @@ _EMS_SYS_LOGGING ems_getLogging() {
 }
 
 void ems_setLogging(_EMS_SYS_LOGGING loglevel) {
-    if (loglevel <= 2) {
+    if (loglevel <= EMS_SYS_LOGGING_VERBOSE) {
         EMS_Sys_Status.emsLogging = loglevel;
-        myDebug("Logging is set to %d\n", EMS_Sys_Status.emsLogging);
+        myDebug("System Logging is set to ");
+        if (loglevel == EMS_SYS_LOGGING_BASIC) {
+            myDebug("Basic\n");
+        } else if (loglevel == EMS_SYS_LOGGING_VERBOSE) {
+            myDebug("Verbose\n");
+        } else {
+            myDebug("None\n");
+        }
     }
 }
 
@@ -218,6 +224,24 @@ uint16_t _toLong(uint8_t i, uint8_t * data) {
     return (((data[i]) << 16) + ((data[i + 1]) << 8) + (data[i + 2]));
 }
 
+/*
+ * Find the pointer to the EMS_Types array for a given type ID
+ */
+int ems_findType(uint8_t type) {
+    uint8_t i         = 0;
+    bool    typeFound = false;
+    // scan through known ID types
+    while (i < MAX_TYPECALLBACK) {
+        if (EMS_Types[i].type == type) {
+            typeFound = true; // we have a match
+            break;
+        }
+        i++;
+    }
+
+    return (typeFound ? i : -1);
+}
+
 // debug print a telegram to telnet console
 // len is length in bytes including the CRC
 void _debugPrintTelegram(const char * prefix, uint8_t * data, uint8_t len, const char * color) {
@@ -231,8 +255,7 @@ void _debugPrintTelegram(const char * prefix, uint8_t * data, uint8_t len, const
         myDebug(COLOR_RED);
     }
 
-    time_t currentTime = now();
-    myDebug("[%02d:%02d:%02d] %s len=%d, data: ", hour(currentTime), minute(currentTime), second(currentTime), prefix, len);
+    myDebug("%s len=%d, data: ", prefix, len);
     for (int i = 0; i < len; i++) {
         myDebug("%02x ", data[i]);
     }
@@ -282,7 +305,8 @@ void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
             myDebug("Error! no send acknowledgement. Giving up.\n");
             _initTxBuffer();
         } else {
-            myDebug("Didn't receive acknowledgement so resending (attempt #%d/%d)...\n",
+            myDebug("Didn't receive acknowledgement from the 0x%02x, so resending (attempt #%d/%d)...\n",
+                    EMS_TxTelegram.type,
                     emsLastRxCount,
                     RX_READ_TIMEOUT_COUNT);
             EMS_Sys_Status.emsTxStatus = EMS_TX_PENDING; // set to pending will trigger sending the same package again
@@ -435,7 +459,7 @@ void _processType(uint8_t * telegram, uint8_t length) {
         sprintf(s, "%s %s, type 0x%02x", src_s, dest_s, type);
         _debugPrintTelegram(s, telegram, length, color_s);
         if (typeFound) {
-            myDebug("--> %s(0x%02x) received.\n", EMS_Types[i].typeString, type);
+            myDebug("<--- %s(0x%02x) received\n", EMS_Types[i].typeString, type);
         }
     }
 
@@ -452,17 +476,26 @@ void _processType(uint8_t * telegram, uint8_t length) {
             offset = 0;
         }
 
-        // get the data at the position we wrote too
-        // do compare, when validating we always return a single value
+        // look up the ID and fetch string
+        int i = ems_findType(EMS_TxTelegram.type);
+        if (i != -1) {
+            myDebug("---> %s(0x%02x) sent with value %d at offset %d ",
+                    EMS_Types[i].typeString,
+                    type,
+                    EMS_TxTelegram.checkValue,
+                    offset);
+        } else {
+            myDebug("---> ?(0x%02x) sent with value %d at offset %d ", type, EMS_TxTelegram.checkValue, offset);
+        }
+
+        // get the data at the position we wrote to and compare
+        // when validating we always return a single value
         if (EMS_TxTelegram.checkValue == data[offset]) {
-            myDebug("Last write operation successful (value=%d, offset=%d)\n", EMS_TxTelegram.checkValue, offset);
+            myDebug("(successful)\n");
             EMS_Sys_Status.emsRefreshed = true;        // flag this so values are sent back to HA via MQTT
             EMS_TxTelegram.action       = EMS_TX_NONE; // no more sends
         } else {
-            myDebug("Last write operation failed. (value=%d, got=%d, offset=%d)\n",
-                    EMS_TxTelegram.checkValue,
-                    data[offset],
-                    offset);
+            myDebug("(failed, received %d)\n", data[offset]);
         }
     }
 }
@@ -472,7 +505,9 @@ void _processType(uint8_t * telegram, uint8_t length) {
  */
 bool _checkWriteQueueFull() {
     if (EMS_Sys_Status.emsTxStatus == EMS_TX_PENDING) { // send is already pending
-        myDebug("Cannot write - already a telegram pending send.\n");
+        if (ems_getLogging() != EMS_SYS_LOGGING_NONE) {
+            myDebug("Holding write command as a telegram (type 0x%02x) is already in the queue\n", EMS_TxTelegram.type);
+        }
         return true;
     }
 
@@ -481,6 +516,7 @@ bool _checkWriteQueueFull() {
 
 /*
  * UBAParameterWW - type 0x33 - warm water parameters
+ * received only after requested
  */
 bool _process_UBAParameterWW(uint8_t * data, uint8_t length) {
     EMS_Boiler.wWSelTemp     = data[2];
@@ -495,6 +531,7 @@ bool _process_UBAParameterWW(uint8_t * data, uint8_t length) {
 
 /*
  * UBAMonitorWWMessage - type 0x34 - warm water monitor. 19 bytes long
+ * received every 10 seconds
  */
 bool _process_UBAMonitorWWMessage(uint8_t * data, uint8_t length) {
     EMS_Boiler.wWCurTmp  = _toFloat(1, data);
@@ -507,6 +544,7 @@ bool _process_UBAMonitorWWMessage(uint8_t * data, uint8_t length) {
 
 /*
  * UBAMonitorFast - type 0x18 - central heating monitor part 1 (25 bytes long)
+ * received every 10 seconds
  */
 bool _process_UBAMonitorFast(uint8_t * data, uint8_t length) {
     EMS_Boiler.selFlowTemp = data[0];
@@ -521,7 +559,7 @@ bool _process_UBAMonitorFast(uint8_t * data, uint8_t length) {
     EMS_Boiler.wWHeat  = bitRead(v, 6);
     EMS_Boiler.wWCirc  = bitRead(v, 7);
 
-    EMS_Boiler.selBurnPow = data[3];
+    EMS_Boiler.selBurnPow = data[3]; // max power
     EMS_Boiler.curBurnPow = data[4];
 
     EMS_Boiler.flameCurr = _toFloat(15, data);
@@ -537,6 +575,7 @@ bool _process_UBAMonitorFast(uint8_t * data, uint8_t length) {
 
 /*
  * UBAMonitorSlow - type 0x19 - central heating monitor part 2 (27 bytes long)
+ * received every 60 seconds
  */
 bool _process_UBAMonitorSlow(uint8_t * data, uint8_t length) {
     EMS_Boiler.extTemp     = _toFloat(0, data); // 0x8000 if not available
@@ -553,6 +592,7 @@ bool _process_UBAMonitorSlow(uint8_t * data, uint8_t length) {
 
 /*
  * RC20StatusMessage - type 0x91 - data from the RC20 thermostat (0x17) - 15 bytes long
+ * received every 60 seconds
  */
 bool _process_RC20StatusMessage(uint8_t * data, uint8_t length) {
     EMS_Thermostat.setpoint_roomTemp = ((float)data[1]) / (float)2;
@@ -565,6 +605,7 @@ bool _process_RC20StatusMessage(uint8_t * data, uint8_t length) {
 
 /*
  * RC20Temperature - type 0xa8 - for set temp value and mode from the RC20 thermostat (0x17)
+ * received only after requested
  */
 bool _process_RC20Temperature(uint8_t * data, uint8_t length) {
     // check if this was called specifically to validate a single value
@@ -658,9 +699,8 @@ void _buildTxTelegram(uint8_t data_value) {
 }
 
 /*
- * Send a command to Tx to Read from another device
- * Read commands when sent must to responded too by the destination (target) immediately
- * usually within a 10ms window
+ * Send a command to UART Tx to Read from another device
+ * Read commands when sent must respond by the destination (target) immediately (or within 10ms)
  */
 void ems_doReadCommand(uint8_t type) {
     if (type == EMS_TYPE_NONE)
@@ -669,27 +709,15 @@ void ems_doReadCommand(uint8_t type) {
     if (_checkWriteQueueFull())
         return; // check if there is already something in the queue
 
-    uint8_t dest;
+    int     i    = ems_findType(type);
+    uint8_t dest = (i == -1 ? EMS_ID_BOILER : EMS_Types[i].src); // default is Boiler
 
-    // scan through known types
-    bool typeFound = false;
-    int  i         = 0;
-    while (i < MAX_TYPECALLBACK) {
-        if (EMS_Types[i].type == type) {
-            typeFound = true; // we have a match
-            // call callback to fetch the values from the telegram
-            dest = EMS_Types[i].src;
-            break;
+    if (ems_getLogging() != EMS_SYS_LOGGING_NONE) {
+        if (i != -1) {
+            myDebug("Requesting type (0x%02x) from dest 0x%02x\n", type, dest);
+        } else {
+            myDebug("Requesting type %s(0x%02x) from dest 0x%02x\n", EMS_Types[i].typeString, type, dest);
         }
-        i++;
-    }
-
-    // for adhoc calls use default values
-    if (!typeFound) {
-        dest = EMS_ID_BOILER; // default is boiler
-        myDebug("Requesting type (0x%02x) from dest 0x%02x\n", type, dest);
-    } else {
-        myDebug("Requesting type %s(0x%02x) from dest 0x%02x\n", EMS_Types[i].typeString, type, dest);
     }
 
     EMS_TxTelegram.action = EMS_TX_READ;             // read command
@@ -783,4 +811,24 @@ void ems_setWarmWaterActivated(bool activated) {
     // 0xFF is on, 0x00 is off
     EMS_TxTelegram.checkValue = (activated ? 0xFF : 0x00);
     _buildTxTelegram(EMS_TxTelegram.checkValue);
+}
+
+/*
+ * experimental code for debugging - use with caution
+ */
+void ems_setExperimental(uint8_t value) {
+    if (_checkWriteQueueFull())
+        return; // check if there is already something in the queue
+
+    myDebug("Sending experimental code, value=%02x\n", value);
+
+    EMS_TxTelegram.action        = EMS_TX_WRITE;
+    EMS_TxTelegram.dest          = EMS_ID_BOILER;
+    EMS_TxTelegram.type          = EMS_TYPE_UBAParameterWW;
+    EMS_TxTelegram.offset        = 6;
+    EMS_TxTelegram.length        = EMS_MIN_TELEGRAM_LENGTH;
+    EMS_TxTelegram.type_validate = EMS_ID_NONE; // don't force a send to check the value but do it during next broadcast
+
+    EMS_TxTelegram.checkValue = value;
+    _buildTxTelegram(value);
 }
