@@ -34,6 +34,7 @@
 #define MQTT_NOTIFICATION MQTT_BASE "notification"
 #define MQTT_TOPIC_COMMAND "command"
 #define MQTT_TOPIC_START "start"
+#define MQTT_HA MQTT_BASE "ha"
 
 #define MAX_SUBSCRIPTIONS 25     // max # of subscriptions
 #define MAX_TIME_INACTIVE 600000 // Max time for inactivity (ms) - 10 mins

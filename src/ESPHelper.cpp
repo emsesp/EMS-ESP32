@@ -822,7 +822,7 @@ void ESPHelper::consoleProcessCommand() {
         resetESP();
     } else if (cmd == '&') {
         _verboseMessages = !_verboseMessages; // toggle
-        telnetClient.printf("Verbose messaging is %s\n", _verboseMessages ? "on" : "off");
+        telnetClient.printf("Verbose messaging is %s\n\r", _verboseMessages ? "on" : "off");
     } else {
         // custom Project commands
         if (_consoleCallbackProjectCmds) {
@@ -842,8 +842,7 @@ void ESPHelper::logger(log_level_t level, const char * message) {
         telnetClient.flush();
     } else if (level == LOG_HA) {
         char s[100];
-        sprintf(s, "%s: %s\n", _hostname,
-                message); // add new line, for the debug telnet printer
+        sprintf(s, "%s: %s\n", _hostname, message); // add new line, for the debug telnet printer
         publish(MQTT_NOTIFICATION, s, false);
     }
 
@@ -860,7 +859,7 @@ void ESPHelper::logger(log_level_t level, const char * message) {
 // send specific command to HA via MQTT
 // format is: home/<hostname>/command/<cmd>
 void ESPHelper::sendHACommand(const char * cmd) {
-    logger(LOG_CONSOLE, "Sending command to HA...");
+    //logger(LOG_CONSOLE, "Sending command to HA...");
 
     char s[100];
     sprintf(s, "%s%s/%s", MQTT_BASE, _hostname, MQTT_TOPIC_COMMAND);
@@ -871,7 +870,7 @@ void ESPHelper::sendHACommand(const char * cmd) {
 // send specific start command to HA via MQTT, which returns the boottime
 // format is: home/<hostname>/start
 void ESPHelper::sendStart() {
-    logger(LOG_CONSOLE, "Sending Start command to HA...");
+    //logger(LOG_CONSOLE, "Sending Start command to HA...");
 
     char s[100];
     sprintf(s, "%s%s/%s", MQTT_BASE, _hostname, MQTT_TOPIC_START);
