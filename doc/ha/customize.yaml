@@ -1,0 +1,12 @@
+     sensor.boiler_boottime:
+       friendly_name: Controller last restart
+       icon: mdi:clock-start
+
+     sensor.showertime_time:
+       friendly_name: 'Last shower at'
+       icon: mdi:timelapse
+
+     sensor.boiler_updated:
+       friendly_name: 'Data last received'
+       icon: mdi:clock-start
+

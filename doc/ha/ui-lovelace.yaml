@@ -1,0 +1,442 @@
+resources:
+  - url: /local/dual-gauge-card.js
+    type: js
+  - url: /local/tracker-card.js?v=0.1.4
+    type: js
+  - url: /local/custom-lovelace/monster-card/monster-card.js?v=0.2.3
+    type: js 
+  - url: /local/custom-lovelace/gauge-card/gauge-card.js
+    type: js 
+  - url: /local/custom-lovelace/bignumber-card/bignumber-card.js
+    type: js 
+  - url: /local/custom-lovelace/group-card/group-card.js
+    type: js 
+  - url: /local/custom-lovelace/thermostat-card/thermostat-card.js
+    type: module
+  - url: /local/button-card.js
+    type: module
+  - url: /local/dark-sky-weather-card.js
+    type: js
+  - url: /local/column-card.js
+    type: js
+
+title: Home
+views:
+  - title: home
+    cards:
+      - type: entities
+        title: Broadcast to Sonos
+        show_header_toggle: true
+        entities:
+          - input_text.sonos_speak
+          - input_select.speaker
+      - type: entities
+        title: DNS
+        show_header_toggle: true
+        entities:
+          - sensor.pihole_dns_queries_today
+          - sensor.pihole_ads_percentage_blocked_today
+          - sensor.pihole_ads_blocked_today
+      - type: entities
+        title: System
+        show_header_toggle: true
+        entities:
+          - sensor.current_ha_release
+          - sensor.glances_disk_used_2
+          - sensor.glances_ram_used
+          - sensor.last_boot
+          - sensor.glances_sleeping
+          - sensor.glances_total
+          - sensor.installed_ha_version
+          - sensor.glances_swap_free
+          - sensor.glances_disk_free
+          - sensor.glances_cpu_temp
+          - sensor.glances_disk_used
+          - sensor.glances_cpu_load
+          - sensor.glances_ram_used_2
+          - sensor.glances_ram_free
+          - sensor.glances_running
+          - sensor.glances_thread
+          - sensor.cpu_temp
+      - type: entities
+        title: People
+        show_header_toggle: true
+        entities:
+          - sensor.pauls_iphone_battery_level
+          - sensor.pauls_iphone_battery_state
+          - sensor.fleurs_iphone_battery_level
+          - sensor.fleurs_iphone_battery_state
+#     - type: entities
+#       title: Climate
+#       show_header_toggle: true
+#       entities:
+#         - sensor.dark_sky_humidity
+#         - sensor.dark_sky_summary
+#         - sensor.dark_sky_temperature
+#         - sensor.dark_sky_precip_intensity
+      - type: weather-forecast
+        name: Weather
+        entity: weather.yweather
+      - type: "custom:dark-sky-weather-card"
+        entity_sun: sun.sun
+#       entity_daily_summary: sensor.dark_sky_daily_summary
+#       entity_current_conditions: sensor.dark_sky_icon  
+#       entity_humidity: sensor.dark_sky_humidity
+#       entity_pressure: sensor.dark_sky_pressure
+#       entity_temperature: sensor.dark_sky_temperature
+#       entity_visibility: sensor.dark_sky_visibility
+#       entity_wind_bearing: sensor.dark_sky_wind_bearing
+#       entity_wind_speed: sensor.dark_sky_wind_speed
+#       entity_forecast_high_temp_1: sensor.dark_sky_daytime_high_temperature_1
+#       entity_forecast_high_temp_2: sensor.dark_sky_daytime_high_temperature_2
+#       entity_forecast_high_temp_3: sensor.dark_sky_daytime_high_temperature_3
+#       entity_forecast_high_temp_4: sensor.dark_sky_daytime_high_temperature_4
+#       entity_forecast_high_temp_5: sensor.dark_sky_daytime_high_temperature_5
+#       entity_forecast_low_temp_1: sensor.dark_sky_overnight_low_temperature
+#       entity_forecast_low_temp_2: sensor.dark_sky_overnight_low_temperature_1
+#       entity_forecast_low_temp_3: sensor.dark_sky_overnight_low_temperature_2
+#       entity_forecast_low_temp_4: sensor.dark_sky_overnight_low_temperature_3
+#       entity_forecast_low_temp_5: sensor.dark_sky_overnight_low_temperature_4
+#       entity_forecast_icon_1: sensor.dark_sky_icon_1
+
+  - title: Heating
+    cards:
+      - type: entities
+        title: Boiler
+        show_header_toggle: true
+        entities:
+          - sensor.boiler_boottime
+          - sensor.boiler_updated
+          - type: divider
+#          - sensor.warm_water_selected_temperature
+          - input_number.boiler_wwtemp
+          - sensor.warm_water_current_temperature
+          - sensor.warm_water_activated
+          - sensor.warm_water_3way_valve
+          - type: divider
+          - sensor.boiler_temperature
+          - sensor.return_temperature
+          - sensor.current_flow_temperature
+          - sensor.pump_modulation
+          - sensor.ignition
+          - sensor.gas
+          - sensor.fan
+          - sensor.boiler_pump
+          - sensor.system_pressure
+          - sensor.burner_max_power
+          - sensor.burner_current_power
+          
+      - type: vertical-stack
+        cards:
+        - type: entities
+          title: Shower Monitor
+          show_header_toggle: true
+          entities:
+            - switch.shower_timer
+            - switch.long_shower_alert
+            - type: divider
+            - sensor.last_shower_duration
+            - sensor.showertime_time
+        - type: custom:button-card
+#         color_type: card
+          color: auto
+          icon: mdi:shower-head
+          name: send a cold shot of shower water
+          style:
+            - text-transform: none
+            - color: rgb(28, 128, 199)
+            - font-weight: bold
+          entity: script.shower_coldshot
+          show_state: false
+            
+      - type: vertical-stack
+        cards:       
+        - type: entities
+          title: Thermostat
+          show_header_toggle: true
+          entities:
+            - sensor.current_room_temperature
+            - sensor.current_mode
+            - input_number.thermostat_temp
+#           - sensor.current_set_temperature
+        - type: history-graph
+          entities:
+            - sensor.current_room_temperature
+            - sensor.dark_sky_temperature
+#        - type: custom:dual-gauge-card
+#          title: Living room
+#          min: -20
+#          max: 40
+#          outer:
+#            entity: climate.thermostat
+#            attribute: current_temperature
+#            label: "Current"
+#            unit: "C"
+#          inner:
+#            entity: climate.thermostat
+#            label: "Target"
+#            attribute: temperature
+#            unit: "C"
+#          colors:
+#            - color: "var(--label-badge-red)"
+#              value: 27.5
+#            - color: "var(--label-badge-green)"
+#              value: 25
+#            - color: "var(--label-badge-yellow)"
+#              value: 18
+#            - color: "var(--label-badge-blue)"
+#              value: 0
+#            - color: "var(--paper-blue-400)"
+#              value: -40
+        - type: custom:thermostat-card
+          title: Living Room
+          entity: climate.thermostat
+          pending: 1
+          chevron_size: 50
+          no_card: false
+          hvac:
+            states:
+              'low': 'low'
+              'manual': 'manual'
+              'auto': 'auto'
+            attribute: operation_mode
+          highlight_tap: true
+  - title: Media
+    cards:
+      - type: media-control
+        entity: media_player.pf_bedroom
+      - type: media-control
+        entity: media_player.kitchen
+      - type: media-control
+        entity: media_player.tv
+      - type: media-control
+        entity: media_player.lounge
+      - type: entities
+        title: Kodi
+        show_header_toggle: false
+        entities:
+          - script.update_kodi_library
+          - script.clean_kodi_library
+      - type: media-control
+        entity: media_player.kodi
+  - title: Door bell
+    cards:
+      - type: entities
+        entities:
+          - sensor.doorbell_boottime
+      - type: entities
+        title: Door Bell
+        show_header_toggle: true
+        entities:
+          - sensor.ring_time
+          - sensor.ring_type
+          
+          
+  - title: Talking Clock
+    cards:
+    
+      - type: vertical-stack
+        cards:
+    
+        - type: entities
+          title: Talking Clock Settings
+          show_header_toggle: false
+          entities:
+            - sensor.talkingclock_boottime
+            - input_number.clock_sensitivity
+            - input_number.clock_displaymode
+            - sensor.temperature
+            - sensor.humidity
+            - switch.talkingclock_clockmode_switch
+            - input_datetime.nightmode_time
+          
+        - type: entities
+          title: Reset Alarms
+          show_header_toggle: true
+          entities:
+            - input_number.alarm_hour
+            - input_number.alarm_minutes
+            - sensor.alarmtime
+
+                    
+      - type: custom:column-card
+        cards:
+        
+          - type: horizontal-stack
+            cards:
+            - type: entities
+              entities:
+                - entity: input_datetime.alarmtime1_mon
+                - entity: input_boolean.alarmtime1_mon
+            - type: entities
+              entities:
+                - entity: input_datetime.alarmtime2_mon
+                - entity: input_boolean.alarmtime2_mon
+          - type: entities
+            entities:
+              - entity: input_text.goodmorning_mon
+              
+          - type: horizontal-stack
+            cards:
+            - type: entities
+              entities:
+                - entity: input_datetime.alarmtime1_tue
+                - entity: input_boolean.alarmtime1_tue
+            - type: entities
+              entities:
+                - entity: input_datetime.alarmtime2_tue
+                - entity: input_boolean.alarmtime2_tue
+          - type: entities
+            entities:
+              - entity: input_text.goodmorning_tue
+              
+          - type: horizontal-stack
+            cards:
+            - type: entities
+              entities:
+                - entity: input_datetime.alarmtime1_wed
+                - entity: input_boolean.alarmtime1_wed
+            - type: entities
+              entities:
+                - entity: input_datetime.alarmtime2_wed
+                - entity: input_boolean.alarmtime2_wed
+          - type: entities
+            entities:
+              - entity: input_text.goodmorning_wed                     
+            
+          - type: horizontal-stack
+            cards:
+            - type: entities
+              entities:
+                - entity: input_datetime.alarmtime1_thu
+                - entity: input_boolean.alarmtime1_thu
+            - type: entities
+              entities:
+                - entity: input_datetime.alarmtime2_thu
+                - entity: input_boolean.alarmtime2_thu
+          - type: entities
+            entities:
+              - entity: input_text.goodmorning_thu
+
+          - type: horizontal-stack
+            cards:
+            - type: entities
+              entities:
+                - entity: input_datetime.alarmtime1_fri
+                - entity: input_boolean.alarmtime1_fri
+            - type: entities
+              entities:
+                - entity: input_datetime.alarmtime2_fri
+                - entity: input_boolean.alarmtime2_fri
+          - type: entities
+            entities:
+              - entity: input_text.goodmorning_fri
+              
+          - type: horizontal-stack
+            cards:
+            - type: entities
+              entities:
+                - entity: input_datetime.alarmtime1_sat
+                - entity: input_boolean.alarmtime1_sat
+            - type: entities
+              entities:
+                - entity: input_datetime.alarmtime2_sat
+                - entity: input_boolean.alarmtime2_sat
+          - type: entities
+            entities:
+              - entity: input_text.goodmorning_sat                     
+            
+          - type: horizontal-stack
+            cards:
+            - type: entities
+              entities:
+                - entity: input_datetime.alarmtime1_sun
+                - entity: input_boolean.alarmtime1_sun
+            - type: entities
+              entities:
+                - entity: input_datetime.alarmtime2_sun
+                - entity: input_boolean.alarmtime2_sun
+          - type: entities
+            entities:
+              - entity: input_text.goodmorning_sun
+              
+#     - type: custom:column-card
+      - type: vertical-stack
+        cards:              
+          - type: "custom:button-card"
+            entity: input_boolean.alarmtime1_mon
+            icon: mdi:alarm
+            name: Mon Alarm 1
+            color: rgb(51,255,51)
+            size: 20px
+          - type: "custom:button-card"
+            entity: input_boolean.alarmtime2_mon
+            icon: mdi:alarm
+            name: Mon Alarm 2
+            color: rgb(51,255,51)
+            size: 20px
+          - type: "custom:button-card"
+            entity: input_boolean.alarmtime1_tue
+            icon: mdi:alarm
+            name: Tue Alarm 1
+            color: rgb(51,255,51)
+            size: 20px
+          - type: "custom:button-card"
+            entity: input_boolean.alarmtime2_tue
+            icon: mdi:alarm
+            name: Tue Alarm 2
+            color: rgb(51,255,51)
+            size: 20px
+          - type: "custom:button-card"
+            entity: input_boolean.alarmtime1_wed
+            icon: mdi:alarm
+            name: Wed Alarm 1
+            color: rgb(51,255,51)
+            size: 20px
+          - type: "custom:button-card"
+            entity: input_boolean.alarmtime2_wed
+            icon: mdi:alarm
+            name: Wed Alarm 2
+            color: rgb(51,255,51)
+            size: 20px
+          - type: "custom:button-card"
+            entity: input_boolean.alarmtime1_thu
+            icon: mdi:alarm
+            name: Thu Alarm 1
+            color: rgb(51,255,51)
+            size: 20px
+          - type: "custom:button-card"
+            entity: input_boolean.alarmtime2_thu
+            icon: mdi:alarm
+            name: Thu Alarm 2
+            color: rgb(51,255,51)
+            size: 20px
+          - type: "custom:button-card"
+            entity: input_boolean.alarmtime1_fri
+            icon: mdi:alarm
+            name: Fri Alarm 1
+            color: rgb(51,255,51)
+            size: 20px
+          - type: "custom:button-card"
+            entity: input_boolean.alarmtime2_fri
+            icon: mdi:alarm
+            name: Fri Alarm 2
+            color: rgb(51,255,51)
+            size: 20px              
+    
+
+
+  - title: Living Room
+    cards:
+      - type: entities
+        entities:
+          - light.tv_room
+          - light.dining_room
+  - title: System
+    cards:
+      - type: custom:tracker-card
+        title:
+        trackers:
+          - sensor.custom_card_tracker
+          - sensor.custom_component_tracker
+

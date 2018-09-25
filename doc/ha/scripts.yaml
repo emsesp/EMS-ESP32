@@ -1,0 +1,7 @@
+shower_coldshot:
+  sequence:
+    - service: mqtt.publish
+      data_template:
+        topic: 'home/boiler/shower_coldshot'
+        payload: '1'
+

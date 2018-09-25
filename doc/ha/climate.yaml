@@ -1,0 +1,11 @@
+  - platform: mqtt
+    name: Thermostat
+    modes:
+      - low
+      - manual
+      - auto
+    mode_state_topic: "home/boiler/thermostat_mode"
+    temperature_command_topic: "home/boiler/thermostat_temp"
+    temperature_state_topic: "home/boiler/thermostat_seltemp"
+    current_temperature_topic: "home/boiler/thermostat_currtemp"
+

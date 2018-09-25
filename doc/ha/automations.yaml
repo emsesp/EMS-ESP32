@@ -1,0 +1,94 @@
+##########################################################
+## Boiler
+##########################################################
+
+- id: boiler_shower
+  alias: Alert shower time
+  trigger:
+    platform: mqtt
+    topic: home/boiler/showertime
+  action:
+    - service: notify.general_notify
+      data_template:
+        title: "Shower finished at {{states.sensor.time.state}}"
+        message: '{{trigger.payload}}'
+
+- id: boiler_shower_alarm
+  alias: Alert shower too long
+  trigger:
+    platform: mqtt
+    topic: home/boiler/command
+    payload: 'shower_alarm'
+  action:
+    - service: notify.admin_notify
+      data_template:
+        title: "Shower Alert!"
+        message: "Shower time exceeded limit"
+
+# when boiler starts send boottime
+- id: boiler_restart
+  alias: See if boiler restarts
+  trigger:
+    platform: mqtt
+    topic: home/boiler/start
+    payload: 'start'
+  action:
+    - service: notify.admin_notify
+      data_template:
+        title: "boiler has booted"
+        message: "Boiler"
+    - service: mqtt.publish
+      data_template:
+        topic: 'home/boiler/start'
+        payload: >
+          {{ now().strftime("%H:%M:%S %-d/%b/%Y") }}
+
+# Set thermostat temp
+- id: thermostat_temp
+  alias: 'Adjust Theromostat Temperature'
+  trigger:
+    platform: state
+    entity_id: input_number.thermostat_temp
+  action:
+    service: mqtt.publish
+    data_template:
+      topic: 'home/boiler/thermostat_temp'
+      payload: >
+        {{ states.input_number.thermostat_temp.state }}
+
+# See if thermostat_temp has changed in recent mqtt payload, then adjust input_number
+- id: thermostat_temp_incoming
+  trigger:
+    platform: state
+    entity_id: sensor.current_set_temperature
+  action:
+    service: input_number.set_value
+    data_template:
+      entity_id: input_number.thermostat_temp
+      value: '{{ states.sensor.current_set_temperature.state }}'
+
+
+# Boiler warm water temp
+- id: boiler_wwtemp
+  trigger:
+    platform: state
+    entity_id: input_number.boiler_wwtemp
+  action:
+    service: mqtt.publish
+    data_template:
+      topic: 'home/boiler/boiler_wwtemp'
+      payload: >
+        {{ states.input_number.boiler_wwtemp.state }}
+
+# See if wwTemp has changed in recent mqtt payload, then adjust input_number
+- id: boiler_wwtemp_incoming
+  trigger:
+    platform: state
+    entity_id: sensor.warm_water_selected_temperature
+  action: 
+    service: input_number.set_value
+    data_template:
+      entity_id: input_number.boiler_wwtemp
+      value: '{{ states.sensor.warm_water_selected_temperature.state }}'
+
+

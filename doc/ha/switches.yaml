@@ -1,0 +1,20 @@
+- platform: mqtt
+  name: "Shower Timer"
+  state_topic: "home/boiler/shower_timer"
+  command_topic: "home/boiler/shower_timer"
+  payload_on: "1"
+  payload_off: "0"
+  optimistic: false
+  qos: 1
+  retain: false
+
+- platform: mqtt
+  name: "Long Shower Alert"
+  state_topic: "home/boiler/shower_alert"
+  command_topic: "home/boiler/shower_alert"
+  payload_on: "1"
+  payload_off: "0"
+  optimistic: false
+  qos: 1
+  retain: false
+
