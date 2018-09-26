@@ -1,8 +1,9 @@
 /*
  * EMS-ESP-Boiler
  * Paul Derbyshire - May 2018 - https://github.com/proddy/EMS-ESP-Boiler
+ * https://community.home-assistant.io/t/thermostat-and-boiler-controller-for-ems-based-boilers-nefit-buderus-bosch-using-esp/53382
  *
- * See ReadMe for Acknowledgments
+ * See ReadMe.md for Acknowledgments
  */
 
 // local libraries

@@ -270,7 +270,8 @@ and the alerts on an iPhone/Android using PushBullet, PushOver or any notificati
 
 ![Home Assistant iPhone notify)](doc/ha/ha_notify.jpg)
 
-You can find the .yaml configuration files under `doc/ha`
+You can find the .yaml configuration files under `doc/ha`. See also https://community.home-assistant.io/t/thermostat-and-boiler-controller-for-ems-based-boilers-nefit-buderus-bosch-using-esp/53382
+
 
 ## Building the firmware
 
