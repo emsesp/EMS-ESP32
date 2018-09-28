@@ -10,6 +10,7 @@ lib_deps =
   Time
   PubSubClient
   ArduinoJson
+  CRC32
 
 [env:nodemcuv2]
 board = nodemcuv2
