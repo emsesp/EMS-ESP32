@@ -76,7 +76,7 @@ const uint8_t ems_crc_table[] =
 
 // constants timers
 const uint64_t RX_READ_TIMEOUT       = 5000; // in ms. 5 seconds timeout for read replies
-const uint8_t  RX_READ_TIMEOUT_COUNT = 4;    // 4 retries before timeout
+const uint8_t  RX_READ_TIMEOUT_COUNT = 3;    // 3 retries before timeout
 
 uint8_t emsLastRxCount; // used for retries when sending failed
 
@@ -301,8 +301,8 @@ void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
         && ((EMS_TxTelegram.action == EMS_TX_READ) || (EMS_TxTelegram.action == EMS_TX_VALIDATE))
         && ((millis() - EMS_Sys_Status.emsLastTx) > RX_READ_TIMEOUT)) {
         if (emsLastRxCount++ >= RX_READ_TIMEOUT_COUNT) {
-            // give up
-            myDebug("Error! no send acknowledgement. Giving up.\n");
+            // give up and reset tx
+            myDebug("Error! Failed to send telegram, cancelling last write command.\n");
             _initTxBuffer();
         } else {
             myDebug("Didn't receive acknowledgement from the 0x%02x, so resending (attempt #%d/%d)...\n",
@@ -506,7 +506,8 @@ void _processType(uint8_t * telegram, uint8_t length) {
 bool _checkWriteQueueFull() {
     if (EMS_Sys_Status.emsTxStatus == EMS_TX_PENDING) { // send is already pending
         if (ems_getLogging() != EMS_SYS_LOGGING_NONE) {
-            myDebug("Holding write command as a telegram (type 0x%02x) is already in the queue\n", EMS_TxTelegram.type);
+            myDebug("Delaying write command as there is already a telegram (type 0x%02x) in the queue\n",
+                    EMS_TxTelegram.type);
         }
         return true;
     }
