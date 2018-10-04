@@ -28,7 +28,7 @@
 // timers, all values are in seconds
 #define PUBLISHVALUES_TIME 300 // every 5 mins post HA values
 #define SYSTEMCHECK_TIME 10    // every 10 seconds check if Boiler is online and execute other requests
-#define REGULARUPDATES_TIME 60 // every minute a call is made
+#define REGULARUPDATES_TIME 60 // every minute a call is made, so for our 2 calls theres a write cmd every 30seconds
 #define HEARTBEAT_TIME 1       // every second blink heartbeat LED
 Ticker  publishValuesTimer;
 Ticker  systemCheckTimer;
@@ -58,9 +58,9 @@ uint8_t regularUpdatesCount = 0;
     "*  x [n] experimental (warning: for debugging only!)"
 
 // GPIOs
-#define LED_RX D1                 // (GPIO5 on nodemcu)
-#define LED_TX D2                 // (GPIO4 on nodemcu)
-#define LED_ERR D3                // (GPIO0 on nodemcu)
+#define LED_RX D1                 // GPIO5
+#define LED_TX D2                 // GPIO4
+#define LED_ERR D3                // GPIO0
 #define LED_HEARTBEAT LED_BUILTIN // onboard LED
 
 // hostname is also used as the MQTT topic identifier (home/<hostname>)
@@ -265,12 +265,13 @@ void showInfo() {
             ((Boiler_Status.shower_timer) ? "enabled" : "disabled"),
             ((Boiler_Status.shower_alert) ? "enabled" : "disabled"));
 
-    myDebug("  EMS Bus Stats: RxPgks=%d, TxPkgs=%d, #CrcErrors=%d, ",
+    myDebug("  EMS Bus Stats: Connected=%s, # Rx telegrams=%d, # Tx telegrams=%d, # Crc Errors=%d, ",
+            (Boiler_Status.boiler_online ? "yes" : "no"),
             EMS_Sys_Status.emsRxPgks,
             EMS_Sys_Status.emsTxPkgs,
             EMS_Sys_Status.emxCrcErr);
 
-    myDebug("RxStatus=");
+    myDebug("Rx Status=");
     switch (EMS_Sys_Status.emsRxStatus) {
     case EMS_RX_IDLE:
         myDebug("idle");
@@ -280,7 +281,7 @@ void showInfo() {
         break;
     }
 
-    myDebug(", TxStatus=");
+    myDebug(", Tx Status=");
     switch (EMS_Sys_Status.emsTxStatus) {
     case EMS_TX_IDLE:
         myDebug("idle");
@@ -293,7 +294,7 @@ void showInfo() {
         break;
     }
 
-    myDebug(", TxAction=");
+    myDebug(", Last Tx Action=");
     switch (EMS_TxTelegram.action) {
     case EMS_TX_READ:
         myDebug("read");
@@ -453,7 +454,7 @@ void publishValues() {
         } else if (EMS_Thermostat.mode == 1) {
             myESP.publish(TOPIC_THERMOSTAT_MODE, "manual");
         } else {
-            myESP.publish(TOPIC_THERMOSTAT_MODE, "auto");
+            myESP.publish(TOPIC_THERMOSTAT_MODE, "auto"); // must be auto
         }
     }
 }
@@ -627,8 +628,10 @@ void updateHeartbeat() {
         heartbeatEnabled = true;
     } else {
         heartbeatEnabled = false;
+#ifdef USE_LED
         // ...and turn off LED
         digitalWrite(LED_HEARTBEAT, HIGH);
+#endif
     }
 }
 
@@ -728,8 +731,10 @@ void showLEDs() {
 // heartbeat callback to light up the LED, called via Ticker
 void heartbeat() {
     if (heartbeatEnabled) {
+#ifdef USE_LED
         int state = digitalRead(LED_HEARTBEAT);
         digitalWrite(LED_HEARTBEAT, !state);
+#endif
     }
 }
 
@@ -738,7 +743,7 @@ void systemCheck() {
     // first do a system check to see if there is still a connection to the EMS
     Boiler_Status.boiler_online = ((timestamp - EMS_Sys_Status.emsLastPoll) < POLL_TIMEOUT_ERR);
     if (!Boiler_Status.boiler_online) {
-        myDebug("Error! Boiler unreachable. Please check connection. Retrying in 10 seconds.\n");
+        myDebug("Error! Unable to connect to EMS bus. Please check connections. Retry in 10 seconds...\n");
     }
 }
 
@@ -748,10 +753,13 @@ void systemCheck() {
 void regularUpdates() {
     uint8_t cycle = (regularUpdatesCount++ % MAX_MANUAL_CALLS);
 
-    if ((cycle == 0) && Boiler_Status.thermostat_enabled) {
-        ems_doReadCommand(EMS_TYPE_RC20Temperature); // to force get the thermostat mode which is not broadcasted
-    } else if (cycle == 1) {
-        ems_doReadCommand(EMS_TYPE_UBAParameterWW); // get Warm Water values
+    // only do calls if the EMS is connected and alive
+    if (Boiler_Status.boiler_online) {
+        if ((cycle == 0) && Boiler_Status.thermostat_enabled) {
+            ems_doReadCommand(EMS_TYPE_RC20Temperature); // to force get the thermostat mode which is not broadcasted
+        } else if (cycle == 1) {
+            ems_doReadCommand(EMS_TYPE_UBAParameterWW); // get Warm Water values
+        }
     }
 }
 
@@ -794,9 +802,6 @@ void loop() {
     // if first time connected to MQTT, send welcome start message
     // which will send all the state values from HA back to the clock via MQTT and return the boottime
     if ((!startMQTTsent) && (connectionStatus == FULL_CONNECTION)) {
-        // now that we're connected lets get some data from the EMS
-        ems_doReadCommand(EMS_TYPE_UBAParameterWW);
-
         myESP.sendStart();
         startMQTTsent = true;
 
@@ -804,8 +809,13 @@ void loop() {
         myESP.publish(TOPIC_SHOWER_TIMER, Boiler_Status.shower_timer ? "1" : "0");
         myESP.publish(TOPIC_SHOWER_ALERT, Boiler_Status.shower_alert ? "1" : "0");
 
-        // make sure warm water if activated, in case it got stuck with the shower alert
-        ems_setWarmWaterActivated(true);
+        if (Boiler_Status.boiler_online) {
+            // now that we're connected lets get some data from the EMS
+            ems_doReadCommand(EMS_TYPE_UBAParameterWW);
+            ems_setWarmWaterActivated(true); // make sure warm water if activated, in case it got stuck with the shower alert
+        } else {
+            myDebugLog("Boot: can't connect to EMS.");
+        }
     }
 
     // if we received new data and flagged for pushing, do it
