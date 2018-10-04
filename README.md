@@ -284,9 +284,9 @@ Roughly these are the steps needed when running Windows:
 - First download [Git](https://git-scm.com/download/win) (install using the default settings)
 - Download and install [Visual Studio Code](https://code.visualstudio.com/docs/?dv=win) (VSC)
 - Restart the PC (if using Windows) to apply the new PATH settings. It should now detect Git
-- Install these VSC extensions: PlatformIDE and GitLens, the reload to activate them
+- Install these VSC extensions: PlatformIO IDE & GitLens, and then click reload to activate them
 - Git clone this repo, eith using `git clone` from PlatformIO's terminal or the Git GUI interface
-- Create a `platformio.ini` based on my `platformio.ini-example` making the necessary changes for your WiFi and MQTT credentials in the build flags. If you're not using MQTT leave MQTT_IP empty (`MQTT_IP=""`)
+- Create a `platformio.ini` based on the `platformio.ini-example` making the necessary changes for your WiFi and MQTT credentials in the build flags. If you're not using MQTT leave MQTT_IP empty (`MQTT_IP=""`)
 
 ### Using ESPurna
 
