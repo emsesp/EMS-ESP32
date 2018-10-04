@@ -400,7 +400,7 @@ void ESPHelper::reconnect() {
                             if (wifiClientSecure.verify(_fingerprint,
                                                         _currentNet.mqttHost)) {
                                 logger(LOG_CONSOLE,
-                                       "Certificate Matches - SUCESS\n");
+                                       "Certificate Matches - SUCCESS\n");
                             } else {
                                 logger(LOG_CONSOLE,
                                        "Certificate Doesn't Match - FAIL\n");
