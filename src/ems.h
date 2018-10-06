@@ -163,10 +163,9 @@ typedef bool (*EMS_processType_cb)(uint8_t * data, uint8_t length);
 
 // Definition for each type, including the relative callback function
 typedef struct {
-    uint8_t    src;
-    uint8_t    type;
-    const char typeString[50];
-    //uint8_t            size; // size of telegram, excluding the 4-byte header and crc
+    uint8_t            src;
+    uint8_t            type;
+    const char         typeString[50];
     EMS_processType_cb processType_cb;
 } _EMS_Types;
 
@@ -184,23 +183,22 @@ typedef struct {
 #define COLOR_BOLD_OFF "\x1B[21m"
 
 // function definitions
-extern void ems_parseTelegram(uint8_t * telegram, uint8_t len);
-void        ems_init();
-void        ems_doReadCommand(uint8_t type);
-void        ems_setThermostatTemp(float temp);
-void        ems_setThermostatMode(uint8_t mode);
-void        ems_setWarmWaterTemp(uint8_t temperature);
-void        ems_setWarmWaterActivated(bool activated);
-void        ems_setExperimental(uint8_t value);
-
-void ems_setPoll(bool b);
-bool ems_getPoll();
-
-bool ems_getThermostatEnabled();
-void ems_setThermostatEnabled(bool b);
-
+extern void      ems_parseTelegram(uint8_t * telegram, uint8_t len);
+void             ems_init();
+void             ems_doReadCommand(uint8_t type);
+void             ems_setThermostatTemp(float temp);
+void             ems_setThermostatMode(uint8_t mode);
+void             ems_setWarmWaterTemp(uint8_t temperature);
+void             ems_setWarmWaterActivated(bool activated);
+void             ems_setExperimental(uint8_t value);
+void             ems_setPoll(bool b);
+bool             ems_getPoll();
+bool             ems_getThermostatEnabled();
+void             ems_setThermostatEnabled(bool b);
 void             ems_setLogging(_EMS_SYS_LOGGING loglevel);
 _EMS_SYS_LOGGING ems_getLogging();
+uint8_t          ems_getEmsTypesCount();
+void             ems_printAllTypes();
 
 // private functions
 uint8_t _crcCalculator(uint8_t * data, uint8_t len);

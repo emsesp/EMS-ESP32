@@ -15,10 +15,11 @@
 #include <ArduinoJson.h> // https://github.com/bblanchon/ArduinoJson
 #include <CRC32.h>       // https://github.com/bakercp/CRC32
 
-// standard libs
+// standard arduino libs
 #include <Ticker.h> // https://github.com/esp8266/Arduino/tree/master/libraries/Ticker
+#include <avr/pgmspace.h>
 
-// these are set as -D build flags. If you're not using PlatformIO hard code them
+// these are set as -D build flags during compilation
 //#define WIFI_SSID "<my_ssid>"
 //#define WIFI_PASSWORD "<my_password>"
 //#define MQTT_IP "<broker_ip>"
@@ -37,25 +38,6 @@ Ticker  heartbeatTimer;
 Ticker  showerColdShotStopTimer;
 uint8_t regularUpdatesCount = 0;
 #define MAX_MANUAL_CALLS 2 // number of ems reads we do during the fetch cycle (in regularUpdates)
-
-// Project commands for telnet
-// Note: ?, *, $, ! and & are reserved
-#define PROJECT_CMDS                                                                                                   \
-    "*  s show statistics\n\r"                                                                                         \
-    "*  P publish stats to MQTT\n\r"                                                                                   \
-    "*  v [n] set logging (0=none, 1=basic, 2=verbose)\n\r"                                                            \
-    "*  p poll response on/off\n\r"                                                                                    \
-    "*  T thermostat Support on/off\n\r"                                                                               \
-    "*  S shower timer on/off\n\r"                                                                                     \
-    "*  A shower alert on/off\n\r"                                                                                     \
-    "*  r [n] request for data from EMS. Examples:\n\r"                                                                \
-    "*     from Boiler: 33=UBAParameterWW, 18=UBAMonitorFast, 19=UBAMonitorSlow, 34=UBAMonitorWWMessage\n\r"           \
-    "*     from Thermostat: 91=RC20StatusMessage, A8=RC20Temperature, 6=RC20Time, 2=Version\n\r"                       \
-    "*  t [n] set thermostat temperature to n\n\r"                                                                     \
-    "*  m [n] set thermostat mode (0=low, 1=manual, 2=clock)\n\r"                                                      \
-    "*  w [n] set boiler warm water temperature to n (min 30)\n\r"                                                     \
-    "*  a [n] boiler warm water on (n=1) or off (n=0)\n\r"                                                             \
-    "*  x [n] experimental (warning: for debugging only!)"
 
 // GPIOs
 #define LED_RX D1                 // GPIO5
@@ -136,6 +118,28 @@ netInfo homeNet = {.mqttHost = MQTT_IP,
                    .pass     = WIFI_PASSWORD};
 
 ESPHelper myESP(&homeNet);
+
+command_t PROGMEM
+          project_cmds[] = {{"s", "show statistics"},
+                      {"h", "show which EMS telegram types have special logic"},
+                      {"P", "publish data to MQTT"},
+                      {"v", "[n] set logging (0=none, 1=basic, 2=verbose)"},
+                      {"p", "poll response on/off (default is off)"},
+                      {"T", "thermostat Support on/off"},
+                      {"S", "shower timer on/off"},
+                      {"A", "shower alert on/off"},
+                      {"r", "[n] send EMS request (n=telegram type id. Use 'h' to list which are the common ones)"},
+                      {"t", "[n] set thermostat temperature to n"},
+                      {"m", "[n] set thermostat mode (0=low, 1=manual, 2=clock)"},
+                      {"w", "[n] set boiler warm water temperature to n (min 30)"},
+                      {"a", "[n] boiler warm water on (n=1) or off (n=0)"},
+                      {"x", "[n] experimental (warning: for debugging only!)"}};
+
+// calculates size of an 2d array at compile time
+template <typename T, size_t N>
+constexpr size_t ArraySize(T (&)[N]) {
+    return N;
+}
 
 // store for overall system status
 _Boiler_Status Boiler_Status;
@@ -259,7 +263,9 @@ void showInfo() {
         myDebug("None");
     }
 
-    myDebug("\n  Thermostat is %s, Poll is %s, Shower timer is %s, Shower alert is %s\n",
+    myDebug("\n  # EMS type handlers: %d\n", ems_getEmsTypesCount());
+
+    myDebug("  Thermostat is %s, Poll is %s, Shower timer is %s, Shower alert is %s\n",
             ((Boiler_Status.thermostat_enabled) ? "enabled" : "disabled"),
             ((EMS_Sys_Status.emsPollEnabled) ? "enabled" : "disabled"),
             ((Boiler_Status.shower_timer) ? "enabled" : "disabled"),
@@ -496,6 +502,9 @@ void myDebugCallback() {
     case 't': // set thermostat temp
         ems_setThermostatTemp(strtof(&cmd[2], 0));
         break;
+    case 'h': // show type handlers
+        ems_printAllTypes();
+        break;
     case 'm': // set thermostat mode
         ems_setThermostatMode(cmd[2] - '0');
         break;
@@ -645,7 +654,7 @@ void _initBoiler() {
 
     // init boiler
     Boiler_Status.wifi_connected = false;
-    Boiler_Status.boiler_online  = true; // assume we have a connection, it will be checked in the loop() anyway
+    Boiler_Status.boiler_online  = false;
 
     // init shower
     Boiler_Shower.timerStart    = 0;
@@ -694,11 +703,8 @@ void setup() {
     myESP.addSubscription(TOPIC_BOILER_WARM_WATER_SELECTED_TEMPERATURE);
     myESP.addSubscription(TOPIC_SHOWER_COLDSHOT);
 
-    // set up Telnet
-
-    myESP.consoleSetHelpProjectsCmds(PROJECT_CMDS);
-    myESP.consoleSetCallBackProjectCmds(myDebugCallback);
-    myESP.begin(HOSTNAME);
+    myESP.consoleSetCallBackProjectCmds(project_cmds, ArraySize(project_cmds), myDebugCallback); // set up Telnet commands
+    myESP.begin(HOSTNAME); // start wifi and mqtt services
 
     // init ems stats
     ems_init();

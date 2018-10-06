@@ -21,11 +21,15 @@ extern ESPHelper myESP;
 #define myDebug(x, ...) myESP.printf(x, ##__VA_ARGS__)
 #endif
 
+// calculates size of an 2d array at compile time
+template <typename T, size_t N>
+constexpr size_t ArraySize(T (&)[N]) {
+    return N;
+}
+
 _EMS_Sys_Status EMS_Sys_Status; // EMS Status
 _EMS_TxTelegram EMS_TxTelegram; // Empty buffer for sending telegrams
 
-// and call backs
-#define MAX_TYPECALLBACK 13 // make sure it matches the #types you have
 // callbacks per type
 bool _process_UBAMonitorFast(uint8_t * data, uint8_t length);
 bool _process_UBAMonitorSlow(uint8_t * data, uint8_t length);
@@ -37,7 +41,7 @@ bool _process_RC20Temperature(uint8_t * data, uint8_t length);
 bool _process_RCTempMessage(uint8_t * data, uint8_t length);
 bool _process_Version(uint8_t * data, uint8_t length);
 
-const _EMS_Types EMS_Types[MAX_TYPECALLBACK] =
+const _EMS_Types EMS_Types[] =
     {{EMS_ID_BOILER, EMS_TYPE_UBAMonitorFast, "UBAMonitorFast", _process_UBAMonitorFast},
      {EMS_ID_BOILER, EMS_TYPE_UBAMonitorSlow, "UBAMonitorSlow", _process_UBAMonitorSlow},
      {EMS_ID_BOILER, EMS_TYPE_UBAMonitorWWMessage, "UBAMonitorWWMessage", _process_UBAMonitorWWMessage},
@@ -52,6 +56,7 @@ const _EMS_Types EMS_Types[MAX_TYPECALLBACK] =
      {EMS_ID_THERMOSTAT, EMS_TYPE_RC20Temperature, "RC20Temperature", _process_RC20Temperature},
      {EMS_ID_THERMOSTAT, EMS_TYPE_RCTempMessage, "RCTempMessage", _process_RCTempMessage},
      {EMS_ID_THERMOSTAT, EMS_TYPE_Version, "Version", _process_Version}};
+uint8_t _EMS_Types_max = ArraySize(EMS_Types); // number of defined types
 
 // reserve space for the data we collect from the Boiler and Thermostat
 _EMS_Boiler     EMS_Boiler;
@@ -181,6 +186,10 @@ _EMS_SYS_LOGGING ems_getLogging() {
     return EMS_Sys_Status.emsLogging;
 }
 
+uint8_t ems_getEmsTypesCount() {
+    return _EMS_Types_max;
+}
+
 void ems_setLogging(_EMS_SYS_LOGGING loglevel) {
     if (loglevel <= EMS_SYS_LOGGING_VERBOSE) {
         EMS_Sys_Status.emsLogging = loglevel;
@@ -224,6 +233,18 @@ uint16_t _toLong(uint8_t i, uint8_t * data) {
     return (((data[i]) << 16) + ((data[i + 1]) << 8) + (data[i + 2]));
 }
 
+// debugging only - print out all handled types
+void ems_printAllTypes() {
+    myDebug("These %d telegram types are recognized:\n", _EMS_Types_max);
+
+    for (uint8_t i = 0; i < _EMS_Types_max; i++) {
+        myDebug(" %s:\ttype:%02x (%s)\n",
+                EMS_Types[i].src == EMS_ID_THERMOSTAT ? "Thermostat" : "Boiler",
+                EMS_Types[i].type,
+                EMS_Types[i].typeString);
+    }
+}
+
 /*
  * Find the pointer to the EMS_Types array for a given type ID
  */
@@ -231,7 +252,7 @@ int ems_findType(uint8_t type) {
     uint8_t i         = 0;
     bool    typeFound = false;
     // scan through known ID types
-    while (i < MAX_TYPECALLBACK) {
+    while (i < _EMS_Types_max) {
         if (EMS_Types[i].type == type) {
             typeFound = true; // we have a match
             break;
@@ -396,7 +417,7 @@ void _processType(uint8_t * telegram, uint8_t length) {
     // set typeFound if we found a match
     int  i         = 0;
     bool typeFound = false;
-    while (i < MAX_TYPECALLBACK) {
+    while (i < _EMS_Types_max) {
         if ((EMS_Types[i].src == src) && (EMS_Types[i].type == type)) {
             // we have a match
             typeFound = true;
