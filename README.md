@@ -4,7 +4,7 @@ EMS-ESP-Boiler is an controller running on an ESP8266 to communicate with EMS (E
 
 There are 3 parts to this project, first the design of the circuit, second the code to deploy to an ESP8266 based microcontroller and lastly settings for Home Assistant to monitor data and issue direct commands via MQTT.
 
-[![version](https://img.shields.io/badge/version-1.1-brightgreen.svg)](CHANGELOG.md)
+[![version](https://img.shields.io/badge/version-1.1.1-brightgreen.svg)](CHANGELOG.md)
 [![branch](https://img.shields.io/badge/branch-dev-orange.svg)](https://github.org/xoseperez/espurna/tree/dev/)
 [![license](https://img.shields.io/github/license/xoseperez/espurna.svg)](LICENSE)
 
@@ -59,12 +59,12 @@ I've tested the code and circuit with a few ESP8266 development boards such as t
 ## Getting Started
 
 1. Either build the circuit below or purchase a ready built board from bbqkees via his [GitHub](https://github.com/bbqkees/Nefit-Buderus-EMS-bus-Arduino-Domoticz) page or the [Domoticz forum](http://www.domoticz.com/forum/viewtopic.php?f=22&t=22079&start=20).
-2. Get an ESP8266 dev board and connect the 2 EMS output lines from the boiler to the circuit and the Rx/Tx out to pins D7 and D8 on the ESP. The EMS connection can either be the 12-15V AC direct from the thermostat bus line or from the 3.5" Service Jack at the front. Again bbqkees has a nice explanation [here](https://github.com/bbqkees/Nefit-Buderus-EMS-bus-Arduino-Domoticz/tree/master/Documentation).
+2. Get an ESP8266 dev board and connect the 2 EMS output lines from the boiler to the circuit and the Rx and Tx out to ESP pins D7 and D8 respectively. The EMS connection can either be the 12-15V AC direct from the thermostat bus line or from the 3.5" Service Jack at the front.
 3. Optionally connect the three LEDs to show Rx and Tx traffic and Error codes to pins D1, D2, D3 respectively. I use 220 Ohm pull-down resistors. These pins are configurable in ``boiler.ino``. This is further explained in the **code** section below.
 4. Build and upload the firmware to the ESP8266 device. I used Platformio with Visual Studio. Do make sure you set the MQTT and WiFi credentials correctly and if you're not using MQTT leave the MQTT_IP blank. The firmware supports OTA too with the default hostname as 'boiler' (or 'boiler.' depending on your OS and how the mdns resolves hostnames).
 5. Power the ESP either via USB or direct into the 5v vin pin from an external power 5V volts supply with min 400mA.
 6. Attach the 3v3 out on the ESP8266 to the DC power line on the EMS circuit as indicated in the schematics.
-7. The WiFi connects via DHCP by default. Find the IP by from your router and then telnet (port 23) to it. Hint: to enable Telnet on Windows run `dism /online /Enable-Feature /FeatureName:TelnetClient` or install something like [putty](https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html). If everything is working you should see the messages appear in the window as shown in the next section. However if you're unable to locate the IP of the ESP then probably the WiFi failed to instantiate. In this case add -DUSE_SERIAL to the build options, connect at USB, build, upload and then use a terminal to connect to the serial port to see the debug messages. A word of warning, do not use both a USB and power from the EMS at the same time.
+7. The WiFi connects via DHCP by default. Find the IP by from your router and then telnet (port 23) to it. Tip: to enable Telnet on Windows run `dism /online /Enable-Feature /FeatureName:TelnetClient` or install something like [putty](https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html). If everything is working you should see the messages appear in the window as shown in the next section. However if you're unable to locate the IP of the ESP then probably the WiFi failed to instantiate. In this case add -DUSE_SERIAL to the build options, connect at USB, build, upload and then use a terminal to connect to the serial port to see the debug messages. A word of warning, do not use both a USB and power from the EMS at the same time.
 
 ## Debugging the output
 
@@ -232,7 +232,7 @@ Consult the wiki documentation for the data format.
 
 Most of the changes will be done in `boiler.ino` and `ems.cpp`.
 
-- To add new handlers for data types, first create a callback function and add to the `EMS_Types` at the top of the file `ems.cpp` and modify `ems.h`
+- To add new handlers for data types, first create a callback function and add to the `EMS_Types` array at the top of the file `ems.cpp` and modify `ems.h`
 - To change your thermostat type set `EMS_ID_THERMOSTAT` in `ems.cpp`. The default is 0x17 for an RC20.
 - The DEFINES `BOILER_THERMOSTAT_ENABLED`, `BOILER_SHOWER_ENABLED` and `BOILER_SHOWER_TIMER` enabled the thermostat logic, the shower logic and the shower timer alert logic respectively. 1 is on and 0 is off.
 
