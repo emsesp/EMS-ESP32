@@ -663,14 +663,11 @@ void ESPHelper::consoleHandle() {
     }
 }
 
-// Set help for commands over telnet
-void ESPHelper::consoleSetHelpProjectsCmds(String help) {
-    _helpProjectCmds = help;
-}
-
 // Set callback of sketch function to process project messages
-void ESPHelper::consoleSetCallBackProjectCmds(void (*callback)()) {
-    _consoleCallbackProjectCmds = callback;
+void ESPHelper::consoleSetCallBackProjectCmds(command_t * cmds, uint8_t count, void (*callback)()) {
+    _helpProjectCmds            = cmds;     // command list
+    _helpProjectCmds_count      = count;    // numiber of commands
+    _consoleCallbackProjectCmds = callback; // external function to handle commands
 }
 
 // Set bootime received as a string from HA
@@ -745,32 +742,31 @@ size_t ESPHelper::write(uint8_t character) {
 
 // Show help of commands
 void ESPHelper::consoleShowHelp() {
-    // Show the initial message
-    String help = "";
-
-    help.concat("*\n\r* Remote Debug for ESP8266/ESP32\n\r");
-    help.concat("* Device hostname: ");
-    help.concat(WiFi.hostname());
-    help.concat(", IP: ");
-    help.concat(WiFi.localIP().toString());
-    help.concat(", MAC address: ");
-    help.concat(WiFi.macAddress());
-    help.concat("\n\r* Connected to WiFi AP: ");
-    help.concat(WiFi.SSID());
-
-    help.concat("\n\r* Boot time: ");
+    String help = "********************************\n\r* Remote Telnet Command Center "
+                  "*\n\r********************************\n\r";
+    help += "* Device hostname: " + WiFi.hostname() + "\tIP: " + WiFi.localIP().toString()
+            + "\tMAC address: " + WiFi.macAddress() + "\n\r";
+    help += "* Connected to WiFi AP: " + WiFi.SSID() + "\n\r";
+    help += "* Boot time: ";
     help.concat(_boottime);
-    help.concat("\n\r* Free Heap RAM: ");
+    help += "\n\r* Free Heap RAM: ";
     help.concat(ESP.getFreeHeap());
-    help.concat(" bytes\n\r");
-    help.concat("*\n\r* Commands:\n\r*  ?=help, *=quit, $=memory, !=reboot, "
-                "&=toggle verbose messages");
+    help += " bytes\n\r";
+    help += "*\n\r* Commands:\n\r*  ?=this help, q=quit telnet, $=show used memory, !=reboot, &=suspend all "
+            "notifications\n\r";
 
-    if (_helpProjectCmds != "" && (_consoleCallbackProjectCmds)) {
-        help.concat("\n\r");
-        help.concat(_helpProjectCmds);
+    // print custom commands if available
+    if (_consoleCallbackProjectCmds) {
+        for (uint8_t i = 0; i < _helpProjectCmds_count; i++) {
+            //for (uint8_t i = 0; i < 5; i++) {
+            help += FPSTR("*  ");
+            help += FPSTR(_helpProjectCmds[i].key);
+            help += FPSTR(" ");
+            help += FPSTR(_helpProjectCmds[i].description);
+            help += FPSTR("\n\r");
+        }
     }
-    help.concat("\n\r");
+
     telnetClient.print(help);
 
 #ifdef USE_SERIAL
@@ -806,13 +802,13 @@ void ESPHelper::consoleProcessCommand() {
     uint8_t cmd      = _command[0];
 
     if (!_verboseMessages) {
-        telnetClient.println("Warning, verbose messaging is off. Use v to toggle.");
+        telnetClient.println("Warning, all messages are supsended. Use & to enable.");
     }
 
     // Process the command
     if (cmd == '?') {
         consoleShowHelp();   // Show help
-    } else if (cmd == '*') { // quit
+    } else if (cmd == 'q') { // quit
         telnetClient.println("* Closing telnet connection...");
         telnetClient.stop();
     } else if (cmd == '$') {
@@ -822,7 +818,7 @@ void ESPHelper::consoleProcessCommand() {
         resetESP();
     } else if (cmd == '&') {
         _verboseMessages = !_verboseMessages; // toggle
-        telnetClient.printf("Verbose messaging is %s\n\r", _verboseMessages ? "on" : "off");
+        telnetClient.printf("Suspend all messages is %s\n\r", _verboseMessages ? "disabled" : "enabled");
     } else {
         // custom Project commands
         if (_consoleCallbackProjectCmds) {

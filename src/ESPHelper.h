@@ -27,6 +27,7 @@
 #include <PubSubClient.h>
 #include <WiFiClientSecure.h>
 #include <WiFiUdp.h>
+#include <pgmspace.h>
 
 // MQTT stuff
 #define DEFAULT_QOS 1 //at least once - devices are guarantee to get a message.
@@ -58,27 +59,29 @@ typedef enum { LOG_NONE, LOG_CONSOLE, LOG_HA } log_level_t;
 
 enum connStatus { NO_CONNECTION, BROADCAST, WIFI_ONLY, FULL_CONNECTION };
 
-struct netInfo {
+typedef struct {
     const char * mqttHost;
     const char * mqttUser;
     const char * mqttPass;
     uint16_t     mqttPort;
     const char * ssid;
     const char * pass;
-};
-typedef struct netInfo netInfo;
+} netInfo;
 
-struct subscription {
+typedef struct {
     bool         isUsed = false;
     const char * topic;
-};
-typedef struct subscription subscription;
+} subscription;
+
+typedef struct {
+    char key[5];
+    char description[400];
+} command_t;
 
 // class ESPHelper {
 class ESPHelper : public Print {
   public:
-    void   consoleSetHelpProjectsCmds(String help);
-    void   consoleSetCallBackProjectCmds(void (*callback)());
+    void   consoleSetCallBackProjectCmds(command_t * cmds, uint8_t count, void (*callback)());
     char * consoleGetLastCommand();
     void   resetESP();
     void   logger(log_level_t level, const char * message);
@@ -198,7 +201,8 @@ class ESPHelper : public Print {
     char     _command[COMMAND_LENGTH];    // Command received, includes options seperated by a space
     uint32_t _lastTimeCommand = millis(); // Last time command received
 
-    String _helpProjectCmds = ""; // Help of commands setted by project
+    command_t * _helpProjectCmds;       // Help of commands setted by project
+    uint8_t     _helpProjectCmds_count; // # available commands
 
     void (*_consoleCallbackProjectCmds)(); // Callable for projects commands
     void consoleShowHelp();
