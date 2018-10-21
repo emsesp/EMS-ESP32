@@ -82,12 +82,13 @@ To see the current values of the Boiler and its parameters type 's' and hit Ente
 Commands can be issued directly to the EMS bus typing in a letter followed by an optional parameter and pressing Enter. Supported commands are:
 
 - **r** to send a read command to all devices to fetch values. The 2nd parameter is the type. For example 'r 33' will request type UBAParameterWW and bring back the Warm Water temperatures (not the heating) from the Boiler. You can issue any type here.
-- **t** set the thermostat temperature to the given value
+- **t** set the thermostat temperature to the given celsius value
 - **w** to adjust the temperature of the warm water from the boiler
 - **a** to turn the warm water on and off
+- **h** to list all the recognized EMS types
 - **p** to toggle the Polling response on/off. It's not necessary to have Polling enabled to work. I use this for debugging purposes.
 - **m** to set the thermostat mode from low, manual and clock/auto.
-- **T** to toggle thermostat reading on/off
+- **T** to toggle thermostat readings on/off
 - **S** to toggle the Shower Timer functionality on/off
 
 **Disclaimer: be careful when sending values to the boiler. If in doubt you can always reset the boiler to its original factory settings by following the instructions in the user guide. On my **Nefit Trendline HRC30** that is done by holding down the Home and Menu buttons simultaneously for a few seconds, selecting factory settings from the scroll menu and lastly pressing the Reset button.**
@@ -220,13 +221,13 @@ The code is built on the Arduino framework and is dependent on these external li
 
 In `boiler.ino` you can make calls to automatically send these read commands. See the function *regularUpdates()*
 
-#### Support for RC35 type Thermostats
+#### Supporting RC35 model Thermostats
 
-An RC35 thermostat has 4 heating circuits. To read the values use the Monitor type IDs (e.g. 0x3E, 0x48, etc). The mode (0=night, 1=day, 2=holiday) is the first byte of the telegram and the temperature is the value of the 2nd byte divided by 2.
+The code is designed for a Moduline300 (RC20) thermostat. To adjust for a RC35 first change `EMS_ID_THERMOSTAT` in `ems.h`. A RC35 thermostat has 4 heating circuits and to read the values use different Monitor type IDs (e.g. 0x3E, 0x48, etc). The mode (0=night, 1=day, 2=holiday) is the first byte of the telegram and the temperature is the value of the 2nd byte divided by 2.
 
 Then to set temperature values use the Working Mode with type IDs (0x3D, 0x47,0x51 and 0x5B) respectively. Set the offset (byte 4 of the header) to determine which temperature you're changing; 1 for night, 2 for day and 3 for holiday. The data value is the desired temperature multiplied by 2 as a single byte.
 
-Consult the wiki documentation for the data format.
+Consult the wiki documentation for the actual data format.
 
 ### Customizing the code
 
@@ -244,7 +245,7 @@ I'm using the standard PubSubClient client so make sure you set `-DMQTT_MAX_PACK
 
 I run Mosquitto on my Raspberry PI 3 as the MQTT broker.
 
-The boiler data is collected and sent as a single JSON object to MQTT TOPIC `home/boiler/boiler_data`. A hash is generated (CRC32 based) to determine if the payload has changed, otherwise don't send it. An example payload looks like:
+The boiler data is collected and sent as a single JSON object to MQTT TOPIC `home/boiler/boiler_data` (or `{hostname}/boiler_data` for ESPurna). A hash is generated (CRC32 based) to determine if the payload has changed, otherwise don't send it. An example payload looks like:
 
 `{"wWCurTmp":"43.0","wWHeat":"on","curFlowTemp":"51.7","retTemp":"48.0","burnGas":"off","heatPmp":"off","fanWork":"off","ignWork":"off","wWCirc":"off","selBurnPow":"0","curBurnPow":"0","sysPress":"1.6","boilTemp":"54.7","pumpMod":"4"}`
 
@@ -290,30 +291,34 @@ Roughly these are the steps needed when running Windows:
 
 ### Using ESPurna
 
-[ESPurna](https://github.com/xoseperez/espurna/wiki) is framework that handles most of the tedious tasks of building IoT devices so you can focus on the functionality you need. This replaces my ESPHelper code in the standalone version above. ESPurna is natively built on PlatformIO and Visual Studio Code too which is nice. So if you're brave, follow these steps:
+[ESPurna](https://github.com/xoseperez/espurna/wiki) is framework that handles most of the tedious tasks of building IoT devices so you can focus on the functionality you need. This replaces my ESPHelper code in the standalone version above. ESPurna is natively built on PlatformIO and Visual Studio Code too which is nice. The latest version supported is 1.13.3. So if you're brave, follow these steps:
 
 1. Download and install [NodeJS](https://nodejs.org/en/download). This gives you npm. Choose the LTS version
-2. Download ESPurna by cloning the ESPurna git repository from `https://github.com/xoseperez/espurna.git`
-3. Restart VSC. PlatformIO should detect and set some things up for you automagically
-4. From VSC open the folder `espurna\code`
+2. Download ESPurna by cloning the ESPurna git repository (command palette, git clone, https://github.com/xoseperez/espurna.git)
+3. Restart VSC.
+4. From VSC open the folder `espurna\code`. PlatformIO should detect and set some things up for you automagically
 5. open a terminal window (*ctrl-`*)
 6. Install the node modules: `npm install --only=dev`
-7. Build the web interface:  `node node_modules/gulp/bin/gulp.js`. This will create a compressed `code/espurna/static/index.html.gz.h`
-8. First time users build the filesystem by *ctrl-alt-t* and run the task 'uploadfs'
-9. Copy these files from this repo's *espurna* directory to where you installed ESPurna
+7. Build the web interface:  `node node_modules/gulp/bin/gulp.js`. This will create a compressed `code/espurna/static/index.html.gz.h`. If you get warnings about lf during the building edit `gulpfile.js` and change the line `'failOnError': true` to `false` as a temporary workaround.
+8. Modify the platformio.ini file making sure you add `-DUSE_CUSTOM_H -DUSE_EXTRA` to the `debug_flags`
+9. Copy the following files from EMS-ESP-Boiler repo to where you installed ESPurna
 
 ```
-code/html/index.html
-code/config/custom.h
-code/espurna/boiler-espurna.ino
-code/espurna/ems*.*
+espurna/index.html -> code/html/index.html
+espurna/custom.h -> code/config/custom.h
+espurna/boiler-espurna.ino -> code/espurna/boiler-espurna.ino
+ems*.* -> code/espurna/
 ```
 
-10. Now build and upload as you usually would. Look at my version of platformio.ini as an example.
+10. Now build and upload as you usually would with PlatformIO (or ctrl-arl-t and choose the right build). Look at my version of platformio.ini as an example.
+11. When the firmware loads, use a wifi connected pc/mobile to connect to the Access Point called ESPURNA_XXXXXX. Use 'fibonacci' as the password. Navigate to `http://192.168.4.1` from a browser, set a new username and password when prompted, log off the wifi and reconnect to the AP using these new credentials. Again go to 192.168.4.1
+12. In the ADMIN page enable Telnet and SAVE
+13. In the WIFI page add your home wifi details, click SAVE and reboot, and go to the new IP
+14. Configure MQTT
 
 The Telnet functions are `BOILER.READ`, `BOILER.INFO` and a few others for reference. `HELP` will list them. Add your own functions to expand the functionality by calling the EMS* functions as in the examples.
 
-If you run into issues refer to ESPurna's official setup instructions [here](https://github.com/xoseperez/espurna/wiki/Build-and-update-from-Visual-Studio-Code-using-PlatformIO).
+If you run into issues refer to ESPurna's official setup instructions [here](https://github.com/xoseperez/espurna/wiki/Build-and-update-from-Visual-Studio-Code-using-PlatformIO) and [here](https://github.com/xoseperez/espurna/wiki/Configuration).
 
 
 This is what ESPurna looks like with the custom boiler code:
@@ -328,10 +333,8 @@ pre-baked firmwares for some ESP8266 devices based on ESPurna are available in t
 2. Install the ESPTool by running `pip install esptool` from a command prompt
 3. Connect the ESP via USB, figure out the COM port
 4. run `esptool.py -p <com> write_flash 0x00000 <firmware>` where firmware is the `.bin` file and \<com\> is the COM port, e.g. `COM3`
-5. Connect using WiFi from a phone or PC to the "**ESPURNA_XXXXXX**" network. Password is '**fibonacci**'
-6. Once connected browse to "http://192.168.4.1" and setup your wifi, mqtt etc
 
-Again, if you run into problems read [this](https://github.com/xoseperez/espurna/wiki/Configuration) from ESPurna's configuration help page.
+now follow the steps in ESPurna section above from #10 on to configure the device.
 
 ### Using the Arduino IDE
 

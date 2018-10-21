@@ -5,9 +5,6 @@
 #undef EMBEDDED_WEB
 #define EMBEDDED_WEB 1
 
-#undef NTP_SERVER
-#define NTP_SERVER "nl.pool.ntp.org"
-
 //#undef MQTT_TOPIC
 //#define MQTT_TOPIC "/{identifier}"
 // default is  "{hostname}"
