@@ -119,21 +119,20 @@ netInfo homeNet = {.mqttHost = MQTT_IP,
 
 ESPHelper myESP(&homeNet);
 
-command_t PROGMEM
-          project_cmds[] = {{"s", "show statistics"},
-                      {"h", "show which EMS telegram types have special logic"},
-                      {"P", "publish data to MQTT"},
-                      {"v", "[n] set logging (0=none, 1=basic, 2=verbose)"},
-                      {"p", "poll response on/off (default is off)"},
-                      {"T", "thermostat Support on/off"},
-                      {"S", "shower timer on/off"},
-                      {"A", "shower alert on/off"},
-                      {"r", "[n] send EMS request (n=telegram type id. Use 'h' to list which are the common ones)"},
-                      {"t", "[n] set thermostat temperature to n"},
-                      {"m", "[n] set thermostat mode (0=low, 1=manual, 2=clock)"},
-                      {"w", "[n] set boiler warm water temperature to n (min 30)"},
-                      {"a", "[n] boiler warm water on (n=1) or off (n=0)"},
-                      {"x", "[n] experimental (warning: for debugging only!)"}};
+command_t PROGMEM project_cmds[] = {{"s", "show statistics"},
+                                    {"h", "list supported EMS telegram types"},
+                                    {"P", "publish all stat to MQTT"},
+                                    {"v", "[n] set logging (0=none, 1=basic, 2=verbose)"},
+                                    {"p", "poll ems response on/off (default is off)"},
+                                    {"T", "thermostat monitoring on/off"},
+                                    {"S", "shower timer on/off"},
+                                    {"A", "shower alert on/off"},
+                                    {"r", "[n] send EMS request (n=telegram type id. Use 'h' for list)"},
+                                    {"t", "[n] set thermostat temperature to n"},
+                                    {"m", "[n] set thermostat mode (0=low, 1=manual, 2=clock)"},
+                                    {"w", "[n] set boiler warm water temperature to n (min 30)"},
+                                    {"a", "[n] boiler warm water on (n=1) or off (n=0)"},
+                                    {"x", "[n] experimental (warning: for debugging only!)"}};
 
 // calculates size of an 2d array at compile time
 template <typename T, size_t N>
@@ -762,7 +761,11 @@ void regularUpdates() {
     // only do calls if the EMS is connected and alive
     if (Boiler_Status.boiler_online) {
         if ((cycle == 0) && Boiler_Status.thermostat_enabled) {
-            ems_doReadCommand(EMS_TYPE_RC20Temperature); // to force get the thermostat mode which is not broadcasted
+            // force get the thermostat mode which is not broadcasted
+            // important! this is only configured for the RC20. Look up the correct telegram type for other thermostat versions
+            if (EMS_ID_THERMOSTAT == 0x17) { // RC20 is type 0x17
+                ems_doReadCommand(EMS_TYPE_RC20Temperature);
+            }
         } else if (cycle == 1) {
             ems_doReadCommand(EMS_TYPE_UBAParameterWW); // get Warm Water values
         }
