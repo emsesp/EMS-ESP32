@@ -4,37 +4,37 @@ EMS-ESP-Boiler is an controller running on an ESP8266 to communicate with EMS (E
 
 There are 3 parts to this project, first the design of the circuit, second the code to deploy to an ESP8266 based microcontroller and lastly settings for Home Assistant to monitor data and issue direct commands via MQTT.
 
-[![version](https://img.shields.io/badge/version-1.1.1-brightgreen.svg)](CHANGELOG.md)
+[![version](https://img.shields.io/badge/version-1.1.2-brightgreen.svg)](CHANGELOG.md)
 [![branch](https://img.shields.io/badge/branch-dev-orange.svg)](https://github.org/xoseperez/espurna/tree/dev/)
 [![license](https://img.shields.io/github/license/xoseperez/espurna.svg)](LICENSE)
 
 - [EMS-ESP-Boiler](#ems-esp-boiler)
-  - [Introduction](#introduction)
-  - [Supported Boilers types](#supported-boilers-types)
-  - [Supported ESP8266 devices](#supported-esp8266-devices)
-  - [Getting Started](#getting-started)
-  - [Debugging the output](#debugging-the-output)
-  - [Building the circuit](#building-the-circuit)
-    - [Powering the circuit](#powering-the-circuit)
-  - [How the EMS works](#how-the-ems-works)
-    - [EMS IDs](#ems-ids)
-    - [EMS Polling](#ems-polling)
-    - [EMS Broadcasting](#ems-broadcasting)
-    - [EMS Reading and Writing](#ems-reading-and-writing)
-  - [The source code](#the-source-code)
-    - [Supported EMS Types](#supported-ems-types)
-      - [Support for RC35 type Thermostats](#support-for-rc35-type-thermostats)
-    - [Customizing the code](#customizing-the-code)
-    - [Using MQTT](#using-mqtt)
-    - [The basic shower logic](#the-basic-shower-logic)
-  - [Home Assistant Configuration](#home-assistant-configuration)
-  - [Building the firmware](#building-the-firmware)
-    - [Using PlatformIO Standalone](#using-platformio-standalone)
-    - [Using ESPurna](#using-espurna)
-    - [Using the pre-built firmware's](#using-the-pre-built-firmwares)
-    - [Using the Arduino IDE](#using-the-arduino-ide)
-  - [Known Issues and ToDo's](#known-issues-and-todos)
-  - [Your comments and feedback](#your-comments-and-feedback)
+    - [Introduction](#introduction)
+    - [Supported Boilers Types](#supported-boilers-types)
+    - [Supported ESP8266 devices](#supported-esp8266-devices)
+    - [Getting Started](#getting-started)
+    - [Monitoring The Output](#monitoring-the-output)
+    - [Building The Circuit](#building-the-circuit)
+        - [Powering The EMS Circuit](#powering-the-ems-circuit)
+    - [How The EMS Bus Works](#how-the-ems-bus-works)
+        - [EMS IDs](#ems-ids)
+        - [EMS Polling](#ems-polling)
+        - [EMS Broadcasting](#ems-broadcasting)
+        - [EMS Reading and Writing](#ems-reading-and-writing)
+    - [The ESP8266 Source Code](#the-esp8266-source-code)
+        - [Supported EMS Types](#supported-ems-types)
+            - [Supporting A Type RC35 Thermostat](#supporting-a-type-rc35-thermostat)
+        - [Customizing The Code](#customizing-the-code)
+        - [Using MQTT](#using-mqtt)
+        - [The Basic Shower Logic](#the-basic-shower-logic)
+    - [Home Assistant Configuration](#home-assistant-configuration)
+    - [Building The Firmware](#building-the-firmware)
+        - [Using PlatformIO Standalone](#using-platformio-standalone)
+        - [Using ESPurna](#using-espurna)
+        - [Using Pre-built Firmware](#using-pre-built-firmware)
+        - [Building Using Arduino IDE](#building-using-arduino-ide)
+    - [Known Issues and ToDo's](#known-issues-and-todos)
+    - [Your Comments and Feedback](#your-comments-and-feedback)
 
 ## Introduction
 
@@ -48,7 +48,7 @@ Acknowledgments and kudos to the following people and their open-sourced project
 
  **EMS Wiki** - A comprehensive [reference](https://emswiki.thefischer.net/doku.php?id=wiki:ems:telegramme) for decoding the EMS telegrams, which I found not always to be 100% accurate. It's in German so use Google Translate if you need help.
 
-## Supported Boilers types
+## Supported Boilers Types
 
 Most Bosch branded boilers that support the Logamatic EMS (and EMS+) bus protocols work with this design. Which are Nefit, Buderus, Worcester and Junkers and copyrighted.
 
@@ -66,7 +66,7 @@ I've tested the code and circuit with a few ESP8266 development boards such as t
 6. Attach the 3v3 out on the ESP8266 to the DC power line on the EMS circuit as indicated in the schematics.
 7. The WiFi connects via DHCP by default. Find the IP by from your router and then telnet (port 23) to it. Tip: to enable Telnet on Windows run `dism /online /Enable-Feature /FeatureName:TelnetClient` or install something like [putty](https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html). If everything is working you should see the messages appear in the window as shown in the next section. However if you're unable to locate the IP of the ESP then probably the WiFi failed to instantiate. In this case add -DUSE_SERIAL to the build options, connect at USB, build, upload and then use a terminal to connect to the serial port to see the debug messages. A word of warning, do not use both a USB and power from the EMS at the same time.
 
-## Debugging the output
+## Monitoring The Output
 
 Use the telnet client to inform you of all activity and errors real-time. This is an example of the telnet output:
 
@@ -93,7 +93,7 @@ Commands can be issued directly to the EMS bus typing in a letter followed by an
 
 **Disclaimer: be careful when sending values to the boiler. If in doubt you can always reset the boiler to its original factory settings by following the instructions in the user guide. On my **Nefit Trendline HRC30** that is done by holding down the Home and Menu buttons simultaneously for a few seconds, selecting factory settings from the scroll menu and lastly pressing the Reset button.**
 
-## Building the circuit
+## Building The Circuit
 
 The EMS circuit is really all credit to the hard work many people have done before me, noticeably *susisstrolch* with his ESP8266 [version](https://github.com/susisstrolch/EMS-ESP8266_12-PCB/tree/newmaster/Schematics/EMS-ESP8266-12).
 
@@ -115,17 +115,19 @@ And lastly if you don't fancy building the circuit, [bbqkees](http://www.domotic
 
 ![WemosD1](doc/schematics/wemos_kees.png)
 
-### Powering the circuit
+### Powering The EMS Circuit
 
-My circuit will work with both 3.3V and 5V. It's easiest though to power directly from the ESP's 3V3 line.
+The EMS circuit will work with both 3.3V and 5V. It's easiest though to power directly from the ESP8266's 3V3 line and run a steady 5V into the microcontroller.
 
-Powering the ESP89266 can be either via the USB from a PC or external 5V power supply or from the EMS itself using a buck step-down converter. The EMS provides about a 15V AC current direct from the EMS line, or around 12V from the 3.5" service jack. The advantage of using the EMS for power is obviously the exclusion of an external power adapter and you can place the small circuit in line with the thermostat tucked away close to the boiler. The circuit's bridge rectifier will produce about 14.5V DC at UEMS (see schematic). I use a [Pololu D24C22F5](https://www.pololu.com/product/2858) which is 5V/2A buck step-down module and probably slightly overkill for what we need. The additional part of the circuit is shown below along with an earlier breadboard prototype using a NodeMCU2 (with the additional LEDs):
+Powering the ESP can be either via the USB from a PC or external 5V power supply or from the EMS itself using a buck step-down converter. The EMS provides about a 15V AC current direct from the EMS line, or around 12V from the 3.5" service jack. The advantage of using the EMS for power is obviously the exclusion of an external power adapter and you can place the small circuit in line with the thermostat tucked away close to the boiler or inside the thermostat. The circuit's bridge rectifier will produce about 14.5V DC at UEMS (see schematic). I use a [Pololu D24C22F5](https://www.pololu.com/product/2858) which is 5V/2A buck step-down module. The additional part of the circuit is shown below along with an earlier breadboard prototype using a NodeMCU2 (with the additional LEDs):
 
-| Power circuit                              | Example                                              |
+| Power Circuit                              | Assembled Example                                    |
 | ------------------------------------------ | ---------------------------------------------------- |
 | ![Power circuit](doc/schematics/power.PNG) | ![Breadboard](doc/schematics/breadboard_example.png) |
 
-## How the EMS works
+***28/Oct/2018: Warning! Transmitting telegram packages while using the EMS bus to power the ESP8266 can cause interference due of the large current drain on some board designs. I'm revising that piece of the circuit with a supercapacitor to see if it helps and will update the schematics soon.***
+
+## How The EMS Bus Works
 
 Packages are sent to the EMS "bus" from the Boiler and any other compatible connected devices via serial TTL transmission. The protocol is 9600 baud, 8N1 (8 bytes, no parity, 1 stop bit). Each package is terminated with a break signal `<BRK>`, a 11-bit long low signal of zeros.
 
@@ -168,7 +170,6 @@ The tables below shows which types are broadcasted regularly by the boiler (ID 0
 | Boiler (0x08) | 0x2A    | n/a                 | status, specific to boiler type        | 21 bytes    | 10 seconds |
 | Boiler (0x08) | 0x07    | n/a                 | ?                                      | 21 bytes    | 30 seconds |
 
-
 | Source (ID)       | Type ID | Name              | Description                                         | Frequency  |
 | ----------------- | ------- | ----------------- | --------------------------------------------------- | ---------- |
 | Thermostat (0x17) | 0x06    | RC20Time          | returns time and date on the thermostat             | 60 seconds |
@@ -187,7 +188,7 @@ When doing a write request, the 7th bit is masked in the `[dest]`. After this wr
 
 Every telegram sent is echo'd back to Rx.
 
-## The source code
+## The ESP8266 Source Code
 
 *Disclaimer*: This code here is really for reference only, I don't expect anyone to use as is since it's highly tailored to my environment and my needs. Most of the code however is self explanatory with comments here and there. If you wish to make some changes start with the `defines` and `const` sections at the top of `boiler.ino`.
 
@@ -221,7 +222,7 @@ The code is built on the Arduino framework and is dependent on these external li
 
 In `boiler.ino` you can make calls to automatically send these read commands. See the function *regularUpdates()*
 
-#### Supporting RC35 model Thermostats
+#### Supporting A Type RC35 Thermostat
 
 The code is designed for a Moduline300 (RC20) thermostat. To adjust for a RC35 first change `EMS_ID_THERMOSTAT` in `ems.h`. A RC35 thermostat has 4 heating circuits and to read the values use different Monitor type IDs (e.g. 0x3E, 0x48, etc). The mode (0=night, 1=day, 2=holiday) is the first byte of the telegram and the temperature is the value of the 2nd byte divided by 2.
 
@@ -229,13 +230,13 @@ Then to set temperature values use the Working Mode with type IDs (0x3D, 0x47,0x
 
 Consult the wiki documentation for the actual data format.
 
-### Customizing the code
+### Customizing The Code
 
 Most of the changes will be done in `boiler.ino` and `ems.cpp`.
 
 - To add new handlers for data types, first create a callback function and add to the `EMS_Types` array at the top of the file `ems.cpp` and modify `ems.h`
 - To change your thermostat type set `EMS_ID_THERMOSTAT` in `ems.cpp`. The default is 0x17 for an RC20.
-- The DEFINES `BOILER_THERMOSTAT_ENABLED`, `BOILER_SHOWER_ENABLED` and `BOILER_SHOWER_TIMER` enabled the thermostat logic, the shower logic and the shower timer alert logic respectively. 1 is on and 0 is off.
+- The `#DEFINES` `BOILER_THERMOSTAT_ENABLED`, `BOILER_SHOWER_ENABLED` and `BOILER_SHOWER_TIMER` enabled the thermostat logic, the shower logic and the shower timer alert logic respectively. 1 is on (enabled) and 0 is off (disabled).
 
 ### Using MQTT
 
@@ -255,7 +256,7 @@ Values sent from HA to set the temperature come in via the subscribed topic `hom
 
 These topics can be configured in the `TOPIC_*` defines in `boiler.ino`. Make sure you change the HA configuration too to match.
 
-### The basic shower logic
+### The Basic Shower Logic
 
 Checking whether the shower is running was tricky. We know when the warm water is on and being heated but need to distinguish between the central heating, shower, hot tap and bath. I found via trial and error the Selected Burner Max Power is between 80% and 115% when the shower is running and fixed at 75% if the central heating is on. Furthermore the Selected Flow Impulsion is 80 C for the heating.
 
@@ -273,8 +274,7 @@ and the alerts on an iPhone/Android using PushBullet, PushOver or any notificati
 
 You can find the .yaml configuration files under `doc/ha`. See also https://community.home-assistant.io/t/thermostat-and-boiler-controller-for-ems-based-boilers-nefit-buderus-bosch-using-esp/53382
 
-
-## Building the firmware
+## Building The Firmware
 
 ### Using PlatformIO Standalone
 
@@ -303,7 +303,7 @@ Roughly these are the steps needed when running Windows:
 8. Modify the platformio.ini file making sure you add `-DUSE_CUSTOM_H -DUSE_EXTRA` to the `debug_flags`
 9. Copy the following files from EMS-ESP-Boiler repo to where you installed ESPurna
 
-```
+```c
 espurna/index.html -> code/html/index.html
 espurna/custom.h -> code/config/custom.h
 espurna/boiler-espurna.ino -> code/espurna/boiler-espurna.ino
@@ -320,12 +320,11 @@ The Telnet functions are `BOILER.READ`, `BOILER.INFO` and a few others for refer
 
 If you run into issues refer to ESPurna's official setup instructions [here](https://github.com/xoseperez/espurna/wiki/Build-and-update-from-Visual-Studio-Code-using-PlatformIO) and [here](https://github.com/xoseperez/espurna/wiki/Configuration).
 
-
 This is what ESPurna looks like with the custom boiler code:
 
 ![Example running in ESPurna](doc/espurna/example.PNG)
 
-### Using the pre-built firmware's
+### Using Pre-built Firmware
 
 pre-baked firmwares for some ESP8266 devices based on ESPurna are available in the directory `/firmware` which you can upload yourself using [esptool](https://github.com/espressif/esptool) bootloader. On Windows, follow these instructions:
 
@@ -336,7 +335,7 @@ pre-baked firmwares for some ESP8266 devices based on ESPurna are available in t
 
 now follow the steps in ESPurna section above from #10 on to configure the device.
 
-### Using the Arduino IDE
+### Building Using Arduino IDE
 
 Porting to the Arduino IDE can be a little tricky but it is possible.
 
@@ -369,8 +368,6 @@ Here's my top things I'm still working on:
 - Complete the ESP32 version. It's surprisingly a lot easier doing the UART handling on an ESP32 with the ESP-IDF SDK. I have a first version beta that is working.
 - Find a better way to control the 3-way valve to switch the warm water off quickly rather than deactivating the warm water heater each time. There is an unsupported call to do this, but I think its too risky and experimental. I'd love to get my hands on an Nefit Easy, sniff the packets being sent and reverse engineer the logic. Anyone help?
 
-## Your comments and feedback
+## Your Comments and Feedback
 
-Any comments, suggestions or code changes are very welcome.
-
-You can contact me at **dev** at **derbyshire** dot **nl** or by posting a GitHub issue.
+Any comments, suggestions or code changes are very welcome. Please post a GitHub issue.
