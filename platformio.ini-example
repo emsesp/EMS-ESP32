@@ -4,8 +4,8 @@ env_default = nodemcuv2
 
 [common]
 platform = espressif8266
-; optional flags are -DUSE_LED -DSHOWER_TEST -DDEBUG -DUSE_SERIAL
-build_flags = -DMQTT_MAX_PACKET_SIZE=300
+; optional flags are -DUSE_LED -DSHOWER_TEST -DDEBUG -DUSE_SERIAL -DNO_TX
+build_flags = -g -w -DMQTT_MAX_PACKET_SIZE=300
 build_flags_custom = '-DWIFI_SSID="my_ssid"' '-DWIFI_PASSWORD="my_password"' '-DMQTT_IP="my_broker_ip"' '-DMQTT_USER="my_broker_username"' '-DMQTT_PASS="my_broker_password"' 
 lib_deps =
   Time
