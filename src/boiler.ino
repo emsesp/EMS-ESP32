@@ -17,7 +17,6 @@
 
 // standard arduino libs
 #include <Ticker.h> // https://github.com/esp8266/Arduino/tree/master/libraries/Ticker
-#include <avr/pgmspace.h>
 
 // these are set as -D build flags during compilation
 //#define WIFI_SSID "<my_ssid>"
@@ -120,7 +119,7 @@ netInfo homeNet = {.mqttHost = MQTT_IP,
 ESPHelper myESP(&homeNet);
 
 command_t PROGMEM project_cmds[] = {{"s", "show statistics"},
-                                    {"h", "list supported EMS telegram types"},
+                                    {"h", "list supported EMS telegram type ids"},
                                     {"P", "publish all stat to MQTT"},
                                     {"v", "[n] set logging (0=none, 1=basic, 2=verbose)"},
                                     {"p", "poll ems response on/off (default is off)"},
@@ -567,7 +566,9 @@ void MQTTcallback(char * topic, byte * payload, uint8_t length) {
     if (strcmp(topic, TOPIC_BOILER_WARM_WATER_SELECTED_TEMPERATURE) == 0) {
         uint8_t i = strtol((char *)payload, 0, 10);
         myDebug("MQTT topic: boiler_warm_water_selected_temperature value %d\n", i);
+#ifndef NO_TX
         ems_setWarmWaterTemp(i);
+#endif
         // publish back so HA is immediately updated
         publishValues();
         return;
@@ -685,9 +686,12 @@ void setup() {
 #endif
 
     // Timers using Ticker library
-    publishValuesTimer.attach(PUBLISHVALUES_TIME, publishValues);                         // post HA values
-    systemCheckTimer.attach(SYSTEMCHECK_TIME, systemCheck);                               // check if Boiler is online
+    publishValuesTimer.attach(PUBLISHVALUES_TIME, publishValues); // post HA values
+    systemCheckTimer.attach(SYSTEMCHECK_TIME, systemCheck);       // check if Boiler is online
+
+#ifndef NO_TX
     regularUpdatesTimer.attach((REGULARUPDATES_TIME / MAX_MANUAL_CALLS), regularUpdates); // regular reads from the EMS
+#endif
 
     // set up WiFi
     myESP.setWifiCallback(WIFIcallback);
@@ -818,6 +822,7 @@ void loop() {
         myESP.publish(TOPIC_SHOWER_TIMER, Boiler_Status.shower_timer ? "1" : "0");
         myESP.publish(TOPIC_SHOWER_ALERT, Boiler_Status.shower_alert ? "1" : "0");
 
+#ifndef NO_TX
         if (Boiler_Status.boiler_online) {
             // now that we're connected lets get some data from the EMS
             ems_doReadCommand(EMS_TYPE_UBAParameterWW);
@@ -825,6 +830,7 @@ void loop() {
         } else {
             myDebugLog("Boot: can't connect to EMS.");
         }
+#endif
     }
 
     // if we received new data and flagged for pushing, do it
