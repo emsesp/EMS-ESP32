@@ -119,13 +119,13 @@ And lastly if you don't fancy building the circuit, [bbqkees](http://www.domotic
 
 The EMS circuit will work with both 3.3V and 5V. It's easiest though to power directly from the ESP8266's 3V3 line and run a steady 5V into the microcontroller.
 
-Powering the ESP can be either via the USB from a PC or external 5V power supply or from the EMS itself using a buck step-down converter. The EMS provides about a 15V AC current direct from the EMS line, or around 12V from the 3.5" service jack. The advantage of using the EMS for power is obviously the exclusion of an external power adapter and you can place the small circuit in line with the thermostat tucked away close to the boiler or inside the thermostat. The circuit's bridge rectifier will produce about 14.5V DC at UEMS (see schematic). I use a [Pololu D24C22F5](https://www.pololu.com/product/2858) which is 5V/2A buck step-down module. The additional part of the circuit is shown below along with an earlier breadboard prototype using a NodeMCU2 (with the additional LEDs):
+Powering the ESP can be either via the USB from a PC or external 5V power supply or from the EMS itself using a buck step-down converter. The EMS provides about a 15V AC current direct from the EMS line, or around 12V from the 3.5" service jack. The advantage of using the EMS for power is obviously the exclusion of an external power adapter and you can place the small circuit in line with the thermostat tucked away close to the boiler or thermostat. The circuit's bridge rectifier will produce about 14.5V DC at UEMS (see schematic). I use a [Pololu D24C22F5](https://www.pololu.com/product/2858) which is 5V/2A buck step-down module. The additional part of the circuit is shown below along with an earlier breadboard prototype using a NodeMCU2 (with the additional LEDs):
 
 | Power Circuit                              | Assembled Example                                    |
 | ------------------------------------------ | ---------------------------------------------------- |
 | ![Power circuit](doc/schematics/power.PNG) | ![Breadboard](doc/schematics/breadboard_example.png) |
 
-***28/Oct/2018: Warning! Transmitting telegram packages while using the EMS bus to power the ESP8266 can cause interference due of the large current drain on some board designs. I'm revising that piece of the circuit with a supercapacitor to see if it helps and will update the schematics soon.***
+***28/Oct/2018: Warning! Transmitting telegram packages while using the EMS bus to power the ESP8266 can cause interference due of the large current drain on some board designs. I'm revising that piece of the circuit and will update the schematics soon.***
 
 ## How The EMS Bus Works
 
@@ -291,7 +291,7 @@ Roughly these are the steps needed when running Windows:
 
 ### Using ESPurna
 
-[ESPurna](https://github.com/xoseperez/espurna/wiki) is framework that handles most of the tedious tasks of building IoT devices so you can focus on the functionality you need. This replaces my ESPHelper code in the standalone version above. ESPurna is natively built on PlatformIO and Visual Studio Code too which is nice. The latest version supported is 1.13.3. So if you're brave, follow these steps:
+[ESPurna](https://github.com/xoseperez/espurna/wiki) is framework that handles most of the tedious tasks of building IoT devices so you can focus on the functionality you need. This replaces my ESPHelper code in the standalone version above. ESPurna is natively built on PlatformIO and Visual Studio Code too which is nice. The latest version I tested this on is 1.13.3. So if you're brave, follow these steps:
 
 1. Download and install [NodeJS](https://nodejs.org/en/download). This gives you npm. Choose the LTS version
 2. Download ESPurna by cloning the ESPurna git repository (command palette, git clone, https://github.com/xoseperez/espurna.git)
@@ -323,6 +323,8 @@ If you run into issues refer to ESPurna's official setup instructions [here](htt
 This is what ESPurna looks like with the custom boiler code:
 
 ![Example running in ESPurna](doc/espurna/example.PNG)
+
+*Note: I didn't bother porting all the EMS Read and Write commands from the Telnet code to the Espurna, but its pretty straight forward if you want to extend the code.*
 
 ### Using Pre-built Firmware
 
