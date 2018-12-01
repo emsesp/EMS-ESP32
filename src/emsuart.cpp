@@ -110,8 +110,8 @@ void ICACHE_FLASH_ATTR emsuart_init() {
     USC0(EMSUART_UART) &= ~(tmp);                     // clear bits
 
     // conf 1 params
-    // UCTOE = RX TimeOut enable (1)
-    // UCTOT = RX TimeOut Threshold (7bit) = want this when no more data after 2 characters. (default was 2)
+    // UCTOE = RX TimeOut enable (default is 1)
+    // UCTOT = RX TimeOut Threshold (7bit) = want this when no more data after 2 characters. (default is 2)
     // UCFFT = RX FIFO Full Threshold (7 bit) = want this to be 31 for 32 bytes of buffer. (default was 127).
     USC1(EMSUART_UART) = 0;                                              // reset config first
     USC1(EMSUART_UART) = (31 << UCFFT) | (0x02 << UCTOT) | (1 << UCTOE); // enable interupts
