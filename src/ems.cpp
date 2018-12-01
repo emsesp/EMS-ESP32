@@ -235,10 +235,10 @@ uint16_t _toLong(uint8_t i, uint8_t * data) {
 
 // debugging only - print out all handled types
 void ems_printAllTypes() {
-    myDebug("These %d telegram types are recognized:\n", _EMS_Types_max);
+    myDebug("These %d telegram type ids are recognized:\n", _EMS_Types_max);
 
     for (uint8_t i = 0; i < _EMS_Types_max; i++) {
-        myDebug(" %s:\ttype:%02x (%s)\n",
+        myDebug(" %s:\ttype %02x (%s)\n",
                 EMS_Types[i].src == EMS_ID_THERMOSTAT ? "Thermostat" : "Boiler",
                 EMS_Types[i].type,
                 EMS_Types[i].typeString);
