@@ -7,7 +7,6 @@
    platform: group
    services:
      - service: ios_pauls_iphone 
-     - service: ios_fleurs_iphone 
      - service: pushover
 
  - name: admin_notify

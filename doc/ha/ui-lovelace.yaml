@@ -1,7 +1,3 @@
-resources:
-  - url: /local/custom-lovelace/thermostat-card/thermostat-card.js
-    type: module
-
 title: Home
 views:
   
@@ -66,17 +62,5 @@ views:
           entities:
             - sensor.current_room_temperature
             - sensor.dark_sky_temperature
-        - type: custom:thermostat-card
-          title: Living Room
+        - type: thermostat
           entity: climate.thermostat
-          pending: 1
-          chevron_size: 50
-          no_card: false
-          hvac:
-            states:
-              'low': 'low'
-              'manual': 'manual'
-              'auto': 'auto'
-            attribute: operation_mode
-          highlight_tap: true
-  
