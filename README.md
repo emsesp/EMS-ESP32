@@ -117,15 +117,16 @@ And lastly if you don't fancy building the circuit, [bbqkees](http://www.domotic
 
 ### Powering The EMS Circuit
 
-The EMS circuit will work with both 3.3V and 5V. It's easiest though to power directly from the ESP8266's 3V3 line and run a steady 5V into the microcontroller.
+The EMS circuit will work with both 3.3V and 5V. It's easiest though to power directly from the ESP8266's 3V3 line and run a steady 5V into the microcontroller. Powering the ESP8266 microcontroller can be either
+- via the USB if your dev board has one
+- using an external 5V power supply into the 5V vin on the board
+- powering from the 3.5" service jack on the boiler. This will give you 8V so you need a buck converter (like a [Pololu D24C22F5](https://www.pololu.com/product/2858)) to step this down to 5V to provide enough power to the ESP8266 (250mA at least)
+- powering from the EMS line, which is 15V A/C and using a buck converter as described above. Note the current design has stability issues when sending packages in this configuration so this is not recommended yet if you plan to many send commands to the thermostat or boiler.
 
-Powering the ESP can be either via the USB from a PC or external 5V power supply or from the EMS itself using a buck step-down converter. The EMS provides about a 15V AC current direct from the EMS line, or around 12V from the 3.5" service jack. The advantage of using the EMS for power is obviously the exclusion of an external power adapter and you can place the small circuit in line with the thermostat tucked away close to the boiler or thermostat. The circuit's bridge rectifier will produce about 14.5V DC at UEMS (see schematic). I use a [Pololu D24C22F5](https://www.pololu.com/product/2858) which is 5V/2A buck step-down module. The additional part of the circuit is shown below along with an earlier breadboard prototype using a NodeMCU2 (with the additional LEDs):
+| With Power Circuit                              |
+| ------------------------------------------ |
+| ![Power circuit](doc/schematics/Schematic_EMS-ESP-Boiler-supercap.png) |
 
-| Power Circuit                              | Assembled Example                                    |
-| ------------------------------------------ | ---------------------------------------------------- |
-| ![Power circuit](doc/schematics/power.PNG) | ![Breadboard](doc/schematics/breadboard_example.png) |
-
-***28/Oct/2018: Warning! Transmitting telegram packages while using the EMS bus to power the ESP8266 can cause interference due of the large current drain on some board designs. I'm revising that piece of the circuit and will update the schematics soon.***
 
 ## How The EMS Bus Works
 
@@ -151,7 +152,7 @@ Our circuit acts as a service key and thus uses an ID 0x0B. This ID is reserved 
 
 The bus master (boiler) sends out a poll request every second by sending out a sequential list of all possible IDs as a single byte followed by the break signal. The ID always has its high 7th bit set so in the code we're looking for 1 byte messages matching the format `[dest|0x80] <BRK>`.
 
-Any connected device can respond to a Polling call with an acknowledging by sending back a single byte with its own ID. In our case we would listen for a `[0x8B] <BRK>` (meaning us) and then send back `[0x0B] <BRK>` to say we're alive and ready.
+Any connected device can respond to a Polling call with an acknowledging by sending back a single byte with its own ID. In our case we would listen for a `[0x8B] <BRK>` (meaning us) and then send back `[0x0B] <BRK>` to say we're alive and ready. Although I found this is not needed for normal operation so it's disabled as default in the code.
 
 Polling is also the trigger to start transmitting any packages queued for sending. It must be done within 200ms or the bus master will time out.
 
