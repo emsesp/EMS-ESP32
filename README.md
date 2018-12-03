@@ -281,14 +281,31 @@ You can find the .yaml configuration files under `doc/ha`. See also https://comm
 
 PlatformIO is my preferred way. The code uses a modified version [ESPHelper](https://github.com/ItKindaWorks/ESPHelper) which handles all the basic handling of the WiFi, MQTT, OTA and Telnet server. I switched from Atom to the marvelous Visual Studio Code, works on Windows, OSX and Linux.
 
-Roughly these are the steps needed when running Windows:
+**On Windows:**
 
-- First download [Git](https://git-scm.com/download/win) (install using the default settings)
+- Download [Git](https://git-scm.com/download/win) (install using the default settings)
 - Download and install [Visual Studio Code](https://code.visualstudio.com/docs/?dv=win) (VSC)
 - Restart the PC (if using Windows) to apply the new PATH settings. It should now detect Git
 - Install these VSC extensions: PlatformIO IDE & GitLens, and then click reload to activate them
 - Git clone this repo, eith using `git clone` from PlatformIO's terminal or the Git GUI interface
 - Create a `platformio.ini` based on the `platformio.ini-example` making the necessary changes for your WiFi and MQTT credentials in the build flags. If you're not using MQTT leave MQTT_IP empty (`MQTT_IP=""`)
+
+**On Linux (e.g. Ubuntu under Windows10):**
+
+- make sure Python 2.7 is installed
+```python
+% pip install -U platformio
+% sudo platformio upgrade
+% platformio platform update
+
+% git clone https://github.com/proddy/EMS-ESP-Boiler.git
+% cd EMS-ESP-Boiler
+% cp platformio.ini-example platformio.ini
+```
+- edit `platformio.ini` to set `env_default` and the flags `WIFI_SSID WIFI_PASSWORD, MQTT_IP, MQTT_USER, MQTT_PASS`. If you're not using MQTT leave MQTT_IP empty (`MQTT_IP=""`)
+```c
+% platformio run -t upload
+```
 
 ### Using ESPurna
 
