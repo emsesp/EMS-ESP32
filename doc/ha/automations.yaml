@@ -52,7 +52,7 @@
   action:
     service: mqtt.publish
     data_template:
-      topic: 'home/boiler/thermostat_temp'
+      topic: 'home/boiler/thermostat_cmd_temp'
       payload: >
         {{ states.input_number.thermostat_temp.state }}
 

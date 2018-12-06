@@ -281,7 +281,7 @@ void showInfo() {
         } else if (EMS_Thermostat.mode == 1) {
             myDebug("manual\n");
         } else if (EMS_Thermostat.mode == 2) {
-            myDebug("clock/auto\n");
+            myDebug("auto\n");
         } else {
             myDebug("?\n");
         }
@@ -386,13 +386,13 @@ void publishValues() {
         mqttSend(TOPIC_THERMOSTAT_CURRTEMP, _float_to_char(s, EMS_Thermostat.curr_roomTemp));
         mqttSend(TOPIC_THERMOSTAT_SELTEMP, _float_to_char(s, EMS_Thermostat.setpoint_roomTemp));
 
-        // send mode 0=low, 1=manual, 2=clock/auto
+        // send mode 0=low, 1=manual, 2=auto
         if (EMS_Thermostat.mode == 0) {
             mqttSend(TOPIC_THERMOSTAT_MODE, "low");
         } else if (EMS_Thermostat.mode == 1) {
             mqttSend(TOPIC_THERMOSTAT_MODE, "manual");
         } else {
-            mqttSend(TOPIC_THERMOSTAT_MODE, "auto"); // must be auto
+            mqttSend(TOPIC_THERMOSTAT_MODE, "auto");
         }
     }
 }

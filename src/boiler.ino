@@ -51,14 +51,19 @@ uint8_t regularUpdatesCount = 0;
 #define MQTT_BOILER MQTT_BASE HOSTNAME "/"
 #define TOPIC_START MQTT_BOILER MQTT_TOPIC_START
 
-#define TOPIC_THERMOSTAT_TEMP MQTT_BOILER "thermostat_temp"                      // for received thermostat temp changes
-#define TOPIC_THERMOSTAT_CURRTEMP MQTT_BOILER "thermostat_currtemp"              // current temperature
-#define TOPIC_THERMOSTAT_SELTEMP MQTT_BOILER "thermostat_seltemp"                // selected temperature
-#define TOPIC_THERMOSTAT_MODE MQTT_BOILER "thermostat_mode"                      // selected temperature
+// thermostat
+#define TOPIC_THERMOSTAT_DATA MQTT_BOILER "thermostat_data"         // for sending thermostat values
+#define TOPIC_THERMOSTAT_CMD_TEMP MQTT_BOILER "thermostat_cmd_temp" // for received thermostat temp changes
+#define TOPIC_THERMOSTAT_CMD_MODE MQTT_BOILER "thermostat_cmd_mode" // for received thermostat mode changes
+#define TOPIC_THERMOSTAT_CURRTEMP "thermostat_currtemp"             // current temperature
+#define TOPIC_THERMOSTAT_SELTEMP "thermostat_seltemp"               // selected temperature
+#define TOPIC_THERMOSTAT_MODE "thermostat_mode"                     // mode
+
+// boiler
+#define TOPIC_BOILER_DATA MQTT_BOILER "boiler_data"                              // for sending boiler values
 #define TOPIC_BOILER_WARM_WATER_SELECTED_TEMPERATURE MQTT_BOILER "boiler_wwtemp" // warm water selected temp
 
-#define TOPIC_BOILER_DATA MQTT_BOILER "boiler_data" // for sending boiler values
-
+// shower time
 #define TOPIC_SHOWERTIME MQTT_BOILER "showertime"           // for sending shower time results
 #define TOPIC_SHOWER_ALARM "shower_alarm"                   // for notifying HA that shower time has reached its limit
 #define TOPIC_SHOWER_TIMER MQTT_BOILER "shower_timer"       // toggle switch for enabling the shower logic
@@ -128,7 +133,7 @@ command_t PROGMEM project_cmds[] = {{"s", "show statistics"},
                                     {"A", "shower alert on/off"},
                                     {"r", "[n] send EMS request (n=telegram type id. Use 'h' for list)"},
                                     {"t", "[n] set thermostat temperature to n"},
-                                    {"m", "[n] set thermostat mode (0=low, 1=manual, 2=clock)"},
+                                    {"m", "[n] set thermostat mode (1=manual, 2=auto)"},
                                     {"w", "[n] set boiler warm water temperature to n (min 30)"},
                                     {"a", "[n] boiler warm water on (n=1) or off (n=0)"},
                                     {"x", "[n] experimental (warning: for debugging only!)"}};
@@ -146,8 +151,9 @@ _Boiler_Shower Boiler_Shower;
 // Debugger to telnet
 #define myDebug(x, ...) myESP.printf(x, ##__VA_ARGS__);
 
-// CRC
-uint32_t previousPublishCRC = 0;
+// CRC checks
+uint32_t previousBoilerPublishCRC     = 0;
+uint32_t previousThermostatPublishCRC = 0;
 
 // Times
 const unsigned long POLL_TIMEOUT_ERR = 10000; // if no signal from boiler for last 10 seconds, assume its offline
@@ -378,9 +384,9 @@ void showInfo() {
         } else if (EMS_Thermostat.mode == 1) {
             myDebug("manual\n");
         } else if (EMS_Thermostat.mode == 2) {
-            myDebug("clock/auto\n");
+            myDebug("auto\n");
         } else {
-            myDebug("?\n");
+            myDebug("<%d>\n", EMS_Thermostat.mode);
         }
     }
 
@@ -395,35 +401,35 @@ void showInfo() {
 }
 
 // send values to HA via MQTT
-void publishValues() {
+void publishValues(bool force) {
     char s[20]; // for formatting strings
 
     // Boiler values as one JSON object
     StaticJsonBuffer<512> jsonBuffer;
     char                  data[512];
-    JsonObject &          root = jsonBuffer.createObject();
+    JsonObject &          rootBoiler = jsonBuffer.createObject();
 
-    root["wWSelTemp"]   = _int_to_char(s, EMS_Boiler.wWSelTemp);
-    root["wWActivated"] = _bool_to_char(s, EMS_Boiler.wWActivated);
-    root["wWCurTmp"]    = _float_to_char(s, EMS_Boiler.wWCurTmp);
-    root["wWHeat"]      = _bool_to_char(s, EMS_Boiler.wWHeat);
-    root["curFlowTemp"] = _float_to_char(s, EMS_Boiler.curFlowTemp);
-    root["retTemp"]     = _float_to_char(s, EMS_Boiler.retTemp);
-    root["burnGas"]     = _bool_to_char(s, EMS_Boiler.burnGas);
-    root["heatPmp"]     = _bool_to_char(s, EMS_Boiler.heatPmp);
-    root["fanWork"]     = _bool_to_char(s, EMS_Boiler.fanWork);
-    root["ignWork"]     = _bool_to_char(s, EMS_Boiler.ignWork);
-    root["wWCirc"]      = _bool_to_char(s, EMS_Boiler.wWCirc);
-    root["selBurnPow"]  = _int_to_char(s, EMS_Boiler.selBurnPow);
-    root["curBurnPow"]  = _int_to_char(s, EMS_Boiler.curBurnPow);
-    root["sysPress"]    = _float_to_char(s, EMS_Boiler.sysPress);
-    root["boilTemp"]    = _float_to_char(s, EMS_Boiler.boilTemp);
-    root["pumpMod"]     = _int_to_char(s, EMS_Boiler.pumpMod);
+    rootBoiler["wWSelTemp"]   = _int_to_char(s, EMS_Boiler.wWSelTemp);
+    rootBoiler["wWActivated"] = _bool_to_char(s, EMS_Boiler.wWActivated);
+    rootBoiler["wWCurTmp"]    = _float_to_char(s, EMS_Boiler.wWCurTmp);
+    rootBoiler["wWHeat"]      = _bool_to_char(s, EMS_Boiler.wWHeat);
+    rootBoiler["curFlowTemp"] = _float_to_char(s, EMS_Boiler.curFlowTemp);
+    rootBoiler["retTemp"]     = _float_to_char(s, EMS_Boiler.retTemp);
+    rootBoiler["burnGas"]     = _bool_to_char(s, EMS_Boiler.burnGas);
+    rootBoiler["heatPmp"]     = _bool_to_char(s, EMS_Boiler.heatPmp);
+    rootBoiler["fanWork"]     = _bool_to_char(s, EMS_Boiler.fanWork);
+    rootBoiler["ignWork"]     = _bool_to_char(s, EMS_Boiler.ignWork);
+    rootBoiler["wWCirc"]      = _bool_to_char(s, EMS_Boiler.wWCirc);
+    rootBoiler["selBurnPow"]  = _int_to_char(s, EMS_Boiler.selBurnPow);
+    rootBoiler["curBurnPow"]  = _int_to_char(s, EMS_Boiler.curBurnPow);
+    rootBoiler["sysPress"]    = _float_to_char(s, EMS_Boiler.sysPress);
+    rootBoiler["boilTemp"]    = _float_to_char(s, EMS_Boiler.boilTemp);
+    rootBoiler["pumpMod"]     = _int_to_char(s, EMS_Boiler.pumpMod);
 
-    size_t len = root.measureLength();
-    root.printTo(data, len + 1); // form the json string
+    size_t len = rootBoiler.measureLength();
+    rootBoiler.printTo(data, len + 1); // form the json string
 
-    // calculate hash
+    // calculate hash and send values if something has changed, to save unnecessary wifi traffic
     CRC32 crc;
     for (size_t i = 0; i < len - 1; i++) {
         crc.update(data[i]);
@@ -431,11 +437,10 @@ void publishValues() {
     uint32_t checksum = crc.finalize();
     //myDebug("HASH=%d %08x, len=%d, s=%s\n", checksum, checksum, len, data);
 
-    // only send values if something has changed, to save unnecessary wifi traffic
-    if (previousPublishCRC != checksum) {
-        previousPublishCRC = checksum;
+    if ((previousBoilerPublishCRC != checksum) || force) {
+        previousBoilerPublishCRC = checksum;
         if (ems_getLogging() != EMS_SYS_LOGGING_NONE) {
-            myDebug("Publishing data to MQTT topics\n");
+            myDebug("Publishing boiler data via MQTT\n");
         }
 
         // send values via MQTT
@@ -445,20 +450,41 @@ void publishValues() {
     // handle the thermostat values separately
     if (EMS_Sys_Status.emsThermostatEnabled) {
         // only send thermostat values if we actually have them
-        if (((int)EMS_Thermostat.curr_roomTemp == (int)0) || ((int)EMS_Thermostat.setpoint_roomTemp == (int)0)) {
+        if (((int)EMS_Thermostat.curr_roomTemp == (int)0) || ((int)EMS_Thermostat.setpoint_roomTemp == (int)0))
             return;
+
+        // build json object
+        JsonObject & rootThermostat               = jsonBuffer.createObject();
+        rootThermostat[TOPIC_THERMOSTAT_CURRTEMP] = _float_to_char(s, EMS_Thermostat.curr_roomTemp);
+        rootThermostat[TOPIC_THERMOSTAT_SELTEMP]  = _float_to_char(s, EMS_Thermostat.setpoint_roomTemp);
+
+        // send mode 0=low, 1=manual, 2=auto
+        if (EMS_Thermostat.mode == 0) {
+            rootThermostat[TOPIC_THERMOSTAT_MODE] = "low";
+        } else if (EMS_Thermostat.mode == 1) {
+            rootThermostat[TOPIC_THERMOSTAT_MODE] = "manual";
+        } else {
+            rootThermostat[TOPIC_THERMOSTAT_MODE] = "auto";
         }
 
-        myESP.publish(TOPIC_THERMOSTAT_CURRTEMP, _float_to_char(s, EMS_Thermostat.curr_roomTemp));
-        myESP.publish(TOPIC_THERMOSTAT_SELTEMP, _float_to_char(s, EMS_Thermostat.setpoint_roomTemp));
+        size_t len = rootThermostat.measureLength();
+        rootThermostat.printTo(data, len + 1); // form the json string
 
-        // send mode 0=low, 1=manual, 2=clock/auto
-        if (EMS_Thermostat.mode == 0) {
-            myESP.publish(TOPIC_THERMOSTAT_MODE, "low");
-        } else if (EMS_Thermostat.mode == 1) {
-            myESP.publish(TOPIC_THERMOSTAT_MODE, "manual");
-        } else {
-            myESP.publish(TOPIC_THERMOSTAT_MODE, "auto"); // must be auto
+        // calculate new CRC
+        crc.reset();
+        for (size_t i = 0; i < len - 1; i++) {
+            crc.update(data[i]);
+        }
+        uint32_t checksum = crc.finalize();
+
+        if ((previousThermostatPublishCRC != checksum) || force) {
+            previousThermostatPublishCRC = checksum;
+            if (ems_getLogging() != EMS_SYS_LOGGING_NONE) {
+                myDebug("Publishing thermostat data via MQTT\n");
+            }
+
+            // send values via MQTT
+            myESP.publish(TOPIC_THERMOSTAT_DATA, data);
         }
     }
 }
@@ -492,7 +518,7 @@ void myDebugCallback() {
         break;
     case 'P':
         myESP.logger(LOG_HA, "Force publish values");
-        publishValues();
+        publishValues(true);
         break;
     case 'r': // read command for Boiler or Thermostat
         ems_doReadCommand((uint8_t)strtol(&cmd[2], 0, 16));
@@ -504,7 +530,10 @@ void myDebugCallback() {
         ems_printAllTypes();
         break;
     case 'm': // set thermostat mode
-        ems_setThermostatMode(cmd[2] - '0');
+        if ((cmd[2] - '0') == 1)
+            ems_setThermostatMode(1);
+        else if ((cmd[2] - '0') == 2)
+            ems_setThermostatMode(2);
         break;
     case 'w': // set warm water temp
         ems_setWarmWaterTemp((uint8_t)strtol(&cmd[2], 0, 10));
@@ -551,14 +580,26 @@ void MQTTcallback(char * topic, byte * payload, uint8_t length) {
         return;
     }
 
-    // thermostat_temp
-    if (strcmp(topic, TOPIC_THERMOSTAT_TEMP) == 0) {
+    // thermostat temp changes
+    if (strcmp(topic, TOPIC_THERMOSTAT_CMD_TEMP) == 0) {
         float f = strtof((char *)payload, 0);
         char  s[10];
-        myDebug("MQTT topic: thermostat_temp value %s\n", _float_to_char(s, f));
+        myDebug("MQTT topic: thermostat temp value %s\n", _float_to_char(s, f));
         ems_setThermostatTemp(f);
         // publish back so HA is immediately updated
-        publishValues();
+        publishValues(true);
+        return;
+    }
+
+    // thermostat mode changes
+    if (strcmp(topic, TOPIC_THERMOSTAT_CMD_MODE) == 0) {
+        payload[length] = '\0'; // add null terminator
+        myDebug("MQTT topic: thermostat mode value %s\n", payload);
+        if (strcmp((char *)payload, "auto") == 0) {
+            ems_setThermostatMode(2);
+        } else if (strcmp((char *)payload, "manual") == 0) {
+            ems_setThermostatMode(1);
+        }
         return;
     }
 
@@ -570,7 +611,7 @@ void MQTTcallback(char * topic, byte * payload, uint8_t length) {
         ems_setWarmWaterTemp(i);
 #endif
         // publish back so HA is immediately updated
-        publishValues();
+        publishValues(true);
         return;
     }
 
@@ -667,6 +708,11 @@ void _initBoiler() {
     updateHeartbeat();
 }
 
+// call PublishValues without forcing, so using CRC to see if we really need to publish
+void do_publishValues() {
+    publishValues(false);
+}
+
 //
 // SETUP
 // Note: we don't init the UART here as we should wait until everything is loaded first. It's done in loop()
@@ -686,8 +732,8 @@ void setup() {
 #endif
 
     // Timers using Ticker library
-    publishValuesTimer.attach(PUBLISHVALUES_TIME, publishValues); // post HA values
-    systemCheckTimer.attach(SYSTEMCHECK_TIME, systemCheck);       // check if Boiler is online
+    publishValuesTimer.attach(PUBLISHVALUES_TIME, do_publishValues); // post HA values
+    systemCheckTimer.attach(SYSTEMCHECK_TIME, do_systemCheck);       // check if Boiler is online
 
 #ifndef NO_TX
     regularUpdatesTimer.attach((REGULARUPDATES_TIME / MAX_MANUAL_CALLS), regularUpdates); // regular reads from the EMS
@@ -700,7 +746,8 @@ void setup() {
     myESP.setMQTTCallback(MQTTcallback);
     myESP.addSubscription(MQTT_HA);
     myESP.addSubscription(TOPIC_START);
-    myESP.addSubscription(TOPIC_THERMOSTAT_TEMP);
+    myESP.addSubscription(TOPIC_THERMOSTAT_CMD_TEMP);
+    myESP.addSubscription(TOPIC_THERMOSTAT_CMD_MODE);
     myESP.addSubscription(TOPIC_SHOWER_TIMER);
     myESP.addSubscription(TOPIC_SHOWER_ALERT);
     myESP.addSubscription(TOPIC_BOILER_WARM_WATER_SELECTED_TEMPERATURE);
@@ -748,7 +795,7 @@ void heartbeat() {
 }
 
 // do a healthcheck every now and then to see if we connections
-void systemCheck() {
+void do_systemCheck() {
     // first do a system check to see if there is still a connection to the EMS
     Boiler_Status.boiler_online = ((timestamp - EMS_Sys_Status.emsLastPoll) < POLL_TIMEOUT_ERR);
     if (!Boiler_Status.boiler_online) {
@@ -836,7 +883,7 @@ void loop() {
     // if we received new data and flagged for pushing, do it
     if (EMS_Sys_Status.emsRefreshed) {
         EMS_Sys_Status.emsRefreshed = false;
-        publishValues();
+        publishValues(true);
     }
 
     /*

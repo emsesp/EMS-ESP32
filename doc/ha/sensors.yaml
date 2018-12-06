@@ -1,16 +1,19 @@
 - platform: mqtt
-  state_topic: 'home/boiler/thermostat_currtemp'
+  state_topic: 'home/boiler/thermostat_data'
   name: 'Current Room Temperature'
   unit_of_measurement: '°C'
+  value_template: "{{ value_json.thermostat_currtemp }}"
 
 - platform: mqtt
-  state_topic: 'home/boiler/thermostat_seltemp'
+  state_topic: 'home/boiler/thermostat_data'
   name: 'Current Set Temperature'
   unit_of_measurement: '°C'
+  value_template: "{{ value_json.thermostat_seltemp }}"
 
 - platform: mqtt
-  state_topic: 'home/boiler/thermostat_mode'
+  state_topic: 'home/boiler/thermostat_data'
   name: 'Current Mode'
+  value_template: "{{ value_json.thermostat_mode }}"
 
 # last time boiler was started
 - platform: template
@@ -22,8 +25,6 @@
   state_topic: 'home/boiler/showertime'
   name: 'Last shower duration'
   force_update: true
-# unit_of_measurement: "minutes"
-# value_template: '{{ states("sensor.last_shower_duration") | float / 60}}'
 
 - platform: mqtt
   state_topic: 'home/boiler/boiler_data'

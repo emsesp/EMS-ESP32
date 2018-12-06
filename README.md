@@ -87,7 +87,7 @@ Commands can be issued directly to the EMS bus typing in a letter followed by an
 - **a** to turn the warm water on and off
 - **h** to list all the recognized EMS types
 - **p** to toggle the Polling response on/off. It's not necessary to have Polling enabled to work. I use this for debugging purposes.
-- **m** to set the thermostat mode from low, manual and clock/auto.
+- **m** to set the thermostat mode to manual or auto.
 - **T** to toggle thermostat readings on/off
 - **S** to toggle the Shower Timer functionality on/off
 
@@ -251,9 +251,7 @@ The boiler data is collected and sent as a single JSON object to MQTT TOPIC `hom
 
 `{"wWCurTmp":"43.0","wWHeat":"on","curFlowTemp":"51.7","retTemp":"48.0","burnGas":"off","heatPmp":"off","fanWork":"off","ignWork":"off","wWCirc":"off","selBurnPow":"0","curBurnPow":"0","sysPress":"1.6","boilTemp":"54.7","pumpMod":"4"}`
 
-The temperature values of the thermostat as two separate topics `home/boiler/thermostat_currtemp` and `home/boiler/thermostat_seltemp`
-
-Values sent from HA to set the temperature come in via the subscribed topic `home/boiler/thermostat_temp`
+Similarly the thermostat values are sent as a json package under a topic named `home/boiler/thermostat_data` with the current mode, room temperature and set temperature.
 
 These topics can be configured in the `TOPIC_*` defines in `boiler.ino`. Make sure you change the HA configuration too to match.
 
