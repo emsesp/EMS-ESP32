@@ -269,18 +269,11 @@ void _debugPrintTelegram(const char * prefix, uint8_t * data, uint8_t len, const
     if (EMS_Sys_Status.emsLogging != EMS_SYS_LOGGING_VERBOSE)
         return;
 
-    bool crcok = (data[len - 1] == _crcCalculator(data, len));
-    if (crcok) {
-        myDebug(color);
-    } else {
-        myDebug(COLOR_RED);
-    }
-
-    myDebug("%s len=%d, data: ", prefix, len);
+    myDebug("%s%s len=%d, telegram: ", color, prefix, len);
     for (int i = 0; i < len; i++) {
         myDebug("%02x ", data[i]);
     }
-    myDebug("(%s) %s\n", crcok ? "OK" : "BAD", COLOR_RESET);
+    myDebug("%s\n", COLOR_RESET);
 }
 
 // send the contents of the Tx buffer
@@ -497,26 +490,33 @@ void _processType(uint8_t * telegram, uint8_t length) {
             offset = 0;
         }
 
-        // look up the ID and fetch string
-        int i = ems_findType(EMS_TxTelegram.type);
-        if (i != -1) {
-            myDebug("---> %s(0x%02x) sent with value %d at offset %d ",
-                    EMS_Types[i].typeString,
-                    type,
-                    EMS_TxTelegram.checkValue,
-                    offset);
-        } else {
-            myDebug("---> ?(0x%02x) sent with value %d at offset %d ", type, EMS_TxTelegram.checkValue, offset);
-        }
-
         // get the data at the position we wrote to and compare
         // when validating we always return a single value
         if (EMS_TxTelegram.checkValue == data[offset]) {
-            myDebug("(successful)\n");
+            // there is a match, so successful send
             EMS_Sys_Status.emsRefreshed = true;        // flag this so values are sent back to HA via MQTT
             EMS_TxTelegram.action       = EMS_TX_NONE; // no more sends
-        } else {
-            myDebug("(failed, received %d)\n", data[offset]);
+        }
+
+        // some debug messages
+        if (EMS_Sys_Status.emsLogging != EMS_SYS_LOGGING_NONE) {
+            // look up the ID and fetch string
+            int i = ems_findType(EMS_TxTelegram.type);
+            if (i != -1) {
+                myDebug("---> %s(0x%02x) sent with value %d at offset %d ",
+                        EMS_Types[i].typeString,
+                        type,
+                        EMS_TxTelegram.checkValue,
+                        offset);
+            } else {
+                myDebug("---> ?(0x%02x) sent with value %d at offset %d ", type, EMS_TxTelegram.checkValue, offset);
+            }
+
+            if (EMS_TxTelegram.checkValue == data[offset]) {
+                myDebug("(successful)\n");
+            } else {
+                myDebug("(failed, received %d)\n", data[offset]);
+            }
         }
     }
 }
@@ -773,7 +773,7 @@ void ems_setThermostatTemp(float temperature) {
 }
 
 /*
- * Set the thermostat working mode (0=low, 1=manual, 2=clock/auto)
+ * Set the thermostat working mode (0=low, 1=manual, 2=auto)
  */
 void ems_setThermostatMode(uint8_t mode) {
     if (_checkWriteQueueFull())
