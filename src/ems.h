@@ -21,8 +21,10 @@
 
 #define EMS_TX_MAXBUFFERSIZE 128 // max size of the buffer. packets are 32 bits
 
-// define here the Thermostat type
-#define EMS_ID_THERMOSTAT 0x17 // x17=RC20 (Moduline300), x10=RC30/RC35 (Moduline 400)
+#define EMS_ID_THERMOSTAT_RC20 0x17 // RC20 (older Moduline 300)
+#define EMS_ID_THERMOSTAT_RC30 0x10 // RC30 (Moduline 300)
+#define EMS_ID_THERMOSTAT_RC35 0x10 // RC35 (Moduline 400)
+#define EMS_ID_THERMOSTAT_EASY 0x18 // Nefit Easy
 
 // define here the EMS telegram types you need
 
@@ -143,10 +145,16 @@ typedef struct {
     uint32_t wWStarts;  // Warm Water # starts
     uint32_t wWWorkM;   // Warm Water # minutes
     uint8_t  wWOneTime; // Warm Water one time function on/off
+
+    // calculated values
+    uint8_t tapwaterActive; // Hot tap water is on/off
+    uint8_t heatingActive;  // Central heating is on/off
+
 } _EMS_Boiler;
 
-// RC20 data
+// Thermostat data
 typedef struct {
+    uint8_t type;              // thermostat type (RC20, RC30, RC35 etc)
     float   setpoint_roomTemp; // current set temp
     float   curr_roomTemp;     // current room temp
     uint8_t mode;              // 0=low, 1=manual, 2=auto
@@ -183,22 +191,26 @@ typedef struct {
 #define COLOR_BOLD_OFF "\x1B[21m"
 
 // function definitions
-extern void      ems_parseTelegram(uint8_t * telegram, uint8_t len);
-void             ems_init();
-void             ems_doReadCommand(uint8_t type);
-void             ems_setThermostatTemp(float temp);
-void             ems_setThermostatMode(uint8_t mode);
-void             ems_setWarmWaterTemp(uint8_t temperature);
-void             ems_setWarmWaterActivated(bool activated);
-void             ems_setExperimental(uint8_t value);
-void             ems_setPoll(bool b);
+extern void ems_parseTelegram(uint8_t * telegram, uint8_t len);
+void        ems_init();
+void        ems_doReadCommand(uint8_t type);
+
+void ems_setThermostatTemp(float temp);
+void ems_setThermostatMode(uint8_t mode);
+void ems_setWarmWaterTemp(uint8_t temperature);
+void ems_setWarmWaterActivated(bool activated);
+void ems_setExperimental(uint8_t value);
+void ems_setPoll(bool b);
+void ems_setThermostatEnabled(bool b);
+void ems_setLogging(_EMS_SYS_LOGGING loglevel);
+
+void             ems_getThermostatTemps();
 bool             ems_getPoll();
 bool             ems_getThermostatEnabled();
-void             ems_setThermostatEnabled(bool b);
-void             ems_setLogging(_EMS_SYS_LOGGING loglevel);
 _EMS_SYS_LOGGING ems_getLogging();
 uint8_t          ems_getEmsTypesCount();
-void             ems_printAllTypes();
+
+void ems_printAllTypes();
 
 // private functions
 uint8_t _crcCalculator(uint8_t * data, uint8_t len);

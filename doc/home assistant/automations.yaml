@@ -1,7 +1,3 @@
-##########################################################
-## Boiler
-##########################################################
-
 - id: boiler_shower
   alias: Alert shower time
   trigger:
@@ -42,31 +38,6 @@
         topic: 'home/boiler/start'
         payload: >
           {{ now().strftime("%H:%M:%S %-d/%b/%Y") }}
-
-# Set thermostat temp
-- id: thermostat_temp
-  alias: 'Adjust Theromostat Temperature'
-  trigger:
-    platform: state
-    entity_id: input_number.thermostat_temp
-  action:
-    service: mqtt.publish
-    data_template:
-      topic: 'home/boiler/thermostat_cmd_temp'
-      payload: >
-        {{ states.input_number.thermostat_temp.state }}
-
-# See if thermostat_temp has changed in recent mqtt payload, then adjust input_number
-- id: thermostat_temp_incoming
-  trigger:
-    platform: state
-    entity_id: sensor.current_set_temperature
-  action:
-    service: input_number.set_value
-    data_template:
-      entity_id: input_number.thermostat_temp
-      value: '{{ states.sensor.current_set_temperature.state }}'
-
 
 # Boiler warm water temp
 - id: boiler_wwtemp

@@ -51,13 +51,6 @@ views:
             
       - type: vertical-stack
         cards:       
-        - type: entities
-          title: Thermostat
-          show_header_toggle: true
-          entities:
-            - sensor.current_room_temperature
-            - sensor.current_mode
-            - input_number.thermostat_temp
         - type: history-graph
           entities:
             - sensor.current_room_temperature

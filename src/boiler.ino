@@ -61,7 +61,10 @@ uint8_t regularUpdatesCount = 0;
 
 // boiler
 #define TOPIC_BOILER_DATA MQTT_BOILER "boiler_data"                              // for sending boiler values
+#define TOPIC_BOILER_ MQTT_BOILER "boiler_wwtemp"                                // warm water selected temp
 #define TOPIC_BOILER_WARM_WATER_SELECTED_TEMPERATURE MQTT_BOILER "boiler_wwtemp" // warm water selected temp
+#define TOPIC_BOILER_TAPWATER_ACTIVE MQTT_BOILER "tapwater_active"               // if hot tap water is running
+#define TOPIC_BOILER_HEATING_ACTIVE MQTT_BOILER "heating_active"                 // if heating is on
 
 // shower time
 #define TOPIC_SHOWERTIME MQTT_BOILER "showertime"           // for sending shower time results
@@ -95,7 +98,6 @@ const unsigned long SHOWER_COLDSHOT_DURATION = 5; // in seconds! how long for co
 const unsigned long SHOWER_OFFSET_TIME       = 0; // 0 seconds grace time, to calibrate actual time under the shower
 #endif
 
-const uint8_t SHOWER_BURNPOWER_MIN = 80;
 typedef struct {
     bool wifi_connected;
     bool boiler_online;
@@ -106,7 +108,6 @@ typedef struct {
 
 typedef struct {
     bool          showerOn;
-    bool          hotWaterOn;
     unsigned long timerStart;    // ms
     unsigned long timerPause;    // ms
     unsigned long duration;      // ms
@@ -124,18 +125,18 @@ netInfo homeNet = {.mqttHost = MQTT_IP,
 ESPHelper myESP(&homeNet);
 
 command_t PROGMEM project_cmds[] = {{"s", "show statistics"},
-                                    {"h", "list supported EMS telegram type ids"},
+                                    {"h", "list EMS telegram type ids with supported logic"},
                                     {"P", "publish all stat to MQTT"},
                                     {"v", "[n] set logging (0=none, 1=basic, 2=verbose)"},
-                                    {"p", "poll ems response on/off (default is off)"},
-                                    {"T", "thermostat monitoring on/off"},
-                                    {"S", "shower timer on/off"},
-                                    {"A", "shower alert on/off"},
-                                    {"r", "[n] send EMS request (n=telegram type id. Use 'h' for list)"},
-                                    {"t", "[n] set thermostat temperature to n"},
+                                    {"p", "toggle EMS Poll response on/off"},
+                                    {"T", "toggle Thermostat monitoring on/off"},
+                                    {"S", "toggle Shower timer on/off"},
+                                    {"A", "toggle shower Alert on/off"},
+                                    {"r", "[n] send EMS request (n=any telegram type id. Use 'h' for suppported types)"},
+                                    {"t", "[n] set thermostat temperature"},
                                     {"m", "[n] set thermostat mode (1=manual, 2=auto)"},
-                                    {"w", "[n] set boiler warm water temperature to n (min 30)"},
-                                    {"a", "[n] boiler warm water on (n=1) or off (n=0)"},
+                                    {"w", "[n] set boiler warm water temperature (min 30)"},
+                                    {"a", "[n] boiler warm water (1=on, 2=off)"},
                                     {"x", "[n] experimental (warning: for debugging only!)"}};
 
 // calculates size of an 2d array at compile time
@@ -162,6 +163,8 @@ const unsigned long TX_HOLD_LED_TIME = 2000;  // how long to hold the Tx LED bec
 unsigned long timestamp; // for internal timings, via millis()
 static int    connectionStatus = NO_CONNECTION;
 bool          startMQTTsent    = false;
+
+uint8_t last_boilerActive = 0xFF; // for remembering last setting of the tap water or heating on/off
 
 // toggle for heartbeat LED
 bool heartbeatEnabled;
@@ -322,6 +325,10 @@ void showInfo() {
 
     myDebug("\n\n%sBoiler stats:%s\n", COLOR_BOLD_ON, COLOR_BOLD_OFF);
 
+    // active stats
+    myDebug("  Hot tap water is %s\n", (EMS_Boiler.tapwaterActive ? "running" : "off"));
+    myDebug("  Central Heating is %s\n", (EMS_Boiler.heatingActive ? "active" : "off"));
+
     // UBAParameterWW
     _renderBoolValue("Warm Water activated", EMS_Boiler.wWActivated);
     _renderBoolValue("Warm Water circulation pump available", EMS_Boiler.wWCircPump);
@@ -348,7 +355,7 @@ void showInfo() {
     _renderBoolValue("Circulation pump", EMS_Boiler.wWCirc);
     _renderIntValue("Burner selected max power", "%", EMS_Boiler.selBurnPow);
     _renderIntValue("Burner current power", "%", EMS_Boiler.curBurnPow);
-    _renderFloatValue("Flame current", "uA", EMS_Boiler.flameCurr);
+    _renderFloatValue("Flame current", "mA", EMS_Boiler.flameCurr);
     _renderFloatValue("System pressure", "bar", EMS_Boiler.sysPress);
 
     // UBAMonitorSlow
@@ -392,15 +399,16 @@ void showInfo() {
 
     // show the Shower Info
     if (Boiler_Status.shower_timer) {
-        myDebug("\n%sShower stats:%s\n", COLOR_BOLD_ON, COLOR_BOLD_OFF);
-        myDebug("  Hot water is %s\n", (Boiler_Shower.hotWaterOn ? "running" : "stopped"));
-        myDebug("  Shower is %s\n", (Boiler_Shower.showerOn ? "on" : "off"));
+        myDebug("\n%s Shower stats:%s\n", COLOR_BOLD_ON, COLOR_BOLD_OFF);
+        myDebug("  Shower Timer is %s\n", (Boiler_Shower.showerOn ? "active" : "off"));
     }
 
     myDebug("\n");
 }
 
 // send values to HA via MQTT
+// a json object is created for the boiler and one for the thermostat
+// CRC check is done to see if there are changes in the values since the last send to avoid too much wifi traffic
 void publishValues(bool force) {
     char s[20]; // for formatting strings
 
@@ -435,7 +443,7 @@ void publishValues(bool force) {
         crc.update(data[i]);
     }
     uint32_t checksum = crc.finalize();
-    //myDebug("HASH=%d %08x, len=%d, s=%s\n", checksum, checksum, len, data);
+    //myDebug("Boiler HASH=%d %08x, len=%d, s=%s\n", checksum, checksum, len, data);
 
     if ((previousBoilerPublishCRC != checksum) || force) {
         previousBoilerPublishCRC = checksum;
@@ -446,6 +454,19 @@ void publishValues(bool force) {
         // send values via MQTT
         myESP.publish(TOPIC_BOILER_DATA, data);
     }
+
+    // see if the heating or hot tap water has changed, if so send
+    // last_boilerActive stores heating in bit 1 and tap water in bit 2
+    if (last_boilerActive != ((EMS_Boiler.tapwaterActive << 1) + EMS_Boiler.heatingActive)) {
+        if (ems_getLogging() != EMS_SYS_LOGGING_NONE) {
+            myDebug("Publishing hot water and heating state via MQTT\n");
+        }
+        myESP.publish(TOPIC_BOILER_TAPWATER_ACTIVE, EMS_Boiler.tapwaterActive == 1 ? "1" : "0");
+        myESP.publish(TOPIC_BOILER_HEATING_ACTIVE, EMS_Boiler.heatingActive == 1 ? "1" : "0");
+
+        last_boilerActive = ((EMS_Boiler.tapwaterActive << 1) + EMS_Boiler.heatingActive); // remember last state
+    }
+
 
     // handle the thermostat values separately
     if (EMS_Sys_Status.emsThermostatEnabled) {
@@ -476,6 +497,7 @@ void publishValues(bool force) {
             crc.update(data[i]);
         }
         uint32_t checksum = crc.finalize();
+        //myDebug("Thermostat HASH=%d %08x, len=%d, s=%s\n", checksum, checksum, len, data);
 
         if ((previousThermostatPublishCRC != checksum) || force) {
             previousThermostatPublishCRC = checksum;
@@ -517,7 +539,7 @@ void myDebugCallback() {
         ems_setPoll(b);
         break;
     case 'P':
-        myESP.logger(LOG_HA, "Force publish values");
+        //myESP.logger(LOG_HA, "Force publish values");
         publishValues(true);
         break;
     case 'r': // read command for Boiler or Thermostat
@@ -751,6 +773,8 @@ void setup() {
     myESP.addSubscription(TOPIC_SHOWER_TIMER);
     myESP.addSubscription(TOPIC_SHOWER_ALERT);
     myESP.addSubscription(TOPIC_BOILER_WARM_WATER_SELECTED_TEMPERATURE);
+    myESP.addSubscription(TOPIC_BOILER_TAPWATER_ACTIVE);
+    myESP.addSubscription(TOPIC_BOILER_HEATING_ACTIVE);
     myESP.addSubscription(TOPIC_SHOWER_COLDSHOT);
 
     myESP.consoleSetCallBackProjectCmds(project_cmds, ArraySize(project_cmds), myDebugCallback); // set up Telnet commands
@@ -812,11 +836,8 @@ void regularUpdates() {
     // only do calls if the EMS is connected and alive
     if (Boiler_Status.boiler_online) {
         if ((cycle == 0) && Boiler_Status.thermostat_enabled) {
-            // force get the thermostat mode which is not broadcasted
-            // important! this is only configured for the RC20. Look up the correct telegram type for other thermostat versions
-            if (EMS_ID_THERMOSTAT == 0x17) { // RC20 is type 0x17
-                ems_doReadCommand(EMS_TYPE_RC20Temperature);
-            }
+            // force get the thermostat data which are not usually automatically broadcasted
+            ems_getThermostatTemps();
         } else if (cycle == 1) {
             ems_doReadCommand(EMS_TYPE_UBAParameterWW); // get Warm Water values
         }
@@ -880,10 +901,11 @@ void loop() {
 #endif
     }
 
+    // publish the values to MQTT (only if there are changes)
     // if we received new data and flagged for pushing, do it
     if (EMS_Sys_Status.emsRefreshed) {
         EMS_Sys_Status.emsRefreshed = false;
-        publishValues(true);
+        publishValues(false);
     }
 
     /*
@@ -892,13 +914,8 @@ void loop() {
     if (Boiler_Status.shower_timer) {
         // if already in cold mode, ignore all this logic until we're out of the cold blast
         if (!Boiler_Shower.doingColdShot) {
-            // these values come from UBAMonitorFast - type 0x18) which is broadcasted every second so our timings are accurate enough
-            // and no need to fetch the values from the boiler
-            Boiler_Shower.hotWaterOn =
-                ((EMS_Boiler.selBurnPow >= SHOWER_BURNPOWER_MIN) && (EMS_Boiler.selFlowTemp == 0) && EMS_Boiler.burnGas);
-
             // is the hot water running?
-            if (Boiler_Shower.hotWaterOn) {
+            if (EMS_Boiler.tapwaterActive) {
                 // if heater was previously off, start the timer
                 if (Boiler_Shower.timerStart == 0) {
                     // hot water just started...

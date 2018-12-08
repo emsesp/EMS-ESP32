@@ -28,6 +28,16 @@
 
 - platform: mqtt
   state_topic: 'home/boiler/boiler_data'
+  name: 'Tap Water'
+  value_template: '{{ value_json.tapwaterActive }}'
+
+- platform: mqtt
+  state_topic: 'home/boiler/boiler_data'
+  name: 'Heating'
+  value_template: '{{ value_json.heatingActive }}'
+
+- platform: mqtt
+  state_topic: 'home/boiler/boiler_data'
   name: 'Warm Water selected temperature'
   unit_of_measurement: '°C'
   value_template: '{{ value_json.wWSelTemp }}'

@@ -1,0 +1,9 @@
+  boiler_wwtemp:
+    name: Warm Water temp
+    icon: mdi:temperature-celsius
+    min: 30
+    max: 60
+    step: 1
+    unit_of_measurement: "°C" 
+    mode: slider
+

@@ -10,6 +10,16 @@
 #include <Arduino.h>
 #include <TimeLib.h>
 
+// add you custom setings here like thermostat IDs and thresholds
+const uint8_t SHOWER_BURNPOWER_MIN = 80;
+
+// define here the Thermostat type
+#define EMS_ID_THERMOSTAT EMS_ID_THERMOSTAT_RC20 // your thermostat ID
+
+// define here the boiler power settings (selBurnPow) when hot tap water is running and the heating is on
+#define EMS_BOILER_BURNPOWER_TAPWATER 115
+#define EMS_BOILER_BURNPOWER_HEATING 75
+
 // Check for ESPurna vs ESPHelper (standalone)
 #ifdef USE_CUSTOM_H
 #include "debug.h"
@@ -41,21 +51,24 @@ bool _process_RC20Temperature(uint8_t * data, uint8_t length);
 bool _process_RCTempMessage(uint8_t * data, uint8_t length);
 bool _process_Version(uint8_t * data, uint8_t length);
 
-const _EMS_Types EMS_Types[] =
-    {{EMS_ID_BOILER, EMS_TYPE_UBAMonitorFast, "UBAMonitorFast", _process_UBAMonitorFast},
-     {EMS_ID_BOILER, EMS_TYPE_UBAMonitorSlow, "UBAMonitorSlow", _process_UBAMonitorSlow},
-     {EMS_ID_BOILER, EMS_TYPE_UBAMonitorWWMessage, "UBAMonitorWWMessage", _process_UBAMonitorWWMessage},
-     {EMS_ID_BOILER, EMS_TYPE_UBAParameterWW, "UBAParameterWW", _process_UBAParameterWW},
-     {EMS_ID_BOILER, EMS_TYPE_UBATotalUptimeMessage, "UBATotalUptimeMessage", NULL},
-     {EMS_ID_BOILER, EMS_TYPE_UBAMaintenanceSettingsMessage, "UBAMaintenanceSettingsMessage", NULL},
-     {EMS_ID_BOILER, EMS_TYPE_UBAParametersMessage, "UBAParametersMessage", NULL},
-     {EMS_ID_BOILER, EMS_TYPE_UBAMaintenanceStatusMessage, "UBAMaintenanceStatusMessage", NULL},
+const _EMS_Types EMS_Types[] = {
 
-     {EMS_ID_THERMOSTAT, EMS_TYPE_RC20StatusMessage, "RC20StatusMessage", _process_RC20StatusMessage},
-     {EMS_ID_THERMOSTAT, EMS_TYPE_RC20Time, "RC20Time", _process_RC20Time},
-     {EMS_ID_THERMOSTAT, EMS_TYPE_RC20Temperature, "RC20Temperature", _process_RC20Temperature},
-     {EMS_ID_THERMOSTAT, EMS_TYPE_RCTempMessage, "RCTempMessage", _process_RCTempMessage},
-     {EMS_ID_THERMOSTAT, EMS_TYPE_Version, "Version", _process_Version}};
+    {EMS_ID_BOILER, EMS_TYPE_UBAMonitorFast, "UBAMonitorFast", _process_UBAMonitorFast},
+    {EMS_ID_BOILER, EMS_TYPE_UBAMonitorSlow, "UBAMonitorSlow", _process_UBAMonitorSlow},
+    {EMS_ID_BOILER, EMS_TYPE_UBAMonitorWWMessage, "UBAMonitorWWMessage", _process_UBAMonitorWWMessage},
+    {EMS_ID_BOILER, EMS_TYPE_UBAParameterWW, "UBAParameterWW", _process_UBAParameterWW},
+    {EMS_ID_BOILER, EMS_TYPE_UBATotalUptimeMessage, "UBATotalUptimeMessage", NULL},
+    {EMS_ID_BOILER, EMS_TYPE_UBAMaintenanceSettingsMessage, "UBAMaintenanceSettingsMessage", NULL},
+    {EMS_ID_BOILER, EMS_TYPE_UBAParametersMessage, "UBAParametersMessage", NULL},
+    {EMS_ID_BOILER, EMS_TYPE_UBAMaintenanceStatusMessage, "UBAMaintenanceStatusMessage", NULL},
+
+    {EMS_ID_THERMOSTAT, EMS_TYPE_RC20StatusMessage, "RC20StatusMessage", _process_RC20StatusMessage},
+    {EMS_ID_THERMOSTAT, EMS_TYPE_RC20Time, "RC20Time", _process_RC20Time},
+    {EMS_ID_THERMOSTAT, EMS_TYPE_RC20Temperature, "RC20Temperature", _process_RC20Temperature},
+    {EMS_ID_THERMOSTAT, EMS_TYPE_RCTempMessage, "RCTempMessage", _process_RCTempMessage},
+    {EMS_ID_THERMOSTAT, EMS_TYPE_Version, "Version", _process_Version}
+
+};
 uint8_t _EMS_Types_max = ArraySize(EMS_Types); // number of defined types
 
 // reserve space for the data we collect from the Boiler and Thermostat
@@ -89,20 +102,21 @@ uint8_t emsLastRxCount; // used for retries when sending failed
 // uses -1 or 255 for values that haven't been set yet (EMS_VALUE_INT_NOTSET and EMS_VALUE_FLOAT_NOTSET)
 void ems_init() {
     // overall status
-    EMS_Sys_Status.emsRxPgks    = 0;
-    EMS_Sys_Status.emsTxPkgs    = 0;
-    EMS_Sys_Status.emxCrcErr    = 0;
-    EMS_Sys_Status.emsRxStatus  = EMS_RX_IDLE;
-    EMS_Sys_Status.emsTxStatus  = EMS_TX_IDLE;
-    EMS_Sys_Status.emsLastPoll  = 0;
-    EMS_Sys_Status.emsLastRx    = 0;
-    EMS_Sys_Status.emsLastTx    = 0;
-    EMS_Sys_Status.emsRefreshed = false;
-
+    EMS_Sys_Status.emsRxPgks            = 0;
+    EMS_Sys_Status.emsTxPkgs            = 0;
+    EMS_Sys_Status.emxCrcErr            = 0;
+    EMS_Sys_Status.emsRxStatus          = EMS_RX_IDLE;
+    EMS_Sys_Status.emsTxStatus          = EMS_TX_IDLE;
+    EMS_Sys_Status.emsLastPoll          = 0;
+    EMS_Sys_Status.emsLastRx            = 0;
+    EMS_Sys_Status.emsLastTx            = 0;
+    EMS_Sys_Status.emsRefreshed         = false;
     EMS_Sys_Status.emsPollEnabled       = false;                // start up with Poll disabled
     EMS_Sys_Status.emsThermostatEnabled = true;                 // there is a RCxx thermostat active as default
     EMS_Sys_Status.emsLogging           = EMS_SYS_LOGGING_NONE; // Verbose logging is off
 
+    // thermostat
+    EMS_Thermostat.type   = EMS_ID_THERMOSTAT; // type, see ems.h
     EMS_Thermostat.hour   = 0;
     EMS_Thermostat.minute = 0;
     EMS_Thermostat.second = 0;
@@ -145,6 +159,9 @@ void ems_init() {
     EMS_Boiler.wWStarts  = EMS_VALUE_INT_NOTSET;   // Warm Water # starts
     EMS_Boiler.wWWorkM   = EMS_VALUE_INT_NOTSET;   // Warm Water # minutes
     EMS_Boiler.wWOneTime = EMS_VALUE_INT_NOTSET;   // Warm Water one time function on/off
+
+    EMS_Boiler.tapwaterActive = EMS_VALUE_INT_NOTSET; // Hot tap water is on/off
+    EMS_Boiler.heatingActive  = EMS_VALUE_INT_NOTSET; // Central heating is on/off
 
     // init the Tx package
     _initTxBuffer();
@@ -316,13 +333,18 @@ void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
         && ((millis() - EMS_Sys_Status.emsLastTx) > RX_READ_TIMEOUT)) {
         if (emsLastRxCount++ >= RX_READ_TIMEOUT_COUNT) {
             // give up and reset tx
-            myDebug("Error! Failed to send telegram, cancelling last write command.\n");
+            if (EMS_Sys_Status.emsLogging != EMS_SYS_LOGGING_NONE) {
+                myDebug("Error! Failed to send telegram, cancelling last write command.\n");
+            }
+            // re-initialise
             _initTxBuffer();
         } else {
-            myDebug("Didn't receive acknowledgement from the 0x%02x, so resending (attempt #%d/%d)...\n",
-                    EMS_TxTelegram.type,
-                    emsLastRxCount,
-                    RX_READ_TIMEOUT_COUNT);
+            if (EMS_Sys_Status.emsLogging != EMS_SYS_LOGGING_NONE) {
+                myDebug("Didn't receive acknowledgement from the 0x%02x, so resending (attempt #%d/%d)...\n",
+                        EMS_TxTelegram.type,
+                        emsLastRxCount,
+                        RX_READ_TIMEOUT_COUNT);
+            }
             EMS_Sys_Status.emsTxStatus = EMS_TX_PENDING; // set to pending will trigger sending the same package again
         }
     }
@@ -415,10 +437,11 @@ void _processType(uint8_t * telegram, uint8_t length) {
             // we have a match
             typeFound = true;
             // call callback to fetch the values from the telegram
-            // ignoring the return value for now
+            // return value tells us if we need to force send values back to MQTT
             if ((EMS_Types[i].processType_cb) != (void *)NULL) {
-                (void)EMS_Types[i].processType_cb(data, length);
+                EMS_Sys_Status.emsRefreshed = EMS_Types[i].processType_cb(data, length);
             }
+
             break;
         }
         i++;
@@ -530,7 +553,7 @@ bool _checkWriteQueueFull() {
             myDebug("Delaying write command as there is already a telegram (type 0x%02x) in the queue\n",
                     EMS_TxTelegram.type);
         }
-        return true;
+        return true; // something in queue
     }
 
     return false; // nothing queue, we can do a write command
@@ -538,7 +561,7 @@ bool _checkWriteQueueFull() {
 
 /*
  * UBAParameterWW - type 0x33 - warm water parameters
- * received only after requested
+ * received only after requested (not broadcasted)
  */
 bool _process_UBAParameterWW(uint8_t * data, uint8_t length) {
     EMS_Boiler.wWSelTemp     = data[2];
@@ -546,9 +569,7 @@ bool _process_UBAParameterWW(uint8_t * data, uint8_t length) {
     EMS_Boiler.wWCircPump    = (data[6] == 0xFF); // 0xFF means on
     EMS_Boiler.wWDesiredTemp = data[8];
 
-    EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back to Home Assistant via MQTT
-
-    return true;
+    return true; // triggers a send the values back to Home Assistant via MQTT
 }
 
 /*
@@ -561,7 +582,7 @@ bool _process_UBAMonitorWWMessage(uint8_t * data, uint8_t length) {
     EMS_Boiler.wWWorkM   = _toLong(10, data);
     EMS_Boiler.wWOneTime = bitRead(data[5], 1);
 
-    return true;
+    return false; // no need to update mqtt
 }
 
 /*
@@ -573,16 +594,23 @@ bool _process_UBAMonitorFast(uint8_t * data, uint8_t length) {
     EMS_Boiler.curFlowTemp = _toFloat(1, data);
     EMS_Boiler.retTemp     = _toFloat(13, data);
 
-    uint8_t v          = data[7];
-    EMS_Boiler.burnGas = bitRead(v, 0);
-    EMS_Boiler.fanWork = bitRead(v, 2);
-    EMS_Boiler.ignWork = bitRead(v, 3);
-    EMS_Boiler.heatPmp = bitRead(v, 5);
-    EMS_Boiler.wWHeat  = bitRead(v, 6);
-    EMS_Boiler.wWCirc  = bitRead(v, 7);
-
-    EMS_Boiler.selBurnPow = data[3]; // max power
+    uint8_t v             = data[7];
+    EMS_Boiler.burnGas    = bitRead(v, 0);
+    EMS_Boiler.fanWork    = bitRead(v, 2);
+    EMS_Boiler.ignWork    = bitRead(v, 3);
+    EMS_Boiler.heatPmp    = bitRead(v, 5);
+    EMS_Boiler.wWHeat     = bitRead(v, 6);
+    EMS_Boiler.wWCirc     = bitRead(v, 7);
     EMS_Boiler.curBurnPow = data[4];
+    EMS_Boiler.selBurnPow = data[3]; // burn power max setting
+
+    // check if the boiler is providing hot water to the tap or hot water to the central heating
+    // we use a quick hack:
+    //   the heating on, if burner selected max power = 75 (UBAMonitorFast:EMS_Boiler.selBurnPow)
+    //   hot tap water running, if burner selected max power=115 (UBAMonitorFast:EMS_Boiler.selBurnPow)
+    // we could also add (EMS_Boiler.selFlowTemp == 0) && EMS_Boiler.burnGas) for more precision
+    EMS_Boiler.tapwaterActive = ((EMS_Boiler.selBurnPow == EMS_BOILER_BURNPOWER_TAPWATER) ? 1 : 0);
+    EMS_Boiler.heatingActive  = ((EMS_Boiler.selBurnPow == EMS_BOILER_BURNPOWER_HEATING) ? 1 : 0);
 
     EMS_Boiler.flameCurr = _toFloat(15, data);
 
@@ -592,7 +620,7 @@ bool _process_UBAMonitorFast(uint8_t * data, uint8_t length) {
         EMS_Boiler.sysPress = (((float)data[17]) / (float)10);
     }
 
-    return true;
+    return false; // no need to update mqtt
 }
 
 /*
@@ -607,9 +635,7 @@ bool _process_UBAMonitorSlow(uint8_t * data, uint8_t length) {
     EMS_Boiler.burnWorkMin = _toLong(13, data);
     EMS_Boiler.heatWorkMin = _toLong(19, data);
 
-    EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back to Home Assistant via MQTT
-
-    return true;
+    return true; // triggers a send the values back to Home Assistant via MQTT
 }
 
 /*
@@ -620,9 +646,7 @@ bool _process_RC20StatusMessage(uint8_t * data, uint8_t length) {
     EMS_Thermostat.setpoint_roomTemp = ((float)data[1]) / (float)2;
     EMS_Thermostat.curr_roomTemp     = _toFloat(2, data);
 
-    EMS_Sys_Status.emsRefreshed = true; // set the updated flag to trigger a send back to HA
-
-    return true;
+    return true; // triggers a send the values back to Home Assistant via MQTT
 }
 
 /*
@@ -642,13 +666,12 @@ bool _process_RC20Temperature(uint8_t * data, uint8_t length) {
         }
 
         // and send the values back to HA (Home Assistant MQTT)
-        EMS_Sys_Status.emsRefreshed = true;
-    } else {
-        // Process the whole telegram package
-        EMS_Thermostat.mode = data[EMS_OFFSET_RC20Temperature_mode]; // get the mode
+        return true;
     }
 
-    return true;
+    // Process the whole telegram package
+    EMS_Thermostat.mode = data[EMS_OFFSET_RC20Temperature_mode]; // get the mode
+    return false;                                                // don't update mqtt
 }
 
 /*
@@ -657,21 +680,24 @@ bool _process_RC20Temperature(uint8_t * data, uint8_t length) {
 bool _process_RCTempMessage(uint8_t * data, uint8_t length) {
     // add support here if you're reading external sensors
 
-    return true;
+    return false; // don't update mqtt
 }
 
 
 /*
  * Version - type 0x02 - get the version of the Thermostat firmware
- * We don't bother storing these values anywhere
+ * When a thermostat is connecting it will send out 0x02 messages too, which we'll ignore
+ * We don't bother storing these values anywhere, just print
  */
 bool _process_Version(uint8_t * data, uint8_t length) {
-    uint8_t major = data[1];
-    uint8_t minor = data[2];
+    // ignore short messages
+    if (length == 8) {
+        uint8_t major = data[1];
+        uint8_t minor = data[2];
+        myDebug("Version %d.%d\n", major, minor);
+    }
 
-    myDebug("Version %d.%d\n", major, minor);
-
-    return true;
+    return false; // don't update mqtt
 }
 
 /*
@@ -696,7 +722,7 @@ bool _process_RC20Time(uint8_t * data, uint8_t length) {
             EMS_Thermostat.year + 2000);
     */
 
-    return true;
+    return false; // don't update mqtt
 }
 
 /*
@@ -718,6 +744,15 @@ void _buildTxTelegram(uint8_t data_value) {
     EMS_TxTelegram.data[5] = _crcCalculator(EMS_TxTelegram.data, EMS_TxTelegram.length);
 
     EMS_Sys_Status.emsTxStatus = EMS_TX_PENDING; // armed and ready to send
+}
+
+/*
+ * Generic function to return temperature settings from the thermostat
+ */
+void ems_getThermostatTemps() {
+    if (EMS_Thermostat.type == EMS_ID_THERMOSTAT_RC20) {
+        ems_doReadCommand(EMS_TYPE_RC20Temperature);
+    }
 }
 
 /*

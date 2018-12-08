@@ -23,7 +23,7 @@ There are 3 parts to this project, first the design of the circuit, second the c
         - [EMS Reading and Writing](#ems-reading-and-writing)
     - [The ESP8266 Source Code](#the-esp8266-source-code)
         - [Supported EMS Types](#supported-ems-types)
-            - [Supporting A Type RC35 Thermostat](#supporting-a-type-rc35-thermostat)
+            - [Supporting other Thermostats types](#supporting-other-thermostats-types)
         - [Customizing The Code](#customizing-the-code)
         - [Using MQTT](#using-mqtt)
         - [The Basic Shower Logic](#the-basic-shower-logic)
@@ -223,13 +223,13 @@ The code is built on the Arduino framework and is dependent on these external li
 
 In `boiler.ino` you can make calls to automatically send these read commands. See the function *regularUpdates()*
 
-#### Supporting A Type RC35 Thermostat
+#### Supporting other Thermostats types
 
-The code is designed for a Moduline300 (RC20) thermostat. To adjust for a RC35 first change `EMS_ID_THERMOSTAT` in `ems.h`. A RC35 thermostat has 4 heating circuits and to read the values use different Monitor type IDs (e.g. 0x3E, 0x48, etc). The mode (0=night, 1=day, 2=holiday) is the first byte of the telegram and the temperature is the value of the 2nd byte divided by 2.
+The code is originally designed for a Moduline300 (RC20) thermostat.
 
-Then to set temperature values use the Working Mode with type IDs (0x3D, 0x47,0x51 and 0x5B) respectively. Set the offset (byte 4 of the header) to determine which temperature you're changing; 1 for night, 2 for day and 3 for holiday. The data value is the desired temperature multiplied by 2 as a single byte.
+To adjust for a RC35 first change `EMS_ID_THERMOSTAT` in `ems.cpp`. A RC35 thermostat has 4 heating circuits and to read the values use different Monitor type IDs (e.g. 0x3E, 0x48, etc). The mode (0=night, 1=day, 2=holiday) is the first byte of the telegram and the temperature is the value of the 2nd byte divided by 2. Then to set temperature values use the Working Mode with type IDs (0x3D, 0x47,0x51 and 0x5B) respectively. Set the offset (byte 4 of the header) to determine which temperature you're changing; 1 for night, 2 for day and 3 for holiday. The data value is the desired temperature multiplied by 2 as a single byte.
 
-Consult the wiki documentation for the actual data format.
+I will add further support for the other thermostats (such as the Nefit Easy) as soon as I can get my hands on a physical device. I do however welcome contribtions to this code repository which is essentially the purpose of GitHub. By inspecting the telegram packets and looking up the codes in the German wiki (and with lots of trial and error) it is possible to easily extend the existing functions to support other EMS devices.
 
 ### Customizing The Code
 
@@ -243,7 +243,7 @@ Most of the changes will be done in `boiler.ino` and `ems.cpp`.
 
 When the ESP8266 boots it will send a start signal via MQTT. This is picked up by Home Assistant and sends a notification informing me that the device has booted. Useful for knowing when the ESP gets reset.
 
-I'm using the standard PubSubClient client so make sure you set `-DMQTT_MAX_PACKET_SIZE=300` as the default package size is 128 and our JSON messages are around 220 bytes.
+I'm using the standard PubSubClient client so make sure you set `-DMQTT_MAX_PACKET_SIZE=400` as the default package size is 128 and our JSON messages are around 300 bytes.
 
 I run Mosquitto on my Raspberry PI 3 as the MQTT broker.
 
