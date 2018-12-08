@@ -265,11 +265,11 @@ There is other logic in the code to compensate for ramp up and whether the showe
 
 Within Home Assistant it renders as:
 
-![Home Assistant panel)](doc/ha/ha.png)
+![Home Assistant panel)](doc/home_assistant/ha.png)
 
-and the alerts on an iPhone/Android using PushBullet, PushOver or any notification service would look like:
+and the alerts on an iOS/Android device using PushBullet, PushOver or any notification service would look like:
 
-![Home Assistant iPhone notify)](doc/ha/ha_notify.jpg)
+![Home Assistant iPhone notify)](doc/home_assistant/ha_notify.jpg)
 
 You can find the .yaml configuration files under `doc/ha`. See also https://community.home-assistant.io/t/thermostat-and-boiler-controller-for-ems-based-boilers-nefit-buderus-bosch-using-esp/53382
 
