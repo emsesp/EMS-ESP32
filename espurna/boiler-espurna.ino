@@ -245,7 +245,7 @@ void showInfo() {
     _renderBoolValue("Circulation pump", EMS_Boiler.wWCirc);
     _renderIntValue("Burner selected max power", "%", EMS_Boiler.selBurnPow);
     _renderIntValue("Burner current power", "%", EMS_Boiler.curBurnPow);
-    _renderFloatValue("Flame current", "mA", EMS_Boiler.flameCurr);
+    _renderFloatValue("Flame current", "uA", EMS_Boiler.flameCurr);
     _renderFloatValue("System pressure", "bar", EMS_Boiler.sysPress);
 
     // UBAMonitorSlow
