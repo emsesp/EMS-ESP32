@@ -37,10 +37,11 @@
 #define EMS_TYPE_UBATotalUptimeMessage 0x14
 #define EMS_TYPE_UBAMaintenanceSettingsMessage 0x15
 #define EMS_TYPE_UBAParametersMessage 0x16
+#define EMS_TYPE_UBASetPoints 0x1A
 
 // Thermostat...
 #define EMS_TYPE_RC20StatusMessage 0x91 // is an automatic thermostat broadcast
-#define EMS_TYPE_RC20Time 0x06          // is an automatic thermostat broadcast
+#define EMS_TYPE_RCTime 0x06            // is an automatic thermostat broadcast
 #define EMS_TYPE_RCTempMessage 0xA3     // is an automatic thermostat broadcast
 #define EMS_TYPE_RC20Temperature 0xA8
 #define EMS_TYPE_Version 0x02 // version of the UBA controller

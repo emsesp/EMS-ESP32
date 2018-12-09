@@ -10,16 +10,6 @@
 #include <Arduino.h>
 #include <TimeLib.h>
 
-// add you custom setings here like thermostat IDs and thresholds
-const uint8_t SHOWER_BURNPOWER_MIN = 80;
-
-// define here the Thermostat type
-#define EMS_ID_THERMOSTAT EMS_ID_THERMOSTAT_RC20 // your thermostat ID
-
-// define here the boiler power settings (selBurnPow) when hot tap water is running and the heating is on
-#define EMS_BOILER_BURNPOWER_TAPWATER 115
-#define EMS_BOILER_BURNPOWER_HEATING 75
-
 // Check for ESPurna vs ESPHelper (standalone)
 #ifdef USE_CUSTOM_H
 #include "debug.h"
@@ -30,6 +20,9 @@ extern void debugSend(const char * format, ...);
 extern ESPHelper myESP;
 #define myDebug(x, ...) myESP.printf(x, ##__VA_ARGS__)
 #endif
+
+// include custom configuration settings
+#include "my_config.h"
 
 // calculates size of an 2d array at compile time
 template <typename T, size_t N>
@@ -46,10 +39,11 @@ bool _process_UBAMonitorSlow(uint8_t * data, uint8_t length);
 bool _process_UBAMonitorWWMessage(uint8_t * data, uint8_t length);
 bool _process_UBAParameterWW(uint8_t * data, uint8_t length);
 bool _process_RC20StatusMessage(uint8_t * data, uint8_t length);
-bool _process_RC20Time(uint8_t * data, uint8_t length);
+bool _process_RCTime(uint8_t * data, uint8_t length);
 bool _process_RC20Temperature(uint8_t * data, uint8_t length);
 bool _process_RCTempMessage(uint8_t * data, uint8_t length);
 bool _process_Version(uint8_t * data, uint8_t length);
+bool _process_SetPoints(uint8_t * data, uint8_t length);
 
 const _EMS_Types EMS_Types[] = {
 
@@ -63,10 +57,11 @@ const _EMS_Types EMS_Types[] = {
     {EMS_ID_BOILER, EMS_TYPE_UBAMaintenanceStatusMessage, "UBAMaintenanceStatusMessage", NULL},
 
     {EMS_ID_THERMOSTAT, EMS_TYPE_RC20StatusMessage, "RC20StatusMessage", _process_RC20StatusMessage},
-    {EMS_ID_THERMOSTAT, EMS_TYPE_RC20Time, "RC20Time", _process_RC20Time},
+    {EMS_ID_THERMOSTAT, EMS_TYPE_RCTime, "RCTime", _process_RCTime},
     {EMS_ID_THERMOSTAT, EMS_TYPE_RC20Temperature, "RC20Temperature", _process_RC20Temperature},
     {EMS_ID_THERMOSTAT, EMS_TYPE_RCTempMessage, "RCTempMessage", _process_RCTempMessage},
-    {EMS_ID_THERMOSTAT, EMS_TYPE_Version, "Version", _process_Version}
+    {EMS_ID_THERMOSTAT, EMS_TYPE_Version, "Version", _process_Version},
+    {EMS_ID_THERMOSTAT, EMS_TYPE_UBASetPoints, "UBASetPoints", _process_SetPoints}
 
 };
 uint8_t _EMS_Types_max = ArraySize(EMS_Types); // number of defined types
@@ -129,7 +124,7 @@ void ems_init() {
     EMS_Boiler.wWActivated   = EMS_VALUE_INT_NOTSET; // Warm Water activated
     EMS_Boiler.wWSelTemp     = EMS_VALUE_INT_NOTSET; // Warm Water selected temperature
     EMS_Boiler.wWCircPump    = EMS_VALUE_INT_NOTSET; // Warm Water circulation pump available
-    EMS_Boiler.wWDesiredTemp = EMS_VALUE_INT_NOTSET; // Warm Water desired temperature
+    EMS_Boiler.wWDesiredTemp = EMS_VALUE_INT_NOTSET; // Warm Water desired temperature to prevent infection
 
     // UBAMonitorFast
     EMS_Boiler.selFlowTemp = EMS_VALUE_INT_NOTSET;   // Selected flow temperature
@@ -237,7 +232,7 @@ uint8_t _crcCalculator(uint8_t * data, uint8_t len) {
     return crc;
 }
 
-// function to turn a telegram int (2 bytes) to a float
+// function to turn a telegram int (2 bytes) to a float. The source is *10
 float _toFloat(uint8_t i, uint8_t * data) {
     if ((data[i] == 0x80) && (data[i + 1] == 0)) // 0x8000 is used when sensor is missing
         return (float)-1;                        // return -1 to indicate that is unknown
@@ -560,6 +555,22 @@ bool _checkWriteQueueFull() {
 }
 
 /*
+ * Check if hot tap water or heating is active
+ * using a quick hack:
+ *   heating is on if Selected Flow Temp >= 70 (in my case)
+ *   tap water is on if Selected Flow Temp = 0 and Selected Burner Power >= 115
+ */
+bool _checkActive() {
+    // hot tap water
+    EMS_Boiler.tapwaterActive =
+        ((EMS_Boiler.selFlowTemp == 0)
+         && (EMS_Boiler.selBurnPow >= EMS_BOILER_BURNPOWER_TAPWATER) & (EMS_Boiler.burnGas == EMS_VALUE_INT_ON));
+
+    EMS_Boiler.heatingActive =
+        ((EMS_Boiler.selFlowTemp >= EMS_BOILER_SELFLOWTEMP_HEATING) && (EMS_Boiler.burnGas == EMS_VALUE_INT_ON));
+}
+
+/*
  * UBAParameterWW - type 0x33 - warm water parameters
  * received only after requested (not broadcasted)
  */
@@ -594,23 +605,16 @@ bool _process_UBAMonitorFast(uint8_t * data, uint8_t length) {
     EMS_Boiler.curFlowTemp = _toFloat(1, data);
     EMS_Boiler.retTemp     = _toFloat(13, data);
 
-    uint8_t v             = data[7];
-    EMS_Boiler.burnGas    = bitRead(v, 0);
-    EMS_Boiler.fanWork    = bitRead(v, 2);
-    EMS_Boiler.ignWork    = bitRead(v, 3);
-    EMS_Boiler.heatPmp    = bitRead(v, 5);
-    EMS_Boiler.wWHeat     = bitRead(v, 6);
-    EMS_Boiler.wWCirc     = bitRead(v, 7);
+    uint8_t v          = data[7];
+    EMS_Boiler.burnGas = bitRead(v, 0);
+    EMS_Boiler.fanWork = bitRead(v, 2);
+    EMS_Boiler.ignWork = bitRead(v, 3);
+    EMS_Boiler.heatPmp = bitRead(v, 5);
+    EMS_Boiler.wWHeat  = bitRead(v, 6);
+    EMS_Boiler.wWCirc  = bitRead(v, 7);
+
     EMS_Boiler.curBurnPow = data[4];
     EMS_Boiler.selBurnPow = data[3]; // burn power max setting
-
-    // check if the boiler is providing hot water to the tap or hot water to the central heating
-    // we use a quick hack:
-    //   the heating on, if burner selected max power = 75 (UBAMonitorFast:EMS_Boiler.selBurnPow)
-    //   hot tap water running, if burner selected max power=115 (UBAMonitorFast:EMS_Boiler.selBurnPow)
-    // we could also add (EMS_Boiler.selFlowTemp == 0) && EMS_Boiler.burnGas) for more precision
-    EMS_Boiler.tapwaterActive = ((EMS_Boiler.selBurnPow == EMS_BOILER_BURNPOWER_TAPWATER) ? 1 : 0);
-    EMS_Boiler.heatingActive  = ((EMS_Boiler.selBurnPow == EMS_BOILER_BURNPOWER_HEATING) ? 1 : 0);
 
     EMS_Boiler.flameCurr = _toFloat(15, data);
 
@@ -619,6 +623,9 @@ bool _process_UBAMonitorFast(uint8_t * data, uint8_t length) {
     } else {
         EMS_Boiler.sysPress = (((float)data[17]) / (float)10);
     }
+
+    // at this point do a quick check to see if the hot water or heating is active
+    (void)_checkActive();
 
     return false; // no need to update mqtt
 }
@@ -694,16 +701,34 @@ bool _process_Version(uint8_t * data, uint8_t length) {
     if (length == 8) {
         uint8_t major = data[1];
         uint8_t minor = data[2];
-        myDebug("Version %d.%d\n", major, minor);
+        if (EMS_Sys_Status.emsLogging != EMS_SYS_LOGGING_NONE) {
+            myDebug("Version %d.%d\n", major, minor);
+        }
     }
 
     return false; // don't update mqtt
 }
 
 /*
- * process_RC20Time - type 0x06 - date and time from the RC20 thermostat (0x17) - 14 bytes long
+ * UBASetPoint 0x1A
  */
-bool _process_RC20Time(uint8_t * data, uint8_t length) {
+bool _process_SetPoints(uint8_t * data, uint8_t length) {
+    uint8_t setpoint = data[0];
+    uint8_t hk_power = data[1];
+    uint8_t ww_power = data[2];
+
+    if (EMS_Sys_Status.emsLogging != EMS_SYS_LOGGING_NONE) {
+        myDebug("UBASetPoint: SetPoint=%d, hk_power=%d ww_power=%d\n", setpoint, hk_power, ww_power);
+    }
+
+    return false;
+}
+
+
+/*
+ * process_RCTime - type 0x06 - date and time from a thermostat - 14 bytes long
+ */
+bool _process_RCTime(uint8_t * data, uint8_t length) {
     EMS_Thermostat.hour   = data[2];
     EMS_Thermostat.minute = data[4];
     EMS_Thermostat.second = data[5];

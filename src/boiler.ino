@@ -3,13 +3,14 @@
  * Paul Derbyshire - May 2018 - https://github.com/proddy/EMS-ESP-Boiler
  * https://community.home-assistant.io/t/thermostat-and-boiler-controller-for-ems-based-boilers-nefit-buderus-bosch-using-esp/53382
  *
- * See ReadMe.md for Acknowledgments
+ * See README for Acknowledgments
  */
 
 // local libraries
 #include "ESPHelper.h"
 #include "ems.h"
 #include "emsuart.h"
+#include "my_config.h"
 
 // public libraries
 #include <ArduinoJson.h> // https://github.com/bblanchon/ArduinoJson
@@ -18,30 +19,21 @@
 // standard arduino libs
 #include <Ticker.h> // https://github.com/esp8266/Arduino/tree/master/libraries/Ticker
 
-// these are set as -D build flags during compilation
-//#define WIFI_SSID "<my_ssid>"
-//#define WIFI_PASSWORD "<my_password>"
-//#define MQTT_IP "<broker_ip>"
-//#define MQTT_USER "<broker_username>"
-//#define MQTT_PASS "<broker_password>"
-
 // timers, all values are in seconds
 #define PUBLISHVALUES_TIME 300 // every 5 mins post HA values
 #define SYSTEMCHECK_TIME 10    // every 10 seconds check if Boiler is online and execute other requests
 #define REGULARUPDATES_TIME 60 // every minute a call is made, so for our 2 calls theres a write cmd every 30seconds
 #define HEARTBEAT_TIME 1       // every second blink heartbeat LED
+#define MAX_MANUAL_CALLS 2     // number of ems reads we do during the fetch cycle (in regularUpdates)
+
 Ticker  publishValuesTimer;
 Ticker  systemCheckTimer;
 Ticker  regularUpdatesTimer;
 Ticker  heartbeatTimer;
 Ticker  showerColdShotStopTimer;
 uint8_t regularUpdatesCount = 0;
-#define MAX_MANUAL_CALLS 2 // number of ems reads we do during the fetch cycle (in regularUpdates)
 
 // GPIOs
-#define LED_RX D1                 // GPIO5
-#define LED_TX D2                 // GPIO4
-#define LED_ERR D3                // GPIO0
 #define LED_HEARTBEAT LED_BUILTIN // onboard LED
 
 // hostname is also used as the MQTT topic identifier (home/<hostname>)
@@ -73,24 +65,16 @@ uint8_t regularUpdatesCount = 0;
 #define TOPIC_SHOWER_ALERT MQTT_BOILER "shower_alert"       // toggle switch for enabling the shower alarm logic
 #define TOPIC_SHOWER_COLDSHOT MQTT_BOILER "shower_coldshot" // used to trigger a coldshot from HA publish
 
-// default values
-// thermostat support, shower timing and shower alert all enabled (1) (disabled = 0)
-#define BOILER_THERMOSTAT_ENABLED 1
-#define BOILER_SHOWER_TIMER 1
-#define BOILER_SHOWER_ALERT 0
-
 // logging - EMS_SYS_LOGGING_VERBOSE, EMS_SYS_LOGGING_NONE, EMS_SYS_LOGGING_BASIC (see ems.h)
 #define BOILER_DEFAULT_LOGGING EMS_SYS_LOGGING_NONE
 
-// shower settings
-#ifndef SHOWER_TEST
-const unsigned long SHOWER_PAUSE_TIME   = 15000;  // 15 seconds, max time if water is switched off & on during a shower
-const unsigned long SHOWER_MIN_DURATION = 180000; // 3 minutes, before recognizing its a shower
-const unsigned long SHOWER_MAX_DURATION = 420000; // 7 minutes, before trigger a shot of cold water
-const unsigned long SHOWER_COLDSHOT_DURATION = 5; // 5 seconds for cold water - note, must be in seconds
-const unsigned long SHOWER_OFFSET_TIME       = 8000; // 8 seconds grace time, to calibrate actual time under the shower
-#else
-// for DEBUGGING only
+// shower settings for DEBUGGING only
+#ifdef SHOWER_TEST
+#undef SHOWER_PAUSE_TIME
+#undef SHOWER_MIN_DURATION
+#undef SHOWER_MAX_DURATION
+#undef SHOWER_COLDSHOT_DURATION
+#undef SHOWER_OFFSET_TIME
 const unsigned long SHOWER_PAUSE_TIME   = 15000;  // 15 seconds, max time if water is switched off & on during a shower
 const unsigned long SHOWER_MIN_DURATION = 20000;  // 20 secs, before recognizing its a shower
 const unsigned long SHOWER_MAX_DURATION = 25000;  // 25 secs, before trigger a shot of cold water
@@ -355,7 +339,7 @@ void showInfo() {
     _renderBoolValue("Circulation pump", EMS_Boiler.wWCirc);
     _renderIntValue("Burner selected max power", "%", EMS_Boiler.selBurnPow);
     _renderIntValue("Burner current power", "%", EMS_Boiler.curBurnPow);
-    _renderFloatValue("Flame current", "mA", EMS_Boiler.flameCurr);
+    _renderFloatValue("Flame current", "uA", EMS_Boiler.flameCurr);
     _renderFloatValue("System pressure", "bar", EMS_Boiler.sysPress);
 
     // UBAMonitorSlow
@@ -393,7 +377,8 @@ void showInfo() {
         } else if (EMS_Thermostat.mode == 2) {
             myDebug("auto\n");
         } else {
-            myDebug("<%d>\n", EMS_Thermostat.mode);
+            myDebug("?\n");
+            // myDebug("? (value is %d)\n", EMS_Thermostat.mode);
         }
     }
 
@@ -790,6 +775,7 @@ void setup() {
 // flash LEDs
 // Using a faster way to write to pins as digitalWrite does a lot of overhead like pin checking & disabling interrupts
 void showLEDs() {
+#ifdef USE_LED
     // ERR LED
     if (!Boiler_Status.boiler_online) {
         WRITE_PERI_REG(PERIPHS_GPIO_BASEADDR + 4, (1 << LED_ERR)); // turn on
@@ -806,6 +792,7 @@ void showLEDs() {
     // because sends are quick, if we did a recent send show the LED for a short while
     uint64_t t = (timestamp - EMS_Sys_Status.emsLastTx);
     WRITE_PERI_REG(PERIPHS_GPIO_BASEADDR + ((t < TX_HOLD_LED_TIME) ? 4 : 8), (1 << LED_TX));
+#endif
 }
 
 // heartbeat callback to light up the LED, called via Ticker

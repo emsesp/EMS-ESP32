@@ -9,32 +9,32 @@ There are 3 parts to this project, first the design of the circuit, second the c
 [![license](https://img.shields.io/github/license/xoseperez/espurna.svg)](LICENSE)
 
 - [EMS-ESP-Boiler](#ems-esp-boiler)
-    - [Introduction](#introduction)
-    - [Supported Boilers Types](#supported-boilers-types)
-    - [Supported ESP8266 devices](#supported-esp8266-devices)
-    - [Getting Started](#getting-started)
-    - [Monitoring The Output](#monitoring-the-output)
-    - [Building The Circuit](#building-the-circuit)
-        - [Powering The EMS Circuit](#powering-the-ems-circuit)
-    - [How The EMS Bus Works](#how-the-ems-bus-works)
-        - [EMS IDs](#ems-ids)
-        - [EMS Polling](#ems-polling)
-        - [EMS Broadcasting](#ems-broadcasting)
-        - [EMS Reading and Writing](#ems-reading-and-writing)
-    - [The ESP8266 Source Code](#the-esp8266-source-code)
-        - [Supported EMS Types](#supported-ems-types)
-            - [Supporting other Thermostats types](#supporting-other-thermostats-types)
-        - [Customizing The Code](#customizing-the-code)
-        - [Using MQTT](#using-mqtt)
-        - [The Basic Shower Logic](#the-basic-shower-logic)
-    - [Home Assistant Configuration](#home-assistant-configuration)
-    - [Building The Firmware](#building-the-firmware)
-        - [Using PlatformIO Standalone](#using-platformio-standalone)
-        - [Using ESPurna](#using-espurna)
-        - [Using Pre-built Firmware](#using-pre-built-firmware)
-        - [Building Using Arduino IDE](#building-using-arduino-ide)
-    - [Known Issues and ToDo's](#known-issues-and-todos)
-    - [Your Comments and Feedback](#your-comments-and-feedback)
+  - [Introduction](#introduction)
+  - [Supported Boilers Types](#supported-boilers-types)
+  - [Supported ESP8266 devices](#supported-esp8266-devices)
+  - [Getting Started](#getting-started)
+  - [Monitoring The Output](#monitoring-the-output)
+  - [Building The Circuit](#building-the-circuit)
+    - [Powering The EMS Circuit](#powering-the-ems-circuit)
+  - [How The EMS Bus Works](#how-the-ems-bus-works)
+    - [EMS IDs](#ems-ids)
+    - [EMS Polling](#ems-polling)
+    - [EMS Broadcasting](#ems-broadcasting)
+    - [EMS Reading and Writing](#ems-reading-and-writing)
+  - [The ESP8266 Source Code](#the-esp8266-source-code)
+    - [Supported EMS Types](#supported-ems-types)
+      - [Supporting other Thermostats types](#supporting-other-thermostats-types)
+    - [Customizing The Code](#customizing-the-code)
+    - [Using MQTT](#using-mqtt)
+    - [The Basic Shower Logic](#the-basic-shower-logic)
+  - [Home Assistant Configuration](#home-assistant-configuration)
+  - [Building The Firmware](#building-the-firmware)
+    - [Using PlatformIO Standalone](#using-platformio-standalone)
+    - [Using ESPurna](#using-espurna)
+    - [Using Pre-built Firmware](#using-pre-built-firmware)
+    - [Building Using Arduino IDE](#building-using-arduino-ide)
+  - [Known Issues and ToDo's](#known-issues-and-todos)
+  - [Your Comments and Feedback](#your-comments-and-feedback)
 
 ## Introduction
 
@@ -173,7 +173,7 @@ The tables below shows which types are broadcasted regularly by the boiler (ID 0
 
 | Source (ID)       | Type ID | Name              | Description                                         | Frequency  |
 | ----------------- | ------- | ----------------- | --------------------------------------------------- | ---------- |
-| Thermostat (0x17) | 0x06    | RC20Time          | returns time and date on the thermostat             | 60 seconds |
+| Thermostat (0x17) | 0x06    | RCTime            | returns time and date on the thermostat             | 60 seconds |
 | Thermostat (0x17) | 0x91    | RC20StatusMessage | returns current and set temperatures                | 60 seconds |
 | Thermostat (0x17) | 0xA3    | RCTempMessage     | returns temp values from external (outdoor) sensors | 60 seconds |
 
@@ -233,11 +233,11 @@ I will add further support for the other thermostats (such as the Nefit Easy) as
 
 ### Customizing The Code
 
-Most of the changes will be done in `boiler.ino` and `ems.cpp`.
-
-- To add new handlers for data types, first create a callback function and add to the `EMS_Types` array at the top of the file `ems.cpp` and modify `ems.h`
-- To change your thermostat type set `EMS_ID_THERMOSTAT` in `ems.cpp`. The default is 0x17 for an RC20.
-- The `#DEFINES` `BOILER_THERMOSTAT_ENABLED`, `BOILER_SHOWER_ENABLED` and `BOILER_SHOWER_TIMER` enabled the thermostat logic, the shower logic and the shower timer alert logic respectively. 1 is on (enabled) and 0 is off (disabled).
+- To configure for your thermostat and specific boiler settings, modify `my_config.h`. Here you can
+  - set the thermostat type. The default ID is 0x17 for an RC20 Moduline 300.
+  - set flags for enabled/disabling functionality such as `BOILER_THERMOSTAT_ENABLED`, `BOILER_SHOWER_ENABLED` and `BOILER_SHOWER_TIMER`.
+  - Set WIFI and MQTT settings, instead of doing this in `platformio.ini`
+- To add new handlers for EMS data types, first create a callback function and add to the `EMS_Types` array at the top of the file `ems.cpp` and modify `ems.h`
 
 ### Using MQTT
 
