@@ -26,7 +26,8 @@
 #define BOILER_SHOWER_ALERT 0       // send alert if showetime exceeded
 
 // define here the Thermostat type. see ems.h for options
-#define EMS_ID_THERMOSTAT EMS_ID_THERMOSTAT_RC20 // your thermostat ID
+//#define EMS_ID_THERMOSTAT EMS_ID_THERMOSTAT_RC20 // your thermostat ID
+#define EMS_ID_THERMOSTAT EMS_ID_THERMOSTAT_EASY
 
 // trigger settings to determine if hot tap water or the heating is active
 #define EMS_BOILER_BURNPOWER_TAPWATER 100

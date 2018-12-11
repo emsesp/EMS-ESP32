@@ -72,7 +72,7 @@ Use the telnet client to inform you of all activity and errors real-time. This i
 
 ![Telnet](doc/telnet/telnet_example.jpg)
 
-If you type 'v 2' and Enter, it will toggle verbose logging showing you more detailed messages. I use ANSI colors with white text for info messages, green for well formatted telegram packages (which have validated CRC checks), red for corrupt packages and yellow for send responses.
+If you type 'v 3' and Enter, it will toggle verbose logging showing you more detailed messages. I use ANSI colors with white text for info messages, green for well formatted telegram packages (which have validated CRC checks), red for corrupt packages and yellow for send responses.
 
 ![Telnet](doc/telnet/telnet_verbose.PNG)
 
@@ -81,15 +81,16 @@ To see the current values of the Boiler and its parameters type 's' and hit Ente
 
 Commands can be issued directly to the EMS bus typing in a letter followed by an optional parameter and pressing Enter. Supported commands are:
 
-- **r** to send a read command to all devices to fetch values. The 2nd parameter is the type. For example 'r 33' will request type UBAParameterWW and bring back the Warm Water temperatures (not the heating) from the Boiler. You can issue any type here.
-- **t** set the thermostat temperature to the given celsius value
+- **r** to send a read command to the boiler. The 2nd parameter is the type. For example 'b 33' will request type UBAParameterWW and bring back the Warm Water temperatures from the Boiler.
+- **t** is similar, but to send a read command to the thermostat.
+- **T** set the thermostat temperature to the given celsius value
 - **w** to adjust the temperature of the warm water from the boiler
 - **a** to turn the warm water on and off
 - **h** to list all the recognized EMS types
-- **p** to toggle the Polling response on/off. It's not necessary to have Polling enabled to work. I use this for debugging purposes.
-- **m** to set the thermostat mode to manual or auto.
-- **T** to toggle thermostat readings on/off
+- **p** to toggle the Polling response on/off (note it's not necessary to have Polling enabled to work)
+- **m** to set the thermostat mode to manual or auto
 - **S** to toggle the Shower Timer functionality on/off
+- **A** to toggle the Shower Timer Alert functionality on/off
 
 **Disclaimer: be careful when sending values to the boiler. If in doubt you can always reset the boiler to its original factory settings by following the instructions in the user guide. On my **Nefit Trendline HRC30** that is done by holding down the Home and Menu buttons simultaneously for a few seconds, selecting factory settings from the scroll menu and lastly pressing the Reset button.**
 
@@ -144,7 +145,7 @@ Each device has a unique ID.
 
 The Boiler has an ID of 0x08 (type MC10) and also referred to as the Bus Master or UBA.
 
-My thermostat, which is a* Moduline 300* uses the RC20 protocol and has an ID 0x17. If you're using an RC30 or RC35 type thermostat such as the newer Moduline 300s or 400s use 0x10 and make adjustments in the code as appropriate. bbqkees did a nice write-up on his github page [here](https://github.com/bbqkees/Nefit-Buderus-EMS-bus-Arduino-Domoticz/blob/master/README.md).
+My thermostat, which is a* Moduline 300* uses the RC30 protocol and has an ID 0x17. If you're using a RC35 type thermostat such as the newer Moduline 300s or 400s use 0x10 and make adjustments in the code as appropriate. bbqkees did a nice write-up on his github page [here](https://github.com/bbqkees/Nefit-Buderus-EMS-bus-Arduino-Domoticz/blob/master/README.md).
 
 Our circuit acts as a service key and thus uses an ID 0x0B. This ID is reserved for special devices intended for installation engineers for maintenance work.
 
@@ -183,7 +184,7 @@ Refer to the code in `ems.cpp` for further explanation on how to parse these mes
 
 Telegram packets can only be sent after the Boiler sends a poll to the sending device. The response can be a read command to request data or a write command to send data. At the end of the transmission a poll response is sent from the client (`<ID> <BRK>`) to say we're all done and free up the bus for other clients.
 
-When doing a request to read data the `[src]` is our device (0x0B) and the `[dest]` has it's 7-bit set. Say we were requesting data from the thermostat we would use `[dest] = 0x97` since RC20 has an ID of 0x17.
+When doing a request to read data the `[src]` is our device (0x0B) and the `[dest]` has it's 7-bit set. Say we were requesting data from the thermostat we would use `[dest] = 0x97` since RC30 has an ID of 0x17.
 
 When doing a write request, the 7th bit is masked in the `[dest]`. After this write request the destination device will send either a single byte 0x01 for success or 0x04 for fail.
 
@@ -218,23 +219,26 @@ The code is built on the Arduino framework and is dependent on these external li
 | Boiler (0x08)     | 0x14    | UBATotalUptimeMessage         |                                          |
 | Boiler (0x08)     | 0x15    | UBAMaintenanceSettingsMessage |                                          |
 | Boiler (0x08)     | 0x16    | UBAParametersMessage          |                                          |
-| Thermostat (0x17) | 0xA8    | RC20Temperature               | sets operating modes                     |
+| Thermostat (0x17) | 0xA8    | RC20Temperature               | sets operating modes for a RC20 & RC30   |
 | Thermostat (0x17) | 0x02    | Version                       | reads Version major/minor                |
+| Thermostat (0x18) | 0x0A    | EasyTemperature               | thermostat monitor for an TC100/Easy     |
 
 In `boiler.ino` you can make calls to automatically send these read commands. See the function *regularUpdates()*
 
 #### Supporting other Thermostats types
 
-The code is originally designed for a Moduline300 (RC20) thermostat.
+The code is originally designed for a Moduline300 (RC30) thermostat.
 
 To adjust for a RC35 first change `EMS_ID_THERMOSTAT` in `ems.cpp`. A RC35 thermostat has 4 heating circuits and to read the values use different Monitor type IDs (e.g. 0x3E, 0x48, etc). The mode (0=night, 1=day, 2=holiday) is the first byte of the telegram and the temperature is the value of the 2nd byte divided by 2. Then to set temperature values use the Working Mode with type IDs (0x3D, 0x47,0x51 and 0x5B) respectively. Set the offset (byte 4 of the header) to determine which temperature you're changing; 1 for night, 2 for day and 3 for holiday. The data value is the desired temperature multiplied by 2 as a single byte.
 
-I will add further support for the other thermostats (such as the Nefit Easy) as soon as I can get my hands on a physical device. I do however welcome contribtions to this code repository which is essentially the purpose of GitHub. By inspecting the telegram packets and looking up the codes in the German wiki (and with lots of trial and error) it is possible to easily extend the existing functions to support other EMS devices.
+There is limited support for an Nefit Easy TC100) thermostat. The current room temperature and setpoint temperature can be read. What still needs fixing is
+- reading the mode (manual vs clock)
+- setting the temperature
 
 ### Customizing The Code
 
 - To configure for your thermostat and specific boiler settings, modify `my_config.h`. Here you can
-  - set the thermostat type. The default ID is 0x17 for an RC20 Moduline 300.
+  - set the thermostat type. The default ID is 0x17 for an RC30 Moduline 300.
   - set flags for enabled/disabling functionality such as `BOILER_THERMOSTAT_ENABLED`, `BOILER_SHOWER_ENABLED` and `BOILER_SHOWER_TIMER`.
   - Set WIFI and MQTT settings, instead of doing this in `platformio.ini`
 - To add new handlers for EMS data types, first create a callback function and add to the `EMS_Types` array at the top of the file `ems.cpp` and modify `ems.h`

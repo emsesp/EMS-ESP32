@@ -44,7 +44,8 @@
 #define EMS_TYPE_RCTime 0x06            // is an automatic thermostat broadcast
 #define EMS_TYPE_RCTempMessage 0xA3     // is an automatic thermostat broadcast
 #define EMS_TYPE_RC20Temperature 0xA8
-#define EMS_TYPE_Version 0x02 // version of the UBA controller
+#define EMS_TYPE_EasyTemperature 0x0A // reading values on an Easy Thermostat
+#define EMS_TYPE_Version 0x02         // version of the UBA controller (boiler)
 
 // Offsets for specific values in a telegram, per type, used for validation
 #define EMS_OFFSET_RC20Temperature_temp 0x1C       // thermostat set temp
@@ -77,8 +78,13 @@ typedef enum {
     EMS_TX_VALIDATE // do a validate after a write
 } _EMS_TX_ACTION;
 
-/* EMS UART logging */
-typedef enum { EMS_SYS_LOGGING_NONE, EMS_SYS_LOGGING_BASIC, EMS_SYS_LOGGING_VERBOSE } _EMS_SYS_LOGGING;
+/* EMS logging */
+typedef enum {
+    EMS_SYS_LOGGING_NONE,       // no messages
+    EMS_SYS_LOGGING_BASIC,      // only basic read/write messages
+    EMS_SYS_LOGGING_THERMOSTAT, // only telegrams sent from thermostat
+    EMS_SYS_LOGGING_VERBOSE     // everything
+} _EMS_SYS_LOGGING;
 
 // status/counters since last power on
 typedef struct {
@@ -194,7 +200,7 @@ typedef struct {
 // function definitions
 extern void ems_parseTelegram(uint8_t * telegram, uint8_t len);
 void        ems_init();
-void        ems_doReadCommand(uint8_t type);
+void        ems_doReadCommand(uint8_t type, uint8_t dest);
 
 void ems_setThermostatTemp(float temp);
 void ems_setThermostatMode(uint8_t mode);

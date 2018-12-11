@@ -74,7 +74,7 @@ typedef struct {
 } subscription;
 
 typedef struct {
-    char key[5];
+    char key[10];
     char description[400];
 } command_t;
 

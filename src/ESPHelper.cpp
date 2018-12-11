@@ -666,7 +666,7 @@ void ESPHelper::consoleHandle() {
 // Set callback of sketch function to process project messages
 void ESPHelper::consoleSetCallBackProjectCmds(command_t * cmds, uint8_t count, void (*callback)()) {
     _helpProjectCmds            = cmds;     // command list
-    _helpProjectCmds_count      = count;    // numiber of commands
+    _helpProjectCmds_count      = count;    // number of commands
     _consoleCallbackProjectCmds = callback; // external function to handle commands
 }
 
@@ -742,26 +742,29 @@ size_t ESPHelper::write(uint8_t character) {
 
 // Show help of commands
 void ESPHelper::consoleShowHelp() {
-    String help = "********************************\n\r* Remote Telnet Command Center "
-                  "*\n\r********************************\n\r";
+    String help = "**********************************************\n\r* Remote Telnet Command Center & Log Monitor "
+                  "*\n\r**********************************************\n\r";
     help += "* Device hostname: " + WiFi.hostname() + "\tIP: " + WiFi.localIP().toString()
             + "\tMAC address: " + WiFi.macAddress() + "\n\r";
     help += "* Connected to WiFi AP: " + WiFi.SSID() + "\n\r";
     help += "* Boot time: ";
     help.concat(_boottime);
-    help += "\n\r* Free Heap RAM: ";
+    help += "\n\r* Free RAM: ";
     help.concat(ESP.getFreeHeap());
     help += " bytes\n\r";
-    help += "*\n\r* Commands:\n\r*  ?=this help, q=quit telnet, $=show used memory, !=reboot, &=suspend all "
+    help += "*\n\r* Commands:\n\r*  ?=this help, q=quit telnet, $=show free memory, !=reboot, &=suspend all "
             "notifications\n\r";
+
+    char s[100];
 
     // print custom commands if available
     if (_consoleCallbackProjectCmds) {
         for (uint8_t i = 0; i < _helpProjectCmds_count; i++) {
-            //for (uint8_t i = 0; i < 5; i++) {
             help += FPSTR("*  ");
             help += FPSTR(_helpProjectCmds[i].key);
-            help += FPSTR(" ");
+            for (int j = 0; j < (8 - strlen(_helpProjectCmds[i].key)); j++) { // padding
+                help += FPSTR(" ");
+            }
             help += FPSTR(_helpProjectCmds[i].description);
             help += FPSTR("\n\r");
         }
@@ -812,7 +815,7 @@ void ESPHelper::consoleProcessCommand() {
         telnetClient.println("* Closing telnet connection...");
         telnetClient.stop();
     } else if (cmd == '$') {
-        telnetClient.print("* Free Heap RAM (bytes): ");
+        telnetClient.print("* Free RAM (bytes): ");
         telnetClient.println(ESP.getFreeHeap());
     } else if (cmd == '!') {
         resetESP();

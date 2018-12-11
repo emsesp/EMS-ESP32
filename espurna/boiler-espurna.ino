@@ -455,7 +455,7 @@ void _boilerLoop() {
         last_boilersend = millis();
 
         // get 0x33 WW values manually
-        ems_doReadCommand(EMS_TYPE_UBAParameterWW);
+        ems_doReadCommand(EMS_TYPE_UBAParameterWW, EMS_ID_BOILER);
 
 #if MQTT_SUPPORT
         // send MQTT
