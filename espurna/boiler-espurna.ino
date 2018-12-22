@@ -166,9 +166,10 @@ void showInfo() {
 
     myDebug("\n  # EMS type handlers: %d\n", ems_getEmsTypesCount());
 
-    myDebug("  Thermostat is %s, Poll is %s, Shower timer is %s, Shower alert is %s\n",
+    myDebug("  Thermostat is %s, Poll is %s, Tx is %s, Shower Timer is %s, Shower Alert is %s\n",
             ((Boiler_Status.thermostat_enabled) ? "enabled" : "disabled"),
             ((EMS_Sys_Status.emsPollEnabled) ? "enabled" : "disabled"),
+            ((EMS_Sys_Status.emsTxEnabled) ? "enabled" : "disabled"),
             ((Boiler_Status.shower_timer) ? "enabled" : "disabled"),
             ((Boiler_Status.shower_alert) ? "enabled" : "disabled"));
 

@@ -5,12 +5,12 @@ views:
     cards:
       - type: entities
         title: Boiler
-        show_header_toggle: true
+        show_header_toggle: false
         entities:
           - sensor.boiler_boottime
           - sensor.boiler_updated
           - type: divider
-          - input_number.boiler_wwtemp
+          - sensor.warm_water_selected_temperature
           - sensor.warm_water_current_temperature
           - sensor.warm_water_activated
           - sensor.warm_water_3way_valve
@@ -31,7 +31,7 @@ views:
         cards:
         - type: entities
           title: Shower Monitor
-          show_header_toggle: true
+          show_header_toggle: false
           entities:
             - switch.shower_timer
             - switch.long_shower_alert

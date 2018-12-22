@@ -39,27 +39,5 @@
         payload: >
           {{ now().strftime("%H:%M:%S %-d/%b/%Y") }}
 
-# Boiler warm water temp
-- id: boiler_wwtemp
-  trigger:
-    platform: state
-    entity_id: input_number.boiler_wwtemp
-  action:
-    service: mqtt.publish
-    data_template:
-      topic: 'home/boiler/boiler_wwtemp'
-      payload: >
-        {{ states.input_number.boiler_wwtemp.state }}
-
-# See if wwTemp has changed in recent mqtt payload, then adjust input_number
-- id: boiler_wwtemp_incoming
-  trigger:
-    platform: state
-    entity_id: sensor.warm_water_selected_temperature
-  action: 
-    service: input_number.set_value
-    data_template:
-      entity_id: input_number.boiler_wwtemp
-      value: '{{ states.sensor.warm_water_selected_temperature.state }}'
 
 

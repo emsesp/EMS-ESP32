@@ -25,20 +25,21 @@
 #define BOILER_SHOWER_TIMER 1       // monitors how long a shower has taken
 #define BOILER_SHOWER_ALERT 0       // send alert if showetime exceeded
 
-// define here the Thermostat type. see ems.h for options
-//#define EMS_ID_THERMOSTAT EMS_ID_THERMOSTAT_RC20 // your thermostat ID
-#define EMS_ID_THERMOSTAT EMS_ID_THERMOSTAT_EASY
+// define here the Thermostat type. see ems.h for the supported types
+#define EMS_ID_THERMOSTAT EMS_ID_THERMOSTAT_RC20
+//#define EMS_ID_THERMOSTAT EMS_ID_THERMOSTAT_RC30
+//#define EMS_ID_THERMOSTAT EMS_ID_THERMOSTAT_EASY
 
 // trigger settings to determine if hot tap water or the heating is active
 #define EMS_BOILER_BURNPOWER_TAPWATER 100
 #define EMS_BOILER_SELFLOWTEMP_HEATING 70
 
-// if using the shower timer, change these settings (in ms)
-#define SHOWER_PAUSE_TIME 15000    // 15 seconds, max time if water is switched off & on during a shower
-#define SHOWER_MIN_DURATION 180000 // 3 minutes, before recognizing its a shower
-#define SHOWER_MAX_DURATION 420000 // 7 minutes, before trigger a shot of cold water
-#define SHOWER_COLDSHOT_DURATION 5 // 5 seconds for cold water - note, must be in seconds
-#define SHOWER_OFFSET_TIME 8000    // 8 seconds grace time, to calibrate actual time under the shower
+// if using the shower timer, change these settings
+#define SHOWER_PAUSE_TIME 15000     // in ms. 15 seconds, max time if water is switched off & on during a shower
+#define SHOWER_MIN_DURATION 120000  // in ms. 2 minutes, before recognizing its a shower
+#define SHOWER_MAX_DURATION 420000  // in ms. 7 minutes, before trigger a shot of cold water
+#define SHOWER_OFFSET_TIME 5000     // in ms. 5 seconds grace time, to calibrate actual time under the shower
+#define SHOWER_COLDSHOT_DURATION 10 // in seconds. 10 seconds for cold water before turning back hot water
 
 // if using LEDs to show traffic, configure the GPIOs here
 // only works if -DUSE_LED is set in platformio.ini

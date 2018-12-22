@@ -70,7 +70,7 @@ ESPHelper::ESPHelper(netInfo * startingNet) {
 //start the wifi & mqtt systems and attempt connection (currently blocking)
 //true on: parameter check validated
 //false on: parameter check failed
-bool ESPHelper::begin(const char * hostname) {
+bool ESPHelper::begin(const char * hostname, const char * app_name, const char * app_version) {
 #ifdef USE_SERIAL1
     Serial1.begin(115200);
     Serial1.setDebugOutput(true);
@@ -84,6 +84,10 @@ bool ESPHelper::begin(const char * hostname) {
     // set hostname first
     strcpy(_hostname, hostname);
     OTA_enable();
+
+    strcpy(_app_name, app_name);       // app name
+    strcpy(_app_version, app_version); // app version
+
 
     setBoottime("<unknown>");
 
@@ -176,7 +180,7 @@ bool ESPHelper::begin(const char * hostname) {
 
         consoleShowHelp(); // show this at bootup
 
-        //mark the system as started and return
+        // mark the system as started and return
         _hasBegun = true;
 
         return true;
@@ -339,6 +343,12 @@ void ESPHelper::setMQTTCallback(MQTT_CALLBACK_SIGNATURE) {
 void ESPHelper::setWifiCallback(void (*callback)()) {
     _wifiCallback    = callback;
     _wifiCallbackSet = true;
+}
+
+//sets a custom function to run when telnet is started
+void ESPHelper::setInitCallback(void (*callback)()) {
+    _initCallback    = callback;
+    _initCallbackSet = true;
 }
 
 //attempts to connect to wifi & mqtt server if not connected
@@ -614,6 +624,8 @@ void ESPHelper::consoleHandle() {
         // Show the initial message
         consoleShowHelp();
 
+        _initCallback(); // call callback to set any custom things
+
         // Empty buffer
         while (telnetClient.available()) {
             telnetClient.read();
@@ -655,7 +667,7 @@ void ESPHelper::consoleHandle() {
 
         // Inactivity - close connection if not received commands from user in telnet to reduce overheads
         if ((millis() - _lastTimeCommand) > MAX_TIME_INACTIVE) {
-            telnetClient.println("* Closing session due to inactivity");
+            telnetClient.println("* Closing telnet session due to inactivity");
             telnetClient.flush();
             telnetClient.stop();
             _telnetConnected = false;
@@ -749,6 +761,10 @@ void ESPHelper::consoleShowHelp() {
     help += "* Connected to WiFi AP: " + WiFi.SSID() + "\n\r";
     help += "* Boot time: ";
     help.concat(_boottime);
+    help += "\n\r* ";
+    help.concat(_app_name);
+    help += " Version ";
+    help.concat(_app_version);
     help += "\n\r* Free RAM: ";
     help.concat(ESP.getFreeHeap());
     help += " bytes\n\r";

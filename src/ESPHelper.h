@@ -90,7 +90,8 @@ class ESPHelper : public Print {
 
     ESPHelper(netInfo * startingNet);
 
-    bool begin(const char * hostname);
+    bool begin(const char * hostname, const char * app_name, const char * app_version);
+
     void end();
 
     void useSecureClient(const char * fingerprint);
@@ -110,6 +111,7 @@ class ESPHelper : public Print {
     void setMQTTCallback(MQTT_CALLBACK_SIGNATURE);
 
     void setWifiCallback(void (*callback)());
+    void setInitCallback(void (*callback)());
 
     void sendHACommand(const char * s);
     void sendStart();
@@ -162,6 +164,8 @@ class ESPHelper : public Print {
     char             _clientName[40];
     void (*_wifiCallback)();
     bool _wifiCallbackSet = false;
+    void (*_initCallback)();
+    bool _initCallbackSet = false;
 
     std::function<void(char *, uint8_t *, uint8_t)> _mqttCallback;
 
@@ -181,7 +185,7 @@ class ESPHelper : public Print {
     netInfo **   _netList;
     bool         _verboseMessages = true;
     subscription _subscriptions[MAX_SUBSCRIPTIONS];
-    char         _hostname[64];
+    char         _hostname[24];
     uint8_t      _qos  = DEFAULT_QOS;
     IPAddress    _apIP = IPAddress(192, 168, 1, 254);
     void         changeNetwork();
@@ -190,7 +194,9 @@ class ESPHelper : public Print {
     void         resubscribe();
     uint8_t      setConnectionStatus();
 
-    char _boottime[50];
+    char _boottime[24];
+    char _app_name[24];
+    char _app_version[10];
 
     // console/telnet specific
     WiFiClient telnetClient;
