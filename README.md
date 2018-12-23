@@ -5,8 +5,6 @@ EMS-ESP-Boiler is a project to build a controller circuit running with an ESP826
 There are 3 parts to this project, first the design of the circuit, second the code for the ESP8266 microcontroller firmware and lastly an example configuration for Home Assistant to monitor the data and issue direct commands via MQTT.
 
 [![version](https://img.shields.io/badge/version-1.1.0-brightgreen.svg)](CHANGELOG.md)
-[![branch](https://img.shields.io/badge/branch-dev-orange.svg)](https://github.org/xoseperez/espurna/tree/dev/)
-[![license](https://img.shields.io/github/license/xoseperez/espurna.svg)](LICENSE)
 
 - [EMS-ESP-Boiler](#ems-esp-boiler)
   - [Introduction](#introduction)
@@ -34,8 +32,6 @@ There are 3 parts to this project, first the design of the circuit, second the c
   - [Home Assistant Configuration](#home-assistant-configuration)
   - [Building The Firmware](#building-the-firmware)
     - [Using PlatformIO Standalone](#using-platformio-standalone)
-    - [Using ESPurna](#using-espurna)
-    - [Using Pre-built Firmware](#using-pre-built-firmware)
     - [Building Using Arduino IDE](#building-using-arduino-ide)
   - [Known Issues](#known-issues)
   - [Wish List](#wish-list)
@@ -44,9 +40,9 @@ There are 3 parts to this project, first the design of the circuit, second the c
 
 ## Introduction
 
-My original intention for this home project with to build my own smart thermostat for my Nefit Trendline boiler and then have it controlled automatically via [Home Assistant](https://www.home-assistant.io/) on my mobile phone. I had a few ESP32s and ESP8266s lying around from previous IoT projects and building a specific circuit to decode the EMS messages was a nice challenge into designing complete end-to-end complex electronic circuits. I then began adding new features such as timing how long the shower would be running for and subsequently triggering an alarm (actually a shot of cold water) after a certain period.
+My original intention for this home project was to build a custom smart thermostat that interfaces with my Nefit Trendline HRC30 boiler and have it controlled via a mobile app using [Home Assistant](https://www.home-assistant.io/). I had a few cheap ESP32s and ESP8266s microcontrollers lying around from previous IoT projects and learning how to build a circuit to decode the EMS messages seemed like a nice challenge.
 
-Acknowledgments and kudos to the following people and their open-sourced projects that have helped me get this far:
+Firstly, some acknowledgments and kudos to the following people who have open-sourced their projects which have helped me tremendously:
 
  **susisstrolch** - Probably the first working version of the EMS bridge circuit I found designed for the ESP8266. I borrowed Juergen's [schematic](https://github.com/susisstrolch/EMS-ESP12) and parts of his code logic.
 
@@ -56,7 +52,7 @@ Acknowledgments and kudos to the following people and their open-sourced project
 
 ## Supported Boilers Types
 
-Most Bosch branded boilers that support the Logamatic EMS (and EMS+) bus protocols work with this design. Which are Nefit, Buderus, Worcester and Junkers and copyrighted. Please make sure you read the **Disclaimer** carefully before sending ambigious messages to your EMS bus as you cause device damage.
+Most Bosch branded boilers that support the Logamatic EMS (and EMS+) bus protocols work with this design. This includes Nefit, Buderus, Worcester and Junkers (all copyrighted). Please make sure you read the **Disclaimer** carefully before sending ambiguous messages to your EMS bus as you cause serious damage to your boiler.
 
 ## Supported ESP8266 devices
 
@@ -276,7 +272,7 @@ I'm using the standard PubSubClient client so make sure you set `-DMQTT_MAX_PACK
 
 I run Mosquitto on my Raspberry PI 3 as the MQTT broker.
 
-The boiler data is collected and sent as a single JSON object to MQTT TOPIC `home/boiler/boiler_data` (or `{hostname}/boiler_data` for ESPurna). A hash is generated (CRC32 based) to determine if the payload has changed, otherwise don't send it. An example payload looks like:
+The boiler data is collected and sent as a single JSON object to MQTT TOPIC `home/boiler/boiler_data`. A hash is generated (CRC32 based) to determine if the payload has changed, otherwise don't send it. An example payload looks like:
 
 `{"wWCurTmp":"43.0","wWHeat":"on","curFlowTemp":"51.7","retTemp":"48.0","burnGas":"off","heatPmp":"off","fanWork":"off","ignWork":"off","wWCirc":"off","selBurnPow":"0","curBurnPow":"0","sysPress":"1.6","boilTemp":"54.7","pumpMod":"4"}`
 
@@ -336,52 +332,6 @@ PlatformIO is my preferred way. The code uses a modified version [ESPHelper](htt
 % platformio run -t upload
 ```
 
-### Using ESPurna
-
-[ESPurna](https://github.com/xoseperez/espurna/wiki) is framework that handles most of the tedious tasks of building IoT devices so you can focus on the functionality you need. This replaces my ESPHelper code in the standalone version above. ESPurna is natively built on PlatformIO and Visual Studio Code too which is nice. The latest version I tested this on is 1.13.3. So if you're brave, follow these steps:
-
-1. Download and install [NodeJS](https://nodejs.org/en/download). This gives you npm. Choose the LTS version
-2. Download ESPurna by cloning the ESPurna git repository (command palette, git clone, https://github.com/xoseperez/espurna.git)
-3. Restart VSC.
-4. From VSC open the folder `espurna\code`. PlatformIO should detect and set some things up for you automagically
-5. open a terminal window (*ctrl-`*)
-6. Install the node modules: `npm install --only=dev`
-7. Build the web interface:  `node node_modules/gulp/bin/gulp.js`. This will create a compressed `code/espurna/static/index.html.gz.h`. If you get warnings about lf during the building edit `gulpfile.js` and change the line `'failOnError': true` to `false` as a temporary workaround.
-8. Modify the platformio.ini file making sure you add `-DUSE_CUSTOM_H -DUSE_EXTRA` to the `debug_flags`
-9. Copy the following files from EMS-ESP-Boiler repo to where you installed ESPurna
-```c
-espurna/index.html -> code/html/index.html
-espurna/custom.h -> code/config/custom.h
-espurna/boiler-espurna.ino -> code/espurna/boiler-espurna.ino
-ems*.* -> code/espurna/
-```
-10. Now build and upload as you usually would with PlatformIO (or ctrl-arl-t and choose the right build). Look at my version of platformio.ini as an example.
-11.  When the firmware loads, use a wifi connected pc/mobile to connect to the Access Point called ESPURNA_XXXXXX. Use 'fibonacci' as the password. Navigate to `http://192.168.4.1` from a browser, set a new username and password when prompted, log off the wifi and reconnect to the AP using these new credentials. Again go to 192.168.4.1
-12.  In the ADMIN page enable Telnet and SAVE
-13.  In the WIFI page add your home wifi details, click SAVE and reboot, and go to the new IP
-14.  Configure MQTT
-
-The Telnet functions are `BOILER.READ`, `BOILER.INFO` and a few others for reference. `HELP` will list them. Add your own functions to expand the functionality by calling the EMS* functions as in the examples.
-
-If you run into issues refer to ESPurna's official setup instructions [here](https://github.com/xoseperez/espurna/wiki/Build-and-update-from-Visual-Studio-Code-using-PlatformIO) and [here](https://github.com/xoseperez/espurna/wiki/Configuration).
-
-This is what ESPurna looks like with the custom boiler code:
-
-![Example running in ESPurna](doc/espurna/example.PNG)
-
-*Note: I didn't bother porting all the EMS Read and Write commands from the Telnet code to the Espurna, but its pretty straight forward if you want to extend the code.*
-
-### Using Pre-built Firmware
-
-pre-baked firmwares for some ESP8266 devices based on ESPurna are available in the directory `/firmware` which you can upload yourself using [esptool](https://github.com/espressif/esptool) bootloader. On Windows, follow these instructions:
-
-1. Check if you have **python 2.7** installed. If not [download it](https://www.python.org/downloads/) and make sure you select the option to add Python to the windows PATH
-2. Install the ESPTool by running `pip install esptool` from a command prompt
-3. Connect the ESP via USB, figure out the COM port
-4. run `esptool.py -p <com> write_flash 0x00000 <firmware>` where firmware is the `.bin` file and \<com\> is the COM port, e.g. `COM3`
-
-now follow the steps in ESPurna section above from #10 on to configure the device.
-
 ### Building Using Arduino IDE
 
 Porting to the Arduino IDE can be a little tricky but it is possible.
@@ -389,7 +339,7 @@ Porting to the Arduino IDE can be a little tricky but it is possible.
 - Add the ESP8266 boards (from Preferences add Additional Board URL `http://arduino.esp8266.com/stable/package_esp8266com_index.json`)
 - Go to Boards Manager and install ESP8266 2.4.x platform
 - Select your ESP8266 from Tools->Boards and the correct port with Tools->Port
-- From the Library Manager install ArduinoJson 5.13.x, PubSubClient 2.6.x, CRC32 and Time
+- From the Library Manager install the needed libraries from platformio.ini such as ArduinoJson 5.13.x, PubSubClient 2.6.x, CRC32 and Time
 - The Arduino IDE doesn't have a common way to set build flags (ugh!) so you'll need to un-comment these lines in `boiler.ino`:
 
 ```c
