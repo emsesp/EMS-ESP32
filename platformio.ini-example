@@ -22,6 +22,7 @@ framework = arduino
 lib_deps = ${common.lib_deps}
 build_flags = ${common.build_flags} ${common.build_flags_custom}
 upload_speed = 921600
+monitor_speed = 115200
 ; comment out next line if using USB and not OTA
 upload_port = "boiler."
 ; examples....
@@ -36,6 +37,7 @@ framework = arduino
 lib_deps = ${common.lib_deps}
 build_flags = ${common.build_flags} ${common.build_flags_custom}
 upload_speed = 921600
+monitor_speed = 115200
 ; comment out next line if using USB and not OTA
 upload_port = "boiler."
 ; examples....

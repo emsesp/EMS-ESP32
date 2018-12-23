@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Setting the mode and setpoint temperature on a RC35
 
+## [1.1.1] 2018-12-23
+
+### Removed
+
+- Espurna build notes and ready made firmware
+
 ## [1.1.0] 2018-12-22
 
 ### Fixed
