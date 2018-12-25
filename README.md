@@ -4,6 +4,7 @@ EMS-ESP-Boiler is a project to build a controller circuit running with an ESP826
 
 There are 3 parts to this project, first the design of the circuit, second the code for the ESP8266 microcontroller firmware and lastly an example configuration for Home Assistant to monitor the data and issue direct commands via MQTT.
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/b8880625bdf841d4adb2829732030887)](https://app.codacy.com/app/proddy/EMS-ESP-Boiler?utm_source=github.com&utm_medium=referral&utm_content=proddy/EMS-ESP-Boiler&utm_campaign=Badge_Grade_Settings)
 [![version](https://img.shields.io/badge/version-1.1.0-brightgreen.svg)](CHANGELOG.md)
 
 - [EMS-ESP-Boiler](#ems-esp-boiler)
