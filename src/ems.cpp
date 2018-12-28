@@ -176,6 +176,8 @@ void ems_init() {
     EMS_Boiler.curBurnPow  = EMS_VALUE_INT_NOTSET;   // Burner current power
     EMS_Boiler.flameCurr   = EMS_VALUE_FLOAT_NOTSET; // Flame current in micro amps
     EMS_Boiler.sysPress    = EMS_VALUE_FLOAT_NOTSET; // System pressure
+    EMS_Boiler.serviceCodeChar1 = EMS_VALUE_INT_NOTSET; //
+    EMS_Boiler.serviceCodeChar2 = EMS_VALUE_INT_NOTSET; //
 
     // UBAMonitorSlow
     EMS_Boiler.extTemp     = EMS_VALUE_FLOAT_NOTSET; // Outside temperature
@@ -190,6 +192,7 @@ void ems_init() {
     EMS_Boiler.wWStarts  = EMS_VALUE_INT_NOTSET;   // Warm Water # starts
     EMS_Boiler.wWWorkM   = EMS_VALUE_INT_NOTSET;   // Warm Water # minutes
     EMS_Boiler.wWOneTime = EMS_VALUE_INT_NOTSET;   // Warm Water one time function on/off
+    EMS_Boiler.wWCurFlow = EMS_VALUE_INT_NOTSET;
 
     EMS_Boiler.tapwaterActive = EMS_VALUE_INT_NOTSET; // Hot tap water is on/off
     EMS_Boiler.heatingActive  = EMS_VALUE_INT_NOTSET; // Central heating is on/off
@@ -723,8 +726,8 @@ void _processType(uint8_t * telegram, uint8_t length) {
 bool _checkActive() {
     // hot tap water
     EMS_Boiler.tapwaterActive =
-        ((EMS_Boiler.selFlowTemp == 0)
-         && (EMS_Boiler.selBurnPow >= EMS_BOILER_BURNPOWER_TAPWATER) & (EMS_Boiler.burnGas == EMS_VALUE_INT_ON));
+        ((EMS_Boiler.wWCurFlow != 0) //this is easier
+         && (EMS_Boiler.burnGas == EMS_VALUE_INT_ON));
 
     // heating
     EMS_Boiler.heatingActive =
@@ -754,6 +757,7 @@ void _process_UBAMonitorWWMessage(uint8_t * data, uint8_t length) {
     EMS_Boiler.wWStarts  = _toLong(13, data);
     EMS_Boiler.wWWorkM   = _toLong(10, data);
     EMS_Boiler.wWOneTime = bitRead(data[5], 1);
+    EMS_Boiler.wWCurFlow = data[9];
 }
 
 /**
@@ -778,6 +782,10 @@ void _process_UBAMonitorFast(uint8_t * data, uint8_t length) {
 
     EMS_Boiler.flameCurr = _toFloat(15, data);
 
+    //read the service code / installation status as appears on the display
+    EMS_Boiler.serviceCodeChar1 = data[18];  //ascii character 1
+    EMS_Boiler.serviceCodeChar2 = data[19];  //ascii character 2
+    
     if (data[17] == 0xFF) { // missing value for system pressure
         EMS_Boiler.sysPress = 0;
     } else {
@@ -1187,7 +1195,7 @@ void ems_setThermostatMode(uint8_t mode) {
  */
 void ems_setWarmWaterTemp(uint8_t temperature) {
     // check for invalid temp values
-    if ((temperature < 30) || (temperature > 90)) {
+    if ((temperature < 30) || (temperature > EMS_BOILER_TAPWATER_TEMPERATURE_MAX)) {
         return;
     }
 
