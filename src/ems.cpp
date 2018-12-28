@@ -161,6 +161,7 @@ void ems_init() {
     EMS_Boiler.wWSelTemp     = EMS_VALUE_INT_NOTSET; // Warm Water selected temperature
     EMS_Boiler.wWCircPump    = EMS_VALUE_INT_NOTSET; // Warm Water circulation pump available
     EMS_Boiler.wWDesiredTemp = EMS_VALUE_INT_NOTSET; // Warm Water desired temperature to prevent infection
+    EMS_Boiler.wWComfort     = EMS_VALUE_INT_NOTSET;
 
     // UBAMonitorFast
     EMS_Boiler.selFlowTemp = EMS_VALUE_INT_NOTSET;   // Selected flow temperature
@@ -743,6 +744,7 @@ void _process_UBAParameterWW(uint8_t * data, uint8_t length) {
     EMS_Boiler.wWSelTemp     = data[2];
     EMS_Boiler.wWCircPump    = (data[6] == 0xFF); // 0xFF means on
     EMS_Boiler.wWDesiredTemp = data[8];
+    EMS_Boiler.wWComfort     = (data[EMS_OFFSET_UBAParameterWW_wwComfort] == 0x00);
 
     // when we receieve this, lets force an MQTT publish
     EMS_Sys_Status.emsRefreshed = true;
@@ -1238,6 +1240,20 @@ void ems_setWarmWaterActivated(bool activated) {
     EMS_TxQueue.push(EMS_TxTelegram);
 }
 
+void ems_setWarmWaterModeComfort(bool comfort) {
+    myDebug("Setting boiler warm water to comfort mode %s\n", comfort ? "Comfort" : "Eco");
+
+    _EMS_TxTelegram EMS_TxTelegram = EMS_TX_TELEGRAM_NEW; // create new Tx
+
+    EMS_TxTelegram.action        = EMS_TX_TELEGRAM_WRITE;
+    EMS_TxTelegram.dest          = EMS_ID_BOILER;
+    EMS_TxTelegram.type          = EMS_TYPE_UBAParameterWW;
+    EMS_TxTelegram.offset        = EMS_OFFSET_UBAParameterWW_wwComfort;
+    EMS_TxTelegram.length        = EMS_MIN_TELEGRAM_LENGTH;
+    EMS_TxTelegram.type_validate = EMS_ID_NONE;               // don't validate
+    EMS_TxTelegram.dataValue     = (comfort ? EMS_VALUE_UBAParameterWW_wwComfort_Comfort : EMS_VALUE_UBAParameterWW_wwComfort_Eco); // 0x00 is on, 0xD8 is off
+    EMS_TxQueue.push(EMS_TxTelegram);
+}
 /**
  * Activate / De-activate the Warm Tap Water
  * true = on, false = off

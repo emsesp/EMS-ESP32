@@ -44,6 +44,10 @@
 #define EMS_OFFSET_UBAParameterWW_wwtemp 2      // WW Temperature
 #define EMS_OFFSET_UBAParameterWW_wwactivated 1 // WW Activated
 
+#define EMS_OFFSET_UBAParameterWW_wwComfort 9   // WW is in comfort or eco mode
+#define EMS_VALUE_UBAParameterWW_wwComfort_Comfort 0x00   // the value for comfort
+#define EMS_VALUE_UBAParameterWW_wwComfort_Eco 0xD8       // the value for eco
+
 /* 
  * Thermostat...
  */
@@ -160,6 +164,7 @@ typedef struct {           // UBAParameterWW
     uint8_t wWSelTemp;     // Warm Water selected temperature
     uint8_t wWCircPump;    // Warm Water circulation pump Available
     uint8_t wWDesiredTemp; // Warm Water desired temperature
+    uint8_t wWComfort;     // Warm water comfort or ECO mode
 
     // UBAMonitorFast
     uint8_t selFlowTemp;      // Selected flow temperature
@@ -253,6 +258,7 @@ void ems_setThermostatTemp(float temp);
 void ems_setThermostatMode(uint8_t mode);
 void ems_setWarmWaterTemp(uint8_t temperature);
 void ems_setWarmWaterActivated(bool activated);
+void ems_setWarmWaterModeComfort(bool comfort);
 void ems_setWarmTapWaterActivated(bool activated);
 void ems_setExperimental(uint8_t value);
 void ems_setPoll(bool b);

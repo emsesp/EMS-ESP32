@@ -299,6 +299,7 @@ void showInfo() {
     // UBAParameterWW
     _renderBoolValue("Warm Water activated", EMS_Boiler.wWActivated);
     _renderBoolValue("Warm Water circulation pump available", EMS_Boiler.wWCircPump);
+    myDebug("  Warm Water is set to %s\n", (EMS_Boiler.wWComfort ? "Comfort" : "ECO"));
     _renderIntValue("Warm Water selected temperature", "C", EMS_Boiler.wWSelTemp);
     _renderIntValue("Warm Water desired temperature", "C", EMS_Boiler.wWDesiredTemp);
 
@@ -396,6 +397,8 @@ void publishValues(bool force) {
 
     rootBoiler["wWSelTemp"]   = _int_to_char(s, EMS_Boiler.wWSelTemp);
     rootBoiler["wWActivated"] = _bool_to_char(s, EMS_Boiler.wWActivated);
+    sprintf(s, "%s",  (EMS_Boiler.wWComfort ? "Comfort" : "ECO"));
+    rootBoiler["wWComfort"]   = s;
     rootBoiler["wWCurTmp"]    = _float_to_char(s, EMS_Boiler.wWCurTmp);
     
     sprintf(s, "%i.%i", EMS_Boiler.wWCurFlow/10, EMS_Boiler.wWCurFlow%10);
