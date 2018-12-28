@@ -44,6 +44,10 @@
 #define EMS_OFFSET_UBAParameterWW_wwtemp 2      // WW Temperature
 #define EMS_OFFSET_UBAParameterWW_wwactivated 1 // WW Activated
 
+#define EMS_OFFSET_UBAParameterWW_wwComfort 9   // WW is in comfort or eco mode
+#define EMS_VALUE_UBAParameterWW_wwComfort_Comfort 0x00   // the value for comfort
+#define EMS_VALUE_UBAParameterWW_wwComfort_Eco 0xD8       // the value for eco
+
 /* 
  * Thermostat...
  */
@@ -160,21 +164,24 @@ typedef struct {           // UBAParameterWW
     uint8_t wWSelTemp;     // Warm Water selected temperature
     uint8_t wWCircPump;    // Warm Water circulation pump Available
     uint8_t wWDesiredTemp; // Warm Water desired temperature
+    uint8_t wWComfort;     // Warm water comfort or ECO mode
 
     // UBAMonitorFast
-    uint8_t selFlowTemp; // Selected flow temperature
-    float   curFlowTemp; // Current flow temperature
-    float   retTemp;     // Return temperature
-    uint8_t burnGas;     // Gas on/off
-    uint8_t fanWork;     // Fan on/off
-    uint8_t ignWork;     // Ignition on/off
-    uint8_t heatPmp;     // Circulating pump on/off
-    uint8_t wWHeat;      // 3-way valve on WW
-    uint8_t wWCirc;      // Circulation on/off
-    uint8_t selBurnPow;  // Burner max power
-    uint8_t curBurnPow;  // Burner current power
-    float   flameCurr;   // Flame current in micro amps
-    float   sysPress;    // System pressure
+    uint8_t selFlowTemp;      // Selected flow temperature
+    float   curFlowTemp;      // Current flow temperature
+    float   retTemp;          // Return temperature
+    uint8_t burnGas;          // Gas on/off
+    uint8_t fanWork;          // Fan on/off
+    uint8_t ignWork;          // Ignition on/off
+    uint8_t heatPmp;          // Circulating pump on/off
+    uint8_t wWHeat;           // 3-way valve on WW
+    uint8_t wWCirc;           // Circulation on/off
+    uint8_t selBurnPow;       // Burner max power
+    uint8_t curBurnPow;       // Burner current power
+    float   flameCurr;        // Flame current in micro amps
+    float   sysPress;         // System pressure
+    uint8_t serviceCodeChar1; // First  Character in status/service code
+    uint8_t serviceCodeChar2; // Second Character in status/service code
 
     // UBAMonitorSlow
     float    extTemp;     // Outside temperature
@@ -189,6 +196,7 @@ typedef struct {           // UBAParameterWW
     uint32_t wWStarts;  // Warm Water # starts
     uint32_t wWWorkM;   // Warm Water # minutes
     uint8_t  wWOneTime; // Warm Water one time function on/off
+    uint8_t  wWCurFlow; // Warm Water current flow in l/min
 
     // calculated values
     uint8_t tapwaterActive; // Hot tap water is on/off
@@ -250,6 +258,7 @@ void ems_setThermostatTemp(float temp);
 void ems_setThermostatMode(uint8_t mode);
 void ems_setWarmWaterTemp(uint8_t temperature);
 void ems_setWarmWaterActivated(bool activated);
+void ems_setWarmWaterModeComfort(bool comfort);
 void ems_setWarmTapWaterActivated(bool activated);
 void ems_setExperimental(uint8_t value);
 void ems_setPoll(bool b);

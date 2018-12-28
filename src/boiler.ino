@@ -238,6 +238,19 @@ void _renderIntValue(const char * prefix, const char * postfix, uint8_t value) {
     myDebug("\n");
 }
 
+// takes an int value at prints it to debug log
+void _renderIntfractionalValue(const char * prefix, const char * postfix, uint8_t value, uint8_t decimals) {
+    myDebug("  %s: ", prefix);
+    char s[20];
+    myDebug("%s.", _int_to_char(s, value/(decimals*10)));
+    myDebug("%s", _int_to_char(s, value%(decimals*10)));
+    if (postfix != NULL) {
+        myDebug(" %s", postfix);
+    }
+
+    myDebug("\n");
+}
+
 // takes a bool value at prints it to debug log
 void _renderBoolValue(const char * prefix, uint8_t value) {
     myDebug("  %s: ", prefix);
@@ -286,11 +299,13 @@ void showInfo() {
     // UBAParameterWW
     _renderBoolValue("Warm Water activated", EMS_Boiler.wWActivated);
     _renderBoolValue("Warm Water circulation pump available", EMS_Boiler.wWCircPump);
+    myDebug("  Warm Water is set to %s\n", (EMS_Boiler.wWComfort ? "Comfort" : "ECO"));
     _renderIntValue("Warm Water selected temperature", "C", EMS_Boiler.wWSelTemp);
     _renderIntValue("Warm Water desired temperature", "C", EMS_Boiler.wWDesiredTemp);
 
     // UBAMonitorWWMessage
     _renderFloatValue("Warm Water current temperature", "C", EMS_Boiler.wWCurTmp);
+    _renderIntfractionalValue("Warm Water current tapwater flow", "l/min", EMS_Boiler.wWCurFlow, 1);
     _renderIntValue("Warm Water # starts", "times", EMS_Boiler.wWStarts);
     myDebug("  Warm Water active time: %d days %d hours %d minutes\n",
             EMS_Boiler.wWWorkM / 1440,
@@ -311,6 +326,7 @@ void showInfo() {
     _renderIntValue("Burner current power", "%", EMS_Boiler.curBurnPow);
     _renderFloatValue("Flame current", "uA", EMS_Boiler.flameCurr);
     _renderFloatValue("System pressure", "bar", EMS_Boiler.sysPress);
+    myDebug("  Current System Service Code: %c%c \n", EMS_Boiler.serviceCodeChar1, EMS_Boiler.serviceCodeChar2);
 
     // UBAMonitorSlow
     _renderFloatValue("Outside temperature", "C", EMS_Boiler.extTemp);
@@ -381,7 +397,12 @@ void publishValues(bool force) {
 
     rootBoiler["wWSelTemp"]   = _int_to_char(s, EMS_Boiler.wWSelTemp);
     rootBoiler["wWActivated"] = _bool_to_char(s, EMS_Boiler.wWActivated);
+    sprintf(s, "%s",  (EMS_Boiler.wWComfort ? "Comfort" : "ECO"));
+    rootBoiler["wWComfort"]   = s;
     rootBoiler["wWCurTmp"]    = _float_to_char(s, EMS_Boiler.wWCurTmp);
+    
+    sprintf(s, "%i.%i", EMS_Boiler.wWCurFlow/10, EMS_Boiler.wWCurFlow%10);
+    rootBoiler["wWCurFlow"]   = s;
     rootBoiler["wWHeat"]      = _bool_to_char(s, EMS_Boiler.wWHeat);
     rootBoiler["curFlowTemp"] = _float_to_char(s, EMS_Boiler.curFlowTemp);
     rootBoiler["retTemp"]     = _float_to_char(s, EMS_Boiler.retTemp);
@@ -395,6 +416,8 @@ void publishValues(bool force) {
     rootBoiler["sysPress"]    = _float_to_char(s, EMS_Boiler.sysPress);
     rootBoiler["boilTemp"]    = _float_to_char(s, EMS_Boiler.boilTemp);
     rootBoiler["pumpMod"]     = _int_to_char(s, EMS_Boiler.pumpMod);
+    sprintf(s, "%c%c", EMS_Boiler.serviceCodeChar1, EMS_Boiler.serviceCodeChar2);
+    rootBoiler["ServiceCode"] = s;
 
     size_t len = rootBoiler.measureLength();
     rootBoiler.printTo(data, len + 1); // form the json string

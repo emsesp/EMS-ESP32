@@ -34,6 +34,9 @@
 #define EMS_BOILER_BURNPOWER_TAPWATER 100
 #define EMS_BOILER_SELFLOWTEMP_HEATING 70
 
+//define maximum settable tapwater temperature, not every installation supports 90 degrees
+#define EMS_BOILER_TAPWATER_TEMPERATURE_MAX 60
+
 // if using the shower timer, change these settings
 #define SHOWER_PAUSE_TIME 15000     // in ms. 15 seconds, max time if water is switched off & on during a shower
 #define SHOWER_MIN_DURATION 120000  // in ms. 2 minutes, before recognizing its a shower
