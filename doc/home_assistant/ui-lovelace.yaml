@@ -14,6 +14,7 @@ views:
           - sensor.warm_water_current_temperature
           - sensor.warm_water_activated
           - sensor.warm_water_3way_valve
+          - sensor.warm_water_tapwater_flow_rate
           - type: divider
           - sensor.boiler_temperature
           - sensor.return_temperature

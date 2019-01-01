@@ -4,7 +4,7 @@ EMS-ESP-Boiler is a project to build a controller circuit running with an ESP826
 
 There are 3 parts to this project, first the design of the circuit, second the code for the ESP8266 microcontroller firmware and lastly an example configuration for Home Assistant to monitor the data and issue direct commands via MQTT.
 
-[![version](https://img.shields.io/badge/version-1.1.0-brightgreen.svg)](CHANGELOG.md)
+[![version](https://img.shields.io/badge/version-1.1.2-brightgreen.svg)](CHANGELOG.md)
 
 - [EMS-ESP-Boiler](#ems-esp-boiler)
   - [Introduction](#introduction)
@@ -33,6 +33,7 @@ There are 3 parts to this project, first the design of the circuit, second the c
   - [Building The Firmware](#building-the-firmware)
     - [Using PlatformIO Standalone](#using-platformio-standalone)
     - [Building Using Arduino IDE](#building-using-arduino-ide)
+  - [Troubleshooting](#troubleshooting)
   - [Known Issues](#known-issues)
   - [Wish List](#wish-list)
   - [Your Comments and Feedback](#your-comments-and-feedback)
@@ -208,9 +209,9 @@ The code is built on the Arduino framework and is dependent on these external li
 
 `ems.cpp` is the logic to read the EMS packets (telegrams), validates them and process them based on the type.
 
-`boiler.ino` is the Arduino code for the ESP8266 that kicks it all off. This is where we have specific logic such as the code to monitor and alert on the Shower timer and light up the LEDs. LED support is enabled by setting the -DUSE_LED build flag.
+`boiler.ino` is the Arduino code for the ESP8266 that kicks it all off. This is where we have specific logic such as the code to monitor and alert on the Shower timer and light up the LEDs. LED support is enabled by default and can be switched off at compile time using the -DNO_LED build flag.
 
-`ESPHelper.cpp` is my customized version of [ESPHelper](https://github.com/ItKindaWorks/ESPHelper) with added Telnet support and some other minor tweaking.
+`MyESP.cpp` is my custom library to handle WiFi, MQTT, MDNS and Telnet. Uses a modified version of TelnetSpy (https://github.com/yasheena/telnetspy)
 
 ### Supported EMS Types
 
@@ -227,11 +228,20 @@ The code is built on the Arduino framework and is dependent on these external li
 | Thermostat        | 0x02             | Version                       | reads Version major/minor                |
 | Thermostat        | 0x91, 0x41, 0x0A | Status Message                | read monitor values                      |
 
-In `boiler.ino` you can make calls to automatically send these read commands. See the function *regularUpdates()*
+In `boiler.ino` you can make calls to automatically request these types in the function *regularUpdates()*.
 
 ### Supported Thermostats
 
-Modify `EMS_ID_THERMOSTAT` in `myconfig.h` to the thermostat type you want to support. 
+I am still working on adding more support to known thermostats.
+
+Currently known types and collected versions:
+
+Moduline 300          = Type 77   Version 03.03
+Moduline 400          = Type 78   Version 03.03
+Buderus RC35          = Type 86   Version 01.15
+Nefit Easy            = Type 202  Version 02.19 
+Nefit Trendline HRC30 = Type 123  Version 06.01
+BC10                  = Type 123  Version 04.05
 
 #### RC20 (Moduline 300)
 
@@ -245,8 +255,6 @@ Type's 3F, 49, 53, 5D are identical. So are 4B, 55, 5F and mostly zero's. Types 
 
 #### RC35
 
-***not implemented yet***!
-
 An RC35 thermostat can support up to 4 heating circuits each controlled with their own Monitor and Working Mode IDs.
 
 Fetching the thermostats setpoint temp us by requesting 0x3E and looking at the 3rd byte in the data telegram (data[2]) and dividing by 2.
@@ -259,8 +267,7 @@ There is limited support for an Nefit Easy TC100/TC200 type thermostat. The curr
 ### Customizing The Code
 
 - To configure for your thermostat and specific boiler settings, modify `my_config.h`. Here you can
-  - set the thermostat type. The default ID is 0x17 for an RC30 Moduline 300.
-  - set flags for enabled/disabling functionality such as `BOILER_THERMOSTAT_ENABLED`, `BOILER_SHOWER_ENABLED` and `BOILER_SHOWER_TIMER`.
+  - set flags for enabled/disabling functionality such as `BOILER_SHOWER_ENABLED` and `BOILER_SHOWER_TIMER`.
   - Set WIFI and MQTT settings, instead of doing this in `platformio.ini`
 - To add new handlers for EMS data types, first create a callback function and add to the `EMS_Types` array at the top of the file `ems.cpp` and modify `ems.h`
 
@@ -327,7 +334,7 @@ PlatformIO is my preferred way. The code uses a modified version [ESPHelper](htt
 % cd EMS-ESP-Boiler
 % cp platformio.ini-example platformio.ini
 ```
-- edit `platformio.ini` to set `env_default` and the flags `WIFI_SSID WIFI_PASSWORD, MQTT_IP, MQTT_USER, MQTT_PASS`. If you're not using MQTT leave MQTT_IP empty (`MQTT_IP=""`)
+- edit `platformio.ini` to set `env_default` and the flags like `WIFI_SSID WIFI_PASSWORD, MQTT_IP, MQTT_USER, MQTT_PASS`. If you're not using MQTT leave MQTT_IP empty (`MQTT_IP=""`)
 ```c
 % platformio run -t upload
 ```
@@ -339,7 +346,7 @@ Porting to the Arduino IDE can be a little tricky but it is possible.
 - Add the ESP8266 boards (from Preferences add Additional Board URL `http://arduino.esp8266.com/stable/package_esp8266com_index.json`)
 - Go to Boards Manager and install ESP8266 2.4.x platform
 - Select your ESP8266 from Tools->Boards and the correct port with Tools->Port
-- From the Library Manager install the needed libraries from platformio.ini such as ArduinoJson 5.13.x, PubSubClient 2.6.x, CRC32 and Time
+- From the Library Manager install the needed libraries from platformio.ini
 - The Arduino IDE doesn't have a common way to set build flags (ugh!) so you'll need to un-comment these lines in `boiler.ino`:
 
 ```c
@@ -353,6 +360,12 @@ Porting to the Arduino IDE can be a little tricky but it is possible.
 - Put all the files in a single sketch folder (`ESPHelper.*, boiler.ino, ems.*, emsuart.*`)
 - cross your fingers and hit CTRL-R to compile...
 
+## Troubleshooting
+
+If the WiFi, MQTT, MDNS or something else fails to connect, re-build the firmware using the `-DDEBUG_SUPPORT` option, connect the ESP8266 to a USB in your computer and monitor the Serial output. A lot of detailed logging will be printed to help you pinpoint the cause of the error.
+
+The onboard LED will flash if there is no connection with the EMS bus. You can disable LED support by adding -DNO_LED to the build options.
+
 ## Known Issues
 
 Some annoying issues that need fixing:
@@ -364,7 +377,6 @@ Some annoying issues that need fixing:
 - Measure amount of gas in m3 per day for the hot water vs the central heating, and convert this into cost in Home Assistant
 - Support changing temps on an Nefit Easy. To do this you must send XMPP messages directly to the thermostat. See this project: https://github.com/robertklep/nefit-easy-core
 - Store custom params like wifi credentials, mqtt, thermostat type on ESP8266 using SPIFFS
-- Automatic detection of thermostat type
 - Add support for a temperature sensor on the circuit (DS18B20)
 
 ## Your Comments and Feedback

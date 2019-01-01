@@ -7,11 +7,13 @@
  */
 
 // local libraries
-#include "ESPHelper.h"
 #include "ems.h"
 #include "emsuart.h"
 #include "my_config.h"
 #include "version.h"
+
+// my libraries
+#include <MyESP.h>
 
 // public libraries
 #include <ArduinoJson.h> // https://github.com/bblanchon/ArduinoJson
@@ -20,6 +22,8 @@
 // standard arduino libs
 #include <Ticker.h> // https://github.com/esp8266/Arduino/tree/master/libraries/Ticker
 
+#define myDebug(...) myESP.myDebug(__VA_ARGS__)
+
 // timers, all values are in seconds
 #define PUBLISHVALUES_TIME 120 // every 2 minutes post HA values
 Ticker publishValuesTimer;
@@ -27,11 +31,11 @@ Ticker publishValuesTimer;
 #define SYSTEMCHECK_TIME 10 // every 10 seconds check if Boiler is online and execute other requests
 Ticker systemCheckTimer;
 
-#define REGULARUPDATES_TIME 60 // every minute a call is made
+#define REGULARUPDATES_TIME 60 // every minute a call is made to fetch data from EMS devices manually
 Ticker regularUpdatesTimer;
 
-#define HEARTBEAT_TIME 1 // every second blink heartbeat LED
-Ticker heartbeatTimer;
+#define LEDCHECK_TIME 1 // every second blink heartbeat LED
+Ticker ledcheckTimer;
 
 // thermostat scan - for debugging
 Ticker scanThermostat;
@@ -40,35 +44,25 @@ uint8_t scanThermostat_count;
 
 Ticker showerColdShotStopTimer;
 
-// GPIOs
-#define LED_HEARTBEAT LED_BUILTIN // onboard LED
-
-// hostname is also used as the MQTT topic identifier (home/<hostname>)
-#define HOSTNAME "boiler"
-
-// app specific - do not change
-#define MQTT_BOILER MQTT_BASE HOSTNAME "/"
-#define TOPIC_START MQTT_BOILER MQTT_TOPIC_START
-
 // thermostat
-#define TOPIC_THERMOSTAT_DATA MQTT_BOILER "thermostat_data"         // for sending thermostat values
-#define TOPIC_THERMOSTAT_CMD_TEMP MQTT_BOILER "thermostat_cmd_temp" // for received thermostat temp changes
-#define TOPIC_THERMOSTAT_CMD_MODE MQTT_BOILER "thermostat_cmd_mode" // for received thermostat mode changes
-#define TOPIC_THERMOSTAT_CURRTEMP "thermostat_currtemp"             // current temperature
-#define TOPIC_THERMOSTAT_SELTEMP "thermostat_seltemp"               // selected temperature
-#define TOPIC_THERMOSTAT_MODE "thermostat_mode"                     // mode
+#define TOPIC_THERMOSTAT_DATA "thermostat_data"         // for sending thermostat values
+#define TOPIC_THERMOSTAT_CMD_TEMP "thermostat_cmd_temp" // for received thermostat temp changes
+#define TOPIC_THERMOSTAT_CMD_MODE "thermostat_cmd_mode" // for received thermostat mode changes
+#define THERMOSTAT_CURRTEMP "thermostat_currtemp"       // current temperature
+#define THERMOSTAT_SELTEMP "thermostat_seltemp"         // selected temperature
+#define THERMOSTAT_MODE "thermostat_mode"               // mode
 
 // boiler
-#define TOPIC_BOILER_DATA MQTT_BOILER "boiler_data"                // for sending boiler values
-#define TOPIC_BOILER_TAPWATER_ACTIVE MQTT_BOILER "tapwater_active" // if hot tap water is running
-#define TOPIC_BOILER_HEATING_ACTIVE MQTT_BOILER "heating_active"   // if heating is on
+#define TOPIC_BOILER_DATA "boiler_data"                // for sending boiler values
+#define TOPIC_BOILER_TAPWATER_ACTIVE "tapwater_active" // if hot tap water is running
+#define TOPIC_BOILER_HEATING_ACTIVE "heating_active"   // if heating is on
 
 // shower time
-#define TOPIC_SHOWERTIME MQTT_BOILER "showertime"           // for sending shower time results
-#define TOPIC_SHOWER_ALARM "shower_alarm"                   // for notifying HA that shower time has reached its limit
-#define TOPIC_SHOWER_TIMER MQTT_BOILER "shower_timer"       // toggle switch for enabling the shower logic
-#define TOPIC_SHOWER_ALERT MQTT_BOILER "shower_alert"       // toggle switch for enabling the shower alarm logic
-#define TOPIC_SHOWER_COLDSHOT MQTT_BOILER "shower_coldshot" // used to trigger a coldshot from HA publish
+#define TOPIC_SHOWERTIME "showertime"           // for sending shower time results
+#define TOPIC_SHOWER_TIMER "shower_timer"       // toggle switch for enabling the shower logic
+#define TOPIC_SHOWER_ALERT "shower_alert"       // toggle switch for enabling the shower alarm logic
+#define TOPIC_SHOWER_COLDSHOT "shower_coldshot" // used to trigger a coldshot from HA publish
+#define SHOWER_ALARM "shower_alarm"             // for notifying HA that shower time has reached its limit
 
 // logging - EMS_SYS_LOGGING_VERBOSE, EMS_SYS_LOGGING_NONE, EMS_SYS_LOGGING_BASIC (see ems.h)
 #define BOILER_DEFAULT_LOGGING EMS_SYS_LOGGING_NONE
@@ -80,17 +74,16 @@ Ticker showerColdShotStopTimer;
 #undef SHOWER_MAX_DURATION
 #undef SHOWER_COLDSHOT_DURATION
 #undef SHOWER_OFFSET_TIME
-const unsigned long SHOWER_PAUSE_TIME   = 15000;  // 15 seconds, max time if water is switched off & on during a shower
-const unsigned long SHOWER_MIN_DURATION = 20000;  // 20 secs, before recognizing its a shower
-const unsigned long SHOWER_MAX_DURATION = 25000;  // 25 secs, before trigger a shot of cold water
-const unsigned long SHOWER_COLDSHOT_DURATION = 5; // in seconds! how long for cold water shot
-const unsigned long SHOWER_OFFSET_TIME       = 0; // 0 seconds grace time, to calibrate actual time under the shower
+const unsigned long SHOWER_PAUSE_TIME        = 15000; // 15 seconds, max time if water is switched off & on during a shower
+const unsigned long SHOWER_MIN_DURATION      = 20000; // 20 secs, before recognizing its a shower
+const unsigned long SHOWER_MAX_DURATION      = 25000; // 25 secs, before trigger a shot of cold water
+const unsigned long SHOWER_COLDSHOT_DURATION = 5;     // in seconds! how long for cold water shot
+const unsigned long SHOWER_OFFSET_TIME       = 0;     // 0 seconds grace time, to calibrate actual time under the shower
 #endif
 
 typedef struct {
-    bool wifi_connected;
     bool shower_timer; // true if we want to report back on shower times
-    bool shower_alert; // true if we want the cold water reminder
+    bool shower_alert; // true if we want the alert of cold water
 } _Boiler_Status;
 
 typedef struct {
@@ -101,19 +94,11 @@ typedef struct {
     bool          doingColdShot; // true if we've just sent a jolt of cold water
 } _Boiler_Shower;
 
-// ESPHelper
-netInfo   homeNet = {.mqttHost = MQTT_IP,
-                   .mqttUser = MQTT_USER,
-                   .mqttPass = MQTT_PASS,
-                   .mqttPort = 1883, // this is the default, change if using another port
-                   .ssid     = WIFI_SSID,
-                   .pass     = WIFI_PASSWORD};
-ESPHelper myESP(&homeNet);
-
 command_t PROGMEM project_cmds[] = {
 
     {"l [n]", "set logging (0=none, 1=raw, 2=basic, 3=thermostat only, 4=verbose)"},
     {"s", "show statistics"},
+    {"D", "auto Detect EMS connected devices"},
     {"h", "list supported EMS telegram type IDs"},
     {"M", "publish to MQTT"},
     {"Q", "print Tx Queue"},
@@ -127,23 +112,13 @@ command_t PROGMEM project_cmds[] = {
     {"w [nn]", "set boiler warm water temperature (min 30)"},
     {"a [n]", "set boiler warm tap water (0=off, 1=on)"},
     {"T [xx]", "set thermostat temperature"},
-    {"m [n]", "set thermostat mode (1=manual, 2=auto)"}
-    //{"U [c]", "do a thermostat scan on all ids (c=start id) for debugging only"}
+    {"m [n]", "set thermostat mode (0=low/night, 1=manual/day, 2=auto)"}
 
 };
-
-// calculates size of an 2d array at compile time
-template <typename T, size_t N>
-constexpr size_t ArraySize(T (&)[N]) {
-    return N;
-}
 
 // store for overall system status
 _Boiler_Status Boiler_Status;
 _Boiler_Shower Boiler_Shower;
-
-// Debugger to telnet
-#define myDebug(x, ...) myESP.printf(x, ##__VA_ARGS__);
 
 // CRC checks
 uint32_t previousBoilerPublishCRC     = 0;
@@ -154,19 +129,13 @@ const unsigned long POLL_TIMEOUT_ERR = 10000; // if no signal from boiler for la
 const unsigned long TX_HOLD_LED_TIME = 2000;  // how long to hold the Tx LED because its so quick
 
 unsigned long timestamp; // for internal timings, via millis()
-static int    connectionStatus = NO_CONNECTION;
-int           boilerStatus     = false;
-bool          startMQTTsent    = false;
 
 uint8_t last_boilerActive = 0xFF; // for remembering last setting of the tap water or heating on/off
-
-// toggle for heartbeat LED
-bool heartbeatEnabled;
 
 // logging messages with fixed strings (newline done automatically)
 void myDebugLog(const char * s) {
     if (ems_getLogging() != EMS_SYS_LOGGING_NONE) {
-        myDebug("%s\n", s);
+        myDebug(s);
     }
 }
 
@@ -177,7 +146,7 @@ char * _float_to_char(char * a, float f, uint8_t precision = 1) {
     char * ret = a;
     // check for 0x8000 (sensor missing)
     if (f == EMS_VALUE_FLOAT_NOTSET) {
-        strcpy(ret, "?");
+        strlcpy(ret, "?", sizeof(ret));
     } else {
         long whole = (long)f;
         itoa(whole, a, 10);
@@ -193,19 +162,19 @@ char * _float_to_char(char * a, float f, uint8_t precision = 1) {
 // convert bool to text
 char * _bool_to_char(char * s, uint8_t value) {
     if (value == EMS_VALUE_INT_ON) {
-        strcpy(s, "on");
+        strlcpy(s, "on", sizeof(s));
     } else if (value == EMS_VALUE_INT_OFF) {
-        strcpy(s, "off");
+        strlcpy(s, "off", sizeof(s));
     } else {
-        strcpy(s, "?");
+        strlcpy(s, "?", sizeof(s));
     }
     return s;
 }
 
-// convert int to text value
+// convert int (single byte) to text value
 char * _int_to_char(char * s, uint8_t value) {
     if (value == EMS_VALUE_INT_NOTSET) {
-        strcpy(s, "?");
+        strlcpy(s, "?", sizeof(s));
     } else {
         itoa(value, s, 10);
     }
@@ -214,88 +183,150 @@ char * _int_to_char(char * s, uint8_t value) {
 
 // takes a float value at prints it to debug log
 void _renderFloatValue(const char * prefix, const char * postfix, float value) {
-    myDebug("  %s: ", prefix);
-    char s[20];
-    myDebug("%s", _float_to_char(s, value));
+    char buffer[200] = {0};
+    char s[20]       = {0};
+    strlcpy(buffer, "  ", sizeof(buffer));
+    strlcat(buffer, prefix, sizeof(buffer));
+    strlcat(buffer, ": ", sizeof(buffer));
+    strlcat(buffer, _float_to_char(s, value), sizeof(buffer));
 
     if (postfix != NULL) {
-        myDebug(" %s", postfix);
+        strlcat(buffer, " ", sizeof(buffer));
+        strlcat(buffer, postfix, sizeof(buffer));
     }
-
-    myDebug("\n");
+    myDebug(buffer);
 }
 
-// takes an int value at prints it to debug log
+// takes an int (single byte) value at prints it to debug log
 void _renderIntValue(const char * prefix, const char * postfix, uint8_t value) {
-    myDebug("  %s: ", prefix);
-    char s[20];
-    myDebug("%s", _int_to_char(s, value));
+    char buffer[200] = {0};
+    char s[20]       = {0};
+    strlcpy(buffer, "  ", sizeof(buffer));
+    strlcat(buffer, prefix, sizeof(buffer));
+    strlcat(buffer, ": ", sizeof(buffer));
+    strlcat(buffer, _int_to_char(s, value), sizeof(buffer));
 
     if (postfix != NULL) {
-        myDebug(" %s", postfix);
+        strlcat(buffer, " ", sizeof(buffer));
+        strlcat(buffer, postfix, sizeof(buffer));
+    }
+    myDebug(buffer);
+}
+
+// takes an int value, converts to a fraction
+void _renderIntfractionalValue(const char * prefix, const char * postfix, uint8_t value, uint8_t decimals) {
+    char buffer[200] = {0};
+    char s[20]       = {0};
+    strlcpy(buffer, "  ", sizeof(buffer));
+    strlcat(buffer, prefix, sizeof(buffer));
+    strlcat(buffer, ": ", sizeof(buffer));
+    strlcat(buffer, _int_to_char(s, value / (decimals * 10)), sizeof(buffer));
+    strlcat(buffer, ".", sizeof(buffer));
+    strlcat(buffer, _int_to_char(s, value % (decimals * 10)), sizeof(buffer));
+
+    if (postfix != NULL) {
+        strlcat(buffer, " ", sizeof(buffer));
+        strlcat(buffer, postfix, sizeof(buffer));
+    }
+    myDebug(buffer);
+}
+
+// takes a long value at prints it to debug log
+void _renderLongValue(const char * prefix, const char * postfix, uint32_t value) {
+    char buffer[200] = {0};
+    strlcpy(buffer, "  ", sizeof(buffer));
+    strlcat(buffer, prefix, sizeof(buffer));
+    strlcat(buffer, ": ", sizeof(buffer));
+
+    if (value == EMS_VALUE_LONG_NOTSET) {
+        strlcat(buffer, "?", sizeof(buffer));
+    } else {
+        char s[20] = {0};
+        strlcat(buffer, ltoa(value, s, 10), sizeof(buffer));
     }
 
-    myDebug("\n");
+    if (postfix != NULL) {
+        strlcat(buffer, " ", sizeof(buffer));
+        strlcat(buffer, postfix, sizeof(buffer));
+    }
+
+    myDebug(buffer);
 }
 
 // takes a bool value at prints it to debug log
 void _renderBoolValue(const char * prefix, uint8_t value) {
-    myDebug("  %s: ", prefix);
-    char s[20];
-    myDebug("%s\n", _bool_to_char(s, value));
+    char buffer[200] = {0};
+    char s[20]       = {0};
+    strlcpy(buffer, "  ", sizeof(buffer));
+    strlcat(buffer, prefix, sizeof(buffer));
+    strlcat(buffer, ": ", sizeof(buffer));
+
+    strlcat(buffer, _bool_to_char(s, value), sizeof(buffer));
+
+    myDebug(buffer);
 }
 
 // Show command - display stats on an 's' command
 void showInfo() {
     // General stats from EMS bus
 
-    myDebug("%sEMS-ESP-Boiler system stats:%s\n", COLOR_BOLD_ON, COLOR_BOLD_OFF);
-    myDebug("  System logging is set to ");
+    myDebug("%sEMS-ESP-Boiler system stats:%s", COLOR_BOLD_ON, COLOR_BOLD_OFF);
     _EMS_SYS_LOGGING sysLog = ems_getLogging();
     if (sysLog == EMS_SYS_LOGGING_BASIC) {
-        myDebug("Basic");
+        myDebug("  System logging is set to Basic");
     } else if (sysLog == EMS_SYS_LOGGING_VERBOSE) {
-        myDebug("Verbose");
+        myDebug("  System logging is set to Verbose");
     } else if (sysLog == EMS_SYS_LOGGING_THERMOSTAT) {
-        myDebug("Thermostat only");
+        myDebug("  System logging is set to Thermostat only");
     } else {
-        myDebug("None");
+        myDebug("  System logging is set to None");
     }
 
-    myDebug("\n  # EMS type handlers: %d\n", ems_getEmsTypesCount());
+    myDebug("  # EMS type handlers: %d", ems_getEmsTypesCount());
 
-    myDebug("  Thermostat is %s, Poll is %s, Tx is %s, Shower Timer is %s, Shower Alert is %s\n",
+    myDebug("  Thermostat is %s, Boiler is %s, Poll is %s, Tx is %s, Shower Timer is %s, Shower Alert is %s",
             (ems_getThermostatEnabled() ? "enabled" : "disabled"),
+            (ems_getBoilerEnabled() ? "enabled" : "disabled"),
             ((EMS_Sys_Status.emsPollEnabled) ? "enabled" : "disabled"),
             ((EMS_Sys_Status.emsTxEnabled) ? "enabled" : "disabled"),
             ((Boiler_Status.shower_timer) ? "enabled" : "disabled"),
             ((Boiler_Status.shower_alert) ? "enabled" : "disabled"));
 
-    myDebug("  EMS Bus Stats: Connected=%s, # Rx telegrams=%d, # Tx telegrams=%d, # Crc Errors=%d\n",
-            (ems_getBoilerEnabled() ? "yes" : "no"),
+    myDebug("  EMS Bus Stats: Connected=%s, # Rx telegrams=%d, # Tx telegrams=%d, # Crc Errors=%d",
+            (ems_getBusConnected() ? "yes" : "no"),
             EMS_Sys_Status.emsRxPgks,
             EMS_Sys_Status.emsTxPkgs,
             EMS_Sys_Status.emxCrcErr);
 
-    myDebug("\n%sBoiler stats:%s\n", COLOR_BOLD_ON, COLOR_BOLD_OFF);
+    myDebug(""); // newline?
+
+    myDebug("%sBoiler stats:%s", COLOR_BOLD_ON, COLOR_BOLD_OFF);
+
+    // version details
+    char buffer_type[64];
+    myDebug("  Boiler type: %s", ems_getBoilerType(buffer_type));
 
     // active stats
-    myDebug("  Hot tap water is %s\n", (EMS_Boiler.tapwaterActive ? "running" : "off"));
-    myDebug("  Central Heating is %s\n", (EMS_Boiler.heatingActive ? "active" : "off"));
+    myDebug("  Hot tap water is %s", (EMS_Boiler.tapwaterActive ? "running" : "off"));
+    myDebug("  Central Heating is %s", (EMS_Boiler.heatingActive ? "active" : "off"));
 
     // UBAParameterWW
     _renderBoolValue("Warm Water activated", EMS_Boiler.wWActivated);
     _renderBoolValue("Warm Water circulation pump available", EMS_Boiler.wWCircPump);
+    myDebug("  Warm Water is set to %s", (EMS_Boiler.wWComfort ? "Comfort" : "ECO"));
     _renderIntValue("Warm Water selected temperature", "C", EMS_Boiler.wWSelTemp);
     _renderIntValue("Warm Water desired temperature", "C", EMS_Boiler.wWDesiredTemp);
 
     // UBAMonitorWWMessage
     _renderFloatValue("Warm Water current temperature", "C", EMS_Boiler.wWCurTmp);
-    _renderIntValue("Warm Water # starts", "times", EMS_Boiler.wWStarts);
-    myDebug("  Warm Water active time: %d days %d hours %d minutes\n",
-            EMS_Boiler.wWWorkM / 1440,
-            (EMS_Boiler.wWWorkM % 1440) / 60,
-            EMS_Boiler.wWWorkM % 60);
+    _renderIntfractionalValue("Warm Water current tapwater flow", "l/min", EMS_Boiler.wWCurFlow, 1);
+    _renderLongValue("Warm Water # starts", "times", EMS_Boiler.wWStarts);
+    if (EMS_Boiler.wWWorkM != EMS_VALUE_LONG_NOTSET) {
+        myDebug("  Warm Water active time: %d days %d hours %d minutes",
+                EMS_Boiler.wWWorkM / 1440,
+                (EMS_Boiler.wWWorkM % 1440) / 60,
+                EMS_Boiler.wWWorkM % 60);
+    }
     _renderBoolValue("Warm Water 3-way valve", EMS_Boiler.wWHeat);
 
     // UBAMonitorFast
@@ -311,77 +342,90 @@ void showInfo() {
     _renderIntValue("Burner current power", "%", EMS_Boiler.curBurnPow);
     _renderFloatValue("Flame current", "uA", EMS_Boiler.flameCurr);
     _renderFloatValue("System pressure", "bar", EMS_Boiler.sysPress);
+    myDebug("  Current System Service Code: %c%c", EMS_Boiler.serviceCodeChar1, EMS_Boiler.serviceCodeChar2);
 
     // UBAMonitorSlow
     _renderFloatValue("Outside temperature", "C", EMS_Boiler.extTemp);
     _renderFloatValue("Boiler temperature", "C", EMS_Boiler.boilTemp);
     _renderIntValue("Pump modulation", "%", EMS_Boiler.pumpMod);
-    _renderIntValue("Burner # restarts", "times", EMS_Boiler.burnStarts);
-    myDebug("  Total burner operating time: %d days %d hours %d minutes\n",
-            EMS_Boiler.burnWorkMin / 1440,
-            (EMS_Boiler.burnWorkMin % 1440) / 60,
-            EMS_Boiler.burnWorkMin % 60);
-    myDebug("  Total heat operating time: %d days %d hours %d minutes\n",
-            EMS_Boiler.heatWorkMin / 1440,
-            (EMS_Boiler.heatWorkMin % 1440) / 60,
-            EMS_Boiler.heatWorkMin % 60);
+    _renderLongValue("Burner # restarts", "times", EMS_Boiler.burnStarts);
+    if (EMS_Boiler.burnWorkMin != EMS_VALUE_LONG_NOTSET) {
+        myDebug("  Total burner operating time: %d days %d hours %d minutes",
+                EMS_Boiler.burnWorkMin / 1440,
+                (EMS_Boiler.burnWorkMin % 1440) / 60,
+                EMS_Boiler.burnWorkMin % 60);
+    }
+    if (EMS_Boiler.heatWorkMin != EMS_VALUE_LONG_NOTSET) {
+        myDebug("  Total heat operating time: %d days %d hours %d minutes",
+                EMS_Boiler.heatWorkMin / 1440,
+                (EMS_Boiler.heatWorkMin % 1440) / 60,
+                EMS_Boiler.heatWorkMin % 60);
+    }
+    if (EMS_Boiler.UBAuptime != EMS_VALUE_LONG_NOTSET) {
+        myDebug("  Total UBA working time: %d days %d hours %d minutes",
+                EMS_Boiler.UBAuptime / 1440,
+                (EMS_Boiler.UBAuptime % 1440) / 60,
+                EMS_Boiler.UBAuptime % 60);
+    }
+
+    myDebug(""); // newline
 
     // Thermostat stats
     if (ems_getThermostatEnabled()) {
-        myDebug("\n%sThermostat stats:%s\n", COLOR_BOLD_ON, COLOR_BOLD_OFF);
-        myDebug("  Thermostat type: ");
-        ems_printThermostatType();
-        myDebug("\n  Thermostat time is ");
-        if (EMS_ID_THERMOSTAT != EMS_ID_THERMOSTAT_EASY) {
-            myDebug("%02d:%02d:%02d %d/%d/%d\n",
+        myDebug("%sThermostat stats:%s", COLOR_BOLD_ON, COLOR_BOLD_OFF);
+        myDebug("  Thermostat type: %s", ems_getThermostatType(buffer_type));
+        if (ems_getThermostatModel() != EMS_MODEL_EASY) {
+            myDebug("  Thermostat time is %02d:%02d:%02d %d/%d/%d",
                     EMS_Thermostat.hour,
                     EMS_Thermostat.minute,
                     EMS_Thermostat.second,
                     EMS_Thermostat.day,
                     EMS_Thermostat.month,
                     EMS_Thermostat.year + 2000);
-        } else {
-            myDebug("<not supported>\n");
         }
 
         _renderFloatValue("Setpoint room temperature", "C", EMS_Thermostat.setpoint_roomTemp);
         _renderFloatValue("Current room temperature", "C", EMS_Thermostat.curr_roomTemp);
-        myDebug("  Mode is set to ");
         if (EMS_Thermostat.mode == 0) {
-            myDebug("low\n");
+            myDebug("  Mode is set to low");
         } else if (EMS_Thermostat.mode == 1) {
-            myDebug("manual\n");
+            myDebug("  Mode is set to manual");
         } else if (EMS_Thermostat.mode == 2) {
-            myDebug("auto\n");
+            myDebug("  Mode is set to auto");
         } else {
-            myDebug("?\n");
-            // myDebug("? (value is %d)\n", EMS_Thermostat.mode);
+            myDebug("  Mode is set to ?");
         }
     }
 
+    myDebug(""); // newline
+
     // show the Shower Info
     if (Boiler_Status.shower_timer) {
-        myDebug("\n%s Shower stats:%s\n", COLOR_BOLD_ON, COLOR_BOLD_OFF);
-        myDebug("  Shower Timer is %s\n", (Boiler_Shower.showerOn ? "active" : "off"));
+        myDebug("%s Shower stats:%s", COLOR_BOLD_ON, COLOR_BOLD_OFF);
+        myDebug("  Shower Timer is %s", (Boiler_Shower.showerOn ? "active" : "off"));
     }
-
-    myDebug("\n");
 }
 
 // send values to HA via MQTT
 // a json object is created for the boiler and one for the thermostat
 // CRC check is done to see if there are changes in the values since the last send to avoid too much wifi traffic
 void publishValues(bool force) {
-    char s[20]; // for formatting strings
+    char s[20] = {0}; // for formatting strings
 
     // Boiler values as one JSON object
     StaticJsonBuffer<512> jsonBuffer;
     char                  data[512];
     JsonObject &          rootBoiler = jsonBuffer.createObject();
+    size_t                rlen;
+    CRC32                 crc;
+    uint32_t              fchecksum;
 
     rootBoiler["wWSelTemp"]   = _int_to_char(s, EMS_Boiler.wWSelTemp);
     rootBoiler["wWActivated"] = _bool_to_char(s, EMS_Boiler.wWActivated);
+    rootBoiler["wWComfort"]   = EMS_Boiler.wWComfort ? "Comfort" : "ECO";
     rootBoiler["wWCurTmp"]    = _float_to_char(s, EMS_Boiler.wWCurTmp);
+    snprintf(s, sizeof(s), "%i.%i", EMS_Boiler.wWCurFlow / 10, EMS_Boiler.wWCurFlow % 10);
+    rootBoiler["wWCurFlow"]   = s;
     rootBoiler["wWHeat"]      = _bool_to_char(s, EMS_Boiler.wWHeat);
     rootBoiler["curFlowTemp"] = _float_to_char(s, EMS_Boiler.curFlowTemp);
     rootBoiler["retTemp"]     = _float_to_char(s, EMS_Boiler.retTemp);
@@ -395,34 +439,31 @@ void publishValues(bool force) {
     rootBoiler["sysPress"]    = _float_to_char(s, EMS_Boiler.sysPress);
     rootBoiler["boilTemp"]    = _float_to_char(s, EMS_Boiler.boilTemp);
     rootBoiler["pumpMod"]     = _int_to_char(s, EMS_Boiler.pumpMod);
+    snprintf(s, sizeof(s), "%c%c", EMS_Boiler.serviceCodeChar1, EMS_Boiler.serviceCodeChar2);
+    rootBoiler["ServiceCode"] = s;
 
-    size_t len = rootBoiler.measureLength();
-    rootBoiler.printTo(data, len + 1); // form the json string
+    rlen = rootBoiler.measureLength();
+    rootBoiler.printTo(data, rlen + 1); // form the json string
 
     // calculate hash and send values if something has changed, to save unnecessary wifi traffic
-    CRC32 crc;
-    for (size_t i = 0; i < len - 1; i++) {
+    for (size_t i = 0; i < rlen - 1; i++) {
         crc.update(data[i]);
     }
-    uint32_t checksum = crc.finalize();
-    if ((previousBoilerPublishCRC != checksum) || force) {
-        previousBoilerPublishCRC = checksum;
-        if (ems_getLogging() >= EMS_SYS_LOGGING_BASIC) {
-            myDebug("Publishing boiler data via MQTT\n");
-        }
+    fchecksum = crc.finalize();
+    if ((previousBoilerPublishCRC != fchecksum) || force) {
+        previousBoilerPublishCRC = fchecksum;
+        myDebugLog("Publishing boiler data via MQTT");
 
         // send values via MQTT
-        myESP.publish(TOPIC_BOILER_DATA, data);
+        myESP.mqttPublish(TOPIC_BOILER_DATA, data);
     }
 
     // see if the heating or hot tap water has changed, if so send
     // last_boilerActive stores heating in bit 1 and tap water in bit 2
     if ((last_boilerActive != ((EMS_Boiler.tapwaterActive << 1) + EMS_Boiler.heatingActive)) || force) {
-        if (ems_getLogging() >= EMS_SYS_LOGGING_BASIC) {
-            myDebug("Publishing hot water and heating state via MQTT\n");
-        }
-        myESP.publish(TOPIC_BOILER_TAPWATER_ACTIVE, EMS_Boiler.tapwaterActive == 1 ? "1" : "0");
-        myESP.publish(TOPIC_BOILER_HEATING_ACTIVE, EMS_Boiler.heatingActive == 1 ? "1" : "0");
+        myDebugLog("Publishing hot water and heating state via MQTT");
+        myESP.mqttPublish(TOPIC_BOILER_TAPWATER_ACTIVE, EMS_Boiler.tapwaterActive == 1 ? "1" : "0");
+        myESP.mqttPublish(TOPIC_BOILER_HEATING_ACTIVE, EMS_Boiler.heatingActive == 1 ? "1" : "0");
 
         last_boilerActive = ((EMS_Boiler.tapwaterActive << 1) + EMS_Boiler.heatingActive); // remember last state
     }
@@ -434,36 +475,34 @@ void publishValues(bool force) {
             return;
 
         // build json object
-        JsonObject & rootThermostat               = jsonBuffer.createObject();
-        rootThermostat[TOPIC_THERMOSTAT_CURRTEMP] = _float_to_char(s, EMS_Thermostat.curr_roomTemp);
-        rootThermostat[TOPIC_THERMOSTAT_SELTEMP]  = _float_to_char(s, EMS_Thermostat.setpoint_roomTemp);
+        JsonObject & rootThermostat         = jsonBuffer.createObject();
+        rootThermostat[THERMOSTAT_CURRTEMP] = _float_to_char(s, EMS_Thermostat.curr_roomTemp);
+        rootThermostat[THERMOSTAT_SELTEMP]  = _float_to_char(s, EMS_Thermostat.setpoint_roomTemp);
 
         // send mode 0=low, 1=manual, 2=auto
         if (EMS_Thermostat.mode == 0) {
-            rootThermostat[TOPIC_THERMOSTAT_MODE] = "low";
+            rootThermostat[THERMOSTAT_MODE] = "low";
         } else if (EMS_Thermostat.mode == 1) {
-            rootThermostat[TOPIC_THERMOSTAT_MODE] = "manual";
+            rootThermostat[THERMOSTAT_MODE] = "manual";
         } else {
-            rootThermostat[TOPIC_THERMOSTAT_MODE] = "auto";
+            rootThermostat[THERMOSTAT_MODE] = "auto";
         }
 
-        size_t len = rootThermostat.measureLength();
-        rootThermostat.printTo(data, len + 1); // form the json string
+        rlen = rootThermostat.measureLength();
+        rootThermostat.printTo(data, rlen + 1); // form the json string
 
         // calculate new CRC
         crc.reset();
-        for (size_t i = 0; i < len - 1; i++) {
+        for (size_t i = 0; i < rlen - 1; i++) {
             crc.update(data[i]);
         }
         uint32_t checksum = crc.finalize();
         if ((previousThermostatPublishCRC != checksum) || force) {
             previousThermostatPublishCRC = checksum;
-            if (ems_getLogging() >= EMS_SYS_LOGGING_BASIC) {
-                myDebug("Publishing thermostat data via MQTT\n");
-            }
+            myDebugLog("Publishing thermostat data via MQTT");
 
             // send values via MQTT
-            myESP.publish(TOPIC_THERMOSTAT_DATA, data);
+            myESP.mqttPublish(TOPIC_THERMOSTAT_DATA, data);
         }
     }
 }
@@ -471,14 +510,14 @@ void publishValues(bool force) {
 // sets the shower timer on/off
 void set_showerTimer() {
     if (ems_getLogging() != EMS_SYS_LOGGING_NONE) {
-        myDebug("Shower timer is %s\n", Boiler_Status.shower_timer ? "enabled" : "disabled");
+        myDebug("Shower timer is %s", Boiler_Status.shower_timer ? "enabled" : "disabled");
     }
 }
 
 // sets the shower alert on/off
 void set_showerAlert() {
     if (ems_getLogging() != EMS_SYS_LOGGING_NONE) {
-        myDebug("Shower alert is %s\n", Boiler_Status.shower_alert ? "enabled" : "disabled");
+        myDebug("Shower alert is %s", Boiler_Status.shower_alert ? "enabled" : "disabled");
     }
 }
 
@@ -503,7 +542,6 @@ void myDebugCallback() {
             ems_setTxEnabled(b);
             break;
         case 'M':
-            //myESP.logger(LOG_HA, "Force publish values");
             publishValues(true);
             break;
         case 'h': // show type handlers
@@ -511,39 +549,38 @@ void myDebugCallback() {
             break;
         case 'S': // toggle Shower timer support
             Boiler_Status.shower_timer = !Boiler_Status.shower_timer;
-            myESP.publish(TOPIC_SHOWER_TIMER, Boiler_Status.shower_timer ? "1" : "0");
+            myESP.mqttPublish(TOPIC_SHOWER_TIMER, Boiler_Status.shower_timer ? "1" : "0");
             break;
         case 'A': // toggle Shower alert
             Boiler_Status.shower_alert = !Boiler_Status.shower_alert;
-            myESP.publish(TOPIC_SHOWER_ALERT, Boiler_Status.shower_alert ? "1" : "0");
+            myESP.mqttPublish(TOPIC_SHOWER_ALERT, Boiler_Status.shower_alert ? "1" : "0");
             break;
-        case 'Q': //print Tx Queue
+        case 'Q': // print Tx Queue
             ems_printTxQueue();
             break;
+        case 'D': // Auto detect EMS devices
+            ems_getVersions();
+            break;
         default:
-            myDebug("Unknown command. Use ? for help.\n");
+            myDebug("Unknown command. Use ? for help.");
             break;
         }
         return;
     }
 
-    // for commands with parameters, assume command is just one letter
+    // for commands with parameters, assume command is just a single letter followed by a space
     switch (cmd[0]) {
     case 'T': // set thermostat temp
         ems_setThermostatTemp(strtof(&cmd[2], 0));
         break;
     case 'm': // set thermostat mode
-        if ((cmd[2] - '0') == 1)
-            ems_setThermostatMode(1);
-        else if ((cmd[2] - '0') == 2)
-            ems_setThermostatMode(2);
+        ems_setThermostatMode(cmd[2] - '0');
         break;
     case 'w': // set warm water temp
         ems_setWarmWaterTemp((uint8_t)strtol(&cmd[2], 0, 10));
         break;
     case 'l': // logging
         ems_setLogging((_EMS_SYS_LOGGING)(cmd[2] - '0'));
-        updateHeartbeat();
         break;
     case 'a': // set ww activate on or off
         if ((cmd[2] - '0') == 1)
@@ -552,21 +589,21 @@ void myDebugCallback() {
             ems_setWarmTapWaterActivated(false);
         break;
     case 'b': // boiler read command
-        ems_doReadCommand((uint8_t)strtol(&cmd[2], 0, 16), EMS_ID_BOILER);
+        ems_doReadCommand((uint8_t)strtol(&cmd[2], 0, 16), EMS_Boiler.type_id);
         break;
     case 't': // thermostat command
-        ems_doReadCommand((uint8_t)strtol(&cmd[2], 0, 16), EMS_ID_THERMOSTAT);
+        ems_doReadCommand((uint8_t)strtol(&cmd[2], 0, 16), EMS_Thermostat.type_id);
         break;
     case 'r': // send raw data
         ems_sendRawTelegram(&cmd[2]);
         break;
     case 'x': // experimental, not displayed!
-        myDebug("Calling experimental...\n");
+        myDebug("Calling experimental...");
         ems_setLogging(EMS_SYS_LOGGING_VERBOSE);
         ems_setExperimental((uint8_t)strtol(&cmd[2], 0, 16)); // takes HEX param
         break;
     case 'U': // thermostat scan
-        myDebug("Doing a type ID scan on thermostat...\n");
+        myDebug("Doing a type ID scan on thermostat...");
         ems_setLogging(EMS_SYS_LOGGING_THERMOSTAT);
         publishValuesTimer.detach();
         systemCheckTimer.detach();
@@ -575,111 +612,88 @@ void myDebugCallback() {
         scanThermostat.attach(SCANTHERMOSTAT_TIME, do_scanThermostat);
         break;
     default:
-        myDebug("Unknown command. Use ? for help.\n");
+        myDebug("Unknown command. Use ? for help.");
         break;
     }
     return;
 }
 
 // MQTT Callback to handle incoming/outgoing changes
-void MQTTcallback(char * topic, byte * payload, uint8_t length) {
-    // check if start is received, if so return boottime - defined in ESPHelper.h
-    if (strcmp(topic, TOPIC_START) == 0) {
-        payload[length] = '\0'; // add null terminator
-        //myDebug("MQTT topic boottime: %s\n", payload);
-        myESP.setBoottime((char *)payload);
-        return;
+void MQTTcallback(unsigned int type, const char * topic, const char * message) {
+    // we're connected. lets subscribe to some topics
+    if (type == MQTT_CONNECT_EVENT) {
+        myESP.mqttSubscribe(TOPIC_THERMOSTAT_CMD_TEMP);
+        myESP.mqttSubscribe(TOPIC_THERMOSTAT_CMD_MODE);
+        myESP.mqttSubscribe(TOPIC_SHOWER_TIMER);
+        myESP.mqttSubscribe(TOPIC_SHOWER_ALERT);
+        myESP.mqttSubscribe(TOPIC_BOILER_TAPWATER_ACTIVE);
+        myESP.mqttSubscribe(TOPIC_BOILER_HEATING_ACTIVE);
+        myESP.mqttSubscribe(TOPIC_SHOWER_COLDSHOT);
+
+        // publish to HA the status of the Shower parameters
+        myESP.mqttPublish(TOPIC_SHOWER_TIMER, Boiler_Status.shower_timer ? "1" : "0");
+        myESP.mqttPublish(TOPIC_SHOWER_ALERT, Boiler_Status.shower_alert ? "1" : "0");
     }
 
-    // thermostat temp changes
-    if (strcmp(topic, TOPIC_THERMOSTAT_CMD_TEMP) == 0) {
-        float f = strtof((char *)payload, 0);
-        char  s[10];
-        myDebug("MQTT topic: thermostat temp value %s\n", _float_to_char(s, f));
-        ems_setThermostatTemp(f);
-        // publish back so HA is immediately updated
-        publishValues(true);
-        return;
-    }
-
-    // thermostat mode changes
-    if (strcmp(topic, TOPIC_THERMOSTAT_CMD_MODE) == 0) {
-        payload[length] = '\0'; // add null terminator
-        myDebug("MQTT topic: thermostat mode value %s\n", payload);
-        if (strcmp((char *)payload, "auto") == 0) {
-            ems_setThermostatMode(2);
-        } else if (strcmp((char *)payload, "manual") == 0) {
-            ems_setThermostatMode(1);
+    if (type == MQTT_MESSAGE_EVENT) {
+        // thermostat temp changes
+        if (strcmp(topic, TOPIC_THERMOSTAT_CMD_TEMP) == 0) {
+            float f     = strtof((char *)message, 0);
+            char  s[10] = {0};
+            myDebug("MQTT topic: thermostat temperature value %s", _float_to_char(s, f));
+            ems_setThermostatTemp(f);
+            publishValues(true); // publish back so HA is immediately updated
         }
-        return;
-    }
 
-    // shower timer
-    if (strcmp(topic, TOPIC_SHOWER_TIMER) == 0) {
-        if (payload[0] == '1') {
-            Boiler_Status.shower_timer = true;
-        } else if (payload[0] == '0') {
-            Boiler_Status.shower_timer = false;
+        // thermostat mode changes
+        if (strcmp(topic, TOPIC_THERMOSTAT_CMD_MODE) == 0) {
+            myDebug("MQTT topic: thermostat mode value %s", message);
+            if (strcmp((char *)message, "auto") == 0) {
+                ems_setThermostatMode(2);
+            } else if (strcmp((char *)message, "manual") == 0) {
+                ems_setThermostatMode(1);
+            }
         }
-        set_showerTimer();
-        return;
-    }
 
-    // shower alert
-    if (strcmp(topic, TOPIC_SHOWER_ALERT) == 0) {
-        if (payload[0] == '1') {
-            Boiler_Status.shower_alert = true;
-        } else if (payload[0] == '0') {
-            Boiler_Status.shower_alert = false;
+        // shower timer
+        if (strcmp(topic, TOPIC_SHOWER_TIMER) == 0) {
+            if (message[0] == '1') {
+                Boiler_Status.shower_timer = true;
+            } else if (message[0] == '0') {
+                Boiler_Status.shower_timer = false;
+            }
+            set_showerTimer();
         }
-        set_showerAlert();
-        return;
-    }
 
-    // shower cold shot
-    if (strcmp(topic, TOPIC_SHOWER_COLDSHOT) == 0) {
-        _showerColdShotStart();
-        return;
-    }
+        // shower alert
+        if (strcmp(topic, TOPIC_SHOWER_ALERT) == 0) {
+            if (message[0] == '1') {
+                Boiler_Status.shower_alert = true;
+            } else if (message[0] == '0') {
+                Boiler_Status.shower_alert = false;
+            }
+            set_showerAlert();
+        }
 
-    // if HA is booted, restart device too
-    if (strcmp(topic, MQTT_HA) == 0) {
-        payload[length] = '\0'; // add null terminator
-        if (strcmp((char *)payload, "start") == 0) {
-            myDebug("HA rebooted - restarting device\n");
-            myESP.resetESP();
+        // shower cold shot
+        if (strcmp(topic, TOPIC_SHOWER_COLDSHOT) == 0) {
+            _showerColdShotStart();
         }
     }
 }
 
-// Init callback, which is used to set functions and call methods when telnet has started
-void InitCallback() {
-    ems_setLogging(BOILER_DEFAULT_LOGGING); // turn off logging as default startup
-}
-
-// WifiCallback, called when a WiFi connect has successfully been established
-void WIFIcallback() {
-    Boiler_Status.wifi_connected = true;
-
-#ifdef USE_LED
-    digitalWrite(LED_HEARTBEAT, HIGH);
-#endif
-
-    // when finally we're all set up, we can fire up the uart (this will enable the UART interrupts)
+// Init callback, which is used to set functions and call methods after a wifi connection has been established
+void WIFICallback() {
+// when finally we're all set up, we can fire up the uart (this will enable the UART interrupts)
+#ifdef DEBUG_SUPPORT
+    myDebug("Warning, in DEBUG mode. EMS bus is disabled. See -DDEBUG_SUPPORT build option.");
+#else
     emsuart_init();
-}
-
-// Sets the LED heartbeat depending on the logging setting
-void updateHeartbeat() {
-    _EMS_SYS_LOGGING logSetting = ems_getLogging();
-    if (logSetting == EMS_SYS_LOGGING_VERBOSE) {
-        heartbeatEnabled = true;
-    } else {
-        heartbeatEnabled = false;
-#ifdef USE_LED
-        digitalWrite(LED_HEARTBEAT, HIGH); // ...and turn off LED
 #endif
-    }
+
+    // now that we're connected, send a version request to see what things are on the EMS bus
+    myDebug("Starting up. Finding what devices are on the EMS bus...");
+    ems_getVersions();
 }
 
 // Initialize the boiler settings
@@ -687,10 +701,6 @@ void initBoiler() {
     // default settings
     Boiler_Status.shower_timer = BOILER_SHOWER_TIMER;
     Boiler_Status.shower_alert = BOILER_SHOWER_ALERT;
-    ems_setThermostatEnabled(BOILER_THERMOSTAT_ENABLED);
-
-    // init boiler
-    Boiler_Status.wifi_connected = false;
 
     // init shower
     Boiler_Shower.timerStart    = 0;
@@ -698,9 +708,9 @@ void initBoiler() {
     Boiler_Shower.duration      = 0;
     Boiler_Shower.doingColdShot = false;
 
-    // heartbeat only if verbose logging
-    ems_setLogging(BOILER_DEFAULT_LOGGING);
-    updateHeartbeat();
+    ems_setLogging(BOILER_DEFAULT_LOGGING); // set default logging
+
+    ems_init(); // call ems.cpp's init function to set all the internal params
 }
 
 // call PublishValues without forcing, so using CRC to see if we really need to publish
@@ -708,95 +718,40 @@ void do_publishValues() {
     publishValues(false);
 }
 
-//
-// SETUP
-// Note: we don't init the UART here as we should wait until everything is loaded first. It's done in loop()
-//
-void setup() {
-#ifdef USE_LED
-    // set pin for LEDs - start up with all lit up while we sort stuff out
-    pinMode(LED_HEARTBEAT, OUTPUT);
-    digitalWrite(LED_HEARTBEAT, LOW);                 // onboard LED is on
-    heartbeatTimer.attach(HEARTBEAT_TIME, heartbeat); // blink heartbeat LED
-#endif
-
-    // Timers using Ticker library
-    publishValuesTimer.attach(PUBLISHVALUES_TIME, do_publishValues); // post HA values
-    systemCheckTimer.attach(SYSTEMCHECK_TIME, do_systemCheck);       // check if Boiler is online
-    regularUpdatesTimer.attach(REGULARUPDATES_TIME, regularUpdates); // regular reads from the EMS
-
-    // set up WiFi
-    myESP.setWifiCallback(WIFIcallback);
-
-    // set up MQTT
-    myESP.setMQTTCallback(MQTTcallback);
-    myESP.addSubscription(MQTT_HA);
-    myESP.addSubscription(TOPIC_START);
-    myESP.addSubscription(TOPIC_THERMOSTAT_CMD_TEMP);
-    myESP.addSubscription(TOPIC_THERMOSTAT_CMD_MODE);
-    myESP.addSubscription(TOPIC_SHOWER_TIMER);
-    myESP.addSubscription(TOPIC_SHOWER_ALERT);
-    myESP.addSubscription(TOPIC_BOILER_TAPWATER_ACTIVE);
-    myESP.addSubscription(TOPIC_BOILER_HEATING_ACTIVE);
-    myESP.addSubscription(TOPIC_SHOWER_COLDSHOT);
-
-    myESP.setInitCallback(InitCallback);
-
-    myESP.consoleSetCallBackProjectCmds(project_cmds, ArraySize(project_cmds), myDebugCallback); // set up Telnet commands
-    myESP.begin(HOSTNAME, APP_NAME, APP_VERSION); // start wifi and mqtt services
-
-    // init ems statisitcs
-    ems_init();
-
-    // init Boiler specific parameters
-    initBoiler();
-}
-
-// heartbeat callback to light up the LED, called via Ticker
-void heartbeat() {
-    if (heartbeatEnabled) {
-#ifdef USE_LED
-        int state = digitalRead(LED_HEARTBEAT);
-        digitalWrite(LED_HEARTBEAT, !state);
-#endif
+// callback to light up the LED, called via Ticker every second
+void do_ledcheck() {
+#ifndef NO_LED
+    int state;
+    if (ems_getBusConnected()) {
+        state = HIGH;
+    } else {
+        state = !digitalRead(BOILER_LED);
     }
+    WRITE_PERI_REG(PERIPHS_GPIO_BASEADDR + (state ? 4 : 8), (1 << BOILER_LED)); // toggle LED. 4 is on. 8 is off
+#endif
 }
 
 // Thermostat scan
 void do_scanThermostat() {
-    //myDebug("Scanning %d..\n", scanThermostat_count);
-    ems_doReadCommand(scanThermostat_count, EMS_ID_THERMOSTAT);
+    myDebug("Scanning thermostat type calls, starting at %d...", scanThermostat_count);
+    ems_doReadCommand(scanThermostat_count, EMS_Thermostat.type_id);
     scanThermostat_count++;
 }
 
-// do a healthcheck every now and then to see if we connections
+// do a system health check every now and then to see if we all connections
 void do_systemCheck() {
-    // first do a system check to see if there is still a connection to the EMS
-    if (!ems_getBoilerEnabled()) {
-        myDebug("Error! Unable to connect to EMS bus. Please check connections. Retry in %d seconds...\n",
+    if (!ems_getBusConnected()) {
+        myDebug("Error! Unable to connect to EMS bus. Please make sure you're not in DEBUG_SUPPORT mode. Retrying in %d seconds...",
                 SYSTEMCHECK_TIME);
     }
-}
-
-// EMS telegrams to send after startup
-void firstTimeFetch() {
-    ems_doReadCommand(EMS_TYPE_UBAMonitorFast, EMS_ID_BOILER); // get boiler stats which usually comes every 10 sec
-    ems_doReadCommand(EMS_TYPE_UBAMonitorSlow, EMS_ID_BOILER); // get boiler stats which usually comes every 60 sec
-    ems_doReadCommand(EMS_TYPE_UBAParameterWW, EMS_ID_BOILER); // get Warm Water values
-
-    if (ems_getThermostatEnabled()) {
-        ems_getThermostatValues();                             // get Thermostat temps (if supported)
-        ems_doReadCommand(EMS_TYPE_RCTime, EMS_ID_THERMOSTAT); // get Thermostat time
-    }
+    ems_setBusConnected(false); // for the bus to be offline, it'll come back on the next Poll
 }
 
 // force calls to get data from EMS for the types that aren't sent as broadcasts
-void regularUpdates() {
-    ems_doReadCommand(EMS_TYPE_UBAParameterWW, EMS_ID_BOILER); // get Warm Water values
-
-    if (ems_getThermostatEnabled()) {
-        ems_getThermostatValues(); // get Thermostat temps (if supported)
-    }
+void do_regularUpdates() {
+    myDebugLog("Calling schedule fetch of values from EMS devices..");
+    ems_getThermostatValues(); // get Thermostat temps (if supported)
+    ems_getBoilerValues();
 }
 
 // turn off hot water to send a shot of cold
@@ -814,6 +769,7 @@ void _showerColdShotStop() {
         myDebugLog("Shower: finished shot of cold. hot water back on");
         ems_setWarmTapWaterActivated(true);
         Boiler_Shower.doingColdShot = false;
+        // disable the timer
         showerColdShotStopTimer.detach();
     }
 }
@@ -834,26 +790,19 @@ void showerCheck() {
                 Boiler_Shower.doingColdShot = false;
                 Boiler_Shower.duration      = 0;
                 Boiler_Shower.showerOn      = false;
-#ifdef SHOWER_TEST
                 myDebugLog("Shower: hot water on...");
-#endif
             } else {
                 // hot water has been  on for a while
                 // first check to see if hot water has been on long enough to be recognized as a Shower/Bath
                 if (!Boiler_Shower.showerOn && (timestamp - Boiler_Shower.timerStart) > SHOWER_MIN_DURATION) {
                     Boiler_Shower.showerOn = true;
-#ifdef SHOWER_TEST
-
                     myDebugLog("Shower: hot water still running, starting shower timer");
-#endif
                 }
                 // check if the shower has been on too long
                 else if ((((timestamp - Boiler_Shower.timerStart) > SHOWER_MAX_DURATION) && !Boiler_Shower.doingColdShot)
                          && Boiler_Status.shower_alert) {
-                    myESP.sendHACommand(TOPIC_SHOWER_ALARM);
-#ifdef SHOWER_TEST
+                    myESP.sendHACommand(SHOWER_ALARM);
                     myDebugLog("Shower: exceeded max shower time");
-#endif
                     _showerColdShotStart();
                 }
             }
@@ -861,43 +810,31 @@ void showerCheck() {
             // if it just turned off, record the time as it could be a short pause
             if ((Boiler_Shower.timerStart != 0) && (Boiler_Shower.timerPause == 0)) {
                 Boiler_Shower.timerPause = timestamp;
-#ifdef SHOWER_TEST
                 myDebugLog("Shower: hot water turned off");
-#endif
             }
 
             // if shower has been off for longer than the wait time
             if ((Boiler_Shower.timerPause != 0) && ((timestamp - Boiler_Shower.timerPause) > SHOWER_PAUSE_TIME)) {
-                /*
-                    sprintf(s,
-                            "Shower: duration %d offset %d",
-                            (Boiler_Shower.timerPause - Boiler_Shower.timerStart),
-                            SHOWER_OFFSET_TIME);
-                    myDebugLog("s");
-                    */
-
                 // it is over the wait period, so assume that the shower has finished and calculate the total time and publish
                 // because its unsigned long, can't have negative so check if length is less than OFFSET_TIME
                 if ((Boiler_Shower.timerPause - Boiler_Shower.timerStart) > SHOWER_OFFSET_TIME) {
                     Boiler_Shower.duration = (Boiler_Shower.timerPause - Boiler_Shower.timerStart - SHOWER_OFFSET_TIME);
                     if (Boiler_Shower.duration > SHOWER_MIN_DURATION) {
-                        char s[50];
-                        sprintf(s,
-                                "%d minutes and %d seconds",
-                                (uint8_t)((Boiler_Shower.duration / (1000 * 60)) % 60),
-                                (uint8_t)((Boiler_Shower.duration / 1000) % 60));
-
+                        char s[50]      = {0};
+                        char buffer[16] = {0};
+                        strlcpy(s, itoa((uint8_t)((Boiler_Shower.duration / (1000 * 60)) % 60), buffer, 10), sizeof(s));
+                        strlcat(s, " minutes and ", sizeof(s));
+                        strlcat(s, itoa((uint8_t)((Boiler_Shower.duration / 1000) % 60), buffer, 10), sizeof(s));
+                        strlcat(s, " seconds", sizeof(s));
                         if (ems_getLogging() != EMS_SYS_LOGGING_NONE) {
-                            myDebug("Shower: finished with duration %s\n", s);
+                            myDebug("Shower: finished with duration %s", s);
                         }
-                        myESP.publish(TOPIC_SHOWERTIME, s); // publish to HA
+                        myESP.mqttPublish(TOPIC_SHOWERTIME, s); // publish to HA
                     }
                 }
 
-#ifdef SHOWER_TEST
                 // reset everything
                 myDebugLog("Shower: resetting timers");
-#endif
                 Boiler_Shower.timerStart = 0;
                 Boiler_Shower.timerPause = 0;
                 Boiler_Shower.showerOn   = false;
@@ -908,38 +845,39 @@ void showerCheck() {
 }
 
 //
+// SETUP
+//
+void setup() {
+#ifndef NO_LED
+    // set pin for LED
+    pinMode(BOILER_LED, OUTPUT);
+    digitalWrite(BOILER_LED, (BOILER_LED == LED_BUILTIN) ? HIGH : LOW); // light on. For onboard high=off
+    ledcheckTimer.attach(LEDCHECK_TIME, do_ledcheck);                   // blink heartbeat LED
+#endif
+
+    // Timers using Ticker library
+    publishValuesTimer.attach(PUBLISHVALUES_TIME, do_publishValues);    // post HA values
+    systemCheckTimer.attach(SYSTEMCHECK_TIME, do_systemCheck);          // check if Boiler is online
+    regularUpdatesTimer.attach(REGULARUPDATES_TIME, do_regularUpdates); // regular reads from the EMS
+
+    // set up myESP for Wifi, MQTT, MDNS and Telnet
+    myESP.setup(APP_HOSTNAME, APP_NAME, APP_VERSION, WIFI_SSID, WIFI_PASSWORD, MQTT_IP, MQTT_USER, MQTT_PASS);
+    myESP.consoleSetCallBackProjectCmds(project_cmds, ArraySize(project_cmds), myDebugCallback); // set up Telnet commands
+    myESP.setWIFICallback(WIFICallback);
+    myESP.setMQTTCallback(MQTTcallback);
+
+    // init Boiler specific parameters
+    initBoiler();
+}
+
+//
 // Main loop
 //
 void loop() {
-    connectionStatus = myESP.loop();
-    timestamp        = millis();
+    timestamp = millis();
 
-    // update the Rx Tx and ERR LEDs
-#ifdef USE_LED
-    showLEDs();
-#endif
-
-    // do not continue unless we have a wifi connection
-    if (connectionStatus < WIFI_ONLY) {
-        return;
-    }
-
-    // if this is the first time we've connected to MQTT, send a welcome start message
-    // which will send all the state values from HA back to the clock via MQTT and return the boottime
-    if ((!startMQTTsent) && (connectionStatus == FULL_CONNECTION)) {
-        myESP.sendStart();
-        startMQTTsent = true;
-
-        // publish to HA the status of the Shower parameters
-        myESP.publish(TOPIC_SHOWER_TIMER, Boiler_Status.shower_timer ? "1" : "0");
-        myESP.publish(TOPIC_SHOWER_ALERT, Boiler_Status.shower_alert ? "1" : "0");
-    }
-
-    // if the EMS bus has just connected, send a request to fetch some initial values
-    if (ems_getBoilerEnabled() && boilerStatus == false) {
-        boilerStatus = true;
-        firstTimeFetch();
-    }
+    // the main loop
+    myESP.loop();
 
     // publish the values to MQTT, regardless if the values haven't changed
     if (ems_getEmsRefreshed()) {
@@ -951,6 +889,4 @@ void loop() {
     if (Boiler_Status.shower_timer) {
         showerCheck();
     }
-
-    yield(); // yield to prevent watchdog from timing out
 }

@@ -44,6 +44,12 @@
 
 - platform: mqtt
   state_topic: 'home/boiler/boiler_data'
+  name: 'Warm Water tapwater flow rate'
+  unit_of_measurement: 'l/min'
+  value_template: '{{ value_json.wWCurFlow }}'
+
+- platform: mqtt
+  state_topic: 'home/boiler/boiler_data'
   name: 'Warm Water current temperature'
   unit_of_measurement: '°C'
   value_template: '{{ value_json.wWCurTmp }}'

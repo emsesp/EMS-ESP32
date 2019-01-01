@@ -5,11 +5,40 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.2.0] 2019-01-01
+
+### Fixed
+
+- Incorrect indenting in `climate.yaml` (thanks @mrfixit1)
+- Improved support for slower WiFi connections
+- Fixed issue with OTA not always giving back a completion response to platformio
+- Fixed issue with repeating reads after a raw mode send
+- Fixed handling of long integers (thanks @SpaceTeddy)
 
 ### Added
 
-- Setting the mode and setpoint temperature on a RC35
+- added 'dout' flashmode to platformio.ini so OTA works now when uploading to a Wemos D1 Pro's or any other board with larger flash's
+- added un tested supporting RC35 type of thermostats
+- Try and discover and set Boiler and Thermostat types automatically
+- Fetch UBATotalUptimeMessage from Boiler to get total working minutes
+- Added check to see if bus is connected. Shown in stats page
+- If no Wifi connection can be made, start up as a WiFi Access Point (AP)
+- Report out service codes and water-flow [pull-request](https://github.com/proddy/EMS-ESP-Boiler/pull/20/files). Thanks @Bonusbartus
+
+### Changed
+
+- Build option is called `DEBUG_SUPPORT` (was `USE_SERIAL`)
+- Replaced old **ESPHelper** with my own **MyESP** library to handle Wifi, MQTT, MDNS and Telnet handlers. Supports asynchronous TCP and has smaller memory footprint. And moved to libs directory.
+- Simplified LED error checking. If enabled (by default), solid means connected and flashing means error. Uses either an external pull-up or the onboard ESP8266 LED.
+- Improved Telnet debugging which uses TelnetSpy to keep a buffer of previous output
+- Optimized memory usage & heap conflicts, removing nasty things like strcpy, sprintf where possible
+- Improved checking for tap water on/off (thanks @Bonusbartus)
+
+### Removed
+
+- Time and TimeLib's. Not used in code.
+- Removed build option `MQTT_MAX_PACKAGE_SIZE` as not using the PubSubClient library any more
+- Removed all of Espurna's pre-built firmwares and instructions to build. Keeping it simple.
 
 ## [1.1.1] 2018-12-23
 
@@ -21,7 +50,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Fixed handling of negative flaoting point values (like outdoor temp)
+- Fixed handling of negative floating point values (like outdoor temp)
 - Fixed handling of auto & manual mode on an RC30
 - [Fixed condition where all telegram types were processed, instead of only broadcasts or our own reads](https://github.com/proddy/EMS-ESP-Boiler/issues/15)
 

@@ -1,19 +1,20 @@
 [platformio]
 ; change this for your ESP8266 device
-env_default = nodemcuv2
-; env_default = d1_mini
+; env_default = nodemcuv2
+env_default = d1_mini
 
 [common]
 platform = espressif8266
-; optional flags are -DUSE_LED -DSHOWER_TEST -DUSE_SERIAL
-build_flags = -g -w -DMQTT_MAX_PACKET_SIZE=400
+flash_mode = dout
+; optional flags are -DNO_LED -DDEBUG_SUPPORT
+build_flags = -g -w
 build_flags_custom = '-DWIFI_SSID="my_ssid"' '-DWIFI_PASSWORD="my_password"' '-DMQTT_IP="my_broker_ip"' '-DMQTT_USER="my_broker_username"' '-DMQTT_PASS="my_broker_password"' 
 lib_deps =
-  Time
-  PubSubClient
-  ArduinoJson
   CRC32
   CircularBuffer
+  JustWifi
+  AsyncMqttClient
+  ArduinoJson
 
 [env:nodemcuv2]
 board = nodemcuv2
@@ -21,12 +22,13 @@ platform = ${common.platform}
 framework = arduino
 lib_deps = ${common.lib_deps}
 build_flags = ${common.build_flags} ${common.build_flags_custom}
+board_build.flash_mode = ${common.flash_mode}
 upload_speed = 921600
 monitor_speed = 115200
 ; comment out next line if using USB and not OTA
-upload_port = "boiler."
+upload_port = "boiler"
 ; examples....
-;upload_port = "boiler"
+;upload_port = "boiler."
 ;upload_port = "boiler.local"
 ;upload_port = 10.10.10.6
 
@@ -36,12 +38,13 @@ platform = ${common.platform}
 framework = arduino
 lib_deps = ${common.lib_deps}
 build_flags = ${common.build_flags} ${common.build_flags_custom}
+board_build.flash_mode = ${common.flash_mode}
 upload_speed = 921600
 monitor_speed = 115200
 ; comment out next line if using USB and not OTA
-upload_port = "boiler."
+upload_port = "boiler"
 ; examples....
-;upload_port = "boiler"
+;upload_port = "boiler."
 ;upload_port = "boiler.local"
 ;upload_port = 10.10.10.6
 

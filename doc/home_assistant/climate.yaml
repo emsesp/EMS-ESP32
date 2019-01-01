@@ -1,20 +1,20 @@
  - platform: mqtt
-    name: Thermostat
-    modes:
-      - low
-      - manual
-      - auto
+   name: Thermostat
+   modes:
+     - low
+     - manual
+     - auto
 
-    mode_state_topic: "home/boiler/thermostat_data"
-    current_temperature_topic: "home/boiler/thermostat_data"
-    temperature_state_topic: "home/boiler/thermostat_data"
+   mode_state_topic: "home/boiler/thermostat_data"
+   current_temperature_topic: "home/boiler/thermostat_data"
+   temperature_state_topic: "home/boiler/thermostat_data"
 
-    temperature_command_topic: "home/boiler/thermostat_cmd_temp"
-    mode_command_topic: "home/boiler/thermostat_cmd_mode"
+   temperature_command_topic: "home/boiler/thermostat_cmd_temp"
+   mode_command_topic: "home/boiler/thermostat_cmd_mode"
 
-    mode_state_template: "{{ value_json.thermostat_mode }}"
-    current_temperature_template: "{{ value_json.thermostat_currtemp }}"
-    temperature_state_template: "{{ value_json.thermostat_seltemp }}"
+   mode_state_template: "{{ value_json.thermostat_mode }}"
+   current_temperature_template: "{{ value_json.thermostat_currtemp }}"
+   temperature_state_template: "{{ value_json.thermostat_seltemp }}"
 
-    temp_step: 0.5
+   temp_step: 0.5
 
