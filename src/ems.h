@@ -49,10 +49,6 @@
 #define EMS_VALUE_UBAParameterWW_wwComfort_Comfort 0x00 // the value for comfort
 #define EMS_VALUE_UBAParameterWW_wwComfort_Eco 0xD8     // the value for eco
 
-#define EMS_OFFSET_UBAParameterWW_wwComfort 9           // WW is in comfort or eco mode
-#define EMS_VALUE_UBAParameterWW_wwComfort_Comfort 0x00 // the value for comfort
-#define EMS_VALUE_UBAParameterWW_wwComfort_Eco 0xD8     // the value for eco
-
 /* 
  * Thermostat...
  */
@@ -321,7 +317,6 @@ void ems_setThermostatTemp(float temp);
 void ems_setThermostatMode(uint8_t mode);
 void ems_setWarmWaterTemp(uint8_t temperature);
 void ems_setWarmWaterActivated(bool activated);
-void ems_setWarmWaterModeComfort(bool comfort);
 void ems_setWarmTapWaterActivated(bool activated);
 void ems_setExperimental(uint8_t value);
 void ems_setPoll(bool b);
