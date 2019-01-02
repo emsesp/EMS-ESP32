@@ -151,8 +151,9 @@ const uint8_t ems_crc_table[] = {0x00, 0x02, 0x04, 0x06, 0x08, 0x0A, 0x0C, 0x0E,
 
 const uint8_t TX_WRITE_TIMEOUT_COUNT = 3; // 3 retries before timeout
 
-uint8_t _emsTxRetryCount; // used for retries when sending failed
-uint8_t _ems_PollCount;
+uint8_t _emsTxRetryCount;   // used for retries when sending failed
+uint8_t _ems_PollCount;     // not used, but can be used to slow down sending on faster chips
+uint8_t _last_TxTelgramCRC; // CRC of last Tx sent, for checking duplicates
 
 // init stats and counters and buffers
 // uses -255 or 255 for values that haven't been set yet (EMS_VALUE_INT_NOTSET and EMS_VALUE_FLOAT_NOTSET)
@@ -239,8 +240,9 @@ void ems_init() {
     EMS_Boiler.model_id = EMS_MODEL_NONE;
 
     // counters
-    _ems_PollCount   = 0;
-    _emsTxRetryCount = 0;
+    _ems_PollCount     = 0;
+    _emsTxRetryCount   = 0;
+    _last_TxTelgramCRC = 0;
 }
 
 // Getters and Setters for parameters
@@ -324,6 +326,7 @@ void ems_setLogging(_EMS_SYS_LOGGING loglevel) {
 /**
  * Calculate CRC checksum using lookup table for speed
  * len is length of data in bytes (including the CRC byte at end)
+ * So its the complete telegram with the header
  */
 uint8_t _crcCalculator(uint8_t * data, uint8_t len) {
     uint8_t crc = 0;
@@ -481,8 +484,6 @@ void _ems_sendTelegram() {
         return;
     }
 
-    EMS_Sys_Status.emsTxStatus = EMS_TX_ACTIVE;
-
     // create header
     EMS_TxTelegram.data[0] = EMS_ID_ME; // src
     // dest
@@ -502,8 +503,18 @@ void _ems_sendTelegram() {
         // for writing its the value we want to write
         EMS_TxTelegram.data[4] = EMS_TxTelegram.dataValue;
     }
-    // finally calculate CRC and add it
-    EMS_TxTelegram.data[EMS_TxTelegram.length - 1] = _crcCalculator(EMS_TxTelegram.data, EMS_TxTelegram.length);
+    // finally calculate CRC and add it to the end
+    uint8_t crc                                    = _crcCalculator(EMS_TxTelegram.data, EMS_TxTelegram.length);
+    EMS_TxTelegram.data[EMS_TxTelegram.length - 1] = crc;
+
+    // check if we already sent the same one, otherwise assume the Tx hasn't been successful
+    // remove from queue and exit
+    if (crc == _last_TxTelgramCRC) {
+        // myDebug("Duplicate message, just sent this one, so removing from queue!");
+        EMS_Sys_Status.emsTxStatus = EMS_TX_IDLE; // finished sending
+        EMS_TxQueue.shift();                      // remove from queue
+    }
+    _last_TxTelgramCRC = crc;
 
     // print debug info
     if (EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_VERBOSE) {
@@ -520,6 +531,7 @@ void _ems_sendTelegram() {
     }
 
     // send the telegram to the UART Tx
+    EMS_Sys_Status.emsTxStatus = EMS_TX_ACTIVE;
     emsuart_tx_buffer(EMS_TxTelegram.data, EMS_TxTelegram.length);
 
     EMS_Sys_Status.emsTxPkgs++;
@@ -602,12 +614,10 @@ void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
 
     // ignore anything that doesn't resemble a proper telegram package
     // minimal is 5 bytes, excluding CRC at the end
-    /*
-    if (length < EMS_MIN_TELEGRAM_LENGTH - 1) {
-        _debugPrintTelegram("Noisy data:", telegram, length, COLOR_RED);
+    if (length < EMS_MIN_TELEGRAM_LENGTH) {
+        // _debugPrintTelegram("Noisy data:", telegram, length, COLOR_RED);
         return;
     }
-    */
 
     // Assume at this point we have something that vaguely resembles a telegram
     // see if we got a telegram as [src] [dest] [type] [offset] [data] [crc]
@@ -631,14 +641,13 @@ void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
     }
 
     // if we are in raw logging mode then just print out the telegram as it is
+    // but still continue to process it
     if (EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_RAW) {
         char raw[300]   = {0};
         char buffer[16] = {0};
         for (int i = 0; i < length; i++) {
             strlcat(raw, _hextoa(telegram[i], buffer), sizeof(raw));
             strlcat(raw, " ", sizeof(raw)); // add space
-            //snprintf(s, sizeof(s), "%02X ", telegram[i]);
-            //raw += s;
         }
         myDebug(raw);
     }
@@ -654,10 +663,11 @@ void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
  */
 void _ems_processTelegram(uint8_t * telegram, uint8_t length) {
     // header
-    uint8_t   src  = telegram[0] & 0x7F;
-    uint8_t   dest = telegram[1] & 0x7F; // remove 8th bit to handle both reads and writes
-    uint8_t   type = telegram[2];
-    uint8_t * data = telegram + 4; // data block starts at position 5
+    uint8_t   src    = telegram[0] & 0x7F;
+    uint8_t   dest   = telegram[1] & 0x7F; // remove 8th bit to handle both reads and writes
+    uint8_t   type   = telegram[2];
+    uint8_t   offset = telegram[3];
+    uint8_t * data   = telegram + 4; // data block starts at position 5
 
     // print detailed telegram data
     if (EMS_Sys_Status.emsLogging >= EMS_SYS_LOGGING_THERMOSTAT) {
@@ -706,7 +716,7 @@ void _ems_processTelegram(uint8_t * telegram, uint8_t length) {
                 _debugPrintTelegram(output_str, telegram, length, color_s);
             }
         } else {
-            // allways print
+            // always print
             _debugPrintTelegram(output_str, telegram, length, color_s);
         }
     }
@@ -722,14 +732,14 @@ void _ems_processTelegram(uint8_t * telegram, uint8_t length) {
         if (EMS_Types[i].type == type) {
             typeFound  = true;
             commonType = (EMS_Types[i].model_id == EMS_MODEL_ALL);                       // is it common type for everyone?
-            forUs      = (src == EMS_Boiler.type_id) || (src == EMS_Thermostat.type_id); // is it for us? So the src must match our own id
+            forUs      = (src == EMS_Boiler.type_id) || (src == EMS_Thermostat.type_id); // is it for us? So the src must match
             break;
         }
         i++;
     }
 
     // if it's a common type (across ems devices) or something specifically for us process it.
-    // dest will be EMS_ID_NONE for a broadcast message
+    // dest will be EMS_ID_NONE and offset 0x00 for a broadcast message
     if (typeFound && (commonType || forUs)) {
         if ((EMS_Types[i].processType_cb) != (void *)NULL) {
             // print non-verbose message
@@ -737,7 +747,10 @@ void _ems_processTelegram(uint8_t * telegram, uint8_t length) {
                 myDebug("<--- %s(0x%02X) received", EMS_Types[i].typeString, type);
             }
             // call callback function to process it
-            (void)EMS_Types[i].processType_cb(data, length - 5);
+            // as we only handle complete telegrams (not partial) check that the offset is 0
+            if (offset == EMS_ID_NONE) {
+                (void)EMS_Types[i].processType_cb(data, length - 5);
+            }
         }
     }
 }
@@ -823,7 +836,7 @@ void _processType(uint8_t * telegram, uint8_t length) {
         // telegram was for us, but seems we didn't ask for it
         // ** do nothing **
     } else {
-        // we didn't request it, was for somebody else, print it out anyway
+        // we didn't request it, was for somebody else or a broadcast, process it anyway
         _ems_processTelegram(telegram, length);
     }
 }
