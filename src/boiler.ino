@@ -23,6 +23,7 @@
 #include <Ticker.h> // https://github.com/esp8266/Arduino/tree/master/libraries/Ticker
 
 #define myDebug(...) myESP.myDebug(__VA_ARGS__)
+#define myDebug_P(...) myESP.myDebug_P(__VA_ARGS__)
 
 // timers, all values are in seconds
 #define PUBLISHVALUES_TIME 120 // every 2 minutes post HA values
@@ -273,13 +274,13 @@ void showInfo() {
     myDebug("%sEMS-ESP-Boiler system stats:%s", COLOR_BOLD_ON, COLOR_BOLD_OFF);
     _EMS_SYS_LOGGING sysLog = ems_getLogging();
     if (sysLog == EMS_SYS_LOGGING_BASIC) {
-        myDebug("  System logging is set to Basic");
+        myDebug("  System logging set to Basic");
     } else if (sysLog == EMS_SYS_LOGGING_VERBOSE) {
-        myDebug("  System logging is set to Verbose");
+        myDebug("  System logging set to Verbose");
     } else if (sysLog == EMS_SYS_LOGGING_THERMOSTAT) {
-        myDebug("  System logging is set to Thermostat only");
+        myDebug("  System logging set to Thermostat only");
     } else {
-        myDebug("  System logging is set to None");
+        myDebug("  System logging set to None");
     }
 
     myDebug("  # EMS type handlers: %d", ems_getEmsTypesCount());
@@ -559,7 +560,7 @@ void myDebugCallback() {
             ems_printTxQueue();
             break;
         case 'D': // Auto detect EMS devices
-            ems_getVersions();
+            ems_getAllVersions();
             break;
         default:
             myDebug("Unknown command. Use ? for help.");
@@ -688,12 +689,15 @@ void WIFICallback() {
 #ifdef DEBUG_SUPPORT
     myDebug("Warning, in DEBUG mode. EMS bus is disabled. See -DDEBUG_SUPPORT build option.");
 #else
+    // Important! This is where we enable the UART service to scan the incoming serial Tx/Rx bus signals
+    // This is done after we have a WiFi signal to avoid any resource conflicts
     emsuart_init();
+    myDebug("[UART] Opened Rx/Tx connection");
 #endif
 
     // now that we're connected, send a version request to see what things are on the EMS bus
     myDebug("Starting up. Finding what devices are on the EMS bus...");
-    ems_getVersions();
+    ems_getAllVersions();
 }
 
 // Initialize the boiler settings
@@ -790,7 +794,6 @@ void showerCheck() {
                 Boiler_Shower.doingColdShot = false;
                 Boiler_Shower.duration      = 0;
                 Boiler_Shower.showerOn      = false;
-                myDebugLog("Shower: hot water on...");
             } else {
                 // hot water has been  on for a while
                 // first check to see if hot water has been on long enough to be recognized as a Shower/Bath
