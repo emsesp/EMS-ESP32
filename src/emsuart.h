@@ -28,6 +28,7 @@ typedef struct {
 } _EMSRxBuf;
 
 void ICACHE_FLASH_ATTR emsuart_init();
+void ICACHE_FLASH_ATTR emsuart_stop();
 void ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len);
 void ICACHE_FLASH_ATTR emsaurt_tx_poll();
 void ICACHE_FLASH_ATTR emsuart_tx_brk();

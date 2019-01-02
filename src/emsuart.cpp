@@ -109,7 +109,7 @@ void ICACHE_FLASH_ATTR emsuart_init() {
     USC0(EMSUART_UART) |= (tmp);                      // set bits
     USC0(EMSUART_UART) &= ~(tmp);                     // clear bits
 
-    // conf 1 params
+    // conf1 params
     // UCTOE = RX TimeOut enable (default is 1)
     // UCTOT = RX TimeOut Threshold (7bit) = want this when no more data after 2 characters. (default is 2)
     // UCFFT = RX FIFO Full Threshold (7 bit) = want this to be 31 for 32 bytes of buffer. (default was 127).
@@ -135,6 +135,14 @@ void ICACHE_FLASH_ATTR emsuart_init() {
 
     // swap Rx and Tx pins to use GPIO13 (D7) and GPIO15 (D8) respectively
     system_uart_swap();
+}
+
+/*
+ * stop UART0 driver
+ */
+void ICACHE_FLASH_ATTR emsuart_stop() {
+    ETS_UART_INTR_DISABLE();
+    ETS_UART_INTR_ATTACH(NULL, NULL);
 }
 
 /*
