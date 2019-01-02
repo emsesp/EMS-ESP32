@@ -129,6 +129,7 @@ typedef struct {
     _EMS_SYS_LOGGING emsLogging;           // logging
     bool             emsRefreshed;         // fresh data, needs to be pushed out to MQTT
     bool             emsBusConnected;      // is there an active bus
+    unsigned long    emsRxTimestamp;       // timestamp of last EMS poll
 } _EMS_Sys_Status;
 
 // The Tx send package
@@ -325,8 +326,8 @@ void ems_setThermostatEnabled(bool b);
 void ems_setBoilerEnabled(bool b);
 void ems_setLogging(_EMS_SYS_LOGGING loglevel);
 void ems_setEmsRefreshed(bool b);
-void ems_setBusConnected(bool b);
 void ems_setWarmWaterModeComfort(bool comfort);
+bool ems_checkEMSBUSAlive();
 
 void             ems_getThermostatValues();
 void             ems_getBoilerValues();
