@@ -338,7 +338,7 @@ bool             ems_getBusConnected();
 _EMS_SYS_LOGGING ems_getLogging();
 uint8_t          ems_getEmsTypesCount();
 bool             ems_getEmsRefreshed();
-void             ems_getVersions();
+void             ems_getAllVersions();
 _EMS_MODEL_ID    ems_getThermostatModel();
 
 void   ems_printAllTypes();

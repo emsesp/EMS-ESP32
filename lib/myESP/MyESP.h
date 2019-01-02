@@ -154,9 +154,9 @@ class MyESP {
     uint8_t     _helpProjectCmds_count; // # available commands
     void        _consoleShowHelp();
     void (*_consoleCallbackProjectCmds)(); // Callable for projects commands
-    void          _consoleProcessCommand();
-    bool          _isCRLF(char character);
-    bool          _verboseMessages;
+    void _consoleProcessCommand();
+    bool _isCRLF(char character);
+    bool _suspendMessages;
 
     // general
     char * _app_hostname;

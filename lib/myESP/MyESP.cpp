@@ -26,7 +26,7 @@ MyESP::MyESP() {
     _wifi_password              = NULL;
     _wifi_ssid                  = NULL;
     _mqtt_reconnect_delay       = MQTT_RECONNECT_DELAY_MIN;
-    _verboseMessages            = true;
+    _suspendMessages            = true;
     _command                    = (char *)malloc(TELNET_MAX_COMMAND_LENGTH); // reserve buffer for Serial/Telnet commands
 }
 
@@ -44,6 +44,9 @@ void MyESP::end() {
 
 // general debug to the telnet or serial channels
 void MyESP::myDebug(const char * format, ...) {
+    if (!_suspendMessages)
+        return;
+
     va_list args;
     va_start(args, format);
     char   test[1];
@@ -70,6 +73,11 @@ void MyESP::myDebug_P(PGM_P format_P, ...) {
     ets_vsnprintf(buffer, len, format, args);
     va_end(args);
 
+    // capture & print timestamp
+    char timestamp[10] = {0};
+    snprintf_P(timestamp, sizeof(timestamp), PSTR("[%06lu] "), millis() % 1000000);
+    SerialAndTelnet.print(timestamp);
+
     SerialAndTelnet.println(buffer);
 
     delete[] buffer;
@@ -84,7 +92,6 @@ void MyESP::_wifiCallback(justwifi_messages_t code, char * parameter) {
         String hostname = WiFi.hostname();
 #endif
 
-        myDebug_P(PSTR("[WIFI] ----------------------------------------------"));
         myDebug_P(PSTR("[WIFI] SSID  %s"), WiFi.SSID().c_str());
         myDebug_P(PSTR("[WIFI] CH    %d"), WiFi.channel());
         myDebug_P(PSTR("[WIFI] RSSI  %d"), WiFi.RSSI());
@@ -94,14 +101,12 @@ void MyESP::_wifiCallback(justwifi_messages_t code, char * parameter) {
         myDebug_P(PSTR("[WIFI] MASK  %s"), WiFi.subnetMask().toString().c_str());
         myDebug_P(PSTR("[WIFI] DNS   %s"), WiFi.dnsIP().toString().c_str());
         myDebug_P(PSTR("[WIFI] HOST  %s"), hostname.c_str());
-        myDebug_P(PSTR("[WIFI] ----------------------------------------------"));
 
         if (WiFi.getMode() & WIFI_AP) {
             myDebug_P(PSTR("[WIFI] MODE AP --------------------------------------"));
             myDebug_P(PSTR("[WIFI] SSID  %s"), jw.getAPSSID().c_str());
             myDebug_P(PSTR("[WIFI] IP    %s"), WiFi.softAPIP().toString().c_str());
             myDebug_P(PSTR("[WIFI] MAC   %s"), WiFi.softAPmacAddress().c_str());
-            myDebug_P(PSTR("[WIFI] ----------------------------------------------"));
         }
 
         // start MDNS
@@ -364,38 +369,41 @@ void MyESP::_telnet_setup() {
 
 // Show help of commands
 void MyESP::_consoleShowHelp() {
-    String help = "\n\r**********************************************\n\r* Remote Telnet Command Center & Log Monitor "
-                  "*\n\r**********************************************\n\r";
-    help += "* Device hostname: " + WiFi.hostname() + "\tIP: " + WiFi.localIP().toString() + "\tMAC address: " + WiFi.macAddress() + "\n\r";
-    help += "* Connected to WiFi AP: " + WiFi.SSID() + "\n\r";
-    help += "* Boot time: ";
-    help.concat(_boottime);
-    help += "\n\r* ";
-    help.concat(_app_name);
-    help += " Version ";
-    help.concat(_app_version);
-    help += "\n\r* Free RAM: ";
-    help.concat(ESP.getFreeHeap());
-    help += " bytes\n\r";
-#ifdef DEBUG_SUPPORT
-    help += "* !! in DEBUG_SUPPORT mode !!\n\r";
+#if defined(ARDUINO_ARCH_ESP32)
+    String hostname = String(WiFi.getHostname());
+#else
+    String hostname = WiFi.hostname();
 #endif
-    help += "*\n\r* Commands:\n\r*  ?=this help, CTRL-D=quit, $=show free memory, !=reboot ESP, &=suspend all messages\n\r";
 
-    // print custom commands if available
+
+    SerialAndTelnet.println("*********************************");
+    SerialAndTelnet.println("*  Console and Log Monitoring   *");
+    SerialAndTelnet.println("*********************************");
+    SerialAndTelnet.printf("* %s %s\n\r", _app_name, _app_version);
+    SerialAndTelnet.printf("* Hostname: %s    IP: %s     MAC: %s\n\r",
+                           hostname.c_str(),
+                           WiFi.localIP().toString().c_str(),
+                           WiFi.macAddress().c_str());
+    SerialAndTelnet.printf("* Connected to WiFi AP: %s\n\r", WiFi.SSID().c_str());
+    SerialAndTelnet.printf("* Boot time: %s\n\r", _boottime);
+    SerialAndTelnet.printf("* Free RAM: %d bytes\n\r", ESP.getFreeHeap());
+#ifdef DEBUG_SUPPORT
+    SerialAndTelnet.println("* !! in DEBUG_SUPPORT mode !!\n\r");
+#endif
+
+    SerialAndTelnet.println("*\n\r* Commands:\n\r*  ?=this help, CTRL-D=quit, $=show free memory, !=reboot ESP, &=suspend all messages");
+
+    // print custom commands if available. Take from progmem
     if (_consoleCallbackProjectCmds) {
         for (uint8_t i = 0; i < _helpProjectCmds_count; i++) {
-            help += FPSTR("*  ");
-            help += FPSTR(_helpProjectCmds[i].key);
-            for (int j = 0; j < (8 - strlen(_helpProjectCmds[i].key)); j++) { // padding
-                help += FPSTR(" ");
+            SerialAndTelnet.print(FPSTR("*  "));
+            SerialAndTelnet.print(FPSTR(_helpProjectCmds[i].key));
+            for (uint8_t j = 0; j < (8 - strlen(_helpProjectCmds[i].key)); j++) {
+                SerialAndTelnet.print(FPSTR(" ")); // padding
             }
-            help += FPSTR(_helpProjectCmds[i].description);
-            help += FPSTR("\n\r");
+            SerialAndTelnet.println(FPSTR(_helpProjectCmds[i].description));
         }
     }
-
-    SerialAndTelnet.println(help.c_str());
 }
 
 // reset / restart
@@ -427,8 +435,8 @@ void MyESP::consoleProcessCommand() {
     } else if (cmd == '!') {
         resetESP();
     } else if (cmd == '&') {
-        _verboseMessages = !_verboseMessages; // toggle
-        myDebug("Suspend all messages is %s", _verboseMessages ? "disabled" : "enabled");
+        myDebug("Suspend all messages is %s", !_suspendMessages ? "disabled" : "enabled");
+        _suspendMessages = !_suspendMessages; // toggle
     } else {
         // custom Project commands
         if (_consoleCallbackProjectCmds) {
@@ -436,7 +444,7 @@ void MyESP::consoleProcessCommand() {
         }
     }
 
-    if (!_verboseMessages) {
+    if (!_suspendMessages) {
         myDebug("Warning, all log messages have been supsended. Use & to re-enable.");
     }
 }
