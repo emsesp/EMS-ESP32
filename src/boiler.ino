@@ -422,6 +422,8 @@ void publishValues(bool force) {
     uint32_t              fchecksum;
 
     rootBoiler["wWSelTemp"]   = _int_to_char(s, EMS_Boiler.wWSelTemp);
+    rootBoiler["selFlowTemp"] = _float_to_char(s, EMS_Boiler.selFlowTemp);
+    rootBoiler["outdoorTemp"] = _float_to_char(s, EMS_Boiler.extTemp);
     rootBoiler["wWActivated"] = _bool_to_char(s, EMS_Boiler.wWActivated);
     rootBoiler["wWComfort"]   = EMS_Boiler.wWComfort ? "Comfort" : "ECO";
     rootBoiler["wWCurTmp"]    = _float_to_char(s, EMS_Boiler.wWCurTmp);
@@ -725,13 +727,13 @@ void do_publishValues() {
 // callback to light up the LED, called via Ticker every second
 void do_ledcheck() {
 #ifndef NO_LED
-    int state;
     if (ems_getBusConnected()) {
-        state = HIGH;
+        digitalWrite(BOILER_LED, (BOILER_LED == LED_BUILTIN) ? LOW : HIGH); // light on. For onboard high=off
     } else {
-        state = !digitalRead(BOILER_LED);
+        int state = digitalRead(BOILER_LED);
+        digitalWrite(BOILER_LED, !state);
     }
-    WRITE_PERI_REG(PERIPHS_GPIO_BASEADDR + (state ? 4 : 8), (1 << BOILER_LED)); // toggle LED. 4 is on. 8 is off
+    //WRITE_PERI_REG(PERIPHS_GPIO_BASEADDR + (state ? 4 : 8), (1 << BOILER_LED)); // 4 is on, 8 is off
 #endif
 }
 
@@ -748,7 +750,6 @@ void do_systemCheck() {
         myDebug("Error! Unable to connect to EMS bus. Please make sure you're not in DEBUG_SUPPORT mode. Retrying in %d seconds...",
                 SYSTEMCHECK_TIME);
     }
-    ems_setBusConnected(false); // for the bus to be offline, it'll come back on the next Poll
 }
 
 // force calls to get data from EMS for the types that aren't sent as broadcasts
@@ -888,7 +889,7 @@ void loop() {
         ems_setEmsRefreshed(false);
     }
 
-    // do shower logic if its enabled
+    // do shower logic if it is enabled
     if (Boiler_Status.shower_timer) {
         showerCheck();
     }
