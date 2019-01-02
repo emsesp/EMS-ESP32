@@ -68,6 +68,7 @@ static void emsuart_rx_intr_handler(void * para) {
 /*
  * system task triggered on BRK interrupt
  * Read commands are all asynchronous
+ * When a buffer is full it is sent to the ems_parseTelegram() function in ems.cpp. This is the hook
  */
 static void ICACHE_FLASH_ATTR emsuart_recvTask(os_event_t * events) {
     // get next free EMS Receive buffer
