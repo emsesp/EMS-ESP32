@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.2] 2019-01-02
+
+### Fixed
+
+- Issues in 1.2.1 (see https://github.com/proddy/EMS-ESP-Boiler/issues/25)
+- Logic for determining if there is activity on the EMS bus and using the onboard LEDs properly
+
 ## [1.2.1] 2019-01-02
 
 ### Fixed
