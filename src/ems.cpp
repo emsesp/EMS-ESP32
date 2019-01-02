@@ -76,7 +76,7 @@ const _Thermostat_Type Thermostat_Types[] = {
     {EMS_MODEL_RC30, EMS_THERMOSTAT_READ_YES, EMS_THERMOSTAT_WRITE_YES},
     {EMS_MODEL_RC35, EMS_THERMOSTAT_READ_YES, EMS_THERMOSTAT_WRITE_YES},
     {EMS_MODEL_EASY, EMS_THERMOSTAT_READ_YES, EMS_THERMOSTAT_WRITE_NO},
-    {EMS_MODEL_ES73, EMS_THERMOSTAT_READ_NO, EMS_THERMOSTAT_WRITE_NO}
+    {EMS_MODEL_ES73, EMS_THERMOSTAT_READ_YES, EMS_THERMOSTAT_WRITE_YES}
 
 };
 
@@ -116,9 +116,16 @@ const _EMS_Type EMS_Types[] = {
     // RC35
     {EMS_MODEL_RC35, EMS_TYPE_RCOutdoorTempMessage, "RCOutdoorTempMessage", _process_RCOutdoorTempMessage},
     {EMS_MODEL_RC35, EMS_TYPE_RCTime, "RCTime", _process_RCTime},
-    {EMS_MODEL_RC35, EMS_TYPE_RC30Set, "RC35Set", _process_RC35Set},
-    {EMS_MODEL_RC35, EMS_TYPE_RC30StatusMessage, "RC35StatusMessage", _process_RC35StatusMessage},
+    {EMS_MODEL_RC35, EMS_TYPE_RC35Set, "RC35Set", _process_RC35Set},
+    {EMS_MODEL_RC35, EMS_TYPE_RC35StatusMessage, "RC35StatusMessage", _process_RC35StatusMessage},
     {EMS_MODEL_RC35, EMS_TYPE_UBASetPoints, "UBASetPoints", _process_SetPoints},
+
+    // ES73
+    {EMS_MODEL_ES73, EMS_TYPE_RCOutdoorTempMessage, "RCOutdoorTempMessage", _process_RCOutdoorTempMessage},
+    {EMS_MODEL_ES73, EMS_TYPE_RCTime, "RCTime", _process_RCTime},
+    {EMS_MODEL_ES73, EMS_TYPE_RC35Set, "RC35Set", _process_RC35Set},
+    {EMS_MODEL_ES73, EMS_TYPE_RC35StatusMessage, "RC35StatusMessage", _process_RC35StatusMessage},
+    {EMS_MODEL_ES73, EMS_TYPE_UBASetPoints, "UBASetPoints", _process_SetPoints},
 
     // Easy
     {EMS_MODEL_EASY, EMS_TYPE_EasyStatusMessage, "EasyStatusMessage", _process_EasyStatusMessage},
@@ -149,7 +156,8 @@ const uint8_t ems_crc_table[] = {0x00, 0x02, 0x04, 0x06, 0x08, 0x0A, 0x0C, 0x0E,
                                  0xCD, 0xCF, 0xC1, 0xC3, 0xC5, 0xC7, 0xF9, 0xFB, 0xFD, 0xFF, 0xF1, 0xF3, 0xF5, 0xF7, 0xE9, 0xEB, 0xED, 0xEF,
                                  0xE1, 0xE3, 0xE5, 0xE7};
 
-const uint8_t TX_WRITE_TIMEOUT_COUNT = 3; // 3 retries before timeout
+const uint8_t       TX_WRITE_TIMEOUT_COUNT = 3;    // 3 retries before timeout
+const unsigned long EMS_BUS_TIMEOUT        = 5000; // timeout in ms before recognizing the ems bus is offline (5 seconds)
 
 uint8_t _emsTxRetryCount;   // used for retries when sending failed
 uint8_t _ems_PollCount;     // not used, but can be used to slow down sending on faster chips
@@ -286,11 +294,10 @@ bool ems_getThermostatEnabled() {
 }
 
 bool ems_getBusConnected() {
+    if ((millis() - EMS_Sys_Status.emsRxTimestamp) > EMS_BUS_TIMEOUT) {
+        EMS_Sys_Status.emsBusConnected = false;
+    }
     return EMS_Sys_Status.emsBusConnected;
-}
-
-void ems_setBusConnected(bool b) {
-    EMS_Sys_Status.emsBusConnected = b;
 }
 
 void ems_setThermostatEnabled(bool b) {
@@ -507,12 +514,12 @@ void _ems_sendTelegram() {
     uint8_t crc                                    = _crcCalculator(EMS_TxTelegram.data, EMS_TxTelegram.length);
     EMS_TxTelegram.data[EMS_TxTelegram.length - 1] = crc;
 
-    // check if we already sent the same one, otherwise assume the Tx hasn't been successful
-    // remove from queue and exit
+    // check if we already sent the same one, otherwise assume the last Tx hasn't been successful
+    // and remove from queue and exit
     if (crc == _last_TxTelgramCRC) {
         // myDebug("Duplicate message, just sent this one, so removing from queue!");
         EMS_Sys_Status.emsTxStatus = EMS_TX_IDLE; // finished sending
-        EMS_TxQueue.shift();                      // remove from queue
+        EMS_TxQueue.shift();                      // remove the last Tx from the queue
     }
     _last_TxTelgramCRC = crc;
 
@@ -563,7 +570,7 @@ void _ems_sendTelegram() {
 }
 
 /**
- * the main logic that parses the telegram message
+ * the main logic that parses the telegram message, triggered by an interrupt in emsuart.cpp
  * length is only data bytes, excluding the BRK
  * Read commands are asynchronous as they're handled by the interrupt
  * When we receive a Poll Request we need to send any Tx packages quickly
@@ -578,7 +585,9 @@ void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
         // check first for a Poll for us
         if (value == (EMS_ID_ME | 0x80)) {
             // we use this to see if we always have a connection to the boiler, in case of drop outs
+            EMS_Sys_Status.emsRxTimestamp  = millis(); // timestamp of last read
             EMS_Sys_Status.emsBusConnected = true;
+
 
             // do we have something to send thats waiting in the Tx queue? if so send it
             if (!EMS_TxQueue.isEmpty()) {
@@ -597,7 +606,6 @@ void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
         } else if ((value == EMS_TX_ERROR) || (value == EMS_TX_SUCCESS)) {
             // if its a success (01) or failure (04), then see if its from one of our last writes
             // a response from UBA after a write should be within a specific time period < 100ms
-            // What we should really do here is just cancel the write operation (for later!)
             if (!EMS_TxQueue.isEmpty()) {
                 _EMS_TxTelegram EMS_TxTelegram = EMS_TxQueue.first(); // get current Tx package we last sent
                 if ((EMS_TxTelegram.action == EMS_TX_TELEGRAM_VALIDATE) && (value == EMS_TX_ERROR)) {
@@ -793,7 +801,7 @@ void _processType(uint8_t * telegram, uint8_t length) {
                 if (EMS_TxTelegram.forceRefresh) {
                     ems_setEmsRefreshed(true); // set the MQTT refresh flag to force sending to MQTT
                 }
-                EMS_TxQueue.shift(); // remove read from queue
+                EMS_TxQueue.shift(); // remove read from queue, all done now
             } else if (EMS_TxTelegram.action == EMS_TX_TELEGRAM_VALIDATE) {
                 // this read was for a validate. Do a compare on the 1 byte result from the last write
                 uint8_t dataReceived = data[0]; // only a single byte is returned after a read
@@ -834,7 +842,6 @@ void _processType(uint8_t * telegram, uint8_t length) {
             }
         }
         // telegram was for us, but seems we didn't ask for it
-        // ** do nothing **
     } else {
         // we didn't request it, was for somebody else or a broadcast, process it anyway
         _ems_processTelegram(telegram, length);
@@ -848,7 +855,7 @@ void _processType(uint8_t * telegram, uint8_t length) {
  *   tap water is on if Selected Flow Temp = 0 and Selected Burner Power >= 115
  */
 bool _checkActive() {
-    /*
+    /* old code
     EMS_Boiler.tapwaterActive = ((EMS_Boiler.selFlowTemp == 0)
                                  && (EMS_Boiler.selBurnPow >= EMS_BOILER_BURNPOWER_TAPWATER) & (EMS_Boiler.burnGas == EMS_VALUE_INT_ON));
 
@@ -1214,7 +1221,7 @@ void ems_getThermostatValues() {
     } else if (model_id == EMS_MODEL_RC30) {
         ems_doReadCommand(EMS_TYPE_RC30StatusMessage, type); // to get the setpoint temp
         ems_doReadCommand(EMS_TYPE_RC30Set, type);           // to get the mode
-    } else if (model_id == EMS_MODEL_RC35) {
+    } else if ((model_id == EMS_MODEL_RC35) || (model_id == EMS_MODEL_ES73)) {
         ems_doReadCommand(EMS_TYPE_RC35StatusMessage, type); // to get the setpoint temp
         ems_doReadCommand(EMS_TYPE_RC35Set, type);           // to get the mode
     } else if (model_id == EMS_MODEL_EASY) {
@@ -1368,12 +1375,6 @@ void ems_doReadCommand(uint8_t type, uint8_t dest, bool forceRefresh) {
         return;
     }
 
-    if (!EMS_Sys_Status.emsBoilerEnabled) {
-        if ((ems_getLogging() == EMS_SYS_LOGGING_VERBOSE)) {
-            myDebug("Boiler not initialized, queuing the read request.");
-        }
-    }
-
     _EMS_TxTelegram EMS_TxTelegram = EMS_TX_TELEGRAM_NEW; // create new Tx
     EMS_TxTelegram.timestamp       = millis();            // set timestamp
 
@@ -1467,18 +1468,20 @@ void ems_setThermostatTemp(float temperature) {
 
     myDebug("Setting new thermostat temperature");
 
+    // when doing a comparison  to validate the new temperature we call a different type
+
     if (model_id == EMS_MODEL_RC20) {
         EMS_TxTelegram.type               = EMS_TYPE_RC20Set;
         EMS_TxTelegram.offset             = EMS_OFFSET_RC20Set_temp;
-        EMS_TxTelegram.comparisonPostRead = EMS_TYPE_RC20StatusMessage; // call a different type to refresh temperature value
+        EMS_TxTelegram.comparisonPostRead = EMS_TYPE_RC20StatusMessage;
     } else if (model_id == EMS_MODEL_RC30) {
         EMS_TxTelegram.type               = EMS_TYPE_RC30Set;
         EMS_TxTelegram.offset             = EMS_OFFSET_RC30Set_temp;
-        EMS_TxTelegram.comparisonPostRead = EMS_TYPE_RC30StatusMessage; // call a different type to refresh temperature value
-    } else if (model_id == EMS_MODEL_RC35) {
+        EMS_TxTelegram.comparisonPostRead = EMS_TYPE_RC30StatusMessage;
+    } else if ((model_id == EMS_MODEL_RC35) || (model_id == EMS_MODEL_ES73)) {
         EMS_TxTelegram.type               = EMS_TYPE_RC35Set;
         EMS_TxTelegram.offset             = EMS_OFFSET_RC35Set_temp;
-        EMS_TxTelegram.comparisonPostRead = EMS_TYPE_RC35StatusMessage; // call a different type to refresh temperature value
+        EMS_TxTelegram.comparisonPostRead = EMS_TYPE_RC35StatusMessage;
     }
 
     EMS_TxTelegram.length           = EMS_MIN_TELEGRAM_LENGTH;
@@ -1525,7 +1528,7 @@ void ems_setThermostatMode(uint8_t mode) {
     } else if (model_id == EMS_MODEL_RC30) {
         EMS_TxTelegram.type   = EMS_TYPE_RC30Set;
         EMS_TxTelegram.offset = EMS_OFFSET_RC30Set_mode;
-    } else if (model_id == EMS_MODEL_RC35) {
+    } else if ((model_id == EMS_MODEL_RC35) || (model_id == EMS_MODEL_ES73)) {
         EMS_TxTelegram.type   = EMS_TYPE_RC35Set;
         EMS_TxTelegram.offset = EMS_OFFSET_RC35Set_mode;
     }
