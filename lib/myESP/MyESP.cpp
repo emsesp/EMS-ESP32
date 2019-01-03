@@ -193,7 +193,7 @@ void MyESP::mqttUnsubscribe(const char * topic) {
 
 // MQTT Publish
 void MyESP::mqttPublish(const char * topic, const char * payload) {
-    char s[600];
+    char s[MQTT_MAX_SIZE];
     snprintf(s, sizeof(s), "%s%s/%s", MQTT_BASE, _app_hostname, topic);
     // myDebug_P(PSTR("[MQTT] Sending pubish to %s with payload %s"), s, payload);
     mqttClient.publish(s, MQTT_QOS, false, payload);

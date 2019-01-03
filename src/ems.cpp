@@ -993,9 +993,7 @@ void _process_RC30StatusMessage(uint8_t * data, uint8_t length) {
  */
 void _process_RC35StatusMessage(uint8_t * data, uint8_t length) {
     EMS_Thermostat.setpoint_roomTemp = ((float)data[EMS_TYPE_RC35StatusMessage_setpoint]) / (float)2;
-
-    // There is no current room temperature sensor in this telegram
-    EMS_Thermostat.curr_roomTemp = EMS_VALUE_FLOAT_NOTSET;
+    EMS_Thermostat.curr_roomTemp     = _toFloat(EMS_TYPE_RC35StatusMessage_curr, data);
 
     EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back to Home Assistant via MQTT
 }
@@ -1097,7 +1095,6 @@ void _process_Version(uint8_t * data, uint8_t length) {
 
         // if we don't have a thermostat set, use this one
         if (!ems_getThermostatEnabled()) {
-            myDebug("Setting the Thermostat to this one.");
             // set its capabilities
             EMS_Thermostat.model_id        = Model_Types[i].model_id;
             EMS_Thermostat.type_id         = Model_Types[i].type_id;
@@ -1118,7 +1115,6 @@ void _process_Version(uint8_t * data, uint8_t length) {
         }
 
         if (!ems_getBoilerEnabled()) {
-            myDebug("Setting the Boiler to this one.");
             EMS_Boiler.type_id  = Model_Types[i].type_id;
             EMS_Boiler.model_id = Model_Types[i].model_id;
             strlcpy(EMS_Boiler.version, version, sizeof(EMS_Boiler.version));

@@ -76,6 +76,7 @@
 // RC35 specific
 #define EMS_TYPE_RC35StatusMessage 0x3E       // is an automatic thermostat broadcast giving us temps
 #define EMS_TYPE_RC35StatusMessage_setpoint 2 // desired temp
+#define EMS_TYPE_RC35StatusMessage_curr 3     // current temp
 #define EMS_TYPE_RC35Set 0x3D                 // for setting values like temp and mode (Working mode HC1)
 #define EMS_OFFSET_RC35Set_mode 7             // position of thermostat mode
 #define EMS_OFFSET_RC35Set_temp_day 2         // position of thermostat setpoint temperature for day time

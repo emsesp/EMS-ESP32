@@ -42,6 +42,7 @@
 #define MQTT_RECONNECT_DELAY_MIN 5000   // Try to reconnect in 5 seconds upon disconnection
 #define MQTT_RECONNECT_DELAY_STEP 5000  // Increase the reconnect delay in 5 seconds after each failed attempt
 #define MQTT_RECONNECT_DELAY_MAX 120000 // Set reconnect time to 2 minutes at most
+#define MQTT_MAX_SIZE 600               // max length of MQTT message
 // Internal MQTT events
 #define MQTT_CONNECT_EVENT 0
 #define MQTT_DISCONNECT_EVENT 1

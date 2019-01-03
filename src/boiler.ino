@@ -100,7 +100,7 @@ command_t PROGMEM project_cmds[] = {
     {"h", "list supported EMS telegram type IDs"},
     {"M", "publish to MQTT"},
     {"Q", "print Tx Queue"},
-    {"U [n]", "do a deep scan of all thermostat messages types, start at n"},
+    {"U [n]", "do a deep scan of all thermostat message types, starting at n"},
     {"P", "toggle EMS Poll response on/off"},
     {"X", "toggle EMS Tx transmission on/off"},
     {"S", "toggle Shower timer on/off"},
@@ -410,12 +410,10 @@ void showInfo() {
 // a json object is created for the boiler and one for the thermostat
 // CRC check is done to see if there are changes in the values since the last send to avoid too much wifi traffic
 void publishValues(bool force) {
-    char s[20] = {0}; // for formatting strings
-
-    // Boiler values as one JSON object
+    char                  s[20] = {0}; // for formatting strings
     StaticJsonBuffer<512> jsonBuffer;
-    char                  data[512];
-    JsonObject &          rootBoiler = jsonBuffer.createObject();
+    char                  data[MQTT_MAX_SIZE] = {0};
+    JsonObject &          rootBoiler          = jsonBuffer.createObject();
     size_t                rlen;
     CRC32                 crc;
     uint32_t              fchecksum;
@@ -481,6 +479,7 @@ void publishValues(bool force) {
         rootThermostat[THERMOSTAT_CURRTEMP] = _float_to_char(s, EMS_Thermostat.curr_roomTemp);
         rootThermostat[THERMOSTAT_SELTEMP]  = _float_to_char(s, EMS_Thermostat.setpoint_roomTemp);
 
+        // RC20 has different mode settings
         if (ems_getThermostatModel() == EMS_MODEL_RC20) {
             if (EMS_Thermostat.mode == 0) {
                 rootThermostat[THERMOSTAT_MODE] = "low";
@@ -499,7 +498,8 @@ void publishValues(bool force) {
             }
         }
 
-        rlen = rootThermostat.measureLength();
+        data[0] = '\0'; // reset data for next package
+        rlen    = rootThermostat.measureLength();
         rootThermostat.printTo(data, rlen + 1); // form the json string
 
         // calculate new CRC
@@ -619,7 +619,7 @@ void myDebugCallback() {
         systemCheckTimer.detach();
         regularUpdatesTimer.detach();
         scanThermostat_count = (uint8_t)strtol(&cmd[2], 0, 16);
-        myDebug("Doing a deep scan on all message types to the thermometer start at 0x%02. Reboot ESP when finished.", scanThermostat_count);
+        myDebug("Starting a deep message scan on thermometer");
         scanThermostat.attach(SCANTHERMOSTAT_TIME, do_scanThermostat);
         break;
     default:
