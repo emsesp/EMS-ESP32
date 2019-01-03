@@ -40,8 +40,8 @@ Ticker ledcheckTimer;
 
 // thermostat scan - for debugging
 Ticker scanThermostat;
-#define SCANTHERMOSTAT_TIME 4
-uint8_t scanThermostat_count;
+#define SCANTHERMOSTAT_TIME 1
+uint8_t scanThermostat_count = 0;
 
 Ticker showerColdShotStopTimer;
 
@@ -100,16 +100,17 @@ command_t PROGMEM project_cmds[] = {
     {"h", "list supported EMS telegram type IDs"},
     {"M", "publish to MQTT"},
     {"Q", "print Tx Queue"},
+    {"U [n]", "do a deep scan of all thermostat messages types, start at n"},
     {"P", "toggle EMS Poll response on/off"},
     {"X", "toggle EMS Tx transmission on/off"},
     {"S", "toggle Shower timer on/off"},
     {"A", "toggle shower Alert on/off"},
-    {"r [s]", "send raw telegram to EMS (s=XX XX XX...)"},
+    {"r [s]", "send raw telegram in hex to EMS (s=XX XX XX...)"},
     {"b [xx]", "send boiler read request (xx=telegram type ID in hex)"},
     {"t [xx]", "send thermostat read request (xx=telegram type ID in hex)"},
-    {"w [nn]", "set boiler warm water temperature (min 30)"},
+    {"w [n]", "set boiler warm water temperature (min 30)"},
     {"a [n]", "set boiler warm tap water (0=off, 1=on)"},
-    {"T [xx]", "set thermostat temperature"},
+    {"T [n]", "set thermostat temperature"},
     {"m [n]", "set thermostat mode (0=low/night, 1=manual/day, 2=auto)"}
 
 };
@@ -296,7 +297,7 @@ void showInfo() {
             EMS_Sys_Status.emsTxPkgs,
             EMS_Sys_Status.emxCrcErr);
 
-    myDebug(""); // newline?
+    myDebug("");
 
     myDebug("%sBoiler stats:%s", COLOR_BOLD_ON, COLOR_BOLD_OFF);
 
@@ -613,12 +614,12 @@ void myDebugCallback() {
         ems_setExperimental((uint8_t)strtol(&cmd[2], 0, 16)); // takes HEX param
         break;
     case 'U': // thermostat scan
-        myDebug("Doing a type ID scan on thermostat...");
         ems_setLogging(EMS_SYS_LOGGING_THERMOSTAT);
         publishValuesTimer.detach();
         systemCheckTimer.detach();
         regularUpdatesTimer.detach();
         scanThermostat_count = (uint8_t)strtol(&cmd[2], 0, 16);
+        myDebug("Doing a deep scan on all message types to the thermometer start at 0x%02. Reboot ESP when finished.", scanThermostat_count);
         scanThermostat.attach(SCANTHERMOSTAT_TIME, do_scanThermostat);
         break;
     default:
@@ -738,7 +739,7 @@ void do_ledcheck() {
 
 // Thermostat scan
 void do_scanThermostat() {
-    myDebug("Scanning thermostat type calls, starting at %d...", scanThermostat_count);
+    myDebug("> Scanning thermostat message type #0x%02X..", scanThermostat_count);
     ems_doReadCommand(scanThermostat_count, EMS_Thermostat.type_id);
     scanThermostat_count++;
 }
@@ -887,7 +888,8 @@ void loop() {
     myESP.loop();
 
     // publish the values to MQTT, regardless if the values haven't changed
-    if (ems_getEmsRefreshed()) {
+    // we don't want to publish when doing a deep scan of the thermostat
+    if (ems_getEmsRefreshed() && (scanThermostat_count == 0)) {
         publishValues(true);
         ems_setEmsRefreshed(false);
     }
