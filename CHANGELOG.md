@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.3] 2019-01-03
+
+### Fixed
+
+- Can now hardcode Boiler and Thermostat types in my_config.h to bypass auto-detection
+- Fixed MQTT subscribing to Heating and Hot Water active topics
+- Fixed for listening to incoming MQTT topics (https://github.com/proddy/EMS-ESP-Boiler/issues/27)
+- Fixed handling of current temperature on an RC35-type thermostat that doesn't have a sensor (https://github.com/proddy/EMS-ESP-Boiler/issues/18)
+
 ## [1.2.2] 2019-01-02
 
 ### Fixed

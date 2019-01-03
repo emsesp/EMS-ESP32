@@ -5,7 +5,7 @@ EMS-ESP-Boiler is a project to build a controller circuit running with an ESP826
 There are 3 parts to this project, first the design of the circuit, second the code for the ESP8266 microcontroller firmware and lastly an example configuration for Home Assistant to monitor the data and issue direct commands via MQTT.
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/b8880625bdf841d4adb2829732030887)](https://app.codacy.com/app/proddy/EMS-ESP-Boiler?utm_source=github.com&utm_medium=referral&utm_content=proddy/EMS-ESP-Boiler&utm_campaign=Badge_Grade_Settings)
-[![version](https://img.shields.io/badge/version-1.2.0-brightgreen.svg)](CHANGELOG.md)
+[![version](https://img.shields.io/badge/version-1.2.3-brightgreen.svg)](CHANGELOG.md)
 
 - [EMS-ESP-Boiler](#ems-esp-boiler)
   - [Introduction](#introduction)
@@ -46,29 +46,30 @@ My original intention for this home project was to build a custom smart thermost
 
 Firstly, some acknowledgments and kudos to the following people who have open-sourced their projects which have helped me tremendously:
 
- **susisstrolch** - Probably the first working version of the EMS bridge circuit I found designed for the ESP8266. I borrowed Juergen's [schematic](https://github.com/susisstrolch/EMS-ESP12) and parts of his code logic.
+ **susisstrolch** - Probably the first working version of the EMS bridge circuit I found designed for the ESP8266. I borrowed Juergen's [schematic](https://github.com/susisstrolch/EMS-ESP12) and parts of his code logic for reading telegrams.
 
- **bbqkees** - Kees built a [circuit](https://github.com/bbqkees/Nefit-Buderus-EMS-bus-Arduino-Domoticz) and some sample Arduino code to read from the EMS and push messages to Domoticz. His SMD board is also now available for purchase.
+ **bbqkees** - Kees built a working [circuit](https://github.com/bbqkees/Nefit-Buderus-EMS-bus-Arduino-Domoticz) and some sample Arduino code to read from the EMS and push messages to Domoticz. His SMD board is also now available for purchase.
 
- **EMS Wiki** - A comprehensive [reference](https://emswiki.thefischer.net/doku.php?id=wiki:ems:telegramme) for decoding the EMS telegrams, which I found not always to be 100% accurate. It's in German so use Google Translate if you need help.
+ **EMS Wiki** - A comprehensive [reference](https://emswiki.thefischer.net/doku.php?id=wiki:ems:telegramme) (in German) for the EMS bus which is a little outdated, not 100% accurate and unfortunately no longer maintained.
 
 ## Supported Boilers Types
 
-Most Bosch branded boilers that support the Logamatic EMS (and EMS+) bus protocols work with this design. This includes Nefit, Buderus, Worcester and Junkers (all copyrighted). Please make sure you read the **Disclaimer** carefully before sending ambiguous messages to your EMS bus as you cause serious damage to your boiler.
+Most Bosch branded boilers that support the Logamatic EMS (and EMS+) bus protocols work with this design. This includes Nefit, Buderus, Worcester and Junkers (all copyrighted). Please make sure you read the **Disclaimer** carefully before sending ambiguous messages to your EMS bus as you could cause serious damage to your boiler or thermostat.
 
 ## Supported ESP8266 devices
 
-I've tested the code and circuit with a few ESP8266 development boards such as the Wemos D1 Mini, Wemos D1 Mini Pro, Nodemcu0.9 and Nodemcu2 boards. It will also work on bare ESP8266 chips such as the E-12s but do make sure you disabled the LED support and wire the UART correctly as the code doesn't use the normal Rx and Tx pins. This is explained below.
+I've tested the code and circuit with a few ESP8266 development boards such as the Wemos D1 Mini, Wemos D1 Mini Pro, Nodemcu0.9 and Nodemcu2 dev boards. It will also work on bare ESP8266 chips such as the ESP-12E but do make sure you disabled the LED support and wire the UART correctly as the code doesn't use the normal Rx and Tx pins. Why is explained later.
 
 ## Getting Started
 
 1. Either build the circuit below or purchase a ready built board from bbqkees via his [GitHub](https://github.com/bbqkees/Nefit-Buderus-EMS-bus-Arduino-Domoticz) page or the [Domoticz forum](http://www.domoticz.com/forum/viewtopic.php?f=22&t=22079&start=20).
 2. Get an ESP8266 dev board and connect the 2 EMS output lines from the boiler to the circuit and the Rx and Tx out to ESP pins D7 and D8 respectively. The EMS connection can either be the 12-15V AC direct from the thermostat bus line or from the 3.5" Service Jack at the front.
-3. Optionally connect the three LEDs to show Rx and Tx traffic and Error codes to pins D1, D2, D3 respectively. I use 220 Ohm pull-down resistors. These pins are configurable in ``boiler.ino``. This is further explained in the **code** section below.
-4. Build and upload the firmware to the ESP8266 device. I used Platformio with Visual Studio. Do make sure you set the MQTT and WiFi credentials correctly and if you're not using MQTT leave the MQTT_IP blank. The firmware supports OTA too with the default hostname as 'boiler' (or 'boiler.' depending on your OS and how the mdns resolves hostnames).
-5. Power the ESP either via USB or direct into the 5v vin pin from an external power 5V volts supply with min 400mA.
-6. Attach the 3v3 out on the ESP8266 to the DC power line on the EMS circuit as indicated in the schematics.
-7. The WiFi connects via DHCP by default. Find the IP by from your router and then telnet (port 23) to it. Tip: to enable Telnet on Windows run `dism /online /Enable-Feature /FeatureName:TelnetClient` or install something like [putty](https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html). If everything is working you should see the messages appear in the window as shown in the next section. However if you're unable to locate the IP of the ESP then probably the WiFi failed to instantiate. In this case add -DUSE_SERIAL to the build options, connect at USB, build, upload and then use a terminal to connect to the serial port to see the debug messages. A word of warning, do not use both a USB and power from the EMS at the same time.
+3. Optionally connect an external LED or decide to use the onboard ESP8266 LED. This will flash when there is an error on the EMS bus line or stay solid when it's connected.
+4. Modify `my_custom.h`
+5. Build and upload the firmware to the ESP8266 device. I used Platformio with Visual Studio Code but using Atom or a command-line is just as easy if you don't plan to make code changes. Do make sure you set the MQTT and WiFi credentials correctly in the build flags and if you're not using MQTT leave the MQTT_IP blank. The firmware supports OTA too with the default hostname as 'boiler'.
+6. Power the ESP either via USB or direct into the 5v vin pin from an external power 5V volts supply with min 400mA.
+7. Attach the 3v3 out on the ESP8266 to the DC power line on the EMS circuit as indicated in the schematics.
+8. The WiFi connects via DHCP by default. Find the IP by from your router and then telnet (port 23) to it. If a connection can't be made it will go into Access Point mode. Tip: to enable Telnet on Windows run `dism /online /Enable-Feature /FeatureName:TelnetClient` or install something like [putty](https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html). If everything is working you should see the messages appear in the window as shown in the next section. However if you're unable to locate the IP of the ESP then something went wrong. Re-compile with the -DDEBUG_SUPPORT and connect via USB to a PC and check the Serial log for errors.
 
 ## Monitoring The Output
 
@@ -212,6 +213,8 @@ The code is built on the Arduino framework and is dependent on these external li
 
 `boiler.ino` is the Arduino code for the ESP8266 that kicks it all off. This is where we have specific logic such as the code to monitor and alert on the Shower timer and light up the LEDs. LED support is enabled by default and can be switched off at compile time using the -DNO_LED build flag.
 
+`my_config.h` all the custom settings
+
 `MyESP.cpp` is my custom library to handle WiFi, MQTT, MDNS and Telnet. Uses a modified version of TelnetSpy (https://github.com/yasheena/telnetspy)
 
 ### Supported EMS Types
@@ -246,20 +249,23 @@ BC10                  = Type 123  Version 04.05
 
 #### RC20 (Moduline 300)
 
-Read and write of setpoint temp and mode supported.
+Read and write of setpoint temperature and mode are supported.
 
 #### RC30 (Moduline 400)
 
-Read and write of setpoint temp and mode supported.
+Read and write of setpoint temperature and mode are supported.
 
-Type's 3F, 49, 53, 5D are identical. So are 4B, 55, 5F and mostly zero's. Types 40, 4A, 54 and 5E are also the same.
+Note I found type's 3F, 49, 53, 5D are identical. So are 4B, 55, 5F and mostly zero's. Types 40, 4A, 54 and 5E are also the same.
 
 #### RC35
 
 An RC35 thermostat can support up to 4 heating circuits each controlled with their own Monitor and Working Mode IDs.
 
-Fetching the thermostats setpoint temp us by requesting 0x3E and looking at the 3rd byte in the data telegram (data[2]) and dividing by 2.
+Fetching the thermostats setpoint temperature us by requesting 0x3E and looking at the 3rd byte in the data telegram (data[2]) and dividing by 2.
+
 The mode is on type 0x47 (or 0x3D) and the 8th byte (data[7]). 0=off, 1=on, 2=auto
+
+This is roughly supported but not fully tested.
 
 #### TC100/TC200 (Nefit Easy)
 
@@ -276,11 +282,9 @@ There is limited support for an Nefit Easy TC100/TC200 type thermostat. The curr
 
 When the ESP8266 boots it will send a start signal via MQTT. This is picked up by Home Assistant and sends a notification informing me that the device has booted. Useful for knowing when the ESP gets reset.
 
-I'm using the standard PubSubClient client so make sure you set `-DMQTT_MAX_PACKET_SIZE=400` as the default package size is 128 and our JSON messages are around 300 bytes.
-
 I run Mosquitto on my Raspberry PI 3 as the MQTT broker.
 
-The boiler data is collected and sent as a single JSON object to MQTT TOPIC `home/boiler/boiler_data`. A hash is generated (CRC32 based) to determine if the payload has changed, otherwise don't send it. An example payload looks like:
+The boiler data is collected and sent as a single JSON object to MQTT TOPIC `home/boiler/boiler_data`. A hash is generated (CRC32 based) to determine if the payload has changed, otherwise don't send it. An example payload looks roughly like:
 
 `{"wWCurTmp":"43.0","wWHeat":"on","curFlowTemp":"51.7","retTemp":"48.0","burnGas":"off","heatPmp":"off","fanWork":"off","ignWork":"off","wWCirc":"off","selBurnPow":"0","curBurnPow":"0","sysPress":"1.6","boilTemp":"54.7","pumpMod":"4"}`
 
@@ -290,9 +294,9 @@ These topics can be configured in the `TOPIC_*` defines in `boiler.ino`. Make su
 
 ### The Basic Shower Logic
 
-Checking whether the shower is running was tricky. We know when the warm water is on and being heated but need to distinguish between the central heating, shower, hot tap and bath. I found via trial and error the Selected Burner Max Power is between 80% and 115% when the shower is running and fixed at 75% if the central heating is on. Furthermore the Selected Flow Impulsion is 80 C for the heating.
+Checking whether the shower is running is tricky. We know when the warm water is on and being heated but need to distinguish between the central heating, shower, hot tap and even a bath tap. So this code is a little experimental.
 
-There is other logic in the code to compensate for ramp up and whether the shower is turned off and back on again quickly within a 10 second window.
+There is other logic in the code to compensate for water heating up to shower temperature and whether the shower is turned off and back on again quickly within a 10 second window.
 
 ## Home Assistant Configuration
 
@@ -309,8 +313,6 @@ You can find the .yaml configuration files under `doc/ha`. See also https://comm
 ## Building The Firmware
 
 ### Using PlatformIO Standalone
-
-PlatformIO is my preferred way. The code uses a modified version [ESPHelper](https://github.com/ItKindaWorks/ESPHelper) which handles all the basic handling of the WiFi, MQTT, OTA and Telnet server. I switched from Atom to the marvelous Visual Studio Code, works on Windows, OSX and Linux.
 
 **On Windows:**
 

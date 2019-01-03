@@ -58,25 +58,34 @@
 #define EMS_TYPE_RCOutdoorTempMessage 0xA3 // is an automatic thermostat broadcast, outdoor external temp
 
 // RC20 specific
-#define EMS_TYPE_RC20StatusMessage 0x91 // is an automatic thermostat broadcast giving us temps
-#define EMS_TYPE_RC20Set 0xA8           // for setting values like temp and mode
-#define EMS_OFFSET_RC20Set_mode 23      // position of thermostat mode
-#define EMS_OFFSET_RC20Set_temp 28      // position of thermostat setpoint temperature
+#define EMS_TYPE_RC20StatusMessage 0x91       // is an automatic thermostat broadcast giving us temps
+#define EMS_TYPE_RC20Set 0xA8                 // for setting values like temp and mode
+#define EMS_OFFSET_RC20Set_mode 23            // position of thermostat mode
+#define EMS_OFFSET_RC20Set_temp 28            // position of thermostat setpoint temperature
+#define EMS_TYPE_RC20StatusMessage_setpoint 1 // setpoint temp
+#define EMS_TYPE_RC20StatusMessage_curr 2     // current temp
 
 // RC30 specific
-#define EMS_TYPE_RC30StatusMessage 0x41 // is an automatic thermostat broadcast giving us temps
-#define EMS_TYPE_RC30Set 0xA7           // for setting values like temp and mode
-#define EMS_OFFSET_RC30Set_mode 23      // position of thermostat mode
-#define EMS_OFFSET_RC30Set_temp 28      // position of thermostat setpoint temperature
+#define EMS_TYPE_RC30StatusMessage 0x41       // is an automatic thermostat broadcast giving us temps
+#define EMS_TYPE_RC30Set 0xA7                 // for setting values like temp and mode
+#define EMS_OFFSET_RC30Set_mode 23            // position of thermostat mode
+#define EMS_OFFSET_RC30Set_temp 28            // position of thermostat setpoint temperature
+#define EMS_TYPE_RC30StatusMessage_setpoint 1 // setpoint temp
+#define EMS_TYPE_RC30StatusMessage_curr 2     // current temp
 
-// RC35 specific - not implemented yet
-#define EMS_TYPE_RC35StatusMessage 0x3E // is an automatic thermostat broadcast giving us temps
-#define EMS_TYPE_RC35Set 0x3D           // for setting values like temp and mode
-#define EMS_OFFSET_RC35Set_mode 7       // position of thermostat mode
-#define EMS_OFFSET_RC35Set_temp 2       // position of thermostat setpoint temperature
+// RC35 specific
+#define EMS_TYPE_RC35StatusMessage 0x3E       // is an automatic thermostat broadcast giving us temps
+#define EMS_TYPE_RC35StatusMessage_setpoint 2 // desired temp
+#define EMS_TYPE_RC35Set 0x3D                 // for setting values like temp and mode (Working mode HC1)
+#define EMS_OFFSET_RC35Set_mode 6             // position of thermostat mode
+#define EMS_OFFSET_RC35Set_temp_day 2         // position of thermostat setpoint temperature for day time
+#define EMS_OFFSET_RC35Set_temp_night 1       // position of thermostat setpoint temperature for night time
 
 // Easy specific
-#define EMS_TYPE_EasyStatusMessage 0x0A // reading values on an Easy Thermostat
+#define EMS_TYPE_EasyStatusMessage 0x0A        // reading values on an Easy Thermostat
+#define EMS_TYPE_EasyStatusMessage_setpoint 10 // setpoint temp
+#define EMS_TYPE_EasyStatusMessage_curr 8      // current temp
+
 
 // default values
 #define EMS_VALUE_INT_ON 1             // boolean true
@@ -119,17 +128,15 @@ typedef enum {
 typedef struct {
     _EMS_RX_STATUS   emsRxStatus;
     _EMS_TX_STATUS   emsTxStatus;
-    uint16_t         emsRxPgks;            // received
-    uint16_t         emsTxPkgs;            // sent
-    uint16_t         emxCrcErr;            // CRC errors
-    bool             emsPollEnabled;       // flag enable the response to poll messages
-    bool             emsTxEnabled;         // flag if we're allowing sending of Tx packages
-    bool             emsThermostatEnabled; // if there is a RCxx thermostat active
-    bool             emsBoilerEnabled;     // is the boiler online
-    _EMS_SYS_LOGGING emsLogging;           // logging
-    bool             emsRefreshed;         // fresh data, needs to be pushed out to MQTT
-    bool             emsBusConnected;      // is there an active bus
-    unsigned long    emsRxTimestamp;       // timestamp of last EMS poll
+    uint16_t         emsRxPgks;       // received
+    uint16_t         emsTxPkgs;       // sent
+    uint16_t         emxCrcErr;       // CRC errors
+    bool             emsPollEnabled;  // flag enable the response to poll messages
+    bool             emsTxEnabled;    // flag if we're allowing sending of Tx packages
+    _EMS_SYS_LOGGING emsLogging;      // logging
+    bool             emsRefreshed;    // fresh data, needs to be pushed out to MQTT
+    bool             emsBusConnected; // is there an active bus
+    unsigned long    emsRxTimestamp;  // timestamp of last EMS poll
 } _EMS_Sys_Status;
 
 // The Tx send package
@@ -310,7 +317,7 @@ typedef struct {
 
 // function definitions
 extern void ems_parseTelegram(uint8_t * telegram, uint8_t len);
-void        ems_init();
+void        ems_init(_EMS_MODEL_ID boiler_modelid, _EMS_MODEL_ID thermostat_modelid);
 void        ems_doReadCommand(uint8_t type, uint8_t dest, bool forceRefresh = false);
 void        ems_sendRawTelegram(char * telegram);
 
@@ -322,12 +329,11 @@ void ems_setWarmTapWaterActivated(bool activated);
 void ems_setExperimental(uint8_t value);
 void ems_setPoll(bool b);
 void ems_setTxEnabled(bool b);
-void ems_setThermostatEnabled(bool b);
-void ems_setBoilerEnabled(bool b);
 void ems_setLogging(_EMS_SYS_LOGGING loglevel);
 void ems_setEmsRefreshed(bool b);
 void ems_setWarmWaterModeComfort(bool comfort);
 bool ems_checkEMSBUSAlive();
+void ems_setModels();
 
 void             ems_getThermostatValues();
 void             ems_getBoilerValues();
@@ -339,9 +345,10 @@ bool             ems_getBusConnected();
 _EMS_SYS_LOGGING ems_getLogging();
 uint8_t          ems_getEmsTypesCount();
 bool             ems_getEmsRefreshed();
-void             ems_getAllVersions();
 _EMS_MODEL_ID    ems_getThermostatModel();
+_EMS_MODEL_ID    ems_getBoilerModel();
 
+void   ems_scanDevices();
 void   ems_printAllTypes();
 char * ems_getThermostatType(char * buffer);
 void   ems_printTxQueue();
@@ -354,6 +361,8 @@ void    _debugPrintPackage(const char * prefix, uint8_t * data, uint8_t len, con
 void    _ems_clearTxData();
 int     _ems_findModel(_EMS_MODEL_ID model_id);
 char *  _ems_buildModelString(char * buffer, uint8_t size, _EMS_MODEL_ID model_id);
+bool    _ems_setModel(_EMS_MODEL_ID model_id);
+
 
 // global so can referenced in other classes
 extern _EMS_Sys_Status EMS_Sys_Status;

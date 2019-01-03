@@ -42,3 +42,19 @@
 
 // set this if using an external temperature sensor like a DS18B20
 #define TEMPERATURE_SENSOR_PIN D7
+
+// logging - EMS_SYS_LOGGING_VERBOSE, EMS_SYS_LOGGING_NONE, EMS_SYS_LOGGING_BASIC (see ems.h)
+// this can be changed via the Telnet console using the 'l' command
+#define BOILER_DEFAULT_LOGGING EMS_SYS_LOGGING_NONE
+//#define BOILER_DEFAULT_LOGGING EMS_SYS_LOGGING_VERBOSE
+//#define BOILER_DEFAULT_LOGGING EMS_SYS_LOGGING_BASIC
+
+// By default the EMS bus will be scanned for known devices. You can override this here
+// by fixing the Boiler and Thermostat types
+// Options are in ems.h and include..
+// boilers: EMS_MODEL_BK15, EMS_MODEL_UBA, EMS_MODEL_BC10, EMS_MODEL_MM10, EMS_MODEL_WM10
+// thermostats: EMS_MODEL_ES73, EMS_MODEL_RC20, EMS_MODEL_RC30, EMS_MODEL_RC35, EMS_MODEL_EASY
+#define MY_BOILER_MODELID EMS_MODEL_NONE
+#define MY_THERMOSTAT_MODELID EMS_MODEL_NONE
+//#define MY_BOILER_MODELID EMS_MODEL_UBA
+//#define MY_THERMOSTAT_MODELID EMS_MODEL_RC20

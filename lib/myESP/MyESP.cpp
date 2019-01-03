@@ -118,7 +118,7 @@ void MyESP::_wifiCallback(justwifi_messages_t code, char * parameter) {
 
         // call any final custom settings
         if (_extern_WIFICallbackSet) {
-            myDebug_P(PSTR("[WIFI] calling custom wifi settings function"));
+            // myDebug_P(PSTR("[WIFI] calling custom wifi settings function"));
             _extern_WIFICallback(); // call callback to set any custom things
         }
     }
@@ -137,6 +137,7 @@ void MyESP::_wifiCallback(justwifi_messages_t code, char * parameter) {
 }
 
 // received MQTT message
+// we send this to the call back function. Important to parse are the event strings such as MQTT_MESSAGE_EVENT and MQTT_CONNECT_EVENT
 void MyESP::_mqttOnMessage(char * topic, char * payload, size_t len) {
     if (len == 0)
         return;
@@ -153,9 +154,14 @@ void MyESP::_mqttOnMessage(char * topic, char * payload, size_t len) {
         return;
     }
 
-    char s[100];
-    snprintf(s, sizeof(s), "%s%s/%s", MQTT_BASE, _app_hostname, MQTT_TOPIC_START);
-    if (strcmp(topic, s) == 0) {
+    // topics are in format MQTT_BASE/HOSTNAME/TOPIC
+    char * topic_magnitude = strrchr(topic, '/'); // strip out everything until last /
+    if (topic_magnitude != nullptr) {
+        topic = topic_magnitude + 1;
+    }
+
+    // check for bootime, something specific I fetch as an acknolwegdemtn from Home Assistant
+    if (strcmp(topic, MQTT_TOPIC_START) == 0) {
         myDebug_P(PSTR("[MQTT] boottime: %s"), message);
         setBoottime(message);
         return;
@@ -379,7 +385,7 @@ void MyESP::_consoleShowHelp() {
     SerialAndTelnet.println("*********************************");
     SerialAndTelnet.println("*  Console and Log Monitoring   *");
     SerialAndTelnet.println("*********************************");
-    SerialAndTelnet.printf("* %s %s\n\r", _app_name, _app_version);
+    SerialAndTelnet.printf("* %s version %s\n\r", _app_name, _app_version);
     SerialAndTelnet.printf("* Hostname: %s    IP: %s     MAC: %s\n\r",
                            hostname.c_str(),
                            WiFi.localIP().toString().c_str(),
@@ -543,7 +549,7 @@ void MyESP::_mqttConnect() {
     mqttClient.setClientId(_app_hostname);
 
     if (_mqtt_username && _mqtt_password) {
-        myDebug_P(PSTR("[MQTT] Connecting to MQTT using user %s & its password"), _mqtt_username);
+        myDebug_P(PSTR("[MQTT] Connecting to MQTT using user %s"), _mqtt_username);
         mqttClient.setCredentials(_mqtt_username, _mqtt_password);
     } else {
         myDebug_P(PSTR("[MQTT] Connecting to MQTT..."));
