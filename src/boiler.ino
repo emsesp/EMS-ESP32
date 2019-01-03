@@ -410,13 +410,13 @@ void showInfo() {
 // a json object is created for the boiler and one for the thermostat
 // CRC check is done to see if there are changes in the values since the last send to avoid too much wifi traffic
 void publishValues(bool force) {
-    char                  s[20] = {0}; // for formatting strings
-    StaticJsonBuffer<512> jsonBuffer;
-    char                  data[MQTT_MAX_SIZE] = {0};
-    JsonObject &          rootBoiler          = jsonBuffer.createObject();
-    size_t                rlen;
-    CRC32                 crc;
-    uint32_t              fchecksum;
+    char                            s[20] = {0}; // for formatting strings
+    StaticJsonBuffer<MQTT_MAX_SIZE> jsonBuffer;
+    char                            data[MQTT_MAX_SIZE] = {0};
+    JsonObject &                    rootBoiler          = jsonBuffer.createObject();
+    size_t                          rlen;
+    CRC32                           crc;
+    uint32_t                        fchecksum;
 
     rootBoiler["wWSelTemp"]   = _int_to_char(s, EMS_Boiler.wWSelTemp);
     rootBoiler["selFlowTemp"] = _float_to_char(s, EMS_Boiler.selFlowTemp);
