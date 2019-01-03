@@ -318,7 +318,7 @@ void showInfo() {
 
     // UBAMonitorWWMessage
     _renderFloatValue("Warm Water current temperature", "C", EMS_Boiler.wWCurTmp);
-    _renderIntfractionalValue("Warm Water current tapwater flow", "l/min", EMS_Boiler.wWCurFlow, 1);
+    _renderIntfractionalValue("Warm Water current tap water flow", "l/min", EMS_Boiler.wWCurFlow, 1);
     _renderLongValue("Warm Water # starts", "times", EMS_Boiler.wWStarts);
     if (EMS_Boiler.wWWorkM != EMS_VALUE_LONG_NOTSET) {
         myDebug("  Warm Water active time: %d days %d hours %d minutes",
