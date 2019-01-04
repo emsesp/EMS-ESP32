@@ -221,21 +221,20 @@ typedef struct {           // UBAParameterWW
     uint8_t wWComfort;     // Warm water comfort or ECO mode
 
     // UBAMonitorFast
-    uint8_t selFlowTemp;      // Selected flow temperature
-    float   curFlowTemp;      // Current flow temperature
-    float   retTemp;          // Return temperature
-    uint8_t burnGas;          // Gas on/off
-    uint8_t fanWork;          // Fan on/off
-    uint8_t ignWork;          // Ignition on/off
-    uint8_t heatPmp;          // Circulating pump on/off
-    uint8_t wWHeat;           // 3-way valve on WW
-    uint8_t wWCirc;           // Circulation on/off
-    uint8_t selBurnPow;       // Burner max power
-    uint8_t curBurnPow;       // Burner current power
-    float   flameCurr;        // Flame current in micro amps
-    float   sysPress;         // System pressure
-    uint8_t serviceCodeChar1; // First  Character in status/service code
-    uint8_t serviceCodeChar2; // Second Character in status/service code
+    uint8_t selFlowTemp;        // Selected flow temperature
+    float   curFlowTemp;        // Current flow temperature
+    float   retTemp;            // Return temperature
+    uint8_t burnGas;            // Gas on/off
+    uint8_t fanWork;            // Fan on/off
+    uint8_t ignWork;            // Ignition on/off
+    uint8_t heatPmp;            // Circulating pump on/off
+    uint8_t wWHeat;             // 3-way valve on WW
+    uint8_t wWCirc;             // Circulation on/off
+    uint8_t selBurnPow;         // Burner max power
+    uint8_t curBurnPow;         // Burner current power
+    float   flameCurr;          // Flame current in micro amps
+    float   sysPress;           // System pressure
+    char    serviceCodeChar[2]; // 2 character status/service code
 
     // UBAMonitorSlow
     float    extTemp;     // Outside temperature

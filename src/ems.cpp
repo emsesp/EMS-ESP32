@@ -198,21 +198,20 @@ void ems_init(_EMS_MODEL_ID boiler_modelid, _EMS_MODEL_ID thermostat_modelid) {
     EMS_Boiler.wWComfort     = EMS_VALUE_INT_NOTSET;
 
     // UBAMonitorFast
-    EMS_Boiler.selFlowTemp      = EMS_VALUE_INT_NOTSET;   // Selected flow temperature
-    EMS_Boiler.curFlowTemp      = EMS_VALUE_FLOAT_NOTSET; // Current flow temperature
-    EMS_Boiler.retTemp          = EMS_VALUE_FLOAT_NOTSET; // Return temperature
-    EMS_Boiler.burnGas          = EMS_VALUE_INT_NOTSET;   // Gas on/off
-    EMS_Boiler.fanWork          = EMS_VALUE_INT_NOTSET;   // Fan on/off
-    EMS_Boiler.ignWork          = EMS_VALUE_INT_NOTSET;   // Ignition on/off
-    EMS_Boiler.heatPmp          = EMS_VALUE_INT_NOTSET;   // Boiler pump on/off
-    EMS_Boiler.wWHeat           = EMS_VALUE_INT_NOTSET;   // 3-way valve on WW
-    EMS_Boiler.wWCirc           = EMS_VALUE_INT_NOTSET;   // Circulation on/off
-    EMS_Boiler.selBurnPow       = EMS_VALUE_INT_NOTSET;   // Burner max power
-    EMS_Boiler.curBurnPow       = EMS_VALUE_INT_NOTSET;   // Burner current power
-    EMS_Boiler.flameCurr        = EMS_VALUE_FLOAT_NOTSET; // Flame current in micro amps
-    EMS_Boiler.sysPress         = EMS_VALUE_FLOAT_NOTSET; // System pressure
-    EMS_Boiler.serviceCodeChar1 = EMS_VALUE_INT_NOTSET;   // service codes
-    EMS_Boiler.serviceCodeChar2 = EMS_VALUE_INT_NOTSET;   // service codes
+    EMS_Boiler.selFlowTemp = EMS_VALUE_INT_NOTSET;   // Selected flow temperature
+    EMS_Boiler.curFlowTemp = EMS_VALUE_FLOAT_NOTSET; // Current flow temperature
+    EMS_Boiler.retTemp     = EMS_VALUE_FLOAT_NOTSET; // Return temperature
+    EMS_Boiler.burnGas     = EMS_VALUE_INT_NOTSET;   // Gas on/off
+    EMS_Boiler.fanWork     = EMS_VALUE_INT_NOTSET;   // Fan on/off
+    EMS_Boiler.ignWork     = EMS_VALUE_INT_NOTSET;   // Ignition on/off
+    EMS_Boiler.heatPmp     = EMS_VALUE_INT_NOTSET;   // Boiler pump on/off
+    EMS_Boiler.wWHeat      = EMS_VALUE_INT_NOTSET;   // 3-way valve on WW
+    EMS_Boiler.wWCirc      = EMS_VALUE_INT_NOTSET;   // Circulation on/off
+    EMS_Boiler.selBurnPow  = EMS_VALUE_INT_NOTSET;   // Burner max power
+    EMS_Boiler.curBurnPow  = EMS_VALUE_INT_NOTSET;   // Burner current power
+    EMS_Boiler.flameCurr   = EMS_VALUE_FLOAT_NOTSET; // Flame current in micro amps
+    EMS_Boiler.sysPress    = EMS_VALUE_FLOAT_NOTSET; // System pressure
+    strlcpy(EMS_Boiler.serviceCodeChar, "??", sizeof(EMS_Boiler.serviceCodeChar));
 
     // UBAMonitorSlow
     EMS_Boiler.extTemp     = EMS_VALUE_FLOAT_NOTSET; // Outside temperature
@@ -934,8 +933,8 @@ void _process_UBAMonitorFast(uint8_t * data, uint8_t length) {
     EMS_Boiler.flameCurr = _toFloat(15, data);
 
     // read the service code / installation status as appears on the display
-    EMS_Boiler.serviceCodeChar1 = data[18]; // ascii character 1
-    EMS_Boiler.serviceCodeChar2 = data[19]; // ascii character 2
+    EMS_Boiler.serviceCodeChar[0] = char(data[18]); // ascii character 1
+    EMS_Boiler.serviceCodeChar[1] = char(data[19]); // ascii character 2
 
     if (data[17] == 0xFF) { // missing value for system pressure
         EMS_Boiler.sysPress = 0;

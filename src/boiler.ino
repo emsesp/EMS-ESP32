@@ -341,7 +341,7 @@ void showInfo() {
     _renderIntValue("Burner current power", "%", EMS_Boiler.curBurnPow);
     _renderFloatValue("Flame current", "uA", EMS_Boiler.flameCurr);
     _renderFloatValue("System pressure", "bar", EMS_Boiler.sysPress);
-    myDebug("  Current System Service Code: %c%c", EMS_Boiler.serviceCodeChar1, EMS_Boiler.serviceCodeChar2);
+    myDebug("  Current System Service Code: %s", EMS_Boiler.serviceCodeChar);
 
     // UBAMonitorSlow
     _renderFloatValue("Outside temperature", "C", EMS_Boiler.extTemp);
@@ -438,8 +438,7 @@ void publishValues(bool force) {
     rootBoiler["sysPress"]    = _float_to_char(s, EMS_Boiler.sysPress);
     rootBoiler["boilTemp"]    = _float_to_char(s, EMS_Boiler.boilTemp);
     rootBoiler["pumpMod"]     = _int_to_char(s, EMS_Boiler.pumpMod);
-    snprintf(s, sizeof(s), "%c%c", EMS_Boiler.serviceCodeChar1, EMS_Boiler.serviceCodeChar2);
-    rootBoiler["ServiceCode"] = s;
+    rootBoiler["ServiceCode"] = EMS_Boiler.serviceCodeChar;
 
     rlen = rootBoiler.measureLength();
     rootBoiler.printTo(data, rlen + 1); // form the json string

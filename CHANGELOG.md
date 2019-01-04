@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Scanning known EMS Devices now ignores duplicates (https://github.com/proddy/EMS-ESP-Boiler/pull/30)
+- ServiceCode stored as a two byte char
 
 ## [1.2.3] 2019-01-03
 

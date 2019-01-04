@@ -481,7 +481,7 @@ void MyESP::_telnetHandle() {
     while (SerialAndTelnet.available()) {
         char character = SerialAndTelnet.read(); // Get character
 
-        // check for ctrl-D
+        // check for ctrl-D (EOF) or EOT
         if ((character == 0xEC) || (character == 0x04)) {
             SerialAndTelnet.disconnectClient();
         }
