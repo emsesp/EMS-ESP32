@@ -39,8 +39,6 @@ void _process_RC30StatusMessage(uint8_t * data, uint8_t length);
 void _process_RC35Set(uint8_t * data, uint8_t length);
 void _process_RC35StatusMessage(uint8_t * data, uint8_t length);
 
-// RC35
-
 // Easy
 void _process_EasyStatusMessage(uint8_t * data, uint8_t length);
 
@@ -1086,7 +1084,7 @@ void _process_Version(uint8_t * data, uint8_t length) {
     // set a thermostat
     if (isThermostat) {
         if (EMS_Sys_Status.emsLogging >= EMS_SYS_LOGGING_BASIC) {
-            myDebug("Found a Thermostat. Model %s with TypeID 0x%02X, Product ID %d, Version %s",
+            myDebug("Thermostat recognized. Model %s with TypeID 0x%02X, Product ID %d, Version %s",
                     Model_Types[i].model_string,
                     Model_Types[i].type_id,
                     product_id,
@@ -1107,7 +1105,7 @@ void _process_Version(uint8_t * data, uint8_t length) {
     } else {
         // otherwise assume its a boiler
         if (EMS_Sys_Status.emsLogging >= EMS_SYS_LOGGING_BASIC) {
-            myDebug("Found a Boiler compatible device, model %s with TypeID 0x%02X, Product ID %d, Version %s",
+            myDebug("Boiler recognized. Model %s with TypeID 0x%02X, Product ID %d, Version %s",
                     Model_Types[i].model_string,
                     Model_Types[i].type_id,
                     product_id,

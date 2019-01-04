@@ -373,6 +373,8 @@ void showInfo() {
     if (ems_getThermostatEnabled()) {
         myDebug("%sThermostat stats:%s", COLOR_BOLD_ON, COLOR_BOLD_OFF);
         myDebug("  Thermostat type: %s", ems_getThermostatType(buffer_type));
+        _renderFloatValue("Setpoint room temperature", "C", EMS_Thermostat.setpoint_roomTemp);
+        _renderFloatValue("Current room temperature", "C", EMS_Thermostat.curr_roomTemp);
         if (ems_getThermostatModel() != EMS_MODEL_EASY) {
             myDebug("  Thermostat time is %02d:%02d:%02d %d/%d/%d",
                     EMS_Thermostat.hour,
@@ -381,19 +383,16 @@ void showInfo() {
                     EMS_Thermostat.day,
                     EMS_Thermostat.month,
                     EMS_Thermostat.year + 2000);
-        }
 
-        _renderFloatValue("Setpoint room temperature", "C", EMS_Thermostat.setpoint_roomTemp);
-        _renderFloatValue("Current room temperature", "C", EMS_Thermostat.curr_roomTemp);
-
-        if (EMS_Thermostat.mode == 0) {
-            myDebug("  Mode is set to low");
-        } else if (EMS_Thermostat.mode == 1) {
-            myDebug("  Mode is set to manual");
-        } else if (EMS_Thermostat.mode == 2) {
-            myDebug("  Mode is set to auto");
-        } else {
-            myDebug("  Mode is set to ?");
+            if (EMS_Thermostat.mode == 0) {
+                myDebug("  Mode is set to low");
+            } else if (EMS_Thermostat.mode == 1) {
+                myDebug("  Mode is set to manual");
+            } else if (EMS_Thermostat.mode == 2) {
+                myDebug("  Mode is set to auto");
+            } else {
+                myDebug("  Mode is set to ?");
+            }
         }
     }
 
@@ -754,7 +753,7 @@ void do_systemCheck() {
 
 // force calls to get data from EMS for the types that aren't sent as broadcasts
 void do_regularUpdates() {
-    myDebugLog("Calling schedule fetch of values from EMS devices..");
+    myDebugLog("Calling scheduled data refresh from EMS devices..");
     ems_getThermostatValues(); // get Thermostat temps (if supported)
     ems_getBoilerValues();
 }
