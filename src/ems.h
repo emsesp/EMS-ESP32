@@ -11,6 +11,9 @@
 #include <CircularBuffer.h> // https://github.com/rlogiacco/CircularBuffer
 #include <MyESP.h>
 
+#include <list>
+#include <vector>
+
 // EMS IDs
 #define EMS_ID_NONE 0x00 // Fixed - used as a dest in broadcast messages and empty type IDs
 #define EMS_ID_ME 0x0B   // Fixed - our device, hardcoded as "Service Key"

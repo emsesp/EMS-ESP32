@@ -80,10 +80,6 @@ const _Thermostat_Type Thermostat_Types[] = {
 
 };
 
-// calculate sizes of arrays
-uint8_t _Model_Types_max      = ArraySize(Model_Types);      // number of models
-uint8_t _Thermostat_Types_max = ArraySize(Thermostat_Types); // number of defined thermostat types
-
 const _EMS_Type EMS_Types[] = {
 
     // common
@@ -133,9 +129,13 @@ const _EMS_Type EMS_Types[] = {
 
 
 };
-uint8_t _EMS_Types_max = ArraySize(EMS_Types); // number of defined types
 
-// reserve space for the data we collect from the Boiler and Thermostat
+// calculate sizes of arrays
+uint8_t _EMS_Types_max        = ArraySize(EMS_Types);        // number of defined types
+uint8_t _Model_Types_max      = ArraySize(Model_Types);      // number of models
+uint8_t _Thermostat_Types_max = ArraySize(Thermostat_Types); // number of defined thermostat types
+
+// these structs contain the data we store from the Boiler and Thermostat
 _EMS_Boiler     EMS_Boiler;
 _EMS_Thermostat EMS_Thermostat;
 
@@ -1410,12 +1410,22 @@ _EMS_MODEL_ID ems_getBoilerModel() {
  * Find the versions of our connected devices
  */
 void ems_scanDevices() {
-    // send Version request to all known EMS devices
     myDebug("Scanning EMS bus for devices. This may take a few seconds.");
-    for (int i = 0; i < _Model_Types_max; i++) {
-        if ((Model_Types[i].model_id != EMS_MODEL_NONE) && (Model_Types[i].model_id != EMS_MODEL_SERVICEKEY)) {
-            ems_doReadCommand(EMS_TYPE_Version, Model_Types[i].type_id);
-        }
+
+    // copy over the IDs from Model-type to a list
+    std::list<uint8_t> Device_Ids;
+    for (_Model_Type mt : Model_Types) {
+        Device_Ids.push_back(mt.type_id);
+    }
+    // remove duplicates and reserved IDs (like our own device)
+    Device_Ids.sort();
+    Device_Ids.unique();
+    Device_Ids.remove(EMS_MODEL_NONE);
+    Device_Ids.remove(EMS_MODEL_SERVICEKEY);
+
+    // send the read command with Version command
+    for (uint8_t type_id : Device_Ids) {
+        ems_doReadCommand(EMS_TYPE_Version, type_id);
     }
 }
 
@@ -1444,7 +1454,7 @@ void ems_printAllTypes() {
             if (Model_Types[j].model_id == Thermostat_Types[i].model_id) {
                 int index = _ems_findModel(Model_Types[j].model_id);
                 if (index != -1) {
-                    myDebug(" %s [ID 0x%02X] Product ID:%d read_supported:%s write_supported:%s",
+                    myDebug(" %s [ID 0x%02X] Product ID:%d Read supported:%s Write supported:%s",
                             Model_Types[index].model_string,
                             Model_Types[index].type_id,
                             Model_Types[index].product_id,
