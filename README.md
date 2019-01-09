@@ -5,7 +5,7 @@ EMS-ESP is a project to build a controller circuit running with an ESP8266 to co
 There are 3 parts to this project, first the design of the circuit, second the code for the ESP8266 microcontroller firmware and lastly an example configuration for Home Assistant to monitor the data and issue direct commands via MQTT.
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/b8880625bdf841d4adb2829732030887)](https://app.codacy.com/app/proddy/EMS-ESP?utm_source=github.com&utm_medium=referral&utm_content=proddy/EMS-ESP&utm_campaign=Badge_Grade_Settings)
-[![version](https://img.shields.io/badge/version-1.2.3-brightgreen.svg)](CHANGELOG.md)
+[![version](https://img.shields.io/badge/version-1.3.0-brightgreen.svg)](CHANGELOG.md)
 
 - [EMS-ESP](#ems-esp)
   - [Introduction](#introduction)
@@ -74,28 +74,15 @@ Use the telnet client to inform you of all activity and errors real-time. This i
 
 ![Telnet](doc/telnet/telnet_example.jpg)
 
-If you type 'l 4' and Enter, it will toggle verbose logging showing you more detailed messages. I use ANSI colors with white text for info messages, green for well formatted telegram packages (which have validated CRC checks), red for corrupt packages and yellow for send responses.
+Type 'log v' and Enter and you'll be seeing verbose logging messages. ANSI colors with white text for info messages, green are for broadcast telegrams, yellow are the ones sent to us and red are for unknown data or telegrans which have failed the CRC check.
 
 ![Telnet](doc/telnet/telnet_verbose.PNG)
 
-To see the current values of the Boiler and its parameters type 's' and hit Enter. Watch out for unsuccessful telegram packets in the #CrcErrors line.
+To see the current stats and collected values type 'info'. Watch out for unsuccessful telegram packets in the #CrcErrors line.
 
 ![Telnet](doc/telnet/telnet_stats.PNG)
 
-Commands can be issued directly to the EMS bus typing in a letter followed by an optional parameter and pressing Enter. Supported commands are:
-
-- **b** to send a read command to the boiler. The 2nd parameter is the type. For example 'b 33' will request type UBAParameterWW and bring back the Warm Water temperatures from the Boiler.
-- **t** is similar, but to send a read command to the thermostat.
-- **T** set the thermostat temperature to the given celsius value
-- **w** to adjust the temperature of the warm water from the boiler
-- **a** to turn the warm tap water on and off
-- **h** to list all the recognized EMS types
-- **P** to toggle the Polling response on/off (note it's not necessary to have Polling enabled to work)
-- **m** to set the thermostat mode to manual or auto
-- **S** to toggle the Shower Timer functionality on/off
-- **A** to toggle the Shower Timer Alert functionality on/off
-
-**Disclaimer: be careful when sending values to the boiler. If in doubt you can always reset the boiler to its original factory settings by following the instructions in the user guide. On my **Nefit Trendline HRC30** that is done by holding down the Home and Menu buttons simultaneously for a few seconds, selecting factory settings from the scroll menu and lastly pressing the Reset button.**
+**Disclaimer: be careful when sending values to the boiler. If in doubt you can always reset the boiler to its original factory settings by following the instructions in the user guide. On my **Nefit Trendline HRC30** that is done by holding down the Home and Menu buttons simultaneously for a few seconds, selecting factory settings from the scroll menu followed by pressing the Reset button.**
 
 ## Building The Circuit
 
@@ -103,7 +90,7 @@ The EMS circuit is really all credit to the hard work many people have done befo
 
 I've included a prototype boards you can build yourself on a breadboard. One part for only reading values from the Boiler and an extension with the write logic so you can also send commands.
 
-We need the Rx/Tx of the ESP8266 for flashing, so the code in ``emsuart.cpp`` switches the UART pins to use RX1 and TX1 (GPIO13/D7 and GPIO15/D8 respectively). This also prevents any bogus stack data being sent to EMS bus when the ESP8266 decides to crash like after a Watch Dog Reset.
+We need the Rx/Tx of the ESP8266 for flashing, so the code in ``emsuart.cpp`` switches the UART pins to use RX1 and TX1 (GPIO13/D7 and GPIO15/D8 respectively). This also prevents any bogus stack data being sent to EMS bus when the ESP8266 decides to crash with a Watch Dog (WD) Reset.
 
 The breadboard layout was done using [DIY Layout Creator](https://github.com/bancika/diy-layout-creator) and sources files are included in this repo.
 
@@ -115,7 +102,7 @@ The schematic used (as designed by [susisstrolch](https://github.com/susisstrolc
 
 *Optionally I've also added 2 0.5A/72V polyfuses between the EMS and the two inductors L1 and L2 for extra protection.*
 
-And lastly if you don't fancy building the circuit, [bbqkees](http://www.domoticz.com/forum/memberlist.php?mode=viewprofile&u=1736) can sell you one complete with SMD components which looks like the photo below when connected to a Wemos D1 Mini:
+And here's a version using bbqkees' circuit
 
 ![WemosD1](doc/schematics/wemos_kees.png)
 
@@ -197,13 +184,6 @@ Every telegram sent is echo'd back to Rx.
 
 *Disclaimer*: This code here is really for reference only, I don't expect anyone to use "as is" since it's highly tailored to my environment and my needs. Most of the code however is self explanatory with comments here and there in the code.
 
-The code is built on the Arduino framework and is dependent on these external libraries:
-
-- Time http://playground.arduino.cc/code/time
-- PubSubClient http://pubsubclient.knolleary.net
-- ArduinoJson https://github.com/bblanchon/ArduinoJson
-- CRC32 https://github.com/bakercp/CRC32
-
 `emsuart.cpp` handles the low level UART read and write logic. You shouldn't need to touch this. All receive commands from the EMS bus are handled asynchronously using a circular buffer via an interrupt. A separate function processes the buffer and extracts the telegrams. Since we don't send too many write commands this is done sequentially. I couldn't use the standard Arduino Serial implementation because of the 11-bit break signal causes a frame-error which gets ignored.
 
 `ems.cpp` is the logic to read the EMS packets (telegrams), validates them and process them based on the type.
@@ -235,31 +215,31 @@ In `ems-esp.ino` you can make calls to automatically request these types in the 
 
 ### Which thermostats are supported?
 
-I am still working on adding more support to known thermostats. Any contributions here are welcome. Please use to 
-
-The know types are listed in `ems_devices.h`. Some special notes
+I am still working on adding more support to known thermostats. Any contributions here are welcome. The know types are listed in `ems_devices.h`.
 
 - RC20 and RC30 are fully supported
 - RC35 only supports the 1st heating circuit (HC1)
-- TC100/TC200/Easy has only support for reading the temperatures. There seems to be no way to set settngs using EMS bus messages. The device only listens to XMPP requests.
+- TC100/TC200/Easy has only support for reading the temperatures. There seems to be no way to set settings using EMS bus messages. One option is to send XMPP messages but a client is needed.
 
 ### Customizing The Code
 
 - To configure for your thermostat and specific boiler settings, modify `my_config.h`. Here you can
   - set flags for enabled/disabling functionality such as `BOILER_SHOWER_ENABLED` and `BOILER_SHOWER_TIMER`.
-  - Set WIFI and MQTT settings, instead of doing this in `platformio.ini`
+  - Set WIFI and MQTT settings, instead of doing this in `platformio.ini`. The values can be set from the telnet command menu using the 'set' command.
 - To add new handlers for EMS data types, first create a callback function and add to the `EMS_Types` array at the top of the file `ems.cpp` and modify `ems.h`
 - To add new devices modify `ems_devices.h` 
 
 ### Using MQTT
 
-The boiler data is collected and sent as a single JSON object to MQTT TOPIC `home/ems-esp/boiler_data`. A hash is generated (CRC32 based) to determine if the payload has changed, otherwise don't send it. An example payload looks roughly like:
+The boiler data is collected and sent as a single JSON object to MQTT TOPIC `home/ems-esp/boiler_data`. The `home` preifx is the MQTT topic prefix and can be customized in `my_config.h`. A hash is generated (CRC32 based) to determine if the payload has changed, otherwise don't send it. An example payload looks roughly like:
 
-`{"wWCurTmp":"43.0","wWHeat":"on","curFlowTemp":"51.7","retTemp":"48.0","burnGas":"off","heatPmp":"off","fanWork":"off","ignWork":"off","wWCirc":"off","selBurnPow":"0","curBurnPow":"0","sysPress":"1.6","boilTemp":"54.7","pumpMod":"4"}`
+`{"wWSelTemp":"60","selFlowTemp":"5.0","outdoorTemp":"?","wWActivated":"on","wWComfort":"Comfort","wWCurTmp":"46.0","wWCurFlow":"0.0","wWHeat":"on","curFlowTemp":"54.2","retTemp":"51.5","burnGas":"off","heatPmp":"off","fanWork":"off","ignWork":"off","wWCirc":"off","selBurnPow":"0","curBurnPow":"0","sysPress":"1.2","boilTemp":"56.7","pumpMod":"0","ServiceCode":"0H"}`
 
-Similarly the thermostat values are sent as a json package under a topic named `home/ems-esp/thermostat_data` with the current mode, room temperature and set temperature.
+Similarly the thermostat values are sent as a json package under a topic named `home/ems-esp/thermostat_data` with the current mode, room temperature and set temperature like
 
-the `home` is the MQTT topic prefix and can be customized in my_config.h
+`{"thermostat_currtemp":"19.8","thermostat_seltemp":"16.0","thermostat_mode":"manual"}`
+
+
 
 ### The Basic Shower Logic
 
