@@ -158,8 +158,8 @@
 #define TELNETSPY_PING_TIME 1500
 #define TELNETSPY_PORT 23
 #define TELNETSPY_CAPTURE_OS_PRINT true
-#define TELNETSPY_WELCOME_MSG "Connection established via TelnetSpy2.\n"
-#define TELNETSPY_REJECT_MSG "TelnetSpy: Only one connection possible.\n"
+#define TELNETSPY_WELCOME_MSG "Connection established via Telnet.\n"
+#define TELNETSPY_REJECT_MSG "Telnet: Only one connection possible.\n"
 
 #ifdef ESP8266
 #include <ESP8266WiFi.h>

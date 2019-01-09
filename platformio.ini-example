@@ -8,7 +8,6 @@ platform = espressif8266
 flash_mode = dout
 ; optional flags are -DNO_LED -DDEBUG_SUPPORT
 build_flags = -g -w
-build_flags_custom = '-DWIFI_SSID="my_ssid"' '-DWIFI_PASSWORD="my_password"' '-DMQTT_IP="my_broker_ip"' '-DMQTT_USER="my_broker_username"' '-DMQTT_PASS="my_broker_password"' 
 lib_deps =
   CRC32
   CircularBuffer
@@ -21,15 +20,11 @@ board = nodemcuv2
 platform = ${common.platform}
 framework = arduino
 lib_deps = ${common.lib_deps}
-build_flags = ${common.build_flags} ${common.build_flags_custom}
+build_flags = ${common.build_flags}
 board_build.flash_mode = ${common.flash_mode}
 upload_speed = 921600
 monitor_speed = 115200
-; comment out next line if using USB and not OTA
-upload_port = "boiler"
-; examples....
-;upload_port = "boiler."
-;upload_port = "boiler.local"
+upload_port = ems-esp.local
 ;upload_port = 10.10.10.6
 
 [env:d1_mini]
@@ -37,14 +32,10 @@ board = d1_mini
 platform = ${common.platform}
 framework = arduino
 lib_deps = ${common.lib_deps}
-build_flags = ${common.build_flags} ${common.build_flags_custom}
+build_flags = ${common.build_flags}
 board_build.flash_mode = ${common.flash_mode}
 upload_speed = 921600
 monitor_speed = 115200
-; comment out next line if using USB and not OTA
-upload_port = "boiler"
-; examples....
-;upload_port = "boiler."
-;upload_port = "boiler.local"
+upload_port = ems-esp.local
 ;upload_port = 10.10.10.6
 

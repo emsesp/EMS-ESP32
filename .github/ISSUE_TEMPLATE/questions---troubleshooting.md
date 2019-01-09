@@ -9,8 +9,8 @@ assignees: ''
 
 *Before creating a new issue please check that you have:*
 
-* *searched the existing [issues](https://github.com/proddy/EMS-ESP-Boiler/issues) (both open and closed)*
-* *searched the [doc](https://github.com/proddy/EMS-ESP-Boiler/blob/master/README.md)*
+* *searched the existing [issues](https://github.com/proddy/EMS-ESP/issues) (both open and closed)*
+* *searched the [doc](https://github.com/proddy/EMS-ESP/blob/master/README.md)*
 
 
 *Fulfilling this template will help developers and contributors help you. Try to be as specific and extensive as possible. If the information provided is not enough the issue will likely be closed.*

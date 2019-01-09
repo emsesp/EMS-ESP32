@@ -1,7 +1,7 @@
 /*
  * emsuart.h
  * Header file for emsuart.cpp
- * Paul Derbyshire - https://github.com/proddy/EMS-ESP-Boiler
+ * Paul Derbyshire - https://github.com/proddy/EMS-ESP
  */
 #pragma once
 

@@ -1,10 +1,18 @@
 /**
  * ems.cpp
+ * 
  * handles all the processing of the EMS messages
- * Paul Derbyshire - https://github.com/proddy/EMS-ESP-Boiler
+ * 
+ * Paul Derbyshire - https://github.com/proddy/EMS-ESP
  */
 
 #include "ems.h"
+#include "ems_devices.h"
+#include "emsuart.h"
+#include <Arduino.h>
+#include <CircularBuffer.h> // https://github.com/rlogiacco/CircularBuffer
+#include <MyESP.h>
+#include <list> // std::list
 
 // myESP
 #define myDebug(...) myESP.myDebug(__VA_ARGS__)
@@ -42,42 +50,9 @@ void _process_RC35StatusMessage(uint8_t * data, uint8_t length);
 // Easy
 void _process_EasyStatusMessage(uint8_t * data, uint8_t length);
 
-// EMS types for known Buderus devices
-// Note: This is still incomplete
-const _Model_Type Model_Types[] = {
-
-    // me
-    {EMS_MODEL_SERVICEKEY, 999, 0x0B, "Service Key"},
-
-    // various boilers and buderus type devices
-    {EMS_MODEL_UBA, 123, 0x08, "MC10/UBA3 Boiler"},      // verified
-    {EMS_MODEL_BK15, 64, 0x08, "Sieger BK15 Boiler"},    // verified
-    {EMS_MODEL_BC10, 190, 0x09, "BC10 Base Controller"}, // verified
-    {EMS_MODEL_MM10, 125, 0x21, "MM10 Mixer Module"},    // warning, fake product id!
-    {EMS_MODEL_WM10, 126, 0x11, "WM10 Switch Module"},   // warning, fake product id!
-
-    // controllers and thermostats
-    {EMS_MODEL_ES73, 76, 0x10, "Sieger ES73"},
-    {EMS_MODEL_RC20, 77, 0x17, "RC20 (Nefit Moduline 300)"},
-    {EMS_MODEL_RC30, 78, 0x10, "RC30 (Nefit Moduline 400)"},
-    {EMS_MODEL_RC35, 86, 0x10, "RC35 (or compatible"},
-    {EMS_MODEL_EASY, 202, 0x18, "TC100 (Nefit Easy/CT100)"}
-
-};
-
 /* 
- * Known thermostat types and their abilities
+ * Recognized EMS types and the functions they call to process the telegrams
  */
-const _Thermostat_Type Thermostat_Types[] = {
-
-    {EMS_MODEL_RC20, EMS_THERMOSTAT_READ_YES, EMS_THERMOSTAT_WRITE_YES},
-    {EMS_MODEL_RC30, EMS_THERMOSTAT_READ_YES, EMS_THERMOSTAT_WRITE_YES},
-    {EMS_MODEL_RC35, EMS_THERMOSTAT_READ_YES, EMS_THERMOSTAT_WRITE_YES},
-    {EMS_MODEL_EASY, EMS_THERMOSTAT_READ_YES, EMS_THERMOSTAT_WRITE_NO},
-    {EMS_MODEL_ES73, EMS_THERMOSTAT_READ_YES, EMS_THERMOSTAT_WRITE_YES}
-
-};
-
 const _EMS_Type EMS_Types[] = {
 
     // common
@@ -93,12 +68,18 @@ const _EMS_Type EMS_Types[] = {
     {EMS_MODEL_UBA, EMS_TYPE_UBAParametersMessage, "UBAParametersMessage", NULL},
     {EMS_MODEL_UBA, EMS_TYPE_UBAMaintenanceStatusMessage, "UBAMaintenanceStatusMessage", NULL},
 
-    // RC20
+    // RC20 and RC20F
     {EMS_MODEL_RC20, EMS_TYPE_RCOutdoorTempMessage, "RCOutdoorTempMessage", _process_RCOutdoorTempMessage},
     {EMS_MODEL_RC20, EMS_TYPE_RCTime, "RCTime", _process_RCTime},
     {EMS_MODEL_RC20, EMS_TYPE_RC20Set, "RC20Set", _process_RC20Set},
     {EMS_MODEL_RC20, EMS_TYPE_RC20StatusMessage, "RC20StatusMessage", _process_RC20StatusMessage},
     {EMS_MODEL_RC20, EMS_TYPE_UBASetPoints, "UBASetPoints", _process_SetPoints},
+
+    {EMS_MODEL_RC20F, EMS_TYPE_RCOutdoorTempMessage, "RCOutdoorTempMessage", _process_RCOutdoorTempMessage},
+    {EMS_MODEL_RC20F, EMS_TYPE_RCTime, "RCTime", _process_RCTime},
+    {EMS_MODEL_RC20F, EMS_TYPE_RC20Set, "RC20Set", _process_RC20Set},
+    {EMS_MODEL_RC20F, EMS_TYPE_RC20StatusMessage, "RC20StatusMessage", _process_RC20StatusMessage},
+    {EMS_MODEL_RC20F, EMS_TYPE_UBASetPoints, "UBASetPoints", _process_SetPoints},
 
     // RC30
     {EMS_MODEL_RC30, EMS_TYPE_RCOutdoorTempMessage, "RCOutdoorTempMessage", _process_RCOutdoorTempMessage},
@@ -124,7 +105,6 @@ const _EMS_Type EMS_Types[] = {
     // Easy
     {EMS_MODEL_EASY, EMS_TYPE_EasyStatusMessage, "EasyStatusMessage", _process_EasyStatusMessage},
     {EMS_MODEL_EASY, EMS_TYPE_UBASetPoints, "UBASetPoints", _process_SetPoints}
-
 
 };
 
@@ -163,7 +143,7 @@ uint8_t _last_TxTelgramCRC; // CRC of last Tx sent, for checking duplicates
 
 // init stats and counters and buffers
 // uses -255 or 255 for values that haven't been set yet (EMS_VALUE_INT_NOTSET and EMS_VALUE_FLOAT_NOTSET)
-void ems_init(_EMS_MODEL_ID boiler_modelid, _EMS_MODEL_ID thermostat_modelid) {
+void ems_init(uint8_t boiler_modelid, uint8_t thermostat_modelid) {
     // overall status
     EMS_Sys_Status.emsRxPgks       = 0;
     EMS_Sys_Status.emsTxPkgs       = 0;
@@ -816,7 +796,7 @@ void _processType(uint8_t * telegram, uint8_t length) {
                     // there is a match, so write must have been successful
                     EMS_TxQueue.shift(); // remove validate from queue
                     if (EMS_Sys_Status.emsLogging >= EMS_SYS_LOGGING_BASIC) {
-                        myDebug("Write to 0x%02X successful.", EMS_TxTelegram.dest);
+                        myDebug("Write to 0x%02X was successful", EMS_TxTelegram.dest);
                     }
                     ems_doReadCommand(EMS_TxTelegram.comparisonPostRead,
                                       EMS_TxTelegram.dest,
@@ -1102,7 +1082,7 @@ void _process_Version(uint8_t * data, uint8_t length) {
             ems_getThermostatValues(); // get Thermostat values (if supported)
         }
     } else {
-        // otherwise assume its a boiler
+        // otherwise assume its a boiler or some other EMS device
         if (EMS_Sys_Status.emsLogging >= EMS_SYS_LOGGING_BASIC) {
             myDebug("Boiler recognized. Model %s with TypeID 0x%02X, Product ID %d, Version %s",
                     Model_Types[i].model_string,
@@ -1125,7 +1105,7 @@ void _process_Version(uint8_t * data, uint8_t length) {
  * Given a MODEL_ID, look up its data and set either a Thermostat or Boiler
  * return false if not found or no need to set
  */
-bool _ems_setModel(_EMS_MODEL_ID model_id) {
+bool _ems_setModel(uint8_t model_id) {
     if (model_id == EMS_MODEL_NONE) {
         return false; // invalid model_id
     }
@@ -1301,8 +1281,8 @@ void ems_getThermostatValues() {
         return;
     }
 
-    _EMS_MODEL_ID model_id = EMS_Thermostat.model_id;
-    uint8_t       type     = EMS_Thermostat.type_id;
+    uint8_t model_id = EMS_Thermostat.model_id;
+    uint8_t type     = EMS_Thermostat.type_id;
 
     if (model_id == EMS_MODEL_RC20) {
         ems_doReadCommand(EMS_TYPE_RC20StatusMessage, type); // to get the setpoint temp
@@ -1332,7 +1312,7 @@ void ems_getBoilerValues() {
 
 
 // return pointer to Model details
-int _ems_findModel(_EMS_MODEL_ID model_id) {
+int _ems_findModel(uint8_t model_id) {
     uint8_t i     = 0;
     bool    found = false;
 
@@ -1351,7 +1331,7 @@ int _ems_findModel(_EMS_MODEL_ID model_id) {
     return i;
 }
 
-char * _ems_buildModelString(char * buffer, uint8_t size, _EMS_MODEL_ID model_id) {
+char * _ems_buildModelString(char * buffer, uint8_t size, uint8_t model_id) {
     int i = _ems_findModel(model_id);
     if (i != -1) {
         char tmp[6] = {0};
@@ -1394,12 +1374,12 @@ char * ems_getBoilerType(char * buffer) {
 }
 
 // returns the model type for a thermostat
-_EMS_MODEL_ID ems_getThermostatModel() {
+uint8_t ems_getThermostatModel() {
     return (EMS_Thermostat.model_id);
 }
 
 // returns the model type for a boiler
-_EMS_MODEL_ID ems_getBoilerModel() {
+uint8_t ems_getBoilerModel() {
     return (EMS_Boiler.model_id);
 }
 
@@ -1407,7 +1387,11 @@ _EMS_MODEL_ID ems_getBoilerModel() {
  * Find the versions of our connected devices
  */
 void ems_scanDevices() {
-    myDebug("Scanning EMS bus for devices. This may take a few seconds.");
+    if (!ems_getBusConnected()) {
+        return;
+    }
+
+    myDebug("Scanning EMS bus for devices. This may take a few seconds...");
 
     // copy over the IDs from Model-type to a list
     std::list<uint8_t> Device_Ids;
@@ -1430,7 +1414,7 @@ void ems_scanDevices() {
  * Print out all handled types
  */
 void ems_printAllTypes() {
-    myDebug("These %d telegram TypeIDs are recognized currently:", _EMS_Types_max);
+    myDebug("These %d telegram TypeIDs are recognized:", _EMS_Types_max);
     uint8_t i;
 
     for (i = 0; i < _EMS_Types_max; i++) {
@@ -1444,7 +1428,7 @@ void ems_printAllTypes() {
         }
     }
 
-    myDebug("\nThese %d thermostats are natively supported:", _Thermostat_Types_max);
+    myDebug("\nThese %d thermostats models are supported:", _Thermostat_Types_max);
     for (i = 0; i < _Thermostat_Types_max; i++) {
         // find the model's details
         for (int j = 0; j < _Model_Types_max; j++) {
@@ -1503,6 +1487,7 @@ void ems_doReadCommand(uint8_t type, uint8_t dest, bool forceRefresh) {
 
 /**
  * Send a raw telegram to the bus
+ * telegram is a string of hex values
  */
 void ems_sendRawTelegram(char * telegram) {
     uint8_t count = 0;
@@ -1558,8 +1543,8 @@ void ems_setThermostatTemp(float temperature) {
     _EMS_TxTelegram EMS_TxTelegram = EMS_TX_TELEGRAM_NEW; // create new Tx
     EMS_TxTelegram.timestamp       = millis();            // set timestamp
 
-    _EMS_MODEL_ID model_id = EMS_Thermostat.model_id;
-    uint8_t       type     = EMS_Thermostat.type_id;
+    uint8_t model_id = EMS_Thermostat.model_id;
+    uint8_t type     = EMS_Thermostat.type_id;
 
     EMS_TxTelegram.action = EMS_TX_TELEGRAM_WRITE;
     EMS_TxTelegram.dest   = type;
@@ -1606,8 +1591,8 @@ void ems_setThermostatMode(uint8_t mode) {
         return;
     }
 
-    _EMS_MODEL_ID model_id = EMS_Thermostat.model_id;
-    uint8_t       type     = EMS_Thermostat.type_id;
+    uint8_t model_id = EMS_Thermostat.model_id;
+    uint8_t type     = EMS_Thermostat.type_id;
 
     myDebug("Setting thermostat mode to %d", mode);
 
@@ -1755,34 +1740,4 @@ void ems_setWarmTapWaterActivated(bool activated) {
     }
 
     EMS_TxQueue.push(EMS_TxTelegram); // add to queue
-}
-
-/**
- * experimental code for debugging - not in production
- */
-void ems_setExperimental(uint8_t value) {
-    /*
-    _EMS_TxTelegram EMS_TxTelegram = EMS_TX_TELEGRAM_NEW; // create new Tx
-    EMS_TxTelegram.timestamp       = millis();            // set timestamp
-
-    EMS_TxTelegram.action        = EMS_TX_TELEGRAM_READ; // read command
-    EMS_TxTelegram.dest          = EMS_Thermostat.type;    // set 8th bit to indicate a read
-    EMS_TxTelegram.offset        = 0;                    // 0 for all data
-    EMS_TxTelegram.length        = 8;
-    EMS_TxTelegram.type          = 0xF0;
-    EMS_TxTelegram.type_validate = EMS_ID_NONE;
-
-    // EMS Plus test
-    // Sending read to 0x18: telegram: 0B 98 F0 00 01 B9 63 DB (len 8)
-    EMS_TxTelegram.data[0] = EMS_ID_ME;             // src
-    EMS_TxTelegram.data[1] = EMS_TxTelegram.dest;   // dest
-    EMS_TxTelegram.data[2] = 0xF0;                  // marker
-    EMS_TxTelegram.data[3] = EMS_TxTelegram.offset; // offset
-    EMS_TxTelegram.data[4] = 0x01;                  // hi byte
-    EMS_TxTelegram.data[5] = 0xB9;                  // low byte
-
-    EMS_TxTelegram.data[6] = 99; // max length
-
-    EMS_TxQueue.push(EMS_TxTelegram);
-    */
 }

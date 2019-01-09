@@ -1,13 +1,13 @@
-# EMS-ESP-Boiler
+# EMS-ESP
 
-EMS-ESP-Boiler is a project to build a controller circuit running with an ESP8266 to communicate with EMS (Energy Management System) based Boilers and Thermostats from the Bosch range and compatibles such as Buderus, Nefit, Junkers etc.
+EMS-ESP is a project to build a controller circuit running with an ESP8266 to communicate with EMS (Energy Management System) based Boilers and Thermostats from the Bosch range and compatibles such as Buderus, Nefit, Junkers etc.
 
 There are 3 parts to this project, first the design of the circuit, second the code for the ESP8266 microcontroller firmware and lastly an example configuration for Home Assistant to monitor the data and issue direct commands via MQTT.
 
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/b8880625bdf841d4adb2829732030887)](https://app.codacy.com/app/proddy/EMS-ESP-Boiler?utm_source=github.com&utm_medium=referral&utm_content=proddy/EMS-ESP-Boiler&utm_campaign=Badge_Grade_Settings)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/b8880625bdf841d4adb2829732030887)](https://app.codacy.com/app/proddy/EMS-ESP?utm_source=github.com&utm_medium=referral&utm_content=proddy/EMS-ESP&utm_campaign=Badge_Grade_Settings)
 [![version](https://img.shields.io/badge/version-1.2.3-brightgreen.svg)](CHANGELOG.md)
 
-- [EMS-ESP-Boiler](#ems-esp-boiler)
+- [EMS-ESP](#ems-esp)
   - [Introduction](#introduction)
   - [Supported Boilers Types](#supported-boilers-types)
   - [Supported ESP8266 devices](#supported-esp8266-devices)
@@ -22,11 +22,7 @@ There are 3 parts to this project, first the design of the circuit, second the c
     - [EMS Reading and Writing](#ems-reading-and-writing)
   - [The ESP8266 Source Code](#the-esp8266-source-code)
     - [Supported EMS Types](#supported-ems-types)
-    - [Supported Thermostats](#supported-thermostats)
-      - [RC20 (Moduline 300)](#rc20-moduline-300)
-      - [RC30 (Moduline 400)](#rc30-moduline-400)
-      - [RC35](#rc35)
-      - [TC100/TC200 (Nefit Easy)](#tc100tc200-nefit-easy)
+    - [Which thermostats are supported?](#which-thermostats-are-supported)
     - [Customizing The Code](#customizing-the-code)
     - [Using MQTT](#using-mqtt)
     - [The Basic Shower Logic](#the-basic-shower-logic)
@@ -34,6 +30,7 @@ There are 3 parts to this project, first the design of the circuit, second the c
   - [Building The Firmware](#building-the-firmware)
     - [Using PlatformIO Standalone](#using-platformio-standalone)
     - [Building Using Arduino IDE](#building-using-arduino-ide)
+  - [Using the Pre-built Firmware](#using-the-pre-built-firmware)
   - [Troubleshooting](#troubleshooting)
   - [Known Issues](#known-issues)
   - [Wish List](#wish-list)
@@ -48,7 +45,7 @@ Firstly, some acknowledgments and kudos to the following people who have open-so
 
  **susisstrolch** - Probably the first working version of the EMS bridge circuit I found designed for the ESP8266. I borrowed Juergen's [schematic](https://github.com/susisstrolch/EMS-ESP12) and parts of his code logic for reading telegrams.
 
- **bbqkees** - Kees built a working [circuit](https://github.com/bbqkees/Nefit-Buderus-EMS-bus-Arduino-Domoticz) and some sample Arduino code to read from the EMS and push messages to Domoticz. His SMD board is also now available for purchase.
+ **bbqkees** - Kees built a working [circuit](https://shop.hotgoodies.nl/ems/) and some sample Arduino code to read from the EMS and push messages to Domoticz. His SMD board is also available for purchase.
 
  **EMS Wiki** - A comprehensive [reference](https://emswiki.thefischer.net/doku.php?id=wiki:ems:telegramme) (in German) for the EMS bus which is a little outdated, not 100% accurate and unfortunately no longer maintained.
 
@@ -62,7 +59,7 @@ I've tested the code and circuit with a few ESP8266 development boards such as t
 
 ## Getting Started
 
-1. Either build the circuit below or purchase a ready built board from bbqkees via his [GitHub](https://github.com/bbqkees/Nefit-Buderus-EMS-bus-Arduino-Domoticz) page or the [Domoticz forum](http://www.domoticz.com/forum/viewtopic.php?f=22&t=22079&start=20).
+1. Either build the circuit described below or purchase a ready built board from bbqkees via [website](https://shop.hotgoodies.nl/ems/).
 2. Get an ESP8266 dev board and connect the 2 EMS output lines from the boiler to the circuit and the Rx and Tx out to ESP pins D7 and D8 respectively. The EMS connection can either be the 12-15V AC direct from the thermostat bus line or from the 3.5" Service Jack at the front.
 3. Optionally connect an external LED or decide to use the onboard ESP8266 LED. This will flash when there is an error on the EMS bus line or stay solid when it's connected.
 4. Modify `my_custom.h`
@@ -133,7 +130,7 @@ The EMS circuit will work with both 3.3V and 5V. It's easiest though to power di
 
 | With Power Circuit                              |
 | ------------------------------------------ |
-| ![Power circuit](doc/schematics/Schematic_EMS-ESP-Boiler-supercap.png) |
+| ![Power circuit](doc/schematics/Schematic_EMS-ESP-supercap.png) |
 
 ## How The EMS Bus Works
 
@@ -211,9 +208,11 @@ The code is built on the Arduino framework and is dependent on these external li
 
 `ems.cpp` is the logic to read the EMS packets (telegrams), validates them and process them based on the type.
 
-`boiler.ino` is the Arduino code for the ESP8266 that kicks it all off. This is where we have specific logic such as the code to monitor and alert on the Shower timer and light up the LEDs. LED support is enabled by default and can be switched off at compile time using the -DNO_LED build flag.
+`ems-esp.ino` is the Arduino code for the ESP8266 that kicks it all off. This is where we have specific logic such as the code to monitor and alert on the Shower timer and light up the LEDs. LED support is enabled by default and can be switched off at compile time using the -DNO_LED build flag.
 
 `my_config.h` all the custom settings
+
+`ems_devices.h` has all the configuration for the known EMS devices this supports
 
 `MyESP.cpp` is my custom library to handle WiFi, MQTT, MDNS and Telnet. Uses a modified version of TelnetSpy (https://github.com/yasheena/telnetspy)
 
@@ -232,44 +231,17 @@ The code is built on the Arduino framework and is dependent on these external li
 | Thermostat        | 0x02             | Version                       | reads Version major/minor                |
 | Thermostat        | 0x91, 0x41, 0x0A | Status Message                | read monitor values                      |
 
-In `boiler.ino` you can make calls to automatically request these types in the function *regularUpdates()*.
+In `ems-esp.ino` you can make calls to automatically request these types in the function *regularUpdates()*.
 
-### Supported Thermostats
+### Which thermostats are supported?
 
-I am still working on adding more support to known thermostats.
+I am still working on adding more support to known thermostats. Any contributions here are welcome. Please use to 
 
-Currently known types and collected versions:
+The know types are listed in `ems_devices.h`. Some special notes
 
-Moduline 300          = Type 77   Version 03.03
-Moduline 400          = Type 78   Version 03.03
-Buderus RC35          = Type 86   Version 01.15
-Nefit Easy            = Type 202  Version 02.19 
-Nefit Trendline HRC30 = Type 123  Version 06.01
-BC10                  = Type 123  Version 04.05
-
-#### RC20 (Moduline 300)
-
-Read and write of setpoint temperature and mode are supported.
-
-#### RC30 (Moduline 400)
-
-Read and write of setpoint temperature and mode are supported.
-
-Note I found type's 3F, 49, 53, 5D are identical. So are 4B, 55, 5F and mostly zero's. Types 40, 4A, 54 and 5E are also the same.
-
-#### RC35
-
-An RC35 thermostat can support up to 4 heating circuits each controlled with their own Monitor and Working Mode IDs.
-
-Fetching the thermostats setpoint temperature us by requesting 0x3E and looking at the 3rd byte in the data telegram (data[2]) and dividing by 2.
-
-The mode is on type 0x47 (or 0x3D) and the 8th byte (data[7]). 0=off, 1=on, 2=auto
-
-This is roughly supported but not fully tested.
-
-#### TC100/TC200 (Nefit Easy)
-
-There is limited support for an Nefit Easy TC100/TC200 type thermostat. The current room temperature and setpoint temperature can be read. What I'm still figuring out is how to read the mode and set the temperature values without sending http post commands to their web server.
+- RC20 and RC30 are fully supported
+- RC35 only supports the 1st heating circuit (HC1)
+- TC100/TC200/Easy has only support for reading the temperatures. There seems to be no way to set settngs using EMS bus messages. The device only listens to XMPP requests.
 
 ### Customizing The Code
 
@@ -277,20 +249,17 @@ There is limited support for an Nefit Easy TC100/TC200 type thermostat. The curr
   - set flags for enabled/disabling functionality such as `BOILER_SHOWER_ENABLED` and `BOILER_SHOWER_TIMER`.
   - Set WIFI and MQTT settings, instead of doing this in `platformio.ini`
 - To add new handlers for EMS data types, first create a callback function and add to the `EMS_Types` array at the top of the file `ems.cpp` and modify `ems.h`
+- To add new devices modify `ems_devices.h` 
 
 ### Using MQTT
 
-When the ESP8266 boots it will send a start signal via MQTT. This is picked up by Home Assistant and sends a notification informing me that the device has booted. Useful for knowing when the ESP gets reset.
-
-I run Mosquitto on my Raspberry PI 3 as the MQTT broker.
-
-The boiler data is collected and sent as a single JSON object to MQTT TOPIC `home/boiler/boiler_data`. A hash is generated (CRC32 based) to determine if the payload has changed, otherwise don't send it. An example payload looks roughly like:
+The boiler data is collected and sent as a single JSON object to MQTT TOPIC `home/ems-esp/boiler_data`. A hash is generated (CRC32 based) to determine if the payload has changed, otherwise don't send it. An example payload looks roughly like:
 
 `{"wWCurTmp":"43.0","wWHeat":"on","curFlowTemp":"51.7","retTemp":"48.0","burnGas":"off","heatPmp":"off","fanWork":"off","ignWork":"off","wWCirc":"off","selBurnPow":"0","curBurnPow":"0","sysPress":"1.6","boilTemp":"54.7","pumpMod":"4"}`
 
-Similarly the thermostat values are sent as a json package under a topic named `home/boiler/thermostat_data` with the current mode, room temperature and set temperature.
+Similarly the thermostat values are sent as a json package under a topic named `home/ems-esp/thermostat_data` with the current mode, room temperature and set temperature.
 
-These topics can be configured in the `TOPIC_*` defines in `boiler.ino`. Make sure you change the HA configuration too to match.
+the `home` is the MQTT topic prefix and can be customized in my_config.h
 
 ### The Basic Shower Logic
 
@@ -333,11 +302,11 @@ You can find the .yaml configuration files under `doc/ha`. See also https://comm
 % sudo platformio upgrade
 % platformio platform update
 
-% git clone https://github.com/proddy/EMS-ESP-Boiler.git
-% cd EMS-ESP-Boiler
+% git clone https://github.com/proddy/EMS-ESP.git
+% cd EMS-ESP
 % cp platformio.ini-example platformio.ini
 ```
-- edit `platformio.ini` to set `env_default` and the flags like `WIFI_SSID WIFI_PASSWORD, MQTT_IP, MQTT_USER, MQTT_PASS`. If you're not using MQTT leave MQTT_IP empty (`MQTT_IP=""`)
+- edit `platformio.ini` to set `env_default` to your board type
 ```c
 % platformio run -t upload
 ```
@@ -350,18 +319,19 @@ Porting to the Arduino IDE can be a little tricky but it is possible.
 - Go to Boards Manager and install ESP8266 2.4.x platform
 - Select your ESP8266 from Tools->Boards and the correct port with Tools->Port
 - From the Library Manager install the needed libraries from platformio.ini
-- The Arduino IDE doesn't have a common way to set build flags (ugh!) so you'll need to un-comment these lines in `boiler.ino`:
-
-```c
-#define WIFI_SSID "<my_ssid>"
-#define WIFI_PASSWORD "<my_password>"
-#define MQTT_IP "<broker_ip>"
-#define MQTT_USER "<broker_username>"
-#define MQTT_PASS "<broker_password>"
-```
-
-- Put all the files in a single sketch folder (`ESPHelper.*, boiler.ino, ems.*, emsuart.*`)
+- Put all the files in a single sketch folder
 - cross your fingers and hit CTRL-R to compile...
+
+## Using the Pre-built Firmware
+
+pre-baked firmwares for some ESP8266 devices are available in the directory `/firmware` which you can upload yourself using [esptool](https://github.com/espressif/esptool) bootloader. On Windows, follow these instructions:
+
+1. Check if you have **python 2.7** installed. If not [download it](https://www.python.org/downloads/) and make sure you select the option to add Python to the windows PATH
+2. Install the ESPTool by running `pip install esptool` from a command prompt
+3. Connect the ESP via USB, figure out the COM port
+4. run `esptool.py -p <com> write_flash 0x00000 <firmware>` where firmware is the `.bin` file and \<com\> is the COM port, e.g. `COM3`
+
+The ESP8266 will start in Access Point (AP) mode, so connect via WiFi to the SSID **EMS-ESP** and telnet to 192.168.4.1. Then use the set command to configure your own network settings.
 
 ## Troubleshooting
 
@@ -384,6 +354,8 @@ Some annoying issues that need fixing:
   - https://github.com/robertklep/nefit-easy-core
 - Store custom params like wifi credentials, mqtt, thermostat type on ESP8266 using SPIFFS
 - Add support for a temperature sensor on the circuit (DS18B20)
+- Improve detection of Heating Off without checking for selFlowTemp (selected flow temperature)
+- Split MQTT into smaller chunks. Now the messages can be up to 600 bytes which may cause issues.
 
 ## Your Comments and Feedback
 

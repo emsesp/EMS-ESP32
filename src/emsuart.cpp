@@ -2,7 +2,7 @@
  * emsuart.cpp
  *
  * The low level UART code for ESP8266 to read and write to the EMS bus via uart
- * Paul Derbyshire - https://github.com/proddy/EMS-ESP-Boiler
+ * Paul Derbyshire - https://github.com/proddy/EMS-ESP
  */
 
 #include "emsuart.h"

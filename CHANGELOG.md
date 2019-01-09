@@ -1,16 +1,37 @@
-# EMS-ESP-Boiler Changelog
+# EMS-ESP Changelog
 
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] 2019-01-09
+
+### Changed
+
+- Renamed project from EMS-ESP-Boiler to EMS-ESP since it's kinda EMS generic now
+- Support for RC20F and RFM20 (https://github.com/proddy/EMS-ESP/issues/18)
+- Moved all EMS device information into a separate file `ems_devices.h` so no longer need to touch `ems.h`
+- Telnet commands can be strings now and output is suspended when typing
+
+### Removed
+
+- Removed SHOWER_TEST
+- Removed WIFI and MQTT credentials from the platformio.ini file
+
+### Added
+
+- Settings are saved and loaded from the ESP8266's file system (SPIFFS). Can be set using the 'set' command
+- Improved support when in Access Point mode (192.168.4.1)
+- pre-built firmwares are back
+
 ## [1.2.4] 2019-01-04
 
 ### Changed
 
-- Scanning known EMS Devices now ignores duplicates (https://github.com/proddy/EMS-ESP-Boiler/pull/30)
+- Scanning known EMS Devices now ignores duplicates (https://github.com/proddy/EMS-ESP/pull/30)
 - ServiceCode stored as a two byte char
+- Support for RC20F and RFM20 (https://github.com/proddy/EMS-ESP/issues/18)
 
 ## [1.2.3] 2019-01-03
 
@@ -18,23 +39,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Can now hardcode Boiler and Thermostat types in my_config.h to bypass auto-detection
 - Fixed MQTT subscribing to Heating and Hot Water active topics
-- Fixed for listening to incoming MQTT topics (https://github.com/proddy/EMS-ESP-Boiler/issues/27)
-- Fixed handling of current temperature on an RC35-type thermostat that doesn't have a sensor (https://github.com/proddy/EMS-ESP-Boiler/issues/18)
+- Fixed for listening to incoming MQTT topics (https://github.com/proddy/EMS-ESP/issues/27)
+- Fixed handling of current temperature on an RC35-type thermostat that doesn't have a sensor (https://github.com/proddy/EMS-ESP/issues/18)
 
 ## [1.2.2] 2019-01-02
 
 ### Fixed
 
-- Issues in 1.2.1 (see https://github.com/proddy/EMS-ESP-Boiler/issues/25)
+- Issues in 1.2.1 (see https://github.com/proddy/EMS-ESP/issues/25)
 - Logic for determining if there is activity on the EMS bus and using the onboard LEDs properly
 
 ## [1.2.1] 2019-01-02
 
 ### Fixed
 
-- Only process broadcast messages if the offset (byte 4) is 0. (https://github.com/proddy/EMS-ESP-Boiler/issues/23)
+- Only process broadcast messages if the offset (byte 4) is 0. (https://github.com/proddy/EMS-ESP/issues/23)
 - Improved checking for duplicate sent Tx telegrams by comparing CRCs
-- Removed distiquishing between noise on the line and corrupt telegrams (https://github.com/proddy/EMS-ESP-Boiler/issues/24)
+- Removed distiquishing between noise on the line and corrupt telegrams (https://github.com/proddy/EMS-ESP/issues/24)
 
 ## [1.2.0] 2019-01-01
 
@@ -54,7 +75,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fetch UBATotalUptimeMessage from Boiler to get total working minutes
 - Added check to see if bus is connected. Shown in stats page
 - If no Wifi connection can be made, start up as a WiFi Access Point (AP)
-- Report out service codes and water-flow [pull-request](https://github.com/proddy/EMS-ESP-Boiler/pull/20/files). Thanks @Bonusbartus
+- Report out service codes and water-flow [pull-request](https://github.com/proddy/EMS-ESP/pull/20/files). Thanks @Bonusbartus
 
 ### Changed
 
@@ -83,16 +104,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fixed handling of negative floating point values (like outdoor temp)
 - Fixed handling of auto & manual mode on an RC30
-- [Fixed condition where all telegram types were processed, instead of only broadcasts or our own reads](https://github.com/proddy/EMS-ESP-Boiler/issues/15)
+- [Fixed condition where all telegram types were processed, instead of only broadcasts or our own reads](https://github.com/proddy/EMS-ESP/issues/15)
 
 ### Added
 
 - Created this CHANGELOG.md file!
-- [Added support for the Nefit Easy thermostat, reading of temperature values only](https://github.com/proddy/EMS-ESP-Boiler/issues/9) - note *read only* (big thanks @**kroon040** for lending me an Easy device) 
-- [Added support for RC35/Moduline 400](https://github.com/proddy/EMS-ESP-Boiler/issues/14) - *read only*
-- [New raw logging mode for logging](https://github.com/proddy/EMS-ESP-Boiler/issues/11)
-- [New 'r'command to send raw data to EMS](https://github.com/proddy/EMS-ESP-Boiler/issues/11)
-- [Added MQTT messages for hot water on and heating on](https://github.com/proddy/EMS-ESP-Boiler/issues/10)
+- [Added support for the Nefit Easy thermostat, reading of temperature values only](https://github.com/proddy/EMS-ESP/issues/9) - note *read only* (big thanks @**kroon040** for lending me an Easy device) 
+- [Added support for RC35/Moduline 400](https://github.com/proddy/EMS-ESP/issues/14) - *read only*
+- [New raw logging mode for logging](https://github.com/proddy/EMS-ESP/issues/11)
+- [New 'r'command to send raw data to EMS](https://github.com/proddy/EMS-ESP/issues/11)
+- [Added MQTT messages for hot water on and heating on](https://github.com/proddy/EMS-ESP/issues/10)
 - Implemented FIFO circular buffer queue for up to 20 Tx messages (Q command to show queue)
 - Toggle Tx transmission via telnet (use 'X' command)
 - Show thermostat type in help stats (use 's' command)

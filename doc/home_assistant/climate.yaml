@@ -5,12 +5,12 @@
      - manual
      - auto
 
-   mode_state_topic: "home/boiler/thermostat_data"
-   current_temperature_topic: "home/boiler/thermostat_data"
-   temperature_state_topic: "home/boiler/thermostat_data"
+   mode_state_topic: "home/ems-esp/thermostat_data"
+   current_temperature_topic: "home/ems-esp/thermostat_data"
+   temperature_state_topic: "home/ems-esp/thermostat_data"
 
-   temperature_command_topic: "home/boiler/thermostat_cmd_temp"
-   mode_command_topic: "home/boiler/thermostat_cmd_mode"
+   temperature_command_topic: "home/ems-esp/thermostat_cmd_temp"
+   mode_command_topic: "home/ems-esp/thermostat_cmd_mode"
 
    mode_state_template: "{{ value_json.thermostat_mode }}"
    current_temperature_template: "{{ value_json.thermostat_currtemp }}"

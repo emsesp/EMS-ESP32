@@ -1,25 +1,15 @@
 /*
- * Header file for EMS.cpp
+ * Header file for ems.cpp
  *
  */
 
 #pragma once
 
-#include "emsuart.h"
-#include "my_config.h" // include custom configuration settings
 #include <Arduino.h>
-#include <CircularBuffer.h> // https://github.com/rlogiacco/CircularBuffer
-#include <MyESP.h>
-
-#include <list>
-#include <vector>
 
 // EMS IDs
 #define EMS_ID_NONE 0x00 // Fixed - used as a dest in broadcast messages and empty type IDs
-#define EMS_ID_ME 0x0B   // Fixed - our device, hardcoded as "Service Key"
-
-//#define EMS_ID_THERMOSTAT 0xFF // Fixed - to recognize a Thermostat
-//#define EMS_ID_BOILER 0x08     // Fixed - also known as MC10.
+#define EMS_ID_ME 0x0B   // Fixed - our device, hardcoded as the "Service Key"
 
 #define EMS_MIN_TELEGRAM_LENGTH 6 // minimal length for a validation telegram, including CRC
 
@@ -27,69 +17,8 @@
 // This can differs per firmware version and typically 32 is the max
 #define EMS_MAX_TELEGRAM_LENGTH 99
 
-// define here the EMS telegram types you need
-
 // Common for all EMS devices
 #define EMS_TYPE_Version 0x02 // version of the UBA controller (boiler)
-
-/* 
- * Boiler...
- */
-#define EMS_TYPE_UBAMonitorFast 0x18              // is an automatic monitor broadcast
-#define EMS_TYPE_UBAMonitorSlow 0x19              // is an automatic monitor broadcast
-#define EMS_TYPE_UBAMonitorWWMessage 0x34         // is an automatic monitor broadcast
-#define EMS_TYPE_UBAMaintenanceStatusMessage 0x1C // is an automatic monitor broadcast
-#define EMS_TYPE_UBAParameterWW 0x33
-#define EMS_TYPE_UBATotalUptimeMessage 0x14
-#define EMS_TYPE_UBAMaintenanceSettingsMessage 0x15
-#define EMS_TYPE_UBAParametersMessage 0x16
-#define EMS_TYPE_UBASetPoints 0x1A
-#define EMS_TYPE_UBAFunctionTest 0x1D
-
-#define EMS_OFFSET_UBAParameterWW_wwtemp 2              // WW Temperature
-#define EMS_OFFSET_UBAParameterWW_wwactivated 1         // WW Activated
-#define EMS_OFFSET_UBAParameterWW_wwComfort 9           // WW is in comfort or eco mode
-#define EMS_VALUE_UBAParameterWW_wwComfort_Comfort 0x00 // the value for comfort
-#define EMS_VALUE_UBAParameterWW_wwComfort_Eco 0xD8     // the value for eco
-
-/* 
- * Thermostat...
- */
-
-// Common for all thermostats
-#define EMS_TYPE_RCTime 0x06               // is an automatic thermostat broadcast
-#define EMS_TYPE_RCOutdoorTempMessage 0xA3 // is an automatic thermostat broadcast, outdoor external temp
-
-// RC20 specific
-#define EMS_TYPE_RC20StatusMessage 0x91       // is an automatic thermostat broadcast giving us temps
-#define EMS_TYPE_RC20Set 0xA8                 // for setting values like temp and mode
-#define EMS_OFFSET_RC20Set_mode 23            // position of thermostat mode
-#define EMS_OFFSET_RC20Set_temp 28            // position of thermostat setpoint temperature
-#define EMS_TYPE_RC20StatusMessage_setpoint 1 // setpoint temp
-#define EMS_TYPE_RC20StatusMessage_curr 2     // current temp
-
-// RC30 specific
-#define EMS_TYPE_RC30StatusMessage 0x41       // is an automatic thermostat broadcast giving us temps
-#define EMS_TYPE_RC30Set 0xA7                 // for setting values like temp and mode
-#define EMS_OFFSET_RC30Set_mode 23            // position of thermostat mode
-#define EMS_OFFSET_RC30Set_temp 28            // position of thermostat setpoint temperature
-#define EMS_TYPE_RC30StatusMessage_setpoint 1 // setpoint temp
-#define EMS_TYPE_RC30StatusMessage_curr 2     // current temp
-
-// RC35 specific
-#define EMS_TYPE_RC35StatusMessage 0x3E       // is an automatic thermostat broadcast giving us temps
-#define EMS_TYPE_RC35StatusMessage_setpoint 2 // desired temp
-#define EMS_TYPE_RC35StatusMessage_curr 3     // current temp
-#define EMS_TYPE_RC35Set 0x3D                 // for setting values like temp and mode (Working mode HC1)
-#define EMS_OFFSET_RC35Set_mode 7             // position of thermostat mode
-#define EMS_OFFSET_RC35Set_temp_day 2         // position of thermostat setpoint temperature for day time
-#define EMS_OFFSET_RC35Set_temp_night 1       // position of thermostat setpoint temperature for night time
-
-// Easy specific
-#define EMS_TYPE_EasyStatusMessage 0x0A        // reading values on an Easy Thermostat
-#define EMS_TYPE_EasyStatusMessage_setpoint 10 // setpoint temp
-#define EMS_TYPE_EasyStatusMessage_curr 8      // current temp
-
 
 // default values
 #define EMS_VALUE_INT_ON 1             // boolean true
@@ -97,6 +26,34 @@
 #define EMS_VALUE_INT_NOTSET 0xFF      // for 8-bit ints
 #define EMS_VALUE_LONG_NOTSET 0xFFFFFF // for 3-byte longs
 #define EMS_VALUE_FLOAT_NOTSET -255    // float unset
+
+#define EMS_THERMOSTAT_READ_YES true
+#define EMS_THERMOSTAT_READ_NO false
+#define EMS_THERMOSTAT_WRITE_YES true
+#define EMS_THERMOSTAT_WRITE_NO false
+
+// ANSI Colors
+#define COLOR_RESET "\x1B[0m"
+#define COLOR_BLACK "\x1B[0;30m"
+#define COLOR_RED "\x1B[0;31m"
+#define COLOR_GREEN "\x1B[0;32m"
+#define COLOR_YELLOW "\x1B[0;33m"
+#define COLOR_BLUE "\x1B[0;34m"
+#define COLOR_MAGENTA "\x1B[0;35m"
+#define COLOR_CYAN "\x1B[0;36m"
+#define COLOR_WHITE "\x1B[0;37m"
+#define COLOR_BOLD_ON "\x1B[1m"
+#define COLOR_BOLD_OFF "\x1B[21m"
+
+// trigger settings to determine if hot tap water or the heating is active
+#define EMS_BOILER_BURNPOWER_TAPWATER 100
+#define EMS_BOILER_SELFLOWTEMP_HEATING 70
+
+//define maximum settable tapwater temperature, not every installation supports 90 degrees
+#define EMS_BOILER_TAPWATER_TEMPERATURE_MAX 60
+
+#define EMS_TX_TELEGRAM_QUEUE_MAX 50 // max size of Tx FIFO queue
+
 
 /* EMS UART transfer status */
 typedef enum {
@@ -160,8 +117,6 @@ typedef struct {
     uint8_t                 data[EMS_MAX_TELEGRAM_LENGTH];
 } _EMS_TxTelegram;
 
-#define EMS_TX_TELEGRAM_QUEUE_MAX 20 // max size of Tx FIFO queue
-
 // default empty Tx
 const _EMS_TxTelegram EMS_TX_TELEGRAM_NEW = {
     EMS_TX_TELEGRAM_INIT, // action
@@ -179,35 +134,11 @@ const _EMS_TxTelegram EMS_TX_TELEGRAM_NEW = {
     {0x00}                // data
 };
 
-// Known Buderus non-Thermostat types
-typedef enum {
-    EMS_MODEL_NONE,
-    EMS_MODEL_ALL, // common for all devices
-
-    // service key
-    EMS_MODEL_SERVICEKEY, // this is us
-
-    // main buderus boiler type devices
-    EMS_MODEL_BK15,
-    EMS_MODEL_UBA,
-    EMS_MODEL_BC10,
-    EMS_MODEL_MM10,
-    EMS_MODEL_WM10,
-
-    // thermostats
-    EMS_MODEL_ES73,
-    EMS_MODEL_RC20,
-    EMS_MODEL_RC30,
-    EMS_MODEL_RC35,
-    EMS_MODEL_EASY
-
-} _EMS_MODEL_ID;
-
 typedef struct {
-    _EMS_MODEL_ID model_id;
-    uint8_t       product_id;
-    uint8_t       type_id;
-    char          model_string[50];
+    uint8_t model_id;
+    uint8_t product_id;
+    uint8_t type_id;
+    char    model_string[50];
 } _Model_Type;
 
 /*
@@ -259,39 +190,34 @@ typedef struct {           // UBAParameterWW
     uint8_t heatingActive;  // Central heating is on/off
 
     // settings
-    char          version[10];
-    uint8_t       type_id;
-    _EMS_MODEL_ID model_id;
+    char    version[10];
+    uint8_t type_id;
+    uint8_t model_id;
 } _EMS_Boiler;
 
 // Definition for thermostat type
 typedef struct {
-    _EMS_MODEL_ID model_id;
-    bool          read_supported;
-    bool          write_supported;
+    uint8_t model_id;
+    bool    read_supported;
+    bool    write_supported;
 } _Thermostat_Type;
-
-#define EMS_THERMOSTAT_READ_YES true
-#define EMS_THERMOSTAT_READ_NO false
-#define EMS_THERMOSTAT_WRITE_YES true
-#define EMS_THERMOSTAT_WRITE_NO false
 
 // Thermostat data
 typedef struct {
-    uint8_t       type_id;  // the type ID of the thermostat
-    _EMS_MODEL_ID model_id; // which Thermostat type
-    bool          read_supported;
-    bool          write_supported;
-    char          version[10];
-    float         setpoint_roomTemp; // current set temp
-    float         curr_roomTemp;     // current room temp
-    uint8_t       mode;              // 0=low, 1=manual, 2=auto
-    uint8_t       hour;
-    uint8_t       minute;
-    uint8_t       second;
-    uint8_t       day;
-    uint8_t       month;
-    uint8_t       year;
+    uint8_t type_id;  // the type ID of the thermostat
+    uint8_t model_id; // which Thermostat type
+    bool    read_supported;
+    bool    write_supported;
+    char    version[10];
+    float   setpoint_roomTemp; // current set temp
+    float   curr_roomTemp;     // current room temp
+    uint8_t mode;              // 0=low, 1=manual, 2=auto
+    uint8_t hour;
+    uint8_t minute;
+    uint8_t second;
+    uint8_t day;
+    uint8_t month;
+    uint8_t year;
 } _EMS_Thermostat;
 
 // call back function signature
@@ -299,28 +225,15 @@ typedef void (*EMS_processType_cb)(uint8_t * data, uint8_t length);
 
 // Definition for each EMS type, including the relative callback function
 typedef struct {
-    _EMS_MODEL_ID      model_id;
+    uint8_t            model_id;
     uint8_t            type;
     const char         typeString[50];
     EMS_processType_cb processType_cb;
 } _EMS_Type;
 
-// ANSI Colors
-#define COLOR_RESET "\x1B[0m"
-#define COLOR_BLACK "\x1B[0;30m"
-#define COLOR_RED "\x1B[0;31m"
-#define COLOR_GREEN "\x1B[0;32m"
-#define COLOR_YELLOW "\x1B[0;33m"
-#define COLOR_BLUE "\x1B[0;34m"
-#define COLOR_MAGENTA "\x1B[0;35m"
-#define COLOR_CYAN "\x1B[0;36m"
-#define COLOR_WHITE "\x1B[0;37m"
-#define COLOR_BOLD_ON "\x1B[1m"
-#define COLOR_BOLD_OFF "\x1B[21m"
-
 // function definitions
 extern void ems_parseTelegram(uint8_t * telegram, uint8_t len);
-void        ems_init(_EMS_MODEL_ID boiler_modelid, _EMS_MODEL_ID thermostat_modelid);
+void        ems_init(uint8_t boiler_modelid, uint8_t thermostat_modelid);
 void        ems_doReadCommand(uint8_t type, uint8_t dest, bool forceRefresh = false);
 void        ems_sendRawTelegram(char * telegram);
 
@@ -329,7 +242,6 @@ void ems_setThermostatMode(uint8_t mode);
 void ems_setWarmWaterTemp(uint8_t temperature);
 void ems_setWarmWaterActivated(bool activated);
 void ems_setWarmTapWaterActivated(bool activated);
-void ems_setExperimental(uint8_t value);
 void ems_setPoll(bool b);
 void ems_setTxEnabled(bool b);
 void ems_setLogging(_EMS_SYS_LOGGING loglevel);
@@ -348,8 +260,8 @@ bool             ems_getBusConnected();
 _EMS_SYS_LOGGING ems_getLogging();
 uint8_t          ems_getEmsTypesCount();
 bool             ems_getEmsRefreshed();
-_EMS_MODEL_ID    ems_getThermostatModel();
-_EMS_MODEL_ID    ems_getBoilerModel();
+uint8_t          ems_getThermostatModel();
+uint8_t          ems_getBoilerModel();
 
 void   ems_scanDevices();
 void   ems_printAllTypes();
@@ -362,10 +274,9 @@ uint8_t _crcCalculator(uint8_t * data, uint8_t len);
 void    _processType(uint8_t * telegram, uint8_t length);
 void    _debugPrintPackage(const char * prefix, uint8_t * data, uint8_t len, const char * color);
 void    _ems_clearTxData();
-int     _ems_findModel(_EMS_MODEL_ID model_id);
-char *  _ems_buildModelString(char * buffer, uint8_t size, _EMS_MODEL_ID model_id);
-bool    _ems_setModel(_EMS_MODEL_ID model_id);
-
+int     _ems_findModel(uint8_t model_id);
+char *  _ems_buildModelString(char * buffer, uint8_t size, uint8_t model_id);
+bool    _ems_setModel(uint8_t model_id);
 
 // global so can referenced in other classes
 extern _EMS_Sys_Status EMS_Sys_Status;

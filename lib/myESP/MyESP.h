@@ -14,8 +14,10 @@
 #include <AsyncMqttClient.h> // https://github.com/marvinroger/async-mqtt-client
 #include <DNSServer.h>
 #include <ESPAsyncTCP.h> // https://github.com/me-no-dev/ESPAsyncTCP
-#include <JustWifi.h>    // https://github.com/xoseperez/justwifi
-#include <TelnetSpy.h>   // modified from https://github.com/yasheena/telnetspy
+#include <FS.h>
+#include <JustWifi.h>  // https://github.com/xoseperez/justwifi
+#include <TelnetSpy.h> // modified from https://github.com/yasheena/telnetspy
+
 
 #if defined(ARDUINO_ARCH_ESP32)
 #include <ESPmDNS.h>
@@ -31,12 +33,12 @@
 #define OTA_PORT 8266 // OTA port
 
 // MQTT
-#define MQTT_BASE "home/"
-#define MQTT_NOTIFICATION MQTT_BASE "notification"
-#define MQTT_TOPIC_COMMAND "command"
-#define MQTT_TOPIC_START "start"
-#define MQTT_TOPIC_START_PAYLOAD "start"
-#define MQTT_HA MQTT_BASE "ha"
+#define MQTT_HA "/home/ha"                       // HA specific
+#define MQTT_HA_NOTIFICATION "home/notification" // HA specific
+#define MQTT_TOPIC_COMMAND "command"             // HA specific
+#define MQTT_TOPIC_START "start"                 // HA specific
+#define MQTT_TOPIC_START_PAYLOAD "start"         // HA specific
+
 #define MQTT_PORT 1883 // MQTT port
 #define MQTT_QOS 1
 #define MQTT_RECONNECT_DELAY_MIN 5000   // Try to reconnect in 5 seconds upon disconnection
@@ -50,6 +52,8 @@
 
 // Telnet
 #define TELNET_MAX_COMMAND_LENGTH 80 // length of a command
+#define TELNET_EVENT_CONNECT 1
+#define TELNET_EVENT_DISCONNECT 0
 #define COLOR_RESET "\x1B[0m"
 #define COLOR_BLACK "\x1B[0;30m"
 #define COLOR_RED "\x1B[0;31m"
@@ -61,11 +65,15 @@
 #define COLOR_WHITE "\x1B[0;37m"
 
 typedef struct {
-    char key[10];
-    char description[400];
+    char key[30];
+    char description[100];
 } command_t;
 
 typedef std::function<void(unsigned int, const char *, const char *)> mqtt_callback_f;
+
+typedef std::function<void(uint8_t, const char *)> telnetcommand_callback_f;
+
+typedef std::function<void(uint8_t)> telnet_callback_f;
 
 // calculates size of an 2d array at compile time
 template <typename T, size_t N>
@@ -81,7 +89,6 @@ class MyESP {
 
     // wifi
     void setWIFICallback(void (*callback)());
-    void setMQTTCallback(mqtt_callback_f callback);
 
     // ha
     void sendHACommand(const char * cmd);
@@ -91,28 +98,22 @@ class MyESP {
     void mqttSubscribe(const char * topic);
     void mqttUnsubscribe(const char * topic);
     void mqttPublish(const char * topic, const char * payload);
+    void setMQTTbase(char * mqttbase);
+    void setMQTTCallback(mqtt_callback_f callback);
 
     // debug & telnet
-    void   myDebug(const char * format, ...);
-    void   myDebug_P(PGM_P format_P, ...);
-    void   consoleSetCallBackProjectCmds(command_t * cmds, uint8_t count, void (*callback)());
-    char * consoleGetLastCommand();
-    void   consoleProcessCommand();
+    void myDebug(const char * format, ...);
+    void myDebug_P(PGM_P format_P, ...);
+    void setTelnetCommands(command_t * cmds, uint8_t count, telnetcommand_callback_f callback);
+    void setTelnetCallback(telnet_callback_f callback);
 
+    // general
     void end();
     void loop();
-    void setup(char * app_hostname,
-               char * app_name,
-               char * app_version,
-               char * wifi_ssid,
-               char * wifi_password,
-               char * mqtt_host,
-               char * mqtt_username,
-               char * mqtt_password);
-
-    char * getBoottime();
-    void   setBoottime(char * boottime);
-    void   resetESP();
+    void begin(char * app_hostname, char * app_name, char * app_version);
+    void setConnection(char * wifi_ssid, char * wifi_password, char * mqtt_host, char * mqtt_username, char * mqtt_password);
+    void setBoottime(char * boottime);
+    void resetESP();
 
   private:
     // mqtt
@@ -128,6 +129,8 @@ class MyESP {
     char *          _mqtt_username;
     char *          _mqtt_password;
     char *          _boottime;
+    bool            _suspendOutput;
+    char *          _mqttbase;
 
     // wifi
     DNSServer dnsServer; // For Access Point (AP) support
@@ -145,19 +148,27 @@ class MyESP {
     void _ota_setup();
 
     // telnet & debug
-    TelnetSpy   SerialAndTelnet;
-    void        _telnetConnected();
-    void        _telnetDisconnected();
-    void        _telnetHandle();
-    void        _telnet_setup();
-    char *      _command;               // the input command from either Serial or Telnet
-    command_t * _helpProjectCmds;       // Help of commands setted by project
-    uint8_t     _helpProjectCmds_count; // # available commands
-    void        _consoleShowHelp();
-    void (*_consoleCallbackProjectCmds)(); // Callable for projects commands
-    void _consoleProcessCommand();
-    bool _isCRLF(char character);
-    bool _suspendMessages;
+    TelnetSpy                SerialAndTelnet;
+    void                     _telnetConnected();
+    void                     _telnetDisconnected();
+    void                     _telnetHandle();
+    void                     _telnetCommand(char * commandLine);
+    char *                   _telnet_readWord();
+    void                     _telnet_setup();
+    char *                   _command;               // the input command from either Serial or Telnet
+    command_t *              _helpProjectCmds;       // Help of commands setted by project
+    uint8_t                  _helpProjectCmds_count; // # available commands
+    void                     _consoleShowHelp();
+    telnetcommand_callback_f _telnetcommand_callback; // Callable for projects commands
+    telnet_callback_f        _telnet_callback;        // callback for connect/disconnect
+    void                     _changeSetting(const char * setting, const char * value);
+
+    // fs
+    void _fs_setup();
+    bool _fs_saveConfig();
+    bool _fs_loadConfig();
+    void _fs_printConfig();
+    void _fs_eraseConfig();
 
     // general
     char * _app_hostname;

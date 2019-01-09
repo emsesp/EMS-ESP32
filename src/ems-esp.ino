@@ -1,13 +1,15 @@
 /*
- * EMS-ESP-Boiler
- * Paul Derbyshire - May 2018 - https://github.com/proddy/EMS-ESP-Boiler
- * https://community.home-assistant.io/t/thermostat-and-boiler-controller-for-ems-based-boilers-nefit-buderus-bosch-using-esp/53382
+ * EMS-ESP
+ * 
+ * Paul Derbyshire - https://github.com/proddy/EMS-ESP
  *
- * See README for Acknowledgments
+ * See ChangeLog.md for history
+ * See README.md for Acknowledgments
  */
 
 // local libraries
 #include "ems.h"
+#include "ems_devices.h"
 #include "emsuart.h"
 #include "my_config.h"
 #include "version.h"
@@ -45,6 +47,8 @@ uint8_t scanThermostat_count = 0;
 
 Ticker showerColdShotStopTimer;
 
+static unsigned long timestamp; // for internal timings, via millis()
+
 // thermostat
 #define TOPIC_THERMOSTAT_DATA "thermostat_data"         // for sending thermostat values
 #define TOPIC_THERMOSTAT_CMD_TEMP "thermostat_cmd_temp" // for received thermostat temp changes
@@ -65,19 +69,11 @@ Ticker showerColdShotStopTimer;
 #define TOPIC_SHOWER_COLDSHOT "shower_coldshot" // used to trigger a coldshot from HA publish
 #define SHOWER_ALARM "shower_alarm"             // for notifying HA that shower time has reached its limit
 
-// shower settings for DEBUGGING only
-#ifdef SHOWER_TEST
-#undef SHOWER_PAUSE_TIME
-#undef SHOWER_MIN_DURATION
-#undef SHOWER_MAX_DURATION
-#undef SHOWER_COLDSHOT_DURATION
-#undef SHOWER_OFFSET_TIME
-const unsigned long SHOWER_PAUSE_TIME        = 15000; // 15 seconds, max time if water is switched off & on during a shower
-const unsigned long SHOWER_MIN_DURATION      = 20000; // 20 secs, before recognizing its a shower
-const unsigned long SHOWER_MAX_DURATION      = 25000; // 25 secs, before trigger a shot of cold water
-const unsigned long SHOWER_COLDSHOT_DURATION = 5;     // in seconds! how long for cold water shot
-const unsigned long SHOWER_OFFSET_TIME       = 0;     // 0 seconds grace time, to calibrate actual time under the shower
-#endif
+// if using the shower timer, change these settings
+#define SHOWER_PAUSE_TIME 15000     // in ms. 15 seconds, max time if water is switched off & on during a shower
+#define SHOWER_MIN_DURATION 120000  // in ms. 2 minutes, before recognizing its a shower
+#define SHOWER_OFFSET_TIME 5000     // in ms. 5 seconds grace time, to calibrate actual time under the shower
+#define SHOWER_COLDSHOT_DURATION 10 // in seconds. 10 seconds for cold water before turning back hot water
 
 typedef struct {
     bool shower_timer; // true if we want to report back on shower times
@@ -94,24 +90,23 @@ typedef struct {
 
 command_t PROGMEM project_cmds[] = {
 
-    {"l [n]", "set logging (0=none, 1=raw, 2=basic, 3=thermostat only, 4=verbose)"},
-    {"s", "show statistics"},
-    {"D", "scan EMS connected Devices"},
-    {"h", "list supported EMS telegram type IDs"},
-    {"M", "publish to MQTT"},
-    {"Q", "print Tx Queue"},
-    {"U [n]", "do a deep scan of all thermostat message types, starting at n"},
-    {"P", "toggle EMS Poll response on/off"},
-    {"X", "toggle EMS Tx transmission on/off"},
-    {"S", "toggle Shower timer on/off"},
-    {"A", "toggle shower Alert on/off"},
-    {"r [s]", "send raw telegram in hex to EMS (s=XX XX XX...)"},
-    {"b [xx]", "send boiler read request (xx=telegram type ID in hex)"},
-    {"t [xx]", "send thermostat read request (xx=telegram type ID in hex)"},
-    {"w [n]", "set boiler warm water temperature (min 30)"},
-    {"a [n]", "set boiler warm tap water (0=off, 1=on)"},
-    {"T [n]", "set thermostat temperature"},
-    {"m [n]", "set thermostat mode (0=low/night, 1=manual/day, 2=auto)"}
+    {"info", "show the values"},
+    {"log <n | b | t | r | v>", "set logging mode to none, basic, thermostat only, raw or verbose"},
+    {"poll", "toggle EMS poll request on/off"},
+    {"tx", "toggle EMX Tx on/off"},
+    {"publish", "publish values to MQTT"},
+    {"types", "list supported EMS telegram type IDs"},
+    {"queue", "print the Tx queue"},
+    {"autodetect", "discover EMS devices and set boiler and thermostat automatically"},
+    {"shower <timer | alert>", "toggle either timer or alert on/off"},
+    {"send XX...", "send raw telegram data in hex to EMS bus"},
+    {"thermostat read <hex type ID>", "send read request to thermostat"},
+    {"thermostat temp <degrees>", "set current thermostat temperature"},
+    {"thermostat mode <mode>", "set mode (0=low/night, 1=manual/day, 2=auto)"},
+    {"thermostat scan <hex type ID>", "do a deep scan of all thermostat message types, starting at n"},
+    {"boiler read <hex type ID>", "send read request to boiler"},
+    {"boiler wwtemp <degrees>", "set warm water temperature"},
+    {"boiler tapwater <on | off>", "set warm tap water on or off"}
 
 };
 
@@ -126,8 +121,6 @@ uint32_t previousThermostatPublishCRC = 0;
 // Times
 const unsigned long POLL_TIMEOUT_ERR = 10000; // if no signal from boiler for last 10 seconds, assume its offline
 const unsigned long TX_HOLD_LED_TIME = 2000;  // how long to hold the Tx LED because its so quick
-
-unsigned long timestamp; // for internal timings, via millis()
 
 uint8_t last_boilerActive = 0xFF; // for remembering last setting of the tap water or heating on/off
 
@@ -269,7 +262,7 @@ void _renderBoolValue(const char * prefix, uint8_t value) {
 void showInfo() {
     // General stats from EMS bus
 
-    myDebug("%sEMS-ESP-Boiler system stats:%s", COLOR_BOLD_ON, COLOR_BOLD_OFF);
+    myDebug("%sEMS-ESP System setstats:%s", COLOR_BOLD_ON, COLOR_BOLD_OFF);
     _EMS_SYS_LOGGING sysLog = ems_getLogging();
     if (sysLog == EMS_SYS_LOGGING_BASIC) {
         myDebug("  System logging set to Basic");
@@ -519,116 +512,203 @@ void publishValues(bool force) {
 // sets the shower timer on/off
 void set_showerTimer() {
     if (ems_getLogging() != EMS_SYS_LOGGING_NONE) {
-        myDebug("Shower timer is %s", Boiler_Status.shower_timer ? "enabled" : "disabled");
+        myDebug("Shower timer has been set to %s", Boiler_Status.shower_timer ? "enabled" : "disabled");
     }
 }
 
 // sets the shower alert on/off
 void set_showerAlert() {
     if (ems_getLogging() != EMS_SYS_LOGGING_NONE) {
-        myDebug("Shower alert is %s", Boiler_Status.shower_alert ? "enabled" : "disabled");
+        myDebug("Shower alert has been set to %s", Boiler_Status.shower_alert ? "enabled" : "disabled");
+    }
+}
+
+// used to read the next string from an input buffer and convert to an 8 bit int
+uint8_t _readIntNumber() {
+    char * numTextPtr = strtok(NULL, ", \n");
+    if (numTextPtr == nullptr) {
+        return 0;
+    }
+    return atoi(numTextPtr);
+}
+
+// used to read the next string from an input buffer as a hex value and convert to an 8 bit int
+uint8_t _readHexNumber() {
+    char * numTextPtr = strtok(NULL, ", \n");
+    if (numTextPtr == nullptr) {
+        return 0;
+    }
+    return (uint8_t)strtol(numTextPtr, 0, 16);
+}
+
+// used to read the next string from an input buffer
+char * _readWord() {
+    char * word = strtok(NULL, ", \n");
+    return word;
+}
+
+// initiate a force scan by sending type read requests from 0 to FF to the thermostat
+// used to analyze repsonses for debugging
+void startThermostatScan(uint8_t start) {
+    ems_setLogging(EMS_SYS_LOGGING_THERMOSTAT);
+    publishValuesTimer.detach();
+    systemCheckTimer.detach();
+    regularUpdatesTimer.detach();
+    scanThermostat_count = start;
+    myDebug("Starting a deep message scan on thermostat");
+    scanThermostat.attach(SCANTHERMOSTAT_TIME, do_scanThermostat);
+}
+
+// call back when a telnet client connects or disconnects
+// we set the logging here
+void TelnetCallback(uint8_t event) {
+    if (event == TELNET_EVENT_CONNECT) {
+        ems_setLogging(EMS_SYS_LOGGING_BASIC);
+    } else if (event == TELNET_EVENT_DISCONNECT) {
+        ems_setLogging(EMS_SYS_LOGGING_NONE);
     }
 }
 
 // extra commands options for telnet debug window
-void myDebugCallback() {
-    char *  cmd = myESP.consoleGetLastCommand();
-    uint8_t len = strlen(cmd);
-    bool    b;
+// wc is the word count, i.e. number of arguments. Everything is in lower case.
+void TelnetCommandCallback(uint8_t wc, const char * commandLine) {
+    bool ok = false;
+    // get first command argument
+    char * first_cmd = strtok((char *)commandLine, ", \n");
 
-    // look for single letter commands
-    if (len == 1) {
-        switch (cmd[0]) {
-        case 's':
-            showInfo();
-            break;
-        case 'P': // toggle Poll
-            b = !ems_getPoll();
-            ems_setPoll(b);
-            break;
-        case 'X': // toggle Tx
-            b = !ems_getTxEnabled();
-            ems_setTxEnabled(b);
-            break;
-        case 'M':
-            publishValues(true);
-            break;
-        case 'h': // show type handlers
-            ems_printAllTypes();
-            break;
-        case 'S': // toggle Shower timer support
-            Boiler_Status.shower_timer = !Boiler_Status.shower_timer;
-            myESP.mqttPublish(TOPIC_SHOWER_TIMER, Boiler_Status.shower_timer ? "1" : "0");
-            break;
-        case 'A': // toggle Shower alert
-            Boiler_Status.shower_alert = !Boiler_Status.shower_alert;
-            myESP.mqttPublish(TOPIC_SHOWER_ALERT, Boiler_Status.shower_alert ? "1" : "0");
-            break;
-        case 'Q': // print Tx Queue
-            ems_printTxQueue();
-            break;
-        case 'D': // Auto detect EMS devices
-            ems_scanDevices();
-            break;
-        default:
-            myDebug("Unknown command. Use ? for help.");
-            break;
+    if (strcmp(first_cmd, "info") == 0) {
+        showInfo();
+        ok = true;
+    }
+
+    if (strcmp(first_cmd, "poll") == 0) {
+        bool b = !ems_getPoll();
+        ems_setPoll(b);
+        ok = true;
+    }
+
+    if (strcmp(first_cmd, "tx") == 0) {
+        bool b = !ems_getTxEnabled();
+        ems_setTxEnabled(b);
+        ok = true;
+    }
+
+    if (strcmp(first_cmd, "publish") == 0) {
+        publishValues(true);
+        ok = true;
+    }
+
+    if (strcmp(first_cmd, "types") == 0) {
+        ems_printAllTypes();
+        ok = true;
+    }
+
+    if (strcmp(first_cmd, "queue") == 0) {
+        ems_printTxQueue();
+        ok = true;
+    }
+
+    if (strcmp(first_cmd, "autodetect") == 0) {
+        ems_scanDevices();
+        ok = true;
+    }
+
+    // shower settings
+    if (strcmp(first_cmd, "shower") == 0) {
+        if (wc == 2) {
+            char * second_cmd = _readWord();
+            if (strcmp(second_cmd, "timer") == 0) {
+                Boiler_Status.shower_timer = !Boiler_Status.shower_timer;
+                myESP.mqttPublish(TOPIC_SHOWER_TIMER, Boiler_Status.shower_timer ? "1" : "0");
+                ok = true;
+            } else if (strcmp(second_cmd, "alert") == 0) {
+                Boiler_Status.shower_alert = !Boiler_Status.shower_alert;
+                myESP.mqttPublish(TOPIC_SHOWER_ALERT, Boiler_Status.shower_alert ? "1" : "0");
+                ok = true;
+            }
         }
-        return;
     }
 
-    // for commands with parameters, assume command is just a single letter followed by a space
-    switch (cmd[0]) {
-    case 'T': // set thermostat temp
-        ems_setThermostatTemp(strtof(&cmd[2], 0));
-        break;
-    case 'm': // set thermostat mode
-        ems_setThermostatMode(cmd[2] - '0');
-        break;
-    case 'w': // set warm water temp
-        ems_setWarmWaterTemp((uint8_t)strtol(&cmd[2], 0, 10));
-        break;
-    case 'l': // logging
-        ems_setLogging((_EMS_SYS_LOGGING)(cmd[2] - '0'));
-        break;
-    case 'a': // set ww activate on or off
-        if ((cmd[2] - '0') == 1)
-            ems_setWarmTapWaterActivated(true);
-        else if ((cmd[2] - '0') == 0)
-            ems_setWarmTapWaterActivated(false);
-        break;
-    case 'b': // boiler read command
-        ems_doReadCommand((uint8_t)strtol(&cmd[2], 0, 16), EMS_Boiler.type_id);
-        break;
-    case 't': // thermostat command
-        ems_doReadCommand((uint8_t)strtol(&cmd[2], 0, 16), EMS_Thermostat.type_id);
-        break;
-    case 'r': // send raw data
-        ems_sendRawTelegram(&cmd[2]);
-        break;
-    case 'x': // experimental, not displayed!
-        myDebug("Calling experimental...");
-        ems_setLogging(EMS_SYS_LOGGING_VERBOSE);
-        ems_setExperimental((uint8_t)strtol(&cmd[2], 0, 16)); // takes HEX param
-        break;
-    case 'U': // thermostat scan
-        ems_setLogging(EMS_SYS_LOGGING_THERMOSTAT);
-        publishValuesTimer.detach();
-        systemCheckTimer.detach();
-        regularUpdatesTimer.detach();
-        scanThermostat_count = (uint8_t)strtol(&cmd[2], 0, 16);
-        myDebug("Starting a deep message scan on thermometer");
-        scanThermostat.attach(SCANTHERMOSTAT_TIME, do_scanThermostat);
-        break;
-    default:
-        myDebug("Unknown command. Use ? for help.");
-        break;
+    // logging
+    if (strcmp(first_cmd, "log") == 0) {
+        if (wc == 2) {
+            char * second_cmd = _readWord();
+            if (strcmp(second_cmd, "v") == 0) {
+                ems_setLogging(EMS_SYS_LOGGING_VERBOSE);
+                ok = true;
+            } else if (strcmp(second_cmd, "b") == 0) {
+                ems_setLogging(EMS_SYS_LOGGING_BASIC);
+                ok = true;
+            } else if (strcmp(second_cmd, "t") == 0) {
+                ems_setLogging(EMS_SYS_LOGGING_THERMOSTAT);
+                ok = true;
+            } else if (strcmp(second_cmd, "r") == 0) {
+                ems_setLogging(EMS_SYS_LOGGING_RAW);
+                ok = true;
+            } else if (strcmp(second_cmd, "n") == 0) {
+                ems_setLogging(EMS_SYS_LOGGING_NONE);
+                ok = true;
+            }
+        }
     }
-    return;
+
+    // thermostat commands
+    if (strcmp(first_cmd, "thermostat") == 0) {
+        if (wc == 3) {
+            char * second_cmd = _readWord();
+            if (strcmp(second_cmd, "temp") == 0) {
+                ems_setThermostatTemp(_readIntNumber());
+                ok = true;
+            } else if (strcmp(second_cmd, "mode") == 0) {
+                ems_setThermostatMode(_readIntNumber());
+                ok = true;
+            } else if (strcmp(second_cmd, "read") == 0) {
+                ems_doReadCommand(_readHexNumber(), EMS_Thermostat.type_id);
+                ok = true;
+            } else if (strcmp(second_cmd, "scan") == 0) {
+                startThermostatScan(_readIntNumber());
+                ok = true;
+            }
+        }
+    }
+
+    // boiler commands
+    if (strcmp(first_cmd, "boiler") == 0) {
+        if (wc == 3) {
+            char * second_cmd = _readWord();
+            if (strcmp(second_cmd, "wwtemp") == 0) {
+                ems_setWarmWaterTemp(_readIntNumber());
+                ok = true;
+            } else if (strcmp(second_cmd, "read") == 0) {
+                ems_doReadCommand(_readHexNumber(), EMS_Boiler.type_id);
+                ok = true;
+            } else if (strcmp(second_cmd, "tapwater") == 0) {
+                char * third_cmd = _readWord();
+                if (strcmp(third_cmd, "on") == 0) {
+                    ems_setWarmTapWaterActivated(true);
+                    ok = true;
+                } else if (strcmp(third_cmd, "off") == 0) {
+                    ems_setWarmTapWaterActivated(false);
+                    ok = true;
+                }
+            }
+        }
+    }
+
+    // send raw
+    if (strcmp(first_cmd, "send") == 0) {
+        ems_sendRawTelegram((char *)&commandLine[5]);
+        ok = true;
+    }
+
+    // check for invalid command
+    if (!ok) {
+        myDebug("Unknown command. Use ? for help.");
+    }
 }
 
 // MQTT Callback to handle incoming/outgoing changes
-void MQTTcallback(unsigned int type, const char * topic, const char * message) {
+void MQTTCallback(unsigned int type, const char * topic, const char * message) {
     // we're connected. lets subscribe to some topics
     if (type == MQTT_CONNECT_EVENT) {
         myESP.mqttSubscribe(TOPIC_THERMOSTAT_CMD_TEMP);
@@ -708,7 +788,7 @@ void WIFICallback() {
 
 // Initialize the boiler settings
 void initShower() {
-    // default showr settings
+    // default shower settings
     Boiler_Status.shower_timer  = BOILER_SHOWER_TIMER;
     Boiler_Status.shower_alert  = BOILER_SHOWER_ALERT;
     Boiler_Shower.timerStart    = 0;
@@ -719,7 +799,10 @@ void initShower() {
 
 // call PublishValues without forcing, so using CRC to see if we really need to publish
 void do_publishValues() {
-    publishValues(false);
+    // don't publish if we're not connected to the EMS bus
+    if (ems_getBusConnected()) {
+        publishValues(false);
+    }
 }
 
 // callback to light up the LED, called via Ticker every second
@@ -745,16 +828,20 @@ void do_scanThermostat() {
 // do a system health check every now and then to see if we all connections
 void do_systemCheck() {
     if (!ems_getBusConnected()) {
-        myDebug("Error! Unable to connect to EMS bus. Please make sure you're not in DEBUG_SUPPORT mode. Retrying in %d seconds...",
+        myDebug("Error! Unable to connect to EMS bus. Check connection and make sure you're not in DEBUG_SUPPORT mode. Retrying in %d "
+                "seconds...",
                 SYSTEMCHECK_TIME);
     }
 }
 
 // force calls to get data from EMS for the types that aren't sent as broadcasts
+// only if we have a EMS connection
 void do_regularUpdates() {
-    myDebugLog("Calling scheduled data refresh from EMS devices..");
-    ems_getThermostatValues(); // get Thermostat temps (if supported)
-    ems_getBoilerValues();
+    if (ems_getBusConnected()) {
+        myDebugLog("Calling scheduled data refresh from EMS devices..");
+        ems_getThermostatValues(); // get Thermostat temps (if supported)
+        ems_getBoilerValues();
+    }
 }
 
 // turn off hot water to send a shot of cold
@@ -860,16 +947,20 @@ void setup() {
     regularUpdatesTimer.attach(REGULARUPDATES_TIME, do_regularUpdates); // regular reads from the EMS
 
     // set up myESP for Wifi, MQTT, MDNS and Telnet
-    // with callbacks
-    myESP.setup(APP_HOSTNAME, APP_NAME, APP_VERSION, WIFI_SSID, WIFI_PASSWORD, MQTT_IP, MQTT_USER, MQTT_PASS);
-    myESP.consoleSetCallBackProjectCmds(project_cmds, ArraySize(project_cmds), myDebugCallback); // set up Telnet commands
+    myESP.setTelnetCommands(project_cmds, ArraySize(project_cmds), TelnetCommandCallback); // set up Telnet commands
+    myESP.setConnection(WIFI_SSID, WIFI_PASSWORD, MQTT_IP, MQTT_USER, MQTT_PASS);          // optional
+    myESP.begin(APP_HOSTNAME, APP_NAME, APP_VERSION);
+    myESP.setMQTTbase(MQTT_BASE);
+
+    // callbacks
     myESP.setWIFICallback(WIFICallback);
-    myESP.setMQTTCallback(MQTTcallback);
+    myESP.setMQTTCallback(MQTTCallback);
+    myESP.setTelnetCallback(TelnetCallback);
 
     // init Shower specific parameters
     initShower();
 
-    ems_setLogging(BOILER_DEFAULT_LOGGING); // set default logging. see my_config.h
+    ems_setLogging(EMS_SYS_LOGGING_NONE); // set default logging to none
 
     // init the EMS bus
     // call ems.cpp's init function to set all the internal params
@@ -892,7 +983,7 @@ void loop() {
         ems_setEmsRefreshed(false);
     }
 
-    // do shower logic if it is enabled
+    // do shower logic, if enabled
     if (Boiler_Status.shower_timer) {
         showerCheck();
     }

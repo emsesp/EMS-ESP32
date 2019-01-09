@@ -550,82 +550,83 @@ void TelnetSpy::handle() {
         return;
     }
     if (!listening) {
-        if ((WiFi.status() == WL_DISCONNECTED) && (WiFi.getMode() & WIFI_AP)) {
+        if (WiFi.status() != WL_CONNECTED) {
+            // unless AP
+            //if (!(WiFi.getMode() & WIFI_AP)) { // proddy
+            //    return;
+            // }
+            telnetServer = new WiFiServer(port);
+            telnetServer->begin();
+            telnetServer->setNoDelay(bufLen > 0);
+            listening = true;
             if (usedSer) {
-                usedSer->println("[TELNET] in AP mode"); // added by Proddy
+                usedSer->println("[TELNET] Telnet server started"); // added by Proddy
             }
-        } else if (WiFi.status() != WL_CONNECTED) {
-            return;
         }
 
-        telnetServer = new WiFiServer(port);
-        telnetServer->begin();
-        telnetServer->setNoDelay(bufLen > 0);
-        listening = true;
-        if (usedSer) {
-            usedSer->println("[TELNET] Telnet server started"); // added by Proddy
-        }
-    }
-    if (telnetServer->hasClient()) {
-        if (client.connected()) {
-            WiFiClient rejectClient = telnetServer->available();
-            if (strlen(rejectMsg) > 0) {
-                rejectClient.write((const uint8_t *)rejectMsg, strlen(rejectMsg));
-            }
-            rejectClient.flush();
-            rejectClient.stop();
-        } else {
-            client = telnetServer->available();
-            if (strlen(welcomeMsg) > 0) {
-                client.write((const uint8_t *)welcomeMsg, strlen(welcomeMsg));
-            }
-        }
-    }
-    if (client.connected()) {
-        if (!connected) {
-            connected = true;
-            if (pingTime != 0) {
-                pingRef = (millis() & 0x7FFFFFF) + pingTime;
-            }
-            if (callbackConnect != NULL) {
-                callbackConnect();
-            }
-        }
-    } else {
-        if (connected) {
-            connected = false;
-            client.flush();
-            client.stop();
-            pingRef = 0xFFFFFFFF;
-            waitRef = 0xFFFFFFFF;
-            if (callbackDisconnect != NULL) {
-                callbackDisconnect();
-            }
-        }
-    }
-
-    if (client.connected() && (bufUsed > 0)) {
-        if (bufUsed >= minBlockSize) {
-            sendBlock();
-        } else {
-            unsigned long m = millis() & 0x7FFFFFF;
-            if (waitRef == 0xFFFFFFFF) {
-                waitRef = m + collectingTime;
-                if (waitRef > 0x7FFFFFFF) {
-                    waitRef -= 0x80000000;
+        if (telnetServer->hasClient()) {
+            if (client.connected()) {
+                WiFiClient rejectClient = telnetServer->available();
+                if (strlen(rejectMsg) > 0) {
+                    rejectClient.write((const uint8_t *)rejectMsg, strlen(rejectMsg));
                 }
+                rejectClient.flush();
+                rejectClient.stop();
             } else {
-                if (!((waitRef < 0x20000000) && (m > 0x60000000)) && (m >= waitRef)) {
-                    sendBlock();
+                client = telnetServer->available();
+                if (strlen(welcomeMsg) > 0) {
+                    client.write((const uint8_t *)welcomeMsg, strlen(welcomeMsg));
                 }
             }
         }
-    }
-    if (client.connected() && (pingRef != 0xFFFFFFFF)) {
-        unsigned long m = millis() & 0x7FFFFFF;
-        if (!((pingRef < 0x20000000) && (m > 0x60000000)) && (m >= pingRef)) {
-            addTelnetBuf(0);
-            sendBlock();
+
+        if (client.connected()) {
+            if (!connected) {
+                connected = true;
+                if (pingTime != 0) {
+                    pingRef = (millis() & 0x7FFFFFF) + pingTime;
+                }
+                if (callbackConnect != NULL) {
+                    callbackConnect();
+                }
+            }
+        } else {
+            if (connected) {
+                connected = false;
+                client.flush();
+                client.stop();
+                pingRef = 0xFFFFFFFF;
+                waitRef = 0xFFFFFFFF;
+                if (callbackDisconnect != NULL) {
+                    callbackDisconnect();
+                }
+            }
+        }
+
+        if (client.connected() && (bufUsed > 0)) {
+            if (bufUsed >= minBlockSize) {
+                sendBlock();
+            } else {
+                unsigned long m = millis() & 0x7FFFFFF;
+                if (waitRef == 0xFFFFFFFF) {
+                    waitRef = m + collectingTime;
+                    if (waitRef > 0x7FFFFFFF) {
+                        waitRef -= 0x80000000;
+                    }
+                } else {
+                    if (!((waitRef < 0x20000000) && (m > 0x60000000)) && (m >= waitRef)) {
+                        sendBlock();
+                    }
+                }
+            }
+        }
+
+        if (client.connected() && (pingRef != 0xFFFFFFFF)) {
+            unsigned long m = millis() & 0x7FFFFFF;
+            if (!((pingRef < 0x20000000) && (m > 0x60000000)) && (m >= pingRef)) {
+                addTelnetBuf(0);
+                sendBlock();
+            }
         }
     }
 }
