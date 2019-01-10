@@ -63,7 +63,7 @@ I've tested the code and circuit with a few ESP8266 development boards such as t
 2. Get an ESP8266 dev board and connect the 2 EMS output lines from the boiler to the circuit and the Rx and Tx out to ESP pins D7 and D8 respectively. The EMS connection can either be the 12-15V AC direct from the thermostat bus line or from the 3.5" Service Jack at the front.
 3. Optionally connect an external LED or decide to use the onboard ESP8266 LED. This will flash when there is an error on the EMS bus line or stay solid when it's connected.
 4. Modify `my_custom.h`
-5. Build and upload the firmware to the ESP8266 device. I used Platformio with Visual Studio Code but using Atom or a command-line is just as easy if you don't plan to make code changes. Do make sure you set the MQTT and WiFi credentials correctly in the build flags and if you're not using MQTT leave the MQTT_IP blank. The firmware supports OTA too with the default hostname as 'boiler'.
+5. Build and upload the firmware to the ESP8266 device. I used PlatformIO with Visual Studio Code but using Atom or a command-line is just as easy if you don't plan to make code changes. Do make sure you set the MQTT and WiFi credentials correctly in the build flags and if you're not using MQTT leave the MQTT_IP blank. The firmware supports OTA too with the default hostname as 'boiler'.
 6. Power the ESP either via USB or direct into the 5v vin pin from an external power 5V volts supply with min 400mA.
 7. Attach the 3v3 out on the ESP8266 to the DC power line on the EMS circuit as indicated in the schematics.
 8. The WiFi connects via DHCP by default. Find the IP by from your router and then telnet (port 23) to it. If a connection can't be made it will go into Access Point mode. Tip: to enable Telnet on Windows run `dism /online /Enable-Feature /FeatureName:TelnetClient` or install something like [putty](https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html). If everything is working you should see the messages appear in the window as shown in the next section. However if you're unable to locate the IP of the ESP then something went wrong. Re-compile with the -DDEBUG_SUPPORT and connect via USB to a PC and check the Serial log for errors.
@@ -225,7 +225,7 @@ I am still working on adding more support to known thermostats. Any contribution
 
 - To configure for your thermostat and specific boiler settings, modify `my_config.h`. Here you can
   - set flags for enabled/disabling functionality such as `BOILER_SHOWER_ENABLED` and `BOILER_SHOWER_TIMER`.
-  - Set WIFI and MQTT settings, instead of doing this in `platformio.ini`. The values can be set from the telnet command menu using the 'set' command.
+  - Set WIFI and MQTT settings, instead of doing this in `platformio.ini`. The values can be set from the telnet command menu using the **set** command.
 - To add new handlers for EMS data types, first create a callback function and add to the `EMS_Types` array at the top of the file `ems.cpp` and modify `ems.h`
 - To add new devices modify `ems_devices.h` 
 
@@ -238,8 +238,6 @@ The boiler data is collected and sent as a single JSON object to MQTT TOPIC `hom
 Similarly the thermostat values are sent as a json package under a topic named `home/ems-esp/thermostat_data` with the current mode, room temperature and set temperature like
 
 `{"thermostat_currtemp":"19.8","thermostat_seltemp":"16.0","thermostat_mode":"manual"}`
-
-
 
 ### The Basic Shower Logic
 
@@ -268,15 +266,15 @@ You can find the .yaml configuration files under `doc/ha`. See also https://comm
 - Download [Git](https://git-scm.com/download/win) (install using the default settings)
 - Download and install [Visual Studio Code](https://code.visualstudio.com/docs/?dv=win) (VSC). It's like 40MB so don't confuse with the commercial Microsoft Visual Studio.
 - Restart the PC (if using Windows) to apply the new PATH settings. It should now detect Git
-- Install these VSC extensions: PlatformIO IDE & GitLens, and then click reload to activate them
+- Install the VSC extensions "PlatformIO IDE" then click reload to activate it
 - Git clone this repo, eith using `git clone` from PlatformIO's terminal or the Git GUI interface
-- Create a `platformio.ini` based on the `platformio.ini-example` making the necessary changes for your WiFi and MQTT credentials in the build flags. If you're not using MQTT leave MQTT_IP empty (`MQTT_IP=""`)
+- Create a `platformio.ini` based on the `platformio.ini-example` making the necessary changes for your board type
 
-**On Linux (e.g. Ubuntu under Windows10):**
+**On Linux (e.g. Ubuntu under Windows 10):**
 
 - make sure Python 2.7 is installed
 - make sure you have a Linux distro installed (https://docs.microsoft.com/en-us/windows/wsl/install-win10)
-- Do:
+- Then...
 ```python
 % pip install -U platformio
 % sudo platformio upgrade
@@ -332,7 +330,6 @@ Some annoying issues that need fixing:
   - https://github.com/patvdleer/nefit-client-python
   - https://github.com/marconfus/ha-nefit
   - https://github.com/robertklep/nefit-easy-core
-- Store custom params like wifi credentials, mqtt, thermostat type on ESP8266 using SPIFFS
 - Add support for a temperature sensor on the circuit (DS18B20)
 - Improve detection of Heating Off without checking for selFlowTemp (selected flow temperature)
 - Split MQTT into smaller chunks. Now the messages can be up to 600 bytes which may cause issues.
