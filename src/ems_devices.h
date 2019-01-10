@@ -7,7 +7,7 @@
 
 #include "ems.h"
 
-/* 
+/*
  * Boiler...
  */
 #define EMS_TYPE_UBAMonitorFast 0x18              // is an automatic monitor broadcast
@@ -27,7 +27,7 @@
 #define EMS_VALUE_UBAParameterWW_wwComfort_Comfort 0x00 // the value for comfort
 #define EMS_VALUE_UBAParameterWW_wwComfort_Eco 0xD8     // the value for eco
 
-/* 
+/*
  * Thermostat...
  */
 
@@ -59,6 +59,7 @@
 #define EMS_OFFSET_RC35Set_mode 7             // position of thermostat mode
 #define EMS_OFFSET_RC35Set_temp_day 2         // position of thermostat setpoint temperature for day time
 #define EMS_OFFSET_RC35Set_temp_night 1       // position of thermostat setpoint temperature for night time
+#define EMS_OFFSET_RC35Get_mode_day 1         // position of thermostat day mode
 
 // Easy specific
 #define EMS_TYPE_EasyStatusMessage 0x0A        // reading values on an Easy Thermostat
@@ -117,7 +118,7 @@ const _Model_Type Model_Types[] = {
     {EMS_MODEL_EASY, 202, 0x18, "TC100 (e.g. Nefit Easy or CT100)"}
 
 };
-/* 
+/*
  * Known thermostat types and their abilities
  */
 const _Thermostat_Type Thermostat_Types[] = {
