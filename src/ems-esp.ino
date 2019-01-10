@@ -114,16 +114,6 @@ command_t PROGMEM project_cmds[] = {
 _Boiler_Status Boiler_Status;
 _Boiler_Shower Boiler_Shower;
 
-// CRC checks
-uint32_t previousBoilerPublishCRC     = 0;
-uint32_t previousThermostatPublishCRC = 0;
-
-// Times
-const unsigned long POLL_TIMEOUT_ERR = 10000; // if no signal from boiler for last 10 seconds, assume its offline
-const unsigned long TX_HOLD_LED_TIME = 2000;  // how long to hold the Tx LED because its so quick
-
-uint8_t last_boilerActive = 0xFF; // for remembering last setting of the tap water or heating on/off
-
 // logging messages with fixed strings
 void myDebugLog(const char * s) {
     if (ems_getLogging() >= EMS_SYS_LOGGING_BASIC) {
@@ -409,6 +399,10 @@ void publishValues(bool force) {
     size_t                          rlen;
     CRC32                           crc;
     uint32_t                        fchecksum;
+
+    static uint8_t  last_boilerActive            = 0xFF; // for remembering last setting of the tap water or heating on/off
+    static uint32_t previousBoilerPublishCRC     = 0;    // CRC check
+    static uint32_t previousThermostatPublishCRC = 0;    // CRC check
 
     rootBoiler["wWSelTemp"]   = _int_to_char(s, EMS_Boiler.wWSelTemp);
     rootBoiler["selFlowTemp"] = _float_to_char(s, EMS_Boiler.selFlowTemp);
@@ -786,9 +780,8 @@ void WIFICallback() {
     ems_setModels();
 }
 
-// Initialize the boiler settings
+// Initialize the boiler settings for the shower settings
 void initShower() {
-    // default shower settings
     Boiler_Status.shower_timer  = BOILER_SHOWER_TIMER;
     Boiler_Status.shower_alert  = BOILER_SHOWER_ALERT;
     Boiler_Shower.timerStart    = 0;
@@ -839,7 +832,7 @@ void do_systemCheck() {
 void do_regularUpdates() {
     if (ems_getBusConnected()) {
         myDebugLog("Calling scheduled data refresh from EMS devices..");
-        ems_getThermostatValues(); // get Thermostat temps (if supported)
+        ems_getThermostatValues();
         ems_getBoilerValues();
     }
 }
@@ -941,10 +934,12 @@ void setup() {
     ledcheckTimer.attach(LEDCHECK_TIME, do_ledcheck);                   // blink heartbeat LED
 #endif
 
+#ifndef DEBUG_SUPPORT
     // Timers using Ticker library
     publishValuesTimer.attach(PUBLISHVALUES_TIME, do_publishValues);    // post HA values
     systemCheckTimer.attach(SYSTEMCHECK_TIME, do_systemCheck);          // check if Boiler is online
     regularUpdatesTimer.attach(REGULARUPDATES_TIME, do_regularUpdates); // regular reads from the EMS
+#endif
 
     // set up myESP for Wifi, MQTT, MDNS and Telnet
     myESP.setTelnetCommands(project_cmds, ArraySize(project_cmds), TelnetCommandCallback); // set up Telnet commands
