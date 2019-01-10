@@ -1,8 +1,8 @@
 /**
  * ems.cpp
- * 
+ *
  * handles all the processing of the EMS messages
- * 
+ *
  * Paul Derbyshire - https://github.com/proddy/EMS-ESP
  */
 
@@ -50,7 +50,7 @@ void _process_RC35StatusMessage(uint8_t * data, uint8_t length);
 // Easy
 void _process_EasyStatusMessage(uint8_t * data, uint8_t length);
 
-/* 
+/*
  * Recognized EMS types and the functions they call to process the telegrams
  */
 const _EMS_Type EMS_Types[] = {
@@ -165,6 +165,7 @@ void ems_init(uint8_t boiler_modelid, uint8_t thermostat_modelid) {
     EMS_Thermostat.month             = 0;
     EMS_Thermostat.year              = 0;
     EMS_Thermostat.mode              = 255; // dummy value
+    EMS_Thermostat.day_mode          = 255; // dummy value
 
     EMS_Thermostat.type_id         = EMS_ID_NONE;
     EMS_Thermostat.read_supported  = false;
@@ -326,7 +327,7 @@ uint8_t _crcCalculator(uint8_t * data, uint8_t len) {
     return crc;
 }
 
-/** 
+/**
  * function to turn a telegram int (2 bytes) to a float. The source is *10
  * negative values are stored as 1-compliment (https://medium.com/@LeeJulija/how-integers-are-stored-in-memory-using-twos-complement-5ba04d61a56c)
  */
@@ -971,7 +972,7 @@ void _process_RC30StatusMessage(uint8_t * data, uint8_t length) {
 void _process_RC35StatusMessage(uint8_t * data, uint8_t length) {
     EMS_Thermostat.setpoint_roomTemp = ((float)data[EMS_TYPE_RC35StatusMessage_setpoint]) / (float)2;
     EMS_Thermostat.curr_roomTemp     = _toFloat(EMS_TYPE_RC35StatusMessage_curr, data);
-
+    EMS_Thermostat.day_mode = bitRead(data[EMS_OFFSET_RC35Get_mode_day], 1); //get day mode flag
     EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back to Home Assistant via MQTT
 }
 
@@ -1563,7 +1564,12 @@ void ems_setThermostatTemp(float temperature) {
         EMS_TxTelegram.comparisonPostRead = EMS_TYPE_RC30StatusMessage;
     } else if ((model_id == EMS_MODEL_RC35) || (model_id == EMS_MODEL_ES73)) {
         EMS_TxTelegram.type               = EMS_TYPE_RC35Set;
-        EMS_TxTelegram.offset             = EMS_OFFSET_RC35Set_temp_day; // day mode only for now
+        if (EMS_Thermostat.day_mode == 0){
+            EMS_TxTelegram.offset         = EMS_OFFSET_RC35Set_temp_night;
+        } else if (EMS_Thermostat.day_mode == 1){
+            EMS_TxTelegram.offset         = EMS_OFFSET_RC35Set_temp_day;
+        }
+
         EMS_TxTelegram.comparisonPostRead = EMS_TYPE_RC35StatusMessage;
     }
 
