@@ -212,6 +212,7 @@ typedef struct {
     float   setpoint_roomTemp; // current set temp
     float   curr_roomTemp;     // current room temp
     uint8_t mode;              // 0=low, 1=manual, 2=auto
+    bool day_mode;             // 0=night, 1=day
     uint8_t hour;
     uint8_t minute;
     uint8_t second;

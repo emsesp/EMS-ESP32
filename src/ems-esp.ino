@@ -1,6 +1,6 @@
 /*
  * EMS-ESP
- * 
+ *
  * Paul Derbyshire - https://github.com/proddy/EMS-ESP
  *
  * See ChangeLog.md for history
@@ -782,8 +782,10 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
             myDebug("MQTT topic: thermostat mode value %s", message);
             if (strcmp((char *)message, "auto") == 0) {
                 ems_setThermostatMode(2);
-            } else if (strcmp((char *)message, "manual") == 0) {
+            } else if (strcmp((char *)message, "day") == 0) {
                 ems_setThermostatMode(1);
+            } else if (strcmp((char *)message, "night") == 0) {
+                ems_setThermostatMode(0);
             }
         }
 
@@ -912,7 +914,7 @@ void _showerColdShotStop() {
     }
 }
 
-/* 
+/*
  *  Shower Logic
  */
 void showerCheck() {

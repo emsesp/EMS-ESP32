@@ -1,8 +1,8 @@
 /*
  * my_config.h
- * 
+ *
  * All configurations and customization's go here
- * 
+ *
  * Paul Derbyshire - https://github.com/proddy/EMS-ESP
  */
 
