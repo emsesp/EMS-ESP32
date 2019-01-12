@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - MQTT keep alive, last will testament and other settings all configurable in my_config.h
+- RC35: MQTT day/night/auto mode; sets setpoint temperature in type 0x3D depends on current night/day Mode (@SpaceTeddy) [#33](https://github.com/proddy/EMS-ESP/pull/33)
 
 ## [1.3.0] 2019-01-09
 

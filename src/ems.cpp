@@ -952,7 +952,7 @@ void _process_RC20StatusMessage(uint8_t * data, uint8_t length) {
     EMS_Thermostat.setpoint_roomTemp = ((float)data[EMS_TYPE_RC20StatusMessage_setpoint]) / (float)2;
     EMS_Thermostat.curr_roomTemp     = _toFloat(EMS_TYPE_RC20StatusMessage_curr, data);
 
-    EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back to Home Assistant via MQTT
+    EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
 }
 
 /**
@@ -964,7 +964,7 @@ void _process_RC30StatusMessage(uint8_t * data, uint8_t length) {
     EMS_Thermostat.setpoint_roomTemp = ((float)data[EMS_TYPE_RC30StatusMessage_setpoint]) / (float)2;
     EMS_Thermostat.curr_roomTemp     = _toFloat(EMS_TYPE_RC30StatusMessage_curr, data);
 
-    EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back to Home Assistant via MQTT
+    EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
 }
 
 /**
@@ -975,8 +975,8 @@ void _process_RC30StatusMessage(uint8_t * data, uint8_t length) {
 void _process_RC35StatusMessage(uint8_t * data, uint8_t length) {
     EMS_Thermostat.setpoint_roomTemp = ((float)data[EMS_TYPE_RC35StatusMessage_setpoint]) / (float)2;
     EMS_Thermostat.curr_roomTemp     = _toFloat(EMS_TYPE_RC35StatusMessage_curr, data);
-    EMS_Thermostat.day_mode = bitRead(data[EMS_OFFSET_RC35Get_mode_day], 1); //get day mode flag
-    EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back to Home Assistant via MQTT
+    EMS_Thermostat.day_mode          = bitRead(data[EMS_OFFSET_RC35Get_mode_day], 1); //get day mode flag
+    EMS_Sys_Status.emsRefreshed      = true;                                          // triggers a send the values back via MQTT
 }
 
 /**
@@ -987,7 +987,7 @@ void _process_EasyStatusMessage(uint8_t * data, uint8_t length) {
     EMS_Thermostat.curr_roomTemp     = ((float)(((data[EMS_TYPE_EasyStatusMessage_curr] << 8) + data[9]))) / 100;
     EMS_Thermostat.setpoint_roomTemp = ((float)(((data[EMS_TYPE_EasyStatusMessage_setpoint] << 8) + data[11]))) / 100;
 
-    EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back to Home Assistant via MQTT
+    EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
 }
 
 /**
@@ -1566,11 +1566,11 @@ void ems_setThermostatTemp(float temperature) {
         EMS_TxTelegram.offset             = EMS_OFFSET_RC30Set_temp;
         EMS_TxTelegram.comparisonPostRead = EMS_TYPE_RC30StatusMessage;
     } else if ((model_id == EMS_MODEL_RC35) || (model_id == EMS_MODEL_ES73)) {
-        EMS_TxTelegram.type               = EMS_TYPE_RC35Set;
-        if (EMS_Thermostat.day_mode == 0){
-            EMS_TxTelegram.offset         = EMS_OFFSET_RC35Set_temp_night;
-        } else if (EMS_Thermostat.day_mode == 1){
-            EMS_TxTelegram.offset         = EMS_OFFSET_RC35Set_temp_day;
+        EMS_TxTelegram.type = EMS_TYPE_RC35Set;
+        if (EMS_Thermostat.day_mode == 0) {
+            EMS_TxTelegram.offset = EMS_OFFSET_RC35Set_temp_night;
+        } else if (EMS_Thermostat.day_mode == 1) {
+            EMS_TxTelegram.offset = EMS_OFFSET_RC35Set_temp_day;
         }
 
         EMS_TxTelegram.comparisonPostRead = EMS_TYPE_RC35StatusMessage;
