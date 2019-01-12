@@ -33,14 +33,7 @@
 #define OTA_PORT 8266 // OTA port
 
 // MQTT
-#define MQTT_HA "/home/ha"                       // HA specific
-#define MQTT_HA_NOTIFICATION "home/notification" // HA specific
-#define MQTT_TOPIC_COMMAND "command"             // HA specific
-#define MQTT_TOPIC_START "start"                 // HA specific
-#define MQTT_TOPIC_START_PAYLOAD "start"         // HA specific
-
-#define MQTT_PORT 1883 // MQTT port
-#define MQTT_QOS 1
+#define MQTT_PORT 1883                  // MQTT port
 #define MQTT_RECONNECT_DELAY_MIN 5000   // Try to reconnect in 5 seconds upon disconnection
 #define MQTT_RECONNECT_DELAY_STEP 5000  // Increase the reconnect delay in 5 seconds after each failed attempt
 #define MQTT_RECONNECT_DELAY_MAX 120000 // Set reconnect time to 2 minutes at most
@@ -69,11 +62,14 @@ typedef struct {
     char description[100];
 } command_t;
 
-typedef std::function<void(unsigned int, const char *, const char *)> mqtt_callback_f;
+typedef enum { MYESP_FSACTION_SET, MYESP_FSACTION_LIST, MYESP_FSACTION_SAVE, MYESP_FSACTION_LOAD } MYESP_FSACTION;
 
-typedef std::function<void(uint8_t, const char *)> telnetcommand_callback_f;
-
-typedef std::function<void(uint8_t)> telnet_callback_f;
+typedef std::function<void(unsigned int, const char *, const char *)>            mqtt_callback_f;
+typedef std::function<void()>                                                    wifi_callback_f;
+typedef std::function<void(uint8_t, const char *)>                               telnetcommand_callback_f;
+typedef std::function<void(uint8_t)>                                             telnet_callback_f;
+typedef std::function<void(MYESP_FSACTION, JsonObject & json)>                   fs_callback_f;
+typedef std::function<bool(MYESP_FSACTION, uint8_t, const char *, const char *)> fs_settings_callback_f;
 
 // calculates size of an 2d array at compile time
 template <typename T, size_t N>
@@ -89,30 +85,35 @@ class MyESP {
 
     // wifi
     void setWIFICallback(void (*callback)());
-
-    // ha
-    void sendHACommand(const char * cmd);
-    void sendHANotification(const char * message);
+    void setWIFI(char * wifi_ssid, char * wifi_password, wifi_callback_f callback);
 
     // mqtt
     void mqttSubscribe(const char * topic);
     void mqttUnsubscribe(const char * topic);
     void mqttPublish(const char * topic, const char * payload);
-    void setMQTTbase(char * mqttbase);
-    void setMQTTCallback(mqtt_callback_f callback);
+    void setMQTT(char *          mqtt_host,
+                 char *          mqtt_username,
+                 char *          mqtt_password,
+                 char *          mqtt_base,
+                 unsigned long   mqtt_keepalive,
+                 unsigned char   mqtt_qos,
+                 bool            mqtt_retain,
+                 char *          mqtt_will,
+                 mqtt_callback_f callback);
 
     // debug & telnet
     void myDebug(const char * format, ...);
     void myDebug_P(PGM_P format_P, ...);
-    void setTelnetCommands(command_t * cmds, uint8_t count, telnetcommand_callback_f callback);
-    void setTelnetCallback(telnet_callback_f callback);
+    void setTelnet(command_t * cmds, uint8_t count, telnetcommand_callback_f callback_cmd, telnet_callback_f callback);
+
+    // FS
+    void setSettings(fs_callback_f callback, fs_settings_callback_f fs_settings_callback);
 
     // general
     void end();
     void loop();
     void begin(char * app_hostname, char * app_name, char * app_version);
-    void setConnection(char * wifi_ssid, char * wifi_password, char * mqtt_host, char * mqtt_username, char * mqtt_password);
-    void setBoottime(char * boottime);
+    void setBoottime(const char * boottime);
     void resetESP();
 
   private:
@@ -130,16 +131,19 @@ class MyESP {
     char *          _mqtt_password;
     char *          _boottime;
     bool            _suspendOutput;
-    char *          _mqttbase;
+    char *          _mqtt_base;
+    unsigned long   _mqtt_keepalive;
+    unsigned char   _mqtt_qos;
+    bool            _mqtt_retain;
+    char *          _mqtt_will;
 
     // wifi
-    DNSServer dnsServer; // For Access Point (AP) support
-    void      _wifiCallback(justwifi_messages_t code, char * parameter);
-    void      _wifi_setup();
-    void (*_extern_WIFICallback)();
-    bool   _extern_WIFICallbackSet;
-    char * _wifi_ssid;
-    char * _wifi_password;
+    DNSServer       dnsServer; // For Access Point (AP) support
+    void            _wifiCallback(justwifi_messages_t code, char * parameter);
+    void            _wifi_setup();
+    wifi_callback_f _wifi_callback;
+    char *          _wifi_ssid;
+    char *          _wifi_password;
 
     // mdns
     void _mdns_setup();
@@ -161,14 +165,16 @@ class MyESP {
     void                     _consoleShowHelp();
     telnetcommand_callback_f _telnetcommand_callback; // Callable for projects commands
     telnet_callback_f        _telnet_callback;        // callback for connect/disconnect
-    void                     _changeSetting(const char * setting, const char * value);
+    void                     _changeSetting(uint8_t wc, const char * setting, const char * value);
 
     // fs
-    void _fs_setup();
-    bool _fs_saveConfig();
-    bool _fs_loadConfig();
-    void _fs_printConfig();
-    void _fs_eraseConfig();
+    void                   _fs_setup();
+    bool                   _fs_saveConfig();
+    bool                   _fs_loadConfig();
+    void                   _fs_printConfig();
+    void                   _fs_eraseConfig();
+    fs_callback_f          _fs_callback;
+    fs_settings_callback_f _fs_settings_callback;
 
     // general
     char * _app_hostname;

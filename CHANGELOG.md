@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.1] 2019-01-12
+
+### Fixed
+
+- telnet commands with set are no longer forced to lower case
+
+### Changed
+
+- Custom settings (e.g set led) moved outside MyESP
+- Moved all MQTT to my_config.h making it independent from Home Assistant
+
+### Added
+
+- MQTT keep alive, last will testament and other settings all configurable in my_config.h
+
 ## [1.3.0] 2019-01-09
 
 ### Changed

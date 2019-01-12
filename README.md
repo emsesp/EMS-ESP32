@@ -63,7 +63,7 @@ I've tested the code and circuit with a few ESP8266 development boards such as t
 2. Get an ESP8266 dev board and connect the 2 EMS output lines from the boiler to the circuit and the Rx and Tx out to ESP pins D7 and D8 respectively. The EMS connection can either be the 12-15V AC direct from the thermostat bus line or from the 3.5" Service Jack at the front.
 3. Optionally connect an external LED or decide to use the onboard ESP8266 LED. This will flash when there is an error on the EMS bus line or stay solid when it's connected.
 4. Modify `my_custom.h`
-5. Build and upload the firmware to the ESP8266 device. I used PlatformIO with Visual Studio Code but using Atom or a command-line is just as easy if you don't plan to make code changes. Do make sure you set the MQTT and WiFi credentials correctly in the build flags and if you're not using MQTT leave the MQTT_IP blank. The firmware supports OTA too with the default hostname as 'boiler'.
+5. Build and upload the firmware to the ESP8266 device. I used PlatformIO with Visual Studio Code but using Atom or a command-line is just as easy if you don't plan to make code changes. Do make sure you set the MQTT and WiFi credentials correctly in the build flags and if you're not using MQTT leave the MQTT_HOST blank. The firmware supports OTA too with the default hostname as 'boiler'.
 6. Power the ESP either via USB or direct into the 5v vin pin from an external power 5V volts supply with min 400mA.
 7. Attach the 3v3 out on the ESP8266 to the DC power line on the EMS circuit as indicated in the schematics.
 8. The WiFi connects via DHCP by default. Find the IP by from your router and then telnet (port 23) to it. If a connection can't be made it will go into Access Point mode. Tip: to enable Telnet on Windows run `dism /online /Enable-Feature /FeatureName:TelnetClient` or install something like [putty](https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html). If everything is working you should see the messages appear in the window as shown in the next section. However if you're unable to locate the IP of the ESP then something went wrong. Re-compile with the -DDEBUG_SUPPORT and connect via USB to a PC and check the Serial log for errors.
@@ -188,7 +188,7 @@ Every telegram sent is echo'd back to Rx.
 
 `ems.cpp` is the logic to read the EMS packets (telegrams), validates them and process them based on the type.
 
-`ems-esp.ino` is the Arduino code for the ESP8266 that kicks it all off. This is where we have specific logic such as the code to monitor and alert on the Shower timer and light up the LEDs. LED support is enabled by default and can be switched off at compile time using the -DNO_LED build flag.
+`ems-esp.ino` is the Arduino code for the ESP8266 that kicks it all off. This is where we have specific logic such as the code to monitor and alert on the Shower timer and light up the LEDs.
 
 `my_config.h` all the custom settings
 
@@ -315,7 +315,7 @@ The ESP8266 will start in Access Point (AP) mode, so connect via WiFi to the SSI
 
 If the WiFi, MQTT, MDNS or something else fails to connect, re-build the firmware using the `-DDEBUG_SUPPORT` option, connect the ESP8266 to a USB in your computer and monitor the Serial output. A lot of detailed logging will be printed to help you pinpoint the cause of the error.
 
-The onboard LED will flash if there is no connection with the EMS bus. You can disable LED support by adding -DNO_LED to the build options.
+The onboard LED will flash if there is no connection with the EMS bus. You can disable LED support by the 'set led' command from the telnet client
 
 ## Known Issues
 

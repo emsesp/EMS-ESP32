@@ -28,7 +28,7 @@
 #define myDebug_P(...) myESP.myDebug_P(__VA_ARGS__)
 
 // timers, all values are in seconds
-#define PUBLISHVALUES_TIME 120 // every 2 minutes post HA values
+#define PUBLISHVALUES_TIME 120 // every 2 minutes post MQTT values
 Ticker publishValuesTimer;
 
 #define SYSTEMCHECK_TIME 10 // every 10 seconds check if Boiler is online and execute other requests
@@ -47,8 +47,6 @@ uint8_t scanThermostat_count = 0;
 
 Ticker showerColdShotStopTimer;
 
-static unsigned long timestamp; // for internal timings, via millis()
-
 // thermostat
 #define TOPIC_THERMOSTAT_DATA "thermostat_data"         // for sending thermostat values
 #define TOPIC_THERMOSTAT_CMD_TEMP "thermostat_cmd_temp" // for received thermostat temp changes
@@ -66,8 +64,8 @@ static unsigned long timestamp; // for internal timings, via millis()
 #define TOPIC_SHOWERTIME "showertime"           // for sending shower time results
 #define TOPIC_SHOWER_TIMER "shower_timer"       // toggle switch for enabling the shower logic
 #define TOPIC_SHOWER_ALERT "shower_alert"       // toggle switch for enabling the shower alarm logic
-#define TOPIC_SHOWER_COLDSHOT "shower_coldshot" // used to trigger a coldshot from HA publish
-#define SHOWER_ALARM "shower_alarm"             // for notifying HA that shower time has reached its limit
+#define TOPIC_SHOWER_COLDSHOT "shower_coldshot" // used to trigger a coldshot from an MQTT command
+#define SHOWER_ALARM "shower_alarm"             // for notifying that shower time has reached its limit
 
 // if using the shower timer, change these settings
 #define SHOWER_PAUSE_TIME 15000     // in ms. 15 seconds, max time if water is switched off & on during a shower
@@ -76,9 +74,11 @@ static unsigned long timestamp; // for internal timings, via millis()
 #define SHOWER_COLDSHOT_DURATION 10 // in seconds. 10 seconds for cold water before turning back hot water
 
 typedef struct {
-    bool shower_timer; // true if we want to report back on shower times
-    bool shower_alert; // true if we want the alert of cold water
-} _Boiler_Status;
+    bool          shower_timer; // true if we want to report back on shower times
+    bool          shower_alert; // true if we want the alert of cold water
+    bool          led_enabled;  // LED on/off
+    unsigned long timestamp;    // for internal timings, via millis()
+} _EMSESP_Status;
 
 typedef struct {
     bool          showerOn;
@@ -86,7 +86,7 @@ typedef struct {
     unsigned long timerPause;    // ms
     unsigned long duration;      // ms
     bool          doingColdShot; // true if we've just sent a jolt of cold water
-} _Boiler_Shower;
+} _EMSESP_Shower;
 
 command_t PROGMEM project_cmds[] = {
 
@@ -103,7 +103,7 @@ command_t PROGMEM project_cmds[] = {
     {"thermostat read <hex type ID>", "send read request to thermostat"},
     {"thermostat temp <degrees>", "set current thermostat temperature"},
     {"thermostat mode <mode>", "set mode (0=low/night, 1=manual/day, 2=auto)"},
-    {"thermostat scan <hex type ID>", "do a deep scan of all thermostat message types, starting at n"},
+    {"thermostat scan <hex type ID>", "do a force read on all type IDs starting at n"},
     {"boiler read <hex type ID>", "send read request to boiler"},
     {"boiler wwtemp <degrees>", "set warm water temperature"},
     {"boiler tapwater <on | off>", "set warm tap water on or off"}
@@ -111,8 +111,8 @@ command_t PROGMEM project_cmds[] = {
 };
 
 // store for overall system status
-_Boiler_Status Boiler_Status;
-_Boiler_Shower Boiler_Shower;
+_EMSESP_Status EMSESP_Status;
+_EMSESP_Shower EMSESP_Shower;
 
 // logging messages with fixed strings
 void myDebugLog(const char * s) {
@@ -264,6 +264,8 @@ void showInfo() {
         myDebug("  System logging set to None");
     }
 
+    myDebug("  LED is %s", EMSESP_Status.led_enabled ? "on" : "off");
+
     myDebug("  # EMS type handlers: %d", ems_getEmsTypesCount());
 
     myDebug("  Thermostat is %s, Boiler is %s, Poll is %s, Tx is %s, Shower Timer is %s, Shower Alert is %s",
@@ -271,8 +273,8 @@ void showInfo() {
             (ems_getBoilerEnabled() ? "enabled" : "disabled"),
             ((EMS_Sys_Status.emsPollEnabled) ? "enabled" : "disabled"),
             ((EMS_Sys_Status.emsTxEnabled) ? "enabled" : "disabled"),
-            ((Boiler_Status.shower_timer) ? "enabled" : "disabled"),
-            ((Boiler_Status.shower_alert) ? "enabled" : "disabled"));
+            ((EMSESP_Status.shower_timer) ? "enabled" : "disabled"),
+            ((EMSESP_Status.shower_alert) ? "enabled" : "disabled"));
 
     myDebug("  EMS Bus Stats: Connected=%s, # Rx telegrams=%d, # Tx telegrams=%d, # Crc Errors=%d",
             (ems_getBusConnected() ? "yes" : "no"),
@@ -382,13 +384,13 @@ void showInfo() {
     myDebug(""); // newline
 
     // show the Shower Info
-    if (Boiler_Status.shower_timer) {
+    if (EMSESP_Status.shower_timer) {
         myDebug("%s Shower stats:%s", COLOR_BOLD_ON, COLOR_BOLD_OFF);
-        myDebug("  Shower Timer is %s", (Boiler_Shower.showerOn ? "active" : "off"));
+        myDebug("  Shower Timer is %s", (EMSESP_Shower.showerOn ? "active" : "off"));
     }
 }
 
-// send values to HA via MQTT
+// send values via MQTT
 // a json object is created for the boiler and one for the thermostat
 // CRC check is done to see if there are changes in the values since the last send to avoid too much wifi traffic
 void publishValues(bool force) {
@@ -506,14 +508,14 @@ void publishValues(bool force) {
 // sets the shower timer on/off
 void set_showerTimer() {
     if (ems_getLogging() != EMS_SYS_LOGGING_NONE) {
-        myDebug("Shower timer has been set to %s", Boiler_Status.shower_timer ? "enabled" : "disabled");
+        myDebug("Shower timer has been set to %s", EMSESP_Status.shower_timer ? "enabled" : "disabled");
     }
 }
 
 // sets the shower alert on/off
 void set_showerAlert() {
     if (ems_getLogging() != EMS_SYS_LOGGING_NONE) {
-        myDebug("Shower alert has been set to %s", Boiler_Status.shower_alert ? "enabled" : "disabled");
+        myDebug("Shower alert has been set to %s", EMSESP_Status.shower_alert ? "enabled" : "disabled");
     }
 }
 
@@ -551,6 +553,43 @@ void startThermostatScan(uint8_t start) {
     scanThermostat_count = start;
     myDebug("Starting a deep message scan on thermostat");
     scanThermostat.attach(SCANTHERMOSTAT_TIME, do_scanThermostat);
+}
+
+
+// callback for loading/saving settings to the file system (SPIFFS)
+void FSCallback(MYESP_FSACTION action, JsonObject & json) {
+    if (action == MYESP_FSACTION_LOAD) {
+        EMSESP_Status.led_enabled = (bool)json["led"];
+    }
+
+    if (action == MYESP_FSACTION_SAVE) {
+        json["led"] = EMSESP_Status.led_enabled;
+    }
+}
+
+// callback for custom settings
+// wc is number of arguments after the 'set' command
+bool SettingsCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, const char * value) {
+    if (action == MYESP_FSACTION_SET) {
+        if ((strcmp(setting, "led") == 0) && (wc == 2)) {
+            if (strcmp(value, "on") == 0) {
+                EMSESP_Status.led_enabled = true;
+            } else if (strcmp(value, "off") == 0) {
+                EMSESP_Status.led_enabled = false;
+                // let's make sure LED is really off
+                digitalWrite(BOILER_LED, (BOILER_LED == LED_BUILTIN) ? HIGH : LOW); // light off. For onboard high=off
+            } else {
+                // unknown command
+                return false;
+            }
+        }
+    }
+
+    if (action == MYESP_FSACTION_LIST) {
+        myDebug("  led=%s", EMSESP_Status.led_enabled ? "on" : "off");
+    }
+
+    return true;
 }
 
 // call back when a telnet client connects or disconnects
@@ -612,12 +651,12 @@ void TelnetCommandCallback(uint8_t wc, const char * commandLine) {
         if (wc == 2) {
             char * second_cmd = _readWord();
             if (strcmp(second_cmd, "timer") == 0) {
-                Boiler_Status.shower_timer = !Boiler_Status.shower_timer;
-                myESP.mqttPublish(TOPIC_SHOWER_TIMER, Boiler_Status.shower_timer ? "1" : "0");
+                EMSESP_Status.shower_timer = !EMSESP_Status.shower_timer;
+                myESP.mqttPublish(TOPIC_SHOWER_TIMER, EMSESP_Status.shower_timer ? "1" : "0");
                 ok = true;
             } else if (strcmp(second_cmd, "alert") == 0) {
-                Boiler_Status.shower_alert = !Boiler_Status.shower_alert;
-                myESP.mqttPublish(TOPIC_SHOWER_ALERT, Boiler_Status.shower_alert ? "1" : "0");
+                EMSESP_Status.shower_alert = !EMSESP_Status.shower_alert;
+                myESP.mqttPublish(TOPIC_SHOWER_ALERT, EMSESP_Status.shower_alert ? "1" : "0");
                 ok = true;
             }
         }
@@ -711,19 +750,31 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
         myESP.mqttSubscribe(TOPIC_SHOWER_ALERT);
         myESP.mqttSubscribe(TOPIC_SHOWER_COLDSHOT);
 
-        // publish to HA the status of the Shower parameters
-        myESP.mqttPublish(TOPIC_SHOWER_TIMER, Boiler_Status.shower_timer ? "1" : "0");
-        myESP.mqttPublish(TOPIC_SHOWER_ALERT, Boiler_Status.shower_alert ? "1" : "0");
+        // subscribe to a start message and send the first publish
+        myESP.mqttSubscribe(MQTT_TOPIC_START);
+        myESP.mqttPublish(MQTT_TOPIC_START, MQTT_TOPIC_START_PAYLOAD);
+
+        // publish the status of the Shower parameters
+        myESP.mqttPublish(TOPIC_SHOWER_TIMER, EMSESP_Status.shower_timer ? "1" : "0");
+        myESP.mqttPublish(TOPIC_SHOWER_ALERT, EMSESP_Status.shower_alert ? "1" : "0");
     }
 
+    // handle incoming MQTT publish events
     if (type == MQTT_MESSAGE_EVENT) {
+        // handle response from a start message
+        // for HA, it gets sent the bootime
+        if (strcmp(topic, MQTT_TOPIC_START) == 0) {
+            myDebug("Received boottime: %s", message);
+            myESP.setBoottime(message);
+        }
+
         // thermostat temp changes
         if (strcmp(topic, TOPIC_THERMOSTAT_CMD_TEMP) == 0) {
             float f     = strtof((char *)message, 0);
             char  s[10] = {0};
             myDebug("MQTT topic: thermostat temperature value %s", _float_to_char(s, f));
             ems_setThermostatTemp(f);
-            publishValues(true); // publish back so HA is immediately updated
+            publishValues(true); // publish back immediately
         }
 
         // thermostat mode changes
@@ -739,9 +790,9 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
         // shower timer
         if (strcmp(topic, TOPIC_SHOWER_TIMER) == 0) {
             if (message[0] == '1') {
-                Boiler_Status.shower_timer = true;
+                EMSESP_Status.shower_timer = true;
             } else if (message[0] == '0') {
-                Boiler_Status.shower_timer = false;
+                EMSESP_Status.shower_timer = false;
             }
             set_showerTimer();
         }
@@ -749,9 +800,9 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
         // shower alert
         if (strcmp(topic, TOPIC_SHOWER_ALERT) == 0) {
             if (message[0] == '1') {
-                Boiler_Status.shower_alert = true;
+                EMSESP_Status.shower_alert = true;
             } else if (message[0] == '0') {
-                Boiler_Status.shower_alert = false;
+                EMSESP_Status.shower_alert = false;
             }
             set_showerAlert();
         }
@@ -780,14 +831,19 @@ void WIFICallback() {
     ems_setModels();
 }
 
-// Initialize the boiler settings for the shower settings
-void initShower() {
-    Boiler_Status.shower_timer  = BOILER_SHOWER_TIMER;
-    Boiler_Status.shower_alert  = BOILER_SHOWER_ALERT;
-    Boiler_Shower.timerStart    = 0;
-    Boiler_Shower.timerPause    = 0;
-    Boiler_Shower.duration      = 0;
-    Boiler_Shower.doingColdShot = false;
+// Initialize the boiler settings and shower settings
+void initEMSESP() {
+    // general settings
+    EMSESP_Status.shower_timer = BOILER_SHOWER_TIMER;
+    EMSESP_Status.shower_alert = BOILER_SHOWER_ALERT;
+    EMSESP_Status.led_enabled  = false;
+    EMSESP_Status.timestamp    = millis();
+
+    // shower settings
+    EMSESP_Shower.timerStart    = 0;
+    EMSESP_Shower.timerPause    = 0;
+    EMSESP_Shower.duration      = 0;
+    EMSESP_Shower.doingColdShot = false;
 }
 
 // call PublishValues without forcing, so using CRC to see if we really need to publish
@@ -799,16 +855,16 @@ void do_publishValues() {
 }
 
 // callback to light up the LED, called via Ticker every second
+// fast way is to use WRITE_PERI_REG(PERIPHS_GPIO_BASEADDR + (state ? 4 : 8), (1 << BOILER_LED)); // 4 is on, 8 is off
 void do_ledcheck() {
-#ifndef NO_LED
-    if (ems_getBusConnected()) {
-        digitalWrite(BOILER_LED, (BOILER_LED == LED_BUILTIN) ? LOW : HIGH); // light on. For onboard LED high=off
-    } else {
-        int state = digitalRead(BOILER_LED);
-        digitalWrite(BOILER_LED, !state);
+    if (EMSESP_Status.led_enabled) {
+        if (ems_getBusConnected()) {
+            digitalWrite(BOILER_LED, (BOILER_LED == LED_BUILTIN) ? LOW : HIGH); // light on. For onboard LED high=off
+        } else {
+            int state = digitalRead(BOILER_LED);
+            digitalWrite(BOILER_LED, !state);
+        }
     }
-    //WRITE_PERI_REG(PERIPHS_GPIO_BASEADDR + (state ? 4 : 8), (1 << BOILER_LED)); // 4 is on, 8 is off
-#endif
 }
 
 // Thermostat scan
@@ -841,17 +897,17 @@ void do_regularUpdates() {
 void _showerColdShotStart() {
     myDebugLog("[Shower] doing a shot of cold water");
     ems_setWarmTapWaterActivated(false);
-    Boiler_Shower.doingColdShot = true;
+    EMSESP_Shower.doingColdShot = true;
     // start the timer for n seconds which will reset the water back to hot
     showerColdShotStopTimer.attach(SHOWER_COLDSHOT_DURATION, _showerColdShotStop);
 }
 
 // turn back on the hot water for the shower
 void _showerColdShotStop() {
-    if (Boiler_Shower.doingColdShot) {
+    if (EMSESP_Shower.doingColdShot) {
         myDebugLog("[Shower] finished shot of cold. hot water back on");
         ems_setWarmTapWaterActivated(true);
-        Boiler_Shower.doingColdShot = false;
+        EMSESP_Shower.doingColdShot = false;
         showerColdShotStopTimer.detach(); // disable the timer
     }
 }
@@ -861,62 +917,61 @@ void _showerColdShotStop() {
  */
 void showerCheck() {
     // if already in cold mode, ignore all this logic until we're out of the cold blast
-    if (!Boiler_Shower.doingColdShot) {
+    if (!EMSESP_Shower.doingColdShot) {
         // is the hot water running?
         if (EMS_Boiler.tapwaterActive) {
             // if heater was previously off, start the timer
-            if (Boiler_Shower.timerStart == 0) {
+            if (EMSESP_Shower.timerStart == 0) {
                 // hot water just started...
-                Boiler_Shower.timerStart    = timestamp;
-                Boiler_Shower.timerPause    = 0; // remove any last pauses
-                Boiler_Shower.doingColdShot = false;
-                Boiler_Shower.duration      = 0;
-                Boiler_Shower.showerOn      = false;
+                EMSESP_Shower.timerStart    = EMSESP_Status.timestamp;
+                EMSESP_Shower.timerPause    = 0; // remove any last pauses
+                EMSESP_Shower.doingColdShot = false;
+                EMSESP_Shower.duration      = 0;
+                EMSESP_Shower.showerOn      = false;
             } else {
                 // hot water has been  on for a while
                 // first check to see if hot water has been on long enough to be recognized as a Shower/Bath
-                if (!Boiler_Shower.showerOn && (timestamp - Boiler_Shower.timerStart) > SHOWER_MIN_DURATION) {
-                    Boiler_Shower.showerOn = true;
+                if (!EMSESP_Shower.showerOn && (EMSESP_Status.timestamp - EMSESP_Shower.timerStart) > SHOWER_MIN_DURATION) {
+                    EMSESP_Shower.showerOn = true;
                     myDebugLog("[Shower] hot water still running, starting shower timer");
                 }
                 // check if the shower has been on too long
-                else if ((((timestamp - Boiler_Shower.timerStart) > SHOWER_MAX_DURATION) && !Boiler_Shower.doingColdShot)
-                         && Boiler_Status.shower_alert) {
-                    myESP.sendHACommand(SHOWER_ALARM);
+                else if ((((EMSESP_Status.timestamp - EMSESP_Shower.timerStart) > SHOWER_MAX_DURATION) && !EMSESP_Shower.doingColdShot)
+                         && EMSESP_Status.shower_alert) {
                     myDebugLog("[Shower] exceeded max shower time");
                     _showerColdShotStart();
                 }
             }
         } else { // hot water is off
             // if it just turned off, record the time as it could be a short pause
-            if ((Boiler_Shower.timerStart != 0) && (Boiler_Shower.timerPause == 0)) {
-                Boiler_Shower.timerPause = timestamp;
+            if ((EMSESP_Shower.timerStart != 0) && (EMSESP_Shower.timerPause == 0)) {
+                EMSESP_Shower.timerPause = EMSESP_Status.timestamp;
             }
 
             // if shower has been off for longer than the wait time
-            if ((Boiler_Shower.timerPause != 0) && ((timestamp - Boiler_Shower.timerPause) > SHOWER_PAUSE_TIME)) {
+            if ((EMSESP_Shower.timerPause != 0) && ((EMSESP_Status.timestamp - EMSESP_Shower.timerPause) > SHOWER_PAUSE_TIME)) {
                 // it is over the wait period, so assume that the shower has finished and calculate the total time and publish
                 // because its unsigned long, can't have negative so check if length is less than OFFSET_TIME
-                if ((Boiler_Shower.timerPause - Boiler_Shower.timerStart) > SHOWER_OFFSET_TIME) {
-                    Boiler_Shower.duration = (Boiler_Shower.timerPause - Boiler_Shower.timerStart - SHOWER_OFFSET_TIME);
-                    if (Boiler_Shower.duration > SHOWER_MIN_DURATION) {
+                if ((EMSESP_Shower.timerPause - EMSESP_Shower.timerStart) > SHOWER_OFFSET_TIME) {
+                    EMSESP_Shower.duration = (EMSESP_Shower.timerPause - EMSESP_Shower.timerStart - SHOWER_OFFSET_TIME);
+                    if (EMSESP_Shower.duration > SHOWER_MIN_DURATION) {
                         char s[50]      = {0};
                         char buffer[16] = {0};
-                        strlcpy(s, itoa((uint8_t)((Boiler_Shower.duration / (1000 * 60)) % 60), buffer, 10), sizeof(s));
+                        strlcpy(s, itoa((uint8_t)((EMSESP_Shower.duration / (1000 * 60)) % 60), buffer, 10), sizeof(s));
                         strlcat(s, " minutes and ", sizeof(s));
-                        strlcat(s, itoa((uint8_t)((Boiler_Shower.duration / 1000) % 60), buffer, 10), sizeof(s));
+                        strlcat(s, itoa((uint8_t)((EMSESP_Shower.duration / 1000) % 60), buffer, 10), sizeof(s));
                         strlcat(s, " seconds", sizeof(s));
                         if (ems_getLogging() != EMS_SYS_LOGGING_NONE) {
                             myDebug("[Shower] finished with duration %s", s);
                         }
-                        myESP.mqttPublish(TOPIC_SHOWERTIME, s); // publish to HA
+                        myESP.mqttPublish(TOPIC_SHOWERTIME, s); // publish to MQTT
                     }
                 }
 
                 // reset everything
-                Boiler_Shower.timerStart = 0;
-                Boiler_Shower.timerPause = 0;
-                Boiler_Shower.showerOn   = false;
+                EMSESP_Shower.timerStart = 0;
+                EMSESP_Shower.timerPause = 0;
+                EMSESP_Shower.showerOn   = false;
                 _showerColdShotStop(); // turn hot water back on in case its off
             }
         }
@@ -927,35 +982,28 @@ void showerCheck() {
 // SETUP
 //
 void setup() {
-#ifndef NO_LED
-    // set pin for LED
-    pinMode(BOILER_LED, OUTPUT);
-    digitalWrite(BOILER_LED, (BOILER_LED == LED_BUILTIN) ? HIGH : LOW); // light on. For onboard high=off
-    ledcheckTimer.attach(LEDCHECK_TIME, do_ledcheck);                   // blink heartbeat LED
-#endif
-
 #ifndef DEBUG_SUPPORT
     // Timers using Ticker library
-    publishValuesTimer.attach(PUBLISHVALUES_TIME, do_publishValues);    // post HA values
+    publishValuesTimer.attach(PUBLISHVALUES_TIME, do_publishValues);    // post MQTT values
     systemCheckTimer.attach(SYSTEMCHECK_TIME, do_systemCheck);          // check if Boiler is online
     regularUpdatesTimer.attach(REGULARUPDATES_TIME, do_regularUpdates); // regular reads from the EMS
 #endif
 
     // set up myESP for Wifi, MQTT, MDNS and Telnet
-    myESP.setTelnetCommands(project_cmds, ArraySize(project_cmds), TelnetCommandCallback); // set up Telnet commands
-    myESP.setConnection(WIFI_SSID, WIFI_PASSWORD, MQTT_IP, MQTT_USER, MQTT_PASS);          // optional
-    myESP.begin(APP_HOSTNAME, APP_NAME, APP_VERSION);
-    myESP.setMQTTbase(MQTT_BASE);
+    myESP.setTelnet(project_cmds, ArraySize(project_cmds), TelnetCommandCallback, TelnetCallback); // set up Telnet commands
+    myESP.setWIFI(WIFI_SSID, WIFI_PASSWORD, WIFICallback);
+    myESP.setMQTT(MQTT_HOST, MQTT_USER, MQTT_PASS, MQTT_BASE, MQTT_KEEPALIVE, MQTT_QOS, MQTT_RETAIN, MQTT_WILL, MQTTCallback);
+    myESP.setSettings(FSCallback, SettingsCallback);
 
-    // callbacks
-    myESP.setWIFICallback(WIFICallback);
-    myESP.setMQTTCallback(MQTTCallback);
-    myESP.setTelnetCallback(TelnetCallback);
+    myESP.begin(APP_HOSTNAME, APP_NAME, APP_VERSION); // start it all up
 
-    // init Shower specific parameters
-    initShower();
+    // init our own parameters
+    initEMSESP();
 
-    ems_setLogging(EMS_SYS_LOGGING_NONE); // set default logging to none
+    // set pin for LED
+    pinMode(BOILER_LED, OUTPUT);
+    digitalWrite(BOILER_LED, (BOILER_LED == LED_BUILTIN) ? HIGH : LOW); // light off. For onboard high=off
+    ledcheckTimer.attach(LEDCHECK_TIME, do_ledcheck);                   // blink heartbeat LED
 
     // init the EMS bus
     // call ems.cpp's init function to set all the internal params
@@ -966,7 +1014,7 @@ void setup() {
 // Main loop
 //
 void loop() {
-    timestamp = millis();
+    EMSESP_Status.timestamp = millis();
 
     // the main loop
     myESP.loop();
@@ -979,7 +1027,7 @@ void loop() {
     }
 
     // do shower logic, if enabled
-    if (Boiler_Status.shower_timer) {
+    if (EMSESP_Status.shower_timer) {
         showerCheck();
     }
 }

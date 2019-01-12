@@ -6,7 +6,7 @@ env_default = d1_mini
 [common]
 platform = espressif8266
 flash_mode = dout
-; optional flags are -DNO_LED -DDEBUG_SUPPORT
+; optional flags are -DDEBUG_SUPPORT
 build_flags = -g -w
 lib_deps =
   CRC32

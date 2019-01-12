@@ -10,25 +10,36 @@
 
 // constructor
 MyESP::MyESP() {
-    _app_hostname           = strdup("MyESP");
-    _app_name               = strdup("MyESP");
-    _app_version            = strdup("1.0.0");
-    _boottime               = strdup("unknown");
-    _extern_WIFICallback    = NULL;
-    _extern_WIFICallbackSet = false;
+    _app_hostname = strdup("MyESP");
+    _app_name     = strdup("MyESP");
+    _app_version  = strdup("1.0.0");
+    _boottime     = strdup("unknown");
+
     _telnetcommand_callback = NULL;
     _telnet_callback        = NULL;
-    _helpProjectCmds        = NULL;
-    _helpProjectCmds_count  = 0;
-    _mqtt_host              = NULL;
-    _mqtt_password          = NULL;
-    _mqtt_username          = NULL;
-    _wifi_password          = NULL;
-    _wifi_ssid              = NULL;
-    _mqttbase               = NULL;
-    _suspendOutput          = false;
-    _mqtt_reconnect_delay   = MQTT_RECONNECT_DELAY_MIN;
-    _command                = (char *)malloc(TELNET_MAX_COMMAND_LENGTH); // reserve buffer for Serial/Telnet commands
+
+    _fs_callback          = NULL;
+    _fs_settings_callback = NULL;
+
+    _helpProjectCmds       = NULL;
+    _helpProjectCmds_count = 0;
+    _command               = (char *)malloc(TELNET_MAX_COMMAND_LENGTH); // reserve buffer for Serial/Telnet commands
+
+    _mqtt_host            = NULL;
+    _mqtt_password        = NULL;
+    _mqtt_username        = NULL;
+    _mqtt_retain          = false;
+    _mqtt_keepalive       = 300;
+    _mqtt_will            = NULL;
+    _mqtt_base            = NULL;
+    _mqtt_qos             = 0;
+    _mqtt_reconnect_delay = MQTT_RECONNECT_DELAY_MIN;
+
+    _wifi_password = NULL;
+    _wifi_ssid     = NULL;
+    _wifi_callback = NULL;
+
+    _suspendOutput = false;
 }
 
 MyESP::~MyESP() {
@@ -113,8 +124,8 @@ void MyESP::_wifiCallback(justwifi_messages_t code, char * parameter) {
         }
 
         // call any final custom settings
-        if (_extern_WIFICallbackSet) {
-            _extern_WIFICallback(); // call callback to set any custom things
+        if (_wifi_callback) {
+            _wifi_callback();
         }
     }
 
@@ -125,8 +136,8 @@ void MyESP::_wifiCallback(justwifi_messages_t code, char * parameter) {
         myDebug_P(PSTR("[WIFI] MAC   %s"), WiFi.softAPmacAddress().c_str());
 
         // call any final custom settings
-        if (_extern_WIFICallbackSet) {
-            _extern_WIFICallback(); // call callback to set any custom things
+        if (_wifi_callback) {
+            _wifi_callback();
         }
     }
 
@@ -152,26 +163,12 @@ void MyESP::_mqttOnMessage(char * topic, char * payload, size_t len) {
     char message[len + 1];
     strlcpy(message, (char *)payload, len + 1);
 
-    // myDebug_P(PSTR("[MQTT] Received %s => %s"), topic, message);
-
-    // check for our default ones
-    if ((strcmp(topic, MQTT_HA) == 0) && (strcmp(message, MQTT_TOPIC_START_PAYLOAD) == 0)) {
-        myDebug_P(PSTR("[MQTT] HA rebooted - restarting device"));
-        resetESP();
-        return;
-    }
+    // myDebug_P(PSTR("[MQTT] Received %s => %s"), topic, message); // enable for debugging
 
     // topics are in format MQTT_BASE/HOSTNAME/TOPIC
     char * topic_magnitude = strrchr(topic, '/'); // strip out everything until last /
     if (topic_magnitude != nullptr) {
         topic = topic_magnitude + 1;
-    }
-
-    // check for bootime, something specific I fetch as an acknowledgement from Home Assistant
-    if (strcmp(topic, MQTT_TOPIC_START) == 0) {
-        myDebug_P(PSTR("[MQTT] received boottime: %s"), message);
-        setBoottime(message);
-        return;
     }
 
     // Send message event to custom service
@@ -183,8 +180,8 @@ void MyESP::_mqttOnMessage(char * topic, char * payload, size_t len) {
 void MyESP::mqttSubscribe(const char * topic) {
     if (mqttClient.connected() && (strlen(topic) > 0)) {
         char s[100];
-        snprintf(s, sizeof(s), "%s/%s/%s", _mqttbase, _app_hostname, topic);
-        unsigned int packetId = mqttClient.subscribe(s, MQTT_QOS);
+        snprintf(s, sizeof(s), "%s/%s/%s", _mqtt_base, _app_hostname, topic);
+        unsigned int packetId = mqttClient.subscribe(s, _mqtt_qos);
         myDebug_P(PSTR("[MQTT] Subscribing to %s (PID %d)"), s, packetId);
     }
 }
@@ -194,7 +191,7 @@ void MyESP::mqttSubscribe(const char * topic) {
 void MyESP::mqttUnsubscribe(const char * topic) {
     if (mqttClient.connected() && (strlen(topic) > 0)) {
         char s[100];
-        snprintf(s, sizeof(s), "%s/%s/%s", _mqttbase, _app_hostname, topic);
+        snprintf(s, sizeof(s), "%s/%s/%s", _mqtt_base, _app_hostname, topic);
         unsigned int packetId = mqttClient.unsubscribe(s);
         myDebug_P(PSTR("[MQTT] Unsubscribing to %s (PID %d)"), s, packetId);
     }
@@ -203,26 +200,15 @@ void MyESP::mqttUnsubscribe(const char * topic) {
 // MQTT Publish
 void MyESP::mqttPublish(const char * topic, const char * payload) {
     char s[MQTT_MAX_SIZE];
-    snprintf(s, sizeof(s), "%s/%s/%s", _mqttbase, _app_hostname, topic);
+    snprintf(s, sizeof(s), "%s/%s/%s", _mqtt_base, _app_hostname, topic);
     // myDebug_P(PSTR("[MQTT] Sending pubish to %s with payload %s"), s, payload);
-    mqttClient.publish(s, MQTT_QOS, false, payload);
+    mqttClient.publish(s, _mqtt_qos, _mqtt_retain, payload);
 }
 
-// MQTT onConnect - when a connect is established automatically subscribe to my HA topics
+// MQTT onConnect - when a connect is established
 void MyESP::_mqttOnConnect() {
     myDebug_P(PSTR("[MQTT] Connected"));
     _mqtt_reconnect_delay = MQTT_RECONNECT_DELAY_MIN;
-
-#ifndef NO_HA
-    // standard subscribes for HA (Home Assistant)
-    mqttClient.subscribe(MQTT_HA, MQTT_QOS); // to "ha"
-    mqttSubscribe(MQTT_TOPIC_START);         // to home/<hostname>/start
-
-    // send specific start command to HA via MQTT, which returns the boottime
-    char s[48];
-    snprintf(s, sizeof(s), "%s/%s/%s", _mqttbase, _app_hostname, MQTT_TOPIC_START);
-    mqttClient.publish(s, MQTT_QOS, false, MQTT_TOPIC_START_PAYLOAD);
-#endif
 
     // call custom function to handle mqtt receives
     (_mqtt_callback)(MQTT_CONNECT_EVENT, NULL, NULL);
@@ -342,30 +328,19 @@ void MyESP::_ota_setup() {
 }
 
 // sets boottime
-void MyESP::setBoottime(char * boottime) {
+void MyESP::setBoottime(const char * boottime) {
     if (_boottime) {
         free(_boottime);
     }
     _boottime = strdup(boottime);
 }
 
-// sets boottime
-void MyESP::setMQTTbase(char * mqttbase) {
-    if (_mqttbase) {
-        free(_mqttbase);
-    }
-    _mqttbase = strdup(mqttbase);
-}
-
 // Set callback of sketch function to process project messages
-void MyESP::setTelnetCommands(command_t * cmds, uint8_t count, telnetcommand_callback_f callback) {
-    _helpProjectCmds        = cmds;     // command list
-    _helpProjectCmds_count  = count;    // number of commands
-    _telnetcommand_callback = callback; // external function to handle commands
-}
-
-void MyESP::setTelnetCallback(telnet_callback_f callback) {
-    _telnet_callback = callback;
+void MyESP::setTelnet(command_t * cmds, uint8_t count, telnetcommand_callback_f callback_cmd, telnet_callback_f callback) {
+    _helpProjectCmds        = cmds;         // command list
+    _helpProjectCmds_count  = count;        // number of commands
+    _telnetcommand_callback = callback_cmd; // external function to handle commands
+    _telnet_callback        = callback;
 }
 
 void MyESP::_telnetConnected() {
@@ -427,6 +402,8 @@ void MyESP::_consoleShowHelp() {
     SerialAndTelnet.println("*\n\r* Commands:\n\r*  ?=help, CTRL-D=quit, !=reboot");
     SerialAndTelnet.println(FPSTR("*  set <wifi_ssid | wifi_password | mqtt_host | mqtt_username | mqtt_password> [value]"));
     SerialAndTelnet.println(FPSTR("*  set erase"));
+    SerialAndTelnet.println(FPSTR("*  set led <on | off>"));
+
     SerialAndTelnet.println(FPSTR("*"));
 
     // print custom commands if available. Take from progmem
@@ -453,7 +430,6 @@ void MyESP::_consoleShowHelp() {
 void MyESP::resetESP() {
     myDebug_P(PSTR("* Reboot ESP..."));
     end();
-
 #if defined(ARDUINO_ARCH_ESP32)
     ESP.reset(); // for ESP8266 only
 #else
@@ -461,23 +437,7 @@ void MyESP::resetESP() {
 #endif
 }
 
-// sends a MQTT notification message to Home Assistant (HA)
-void MyESP::sendHANotification(const char * message) {
-    char payload[48];
-    snprintf(payload, sizeof(payload), "%s : %s", _app_hostname, message);
-    myDebug_P(PSTR("[MQTT] Sending HA notification %s"), payload);
-    mqttClient.publish(MQTT_HA_NOTIFICATION, MQTT_QOS, false, payload);
-}
-
-// send specific command to Home Assistant (HA) via MQTT
-// format is: home/<hostname>/command with payload <cmd>
-void MyESP::sendHACommand(const char * cmd) {
-    myDebug_P(PSTR("[MQTT] Sending HA command %s"), cmd);
-    char topic[48];
-    snprintf(topic, sizeof(topic), "%s/%s/%s", _mqttbase, _app_hostname, MQTT_TOPIC_COMMAND);
-    mqttClient.publish(topic, MQTT_QOS, false, cmd);
-}
-
+// read next word from string buffer
 char * MyESP::_telnet_readWord() {
     char * word = strtok(NULL, ", \n");
     return word;
@@ -485,10 +445,10 @@ char * MyESP::_telnet_readWord() {
 
 // change settings - always as strings
 // messy code but effective since we don't have too many settings
-void MyESP::_changeSetting(const char * setting, const char * value) {
+void MyESP::_changeSetting(uint8_t wc, const char * setting, const char * value) {
     bool ok = false;
 
-    // validate 2nd argument
+    // check for our internal commands first
     if (strcmp(setting, "erase") == 0) {
         _fs_eraseConfig();
         return;
@@ -502,9 +462,7 @@ void MyESP::_changeSetting(const char * setting, const char * value) {
             _wifi_ssid = strdup(value);
         }
         ok = true;
-    }
-
-    if (strcmp(setting, "wifi_password") == 0) {
+    } else if (strcmp(setting, "wifi_password") == 0) {
         if (_wifi_password)
             free(_wifi_password);
         _wifi_password = NULL; // just to be sure
@@ -512,9 +470,7 @@ void MyESP::_changeSetting(const char * setting, const char * value) {
             _wifi_password = strdup(value);
         }
         ok = true;
-    }
-
-    if (strcmp(setting, "mqtt_host") == 0) {
+    } else if (strcmp(setting, "mqtt_host") == 0) {
         if (_mqtt_host)
             free(_mqtt_host);
         _mqtt_host = NULL; // just to be sure
@@ -522,9 +478,7 @@ void MyESP::_changeSetting(const char * setting, const char * value) {
             _mqtt_host = strdup(value);
         }
         ok = true;
-    }
-
-    if (strcmp(setting, "mqtt_username") == 0) {
+    } else if (strcmp(setting, "mqtt_username") == 0) {
         if (_mqtt_username)
             free(_mqtt_username);
         _mqtt_username = NULL; // just to be sure
@@ -532,9 +486,7 @@ void MyESP::_changeSetting(const char * setting, const char * value) {
             _mqtt_username = strdup(value);
         }
         ok = true;
-    }
-
-    if (strcmp(setting, "mqtt_password") == 0) {
+    } else if (strcmp(setting, "mqtt_password") == 0) {
         if (_mqtt_password)
             free(_mqtt_password);
         _mqtt_password = NULL; // just to be sure
@@ -542,6 +494,9 @@ void MyESP::_changeSetting(const char * setting, const char * value) {
             _mqtt_password = strdup(value);
         }
         ok = true;
+    } else {
+        // finally check for any custom commands
+        ok = (_fs_settings_callback)(MYESP_FSACTION_SET, wc, setting, value);
     }
 
     if (!ok) {
@@ -558,7 +513,7 @@ void MyESP::_changeSetting(const char * setting, const char * value) {
     }
 
     if (_fs_saveConfig()) {
-        SerialAndTelnet.println("Changes will have effect after the next restart. Please reboot using ! command");
+        SerialAndTelnet.println("Note, some changes will only have effect after a device reboot (use ! command)");
     }
 }
 
@@ -600,14 +555,19 @@ void MyESP::_telnetCommand(char * commandLine) {
                 for (uint8_t i = 0; i < strlen(_mqtt_password); i++)
                     SerialAndTelnet.print("*");
             }
-            SerialAndTelnet.println("\n\r\n\rUsage: set <setting> <value>");
+            SerialAndTelnet.println();
+
+            // print custom settings
+            (_fs_settings_callback)(MYESP_FSACTION_LIST, 0, NULL, NULL);
+
+            SerialAndTelnet.println("\n\rUsage: set <setting> <value>");
         } else if (wc == 2) {
             char * setting = _telnet_readWord();
-            _changeSetting(setting, NULL);
+            _changeSetting(1, setting, NULL);
         } else if (wc == 3) {
             char * setting = _telnet_readWord();
             char * value   = _telnet_readWord();
-            _changeSetting(setting, value);
+            _changeSetting(2, setting, value);
         }
         return;
     }
@@ -655,7 +615,6 @@ void MyESP::_telnetHandle() {
             break;
         default:
             _suspendOutput = true;
-            c              = tolower(c);
             if (charsRead < TELNET_MAX_COMMAND_LENGTH) {
                 _command[charsRead++] = c;
             }
@@ -663,17 +622,6 @@ void MyESP::_telnetHandle() {
             break;
         }
     }
-}
-
-// sets a custom function to run when wifi is started
-void MyESP::setWIFICallback(void (*callback)()) {
-    _extern_WIFICallback    = callback;
-    _extern_WIFICallbackSet = true;
-}
-
-// the mqtt callback for after connecting to subscribe and process incoming messages
-void MyESP::setMQTTCallback(mqtt_callback_f callback) {
-    _mqtt_callback = callback;
 }
 
 // ensure we have a connection to MQTT broker
@@ -696,6 +644,9 @@ void MyESP::_mqttConnect() {
 
     mqttClient.setServer(_mqtt_host, MQTT_PORT);
     mqttClient.setClientId(_app_hostname);
+    mqttClient.setKeepAlive(_mqtt_keepalive);
+    mqttClient.setCleanSession(false);
+    mqttClient.setWill(_mqtt_will, _mqtt_qos, _mqtt_retain, "0"); // payload is 0
 
     if (_mqtt_username && _mqtt_password) {
         myDebug_P(PSTR("[MQTT] Connecting to MQTT using user %s"), _mqtt_username);
@@ -709,7 +660,7 @@ void MyESP::_mqttConnect() {
 }
 
 // Setup everything we need
-void MyESP::setConnection(char * wifi_ssid, char * wifi_password, char * mqtt_host, char * mqtt_username, char * mqtt_password) {
+void MyESP::setWIFI(char * wifi_ssid, char * wifi_password, wifi_callback_f callback) {
     // Check SSID too long or missing
     if (!wifi_ssid || *wifi_ssid == 0x00 || strlen(wifi_ssid) > 31) {
         _wifi_ssid = NULL;
@@ -724,6 +675,19 @@ void MyESP::setConnection(char * wifi_ssid, char * wifi_password, char * mqtt_ho
         _wifi_password = strdup(wifi_password);
     }
 
+    // callback
+    _wifi_callback = callback;
+}
+
+void MyESP::setMQTT(char *          mqtt_host,
+                    char *          mqtt_username,
+                    char *          mqtt_password,
+                    char *          mqtt_base,
+                    unsigned long   mqtt_keepalive,
+                    unsigned char   mqtt_qos,
+                    bool            mqtt_retain,
+                    char *          mqtt_will,
+                    mqtt_callback_f callback) {
     // can be empty
     if (!mqtt_host || *mqtt_host == 0x00) {
         _mqtt_host = NULL;
@@ -744,6 +708,26 @@ void MyESP::setConnection(char * wifi_ssid, char * wifi_password, char * mqtt_ho
     } else {
         _mqtt_password = strdup(mqtt_password);
     }
+
+    // base
+    if (_mqtt_base) {
+        free(_mqtt_base);
+    }
+    _mqtt_base = strdup(mqtt_base);
+
+    // callback
+    _mqtt_callback = callback;
+
+    // other mqtt settings
+    _mqtt_keepalive = mqtt_keepalive;
+    _mqtt_qos       = mqtt_qos;
+    _mqtt_retain    = mqtt_retain;
+
+    // last will
+    if (_mqtt_will) {
+        free(_mqtt_will);
+    }
+    _mqtt_will = strdup(mqtt_will);
 }
 
 // print contents of file
@@ -768,6 +752,11 @@ void MyESP::_fs_eraseConfig() {
     }
 }
 
+void MyESP::setSettings(fs_callback_f callback_fs, fs_settings_callback_f callback_settings_fs) {
+    _fs_callback          = callback_fs;
+    _fs_settings_callback = callback_settings_fs;
+}
+
 // load from spiffs
 bool MyESP::_fs_loadConfig() {
     File configFile = SPIFFS.open("/config.json", "r");
@@ -788,7 +777,7 @@ bool MyESP::_fs_loadConfig() {
     // use configFile.readString
     configFile.readBytes(buf.get(), size);
 
-    StaticJsonBuffer<300> jsonBuffer; // https://arduinojson.org/v5/assistant/
+    StaticJsonBuffer<500> jsonBuffer; // https://arduinojson.org/v5/assistant/
     JsonObject &          json = jsonBuffer.parseObject(buf.get());
 
     const char * value;
@@ -808,6 +797,9 @@ bool MyESP::_fs_loadConfig() {
     value          = json["mqtt_password"];
     _mqtt_password = (value) ? strdup(value) : NULL;
 
+    // callback for custom settings
+    (_fs_callback)(MYESP_FSACTION_LOAD, json);
+
     configFile.close();
 
     return true;
@@ -815,7 +807,7 @@ bool MyESP::_fs_loadConfig() {
 
 // save settings to spiffs
 bool MyESP::_fs_saveConfig() {
-    StaticJsonBuffer<200> jsonBuffer;
+    StaticJsonBuffer<500> jsonBuffer; // https://arduinojson.org/v5/assistant/
     JsonObject &          json = jsonBuffer.createObject();
 
     json["wifi_ssid"]     = _wifi_ssid;
@@ -823,6 +815,9 @@ bool MyESP::_fs_saveConfig() {
     json["mqtt_host"]     = _mqtt_host;
     json["mqtt_username"] = _mqtt_username;
     json["mqtt_password"] = _mqtt_password;
+
+    // callback for custom settings
+    (_fs_callback)(MYESP_FSACTION_SAVE, json);
 
     File configFile = SPIFFS.open("/config.json", "w");
     if (!configFile) {
@@ -842,6 +837,8 @@ void MyESP::_fs_setup() {
         myDebug_P(PSTR("[FS] Failed to mount the file system"));
         return;
     }
+
+    // _fs_printConfig(); // for debugging
 
     // load the config file. if it doesn't exist create it with anything that was specified
     if (!_fs_loadConfig()) {

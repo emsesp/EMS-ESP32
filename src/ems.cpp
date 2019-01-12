@@ -224,6 +224,9 @@ void ems_init(uint8_t boiler_modelid, uint8_t thermostat_modelid) {
     _ems_PollCount     = 0;
     _emsTxRetryCount   = 0;
     _last_TxTelgramCRC = 0;
+
+    // default logging is non
+    ems_setLogging(EMS_SYS_LOGGING_NONE);
 }
 
 // Getters and Setters for parameters

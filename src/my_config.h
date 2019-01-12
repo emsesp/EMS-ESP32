@@ -15,12 +15,18 @@
 // as these values are stored in SPIFFs for persisted
 #define WIFI_SSID NULL
 #define WIFI_PASSWORD NULL
-#define MQTT_IP NULL
+#define MQTT_HOST NULL
 #define MQTT_USER NULL
 #define MQTT_PASS NULL
 
 // All MQTT topics are prefixed with the following string
 #define MQTT_BASE "home"
+#define MQTT_TOPIC_START "start"
+#define MQTT_TOPIC_START_PAYLOAD "start"
+#define MQTT_WILL "status" // for last will & testament
+#define MQTT_RETAIN true
+#define MQTT_KEEPALIVE 300
+#define MQTT_QOS 1
 
 // default values for shower logic on/off
 #define BOILER_SHOWER_TIMER 1      // enable (1) to monitor shower time
@@ -29,7 +35,7 @@
 
 // Set LED pin used for showing ems bus connection status. Solid is connected, Flashing is error
 // can be either the onboard LED on the ESP8266 or external via an external pull-up LED (e.g. D1)
-// note: can be disabled completely using -DNO_LED build flag in platformio.ini
+// can be enabled and disabled via the 'set led' command
 #define BOILER_LED LED_BUILTIN // LED_BULLETIN for onboard LED
 
 // set this if using an external temperature sensor like a DS18B20
