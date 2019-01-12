@@ -98,7 +98,8 @@ class MyESP {
                  unsigned long   mqtt_keepalive,
                  unsigned char   mqtt_qos,
                  bool            mqtt_retain,
-                 char *          mqtt_will,
+                 char *          mqtt_will_topic,
+                 char *          mqtt_will_payload,
                  mqtt_callback_f callback);
 
     // debug & telnet
@@ -135,7 +136,8 @@ class MyESP {
     unsigned long   _mqtt_keepalive;
     unsigned char   _mqtt_qos;
     bool            _mqtt_retain;
-    char *          _mqtt_will;
+    char *          _mqtt_will_topic;
+    char *          _mqtt_will_payload;
 
     // wifi
     DNSServer       dnsServer; // For Access Point (AP) support

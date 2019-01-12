@@ -30,7 +30,8 @@ MyESP::MyESP() {
     _mqtt_username        = NULL;
     _mqtt_retain          = false;
     _mqtt_keepalive       = 300;
-    _mqtt_will            = NULL;
+    _mqtt_will_topic      = NULL;
+    _mqtt_will_payload    = NULL;
     _mqtt_base            = NULL;
     _mqtt_qos             = 0;
     _mqtt_reconnect_delay = MQTT_RECONNECT_DELAY_MIN;
@@ -646,7 +647,7 @@ void MyESP::_mqttConnect() {
     mqttClient.setClientId(_app_hostname);
     mqttClient.setKeepAlive(_mqtt_keepalive);
     mqttClient.setCleanSession(false);
-    mqttClient.setWill(_mqtt_will, _mqtt_qos, _mqtt_retain, "0"); // payload is 0
+    mqttClient.setWill(_mqtt_will_topic, _mqtt_qos, _mqtt_retain, _mqtt_will_payload);
 
     if (_mqtt_username && _mqtt_password) {
         myDebug_P(PSTR("[MQTT] Connecting to MQTT using user %s"), _mqtt_username);
@@ -686,7 +687,8 @@ void MyESP::setMQTT(char *          mqtt_host,
                     unsigned long   mqtt_keepalive,
                     unsigned char   mqtt_qos,
                     bool            mqtt_retain,
-                    char *          mqtt_will,
+                    char *          mqtt_will_topic,
+                    char *          mqtt_will_payload,
                     mqtt_callback_f callback) {
     // can be empty
     if (!mqtt_host || *mqtt_host == 0x00) {
@@ -724,10 +726,17 @@ void MyESP::setMQTT(char *          mqtt_host,
     _mqtt_retain    = mqtt_retain;
 
     // last will
-    if (_mqtt_will) {
-        free(_mqtt_will);
+    if (!mqtt_will_topic || *mqtt_will_topic == 0x00) {
+        _mqtt_will_topic = NULL;
+    } else {
+        _mqtt_will_topic = strdup(mqtt_will_topic);
     }
-    _mqtt_will = strdup(mqtt_will);
+
+    if (!mqtt_will_payload || *mqtt_will_payload == 0x00) {
+        _mqtt_will_payload = NULL;
+    } else {
+        _mqtt_will_payload = strdup(mqtt_will_payload);
+    }
 }
 
 // print contents of file

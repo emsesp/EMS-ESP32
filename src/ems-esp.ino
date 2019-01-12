@@ -994,7 +994,8 @@ void setup() {
     // set up myESP for Wifi, MQTT, MDNS and Telnet
     myESP.setTelnet(project_cmds, ArraySize(project_cmds), TelnetCommandCallback, TelnetCallback); // set up Telnet commands
     myESP.setWIFI(WIFI_SSID, WIFI_PASSWORD, WIFICallback);
-    myESP.setMQTT(MQTT_HOST, MQTT_USER, MQTT_PASS, MQTT_BASE, MQTT_KEEPALIVE, MQTT_QOS, MQTT_RETAIN, MQTT_WILL, MQTTCallback);
+    myESP.setMQTT(
+        MQTT_HOST, MQTT_USER, MQTT_PASS, MQTT_BASE, MQTT_KEEPALIVE, MQTT_QOS, MQTT_RETAIN, MQTT_WILL_TOPIC, MQTT_WILL_PAYLOAD, MQTTCallback);
     myESP.setSettings(FSCallback, SettingsCallback);
 
     myESP.begin(APP_HOSTNAME, APP_NAME, APP_VERSION); // start it all up
