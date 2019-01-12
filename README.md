@@ -313,7 +313,7 @@ The ESP8266 will start in Access Point (AP) mode, so connect via WiFi to the SSI
 
 ## Troubleshooting
 
-If the WiFi, MQTT, MDNS or something else fails to connect, re-build the firmware using the `-DDEBUG_SUPPORT` option, connect the ESP8266 to a USB in your computer and monitor the Serial output. A lot of detailed logging will be printed to help you pinpoint the cause of the error.
+If the WiFi fails to connect you won't be able to debug using the Telnet so re-build the firmware using the `-DDEBUG_SUPPORT` by un-commenting `debug_mode` in `platformio.ini`. Then connect the ESP8266 to a USB in your computer and monitor the Serial output. A lot of detailed logging will be printed to help you pinpoint the cause of the error for the Wifi, MQTT, MDNS and other things.
 
 The onboard LED will flash if there is no connection with the EMS bus. You can disable LED support by the 'set led' command from the telnet client
 
