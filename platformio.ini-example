@@ -6,7 +6,8 @@ env_default = d1_mini
 [common]
 platform = espressif8266
 flash_mode = dout
-; optional flags are -DDEBUG_SUPPORT
+;debug_mode = -DDEBUG_SUPPORT
+debug_mode =
 build_flags = -g -w
 lib_deps =
   CRC32
@@ -20,7 +21,7 @@ board = nodemcuv2
 platform = ${common.platform}
 framework = arduino
 lib_deps = ${common.lib_deps}
-build_flags = ${common.build_flags}
+build_flags = ${common.build_flags} ${common.debug_mode}
 board_build.flash_mode = ${common.flash_mode}
 upload_speed = 921600
 monitor_speed = 115200
@@ -32,7 +33,7 @@ board = d1_mini
 platform = ${common.platform}
 framework = arduino
 lib_deps = ${common.lib_deps}
-build_flags = ${common.build_flags}
+build_flags = ${common.build_flags} ${common.debug_mode}
 board_build.flash_mode = ${common.flash_mode}
 upload_speed = 921600
 monitor_speed = 115200
