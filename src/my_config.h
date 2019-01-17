@@ -25,7 +25,7 @@
 #define MQTT_TOPIC_START_PAYLOAD "start"
 #define MQTT_WILL_TOPIC "status" // for last will & testament topic name
 #define MQTT_WILL_PAYLOAD "0"    // for last will & testament payload
-#define MQTT_RETAIN true
+#define MQTT_RETAIN false
 #define MQTT_KEEPALIVE 300
 #define MQTT_QOS 1
 
