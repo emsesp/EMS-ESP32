@@ -401,10 +401,10 @@ void MyESP::_consoleShowHelp() {
 #endif
 
     SerialAndTelnet.println("*\n\r* Commands:\n\r*  ?=help, CTRL-D=quit, !=reboot");
+    SerialAndTelnet.println(FPSTR("*  set"));
     SerialAndTelnet.println(FPSTR("*  set <wifi_ssid | wifi_password | mqtt_host | mqtt_username | mqtt_password> [value]"));
     SerialAndTelnet.println(FPSTR("*  set erase"));
     SerialAndTelnet.println(FPSTR("*  set led <on | off>"));
-
     SerialAndTelnet.println(FPSTR("*"));
 
     // print custom commands if available. Take from progmem
