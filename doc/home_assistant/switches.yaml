@@ -1,7 +1,7 @@
 - platform: mqtt
   name: "Shower Timer"
-  state_topic: "home/esp-esp/shower_timer"
-  command_topic: "home/esp-esp/shower_timer"
+  state_topic: "home/ems-esp/shower_timer"
+  command_topic: "home/ems-esp/shower_timer"
   payload_on: "1"
   payload_off: "0"
   optimistic: false
@@ -10,8 +10,8 @@
 
 - platform: mqtt
   name: "Long Shower Alert"
-  state_topic: "home/esp-esp/shower_alert"
-  command_topic: "home/esp-esp/shower_alert"
+  state_topic: "home/ems-esp/shower_alert"
+  command_topic: "home/ems-esp/shower_alert"
   payload_on: "1"
   payload_off: "0"
   optimistic: false
