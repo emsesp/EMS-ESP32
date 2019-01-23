@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.2] 2019-01-23
+
+### Fixed
+
+- Handle thermostats that don't have builtin temperature sensors when showing current temperature (https://github.com/proddy/EMS-ESP/issues/18#issuecomment-451012963)
+
+### Changed
+
+- Improved way to identify if the EMS bus is connected
+- Improved 'types' command to show more details
+- Improved auto detect of thermostat types
+
+### Added
+
+- Some more devices like the Nefit Topline & RC310 thermostat recognition
+- Added a check to see Tx is possible. See 'Tx Capable' under the 'info' screen
+
+### Removed
+
+- Removed `MY_BOILER_MODELID` from `my_config.h`. It's always hardcoded.
+
 ## [1.3.1] 2019-01-12
 
 ### Fixed

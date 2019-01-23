@@ -1,5 +1,10 @@
 /*
  * Header file for ems.cpp
+ * 
+ * Paul Derbyshire - https://github.com/proddy/EMS-ESP
+ *
+ * See ChangeLog.md for history
+ * See README.md for Acknowledgments
  *
  */
 
@@ -8,8 +13,9 @@
 #include <Arduino.h>
 
 // EMS IDs
-#define EMS_ID_NONE 0x00 // Fixed - used as a dest in broadcast messages and empty type IDs
-#define EMS_ID_ME 0x0B   // Fixed - our device, hardcoded as the "Service Key"
+#define EMS_ID_NONE 0x00   // Fixed - used as a dest in broadcast messages and empty type IDs
+#define EMS_ID_ME 0x0B     // Fixed - our device, hardcoded as the "Service Key"
+#define EMS_ID_BOILER 0x08 // Fixed - boilers are always 0x08. I think.
 
 #define EMS_MIN_TELEGRAM_LENGTH 6 // minimal length for a validation telegram, including CRC
 
@@ -25,7 +31,7 @@
 #define EMS_VALUE_INT_OFF 0            // boolean false
 #define EMS_VALUE_INT_NOTSET 0xFF      // for 8-bit ints
 #define EMS_VALUE_LONG_NOTSET 0xFFFFFF // for 3-byte longs
-#define EMS_VALUE_FLOAT_NOTSET -255    // float unset
+#define EMS_VALUE_FLOAT_NOTSET -255    // float
 
 #define EMS_THERMOSTAT_READ_YES true
 #define EMS_THERMOSTAT_READ_NO false
@@ -89,15 +95,17 @@ typedef enum {
 typedef struct {
     _EMS_RX_STATUS   emsRxStatus;
     _EMS_TX_STATUS   emsTxStatus;
-    uint16_t         emsRxPgks;       // received
-    uint16_t         emsTxPkgs;       // sent
-    uint16_t         emxCrcErr;       // CRC errors
-    bool             emsPollEnabled;  // flag enable the response to poll messages
-    bool             emsTxEnabled;    // flag if we're allowing sending of Tx packages
-    _EMS_SYS_LOGGING emsLogging;      // logging
-    bool             emsRefreshed;    // fresh data, needs to be pushed out to MQTT
-    bool             emsBusConnected; // is there an active bus
-    unsigned long    emsRxTimestamp;  // timestamp of last EMS poll
+    uint16_t         emsRxPgks;        // received
+    uint16_t         emsTxPkgs;        // sent
+    uint16_t         emxCrcErr;        // CRC errors
+    bool             emsPollEnabled;   // flag enable the response to poll messages
+    bool             emsTxEnabled;     // flag if we're allowing sending of Tx packages
+    _EMS_SYS_LOGGING emsLogging;       // logging
+    bool             emsRefreshed;     // fresh data, needs to be pushed out to MQTT
+    bool             emsBusConnected;  // is there an active bus
+    unsigned long    emsRxTimestamp;   // timestamp of last EMS message received
+    unsigned long    emsPollTimestamp; // timestamp of last EMS poll
+    bool             emsTxCapable;     // able to send via Tx
 } _EMS_Sys_Status;
 
 // The Tx send package
@@ -139,7 +147,17 @@ typedef struct {
     uint8_t product_id;
     uint8_t type_id;
     char    model_string[50];
-} _Model_Type;
+} _Boiler_Type;
+
+// Definition for thermostat type
+typedef struct {
+    uint8_t model_id;
+    uint8_t product_id;
+    uint8_t type_id;
+    char    model_string[50];
+    bool    read_supported;
+    bool    write_supported;
+} _Thermostat_Type;
 
 /*
  * Telegram package defintions
@@ -191,21 +209,15 @@ typedef struct {           // UBAParameterWW
 
     // settings
     char    version[10];
-    uint8_t type_id;
-    uint8_t model_id;
+    uint8_t type_id; // this is typically always 0x08
+    uint8_t product_id;
 } _EMS_Boiler;
-
-// Definition for thermostat type
-typedef struct {
-    uint8_t model_id;
-    bool    read_supported;
-    bool    write_supported;
-} _Thermostat_Type;
 
 // Thermostat data
 typedef struct {
     uint8_t type_id;  // the type ID of the thermostat
     uint8_t model_id; // which Thermostat type
+    uint8_t product_id;
     bool    read_supported;
     bool    write_supported;
     char    version[10];
@@ -234,7 +246,7 @@ typedef struct {
 
 // function definitions
 extern void ems_parseTelegram(uint8_t * telegram, uint8_t len);
-void        ems_init(uint8_t boiler_modelid, uint8_t thermostat_modelid);
+void        ems_init(uint8_t thermostat_modelid);
 void        ems_doReadCommand(uint8_t type, uint8_t dest, bool forceRefresh = false);
 void        ems_sendRawTelegram(char * telegram);
 
@@ -259,25 +271,25 @@ bool             ems_getThermostatEnabled();
 bool             ems_getBoilerEnabled();
 bool             ems_getBusConnected();
 _EMS_SYS_LOGGING ems_getLogging();
-uint8_t          ems_getEmsTypesCount();
 bool             ems_getEmsRefreshed();
 uint8_t          ems_getThermostatModel();
-uint8_t          ems_getBoilerModel();
+void             ems_discoverModels();
+bool             ems_getTxCapable();
 
 void   ems_scanDevices();
 void   ems_printAllTypes();
-char * ems_getThermostatType(char * buffer);
+char * ems_getThermostatDescription(char * buffer);
 void   ems_printTxQueue();
-char * ems_getBoilerType(char * buffer);
+char * ems_getBoilerDescription(char * buffer);
 
 // private functions
 uint8_t _crcCalculator(uint8_t * data, uint8_t len);
 void    _processType(uint8_t * telegram, uint8_t length);
 void    _debugPrintPackage(const char * prefix, uint8_t * data, uint8_t len, const char * color);
 void    _ems_clearTxData();
-int     _ems_findModel(uint8_t model_id);
-char *  _ems_buildModelString(char * buffer, uint8_t size, uint8_t model_id);
+int     _ems_findBoilerModel(uint8_t model_id);
 bool    _ems_setModel(uint8_t model_id);
+void    _ems_setThermostatModel(uint8_t thermostat_modelid);
 
 // global so can referenced in other classes
 extern _EMS_Sys_Status EMS_Sys_Status;

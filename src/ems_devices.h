@@ -1,5 +1,10 @@
 /*
  * General information about known EMS devices
+ * 
+ * Paul Derbyshire - https://github.com/proddy/EMS-ESP
+ *
+ * See ChangeLog.md for history
+ * See README.md for Acknowledgments
  *
  */
 
@@ -28,7 +33,7 @@
 #define EMS_VALUE_UBAParameterWW_wwComfort_Eco 0xD8     // the value for eco
 
 /*
- * Thermostat...
+ * Thermostats...
  */
 
 // Common for all thermostats
@@ -71,17 +76,8 @@ typedef enum {
     EMS_MODEL_NONE,
     EMS_MODEL_ALL, // common for all devices
 
-    // service key
-    EMS_MODEL_SERVICEKEY, // this is us
-
-    // main buderus boiler type devices
-    EMS_MODEL_BK15,
+    // generic ID for the boiler
     EMS_MODEL_UBA,
-    EMS_MODEL_BC10,
-    EMS_MODEL_BC25,
-    EMS_MODEL_MM10,
-    EMS_MODEL_WM10,
-    EMS_MODEL_RFM20,
 
     // thermostats
     EMS_MODEL_ES73,
@@ -89,45 +85,42 @@ typedef enum {
     EMS_MODEL_RC20F,
     EMS_MODEL_RC30,
     EMS_MODEL_RC35,
-    EMS_MODEL_EASY
+    EMS_MODEL_EASY,
+    EMS_MODEL_RC310,
+    EMS_MODEL_CW100
 
 } _EMS_MODEL_ID;
 
 // EMS types for known Buderus devices. This list will be extended when new devices are recognized.
 // format is MODEL_ID, PRODUCT ID, TYPE_ID, DESCRIPTION
-const _Model_Type Model_Types[] = {
-
-    // me
-    {EMS_MODEL_SERVICEKEY, 999, 0x0B, "Service Key"},
+const _Boiler_Type Boiler_Types[] = {
 
     // various boilers and buderus type devices
-    {EMS_MODEL_UBA, 123, 0x08, "MC10/UBA3 Boiler"},
-    {EMS_MODEL_BK15, 64, 0x08, "Sieger BK15 Boiler"},
-    {EMS_MODEL_BC10, 190, 0x09, "BC10 Base Controller"},
-    {EMS_MODEL_BC25, 125, 0x09, "BC25 Base Controller"},
-    {EMS_MODEL_RFM20, 68, 0x09, "RFM20 RC20F Receiver"},
-    {EMS_MODEL_MM10, 251, 0x21, "MM10 Mixer Module"},  // warning, fake product id!
-    {EMS_MODEL_WM10, 250, 0x11, "WM10 Switch Module"}, // warning, fake product id!
-
-    // controllers and thermostats
-    {EMS_MODEL_ES73, 76, 0x10, "Sieger ES73"},
-    {EMS_MODEL_RC20, 77, 0x17, "RC20 (e.g. Nefit Moduline 300)"},
-    {EMS_MODEL_RC20F, 93, 0x18, "RC20F"},
-    {EMS_MODEL_RC30, 78, 0x10, "RC30 (e.g. Nefit Moduline 400)"},
-    {EMS_MODEL_RC35, 86, 0x10, "RC35 (or compatible"},
-    {EMS_MODEL_EASY, 202, 0x18, "TC100 (e.g. Nefit Easy or CT100)"}
+    {EMS_MODEL_UBA, 72, 0x08, "MC10"},
+    {EMS_MODEL_UBA, 123, 0x08, "Nefit Trendline"},
+    {EMS_MODEL_UBA, 115, 0x08, "Nefit Topline Compact"},
+    {EMS_MODEL_UBA, 64, 0x08, "Sieger BK15 Boiler"},
+    {EMS_MODEL_UBA, 190, 0x09, "BC10 Base Controller"},
+    {EMS_MODEL_UBA, 125, 0x09, "BC25 Base Controller"},
+    {EMS_MODEL_UBA, 68, 0x09, "RFM20 Receiver"},
+    {EMS_MODEL_UBA, 95, 0x08, "Bosch Condens 2500"},
+    {EMS_MODEL_UBA, 251, 0x21, "MM10 Mixer Module"},  // warning, fake product id!
+    {EMS_MODEL_UBA, 250, 0x11, "WM10 Switch Module"}, // warning, fake product id!
 
 };
+
 /*
- * Known thermostat types and their abilities
+ * Known thermostat types and their capabilities
  */
 const _Thermostat_Type Thermostat_Types[] = {
 
-    {EMS_MODEL_RC20, EMS_THERMOSTAT_READ_YES, EMS_THERMOSTAT_WRITE_YES},
-    {EMS_MODEL_RC20F, EMS_THERMOSTAT_READ_YES, EMS_THERMOSTAT_WRITE_YES},
-    {EMS_MODEL_RC30, EMS_THERMOSTAT_READ_YES, EMS_THERMOSTAT_WRITE_YES},
-    {EMS_MODEL_RC35, EMS_THERMOSTAT_READ_YES, EMS_THERMOSTAT_WRITE_YES},
-    {EMS_MODEL_EASY, EMS_THERMOSTAT_READ_YES, EMS_THERMOSTAT_WRITE_NO},
-    {EMS_MODEL_ES73, EMS_THERMOSTAT_READ_YES, EMS_THERMOSTAT_WRITE_YES}
+    {EMS_MODEL_ES73, 76, 0x10, "Sieger ES73", EMS_THERMOSTAT_READ_YES, EMS_THERMOSTAT_WRITE_YES},
+    {EMS_MODEL_RC20, 77, 0x17, "RC20 (e.g. Nefit Moduline 300)", EMS_THERMOSTAT_READ_YES, EMS_THERMOSTAT_WRITE_YES},
+    {EMS_MODEL_RC20F, 93, 0x18, "RC20F", EMS_THERMOSTAT_READ_YES, EMS_THERMOSTAT_WRITE_YES},
+    {EMS_MODEL_RC30, 78, 0x10, "RC30 (e.g. Nefit Moduline 400)", EMS_THERMOSTAT_READ_YES, EMS_THERMOSTAT_WRITE_YES},
+    {EMS_MODEL_RC35, 86, 0x10, "RC35", EMS_THERMOSTAT_READ_YES, EMS_THERMOSTAT_WRITE_YES},
+    {EMS_MODEL_EASY, 202, 0x18, "TC100 (e.g. Nefit Easy or CT100)", EMS_THERMOSTAT_READ_YES, EMS_THERMOSTAT_WRITE_NO},
+    {EMS_MODEL_RC310, 158, 0x10, "RC310", EMS_THERMOSTAT_READ_NO, EMS_THERMOSTAT_WRITE_NO},
+    {EMS_MODEL_CW100, 255, 0x18, "Bosch CW100", EMS_THERMOSTAT_READ_NO, EMS_THERMOSTAT_WRITE_NO}
 
 };

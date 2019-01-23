@@ -31,7 +31,7 @@
 #define PUBLISHVALUES_TIME 120 // every 2 minutes post MQTT values
 Ticker publishValuesTimer;
 
-#define SYSTEMCHECK_TIME 10 // every 10 seconds check if Boiler is online and execute other requests
+#define SYSTEMCHECK_TIME 20 // every 20 seconds check if Boiler is online
 Ticker systemCheckTimer;
 
 #define REGULARUPDATES_TIME 60 // every minute a call is made to fetch data from EMS devices manually
@@ -252,7 +252,7 @@ void _renderBoolValue(const char * prefix, uint8_t value) {
 void showInfo() {
     // General stats from EMS bus
 
-    myDebug("%sEMS-ESP System setstats:%s", COLOR_BOLD_ON, COLOR_BOLD_OFF);
+    myDebug("%sEMS-ESP System stats:%s", COLOR_BOLD_ON, COLOR_BOLD_OFF);
     _EMS_SYS_LOGGING sysLog = ems_getLogging();
     if (sysLog == EMS_SYS_LOGGING_BASIC) {
         myDebug("  System logging set to Basic");
@@ -266,8 +266,6 @@ void showInfo() {
 
     myDebug("  LED is %s", EMSESP_Status.led_enabled ? "on" : "off");
 
-    myDebug("  # EMS type handlers: %d", ems_getEmsTypesCount());
-
     myDebug("  Thermostat is %s, Boiler is %s, Poll is %s, Tx is %s, Shower Timer is %s, Shower Alert is %s",
             (ems_getThermostatEnabled() ? "enabled" : "disabled"),
             (ems_getBoilerEnabled() ? "enabled" : "disabled"),
@@ -276,7 +274,9 @@ void showInfo() {
             ((EMSESP_Status.shower_timer) ? "enabled" : "disabled"),
             ((EMSESP_Status.shower_alert) ? "enabled" : "disabled"));
 
-    myDebug("  EMS Bus Stats: Connected=%s, # Rx telegrams=%d, # Tx telegrams=%d, # Crc Errors=%d",
+    myDebug("\n%sEMS Bus Stats:%s", COLOR_BOLD_ON, COLOR_BOLD_OFF);
+    myDebug("  Bus Connected=%s, Tx Capable=%s, # Rx telegrams=%d, # Tx telegrams=%d, # Crc Errors=%d",
+            (ems_getTxCapable() ? "yes" : "no"),
             (ems_getBusConnected() ? "yes" : "no"),
             EMS_Sys_Status.emsRxPgks,
             EMS_Sys_Status.emsTxPkgs,
@@ -288,7 +288,7 @@ void showInfo() {
 
     // version details
     char buffer_type[64];
-    myDebug("  Boiler type: %s", ems_getBoilerType(buffer_type));
+    myDebug("  Boiler type: %s", ems_getBoilerDescription(buffer_type));
 
     // active stats
     myDebug("  Hot tap water is %s", (EMS_Boiler.tapwaterActive ? "running" : "off"));
@@ -357,7 +357,7 @@ void showInfo() {
     // Thermostat stats
     if (ems_getThermostatEnabled()) {
         myDebug("%sThermostat stats:%s", COLOR_BOLD_ON, COLOR_BOLD_OFF);
-        myDebug("  Thermostat type: %s", ems_getThermostatType(buffer_type));
+        myDebug("  Thermostat type: %s", ems_getThermostatDescription(buffer_type));
         _renderFloatValue("Setpoint room temperature", "C", EMS_Thermostat.setpoint_roomTemp);
         _renderFloatValue("Current room temperature", "C", EMS_Thermostat.curr_roomTemp);
         if (ems_getThermostatModel() != EMS_MODEL_EASY) {
@@ -448,7 +448,7 @@ void publishValues(bool force) {
     // see if the heating or hot tap water has changed, if so send
     // last_boilerActive stores heating in bit 1 and tap water in bit 2
     if ((last_boilerActive != ((EMS_Boiler.tapwaterActive << 1) + EMS_Boiler.heatingActive)) || force) {
-        myDebugLog("Publishing hot water and heating state via MQTT");
+        myDebugLog("Publishing hot water and heating states via MQTT");
         myESP.mqttPublish(TOPIC_BOILER_TAPWATER_ACTIVE, EMS_Boiler.tapwaterActive == 1 ? "1" : "0");
         myESP.mqttPublish(TOPIC_BOILER_HEATING_ACTIVE, EMS_Boiler.heatingActive == 1 ? "1" : "0");
 
@@ -570,17 +570,18 @@ void FSCallback(MYESP_FSACTION action, JsonObject & json) {
 // callback for custom settings
 // wc is number of arguments after the 'set' command
 bool SettingsCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, const char * value) {
+    bool ok = false;
+
     if (action == MYESP_FSACTION_SET) {
         if ((strcmp(setting, "led") == 0) && (wc == 2)) {
             if (strcmp(value, "on") == 0) {
                 EMSESP_Status.led_enabled = true;
+                ok                        = true;
             } else if (strcmp(value, "off") == 0) {
                 EMSESP_Status.led_enabled = false;
+                ok                        = true;
                 // let's make sure LED is really off
                 digitalWrite(BOILER_LED, (BOILER_LED == LED_BUILTIN) ? HIGH : LOW); // light off. For onboard high=off
-            } else {
-                // unknown command
-                return false;
             }
         }
     }
@@ -589,7 +590,7 @@ bool SettingsCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, c
         myDebug("  led=%s", EMSESP_Status.led_enabled ? "on" : "off");
     }
 
-    return true;
+    return ok;
 }
 
 // call back when a telnet client connects or disconnects
@@ -762,7 +763,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
     // handle incoming MQTT publish events
     if (type == MQTT_MESSAGE_EVENT) {
         // handle response from a start message
-        // for HA, it gets sent the bootime
+        // for example with HA it sends the system time from the server
         if (strcmp(topic, MQTT_TOPIC_START) == 0) {
             myDebug("Received boottime: %s", message);
             myESP.setBoottime(message);
@@ -828,9 +829,10 @@ void WIFICallback() {
     myDebug("[UART] Opened Rx/Tx connection");
 #endif
 
-    // now that we're connected, check to see if we boiler and thermostat set
-    // otherwise this will initiate a self scan
-    ems_setModels();
+    // now that we're connected, set up the boiler and thermostat
+    // the boiler's version will be requested and if there is no thermostat hardcoded it will try
+    // and find the first one
+    ems_discoverModels();
 }
 
 // Initialize the boiler settings and shower settings
@@ -879,20 +881,16 @@ void do_scanThermostat() {
 // do a system health check every now and then to see if we all connections
 void do_systemCheck() {
     if (!ems_getBusConnected()) {
-        myDebug("Error! Unable to connect to EMS bus. Check connection and make sure you're not in DEBUG_SUPPORT mode. Retrying in %d "
-                "seconds...",
-                SYSTEMCHECK_TIME);
+        myDebug("Error! Unable to read from EMS bus. Retrying in %d seconds...", SYSTEMCHECK_TIME);
     }
 }
 
 // force calls to get data from EMS for the types that aren't sent as broadcasts
 // only if we have a EMS connection
 void do_regularUpdates() {
-    if (ems_getBusConnected()) {
-        myDebugLog("Calling scheduled data refresh from EMS devices..");
-        ems_getThermostatValues();
-        ems_getBoilerValues();
-    }
+    myDebugLog("Calling scheduled data refresh from EMS devices..");
+    ems_getThermostatValues();
+    ems_getBoilerValues();
 }
 
 // turn off hot water to send a shot of cold
@@ -1010,7 +1008,7 @@ void setup() {
 
     // init the EMS bus
     // call ems.cpp's init function to set all the internal params
-    ems_init(MY_BOILER_MODELID, MY_THERMOSTAT_MODELID);
+    ems_init(MY_THERMOSTAT_MODELID);
 }
 
 //
