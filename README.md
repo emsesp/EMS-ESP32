@@ -5,7 +5,7 @@ EMS-ESP is a project to build an electronic controller circuit using an Espressi
 There are 3 parts to this project, first the design of the circuit, secondly the code for the ESP8266 microcontroller firmware and lastly an example configuration for Home Assistant to monitor the data and issue direct commands via MQTT.
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/b8880625bdf841d4adb2829732030887)](https://app.codacy.com/app/proddy/EMS-ESP?utm_source=github.com&utm_medium=referral&utm_content=proddy/EMS-ESP&utm_campaign=Badge_Grade_Settings)
-[![version](https://img.shields.io/badge/version-1.3.1-brightgreen.svg)](CHANGELOG.md)
+[![version](https://img.shields.io/badge/version-1.3.2-brightgreen.svg)](CHANGELOG.md)
 
 - [EMS-ESP](#ems-esp)
   - [Introduction](#introduction)
@@ -21,7 +21,7 @@ There are 3 parts to this project, first the design of the circuit, secondly the
     - [EMS Broadcasting](#ems-broadcasting)
     - [EMS Reading and Writing](#ems-reading-and-writing)
   - [The ESP8266 Source Code](#the-esp8266-source-code)
-    - [Supported EMS Types](#supported-ems-types)
+    - [Special EMS Types](#special-ems-types)
     - [Which thermostats are supported?](#which-thermostats-are-supported)
     - [Customizing The Code](#customizing-the-code)
     - [Using MQTT](#using-mqtt)
@@ -192,12 +192,12 @@ Every telegram sent is echo'd back to Rx, along the same Bus used for all Rx/Tx 
 
 `ems.cpp` defines callback functions that handle all the broadcast types listed above (e.g. 0x34, 0x18, 0x19 etc) plus these extra types:
 
-| Source (ID)       | Type ID          | Name                          | Description                              |
-| ----------------- | ---------------- | ----------------------------- | ---------------------------------------- |
-| Boiler (0x08)     | 0x33             | UBAParameterWW                | reads selected & desired warm water temp |
-| Boiler (0x08)     | 0x14             | UBATotalUptimeMessage         |                                          |
-| Boiler (0x08)     | 0x15             | UBAMaintenanceSettingsMessage |                                          |
-| Boiler (0x08)     | 0x16             | UBAParametersMessage          |                                          |
+| Source (ID)   | Type ID | Name                          | Description                              |
+| ------------- | ------- | ----------------------------- | ---------------------------------------- |
+| Boiler (0x08) | 0x33    | UBAParameterWW                | reads selected & desired warm water temp |
+| Boiler (0x08) | 0x14    | UBATotalUptimeMessage         |                                          |
+| Boiler (0x08) | 0x15    | UBAMaintenanceSettingsMessage |                                          |
+| Boiler (0x08) | 0x16    | UBAParametersMessage          |                                          |
 
 In `ems.cpp` you can add scheduled calls to specific EMS types in the functions         `ems_getThermostatValues()` and `ems_getBoilerValues()`.
 
@@ -284,7 +284,7 @@ Porting to the Arduino IDE can be a little tricky but it is possible.
 - Add the ESP8266 boards (from Preferences add Additional Board URL `http://arduino.esp8266.com/stable/package_esp8266com_index.json`)
 - Go to Boards Manager and install ESP8266 2.4.x platform
 - Select your ESP8266 from Tools->Boards and the correct port with Tools->Port
-- From the Library Manager install the needed libraries from platformio.ini
+- From the Library Manager install the needed libraries from platformio.ini. Note make sure you pick ArduinoJson v5 and not v6. See https://arduinojson.org/v5/doc/
 - Put all the files in a single sketch folder
 - cross your fingers and hit CTRL-R to compile
 
