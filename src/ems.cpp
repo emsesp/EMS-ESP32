@@ -1413,12 +1413,12 @@ void ems_scanDevices() {
  * Print out all handled types
  */
 void ems_printAllTypes() {
-    myDebug("\nThese %d boiler type devices are supported:", _Boiler_Types_max);
-
     uint8_t i;
 
+    myDebug("\nThese %d boiler type devices are in the library:", _Boiler_Types_max);
+
     for (i = 0; i < _Boiler_Types_max; i++) {
-        myDebug(" %s : type ID:0x%02X (%s)", Boiler_Types[i].model_string, EMS_Types[i].type, EMS_Types[i].typeString);
+        myDebug(" %s,  type ID:0x%02X Product ID:%d", Boiler_Types[i].model_string, Boiler_Types[i].type_id, Boiler_Types[i].product_id);
     }
 
     myDebug("\nThese telegram type IDs are recognized for the selected boiler:");
@@ -1431,12 +1431,12 @@ void ems_printAllTypes() {
 
     myDebug("\nThese %d thermostats models are supported:", _Thermostat_Types_max);
     for (i = 0; i < _Thermostat_Types_max; i++) {
-        myDebug(" %s type ID:0x%02X Product ID:%d Read supported:%s Write supported:%s",
+        myDebug(" %s,  type ID:0x%02X Product ID:%d Read/Write support:%c%c",
                 Thermostat_Types[i].model_string,
                 Thermostat_Types[i].type_id,
                 Thermostat_Types[i].product_id,
-                (Thermostat_Types[i].read_supported) ? "yes" : "no",
-                (Thermostat_Types[i].write_supported) ? "yes" : "no");
+                (Thermostat_Types[i].read_supported) ? 'r' : ' ',
+                (Thermostat_Types[i].write_supported) ? 'w' : ' ');
     }
 }
 
