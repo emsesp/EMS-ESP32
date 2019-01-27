@@ -13,7 +13,9 @@ MyESP::MyESP() {
     _app_hostname = strdup("MyESP");
     _app_name     = strdup("MyESP");
     _app_version  = strdup("1.0.0");
+
     _boottime     = strdup("unknown");
+    _load_average = 100; // calculated load average
 
     _telnetcommand_callback = NULL;
     _telnet_callback        = NULL;
@@ -33,6 +35,7 @@ MyESP::MyESP() {
     _mqtt_will_topic      = NULL;
     _mqtt_will_payload    = NULL;
     _mqtt_base            = NULL;
+    _mqtt_topic           = NULL;
     _mqtt_qos             = 0;
     _mqtt_reconnect_delay = MQTT_RECONNECT_DELAY_MIN;
 
@@ -180,10 +183,8 @@ void MyESP::_mqttOnMessage(char * topic, char * payload, size_t len) {
 // to MQTT_BASE/app_hostname/topic
 void MyESP::mqttSubscribe(const char * topic) {
     if (mqttClient.connected() && (strlen(topic) > 0)) {
-        char s[100];
-        snprintf(s, sizeof(s), "%s/%s/%s", _mqtt_base, _app_hostname, topic);
-        unsigned int packetId = mqttClient.subscribe(s, _mqtt_qos);
-        myDebug_P(PSTR("[MQTT] Subscribing to %s (PID %d)"), s, packetId);
+        unsigned int packetId = mqttClient.subscribe(_mqttTopic(topic), _mqtt_qos);
+        myDebug_P(PSTR("[MQTT] Subscribing to %s (PID %d)"), _mqttTopic(topic), packetId);
     }
 }
 
@@ -191,19 +192,15 @@ void MyESP::mqttSubscribe(const char * topic) {
 // to MQTT_BASE/app_hostname/topic
 void MyESP::mqttUnsubscribe(const char * topic) {
     if (mqttClient.connected() && (strlen(topic) > 0)) {
-        char s[100];
-        snprintf(s, sizeof(s), "%s/%s/%s", _mqtt_base, _app_hostname, topic);
-        unsigned int packetId = mqttClient.unsubscribe(s);
-        myDebug_P(PSTR("[MQTT] Unsubscribing to %s (PID %d)"), s, packetId);
+        unsigned int packetId = mqttClient.unsubscribe(_mqttTopic(topic));
+        myDebug_P(PSTR("[MQTT] Unsubscribing to %s (PID %d)"), _mqttTopic(topic), packetId);
     }
 }
 
 // MQTT Publish
 void MyESP::mqttPublish(const char * topic, const char * payload) {
-    char s[MQTT_MAX_SIZE];
-    snprintf(s, sizeof(s), "%s/%s/%s", _mqtt_base, _app_hostname, topic);
-    // myDebug_P(PSTR("[MQTT] Sending pubish to %s with payload %s"), s, payload);
-    mqttClient.publish(s, _mqtt_qos, _mqtt_retain, payload);
+    // myDebug_P(PSTR("[MQTT] Sending pubish to %s with payload %s"), _mqttTopic(topic), payload);
+    mqttClient.publish(_mqttTopic(topic), _mqtt_qos, _mqtt_retain, payload);
 }
 
 // MQTT onConnect - when a connect is established
@@ -227,7 +224,7 @@ void MyESP::_mqtt_setup() {
 
     mqttClient.onDisconnect([this](AsyncMqttClientDisconnectReason reason) {
         if (reason == AsyncMqttClientDisconnectReason::TCP_DISCONNECTED) {
-            myDebug_P(PSTR("[MQTT] TCP Disconnected"));
+            myDebug_P(PSTR("[MQTT] TCP Disconnected. Check mqtt logs."));
             (_mqtt_callback)(MQTT_DISCONNECT_EVENT, NULL, NULL); // call callback with disconnect
         }
         if (reason == AsyncMqttClientDisconnectReason::MQTT_IDENTIFIER_REJECTED) {
@@ -394,8 +391,9 @@ void MyESP::_consoleShowHelp() {
         SerialAndTelnet.printf("* Connected to WiFi SSID: %s\n\r", WiFi.SSID().c_str());
         SerialAndTelnet.printf("* Boot time: %s\n\r", _boottime);
     }
+    SerialAndTelnet.printf("* Free RAM:%d KB, Load:%d%%\n\r", (ESP.getFreeHeap() / 1024), getSystemLoadAverage());
+    // for battery power is ESP.getVcc()
 
-    SerialAndTelnet.printf("* Free RAM: %d bytes\n\r", ESP.getFreeHeap());
 #ifdef DEBUG_SUPPORT
     SerialAndTelnet.println("* Warning: in DEBUG_SUPPORT mode!");
 #endif
@@ -425,6 +423,8 @@ void MyESP::_consoleShowHelp() {
             SerialAndTelnet.println(FPSTR(_helpProjectCmds[i].description));
         }
     }
+
+    SerialAndTelnet.println(); // newline
 }
 
 // reset / restart
@@ -561,7 +561,7 @@ void MyESP::_telnetCommand(char * commandLine) {
             // print custom settings
             (_fs_settings_callback)(MYESP_FSACTION_LIST, 0, NULL, NULL);
 
-            SerialAndTelnet.println("\n\rUsage: set <setting> <value>");
+            SerialAndTelnet.println("\n\rUsage: set <setting> [value]");
         } else if (wc == 2) {
             char * setting = _telnet_readWord();
             _changeSetting(1, setting, NULL);
@@ -647,10 +647,15 @@ void MyESP::_mqttConnect() {
     mqttClient.setClientId(_app_hostname);
     mqttClient.setKeepAlive(_mqtt_keepalive);
     mqttClient.setCleanSession(false);
-    mqttClient.setWill(_mqtt_will_topic, _mqtt_qos, _mqtt_retain, _mqtt_will_payload);
+
+    // last will
+    if (_mqtt_will_topic) {
+        myDebug_P(PSTR("[MQTT] Setting last will topic %s"), _mqttTopic(_mqtt_will_topic));
+        mqttClient.setWill(_mqttTopic(_mqtt_will_topic), _mqtt_qos, _mqtt_retain, _mqtt_will_payload);
+    }
 
     if (_mqtt_username && _mqtt_password) {
-        myDebug_P(PSTR("[MQTT] Connecting to MQTT using user %s"), _mqtt_username);
+        myDebug_P(PSTR("[MQTT] Connecting to MQTT using user %s..."), _mqtt_username);
         mqttClient.setCredentials(_mqtt_username, _mqtt_password);
     } else {
         myDebug_P(PSTR("[MQTT] Connecting to MQTT..."));
@@ -720,7 +725,7 @@ void MyESP::setMQTT(char *          mqtt_host,
     // callback
     _mqtt_callback = callback;
 
-    // other mqtt settings
+    // various mqtt settings
     _mqtt_keepalive = mqtt_keepalive;
     _mqtt_qos       = mqtt_qos;
     _mqtt_retain    = mqtt_retain;
@@ -731,13 +736,33 @@ void MyESP::setMQTT(char *          mqtt_host,
     } else {
         _mqtt_will_topic = strdup(mqtt_will_topic);
     }
-
     if (!mqtt_will_payload || *mqtt_will_payload == 0x00) {
         _mqtt_will_payload = NULL;
     } else {
         _mqtt_will_payload = strdup(mqtt_will_payload);
     }
 }
+
+// builds up a topic by prefixing the base and hostname
+char * MyESP::_mqttTopic(const char * topic) {
+    char buffer[MQTT_MAX_TOPIC_SIZE] = {0};
+
+    strlcpy(buffer, _mqtt_base, sizeof(buffer));
+    strlcat(buffer, "/", sizeof(buffer));
+    strlcat(buffer, _app_hostname, sizeof(buffer));
+    strlcat(buffer, "/", sizeof(buffer));
+    strlcat(buffer, topic, sizeof(buffer));
+
+    //snprintf(buffer, sizeof(buffer), "%s/%s/%s", _mqtt_base, _app_hostname, topic);
+
+    if (_mqtt_topic) {
+        free(_mqtt_topic);
+    }
+    _mqtt_topic = strdup(buffer);
+
+    return _mqtt_topic;
+}
+
 
 // print contents of file
 void MyESP::_fs_printConfig() {
@@ -754,7 +779,7 @@ void MyESP::_fs_printConfig() {
 
 // format File System
 void MyESP::_fs_eraseConfig() {
-    myDebug_P(PSTR("[FS] Erasing settings. Please wait. ESP will automatically restart when finished."));
+    myDebug_P(PSTR("[FS] Erasing settings, please wait. ESP will automatically restart when finished."));
 
     if (SPIFFS.format()) {
         resetESP();
@@ -855,6 +880,30 @@ void MyESP::_fs_setup() {
     }
 }
 
+unsigned long MyESP::getSystemLoadAverage() {
+    return _load_average;
+}
+
+// calculate load average
+void MyESP::_calculateLoad() {
+    static unsigned long last_loadcheck    = 0;
+    static unsigned long load_counter_temp = 0;
+    load_counter_temp++;
+
+    if (millis() - last_loadcheck > LOADAVG_INTERVAL) {
+        static unsigned long load_counter     = 0;
+        static unsigned long load_counter_max = 1;
+
+        load_counter      = load_counter_temp;
+        load_counter_temp = 0;
+        if (load_counter > load_counter_max) {
+            load_counter_max = load_counter;
+        }
+        _load_average  = 100 - (100 * load_counter / load_counter_max);
+        last_loadcheck = millis();
+    }
+}
+
 // register new instance
 void MyESP::begin(char * app_hostname, char * app_name, char * app_version) {
     _app_hostname = strdup(app_hostname);
@@ -874,9 +923,12 @@ void MyESP::begin(char * app_hostname, char * app_name, char * app_version) {
  * Loop. This is called as often as possible and it handles wifi, telnet, mqtt etc
  */
 void MyESP::loop() {
+    _calculateLoad(); // calculate load
+
     jw.loop();       // WiFi
     _telnetHandle(); // Telnet/Debugger
 
+    // do nothing else until we've got a wifi connection
     if (WiFi.getMode() & WIFI_AP) {
         return;
     }

@@ -22,16 +22,20 @@ _EMS_Sys_Status EMS_Sys_Status; // EMS Status
 CircularBuffer<_EMS_TxTelegram, EMS_TX_TELEGRAM_QUEUE_MAX> EMS_TxQueue; // FIFO queue for Tx send buffer
 
 // callbacks per type
-// Boiler and Buderus devices
+
+// generic
 void _process_Version(uint8_t * data, uint8_t length);
+
+// Boiler and Buderus devices
 void _process_UBAMonitorFast(uint8_t * data, uint8_t length);
 void _process_UBAMonitorSlow(uint8_t * data, uint8_t length);
 void _process_UBAMonitorWWMessage(uint8_t * data, uint8_t length);
 void _process_UBAParameterWW(uint8_t * data, uint8_t length);
 void _process_UBATotalUptimeMessage(uint8_t * data, uint8_t length);
+void _process_UBAParametersMessage(uint8_t * data, uint8_t length);
+void _process_SetPoints(uint8_t * data, uint8_t length);
 
 // Common for most thermostats
-void _process_SetPoints(uint8_t * data, uint8_t length);
 void _process_RCTime(uint8_t * data, uint8_t length);
 void _process_RCOutdoorTempMessage(uint8_t * data, uint8_t length);
 
@@ -66,8 +70,7 @@ const _EMS_Type EMS_Types[] = {
     {EMS_MODEL_UBA, EMS_TYPE_UBAParameterWW, "UBAParameterWW", _process_UBAParameterWW},
     {EMS_MODEL_UBA, EMS_TYPE_UBATotalUptimeMessage, "UBATotalUptimeMessage", _process_UBATotalUptimeMessage},
     {EMS_MODEL_UBA, EMS_TYPE_UBAMaintenanceSettingsMessage, "UBAMaintenanceSettingsMessage", NULL},
-    {EMS_MODEL_UBA, EMS_TYPE_UBAParametersMessage, "UBAParametersMessage", NULL},
-    {EMS_MODEL_UBA, EMS_TYPE_UBAMaintenanceStatusMessage, "UBAMaintenanceStatusMessage", NULL},
+    {EMS_MODEL_UBA, EMS_TYPE_UBAParametersMessage, "UBAParametersMessage", _process_UBAParametersMessage},
     {EMS_MODEL_UBA, EMS_TYPE_UBASetPoints, "UBASetPoints", _process_SetPoints},
 
     // RC20 and RC20F
@@ -212,6 +215,12 @@ void ems_init(uint8_t thermostat_modelid) {
     // UBATotalUptimeMessage
     EMS_Boiler.UBAuptime = EMS_VALUE_LONG_NOTSET; // Total UBA working hours
 
+    // UBAParametersMessage
+    EMS_Boiler.heating_temp = EMS_VALUE_INT_NOTSET; // Heating temperature setting on the boiler
+    EMS_Boiler.pump_mod_max = EMS_VALUE_INT_NOTSET; // Boiler circuit pump modulation max. power
+    EMS_Boiler.pump_mod_min = EMS_VALUE_INT_NOTSET; // Boiler circuit pump modulation min. power
+
+    // calculated values
     EMS_Boiler.tapwaterActive = EMS_VALUE_INT_NOTSET; // Hot tap water is on/off
     EMS_Boiler.heatingActive  = EMS_VALUE_INT_NOTSET; // Central heating is on/off
 
@@ -569,11 +578,6 @@ void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
     if (length == 1) {
         uint8_t value = telegram[0]; // 1st byte of data package
 
-        // TODO: remove, only for debugging why some people can't do a Tx
-        //if ((value & 0x80) == 0x80) {
-        //    myDebug("Poll: %02X", value);
-        //}
-
         // check first for a Poll for us
         if (value == (EMS_ID_ME | 0x80)) {
             // store when we received a last poll
@@ -884,6 +888,15 @@ void _process_UBAParameterWW(uint8_t * data, uint8_t length) {
 void _process_UBATotalUptimeMessage(uint8_t * data, uint8_t length) {
     EMS_Boiler.UBAuptime        = _toLong(0, data);
     EMS_Sys_Status.emsRefreshed = true; // when we receieve this, lets force an MQTT publish
+}
+
+/*
+ * UBAParametersMessage - type 0x16
+ */
+void _process_UBAParametersMessage(uint8_t * data, uint8_t length) {
+    EMS_Boiler.heating_temp = data[1];
+    EMS_Boiler.pump_mod_max = data[9];
+    EMS_Boiler.pump_mod_min = data[10];
 }
 
 /**
@@ -1298,6 +1311,7 @@ void ems_getBoilerValues() {
     ems_doReadCommand(EMS_TYPE_UBAMonitorFast, EMS_Boiler.type_id); // get boiler stats, instead of waiting 10secs for the broadcast
     ems_doReadCommand(EMS_TYPE_UBAMonitorSlow, EMS_Boiler.type_id); // get more boiler stats, instead of waiting 60secs for the broadcast
     ems_doReadCommand(EMS_TYPE_UBAParameterWW, EMS_Boiler.type_id); // get Warm Water values
+    ems_doReadCommand(EMS_TYPE_UBAParametersMessage, EMS_Boiler.type_id);  // get MC10 boiler values
     ems_doReadCommand(EMS_TYPE_UBATotalUptimeMessage, EMS_Boiler.type_id); // get Warm Water values
 }
 
@@ -1381,7 +1395,7 @@ char * ems_getBoilerDescription(char * buffer) {
  * Find the versions of our connected devices
  */
 void ems_scanDevices() {
-    myDebug("Scanning EMS bus for devices. This may take a few seconds...");
+    myDebug("Scanning EMS bus for devices...");
 
     // start refresh when scanning and forget anything devices we may have already set
     EMS_Thermostat.type_id  = EMS_ID_NONE; // forget thermostat

@@ -25,6 +25,8 @@
 #include <ESP8266mDNS.h>
 #endif
 
+#define LOADAVG_INTERVAL 30000 // Interval between calculating load average (in ms)
+
 // WIFI
 #define WIFI_CONNECT_TIMEOUT 10000    // Connecting timeout for WIFI in ms
 #define WIFI_RECONNECT_INTERVAL 60000 // If could not connect to WIFI, retry after this time in ms
@@ -38,6 +40,8 @@
 #define MQTT_RECONNECT_DELAY_STEP 5000  // Increase the reconnect delay in 5 seconds after each failed attempt
 #define MQTT_RECONNECT_DELAY_MAX 120000 // Set reconnect time to 2 minutes at most
 #define MQTT_MAX_SIZE 600               // max length of MQTT message
+#define MQTT_MAX_TOPIC_SIZE 50          // max length of MQTT message
+
 // Internal MQTT events
 #define MQTT_CONNECT_EVENT 0
 #define MQTT_DISCONNECT_EVENT 1
@@ -111,11 +115,12 @@ class MyESP {
     void setSettings(fs_callback_f callback, fs_settings_callback_f fs_settings_callback);
 
     // general
-    void end();
-    void loop();
-    void begin(char * app_hostname, char * app_name, char * app_version);
-    void setBoottime(const char * boottime);
-    void resetESP();
+    void          end();
+    void          loop();
+    void          begin(char * app_hostname, char * app_name, char * app_version);
+    void          setBoottime(const char * boottime);
+    void          resetESP();
+    unsigned long getSystemLoadAverage();
 
   private:
     // mqtt
@@ -127,6 +132,7 @@ class MyESP {
     mqtt_callback_f _mqtt_callback;
     void            _mqttOnConnect();
     void            _sendStart();
+    char *          _mqttTopic(const char * topic);
     char *          _mqtt_host;
     char *          _mqtt_username;
     char *          _mqtt_password;
@@ -138,6 +144,7 @@ class MyESP {
     bool            _mqtt_retain;
     char *          _mqtt_will_topic;
     char *          _mqtt_will_payload;
+    char *          _mqtt_topic;
 
     // wifi
     DNSServer       dnsServer; // For Access Point (AP) support
@@ -182,6 +189,10 @@ class MyESP {
     char * _app_hostname;
     char * _app_name;
     char * _app_version;
+
+    // load average (0..100)
+    void               _calculateLoad();
+    unsigned short int _load_average;
 };
 
 extern MyESP myESP;

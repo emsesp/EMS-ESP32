@@ -203,6 +203,11 @@ typedef struct {           // UBAParameterWW
     // UBATotalUptimeMessage
     uint32_t UBAuptime; // Total UBA working hours
 
+    // UBAParametersMessage
+    uint8_t heating_temp; // Heating temperature setting on the boiler
+    uint8_t pump_mod_max; // Boiler circuit pump modulation max. power
+    uint8_t pump_mod_min; // Boiler circuit pump modulation min. power
+
     // calculated values
     uint8_t tapwaterActive; // Hot tap water is on/off
     uint8_t heatingActive;  // Central heating is on/off

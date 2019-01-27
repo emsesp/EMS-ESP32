@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] 2019-01-27
+
+### Changed
+
+- last will MQTT topic prefixed with a header like the rest of the topics
+- All double and float numbers rendered to 2 decimal places (precision = 2)
+- Default logging set to None when starting a telnet session
+
+### Added
+
+- Added support for external Dallas sensors (DS1822, DS18S20, DS18B20, DS1825). See readme
+- Added UBAParametersMessage type to fetch boiler modulation min & max values
+- Report shows system load average
+
 ## [1.3.2] 2019-01-23
 
 ### Fixed

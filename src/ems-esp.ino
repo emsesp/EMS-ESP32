@@ -8,13 +8,17 @@
  */
 
 // local libraries
+#include "ds18.h"
 #include "ems.h"
 #include "ems_devices.h"
 #include "emsuart.h"
 #include "my_config.h"
 #include "version.h"
 
-// my libraries
+// Dallas external temp sensors
+DS18 ds18;
+
+// shared libraries
 #include <MyESP.h>
 
 // public libraries
@@ -74,10 +78,11 @@ Ticker showerColdShotStopTimer;
 #define SHOWER_COLDSHOT_DURATION 10 // in seconds. 10 seconds for cold water before turning back hot water
 
 typedef struct {
-    bool          shower_timer; // true if we want to report back on shower times
-    bool          shower_alert; // true if we want the alert of cold water
-    bool          led_enabled;  // LED on/off
-    unsigned long timestamp;    // for internal timings, via millis()
+    bool          shower_timer;   // true if we want to report back on shower times
+    bool          shower_alert;   // true if we want the alert of cold water
+    bool          led_enabled;    // LED on/off
+    unsigned long timestamp;      // for internal timings, via millis()
+    uint8_t       dallas_sensors; // count of dallas sensors
 } _EMSESP_Status;
 
 typedef struct {
@@ -122,7 +127,7 @@ void myDebugLog(const char * s) {
 }
 
 // convert float to char
-char * _float_to_char(char * a, float f, uint8_t precision = 1) {
+char * _float_to_char(char * a, float f, uint8_t precision = 2) {
     long p[] = {0, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000};
 
     char * ret = a;
@@ -202,14 +207,20 @@ void _renderIntfractionalValue(const char * prefix, const char * postfix, uint8_
     strlcpy(buffer, "  ", sizeof(buffer));
     strlcat(buffer, prefix, sizeof(buffer));
     strlcat(buffer, ": ", sizeof(buffer));
-    strlcat(buffer, _int_to_char(s, value / (decimals * 10)), sizeof(buffer));
-    strlcat(buffer, ".", sizeof(buffer));
-    strlcat(buffer, _int_to_char(s, value % (decimals * 10)), sizeof(buffer));
+
+    if (value == EMS_VALUE_INT_NOTSET) {
+        strlcat(buffer, "?", sizeof(buffer));
+    } else {
+        strlcat(buffer, _int_to_char(s, value / (decimals * 10)), sizeof(buffer));
+        strlcat(buffer, ".", sizeof(buffer));
+        strlcat(buffer, _int_to_char(s, value % (decimals * 10)), sizeof(buffer));
+    }
 
     if (postfix != NULL) {
         strlcat(buffer, " ", sizeof(buffer));
         strlcat(buffer, postfix, sizeof(buffer));
     }
+
     myDebug(buffer);
 }
 
@@ -266,6 +277,8 @@ void showInfo() {
 
     myDebug("  LED is %s", EMSESP_Status.led_enabled ? "on" : "off");
 
+    myDebug("  # connected Dallas temperature sensors = %d", EMSESP_Status.dallas_sensors);
+
     myDebug("  Thermostat is %s, Boiler is %s, Poll is %s, Tx is %s, Shower Timer is %s, Shower Alert is %s",
             (ems_getThermostatEnabled() ? "enabled" : "disabled"),
             (ems_getBoilerEnabled() ? "enabled" : "disabled"),
@@ -291,8 +304,10 @@ void showInfo() {
     myDebug("  Boiler type: %s", ems_getBoilerDescription(buffer_type));
 
     // active stats
-    myDebug("  Hot tap water is %s", (EMS_Boiler.tapwaterActive ? "running" : "off"));
-    myDebug("  Central Heating is %s", (EMS_Boiler.heatingActive ? "active" : "off"));
+    if (ems_getBusConnected()) {
+        myDebug("  Hot tap water is %s", (EMS_Boiler.tapwaterActive ? "running" : "off"));
+        myDebug("  Central Heating is %s", (EMS_Boiler.heatingActive ? "active" : "off"));
+    }
 
     // UBAParameterWW
     _renderBoolValue("Warm Water activated", EMS_Boiler.wWActivated);
@@ -327,6 +342,11 @@ void showInfo() {
     _renderFloatValue("Flame current", "uA", EMS_Boiler.flameCurr);
     _renderFloatValue("System pressure", "bar", EMS_Boiler.sysPress);
     myDebug("  Current System Service Code: %s", EMS_Boiler.serviceCodeChar);
+
+    // UBAParametersMessage
+    _renderIntValue("Heating temperature setting on the boiler", "C", EMS_Boiler.heating_temp);
+    _renderIntValue("Boiler circuit pump modulation max. power", "%", EMS_Boiler.pump_mod_max);
+    _renderIntValue("Boiler circuit pump modulation min. power", "%", EMS_Boiler.pump_mod_min);
 
     // UBAMonitorSlow
     _renderFloatValue("Outside temperature", "C", EMS_Boiler.extTemp);
@@ -383,9 +403,21 @@ void showInfo() {
 
     myDebug(""); // newline
 
+    // Dallas
+    if (EMSESP_Status.dallas_sensors != 0) {
+        myDebug("%sExternal temperature sensors:%s", COLOR_BOLD_ON, COLOR_BOLD_OFF);
+        for (uint8_t i = 0; i < EMSESP_Status.dallas_sensors; i++) {
+            char s[80] = {0};
+            snprintf(s, sizeof(s), "Sensor #%d", i + 1);
+            _renderFloatValue(s, "C", ds18.getValue(i));
+        }
+    }
+
+    myDebug(""); // newline
+
     // show the Shower Info
     if (EMSESP_Status.shower_timer) {
-        myDebug("%s Shower stats:%s", COLOR_BOLD_ON, COLOR_BOLD_OFF);
+        myDebug("%sShower stats:%s", COLOR_BOLD_ON, COLOR_BOLD_OFF);
         myDebug("  Shower Timer is %s", (EMSESP_Shower.showerOn ? "active" : "off"));
     }
 }
@@ -597,7 +629,7 @@ bool SettingsCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, c
 // we set the logging here
 void TelnetCallback(uint8_t event) {
     if (event == TELNET_EVENT_CONNECT) {
-        ems_setLogging(EMS_SYS_LOGGING_BASIC);
+        ems_setLogging(EMS_SYS_LOGGING_NONE);
     } else if (event == TELNET_EVENT_DISCONNECT) {
         ems_setLogging(EMS_SYS_LOGGING_NONE);
     }
@@ -838,10 +870,11 @@ void WIFICallback() {
 // Initialize the boiler settings and shower settings
 void initEMSESP() {
     // general settings
-    EMSESP_Status.shower_timer = BOILER_SHOWER_TIMER;
-    EMSESP_Status.shower_alert = BOILER_SHOWER_ALERT;
-    EMSESP_Status.led_enabled  = false;
-    EMSESP_Status.timestamp    = millis();
+    EMSESP_Status.shower_timer   = BOILER_SHOWER_TIMER;
+    EMSESP_Status.shower_alert   = BOILER_SHOWER_ALERT;
+    EMSESP_Status.led_enabled    = false;
+    EMSESP_Status.timestamp      = millis();
+    EMSESP_Status.dallas_sensors = 0;
 
     // shower settings
     EMSESP_Shower.timerStart    = 0;
@@ -888,18 +921,22 @@ void do_systemCheck() {
 // force calls to get data from EMS for the types that aren't sent as broadcasts
 // only if we have a EMS connection
 void do_regularUpdates() {
-    myDebugLog("Calling scheduled data refresh from EMS devices..");
-    ems_getThermostatValues();
-    ems_getBoilerValues();
+    if (ems_getBusConnected()) {
+        myDebugLog("Calling scheduled data refresh from EMS devices..");
+        ems_getThermostatValues();
+        ems_getBoilerValues();
+    }
 }
 
 // turn off hot water to send a shot of cold
 void _showerColdShotStart() {
-    myDebugLog("[Shower] doing a shot of cold water");
-    ems_setWarmTapWaterActivated(false);
-    EMSESP_Shower.doingColdShot = true;
-    // start the timer for n seconds which will reset the water back to hot
-    showerColdShotStopTimer.attach(SHOWER_COLDSHOT_DURATION, _showerColdShotStop);
+    if (EMSESP_Status.shower_alert) {
+        myDebugLog("[Shower] doing a shot of cold water");
+        ems_setWarmTapWaterActivated(false);
+        EMSESP_Shower.doingColdShot = true;
+        // start the timer for n seconds which will reset the water back to hot
+        showerColdShotStopTimer.attach(SHOWER_COLDSHOT_DURATION, _showerColdShotStop);
+    }
 }
 
 // turn back on the hot water for the shower
@@ -1006,6 +1043,9 @@ void setup() {
     digitalWrite(BOILER_LED, (BOILER_LED == LED_BUILTIN) ? HIGH : LOW); // light off. For onboard high=off
     ledcheckTimer.attach(LEDCHECK_TIME, do_ledcheck);                   // blink heartbeat LED
 
+    // check for Dallas sensors
+    EMSESP_Status.dallas_sensors = ds18.setup(TEMPERATURE_SENSOR_PIN);
+
     // init the EMS bus
     // call ems.cpp's init function to set all the internal params
     ems_init(MY_THERMOSTAT_MODELID);
@@ -1019,6 +1059,11 @@ void loop() {
 
     // the main loop
     myESP.loop();
+
+    // check Dallas sensors
+    if (EMSESP_Status.dallas_sensors != 0) {
+        ds18.loop();
+    }
 
     // publish the values to MQTT, regardless if the values haven't changed
     // we don't want to publish when doing a deep scan of the thermostat

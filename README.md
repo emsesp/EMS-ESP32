@@ -2,10 +2,10 @@
 
 EMS-ESP is a project to build an electronic controller circuit using an Espressif ESP8266 microcontroller to communicate with EMS (Energy Management System) based Boilers and Thermostats from the Bosch range and compatibles such as Buderus, Nefit, Junkers etc.
 
-There are 3 parts to this project, first the design of the circuit, secondly the code for the ESP8266 microcontroller firmware and lastly an example configuration for Home Assistant to monitor the data and issue direct commands via MQTT.
+There are 3 parts to this project, first the design of the circuit, secondly the code for the ESP8266 microcontroller firmware with telnet and MQTT support, and lastly an example configuration for Home Assistant to monitor the data and issue direct commands via a MQTT broker.
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/b8880625bdf841d4adb2829732030887)](https://app.codacy.com/app/proddy/EMS-ESP?utm_source=github.com&utm_medium=referral&utm_content=proddy/EMS-ESP&utm_campaign=Badge_Grade_Settings)
-[![version](https://img.shields.io/badge/version-1.3.2-brightgreen.svg)](CHANGELOG.md)
+[![version](https://img.shields.io/badge/version-1.4.0-brightgreen.svg)](CHANGELOG.md)
 
 - [EMS-ESP](#ems-esp)
   - [Introduction](#introduction)
@@ -15,6 +15,7 @@ There are 3 parts to this project, first the design of the circuit, secondly the
   - [Monitoring The Output](#monitoring-the-output)
   - [Building The Circuit](#building-the-circuit)
     - [Powering The EMS Circuit](#powering-the-ems-circuit)
+  - [Adding external temperature sensors](#adding-external-temperature-sensors)
   - [How The EMS Bus Works](#how-the-ems-bus-works)
     - [EMS IDs](#ems-ids)
     - [EMS Polling](#ems-polling)
@@ -115,6 +116,10 @@ The EMS circuit will work with both 3.3V and 5V. It's easiest though to power di
 | ------------------------------------------ |
 | ![Power circuit](doc/schematics/Schematic_EMS-ESP-supercap.png) |
 
+## Adding external temperature sensors
+
+The code supports auto-detection of Dallas type temperature sensors. The default gpio pin (DQ) to the ESP8266 is D5 but this can be configured in `my_config.h`. The dallas chips DS1822, DS18S20, DS18B20, DS1825 are supported including their parasite varieties.
+
 ## How The EMS Bus Works
 
 Packages are streamed to the EMS "bus" from any other compatible connected device via serial TTL transmission using protocol 9600 baud, 8N1 (8 bytes, no parity, 1 stop bit). Each package is terminated with a break signal `<BRK>`, a 11-bit long low signal of zeros.
@@ -203,11 +208,11 @@ In `ems.cpp` you can add scheduled calls to specific EMS types in the functions 
 
 ### Which thermostats are supported?
 
-I am still working on adding more support to known thermostats. Any contributions here are welcome. The know types are listed in `ems_devices.h`.
+I am still working on adding more support to known thermostats. Any contributions here are welcome. The know types are listed in `ems_devices.h` and include
 
-- RC20 and RC30 are fully supported
-- RC35 only supports the 1st heating circuit (HC1)
-- TC100/TC200/Easy has only support for reading the temperatures. There seems to be no way to set settings using EMS bus messages. One option is to send XMPP messages but a client is needed.
+- RC20 and RC30, both are fully supported
+- RC35 with support for the 1st heating circuit (HC1)
+- TC100/TC200/Easy but only with support for reading the temperatures. There seems to be no way to set settings using EMS bus messages that I know of. One option is to send XMPP messages but a special server is needed and out of scope for this project.
 
 ### Customizing The Code
 
@@ -215,19 +220,21 @@ I am still working on adding more support to known thermostats. Any contribution
   - set flags for enabled/disabling functionality such as `BOILER_SHOWER_ENABLED` and `BOILER_SHOWER_TIMER`.
   - Set WIFI and MQTT settings. The values can also be set from the telnet command menu using the **set** command.
 - To add new handlers for EMS data types, first create a callback function and add to the `EMS_Types` array at the top of the file `ems.cpp` and modify `ems.h`
-- To add new devices modify `ems_devices.h` 
+- To add new devices modify `ems_devices.h`
 
 ### Using MQTT
 
-The boiler data is collected and sent as a single JSON object to MQTT TOPIC `home/ems-esp/boiler_data`. The `home` preifx is the MQTT topic prefix and can be customized in `my_config.h`. A hash is generated (CRC32 based) to determine if the payload has changed, otherwise don't send it. An example payload looks roughly like:
+The boiler data is collected and sent as a single JSON object to MQTT TOPIC `home/ems-esp/boiler_data`. The `home` preifx is the MQTT topic prefix and can be customized in `my_config.h`. A hash is generated (CRC32 based) to determine if the payload has changed, otherwise it will not be sent. An example payload looks like:
 
 `{"wWSelTemp":"60","selFlowTemp":"5.0","outdoorTemp":"?","wWActivated":"on","wWComfort":"Comfort","wWCurTmp":"46.0","wWCurFlow":"0.0","wWHeat":"on","curFlowTemp":"54.2","retTemp":"51.5","burnGas":"off","heatPmp":"off","fanWork":"off","ignWork":"off","wWCirc":"off","selBurnPow":"0","curBurnPow":"0","sysPress":"1.2","boilTemp":"56.7","pumpMod":"0","ServiceCode":"0H"}`
 
-Similarly the thermostat values are sent as a JSON package under the topic `home/ems-esp/thermostat_data` with the current mode, room temperature and set temperature like
+Similarly the thermostat values are also sent as a JSON package with the topic `home/ems-esp/thermostat_data` along with the current mode, room temperature and set temperature:
 
 `{"thermostat_currtemp":"19.8","thermostat_seltemp":"16.0","thermostat_mode":"manual"}`
 
 If MQTT is not used set the MQTT_HOST to `NULL`.
+
+Some home automation systems such as Domoticz and OpenHab have special formats for their MQTT messages so I would advise to use [node-red](https://nodered.org/) as a parser.
 
 ### The Basic Shower Logic
 
@@ -284,7 +291,7 @@ Porting to the Arduino IDE can be a little tricky but it is possible.
 - Add the ESP8266 boards (from Preferences add Additional Board URL `http://arduino.esp8266.com/stable/package_esp8266com_index.json`)
 - Go to Boards Manager and install ESP8266 2.4.x platform
 - Select your ESP8266 from Tools->Boards and the correct port with Tools->Port
-- From the Library Manager install the needed libraries from platformio.ini. Note make sure you pick ArduinoJson v5 and not v6. See https://arduinojson.org/v5/doc/
+- From the Library Manager install the needed libraries from platformio.ini. Note make sure you pick ArduinoJson v5 (5.13.4 and above) and not v6. See https://arduinojson.org/v5/doc/
 - Put all the files in a single sketch folder
 - cross your fingers and hit CTRL-R to compile
 
@@ -320,9 +327,8 @@ Some annoying issues that need fixing:
   - https://github.com/patvdleer/nefit-client-python
   - https://github.com/marconfus/ha-nefit
   - https://github.com/robertklep/nefit-easy-core
-- Add support for a temperature sensor on the circuit (DS18B20)
 - Improve detection of Heating Off without checking for selFlowTemp (selected flow temperature)
-- Split MQTT into smaller chunks. Now the messages can be up to 600 bytes which may cause issues.
+- Split MQTT into smaller chunks. Now the messages can be up to 600 bytes which may cause issues. Preferably make the items configurable.
 
 ## Your Comments and Feedback
 
