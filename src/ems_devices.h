@@ -3,7 +3,7 @@
  * 
  * Paul Derbyshire - https://github.com/proddy/EMS-ESP
  *
- * See ChangeLog.md for history
+ * See ChangeLog.md for History
  * See README.md for Acknowledgments
  *
  */
@@ -11,6 +11,12 @@
 #pragma once
 
 #include "ems.h"
+
+
+/*
+ * Common
+ */
+#define EMS_TYPE_Version 0x02
 
 /*
  * Boiler...
@@ -91,11 +97,10 @@ typedef enum {
 
 } _EMS_MODEL_ID;
 
-// EMS types for known Buderus devices. This list will be extended when new devices are recognized.
+// EMS types for known Buderus/Bosch devices. This list will be extended when new devices are recognized.
 // format is MODEL_ID, PRODUCT ID, TYPE_ID, DESCRIPTION
 const _Boiler_Type Boiler_Types[] = {
 
-    // various boilers and buderus type devices
     {EMS_MODEL_UBA, 72, 0x08, "MC10"},
     {EMS_MODEL_UBA, 123, 0x08, "Buderus GB172/Nefit Trendline"},
     {EMS_MODEL_UBA, 115, 0x08, "Nefit Topline Compact"},

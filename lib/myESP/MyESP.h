@@ -61,8 +61,11 @@
 #define COLOR_CYAN "\x1B[0;36m"
 #define COLOR_WHITE "\x1B[0;37m"
 
+// SPIFFS
+#define SPIFFS_MAXSIZE 500 // https://arduinojson.org/v5/assistant/
+
 typedef struct {
-    char key[30];
+    char key[40];
     char description[100];
 } command_t;
 
@@ -72,7 +75,7 @@ typedef std::function<void(unsigned int, const char *, const char *)>           
 typedef std::function<void()>                                                    wifi_callback_f;
 typedef std::function<void(uint8_t, const char *)>                               telnetcommand_callback_f;
 typedef std::function<void(uint8_t)>                                             telnet_callback_f;
-typedef std::function<void(MYESP_FSACTION, JsonObject & json)>                   fs_callback_f;
+typedef std::function<bool(MYESP_FSACTION, JsonObject & json)>                   fs_callback_f;
 typedef std::function<bool(MYESP_FSACTION, uint8_t, const char *, const char *)> fs_settings_callback_f;
 
 // calculates size of an 2d array at compile time
@@ -113,6 +116,7 @@ class MyESP {
 
     // FS
     void setSettings(fs_callback_f callback, fs_settings_callback_f fs_settings_callback);
+    bool fs_saveConfig();
 
     // general
     void          end();
@@ -178,7 +182,6 @@ class MyESP {
 
     // fs
     void                   _fs_setup();
-    bool                   _fs_saveConfig();
     bool                   _fs_loadConfig();
     void                   _fs_printConfig();
     void                   _fs_eraseConfig();

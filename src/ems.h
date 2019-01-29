@@ -13,18 +13,14 @@
 #include <Arduino.h>
 
 // EMS IDs
-#define EMS_ID_NONE 0x00   // Fixed - used as a dest in broadcast messages and empty type IDs
-#define EMS_ID_ME 0x0B     // Fixed - our device, hardcoded as the "Service Key"
-#define EMS_ID_BOILER 0x08 // Fixed - boilers are always 0x08. I think.
+#define EMS_ID_NONE 0x00 // Fixed - used as a dest in broadcast messages and empty type IDs
+#define EMS_ID_ME 0x0B   // Fixed - our device, hardcoded as the "Service Key"
+#define EMS_ID_DEFAULT_BOILER 0x08
 
 #define EMS_MIN_TELEGRAM_LENGTH 6 // minimal length for a validation telegram, including CRC
 
 // max length of a telegram, including CRC, for Rx and Tx.
-// This can differs per firmware version and typically 32 is the max
 #define EMS_MAX_TELEGRAM_LENGTH 99
-
-// Common for all EMS devices
-#define EMS_TYPE_Version 0x02 // version of the UBA controller (boiler)
 
 // default values
 #define EMS_VALUE_INT_ON 1             // boolean true
@@ -60,6 +56,8 @@
 
 #define EMS_TX_TELEGRAM_QUEUE_MAX 50 // max size of Tx FIFO queue
 
+//#define EMS_SYS_LOGGING_DEFAULT EMS_SYS_LOGGING_VERBOSE
+#define EMS_SYS_LOGGING_DEFAULT EMS_SYS_LOGGING_NONE
 
 /* EMS UART transfer status */
 typedef enum {
@@ -251,7 +249,7 @@ typedef struct {
 
 // function definitions
 extern void ems_parseTelegram(uint8_t * telegram, uint8_t len);
-void        ems_init(uint8_t thermostat_modelid);
+void        ems_init();
 void        ems_doReadCommand(uint8_t type, uint8_t dest, bool forceRefresh = false);
 void        ems_sendRawTelegram(char * telegram);
 

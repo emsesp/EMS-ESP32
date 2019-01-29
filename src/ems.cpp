@@ -143,7 +143,7 @@ uint8_t _last_TxTelgramCRC; // CRC of last Tx sent, for checking duplicates
 
 // init stats and counters and buffers
 // uses -255 or 255 for values that haven't been set yet (EMS_VALUE_INT_NOTSET and EMS_VALUE_FLOAT_NOTSET)
-void ems_init(uint8_t thermostat_modelid) {
+void ems_init() {
     // overall status
     EMS_Sys_Status.emsRxPgks        = 0;
     EMS_Sys_Status.emsTxPkgs        = 0;
@@ -224,15 +224,13 @@ void ems_init(uint8_t thermostat_modelid) {
     EMS_Boiler.tapwaterActive = EMS_VALUE_INT_NOTSET; // Hot tap water is on/off
     EMS_Boiler.heatingActive  = EMS_VALUE_INT_NOTSET; // Central heating is on/off
 
-    // boiler is hardcoded
-    EMS_Boiler.type_id    = EMS_ID_BOILER; // fixed at 0x08
+    // set boiler type
     EMS_Boiler.product_id = 0;
     strlcpy(EMS_Boiler.version, "not set", sizeof(EMS_Boiler.version));
 
     // set thermostat model
-    EMS_Thermostat.type_id    = EMS_ID_NONE; // fixed at 0x08
+    EMS_Thermostat.model_id   = EMS_MODEL_NONE;
     EMS_Thermostat.product_id = 0;
-    _ems_setThermostatModel(thermostat_modelid);
     strlcpy(EMS_Thermostat.version, "not set", sizeof(EMS_Thermostat.version));
 
     // counters
@@ -240,8 +238,8 @@ void ems_init(uint8_t thermostat_modelid) {
     _emsTxRetryCount   = 0;
     _last_TxTelgramCRC = 0;
 
-    // default logging is non
-    ems_setLogging(EMS_SYS_LOGGING_NONE);
+    // default logging is none
+    ems_setLogging(EMS_SYS_LOGGING_DEFAULT);
 }
 
 // Getters and Setters for parameters
@@ -469,15 +467,15 @@ void _ems_sendTelegram() {
         return;
     }
 
-    // if Tx is disabled, don't do anything and ignore the request
-    // this could be because the boiler has yet to be found and the type_id is still empty
+    // if there is no destination, also delete it from the queue
     if (EMS_TxTelegram.dest == EMS_ID_NONE) {
         EMS_Sys_Status.emsTxStatus = EMS_TX_IDLE; // finished sending
         EMS_TxQueue.shift();                      // remove from queue
         return;
     }
 
-    // if there is no destination, also delete it from the queue
+    // if Tx is disabled, don't do anything and ignore the request
+    // this could be because the boiler has yet to be found and the type_id is still empty
     if (!EMS_Sys_Status.emsTxEnabled) {
         myDebug("Tx is disabled. Ignoring %s request to 0x%02X.",
                 ((EMS_TxTelegram.action == EMS_TX_TELEGRAM_WRITE) ? "write" : "read"),
@@ -516,6 +514,7 @@ void _ems_sendTelegram() {
         // myDebug("Duplicate message, just sent this one, so removing from queue!");
         EMS_Sys_Status.emsTxStatus = EMS_TX_IDLE; // finished sending
         EMS_TxQueue.shift();                      // remove the last Tx from the queue
+        return;
     }
     _last_TxTelgramCRC = crc;
 
@@ -770,8 +769,8 @@ void _ems_processTelegram(uint8_t * telegram, uint8_t length) {
  */
 void _processType(uint8_t * telegram, uint8_t length) {
     // header
-    uint8_t   src  = telegram[0] & 0x7F; // removing 8th bit as we deal with both reads and writes
-    uint8_t   dest = telegram[1] & 0x7F; // remove 8th bit to handle both reads and writes
+    uint8_t   src  = telegram[0] & 0x7F; // removing 8th bit as we deal with both reads and writes here
+    uint8_t   dest = telegram[1] & 0x7F;
     uint8_t   type = telegram[2];
     uint8_t * data = telegram + 4; // data block starts at position 5
 
@@ -781,27 +780,33 @@ void _processType(uint8_t * telegram, uint8_t length) {
         return;
     }
 
-    // did we request this telegram? If so it would be either a read or a validate telegram and still on the
-    // Tx queue with the same type
+    // did we request this telegram? If so it would be either a read or a validate telegram and still
+    // on top of the Tx queue with the same type. because we don't remove a Tx from the queue after a send
     // if its a validate check the value, or if its a read, update the Read counter
     // then we can safely removed the read/validate from the queue
     if ((dest == EMS_ID_ME) && (!EMS_TxQueue.isEmpty())) {
         _EMS_TxTelegram EMS_TxTelegram = EMS_TxQueue.first(); // get current Tx package we last sent
 
-        // do the types match? If so we were expecting this response back to us
+        // do the types match? If so we were expecting this telegram response back to us
         if (EMS_TxTelegram.type == type) {
-            emsaurt_tx_poll(); // send Acknowledgement back to free the EMS bus
+            emsaurt_tx_poll(); // send Acknowledgement back to free the EMS bus since we have the telegram
 
-            // if last action was a read, we are just happy that we actually got a response back
+            // if last action was a read, go ahead and process it
             if (EMS_TxTelegram.action == EMS_TX_TELEGRAM_READ) {
-                EMS_Sys_Status.emsRxPgks++;             // increment rx counter
-                _emsTxRetryCount = 0;                   // reset retry count
-                _ems_processTelegram(telegram, length); // and process the telegram
+                EMS_Sys_Status.emsRxPgks++; // increment rx counter
+                _emsTxRetryCount = 0;       // reset retry count
+                //
+                // and process the telegram. This calls the main function to process each type
+                //
+                _ems_processTelegram(telegram, length);
                 if (EMS_TxTelegram.forceRefresh) {
                     ems_setEmsRefreshed(true); // set the MQTT refresh flag to force sending to MQTT
                 }
                 EMS_TxQueue.shift(); // remove read from queue, all done now
-            } else if (EMS_TxTelegram.action == EMS_TX_TELEGRAM_VALIDATE) {
+                return;              // quit
+            }
+
+            if (EMS_TxTelegram.action == EMS_TX_TELEGRAM_VALIDATE) {
                 // this read was for a validate. Do a compare on the 1 byte result from the last write
                 uint8_t dataReceived = data[0]; // only a single byte is returned after a read
                 if (EMS_TxTelegram.comparisonValue == dataReceived) {
@@ -816,7 +821,7 @@ void _processType(uint8_t * telegram, uint8_t length) {
                 } else {
                     // write failed.
                     if (EMS_Sys_Status.emsLogging >= EMS_SYS_LOGGING_BASIC) {
-                        myDebug("Last write failed. Compared set value 0x%02X with received value 0x%02X.",
+                        myDebug("Last write failed. Compared set value 0x%02X with received value 0x%02X",
                                 EMS_TxTelegram.comparisonValue,
                                 dataReceived);
                     }
@@ -838,9 +843,18 @@ void _processType(uint8_t * telegram, uint8_t length) {
                         EMS_TxQueue.unshift(EMS_TxTelegram);                        // add back to queue making it next in line
                     }
                 }
+
+                return;
             }
         }
         // telegram was for us, but seems we didn't ask for it
+        // so kinda invalidates the last action on the queue remove from queue
+        myDebug("Telegram sent to us but we didn't ask for it! (src=0x%02X dest=0x%02X type=0x%02X)",
+                telegram[0] & 0x7F,
+                telegram[1] & 0x7F,
+                telegram[2]);
+        // ems_printTxQueue();
+        // EMS_TxQueue.shift(); // remove validate from queue
     } else {
         // we didn't request it, was for somebody else or a broadcast, process it anyway
         _ems_processTelegram(telegram, length);
@@ -1055,6 +1069,7 @@ void _process_Version(uint8_t * data, uint8_t length) {
         return;
     }
 
+    bool    do_save     = false;
     uint8_t product_id  = data[0];
     char    version[10] = {0};
     snprintf(version, sizeof(version), "%02d.%02d", data[1], data[2]);
@@ -1072,29 +1087,33 @@ void _process_Version(uint8_t * data, uint8_t length) {
 
     if (typeFound) {
         // its a boiler
-        if (EMS_Sys_Status.emsLogging >= EMS_SYS_LOGGING_BASIC) {
-            myDebug("Boiler found. Model %s with TypeID 0x%02X, Product ID %d, Version %s",
+        myDebug("Boiler type device found. Model %s with TypeID 0x%02X, Product ID %d, Version %s",
+                Boiler_Types[i].model_string,
+                Boiler_Types[i].type_id,
+                product_id,
+                version);
+
+        // if its a boiler set it
+        // it will take the first one found in the list
+        if ((EMS_Boiler.type_id == EMS_ID_NONE) || (EMS_Boiler.type_id == Boiler_Types[i].type_id)) {
+            myDebug("* Setting Boiler type to Model %s, TypeID 0x%02X, Product ID %d, Version %s",
                     Boiler_Types[i].model_string,
                     Boiler_Types[i].type_id,
                     product_id,
                     version);
-        }
 
-        // if its a boiler set it (even if it was already set)
-        if (Boiler_Types[i].type_id == EMS_ID_BOILER) {
-            if (EMS_Sys_Status.emsLogging >= EMS_SYS_LOGGING_BASIC) {
-                myDebug("* Setting boiler to this new type");
-            }
             EMS_Boiler.type_id    = Boiler_Types[i].type_id;
             EMS_Boiler.product_id = Boiler_Types[i].product_id;
             strlcpy(EMS_Boiler.version, version, sizeof(EMS_Boiler.version));
+
+            do_save = true;
 
             ems_getBoilerValues(); // get Boiler values that we would usually have to wait for
         }
         return;
     }
 
-    // its not a boiler, maybe its a known thermostat
+    // its not a boiler, maybe its a known thermostat?
     i = 0;
     while (i < _Thermostat_Types_max) {
         if (Thermostat_Types[i].product_id == product_id) {
@@ -1115,11 +1134,14 @@ void _process_Version(uint8_t * data, uint8_t length) {
         }
 
         // if we don't have a thermostat set, use this one
-        // if its the one we hard coded, refresh the data anyway
-        if ((EMS_Thermostat.model_id == EMS_MODEL_NONE) || (EMS_Thermostat.model_id == Thermostat_Types[i].model_id)) {
-            if (EMS_Sys_Status.emsLogging >= EMS_SYS_LOGGING_BASIC) {
-                myDebug("* Setting thermostat to this new type");
-            }
+        if ((EMS_Thermostat.type_id == EMS_ID_NONE) || (EMS_Thermostat.model_id == EMS_MODEL_NONE)
+            || (EMS_Thermostat.type_id == Thermostat_Types[i].type_id)) {
+            myDebug("* Setting Thermostat type to Model %s, TypeID 0x%02X, Product ID %d, Version %s",
+                    Thermostat_Types[i].model_string,
+                    Thermostat_Types[i].type_id,
+                    product_id,
+                    version);
+
             EMS_Thermostat.model_id        = Thermostat_Types[i].model_id;
             EMS_Thermostat.type_id         = Thermostat_Types[i].type_id;
             EMS_Thermostat.read_supported  = Thermostat_Types[i].read_supported;
@@ -1127,11 +1149,18 @@ void _process_Version(uint8_t * data, uint8_t length) {
             EMS_Thermostat.product_id      = product_id;
             strlcpy(EMS_Thermostat.version, version, sizeof(EMS_Thermostat.version));
 
+            do_save = true;
+
             // get Thermostat values (if supported)
             ems_getThermostatValues();
         }
     } else {
         myDebug("Unrecognized device found. Product ID %d, Version %s", product_id, version);
+    }
+
+    // if the boiler or thermostat values have changed, save them to SPIFFS
+    if (do_save) {
+        myESP.fs_saveConfig();
     }
 }
 
@@ -1140,15 +1169,15 @@ void _process_Version(uint8_t * data, uint8_t length) {
  */
 void ems_discoverModels() {
     // boiler
-    ems_doReadCommand(EMS_TYPE_Version, EMS_ID_BOILER); // get version details of boiler
-    ems_getBoilerValues();                              // fetch values from boiler, instead of waiting for broadcasts
+    ems_doReadCommand(EMS_TYPE_Version, EMS_Boiler.type_id); // get version details of boiler
+    ems_getBoilerValues();                                   // fetch values from boiler, instead of waiting for broadcasts
 
     // thermostat
-    if (EMS_Thermostat.model_id == EMS_MODEL_NONE) {
+    // if it hasn't been set, auto discover it
+    if (EMS_Thermostat.type_id == EMS_ID_NONE) {
         ems_scanDevices(); // auto-discover it
     } else {
         // set the model as hardcoded (see my_devices.h) and fetch the version and product id
-        _ems_setThermostatModel(EMS_Thermostat.model_id);
         ems_doReadCommand(EMS_TYPE_Version, EMS_Thermostat.type_id);
         ems_getThermostatValues();
     }

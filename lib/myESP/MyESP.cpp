@@ -402,10 +402,8 @@ void MyESP::_consoleShowHelp() {
     SerialAndTelnet.println(FPSTR("*  set"));
     SerialAndTelnet.println(FPSTR("*  set <wifi_ssid | wifi_password | mqtt_host | mqtt_username | mqtt_password> [value]"));
     SerialAndTelnet.println(FPSTR("*  set erase"));
-    SerialAndTelnet.println(FPSTR("*  set led <on | off>"));
-    SerialAndTelnet.println(FPSTR("*"));
 
-    // print custom commands if available. Take from progmem
+    // print custom commands if available. Taken from progmem
     if (_telnetcommand_callback) {
         // find the longest key length so we can right align it
         uint8_t max_len = 0;
@@ -513,8 +511,8 @@ void MyESP::_changeSetting(uint8_t wc, const char * setting, const char * value)
         SerialAndTelnet.printf("%s changed to %s\n\r", setting, value);
     }
 
-    if (_fs_saveConfig()) {
-        SerialAndTelnet.println("Note, some changes will only have effect after a device reboot (use ! command)");
+    if (fs_saveConfig()) {
+        SerialAndTelnet.println("Note, some changes will only have effect after the ESP is restarted (use ! command)");
     }
 }
 
@@ -811,8 +809,8 @@ bool MyESP::_fs_loadConfig() {
     // use configFile.readString
     configFile.readBytes(buf.get(), size);
 
-    StaticJsonBuffer<500> jsonBuffer; // https://arduinojson.org/v5/assistant/
-    JsonObject &          json = jsonBuffer.parseObject(buf.get());
+    StaticJsonBuffer<SPIFFS_MAXSIZE> jsonBuffer;
+    JsonObject &                     json = jsonBuffer.parseObject(buf.get());
 
     const char * value;
 
@@ -831,18 +829,19 @@ bool MyESP::_fs_loadConfig() {
     value          = json["mqtt_password"];
     _mqtt_password = (value) ? strdup(value) : NULL;
 
-    // callback for custom settings
-    (_fs_callback)(MYESP_FSACTION_LOAD, json);
+    // callback for loading custom settings
+    // ok is false if there's a problem loading a custom setting (e.g. does not exist)
+    bool ok = (_fs_callback)(MYESP_FSACTION_LOAD, json);
 
     configFile.close();
 
-    return true;
+    return ok;
 }
 
 // save settings to spiffs
-bool MyESP::_fs_saveConfig() {
-    StaticJsonBuffer<500> jsonBuffer; // https://arduinojson.org/v5/assistant/
-    JsonObject &          json = jsonBuffer.createObject();
+bool MyESP::fs_saveConfig() {
+    StaticJsonBuffer<SPIFFS_MAXSIZE> jsonBuffer;
+    JsonObject &                     json = jsonBuffer.createObject();
 
     json["wifi_ssid"]     = _wifi_ssid;
     json["wifi_password"] = _wifi_password;
@@ -850,8 +849,8 @@ bool MyESP::_fs_saveConfig() {
     json["mqtt_username"] = _mqtt_username;
     json["mqtt_password"] = _mqtt_password;
 
-    // callback for custom settings
-    (_fs_callback)(MYESP_FSACTION_SAVE, json);
+    // callback for saving custom settings
+    (void)(_fs_callback)(MYESP_FSACTION_SAVE, json);
 
     File configFile = SPIFFS.open("/config.json", "w");
     if (!configFile) {
@@ -872,11 +871,12 @@ void MyESP::_fs_setup() {
         return;
     }
 
-    // _fs_printConfig(); // for debugging
+    //_fs_printConfig(); // for debugging
 
-    // load the config file. if it doesn't exist create it with anything that was specified
+    // load the config file. if it doesn't exist create it
     if (!_fs_loadConfig()) {
-        _fs_saveConfig();
+        myDebug_P(PSTR("[FS] Re-creating config file"));
+        fs_saveConfig();
     }
 }
 
@@ -939,4 +939,4 @@ void MyESP::loop() {
     yield(); // ...and breath
 }
 
-MyESP myESP;
+MyESP myESP; // create instance
