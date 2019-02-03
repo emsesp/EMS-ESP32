@@ -831,6 +831,8 @@ bool MyESP::_fs_loadConfig() {
     File configFile = SPIFFS.open("/config.json", "r");
     if (!configFile) {
         myDebug_P(PSTR("[FS] Failed to open config file"));
+        // file does not exist, so assume its the first install. Set serial to on
+        _use_serial = true;
         return false;
     }
 
@@ -874,7 +876,7 @@ bool MyESP::_fs_loadConfig() {
     if (json.containsKey("use_serial")) {
         _use_serial = (bool)json["use_serial"];
     } else {
-        _use_serial = true; // if first time, set serial
+        _use_serial = false; // if first time, set serial to off
         ok          = false;
     }
 
