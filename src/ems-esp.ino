@@ -78,7 +78,7 @@ typedef struct {
 command_t PROGMEM project_cmds[] = {
 
     {"set led <on | off>", "toggle status LED on/off"},
-    {"set led_gpio <pin>", "set the LED pin (onboard=16)"},
+    {"set led_gpio <pin>", "set the LED pin. Default is the onboard LED."},
     {"set dallas_gpio <pin>", "set the pin for the external Dallas temperature sensor (D5=14)"},
     {"set thermostat_type <hex type ID>", "set the thermostat type id (e.g. 10 for 0x10)"},
     {"set boiler_type <hex type ID>", "set the boiler type id (e.g. 8 for 0x08)"},
