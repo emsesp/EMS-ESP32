@@ -27,6 +27,7 @@ MyESP::MyESP() {
     _helpProjectCmds_count = 0;
     _command               = (char *)malloc(TELNET_MAX_COMMAND_LENGTH); // reserve buffer for Serial/Telnet commands
 
+    _use_serial           = false;
     _mqtt_host            = NULL;
     _mqtt_password        = NULL;
     _mqtt_username        = NULL;
@@ -361,12 +362,13 @@ void MyESP::_telnet_setup() {
     SerialAndTelnet.setWelcomeMsg("");
     SerialAndTelnet.setCallbackOnConnect([this]() { _telnetConnected(); });
     SerialAndTelnet.setCallbackOnDisconnect([this]() { _telnetDisconnected(); });
-    SerialAndTelnet.begin(115200);
-    SerialAndTelnet.setDebugOutput(false);
 
-#ifndef DEBUG_SUPPORT
-    SerialAndTelnet.setSerial(NULL);
-#endif
+    if (!_use_serial) {
+        SerialAndTelnet.setSerial(NULL);
+    }
+
+    SerialAndTelnet.begin(115200); // baud is 115200
+    SerialAndTelnet.setDebugOutput(false);
 
     // init command buffer for console commands
     memset(_command, 0, TELNET_MAX_COMMAND_LENGTH);
@@ -374,34 +376,41 @@ void MyESP::_telnet_setup() {
 
 // Show help of commands
 void MyESP::_consoleShowHelp() {
-    SerialAndTelnet.printf("\n\r* Connected to: %s version %s\n\r", _app_name, _app_version);
+    SerialAndTelnet.println();
+    SerialAndTelnet.printf("* Connected to: %s version %s", _app_name, _app_version);
+    SerialAndTelnet.println();
 
     if (WiFi.getMode() & WIFI_AP) {
-        SerialAndTelnet.printf("* ESP8266 is in AP mode with SSID %s\n\r", jw.getAPSSID().c_str());
+        SerialAndTelnet.printf("* ESP8266 is in AP mode with SSID %s", jw.getAPSSID().c_str());
+        SerialAndTelnet.println();
     } else {
 #if defined(ARDUINO_ARCH_ESP32)
         String hostname = String(WiFi.getHostname());
 #else
         String hostname = WiFi.hostname();
 #endif
-        SerialAndTelnet.printf("* Hostname: %s    IP: %s     MAC: %s\n\r",
+        SerialAndTelnet.printf("* Hostname: %s   IP: %s   MAC: %s",
                                hostname.c_str(),
                                WiFi.localIP().toString().c_str(),
                                WiFi.macAddress().c_str());
-        SerialAndTelnet.printf("* Connected to WiFi SSID: %s\n\r", WiFi.SSID().c_str());
-        SerialAndTelnet.printf("* Boot time: %s\n\r", _boottime);
+        SerialAndTelnet.println();
+        SerialAndTelnet.printf("* Connected to WiFi SSID: %s", WiFi.SSID().c_str());
+        SerialAndTelnet.println();
+        SerialAndTelnet.printf("* Boot time: %s", _boottime);
+        SerialAndTelnet.println();
     }
-    SerialAndTelnet.printf("* Free RAM:%d KB, Load:%d%%\n\r", (ESP.getFreeHeap() / 1024), getSystemLoadAverage());
+    SerialAndTelnet.printf("* Free RAM:%d KB, Load:%d%%", (ESP.getFreeHeap() / 1024), getSystemLoadAverage());
+    SerialAndTelnet.println();
     // for battery power is ESP.getVcc()
 
-#ifdef DEBUG_SUPPORT
-    SerialAndTelnet.println("* Warning: in DEBUG_SUPPORT mode!");
-#endif
-
-    SerialAndTelnet.println("*\n\r* Commands:\n\r*  ?=help, CTRL-D=quit, !=reboot");
+    SerialAndTelnet.println(FPSTR("*"));
+    SerialAndTelnet.println(FPSTR("* Commands:"));
+    SerialAndTelnet.println(FPSTR("*  ?=help, CTRL-D=quit, !=reboot"));
     SerialAndTelnet.println(FPSTR("*  set"));
     SerialAndTelnet.println(FPSTR("*  set <wifi_ssid | wifi_password | mqtt_host | mqtt_username | mqtt_password> [value]"));
     SerialAndTelnet.println(FPSTR("*  set erase"));
+    SerialAndTelnet.println(FPSTR("*  set serial"));
+
 
     // print custom commands if available. Taken from progmem
     if (_telnetcommand_callback) {
@@ -493,6 +502,20 @@ void MyESP::_changeSetting(uint8_t wc, const char * setting, const char * value)
             _mqtt_password = strdup(value);
         }
         ok = true;
+    } else if (strcmp(setting, "serial") == 0) {
+        ok          = true;
+        _use_serial = false;
+        if (value) {
+            if (strcmp(value, "on") == 0) {
+                _use_serial = true;
+                ok          = true;
+            } else if (strcmp(value, "off") == 0) {
+                _use_serial = false;
+                ok          = true;
+            } else {
+                ok = false;
+            }
+        }
     } else {
         // finally check for any custom commands
         ok = (_fs_settings_callback)(MYESP_FSACTION_SET, wc, setting, value);
@@ -505,11 +528,12 @@ void MyESP::_changeSetting(uint8_t wc, const char * setting, const char * value)
 
     // check for 2 params
     if (value == nullptr) {
-        SerialAndTelnet.printf("%s setting deleted\n\r", setting);
+        SerialAndTelnet.printf("%s setting reset to its default value", setting);
     } else {
-        // 3 params
-        SerialAndTelnet.printf("%s changed to %s\n\r", setting, value);
+        // must be 3 params
+        SerialAndTelnet.printf("%s changed to %s", setting, value);
     }
+    SerialAndTelnet.println();
 
     if (fs_saveConfig()) {
         SerialAndTelnet.println("Note, some changes will only have effect after the ESP is restarted (use ! command)");
@@ -536,8 +560,10 @@ void MyESP::_telnetCommand(char * commandLine) {
     char * ptrToCommandName = strtok((char *)temp, ", \n");
     if (strcmp(ptrToCommandName, "set") == 0) {
         if (wc == 1) {
-            SerialAndTelnet.println("\n\Stored settings:");
-            SerialAndTelnet.printf("  wifi_ssid=%s\n\r", (!_wifi_ssid) ? "<not set>" : _wifi_ssid);
+            SerialAndTelnet.println();
+            SerialAndTelnet.println("Stored settings:");
+            SerialAndTelnet.printf("  wifi_ssid=%s", (!_wifi_ssid) ? "<not set>" : _wifi_ssid);
+            SerialAndTelnet.println();
             SerialAndTelnet.printf("  wifi_password=");
             if (!_wifi_password) {
                 SerialAndTelnet.print("<not set>");
@@ -545,8 +571,11 @@ void MyESP::_telnetCommand(char * commandLine) {
                 for (uint8_t i = 0; i < strlen(_wifi_password); i++)
                     SerialAndTelnet.print("*");
             }
-            SerialAndTelnet.printf("\n\r  mqtt_host=%s\n\r", (!_mqtt_host) ? "<not set>" : _mqtt_host);
-            SerialAndTelnet.printf("  mqtt_username=%s\n\r", (!_mqtt_username) ? "<not set>" : _mqtt_username);
+            SerialAndTelnet.println();
+            SerialAndTelnet.printf("  mqtt_host=%s", (!_mqtt_host) ? "<not set>" : _mqtt_host);
+            SerialAndTelnet.println();
+            SerialAndTelnet.printf("  mqtt_username=%s", (!_mqtt_username) ? "<not set>" : _mqtt_username);
+            SerialAndTelnet.println();
             SerialAndTelnet.printf("  mqtt_password=");
             if (!_mqtt_password) {
                 SerialAndTelnet.print("<not set>");
@@ -554,12 +583,17 @@ void MyESP::_telnetCommand(char * commandLine) {
                 for (uint8_t i = 0; i < strlen(_mqtt_password); i++)
                     SerialAndTelnet.print("*");
             }
+
+            SerialAndTelnet.println();
+            SerialAndTelnet.printf("  serial=%s", (_use_serial) ? "on" : "off");
+
             SerialAndTelnet.println();
 
             // print custom settings
             (_fs_settings_callback)(MYESP_FSACTION_LIST, 0, NULL, NULL);
 
-            SerialAndTelnet.println("\n\rUsage: set <setting> [value]");
+            SerialAndTelnet.println();
+            SerialAndTelnet.println("Usage: set <setting> [value]");
         } else if (wc == 2) {
             char * setting = _telnet_readWord();
             _changeSetting(1, setting, NULL);
@@ -583,9 +617,11 @@ void MyESP::_telnetHandle() {
     // read asynchronously until full command input
     while (SerialAndTelnet.available()) {
         char c = SerialAndTelnet.read();
-#ifdef DEBUG_SUPPORT
-        Serial.print(c);
-#endif
+
+        if (_use_serial) {
+            SerialAndTelnet.serialPrint(c); // echo to Serial if connected
+        }
+
         switch (c) {
         case '\r': // likely have full command in buffer now, commands are terminated by CR and/or LF
         case '\n':
@@ -683,6 +719,7 @@ void MyESP::setWIFI(char * wifi_ssid, char * wifi_password, wifi_callback_f call
     _wifi_callback = callback;
 }
 
+// init MQTT settings
 void MyESP::setMQTT(char *          mqtt_host,
                     char *          mqtt_username,
                     char *          mqtt_password,
@@ -833,6 +870,14 @@ bool MyESP::_fs_loadConfig() {
     // ok is false if there's a problem loading a custom setting (e.g. does not exist)
     bool ok = (_fs_callback)(MYESP_FSACTION_LOAD, json);
 
+    // new configs after release 1.3.x
+    if (json.containsKey("use_serial")) {
+        _use_serial = (bool)json["use_serial"];
+    } else {
+        _use_serial = true; // if first time, set serial
+        ok          = false;
+    }
+
     configFile.close();
 
     return ok;
@@ -848,6 +893,7 @@ bool MyESP::fs_saveConfig() {
     json["mqtt_host"]     = _mqtt_host;
     json["mqtt_username"] = _mqtt_username;
     json["mqtt_password"] = _mqtt_password;
+    json["use_serial"]    = _use_serial;
 
     // callback for saving custom settings
     (void)(_fs_callback)(MYESP_FSACTION_SAVE, json);
@@ -911,8 +957,8 @@ void MyESP::begin(char * app_hostname, char * app_name, char * app_version) {
     _app_version  = strdup(app_version);
 
     // call setup of the services...
+    _fs_setup();     // SPIFFS setup, do this first to get values
     _telnet_setup(); // Telnet setup
-    _fs_setup();     // SPIFFS setup
     _wifi_setup();   // WIFI setup
     _mqtt_setup();   // MQTT Setup
     _mdns_setup();   // MDNS setup
@@ -923,9 +969,10 @@ void MyESP::begin(char * app_hostname, char * app_name, char * app_version) {
  * Loop. This is called as often as possible and it handles wifi, telnet, mqtt etc
  */
 void MyESP::loop() {
-    _calculateLoad(); // calculate load
+    _calculateLoad();
 
-    jw.loop();       // WiFi
+    jw.loop(); // WiFi
+
     _telnetHandle(); // Telnet/Debugger
 
     // do nothing else until we've got a wifi connection

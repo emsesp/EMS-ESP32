@@ -46,6 +46,13 @@
 #define EMS_TYPE_RCTime 0x06               // is an automatic thermostat broadcast
 #define EMS_TYPE_RCOutdoorTempMessage 0xA3 // is an automatic thermostat broadcast, outdoor external temp
 
+// RC10 specific
+#define EMS_TYPE_RC10StatusMessage 0xB1       // is an automatic thermostat broadcast giving us temps
+#define EMS_TYPE_RC10Set 0xB0                 // for setting values like temp and mode
+#define EMS_OFFSET_RC10Set_temp 4             // position of thermostat setpoint temperature
+#define EMS_TYPE_RC10StatusMessage_setpoint 1 // setpoint temp
+#define EMS_TYPE_RC10StatusMessage_curr 3     // current temp
+
 // RC20 specific
 #define EMS_TYPE_RC20StatusMessage 0x91       // is an automatic thermostat broadcast giving us temps
 #define EMS_TYPE_RC20Set 0xA8                 // for setting values like temp and mode
@@ -87,6 +94,7 @@ typedef enum {
 
     // thermostats
     EMS_MODEL_ES73,
+    EMS_MODEL_RC10,
     EMS_MODEL_RC20,
     EMS_MODEL_RC20F,
     EMS_MODEL_RC30,
@@ -104,8 +112,9 @@ const _Boiler_Type Boiler_Types[] = {
     {EMS_MODEL_UBA, 72, 0x08, "MC10"},
     {EMS_MODEL_UBA, 123, 0x08, "Buderus GB172/Nefit Trendline"},
     {EMS_MODEL_UBA, 115, 0x08, "Nefit Topline Compact"},
-    {EMS_MODEL_UBA, 64, 0x08, "Sieger BK15 Boiler"},
+    {EMS_MODEL_UBA, 64, 0x08, "Sieger BK15 Boiler/Nefit Smartline"},
     {EMS_MODEL_UBA, 190, 0x09, "BC10 Base Controller"},
+    {EMS_MODEL_UBA, 114, 0x09, "BC10 Base Controller"},
     {EMS_MODEL_UBA, 125, 0x09, "BC25 Base Controller"},
     {EMS_MODEL_UBA, 68, 0x09, "RFM20 Receiver"},
     {EMS_MODEL_UBA, 95, 0x08, "Bosch Condens 2500"},
@@ -120,6 +129,7 @@ const _Boiler_Type Boiler_Types[] = {
 const _Thermostat_Type Thermostat_Types[] = {
 
     {EMS_MODEL_ES73, 76, 0x10, "Sieger ES73", EMS_THERMOSTAT_READ_YES, EMS_THERMOSTAT_WRITE_YES},
+    {EMS_MODEL_RC10, 79, 0x17, "RC10/Nefit Moduline 100)", EMS_THERMOSTAT_READ_YES, EMS_THERMOSTAT_WRITE_YES},
     {EMS_MODEL_RC20, 77, 0x17, "RC20/Nefit Moduline 300)", EMS_THERMOSTAT_READ_YES, EMS_THERMOSTAT_WRITE_YES},
     {EMS_MODEL_RC20F, 93, 0x18, "RC20F", EMS_THERMOSTAT_READ_YES, EMS_THERMOSTAT_WRITE_YES},
     {EMS_MODEL_RC30, 78, 0x10, "RC30/Nefit Moduline 400)", EMS_THERMOSTAT_READ_YES, EMS_THERMOSTAT_WRITE_YES},

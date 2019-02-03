@@ -273,6 +273,22 @@ size_t TelnetSpy::write(uint8_t data) {
     return 1;
 }
 
+// this still needs some work
+bool TelnetSpy::isSerialAvailable(void) {
+    if (usedSer) {
+        usedSer->write("test");
+        //Wait for four seconds or till data is available on serial, whichever occurs first.
+        while (usedSer->available() == 0 && millis() < 4000)
+            ;
+
+        if (usedSer->available() > 0) {
+            (void)usedSer->read(); // We then clear the input buffer
+            return true;
+        }
+    }
+    return false;
+}
+
 int TelnetSpy::available(void) {
     if (usedSer) {
         int avail = usedSer->available();
@@ -536,6 +552,12 @@ void TelnetSpy::setCallbackOnConnect(telnetSpyCallback callback) {
 
 void TelnetSpy::setCallbackOnDisconnect(telnetSpyCallback callback) {
     callbackDisconnect = callback;
+}
+
+void TelnetSpy::serialPrint(char c) {
+    if (usedSer) {
+        usedSer->print(c);
+    }
 }
 
 void TelnetSpy::handle() {

@@ -140,8 +140,6 @@ class MyESP {
     char *          _mqtt_host;
     char *          _mqtt_username;
     char *          _mqtt_password;
-    char *          _boottime;
-    bool            _suspendOutput;
     char *          _mqtt_base;
     unsigned long   _mqtt_keepalive;
     unsigned char   _mqtt_qos;
@@ -192,6 +190,9 @@ class MyESP {
     char * _app_hostname;
     char * _app_name;
     char * _app_version;
+    char * _boottime;
+    bool   _suspendOutput;
+    bool   _use_serial;
 
     // load average (0..100)
     void               _calculateLoad();

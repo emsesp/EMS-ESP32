@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] 2019-02-
+
+### Added
+
+- Support for RC10 thermostat
+
+### Changed
+
+- removed MQTT and WIFI settings from my_config.h. These have to be set either within the application (using set) or hardcoded in platformio.ini
+- Improved Tx logic. Retries are more efficient and startup is faster
+- # Rx telegrams and # Tx telegrams show number of successful Reads and Writes initiated by the user or automatically
+
+### Removed
+
+- poll and tx commands
+- DEBUG_SUPPORT. Now controlled with the 'set serial' command
+- TxCapable removed
+
 ## [1.4.1] 2019-01-29
 
 ### Added

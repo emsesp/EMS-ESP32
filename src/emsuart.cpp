@@ -28,8 +28,8 @@ static void emsuart_rx_intr_handler(void * para) {
     static uint8_t  uart_buffer[EMS_MAXBUFFERSIZE];
 
     // is a new buffer? if so init the thing for a new telegram
-    if (EMS_Sys_Status.emsRxStatus == EMS_RX_IDLE) {
-        EMS_Sys_Status.emsRxStatus = EMS_RX_ACTIVE; // status set to active
+    if (EMS_Sys_Status.emsRxStatus == EMS_RX_STATUS_IDLE) {
+        EMS_Sys_Status.emsRxStatus = EMS_RX_STATUS_BUSY; // status set to busy
         length                     = 0;
     }
 
@@ -55,7 +55,7 @@ static void emsuart_rx_intr_handler(void * para) {
         os_memcpy((void *)pEMSRxBuf->buffer, (void *)&uart_buffer, length);
 
         // set the status flag stating BRK has been received and we can start a new package
-        EMS_Sys_Status.emsRxStatus = EMS_RX_IDLE;
+        EMS_Sys_Status.emsRxStatus = EMS_RX_STATUS_IDLE;
 
         // call emsuart_recvTask() at next opportunity
         system_os_post(EMSUART_recvTaskPrio, 0, 0);

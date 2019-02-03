@@ -61,16 +61,17 @@
 
 /* EMS UART transfer status */
 typedef enum {
-    EMS_RX_IDLE,
-    EMS_RX_ACTIVE // Rx package is being sent
+    EMS_RX_STATUS_IDLE,
+    EMS_RX_STATUS_BUSY // Rx package is being received
 } _EMS_RX_STATUS;
 
 typedef enum {
-    EMS_TX_IDLE,
-    EMS_TX_ACTIVE, // Tx package being sent, no break sent
-    EMS_TX_SUCCESS,
-    EMS_TX_ERROR
+    EMS_TX_STATUS_IDLE, // ready
+    EMS_TX_STATUS_WAIT  // waiting for response from last Tx
 } _EMS_TX_STATUS;
+
+#define EMS_TX_SUCCESS 0x01 // EMS single byte after a Tx Write indicating a success
+#define EMS_TX_ERROR 0x04   // EMS single byte after a Tx Write indicating an error
 
 typedef enum {
     EMS_TX_TELEGRAM_INIT,     // just initialized
@@ -97,18 +98,18 @@ typedef struct {
     uint16_t         emsTxPkgs;        // sent
     uint16_t         emxCrcErr;        // CRC errors
     bool             emsPollEnabled;   // flag enable the response to poll messages
-    bool             emsTxEnabled;     // flag if we're allowing sending of Tx packages
     _EMS_SYS_LOGGING emsLogging;       // logging
     bool             emsRefreshed;     // fresh data, needs to be pushed out to MQTT
     bool             emsBusConnected;  // is there an active bus
     unsigned long    emsRxTimestamp;   // timestamp of last EMS message received
-    unsigned long    emsPollTimestamp; // timestamp of last EMS poll
+    unsigned long    emsPollTimestamp; // timestamp of last EMS poll sent to us
     bool             emsTxCapable;     // able to send via Tx
+    uint8_t          txRetryCount;     // # times the last Tx was re-sent
 } _EMS_Sys_Status;
 
 // The Tx send package
 typedef struct {
-    _EMS_TX_TELEGRAM_ACTION action; // read or write
+    _EMS_TX_TELEGRAM_ACTION action; // read, write, validate, init
     uint8_t                 dest;
     uint8_t                 type;
     uint8_t                 offset;
@@ -122,6 +123,8 @@ typedef struct {
     unsigned long           timestamp;          // when created
     uint8_t                 data[EMS_MAX_TELEGRAM_LENGTH];
 } _EMS_TxTelegram;
+
+
 
 // default empty Tx
 const _EMS_TxTelegram EMS_TX_TELEGRAM_NEW = {
@@ -236,8 +239,8 @@ typedef struct {
     uint8_t year;
 } _EMS_Thermostat;
 
-// call back function signature
-typedef void (*EMS_processType_cb)(uint8_t * data, uint8_t length);
+// call back function signature for processing telegram types
+typedef void (*EMS_processType_cb)(uint8_t type, uint8_t * data, uint8_t length);
 
 // Definition for each EMS type, including the relative callback function
 typedef struct {
@@ -293,6 +296,7 @@ void    _ems_clearTxData();
 int     _ems_findBoilerModel(uint8_t model_id);
 bool    _ems_setModel(uint8_t model_id);
 void    _ems_setThermostatModel(uint8_t thermostat_modelid);
+void    _removeTxQueue();
 
 // global so can referenced in other classes
 extern _EMS_Sys_Status EMS_Sys_Status;

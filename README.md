@@ -73,7 +73,7 @@ The code and circuit has been tested with a few ESP8266 development boards such 
 
 Use the telnet client to inform you of all activity and errors real-time. This is an example of the telnet output:
 
-![Telnet](doc/telnet/telnet_example.jpg)
+![Telnet](doc/telnet/telnet_menu.jpg)
 
 Type 'log v' and Enter and you'll be seeing verbose logging messages. ANSI colors with white text for info messages, green are for broadcast telegrams, yellow are the ones sent to us and red are for unknown data or telegrans which have failed the CRC check.
 
@@ -83,7 +83,7 @@ To see the current stats and collected values type 'info'. Watch out for unsucce
 
 ![Telnet](doc/telnet/telnet_stats.PNG)
 
-**Disclaimer: be careful when sending values to the boiler. If in doubt you can always reset the boiler to its original factory settings by following the instructions in the user guide. On my **Nefit Trendline** that is done by holding down the Home and Menu buttons simultaneously for a few seconds, selecting factory settings from the scroll menu followed by pressing the Reset button.**
+**Disclaimer: be careful when sending values to the boiler. If in doubt you can always reset the boiler to its original factory settings by following the instructions in the user guide. For example on my Nefit Trendline that is done by holding down the Home and Menu buttons simultaneously for a few seconds, selecting factory settings from the scroll menu followed by pressing the Reset button.**
 
 ## Building The Circuit
 
@@ -118,7 +118,7 @@ The EMS circuit will work with both 3.3V and 5V. It's easiest though to power di
 
 ## Adding external temperature sensors
 
-The code supports auto-detection of Dallas type temperature sensors. The default gpio pin (DQ) to the ESP8266 is D5 but this can be configured in `my_config.h`. The dallas chips DS1822, DS18S20, DS18B20, DS1825 are supported including their parasite varieties.
+The code supports auto-detection of Dallas type temperature sensors. The default gpio pin used on the ESP8266 is D5 but this can be configured in the setting menu (`set dallas_gpio`). The dallas chips DS1822, DS18S20, DS18B20, DS1825 are supported including their parasite varieties.
 
 ## How The EMS Bus Works
 
@@ -211,6 +211,7 @@ In `ems.cpp` you can add scheduled calls to specific EMS types in the functions 
 I am still working on adding more support to known thermostats. Any contributions here are welcome. The know types are listed in `ems_devices.h` and include
 
 - RC20 and RC30, both are fully supported
+- RC10 support is being added
 - RC35 with support for the 1st heating circuit (HC1)
 - TC100/TC200/Easy but only with support for reading the temperatures. There seems to be no way to set settings using EMS bus messages that I know of. One option is to send XMPP messages but a special server is needed and out of scope for this project.
 
@@ -234,7 +235,7 @@ Similarly the thermostat values are also sent as a JSON package with the topic `
 
 If MQTT is not used set the MQTT_HOST to `NULL`.
 
-Some home automation systems such as Domoticz and OpenHab have special formats for their MQTT messages so I would advise to use [node-red](https://nodered.org/) as a parser.
+Some home automation systems such as Domoticz and OpenHab have special formats for their MQTT messages so I would advise to use [node-red](https://nodered.org/) as a parser like in [this example](https://www.domoticz.com/forum/download/file.php?id=18977&sid=67d048f1b4c8833822175eac6b55ecff).
 
 ### The Basic Shower Logic
 
@@ -286,10 +287,10 @@ edit `platformio.ini` to set `env_default` to your board type, then
 
 ### Building Using Arduino IDE
 
-Porting to the Arduino IDE can be a little tricky but it is possible.
+Porting to the Arduino IDE can be a little tricky but it did it once. Something along these lines:
 
 - Add the ESP8266 boards (from Preferences add Additional Board URL `http://arduino.esp8266.com/stable/package_esp8266com_index.json`)
-- Go to Boards Manager and install ESP8266 2.4.x platform
+- Go to Boards Manager and install ESP8266 2.4.x platform. Make sure your board supports SPIFFS.
 - Select your ESP8266 from Tools->Boards and the correct port with Tools->Port
 - From the Library Manager install the needed libraries from platformio.ini. Note make sure you pick ArduinoJson v5 (5.13.4 and above) and not v6. See https://arduinojson.org/v5/doc/
 - Put all the files in a single sketch folder
@@ -304,13 +305,13 @@ pre-baked firmwares for some ESP8266 devices are available in the directory `/fi
 3. Connect the ESP via USB, figure out the COM port
 4. run `esptool.py -p <com> write_flash 0x00000 <firmware>` where firmware is the `.bin` file and \<com\> is the COM port, e.g. `COM3`
 
-The ESP8266 will start in Access Point (AP) mode. Connect via WiFi to the SSID **EMS-ESP** and telnet to **192.168.4.1**. Then use the set command to configure your own network settings.
+The ESP8266 will start in Access Point (AP) mode. Connect via WiFi to the SSID **EMS-ESP** and telnet to **192.168.4.1**. Then use the set command to configure your own network settings. Alternatively connect the ESP8266 to your PC and open a Serial monitor to configure the settings. Make sure you disable Serial support before connecting the EMS lines using `set serial off`.
 
 `set erase` will clear all settings. `set` wil show all settings.
 
 ## Troubleshooting
 
-If the WiFi fails to connect you won't be able to debug using the Telnet so re-build the firmware using the `-DDEBUG_SUPPORT` by un-commenting `debug_mode` in `platformio.ini`. Then connect the ESP8266 to a USB in your computer and monitor the Serial output. A lot of detailed logging will be printed to help you pinpoint the cause of the error for the Wifi, MQTT, MDNS and other things.
+When flashing for the first time the Serial port is enabled by default. You can then use a PC with USB to the ESP8266 to set the settings like wifi, mqtt etc and also monitor the boot up procedure. Remember to disable the serial (`set serial off`) when connecting to the EMS lines.
 
 The onboard LED will flash if there is no connection with the EMS bus. You can disable LED support by the 'set led' command from the telnet client
 
@@ -318,7 +319,7 @@ The onboard LED will flash if there is no connection with the EMS bus. You can d
 
 Some annoying issues that need fixing:
 
-- Very infrequently an EMS write command is not sent, probably due to a collision somewhere in the UART between an incoming Rx and a Poll. The retries in the code fix this for now.
+- On newer EMS+ Boilers the Tx commands for reading and writing may not always work. I believe there is some handshake that needs to happen before the UBA3/Master is able to send a poll request to our service device.
 
 ## Wish List
 

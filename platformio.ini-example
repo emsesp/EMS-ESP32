@@ -6,9 +6,12 @@ env_default = d1_mini
 [common]
 platform = espressif8266
 flash_mode = dout
-;debug_mode = -DDEBUG_SUPPORT
-debug_mode =
 build_flags = -g -w
+
+wifi_settings =
+; hard code if you prefer. Recommendation is to set from within the app when in Serial or AP mode
+;wifi_settings = -DWIFI_SSID="your_ssid" -DWIFI_PASSWORD="your_pw"
+
 lib_deps =
   CRC32
   CircularBuffer
@@ -22,7 +25,7 @@ board = nodemcuv2
 platform = ${common.platform}
 framework = arduino
 lib_deps = ${common.lib_deps}
-build_flags = ${common.build_flags} ${common.debug_mode}
+build_flags = ${common.build_flags} ${common.wifi_settings}
 board_build.flash_mode = ${common.flash_mode}
 upload_speed = 921600
 monitor_speed = 115200
@@ -34,7 +37,7 @@ board = d1_mini
 platform = ${common.platform}
 framework = arduino
 lib_deps = ${common.lib_deps}
-build_flags = ${common.build_flags} ${common.debug_mode}
+build_flags = ${common.build_flags} ${common.wifi_settings}
 board_build.flash_mode = ${common.flash_mode}
 upload_speed = 921600
 monitor_speed = 115200

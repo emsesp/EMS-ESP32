@@ -186,6 +186,7 @@ class TelnetSpy : public Stream {
     void     setPingTime(uint16_t pngTime);
     void     setSerial(HardwareSerial * usedSerial);
     bool     isClientConnected();
+    void     serialPrint(char c);
 
     void                          disconnectClient();                                  // added by Proddy
     typedef std::function<void()> telnetSpyCallback;                                   // added by Proddy
@@ -240,6 +241,8 @@ class TelnetSpy : public Stream {
              operator bool() const;
     void     setDebugOutput(bool);
     uint32_t baudRate(void);
+
+    bool isSerialAvailable(void);
 
   protected:
     void             sendBlock(void);

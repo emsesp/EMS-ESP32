@@ -85,11 +85,9 @@ command_t PROGMEM project_cmds[] = {
 
     {"info", "show the values"},
     {"log <n | b | t | r | v>", "set logging mode to none, basic, thermostat only, raw or verbose"},
-    {"poll", "toggle EMS poll request on/off"},
-    {"tx", "toggle EMX Tx line on/off"},
     {"publish", "publish values to MQTT"},
     {"types", "list supported EMS telegram type IDs"},
-    {"queue", "print the Tx queue"},
+    {"queue", "list Tx queue"},
     {"autodetect", "discover EMS devices and set boiler and thermostat automatically"},
     {"shower <timer | alert>", "toggle either timer or alert on/off"},
     {"send XX...", "send raw telegram data in hex to EMS bus"},
@@ -265,19 +263,16 @@ void showInfo() {
 
     myDebug("  LED is %s", EMSESP_Status.led_enabled ? "on" : "off");
 
-    myDebug("  # connected Dallas temperature sensors = %d", EMSESP_Status.dallas_sensors);
+    myDebug("  # connected Dallas temperature sensors=%d", EMSESP_Status.dallas_sensors);
 
-    myDebug("  Thermostat is %s, Boiler is %s, Poll is %s, Tx is %s, Shower Timer is %s, Shower Alert is %s",
+    myDebug("  Thermostat is %s, Boiler is %s, Shower Timer is %s, Shower Alert is %s",
             (ems_getThermostatEnabled() ? "enabled" : "disabled"),
             (ems_getBoilerEnabled() ? "enabled" : "disabled"),
-            ((EMS_Sys_Status.emsPollEnabled) ? "enabled" : "disabled"),
-            ((EMS_Sys_Status.emsTxEnabled) ? "enabled" : "disabled"),
             ((EMSESP_Status.shower_timer) ? "enabled" : "disabled"),
             ((EMSESP_Status.shower_alert) ? "enabled" : "disabled"));
 
     myDebug("\n%sEMS Bus Stats:%s", COLOR_BOLD_ON, COLOR_BOLD_OFF);
-    myDebug("  Bus Connected=%s, Tx Capable=%s, # Rx telegrams=%d, # Tx telegrams=%d, # Crc Errors=%d",
-            (ems_getTxCapable() ? "yes" : "no"),
+    myDebug("  Bus Connected=%s, # Rx telegrams=%d, # Tx telegrams=%d, # Crc Errors=%d",
             (ems_getBusConnected() ? "yes" : "no"),
             EMS_Sys_Status.emsRxPgks,
             EMS_Sys_Status.emsTxPkgs,
@@ -633,7 +628,7 @@ bool FSCallback(MYESP_FSACTION action, JsonObject & json) {
 
 // callback for custom settings when showing Stored Settings
 // wc is number of arguments after the 'set' command
-// returns true if successful
+// returns true if the setting was recognized and changed
 bool SettingsCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, const char * value) {
     bool ok = false;
 
@@ -718,18 +713,6 @@ void TelnetCommandCallback(uint8_t wc, const char * commandLine) {
 
     if (strcmp(first_cmd, "info") == 0) {
         showInfo();
-        ok = true;
-    }
-
-    if (strcmp(first_cmd, "poll") == 0) {
-        bool b = !ems_getPoll();
-        ems_setPoll(b);
-        ok = true;
-    }
-
-    if (strcmp(first_cmd, "tx") == 0) {
-        bool b = !ems_getTxEnabled();
-        ems_setTxEnabled(b);
         ok = true;
     }
 
@@ -925,17 +908,12 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
 
 // Init callback, which is used to set functions and call methods after a wifi connection has been established
 void WIFICallback() {
-// when finally we're all set up, we can fire up the uart (this will enable the UART interrupts)
-#ifdef DEBUG_SUPPORT
-    myDebug("Warning, in DEBUG mode. EMS bus has been disabled. See -DDEBUG_SUPPORT build option.");
-#else
-    // Important! This is where we enable the UART service to scan the incoming serial Tx/Rx bus signals
+    // This is where we enable the UART service to scan the incoming serial Tx/Rx bus signals
     // This is done after we have a WiFi signal to avoid any resource conflicts
     emsuart_init();
     myDebug("[UART] Opened Rx/Tx connection");
-#endif
 
-    // now that we're connected, find out what boiler and thermostats we have specified
+    // go and find the boiler and thermostat types
     ems_discoverModels();
 }
 
@@ -1100,18 +1078,21 @@ void setup() {
     // call ems.cpp's init function to set all the internal params
     ems_init();
 
-#ifndef DEBUG_SUPPORT
     // Timers using Ticker library
     publishValuesTimer.attach(PUBLISHVALUES_TIME, do_publishValues);    // post MQTT values
     systemCheckTimer.attach(SYSTEMCHECK_TIME, do_systemCheck);          // check if Boiler is online
     regularUpdatesTimer.attach(REGULARUPDATES_TIME, do_regularUpdates); // regular reads from the EMS
-#endif
 
     // set up myESP for Wifi, MQTT, MDNS and Telnet
     myESP.setTelnet(project_cmds, ArraySize(project_cmds), TelnetCommandCallback, TelnetCallback); // set up Telnet commands
+#ifdef WIFI_SSID
     myESP.setWIFI(WIFI_SSID, WIFI_PASSWORD, WIFICallback);
-    myESP.setMQTT(
-        MQTT_HOST, MQTT_USER, MQTT_PASS, MQTT_BASE, MQTT_KEEPALIVE, MQTT_QOS, MQTT_RETAIN, MQTT_WILL_TOPIC, MQTT_WILL_PAYLOAD, MQTTCallback);
+#else
+    myESP.setWIFI(NULL, NULL, WIFICallback); // pull the wifi settings from the SPIFFS stored settings
+#endif
+
+    // MQTT host, username and password taken from the SPIFFS settings
+    myESP.setMQTT(NULL, NULL, NULL, MQTT_BASE, MQTT_KEEPALIVE, MQTT_QOS, MQTT_RETAIN, MQTT_WILL_TOPIC, MQTT_WILL_PAYLOAD, MQTTCallback);
 
     // custom settings in SPIFFS
     myESP.setSettings(FSCallback, SettingsCallback);

@@ -10,8 +10,10 @@
 
 #include "ems.h"
 
-// All MQTT topics are prefixed with the following string
-#define MQTT_BASE "home"
+// MQTT base name
+#define MQTT_BASE "home" // all MQTT topics are prefix with this string, in the format <MQTT_BASE>/<app name>/<topic>
+
+// MQTT general settings
 #define MQTT_TOPIC_START "start"
 #define MQTT_TOPIC_START_PAYLOAD "start"
 #define MQTT_WILL_TOPIC "status" // for last will & testament topic name
@@ -20,7 +22,7 @@
 #define MQTT_KEEPALIVE 300
 #define MQTT_QOS 1
 
-// thermostat
+// MQTT for thermostat
 #define TOPIC_THERMOSTAT_DATA "thermostat_data"         // for sending thermostat values
 #define TOPIC_THERMOSTAT_CMD_TEMP "thermostat_cmd_temp" // for received thermostat temp changes
 #define TOPIC_THERMOSTAT_CMD_MODE "thermostat_cmd_mode" // for received thermostat mode changes
@@ -28,7 +30,7 @@
 #define THERMOSTAT_SELTEMP "thermostat_seltemp"         // selected temperature
 #define THERMOSTAT_MODE "thermostat_mode"               // mode
 
-// boiler
+// MQTT for boiler
 #define TOPIC_BOILER_DATA "boiler_data"                // for sending boiler values
 #define TOPIC_BOILER_TAPWATER_ACTIVE "tapwater_active" // if hot tap water is running
 #define TOPIC_BOILER_HEATING_ACTIVE "heating_active"   // if heating is on
@@ -44,17 +46,10 @@
 #define BOILER_SHOWER_ALERT 0      // enable (1) to send alert of cold water when shower time limit has exceeded
 #define SHOWER_MAX_DURATION 420000 // in ms. 7 minutes, before trigger a shot of cold water
 
-//////////////////////////////////////////////////////////////////////////////////////////////////
-// THESE DEFAULT VALUES CAN ALSO BE SET AND STORED WITHTIN THE APPLICATION (see 'set' command)  //
-//////////////////////////////////////////////////////////////////////////////////////////////////
-
-// Set your wifi and mqtt params
-// If set to NULL (default) you'll need to set them in AP mode using the 'set' command
-#define WIFI_SSID NULL
-#define WIFI_PASSWORD NULL
-#define MQTT_HOST NULL
-#define MQTT_USER NULL
-#define MQTT_PASS NULL
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// THESE DEFAULT VALUES CAN ALSO BE SET AND STORED WITHTIN THE APPLICATION (see 'set' command)    //
+// ALTHOUGH YOU MAY ALSO HARDCODE THEM HERE BUT THEY WILL BE OVERWRITTEN WITH NEW RELEASE UPDATES //
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Set LED pin used for showing ems bus connection status. Solid is connected, Flashing is error
 // can be either the onboard LED on the ESP8266 (LED_BULLETIN) or external via an external pull-up LED (e.g. D1 on bbqkees' board)
