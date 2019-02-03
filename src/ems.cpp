@@ -975,7 +975,7 @@ void _process_UBAMonitorSlow(uint8_t type, uint8_t * data, uint8_t length) {
  */
 void _process_RC10StatusMessage(uint8_t type, uint8_t * data, uint8_t length) {
     EMS_Thermostat.setpoint_roomTemp = ((float)data[EMS_TYPE_RC10StatusMessage_setpoint]) / (float)2;
-    EMS_Thermostat.curr_roomTemp     = _toFloat(EMS_TYPE_RC10StatusMessage_curr, data);
+    EMS_Thermostat.curr_roomTemp     = ((float)data[EMS_TYPE_RC10StatusMessage_curr]) / (float)10;
 
     EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
 }

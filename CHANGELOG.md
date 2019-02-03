@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.1] 2019-02-03
+
+### Fixed
+
+- issue with Serial monitoring conflicting with UART when both running
+
+### Changed
+
+- `thermostat temp` now except floats (e.g. 20.5). Some thermostats may round up or down if they use 0.5 intervals.
+
 ## [1.5.0] 2019-02-03
 
 ### Added

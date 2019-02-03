@@ -10,7 +10,7 @@ build_flags = -g -w
 
 wifi_settings =
 ; hard code if you prefer. Recommendation is to set from within the app when in Serial or AP mode
-;wifi_settings = -DWIFI_SSID="your_ssid" -DWIFI_PASSWORD="your_pw"
+;wifi_settings = '-DWIFI_SSID="XXXX"' '-DWIFI_PASSWORD="XXXX"'
 
 lib_deps =
   CRC32

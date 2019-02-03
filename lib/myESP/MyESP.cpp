@@ -102,6 +102,11 @@ void MyESP::myDebug_P(PGM_P format_P, ...) {
     delete[] buffer;
 }
 
+// use Serial?
+bool MyESP::getUseSerial() {
+    return (_use_serial);
+}
+
 // called when WiFi is connected, and used to start MDNS
 void MyESP::_wifiCallback(justwifi_messages_t code, char * parameter) {
     if ((code == MESSAGE_CONNECTED)) {
@@ -629,6 +634,9 @@ void MyESP::_telnetHandle() {
             if (charsRead > 0) {
                 charsRead      = 0; //  is static, so have to reset
                 _suspendOutput = false;
+                if (_use_serial) {
+                    SerialAndTelnet.println(); // force newline if in Telnet
+                }
                 _telnetCommand(_command);
             }
             break;
@@ -814,9 +822,10 @@ void MyESP::_fs_printConfig() {
 
 // format File System
 void MyESP::_fs_eraseConfig() {
-    myDebug_P(PSTR("[FS] Erasing settings, please wait. ESP will automatically restart when finished."));
+    myDebug_P(PSTR("[FS] Erasing settings, please wait a few seconds. ESP will automatically restart when finished."));
 
     if (SPIFFS.format()) {
+        delay(2000); // wait 2 seconds
         resetESP();
     }
 }
@@ -833,7 +842,7 @@ bool MyESP::_fs_loadConfig() {
         myDebug_P(PSTR("[FS] Failed to open config file"));
         // file does not exist, so assume its the first install. Set serial to on
         _use_serial = true;
-        return false;
+        return false; // this will trigger a new file being created
     }
 
     size_t size = configFile.size();

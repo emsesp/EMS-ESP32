@@ -113,6 +113,7 @@ class MyESP {
     void myDebug(const char * format, ...);
     void myDebug_P(PGM_P format_P, ...);
     void setTelnet(command_t * cmds, uint8_t count, telnetcommand_callback_f callback_cmd, telnet_callback_f callback);
+    bool getUseSerial();
 
     // FS
     void setSettings(fs_callback_f callback, fs_settings_callback_f fs_settings_callback);

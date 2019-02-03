@@ -78,7 +78,7 @@ typedef struct {
 command_t PROGMEM project_cmds[] = {
 
     {"set led <on | off>", "toggle status LED on/off"},
-    {"set led_gpio <pin>", "set the LED pin (onboard=2)"},
+    {"set led_gpio <pin>", "set the LED pin (onboard=16)"},
     {"set dallas_gpio <pin>", "set the pin for the external Dallas temperature sensor (D5=14)"},
     {"set thermostat_type <hex type ID>", "set the thermostat type id (e.g. 10 for 0x10)"},
     {"set boiler_type <hex type ID>", "set the boiler type id (e.g. 8 for 0x08)"},
@@ -384,9 +384,8 @@ void showInfo() {
                 myDebug("  Mode is set to ?");
             }
         }
+        myDebug(""); // newline
     }
-
-    myDebug(""); // newline
 
     // Dallas
     if (EMSESP_Status.dallas_sensors != 0) {
@@ -396,9 +395,8 @@ void showInfo() {
             snprintf(s, sizeof(s), "Sensor #%d", i + 1);
             _renderFloatValue(s, "C", ds18.getValue(i));
         }
+        myDebug(""); // newline
     }
-
-    myDebug(""); // newline
 
     // show the Shower Info
     if (EMSESP_Status.shower_timer) {
@@ -545,6 +543,15 @@ uint8_t _readIntNumber() {
     return atoi(numTextPtr);
 }
 
+// used to read the next string from an input buffer and convert to a double
+float _readFloatNumber() {
+    char * numTextPtr = strtok(NULL, ", \n");
+    if (numTextPtr == nullptr) {
+        return 0;
+    }
+    return atof(numTextPtr);
+}
+
 // used to read the next string from an input buffer as a hex value and convert to an 8 bit int
 uint8_t _readHexNumber() {
     char * numTextPtr = strtok(NULL, ", \n");
@@ -572,7 +579,6 @@ void startThermostatScan(uint8_t start) {
     scanThermostat.attach(SCANTHERMOSTAT_TIME, do_scanThermostat);
 }
 
-
 // callback for loading/saving settings to the file system (SPIFFS)
 bool FSCallback(MYESP_FSACTION action, JsonObject & json) {
     bool ok = true;
@@ -581,21 +587,24 @@ bool FSCallback(MYESP_FSACTION action, JsonObject & json) {
         if (json.containsKey("led")) {
             EMSESP_Status.led_enabled = (bool)json["led"];
         } else {
-            ok = false;
+            EMSESP_Status.led_enabled = LED_BUILTIN; // default value
+            ok                        = false;
         }
 
         // led_gpio
         if (json.containsKey("led_gpio")) {
             EMSESP_Status.led_gpio = json["led_gpio"];
         } else {
-            ok = false;
+            EMSESP_Status.led_gpio = EMSESP_LED_GPIO; // default value
+            ok                     = false;
         }
 
         // dallas_gpio
         if (json.containsKey("dallas_gpio")) {
             EMSESP_Status.dallas_gpio = json["dallas_gpio"];
         } else {
-            ok = false;
+            EMSESP_Status.dallas_gpio = EMSESP_DALLAS_GPIO; // default value
+            ok                        = false;
         }
 
         // thermostat_type
@@ -780,7 +789,7 @@ void TelnetCommandCallback(uint8_t wc, const char * commandLine) {
         if (wc == 3) {
             char * second_cmd = _readWord();
             if (strcmp(second_cmd, "temp") == 0) {
-                ems_setThermostatTemp(_readIntNumber());
+                ems_setThermostatTemp(_readFloatNumber());
                 ok = true;
             } else if (strcmp(second_cmd, "mode") == 0) {
                 ems_setThermostatMode(_readIntNumber());
@@ -910,11 +919,14 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
 void WIFICallback() {
     // This is where we enable the UART service to scan the incoming serial Tx/Rx bus signals
     // This is done after we have a WiFi signal to avoid any resource conflicts
-    emsuart_init();
-    myDebug("[UART] Opened Rx/Tx connection");
-
-    // go and find the boiler and thermostat types
-    ems_discoverModels();
+    if (myESP.getUseSerial()) {
+        myDebug("EMS UART disabled when in Serial mode. Use 'set serial off' to change.");
+    } else {
+        emsuart_init();
+        myDebug("[UART] Opened Rx/Tx connection");
+        // go and find the boiler and thermostat types
+        ems_discoverModels();
+    }
 }
 
 // Initialize the boiler settings and shower settings
@@ -922,7 +934,7 @@ void initEMSESP() {
     // general settings
     EMSESP_Status.shower_timer   = BOILER_SHOWER_TIMER;
     EMSESP_Status.shower_alert   = BOILER_SHOWER_ALERT;
-    EMSESP_Status.led_enabled    = false;
+    EMSESP_Status.led_enabled    = true; // LED is on by default
     EMSESP_Status.timestamp      = millis();
     EMSESP_Status.dallas_sensors = 0;
 
@@ -939,7 +951,7 @@ void initEMSESP() {
 // call PublishValues without forcing, so using CRC to see if we really need to publish
 void do_publishValues() {
     // don't publish if we're not connected to the EMS bus
-    if (ems_getBusConnected()) {
+    if ((ems_getBusConnected()) && (!myESP.getUseSerial())) {
         publishValues(false);
     }
 }
@@ -959,14 +971,16 @@ void do_ledcheck() {
 
 // Thermostat scan
 void do_scanThermostat() {
-    myDebug("> Scanning thermostat message type #0x%02X..", scanThermostat_count);
-    ems_doReadCommand(scanThermostat_count, EMS_Thermostat.type_id);
-    scanThermostat_count++;
+    if ((ems_getBusConnected()) && (!myESP.getUseSerial())) {
+        myDebug("> Scanning thermostat message type #0x%02X..", scanThermostat_count);
+        ems_doReadCommand(scanThermostat_count, EMS_Thermostat.type_id);
+        scanThermostat_count++;
+    }
 }
 
 // do a system health check every now and then to see if we all connections
 void do_systemCheck() {
-    if (!ems_getBusConnected()) {
+    if ((!ems_getBusConnected()) && (!myESP.getUseSerial())) {
         myDebug("Error! Unable to read from EMS bus. Retrying in %d seconds...", SYSTEMCHECK_TIME);
     }
 }
@@ -974,7 +988,7 @@ void do_systemCheck() {
 // force calls to get data from EMS for the types that aren't sent as broadcasts
 // only if we have a EMS connection
 void do_regularUpdates() {
-    if (ems_getBusConnected()) {
+    if ((ems_getBusConnected()) && (!myESP.getUseSerial())) {
         myDebugLog("Calling scheduled data refresh from EMS devices..");
         ems_getThermostatValues();
         ems_getBoilerValues();
