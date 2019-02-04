@@ -410,9 +410,11 @@ void MyESP::_consoleShowHelp() {
 
     SerialAndTelnet.println(FPSTR("*"));
     SerialAndTelnet.println(FPSTR("* Commands:"));
-    SerialAndTelnet.println(FPSTR("*  ?=help, CTRL-D=quit, !=reboot"));
+    SerialAndTelnet.println(FPSTR("*  ?=help, CTRL-D=quit"));
+    SerialAndTelnet.println(FPSTR("*  reboot"));
     SerialAndTelnet.println(FPSTR("*  set"));
-    SerialAndTelnet.println(FPSTR("*  set <wifi_ssid | wifi_password | mqtt_host | mqtt_username | mqtt_password> [value]"));
+    SerialAndTelnet.println(FPSTR("*  set wifi <ssid> <password>"));
+    SerialAndTelnet.println(FPSTR("*  set <mqtt_host | mqtt_username | mqtt_password> [value]"));
     SerialAndTelnet.println(FPSTR("*  set erase"));
     SerialAndTelnet.println(FPSTR("*  set serial"));
 
@@ -456,8 +458,32 @@ char * MyESP::_telnet_readWord() {
     return word;
 }
 
+// change setting for 2 params (set <command> <value1> <value2>)
+void MyESP::_changeSetting2(const char * setting, const char * value1, const char * value2) {
+    if (strcmp(setting, "wifi") == 0) {
+        if (_wifi_ssid)
+            free(_wifi_ssid);
+        if (_wifi_password)
+            free(_wifi_password);
+        _wifi_ssid     = NULL;
+        _wifi_password = NULL;
+
+        if (value1) {
+            _wifi_ssid = strdup(value1);
+        }
+
+        if (value2) {
+            _wifi_password = strdup(value2);
+        }
+
+        (void)fs_saveConfig();
+        SerialAndTelnet.println("Wifi credentials set. Type 'reboot' to restart...");
+    }
+}
+
 // change settings - always as strings
 // messy code but effective since we don't have too many settings
+// wc is word count, number of parameters after the 'set' command
 void MyESP::_changeSetting(uint8_t wc, const char * setting, const char * value) {
     bool ok = false;
 
@@ -465,24 +491,14 @@ void MyESP::_changeSetting(uint8_t wc, const char * setting, const char * value)
     if (strcmp(setting, "erase") == 0) {
         _fs_eraseConfig();
         return;
-    }
-
-    if (strcmp(setting, "wifi_ssid") == 0) {
+    } else if ((strcmp(setting, "wifi") == 0) && (wc == 1)) { // erase wifi settings
         if (_wifi_ssid)
             free(_wifi_ssid);
-        _wifi_ssid = NULL; // just to be sure
-        if (value) {
-            _wifi_ssid = strdup(value);
-        }
-        ok = true;
-    } else if (strcmp(setting, "wifi_password") == 0) {
         if (_wifi_password)
             free(_wifi_password);
-        _wifi_password = NULL; // just to be sure
-        if (value) {
-            _wifi_password = strdup(value);
-        }
-        ok = true;
+        _wifi_ssid     = NULL;
+        _wifi_password = NULL;
+        ok             = true;
     } else if (strcmp(setting, "mqtt_host") == 0) {
         if (_mqtt_host)
             free(_mqtt_host);
@@ -533,16 +549,14 @@ void MyESP::_changeSetting(uint8_t wc, const char * setting, const char * value)
 
     // check for 2 params
     if (value == nullptr) {
-        SerialAndTelnet.printf("%s setting reset to its default value", setting);
+        SerialAndTelnet.printf("%s setting reset to its default value.", setting);
     } else {
         // must be 3 params
-        SerialAndTelnet.printf("%s changed to %s", setting, value);
+        SerialAndTelnet.printf("%s changed.", setting);
     }
     SerialAndTelnet.println();
 
-    if (fs_saveConfig()) {
-        SerialAndTelnet.println("Note, some changes will only have effect after the ESP is restarted (use ! command)");
-    }
+    (void)fs_saveConfig();
 }
 
 void MyESP::_telnetCommand(char * commandLine) {
@@ -563,13 +577,13 @@ void MyESP::_telnetCommand(char * commandLine) {
     // check first for reserved commands
     char * temp             = strdup(commandLine); // because strotok kills original string buffer
     char * ptrToCommandName = strtok((char *)temp, ", \n");
+
+    // set command
     if (strcmp(ptrToCommandName, "set") == 0) {
         if (wc == 1) {
             SerialAndTelnet.println();
             SerialAndTelnet.println("Stored settings:");
-            SerialAndTelnet.printf("  wifi_ssid=%s", (!_wifi_ssid) ? "<not set>" : _wifi_ssid);
-            SerialAndTelnet.println();
-            SerialAndTelnet.printf("  wifi_password=");
+            SerialAndTelnet.printf("  wifi=%s ", (!_wifi_ssid) ? "<not set>" : _wifi_ssid);
             if (!_wifi_password) {
                 SerialAndTelnet.print("<not set>");
             } else {
@@ -598,7 +612,7 @@ void MyESP::_telnetCommand(char * commandLine) {
             (_fs_settings_callback)(MYESP_FSACTION_LIST, 0, NULL, NULL);
 
             SerialAndTelnet.println();
-            SerialAndTelnet.println("Usage: set <setting> [value]");
+            SerialAndTelnet.println("Usage: set <setting> [value...]");
         } else if (wc == 2) {
             char * setting = _telnet_readWord();
             _changeSetting(1, setting, NULL);
@@ -606,8 +620,18 @@ void MyESP::_telnetCommand(char * commandLine) {
             char * setting = _telnet_readWord();
             char * value   = _telnet_readWord();
             _changeSetting(2, setting, value);
+        } else if (wc == 4) {
+            char * setting = _telnet_readWord();
+            char * value1  = _telnet_readWord();
+            char * value2  = _telnet_readWord();
+            _changeSetting2(setting, value1, value2);
         }
         return;
+    }
+
+    // reboot command
+    if ((strcmp(ptrToCommandName, "reboot") == 0) && (wc == 1)) {
+        resetESP();
     }
 
     // call callback function
@@ -632,7 +656,7 @@ void MyESP::_telnetHandle() {
         case '\n':
             _command[charsRead] = '\0'; // null terminate our command char array
             if (charsRead > 0) {
-                charsRead      = 0; //  is static, so have to reset
+                charsRead      = 0; // is static, so have to reset
                 _suspendOutput = false;
                 if (_use_serial) {
                     SerialAndTelnet.println(); // force newline if in Telnet
@@ -640,19 +664,20 @@ void MyESP::_telnetHandle() {
                 _telnetCommand(_command);
             }
             break;
-        case '\b':               // handle backspace in input: put a space in last char
-            if (charsRead > 0) { // and adjust commandLine and charsRead
+        case '\b': // handle backspace in input: put a space in last char
+            if (charsRead > 0) {
                 _command[--charsRead] = '\0';
-                SerialAndTelnet << byte('\b') << byte(' ') << byte('\b'); //no idea how this works, found it on the Internet
+                SerialAndTelnet << byte('\b') << byte(' ') << byte('\b');
             }
             break;
         case '?':
-            _consoleShowHelp();
+            if (!_suspendOutput) {
+                _consoleShowHelp();
+            } else {
+                _command[charsRead++] = c; // add it to buffer as its part of the string entered
+            }
             break;
-        case '!':
-            resetESP();
-            break;
-        case 0x04: // EOT
+        case 0x04: // EOT, CTRL-D
             myDebug_P(PSTR("* exiting telnet session"));
             SerialAndTelnet.disconnectClient();
             break;
@@ -825,7 +850,7 @@ void MyESP::_fs_eraseConfig() {
     myDebug_P(PSTR("[FS] Erasing settings, please wait a few seconds. ESP will automatically restart when finished."));
 
     if (SPIFFS.format()) {
-        delay(2000); // wait 2 seconds
+        delay(1000); // wait 1 seconds
         resetESP();
     }
 }
@@ -928,7 +953,7 @@ void MyESP::_fs_setup() {
         return;
     }
 
-    //_fs_printConfig(); // for debugging
+    // _fs_printConfig(); // for debugging
 
     // load the config file. if it doesn't exist create it
     if (!_fs_loadConfig()) {

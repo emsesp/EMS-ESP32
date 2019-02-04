@@ -23,17 +23,18 @@
 #define MQTT_QOS 1
 
 // MQTT for thermostat
-#define TOPIC_THERMOSTAT_DATA "thermostat_data"         // for sending thermostat values
-#define TOPIC_THERMOSTAT_CMD_TEMP "thermostat_cmd_temp" // for received thermostat temp changes
-#define TOPIC_THERMOSTAT_CMD_MODE "thermostat_cmd_mode" // for received thermostat mode changes
+#define TOPIC_THERMOSTAT_DATA "thermostat_data"         // for sending thermostat values to MQTT
+#define TOPIC_THERMOSTAT_CMD_TEMP "thermostat_cmd_temp" // for received thermostat temp changes via MQTT
+#define TOPIC_THERMOSTAT_CMD_MODE "thermostat_cmd_mode" // for received thermostat mode changes via MQTT
 #define THERMOSTAT_CURRTEMP "thermostat_currtemp"       // current temperature
 #define THERMOSTAT_SELTEMP "thermostat_seltemp"         // selected temperature
 #define THERMOSTAT_MODE "thermostat_mode"               // mode
 
 // MQTT for boiler
-#define TOPIC_BOILER_DATA "boiler_data"                // for sending boiler values
+#define TOPIC_BOILER_DATA "boiler_data"                // for sending boiler values to MQTT
 #define TOPIC_BOILER_TAPWATER_ACTIVE "tapwater_active" // if hot tap water is running
 #define TOPIC_BOILER_HEATING_ACTIVE "heating_active"   // if heating is on
+#define TOPIC_BOILER_WWACTIVATED "wwactivated"         // for receiving MQTT message to change water on/off
 
 // shower time
 #define TOPIC_SHOWERTIME "showertime"           // for sending shower time results

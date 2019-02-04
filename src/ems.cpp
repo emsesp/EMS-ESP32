@@ -768,9 +768,10 @@ void _processType(uint8_t * telegram, uint8_t length) {
     EMS_Sys_Status.emsTxStatus = EMS_TX_STATUS_IDLE;
 
     // at this point we can assume Txstatus is EMS_TX_STATUS_WAIT
-    // for READ, WRITE or VALIDATE the dest is always us, so check this
-    // if not just process and quit
+    // for READ, WRITE or VALIDATE the dest (telegram[1]) is always us, so check for this
+    // if not we probably didn't get any response so remove the last Tx from the queue and process the telegram
     if ((telegram[1] & 0x7F) != EMS_ID_ME) {
+        _removeTxQueue();
         _ems_processTelegram(telegram, length);
         return;
     }
@@ -1443,11 +1444,7 @@ char * ems_getBoilerDescription(char * buffer) {
  * Find the versions of our connected devices
  */
 void ems_scanDevices() {
-    myDebug("Scanning EMS bus for devices...");
-
-    // start refresh when scanning and forget anything devices we may have already set
-    EMS_Thermostat.type_id  = EMS_ID_NONE; // forget thermostat
-    EMS_Thermostat.model_id = EMS_MODEL_NONE;
+    myDebug("Scanning EMS bus for devices.");
 
     std::list<uint8_t> Device_Ids; // new list
 

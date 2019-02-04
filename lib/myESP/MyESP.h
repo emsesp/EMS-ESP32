@@ -178,6 +178,7 @@ class MyESP {
     telnetcommand_callback_f _telnetcommand_callback; // Callable for projects commands
     telnet_callback_f        _telnet_callback;        // callback for connect/disconnect
     void                     _changeSetting(uint8_t wc, const char * setting, const char * value);
+    void                     _changeSetting2(const char * setting, const char * value1, const char * value2);
 
     // fs
     void                   _fs_setup();

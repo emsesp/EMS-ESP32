@@ -82,7 +82,6 @@ command_t PROGMEM project_cmds[] = {
     {"set dallas_gpio <pin>", "set the pin for the external Dallas temperature sensor (D5=14)"},
     {"set thermostat_type <hex type ID>", "set the thermostat type id (e.g. 10 for 0x10)"},
     {"set boiler_type <hex type ID>", "set the boiler type id (e.g. 8 for 0x08)"},
-
     {"info", "show the values"},
     {"log <n | b | t | r | v>", "set logging mode to none, basic, thermostat only, raw or verbose"},
     {"publish", "publish values to MQTT"},
@@ -845,6 +844,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
     if (type == MQTT_CONNECT_EVENT) {
         myESP.mqttSubscribe(TOPIC_THERMOSTAT_CMD_TEMP);
         myESP.mqttSubscribe(TOPIC_THERMOSTAT_CMD_MODE);
+        myESP.mqttSubscribe(TOPIC_BOILER_WWACTIVATED);
         myESP.mqttSubscribe(TOPIC_SHOWER_TIMER);
         myESP.mqttSubscribe(TOPIC_SHOWER_ALERT);
         myESP.mqttSubscribe(TOPIC_SHOWER_COLDSHOT);
@@ -886,6 +886,16 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
             } else if (strcmp((char *)message, "night") == 0) {
                 ems_setThermostatMode(0);
             }
+        }
+
+        // wwActivated
+        if (strcmp(topic, TOPIC_BOILER_WWACTIVATED) == 0) {
+            if (message[0] == '1') {
+                ems_setWarmWaterActivated(true);
+            } else if (message[0] == '0') {
+                ems_setWarmWaterActivated(false);
+            }
+            publishValues(true); // publish back immediately
         }
 
         // shower timer

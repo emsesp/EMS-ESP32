@@ -5,7 +5,7 @@ EMS-ESP is a project to build an electronic controller circuit using an Espressi
 There are 3 parts to this project, first the design of the circuit, secondly the code for the ESP8266 microcontroller firmware with telnet and MQTT support, and lastly an example configuration for Home Assistant to monitor the data and issue direct commands via a MQTT broker.
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/b8880625bdf841d4adb2829732030887)](https://app.codacy.com/app/proddy/EMS-ESP?utm_source=github.com&utm_medium=referral&utm_content=proddy/EMS-ESP&utm_campaign=Badge_Grade_Settings)
-[![version](https://img.shields.io/badge/version-1.4.0-brightgreen.svg)](CHANGELOG.md)
+[![version](https://img.shields.io/badge/version-1.5.2-brightgreen.svg)](CHANGELOG.md)
 
 - [EMS-ESP](#ems-esp)
   - [Introduction](#introduction)
@@ -233,7 +233,15 @@ Similarly the thermostat values are also sent as a JSON package with the topic `
 
 `{"thermostat_currtemp":"19.8","thermostat_seltemp":"16.0","thermostat_mode":"manual"}`
 
-If MQTT is not used set the MQTT_HOST to `NULL`.
+These incoming MQTT topics are also handled:
+
+| topic               | ID in my_config.h         | Payload                | Description                              |
+| ------------------- | ------------------------- | ---------------------- | ---------------------------------------- |
+| thermostat_cmd_temp | TOPIC_THERMOSTAT_CMD_TEMP | temperature as a float | sets the thermostat current setpoint     |
+| thermostat_cmd_mode | TOPIC_THERMOSTAT_CMD_MODE | auto, day, night       | sets the thermostat mode                 |
+| wwactivated         | TOPIC_BOILER_WWACTIVATED  | 0 or 1                 | turns boiler warm water on/off (not tap) |
+
+If MQTT is not used use 'set mqtt_host' to remove it.
 
 Some home automation systems such as Domoticz and OpenHab have special formats for their MQTT messages so I would advise to use [node-red](https://nodered.org/) as a parser like in [this example](https://www.domoticz.com/forum/download/file.php?id=18977&sid=67d048f1b4c8833822175eac6b55ecff).
 
@@ -305,9 +313,11 @@ pre-baked firmwares for some ESP8266 devices are available in the directory `/fi
 3. Connect the ESP via USB, figure out the COM port
 4. run `esptool.py -p <com> write_flash 0x00000 <firmware>` where firmware is the `.bin` file and \<com\> is the COM port, e.g. `COM3`
 
-The ESP8266 will start in Access Point (AP) mode. Connect via WiFi to the SSID **EMS-ESP** and telnet to **192.168.4.1**. Then use the set command to configure your own network settings. Alternatively connect the ESP8266 to your PC and open a Serial monitor to configure the settings. Make sure you disable Serial support before connecting the EMS lines using `set serial off`.
+The ESP8266 will start in Access Point (AP) mode. Connect via WiFi to the SSID **EMS-ESP** and telnet to **192.168.4.1**. Then use the `set wifi` command to configure your own network settings like `set wifi your_ssid your_password`. Alternatively connect the ESP8266 to your PC and open a Serial monitor to configure the settings. Make sure you disable Serial support before connecting the EMS lines using `set serial off`.
 
-`set erase` will clear all settings. `set` wil show all settings.
+`set erase` will clear all settings.
+
+`set` wil list all currently stored settings.
 
 ## Troubleshooting
 
