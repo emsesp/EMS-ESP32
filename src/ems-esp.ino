@@ -895,7 +895,6 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
             } else if (message[0] == '0') {
                 ems_setWarmWaterActivated(false);
             }
-            publishValues(true); // publish back immediately
         }
 
         // shower timer
@@ -1149,11 +1148,11 @@ void loop() {
         ds18.loop();
     }
 
-    // publish the values to MQTT, regardless if the values haven't changed
-    // we don't want to publish when doing a deep scan of the thermostat
+    // publish the values to MQTT, only if the values have changed
+    // although we don't want to publish when doing a deep scan of the thermostat
     if (ems_getEmsRefreshed() && (scanThermostat_count == 0)) {
-        publishValues(true);
-        ems_setEmsRefreshed(false);
+        publishValues(false);
+        ems_setEmsRefreshed(false); // reset
     }
 
     // do shower logic, if enabled

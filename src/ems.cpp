@@ -524,6 +524,7 @@ void _createValidate() {
 
     // safety check: only do a validate after a write and when we have a type to validate
     if ((EMS_TxTelegram.action != EMS_TX_TELEGRAM_WRITE) || (EMS_TxTelegram.type_validate == EMS_ID_NONE)) {
+        EMS_TxQueue.shift(); // remove from queue
         return;
     }
 
@@ -582,7 +583,7 @@ void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
                 EMS_Sys_Status.emsTxPkgs++;
                 // got a success 01. Send a validate to check the value of the last write
                 emsaurt_tx_poll(); // send a poll to free the EMS bus
-                _createValidate(); // create a validate Tx request
+                _createValidate(); // create a validate Tx request (if needed)
             } else if (value == EMS_TX_ERROR) {
                 // last write failed (04), delete it from queue and dont bother to retry
                 if (EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_VERBOSE) {
@@ -767,9 +768,9 @@ void _processType(uint8_t * telegram, uint8_t length) {
     // release the lock on the TxQueue
     EMS_Sys_Status.emsTxStatus = EMS_TX_STATUS_IDLE;
 
-    // at this point we can assume Txstatus is EMS_TX_STATUS_WAIT
+    // at this point we can assume Txstatus is EMS_TX_STATUS_WAIT so we just sent a read/write/validate
     // for READ, WRITE or VALIDATE the dest (telegram[1]) is always us, so check for this
-    // if not we probably didn't get any response so remove the last Tx from the queue and process the telegram
+    // and if not we probably didn't get any response so remove the last Tx from the queue and process the telegram anyway
     if ((telegram[1] & 0x7F) != EMS_ID_ME) {
         _removeTxQueue();
         _ems_processTelegram(telegram, length);
