@@ -240,6 +240,7 @@ These incoming MQTT topics are also handled:
 | thermostat_cmd_temp | TOPIC_THERMOSTAT_CMD_TEMP | temperature as a float | sets the thermostat current setpoint     |
 | thermostat_cmd_mode | TOPIC_THERMOSTAT_CMD_MODE | auto, day, night       | sets the thermostat mode                 |
 | wwactivated         | TOPIC_BOILER_WWACTIVATED  | 0 or 1                 | turns boiler warm water on/off (not tap) |
+| boiler_cmd_wwtemp   | TOPIC_BOILER_CMD_WWTEMP   | temperature as a float | sets the boiler wwtemp current setpoint  |
 
 If MQTT is not used use 'set mqtt_host' to remove it.
 

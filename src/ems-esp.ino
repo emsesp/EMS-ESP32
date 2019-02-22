@@ -845,6 +845,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
         myESP.mqttSubscribe(TOPIC_THERMOSTAT_CMD_TEMP);
         myESP.mqttSubscribe(TOPIC_THERMOSTAT_CMD_MODE);
         myESP.mqttSubscribe(TOPIC_BOILER_WWACTIVATED);
+        myESP.mqttSubscribe(TOPIC_BOILER_CMD_WWTEMP);
         myESP.mqttSubscribe(TOPIC_SHOWER_TIMER);
         myESP.mqttSubscribe(TOPIC_SHOWER_ALERT);
         myESP.mqttSubscribe(TOPIC_SHOWER_COLDSHOT);
@@ -895,6 +896,15 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
             } else if (message[0] == '0') {
                 ems_setWarmWaterActivated(false);
             }
+        }
+		
+        // boiler wwtemp changes
+        if (strcmp(topic, TOPIC_BOILER_CMD_WWTEMP) == 0) {
+            float f     = strtof((char *)message, 0);
+            char  s[10] = {0};
+            myDebug("MQTT topic: boiler warm water temperature value %s", _float_to_char(s, f));
+            ems_setWarmWaterTemp(f);
+            publishValues(true); // publish back immediately
         }
 
         // shower timer
