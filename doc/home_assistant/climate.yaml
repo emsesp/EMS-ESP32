@@ -18,3 +18,13 @@
 
    temp_step: 0.5
 
+ - platform: mqtt
+   name: boiler
+   min_temp: 40
+   max_temp: 60
+   temp_step: 1
+   current_temperature_topic: "home/ems-esp/boiler_data"
+   temperature_state_topic: "home/ems-esp/boiler_data"
+   temperature_command_topic: "home/ems-esp/boiler_cmd_wwtemp"
+   current_temperature_template: "{{ value_json.wWCurTmp }}"
+   temperature_state_template: "{{ value_json.wWSelTemp }}"

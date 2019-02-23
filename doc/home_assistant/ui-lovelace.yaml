@@ -57,3 +57,6 @@ views:
             - sensor.dark_sky_temperature
         - type: thermostat
           entity: climate.thermostat
+        - type: thermostat
+          name: WarmWater
+          entity: climate.boiler
