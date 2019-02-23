@@ -113,6 +113,8 @@ const _EMS_Type EMS_Types[] = {
 
     // Easy
     {EMS_MODEL_EASY, EMS_TYPE_EasyStatusMessage, "EasyStatusMessage", _process_EasyStatusMessage},
+    {EMS_MODEL_BOSCHEASY, EMS_TYPE_EasyStatusMessage, "EasyStatusMessage", _process_EasyStatusMessage},
+
 
 };
 
@@ -1257,7 +1259,7 @@ void _process_SetPoints(uint8_t type, uint8_t * data, uint8_t length) {
  * common for all thermostats
  */
 void _process_RCTime(uint8_t type, uint8_t * data, uint8_t length) {
-    if (EMS_Thermostat.model_id == EMS_MODEL_EASY) {
+    if ((EMS_Thermostat.model_id == EMS_MODEL_EASY) || (EMS_Thermostat.model_id == EMS_MODEL_BOSCHEASY)) {
         return; // not supported
     }
 
@@ -1347,7 +1349,7 @@ void ems_getThermostatValues() {
     } else if ((model_id == EMS_MODEL_RC35) || (model_id == EMS_MODEL_ES73)) {
         ems_doReadCommand(EMS_TYPE_RC35StatusMessage, type); // to get the setpoint temp
         ems_doReadCommand(EMS_TYPE_RC35Set, type);           // to get the mode
-    } else if (model_id == EMS_MODEL_EASY) {
+    } else if ((model_id == EMS_MODEL_EASY) || (model_id == EMS_MODEL_BOSCHEASY)) {
         ems_doReadCommand(EMS_TYPE_EasyStatusMessage, type);
     }
 
@@ -1723,7 +1725,7 @@ void ems_setWarmWaterTemp(uint8_t temperature) {
 }
 
 /**
- * Set the warm water mode to comfort ot Eco
+ * Set the warm water mode to comfort to Eco/Comfort
  */
 void ems_setWarmWaterModeComfort(bool comfort) {
     myDebug("Setting boiler warm water to comfort mode %s\n", comfort ? "Comfort" : "Eco");

@@ -78,7 +78,7 @@ typedef struct {
 command_t PROGMEM project_cmds[] = {
 
     {"set led <on | off>", "toggle status LED on/off"},
-    {"set led_gpio <pin>", "set the LED pin. Default is the onboard LED."},
+    {"set led_gpio <pin>", "set the LED pin. Default is the onboard LED (D1=5)"},
     {"set dallas_gpio <pin>", "set the pin for the external Dallas temperature sensor (D5=14)"},
     {"set thermostat_type <hex type ID>", "set the thermostat type id (e.g. 10 for 0x10)"},
     {"set boiler_type <hex type ID>", "set the boiler type id (e.g. 8 for 0x08)"},
@@ -364,7 +364,7 @@ void showInfo() {
         myDebug("  Thermostat type: %s", ems_getThermostatDescription(buffer_type));
         _renderFloatValue("Setpoint room temperature", "C", EMS_Thermostat.setpoint_roomTemp);
         _renderFloatValue("Current room temperature", "C", EMS_Thermostat.curr_roomTemp);
-        if (ems_getThermostatModel() != EMS_MODEL_EASY) {
+        if ((ems_getThermostatModel() != EMS_MODEL_EASY) && (ems_getThermostatModel() != EMS_MODEL_BOSCHEASY)) {
             myDebug("  Thermostat time is %02d:%02d:%02d %d/%d/%d",
                     EMS_Thermostat.hour,
                     EMS_Thermostat.minute,
@@ -657,6 +657,9 @@ bool SettingsCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, c
         // led_gpio
         if ((strcmp(setting, "led_gpio") == 0) && (wc == 2)) {
             EMSESP_Status.led_gpio = atoi(value);
+            // reset pin
+            pinMode(EMSESP_Status.led_gpio, OUTPUT);
+            digitalWrite(EMSESP_Status.led_gpio, (EMSESP_Status.led_gpio == LED_BUILTIN) ? HIGH : LOW); // light off. For onboard high=off
             ok                     = true;
         }
 
@@ -1115,7 +1118,8 @@ void setup() {
 #endif
 
     // MQTT host, username and password taken from the SPIFFS settings
-    myESP.setMQTT(NULL, NULL, NULL, MQTT_BASE, MQTT_KEEPALIVE, MQTT_QOS, MQTT_RETAIN, MQTT_WILL_TOPIC, MQTT_WILL_PAYLOAD, MQTTCallback);
+    myESP.setMQTT(NULL, NULL, NULL, MQTT_BASE, MQTT_KEEPALIVE, MQTT_QOS, MQTT_RETAIN, MQTT_WILL_TOPIC, 
+      MQTT_WILL_ONLINE_PAYLOAD, MQTT_WILL_OFFLINE_PAYLOAD, MQTTCallback);
 
     // custom settings in SPIFFS
     myESP.setSettings(FSCallback, SettingsCallback);

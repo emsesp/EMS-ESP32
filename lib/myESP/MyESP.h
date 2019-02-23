@@ -11,19 +11,22 @@
 
 #include <ArduinoJson.h>
 #include <ArduinoOTA.h>
-#include <AsyncMqttClient.h> // https://github.com/marvinroger/async-mqtt-client
+#include <AsyncMqttClient.h> // https://github.com/marvinroger/async-mqtt-client and for ESP32 see https://github.com/marvinroger/async-mqtt-client/issues/127
 #include <DNSServer.h>
-#include <ESPAsyncTCP.h> // https://github.com/me-no-dev/ESPAsyncTCP
 #include <FS.h>
 #include <JustWifi.h>  // https://github.com/xoseperez/justwifi
 #include <TelnetSpy.h> // modified from https://github.com/yasheena/telnetspy
 
-
 #if defined(ARDUINO_ARCH_ESP32)
 #include <ESPmDNS.h>
+#include <SPIFFS.h>             // added for ESP32
+#define ets_vsnprintf vsnprintf // added for ESP32
 #else
 #include <ESP8266mDNS.h>
+#include <ESPAsyncTCP.h>
 #endif
+
+#define MYEMS_CONFIG_FILE "/config.json"
 
 #define LOADAVG_INTERVAL 30000 // Interval between calculating load average (in ms)
 
@@ -32,7 +35,7 @@
 #define WIFI_RECONNECT_INTERVAL 60000 // If could not connect to WIFI, retry after this time in ms
 
 // OTA
-#define OTA_PORT 8266 // OTA port
+#define OTA_PORT 3232 // OTA port. Was 8266
 
 // MQTT
 #define MQTT_PORT 1883                  // MQTT port
@@ -48,9 +51,12 @@
 #define MQTT_MESSAGE_EVENT 2
 
 // Telnet
+#define TELNET_SERIAL_BAUD 115200
 #define TELNET_MAX_COMMAND_LENGTH 80 // length of a command
 #define TELNET_EVENT_CONNECT 1
 #define TELNET_EVENT_DISCONNECT 0
+
+// ANSI Colors
 #define COLOR_RESET "\x1B[0m"
 #define COLOR_BLACK "\x1B[0;30m"
 #define COLOR_RED "\x1B[0;31m"
@@ -60,6 +66,9 @@
 #define COLOR_MAGENTA "\x1B[0;35m"
 #define COLOR_CYAN "\x1B[0;36m"
 #define COLOR_WHITE "\x1B[0;37m"
+#define COLOR_BOLD_ON "\x1B[1m"
+#define COLOR_BOLD_OFF "\x1B[21m"
+
 
 // SPIFFS
 #define SPIFFS_MAXSIZE 500 // https://arduinojson.org/v5/assistant/
@@ -92,21 +101,23 @@ class MyESP {
 
     // wifi
     void setWIFICallback(void (*callback)());
-    void setWIFI(char * wifi_ssid, char * wifi_password, wifi_callback_f callback);
+    void setWIFI(const char * wifi_ssid, const char * wifi_password, wifi_callback_f callback);
+    bool isWifiConnected();
 
     // mqtt
     void mqttSubscribe(const char * topic);
     void mqttUnsubscribe(const char * topic);
     void mqttPublish(const char * topic, const char * payload);
-    void setMQTT(char *          mqtt_host,
-                 char *          mqtt_username,
-                 char *          mqtt_password,
-                 char *          mqtt_base,
-                 unsigned long   mqtt_keepalive,
-                 unsigned char   mqtt_qos,
-                 bool            mqtt_retain,
-                 char *          mqtt_will_topic,
-                 char *          mqtt_will_payload,
+    void setMQTT(const char *  mqtt_host,
+                 const char *  mqtt_username,
+                 const char *  mqtt_password,
+                 const char *  mqtt_base,
+                 unsigned long mqtt_keepalive,
+                 unsigned char mqtt_qos,
+                 bool          mqtt_retain,
+                 const char *  mqtt_will_topic,
+                 const char *  mqtt_will_online_payload,
+                 const char *  mqtt_will_offline_payload,
                  mqtt_callback_f callback);
 
     // debug & telnet
@@ -120,12 +131,12 @@ class MyESP {
     bool fs_saveConfig();
 
     // general
-    void          end();
-    void          loop();
-    void          begin(char * app_hostname, char * app_name, char * app_version);
-    void          setBoottime(const char * boottime);
-    void          resetESP();
-    unsigned long getSystemLoadAverage();
+    void     end();
+    void     loop();
+    void     begin(const char * app_hostname, const char * app_name, const char * app_version);
+    void     setBoottime(const char * boottime);
+    void     resetESP();
+    uint16_t getSystemLoadAverage();
 
   private:
     // mqtt
@@ -146,7 +157,8 @@ class MyESP {
     unsigned char   _mqtt_qos;
     bool            _mqtt_retain;
     char *          _mqtt_will_topic;
-    char *          _mqtt_will_payload;
+    char *          _mqtt_will_online_payload;
+    char *          _mqtt_will_offline_payload;
     char *          _mqtt_topic;
 
     // wifi
@@ -156,6 +168,7 @@ class MyESP {
     wifi_callback_f _wifi_callback;
     char *          _wifi_ssid;
     char *          _wifi_password;
+    bool            _wifi_connected;
 
     // mdns
     void _mdns_setup();
@@ -181,10 +194,11 @@ class MyESP {
     void                     _changeSetting2(const char * setting, const char * value1, const char * value2);
 
     // fs
-    void                   _fs_setup();
-    bool                   _fs_loadConfig();
-    void                   _fs_printConfig();
-    void                   _fs_eraseConfig();
+    void _fs_setup();
+    bool _fs_loadConfig();
+    void _fs_printConfig();
+    void _fs_eraseConfig();
+
     fs_callback_f          _fs_callback;
     fs_settings_callback_f _fs_settings_callback;
 

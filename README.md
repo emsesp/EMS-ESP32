@@ -5,7 +5,7 @@ EMS-ESP is a project to build an electronic controller circuit using an Espressi
 There are 3 parts to this project, first the design of the circuit, secondly the code for the ESP8266 microcontroller firmware with telnet and MQTT support, and lastly an example configuration for Home Assistant to monitor the data and issue direct commands via a MQTT broker.
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/b8880625bdf841d4adb2829732030887)](https://app.codacy.com/app/proddy/EMS-ESP?utm_source=github.com&utm_medium=referral&utm_content=proddy/EMS-ESP&utm_campaign=Badge_Grade_Settings)
-[![version](https://img.shields.io/badge/version-1.5.2-brightgreen.svg)](CHANGELOG.md)
+[![version](https://img.shields.io/badge/version-1.5.3-brightgreen.svg)](CHANGELOG.md)
 
 - [EMS-ESP](#ems-esp)
   - [Introduction](#introduction)
@@ -61,7 +61,7 @@ The code and circuit has been tested with a few ESP8266 development boards such 
 ## Getting Started
 
 1. Either build the circuit described below or purchase a ready built board
-2. Get an ESP8266 dev board and connect the 2 EMS output lines from the boiler to the circuit and the Rx and Tx out to ESP pins D7 and D8 respectively. To prevent interference with the serial ports and debug messages we use pins RX1 and TX1 (GPIO13/D7 and GPIO15/D8 respectively). The EMS connection can either be the 12-15V AC direct from the thermostat bus line or from the 3.5" Service Jack at the front of the boiler.
+2. Get an ESP8266 dev board and connect the 2 EMS output lines from the boiler to the circuit and the Rx and Tx out to ESP pins D7 and D8 respectively. To prevent interference with the serial ports and debug messages we use these pins RX1 and TX1. The EMS connection can either be the 12-15V AC direct from the thermostat bus line or from the 3.5" Service Jack at the front of the boiler.
 3. Optionally connect an external LED or decide to use the onboard ESP8266 LED. This will flash when there is an error on the EMS bus line or stay solid when it's connected to the EMS bus.
 4. Modify `my_custom.h` if needed
 5. Build and upload the firmware to the ESP8266 device. I used PlatformIO with Visual Studio Code but using Atom or a command-line is just as easy if you don't plan to make many code changes.
@@ -313,7 +313,7 @@ pre-baked firmwares for some ESP8266 devices are available in the directory `/fi
 3. Connect the ESP via USB, figure out the COM port
 4. run `esptool.py -p <com> write_flash 0x00000 <firmware>` where firmware is the `.bin` file and \<com\> is the COM port, e.g. `COM3`
 
-The ESP8266 will start in Access Point (AP) mode. Connect via WiFi to the SSID **EMS-ESP** and telnet to **192.168.4.1**. Then use the `set wifi` command to configure your own network settings like `set wifi your_ssid your_password`. Alternatively connect the ESP8266 to your PC and open a Serial monitor to configure the settings. Make sure you disable Serial support before connecting the EMS lines using `set serial off`.
+The ESP8266 will start in Access Point (AP) mode. Connect via WiFi to the SSID **EMS-ESP** and telnet to **192.168.4.1**. Then use the `set wifi` command to configure your own network settings like `set wifi your_ssid your_password`. Alternatively connect the ESP8266 to your PC and open a Serial monitor (with baud 115200) to configure the settings. Make sure you disable Serial support before connecting the EMS lines using `set serial off`.
 
 `set erase` will clear all settings.
 
@@ -321,7 +321,7 @@ The ESP8266 will start in Access Point (AP) mode. Connect via WiFi to the SSID *
 
 ## Troubleshooting
 
-When flashing for the first time the Serial port is enabled by default. You can then use a PC with USB to the ESP8266 to set the settings like wifi, mqtt etc and also monitor the boot up procedure. Remember to disable the serial (`set serial off`) when connecting to the EMS lines.
+When flashing for the first time the Serial port is enabled by default with baud 115200. You can then use a PC with USB to the ESP8266 to set the settings like wifi, mqtt etc and also monitor the boot up procedure. Remember to disable the serial (`set serial off`) when connecting to the EMS lines.
 
 The onboard LED will flash if there is no connection with the EMS bus. You can disable LED support by the 'set led' command from the telnet client
 

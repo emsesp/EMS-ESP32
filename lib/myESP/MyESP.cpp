@@ -2,6 +2,7 @@
  * MyESP - my ESP helper class to handle Wifi, MDNS, MQTT and Telnet
  * 
  * Paul Derbyshire - December 2018
+ * Version 1.1 - Feb 22 2019. Added support for ESP32
  *
  * Ideas borrowed from Espurna https://github.com/xoseperez/espurna
  */
@@ -27,22 +28,24 @@ MyESP::MyESP() {
     _helpProjectCmds_count = 0;
     _command               = (char *)malloc(TELNET_MAX_COMMAND_LENGTH); // reserve buffer for Serial/Telnet commands
 
-    _use_serial           = false;
-    _mqtt_host            = NULL;
-    _mqtt_password        = NULL;
-    _mqtt_username        = NULL;
-    _mqtt_retain          = false;
-    _mqtt_keepalive       = 300;
-    _mqtt_will_topic      = NULL;
-    _mqtt_will_payload    = NULL;
-    _mqtt_base            = NULL;
-    _mqtt_topic           = NULL;
-    _mqtt_qos             = 0;
-    _mqtt_reconnect_delay = MQTT_RECONNECT_DELAY_MIN;
+    _use_serial                = false;
+    _mqtt_host                 = NULL;
+    _mqtt_password             = NULL;
+    _mqtt_username             = NULL;
+    _mqtt_retain               = false;
+    _mqtt_keepalive            = 300;
+    _mqtt_will_topic           = NULL;
+    _mqtt_will_online_payload  = NULL;
+    _mqtt_will_offline_payload = NULL;
+    _mqtt_base                 = NULL;
+    _mqtt_topic                = NULL;
+    _mqtt_qos                  = 0;
+    _mqtt_reconnect_delay      = MQTT_RECONNECT_DELAY_MIN;
 
-    _wifi_password = NULL;
-    _wifi_ssid     = NULL;
-    _wifi_callback = NULL;
+    _wifi_password  = NULL;
+    _wifi_ssid      = NULL;
+    _wifi_callback  = NULL;
+    _wifi_connected = false;
 
     _suspendOutput = false;
 }
@@ -65,8 +68,10 @@ void MyESP::myDebug(const char * format, ...) {
 
     va_list args;
     va_start(args, format);
-    char   test[1];
-    int    len    = ets_vsnprintf(test, 1, format, args) + 1;
+    char test[1];
+
+    int len = ets_vsnprintf(test, 1, format, args) + 1;
+
     char * buffer = new char[len];
     ets_vsnprintf(buffer, len, format, args);
     va_end(args);
@@ -75,6 +80,7 @@ void MyESP::myDebug(const char * format, ...) {
 
     delete[] buffer;
 }
+
 
 // for flashmemory. Must use PSTR()
 void MyESP::myDebug_P(PGM_P format_P, ...) {
@@ -86,10 +92,12 @@ void MyESP::myDebug_P(PGM_P format_P, ...) {
 
     va_list args;
     va_start(args, format_P);
-    char   test[1];
-    int    len    = ets_vsnprintf(test, 1, format, args) + 1;
+    char test[1];
+    int  len = ets_vsnprintf(test, 1, format, args) + 1;
+
     char * buffer = new char[len];
     ets_vsnprintf(buffer, len, format, args);
+
     va_end(args);
 
     // capture & print timestamp
@@ -107,7 +115,7 @@ bool MyESP::getUseSerial() {
     return (_use_serial);
 }
 
-// called when WiFi is connected, and used to start MDNS
+// called when WiFi is connected, and used to start MDNS, OTA, MATT
 void MyESP::_wifiCallback(justwifi_messages_t code, char * parameter) {
     if ((code == MESSAGE_CONNECTED)) {
 #if defined(ARDUINO_ARCH_ESP32)
@@ -128,14 +136,34 @@ void MyESP::_wifiCallback(justwifi_messages_t code, char * parameter) {
 
         // start MDNS
         if (MDNS.begin((char *)hostname.c_str())) {
+            _mdns_setup(); // MDNS setup
             myDebug_P(PSTR("[MDNS] OK"));
         } else {
             myDebug_P(PSTR("[MDNS] FAIL"));
         }
 
+        // start OTA
+        ArduinoOTA.begin(); // moved to support esp32
+        myDebug_P(PSTR("[OTA] listening to %s.local:%u"), ArduinoOTA.getHostname().c_str(), OTA_PORT);
+
+        // MQTT Setup
+        _mqtt_setup();
+
+        _wifi_connected = true;
+
         // call any final custom settings
         if (_wifi_callback) {
             _wifi_callback();
+        }
+
+        // finally if we don't want Serial anymore, turn it off
+        if (!_use_serial) {
+            Serial.println("Disabling serial port");
+            Serial.flush();
+            Serial.end();
+            SerialAndTelnet.setSerial(NULL);
+        } else {
+            Serial.println("Using serial port output");
         }
     }
 
@@ -153,14 +181,17 @@ void MyESP::_wifiCallback(justwifi_messages_t code, char * parameter) {
 
     if (code == MESSAGE_CONNECTING) {
         myDebug_P(PSTR("[WIFI] Connecting to %s"), parameter);
+        _wifi_connected = false;
     }
 
     if (code == MESSAGE_CONNECT_FAILED) {
         myDebug_P(PSTR("[WIFI] Could not connect to %s"), parameter);
+        _wifi_connected = false;
     }
 
     if (code == MESSAGE_DISCONNECTED) {
         myDebug_P(PSTR("[WIFI] Disconnected"));
+        _wifi_connected = false;
     }
 }
 
@@ -213,6 +244,9 @@ void MyESP::mqttPublish(const char * topic, const char * payload) {
 void MyESP::_mqttOnConnect() {
     myDebug_P(PSTR("[MQTT] Connected"));
     _mqtt_reconnect_delay = MQTT_RECONNECT_DELAY_MIN;
+
+    // say we're alive to the Last Will topic
+    mqttClient.publish(_mqttTopic(_mqtt_will_topic), 1, true, _mqtt_will_online_payload);
 
     // call custom function to handle mqtt receives
     (_mqtt_callback)(MQTT_CONNECT_EVENT, NULL, NULL);
@@ -276,24 +310,15 @@ void MyESP::_mdns_setup() {
     MDNS.addService("telnet", "tcp", TELNETSPY_PORT);
 
     // for OTA discovery
+#if defined(ARDUINO_ARCH_ESP32) // TODO: doesn't work for esp32
+    //MDNS.addServiceTxt("_arduino", "_tcp", "app_name", (const char *)_app_name);
+    //MDNS.addServiceTxt("_arduino", "_tcp", "app_version", (const char *)_app_version);
+    //MDNS.addServiceTxt("_arduino", "_tcp", "mac", WiFi.macAddress());
+#else
     MDNS.addServiceTxt("arduino", "tcp", "app_name", (const char *)_app_name);
     MDNS.addServiceTxt("arduino", "tcp", "app_version", (const char *)_app_version);
     MDNS.addServiceTxt("arduino", "tcp", "mac", WiFi.macAddress());
-    {
-        char buffer[6] = {0};
-        itoa(ESP.getFlashChipRealSize() / 1024, buffer, 10);
-        MDNS.addServiceTxt("arduino", "tcp", "mem_size", (const char *)buffer);
-    }
-    {
-        char buffer[6] = {0};
-        itoa(ESP.getFlashChipSize() / 1024, buffer, 10);
-        MDNS.addServiceTxt("arduino", "tcp", "sdk_size", (const char *)buffer);
-    }
-    {
-        char buffer[6] = {0};
-        itoa(ESP.getFreeSketchSpace(), buffer, 10);
-        MDNS.addServiceTxt("arduino", "tcp", "free_space", (const char *)buffer);
-    }
+#endif
 }
 
 // OTA Setup
@@ -304,6 +329,8 @@ void MyESP::_ota_setup() {
 
     ArduinoOTA.setPort(OTA_PORT);
     ArduinoOTA.setHostname(_app_hostname);
+    //ArduinoOTA.setMdnsEnabled(true); // because we're using our own MDNS
+
     ArduinoOTA.onStart([this]() { myDebug_P(PSTR("[OTA] Start")); });
     ArduinoOTA.onEnd([this]() { myDebug_P(PSTR("[OTA] Done, restarting...")); });
     ArduinoOTA.onProgress([this](unsigned int progress, unsigned int total) {
@@ -327,8 +354,6 @@ void MyESP::_ota_setup() {
         else if (error == OTA_END_ERROR)
             myDebug_P(PSTR("End Failed"));
     });
-
-    ArduinoOTA.begin();
 }
 
 // sets boottime
@@ -364,16 +389,11 @@ void MyESP::_telnetDisconnected() {
 
 // Initialize the telnet server
 void MyESP::_telnet_setup() {
-    SerialAndTelnet.setWelcomeMsg("");
+    SerialAndTelnet.setWelcomeMsg((char *)"");
     SerialAndTelnet.setCallbackOnConnect([this]() { _telnetConnected(); });
     SerialAndTelnet.setCallbackOnDisconnect([this]() { _telnetDisconnected(); });
-
-    if (!_use_serial) {
-        SerialAndTelnet.setSerial(NULL);
-    }
-
-    SerialAndTelnet.begin(115200); // baud is 115200
     SerialAndTelnet.setDebugOutput(false);
+    SerialAndTelnet.begin(TELNET_SERIAL_BAUD); // default baud is 115200
 
     // init command buffer for console commands
     memset(_command, 0, TELNET_MAX_COMMAND_LENGTH);
@@ -398,6 +418,9 @@ void MyESP::_consoleShowHelp() {
                                hostname.c_str(),
                                WiFi.localIP().toString().c_str(),
                                WiFi.macAddress().c_str());
+#ifdef ARDUINO_BOARD
+        SerialAndTelnet.printf("  Board: %s", ARDUINO_BOARD);
+#endif
         SerialAndTelnet.println();
         SerialAndTelnet.printf("* Connected to WiFi SSID: %s", WiFi.SSID().c_str());
         SerialAndTelnet.println();
@@ -417,7 +440,6 @@ void MyESP::_consoleShowHelp() {
     SerialAndTelnet.println(FPSTR("*  set <mqtt_host | mqtt_username | mqtt_password> [value]"));
     SerialAndTelnet.println(FPSTR("*  set erase"));
     SerialAndTelnet.println(FPSTR("*  set serial"));
-
 
     // print custom commands if available. Taken from progmem
     if (_telnetcommand_callback) {
@@ -446,7 +468,7 @@ void MyESP::resetESP() {
     myDebug_P(PSTR("* Reboot ESP..."));
     end();
 #if defined(ARDUINO_ARCH_ESP32)
-    ESP.reset(); // for ESP8266 only
+    ESP.restart();
 #else
     ESP.restart();
 #endif
@@ -718,7 +740,7 @@ void MyESP::_mqttConnect() {
     // last will
     if (_mqtt_will_topic) {
         myDebug_P(PSTR("[MQTT] Setting last will topic %s"), _mqttTopic(_mqtt_will_topic));
-        mqttClient.setWill(_mqttTopic(_mqtt_will_topic), _mqtt_qos, _mqtt_retain, _mqtt_will_payload);
+        mqttClient.setWill(_mqttTopic(_mqtt_will_topic), 1, true, _mqtt_will_offline_payload); // retain always true
     }
 
     if (_mqtt_username && _mqtt_password) {
@@ -733,7 +755,7 @@ void MyESP::_mqttConnect() {
 }
 
 // Setup everything we need
-void MyESP::setWIFI(char * wifi_ssid, char * wifi_password, wifi_callback_f callback) {
+void MyESP::setWIFI(const char * wifi_ssid, const char * wifi_password, wifi_callback_f callback) {
     // Check SSID too long or missing
     if (!wifi_ssid || *wifi_ssid == 0x00 || strlen(wifi_ssid) > 31) {
         _wifi_ssid = NULL;
@@ -753,15 +775,16 @@ void MyESP::setWIFI(char * wifi_ssid, char * wifi_password, wifi_callback_f call
 }
 
 // init MQTT settings
-void MyESP::setMQTT(char *          mqtt_host,
-                    char *          mqtt_username,
-                    char *          mqtt_password,
-                    char *          mqtt_base,
+void MyESP::setMQTT(const char *    mqtt_host,
+                    const char *    mqtt_username,
+                    const char *    mqtt_password,
+                    const char *    mqtt_base,
                     unsigned long   mqtt_keepalive,
                     unsigned char   mqtt_qos,
                     bool            mqtt_retain,
-                    char *          mqtt_will_topic,
-                    char *          mqtt_will_payload,
+                    const char *    mqtt_will_topic,
+                    const char *    mqtt_will_online_payload,
+                    const char *    mqtt_will_offline_payload,
                     mqtt_callback_f callback) {
     // can be empty
     if (!mqtt_host || *mqtt_host == 0x00) {
@@ -804,10 +827,17 @@ void MyESP::setMQTT(char *          mqtt_host,
     } else {
         _mqtt_will_topic = strdup(mqtt_will_topic);
     }
-    if (!mqtt_will_payload || *mqtt_will_payload == 0x00) {
-        _mqtt_will_payload = NULL;
+
+    if (!mqtt_will_online_payload || *mqtt_will_online_payload == 0x00) {
+        _mqtt_will_online_payload = NULL;
     } else {
-        _mqtt_will_payload = strdup(mqtt_will_payload);
+        _mqtt_will_online_payload = strdup(mqtt_will_online_payload);
+    }
+
+    if (!mqtt_will_offline_payload || *mqtt_will_offline_payload == 0x00) {
+        _mqtt_will_offline_payload = NULL;
+    } else {
+        _mqtt_will_offline_payload = strdup(mqtt_will_offline_payload);
     }
 }
 
@@ -821,8 +851,6 @@ char * MyESP::_mqttTopic(const char * topic) {
     strlcat(buffer, "/", sizeof(buffer));
     strlcat(buffer, topic, sizeof(buffer));
 
-    //snprintf(buffer, sizeof(buffer), "%s/%s/%s", _mqtt_base, _app_hostname, topic);
-
     if (_mqtt_topic) {
         free(_mqtt_topic);
     }
@@ -833,15 +861,15 @@ char * MyESP::_mqttTopic(const char * topic) {
 
 
 // print contents of file
+// assume Serial is open
 void MyESP::_fs_printConfig() {
-    File configFile = SPIFFS.open("/config.json", "r");
+    myDebug_P(PSTR("[FS] Contents:"));
 
-    myDebug_P(PSTR("[FS] Contents...."));
-
+    File configFile = SPIFFS.open(MYEMS_CONFIG_FILE, "r");
     while (configFile.available()) {
         SerialAndTelnet.print((char)configFile.read());
     }
-    SerialAndTelnet.println();
+    myDebug_P(PSTR(""));
     configFile.close();
 }
 
@@ -862,17 +890,16 @@ void MyESP::setSettings(fs_callback_f callback_fs, fs_settings_callback_f callba
 
 // load from spiffs
 bool MyESP::_fs_loadConfig() {
-    File configFile = SPIFFS.open("/config.json", "r");
-    if (!configFile) {
-        myDebug_P(PSTR("[FS] Failed to open config file"));
-        // file does not exist, so assume its the first install. Set serial to on
-        _use_serial = true;
-        return false; // this will trigger a new file being created
-    }
+    File configFile = SPIFFS.open(MYEMS_CONFIG_FILE, "r");
 
     size_t size = configFile.size();
     if (size > 1024) {
         myDebug_P(PSTR("[FS] Config file size is too large"));
+        return false;
+    } else if (size == 0) {
+        myDebug_P(PSTR("[FS] Failed to open config file"));
+        // file does not exist, so assume its the first install. Set serial to on
+        _use_serial = true;
         return false;
     }
 
@@ -934,35 +961,38 @@ bool MyESP::fs_saveConfig() {
     // callback for saving custom settings
     (void)(_fs_callback)(MYESP_FSACTION_SAVE, json);
 
-    File configFile = SPIFFS.open("/config.json", "w");
+    File configFile = SPIFFS.open(MYEMS_CONFIG_FILE, "w");
     if (!configFile) {
-        myDebug_P(PSTR("[FS] Failed to open config file for writing"));
+        Serial.println("[FS] Failed to open config file for writing");
         return false;
     }
 
     json.printTo(configFile);
+
+    configFile.close();
 
     return true;
 }
 
 // init the SPIFF file system and load the config
 // if it doesn't exist try and create it
+// force Serial for debugging, and turn it off afterwards
 void MyESP::_fs_setup() {
     if (!SPIFFS.begin()) {
-        myDebug_P(PSTR("[FS] Failed to mount the file system"));
+        Serial.println("[FS] Failed to mount the file system");
         return;
     }
 
-    // _fs_printConfig(); // for debugging
-
     // load the config file. if it doesn't exist create it
     if (!_fs_loadConfig()) {
-        myDebug_P(PSTR("[FS] Re-creating config file"));
+        Serial.println("[FS] Re-creating config file");
         fs_saveConfig();
     }
+
+    // _fs_printConfig(); // for debugging
 }
 
-unsigned long MyESP::getSystemLoadAverage() {
+uint16_t MyESP::getSystemLoadAverage() {
     return _load_average;
 }
 
@@ -986,19 +1016,32 @@ void MyESP::_calculateLoad() {
     }
 }
 
+// return true if wifi is connected
+//    WL_NO_SHIELD        = 255,   // for compatibility with WiFi Shield library
+//    WL_IDLE_STATUS      = 0,
+//    WL_NO_SSID_AVAIL    = 1,
+//    WL_SCAN_COMPLETED   = 2,
+//    WL_CONNECTED        = 3,
+//    WL_CONNECT_FAILED   = 4,
+//    WL_CONNECTION_LOST  = 5,
+//    WL_DISCONNECTED     = 6
+bool MyESP::isWifiConnected() {
+    return (_wifi_connected);
+}
+
 // register new instance
-void MyESP::begin(char * app_hostname, char * app_name, char * app_version) {
+void MyESP::begin(const char * app_hostname, const char * app_name, const char * app_version) {
     _app_hostname = strdup(app_hostname);
     _app_name     = strdup(app_name);
     _app_version  = strdup(app_version);
 
-    // call setup of the services...
-    _fs_setup();     // SPIFFS setup, do this first to get values
     _telnet_setup(); // Telnet setup
+    _fs_setup();     // SPIFFS setup, do this first to get values
     _wifi_setup();   // WIFI setup
-    _mqtt_setup();   // MQTT Setup
-    _mdns_setup();   // MDNS setup
-    _ota_setup();    // OTA setup
+    _ota_setup();
+
+    // the other setups will be done after the wifi has connected
+    // _mqtt_setup() _mdns_setup()
 }
 
 /*
@@ -1006,10 +1049,9 @@ void MyESP::begin(char * app_hostname, char * app_name, char * app_version) {
  */
 void MyESP::loop() {
     _calculateLoad();
+    _telnetHandle(); // Telnet/Debugger
 
     jw.loop(); // WiFi
-
-    _telnetHandle(); // Telnet/Debugger
 
     // do nothing else until we've got a wifi connection
     if (WiFi.getMode() & WIFI_AP) {

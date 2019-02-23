@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.3] 2019-02-22
+
+### Changed
+
+- Support for latest esp8266 arduino core version [2.5.0](https://github.com/esp8266/Arduino/releases/tag/2.5.0) and  platform espressif8266 version 2.0.0
+- Added board type to the info screen
+
+### Added
+
+- Improved MQTT LWT (Last Will Testament). Uses payload called 'online' and 'offline'. See https://github.com/proddy/EMS-ESP/issues/57
+- Added ESP32 support to MyESP library
+- Added Bosch Easy thermostat, Buderus Logamax U122
+- Support for changing boiler wwtemp via MQTT (merge #58 from egrekov). thanks!
+
 ## [1.5.2] 2019-02-04
 
 ### Changed

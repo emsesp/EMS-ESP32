@@ -4,8 +4,7 @@
 env_default = d1_mini
 
 [common]
-; platform = espressif8266
-platform = espressif8266@1.8.0
+platform = espressif8266
 flash_mode = dout
 build_flags = -g -w
 
