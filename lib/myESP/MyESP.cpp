@@ -1,5 +1,5 @@
 /*
- * MyESP - my ESP helper class to handle Wifi, MDNS, MQTT and Telnet
+ * MyESP - my ESP helper class to handle Wifi, MQTT and Telnet
  * 
  * Paul Derbyshire - December 2018
  * Version 1.1 - Feb 22 2019. Added support for ESP32
@@ -115,7 +115,7 @@ bool MyESP::getUseSerial() {
     return (_use_serial);
 }
 
-// called when WiFi is connected, and used to start MDNS, OTA, MATT
+// called when WiFi is connected, and used to start OTA, MQTT
 void MyESP::_wifiCallback(justwifi_messages_t code, char * parameter) {
     if ((code == MESSAGE_CONNECTED)) {
 #if defined(ARDUINO_ARCH_ESP32)
@@ -133,14 +133,6 @@ void MyESP::_wifiCallback(justwifi_messages_t code, char * parameter) {
         myDebug_P(PSTR("[WIFI] MASK  %s"), WiFi.subnetMask().toString().c_str());
         myDebug_P(PSTR("[WIFI] DNS   %s"), WiFi.dnsIP().toString().c_str());
         myDebug_P(PSTR("[WIFI] HOST  %s"), hostname.c_str());
-
-        // start MDNS
-        if (MDNS.begin((char *)hostname.c_str())) {
-            _mdns_setup(); // MDNS setup
-            myDebug_P(PSTR("[MDNS] OK"));
-        } else {
-            myDebug_P(PSTR("[MDNS] FAIL"));
-        }
 
         // start OTA
         ArduinoOTA.begin(); // moved to support esp32
@@ -305,31 +297,14 @@ void MyESP::_wifi_setup() {
     jw.addNetwork(_wifi_ssid, _wifi_password); // Add a network
 }
 
-// MDNS setup
-void MyESP::_mdns_setup() {
-    MDNS.addService("telnet", "tcp", TELNETSPY_PORT);
-
-    // for OTA discovery
-#if defined(ARDUINO_ARCH_ESP32) // TODO: doesn't work for esp32
-    //MDNS.addServiceTxt("_arduino", "_tcp", "app_name", (const char *)_app_name);
-    //MDNS.addServiceTxt("_arduino", "_tcp", "app_version", (const char *)_app_version);
-    //MDNS.addServiceTxt("_arduino", "_tcp", "mac", WiFi.macAddress());
-#else
-    MDNS.addServiceTxt("arduino", "tcp", "app_name", (const char *)_app_name);
-    MDNS.addServiceTxt("arduino", "tcp", "app_version", (const char *)_app_version);
-    MDNS.addServiceTxt("arduino", "tcp", "mac", WiFi.macAddress());
-#endif
-}
-
 // OTA Setup
 void MyESP::_ota_setup() {
     if (!_wifi_ssid) {
         return;
     }
 
-    ArduinoOTA.setPort(OTA_PORT);
+    //ArduinoOTA.setPort(OTA_PORT);
     ArduinoOTA.setHostname(_app_hostname);
-    //ArduinoOTA.setMdnsEnabled(true); // because we're using our own MDNS
 
     ArduinoOTA.onStart([this]() { myDebug_P(PSTR("[OTA] Start")); });
     ArduinoOTA.onEnd([this]() { myDebug_P(PSTR("[OTA] Done, restarting...")); });
@@ -344,15 +319,15 @@ void MyESP::_ota_setup() {
 
     ArduinoOTA.onError([this](ota_error_t error) {
         if (error == OTA_AUTH_ERROR)
-            myDebug_P(PSTR("Auth Failed"));
+            myDebug_P(PSTR("[OTA] Auth Failed"));
         else if (error == OTA_BEGIN_ERROR)
-            myDebug_P(PSTR("Begin Failed"));
+            myDebug_P(PSTR("[OTA] Begin Failed"));
         else if (error == OTA_CONNECT_ERROR)
-            myDebug_P(PSTR("Connect Failed"));
+            myDebug_P(PSTR("[OTA] Connect Failed"));
         else if (error == OTA_RECEIVE_ERROR)
-            myDebug_P(PSTR("Receive Failed"));
+            myDebug_P(PSTR("[OTA] Receive Failed"));
         else if (error == OTA_END_ERROR)
-            myDebug_P(PSTR("End Failed"));
+            myDebug_P(PSTR("[OTA] End Failed"));
     });
 }
 
@@ -700,7 +675,7 @@ void MyESP::_telnetHandle() {
             }
             break;
         case 0x04: // EOT, CTRL-D
-            myDebug_P(PSTR("* exiting telnet session"));
+            myDebug_P(PSTR("[TELNET] exiting telnet session"));
             SerialAndTelnet.disconnectClient();
             break;
         default:
@@ -1039,9 +1014,6 @@ void MyESP::begin(const char * app_hostname, const char * app_name, const char *
     _fs_setup();     // SPIFFS setup, do this first to get values
     _wifi_setup();   // WIFI setup
     _ota_setup();
-
-    // the other setups will be done after the wifi has connected
-    // _mqtt_setup() _mdns_setup()
 }
 
 /*

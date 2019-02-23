@@ -18,12 +18,14 @@
 #include <TelnetSpy.h> // modified from https://github.com/yasheena/telnetspy
 
 #if defined(ARDUINO_ARCH_ESP32)
-#include <ESPmDNS.h>
+//#include <ESPmDNS.h>
 #include <SPIFFS.h>             // added for ESP32
 #define ets_vsnprintf vsnprintf // added for ESP32
+#define OTA_PORT 8266
 #else
-#include <ESP8266mDNS.h>
+//#include <ESP8266mDNS.h>
 #include <ESPAsyncTCP.h>
+#define OTA_PORT 3232
 #endif
 
 #define MYEMS_CONFIG_FILE "/config.json"
@@ -33,9 +35,6 @@
 // WIFI
 #define WIFI_CONNECT_TIMEOUT 10000    // Connecting timeout for WIFI in ms
 #define WIFI_RECONNECT_INTERVAL 60000 // If could not connect to WIFI, retry after this time in ms
-
-// OTA
-#define OTA_PORT 3232 // OTA port. Was 8266
 
 // MQTT
 #define MQTT_PORT 1883                  // MQTT port
@@ -169,9 +168,6 @@ class MyESP {
     char *          _wifi_ssid;
     char *          _wifi_password;
     bool            _wifi_connected;
-
-    // mdns
-    void _mdns_setup();
 
     // ota
     void _ota_setup();

@@ -191,7 +191,7 @@ Every telegram sent is echo'd back to Rx, along the same Bus used for all Rx/Tx 
 
 `ems_devices.h` has all the configuration for the known EMS devices currently supported.
 
-`MyESP.cpp` is my custom library to handle WiFi, MQTT, MDNS and Telnet. Uses a modified version of [TelnetSpy](https://github.com/yasheena/telnetspy)
+`MyESP.cpp` is my custom library to handle WiFi, MQTT and Telnet. Uses a modified version of [TelnetSpy](https://github.com/yasheena/telnetspy)
 
 ### Special EMS Types
 

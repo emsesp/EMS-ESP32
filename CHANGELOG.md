@@ -19,6 +19,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added Bosch Easy thermostat, Buderus Logamax U122
 - Support for changing boiler wwtemp via MQTT (merge #58 from egrekov). thanks!
 
+### Removed
+
+- Custom MDNS support. Now handled much better in the new esp core under OTA
+
 ## [1.5.2] 2019-02-04
 
 ### Changed
