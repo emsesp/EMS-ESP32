@@ -324,7 +324,9 @@ The ESP8266 will start in Access Point (AP) mode. Connect via WiFi to the SSID *
 
 When flashing for the first time the Serial port is enabled by default with baud 115200. You can then use a PC with USB to the ESP8266 to set the settings like wifi, mqtt etc and also monitor the boot up procedure. Remember to disable the serial (`set serial off`) when connecting to the EMS lines.
 
-The onboard LED will flash if there is no connection with the EMS bus. You can disable LED support by the 'set led' command from the telnet client
+The onboard LED will flash if there is no connection with the EMS bus. You can disable LED support by the 'set led' command from the telnet client.
+
+If you want to completely erase the ESP and rebuild the firmware then do a `pio run -t erase` which will wipe the onboard flash including the SPIFFs where all the settings are stored.
 
 ## Known Issues
 
