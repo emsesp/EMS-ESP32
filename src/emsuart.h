@@ -9,7 +9,7 @@
 
 #include <Arduino.h>
 
-#define EMSUART_UART 0      // UART 0 - there is only one on the esp8266
+#define EMSUART_UART 0      // UART 0
 #define EMSUART_CONFIG 0x1c // 8N1 (8 bits, no stop bits, 1 parity)
 #define EMSUART_BAUD 9600   // uart baud rate for the EMS circuit
 

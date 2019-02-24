@@ -143,11 +143,6 @@ void MyESP::_wifiCallback(justwifi_messages_t code, char * parameter) {
 
         _wifi_connected = true;
 
-        // call any final custom settings
-        if (_wifi_callback) {
-            _wifi_callback();
-        }
-
         // finally if we don't want Serial anymore, turn it off
         if (!_use_serial) {
             Serial.println("Disabling serial port");
@@ -156,6 +151,11 @@ void MyESP::_wifiCallback(justwifi_messages_t code, char * parameter) {
             SerialAndTelnet.setSerial(NULL);
         } else {
             Serial.println("Using serial port output");
+        }
+
+        // call any final custom settings
+        if (_wifi_callback) {
+            _wifi_callback();
         }
     }
 

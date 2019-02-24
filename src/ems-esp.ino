@@ -41,7 +41,7 @@ Ticker systemCheckTimer;
 #define REGULARUPDATES_TIME 60 // every minute a call is made to fetch data from EMS devices manually
 Ticker regularUpdatesTimer;
 
-#define LEDCHECK_TIME 1 // every second blink the heartbeat LED
+#define LEDCHECK_TIME 500 // every 1/2 second blink the heartbeat LED
 Ticker ledcheckTimer;
 
 // thermostat scan - for debugging
@@ -941,6 +941,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
 void WIFICallback() {
     // This is where we enable the UART service to scan the incoming serial Tx/Rx bus signals
     // This is done after we have a WiFi signal to avoid any resource conflicts
+    
     if (myESP.getUseSerial()) {
         myDebug("EMS UART disabled when in Serial mode. Use 'set serial off' to change.");
     } else {
@@ -949,6 +950,7 @@ void WIFICallback() {
         // go and find the boiler and thermostat types
         ems_discoverModels();
     }
+
 }
 
 // Initialize the boiler settings and shower settings
@@ -1141,7 +1143,7 @@ void setup() {
     if (EMSESP_Status.led_gpio != EMS_VALUE_INT_NOTSET) {
         pinMode(EMSESP_Status.led_gpio, OUTPUT);
         digitalWrite(EMSESP_Status.led_gpio, (EMSESP_Status.led_gpio == LED_BUILTIN) ? HIGH : LOW); // light off. For onboard high=off
-        ledcheckTimer.attach(LEDCHECK_TIME, do_ledcheck);                                           // blink heartbeat LED
+        ledcheckTimer.attach_ms(LEDCHECK_TIME, do_ledcheck);                                           // blink heartbeat LED
     }
 
     // check for Dallas sensors
