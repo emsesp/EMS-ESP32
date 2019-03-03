@@ -7,6 +7,7 @@ env_default = d1_mini
 platform = espressif8266
 flash_mode = dout
 build_flags = -g -w
+;build_flags = -g -w -DBUILD_TIME=$UNIX_TIME
 
 wifi_settings =
 ; hard code if you prefer. Recommendation is to set from within the app when in Serial or AP mode

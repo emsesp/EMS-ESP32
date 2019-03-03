@@ -660,7 +660,7 @@ bool SettingsCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, c
             // reset pin
             pinMode(EMSESP_Status.led_gpio, OUTPUT);
             digitalWrite(EMSESP_Status.led_gpio, (EMSESP_Status.led_gpio == LED_BUILTIN) ? HIGH : LOW); // light off. For onboard high=off
-            ok                     = true;
+            ok = true;
         }
 
         // dallas_gpio
@@ -841,6 +841,12 @@ void TelnetCommandCallback(uint8_t wc, const char * commandLine) {
     }
 }
 
+// OTA callback when the OTA process starts
+// so we can disable the EMS to avoid any noise
+void OTACallback() {
+    emsuart_stop();
+}
+
 // MQTT Callback to handle incoming/outgoing changes
 void MQTTCallback(unsigned int type, const char * topic, const char * message) {
     // we're connected. lets subscribe to some topics
@@ -900,7 +906,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
                 ems_setWarmWaterActivated(false);
             }
         }
-		
+
         // boiler wwtemp changes
         if (strcmp(topic, TOPIC_BOILER_CMD_WWTEMP) == 0) {
             float f     = strtof((char *)message, 0);
@@ -941,7 +947,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
 void WIFICallback() {
     // This is where we enable the UART service to scan the incoming serial Tx/Rx bus signals
     // This is done after we have a WiFi signal to avoid any resource conflicts
-    
+
     if (myESP.getUseSerial()) {
         myDebug("EMS UART disabled when in Serial mode. Use 'set serial off' to change.");
     } else {
@@ -950,7 +956,6 @@ void WIFICallback() {
         // go and find the boiler and thermostat types
         ems_discoverModels();
     }
-
 }
 
 // Initialize the boiler settings and shower settings
@@ -1130,8 +1135,20 @@ void setup() {
 #endif
 
     // MQTT host, username and password taken from the SPIFFS settings
-    myESP.setMQTT(NULL, NULL, NULL, MQTT_BASE, MQTT_KEEPALIVE, MQTT_QOS, MQTT_RETAIN, MQTT_WILL_TOPIC, 
-      MQTT_WILL_ONLINE_PAYLOAD, MQTT_WILL_OFFLINE_PAYLOAD, MQTTCallback);
+    myESP.setMQTT(NULL,
+                  NULL,
+                  NULL,
+                  MQTT_BASE,
+                  MQTT_KEEPALIVE,
+                  MQTT_QOS,
+                  MQTT_RETAIN,
+                  MQTT_WILL_TOPIC,
+                  MQTT_WILL_ONLINE_PAYLOAD,
+                  MQTT_WILL_OFFLINE_PAYLOAD,
+                  MQTTCallback);
+
+    // OTA callback which is called when OTA is starting
+    myESP.setOTA(OTACallback);
 
     // custom settings in SPIFFS
     myESP.setSettings(FSCallback, SettingsCallback);
@@ -1143,7 +1160,7 @@ void setup() {
     if (EMSESP_Status.led_gpio != EMS_VALUE_INT_NOTSET) {
         pinMode(EMSESP_Status.led_gpio, OUTPUT);
         digitalWrite(EMSESP_Status.led_gpio, (EMSESP_Status.led_gpio == LED_BUILTIN) ? HIGH : LOW); // light off. For onboard high=off
-        ledcheckTimer.attach_ms(LEDCHECK_TIME, do_ledcheck);                                           // blink heartbeat LED
+        ledcheckTimer.attach_ms(LEDCHECK_TIME, do_ledcheck);                                        // blink heartbeat LED
     }
 
     // check for Dallas sensors

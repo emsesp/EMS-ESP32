@@ -2,7 +2,8 @@
  * MyESP - my ESP helper class to handle Wifi, MQTT and Telnet
  * 
  * Paul Derbyshire - December 2018
- * Version 1.1 - Feb 22 2019. Added support for ESP32
+ * Version 1.1   - Feb 22 2019. Added support for ESP32
+ * Version 1.1.1 - March 3 2019. Added OTA callback
  *
  * Ideas borrowed from Espurna https://github.com/xoseperez/espurna
  */
@@ -13,7 +14,7 @@
 MyESP::MyESP() {
     _app_hostname = strdup("MyESP");
     _app_name     = strdup("MyESP");
-    _app_version  = strdup("1.0.0");
+    _app_version  = strdup("1.1.1");
 
     _boottime     = strdup("unknown");
     _load_average = 100; // calculated load average
@@ -46,6 +47,8 @@ MyESP::MyESP() {
     _wifi_ssid      = NULL;
     _wifi_callback  = NULL;
     _wifi_connected = false;
+
+    _ota_callback = NULL;
 
     _suspendOutput = false;
 }
@@ -297,6 +300,20 @@ void MyESP::_wifi_setup() {
     jw.addNetwork(_wifi_ssid, _wifi_password); // Add a network
 }
 
+// set the callback function for the OTA onstart
+void MyESP::setOTA(ota_callback_f OTACallback) {
+    _ota_callback = OTACallback;
+}
+
+// OTA callback when the upload process starts
+void MyESP::_OTACallback() {
+    myDebug_P(PSTR("[OTA] Start"));
+    SerialAndTelnet.handle(); // force flush
+    if (_ota_callback) {
+        (_ota_callback)(); // call custom function to handle mqtt receives
+    }
+}
+
 // OTA Setup
 void MyESP::_ota_setup() {
     if (!_wifi_ssid) {
@@ -306,7 +323,7 @@ void MyESP::_ota_setup() {
     //ArduinoOTA.setPort(OTA_PORT);
     ArduinoOTA.setHostname(_app_hostname);
 
-    ArduinoOTA.onStart([this]() { myDebug_P(PSTR("[OTA] Start")); });
+    ArduinoOTA.onStart([this]() { _OTACallback(); });
     ArduinoOTA.onEnd([this]() { myDebug_P(PSTR("[OTA] Done, restarting...")); });
     ArduinoOTA.onProgress([this](unsigned int progress, unsigned int total) {
         static unsigned int _progOld;
@@ -374,6 +391,70 @@ void MyESP::_telnet_setup() {
     memset(_command, 0, TELNET_MAX_COMMAND_LENGTH);
 }
 
+
+#define RTC_LEAP_YEAR(year) ((((year) % 4 == 0) && ((year) % 100 != 0)) || ((year) % 400 == 0))
+
+/* Days in a month */
+static uint8_t RTC_Months[2][12] = {
+    {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}, /* Not leap year */
+    {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}  /* Leap year */
+};
+
+// https://stackoverflow.com/questions/43063071/the-arduino-ntp-i-want-print-out-datadd-mm-yyyy
+void MyESP::_printBuildTime(unsigned long unix) {
+    // compensate for summer/winter time and CET. Can't be bothered to work out DST.
+    // add 3600 to the UNIX time during winter, (3600 s = 1 h), and 7200 during summer (DST).
+    unix += 3600; // add 1 hour
+
+    uint8_t Day, Month;
+
+    uint8_t Seconds = unix % 60;          /* Get seconds from unix */
+    unix /= 60;                           /* Go to minutes */
+    uint8_t Minutes = unix % 60;          /* Get minutes */
+    unix /= 60;                           /* Go to hours */
+    uint8_t Hours = unix % 24;            /* Get hours */
+    unix /= 24;                           /* Go to days */
+    uint8_t WeekDay = (unix + 3) % 7 + 1; /* Get week day, monday is first day */
+
+    uint16_t year = 1970; /* Process year */
+    while (1) {
+        if (RTC_LEAP_YEAR(year)) {
+            if (unix >= 366) {
+                unix -= 366;
+            } else {
+                break;
+            }
+        } else if (unix >= 365) {
+            unix -= 365;
+        } else {
+            break;
+        }
+        year++;
+    }
+
+    /* Get year in xx format */
+    uint8_t Year = (uint8_t)(year - 2000);
+    /* Get month */
+    for (Month = 0; Month < 12; Month++) {
+        if (RTC_LEAP_YEAR(year)) {
+            if (unix >= (uint32_t)RTC_Months[1][Month]) {
+                unix -= RTC_Months[1][Month];
+            } else {
+                break;
+            }
+        } else if (unix >= (uint32_t)RTC_Months[0][Month]) {
+            unix -= RTC_Months[0][Month];
+        } else {
+            break;
+        }
+    }
+
+    Month++;        /* Month starts with 1 */
+    Day = unix + 1; /* Date starts with 1 */
+
+    SerialAndTelnet.printf("%02d:%02d:%02d %d/%d/%d", Hours, Minutes, Seconds, Day, Month, Year);
+}
+
 // Show help of commands
 void MyESP::_consoleShowHelp() {
     SerialAndTelnet.println();
@@ -389,15 +470,21 @@ void MyESP::_consoleShowHelp() {
 #else
         String hostname = WiFi.hostname();
 #endif
-        SerialAndTelnet.printf("* Hostname: %s   IP: %s   MAC: %s",
+        SerialAndTelnet.printf("* Hostname: %s  IP: %s  MAC: %s",
                                hostname.c_str(),
                                WiFi.localIP().toString().c_str(),
                                WiFi.macAddress().c_str());
 #ifdef ARDUINO_BOARD
         SerialAndTelnet.printf("  Board: %s", ARDUINO_BOARD);
 #endif
+
+#ifdef BUILD_TIME
+        SerialAndTelnet.print("  (Build ");
+        _printBuildTime(BUILD_TIME);
+        SerialAndTelnet.print(")");
+#endif
         SerialAndTelnet.println();
-        SerialAndTelnet.printf("* Connected to WiFi SSID: %s", WiFi.SSID().c_str());
+        SerialAndTelnet.printf("* Connected to WiFi SSID: %s (signal %d%%)", WiFi.SSID().c_str(), getWifiQuality());
         SerialAndTelnet.println();
         SerialAndTelnet.printf("* Boot time: %s", _boottime);
         SerialAndTelnet.println();
@@ -991,8 +1078,7 @@ void MyESP::_calculateLoad() {
     }
 }
 
-// return true if wifi is connected
-//    WL_NO_SHIELD        = 255,   // for compatibility with WiFi Shield library
+// return true if wifi is connected:
 //    WL_IDLE_STATUS      = 0,
 //    WL_NO_SSID_AVAIL    = 1,
 //    WL_SCAN_COMPLETED   = 2,
@@ -1002,6 +1088,25 @@ void MyESP::_calculateLoad() {
 //    WL_DISCONNECTED     = 6
 bool MyESP::isWifiConnected() {
     return (_wifi_connected);
+}
+
+/*
+ *  Return the quality (Received Signal Strength Indicator) of the WiFi network.
+ *  Returns -1 if WiFi is disconnected.
+ *  High quality: 90% ~= -55dBm
+ *  Medium quality: 50% ~= -75dBm
+ *  Low quality: 30% ~= -85dBm
+ *  Unusable quality: 8% ~= -96dBm
+ */
+int MyESP::getWifiQuality() {
+    if (WiFi.status() != WL_CONNECTED)
+        return -1;
+    int dBm = WiFi.RSSI();
+    if (dBm <= -100)
+        return 0;
+    if (dBm >= -50)
+        return 100;
+    return 2 * (dBm + 100);
 }
 
 // register new instance

@@ -81,6 +81,7 @@ typedef enum { MYESP_FSACTION_SET, MYESP_FSACTION_LIST, MYESP_FSACTION_SAVE, MYE
 
 typedef std::function<void(unsigned int, const char *, const char *)>            mqtt_callback_f;
 typedef std::function<void()>                                                    wifi_callback_f;
+typedef std::function<void()>                                                    ota_callback_f;
 typedef std::function<void(uint8_t, const char *)>                               telnetcommand_callback_f;
 typedef std::function<void(uint8_t)>                                             telnet_callback_f;
 typedef std::function<bool(MYESP_FSACTION, JsonObject & json)>                   fs_callback_f;
@@ -107,17 +108,20 @@ class MyESP {
     void mqttSubscribe(const char * topic);
     void mqttUnsubscribe(const char * topic);
     void mqttPublish(const char * topic, const char * payload);
-    void setMQTT(const char *  mqtt_host,
-                 const char *  mqtt_username,
-                 const char *  mqtt_password,
-                 const char *  mqtt_base,
-                 unsigned long mqtt_keepalive,
-                 unsigned char mqtt_qos,
-                 bool          mqtt_retain,
-                 const char *  mqtt_will_topic,
-                 const char *  mqtt_will_online_payload,
-                 const char *  mqtt_will_offline_payload,
+    void setMQTT(const char *    mqtt_host,
+                 const char *    mqtt_username,
+                 const char *    mqtt_password,
+                 const char *    mqtt_base,
+                 unsigned long   mqtt_keepalive,
+                 unsigned char   mqtt_qos,
+                 bool            mqtt_retain,
+                 const char *    mqtt_will_topic,
+                 const char *    mqtt_will_online_payload,
+                 const char *    mqtt_will_offline_payload,
                  mqtt_callback_f callback);
+
+    // OTA
+    void setOTA(ota_callback_f OTACallback);
 
     // debug & telnet
     void myDebug(const char * format, ...);
@@ -136,6 +140,8 @@ class MyESP {
     void     setBoottime(const char * boottime);
     void     resetESP();
     uint16_t getSystemLoadAverage();
+    int      getWifiQuality();
+
 
   private:
     // mqtt
@@ -170,7 +176,9 @@ class MyESP {
     bool            _wifi_connected;
 
     // ota
-    void _ota_setup();
+    ota_callback_f _ota_callback;
+    void           _ota_setup();
+    void           _OTACallback();
 
     // telnet & debug
     TelnetSpy                SerialAndTelnet;
@@ -205,6 +213,7 @@ class MyESP {
     char * _boottime;
     bool   _suspendOutput;
     bool   _use_serial;
+    void   _printBuildTime(unsigned long rawTime);
 
     // load average (0..100)
     void               _calculateLoad();
