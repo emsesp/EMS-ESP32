@@ -14,11 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Callback for OTA. This is used to disable EMS bus during a firmware OTA update, which caused problems with the latest ESP89266 core libraries
 - Added rough estimate of WiFi signal strength to info page
-- Added the build time & date to the info page (optional in platformio.ini)
-  
-
-
-## [1.5.3] 2019-02-22
+- Added the build time & date to the info page (optional in platformio.ini)## [1.5.3] 2019-02-22
 
 ### Changed
 

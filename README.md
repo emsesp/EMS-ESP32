@@ -5,11 +5,11 @@ EMS-ESP is a project to build an electronic controller circuit using an Espressi
 There are 3 parts to this project, first the design of the circuit, secondly the code for the ESP8266 microcontroller firmware with telnet and MQTT support, and lastly an example configuration for Home Assistant to monitor the data and issue direct commands via a MQTT broker.
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/b8880625bdf841d4adb2829732030887)](https://app.codacy.com/app/proddy/EMS-ESP?utm_source=github.com&utm_medium=referral&utm_content=proddy/EMS-ESP&utm_campaign=Badge_Grade_Settings)
-[![version](https://img.shields.io/badge/version-1.5.3-brightgreen.svg)](CHANGELOG.md)
+[![version](https://img.shields.io/badge/version-1.5.4-brightgreen.svg)](CHANGELOG.md)
 
 - [EMS-ESP](#ems-esp)
   - [Introduction](#introduction)
-  - [Supported Boilers Types](#supported-boilers-types)
+  - [Supported EMS Devices](#supported-ems-devices)
   - [Supported ESP8266 devices](#supported-esp8266-devices)
   - [Getting Started](#getting-started)
   - [Monitoring The Output](#monitoring-the-output)
@@ -50,9 +50,11 @@ Acknowledgments and kudos to the following people who have open-sourced their pr
 
  **EMS Wiki** - A comprehensive [reference](https://emswiki.thefischer.net/doku.php?id=wiki:ems:telegramme) (in German) for the EMS bus which is a little outdated, not always 100% accurate and sadly no longer maintained.
 
-## Supported Boilers Types
+## Supported EMS Devices
 
-Most Bosch branded boilers that support the Logamatic EMS (and EMS+) bus protocols work with this design. This includes Nefit, Buderus, Worcester and Junkers (all copyrighted). Please make sure you read the **Disclaimer** carefully before sending ambiguous messages to your EMS bus as you could cause serious damage to your equiptment.
+Most Bosch branded boilers that support the Logamatic EMS bus protocols work with this design. This includes Nefit, Buderus, Worcester and Junkers (all copyrighted). Please make sure you read the **Disclaimer** carefully before sending ambiguous messages to your EMS bus as you could cause serious damage to your equipment.
+
+Note support for the later EMS Plus (EMS+ or EMS2) standard hasn't been added yet to the library. If you'd like to help please reach out.
 
 ## Supported ESP8266 devices
 
@@ -60,14 +62,30 @@ The code and circuit has been tested with a few ESP8266 development boards such 
 
 ## Getting Started
 
-1. Either build the circuit described below or purchase a ready built board
-2. Get an ESP8266 dev board and connect the 2 EMS output lines from the boiler to the circuit and the Rx and Tx out to ESP pins D7 and D8 respectively. To prevent interference with the serial ports and debug messages we use these pins RX1 and TX1. The EMS connection can either be the 12-15V AC direct from the thermostat bus line or from the 3.5" Service Jack at the front of the boiler.
-3. Optionally connect an external LED or decide to use the onboard ESP8266 LED. This will flash when there is an error on the EMS bus line or stay solid when it's connected to the EMS bus.
-4. Modify `my_custom.h` if needed
-5. Build and upload the firmware to the ESP8266 device. I used PlatformIO with Visual Studio Code but using Atom or a command-line is just as easy if you don't plan to make many code changes.
-6. Power the ESP either via USB or direct into the 5v vin pin from an external 5V power source (with min 300mA is required).
-7. Attach the 3v3 out on the ESP8266 to the DC power line on the EMS circuit as indicated in the schematics to power the circuit.
-8. The WiFi connects via DHCP by default. Find the IP by from your router and then telnet (port 23) to it. If a connection can't be made it will go into Access Point mode. Tip: to enable Telnet on Windows run `dism /online /Enable-Feature /FeatureName:TelnetClient` or install something like [putty](https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html). If everything is working you should see the messages appear in the window as shown in the next section. However if you're unable to locate the IP of the ESP then something went wrong. Re-compile with the -DDEBUG_SUPPORT and connect via USB to a PC and check the Serial log for errors.
+1. Either build the circuit described below or purchase a ready built board from bbqkees.
+2. Grab any ESP8266 dev board. The latest bbqkees boards have a Wemos D1 pre-mounted with a copy of this firmware.
+3. Optionally add external Dallas temperature sensors and an external LED. The default pins for these are D1 and D5 respectively.
+4. Decide whether to compile and upload the code yourself using PlatformIO or just upload the pre-baked firmware using the esptool (read these [instructions](#using-the-pre-built-firmware)). If you want to build yourself now is the time to customize your settings in `my_custom.h`. Upload the firmware.
+5. Connect a USB 5v power supply to the ESP8266 board, either via laptop/PC or external power supply.
+7. When the ESP8266 starts up for the first time the onboard LED will be flashing. This is because the EMS bus is not yet connected.
+8. If you haven't hardcoded the WiFi credentials in step 4, the ESP8266 will boot up in a WiFi Access Point (AP) mode with the ssid name `ems-esp`. Now you can either use a laptop and connect to this AP using Telnet to `192.168.1.4` or if its powered from a computers USB use a Serial monitor tool to the ESP's COM port. Tip: to enable Telnet on Windows 10 run `dism /online /Enable-Feature /FeatureName:TelnetClient` or install something like [putty](https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html).
+9. Next is to change some of the settings. Type `set` to list the current stored settings. Use `set wifi` to add your wifi credentials and if you're using MQTT set the host, username and password. There is no need to reboot the device. 
+10. The `led_gpio` will default to the onboard LED (which is probably blinking now). Ignore `thermostat_type` and `boiler_type` as these will be auto-detected hopefully later on.
+11. **Important**: If `serial` is set to `on` set it to `off` using `set serial off`. The EMS bus is disabled when the serial is on. This mode is only used for setting up a new board or debugging startup issues.
+12. Hook up the ESP to the EMS board as follows:
+    
+| EMS board | ESP8266 dev board |
+| ----------|------------------ |
+| Ground/G/J2|  GND/G |
+| Rx/J2 | D7 |
+| Tx/J2 | D8 |
+| VC/J2 | 3v3 or 5v |
+13.  Connect the EMS lines to the ESP. This can be done via the two EMS wires or via the 3.5" service jack if you have an bbqkees board.
+14.  Reboot the ESP, either by the reset switch or pulling the power.
+15.  The ESP will first perform an autodetect to try and discover the EMS devices attached. If your boiler and thermostat are recognized it will set these types and store them for ever and ever. You can trace the output by telnet'ing to the board `telnet ems-esp.local`. Also type `info` to check what happened.
+16.  If your boiler/thermostat is not discovered create a GitHub issue stating the type and product ID. These will be added to the file `ems_devices.h` in a future release.
+17.  If all is well and there is traffic on the EMS bus the onboard LED will stop blinking and be permanently on. If this is annoying you can disable with `set led off`. To see the EMS messages type `set log v` for verbose logging.
+18.  And all is not well, check the wiring, make sure serial is off and look at the telnet session for errors. If in doubt, wipe the ESP with `pio run -t erase` and start again with step #3
 
 ## Monitoring The Output
 

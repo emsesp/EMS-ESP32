@@ -56,7 +56,7 @@
 
 // Set LED pin used for showing ems bus connection status. Solid is connected, Flashing is error
 // can be either the onboard LED on the ESP8266 (LED_BULLETIN) or external via an external pull-up LED
-// (e.g. D1/5 on a bbqkees' board
+// (e.g. D1 on a bbqkees' board
 // can be enabled and disabled via the 'set led'
 // pin can be set by 'set led_gpio'
 #define EMSESP_LED_GPIO LED_BUILTIN
