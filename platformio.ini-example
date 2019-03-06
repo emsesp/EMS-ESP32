@@ -1,6 +1,4 @@
 [platformio]
-; change this for your ESP8266 device
-; env_default = nodemcuv2
 env_default = d1_mini
 
 [common]
@@ -18,20 +16,9 @@ lib_deps =
   CircularBuffer
   JustWifi
   AsyncMqttClient
-  ArduinoJson
+;  ArduinoJson
+  https://github.com/bblanchon/ArduinoJson#v5.13.5
   OneWire
-
-[env:nodemcuv2]
-board = nodemcuv2
-platform = ${common.platform}
-framework = arduino
-lib_deps = ${common.lib_deps}
-build_flags = ${common.build_flags} ${common.wifi_settings}
-board_build.flash_mode = ${common.flash_mode}
-upload_speed = 921600
-monitor_speed = 115200
-upload_port = ems-esp.local
-;upload_port = 10.10.10.6
 
 [env:d1_mini]
 board = d1_mini
@@ -42,6 +29,9 @@ build_flags = ${common.build_flags} ${common.wifi_settings}
 board_build.flash_mode = ${common.flash_mode}
 upload_speed = 921600
 monitor_speed = 115200
-upload_port = ems-esp.local
-;upload_port = 10.10.10.6
+
+; for OTA comment out these sections
+;upload_protocol = espota
+;upload_port = ems-esp.local
+
 
