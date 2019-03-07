@@ -21,7 +21,7 @@ There are 3 parts to this project, first the design of the circuit, secondly the
     - [EMS Polling](#ems-polling)
     - [EMS Broadcasting](#ems-broadcasting)
     - [EMS Reading and Writing](#ems-reading-and-writing)
-  - [EMS](#ems-plus)
+  - [EMS Plus](#ems-plus)
     - [EMS Plus byte layout](#ems-plus-byte-layout)
   - [The ESP8266 Source Code](#the-esp8266-source-code)
     - [Special EMS Types](#special-ems-types)
@@ -149,14 +149,6 @@ A package can be a single byte (see Polling below) or a string of 6 or more byte
 ``[src] [dest] [type] [offset] [data] [crc] <BRK>``
 
 The first 4 bytes is referenced as the *header* in this document.
-## Ems Plus
-In this chapter we will report our findings on the ems plus.
-### EMS Plus byte layout
-| 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 |
-| - | - | - | - | - | - | - | - |
-| 18 | 00 | FF | 03 | 01 | A5 | 28 | 46|
-|transmitter| receiver | ems plus mark | temperature set point marker | offset | ? | value | cnc
-
 ### EMS IDs
 
 Each device has a unique ID.
@@ -205,6 +197,14 @@ When executing a request to read data the `[src]` is our device `(0x0B)` and the
 Following a write request, the `[dest]` doesn't have the 8th bit set and after this write request the destination device will send either a single byte 0x01 for success or 0x04 for failure.
 
 Every telegram sent is echo'd back to Rx, along the same Bus used for all Rx/Tx transmissions.
+
+## Ems Plus
+In this chapter we will report our findings on the ems plus.
+### EMS Plus byte layout
+| 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 |
+| - | - | - | - | - | - | - | - |
+| 18 | 00 | FF | 03 | 01 | A5 | 28 | 46|
+|transmitter| receiver | ems plus mark | temperature set point marker | offset | ? | value | cnc
 
 ## The ESP8266 Source Code
 
