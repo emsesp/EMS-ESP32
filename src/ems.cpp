@@ -59,6 +59,9 @@ void _process_RC35StatusMessage(uint8_t type, uint8_t * data, uint8_t length);
 void _process_EasyStatusMessage(uint8_t type, uint8_t * data, uint8_t length);
 //EMS Plus
 void _process_EmsPlusStatusMessage(uint8_t type, uint8_t * data, uint8_t length);
+
+//debug messages
+void _printMessage(uint8_t * telegram, uint8_t length);
 /*
  * Recognized EMS types and the functions they call to process the telegrams
  * Format: MODEL ID, TYPE ID, Description, function
@@ -116,7 +119,7 @@ const _EMS_Type EMS_Types[] = {
     {EMS_MODEL_EASY, EMS_TYPE_EasyStatusMessage, "EasyStatusMessage", _process_EasyStatusMessage},
     {EMS_MODEL_BOSCHEASY, EMS_TYPE_EasyStatusMessage, "EasyStatusMessage", _process_EasyStatusMessage},
     //Ems plus
-    {EMSP_MODEL_RC10, EMS_TYPE_EmsPlusStatusMessage, "EasyStatusMessage", _process_EmsPlusStatusMessage}
+    {EMSP_MODEL_RC10, EMS_TYPE_EmsPlusStatusMessage, "EMSPStatusMessage", _process_EmsPlusStatusMessage}
 
 
 };
@@ -652,7 +655,48 @@ void _ems_processTelegram(uint8_t * telegram, uint8_t length) {
     uint8_t   type   = telegram[2];
     uint8_t   offset = telegram[3];
     uint8_t * data   = telegram + 4; // data block starts at position 5
+    _printMessage(telegram, length);
 
+    // see if we recognize the type first by scanning our known EMS types list
+    // trying to match the type ID
+    bool commonType = false;
+    bool typeFound  = false;
+    bool forUs      = false;
+    int  i          = 0;
+
+    while (i < _EMS_Types_max) {
+        if (EMS_Types[i].type == type) {
+            typeFound  = true;
+            commonType = (EMS_Types[i].model_id == EMS_MODEL_ALL);                       // is it common type for everyone?
+            forUs      = (src == EMS_Boiler.type_id) || (src == EMS_Thermostat.type_id); // is it for us? So the src must match
+            break;
+        }
+        i++;
+    }
+
+    // if it's a common type (across ems devices) or something specifically for us process it.
+    // dest will be EMS_ID_NONE and offset 0x00 for a broadcast message
+    if (typeFound && (commonType || forUs)) {
+        if ((EMS_Types[i].processType_cb) != (void *)NULL) {
+            // print non-verbose message
+            if ((EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_BASIC) || (EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_VERBOSE)) {
+                myDebug("<--- %s(0x%02X) received", EMS_Types[i].typeString, type);
+            }
+            // call callback function to process it
+            // as we only handle complete telegrams (not partial) check that the offset is 0
+            if (offset == EMS_ID_NONE) {
+                (void)EMS_Types[i].processType_cb(type, data, length - 5);
+            } else if (type == 255)
+                (void)EMS_Types[i].processType_cb(type, telegram, length);
+        }
+    }
+}
+void _printMessage(uint8_t * telegram, uint8_t length) {
+    uint8_t   src    = telegram[0] & 0x7F;
+    uint8_t   dest   = telegram[1] & 0x7F; // remove 8th bit to handle both reads and writes
+    uint8_t   type   = telegram[2];
+    uint8_t   offset = telegram[3];
+    uint8_t * data   = telegram + 4; // data block starts at position 5
     // print detailed telegram data
     if (EMS_Sys_Status.emsLogging >= EMS_SYS_LOGGING_THERMOSTAT) {
         char output_str[300] = {0}; // roughly EMS_MAX_TELEGRAM_LENGTH*3 + 20
@@ -702,39 +746,6 @@ void _ems_processTelegram(uint8_t * telegram, uint8_t length) {
         } else {
             // always print
             _debugPrintTelegram(output_str, telegram, length, color_s);
-        }
-    }
-
-    // see if we recognize the type first by scanning our known EMS types list
-    // trying to match the type ID
-    bool commonType = false;
-    bool typeFound  = false;
-    bool forUs      = false;
-    int  i          = 0;
-
-    while (i < _EMS_Types_max) {
-        if (EMS_Types[i].type == type) {
-            typeFound  = true;
-            commonType = (EMS_Types[i].model_id == EMS_MODEL_ALL);                       // is it common type for everyone?
-            forUs      = (src == EMS_Boiler.type_id) || (src == EMS_Thermostat.type_id); // is it for us? So the src must match
-            break;
-        }
-        i++;
-    }
-
-    // if it's a common type (across ems devices) or something specifically for us process it.
-    // dest will be EMS_ID_NONE and offset 0x00 for a broadcast message
-    if (typeFound && (commonType || forUs)) {
-        if ((EMS_Types[i].processType_cb) != (void *)NULL) {
-            // print non-verbose message
-            if ((EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_BASIC) || (EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_VERBOSE)) {
-                myDebug("<--- %s(0x%02X) received", EMS_Types[i].typeString, type);
-            }
-            // call callback function to process it
-            // as we only handle complete telegrams (not partial) check that the offset is 0
-            if (offset == EMS_ID_NONE) {
-                (void)EMS_Types[i].processType_cb(type, data, length - 5);
-            }
         }
     }
 }
@@ -1040,10 +1051,24 @@ void _process_EasyStatusMessage(uint8_t type, uint8_t * data, uint8_t length) {
     EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
 }
 void _process_EmsPlusStatusMessage(uint8_t type, uint8_t * data, uint8_t length) {
-    myDebug("The type is ", type);
-    myDebug("The data is ", data);
-    myDebug("The length is ", length);
+    if (data[3] == 3 || data[3] == 6 || data[3] == 10) {
+        EMS_Thermostat.setpoint_roomTemp = ((float)data[6]) / (float)2;
+        if (true) {
+            char str[300];
+            char buffer[16];
+            for (size_t i = 0; i < length; i++) {
+                strlcat(str, _hextoa(data[i], buffer), sizeof(str));
+                strlcat(str, " ", sizeof(str)); // add space
+            }
+            myDebug(str);
+        }
+    }
+    //EMS_Sys_Status.emsLogging = EMS_SYS_LOGGING_NONE;
 }
+/*
+        strlcat(output_str, ", type 0x", sizeof(output_str));
+        strlcat(output_str, _hextoa(type, buffer), sizeof(output_str));
+*/
 /**
  * type 0xB0 - for reading the mode from the RC10 thermostat (0x17)
  * received only after requested
