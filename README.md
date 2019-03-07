@@ -21,6 +21,8 @@ There are 3 parts to this project, first the design of the circuit, secondly the
     - [EMS Polling](#ems-polling)
     - [EMS Broadcasting](#ems-broadcasting)
     - [EMS Reading and Writing](#ems-reading-and-writing)
+  - [EMS]
+    - [EMS Plus byte layout][#ems-plus-byte-layout]
   - [The ESP8266 Source Code](#the-esp8266-source-code)
     - [Special EMS Types](#special-ems-types)
     - [Which thermostats are supported?](#which-thermostats-are-supported)
@@ -148,6 +150,12 @@ A package can be a single byte (see Polling below) or a string of 6 or more byte
 
 The first 4 bytes is referenced as the *header* in this document.
 
+### EMS Plus byte layout
+| 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 |
+| - | - | - | - | - | - | - | - |
+| 18 | 00 | FF | 03 | 01 | A5 | 28 | 46|
+|transmitter| receiver | ems plus mark | temperature set point marker | offset | ? | value | cnc
+
 ### EMS IDs
 
 Each device has a unique ID.
@@ -223,12 +231,6 @@ Every telegram sent is echo'd back to Rx, along the same Bus used for all Rx/Tx 
 | Boiler (0x08) | 0x16    | UBAParametersMessage          |                                          |
 
 In `ems.cpp` you can add scheduled calls to specific EMS types in the functions         `ems_getThermostatValues()` and `ems_getBoilerValues()`.
-
-### EMS+ byte layout
-| 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 |
-| - | - | - | - | - | - | - | - |
-| 18 | 00 | FF | 03 | 01 | A5 | 28 | 46|
-|transmitter| receiver | ems plus mark | temperature set point marker | offset | ? | value | cnc
 
 ### Which thermostats are supported?
 
