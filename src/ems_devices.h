@@ -83,7 +83,10 @@
 #define EMS_TYPE_EasyStatusMessage 0x0A        // reading values on an Easy Thermostat
 #define EMS_TYPE_EasyStatusMessage_setpoint 10 // setpoint temp
 #define EMS_TYPE_EasyStatusMessage_curr 8      // current temp
-
+// Ems plus
+#define EMS_TYPE_EmsPlusStatusMessage 0x00       // reading values on an Easy Thermostat
+#define EMS_TYPE_EmsPlusStatusMessage_setpoint 0 // setpoint temp
+#define EMS_TYPE_EmsPlusStatusMessage_curr 0     // current temp
 // Known EMS types
 typedef enum {
     EMS_MODEL_NONE,
@@ -102,7 +105,9 @@ typedef enum {
     EMS_MODEL_EASY,
     EMS_MODEL_BOSCHEASY,
     EMS_MODEL_RC310,
-    EMS_MODEL_CW100
+    EMS_MODEL_CW100,
+    //Ems plus
+    EMSP_MODEL_RC10
 
 } _EMS_MODEL_ID;
 
@@ -140,6 +145,6 @@ const _Thermostat_Type Thermostat_Types[] = {
     {EMS_MODEL_BOSCHEASY, 206, 0x02, "Bosch Easy", EMS_THERMOSTAT_READ_YES, EMS_THERMOSTAT_WRITE_NO},
     {EMS_MODEL_RC310, 158, 0x10, "RC310", EMS_THERMOSTAT_READ_NO, EMS_THERMOSTAT_WRITE_NO},
     {EMS_MODEL_CW100, 255, 0x18, "Bosch CW100", EMS_THERMOSTAT_READ_NO, EMS_THERMOSTAT_WRITE_NO},
-    {EMS_MODEL_RC10, 165, 0x02, "RC10/Nefit Moduline 1010)", EMS_THERMOSTAT_READ_YES, EMS_THERMOSTAT_WRITE_YES},
+    {EMSP_MODEL_RC10, 165, 0x02, "RC10/Nefit Moduline 1010)", EMS_THERMOSTAT_READ_YES, EMS_THERMOSTAT_WRITE_YES},
 
 };

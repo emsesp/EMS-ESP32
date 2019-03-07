@@ -29,7 +29,7 @@ MyESP::MyESP() {
     _helpProjectCmds_count = 0;
     _command               = (char *)malloc(TELNET_MAX_COMMAND_LENGTH); // reserve buffer for Serial/Telnet commands
 
-    _use_serial                = false;
+    _use_serial                = true;
     _mqtt_host                 = NULL;
     _mqtt_password             = NULL;
     _mqtt_username             = NULL;

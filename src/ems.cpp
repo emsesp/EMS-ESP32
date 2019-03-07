@@ -57,7 +57,8 @@ void _process_RC35StatusMessage(uint8_t type, uint8_t * data, uint8_t length);
 
 // Easy
 void _process_EasyStatusMessage(uint8_t type, uint8_t * data, uint8_t length);
-
+//EMS Plus
+void _process_EmsPlusStatusMessage(uint8_t type, uint8_t * data, uint8_t length);
 /*
  * Recognized EMS types and the functions they call to process the telegrams
  * Format: MODEL ID, TYPE ID, Description, function
@@ -114,6 +115,8 @@ const _EMS_Type EMS_Types[] = {
     // Easy
     {EMS_MODEL_EASY, EMS_TYPE_EasyStatusMessage, "EasyStatusMessage", _process_EasyStatusMessage},
     {EMS_MODEL_BOSCHEASY, EMS_TYPE_EasyStatusMessage, "EasyStatusMessage", _process_EasyStatusMessage},
+    //Ems plus
+    {EMSP_MODEL_RC10, EMS_TYPE_EmsPlusStatusMessage, "EasyStatusMessage", _process_EmsPlusStatusMessage}
 
 
 };
@@ -241,7 +244,7 @@ void ems_init() {
     strlcpy(EMS_Thermostat.version, "not set", sizeof(EMS_Thermostat.version));
 
     // default logging is none
-    ems_setLogging(EMS_SYS_LOGGING_DEFAULT);
+    ems_setLogging(EMS_SYS_LOGGING_THERMOSTAT);
 }
 
 // Getters and Setters for parameters
@@ -1036,7 +1039,11 @@ void _process_EasyStatusMessage(uint8_t type, uint8_t * data, uint8_t length) {
 
     EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
 }
-
+void _process_EmsPlusStatusMessage(uint8_t type, uint8_t * data, uint8_t length) {
+    myDebug("The type is ", type);
+    myDebug("The data is ", data);
+    myDebug("The length is ", length);
+}
 /**
  * type 0xB0 - for reading the mode from the RC10 thermostat (0x17)
  * received only after requested
