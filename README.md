@@ -21,8 +21,8 @@ There are 3 parts to this project, first the design of the circuit, secondly the
     - [EMS Polling](#ems-polling)
     - [EMS Broadcasting](#ems-broadcasting)
     - [EMS Reading and Writing](#ems-reading-and-writing)
-  - [EMS]
-    - [EMS Plus byte layout][#ems-plus-byte-layout]
+  - [EMS](#ems-plus)
+    - [EMS Plus byte layout](#ems-plus-byte-layout)
   - [The ESP8266 Source Code](#the-esp8266-source-code)
     - [Special EMS Types](#special-ems-types)
     - [Which thermostats are supported?](#which-thermostats-are-supported)
@@ -149,7 +149,8 @@ A package can be a single byte (see Polling below) or a string of 6 or more byte
 ``[src] [dest] [type] [offset] [data] [crc] <BRK>``
 
 The first 4 bytes is referenced as the *header* in this document.
-
+## Ems Plus
+In this chapter we will report our findings on the ems plus.
 ### EMS Plus byte layout
 | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 |
 | - | - | - | - | - | - | - | - |
