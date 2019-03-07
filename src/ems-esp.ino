@@ -469,8 +469,7 @@ void publishValues(bool force) {
     }
 
     // handle the thermostat values separately
-    //if (ems_getThermostatEnabled()) {
-    if (true) {
+    if (ems_getThermostatEnabled()) {
         // only send thermostat values if we actually have them
         if (((int)EMS_Thermostat.curr_roomTemp == (int)0) || ((int)EMS_Thermostat.setpoint_roomTemp == (int)0))
             return;
