@@ -1,0 +1,37 @@
+[platformio]
+env_default = d1_mini
+
+[common]
+platform = espressif8266
+flash_mode = dout
+build_flags = -g -w
+;build_flags = -g -w -DBUILD_TIME=$UNIX_TIME
+
+wifi_settings =
+; hard code if you prefer. Recommendation is to set from within the app when in Serial or AP mode
+;wifi_settings = '-DWIFI_SSID="XXXX"' '-DWIFI_PASSWORD="XXXX"'
+
+lib_deps =
+  CRC32
+  CircularBuffer
+  JustWifi
+  AsyncMqttClient
+  ArduinoJson
+;  https://github.com/bblanchon/ArduinoJson#v5.13.5
+  OneWire
+
+[env:d1_mini]
+board = d1_mini
+platform = ${common.platform}
+framework = arduino
+lib_deps = ${common.lib_deps}
+build_flags = ${common.build_flags} ${common.wifi_settings}
+board_build.flash_mode = ${common.flash_mode}
+upload_speed = 921600
+monitor_speed = 115200
+
+; for OTA comment out these sections
+;upload_protocol = espota
+;upload_port = ems-esp.local
+
+

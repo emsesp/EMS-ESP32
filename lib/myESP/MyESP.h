@@ -1,5 +1,5 @@
 /*
- * MyEsp.h
+ * MyESP.h
  *
  * Paul Derbyshire - December 2018
  */
@@ -8,6 +8,8 @@
 
 #ifndef MyEMS_h
 #define MyEMS_h
+
+#define MYESP_VERSION "1.1.4"
 
 #include <ArduinoJson.h>
 #include <ArduinoOTA.h>
@@ -38,8 +40,8 @@
 
 // MQTT
 #define MQTT_PORT 1883                  // MQTT port
-#define MQTT_RECONNECT_DELAY_MIN 5000   // Try to reconnect in 5 seconds upon disconnection
-#define MQTT_RECONNECT_DELAY_STEP 5000  // Increase the reconnect delay in 5 seconds after each failed attempt
+#define MQTT_RECONNECT_DELAY_MIN 2000   // Try to reconnect in 3 seconds upon disconnection
+#define MQTT_RECONNECT_DELAY_STEP 3000  // Increase the reconnect delay in 3 seconds after each failed attempt
 #define MQTT_RECONNECT_DELAY_MAX 120000 // Set reconnect time to 2 minutes at most
 #define MQTT_MAX_SIZE 600               // max length of MQTT message
 #define MQTT_MAX_TOPIC_SIZE 50          // max length of MQTT message
@@ -68,7 +70,6 @@
 #define COLOR_BOLD_ON "\x1B[1m"
 #define COLOR_BOLD_OFF "\x1B[21m"
 
-
 // SPIFFS
 #define SPIFFS_MAXSIZE 500 // https://arduinojson.org/v5/assistant/
 
@@ -84,7 +85,7 @@ typedef std::function<void()>                                                   
 typedef std::function<void()>                                                    ota_callback_f;
 typedef std::function<void(uint8_t, const char *)>                               telnetcommand_callback_f;
 typedef std::function<void(uint8_t)>                                             telnet_callback_f;
-typedef std::function<bool(MYESP_FSACTION, JsonObject & json)>                   fs_callback_f;
+typedef std::function<bool(MYESP_FSACTION, const JsonObject json)>               fs_callback_f;
 typedef std::function<bool(MYESP_FSACTION, uint8_t, const char *, const char *)> fs_settings_callback_f;
 
 // calculates size of an 2d array at compile time
@@ -165,6 +166,8 @@ class MyESP {
     char *          _mqtt_will_online_payload;
     char *          _mqtt_will_offline_payload;
     char *          _mqtt_topic;
+    unsigned long   _mqtt_last_connection;
+    bool            _mqtt_connecting;
 
     // wifi
     DNSServer       dnsServer; // For Access Point (AP) support
