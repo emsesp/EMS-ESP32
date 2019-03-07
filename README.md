@@ -224,6 +224,12 @@ Every telegram sent is echo'd back to Rx, along the same Bus used for all Rx/Tx 
 
 In `ems.cpp` you can add scheduled calls to specific EMS types in the functions         `ems_getThermostatValues()` and `ems_getBoilerValues()`.
 
+### EMS+ byte layout
+| 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 |
+| - | - | - | - | - | - | - | - |
+| 18 | 00 | FF | 03 | 01 | A5 | 28 | 46|
+|transmitter| receiver | ems plus mark | temperature set point marker | offset | ? | value | cnc
+
 ### Which thermostats are supported?
 
 I am still working on adding more support to known thermostats. Any contributions here are welcome. The know types are listed in `ems_devices.h` and include
