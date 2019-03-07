@@ -16,8 +16,8 @@ lib_deps =
   CircularBuffer
   JustWifi
   AsyncMqttClient
-;  ArduinoJson
-  https://github.com/bblanchon/ArduinoJson#v5.13.5
+  ArduinoJson
+;  https://github.com/bblanchon/ArduinoJson#v5.13.5
   OneWire
 
 [env:d1_mini]

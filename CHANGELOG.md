@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.5] 2019-03-07
+
+### Fixed
+- Support the latest ArduinoJson v6 and espressif8266 2.0.4 libraries (in PlatformIO do a `pio lib update` and `pio update`)
+
+### Changed
+
+- MQTT keep alive to 2 minutes (60 seconds was just too short for slower networks)
+- Improved MQTT startup time
+- Setting wifi or mqtt settings are immediate, no need to restart the ESP
+- Text changes in the help
+
+### Added
+- Show if MQTT is connected
+- Show version of MyESP (the custom MQTT, Wifi, OTA, MDNS, Telnet library)
+- EMS-OT OpenTherm connector
+
 ## [1.5.4] 2019-03-03
 
 ### Changed
@@ -14,7 +31,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Callback for OTA. This is used to disable EMS bus during a firmware OTA update, which caused problems with the latest ESP89266 core libraries
 - Added rough estimate of WiFi signal strength to info page
-- Added the build time & date to the info page (optional in platformio.ini)## [1.5.3] 2019-02-22
+- Added the build time & date to the info page (optional in platformio.ini)
+  
+## [1.5.3] 2019-02-22
 
 ### Changed
 
@@ -83,7 +102,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - some minor improvements to autodetect
-
 
 ## [1.4.0] 2019-01-27
 

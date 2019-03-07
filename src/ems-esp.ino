@@ -79,24 +79,24 @@ command_t PROGMEM project_cmds[] = {
 
     {"set led <on | off>", "toggle status LED on/off"},
     {"set led_gpio <pin>", "set the LED pin. Default is the onboard LED (D1=5)"},
-    {"set dallas_gpio <pin>", "set the pin for the external Dallas temperature sensor (D5=14)"},
-    {"set thermostat_type <hex type ID>", "set the thermostat type id (e.g. 10 for 0x10)"},
-    {"set boiler_type <hex type ID>", "set the boiler type id (e.g. 8 for 0x08)"},
-    {"info", "show the values"},
+    {"set dallas_gpio <pin>", "set the pin for external Dallas temperature sensors (D5=14)"},
+    {"set thermostat_type <type ID>", "set the thermostat type id (e.g. 10 for 0x10)"},
+    {"set boiler_type <type ID>", "set the boiler type id (e.g. 8 for 0x08)"},
+    {"info", "show data captured on the EMS bus"},
     {"log <n | b | t | r | v>", "set logging mode to none, basic, thermostat only, raw or verbose"},
-    {"publish", "publish values to MQTT"},
+    {"publish", "forice a publish of all values to MQTT"},
     {"types", "list supported EMS telegram type IDs"},
-    {"queue", "list Tx queue"},
-    {"autodetect", "discover EMS devices and set boiler and thermostat automatically"},
+    {"queue", "show current Tx queue"},
+    {"autodetect", "discover EMS devices and attempt to automatically set boiler and thermostat"},
     {"shower <timer | alert>", "toggle either timer or alert on/off"},
-    {"send XX...", "send raw telegram data in hex to EMS bus"},
-    {"thermostat read <hex type ID>", "send read request to thermostat"},
+    {"send XX ...", "send raw telegram data as hex to EMS bus"},
+    {"thermostat read <type ID>", "send read request to the thermostat"},
     {"thermostat temp <degrees>", "set current thermostat temperature"},
     {"thermostat mode <mode>", "set mode (0=low/night, 1=manual/day, 2=auto)"},
-    {"thermostat scan <hex type ID>", "do a force read on all type IDs starting at n"},
-    {"boiler read <hex type ID>", "send read request to boiler"},
-    {"boiler wwtemp <degrees>", "set warm water temperature"},
-    {"boiler tapwater <on | off>", "set warm tap water on or off"}
+    {"thermostat scan <type ID>", "do a read on all type IDs"},
+    {"boiler read <type ID>", "send read request to boiler"},
+    {"boiler wwtemp <degrees>", "set boiler warm water temperature"},
+    {"boiler tapwater <on | off>", "set boiler warm tap water on/off"}
 
 };
 
@@ -400,7 +400,7 @@ void showInfo() {
     // show the Shower Info
     if (EMSESP_Status.shower_timer) {
         myDebug("%sShower stats:%s", COLOR_BOLD_ON, COLOR_BOLD_OFF);
-        myDebug("  Shower Timer is %s", (EMSESP_Shower.showerOn ? "active" : "off"));
+        myDebug("  Shower is %s", (EMSESP_Shower.showerOn ? "running" : "off"));
     }
 }
 
@@ -408,17 +408,17 @@ void showInfo() {
 // a json object is created for the boiler and one for the thermostat
 // CRC check is done to see if there are changes in the values since the last send to avoid too much wifi traffic
 void publishValues(bool force) {
-    char                            s[20] = {0}; // for formatting strings
-    StaticJsonBuffer<MQTT_MAX_SIZE> jsonBuffer;
-    char                            data[MQTT_MAX_SIZE] = {0};
-    JsonObject &                    rootBoiler          = jsonBuffer.createObject();
-    size_t                          rlen;
-    CRC32                           crc;
-    uint32_t                        fchecksum;
+    char                              s[20] = {0}; // for formatting strings
+    StaticJsonDocument<MQTT_MAX_SIZE> doc;
+    char                              data[MQTT_MAX_SIZE] = {0};
+    CRC32                             crc;
+    uint32_t                          fchecksum;
 
     static uint8_t  last_boilerActive            = 0xFF; // for remembering last setting of the tap water or heating on/off
     static uint32_t previousBoilerPublishCRC     = 0;    // CRC check
     static uint32_t previousThermostatPublishCRC = 0;    // CRC check
+
+    JsonObject rootBoiler = doc.to<JsonObject>();
 
     rootBoiler["wWSelTemp"]   = _int_to_char(s, EMS_Boiler.wWSelTemp);
     rootBoiler["selFlowTemp"] = _float_to_char(s, EMS_Boiler.selFlowTemp);
@@ -443,11 +443,10 @@ void publishValues(bool force) {
     rootBoiler["pumpMod"]     = _int_to_char(s, EMS_Boiler.pumpMod);
     rootBoiler["ServiceCode"] = EMS_Boiler.serviceCodeChar;
 
-    rlen = rootBoiler.measureLength();
-    rootBoiler.printTo(data, rlen + 1); // form the json string
+    serializeJson(doc, data, sizeof(data));
 
     // calculate hash and send values if something has changed, to save unnecessary wifi traffic
-    for (size_t i = 0; i < rlen - 1; i++) {
+    for (size_t i = 0; i < measureJson(doc) - 1; i++) {
         crc.update(data[i]);
     }
     fchecksum = crc.finalize();
@@ -470,13 +469,16 @@ void publishValues(bool force) {
     }
 
     // handle the thermostat values separately
-    if (ems_getThermostatEnabled()) {
+    //if (ems_getThermostatEnabled()) {
+    if (true) {
         // only send thermostat values if we actually have them
         if (((int)EMS_Thermostat.curr_roomTemp == (int)0) || ((int)EMS_Thermostat.setpoint_roomTemp == (int)0))
             return;
 
-        // build json object
-        JsonObject & rootThermostat         = jsonBuffer.createObject();
+        // build new json object
+        doc.clear();
+        JsonObject rootThermostat = doc.to<JsonObject>();
+
         rootThermostat[THERMOSTAT_CURRTEMP] = _float_to_char(s, EMS_Thermostat.curr_roomTemp);
         rootThermostat[THERMOSTAT_SELTEMP]  = _float_to_char(s, EMS_Thermostat.setpoint_roomTemp);
 
@@ -500,12 +502,11 @@ void publishValues(bool force) {
         }
 
         data[0] = '\0'; // reset data for next package
-        rlen    = rootThermostat.measureLength();
-        rootThermostat.printTo(data, rlen + 1); // form the json string
+        serializeJson(doc, data, sizeof(data));
 
         // calculate new CRC
         crc.reset();
-        for (size_t i = 0; i < rlen - 1; i++) {
+        for (size_t i = 0; i < measureJson(doc) - 1; i++) {
             crc.update(data[i]);
         }
         uint32_t checksum = crc.finalize();
@@ -579,48 +580,34 @@ void startThermostatScan(uint8_t start) {
 }
 
 // callback for loading/saving settings to the file system (SPIFFS)
-bool FSCallback(MYESP_FSACTION action, JsonObject & json) {
-    bool ok = true;
+bool FSCallback(MYESP_FSACTION action, const JsonObject json) {
     if (action == MYESP_FSACTION_LOAD) {
         // led
-        if (json.containsKey("led")) {
-            EMSESP_Status.led_enabled = (bool)json["led"];
-        } else {
+        if (!(EMSESP_Status.led_enabled = json["led"])) {
             EMSESP_Status.led_enabled = LED_BUILTIN; // default value
-            ok                        = false;
         }
 
         // led_gpio
-        if (json.containsKey("led_gpio")) {
-            EMSESP_Status.led_gpio = json["led_gpio"];
-        } else {
+        if (!(EMSESP_Status.led_gpio = json["led_gpio"])) {
             EMSESP_Status.led_gpio = EMSESP_LED_GPIO; // default value
-            ok                     = false;
         }
 
         // dallas_gpio
-        if (json.containsKey("dallas_gpio")) {
-            EMSESP_Status.dallas_gpio = json["dallas_gpio"];
-        } else {
+        if (!(EMSESP_Status.dallas_gpio = json["dallas_gpio"])) {
             EMSESP_Status.dallas_gpio = EMSESP_DALLAS_GPIO; // default value
-            ok                        = false;
         }
 
         // thermostat_type
-        if (json.containsKey("thermostat_type")) {
-            EMS_Thermostat.type_id = json["thermostat_type"];
-        } else {
+        if (!(EMS_Thermostat.type_id = json["thermostat_type"])) {
             EMS_Thermostat.type_id = EMSESP_THERMOSTAT_TYPE; // set default
-            ok                     = false;
         }
 
         // boiler_type
-        if (json.containsKey("boiler_type")) {
-            EMS_Boiler.type_id = json["boiler_type"];
-        } else {
+        if (!(EMS_Boiler.type_id = json["boiler_type"])) {
             EMS_Boiler.type_id = EMSESP_BOILER_TYPE; // set default
-            ok                 = false;
         }
+
+        return false; // always save the settings
     }
 
     if (action == MYESP_FSACTION_SAVE) {
@@ -629,9 +616,9 @@ bool FSCallback(MYESP_FSACTION action, JsonObject & json) {
         json["dallas_gpio"]     = EMSESP_Status.dallas_gpio;
         json["thermostat_type"] = EMS_Thermostat.type_id;
         json["boiler_type"]     = EMS_Boiler.type_id;
-    }
 
-    return ok; // all ok
+        return true;
+    }
 }
 
 // callback for custom settings when showing Stored Settings
@@ -949,7 +936,7 @@ void WIFICallback() {
     // This is done after we have a WiFi signal to avoid any resource conflicts
 
     if (myESP.getUseSerial()) {
-        myDebug("EMS UART disabled when in Serial mode. Use 'set serial off' to change.");
+        myDebug("Warning! EMS bus disabled when in Serial mode. Use 'set serial off' to enable.");
     } else {
         emsuart_init();
         myDebug("[UART] Opened Rx/Tx connection");

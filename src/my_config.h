@@ -20,7 +20,7 @@
 #define MQTT_WILL_ONLINE_PAYLOAD "online"   // for last will & testament payload
 #define MQTT_WILL_OFFLINE_PAYLOAD "offline" // for last will & testament payload
 #define MQTT_RETAIN false
-#define MQTT_KEEPALIVE 60 // 1 minute
+#define MQTT_KEEPALIVE 120 // 2 minutes
 #define MQTT_QOS 1
 
 // MQTT for thermostat

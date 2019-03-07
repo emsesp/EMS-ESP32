@@ -2,21 +2,27 @@
  * MyESP - my ESP helper class to handle Wifi, MQTT and Telnet
  * 
  * Paul Derbyshire - December 2018
- * Version 1.1   - Feb 22 2019. Added support for ESP32
- * Version 1.1.1 - March 3 2019. Added OTA callback
  *
  * Ideas borrowed from Espurna https://github.com/xoseperez/espurna
  */
 
 #include "MyESP.h"
 
+#define RTC_LEAP_YEAR(year) ((((year) % 4 == 0) && ((year) % 100 != 0)) || ((year) % 400 == 0))
+
+/* Days in a month */
+static uint8_t RTC_Months[2][12] = {
+    {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}, /* Not leap year */
+    {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}  /* Leap year */
+};
+
 // constructor
 MyESP::MyESP() {
     _app_hostname = strdup("MyESP");
     _app_name     = strdup("MyESP");
-    _app_version  = strdup("1.1.1");
+    _app_version  = strdup(MYESP_VERSION);
 
-    _boottime     = strdup("unknown");
+    _boottime     = strdup("<unknown>");
     _load_average = 100; // calculated load average
 
     _telnetcommand_callback = NULL;
@@ -42,13 +48,13 @@ MyESP::MyESP() {
     _mqtt_topic                = NULL;
     _mqtt_qos                  = 0;
     _mqtt_reconnect_delay      = MQTT_RECONNECT_DELAY_MIN;
+    _mqtt_last_connection      = 0;
+    _mqtt_connecting           = false;
 
     _wifi_password  = NULL;
     _wifi_ssid      = NULL;
     _wifi_callback  = NULL;
     _wifi_connected = false;
-
-    _ota_callback = NULL;
 
     _suspendOutput = false;
 }
@@ -240,6 +246,8 @@ void MyESP::_mqttOnConnect() {
     myDebug_P(PSTR("[MQTT] Connected"));
     _mqtt_reconnect_delay = MQTT_RECONNECT_DELAY_MIN;
 
+    _mqtt_last_connection = millis();
+
     // say we're alive to the Last Will topic
     mqttClient.publish(_mqttTopic(_mqtt_will_topic), 1, true, _mqtt_will_online_payload);
 
@@ -252,8 +260,6 @@ void MyESP::_mqtt_setup() {
     if (!_mqtt_host) {
         myDebug_P(PSTR("[MQTT] disabled"));
     }
-
-    _mqtt_reconnect_delay = MQTT_RECONNECT_DELAY_MIN;
 
     mqttClient.onConnect([this](bool sessionPresent) { _mqttOnConnect(); });
 
@@ -274,6 +280,10 @@ void MyESP::_mqtt_setup() {
         if (reason == AsyncMqttClientDisconnectReason::MQTT_NOT_AUTHORIZED) {
             myDebug_P(PSTR("[MQTT] Not authorized"));
         }
+
+        // Reset reconnection delay
+        _mqtt_last_connection = millis();
+        _mqtt_connecting      = false;
     });
 
     //mqttClient.onSubscribe([this](uint16_t packetId, uint8_t qos) { myDebug_P(PSTR("[MQTT] Subscribe ACK for PID %d"), packetId); });
@@ -391,15 +401,6 @@ void MyESP::_telnet_setup() {
     memset(_command, 0, TELNET_MAX_COMMAND_LENGTH);
 }
 
-
-#define RTC_LEAP_YEAR(year) ((((year) % 4 == 0) && ((year) % 100 != 0)) || ((year) % 400 == 0))
-
-/* Days in a month */
-static uint8_t RTC_Months[2][12] = {
-    {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}, /* Not leap year */
-    {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}  /* Leap year */
-};
-
 // https://stackoverflow.com/questions/43063071/the-arduino-ntp-i-want-print-out-datadd-mm-yyyy
 void MyESP::_printBuildTime(unsigned long unix) {
     // compensate for summer/winter time and CET. Can't be bothered to work out DST.
@@ -462,7 +463,7 @@ void MyESP::_consoleShowHelp() {
     SerialAndTelnet.println();
 
     if (WiFi.getMode() & WIFI_AP) {
-        SerialAndTelnet.printf("* ESP8266 is in AP mode with SSID %s", jw.getAPSSID().c_str());
+        SerialAndTelnet.printf("* ESP is in AP mode with SSID %s", jw.getAPSSID().c_str());
         SerialAndTelnet.println();
     } else {
 #if defined(ARDUINO_ARCH_ESP32)
@@ -477,6 +478,7 @@ void MyESP::_consoleShowHelp() {
 #ifdef ARDUINO_BOARD
         SerialAndTelnet.printf("  Board: %s", ARDUINO_BOARD);
 #endif
+        SerialAndTelnet.printf(" (MyESP v%s)", MYESP_VERSION);
 
 #ifdef BUILD_TIME
         SerialAndTelnet.print("  (Build ");
@@ -486,10 +488,13 @@ void MyESP::_consoleShowHelp() {
         SerialAndTelnet.println();
         SerialAndTelnet.printf("* Connected to WiFi SSID: %s (signal %d%%)", WiFi.SSID().c_str(), getWifiQuality());
         SerialAndTelnet.println();
+        SerialAndTelnet.printf("* MQTT is %s", mqttClient.connected() ? "connected" : "disconnected");
+        SerialAndTelnet.println();
         SerialAndTelnet.printf("* Boot time: %s", _boottime);
         SerialAndTelnet.println();
     }
-    SerialAndTelnet.printf("* Free RAM:%d KB, Load:%d%%", (ESP.getFreeHeap() / 1024), getSystemLoadAverage());
+
+    SerialAndTelnet.printf("* Free RAM: %d KB   Load: %d%%", (ESP.getFreeHeap() / 1024), getSystemLoadAverage());
     SerialAndTelnet.println();
     // for battery power is ESP.getVcc()
 
@@ -498,7 +503,7 @@ void MyESP::_consoleShowHelp() {
     SerialAndTelnet.println(FPSTR("*  ?=help, CTRL-D=quit"));
     SerialAndTelnet.println(FPSTR("*  reboot"));
     SerialAndTelnet.println(FPSTR("*  set"));
-    SerialAndTelnet.println(FPSTR("*  set wifi <ssid> <password>"));
+    SerialAndTelnet.println(FPSTR("*  set wifi [ssid] [password]"));
     SerialAndTelnet.println(FPSTR("*  set <mqtt_host | mqtt_username | mqtt_password> [value]"));
     SerialAndTelnet.println(FPSTR("*  set erase"));
     SerialAndTelnet.println(FPSTR("*  set serial"));
@@ -538,8 +543,7 @@ void MyESP::resetESP() {
 
 // read next word from string buffer
 char * MyESP::_telnet_readWord() {
-    char * word = strtok(NULL, ", \n");
-    return word;
+    return (strtok(NULL, ", \n"));
 }
 
 // change setting for 2 params (set <command> <value1> <value2>)
@@ -561,7 +565,10 @@ void MyESP::_changeSetting2(const char * setting, const char * value1, const cha
         }
 
         (void)fs_saveConfig();
-        SerialAndTelnet.println("Wifi credentials set. Type 'reboot' to restart...");
+        SerialAndTelnet.println("WiFi settings changed. Reconnecting...");
+        jw.disconnect();
+        jw.cleanNetworks();
+        jw.addNetwork(_wifi_ssid, _wifi_password);
     }
 }
 
@@ -778,15 +785,20 @@ void MyESP::_telnetHandle() {
 
 // ensure we have a connection to MQTT broker
 void MyESP::_mqttConnect() {
-    if (!_mqtt_host || mqttClient.connected() || (WiFi.status() != WL_CONNECTED)) {
+    if (!_mqtt_host)
+        return; // MQTT not enabled
+
+    // Do not connect if already connected or still trying to connect
+    if (mqttClient.connected() || _mqtt_connecting || (WiFi.status() != WL_CONNECTED)) {
         return;
     }
 
     // Check reconnect interval
-    static unsigned long last = 0;
-    if (millis() - last < _mqtt_reconnect_delay)
+    if (millis() - _mqtt_last_connection < _mqtt_reconnect_delay) {
         return;
-    last = millis();
+    }
+
+    _mqtt_connecting = true; // we're doing a connection
 
     // Increase the reconnect delay
     _mqtt_reconnect_delay += MQTT_RECONNECT_DELAY_STEP;
@@ -801,7 +813,7 @@ void MyESP::_mqttConnect() {
 
     // last will
     if (_mqtt_will_topic) {
-        myDebug_P(PSTR("[MQTT] Setting last will topic %s"), _mqttTopic(_mqtt_will_topic));
+        //myDebug_P(PSTR("[MQTT] Setting last will topic %s"), _mqttTopic(_mqtt_will_topic));
         mqttClient.setWill(_mqttTopic(_mqtt_will_topic), 1, true, _mqtt_will_offline_payload); // retain always true
     }
 
@@ -923,15 +935,21 @@ char * MyESP::_mqttTopic(const char * topic) {
 
 
 // print contents of file
-// assume Serial is open
+// assumes Serial is open
 void MyESP::_fs_printConfig() {
     myDebug_P(PSTR("[FS] Contents:"));
 
     File configFile = SPIFFS.open(MYEMS_CONFIG_FILE, "r");
+    if (!configFile) {
+        Serial.println(F("[FS] Failed to read file for printing"));
+        return;
+    }
+
     while (configFile.available()) {
         SerialAndTelnet.print((char)configFile.read());
     }
-    myDebug_P(PSTR(""));
+    SerialAndTelnet.println();
+
     configFile.close();
 }
 
@@ -965,14 +983,15 @@ bool MyESP::_fs_loadConfig() {
         return false;
     }
 
-    // assign buffer
-    std::unique_ptr<char[]> buf(new char[size]);
+    StaticJsonDocument<SPIFFS_MAXSIZE> doc;
+    JsonObject                         json = doc.to<JsonObject>();
 
-    // use configFile.readString
-    configFile.readBytes(buf.get(), size);
-
-    StaticJsonBuffer<SPIFFS_MAXSIZE> jsonBuffer;
-    JsonObject &                     json = jsonBuffer.parseObject(buf.get());
+    // Deserialize the JSON document
+    DeserializationError error = deserializeJson(doc, configFile);
+    if (error) {
+        Serial.println(F("[FS] Failed to read file"));
+        return false;
+    }
 
     const char * value;
 
@@ -991,17 +1010,11 @@ bool MyESP::_fs_loadConfig() {
     value          = json["mqtt_password"];
     _mqtt_password = (value) ? strdup(value) : NULL;
 
+    _use_serial = (bool)json["use_serial"];
+
     // callback for loading custom settings
     // ok is false if there's a problem loading a custom setting (e.g. does not exist)
     bool ok = (_fs_callback)(MYESP_FSACTION_LOAD, json);
-
-    // new configs after release 1.3.x
-    if (json.containsKey("use_serial")) {
-        _use_serial = (bool)json["use_serial"];
-    } else {
-        _use_serial = false; // if first time, set serial to off
-        ok          = false;
-    }
 
     configFile.close();
 
@@ -1010,9 +1023,10 @@ bool MyESP::_fs_loadConfig() {
 
 // save settings to spiffs
 bool MyESP::fs_saveConfig() {
-    StaticJsonBuffer<SPIFFS_MAXSIZE> jsonBuffer;
-    JsonObject &                     json = jsonBuffer.createObject();
+    StaticJsonDocument<SPIFFS_MAXSIZE> doc;
+    JsonObject                         json = doc.to<JsonObject>();
 
+    json["app_version"]   = _app_version;
     json["wifi_ssid"]     = _wifi_ssid;
     json["wifi_password"] = _wifi_password;
     json["mqtt_host"]     = _mqtt_host;
@@ -1029,7 +1043,10 @@ bool MyESP::fs_saveConfig() {
         return false;
     }
 
-    json.printTo(configFile);
+    // Serialize JSON to file
+    if (serializeJson(json, configFile) == 0) {
+        Serial.println(F("[FS] Failed to write to file"));
+    }
 
     configFile.close();
 
@@ -1042,16 +1059,17 @@ bool MyESP::fs_saveConfig() {
 void MyESP::_fs_setup() {
     if (!SPIFFS.begin()) {
         Serial.println("[FS] Failed to mount the file system");
+        _fs_eraseConfig(); // fix for ESP32
         return;
     }
 
-    // load the config file. if it doesn't exist create it
+    // load the config file. if it doesn't exist (function returns false) create it
     if (!_fs_loadConfig()) {
-        Serial.println("[FS] Re-creating config file");
+        // Serial.println("[FS] Re-creating config file");
         fs_saveConfig();
     }
 
-    // _fs_printConfig(); // for debugging
+    // _fs_printConfig(); // TODO: for debugging
 }
 
 uint16_t MyESP::getSystemLoadAverage() {
@@ -1078,7 +1096,8 @@ void MyESP::_calculateLoad() {
     }
 }
 
-// return true if wifi is connected:
+// return true if wifi is connected
+//    WL_NO_SHIELD        = 255,   // for compatibility with WiFi Shield library
 //    WL_IDLE_STATUS      = 0,
 //    WL_NO_SSID_AVAIL    = 1,
 //    WL_SCAN_COMPLETED   = 2,
@@ -1091,13 +1110,16 @@ bool MyESP::isWifiConnected() {
 }
 
 /*
- *  Return the quality (Received Signal Strength Indicator) of the WiFi network.
- *  Returns -1 if WiFi is disconnected.
- *  High quality: 90% ~= -55dBm
- *  Medium quality: 50% ~= -75dBm
- *  Low quality: 30% ~= -85dBm
- *  Unusable quality: 8% ~= -96dBm
- */
+   Return the quality (Received Signal Strength Indicator)
+   of the WiFi network.
+   Returns a number between 0 and 100 if WiFi is connected.
+   Returns -1 if WiFi is disconnected.
+
+   High quality: 90% ~= -55dBm
+   Medium quality: 50% ~= -75dBm
+   Low quality: 30% ~= -85dBm
+   Unusable quality: 8% ~= -96dBm
+*/
 int MyESP::getWifiQuality() {
     if (WiFi.status() != WL_CONNECTED)
         return -1;

@@ -1447,7 +1447,7 @@ char * ems_getBoilerDescription(char * buffer) {
  * Find the versions of our connected devices
  */
 void ems_scanDevices() {
-    myDebug("Scanning EMS bus for devices.");
+    myDebug("Started scan of EMS bus for known devices");
 
     std::list<uint8_t> Device_Ids; // new list
 
