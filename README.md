@@ -204,7 +204,7 @@ In this chapter we will report our findings on the ems plus.
 | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 |
 | - | - | - | - | - | - | - | - |
 | 18 | 00 | FF | 03 | 01 | A5 | 28 | 46|
-|transmitter| receiver | ems plus mark | temperature set point marker | offset | ? | value | cnc
+|transmitter| receiver | ems plus mark | message type | offset | ? | value | cnc
 
 ## The ESP8266 Source Code
 
