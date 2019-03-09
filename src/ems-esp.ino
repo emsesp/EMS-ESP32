@@ -58,9 +58,11 @@ Ticker showerColdShotStopTimer;
 #define SHOWER_COLDSHOT_DURATION 10 // in seconds. 10 seconds for cold water before turning back hot water
 
 typedef struct {
-    bool          shower_timer;   // true if we want to report back on shower times
-    bool          shower_alert;   // true if we want the alert of cold water
-    bool          led_enabled;    // LED on/off
+    bool shower_timer; // true if we want to report back on shower times
+    bool shower_alert; // true if we want the alert of cold water
+    bool led_enabled;  // LED on/off
+    bool test_mode;    // test mode to stop automatic Tx on/off
+
     unsigned long timestamp;      // for internal timings, via millis()
     uint8_t       dallas_sensors; // count of dallas sensors
     uint8_t       led_gpio;
@@ -82,9 +84,10 @@ command_t PROGMEM project_cmds[] = {
     {"set dallas_gpio <pin>", "set the pin for external Dallas temperature sensors (D5=14)"},
     {"set thermostat_type <type ID>", "set the thermostat type id (e.g. 10 for 0x10)"},
     {"set boiler_type <type ID>", "set the boiler type id (e.g. 8 for 0x08)"},
+    {"set test_mode <on | off>", "test_mode turns off all automatic reads"},
     {"info", "show data captured on the EMS bus"},
     {"log <n | b | t | r | v>", "set logging mode to none, basic, thermostat only, raw or verbose"},
-    {"publish", "forice a publish of all values to MQTT"},
+    {"publish", "publish all values to MQTT"},
     {"types", "list supported EMS telegram type IDs"},
     {"queue", "show current Tx queue"},
     {"autodetect", "discover EMS devices and attempt to automatically set boiler and thermostat"},
@@ -261,6 +264,7 @@ void showInfo() {
     }
 
     myDebug("  LED is %s", EMSESP_Status.led_enabled ? "on" : "off");
+    myDebug("  Test Mode is %s", EMSESP_Status.test_mode ? "on" : "off");
 
     myDebug("  # connected Dallas temperature sensors=%d", EMSESP_Status.dallas_sensors);
 
@@ -606,6 +610,11 @@ bool FSCallback(MYESP_FSACTION action, const JsonObject json) {
             EMS_Boiler.type_id = EMSESP_BOILER_TYPE; // set default
         }
 
+        // test mode
+        if (!(EMSESP_Status.test_mode = json["test_mode"])) {
+            EMSESP_Status.test_mode = false; // default value
+        }
+
         return false; // always save the settings
     }
 
@@ -615,9 +624,12 @@ bool FSCallback(MYESP_FSACTION action, const JsonObject json) {
         json["dallas_gpio"]     = EMSESP_Status.dallas_gpio;
         json["thermostat_type"] = EMS_Thermostat.type_id;
         json["boiler_type"]     = EMS_Boiler.type_id;
+        json["test_mode"]       = EMSESP_Status.test_mode;
 
         return true;
     }
+
+    return false;
 }
 
 // callback for custom settings when showing Stored Settings
@@ -637,6 +649,18 @@ bool SettingsCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, c
                 ok                        = true;
                 // let's make sure LED is really off
                 digitalWrite(EMSESP_Status.led_gpio, (EMSESP_Status.led_gpio == LED_BUILTIN) ? HIGH : LOW); // light off. For onboard high=off
+            }
+        }
+
+        // test mode
+        if ((strcmp(setting, "test_mode") == 0) && (wc == 2)) {
+            if (strcmp(value, "on") == 0) {
+                EMSESP_Status.test_mode = true;
+                ok                      = true;
+                myDebug("* Reboot to go into test mode.");
+            } else if (strcmp(value, "off") == 0) {
+                EMSESP_Status.test_mode = false;
+                ok                      = true;
             }
         }
 
@@ -669,6 +693,7 @@ bool SettingsCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, c
     }
 
     if (action == MYESP_FSACTION_LIST) {
+        myDebug("  test_mode=%s", EMSESP_Status.test_mode ? "on" : "off");
         myDebug("  led=%s", EMSESP_Status.led_enabled ? "on" : "off");
         myDebug("  led_gpio=%d", EMSESP_Status.led_gpio);
         myDebug("  dallas_gpio=%d", EMSESP_Status.dallas_gpio);
@@ -947,9 +972,11 @@ void WIFICallback() {
 // Initialize the boiler settings and shower settings
 void initEMSESP() {
     // general settings
-    EMSESP_Status.shower_timer   = BOILER_SHOWER_TIMER;
-    EMSESP_Status.shower_alert   = BOILER_SHOWER_ALERT;
-    EMSESP_Status.led_enabled    = true; // LED is on by default
+    EMSESP_Status.shower_timer = BOILER_SHOWER_TIMER;
+    EMSESP_Status.shower_alert = BOILER_SHOWER_ALERT;
+    EMSESP_Status.led_enabled  = true; // LED is on by default
+    EMSESP_Status.test_mode    = false;
+
     EMSESP_Status.timestamp      = millis();
     EMSESP_Status.dallas_sensors = 0;
 
@@ -1107,10 +1134,7 @@ void setup() {
     // call ems.cpp's init function to set all the internal params
     ems_init();
 
-    // Timers using Ticker library
-    publishValuesTimer.attach(PUBLISHVALUES_TIME, do_publishValues);    // post MQTT values
-    systemCheckTimer.attach(SYSTEMCHECK_TIME, do_systemCheck);          // check if Boiler is online
-    regularUpdatesTimer.attach(REGULARUPDATES_TIME, do_regularUpdates); // regular reads from the EMS
+    systemCheckTimer.attach(SYSTEMCHECK_TIME, do_systemCheck); // check if Boiler is online
 
     // set up myESP for Wifi, MQTT, MDNS and Telnet
     myESP.setTelnet(project_cmds, ArraySize(project_cmds), TelnetCommandCallback, TelnetCallback); // set up Telnet commands
@@ -1142,6 +1166,12 @@ void setup() {
     // start up all the services
     myESP.begin(APP_HOSTNAME, APP_NAME, APP_VERSION);
 
+    // enable regular checks if not in test mode
+    if (!EMSESP_Status.test_mode) {
+        publishValuesTimer.attach(PUBLISHVALUES_TIME, do_publishValues);    // post MQTT values
+        regularUpdatesTimer.attach(REGULARUPDATES_TIME, do_regularUpdates); // regular reads from the EMS
+    }
+
     // set pin for LED
     if (EMSESP_Status.led_gpio != EMS_VALUE_INT_NOTSET) {
         pinMode(EMSESP_Status.led_gpio, OUTPUT);
@@ -1169,7 +1199,7 @@ void loop() {
 
     // publish the values to MQTT, only if the values have changed
     // although we don't want to publish when doing a deep scan of the thermostat
-    if (ems_getEmsRefreshed() && (scanThermostat_count == 0)) {
+    if (ems_getEmsRefreshed() && (scanThermostat_count == 0) && (!EMSESP_Status.test_mode)) {
         publishValues(false);
         ems_setEmsRefreshed(false); // reset
     }

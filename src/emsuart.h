@@ -25,7 +25,7 @@
 #define EMSUART_recvTaskQueueLen 64
 
 typedef struct {
-    int16_t writePtr;
+    uint8_t writePtr;
     uint8_t buffer[EMS_MAXBUFFERSIZE];
 } _EMSRxBuf;
 

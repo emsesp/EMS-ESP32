@@ -174,8 +174,8 @@ class TelnetSpy : public Stream {
     ~TelnetSpy();
     void     handle(void);
     void     setPort(uint16_t portToUse);
-    void     setWelcomeMsg(char * msg);
-    void     setRejectMsg(char * msg);
+    void     setWelcomeMsg(const char * msg);
+    void     setRejectMsg(const char * msg);
     void     setMinBlockSize(uint16_t minSize);
     void     setCollectingTime(uint16_t colTime);
     void     setMaxBlockSize(uint16_t maxSize);

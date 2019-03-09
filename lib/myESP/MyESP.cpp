@@ -33,7 +33,6 @@ MyESP::MyESP() {
 
     _helpProjectCmds       = NULL;
     _helpProjectCmds_count = 0;
-    _command               = (char *)malloc(TELNET_MAX_COMMAND_LENGTH); // reserve buffer for Serial/Telnet commands
 
     _use_serial                = false;
     _mqtt_host                 = NULL;
@@ -65,7 +64,6 @@ MyESP::~MyESP() {
 
 // end
 void MyESP::end() {
-    free(_command);
     SerialAndTelnet.end();
     jw.disconnect();
 }
@@ -266,7 +264,8 @@ void MyESP::_mqtt_setup() {
     mqttClient.onDisconnect([this](AsyncMqttClientDisconnectReason reason) {
         if (reason == AsyncMqttClientDisconnectReason::TCP_DISCONNECTED) {
             myDebug_P(PSTR("[MQTT] TCP Disconnected. Check mqtt logs."));
-            (_mqtt_callback)(MQTT_DISCONNECT_EVENT, NULL, NULL); // call callback with disconnect
+            (_mqtt_callback)(MQTT_DISCONNECT_EVENT, NULL,
+                             NULL); // call callback with disconnect
         }
         if (reason == AsyncMqttClientDisconnectReason::MQTT_IDENTIFIER_REJECTED) {
             myDebug_P(PSTR("[MQTT] Identifier Rejected"));
@@ -391,7 +390,7 @@ void MyESP::_telnetDisconnected() {
 
 // Initialize the telnet server
 void MyESP::_telnet_setup() {
-    SerialAndTelnet.setWelcomeMsg((char *)"");
+    SerialAndTelnet.setWelcomeMsg("");
     SerialAndTelnet.setCallbackOnConnect([this]() { _telnetConnected(); });
     SerialAndTelnet.setCallbackOnDisconnect([this]() { _telnetDisconnected(); });
     SerialAndTelnet.setDebugOutput(false);
@@ -738,9 +737,7 @@ void MyESP::_telnetHandle() {
     while (SerialAndTelnet.available()) {
         char c = SerialAndTelnet.read();
 
-        if (_use_serial) {
-            SerialAndTelnet.serialPrint(c); // echo to Serial if connected
-        }
+        SerialAndTelnet.serialPrint(c); // echo to Serial if connected
 
         switch (c) {
         case '\r': // likely have full command in buffer now, commands are terminated by CR and/or LF
@@ -750,17 +747,24 @@ void MyESP::_telnetHandle() {
                 charsRead      = 0; // is static, so have to reset
                 _suspendOutput = false;
                 if (_use_serial) {
-                    SerialAndTelnet.println(); // force newline if in Telnet
+                    SerialAndTelnet.serialPrint('\n'); // force newline if in Serial
                 }
                 _telnetCommand(_command);
             }
             break;
-        case '\b': // handle backspace in input: put a space in last char
+
+        case '\b': // (^H) handle backspace in input: put a space in last char - coded by Simon Arlott
+        case 0x7F: // (^?)
+
             if (charsRead > 0) {
                 _command[--charsRead] = '\0';
-                SerialAndTelnet << byte('\b') << byte(' ') << byte('\b');
+
+                SerialAndTelnet.write(' ');
+                SerialAndTelnet.write('\b');
             }
+
             break;
+
         case '?':
             if (!_suspendOutput) {
                 _consoleShowHelp();
@@ -814,7 +818,8 @@ void MyESP::_mqttConnect() {
     // last will
     if (_mqtt_will_topic) {
         //myDebug_P(PSTR("[MQTT] Setting last will topic %s"), _mqttTopic(_mqtt_will_topic));
-        mqttClient.setWill(_mqttTopic(_mqtt_will_topic), 1, true, _mqtt_will_offline_payload); // retain always true
+        mqttClient.setWill(_mqttTopic(_mqtt_will_topic), 1, true,
+                           _mqtt_will_offline_payload); // retain always true
     }
 
     if (_mqtt_username && _mqtt_password) {
@@ -955,7 +960,8 @@ void MyESP::_fs_printConfig() {
 
 // format File System
 void MyESP::_fs_eraseConfig() {
-    myDebug_P(PSTR("[FS] Erasing settings, please wait a few seconds. ESP will automatically restart when finished."));
+    myDebug_P(PSTR("[FS] Erasing settings, please wait a few seconds. ESP will "
+                   "automatically restart when finished."));
 
     if (SPIFFS.format()) {
         delay(1000); // wait 1 seconds
@@ -1037,6 +1043,12 @@ bool MyESP::fs_saveConfig() {
     // callback for saving custom settings
     (void)(_fs_callback)(MYESP_FSACTION_SAVE, json);
 
+    // if file exists, remove it just to be safe
+    if (SPIFFS.exists(MYEMS_CONFIG_FILE)) {
+        // delete it
+        SPIFFS.remove(MYEMS_CONFIG_FILE);
+    }
+
     File configFile = SPIFFS.open(MYEMS_CONFIG_FILE, "w");
     if (!configFile) {
         Serial.println("[FS] Failed to open config file for writing");
@@ -1069,7 +1081,7 @@ void MyESP::_fs_setup() {
         fs_saveConfig();
     }
 
-    // _fs_printConfig(); // TODO: for debugging
+    //_fs_printConfig(); // TODO: for debugging
 }
 
 uint16_t MyESP::getSystemLoadAverage() {
