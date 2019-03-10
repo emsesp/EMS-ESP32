@@ -3,7 +3,6 @@ from subprocess import call
 import os
 Import("env")
 
-
 def code_check(source, target, env):
     print("\n** Starting cppcheck...")
     call(["cppcheck", os.getcwd()+"/.", "--force", "--enable=all"])
@@ -17,7 +16,6 @@ def code_check(source, target, env):
 #defines = {k: v for (k, v) in my_flags.get("CPPDEFINES")}
 # print defines
 # print env.Dump()
-
 
 #  built in targets: (buildprog, size, upload, program, buildfs, uploadfs, uploadfsota)
 env.AddPreAction("buildprog", code_check)

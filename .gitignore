@@ -6,4 +6,3 @@
 platformio.ini
 lib/readme.txt
 .travis.yml
-*.py
