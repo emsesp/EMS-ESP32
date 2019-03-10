@@ -993,7 +993,7 @@ void initEMSESP() {
 // call PublishValues without forcing, so using CRC to see if we really need to publish
 void do_publishValues() {
     // don't publish if we're not connected to the EMS bus
-    if ((ems_getBusConnected()) && (!myESP.getUseSerial())) {
+    if ((ems_getBusConnected()) && (!myESP.getUseSerial()) && myESP.isMQTTConnected() ) {
         publishValues(false);
     }
 }

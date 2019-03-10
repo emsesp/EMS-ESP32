@@ -164,6 +164,8 @@ void MyESP::_wifiCallback(justwifi_messages_t code, char * parameter) {
         if (_wifi_callback) {
             _wifi_callback();
         }
+
+        jw.enableAPFallback(false);  // Disable AP mode after initial connect was succesfull. Thanks @JewelZB 
     }
 
     if (code == MESSAGE_ACCESSPOINT_CREATED) {
@@ -289,10 +291,7 @@ void MyESP::_mqtt_setup() {
 
     //mqttClient.onPublish([this](uint16_t packetId) { myDebug_P(PSTR("[MQTT] Publish ACK for PID %d"), packetId); });
 
-    mqttClient.onMessage(
-        [this](char * topic, char * payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) {
-            _mqttOnMessage(topic, payload, len);
-        });
+    mqttClient.onMessage([this](char * topic, char * payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) { _mqttOnMessage(topic, payload, len); });
 }
 
 // WiFI setup
@@ -414,7 +413,6 @@ void MyESP::_printBuildTime(unsigned long unix) {
     unix /= 60;                           /* Go to hours */
     uint8_t Hours = unix % 24;            /* Get hours */
     unix /= 24;                           /* Go to days */
-    uint8_t WeekDay = (unix + 3) % 7 + 1; /* Get week day, monday is first day */
 
     uint16_t year = 1970; /* Process year */
     while (1) {
@@ -470,10 +468,7 @@ void MyESP::_consoleShowHelp() {
 #else
         String hostname = WiFi.hostname();
 #endif
-        SerialAndTelnet.printf("* Hostname: %s  IP: %s  MAC: %s",
-                               hostname.c_str(),
-                               WiFi.localIP().toString().c_str(),
-                               WiFi.macAddress().c_str());
+        SerialAndTelnet.printf("* Hostname: %s  IP: %s  MAC: %s", hostname.c_str(), WiFi.localIP().toString().c_str(), WiFi.macAddress().c_str());
 #ifdef ARDUINO_BOARD
         SerialAndTelnet.printf("  Board: %s", ARDUINO_BOARD);
 #endif
@@ -501,6 +496,7 @@ void MyESP::_consoleShowHelp() {
     SerialAndTelnet.println(FPSTR("* Commands:"));
     SerialAndTelnet.println(FPSTR("*  ?=help, CTRL-D=quit"));
     SerialAndTelnet.println(FPSTR("*  reboot"));
+    SerialAndTelnet.println(FPSTR("*  crash <dump | clear | test [n]>"));
     SerialAndTelnet.println(FPSTR("*  set"));
     SerialAndTelnet.println(FPSTR("*  set wifi [ssid] [password]"));
     SerialAndTelnet.println(FPSTR("*  set <mqtt_host | mqtt_username | mqtt_password> [value]"));
@@ -724,6 +720,20 @@ void MyESP::_telnetCommand(char * commandLine) {
         resetESP();
     }
 
+    // crash command
+    if ((strcmp(ptrToCommandName, "crash") == 0) && (wc >= 2)) {
+        char * cmd = _telnet_readWord();
+        if (strcmp(cmd, "dump") == 0) {
+            crashDump();
+        } else if (strcmp(cmd, "clear") == 0) {
+            crashClear();
+        } else if ((strcmp(cmd, "test") == 0) && (wc == 3) ) {
+            char * value = _telnet_readWord();
+            crashTest(atoi(value));
+        }
+        return;
+    }
+
     // call callback function
     (_telnetcommand_callback)(wc, commandLine);
 }
@@ -854,17 +864,7 @@ void MyESP::setWIFI(const char * wifi_ssid, const char * wifi_password, wifi_cal
 }
 
 // init MQTT settings
-void MyESP::setMQTT(const char *    mqtt_host,
-                    const char *    mqtt_username,
-                    const char *    mqtt_password,
-                    const char *    mqtt_base,
-                    unsigned long   mqtt_keepalive,
-                    unsigned char   mqtt_qos,
-                    bool            mqtt_retain,
-                    const char *    mqtt_will_topic,
-                    const char *    mqtt_will_online_payload,
-                    const char *    mqtt_will_offline_payload,
-                    mqtt_callback_f callback) {
+void MyESP::setMQTT(const char * mqtt_host, const char * mqtt_username, const char * mqtt_password, const char * mqtt_base, unsigned long mqtt_keepalive, unsigned char mqtt_qos, bool mqtt_retain, const char * mqtt_will_topic, const char * mqtt_will_online_payload, const char * mqtt_will_offline_payload, mqtt_callback_f callback) {
     // can be empty
     if (!mqtt_host || *mqtt_host == 0x00) {
         _mqtt_host = NULL;
@@ -1108,6 +1108,11 @@ void MyESP::_calculateLoad() {
     }
 }
 
+// returns true is MQTT is alive
+bool MyESP::isMQTTConnected() {
+    return mqttClient.connected();
+}
+
 // return true if wifi is connected
 //    WL_NO_SHIELD        = 255,   // for compatibility with WiFi Shield library
 //    WL_IDLE_STATUS      = 0,
@@ -1143,7 +1148,155 @@ int MyESP::getWifiQuality() {
     return 2 * (dBm + 100);
 }
 
-// register new instance
+/**
+ * Save crash information in EEPROM
+ * This function is called automatically if ESP8266 suffers an exception
+ * It should be kept quick / consise to be able to execute before hardware wdt may kick in
+ */
+extern "C" void custom_crash_callback(struct rst_info * rst_info, uint32_t stack_start, uint32_t stack_end) {
+
+    // Note that 'EEPROM.begin' method is reserving a RAM buffer
+    // The buffer size is SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_SPACE_SIZE
+    EEPROM.begin(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_EEPROM_SIZE);
+
+    // write crash time to EEPROM
+    uint32_t crash_time = millis();
+    EEPROM.put(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_CRASH_TIME, crash_time);
+
+    // write reset info to EEPROM
+    EEPROM.write(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_RESTART_REASON, rst_info->reason);
+    EEPROM.write(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_EXCEPTION_CAUSE, rst_info->exccause);
+
+    // write epc1, epc2, epc3, excvaddr and depc to EEPROM
+    EEPROM.put(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_EPC1, rst_info->epc1);
+    EEPROM.put(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_EPC2, rst_info->epc2);
+    EEPROM.put(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_EPC3, rst_info->epc3);
+    EEPROM.put(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_EXCVADDR, rst_info->excvaddr);
+    EEPROM.put(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_DEPC, rst_info->depc);
+
+    // write stack start and end address to EEPROM
+    EEPROM.put(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_STACK_START, stack_start);
+    EEPROM.put(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_STACK_END, stack_end);
+
+    // starting address
+    const uint16_t settings_start = SPI_FLASH_SEC_SIZE - SAVE_CRASH_EEPROM_SIZE - 0x10;
+
+    // write stack trace to EEPROM and avoid overwriting settings
+    int16_t current_address = SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_STACK_TRACE;
+    for (uint32_t i = stack_start; i < stack_end; i++) {
+        if (current_address >= settings_start)
+            break;
+        byte * byteValue = (byte *)i;
+        EEPROM.write(current_address++, *byteValue);
+    }
+
+    EEPROM.commit();
+}
+
+void MyESP::crashTest(uint8_t t) {
+    if (t == 1) {
+        myDebug("Attempting to divide by zero ...");
+        int result, zero;
+        zero   = 0;
+        result = 1 / zero;
+        myDebug("Result = %d", result);
+    }
+
+    if (t == 2) {
+        myDebug("Attempting to read through a pointer to no object ...");
+        int * nullPointer;
+        nullPointer = NULL;
+        // null pointer dereference - read
+        // attempt to read a value through a null pointer
+        Serial.println(*nullPointer);
+    }
+
+    if (t == 3) {
+        Serial.printf("Crashing with hardware WDT (%ld ms) ...\n", millis());
+        ESP.wdtDisable();
+        while (true) {
+            // stay in an infinite loop doing nothing
+            // this way other process can not be executed
+            //
+            // Note:
+            // Hardware wdt kicks in if software wdt is unable to perfrom
+            // Nothing will be saved in EEPROM for the hardware wdt
+        }
+    }
+
+    if (t == 4) {
+        Serial.printf("Crashing with software WDT (%ld ms) ...\n", millis());
+        while (true) {
+            // stay in an infinite loop doing nothing
+            // this way other process can not be executed
+        }
+    }
+}
+
+/**
+ * Clears crash info
+ */
+void MyESP::crashClear() {
+    EEPROM.begin(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_EEPROM_SIZE);
+
+    uint32_t crash_time = 0xFFFFFFFF;
+    EEPROM.put(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_CRASH_TIME, crash_time);
+    EEPROM.commit();
+}
+
+/**
+ * Print out crash information that has been previously saved in EEPROM
+ */
+void MyESP::crashDump() {
+    EEPROM.begin(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_EEPROM_SIZE);
+
+    uint32_t crash_time;
+    EEPROM.get(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_CRASH_TIME, crash_time);
+    if ((crash_time == 0) || (crash_time == 0xFFFFFFFF)) {
+        myDebug_P(PSTR("[CRASH] No crash info"));
+        return;
+    }
+
+    myDebug_P(PSTR("[CRASH] Latest crash was at %lu ms after boot"), crash_time);
+    myDebug_P(PSTR("[CRASH] Reason of restart: %u"), EEPROM.read(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_RESTART_REASON));
+    myDebug_P(PSTR("[CRASH] Exception cause: %u"), EEPROM.read(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_EXCEPTION_CAUSE));
+
+    uint32_t epc1, epc2, epc3, excvaddr, depc;
+    EEPROM.get(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_EPC1, epc1);
+    EEPROM.get(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_EPC2, epc2);
+    EEPROM.get(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_EPC3, epc3);
+    EEPROM.get(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_EXCVADDR, excvaddr);
+    EEPROM.get(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_DEPC, depc);
+
+    myDebug_P(PSTR("[CRASH] epc1=0x%08x epc2=0x%08x epc3=0x%08x"), epc1, epc2, epc3);
+    myDebug_P(PSTR("[CRASH] excvaddr=0x%08x depc=0x%08x"), excvaddr, depc);
+
+    uint32_t stack_start, stack_end;
+    EEPROM.get(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_STACK_START, stack_start);
+    EEPROM.get(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_STACK_END, stack_end);
+
+    myDebug_P(PSTR("[CRASH] sp=0x%08x end=0x%08x"), stack_start, stack_end);
+
+    int16_t current_address = SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_STACK_TRACE;
+    int16_t stack_len       = stack_end - stack_start;
+
+    uint32_t stack_trace;
+
+    myDebug(">>>stack>>>");
+
+    for (int16_t i = 0; i < stack_len; i += 0x10) {
+        SerialAndTelnet.printf("%08x: ", stack_start + i);
+        for (byte j = 0; j < 4; j++) {
+            EEPROM.get(current_address, stack_trace);
+            SerialAndTelnet.printf("%08x ", stack_trace);
+            current_address += 4;
+        }
+        SerialAndTelnet.println();
+    }
+    myDebug("<<<stack<<<");
+}
+
+// setup MyESP
 void MyESP::begin(const char * app_hostname, const char * app_name, const char * app_version) {
     _app_hostname = strdup(app_hostname);
     _app_name     = strdup(app_name);

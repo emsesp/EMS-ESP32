@@ -1508,7 +1508,7 @@ void ems_printAllTypes() {
  */
 void ems_doReadCommand(uint8_t type, uint8_t dest, bool forceRefresh) {
     // if not a valid type of boiler is not accessible then quits
-    if (type == EMS_ID_NONE) {
+    if ( (type == EMS_ID_NONE) || (dest == EMS_ID_NONE) ) {
         return;
     }
 

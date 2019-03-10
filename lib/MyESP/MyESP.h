@@ -9,7 +9,7 @@
 #ifndef MyEMS_h
 #define MyEMS_h
 
-#define MYESP_VERSION "1.1.5"
+#define MYESP_VERSION "1.1.6b"
 
 #include <ArduinoJson.h>
 #include <ArduinoOTA.h>
@@ -18,6 +18,11 @@
 #include <FS.h>
 #include <JustWifi.h>  // https://github.com/xoseperez/justwifi
 #include <TelnetSpy.h> // modified from https://github.com/yasheena/telnetspy
+
+#include "EEPROM.h"
+extern "C" {
+     void custom_crash_callback(struct rst_info*, uint32_t, uint32_t);
+}
 
 #if defined(ARDUINO_ARCH_ESP32)
 //#include <ESPmDNS.h>
@@ -73,6 +78,21 @@
 // SPIFFS
 #define SPIFFS_MAXSIZE 500 // https://arduinojson.org/v5/assistant/
 
+// CRASH
+#define SAVE_CRASH_EEPROM_OFFSET    0x0100  // initial address for crash data
+#define SAVE_CRASH_EEPROM_SIZE      0x0200  // size
+#define SAVE_CRASH_CRASH_TIME       0x00  // 4 bytes
+#define SAVE_CRASH_RESTART_REASON   0x04  // 1 byte
+#define SAVE_CRASH_EXCEPTION_CAUSE  0x05  // 1 byte
+#define SAVE_CRASH_EPC1             0x06  // 4 bytes
+#define SAVE_CRASH_EPC2             0x0A  // 4 bytes
+#define SAVE_CRASH_EPC3             0x0E  // 4 bytes
+#define SAVE_CRASH_EXCVADDR         0x12  // 4 bytes
+#define SAVE_CRASH_DEPC             0x16  // 4 bytes
+#define SAVE_CRASH_STACK_START      0x1A  // 4 bytes
+#define SAVE_CRASH_STACK_END        0x1E  // 4 bytes
+#define SAVE_CRASH_STACK_TRACE      0x22  // variable
+
 typedef struct {
     char key[40];
     char description[100];
@@ -106,6 +126,7 @@ class MyESP {
     bool isWifiConnected();
 
     // mqtt
+    bool isMQTTConnected();
     void mqttSubscribe(const char * topic);
     void mqttUnsubscribe(const char * topic);
     void mqttPublish(const char * topic, const char * payload);
@@ -133,6 +154,11 @@ class MyESP {
     // FS
     void setSettings(fs_callback_f callback, fs_settings_callback_f fs_settings_callback);
     bool fs_saveConfig();
+
+    // CRASH
+    void crashClear();
+    void crashDump();
+    void crashTest(uint8_t t);
 
     // general
     void     end();
