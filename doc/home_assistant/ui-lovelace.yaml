@@ -13,7 +13,8 @@ views:
           - sensor.warm_water_selected_temperature
           - sensor.warm_water_current_temperature
           - sensor.warm_water_activated
-          - sensor.warm_water_3way_valve
+          - sensor.warm_water_3_way_valve
+          - sensor.warm_water_tapwater_flow_rate
           - type: divider
           - sensor.boiler_temperature
           - sensor.return_temperature
@@ -38,16 +39,15 @@ views:
             - type: divider
             - sensor.last_shower_duration
             - sensor.showertime_time
-        - type: custom:button-card
-          color: auto
+        - type: entity-button
           icon: mdi:shower-head
           name: send a cold shot of shower water
-          style:
-            - text-transform: none
-            - color: rgb(28, 128, 199)
-            - font-weight: bold
           entity: script.shower_coldshot
-          show_state: false
+          tap_action:
+            action: call-service
+            service: script.turn_on
+            service_data:
+              entity_id: script.shower_coldshot
             
       - type: vertical-stack
         cards:       
@@ -57,3 +57,6 @@ views:
             - sensor.dark_sky_temperature
         - type: thermostat
           entity: climate.thermostat
+        - type: thermostat
+          name: WarmWater
+          entity: climate.boiler

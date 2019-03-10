@@ -2,7 +2,7 @@
  * emsuart.cpp
  *
  * The low level UART code for ESP8266 to read and write to the EMS bus via uart
- * Paul Derbyshire - https://github.com/proddy/EMS-ESP-Boiler
+ * Paul Derbyshire - https://github.com/proddy/EMS-ESP
  */
 
 #include "emsuart.h"
@@ -28,8 +28,8 @@ static void emsuart_rx_intr_handler(void * para) {
     static uint8_t  uart_buffer[EMS_MAXBUFFERSIZE];
 
     // is a new buffer? if so init the thing for a new telegram
-    if (EMS_Sys_Status.emsRxStatus == EMS_RX_IDLE) {
-        EMS_Sys_Status.emsRxStatus = EMS_RX_ACTIVE; // status set to active
+    if (EMS_Sys_Status.emsRxStatus == EMS_RX_STATUS_IDLE) {
+        EMS_Sys_Status.emsRxStatus = EMS_RX_STATUS_BUSY; // status set to busy
         length                     = 0;
     }
 
@@ -55,7 +55,7 @@ static void emsuart_rx_intr_handler(void * para) {
         os_memcpy((void *)pEMSRxBuf->buffer, (void *)&uart_buffer, length);
 
         // set the status flag stating BRK has been received and we can start a new package
-        EMS_Sys_Status.emsRxStatus = EMS_RX_IDLE;
+        EMS_Sys_Status.emsRxStatus = EMS_RX_STATUS_IDLE;
 
         // call emsuart_recvTask() at next opportunity
         system_os_post(EMSUART_recvTaskPrio, 0, 0);
@@ -68,6 +68,7 @@ static void emsuart_rx_intr_handler(void * para) {
 /*
  * system task triggered on BRK interrupt
  * Read commands are all asynchronous
+ * When a buffer is full it is sent to the ems_parseTelegram() function in ems.cpp. This is the hook
  */
 static void ICACHE_FLASH_ATTR emsuart_recvTask(os_event_t * events) {
     // get next free EMS Receive buffer
@@ -109,7 +110,7 @@ void ICACHE_FLASH_ATTR emsuart_init() {
     USC0(EMSUART_UART) |= (tmp);                      // set bits
     USC0(EMSUART_UART) &= ~(tmp);                     // clear bits
 
-    // conf 1 params
+    // conf1 params
     // UCTOE = RX TimeOut enable (default is 1)
     // UCTOT = RX TimeOut Threshold (7bit) = want this when no more data after 2 characters. (default is 2)
     // UCFFT = RX FIFO Full Threshold (7 bit) = want this to be 31 for 32 bytes of buffer. (default was 127).
@@ -135,6 +136,14 @@ void ICACHE_FLASH_ATTR emsuart_init() {
 
     // swap Rx and Tx pins to use GPIO13 (D7) and GPIO15 (D8) respectively
     system_uart_swap();
+}
+
+/*
+ * stop UART0 driver
+ */
+void ICACHE_FLASH_ATTR emsuart_stop() {
+    ETS_UART_INTR_DISABLE();
+    ETS_UART_INTR_ATTACH(NULL, NULL);
 }
 
 /*

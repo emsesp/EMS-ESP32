@@ -1,2 +1,10 @@
-#define APP_NAME "EMS-ESP-Boiler"
-#define APP_VERSION "1.1.0"
+/**
+ *
+ * Paul Derbyshire - https://github.com/proddy/EMS-ESP
+ */
+
+#pragma once
+
+#define APP_NAME "EMS-ESP"
+#define APP_VERSION "1.5.7b"
+#define APP_HOSTNAME "ems-esp"

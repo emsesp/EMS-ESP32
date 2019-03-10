@@ -2,7 +2,7 @@
   alias: Alert shower time
   trigger:
     platform: mqtt
-    topic: home/boiler/showertime
+    topic: home/ems-esp/showertime
   action:
     - service: notify.general_notify
       data_template:
@@ -13,7 +13,7 @@
   alias: Alert shower too long
   trigger:
     platform: mqtt
-    topic: home/boiler/command
+    topic: home/ems-esp/command
     payload: 'shower_alarm'
   action:
     - service: notify.admin_notify
@@ -21,21 +21,21 @@
         title: "Shower Alert!"
         message: "Shower time exceeded limit"
 
-# when boiler starts send boottime
+# when ems-esp starts send boottime
 - id: boiler_restart
-  alias: See if boiler restarts
+  alias: See if ems-esp restarts
   trigger:
     platform: mqtt
-    topic: home/boiler/start
+    topic: home/ems-esp/start
     payload: 'start'
   action:
     - service: notify.admin_notify
       data_template:
-        title: "boiler has booted"
-        message: "Boiler"
+        title: "ems-esp has booted"
+        message: "EMS-ESP"
     - service: mqtt.publish
       data_template:
-        topic: 'home/boiler/start'
+        topic: 'home/ems-esp/start'
         payload: >
           {{ now().strftime("%H:%M:%S %-d/%b/%Y") }}
 

@@ -1,13 +1,15 @@
 /*
  * emsuart.h
+ * 
  * Header file for emsuart.cpp
- * Paul Derbyshire - https://github.com/proddy/EMS-ESP-Boiler
+ * 
+ * Paul Derbyshire - https://github.com/proddy/EMS-ESP
  */
 #pragma once
 
 #include <Arduino.h>
 
-#define EMSUART_UART 0      // UART 0 - there is only one on the esp8266
+#define EMSUART_UART 0      // UART 0
 #define EMSUART_CONFIG 0x1c // 8N1 (8 bits, no stop bits, 1 parity)
 #define EMSUART_BAUD 9600   // uart baud rate for the EMS circuit
 
@@ -23,11 +25,12 @@
 #define EMSUART_recvTaskQueueLen 64
 
 typedef struct {
-    int16_t writePtr;
+    uint8_t writePtr;
     uint8_t buffer[EMS_MAXBUFFERSIZE];
 } _EMSRxBuf;
 
 void ICACHE_FLASH_ATTR emsuart_init();
+void ICACHE_FLASH_ATTR emsuart_stop();
 void ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len);
 void ICACHE_FLASH_ATTR emsaurt_tx_poll();
 void ICACHE_FLASH_ATTR emsuart_tx_brk();
