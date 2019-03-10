@@ -325,18 +325,16 @@ Porting to the Arduino IDE can be a little tricky but it did it once. Something 
 
 ## Using the Pre-built Firmware
 
-pre-baked firmwares for some ESP8266 devices are available in the directory `/firmware` which you can upload yourself using [esptool](https://github.com/espressif/esptool) bootloader. On Windows, follow these instructions:
+pre-baked firmware for the Wemos D1 mini is available in the GitHub [releases](https://github.com/proddy/EMS-ESP/releases) which you can upload yourself using the [esptool](https://github.com/espressif/esptool) bootloader like `esptool.py -p <com port> write_flash 0x00000 <firmware.bin file>`. Here's how to set it up on Windows:
 
 1. Check if you have **python 2.7** installed. If not [download it](https://www.python.org/downloads/) and make sure you select the option to add Python to the windows PATH
-2. Install the ESPTool by running `pip install esptool` from a command prompt
-3. Connect the ESP via USB, figure out the COM port
-4. run `esptool.py -p <com> write_flash 0x00000 <firmware>` where firmware is the `.bin` file and \<com\> is the COM port, e.g. `COM3`
+2. Then install the ESPTool by running `pip install esptool` from a command prompt
 
 The ESP8266 will start in Access Point (AP) mode. Connect via WiFi to the SSID **EMS-ESP** and telnet to **192.168.4.1**. Then use the `set wifi` command to configure your own network settings like `set wifi your_ssid your_password`. Alternatively connect the ESP8266 to your PC and open a Serial monitor (with baud 115200) to configure the settings. Make sure you disable Serial support before connecting the EMS lines using `set serial off`.
 
-`set erase` will clear all settings.
-
 `set` wil list all currently stored settings.
+
+`set erase` will clear all settings.
 
 ## Troubleshooting
 
