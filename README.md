@@ -200,11 +200,17 @@ Every telegram sent is echo'd back to Rx, along the same Bus used for all Rx/Tx 
 
 ## Ems Plus
 In this chapter we will report our findings on the ems plus.
-### EMS Plus byte layout
+### Message layout
 | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 |
 | - | - | - | - | - | - | - | - |
 | 18 | 00 | FF | 03 | 01 | A5 | 28 | 46|
 |transmitter| receiver | ems plus mark | message type | offset | ? | value | cnc
+
+### Message types
+| Message type | Definition          |
+|--------------|---------------------|
+| 03           | Set temperature     |
+| 00           | Current temperature |
 
 ## The ESP8266 Source Code
 
