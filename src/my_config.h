@@ -45,7 +45,7 @@
 #define TOPIC_SHOWER_COLDSHOT "shower_coldshot" // used to trigger a coldshot from an MQTT command
 
 // default values for shower logic on/off
-#define BOILER_SHOWER_TIMER 1      // enable (1) to monitor shower time
+#define BOILER_SHOWER_TIMER 0      // enable (1) to monitor shower time
 #define BOILER_SHOWER_ALERT 0      // enable (1) to send alert of cold water when shower time limit has exceeded
 #define SHOWER_MAX_DURATION 420000 // in ms. 7 minutes, before trigger a shot of cold water
 

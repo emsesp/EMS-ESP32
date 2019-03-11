@@ -119,6 +119,7 @@ const _Boiler_Type Boiler_Types[] = {
     {EMS_MODEL_UBA, 190, 0x09, "BC10 Base Controller"},
     {EMS_MODEL_UBA, 114, 0x09, "BC10 Base Controller"},
     {EMS_MODEL_UBA, 125, 0x09, "BC25 Base Controller"},
+    {EMS_MODEL_UBA, 205, 0x02, "Nefit Moduline Easy Connect"},
     {EMS_MODEL_UBA, 68, 0x09, "RFM20 Receiver"},
     {EMS_MODEL_UBA, 95, 0x08, "Bosch Condens 2500"},
     {EMS_MODEL_UBA, 251, 0x21, "MM10 Mixer Module"},  // warning, fake product id!
@@ -141,6 +142,7 @@ const _Thermostat_Type Thermostat_Types[] = {
     {EMS_MODEL_BOSCHEASY, 206, 0x02, "Bosch Easy", EMS_THERMOSTAT_READ_YES, EMS_THERMOSTAT_WRITE_NO},
     {EMS_MODEL_RC310, 158, 0x10, "RC310", EMS_THERMOSTAT_READ_NO, EMS_THERMOSTAT_WRITE_NO},
     {EMS_MODEL_CW100, 255, 0x18, "Bosch CW100", EMS_THERMOSTAT_READ_NO, EMS_THERMOSTAT_WRITE_NO},
-    {EMS_MODEL_OT, 171, 0x02, "EMS-OT OpenTherm converter", EMS_THERMOSTAT_READ_YES, EMS_THERMOSTAT_WRITE_YES}
+    {EMS_MODEL_OT, 171, 0x02, "EMS-OT OpenTherm converter", EMS_THERMOSTAT_READ_YES, EMS_THERMOSTAT_WRITE_YES},
+    {EMS_MODEL_RC10, 165, 0x02, "RC10/Nefit Moduline 1010)", EMS_THERMOSTAT_READ_YES, EMS_THERMOSTAT_WRITE_YES}
 
 };
