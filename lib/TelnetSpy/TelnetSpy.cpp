@@ -106,14 +106,14 @@ void TelnetSpy::setPort(uint16_t portToUse) {
     }
 }
 
-void TelnetSpy::setWelcomeMsg(char * msg) {
+void TelnetSpy::setWelcomeMsg(const char * msg) {
     if (welcomeMsg) {
         free(welcomeMsg);
     }
     welcomeMsg = strdup(msg);
 }
 
-void TelnetSpy::setRejectMsg(char * msg) {
+void TelnetSpy::setRejectMsg(const char * msg) {
     if (rejectMsg) {
         free(rejectMsg);
     }
@@ -434,22 +434,24 @@ TelnetSpy::operator bool() const {
 
 void TelnetSpy::setDebugOutput(bool en) {
     debugOutput = en;
+
+    // TODO: figure out how to disable system printing for the ESP32
     if (debugOutput) {
         actualObject = this;
+
 #ifdef ESP8266
         os_install_putc1((void *)TelnetSpy_putc); // Set system printing (os_printf) to TelnetSpy
         system_set_os_print(true);
-#else // ESP32 \
-	  // ToDo: How can be done this for ESP32 ?
 #endif
+
     } else {
         if (actualObject == this) {
+
 #ifdef ESP8266
             system_set_os_print(false);
             os_install_putc1((void *)TelnetSpy_ignore_putc); // Ignore system printing
-#else                                                        // ESP32 \
-															 // ToDo: How can be done this for ESP32 ?
 #endif
+
             actualObject = NULL;
         }
     }

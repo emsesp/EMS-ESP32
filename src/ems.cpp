@@ -884,7 +884,7 @@ void _processType(uint8_t * telegram, uint8_t length) {
  * Check if hot tap water or heating is active
  * using a quick hack for checking the heating. Selected Flow Temp >= 70
  */
-bool _checkActive() {
+void _checkActive() {
     // hot tap water, using flow to check insread of the burner power
     EMS_Boiler.tapwaterActive = ((EMS_Boiler.wWCurFlow != 0) && (EMS_Boiler.burnGas == EMS_VALUE_INT_ON));
 
@@ -969,7 +969,7 @@ void _process_UBAMonitorFast(uint8_t type, uint8_t * data, uint8_t length) {
     }
 
     // at this point do a quick check to see if the hot water or heating is active
-    (void)_checkActive();
+    _checkActive();
 }
 
 /**
@@ -1587,13 +1587,13 @@ void ems_sendRawTelegram(char * telegram) {
     EMS_Sys_Status.txRetryCount    = 0;                   // reset retry counter
 
     // get first value, which should be the src
-    if (p = strtok(telegram, " ,")) { // delimiter
+    if ( (p = strtok(telegram, " ,")) ) { // delimiter
         strlcpy(value, p, sizeof(value));
         EMS_TxTelegram.data[0] = (uint8_t)strtol(value, 0, 16);
     }
     // and interate until end
     while (p != 0) {
-        if (p = strtok(NULL, " ,")) {
+        if ( (p = strtok(NULL, " ,")) ) {
             strlcpy(value, p, sizeof(value));
             uint8_t val                  = (uint8_t)strtol(value, 0, 16);
             EMS_TxTelegram.data[++count] = val;

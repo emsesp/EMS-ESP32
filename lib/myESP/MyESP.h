@@ -9,7 +9,7 @@
 #ifndef MyEMS_h
 #define MyEMS_h
 
-#define MYESP_VERSION "1.1.4"
+#define MYESP_VERSION "1.1.5"
 
 #include <ArduinoJson.h>
 #include <ArduinoOTA.h>
@@ -68,7 +68,7 @@
 #define COLOR_CYAN "\x1B[0;36m"
 #define COLOR_WHITE "\x1B[0;37m"
 #define COLOR_BOLD_ON "\x1B[1m"
-#define COLOR_BOLD_OFF "\x1B[21m"
+#define COLOR_BOLD_OFF "\x1B[22m" // fixed by Scott Arlott
 
 // SPIFFS
 #define SPIFFS_MAXSIZE 500 // https://arduinojson.org/v5/assistant/
@@ -191,9 +191,9 @@ class MyESP {
     void                     _telnetCommand(char * commandLine);
     char *                   _telnet_readWord();
     void                     _telnet_setup();
-    char *                   _command;               // the input command from either Serial or Telnet
-    command_t *              _helpProjectCmds;       // Help of commands setted by project
-    uint8_t                  _helpProjectCmds_count; // # available commands
+    char                     _command[TELNET_MAX_COMMAND_LENGTH]; // the input command from either Serial or Telnet
+    command_t *              _helpProjectCmds;                    // Help of commands setted by project
+    uint8_t                  _helpProjectCmds_count;              // # available commands
     void                     _consoleShowHelp();
     telnetcommand_callback_f _telnetcommand_callback; // Callable for projects commands
     telnet_callback_f        _telnet_callback;        // callback for connect/disconnect
