@@ -335,7 +335,7 @@ float _toFloat(uint8_t i, uint8_t * data) {
     if ((data[i] & 0x80) == 0x80) {
         // check if its an invalid number
         // 0x8000 is used when sensor is missing
-        if ((data[i] == 0x80) && (data[i + 1] == 0)) {
+        if ((data[i] >= 0x80) && (data[i + 1] == 0)) {
             return (float)EMS_VALUE_FLOAT_NOTSET; // return -1 to indicate that is unknown
         }
         // its definitely a negative number
