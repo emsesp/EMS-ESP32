@@ -327,7 +327,7 @@ void showInfo() {
     _renderIntValue("Burner current power", "%", EMS_Boiler.curBurnPow);
     _renderFloatValue("Flame current", "uA", EMS_Boiler.flameCurr);
     _renderFloatValue("System pressure", "bar", EMS_Boiler.sysPress);
-    myDebug("  System Service Code: %s(%d)", EMS_Boiler.serviceCodeChar, EMS_Boiler.serviceCode);
+    myDebug("  System Service Code: %s (%d)", EMS_Boiler.serviceCodeChar, EMS_Boiler.serviceCode);
 
     // UBAParametersMessage
     _renderIntValue("Heating temperature setting on the boiler", "C", EMS_Boiler.heating_temp);
@@ -431,22 +431,22 @@ void publishValues(bool force) {
     rootBoiler["wWComfort"]   = EMS_Boiler.wWComfort ? "Comfort" : "ECO";
     rootBoiler["wWCurTmp"]    = _float_to_char(s, EMS_Boiler.wWCurTmp);
     snprintf(s, sizeof(s), "%i.%i", EMS_Boiler.wWCurFlow / 10, EMS_Boiler.wWCurFlow % 10);
-    rootBoiler["wWCurFlow"]   = s;
-    rootBoiler["wWHeat"]      = _bool_to_char(s, EMS_Boiler.wWHeat);
-    rootBoiler["curFlowTemp"] = _float_to_char(s, EMS_Boiler.curFlowTemp);
-    rootBoiler["retTemp"]     = _float_to_char(s, EMS_Boiler.retTemp);
-    rootBoiler["burnGas"]     = _bool_to_char(s, EMS_Boiler.burnGas);
-    rootBoiler["heatPmp"]     = _bool_to_char(s, EMS_Boiler.heatPmp);
-    rootBoiler["fanWork"]     = _bool_to_char(s, EMS_Boiler.fanWork);
-    rootBoiler["ignWork"]     = _bool_to_char(s, EMS_Boiler.ignWork);
-    rootBoiler["wWCirc"]      = _bool_to_char(s, EMS_Boiler.wWCirc);
-    rootBoiler["selBurnPow"]  = _int_to_char(s, EMS_Boiler.selBurnPow);
-    rootBoiler["curBurnPow"]  = _int_to_char(s, EMS_Boiler.curBurnPow);
-    rootBoiler["sysPress"]    = _float_to_char(s, EMS_Boiler.sysPress);
-    rootBoiler["boilTemp"]    = _float_to_char(s, EMS_Boiler.boilTemp);
-    rootBoiler["pumpMod"]     = _int_to_char(s, EMS_Boiler.pumpMod);
-    rootBoiler["ServiceCode"] = EMS_Boiler.serviceCodeChar;
-    rootBoiler["ServiceCodeNumber"]   = EMS_Boiler.serviceCode;
+    rootBoiler["wWCurFlow"]         = s;
+    rootBoiler["wWHeat"]            = _bool_to_char(s, EMS_Boiler.wWHeat);
+    rootBoiler["curFlowTemp"]       = _float_to_char(s, EMS_Boiler.curFlowTemp);
+    rootBoiler["retTemp"]           = _float_to_char(s, EMS_Boiler.retTemp);
+    rootBoiler["burnGas"]           = _bool_to_char(s, EMS_Boiler.burnGas);
+    rootBoiler["heatPmp"]           = _bool_to_char(s, EMS_Boiler.heatPmp);
+    rootBoiler["fanWork"]           = _bool_to_char(s, EMS_Boiler.fanWork);
+    rootBoiler["ignWork"]           = _bool_to_char(s, EMS_Boiler.ignWork);
+    rootBoiler["wWCirc"]            = _bool_to_char(s, EMS_Boiler.wWCirc);
+    rootBoiler["selBurnPow"]        = _int_to_char(s, EMS_Boiler.selBurnPow);
+    rootBoiler["curBurnPow"]        = _int_to_char(s, EMS_Boiler.curBurnPow);
+    rootBoiler["sysPress"]          = _float_to_char(s, EMS_Boiler.sysPress);
+    rootBoiler["boilTemp"]          = _float_to_char(s, EMS_Boiler.boilTemp);
+    rootBoiler["pumpMod"]           = _int_to_char(s, EMS_Boiler.pumpMod);
+    rootBoiler["ServiceCode"]       = EMS_Boiler.serviceCodeChar;
+    rootBoiler["ServiceCodeNumber"] = EMS_Boiler.serviceCode;
 
     serializeJson(doc, data, sizeof(data));
 
@@ -994,7 +994,7 @@ void initEMSESP() {
 // call PublishValues without forcing, so using CRC to see if we really need to publish
 void do_publishValues() {
     // don't publish if we're not connected to the EMS bus
-    if ((ems_getBusConnected()) && (!myESP.getUseSerial()) && myESP.isMQTTConnected() ) {
+    if ((ems_getBusConnected()) && (!myESP.getUseSerial()) && myESP.isMQTTConnected()) {
         publishValues(false);
     }
 }

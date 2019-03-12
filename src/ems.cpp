@@ -203,7 +203,7 @@ void ems_init() {
     EMS_Boiler.flameCurr   = EMS_VALUE_FLOAT_NOTSET; // Flame current in micro amps
     EMS_Boiler.sysPress    = EMS_VALUE_FLOAT_NOTSET; // System pressure
     strlcpy(EMS_Boiler.serviceCodeChar, "??", sizeof(EMS_Boiler.serviceCodeChar));
-    EMS_Boiler.serviceCode   = EMS_VALUE_SHORT_NOTSET;
+    EMS_Boiler.serviceCode = EMS_VALUE_SHORT_NOTSET;
 
     // UBAMonitorSlow
     EMS_Boiler.extTemp     = EMS_VALUE_FLOAT_NOTSET; // Outside temperature
@@ -950,6 +950,7 @@ void _process_UBAMonitorFast(uint8_t type, uint8_t * data, uint8_t length) {
     // read the service code / installation status as appears on the display
     EMS_Boiler.serviceCodeChar[0] = char(data[18]); // ascii character 1
     EMS_Boiler.serviceCodeChar[1] = char(data[19]); // ascii character 2
+    EMS_Boiler.serviceCodeChar[2] = '\0';           // null terminate string
 
     // read error code
     EMS_Boiler.serviceCode = (data[20] << 8) + data[21];
@@ -1514,7 +1515,7 @@ void ems_printAllTypes() {
  */
 void ems_doReadCommand(uint8_t type, uint8_t dest, bool forceRefresh) {
     // if not a valid type of boiler is not accessible then quits
-    if ( (type == EMS_ID_NONE) || (dest == EMS_ID_NONE) ) {
+    if ((type == EMS_ID_NONE) || (dest == EMS_ID_NONE)) {
         return;
     }
 
@@ -1561,13 +1562,13 @@ void ems_sendRawTelegram(char * telegram) {
     EMS_Sys_Status.txRetryCount    = 0;                   // reset retry counter
 
     // get first value, which should be the src
-    if ( (p = strtok(telegram, " ,")) ) { // delimiter
+    if ((p = strtok(telegram, " ,"))) { // delimiter
         strlcpy(value, p, sizeof(value));
         EMS_TxTelegram.data[0] = (uint8_t)strtol(value, 0, 16);
     }
     // and interate until end
     while (p != 0) {
-        if ( (p = strtok(NULL, " ,")) ) {
+        if ((p = strtok(NULL, " ,"))) {
             strlcpy(value, p, sizeof(value));
             uint8_t val                  = (uint8_t)strtol(value, 0, 16);
             EMS_TxTelegram.data[++count] = val;

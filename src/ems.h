@@ -172,7 +172,7 @@ typedef struct {           // UBAParameterWW
     uint8_t  curBurnPow;         // Burner current power
     float    flameCurr;          // Flame current in micro amps
     float    sysPress;           // System pressure
-    char     serviceCodeChar[2]; // 2 character status/service code
+    char     serviceCodeChar[3]; // 2 character status/service code
     uint16_t serviceCode;        // error/service code
 
     // UBAMonitorSlow
