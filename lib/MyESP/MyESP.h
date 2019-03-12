@@ -19,10 +19,12 @@
 #include <JustWifi.h>  // https://github.com/xoseperez/justwifi
 #include <TelnetSpy.h> // modified from https://github.com/yasheena/telnetspy
 
+#ifdef CRASH
 #include "EEPROM.h"
 extern "C" {
      void custom_crash_callback(struct rst_info*, uint32_t, uint32_t);
 }
+#endif
 
 #if defined(ARDUINO_ARCH_ESP32)
 //#include <ESPmDNS.h>

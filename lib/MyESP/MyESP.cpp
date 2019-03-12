@@ -165,7 +165,7 @@ void MyESP::_wifiCallback(justwifi_messages_t code, char * parameter) {
             _wifi_callback();
         }
 
-        jw.enableAPFallback(false);  // Disable AP mode after initial connect was succesfull. Thanks @JewelZB 
+        jw.enableAPFallback(false); // Disable AP mode after initial connect was succesfull. Thanks @JewelZB
     }
 
     if (code == MESSAGE_ACCESSPOINT_CREATED) {
@@ -291,7 +291,10 @@ void MyESP::_mqtt_setup() {
 
     //mqttClient.onPublish([this](uint16_t packetId) { myDebug_P(PSTR("[MQTT] Publish ACK for PID %d"), packetId); });
 
-    mqttClient.onMessage([this](char * topic, char * payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) { _mqttOnMessage(topic, payload, len); });
+    mqttClient.onMessage(
+        [this](char * topic, char * payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) {
+            _mqttOnMessage(topic, payload, len);
+        });
 }
 
 // WiFI setup
@@ -407,12 +410,12 @@ void MyESP::_printBuildTime(unsigned long unix) {
 
     uint8_t Day, Month;
 
-    uint8_t Seconds = unix % 60;          /* Get seconds from unix */
-    unix /= 60;                           /* Go to minutes */
-    uint8_t Minutes = unix % 60;          /* Get minutes */
-    unix /= 60;                           /* Go to hours */
-    uint8_t Hours = unix % 24;            /* Get hours */
-    unix /= 24;                           /* Go to days */
+    uint8_t Seconds = unix % 60; /* Get seconds from unix */
+    unix /= 60;                  /* Go to minutes */
+    uint8_t Minutes = unix % 60; /* Get minutes */
+    unix /= 60;                  /* Go to hours */
+    uint8_t Hours = unix % 24;   /* Get hours */
+    unix /= 24;                  /* Go to days */
 
     uint16_t year = 1970; /* Process year */
     while (1) {
@@ -468,7 +471,10 @@ void MyESP::_consoleShowHelp() {
 #else
         String hostname = WiFi.hostname();
 #endif
-        SerialAndTelnet.printf("* Hostname: %s  IP: %s  MAC: %s", hostname.c_str(), WiFi.localIP().toString().c_str(), WiFi.macAddress().c_str());
+        SerialAndTelnet.printf("* Hostname: %s  IP: %s  MAC: %s",
+                               hostname.c_str(),
+                               WiFi.localIP().toString().c_str(),
+                               WiFi.macAddress().c_str());
 #ifdef ARDUINO_BOARD
         SerialAndTelnet.printf("  Board: %s", ARDUINO_BOARD);
 #endif
@@ -727,7 +733,7 @@ void MyESP::_telnetCommand(char * commandLine) {
             crashDump();
         } else if (strcmp(cmd, "clear") == 0) {
             crashClear();
-        } else if ((strcmp(cmd, "test") == 0) && (wc == 3) ) {
+        } else if ((strcmp(cmd, "test") == 0) && (wc == 3)) {
             char * value = _telnet_readWord();
             crashTest(atoi(value));
         }
@@ -864,7 +870,17 @@ void MyESP::setWIFI(const char * wifi_ssid, const char * wifi_password, wifi_cal
 }
 
 // init MQTT settings
-void MyESP::setMQTT(const char * mqtt_host, const char * mqtt_username, const char * mqtt_password, const char * mqtt_base, unsigned long mqtt_keepalive, unsigned char mqtt_qos, bool mqtt_retain, const char * mqtt_will_topic, const char * mqtt_will_online_payload, const char * mqtt_will_offline_payload, mqtt_callback_f callback) {
+void MyESP::setMQTT(const char *    mqtt_host,
+                    const char *    mqtt_username,
+                    const char *    mqtt_password,
+                    const char *    mqtt_base,
+                    unsigned long   mqtt_keepalive,
+                    unsigned char   mqtt_qos,
+                    bool            mqtt_retain,
+                    const char *    mqtt_will_topic,
+                    const char *    mqtt_will_online_payload,
+                    const char *    mqtt_will_offline_payload,
+                    mqtt_callback_f callback) {
     // can be empty
     if (!mqtt_host || *mqtt_host == 0x00) {
         _mqtt_host = NULL;
@@ -1148,13 +1164,13 @@ int MyESP::getWifiQuality() {
     return 2 * (dBm + 100);
 }
 
+#ifdef CRASH
 /**
  * Save crash information in EEPROM
  * This function is called automatically if ESP8266 suffers an exception
  * It should be kept quick / consise to be able to execute before hardware wdt may kick in
  */
 extern "C" void custom_crash_callback(struct rst_info * rst_info, uint32_t stack_start, uint32_t stack_end) {
-
     // Note that 'EEPROM.begin' method is reserving a RAM buffer
     // The buffer size is SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_SPACE_SIZE
     EEPROM.begin(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_EEPROM_SIZE);
@@ -1295,6 +1311,17 @@ void MyESP::crashDump() {
     }
     myDebug("<<<stack<<<");
 }
+#else
+void MyESP::crashTest(uint8_t t) {
+    myDebug("[CRASH] disabled or not supported");
+}
+void MyESP::crashClear() {
+    myDebug("[CRASH] disabled or not supported");
+}
+void MyESP::crashDump() {
+    myDebug("[CRASH] disabled or not supported");
+}
+#endif
 
 // setup MyESP
 void MyESP::begin(const char * app_hostname, const char * app_name, const char * app_version) {

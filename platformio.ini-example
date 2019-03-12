@@ -5,7 +5,7 @@ env_default = d1_mini
 platform = espressif8266
 flash_mode = dout
 
-build_flags_debug = -ggdb3 -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-parameter -Wno-unused-variable
+build_flags_debug = -ggdb3 -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-parameter -Wno-unused-variable -DCRASH
 ;build_flags_prod = -Os -DBUILD_TIME=$UNIX_TIME
 
 build_flags = ${common.build_flags_debug}
