@@ -327,7 +327,7 @@ void showInfo() {
     _renderIntValue("Burner current power", "%", EMS_Boiler.curBurnPow);
     _renderFloatValue("Flame current", "uA", EMS_Boiler.flameCurr);
     _renderFloatValue("System pressure", "bar", EMS_Boiler.sysPress);
-    myDebug("  Current System Service Code: %s", EMS_Boiler.serviceCodeChar);
+    myDebug("  System Service Code: %s(%d)", EMS_Boiler.serviceCodeChar, EMS_Boiler.serviceCode);
 
     // UBAParametersMessage
     _renderIntValue("Heating temperature setting on the boiler", "C", EMS_Boiler.heating_temp);
@@ -446,6 +446,7 @@ void publishValues(bool force) {
     rootBoiler["boilTemp"]    = _float_to_char(s, EMS_Boiler.boilTemp);
     rootBoiler["pumpMod"]     = _int_to_char(s, EMS_Boiler.pumpMod);
     rootBoiler["ServiceCode"] = EMS_Boiler.serviceCodeChar;
+    rootBoiler["ServiceCodeNumber"]   = EMS_Boiler.serviceCode;
 
     serializeJson(doc, data, sizeof(data));
 
@@ -512,9 +513,9 @@ void publishValues(bool force) {
         for (size_t i = 0; i < measureJson(doc) - 1; i++) {
             crc.update(data[i]);
         }
-        uint32_t checksum = crc.finalize();
-        if ((previousThermostatPublishCRC != checksum) || force) {
-            previousThermostatPublishCRC = checksum;
+        fchecksum = crc.finalize();
+        if ((previousThermostatPublishCRC != fchecksum) || force) {
+            previousThermostatPublishCRC = fchecksum;
             myDebugLog("Publishing thermostat data via MQTT");
 
             // send values via MQTT

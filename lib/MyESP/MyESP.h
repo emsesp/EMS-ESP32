@@ -76,7 +76,7 @@ extern "C" {
 #define COLOR_BOLD_OFF "\x1B[22m" // fixed by Scott Arlott
 
 // SPIFFS
-#define SPIFFS_MAXSIZE 500 // https://arduinojson.org/v5/assistant/
+#define SPIFFS_MAXSIZE 500 // https://arduinojson.org/v6/assistant/
 
 // CRASH
 #define SAVE_CRASH_EEPROM_OFFSET    0x0100  // initial address for crash data

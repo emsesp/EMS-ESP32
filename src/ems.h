@@ -27,6 +27,7 @@
 #define EMS_VALUE_INT_OFF 0            // boolean false
 #define EMS_VALUE_INT_NOTSET 0xFF      // for 8-bit ints
 #define EMS_VALUE_LONG_NOTSET 0xFFFFFF // for 3-byte longs
+#define EMS_VALUE_SHORT_NOTSET 0xFFFF  // for 2-byte shorts
 #define EMS_VALUE_FLOAT_NOTSET -255    // float
 
 #define EMS_THERMOSTAT_READ_YES true
@@ -158,20 +159,21 @@ typedef struct {           // UBAParameterWW
     uint8_t wWComfort;     // Warm water comfort or ECO mode
 
     // UBAMonitorFast
-    uint8_t selFlowTemp;        // Selected flow temperature
-    float   curFlowTemp;        // Current flow temperature
-    float   retTemp;            // Return temperature
-    uint8_t burnGas;            // Gas on/off
-    uint8_t fanWork;            // Fan on/off
-    uint8_t ignWork;            // Ignition on/off
-    uint8_t heatPmp;            // Circulating pump on/off
-    uint8_t wWHeat;             // 3-way valve on WW
-    uint8_t wWCirc;             // Circulation on/off
-    uint8_t selBurnPow;         // Burner max power
-    uint8_t curBurnPow;         // Burner current power
-    float   flameCurr;          // Flame current in micro amps
-    float   sysPress;           // System pressure
-    char    serviceCodeChar[2]; // 2 character status/service code
+    uint8_t  selFlowTemp;        // Selected flow temperature
+    float    curFlowTemp;        // Current flow temperature
+    float    retTemp;            // Return temperature
+    uint8_t  burnGas;            // Gas on/off
+    uint8_t  fanWork;            // Fan on/off
+    uint8_t  ignWork;            // Ignition on/off
+    uint8_t  heatPmp;            // Circulating pump on/off
+    uint8_t  wWHeat;             // 3-way valve on WW
+    uint8_t  wWCirc;             // Circulation on/off
+    uint8_t  selBurnPow;         // Burner max power
+    uint8_t  curBurnPow;         // Burner current power
+    float    flameCurr;          // Flame current in micro amps
+    float    sysPress;           // System pressure
+    char     serviceCodeChar[2]; // 2 character status/service code
+    uint16_t serviceCode;        // error/service code
 
     // UBAMonitorSlow
     float    extTemp;     // Outside temperature

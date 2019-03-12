@@ -203,6 +203,7 @@ void ems_init() {
     EMS_Boiler.flameCurr   = EMS_VALUE_FLOAT_NOTSET; // Flame current in micro amps
     EMS_Boiler.sysPress    = EMS_VALUE_FLOAT_NOTSET; // System pressure
     strlcpy(EMS_Boiler.serviceCodeChar, "??", sizeof(EMS_Boiler.serviceCodeChar));
+    EMS_Boiler.serviceCode   = EMS_VALUE_SHORT_NOTSET;
 
     // UBAMonitorSlow
     EMS_Boiler.extTemp     = EMS_VALUE_FLOAT_NOTSET; // Outside temperature
@@ -925,6 +926,8 @@ void _process_UBAMonitorWWMessage(uint8_t type, uint8_t * data, uint8_t length) 
 /**
  * UBAMonitorFast - type 0x18 - central heating monitor part 1 (25 bytes long)
  * received every 10 seconds
+ * e.g. 08 00 18 00 4B 01 67 02 00 01 01 40 40 01 4B 80 00 01 4A 00 00 0E 30 45 01 09 00 00 00 (CRC=04), #data=25
+ *      08 00 18 00 4B 01 56 03 00 01 01 40 40 01 3E 80 00 01 4D 00 00 0E 30 45 01 09 00 00 00 (CRC=EA), #data=25
  */
 void _process_UBAMonitorFast(uint8_t type, uint8_t * data, uint8_t length) {
     EMS_Boiler.selFlowTemp = data[0];
@@ -947,6 +950,9 @@ void _process_UBAMonitorFast(uint8_t type, uint8_t * data, uint8_t length) {
     // read the service code / installation status as appears on the display
     EMS_Boiler.serviceCodeChar[0] = char(data[18]); // ascii character 1
     EMS_Boiler.serviceCodeChar[1] = char(data[19]); // ascii character 2
+
+    // read error code
+    EMS_Boiler.serviceCode = (data[20] << 8) + data[21];
 
     if (data[17] == 0xFF) { // missing value for system pressure
         EMS_Boiler.sysPress = 0;

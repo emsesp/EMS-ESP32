@@ -6,3 +6,4 @@
 platformio.ini
 lib/readme.txt
 .travis.yml
+stackdmp.txt
