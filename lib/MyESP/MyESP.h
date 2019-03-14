@@ -9,7 +9,7 @@
 #ifndef MyEMS_h
 #define MyEMS_h
 
-#define MYESP_VERSION "1.1.6b"
+#define MYESP_VERSION "1.1.6c"
 
 #include <ArduinoJson.h>
 #include <ArduinoOTA.h>
@@ -20,9 +20,9 @@
 #include <TelnetSpy.h> // modified from https://github.com/yasheena/telnetspy
 
 #ifdef CRASH
-#include "EEPROM.h"
+#include <EEPROM_Rotate.h>
 extern "C" {
-     void custom_crash_callback(struct rst_info*, uint32_t, uint32_t);
+void custom_crash_callback(struct rst_info *, uint32_t, uint32_t);
 }
 #endif
 
@@ -81,19 +81,36 @@ extern "C" {
 #define SPIFFS_MAXSIZE 500 // https://arduinojson.org/v6/assistant/
 
 // CRASH
-#define SAVE_CRASH_EEPROM_OFFSET    0x0100  // initial address for crash data
-#define SAVE_CRASH_EEPROM_SIZE      0x0200  // size
-#define SAVE_CRASH_CRASH_TIME       0x00  // 4 bytes
-#define SAVE_CRASH_RESTART_REASON   0x04  // 1 byte
-#define SAVE_CRASH_EXCEPTION_CAUSE  0x05  // 1 byte
-#define SAVE_CRASH_EPC1             0x06  // 4 bytes
-#define SAVE_CRASH_EPC2             0x0A  // 4 bytes
-#define SAVE_CRASH_EPC3             0x0E  // 4 bytes
-#define SAVE_CRASH_EXCVADDR         0x12  // 4 bytes
-#define SAVE_CRASH_DEPC             0x16  // 4 bytes
-#define SAVE_CRASH_STACK_START      0x1A  // 4 bytes
-#define SAVE_CRASH_STACK_END        0x1E  // 4 bytes
-#define SAVE_CRASH_STACK_TRACE      0x22  // variable
+#define EEPROM_ROTATE_DATA 11           // Reserved for the EEPROM_ROTATE library (3 bytes)
+/**
+ * Structure of the single crash data set
+ *
+ *  1. Crash time
+ *  2. Restart reason
+ *  3. Exception cause
+ *  4. epc1
+ *  5. epc2
+ *  6. epc3
+ *  7. excvaddr
+ *  8. depc
+ *  9. adress of stack start
+ * 10. adress of stack end
+ * 11. stack trace bytes
+ *     ...
+ */
+#define SAVE_CRASH_EEPROM_OFFSET 0x0100 // initial address for crash data
+#define SAVE_CRASH_CRASH_TIME 0x00      // 4 bytes
+#define SAVE_CRASH_RESTART_REASON 0x04  // 1 byte
+#define SAVE_CRASH_EXCEPTION_CAUSE 0x05 // 1 byte
+#define SAVE_CRASH_EPC1 0x06            // 4 bytes
+#define SAVE_CRASH_EPC2 0x0A            // 4 bytes
+#define SAVE_CRASH_EPC3 0x0E            // 4 bytes
+#define SAVE_CRASH_EXCVADDR 0x12        // 4 bytes
+#define SAVE_CRASH_DEPC 0x16            // 4 bytes
+#define SAVE_CRASH_STACK_START 0x1A     // 4 bytes
+#define SAVE_CRASH_STACK_END 0x1E       // 4 bytes
+#define SAVE_CRASH_STACK_TRACE 0x22     // variable
+
 
 typedef struct {
     char key[40];
@@ -161,6 +178,7 @@ class MyESP {
     void crashClear();
     void crashDump();
     void crashTest(uint8_t t);
+    void crashInfo();
 
     // general
     void     end();
@@ -210,6 +228,9 @@ class MyESP {
     ota_callback_f _ota_callback;
     void           _ota_setup();
     void           _OTACallback();
+
+    // crash
+    void _eeprom_setup();
 
     // telnet & debug
     TelnetSpy                SerialAndTelnet;

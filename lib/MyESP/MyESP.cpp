@@ -8,6 +8,10 @@
 
 #include "MyESP.h"
 
+#ifdef CRASH
+EEPROM_Rotate EEPROMr;
+#endif
+
 #define RTC_LEAP_YEAR(year) ((((year) % 4 == 0) && ((year) % 100 != 0)) || ((year) % 400 == 0))
 
 /* Days in a month */
@@ -169,6 +173,8 @@ void MyESP::_wifiCallback(justwifi_messages_t code, char * parameter) {
     }
 
     if (code == MESSAGE_ACCESSPOINT_CREATED) {
+        _wifi_connected = true;
+
         myDebug_P(PSTR("[WIFI] MODE AP --------------------------------------"));
         myDebug_P(PSTR("[WIFI] SSID  %s"), jw.getAPSSID().c_str());
         myDebug_P(PSTR("[WIFI] IP    %s"), WiFi.softAPIP().toString().c_str());
@@ -265,9 +271,8 @@ void MyESP::_mqtt_setup() {
 
     mqttClient.onDisconnect([this](AsyncMqttClientDisconnectReason reason) {
         if (reason == AsyncMqttClientDisconnectReason::TCP_DISCONNECTED) {
-            myDebug_P(PSTR("[MQTT] TCP Disconnected. Check mqtt logs."));
-            (_mqtt_callback)(MQTT_DISCONNECT_EVENT, NULL,
-                             NULL); // call callback with disconnect
+            myDebug_P(PSTR("[MQTT] TCP Disconnected"));
+            (_mqtt_callback)(MQTT_DISCONNECT_EVENT, NULL, NULL); // call callback with disconnect
         }
         if (reason == AsyncMqttClientDisconnectReason::MQTT_IDENTIFIER_REJECTED) {
             myDebug_P(PSTR("[MQTT] Identifier Rejected"));
@@ -319,7 +324,22 @@ void MyESP::setOTA(ota_callback_f OTACallback) {
 // OTA callback when the upload process starts
 void MyESP::_OTACallback() {
     myDebug_P(PSTR("[OTA] Start"));
-    SerialAndTelnet.handle(); // force flush
+
+#ifdef CRASH
+    // If we are not specifically reserving the sectors we are using as
+    // EEPROM in the memory layout then any OTA upgrade will overwrite
+    // all but the last one.
+    // Calling rotate(false) disables rotation so all writes will be done
+    // to the last sector. It also sets the dirty flag to true so the next commit()
+    // will actually persist current configuration to that last sector.
+    // Calling rotate(false) will also prevent any other EEPROM write
+    // to overwrite the OTA image.
+    // In case the OTA process fails, reenable rotation.
+    // See onError callback below.
+    EEPROMr.rotate(false);
+    EEPROMr.commit();
+#endif
+
     if (_ota_callback) {
         (_ota_callback)(); // call custom function to handle mqtt receives
     }
@@ -356,6 +376,12 @@ void MyESP::_ota_setup() {
             myDebug_P(PSTR("[OTA] Receive Failed"));
         else if (error == OTA_END_ERROR)
             myDebug_P(PSTR("[OTA] End Failed"));
+
+#ifdef CRASH
+        // There's been an error, reenable rotation
+        EEPROMr.rotate(true);
+#endif
+
     });
 }
 
@@ -365,6 +391,15 @@ void MyESP::setBoottime(const char * boottime) {
         free(_boottime);
     }
     _boottime = strdup(boottime);
+}
+
+// eeprom
+void MyESP::_eeprom_setup() {
+#ifdef CRASH
+    EEPROMr.size(4);
+    //EEPROMr.offset(EEPROM_ROTATE_DATA);
+    EEPROMr.begin(SPI_FLASH_SEC_SIZE);
+#endif
 }
 
 // Set callback of sketch function to process project messages
@@ -502,7 +537,7 @@ void MyESP::_consoleShowHelp() {
     SerialAndTelnet.println(FPSTR("* Commands:"));
     SerialAndTelnet.println(FPSTR("*  ?=help, CTRL-D=quit"));
     SerialAndTelnet.println(FPSTR("*  reboot"));
-    SerialAndTelnet.println(FPSTR("*  crash <dump | clear | test [n]>"));
+    SerialAndTelnet.println(FPSTR("*  crash <dump | info | clear | test [n]>"));
     SerialAndTelnet.println(FPSTR("*  set"));
     SerialAndTelnet.println(FPSTR("*  set wifi [ssid] [password]"));
     SerialAndTelnet.println(FPSTR("*  set <mqtt_host | mqtt_username | mqtt_password> [value]"));
@@ -736,8 +771,10 @@ void MyESP::_telnetCommand(char * commandLine) {
         } else if ((strcmp(cmd, "test") == 0) && (wc == 3)) {
             char * value = _telnet_readWord();
             crashTest(atoi(value));
+        } else if (strcmp(cmd, "info") == 0) {
+            crashInfo();
         }
-        return;
+        return; // don't call custom command line callback
     }
 
     // call callback function
@@ -1171,47 +1208,38 @@ int MyESP::getWifiQuality() {
  * It should be kept quick / consise to be able to execute before hardware wdt may kick in
  */
 extern "C" void custom_crash_callback(struct rst_info * rst_info, uint32_t stack_start, uint32_t stack_end) {
-    // Note that 'EEPROM.begin' method is reserving a RAM buffer
-    // The buffer size is SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_SPACE_SIZE
-    EEPROM.begin(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_EEPROM_SIZE);
-
     // write crash time to EEPROM
     uint32_t crash_time = millis();
-    EEPROM.put(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_CRASH_TIME, crash_time);
+    EEPROMr.put(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_CRASH_TIME, crash_time);
 
     // write reset info to EEPROM
-    EEPROM.write(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_RESTART_REASON, rst_info->reason);
-    EEPROM.write(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_EXCEPTION_CAUSE, rst_info->exccause);
+    EEPROMr.write(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_RESTART_REASON, rst_info->reason);
+    EEPROMr.write(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_EXCEPTION_CAUSE, rst_info->exccause);
 
     // write epc1, epc2, epc3, excvaddr and depc to EEPROM
-    EEPROM.put(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_EPC1, rst_info->epc1);
-    EEPROM.put(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_EPC2, rst_info->epc2);
-    EEPROM.put(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_EPC3, rst_info->epc3);
-    EEPROM.put(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_EXCVADDR, rst_info->excvaddr);
-    EEPROM.put(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_DEPC, rst_info->depc);
+    EEPROMr.put(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_EPC1, rst_info->epc1);
+    EEPROMr.put(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_EPC2, rst_info->epc2);
+    EEPROMr.put(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_EPC3, rst_info->epc3);
+    EEPROMr.put(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_EXCVADDR, rst_info->excvaddr);
+    EEPROMr.put(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_DEPC, rst_info->depc);
 
     // write stack start and end address to EEPROM
-    EEPROM.put(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_STACK_START, stack_start);
-    EEPROM.put(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_STACK_END, stack_end);
-
-    // starting address
-    const uint16_t settings_start = SPI_FLASH_SEC_SIZE - SAVE_CRASH_EEPROM_SIZE - 0x10;
+    EEPROMr.put(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_STACK_START, stack_start);
+    EEPROMr.put(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_STACK_END, stack_end);
 
     // write stack trace to EEPROM and avoid overwriting settings
     int16_t current_address = SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_STACK_TRACE;
     for (uint32_t i = stack_start; i < stack_end; i++) {
-        if (current_address >= settings_start)
-            break;
         byte * byteValue = (byte *)i;
-        EEPROM.write(current_address++, *byteValue);
+        EEPROMr.write(current_address++, *byteValue);
     }
 
-    EEPROM.commit();
+    EEPROMr.commit();
 }
 
 void MyESP::crashTest(uint8_t t) {
     if (t == 1) {
-        myDebug("Attempting to divide by zero ...");
+        myDebug("[CRASH] Attempting to divide by zero ...");
         int result, zero;
         zero   = 0;
         result = 1 / zero;
@@ -1219,7 +1247,7 @@ void MyESP::crashTest(uint8_t t) {
     }
 
     if (t == 2) {
-        myDebug("Attempting to read through a pointer to no object ...");
+        myDebug("[CRASH] Attempting to read through a pointer to no object ...");
         int * nullPointer;
         nullPointer = NULL;
         // null pointer dereference - read
@@ -1228,7 +1256,7 @@ void MyESP::crashTest(uint8_t t) {
     }
 
     if (t == 3) {
-        Serial.printf("Crashing with hardware WDT (%ld ms) ...\n", millis());
+        Serial.printf("[CRASH] Crashing with hardware WDT (%ld ms) ...\n", millis());
         ESP.wdtDisable();
         while (true) {
             // stay in an infinite loop doing nothing
@@ -1241,7 +1269,7 @@ void MyESP::crashTest(uint8_t t) {
     }
 
     if (t == 4) {
-        Serial.printf("Crashing with software WDT (%ld ms) ...\n", millis());
+        Serial.printf("[CRASH] Crashing with software WDT (%ld ms) ...\n", millis());
         while (true) {
             // stay in an infinite loop doing nothing
             // this way other process can not be executed
@@ -1253,43 +1281,49 @@ void MyESP::crashTest(uint8_t t) {
  * Clears crash info
  */
 void MyESP::crashClear() {
-    EEPROM.begin(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_EEPROM_SIZE);
-
+    myDebug_P(PSTR("[CRASH] Clearing crash dump"));
     uint32_t crash_time = 0xFFFFFFFF;
-    EEPROM.put(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_CRASH_TIME, crash_time);
-    EEPROM.commit();
+    EEPROMr.put(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_CRASH_TIME, crash_time);
+    EEPROMr.commit();
+}
+
+/* Crash info */
+void MyESP::crashInfo() {
+    myDebug_P(PSTR("[EEPROM] Sector pool size: %u"), EEPROMr.size());
+    myDebug_P(PSTR("[EEPROM] Sectors in use  : "));
+    for (uint32_t i = 0; i < EEPROMr.size(); i++) {
+        myDebug_P(PSTR("%d"), EEPROMr.base() - i);
+    }
 }
 
 /**
  * Print out crash information that has been previously saved in EEPROM
  */
 void MyESP::crashDump() {
-    EEPROM.begin(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_EEPROM_SIZE);
-
     uint32_t crash_time;
-    EEPROM.get(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_CRASH_TIME, crash_time);
+    EEPROMr.get(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_CRASH_TIME, crash_time);
     if ((crash_time == 0) || (crash_time == 0xFFFFFFFF)) {
         myDebug_P(PSTR("[CRASH] No crash info"));
         return;
     }
 
     myDebug_P(PSTR("[CRASH] Latest crash was at %lu ms after boot"), crash_time);
-    myDebug_P(PSTR("[CRASH] Reason of restart: %u"), EEPROM.read(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_RESTART_REASON));
-    myDebug_P(PSTR("[CRASH] Exception cause: %u"), EEPROM.read(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_EXCEPTION_CAUSE));
+    myDebug_P(PSTR("[CRASH] Reason of restart: %u"), EEPROMr.read(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_RESTART_REASON));
+    myDebug_P(PSTR("[CRASH] Exception cause: %u"), EEPROMr.read(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_EXCEPTION_CAUSE));
 
     uint32_t epc1, epc2, epc3, excvaddr, depc;
-    EEPROM.get(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_EPC1, epc1);
-    EEPROM.get(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_EPC2, epc2);
-    EEPROM.get(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_EPC3, epc3);
-    EEPROM.get(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_EXCVADDR, excvaddr);
-    EEPROM.get(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_DEPC, depc);
+    EEPROMr.get(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_EPC1, epc1);
+    EEPROMr.get(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_EPC2, epc2);
+    EEPROMr.get(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_EPC3, epc3);
+    EEPROMr.get(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_EXCVADDR, excvaddr);
+    EEPROMr.get(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_DEPC, depc);
 
     myDebug_P(PSTR("[CRASH] epc1=0x%08x epc2=0x%08x epc3=0x%08x"), epc1, epc2, epc3);
     myDebug_P(PSTR("[CRASH] excvaddr=0x%08x depc=0x%08x"), excvaddr, depc);
 
     uint32_t stack_start, stack_end;
-    EEPROM.get(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_STACK_START, stack_start);
-    EEPROM.get(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_STACK_END, stack_end);
+    EEPROMr.get(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_STACK_START, stack_start);
+    EEPROMr.get(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_STACK_END, stack_end);
 
     myDebug_P(PSTR("[CRASH] sp=0x%08x end=0x%08x"), stack_start, stack_end);
 
@@ -1303,7 +1337,7 @@ void MyESP::crashDump() {
     for (int16_t i = 0; i < stack_len; i += 0x10) {
         SerialAndTelnet.printf("%08x: ", stack_start + i);
         for (byte j = 0; j < 4; j++) {
-            EEPROM.get(current_address, stack_trace);
+            EEPROMr.get(current_address, stack_trace);
             SerialAndTelnet.printf("%08x ", stack_trace);
             current_address += 4;
         }
@@ -1313,13 +1347,16 @@ void MyESP::crashDump() {
 }
 #else
 void MyESP::crashTest(uint8_t t) {
-    myDebug("[CRASH] disabled or not supported");
+    myDebug("[CRASH] disabled or not supported. Compile with -DCRASH");
 }
 void MyESP::crashClear() {
-    myDebug("[CRASH] disabled or not supported");
+    myDebug("[CRASH] disabled or not supported. Compile with -DCRASH");
 }
 void MyESP::crashDump() {
-    myDebug("[CRASH] disabled or not supported");
+    myDebug("[CRASH] disabled or not supported. Compile with -DCRASH");
+}
+void MyESP::crashInfo() {
+    myDebug("[CRASH] disabled or not supported. Compile with -DCRASH");
 }
 #endif
 
@@ -1329,7 +1366,8 @@ void MyESP::begin(const char * app_hostname, const char * app_name, const char *
     _app_name     = strdup(app_name);
     _app_version  = strdup(app_version);
 
-    _telnet_setup(); // Telnet setup
+    _telnet_setup(); // Telnet setup, does first to set Serial
+    _eeprom_setup(); // set up eeprom for storing crash data
     _fs_setup();     // SPIFFS setup, do this first to get values
     _wifi_setup();   // WIFI setup
     _ota_setup();
