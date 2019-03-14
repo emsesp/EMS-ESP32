@@ -1,14 +1,22 @@
 [platformio]
+; add here your board, e.g. nodemcuv2, d1_mini, d1_mini_pro
 env_default = d1_mini
 
 [common]
 platform = espressif8266
+[common]
+platform_def = espressif8266
+platform_180 = espressif8266@1.8.0
+;platform = ${common.platform_def}
+platform = ${common.platform_180}
+
 flash_mode = dout
 
-build_flags_debug = -ggdb3 -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-parameter -Wno-unused-variable -DCRASH
-;build_flags_prod = -Os -DBUILD_TIME=$UNIX_TIME
+; for production
+;build_flags = -Os -DBUILD_TIME=$UNIX_TIME
 
-build_flags = ${common.build_flags_debug}
+; for debug
+build_flags = -g -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-parameter -Wno-unused-variable -DCRASH
 
 wifi_settings =
 ; hard code if you prefer. Recommendation is to set from within the app when in Serial or AP mode
@@ -21,6 +29,7 @@ lib_deps =
   AsyncMqttClient
   ArduinoJson
   OneWire
+  EEPROM_rotate
 
 [env:d1_mini]
 board = d1_mini
