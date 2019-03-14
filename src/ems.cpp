@@ -119,7 +119,7 @@ const _EMS_Type EMS_Types[] = {
     {EMS_MODEL_EASY, EMS_TYPE_EasyStatusMessage, "EasyStatusMessage", _process_EasyStatusMessage},
     {EMS_MODEL_BOSCHEASY, EMS_TYPE_EasyStatusMessage, "EasyStatusMessage", _process_EasyStatusMessage},
     //Ems plus
-    {EMSP_MODEL_RC10, EMS_TYPE_EmsPlusStatusMessage, "EMSPStatusMessage", _process_EmsPlusStatusMessage}
+    {EMSP_MODEL_RC10, EMSP_TYPE_EmsPlusStatusMessage, "EMSPStatusMessage", _process_EmsPlusStatusMessage}
 
 
 };
@@ -1051,19 +1051,19 @@ void _process_EasyStatusMessage(uint8_t type, uint8_t * data, uint8_t length) {
     EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
 }
 void _process_EmsPlusStatusMessage(uint8_t type, uint8_t * data, uint8_t length) {
-    if (data[3] == 3 || data[3] == 6 || data[3] == 10) {
-        EMS_Thermostat.setpoint_roomTemp = ((float)data[6]) / (float)2;
-        if (true) {
-            char str[300];
-            char buffer[16];
-            for (size_t i = 0; i < length; i++) {
-                strlcat(str, _hextoa(data[i], buffer), sizeof(str));
-                strlcat(str, " ", sizeof(str)); // add space
-            }
-            myDebug(str);
+    if (true) {
+        char str[300];
+        char buffer[16];
+        for (size_t i = 0; i < length; i++) {
+            strlcat(str, _hextoa(data[i], buffer), sizeof(str));
+            strlcat(str, " ", sizeof(str)); // add space
         }
+        myDebug(str);
     }
-    //EMS_Sys_Status.emsLogging = EMS_SYS_LOGGING_NONE;
+    if (data[EMSP_TYPE] == EMSP_TYPE_EmsPlusStatusMessage_setpoint)
+        EMS_Thermostat.setpoint_roomTemp = ((float)data[6]) / (float)2;
+    if (data[EMSP_TYPE] == EMSP_TYPE_EmsPlusStatusMessage_curr)
+        EMS_Thermostat.curr_roomTemp = ((float)data[7]) / (float)10;
 }
 /*
         strlcat(output_str, ", type 0x", sizeof(output_str));
@@ -1587,13 +1587,13 @@ void ems_sendRawTelegram(char * telegram) {
     EMS_Sys_Status.txRetryCount    = 0;                   // reset retry counter
 
     // get first value, which should be the src
-    if ( (p = strtok(telegram, " ,")) ) { // delimiter
+    if ((p = strtok(telegram, " ,"))) { // delimiter
         strlcpy(value, p, sizeof(value));
         EMS_TxTelegram.data[0] = (uint8_t)strtol(value, 0, 16);
     }
     // and interate until end
     while (p != 0) {
-        if ( (p = strtok(NULL, " ,")) ) {
+        if ((p = strtok(NULL, " ,"))) {
             strlcpy(value, p, sizeof(value));
             uint8_t val                  = (uint8_t)strtol(value, 0, 16);
             EMS_TxTelegram.data[++count] = val;

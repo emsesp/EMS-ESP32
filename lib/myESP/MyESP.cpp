@@ -322,13 +322,17 @@ void MyESP::_OTACallback() {
         (_ota_callback)(); // call custom function to handle mqtt receives
     }
 }
-
+ESP8266WebServer        httpServer(80);
+ESP8266HTTPUpdateServer httpUpdater;
 // OTA Setup
 void MyESP::_ota_setup() {
     if (!_wifi_ssid) {
         return;
     }
-
+    MDNS.begin(_app_hostname);
+    httpUpdater.setup(&httpServer);
+    httpServer.begin();
+    MDNS.addService("http", "tcp", 80);
     //ArduinoOTA.setPort(OTA_PORT);
     ArduinoOTA.setHostname(_app_hostname);
 
@@ -1161,7 +1165,8 @@ void MyESP::begin(const char * app_hostname, const char * app_name, const char *
 void MyESP::loop() {
     _calculateLoad();
     _telnetHandle(); // Telnet/Debugger
-
+    httpServer.handleClient();
+    MDNS.update();
     jw.loop(); // WiFi
 
     // do nothing else until we've got a wifi connection

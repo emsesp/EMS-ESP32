@@ -15,19 +15,21 @@
 #include <ArduinoOTA.h>
 #include <AsyncMqttClient.h> // https://github.com/marvinroger/async-mqtt-client and for ESP32 see https://github.com/marvinroger/async-mqtt-client/issues/127
 #include <DNSServer.h>
+
 #include <FS.h>
 #include <JustWifi.h>  // https://github.com/xoseperez/justwifi
 #include <TelnetSpy.h> // modified from https://github.com/yasheena/telnetspy
-
 #if defined(ARDUINO_ARCH_ESP32)
-//#include <ESPmDNS.h>
+#include <ESPmDNS.h>
 #include <SPIFFS.h>             // added for ESP32
 #define ets_vsnprintf vsnprintf // added for ESP32
 #define OTA_PORT 8266
 #else
-//#include <ESP8266mDNS.h>
+#include <ESP8266HTTPUpdateServer.h>
+#include <ESP8266WebServer.h>
+#include <ESP8266mDNS.h>
 #include <ESPAsyncTCP.h>
-#define OTA_PORT 3232
+#define OTA_PORT 8266
 #endif
 
 #define MYEMS_CONFIG_FILE "/config.json"

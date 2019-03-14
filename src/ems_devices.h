@@ -84,9 +84,10 @@
 #define EMS_TYPE_EasyStatusMessage_setpoint 10 // setpoint temp
 #define EMS_TYPE_EasyStatusMessage_curr 8      // current temp
 // Ems plus
-#define EMS_TYPE_EmsPlusStatusMessage 0xFF       // reading values on an Easy Thermostat
-#define EMS_TYPE_EmsPlusStatusMessage_setpoint 0 // setpoint temp
-#define EMS_TYPE_EmsPlusStatusMessage_curr 0     // current temp
+#define EMSP_TYPE_EmsPlusStatusMessage 0xFF // reading values on an Easy Thermostat
+#define EMSP_TYPE 3
+#define EMSP_TYPE_EmsPlusStatusMessage_setpoint 10 // setpoint temp
+#define EMSP_TYPE_EmsPlusStatusMessage_curr 0      // current temp
 // Known EMS types
 typedef enum {
     EMS_MODEL_NONE,
