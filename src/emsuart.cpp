@@ -144,6 +144,7 @@ void ICACHE_FLASH_ATTR emsuart_init() {
 void ICACHE_FLASH_ATTR emsuart_stop() {
     ETS_UART_INTR_DISABLE();
     ETS_UART_INTR_ATTACH(NULL, NULL);
+    system_uart_swap(); // to be sure, swap Tx/Rx back. Idea from Simon Arlott
 }
 
 /*
