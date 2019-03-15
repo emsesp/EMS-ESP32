@@ -97,12 +97,12 @@ void ICACHE_FLASH_ATTR emsuart_init() {
 
     // pin settings
     PIN_PULLUP_DIS(PERIPHS_IO_MUX_U0TXD_U);
-    PIN_FUNC_SELECT(PERIPHS_IO_MUX_U0TXD_U, FUNC_U0RXD);
+    PIN_FUNC_SELECT(PERIPHS_IO_MUX_U0TXD_U, FUNC_U0TXD);
     PIN_PULLUP_DIS(PERIPHS_IO_MUX_U0RXD_U);
     PIN_FUNC_SELECT(PERIPHS_IO_MUX_U0RXD_U, FUNC_U0RXD);
 
     // set 9600, 8 bits, no parity check, 1 stop bit
-    USD(EMSUART_UART)  = (ESP8266_CLOCK / EMSUART_BAUD);
+    USD(EMSUART_UART)  = (UART_CLK_FREQ / EMSUART_BAUD);  
     USC0(EMSUART_UART) = EMSUART_CONFIG; // 8N1
 
     // flush everything left over in buffer, this clears both rx and tx FIFOs
@@ -145,6 +145,8 @@ void ICACHE_FLASH_ATTR emsuart_stop() {
     ETS_UART_INTR_DISABLE();
     ETS_UART_INTR_ATTACH(NULL, NULL);
     system_uart_swap(); // to be sure, swap Tx/Rx back. Idea from Simon Arlott
+    //detachInterrupt(digitalPinToInterrupt(D7));
+    //noInterrupts();
 }
 
 /*
