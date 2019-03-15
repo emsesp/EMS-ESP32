@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.7 dev] 2019-03-
+
+### Added
+
+- system command to show ESP stats
+- crash command to see stack of last system crash, with .py files to track stack dump
+
+### Fixed
+
+- incorrect rendering of null temperature values (the -3200 degrees issue)
+- OTA is more stable
+- Added a hack to overcome WiFi power issues in esp core 2.5.0 libraries causing constant re-connects
+
+### Changed
+
+- included various fixes and suggestions from nomis (Simon Arlott)
+
+- upgraded MyESP library
+
 ## [1.5.6] 2019-03-09
 
 ### Added
@@ -15,7 +34,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - upgraded MyESP library
 - minor changes
-
 
 ## [1.5.5] 2019-03-07
 
