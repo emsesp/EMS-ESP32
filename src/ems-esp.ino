@@ -251,6 +251,8 @@ void _renderBoolValue(const char * prefix, uint8_t value) {
 void showInfo() {
     // General stats from EMS bus
 
+    char buffer_type[128] = {0};
+
     myDebug("%sEMS-ESP System stats:%s", COLOR_BOLD_ON, COLOR_BOLD_OFF);
     _EMS_SYS_LOGGING sysLog = ems_getLogging();
     if (sysLog == EMS_SYS_LOGGING_BASIC) {
@@ -263,9 +265,7 @@ void showInfo() {
         myDebug("  System logging set to None");
     }
 
-    myDebug("  LED is %s", EMSESP_Status.led_enabled ? "on" : "off");
-    myDebug("  Test Mode is %s", EMSESP_Status.test_mode ? "on" : "off");
-
+    myDebug("  LED is %s, Test Mode is %s", EMSESP_Status.led_enabled ? "on" : "off", EMSESP_Status.test_mode ? "on" : "off");
     myDebug("  # connected Dallas temperature sensors=%d", EMSESP_Status.dallas_sensors);
 
     myDebug("  Thermostat is %s, Boiler is %s, Shower Timer is %s, Shower Alert is %s",
@@ -286,19 +286,25 @@ void showInfo() {
     myDebug("%sBoiler stats:%s", COLOR_BOLD_ON, COLOR_BOLD_OFF);
 
     // version details
-    char buffer_type[64];
     myDebug("  Boiler type: %s", ems_getBoilerDescription(buffer_type));
 
     // active stats
     if (ems_getBusConnected()) {
-        myDebug("  Hot tap water is %s", (EMS_Boiler.tapwaterActive ? "running" : "off"));
-        myDebug("  Central Heating is %s", (EMS_Boiler.heatingActive ? "active" : "off"));
+        if (EMS_Boiler.tapwaterActive != EMS_VALUE_INT_NOTSET) {
+            myDebug("  Hot tap water is %s", EMS_Boiler.tapwaterActive ? "running" : "off");
+        }
+
+        if (EMS_Boiler.heatingActive != EMS_VALUE_INT_NOTSET) {
+            myDebug("  Central Heating is %s", EMS_Boiler.heatingActive ? "active" : "off");
+        }
     }
 
     // UBAParameterWW
     _renderBoolValue("Warm Water activated", EMS_Boiler.wWActivated);
     _renderBoolValue("Warm Water circulation pump available", EMS_Boiler.wWCircPump);
-    myDebug("  Warm Water is set to %s", (EMS_Boiler.wWComfort ? "Comfort" : "ECO"));
+    if (EMS_Boiler.wWComfort != EMS_VALUE_INT_NOTSET) {
+        myDebug("  Warm Water is set to %s", (EMS_Boiler.wWComfort ? "Comfort" : "ECO"));
+    }
     _renderIntValue("Warm Water selected temperature", "C", EMS_Boiler.wWSelTemp);
     _renderIntValue("Warm Water desired temperature", "C", EMS_Boiler.wWDesiredTemp);
 
@@ -392,9 +398,9 @@ void showInfo() {
 
     // Dallas
     if (EMSESP_Status.dallas_sensors != 0) {
+        char s[80] = {0};
         myDebug("%sExternal temperature sensors:%s", COLOR_BOLD_ON, COLOR_BOLD_OFF);
-        for (uint8_t i = 0; i < EMSESP_Status.dallas_sensors; i++) {
-            char s[80] = {0};
+        for (uint8_t i = 0; i < EMSESP_Status.dallas_sensors; i++) {   
             snprintf(s, sizeof(s), "Sensor #%d", i + 1);
             _renderFloatValue(s, "C", ds18.getValue(i));
         }
@@ -1066,7 +1072,7 @@ void showerCheck() {
     // if already in cold mode, ignore all this logic until we're out of the cold blast
     if (!EMSESP_Shower.doingColdShot) {
         // is the hot water running?
-        if (EMS_Boiler.tapwaterActive) {
+        if (EMS_Boiler.tapwaterActive == 1) {
             // if heater was previously off, start the timer
             if (EMSESP_Shower.timerStart == 0) {
                 // hot water just started...
@@ -1209,4 +1215,6 @@ void loop() {
     if (EMSESP_Status.shower_timer) {
         showerCheck();
     }
+
+    delay(1); // some time to WiFi and everything else to catch up
 }

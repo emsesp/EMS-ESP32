@@ -1,5 +1,5 @@
 /*
- * MyESP - my ESP helper class to handle Wifi, MQTT and Telnet
+ * MyESP - my ESP helper class to handle WiFi, MQTT and Telnet
  * 
  * Paul Derbyshire - December 2018
  *
@@ -26,7 +26,7 @@ MyESP::MyESP() {
     _app_name     = strdup("MyESP");
     _app_version  = strdup(MYESP_VERSION);
 
-    _boottime     = strdup("<unknown>");
+    _boottime     = NULL;
     _load_average = 100; // calculated load average
 
     _telnetcommand_callback = NULL;
@@ -314,6 +314,8 @@ void MyESP::_wifi_setup() {
     jw.enableScan(false);                      // Configure it to scan available networks and connect in order of dBm
     jw.cleanNetworks();                        // Clean existing network configuration
     jw.addNetwork(_wifi_ssid, _wifi_password); // Add a network
+
+    WiFi.setSleepMode(WIFI_NONE_SLEEP); // TODO: possible fix for wifi dropouts in core 2.5.0
 }
 
 // set the callback function for the OTA onstart
@@ -381,7 +383,6 @@ void MyESP::_ota_setup() {
         // There's been an error, reenable rotation
         EEPROMr.rotate(true);
 #endif
-
     });
 }
 
@@ -498,47 +499,27 @@ void MyESP::_consoleShowHelp() {
     SerialAndTelnet.println();
 
     if (WiFi.getMode() & WIFI_AP) {
-        SerialAndTelnet.printf("* ESP is in AP mode with SSID %s", jw.getAPSSID().c_str());
-        SerialAndTelnet.println();
+        SerialAndTelnet.printf("* Device is in AP mode with SSID %s", jw.getAPSSID().c_str());
     } else {
-#if defined(ARDUINO_ARCH_ESP32)
-        String hostname = String(WiFi.getHostname());
-#else
-        String hostname = WiFi.hostname();
-#endif
-        SerialAndTelnet.printf("* Hostname: %s  IP: %s  MAC: %s",
-                               hostname.c_str(),
-                               WiFi.localIP().toString().c_str(),
-                               WiFi.macAddress().c_str());
-#ifdef ARDUINO_BOARD
-        SerialAndTelnet.printf("  Board: %s", ARDUINO_BOARD);
-#endif
-        SerialAndTelnet.printf(" (MyESP v%s)", MYESP_VERSION);
-
-#ifdef BUILD_TIME
-        SerialAndTelnet.print("  (Build ");
-        _printBuildTime(BUILD_TIME);
-        SerialAndTelnet.print(")");
-#endif
+        SerialAndTelnet.printf("* Hostname: %s (%s)", getESPhostname().c_str(), WiFi.localIP().toString().c_str());
         SerialAndTelnet.println();
-        SerialAndTelnet.printf("* Connected to WiFi SSID: %s (signal %d%%)", WiFi.SSID().c_str(), getWifiQuality());
+        SerialAndTelnet.printf("* WiFi SSID: %s (signal %d%%)", WiFi.SSID().c_str(), getWifiQuality());
         SerialAndTelnet.println();
         SerialAndTelnet.printf("* MQTT is %s", mqttClient.connected() ? "connected" : "disconnected");
-        SerialAndTelnet.println();
+    }
+
+    SerialAndTelnet.println();
+
+    if (_boottime != NULL) {
         SerialAndTelnet.printf("* Boot time: %s", _boottime);
         SerialAndTelnet.println();
     }
 
-    SerialAndTelnet.printf("* Free RAM: %d KB   Load: %d%%", (ESP.getFreeHeap() / 1024), getSystemLoadAverage());
-    SerialAndTelnet.println();
-    // for battery power is ESP.getVcc()
-
     SerialAndTelnet.println(FPSTR("*"));
     SerialAndTelnet.println(FPSTR("* Commands:"));
-    SerialAndTelnet.println(FPSTR("*  ?=help, CTRL-D=quit"));
-    SerialAndTelnet.println(FPSTR("*  reboot"));
-    SerialAndTelnet.println(FPSTR("*  crash <dump | info | clear | test [n]>"));
-    SerialAndTelnet.println(FPSTR("*  set"));
+    SerialAndTelnet.println(FPSTR("*  ?=help, CTRL-D=quit telnet"));
+    SerialAndTelnet.println(FPSTR("*  set | reboot | system"));
+    SerialAndTelnet.println(FPSTR("*  crash <dump | clear | test [n]>"));
     SerialAndTelnet.println(FPSTR("*  set wifi [ssid] [password]"));
     SerialAndTelnet.println(FPSTR("*  set <mqtt_host | mqtt_username | mqtt_password> [value]"));
     SerialAndTelnet.println(FPSTR("*  set erase"));
@@ -761,6 +742,13 @@ void MyESP::_telnetCommand(char * commandLine) {
         resetESP();
     }
 
+    // show system stats
+    if ((strcmp(ptrToCommandName, "system") == 0) && (wc == 1)) {
+        showSystemStats();
+        return;
+    }
+
+
     // crash command
     if ((strcmp(ptrToCommandName, "crash") == 0) && (wc >= 2)) {
         char * cmd = _telnet_readWord();
@@ -771,8 +759,6 @@ void MyESP::_telnetCommand(char * commandLine) {
         } else if ((strcmp(cmd, "test") == 0) && (wc == 3)) {
             char * value = _telnet_readWord();
             crashTest(atoi(value));
-        } else if (strcmp(cmd, "info") == 0) {
-            crashInfo();
         }
         return; // don't call custom command line callback
     }
@@ -780,6 +766,82 @@ void MyESP::_telnetCommand(char * commandLine) {
     // call callback function
     (_telnetcommand_callback)(wc, commandLine);
 }
+
+// returns WiFi hostname as a String object
+String MyESP::getESPhostname() {
+    String hostname;
+
+#if defined(ARDUINO_ARCH_ESP32)
+    hostname = String(WiFi.getHostname());
+#else
+    hostname = WiFi.hostname();
+#endif
+
+    return (hostname);
+}
+
+// print out ESP system stats
+// for battery power is ESP.getVcc()
+void MyESP::showSystemStats() {
+#ifdef BUILD_TIME
+    myDebug_P("[SYSTEM] Build timestamp: %s)", _printBuildTime(BUILD_TIME););
+#endif
+
+    myDebug_P(PSTR("[APP] MyESP version: %s"), MYESP_VERSION);
+    myDebug_P(PSTR("[APP] System Load: %d%%"), getSystemLoadAverage());
+
+    if (WiFi.getMode() & WIFI_AP) {
+        myDebug_P(PSTR("[WIFI] Device is in AP mode with SSID %s"), jw.getAPSSID().c_str());
+    } else {
+        myDebug_P(PSTR("[WIFI] Wifi Hostname: %s"), getESPhostname().c_str());
+        myDebug_P(PSTR("[WIFI] Wifi IP: %s"), WiFi.localIP().toString().c_str());
+        myDebug_P(PSTR("[WIFI] Wifi signal strength: %d%%"), getWifiQuality());
+    }
+
+    myDebug_P(PSTR("[WIFI] Wifi MAC: %s"), WiFi.macAddress().c_str());
+
+#ifdef CRASH
+    char output_str[80] = {0};
+    char buffer[16]     = {0};
+    /* Crash info */
+    myDebug_P(PSTR("[EEPROM] EEPROM size: %u"), EEPROMr.reserved() * SPI_FLASH_SEC_SIZE);
+    strlcpy(output_str, PSTR("[EEPROM] EEPROM Sector pool size is "), sizeof(output_str));
+    strlcat(output_str, itoa(EEPROMr.size(), buffer, 10), sizeof(output_str));
+    strlcat(output_str, PSTR(", and in use are: "), sizeof(output_str));
+    for (uint32_t i = 0; i < EEPROMr.size(); i++) {
+        strlcat(output_str, itoa(EEPROMr.base() - i, buffer, 10), sizeof(output_str));
+        strlcat(output_str, PSTR(" "), sizeof(output_str));
+    }
+    myDebug_P(output_str);
+#endif
+
+#ifdef ARDUINO_BOARD
+    myDebug_P(PSTR("[SYSTEM] Board: %s"), ARDUINO_BOARD);
+#endif
+
+    myDebug_P(PSTR("[SYSTEM] CPU chip ID: 0x%06X"), ESP.getChipId());
+    myDebug_P(PSTR("[SYSTEM] CPU frequency: %u MHz"), ESP.getCpuFreqMHz());
+    myDebug_P(PSTR("[SYSTEM] SDK version: %s"), ESP.getSdkVersion());
+    myDebug_P(PSTR("[SYSTEM] Core version: %s"), ESP.getCoreVersion().c_str());
+    myDebug_P(PSTR("[SYSTEM] Boot version: %d"), ESP.getBootVersion());
+    myDebug_P(PSTR("[SYSTEM] Boot mode: %d"), ESP.getBootMode());
+    //myDebug_P(PSTR("[SYSTEM] Firmware MD5: %s"), (char *)ESP.getSketchMD5().c_str());
+
+    FlashMode_t mode = ESP.getFlashChipMode();
+    myDebug_P(PSTR("[FLASH] Flash chip ID: 0x%06X"), ESP.getFlashChipId());
+    myDebug_P(PSTR("[FLASH] Flash speed: %u Hz"), ESP.getFlashChipSpeed());
+    myDebug_P(PSTR("[FLASH] Flash mode: %s"),
+              mode == FM_QIO ? "QIO" : mode == FM_QOUT ? "QOUT" : mode == FM_DIO ? "DIO" : mode == FM_DOUT ? "DOUT" : "UNKNOWN");
+    myDebug_P(PSTR("[FLASH] Flash size (CHIP): %d"), ESP.getFlashChipRealSize());
+    myDebug_P(PSTR("[FLASH] Flash size (SDK): %d"), ESP.getFlashChipSize());
+    myDebug_P(PSTR("[FLASH] Flash Reserved: %d"), 1 * SPI_FLASH_SEC_SIZE);
+    myDebug_P(PSTR("[MEM] Firmware size: %d"), ESP.getSketchSize());
+    myDebug_P(PSTR("[MEM] Max OTA size: %d"), (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000);
+    myDebug_P(PSTR("[MEM] OTA Reserved: %d"), 4 * SPI_FLASH_SEC_SIZE);
+    myDebug_P(PSTR("[MEM] Free Heap: %d"), ESP.getFreeHeap());
+    myDebug_P(PSTR("[MEM] Stack: %d"), ESP.getFreeContStack());
+}
+
 
 // handler for Telnet
 void MyESP::_telnetHandle() {
@@ -1134,7 +1196,7 @@ void MyESP::_fs_setup() {
         fs_saveConfig();
     }
 
-    //_fs_printConfig(); // TODO: for debugging
+    //_fs_printConfig(); // enable for debugging
 }
 
 uint16_t MyESP::getSystemLoadAverage() {
@@ -1287,15 +1349,6 @@ void MyESP::crashClear() {
     EEPROMr.commit();
 }
 
-/* Crash info */
-void MyESP::crashInfo() {
-    myDebug_P(PSTR("[EEPROM] Sector pool size: %u"), EEPROMr.size());
-    myDebug_P(PSTR("[EEPROM] Sectors in use  : "));
-    for (uint32_t i = 0; i < EEPROMr.size(); i++) {
-        myDebug_P(PSTR("%d"), EEPROMr.base() - i);
-    }
-}
-
 /**
  * Print out crash information that has been previously saved in EEPROM
  */
@@ -1378,14 +1431,16 @@ void MyESP::begin(const char * app_hostname, const char * app_name, const char *
  */
 void MyESP::loop() {
     _calculateLoad();
-    _telnetHandle(); // Telnet/Debugger
+    _telnetHandle();
 
     jw.loop(); // WiFi
 
+    /*
     // do nothing else until we've got a wifi connection
     if (WiFi.getMode() & WIFI_AP) {
         return;
     }
+    */
 
     ArduinoOTA.handle(); // OTA
     _mqttConnect();      // MQTT

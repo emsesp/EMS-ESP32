@@ -7,8 +7,8 @@ platform = espressif8266
 [common]
 platform_def = espressif8266
 platform_180 = espressif8266@1.8.0
-;platform = ${common.platform_def}
-platform = ${common.platform_180}
+platform = ${common.platform_def}
+;platform = ${common.platform_180}
 
 flash_mode = dout
 

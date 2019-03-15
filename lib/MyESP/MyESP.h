@@ -9,7 +9,7 @@
 #ifndef MyEMS_h
 #define MyEMS_h
 
-#define MYESP_VERSION "1.1.6c"
+#define MYESP_VERSION "1.1.6d"
 
 #include <ArduinoJson.h>
 #include <ArduinoOTA.h>
@@ -75,13 +75,13 @@ void custom_crash_callback(struct rst_info *, uint32_t, uint32_t);
 #define COLOR_CYAN "\x1B[0;36m"
 #define COLOR_WHITE "\x1B[0;37m"
 #define COLOR_BOLD_ON "\x1B[1m"
-#define COLOR_BOLD_OFF "\x1B[22m" // fixed by Scott Arlott
+#define COLOR_BOLD_OFF "\x1B[22m" // fix by Scott Arlott to support Linux
 
 // SPIFFS
 #define SPIFFS_MAXSIZE 500 // https://arduinojson.org/v6/assistant/
 
 // CRASH
-#define EEPROM_ROTATE_DATA 11           // Reserved for the EEPROM_ROTATE library (3 bytes)
+#define EEPROM_ROTATE_DATA 11 // Reserved for the EEPROM_ROTATE library (3 bytes)
 /**
  * Structure of the single crash data set
  *
@@ -93,8 +93,8 @@ void custom_crash_callback(struct rst_info *, uint32_t, uint32_t);
  *  6. epc3
  *  7. excvaddr
  *  8. depc
- *  9. adress of stack start
- * 10. adress of stack end
+ *  9. address of stack start
+ * 10. address of stack end
  * 11. stack trace bytes
  *     ...
  */
@@ -188,6 +188,7 @@ class MyESP {
     void     resetESP();
     uint16_t getSystemLoadAverage();
     int      getWifiQuality();
+    void     showSystemStats();
 
 
   private:
@@ -223,6 +224,7 @@ class MyESP {
     char *          _wifi_ssid;
     char *          _wifi_password;
     bool            _wifi_connected;
+    String          getESPhostname();
 
     // ota
     ota_callback_f _ota_callback;
