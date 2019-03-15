@@ -35,6 +35,9 @@ DS18 ds18;
 #define PUBLISHVALUES_TIME 120 // every 2 minutes publish MQTT values
 Ticker publishValuesTimer;
 
+#define PUBLISHSENSORVALUES_TIME 180 // every 3 minutes publish MQTT sensor values
+Ticker publishSensorValuesTimer;
+
 #define SYSTEMCHECK_TIME 20 // every 20 seconds check if Boiler is online
 Ticker systemCheckTimer;
 
@@ -67,6 +70,7 @@ typedef struct {
     uint8_t       dallas_sensors; // count of dallas sensors
     uint8_t       led_gpio;
     uint8_t       dallas_gpio;
+    uint8_t       dallas_parasite;
 } _EMSESP_Status;
 
 typedef struct {
@@ -414,6 +418,32 @@ void showInfo() {
     }
 }
 
+// send all dallas sensor values as a JSON package to MQTT
+void publishSensorValues() {
+    StaticJsonDocument<MQTT_MAX_SIZE> doc;
+    bool hasdata = false;
+
+     // see if the sensor values have changed, if so send
+    //JsonObject & sensors         = jsonBuffer.createObject();
+    JsonObject sensors = doc.to<JsonObject>();
+    for (uint8_t i = 0; i < EMSESP_Status.dallas_sensors; i++) {
+        double sensorValue = ds18.getValue(i);
+        if(sensorValue != DS18_DISCONNECTED && sensorValue != DS18_CRC_ERROR)    {
+            char label[8]       = {0};
+            char valuestr[8]    = {0}; // for formatting temp
+            sprintf(label,"temp_%d",(i+1));
+            sensors[label] = _float_to_char(valuestr, sensorValue);
+            hasdata = true;
+        }
+    }
+
+    if (hasdata) {
+        char data[MQTT_MAX_SIZE] = {0};
+        serializeJson(doc, data, sizeof(data));
+        myESP.mqttPublish(TOPIC_EXTERNAL_SENSORS, data);
+    }
+}
+
 // send values via MQTT
 // a json object is created for the boiler and one for the thermostat
 // CRC check is done to see if there are changes in the values since the last send to avoid too much wifi traffic
@@ -607,6 +637,11 @@ bool FSCallback(MYESP_FSACTION action, const JsonObject json) {
             EMSESP_Status.dallas_gpio = EMSESP_DALLAS_GPIO; // default value
         }
 
+        // dallas_gpio
+        if (!(EMSESP_Status.dallas_gpio = json["dallas_parasite"])) {
+            EMSESP_Status.dallas_parasite = EMSESP_DALLAS_PARASITE; // default value
+        }
+
         // thermostat_type
         if (!(EMS_Thermostat.type_id = json["thermostat_type"])) {
             EMS_Thermostat.type_id = EMSESP_THERMOSTAT_TYPE; // set default
@@ -629,6 +664,7 @@ bool FSCallback(MYESP_FSACTION action, const JsonObject json) {
         json["led"]             = EMSESP_Status.led_enabled;
         json["led_gpio"]        = EMSESP_Status.led_gpio;
         json["dallas_gpio"]     = EMSESP_Status.dallas_gpio;
+        json["dallas_parasite"] = EMSESP_Status.dallas_parasite;
         json["thermostat_type"] = EMS_Thermostat.type_id;
         json["boiler_type"]     = EMS_Boiler.type_id;
         json["test_mode"]       = EMSESP_Status.test_mode;
@@ -686,6 +722,17 @@ bool SettingsCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, c
             ok                        = true;
         }
 
+        // dallas_parasite
+        if ((strcmp(setting, "dallas_parasite") == 0) && (wc == 2)) {
+            if (strcmp(value, "true") == 0) {
+                EMSESP_Status.dallas_parasite = true;
+                ok                        = true;
+            } else if (strcmp(value, "false") == 0) {
+                EMSESP_Status.dallas_parasite = false;
+                ok                        = true;
+            }
+        }
+
         // thermostat_type
         if (strcmp(setting, "thermostat_type") == 0) {
             EMS_Thermostat.type_id = ((wc == 2) ? (uint8_t)strtol(value, 0, 16) : EMS_ID_NONE);
@@ -704,6 +751,7 @@ bool SettingsCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, c
         myDebug("  led=%s", EMSESP_Status.led_enabled ? "on" : "off");
         myDebug("  led_gpio=%d", EMSESP_Status.led_gpio);
         myDebug("  dallas_gpio=%d", EMSESP_Status.dallas_gpio);
+        myDebug("  dallas_parasite=%s", EMSESP_Status.dallas_parasite ? "on" : "off");
 
         if (EMS_Thermostat.type_id == EMS_ID_NONE) {
             myDebug("  thermostat_type=<not set>");
@@ -997,6 +1045,13 @@ void initEMSESP() {
     EMSESP_Shower.doingColdShot = false;
 }
 
+// publish external dallas sensor temperature values to MQTT
+void do_publishSensorValues() {
+    if (EMSESP_Status.dallas_sensors != 0) {
+        publishSensorValues();
+    }
+}
+
 // call PublishValues without forcing, so using CRC to see if we really need to publish
 void do_publishValues() {
     // don't publish if we're not connected to the EMS bus
@@ -1177,6 +1232,7 @@ void setup() {
     if (!EMSESP_Status.test_mode) {
         publishValuesTimer.attach(PUBLISHVALUES_TIME, do_publishValues);    // post MQTT values
         regularUpdatesTimer.attach(REGULARUPDATES_TIME, do_regularUpdates); // regular reads from the EMS
+        publishSensorValuesTimer.attach(PUBLISHSENSORVALUES_TIME, do_publishSensorValues);    // post MQTT sensor values
     }
 
     // set pin for LED
@@ -1187,7 +1243,8 @@ void setup() {
     }
 
     // check for Dallas sensors
-    EMSESP_Status.dallas_sensors = ds18.setup(EMSESP_Status.dallas_gpio); // returns #sensors
+    EMSESP_Status.dallas_sensors = ds18.setup(EMSESP_Status.dallas_gpio, EMSESP_Status.dallas_parasite); // returns #sensors
+
 }
 
 //

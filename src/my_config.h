@@ -49,6 +49,9 @@
 #define BOILER_SHOWER_ALERT 0      // enable (1) to send alert of cold water when shower time limit has exceeded
 #define SHOWER_MAX_DURATION 420000 // in ms. 7 minutes, before trigger a shot of cold water
 
+// MQTT for EXTERNAL SENSORS
+#define TOPIC_EXTERNAL_SENSORS "sensors"                // for sending sensor values to MQTT
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // THESE DEFAULT VALUES CAN ALSO BE SET AND STORED WITHTIN THE APPLICATION (see 'set' command)    //
 // ALTHOUGH YOU MAY ALSO HARDCODE THEM HERE BUT THEY WILL BE OVERWRITTEN WITH NEW RELEASE UPDATES //
@@ -64,6 +67,7 @@
 // set this if using an external temperature sensor like a DS18B20
 // D5 is the default on bbqkees' board
 #define EMSESP_DALLAS_GPIO D5
+#define EMSESP_DALLAS_PARASITE false
 
 // By default the EMS bus will be scanned for known devices based on product ids in ems_devices.h
 // You can override the Thermostat and Boiler types here

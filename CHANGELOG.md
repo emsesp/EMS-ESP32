@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - system command to show ESP stats
 - crash command to see stack of last system crash, with .py files to track stack dump
+- publish dallas external temp sensors to MQTT (Thanks @JewelZB)
 
 ### Fixed
 

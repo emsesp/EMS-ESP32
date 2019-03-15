@@ -20,8 +20,8 @@
 #define DS18_CHIP_DS1825 0x3B
 
 #define DS18_DATA_SIZE 9
-#define DS18_PARASITE 1
 #define DS18_DISCONNECTED -127
+#define DS18_CRC_ERROR -126
 
 #define GPIO_NONE 0x99
 #define DS18_READ_INTERVAL 2000 // Force sensor read & cache every 2 seconds
@@ -39,7 +39,7 @@ class DS18 {
     DS18();
     ~DS18();
 
-    uint8_t setup(uint8_t gpio);
+    uint8_t setup(uint8_t gpio, bool parasite);
     void    loop();
     char *  getDeviceString(char * s, unsigned char index);
     double  getValue(unsigned char index);
@@ -50,6 +50,7 @@ class DS18 {
     uint8_t       loadDevices();
 
     OneWire * _wire;
-    uint8_t   _count; // # devices
-    uint8_t   _gpio;  // the sensor pin
+    uint8_t   _count;    // # devices
+    uint8_t   _gpio;     // the sensor pin
+    uint8_t   _parasite; // parasite mode
 };

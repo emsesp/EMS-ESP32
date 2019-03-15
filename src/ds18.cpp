@@ -25,10 +25,11 @@ DS18::~DS18() {
 }
 
 // init
-uint8_t DS18::setup(uint8_t gpio) {
+uint8_t DS18::setup(uint8_t gpio, bool parasite) {
     uint8_t count;
 
-    _gpio = gpio;
+    _gpio     = gpio;
+    _parasite = (parasite ? 1 : 0);
 
     // OneWire
     if (_wire)
@@ -62,8 +63,7 @@ void DS18::loop() {
         // Start conversion
         _wire->reset();
         _wire->skip();
-        _wire->write(DS18_CMD_START_CONVERSION, DS18_PARASITE);
-
+        _wire->write(DS18_CMD_START_CONVERSION, _parasite);
     } else {
         // Read scratchpads
         for (unsigned char index = 0; index < _devices.size(); index++) {
@@ -161,7 +161,7 @@ double DS18::getValue(unsigned char index) {
     uint8_t * data = _devices[index].data;
 
     if (OneWire::crc8(data, DS18_DATA_SIZE - 1) != data[DS18_DATA_SIZE - 1]) {
-        return 0;
+        return DS18_CRC_ERROR;
     }
 
     int16_t raw = (data[1] << 8) | data[0];
@@ -182,9 +182,6 @@ double DS18::getValue(unsigned char index) {
     }
 
     double value = (float)raw / 16.0;
-    if (value == DS18_DISCONNECTED) {
-        return 0;
-    }
 
     return value;
 }
