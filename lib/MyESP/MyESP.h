@@ -9,7 +9,7 @@
 #ifndef MyEMS_h
 #define MyEMS_h
 
-#define MYESP_VERSION "1.1.6d"
+#define MYESP_VERSION "1.1.6"
 
 #include <ArduinoJson.h>
 #include <ArduinoOTA.h>
@@ -78,10 +78,9 @@ void custom_crash_callback(struct rst_info *, uint32_t, uint32_t);
 #define COLOR_BOLD_OFF "\x1B[22m" // fix by Scott Arlott to support Linux
 
 // SPIFFS
-#define SPIFFS_MAXSIZE 500 // https://arduinojson.org/v6/assistant/
+#define SPIFFS_MAXSIZE 600 // https://arduinojson.org/v6/assistant/
 
 // CRASH
-#define EEPROM_ROTATE_DATA 11 // Reserved for the EEPROM_ROTATE library (3 bytes)
 /**
  * Structure of the single crash data set
  *
@@ -111,8 +110,8 @@ void custom_crash_callback(struct rst_info *, uint32_t, uint32_t);
 #define SAVE_CRASH_STACK_END 0x1E       // 4 bytes
 #define SAVE_CRASH_STACK_TRACE 0x22     // variable
 
-
 typedef struct {
+    bool set; // is it a set command
     char key[40];
     char description[100];
 } command_t;
@@ -132,6 +131,8 @@ template <typename T, size_t N>
 constexpr size_t ArraySize(T (&)[N]) {
     return N;
 }
+
+#define UPTIME_OVERFLOW 4294967295 // Uptime overflow value
 
 // class definition
 class MyESP {
@@ -189,7 +190,6 @@ class MyESP {
     uint16_t getSystemLoadAverage();
     int      getWifiQuality();
     void     showSystemStats();
-
 
   private:
     // mqtt
@@ -257,17 +257,20 @@ class MyESP {
     void _fs_printConfig();
     void _fs_eraseConfig();
 
+    // settings
     fs_callback_f          _fs_callback;
     fs_settings_callback_f _fs_settings_callback;
+    void                   _printSetCommands();
 
     // general
-    char * _app_hostname;
-    char * _app_name;
-    char * _app_version;
-    char * _boottime;
-    bool   _suspendOutput;
-    bool   _use_serial;
-    void   _printBuildTime(unsigned long rawTime);
+    char *        _app_hostname;
+    char *        _app_name;
+    char *        _app_version;
+    char *        _boottime;
+    bool          _suspendOutput;
+    bool          _use_serial;
+    unsigned long _getUptime();
+    String        _buildTime();
 
     // load average (0..100)
     void               _calculateLoad();
