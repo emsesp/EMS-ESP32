@@ -13,7 +13,7 @@ platform = ${common.platform_def}
 flash_mode = dout
 
 ; for production
-;build_flags = -Os -DBUILD_TIME=$UNIX_TIME
+;build_flags = -Os
 
 ; for debug
 build_flags = -g -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-parameter -Wno-unused-variable -DCRASH
