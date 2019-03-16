@@ -44,32 +44,24 @@
 #define TOPIC_SHOWER_ALERT "shower_alert"       // toggle switch for enabling the shower alarm logic
 #define TOPIC_SHOWER_COLDSHOT "shower_coldshot" // used to trigger a coldshot from an MQTT command
 
-// default values for shower logic on/off
-#define BOILER_SHOWER_TIMER 0      // enable (1) to monitor shower time
-#define BOILER_SHOWER_ALERT 0      // enable (1) to send alert of cold water when shower time limit has exceeded
-#define SHOWER_MAX_DURATION 420000 // in ms. 7 minutes, before trigger a shot of cold water
-
 // MQTT for EXTERNAL SENSORS
-#define TOPIC_EXTERNAL_SENSORS "sensors"                // for sending sensor values to MQTT
+#define TOPIC_EXTERNAL_SENSORS "sensors" // for sending sensor values to MQTT
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // THESE DEFAULT VALUES CAN ALSO BE SET AND STORED WITHTIN THE APPLICATION (see 'set' command)    //
-// ALTHOUGH YOU MAY ALSO HARDCODE THEM HERE BUT THEY WILL BE OVERWRITTEN WITH NEW RELEASE UPDATES //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// Set LED pin used for showing ems bus connection status. Solid is connected, Flashing is error
-// can be either the onboard LED on the ESP8266 (LED_BULLETIN) or external via an external pull-up LED
-// (e.g. D1 on a bbqkees' board
-// can be enabled and disabled via the 'set led'
-// pin can be set by 'set led_gpio'
+// Set LED pin used for showing the EMS bus connection status. Solid means EMS bus working, flashing is an error
+// can be either the onboard LED on the ESP8266 (LED_BULLETIN) or external via an external pull-up LED (e.g. D1 on a bbqkees' board)
+// can be enabled and disabled via the 'set led' command and pin set by 'set led_gpio'
 #define EMSESP_LED_GPIO LED_BUILTIN
 
 // set this if using an external temperature sensor like a DS18B20
-// D5 is the default on bbqkees' board
+// D5 is the default on a bbqkees board
 #define EMSESP_DALLAS_GPIO D5
 #define EMSESP_DALLAS_PARASITE false
 
-// By default the EMS bus will be scanned for known devices based on product ids in ems_devices.h
+// By default the EMS bus will be scanned for known devices based on the product ids in ems_devices.h
 // You can override the Thermostat and Boiler types here
 #define EMSESP_BOILER_TYPE EMS_ID_NONE
 #define EMSESP_THERMOSTAT_TYPE EMS_ID_NONE
