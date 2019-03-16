@@ -4,9 +4,6 @@
  * 
  * Paul Derbyshire - https://github.com/proddy/EMS-ESP
  *
- * See ChangeLog.md for history
- * See README.md for Acknowledgments
- *
  */
 
 #pragma once

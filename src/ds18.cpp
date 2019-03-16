@@ -4,9 +4,6 @@
  * 
  * Paul Derbyshire - https://github.com/proddy/EMS-ESP
  *
- * See ChangeLog.md for history
- * See README.md for Acknowledgments
- *
  */
 
 #include "ds18.h"
@@ -14,9 +11,10 @@
 std::vector<ds_device_t> _devices;
 
 DS18::DS18() {
-    _wire  = NULL;
-    _count = 0;
-    _gpio  = GPIO_NONE;
+    _wire     = NULL;
+    _count    = 0;
+    _gpio     = GPIO_NONE;
+    _parasite = 0;
 }
 
 DS18::~DS18() {
@@ -117,7 +115,7 @@ char * DS18::getDeviceString(char * buffer, unsigned char index) {
         char a[30] = {0};
         snprintf(a,
                  sizeof(a),
-                 "(%02X%02X%02X%02X%02X%02X%02X%02X) @ GPIO%d",
+                 " (%02X%02X%02X%02X%02X%02X%02X%02X) @ GPIO%d",
                  address[0],
                  address[1],
                  address[2],
