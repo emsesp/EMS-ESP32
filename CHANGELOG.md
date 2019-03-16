@@ -12,17 +12,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - system command to show ESP stats
 - crash command to see stack of last system crash, with .py files to track stack dump
 - publish dallas external temp sensors to MQTT (Thanks @JewelZB)
+- shower timer and shower alert options available via set commands
+- Added support for warm water modes Hot, Comfort and Intelligent (https://github.com/proddy/EMS-ESP/issues/67)
 
 ### Fixed
 
 - incorrect rendering of null temperature values (the -3200 degrees issue)
 - OTA is more stable
 - Added a hack to overcome WiFi power issues in esp core 2.5.0 libraries causing constant re-connects
+- Performance issues with telnet output
 
 ### Changed
 
-- included various fixes and suggestions from nomis (Simon Arlott)
-
+- included various fixes and suggestions from @nomis
 - upgraded MyESP library
 
 ## [1.5.6] 2019-03-09
