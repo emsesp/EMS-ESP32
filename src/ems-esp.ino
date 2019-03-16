@@ -59,18 +59,20 @@ Ticker showerColdShotStopTimer;
 #define SHOWER_MIN_DURATION 120000  // in ms. 2 minutes, before recognizing its a shower
 #define SHOWER_OFFSET_TIME 5000     // in ms. 5 seconds grace time, to calibrate actual time under the shower
 #define SHOWER_COLDSHOT_DURATION 10 // in seconds. 10 seconds for cold water before turning back hot water
+#define SHOWER_MAX_DURATION 420000  // in ms. 7 minutes, before trigger a shot of cold water
 
 typedef struct {
-    bool shower_timer; // true if we want to report back on shower times
-    bool shower_alert; // true if we want the alert of cold water
-    bool led_enabled;  // LED on/off
-    bool test_mode;    // test mode to stop automatic Tx on/off
-
     unsigned long timestamp;      // for internal timings, via millis()
     uint8_t       dallas_sensors; // count of dallas sensors
-    uint8_t       led_gpio;
-    uint8_t       dallas_gpio;
-    uint8_t       dallas_parasite;
+
+    // custom params
+    bool    shower_timer; // true if we want to report back on shower times
+    bool    shower_alert; // true if we want the alert of cold water
+    bool    led_enabled;  // LED on/off
+    bool    test_mode;    // test mode to stop automatic Tx on/off
+    uint8_t led_gpio;
+    uint8_t dallas_gpio;
+    uint8_t dallas_parasite;
 } _EMSESP_Status;
 
 typedef struct {
@@ -83,27 +85,30 @@ typedef struct {
 
 command_t PROGMEM project_cmds[] = {
 
-    {"set led <on | off>", "toggle status LED on/off"},
-    {"set led_gpio <pin>", "set the LED pin. Default is the onboard LED (D1=5)"},
-    {"set dallas_gpio <pin>", "set the pin for external Dallas temperature sensors (D5=14)"},
-    {"set thermostat_type <type ID>", "set the thermostat type id (e.g. 10 for 0x10)"},
-    {"set boiler_type <type ID>", "set the boiler type id (e.g. 8 for 0x08)"},
-    {"set test_mode <on | off>", "test_mode turns off all automatic reads"},
-    {"info", "show data captured on the EMS bus"},
-    {"log <n | b | t | r | v>", "set logging mode to none, basic, thermostat only, raw or verbose"},
-    {"publish", "publish all values to MQTT"},
-    {"types", "list supported EMS telegram type IDs"},
-    {"queue", "show current Tx queue"},
-    {"autodetect", "discover EMS devices and attempt to automatically set boiler and thermostat"},
-    {"shower <timer | alert>", "toggle either timer or alert on/off"},
-    {"send XX ...", "send raw telegram data as hex to EMS bus"},
-    {"thermostat read <type ID>", "send read request to the thermostat"},
-    {"thermostat temp <degrees>", "set current thermostat temperature"},
-    {"thermostat mode <mode>", "set mode (0=low/night, 1=manual/day, 2=auto)"},
-    {"thermostat scan <type ID>", "do a read on all type IDs"},
-    {"boiler read <type ID>", "send read request to boiler"},
-    {"boiler wwtemp <degrees>", "set boiler warm water temperature"},
-    {"boiler tapwater <on | off>", "set boiler warm tap water on/off"}
+    {true, "led <on | off>", "toggle status LED on/off"},
+    {true, "led_gpio <gpio>", "set the LED pin. Default is the onboard LED (D1=5)"},
+    {true, "dallas_gpio <gpio>", "set the pin for external Dallas temperature sensors (D5=14)"},
+    {true, "dallas_parasite <on | off>", "set to on if powering Dallas via parasite"},
+    {true, "thermostat_type <type ID>", "set the thermostat type id (e.g. 10 for 0x10)"},
+    {true, "boiler_type <type ID>", "set the boiler type id (e.g. 8 for 0x08)"},
+    {true, "test_mode <on | off>", "test_mode turns off all automatic reads"},
+    {true, "shower_timer <on | off>", "notify on shower durations"},
+    {true, "shower_alert <on | off>", "send a warning of cold water after shower time is exceeded"},
+    {false, "info", "show data captured on the EMS bus"},
+    {false, "log <n | b | t | r | v>", "set logging mode to none, basic, thermostat only, raw or verbose"},
+    {false, "publish", "publish all values to MQTT"},
+    {false, "types", "list supported EMS telegram type IDs"},
+    {false, "queue", "show current Tx queue"},
+    {false, "autodetect", "detect EMS devices and attempt to automatically set boiler and thermostat types"},
+    {false, "shower <timer | alert>", "toggle either timer or alert on/off"},
+    {false, "send XX ...", "send raw telegram data as hex to EMS bus"},
+    {false, "thermostat read <type ID>", "send read request to the thermostat"},
+    {false, "thermostat temp <degrees>", "set current thermostat temperature"},
+    {false, "thermostat mode <mode>", "set mode (0=low/night, 1=manual/day, 2=auto)"},
+    {false, "thermostat scan <type ID>", "do a read on all type IDs"},
+    {false, "boiler read <type ID>", "send read request to boiler"},
+    {false, "boiler wwtemp <degrees>", "set boiler warm water temperature"},
+    {false, "boiler tapwater <on | off>", "set boiler warm tap water on/off"}
 
 };
 
@@ -306,9 +311,14 @@ void showInfo() {
     // UBAParameterWW
     _renderBoolValue("Warm Water activated", EMS_Boiler.wWActivated);
     _renderBoolValue("Warm Water circulation pump available", EMS_Boiler.wWCircPump);
-    if (EMS_Boiler.wWComfort != EMS_VALUE_INT_NOTSET) {
-        myDebug("  Warm Water is set to %s", (EMS_Boiler.wWComfort ? "Comfort" : "ECO"));
+    if (EMS_Boiler.wWComfort == EMS_VALUE_UBAParameterWW_wwComfort_Hot) {
+        myDebug("  Warm Water comfort is set to Hot");
+    } else if (EMS_Boiler.wWComfort == EMS_VALUE_UBAParameterWW_wwComfort_Eco) {
+        myDebug("  Warm Water comfort is set to Eco");
+    } else if (EMS_Boiler.wWComfort == EMS_VALUE_UBAParameterWW_wwComfort_Intelligent) {
+        myDebug("  Warm Water comfort is set to Intelligent");
     }
+
     _renderIntValue("Warm Water selected temperature", "C", EMS_Boiler.wWSelTemp);
     _renderIntValue("Warm Water desired temperature", "C", EMS_Boiler.wWDesiredTemp);
 
@@ -337,7 +347,11 @@ void showInfo() {
     _renderIntValue("Burner current power", "%", EMS_Boiler.curBurnPow);
     _renderFloatValue("Flame current", "uA", EMS_Boiler.flameCurr);
     _renderFloatValue("System pressure", "bar", EMS_Boiler.sysPress);
-    myDebug("  System Service Code: %s (%d)", EMS_Boiler.serviceCodeChar, EMS_Boiler.serviceCode);
+    if (EMS_Boiler.serviceCode == EMS_VALUE_SHORT_NOTSET) {
+        myDebug("  System service code: %s", EMS_Boiler.serviceCodeChar);
+    } else {
+        myDebug("  System service code: %s (%d)", EMS_Boiler.serviceCodeChar, EMS_Boiler.serviceCode);
+    }
 
     // UBAParametersMessage
     _renderIntValue("Heating temperature setting on the boiler", "C", EMS_Boiler.heating_temp);
@@ -402,10 +416,11 @@ void showInfo() {
 
     // Dallas
     if (EMSESP_Status.dallas_sensors != 0) {
-        char s[80] = {0};
+        char s[80]       = {0};
+        char buffer[128] = {0};
         myDebug("%sExternal temperature sensors:%s", COLOR_BOLD_ON, COLOR_BOLD_OFF);
-        for (uint8_t i = 0; i < EMSESP_Status.dallas_sensors; i++) {   
-            snprintf(s, sizeof(s), "Sensor #%d", i + 1);
+        for (uint8_t i = 0; i < EMSESP_Status.dallas_sensors; i++) {
+            snprintf(s, sizeof(s), "Sensor #%d %s", i + 1, ds18.getDeviceString(buffer, i));
             _renderFloatValue(s, "C", ds18.getValue(i));
         }
         myDebug(""); // newline
@@ -421,19 +436,18 @@ void showInfo() {
 // send all dallas sensor values as a JSON package to MQTT
 void publishSensorValues() {
     StaticJsonDocument<MQTT_MAX_SIZE> doc;
-    bool hasdata = false;
+    bool                              hasdata = false;
 
-     // see if the sensor values have changed, if so send
-    //JsonObject & sensors         = jsonBuffer.createObject();
+    // see if the sensor values have changed, if so send
     JsonObject sensors = doc.to<JsonObject>();
     for (uint8_t i = 0; i < EMSESP_Status.dallas_sensors; i++) {
         double sensorValue = ds18.getValue(i);
-        if(sensorValue != DS18_DISCONNECTED && sensorValue != DS18_CRC_ERROR)    {
-            char label[8]       = {0};
-            char valuestr[8]    = {0}; // for formatting temp
-            sprintf(label,"temp_%d",(i+1));
+        if (sensorValue != DS18_DISCONNECTED && sensorValue != DS18_CRC_ERROR) {
+            char label[8]    = {0};
+            char valuestr[8] = {0}; // for formatting temp
+            sprintf(label, "temp_%d", (i + 1));
             sensors[label] = _float_to_char(valuestr, sensorValue);
-            hasdata = true;
+            hasdata        = true;
         }
     }
 
@@ -455,8 +469,8 @@ void publishValues(bool force) {
     uint32_t                          fchecksum;
 
     static uint8_t  last_boilerActive            = 0xFF; // for remembering last setting of the tap water or heating on/off
-    static uint32_t previousBoilerPublishCRC     = 0;    // CRC check
-    static uint32_t previousThermostatPublishCRC = 0;    // CRC check
+    static uint32_t previousBoilerPublishCRC     = 0;    // CRC check for boiler values
+    static uint32_t previousThermostatPublishCRC = 0;    // CRC check for thermostat values
 
     JsonObject rootBoiler = doc.to<JsonObject>();
 
@@ -464,8 +478,16 @@ void publishValues(bool force) {
     rootBoiler["selFlowTemp"] = _float_to_char(s, EMS_Boiler.selFlowTemp);
     rootBoiler["outdoorTemp"] = _float_to_char(s, EMS_Boiler.extTemp);
     rootBoiler["wWActivated"] = _bool_to_char(s, EMS_Boiler.wWActivated);
-    rootBoiler["wWComfort"]   = EMS_Boiler.wWComfort ? "Comfort" : "ECO";
-    rootBoiler["wWCurTmp"]    = _float_to_char(s, EMS_Boiler.wWCurTmp);
+
+    if (EMS_Boiler.wWComfort == EMS_VALUE_UBAParameterWW_wwComfort_Hot) {
+        rootBoiler["wWComfort"] = "Hot";
+    } else if (EMS_Boiler.wWComfort == EMS_VALUE_UBAParameterWW_wwComfort_Eco) {
+        rootBoiler["wWComfort"] = "Eco";
+    } else if (EMS_Boiler.wWComfort == EMS_VALUE_UBAParameterWW_wwComfort_Intelligent) {
+        rootBoiler["wWComfort"] = "Intelligent";
+    }
+
+    rootBoiler["wWCurTmp"] = _float_to_char(s, EMS_Boiler.wWCurTmp);
     snprintf(s, sizeof(s), "%i.%i", EMS_Boiler.wWCurFlow / 10, EMS_Boiler.wWCurFlow % 10);
     rootBoiler["wWCurFlow"]         = s;
     rootBoiler["wWHeat"]            = _bool_to_char(s, EMS_Boiler.wWHeat);
@@ -637,8 +659,8 @@ bool FSCallback(MYESP_FSACTION action, const JsonObject json) {
             EMSESP_Status.dallas_gpio = EMSESP_DALLAS_GPIO; // default value
         }
 
-        // dallas_gpio
-        if (!(EMSESP_Status.dallas_gpio = json["dallas_parasite"])) {
+        // dallas_parasite
+        if (!(EMSESP_Status.dallas_parasite = json["dallas_parasite"])) {
             EMSESP_Status.dallas_parasite = EMSESP_DALLAS_PARASITE; // default value
         }
 
@@ -657,6 +679,16 @@ bool FSCallback(MYESP_FSACTION action, const JsonObject json) {
             EMSESP_Status.test_mode = false; // default value
         }
 
+        // shower_timer
+        if (!(EMSESP_Status.shower_timer = json["shower_timer"])) {
+            EMSESP_Status.shower_timer = false; // default value
+        }
+
+        // shower_alert
+        if (!(EMSESP_Status.shower_alert = json["shower_alert"])) {
+            EMSESP_Status.shower_alert = false; // default value
+        }
+
         return false; // always save the settings
     }
 
@@ -668,6 +700,8 @@ bool FSCallback(MYESP_FSACTION action, const JsonObject json) {
         json["thermostat_type"] = EMS_Thermostat.type_id;
         json["boiler_type"]     = EMS_Boiler.type_id;
         json["test_mode"]       = EMSESP_Status.test_mode;
+        json["shower_timer"]    = EMSESP_Status.shower_timer;
+        json["shower_alert"]    = EMSESP_Status.shower_alert;
 
         return true;
     }
@@ -691,7 +725,8 @@ bool SettingsCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, c
                 EMSESP_Status.led_enabled = false;
                 ok                        = true;
                 // let's make sure LED is really off
-                digitalWrite(EMSESP_Status.led_gpio, (EMSESP_Status.led_gpio == LED_BUILTIN) ? HIGH : LOW); // light off. For onboard high=off
+                digitalWrite(EMSESP_Status.led_gpio,
+                             (EMSESP_Status.led_gpio == LED_BUILTIN) ? HIGH : LOW); // light off. For onboard high=off
             }
         }
 
@@ -724,12 +759,12 @@ bool SettingsCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, c
 
         // dallas_parasite
         if ((strcmp(setting, "dallas_parasite") == 0) && (wc == 2)) {
-            if (strcmp(value, "true") == 0) {
+            if (strcmp(value, "on") == 0) {
                 EMSESP_Status.dallas_parasite = true;
-                ok                        = true;
-            } else if (strcmp(value, "false") == 0) {
+                ok                            = true;
+            } else if (strcmp(value, "off") == 0) {
                 EMSESP_Status.dallas_parasite = false;
-                ok                        = true;
+                ok                            = true;
             }
         }
 
@@ -744,10 +779,31 @@ bool SettingsCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, c
             EMS_Boiler.type_id = ((wc == 2) ? (uint8_t)strtol(value, 0, 16) : EMS_ID_NONE);
             ok                 = true;
         }
+
+        // shower timer
+        if ((strcmp(setting, "shower_timer") == 0) && (wc == 2)) {
+            if (strcmp(value, "on") == 0) {
+                EMSESP_Status.shower_timer = true;
+                ok                         = true;
+            } else if (strcmp(value, "off") == 0) {
+                EMSESP_Status.shower_timer = false;
+                ok                         = true;
+            }
+        }
+
+        // shower alert
+        if ((strcmp(setting, "shower_alert") == 0) && (wc == 2)) {
+            if (strcmp(value, "on") == 0) {
+                EMSESP_Status.shower_alert = true;
+                ok                         = true;
+            } else if (strcmp(value, "off") == 0) {
+                EMSESP_Status.shower_alert = false;
+                ok                         = true;
+            }
+        }
     }
 
     if (action == MYESP_FSACTION_LIST) {
-        myDebug("  test_mode=%s", EMSESP_Status.test_mode ? "on" : "off");
         myDebug("  led=%s", EMSESP_Status.led_enabled ? "on" : "off");
         myDebug("  led_gpio=%d", EMSESP_Status.led_gpio);
         myDebug("  dallas_gpio=%d", EMSESP_Status.dallas_gpio);
@@ -766,6 +822,10 @@ bool SettingsCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, c
         } else {
             myDebug("  boiler_type=%02X", EMS_Boiler.type_id);
         }
+
+        myDebug("  test_mode=%s", EMSESP_Status.test_mode ? "on" : "off");
+        myDebug("  shower_timer=%s", EMSESP_Status.shower_timer ? "on" : "off");
+        myDebug("  shower_alert=%s", EMSESP_Status.shower_alert ? "on" : "off");
     }
 
     return ok;
@@ -1015,7 +1075,7 @@ void WIFICallback() {
     // This is done after we have a WiFi signal to avoid any resource conflicts
 
     if (myESP.getUseSerial()) {
-        myDebug("Warning! EMS bus disabled when in Serial mode. Use 'set serial off' to enable.");
+        myDebug("Warning! EMS bus disabled when in Serial mode. Use 'set serial off' to start EMS.");
     } else {
         emsuart_init();
         myDebug("[UART] Opened Rx/Tx connection");
@@ -1027,8 +1087,8 @@ void WIFICallback() {
 // Initialize the boiler settings and shower settings
 void initEMSESP() {
     // general settings
-    EMSESP_Status.shower_timer = BOILER_SHOWER_TIMER;
-    EMSESP_Status.shower_alert = BOILER_SHOWER_ALERT;
+    EMSESP_Status.shower_timer = false;
+    EMSESP_Status.shower_alert = false;
     EMSESP_Status.led_enabled  = true; // LED is on by default
     EMSESP_Status.test_mode    = false;
 
@@ -1230,9 +1290,9 @@ void setup() {
 
     // enable regular checks if not in test mode
     if (!EMSESP_Status.test_mode) {
-        publishValuesTimer.attach(PUBLISHVALUES_TIME, do_publishValues);    // post MQTT values
-        regularUpdatesTimer.attach(REGULARUPDATES_TIME, do_regularUpdates); // regular reads from the EMS
-        publishSensorValuesTimer.attach(PUBLISHSENSORVALUES_TIME, do_publishSensorValues);    // post MQTT sensor values
+        publishValuesTimer.attach(PUBLISHVALUES_TIME, do_publishValues);                   // post MQTT values
+        regularUpdatesTimer.attach(REGULARUPDATES_TIME, do_regularUpdates);                // regular reads from the EMS
+        publishSensorValuesTimer.attach(PUBLISHSENSORVALUES_TIME, do_publishSensorValues); // post MQTT sensor values
     }
 
     // set pin for LED
@@ -1244,7 +1304,6 @@ void setup() {
 
     // check for Dallas sensors
     EMSESP_Status.dallas_sensors = ds18.setup(EMSESP_Status.dallas_gpio, EMSESP_Status.dallas_parasite); // returns #sensors
-
 }
 
 //

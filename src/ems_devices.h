@@ -32,11 +32,12 @@
 #define EMS_TYPE_UBASetPoints 0x1A
 #define EMS_TYPE_UBAFunctionTest 0x1D
 
-#define EMS_OFFSET_UBAParameterWW_wwtemp 2              // WW Temperature
-#define EMS_OFFSET_UBAParameterWW_wwactivated 1         // WW Activated
-#define EMS_OFFSET_UBAParameterWW_wwComfort 9           // WW is in comfort or eco mode
-#define EMS_VALUE_UBAParameterWW_wwComfort_Comfort 0x00 // the value for comfort
-#define EMS_VALUE_UBAParameterWW_wwComfort_Eco 0xD8     // the value for eco
+#define EMS_OFFSET_UBAParameterWW_wwtemp 2                  // WW Temperature
+#define EMS_OFFSET_UBAParameterWW_wwactivated 1             // WW Activated
+#define EMS_OFFSET_UBAParameterWW_wwComfort 9               // WW is in comfort or eco mode
+#define EMS_VALUE_UBAParameterWW_wwComfort_Hot 0x00         // the value for hot
+#define EMS_VALUE_UBAParameterWW_wwComfort_Eco 0xD8         // the value for eco
+#define EMS_VALUE_UBAParameterWW_wwComfort_Intelligent 0xEC // the value for intelligent
 
 /*
  * Thermostats...

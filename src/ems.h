@@ -254,7 +254,7 @@ void ems_setPoll(bool b);
 void ems_setTxEnabled(bool b);
 void ems_setLogging(_EMS_SYS_LOGGING loglevel);
 void ems_setEmsRefreshed(bool b);
-void ems_setWarmWaterModeComfort(bool comfort);
+void ems_setWarmWaterModeComfort(uint8_t comfort);
 bool ems_checkEMSBUSAlive();
 void ems_setModels();
 

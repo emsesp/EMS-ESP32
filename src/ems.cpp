@@ -892,7 +892,7 @@ void _process_UBAParameterWW(uint8_t type, uint8_t * data, uint8_t length) {
     EMS_Boiler.wWSelTemp     = data[2];
     EMS_Boiler.wWCircPump    = (data[6] == 0xFF); // 0xFF means on
     EMS_Boiler.wWDesiredTemp = data[8];
-    EMS_Boiler.wWComfort     = (data[EMS_OFFSET_UBAParameterWW_wwComfort] == 0x00);
+    EMS_Boiler.wWComfort     = data[EMS_OFFSET_UBAParameterWW_wwComfort];
 
     EMS_Sys_Status.emsRefreshed = true; // when we receieve this, lets force an MQTT publish
 }
@@ -1098,7 +1098,6 @@ void _process_Version(uint8_t type, uint8_t * data, uint8_t length) {
         return;
     }
 
-    bool    do_save     = false;
     uint8_t product_id  = data[0];
     char    version[10] = {0};
     snprintf(version, sizeof(version), "%02d.%02d", data[1], data[2]);
@@ -1135,7 +1134,7 @@ void _process_Version(uint8_t type, uint8_t * data, uint8_t length) {
             EMS_Boiler.product_id = Boiler_Types[i].product_id;
             strlcpy(EMS_Boiler.version, version, sizeof(EMS_Boiler.version));
 
-            do_save = true;
+            myESP.fs_saveConfig(); // save config to SPIFFS
 
             ems_getBoilerValues(); // get Boiler values that we would usually have to wait for
         }
@@ -1178,7 +1177,7 @@ void _process_Version(uint8_t type, uint8_t * data, uint8_t length) {
             EMS_Thermostat.product_id      = product_id;
             strlcpy(EMS_Thermostat.version, version, sizeof(EMS_Thermostat.version));
 
-            do_save = true;
+            myESP.fs_saveConfig(); // save config to SPIFFS
 
             // get Thermostat values (if supported)
             ems_getThermostatValues();
@@ -1187,10 +1186,6 @@ void _process_Version(uint8_t type, uint8_t * data, uint8_t length) {
         myDebug("Unrecognized device found. TypeID 0x%02X, Product ID %d, Version %s", type, product_id, version);
     }
 
-    // if the boiler or thermostat values have changed, save them to SPIFFS
-    if (do_save) {
-        myESP.fs_saveConfig();
-    }
 }
 
 /*
@@ -1737,13 +1732,25 @@ void ems_setWarmWaterTemp(uint8_t temperature) {
 
 /**
  * Set the warm water mode to comfort to Eco/Comfort
+ * 1 = Hot, 2 = Eco, 3 = Intelligent
  */
-void ems_setWarmWaterModeComfort(bool comfort) {
-    myDebug("Setting boiler warm water to comfort mode %s\n", comfort ? "Comfort" : "Eco");
-
+void ems_setWarmWaterModeComfort(uint8_t comfort) {
     _EMS_TxTelegram EMS_TxTelegram = EMS_TX_TELEGRAM_NEW; // create new Tx
     EMS_TxTelegram.timestamp       = millis();            // set timestamp
     EMS_Sys_Status.txRetryCount    = 0;                   // reset retry counter
+
+    if (comfort == 1) {
+        myDebug("Setting boiler warm water comfort mode to Comfort");
+        EMS_TxTelegram.dataValue = EMS_VALUE_UBAParameterWW_wwComfort_Hot;
+    } else if (comfort == 2) {
+        myDebug("Setting boiler warm water comfort mode to Eco");
+        EMS_TxTelegram.dataValue = EMS_VALUE_UBAParameterWW_wwComfort_Eco;
+    } else if (comfort == 3) {
+        myDebug("Setting boiler warm water comfort mode to Intelligent");
+        EMS_TxTelegram.dataValue = EMS_VALUE_UBAParameterWW_wwComfort_Intelligent;
+    } else {
+        return; // invalid comfort value
+    }
 
     EMS_TxTelegram.action        = EMS_TX_TELEGRAM_WRITE;
     EMS_TxTelegram.dest          = EMS_Boiler.type_id;
@@ -1751,8 +1758,6 @@ void ems_setWarmWaterModeComfort(bool comfort) {
     EMS_TxTelegram.offset        = EMS_OFFSET_UBAParameterWW_wwComfort;
     EMS_TxTelegram.length        = EMS_MIN_TELEGRAM_LENGTH;
     EMS_TxTelegram.type_validate = EMS_ID_NONE; // don't validate
-    EMS_TxTelegram.dataValue =
-        (comfort ? EMS_VALUE_UBAParameterWW_wwComfort_Comfort : EMS_VALUE_UBAParameterWW_wwComfort_Eco); // 0x00 is on, 0xD8 is off
 
     EMS_TxQueue.push(EMS_TxTelegram);
 }
