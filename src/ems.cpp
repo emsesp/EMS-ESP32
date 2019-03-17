@@ -391,6 +391,17 @@ char * _smallitoa(uint8_t value, char * buffer) {
     return buffer;
 }
 
+/* for decimals 0 to 999, printed as a string
+ * From Simon Arlott @nomis
+ */
+char * _smallitoa3(uint16_t value, char * buffer) {
+    buffer[0] = ((value / 100) == 0) ? '0' : (value / 100) + '0';
+    buffer[1] = (((value % 100) / 10) == 0) ? '0' : ((value % 100) / 10) + '0';
+    buffer[2] = (value % 10) + '0';
+    buffer[3] = '\0';
+    return buffer;
+}
+
 /**
  * debug print a telegram to telnet/serial including the CRC
  * len is length in bytes including the CRC
@@ -403,6 +414,7 @@ void _debugPrintTelegram(const char * prefix, uint8_t * data, uint8_t len, const
     char buffer[16]      = {0};
 
     unsigned long upt = millis();
+    
     strlcpy(output_str, "(", sizeof(output_str));
     strlcat(output_str, COLOR_CYAN, sizeof(output_str));
     strlcat(output_str, _smallitoa((uint8_t)((upt / 3600000) % 24), buffer), sizeof(output_str));
@@ -410,6 +422,8 @@ void _debugPrintTelegram(const char * prefix, uint8_t * data, uint8_t len, const
     strlcat(output_str, _smallitoa((uint8_t)((upt / 60000) % 60), buffer), sizeof(output_str));
     strlcat(output_str, ":", sizeof(output_str));
     strlcat(output_str, _smallitoa((uint8_t)((upt / 1000) % 60), buffer), sizeof(output_str));
+    strlcat(output_str, ".", sizeof(output_str));
+    strlcat(output_str, _smallitoa3(upt % 1000, buffer), sizeof(output_str));
     strlcat(output_str, COLOR_RESET, sizeof(output_str));
     strlcat(output_str, ") ", sizeof(output_str));
 
@@ -561,7 +575,7 @@ void _createValidate() {
  */
 void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
     // check if we just received a single byte
-    // it could well be a Poll request from the boiler to us which will have a value of 0x8B (0x0B | 0x80)
+    // it could well be a Poll request from the boiler for us, which will have a value of 0x8B (0x0B | 0x80)
     // or either a return code like 0x01 or 0x04 from the last Write command
     if (length == 1) {
         uint8_t value = telegram[0]; // 1st byte of data package
@@ -571,7 +585,8 @@ void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
             EMS_Sys_Status.emsPollTimestamp = millis(); // store when we received a last poll
             EMS_Sys_Status.emsTxCapable     = true;
 
-            // do we have something to send thats waiting in the Tx queue? if so send it if the Queue is not in a wait state
+            // do we have something to send thats waiting in the Tx queue?
+            // if so send it if the Queue is not in a wait state
             if ((!EMS_TxQueue.isEmpty()) && (EMS_Sys_Status.emsTxStatus == EMS_TX_STATUS_IDLE)) {
                 _ems_sendTelegram(); // perform the read/write command immediately
             } else {
@@ -930,8 +945,6 @@ void _process_UBAMonitorWWMessage(uint8_t type, uint8_t * data, uint8_t length) 
 /**
  * UBAMonitorFast - type 0x18 - central heating monitor part 1 (25 bytes long)
  * received every 10 seconds
- * e.g. 08 00 18 00 4B 01 67 02 00 01 01 40 40 01 4B 80 00 01 4A 00 00 0E 30 45 01 09 00 00 00 (CRC=04), #data=25
- *      08 00 18 00 4B 01 56 03 00 01 01 40 40 01 3E 80 00 01 4D 00 00 0E 30 45 01 09 00 00 00 (CRC=EA), #data=25
  */
 void _process_UBAMonitorFast(uint8_t type, uint8_t * data, uint8_t length) {
     EMS_Boiler.selFlowTemp = data[0];
