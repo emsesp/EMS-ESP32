@@ -410,7 +410,7 @@ void _debugPrintTelegram(const char * prefix, uint8_t * data, uint8_t len, const
     if (EMS_Sys_Status.emsLogging <= EMS_SYS_LOGGING_BASIC)
         return;
 
-    char output_str[300] = {0}; // roughly EMS_MAX_TELEGRAM_LENGTH*3 + 20
+    char output_str[200] = {0};
     char buffer[16]      = {0};
 
     unsigned long upt = millis();
@@ -668,7 +668,7 @@ void _ems_processTelegram(uint8_t * telegram, uint8_t length) {
 
     // print detailed telegram data
     if (EMS_Sys_Status.emsLogging >= EMS_SYS_LOGGING_THERMOSTAT) {
-        char output_str[300] = {0}; // roughly EMS_MAX_TELEGRAM_LENGTH*3 + 20
+        char output_str[200] = {0};
         char buffer[16]      = {0};
         char color_s[20]     = {0};
 
@@ -740,7 +740,7 @@ void _ems_processTelegram(uint8_t * telegram, uint8_t length) {
     if (typeFound && (commonType || forUs)) {
         if ((EMS_Types[i].processType_cb) != (void *)NULL) {
             // print non-verbose message
-            if ((EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_BASIC) || (EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_VERBOSE)) {
+            if (EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_BASIC) {
                 myDebug("<--- %s(0x%02X) received", EMS_Types[i].typeString, type);
             }
             // call callback function to process it
