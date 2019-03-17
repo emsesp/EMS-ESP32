@@ -37,6 +37,7 @@
 #define TOPIC_BOILER_HEATING_ACTIVE "heating_active"   // if heating is on
 #define TOPIC_BOILER_WWACTIVATED "wwactivated"         // for receiving MQTT message to change water on/off
 #define TOPIC_BOILER_CMD_WWTEMP "boiler_cmd_wwtemp"    // for received boiler wwtemp changes via MQTT
+#define TOPIC_BOILER_CMD_COMFORT "boiler_cmd_comfort"  // for received boiler ww comfort setting via MQTT
 
 // shower time
 #define TOPIC_SHOWERTIME "showertime"           // for sending shower time results

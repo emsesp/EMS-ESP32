@@ -806,31 +806,38 @@ unsigned long MyESP::_getUptime() {
 // print out ESP system stats
 // for battery power is ESP.getVcc()
 void MyESP::showSystemStats() {
-    myDebug_P(PSTR("[APP] %s version: %s"), _app_name, _app_version);
-    myDebug_P(PSTR("[APP] MyESP version: %s"), MYESP_VERSION);
-    myDebug_P(PSTR("[APP] Build timestamp: %s"), _buildTime().c_str());
+#if defined(ESP8266)
+    myDebug_P(PSTR("%sESP8266 System stats:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
+#else
+    myDebug_P(PSTR("ESP32 System stats:"));
+#endif
+    myDebug_P(PSTR(""));
+
+    myDebug_P(PSTR(" [APP] %s version: %s"), _app_name, _app_version);
+    myDebug_P(PSTR(" [APP] MyESP version: %s"), MYESP_VERSION);
+    myDebug_P(PSTR(" [APP] Build timestamp: %s"), _buildTime().c_str());
     if (_boottime != NULL) {
-        myDebug_P(PSTR("[APP] Boot time: %s"), _boottime);
+        myDebug_P(PSTR(" [APP] Boot time: %s"), _boottime);
     }
-    myDebug_P(PSTR("[APP] Uptime: %d seconds"), _getUptime());
-    myDebug_P(PSTR("[APP] System Load: %d%%"), getSystemLoadAverage());
+    myDebug_P(PSTR(" [APP] Uptime: %d seconds"), _getUptime());
+    myDebug_P(PSTR(" [APP] System Load: %d%%"), getSystemLoadAverage());
 
     if (isAPmode()) {
-        myDebug_P(PSTR("[WIFI] Device is in AP mode with SSID %s"), jw.getAPSSID().c_str());
+        myDebug_P(PSTR(" [WIFI] Device is in AP mode with SSID %s"), jw.getAPSSID().c_str());
     } else {
-        myDebug_P(PSTR("[WIFI] WiFi Hostname: %s"), _getESPhostname().c_str());
-        myDebug_P(PSTR("[WIFI] WiFi IP: %s"), WiFi.localIP().toString().c_str());
-        myDebug_P(PSTR("[WIFI] WiFi signal strength: %d%%"), getWifiQuality());
+        myDebug_P(PSTR(" [WIFI] WiFi Hostname: %s"), _getESPhostname().c_str());
+        myDebug_P(PSTR(" [WIFI] WiFi IP: %s"), WiFi.localIP().toString().c_str());
+        myDebug_P(PSTR(" [WIFI] WiFi signal strength: %d%%"), getWifiQuality());
     }
 
-    myDebug_P(PSTR("[WIFI] WiFi MAC: %s"), WiFi.macAddress().c_str());
+    myDebug_P(PSTR(" [WIFI] WiFi MAC: %s"), WiFi.macAddress().c_str());
 
 #ifdef CRASH
     char output_str[80] = {0};
     char buffer[16]     = {0};
     /* Crash info */
-    myDebug_P(PSTR("[EEPROM] EEPROM size: %u"), EEPROMr.reserved() * SPI_FLASH_SEC_SIZE);
-    strlcpy(output_str, PSTR("[EEPROM] EEPROM Sector pool size is "), sizeof(output_str));
+    myDebug_P(PSTR(" [EEPROM] EEPROM size: %u"), EEPROMr.reserved() * SPI_FLASH_SEC_SIZE);
+    strlcpy(output_str, PSTR(" [EEPROM] EEPROM Sector pool size is "), sizeof(output_str));
     strlcat(output_str, itoa(EEPROMr.size(), buffer, 10), sizeof(output_str));
     strlcat(output_str, PSTR(", and in use are: "), sizeof(output_str));
     for (uint32_t i = 0; i < EEPROMr.size(); i++) {
@@ -841,39 +848,40 @@ void MyESP::showSystemStats() {
 #endif
 
 #ifdef ARDUINO_BOARD
-    myDebug_P(PSTR("[SYSTEM] Board: %s"), ARDUINO_BOARD);
+    myDebug_P(PSTR(" [SYSTEM] Board: %s"), ARDUINO_BOARD);
 #endif
 
-    myDebug_P(PSTR("[SYSTEM] CPU frequency: %u MHz"), ESP.getCpuFreqMHz());
-    myDebug_P(PSTR("[SYSTEM] SDK version: %s"), ESP.getSdkVersion());
+    myDebug_P(PSTR(" [SYSTEM] CPU frequency: %u MHz"), ESP.getCpuFreqMHz());
+    myDebug_P(PSTR(" [SYSTEM] SDK version: %s"), ESP.getSdkVersion());
 
 #if defined(ESP8266)
-    myDebug_P(PSTR("[SYSTEM] CPU chip ID: 0x%06X"), ESP.getChipId());
-    myDebug_P(PSTR("[SYSTEM] Core version: %s"), ESP.getCoreVersion().c_str());
-    myDebug_P(PSTR("[SYSTEM] Boot version: %d"), ESP.getBootVersion());
-    myDebug_P(PSTR("[SYSTEM] Boot mode: %d"), ESP.getBootMode());
+    myDebug_P(PSTR(" [SYSTEM] CPU chip ID: 0x%06X"), ESP.getChipId());
+    myDebug_P(PSTR(" [SYSTEM] Core version: %s"), ESP.getCoreVersion().c_str());
+    myDebug_P(PSTR(" [SYSTEM] Boot version: %d"), ESP.getBootVersion());
+    myDebug_P(PSTR(" [SYSTEM] Boot mode: %d"), ESP.getBootMode());
     //myDebug_P(PSTR("[SYSTEM] Firmware MD5: %s"), (char *)ESP.getSketchMD5().c_str());
 #endif
 
     FlashMode_t mode = ESP.getFlashChipMode();
 #if defined(ESP8266)
-    myDebug_P(PSTR("[FLASH] Flash chip ID: 0x%06X"), ESP.getFlashChipId());
+    myDebug_P(PSTR(" [FLASH] Flash chip ID: 0x%06X"), ESP.getFlashChipId());
 #endif
-    myDebug_P(PSTR("[FLASH] Flash speed: %u Hz"), ESP.getFlashChipSpeed());
-    myDebug_P(PSTR("[FLASH] Flash mode: %s"),
+    myDebug_P(PSTR(" [FLASH] Flash speed: %u Hz"), ESP.getFlashChipSpeed());
+    myDebug_P(PSTR(" [FLASH] Flash mode: %s"),
               mode == FM_QIO ? "QIO" : mode == FM_QOUT ? "QOUT" : mode == FM_DIO ? "DIO" : mode == FM_DOUT ? "DOUT" : "UNKNOWN");
 #if defined(ESP8266)
-    myDebug_P(PSTR("[FLASH] Flash size (CHIP): %d"), ESP.getFlashChipRealSize());
+    myDebug_P(PSTR(" [FLASH] Flash size (CHIP): %d"), ESP.getFlashChipRealSize());
 #endif
-    myDebug_P(PSTR("[FLASH] Flash size (SDK): %d"), ESP.getFlashChipSize());
-    myDebug_P(PSTR("[FLASH] Flash Reserved: %d"), 1 * SPI_FLASH_SEC_SIZE);
-    myDebug_P(PSTR("[MEM] Firmware size: %d"), ESP.getSketchSize());
-    myDebug_P(PSTR("[MEM] Max OTA size: %d"), (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000);
-    myDebug_P(PSTR("[MEM] OTA Reserved: %d"), 4 * SPI_FLASH_SEC_SIZE);
-    myDebug_P(PSTR("[MEM] Free Heap: %d"), ESP.getFreeHeap());
+    myDebug_P(PSTR(" [FLASH] Flash size (SDK): %d"), ESP.getFlashChipSize());
+    myDebug_P(PSTR(" [FLASH] Flash Reserved: %d"), 1 * SPI_FLASH_SEC_SIZE);
+    myDebug_P(PSTR(" [MEM] Firmware size: %d"), ESP.getSketchSize());
+    myDebug_P(PSTR(" [MEM] Max OTA size: %d"), (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000);
+    myDebug_P(PSTR(" [MEM] OTA Reserved: %d"), 4 * SPI_FLASH_SEC_SIZE);
+    myDebug_P(PSTR(" [MEM] Free Heap: %d"), ESP.getFreeHeap());
 #if defined(ESP8266)
-    myDebug_P(PSTR("[MEM] Stack: %d"), ESP.getFreeContStack());
+    myDebug_P(PSTR(" [MEM] Stack: %d"), ESP.getFreeContStack());
 #endif
+    myDebug_P(PSTR(""));
 }
 
 // handler for Telnet

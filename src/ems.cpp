@@ -1740,7 +1740,7 @@ void ems_setWarmWaterModeComfort(uint8_t comfort) {
     EMS_Sys_Status.txRetryCount    = 0;                   // reset retry counter
 
     if (comfort == 1) {
-        myDebug("Setting boiler warm water comfort mode to Comfort");
+        myDebug("Setting boiler warm water comfort mode to Hot");
         EMS_TxTelegram.dataValue = EMS_VALUE_UBAParameterWW_wwComfort_Hot;
     } else if (comfort == 2) {
         myDebug("Setting boiler warm water comfort mode to Eco");

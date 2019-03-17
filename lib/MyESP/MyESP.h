@@ -112,7 +112,7 @@ void custom_crash_callback(struct rst_info *, uint32_t, uint32_t);
 
 typedef struct {
     bool set; // is it a set command
-    char key[40];
+    char key[50];
     char description[100];
 } command_t;
 
