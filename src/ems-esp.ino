@@ -436,16 +436,17 @@ void showInfo() {
 // send all dallas sensor values as a JSON package to MQTT
 void publishSensorValues() {
     StaticJsonDocument<MQTT_MAX_SIZE> doc;
-    bool                              hasdata = false;
+    JsonObject                        sensors = doc.to<JsonObject>();
+
+    bool hasdata     = false;
+    char label[8]    = {0};
+    char valuestr[8] = {0}; // for formatting temp
 
     // see if the sensor values have changed, if so send
-    JsonObject sensors = doc.to<JsonObject>();
     for (uint8_t i = 0; i < EMSESP_Status.dallas_sensors; i++) {
         double sensorValue = ds18.getValue(i);
         if (sensorValue != DS18_DISCONNECTED && sensorValue != DS18_CRC_ERROR) {
-            char label[8]    = {0};
-            char valuestr[8] = {0}; // for formatting temp
-            sprintf(label, "temp_%d", (i + 1));
+            sprintf(label, PAYLOAD_EXTERNAL_SENSORS, (i + 1));
             sensors[label] = _float_to_char(valuestr, sensorValue);
             hasdata        = true;
         }
@@ -643,53 +644,64 @@ void startThermostatScan(uint8_t start) {
 
 // callback for loading/saving settings to the file system (SPIFFS)
 bool FSCallback(MYESP_FSACTION action, const JsonObject json) {
+    bool recreate_config = false;
+
     if (action == MYESP_FSACTION_LOAD) {
         // led
         if (!(EMSESP_Status.led_enabled = json["led"])) {
             EMSESP_Status.led_enabled = LED_BUILTIN; // default value
+            recreate_config           = true;
         }
 
         // led_gpio
         if (!(EMSESP_Status.led_gpio = json["led_gpio"])) {
             EMSESP_Status.led_gpio = EMSESP_LED_GPIO; // default value
+            recreate_config        = true;
         }
 
         // dallas_gpio
         if (!(EMSESP_Status.dallas_gpio = json["dallas_gpio"])) {
             EMSESP_Status.dallas_gpio = EMSESP_DALLAS_GPIO; // default value
+            recreate_config           = true;
         }
 
         // dallas_parasite
         if (!(EMSESP_Status.dallas_parasite = json["dallas_parasite"])) {
             EMSESP_Status.dallas_parasite = EMSESP_DALLAS_PARASITE; // default value
+            recreate_config               = true;
         }
 
         // thermostat_type
         if (!(EMS_Thermostat.type_id = json["thermostat_type"])) {
             EMS_Thermostat.type_id = EMSESP_THERMOSTAT_TYPE; // set default
+            recreate_config        = true;
         }
 
         // boiler_type
         if (!(EMS_Boiler.type_id = json["boiler_type"])) {
             EMS_Boiler.type_id = EMSESP_BOILER_TYPE; // set default
+            recreate_config    = true;
         }
 
         // test mode
         if (!(EMSESP_Status.test_mode = json["test_mode"])) {
             EMSESP_Status.test_mode = false; // default value
+            recreate_config         = true;
         }
 
         // shower_timer
         if (!(EMSESP_Status.shower_timer = json["shower_timer"])) {
             EMSESP_Status.shower_timer = false; // default value
+            recreate_config            = true;
         }
 
         // shower_alert
         if (!(EMSESP_Status.shower_alert = json["shower_alert"])) {
             EMSESP_Status.shower_alert = false; // default value
+            recreate_config            = true;
         }
 
-        return false; // always save the settings
+        return recreate_config; // return false if some settings are missing and we need to rebuild the file
     }
 
     if (action == MYESP_FSACTION_SAVE) {
@@ -709,7 +721,7 @@ bool FSCallback(MYESP_FSACTION action, const JsonObject json) {
     return false;
 }
 
-// callback for custom settings when showing Stored Settings
+// callback for custom settings when showing Stored Settings with the 'set' command
 // wc is number of arguments after the 'set' command
 // returns true if the setting was recognized and changed
 bool SettingsCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, const char * value) {
@@ -727,6 +739,8 @@ bool SettingsCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, c
                 // let's make sure LED is really off
                 digitalWrite(EMSESP_Status.led_gpio,
                              (EMSESP_Status.led_gpio == LED_BUILTIN) ? HIGH : LOW); // light off. For onboard high=off
+            } else {
+                myDebug("Error. Usage: set led <on | off>");
             }
         }
 
@@ -739,6 +753,8 @@ bool SettingsCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, c
             } else if (strcmp(value, "off") == 0) {
                 EMSESP_Status.test_mode = false;
                 ok                      = true;
+            } else {
+                myDebug("Error. Usage: set test_mode <on | off>");
             }
         }
 
@@ -765,6 +781,8 @@ bool SettingsCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, c
             } else if (strcmp(value, "off") == 0) {
                 EMSESP_Status.dallas_parasite = false;
                 ok                            = true;
+            } else {
+                myDebug("Error. Usage: set dallas_parasite <on | off>");
             }
         }
 
@@ -788,6 +806,8 @@ bool SettingsCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, c
             } else if (strcmp(value, "off") == 0) {
                 EMSESP_Status.shower_timer = false;
                 ok                         = true;
+            } else {
+                myDebug("Error. Usage: set shower_timer <on | off>");
             }
         }
 
@@ -799,6 +819,8 @@ bool SettingsCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, c
             } else if (strcmp(value, "off") == 0) {
                 EMSESP_Status.shower_alert = false;
                 ok                         = true;
+            } else {
+                myDebug("Error. Usage: set shower_alert <on | off>");
             }
         }
     }
@@ -969,8 +991,14 @@ void TelnetCommandCallback(uint8_t wc, const char * commandLine) {
 
 // OTA callback when the OTA process starts
 // so we can disable the EMS to avoid any noise
-void OTACallback() {
+void OTACallback_pre() {
     emsuart_stop();
+}
+
+// OTA callback when the OTA process finishes
+// so we can re-enable the UART
+void OTACallback_post() {
+    emsuart_start();
 }
 
 // MQTT Callback to handle incoming/outgoing changes
@@ -1280,7 +1308,7 @@ void setup() {
                   MQTTCallback);
 
     // OTA callback which is called when OTA is starting
-    myESP.setOTA(OTACallback);
+    myESP.setOTA(OTACallback_pre, OTACallback_post);
 
     // custom settings in SPIFFS
     myESP.setSettings(FSCallback, SettingsCallback);

@@ -9,7 +9,7 @@
 #ifndef MyEMS_h
 #define MyEMS_h
 
-#define MYESP_VERSION "1.1.6"
+#define MYESP_VERSION "1.1.6b1"
 
 #include <ArduinoJson.h>
 #include <ArduinoOTA.h>
@@ -144,6 +144,7 @@ class MyESP {
     void setWIFICallback(void (*callback)());
     void setWIFI(const char * wifi_ssid, const char * wifi_password, wifi_callback_f callback);
     bool isWifiConnected();
+    bool isAPmode();
 
     // mqtt
     bool isMQTTConnected();
@@ -163,7 +164,7 @@ class MyESP {
                  mqtt_callback_f callback);
 
     // OTA
-    void setOTA(ota_callback_f OTACallback);
+    void setOTA(ota_callback_f OTACallback_pre, ota_callback_f OTACallback_post);
 
     // debug & telnet
     void myDebug(const char * format, ...);
@@ -175,7 +176,7 @@ class MyESP {
     void setSettings(fs_callback_f callback, fs_settings_callback_f fs_settings_callback);
     bool fs_saveConfig();
 
-    // CRASH
+    // Crash
     void crashClear();
     void crashDump();
     void crashTest(uint8_t t);
@@ -224,10 +225,11 @@ class MyESP {
     char *          _wifi_ssid;
     char *          _wifi_password;
     bool            _wifi_connected;
-    String          getESPhostname();
+    String          _getESPhostname();
 
     // ota
-    ota_callback_f _ota_callback;
+    ota_callback_f _ota_pre_callback;
+    ota_callback_f _ota_post_callback;
     void           _ota_setup();
     void           _OTACallback();
 

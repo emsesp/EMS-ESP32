@@ -129,13 +129,13 @@ void ICACHE_FLASH_ATTR emsuart_init() {
     system_os_task(emsuart_recvTask, EMSUART_recvTaskPrio, recvTaskQueue, EMSUART_recvTaskQueueLen);
 
     // disable esp debug which will go to Tx and mess up the line
-    // system_set_os_print(0); // https://github.com/espruino/Espruino/issues/655
-
-    ETS_UART_INTR_ATTACH(emsuart_rx_intr_handler, NULL);
-    ETS_UART_INTR_ENABLE();
+    system_set_os_print(0); // https://github.com/espruino/Espruino/issues/655
 
     // swap Rx and Tx pins to use GPIO13 (D7) and GPIO15 (D8) respectively
     system_uart_swap();
+
+    ETS_UART_INTR_ATTACH(emsuart_rx_intr_handler, NULL);
+    ETS_UART_INTR_ENABLE();
 }
 
 /*
@@ -143,10 +143,17 @@ void ICACHE_FLASH_ATTR emsuart_init() {
  */
 void ICACHE_FLASH_ATTR emsuart_stop() {
     ETS_UART_INTR_DISABLE();
-    ETS_UART_INTR_ATTACH(NULL, NULL);
-    system_uart_swap(); // to be sure, swap Tx/Rx back. Idea from Simon Arlott
+    //ETS_UART_INTR_ATTACH(NULL, NULL);
+    //system_uart_swap(); // to be sure, swap Tx/Rx back. Idea from Simon Arlott
     //detachInterrupt(digitalPinToInterrupt(D7));
     //noInterrupts();
+}
+
+/*
+ * re-start UART0 driver
+ */
+void ICACHE_FLASH_ATTR emsuart_start() {
+    ETS_UART_INTR_ENABLE();
 }
 
 /*

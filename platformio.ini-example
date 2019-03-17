@@ -13,10 +13,10 @@ platform = ${common.platform_def}
 flash_mode = dout
 
 ; for production
-;build_flags = -Os
+build_flags = -Os -w
 
 ; for debug
-build_flags = -g -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-parameter -Wno-unused-variable -DCRASH
+; build_flags = -g -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-parameter -Wno-unused-variable -DCRASH
 
 wifi_settings =
 ; hard code if you prefer. Recommendation is to set from within the app when in Serial or AP mode
