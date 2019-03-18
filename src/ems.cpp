@@ -118,7 +118,7 @@ const _EMS_Type EMS_Types[] = {
 
 };
 
-// calculate sizes of arrays
+// calculate sizes of arrays at compile
 uint8_t _EMS_Types_max        = ArraySize(EMS_Types);        // number of defined types
 uint8_t _Boiler_Types_max     = ArraySize(Boiler_Types);     // number of models
 uint8_t _Thermostat_Types_max = ArraySize(Thermostat_Types); // number of defined thermostat types
@@ -162,6 +162,7 @@ void ems_init() {
     EMS_Sys_Status.emsBusConnected  = false;
     EMS_Sys_Status.emsRxTimestamp   = 0;
     EMS_Sys_Status.emsTxCapable     = false;
+    EMS_Sys_Status.emsTxDisabled    = false;
     EMS_Sys_Status.emsPollTimestamp = 0;
     EMS_Sys_Status.txRetryCount     = 0;
 
@@ -234,12 +235,12 @@ void ems_init() {
 
     // set boiler type
     EMS_Boiler.product_id = 0;
-    strlcpy(EMS_Boiler.version, "not set", sizeof(EMS_Boiler.version));
+    strlcpy(EMS_Boiler.version, "?", sizeof(EMS_Boiler.version));
 
     // set thermostat model
     EMS_Thermostat.model_id   = EMS_MODEL_NONE;
     EMS_Thermostat.product_id = 0;
-    strlcpy(EMS_Thermostat.version, "not set", sizeof(EMS_Thermostat.version));
+    strlcpy(EMS_Thermostat.version, "?", sizeof(EMS_Thermostat.version));
 
     // default logging is none
     ems_setLogging(EMS_SYS_LOGGING_DEFAULT);
@@ -273,6 +274,10 @@ bool ems_getThermostatEnabled() {
 
 uint8_t ems_getThermostatModel() {
     return (EMS_Thermostat.model_id);
+}
+
+void ems_setTxDisabled(bool b) {
+    EMS_Sys_Status.emsTxDisabled = b;
 }
 
 bool ems_getTxCapable() {
@@ -392,7 +397,7 @@ char * _smallitoa(uint8_t value, char * buffer) {
 }
 
 /* for decimals 0 to 999, printed as a string
- * From Simon Arlott @nomis
+ * From @nomis
  */
 char * _smallitoa3(uint16_t value, char * buffer) {
     buffer[0] = ((value / 100) == 0) ? '0' : (value / 100) + '0';
@@ -406,24 +411,24 @@ char * _smallitoa3(uint16_t value, char * buffer) {
  * debug print a telegram to telnet/serial including the CRC
  * len is length in bytes including the CRC
  */
-void _debugPrintTelegram(const char * prefix, uint8_t * data, uint8_t len, const char * color) {
+void _debugPrintTelegram(const char * prefix, _EMS_RxTelegram EMS_RxTelegram, const char * color) {
     if (EMS_Sys_Status.emsLogging <= EMS_SYS_LOGGING_BASIC)
         return;
 
-    char output_str[200] = {0};
-    char buffer[16]      = {0};
+    char      output_str[200] = {0};
+    char      buffer[16]      = {0};
+    uint8_t   len             = EMS_RxTelegram.length;
+    uint8_t * data            = EMS_RxTelegram.telegram;
 
-    unsigned long upt = millis();
-    
     strlcpy(output_str, "(", sizeof(output_str));
     strlcat(output_str, COLOR_CYAN, sizeof(output_str));
-    strlcat(output_str, _smallitoa((uint8_t)((upt / 3600000) % 24), buffer), sizeof(output_str));
+    strlcat(output_str, _smallitoa((uint8_t)((EMS_RxTelegram.timestamp / 3600000) % 24), buffer), sizeof(output_str));
     strlcat(output_str, ":", sizeof(output_str));
-    strlcat(output_str, _smallitoa((uint8_t)((upt / 60000) % 60), buffer), sizeof(output_str));
+    strlcat(output_str, _smallitoa((uint8_t)((EMS_RxTelegram.timestamp / 60000) % 60), buffer), sizeof(output_str));
     strlcat(output_str, ":", sizeof(output_str));
-    strlcat(output_str, _smallitoa((uint8_t)((upt / 1000) % 60), buffer), sizeof(output_str));
+    strlcat(output_str, _smallitoa((uint8_t)((EMS_RxTelegram.timestamp / 1000) % 60), buffer), sizeof(output_str));
     strlcat(output_str, ".", sizeof(output_str));
-    strlcat(output_str, _smallitoa3(upt % 1000, buffer), sizeof(output_str));
+    strlcat(output_str, _smallitoa3(EMS_RxTelegram.timestamp % 1000, buffer), sizeof(output_str));
     strlcat(output_str, COLOR_RESET, sizeof(output_str));
     strlcat(output_str, ") ", sizeof(output_str));
 
@@ -468,9 +473,13 @@ void _ems_sendTelegram() {
     // if we're in raw mode just fire and forget
     if (EMS_TxTelegram.action == EMS_TX_TELEGRAM_RAW) {
         EMS_TxTelegram.data[EMS_TxTelegram.length - 1] = _crcCalculator(EMS_TxTelegram.data, EMS_TxTelegram.length); // add the CRC
-        _debugPrintTelegram("Sending raw", EMS_TxTelegram.data, EMS_TxTelegram.length, COLOR_CYAN);                  // always show
-        emsuart_tx_buffer(EMS_TxTelegram.data, EMS_TxTelegram.length); // send the telegram to the UART Tx
-        EMS_TxQueue.shift();                                           // remove from queue
+        _EMS_RxTelegram EMS_RxTelegram;
+        EMS_RxTelegram.length    = EMS_TxTelegram.length;
+        EMS_RxTelegram.telegram  = EMS_TxTelegram.data;
+        EMS_RxTelegram.timestamp = millis();                            // now
+        _debugPrintTelegram("Sending raw", EMS_RxTelegram, COLOR_CYAN); // always show
+        emsuart_tx_buffer(EMS_TxTelegram.data, EMS_TxTelegram.length);  // send the telegram to the UART Tx
+        EMS_TxQueue.shift();                                            // remove from queue
         return;
     }
 
@@ -514,7 +523,11 @@ void _ems_sendTelegram() {
             snprintf(s, sizeof(s), "Sending validate of type 0x%02X to 0x%02X:", EMS_TxTelegram.type, EMS_TxTelegram.dest & 0x7F);
         }
 
-        _debugPrintTelegram(s, EMS_TxTelegram.data, EMS_TxTelegram.length, COLOR_CYAN);
+        _EMS_RxTelegram EMS_RxTelegram;
+        EMS_RxTelegram.length    = EMS_TxTelegram.length;
+        EMS_RxTelegram.telegram  = EMS_TxTelegram.data;
+        EMS_RxTelegram.timestamp = millis(); // now
+        _debugPrintTelegram(s, EMS_RxTelegram, COLOR_CYAN);
     }
 
     // send the telegram to the UART Tx
@@ -577,12 +590,19 @@ void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
     // check if we just received a single byte
     // it could well be a Poll request from the boiler for us, which will have a value of 0x8B (0x0B | 0x80)
     // or either a return code like 0x01 or 0x04 from the last Write command
+
+    // create the Rx package
+    _EMS_RxTelegram EMS_RxTelegram;
+    EMS_RxTelegram.length    = length;
+    EMS_RxTelegram.telegram  = telegram;
+    EMS_RxTelegram.timestamp = millis();
+
     if (length == 1) {
         uint8_t value = telegram[0]; // 1st byte of data package
 
         // check first for a Poll for us
         if (value == (EMS_ID_ME | 0x80)) {
-            EMS_Sys_Status.emsPollTimestamp = millis(); // store when we received a last poll
+            EMS_Sys_Status.emsPollTimestamp = EMS_RxTelegram.timestamp; // store when we received a last poll
             EMS_Sys_Status.emsTxCapable     = true;
 
             // do we have something to send thats waiting in the Tx queue?
@@ -628,7 +648,7 @@ void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
     if (telegram[length - 1] != crc) {
         EMS_Sys_Status.emxCrcErr++;
         if (EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_VERBOSE) {
-            _debugPrintTelegram("Corrupt telegram:", telegram, length, COLOR_RED);
+            _debugPrintTelegram("Corrupt telegram:", EMS_RxTelegram, COLOR_RED);
         }
         return;
     }
@@ -647,24 +667,25 @@ void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
 
     // here we know its a valid incoming telegram of at least 6 bytes
     // we use this to see if we always have a connection to the boiler, in case of drop outs
-    EMS_Sys_Status.emsRxTimestamp  = millis(); // timestamp of last read
+    EMS_Sys_Status.emsRxTimestamp  = EMS_RxTelegram.timestamp; // timestamp of last read
     EMS_Sys_Status.emsBusConnected = true;
 
     // now lets process it and see what to do next
-    _processType(telegram, length);
+    _processType(EMS_RxTelegram);
 }
 
 /**
  * print detailed telegram
  * and then call its callback if there is one defined
  */
-void _ems_processTelegram(uint8_t * telegram, uint8_t length) {
+void _ems_processTelegram(_EMS_RxTelegram EMS_RxTelegram) {
     // header
-    uint8_t   src    = telegram[0] & 0x7F;
-    uint8_t   dest   = telegram[1] & 0x7F; // remove 8th bit to handle both reads and writes
-    uint8_t   type   = telegram[2];
-    uint8_t   offset = telegram[3];
-    uint8_t * data   = telegram + 4; // data block starts at position 5
+    uint8_t * telegram = EMS_RxTelegram.telegram;
+    uint8_t   src      = telegram[0] & 0x7F;
+    uint8_t   dest     = telegram[1] & 0x7F; // remove 8th bit to handle both reads and writes
+    uint8_t   type     = telegram[2];
+    uint8_t   offset   = telegram[3];
+    uint8_t * data     = telegram + 4; // data block starts at position 5
 
     // print detailed telegram data
     if (EMS_Sys_Status.emsLogging >= EMS_SYS_LOGGING_THERMOSTAT) {
@@ -710,11 +731,11 @@ void _ems_processTelegram(uint8_t * telegram, uint8_t length) {
         if (EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_THERMOSTAT) {
             // only print ones to/from thermostat if logging is set to thermostat only
             if ((src == EMS_Thermostat.type_id) || (dest == EMS_Thermostat.type_id)) {
-                _debugPrintTelegram(output_str, telegram, length, color_s);
+                _debugPrintTelegram(output_str, EMS_RxTelegram, color_s);
             }
         } else {
             // always print
-            _debugPrintTelegram(output_str, telegram, length, color_s);
+            _debugPrintTelegram(output_str, EMS_RxTelegram, color_s);
         }
     }
 
@@ -746,7 +767,7 @@ void _ems_processTelegram(uint8_t * telegram, uint8_t length) {
             // call callback function to process it
             // as we only handle complete telegrams (not partial) check that the offset is 0
             if (offset == EMS_ID_NONE) {
-                (void)EMS_Types[i].processType_cb(type, data, length - 5);
+                (void)EMS_Types[i].processType_cb(type, data, EMS_RxTelegram.length - 5);
             }
         }
     }
@@ -767,19 +788,22 @@ void _removeTxQueue() {
  * length is only data bytes, excluding the BRK
  * We only remove from the Tx queue if the read or write was successful
  */
-void _processType(uint8_t * telegram, uint8_t length) {
+void _processType(_EMS_RxTelegram EMS_RxTelegram) {
+    uint8_t * telegram = EMS_RxTelegram.telegram;
+    uint8_t   length   = EMS_RxTelegram.length;
+
     // header
     uint8_t src = telegram[0] & 0x7F; // removing 8th bit as we deal with both reads and writes here
 
     // if its an echo of ourselves from the master UBA, ignore
     if (src == EMS_ID_ME) {
-        //_debugPrintTelegram("Telegram echo:", telegram, length, COLOR_BLUE);
+        _debugPrintTelegram("echo:", EMS_RxTelegram, COLOR_WHITE);
         return;
     }
 
     // if its a broadcast and we didn't just send anything, process it and exit
     if (EMS_Sys_Status.emsTxStatus == EMS_TX_STATUS_IDLE) {
-        _ems_processTelegram(telegram, length);
+        _ems_processTelegram(EMS_RxTelegram);
         return;
     }
 
@@ -791,13 +815,13 @@ void _processType(uint8_t * telegram, uint8_t length) {
     // and if not we probably didn't get any response so remove the last Tx from the queue and process the telegram anyway
     if ((telegram[1] & 0x7F) != EMS_ID_ME) {
         _removeTxQueue();
-        _ems_processTelegram(telegram, length);
+        _ems_processTelegram(EMS_RxTelegram);
         return;
     }
 
     // first double check we actually have something in the queue
     if (EMS_TxQueue.isEmpty()) {
-        _ems_processTelegram(telegram, length);
+        _ems_processTelegram(EMS_RxTelegram);
         return;
     }
 
@@ -832,7 +856,7 @@ void _processType(uint8_t * telegram, uint8_t length) {
                 }
             }
         }
-        _ems_processTelegram(telegram, length); // process it always
+        _ems_processTelegram(EMS_RxTelegram); // process it always
     }
 
     if (EMS_TxTelegram.action == EMS_TX_TELEGRAM_WRITE) {
@@ -1128,7 +1152,7 @@ void _process_Version(uint8_t type, uint8_t * data, uint8_t length) {
 
     if (typeFound) {
         // its a boiler
-        myDebug("Boiler type device found. Model %s with TypeID 0x%02X, Product ID %d, Version %s",
+        myDebug("Boiler found. Model %s with TypeID 0x%02X, Product ID %d, Version %s",
                 Boiler_Types[i].model_string,
                 Boiler_Types[i].type_id,
                 product_id,
@@ -1198,7 +1222,6 @@ void _process_Version(uint8_t type, uint8_t * data, uint8_t length) {
     } else {
         myDebug("Unrecognized device found. TypeID 0x%02X, Product ID %d, Version %s", type, product_id, version);
     }
-
 }
 
 /*
@@ -1531,6 +1554,11 @@ void ems_doReadCommand(uint8_t type, uint8_t dest, bool forceRefresh) {
         return;
     }
 
+    // if we're preventing all outbound traffic, quit
+    if (EMS_Sys_Status.emsTxDisabled) {
+        return;
+    }
+
     _EMS_TxTelegram EMS_TxTelegram = EMS_TX_TELEGRAM_NEW; // create new Tx
     EMS_TxTelegram.timestamp       = millis();            // set timestamp
     EMS_Sys_Status.txRetryCount    = 0;                   // reset retry counter
@@ -1569,6 +1597,10 @@ void ems_sendRawTelegram(char * telegram) {
     char *  p;
     char    value[10] = {0};
 
+    if (EMS_Sys_Status.emsTxDisabled) {
+        return; // user has disabled all Tx
+    }
+
     _EMS_TxTelegram EMS_TxTelegram = EMS_TX_TELEGRAM_NEW; // create new Tx
     EMS_TxTelegram.timestamp       = millis();            // set timestamp
     EMS_Sys_Status.txRetryCount    = 0;                   // reset retry counter
@@ -1592,6 +1624,10 @@ void ems_sendRawTelegram(char * telegram) {
                 EMS_TxTelegram.offset = val;
             }
         }
+    }
+
+    if (count == 0) {
+        return; // nothing to send
     }
 
     // calculate length including header and CRC
@@ -1844,4 +1880,27 @@ void ems_setWarmTapWaterActivated(bool activated) {
     }
 
     EMS_TxQueue.push(EMS_TxTelegram); // add to queue
+}
+
+/*
+ * Start up sequence for UBA Master
+ * Still experimental
+ */
+void ems_startupTelegrams() {
+    if ((EMS_Sys_Status.emsTxDisabled) || (!EMS_Sys_Status.emsBusConnected)) {
+        myDebug("Unable to send startup sequence when in silent mode or bus is disabled");
+    }
+
+    myDebug("Sending startup sequence...");
+    char s[20] = {0};
+
+    // (00:07:27.512) Telegram echo: telegram: 0B 08 1D 00 00 (CRC=84), #data=1
+    // Write type 0x1D to get out of function test mode
+    snprintf(s, sizeof(s), "%02X %02X 1D 00 00", EMS_ID_ME, EMS_Boiler.type_id);
+    ems_sendRawTelegram(s);
+
+    // (00:07:35.555) Telegram echo: telegram: 0B 88 01 00 1B (CRC=8B), #data=1
+    // Read type 0x01
+    snprintf(s, sizeof(s), "%02X %02X 01 00 1B", EMS_ID_ME, EMS_Boiler.type_id | 0x80);
+    ems_sendRawTelegram(s);
 }

@@ -92,6 +92,7 @@ typedef struct {
     unsigned long    emsRxTimestamp;   // timestamp of last EMS message received
     unsigned long    emsPollTimestamp; // timestamp of last EMS poll sent to us
     bool             emsTxCapable;     // able to send via Tx
+    bool             emsTxDisabled;    // true to prevent all Tx
     uint8_t          txRetryCount;     // # times the last Tx was re-sent
 } _EMS_Sys_Status;
 
@@ -112,6 +113,12 @@ typedef struct {
     uint8_t                 data[EMS_MAX_TELEGRAM_LENGTH];
 } _EMS_TxTelegram;
 
+// The Rx receive package
+typedef struct {
+    uint32_t  timestamp; // timestamp from millis()
+    uint8_t * telegram;  // the full data package
+    uint8_t   length;    // length in bytes
+} _EMS_RxTelegram;
 
 
 // default empty Tx
@@ -179,7 +186,7 @@ typedef struct {           // UBAParameterWW
     float    extTemp;     // Outside temperature
     float    boilTemp;    // Boiler temperature
     uint8_t  pumpMod;     // Pump modulation
-    uint32_t burnStarts;  // # burner restarts
+    uint32_t burnStarts;  // # burner starts
     uint32_t burnWorkMin; // Total burner operating time
     uint32_t heatWorkMin; // Total heat operating time
 
@@ -251,12 +258,12 @@ void ems_setWarmWaterTemp(uint8_t temperature);
 void ems_setWarmWaterActivated(bool activated);
 void ems_setWarmTapWaterActivated(bool activated);
 void ems_setPoll(bool b);
-void ems_setTxEnabled(bool b);
 void ems_setLogging(_EMS_SYS_LOGGING loglevel);
 void ems_setEmsRefreshed(bool b);
 void ems_setWarmWaterModeComfort(uint8_t comfort);
 bool ems_checkEMSBUSAlive();
 void ems_setModels();
+void ems_setTxDisabled(bool b);
 
 void             ems_getThermostatValues();
 void             ems_getBoilerValues();
@@ -277,10 +284,12 @@ char * ems_getThermostatDescription(char * buffer);
 void   ems_printTxQueue();
 char * ems_getBoilerDescription(char * buffer);
 
+void ems_startupTelegrams();
+
 // private functions
 uint8_t _crcCalculator(uint8_t * data, uint8_t len);
-void    _processType(uint8_t * telegram, uint8_t length);
-void    _debugPrintPackage(const char * prefix, uint8_t * data, uint8_t len, const char * color);
+void    _processType(_EMS_RxTelegram EMS_RxTelegram);
+void    _debugPrintPackage(const char * prefix, _EMS_RxTelegram EMS_RxTelegram, const char * color);
 void    _ems_clearTxData();
 int     _ems_findBoilerModel(uint8_t model_id);
 bool    _ems_setModel(uint8_t model_id);
