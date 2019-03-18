@@ -66,7 +66,7 @@ typedef struct {
     // custom params
     bool     shower_timer; // true if we want to report back on shower times
     bool     shower_alert; // true if we want the alert of cold water
-    bool     led_enabled;  // LED on/off
+    bool     led;          // LED on/off
     bool     silent_mode;  // stop automatic Tx on/off
     uint16_t publish_time; // frequency of MQTT publish in seconds
     uint8_t  led_gpio;
@@ -276,7 +276,7 @@ void showInfo() {
         myDebug("  System logging set to None");
     }
 
-    myDebug("  LED is %s, Silent mode is %s", EMSESP_Status.led_enabled ? "on" : "off", EMSESP_Status.silent_mode ? "on" : "off");
+    myDebug("  LED is %s, Silent mode is %s", EMSESP_Status.led ? "on" : "off", EMSESP_Status.silent_mode ? "on" : "off");
     myDebug("  # connected Dallas temperature sensors=%d", EMSESP_Status.dallas_sensors);
 
     myDebug("  Thermostat is %s, Boiler is %s, Shower Timer is %s, Shower Alert is %s",
@@ -647,77 +647,61 @@ void startThermostatScan(uint8_t start) {
 
 // callback for loading/saving settings to the file system (SPIFFS)
 bool FSCallback(MYESP_FSACTION action, const JsonObject json) {
-    bool recreate_config = false;
+    bool recreate_config = true;
 
     if (action == MYESP_FSACTION_LOAD) {
         // led
-        if (!(EMSESP_Status.led_enabled = json["led"])) {
-            EMSESP_Status.led_enabled = LED_BUILTIN; // default value
-            recreate_config           = true;
-        }
+        EMSESP_Status.led = json["led"];
 
         // led_gpio
         if (!(EMSESP_Status.led_gpio = json["led_gpio"])) {
             EMSESP_Status.led_gpio = EMSESP_LED_GPIO; // default value
-            recreate_config        = true;
         }
 
         // dallas_gpio
         if (!(EMSESP_Status.dallas_gpio = json["dallas_gpio"])) {
             EMSESP_Status.dallas_gpio = EMSESP_DALLAS_GPIO; // default value
-            recreate_config           = true;
         }
 
         // dallas_parasite
         if (!(EMSESP_Status.dallas_parasite = json["dallas_parasite"])) {
             EMSESP_Status.dallas_parasite = EMSESP_DALLAS_PARASITE; // default value
-            recreate_config               = true;
         }
 
         // thermostat_type
         if (!(EMS_Thermostat.type_id = json["thermostat_type"])) {
             EMS_Thermostat.type_id = EMSESP_THERMOSTAT_TYPE; // set default
-            recreate_config        = true;
         }
 
         // boiler_type
         if (!(EMS_Boiler.type_id = json["boiler_type"])) {
             EMS_Boiler.type_id = EMSESP_BOILER_TYPE; // set default
-            recreate_config    = true;
         }
 
-        // test mode
-        if (!(EMSESP_Status.silent_mode = json["silent_mode"])) {
-            EMSESP_Status.silent_mode = false; // default value
-            ems_setTxDisabled(false);
-            recreate_config = true;
-        } else {
-            ems_setTxDisabled(true); // silent_mpde is on
-        }
+        // silent mode
+        EMSESP_Status.silent_mode = json["silent_mode"];
+        ems_setTxDisabled(EMSESP_Status.silent_mode);
 
         // shower_timer
         if (!(EMSESP_Status.shower_timer = json["shower_timer"])) {
             EMSESP_Status.shower_timer = false; // default value
-            recreate_config            = true;
         }
 
         // shower_alert
         if (!(EMSESP_Status.shower_alert = json["shower_alert"])) {
             EMSESP_Status.shower_alert = false; // default value
-            recreate_config            = true;
         }
 
         // publish_time
         if (!(EMSESP_Status.publish_time = json["publish_time"])) {
             EMSESP_Status.publish_time = DEFAULT_PUBLISHVALUES_TIME; // default value
-            recreate_config            = true;
         }
 
         return recreate_config; // return false if some settings are missing and we need to rebuild the file
     }
 
     if (action == MYESP_FSACTION_SAVE) {
-        json["led"]             = EMSESP_Status.led_enabled;
+        json["led"]             = EMSESP_Status.led;
         json["led_gpio"]        = EMSESP_Status.led_gpio;
         json["dallas_gpio"]     = EMSESP_Status.dallas_gpio;
         json["dallas_parasite"] = EMSESP_Status.dallas_parasite;
@@ -736,7 +720,7 @@ bool FSCallback(MYESP_FSACTION action, const JsonObject json) {
 
 // callback for custom settings when showing Stored Settings with the 'set' command
 // wc is number of arguments after the 'set' command
-// returns true if the setting was recognized and changed
+// returns true if the setting was recognized and changed and should be saved back to SPIFFs
 bool SettingsCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, const char * value) {
     bool ok = false;
 
@@ -744,14 +728,13 @@ bool SettingsCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, c
         // led
         if ((strcmp(setting, "led") == 0) && (wc == 2)) {
             if (strcmp(value, "on") == 0) {
-                EMSESP_Status.led_enabled = true;
-                ok                        = true;
+                EMSESP_Status.led = true;
+                ok                = true;
             } else if (strcmp(value, "off") == 0) {
-                EMSESP_Status.led_enabled = false;
-                ok                        = true;
-                // let's make sure LED is really off
-                digitalWrite(EMSESP_Status.led_gpio,
-                             (EMSESP_Status.led_gpio == LED_BUILTIN) ? HIGH : LOW); // light off. For onboard high=off
+                EMSESP_Status.led = false;
+                ok                = true;
+                // let's make sure LED is really off - For onboard high=off
+                digitalWrite(EMSESP_Status.led_gpio, (EMSESP_Status.led_gpio == LED_BUILTIN) ? HIGH : LOW);
             } else {
                 myDebug("Error. Usage: set led <on | off>");
             }
@@ -848,7 +831,7 @@ bool SettingsCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, c
     }
 
     if (action == MYESP_FSACTION_LIST) {
-        myDebug("  led=%s", EMSESP_Status.led_enabled ? "on" : "off");
+        myDebug("  led=%s", EMSESP_Status.led ? "on" : "off");
         myDebug("  led_gpio=%d", EMSESP_Status.led_gpio);
         myDebug("  dallas_gpio=%d", EMSESP_Status.dallas_gpio);
         myDebug("  dallas_parasite=%s", EMSESP_Status.dallas_parasite ? "on" : "off");
@@ -1166,7 +1149,7 @@ void initEMSESP() {
     // general settings
     EMSESP_Status.shower_timer = false;
     EMSESP_Status.shower_alert = false;
-    EMSESP_Status.led_enabled  = true; // LED is on by default
+    EMSESP_Status.led          = true; // LED is on by default
     EMSESP_Status.silent_mode  = false;
     EMSESP_Status.publish_time = DEFAULT_PUBLISHVALUES_TIME;
 
@@ -1201,7 +1184,7 @@ void do_publishValues() {
 // callback to light up the LED, called via Ticker every second
 // fast way is to use WRITE_PERI_REG(PERIPHS_GPIO_BASEADDR + (state ? 4 : 8), (1 << EMSESP_Status.led_gpio)); // 4 is on, 8 is off
 void do_ledcheck() {
-    if (EMSESP_Status.led_enabled) {
+    if (EMSESP_Status.led) {
         if (ems_getBusConnected()) {
             digitalWrite(EMSESP_Status.led_gpio, (EMSESP_Status.led_gpio == LED_BUILTIN) ? LOW : HIGH); // light on. For onboard LED high=off
         } else {

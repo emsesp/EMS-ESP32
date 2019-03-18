@@ -505,7 +505,7 @@ void MyESP::_printSetCommands() {
     myDebug_P(PSTR("*  set erase"));
     myDebug_P(PSTR("*  set wifi [ssid] [password]"));
     myDebug_P(PSTR("*  set <mqtt_host | mqtt_username | mqtt_password> [value]"));
-    myDebug_P(PSTR("*  set serial"));
+    myDebug_P(PSTR("*  set serial <on | off>"));
 
     // print custom commands if available. Taken from progmem
     if (_telnetcommand_callback) {
@@ -679,7 +679,7 @@ void MyESP::_changeSetting(uint8_t wc, const char * setting, const char * value)
 
     myDebug_P(PSTR("")); // newline
 
-    (void)fs_saveConfig();
+    (void)fs_saveConfig(); // always save the values
 }
 
 void MyESP::_telnetCommand(char * commandLine) {
@@ -1244,7 +1244,6 @@ bool MyESP::fs_saveConfig() {
 
 // init the SPIFF file system and load the config
 // if it doesn't exist try and create it
-// force Serial for debugging, and turn it off afterwards
 void MyESP::_fs_setup() {
     if (!SPIFFS.begin()) {
         myDebug_P(PSTR("[FS] Failed to mount the file system. Erasing..."));
@@ -1258,7 +1257,7 @@ void MyESP::_fs_setup() {
         fs_saveConfig();
     }
 
-    //_fs_printConfig(); // enable for debugging
+    // _fs_printConfig(); // enable for debugging
 }
 
 uint16_t MyESP::getSystemLoadAverage() {
