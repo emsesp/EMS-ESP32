@@ -67,8 +67,8 @@ static void emsuart_rx_intr_handler(void * para) {
 
 /*
  * system task triggered on BRK interrupt
- * Read commands are all asynchronous
- * When a buffer is full it is sent to the ems_parseTelegram() function in ems.cpp. This is the hook
+ * incoming received messages are always asynchronous
+ * The full buffer is sent to the ems_parseTelegram() function in ems.cpp.
  */
 static void ICACHE_FLASH_ATTR emsuart_recvTask(os_event_t * events) {
     // get next free EMS Receive buffer
@@ -144,7 +144,7 @@ void ICACHE_FLASH_ATTR emsuart_init() {
 void ICACHE_FLASH_ATTR emsuart_stop() {
     ETS_UART_INTR_DISABLE();
     //ETS_UART_INTR_ATTACH(NULL, NULL);
-    //system_uart_swap(); // to be sure, swap Tx/Rx back. Idea from Simon Arlott
+    //system_uart_swap(); // to be sure, swap Tx/Rx back.
     //detachInterrupt(digitalPinToInterrupt(D7));
     //noInterrupts();
 }
