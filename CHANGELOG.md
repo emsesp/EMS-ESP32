@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - included various fixes and suggestions from @nomis
 - upgraded MyESP library
+- test_mode renamed to silent_mode
 
 ## [1.5.6] 2019-03-09
 
