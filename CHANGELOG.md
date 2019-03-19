@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.5.7 dev] 2019-03-
+## [1.6.0 dev] 2019-03-19
 
 ### Added
 
@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - included various fixes and suggestions from @nomis
 - upgraded MyESP library
 - test_mode renamed to silent_mode
+- 'set wifi' replaced with 'set wifi_ssid and set wifi_password' to allow values with spaces
 
 ## [1.5.6] 2019-03-09
 

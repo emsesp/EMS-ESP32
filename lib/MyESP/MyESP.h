@@ -9,7 +9,7 @@
 #ifndef MyEMS_h
 #define MyEMS_h
 
-#define MYESP_VERSION "1.1.6b2"
+#define MYESP_VERSION "1.1.6b3"
 
 #include <ArduinoJson.h>
 #include <ArduinoOTA.h>
@@ -242,7 +242,7 @@ class MyESP {
     void                     _telnetDisconnected();
     void                     _telnetHandle();
     void                     _telnetCommand(char * commandLine);
-    char *                   _telnet_readWord();
+    char *                   _telnet_readWord(bool allow_all_chars);
     void                     _telnet_setup();
     char                     _command[TELNET_MAX_COMMAND_LENGTH]; // the input command from either Serial or Telnet
     command_t *              _helpProjectCmds;                    // Help of commands setted by project
@@ -250,8 +250,7 @@ class MyESP {
     void                     _consoleShowHelp();
     telnetcommand_callback_f _telnetcommand_callback; // Callable for projects commands
     telnet_callback_f        _telnet_callback;        // callback for connect/disconnect
-    void                     _changeSetting(uint8_t wc, const char * setting, const char * value);
-    void                     _changeSetting2(const char * setting, const char * value1, const char * value2);
+    bool                     _changeSetting(uint8_t wc, const char * setting, const char * value);
 
     // fs
     void _fs_setup();

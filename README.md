@@ -5,7 +5,7 @@ EMS-ESP is a project to build an electronic controller circuit using an Espressi
 There are 3 parts to this project, first the design of the circuit, secondly the code for the ESP8266 microcontroller firmware with telnet and MQTT support, and lastly an example configuration for Home Assistant to monitor the data and issue direct commands via a MQTT broker.
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/b8880625bdf841d4adb2829732030887)](https://app.codacy.com/app/proddy/EMS-ESP?utm_source=github.com&utm_medium=referral&utm_content=proddy/EMS-ESP&utm_campaign=Badge_Grade_Settings)
-[![version](https://img.shields.io/badge/version-1.5.5-brightgreen.svg)](CHANGELOG.md)
+[![version](https://img.shields.io/badge/version-1.6.0-brightgreen.svg)](CHANGELOG.md)
 
 - [EMS-ESP](#ems-esp)
   - [Introduction](#introduction)
@@ -69,7 +69,7 @@ The code and circuit has been tested with a few ESP8266 development boards such 
 5. Connect an external USB 5v power adapter to the ESP8266 board.
 7. When the ESP8266 starts up for the first time the onboard LED will be flashing. This is because the EMS bus is not yet connected and receiving data.
 8. If you haven't hardcoded the WiFi credentials in step 4, the ESP8266 will boot up in a WiFi Access Point (AP) mode with the ssid name `ems-esp`. Now you can either use a laptop and connect to this AP using Telnet to `192.168.1.4` or if its powered from a computers USB use a Serial monitor tool to the ESP's COM port. Tip: to enable Telnet on Windows 10 run `dism /online /Enable-Feature /FeatureName:TelnetClient` or install something like [putty](https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html).
-9. Next is to customize some of the onboard settings. Type `set` to list the current stored settings and `?` to see the syntax. Use `set wifi` to add your wifi credentials and if you're using MQTT set the host, username and password. There is no need to reboot the ESP.
+9. Next is to customize some of the onboard settings. Type `set` to list the current stored settings and `?` to see the syntax. Use `set wifi_ssid` and `set wifi_password` to add your WiFi credentials and if you're using MQTT set the host, username and password. There is no need to reboot the ESP.
 10. The `led_gpio` will default to the onboard LED (which is probably blinking now). Ignore `thermostat_type` and `boiler_type` as these will be auto-detected hopefully later on.
 11. **Important**: By default the serial port is enabled and the EMS bus disabled. This is to allow users to configure their ESP via the serial monitor when pluged into a PC/laptop. You must disable serial with `set serial off` to get the EMS transmission working.
 12. Hook up the ESP to the EMS board as follows:
@@ -330,7 +330,7 @@ pre-baked firmware for the Wemos D1 mini is available in the GitHub [releases](h
 1. Check if you have **python 2.7** installed. If not [download it](https://www.python.org/downloads/) and make sure you select the option to add Python to the windows PATH
 2. Then install the ESPTool by running `pip install esptool` from a command prompt
 
-The ESP8266 will start in Access Point (AP) mode. Connect via WiFi to the SSID **EMS-ESP** and telnet to **192.168.4.1**. Then use the `set wifi` command to configure your own network settings like `set wifi your_ssid your_password`. Alternatively connect the ESP8266 to your PC and open a Serial monitor (with baud 115200) to configure the settings. Make sure you disable Serial support before connecting the EMS lines using `set serial off`.
+The ESP8266 will start in Access Point (AP) mode. Connect via WiFi to the SSID **EMS-ESP** and telnet to **192.168.4.1**. Then use the `set wifi_ssid/set wifi_password` command to configure your own network settings. Alternatively connect the ESP8266 to your PC and open a Serial monitor (with baud 115200) to configure the settings. Make sure you disable Serial support before connecting the EMS lines using `set serial off`.
 
 `set` wil list all currently stored settings.
 

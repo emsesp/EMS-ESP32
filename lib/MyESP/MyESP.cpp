@@ -503,7 +503,7 @@ void MyESP::_printSetCommands() {
     myDebug_P(PSTR("The following set commands are available:"));
     myDebug_P(PSTR("")); // newline
     myDebug_P(PSTR("*  set erase"));
-    myDebug_P(PSTR("*  set wifi [ssid] [password]"));
+    myDebug_P(PSTR("*  set <wifi_ssid | wifi_password> [value]"));
     myDebug_P(PSTR("*  set <mqtt_host | mqtt_username | mqtt_password> [value]"));
     myDebug_P(PSTR("*  set serial <on | off>"));
 
@@ -532,12 +532,14 @@ void MyESP::_printSetCommands() {
     myDebug_P(PSTR("")); // newline
     myDebug_P(PSTR("Stored settings:"));
     myDebug_P(PSTR("")); // newline
-    SerialAndTelnet.printf(PSTR("  wifi=%s "), (!_wifi_ssid) ? "<not set>" : _wifi_ssid);
+    myDebug_P(PSTR("  wifi_ssid=%s "), (!_wifi_ssid) ? "<not set>" : _wifi_ssid);
+    SerialAndTelnet.print(FPSTR("  wifi_password="));
     if (!_wifi_password) {
         SerialAndTelnet.print(FPSTR("<not set>"));
     } else {
-        for (uint8_t i = 0; i < strlen(_wifi_password); i++)
+        for (uint8_t i = 0; i < strlen(_wifi_password); i++) {
             SerialAndTelnet.print(FPSTR("*"));
+        }
     }
     myDebug_P(PSTR("")); // newline
     myDebug_P(PSTR("  mqtt_host=%s"), (!_mqtt_host) ? "<not set>" : _mqtt_host);
@@ -546,8 +548,9 @@ void MyESP::_printSetCommands() {
     if (!_mqtt_password) {
         SerialAndTelnet.print(FPSTR("<not set>"));
     } else {
-        for (uint8_t i = 0; i < strlen(_mqtt_password); i++)
+        for (uint8_t i = 0; i < strlen(_mqtt_password); i++) {
             SerialAndTelnet.print(FPSTR("*"));
+        }
     }
 
     myDebug_P(PSTR("")); // newline
@@ -571,54 +574,47 @@ void MyESP::resetESP() {
 }
 
 // read next word from string buffer
-char * MyESP::_telnet_readWord() {
-    return (strtok(NULL, ", \n"));
-}
-
-// change setting for 2 params (set <command> <value1> <value2>)
-void MyESP::_changeSetting2(const char * setting, const char * value1, const char * value2) {
-    if (strcmp(setting, "wifi") == 0) {
-        if (_wifi_ssid)
-            free(_wifi_ssid);
-        if (_wifi_password)
-            free(_wifi_password);
-        _wifi_ssid     = NULL;
-        _wifi_password = NULL;
-
-        if (value1) {
-            _wifi_ssid = strdup(value1);
-        }
-
-        if (value2) {
-            _wifi_password = strdup(value2);
-        }
-
-        (void)fs_saveConfig();
-        myDebug_P(PSTR("WiFi settings changed. Reboot ESP."));
-        //jw.disconnect();
-        //jw.cleanNetworks();
-        //jw.addNetwork(_wifi_ssid, _wifi_password);
+// if parameter true then a word is only terminated by a newline
+char * MyESP::_telnet_readWord(bool allow_all_chars) {
+    if (allow_all_chars) {
+        return (strtok(NULL, "\n")); // allow only newline
+    } else {
+        return (strtok(NULL, ", \n")); // allow space and comma
     }
 }
 
 // change settings - always as strings
 // messy code but effective since we don't have too many settings
 // wc is word count, number of parameters after the 'set' command
-void MyESP::_changeSetting(uint8_t wc, const char * setting, const char * value) {
+bool MyESP::_changeSetting(uint8_t wc, const char * setting, const char * value) {
     bool ok = false;
 
     // check for our internal commands first
     if (strcmp(setting, "erase") == 0) {
         _fs_eraseConfig();
-        return;
-    } else if ((strcmp(setting, "wifi") == 0) && (wc == 1)) { // erase wifi settings
+        return true;
+
+    } else if (strcmp(setting, "wifi_ssid") == 0) {
         if (_wifi_ssid)
             free(_wifi_ssid);
+        _wifi_ssid = NULL; // just to be sure
+        if (value) {
+            _wifi_ssid = strdup(value);
+        }
+        ok = true;
+        jw.enableSTA(false);
+        myDebug_P(PSTR("Note: please reboot to apply new WiFi settings"));
+    } else if (strcmp(setting, "wifi_password") == 0) {
         if (_wifi_password)
             free(_wifi_password);
-        _wifi_ssid     = NULL;
-        _wifi_password = NULL;
-        ok             = true;
+        _wifi_password = NULL; // just to be sure
+        if (value) {
+            _wifi_password = strdup(value);
+        }
+        ok = true;
+        jw.enableSTA(false);
+        myDebug_P(PSTR("Note: please reboot to apply new WiFi settings"));
+
     } else if (strcmp(setting, "mqtt_host") == 0) {
         if (_mqtt_host)
             free(_mqtt_host);
@@ -643,6 +639,7 @@ void MyESP::_changeSetting(uint8_t wc, const char * setting, const char * value)
             _mqtt_password = strdup(value);
         }
         ok = true;
+
     } else if (strcmp(setting, "serial") == 0) {
         ok          = true;
         _use_serial = false;
@@ -664,29 +661,30 @@ void MyESP::_changeSetting(uint8_t wc, const char * setting, const char * value)
         ok = (_fs_settings_callback)(MYESP_FSACTION_SET, wc, setting, value);
     }
 
-    if (!ok) {
-        myDebug_P(PSTR("\nInvalid parameter for set command."));
-        return;
+    // if we were able to recognize the set command, continue
+    if (ok) {
+        // check for 2 params
+        if (value == nullptr) {
+            myDebug_P(PSTR("%s setting reset to its default value."), setting);
+        } else {
+            // must be 3 params
+            myDebug_P(PSTR("%s changed."), setting);
+        }
+
+        myDebug_P(PSTR("")); // newline
+
+        (void)fs_saveConfig(); // always save the values
     }
 
-    // check for 2 params
-    if (value == nullptr) {
-        myDebug_P(PSTR("%s setting reset to its default value."), setting);
-    } else {
-        // must be 3 params
-        myDebug_P(PSTR("%s changed."), setting);
-    }
-
-    myDebug_P(PSTR("")); // newline
-
-    (void)fs_saveConfig(); // always save the values
+    return ok;
 }
 
 void MyESP::_telnetCommand(char * commandLine) {
+    char * str   = commandLine;
+    bool   state = false;
+
     // count the number of arguments
-    char *   str   = commandLine;
-    bool     state = false;
-    unsigned wc    = 0;
+    unsigned wc = 0;
     while (*str) {
         if (*str == ' ' || *str == '\n' || *str == '\t') {
             state = false;
@@ -698,26 +696,28 @@ void MyESP::_telnetCommand(char * commandLine) {
     }
 
     // check first for reserved commands
-    char * temp             = strdup(commandLine); // because strotok kills original string buffer
-    char * ptrToCommandName = strtok((char *)temp, ", \n");
+    char * temp             = strdup(commandLine);         // because strotok kills original string buffer
+    char * ptrToCommandName = strtok((char *)temp, " \n"); // space and newline
 
     // set command
     if (strcmp(ptrToCommandName, "set") == 0) {
+        bool ok = false;
         if (wc == 1) {
             _printSetCommands();
-        } else if (wc == 2) {
-            char * setting = _telnet_readWord();
-            _changeSetting(1, setting, NULL);
-        } else if (wc == 3) {
-            char * setting = _telnet_readWord();
-            char * value   = _telnet_readWord();
-            _changeSetting(2, setting, value);
-        } else if (wc == 4) {
-            char * setting = _telnet_readWord();
-            char * value1  = _telnet_readWord();
-            char * value2  = _telnet_readWord();
-            _changeSetting2(setting, value1, value2);
+            ok = true;
+        } else if (wc == 2) { // set <xxx>
+            char * setting = _telnet_readWord(false);
+            ok             = _changeSetting(wc - 1, setting, NULL);
+        } else { // set <xxx> <yyy>
+            char * setting = _telnet_readWord(false);
+            char * value   = _telnet_readWord(true); // allow strange characters
+            ok             = _changeSetting(wc - 1, setting, value);
         }
+
+        if (!ok) {
+            myDebug_P(PSTR("\nInvalid parameter for set command."));
+        }
+
         return;
     }
 
@@ -735,13 +735,13 @@ void MyESP::_telnetCommand(char * commandLine) {
 // crash command
 #ifdef CRASH
     if ((strcmp(ptrToCommandName, "crash") == 0) && (wc >= 2)) {
-        char * cmd = _telnet_readWord();
+        char * cmd = _telnet_readWord(false);
         if (strcmp(cmd, "dump") == 0) {
             crashDump();
         } else if (strcmp(cmd, "clear") == 0) {
             crashClear();
         } else if ((strcmp(cmd, "test") == 0) && (wc == 3)) {
-            char * value = _telnet_readWord();
+            char * value = _telnet_readWord(false);
             crashTest(atoi(value));
         }
         return; // don't call custom command line callback
@@ -1253,7 +1253,7 @@ void MyESP::_fs_setup() {
 
     // load the config file. if it doesn't exist (function returns false) create it
     if (!_fs_loadConfig()) {
-        myDebug_P(PSTR("[FS] Re-creating config file"));
+        //myDebug_P(PSTR("[FS] Re-creating config file"));
         fs_saveConfig();
     }
 
