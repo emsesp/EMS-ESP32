@@ -3,8 +3,6 @@
 env_default = d1_mini
 
 [common]
-platform = espressif8266
-[common]
 platform_def = espressif8266
 platform_180 = espressif8266@1.8.0
 platform = ${common.platform_def}
