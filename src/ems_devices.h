@@ -39,6 +39,9 @@
 #define EMS_VALUE_UBAParameterWW_wwComfort_Eco 0xD8         // the value for eco
 #define EMS_VALUE_UBAParameterWW_wwComfort_Intelligent 0xEC // the value for intelligent
 
+// Other
+#define EMS_TYPE_SM10Monitor 0x97 // SM10Monitor
+
 /*
  * Thermostats...
  */
@@ -93,7 +96,10 @@ typedef enum {
     // generic ID for the boiler
     EMS_MODEL_UBA,
 
-    // thermostats
+    // generic ID for all the other weird devices
+    EMS_MODEL_OTHER,
+
+    // and finaly the thermostats
     EMS_MODEL_ES73,
     EMS_MODEL_RC10,
     EMS_MODEL_RC20,
@@ -117,14 +123,19 @@ const _Boiler_Type Boiler_Types[] = {
     {EMS_MODEL_UBA, 115, 0x08, "Nefit Topline Compact"},
     {EMS_MODEL_UBA, 203, 0x08, "Buderus Logamax U122"},
     {EMS_MODEL_UBA, 64, 0x08, "Sieger BK15 Boiler/Nefit Smartline"},
-    {EMS_MODEL_UBA, 190, 0x09, "BC10 Base Controller"},
-    {EMS_MODEL_UBA, 114, 0x09, "BC10 Base Controller"},
-    {EMS_MODEL_UBA, 125, 0x09, "BC25 Base Controller"},
-    {EMS_MODEL_UBA, 205, 0x02, "Nefit Moduline Easy Connect"},
-    {EMS_MODEL_UBA, 68, 0x09, "RFM20 Receiver"},
-    {EMS_MODEL_UBA, 95, 0x08, "Bosch Condens 2500"},
-    {EMS_MODEL_UBA, 251, 0x21, "MM10 Mixer Module"},  // warning, fake product id!
-    {EMS_MODEL_UBA, 250, 0x11, "WM10 Switch Module"}, // warning, fake product id!
+    {EMS_MODEL_UBA, 95, 0x08, "Bosch Condens 2500"}
+
+};
+
+// Other EMS devices which are not considered boilers or thermostats
+const _Other_Type Other_Types[] = {{EMS_MODEL_OTHER, 251, 0x21, "MM10 Mixer Module"},  // warning, fake product id!
+                                   {EMS_MODEL_OTHER, 250, 0x11, "WM10 Switch Module"}, // warning, fake product id!
+                                   {EMS_MODEL_OTHER, 68, 0x09, "RFM20 Receiver"},
+                                   {EMS_MODEL_OTHER, 190, 0x09, "BC10 Base Controller"},
+                                   {EMS_MODEL_OTHER, 114, 0x09, "BC10 Base Controller"},
+                                   {EMS_MODEL_OTHER, 125, 0x09, "BC25 Base Controller"},
+                                   {EMS_MODEL_OTHER, 205, 0x02, "Nefit Moduline Easy Connect"},
+                                   {EMS_MODEL_OTHER, 73, 0x02, "SM10 Solar Module"}
 
 };
 

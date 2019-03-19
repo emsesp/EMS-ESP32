@@ -17,6 +17,8 @@
 #define EMS_ID_ME 0x0B   // Fixed - our device, hardcoded as the "Service Key"
 #define EMS_ID_DEFAULT_BOILER 0x08
 
+#define EMS_ID_SM10 0x30
+
 #define EMS_MIN_TELEGRAM_LENGTH 6 // minimal length for a validation telegram, including CRC
 
 // max length of a telegram, including CRC, for Rx and Tx. Data size is 32, so reserving 40 to be safe
@@ -145,6 +147,13 @@ typedef struct {
     char    model_string[50];
 } _Boiler_Type;
 
+typedef struct {
+    uint8_t model_id;
+    uint8_t product_id;
+    uint8_t type_id;
+    char    model_string[50];
+} _Other_Type;
+
 // Definition for thermostat type
 typedef struct {
     uint8_t model_id;
@@ -215,6 +224,18 @@ typedef struct {           // UBAParameterWW
     uint8_t product_id;
 } _EMS_Boiler;
 
+/*
+ * Telegram package defintions for Other EMS devices
+ */
+typedef struct {
+    // SM10 Solar Module - SM10Monitor
+    bool     SM10;                    // set true if there is a SM10 available
+    float    SM10collectorTemp;       // collector temp from SM10
+    uint8_t  SM10modulationSolarPump; // modulation solar pump
+    uint8_t  SM10pumpOn;              // SM10 pump on/off
+    uint32_t SM10Uptime;              // SM10 uptime
+} _EMS_Other;
+
 // Thermostat data
 typedef struct {
     uint8_t type_id;  // the type ID of the thermostat
@@ -267,6 +288,7 @@ void ems_setTxDisabled(bool b);
 
 void             ems_getThermostatValues();
 void             ems_getBoilerValues();
+void             ems_getOtherValues();
 bool             ems_getPoll();
 bool             ems_getTxEnabled();
 bool             ems_getThermostatEnabled();
@@ -300,3 +322,5 @@ void    _removeTxQueue();
 extern _EMS_Sys_Status EMS_Sys_Status;
 extern _EMS_Boiler     EMS_Boiler;
 extern _EMS_Thermostat EMS_Thermostat;
+extern _EMS_Other      EMS_Other;
+

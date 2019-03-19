@@ -34,6 +34,7 @@ void _process_UBAParameterWW(uint8_t type, uint8_t * data, uint8_t length);
 void _process_UBATotalUptimeMessage(uint8_t type, uint8_t * data, uint8_t length);
 void _process_UBAParametersMessage(uint8_t type, uint8_t * data, uint8_t length);
 void _process_SetPoints(uint8_t type, uint8_t * data, uint8_t length);
+void _process_SM10Monitor(uint8_t type, uint8_t * data, uint8_t length);
 
 // Common for most thermostats
 void _process_RCTime(uint8_t type, uint8_t * data, uint8_t length);
@@ -77,6 +78,9 @@ const _EMS_Type EMS_Types[] = {
     {EMS_MODEL_UBA, EMS_TYPE_UBAParametersMessage, "UBAParametersMessage", _process_UBAParametersMessage},
     {EMS_MODEL_UBA, EMS_TYPE_UBASetPoints, "UBASetPoints", _process_SetPoints},
 
+    // Other devices
+    {EMS_MODEL_OTHER, EMS_TYPE_SM10Monitor, "SM10Monitor", _process_SM10Monitor},
+
     // RC10
     {EMS_MODEL_RC10, EMS_TYPE_RCTime, "RCTime", _process_RCTime},
     {EMS_MODEL_RC10, EMS_TYPE_RC10Set, "RC10Set", _process_RC10Set},
@@ -115,17 +119,18 @@ const _EMS_Type EMS_Types[] = {
     {EMS_MODEL_EASY, EMS_TYPE_EasyStatusMessage, "EasyStatusMessage", _process_EasyStatusMessage},
     {EMS_MODEL_BOSCHEASY, EMS_TYPE_EasyStatusMessage, "EasyStatusMessage", _process_EasyStatusMessage},
 
-
 };
 
 // calculate sizes of arrays at compile
 uint8_t _EMS_Types_max        = ArraySize(EMS_Types);        // number of defined types
-uint8_t _Boiler_Types_max     = ArraySize(Boiler_Types);     // number of models
+uint8_t _Boiler_Types_max     = ArraySize(Boiler_Types);     // number of boiler models
+uint8_t _Other_Types_max      = ArraySize(Other_Types);      // number of other ems devices
 uint8_t _Thermostat_Types_max = ArraySize(Thermostat_Types); // number of defined thermostat types
 
 // these structs contain the data we store from the Boiler and Thermostat
 _EMS_Boiler     EMS_Boiler;
 _EMS_Thermostat EMS_Thermostat;
+_EMS_Other      EMS_Other;
 
 // CRC lookup table with poly 12 for faster checking
 const uint8_t ems_crc_table[] = {0x00, 0x02, 0x04, 0x06, 0x08, 0x0A, 0x0C, 0x0E, 0x10, 0x12, 0x14, 0x16, 0x18, 0x1A, 0x1C, 0x1E, 0x20, 0x22,
@@ -229,6 +234,12 @@ void ems_init() {
     EMS_Boiler.pump_mod_max = EMS_VALUE_INT_NOTSET; // Boiler circuit pump modulation max. power
     EMS_Boiler.pump_mod_min = EMS_VALUE_INT_NOTSET; // Boiler circuit pump modulation min. power
 
+    // Other EMS devices values
+    EMS_Other.SM10collectorTemp       = EMS_VALUE_FLOAT_NOTSET; // collector temp from SM10
+    EMS_Other.SM10modulationSolarPump = EMS_VALUE_INT_NOTSET;   // modulation solar pump
+    EMS_Other.SM10pumpOn              = EMS_VALUE_INT_NOTSET;   // SM10 pump on/off
+    EMS_Other.SM10Uptime              = EMS_VALUE_LONG_NOTSET;  // SM10 uptime
+
     // calculated values
     EMS_Boiler.tapwaterActive = EMS_VALUE_INT_NOTSET; // Hot tap water is on/off
     EMS_Boiler.heatingActive  = EMS_VALUE_INT_NOTSET; // Central heating is on/off
@@ -241,6 +252,9 @@ void ems_init() {
     EMS_Thermostat.model_id   = EMS_MODEL_NONE;
     EMS_Thermostat.product_id = 0;
     strlcpy(EMS_Thermostat.version, "?", sizeof(EMS_Thermostat.version));
+
+    // set other types
+    EMS_Other.SM10 = false;
 
     // default logging is none
     ems_setLogging(EMS_SYS_LOGGING_DEFAULT);
@@ -1219,6 +1233,33 @@ void _process_Version(uint8_t type, uint8_t * data, uint8_t length) {
             // get Thermostat values (if supported)
             ems_getThermostatValues();
         }
+        return;
+    }
+
+    // finally look for the other devices
+    i = 0;
+    while (i < _Other_Types_max) {
+        if (Other_Types[i].product_id == product_id) {
+            typeFound = true; // we have a matching product id. i is the index.
+            break;
+        }
+        i++;
+    }
+
+    if (typeFound) {
+        // its a boiler
+        myDebug("Device found. Model %s with TypeID 0x%02X, Product ID %d, Version %s",
+                Other_Types[i].model_string,
+                Other_Types[i].type_id,
+                product_id,
+                version);
+
+        // see if this is a Solar Module SM10 // TODO: tidy up
+        if (Other_Types[i].type_id == EMS_ID_SM10) {
+            EMS_Other.SM10 = true; // we have detected a SM10
+        }
+
+        return;
     } else {
         myDebug("Unrecognized device found. TypeID 0x%02X, Product ID %d, Version %s", type, product_id, version);
     }
@@ -1279,6 +1320,18 @@ void _ems_setThermostatModel(uint8_t thermostat_modelid) {
     EMS_Thermostat.read_supported  = thermostat_type->read_supported;
     EMS_Thermostat.write_supported = thermostat_type->write_supported;
 }
+
+/*
+ * SM10Monitor - type 0x97
+ */
+void _process_SM10Monitor(uint8_t type, uint8_t * data, uint8_t length) {
+    // TODO: polish off
+    EMS_Other.SM10collectorTemp       = _toFloat(2, data);   // collector temp from SM10
+    EMS_Other.SM10modulationSolarPump = data[4];             // modulation solar pump
+    EMS_Other.SM10pumpOn              = bitRead(data[6], 1); // SM10 pump on/off
+    EMS_Other.SM10Uptime              = _toLong(8, data);    // SM10 uptime
+}
+
 
 /**
  * UBASetPoint 0x1A
@@ -1409,6 +1462,15 @@ void ems_getBoilerValues() {
     ems_doReadCommand(EMS_TYPE_UBATotalUptimeMessage, EMS_Boiler.type_id); // get uptime from boiler
 }
 
+/*
+ * Get other values from EMS devices
+ */
+void ems_getOtherValues() {
+    if (EMS_Other.SM10) {
+        ems_doReadCommand(EMS_TYPE_SM10Monitor, EMS_ID_SM10); // fetch all from SM10Monitor, e.g. 0B B0 97 00 16
+    }
+}
+
 /**
  *  returns current thermostat type as a string
  */
@@ -1491,7 +1553,7 @@ char * ems_getBoilerDescription(char * buffer) {
 void ems_scanDevices() {
     myDebug("Started scan of EMS bus for known devices");
 
-    std::list<uint8_t> Device_Ids; // new list
+    std::list<uint8_t> Device_Ids; // create a new list
 
     // copy over boilers
     for (_Boiler_Type bt : Boiler_Types) {
@@ -1502,6 +1564,12 @@ void ems_scanDevices() {
     for (_Thermostat_Type tt : Thermostat_Types) {
         Device_Ids.push_back(tt.type_id);
     }
+
+    // copy over others
+    for (_Other_Type ot : Other_Types) {
+        Device_Ids.push_back(ot.type_id);
+    }
+
     // remove duplicates and reserved IDs (like our own device)
     Device_Ids.sort();
     Device_Ids.unique();
@@ -1529,6 +1597,14 @@ void ems_printAllTypes() {
 
     for (i = 0; i < _EMS_Types_max; i++) {
         if ((EMS_Types[i].model_id == EMS_MODEL_ALL) || (EMS_Types[i].model_id == EMS_MODEL_UBA)) {
+            myDebug(" type %02X (%s)", EMS_Types[i].type, EMS_Types[i].typeString);
+        }
+    }
+
+    myDebug("\nThese telegram type IDs are recognized for other EMS devices:");
+
+    for (i = 0; i < _EMS_Types_max; i++) {
+        if (EMS_Types[i].model_id == EMS_MODEL_OTHER) {
             myDebug(" type %02X (%s)", EMS_Types[i].type, EMS_Types[i].typeString);
         }
     }

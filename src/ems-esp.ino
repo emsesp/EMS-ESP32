@@ -389,6 +389,19 @@ void showInfo() {
 
     myDebug(""); // newline
 
+    // For SM10 Solar Module
+    if (EMS_Other.SM10) {
+        _renderIntValue("SM10 modulation pump", "%", EMS_Other.SM10modulationSolarPump);
+        _renderFloatValue("SM10 collector temperature", "C", EMS_Other.SM10collectorTemp);
+        _renderBoolValue("SM10 pump", EMS_Other.SM10pumpOn);
+        myDebug("  SM10 uptime: %d days %d hours %d minutes",
+                EMS_Other.SM10Uptime / 1440,
+                (EMS_Other.SM10Uptime % 1440) / 60,
+                EMS_Other.SM10Uptime % 60);
+    }
+
+    myDebug(""); // newline
+
     // Thermostat stats
     if (ems_getThermostatEnabled()) {
         myDebug("%sThermostat stats:%s", COLOR_BOLD_ON, COLOR_BOLD_OFF);
@@ -1217,6 +1230,7 @@ void do_regularUpdates() {
         myDebugLog("Calling scheduled data refresh from EMS devices..");
         ems_getThermostatValues();
         ems_getBoilerValues();
+        ems_getOtherValues();
     }
 }
 
