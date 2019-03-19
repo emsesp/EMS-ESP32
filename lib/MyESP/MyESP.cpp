@@ -1191,6 +1191,7 @@ bool MyESP::_fs_loadConfig() {
 bool MyESP::fs_saveConfig() {
     bool ok = true;
 
+    // call any custom functions before handling SPIFFS
     if (_ota_pre_callback) {
         (_ota_pre_callback)();
     }
@@ -1211,35 +1212,31 @@ bool MyESP::fs_saveConfig() {
 
     // if file exists, remove it just to be safe
     if (SPIFFS.exists(MYEMS_CONFIG_FILE)) {
-        // delete it
         SPIFFS.remove(MYEMS_CONFIG_FILE);
     }
 
+    // open for writing
     File configFile = SPIFFS.open(MYEMS_CONFIG_FILE, "w");
     if (!configFile) {
         myDebug_P(PSTR("[FS] Failed to open config file for writing"));
-        ok = false;
+        return false;
     }
 
-    /*
-    if (ok) {
-        myDebug_P(PSTR("[FS] Writing config file"));
-    }
-    */
 
     // Serialize JSON to file
     if (serializeJson(json, configFile) == 0) {
-        myDebug_P(PSTR("[FS] Failed to write to file"));
+        myDebug_P(PSTR("[FS] Failed to write config file"));
         ok = false;
     }
 
     configFile.close();
 
+    // call any custom functions before handling SPIFFS
     if (_ota_post_callback) {
         (_ota_post_callback)();
     }
 
-    return ok;
+    return ok; // it worked
 }
 
 // init the SPIFF file system and load the config

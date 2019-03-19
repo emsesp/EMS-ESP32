@@ -118,7 +118,7 @@ typedef enum {
 // format is MODEL_ID, PRODUCT ID, TYPE_ID, DESCRIPTION
 const _Boiler_Type Boiler_Types[] = {
 
-    {EMS_MODEL_UBA, 72, 0x08, "MC10"},
+    {EMS_MODEL_UBA, 72, 0x08, "MC10 Module"},
     {EMS_MODEL_UBA, 123, 0x08, "Buderus GB172/Nefit Trendline"},
     {EMS_MODEL_UBA, 115, 0x08, "Nefit Topline Compact"},
     {EMS_MODEL_UBA, 203, 0x08, "Buderus Logamax U122"},
@@ -128,14 +128,16 @@ const _Boiler_Type Boiler_Types[] = {
 };
 
 // Other EMS devices which are not considered boilers or thermostats
-const _Other_Type Other_Types[] = {{EMS_MODEL_OTHER, 251, 0x21, "MM10 Mixer Module"},  // warning, fake product id!
-                                   {EMS_MODEL_OTHER, 250, 0x11, "WM10 Switch Module"}, // warning, fake product id!
-                                   {EMS_MODEL_OTHER, 68, 0x09, "RFM20 Receiver"},
-                                   {EMS_MODEL_OTHER, 190, 0x09, "BC10 Base Controller"},
-                                   {EMS_MODEL_OTHER, 114, 0x09, "BC10 Base Controller"},
-                                   {EMS_MODEL_OTHER, 125, 0x09, "BC25 Base Controller"},
-                                   {EMS_MODEL_OTHER, 205, 0x02, "Nefit Moduline Easy Connect"},
-                                   {EMS_MODEL_OTHER, 73, 0x02, "SM10 Solar Module"}
+const _Other_Type Other_Types[] = {
+
+    {EMS_MODEL_OTHER, 251, 0x21, "MM10 Mixer Module"},  // warning, fake product id!
+    {EMS_MODEL_OTHER, 250, 0x11, "WM10 Switch Module"}, // warning, fake product id!
+    {EMS_MODEL_OTHER, 68, 0x09, "RFM20 Receiver"},
+    {EMS_MODEL_OTHER, 190, 0x09, "BC10 Base Controller"},
+    {EMS_MODEL_OTHER, 114, 0x09, "BC10 Base Controller"},
+    {EMS_MODEL_OTHER, 125, 0x09, "BC25 Base Controller"},
+    {EMS_MODEL_OTHER, 205, 0x02, "Nefit Moduline Easy Connect"},
+    {EMS_MODEL_OTHER, 73, 0x02, "SM10 Solar Module"}
 
 };
 

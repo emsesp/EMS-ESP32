@@ -781,7 +781,7 @@ void _ems_processTelegram(_EMS_RxTelegram EMS_RxTelegram) {
             // call callback function to process it
             // as we only handle complete telegrams (not partial) check that the offset is 0
             if (offset == EMS_ID_NONE) {
-                (void)EMS_Types[i].processType_cb(type, data, EMS_RxTelegram.length - 5);
+                (void)EMS_Types[i].processType_cb(src, data, EMS_RxTelegram.length - 5);
             }
         }
     }
@@ -1247,7 +1247,6 @@ void _process_Version(uint8_t type, uint8_t * data, uint8_t length) {
     }
 
     if (typeFound) {
-        // its a boiler
         myDebug("Device found. Model %s with TypeID 0x%02X, Product ID %d, Version %s",
                 Other_Types[i].model_string,
                 Other_Types[i].type_id,
@@ -1271,6 +1270,9 @@ void _process_Version(uint8_t type, uint8_t * data, uint8_t length) {
 void ems_discoverModels() {
     // boiler
     ems_doReadCommand(EMS_TYPE_Version, EMS_Boiler.type_id); // get version details of boiler
+
+    // solar module
+    ems_doReadCommand(EMS_TYPE_Version, EMS_ID_SM10); // check if there is Solar Module available
 
     // thermostat
     // if it hasn't been set, auto discover it
@@ -1588,23 +1590,18 @@ void ems_printAllTypes() {
     uint8_t i;
 
     myDebug("\nThese %d boiler type devices are in the library:", _Boiler_Types_max);
-
     for (i = 0; i < _Boiler_Types_max; i++) {
         myDebug(" %s,  type ID:0x%02X Product ID:%d", Boiler_Types[i].model_string, Boiler_Types[i].type_id, Boiler_Types[i].product_id);
     }
 
-    myDebug("\nThese telegram type IDs are recognized for the selected boiler:");
-
-    for (i = 0; i < _EMS_Types_max; i++) {
-        if ((EMS_Types[i].model_id == EMS_MODEL_ALL) || (EMS_Types[i].model_id == EMS_MODEL_UBA)) {
-            myDebug(" type %02X (%s)", EMS_Types[i].type, EMS_Types[i].typeString);
-        }
+    myDebug("\nThese %d EMS devices are in the library:", _Other_Types_max);
+    for (i = 0; i < _Other_Types_max; i++) {
+        myDebug(" %s,  type ID:0x%02X Product ID:%d", Other_Types[i].model_string, Other_Types[i].type_id, Other_Types[i].product_id);
     }
 
-    myDebug("\nThese telegram type IDs are recognized for other EMS devices:");
-
+    myDebug("\nThese telegram type IDs are recognized for the selected boiler:");
     for (i = 0; i < _EMS_Types_max; i++) {
-        if (EMS_Types[i].model_id == EMS_MODEL_OTHER) {
+        if ((EMS_Types[i].model_id == EMS_MODEL_ALL) || (EMS_Types[i].model_id == EMS_MODEL_UBA)) {
             myDebug(" type %02X (%s)", EMS_Types[i].type, EMS_Types[i].typeString);
         }
     }

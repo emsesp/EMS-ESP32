@@ -1354,7 +1354,7 @@ void setup() {
                   MQTT_WILL_OFFLINE_PAYLOAD,
                   MQTTCallback);
 
-    // OTA callback which is called when OTA is starting
+    // OTA callback which is called when OTA is starting and stopping
     myESP.setOTA(OTACallback_pre, OTACallback_post);
 
     // custom settings in SPIFFS
