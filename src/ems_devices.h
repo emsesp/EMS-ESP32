@@ -137,7 +137,7 @@ const _Other_Type Other_Types[] = {
     {EMS_MODEL_OTHER, 114, 0x09, "BC10 Base Controller"},
     {EMS_MODEL_OTHER, 125, 0x09, "BC25 Base Controller"},
     {EMS_MODEL_OTHER, 205, 0x02, "Nefit Moduline Easy Connect"},
-    {EMS_MODEL_OTHER, 73, 0x02, "SM10 Solar Module"}
+    {EMS_MODEL_OTHER, 73, EMS_ID_SM10, "SM10 Solar Module"}
 
 };
 

@@ -1236,7 +1236,7 @@ void _process_Version(uint8_t type, uint8_t * data, uint8_t length) {
         return;
     }
 
-    // finally look for the other devices
+    // finally look for the other EMS devices
     i = 0;
     while (i < _Other_Types_max) {
         if (Other_Types[i].product_id == product_id) {
@@ -1253,9 +1253,10 @@ void _process_Version(uint8_t type, uint8_t * data, uint8_t length) {
                 product_id,
                 version);
 
-        // see if this is a Solar Module SM10 // TODO: tidy up
+        // see if this is a Solar Module SM10
         if (Other_Types[i].type_id == EMS_ID_SM10) {
             EMS_Other.SM10 = true; // we have detected a SM10
+            myDebug("SM10 Solar Module support enabled.");
         }
 
         return;
