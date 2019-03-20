@@ -766,6 +766,7 @@ String MyESP::_getESPhostname() {
 }
 
 // returns build time as a String - copied for espurna. see (c)
+// takes the time from the gcc during compilation
 String MyESP::_buildTime() {
     const char   time_now[] = __TIME__; // hh:mm:ss
     unsigned int hour       = atoi(&time_now[0]);

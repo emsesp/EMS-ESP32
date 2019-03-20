@@ -11,7 +11,7 @@ platform = ${common.platform_def}
 flash_mode = dout
 
 ; for production
-build_flags = -Os -w
+build_flags = -g -w
 
 ; for debug
 ; build_flags = -g -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-parameter -Wno-unused-variable -DCRASH

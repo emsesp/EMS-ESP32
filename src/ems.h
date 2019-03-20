@@ -255,7 +255,7 @@ typedef struct {
 } _EMS_Thermostat;
 
 // call back function signature for processing telegram types
-typedef void (*EMS_processType_cb)(uint8_t type, uint8_t * data, uint8_t length);
+typedef void (*EMS_processType_cb)(uint8_t src, uint8_t * data, uint8_t length);
 
 // Definition for each EMS type, including the relative callback function
 typedef struct {
@@ -308,8 +308,8 @@ void ems_startupTelegrams();
 
 // private functions
 uint8_t _crcCalculator(uint8_t * data, uint8_t len);
-void    _processType(_EMS_RxTelegram EMS_RxTelegram);
-void    _debugPrintPackage(const char * prefix, _EMS_RxTelegram EMS_RxTelegram, const char * color);
+void    _processType(_EMS_RxTelegram *EMS_RxTelegram);
+void    _debugPrintPackage(const char * prefix, _EMS_RxTelegram * EMS_RxTelegram, const char * color);
 void    _ems_clearTxData();
 int     _ems_findBoilerModel(uint8_t model_id);
 bool    _ems_setModel(uint8_t model_id);

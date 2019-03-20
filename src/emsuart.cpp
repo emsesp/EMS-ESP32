@@ -102,7 +102,7 @@ void ICACHE_FLASH_ATTR emsuart_init() {
     PIN_FUNC_SELECT(PERIPHS_IO_MUX_U0RXD_U, FUNC_U0RXD);
 
     // set 9600, 8 bits, no parity check, 1 stop bit
-    USD(EMSUART_UART)  = (UART_CLK_FREQ / EMSUART_BAUD);  
+    USD(EMSUART_UART)  = (UART_CLK_FREQ / EMSUART_BAUD);
     USC0(EMSUART_UART) = EMSUART_CONFIG; // 8N1
 
     // flush everything left over in buffer, this clears both rx and tx FIFOs

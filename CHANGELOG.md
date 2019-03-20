@@ -5,15 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.6.0 dev] 2019-03-19
+## [1.6.0 dev] 2019-03-20
 
 ### Added
 
-- system command to show ESP stats
-- crash command to see stack of last system crash, with .py files to track stack dump
-- publish dallas external temp sensors to MQTT (Thanks @JewelZB)
+- system command to show ESP8266 stats
+- crash command to see stack of last system crash, with .py files to track stack dump (compile with -DCRASH)
+- publish dallas external temp sensors to MQTT (thanks @JewelZB)
 - shower timer and shower alert options available via set commands
-- Added support for warm water modes Hot, Comfort and Intelligent (https://github.com/proddy/EMS-ESP/issues/67)
+- added support for warm water modes Hot, Comfort and Intelligent (https://github.com/proddy/EMS-ESP/issues/67)
+- added 'set publish_time' to set how often to publish MQTT
+- support for SM10 Solar Module
 
 ### Fixed
 
@@ -25,7 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - included various fixes and suggestions from @nomis
-- upgraded MyESP library
+- upgraded MyESP library with many optimizations
 - test_mode renamed to silent_mode
 - 'set wifi' replaced with 'set wifi_ssid and set wifi_password' to allow values with spaces
 

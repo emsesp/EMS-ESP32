@@ -110,10 +110,7 @@ command_t PROGMEM project_cmds[] = {
     {false, "boiler read <type ID>", "send read request to boiler"},
     {false, "boiler wwtemp <degrees>", "set boiler warm water temperature"},
     {false, "boiler tapwater <on | off>", "set boiler warm tap water on/off"},
-    {false, "boiler comfort <hot | eco | intelligent>", "set boiler warm water comfort setting"},
-    {false, "startup", "send startup sequence to bus master - still experimental"}
-
-};
+    {false, "boiler comfort <hot | eco | intelligent>", "set boiler warm water comfort setting"}};
 
 // store for overall system status
 _EMSESP_Status EMSESP_Status;
