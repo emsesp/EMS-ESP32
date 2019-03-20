@@ -202,16 +202,16 @@ Every telegram sent is echo'd back to Rx, along the same Bus used for all Rx/Tx 
 ## Ems Plus
 In this chapter we will report our findings on the ems plus.
 ### Message layout
-| 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 |
+| 0 | 1 | 2 | 3 | 4 | 5 | n....n-1 | n |
 | - | - | - | - | - | - | - | - |
+|transmitter| receiver | ems plus mark | message type | offset | device intended for | data | cnc
 | 18 | 00 | FF | 03 | 01 | A5 | 28 | 46|
-|transmitter| receiver | ems plus mark | message type | offset | ? | value | cnc
 
 ### Message types
 | Message type | Definition          |
 |--------------|---------------------|
 | 03           | Set temperature     |
-| 00           | Current temperature |
+| 00           | Status message |
 
 ## The ESP8266 Source Code
 
