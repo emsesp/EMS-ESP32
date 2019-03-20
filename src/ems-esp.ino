@@ -392,13 +392,9 @@ void showInfo() {
 
     // For SM10 Solar Module
     if (EMS_Other.SM10) {
-        _renderIntValue("SM10 modulation pump", "%", EMS_Other.SM10modulationSolarPump);
         _renderFloatValue("SM10 collector temperature", "C", EMS_Other.SM10collectorTemp);
-        _renderBoolValue("SM10 pump", EMS_Other.SM10pumpOn);
-        myDebug("  SM10 uptime: %d days %d hours %d minutes",
-                EMS_Other.SM10Uptime / 1440,
-                (EMS_Other.SM10Uptime % 1440) / 60,
-                EMS_Other.SM10Uptime % 60);
+        _renderFloatValue("SM10 bottom temperature", "C", EMS_Other.SM10bottomTemp);
+        _renderIntValue("SM10 pump", "%", EMS_Other.SM10pumpModulation);
     }
 
     myDebug(""); // newline

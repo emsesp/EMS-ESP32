@@ -235,10 +235,9 @@ void ems_init() {
     EMS_Boiler.pump_mod_min = EMS_VALUE_INT_NOTSET; // Boiler circuit pump modulation min. power
 
     // Other EMS devices values
-    EMS_Other.SM10collectorTemp       = EMS_VALUE_FLOAT_NOTSET; // collector temp from SM10
-    EMS_Other.SM10modulationSolarPump = EMS_VALUE_INT_NOTSET;   // modulation solar pump
-    EMS_Other.SM10pumpOn              = EMS_VALUE_INT_NOTSET;   // SM10 pump on/off
-    EMS_Other.SM10Uptime              = EMS_VALUE_LONG_NOTSET;  // SM10 uptime
+    EMS_Other.SM10collectorTemp  = EMS_VALUE_FLOAT_NOTSET; // collector temp from SM10
+    EMS_Other.SM10bottomTemp     = EMS_VALUE_FLOAT_NOTSET; // bottom temp from SM10
+    EMS_Other.SM10pumpModulation = EMS_VALUE_INT_NOTSET;   // modulation solar pump SM10
 
     // calculated values
     EMS_Boiler.tapwaterActive = EMS_VALUE_INT_NOTSET; // Hot tap water is on/off
@@ -712,6 +711,8 @@ void _ems_processTelegram(_EMS_RxTelegram EMS_RxTelegram) {
             strlcpy(output_str, "Boiler", sizeof(output_str));
         } else if (src == EMS_Thermostat.type_id) {
             strlcpy(output_str, "Thermostat", sizeof(output_str));
+        } else if (src == EMS_ID_SM10) {
+            strlcpy(output_str, "SM10", sizeof(output_str));
         } else {
             strlcpy(output_str, "0x", sizeof(output_str));
             strlcat(output_str, _hextoa(src, buffer), sizeof(output_str));
@@ -728,6 +729,9 @@ void _ems_processTelegram(_EMS_RxTelegram EMS_RxTelegram) {
             strlcpy(color_s, COLOR_GREEN, sizeof(color_s));
         } else if (dest == EMS_Boiler.type_id) {
             strlcat(output_str, "Boiler", sizeof(output_str));
+            strlcpy(color_s, COLOR_MAGENTA, sizeof(color_s));
+        } else if (dest == EMS_ID_SM10) {
+            strlcat(output_str, "SM10", sizeof(output_str));
             strlcpy(color_s, COLOR_MAGENTA, sizeof(color_s));
         } else if (dest == EMS_Thermostat.type_id) {
             strlcat(output_str, "Thermostat", sizeof(output_str));
@@ -1329,10 +1333,9 @@ void _ems_setThermostatModel(uint8_t thermostat_modelid) {
  */
 void _process_SM10Monitor(uint8_t type, uint8_t * data, uint8_t length) {
     // TODO: polish off
-    EMS_Other.SM10collectorTemp       = _toFloat(2, data);   // collector temp from SM10
-    EMS_Other.SM10modulationSolarPump = data[4];             // modulation solar pump
-    EMS_Other.SM10pumpOn              = bitRead(data[6], 1); // SM10 pump on/off
-    EMS_Other.SM10Uptime              = _toLong(8, data);    // SM10 uptime
+    EMS_Other.SM10collectorTemp  = _toFloat(2, data); // collector temp from SM10
+    EMS_Other.SM10bottomTemp     = _toFloat(5, data); // bottom temp from SM10
+    EMS_Other.SM10pumpModulation = data[4];           // modulation solar pump
 }
 
 

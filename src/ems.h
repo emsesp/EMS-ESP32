@@ -20,8 +20,8 @@
 
 #define EMS_MIN_TELEGRAM_LENGTH 6 // minimal length for a validation telegram, including CRC
 
-// max length of a telegram, including CRC, for Rx and Tx. Data size is 32, so reserving 40 to be safe
-#define EMS_MAX_TELEGRAM_LENGTH 40
+// max length of a telegram, including CRC, for Rx and Tx.
+#define EMS_MAX_TELEGRAM_LENGTH 32
 
 // default values
 #define EMS_VALUE_INT_ON 1             // boolean true
@@ -228,11 +228,10 @@ typedef struct {           // UBAParameterWW
  */
 typedef struct {
     // SM10 Solar Module - SM10Monitor
-    bool     SM10;                    // set true if there is a SM10 available
-    float    SM10collectorTemp;       // collector temp from SM10
-    uint8_t  SM10modulationSolarPump; // modulation solar pump
-    uint8_t  SM10pumpOn;              // SM10 pump on/off
-    uint32_t SM10Uptime;              // SM10 uptime
+    bool    SM10;               // set true if there is a SM10 available
+    float   SM10collectorTemp;  // collector temp from SM10
+    float   SM10bottomTemp;     // bottom temp from SM10
+    uint8_t SM10pumpModulation; // modulation solar pump
 } _EMS_Other;
 
 // Thermostat data
