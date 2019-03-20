@@ -21,7 +21,7 @@
 
 #include "EEPROM.h"
 extern "C" {
-     void custom_crash_callback(struct rst_info*, uint32_t, uint32_t);
+void custom_crash_callback(struct rst_info *, uint32_t, uint32_t);
 }
 
 #if defined(ARDUINO_ARCH_ESP32)
@@ -72,6 +72,14 @@ extern "C" {
 #define COLOR_MAGENTA "\x1B[0;35m"
 #define COLOR_CYAN "\x1B[0;36m"
 #define COLOR_WHITE "\x1B[0;37m"
+#define COLOR_BRIGHT_BLACK "\x1B[0;90m"
+#define COLOR_BRIGHT_RED "\x1B[0;91m"
+#define COLOR_BRIGHT_GREEN "\x1B[0;92m"
+#define COLOR_BRIGHT_YELLOW "\x1B[0;99m"
+#define COLOR_BRIGHT_BLUE "\x1B[0;94m"
+#define COLOR_BRIGHT_MAGENTA "\x1B[0;95m"
+#define COLOR_BRIGHT_CYAN "\x1B[0;96m"
+#define COLOR_BRIGHT_WHITE "\x1B[0;97m"
 #define COLOR_BOLD_ON "\x1B[1m"
 #define COLOR_BOLD_OFF "\x1B[22m" // fixed by Scott Arlott
 
@@ -79,19 +87,19 @@ extern "C" {
 #define SPIFFS_MAXSIZE 500 // https://arduinojson.org/v5/assistant/
 
 // CRASH
-#define SAVE_CRASH_EEPROM_OFFSET    0x0100  // initial address for crash data
-#define SAVE_CRASH_EEPROM_SIZE      0x0200  // size
-#define SAVE_CRASH_CRASH_TIME       0x00  // 4 bytes
-#define SAVE_CRASH_RESTART_REASON   0x04  // 1 byte
-#define SAVE_CRASH_EXCEPTION_CAUSE  0x05  // 1 byte
-#define SAVE_CRASH_EPC1             0x06  // 4 bytes
-#define SAVE_CRASH_EPC2             0x0A  // 4 bytes
-#define SAVE_CRASH_EPC3             0x0E  // 4 bytes
-#define SAVE_CRASH_EXCVADDR         0x12  // 4 bytes
-#define SAVE_CRASH_DEPC             0x16  // 4 bytes
-#define SAVE_CRASH_STACK_START      0x1A  // 4 bytes
-#define SAVE_CRASH_STACK_END        0x1E  // 4 bytes
-#define SAVE_CRASH_STACK_TRACE      0x22  // variable
+#define SAVE_CRASH_EEPROM_OFFSET 0x0100 // initial address for crash data
+#define SAVE_CRASH_EEPROM_SIZE 0x0200   // size
+#define SAVE_CRASH_CRASH_TIME 0x00      // 4 bytes
+#define SAVE_CRASH_RESTART_REASON 0x04  // 1 byte
+#define SAVE_CRASH_EXCEPTION_CAUSE 0x05 // 1 byte
+#define SAVE_CRASH_EPC1 0x06            // 4 bytes
+#define SAVE_CRASH_EPC2 0x0A            // 4 bytes
+#define SAVE_CRASH_EPC3 0x0E            // 4 bytes
+#define SAVE_CRASH_EXCVADDR 0x12        // 4 bytes
+#define SAVE_CRASH_DEPC 0x16            // 4 bytes
+#define SAVE_CRASH_STACK_START 0x1A     // 4 bytes
+#define SAVE_CRASH_STACK_END 0x1E       // 4 bytes
+#define SAVE_CRASH_STACK_TRACE 0x22     // variable
 
 typedef struct {
     char key[40];

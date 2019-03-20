@@ -226,7 +226,7 @@ class MyESP {
     char * _boottime;
     bool   _suspendOutput;
     bool   _use_serial;
-    void   _printBuildTime(unsigned long rawTime);
+    void   _printBuildTime(unsigned long unix);
 
     // load average (0..100)
     void               _calculateLoad();
