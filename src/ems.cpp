@@ -25,6 +25,7 @@ CircularBuffer<_EMS_TxTelegram, EMS_TX_TELEGRAM_QUEUE_MAX> EMS_TxQueue; // FIFO 
 
 // generic
 void _process_Version(uint8_t type, uint8_t * data, uint8_t length);
+void _printMessage(uint8_t * telegram, uint8_t length);
 
 // Boiler and Buderus devices
 void _process_UBAMonitorFast(uint8_t type, uint8_t * data, uint8_t length);
@@ -61,8 +62,6 @@ void _process_EasyStatusMessage(uint8_t type, uint8_t * data, uint8_t length);
 void _process_RC1010StatusMessage(uint8_t type, uint8_t * data, uint8_t length);
 void _process_RC1010SetMessage(uint8_t type, uint8_t * data, uint8_t length);
 
-//debug messages
-void _printMessage(uint8_t * telegram, uint8_t length);
 /*
  * Recognized EMS types and the functions they call to process the telegrams
  * Format: MODEL ID, TYPE ID, Description, function
@@ -247,7 +246,7 @@ void ems_init() {
     strlcpy(EMS_Thermostat.version, "not set", sizeof(EMS_Thermostat.version));
 
     // default logging is none
-    ems_setLogging(EMS_SYS_LOGGING_THERMOSTAT);
+    ems_setLogging(EMS_SYS_LOGGING_DEFAULT);
 }
 
 // Getters and Setters for parameters
@@ -791,6 +790,40 @@ void _printMessage(uint8_t * telegram, uint8_t length) {
             _debugPrintTelegram(output_str, telegram, length, color_s);
         }
     }
+
+    // see if we recognize the type first by scanning our known EMS types list
+    // trying to match the type ID
+    bool commonType = false;
+    bool typeFound  = false;
+    bool forUs      = false;
+    int  i          = 0;
+
+    while (i < _EMS_Types_max) {
+        if (EMS_Types[i].type == type) {
+            typeFound  = true;
+            commonType = (EMS_Types[i].model_id == EMS_MODEL_ALL);                       // is it common type for everyone?
+            forUs      = (src == EMS_Boiler.type_id) || (src == EMS_Thermostat.type_id); // is it for us? So the src must match
+            break;
+        }
+        i++;
+    }
+
+    // if it's a common type (across ems devices) or something specifically for us process it.
+    // dest will be EMS_ID_NONE and offset 0x00 for a broadcast message
+    if (typeFound && (commonType || forUs)) {
+        if ((EMS_Types[i].processType_cb) != (void *)NULL) {
+            // print non-verbose message
+            if ((EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_BASIC) || (EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_VERBOSE)) {
+                myDebug("<--- %s(0x%02X) received", EMS_Types[i].typeString, type);
+            }
+            // call callback function to process it
+            // as we only handle complete telegrams (not partial) check that the offset is 0
+            if (offset == EMS_ID_NONE) {
+                (void)EMS_Types[i].processType_cb(type, data, length - 5);
+            }
+        }
+    }
+    EMS_Sys_Status.emsTxStatus = EMS_TX_STATUS_IDLE;
 }
 
 /**
@@ -1054,10 +1087,8 @@ void _process_RC20StatusMessage(uint8_t type, uint8_t * data, uint8_t length) {
 }
 
 /**
- * type 0x41 - data from the RC30 thermostat (0x10) - 14 bytes long
- * For reading the temp values only
- * received every 60 seconds
- */
+    *type 0x41 - data from the RC30 thermostat(0x10) - 14 bytes long * For reading the temp values only * received every 60 seconds 
+*/
 void _process_RC30StatusMessage(uint8_t type, uint8_t * data, uint8_t length) {
     EMS_Thermostat.setpoint_roomTemp = ((float)data[EMS_TYPE_RC30StatusMessage_setpoint]) / (float)2;
     EMS_Thermostat.curr_roomTemp     = _toFloat(EMS_TYPE_RC30StatusMessage_curr, data);
@@ -1090,8 +1121,7 @@ void _process_RC35StatusMessage(uint8_t type, uint8_t * data, uint8_t length) {
 void _process_EasyStatusMessage(uint8_t type, uint8_t * data, uint8_t length) {
     EMS_Thermostat.curr_roomTemp     = ((float)(((data[EMS_TYPE_EasyStatusMessage_curr] << 8) + data[9]))) / 100;
     EMS_Thermostat.setpoint_roomTemp = ((float)(((data[EMS_TYPE_EasyStatusMessage_setpoint] << 8) + data[11]))) / 100;
-
-    EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
+    EMS_Sys_Status.emsRefreshed      = true; // triggers a send the values back via MQTT
 }
 /**
  * type 0x00 - data from the Nefit RC1010 thermostat (0x18) - 24 bytes long
@@ -1580,7 +1610,7 @@ void ems_printAllTypes() {
  */
 void ems_doReadCommand(uint8_t type, uint8_t dest, bool forceRefresh) {
     // if not a valid type of boiler is not accessible then quits
-    if (type == EMS_ID_NONE) {
+    if ((type == EMS_ID_NONE) || (dest == EMS_ID_NONE)) {
         return;
     }
 

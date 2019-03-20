@@ -4,8 +4,11 @@ env_default = d1_mini
 [common]
 platform = espressif8266
 flash_mode = dout
-build_flags = -g -w
-;build_flags = -g -w -DBUILD_TIME=$UNIX_TIME
+
+build_flags_debug = -ggdb3 -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-parameter -Wno-unused-variable
+;build_flags_prod = -Os -DBUILD_TIME=$UNIX_TIME
+
+build_flags = ${common.build_flags_debug}
 
 wifi_settings =
 ; hard code if you prefer. Recommendation is to set from within the app when in Serial or AP mode
@@ -17,7 +20,6 @@ lib_deps =
   JustWifi
   AsyncMqttClient
   ArduinoJson
-;  https://github.com/bblanchon/ArduinoJson#v5.13.5
   OneWire
 
 [env:d1_mini]
@@ -32,6 +34,6 @@ monitor_speed = 115200
 
 ; for OTA comment out these sections
 ;upload_protocol = espota
-;upload_port = ems-esp.local
+;upload_port = <the IP address...>
 
 
