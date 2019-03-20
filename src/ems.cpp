@@ -704,12 +704,12 @@ void _printMessage(uint8_t * telegram, uint8_t length) {
     uint8_t   dest   = telegram[1] & 0x7F; // remove 8th bit to handle both reads and writes
     uint8_t   type   = telegram[2];
     uint8_t   offset = telegram[3];
-    uint8_t * data   = telegram + 4; // data block starts at position 5
+    uint8_t * data   = &telegram[4]; // data block starts at position 5
     if (type >= 240) {
-        type           = telegram[3];
-        uint8_t offset = telegram[4];
-        data           = telegram + 5;
-        emsp           = true;
+        type   = telegram[3];
+        offset = telegram[4];
+        data   = &telegram[5 + offset];
+        emsp   = true;
     }
     // print detailed telegram data
     if (EMS_Sys_Status.emsLogging >= EMS_SYS_LOGGING_THERMOSTAT) {
