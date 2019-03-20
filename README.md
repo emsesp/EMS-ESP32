@@ -209,7 +209,9 @@ Every telegram sent is echo'd back to Rx, along the same Bus used for all Rx/Tx 
 
 `ems_devices.h` has all the configuration for the known EMS devices currently supported.
 
-`MyESP.cpp` is my custom library to handle WiFi, MQTT and Telnet. Uses a modified version of [TelnetSpy](https://github.com/yasheena/telnetspy)
+`MyESP.cpp` is my custom library to handle WiFi, MQTT and Telnet. Uses a modified version of [TelnetSpy](https://github.com/yasheena/telnetspy).
+
+`ds18.*` are the Dallas libraries for any external temperature sensors.
 
 ### Special EMS Types
 
@@ -228,18 +230,15 @@ In `ems.cpp` you can add scheduled calls to specific EMS types in the functions 
 
 I am still working on adding more support to known thermostats. Any contributions here are welcome. The know types are listed in `ems_devices.h` and include
 
-- RC20 and RC30, both are fully supported
-- RC10 support is being added
+- RC10, RC20 and RC30 are fully supported
 - RC35 with support for the 1st heating circuit (HC1)
-- TC100/TC200/Easy but only with support for reading the temperatures. There seems to be no way to set settings using EMS bus messages that I know of. One option is to send XMPP messages but a special server is needed and out of scope for this project.
+- TC100/TC200/Easy but only with support for *reading* the temperature values. There seems to be no way to set settings using EMS bus messages that I know of. One option is to send XMPP messages but a special server is needed and out of scope for this project.
 
 ### Customizing The Code
 
-- To configure for your thermostat and specific boiler settings, modify `my_config.h`. Here you can
-  - set flags for enabled/disabling functionality such as `BOILER_SHOWER_ENABLED` and `BOILER_SHOWER_TIMER`.
-  - Set WIFI and MQTT settings. The values can also be set from the telnet command menu using the **set** command.
-- To add new handlers for EMS data types, first create a callback function and add to the `EMS_Types` array at the top of the file `ems.cpp` and modify `ems.h`
-- To add new devices modify `ems_devices.h`
+- To configure for your thermostat and specific boiler settings, modify `my_config.h`.
+- Most values can also be set from the telnet command menu using the **set** command.
+- To add new handlers for EMS data types, first create a callback function and add to the `EMS_Types` array at the top of the file `ems.cpp` and modify `ems.h`. Also add to `ems_devices.h`.
 
 ### Using MQTT
 
@@ -302,6 +301,7 @@ Make sure Python 2.7 is installed, then...
 % pip install -U platformio
 % sudo platformio upgrade
 % platformio platform update
+% platformio lib upgrade
 
 % git clone https://github.com/proddy/EMS-ESP.git
 % cd EMS-ESP
@@ -311,17 +311,6 @@ edit `platformio.ini` to set `env_default` to your board type, then
 ```c
 % platformio run -t upload
 ```
-
-### Building Using Arduino IDE
-
-Porting to the Arduino IDE can be a little tricky but it did it once. Something along these lines:
-
-- Add the ESP8266 boards (from Preferences add Additional Board URL `http://arduino.esp8266.com/stable/package_esp8266com_index.json`)
-- Go to Boards Manager and install ESP8266 2.4.x platform. Make sure your board supports SPIFFS.
-- Select your ESP8266 from Tools->Boards and the correct port with Tools->Port
-- From the Library Manager install the needed libraries from platformio.ini. Note make sure you pick ArduinoJson v5 (5.13.4 and above) and not v6. See https://arduinojson.org/v5/doc/
-- Put all the files in a single sketch folder
-- cross your fingers and hit CTRL-R to compile
 
 ## Using the Pre-built Firmware
 
