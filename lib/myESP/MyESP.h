@@ -69,6 +69,14 @@
 #define COLOR_MAGENTA "\x1B[0;35m"
 #define COLOR_CYAN "\x1B[0;36m"
 #define COLOR_WHITE "\x1B[0;37m"
+#define COLOR_BRIGHT_BLACK "\x1B[0;90m"
+#define COLOR_BRIGHT_RED "\x1B[0;91m"
+#define COLOR_BRIGHT_GREEN "\x1B[0;92m"
+#define COLOR_BRIGHT_YELLOW "\x1B[0;99m"
+#define COLOR_BRIGHT_BLUE "\x1B[0;94m"
+#define COLOR_BRIGHT_MAGENTA "\x1B[0;95m"
+#define COLOR_BRIGHT_CYAN "\x1B[0;96m"
+#define COLOR_BRIGHT_WHITE "\x1B[0;97m"
 #define COLOR_BOLD_ON "\x1B[1m"
 #define COLOR_BOLD_OFF "\x1B[22m" // fixed by Scott Arlott
 
