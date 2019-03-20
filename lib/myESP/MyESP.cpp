@@ -34,7 +34,7 @@ MyESP::MyESP() {
     _helpProjectCmds       = NULL;
     _helpProjectCmds_count = 0;
 
-    _use_serial                = true;
+    _use_serial                = false;
     _mqtt_host                 = NULL;
     _mqtt_password             = NULL;
     _mqtt_username             = NULL;
