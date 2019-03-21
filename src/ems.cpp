@@ -759,25 +759,25 @@ void _ems_processTelegram(_EMS_RxTelegram * EMS_RxTelegram) {
     }
 
     // see if we recognize the type first by scanning our known EMS types list
-    // trying to match the type ID
-    bool commonType = false;
-    bool typeFound  = false;
-    bool forUs      = false;
-    int  i          = 0;
+    bool    typeFound = false;
+    uint8_t i         = 0;
 
     while (i < _EMS_Types_max) {
         if (EMS_Types[i].type == type) {
-            typeFound  = true;
-            commonType = (EMS_Types[i].model_id == EMS_MODEL_ALL);                       // is it common type for everyone?
-            forUs      = (src == EMS_Boiler.type_id) || (src == EMS_Thermostat.type_id); // is it for us? So the src must match
-            break;
+            // is it common type for everyone?
+            // is it for us? So the src must match with either the boiler, thermostat or other devices
+            if ((EMS_Types[i].model_id == EMS_MODEL_ALL)
+                || ((src == EMS_Boiler.type_id) || (src == EMS_Thermostat.type_id) || (src == EMS_ID_SM10))) {
+                typeFound = true;
+                break;
+            }
         }
         i++;
     }
 
     // if it's a common type (across ems devices) or something specifically for us process it.
     // dest will be EMS_ID_NONE and offset 0x00 for a broadcast message
-    if (typeFound && (commonType || forUs)) {
+    if (typeFound) {
         if ((EMS_Types[i].processType_cb) != (void *)NULL) {
             // print non-verbose message
             if (EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_BASIC) {
@@ -785,7 +785,7 @@ void _ems_processTelegram(_EMS_RxTelegram * EMS_RxTelegram) {
             }
             // call callback function to process it
             // as we only handle complete telegrams (not partial) check that the offset is 0
-            if (offset == EMS_ID_NONE) {
+            if (offset == 0) {
                 (void)EMS_Types[i].processType_cb(src, data, EMS_RxTelegram->length - 5);
             }
         }

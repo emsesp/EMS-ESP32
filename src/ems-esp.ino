@@ -32,7 +32,7 @@ DS18 ds18;
 #define myDebug_P(...) myESP.myDebug_P(__VA_ARGS__)
 
 // set to value >0 if the ESP is overheating or there are timing issues. Recommend a value of 1.
-#define EMSESP_DELAY 0 // initially set to 0 for no delay
+#define EMSESP_DELAY 1 // initially set to 0 for no delay
 
 // timers, all values are in seconds
 #define DEFAULT_PUBLISHWAIT 120 // every 2 minutes publish MQTT values, including Dallas sensors
@@ -1204,7 +1204,7 @@ void do_ledcheck() {
 // Thermostat scan
 void do_scanThermostat() {
     if ((ems_getBusConnected()) && (!myESP.getUseSerial())) {
-        myDebug("> Scanning thermostat message type #0x%02X..", scanThermostat_count);
+        myDebug("> Scanning thermostat message type #0x%02X...", scanThermostat_count);
         ems_doReadCommand(scanThermostat_count, EMS_Thermostat.type_id);
         scanThermostat_count++;
     }
@@ -1221,7 +1221,7 @@ void do_systemCheck() {
 // only if we have a EMS connection
 void do_regularUpdates() {
     if ((ems_getBusConnected()) && (!myESP.getUseSerial())) {
-        myDebugLog("Calling scheduled data refresh from EMS devices..");
+        myDebugLog("Calling scheduled data refresh from EMS devices...");
         ems_getThermostatValues();
         ems_getBoilerValues();
         ems_getOtherValues();
