@@ -31,6 +31,9 @@ DS18 ds18;
 #define myDebug(...) myESP.myDebug(__VA_ARGS__)
 #define myDebug_P(...) myESP.myDebug_P(__VA_ARGS__)
 
+// set to value >0 if the ESP is overheating or there are timing issues. Recommend a value of 1.
+#define EMSESP_DELAY 0 // initially set to 0 for no delay
+
 // timers, all values are in seconds
 #define DEFAULT_PUBLISHWAIT 120 // every 2 minutes publish MQTT values, including Dallas sensors
 Ticker publishValuesTimer;
@@ -1382,7 +1385,7 @@ void loop() {
     // the main loop
     myESP.loop();
 
-    // check Dallas sensors
+    // check Dallas sensors, every 2 seconds
     if (EMSESP_Status.dallas_sensors != 0) {
         ds18.loop();
     }
@@ -1399,5 +1402,8 @@ void loop() {
         showerCheck();
     }
 
-    delay(1); // some time to WiFi and everything else to catch up, and prevent overheating
+    if (EMSESP_DELAY != 0) {
+        delay(EMSESP_DELAY); // some time to WiFi and everything else to catch up, and prevent overheating
+    }
+
 }
