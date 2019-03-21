@@ -392,9 +392,10 @@ void showInfo() {
 
     // For SM10 Solar Module
     if (EMS_Other.SM10) {
-        _renderFloatValue("SM10 collector temperature", "C", EMS_Other.SM10collectorTemp);
-        _renderFloatValue("SM10 bottom temperature", "C", EMS_Other.SM10bottomTemp);
-        _renderIntValue("SM10 pump", "%", EMS_Other.SM10pumpModulation);
+        myDebug("%sSolar Module stats:%s", COLOR_BOLD_ON, COLOR_BOLD_OFF);
+        _renderFloatValue("  Collector temperature", "C", EMS_Other.SM10collectorTemp);
+        _renderFloatValue("  Bottom temperature", "C", EMS_Other.SM10bottomTemp);
+        _renderIntValue("  Pump modulation", "%", EMS_Other.SM10pumpModulation);
     }
 
     myDebug(""); // newline
@@ -1405,5 +1406,4 @@ void loop() {
     if (EMSESP_DELAY != 0) {
         delay(EMSESP_DELAY); // some time to WiFi and everything else to catch up, and prevent overheating
     }
-
 }

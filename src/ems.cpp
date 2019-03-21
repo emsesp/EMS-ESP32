@@ -1263,7 +1263,10 @@ void _process_Version(uint8_t src, uint8_t * data, uint8_t length) {
             myDebug("SM10 Solar Module support enabled.");
         }
 
+        // fetch other values
+        ems_getOtherValues();
         return;
+
     } else {
         myDebug("Unrecognized device found. TypeID 0x%02X, Product ID %d, Version %s", src, product_id, version);
     }
