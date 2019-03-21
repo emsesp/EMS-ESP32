@@ -815,7 +815,7 @@ void _processType(_EMS_RxTelegram * EMS_RxTelegram) {
 
     // if its an echo of ourselves from the master UBA, ignore
     if (src == EMS_ID_ME) {
-        _debugPrintTelegram("echo:", EMS_RxTelegram, COLOR_WHITE);
+        // _debugPrintTelegram("echo:", EMS_RxTelegram, COLOR_WHITE);
         return;
     }
 
@@ -1273,7 +1273,6 @@ void _process_Version(uint8_t src, uint8_t * data, uint8_t length) {
  * SM10Monitor - type 0x97
  */
 void _process_SM10Monitor(uint8_t src, uint8_t * data, uint8_t length) {
-    // TODO: polish off
     EMS_Other.SM10collectorTemp  = _toFloat(2, data); // collector temp from SM10
     EMS_Other.SM10bottomTemp     = _toFloat(5, data); // bottom temp from SM10
     EMS_Other.SM10pumpModulation = data[4];           // modulation solar pump
