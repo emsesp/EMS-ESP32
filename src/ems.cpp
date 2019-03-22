@@ -238,6 +238,7 @@ void ems_init() {
     EMS_Other.SM10collectorTemp  = EMS_VALUE_FLOAT_NOTSET; // collector temp from SM10
     EMS_Other.SM10bottomTemp     = EMS_VALUE_FLOAT_NOTSET; // bottom temp from SM10
     EMS_Other.SM10pumpModulation = EMS_VALUE_INT_NOTSET;   // modulation solar pump SM10
+    EMS_Other.SM10pump           = EMS_VALUE_INT_NOTSET;   // pump active
 
     // calculated values
     EMS_Boiler.tapwaterActive = EMS_VALUE_INT_NOTSET; // Hot tap water is on/off
@@ -1143,6 +1144,51 @@ void _process_RCOutdoorTempMessage(uint8_t src, uint8_t * data, uint8_t length) 
     // add support here if you're reading external sensors
 }
 
+/*
+ * SM10Monitor - type 0x97
+ */
+void _process_SM10Monitor(uint8_t src, uint8_t * data, uint8_t length) {
+    EMS_Other.SM10collectorTemp  = _toFloat(2, data);   // collector temp from SM10
+    EMS_Other.SM10bottomTemp     = _toFloat(5, data);   // bottom temp from SM10
+    EMS_Other.SM10pumpModulation = data[4];             // modulation solar pump
+    EMS_Other.SM10pump           = bitRead(data[6], 1); // active if bit 1 is set (to 1)
+
+    EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
+}
+
+/**
+ * UBASetPoint 0x1A
+ */
+void _process_SetPoints(uint8_t src, uint8_t * data, uint8_t length) {
+    /*
+    if (EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_VERBOSE) {
+        if (length != 0) {
+            uint8_t setpoint = data[0];
+            uint8_t hk_power = data[1];
+            uint8_t ww_power = data[2];
+            myDebug(" SetPoint=%d, hk_power=%d, ww_power=%d", setpoint, hk_power, ww_power);
+        }
+    }
+    */
+}
+
+/**
+ * process_RCTime - type 0x06 - date and time from a thermostat - 14 bytes long
+ * common for all thermostats
+ */
+void _process_RCTime(uint8_t src, uint8_t * data, uint8_t length) {
+    if ((EMS_Thermostat.model_id == EMS_MODEL_EASY) || (EMS_Thermostat.model_id == EMS_MODEL_BOSCHEASY)) {
+        return; // not supported
+    }
+
+    EMS_Thermostat.hour   = data[2];
+    EMS_Thermostat.minute = data[4];
+    EMS_Thermostat.second = data[5];
+    EMS_Thermostat.day    = data[3];
+    EMS_Thermostat.month  = data[1];
+    EMS_Thermostat.year   = data[0];
+}
+
 /**
  * type 0x02 - get the firmware version and type of an EMS device
  * look up known devices via the product id and setup if not already set
@@ -1270,48 +1316,6 @@ void _process_Version(uint8_t src, uint8_t * data, uint8_t length) {
     } else {
         myDebug("Unrecognized device found. TypeID 0x%02X, Product ID %d, Version %s", src, product_id, version);
     }
-}
-
-/*
- * SM10Monitor - type 0x97
- */
-void _process_SM10Monitor(uint8_t src, uint8_t * data, uint8_t length) {
-    EMS_Other.SM10collectorTemp  = _toFloat(2, data); // collector temp from SM10
-    EMS_Other.SM10bottomTemp     = _toFloat(5, data); // bottom temp from SM10
-    EMS_Other.SM10pumpModulation = data[4];           // modulation solar pump
-}
-
-/**
- * UBASetPoint 0x1A
- */
-void _process_SetPoints(uint8_t src, uint8_t * data, uint8_t length) {
-    /*
-    if (EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_VERBOSE) {
-        if (length != 0) {
-            uint8_t setpoint = data[0];
-            uint8_t hk_power = data[1];
-            uint8_t ww_power = data[2];
-            myDebug(" SetPoint=%d, hk_power=%d, ww_power=%d", setpoint, hk_power, ww_power);
-        }
-    }
-    */
-}
-
-/**
- * process_RCTime - type 0x06 - date and time from a thermostat - 14 bytes long
- * common for all thermostats
- */
-void _process_RCTime(uint8_t src, uint8_t * data, uint8_t length) {
-    if ((EMS_Thermostat.model_id == EMS_MODEL_EASY) || (EMS_Thermostat.model_id == EMS_MODEL_BOSCHEASY)) {
-        return; // not supported
-    }
-
-    EMS_Thermostat.hour   = data[2];
-    EMS_Thermostat.minute = data[4];
-    EMS_Thermostat.second = data[5];
-    EMS_Thermostat.day    = data[3];
-    EMS_Thermostat.month  = data[1];
-    EMS_Thermostat.year   = data[0];
 }
 
 /*
@@ -1486,9 +1490,9 @@ char * ems_getThermostatDescription(char * buffer) {
     if (!ems_getThermostatEnabled()) {
         strlcpy(buffer, "<not enabled>", size);
     } else {
-        // find the boiler details
-        int  i     = 0;
-        bool found = false;
+        int  i      = 0;
+        bool found  = false;
+        char tmp[6] = {0};
 
         // scan through known ID types
         while (i < _Thermostat_Types_max) {
@@ -1498,16 +1502,15 @@ char * ems_getThermostatDescription(char * buffer) {
             }
             i++;
         }
+
         if (found) {
             strlcpy(buffer, Thermostat_Types[i].model_string, size);
         } else {
-            strlcpy(buffer, "Generic Type", size);
+            strlcpy(buffer, "TypeID: 0x", size);
+            strlcat(buffer, _hextoa(EMS_Thermostat.type_id, tmp), size);
         }
 
-        char tmp[6] = {0};
-        strlcat(buffer, " [Type ID: 0x", size);
-        strlcat(buffer, _hextoa(EMS_Thermostat.type_id, tmp), size);
-        strlcat(buffer, "] Product ID:", size);
+        strlcat(buffer, " Product ID:", size);
         strlcat(buffer, itoa(EMS_Thermostat.product_id, tmp, 10), size);
         strlcat(buffer, " Version:", size);
         strlcat(buffer, EMS_Thermostat.version, size);
@@ -1524,9 +1527,9 @@ char * ems_getBoilerDescription(char * buffer) {
     if (!ems_getBoilerEnabled()) {
         strlcpy(buffer, "<not enabled>", size);
     } else {
-        // find the boiler details
-        int  i     = 0;
-        bool found = false;
+        int  i      = 0;
+        bool found  = false;
+        char tmp[6] = {0};
 
         // scan through known ID types
         while (i < _Boiler_Types_max) {
@@ -1539,13 +1542,11 @@ char * ems_getBoilerDescription(char * buffer) {
         if (found) {
             strlcpy(buffer, Boiler_Types[i].model_string, size);
         } else {
-            strlcpy(buffer, "Generic Type", size);
+            strlcpy(buffer, "TypeID: 0x", size);
+            strlcat(buffer, _hextoa(EMS_Boiler.type_id, tmp), size);
         }
 
-        char tmp[6] = {0};
-        strlcat(buffer, " [Type ID: 0x", size);
-        strlcat(buffer, _hextoa(EMS_Boiler.type_id, tmp), size);
-        strlcat(buffer, "] Product ID:", size);
+        strlcat(buffer, " Product ID:", size);
         strlcat(buffer, itoa(EMS_Boiler.product_id, tmp, 10), size);
         strlcat(buffer, " Version:", size);
         strlcat(buffer, EMS_Boiler.version, size);

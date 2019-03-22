@@ -232,6 +232,7 @@ typedef struct {
     float   SM10collectorTemp;  // collector temp from SM10
     float   SM10bottomTemp;     // bottom temp from SM10
     uint8_t SM10pumpModulation; // modulation solar pump
+    uint8_t SM10pump;           // pump active
 } _EMS_Other;
 
 // Thermostat data
@@ -308,7 +309,7 @@ void ems_startupTelegrams();
 
 // private functions
 uint8_t _crcCalculator(uint8_t * data, uint8_t len);
-void    _processType(_EMS_RxTelegram *EMS_RxTelegram);
+void    _processType(_EMS_RxTelegram * EMS_RxTelegram);
 void    _debugPrintPackage(const char * prefix, _EMS_RxTelegram * EMS_RxTelegram, const char * color);
 void    _ems_clearTxData();
 int     _ems_findBoilerModel(uint8_t model_id);

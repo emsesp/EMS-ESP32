@@ -396,6 +396,7 @@ void showInfo() {
         _renderFloatValue("  Collector temperature", "C", EMS_Other.SM10collectorTemp);
         _renderFloatValue("  Bottom temperature", "C", EMS_Other.SM10bottomTemp);
         _renderIntValue("  Pump modulation", "%", EMS_Other.SM10pumpModulation);
+        _renderBoolValue("  Pump active", EMS_Other.SM10pump);
     }
 
     myDebug(""); // newline
@@ -486,6 +487,7 @@ void publishValues(bool force) {
     static uint8_t  last_boilerActive            = 0xFF; // for remembering last setting of the tap water or heating on/off
     static uint32_t previousBoilerPublishCRC     = 0;    // CRC check for boiler values
     static uint32_t previousThermostatPublishCRC = 0;    // CRC check for thermostat values
+    static uint32_t previousOtherPublishCRC      = 0;    // CRC check for other values (e.g. SM10)
 
     JsonObject rootBoiler = doc.to<JsonObject>();
 
@@ -593,6 +595,36 @@ void publishValues(bool force) {
 
             // send values via MQTT
             myESP.mqttPublish(TOPIC_THERMOSTAT_DATA, data);
+        }
+    }
+
+    // handle the other values separately
+    // For SM10 Solar Module
+    if (EMS_Other.SM10) {
+        // build new json object
+        doc.clear();
+        JsonObject rootSM10 = doc.to<JsonObject>();
+
+        rootSM10[SM10_COLLECTORTEMP]  = _float_to_char(s, EMS_Other.SM10collectorTemp);
+        rootSM10[SM10_BOTTOMTEMP]     = _float_to_char(s, EMS_Other.SM10bottomTemp);
+        rootSM10[SM10_PUMPMODULATION] = _int_to_char(s, EMS_Other.SM10pumpModulation);
+        rootSM10[SM10_PUMP]           = _bool_to_char(s, EMS_Other.SM10pump);
+
+        data[0] = '\0'; // reset data for next package
+        serializeJson(doc, data, sizeof(data));
+
+        // calculate new CRC
+        crc.reset();
+        for (size_t i = 0; i < measureJson(doc) - 1; i++) {
+            crc.update(data[i]);
+        }
+        fchecksum = crc.finalize();
+        if ((previousOtherPublishCRC != fchecksum) || force) {
+            previousOtherPublishCRC = fchecksum;
+            myDebugLog("Publishing SM10 data via MQTT");
+
+            // send values via MQTT
+            myESP.mqttPublish(TOPIC_SM10_DATA, data);
         }
     }
 }
@@ -1387,6 +1419,7 @@ void loop() {
     myESP.loop();
 
     // check Dallas sensors, every 2 seconds
+    // these values are published to MQTT seperately via the timer publishSensorValuesTimer
     if (EMSESP_Status.dallas_sensors != 0) {
         ds18.loop();
     }

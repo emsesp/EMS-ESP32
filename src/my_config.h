@@ -39,6 +39,13 @@
 #define TOPIC_BOILER_CMD_WWTEMP "boiler_cmd_wwtemp"    // for received boiler wwtemp changes via MQTT
 #define TOPIC_BOILER_CMD_COMFORT "boiler_cmd_comfort"  // for received boiler ww comfort setting via MQTT
 
+// MQTT for SM10 Solar Module
+#define TOPIC_SM10_DATA "sm10_data"          // topic name
+#define SM10_COLLECTORTEMP "temp"            // collector temp
+#define SM10_BOTTOMTEMP "bottomtemp"         // bottom temp
+#define SM10_PUMPMODULATION "pumpmodulation" // pump modulation
+#define SM10_PUMP "pump"                     // pump active
+
 // shower time
 #define TOPIC_SHOWERTIME "showertime"           // for sending shower time results
 #define TOPIC_SHOWER_TIMER "shower_timer"       // toggle switch for enabling the shower logic
@@ -48,6 +55,7 @@
 // MQTT for EXTERNAL SENSORS
 #define TOPIC_EXTERNAL_SENSORS "sensors"   // for sending sensor values to MQTT
 #define PAYLOAD_EXTERNAL_SENSORS "temp_%d" // for formatting the payload for each external dallas sensor
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // THESE DEFAULT VALUES CAN ALSO BE SET AND STORED WITHTIN THE APPLICATION (see 'set' command)    //
