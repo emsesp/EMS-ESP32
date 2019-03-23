@@ -134,7 +134,6 @@ char * DS18::getDeviceString(char * buffer, unsigned char index) {
     return buffer;
 }
 
-
 /*
  * Read sensor values
  * 
@@ -152,7 +151,7 @@ char * DS18::getDeviceString(char * buffer, unsigned char index) {
             DS18B20 & DS1822: store for crc
     byte 8: SCRATCHPAD_CRC
 */
-double DS18::getValue(unsigned char index) {
+int16_t DS18::getRawValue(unsigned char index) {
     if (index >= _count)
         return 0;
 
@@ -179,8 +178,12 @@ double DS18::getValue(unsigned char index) {
                             // 12 bit res, 750 ms
     }
 
-    double value = (float)raw / 16.0;
+    return raw;
+}
 
+// return real value as a double
+double DS18::getValue(unsigned char index) {
+    double value = (float)getRawValue(index) / 16.0;
     return value;
 }
 
