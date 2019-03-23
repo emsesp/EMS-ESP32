@@ -27,9 +27,8 @@
 #define EMS_VALUE_INT_ON 1             // boolean true
 #define EMS_VALUE_INT_OFF 0            // boolean false
 #define EMS_VALUE_INT_NOTSET 0xFF      // for 8-bit ints
+#define EMS_VALUE_SHORT_NOTSET 0x8000  // for 2-byte shorts
 #define EMS_VALUE_LONG_NOTSET 0xFFFFFF // for 3-byte longs
-#define EMS_VALUE_SHORT_NOTSET 0xFFFF  // for 2-byte shorts
-#define EMS_VALUE_FLOAT_NOTSET -255    // float
 
 #define EMS_THERMOSTAT_READ_YES true
 #define EMS_THERMOSTAT_READ_NO false
@@ -175,8 +174,8 @@ typedef struct {           // UBAParameterWW
 
     // UBAMonitorFast
     uint8_t  selFlowTemp;        // Selected flow temperature
-    float    curFlowTemp;        // Current flow temperature
-    float    retTemp;            // Return temperature
+    int16_t curFlowTemp;        // Current flow temperature
+    int16_t retTemp;            // Return temperature
     uint8_t  burnGas;            // Gas on/off
     uint8_t  fanWork;            // Fan on/off
     uint8_t  ignWork;            // Ignition on/off
@@ -185,21 +184,21 @@ typedef struct {           // UBAParameterWW
     uint8_t  wWCirc;             // Circulation on/off
     uint8_t  selBurnPow;         // Burner max power
     uint8_t  curBurnPow;         // Burner current power
-    float    flameCurr;          // Flame current in micro amps
-    float    sysPress;           // System pressure
+    uint16_t flameCurr;          // Flame current in micro amps
+    uint8_t  sysPress;           // System pressure
     char     serviceCodeChar[3]; // 2 character status/service code
     uint16_t serviceCode;        // error/service code
 
     // UBAMonitorSlow
-    float    extTemp;     // Outside temperature
-    float    boilTemp;    // Boiler temperature
+    int16_t extTemp;     // Outside temperature
+    int16_t boilTemp;    // Boiler temperature
     uint8_t  pumpMod;     // Pump modulation
     uint32_t burnStarts;  // # burner starts
     uint32_t burnWorkMin; // Total burner operating time
     uint32_t heatWorkMin; // Total heat operating time
 
     // UBAMonitorWWMessage
-    float    wWCurTmp;  // Warm Water current temperature:
+    int16_t wWCurTmp;  // Warm Water current temperature:
     uint32_t wWStarts;  // Warm Water # starts
     uint32_t wWWorkM;   // Warm Water # minutes
     uint8_t  wWOneTime; // Warm Water one time function on/off
@@ -228,31 +227,31 @@ typedef struct {           // UBAParameterWW
  */
 typedef struct {
     // SM10 Solar Module - SM10Monitor
-    bool    SM10;               // set true if there is a SM10 available
-    float   SM10collectorTemp;  // collector temp from SM10
-    float   SM10bottomTemp;     // bottom temp from SM10
-    uint8_t SM10pumpModulation; // modulation solar pump
-    uint8_t SM10pump;           // pump active
+    bool     SM10;               // set true if there is a SM10 available
+    int16_t SM10collectorTemp;  // collector temp from SM10
+    int16_t SM10bottomTemp;     // bottom temp from SM10
+    uint8_t  SM10pumpModulation; // modulation solar pump
+    uint8_t  SM10pump;           // pump active
 } _EMS_Other;
 
 // Thermostat data
 typedef struct {
-    uint8_t type_id;  // the type ID of the thermostat
-    uint8_t model_id; // which Thermostat type
-    uint8_t product_id;
-    bool    read_supported;
-    bool    write_supported;
-    char    version[10];
-    float   setpoint_roomTemp; // current set temp
-    float   curr_roomTemp;     // current room temp
-    uint8_t mode;              // 0=low, 1=manual, 2=auto
-    bool    day_mode;          // 0=night, 1=day
-    uint8_t hour;
-    uint8_t minute;
-    uint8_t second;
-    uint8_t day;
-    uint8_t month;
-    uint8_t year;
+    uint8_t  type_id;  // the type ID of the thermostat
+    uint8_t  model_id; // which Thermostat type
+    uint8_t  product_id;
+    bool     read_supported;
+    bool     write_supported;
+    char     version[10];
+    int16_t setpoint_roomTemp; // current set temp
+    int16_t curr_roomTemp;     // current room temp
+    uint8_t  mode;              // 0=low, 1=manual, 2=auto
+    bool     day_mode;          // 0=night, 1=day
+    uint8_t  hour;
+    uint8_t  minute;
+    uint8_t  second;
+    uint8_t  day;
+    uint8_t  month;
+    uint8_t  year;
 } _EMS_Thermostat;
 
 // call back function signature for processing telegram types

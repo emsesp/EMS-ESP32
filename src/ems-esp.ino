@@ -101,6 +101,7 @@ command_t PROGMEM project_cmds[] = {
     {false, "info", "show data captured on the EMS bus"},
     {false, "log <n | b | t | r | v>", "set logging mode to none, basic, thermostat only, raw or verbose"},
     {false, "publish", "publish all values to MQTT"},
+    {false, "refresh", "fetch values from the EMS devices"},
     {false, "types", "list supported EMS telegram type IDs"},
     {false, "queue", "show current Tx queue"},
     {false, "autodetect", "detect EMS devices and attempt to automatically set boiler and thermostat types"},
@@ -132,7 +133,7 @@ char * _float_to_char(char * a, float f, uint8_t precision = 2) {
 
     char * ret = a;
     // check for 0x8000 (sensor missing)
-    if (f == EMS_VALUE_FLOAT_NOTSET) {
+    if (f == EMS_VALUE_SHORT_NOTSET) {
         strlcpy(ret, "?", sizeof(ret));
     } else {
         long whole = (long)f;
@@ -158,63 +159,76 @@ char * _bool_to_char(char * s, uint8_t value) {
     return s;
 }
 
-// convert int (single byte) to text value
-char * _int_to_char(char * s, uint8_t value) {
-    if (value == EMS_VALUE_INT_NOTSET) {
+// convert short (two bytes) to text value
+// negative values are assumed stored as 1-compliment (https://medium.com/@LeeJulija/how-integers-are-stored-in-memory-using-twos-complement-5ba04d61a56c)
+char * _short_to_char(char * s, int16_t value, uint8_t div = 10) {
+    // remove errors on invalid values
+    if (abs(value) >= EMS_VALUE_SHORT_NOTSET) {
         strlcpy(s, "?", sizeof(s));
+        return (s);
+    }
+
+    if (div != 0) {
+        char s2[5] = {0};
+        // check for negative values
+        if (value < 0) {
+            strlcpy(s, "-", 2);
+            strlcat(s, itoa(abs(value) / div, s2, 10), 5);
+        } else {
+            strlcpy(s, itoa(value / div, s2, 10), 5);
+        }
+        strlcat(s, ".", sizeof(s));
+        strlcat(s, itoa(abs(value) % div, s2, 10), 5);
     } else {
         itoa(value, s, 10);
     }
     return s;
 }
 
-// takes a float value at prints it to debug log
-void _renderFloatValue(const char * prefix, const char * postfix, float value) {
-    char buffer[200] = {0};
-    char s[20]       = {0};
-    strlcpy(buffer, "  ", sizeof(buffer));
-    strlcat(buffer, prefix, sizeof(buffer));
-    strlcat(buffer, ": ", sizeof(buffer));
-    strlcat(buffer, _float_to_char(s, value), sizeof(buffer));
-
-    if (postfix != NULL) {
-        strlcat(buffer, " ", sizeof(buffer));
-        strlcat(buffer, postfix, sizeof(buffer));
-    }
-    myDebug(buffer);
-}
-
-// takes an int (single byte) value at prints it to debug log
-void _renderIntValue(const char * prefix, const char * postfix, uint8_t value) {
-    char buffer[200] = {0};
-    char s[20]       = {0};
-    strlcpy(buffer, "  ", sizeof(buffer));
-    strlcat(buffer, prefix, sizeof(buffer));
-    strlcat(buffer, ": ", sizeof(buffer));
-    strlcat(buffer, _int_to_char(s, value), sizeof(buffer));
-
-    if (postfix != NULL) {
-        strlcat(buffer, " ", sizeof(buffer));
-        strlcat(buffer, postfix, sizeof(buffer));
-    }
-    myDebug(buffer);
-}
-
-// takes an int value, converts to a fraction
-void _renderIntfractionalValue(const char * prefix, const char * postfix, uint8_t value, uint8_t decimals) {
-    char buffer[200] = {0};
-    char s[20]       = {0};
-    strlcpy(buffer, "  ", sizeof(buffer));
-    strlcat(buffer, prefix, sizeof(buffer));
-    strlcat(buffer, ": ", sizeof(buffer));
-
+// convert int (single byte) to text value
+char * _int_to_char(char * s, uint8_t value, uint8_t div = 0) {
     if (value == EMS_VALUE_INT_NOTSET) {
-        strlcat(buffer, "?", sizeof(buffer));
+        strlcpy(s, "?", sizeof(s));
     } else {
-        strlcat(buffer, _int_to_char(s, value / (decimals * 10)), sizeof(buffer));
-        strlcat(buffer, ".", sizeof(buffer));
-        strlcat(buffer, _int_to_char(s, value % (decimals * 10)), sizeof(buffer));
+        if (div != 0) {
+            char s2[5] = {0};
+            strlcpy(s, itoa(value / div, s2, 10), 5);
+            strlcat(s, ".", sizeof(s));
+            strlcat(s, itoa(value % div, s2, 10), 5);
+        } else {
+            itoa(value, s, 10);
+        }
     }
+    return s;
+}
+
+// takes an int value (1 byte), converts to a fraction
+void _renderIntValue(const char * prefix, const char * postfix, uint8_t value, uint8_t div = 0) {
+    char buffer[200] = {0};
+    char s[20]       = {0};
+    strlcpy(buffer, "  ", sizeof(buffer));
+    strlcat(buffer, prefix, sizeof(buffer));
+    strlcat(buffer, ": ", sizeof(buffer));
+
+    strlcat(buffer, _int_to_char(s, value, div), sizeof(buffer));
+
+    if (postfix != NULL) {
+        strlcat(buffer, " ", sizeof(buffer));
+        strlcat(buffer, postfix, sizeof(buffer));
+    }
+
+    myDebug(buffer);
+}
+
+// takes a short value (2 bytes), converts to a fraction
+void _renderShortValue(const char * prefix, const char * postfix, int16_t value, uint8_t div = 10) {
+    char buffer[200] = {0};
+    char s[20]       = {0};
+    strlcpy(buffer, "  ", sizeof(buffer));
+    strlcat(buffer, prefix, sizeof(buffer));
+    strlcat(buffer, ": ", sizeof(buffer));
+
+    strlcat(buffer, _short_to_char(s, value, div), sizeof(buffer));
 
     if (postfix != NULL) {
         strlcat(buffer, " ", sizeof(buffer));
@@ -308,7 +322,7 @@ void showInfo() {
         }
 
         if (EMS_Boiler.heatingActive != EMS_VALUE_INT_NOTSET) {
-            myDebug("  Central Heating: %s", EMS_Boiler.heatingActive ? "active" : "off");
+            myDebug("  Central heating: %s", EMS_Boiler.heatingActive ? "active" : "off");
         }
     }
 
@@ -327,8 +341,8 @@ void showInfo() {
     _renderIntValue("Warm Water desired temperature", "C", EMS_Boiler.wWDesiredTemp);
 
     // UBAMonitorWWMessage
-    _renderFloatValue("Warm Water current temperature", "C", EMS_Boiler.wWCurTmp);
-    _renderIntfractionalValue("Warm Water current tap water flow", "l/min", EMS_Boiler.wWCurFlow, 1);
+    _renderShortValue("Warm Water current temperature", "C", EMS_Boiler.wWCurTmp);
+    _renderIntValue("Warm Water current tap water flow", "l/min", EMS_Boiler.wWCurFlow, 10);
     _renderLongValue("Warm Water # starts", "times", EMS_Boiler.wWStarts);
     if (EMS_Boiler.wWWorkM != EMS_VALUE_LONG_NOTSET) {
         myDebug("  Warm Water active time: %d days %d hours %d minutes",
@@ -340,8 +354,8 @@ void showInfo() {
 
     // UBAMonitorFast
     _renderIntValue("Selected flow temperature", "C", EMS_Boiler.selFlowTemp);
-    _renderFloatValue("Current flow temperature", "C", EMS_Boiler.curFlowTemp);
-    _renderFloatValue("Return temperature", "C", EMS_Boiler.retTemp);
+    _renderShortValue("Current flow temperature", "C", EMS_Boiler.curFlowTemp);
+    _renderShortValue("Return temperature", "C", EMS_Boiler.retTemp);
     _renderBoolValue("Gas", EMS_Boiler.burnGas);
     _renderBoolValue("Boiler pump", EMS_Boiler.heatPmp);
     _renderBoolValue("Fan", EMS_Boiler.fanWork);
@@ -349,8 +363,8 @@ void showInfo() {
     _renderBoolValue("Circulation pump", EMS_Boiler.wWCirc);
     _renderIntValue("Burner selected max power", "%", EMS_Boiler.selBurnPow);
     _renderIntValue("Burner current power", "%", EMS_Boiler.curBurnPow);
-    _renderFloatValue("Flame current", "uA", EMS_Boiler.flameCurr);
-    _renderFloatValue("System pressure", "bar", EMS_Boiler.sysPress);
+    _renderShortValue("Flame current", "uA", EMS_Boiler.flameCurr);
+    _renderIntValue("System pressure", "bar", EMS_Boiler.sysPress, 10);
     if (EMS_Boiler.serviceCode == EMS_VALUE_SHORT_NOTSET) {
         myDebug("  System service code: %s", EMS_Boiler.serviceCodeChar);
     } else {
@@ -359,14 +373,14 @@ void showInfo() {
 
     // UBAParametersMessage
     _renderIntValue("Heating temperature setting on the boiler", "C", EMS_Boiler.heating_temp);
-    _renderIntValue("Boiler circuit pump modulation max. power", "%", EMS_Boiler.pump_mod_max);
-    _renderIntValue("Boiler circuit pump modulation min. power", "%", EMS_Boiler.pump_mod_min);
+    _renderIntValue("Boiler circuit pump modulation max power", "%", EMS_Boiler.pump_mod_max);
+    _renderIntValue("Boiler circuit pump modulation min power", "%", EMS_Boiler.pump_mod_min);
 
     // UBAMonitorSlow
-    if (EMS_Boiler.extTemp != EMS_VALUE_FLOAT_NOTSET) {
-        _renderFloatValue("Outside temperature", "C", EMS_Boiler.extTemp);
+    if (EMS_Boiler.extTemp != EMS_VALUE_SHORT_NOTSET) {
+        _renderShortValue("Outside temperature", "C", EMS_Boiler.extTemp);
     }
-    _renderFloatValue("Boiler temperature", "C", EMS_Boiler.boilTemp);
+    _renderShortValue("Boiler temperature", "C", EMS_Boiler.boilTemp);
     _renderIntValue("Pump modulation", "%", EMS_Boiler.pumpMod);
     _renderLongValue("Burner # starts", "times", EMS_Boiler.burnStarts);
     if (EMS_Boiler.burnWorkMin != EMS_VALUE_LONG_NOTSET) {
@@ -393,8 +407,8 @@ void showInfo() {
     // For SM10 Solar Module
     if (EMS_Other.SM10) {
         myDebug("%sSolar Module stats:%s", COLOR_BOLD_ON, COLOR_BOLD_OFF);
-        _renderFloatValue("  Collector temperature", "C", EMS_Other.SM10collectorTemp);
-        _renderFloatValue("  Bottom temperature", "C", EMS_Other.SM10bottomTemp);
+        _renderShortValue("  Collector temperature", "C", EMS_Other.SM10collectorTemp);
+        _renderShortValue("  Bottom temperature", "C", EMS_Other.SM10bottomTemp);
         _renderIntValue("  Pump modulation", "%", EMS_Other.SM10pumpModulation);
         _renderBoolValue("  Pump active", EMS_Other.SM10pump);
     }
@@ -405,9 +419,15 @@ void showInfo() {
     if (ems_getThermostatEnabled()) {
         myDebug("%sThermostat stats:%s", COLOR_BOLD_ON, COLOR_BOLD_OFF);
         myDebug("  Thermostat type: %s", ems_getThermostatDescription(buffer_type));
-        _renderFloatValue("Setpoint room temperature", "C", EMS_Thermostat.setpoint_roomTemp);
-        _renderFloatValue("Current room temperature", "C", EMS_Thermostat.curr_roomTemp);
-        if ((ems_getThermostatModel() != EMS_MODEL_EASY) && (ems_getThermostatModel() != EMS_MODEL_BOSCHEASY)) {
+        if ((ems_getThermostatModel() == EMS_MODEL_EASY) || (ems_getThermostatModel() == EMS_MODEL_BOSCHEASY)) {
+            // for easy temps are * 100
+            // also we don't have the time or mode
+            _renderShortValue("Setpoint room temperature", "C", EMS_Thermostat.setpoint_roomTemp, 100);
+            _renderShortValue("Current room temperature", "C", EMS_Thermostat.curr_roomTemp, 100);
+        } else {
+            _renderShortValue("Setpoint room temperature", "C", EMS_Thermostat.setpoint_roomTemp, 2);
+            _renderShortValue("Current room temperature", "C", EMS_Thermostat.curr_roomTemp, 10);
+
             myDebug("  Thermostat time is %02d:%02d:%02d %d/%d/%d",
                     EMS_Thermostat.hour,
                     EMS_Thermostat.minute,
@@ -436,7 +456,7 @@ void showInfo() {
         myDebug("%sExternal temperature sensors:%s", COLOR_BOLD_ON, COLOR_BOLD_OFF);
         for (uint8_t i = 0; i < EMSESP_Status.dallas_sensors; i++) {
             snprintf(s, sizeof(s), "Sensor #%d %s", i + 1, ds18.getDeviceString(buffer, i));
-            _renderFloatValue(s, "C", ds18.getValue(i));
+            _renderShortValue(s, "C", ds18.getRawValue(i), 16); // divide by 16
         }
         myDebug(""); // newline
     }
@@ -492,8 +512,8 @@ void publishValues(bool force) {
     JsonObject rootBoiler = doc.to<JsonObject>();
 
     rootBoiler["wWSelTemp"]   = _int_to_char(s, EMS_Boiler.wWSelTemp);
-    rootBoiler["selFlowTemp"] = _float_to_char(s, EMS_Boiler.selFlowTemp);
-    rootBoiler["outdoorTemp"] = _float_to_char(s, EMS_Boiler.extTemp);
+    rootBoiler["selFlowTemp"] = _int_to_char(s, EMS_Boiler.selFlowTemp);
+    rootBoiler["outdoorTemp"] = _short_to_char(s, EMS_Boiler.extTemp);
     rootBoiler["wWActivated"] = _bool_to_char(s, EMS_Boiler.wWActivated);
 
     if (EMS_Boiler.wWComfort == EMS_VALUE_UBAParameterWW_wwComfort_Hot) {
@@ -504,12 +524,12 @@ void publishValues(bool force) {
         rootBoiler["wWComfort"] = "Intelligent";
     }
 
-    rootBoiler["wWCurTmp"] = _float_to_char(s, EMS_Boiler.wWCurTmp);
+    rootBoiler["wWCurTmp"] = _short_to_char(s, EMS_Boiler.wWCurTmp);
     snprintf(s, sizeof(s), "%i.%i", EMS_Boiler.wWCurFlow / 10, EMS_Boiler.wWCurFlow % 10);
     rootBoiler["wWCurFlow"]         = s;
     rootBoiler["wWHeat"]            = _bool_to_char(s, EMS_Boiler.wWHeat);
-    rootBoiler["curFlowTemp"]       = _float_to_char(s, EMS_Boiler.curFlowTemp);
-    rootBoiler["retTemp"]           = _float_to_char(s, EMS_Boiler.retTemp);
+    rootBoiler["curFlowTemp"]       = _short_to_char(s, EMS_Boiler.curFlowTemp);
+    rootBoiler["retTemp"]           = _short_to_char(s, EMS_Boiler.retTemp);
     rootBoiler["burnGas"]           = _bool_to_char(s, EMS_Boiler.burnGas);
     rootBoiler["heatPmp"]           = _bool_to_char(s, EMS_Boiler.heatPmp);
     rootBoiler["fanWork"]           = _bool_to_char(s, EMS_Boiler.fanWork);
@@ -517,8 +537,8 @@ void publishValues(bool force) {
     rootBoiler["wWCirc"]            = _bool_to_char(s, EMS_Boiler.wWCirc);
     rootBoiler["selBurnPow"]        = _int_to_char(s, EMS_Boiler.selBurnPow);
     rootBoiler["curBurnPow"]        = _int_to_char(s, EMS_Boiler.curBurnPow);
-    rootBoiler["sysPress"]          = _float_to_char(s, EMS_Boiler.sysPress);
-    rootBoiler["boilTemp"]          = _float_to_char(s, EMS_Boiler.boilTemp);
+    rootBoiler["sysPress"]          = _int_to_char(s, EMS_Boiler.sysPress, 10);
+    rootBoiler["boilTemp"]          = _short_to_char(s, EMS_Boiler.boilTemp);
     rootBoiler["pumpMod"]           = _int_to_char(s, EMS_Boiler.pumpMod);
     rootBoiler["ServiceCode"]       = EMS_Boiler.serviceCodeChar;
     rootBoiler["ServiceCodeNumber"] = EMS_Boiler.serviceCode;
@@ -551,15 +571,20 @@ void publishValues(bool force) {
     // handle the thermostat values separately
     if (ems_getThermostatEnabled()) {
         // only send thermostat values if we actually have them
-        if (((int)EMS_Thermostat.curr_roomTemp == (int)0) || ((int)EMS_Thermostat.setpoint_roomTemp == (int)0))
+        if ((EMS_Thermostat.curr_roomTemp == 0) || (EMS_Thermostat.setpoint_roomTemp == 0))
             return;
 
         // build new json object
         doc.clear();
         JsonObject rootThermostat = doc.to<JsonObject>();
 
-        rootThermostat[THERMOSTAT_CURRTEMP] = _float_to_char(s, EMS_Thermostat.curr_roomTemp);
-        rootThermostat[THERMOSTAT_SELTEMP]  = _float_to_char(s, EMS_Thermostat.setpoint_roomTemp);
+        if ((ems_getThermostatModel() == EMS_MODEL_EASY) || (ems_getThermostatModel() == EMS_MODEL_BOSCHEASY)) {
+            rootThermostat[THERMOSTAT_CURRTEMP] = _short_to_char(s, EMS_Thermostat.curr_roomTemp, 100);
+            rootThermostat[THERMOSTAT_SELTEMP]  = _short_to_char(s, EMS_Thermostat.setpoint_roomTemp, 100);
+        } else {
+            rootThermostat[THERMOSTAT_CURRTEMP] = _short_to_char(s, EMS_Thermostat.curr_roomTemp, 10);
+            rootThermostat[THERMOSTAT_SELTEMP]  = _short_to_char(s, EMS_Thermostat.setpoint_roomTemp, 2);
+        }
 
         // RC20 has different mode settings
         if (ems_getThermostatModel() == EMS_MODEL_RC20) {
@@ -605,8 +630,8 @@ void publishValues(bool force) {
         doc.clear();
         JsonObject rootSM10 = doc.to<JsonObject>();
 
-        rootSM10[SM10_COLLECTORTEMP]  = _float_to_char(s, EMS_Other.SM10collectorTemp);
-        rootSM10[SM10_BOTTOMTEMP]     = _float_to_char(s, EMS_Other.SM10bottomTemp);
+        rootSM10[SM10_COLLECTORTEMP]  = _short_to_char(s, EMS_Other.SM10collectorTemp);
+        rootSM10[SM10_BOTTOMTEMP]     = _short_to_char(s, EMS_Other.SM10bottomTemp);
         rootSM10[SM10_PUMPMODULATION] = _int_to_char(s, EMS_Other.SM10pumpModulation);
         rootSM10[SM10_PUMP]           = _bool_to_char(s, EMS_Other.SM10pump);
 
@@ -925,6 +950,12 @@ void TelnetCommandCallback(uint8_t wc, const char * commandLine) {
         ok = true;
     }
 
+    if (strcmp(first_cmd, "refresh") == 0) {
+        myDebug("Fetching data from EMS devices...");
+        do_regularUpdates();
+        ok = true;
+    }
+
     if (strcmp(first_cmd, "types") == 0) {
         ems_printAllTypes();
         ok = true;
@@ -1118,10 +1149,9 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
 
         // boiler wwtemp changes
         if (strcmp(topic, TOPIC_BOILER_CMD_WWTEMP) == 0) {
-            float f     = strtof((char *)message, 0);
-            char  s[10] = {0};
-            myDebug("MQTT topic: boiler warm water temperature value %s", _float_to_char(s, f));
-            ems_setWarmWaterTemp(f);
+            uint8_t t = atoi((char *)message);
+            myDebug("MQTT topic: boiler warm water temperature value %d", t);
+            ems_setWarmWaterTemp(t);
             publishValues(true); // publish back immediately
         }
 

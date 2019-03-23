@@ -14,7 +14,12 @@
 #include <MyESP.h>
 #include <list> // std::list
 
-// myESP
+#define _toByte(i) (data[i])
+#define _toShort(i) ((data[i] << 8) + data[i + 1])
+#define _toLong(i) ((data[i] << 16) + (data[i + 1] << 8) + (data[i + 2]))
+#define _bitRead(i, bit) (((data[i]) >> (bit)) & 0x01)
+
+// myESP for logging to telnet and serial
 #define myDebug(...) myESP.myDebug(__VA_ARGS__)
 
 _EMS_Sys_Status EMS_Sys_Status; // EMS Status
@@ -128,9 +133,9 @@ uint8_t _Other_Types_max      = ArraySize(Other_Types);      // number of other 
 uint8_t _Thermostat_Types_max = ArraySize(Thermostat_Types); // number of defined thermostat types
 
 // these structs contain the data we store from the Boiler and Thermostat
-_EMS_Boiler     EMS_Boiler;
-_EMS_Thermostat EMS_Thermostat;
-_EMS_Other      EMS_Other;
+_EMS_Boiler     EMS_Boiler; // for boiler
+_EMS_Thermostat EMS_Thermostat; // for thermostat
+_EMS_Other      EMS_Other; // for other known EMS devices
 
 // CRC lookup table with poly 12 for faster checking
 const uint8_t ems_crc_table[] = {0x00, 0x02, 0x04, 0x06, 0x08, 0x0A, 0x0C, 0x0E, 0x10, 0x12, 0x14, 0x16, 0x18, 0x1A, 0x1C, 0x1E, 0x20, 0x22,
@@ -172,8 +177,8 @@ void ems_init() {
     EMS_Sys_Status.txRetryCount     = 0;
 
     // thermostat
-    EMS_Thermostat.setpoint_roomTemp = EMS_VALUE_FLOAT_NOTSET;
-    EMS_Thermostat.curr_roomTemp     = EMS_VALUE_FLOAT_NOTSET;
+    EMS_Thermostat.setpoint_roomTemp = EMS_VALUE_SHORT_NOTSET;
+    EMS_Thermostat.curr_roomTemp     = EMS_VALUE_SHORT_NOTSET;
     EMS_Thermostat.hour              = 0;
     EMS_Thermostat.minute            = 0;
     EMS_Thermostat.second            = 0;
@@ -196,8 +201,8 @@ void ems_init() {
 
     // UBAMonitorFast
     EMS_Boiler.selFlowTemp = EMS_VALUE_INT_NOTSET;   // Selected flow temperature
-    EMS_Boiler.curFlowTemp = EMS_VALUE_FLOAT_NOTSET; // Current flow temperature
-    EMS_Boiler.retTemp     = EMS_VALUE_FLOAT_NOTSET; // Return temperature
+    EMS_Boiler.curFlowTemp = EMS_VALUE_SHORT_NOTSET; // Current flow temperature
+    EMS_Boiler.retTemp     = EMS_VALUE_SHORT_NOTSET; // Return temperature
     EMS_Boiler.burnGas     = EMS_VALUE_INT_NOTSET;   // Gas on/off
     EMS_Boiler.fanWork     = EMS_VALUE_INT_NOTSET;   // Fan on/off
     EMS_Boiler.ignWork     = EMS_VALUE_INT_NOTSET;   // Ignition on/off
@@ -206,21 +211,21 @@ void ems_init() {
     EMS_Boiler.wWCirc      = EMS_VALUE_INT_NOTSET;   // Circulation on/off
     EMS_Boiler.selBurnPow  = EMS_VALUE_INT_NOTSET;   // Burner max power
     EMS_Boiler.curBurnPow  = EMS_VALUE_INT_NOTSET;   // Burner current power
-    EMS_Boiler.flameCurr   = EMS_VALUE_FLOAT_NOTSET; // Flame current in micro amps
-    EMS_Boiler.sysPress    = EMS_VALUE_FLOAT_NOTSET; // System pressure
+    EMS_Boiler.flameCurr   = EMS_VALUE_SHORT_NOTSET; // Flame current in micro amps
+    EMS_Boiler.sysPress    = EMS_VALUE_INT_NOTSET;   // System pressure
     strlcpy(EMS_Boiler.serviceCodeChar, "??", sizeof(EMS_Boiler.serviceCodeChar));
     EMS_Boiler.serviceCode = EMS_VALUE_SHORT_NOTSET;
 
     // UBAMonitorSlow
-    EMS_Boiler.extTemp     = EMS_VALUE_FLOAT_NOTSET; // Outside temperature
-    EMS_Boiler.boilTemp    = EMS_VALUE_FLOAT_NOTSET; // Boiler temperature
+    EMS_Boiler.extTemp     = EMS_VALUE_SHORT_NOTSET; // Outside temperature
+    EMS_Boiler.boilTemp    = EMS_VALUE_SHORT_NOTSET; // Boiler temperature
     EMS_Boiler.pumpMod     = EMS_VALUE_INT_NOTSET;   // Pump modulation
     EMS_Boiler.burnStarts  = EMS_VALUE_LONG_NOTSET;  // # burner restarts
     EMS_Boiler.burnWorkMin = EMS_VALUE_LONG_NOTSET;  // Total burner operating time
     EMS_Boiler.heatWorkMin = EMS_VALUE_LONG_NOTSET;  // Total heat operating time
 
     // UBAMonitorWWMessage
-    EMS_Boiler.wWCurTmp  = EMS_VALUE_FLOAT_NOTSET; // Warm Water current temperature:
+    EMS_Boiler.wWCurTmp  = EMS_VALUE_SHORT_NOTSET; // Warm Water current temperature:
     EMS_Boiler.wWStarts  = EMS_VALUE_LONG_NOTSET;  // Warm Water # starts
     EMS_Boiler.wWWorkM   = EMS_VALUE_LONG_NOTSET;  // Warm Water # minutes
     EMS_Boiler.wWOneTime = EMS_VALUE_INT_NOTSET;   // Warm Water one time function on/off
@@ -235,8 +240,8 @@ void ems_init() {
     EMS_Boiler.pump_mod_min = EMS_VALUE_INT_NOTSET; // Boiler circuit pump modulation min. power
 
     // Other EMS devices values
-    EMS_Other.SM10collectorTemp  = EMS_VALUE_FLOAT_NOTSET; // collector temp from SM10
-    EMS_Other.SM10bottomTemp     = EMS_VALUE_FLOAT_NOTSET; // bottom temp from SM10
+    EMS_Other.SM10collectorTemp  = EMS_VALUE_SHORT_NOTSET; // collector temp from SM10
+    EMS_Other.SM10bottomTemp     = EMS_VALUE_SHORT_NOTSET; // bottom temp from SM10
     EMS_Other.SM10pumpModulation = EMS_VALUE_INT_NOTSET;   // modulation solar pump SM10
     EMS_Other.SM10pump           = EMS_VALUE_INT_NOTSET;   // pump active
 
@@ -346,52 +351,7 @@ uint8_t _crcCalculator(uint8_t * data, uint8_t len) {
     return crc;
 }
 
-/**
- * function to turn a telegram int (2 bytes) to a float. The source is *10
- * negative values are stored as 1-compliment (https://medium.com/@LeeJulija/how-integers-are-stored-in-memory-using-twos-complement-5ba04d61a56c)
- */
-float _toFloat(uint8_t i, uint8_t * data) {
-    // if the MSB is set, it's a negative number or an error
-    if ((data[i] & 0x80) == 0x80) {
-        // check if its an invalid number
-        // 0x8000 is used when sensor is missing
-        if ((data[i] >= 0x80) && (data[i + 1] == 0)) {
-            return (float)EMS_VALUE_FLOAT_NOTSET; // return -1 to indicate that is unknown
-        }
-        // its definitely a negative number
-        // assume its 1-compliment, otherwise we need add 1 to the total for 2-compliment
-        int16_t x = (data[i] << 8) + data[i + 1];
-        return ((float)(x)) / 10;
-    } else {
-        // ...a positive number
-        return ((float)(((data[i] << 8) + data[i + 1]))) / 10;
-    }
-}
-
-// function to turn a telegram long (3 bytes) to a long int
-uint32_t _toLong(uint8_t i, uint8_t * data) {
-    return (((data[i]) << 16) + ((data[i + 1]) << 8) + (data[i + 2]));
-}
-
-/**
- * Find the pointer to the EMS_Types array for a given type ID
- */
-int _ems_findType(uint8_t type) {
-    uint8_t i         = 0;
-    bool    typeFound = false;
-    // scan through known ID types
-    while (i < _EMS_Types_max) {
-        if (EMS_Types[i].type == type) {
-            typeFound = true; // we have a match
-            break;
-        }
-        i++;
-    }
-
-    return (typeFound ? i : -1);
-}
-
-// like itoa but for hex, and quick
+// like itoa but for hex, and quicker
 char * _hextoa(uint8_t value, char * buffer) {
     char * p    = buffer;
     byte   nib1 = (value >> 4) & 0x0F;
@@ -419,6 +379,25 @@ char * _smallitoa3(uint16_t value, char * buffer) {
     buffer[2] = (value % 10) + '0';
     buffer[3] = '\0';
     return buffer;
+}
+
+/**
+ * Find the pointer to the EMS_Types array for a given type ID
+ * or -1 if not found
+ */
+int _ems_findType(uint8_t type) {
+    uint8_t i         = 0;
+    bool    typeFound = false;
+    // scan through known ID types
+    while (i < _EMS_Types_max) {
+        if (EMS_Types[i].type == type) {
+            typeFound = true; // we have a match
+            break;
+        }
+        i++;
+    }
+
+    return (typeFound ? i : -1);
 }
 
 /**
@@ -946,11 +925,11 @@ void _checkActive() {
  * received only after requested (not broadcasted)
  */
 void _process_UBAParameterWW(uint8_t src, uint8_t * data, uint8_t length) {
-    EMS_Boiler.wWActivated   = (data[1] == 0xFF); // 0xFF means on
-    EMS_Boiler.wWSelTemp     = data[2];
-    EMS_Boiler.wWCircPump    = (data[6] == 0xFF); // 0xFF means on
-    EMS_Boiler.wWDesiredTemp = data[8];
-    EMS_Boiler.wWComfort     = data[EMS_OFFSET_UBAParameterWW_wwComfort];
+    EMS_Boiler.wWActivated   = (_toByte(1) == 0xFF); // 0xFF means on
+    EMS_Boiler.wWSelTemp     = _toByte(2);
+    EMS_Boiler.wWCircPump    = (_toByte(6) == 0xFF); // 0xFF means on
+    EMS_Boiler.wWDesiredTemp = _toByte(8);
+    EMS_Boiler.wWComfort     = _toByte(EMS_OFFSET_UBAParameterWW_wwComfort);
 
     EMS_Sys_Status.emsRefreshed = true; // when we receieve this, lets force an MQTT publish
 }
@@ -960,7 +939,7 @@ void _process_UBAParameterWW(uint8_t src, uint8_t * data, uint8_t length) {
  * received only after requested (not broadcasted)
  */
 void _process_UBATotalUptimeMessage(uint8_t src, uint8_t * data, uint8_t length) {
-    EMS_Boiler.UBAuptime        = _toLong(0, data);
+    EMS_Boiler.UBAuptime        = _toLong(0);
     EMS_Sys_Status.emsRefreshed = true; // when we receieve this, lets force an MQTT publish
 }
 
@@ -968,9 +947,9 @@ void _process_UBATotalUptimeMessage(uint8_t src, uint8_t * data, uint8_t length)
  * UBAParametersMessage - type 0x16
  */
 void _process_UBAParametersMessage(uint8_t src, uint8_t * data, uint8_t length) {
-    EMS_Boiler.heating_temp = data[1];
-    EMS_Boiler.pump_mod_max = data[9];
-    EMS_Boiler.pump_mod_min = data[10];
+    EMS_Boiler.heating_temp = _toByte(1);
+    EMS_Boiler.pump_mod_max = _toByte(9);
+    EMS_Boiler.pump_mod_min = _toByte(10);
 }
 
 /**
@@ -978,11 +957,11 @@ void _process_UBAParametersMessage(uint8_t src, uint8_t * data, uint8_t length) 
  * received every 10 seconds
  */
 void _process_UBAMonitorWWMessage(uint8_t src, uint8_t * data, uint8_t length) {
-    EMS_Boiler.wWCurTmp  = _toFloat(1, data);
-    EMS_Boiler.wWStarts  = _toLong(13, data);
-    EMS_Boiler.wWWorkM   = _toLong(10, data);
-    EMS_Boiler.wWOneTime = bitRead(data[5], 1);
-    EMS_Boiler.wWCurFlow = data[9];
+    EMS_Boiler.wWCurTmp  = _toShort(1);
+    EMS_Boiler.wWStarts  = _toLong(13);
+    EMS_Boiler.wWWorkM   = _toLong(10);
+    EMS_Boiler.wWOneTime = _bitRead(5, 1);
+    EMS_Boiler.wWCurFlow = _toByte(9);
 }
 
 /**
@@ -990,36 +969,32 @@ void _process_UBAMonitorWWMessage(uint8_t src, uint8_t * data, uint8_t length) {
  * received every 10 seconds
  */
 void _process_UBAMonitorFast(uint8_t src, uint8_t * data, uint8_t length) {
-    EMS_Boiler.selFlowTemp = data[0];
-    EMS_Boiler.curFlowTemp = _toFloat(1, data);
-    EMS_Boiler.retTemp     = _toFloat(13, data);
+    EMS_Boiler.selFlowTemp = _toByte(0);
+    EMS_Boiler.curFlowTemp = _toShort(1);
+    EMS_Boiler.retTemp     = _toShort(13);
 
-    uint8_t v          = data[7];
-    EMS_Boiler.burnGas = bitRead(v, 0);
-    EMS_Boiler.fanWork = bitRead(v, 2);
-    EMS_Boiler.ignWork = bitRead(v, 3);
-    EMS_Boiler.heatPmp = bitRead(v, 5);
-    EMS_Boiler.wWHeat  = bitRead(v, 6);
-    EMS_Boiler.wWCirc  = bitRead(v, 7);
+    EMS_Boiler.burnGas = _bitRead(7, 0);
+    EMS_Boiler.fanWork = _bitRead(7, 2);
+    EMS_Boiler.ignWork = _bitRead(7, 3);
+    EMS_Boiler.heatPmp = _bitRead(7, 5);
+    EMS_Boiler.wWHeat  = _bitRead(7, 6);
+    EMS_Boiler.wWCirc  = _bitRead(7, 7);
 
-    EMS_Boiler.curBurnPow = data[4];
-    EMS_Boiler.selBurnPow = data[3]; // burn power max setting
+    EMS_Boiler.curBurnPow = _toByte(4);
+    EMS_Boiler.selBurnPow = _toByte(3); // burn power max setting
 
-    EMS_Boiler.flameCurr = _toFloat(15, data);
+    EMS_Boiler.flameCurr = _toShort(15);
 
     // read the service code / installation status as appears on the display
-    EMS_Boiler.serviceCodeChar[0] = char(data[18]); // ascii character 1
-    EMS_Boiler.serviceCodeChar[1] = char(data[19]); // ascii character 2
+    EMS_Boiler.serviceCodeChar[0] = char(_toByte(18)); // ascii character 1
+    EMS_Boiler.serviceCodeChar[1] = char(_toByte(19)); // ascii character 2
     EMS_Boiler.serviceCodeChar[2] = '\0';           // null terminate string
 
     // read error code
-    EMS_Boiler.serviceCode = (data[20] << 8) + data[21];
+    EMS_Boiler.serviceCode = _toShort(20);
 
-    if (data[17] == 0xFF) { // missing value for system pressure
-        EMS_Boiler.sysPress = 0;
-    } else {
-        EMS_Boiler.sysPress = (((float)data[17]) / (float)10);
-    }
+    // system pressure. FF means missing
+    EMS_Boiler.sysPress = _toByte(17); // this is *10
 
     // at this point do a quick check to see if the hot water or heating is active
     _checkActive();
@@ -1030,23 +1005,23 @@ void _process_UBAMonitorFast(uint8_t src, uint8_t * data, uint8_t length) {
  * received every 60 seconds
  */
 void _process_UBAMonitorSlow(uint8_t src, uint8_t * data, uint8_t length) {
-    EMS_Boiler.extTemp     = _toFloat(0, data); // 0x8000 if not available
-    EMS_Boiler.boilTemp    = _toFloat(2, data); // 0x8000 if not available
-    EMS_Boiler.pumpMod     = data[9];
-    EMS_Boiler.burnStarts  = _toLong(10, data);
-    EMS_Boiler.burnWorkMin = _toLong(13, data);
-    EMS_Boiler.heatWorkMin = _toLong(19, data);
+    EMS_Boiler.extTemp     = _toShort(0); // 0x8000 if not available
+    EMS_Boiler.boilTemp    = _toShort(2); // 0x8000 if not available
+    EMS_Boiler.pumpMod     = _toByte(9);
+    EMS_Boiler.burnStarts  = _toLong(10);
+    EMS_Boiler.burnWorkMin = _toLong(13);
+    EMS_Boiler.heatWorkMin = _toLong(19);
 }
-
 
 /**
  * type 0xB1 - data from the RC10 thermostat (0x17)
  * For reading the temp values only
  * received every 60 seconds
+ * e.g. 17 0B 91 00 80 1E 00 CB 27 00 00 00 00 05 01 00 CB 00 (CRC=47), #data=14
  */
 void _process_RC10StatusMessage(uint8_t src, uint8_t * data, uint8_t length) {
-    EMS_Thermostat.setpoint_roomTemp = ((float)data[EMS_TYPE_RC10StatusMessage_setpoint]) / (float)2;
-    EMS_Thermostat.curr_roomTemp     = ((float)data[EMS_TYPE_RC10StatusMessage_curr]) / (float)10;
+    EMS_Thermostat.setpoint_roomTemp = _toByte(EMS_TYPE_RC10StatusMessage_setpoint); // is * 2
+    EMS_Thermostat.curr_roomTemp     = _toByte(EMS_TYPE_RC10StatusMessage_curr);     // is * 10
 
     EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
 }
@@ -1057,8 +1032,8 @@ void _process_RC10StatusMessage(uint8_t src, uint8_t * data, uint8_t length) {
  * received every 60 seconds
  */
 void _process_RC20StatusMessage(uint8_t src, uint8_t * data, uint8_t length) {
-    EMS_Thermostat.setpoint_roomTemp = ((float)data[EMS_TYPE_RC20StatusMessage_setpoint]) / (float)2;
-    EMS_Thermostat.curr_roomTemp     = _toFloat(EMS_TYPE_RC20StatusMessage_curr, data);
+    EMS_Thermostat.setpoint_roomTemp = _toByte(EMS_TYPE_RC20StatusMessage_setpoint); // is * 2
+    EMS_Thermostat.curr_roomTemp     = _toShort(EMS_TYPE_RC20StatusMessage_curr);     // is * 10
 
     EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
 }
@@ -1069,8 +1044,8 @@ void _process_RC20StatusMessage(uint8_t src, uint8_t * data, uint8_t length) {
  * received every 60 seconds
  */
 void _process_RC30StatusMessage(uint8_t src, uint8_t * data, uint8_t length) {
-    EMS_Thermostat.setpoint_roomTemp = ((float)data[EMS_TYPE_RC30StatusMessage_setpoint]) / (float)2;
-    EMS_Thermostat.curr_roomTemp     = _toFloat(EMS_TYPE_RC30StatusMessage_curr, data);
+    EMS_Thermostat.setpoint_roomTemp = _toByte(EMS_TYPE_RC30StatusMessage_setpoint); // is * 2
+    EMS_Thermostat.curr_roomTemp     = _toShort(EMS_TYPE_RC30StatusMessage_curr);    // note, its 2 bytes here
 
     EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
 }
@@ -1081,13 +1056,13 @@ void _process_RC30StatusMessage(uint8_t src, uint8_t * data, uint8_t length) {
  * received every 60 seconds
  */
 void _process_RC35StatusMessage(uint8_t src, uint8_t * data, uint8_t length) {
-    EMS_Thermostat.setpoint_roomTemp = ((float)data[EMS_TYPE_RC35StatusMessage_setpoint]) / (float)2;
+    EMS_Thermostat.setpoint_roomTemp = _toByte(EMS_TYPE_RC35StatusMessage_setpoint); // is * 2
 
     // check if temp sensor is unavailable
     if ((data[0] == 0x7D) && (data[1] = 0x00)) {
-        EMS_Thermostat.curr_roomTemp = EMS_VALUE_FLOAT_NOTSET;
+        EMS_Thermostat.curr_roomTemp = EMS_VALUE_SHORT_NOTSET;
     } else {
-        EMS_Thermostat.curr_roomTemp = _toFloat(EMS_TYPE_RC35StatusMessage_curr, data);
+        EMS_Thermostat.curr_roomTemp = _toShort(EMS_TYPE_RC35StatusMessage_curr);
     }
     EMS_Thermostat.day_mode     = bitRead(data[EMS_OFFSET_RC35Get_mode_day], 1); //get day mode flag
     EMS_Sys_Status.emsRefreshed = true;                                          // triggers a send the values back via MQTT
@@ -1095,11 +1070,11 @@ void _process_RC35StatusMessage(uint8_t src, uint8_t * data, uint8_t length) {
 
 /**
  * type 0x0A - data from the Nefit Easy/TC100 thermostat (0x18) - 31 bytes long
- * The Easy has a digital precision of its floats to 2 decimal places, so values is divided by 100
+ * The Easy has a digital precision of its floats to 2 decimal places, so values must be divided by 100
  */
 void _process_EasyStatusMessage(uint8_t src, uint8_t * data, uint8_t length) {
-    EMS_Thermostat.curr_roomTemp     = ((float)(((data[EMS_TYPE_EasyStatusMessage_curr] << 8) + data[9]))) / 100;
-    EMS_Thermostat.setpoint_roomTemp = ((float)(((data[EMS_TYPE_EasyStatusMessage_setpoint] << 8) + data[11]))) / 100;
+    EMS_Thermostat.curr_roomTemp     = _toShort(EMS_TYPE_EasyStatusMessage_curr);     // is *100
+    EMS_Thermostat.setpoint_roomTemp = _toShort(EMS_TYPE_EasyStatusMessage_setpoint); // is *100
 
     EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
 }
@@ -1117,7 +1092,7 @@ void _process_RC10Set(uint8_t src, uint8_t * data, uint8_t length) {
  * received only after requested
  */
 void _process_RC20Set(uint8_t src, uint8_t * data, uint8_t length) {
-    EMS_Thermostat.mode = data[EMS_OFFSET_RC20Set_mode];
+    EMS_Thermostat.mode = _toByte(EMS_OFFSET_RC20Set_mode);
 }
 
 /**
@@ -1125,7 +1100,7 @@ void _process_RC20Set(uint8_t src, uint8_t * data, uint8_t length) {
  * received only after requested
  */
 void _process_RC30Set(uint8_t src, uint8_t * data, uint8_t length) {
-    EMS_Thermostat.mode = data[EMS_OFFSET_RC30Set_mode];
+    EMS_Thermostat.mode = _toByte(EMS_OFFSET_RC30Set_mode);
 }
 
 /**
@@ -1134,7 +1109,7 @@ void _process_RC30Set(uint8_t src, uint8_t * data, uint8_t length) {
  * received only after requested
  */
 void _process_RC35Set(uint8_t src, uint8_t * data, uint8_t length) {
-    EMS_Thermostat.mode = data[EMS_OFFSET_RC35Set_mode];
+    EMS_Thermostat.mode = _toByte(EMS_OFFSET_RC35Set_mode);
 }
 
 /**
@@ -1148,10 +1123,10 @@ void _process_RCOutdoorTempMessage(uint8_t src, uint8_t * data, uint8_t length) 
  * SM10Monitor - type 0x97
  */
 void _process_SM10Monitor(uint8_t src, uint8_t * data, uint8_t length) {
-    EMS_Other.SM10collectorTemp  = _toFloat(2, data);   // collector temp from SM10
-    EMS_Other.SM10bottomTemp     = _toFloat(5, data);   // bottom temp from SM10
-    EMS_Other.SM10pumpModulation = data[4];             // modulation solar pump
-    EMS_Other.SM10pump           = bitRead(data[6], 1); // active if bit 1 is set (to 1)
+    EMS_Other.SM10collectorTemp  = _toShort(2);    // collector temp from SM10, is *10
+    EMS_Other.SM10bottomTemp     = _toShort(5);    // bottom temp from SM10, is *10
+    EMS_Other.SM10pumpModulation = _toByte(4);     // modulation solar pump
+    EMS_Other.SM10pump           = _bitRead(5, 1); // active if bit 1 is set (to 1)
 
     EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
 }
@@ -1181,12 +1156,12 @@ void _process_RCTime(uint8_t src, uint8_t * data, uint8_t length) {
         return; // not supported
     }
 
-    EMS_Thermostat.hour   = data[2];
-    EMS_Thermostat.minute = data[4];
-    EMS_Thermostat.second = data[5];
-    EMS_Thermostat.day    = data[3];
-    EMS_Thermostat.month  = data[1];
-    EMS_Thermostat.year   = data[0];
+    EMS_Thermostat.hour   = _toByte(2);
+    EMS_Thermostat.minute = _toByte(4);
+    EMS_Thermostat.second = _toByte(5);
+    EMS_Thermostat.day    = _toByte(3);
+    EMS_Thermostat.month  = _toByte(1);
+    EMS_Thermostat.year   = _toByte(0);
 }
 
 /**
@@ -1199,9 +1174,9 @@ void _process_Version(uint8_t src, uint8_t * data, uint8_t length) {
         return;
     }
 
-    uint8_t product_id  = data[0];
+    uint8_t product_id  = _toByte(0);
     char    version[10] = {0};
-    snprintf(version, sizeof(version), "%02d.%02d", data[1], data[2]);
+    snprintf(version, sizeof(version), "%02d.%02d", _toByte(1), _toByte(2));
 
     // see if its a known boiler
     int  i         = 0;
@@ -1510,10 +1485,11 @@ char * ems_getThermostatDescription(char * buffer) {
             strlcat(buffer, _hextoa(EMS_Thermostat.type_id, tmp), size);
         }
 
-        strlcat(buffer, " Product ID:", size);
+        strlcat(buffer, " (Product ID:", size);
         strlcat(buffer, itoa(EMS_Thermostat.product_id, tmp, 10), size);
         strlcat(buffer, " Version:", size);
         strlcat(buffer, EMS_Thermostat.version, size);
+        strlcat(buffer, ")", size);
     }
 
     return buffer;
@@ -1546,10 +1522,11 @@ char * ems_getBoilerDescription(char * buffer) {
             strlcat(buffer, _hextoa(EMS_Boiler.type_id, tmp), size);
         }
 
-        strlcat(buffer, " Product ID:", size);
+        strlcat(buffer, " (Product ID:", size);
         strlcat(buffer, itoa(EMS_Boiler.product_id, tmp, 10), size);
         strlcat(buffer, " Version:", size);
         strlcat(buffer, EMS_Boiler.version, size);
+        strlcat(buffer, ")", size);
     }
 
     return buffer;
@@ -1635,6 +1612,7 @@ void ems_doReadCommand(uint8_t type, uint8_t dest, bool forceRefresh) {
 
     // if we're preventing all outbound traffic, quit
     if (EMS_Sys_Status.emsTxDisabled) {
+        myDebug("in Silent Mode. All Tx is disabled.");
         return;
     }
 
