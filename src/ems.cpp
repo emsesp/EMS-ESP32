@@ -136,9 +136,9 @@ uint8_t _Other_Types_max      = ArraySize(Other_Types);      // number of other 
 uint8_t _Thermostat_Types_max = ArraySize(Thermostat_Types); // number of defined thermostat types
 
 // these structs contain the data we store from the Boiler and Thermostat
-_EMS_Boiler     EMS_Boiler; // for boiler
+_EMS_Boiler     EMS_Boiler;     // for boiler
 _EMS_Thermostat EMS_Thermostat; // for thermostat
-_EMS_Other      EMS_Other; // for other known EMS devices
+_EMS_Other      EMS_Other;      // for other known EMS devices
 
 // CRC lookup table with poly 12 for faster checking
 const uint8_t ems_crc_table[] = {0x00, 0x02, 0x04, 0x06, 0x08, 0x0A, 0x0C, 0x0E, 0x10, 0x12, 0x14, 0x16, 0x18, 0x1A, 0x1C, 0x1E, 0x20, 0x22,
@@ -577,13 +577,25 @@ void _createValidate() {
     EMS_TxQueue.unshift(new_EMS_TxTelegram); // add back to queue making it first to be picked up next (FIFO)
 }
 
+
+/*
+ * Entry point TODO: tidy up
+ */
+void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
+    _ems_readTelegram(telegram, length);
+    // now clear it just be safe
+    for (uint8_t i = 0; i < EMS_MAXBUFFERSIZE; i++) {
+        telegram[i] = 0x00;
+    }
+}
+
 /**
  * the main logic that parses the telegram message, triggered by an interrupt in emsuart.cpp
  * length is only data bytes, excluding the BRK
  * Read commands are asynchronous as they're handled by the interrupt
  * When we receive a Poll Request we need to send any Tx packages quickly within a 200ms window
  */
-void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
+void _ems_readTelegram(uint8_t * telegram, uint8_t length) {
     // check if we just received a single byte
     // it could well be a Poll request from the boiler for us, which will have a value of 0x8B (0x0B | 0x80)
     // or either a return code like 0x01 or 0x04 from the last Write command
@@ -991,7 +1003,7 @@ void _process_UBAMonitorFast(uint8_t src, uint8_t * data, uint8_t length) {
     // read the service code / installation status as appears on the display
     EMS_Boiler.serviceCodeChar[0] = char(_toByte(18)); // ascii character 1
     EMS_Boiler.serviceCodeChar[1] = char(_toByte(19)); // ascii character 2
-    EMS_Boiler.serviceCodeChar[2] = '\0';           // null terminate string
+    EMS_Boiler.serviceCodeChar[2] = '\0';              // null terminate string
 
     // read error code
     EMS_Boiler.serviceCode = _toShort(20);
@@ -1036,7 +1048,7 @@ void _process_RC10StatusMessage(uint8_t src, uint8_t * data, uint8_t length) {
  */
 void _process_RC20StatusMessage(uint8_t src, uint8_t * data, uint8_t length) {
     EMS_Thermostat.setpoint_roomTemp = _toByte(EMS_TYPE_RC20StatusMessage_setpoint); // is * 2
-    EMS_Thermostat.curr_roomTemp     = _toShort(EMS_TYPE_RC20StatusMessage_curr);     // is * 10
+    EMS_Thermostat.curr_roomTemp     = _toShort(EMS_TYPE_RC20StatusMessage_curr);    // is * 10
 
     EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
 }
