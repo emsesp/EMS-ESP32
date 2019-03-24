@@ -3,17 +3,11 @@
 env_default = d1_mini
 
 [common]
-platform_def = espressif8266
-platform_180 = espressif8266@1.8.0
-platform = ${common.platform_def}
-;platform = ${common.platform_180}
-
 flash_mode = dout
 
-; for production
 build_flags = -g -w
 
-; for debug
+; for debug use these...
 ; build_flags = -g -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-parameter -Wno-unused-variable -DCRASH
 
 wifi_settings =
@@ -31,17 +25,16 @@ lib_deps =
 
 [env:d1_mini]
 board = d1_mini
-platform = ${common.platform}
+platform = espressif8266
 framework = arduino
 lib_deps = ${common.lib_deps}
 build_flags = ${common.build_flags} ${common.wifi_settings}
 board_build.flash_mode = ${common.flash_mode}
 upload_speed = 921600
 monitor_speed = 115200
-
 ; for OTA comment out these sections
 ;upload_protocol = espota
 ;upload_port = ems-esp.local
-;upload_port = <the IP address...>
+;upload_port = <add here your ip of the device>
 
 
