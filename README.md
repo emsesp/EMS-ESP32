@@ -202,7 +202,7 @@ Every telegram sent is echo'd back to Rx, along the same Bus used for all Rx/Tx 
 
 `ems.cpp` is the logic to read the EMS data packets (telegrams), validates them and process them based on the type.
 
-`ems-esp.ino` is the Arduino code for the ESP8266 that kicks it all off. This is where we have specific logic such as the code to monitor and alert on the Shower timer and light up the LEDs.
+`ems-esp.cpp` is the Arduino code for the ESP8266 that kicks it all off. This is where we have specific logic such as the code to monitor and alert on the Shower timer and light up the LEDs.
 
 `my_config.h` has all the custom settings tailored to your environment. Specific values here are also stored in the ESP's SPIFFs (File system).
 
