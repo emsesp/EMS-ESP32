@@ -579,33 +579,34 @@ void _createValidate() {
 
 
 /*
- * Entry point TODO: tidy up
+ * Entry point triggered by an interrupt in emsuart.cpp
+ * length is only data bytes, excluding the BRK
+ * Read commands are asynchronous as they're handled by the interrupt
+ * When a telegram is processed we forcefully erase it from the stack to prevent overflow
  */
 void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
-    _ems_readTelegram(telegram, length);
-    // now clear it just be safe
-    for (uint8_t i = 0; i < EMS_MAXBUFFERSIZE; i++) {
-        telegram[i] = 0x00;
+    if ((length != 0) && (telegram[0] != 0x00)) {
+        _ems_readTelegram(telegram, length);
     }
+    // now clear the Rx buffer just be safe and prevent duplicates
+    for (uint8_t i = 0; i < EMS_MAXBUFFERSIZE; telegram[i++] = 0x00)
+        ; 
 }
 
 /**
- * the main logic that parses the telegram message, triggered by an interrupt in emsuart.cpp
- * length is only data bytes, excluding the BRK
- * Read commands are asynchronous as they're handled by the interrupt
+ * the main logic that parses the telegram message
  * When we receive a Poll Request we need to send any Tx packages quickly within a 200ms window
  */
 void _ems_readTelegram(uint8_t * telegram, uint8_t length) {
-    // check if we just received a single byte
-    // it could well be a Poll request from the boiler for us, which will have a value of 0x8B (0x0B | 0x80)
-    // or either a return code like 0x01 or 0x04 from the last Write command
-
     // create the Rx package
     static _EMS_RxTelegram EMS_RxTelegram;
     EMS_RxTelegram.length    = length;
     EMS_RxTelegram.telegram  = telegram;
     EMS_RxTelegram.timestamp = millis();
 
+    // check if we just received a single byte
+    // it could well be a Poll request from the boiler for us, which will have a value of 0x8B (0x0B | 0x80)
+    // or either a return code like 0x01 or 0x04 from the last Write command
     if (length == 1) {
         uint8_t value = telegram[0]; // 1st byte of data package
 
