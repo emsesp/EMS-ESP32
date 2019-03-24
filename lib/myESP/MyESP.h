@@ -9,7 +9,7 @@
 #ifndef MyEMS_h
 #define MyEMS_h
 
-#define MYESP_VERSION "1.1.5"
+#define MYESP_VERSION "1.1.6"
 
 #include <ArduinoJson.h>
 #include <ArduinoOTA.h>
@@ -18,6 +18,13 @@
 #include <FS.h>
 #include <JustWifi.h>  // https://github.com/xoseperez/justwifi
 #include <TelnetSpy.h> // modified from https://github.com/yasheena/telnetspy
+
+#ifdef CRASH
+#include <EEPROM_Rotate.h>
+extern "C" {
+void custom_crash_callback(struct rst_info *, uint32_t, uint32_t);
+}
+#endif
 
 #if defined(ARDUINO_ARCH_ESP32)
 //#include <ESPmDNS.h>
@@ -68,13 +75,44 @@
 #define COLOR_CYAN "\x1B[0;36m"
 #define COLOR_WHITE "\x1B[0;37m"
 #define COLOR_BOLD_ON "\x1B[1m"
-#define COLOR_BOLD_OFF "\x1B[22m" // fixed by Scott Arlott
+#define COLOR_BOLD_OFF "\x1B[22m" // fix by Scott Arlott to support Linux
 
 // SPIFFS
-#define SPIFFS_MAXSIZE 500 // https://arduinojson.org/v5/assistant/
+#define SPIFFS_MAXSIZE 600 // https://arduinojson.org/v6/assistant/
+
+// CRASH
+/**
+ * Structure of the single crash data set
+ *
+ *  1. Crash time
+ *  2. Restart reason
+ *  3. Exception cause
+ *  4. epc1
+ *  5. epc2
+ *  6. epc3
+ *  7. excvaddr
+ *  8. depc
+ *  9. address of stack start
+ * 10. address of stack end
+ * 11. stack trace bytes
+ *     ...
+ */
+#define SAVE_CRASH_EEPROM_OFFSET 0x0100 // initial address for crash data
+#define SAVE_CRASH_CRASH_TIME 0x00      // 4 bytes
+#define SAVE_CRASH_RESTART_REASON 0x04  // 1 byte
+#define SAVE_CRASH_EXCEPTION_CAUSE 0x05 // 1 byte
+#define SAVE_CRASH_EPC1 0x06            // 4 bytes
+#define SAVE_CRASH_EPC2 0x0A            // 4 bytes
+#define SAVE_CRASH_EPC3 0x0E            // 4 bytes
+#define SAVE_CRASH_EXCVADDR 0x12        // 4 bytes
+#define SAVE_CRASH_DEPC 0x16            // 4 bytes
+#define SAVE_CRASH_STACK_START 0x1A     // 4 bytes
+#define SAVE_CRASH_STACK_END 0x1E       // 4 bytes
+#define SAVE_CRASH_STACK_TRACE 0x22     // variable
 
 typedef struct {
-    char key[40];
+    bool set; // is it a set command
+    char key[50];
     char description[100];
 } command_t;
 
@@ -94,6 +132,8 @@ constexpr size_t ArraySize(T (&)[N]) {
     return N;
 }
 
+#define UPTIME_OVERFLOW 4294967295 // Uptime overflow value
+
 // class definition
 class MyESP {
   public:
@@ -104,8 +144,10 @@ class MyESP {
     void setWIFICallback(void (*callback)());
     void setWIFI(const char * wifi_ssid, const char * wifi_password, wifi_callback_f callback);
     bool isWifiConnected();
+    bool isAPmode();
 
     // mqtt
+    bool isMQTTConnected();
     void mqttSubscribe(const char * topic);
     void mqttUnsubscribe(const char * topic);
     void mqttPublish(const char * topic, const char * payload);
@@ -122,7 +164,7 @@ class MyESP {
                  mqtt_callback_f callback);
 
     // OTA
-    void setOTA(ota_callback_f OTACallback);
+    void setOTA(ota_callback_f OTACallback_pre, ota_callback_f OTACallback_post);
 
     // debug & telnet
     void myDebug(const char * format, ...);
@@ -134,6 +176,12 @@ class MyESP {
     void setSettings(fs_callback_f callback, fs_settings_callback_f fs_settings_callback);
     bool fs_saveConfig();
 
+    // Crash
+    void crashClear();
+    void crashDump();
+    void crashTest(uint8_t t);
+    void crashInfo();
+
     // general
     void     end();
     void     loop();
@@ -142,7 +190,7 @@ class MyESP {
     void     resetESP();
     uint16_t getSystemLoadAverage();
     int      getWifiQuality();
-
+    void     showSystemStats();
 
   private:
     // mqtt
@@ -177,11 +225,16 @@ class MyESP {
     char *          _wifi_ssid;
     char *          _wifi_password;
     bool            _wifi_connected;
+    String          _getESPhostname();
 
     // ota
-    ota_callback_f _ota_callback;
+    ota_callback_f _ota_pre_callback;
+    ota_callback_f _ota_post_callback;
     void           _ota_setup();
     void           _OTACallback();
+
+    // crash
+    void _eeprom_setup();
 
     // telnet & debug
     TelnetSpy                SerialAndTelnet;
@@ -189,7 +242,7 @@ class MyESP {
     void                     _telnetDisconnected();
     void                     _telnetHandle();
     void                     _telnetCommand(char * commandLine);
-    char *                   _telnet_readWord();
+    char *                   _telnet_readWord(bool allow_all_chars);
     void                     _telnet_setup();
     char                     _command[TELNET_MAX_COMMAND_LENGTH]; // the input command from either Serial or Telnet
     command_t *              _helpProjectCmds;                    // Help of commands setted by project
@@ -197,8 +250,7 @@ class MyESP {
     void                     _consoleShowHelp();
     telnetcommand_callback_f _telnetcommand_callback; // Callable for projects commands
     telnet_callback_f        _telnet_callback;        // callback for connect/disconnect
-    void                     _changeSetting(uint8_t wc, const char * setting, const char * value);
-    void                     _changeSetting2(const char * setting, const char * value1, const char * value2);
+    bool                     _changeSetting(uint8_t wc, const char * setting, const char * value);
 
     // fs
     void _fs_setup();
@@ -206,17 +258,20 @@ class MyESP {
     void _fs_printConfig();
     void _fs_eraseConfig();
 
+    // settings
     fs_callback_f          _fs_callback;
     fs_settings_callback_f _fs_settings_callback;
+    void                   _printSetCommands();
 
     // general
-    char * _app_hostname;
-    char * _app_name;
-    char * _app_version;
-    char * _boottime;
-    bool   _suspendOutput;
-    bool   _use_serial;
-    void   _printBuildTime(unsigned long rawTime);
+    char *        _app_hostname;
+    char *        _app_name;
+    char *        _app_version;
+    char *        _boottime;
+    bool          _suspendOutput;
+    bool          _use_serial;
+    unsigned long _getUptime();
+    String        _buildTime();
 
     // load average (0..100)
     void               _calculateLoad();

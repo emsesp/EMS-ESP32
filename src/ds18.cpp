@@ -4,9 +4,6 @@
  * 
  * Paul Derbyshire - https://github.com/proddy/EMS-ESP
  *
- * See ChangeLog.md for history
- * See README.md for Acknowledgments
- *
  */
 
 #include "ds18.h"
@@ -14,9 +11,10 @@
 std::vector<ds_device_t> _devices;
 
 DS18::DS18() {
-    _wire  = NULL;
-    _count = 0;
-    _gpio  = GPIO_NONE;
+    _wire     = NULL;
+    _count    = 0;
+    _gpio     = GPIO_NONE;
+    _parasite = 0;
 }
 
 DS18::~DS18() {
@@ -25,10 +23,11 @@ DS18::~DS18() {
 }
 
 // init
-uint8_t DS18::setup(uint8_t gpio) {
+uint8_t DS18::setup(uint8_t gpio, bool parasite) {
     uint8_t count;
 
-    _gpio = gpio;
+    _gpio     = gpio;
+    _parasite = (parasite ? 1 : 0);
 
     // OneWire
     if (_wire)
@@ -62,8 +61,7 @@ void DS18::loop() {
         // Start conversion
         _wire->reset();
         _wire->skip();
-        _wire->write(DS18_CMD_START_CONVERSION, DS18_PARASITE);
-
+        _wire->write(DS18_CMD_START_CONVERSION, _parasite);
     } else {
         // Read scratchpads
         for (unsigned char index = 0; index < _devices.size(); index++) {
@@ -117,7 +115,7 @@ char * DS18::getDeviceString(char * buffer, unsigned char index) {
         char a[30] = {0};
         snprintf(a,
                  sizeof(a),
-                 "(%02X%02X%02X%02X%02X%02X%02X%02X) @ GPIO%d",
+                 " (%02X%02X%02X%02X%02X%02X%02X%02X) @ GPIO%d",
                  address[0],
                  address[1],
                  address[2],
@@ -136,7 +134,6 @@ char * DS18::getDeviceString(char * buffer, unsigned char index) {
     return buffer;
 }
 
-
 /*
  * Read sensor values
  * 
@@ -154,14 +151,14 @@ char * DS18::getDeviceString(char * buffer, unsigned char index) {
             DS18B20 & DS1822: store for crc
     byte 8: SCRATCHPAD_CRC
 */
-double DS18::getValue(unsigned char index) {
+int16_t DS18::getRawValue(unsigned char index) {
     if (index >= _count)
         return 0;
 
     uint8_t * data = _devices[index].data;
 
     if (OneWire::crc8(data, DS18_DATA_SIZE - 1) != data[DS18_DATA_SIZE - 1]) {
-        return 0;
+        return DS18_CRC_ERROR;
     }
 
     int16_t raw = (data[1] << 8) | data[0];
@@ -181,11 +178,13 @@ double DS18::getValue(unsigned char index) {
                             // 12 bit res, 750 ms
     }
 
-    double value = (float)raw / 16.0;
-    if (value == DS18_DISCONNECTED) {
-        return 0;
-    }
+    return raw;
+}
 
+// return real value as a double
+// The raw temperature data is in units of sixteenths of a degree, so the value must be divided by 16 in order to convert it to degrees.
+double DS18::getValue(unsigned char index) {
+    double value = (float)getRawValue(index) / 16.0;
     return value;
 }
 
