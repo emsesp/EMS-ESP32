@@ -24,8 +24,8 @@ os_event_t recvTaskQueue[EMSUART_recvTaskQueueLen]; // our Rx queue
 // Important: do not use ICACHE_FLASH_ATTR !
 //
 static void emsuart_rx_intr_handler(void * para) {
-    static uint16_t length;
-    static uint8_t  uart_buffer[EMS_MAXBUFFERSIZE];
+    static uint8_t length;
+    static uint8_t uart_buffer[EMS_MAXBUFFERSIZE];
 
     // is a new buffer? if so init the thing for a new telegram
     if (EMS_Sys_Status.emsRxStatus == EMS_RX_STATUS_IDLE) {
