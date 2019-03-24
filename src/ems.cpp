@@ -14,11 +14,6 @@
 #include <MyESP.h>
 #include <list> // std::list
 
-#define _toByte(i) (data[i])
-#define _toShort(i) ((data[i] << 8) + data[i + 1])
-#define _toLong(i) ((data[i] << 16) + (data[i + 1] << 8) + (data[i + 2]))
-#define _bitRead(i, bit) (((data[i]) >> (bit)) & 0x01)
-
 // myESP for logging to telnet and serial
 #define myDebug(...) myESP.myDebug(__VA_ARGS__)
 
@@ -26,7 +21,15 @@ _EMS_Sys_Status EMS_Sys_Status; // EMS Status
 
 CircularBuffer<_EMS_TxTelegram, EMS_TX_TELEGRAM_QUEUE_MAX> EMS_TxQueue; // FIFO queue for Tx send buffer
 
-// callbacks per type
+//
+// process callbacks per type
+//
+
+// macros used in the _process* functions
+#define _toByte(i) (data[i])
+#define _toShort(i) ((data[i] << 8) + data[i + 1])
+#define _toLong(i) ((data[i] << 16) + (data[i + 1] << 8) + (data[i + 2]))
+#define _bitRead(i, bit) (((data[i]) >> (bit)) & 0x01)
 
 // generic
 void _process_Version(uint8_t src, uint8_t * data, uint8_t length);
@@ -1191,7 +1194,7 @@ void _process_Version(uint8_t src, uint8_t * data, uint8_t length) {
 
     if (typeFound) {
         // its a boiler
-        myDebug("Boiler found. Model %s with TypeID 0x%02X, Product ID %d, Version %s",
+        myDebug("Boiler found. Model %s with TypeID 0x%02X, ProductID %d, Version %s",
                 Boiler_Types[i].model_string,
                 Boiler_Types[i].type_id,
                 product_id,
@@ -1200,7 +1203,7 @@ void _process_Version(uint8_t src, uint8_t * data, uint8_t length) {
         // if its a boiler set it
         // it will take the first one found in the list
         if ((EMS_Boiler.type_id == EMS_ID_NONE) || (EMS_Boiler.type_id == Boiler_Types[i].type_id)) {
-            myDebug("* Setting Boiler type to Model %s, TypeID 0x%02X, Product ID %d, Version %s",
+            myDebug("* Setting Boiler type to Model %s, TypeID 0x%02X, ProductID %d, Version %s",
                     Boiler_Types[i].model_string,
                     Boiler_Types[i].type_id,
                     product_id,
@@ -1230,7 +1233,7 @@ void _process_Version(uint8_t src, uint8_t * data, uint8_t length) {
     if (typeFound) {
         // its a known thermostat
         if (EMS_Sys_Status.emsLogging >= EMS_SYS_LOGGING_BASIC) {
-            myDebug("Thermostat found. Model %s with TypeID 0x%02X, Product ID %d, Version %s",
+            myDebug("Thermostat found. Model %s with TypeID 0x%02X, ProductID %d, Version %s",
                     Thermostat_Types[i].model_string,
                     Thermostat_Types[i].type_id,
                     product_id,
@@ -1240,7 +1243,7 @@ void _process_Version(uint8_t src, uint8_t * data, uint8_t length) {
         // if we don't have a thermostat set, use this one
         if ((EMS_Thermostat.type_id == EMS_ID_NONE) || (EMS_Thermostat.model_id == EMS_MODEL_NONE)
             || (EMS_Thermostat.type_id == Thermostat_Types[i].type_id)) {
-            myDebug("* Setting Thermostat type to Model %s, TypeID 0x%02X, Product ID %d, Version %s",
+            myDebug("* Setting Thermostat type to Model %s, TypeID 0x%02X, ProductID %d, Version %s",
                     Thermostat_Types[i].model_string,
                     Thermostat_Types[i].type_id,
                     product_id,
@@ -1272,7 +1275,7 @@ void _process_Version(uint8_t src, uint8_t * data, uint8_t length) {
     }
 
     if (typeFound) {
-        myDebug("Device found. Model %s with TypeID 0x%02X, Product ID %d, Version %s",
+        myDebug("Device found. Model %s with TypeID 0x%02X, ProductID %d, Version %s",
                 Other_Types[i].model_string,
                 Other_Types[i].type_id,
                 product_id,
@@ -1289,7 +1292,7 @@ void _process_Version(uint8_t src, uint8_t * data, uint8_t length) {
         return;
 
     } else {
-        myDebug("Unrecognized device found. TypeID 0x%02X, Product ID %d, Version %s", src, product_id, version);
+        myDebug("Unrecognized device found. TypeID 0x%02X, ProductID %d, Version %s", src, product_id, version);
     }
 }
 
@@ -1339,7 +1342,7 @@ void _ems_setThermostatModel(uint8_t thermostat_modelid) {
 
     // set the thermostat
     if (EMS_Sys_Status.emsLogging >= EMS_SYS_LOGGING_BASIC) {
-        myDebug("Setting Thermostat. Model %s with TypeID 0x%02X, Product ID %d",
+        myDebug("Setting Thermostat. Model %s with TypeID 0x%02X, ProductID %d",
                 thermostat_type->model_string,
                 thermostat_type->type_id,
                 thermostat_type->product_id);
@@ -1485,7 +1488,7 @@ char * ems_getThermostatDescription(char * buffer) {
             strlcat(buffer, _hextoa(EMS_Thermostat.type_id, tmp), size);
         }
 
-        strlcat(buffer, " (Product ID:", size);
+        strlcat(buffer, " (ProductID:", size);
         strlcat(buffer, itoa(EMS_Thermostat.product_id, tmp, 10), size);
         strlcat(buffer, " Version:", size);
         strlcat(buffer, EMS_Thermostat.version, size);
@@ -1522,7 +1525,7 @@ char * ems_getBoilerDescription(char * buffer) {
             strlcat(buffer, _hextoa(EMS_Boiler.type_id, tmp), size);
         }
 
-        strlcat(buffer, " (Product ID:", size);
+        strlcat(buffer, " (ProductID:", size);
         strlcat(buffer, itoa(EMS_Boiler.product_id, tmp, 10), size);
         strlcat(buffer, " Version:", size);
         strlcat(buffer, EMS_Boiler.version, size);
@@ -1574,12 +1577,12 @@ void ems_printAllTypes() {
 
     myDebug("\nThese %d boiler type devices are in the library:", _Boiler_Types_max);
     for (i = 0; i < _Boiler_Types_max; i++) {
-        myDebug(" %s,  type ID:0x%02X Product ID:%d", Boiler_Types[i].model_string, Boiler_Types[i].type_id, Boiler_Types[i].product_id);
+        myDebug(" %s,  type ID:0x%02X ProductID:%d", Boiler_Types[i].model_string, Boiler_Types[i].type_id, Boiler_Types[i].product_id);
     }
 
     myDebug("\nThese %d EMS devices are in the library:", _Other_Types_max);
     for (i = 0; i < _Other_Types_max; i++) {
-        myDebug(" %s,  type ID:0x%02X Product ID:%d", Other_Types[i].model_string, Other_Types[i].type_id, Other_Types[i].product_id);
+        myDebug(" %s,  type ID:0x%02X ProductID:%d", Other_Types[i].model_string, Other_Types[i].type_id, Other_Types[i].product_id);
     }
 
     myDebug("\nThese telegram type IDs are recognized for the selected boiler:");
@@ -1591,7 +1594,7 @@ void ems_printAllTypes() {
 
     myDebug("\nThese %d thermostats models are supported:", _Thermostat_Types_max);
     for (i = 0; i < _Thermostat_Types_max; i++) {
-        myDebug(" %s,  type ID:0x%02X Product ID:%d Read/Write support:%c%c",
+        myDebug(" %s,  type ID:0x%02X ProductID:%d Read/Write support:%c%c",
                 Thermostat_Types[i].model_string,
                 Thermostat_Types[i].type_id,
                 Thermostat_Types[i].product_id,
@@ -1940,7 +1943,7 @@ void ems_setWarmTapWaterActivated(bool activated) {
 }
 
 /*
- * Start up sequence for UBA Master
+ * Start up sequence for UBA Master, hopefully to initialize a handshake
  * Still experimental
  */
 void ems_startupTelegrams() {

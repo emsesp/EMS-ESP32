@@ -161,56 +161,42 @@ char * _bool_to_char(char * s, uint8_t value) {
 
 // convert short (two bytes) to text value
 // negative values are assumed stored as 1-compliment (https://medium.com/@LeeJulija/how-integers-are-stored-in-memory-using-twos-complement-5ba04d61a56c)
-char * _short_to_char(char * s, int16_t value, uint8_t div = 10) {
+char * _short_to_char(char * s, int16_t value, uint8_t decimals = 1) {
     // remove errors on invalid values
     if (abs(value) >= EMS_VALUE_SHORT_NOTSET) {
         strlcpy(s, "?", sizeof(s));
         return (s);
     }
 
-    if (div != 0) {
-        char s2[5] = {0};
-        // check for negative values
-        if (value < 0) {
-            strlcpy(s, "-", 2);
-            strlcat(s, itoa(abs(value) / div, s2, 10), 5);
-        } else {
-            strlcpy(s, itoa(value / div, s2, 10), 5);
-        }
-        strlcat(s, ".", sizeof(s));
-        strlcat(s, itoa(abs(value) % div, s2, 10), 5);
-    } else {
+    if (decimals == 0) {
         itoa(value, s, 10);
+        return (s);
     }
+
+    // floating point
+    char s2[5] = {0};
+    // check for negative values
+    if (value < 0) {
+        strlcpy(s, "-", 2);
+        value = abs(value);
+    }
+    strlcpy(s, itoa(value / (decimals * 10), s2, 10), 5);
+    strlcat(s, ".", sizeof(s));
+    strlcat(s, itoa(value % (decimals * 10), s2, 10), 5);
+
     return s;
 }
 
-// convert int (single byte) to text value
-char * _int_to_char(char * s, uint8_t value, uint8_t div = 0) {
-    if (value == EMS_VALUE_INT_NOTSET) {
-        strlcpy(s, "?", sizeof(s));
-    } else {
-        if (div != 0) {
-            char s2[5] = {0};
-            strlcpy(s, itoa(value / div, s2, 10), 5);
-            strlcat(s, ".", sizeof(s));
-            strlcat(s, itoa(value % div, s2, 10), 5);
-        } else {
-            itoa(value, s, 10);
-        }
-    }
-    return s;
-}
-
-// takes an int value (1 byte), converts to a fraction
-void _renderIntValue(const char * prefix, const char * postfix, uint8_t value, uint8_t div = 0) {
+// takes a short value (2 bytes), converts to a fraction
+// most values stored a s short are either *10 or *100
+void _renderShortValue(const char * prefix, const char * postfix, int16_t value, uint8_t decimals = 1) {
     char buffer[200] = {0};
     char s[20]       = {0};
     strlcpy(buffer, "  ", sizeof(buffer));
     strlcat(buffer, prefix, sizeof(buffer));
     strlcat(buffer, ": ", sizeof(buffer));
 
-    strlcat(buffer, _int_to_char(s, value, div), sizeof(buffer));
+    strlcat(buffer, _short_to_char(s, value, decimals), sizeof(buffer));
 
     if (postfix != NULL) {
         strlcat(buffer, " ", sizeof(buffer));
@@ -220,15 +206,49 @@ void _renderIntValue(const char * prefix, const char * postfix, uint8_t value, u
     myDebug(buffer);
 }
 
-// takes a short value (2 bytes), converts to a fraction
-void _renderShortValue(const char * prefix, const char * postfix, int16_t value, uint8_t div = 10) {
+// convert int (single byte) to text value
+char * _int_to_char(char * s, uint8_t value, uint8_t div = 1) {
+    if (value == EMS_VALUE_INT_NOTSET) {
+        strlcpy(s, "?", sizeof(s));
+        return (s);
+    }
+
+    char s2[5] = {0};
+
+    switch (div) {
+    case 1:
+        itoa(value, s, 10);
+        break;
+
+    case 2:
+        strlcpy(s, itoa(value >> 1, s2, 10), 5);
+        strlcat(s, ".", sizeof(s));
+        strlcat(s, ((value & 0x01) ? "5" : "0"), 5);
+        break;
+
+    case 10:
+        strlcpy(s, itoa(value / 10, s2, 10), 5);
+        strlcat(s, ".", sizeof(s));
+        strlcat(s, itoa(value % 10, s2, 10), 5);
+        break;
+
+    default:
+        itoa(value, s, 10);
+        break;
+    }
+
+    return s;
+}
+
+// takes an int value (1 byte), converts to a fraction
+void _renderIntValue(const char * prefix, const char * postfix, uint8_t value, uint8_t div = 1) {
     char buffer[200] = {0};
     char s[20]       = {0};
     strlcpy(buffer, "  ", sizeof(buffer));
     strlcat(buffer, prefix, sizeof(buffer));
     strlcat(buffer, ": ", sizeof(buffer));
 
-    strlcat(buffer, _short_to_char(s, value, div), sizeof(buffer));
+    strlcat(buffer, _int_to_char(s, value, div), sizeof(buffer));
 
     if (postfix != NULL) {
         strlcat(buffer, " ", sizeof(buffer));
@@ -422,11 +442,16 @@ void showInfo() {
         if ((ems_getThermostatModel() == EMS_MODEL_EASY) || (ems_getThermostatModel() == EMS_MODEL_BOSCHEASY)) {
             // for easy temps are * 100
             // also we don't have the time or mode
-            _renderShortValue("Setpoint room temperature", "C", EMS_Thermostat.setpoint_roomTemp, 100);
-            _renderShortValue("Current room temperature", "C", EMS_Thermostat.curr_roomTemp, 100);
-        } else {
-            _renderShortValue("Setpoint room temperature", "C", EMS_Thermostat.setpoint_roomTemp, 2);
+            _renderShortValue("Set room temperature", "C", EMS_Thermostat.setpoint_roomTemp, 10);
             _renderShortValue("Current room temperature", "C", EMS_Thermostat.curr_roomTemp, 10);
+        } else {
+            // because we store in 2 bytes short, when converting to a single byte we'll loose the negative value if its unset
+            if ((EMS_Thermostat.setpoint_roomTemp <= 0) || (EMS_Thermostat.curr_roomTemp <= 0)) {
+                EMS_Thermostat.setpoint_roomTemp = EMS_VALUE_INT_NOTSET;
+                EMS_Thermostat.curr_roomTemp     = EMS_VALUE_INT_NOTSET;
+            }
+            _renderIntValue("Setpoint room temperature", "C", EMS_Thermostat.setpoint_roomTemp, 2); // convert to a single byte * 2
+            _renderIntValue("Current room temperature", "C", EMS_Thermostat.curr_roomTemp, 10);     // is *10
 
             myDebug("  Thermostat time is %02d:%02d:%02d %d/%d/%d",
                     EMS_Thermostat.hour,
@@ -451,12 +476,12 @@ void showInfo() {
 
     // Dallas
     if (EMSESP_Status.dallas_sensors != 0) {
-        char s[80]       = {0};
+        //char s[80]       = {0};
         char buffer[128] = {0};
+        char valuestr[8] = {0}; // for formatting temp
         myDebug("%sExternal temperature sensors:%s", COLOR_BOLD_ON, COLOR_BOLD_OFF);
         for (uint8_t i = 0; i < EMSESP_Status.dallas_sensors; i++) {
-            snprintf(s, sizeof(s), "Sensor #%d %s", i + 1, ds18.getDeviceString(buffer, i));
-            _renderShortValue(s, "C", ds18.getRawValue(i), 16); // divide by 16
+            myDebug("  Sensor #%d %s: %s C", i + 1, ds18.getDeviceString(buffer, i), _float_to_char(valuestr, ds18.getValue(i) ));
         }
         myDebug(""); // newline
     }
@@ -524,9 +549,8 @@ void publishValues(bool force) {
         rootBoiler["wWComfort"] = "Intelligent";
     }
 
-    rootBoiler["wWCurTmp"] = _short_to_char(s, EMS_Boiler.wWCurTmp);
-    snprintf(s, sizeof(s), "%i.%i", EMS_Boiler.wWCurFlow / 10, EMS_Boiler.wWCurFlow % 10);
-    rootBoiler["wWCurFlow"]         = s;
+    rootBoiler["wWCurTmp"]          = _short_to_char(s, EMS_Boiler.wWCurTmp);
+    rootBoiler["wWCurFlow"]         = _int_to_char(s, EMS_Boiler.wWCurFlow, 10);
     rootBoiler["wWHeat"]            = _bool_to_char(s, EMS_Boiler.wWHeat);
     rootBoiler["curFlowTemp"]       = _short_to_char(s, EMS_Boiler.curFlowTemp);
     rootBoiler["retTemp"]           = _short_to_char(s, EMS_Boiler.retTemp);
@@ -571,7 +595,7 @@ void publishValues(bool force) {
     // handle the thermostat values separately
     if (ems_getThermostatEnabled()) {
         // only send thermostat values if we actually have them
-        if ((EMS_Thermostat.curr_roomTemp == 0) || (EMS_Thermostat.setpoint_roomTemp == 0))
+        if ((EMS_Thermostat.curr_roomTemp <= 0) || (EMS_Thermostat.setpoint_roomTemp <= 0))
             return;
 
         // build new json object
@@ -579,11 +603,11 @@ void publishValues(bool force) {
         JsonObject rootThermostat = doc.to<JsonObject>();
 
         if ((ems_getThermostatModel() == EMS_MODEL_EASY) || (ems_getThermostatModel() == EMS_MODEL_BOSCHEASY)) {
-            rootThermostat[THERMOSTAT_CURRTEMP] = _short_to_char(s, EMS_Thermostat.curr_roomTemp, 100);
-            rootThermostat[THERMOSTAT_SELTEMP]  = _short_to_char(s, EMS_Thermostat.setpoint_roomTemp, 100);
-        } else {
+            rootThermostat[THERMOSTAT_SELTEMP]  = _short_to_char(s, EMS_Thermostat.setpoint_roomTemp, 10);
             rootThermostat[THERMOSTAT_CURRTEMP] = _short_to_char(s, EMS_Thermostat.curr_roomTemp, 10);
-            rootThermostat[THERMOSTAT_SELTEMP]  = _short_to_char(s, EMS_Thermostat.setpoint_roomTemp, 2);
+        } else {
+            rootThermostat[THERMOSTAT_SELTEMP]  = _int_to_char(s, EMS_Thermostat.setpoint_roomTemp, 2);
+            rootThermostat[THERMOSTAT_CURRTEMP] = _int_to_char(s, EMS_Thermostat.curr_roomTemp, 10);
         }
 
         // RC20 has different mode settings
@@ -701,6 +725,61 @@ char * _readWord() {
     return word;
 }
 
+// publish external dallas sensor temperature values to MQTT
+void do_publishSensorValues() {
+    if (EMSESP_Status.dallas_sensors != 0) {
+        publishSensorValues();
+    }
+}
+
+// call PublishValues without forcing, so using CRC to see if we really need to publish
+void do_publishValues() {
+    // don't publish if we're not connected to the EMS bus
+    if ((ems_getBusConnected()) && (!myESP.getUseSerial()) && myESP.isMQTTConnected()) {
+        publishValues(false);
+    }
+}
+
+// callback to light up the LED, called via Ticker every second
+// fast way is to use WRITE_PERI_REG(PERIPHS_GPIO_BASEADDR + (state ? 4 : 8), (1 << EMSESP_Status.led_gpio)); // 4 is on, 8 is off
+void do_ledcheck() {
+    if (EMSESP_Status.led) {
+        if (ems_getBusConnected()) {
+            digitalWrite(EMSESP_Status.led_gpio, (EMSESP_Status.led_gpio == LED_BUILTIN) ? LOW : HIGH); // light on. For onboard LED high=off
+        } else {
+            int state = digitalRead(EMSESP_Status.led_gpio);
+            digitalWrite(EMSESP_Status.led_gpio, !state);
+        }
+    }
+}
+
+// Thermostat scan
+void do_scanThermostat() {
+    if ((ems_getBusConnected()) && (!myESP.getUseSerial())) {
+        myDebug("> Scanning thermostat message type #0x%02X...", scanThermostat_count);
+        ems_doReadCommand(scanThermostat_count, EMS_Thermostat.type_id);
+        scanThermostat_count++;
+    }
+}
+
+// do a system health check every now and then to see if we all connections
+void do_systemCheck() {
+    if ((!ems_getBusConnected()) && (!myESP.getUseSerial())) {
+        myDebug("Error! Unable to read from EMS bus. Retrying in %d seconds...", SYSTEMCHECK_TIME);
+    }
+}
+
+// force calls to get data from EMS for the types that aren't sent as broadcasts
+// only if we have a EMS connection
+void do_regularUpdates() {
+    if ((ems_getBusConnected()) && (!myESP.getUseSerial())) {
+        myDebugLog("Calling scheduled data refresh from EMS devices...");
+        ems_getThermostatValues();
+        ems_getBoilerValues();
+        ems_getOtherValues();
+    }
+}
+
 // initiate a force scan by sending type read requests from 0 to FF to the thermostat
 // used to analyze responses for debugging
 void startThermostatScan(uint8_t start) {
@@ -711,6 +790,27 @@ void startThermostatScan(uint8_t start) {
     scanThermostat_count = start;
     myDebug("Starting a deep message scan on thermostat");
     scanThermostat.attach(SCANTHERMOSTAT_TIME, do_scanThermostat);
+}
+
+// turn back on the hot water for the shower
+void _showerColdShotStop() {
+    if (EMSESP_Shower.doingColdShot) {
+        myDebugLog("[Shower] finished shot of cold. hot water back on");
+        ems_setWarmTapWaterActivated(true);
+        EMSESP_Shower.doingColdShot = false;
+        showerColdShotStopTimer.detach(); // disable the timer
+    }
+}
+
+// turn off hot water to send a shot of cold
+void _showerColdShotStart() {
+    if (EMSESP_Status.shower_alert) {
+        myDebugLog("[Shower] doing a shot of cold water");
+        ems_setWarmTapWaterActivated(false);
+        EMSESP_Shower.doingColdShot = true;
+        // start the timer for n seconds which will reset the water back to hot
+        showerColdShotStopTimer.attach(SHOWER_COLDSHOT_DURATION, _showerColdShotStop);
+    }
 }
 
 // callback for loading/saving settings to the file system (SPIFFS)
@@ -1233,82 +1333,6 @@ void initEMSESP() {
     EMSESP_Shower.timerPause    = 0;
     EMSESP_Shower.duration      = 0;
     EMSESP_Shower.doingColdShot = false;
-}
-
-// publish external dallas sensor temperature values to MQTT
-void do_publishSensorValues() {
-    if (EMSESP_Status.dallas_sensors != 0) {
-        publishSensorValues();
-    }
-}
-
-// call PublishValues without forcing, so using CRC to see if we really need to publish
-void do_publishValues() {
-    // don't publish if we're not connected to the EMS bus
-    if ((ems_getBusConnected()) && (!myESP.getUseSerial()) && myESP.isMQTTConnected()) {
-        publishValues(false);
-    }
-}
-
-// callback to light up the LED, called via Ticker every second
-// fast way is to use WRITE_PERI_REG(PERIPHS_GPIO_BASEADDR + (state ? 4 : 8), (1 << EMSESP_Status.led_gpio)); // 4 is on, 8 is off
-void do_ledcheck() {
-    if (EMSESP_Status.led) {
-        if (ems_getBusConnected()) {
-            digitalWrite(EMSESP_Status.led_gpio, (EMSESP_Status.led_gpio == LED_BUILTIN) ? LOW : HIGH); // light on. For onboard LED high=off
-        } else {
-            int state = digitalRead(EMSESP_Status.led_gpio);
-            digitalWrite(EMSESP_Status.led_gpio, !state);
-        }
-    }
-}
-
-// Thermostat scan
-void do_scanThermostat() {
-    if ((ems_getBusConnected()) && (!myESP.getUseSerial())) {
-        myDebug("> Scanning thermostat message type #0x%02X...", scanThermostat_count);
-        ems_doReadCommand(scanThermostat_count, EMS_Thermostat.type_id);
-        scanThermostat_count++;
-    }
-}
-
-// do a system health check every now and then to see if we all connections
-void do_systemCheck() {
-    if ((!ems_getBusConnected()) && (!myESP.getUseSerial())) {
-        myDebug("Error! Unable to read from EMS bus. Retrying in %d seconds...", SYSTEMCHECK_TIME);
-    }
-}
-
-// force calls to get data from EMS for the types that aren't sent as broadcasts
-// only if we have a EMS connection
-void do_regularUpdates() {
-    if ((ems_getBusConnected()) && (!myESP.getUseSerial())) {
-        myDebugLog("Calling scheduled data refresh from EMS devices...");
-        ems_getThermostatValues();
-        ems_getBoilerValues();
-        ems_getOtherValues();
-    }
-}
-
-// turn off hot water to send a shot of cold
-void _showerColdShotStart() {
-    if (EMSESP_Status.shower_alert) {
-        myDebugLog("[Shower] doing a shot of cold water");
-        ems_setWarmTapWaterActivated(false);
-        EMSESP_Shower.doingColdShot = true;
-        // start the timer for n seconds which will reset the water back to hot
-        showerColdShotStopTimer.attach(SHOWER_COLDSHOT_DURATION, _showerColdShotStop);
-    }
-}
-
-// turn back on the hot water for the shower
-void _showerColdShotStop() {
-    if (EMSESP_Shower.doingColdShot) {
-        myDebugLog("[Shower] finished shot of cold. hot water back on");
-        ems_setWarmTapWaterActivated(true);
-        EMSESP_Shower.doingColdShot = false;
-        showerColdShotStopTimer.detach(); // disable the timer
-    }
 }
 
 /*

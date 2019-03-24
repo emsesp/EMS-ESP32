@@ -30,7 +30,6 @@ There are 3 parts to this project, first the design of the circuit, secondly the
   - [Home Assistant Configuration](#home-assistant-configuration)
   - [Building The Firmware](#building-the-firmware)
     - [Using PlatformIO Standalone](#using-platformio-standalone)
-    - [Building Using Arduino IDE](#building-using-arduino-ide)
   - [Using the Pre-built Firmware](#using-the-pre-built-firmware)
   - [Troubleshooting](#troubleshooting)
   - [Known Issues](#known-issues)
@@ -83,7 +82,7 @@ The code and circuit has been tested with a few ESP8266 development boards such 
 13.  Connect the EMS lines to the ESP. This can be done via the two EMS wires or via the 3.5mm service jack if you have an bbqkees board.
 14.  Reboot the ESP, either by the reset switch or pulling the power.
 15.  The ESP will first perform an autodetect to try and discover the EMS devices attached. If your boiler and thermostat are recognized it will set these types and store them for ever and ever. You can trace the output by telnet'ing to the board `telnet ems-esp.local`. Also use `info` to check the status.
-16.  If your boiler/thermostat is not discovered create a GitHub issue stating the type and product ID. These will be added to the file `ems_devices.h` in a future release.
+16.  If your boiler/thermostat is not discovered create a GitHub issue stating the type and Product ID. These will be added to the file `ems_devices.h` in a future release.
 17.  If all is well and there is traffic on the EMS bus the onboard LED will stop blinking and be permanently on. If this is annoying you can disable with `set led off`. To see the EMS messages type `set log v` for verbose logging.
 18.  And all is not well, check the wiring, make sure serial is off and look at the telnet session for errors. If in doubt, wipe the ESP with `pio run -t erase` and start again with step #3
 
