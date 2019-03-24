@@ -1129,7 +1129,7 @@ void _process_SM10Monitor(uint8_t src, uint8_t * data, uint8_t length) {
     EMS_Other.SM10collectorTemp  = _toShort(2);    // collector temp from SM10, is *10
     EMS_Other.SM10bottomTemp     = _toShort(5);    // bottom temp from SM10, is *10
     EMS_Other.SM10pumpModulation = _toByte(4);     // modulation solar pump
-    EMS_Other.SM10pump           = _bitRead(7, 1); // active if bit 1 is set (to 1)
+    EMS_Other.SM10pump           = _bitRead(7, 1); // active if bit 1 is set
 
     EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
 }
