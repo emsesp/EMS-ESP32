@@ -9,7 +9,7 @@
 #ifndef MyEMS_h
 #define MyEMS_h
 
-#define MYESP_VERSION "1.1.6"
+#define MYESP_VERSION "1.1.7"
 
 #include <ArduinoJson.h>
 #include <ArduinoOTA.h>
@@ -50,7 +50,6 @@ void custom_crash_callback(struct rst_info *, uint32_t, uint32_t);
 #define MQTT_RECONNECT_DELAY_MIN 2000   // Try to reconnect in 3 seconds upon disconnection
 #define MQTT_RECONNECT_DELAY_STEP 3000  // Increase the reconnect delay in 3 seconds after each failed attempt
 #define MQTT_RECONNECT_DELAY_MAX 120000 // Set reconnect time to 2 minutes at most
-#define MQTT_MAX_SIZE 600               // max length of MQTT message
 #define MQTT_MAX_TOPIC_SIZE 50          // max length of MQTT message
 
 // Internal MQTT events
@@ -155,7 +154,7 @@ class MyESP {
                  const char *    mqtt_username,
                  const char *    mqtt_password,
                  const char *    mqtt_base,
-                 unsigned long   mqtt_keepalive,
+                 uint32_t        mqtt_keepalive,
                  unsigned char   mqtt_qos,
                  bool            mqtt_retain,
                  const char *    mqtt_will_topic,
@@ -171,6 +170,7 @@ class MyESP {
     void myDebug_P(PGM_P format_P, ...);
     void setTelnet(command_t * cmds, uint8_t count, telnetcommand_callback_f callback_cmd, telnet_callback_f callback);
     bool getUseSerial();
+    void setUseSerial(bool toggle);
 
     // FS
     void setSettings(fs_callback_f callback, fs_settings_callback_f fs_settings_callback);
@@ -195,7 +195,7 @@ class MyESP {
   private:
     // mqtt
     AsyncMqttClient mqttClient;
-    unsigned long   _mqtt_reconnect_delay;
+    uint32_t        _mqtt_reconnect_delay;
     void            _mqttOnMessage(char * topic, char * payload, size_t len);
     void            _mqttConnect();
     void            _mqtt_setup();
@@ -207,14 +207,14 @@ class MyESP {
     char *          _mqtt_username;
     char *          _mqtt_password;
     char *          _mqtt_base;
-    unsigned long   _mqtt_keepalive;
-    unsigned char   _mqtt_qos;
+    uint32_t        _mqtt_keepalive;
+    uint8_t         _mqtt_qos;
     bool            _mqtt_retain;
     char *          _mqtt_will_topic;
     char *          _mqtt_will_online_payload;
     char *          _mqtt_will_offline_payload;
     char *          _mqtt_topic;
-    unsigned long   _mqtt_last_connection;
+    uint32_t        _mqtt_last_connection;
     bool            _mqtt_connecting;
 
     // wifi
@@ -264,14 +264,14 @@ class MyESP {
     void                   _printSetCommands();
 
     // general
-    char *        _app_hostname;
-    char *        _app_name;
-    char *        _app_version;
-    char *        _boottime;
-    bool          _suspendOutput;
-    bool          _use_serial;
-    unsigned long _getUptime();
-    String        _buildTime();
+    char *   _app_hostname;
+    char *   _app_name;
+    char *   _app_version;
+    char *   _boottime;
+    bool     _suspendOutput;
+    bool     _use_serial;
+    uint32_t _getUptime();
+    String   _buildTime();
 
     // load average (0..100)
     void               _calculateLoad();

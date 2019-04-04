@@ -155,8 +155,6 @@ void MyESP::_wifiCallback(justwifi_messages_t code, char * parameter) {
         // finally if we don't want Serial anymore, turn it off
         if (!_use_serial) {
             myDebug_P(PSTR("Disabling serial port"));
-            Serial.flush();
-            Serial.end();
             SerialAndTelnet.setSerial(NULL);
         } else {
             myDebug_P(PSTR("Using serial port output"));
@@ -679,6 +677,19 @@ bool MyESP::_changeSetting(uint8_t wc, const char * setting, const char * value)
     return ok;
 }
 
+// force the serial on/off
+void MyESP::setUseSerial(bool toggle) {
+    //(void)fs_saveConfig(); // save the setting for next reboot
+
+    if (toggle) {
+        SerialAndTelnet.setSerial(&Serial);
+        _use_serial = true;
+    } else {
+        SerialAndTelnet.setSerial(NULL);
+        _use_serial = false;
+    }
+}
+
 void MyESP::_telnetCommand(char * commandLine) {
     char * str   = commandLine;
     bool   state = false;
@@ -792,14 +803,14 @@ String MyESP::_buildTime() {
 }
 
 // returns system uptime in seconds - copied for espurna. see (c)
-unsigned long MyESP::_getUptime() {
-    static unsigned long last_uptime      = 0;
+uint32_t MyESP::_getUptime() {
+    static uint32_t      last_uptime      = 0;
     static unsigned char uptime_overflows = 0;
 
     if (millis() < last_uptime)
         ++uptime_overflows;
-    last_uptime                  = millis();
-    unsigned long uptime_seconds = uptime_overflows * (UPTIME_OVERFLOW / 1000) + (last_uptime / 1000);
+    last_uptime             = millis();
+    uint32_t uptime_seconds = uptime_overflows * (UPTIME_OVERFLOW / 1000) + (last_uptime / 1000);
 
     return uptime_seconds;
 }
@@ -884,9 +895,7 @@ void MyESP::showSystemStats() {
     myDebug_P(PSTR(" [MEM] Max OTA size: %d"), (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000);
     myDebug_P(PSTR(" [MEM] OTA Reserved: %d"), 4 * SPI_FLASH_SEC_SIZE);
     myDebug_P(PSTR(" [MEM] Free Heap: %d"), ESP.getFreeHeap());
-#if defined(ESP8266)
-    myDebug_P(PSTR(" [MEM] Stack: %d"), ESP.getFreeContStack());
-#endif
+
     myDebug_P(PSTR(""));
 }
 
@@ -1019,8 +1028,8 @@ void MyESP::setMQTT(const char *    mqtt_host,
                     const char *    mqtt_username,
                     const char *    mqtt_password,
                     const char *    mqtt_base,
-                    unsigned long   mqtt_keepalive,
-                    unsigned char   mqtt_qos,
+                    uint32_t        mqtt_keepalive,
+                    uint8_t         mqtt_qos,
                     bool            mqtt_retain,
                     const char *    mqtt_will_topic,
                     const char *    mqtt_will_online_payload,
@@ -1155,7 +1164,7 @@ bool MyESP::_fs_loadConfig() {
     // Deserialize the JSON document
     DeserializationError error = deserializeJson(doc, configFile);
     if (error) {
-        Serial.println(F("[FS] Failed to read file"));
+        myDebug_P(PSTR("[FS] Failed to read config file"));
         return false;
     }
 
@@ -1264,13 +1273,13 @@ uint16_t MyESP::getSystemLoadAverage() {
 
 // calculate load average
 void MyESP::_calculateLoad() {
-    static unsigned long last_loadcheck    = 0;
-    static unsigned long load_counter_temp = 0;
+    static uint32_t last_loadcheck    = 0;
+    static uint32_t load_counter_temp = 0;
     load_counter_temp++;
 
     if (millis() - last_loadcheck > LOADAVG_INTERVAL) {
-        static unsigned long load_counter     = 0;
-        static unsigned long load_counter_max = 1;
+        static uint32_t load_counter     = 0;
+        static uint32_t load_counter_max = 1;
 
         load_counter      = load_counter_temp;
         load_counter_temp = 0;
@@ -1478,7 +1487,7 @@ void MyESP::begin(const char * app_hostname, const char * app_name, const char *
     _eeprom_setup(); // set up eeprom for storing crash data
     _fs_setup();     // SPIFFS setup, do this first to get values
     _wifi_setup();   // WIFI setup
-    _ota_setup();
+    _ota_setup();    // init OTA
 }
 
 /*
@@ -1490,12 +1499,10 @@ void MyESP::loop() {
 
     jw.loop(); // WiFi
 
-    /*
     // do nothing else until we've got a wifi connection
     if (WiFi.getMode() & WIFI_AP) {
         return;
     }
-    */
 
     ArduinoOTA.handle(); // OTA
     _mqttConnect();      // MQTT

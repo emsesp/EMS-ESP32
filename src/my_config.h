@@ -22,6 +22,7 @@
 #define MQTT_RETAIN false
 #define MQTT_KEEPALIVE 120 // 2 minutes
 #define MQTT_QOS 1
+#define MQTT_MAX_SIZE 700 // max size of a JSON object. See https://arduinojson.org/v6/assistant/
 
 // MQTT for thermostat
 #define TOPIC_THERMOSTAT_DATA "thermostat_data"         // for sending thermostat values to MQTT

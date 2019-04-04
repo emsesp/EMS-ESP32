@@ -157,9 +157,9 @@ const uint8_t ems_crc_table[] = {0x00, 0x02, 0x04, 0x06, 0x08, 0x0A, 0x0C, 0x0E,
                                  0xCD, 0xCF, 0xC1, 0xC3, 0xC5, 0xC7, 0xF9, 0xFB, 0xFD, 0xFF, 0xF1, 0xF3, 0xF5, 0xF7, 0xE9, 0xEB, 0xED, 0xEF,
                                  0xE1, 0xE3, 0xE5, 0xE7};
 
-const uint8_t       TX_WRITE_TIMEOUT_COUNT = 2;     // 3 retries before timeout
-const unsigned long EMS_BUS_TIMEOUT        = 15000; // timeout in ms before recognizing the ems bus is offline (15 seconds)
-const unsigned long EMS_POLL_TIMEOUT       = 5000;  // timeout in ms before recognizing the ems bus is offline (5 seconds)
+const uint8_t  TX_WRITE_TIMEOUT_COUNT = 2;     // 3 retries before timeout
+const uint32_t EMS_BUS_TIMEOUT        = 15000; // timeout in ms before recognizing the ems bus is offline (15 seconds)
+const uint32_t EMS_POLL_TIMEOUT       = 5000;  // timeout in ms before recognizing the ems bus is offline (5 seconds)
 
 // init stats and counters and buffers
 // uses -255 or 255 for values that haven't been set yet (EMS_VALUE_INT_NOTSET and EMS_VALUE_FLOAT_NOTSET)
@@ -176,7 +176,7 @@ void ems_init() {
     EMS_Sys_Status.emsRxTimestamp   = 0;
     EMS_Sys_Status.emsTxCapable     = false;
     EMS_Sys_Status.emsTxDisabled    = false;
-    EMS_Sys_Status.emsPollTimestamp = 0;
+    EMS_Sys_Status.emsPollFrequency = 0;
     EMS_Sys_Status.txRetryCount     = 0;
 
     // thermostat
@@ -302,8 +302,12 @@ void ems_setTxDisabled(bool b) {
     EMS_Sys_Status.emsTxDisabled = b;
 }
 
+uint32_t ems_getPollFrequency() {
+    return EMS_Sys_Status.emsPollFrequency;
+}
+
 bool ems_getTxCapable() {
-    if ((millis() - EMS_Sys_Status.emsPollTimestamp) > EMS_POLL_TIMEOUT) {
+    if ((EMS_Sys_Status.emsPollFrequency == 0) || (EMS_Sys_Status.emsPollFrequency > EMS_POLL_TIMEOUT)) {
         EMS_Sys_Status.emsTxCapable = false;
     }
     return EMS_Sys_Status.emsTxCapable;
@@ -577,7 +581,6 @@ void _createValidate() {
     EMS_TxQueue.unshift(new_EMS_TxTelegram); // add back to queue making it first to be picked up next (FIFO)
 }
 
-
 /*
  * Entry point triggered by an interrupt in emsuart.cpp
  * length is only data bytes, excluding the BRK
@@ -588,9 +591,9 @@ void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
     if ((length != 0) && (telegram[0] != 0x00)) {
         _ems_readTelegram(telegram, length);
     }
-    // now clear the Rx buffer just be safe and prevent duplicates
-    for (uint8_t i = 0; i < EMS_MAXBUFFERSIZE; telegram[i++] = 0x00)
-        ; 
+
+    // clear the Rx buffer just be safe and prevent duplicates
+    memset(telegram, 0, EMS_MAXBUFFERSIZE);
 }
 
 /**
@@ -600,9 +603,10 @@ void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
 void _ems_readTelegram(uint8_t * telegram, uint8_t length) {
     // create the Rx package
     static _EMS_RxTelegram EMS_RxTelegram;
-    EMS_RxTelegram.length    = length;
-    EMS_RxTelegram.telegram  = telegram;
-    EMS_RxTelegram.timestamp = millis();
+    static uint32_t        _last_emsPollFrequency = 0;
+    EMS_RxTelegram.length                         = length;
+    EMS_RxTelegram.telegram                       = telegram;
+    EMS_RxTelegram.timestamp                      = millis();
 
     // check if we just received a single byte
     // it could well be a Poll request from the boiler for us, which will have a value of 0x8B (0x0B | 0x80)
@@ -610,10 +614,12 @@ void _ems_readTelegram(uint8_t * telegram, uint8_t length) {
     if (length == 1) {
         uint8_t value = telegram[0]; // 1st byte of data package
 
+        EMS_Sys_Status.emsPollFrequency = (EMS_RxTelegram.timestamp - _last_emsPollFrequency);
+        _last_emsPollFrequency          = EMS_RxTelegram.timestamp;
+
         // check first for a Poll for us
         if (value == (EMS_ID_ME | 0x80)) {
-            EMS_Sys_Status.emsPollTimestamp = EMS_RxTelegram.timestamp; // store when we received a last poll
-            EMS_Sys_Status.emsTxCapable     = true;
+            EMS_Sys_Status.emsTxCapable = true;
 
             // do we have something to send thats waiting in the Tx queue?
             // if so send it if the Queue is not in a wait state
@@ -1396,8 +1402,8 @@ void ems_printTxQueue() {
             strlcpy(sType, "?", sizeof(sType));
         }
 
-        char          addedTime[15] = {0};
-        unsigned long upt           = EMS_TxTelegram.timestamp;
+        char     addedTime[15] = {0};
+        uint32_t upt           = EMS_TxTelegram.timestamp;
         snprintf(addedTime,
                  sizeof(addedTime),
                  "(%02d:%02d:%02d)",

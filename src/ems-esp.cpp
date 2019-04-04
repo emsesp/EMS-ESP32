@@ -63,8 +63,8 @@ Ticker showerColdShotStopTimer;
 #define SHOWER_MAX_DURATION 420000  // in ms. 7 minutes, before trigger a shot of cold water
 
 typedef struct {
-    unsigned long timestamp;      // for internal timings, via millis()
-    uint8_t       dallas_sensors; // count of dallas sensors
+    uint32_t timestamp;      // for internal timings, via millis()
+    uint8_t  dallas_sensors; // count of dallas sensors
 
     // custom params
     bool     shower_timer; // true if we want to report back on shower times
@@ -78,11 +78,11 @@ typedef struct {
 } _EMSESP_Status;
 
 typedef struct {
-    bool          showerOn;
-    unsigned long timerStart;    // ms
-    unsigned long timerPause;    // ms
-    unsigned long duration;      // ms
-    bool          doingColdShot; // true if we've just sent a jolt of cold water
+    bool     showerOn;
+    uint32_t timerStart;    // ms
+    uint32_t timerPause;    // ms
+    uint32_t duration;      // ms
+    bool     doingColdShot; // true if we've just sent a jolt of cold water
 } _EMSESP_Shower;
 
 command_t PROGMEM project_cmds[] = {
@@ -312,7 +312,9 @@ void showInfo() {
     }
 
     myDebug("  LED is %s, Silent mode is %s", EMSESP_Status.led ? "on" : "off", EMSESP_Status.silent_mode ? "on" : "off");
-    myDebug("  %d external temperature sensor%s connected", EMSESP_Status.dallas_sensors, (EMSESP_Status.dallas_sensors > 1) ? "s" : "");
+    if (EMSESP_Status.dallas_sensors > 0) {
+        myDebug("  %d external temperature sensor%s connected", EMSESP_Status.dallas_sensors, (EMSESP_Status.dallas_sensors == 1) ? "" : "s");
+    }
 
     myDebug("  Thermostat is %s, Boiler is %s, Shower Timer is %s, Shower Alert is %s",
             (ems_getThermostatEnabled() ? "enabled" : "disabled"),
@@ -321,12 +323,23 @@ void showInfo() {
             ((EMSESP_Status.shower_alert) ? "enabled" : "disabled"));
 
     myDebug("\n%sEMS Bus stats:%s", COLOR_BOLD_ON, COLOR_BOLD_OFF);
-    myDebug("  Bus Connected=%s, Tx is %s, # Rx telegrams=%d, # Tx telegrams=%d, # Crc Errors=%d",
-            (ems_getBusConnected() ? "yes" : "no"),
-            (ems_getTxCapable() ? "active" : "not active"),
-            EMS_Sys_Status.emsRxPgks,
-            EMS_Sys_Status.emsTxPkgs,
-            EMS_Sys_Status.emxCrcErr);
+
+    if (ems_getBusConnected()) {
+        myDebug("  Bus is connected");
+
+        myDebug("  Rx: Poll=%d ms, # Rx telegrams read=%d, # Crc Errors=%d",
+                ems_getPollFrequency(),
+                EMS_Sys_Status.emsRxPgks,
+                EMS_Sys_Status.emxCrcErr);
+
+        if (ems_getTxCapable()) {
+            myDebug("  Tx: available, # Tx telegrams sent=%d", EMS_Sys_Status.emsTxPkgs);
+        } else {
+            myDebug("  Tx: no signal");
+        }
+    } else {
+        myDebug("  No connection can be made to the EMS bus");
+    }
 
     myDebug("");
     myDebug("%sBoiler stats:%s", COLOR_BOLD_ON, COLOR_BOLD_OFF);
@@ -493,8 +506,8 @@ void showInfo() {
 
 // send all dallas sensor values as a JSON package to MQTT
 void publishSensorValues() {
-    StaticJsonDocument<MQTT_MAX_SIZE> doc;
-    JsonObject                        sensors = doc.to<JsonObject>();
+    StaticJsonDocument<200> doc;
+    JsonObject              sensors = doc.to<JsonObject>();
 
     bool hasdata     = false;
     char label[8]    = {0};
@@ -511,7 +524,7 @@ void publishSensorValues() {
     }
 
     if (hasdata) {
-        char data[MQTT_MAX_SIZE] = {0};
+        char data[200] = {0};
         serializeJson(doc, data, sizeof(data));
         myESP.mqttPublish(TOPIC_EXTERNAL_SENSORS, data);
     }

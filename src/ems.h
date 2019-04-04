@@ -89,8 +89,8 @@ typedef struct {
     _EMS_SYS_LOGGING emsLogging;       // logging
     bool             emsRefreshed;     // fresh data, needs to be pushed out to MQTT
     bool             emsBusConnected;  // is there an active bus
-    unsigned long    emsRxTimestamp;   // timestamp of last EMS message received
-    unsigned long    emsPollTimestamp; // timestamp of last EMS poll sent to us
+    uint32_t         emsRxTimestamp;   // timestamp of last EMS message received
+    uint32_t         emsPollFrequency; // time between EMS polls
     bool             emsTxCapable;     // able to send via Tx
     bool             emsTxDisabled;    // true to prevent all Tx
     uint8_t          txRetryCount;     // # times the last Tx was re-sent
@@ -109,7 +109,7 @@ typedef struct {
     uint8_t                 comparisonOffset;   // offset of where the byte is we want to compare too later
     uint8_t                 comparisonPostRead; // after a successful write call this to read
     bool                    forceRefresh;       // should we send to MQTT after a successful Tx?
-    unsigned long           timestamp;          // when created
+    uint32_t                timestamp;          // when created
     uint8_t                 data[EMS_MAX_TELEGRAM_LENGTH];
 } _EMS_TxTelegram;
 
@@ -119,7 +119,6 @@ typedef struct {
     uint8_t * telegram;  // the full data package
     uint8_t   length;    // length in bytes
 } _EMS_RxTelegram;
-
 
 // default empty Tx
 const _EMS_TxTelegram EMS_TX_TELEGRAM_NEW = {
@@ -297,6 +296,7 @@ bool             ems_getEmsRefreshed();
 uint8_t          ems_getThermostatModel();
 void             ems_discoverModels();
 bool             ems_getTxCapable();
+uint32_t         ems_getPollFrequency();
 
 void   ems_scanDevices();
 void   ems_printAllTypes();

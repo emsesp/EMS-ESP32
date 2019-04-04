@@ -177,6 +177,7 @@ void ICACHE_FLASH_ATTR emsuart_tx_brk() {
 void ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
     for (uint8_t i = 0; i < len; i++) {
         USF(EMSUART_UART) = buf[i];
+        //delayMicroseconds(EMS_TX_BRK_WAIT);
     }
     emsuart_tx_brk();
 }
