@@ -66,31 +66,6 @@ The code and circuit has been tested with a few ESP8266 development boards such 
 
 1. Either build the circuit described below or purchase a ready built board from bbqkees.
 2. Grab any ESP8266 dev board. The latest bbqkees boards have a Wemos D1 pre-mounted with a copy of this firmware.
-<<<<<<< HEAD
-3. Optionally add external Dallas temperature sensors and an external LED. The default pins for these are D1 and D5 respectively.
-4. Decide whether to compile and upload the code yourself using PlatformIO or just upload the pre-baked firmware using the esptool (read these [instructions](#using-the-pre-built-firmware)). If you want to build yourself now is the time to customize your settings in `my_custom.h`. Upload the firmware.
-5. Connect a USB 5v power supply to the ESP8266 board, either via laptop/PC or external power supply.
-6. When the ESP8266 starts up for the first time the onboard LED will be flashing. This is because the EMS bus is not yet connected.
-7. If you haven't hardcoded the WiFi credentials in step 4, the ESP8266 will boot up in a WiFi Access Point (AP) mode with the ssid name `ems-esp`. Now you can either use a laptop and connect to this AP using Telnet to `192.168.1.4` or if its powered from a computers USB use a Serial monitor tool to the ESP's COM port. Tip: to enable Telnet on Windows 10 run `dism /online /Enable-Feature /FeatureName:TelnetClient` or install something like [putty](https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html).
-8. Next is to change some of the settings. Type `set` to list the current stored settings. Use `set wifi` to add your wifi credentials and if you're using MQTT set the host, username and password. There is no need to reboot the device.
-9. The `led_gpio` will default to the onboard LED (which is probably blinking now). Ignore `thermostat_type` and `boiler_type` as these will be auto-detected hopefully later on.
-10. **Important**: If `serial` is set to `on` set it to `off` using `set serial off`. The EMS bus is disabled when the serial is on. This mode is only used for setting up a new board or debugging startup issues.
-11. Hook up the ESP to the EMS board as follows:
-
-| EMS board   | ESP8266 dev board |
-| ----------- | ----------------- |
-| Ground/G/J2 | GND/G             |
-| Rx/J2       | D7                |
-| Tx/J2       | D8                |
-| VC/J2       | 3v3 or 5v         |
-
-13. Connect the EMS lines to the ESP. This can be done via the two EMS wires or via the 3.5" service jack if you have an bbqkees board.
-14. Reboot the ESP, either by the reset switch or pulling the power.
-15. The ESP will first perform an autodetect to try and discover the EMS devices attached. If your boiler and thermostat are recognized it will set these types and store them for ever and ever. You can trace the output by telnet'ing to the board `telnet ems-esp.local`. Also type `info` to check what happened.
-16. If your boiler/thermostat is not discovered create a GitHub issue stating the type and product ID. These will be added to the file `ems_devices.h` in a future release.
-17. If all is well and there is traffic on the EMS bus the onboard LED will stop blinking and be permanently on. If this is annoying you can disable with `set led off`. To see the EMS messages type `set log v` for verbose logging.
-18. And all is not well, check the wiring, make sure serial is off and look at the telnet session for errors. If in doubt, wipe the ESP with `pio run -t erase` and start again with step #3
-=======
 3. Optionally add external Dallas temperature sensors (to D1) and an external LED (to D5).
 4. Decide whether to compile and upload the code yourself using PlatformIO or just upload the pre-baked firmware using the esptool (read these [instructions](#using-the-pre-built-firmware)). If you want to build yourself now is the time to customize your settings in `my_custom.h`. Upload the firmware via USB.
 5. Connect an external USB 5v power adapter to the ESP8266 board.
@@ -101,19 +76,18 @@ The code and circuit has been tested with a few ESP8266 development boards such 
 11. **Important**: By default the serial port is enabled and the EMS bus disabled. This is to allow users to configure their ESP via the serial monitor when pluged into a PC/laptop. You must disable serial with `set serial off` to get the EMS transmission working.
 12. Hook up the ESP to the EMS board as follows:
     
-| EMS board | ESP8266 dev board |
-| ----------|------------------ |
-| Ground/G/J2|  GND/G |
-| Rx/J2 | D7 |
-| Tx/J2 | D8 |
-| VC/J2 | 3v3 |
+| EMS board   | ESP8266 dev board |
+| ----------- | ----------------- |
+| Ground/G/J2 | GND/G             |
+| Rx/J2       | D7                |
+| Tx/J2       | D8                |
+| VC/J2       | 3v3               |
 13.  Connect the EMS lines to the ESP. This can be done via the two EMS wires or via the 3.5mm service jack if you have an bbqkees board.
 14.  Reboot the ESP, either by the reset switch or pulling the power.
 15.  The ESP will first perform an autodetect to try and discover the EMS devices attached. If your boiler and thermostat are recognized it will set these types and store them for ever and ever. You can trace the output by telnet'ing to the board `telnet ems-esp.local`. Also use `info` to check the status.
 16.  If your boiler/thermostat is not discovered create a GitHub issue stating the type and Product ID. These will be added to the file `ems_devices.h` in a future release.
 17.  If all is well and there is traffic on the EMS bus the onboard LED will stop blinking and be permanently on. If this is annoying you can disable with `set led off`. To see the EMS messages type `set log v` for verbose logging.
 18.  And all is not well, check the wiring, make sure serial is off and look at the telnet session for errors. If in doubt, wipe the ESP with `pio run -t erase` and start again with step #3
->>>>>>> upstream/dev
 
 ## Monitoring The Output
 
@@ -225,9 +199,9 @@ Following a write request, the `[dest]` doesn't have the 8th bit set and after t
 
 Every telegram sent is echo'd back to Rx, along the same Bus used for all Rx/Tx transmissions.
 
-## Ems Plus
+## EMS Plus
 
-In this chapter we will report our findings on the ems plus.
+In this chapter we will report our findings on the EMS plus protocol which differs slighly from EMS 1.0.
 
 ### Message layout
 
@@ -298,12 +272,13 @@ Similarly the thermostat values are also sent as a JSON package with the topic `
 
 These incoming MQTT topics are also handled:
 
-| topic               | ID in my_config.h         | Payload                | Description                              |
-| ------------------- | ------------------------- | ---------------------- | ---------------------------------------- |
-| thermostat_cmd_temp | TOPIC_THERMOSTAT_CMD_TEMP | temperature as a float | sets the thermostat current setpoint     |
-| thermostat_cmd_mode | TOPIC_THERMOSTAT_CMD_MODE | auto, day, night       | sets the thermostat mode                 |
-| wwactivated         | TOPIC_BOILER_WWACTIVATED  | 0 or 1                 | turns boiler warm water on/off (not tap) |
-| boiler_cmd_wwtemp   | TOPIC_BOILER_CMD_WWTEMP   | temperature as a float | sets the boiler wwtemp current setpoint  |
+| topic               | #define in my_config.h    | Payload                      | Description                              |
+| ------------------- | ------------------------- | ---------------------------- | ---------------------------------------- |
+| thermostat_cmd_temp | TOPIC_THERMOSTAT_CMD_TEMP | temperature vlaue as a float | sets the thermostat current setpoint     |
+| thermostat_cmd_mode | TOPIC_THERMOSTAT_CMD_MODE | auto, day, night             | sets the thermostat mode                 |
+| wwactivated         | TOPIC_BOILER_WWACTIVATED  | 0 or 1                       | turns boiler warm water on/off (not tap) |
+| boiler_cmd_wwtemp   | TOPIC_BOILER_CMD_WWTEMP   | temperature as a float       | sets the boiler wwtemp current setpoint  |
+| restart             | MQTT_TOPIC_RESTART        |                              | restarts the ems-esp device              |
 
 If MQTT is not used use 'set mqtt_host' to remove it.
 
