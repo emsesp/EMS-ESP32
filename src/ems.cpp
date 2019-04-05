@@ -21,23 +21,20 @@ _EMS_Sys_Status EMS_Sys_Status; // EMS Status
 
 CircularBuffer<_EMS_TxTelegram, EMS_TX_TELEGRAM_QUEUE_MAX> EMS_TxQueue; // FIFO queue for Tx send buffer
 
-//
-// process callbacks per type
-//
-
 // macros used in the _process* functions
 #define _toByte(i) (data[i])
 #define _toShort(i) ((data[i] << 8) + data[i + 1])
 #define _toLong(i) ((data[i] << 16) + (data[i + 1] << 8) + (data[i + 2]))
 #define _bitRead(i, bit) (((data[i]) >> (bit)) & 0x01)
 
+void _printMessage(_EMS_RxTelegram * EMS_RxTelegram);
+
+//
+// process callbacks per type
+//
+
 // generic
-<<<<<<< HEAD
-void _process_Version(uint8_t type, uint8_t * data, uint8_t length);
-void _printMessage(uint8_t * telegram, uint8_t length);
-=======
 void _process_Version(uint8_t src, uint8_t * data, uint8_t length);
->>>>>>> upstream/dev
 
 // Boiler and Buderus devices
 void _process_UBAMonitorFast(uint8_t src, uint8_t * data, uint8_t length);
@@ -70,18 +67,15 @@ void _process_RC35Set(uint8_t src, uint8_t * data, uint8_t length);
 void _process_RC35StatusMessage(uint8_t src, uint8_t * data, uint8_t length);
 
 // Easy
-<<<<<<< HEAD
 void _process_EasyStatusMessage(uint8_t type, uint8_t * data, uint8_t length);
+
 //RC1010
 void _process_RC1010StatusMessage(uint8_t type, uint8_t * data, uint8_t length);
 void _process_RC1010SetMessage(uint8_t type, uint8_t * data, uint8_t length);
-=======
-void _process_EasyStatusMessage(uint8_t src, uint8_t * data, uint8_t length);
->>>>>>> upstream/dev
 
 /*
  * Recognized EMS types and the functions they call to process the telegrams
- * Format: MODEL ID, TYPE ID, Description, function
+ * Format: MODEL ID, TYPE ID, Description, function, emsplus
  */
 const _EMS_Type EMS_Types[] = {
 
@@ -136,19 +130,15 @@ const _EMS_Type EMS_Types[] = {
     {EMS_MODEL_ES73, EMS_TYPE_RC35StatusMessage, "RC35StatusMessage", _process_RC35StatusMessage, false},
 
     // Easy
-<<<<<<< HEAD
     {EMS_MODEL_EASY, EMS_TYPE_EasyStatusMessage, "EasyStatusMessage", _process_EasyStatusMessage, false},
     {EMS_MODEL_BOSCHEASY, EMS_TYPE_EasyStatusMessage, "EasyStatusMessage", _process_EasyStatusMessage, false},
+
     //Ems plus
     //Nefit 1010
     {EMS_MODEL_RC1010, EMS_TYPE_RC1010StatusMessage, "RC1010StatusMessage", _process_RC1010StatusMessage, true},
-    {EMS_MODEL_RC1010, EMS_TYPE_RC1010Set, "RC1010SetMessage", _process_RC1010SetMessage, true}};
-=======
-    {EMS_MODEL_EASY, EMS_TYPE_EasyStatusMessage, "EasyStatusMessage", _process_EasyStatusMessage},
-    {EMS_MODEL_BOSCHEASY, EMS_TYPE_EasyStatusMessage, "EasyStatusMessage", _process_EasyStatusMessage},
+    {EMS_MODEL_RC1010, EMS_TYPE_RC1010Set, "RC1010SetMessage", _process_RC1010SetMessage, true}
 
 };
->>>>>>> upstream/dev
 
 // calculate sizes of arrays at compile
 uint8_t _EMS_Types_max        = ArraySize(EMS_Types);        // number of defined types
@@ -274,12 +264,12 @@ void ems_init() {
     EMS_Boiler.heatingActive  = EMS_VALUE_INT_NOTSET; // Central heating is on/off
 
     // set boiler type
-    EMS_Boiler.product_id = 0;
+    EMS_Boiler.product_id = EMS_ID_NONE;
     strlcpy(EMS_Boiler.version, "?", sizeof(EMS_Boiler.version));
 
     // set thermostat model
     EMS_Thermostat.model_id   = EMS_MODEL_NONE;
-    EMS_Thermostat.product_id = 0;
+    EMS_Thermostat.product_id = EMS_ID_NONE;
     strlcpy(EMS_Thermostat.version, "?", sizeof(EMS_Thermostat.version));
 
     // set other types
@@ -717,16 +707,19 @@ void _ems_readTelegram(uint8_t * telegram, uint8_t length) {
  */
 void _ems_processTelegram(_EMS_RxTelegram * EMS_RxTelegram) {
     // header
-<<<<<<< HEAD
-    uint8_t   src     = telegram[0] & 0x7F;
-    uint8_t   dest    = telegram[1] & 0x7F; // remove 8th bit to handle both reads and writes
-    uint8_t   type    = telegram[2];
-    uint8_t   offset  = telegram[3];
-    uint8_t * data    = &telegram[4]; // data block starts at position 4
+    uint8_t * telegram = EMS_RxTelegram->telegram;
+    uint8_t   length   = EMS_RxTelegram->length;
+    uint8_t   src      = telegram[0] & 0x7F;
+    uint8_t   type     = telegram[2];
+    uint8_t   offset   = telegram[3];
+    uint8_t * data     = &telegram[4]; // data block starts at position 4
+
+    // EMS Plus support
     uint8_t   ptype   = telegram[3];
     uint8_t   poffset = telegram[4];
     uint8_t * pdata   = &telegram[5 + poffset]; // data block starts at position 5 plus the offset
-    _printMessage(telegram, length);
+
+    _printMessage(EMS_RxTelegram);
 
     // see if we recognize the type first by scanning our known EMS types list
     // trying to match the type ID
@@ -766,28 +759,27 @@ void _ems_processTelegram(_EMS_RxTelegram * EMS_RxTelegram) {
         }
     }
 }
-void _printMessage(uint8_t * telegram, uint8_t length) {
+
+/*
+ * print the telegram
+ */
+void _printMessage(_EMS_RxTelegram * EMS_RxTelegram) {
+    uint8_t * telegram = EMS_RxTelegram->telegram;
+
     bool      emsp   = false;
     uint8_t   src    = telegram[0] & 0x7F;
     uint8_t   dest   = telegram[1] & 0x7F; // remove 8th bit to handle both reads and writes
     uint8_t   type   = telegram[2];
     uint8_t   offset = telegram[3];
     uint8_t * data   = &telegram[4]; // data block starts at position 5
-    if (type >= 240) {
+
+    if (type >= 0xF0) {
         type   = telegram[3];
         offset = telegram[4];
         data   = &telegram[5 + offset];
         emsp   = true;
     }
-=======
-    uint8_t * telegram = EMS_RxTelegram->telegram;
-    uint8_t   src      = telegram[0] & 0x7F;
-    uint8_t   dest     = telegram[1] & 0x7F; // remove 8th bit to handle both reads and writes
-    uint8_t   type     = telegram[2];
-    uint8_t   offset   = telegram[3];
-    uint8_t * data     = telegram + 4; // data block starts at position 5
 
->>>>>>> upstream/dev
     // print detailed telegram data
     if (EMS_Sys_Status.emsLogging >= EMS_SYS_LOGGING_THERMOSTAT) {
         char output_str[200] = {0};
@@ -798,16 +790,10 @@ void _printMessage(uint8_t * telegram, uint8_t length) {
         if (src == EMS_Boiler.type_id) {
             strlcpy(output_str, "Boiler", sizeof(output_str));
         } else if (src == EMS_Thermostat.type_id) {
-<<<<<<< HEAD
             if (emsp)
                 strlcpy(output_str, "Thermostat+", sizeof(output_str));
             else
                 strlcpy(output_str, "Thermostat", sizeof(output_str));
-=======
-            strlcpy(output_str, "Thermostat", sizeof(output_str));
-        } else if (src == EMS_ID_SM10) {
-            strlcpy(output_str, "SM10", sizeof(output_str));
->>>>>>> upstream/dev
         } else {
             strlcpy(output_str, "0x", sizeof(output_str));
             strlcat(output_str, _hextoa(src, buffer), sizeof(output_str));
@@ -833,24 +819,19 @@ void _printMessage(uint8_t * telegram, uint8_t length) {
                 strlcpy(color_s, COLOR_GREEN, sizeof(color_s));
             }
         } else if (dest == EMS_Boiler.type_id) {
-<<<<<<< HEAD
             if (emsp) {
-                strlcat(output_str, "Boiler", sizeof(output_str));
+                strlcat(output_str, "Boiler+", sizeof(output_str));
                 strlcpy(color_s, COLOR_BRIGHT_MAGENTA, sizeof(color_s));
             } else {
                 strlcat(output_str, "Boiler", sizeof(output_str));
                 strlcpy(color_s, COLOR_MAGENTA, sizeof(color_s));
             }
-=======
-            strlcat(output_str, "Boiler", sizeof(output_str));
-            strlcpy(color_s, COLOR_MAGENTA, sizeof(color_s));
         } else if (dest == EMS_ID_SM10) {
             strlcat(output_str, "SM10", sizeof(output_str));
             strlcpy(color_s, COLOR_MAGENTA, sizeof(color_s));
->>>>>>> upstream/dev
         } else if (dest == EMS_Thermostat.type_id) {
             if (emsp) {
-                strlcat(output_str, "Thermostat", sizeof(output_str));
+                strlcat(output_str, "Thermostat+", sizeof(output_str));
                 strlcpy(color_s, COLOR_BRIGHT_MAGENTA, sizeof(color_s));
             } else {
                 strlcat(output_str, "Thermostat", sizeof(output_str));
@@ -1166,8 +1147,8 @@ void _process_UBAMonitorSlow(uint8_t src, uint8_t * data, uint8_t length) {
  * e.g. 17 0B 91 00 80 1E 00 CB 27 00 00 00 00 05 01 00 CB 00 (CRC=47), #data=14
  */
 void _process_RC10StatusMessage(uint8_t src, uint8_t * data, uint8_t length) {
-    EMS_Thermostat.setpoint_roomTemp = _toByte(EMS_TYPE_RC10StatusMessage_setpoint); // is * 2
-    EMS_Thermostat.curr_roomTemp     = _toByte(EMS_TYPE_RC10StatusMessage_curr);     // is * 10
+    EMS_Thermostat.setpoint_roomTemp = _toByte(EMS_OFFSET_RC10StatusMessage_setpoint); // is * 2
+    EMS_Thermostat.curr_roomTemp     = _toByte(EMS_OFFSET_RC10StatusMessage_curr);     // is * 10
 
     EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
 }
@@ -1178,28 +1159,19 @@ void _process_RC10StatusMessage(uint8_t src, uint8_t * data, uint8_t length) {
  * received every 60 seconds
  */
 void _process_RC20StatusMessage(uint8_t src, uint8_t * data, uint8_t length) {
-    EMS_Thermostat.setpoint_roomTemp = _toByte(EMS_TYPE_RC20StatusMessage_setpoint); // is * 2
-    EMS_Thermostat.curr_roomTemp     = _toShort(EMS_TYPE_RC20StatusMessage_curr);    // is * 10
+    EMS_Thermostat.setpoint_roomTemp = _toByte(EMS_OFFSET_RC20StatusMessage_setpoint); // is * 2
+    EMS_Thermostat.curr_roomTemp     = _toShort(EMS_OFFSET_RC20StatusMessage_curr);    // is * 10
 
     EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
 }
 
 /**
-<<<<<<< HEAD
-    *type 0x41 - data from the RC30 thermostat(0x10) - 14 bytes long * For reading the temp values only * received every 60 seconds 
+ * type 0x41 - data from the RC30 thermostat(0x10) - 14 bytes long
+ * For reading the temp values only * received every 60 seconds 
 */
-void _process_RC30StatusMessage(uint8_t type, uint8_t * data, uint8_t length) {
-    EMS_Thermostat.setpoint_roomTemp = ((float)data[EMS_TYPE_RC30StatusMessage_setpoint]) / (float)2;
-    EMS_Thermostat.curr_roomTemp     = _toFloat(EMS_TYPE_RC30StatusMessage_curr, data);
-=======
- * type 0x41 - data from the RC30 thermostat (0x10) - 14 bytes long
- * For reading the temp values only
- * received every 60 seconds
- */
 void _process_RC30StatusMessage(uint8_t src, uint8_t * data, uint8_t length) {
-    EMS_Thermostat.setpoint_roomTemp = _toByte(EMS_TYPE_RC30StatusMessage_setpoint); // is * 2
-    EMS_Thermostat.curr_roomTemp     = _toShort(EMS_TYPE_RC30StatusMessage_curr);    // note, its 2 bytes here
->>>>>>> upstream/dev
+    EMS_Thermostat.setpoint_roomTemp = _toByte(EMS_OFFSET_RC30StatusMessage_setpoint); // is * 2
+    EMS_Thermostat.curr_roomTemp     = _toShort(EMS_OFFSET_RC30StatusMessage_curr);    // note, its 2 bytes here
 
     EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
 }
@@ -1210,15 +1182,15 @@ void _process_RC30StatusMessage(uint8_t src, uint8_t * data, uint8_t length) {
  * received every 60 seconds
  */
 void _process_RC35StatusMessage(uint8_t src, uint8_t * data, uint8_t length) {
-    EMS_Thermostat.setpoint_roomTemp = _toByte(EMS_TYPE_RC35StatusMessage_setpoint); // is * 2
+    EMS_Thermostat.setpoint_roomTemp = _toByte(EMS_OFFSET_RC35StatusMessage_setpoint); // is * 2
 
     // check if temp sensor is unavailable
     if ((data[0] == 0x7D) && (data[1] = 0x00)) {
         EMS_Thermostat.curr_roomTemp = EMS_VALUE_SHORT_NOTSET;
     } else {
-        EMS_Thermostat.curr_roomTemp = _toShort(EMS_TYPE_RC35StatusMessage_curr);
+        EMS_Thermostat.curr_roomTemp = _toShort(EMS_OFFSET_RC35StatusMessage_curr);
     }
-    EMS_Thermostat.day_mode     = bitRead(data[EMS_OFFSET_RC35Get_mode_day], 1); //get day mode flag
+    EMS_Thermostat.day_mode     = bitRead(data[EMS_OFFSET_RC35Get_mode_day], 1); // get day mode flag
     EMS_Sys_Status.emsRefreshed = true;                                          // triggers a send the values back via MQTT
 }
 
@@ -1226,32 +1198,27 @@ void _process_RC35StatusMessage(uint8_t src, uint8_t * data, uint8_t length) {
  * type 0x0A - data from the Nefit Easy/TC100 thermostat (0x18) - 31 bytes long
  * The Easy has a digital precision of its floats to 2 decimal places, so values must be divided by 100
  */
-<<<<<<< HEAD
-void _process_EasyStatusMessage(uint8_t type, uint8_t * data, uint8_t length) {
-    EMS_Thermostat.curr_roomTemp     = ((float)(((data[EMS_TYPE_EasyStatusMessage_curr] << 8) + data[9]))) / 100;
-    EMS_Thermostat.setpoint_roomTemp = ((float)(((data[EMS_TYPE_EasyStatusMessage_setpoint] << 8) + data[11]))) / 100;
-    EMS_Sys_Status.emsRefreshed      = true; // triggers a send the values back via MQTT
+void _process_EasyStatusMessage(uint8_t src, uint8_t * data, uint8_t length) {
+    EMS_Thermostat.curr_roomTemp     = _toShort(EMS_OFFSET_EasyStatusMessage_curr);     // is *100
+    EMS_Thermostat.setpoint_roomTemp = _toShort(EMS_OFFSET_EasyStatusMessage_setpoint); // is *100
+
+    EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
 }
+
 /**
  * type 0x00 - data from the Nefit RC1010 thermostat (0x18) - 24 bytes long
  * The 1010 has a digital precision of its floats to 1 decimal places for the current temperature, so values is divided by 10
  * The 1010 has a digital precision of its floats to 1 decimal places for the set temperature, so values is divided by 2
  */
 void _process_RC1010StatusMessage(uint8_t type, uint8_t * data, uint8_t length) {
-    EMS_Thermostat.curr_roomTemp     = ((float)data[EMS_TYPE_RC1010StatusMessage_curr]) / (float)10;
-    EMS_Thermostat.setpoint_roomTemp = ((float)data[EMS_TYPE_RC1010StatusMessage_set]) / (float)2;
-=======
-void _process_EasyStatusMessage(uint8_t src, uint8_t * data, uint8_t length) {
-    EMS_Thermostat.curr_roomTemp     = _toShort(EMS_TYPE_EasyStatusMessage_curr);     // is *100
-    EMS_Thermostat.setpoint_roomTemp = _toShort(EMS_TYPE_EasyStatusMessage_setpoint); // is *100
->>>>>>> upstream/dev
+    EMS_Thermostat.curr_roomTemp     = _toShort(EMS_OFFSET_RC1010StatusMessage_curr);
+    EMS_Thermostat.setpoint_roomTemp = _toByte(EMS_OFFSET_RC1010StatusMessage_setpoint); // is * 2
+}
 
-    EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
-}
 void _process_RC1010SetMessage(uint8_t type, uint8_t * data, uint8_t length) {
-    EMS_Thermostat.setpoint_roomTemp = ((float)data[EMS_TYPE_RC1010Set]) / (float)2;
-    EMS_Sys_Status.emsRefreshed      = true; // triggers a send the values back via MQTT
+ // to complete
 }
+
 /**
  * type 0xB0 - for reading the mode from the RC10 thermostat (0x17)
  * received only after requested
@@ -1364,16 +1331,16 @@ void _process_Version(uint8_t src, uint8_t * data, uint8_t length) {
 
     if (typeFound) {
         // its a boiler
-        myDebug("Boiler found. Model %s with TypeID 0x%02X, ProductID %d, Version %s",
+        myDebug("Boiler found. Model %s (TypeID:0x%02X ProductID:%d Version:%s)",
                 Boiler_Types[i].model_string,
                 Boiler_Types[i].type_id,
                 product_id,
                 version);
 
-        // if its a boiler set it
+        // if its a boiler set it, unless it already has been set by checking for a productID
         // it will take the first one found in the list
-        if ((EMS_Boiler.type_id == EMS_ID_NONE) || (EMS_Boiler.type_id == Boiler_Types[i].type_id)) {
-            myDebug("* Setting Boiler type to Model %s, TypeID 0x%02X, ProductID %d, Version %s",
+        if (((EMS_Boiler.type_id == EMS_ID_NONE) || (EMS_Boiler.type_id == Boiler_Types[i].type_id)) && EMS_Boiler.product_id == EMS_ID_NONE) {
+            myDebug("* Setting Boiler to model %s (TypeID:0x%02X ProductID:%d Version:%s)",
                     Boiler_Types[i].model_string,
                     Boiler_Types[i].type_id,
                     product_id,
@@ -1403,7 +1370,7 @@ void _process_Version(uint8_t src, uint8_t * data, uint8_t length) {
     if (typeFound) {
         // its a known thermostat
         if (EMS_Sys_Status.emsLogging >= EMS_SYS_LOGGING_BASIC) {
-            myDebug("Thermostat found. Model %s with TypeID 0x%02X, ProductID %d, Version %s",
+            myDebug("Thermostat found. Model %s (TypeID:0x%02X ProductID:%d Version:%s)",
                     Thermostat_Types[i].model_string,
                     Thermostat_Types[i].type_id,
                     product_id,
@@ -1411,9 +1378,10 @@ void _process_Version(uint8_t src, uint8_t * data, uint8_t length) {
         }
 
         // if we don't have a thermostat set, use this one
-        if ((EMS_Thermostat.type_id == EMS_ID_NONE) || (EMS_Thermostat.model_id == EMS_MODEL_NONE)
-            || (EMS_Thermostat.type_id == Thermostat_Types[i].type_id)) {
-            myDebug("* Setting Thermostat type to Model %s, TypeID 0x%02X, ProductID %d, Version %s",
+        if (((EMS_Thermostat.type_id == EMS_ID_NONE) || (EMS_Thermostat.model_id == EMS_MODEL_NONE)
+             || (EMS_Thermostat.type_id == Thermostat_Types[i].type_id))
+            && EMS_Thermostat.product_id == EMS_ID_NONE) {
+            myDebug("* Setting Thermostat model to %s (TypeID:0x%02X ProductID:%d Version:%s)",
                     Thermostat_Types[i].model_string,
                     Thermostat_Types[i].type_id,
                     product_id,
@@ -1470,6 +1438,8 @@ void _process_Version(uint8_t src, uint8_t * data, uint8_t length) {
  * Figure out the boiler and thermostat types
  */
 void ems_discoverModels() {
+    myDebug("Starting auto discover of EMS devices...");
+
     // boiler
     ems_doReadCommand(EMS_TYPE_Version, EMS_Boiler.type_id); // get version details of boiler
 
@@ -1526,43 +1496,6 @@ void _ems_setThermostatModel(uint8_t thermostat_modelid) {
 }
 
 /**
-<<<<<<< HEAD
- * UBASetPoint 0x1A
- */
-void _process_SetPoints(uint8_t type, uint8_t * data, uint8_t length) {
-    /*
-    if (EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_VERBOSE) {
-        if (length != 0) {
-            uint8_t setpoint = data[0];
-            uint8_t hk_power = data[1];
-            uint8_t ww_power = data[2];
-            myDebug(" SetPoint=%d, hk_power=%d, ww_power=%d", setpoint, hk_power, ww_power);
-        }
-    }
-    */
-}
-
-/**
- * process_RCTime - type 0x06 - date and time from a thermostat - 14 bytes long
- * common for all thermostats
- */
-void _process_RCTime(uint8_t type, uint8_t * data, uint8_t length) {
-    if ((EMS_Thermostat.model_id == EMS_MODEL_EASY) || (EMS_Thermostat.model_id == EMS_MODEL_BOSCHEASY)) {
-        return; // not supported
-    }
-    if (length > 5) {
-        EMS_Thermostat.hour   = data[2];
-        EMS_Thermostat.minute = data[4];
-        EMS_Thermostat.second = data[5];
-        EMS_Thermostat.day    = data[3];
-        EMS_Thermostat.month  = data[1];
-        EMS_Thermostat.year   = data[0];
-    }
-}
-
-/**
-=======
->>>>>>> upstream/dev
  * Print the Tx queue - for debugging
  */
 void ems_printTxQueue() {
@@ -1570,7 +1503,7 @@ void ems_printTxQueue() {
     char            sType[20] = {0};
 
     if (EMS_TxQueue.size() == 0) {
-        myDebug("Tx queue is empty.");
+        myDebug("Tx queue is empty");
         return;
     }
 
@@ -1782,17 +1715,27 @@ void ems_scanDevices() {
 void ems_printAllTypes() {
     uint8_t i;
 
-    myDebug("\nThese %d boiler type devices are in the library:", _Boiler_Types_max);
+    myDebug("\nThese %d devices are defined as boiler units:", _Boiler_Types_max);
     for (i = 0; i < _Boiler_Types_max; i++) {
-        myDebug(" %s,  type ID:0x%02X ProductID:%d", Boiler_Types[i].model_string, Boiler_Types[i].type_id, Boiler_Types[i].product_id);
+        myDebug(" %s%s%s (TypeID:0x%02X ProductID:%d)",
+                COLOR_BOLD_ON,
+                Boiler_Types[i].model_string,
+                COLOR_BOLD_OFF,
+                Boiler_Types[i].type_id,
+                Boiler_Types[i].product_id);
     }
 
-    myDebug("\nThese %d EMS devices are in the library:", _Other_Types_max);
+    myDebug("\nThese %d devices are defined as other EMS devices:", _Other_Types_max);
     for (i = 0; i < _Other_Types_max; i++) {
-        myDebug(" %s,  type ID:0x%02X ProductID:%d", Other_Types[i].model_string, Other_Types[i].type_id, Other_Types[i].product_id);
+        myDebug(" %s%s%s (TypeID:0x%02X ProductID:%d)",
+                COLOR_BOLD_ON,
+                Other_Types[i].model_string,
+                COLOR_BOLD_OFF,
+                Other_Types[i].type_id,
+                Other_Types[i].product_id);
     }
 
-    myDebug("\nThese telegram type IDs are recognized for the selected boiler:");
+    myDebug("\nThe following telegram type IDs are recognized:");
     for (i = 0; i < _EMS_Types_max; i++) {
         if ((EMS_Types[i].model_id == EMS_MODEL_ALL) || (EMS_Types[i].model_id == EMS_MODEL_UBA)) {
             myDebug(" type %02X (%s)", EMS_Types[i].type, EMS_Types[i].typeString);
@@ -1801,12 +1744,14 @@ void ems_printAllTypes() {
 
     myDebug("\nThese %d thermostats models are supported:", _Thermostat_Types_max);
     for (i = 0; i < _Thermostat_Types_max; i++) {
-        myDebug(" %s,  type ID:0x%02X ProductID:%d Read/Write support:%c%c",
+        myDebug(" %s%s%s (TypeID:0x%02X ProductID:%d) Read:%c Write:%c",
+                COLOR_BOLD_ON,
                 Thermostat_Types[i].model_string,
+                COLOR_BOLD_OFF,
                 Thermostat_Types[i].type_id,
                 Thermostat_Types[i].product_id,
-                (Thermostat_Types[i].read_supported) ? 'r' : ' ',
-                (Thermostat_Types[i].write_supported) ? 'w' : ' ');
+                (Thermostat_Types[i].read_supported) ? 'y' : 'n',
+                (Thermostat_Types[i].write_supported) ? 'y' : 'n');
     }
 }
 
@@ -1817,15 +1762,12 @@ void ems_printAllTypes() {
 void ems_doReadCommand(uint8_t type, uint8_t dest, bool forceRefresh) {
     // if not a valid type of boiler is not accessible then quits
     if ((type == EMS_ID_NONE) || (dest == EMS_ID_NONE)) {
-<<<<<<< HEAD
-=======
         return;
     }
 
     // if we're preventing all outbound traffic, quit
     if (EMS_Sys_Status.emsTxDisabled) {
         myDebug("in Silent Mode. All Tx is disabled.");
->>>>>>> upstream/dev
         return;
     }
 

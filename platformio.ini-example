@@ -12,7 +12,7 @@ build_flags = -g -w
 
 wifi_settings =
 ; hard code if you prefer. Recommendation is to set from within the app when in Serial or AP mode
-;wifi_settings = '-DWIFI_SSID="XXXX"' '-DWIFI_PASSWORD="XXXX"'
+; wifi_settings = '-DWIFI_SSID="XXXX"' '-DWIFI_PASSWORD="XXXX"'
 
 lib_deps =
   CRC32
@@ -34,11 +34,5 @@ upload_speed = 921600
 monitor_speed = 115200
 ; for OTA comment out these sections
 ;upload_protocol = espota
-<<<<<<< HEAD
-;upload_port = <the IP address...>
-=======
 ;upload_port = ems-esp.local
 ;upload_port = <add here your ip of the device>
->>>>>>> upstream/dev
-
-

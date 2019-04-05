@@ -14,8 +14,6 @@
 #define MQTT_BASE "home" // all MQTT topics are prefix with this string, in the format <MQTT_BASE>/<app name>/<topic>
 
 // MQTT general settings
-#define MQTT_TOPIC_START "start"
-#define MQTT_TOPIC_START_PAYLOAD "start"
 #define MQTT_WILL_TOPIC "status"            // for last will & testament topic name
 #define MQTT_WILL_ONLINE_PAYLOAD "online"   // for last will & testament payload
 #define MQTT_WILL_OFFLINE_PAYLOAD "offline" // for last will & testament payload
@@ -53,17 +51,10 @@
 #define TOPIC_SHOWER_ALERT "shower_alert"       // toggle switch for enabling the shower alarm logic
 #define TOPIC_SHOWER_COLDSHOT "shower_coldshot" // used to trigger a coldshot from an MQTT command
 
-<<<<<<< HEAD
-// default values for shower logic on/off
-#define BOILER_SHOWER_TIMER 0      // enable (1) to monitor shower time
-#define BOILER_SHOWER_ALERT 0      // enable (1) to send alert of cold water when shower time limit has exceeded
-#define SHOWER_MAX_DURATION 420000 // in ms. 7 minutes, before trigger a shot of cold water
-=======
 // MQTT for EXTERNAL SENSORS
 #define TOPIC_EXTERNAL_SENSORS "sensors"   // for sending sensor values to MQTT
 #define PAYLOAD_EXTERNAL_SENSORS "temp_%d" // for formatting the payload for each external dallas sensor
 
->>>>>>> upstream/dev
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // THESE DEFAULT VALUES CAN ALSO BE SET AND STORED WITHTIN THE APPLICATION (see 'set' command)    //

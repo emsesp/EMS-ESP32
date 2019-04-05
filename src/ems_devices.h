@@ -51,48 +51,49 @@
 #define EMS_TYPE_RCOutdoorTempMessage 0xA3 // is an automatic thermostat broadcast, outdoor external temp
 
 // RC10 specific
-#define EMS_TYPE_RC10StatusMessage 0xB1       // is an automatic thermostat broadcast giving us temps
-#define EMS_TYPE_RC10Set 0xB0                 // for setting values like temp and mode
-#define EMS_OFFSET_RC10Set_temp 4             // position of thermostat setpoint temperature
-#define EMS_TYPE_RC10StatusMessage_setpoint 1 // setpoint temp
-#define EMS_TYPE_RC10StatusMessage_curr 3     // current temp
+#define EMS_TYPE_RC10StatusMessage 0xB1         // is an automatic thermostat broadcast giving us temps
+#define EMS_TYPE_RC10Set 0xB0                   // for setting values like temp and mode
+#define EMS_OFFSET_RC10Set_temp 4               // position of thermostat setpoint temperature
+#define EMS_OFFSET_RC10StatusMessage_setpoint 1 // setpoint temp
+#define EMS_OFFSET_RC10StatusMessage_curr 3     // current temp
 
 // RC20 specific
-#define EMS_TYPE_RC20StatusMessage 0x91       // is an automatic thermostat broadcast giving us temps
-#define EMS_TYPE_RC20Set 0xA8                 // for setting values like temp and mode
-#define EMS_OFFSET_RC20Set_mode 23            // position of thermostat mode
-#define EMS_OFFSET_RC20Set_temp 28            // position of thermostat setpoint temperature
-#define EMS_TYPE_RC20StatusMessage_setpoint 1 // setpoint temp
-#define EMS_TYPE_RC20StatusMessage_curr 2     // current temp
+#define EMS_TYPE_RC20StatusMessage 0x91         // is an automatic thermostat broadcast giving us temps
+#define EMS_TYPE_RC20Set 0xA8                   // for setting values like temp and mode
+#define EMS_OFFSET_RC20Set_mode 23              // position of thermostat mode
+#define EMS_OFFSET_RC20Set_temp 28              // position of thermostat setpoint temperature
+#define EMS_OFFSET_RC20StatusMessage_setpoint 1 // setpoint temp
+#define EMS_OFFSET_RC20StatusMessage_curr 2     // current temp
 
 // RC30 specific
-#define EMS_TYPE_RC30StatusMessage 0x41       // is an automatic thermostat broadcast giving us temps
-#define EMS_TYPE_RC30Set 0xA7                 // for setting values like temp and mode
-#define EMS_OFFSET_RC30Set_mode 23            // position of thermostat mode
-#define EMS_OFFSET_RC30Set_temp 28            // position of thermostat setpoint temperature
-#define EMS_TYPE_RC30StatusMessage_setpoint 1 // setpoint temp
-#define EMS_TYPE_RC30StatusMessage_curr 2     // current temp
+#define EMS_TYPE_RC30StatusMessage 0x41         // is an automatic thermostat broadcast giving us temps
+#define EMS_TYPE_RC30Set 0xA7                   // for setting values like temp and mode
+#define EMS_OFFSET_RC30Set_mode 23              // position of thermostat mode
+#define EMS_OFFSET_RC30Set_temp 28              // position of thermostat setpoint temperature
+#define EMS_OFFSET_RC30StatusMessage_setpoint 1 // setpoint temp
+#define EMS_OFFSET_RC30StatusMessage_curr 2     // current temp
 
 // RC35 specific
-#define EMS_TYPE_RC35StatusMessage 0x3E       // is an automatic thermostat broadcast giving us temps
-#define EMS_TYPE_RC35StatusMessage_setpoint 2 // desired temp
-#define EMS_TYPE_RC35StatusMessage_curr 3     // current temp
-#define EMS_TYPE_RC35Set 0x3D                 // for setting values like temp and mode (Working mode HC1)
-#define EMS_OFFSET_RC35Set_mode 7             // position of thermostat mode
-#define EMS_OFFSET_RC35Set_temp_day 2         // position of thermostat setpoint temperature for day time
-#define EMS_OFFSET_RC35Set_temp_night 1       // position of thermostat setpoint temperature for night time
-#define EMS_OFFSET_RC35Get_mode_day 1         // position of thermostat day mode
+#define EMS_TYPE_RC35StatusMessage 0x3E         // is an automatic thermostat broadcast giving us temps
+#define EMS_TYPE_RC35Set 0x3D                   // for setting values like temp and mode (Working mode HC1)
+#define EMS_OFFSET_RC35StatusMessage_setpoint 2 // desired temp
+#define EMS_OFFSET_RC35StatusMessage_curr 3     // current temp
+#define EMS_OFFSET_RC35Set_mode 7               // position of thermostat mode
+#define EMS_OFFSET_RC35Set_temp_day 2           // position of thermostat setpoint temperature for day time
+#define EMS_OFFSET_RC35Set_temp_night 1         // position of thermostat setpoint temperature for night time
+#define EMS_OFFSET_RC35Get_mode_day 1           // position of thermostat day mode
 
 // Easy specific
-#define EMS_TYPE_EasyStatusMessage 0x0A        // reading values on an Easy Thermostat
-#define EMS_TYPE_EasyStatusMessage_setpoint 10 // setpoint temp
-#define EMS_TYPE_EasyStatusMessage_curr 8      // current temp
+#define EMS_TYPE_EasyStatusMessage 0x0A          // reading values on an Easy Thermostat
+#define EMS_OFFSET_EasyStatusMessage_setpoint 10 // setpoint temp
+#define EMS_OFFSET_EasyStatusMessage_curr 8      // current temp
+
 // RC1010 specific
-#define EMS_TYPE_RC1010StatusMessage 0x00   // is an automatic thermostat broadcast giving us temps
-#define EMS_TYPE_RC1010StatusMessage_curr 1 // current temp
-#define EMS_TYPE_RC1010StatusMessage_set 3  // setpoint temp
-#define EMS_TYPE_RC1010Set 0x03             // setpoint temp message
-#define EMS_TYPE_RC1010Set_set 0            // setpoint temp
+#define EMS_TYPE_RC1010StatusMessage 0x00         // is an automatic thermostat broadcast giving us temps
+#define EMS_TYPE_RC1010Set 0x03                   // setpoint temp message
+#define EMS_OFFSET_RC1010StatusMessage_setpoint 3 // setpoint temp
+#define EMS_OFFSET_RC1010StatusMessage_curr 1     // current temp
+
 // Known EMS types
 typedef enum {
     EMS_MODEL_NONE,
@@ -130,16 +131,6 @@ const _Boiler_Type Boiler_Types[] = {
     {EMS_MODEL_UBA, 203, 0x08, "Buderus Logamax U122"},
     {EMS_MODEL_UBA, 208, 0x08, "Buderus Logamax plus"},
     {EMS_MODEL_UBA, 64, 0x08, "Sieger BK15 Boiler/Nefit Smartline"},
-<<<<<<< HEAD
-    {EMS_MODEL_UBA, 190, 0x09, "BC10 Base Controller"},
-    {EMS_MODEL_UBA, 114, 0x09, "BC10 Base Controller"},
-    {EMS_MODEL_UBA, 125, 0x09, "BC25 Base Controller"},
-    {EMS_MODEL_UBA, 68, 0x09, "RFM20 Receiver"},
-    {EMS_MODEL_UBA, 95, 0x08, "Bosch Condens 2500"},
-    {EMS_MODEL_UBA, 205, 0x08, "Nefit Moduline Easy Connect"},
-    {EMS_MODEL_UBA, 251, 0x21, "MM10 Mixer Module"},  // warning, fake product id!
-    {EMS_MODEL_UBA, 250, 0x11, "WM10 Switch Module"}, // warning, fake product id!
-=======
     {EMS_MODEL_UBA, 95, 0x08, "Bosch Condens 2500"}
 
 };
@@ -154,9 +145,9 @@ const _Other_Type Other_Types[] = {
     {EMS_MODEL_OTHER, 114, 0x09, "BC10 Base Controller"},
     {EMS_MODEL_OTHER, 125, 0x09, "BC25 Base Controller"},
     {EMS_MODEL_OTHER, 205, 0x02, "Nefit Moduline Easy Connect"},
-    {EMS_MODEL_OTHER, 73, EMS_ID_SM10, "SM10 Solar Module"}
+    {EMS_MODEL_OTHER, 73, EMS_ID_SM10, "SM10 Solar Module"},
+    {EMS_MODEL_OTHER, 171, 0x02, "EMS-OT OpenTherm converter"}
 
->>>>>>> upstream/dev
 };
 
 /*
@@ -174,12 +165,7 @@ const _Thermostat_Type Thermostat_Types[] = {
     {EMS_MODEL_BOSCHEASY, 206, 0x02, "Bosch Easy", EMS_THERMOSTAT_READ_YES, EMS_THERMOSTAT_WRITE_NO},
     {EMS_MODEL_RC310, 158, 0x10, "RC310", EMS_THERMOSTAT_READ_NO, EMS_THERMOSTAT_WRITE_NO},
     {EMS_MODEL_CW100, 255, 0x18, "Bosch CW100", EMS_THERMOSTAT_READ_NO, EMS_THERMOSTAT_WRITE_NO},
-<<<<<<< HEAD
-    {EMS_MODEL_RC1010, 165, 0x18, "RC1010/Nefit Moduline 1010)", EMS_THERMOSTAT_READ_NO, EMS_THERMOSTAT_WRITE_NO},
-    {EMS_MODEL_OT, 171, 0x02, "EMS-OT OpenTherm converter", EMS_THERMOSTAT_READ_YES, EMS_THERMOSTAT_WRITE_YES},
-=======
-    {EMS_MODEL_OT, 171, 0x02, "EMS-OT OpenTherm converter", EMS_THERMOSTAT_READ_YES, EMS_THERMOSTAT_WRITE_YES},
-    {EMS_MODEL_RC10, 165, 0x02, "RC10/Nefit Moduline 1010", EMS_THERMOSTAT_READ_YES, EMS_THERMOSTAT_WRITE_YES}
+    {EMS_MODEL_RC1010, 165, 0x18, "RC1010/Nefit Moduline 1010", EMS_THERMOSTAT_READ_NO, EMS_THERMOSTAT_WRITE_NO}
 
->>>>>>> upstream/dev
+
 };

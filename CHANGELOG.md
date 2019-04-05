@@ -5,11 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.6.1 dev] 2019-03-
+## [1.7.0 dev] 2019-03-
 
 ### Added
 
 - Buderus Logamax plus
+- EMS+ support (thanks @GlennArens, @gl3nni3)
+- MQTT 'restart' topic to reboot ESP (thanks @balk77)
 
 ## [1.6.0] 2019-03-24
 
