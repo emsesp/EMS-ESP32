@@ -1,9 +1,9 @@
  - platform: mqtt
    name: Thermostat
    modes:
-     - low
-     - manual
-     - auto
+     - "auto"
+     - "manual"
+     - "off"
 
    mode_state_topic: "home/ems-esp/thermostat_data"
    current_temperature_topic: "home/ems-esp/thermostat_data"
@@ -20,6 +20,9 @@
 
  - platform: mqtt
    name: boiler
+   modes:
+    - "on"
+    - "off"
    min_temp: 40
    max_temp: 60
    temp_step: 1
@@ -28,3 +31,6 @@
    temperature_command_topic: "home/ems-esp/boiler_cmd_wwtemp"
    current_temperature_template: "{{ value_json.wWCurTmp }}"
    temperature_state_template: "{{ value_json.wWSelTemp }}"
+   mode_state_template: "{{ value_json.wWActivated }}"
+   mode_state_topic: "home/ems-esp/boiler_data"
+   mode_command_topic: "home/ems-esp/wwactivated"

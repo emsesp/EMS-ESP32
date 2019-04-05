@@ -1233,18 +1233,18 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
             myDebug("MQTT topic: thermostat mode value %s", message);
             if (strcmp((char *)message, "auto") == 0) {
                 ems_setThermostatMode(2);
-            } else if (strcmp((char *)message, "day") == 0) {
+            } else if (strcmp((char *)message, "day") == 0 || strcmp((char *)message, "manual") == 0) {
                 ems_setThermostatMode(1);
-            } else if (strcmp((char *)message, "night") == 0) {
+            } else if (strcmp((char *)message, "night") == 0 || strcmp((char *)message, "off") == 0) {
                 ems_setThermostatMode(0);
             }
         }
 
         // wwActivated
         if (strcmp(topic, TOPIC_BOILER_WWACTIVATED) == 0) {
-            if (message[0] == '1') {
+            if (message[0] == '1' || message[0] == 'on') {
                 ems_setWarmWaterActivated(true);
-            } else if (message[0] == '0') {
+            } else if (message[0] == '0' || message[0] == 'off') {
                 ems_setWarmWaterActivated(false);
             }
         }
