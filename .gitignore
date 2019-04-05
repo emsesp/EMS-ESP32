@@ -6,9 +6,5 @@
 platformio.ini
 lib/readme.txt
 .travis.yml
-<<<<<<< HEAD
-*.py
-=======
 stackdmp.txt
 *.jar
->>>>>>> upstream/dev
