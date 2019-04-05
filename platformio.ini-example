@@ -34,7 +34,11 @@ upload_speed = 921600
 monitor_speed = 115200
 ; for OTA comment out these sections
 ;upload_protocol = espota
+<<<<<<< HEAD
+;upload_port = <the IP address...>
+=======
 ;upload_port = ems-esp.local
 ;upload_port = <add here your ip of the device>
+>>>>>>> upstream/dev
 
 

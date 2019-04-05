@@ -87,7 +87,12 @@
 #define EMS_TYPE_EasyStatusMessage 0x0A        // reading values on an Easy Thermostat
 #define EMS_TYPE_EasyStatusMessage_setpoint 10 // setpoint temp
 #define EMS_TYPE_EasyStatusMessage_curr 8      // current temp
-
+// RC1010 specific
+#define EMS_TYPE_RC1010StatusMessage 0x00   // is an automatic thermostat broadcast giving us temps
+#define EMS_TYPE_RC1010StatusMessage_curr 1 // current temp
+#define EMS_TYPE_RC1010StatusMessage_set 3  // setpoint temp
+#define EMS_TYPE_RC1010Set 0x03             // setpoint temp message
+#define EMS_TYPE_RC1010Set_set 0            // setpoint temp
 // Known EMS types
 typedef enum {
     EMS_MODEL_NONE,
@@ -110,6 +115,7 @@ typedef enum {
     EMS_MODEL_BOSCHEASY,
     EMS_MODEL_RC310,
     EMS_MODEL_CW100,
+    EMS_MODEL_RC1010,
     EMS_MODEL_OT
 
 } _EMS_MODEL_ID;
@@ -124,6 +130,16 @@ const _Boiler_Type Boiler_Types[] = {
     {EMS_MODEL_UBA, 203, 0x08, "Buderus Logamax U122"},
     {EMS_MODEL_UBA, 208, 0x08, "Buderus Logamax plus"},
     {EMS_MODEL_UBA, 64, 0x08, "Sieger BK15 Boiler/Nefit Smartline"},
+<<<<<<< HEAD
+    {EMS_MODEL_UBA, 190, 0x09, "BC10 Base Controller"},
+    {EMS_MODEL_UBA, 114, 0x09, "BC10 Base Controller"},
+    {EMS_MODEL_UBA, 125, 0x09, "BC25 Base Controller"},
+    {EMS_MODEL_UBA, 68, 0x09, "RFM20 Receiver"},
+    {EMS_MODEL_UBA, 95, 0x08, "Bosch Condens 2500"},
+    {EMS_MODEL_UBA, 205, 0x08, "Nefit Moduline Easy Connect"},
+    {EMS_MODEL_UBA, 251, 0x21, "MM10 Mixer Module"},  // warning, fake product id!
+    {EMS_MODEL_UBA, 250, 0x11, "WM10 Switch Module"}, // warning, fake product id!
+=======
     {EMS_MODEL_UBA, 95, 0x08, "Bosch Condens 2500"}
 
 };
@@ -140,6 +156,7 @@ const _Other_Type Other_Types[] = {
     {EMS_MODEL_OTHER, 205, 0x02, "Nefit Moduline Easy Connect"},
     {EMS_MODEL_OTHER, 73, EMS_ID_SM10, "SM10 Solar Module"}
 
+>>>>>>> upstream/dev
 };
 
 /*
@@ -157,7 +174,12 @@ const _Thermostat_Type Thermostat_Types[] = {
     {EMS_MODEL_BOSCHEASY, 206, 0x02, "Bosch Easy", EMS_THERMOSTAT_READ_YES, EMS_THERMOSTAT_WRITE_NO},
     {EMS_MODEL_RC310, 158, 0x10, "RC310", EMS_THERMOSTAT_READ_NO, EMS_THERMOSTAT_WRITE_NO},
     {EMS_MODEL_CW100, 255, 0x18, "Bosch CW100", EMS_THERMOSTAT_READ_NO, EMS_THERMOSTAT_WRITE_NO},
+<<<<<<< HEAD
+    {EMS_MODEL_RC1010, 165, 0x18, "RC1010/Nefit Moduline 1010)", EMS_THERMOSTAT_READ_NO, EMS_THERMOSTAT_WRITE_NO},
+    {EMS_MODEL_OT, 171, 0x02, "EMS-OT OpenTherm converter", EMS_THERMOSTAT_READ_YES, EMS_THERMOSTAT_WRITE_YES},
+=======
     {EMS_MODEL_OT, 171, 0x02, "EMS-OT OpenTherm converter", EMS_THERMOSTAT_READ_YES, EMS_THERMOSTAT_WRITE_YES},
     {EMS_MODEL_RC10, 165, 0x02, "RC10/Nefit Moduline 1010", EMS_THERMOSTAT_READ_YES, EMS_THERMOSTAT_WRITE_YES}
 
+>>>>>>> upstream/dev
 };

@@ -1346,6 +1346,77 @@ void initEMSESP() {
     EMSESP_Shower.doingColdShot = false;
 }
 
+<<<<<<< HEAD:src/ems-esp.ino
+// call PublishValues without forcing, so using CRC to see if we really need to publish
+void do_publishValues() {
+    // don't publish if we're not connected to the EMS bus
+    if ((ems_getBusConnected()) && (!myESP.getUseSerial()) && myESP.isMQTTConnected()) {
+        publishValues(false);
+    }
+}
+
+// callback to light up the LED, called via Ticker every second
+// fast way is to use WRITE_PERI_REG(PERIPHS_GPIO_BASEADDR + (state ? 4 : 8), (1 << EMSESP_Status.led_gpio)); // 4 is on, 8 is off
+void do_ledcheck() {
+    if (EMSESP_Status.led_enabled) {
+        if (ems_getBusConnected()) {
+            digitalWrite(EMSESP_Status.led_gpio, (EMSESP_Status.led_gpio == LED_BUILTIN) ? LOW : HIGH); // light on. For onboard LED high=off
+        } else {
+            int state = digitalRead(EMSESP_Status.led_gpio);
+            digitalWrite(EMSESP_Status.led_gpio, !state);
+        }
+    }
+}
+
+// Thermostat scan
+void do_scanThermostat() {
+    if ((ems_getBusConnected()) && (!myESP.getUseSerial())) {
+        myDebug("> Scanning thermostat message type #0x%02X..", scanThermostat_count);
+        ems_doReadCommand(scanThermostat_count, EMS_Thermostat.type_id);
+        scanThermostat_count++;
+    }
+}
+
+// do a system health check every now and then to see if we all connections
+void do_systemCheck() {
+    if ((!ems_getBusConnected()) && (!myESP.getUseSerial())) {
+        myDebug("Error! Unable to read from EMS bus. Retrying in %d seconds...", SYSTEMCHECK_TIME);
+    }
+}
+
+// force calls to get data from EMS for the types that aren't sent as broadcasts
+// only if we have a EMS connection
+void do_regularUpdates() {
+    if ((ems_getBusConnected()) && (!myESP.getUseSerial())) {
+        myDebugLog("Calling scheduled data refresh from EMS devices..");
+        ems_getThermostatValues();
+        ems_getBoilerValues();
+    }
+}
+
+// turn off hot water to send a shot of cold
+void _showerColdShotStart() {
+    if (EMSESP_Status.shower_alert) {
+        myDebugLog("[Shower] doing a shot of cold water");
+        ems_setWarmTapWaterActivated(false);
+        EMSESP_Shower.doingColdShot = true;
+        // start the timer for n seconds which will reset the water back to hot
+        showerColdShotStopTimer.attach(SHOWER_COLDSHOT_DURATION, _showerColdShotStop);
+    }
+}
+
+// turn back on the hot water for the shower
+void _showerColdShotStop() {
+    if (EMSESP_Shower.doingColdShot) {
+        myDebugLog("[Shower] finished shot of cold. hot water back on");
+        ems_setWarmTapWaterActivated(true);
+        EMSESP_Shower.doingColdShot = false;
+        showerColdShotStopTimer.detach(); // disable the timer
+    }
+}
+
+=======
+>>>>>>> upstream/dev:src/ems-esp.cpp
 /*
  *  Shower Logic
  */
