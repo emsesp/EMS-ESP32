@@ -1456,45 +1456,6 @@ void ems_discoverModels() {
     }
 }
 
-/*
- * Given a thermostat model ID go and fetch its characteristics
- */
-void _ems_setThermostatModel(uint8_t thermostat_modelid) {
-    bool                     found = false;
-    uint8_t                  i     = 0;
-    const _Thermostat_Type * thermostat_type;
-    while (i < _Thermostat_Types_max) {
-        thermostat_type = &Thermostat_Types[i];
-        if (thermostat_type->model_id == thermostat_modelid) {
-            found = true; // we have a matching product id
-            break;
-        }
-        i++;
-    }
-
-    if (!found) {
-        if (EMS_Sys_Status.emsLogging >= EMS_SYS_LOGGING_BASIC) {
-            myDebug("Unknown thermostat model specified. Trying a scan...");
-        }
-        ems_scanDevices(); // auto-discover it
-        return;
-    }
-
-    // set the thermostat
-    if (EMS_Sys_Status.emsLogging >= EMS_SYS_LOGGING_BASIC) {
-        myDebug("Setting Thermostat. Model %s with TypeID 0x%02X, ProductID %d",
-                thermostat_type->model_string,
-                thermostat_type->type_id,
-                thermostat_type->product_id);
-    }
-
-    // set its capabilities
-    EMS_Thermostat.model_id        = thermostat_type->model_id;
-    EMS_Thermostat.type_id         = thermostat_type->type_id;
-    EMS_Thermostat.read_supported  = thermostat_type->read_supported;
-    EMS_Thermostat.write_supported = thermostat_type->write_supported;
-}
-
 /**
  * Print the Tx queue - for debugging
  */

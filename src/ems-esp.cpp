@@ -828,9 +828,9 @@ void _showerColdShotStart() {
 
 // callback for loading/saving settings to the file system (SPIFFS)
 bool FSCallback(MYESP_FSACTION action, const JsonObject json) {
-    bool recreate_config = true;
-
     if (action == MYESP_FSACTION_LOAD) {
+        bool recreate_config = true;
+
         // led
         EMSESP_Status.led = json["led"];
 

@@ -315,7 +315,6 @@ void    _debugPrintPackage(const char * prefix, _EMS_RxTelegram * EMS_RxTelegram
 void    _ems_clearTxData();
 int     _ems_findBoilerModel(uint8_t model_id);
 bool    _ems_setModel(uint8_t model_id);
-void    _ems_setThermostatModel(uint8_t thermostat_modelid);
 void    _removeTxQueue();
 void    _ems_readTelegram(uint8_t * telegram, uint8_t length);
 
