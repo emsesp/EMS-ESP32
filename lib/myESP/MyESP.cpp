@@ -1,5 +1,5 @@
 /*
- * MyESP - my ESP helper class to handle Wifi, MQTT and Telnet
+ * MyESP - my ESP helper class to handle WiFi, MQTT and Telnet
  * 
  * Paul Derbyshire - December 2018
  *
@@ -8,13 +8,9 @@
 
 #include "MyESP.h"
 
-#define RTC_LEAP_YEAR(year) ((((year) % 4 == 0) && ((year) % 100 != 0)) || ((year) % 400 == 0))
-
-/* Days in a month */
-static uint8_t RTC_Months[2][12] = {
-    {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}, /* Not leap year */
-    {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}  /* Leap year */
-};
+#ifdef CRASH
+EEPROM_Rotate EEPROMr;
+#endif
 
 // constructor
 MyESP::MyESP() {
@@ -22,11 +18,13 @@ MyESP::MyESP() {
     _app_name     = strdup("MyESP");
     _app_version  = strdup(MYESP_VERSION);
 
-    _boottime     = strdup("<unknown>");
+    _boottime     = NULL;
     _load_average = 100; // calculated load average
 
     _telnetcommand_callback = NULL;
     _telnet_callback        = NULL;
+
+    _command[0] = '\0';
 
     _fs_callback          = NULL;
     _fs_settings_callback = NULL;
@@ -34,7 +32,7 @@ MyESP::MyESP() {
     _helpProjectCmds       = NULL;
     _helpProjectCmds_count = 0;
 
-    _use_serial                = true;
+    _use_serial                = false;
     _mqtt_host                 = NULL;
     _mqtt_password             = NULL;
     _mqtt_username             = NULL;
@@ -54,6 +52,9 @@ MyESP::MyESP() {
     _wifi_ssid      = NULL;
     _wifi_callback  = NULL;
     _wifi_connected = false;
+
+    _ota_pre_callback  = NULL;
+    _ota_post_callback = NULL;
 
     _suspendOutput = false;
 }
@@ -88,7 +89,6 @@ void MyESP::myDebug(const char * format, ...) {
     delete[] buffer;
 }
 
-
 // for flashmemory. Must use PSTR()
 void MyESP::myDebug_P(PGM_P format_P, ...) {
     if (_suspendOutput)
@@ -107,10 +107,12 @@ void MyESP::myDebug_P(PGM_P format_P, ...) {
 
     va_end(args);
 
+#ifdef MYESP_TIMESTAMP
     // capture & print timestamp
     char timestamp[10] = {0};
     snprintf_P(timestamp, sizeof(timestamp), PSTR("[%06lu] "), millis() % 1000000);
     SerialAndTelnet.print(timestamp);
+#endif
 
     SerialAndTelnet.println(buffer);
 
@@ -152,25 +154,35 @@ void MyESP::_wifiCallback(justwifi_messages_t code, char * parameter) {
 
         // finally if we don't want Serial anymore, turn it off
         if (!_use_serial) {
-            Serial.println("Disabling serial port");
-            Serial.flush();
-            Serial.end();
+            myDebug_P(PSTR("Disabling serial port"));
             SerialAndTelnet.setSerial(NULL);
         } else {
-            Serial.println("Using serial port output");
+            myDebug_P(PSTR("Using serial port output"));
         }
 
         // call any final custom settings
         if (_wifi_callback) {
             _wifi_callback();
         }
+
+        jw.enableAPFallback(false); // Disable AP mode after initial connect was succesfull. Thanks @JewelZB
     }
 
     if (code == MESSAGE_ACCESSPOINT_CREATED) {
+        _wifi_connected = true;
+
         myDebug_P(PSTR("[WIFI] MODE AP --------------------------------------"));
         myDebug_P(PSTR("[WIFI] SSID  %s"), jw.getAPSSID().c_str());
         myDebug_P(PSTR("[WIFI] IP    %s"), WiFi.softAPIP().toString().c_str());
         myDebug_P(PSTR("[WIFI] MAC   %s"), WiFi.softAPmacAddress().c_str());
+
+        // we could be in panic mode so enable Serial again
+        if (!_use_serial) {
+            SerialAndTelnet.setSerial(&Serial);
+            _use_serial = true;
+        }
+
+        myDebug_P(PSTR("Enabling serial port output"));
 
         // call any final custom settings
         if (_wifi_callback) {
@@ -194,6 +206,12 @@ void MyESP::_wifiCallback(justwifi_messages_t code, char * parameter) {
     }
 }
 
+// return true if in WiFi AP mode
+// does not work after wifi reset on ESP32 yet. See https://github.com/espressif/arduino-esp32/issues/1306
+bool MyESP::isAPmode() {
+    return (WiFi.getMode() & WIFI_AP);
+}
+
 // received MQTT message
 // we send this to the call back function. Important to parse are the event strings such as MQTT_MESSAGE_EVENT and MQTT_CONNECT_EVENT
 void MyESP::_mqttOnMessage(char * topic, char * payload, size_t len) {
@@ -209,6 +227,22 @@ void MyESP::_mqttOnMessage(char * topic, char * payload, size_t len) {
     char * topic_magnitude = strrchr(topic, '/'); // strip out everything until last /
     if (topic_magnitude != nullptr) {
         topic = topic_magnitude + 1;
+    }
+
+    // check for standard messages
+    // Restart the device
+    if (strcmp(topic, MQTT_TOPIC_RESTART) == 0) {
+        myDebug_P(PSTR("[MQTT] Received restart command"), message);
+        myESP.resetESP();
+        return;
+    }
+
+    // handle response from a start message
+    // for example with HA it sends the system time from the server
+    if (strcmp(topic, MQTT_TOPIC_START) == 0) {
+        myDebug_P(PSTR("[MQTT] Received boottime: %s"), message);
+        myESP.setBoottime(message);
+        return;
     }
 
     // Send message event to custom service
@@ -249,6 +283,13 @@ void MyESP::_mqttOnConnect() {
     // say we're alive to the Last Will topic
     mqttClient.publish(_mqttTopic(_mqtt_will_topic), 1, true, _mqtt_will_online_payload);
 
+    // subscribe to general subs
+    mqttSubscribe(MQTT_TOPIC_RESTART);
+
+    // subscribe to a start message and send the first publish
+    myESP.mqttSubscribe(MQTT_TOPIC_START);
+    myESP.mqttPublish(MQTT_TOPIC_START, MQTT_TOPIC_START_PAYLOAD);
+
     // call custom function to handle mqtt receives
     (_mqtt_callback)(MQTT_CONNECT_EVENT, NULL, NULL);
 }
@@ -263,9 +304,8 @@ void MyESP::_mqtt_setup() {
 
     mqttClient.onDisconnect([this](AsyncMqttClientDisconnectReason reason) {
         if (reason == AsyncMqttClientDisconnectReason::TCP_DISCONNECTED) {
-            myDebug_P(PSTR("[MQTT] TCP Disconnected. Check mqtt logs."));
-            (_mqtt_callback)(MQTT_DISCONNECT_EVENT, NULL,
-                             NULL); // call callback with disconnect
+            myDebug_P(PSTR("[MQTT] TCP Disconnected"));
+            (_mqtt_callback)(MQTT_DISCONNECT_EVENT, NULL, NULL); // call callback with disconnect
         }
         if (reason == AsyncMqttClientDisconnectReason::MQTT_IDENTIFIER_REJECTED) {
             myDebug_P(PSTR("[MQTT] Identifier Rejected"));
@@ -297,7 +337,7 @@ void MyESP::_mqtt_setup() {
 
 // WiFI setup
 void MyESP::_wifi_setup() {
-    jw.setHostname(_app_hostname); // Set WIFI hostname (otherwise it would be ESP-XXXXXX)
+    jw.setHostname(_app_hostname); // Set WIFI hostname
     jw.subscribe([this](justwifi_messages_t code, char * parameter) { _wifiCallback(code, parameter); });
     jw.enableAP(false);
     jw.setConnectTimeout(WIFI_CONNECT_TIMEOUT);
@@ -307,32 +347,48 @@ void MyESP::_wifi_setup() {
     jw.enableScan(false);                      // Configure it to scan available networks and connect in order of dBm
     jw.cleanNetworks();                        // Clean existing network configuration
     jw.addNetwork(_wifi_ssid, _wifi_password); // Add a network
+
+#if defined(ESP8266)
+    WiFi.setSleepMode(WIFI_NONE_SLEEP); // added to possibly fix wifi dropouts in arduino core 2.5.0
+#endif
 }
 
 // set the callback function for the OTA onstart
-void MyESP::setOTA(ota_callback_f OTACallback) {
-    _ota_callback = OTACallback;
+void MyESP::setOTA(ota_callback_f OTACallback_pre, ota_callback_f OTACallback_post) {
+    _ota_pre_callback  = OTACallback_pre;
+    _ota_post_callback = OTACallback_post;
 }
 
 // OTA callback when the upload process starts
 void MyESP::_OTACallback() {
     myDebug_P(PSTR("[OTA] Start"));
-    SerialAndTelnet.handle(); // force flush
-    if (_ota_callback) {
-        (_ota_callback)(); // call custom function to handle mqtt receives
+
+#ifdef CRASH
+    // If we are not specifically reserving the sectors we are using as
+    // EEPROM in the memory layout then any OTA upgrade will overwrite
+    // all but the last one.
+    // Calling rotate(false) disables rotation so all writes will be done
+    // to the last sector. It also sets the dirty flag to true so the next commit()
+    // will actually persist current configuration to that last sector.
+    // Calling rotate(false) will also prevent any other EEPROM write
+    // to overwrite the OTA image.
+    // In case the OTA process fails, reenable rotation.
+    // See onError callback below.
+    EEPROMr.rotate(false);
+    EEPROMr.commit();
+#endif
+
+    if (_ota_pre_callback) {
+        (_ota_pre_callback)(); // call custom function
     }
 }
-ESP8266WebServer        httpServer(80);
-ESP8266HTTPUpdateServer httpUpdater;
+
 // OTA Setup
 void MyESP::_ota_setup() {
     if (!_wifi_ssid) {
         return;
     }
-    MDNS.begin(_app_hostname);
-    httpUpdater.setup(&httpServer);
-    httpServer.begin();
-    MDNS.addService("http", "tcp", 80);
+
     //ArduinoOTA.setPort(OTA_PORT);
     ArduinoOTA.setHostname(_app_hostname);
 
@@ -358,6 +414,11 @@ void MyESP::_ota_setup() {
             myDebug_P(PSTR("[OTA] Receive Failed"));
         else if (error == OTA_END_ERROR)
             myDebug_P(PSTR("[OTA] End Failed"));
+
+#ifdef CRASH
+        // There's been an error, reenable rotation
+        EEPROMr.rotate(true);
+#endif
     });
 }
 
@@ -367,6 +428,14 @@ void MyESP::setBoottime(const char * boottime) {
         free(_boottime);
     }
     _boottime = strdup(boottime);
+}
+
+// eeprom
+void MyESP::_eeprom_setup() {
+#ifdef CRASH
+    EEPROMr.size(4);
+    EEPROMr.begin(SPI_FLASH_SEC_SIZE);
+#endif
 }
 
 // Set callback of sketch function to process project messages
@@ -404,133 +473,114 @@ void MyESP::_telnet_setup() {
     memset(_command, 0, TELNET_MAX_COMMAND_LENGTH);
 }
 
-// https://stackoverflow.com/questions/43063071/the-arduino-ntp-i-want-print-out-datadd-mm-yyyy
-void MyESP::_printBuildTime(unsigned long unix) {
-    // compensate for summer/winter time and CET. Can't be bothered to work out DST.
-    // add 3600 to the UNIX time during winter, (3600 s = 1 h), and 7200 during summer (DST).
-    unix += 3600; // add 1 hour
-
-    uint8_t Day, Month;
-
-    uint8_t Seconds = unix % 60;          /* Get seconds from unix */
-    unix /= 60;                           /* Go to minutes */
-    uint8_t Minutes = unix % 60;          /* Get minutes */
-    unix /= 60;                           /* Go to hours */
-    uint8_t Hours = unix % 24;            /* Get hours */
-    unix /= 24;                           /* Go to days */
-    uint8_t WeekDay = (unix + 3) % 7 + 1; /* Get week day, monday is first day */
-
-    uint16_t year = 1970; /* Process year */
-    while (1) {
-        if (RTC_LEAP_YEAR(year)) {
-            if (unix >= 366) {
-                unix -= 366;
-            } else {
-                break;
-            }
-        } else if (unix >= 365) {
-            unix -= 365;
-        } else {
-            break;
-        }
-        year++;
-    }
-
-    /* Get year in xx format */
-    uint8_t Year = (uint8_t)(year - 2000);
-    /* Get month */
-    for (Month = 0; Month < 12; Month++) {
-        if (RTC_LEAP_YEAR(year)) {
-            if (unix >= (uint32_t)RTC_Months[1][Month]) {
-                unix -= RTC_Months[1][Month];
-            } else {
-                break;
-            }
-        } else if (unix >= (uint32_t)RTC_Months[0][Month]) {
-            unix -= RTC_Months[0][Month];
-        } else {
-            break;
-        }
-    }
-
-    Month++;        /* Month starts with 1 */
-    Day = unix + 1; /* Date starts with 1 */
-
-    SerialAndTelnet.printf("%02d:%02d:%02d %d/%d/%d", Hours, Minutes, Seconds, Day, Month, Year);
-}
-
 // Show help of commands
 void MyESP::_consoleShowHelp() {
-    SerialAndTelnet.println();
-    SerialAndTelnet.printf("* Connected to: %s version %s", _app_name, _app_version);
-    SerialAndTelnet.println();
+    myDebug_P(PSTR(""));
+    myDebug_P(PSTR("* Connected to: %s version %s"), _app_name, _app_version);
 
-    if (WiFi.getMode() & WIFI_AP) {
-        SerialAndTelnet.printf("* ESP is in AP mode with SSID %s", jw.getAPSSID().c_str());
-        SerialAndTelnet.println();
+    if (isAPmode()) {
+        myDebug_P(PSTR("* Device is in AP mode with SSID %s"), jw.getAPSSID().c_str());
     } else {
-#if defined(ARDUINO_ARCH_ESP32)
-        String hostname = String(WiFi.getHostname());
-#else
-        String hostname = WiFi.hostname();
-#endif
-        SerialAndTelnet.printf("* Hostname: %s  IP: %s  MAC: %s",
-                               hostname.c_str(),
-                               WiFi.localIP().toString().c_str(),
-                               WiFi.macAddress().c_str());
-#ifdef ARDUINO_BOARD
-        SerialAndTelnet.printf("  Board: %s", ARDUINO_BOARD);
-#endif
-        SerialAndTelnet.printf(" (MyESP v%s)", MYESP_VERSION);
-
-#ifdef BUILD_TIME
-        SerialAndTelnet.print("  (Build ");
-        _printBuildTime(BUILD_TIME);
-        SerialAndTelnet.print(")");
-#endif
-        SerialAndTelnet.println();
-        SerialAndTelnet.printf("* Connected to WiFi SSID: %s (signal %d%%)", WiFi.SSID().c_str(), getWifiQuality());
-        SerialAndTelnet.println();
-        SerialAndTelnet.printf("* MQTT is %s", mqttClient.connected() ? "connected" : "disconnected");
-        SerialAndTelnet.println();
-        SerialAndTelnet.printf("* Boot time: %s", _boottime);
-        SerialAndTelnet.println();
+        myDebug_P(PSTR("* Hostname: %s (%s)"), _getESPhostname().c_str(), WiFi.localIP().toString().c_str());
+        myDebug_P(PSTR("* WiFi SSID: %s (signal %d%%)"), WiFi.SSID().c_str(), getWifiQuality());
+        myDebug_P(PSTR("* MQTT is %s"), mqttClient.connected() ? "connected" : "disconnected");
     }
 
-    SerialAndTelnet.printf("* Free RAM: %d KB   Load: %d%%", (ESP.getFreeHeap() / 1024), getSystemLoadAverage());
-    SerialAndTelnet.println();
-    // for battery power is ESP.getVcc()
-
-    SerialAndTelnet.println(FPSTR("*"));
-    SerialAndTelnet.println(FPSTR("* Commands:"));
-    SerialAndTelnet.println(FPSTR("*  ?=help, CTRL-D=quit"));
-    SerialAndTelnet.println(FPSTR("*  reboot"));
-    SerialAndTelnet.println(FPSTR("*  set"));
-    SerialAndTelnet.println(FPSTR("*  set wifi [ssid] [password]"));
-    SerialAndTelnet.println(FPSTR("*  set <mqtt_host | mqtt_username | mqtt_password> [value]"));
-    SerialAndTelnet.println(FPSTR("*  set erase"));
-    SerialAndTelnet.println(FPSTR("*  set serial"));
+    myDebug_P(PSTR("*"));
+    myDebug_P(PSTR("* Commands:"));
+    myDebug_P(PSTR("*  ?=help, CTRL-D=quit telnet"));
+    myDebug_P(PSTR("*  set, system, reboot"));
+#ifdef CRASH
+    myDebug_P(PSTR("*  crash <dump | clear | test [n]>"));
+#endif
 
     // print custom commands if available. Taken from progmem
     if (_telnetcommand_callback) {
         // find the longest key length so we can right align it
         uint8_t max_len = 0;
         for (uint8_t i = 0; i < _helpProjectCmds_count; i++) {
-            if (strlen(_helpProjectCmds[i].key) > max_len)
+            if ((strlen(_helpProjectCmds[i].key) > max_len) && (!_helpProjectCmds[i].set)) {
                 max_len = strlen(_helpProjectCmds[i].key);
+            }
         }
 
         for (uint8_t i = 0; i < _helpProjectCmds_count; i++) {
-            SerialAndTelnet.print(FPSTR("*  "));
-            SerialAndTelnet.print(FPSTR(_helpProjectCmds[i].key));
-            for (uint8_t j = 0; j < ((max_len + 5) - strlen(_helpProjectCmds[i].key)); j++) { // account for longest string length
-                SerialAndTelnet.print(FPSTR(" "));                                            // padding
+            if (!_helpProjectCmds[i].set) {
+                SerialAndTelnet.print(FPSTR("*  "));
+                SerialAndTelnet.print(FPSTR(_helpProjectCmds[i].key));
+                for (uint8_t j = 0; j < ((max_len + 5) - strlen(_helpProjectCmds[i].key)); j++) { // account for longest string length
+                    SerialAndTelnet.print(FPSTR(" "));                                            // padding
+                }
+                SerialAndTelnet.println(FPSTR(_helpProjectCmds[i].description));
             }
-            SerialAndTelnet.println(FPSTR(_helpProjectCmds[i].description));
+        }
+    }
+    myDebug_P(PSTR("")); // newline
+}
+
+// print all set commands and current values
+void MyESP::_printSetCommands() {
+    myDebug_P(PSTR("")); // newline
+    myDebug_P(PSTR("The following set commands are available:"));
+    myDebug_P(PSTR("")); // newline
+    myDebug_P(PSTR("*  set erase"));
+    myDebug_P(PSTR("*  set <wifi_ssid | wifi_password> [value]"));
+    myDebug_P(PSTR("*  set <mqtt_host | mqtt_username | mqtt_password> [value]"));
+    myDebug_P(PSTR("*  set serial <on | off>"));
+
+    // print custom commands if available. Taken from progmem
+    if (_telnetcommand_callback) {
+        // find the longest key length so we can right align it
+        uint8_t max_len = 0;
+        for (uint8_t i = 0; i < _helpProjectCmds_count; i++) {
+            if ((strlen(_helpProjectCmds[i].key) > max_len) && (_helpProjectCmds[i].set)) {
+                max_len = strlen(_helpProjectCmds[i].key);
+            }
+        }
+
+        for (uint8_t i = 0; i < _helpProjectCmds_count; i++) {
+            if (_helpProjectCmds[i].set) {
+                SerialAndTelnet.print(FPSTR("*  set "));
+                SerialAndTelnet.print(FPSTR(_helpProjectCmds[i].key));
+                for (uint8_t j = 0; j < ((max_len + 5) - strlen(_helpProjectCmds[i].key)); j++) { // account for longest string length
+                    SerialAndTelnet.print(FPSTR(" "));                                            // padding
+                }
+                SerialAndTelnet.println(FPSTR(_helpProjectCmds[i].description));
+            }
         }
     }
 
-    SerialAndTelnet.println(); // newline
+    myDebug_P(PSTR("")); // newline
+    myDebug_P(PSTR("Stored settings:"));
+    myDebug_P(PSTR("")); // newline
+    myDebug_P(PSTR("  wifi_ssid=%s "), (!_wifi_ssid) ? "<not set>" : _wifi_ssid);
+    SerialAndTelnet.print(FPSTR("  wifi_password="));
+    if (!_wifi_password) {
+        SerialAndTelnet.print(FPSTR("<not set>"));
+    } else {
+        for (uint8_t i = 0; i < strlen(_wifi_password); i++) {
+            SerialAndTelnet.print(FPSTR("*"));
+        }
+    }
+    myDebug_P(PSTR("")); // newline
+    myDebug_P(PSTR("  mqtt_host=%s"), (!_mqtt_host) ? "<not set>" : _mqtt_host);
+    myDebug_P(PSTR("  mqtt_username=%s"), (!_mqtt_username) ? "<not set>" : _mqtt_username);
+    SerialAndTelnet.print(FPSTR("  mqtt_password="));
+    if (!_mqtt_password) {
+        SerialAndTelnet.print(FPSTR("<not set>"));
+    } else {
+        for (uint8_t i = 0; i < strlen(_mqtt_password); i++) {
+            SerialAndTelnet.print(FPSTR("*"));
+        }
+    }
+
+    myDebug_P(PSTR("")); // newline
+    myDebug_P(PSTR("  serial=%s"), (_use_serial) ? "on" : "off");
+
+    // print any custom settings
+    (_fs_settings_callback)(MYESP_FSACTION_LIST, 0, NULL, NULL);
+
+    myDebug_P(PSTR("")); // newline
 }
 
 // reset / restart
@@ -545,54 +595,47 @@ void MyESP::resetESP() {
 }
 
 // read next word from string buffer
-char * MyESP::_telnet_readWord() {
-    return (strtok(NULL, ", \n"));
-}
-
-// change setting for 2 params (set <command> <value1> <value2>)
-void MyESP::_changeSetting2(const char * setting, const char * value1, const char * value2) {
-    if (strcmp(setting, "wifi") == 0) {
-        if (_wifi_ssid)
-            free(_wifi_ssid);
-        if (_wifi_password)
-            free(_wifi_password);
-        _wifi_ssid     = NULL;
-        _wifi_password = NULL;
-
-        if (value1) {
-            _wifi_ssid = strdup(value1);
-        }
-
-        if (value2) {
-            _wifi_password = strdup(value2);
-        }
-
-        (void)fs_saveConfig();
-        SerialAndTelnet.println("WiFi settings changed. Reconnecting...");
-        jw.disconnect();
-        jw.cleanNetworks();
-        jw.addNetwork(_wifi_ssid, _wifi_password);
+// if parameter true then a word is only terminated by a newline
+char * MyESP::_telnet_readWord(bool allow_all_chars) {
+    if (allow_all_chars) {
+        return (strtok(NULL, "\n")); // allow only newline
+    } else {
+        return (strtok(NULL, ", \n")); // allow space and comma
     }
 }
 
 // change settings - always as strings
 // messy code but effective since we don't have too many settings
 // wc is word count, number of parameters after the 'set' command
-void MyESP::_changeSetting(uint8_t wc, const char * setting, const char * value) {
+bool MyESP::_changeSetting(uint8_t wc, const char * setting, const char * value) {
     bool ok = false;
 
     // check for our internal commands first
     if (strcmp(setting, "erase") == 0) {
         _fs_eraseConfig();
-        return;
-    } else if ((strcmp(setting, "wifi") == 0) && (wc == 1)) { // erase wifi settings
+        return true;
+
+    } else if (strcmp(setting, "wifi_ssid") == 0) {
         if (_wifi_ssid)
             free(_wifi_ssid);
+        _wifi_ssid = NULL; // just to be sure
+        if (value) {
+            _wifi_ssid = strdup(value);
+        }
+        ok = true;
+        jw.enableSTA(false);
+        myDebug_P(PSTR("Note: please reboot to apply new WiFi settings"));
+    } else if (strcmp(setting, "wifi_password") == 0) {
         if (_wifi_password)
             free(_wifi_password);
-        _wifi_ssid     = NULL;
-        _wifi_password = NULL;
-        ok             = true;
+        _wifi_password = NULL; // just to be sure
+        if (value) {
+            _wifi_password = strdup(value);
+        }
+        ok = true;
+        jw.enableSTA(false);
+        myDebug_P(PSTR("Note: please reboot to apply new WiFi settings"));
+
     } else if (strcmp(setting, "mqtt_host") == 0) {
         if (_mqtt_host)
             free(_mqtt_host);
@@ -617,6 +660,7 @@ void MyESP::_changeSetting(uint8_t wc, const char * setting, const char * value)
             _mqtt_password = strdup(value);
         }
         ok = true;
+
     } else if (strcmp(setting, "serial") == 0) {
         ok          = true;
         _use_serial = false;
@@ -624,9 +668,11 @@ void MyESP::_changeSetting(uint8_t wc, const char * setting, const char * value)
             if (strcmp(value, "on") == 0) {
                 _use_serial = true;
                 ok          = true;
+                myDebug_P(PSTR("Reboot ESP to activate Serial mode."));
             } else if (strcmp(value, "off") == 0) {
                 _use_serial = false;
                 ok          = true;
+                myDebug_P(PSTR("Reboot ESP to deactivate Serial mode."));
             } else {
                 ok = false;
             }
@@ -636,28 +682,43 @@ void MyESP::_changeSetting(uint8_t wc, const char * setting, const char * value)
         ok = (_fs_settings_callback)(MYESP_FSACTION_SET, wc, setting, value);
     }
 
-    if (!ok) {
-        SerialAndTelnet.println("\nInvalid parameter for set command.");
-        return;
+    // if we were able to recognize the set command, continue
+    if (ok) {
+        // check for 2 params
+        if (value == nullptr) {
+            myDebug_P(PSTR("%s setting reset to its default value."), setting);
+        } else {
+            // must be 3 params
+            myDebug_P(PSTR("%s changed."), setting);
+        }
+
+        myDebug_P(PSTR("")); // newline
+
+        (void)fs_saveConfig(); // always save the values
     }
 
-    // check for 2 params
-    if (value == nullptr) {
-        SerialAndTelnet.printf("%s setting reset to its default value.", setting);
+    return ok;
+}
+
+// force the serial on/off
+void MyESP::setUseSerial(bool toggle) {
+    //(void)fs_saveConfig(); // save the setting for next reboot
+
+    if (toggle) {
+        SerialAndTelnet.setSerial(&Serial);
+        _use_serial = true;
     } else {
-        // must be 3 params
-        SerialAndTelnet.printf("%s changed.", setting);
+        SerialAndTelnet.setSerial(NULL);
+        _use_serial = false;
     }
-    SerialAndTelnet.println();
-
-    (void)fs_saveConfig();
 }
 
 void MyESP::_telnetCommand(char * commandLine) {
+    char * str   = commandLine;
+    bool   state = false;
+
     // count the number of arguments
-    char *   str   = commandLine;
-    bool     state = false;
-    unsigned wc    = 0;
+    unsigned wc = 0;
     while (*str) {
         if (*str == ' ' || *str == '\n' || *str == '\t') {
             state = false;
@@ -669,57 +730,28 @@ void MyESP::_telnetCommand(char * commandLine) {
     }
 
     // check first for reserved commands
-    char * temp             = strdup(commandLine); // because strotok kills original string buffer
-    char * ptrToCommandName = strtok((char *)temp, ", \n");
+    char * temp             = strdup(commandLine);         // because strotok kills original string buffer
+    char * ptrToCommandName = strtok((char *)temp, " \n"); // space and newline
 
     // set command
     if (strcmp(ptrToCommandName, "set") == 0) {
+        bool ok = false;
         if (wc == 1) {
-            SerialAndTelnet.println();
-            SerialAndTelnet.println("Stored settings:");
-            SerialAndTelnet.printf("  wifi=%s ", (!_wifi_ssid) ? "<not set>" : _wifi_ssid);
-            if (!_wifi_password) {
-                SerialAndTelnet.print("<not set>");
-            } else {
-                for (uint8_t i = 0; i < strlen(_wifi_password); i++)
-                    SerialAndTelnet.print("*");
-            }
-            SerialAndTelnet.println();
-            SerialAndTelnet.printf("  mqtt_host=%s", (!_mqtt_host) ? "<not set>" : _mqtt_host);
-            SerialAndTelnet.println();
-            SerialAndTelnet.printf("  mqtt_username=%s", (!_mqtt_username) ? "<not set>" : _mqtt_username);
-            SerialAndTelnet.println();
-            SerialAndTelnet.printf("  mqtt_password=");
-            if (!_mqtt_password) {
-                SerialAndTelnet.print("<not set>");
-            } else {
-                for (uint8_t i = 0; i < strlen(_mqtt_password); i++)
-                    SerialAndTelnet.print("*");
-            }
-
-            SerialAndTelnet.println();
-            SerialAndTelnet.printf("  serial=%s", (_use_serial) ? "on" : "off");
-
-            SerialAndTelnet.println();
-
-            // print custom settings
-            (_fs_settings_callback)(MYESP_FSACTION_LIST, 0, NULL, NULL);
-
-            SerialAndTelnet.println();
-            SerialAndTelnet.println("Usage: set <setting> [value...]");
-        } else if (wc == 2) {
-            char * setting = _telnet_readWord();
-            _changeSetting(1, setting, NULL);
-        } else if (wc == 3) {
-            char * setting = _telnet_readWord();
-            char * value   = _telnet_readWord();
-            _changeSetting(2, setting, value);
-        } else if (wc == 4) {
-            char * setting = _telnet_readWord();
-            char * value1  = _telnet_readWord();
-            char * value2  = _telnet_readWord();
-            _changeSetting2(setting, value1, value2);
+            _printSetCommands();
+            ok = true;
+        } else if (wc == 2) { // set <xxx>
+            char * setting = _telnet_readWord(false);
+            ok             = _changeSetting(wc - 1, setting, NULL);
+        } else { // set <xxx> <yyy>
+            char * setting = _telnet_readWord(false);
+            char * value   = _telnet_readWord(true); // allow strange characters
+            ok             = _changeSetting(wc - 1, setting, value);
         }
+
+        if (!ok) {
+            myDebug_P(PSTR("\nInvalid parameter for set command."));
+        }
+
         return;
     }
 
@@ -728,8 +760,166 @@ void MyESP::_telnetCommand(char * commandLine) {
         resetESP();
     }
 
+    // show system stats
+    if ((strcmp(ptrToCommandName, "system") == 0) && (wc == 1)) {
+        showSystemStats();
+        return;
+    }
+
+// crash command
+#ifdef CRASH
+    if ((strcmp(ptrToCommandName, "crash") == 0) && (wc >= 2)) {
+        char * cmd = _telnet_readWord(false);
+        if (strcmp(cmd, "dump") == 0) {
+            crashDump();
+        } else if (strcmp(cmd, "clear") == 0) {
+            crashClear();
+        } else if ((strcmp(cmd, "test") == 0) && (wc == 3)) {
+            char * value = _telnet_readWord(false);
+            crashTest(atoi(value));
+        }
+        return; // don't call custom command line callback
+    }
+#endif
+
     // call callback function
     (_telnetcommand_callback)(wc, commandLine);
+}
+
+// returns WiFi hostname as a String object
+String MyESP::_getESPhostname() {
+    String hostname;
+
+#if defined(ARDUINO_ARCH_ESP32)
+    hostname = String(WiFi.getHostname());
+#else
+    hostname = WiFi.hostname();
+#endif
+
+    return (hostname);
+}
+
+// returns build time as a String - copied for espurna. see (c)
+// takes the time from the gcc during compilation
+String MyESP::_buildTime() {
+    const char   time_now[] = __TIME__; // hh:mm:ss
+    unsigned int hour       = atoi(&time_now[0]);
+    unsigned int minute     = atoi(&time_now[3]);
+    unsigned int second     = atoi(&time_now[6]);
+
+    const char   date_now[] = __DATE__; // Mmm dd yyyy
+    const char * months[]   = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+    unsigned int month      = 0;
+    for (int i = 0; i < 12; i++) {
+        if (strncmp(date_now, months[i], 3) == 0) {
+            month = i + 1;
+            break;
+        }
+    }
+    unsigned int day  = atoi(&date_now[3]);
+    unsigned int year = atoi(&date_now[7]);
+
+    char buffer[20];
+    snprintf_P(buffer, sizeof(buffer), PSTR("%04d-%02d-%02d %02d:%02d:%02d"), year, month, day, hour, minute, second);
+
+    return String(buffer);
+}
+
+// returns system uptime in seconds - copied for espurna. see (c)
+unsigned long MyESP::_getUptime() {
+    static unsigned long last_uptime      = 0;
+    static unsigned char uptime_overflows = 0;
+
+    if (millis() < last_uptime)
+        ++uptime_overflows;
+    last_uptime                  = millis();
+    unsigned long uptime_seconds = uptime_overflows * (UPTIME_OVERFLOW / 1000) + (last_uptime / 1000);
+
+    return uptime_seconds;
+}
+
+// print out ESP system stats
+// for battery power is ESP.getVcc()
+void MyESP::showSystemStats() {
+#if defined(ESP8266)
+    myDebug_P(PSTR("%sESP8266 System stats:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
+#else
+    myDebug_P(PSTR("ESP32 System stats:"));
+#endif
+    myDebug_P(PSTR(""));
+
+    myDebug_P(PSTR(" [APP] %s version: %s"), _app_name, _app_version);
+    myDebug_P(PSTR(" [APP] MyESP version: %s"), MYESP_VERSION);
+    myDebug_P(PSTR(" [APP] Build timestamp: %s"), _buildTime().c_str());
+    if (_boottime != NULL) {
+        myDebug_P(PSTR(" [APP] Boot time: %s"), _boottime);
+    }
+    uint32_t t   = _getUptime(); // seconds
+    uint32_t h   = (uint32_t)t / (uint32_t)3600L;
+    uint32_t rem = (uint32_t)t % (uint32_t)3600L;
+    uint32_t m   = rem / 60;
+    uint32_t s   = rem % 60;
+    myDebug_P(PSTR(" [APP] Uptime: %d seconds (%02d:%02d:%02d)"), t, h, m, s);
+    myDebug_P(PSTR(" [APP] System Load: %d%%"), getSystemLoadAverage());
+
+    if (isAPmode()) {
+        myDebug_P(PSTR(" [WIFI] Device is in AP mode with SSID %s"), jw.getAPSSID().c_str());
+    } else {
+        myDebug_P(PSTR(" [WIFI] WiFi Hostname: %s"), _getESPhostname().c_str());
+        myDebug_P(PSTR(" [WIFI] WiFi IP: %s"), WiFi.localIP().toString().c_str());
+        myDebug_P(PSTR(" [WIFI] WiFi signal strength: %d%%"), getWifiQuality());
+    }
+
+    myDebug_P(PSTR(" [WIFI] WiFi MAC: %s"), WiFi.macAddress().c_str());
+
+#ifdef CRASH
+    char output_str[80] = {0};
+    char buffer[16]     = {0};
+    /* Crash info */
+    myDebug_P(PSTR(" [EEPROM] EEPROM size: %u"), EEPROMr.reserved() * SPI_FLASH_SEC_SIZE);
+    strlcpy(output_str, PSTR(" [EEPROM] EEPROM Sector pool size is "), sizeof(output_str));
+    strlcat(output_str, itoa(EEPROMr.size(), buffer, 10), sizeof(output_str));
+    strlcat(output_str, PSTR(", and in use are: "), sizeof(output_str));
+    for (uint32_t i = 0; i < EEPROMr.size(); i++) {
+        strlcat(output_str, itoa(EEPROMr.base() - i, buffer, 10), sizeof(output_str));
+        strlcat(output_str, PSTR(" "), sizeof(output_str));
+    }
+    myDebug_P(output_str);
+#endif
+
+#ifdef ARDUINO_BOARD
+    myDebug_P(PSTR(" [SYSTEM] Board: %s"), ARDUINO_BOARD);
+#endif
+
+    myDebug_P(PSTR(" [SYSTEM] CPU frequency: %u MHz"), ESP.getCpuFreqMHz());
+    myDebug_P(PSTR(" [SYSTEM] SDK version: %s"), ESP.getSdkVersion());
+
+#if defined(ESP8266)
+    myDebug_P(PSTR(" [SYSTEM] CPU chip ID: 0x%06X"), ESP.getChipId());
+    myDebug_P(PSTR(" [SYSTEM] Core version: %s"), ESP.getCoreVersion().c_str());
+    myDebug_P(PSTR(" [SYSTEM] Boot version: %d"), ESP.getBootVersion());
+    myDebug_P(PSTR(" [SYSTEM] Boot mode: %d"), ESP.getBootMode());
+    //myDebug_P(PSTR("[SYSTEM] Firmware MD5: %s"), (char *)ESP.getSketchMD5().c_str());
+#endif
+
+    FlashMode_t mode = ESP.getFlashChipMode();
+#if defined(ESP8266)
+    myDebug_P(PSTR(" [FLASH] Flash chip ID: 0x%06X"), ESP.getFlashChipId());
+#endif
+    myDebug_P(PSTR(" [FLASH] Flash speed: %u Hz"), ESP.getFlashChipSpeed());
+    myDebug_P(PSTR(" [FLASH] Flash mode: %s"),
+              mode == FM_QIO ? "QIO" : mode == FM_QOUT ? "QOUT" : mode == FM_DIO ? "DIO" : mode == FM_DOUT ? "DOUT" : "UNKNOWN");
+#if defined(ESP8266)
+    myDebug_P(PSTR(" [FLASH] Flash size (CHIP): %d"), ESP.getFlashChipRealSize());
+#endif
+    myDebug_P(PSTR(" [FLASH] Flash size (SDK): %d"), ESP.getFlashChipSize());
+    myDebug_P(PSTR(" [FLASH] Flash Reserved: %d"), 1 * SPI_FLASH_SEC_SIZE);
+    myDebug_P(PSTR(" [MEM] Firmware size: %d"), ESP.getSketchSize());
+    myDebug_P(PSTR(" [MEM] Max OTA size: %d"), (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000);
+    myDebug_P(PSTR(" [MEM] OTA Reserved: %d"), 4 * SPI_FLASH_SEC_SIZE);
+    myDebug_P(PSTR(" [MEM] Free Heap: %d"), ESP.getFreeHeap());
+
+    myDebug_P(PSTR(""));
 }
 
 // handler for Telnet
@@ -741,7 +931,7 @@ void MyESP::_telnetHandle() {
     while (SerialAndTelnet.available()) {
         char c = SerialAndTelnet.read();
 
-        SerialAndTelnet.serialPrint(c); // echo to Serial if connected
+        SerialAndTelnet.serialPrint(c); // echo to Serial (if connected)
 
         switch (c) {
         case '\r': // likely have full command in buffer now, commands are terminated by CR and/or LF
@@ -757,9 +947,8 @@ void MyESP::_telnetHandle() {
             }
             break;
 
-        case '\b': // (^H) handle backspace in input: put a space in last char - coded by Simon Arlott
+        case '\b': // (^H)
         case 0x7F: // (^?)
-
             if (charsRead > 0) {
                 _command[--charsRead] = '\0';
 
@@ -942,7 +1131,6 @@ char * MyESP::_mqttTopic(const char * topic) {
     return _mqtt_topic;
 }
 
-
 // print contents of file
 // assumes Serial is open
 void MyESP::_fs_printConfig() {
@@ -950,14 +1138,14 @@ void MyESP::_fs_printConfig() {
 
     File configFile = SPIFFS.open(MYEMS_CONFIG_FILE, "r");
     if (!configFile) {
-        Serial.println(F("[FS] Failed to read file for printing"));
+        myDebug_P(PSTR("[FS] Failed to read file for printing"));
         return;
     }
 
     while (configFile.available()) {
         SerialAndTelnet.print((char)configFile.read());
     }
-    SerialAndTelnet.println();
+    myDebug_P(PSTR("")); // newline
 
     configFile.close();
 }
@@ -999,12 +1187,13 @@ bool MyESP::_fs_loadConfig() {
     // Deserialize the JSON document
     DeserializationError error = deserializeJson(doc, configFile);
     if (error) {
-        Serial.println(F("[FS] Failed to read file"));
+        myDebug_P(PSTR("[FS] Failed to read config file"));
         return false;
     }
 
     const char * value;
 
+    // fetch the standard system parameters
     value      = json["wifi_ssid"];
     _wifi_ssid = (value) ? strdup(value) : NULL;
 
@@ -1033,6 +1222,13 @@ bool MyESP::_fs_loadConfig() {
 
 // save settings to spiffs
 bool MyESP::fs_saveConfig() {
+    bool ok = true;
+
+    // call any custom functions before handling SPIFFS
+    if (_ota_pre_callback) {
+        (_ota_pre_callback)();
+    }
+
     StaticJsonDocument<SPIFFS_MAXSIZE> doc;
     JsonObject                         json = doc.to<JsonObject>();
 
@@ -1049,43 +1245,49 @@ bool MyESP::fs_saveConfig() {
 
     // if file exists, remove it just to be safe
     if (SPIFFS.exists(MYEMS_CONFIG_FILE)) {
-        // delete it
         SPIFFS.remove(MYEMS_CONFIG_FILE);
     }
 
+    // open for writing
     File configFile = SPIFFS.open(MYEMS_CONFIG_FILE, "w");
     if (!configFile) {
-        Serial.println("[FS] Failed to open config file for writing");
+        myDebug_P(PSTR("[FS] Failed to open config file for writing"));
         return false;
     }
 
+
     // Serialize JSON to file
     if (serializeJson(json, configFile) == 0) {
-        Serial.println(F("[FS] Failed to write to file"));
+        myDebug_P(PSTR("[FS] Failed to write config file"));
+        ok = false;
     }
 
     configFile.close();
 
-    return true;
+    // call any custom functions before handling SPIFFS
+    if (_ota_post_callback) {
+        (_ota_post_callback)();
+    }
+
+    return ok; // it worked
 }
 
 // init the SPIFF file system and load the config
 // if it doesn't exist try and create it
-// force Serial for debugging, and turn it off afterwards
 void MyESP::_fs_setup() {
     if (!SPIFFS.begin()) {
-        Serial.println("[FS] Failed to mount the file system");
+        myDebug_P(PSTR("[FS] Failed to mount the file system. Erasing..."));
         _fs_eraseConfig(); // fix for ESP32
         return;
     }
 
     // load the config file. if it doesn't exist (function returns false) create it
     if (!_fs_loadConfig()) {
-        // Serial.println("[FS] Re-creating config file");
+        //myDebug_P(PSTR("[FS] Re-creating config file"));
         fs_saveConfig();
     }
 
-    //_fs_printConfig(); // TODO: for debugging
+    // _fs_printConfig(); // enable for debugging
 }
 
 uint16_t MyESP::getSystemLoadAverage() {
@@ -1110,6 +1312,11 @@ void MyESP::_calculateLoad() {
         _load_average  = 100 - (100 * load_counter / load_counter_max);
         last_loadcheck = millis();
     }
+}
+
+// returns true is MQTT is alive
+bool MyESP::isMQTTConnected() {
+    return mqttClient.connected();
 }
 
 // return true if wifi is connected
@@ -1147,16 +1354,163 @@ int MyESP::getWifiQuality() {
     return 2 * (dBm + 100);
 }
 
-// register new instance
+#ifdef CRASH
+/**
+ * Save crash information in EEPROM
+ * This function is called automatically if ESP8266 suffers an exception
+ * It should be kept quick / consise to be able to execute before hardware wdt may kick in
+ */
+extern "C" void custom_crash_callback(struct rst_info * rst_info, uint32_t stack_start, uint32_t stack_end) {
+    // write crash time to EEPROM
+    uint32_t crash_time = millis();
+    EEPROMr.put(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_CRASH_TIME, crash_time);
+
+    // write reset info to EEPROM
+    EEPROMr.write(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_RESTART_REASON, rst_info->reason);
+    EEPROMr.write(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_EXCEPTION_CAUSE, rst_info->exccause);
+
+    // write epc1, epc2, epc3, excvaddr and depc to EEPROM
+    EEPROMr.put(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_EPC1, rst_info->epc1);
+    EEPROMr.put(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_EPC2, rst_info->epc2);
+    EEPROMr.put(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_EPC3, rst_info->epc3);
+    EEPROMr.put(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_EXCVADDR, rst_info->excvaddr);
+    EEPROMr.put(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_DEPC, rst_info->depc);
+
+    // write stack start and end address to EEPROM
+    EEPROMr.put(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_STACK_START, stack_start);
+    EEPROMr.put(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_STACK_END, stack_end);
+
+    // write stack trace to EEPROM and avoid overwriting settings
+    int16_t current_address = SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_STACK_TRACE;
+    for (uint32_t i = stack_start; i < stack_end; i++) {
+        byte * byteValue = (byte *)i;
+        EEPROMr.write(current_address++, *byteValue);
+    }
+
+    EEPROMr.commit();
+}
+
+void MyESP::crashTest(uint8_t t) {
+    if (t == 1) {
+        myDebug("[CRASH] Attempting to divide by zero ...");
+        int result, zero;
+        zero   = 0;
+        result = 1 / zero;
+        myDebug("Result = %d", result);
+    }
+
+    if (t == 2) {
+        myDebug("[CRASH] Attempting to read through a pointer to no object ...");
+        int * nullPointer;
+        nullPointer = NULL;
+        // null pointer dereference - read
+        // attempt to read a value through a null pointer
+        Serial.println(*nullPointer);
+    }
+
+    if (t == 3) {
+        Serial.printf("[CRASH] Crashing with hardware WDT (%ld ms) ...\n", millis());
+        ESP.wdtDisable();
+        while (true) {
+            // stay in an infinite loop doing nothing
+            // this way other process can not be executed
+            //
+            // Note:
+            // Hardware wdt kicks in if software wdt is unable to perfrom
+            // Nothing will be saved in EEPROM for the hardware wdt
+        }
+    }
+
+    if (t == 4) {
+        Serial.printf("[CRASH] Crashing with software WDT (%ld ms) ...\n", millis());
+        while (true) {
+            // stay in an infinite loop doing nothing
+            // this way other process can not be executed
+        }
+    }
+}
+
+/**
+ * Clears crash info
+ */
+void MyESP::crashClear() {
+    myDebug_P(PSTR("[CRASH] Clearing crash dump"));
+    uint32_t crash_time = 0xFFFFFFFF;
+    EEPROMr.put(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_CRASH_TIME, crash_time);
+    EEPROMr.commit();
+}
+
+/**
+ * Print out crash information that has been previously saved in EEPROM
+ */
+void MyESP::crashDump() {
+    uint32_t crash_time;
+    EEPROMr.get(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_CRASH_TIME, crash_time);
+    if ((crash_time == 0) || (crash_time == 0xFFFFFFFF)) {
+        myDebug_P(PSTR("[CRASH] No crash info"));
+        return;
+    }
+
+    myDebug_P(PSTR("[CRASH] Latest crash was at %lu ms after boot"), crash_time);
+    myDebug_P(PSTR("[CRASH] Reason of restart: %u"), EEPROMr.read(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_RESTART_REASON));
+    myDebug_P(PSTR("[CRASH] Exception cause: %u"), EEPROMr.read(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_EXCEPTION_CAUSE));
+
+    uint32_t epc1, epc2, epc3, excvaddr, depc;
+    EEPROMr.get(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_EPC1, epc1);
+    EEPROMr.get(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_EPC2, epc2);
+    EEPROMr.get(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_EPC3, epc3);
+    EEPROMr.get(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_EXCVADDR, excvaddr);
+    EEPROMr.get(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_DEPC, depc);
+
+    myDebug_P(PSTR("[CRASH] epc1=0x%08x epc2=0x%08x epc3=0x%08x"), epc1, epc2, epc3);
+    myDebug_P(PSTR("[CRASH] excvaddr=0x%08x depc=0x%08x"), excvaddr, depc);
+
+    uint32_t stack_start, stack_end;
+    EEPROMr.get(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_STACK_START, stack_start);
+    EEPROMr.get(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_STACK_END, stack_end);
+
+    myDebug_P(PSTR("[CRASH] sp=0x%08x end=0x%08x"), stack_start, stack_end);
+
+    int16_t current_address = SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_STACK_TRACE;
+    int16_t stack_len       = stack_end - stack_start;
+
+    uint32_t stack_trace;
+
+    myDebug(">>>stack>>>");
+
+    for (int16_t i = 0; i < stack_len; i += 0x10) {
+        SerialAndTelnet.printf("%08x: ", stack_start + i);
+        for (byte j = 0; j < 4; j++) {
+            EEPROMr.get(current_address, stack_trace);
+            SerialAndTelnet.printf("%08x ", stack_trace);
+            current_address += 4;
+        }
+        SerialAndTelnet.println();
+    }
+    myDebug("<<<stack<<<");
+}
+#else
+void MyESP::crashTest(uint8_t t) {
+}
+void MyESP::crashClear() {
+}
+void MyESP::crashDump() {
+}
+void MyESP::crashInfo() {
+}
+#endif
+
+// setup MyESP
 void MyESP::begin(const char * app_hostname, const char * app_name, const char * app_version) {
     _app_hostname = strdup(app_hostname);
     _app_name     = strdup(app_name);
     _app_version  = strdup(app_version);
 
-    _telnet_setup(); // Telnet setup
+    _telnet_setup(); // Telnet setup, does first to set Serial
+    _eeprom_setup(); // set up eeprom for storing crash data
     _fs_setup();     // SPIFFS setup, do this first to get values
     _wifi_setup();   // WIFI setup
-    _ota_setup();
+    _ota_setup();    // init OTA
 }
 
 /*
@@ -1164,9 +1518,8 @@ void MyESP::begin(const char * app_hostname, const char * app_name, const char *
  */
 void MyESP::loop() {
     _calculateLoad();
-    _telnetHandle(); // Telnet/Debugger
-    httpServer.handleClient();
-    MDNS.update();
+    _telnetHandle();
+
     jw.loop(); // WiFi
 
     // do nothing else until we've got a wifi connection
