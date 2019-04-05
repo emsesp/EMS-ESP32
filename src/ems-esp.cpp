@@ -110,7 +110,7 @@ command_t PROGMEM project_cmds[] = {
     {false, "thermostat read <type ID>", "send read request to the thermostat"},
     {false, "thermostat temp <degrees>", "set current thermostat temperature"},
     {false, "thermostat mode <mode>", "set mode (0=low/night, 1=manual/day, 2=auto)"},
-    {false, "thermostat scan <type ID>", "do a read on all type IDs"},
+    {false, "thermostat scan <type ID>", "probe thermostat on all type id responses"},
     {false, "boiler read <type ID>", "send read request to boiler"},
     {false, "boiler wwtemp <degrees>", "set boiler warm water temperature"},
     {false, "boiler tapwater <on | off>", "set boiler warm tap water on/off"},
@@ -329,7 +329,7 @@ void showInfo() {
     if (ems_getBusConnected()) {
         myDebug("  Bus is connected");
 
-        myDebug("  Rx: Poll=%d ms, # Rx telegrams read=%d, # Crc Errors=%d",
+        myDebug("  Rx: Poll=%d ms, # Rx telegrams read=%d, # CRC errors=%d",
                 ems_getPollFrequency(),
                 EMS_Sys_Status.emsRxPgks,
                 EMS_Sys_Status.emxCrcErr);
