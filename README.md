@@ -5,7 +5,7 @@ EMS-ESP is a project to build an electronic controller circuit using an Espressi
 There are 3 parts to this project, first the design of the circuit, secondly the code for the ESP8266 microcontroller firmware with telnet and MQTT support, and lastly an example configuration for Home Assistant to monitor the data and issue direct commands via a MQTT broker.
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/b8880625bdf841d4adb2829732030887)](https://app.codacy.com/app/proddy/EMS-ESP?utm_source=github.com&utm_medium=referral&utm_content=proddy/EMS-ESP&utm_campaign=Badge_Grade_Settings)
-[![version](https://img.shields.io/badge/version-1.5.5-brightgreen.svg)](CHANGELOG.md)
+[![version](https://img.shields.io/badge/version-1.7.0-brightgreen.svg)](CHANGELOG.md)
 
 - [EMS-ESP](#ems-esp)
   - [Introduction](#introduction)
@@ -33,7 +33,6 @@ There are 3 parts to this project, first the design of the circuit, secondly the
   - [Home Assistant Configuration](#home-assistant-configuration)
   - [Building The Firmware](#building-the-firmware)
     - [Using PlatformIO Standalone](#using-platformio-standalone)
-    - [Building Using Arduino IDE](#building-using-arduino-ide)
   - [Using the Pre-built Firmware](#using-the-pre-built-firmware)
   - [Troubleshooting](#troubleshooting)
   - [Known Issues](#known-issues)
@@ -67,6 +66,7 @@ The code and circuit has been tested with a few ESP8266 development boards such 
 
 1. Either build the circuit described below or purchase a ready built board from bbqkees.
 2. Grab any ESP8266 dev board. The latest bbqkees boards have a Wemos D1 pre-mounted with a copy of this firmware.
+<<<<<<< HEAD
 3. Optionally add external Dallas temperature sensors and an external LED. The default pins for these are D1 and D5 respectively.
 4. Decide whether to compile and upload the code yourself using PlatformIO or just upload the pre-baked firmware using the esptool (read these [instructions](#using-the-pre-built-firmware)). If you want to build yourself now is the time to customize your settings in `my_custom.h`. Upload the firmware.
 5. Connect a USB 5v power supply to the ESP8266 board, either via laptop/PC or external power supply.
@@ -90,6 +90,30 @@ The code and circuit has been tested with a few ESP8266 development boards such 
 16. If your boiler/thermostat is not discovered create a GitHub issue stating the type and product ID. These will be added to the file `ems_devices.h` in a future release.
 17. If all is well and there is traffic on the EMS bus the onboard LED will stop blinking and be permanently on. If this is annoying you can disable with `set led off`. To see the EMS messages type `set log v` for verbose logging.
 18. And all is not well, check the wiring, make sure serial is off and look at the telnet session for errors. If in doubt, wipe the ESP with `pio run -t erase` and start again with step #3
+=======
+3. Optionally add external Dallas temperature sensors (to D1) and an external LED (to D5).
+4. Decide whether to compile and upload the code yourself using PlatformIO or just upload the pre-baked firmware using the esptool (read these [instructions](#using-the-pre-built-firmware)). If you want to build yourself now is the time to customize your settings in `my_custom.h`. Upload the firmware via USB.
+5. Connect an external USB 5v power adapter to the ESP8266 board.
+7. When the ESP8266 starts up for the first time the onboard LED will be flashing. This is because the EMS bus is not yet connected and receiving data.
+8. If you haven't hardcoded the WiFi credentials in step 4, the ESP8266 will boot up in a WiFi Access Point (AP) mode with the ssid name `ems-esp`. Now you can either use a laptop and connect to this AP using Telnet to `192.168.1.4` or if its powered from a computers USB use a Serial monitor tool to the ESP's COM port. Tip: to enable Telnet on Windows 10 run `dism /online /Enable-Feature /FeatureName:TelnetClient` or install something like [putty](https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html).
+9. Next is to customize some of the onboard settings. Type `set` to list the current stored settings and `?` to see the syntax. Use `set wifi_ssid` and `set wifi_password` to add your WiFi credentials and if you're using MQTT set the host, username and password. There is no need to reboot the ESP.
+10. The `led_gpio` will default to the onboard LED (which is probably blinking now). Ignore `thermostat_type` and `boiler_type` as these will be auto-detected hopefully later on.
+11. **Important**: By default the serial port is enabled and the EMS bus disabled. This is to allow users to configure their ESP via the serial monitor when pluged into a PC/laptop. You must disable serial with `set serial off` to get the EMS transmission working.
+12. Hook up the ESP to the EMS board as follows:
+    
+| EMS board | ESP8266 dev board |
+| ----------|------------------ |
+| Ground/G/J2|  GND/G |
+| Rx/J2 | D7 |
+| Tx/J2 | D8 |
+| VC/J2 | 3v3 |
+13.  Connect the EMS lines to the ESP. This can be done via the two EMS wires or via the 3.5mm service jack if you have an bbqkees board.
+14.  Reboot the ESP, either by the reset switch or pulling the power.
+15.  The ESP will first perform an autodetect to try and discover the EMS devices attached. If your boiler and thermostat are recognized it will set these types and store them for ever and ever. You can trace the output by telnet'ing to the board `telnet ems-esp.local`. Also use `info` to check the status.
+16.  If your boiler/thermostat is not discovered create a GitHub issue stating the type and Product ID. These will be added to the file `ems_devices.h` in a future release.
+17.  If all is well and there is traffic on the EMS bus the onboard LED will stop blinking and be permanently on. If this is annoying you can disable with `set led off`. To see the EMS messages type `set log v` for verbose logging.
+18.  And all is not well, check the wiring, make sure serial is off and look at the telnet session for errors. If in doubt, wipe the ESP with `pio run -t erase` and start again with step #3
+>>>>>>> upstream/dev
 
 ## Monitoring The Output
 
@@ -131,8 +155,8 @@ The EMS circuit will work with both 3.3V and 5V. It's easiest though to power di
 
 - via the USB if your dev board has one
 - using an external 5V power supply into the 5V vin on the board
-- powering from the 3.5" service jack on the boiler. This will give you 8V so you need a buck converter (like a [Pololu D24C22F5](https://www.pololu.com/product/2858)) to step this down to 5V to provide enough power to the ESP8266 (250mA at least)
-- powering from the EMS line, which is 15V A/C and using a buck converter as described above. Note the current design has stability issues when sending packages in this configuration so this is not recommended yet if you plan to many send commands to the thermostat or boiler.
+- powering from the 3.5mm service jack (stereo jack) on the boiler. This will give you 8V so you need a buck converter (like a [Pololu D24C22F5](https://www.pololu.com/product/2858)) to step this down to 5V to provide enough power to the ESP8266 (250mA at least)
+- powering direct from the EMS line, which is 15V DC and using a buck converter as described above.
 
 | With Power Circuit                                              |
 | --------------------------------------------------------------- |
@@ -225,13 +249,15 @@ In this chapter we will report our findings on the ems plus.
 
 `ems.cpp` is the logic to read the EMS data packets (telegrams), validates them and process them based on the type.
 
-`ems-esp.ino` is the Arduino code for the ESP8266 that kicks it all off. This is where we have specific logic such as the code to monitor and alert on the Shower timer and light up the LEDs.
+`ems-esp.cpp` is the Arduino code for the ESP8266 that kicks it all off. This is where we have specific logic such as the code to monitor and alert on the Shower timer and light up the LEDs.
 
 `my_config.h` has all the custom settings tailored to your environment. Specific values here are also stored in the ESP's SPIFFs (File system).
 
 `ems_devices.h` has all the configuration for the known EMS devices currently supported.
 
-`MyESP.cpp` is my custom library to handle WiFi, MQTT and Telnet. Uses a modified version of [TelnetSpy](https://github.com/yasheena/telnetspy)
+`MyESP.cpp` is my custom library to handle WiFi, MQTT and Telnet. Uses a modified version of [TelnetSpy](https://github.com/yasheena/telnetspy).
+
+`ds18.*` are the Dallas libraries for any external temperature sensors.
 
 ### Special EMS Types
 
@@ -250,18 +276,15 @@ In `ems.cpp` you can add scheduled calls to specific EMS types in the functions 
 
 I am still working on adding more support to known thermostats. Any contributions here are welcome. The know types are listed in `ems_devices.h` and include
 
-- RC20 and RC30, both are fully supported
-- RC10 support is being added
+- RC10, RC20 and RC30 are fully supported
 - RC35 with support for the 1st heating circuit (HC1)
-- TC100/TC200/Easy but only with support for reading the temperatures. There seems to be no way to set settings using EMS bus messages that I know of. One option is to send XMPP messages but a special server is needed and out of scope for this project.
+- TC100/TC200/Easy but only with support for *reading* the temperature values. There seems to be no way to set settings using EMS bus messages that I know of. One option is to send XMPP messages but a special server is needed and out of scope for this project.
 
 ### Customizing The Code
 
-- To configure for your thermostat and specific boiler settings, modify `my_config.h`. Here you can
-  - set flags for enabled/disabling functionality such as `BOILER_SHOWER_ENABLED` and `BOILER_SHOWER_TIMER`.
-  - Set WIFI and MQTT settings. The values can also be set from the telnet command menu using the **set** command.
-- To add new handlers for EMS data types, first create a callback function and add to the `EMS_Types` array at the top of the file `ems.cpp` and modify `ems.h`
-- To add new devices modify `ems_devices.h`
+- To configure for your thermostat and specific boiler settings, modify `my_config.h`.
+- Most values can also be set from the telnet command menu using the **set** command.
+- To add new handlers for EMS data types, first create a callback function and add to the `EMS_Types` array at the top of the file `ems.cpp` and modify `ems.h`. Also add to `ems_devices.h`.
 
 ### Using MQTT
 
@@ -325,6 +348,7 @@ Make sure Python 2.7 is installed, then...
 % pip install -U platformio
 % sudo platformio upgrade
 % platformio platform update
+% platformio lib upgrade
 
 % git clone https://github.com/proddy/EMS-ESP.git
 % cd EMS-ESP
@@ -337,17 +361,6 @@ edit `platformio.ini` to set `env_default` to your board type, then
 % platformio run -t upload
 ```
 
-### Building Using Arduino IDE
-
-Porting to the Arduino IDE can be a little tricky but it did it once. Something along these lines:
-
-- Add the ESP8266 boards (from Preferences add Additional Board URL `http://arduino.esp8266.com/stable/package_esp8266com_index.json`)
-- Go to Boards Manager and install ESP8266 2.4.x platform. Make sure your board supports SPIFFS.
-- Select your ESP8266 from Tools->Boards and the correct port with Tools->Port
-- From the Library Manager install the needed libraries from platformio.ini. Note make sure you pick ArduinoJson v5 (5.13.4 and above) and not v6. See https://arduinojson.org/v5/doc/
-- Put all the files in a single sketch folder
-- cross your fingers and hit CTRL-R to compile
-
 ## Using the Pre-built Firmware
 
 pre-baked firmware for the Wemos D1 mini is available in the GitHub [releases](https://github.com/proddy/EMS-ESP/releases) which you can upload yourself using the [esptool](https://github.com/espressif/esptool) bootloader like `esptool.py -p <com port> write_flash 0x00000 <firmware.bin file>`. Here's how to set it up on Windows:
@@ -355,7 +368,7 @@ pre-baked firmware for the Wemos D1 mini is available in the GitHub [releases](h
 1. Check if you have **python 2.7** installed. If not [download it](https://www.python.org/downloads/) and make sure you select the option to add Python to the windows PATH
 2. Then install the ESPTool by running `pip install esptool` from a command prompt
 
-The ESP8266 will start in Access Point (AP) mode. Connect via WiFi to the SSID **EMS-ESP** and telnet to **192.168.4.1**. Then use the `set wifi` command to configure your own network settings like `set wifi your_ssid your_password`. Alternatively connect the ESP8266 to your PC and open a Serial monitor (with baud 115200) to configure the settings. Make sure you disable Serial support before connecting the EMS lines using `set serial off`.
+The ESP8266 will start in Access Point (AP) mode. Connect via WiFi to the SSID **EMS-ESP** and telnet to **192.168.4.1**. Then use the `set wifi_ssid/set wifi_password` command to configure your own network settings. Alternatively connect the ESP8266 to your PC and open a Serial monitor (with baud 115200) to configure the settings. Make sure you disable Serial support before connecting the EMS lines using `set serial off`.
 
 `set` wil list all currently stored settings.
 

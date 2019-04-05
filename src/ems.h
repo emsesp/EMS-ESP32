@@ -17,18 +17,19 @@
 #define EMS_PLUS_ID_NONE 0x01 // Fixed - used as a dest in broadcast messages and empty type IDs
 #define EMS_ID_ME 0x0B        // Fixed - our device, hardcoded as the "Service Key"
 #define EMS_ID_DEFAULT_BOILER 0x08
+#define EMS_ID_SM10 0x30 // Solar Module SM10
 
 #define EMS_MIN_TELEGRAM_LENGTH 6 // minimal length for a validation telegram, including CRC
 
 // max length of a telegram, including CRC, for Rx and Tx.
-#define EMS_MAX_TELEGRAM_LENGTH 99
+#define EMS_MAX_TELEGRAM_LENGTH 32
 
 // default values
 #define EMS_VALUE_INT_ON 1             // boolean true
 #define EMS_VALUE_INT_OFF 0            // boolean false
 #define EMS_VALUE_INT_NOTSET 0xFF      // for 8-bit ints
+#define EMS_VALUE_SHORT_NOTSET 0x8000  // for 2-byte shorts
 #define EMS_VALUE_LONG_NOTSET 0xFFFFFF // for 3-byte longs
-#define EMS_VALUE_FLOAT_NOTSET -255    // float
 
 #define EMS_THERMOSTAT_READ_YES true
 #define EMS_THERMOSTAT_READ_NO false
@@ -89,9 +90,10 @@ typedef struct {
     _EMS_SYS_LOGGING emsLogging;       // logging
     bool             emsRefreshed;     // fresh data, needs to be pushed out to MQTT
     bool             emsBusConnected;  // is there an active bus
-    unsigned long    emsRxTimestamp;   // timestamp of last EMS message received
-    unsigned long    emsPollTimestamp; // timestamp of last EMS poll sent to us
+    uint32_t         emsRxTimestamp;   // timestamp of last EMS message received
+    uint32_t         emsPollFrequency; // time between EMS polls
     bool             emsTxCapable;     // able to send via Tx
+    bool             emsTxDisabled;    // true to prevent all Tx
     uint8_t          txRetryCount;     // # times the last Tx was re-sent
 } _EMS_Sys_Status;
 
@@ -108,11 +110,16 @@ typedef struct {
     uint8_t                 comparisonOffset;   // offset of where the byte is we want to compare too later
     uint8_t                 comparisonPostRead; // after a successful write call this to read
     bool                    forceRefresh;       // should we send to MQTT after a successful Tx?
-    unsigned long           timestamp;          // when created
+    uint32_t                timestamp;          // when created
     uint8_t                 data[EMS_MAX_TELEGRAM_LENGTH];
 } _EMS_TxTelegram;
 
-
+// The Rx receive package
+typedef struct {
+    uint32_t  timestamp; // timestamp from millis()
+    uint8_t * telegram;  // the full data package
+    uint8_t   length;    // length in bytes
+} _EMS_RxTelegram;
 
 // default empty Tx
 const _EMS_TxTelegram EMS_TX_TELEGRAM_NEW = {
@@ -138,6 +145,13 @@ typedef struct {
     char    model_string[50];
 } _Boiler_Type;
 
+typedef struct {
+    uint8_t model_id;
+    uint8_t product_id;
+    uint8_t type_id;
+    char    model_string[50];
+} _Other_Type;
+
 // Definition for thermostat type
 typedef struct {
     uint8_t model_id;
@@ -159,31 +173,32 @@ typedef struct {           // UBAParameterWW
     uint8_t wWComfort;     // Warm water comfort or ECO mode
 
     // UBAMonitorFast
-    uint8_t selFlowTemp;        // Selected flow temperature
-    float   curFlowTemp;        // Current flow temperature
-    float   retTemp;            // Return temperature
-    uint8_t burnGas;            // Gas on/off
-    uint8_t fanWork;            // Fan on/off
-    uint8_t ignWork;            // Ignition on/off
-    uint8_t heatPmp;            // Circulating pump on/off
-    uint8_t wWHeat;             // 3-way valve on WW
-    uint8_t wWCirc;             // Circulation on/off
-    uint8_t selBurnPow;         // Burner max power
-    uint8_t curBurnPow;         // Burner current power
-    float   flameCurr;          // Flame current in micro amps
-    float   sysPress;           // System pressure
-    char    serviceCodeChar[2]; // 2 character status/service code
+    uint8_t  selFlowTemp;        // Selected flow temperature
+    int16_t  curFlowTemp;        // Current flow temperature
+    int16_t  retTemp;            // Return temperature
+    uint8_t  burnGas;            // Gas on/off
+    uint8_t  fanWork;            // Fan on/off
+    uint8_t  ignWork;            // Ignition on/off
+    uint8_t  heatPmp;            // Circulating pump on/off
+    uint8_t  wWHeat;             // 3-way valve on WW
+    uint8_t  wWCirc;             // Circulation on/off
+    uint8_t  selBurnPow;         // Burner max power
+    uint8_t  curBurnPow;         // Burner current power
+    uint16_t flameCurr;          // Flame current in micro amps
+    uint8_t  sysPress;           // System pressure
+    char     serviceCodeChar[3]; // 2 character status/service code
+    uint16_t serviceCode;        // error/service code
 
     // UBAMonitorSlow
-    float    extTemp;     // Outside temperature
-    float    boilTemp;    // Boiler temperature
+    int16_t  extTemp;     // Outside temperature
+    int16_t  boilTemp;    // Boiler temperature
     uint8_t  pumpMod;     // Pump modulation
-    uint32_t burnStarts;  // # burner restarts
+    uint32_t burnStarts;  // # burner starts
     uint32_t burnWorkMin; // Total burner operating time
     uint32_t heatWorkMin; // Total heat operating time
 
     // UBAMonitorWWMessage
-    float    wWCurTmp;  // Warm Water current temperature:
+    int16_t  wWCurTmp;  // Warm Water current temperature:
     uint32_t wWStarts;  // Warm Water # starts
     uint32_t wWWorkM;   // Warm Water # minutes
     uint8_t  wWOneTime; // Warm Water one time function on/off
@@ -207,6 +222,18 @@ typedef struct {           // UBAParameterWW
     uint8_t product_id;
 } _EMS_Boiler;
 
+/*
+ * Telegram package defintions for Other EMS devices
+ */
+typedef struct {
+    // SM10 Solar Module - SM10Monitor
+    bool    SM10;               // set true if there is a SM10 available
+    int16_t SM10collectorTemp;  // collector temp from SM10
+    int16_t SM10bottomTemp;     // bottom temp from SM10
+    uint8_t SM10pumpModulation; // modulation solar pump
+    uint8_t SM10pump;           // pump active
+} _EMS_Other;
+
 // Thermostat data
 typedef struct {
     uint8_t type_id;  // the type ID of the thermostat
@@ -215,8 +242,8 @@ typedef struct {
     bool    read_supported;
     bool    write_supported;
     char    version[10];
-    float   setpoint_roomTemp; // current set temp
-    float   curr_roomTemp;     // current room temp
+    int16_t setpoint_roomTemp; // current set temp
+    int16_t curr_roomTemp;     // current room temp
     uint8_t mode;              // 0=low, 1=manual, 2=auto
     bool    day_mode;          // 0=night, 1=day
     uint8_t hour;
@@ -228,7 +255,7 @@ typedef struct {
 } _EMS_Thermostat;
 
 // call back function signature for processing telegram types
-typedef void (*EMS_processType_cb)(uint8_t type, uint8_t * data, uint8_t length);
+typedef void (*EMS_processType_cb)(uint8_t src, uint8_t * data, uint8_t length);
 
 // Definition for each EMS type, including the relative callback function
 typedef struct {
@@ -251,15 +278,16 @@ void ems_setWarmWaterTemp(uint8_t temperature);
 void ems_setWarmWaterActivated(bool activated);
 void ems_setWarmTapWaterActivated(bool activated);
 void ems_setPoll(bool b);
-void ems_setTxEnabled(bool b);
 void ems_setLogging(_EMS_SYS_LOGGING loglevel);
 void ems_setEmsRefreshed(bool b);
-void ems_setWarmWaterModeComfort(bool comfort);
+void ems_setWarmWaterModeComfort(uint8_t comfort);
 bool ems_checkEMSBUSAlive();
 void ems_setModels();
+void ems_setTxDisabled(bool b);
 
 void             ems_getThermostatValues();
 void             ems_getBoilerValues();
+void             ems_getOtherValues();
 bool             ems_getPoll();
 bool             ems_getTxEnabled();
 bool             ems_getThermostatEnabled();
@@ -270,6 +298,7 @@ bool             ems_getEmsRefreshed();
 uint8_t          ems_getThermostatModel();
 void             ems_discoverModels();
 bool             ems_getTxCapable();
+uint32_t         ems_getPollFrequency();
 
 void   ems_scanDevices();
 void   ems_printAllTypes();
@@ -277,17 +306,21 @@ char * ems_getThermostatDescription(char * buffer);
 void   ems_printTxQueue();
 char * ems_getBoilerDescription(char * buffer);
 
+void ems_startupTelegrams();
+
 // private functions
 uint8_t _crcCalculator(uint8_t * data, uint8_t len);
-void    _processType(uint8_t * telegram, uint8_t length);
-void    _debugPrintPackage(const char * prefix, uint8_t * data, uint8_t len, const char * color);
+void    _processType(_EMS_RxTelegram * EMS_RxTelegram);
+void    _debugPrintPackage(const char * prefix, _EMS_RxTelegram * EMS_RxTelegram, const char * color);
 void    _ems_clearTxData();
 int     _ems_findBoilerModel(uint8_t model_id);
 bool    _ems_setModel(uint8_t model_id);
 void    _ems_setThermostatModel(uint8_t thermostat_modelid);
 void    _removeTxQueue();
+void    _ems_readTelegram(uint8_t * telegram, uint8_t length);
 
 // global so can referenced in other classes
 extern _EMS_Sys_Status EMS_Sys_Status;
 extern _EMS_Boiler     EMS_Boiler;
 extern _EMS_Thermostat EMS_Thermostat;
+extern _EMS_Other      EMS_Other;

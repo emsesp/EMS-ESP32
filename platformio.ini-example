@@ -1,14 +1,14 @@
 [platformio]
+; add here your board, e.g. nodemcuv2, d1_mini, d1_mini_pro
 env_default = d1_mini
 
 [common]
-platform = espressif8266
 flash_mode = dout
 
-build_flags_debug = -ggdb3 -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-parameter -Wno-unused-variable
-;build_flags_prod = -Os -DBUILD_TIME=$UNIX_TIME
+build_flags = -g -w
 
-build_flags = ${common.build_flags_debug}
+; for debug use these...
+; build_flags = -g -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-parameter -Wno-unused-variable -DCRASH
 
 wifi_settings =
 ; hard code if you prefer. Recommendation is to set from within the app when in Serial or AP mode
@@ -21,19 +21,24 @@ lib_deps =
   AsyncMqttClient
   ArduinoJson
   OneWire
+  EEPROM_rotate
 
 [env:d1_mini]
 board = d1_mini
-platform = ${common.platform}
+platform = espressif8266
 framework = arduino
 lib_deps = ${common.lib_deps}
 build_flags = ${common.build_flags} ${common.wifi_settings}
 board_build.flash_mode = ${common.flash_mode}
 upload_speed = 921600
 monitor_speed = 115200
-
 ; for OTA comment out these sections
 ;upload_protocol = espota
+<<<<<<< HEAD
 ;upload_port = <the IP address...>
+=======
+;upload_port = ems-esp.local
+;upload_port = <add here your ip of the device>
+>>>>>>> upstream/dev
 
 
