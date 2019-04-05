@@ -1,9 +1,9 @@
  - platform: mqtt
    name: Thermostat
    modes:
-     - low
-     - manual
-     - auto
+     - "auto"
+     - "manual"
+     - "off"
 
    mode_state_topic: "home/ems-esp/thermostat_data"
    current_temperature_topic: "home/ems-esp/thermostat_data"
