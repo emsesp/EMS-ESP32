@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Buderus Logamax plus
 - EMS+ support (thanks @GlennArens, @gl3nni3)
 - MQTT 'restart' topic to reboot ESP (thanks @balk77)
+- Support for multiple thermostat heating circuits like the HC1/HC2 on a RC35, also via MQTT (thanks @lobocobra)
 
 ## [1.6.0] 2019-03-24
 

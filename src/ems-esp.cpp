@@ -34,6 +34,8 @@ DS18 ds18;
 // set to value >0 if the ESP is overheating or there are timing issues. Recommend a value of 1.
 #define EMSESP_DELAY 1 // initially set to 0 for no delay
 
+#define DEFAULT_HEATINGCIRCUIT 1 // default to HC1 for thermostats that support multiple heating circuits like the RC35
+
 // timers, all values are in seconds
 #define DEFAULT_PUBLISHWAIT 120 // every 2 minutes publish MQTT values, including Dallas sensors
 Ticker publishValuesTimer;
@@ -67,14 +69,15 @@ typedef struct {
     uint8_t  dallas_sensors; // count of dallas sensors
 
     // custom params
-    bool     shower_timer; // true if we want to report back on shower times
-    bool     shower_alert; // true if we want the alert of cold water
-    bool     led;          // LED on/off
-    bool     silent_mode;  // stop automatic Tx on/off
-    uint16_t publish_wait; // frequency of MQTT publish in seconds
-    uint8_t  led_gpio;
-    uint8_t  dallas_gpio;
-    uint8_t  dallas_parasite;
+    bool     shower_timer;    // true if we want to report back on shower times
+    bool     shower_alert;    // true if we want the alert of cold water
+    bool     led;             // LED on/off
+    bool     silent_mode;     // stop automatic Tx on/off
+    uint16_t publish_wait;    // frequency of MQTT publish in seconds
+    uint8_t  led_gpio;        // pin for LED
+    uint8_t  dallas_gpio;     // pin for attaching external dallas temperature sensors
+    bool     dallas_parasite; // on/off is using parasite
+    uint8_t  heating_circuit; // number of heating circuit, 1 or 2
 } _EMSESP_Status;
 
 typedef struct {
@@ -97,6 +100,7 @@ command_t PROGMEM project_cmds[] = {
     {true, "shower_timer <on | off>", "notify via MQTT all shower durations"},
     {true, "shower_alert <on | off>", "send a warning of cold water after shower time is exceeded"},
     {true, "publish_wait <seconds>", "set frequency for publishing to MQTT"},
+    {true, "heating_circuit <1 | 2>", "set the thermostat HC to work with if using multiple heating circuits"},
 
     {false, "info", "show data captured on the EMS bus"},
     {false, "log <n | b | t | r | v>", "set logging mode to none, basic, thermostat only, raw or verbose"},
@@ -615,12 +619,20 @@ void publishValues(bool force) {
         doc.clear();
         JsonObject rootThermostat = doc.to<JsonObject>();
 
+        rootThermostat[THERMOSTAT_HC] = _int_to_char(s, EMSESP_Status.heating_circuit);
+
         if ((ems_getThermostatModel() == EMS_MODEL_EASY) || (ems_getThermostatModel() == EMS_MODEL_BOSCHEASY)) {
             rootThermostat[THERMOSTAT_SELTEMP]  = _short_to_char(s, EMS_Thermostat.setpoint_roomTemp, 10);
             rootThermostat[THERMOSTAT_CURRTEMP] = _short_to_char(s, EMS_Thermostat.curr_roomTemp, 10);
         } else {
             rootThermostat[THERMOSTAT_SELTEMP]  = _int_to_char(s, EMS_Thermostat.setpoint_roomTemp, 2);
             rootThermostat[THERMOSTAT_CURRTEMP] = _int_to_char(s, EMS_Thermostat.curr_roomTemp, 10);
+
+            rootThermostat[THERMOSTAT_DAYTEMP]         = _int_to_char(s, EMS_Thermostat.daytemp, 2);
+            rootThermostat[THERMOSTAT_NIGHTTEMP]       = _int_to_char(s, EMS_Thermostat.nighttemp, 2);
+            rootThermostat[THERMOSTAT_HOLIDAYTEMP]     = _int_to_char(s, EMS_Thermostat.holidaytemp, 2);
+            rootThermostat[THERMOSTAT_HEATINGTYPE]     = _int_to_char(s, EMS_Thermostat.heatingtype);
+            rootThermostat[THERMOSTAT_CIRCUITCALCTEMP] = _int_to_char(s, EMS_Thermostat.circuitcalctemp);
         }
 
         // RC20 has different mode settings
@@ -749,7 +761,7 @@ void do_publishSensorValues() {
 void do_publishValues() {
     // don't publish if we're not connected to the EMS bus
     if ((ems_getBusConnected()) && (!myESP.getUseSerial()) && myESP.isMQTTConnected()) {
-        publishValues(false);
+        publishValues(true); // force publish
     }
 }
 
@@ -845,9 +857,7 @@ bool FSCallback(MYESP_FSACTION action, const JsonObject json) {
         }
 
         // dallas_parasite
-        if (!(EMSESP_Status.dallas_parasite = json["dallas_parasite"])) {
-            EMSESP_Status.dallas_parasite = EMSESP_DALLAS_PARASITE; // default value
-        }
+        EMSESP_Status.dallas_parasite = json["dallas_parasite"];
 
         // thermostat_type
         if (!(EMS_Thermostat.type_id = json["thermostat_type"])) {
@@ -874,20 +884,28 @@ bool FSCallback(MYESP_FSACTION action, const JsonObject json) {
             EMSESP_Status.publish_wait = DEFAULT_PUBLISHWAIT; // default value
         }
 
+        // heating_circuit
+        if (!(EMSESP_Status.heating_circuit = json["heating_circuit"])) {
+            EMSESP_Status.heating_circuit = DEFAULT_HEATINGCIRCUIT; // default value
+        }
+        ems_setThermostatHC(EMSESP_Status.heating_circuit);
+
         return recreate_config; // return false if some settings are missing and we need to rebuild the file
     }
 
     if (action == MYESP_FSACTION_SAVE) {
+        json["thermostat_type"] = EMS_Thermostat.type_id;
+        json["boiler_type"]     = EMS_Boiler.type_id;
+
         json["led"]             = EMSESP_Status.led;
         json["led_gpio"]        = EMSESP_Status.led_gpio;
         json["dallas_gpio"]     = EMSESP_Status.dallas_gpio;
         json["dallas_parasite"] = EMSESP_Status.dallas_parasite;
-        json["thermostat_type"] = EMS_Thermostat.type_id;
-        json["boiler_type"]     = EMS_Boiler.type_id;
         json["silent_mode"]     = EMSESP_Status.silent_mode;
         json["shower_timer"]    = EMSESP_Status.shower_timer;
         json["shower_alert"]    = EMSESP_Status.shower_alert;
         json["publish_wait"]    = EMSESP_Status.publish_wait;
+        json["heating_circuit"] = EMSESP_Status.heating_circuit;
 
         return true;
     }
@@ -1005,6 +1023,18 @@ bool SettingsCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, c
             EMSESP_Status.publish_wait = atoi(value);
             ok                         = true;
         }
+
+        // heating_circuit
+        if ((strcmp(setting, "heating_circuit") == 0) && (wc == 2)) {
+            uint8_t hc = atoi(value);
+            if ((hc >= 1) && (hc <= 2)) {
+                EMSESP_Status.heating_circuit = hc;
+                ems_setThermostatHC(hc);
+                ok = true;
+            } else {
+                myDebug("Error. Usage: set heating_circuit <1 | 2>");
+            }
+        }
     }
 
     if (action == MYESP_FSACTION_LIST) {
@@ -1015,14 +1045,14 @@ bool SettingsCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, c
 
         if (EMS_Thermostat.type_id == EMS_ID_NONE) {
             myDebug("  thermostat_type=<not set>");
-
         } else {
             myDebug("  thermostat_type=%02X", EMS_Thermostat.type_id);
         }
 
+        myDebug("  heating_circuit=%d", EMSESP_Status.heating_circuit);
+
         if (EMS_Boiler.type_id == EMS_ID_NONE) {
             myDebug("  boiler_type=<not set>");
-
         } else {
             myDebug("  boiler_type=%02X", EMS_Boiler.type_id);
         }
@@ -1225,7 +1255,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
             char  s[10] = {0};
             myDebug("MQTT topic: thermostat temperature value %s", _float_to_char(s, f));
             ems_setThermostatTemp(f);
-            publishValues(true); // publish back immediately
+            publishValues(true); // publish back immediately, can't remember why I do this?!
         }
 
         // thermostat mode changes
@@ -1239,6 +1269,41 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
                 ems_setThermostatMode(0);
             }
         }
+
+        // thermostat heating circuit change
+        if (strcmp(topic, TOPIC_THERMOSTAT_CMD_HC) == 0) {
+            myDebug("MQTT topic: thermostat heating circuit value %s", message);
+            uint8_t hc = atoi((char *)message);
+            if ((hc >= 1) && (hc <= 2)) {
+                EMSESP_Status.heating_circuit = hc;
+                ems_setThermostatHC(hc);
+                // TODO: save setting to SPIFFS??
+            }
+        }
+
+        // set night temp value
+        if (strcmp(topic, TOPIC_THERMOSTAT_CMD_NIGHTTEMP) == 0) {
+            float f     = strtof((char *)message, 0);
+            char  s[10] = {0};
+            myDebug("MQTT topic: new thermostat night temperature value %s", _float_to_char(s, f));
+            ems_setThermostatTemp(f,1);
+        }
+
+        // set daytemp value
+        if (strcmp(topic, TOPIC_THERMOSTAT_CMD_DAYTEMP) == 0) {
+            float f     = strtof((char *)message, 0);
+            char  s[10] = {0};
+            myDebug("MQTT topic: new thermostat day temperature value %s", _float_to_char(s, f));
+            ems_setThermostatTemp(f,2);
+        }
+
+        // set holiday value
+        if (strcmp(topic, TOPIC_THERMOSTAT_CMD_HOLIDAYTEMP) == 0) {
+            float f     = strtof((char *)message, 0);
+            char  s[10] = {0};
+            myDebug("MQTT topic: new thermostat holiday temperature value %s", _float_to_char(s, f));
+            ems_setThermostatTemp(f,3);
+        }   
 
         // wwActivated
         if (strcmp(topic, TOPIC_BOILER_WWACTIVATED) == 0) {
@@ -1254,7 +1319,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
             uint8_t t = atoi((char *)message);
             myDebug("MQTT topic: boiler warm water temperature value %d", t);
             ems_setWarmWaterTemp(t);
-            publishValues(true); // publish back immediately
+            publishValues(true); // publish back immediately, can't remember why I do this?!
         }
 
         // boiler ww comfort setting
@@ -1317,17 +1382,16 @@ void WIFICallback() {
 // Most of these will be overwritten after the SPIFFS config file is loaded
 void initEMSESP() {
     // general settings
-    EMSESP_Status.shower_timer = false;
-    EMSESP_Status.shower_alert = false;
-    EMSESP_Status.led          = true; // LED is on by default
-    EMSESP_Status.silent_mode  = false;
-    EMSESP_Status.publish_wait = DEFAULT_PUBLISHWAIT;
-
-    EMSESP_Status.timestamp      = millis();
-    EMSESP_Status.dallas_sensors = 0;
-
-    EMSESP_Status.led_gpio    = EMSESP_LED_GPIO;
-    EMSESP_Status.dallas_gpio = EMSESP_DALLAS_GPIO;
+    EMSESP_Status.shower_timer    = false;
+    EMSESP_Status.shower_alert    = false;
+    EMSESP_Status.led             = true; // LED is on by default
+    EMSESP_Status.silent_mode     = false;
+    EMSESP_Status.publish_wait    = DEFAULT_PUBLISHWAIT;
+    EMSESP_Status.timestamp       = millis();
+    EMSESP_Status.dallas_sensors  = 0;
+    EMSESP_Status.led_gpio        = EMSESP_LED_GPIO;
+    EMSESP_Status.dallas_gpio     = EMSESP_DALLAS_GPIO;
+    EMSESP_Status.heating_circuit = 1; // default heating circuit
 
     // shower settings
     EMSESP_Shower.timerStart    = 0;

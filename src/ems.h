@@ -241,6 +241,7 @@ typedef struct {
     uint8_t product_id;
     bool    read_supported;
     bool    write_supported;
+    uint8_t hc; // heating circuit 1 or 2
     char    version[10];
     int16_t setpoint_roomTemp; // current set temp
     int16_t curr_roomTemp;     // current room temp
@@ -252,6 +253,11 @@ typedef struct {
     uint8_t day;
     uint8_t month;
     uint8_t year;
+    uint8_t daytemp;
+    uint8_t nighttemp;
+    uint8_t holidaytemp;
+    uint8_t heatingtype;
+    uint8_t circuitcalctemp;
 } _EMS_Thermostat;
 
 // call back function signature for processing telegram types
@@ -272,8 +278,9 @@ void        ems_init();
 void        ems_doReadCommand(uint8_t type, uint8_t dest, bool forceRefresh = false);
 void        ems_sendRawTelegram(char * telegram);
 
-void ems_setThermostatTemp(float temp);
+void ems_setThermostatTemp(float temperature, uint8_t temptype = 0);
 void ems_setThermostatMode(uint8_t mode);
+void ems_setThermostatHC(uint8_t hc);
 void ems_setWarmWaterTemp(uint8_t temperature);
 void ems_setWarmWaterActivated(bool activated);
 void ems_setWarmTapWaterActivated(bool activated);

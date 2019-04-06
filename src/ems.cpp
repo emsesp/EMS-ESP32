@@ -27,8 +27,6 @@ CircularBuffer<_EMS_TxTelegram, EMS_TX_TELEGRAM_QUEUE_MAX> EMS_TxQueue; // FIFO 
 #define _toLong(i) ((data[i] << 16) + (data[i + 1] << 8) + (data[i + 2]))
 #define _bitRead(i, bit) (((data[i]) >> (bit)) & 0x01)
 
-void _printMessage(_EMS_RxTelegram * EMS_RxTelegram);
-
 //
 // process callbacks per type
 //
@@ -120,14 +118,16 @@ const _EMS_Type EMS_Types[] = {
     // RC35
     {EMS_MODEL_RC35, EMS_TYPE_RCOutdoorTempMessage, "RCOutdoorTempMessage", _process_RCOutdoorTempMessage, false},
     {EMS_MODEL_RC35, EMS_TYPE_RCTime, "RCTime", _process_RCTime, false},
-    {EMS_MODEL_RC35, EMS_TYPE_RC35Set, "RC35Set", _process_RC35Set, false},
-    {EMS_MODEL_RC35, EMS_TYPE_RC35StatusMessage, "RC35StatusMessage", _process_RC35StatusMessage, false},
+    {EMS_MODEL_RC35, EMS_TYPE_RC35Set_HC1, "RC35Set_HC1", _process_RC35Set, false},
+    {EMS_MODEL_RC35, EMS_TYPE_RC35StatusMessage_HC1, "RC35StatusMessage_HC1", _process_RC35StatusMessage, false},
+    {EMS_MODEL_RC35, EMS_TYPE_RC35Set_HC2, "RC35Set_HC2", _process_RC35Set, false},
+    {EMS_MODEL_RC35, EMS_TYPE_RC35StatusMessage_HC2, "RC35StatusMessage_HC2", _process_RC35StatusMessage, false},
 
     // ES73
     {EMS_MODEL_ES73, EMS_TYPE_RCOutdoorTempMessage, "RCOutdoorTempMessage", _process_RCOutdoorTempMessage, false},
     {EMS_MODEL_ES73, EMS_TYPE_RCTime, "RCTime", _process_RCTime, false},
-    {EMS_MODEL_ES73, EMS_TYPE_RC35Set, "RC35Set", _process_RC35Set, false},
-    {EMS_MODEL_ES73, EMS_TYPE_RC35StatusMessage, "RC35StatusMessage", _process_RC35StatusMessage, false},
+    {EMS_MODEL_ES73, EMS_TYPE_RC35Set_HC1, "RC35Set", _process_RC35Set, false},
+    {EMS_MODEL_ES73, EMS_TYPE_RC35StatusMessage_HC1, "RC35StatusMessage", _process_RC35StatusMessage, false},
 
     // Easy
     {EMS_MODEL_EASY, EMS_TYPE_EasyStatusMessage, "EasyStatusMessage", _process_EasyStatusMessage, false},
@@ -201,10 +201,16 @@ void ems_init() {
     EMS_Thermostat.year              = 0;
     EMS_Thermostat.mode              = 255; // dummy value
     EMS_Thermostat.day_mode          = 255; // dummy value
+    EMS_Thermostat.type_id           = EMS_ID_NONE;
+    EMS_Thermostat.read_supported    = false;
+    EMS_Thermostat.write_supported   = false;
+    EMS_Thermostat.hc                = 1;                    // default heating circuit is 1
+    EMS_Thermostat.daytemp           = EMS_VALUE_INT_NOTSET; // 0x47 byte
+    EMS_Thermostat.nighttemp         = EMS_VALUE_INT_NOTSET; // 0x47 byte
+    EMS_Thermostat.holidaytemp       = EMS_VALUE_INT_NOTSET; // 0x47 byte
+    EMS_Thermostat.heatingtype       = EMS_VALUE_INT_NOTSET; // 0x47 byte floor heating = 3
+    EMS_Thermostat.circuitcalctemp   = EMS_VALUE_INT_NOTSET; // 0x48 byte 14
 
-    EMS_Thermostat.type_id         = EMS_ID_NONE;
-    EMS_Thermostat.read_supported  = false;
-    EMS_Thermostat.write_supported = false;
 
     // UBAParameterWW
     EMS_Boiler.wWActivated   = EMS_VALUE_INT_NOTSET; // Warm Water activated
@@ -295,6 +301,10 @@ bool ems_getEmsRefreshed() {
 
 void ems_setEmsRefreshed(bool b) {
     EMS_Sys_Status.emsRefreshed = b;
+}
+
+void ems_setThermostatHC(uint8_t hc) {
+    EMS_Thermostat.hc = hc;
 }
 
 bool ems_getBoilerEnabled() {
@@ -701,6 +711,110 @@ void _ems_readTelegram(uint8_t * telegram, uint8_t length) {
     _processType(&EMS_RxTelegram);
 }
 
+/*
+ * print the telegram
+ */
+void _printMessage(_EMS_RxTelegram * EMS_RxTelegram) {
+    uint8_t * telegram = EMS_RxTelegram->telegram;
+
+    // header info
+    uint8_t   src  = telegram[0] & 0x7F;
+    uint8_t   dest = telegram[1] & 0x7F; // remove 8th bit to handle both reads and writes
+    uint8_t   type;
+    bool      emsp;
+
+    // check if EMS or EMS+ by checking 3rd byte of telegram
+    if (telegram[2] >= 0xF0) {
+        // EMS+
+        type   = telegram[3];
+        emsp   = true;
+    } else {
+        type   = telegram[2];
+        emsp   = false;
+    }
+
+    char output_str[200] = {0};
+    char buffer[16]      = {0};
+    char color_s[20]     = {0};
+
+    // source
+    if (src == EMS_Boiler.type_id) {
+        strlcpy(output_str, "Boiler", sizeof(output_str));
+    } else if (src == EMS_Thermostat.type_id) {
+        if (emsp)
+            strlcpy(output_str, "Thermostat+", sizeof(output_str));
+        else
+            strlcpy(output_str, "Thermostat", sizeof(output_str));
+    } else {
+        strlcpy(output_str, "0x", sizeof(output_str));
+        strlcat(output_str, _hextoa(src, buffer), sizeof(output_str));
+    }
+
+    strlcat(output_str, " -> ", sizeof(output_str));
+
+    // destination
+    if (dest == EMS_ID_ME) {
+        if (emsp) {
+            strlcat(output_str, "me", sizeof(output_str));
+            strlcpy(color_s, COLOR_BRIGHT_YELLOW, sizeof(color_s));
+        } else {
+            strlcat(output_str, "me", sizeof(output_str));
+            strlcpy(color_s, COLOR_YELLOW, sizeof(color_s));
+        }
+    } else if (dest == EMS_ID_NONE) {
+        if (emsp) {
+            strlcat(output_str, "all", sizeof(output_str));
+            strlcpy(color_s, COLOR_BRIGHT_GREEN, sizeof(color_s));
+        } else {
+            strlcat(output_str, "all", sizeof(output_str));
+            strlcpy(color_s, COLOR_GREEN, sizeof(color_s));
+        }
+    } else if (dest == EMS_Boiler.type_id) {
+        if (emsp) {
+            strlcat(output_str, "Boiler+", sizeof(output_str));
+            strlcpy(color_s, COLOR_BRIGHT_MAGENTA, sizeof(color_s));
+        } else {
+            strlcat(output_str, "Boiler", sizeof(output_str));
+            strlcpy(color_s, COLOR_MAGENTA, sizeof(color_s));
+        }
+    } else if (dest == EMS_ID_SM10) {
+        strlcat(output_str, "SM10", sizeof(output_str));
+        strlcpy(color_s, COLOR_MAGENTA, sizeof(color_s));
+    } else if (dest == EMS_Thermostat.type_id) {
+        if (emsp) {
+            strlcat(output_str, "Thermostat+", sizeof(output_str));
+            strlcpy(color_s, COLOR_BRIGHT_MAGENTA, sizeof(color_s));
+        } else {
+            strlcat(output_str, "Thermostat", sizeof(output_str));
+            strlcpy(color_s, COLOR_MAGENTA, sizeof(color_s));
+        }
+    } else {
+        if (emsp) {
+            strlcat(output_str, "0x", sizeof(output_str));
+            strlcat(output_str, _hextoa(dest, buffer), sizeof(output_str));
+            strlcpy(color_s, COLOR_BRIGHT_MAGENTA, sizeof(color_s));
+        } else {
+            strlcat(output_str, "0x", sizeof(output_str));
+            strlcat(output_str, _hextoa(dest, buffer), sizeof(output_str));
+            strlcpy(color_s, COLOR_MAGENTA, sizeof(color_s));
+        }
+    }
+
+    // type
+    strlcat(output_str, ", type 0x", sizeof(output_str));
+    strlcat(output_str, _hextoa(type, buffer), sizeof(output_str));
+
+    if (EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_THERMOSTAT) {
+        // only print ones to/from thermostat if logging is set to thermostat only
+        if ((src == EMS_Thermostat.type_id) || (dest == EMS_Thermostat.type_id)) {
+            _debugPrintTelegram(output_str, EMS_RxTelegram, color_s);
+        }
+    } else {
+        // always print
+        _debugPrintTelegram(output_str, EMS_RxTelegram, color_s);
+    }
+}
+
 /**
  * print detailed telegram
  * and then call its callback if there is one defined
@@ -719,149 +833,9 @@ void _ems_processTelegram(_EMS_RxTelegram * EMS_RxTelegram) {
     uint8_t   poffset = telegram[4];
     uint8_t * pdata   = &telegram[5 + poffset]; // data block starts at position 5 plus the offset
 
-    _printMessage(EMS_RxTelegram);
-
-    // see if we recognize the type first by scanning our known EMS types list
-    // trying to match the type ID
-    bool commonType = false;
-    bool typeFound  = false;
-    bool forUs      = false;
-    int  i          = 0;
-
-    while (i < _EMS_Types_max) {
-        if ((EMS_Types[i].type == type) || (EMS_Types[i].emsplus && type >= 240 && EMS_Types[i].type == ptype)) {
-            typeFound  = true;
-            commonType = (EMS_Types[i].model_id == EMS_MODEL_ALL);                       // is it common type for everyone?
-            forUs      = (src == EMS_Boiler.type_id) || (src == EMS_Thermostat.type_id); // is it for us? So the src must match
-            break;
-        }
-        i++;
-    }
-
-    // if it's a common type (across ems devices) or something specifically for us process it.
-    // dest will be EMS_ID_NONE and offset 0x00 for a broadcast message
-    if (typeFound && (commonType || forUs)) {
-        if ((EMS_Types[i].processType_cb) != (void *)NULL) {
-            // print non-verbose message
-            if ((EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_BASIC) || (EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_VERBOSE)) {
-                if (EMS_Types[i].emsplus)
-                    myDebug("<--- %s(0x%02X) received", EMS_Types[i].typeString, ptype);
-                else
-                    myDebug("<--- %s(0x%02X) received", EMS_Types[i].typeString, type);
-            }
-            // call callback function to process it
-            if (EMS_Types[i].emsplus && poffset == EMS_PLUS_ID_NONE)
-                (void)EMS_Types[i].processType_cb(ptype, pdata, length - 6 - poffset);
-            // as we only handle complete telegrams (not partial) check that the offset is 0
-            else if (offset == EMS_ID_NONE && !EMS_Types[i].emsplus) {
-                (void)EMS_Types[i].processType_cb(type, data, length - 5);
-            }
-        }
-    }
-}
-
-/*
- * print the telegram
- */
-void _printMessage(_EMS_RxTelegram * EMS_RxTelegram) {
-    uint8_t * telegram = EMS_RxTelegram->telegram;
-
-    bool      emsp   = false;
-    uint8_t   src    = telegram[0] & 0x7F;
-    uint8_t   dest   = telegram[1] & 0x7F; // remove 8th bit to handle both reads and writes
-    uint8_t   type   = telegram[2];
-    uint8_t   offset = telegram[3];
-    uint8_t * data   = &telegram[4]; // data block starts at position 5
-
-    if (type >= 0xF0) {
-        type   = telegram[3];
-        offset = telegram[4];
-        data   = &telegram[5 + offset];
-        emsp   = true;
-    }
-
-    // print detailed telegram data
+    // print out the telegram
     if (EMS_Sys_Status.emsLogging >= EMS_SYS_LOGGING_THERMOSTAT) {
-        char output_str[200] = {0};
-        char buffer[16]      = {0};
-        char color_s[20]     = {0};
-
-        // source
-        if (src == EMS_Boiler.type_id) {
-            strlcpy(output_str, "Boiler", sizeof(output_str));
-        } else if (src == EMS_Thermostat.type_id) {
-            if (emsp)
-                strlcpy(output_str, "Thermostat+", sizeof(output_str));
-            else
-                strlcpy(output_str, "Thermostat", sizeof(output_str));
-        } else {
-            strlcpy(output_str, "0x", sizeof(output_str));
-            strlcat(output_str, _hextoa(src, buffer), sizeof(output_str));
-        }
-
-        strlcat(output_str, " -> ", sizeof(output_str));
-
-        // destination
-        if (dest == EMS_ID_ME) {
-            if (emsp) {
-                strlcat(output_str, "me", sizeof(output_str));
-                strlcpy(color_s, COLOR_BRIGHT_YELLOW, sizeof(color_s));
-            } else {
-                strlcat(output_str, "me", sizeof(output_str));
-                strlcpy(color_s, COLOR_YELLOW, sizeof(color_s));
-            }
-        } else if (dest == EMS_ID_NONE) {
-            if (emsp) {
-                strlcat(output_str, "all", sizeof(output_str));
-                strlcpy(color_s, COLOR_BRIGHT_GREEN, sizeof(color_s));
-            } else {
-                strlcat(output_str, "all", sizeof(output_str));
-                strlcpy(color_s, COLOR_GREEN, sizeof(color_s));
-            }
-        } else if (dest == EMS_Boiler.type_id) {
-            if (emsp) {
-                strlcat(output_str, "Boiler+", sizeof(output_str));
-                strlcpy(color_s, COLOR_BRIGHT_MAGENTA, sizeof(color_s));
-            } else {
-                strlcat(output_str, "Boiler", sizeof(output_str));
-                strlcpy(color_s, COLOR_MAGENTA, sizeof(color_s));
-            }
-        } else if (dest == EMS_ID_SM10) {
-            strlcat(output_str, "SM10", sizeof(output_str));
-            strlcpy(color_s, COLOR_MAGENTA, sizeof(color_s));
-        } else if (dest == EMS_Thermostat.type_id) {
-            if (emsp) {
-                strlcat(output_str, "Thermostat+", sizeof(output_str));
-                strlcpy(color_s, COLOR_BRIGHT_MAGENTA, sizeof(color_s));
-            } else {
-                strlcat(output_str, "Thermostat", sizeof(output_str));
-                strlcpy(color_s, COLOR_MAGENTA, sizeof(color_s));
-            }
-        } else {
-            if (emsp) {
-                strlcat(output_str, "0x", sizeof(output_str));
-                strlcat(output_str, _hextoa(dest, buffer), sizeof(output_str));
-                strlcpy(color_s, COLOR_BRIGHT_MAGENTA, sizeof(color_s));
-            } else {
-                strlcat(output_str, "0x", sizeof(output_str));
-                strlcat(output_str, _hextoa(dest, buffer), sizeof(output_str));
-                strlcpy(color_s, COLOR_MAGENTA, sizeof(color_s));
-            }
-        }
-
-        // type
-        strlcat(output_str, ", type 0x", sizeof(output_str));
-        strlcat(output_str, _hextoa(type, buffer), sizeof(output_str));
-
-        if (EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_THERMOSTAT) {
-            // only print ones to/from thermostat if logging is set to thermostat only
-            if ((src == EMS_Thermostat.type_id) || (dest == EMS_Thermostat.type_id)) {
-                _debugPrintTelegram(output_str, EMS_RxTelegram, color_s);
-            }
-        } else {
-            // always print
-            _debugPrintTelegram(output_str, EMS_RxTelegram, color_s);
-        }
+        _printMessage(EMS_RxTelegram);
     }
 
     // see if we recognize the type first by scanning our known EMS types list
@@ -886,16 +860,22 @@ void _printMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     if (typeFound) {
         if ((EMS_Types[i].processType_cb) != (void *)NULL) {
             // print non-verbose message
-            if (EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_BASIC) {
-                myDebug("<--- %s(0x%02X) received", EMS_Types[i].typeString, type);
+            if ((EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_BASIC) || (EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_VERBOSE)) {
+                if (EMS_Types[i].emsplus)
+                    myDebug("<--- %s(0x%02X) received", EMS_Types[i].typeString, ptype);
+                else
+                    myDebug("<--- %s(0x%02X) received", EMS_Types[i].typeString, type);
             }
             // call callback function to process it
+            if (EMS_Types[i].emsplus && poffset == EMS_PLUS_ID_NONE)
+                (void)EMS_Types[i].processType_cb(ptype, pdata, length - 6 - poffset);
             // as we only handle complete telegrams (not partial) check that the offset is 0
-            if (offset == 0) {
-                (void)EMS_Types[i].processType_cb(src, data, EMS_RxTelegram->length - 5);
+            else if (offset == EMS_ID_NONE && !EMS_Types[i].emsplus) {
+                (void)EMS_Types[i].processType_cb(type, data, length - 5);
             }
         }
     }
+
     EMS_Sys_Status.emsTxStatus = EMS_TX_STATUS_IDLE;
 }
 
@@ -1177,7 +1157,7 @@ void _process_RC30StatusMessage(uint8_t src, uint8_t * data, uint8_t length) {
 }
 
 /**
- * type 0x3E - data from the RC35 thermostat (0x10) - 16 bytes
+ * type 0x3E and 0x48 - data from the RC35 thermostat (0x10) - 16 bytes
  * For reading the temp values only
  * received every 60 seconds
  */
@@ -1185,13 +1165,16 @@ void _process_RC35StatusMessage(uint8_t src, uint8_t * data, uint8_t length) {
     EMS_Thermostat.setpoint_roomTemp = _toByte(EMS_OFFSET_RC35StatusMessage_setpoint); // is * 2
 
     // check if temp sensor is unavailable
-    if ((data[0] == 0x7D) && (data[1] = 0x00)) {
+    if (data[3] == 0x7D) {
         EMS_Thermostat.curr_roomTemp = EMS_VALUE_SHORT_NOTSET;
     } else {
         EMS_Thermostat.curr_roomTemp = _toShort(EMS_OFFSET_RC35StatusMessage_curr);
     }
-    EMS_Thermostat.day_mode     = bitRead(data[EMS_OFFSET_RC35Get_mode_day], 1); // get day mode flag
-    EMS_Sys_Status.emsRefreshed = true;                                          // triggers a send the values back via MQTT
+    EMS_Thermostat.day_mode = bitRead(data[EMS_OFFSET_RC35Get_mode_day], 1); // get day mode flag
+
+    EMS_Thermostat.circuitcalctemp = data[EMS_OFFSET_RC35Set_circuitcalctemp]; // 0x48 calculated temperature Vorlauf bit 14
+
+    EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
 }
 
 /**
@@ -1216,7 +1199,7 @@ void _process_RC1010StatusMessage(uint8_t type, uint8_t * data, uint8_t length) 
 }
 
 void _process_RC1010SetMessage(uint8_t type, uint8_t * data, uint8_t length) {
- // to complete
+    // to complete
 }
 
 /**
@@ -1244,12 +1227,19 @@ void _process_RC30Set(uint8_t src, uint8_t * data, uint8_t length) {
 }
 
 /**
- * type 0x3D - for reading the mode from the RC35 thermostat (0x10)
- * Working Mode Heating Circuit 1 (HC1)
+ * type 0x3D and 0x47 - for reading the mode from the RC35 thermostat (0x10)
+ * Working Mode Heating Circuit 1 & 2 (HC1, HC2)
  * received only after requested
  */
 void _process_RC35Set(uint8_t src, uint8_t * data, uint8_t length) {
     EMS_Thermostat.mode = _toByte(EMS_OFFSET_RC35Set_mode);
+
+    EMS_Thermostat.daytemp     = _toByte(EMS_OFFSET_RC35Set_temp_day);     // is * 2
+    EMS_Thermostat.nighttemp   = _toByte(EMS_OFFSET_RC35Set_temp_night);   // is * 2
+    EMS_Thermostat.holidaytemp = _toByte(EMS_OFFSET_RC35Set_temp_holiday); // is * 2
+    EMS_Thermostat.heatingtype = _toByte(EMS_OFFSET_RC35Set_heatingtype);  // byte 0 bit floor heating = 3 0x47
+
+    EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
 }
 
 /**
@@ -1524,6 +1514,7 @@ void ems_getThermostatValues() {
 
     uint8_t model_id = EMS_Thermostat.model_id;
     uint8_t type     = EMS_Thermostat.type_id;
+    uint8_t hc       = EMS_Thermostat.hc;
 
     if (model_id == EMS_MODEL_RC20) {
         ems_doReadCommand(EMS_TYPE_RC20StatusMessage, type); // to get the setpoint temp
@@ -1532,8 +1523,13 @@ void ems_getThermostatValues() {
         ems_doReadCommand(EMS_TYPE_RC30StatusMessage, type); // to get the setpoint temp
         ems_doReadCommand(EMS_TYPE_RC30Set, type);           // to get the mode
     } else if ((model_id == EMS_MODEL_RC35) || (model_id == EMS_MODEL_ES73)) {
-        ems_doReadCommand(EMS_TYPE_RC35StatusMessage, type); // to get the setpoint temp
-        ems_doReadCommand(EMS_TYPE_RC35Set, type);           // to get the mode
+        if (hc == 1) {
+            ems_doReadCommand(EMS_TYPE_RC35StatusMessage_HC1, type); // to get the setpoint temp
+            ems_doReadCommand(EMS_TYPE_RC35Set_HC1, type);           // to get the mode
+        } else if (hc == 2) {
+            ems_doReadCommand(EMS_TYPE_RC35StatusMessage_HC2, type); // to get the setpoint temp
+            ems_doReadCommand(EMS_TYPE_RC35Set_HC2, type);           // to get the mode
+        }
     } else if ((model_id == EMS_MODEL_EASY) || (model_id == EMS_MODEL_BOSCHEASY)) {
         ems_doReadCommand(EMS_TYPE_EasyStatusMessage, type);
     }
@@ -1640,7 +1636,7 @@ char * ems_getBoilerDescription(char * buffer) {
  * Find the versions of our connected devices
  */
 void ems_scanDevices() {
-    myDebug("Started scan of EMS bus for known devices");
+    myDebug("Started scan on EMS bus for known devices");
 
     std::list<uint8_t> Device_Ids; // create a new list
 
@@ -1814,8 +1810,9 @@ void ems_sendRawTelegram(char * telegram) {
 
 /**
  * Set the temperature of the thermostat
+ * temptype 0 = normal, 1=night temp, 2=day temp, 3=holiday temp
  */
-void ems_setThermostatTemp(float temperature) {
+void ems_setThermostatTemp(float temperature, uint8_t temptype) {
     if (!ems_getThermostatEnabled()) {
         return;
     }
@@ -1831,6 +1828,7 @@ void ems_setThermostatTemp(float temperature) {
 
     uint8_t model_id = EMS_Thermostat.model_id;
     uint8_t type     = EMS_Thermostat.type_id;
+    uint8_t hc       = EMS_Thermostat.hc; // heating circuit
 
     EMS_TxTelegram.action = EMS_TX_TELEGRAM_WRITE;
     EMS_TxTelegram.dest   = type;
@@ -1852,14 +1850,35 @@ void ems_setThermostatTemp(float temperature) {
         EMS_TxTelegram.offset             = EMS_OFFSET_RC30Set_temp;
         EMS_TxTelegram.comparisonPostRead = EMS_TYPE_RC30StatusMessage;
     } else if ((model_id == EMS_MODEL_RC35) || (model_id == EMS_MODEL_ES73)) {
-        EMS_TxTelegram.type = EMS_TYPE_RC35Set;
-        if (EMS_Thermostat.day_mode == 0) {
+        switch (temptype) {
+        case 1: // change the night temp
             EMS_TxTelegram.offset = EMS_OFFSET_RC35Set_temp_night;
-        } else if (EMS_Thermostat.day_mode == 1) {
+            break;
+        case 2: //  change the day temp
             EMS_TxTelegram.offset = EMS_OFFSET_RC35Set_temp_day;
+            break;
+        case 3:                        // change the holiday temp
+            EMS_TxTelegram.offset = 3; //holiday on RC35
+            break;
+        default:
+        case 0: // automatic selection, if no type is defined, we use the standard code
+            if (EMS_Thermostat.day_mode == 0) {
+                EMS_TxTelegram.offset = EMS_OFFSET_RC35Set_temp_night;
+            } else if (EMS_Thermostat.day_mode == 1) {
+                EMS_TxTelegram.offset = EMS_OFFSET_RC35Set_temp_day;
+            }
+            break;
         }
 
-        EMS_TxTelegram.comparisonPostRead = EMS_TYPE_RC35StatusMessage;
+        if (hc == 1) {
+            // heating circuit 1
+            EMS_TxTelegram.type               = EMS_TYPE_RC35Set_HC1;
+            EMS_TxTelegram.comparisonPostRead = EMS_TYPE_RC35StatusMessage_HC1;
+        } else {
+            // heating circuit 2
+            EMS_TxTelegram.type               = EMS_TYPE_RC35Set_HC2;
+            EMS_TxTelegram.comparisonPostRead = EMS_TYPE_RC35StatusMessage_HC2;
+        }
     }
 
     EMS_TxTelegram.length           = EMS_MIN_TELEGRAM_LENGTH;
@@ -1868,7 +1887,7 @@ void ems_setThermostatTemp(float temperature) {
     EMS_TxTelegram.comparisonOffset = EMS_TxTelegram.offset;
     EMS_TxTelegram.comparisonValue  = EMS_TxTelegram.dataValue;
 
-    EMS_TxTelegram.forceRefresh = false; // send to MQTT is done automatically in EMS_TYPE_RC30StatusMessage
+    EMS_TxTelegram.forceRefresh = false; // send to MQTT is done automatically in EMS_TYPE_RC*StatusMessage
     EMS_TxQueue.push(EMS_TxTelegram);
 }
 
@@ -1888,6 +1907,7 @@ void ems_setThermostatMode(uint8_t mode) {
 
     uint8_t model_id = EMS_Thermostat.model_id;
     uint8_t type     = EMS_Thermostat.type_id;
+    uint8_t hc       = EMS_Thermostat.hc;
 
     myDebug("Setting thermostat mode to %d", mode);
 
@@ -1908,7 +1928,7 @@ void ems_setThermostatMode(uint8_t mode) {
         EMS_TxTelegram.type   = EMS_TYPE_RC30Set;
         EMS_TxTelegram.offset = EMS_OFFSET_RC30Set_mode;
     } else if ((model_id == EMS_MODEL_RC35) || (model_id == EMS_MODEL_ES73)) {
-        EMS_TxTelegram.type   = EMS_TYPE_RC35Set;
+        EMS_TxTelegram.type   = (hc == 2) ? EMS_TYPE_RC35Set_HC2 : EMS_TYPE_RC35Set_HC1;
         EMS_TxTelegram.offset = EMS_OFFSET_RC35Set_mode;
     }
 

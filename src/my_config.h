@@ -23,12 +23,22 @@
 #define MQTT_MAX_SIZE 700 // max size of a JSON object. See https://arduinojson.org/v6/assistant/
 
 // MQTT for thermostat
-#define TOPIC_THERMOSTAT_DATA "thermostat_data"         // for sending thermostat values to MQTT
-#define TOPIC_THERMOSTAT_CMD_TEMP "thermostat_cmd_temp" // for received thermostat temp changes via MQTT
-#define TOPIC_THERMOSTAT_CMD_MODE "thermostat_cmd_mode" // for received thermostat mode changes via MQTT
-#define THERMOSTAT_CURRTEMP "thermostat_currtemp"       // current temperature
-#define THERMOSTAT_SELTEMP "thermostat_seltemp"         // selected temperature
-#define THERMOSTAT_MODE "thermostat_mode"               // mode
+#define TOPIC_THERMOSTAT_DATA "thermostat_data"                    // for sending thermostat values to MQTT
+#define TOPIC_THERMOSTAT_CMD_TEMP "thermostat_cmd_temp"            // for received thermostat temp changes via MQTT
+#define TOPIC_THERMOSTAT_CMD_MODE "thermostat_cmd_mode"            // for received thermostat mode changes via MQTT
+#define TOPIC_THERMOSTAT_CMD_HC "thermostat_cmd_hc"                // for received thermostat hc number changes via MQTT
+#define TOPIC_THERMOSTAT_CMD_DAYTEMP "thermostat_daytemp"          // RC35 specific
+#define TOPIC_THERMOSTAT_CMD_NIGHTTEMP "thermostat_nighttemp"      // RC35 specific
+#define TOPIC_THERMOSTAT_CMD_HOLIDAYTEMP "thermostat_holidayttemp" // RC35 specific
+#define THERMOSTAT_CURRTEMP "thermostat_currtemp"                  // current temperature
+#define THERMOSTAT_SELTEMP "thermostat_seltemp"                    // selected temperature
+#define THERMOSTAT_HC "thermostat_hc"                              // which heating circuit number
+#define THERMOSTAT_MODE "thermostat_mode"                          // mode
+#define THERMOSTAT_DAYTEMP "thermostat_daytemp"                    // RC35 specific
+#define THERMOSTAT_NIGHTTEMP "thermostat_nighttemp"                // RC35 specific
+#define THERMOSTAT_HOLIDAYTEMP "thermostat_holidayttemp"           // RC35 specific
+#define THERMOSTAT_HEATINGTYPE "themrostat_heatingtype"            // RC35 specific (3=floorheating)
+#define THERMOSTAT_CIRCUITCALCTEMP "thermostat_circuitcalctemp"    // RC35 specific
 
 // MQTT for boiler
 #define TOPIC_BOILER_DATA "boiler_data"                // for sending boiler values to MQTT
