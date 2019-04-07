@@ -32,7 +32,6 @@ void custom_crash_callback(struct rst_info *, uint32_t, uint32_t);
 #define ets_vsnprintf vsnprintf // added for ESP32
 #define OTA_PORT 8266
 #else
-//#include <ESP8266mDNS.h>
 #include <ESPAsyncTCP.h>
 #define OTA_PORT 3232
 #endif

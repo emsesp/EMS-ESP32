@@ -118,6 +118,7 @@ command_t PROGMEM project_cmds[] = {
     {false, "boiler read <type ID>", "send read request to boiler"},
     {false, "boiler wwtemp <degrees>", "set boiler warm water temperature"},
     {false, "boiler tapwater <on | off>", "set boiler warm tap water on/off"},
+    {false, "boiler flowtemp <degrees>", "set boiler flow temperature"},
     {false, "boiler comfort <hot | eco | intelligent>", "set boiler warm water comfort setting"}
 
 };
@@ -1202,6 +1203,9 @@ void TelnetCommandCallback(uint8_t wc, const char * commandLine) {
                 ems_setWarmTapWaterActivated(false);
                 ok = true;
             }
+        } else if (strcmp(second_cmd, "flowtemp") == 0) {
+            ems_setFlowTemp(_readIntNumber());
+            ok = true;
         }
     }
 
@@ -1286,7 +1290,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
             float f     = strtof((char *)message, 0);
             char  s[10] = {0};
             myDebug("MQTT topic: new thermostat night temperature value %s", _float_to_char(s, f));
-            ems_setThermostatTemp(f,1);
+            ems_setThermostatTemp(f, 1);
         }
 
         // set daytemp value
@@ -1294,7 +1298,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
             float f     = strtof((char *)message, 0);
             char  s[10] = {0};
             myDebug("MQTT topic: new thermostat day temperature value %s", _float_to_char(s, f));
-            ems_setThermostatTemp(f,2);
+            ems_setThermostatTemp(f, 2);
         }
 
         // set holiday value
@@ -1302,8 +1306,8 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
             float f     = strtof((char *)message, 0);
             char  s[10] = {0};
             myDebug("MQTT topic: new thermostat holiday temperature value %s", _float_to_char(s, f));
-            ems_setThermostatTemp(f,3);
-        }   
+            ems_setThermostatTemp(f, 3);
+        }
 
         // wwActivated
         if (strcmp(topic, TOPIC_BOILER_WWACTIVATED) == 0) {

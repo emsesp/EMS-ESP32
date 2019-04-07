@@ -282,6 +282,7 @@ void ems_setThermostatTemp(float temperature, uint8_t temptype = 0);
 void ems_setThermostatMode(uint8_t mode);
 void ems_setThermostatHC(uint8_t hc);
 void ems_setWarmWaterTemp(uint8_t temperature);
+void ems_setFlowTemp(uint8_t temperature);
 void ems_setWarmWaterActivated(bool activated);
 void ems_setWarmTapWaterActivated(bool activated);
 void ems_setPoll(bool b);

@@ -1265,16 +1265,23 @@ void _process_SM10Monitor(uint8_t src, uint8_t * data, uint8_t length) {
  * UBASetPoint 0x1A
  */
 void _process_SetPoints(uint8_t src, uint8_t * data, uint8_t length) {
-    /*
+    
     if (EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_VERBOSE) {
         if (length != 0) {
-            uint8_t setpoint = data[0];
-            uint8_t hk_power = data[1];
-            uint8_t ww_power = data[2];
-            myDebug(" SetPoint=%d, hk_power=%d, ww_power=%d", setpoint, hk_power, ww_power);
+            uint8_t setpoint = data[0]; // flow temp is * 2
+            uint8_t ww_power = data[2]; // power in %
+
+            char s[5];
+            char s2[5];
+            strlcpy(s, itoa(setpoint >> 1, s2, 10), 5);
+            strlcat(s, ".", sizeof(s));
+            strlcat(s, ((setpoint & 0x01) ? "5" : "0"), 5);
+
+            myDebug(" Boiler flow temp %s C, Warm Water power %d %", s, ww_power);
+        
         }
     }
-    */
+    
 }
 
 /**
@@ -1970,6 +1977,34 @@ void ems_setWarmWaterTemp(uint8_t temperature) {
     EMS_TxTelegram.forceRefresh       = false; // no need to send since this is done by 0x33 process
 
     EMS_TxQueue.push(EMS_TxTelegram);
+}
+
+/**
+ * Set the boiler flow temp
+ */
+void ems_setFlowTemp(uint8_t temperature) {
+
+    myDebug("Setting boiler flow temperature to %d C", temperature);
+
+    _EMS_TxTelegram EMS_TxTelegram = EMS_TX_TELEGRAM_NEW; // create new Tx
+    EMS_TxTelegram.timestamp       = millis();            // set timestamp
+    EMS_Sys_Status.txRetryCount    = 0;                   // reset retry counter
+
+    EMS_TxTelegram.action    = EMS_TX_TELEGRAM_WRITE;
+    EMS_TxTelegram.dest      = EMS_Boiler.type_id;
+    EMS_TxTelegram.type      = EMS_TYPE_UBASetPoints;
+    EMS_TxTelegram.offset    = EMS_OFFSET_UBASetPoints_flowtemp;
+    EMS_TxTelegram.length    = EMS_MIN_TELEGRAM_LENGTH;
+    EMS_TxTelegram.dataValue = temperature; // value to compare against. must be a single int
+
+    EMS_TxTelegram.type_validate      = EMS_TYPE_UBASetPoints; // validate
+    EMS_TxTelegram.comparisonOffset   = EMS_OFFSET_UBASetPoints_flowtemp;
+    EMS_TxTelegram.comparisonValue    = temperature;
+    EMS_TxTelegram.comparisonPostRead = EMS_TYPE_UBASetPoints;
+    EMS_TxTelegram.forceRefresh       = false;
+
+    EMS_TxQueue.push(EMS_TxTelegram);
+   
 }
 
 /**

@@ -39,6 +39,8 @@
 #define EMS_VALUE_UBAParameterWW_wwComfort_Eco 0xD8         // the value for eco
 #define EMS_VALUE_UBAParameterWW_wwComfort_Intelligent 0xEC // the value for intelligent
 
+#define EMS_OFFSET_UBASetPoints_flowtemp 0 // flow temp
+
 // Other
 #define EMS_TYPE_SM10Monitor 0x97 // SM10Monitor
 
