@@ -620,7 +620,7 @@ void publishValues(bool force) {
     // handle the thermostat values separately
     if (ems_getThermostatEnabled()) {
         // only send thermostat values if we actually have them
-        if ((EMS_Thermostat.curr_roomTemp <= 0) || (EMS_Thermostat.setpoint_roomTemp <= 0))
+        if ((EMS_Thermostat.curr_roomTemp <= 0) && (EMS_Thermostat.setpoint_roomTemp <= 0))
             return;
 
         // build new json object
