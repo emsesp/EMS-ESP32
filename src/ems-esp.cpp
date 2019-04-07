@@ -470,6 +470,12 @@ void showInfo() {
             _renderIntValue("Setpoint room temperature", "C", EMS_Thermostat.setpoint_roomTemp, 2); // convert to a single byte * 2
             _renderIntValue("Current room temperature", "C", EMS_Thermostat.curr_roomTemp, 10);     // is *10
 
+            if ((EMS_Thermostat.holidaytemp > 0) && (EMSESP_Status.heating_circuit == 2)) {  // only if we are on a RC35 we show more info
+                _renderIntValue("Day temperature", "C", EMS_Thermostat.daytemp, 2);          // convert to a single byte * 2
+                _renderIntValue("Night temperature", "C", EMS_Thermostat.nighttemp, 2);      // convert to a single byte * 2
+                _renderIntValue("Vacation temperature", "C", EMS_Thermostat.holidaytemp, 2); // convert to a single byte * 2
+            }
+
             myDebug("  Thermostat time is %02d:%02d:%02d %d/%d/%d",
                     EMS_Thermostat.hour,
                     EMS_Thermostat.minute,
@@ -540,6 +546,7 @@ void publishSensorValues() {
 // send values via MQTT
 // a json object is created for the boiler and one for the thermostat
 // CRC check is done to see if there are changes in the values since the last send to avoid too much wifi traffic
+// a check is done against the previous values and if there are changes only then they are published. Unless force=true
 void publishValues(bool force) {
     char                              s[20] = {0}; // for formatting strings
     StaticJsonDocument<MQTT_MAX_SIZE> doc;
@@ -1245,6 +1252,10 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
         myESP.mqttSubscribe(TOPIC_SHOWER_TIMER);
         myESP.mqttSubscribe(TOPIC_SHOWER_ALERT);
         myESP.mqttSubscribe(TOPIC_SHOWER_COLDSHOT);
+        myESP.mqttSubscribe(TOPIC_THERMOSTAT_CMD_HC);
+        myESP.mqttSubscribe(TOPIC_THERMOSTAT_CMD_DAYTEMP);
+        myESP.mqttSubscribe(TOPIC_THERMOSTAT_CMD_NIGHTTEMP);
+        myESP.mqttSubscribe(TOPIC_THERMOSTAT_CMD_HOLIDAYTEMP);
 
         // publish the status of the Shower parameters
         myESP.mqttPublish(TOPIC_SHOWER_TIMER, EMSESP_Status.shower_timer ? "1" : "0");
