@@ -1268,17 +1268,19 @@ void _process_SetPoints(uint8_t src, uint8_t * data, uint8_t length) {
     
     if (EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_VERBOSE) {
         if (length != 0) {
-            uint8_t setpoint = data[0]; // flow temp is * 2
-            uint8_t ww_power = data[2]; // power in %
+            uint8_t setpoint = data[0]; // flow temp
+            //uint8_t ww_power = data[2]; // power in %
 
+            /* this logic if the value is *2
             char s[5];
             char s2[5];
             strlcpy(s, itoa(setpoint >> 1, s2, 10), 5);
             strlcat(s, ".", sizeof(s));
             strlcat(s, ((setpoint & 0x01) ? "5" : "0"), 5);
-
             myDebug(" Boiler flow temp %s C, Warm Water power %d %", s, ww_power);
-        
+            */
+
+            myDebug(" Boiler flow temp %s C", setpoint);
         }
     }
     
