@@ -1280,7 +1280,7 @@ void _process_SetPoints(uint8_t src, uint8_t * data, uint8_t length) {
             myDebug(" Boiler flow temp %s C, Warm Water power %d %", s, ww_power);
             */
 
-            myDebug(" Boiler flow temp %s C", setpoint);
+            myDebug(" Boiler flow temperature is %d C", setpoint);
         }
     }
     
