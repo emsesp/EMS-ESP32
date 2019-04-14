@@ -101,6 +101,7 @@ command_t PROGMEM project_cmds[] = {
     {true, "shower_alert <on | off>", "send a warning of cold water after shower time is exceeded"},
     {true, "publish_wait <seconds>", "set frequency for publishing to MQTT"},
     {true, "heating_circuit <1 | 2>", "set the thermostat HC to work with if using multiple heating circuits"},
+    {true, "tx_delay <on | off>", "turn on if Tx not working on newer boilers"},
 
     {false, "info", "show data captured on the EMS bus"},
     {false, "log <n | b | t | r | v>", "set logging mode to none, basic, thermostat only, raw or verbose"},
@@ -340,7 +341,7 @@ void showInfo() {
                 EMS_Sys_Status.emxCrcErr);
 
         if (ems_getTxCapable()) {
-            myDebug("  Tx: available, # Tx telegrams sent=%d", EMS_Sys_Status.emsTxPkgs);
+            myDebug("  Tx: available, Tx delay is %s, # Tx telegrams sent=%d", (ems_getTxDelay() ? "on" : "off"), EMS_Sys_Status.emsTxPkgs);
         } else {
             myDebug("  Tx: no signal");
         }
@@ -887,6 +888,9 @@ bool FSCallback(MYESP_FSACTION action, const JsonObject json) {
         // shower_alert
         EMSESP_Status.shower_alert = json["shower_alert"];
 
+        // tx delay
+        ems_setTxDelay(json["tx_delay"]);
+
         // publish_wait
         if (!(EMSESP_Status.publish_wait = json["publish_wait"])) {
             EMSESP_Status.publish_wait = DEFAULT_PUBLISHWAIT; // default value
@@ -914,6 +918,7 @@ bool FSCallback(MYESP_FSACTION action, const JsonObject json) {
         json["shower_alert"]    = EMSESP_Status.shower_alert;
         json["publish_wait"]    = EMSESP_Status.publish_wait;
         json["heating_circuit"] = EMSESP_Status.heating_circuit;
+        json["tx_delay"]        = ems_getTxDelay();
 
         return true;
     }
@@ -1043,6 +1048,19 @@ bool SettingsCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, c
                 myDebug("Error. Usage: set heating_circuit <1 | 2>");
             }
         }
+
+        // tx delay
+        if ((strcmp(setting, "tx_delay") == 0) && (wc == 2)) {
+            if (strcmp(value, "on") == 0) {
+                ems_setTxDelay(true);
+                ok = true;
+            } else if (strcmp(value, "off") == 0) {
+                ems_setTxDelay(false);
+                ok = true;
+            } else {
+                myDebug("Error. Usage: set tx_delay <on | off>");
+            }
+        }
     }
 
     if (action == MYESP_FSACTION_LIST) {
@@ -1069,6 +1087,7 @@ bool SettingsCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, c
         myDebug("  shower_timer=%s", EMSESP_Status.shower_timer ? "on" : "off");
         myDebug("  shower_alert=%s", EMSESP_Status.shower_alert ? "on" : "off");
         myDebug("  publish_wait=%d", EMSESP_Status.publish_wait);
+        myDebug("  tx_delay=%s", ems_getTxDelay() ? "on" : "off");
     }
 
     return ok;
@@ -1523,7 +1542,7 @@ void setup() {
     // start up all the services
     myESP.begin(APP_HOSTNAME, APP_NAME, APP_VERSION);
 
-    // at this point we have the settings from our internall SPIFFS config file
+    // at this point we have all the settings from our internall SPIFFS config file
 
     // enable regular checks if not in test mode
     if (!EMSESP_Status.silent_mode) {
@@ -1553,7 +1572,7 @@ void loop() {
     myESP.loop();
 
     // check Dallas sensors, every 2 seconds
-    // these values are published to MQTT seperately via the timer publishSensorValuesTimer
+    // these values are published to MQTT separately via the timer publishSensorValuesTimer
     if (EMSESP_Status.dallas_sensors != 0) {
         ds18.loop();
     }

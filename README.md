@@ -357,6 +357,8 @@ The onboard LED will flash if there is no connection with the EMS bus. You can d
 
 If you want to completely erase the ESP and rebuild the firmware then do a `pio run -t erase` which will wipe the onboard flash including the SPIFFs where all the settings are stored.
 
+If you're unable to send commands then the Tx is most likely not working. Check with `info` to see if the Tx is available and that the rx poll is less than 200ms. Then trying putting a delay in the Tx by using `set tx_delay on` and `reboot`. See if that helps.
+
 ## Known Issues
 
 Some annoying issues that need fixing:

@@ -189,6 +189,7 @@ void ems_init() {
     EMS_Sys_Status.emsTxDisabled    = false;
     EMS_Sys_Status.emsPollFrequency = 0;
     EMS_Sys_Status.txRetryCount     = 0;
+    EMS_Sys_Status.emsTxDelay       = false;
 
     // thermostat
     EMS_Thermostat.setpoint_roomTemp = EMS_VALUE_SHORT_NOTSET;
@@ -293,6 +294,15 @@ void ems_setPoll(bool b) {
 
 bool ems_getPoll() {
     return EMS_Sys_Status.emsPollEnabled;
+}
+
+void ems_setTxDelay(bool b) {
+    EMS_Sys_Status.emsTxDelay = b;
+    myDebug("EMS Tx delay is %s", EMS_Sys_Status.emsTxDelay ? "enabled" : "disabled");
+}
+
+bool ems_getTxDelay() {
+    return EMS_Sys_Status.emsTxDelay;
 }
 
 bool ems_getEmsRefreshed() {
@@ -718,19 +728,19 @@ void _printMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     uint8_t * telegram = EMS_RxTelegram->telegram;
 
     // header info
-    uint8_t   src  = telegram[0] & 0x7F;
-    uint8_t   dest = telegram[1] & 0x7F; // remove 8th bit to handle both reads and writes
-    uint8_t   type;
-    bool      emsp;
+    uint8_t src  = telegram[0] & 0x7F;
+    uint8_t dest = telegram[1] & 0x7F; // remove 8th bit to handle both reads and writes
+    uint8_t type;
+    bool    emsp;
 
     // check if EMS or EMS+ by checking 3rd byte of telegram
     if (telegram[2] >= 0xF0) {
         // EMS+
-        type   = telegram[3];
-        emsp   = true;
+        type = telegram[3];
+        emsp = true;
     } else {
-        type   = telegram[2];
-        emsp   = false;
+        type = telegram[2];
+        emsp = false;
     }
 
     char output_str[200] = {0};
@@ -1265,7 +1275,6 @@ void _process_SM10Monitor(uint8_t src, uint8_t * data, uint8_t length) {
  * UBASetPoint 0x1A
  */
 void _process_SetPoints(uint8_t src, uint8_t * data, uint8_t length) {
-    
     if (EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_VERBOSE) {
         if (length != 0) {
             uint8_t setpoint = data[0]; // flow temp
@@ -1283,7 +1292,6 @@ void _process_SetPoints(uint8_t src, uint8_t * data, uint8_t length) {
             myDebug(" Boiler flow temperature is %d C", setpoint);
         }
     }
-    
 }
 
 /**
@@ -1985,7 +1993,6 @@ void ems_setWarmWaterTemp(uint8_t temperature) {
  * Set the boiler flow temp
  */
 void ems_setFlowTemp(uint8_t temperature) {
-
     myDebug("Setting boiler flow temperature to %d C", temperature);
 
     _EMS_TxTelegram EMS_TxTelegram = EMS_TX_TELEGRAM_NEW; // create new Tx
@@ -2006,7 +2013,6 @@ void ems_setFlowTemp(uint8_t temperature) {
     EMS_TxTelegram.forceRefresh       = false;
 
     EMS_TxQueue.push(EMS_TxTelegram);
-   
 }
 
 /**

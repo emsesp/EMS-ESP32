@@ -854,12 +854,16 @@ void MyESP::showSystemStats() {
     if (_boottime != NULL) {
         myDebug_P(PSTR(" [APP] Boot time: %s"), _boottime);
     }
+
+    // uptime
     uint32_t t   = _getUptime(); // seconds
-    uint32_t h   = (uint32_t)t / (uint32_t)3600L;
-    uint32_t rem = (uint32_t)t % (uint32_t)3600L;
-    uint32_t m   = rem / 60;
-    uint32_t s   = rem % 60;
-    myDebug_P(PSTR(" [APP] Uptime: %d seconds (%02d:%02d:%02d)"), t, h, m, s);
+    uint32_t d   = t / 86400L;
+    uint32_t h   = (t / 3600L) % 60;
+    uint32_t rem = t % 3600L;
+    uint8_t  m   = rem / 60;
+    uint8_t  s   = rem % 60;
+    myDebug_P(PSTR(" [APP] Uptime: %d days, %d hours, %d minutes, %d seconds"), d, h, m, s);
+
     myDebug_P(PSTR(" [APP] System Load: %d%%"), getSystemLoadAverage());
 
     if (isAPmode()) {
