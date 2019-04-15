@@ -55,6 +55,11 @@ Ticker scanThermostat;
 #define SCANTHERMOSTAT_TIME 1
 uint8_t scanThermostat_count = 0;
 
+// ems bus scan
+Ticker scanDevices;
+#define SCANDEVICES_TIME 1
+uint8_t scanDevices_count;
+
 Ticker showerColdShotStopTimer;
 
 // if using the shower timer, change these settings
@@ -107,9 +112,9 @@ command_t PROGMEM project_cmds[] = {
     {false, "log <n | b | t | r | v>", "set logging mode to none, basic, thermostat only, raw or verbose"},
     {false, "publish", "publish all values to MQTT"},
     {false, "refresh", "fetch values from the EMS devices"},
-    {false, "types", "list supported EMS telegram type IDs"},
+    {false, "devices", "list all supported and detected EMS devices and types IDs"},
     {false, "queue", "show current Tx queue"},
-    {false, "autodetect", "detect EMS devices and attempt to automatically set boiler and thermostat types"},
+    {false, "autodetect [deep]", "detect EMS devices and attempt to automatically set boiler and thermostat types"},
     {false, "shower <timer | alert>", "toggle either timer or alert on/off"},
     {false, "send XX ...", "send raw telegram data as hex to EMS bus"},
     {false, "thermostat read <type ID>", "send read request to the thermostat"},
@@ -814,6 +819,42 @@ void do_regularUpdates() {
     }
 }
 
+// stop devices scan and restart all other timers
+void stopDeviceScan() {
+    publishValuesTimer.attach(EMSESP_Status.publish_wait, do_publishValues);             // post MQTT EMS values
+    publishSensorValuesTimer.attach(EMSESP_Status.publish_wait, do_publishSensorValues); // post MQTT sensor values
+    regularUpdatesTimer.attach(REGULARUPDATES_TIME, do_regularUpdates);                  // regular reads from the EMS
+    systemCheckTimer.attach(SYSTEMCHECK_TIME, do_systemCheck);                           // check if Boiler is online
+    scanThermostat_count = 0;
+    scanThermostat.detach();
+}
+
+// EMS device scan
+void do_scanDevices() {
+    if (scanDevices_count == 0) {
+        // we're at the finish line
+        myDebug("Finished a deep EMS device scan. Type 'devices' to see what was discovered");
+        stopDeviceScan();
+        return;
+    }
+
+    if ((ems_getBusConnected()) && (!myESP.getUseSerial())) {
+        myDebug("> Scanning EMS bus for a device type 0x%02X...", scanDevices_count); // TODO: remove debug line
+        ems_doReadCommand(EMS_TYPE_Version, scanDevices_count++);                   // ask for version
+    }
+}
+
+// initiate a force scan by sending a version command to all type ids
+void startDeviceScan() {
+    publishValuesTimer.detach();
+    systemCheckTimer.detach();
+    regularUpdatesTimer.detach();
+    publishSensorValuesTimer.detach();
+    scanDevices_count = 1;
+    myDebug("Starting a deep EMS device scan...");
+    scanThermostat.attach(SCANDEVICES_TIME, do_scanDevices);
+}
+
 // initiate a force scan by sending type read requests from 0 to FF to the thermostat
 // used to analyze responses for debugging
 void startThermostatScan(uint8_t start) {
@@ -1126,8 +1167,8 @@ void TelnetCommandCallback(uint8_t wc, const char * commandLine) {
         ok = true;
     }
 
-    if (strcmp(first_cmd, "types") == 0) {
-        ems_printAllTypes();
+    if (strcmp(first_cmd, "devices") == 0) {
+        ems_printAllDevices();
         ok = true;
     }
 
@@ -1137,8 +1178,16 @@ void TelnetCommandCallback(uint8_t wc, const char * commandLine) {
     }
 
     if (strcmp(first_cmd, "autodetect") == 0) {
-        ems_scanDevices();
-        ok = true;
+        if (wc == 2) {
+            char * second_cmd = _readWord();
+            if (strcmp(second_cmd, "deep") == 0) {
+                startDeviceScan();
+                ok = true;
+            }
+        } else {
+            ems_scanDevices();
+            ok = true;
+        }
     }
 
     if (strcmp(first_cmd, "startup") == 0) {

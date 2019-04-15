@@ -163,6 +163,13 @@ typedef struct {
     bool    write_supported;
 } _Thermostat_Type;
 
+typedef struct {
+    uint8_t product_id;
+    uint8_t type_id;
+    char    version[10];
+    char    model_string[50];
+} _Generic_Type;
+
 /*
  * Telegram package defintions
  */
@@ -312,7 +319,7 @@ bool             ems_getTxCapable();
 uint32_t         ems_getPollFrequency();
 
 void   ems_scanDevices();
-void   ems_printAllTypes();
+void   ems_printAllDevices();
 char * ems_getThermostatDescription(char * buffer);
 void   ems_printTxQueue();
 char * ems_getBoilerDescription(char * buffer);

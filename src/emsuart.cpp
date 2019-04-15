@@ -109,8 +109,9 @@ void ICACHE_FLASH_ATTR emsuart_init() {
     // UCTOE = RX TimeOut enable (default is 1)
     // UCTOT = RX TimeOut Threshold (7bit) = want this when no more data after 2 characters. (default is 2)
     // UCFFT = RX FIFO Full Threshold (7 bit) = want this to be 31 for 32 bytes of buffer. (default was 127).
+    // see https://www.espressif.com/sites/default/files/documentation/esp8266-technical_reference_en.pdf
     USC1(EMSUART_UART) = 0;                                              // reset config first
-    USC1(EMSUART_UART) = (31 << UCFFT) | (0x02 << UCTOT) | (1 << UCTOE); // enable interupts
+    USC1(EMSUART_UART) = (EMS_MAX_TELEGRAM_LENGTH << UCFFT) | (0x02 << UCTOT) | (1 << UCTOE); // enable interupts
 
     // set interrupts for triggers
     USIC(EMSUART_UART) = 0xffff; // clear all interupts

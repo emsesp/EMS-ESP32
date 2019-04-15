@@ -21,6 +21,9 @@ _EMS_Sys_Status EMS_Sys_Status; // EMS Status
 
 CircularBuffer<_EMS_TxTelegram, EMS_TX_TELEGRAM_QUEUE_MAX> EMS_TxQueue; // FIFO queue for Tx send buffer
 
+// for storing all detected EMS devices
+std::list<_Generic_Type> Devices;
+
 // macros used in the _process* functions
 #define _toByte(i) (data[i])
 #define _toShort(i) ((data[i] << 8) + data[i + 1])
@@ -1311,6 +1314,29 @@ void _process_RCTime(uint8_t src, uint8_t * data, uint8_t length) {
     EMS_Thermostat.year   = _toByte(0);
 }
 
+/*
+ * add an EMS device to our list of detected devices
+ */
+void _addDevice(uint8_t product_id, uint8_t type_id, char * version, const char * model_string) {
+    _Generic_Type device;
+
+    // if its a duplicate don't add
+    bool found = false;
+    for (std::list<_Generic_Type>::iterator it = Devices.begin(); it != Devices.end(); it++) {
+        if (((it)->product_id == product_id) && ((it)->type_id == type_id)) {
+            found = true;
+        }
+    }
+
+    if (!found) {
+        device.product_id = product_id;
+        device.type_id    = type_id;
+        strlcpy(device.version, version, sizeof(device.version));
+        strlcpy(device.model_string, model_string, sizeof(device.model_string));
+        Devices.push_back(device);
+    }
+}
+
 /**
  * type 0x02 - get the firmware version and type of an EMS device
  * look up known devices via the product id and setup if not already set
@@ -1343,6 +1369,9 @@ void _process_Version(uint8_t src, uint8_t * data, uint8_t length) {
                 Boiler_Types[i].type_id,
                 product_id,
                 version);
+
+        // add to list
+        _addDevice(product_id, Boiler_Types[i].type_id, version, Boiler_Types[i].model_string);
 
         // if its a boiler set it, unless it already has been set by checking for a productID
         // it will take the first one found in the list
@@ -1383,6 +1412,9 @@ void _process_Version(uint8_t src, uint8_t * data, uint8_t length) {
                     product_id,
                     version);
         }
+
+        // add to list
+        _addDevice(product_id, Boiler_Types[i].type_id, version, Thermostat_Types[i].model_string);
 
         // if we don't have a thermostat set, use this one
         if (((EMS_Thermostat.type_id == EMS_ID_NONE) || (EMS_Thermostat.model_id == EMS_MODEL_NONE)
@@ -1426,6 +1458,9 @@ void _process_Version(uint8_t src, uint8_t * data, uint8_t length) {
                 product_id,
                 version);
 
+        // add to list
+        _addDevice(product_id, Other_Types[i].type_id, version, Other_Types[i].model_string);
+
         // see if this is a Solar Module SM10
         if (Other_Types[i].type_id == EMS_ID_SM10) {
             EMS_Other.SM10 = true; // we have detected a SM10
@@ -1438,6 +1473,9 @@ void _process_Version(uint8_t src, uint8_t * data, uint8_t length) {
 
     } else {
         myDebug("Unrecognized device found. TypeID 0x%02X, ProductID %d, Version %s", src, product_id, version);
+
+        // add to list
+        _addDevice(product_id, src, version, "unknown?");
     }
 }
 
@@ -1686,10 +1724,10 @@ void ems_scanDevices() {
 /**
  * Print out all handled types
  */
-void ems_printAllTypes() {
+void ems_printAllDevices() {
     uint8_t i;
 
-    myDebug("\nThese %d devices are defined as boiler units:", _Boiler_Types_max);
+    myDebug("\nThese %d devices are supported as boiler units:", _Boiler_Types_max);
     for (i = 0; i < _Boiler_Types_max; i++) {
         myDebug(" %s%s%s (TypeID:0x%02X ProductID:%d)",
                 COLOR_BOLD_ON,
@@ -1699,7 +1737,7 @@ void ems_printAllTypes() {
                 Boiler_Types[i].product_id);
     }
 
-    myDebug("\nThese %d devices are defined as other EMS devices:", _Other_Types_max);
+    myDebug("\nThese %d devices are supported as other known EMS devices:", _Other_Types_max);
     for (i = 0; i < _Other_Types_max; i++) {
         myDebug(" %s%s%s (TypeID:0x%02X ProductID:%d)",
                 COLOR_BOLD_ON,
@@ -1709,7 +1747,7 @@ void ems_printAllTypes() {
                 Other_Types[i].product_id);
     }
 
-    myDebug("\nThe following telegram type IDs are recognized:");
+    myDebug("\nThe following telegram type IDs are supported:");
     for (i = 0; i < _EMS_Types_max; i++) {
         if ((EMS_Types[i].model_id == EMS_MODEL_ALL) || (EMS_Types[i].model_id == EMS_MODEL_UBA)) {
             myDebug(" type %02X (%s)", EMS_Types[i].type, EMS_Types[i].typeString);
@@ -1727,6 +1765,21 @@ void ems_printAllTypes() {
                 (Thermostat_Types[i].read_supported) ? 'y' : 'n',
                 (Thermostat_Types[i].write_supported) ? 'y' : 'n');
     }
+
+    if (Devices.size() != 0) {
+        myDebug("\nThese %d EMS devices were detected on your system:", Devices.size());
+        for (std::list<_Generic_Type>::iterator it = Devices.begin(); it != Devices.end(); it++) {
+            myDebug(" %s%s%s (TypeID:0x%02X ProductID:%d Version:%s)",
+                    COLOR_BOLD_ON,
+                    (it)->model_string,
+                    COLOR_BOLD_OFF,
+                    (it)->type_id,
+                    (it)->product_id,
+                    (it)->version);
+        }
+    }
+
+    myDebug(""); // newline
 }
 
 /**

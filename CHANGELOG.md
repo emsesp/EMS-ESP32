@@ -16,6 +16,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `boiler flowtemp` command to set the flow temperature [(issue 59)](https://github.com/proddy/EMS-ESP/issues/59)
 - `tx_delay` setting for circuits where we needed to slow down Tx transmission
 
+### Changed
+
+- `types` renamed to `devices` to also show all detected devices
+
+
 ## [1.6.0] 2019-03-24
 
 ### Added
