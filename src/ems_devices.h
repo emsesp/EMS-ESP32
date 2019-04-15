@@ -112,7 +112,7 @@ typedef enum {
     // generic ID for all the other weird devices
     EMS_MODEL_OTHER,
 
-    // and finaly the thermostats
+    // and finally the thermostats
     EMS_MODEL_ES73,
     EMS_MODEL_RC10,
     EMS_MODEL_RC20,
@@ -152,7 +152,8 @@ const _Other_Type Other_Types[] = {
     {EMS_MODEL_OTHER, 114, 0x09, "BC10 Base Controller"},
     {EMS_MODEL_OTHER, 125, 0x09, "BC25 Base Controller"},
     {EMS_MODEL_OTHER, 205, 0x02, "Nefit Moduline Easy Connect"},
-    {EMS_MODEL_OTHER, 73, EMS_ID_SM10, "SM10 Solar Module"},
+    {EMS_MODEL_OTHER, 73, EMS_ID_SM, "SM10 Solar Module"},
+    {EMS_MODEL_OTHER, 163, EMS_ID_SM, "SM100 Solar Module"},
     {EMS_MODEL_OTHER, 171, 0x02, "EMS-OT OpenTherm converter"}
 
 };
