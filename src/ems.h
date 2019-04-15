@@ -17,7 +17,7 @@
 #define EMS_PLUS_ID_NONE 0x01 // Fixed - used as a dest in broadcast messages and empty type IDs
 #define EMS_ID_ME 0x0B        // Fixed - our device, hardcoded as the "Service Key"
 #define EMS_ID_DEFAULT_BOILER 0x08
-#define EMS_ID_SM10 0x30 // Solar Module SM10
+#define EMS_ID_SM 0x30 // Solar Module SM10 and SM100
 
 #define EMS_MIN_TELEGRAM_LENGTH 6 // minimal length for a validation telegram, including CRC
 
@@ -235,11 +235,11 @@ typedef struct {           // UBAParameterWW
  */
 typedef struct {
     // SM10 Solar Module - SM10Monitor
-    bool    SM10;               // set true if there is a SM10 available
-    int16_t SM10collectorTemp;  // collector temp from SM10
-    int16_t SM10bottomTemp;     // bottom temp from SM10
-    uint8_t SM10pumpModulation; // modulation solar pump
-    uint8_t SM10pump;           // pump active
+    bool    SM;               // set true if there is a SM10 available
+    int16_t SMcollectorTemp;  // collector temp from SM10
+    int16_t SMbottomTemp;     // bottom temp from SM10
+    uint8_t SMpumpModulation; // modulation solar pump
+    uint8_t SMpump;           // pump active
 } _EMS_Other;
 
 // Thermostat data
@@ -320,6 +320,7 @@ uint32_t         ems_getPollFrequency();
 
 void   ems_scanDevices();
 void   ems_printAllDevices();
+void   ems_printDevices();
 char * ems_getThermostatDescription(char * buffer);
 void   ems_printTxQueue();
 char * ems_getBoilerDescription(char * buffer);

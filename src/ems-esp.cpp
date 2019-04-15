@@ -57,7 +57,7 @@ uint8_t scanThermostat_count = 0;
 
 // ems bus scan
 Ticker scanDevices;
-#define SCANDEVICES_TIME 1
+#define SCANDEVICES_TIME 250 // ms
 uint8_t scanDevices_count;
 
 Ticker showerColdShotStopTimer;
@@ -448,13 +448,13 @@ void showInfo() {
     }
 
     // For SM10 Solar Module
-    if (EMS_Other.SM10) {
+    if (EMS_Other.SM) {
         myDebug(""); // newline
         myDebug("%sSolar Module stats:%s", COLOR_BOLD_ON, COLOR_BOLD_OFF);
-        _renderShortValue("  Collector temperature", "C", EMS_Other.SM10collectorTemp);
-        _renderShortValue("  Bottom temperature", "C", EMS_Other.SM10bottomTemp);
-        _renderIntValue("  Pump modulation", "%", EMS_Other.SM10pumpModulation);
-        _renderBoolValue("  Pump active", EMS_Other.SM10pump);
+        _renderShortValue("  Collector temperature", "C", EMS_Other.SMcollectorTemp);
+        _renderShortValue("  Bottom temperature", "C", EMS_Other.SMbottomTemp);
+        _renderIntValue("  Pump modulation", "%", EMS_Other.SMpumpModulation);
+        _renderBoolValue("  Pump active", EMS_Other.SMpump);
     }
 
     // Thermostat stats
@@ -688,15 +688,15 @@ void publishValues(bool force) {
 
     // handle the other values separately
     // For SM10 Solar Module
-    if (EMS_Other.SM10) {
+    if (EMS_Other.SM) {
         // build new json object
         doc.clear();
         JsonObject rootSM10 = doc.to<JsonObject>();
 
-        rootSM10[SM10_COLLECTORTEMP]  = _short_to_char(s, EMS_Other.SM10collectorTemp);
-        rootSM10[SM10_BOTTOMTEMP]     = _short_to_char(s, EMS_Other.SM10bottomTemp);
-        rootSM10[SM10_PUMPMODULATION] = _int_to_char(s, EMS_Other.SM10pumpModulation);
-        rootSM10[SM10_PUMP]           = _bool_to_char(s, EMS_Other.SM10pump);
+        rootSM10[SM10_COLLECTORTEMP]  = _short_to_char(s, EMS_Other.SMcollectorTemp);
+        rootSM10[SM10_BOTTOMTEMP]     = _short_to_char(s, EMS_Other.SMbottomTemp);
+        rootSM10[SM10_PUMPMODULATION] = _int_to_char(s, EMS_Other.SMpumpModulation);
+        rootSM10[SM10_PUMP]           = _bool_to_char(s, EMS_Other.SMpump);
 
         data[0] = '\0'; // reset data for next package
         serializeJson(doc, data, sizeof(data));
@@ -833,14 +833,16 @@ void stopDeviceScan() {
 void do_scanDevices() {
     if (scanDevices_count == 0) {
         // we're at the finish line
-        myDebug("Finished a deep EMS device scan. Type 'devices' to see what was discovered");
+        myDebug("Finished the deep EMS device scan.");
         stopDeviceScan();
+        ems_printDevices();
+        ems_setLogging(EMS_SYS_LOGGING_NONE);
         return;
     }
 
     if ((ems_getBusConnected()) && (!myESP.getUseSerial())) {
-        myDebug("> Scanning EMS bus for a device type 0x%02X...", scanDevices_count); // TODO: remove debug line
-        ems_doReadCommand(EMS_TYPE_Version, scanDevices_count++);                   // ask for version
+        // myDebug("> Scanning EMS bus for a device type 0x%02X...", scanDevices_count);
+        ems_doReadCommand(EMS_TYPE_Version, scanDevices_count++); // ask for version
     }
 }
 
@@ -850,9 +852,10 @@ void startDeviceScan() {
     systemCheckTimer.detach();
     regularUpdatesTimer.detach();
     publishSensorValuesTimer.detach();
-    scanDevices_count = 1;
-    myDebug("Starting a deep EMS device scan...");
-    scanThermostat.attach(SCANDEVICES_TIME, do_scanDevices);
+    scanDevices_count = 1; // starts at 1
+    ems_setLogging(EMS_SYS_LOGGING_NONE);
+    myDebug("Starting a deep EMS device scan. This will take about 1 minute. Please wait...");
+    scanThermostat.attach_ms(SCANDEVICES_TIME, do_scanDevices);
 }
 
 // initiate a force scan by sending type read requests from 0 to FF to the thermostat

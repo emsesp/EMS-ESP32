@@ -264,10 +264,10 @@ void ems_init() {
     EMS_Boiler.pump_mod_min = EMS_VALUE_INT_NOTSET; // Boiler circuit pump modulation min. power
 
     // Other EMS devices values
-    EMS_Other.SM10collectorTemp  = EMS_VALUE_SHORT_NOTSET; // collector temp from SM10
-    EMS_Other.SM10bottomTemp     = EMS_VALUE_SHORT_NOTSET; // bottom temp from SM10
-    EMS_Other.SM10pumpModulation = EMS_VALUE_INT_NOTSET;   // modulation solar pump SM10
-    EMS_Other.SM10pump           = EMS_VALUE_INT_NOTSET;   // pump active
+    EMS_Other.SMcollectorTemp  = EMS_VALUE_SHORT_NOTSET; // collector temp from SM10/SM100
+    EMS_Other.SMbottomTemp     = EMS_VALUE_SHORT_NOTSET; // bottom temp from SM10/SM100
+    EMS_Other.SMpumpModulation = EMS_VALUE_INT_NOTSET;   // modulation solar pump SM10/SM100
+    EMS_Other.SMpump           = EMS_VALUE_INT_NOTSET;   // pump active
 
     // calculated values
     EMS_Boiler.tapwaterActive = EMS_VALUE_INT_NOTSET; // Hot tap water is on/off
@@ -283,7 +283,7 @@ void ems_init() {
     strlcpy(EMS_Thermostat.version, "?", sizeof(EMS_Thermostat.version));
 
     // set other types
-    EMS_Other.SM10 = false;
+    EMS_Other.SM = false;
 
     // default logging is none
     ems_setLogging(EMS_SYS_LOGGING_DEFAULT);
@@ -790,8 +790,8 @@ void _printMessage(_EMS_RxTelegram * EMS_RxTelegram) {
             strlcat(output_str, "Boiler", sizeof(output_str));
             strlcpy(color_s, COLOR_MAGENTA, sizeof(color_s));
         }
-    } else if (dest == EMS_ID_SM10) {
-        strlcat(output_str, "SM10", sizeof(output_str));
+    } else if (dest == EMS_ID_SM) {
+        strlcat(output_str, "SM", sizeof(output_str));
         strlcpy(color_s, COLOR_MAGENTA, sizeof(color_s));
     } else if (dest == EMS_Thermostat.type_id) {
         if (emsp) {
@@ -860,7 +860,7 @@ void _ems_processTelegram(_EMS_RxTelegram * EMS_RxTelegram) {
             // is it common type for everyone?
             // is it for us? So the src must match with either the boiler, thermostat or other devices
             if ((EMS_Types[i].model_id == EMS_MODEL_ALL)
-                || ((src == EMS_Boiler.type_id) || (src == EMS_Thermostat.type_id) || (src == EMS_ID_SM10))) {
+                || ((src == EMS_Boiler.type_id) || (src == EMS_Thermostat.type_id) || (src == EMS_ID_SM))) {
                 typeFound = true;
                 break;
             }
@@ -1266,10 +1266,10 @@ void _process_RCOutdoorTempMessage(uint8_t src, uint8_t * data, uint8_t length) 
  * SM10Monitor - type 0x97
  */
 void _process_SM10Monitor(uint8_t src, uint8_t * data, uint8_t length) {
-    EMS_Other.SM10collectorTemp  = _toShort(2);    // collector temp from SM10, is *10
-    EMS_Other.SM10bottomTemp     = _toShort(5);    // bottom temp from SM10, is *10
-    EMS_Other.SM10pumpModulation = _toByte(4);     // modulation solar pump
-    EMS_Other.SM10pump           = _bitRead(7, 1); // active if bit 1 is set
+    EMS_Other.SMcollectorTemp  = _toShort(2);    // collector temp from SM10/SM100, is *10
+    EMS_Other.SMbottomTemp     = _toShort(5);    // bottom temp from SM10/SM100, is *10
+    EMS_Other.SMpumpModulation = _toByte(4);     // modulation solar pump
+    EMS_Other.SMpump           = _bitRead(7, 1); // active if bit 1 is set
 
     EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
 }
@@ -1462,8 +1462,8 @@ void _process_Version(uint8_t src, uint8_t * data, uint8_t length) {
         _addDevice(product_id, Other_Types[i].type_id, version, Other_Types[i].model_string);
 
         // see if this is a Solar Module SM10
-        if (Other_Types[i].type_id == EMS_ID_SM10) {
-            EMS_Other.SM10 = true; // we have detected a SM10
+        if (Other_Types[i].type_id == EMS_ID_SM) {
+            EMS_Other.SM = true; // we have detected a SM10
             myDebug("SM10 Solar Module support enabled.");
         }
 
@@ -1489,7 +1489,7 @@ void ems_discoverModels() {
     ems_doReadCommand(EMS_TYPE_Version, EMS_Boiler.type_id); // get version details of boiler
 
     // solar module
-    ems_doReadCommand(EMS_TYPE_Version, EMS_ID_SM10); // check if there is Solar Module available
+    ems_doReadCommand(EMS_TYPE_Version, EMS_ID_SM); // check if there is Solar Module available
 
     // thermostat
     // if it hasn't been set, auto discover it
@@ -1607,8 +1607,8 @@ void ems_getBoilerValues() {
  * Get other values from EMS devices
  */
 void ems_getOtherValues() {
-    if (EMS_Other.SM10) {
-        ems_doReadCommand(EMS_TYPE_SM10Monitor, EMS_ID_SM10); // fetch all from SM10Monitor, e.g. 0B B0 97 00 16
+    if (EMS_Other.SM) {
+        ems_doReadCommand(EMS_TYPE_SM10Monitor, EMS_ID_SM); // fetch all from SM10Monitor, e.g. 0B B0 97 00 16
     }
 }
 
@@ -1766,8 +1766,18 @@ void ems_printAllDevices() {
                 (Thermostat_Types[i].write_supported) ? 'y' : 'n');
     }
 
+    // print out known devices
+    ems_printDevices();
+
+    myDebug(""); // newline
+}
+
+/*
+ * print out contents of the device list that was captured
+ */
+void ems_printDevices() {
     if (Devices.size() != 0) {
-        myDebug("\nThese %d EMS devices were detected on your system:", Devices.size());
+        myDebug("\nThese %d EMS devices were detected:", Devices.size());
         for (std::list<_Generic_Type>::iterator it = Devices.begin(); it != Devices.end(); it++) {
             myDebug(" %s%s%s (TypeID:0x%02X ProductID:%d Version:%s)",
                     COLOR_BOLD_ON,
@@ -1777,9 +1787,9 @@ void ems_printAllDevices() {
                     (it)->product_id,
                     (it)->version);
         }
-    }
 
-    myDebug(""); // newline
+        myDebug("\nIf any are marked as 'unknown', please report as a GitHub issue so we can update the EMS devices database.\n");
+    }
 }
 
 /**
