@@ -37,7 +37,7 @@
 #define THERMOSTAT_DAYTEMP "thermostat_daytemp"                    // RC35 specific
 #define THERMOSTAT_NIGHTTEMP "thermostat_nighttemp"                // RC35 specific
 #define THERMOSTAT_HOLIDAYTEMP "thermostat_holidayttemp"           // RC35 specific
-#define THERMOSTAT_HEATINGTYPE "themrostat_heatingtype"            // RC35 specific (3=floorheating)
+#define THERMOSTAT_HEATINGTYPE "thermostat_heatingtype"            // RC35 specific (3=floorheating)
 #define THERMOSTAT_CIRCUITCALCTEMP "thermostat_circuitcalctemp"    // RC35 specific
 
 // MQTT for boiler
