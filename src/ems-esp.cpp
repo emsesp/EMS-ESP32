@@ -99,8 +99,8 @@ command_t PROGMEM project_cmds[] = {
     {true, "led_gpio <gpio>", "set the LED pin. Default is the onboard LED (D1=5)"},
     {true, "dallas_gpio <gpio>", "set the pin for external Dallas temperature sensors (D5=14)"},
     {true, "dallas_parasite <on | off>", "set to on if powering Dallas via parasite"},
-    {true, "thermostat_type <type ID>", "set the thermostat type id (e.g. 10 for 0x10)"},
-    {true, "boiler_type <type ID>", "set the boiler type id (e.g. 8 for 0x08)"},
+    {true, "thermostat_type <device ID>", "set the thermostat type id (e.g. 10 for 0x10)"},
+    {true, "boiler_type <device ID>", "set the boiler type id (e.g. 8 for 0x08)"},
     {true, "silent_mode <on | off>", "when on all automatic Tx is disabled"},
     {true, "shower_timer <on | off>", "notify via MQTT all shower durations"},
     {true, "shower_alert <on | off>", "send a warning of cold water after shower time is exceeded"},
@@ -358,7 +358,7 @@ void showInfo() {
     myDebug("%sBoiler stats:%s", COLOR_BOLD_ON, COLOR_BOLD_OFF);
 
     // version details
-    myDebug("  Boiler type: %s", ems_getBoilerDescription(buffer_type));
+    myDebug("  Boiler: %s", ems_getBoilerDescription(buffer_type));
 
     // active stats
     if (ems_getBusConnected()) {
@@ -461,7 +461,7 @@ void showInfo() {
     if (ems_getThermostatEnabled()) {
         myDebug(""); // newline
         myDebug("%sThermostat stats:%s", COLOR_BOLD_ON, COLOR_BOLD_OFF);
-        myDebug("  Thermostat type: %s", ems_getThermostatDescription(buffer_type));
+        myDebug("  Thermostat: %s", ems_getThermostatDescription(buffer_type));
         if ((ems_getThermostatModel() == EMS_MODEL_EASY) || (ems_getThermostatModel() == EMS_MODEL_BOSCHEASY)) {
             // for easy temps are * 100
             // also we don't have the time or mode
@@ -796,7 +796,7 @@ void do_ledcheck() {
 void do_scanThermostat() {
     if ((ems_getBusConnected()) && (!myESP.getUseSerial())) {
         myDebug("> Scanning thermostat message type #0x%02X...", scanThermostat_count);
-        ems_doReadCommand(scanThermostat_count, EMS_Thermostat.type_id);
+        ems_doReadCommand(scanThermostat_count, EMS_Thermostat.device_id);
         scanThermostat_count++;
     }
 }
@@ -913,13 +913,13 @@ bool FSCallback(MYESP_FSACTION action, const JsonObject json) {
         EMSESP_Status.dallas_parasite = json["dallas_parasite"];
 
         // thermostat_type
-        if (!(EMS_Thermostat.type_id = json["thermostat_type"])) {
-            EMS_Thermostat.type_id = EMSESP_THERMOSTAT_TYPE; // set default
+        if (!(EMS_Thermostat.device_id = json["thermostat_type"])) {
+            EMS_Thermostat.device_id = EMSESP_THERMOSTAT_TYPE; // set default
         }
 
         // boiler_type
-        if (!(EMS_Boiler.type_id = json["boiler_type"])) {
-            EMS_Boiler.type_id = EMSESP_BOILER_TYPE; // set default
+        if (!(EMS_Boiler.device_id = json["boiler_type"])) {
+            EMS_Boiler.device_id = EMSESP_BOILER_TYPE; // set default
         }
 
         // silent mode
@@ -950,8 +950,8 @@ bool FSCallback(MYESP_FSACTION action, const JsonObject json) {
     }
 
     if (action == MYESP_FSACTION_SAVE) {
-        json["thermostat_type"] = EMS_Thermostat.type_id;
-        json["boiler_type"]     = EMS_Boiler.type_id;
+        json["thermostat_type"] = EMS_Thermostat.device_id;
+        json["boiler_type"]     = EMS_Boiler.device_id;
 
         json["led"]             = EMSESP_Status.led;
         json["led_gpio"]        = EMSESP_Status.led_gpio;
@@ -1039,13 +1039,13 @@ bool SettingsCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, c
 
         // thermostat_type
         if (strcmp(setting, "thermostat_type") == 0) {
-            EMS_Thermostat.type_id = ((wc == 2) ? (uint8_t)strtol(value, 0, 16) : EMS_ID_NONE);
+            EMS_Thermostat.device_id = ((wc == 2) ? (uint8_t)strtol(value, 0, 16) : EMS_ID_NONE);
             ok                     = true;
         }
 
         // boiler_type
         if (strcmp(setting, "boiler_type") == 0) {
-            EMS_Boiler.type_id = ((wc == 2) ? (uint8_t)strtol(value, 0, 16) : EMS_ID_NONE);
+            EMS_Boiler.device_id = ((wc == 2) ? (uint8_t)strtol(value, 0, 16) : EMS_ID_NONE);
             ok                 = true;
         }
 
@@ -1113,18 +1113,18 @@ bool SettingsCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, c
         myDebug("  dallas_gpio=%d", EMSESP_Status.dallas_gpio);
         myDebug("  dallas_parasite=%s", EMSESP_Status.dallas_parasite ? "on" : "off");
 
-        if (EMS_Thermostat.type_id == EMS_ID_NONE) {
+        if (EMS_Thermostat.device_id == EMS_ID_NONE) {
             myDebug("  thermostat_type=<not set>");
         } else {
-            myDebug("  thermostat_type=%02X", EMS_Thermostat.type_id);
+            myDebug("  thermostat_type=%02X", EMS_Thermostat.device_id);
         }
 
         myDebug("  heating_circuit=%d", EMSESP_Status.heating_circuit);
 
-        if (EMS_Boiler.type_id == EMS_ID_NONE) {
+        if (EMS_Boiler.device_id == EMS_ID_NONE) {
             myDebug("  boiler_type=<not set>");
         } else {
-            myDebug("  boiler_type=%02X", EMS_Boiler.type_id);
+            myDebug("  boiler_type=%02X", EMS_Boiler.device_id);
         }
 
         myDebug("  silent_mode=%s", EMSESP_Status.silent_mode ? "on" : "off");
@@ -1243,7 +1243,7 @@ void TelnetCommandCallback(uint8_t wc, const char * commandLine) {
             ems_setThermostatMode(_readIntNumber());
             ok = true;
         } else if (strcmp(second_cmd, "read") == 0) {
-            ems_doReadCommand(_readHexNumber(), EMS_Thermostat.type_id);
+            ems_doReadCommand(_readHexNumber(), EMS_Thermostat.device_id);
             ok = true;
         } else if (strcmp(second_cmd, "scan") == 0) {
             startThermostatScan(_readIntNumber());
@@ -1270,7 +1270,7 @@ void TelnetCommandCallback(uint8_t wc, const char * commandLine) {
                 ok = true;
             }
         } else if (strcmp(second_cmd, "read") == 0) {
-            ems_doReadCommand(_readHexNumber(), EMS_Boiler.type_id);
+            ems_doReadCommand(_readHexNumber(), EMS_Boiler.device_id);
             ok = true;
         } else if (strcmp(second_cmd, "tapwater") == 0) {
             char * third_cmd = _readWord();

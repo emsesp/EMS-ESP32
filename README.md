@@ -21,9 +21,6 @@ There are 3 parts to this project, first the design of the circuit, secondly the
     - [EMS Polling](#ems-polling)
     - [EMS Broadcasting](#ems-broadcasting)
     - [EMS Reading and Writing](#ems-reading-and-writing)
-  - [EMS Plus](#ems-plus)
-    - [Message layout](#message-layout)
-    - [Message types](#message-types)
   - [The ESP8266 Source Code](#the-esp8266-source-code)
     - [Special EMS Types](#special-ems-types)
     - [Which thermostats are supported?](#which-thermostats-are-supported)
@@ -69,12 +66,12 @@ The code and circuit has been tested with a few ESP8266 development boards such 
 3. Optionally add external Dallas temperature sensors (to D1) and an external LED (to D5).
 4. Decide whether to compile and upload the code yourself using PlatformIO or just upload the pre-baked firmware using the esptool (read these [instructions](#using-the-pre-built-firmware)). If you want to build yourself now is the time to customize your settings in `my_custom.h`. Upload the firmware via USB.
 5. Connect an external USB 5v power adapter to the ESP8266 board.
-7. When the ESP8266 starts up for the first time the onboard LED will be flashing. This is because the EMS bus is not yet connected and receiving data.
-8. If you haven't hardcoded the WiFi credentials in step 4, the ESP8266 will boot up in a WiFi Access Point (AP) mode with the ssid name `ems-esp`. Now you can either use a laptop and connect to this AP using Telnet to `192.168.1.4` or if its powered from a computers USB use a Serial monitor tool to the ESP's COM port. Tip: to enable Telnet on Windows 10 run `dism /online /Enable-Feature /FeatureName:TelnetClient` or install something like [putty](https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html).
-9. Next is to customize some of the onboard settings. Type `set` to list the current stored settings and `?` to see the syntax. Use `set wifi_ssid` and `set wifi_password` to add your WiFi credentials and if you're using MQTT set the host, username and password. There is no need to reboot the ESP.
-10. The `led_gpio` will default to the onboard LED (which is probably blinking now). Ignore `thermostat_type` and `boiler_type` as these will be auto-detected hopefully later on.
-11. **Important**: By default the serial port is enabled and the EMS bus disabled. This is to allow users to configure their ESP via the serial monitor when pluged into a PC/laptop. You must disable serial with `set serial off` to get the EMS transmission working.
-12. Hook up the ESP to the EMS board as follows:
+6. When the ESP8266 starts up for the first time the onboard LED will be flashing. This is because the EMS bus is not yet connected and receiving data.
+7. If you haven't hardcoded the WiFi credentials in step 4, the ESP8266 will boot up in a WiFi Access Point (AP) mode with the ssid name `ems-esp`. Now you can either use a laptop and connect to this AP using Telnet to `192.168.1.4` or if its powered from a computers USB use a Serial monitor tool to the ESP's COM port. Tip: to enable Telnet on Windows 10 run `dism /online /Enable-Feature /FeatureName:TelnetClient` or install something like [putty](https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html).
+8. Next is to customize some of the onboard settings. Type `set` to list the current stored settings and `?` to see the syntax. Use `set wifi_ssid` and `set wifi_password` to add your WiFi credentials and if you're using MQTT set the host, username and password. There is no need to reboot the ESP.
+9. The `led_gpio` will default to the onboard LED (which is probably blinking now). Ignore `thermostat_type` and `boiler_type` as these will be auto-detected hopefully later on.
+10. **Important**: By default the serial port is enabled and the EMS bus disabled. This is to allow users to configure their ESP via the serial monitor when pluged into a PC/laptop. You must disable serial with `set serial off` to get the EMS transmission working.
+11. Hook up the ESP to the EMS board as follows:
     
 | EMS board   | ESP8266 dev board |
 | ----------- | ----------------- |
@@ -82,12 +79,12 @@ The code and circuit has been tested with a few ESP8266 development boards such 
 | Rx/J2       | D7                |
 | Tx/J2       | D8                |
 | VC/J2       | 3v3               |
-13.  Connect the EMS lines to the ESP. This can be done via the two EMS wires or via the 3.5mm service jack if you have an bbqkees board.
-14.  Reboot the ESP, either by the reset switch or pulling the power.
-15.  The ESP will first perform an autodetect to try and discover the EMS devices attached. If your boiler and thermostat are recognized it will set these types and store them for ever and ever. You can trace the output by telnet'ing to the board `telnet ems-esp.local`. Also use `info` to check the status.
-16.  If your boiler/thermostat is not discovered create a GitHub issue stating the type and Product ID. These will be added to the file `ems_devices.h` in a future release.
-17.  If all is well and there is traffic on the EMS bus the onboard LED will stop blinking and be permanently on. If this is annoying you can disable with `set led off`. To see the EMS messages type `set log v` for verbose logging.
-18.  And all is not well, check the wiring, make sure serial is off and look at the telnet session for errors. If in doubt, wipe the ESP with `pio run -t erase` and start again with step #3
+12.   Connect the EMS lines to the ESP. This can be done via the two EMS wires or via the 3.5mm service jack if you have an bbqkees board.
+13.   Reboot the ESP, either by the reset switch or pulling the power.
+14.   The ESP will first perform an autodetect to try and discover the EMS devices attached. If your boiler and thermostat are recognized it will set these types and store them for ever and ever. You can trace the output by telnet'ing to the board `telnet ems-esp.local`. Also use `info` to check the status.
+15.   If your boiler/thermostat is not discovered create a GitHub issue stating the type and Product ID. These will be added to the file `ems_devices.h` in a future release.
+16.   If all is well and there is traffic on the EMS bus the onboard LED will stop blinking and be permanently on. If this is annoying you can disable with `set led off`. To see the EMS messages type `set log v` for verbose logging.
+17.   And all is not well, check the wiring, make sure serial is off and look at the telnet session for errors. If in doubt, wipe the ESP with `pio run -t erase` and start again with step #3
 
 ## Monitoring The Output
 
@@ -199,24 +196,6 @@ Following a write request, the `[dest]` doesn't have the 8th bit set and after t
 
 Every telegram sent is echo'd back to Rx, along the same Bus used for all Rx/Tx transmissions.
 
-## EMS Plus
-
-In this chapter we will report our findings on the EMS plus protocol which differs slighly from EMS 1.0.
-
-### Message layout
-
-| 0           | 1        | 2             | 3            | 4      | 5                   | n....n-1 | n   |
-| ----------- | -------- | ------------- | ------------ | ------ | ------------------- | -------- | --- |
-| transmitter | receiver | ems plus mark | message type | offset | device intended for | data     | cnc |
-| 18          | 00       | FF            | 03           | 01     | A5                  | 28       | 46  |
-
-### Message types
-
-| Message type | Definition      |
-| ------------ | --------------- |
-| 03           | Set temperature |
-| 00           | Status message  |
-
 ## The ESP8266 Source Code
 
 `emsuart.cpp` handles the low level UART read and write logic to the bus. You shouldn't need to touch this. All receive commands from the EMS bus are handled asynchronously using a circular buffer via an interrupt. A separate function processes the buffer and extracts the telegrams.
@@ -312,7 +291,7 @@ You can find the .yaml configuration files under `doc/ha`. See also this [HA for
 - Download and install [Visual Studio Code](https://code.visualstudio.com/docs/?dv=win) (VSC). It's like 40MB so don't confuse with the commercial Microsoft Visual Studio.
 - Restart the PC (if using Windows) to apply the new PATH settings. It should now detect Git
 - Install the VSC extension "PlatformIO IDE" then click reload to activate it
-- Git clone this repo, eith using `git clone` from PlatformIO's terminal or the Git GUI interface
+- Git clone this repo using `git clone` from PlatformIO's terminal or the Git GUI interface
 - Create a `platformio.ini` based on the `platformio.ini-example` making the necessary changes for your board type
 
 **On Linux (e.g. Ubuntu under Windows 10):**

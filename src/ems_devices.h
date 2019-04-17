@@ -12,7 +12,6 @@
 
 #include "ems.h"
 
-
 /*
  * Common
  */
@@ -96,7 +95,7 @@
 #define EMS_OFFSET_EasyStatusMessage_curr 8      // current temp
 
 // RC1010 specific
-#define EMS_TYPE_RC1010StatusMessage 0x00         // is an automatic thermostat broadcast giving us temps
+#define EMS_TYPE_RC1010StatusMessage 0x01A5       // is an automatic thermostat broadcast giving us temps
 #define EMS_TYPE_RC1010Set 0x03                   // setpoint temp message
 #define EMS_OFFSET_RC1010StatusMessage_setpoint 3 // setpoint temp
 #define EMS_OFFSET_RC1010StatusMessage_curr 1     // current temp
@@ -129,16 +128,22 @@ typedef enum {
 } _EMS_MODEL_ID;
 
 // EMS types for known Buderus/Bosch devices. This list will be extended when new devices are recognized.
-// format is MODEL_ID, PRODUCT ID, TYPE_ID, DESCRIPTION
+// format is MODEL_ID, PRODUCT ID, TYPE_ID, DESCRIPTION, EMSPLUS
 const _Boiler_Type Boiler_Types[] = {
 
     {EMS_MODEL_UBA, 72, 0x08, "MC10 Module"},
-    {EMS_MODEL_UBA, 123, 0x08, "Buderus GB172/Nefit Trendline"},
+    {
+        EMS_MODEL_UBA,
+        123,
+        0x08,
+        "Buderus GB172/Nefit Trendline",
+    },
     {EMS_MODEL_UBA, 115, 0x08, "Nefit Topline Compact"},
     {EMS_MODEL_UBA, 203, 0x08, "Buderus Logamax U122"},
     {EMS_MODEL_UBA, 208, 0x08, "Buderus Logamax plus"},
     {EMS_MODEL_UBA, 64, 0x08, "Sieger BK15 Boiler/Nefit Smartline"},
-    {EMS_MODEL_UBA, 95, 0x08, "Bosch Condens 2500"}
+    {EMS_MODEL_UBA, 95, 0x08, "Bosch Condens 2500/Junkers Cerapur Comfort"},
+    {EMS_MODEL_UBA, 122, 0x08, "Nefit Proline"}
 
 };
 
@@ -173,7 +178,7 @@ const _Thermostat_Type Thermostat_Types[] = {
     {EMS_MODEL_BOSCHEASY, 206, 0x02, "Bosch Easy", EMS_THERMOSTAT_READ_YES, EMS_THERMOSTAT_WRITE_NO},
     {EMS_MODEL_RC310, 158, 0x10, "RC310", EMS_THERMOSTAT_READ_NO, EMS_THERMOSTAT_WRITE_NO},
     {EMS_MODEL_CW100, 255, 0x18, "Bosch CW100", EMS_THERMOSTAT_READ_NO, EMS_THERMOSTAT_WRITE_NO},
+    {EMS_MODEL_CW100, 255, 0x18, "Bosch CW100", EMS_THERMOSTAT_READ_NO, EMS_THERMOSTAT_WRITE_NO},
     {EMS_MODEL_RC1010, 165, 0x18, "RC1010/Nefit Moduline 1010", EMS_THERMOSTAT_READ_NO, EMS_THERMOSTAT_WRITE_NO}
-
 
 };

@@ -13,8 +13,8 @@
 #include <Arduino.h>
 
 // EMS IDs
-#define EMS_ID_NONE 0x00      // Fixed - used as a dest in broadcast messages and empty type IDs
-#define EMS_PLUS_ID_NONE 0x01 // Fixed - used as a dest in broadcast messages and empty type IDs
+#define EMS_ID_NONE 0x00      // Fixed - used as a dest in broadcast messages and empty device IDs
+#define EMS_PLUS_ID_NONE 0x01 // Fixed - used as a dest in broadcast messages and empty device IDs
 #define EMS_ID_ME 0x0B        // Fixed - our device, hardcoded as the "Service Key"
 #define EMS_ID_DEFAULT_BOILER 0x08
 #define EMS_ID_SM 0x30 // Solar Module SM10 and SM100
@@ -102,14 +102,14 @@ typedef struct {
 typedef struct {
     _EMS_TX_TELEGRAM_ACTION action; // read, write, validate, init
     uint8_t                 dest;
-    uint8_t                 type;
+    uint16_t                type;
     uint8_t                 offset;
     uint8_t                 length;
     uint8_t                 dataValue;          // value to validate against
-    uint8_t                 type_validate;      // type to call after a successful Write command
+    uint16_t                type_validate;      // type to call after a successful Write command
     uint8_t                 comparisonValue;    // value to compare against during a validate
     uint8_t                 comparisonOffset;   // offset of where the byte is we want to compare too later
-    uint8_t                 comparisonPostRead; // after a successful write call this to read
+    uint16_t                comparisonPostRead; // after a successful write call this to read from this type ID
     bool                    forceRefresh;       // should we send to MQTT after a successful Tx?
     uint32_t                timestamp;          // when created
     uint8_t                 data[EMS_MAX_TELEGRAM_LENGTH];
@@ -120,6 +120,12 @@ typedef struct {
     uint32_t  timestamp; // timestamp from millis()
     uint8_t * telegram;  // the full data package
     uint8_t   length;    // length in bytes
+    uint8_t   src;       // source ID
+    uint8_t   dest;      // destination ID
+    uint16_t  type;      // type ID as a double byte to support EMS+
+    uint8_t   offset;    // offset
+    uint8_t * data;      // pointer to where telegram data starts
+    bool      emsplus;   // true if ems+/ems 2.0
 } _EMS_RxTelegram;
 
 // default empty Tx
@@ -142,22 +148,22 @@ const _EMS_TxTelegram EMS_TX_TELEGRAM_NEW = {
 typedef struct {
     uint8_t model_id;
     uint8_t product_id;
-    uint8_t type_id;
+    uint8_t device_id;
     char    model_string[50];
 } _Boiler_Type;
 
 typedef struct {
     uint8_t model_id;
     uint8_t product_id;
-    uint8_t type_id;
+    uint8_t device_id;
     char    model_string[50];
 } _Other_Type;
 
-// Definition for thermostat type
+// Definition for thermostat devices
 typedef struct {
     uint8_t model_id;
     uint8_t product_id;
-    uint8_t type_id;
+    uint8_t device_id;
     char    model_string[50];
     bool    read_supported;
     bool    write_supported;
@@ -165,7 +171,7 @@ typedef struct {
 
 typedef struct {
     uint8_t product_id;
-    uint8_t type_id;
+    uint8_t device_id;
     char    version[10];
     char    model_string[50];
 } _Generic_Type;
@@ -226,7 +232,7 @@ typedef struct {           // UBAParameterWW
 
     // settings
     char    version[10];
-    uint8_t type_id; // this is typically always 0x08
+    uint8_t device_id; // this is typically always 0x08
     uint8_t product_id;
 } _EMS_Boiler;
 
@@ -244,8 +250,8 @@ typedef struct {
 
 // Thermostat data
 typedef struct {
-    uint8_t type_id;  // the type ID of the thermostat
-    uint8_t model_id; // which Thermostat type
+    uint8_t device_id; // the device ID of the thermostat
+    uint8_t model_id;  // thermostat model
     uint8_t product_id;
     bool    read_supported;
     bool    write_supported;
@@ -269,21 +275,20 @@ typedef struct {
 } _EMS_Thermostat;
 
 // call back function signature for processing telegram types
-typedef void (*EMS_processType_cb)(uint8_t src, uint8_t * data, uint8_t length);
+typedef void (*EMS_processType_cb)(_EMS_RxTelegram * EMS_RxTelegram);
 
 // Definition for each EMS type, including the relative callback function
 typedef struct {
     uint8_t            model_id;
-    uint8_t            type;
+    uint16_t           type; // long to support EMS+
     const char         typeString[50];
     EMS_processType_cb processType_cb;
-    bool               emsplus;
 } _EMS_Type;
 
 // function definitions
 extern void ems_parseTelegram(uint8_t * telegram, uint8_t len);
 void        ems_init();
-void        ems_doReadCommand(uint8_t type, uint8_t dest, bool forceRefresh = false);
+void        ems_doReadCommand(uint16_t type, uint8_t dest, bool forceRefresh = false);
 void        ems_sendRawTelegram(char * telegram);
 
 void ems_setThermostatTemp(float temperature, uint8_t temptype = 0);
