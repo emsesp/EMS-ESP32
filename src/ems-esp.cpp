@@ -469,10 +469,14 @@ void showInfo() {
             _renderShortValue("Current room temperature", "C", EMS_Thermostat.curr_roomTemp, 10);
         } else {
             // because we store in 2 bytes short, when converting to a single byte we'll loose the negative value if its unset
-            if ((EMS_Thermostat.setpoint_roomTemp <= 0) || (EMS_Thermostat.curr_roomTemp <= 0)) {
+            if (EMS_Thermostat.setpoint_roomTemp <= 0) {
                 EMS_Thermostat.setpoint_roomTemp = EMS_VALUE_INT_NOTSET;
-                EMS_Thermostat.curr_roomTemp     = EMS_VALUE_INT_NOTSET;
             }
+
+            if (EMS_Thermostat.curr_roomTemp <= 0) {
+                EMS_Thermostat.curr_roomTemp = EMS_VALUE_INT_NOTSET;
+            }
+
             _renderIntValue("Setpoint room temperature", "C", EMS_Thermostat.setpoint_roomTemp, 2); // convert to a single byte * 2
             _renderIntValue("Current room temperature", "C", EMS_Thermostat.curr_roomTemp, 10);     // is *10
 
@@ -1040,13 +1044,13 @@ bool SettingsCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, c
         // thermostat_type
         if (strcmp(setting, "thermostat_type") == 0) {
             EMS_Thermostat.device_id = ((wc == 2) ? (uint8_t)strtol(value, 0, 16) : EMS_ID_NONE);
-            ok                     = true;
+            ok                       = true;
         }
 
         // boiler_type
         if (strcmp(setting, "boiler_type") == 0) {
             EMS_Boiler.device_id = ((wc == 2) ? (uint8_t)strtol(value, 0, 16) : EMS_ID_NONE);
-            ok                 = true;
+            ok                   = true;
         }
 
         // shower timer
