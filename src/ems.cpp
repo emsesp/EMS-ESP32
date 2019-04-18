@@ -1171,11 +1171,17 @@ void _process_EasyStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
  * EMS+ messages may come in with different offsets so handle them here
  */
 void _process_RC1010StatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
-    // the whole telegram
-    // e.g. Thermostat -> all, telegram: 10 00 FF 00 01 A5 00 D7 21 00 00 00 00 30 01 84 01 01 03 01 84 01 F1 00 00 11 01 00 08 63 00 (CRC=CC), #data=27
+    
     if (EMS_RxTelegram->offset == 0) {
-        EMS_Thermostat.curr_roomTemp     = _toShort(EMS_OFFSET_RC1010StatusMessage_curr);    // is * 10
-        EMS_Thermostat.setpoint_roomTemp = _toByte(EMS_OFFSET_RC1010StatusMessage_setpoint); // is * 2
+        // the whole telegram
+        // e.g. Thermostat -> all, telegram: 10 00 FF 00 01 A5 00 D7 21 00 00 00 00 30 01 84 01 01 03 01 84 01 F1 00 00 11 01 00 08 63 00 (CRC=CC), #data=27
+        EMS_Thermostat.curr_roomTemp     = _toShort(EMS_OFFSET_RC1010StatusMessage_curr);    // value is * 10
+        EMS_Thermostat.setpoint_roomTemp = _toByte(EMS_OFFSET_RC1010StatusMessage_setpoint); // value is * 2
+
+        // room night setpoint is _toByte(2) (value is *2)
+        // boiler set temp is _toByte(4) (value is *2)
+        // day night is byte(8), 0x01 for night, 0x00 for day
+        
     }
 
     // this is a temp value but not sure which one
