@@ -571,11 +571,6 @@ void publishValues(bool force) {
 
     JsonObject rootBoiler = doc.to<JsonObject>();
 
-    rootBoiler["wWSelTemp"]   = _int_to_char(s, EMS_Boiler.wWSelTemp);
-    rootBoiler["selFlowTemp"] = _int_to_char(s, EMS_Boiler.selFlowTemp);
-    rootBoiler["outdoorTemp"] = _short_to_char(s, EMS_Boiler.extTemp);
-    rootBoiler["wWActivated"] = _bool_to_char(s, EMS_Boiler.wWActivated);
-
     if (EMS_Boiler.wWComfort == EMS_VALUE_UBAParameterWW_wwComfort_Hot) {
         rootBoiler["wWComfort"] = "Hot";
     } else if (EMS_Boiler.wWComfort == EMS_VALUE_UBAParameterWW_wwComfort_Eco) {
@@ -584,21 +579,40 @@ void publishValues(bool force) {
         rootBoiler["wWComfort"] = "Intelligent";
     }
 
-    rootBoiler["wWCurTmp"]          = _short_to_char(s, EMS_Boiler.wWCurTmp);
-    rootBoiler["wWCurFlow"]         = _int_to_char(s, EMS_Boiler.wWCurFlow, 10);
-    rootBoiler["wWHeat"]            = _bool_to_char(s, EMS_Boiler.wWHeat);
-    rootBoiler["curFlowTemp"]       = _short_to_char(s, EMS_Boiler.curFlowTemp);
-    rootBoiler["retTemp"]           = _short_to_char(s, EMS_Boiler.retTemp);
-    rootBoiler["burnGas"]           = _bool_to_char(s, EMS_Boiler.burnGas);
-    rootBoiler["heatPmp"]           = _bool_to_char(s, EMS_Boiler.heatPmp);
-    rootBoiler["fanWork"]           = _bool_to_char(s, EMS_Boiler.fanWork);
-    rootBoiler["ignWork"]           = _bool_to_char(s, EMS_Boiler.ignWork);
-    rootBoiler["wWCirc"]            = _bool_to_char(s, EMS_Boiler.wWCirc);
-    rootBoiler["selBurnPow"]        = _int_to_char(s, EMS_Boiler.selBurnPow);
-    rootBoiler["curBurnPow"]        = _int_to_char(s, EMS_Boiler.curBurnPow);
-    rootBoiler["sysPress"]          = _int_to_char(s, EMS_Boiler.sysPress, 10);
-    rootBoiler["boilTemp"]          = _short_to_char(s, EMS_Boiler.boilTemp);
-    rootBoiler["pumpMod"]           = _int_to_char(s, EMS_Boiler.pumpMod);
+    if (EMS_Boiler.wWSelTemp != EMS_VALUE_INT_NOTSET)
+        rootBoiler["wWSelTemp"] = EMS_Boiler.wWSelTemp;
+    if (EMS_Boiler.selFlowTemp != EMS_VALUE_INT_NOTSET)
+        rootBoiler["selFlowTemp"] = EMS_Boiler.selFlowTemp;
+    if (EMS_Boiler.selBurnPow != EMS_VALUE_INT_NOTSET)
+        rootBoiler["selBurnPow"] = EMS_Boiler.selBurnPow;
+    if (EMS_Boiler.curBurnPow != EMS_VALUE_INT_NOTSET)
+        rootBoiler["curBurnPow"] = EMS_Boiler.curBurnPow;
+    if (EMS_Boiler.pumpMod != EMS_VALUE_INT_NOTSET)
+        rootBoiler["pumpMod"] = EMS_Boiler.pumpMod;
+
+    if (abs(EMS_Boiler.extTemp) < EMS_VALUE_SHORT_NOTSET)
+        rootBoiler["outdoorTemp"] = (double)EMS_Boiler.extTemp / 10;
+    if (abs(EMS_Boiler.wWCurTmp) < EMS_VALUE_SHORT_NOTSET)
+        rootBoiler["wWCurTmp"] = (double)EMS_Boiler.wWCurTmp / 10;
+    if (abs(EMS_Boiler.wWCurFlow) < EMS_VALUE_SHORT_NOTSET)
+        rootBoiler["wWCurFlow"] = (double)EMS_Boiler.wWCurFlow / 10;
+    if (abs(EMS_Boiler.curFlowTemp) < EMS_VALUE_SHORT_NOTSET)
+        rootBoiler["curFlowTemp"] = (double)EMS_Boiler.curFlowTemp / 10;
+    if (abs(EMS_Boiler.retTemp) < EMS_VALUE_SHORT_NOTSET)
+        rootBoiler["retTemp"] = (double)EMS_Boiler.retTemp / 10;
+    if (abs(EMS_Boiler.sysPress) < EMS_VALUE_SHORT_NOTSET)
+        rootBoiler["sysPress"] = (double)EMS_Boiler.sysPress / 10;
+    if (abs(EMS_Boiler.boilTemp) < EMS_VALUE_SHORT_NOTSET)
+        rootBoiler["boilTemp"] = (double)EMS_Boiler.boilTemp / 10;
+
+    rootBoiler["wWActivated"] = _bool_to_char(s, EMS_Boiler.wWActivated);
+    rootBoiler["burnGas"]     = _bool_to_char(s, EMS_Boiler.burnGas);
+    rootBoiler["heatPmp"]     = _bool_to_char(s, EMS_Boiler.heatPmp);
+    rootBoiler["fanWork"]     = _bool_to_char(s, EMS_Boiler.fanWork);
+    rootBoiler["ignWork"]     = _bool_to_char(s, EMS_Boiler.ignWork);
+    rootBoiler["wWCirc"]      = _bool_to_char(s, EMS_Boiler.wWCirc);
+    rootBoiler["wWHeat"]      = _bool_to_char(s, EMS_Boiler.wWHeat);
+
     rootBoiler["ServiceCode"]       = EMS_Boiler.serviceCodeChar;
     rootBoiler["ServiceCodeNumber"] = EMS_Boiler.serviceCode;
 
@@ -640,17 +654,28 @@ void publishValues(bool force) {
         rootThermostat[THERMOSTAT_HC] = _int_to_char(s, EMSESP_Status.heating_circuit);
 
         if ((ems_getThermostatModel() == EMS_MODEL_EASY) || (ems_getThermostatModel() == EMS_MODEL_BOSCHEASY)) {
-            rootThermostat[THERMOSTAT_SELTEMP]  = _short_to_char(s, EMS_Thermostat.setpoint_roomTemp, 10);
-            rootThermostat[THERMOSTAT_CURRTEMP] = _short_to_char(s, EMS_Thermostat.curr_roomTemp, 10);
-        } else {
-            rootThermostat[THERMOSTAT_SELTEMP]  = _int_to_char(s, EMS_Thermostat.setpoint_roomTemp, 2);
-            rootThermostat[THERMOSTAT_CURRTEMP] = _int_to_char(s, EMS_Thermostat.curr_roomTemp, 10);
+            if (abs(EMS_Thermostat.setpoint_roomTemp) < EMS_VALUE_SHORT_NOTSET)
+                rootThermostat[THERMOSTAT_SELTEMP] = (double)EMS_Thermostat.setpoint_roomTemp / 10;
+            if (abs(EMS_Thermostat.curr_roomTemp) < EMS_VALUE_SHORT_NOTSET)
+                rootThermostat[THERMOSTAT_CURRTEMP] = (double)EMS_Thermostat.curr_roomTemp / 10;
 
-            rootThermostat[THERMOSTAT_DAYTEMP]         = _int_to_char(s, EMS_Thermostat.daytemp, 2);
-            rootThermostat[THERMOSTAT_NIGHTTEMP]       = _int_to_char(s, EMS_Thermostat.nighttemp, 2);
-            rootThermostat[THERMOSTAT_HOLIDAYTEMP]     = _int_to_char(s, EMS_Thermostat.holidaytemp, 2);
-            rootThermostat[THERMOSTAT_HEATINGTYPE]     = _int_to_char(s, EMS_Thermostat.heatingtype);
-            rootThermostat[THERMOSTAT_CIRCUITCALCTEMP] = _int_to_char(s, EMS_Thermostat.circuitcalctemp);
+        } else {
+            if (EMS_Thermostat.setpoint_roomTemp != EMS_VALUE_INT_NOTSET)
+                rootThermostat[THERMOSTAT_SELTEMP] = (double)EMS_Thermostat.setpoint_roomTemp / 2;
+            if (EMS_Thermostat.curr_roomTemp != EMS_VALUE_INT_NOTSET)
+                rootThermostat[THERMOSTAT_CURRTEMP] = (double)EMS_Thermostat.curr_roomTemp / 10;
+
+            if (EMS_Thermostat.daytemp != EMS_VALUE_INT_NOTSET)
+                rootThermostat[THERMOSTAT_DAYTEMP] = (double)EMS_Thermostat.daytemp / 2;
+            if (EMS_Thermostat.nighttemp != EMS_VALUE_INT_NOTSET)
+                rootThermostat[THERMOSTAT_NIGHTTEMP] = (double)EMS_Thermostat.nighttemp / 2;
+            if (EMS_Thermostat.holidaytemp != EMS_VALUE_INT_NOTSET)
+                rootThermostat[THERMOSTAT_HOLIDAYTEMP] = (double)EMS_Thermostat.holidaytemp / 2;
+
+            if (EMS_Thermostat.heatingtype != EMS_VALUE_INT_NOTSET)
+                rootThermostat[THERMOSTAT_HEATINGTYPE] = EMS_Thermostat.heatingtype;
+            if (EMS_Thermostat.circuitcalctemp != EMS_VALUE_INT_NOTSET)
+                rootThermostat[THERMOSTAT_CIRCUITCALCTEMP] = EMS_Thermostat.circuitcalctemp;
         }
 
         // RC20 has different mode settings
@@ -697,10 +722,19 @@ void publishValues(bool force) {
         doc.clear();
         JsonObject rootSM10 = doc.to<JsonObject>();
 
-        rootSM10[SM10_COLLECTORTEMP]  = _short_to_char(s, EMS_Other.SMcollectorTemp);
-        rootSM10[SM10_BOTTOMTEMP]     = _short_to_char(s, EMS_Other.SMbottomTemp);
-        rootSM10[SM10_PUMPMODULATION] = _int_to_char(s, EMS_Other.SMpumpModulation);
-        rootSM10[SM10_PUMP]           = _bool_to_char(s, EMS_Other.SMpump);
+        rootSM10[SM10_COLLECTORTEMP] = _short_to_char(s, EMS_Other.SMcollectorTemp);
+        rootSM10[SM10_BOTTOMTEMP]    = _short_to_char(s, EMS_Other.SMbottomTemp);
+
+        if (abs(EMS_Other.SMcollectorTemp) < EMS_VALUE_SHORT_NOTSET)
+            rootSM10[SM10_COLLECTORTEMP] = (double)EMS_Other.SMcollectorTemp / 10;
+        if (abs(EMS_Other.SMbottomTemp) < EMS_VALUE_SHORT_NOTSET)
+            rootSM10[SM10_BOTTOMTEMP] = (double)EMS_Other.SMbottomTemp / 10;
+
+
+        if (EMS_Other.SMpumpModulation != EMS_VALUE_INT_NOTSET)
+            rootSM10[SM10_PUMPMODULATION] = EMS_Other.SMpumpModulation;
+
+        rootSM10[SM10_PUMP] = _bool_to_char(s, EMS_Other.SMpump);
 
         data[0] = '\0'; // reset data for next package
         serializeJson(doc, data, sizeof(data));
