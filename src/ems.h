@@ -31,8 +31,6 @@
 #define EMS_VALUE_SHORT_NOTSET 0x8000  // for 2-byte shorts
 #define EMS_VALUE_LONG_NOTSET 0xFFFFFF // for 3-byte longs
 
-#define EMS_THERMOSTAT_READ_YES true
-#define EMS_THERMOSTAT_READ_NO false
 #define EMS_THERMOSTAT_WRITE_YES true
 #define EMS_THERMOSTAT_WRITE_NO false
 
@@ -117,15 +115,16 @@ typedef struct {
 
 // The Rx receive package
 typedef struct {
-    uint32_t  timestamp; // timestamp from millis()
-    uint8_t * telegram;  // the full data package
-    uint8_t   length;    // length in bytes
-    uint8_t   src;       // source ID
-    uint8_t   dest;      // destination ID
-    uint16_t  type;      // type ID as a double byte to support EMS+
-    uint8_t   offset;    // offset
-    uint8_t * data;      // pointer to where telegram data starts
-    bool      emsplus;   // true if ems+/ems 2.0
+    uint32_t  timestamp;   // timestamp from millis()
+    uint8_t * telegram;    // the full data package
+    uint8_t   length;      // length in bytes of the data
+    uint8_t   full_length; // full length of the complete telegram
+    uint8_t   src;         // source ID
+    uint8_t   dest;        // destination ID
+    uint16_t  type;        // type ID as a double byte to support EMS+
+    uint8_t   offset;      // offset
+    uint8_t * data;        // pointer to where telegram data starts
+    bool      emsplus;     // true if ems+/ems 2.0
 } _EMS_RxTelegram;
 
 // default empty Tx
@@ -165,7 +164,6 @@ typedef struct {
     uint8_t product_id;
     uint8_t device_id;
     char    model_string[50];
-    bool    read_supported;
     bool    write_supported;
 } _Thermostat_Type;
 
@@ -253,7 +251,6 @@ typedef struct {
     uint8_t device_id; // the device ID of the thermostat
     uint8_t model_id;  // thermostat model
     uint8_t product_id;
-    bool    read_supported;
     bool    write_supported;
     uint8_t hc; // heating circuit 1 or 2
     char    version[10];
@@ -280,7 +277,7 @@ typedef void (*EMS_processType_cb)(_EMS_RxTelegram * EMS_RxTelegram);
 // Definition for each EMS type, including the relative callback function
 typedef struct {
     uint8_t            model_id;
-    uint16_t           type; // long to support EMS+
+    uint16_t           type; // long to support EMS+ types
     const char         typeString[50];
     EMS_processType_cb processType_cb;
 } _EMS_Type;
@@ -329,8 +326,8 @@ void   ems_printDevices();
 char * ems_getThermostatDescription(char * buffer);
 void   ems_printTxQueue();
 char * ems_getBoilerDescription(char * buffer);
-
-void ems_startupTelegrams();
+void   ems_testTelegram(uint8_t test_num);
+void   ems_startupTelegrams();
 
 // private functions
 uint8_t _crcCalculator(uint8_t * data, uint8_t len);

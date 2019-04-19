@@ -46,6 +46,7 @@ void _process_UBATotalUptimeMessage(_EMS_RxTelegram * EMS_RxTelegram);
 void _process_UBAParametersMessage(_EMS_RxTelegram * EMS_RxTelegram);
 void _process_SetPoints(_EMS_RxTelegram * EMS_RxTelegram);
 void _process_SM10Monitor(_EMS_RxTelegram * EMS_RxTelegram);
+void _process_SM100Monitor(_EMS_RxTelegram * EMS_RxTelegram);
 
 // Common for most thermostats
 void _process_RCTime(_EMS_RxTelegram * EMS_RxTelegram);
@@ -70,9 +71,9 @@ void _process_RC35StatusMessage(_EMS_RxTelegram * EMS_RxTelegram);
 // Easy
 void _process_EasyStatusMessage(_EMS_RxTelegram * EMS_RxTelegram);
 
-//RC1010
-void _process_RC1010StatusMessage(_EMS_RxTelegram * EMS_RxTelegram);
-void _process_RC1010SetMessage(_EMS_RxTelegram * EMS_RxTelegram);
+// RC1010, RC300, RC310
+void _process_RCPLUSStatusMessage(_EMS_RxTelegram * EMS_RxTelegram);
+void _process_RCPLUSSetMessage(_EMS_RxTelegram * EMS_RxTelegram);
 
 /*
  * Recognized EMS types and the functions they call to process the telegrams
@@ -95,6 +96,7 @@ const _EMS_Type EMS_Types[] = {
 
     // Other devices
     {EMS_MODEL_OTHER, EMS_TYPE_SM10Monitor, "SM10Monitor", _process_SM10Monitor},
+    {EMS_MODEL_OTHER, EMS_TYPE_SM100Monitor, "SM100Monitor", _process_SM100Monitor},
 
     // RC10
     {EMS_MODEL_RC10, EMS_TYPE_RCTime, "RCTime", _process_RCTime},
@@ -136,9 +138,9 @@ const _EMS_Type EMS_Types[] = {
     {EMS_MODEL_EASY, EMS_TYPE_EasyStatusMessage, "EasyStatusMessage", _process_EasyStatusMessage},
     {EMS_MODEL_BOSCHEASY, EMS_TYPE_EasyStatusMessage, "EasyStatusMessage", _process_EasyStatusMessage},
 
-    // Nefit 1010
-    {EMS_MODEL_RC1010, EMS_TYPE_RC1010StatusMessage, "RC1010StatusMessage", _process_RC1010StatusMessage},
-    {EMS_MODEL_RC1010, EMS_TYPE_RC1010Set, "RC1010SetMessage", _process_RC1010SetMessage}
+    // Nefit 1010, RC300, RC310 (EMS Plus)
+    {EMS_MODEL_ALL, EMS_TYPE_RCPLUSStatusMessage, "RCPLUSStatusMessage", _process_RCPLUSStatusMessage},
+    {EMS_MODEL_ALL, EMS_TYPE_RCPLUSSet, "RCPLUSSetMessage", _process_RCPLUSSetMessage}
 
 };
 
@@ -205,7 +207,6 @@ void ems_init() {
     EMS_Thermostat.mode              = 255; // dummy value
     EMS_Thermostat.day_mode          = 255; // dummy value
     EMS_Thermostat.device_id         = EMS_ID_NONE;
-    EMS_Thermostat.read_supported    = false;
     EMS_Thermostat.write_supported   = false;
     EMS_Thermostat.hc                = 1;                    // default heating circuit is 1
     EMS_Thermostat.daytemp           = EMS_VALUE_INT_NOTSET; // 0x47 byte
@@ -377,7 +378,7 @@ void ems_setLogging(_EMS_SYS_LOGGING loglevel) {
 /**
  * Calculate CRC checksum using lookup table for speed
  * len is length of data in bytes (including the CRC byte at end)
- * So its the complete telegram with the header
+ * So its the complete telegram with the header. CRC is calculated only over the data bytes
  */
 uint8_t _crcCalculator(uint8_t * data, uint8_t len) {
     uint8_t crc = 0;
@@ -450,8 +451,9 @@ void _debugPrintTelegram(const char * prefix, _EMS_RxTelegram * EMS_RxTelegram, 
 
     char      output_str[200] = {0};
     char      buffer[16]      = {0};
-    uint8_t   len             = EMS_RxTelegram->length;
     uint8_t * data            = EMS_RxTelegram->telegram;
+    uint8_t   len             = EMS_RxTelegram->length;          // length of data block
+    uint8_t   full_len        = EMS_RxTelegram->full_length - 1; // no CRC
 
     strlcpy(output_str, "(", sizeof(output_str));
     strlcat(output_str, COLOR_CYAN, sizeof(output_str));
@@ -469,19 +471,19 @@ void _debugPrintTelegram(const char * prefix, _EMS_RxTelegram * EMS_RxTelegram, 
     strlcat(output_str, prefix, sizeof(output_str));
     strlcat(output_str, " telegram: ", sizeof(output_str));
 
-    for (int i = 0; i < len - 1; i++) {
+    for (int i = 0; i < full_len; i++) {
         strlcat(output_str, _hextoa(data[i], buffer), sizeof(output_str));
         strlcat(output_str, " ", sizeof(output_str)); // add space
     }
 
     strlcat(output_str, "(CRC=", sizeof(output_str));
-    strlcat(output_str, _hextoa(data[len - 1], buffer), sizeof(output_str));
+    strlcat(output_str, _hextoa(data[full_len], buffer), sizeof(output_str));
     strlcat(output_str, ")", sizeof(output_str));
 
     // print number of data bytes only if its a valid telegram
     if (len > 5) {
         strlcat(output_str, ", #data=", sizeof(output_str));
-        strlcat(output_str, itoa(len - 5, buffer, 10), sizeof(output_str));
+        strlcat(output_str, itoa(len, buffer, 10), sizeof(output_str));
     }
 
     strlcat(output_str, COLOR_RESET, sizeof(output_str));
@@ -508,7 +510,6 @@ void _ems_sendTelegram() {
         EMS_TxQueue.shift(); // remove from queue
         return;
     }
-
 
     // if we're in raw mode just fire and forget
     if (EMS_TxTelegram.action == EMS_TX_TELEGRAM_RAW) {
@@ -616,7 +617,7 @@ void _createValidate() {
 
 /*
  * Entry point triggered by an interrupt in emsuart.cpp
- * length is only data bytes, excluding the BRK
+ * length is size of all the data bytes with CRC, excluding the BRK at the end
  * Read commands are asynchronous as they're handled by the interrupt
  * When a telegram is processed we forcefully erase it from the stack to prevent overflow
  */
@@ -632,6 +633,7 @@ void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
 /**
  * the main logic that parses the telegram message
  * When we receive a Poll Request we need to send any Tx packages quickly within a 200ms window
+ * length is total number of bytes of the telegram excluding the CRC byte at the end
  */
 void _ems_readTelegram(uint8_t * telegram, uint8_t length) {
     // create the Rx package
@@ -639,6 +641,7 @@ void _ems_readTelegram(uint8_t * telegram, uint8_t length) {
     static uint32_t        _last_emsPollFrequency = 0;
     EMS_RxTelegram.telegram                       = telegram;
     EMS_RxTelegram.timestamp                      = millis();
+    EMS_RxTelegram.full_length                    = length;
 
     // check if we just received a single byte
     // it could well be a Poll request from the boiler for us, which will have a value of 0x8B (0x0B | 0x80)
@@ -690,6 +693,25 @@ void _ems_readTelegram(uint8_t * telegram, uint8_t length) {
         return;
     }
 
+    // fill in the rest of the Telegram
+    EMS_RxTelegram.src    = telegram[0] & 0x7F; // removing 8th bit as we deal with both reads and writes here
+    EMS_RxTelegram.dest   = telegram[1] & 0x7F; // remove 8th bit (don't care if read or write)
+    EMS_RxTelegram.offset = telegram[3];        // offset is always 4th byte
+
+    // determing if its normal ems or ems plus
+    if (telegram[2] >= 0xF0) {
+        // its EMS plus
+        EMS_RxTelegram.emsplus = true;
+        EMS_RxTelegram.type    = (telegram[4] << 8) + telegram[5]; // is a long in bytes 5 & 6
+        EMS_RxTelegram.data    = telegram + 6;
+        EMS_RxTelegram.length  = length - 8; // remove 5 bytes header plus CRC + length byte + 0x00 at end
+    } else {
+        EMS_RxTelegram.emsplus = false;
+        EMS_RxTelegram.type    = telegram[2]; // 3rd byte
+        EMS_RxTelegram.data    = telegram + 4;
+        EMS_RxTelegram.length  = length - 5; // remove 4 bytes header plus CRC
+    }
+
     // Assume at this point we have something that vaguely resembles a telegram in the format [src] [dest] [type] [offset] [data] [crc]
     // validate the CRC, if its bad ignore it
     if (telegram[length - 1] != _crcCalculator(telegram, length)) {
@@ -716,25 +738,6 @@ void _ems_readTelegram(uint8_t * telegram, uint8_t length) {
     // we use this to see if we always have a connection to the boiler, in case of drop outs
     EMS_Sys_Status.emsRxTimestamp  = EMS_RxTelegram.timestamp; // timestamp of last read
     EMS_Sys_Status.emsBusConnected = true;
-
-    // fill in the rest of the Telegram
-    EMS_RxTelegram.src    = telegram[0] & 0x7F; // removing 8th bit as we deal with both reads and writes here
-    EMS_RxTelegram.dest   = telegram[1] & 0x7F; // remove 8th bit (don't care if read or write)
-    EMS_RxTelegram.offset = telegram[3];        // offset is always 4th byte
-
-    // determing if its normal ems or ems plus
-    if (telegram[2] >= 0xF0) {
-        // its EMS plus
-        EMS_RxTelegram.emsplus = true;
-        EMS_RxTelegram.type    = (telegram[4] << 8) + telegram[5]; // is a long in bytes 5 & 6
-        EMS_RxTelegram.data    = telegram + 6;
-        EMS_RxTelegram.length  = length - 8; // remove 5 bytes header plus CRC + length byte + 0x00 at end
-    } else {
-        EMS_RxTelegram.emsplus = false;
-        EMS_RxTelegram.type    = telegram[2]; // 3rd byte
-        EMS_RxTelegram.data    = telegram + 4;
-        EMS_RxTelegram.length  = length - 5; // remove 4 bytes header plus CRC
-    }
 
     // now lets process it and see what to do next
     _processType(&EMS_RxTelegram);
@@ -1167,21 +1170,19 @@ void _process_EasyStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
 }
 
 /**
- * type 0x01A5 - data from the Nefit RC1010 thermostat (0x18)
+ * type 0x01A5 - data from the Nefit RC1010 thermostat (0x18) and RC300/310s on 0x10
  * EMS+ messages may come in with different offsets so handle them here
  */
-void _process_RC1010StatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
-    
+void _process_RCPLUSStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     if (EMS_RxTelegram->offset == 0) {
         // the whole telegram
         // e.g. Thermostat -> all, telegram: 10 00 FF 00 01 A5 00 D7 21 00 00 00 00 30 01 84 01 01 03 01 84 01 F1 00 00 11 01 00 08 63 00 (CRC=CC), #data=27
-        EMS_Thermostat.curr_roomTemp     = _toShort(EMS_OFFSET_RC1010StatusMessage_curr);    // value is * 10
-        EMS_Thermostat.setpoint_roomTemp = _toByte(EMS_OFFSET_RC1010StatusMessage_setpoint); // value is * 2
+        EMS_Thermostat.curr_roomTemp     = _toShort(EMS_OFFSET_RCPLUSStatusMessage_curr);    // value is * 10
+        EMS_Thermostat.setpoint_roomTemp = _toByte(EMS_OFFSET_RCPLUSStatusMessage_setpoint); // value is * 2
 
         // room night setpoint is _toByte(2) (value is *2)
         // boiler set temp is _toByte(4) (value is *2)
         // day night is byte(8), 0x01 for night, 0x00 for day
-        
     }
 
     // this is a temp value but not sure which one
@@ -1200,7 +1201,7 @@ void _process_RC1010StatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
 /*
  * to complete....
  */
-void _process_RC1010SetMessage(_EMS_RxTelegram * EMS_RxTelegram) {
+void _process_RCPLUSSetMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     // to complete
 }
 
@@ -1263,6 +1264,21 @@ void _process_SM10Monitor(_EMS_RxTelegram * EMS_RxTelegram) {
     EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
 }
 
+/*
+ * SM100Monitor - type 0x0262 EMS+
+ */
+void _process_SM100Monitor(_EMS_RxTelegram * EMS_RxTelegram) {
+
+    // to be completed
+    // need help to decyper telegram, e.g. 30 00 FF 00 02 62 00 A1 01 3F 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00
+    //EMS_Other.SMcollectorTemp  = _toShort(2);    // collector temp from SM10/SM100, is *10
+    //EMS_Other.SMbottomTemp     = _toShort(5);    // bottom temp from SM10/SM100, is *10
+    //EMS_Other.SMpumpModulation = _toByte(4);     // modulation solar pump
+    //EMS_Other.SMpump           = _bitRead(7, 1); // active if bit 1 is set
+
+    EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
+}
+
 /**
  * UBASetPoint 0x1A
  */
@@ -1272,7 +1288,7 @@ void _process_SetPoints(_EMS_RxTelegram * EMS_RxTelegram) {
             uint8_t setpoint = EMS_RxTelegram->data[0]; // flow temp
             //uint8_t ww_power = data[2]; // power in %
 
-            /* this logic if the value is *2
+            /* use this logic if the value is *2
             char s[5];
             char s2[5];
             strlcpy(s, itoa(setpoint >> 1, s2, 10), 5);
@@ -1418,7 +1434,6 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
 
             EMS_Thermostat.model_id        = Thermostat_Types[i].model_id;
             EMS_Thermostat.device_id       = Thermostat_Types[i].device_id;
-            EMS_Thermostat.read_supported  = Thermostat_Types[i].read_supported;
             EMS_Thermostat.write_supported = Thermostat_Types[i].write_supported;
             EMS_Thermostat.product_id      = product_id;
             strlcpy(EMS_Thermostat.version, version, sizeof(EMS_Thermostat.version));
@@ -1549,11 +1564,6 @@ void ems_printTxQueue() {
  */
 void ems_getThermostatValues() {
     if (!ems_getThermostatEnabled()) {
-        return;
-    }
-
-    if (!EMS_Thermostat.read_supported) {
-        myDebug("Read operations not yet supported for this model thermostat");
         return;
     }
 
@@ -1746,13 +1756,12 @@ void ems_printAllDevices() {
 
     myDebug("\nThese %d thermostat devices are supported:", _Thermostat_Types_max);
     for (i = 0; i < _Thermostat_Types_max; i++) {
-        myDebug(" %s%s%s (DeviceID:0x%02X ProductID:%d) Read:%c Write:%c",
+        myDebug(" %s%s%s (DeviceID:0x%02X ProductID:%d) can write:%c",
                 COLOR_BOLD_ON,
                 Thermostat_Types[i].model_string,
                 COLOR_BOLD_OFF,
                 Thermostat_Types[i].device_id,
                 Thermostat_Types[i].product_id,
-                (Thermostat_Types[i].read_supported) ? 'y' : 'n',
                 (Thermostat_Types[i].write_supported) ? 'y' : 'n');
     }
 
@@ -1778,8 +1787,8 @@ void ems_printDevices() {
                     (it)->version);
         }
 
-        myDebug("\nNote: if any devices are marked as 'unknown?', please report this as a GitHub issue so we can update the EMS devices "
-                "database.\n");
+        myDebug("\nNote: if any devices are marked as 'unknown?' please report this as a GitHub issue so the EMS devices list can be "
+                "updated.\n");
     }
 }
 
@@ -2193,4 +2202,61 @@ void ems_startupTelegrams() {
     // Read type 0x01
     snprintf(s, sizeof(s), "%02X %02X 01 00 1B", EMS_ID_ME, EMS_Boiler.device_id | 0x80);
     ems_sendRawTelegram(s);
+}
+
+/*
+ * Test parsing of telgrams by injecting fake telegrams and simulating the response
+ */
+void ems_testTelegram(uint8_t test_num) {
+    if (test_num == 0)
+        return;
+
+    static const char tests[5][200] = {
+
+        "08 00 34 00 3E 02 1D 80 00 31 00 00 01 00 01 0B AE 02",                                        // test 1
+        "10 00 FF 00 01 A5 80 00 01 30 28 00 30 28 01 54 03 03 01 01 54 02 A8 00 00 11 01 03 FF FF 00", // test 2 - RC310 ems+
+        "10 00 FF 19 01 A5 06 04 00 00 00 00 FF 64 37 00 3C 01 FF 01",                                  // test 3 - RC310 ems+
+        "30 00 FF 00 02 62 00 A1 01 3F 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00",    // test 4 - SM100
+        "10 00 FF 00 01 A5 00 D7 21 00 00 00 00 30 01 84 01 01 03 01 84 01 F1 00 00 11 01 00 08 63 00"  // test 5 - RC1010
+        "18 00 FF 00 01 A5 00 DD 21 23 00 00 23 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00"           // test 6 - RC300
+
+    };
+
+    // stop all Tx
+    if (!EMS_TxQueue.isEmpty()) {
+        EMS_TxQueue.clear();
+        EMS_Sys_Status.emsTxStatus = EMS_TX_STATUS_IDLE;
+    }
+
+    static uint8_t * telegram = (uint8_t *)malloc(EMS_MAX_TELEGRAM_LENGTH); // warning, memory is not free'd so use only for debugging
+
+    char telegram_string[200];
+    strlcpy(telegram_string, tests[test_num - 1], sizeof(telegram_string));
+
+    uint8_t length = 0;
+    char *  p;
+    char    value[10] = {0};
+
+    // get first value, which should be the src
+    if ((p = strtok(telegram_string, " ,"))) {
+        strlcpy(value, p, sizeof(value));
+        telegram[0] = (uint8_t)strtol(value, 0, 16);
+    }
+
+    // and interate until end
+    while (p != 0) {
+        if ((p = strtok(NULL, " ,"))) {
+            strlcpy(value, p, sizeof(value));
+            uint8_t val        = (uint8_t)strtol(value, 0, 16);
+            telegram[++length] = val;
+        }
+    }
+
+    length++;                                                // this is the total amount of bytes
+    telegram[length] = _crcCalculator(telegram, length + 1); // add the CRC
+
+    myDebug("[TEST %d] Injecting telegram %s (length %d)", test_num, tests[test_num - 1], length);
+
+    // go an parse it
+    _ems_readTelegram(telegram, length + 1); // include CRC in length
 }

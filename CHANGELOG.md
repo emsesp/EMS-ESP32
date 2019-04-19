@@ -9,19 +9,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Buderus Logamax plus
-- EMS+ support (thanks @GlennArens, @gl3nni3)
+- Buderus Logamax plus boiler added
+- EMS+ support (thanks too @gl3nni3 for making the first implementation)
 - MQTT 'restart' topic to reboot ESP (thanks @balk77)
 - Support for multiple thermostat heating circuits like the HC1/HC2 on a RC35, also via MQTT (thanks @lobocobra)
 - `boiler flowtemp` command to set the flow temperature [(issue 59)](https://github.com/proddy/EMS-ESP/issues/59)
 - `tx_delay` setting for circuits where we needed to slow down Tx transmission
 - nefit proline hrc 24 cw4 thermostat
+- support for Buderus RC300 and RC310 thermostats [(issue 37)](https://github.com/proddy/EMS-ESP/issues/37)
+- added a test harness to try out response to various telegrams
 
 ### Changed
 
 - `types` renamed to `devices` to also show all detected devices
 - EMS Plus logic optimized
-
 
 ## [1.6.0] 2019-03-24
 

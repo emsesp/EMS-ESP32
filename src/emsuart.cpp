@@ -72,7 +72,7 @@ static void emsuart_rx_intr_handler(void * para) {
  */
 static void ICACHE_FLASH_ATTR emsuart_recvTask(os_event_t * events) {
     _EMSRxBuf * pCurrent = pEMSRxBuf;
-    ems_parseTelegram((uint8_t *)pCurrent->buffer, (pCurrent->writePtr) - 1); //  transmit EMS buffer, excluding the BRK
+    ems_parseTelegram((uint8_t *)pCurrent->buffer, (pCurrent->writePtr) - 1); // transmit EMS buffer, excluding the BRK
     pEMSRxBuf = paEMSRxBuf[++emsRxBufIdx % EMS_MAXBUFFERS];                   // next free EMS Receive buffer
 }
 

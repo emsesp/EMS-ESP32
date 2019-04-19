@@ -929,6 +929,17 @@ void _showerColdShotStart() {
     }
 }
 
+// run tests to validate handling of telegrams by injecting fake telegrams
+void runUnitTest(uint8_t test_num) {
+    ems_setLogging(EMS_SYS_LOGGING_VERBOSE);
+    publishValuesTimer.detach();
+    systemCheckTimer.detach();
+    regularUpdatesTimer.detach();
+    if (test_num >= 1 && test_num <= 10) {
+        ems_testTelegram(test_num);
+    }
+}
+
 // callback for loading/saving settings to the file system (SPIFFS)
 bool FSCallback(MYESP_FSACTION action, const JsonObject json) {
     if (action == MYESP_FSACTION_LOAD) {
@@ -1328,6 +1339,12 @@ void TelnetCommandCallback(uint8_t wc, const char * commandLine) {
     // send raw
     if (strcmp(first_cmd, "send") == 0) {
         ems_sendRawTelegram((char *)&commandLine[5]);
+        ok = true;
+    }
+
+    // test commands
+    if ((strcmp(first_cmd, "test") == 0) && (wc == 2)) {
+        runUnitTest(_readIntNumber());
         ok = true;
     }
 

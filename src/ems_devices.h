@@ -41,7 +41,8 @@
 #define EMS_OFFSET_UBASetPoints_flowtemp 0 // flow temp
 
 // Other
-#define EMS_TYPE_SM10Monitor 0x97 // SM10Monitor
+#define EMS_TYPE_SM10Monitor 0x97    // SM10Monitor
+#define EMS_TYPE_SM100Monitor 0x0262 // SM100Monitor
 
 /*
  * Thermostats...
@@ -94,11 +95,11 @@
 #define EMS_OFFSET_EasyStatusMessage_setpoint 10 // setpoint temp
 #define EMS_OFFSET_EasyStatusMessage_curr 8      // current temp
 
-// RC1010 specific
-#define EMS_TYPE_RC1010StatusMessage 0x01A5       // is an automatic thermostat broadcast giving us temps
-#define EMS_TYPE_RC1010Set 0x03                   // setpoint temp message
-#define EMS_OFFSET_RC1010StatusMessage_setpoint 3 // setpoint temp
-#define EMS_OFFSET_RC1010StatusMessage_curr 1     // current temp
+// RC1010,RC310 and RC300 specific (EMS Plus)
+#define EMS_TYPE_RCPLUSStatusMessage 0x01A5       // is an automatic thermostat broadcast giving us temps
+#define EMS_TYPE_RCPLUSSet 0x03                   // setpoint temp message - this is incorrect!
+#define EMS_OFFSET_RCPLUSStatusMessage_setpoint 2 // setpoint temp
+#define EMS_OFFSET_RCPLUSStatusMessage_curr 0     // current temp
 
 // Known EMS types
 typedef enum {
@@ -168,17 +169,16 @@ const _Other_Type Other_Types[] = {
  */
 const _Thermostat_Type Thermostat_Types[] = {
 
-    {EMS_MODEL_ES73, 76, 0x10, "Sieger ES73", EMS_THERMOSTAT_READ_YES, EMS_THERMOSTAT_WRITE_YES},
-    {EMS_MODEL_RC10, 79, 0x17, "RC10/Nefit Moduline 100", EMS_THERMOSTAT_READ_YES, EMS_THERMOSTAT_WRITE_YES},
-    {EMS_MODEL_RC20, 77, 0x17, "RC20/Nefit Moduline 300", EMS_THERMOSTAT_READ_YES, EMS_THERMOSTAT_WRITE_YES},
-    {EMS_MODEL_RC20F, 93, 0x18, "RC20F", EMS_THERMOSTAT_READ_YES, EMS_THERMOSTAT_WRITE_YES},
-    {EMS_MODEL_RC30, 78, 0x10, "RC30/Nefit Moduline 400", EMS_THERMOSTAT_READ_YES, EMS_THERMOSTAT_WRITE_YES},
-    {EMS_MODEL_RC35, 86, 0x10, "RC35", EMS_THERMOSTAT_READ_YES, EMS_THERMOSTAT_WRITE_YES},
-    {EMS_MODEL_EASY, 202, 0x18, "TC100/Nefit Easy", EMS_THERMOSTAT_READ_YES, EMS_THERMOSTAT_WRITE_NO},
-    {EMS_MODEL_BOSCHEASY, 206, 0x02, "Bosch Easy", EMS_THERMOSTAT_READ_YES, EMS_THERMOSTAT_WRITE_NO},
-    {EMS_MODEL_RC310, 158, 0x10, "RC310", EMS_THERMOSTAT_READ_NO, EMS_THERMOSTAT_WRITE_NO},
-    {EMS_MODEL_CW100, 255, 0x18, "Bosch CW100", EMS_THERMOSTAT_READ_NO, EMS_THERMOSTAT_WRITE_NO},
-    {EMS_MODEL_CW100, 255, 0x18, "Bosch CW100", EMS_THERMOSTAT_READ_NO, EMS_THERMOSTAT_WRITE_NO},
-    {EMS_MODEL_RC1010, 165, 0x18, "RC1010/Nefit Moduline 1010", EMS_THERMOSTAT_READ_NO, EMS_THERMOSTAT_WRITE_NO}
+    {EMS_MODEL_ES73, 76, 0x10, "Sieger ES73", EMS_THERMOSTAT_WRITE_YES},
+    {EMS_MODEL_RC10, 79, 0x17, "RC10/Nefit Moduline 100", EMS_THERMOSTAT_WRITE_YES},
+    {EMS_MODEL_RC20, 77, 0x17, "RC20/Nefit Moduline 300", EMS_THERMOSTAT_WRITE_YES},
+    {EMS_MODEL_RC20F, 93, 0x18, "RC20F", EMS_THERMOSTAT_WRITE_YES},
+    {EMS_MODEL_RC30, 78, 0x10, "RC30/Nefit Moduline 400", EMS_THERMOSTAT_WRITE_YES},
+    {EMS_MODEL_RC35, 86, 0x10, "RC35", EMS_THERMOSTAT_WRITE_YES},
+    {EMS_MODEL_EASY, 202, 0x18, "TC100/Nefit Easy", EMS_THERMOSTAT_WRITE_NO},
+    {EMS_MODEL_BOSCHEASY, 206, 0x02, "Bosch Easy", EMS_THERMOSTAT_WRITE_NO},
+    {EMS_MODEL_RC310, 158, 0x10, "RC300/RC310", EMS_THERMOSTAT_WRITE_NO},
+    {EMS_MODEL_CW100, 255, 0x18, "Bosch CW100", EMS_THERMOSTAT_WRITE_NO},
+    {EMS_MODEL_RC1010, 165, 0x18, "RC1010/Nefit Moduline 1010", EMS_THERMOSTAT_WRITE_NO}
 
 };
