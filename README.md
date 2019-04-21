@@ -288,11 +288,13 @@ You can find the .yaml configuration files under `doc/ha`. See also this [HA for
 **On Windows:**
 
 - Download [Git](https://git-scm.com/download/win) (install using the default settings)
-- Download and install [Visual Studio Code](https://code.visualstudio.com/docs/?dv=win) (VSC). It's like 40MB so don't confuse with the commercial Microsoft Visual Studio.
+- Download and install [Visual Studio Code](https://code.visualstudio.com/docs/?dv=win)
 - Restart the PC (if using Windows) to apply the new PATH settings. It should now detect Git
 - Install the VSC extension "PlatformIO IDE" then click reload to activate it
-- Git clone this repo using `git clone` from PlatformIO's terminal or the Git GUI interface
-- Create a `platformio.ini` based on the `platformio.ini-example` making the necessary changes for your board type
+- Git clone this repo using `git clone` from PlatformIO (F1, type git clone and use https://github.com/proddy/EMS-ESP.git as the URL)
+- Copy `platformio.ini-example` to `platform.ini` making the necessary changes for your board type
+- In the PlatformIO tab (Alien icon on the left) do a `Update All` to make sure you have the latest ESP libraries and then under `Project Tasks` click the `Update project libraries`
+- Now build the firmware with either the 'tick' icon on the lower left bar or selecting `Build` from the Project Tasks
 
 **On Linux (e.g. Ubuntu under Windows 10):**
 
