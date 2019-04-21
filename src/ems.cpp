@@ -401,14 +401,6 @@ char * _hextoa(uint8_t value, char * buffer) {
     return buffer;
 }
 
-// long to hex
-char * _hextoa16(uint16_t value, char * buffer) {
-    // TODO: needs improving
-    char s[10];
-    strlcpy(buffer, itoa(value, s, 10), 10);
-    return buffer;
-}
-
 // for decimals 0 to 99, printed as a string
 char * _smallitoa(uint8_t value, char * buffer) {
     buffer[0] = ((value / 10) == 0) ? '0' : (value / 10) + '0';
@@ -800,7 +792,13 @@ void _printMessage(_EMS_RxTelegram * EMS_RxTelegram) {
 
     // type
     strlcat(output_str, ", type 0x", sizeof(output_str));
-    strlcat(output_str, _hextoa16(type, buffer), sizeof(output_str));
+
+    if (EMS_RxTelegram->emsplus) {
+        strlcat(output_str, _hextoa(type >> 8, buffer), sizeof(output_str));
+        strlcat(output_str, _hextoa(type & 0xFF, buffer), sizeof(output_str));
+    } else {
+        strlcat(output_str, _hextoa(type, buffer), sizeof(output_str));
+    }
 
     if (EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_THERMOSTAT) {
         // only print ones to/from thermostat if logging is set to thermostat only
