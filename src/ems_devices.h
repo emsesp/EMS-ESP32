@@ -43,6 +43,7 @@
 // Other
 #define EMS_TYPE_SM10Monitor 0x97    // SM10Monitor
 #define EMS_TYPE_SM100Monitor 0x0262 // SM100Monitor
+#define EMS_TYPE_SM100Status 0x0264  // SM100Status
 
 /*
  * Thermostats...

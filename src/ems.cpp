@@ -47,6 +47,7 @@ void _process_UBAParametersMessage(_EMS_RxTelegram * EMS_RxTelegram);
 void _process_SetPoints(_EMS_RxTelegram * EMS_RxTelegram);
 void _process_SM10Monitor(_EMS_RxTelegram * EMS_RxTelegram);
 void _process_SM100Monitor(_EMS_RxTelegram * EMS_RxTelegram);
+void _process_SM100Status(_EMS_RxTelegram * EMS_RxTelegram);
 
 // Common for most thermostats
 void _process_RCTime(_EMS_RxTelegram * EMS_RxTelegram);
@@ -97,6 +98,7 @@ const _EMS_Type EMS_Types[] = {
     // Other devices
     {EMS_MODEL_OTHER, EMS_TYPE_SM10Monitor, "SM10Monitor", _process_SM10Monitor},
     {EMS_MODEL_OTHER, EMS_TYPE_SM100Monitor, "SM100Monitor", _process_SM100Monitor},
+    {EMS_MODEL_OTHER, EMS_TYPE_SM100Status, "SM100Status", _process_SM100Status},
 
     // RC10
     {EMS_MODEL_RC10, EMS_TYPE_RCTime, "RCTime", _process_RCTime},
@@ -1257,11 +1259,12 @@ void _process_RCOutdoorTempMessage(_EMS_RxTelegram * EMS_RxTelegram) {
  * SM10Monitor - type 0x97
  */
 void _process_SM10Monitor(_EMS_RxTelegram * EMS_RxTelegram) {
-    EMS_Other.SMcollectorTemp  = _toShort(2);    // collector temp from SM10/SM100, is *10
-    EMS_Other.SMbottomTemp     = _toShort(5);    // bottom temp from SM10/SM100, is *10
+    EMS_Other.SMcollectorTemp  = _toShort(2);    // collector temp from SM10, is *10
+    EMS_Other.SMbottomTemp     = _toShort(5);    // bottom temp from SM10, is *10
     EMS_Other.SMpumpModulation = _toByte(4);     // modulation solar pump
     EMS_Other.SMpump           = _bitRead(7, 1); // active if bit 1 is set
 
+    EMS_Other.SM                = true;
     EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
 }
 
@@ -1269,13 +1272,20 @@ void _process_SM10Monitor(_EMS_RxTelegram * EMS_RxTelegram) {
  * SM100Monitor - type 0x0262 EMS+
  */
 void _process_SM100Monitor(_EMS_RxTelegram * EMS_RxTelegram) {
-    // to be completed
-    // need help to decyper telegram, e.g. 30 00 FF 00 02 62 00 A1 01 3F 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00
-    //EMS_Other.SMcollectorTemp  = _toShort(2);    // collector temp from SM10/SM100, is *10
-    //EMS_Other.SMbottomTemp     = _toShort(5);    // bottom temp from SM10/SM100, is *10
-    //EMS_Other.SMpumpModulation = _toByte(4);     // modulation solar pump
-    //EMS_Other.SMpump           = _bitRead(7, 1); // active if bit 1 is set
+    EMS_Other.SMcollectorTemp = _toShort(0); // collector temp from SM100, is *10
+    EMS_Other.SMbottomTemp    = _toShort(2); // bottom temp from SM100, is *10
 
+    EMS_Other.SM                = true;
+    EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
+}
+
+/*
+ * SM100Status - type 0x0264 EMS+
+ */
+void _process_SM100Status(_EMS_RxTelegram * EMS_RxTelegram) {
+    EMS_Other.SMpumpModulation = _toByte(9); // modulation solar pump
+
+    EMS_Other.SM                = true;
     EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
 }
 
@@ -2202,7 +2212,7 @@ void ems_testTelegram(uint8_t test_num) {
     if (test_num == 0)
         return;
 
-    static const char tests[7][200] = {
+    static const char tests[9][200] = {
 
         "08 00 34 00 3E 02 1D 80 00 31 00 00 01 00 01 0B AE 02",                                        // test 1
         "10 00 FF 00 01 A5 80 00 01 30 28 00 30 28 01 54 03 03 01 01 54 02 A8 00 00 11 01 03 FF FF 00", // test 2 - RC310 ems+
@@ -2210,7 +2220,9 @@ void ems_testTelegram(uint8_t test_num) {
         "30 00 FF 00 02 62 00 A1 01 3F 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00",    // test 4 - SM100
         "10 00 FF 00 01 A5 00 D7 21 00 00 00 00 30 01 84 01 01 03 01 84 01 F1 00 00 11 01 00 08 63 00", // test 5 - RC1010
         "18 00 FF 00 01 A5 00 DD 21 23 00 00 23 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00",          // test 6 - RC300
-        "90 00 FF 00 00 6F 01 01 00 46 00 B9"                                                           // test 7 - FR10
+        "90 00 FF 00 00 6F 01 01 00 46 00 B9",                                                          // test 7 - FR10
+        "30 00 FF 00 02 62 01 FB 01 9E 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 2B", // test 8 - SM100
+        "30 00 FF 00 02 64 00 00 00 04 00 00 FF 00 00 1E 0C 20 64 00 00 00 00 E9"                       // test 9 - SM100
 
     };
 

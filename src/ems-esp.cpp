@@ -160,7 +160,7 @@ char * _float_to_char(char * a, float f, uint8_t precision = 2) {
     return ret;
 }
 
-// convert bool to text
+// convert bool to text. bools are stored as bytes
 char * _bool_to_char(char * s, uint8_t value) {
     if (value == EMS_VALUE_INT_ON) {
         strlcpy(s, "on", sizeof(s));
@@ -340,10 +340,7 @@ void showInfo() {
     if (ems_getBusConnected()) {
         myDebug("  Bus is connected");
 
-        myDebug("  Rx: Poll=%d ms, # Rx telegrams read=%d, # CRC errors=%d",
-                ems_getPollFrequency(),
-                EMS_Sys_Status.emsRxPgks,
-                EMS_Sys_Status.emxCrcErr);
+        myDebug("  Rx: Poll=%d ms, # Rx telegrams read=%d, # CRC errors=%d", ems_getPollFrequency(), EMS_Sys_Status.emsRxPgks, EMS_Sys_Status.emxCrcErr);
 
         if (ems_getTxCapable()) {
             myDebug("  Tx: available, Tx delay is %s, # Tx telegrams sent=%d", (ems_getTxDelay() ? "on" : "off"), EMS_Sys_Status.emsTxPkgs);
@@ -390,10 +387,7 @@ void showInfo() {
     _renderIntValue("Warm Water current tap water flow", "l/min", EMS_Boiler.wWCurFlow, 10);
     _renderLongValue("Warm Water # starts", "times", EMS_Boiler.wWStarts);
     if (EMS_Boiler.wWWorkM != EMS_VALUE_LONG_NOTSET) {
-        myDebug("  Warm Water active time: %d days %d hours %d minutes",
-                EMS_Boiler.wWWorkM / 1440,
-                (EMS_Boiler.wWWorkM % 1440) / 60,
-                EMS_Boiler.wWWorkM % 60);
+        myDebug("  Warm Water active time: %d days %d hours %d minutes", EMS_Boiler.wWWorkM / 1440, (EMS_Boiler.wWWorkM % 1440) / 60, EMS_Boiler.wWWorkM % 60);
     }
     _renderBoolValue("Warm Water 3-way valve", EMS_Boiler.wWHeat);
 
@@ -441,10 +435,7 @@ void showInfo() {
                 EMS_Boiler.heatWorkMin % 60);
     }
     if (EMS_Boiler.UBAuptime != EMS_VALUE_LONG_NOTSET) {
-        myDebug("  Total UBA working time: %d days %d hours %d minutes",
-                EMS_Boiler.UBAuptime / 1440,
-                (EMS_Boiler.UBAuptime % 1440) / 60,
-                EMS_Boiler.UBAuptime % 60);
+        myDebug("  Total UBA working time: %d days %d hours %d minutes", EMS_Boiler.UBAuptime / 1440, (EMS_Boiler.UBAuptime % 1440) / 60, EMS_Boiler.UBAuptime % 60);
     }
 
     // For SM10 Solar Module
@@ -529,6 +520,11 @@ void showInfo() {
 
 // send all dallas sensor values as a JSON package to MQTT
 void publishSensorValues() {
+    // don't send if MQTT is connected
+    if (!myESP.isMQTTConnected()) {
+        return;
+    }
+
     StaticJsonDocument<200> doc;
     JsonObject              sensors = doc.to<JsonObject>();
 
@@ -558,6 +554,11 @@ void publishSensorValues() {
 // CRC check is done to see if there are changes in the values since the last send to avoid too much wifi traffic
 // a check is done against the previous values and if there are changes only then they are published. Unless force=true
 void publishValues(bool force) {
+    // don't send if MQTT is connected
+    if (!myESP.isMQTTConnected()) {
+        return;
+    }
+
     char                              s[20] = {0}; // for formatting strings
     StaticJsonDocument<MQTT_MAX_SIZE> doc;
     char                              data[MQTT_MAX_SIZE] = {0};
@@ -1001,7 +1002,6 @@ bool FSCallback(MYESP_FSACTION action, const JsonObject json) {
     if (action == MYESP_FSACTION_SAVE) {
         json["thermostat_type"] = EMS_Thermostat.device_id;
         json["boiler_type"]     = EMS_Boiler.device_id;
-
         json["led"]             = EMSESP_Status.led;
         json["led_gpio"]        = EMSESP_Status.led_gpio;
         json["dallas_gpio"]     = EMSESP_Status.dallas_gpio;
@@ -1628,17 +1628,8 @@ void setup() {
 #endif
 
     // MQTT host, username and password taken from the SPIFFS settings
-    myESP.setMQTT(NULL,
-                  NULL,
-                  NULL,
-                  MQTT_BASE,
-                  MQTT_KEEPALIVE,
-                  MQTT_QOS,
-                  MQTT_RETAIN,
-                  MQTT_WILL_TOPIC,
-                  MQTT_WILL_ONLINE_PAYLOAD,
-                  MQTT_WILL_OFFLINE_PAYLOAD,
-                  MQTTCallback);
+    myESP.setMQTT(
+        NULL, NULL, NULL, MQTT_BASE, MQTT_KEEPALIVE, MQTT_QOS, MQTT_RETAIN, MQTT_WILL_TOPIC, MQTT_WILL_ONLINE_PAYLOAD, MQTT_WILL_OFFLINE_PAYLOAD, MQTTCallback);
 
     // OTA callback which is called when OTA is starting and stopping
     myESP.setOTA(OTACallback_pre, OTACallback_post);
