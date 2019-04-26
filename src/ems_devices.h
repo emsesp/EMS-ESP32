@@ -134,15 +134,10 @@ typedef enum {
 const _Boiler_Type Boiler_Types[] = {
 
     {EMS_MODEL_UBA, 72, 0x08, "MC10 Module"},
-    {
-        EMS_MODEL_UBA,
-        123,
-        0x08,
-        "Buderus GB172/Nefit Trendline",
-    },
-    {EMS_MODEL_UBA, 115, 0x08, "Nefit Topline Compact"},
+    {EMS_MODEL_UBA, 123, 0x08, "Buderus GB172/Nefit Trendline"},
+    {EMS_MODEL_UBA, 115, 0x08, "Nefit Topline Compact/Buderus GB162"},
     {EMS_MODEL_UBA, 203, 0x08, "Buderus Logamax U122"},
-    {EMS_MODEL_UBA, 208, 0x08, "Buderus Logamax plus"},
+    {EMS_MODEL_UBA, 208, 0x08, "Buderus Logamax plus/GB192"},
     {EMS_MODEL_UBA, 64, 0x08, "Sieger BK15 Boiler/Nefit Smartline"},
     {EMS_MODEL_UBA, 95, 0x08, "Bosch Condens 2500/Junkers Cerapur Comfort"},
     {EMS_MODEL_UBA, 122, 0x08, "Nefit Proline"}
@@ -154,7 +149,9 @@ const _Other_Type Other_Types[] = {
 
     {EMS_MODEL_OTHER, 251, 0x21, "MM10 Mixer Module"},  // warning, fake product id!
     {EMS_MODEL_OTHER, 250, 0x11, "WM10 Switch Module"}, // warning, fake product id!
-    {EMS_MODEL_OTHER, 68, 0x09, "RFM20 Receiver"},
+    {EMS_MODEL_OTHER, 160, 0x20, "MM100 Mixing Module"}, 
+    {EMS_MODEL_OTHER, 160, 0x21, "MM100 Mixing Module"},
+    {EMS_MODEL_OTHER, 68, 0x09, "BC10/RFM20 Receiver"},
     {EMS_MODEL_OTHER, 190, 0x09, "BC10 Base Controller"},
     {EMS_MODEL_OTHER, 114, 0x09, "BC10 Base Controller"},
     {EMS_MODEL_OTHER, 125, 0x09, "BC25 Base Controller"},
