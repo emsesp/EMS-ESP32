@@ -18,11 +18,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - nefit proline hrc 24 cw4 thermostat
 - support for Buderus RC300 and RC310 thermostats [(issue 37)](https://github.com/proddy/EMS-ESP/issues/37)
 - added a test harness to try out response to various telegrams
+- EMS_ID_GATEWAY for Buderus Web Gateway KM200
 
 ### Changed
 
 - `types` renamed to `devices` to also show all detected devices
 - EMS Plus logic optimized
+- `silent_mode` to `listen_mode`
 
 ## [1.6.0] 2019-03-24
 

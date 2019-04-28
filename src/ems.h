@@ -17,7 +17,9 @@
 #define EMS_PLUS_ID_NONE 0x01 // Fixed - used as a dest in broadcast messages and empty device IDs
 #define EMS_ID_ME 0x0B        // Fixed - our device, hardcoded as the "Service Key"
 #define EMS_ID_DEFAULT_BOILER 0x08
-#define EMS_ID_SM 0x30 // Solar Module SM10 and SM100
+#define EMS_ID_SM 0x30      // Solar Module SM10 and SM100
+#define EMS_ID_GATEWAY 0x48 // KM200 Web Gateway
+
 
 #define EMS_MIN_TELEGRAM_LENGTH 6 // minimal length for a validation telegram, including CRC
 

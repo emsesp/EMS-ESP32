@@ -77,7 +77,7 @@ typedef struct {
     bool     shower_timer;    // true if we want to report back on shower times
     bool     shower_alert;    // true if we want the alert of cold water
     bool     led;             // LED on/off
-    bool     silent_mode;     // stop automatic Tx on/off
+    bool     listen_mode;     // stop automatic Tx on/off
     uint16_t publish_wait;    // frequency of MQTT publish in seconds
     uint8_t  led_gpio;        // pin for LED
     uint8_t  dallas_gpio;     // pin for attaching external dallas temperature sensors
@@ -101,7 +101,7 @@ command_t PROGMEM project_cmds[] = {
     {true, "dallas_parasite <on | off>", "set to on if powering Dallas via parasite"},
     {true, "thermostat_type <device ID>", "set the thermostat type id (e.g. 10 for 0x10)"},
     {true, "boiler_type <device ID>", "set the boiler type id (e.g. 8 for 0x08)"},
-    {true, "silent_mode <on | off>", "when on all automatic Tx is disabled"},
+    {true, "listen_mode <on | off>", "when on all automatic Tx is disabled"},
     {true, "shower_timer <on | off>", "notify via MQTT all shower durations"},
     {true, "shower_alert <on | off>", "send a warning of cold water after shower time is exceeded"},
     {true, "publish_wait <seconds>", "set frequency for publishing to MQTT"},
@@ -324,7 +324,7 @@ void showInfo() {
         myDebug("  System logging set to None");
     }
 
-    myDebug("  LED is %s, Silent mode is %s", EMSESP_Status.led ? "on" : "off", EMSESP_Status.silent_mode ? "on" : "off");
+    myDebug("  LED is %s, Silent mode is %s", EMSESP_Status.led ? "on" : "off", EMSESP_Status.listen_mode ? "on" : "off");
     if (EMSESP_Status.dallas_sensors > 0) {
         myDebug("  %d external temperature sensor%s found", EMSESP_Status.dallas_sensors, (EMSESP_Status.dallas_sensors == 1) ? "" : "s");
     }
@@ -936,6 +936,7 @@ void runUnitTest(uint8_t test_num) {
     publishValuesTimer.detach();
     systemCheckTimer.detach();
     regularUpdatesTimer.detach();
+    EMSESP_Status.listen_mode = true; // temporary go into listen mode to disable Tx
     if (test_num >= 1 && test_num <= 10) {
         ems_testTelegram(test_num);
     }
@@ -973,8 +974,8 @@ bool FSCallback(MYESP_FSACTION action, const JsonObject json) {
         }
 
         // silent mode
-        EMSESP_Status.silent_mode = json["silent_mode"];
-        ems_setTxDisabled(EMSESP_Status.silent_mode);
+        EMSESP_Status.listen_mode = json["listen_mode"];
+        ems_setTxDisabled(EMSESP_Status.listen_mode);
 
         // shower_timer
         EMSESP_Status.shower_timer = json["shower_timer"];
@@ -1006,7 +1007,7 @@ bool FSCallback(MYESP_FSACTION action, const JsonObject json) {
         json["led_gpio"]        = EMSESP_Status.led_gpio;
         json["dallas_gpio"]     = EMSESP_Status.dallas_gpio;
         json["dallas_parasite"] = EMSESP_Status.dallas_parasite;
-        json["silent_mode"]     = EMSESP_Status.silent_mode;
+        json["listen_mode"]     = EMSESP_Status.listen_mode;
         json["shower_timer"]    = EMSESP_Status.shower_timer;
         json["shower_alert"]    = EMSESP_Status.shower_alert;
         json["publish_wait"]    = EMSESP_Status.publish_wait;
@@ -1042,19 +1043,19 @@ bool SettingsCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, c
         }
 
         // test mode
-        if ((strcmp(setting, "silent_mode") == 0) && (wc == 2)) {
+        if ((strcmp(setting, "listen_mode") == 0) && (wc == 2)) {
             if (strcmp(value, "on") == 0) {
-                EMSESP_Status.silent_mode = true;
+                EMSESP_Status.listen_mode = true;
                 ok                        = true;
-                myDebug("* in Silent mode. All Tx is disabled.");
+                myDebug("* in listen mode. All Tx is disabled.");
                 ems_setTxDisabled(true);
             } else if (strcmp(value, "off") == 0) {
-                EMSESP_Status.silent_mode = false;
+                EMSESP_Status.listen_mode = false;
                 ok                        = true;
                 ems_setTxDisabled(false);
-                myDebug("* out of Silent mode. Tx is enabled.");
+                myDebug("* out of listen mode. Tx is enabled.");
             } else {
-                myDebug("Error. Usage: set silent_mode <on | off>");
+                myDebug("Error. Usage: set listen_mode <on | off>");
             }
         }
 
@@ -1176,7 +1177,7 @@ bool SettingsCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, c
             myDebug("  boiler_type=%02X", EMS_Boiler.device_id);
         }
 
-        myDebug("  silent_mode=%s", EMSESP_Status.silent_mode ? "on" : "off");
+        myDebug("  listen_mode=%s", EMSESP_Status.listen_mode ? "on" : "off");
         myDebug("  shower_timer=%s", EMSESP_Status.shower_timer ? "on" : "off");
         myDebug("  shower_alert=%s", EMSESP_Status.shower_alert ? "on" : "off");
         myDebug("  publish_wait=%d", EMSESP_Status.publish_wait);
@@ -1512,7 +1513,7 @@ void WIFICallback() {
     } else {
         emsuart_init();
         myDebug("[UART] Opened Rx/Tx connection");
-        if (!EMSESP_Status.silent_mode) {
+        if (!EMSESP_Status.listen_mode) {
             // go and find the boiler and thermostat types, if not in silent mode
             ems_discoverModels();
         }
@@ -1526,7 +1527,7 @@ void initEMSESP() {
     EMSESP_Status.shower_timer    = false;
     EMSESP_Status.shower_alert    = false;
     EMSESP_Status.led             = true; // LED is on by default
-    EMSESP_Status.silent_mode     = false;
+    EMSESP_Status.listen_mode     = false;
     EMSESP_Status.publish_wait    = DEFAULT_PUBLISHWAIT;
     EMSESP_Status.timestamp       = millis();
     EMSESP_Status.dallas_sensors  = 0;
@@ -1643,7 +1644,7 @@ void setup() {
     // at this point we have all the settings from our internall SPIFFS config file
 
     // enable regular checks if not in test mode
-    if (!EMSESP_Status.silent_mode) {
+    if (!EMSESP_Status.listen_mode) {
         publishValuesTimer.attach(EMSESP_Status.publish_wait, do_publishValues);             // post MQTT EMS values
         publishSensorValuesTimer.attach(EMSESP_Status.publish_wait, do_publishSensorValues); // post MQTT sensor values
         regularUpdatesTimer.attach(REGULARUPDATES_TIME, do_regularUpdates);                  // regular reads from the EMS
@@ -1677,7 +1678,7 @@ void loop() {
 
     // publish the values to MQTT, only if the values have changed
     // although we don't want to publish when doing a deep scan of the thermostat
-    if (ems_getEmsRefreshed() && (scanThermostat_count == 0) && (!EMSESP_Status.silent_mode)) {
+    if (ems_getEmsRefreshed() && (scanThermostat_count == 0) && (!EMSESP_Status.listen_mode)) {
         publishValues(false);
         ems_setEmsRefreshed(false); // reset
     }

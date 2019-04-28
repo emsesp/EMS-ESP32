@@ -149,7 +149,7 @@ const _Other_Type Other_Types[] = {
 
     {EMS_MODEL_OTHER, 251, 0x21, "MM10 Mixer Module"},  // warning, fake product id!
     {EMS_MODEL_OTHER, 250, 0x11, "WM10 Switch Module"}, // warning, fake product id!
-    {EMS_MODEL_OTHER, 160, 0x20, "MM100 Mixing Module"}, 
+    {EMS_MODEL_OTHER, 160, 0x20, "MM100 Mixing Module"},
     {EMS_MODEL_OTHER, 160, 0x21, "MM100 Mixing Module"},
     {EMS_MODEL_OTHER, 68, 0x09, "BC10/RFM20 Receiver"},
     {EMS_MODEL_OTHER, 190, 0x09, "BC10 Base Controller"},
@@ -158,7 +158,8 @@ const _Other_Type Other_Types[] = {
     {EMS_MODEL_OTHER, 205, 0x02, "Nefit Moduline Easy Connect"},
     {EMS_MODEL_OTHER, 73, EMS_ID_SM, "SM10 Solar Module"},
     {EMS_MODEL_OTHER, 163, EMS_ID_SM, "SM100 Solar Module"},
-    {EMS_MODEL_OTHER, 171, 0x02, "EMS-OT OpenTherm converter"}
+    {EMS_MODEL_OTHER, 171, 0x02, "EMS-OT OpenTherm converter"},
+    {EMS_MODEL_OTHER, 252, EMS_ID_GATEWAY, "Web Gateway KM200"} // warning, fake product id!
 
 };
 

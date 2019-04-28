@@ -617,7 +617,7 @@ void _createValidate() {
 
 /*
  * Entry point triggered by an interrupt in emsuart.cpp
- * length is size of all the data bytes with CRC, excluding the BRK at the end
+ * length is size of all the telegram bytes including the CRC, excluding the BRK at the end
  * Read commands are asynchronous as they're handled by the interrupt
  * When a telegram is processed we forcefully erase it from the stack to prevent overflow
  */
@@ -633,7 +633,7 @@ void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
 /**
  * the main logic that parses the telegram message
  * When we receive a Poll Request we need to send any Tx packages quickly within a 200ms window
- * length is total number of bytes of the telegram excluding the CRC byte at the end
+ * length is total number of bytes of the telegram including the CRC byte at the end if it exists
  */
 void _ems_readTelegram(uint8_t * telegram, uint8_t length) {
     // create the Rx package
@@ -704,7 +704,11 @@ void _ems_readTelegram(uint8_t * telegram, uint8_t length) {
         EMS_RxTelegram.emsplus = true;
         EMS_RxTelegram.type    = (telegram[4] << 8) + telegram[5]; // is a long in bytes 5 & 6
         EMS_RxTelegram.data    = telegram + 6;
-        EMS_RxTelegram.length  = length - 8; // remove 5 bytes header plus CRC + length byte + 0x00 at end
+        if (length <= 7) {
+            EMS_RxTelegram.length = 0; // special broadcast on ems+ have no data values
+        } else {
+            EMS_RxTelegram.length = length - 8; // remove 5 bytes header plus CRC + length byte + 0x00 at end
+        }
     } else {
         EMS_RxTelegram.emsplus = false;
         EMS_RxTelegram.type    = telegram[2]; // 3rd byte
@@ -763,6 +767,8 @@ void _printMessage(_EMS_RxTelegram * EMS_RxTelegram) {
         strlcpy(output_str, "Thermostat", sizeof(output_str));
     } else if (src == EMS_ID_SM) {
         strlcpy(output_str, "SM", sizeof(output_str));
+    } else if (src == EMS_ID_GATEWAY) {
+        strlcpy(output_str, "Gateway", sizeof(output_str));
     } else {
         strlcpy(output_str, "0x", sizeof(output_str));
         strlcat(output_str, _hextoa(src, buffer), sizeof(output_str));
@@ -2212,7 +2218,7 @@ void ems_testTelegram(uint8_t test_num) {
     if (test_num == 0)
         return;
 
-    static const char tests[9][200] = {
+    static const char tests[10][200] = {
 
         "08 00 34 00 3E 02 1D 80 00 31 00 00 01 00 01 0B AE 02",                                        // test 1
         "10 00 FF 00 01 A5 80 00 01 30 28 00 30 28 01 54 03 03 01 01 54 02 A8 00 00 11 01 03 FF FF 00", // test 2 - RC310 ems+
@@ -2222,7 +2228,8 @@ void ems_testTelegram(uint8_t test_num) {
         "18 00 FF 00 01 A5 00 DD 21 23 00 00 23 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00",          // test 6 - RC300
         "90 00 FF 00 00 6F 01 01 00 46 00 B9",                                                          // test 7 - FR10
         "30 00 FF 00 02 62 01 FB 01 9E 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 2B", // test 8 - SM100
-        "30 00 FF 00 02 64 00 00 00 04 00 00 FF 00 00 1E 0C 20 64 00 00 00 00 E9"                       // test 9 - SM100
+        "30 00 FF 00 02 64 00 00 00 04 00 00 FF 00 00 1E 0C 20 64 00 00 00 00 E9",                      // test 9 - SM100
+        "30 09 FF 00 00 01"                                                                             // test 10
 
     };
 
@@ -2259,7 +2266,7 @@ void ems_testTelegram(uint8_t test_num) {
     length++;                                                // this is the total amount of bytes
     telegram[length] = _crcCalculator(telegram, length + 1); // add the CRC
 
-    myDebug("[TEST %d] Injecting telegram %s (length %d)", test_num, tests[test_num - 1], length);
+    myDebug("[TEST %d] Injecting telegram %s (data length %d)", test_num, tests[test_num - 1], length);
 
     // go an parse it
     _ems_readTelegram(telegram, length + 1); // include CRC in length
