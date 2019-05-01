@@ -104,7 +104,7 @@ typedef struct {
     uint8_t                 dest;
     uint16_t                type;
     uint8_t                 offset;
-    uint8_t                 length;
+    uint8_t                 length;             // full length of complete telegram
     uint8_t                 dataValue;          // value to validate against
     uint16_t                type_validate;      // type to call after a successful Write command
     uint8_t                 comparisonValue;    // value to compare against during a validate
@@ -119,8 +119,8 @@ typedef struct {
 typedef struct {
     uint32_t  timestamp;   // timestamp from millis()
     uint8_t * telegram;    // the full data package
-    uint8_t   length;      // length in bytes of the data
-    uint8_t   full_length; // full length of the complete telegram
+    uint8_t   data_length; // length in bytes of the data
+    uint8_t   length;      // full length of the complete telegram
     uint8_t   src;         // source ID
     uint8_t   dest;        // destination ID
     uint16_t  type;        // type ID as a double byte to support EMS+

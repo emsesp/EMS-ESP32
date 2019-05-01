@@ -937,9 +937,7 @@ void runUnitTest(uint8_t test_num) {
     systemCheckTimer.detach();
     regularUpdatesTimer.detach();
     EMSESP_Status.listen_mode = true; // temporary go into listen mode to disable Tx
-    if (test_num >= 1 && test_num <= 10) {
-        ems_testTelegram(test_num);
-    }
+    ems_testTelegram(test_num);
 }
 
 // callback for loading/saving settings to the file system (SPIFFS)

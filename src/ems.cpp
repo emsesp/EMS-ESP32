@@ -14,6 +14,11 @@
 #include <MyESP.h>
 #include <list> // std::list
 
+#ifdef TESTS
+#include "unit_tests.h"
+uint8_t _TEST_DATA_max = ArraySize(TEST_DATA);
+#endif
+
 // myESP for logging to telnet and serial
 #define myDebug(...) myESP.myDebug(__VA_ARGS__)
 
@@ -249,7 +254,7 @@ void ems_init() {
     EMS_Boiler.heatWorkMin = EMS_VALUE_LONG_NOTSET;  // Total heat operating time
 
     // UBAMonitorWWMessage
-    EMS_Boiler.wWCurTmp  = EMS_VALUE_SHORT_NOTSET; // Warm Water current temperature:
+    EMS_Boiler.wWCurTmp  = EMS_VALUE_SHORT_NOTSET; // Warm Water current temperature
     EMS_Boiler.wWStarts  = EMS_VALUE_LONG_NOTSET;  // Warm Water # starts
     EMS_Boiler.wWWorkM   = EMS_VALUE_LONG_NOTSET;  // Warm Water # minutes
     EMS_Boiler.wWOneTime = EMS_VALUE_INT_NOTSET;   // Warm Water one time function on/off
@@ -443,7 +448,6 @@ int _ems_findType(uint8_t type) {
 
 /**
  * debug print a telegram to telnet/serial including the CRC
- * len is length in bytes including the CRC
  */
 void _debugPrintTelegram(const char * prefix, _EMS_RxTelegram * EMS_RxTelegram, const char * color) {
     if (EMS_Sys_Status.emsLogging <= EMS_SYS_LOGGING_BASIC)
@@ -452,8 +456,8 @@ void _debugPrintTelegram(const char * prefix, _EMS_RxTelegram * EMS_RxTelegram, 
     char      output_str[200] = {0};
     char      buffer[16]      = {0};
     uint8_t * data            = EMS_RxTelegram->telegram;
-    uint8_t   len             = EMS_RxTelegram->length;          // length of data block
-    uint8_t   full_len        = EMS_RxTelegram->full_length - 1; // no CRC
+    uint8_t   len             = EMS_RxTelegram->data_length; // length of data block
+    uint8_t   full_len        = EMS_RxTelegram->length - 1;  // no CRC
 
     strlcpy(output_str, "(", sizeof(output_str));
     strlcat(output_str, COLOR_CYAN, sizeof(output_str));
@@ -513,11 +517,12 @@ void _ems_sendTelegram() {
 
     // if we're in raw mode just fire and forget
     if (EMS_TxTelegram.action == EMS_TX_TELEGRAM_RAW) {
+        _EMS_RxTelegram EMS_RxTelegram; // create new Rx object
+
         EMS_TxTelegram.data[EMS_TxTelegram.length - 1] = _crcCalculator(EMS_TxTelegram.data, EMS_TxTelegram.length); // add the CRC
-        _EMS_RxTelegram EMS_RxTelegram;
-        EMS_RxTelegram.length    = EMS_TxTelegram.length;
-        EMS_RxTelegram.telegram  = EMS_TxTelegram.data;
-        EMS_RxTelegram.timestamp = millis();                             // now
+        EMS_RxTelegram.length                          = EMS_TxTelegram.length;                                      // full length of telegram
+        EMS_RxTelegram.telegram                        = EMS_TxTelegram.data;
+        EMS_RxTelegram.timestamp                       = millis();       // now
         _debugPrintTelegram("Sending raw", &EMS_RxTelegram, COLOR_CYAN); // always show
         emsuart_tx_buffer(EMS_TxTelegram.data, EMS_TxTelegram.length);   // send the telegram to the UART Tx
         EMS_TxQueue.shift();                                             // remove from queue
@@ -559,7 +564,7 @@ void _ems_sendTelegram() {
         }
 
         _EMS_RxTelegram EMS_RxTelegram;
-        EMS_RxTelegram.length    = EMS_TxTelegram.length;
+        EMS_RxTelegram.length    = EMS_TxTelegram.length; // complete length of telegram
         EMS_RxTelegram.telegram  = EMS_TxTelegram.data;
         EMS_RxTelegram.timestamp = millis(); // now
         _debugPrintTelegram(s, &EMS_RxTelegram, COLOR_CYAN);
@@ -641,7 +646,7 @@ void _ems_readTelegram(uint8_t * telegram, uint8_t length) {
     static uint32_t        _last_emsPollFrequency = 0;
     EMS_RxTelegram.telegram                       = telegram;
     EMS_RxTelegram.timestamp                      = millis();
-    EMS_RxTelegram.full_length                    = length;
+    EMS_RxTelegram.length                         = length;
 
     // check if we just received a single byte
     // it could well be a Poll request from the boiler for us, which will have a value of 0x8B (0x0B | 0x80)
@@ -705,15 +710,15 @@ void _ems_readTelegram(uint8_t * telegram, uint8_t length) {
         EMS_RxTelegram.type    = (telegram[4] << 8) + telegram[5]; // is a long in bytes 5 & 6
         EMS_RxTelegram.data    = telegram + 6;
         if (length <= 7) {
-            EMS_RxTelegram.length = 0; // special broadcast on ems+ have no data values
+            EMS_RxTelegram.data_length = 0; // special broadcast on ems+ have no data values
         } else {
-            EMS_RxTelegram.length = length - 8; // remove 5 bytes header plus CRC + length byte + 0x00 at end
+            EMS_RxTelegram.data_length = length - 8; // remove 5 bytes header plus CRC + length byte + 0x00 at end
         }
     } else {
-        EMS_RxTelegram.emsplus = false;
-        EMS_RxTelegram.type    = telegram[2]; // 3rd byte
-        EMS_RxTelegram.data    = telegram + 4;
-        EMS_RxTelegram.length  = length - 5; // remove 4 bytes header plus CRC
+        EMS_RxTelegram.emsplus     = false;
+        EMS_RxTelegram.type        = telegram[2]; // 3rd byte
+        EMS_RxTelegram.data        = telegram + 4;
+        EMS_RxTelegram.data_length = length - 5; // remove 4 bytes header plus CRC
     }
 
     // Assume at this point we have something that vaguely resembles a telegram in the format [src] [dest] [type] [offset] [data] [crc]
@@ -788,6 +793,9 @@ void _printMessage(_EMS_RxTelegram * EMS_RxTelegram) {
         strlcpy(color_s, COLOR_MAGENTA, sizeof(color_s));
     } else if (dest == EMS_ID_SM) {
         strlcat(output_str, "SM", sizeof(output_str));
+        strlcpy(color_s, COLOR_MAGENTA, sizeof(color_s));
+    } else if (dest == EMS_ID_GATEWAY) {
+        strlcat(output_str, "Gateway", sizeof(output_str));
         strlcpy(color_s, COLOR_MAGENTA, sizeof(color_s));
     } else if (dest == EMS_Thermostat.device_id) {
         strlcat(output_str, "Thermostat", sizeof(output_str));
@@ -1300,7 +1308,7 @@ void _process_SM100Status(_EMS_RxTelegram * EMS_RxTelegram) {
  */
 void _process_SetPoints(_EMS_RxTelegram * EMS_RxTelegram) {
     if (EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_VERBOSE) {
-        if (EMS_RxTelegram->length != 0) {
+        if (EMS_RxTelegram->data_length != 0) {
             uint8_t setpoint = EMS_RxTelegram->data[0]; // flow temp
             //uint8_t ww_power = data[2]; // power in %
 
@@ -1364,7 +1372,7 @@ void _addDevice(uint8_t product_id, uint8_t device_id, char * version, const cha
  */
 void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
     // ignore short messages that we can't interpret
-    if (EMS_RxTelegram->length < 3) {
+    if (EMS_RxTelegram->data_length < 3) {
         return;
     }
 
@@ -2215,23 +2223,11 @@ void ems_startupTelegrams() {
  * Test parsing of telgrams by injecting fake telegrams and simulating the response
  */
 void ems_testTelegram(uint8_t test_num) {
-    if (test_num == 0)
+#ifdef TESTS
+    if ((test_num == 0) || (test_num > _TEST_DATA_max)) {
+        myDebug("Invalid test. Pick between 1 and %d", _TEST_DATA_max);
         return;
-
-    static const char tests[10][200] = {
-
-        "08 00 34 00 3E 02 1D 80 00 31 00 00 01 00 01 0B AE 02",                                        // test 1
-        "10 00 FF 00 01 A5 80 00 01 30 28 00 30 28 01 54 03 03 01 01 54 02 A8 00 00 11 01 03 FF FF 00", // test 2 - RC310 ems+
-        "10 00 FF 19 01 A5 06 04 00 00 00 00 FF 64 37 00 3C 01 FF 01",                                  // test 3 - RC310 ems+
-        "30 00 FF 00 02 62 00 A1 01 3F 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00",    // test 4 - SM100
-        "10 00 FF 00 01 A5 00 D7 21 00 00 00 00 30 01 84 01 01 03 01 84 01 F1 00 00 11 01 00 08 63 00", // test 5 - RC1010
-        "18 00 FF 00 01 A5 00 DD 21 23 00 00 23 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00",          // test 6 - RC300
-        "90 00 FF 00 00 6F 01 01 00 46 00 B9",                                                          // test 7 - FR10
-        "30 00 FF 00 02 62 01 FB 01 9E 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 2B", // test 8 - SM100
-        "30 00 FF 00 02 64 00 00 00 04 00 00 FF 00 00 1E 0C 20 64 00 00 00 00 E9",                      // test 9 - SM100
-        "30 09 FF 00 00 01"                                                                             // test 10
-
-    };
+    }
 
     // stop all Tx
     if (!EMS_TxQueue.isEmpty()) {
@@ -2242,7 +2238,7 @@ void ems_testTelegram(uint8_t test_num) {
     static uint8_t * telegram = (uint8_t *)malloc(EMS_MAX_TELEGRAM_LENGTH); // warning, memory is not free'd so use only for debugging
 
     char telegram_string[200];
-    strlcpy(telegram_string, tests[test_num - 1], sizeof(telegram_string));
+    strlcpy(telegram_string, TEST_DATA[test_num - 1], sizeof(telegram_string));
 
     uint8_t length = 0;
     char *  p;
@@ -2266,8 +2262,11 @@ void ems_testTelegram(uint8_t test_num) {
     length++;                                                // this is the total amount of bytes
     telegram[length] = _crcCalculator(telegram, length + 1); // add the CRC
 
-    myDebug("[TEST %d] Injecting telegram %s (data length %d)", test_num, tests[test_num - 1], length);
+    myDebug("[TEST %d] Injecting telegram %s (data length %d)", test_num, TEST_DATA[test_num - 1], length);
 
     // go an parse it
     _ems_readTelegram(telegram, length + 1); // include CRC in length
+#else
+    myDebug("Firmware not compiled with tests");
+#endif
 }
