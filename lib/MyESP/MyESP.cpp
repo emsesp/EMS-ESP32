@@ -1191,7 +1191,7 @@ bool MyESP::_fs_loadConfig() {
     // Deserialize the JSON document
     DeserializationError error = deserializeJson(doc, configFile);
     if (error) {
-        myDebug_P(PSTR("[FS] Failed to read config file"));
+        myDebug_P(PSTR("[FS] Failed to read config file. Error %s"), error.c_str());
         return false;
     }
 
