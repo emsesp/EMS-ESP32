@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.7.0 dev] 2019-04-17
+## [1.7.0 dev] 2019-05
 
 ### Added
 
@@ -15,16 +15,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for multiple thermostat heating circuits like the HC1/HC2 on a RC35, also via MQTT (thanks @lobocobra)
 - `boiler flowtemp` command to set the flow temperature [(issue 59)](https://github.com/proddy/EMS-ESP/issues/59)
 - `tx_delay` setting for circuits where we needed to slow down Tx transmission
-- nefit proline hrc 24 cw4 thermostat
-- support for Buderus RC300 and RC310 thermostats [(issue 37)](https://github.com/proddy/EMS-ESP/issues/37)
+- new boiler: Nefit proline hrc 24 cw4 thermostat
+- new thermostats: Buderus RC300 and RC310 thermostats [(issue 37)](https://github.com/proddy/EMS-ESP/issues/37)
 - added a test harness to try out response to various telegrams
-- EMS_ID_GATEWAY for Buderus Web Gateway KM200
+- new devices: Buderus Web Gateway KM200, Solar Module SM100
 
 ### Changed
 
 - `types` renamed to `devices` to also show all detected devices
 - EMS Plus logic optimized
 - `silent_mode` to `listen_mode`
+- increased Tx queue to 100
 
 ## [1.6.0] 2019-03-24
 

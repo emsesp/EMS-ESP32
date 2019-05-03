@@ -57,7 +57,7 @@ uint8_t scanThermostat_count = 0;
 
 // ems bus scan
 Ticker scanDevices;
-#define SCANDEVICES_TIME 250 // ms
+#define SCANDEVICES_TIME 350 // ms
 uint8_t scanDevices_count;
 
 Ticker showerColdShotStopTimer;
@@ -324,7 +324,7 @@ void showInfo() {
         myDebug("  System logging set to None");
     }
 
-    myDebug("  LED is %s, Silent mode is %s", EMSESP_Status.led ? "on" : "off", EMSESP_Status.listen_mode ? "on" : "off");
+    myDebug("  LED is %s, Listen mode is %s", EMSESP_Status.led ? "on" : "off", EMSESP_Status.listen_mode ? "on" : "off");
     if (EMSESP_Status.dallas_sensors > 0) {
         myDebug("  %d external temperature sensor%s found", EMSESP_Status.dallas_sensors, (EMSESP_Status.dallas_sensors == 1) ? "" : "s");
     }
@@ -893,7 +893,7 @@ void startDeviceScan() {
     publishSensorValuesTimer.detach();
     scanDevices_count = 1; // starts at 1
     ems_setLogging(EMS_SYS_LOGGING_NONE);
-    myDebug("Starting a deep EMS device scan. This will take about 1 minute. Please wait...");
+    myDebug("Starting a deep EMS device scan. This can take up to 2 minutes. Please wait...");
     scanThermostat.attach_ms(SCANDEVICES_TIME, do_scanDevices);
 }
 
@@ -971,7 +971,7 @@ bool FSCallback(MYESP_FSACTION action, const JsonObject json) {
             EMS_Boiler.device_id = EMSESP_BOILER_TYPE; // set default
         }
 
-        // silent mode
+        // listen mode
         EMSESP_Status.listen_mode = json["listen_mode"];
         ems_setTxDisabled(EMSESP_Status.listen_mode);
 
@@ -1512,7 +1512,7 @@ void WIFICallback() {
         emsuart_init();
         myDebug("[UART] Opened Rx/Tx connection");
         if (!EMSESP_Status.listen_mode) {
-            // go and find the boiler and thermostat types, if not in silent mode
+            // go and find the boiler and thermostat types, if not in listen mode
             ems_discoverModels();
         }
     }

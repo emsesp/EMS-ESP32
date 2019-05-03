@@ -20,7 +20,6 @@
 #define EMS_ID_SM 0x30      // Solar Module SM10 and SM100
 #define EMS_ID_GATEWAY 0x48 // KM200 Web Gateway
 
-
 #define EMS_MIN_TELEGRAM_LENGTH 6 // minimal length for a validation telegram, including CRC
 
 // max length of a telegram, including CRC, for Rx and Tx.
@@ -40,12 +39,12 @@
 #define EMS_BOILER_BURNPOWER_TAPWATER 100
 #define EMS_BOILER_SELFLOWTEMP_HEATING 70
 
-//define maximum settable tapwater temperature, not every installation supports 90 degrees
+// define maximum settable tapwater temperature
 #define EMS_BOILER_TAPWATER_TEMPERATURE_MAX 60
 
-#define EMS_TX_TELEGRAM_QUEUE_MAX 50 // max size of Tx FIFO queue
+#define EMS_TX_TELEGRAM_QUEUE_MAX 100 // max size of Tx FIFO queue
 
-//#define EMS_SYS_LOGGING_DEFAULT EMS_SYS_LOGGING_VERBOSE
+// #define EMS_SYS_LOGGING_DEFAULT EMS_SYS_LOGGING_VERBOSE
 #define EMS_SYS_LOGGING_DEFAULT EMS_SYS_LOGGING_NONE
 
 /* EMS UART transfer status */
