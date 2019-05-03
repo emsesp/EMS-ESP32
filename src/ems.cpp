@@ -49,10 +49,16 @@ void _process_UBAMonitorWWMessage(_EMS_RxTelegram * EMS_RxTelegram);
 void _process_UBAParameterWW(_EMS_RxTelegram * EMS_RxTelegram);
 void _process_UBATotalUptimeMessage(_EMS_RxTelegram * EMS_RxTelegram);
 void _process_UBAParametersMessage(_EMS_RxTelegram * EMS_RxTelegram);
+
 void _process_SetPoints(_EMS_RxTelegram * EMS_RxTelegram);
+
+// SM10
 void _process_SM10Monitor(_EMS_RxTelegram * EMS_RxTelegram);
+
+// SM100
 void _process_SM100Monitor(_EMS_RxTelegram * EMS_RxTelegram);
 void _process_SM100Status(_EMS_RxTelegram * EMS_RxTelegram);
+void _process_SM100Status2(_EMS_RxTelegram * EMS_RxTelegram);
 
 // Common for most thermostats
 void _process_RCTime(_EMS_RxTelegram * EMS_RxTelegram);
@@ -104,6 +110,7 @@ const _EMS_Type EMS_Types[] = {
     {EMS_MODEL_OTHER, EMS_TYPE_SM10Monitor, "SM10Monitor", _process_SM10Monitor},
     {EMS_MODEL_OTHER, EMS_TYPE_SM100Monitor, "SM100Monitor", _process_SM100Monitor},
     {EMS_MODEL_OTHER, EMS_TYPE_SM100Status, "SM100Status", _process_SM100Status},
+    {EMS_MODEL_OTHER, EMS_TYPE_SM100Status2, "SM100Status2", _process_SM100Status2},
 
     // RC10
     {EMS_MODEL_RC10, EMS_TYPE_RCTime, "RCTime", _process_RCTime},
@@ -831,7 +838,6 @@ void _printMessage(_EMS_RxTelegram * EMS_RxTelegram) {
  * and then call its callback if there is one defined
  */
 void _ems_processTelegram(_EMS_RxTelegram * EMS_RxTelegram) {
-
     // print out the telegram for verbose mode
     if (EMS_Sys_Status.emsLogging >= EMS_SYS_LOGGING_THERMOSTAT) {
         _printMessage(EMS_RxTelegram);
@@ -843,8 +849,8 @@ void _ems_processTelegram(_EMS_RxTelegram * EMS_RxTelegram) {
     }
 
     // header
-    uint8_t  src    = EMS_RxTelegram->src;
-    uint16_t type   = EMS_RxTelegram->type;
+    uint8_t  dest = EMS_RxTelegram->dest;
+    uint16_t type = EMS_RxTelegram->type;
 
     // see if we recognize the type first by scanning our known EMS types list
     bool    typeFound = false;
@@ -852,12 +858,19 @@ void _ems_processTelegram(_EMS_RxTelegram * EMS_RxTelegram) {
 
     while (i < _EMS_Types_max) {
         if (EMS_Types[i].type == type) {
-            // is it common type for everyone?
-            // is it for us? So the src must match with either the boiler, thermostat or other devices
+            // is it a broadcast or something sent to us?
+            // we don't really care where it is from
+            if ((dest == EMS_ID_NONE) || (dest == EMS_ID_ME)) {
+                typeFound = true;
+                break;
+            }
+
+            /*
             if ((EMS_Types[i].model_id == EMS_MODEL_ALL) || ((src == EMS_Boiler.device_id) || (src == EMS_Thermostat.device_id) || (src == EMS_ID_SM))) {
                 typeFound = true;
                 break;
             }
+            */
         }
         i++;
     }
@@ -868,7 +881,7 @@ void _ems_processTelegram(_EMS_RxTelegram * EMS_RxTelegram) {
         if ((EMS_Types[i].processType_cb) != (void *)NULL) {
             // print non-verbose message
             if ((EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_BASIC) || (EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_VERBOSE)) {
-                myDebug("<--- %s(0x%02X) received", EMS_Types[i].typeString, type);
+                myDebug("<--- %s(0x%02X)", EMS_Types[i].typeString, type);
             }
             // call callback function to process the telegram, only if there is data
             if (EMS_RxTelegram->emsplus) {
@@ -1307,6 +1320,18 @@ void _process_SM100Monitor(_EMS_RxTelegram * EMS_RxTelegram) {
  */
 void _process_SM100Status(_EMS_RxTelegram * EMS_RxTelegram) {
     EMS_Other.SMpumpModulation = _toByte(9); // modulation solar pump
+
+    EMS_Other.SM                = true;
+    EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
+}
+
+/*
+ * SM100Status2 - type 0x026A EMS+ for pump on/off
+ */
+void _process_SM100Status2(_EMS_RxTelegram * EMS_RxTelegram) {
+    if (EMS_RxTelegram->data_length == 1) {
+        EMS_Other.SMpump = _bitRead(0, 2);    // 03=off 04=on
+    }
 
     EMS_Other.SM                = true;
     EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT

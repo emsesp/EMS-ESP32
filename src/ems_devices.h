@@ -44,6 +44,7 @@
 #define EMS_TYPE_SM10Monitor 0x97    // SM10Monitor
 #define EMS_TYPE_SM100Monitor 0x0262 // SM100Monitor
 #define EMS_TYPE_SM100Status 0x0264  // SM100Status
+#define EMS_TYPE_SM100Status2 0x026A // SM100Status2
 
 /*
  * Thermostats...
@@ -124,7 +125,7 @@ typedef enum {
     EMS_MODEL_BOSCHEASY,
     EMS_MODEL_RC310,
     EMS_MODEL_CW100,
-    EMS_MODEL_RC1010,
+    EMS_MODEL_1010,
     EMS_MODEL_OT
 
 } _EMS_MODEL_ID;
@@ -159,7 +160,7 @@ const _Other_Type Other_Types[] = {
     {EMS_MODEL_OTHER, 73, EMS_ID_SM, "SM10 Solar Module"},
     {EMS_MODEL_OTHER, 163, EMS_ID_SM, "SM100 Solar Module"},
     {EMS_MODEL_OTHER, 171, 0x02, "EMS-OT OpenTherm converter"},
-    {EMS_MODEL_OTHER, 252, EMS_ID_GATEWAY, "Web Gateway KM200"} // warning, fake product id!
+    {EMS_MODEL_OTHER, 189, EMS_ID_GATEWAY, "Web Gateway KM200"}
 
 };
 
@@ -178,6 +179,6 @@ const _Thermostat_Type Thermostat_Types[] = {
     {EMS_MODEL_BOSCHEASY, 206, 0x02, "Bosch Easy", EMS_THERMOSTAT_WRITE_NO},
     {EMS_MODEL_RC310, 158, 0x10, "RC300/RC310", EMS_THERMOSTAT_WRITE_NO},
     {EMS_MODEL_CW100, 255, 0x18, "Bosch CW100", EMS_THERMOSTAT_WRITE_NO},
-    {EMS_MODEL_RC1010, 165, 0x18, "RC1010/Nefit Moduline 1010", EMS_THERMOSTAT_WRITE_NO}
+    {EMS_MODEL_1010, 165, 0x18, "Nefit Moduline 1010", EMS_THERMOSTAT_WRITE_NO}
 
 };
