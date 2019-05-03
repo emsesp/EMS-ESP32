@@ -34,7 +34,9 @@ static const char * TEST_DATA[] = {
     "30 00 FF 0A 02 6A 03",                                                                         // test 29 - SM100 pump off
     "48 90 02 00 01",                                                                               // test 30 - version test
     "10 48 02 00 9E",                                                                               // test 31 - version test
-    "48 88 02 00 0A"                                                                                // test 32 - version test
+    "30 00 FF 00 02 8E 00 00 0C F3 00 00 06 02 00 00 76 33",                                        // test 32 - SM100 energy
+    "30 00 FF 00 02 8E 00 00 07 9E 00 00 06 C5 00 00 76 35",                                        // test 33 - SM100 energy
+    "30 00 FF 00 02 8E 00 00 00 00 00 00 06 C5 00 00 76 35"                                         // test 34 - SM100 energy
 
 };
 

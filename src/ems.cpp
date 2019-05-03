@@ -42,7 +42,7 @@ std::list<_Generic_Type> Devices;
 // generic
 void _process_Version(_EMS_RxTelegram * EMS_RxTelegram);
 
-// Boiler and Buderus devices
+// EMS master/Boiler devices
 void _process_UBAMonitorFast(_EMS_RxTelegram * EMS_RxTelegram);
 void _process_UBAMonitorSlow(_EMS_RxTelegram * EMS_RxTelegram);
 void _process_UBAMonitorWWMessage(_EMS_RxTelegram * EMS_RxTelegram);
@@ -59,6 +59,7 @@ void _process_SM10Monitor(_EMS_RxTelegram * EMS_RxTelegram);
 void _process_SM100Monitor(_EMS_RxTelegram * EMS_RxTelegram);
 void _process_SM100Status(_EMS_RxTelegram * EMS_RxTelegram);
 void _process_SM100Status2(_EMS_RxTelegram * EMS_RxTelegram);
+void _process_SM100Energy(_EMS_RxTelegram * EMS_RxTelegram);
 
 // Common for most thermostats
 void _process_RCTime(_EMS_RxTelegram * EMS_RxTelegram);
@@ -111,6 +112,7 @@ const _EMS_Type EMS_Types[] = {
     {EMS_MODEL_OTHER, EMS_TYPE_SM100Monitor, "SM100Monitor", _process_SM100Monitor},
     {EMS_MODEL_OTHER, EMS_TYPE_SM100Status, "SM100Status", _process_SM100Status},
     {EMS_MODEL_OTHER, EMS_TYPE_SM100Status2, "SM100Status2", _process_SM100Status2},
+    {EMS_MODEL_OTHER, EMS_TYPE_SM100Energy, "SM100Energy", _process_SM100Energy},
 
     // RC10
     {EMS_MODEL_RC10, EMS_TYPE_RCTime, "RCTime", _process_RCTime},
@@ -280,6 +282,9 @@ void ems_init() {
     EMS_Other.SMbottomTemp     = EMS_VALUE_SHORT_NOTSET; // bottom temp from SM10/SM100
     EMS_Other.SMpumpModulation = EMS_VALUE_INT_NOTSET;   // modulation solar pump SM10/SM100
     EMS_Other.SMpump           = EMS_VALUE_INT_NOTSET;   // pump active
+    EMS_Other.SMEnergyLastHour = EMS_VALUE_SHORT_NOTSET;
+    EMS_Other.SMEnergyToday    = EMS_VALUE_SHORT_NOTSET;
+    EMS_Other.SMEnergyTotal    = EMS_VALUE_SHORT_NOTSET;
 
     // calculated values
     EMS_Boiler.tapwaterActive = EMS_VALUE_INT_NOTSET; // Hot tap water is on/off
@@ -1330,8 +1335,22 @@ void _process_SM100Status(_EMS_RxTelegram * EMS_RxTelegram) {
  */
 void _process_SM100Status2(_EMS_RxTelegram * EMS_RxTelegram) {
     if (EMS_RxTelegram->data_length == 1) {
-        EMS_Other.SMpump = _bitRead(0, 2);    // 03=off 04=on
+        EMS_Other.SMpump = _bitRead(0, 2); // 03=off 04=on
     }
+
+    EMS_Other.SM                = true;
+    EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
+}
+
+/*
+ * SM100Energy - type 0x028E EMS+ for energy readings
+ */
+void _process_SM100Energy(_EMS_RxTelegram * EMS_RxTelegram) {
+    // e.g. 30 00 FF 00 02 8E 00 00 00 00 00 00 06 C5 00 00 76 35
+
+    EMS_Other.SMEnergyLastHour = _toShort(2);  // last hour / 10 in Wh
+    EMS_Other.SMEnergyToday    = _toShort(6);  // todays in Wh
+    EMS_Other.SMEnergyTotal    = _toShort(10); // total / 10 in kWh
 
     EMS_Other.SM                = true;
     EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT

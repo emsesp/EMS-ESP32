@@ -238,13 +238,17 @@ typedef struct {           // UBAParameterWW
 /*
  * Telegram package defintions for Other EMS devices
  */
+
+// SM Solar Module - SM10Monitor/SM100Monitor
 typedef struct {
-    // SM10 Solar Module - SM10Monitor
-    bool    SM;               // set true if there is a SM10 available
-    int16_t SMcollectorTemp;  // collector temp from SM10
-    int16_t SMbottomTemp;     // bottom temp from SM10
+    bool    SM;               // set true if there is a SM available
+    int16_t SMcollectorTemp;  // collector temp
+    int16_t SMbottomTemp;     // bottom temp
     uint8_t SMpumpModulation; // modulation solar pump
     uint8_t SMpump;           // pump active
+    int16_t SMEnergyLastHour;
+    int16_t SMEnergyToday;
+    int16_t SMEnergyTotal;
 } _EMS_Other;
 
 // Thermostat data

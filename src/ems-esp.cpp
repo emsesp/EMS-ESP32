@@ -172,39 +172,42 @@ char * _bool_to_char(char * s, uint8_t value) {
     return s;
 }
 
-// convert short (two bytes) to text value
+// convert short (two bytes) to text string
+// decimals: 0 = no division, 1=divide value by 10, 10=divide value by 100
 // negative values are assumed stored as 1-compliment (https://medium.com/@LeeJulija/how-integers-are-stored-in-memory-using-twos-complement-5ba04d61a56c)
 char * _short_to_char(char * s, int16_t value, uint8_t decimals = 1) {
-    // remove errors on invalid values
+    // remove errors or invalid values
     if (abs(value) >= EMS_VALUE_SHORT_NOTSET) {
-        strlcpy(s, "?", sizeof(s));
+        strlcpy(s, "?", 10);
         return (s);
     }
 
+    // just print
     if (decimals == 0) {
-        itoa(value, s, 10);
+        ltoa(value, s, 10);
         return (s);
     }
 
-    // floating point
-    char s2[5] = {0};
+    // do floating point
+    char s2[10] = {0};
     // check for negative values
     if (value < 0) {
-        strlcpy(s, "-", 2);
+        strlcpy(s, "-", 10);
         value = abs(value);
     }
-    strlcpy(s, itoa(value / (decimals * 10), s2, 10), 5);
-    strlcat(s, ".", sizeof(s));
-    strlcat(s, itoa(value % (decimals * 10), s2, 10), 5);
+
+    strlcpy(s, ltoa(value / (decimals * 10), s2, 10), 10);
+    strlcat(s, ".", 10);
+    strlcat(s, ltoa(value % (decimals * 10), s2, 10), 10);
 
     return s;
 }
 
 // takes a short value (2 bytes), converts to a fraction
-// most values stored a s short are either *10 or *100
+// decimals: 0 = no division, 1=divide value by 10, 10=divide value by 100
 void _renderShortValue(const char * prefix, const char * postfix, int16_t value, uint8_t decimals = 1) {
-    char buffer[200] = {0};
-    char s[20]       = {0};
+    static char buffer[200] = {0};
+    static char s[20]       = {0};
     strlcpy(buffer, "  ", sizeof(buffer));
     strlcat(buffer, prefix, sizeof(buffer));
     strlcat(buffer, ": ", sizeof(buffer));
@@ -226,7 +229,7 @@ char * _int_to_char(char * s, uint8_t value, uint8_t div = 1) {
         return (s);
     }
 
-    char s2[5] = {0};
+    static char s2[5] = {0};
 
     switch (div) {
     case 1:
@@ -255,8 +258,8 @@ char * _int_to_char(char * s, uint8_t value, uint8_t div = 1) {
 
 // takes an int value (1 byte), converts to a fraction
 void _renderIntValue(const char * prefix, const char * postfix, uint8_t value, uint8_t div = 1) {
-    char buffer[200] = {0};
-    char s[20]       = {0};
+    static char buffer[200] = {0};
+    static char s[20]       = {0};
     strlcpy(buffer, "  ", sizeof(buffer));
     strlcat(buffer, prefix, sizeof(buffer));
     strlcat(buffer, ": ", sizeof(buffer));
@@ -273,7 +276,7 @@ void _renderIntValue(const char * prefix, const char * postfix, uint8_t value, u
 
 // takes a long value at prints it to debug log
 void _renderLongValue(const char * prefix, const char * postfix, uint32_t value) {
-    char buffer[200] = {0};
+    static char buffer[200] = {0};
     strlcpy(buffer, "  ", sizeof(buffer));
     strlcat(buffer, prefix, sizeof(buffer));
     strlcat(buffer, ": ", sizeof(buffer));
@@ -295,8 +298,8 @@ void _renderLongValue(const char * prefix, const char * postfix, uint32_t value)
 
 // takes a bool value at prints it to debug log
 void _renderBoolValue(const char * prefix, uint8_t value) {
-    char buffer[200] = {0};
-    char s[20]       = {0};
+    static char buffer[200] = {0};
+    static char s[20]       = {0};
     strlcpy(buffer, "  ", sizeof(buffer));
     strlcat(buffer, prefix, sizeof(buffer));
     strlcat(buffer, ": ", sizeof(buffer));
@@ -310,7 +313,7 @@ void _renderBoolValue(const char * prefix, uint8_t value) {
 void showInfo() {
     // General stats from EMS bus
 
-    char buffer_type[128] = {0};
+    static char buffer_type[128] = {0};
 
     myDebug("%sEMS-ESP system stats:%s", COLOR_BOLD_ON, COLOR_BOLD_OFF);
     _EMS_SYS_LOGGING sysLog = ems_getLogging();
@@ -438,7 +441,7 @@ void showInfo() {
         myDebug("  Total UBA working time: %d days %d hours %d minutes", EMS_Boiler.UBAuptime / 1440, (EMS_Boiler.UBAuptime % 1440) / 60, EMS_Boiler.UBAuptime % 60);
     }
 
-    // For SM10 Solar Module
+    // For SM10/SM100 Solar Module
     if (EMS_Other.SM) {
         myDebug(""); // newline
         myDebug("%sSolar Module stats:%s", COLOR_BOLD_ON, COLOR_BOLD_OFF);
@@ -446,6 +449,9 @@ void showInfo() {
         _renderShortValue("  Bottom temperature", "C", EMS_Other.SMbottomTemp);
         _renderIntValue("  Pump modulation", "%", EMS_Other.SMpumpModulation);
         _renderBoolValue("  Pump active", EMS_Other.SMpump);
+        _renderShortValue("  Energy Last Hour", "Wh", EMS_Other.SMEnergyLastHour, 1); // *10
+        _renderShortValue("  Energy Today", "Wh", EMS_Other.SMEnergyToday, 0);
+        _renderShortValue("  Energy Total", "kWH", EMS_Other.SMEnergyTotal, 1); // *10
     }
 
     // Thermostat stats
@@ -717,25 +723,33 @@ void publishValues(bool force) {
     }
 
     // handle the other values separately
-    // For SM10 Solar Module
+    // For SM10 and SM100 Solar Modules
     if (EMS_Other.SM) {
         // build new json object
         doc.clear();
-        JsonObject rootSM10 = doc.to<JsonObject>();
+        JsonObject rootSM = doc.to<JsonObject>();
 
-        rootSM10[SM10_COLLECTORTEMP] = _short_to_char(s, EMS_Other.SMcollectorTemp);
-        rootSM10[SM10_BOTTOMTEMP]    = _short_to_char(s, EMS_Other.SMbottomTemp);
+        rootSM[SM_COLLECTORTEMP] = _short_to_char(s, EMS_Other.SMcollectorTemp);
+        rootSM[SM_BOTTOMTEMP]    = _short_to_char(s, EMS_Other.SMbottomTemp);
 
         if (abs(EMS_Other.SMcollectorTemp) < EMS_VALUE_SHORT_NOTSET)
-            rootSM10[SM10_COLLECTORTEMP] = (double)EMS_Other.SMcollectorTemp / 10;
+            rootSM[SM_COLLECTORTEMP] = (double)EMS_Other.SMcollectorTemp / 10;
         if (abs(EMS_Other.SMbottomTemp) < EMS_VALUE_SHORT_NOTSET)
-            rootSM10[SM10_BOTTOMTEMP] = (double)EMS_Other.SMbottomTemp / 10;
-
+            rootSM[SM_BOTTOMTEMP] = (double)EMS_Other.SMbottomTemp / 10;
 
         if (EMS_Other.SMpumpModulation != EMS_VALUE_INT_NOTSET)
-            rootSM10[SM10_PUMPMODULATION] = EMS_Other.SMpumpModulation;
+            rootSM[SM_PUMPMODULATION] = EMS_Other.SMpumpModulation;
 
-        rootSM10[SM10_PUMP] = _bool_to_char(s, EMS_Other.SMpump);
+        rootSM[SM_PUMP] = _bool_to_char(s, EMS_Other.SMpump);
+
+        if (abs(EMS_Other.SMEnergyLastHour) < EMS_VALUE_SHORT_NOTSET)
+            rootSM[SM_ENERGYLASTHOUR] = (double)EMS_Other.SMEnergyLastHour / 10;
+
+        if (abs(EMS_Other.SMEnergyToday) < EMS_VALUE_SHORT_NOTSET)
+            rootSM[SM_ENERGYTODAY] = EMS_Other.SMEnergyToday;
+
+        if (abs(EMS_Other.SMEnergyTotal) < EMS_VALUE_SHORT_NOTSET)
+            rootSM[SM_ENERGYTOTAL] = (double)EMS_Other.SMEnergyTotal / 10;
 
         data[0] = '\0'; // reset data for next package
         serializeJson(doc, data, sizeof(data));
@@ -748,10 +762,10 @@ void publishValues(bool force) {
         fchecksum = crc.finalize();
         if ((previousOtherPublishCRC != fchecksum) || force) {
             previousOtherPublishCRC = fchecksum;
-            myDebugLog("Publishing SM10 data via MQTT");
+            myDebugLog("Publishing SM data via MQTT");
 
             // send values via MQTT
-            myESP.mqttPublish(TOPIC_SM10_DATA, data);
+            myESP.mqttPublish(TOPIC_SM_DATA, data);
         }
     }
 }

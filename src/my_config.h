@@ -48,12 +48,15 @@
 #define TOPIC_BOILER_CMD_WWTEMP "boiler_cmd_wwtemp"    // for received boiler wwtemp changes via MQTT
 #define TOPIC_BOILER_CMD_COMFORT "boiler_cmd_comfort"  // for received boiler ww comfort setting via MQTT
 
-// MQTT for SM10 Solar Module
-#define TOPIC_SM10_DATA "sm10_data"          // topic name
-#define SM10_COLLECTORTEMP "temp"            // collector temp
-#define SM10_BOTTOMTEMP "bottomtemp"         // bottom temp
-#define SM10_PUMPMODULATION "pumpmodulation" // pump modulation
-#define SM10_PUMP "pump"                     // pump active
+// MQTT for SM10/SM100 Solar Module
+#define TOPIC_SM_DATA "sm_data"            // topic name
+#define SM_COLLECTORTEMP "temp"            // collector temp
+#define SM_BOTTOMTEMP "bottomtemp"         // bottom temp
+#define SM_PUMPMODULATION "pumpmodulation" // pump modulation
+#define SM_PUMP "pump"                     // pump active
+#define SM_ENERGYLASTHOUR "energylasthour" // energy last hour
+#define SM_ENERGYTODAY "energytoday"       // energy today
+#define SM_ENERGYTOTAL "energytotal"       // energy total
 
 // shower time
 #define TOPIC_SHOWERTIME "showertime"           // for sending shower time results
