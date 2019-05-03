@@ -716,16 +716,31 @@ void _ems_readTelegram(uint8_t * telegram, uint8_t length) {
 
     // determing if its normal ems or ems plus
     if (telegram[2] >= 0xF0) {
-        // its EMS plus
+        // its EMS plus / EMS 2.0
         EMS_RxTelegram.emsplus = true;
-        EMS_RxTelegram.type    = (telegram[4] << 8) + telegram[5]; // is a long in bytes 5 & 6
-        EMS_RxTelegram.data    = telegram + 6;
-        if (length <= 7) {
-            EMS_RxTelegram.data_length = 0; // special broadcast on ems+ have no data values
+
+        if (telegram[2] == 0xFF) {
+            EMS_RxTelegram.type = (telegram[4] << 8) + telegram[5]; // is a long in bytes 5 & 6
+            EMS_RxTelegram.data = telegram + 6;
+
+            if (length <= 7) {
+                EMS_RxTelegram.data_length = 0; // special broadcast on ems+ have no data values
+            } else {
+                EMS_RxTelegram.data_length = length - 7; // remove 6 byte header plus CRC
+            }
         } else {
-            EMS_RxTelegram.data_length = length - 7; // remove 6 byte header plus CRC
+            // its F9 or F7
+            uint8_t shift       = (telegram[4] != 0xFF); // true (1) if byte 4 is not 0xFF, then telegram is 1 byte longer
+            EMS_RxTelegram.type = (telegram[5 + shift] << 8) + telegram[6 + shift];
+            EMS_RxTelegram.data = telegram + 6 + shift; // there is a special byte after the typeID which we ignore for now
+            if (length <= (9 + shift)) {
+                EMS_RxTelegram.data_length = 0; // special broadcast on ems+ have no data values
+            } else {
+                EMS_RxTelegram.data_length = length - (9 + shift);
+            }
         }
     } else {
+        // Normal EMS 1.0
         EMS_RxTelegram.emsplus     = false;
         EMS_RxTelegram.type        = telegram[2]; // 3rd byte
         EMS_RxTelegram.data        = telegram + 4;
