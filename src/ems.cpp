@@ -709,7 +709,7 @@ void _ems_readTelegram(uint8_t * telegram, uint8_t length) {
         return;
     }
 
-    // fill in the rest of the Telegram
+    // fill in the rest of the telegram
     EMS_RxTelegram.src    = telegram[0] & 0x7F; // removing 8th bit as we deal with both reads and writes here
     EMS_RxTelegram.dest   = telegram[1] & 0x7F; // remove 8th bit (don't care if read or write)
     EMS_RxTelegram.offset = telegram[3];        // offset is always 4th byte
@@ -1323,12 +1323,12 @@ void _process_SM10Monitor(_EMS_RxTelegram * EMS_RxTelegram) {
  * SM100Monitor - type 0x0262 EMS+
  */
 void _process_SM100Monitor(_EMS_RxTelegram * EMS_RxTelegram) {
-    if (EMS_RxTelegram->data_length <= 2) {
-        EMS_Other.SMcollectorTemp = _toShort(0); // collector temp from SM100, is *10
-    }
-
     if (EMS_RxTelegram->data_length > 2) {
-        EMS_Other.SMbottomTemp = _toShort(2); // bottom temp from SM100, is *10
+        EMS_Other.SMcollectorTemp = _toShort(0); // collector temp from SM100, is *10
+        EMS_Other.SMbottomTemp    = _toShort(2); // bottom temp from SM100, is *10
+    } else {
+        // only one value sent, assume its the collector temp
+        EMS_Other.SMcollectorTemp = _toShort(0); // collector temp from SM100, is *10
     }
 
     EMS_Other.SM                = true;

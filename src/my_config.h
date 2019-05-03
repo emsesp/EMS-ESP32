@@ -50,7 +50,7 @@
 
 // MQTT for SM10/SM100 Solar Module
 #define TOPIC_SM_DATA "sm_data"            // topic name
-#define SM_COLLECTORTEMP "temp"            // collector temp
+#define SM_COLLECTORTEMP "collectortemp"   // collector temp
 #define SM_BOTTOMTEMP "bottomtemp"         // bottom temp
 #define SM_PUMPMODULATION "pumpmodulation" // pump modulation
 #define SM_PUMP "pump"                     // pump active

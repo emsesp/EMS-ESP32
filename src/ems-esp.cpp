@@ -729,18 +729,18 @@ void publishValues(bool force) {
         doc.clear();
         JsonObject rootSM = doc.to<JsonObject>();
 
-        rootSM[SM_COLLECTORTEMP] = _short_to_char(s, EMS_Other.SMcollectorTemp);
-        rootSM[SM_BOTTOMTEMP]    = _short_to_char(s, EMS_Other.SMbottomTemp);
-
         if (abs(EMS_Other.SMcollectorTemp) < EMS_VALUE_SHORT_NOTSET)
             rootSM[SM_COLLECTORTEMP] = (double)EMS_Other.SMcollectorTemp / 10;
+
         if (abs(EMS_Other.SMbottomTemp) < EMS_VALUE_SHORT_NOTSET)
             rootSM[SM_BOTTOMTEMP] = (double)EMS_Other.SMbottomTemp / 10;
 
         if (EMS_Other.SMpumpModulation != EMS_VALUE_INT_NOTSET)
             rootSM[SM_PUMPMODULATION] = EMS_Other.SMpumpModulation;
 
-        rootSM[SM_PUMP] = _bool_to_char(s, EMS_Other.SMpump);
+        if (EMS_Other.SMpump != EMS_VALUE_INT_NOTSET) {
+            rootSM[SM_PUMP] = _bool_to_char(s, EMS_Other.SMpump);
+        }
 
         if (abs(EMS_Other.SMEnergyLastHour) < EMS_VALUE_SHORT_NOTSET)
             rootSM[SM_ENERGYLASTHOUR] = (double)EMS_Other.SMEnergyLastHour / 10;
