@@ -6,5 +6,5 @@
 #pragma once
 
 #define APP_NAME "EMS-ESP"
-#define APP_VERSION "1.7.0b13"
+#define APP_VERSION "1.7.0b14"
 #define APP_HOSTNAME "ems-esp"

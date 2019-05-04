@@ -1321,12 +1321,20 @@ void _process_SM10Monitor(_EMS_RxTelegram * EMS_RxTelegram) {
 
 /*
  * SM100Monitor - type 0x0262 EMS+
+ * e.g, 30 00 FF 00 02 62 01 AC
+ *      30 00 FF 18 02 62 80 00
+ *      30 00 FF 00 02 62 01 A1 - for bottom temps
  */
 void _process_SM100Monitor(_EMS_RxTelegram * EMS_RxTelegram) {
     // only process the complete telegram, not partial
-    if (EMS_RxTelegram->offset == 0) {
-        EMS_Other.SMcollectorTemp = _toShort(0); // collector temp from SM100, is *10
-        EMS_Other.SMbottomTemp    = _toShort(2); // bottom temp from SM100, is *10
+    if (EMS_RxTelegram->offset != 0) {
+        return;
+    }
+
+    EMS_Other.SMcollectorTemp = _toShort(0); // collector temp from SM100, is *10
+
+    if (EMS_RxTelegram->data_length > 2) {
+        EMS_Other.SMbottomTemp = _toShort(2); // bottom temp from SM100, is *10
     }
 
     EMS_Other.SM                = true;
@@ -1335,9 +1343,17 @@ void _process_SM100Monitor(_EMS_RxTelegram * EMS_RxTelegram) {
 
 /*
  * SM100Status - type 0x0264 EMS+ for pump modulation
+ * e.g. 30 00 FF 09 02 64 64 = 100%
+ *      30 00 FF 09 02 64 1E = 30%
  */
 void _process_SM100Status(_EMS_RxTelegram * EMS_RxTelegram) {
-    EMS_Other.SMpumpModulation = _toByte(9); // modulation solar pump
+    // check for complete telegram
+    if (EMS_RxTelegram->offset == 0) {
+        EMS_Other.SMpumpModulation = _toByte(9); // modulation solar pump
+    } else if (EMS_RxTelegram->offset == 0x09) {
+        // or short telegram with a single byte with offset 09
+        EMS_Other.SMpumpModulation = _toByte(0); // modulation solar pump
+    }
 
     EMS_Other.SM                = true;
     EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
@@ -1349,9 +1365,9 @@ void _process_SM100Status(_EMS_RxTelegram * EMS_RxTelegram) {
 void _process_SM100Status2(_EMS_RxTelegram * EMS_RxTelegram) {
     // check for complete telegram
     if (EMS_RxTelegram->offset == 0) {
-        EMS_Other.SMpump = _bitRead(9, 2); // 03=off 04=on at offset 10 which is byte 9
+        EMS_Other.SMpump = _bitRead(10, 2); // 03=off 04=on at offset 10 which is byte 10
     } else if (EMS_RxTelegram->offset == 0x0A) {
-        // or short telegram with a single byte at offset 0A
+        // or short telegram with a single byte with offset 0A
         EMS_Other.SMpump = _bitRead(0, 2); // 03=off 04=on
     }
 
