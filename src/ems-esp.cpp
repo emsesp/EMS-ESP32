@@ -601,13 +601,13 @@ void publishValues(bool force) {
         rootBoiler["outdoorTemp"] = (double)EMS_Boiler.extTemp / 10;
     if (abs(EMS_Boiler.wWCurTmp) < EMS_VALUE_SHORT_NOTSET)
         rootBoiler["wWCurTmp"] = (double)EMS_Boiler.wWCurTmp / 10;
-    if (abs(EMS_Boiler.wWCurFlow) < EMS_VALUE_SHORT_NOTSET)
+    if (abs(EMS_Boiler.wWCurFlow) != EMS_VALUE_INT_NOTSET)
         rootBoiler["wWCurFlow"] = (double)EMS_Boiler.wWCurFlow / 10;
     if (abs(EMS_Boiler.curFlowTemp) < EMS_VALUE_SHORT_NOTSET)
         rootBoiler["curFlowTemp"] = (double)EMS_Boiler.curFlowTemp / 10;
     if (abs(EMS_Boiler.retTemp) < EMS_VALUE_SHORT_NOTSET)
         rootBoiler["retTemp"] = (double)EMS_Boiler.retTemp / 10;
-    if (abs(EMS_Boiler.sysPress) < EMS_VALUE_SHORT_NOTSET)
+    if (abs(EMS_Boiler.sysPress) != EMS_VALUE_INT_NOTSET)
         rootBoiler["sysPress"] = (double)EMS_Boiler.sysPress / 10;
     if (abs(EMS_Boiler.boilTemp) < EMS_VALUE_SHORT_NOTSET)
         rootBoiler["boilTemp"] = (double)EMS_Boiler.boilTemp / 10;
