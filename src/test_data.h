@@ -42,7 +42,8 @@ static const char * TEST_DATA[] = {
     "10 48 F9 00 FF 01 6D 08",                                                                      // test 37 - F9
     "10 00 F7 00 FF 01 B9 35 19",                                                                   // test 38 - F7
     "30 00 FF 00 02 62 00 E7 01 AE 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00",    // test 39 - SM100
-    "30 00 FF 00 02 62 00 E4"                                                                       // test 40 - SM100
+    "30 00 FF 00 02 62 00 E4",                                                                      // test 40 - SM100
+    "10 48 F7 00 FF 01 A5 DF FF F7 7F 1F"                                                           // test 41 - gateway
 
 };
 

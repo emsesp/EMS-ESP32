@@ -1323,12 +1323,10 @@ void _process_SM10Monitor(_EMS_RxTelegram * EMS_RxTelegram) {
  * SM100Monitor - type 0x0262 EMS+
  */
 void _process_SM100Monitor(_EMS_RxTelegram * EMS_RxTelegram) {
-    if (EMS_RxTelegram->data_length > 2) {
+    // only process the complete telegram, not partial
+    if (EMS_RxTelegram->offset == 0) {
         EMS_Other.SMcollectorTemp = _toShort(0); // collector temp from SM100, is *10
         EMS_Other.SMbottomTemp    = _toShort(2); // bottom temp from SM100, is *10
-    } else {
-        // only one value sent, assume its the collector temp
-        EMS_Other.SMcollectorTemp = _toShort(0); // collector temp from SM100, is *10
     }
 
     EMS_Other.SM                = true;
@@ -1336,7 +1334,7 @@ void _process_SM100Monitor(_EMS_RxTelegram * EMS_RxTelegram) {
 }
 
 /*
- * SM100Status - type 0x0264 EMS+
+ * SM100Status - type 0x0264 EMS+ for pump modulation
  */
 void _process_SM100Status(_EMS_RxTelegram * EMS_RxTelegram) {
     EMS_Other.SMpumpModulation = _toByte(9); // modulation solar pump
@@ -1346,10 +1344,14 @@ void _process_SM100Status(_EMS_RxTelegram * EMS_RxTelegram) {
 }
 
 /*
- * SM100Status2 - type 0x026A EMS+ for pump on/off
+ * SM100Status2 - type 0x026A EMS+ for pump on/off at offset 0x0A
  */
 void _process_SM100Status2(_EMS_RxTelegram * EMS_RxTelegram) {
-    if (EMS_RxTelegram->data_length == 1) {
+    // check for complete telegram
+    if (EMS_RxTelegram->offset == 0) {
+        EMS_Other.SMpump = _bitRead(9, 2); // 03=off 04=on at offset 10 which is byte 9
+    } else if (EMS_RxTelegram->offset == 0x0A) {
+        // or short telegram with a single byte at offset 0A
         EMS_Other.SMpump = _bitRead(0, 2); // 03=off 04=on
     }
 
