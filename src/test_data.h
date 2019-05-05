@@ -45,7 +45,8 @@ static const char * TEST_DATA[] = {
     "30 00 FF 00 02 62 00 E4",                                                                      // test 40 - SM100
     "10 48 F7 00 FF 01 A5 DF FF F7 7F 1F",                                                          // test 41 - gateway
     "30 00 FF 09 02 64 1E",                                                                         // test 42 - SM100
-    "08 00 18 00 05 03 30 00 00 00 00 04 40 80 00 02 17 80 00 00 00 FF 30 48 00 CB 00 00 00"        // test 43 - sys pressure
+    "08 00 18 00 05 03 30 00 00 00 00 04 40 80 00 02 17 80 00 00 00 FF 30 48 00 CB 00 00 00",       // test 43 - sys pressure
+    "90 00 FF 00 00 6F 03 01 00 BE 00 BF"                                                           // test 44 - FR10
 
 };
 

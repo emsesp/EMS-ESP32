@@ -5,26 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.7.0 dev] 2019-05
+## [1.7.0] 2019-05-05
 
 ### Added
 
-- Buderus Logamax plus boiler added
-- EMS+ support (thanks too @gl3nni3 for making the first implementation)
+- EMS+ support (thanks too @gl3nni3 for doing the first research)
 - MQTT 'restart' topic to reboot ESP (thanks @balk77)
 - Support for multiple thermostat heating circuits like the HC1/HC2 on a RC35, also via MQTT (thanks @lobocobra)
 - `boiler flowtemp` command to set the flow temperature [(issue 59)](https://github.com/proddy/EMS-ESP/issues/59)
+- added a test harness to try out response to various telegrams
 - `tx_delay` setting for circuits where we needed to slow down Tx transmission
 - new boiler: Nefit proline hrc 24 cw4 thermostat
-- new thermostats: Buderus RC300 and RC310 thermostats [(issue 37)](https://github.com/proddy/EMS-ESP/issues/37)
-- added a test harness to try out response to various telegrams
-- new devices: Buderus Web Gateway KM200, Solar Module SM100
+- new boiler: Buderus Logamax plus
+- new thermostat: Buderus RC300 and RC310 thermostats [(issue 37)](https://github.com/proddy/EMS-ESP/issues/37)
+- new thermostat: Junkers FR10 [(issue 98)](https://github.com/proddy/EMS-ESP/issues/98)
+- new devices: Buderus Web Gateway KM200, Buderus Solar Module SM100
 
 ### Changed
 
 - `types` renamed to `devices` to also show all detected devices
-- EMS Plus logic optimized
-- `silent_mode` to `listen_mode`
+- renamed `silent_mode` to `listen_mode`
 - increased Tx queue to 100
 
 ## [1.6.0] 2019-03-24

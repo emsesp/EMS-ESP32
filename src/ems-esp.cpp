@@ -460,10 +460,13 @@ void showInfo() {
         myDebug("%sThermostat stats:%s", COLOR_BOLD_ON, COLOR_BOLD_OFF);
         myDebug("  Thermostat: %s", ems_getThermostatDescription(buffer_type));
         if ((ems_getThermostatModel() == EMS_MODEL_EASY) || (ems_getThermostatModel() == EMS_MODEL_BOSCHEASY)) {
-            // for easy temps are * 100
-            // also we don't have the time or mode
-            _renderShortValue("Set room temperature", "C", EMS_Thermostat.setpoint_roomTemp, 10);
-            _renderShortValue("Current room temperature", "C", EMS_Thermostat.curr_roomTemp, 10);
+            // for easy temps are * 100, also we don't have the time or mode
+            _renderShortValue("Set room temperature", "C", EMS_Thermostat.setpoint_roomTemp, 10); // *100
+            _renderShortValue("Current room temperature", "C", EMS_Thermostat.curr_roomTemp, 10); // *100
+        } else if (ems_getThermostatModel() == EMS_MODEL_FR10) {
+            // Junkers are *10
+            _renderIntValue("Set room temperature", "C", EMS_Thermostat.setpoint_roomTemp, 10); // *10
+            _renderIntValue("Current room temperature", "C", EMS_Thermostat.curr_roomTemp, 10); // *10
         } else {
             // because we store in 2 bytes short, when converting to a single byte we'll loose the negative value if its unset
             if (EMS_Thermostat.setpoint_roomTemp <= 0) {
@@ -673,7 +676,14 @@ void publishValues(bool force) {
 
         rootThermostat[THERMOSTAT_HC] = _int_to_char(s, EMSESP_Status.heating_circuit);
 
+        // different logic depending on thermostat types
         if ((ems_getThermostatModel() == EMS_MODEL_EASY) || (ems_getThermostatModel() == EMS_MODEL_BOSCHEASY)) {
+            if (abs(EMS_Thermostat.setpoint_roomTemp) < EMS_VALUE_SHORT_NOTSET)
+                rootThermostat[THERMOSTAT_SELTEMP] = (double)EMS_Thermostat.setpoint_roomTemp / 10;
+            if (abs(EMS_Thermostat.curr_roomTemp) < EMS_VALUE_SHORT_NOTSET)
+                rootThermostat[THERMOSTAT_CURRTEMP] = (double)EMS_Thermostat.curr_roomTemp / 10;
+
+        } else if (ems_getThermostatModel() == EMS_MODEL_FR10) {
             if (abs(EMS_Thermostat.setpoint_roomTemp) < EMS_VALUE_SHORT_NOTSET)
                 rootThermostat[THERMOSTAT_SELTEMP] = (double)EMS_Thermostat.setpoint_roomTemp / 10;
             if (abs(EMS_Thermostat.curr_roomTemp) < EMS_VALUE_SHORT_NOTSET)

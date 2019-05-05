@@ -81,12 +81,15 @@ void _process_RC30StatusMessage(_EMS_RxTelegram * EMS_RxTelegram);
 void _process_RC35Set(_EMS_RxTelegram * EMS_RxTelegram);
 void _process_RC35StatusMessage(_EMS_RxTelegram * EMS_RxTelegram);
 
-// Easy
+// Easy type devices like C100
 void _process_EasyStatusMessage(_EMS_RxTelegram * EMS_RxTelegram);
 
 // RC1010, RC300, RC310
 void _process_RCPLUSStatusMessage(_EMS_RxTelegram * EMS_RxTelegram);
 void _process_RCPLUSSetMessage(_EMS_RxTelegram * EMS_RxTelegram);
+
+// Junkers FR10
+void _process_FR10StatusMessage(_EMS_RxTelegram * EMS_RxTelegram);
 
 /*
  * Recognized EMS types and the functions they call to process the telegrams
@@ -156,7 +159,11 @@ const _EMS_Type EMS_Types[] = {
 
     // Nefit 1010, RC300, RC310 (EMS Plus)
     {EMS_MODEL_ALL, EMS_TYPE_RCPLUSStatusMessage, "RCPLUSStatusMessage", _process_RCPLUSStatusMessage},
-    {EMS_MODEL_ALL, EMS_TYPE_RCPLUSSet, "RCPLUSSetMessage", _process_RCPLUSSetMessage}
+    {EMS_MODEL_ALL, EMS_TYPE_RCPLUSSet, "RCPLUSSetMessage", _process_RCPLUSSetMessage},
+
+    // Junkers FR10
+    {EMS_MODEL_ALL, EMS_TYPE_FR10StatusMessage, "FR10StatusMessage", _process_FR10StatusMessage}
+
 
 };
 
@@ -1253,6 +1260,17 @@ void _process_RCPLUSStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
 }
 
 /*
+ * FR10 Junkers - type x6F01
+ */
+void _process_FR10StatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
+    if (EMS_RxTelegram->data_length == 6) {
+        // e.g. 90 00 FF 00 00 6F 03 01 00 BE 00 BF
+        EMS_Thermostat.curr_roomTemp     = _toByte(EMS_OFFSET_FR10StatusMessage_curr);     // value is * 10
+        EMS_Thermostat.setpoint_roomTemp = _toByte(EMS_OFFSET_FR10StatusMessage_setpoint); // value is * 10, which is different from other EMS+ devices
+    }
+}
+
+/*
  * to complete....
  */
 void _process_RCPLUSSetMessage(_EMS_RxTelegram * EMS_RxTelegram) {
@@ -1742,7 +1760,11 @@ char * ems_getThermostatDescription(char * buffer) {
         }
 
         strlcat(buffer, " (ProductID:", size);
-        strlcat(buffer, itoa(EMS_Thermostat.product_id, tmp, 10), size);
+        if (EMS_Thermostat.product_id == EMS_ID_NONE) {
+            strlcat(buffer, "?", size);
+        } else {
+            strlcat(buffer, itoa(EMS_Thermostat.product_id, tmp, 10), size);
+        }
         strlcat(buffer, " Version:", size);
         strlcat(buffer, EMS_Thermostat.version, size);
         strlcat(buffer, ")", size);
@@ -1779,7 +1801,11 @@ char * ems_getBoilerDescription(char * buffer) {
         }
 
         strlcat(buffer, " (ProductID:", size);
-        strlcat(buffer, itoa(EMS_Boiler.product_id, tmp, 10), size);
+        if (EMS_Boiler.product_id == EMS_ID_NONE) {
+            strlcat(buffer, "?", size);
+        } else {
+            strlcat(buffer, itoa(EMS_Boiler.product_id, tmp, 10), size);
+        }
         strlcat(buffer, " Version:", size);
         strlcat(buffer, EMS_Boiler.version, size);
         strlcat(buffer, ")", size);
