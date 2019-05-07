@@ -185,7 +185,7 @@ void ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
           delayMicroseconds(EMS_TX_BRK_WAIT);
         }
     }
-    emsuart_tx_brk();
+    emsuart_tx_brk(); // send <BRK>
 }
 
 /*
@@ -193,5 +193,5 @@ void ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
  */
 void ICACHE_FLASH_ATTR emsaurt_tx_poll() {
     USF(EMSUART_UART) = EMS_ID_ME;
-    emsuart_tx_brk();
+    emsuart_tx_brk(); // send <BRK>
 }

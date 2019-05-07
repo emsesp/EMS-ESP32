@@ -165,7 +165,7 @@ const _EMS_Type EMS_Types[] = {
     {EMS_MODEL_ALL, EMS_TYPE_RCPLUSSet, "RCPLUSSetMessage", _process_RCPLUSSetMessage},
     {EMS_MODEL_ALL, EMS_TYPE_RCPLUSStatusHeating, "RCPLUSStatusHeating", _process_RCPLUSStatusHeating},
     {EMS_MODEL_ALL, EMS_TYPE_RCPLUSStatusMode, "RCPLUSStatusMode", _process_RCPLUSStatusMode},
-    
+
     // Junkers FR10
     {EMS_MODEL_ALL, EMS_TYPE_FR10StatusMessage, "FR10StatusMessage", _process_FR10StatusMessage}
 
@@ -503,7 +503,9 @@ void _debugPrintTelegram(const char * prefix, _EMS_RxTelegram * EMS_RxTelegram, 
         strlcat(output_str, " ", sizeof(output_str)); // add space
     }
 
-    if (!raw) {
+    if (raw) {
+        strlcat(output_str, _hextoa(data[length - 1], buffer), sizeof(output_str));
+    } else {
         strlcat(output_str, "(CRC=", sizeof(output_str));
         strlcat(output_str, _hextoa(data[length - 1], buffer), sizeof(output_str));
         strlcat(output_str, ")", sizeof(output_str));
@@ -541,16 +543,17 @@ void _ems_sendTelegram() {
     }
 
     // if we're in raw mode just fire and forget
+    // e.g. send 0B 88 02 00 20
     if (EMS_TxTelegram.action == EMS_TX_TELEGRAM_RAW) {
         _EMS_RxTelegram EMS_RxTelegram; // create new Rx object
 
         EMS_TxTelegram.data[EMS_TxTelegram.length - 1] = _crcCalculator(EMS_TxTelegram.data, EMS_TxTelegram.length); // add the CRC
         EMS_RxTelegram.length                          = EMS_TxTelegram.length;                                      // full length of telegram
         EMS_RxTelegram.telegram                        = EMS_TxTelegram.data;
-        EMS_RxTelegram.timestamp                       = millis();       // now
-        _debugPrintTelegram("Sending raw", &EMS_RxTelegram, COLOR_CYAN); // always show
-        emsuart_tx_buffer(EMS_TxTelegram.data, EMS_TxTelegram.length);   // send the telegram to the UART Tx
-        EMS_TxQueue.shift();                                             // remove from queue
+        EMS_RxTelegram.timestamp                       = millis();               // now
+        _debugPrintTelegram("Sending raw: ", &EMS_RxTelegram, COLOR_CYAN, true); // always show
+        emsuart_tx_buffer(EMS_TxTelegram.data, EMS_TxTelegram.length);           // send the telegram to the UART Tx
+        EMS_TxQueue.shift();                                                     // remove from queue
         return;
     }
 
