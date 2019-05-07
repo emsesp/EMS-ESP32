@@ -87,11 +87,14 @@ void _process_EasyStatusMessage(_EMS_RxTelegram * EMS_RxTelegram);
 // RC1010, RC300, RC310
 void _process_RCPLUSStatusMessage(_EMS_RxTelegram * EMS_RxTelegram);
 void _process_RCPLUSSetMessage(_EMS_RxTelegram * EMS_RxTelegram);
+void _process_RCPLUSStatusHeating(_EMS_RxTelegram * EMS_RxTelegram);
+void _process_RCPLUSStatusHeating(_EMS_RxTelegram * EMS_RxTelegram);
+void _process_RCPLUSStatusMode(_EMS_RxTelegram * EMS_RxTelegram);
 
 // Junkers FR10
 void _process_FR10StatusMessage(_EMS_RxTelegram * EMS_RxTelegram);
 
-/*
+/**
  * Recognized EMS types and the functions they call to process the telegrams
  * Format: MODEL ID, TYPE ID, Description, function, emsplus
  */
@@ -160,7 +163,9 @@ const _EMS_Type EMS_Types[] = {
     // Nefit 1010, RC300, RC310 (EMS Plus)
     {EMS_MODEL_ALL, EMS_TYPE_RCPLUSStatusMessage, "RCPLUSStatusMessage", _process_RCPLUSStatusMessage},
     {EMS_MODEL_ALL, EMS_TYPE_RCPLUSSet, "RCPLUSSetMessage", _process_RCPLUSSetMessage},
-
+    {EMS_MODEL_ALL, EMS_TYPE_RCPLUSStatusHeating, "RCPLUSStatusHeating", _process_RCPLUSStatusHeating},
+    {EMS_MODEL_ALL, EMS_TYPE_RCPLUSStatusMode, "RCPLUSStatusMode", _process_RCPLUSStatusMode},
+    
     // Junkers FR10
     {EMS_MODEL_ALL, EMS_TYPE_FR10StatusMessage, "FR10StatusMessage", _process_FR10StatusMessage}
 
@@ -467,10 +472,7 @@ int _ems_findType(uint8_t type) {
 /**
  * debug print a telegram to telnet/serial including the CRC
  */
-void _debugPrintTelegram(const char * prefix, _EMS_RxTelegram * EMS_RxTelegram, const char * color) {
-    if (EMS_Sys_Status.emsLogging <= EMS_SYS_LOGGING_BASIC)
-        return;
-
+void _debugPrintTelegram(const char * prefix, _EMS_RxTelegram * EMS_RxTelegram, const char * color, bool raw = false) {
     char      output_str[200] = {0};
     char      buffer[16]      = {0};
     uint8_t * data            = EMS_RxTelegram->telegram;
@@ -491,21 +493,26 @@ void _debugPrintTelegram(const char * prefix, _EMS_RxTelegram * EMS_RxTelegram, 
 
     strlcat(output_str, color, sizeof(output_str));
     strlcat(output_str, prefix, sizeof(output_str));
-    strlcat(output_str, " telegram: ", sizeof(output_str));
+
+    if (!raw) {
+        strlcat(output_str, " telegram: ", sizeof(output_str));
+    }
 
     for (int i = 0; i < (length - 1); i++) {
         strlcat(output_str, _hextoa(data[i], buffer), sizeof(output_str));
         strlcat(output_str, " ", sizeof(output_str)); // add space
     }
 
-    strlcat(output_str, "(CRC=", sizeof(output_str));
-    strlcat(output_str, _hextoa(data[length - 1], buffer), sizeof(output_str));
-    strlcat(output_str, ")", sizeof(output_str));
+    if (!raw) {
+        strlcat(output_str, "(CRC=", sizeof(output_str));
+        strlcat(output_str, _hextoa(data[length - 1], buffer), sizeof(output_str));
+        strlcat(output_str, ")", sizeof(output_str));
 
-    // print number of data bytes only if its a valid telegram
-    if (data_len) {
-        strlcat(output_str, " #data=", sizeof(output_str));
-        strlcat(output_str, itoa(data_len, buffer, 10), sizeof(output_str));
+        // print number of data bytes only if its a valid telegram
+        if (data_len) {
+            strlcat(output_str, " #data=", sizeof(output_str));
+            strlcat(output_str, itoa(data_len, buffer, 10), sizeof(output_str));
+        }
     }
 
     strlcat(output_str, COLOR_RESET, sizeof(output_str));
@@ -638,7 +645,7 @@ void _createValidate() {
     EMS_TxQueue.unshift(new_EMS_TxTelegram); // add back to queue making it first to be picked up next (FIFO)
 }
 
-/*
+/**
  * Entry point triggered by an interrupt in emsuart.cpp
  * length is size of all the telegram bytes including the CRC, excluding the BRK at the end
  * Read commands are asynchronous as they're handled by the interrupt
@@ -755,11 +762,11 @@ void _ems_readTelegram(uint8_t * telegram, uint8_t length) {
     }
 
     // Assume at this point we have something that vaguely resembles a telegram in the format [src] [dest] [type] [offset] [data] [crc]
-    // validate the CRC, if its bad ignore it
+    // validate the CRC, if it's bad ignore it
     if (telegram[length - 1] != _crcCalculator(telegram, length)) {
         EMS_Sys_Status.emxCrcErr++;
         if (EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_VERBOSE) {
-            _debugPrintTelegram("Corrupt telegram:", &EMS_RxTelegram, COLOR_RED);
+            _debugPrintTelegram("Corrupt telegram: ", &EMS_RxTelegram, COLOR_RED, true);
         }
         return;
     }
@@ -767,13 +774,7 @@ void _ems_readTelegram(uint8_t * telegram, uint8_t length) {
     // if we are in raw logging mode then just print out the telegram as it is
     // but still continue to process it
     if (EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_RAW) {
-        char raw[300]   = {0};
-        char buffer[16] = {0};
-        for (int i = 0; i < length; i++) {
-            strlcat(raw, _hextoa(telegram[i], buffer), sizeof(raw));
-            strlcat(raw, " ", sizeof(raw)); // add space
-        }
-        myDebug(raw);
+        _debugPrintTelegram("", &EMS_RxTelegram, COLOR_WHITE, true);
     }
 
     // here we know its a valid incoming telegram of at least 6 bytes
@@ -785,7 +786,7 @@ void _ems_readTelegram(uint8_t * telegram, uint8_t length) {
     _processType(&EMS_RxTelegram);
 }
 
-/*
+/**
  * print the telegram
  */
 void _printMessage(_EMS_RxTelegram * EMS_RxTelegram) {
@@ -1091,7 +1092,7 @@ void _process_UBATotalUptimeMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     EMS_Sys_Status.emsRefreshed = true; // when we receieve this, lets force an MQTT publish
 }
 
-/*
+/**
  * UBAParametersMessage - type 0x16
  */
 void _process_UBAParametersMessage(_EMS_RxTelegram * EMS_RxTelegram) {
@@ -1213,7 +1214,7 @@ void _process_RC35StatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     }
     EMS_Thermostat.day_mode = _bitRead(EMS_OFFSET_RC35Get_mode_day, 1); // get day mode flag
 
-    EMS_Thermostat.circuitcalctemp = EMS_RxTelegram->data[EMS_OFFSET_RC35Set_circuitcalctemp]; // 0x48 calculated temperature
+    EMS_Thermostat.circuitcalctemp = _toByte(EMS_OFFSET_RC35Set_circuitcalctemp); // 0x48 calculated temperature
 
     EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
 }
@@ -1241,6 +1242,8 @@ void _process_RCPLUSStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
         EMS_Thermostat.curr_roomTemp     = _toShort(EMS_OFFSET_RCPLUSStatusMessage_curr);    // value is * 10
         EMS_Thermostat.setpoint_roomTemp = _toByte(EMS_OFFSET_RCPLUSStatusMessage_setpoint); // value is * 2
 
+        EMS_Thermostat.day_mode = _bitRead(EMS_OFFSET_RCPLUSGet_mode_day, 1); // get day mode flag
+
         // room night setpoint is _toByte(2) (value is *2)
         // boiler set temp is _toByte(4) (value is *2)
         // day night is byte(8), 0x01 for night, 0x00 for day
@@ -1259,7 +1262,22 @@ void _process_RCPLUSStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     }
 }
 
-/*
+/**
+ * type 0x01B9 - heating data from the Nefit RC1010 thermostat (0x18) and RC300/310s on 0x10
+ */
+void _process_RCPLUSStatusHeating(_EMS_RxTelegram * EMS_RxTelegram) {
+    // see wiki
+    // operation mode, comfort levels 1,2,3, eco level
+}
+
+/**
+ * type 0x01AF - summer/winter mode from the Nefit RC1010 thermostat (0x18) and RC300/310s on 0x10
+ */
+void _process_RCPLUSStatusMode(_EMS_RxTelegram * EMS_RxTelegram) {
+    // _toByte(0); // 0x00=OFF 0x01=Automatic 0x02=Forced
+}
+
+/**
  * FR10 Junkers - type x6F01
  */
 void _process_FR10StatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
@@ -1270,7 +1288,7 @@ void _process_FR10StatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     }
 }
 
-/*
+/**
  * to complete....
  */
 void _process_RCPLUSSetMessage(_EMS_RxTelegram * EMS_RxTelegram) {
@@ -1814,7 +1832,7 @@ char * ems_getBoilerDescription(char * buffer) {
     return buffer;
 }
 
-/*
+/**
  * Find the versions of our connected devices
  */
 void ems_scanDevices() {
@@ -1898,7 +1916,7 @@ void ems_printAllDevices() {
     myDebug(""); // newline
 }
 
-/*
+/**
  * print out contents of the device list that was captured
  */
 void ems_printDevices() {
@@ -2308,7 +2326,7 @@ void ems_setWarmTapWaterActivated(bool activated) {
     EMS_TxQueue.push(EMS_TxTelegram); // add to queue
 }
 
-/*
+/**
  * Start up sequence for UBA Master, hopefully to initialize a handshake
  * Still experimental
  */
@@ -2329,7 +2347,7 @@ void ems_startupTelegrams() {
     ems_sendRawTelegram(s);
 }
 
-/*
+/**
  * Test parsing of telgrams by injecting fake telegrams and simulating the response
  */
 void ems_testTelegram(uint8_t test_num) {

@@ -100,9 +100,12 @@
 
 // RC1010, RC310 and RC300 specific (EMS Plus)
 #define EMS_TYPE_RCPLUSStatusMessage 0x01A5       // is an automatic thermostat broadcast giving us temps
+#define EMS_TYPE_RCPLUSStatusHeating 0x01B9       // heating mode
+#define EMS_TYPE_RCPLUSStatusMode 0x1AF           // summer/winter mode
 #define EMS_TYPE_RCPLUSSet 0x03                   // setpoint temp message
 #define EMS_OFFSET_RCPLUSStatusMessage_setpoint 3 // setpoint temp
 #define EMS_OFFSET_RCPLUSStatusMessage_curr 0     // current temp
+#define EMS_OFFSET_RCPLUSGet_mode_day 8           // day/night mode
 
 // Junkers FR10 (EMS Plus)
 #define EMS_TYPE_FR10StatusMessage 0x6F         // is an automatic thermostat broadcast giving us temps
@@ -151,7 +154,8 @@ const _Boiler_Type Boiler_Types[] = {
     {EMS_MODEL_UBA, 208, 0x08, "Buderus Logamax plus/GB192"},
     {EMS_MODEL_UBA, 64, 0x08, "Sieger BK15 Boiler/Nefit Smartline"},
     {EMS_MODEL_UBA, 95, 0x08, "Bosch Condens 2500/Junkers Heatronics3"},
-    {EMS_MODEL_UBA, 122, 0x08, "Nefit Proline"}
+    {EMS_MODEL_UBA, 122, 0x08, "Nefit Proline"},
+    {EMS_MODEL_UBA, 172, 0x08, "Nefit Enviline"}
 
 };
 
@@ -190,7 +194,7 @@ const _Thermostat_Type Thermostat_Types[] = {
     {EMS_MODEL_RC20F, 93, 0x18, "RC20F", EMS_THERMOSTAT_WRITE_YES},
     {EMS_MODEL_RC30, 78, 0x10, "RC30/Nefit Moduline 400", EMS_THERMOSTAT_WRITE_YES},
     {EMS_MODEL_RC35, 86, 0x10, "RC35", EMS_THERMOSTAT_WRITE_YES},
-    {EMS_MODEL_RC310, 158, 0x10, "RC300/RC310", EMS_THERMOSTAT_WRITE_YES},
+    {EMS_MODEL_RC310, 158, 0x10, "RC3x0/Nefit Moduline 1010H", EMS_THERMOSTAT_WRITE_YES},
     {EMS_MODEL_1010, 165, 0x18, "Nefit Moduline 1010", EMS_THERMOSTAT_WRITE_YES},
 
     // Sieger

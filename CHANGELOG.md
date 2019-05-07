@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `boiler flowtemp` command to set the flow temperature [(issue 59)](https://github.com/proddy/EMS-ESP/issues/59)
 - added a test harness to try out response to various telegrams
 - `tx_delay` setting for circuits where we needed to slow down Tx transmission
-- new boiler: Nefit proline hrc 24 cw4 thermostat
+- new boiler: Nefit proline hrc 24 cw4 thermostat and Nefit Enviline heatpump
 - new boiler: Buderus Logamax plus
 - new thermostat: Buderus RC300 and RC310 thermostats [(issue 37)](https://github.com/proddy/EMS-ESP/issues/37)
 - new thermostat: Junkers FR10 [(issue 98)](https://github.com/proddy/EMS-ESP/issues/98)
