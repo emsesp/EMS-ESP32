@@ -419,7 +419,7 @@ void showInfo() {
     _renderIntValue("Boiler circuit pump modulation min power", "%", EMS_Boiler.pump_mod_min);
 
     // UBAMonitorSlow
-    if (EMS_Boiler.extTemp != EMS_VALUE_SHORT_NOTSET) {
+    if (EMS_Boiler.extTemp != (int16_t)EMS_VALUE_SHORT_NOTSET) {
         _renderShortValue("Outside temperature", "C", EMS_Boiler.extTemp);
     }
     _renderShortValue("Boiler temperature", "C", EMS_Boiler.boilTemp);
