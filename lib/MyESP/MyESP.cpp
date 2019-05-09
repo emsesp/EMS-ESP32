@@ -1424,15 +1424,15 @@ extern "C" void custom_crash_callback(struct rst_info * rst_info, uint32_t stack
 
 void MyESP::crashTest(uint8_t t) {
     if (t == 1) {
-        myDebug("[CRASH] Attempting to divide by zero ...");
+        myDebug_P(PSTR("[CRASH] Attempting to divide by zero ..."));
         int result, zero;
         zero   = 0;
         result = 1 / zero;
-        myDebug("Result = %d", result);
+        myDebug_P(PSTR("Result = %d"), result);
     }
 
     if (t == 2) {
-        myDebug("[CRASH] Attempting to read through a pointer to no object ...");
+        myDebug_P(PSTR("[CRASH] Attempting to read through a pointer to no object ..."));
         int * nullPointer;
         nullPointer = NULL;
         // null pointer dereference - read
@@ -1441,7 +1441,7 @@ void MyESP::crashTest(uint8_t t) {
     }
 
     if (t == 3) {
-        Serial.printf("[CRASH] Crashing with hardware WDT (%ld ms) ...\n", millis());
+        myDebug_P(PSTR("[CRASH] Crashing with hardware WDT (%ld ms) ...\n"), millis());
         ESP.wdtDisable();
         while (true) {
             // stay in an infinite loop doing nothing
@@ -1454,7 +1454,7 @@ void MyESP::crashTest(uint8_t t) {
     }
 
     if (t == 4) {
-        Serial.printf("[CRASH] Crashing with software WDT (%ld ms) ...\n", millis());
+        myDebug_P(PSTR("[CRASH] Crashing with software WDT (%ld ms) ...\n"), millis());
         while (true) {
             // stay in an infinite loop doing nothing
             // this way other process can not be executed
@@ -1508,7 +1508,7 @@ void MyESP::crashDump() {
 
     uint32_t stack_trace;
 
-    myDebug(">>>stack>>>");
+    myDebug_P(PSTR(">>>stack>>>"));
 
     for (int16_t i = 0; i < stack_len; i += 0x10) {
         SerialAndTelnet.printf("%08x: ", stack_start + i);
@@ -1519,7 +1519,7 @@ void MyESP::crashDump() {
         }
         SerialAndTelnet.println();
     }
-    myDebug("<<<stack<<<");
+    myDebug_P(PSTR("<<<stack<<<"));
 }
 #else
 void MyESP::crashTest(uint8_t t) {

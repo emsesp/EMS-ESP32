@@ -41,7 +41,7 @@ DS18 ds18;
 Ticker publishValuesTimer;
 Ticker publishSensorValuesTimer;
 
-#define SYSTEMCHECK_TIME 20 // every 20 seconds check if Boiler is online
+#define SYSTEMCHECK_TIME 10 // every 10 seconds check if EMS can be reached
 Ticker systemCheckTimer;
 
 #define REGULARUPDATES_TIME 60 // every minute a call is made to fetch data from EMS devices manually
@@ -144,19 +144,15 @@ void myDebugLog(const char * s) {
 char * _float_to_char(char * a, float f, uint8_t precision = 2) {
     long p[] = {0, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000};
 
-    char * ret = a;
-    // check for 0x8000 (sensor missing)
-    if (f == EMS_VALUE_SHORT_NOTSET) {
-        strlcpy(ret, "?", sizeof(ret));
-    } else {
-        long whole = (long)f;
-        itoa(whole, a, 10);
-        while (*a != '\0')
-            a++;
-        *a++         = '.';
-        long decimal = abs((long)((f - whole) * p[precision]));
-        itoa(decimal, a, 10);
-    }
+    char * ret   = a;
+    long   whole = (long)f;
+    itoa(whole, a, 10);
+    while (*a != '\0')
+        a++;
+    *a++         = '.';
+    long decimal = abs((long)((f - whole) * p[precision]));
+    itoa(decimal, a, 10);
+
     return ret;
 }
 
@@ -315,59 +311,59 @@ void showInfo() {
 
     static char buffer_type[128] = {0};
 
-    myDebug("%sEMS-ESP system stats:%s", COLOR_BOLD_ON, COLOR_BOLD_OFF);
+    myDebug_P(PSTR("%sEMS-ESP system stats:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
     _EMS_SYS_LOGGING sysLog = ems_getLogging();
     if (sysLog == EMS_SYS_LOGGING_BASIC) {
-        myDebug("  System logging set to Basic");
+        myDebug_P(PSTR("  System logging set to Basic"));
     } else if (sysLog == EMS_SYS_LOGGING_VERBOSE) {
-        myDebug("  System logging set to Verbose");
+        myDebug_P(PSTR("  System logging set to Verbose"));
     } else if (sysLog == EMS_SYS_LOGGING_THERMOSTAT) {
-        myDebug("  System logging set to Thermostat only");
+        myDebug_P(PSTR("  System logging set to Thermostat only"));
     } else {
-        myDebug("  System logging set to None");
+        myDebug_P(PSTR("  System logging set to None"));
     }
 
-    myDebug("  LED is %s, Listen mode is %s", EMSESP_Status.led ? "on" : "off", EMSESP_Status.listen_mode ? "on" : "off");
+    myDebug_P(PSTR("  LED is %s, Listen mode is %s"), EMSESP_Status.led ? "on" : "off", EMSESP_Status.listen_mode ? "on" : "off");
     if (EMSESP_Status.dallas_sensors > 0) {
-        myDebug("  %d external temperature sensor%s found", EMSESP_Status.dallas_sensors, (EMSESP_Status.dallas_sensors == 1) ? "" : "s");
+        myDebug_P(PSTR("  %d external temperature sensor%s found"), EMSESP_Status.dallas_sensors, (EMSESP_Status.dallas_sensors == 1) ? "" : "s");
     }
 
-    myDebug("  Thermostat is %s, Boiler is %s, Shower Timer is %s, Shower Alert is %s",
-            (ems_getThermostatEnabled() ? "enabled" : "disabled"),
-            (ems_getBoilerEnabled() ? "enabled" : "disabled"),
-            ((EMSESP_Status.shower_timer) ? "enabled" : "disabled"),
-            ((EMSESP_Status.shower_alert) ? "enabled" : "disabled"));
+    myDebug_P(PSTR("  Thermostat is %s, Boiler is %s, Shower Timer is %s, Shower Alert is %s"),
+              (ems_getThermostatEnabled() ? "enabled" : "disabled"),
+              (ems_getBoilerEnabled() ? "enabled" : "disabled"),
+              ((EMSESP_Status.shower_timer) ? "enabled" : "disabled"),
+              ((EMSESP_Status.shower_alert) ? "enabled" : "disabled"));
 
-    myDebug("\n%sEMS Bus stats:%s", COLOR_BOLD_ON, COLOR_BOLD_OFF);
+    myDebug_P(PSTR("\n%sEMS Bus stats:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
 
     if (ems_getBusConnected()) {
-        myDebug("  Bus is connected");
+        myDebug_P(PSTR("  Bus is connected"));
 
-        myDebug("  Rx: Poll=%d ms, # Rx telegrams read=%d, # CRC errors=%d", ems_getPollFrequency(), EMS_Sys_Status.emsRxPgks, EMS_Sys_Status.emxCrcErr);
+        myDebug_P(PSTR("  Rx: Poll=%d ms, # Rx telegrams read=%d, # CRC errors=%d"), ems_getPollFrequency(), EMS_Sys_Status.emsRxPgks, EMS_Sys_Status.emxCrcErr);
 
         if (ems_getTxCapable()) {
-            myDebug("  Tx: available, Tx delay is %s, # Tx telegrams sent=%d", (ems_getTxDelay() ? "on" : "off"), EMS_Sys_Status.emsTxPkgs);
+            myDebug_P(PSTR("  Tx: available, Tx delay is %s, # Tx telegrams sent=%d"), (ems_getTxDelay() ? "on" : "off"), EMS_Sys_Status.emsTxPkgs);
         } else {
-            myDebug("  Tx: no signal");
+            myDebug_P(PSTR("  Tx: no signal"));
         }
     } else {
-        myDebug("  No connection can be made to the EMS bus");
+        myDebug_P(PSTR("  No connection can be made to the EMS bus"));
     }
 
-    myDebug("");
-    myDebug("%sBoiler stats:%s", COLOR_BOLD_ON, COLOR_BOLD_OFF);
+    myDebug_P(PSTR(""));
+    myDebug_P(PSTR("%sBoiler stats:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
 
     // version details
-    myDebug("  Boiler: %s", ems_getBoilerDescription(buffer_type));
+    myDebug_P(PSTR("  Boiler: %s"), ems_getBoilerDescription(buffer_type));
 
     // active stats
     if (ems_getBusConnected()) {
         if (EMS_Boiler.tapwaterActive != EMS_VALUE_INT_NOTSET) {
-            myDebug("  Hot tap water: %s", EMS_Boiler.tapwaterActive ? "running" : "off");
+            myDebug_P(PSTR("  Hot tap water: %s"), EMS_Boiler.tapwaterActive ? "running" : "off");
         }
 
         if (EMS_Boiler.heatingActive != EMS_VALUE_INT_NOTSET) {
-            myDebug("  Central heating: %s", EMS_Boiler.heatingActive ? "active" : "off");
+            myDebug_P(PSTR("  Central heating: %s"), EMS_Boiler.heatingActive ? "active" : "off");
         }
     }
 
@@ -375,11 +371,11 @@ void showInfo() {
     _renderBoolValue("Warm Water activated", EMS_Boiler.wWActivated);
     _renderBoolValue("Warm Water circulation pump available", EMS_Boiler.wWCircPump);
     if (EMS_Boiler.wWComfort == EMS_VALUE_UBAParameterWW_wwComfort_Hot) {
-        myDebug("  Warm Water comfort setting: Hot");
+        myDebug_P(PSTR("  Warm Water comfort setting: Hot"));
     } else if (EMS_Boiler.wWComfort == EMS_VALUE_UBAParameterWW_wwComfort_Eco) {
-        myDebug("  Warm Water comfort setting: Eco");
+        myDebug_P(PSTR("  Warm Water comfort setting: Eco"));
     } else if (EMS_Boiler.wWComfort == EMS_VALUE_UBAParameterWW_wwComfort_Intelligent) {
-        myDebug("  Warm Water comfort setting: Intelligent");
+        myDebug_P(PSTR("  Warm Water comfort setting: Intelligent"));
     }
 
     _renderIntValue("Warm Water selected temperature", "C", EMS_Boiler.wWSelTemp);
@@ -390,7 +386,10 @@ void showInfo() {
     _renderIntValue("Warm Water current tap water flow", "l/min", EMS_Boiler.wWCurFlow, 10);
     _renderLongValue("Warm Water # starts", "times", EMS_Boiler.wWStarts);
     if (EMS_Boiler.wWWorkM != EMS_VALUE_LONG_NOTSET) {
-        myDebug("  Warm Water active time: %d days %d hours %d minutes", EMS_Boiler.wWWorkM / 1440, (EMS_Boiler.wWWorkM % 1440) / 60, EMS_Boiler.wWWorkM % 60);
+        myDebug_P(PSTR("  Warm Water active time: %d days %d hours %d minutes"),
+                  EMS_Boiler.wWWorkM / 1440,
+                  (EMS_Boiler.wWWorkM % 1440) / 60,
+                  EMS_Boiler.wWWorkM % 60);
     }
     _renderBoolValue("Warm Water 3-way valve", EMS_Boiler.wWHeat);
 
@@ -408,9 +407,9 @@ void showInfo() {
     _renderShortValue("Flame current", "uA", EMS_Boiler.flameCurr);
     _renderIntValue("System pressure", "bar", EMS_Boiler.sysPress, 10);
     if (EMS_Boiler.serviceCode == EMS_VALUE_SHORT_NOTSET) {
-        myDebug("  System service code: %s", EMS_Boiler.serviceCodeChar);
+        myDebug_P(PSTR("  System service code: %s"), EMS_Boiler.serviceCodeChar);
     } else {
-        myDebug("  System service code: %s (%d)", EMS_Boiler.serviceCodeChar, EMS_Boiler.serviceCode);
+        myDebug_P(PSTR("  System service code: %s (%d)"), EMS_Boiler.serviceCodeChar, EMS_Boiler.serviceCode);
     }
 
     // UBAParametersMessage
@@ -426,25 +425,28 @@ void showInfo() {
     _renderIntValue("Pump modulation", "%", EMS_Boiler.pumpMod);
     _renderLongValue("Burner # starts", "times", EMS_Boiler.burnStarts);
     if (EMS_Boiler.burnWorkMin != EMS_VALUE_LONG_NOTSET) {
-        myDebug("  Total burner operating time: %d days %d hours %d minutes",
-                EMS_Boiler.burnWorkMin / 1440,
-                (EMS_Boiler.burnWorkMin % 1440) / 60,
-                EMS_Boiler.burnWorkMin % 60);
+        myDebug_P(PSTR("  Total burner operating time: %d days %d hours %d minutes"),
+                  EMS_Boiler.burnWorkMin / 1440,
+                  (EMS_Boiler.burnWorkMin % 1440) / 60,
+                  EMS_Boiler.burnWorkMin % 60);
     }
     if (EMS_Boiler.heatWorkMin != EMS_VALUE_LONG_NOTSET) {
-        myDebug("  Total heat operating time: %d days %d hours %d minutes",
-                EMS_Boiler.heatWorkMin / 1440,
-                (EMS_Boiler.heatWorkMin % 1440) / 60,
-                EMS_Boiler.heatWorkMin % 60);
+        myDebug_P(PSTR("  Total heat operating time: %d days %d hours %d minutes"),
+                  EMS_Boiler.heatWorkMin / 1440,
+                  (EMS_Boiler.heatWorkMin % 1440) / 60,
+                  EMS_Boiler.heatWorkMin % 60);
     }
     if (EMS_Boiler.UBAuptime != EMS_VALUE_LONG_NOTSET) {
-        myDebug("  Total UBA working time: %d days %d hours %d minutes", EMS_Boiler.UBAuptime / 1440, (EMS_Boiler.UBAuptime % 1440) / 60, EMS_Boiler.UBAuptime % 60);
+        myDebug_P(PSTR("  Total UBA working time: %d days %d hours %d minutes"),
+                  EMS_Boiler.UBAuptime / 1440,
+                  (EMS_Boiler.UBAuptime % 1440) / 60,
+                  EMS_Boiler.UBAuptime % 60);
     }
 
     // For SM10/SM100 Solar Module
     if (EMS_Other.SM) {
-        myDebug(""); // newline
-        myDebug("%sSolar Module stats:%s", COLOR_BOLD_ON, COLOR_BOLD_OFF);
+        myDebug_P(PSTR("")); // newline
+        myDebug_P(PSTR("%sSolar Module stats:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
         _renderShortValue("  Collector temperature", "C", EMS_Other.SMcollectorTemp);
         _renderShortValue("  Bottom temperature", "C", EMS_Other.SMbottomTemp);
         _renderIntValue("  Pump modulation", "%", EMS_Other.SMpumpModulation);
@@ -456,9 +458,9 @@ void showInfo() {
 
     // Thermostat stats
     if (ems_getThermostatEnabled()) {
-        myDebug(""); // newline
-        myDebug("%sThermostat stats:%s", COLOR_BOLD_ON, COLOR_BOLD_OFF);
-        myDebug("  Thermostat: %s", ems_getThermostatDescription(buffer_type));
+        myDebug_P(PSTR("")); // newline
+        myDebug_P(PSTR("%sThermostat stats:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
+        myDebug_P(PSTR("  Thermostat: %s"), ems_getThermostatDescription(buffer_type));
         if ((ems_getThermostatModel() == EMS_MODEL_EASY) || (ems_getThermostatModel() == EMS_MODEL_BOSCHEASY)) {
             // for easy temps are * 100, also we don't have the time or mode
             _renderShortValue("Set room temperature", "C", EMS_Thermostat.setpoint_roomTemp, 10); // *100
@@ -486,45 +488,45 @@ void showInfo() {
                 _renderIntValue("Vacation temperature", "C", EMS_Thermostat.holidaytemp, 2); // convert to a single byte * 2
             }
 
-            myDebug("  Thermostat time is %02d:%02d:%02d %d/%d/%d",
-                    EMS_Thermostat.hour,
-                    EMS_Thermostat.minute,
-                    EMS_Thermostat.second,
-                    EMS_Thermostat.day,
-                    EMS_Thermostat.month,
-                    EMS_Thermostat.year + 2000);
+            myDebug_P(PSTR("  Thermostat time is %02d:%02d:%02d %d/%d/%d"),
+                      EMS_Thermostat.hour,
+                      EMS_Thermostat.minute,
+                      EMS_Thermostat.second,
+                      EMS_Thermostat.day,
+                      EMS_Thermostat.month,
+                      EMS_Thermostat.year + 2000);
 
             if (EMS_Thermostat.mode == 0) {
-                myDebug("  Mode is set to low");
+                myDebug_P(PSTR("  Mode is set to low"));
             } else if (EMS_Thermostat.mode == 1) {
-                myDebug("  Mode is set to manual");
+                myDebug_P(PSTR("  Mode is set to manual"));
             } else if (EMS_Thermostat.mode == 2) {
-                myDebug("  Mode is set to auto");
+                myDebug_P(PSTR("  Mode is set to auto"));
             } else {
-                myDebug("  Mode is set to ?");
+                myDebug_P(PSTR("  Mode is set to ?"));
             }
         }
     }
 
     // Dallas
     if (EMSESP_Status.dallas_sensors != 0) {
-        myDebug(""); // newline
+        myDebug_P(PSTR("")); // newline
         char buffer[128] = {0};
         char valuestr[8] = {0}; // for formatting temp
-        myDebug("%sExternal temperature sensors:%s", COLOR_BOLD_ON, COLOR_BOLD_OFF);
+        myDebug_P(PSTR("%sExternal temperature sensors:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
         for (uint8_t i = 0; i < EMSESP_Status.dallas_sensors; i++) {
-            myDebug("  Sensor #%d %s: %s C", i + 1, ds18.getDeviceString(buffer, i), _float_to_char(valuestr, ds18.getValue(i)));
+            myDebug_P(PSTR("  Sensor #%d %s: %s C"), i + 1, ds18.getDeviceString(buffer, i), _float_to_char(valuestr, ds18.getValue(i)));
         }
     }
 
     // show the Shower Info
     if (EMSESP_Status.shower_timer) {
-        myDebug(""); // newline
-        myDebug("%sShower stats:%s", COLOR_BOLD_ON, COLOR_BOLD_OFF);
-        myDebug("  Shower is %s", (EMSESP_Shower.showerOn ? "running" : "off"));
+        myDebug_P(PSTR("")); // newline
+        myDebug_P(PSTR("%sShower stats:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
+        myDebug_P(PSTR("  Shower is %s"), (EMSESP_Shower.showerOn ? "running" : "off"));
     }
 
-    myDebug(""); // newline
+    myDebug_P(PSTR("")); // newline
 }
 
 // send all dallas sensor values as a JSON package to MQTT
@@ -797,14 +799,14 @@ void publishValues(bool force) {
 // sets the shower timer on/off
 void set_showerTimer() {
     if (ems_getLogging() != EMS_SYS_LOGGING_NONE) {
-        myDebug("Shower timer has been set to %s", EMSESP_Status.shower_timer ? "enabled" : "disabled");
+        myDebug_P(PSTR("Shower timer has been set to %s"), EMSESP_Status.shower_timer ? "enabled" : "disabled");
     }
 }
 
 // sets the shower alert on/off
 void set_showerAlert() {
     if (ems_getLogging() != EMS_SYS_LOGGING_NONE) {
-        myDebug("Shower alert has been set to %s", EMSESP_Status.shower_alert ? "enabled" : "disabled");
+        myDebug_P(PSTR("Shower alert has been set to %s"), EMSESP_Status.shower_alert ? "enabled" : "disabled");
     }
 }
 
@@ -872,7 +874,7 @@ void do_ledcheck() {
 // Thermostat scan
 void do_scanThermostat() {
     if ((ems_getBusConnected()) && (!myESP.getUseSerial())) {
-        myDebug("> Scanning thermostat message type #0x%02X...", scanThermostat_count);
+        myDebug_P(PSTR("> Scanning thermostat message type #0x%02X..."), scanThermostat_count);
         ems_doReadCommand(scanThermostat_count, EMS_Thermostat.device_id);
         scanThermostat_count++;
     }
@@ -881,7 +883,7 @@ void do_scanThermostat() {
 // do a system health check every now and then to see if we all connections
 void do_systemCheck() {
     if ((!ems_getBusConnected()) && (!myESP.getUseSerial())) {
-        myDebug("Error! Unable to read the EMS bus. Retrying in %d seconds...", SYSTEMCHECK_TIME);
+        myDebug_P(PSTR("Error! Unable to read the EMS bus."));
     }
 }
 
@@ -910,7 +912,7 @@ void stopDeviceScan() {
 void do_scanDevices() {
     if (scanDevices_count == 0) {
         // we're at the finish line
-        myDebug("Finished the deep EMS device scan.");
+        myDebug_P(PSTR("Finished the deep EMS device scan."));
         stopDeviceScan();
         ems_printDevices();
         ems_setLogging(EMS_SYS_LOGGING_NONE);
@@ -918,7 +920,6 @@ void do_scanDevices() {
     }
 
     if ((ems_getBusConnected()) && (!myESP.getUseSerial())) {
-        // myDebug("> Scanning EMS bus for a device type 0x%02X...", scanDevices_count);
         ems_doReadCommand(EMS_TYPE_Version, scanDevices_count++); // ask for version
     }
 }
@@ -931,7 +932,7 @@ void startDeviceScan() {
     publishSensorValuesTimer.detach();
     scanDevices_count = 1; // starts at 1
     ems_setLogging(EMS_SYS_LOGGING_NONE);
-    myDebug("Starting a deep EMS device scan. This can take up to 2 minutes. Please wait...");
+    myDebug_P(PSTR("Starting a deep EMS device scan. This can take up to 2 minutes. Please wait..."));
     scanThermostat.attach_ms(SCANDEVICES_TIME, do_scanDevices);
 }
 
@@ -943,7 +944,7 @@ void startThermostatScan(uint8_t start) {
     systemCheckTimer.detach();
     regularUpdatesTimer.detach();
     scanThermostat_count = start;
-    myDebug("Starting a deep message scan on thermostat");
+    myDebug_P(PSTR("Starting a deep message scan on thermostat"));
     scanThermostat.attach(SCANTHERMOSTAT_TIME, do_scanThermostat);
 }
 
@@ -1074,7 +1075,7 @@ bool SettingsCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, c
                 // let's make sure LED is really off - For onboard high=off
                 digitalWrite(EMSESP_Status.led_gpio, (EMSESP_Status.led_gpio == LED_BUILTIN) ? HIGH : LOW);
             } else {
-                myDebug("Error. Usage: set led <on | off>");
+                myDebug_P(PSTR("Error. Usage: set led <on | off>"));
             }
         }
 
@@ -1083,15 +1084,15 @@ bool SettingsCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, c
             if (strcmp(value, "on") == 0) {
                 EMSESP_Status.listen_mode = true;
                 ok                        = true;
-                myDebug("* in listen mode. All Tx is disabled.");
+                myDebug_P(PSTR("* in listen mode. All Tx is disabled."));
                 ems_setTxDisabled(true);
             } else if (strcmp(value, "off") == 0) {
                 EMSESP_Status.listen_mode = false;
                 ok                        = true;
                 ems_setTxDisabled(false);
-                myDebug("* out of listen mode. Tx is enabled.");
+                myDebug_P(PSTR("* out of listen mode. Tx is enabled."));
             } else {
-                myDebug("Error. Usage: set listen_mode <on | off>");
+                myDebug_P(PSTR("Error. Usage: set listen_mode <on | off>"));
             }
         }
 
@@ -1119,7 +1120,7 @@ bool SettingsCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, c
                 EMSESP_Status.dallas_parasite = false;
                 ok                            = true;
             } else {
-                myDebug("Error. Usage: set dallas_parasite <on | off>");
+                myDebug_P(PSTR("Error. Usage: set dallas_parasite <on | off>"));
             }
         }
 
@@ -1144,7 +1145,7 @@ bool SettingsCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, c
                 EMSESP_Status.shower_timer = false;
                 ok                         = true;
             } else {
-                myDebug("Error. Usage: set shower_timer <on | off>");
+                myDebug_P(PSTR("Error. Usage: set shower_timer <on | off>"));
             }
         }
 
@@ -1157,7 +1158,7 @@ bool SettingsCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, c
                 EMSESP_Status.shower_alert = false;
                 ok                         = true;
             } else {
-                myDebug("Error. Usage: set shower_alert <on | off>");
+                myDebug_P(PSTR("Error. Usage: set shower_alert <on | off>"));
             }
         }
 
@@ -1175,7 +1176,7 @@ bool SettingsCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, c
                 ems_setThermostatHC(hc);
                 ok = true;
             } else {
-                myDebug("Error. Usage: set heating_circuit <1 | 2>");
+                myDebug_P(PSTR("Error. Usage: set heating_circuit <1 | 2>"));
             }
         }
 
@@ -1188,36 +1189,36 @@ bool SettingsCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, c
                 ems_setTxDelay(false);
                 ok = true;
             } else {
-                myDebug("Error. Usage: set tx_delay <on | off>");
+                myDebug_P(PSTR("Error. Usage: set tx_delay <on | off>"));
             }
         }
     }
 
     if (action == MYESP_FSACTION_LIST) {
-        myDebug("  led=%s", EMSESP_Status.led ? "on" : "off");
-        myDebug("  led_gpio=%d", EMSESP_Status.led_gpio);
-        myDebug("  dallas_gpio=%d", EMSESP_Status.dallas_gpio);
-        myDebug("  dallas_parasite=%s", EMSESP_Status.dallas_parasite ? "on" : "off");
+        myDebug_P(PSTR("  led=%s"), EMSESP_Status.led ? "on" : "off");
+        myDebug_P(PSTR("  led_gpio=%d"), EMSESP_Status.led_gpio);
+        myDebug_P(PSTR("  dallas_gpio=%d"), EMSESP_Status.dallas_gpio);
+        myDebug_P(PSTR("  dallas_parasite=%s"), EMSESP_Status.dallas_parasite ? "on" : "off");
 
         if (EMS_Thermostat.device_id == EMS_ID_NONE) {
-            myDebug("  thermostat_type=<not set>");
+            myDebug_P(PSTR("  thermostat_type=<not set>"));
         } else {
-            myDebug("  thermostat_type=%02X", EMS_Thermostat.device_id);
+            myDebug_P(PSTR("  thermostat_type=%02X"), EMS_Thermostat.device_id);
         }
 
-        myDebug("  heating_circuit=%d", EMSESP_Status.heating_circuit);
+        myDebug_P(PSTR("  heating_circuit=%d"), EMSESP_Status.heating_circuit);
 
         if (EMS_Boiler.device_id == EMS_ID_NONE) {
-            myDebug("  boiler_type=<not set>");
+            myDebug_P(PSTR("  boiler_type=<not set>"));
         } else {
-            myDebug("  boiler_type=%02X", EMS_Boiler.device_id);
+            myDebug_P(PSTR("  boiler_type=%02X"), EMS_Boiler.device_id);
         }
 
-        myDebug("  listen_mode=%s", EMSESP_Status.listen_mode ? "on" : "off");
-        myDebug("  shower_timer=%s", EMSESP_Status.shower_timer ? "on" : "off");
-        myDebug("  shower_alert=%s", EMSESP_Status.shower_alert ? "on" : "off");
-        myDebug("  publish_wait=%d", EMSESP_Status.publish_wait);
-        myDebug("  tx_delay=%s", ems_getTxDelay() ? "on" : "off");
+        myDebug_P(PSTR("  listen_mode=%s"), EMSESP_Status.listen_mode ? "on" : "off");
+        myDebug_P(PSTR("  shower_timer=%s"), EMSESP_Status.shower_timer ? "on" : "off");
+        myDebug_P(PSTR("  shower_alert=%s"), EMSESP_Status.shower_alert ? "on" : "off");
+        myDebug_P(PSTR("  publish_wait=%d"), EMSESP_Status.publish_wait);
+        myDebug_P(PSTR("  tx_delay=%s"), ems_getTxDelay() ? "on" : "off");
     }
 
     return ok;
@@ -1251,7 +1252,7 @@ void TelnetCommandCallback(uint8_t wc, const char * commandLine) {
     }
 
     if (strcmp(first_cmd, "refresh") == 0) {
-        myDebug("Fetching data from EMS devices...");
+        myDebug_P(PSTR("Fetching data from EMS devices..."));
         do_regularUpdates();
         ok = true;
     }
@@ -1431,14 +1432,14 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
         if (strcmp(topic, TOPIC_THERMOSTAT_CMD_TEMP) == 0) {
             float f     = strtof((char *)message, 0);
             char  s[10] = {0};
-            myDebug("MQTT topic: thermostat temperature value %s", _float_to_char(s, f));
+            myDebug_P(PSTR("MQTT topic: thermostat temperature value %s"), _float_to_char(s, f));
             ems_setThermostatTemp(f);
             publishValues(true); // publish back immediately, can't remember why I do this?!
         }
 
         // thermostat mode changes
         if (strcmp(topic, TOPIC_THERMOSTAT_CMD_MODE) == 0) {
-            myDebug("MQTT topic: thermostat mode value %s", message);
+            myDebug_P(PSTR("MQTT topic: thermostat mode value %s"), message);
             if (strcmp((char *)message, "auto") == 0) {
                 ems_setThermostatMode(2);
             } else if (strcmp((char *)message, "day") == 0 || strcmp((char *)message, "manual") == 0) {
@@ -1450,7 +1451,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
 
         // thermostat heating circuit change
         if (strcmp(topic, TOPIC_THERMOSTAT_CMD_HC) == 0) {
-            myDebug("MQTT topic: thermostat heating circuit value %s", message);
+            myDebug_P(PSTR("MQTT topic: thermostat heating circuit value %s"), message);
             uint8_t hc = atoi((char *)message);
             if ((hc >= 1) && (hc <= 2)) {
                 EMSESP_Status.heating_circuit = hc;
@@ -1463,7 +1464,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
         if (strcmp(topic, TOPIC_THERMOSTAT_CMD_NIGHTTEMP) == 0) {
             float f     = strtof((char *)message, 0);
             char  s[10] = {0};
-            myDebug("MQTT topic: new thermostat night temperature value %s", _float_to_char(s, f));
+            myDebug_P(PSTR("MQTT topic: new thermostat night temperature value %s"), _float_to_char(s, f));
             ems_setThermostatTemp(f, 1);
         }
 
@@ -1471,7 +1472,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
         if (strcmp(topic, TOPIC_THERMOSTAT_CMD_DAYTEMP) == 0) {
             float f     = strtof((char *)message, 0);
             char  s[10] = {0};
-            myDebug("MQTT topic: new thermostat day temperature value %s", _float_to_char(s, f));
+            myDebug_P(PSTR("MQTT topic: new thermostat day temperature value %s"), _float_to_char(s, f));
             ems_setThermostatTemp(f, 2);
         }
 
@@ -1479,7 +1480,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
         if (strcmp(topic, TOPIC_THERMOSTAT_CMD_HOLIDAYTEMP) == 0) {
             float f     = strtof((char *)message, 0);
             char  s[10] = {0};
-            myDebug("MQTT topic: new thermostat holiday temperature value %s", _float_to_char(s, f));
+            myDebug_P(PSTR("MQTT topic: new thermostat holiday temperature value %s"), _float_to_char(s, f));
             ems_setThermostatTemp(f, 3);
         }
 
@@ -1495,14 +1496,14 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
         // boiler wwtemp changes
         if (strcmp(topic, TOPIC_BOILER_CMD_WWTEMP) == 0) {
             uint8_t t = atoi((char *)message);
-            myDebug("MQTT topic: boiler warm water temperature value %d", t);
+            myDebug_P(PSTR("MQTT topic: boiler warm water temperature value %d"), t);
             ems_setWarmWaterTemp(t);
             publishValues(true); // publish back immediately, can't remember why I do this?!
         }
 
         // boiler ww comfort setting
         if (strcmp(topic, TOPIC_BOILER_CMD_COMFORT) == 0) {
-            myDebug("MQTT topic: boiler warm water comfort value is %s", message);
+            myDebug_P(PSTR("MQTT topic: boiler warm water comfort value is %s"), message);
             if (strcmp((char *)message, "hot") == 0) {
                 ems_setWarmWaterModeComfort(1);
             } else if (strcmp((char *)message, "comfort") == 0) {
@@ -1545,10 +1546,10 @@ void WIFICallback() {
     // This is done after we have a WiFi signal to avoid any resource conflicts
 
     if (myESP.getUseSerial()) {
-        myDebug("Warning! EMS bus disabled when in Serial mode. Use 'set serial off' to start EMS.");
+        myDebug_P(PSTR("Warning! EMS bus disabled when in Serial mode. Use 'set serial off' to start EMS."));
     } else {
         emsuart_init();
-        myDebug("[UART] Opened Rx/Tx connection");
+        myDebug_P(PSTR("[UART] Opened Rx/Tx connection"));
         if (!EMSESP_Status.listen_mode) {
             // go and find the boiler and thermostat types, if not in listen mode
             ems_discoverModels();
@@ -1628,7 +1629,7 @@ void showerCheck() {
                         strlcat(s, itoa((uint8_t)((EMSESP_Shower.duration / 1000) % 60), buffer, 10), sizeof(s));
                         strlcat(s, " seconds", sizeof(s));
                         if (ems_getLogging() != EMS_SYS_LOGGING_NONE) {
-                            myDebug("[Shower] finished with duration %s", s);
+                            myDebug_P(PSTR("[Shower] finished with duration %s"), s);
                         }
                         myESP.mqttPublish(TOPIC_SHOWERTIME, s); // publish to MQTT
                     }
