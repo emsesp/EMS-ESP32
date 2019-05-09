@@ -1387,7 +1387,7 @@ void TelnetCommandCallback(uint8_t wc, const char * commandLine) {
 
     // check for invalid command
     if (!ok) {
-        myDebug("Unknown command. Use ? for help.");
+        myDebug_P(PSTR("Unknown command. Use ? for help."));
     }
 }
 

@@ -329,10 +329,9 @@ void MyESP::_mqtt_setup() {
 
     //mqttClient.onPublish([this](uint16_t packetId) { myDebug_P(PSTR("[MQTT] Publish ACK for PID %d"), packetId); });
 
-    mqttClient.onMessage(
-        [this](char * topic, char * payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) {
-            _mqttOnMessage(topic, payload, len);
-        });
+    mqttClient.onMessage([this](char * topic, char * payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) {
+        _mqttOnMessage(topic, payload, len);
+    });
 }
 
 // WiFI setup
@@ -488,7 +487,7 @@ void MyESP::_consoleShowHelp() {
 
     myDebug_P(PSTR("*"));
     myDebug_P(PSTR("* Commands:"));
-    myDebug_P(PSTR("*  ?=help, CTRL-D=quit telnet"));
+    myDebug_P(PSTR("*  ?=help, CTRL-D/quit=exit telnet session"));
     myDebug_P(PSTR("*  set, system, reboot"));
 #ifdef CRASH
     myDebug_P(PSTR("*  crash <dump | clear | test [n]>"));
@@ -717,6 +716,9 @@ void MyESP::_telnetCommand(char * commandLine) {
     char * str   = commandLine;
     bool   state = false;
 
+    if (strlen(commandLine) == 0)
+        return;
+
     // count the number of arguments
     unsigned wc = 0;
     while (*str) {
@@ -765,6 +767,14 @@ void MyESP::_telnetCommand(char * commandLine) {
         showSystemStats();
         return;
     }
+
+    // show system stats
+    if ((strcmp(ptrToCommandName, "quit") == 0) && (wc == 1)) {
+        myDebug_P(PSTR("[TELNET] exiting telnet session"));
+        SerialAndTelnet.disconnectClient();
+        return;
+    }
+
 
 // crash command
 #ifdef CRASH
@@ -911,8 +921,7 @@ void MyESP::showSystemStats() {
     myDebug_P(PSTR(" [FLASH] Flash chip ID: 0x%06X"), ESP.getFlashChipId());
 #endif
     myDebug_P(PSTR(" [FLASH] Flash speed: %u Hz"), ESP.getFlashChipSpeed());
-    myDebug_P(PSTR(" [FLASH] Flash mode: %s"),
-              mode == FM_QIO ? "QIO" : mode == FM_QOUT ? "QOUT" : mode == FM_DIO ? "DIO" : mode == FM_DOUT ? "DOUT" : "UNKNOWN");
+    myDebug_P(PSTR(" [FLASH] Flash mode: %s"), mode == FM_QIO ? "QIO" : mode == FM_QOUT ? "QOUT" : mode == FM_DIO ? "DIO" : mode == FM_DOUT ? "DOUT" : "UNKNOWN");
 #if defined(ESP8266)
     myDebug_P(PSTR(" [FLASH] Flash size (CHIP): %d"), ESP.getFlashChipRealSize());
 #endif
@@ -935,12 +944,16 @@ void MyESP::_telnetHandle() {
     while (SerialAndTelnet.available()) {
         char c = SerialAndTelnet.read();
 
+        if (c == 0)
+            return;
+
         SerialAndTelnet.serialPrint(c); // echo to Serial (if connected)
 
         switch (c) {
         case '\r': // likely have full command in buffer now, commands are terminated by CR and/or LF
         case '\n':
             _command[charsRead] = '\0'; // null terminate our command char array
+
             if (charsRead > 0) {
                 charsRead      = 0; // is static, so have to reset
                 _suspendOutput = false;
@@ -984,7 +997,7 @@ void MyESP::_telnetHandle() {
     }
 }
 
-// ensure we have a connection to MQTT broker
+// make sure we have a connection to MQTT broker
 void MyESP::_mqttConnect() {
     if (!_mqtt_host)
         return; // MQTT not enabled
