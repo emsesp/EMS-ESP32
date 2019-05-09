@@ -2,7 +2,8 @@
 from subprocess import call
 import os
 
-# example stackdmp.txt would contain text like below copied & pasted from a 'crash dump' command
+# example stackdmp.txt would contain text like below copied & pasted from a 'crash dump' command:
+
 # >>>stack>>>
 # 3fffff20: 3fff32f0 00000003 3fff3028 402101b2
 # 3fffff30: 3fffdad0 3fff3280 0000000d 402148aa
@@ -16,7 +17,11 @@ import os
 # 3fffffb0: feefeffe feefeffe 3ffe8558 40100b01
 # <<<stack<<<
 
-# java -jar .\EspStackTraceDecoder.jar C:\Users\Paul\.platformio\packages\toolchain-xtensa\bin\xtensa-lx106-elf-addr2line.exe .pioenvs/d1_mini/firmware_d1_mini.elf stackdmp.txt
+# two ways of analyzing the dumps
+# 1. java -jar .\EspStackTraceDecoder.jar C:\Users\Paul\.platformio\packages\toolchain-xtensa\bin\xtensa-lx106-elf-addr2line.exe .pioenvs/d1_mini/firmware_d1_mini.elf stackdmp.txt
+# 2. python decoder.py -p ESP8266 -t C:\Users\Paul\.platformio\packages\toolchain-xtensa -e .pioenvs/nodemcuv2/firmware.elf stackdmp.txt
 
-# python decoder.py -p ESP8266 -t C:\Users\Paul\.platformio\packages\toolchain-xtensa -e .pioenvs/nodemcuv2/firmware.elf stackdmp.txt
+# for linux use
+# /mnt/c/users/paul/.platformio/packages/toolchain-xtensa/bin
+
 call(['python', 'decoder.py ', '-s', '-e', os.getcwd()+"/.pioenvs/d1_mini/firmware_d1_mini.elf", 'stackdmp.txt'])
