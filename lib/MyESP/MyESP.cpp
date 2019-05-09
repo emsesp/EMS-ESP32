@@ -448,8 +448,23 @@ void MyESP::setTelnet(command_t * cmds, uint8_t count, telnetcommand_callback_f 
 void MyESP::_telnetConnected() {
     myDebug_P(PSTR("[TELNET] Telnet connection established"));
     _consoleShowHelp(); // Show the initial message
+
+    // show crash dump if just restarted after a fatal crash
+#ifdef CRASH
+    uint32_t crash_time;
+    EEPROMr.get(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_CRASH_TIME, crash_time);
+    if ((crash_time != 0) && (crash_time != 0xFFFFFFFF)) {
+        crashDump();
+        // clear crash data
+        crash_time = 0xFFFFFFFF;
+        EEPROMr.put(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_CRASH_TIME, crash_time);
+        EEPROMr.commit();
+    }
+#endif
+
+    // call callback
     if (_telnet_callback) {
-        (_telnet_callback)(TELNET_EVENT_CONNECT); // call callback
+        (_telnet_callback)(TELNET_EVENT_CONNECT);
     }
 }
 
