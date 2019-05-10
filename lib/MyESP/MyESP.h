@@ -41,8 +41,8 @@ void custom_crash_callback(struct rst_info *, uint32_t, uint32_t);
 #define LOADAVG_INTERVAL 30000 // Interval between calculating load average (in ms)
 
 // WIFI
-#define WIFI_CONNECT_TIMEOUT 10000    // Connecting timeout for WIFI in ms
-#define WIFI_RECONNECT_INTERVAL 60000 // If could not connect to WIFI, retry after this time in ms
+#define WIFI_CONNECT_TIMEOUT 10000     // Connecting timeout for WIFI in ms
+#define WIFI_RECONNECT_INTERVAL 600000 // If could not connect to WIFI, retry after this time in ms. 10 minutes
 
 // MQTT
 #define MQTT_PORT 1883                  // MQTT port
