@@ -1,0 +1,50 @@
+;
+; PlatformIO Project Configuration File for EMS-ESP
+; Uses PlatformIO 4.0
+;
+
+[platformio]
+env_default = debug
+
+[common]
+; hard code if you prefer. Recommendation is to set from within the app when in Serial or AP mode
+; wifi_settings = '-DWIFI_SSID="XXXX"' '-DWIFI_PASSWORD="XXXX"'
+wifi_settings =
+
+[env]
+platform = espressif8266
+; platform = https://github.com/platformio/platform-espressif8266.git
+board = d1_mini
+; board = nodemcuv2
+; board = d1_mini_pro
+framework = arduino
+lib_deps =
+  CRC32
+  CircularBuffer
+  JustWifi
+  AsyncMqttClient
+  ArduinoJson
+  OneWire
+  EEPROM_rotate
+lib_ignore = 
+;lib_extra_dirs = D:\dev\lib
+upload_speed = 921600
+monitor_speed = 115200
+; Set the ESP8266 clock frequency to 160MHz
+;board_f_cpu = 160000000L
+upload_protocol = espota
+upload_port = ems-esp.local
+
+[env:debug]
+build_flags = -g -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-parameter -Wno-unused-variable -DCRASH -DTESTS ${common.wifi_settings}
+
+[env:clean]
+extra_scripts = pre:scripts/clean_fw.py
+
+[env:release]
+build_flags = -g -w
+extra_scripts = pre:scripts/rename_fw.py
+
+[env:checkcode]
+build_flags = -g -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-parameter -Wno-unused-variable -DCRASH -DTESTS
+extra_scripts = scripts/checkcode.py
