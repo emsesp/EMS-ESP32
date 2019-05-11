@@ -388,7 +388,7 @@ void MyESP::_ota_setup() {
         return;
     }
 
-    //ArduinoOTA.setPort(OTA_PORT);
+    ArduinoOTA.setPort(OTA_PORT);
     ArduinoOTA.setHostname(_app_hostname);
 
     ArduinoOTA.onStart([this]() { _OTACallback(); });

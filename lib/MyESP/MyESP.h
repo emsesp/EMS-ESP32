@@ -9,7 +9,7 @@
 #ifndef MyEMS_h
 #define MyEMS_h
 
-#define MYESP_VERSION "1.1.9"
+#define MYESP_VERSION "1.1.10"
 
 #include <ArduinoJson.h>
 #include <ArduinoOTA.h>
@@ -30,10 +30,10 @@ void custom_crash_callback(struct rst_info *, uint32_t, uint32_t);
 //#include <ESPmDNS.h>
 #include <SPIFFS.h>             // added for ESP32
 #define ets_vsnprintf vsnprintf // added for ESP32
-#define OTA_PORT 8266
+#define OTA_PORT 3232
 #else
 #include <ESPAsyncTCP.h>
-#define OTA_PORT 3232
+#define OTA_PORT 8266
 #endif
 
 #define MYEMS_CONFIG_FILE "/config.json"
