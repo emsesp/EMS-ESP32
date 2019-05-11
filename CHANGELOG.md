@@ -5,20 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.7.0] 2019-05-05
+## [1.7.0] 2019-05-11
 
 ### Added
 
-- EMS+ support (thanks too @gl3nni3 for doing the first research)
+- EMS+ core support (thanks too @gl3nni3 for doing the first research)
 - MQTT 'restart' topic to reboot ESP (thanks @balk77)
 - Support for multiple thermostat heating circuits like the HC1/HC2 on a RC35, also via MQTT (thanks @lobocobra)
 - `boiler flowtemp` command to set the flow temperature [(issue 59)](https://github.com/proddy/EMS-ESP/issues/59)
-- added a test harness to try out response to various telegrams
+- added a test harness to try out response to various telegrams (test command)
 - `tx_delay` setting for circuits where we needed to slow down Tx transmission
 - new boiler: Nefit proline hrc 24 cw4 thermostat and Nefit Enviline heatpump
 - new boiler: Buderus Logamax plus
-- new thermostat: Buderus RC300 and RC310 thermostats [(issue 37)](https://github.com/proddy/EMS-ESP/issues/37)
-- new thermostat: Junkers FR10 [(issue 98)](https://github.com/proddy/EMS-ESP/issues/98)
+- new thermostat: Buderus RC300 and RC310 thermostats, read-only [(issue 37)](https://github.com/proddy/EMS-ESP/issues/37)
+- new thermostat: Junkers FR10, read-only [(issue 98)](https://github.com/proddy/EMS-ESP/issues/98)
 - new devices: Buderus Web Gateway KM200, Buderus Solar Module SM100
 
 ### Changed
