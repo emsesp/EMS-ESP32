@@ -9,7 +9,7 @@
 #ifndef MyEMS_h
 #define MyEMS_h
 
-#define MYESP_VERSION "1.1.6"
+#define MYESP_VERSION "1.1.9"
 
 #include <ArduinoJson.h>
 #include <ArduinoOTA.h>
@@ -32,7 +32,6 @@ void custom_crash_callback(struct rst_info *, uint32_t, uint32_t);
 #define ets_vsnprintf vsnprintf // added for ESP32
 #define OTA_PORT 8266
 #else
-//#include <ESP8266mDNS.h>
 #include <ESPAsyncTCP.h>
 #define OTA_PORT 3232
 #endif
@@ -42,16 +41,18 @@ void custom_crash_callback(struct rst_info *, uint32_t, uint32_t);
 #define LOADAVG_INTERVAL 30000 // Interval between calculating load average (in ms)
 
 // WIFI
-#define WIFI_CONNECT_TIMEOUT 10000    // Connecting timeout for WIFI in ms
-#define WIFI_RECONNECT_INTERVAL 60000 // If could not connect to WIFI, retry after this time in ms
+#define WIFI_CONNECT_TIMEOUT 10000     // Connecting timeout for WIFI in ms
+#define WIFI_RECONNECT_INTERVAL 600000 // If could not connect to WIFI, retry after this time in ms. 10 minutes
 
 // MQTT
 #define MQTT_PORT 1883                  // MQTT port
 #define MQTT_RECONNECT_DELAY_MIN 2000   // Try to reconnect in 3 seconds upon disconnection
 #define MQTT_RECONNECT_DELAY_STEP 3000  // Increase the reconnect delay in 3 seconds after each failed attempt
 #define MQTT_RECONNECT_DELAY_MAX 120000 // Set reconnect time to 2 minutes at most
-#define MQTT_MAX_SIZE 600               // max length of MQTT message
 #define MQTT_MAX_TOPIC_SIZE 50          // max length of MQTT message
+#define MQTT_TOPIC_START "start"
+#define MQTT_TOPIC_START_PAYLOAD "start"
+#define MQTT_TOPIC_RESTART "restart"
 
 // Internal MQTT events
 #define MQTT_CONNECT_EVENT 0
@@ -75,10 +76,18 @@ void custom_crash_callback(struct rst_info *, uint32_t, uint32_t);
 #define COLOR_CYAN "\x1B[0;36m"
 #define COLOR_WHITE "\x1B[0;37m"
 #define COLOR_BOLD_ON "\x1B[1m"
-#define COLOR_BOLD_OFF "\x1B[22m" // fix by Scott Arlott to support Linux
+#define COLOR_BOLD_OFF "\x1B[22m"
+#define COLOR_BRIGHT_BLACK "\x1B[0;90m"
+#define COLOR_BRIGHT_RED "\x1B[0;91m"
+#define COLOR_BRIGHT_GREEN "\x1B[0;92m"
+#define COLOR_BRIGHT_YELLOW "\x1B[0;99m"
+#define COLOR_BRIGHT_BLUE "\x1B[0;94m"
+#define COLOR_BRIGHT_MAGENTA "\x1B[0;95m"
+#define COLOR_BRIGHT_CYAN "\x1B[0;96m"
+#define COLOR_BRIGHT_WHITE "\x1B[0;97m"
 
 // SPIFFS
-#define SPIFFS_MAXSIZE 600 // https://arduinojson.org/v6/assistant/
+#define SPIFFS_MAXSIZE 800 // https://arduinojson.org/v6/assistant/
 
 // CRASH
 /**
@@ -171,6 +180,7 @@ class MyESP {
     void myDebug_P(PGM_P format_P, ...);
     void setTelnet(command_t * cmds, uint8_t count, telnetcommand_callback_f callback_cmd, telnet_callback_f callback);
     bool getUseSerial();
+    void setUseSerial(bool toggle);
 
     // FS
     void setSettings(fs_callback_f callback, fs_settings_callback_f fs_settings_callback);

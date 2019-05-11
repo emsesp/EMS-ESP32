@@ -14,22 +14,31 @@
 #define MQTT_BASE "home" // all MQTT topics are prefix with this string, in the format <MQTT_BASE>/<app name>/<topic>
 
 // MQTT general settings
-#define MQTT_TOPIC_START "start"
-#define MQTT_TOPIC_START_PAYLOAD "start"
 #define MQTT_WILL_TOPIC "status"            // for last will & testament topic name
 #define MQTT_WILL_ONLINE_PAYLOAD "online"   // for last will & testament payload
 #define MQTT_WILL_OFFLINE_PAYLOAD "offline" // for last will & testament payload
 #define MQTT_RETAIN false
 #define MQTT_KEEPALIVE 120 // 2 minutes
 #define MQTT_QOS 1
+#define MQTT_MAX_SIZE 700 // max size of a JSON object. See https://arduinojson.org/v6/assistant/
 
 // MQTT for thermostat
-#define TOPIC_THERMOSTAT_DATA "thermostat_data"         // for sending thermostat values to MQTT
-#define TOPIC_THERMOSTAT_CMD_TEMP "thermostat_cmd_temp" // for received thermostat temp changes via MQTT
-#define TOPIC_THERMOSTAT_CMD_MODE "thermostat_cmd_mode" // for received thermostat mode changes via MQTT
-#define THERMOSTAT_CURRTEMP "thermostat_currtemp"       // current temperature
-#define THERMOSTAT_SELTEMP "thermostat_seltemp"         // selected temperature
-#define THERMOSTAT_MODE "thermostat_mode"               // mode
+#define TOPIC_THERMOSTAT_DATA "thermostat_data"                    // for sending thermostat values to MQTT
+#define TOPIC_THERMOSTAT_CMD_TEMP "thermostat_cmd_temp"            // for received thermostat temp changes via MQTT
+#define TOPIC_THERMOSTAT_CMD_MODE "thermostat_cmd_mode"            // for received thermostat mode changes via MQTT
+#define TOPIC_THERMOSTAT_CMD_HC "thermostat_cmd_hc"                // for received thermostat hc number changes via MQTT
+#define TOPIC_THERMOSTAT_CMD_DAYTEMP "thermostat_daytemp"          // RC35 specific
+#define TOPIC_THERMOSTAT_CMD_NIGHTTEMP "thermostat_nighttemp"      // RC35 specific
+#define TOPIC_THERMOSTAT_CMD_HOLIDAYTEMP "thermostat_holidayttemp" // RC35 specific
+#define THERMOSTAT_CURRTEMP "thermostat_currtemp"                  // current temperature
+#define THERMOSTAT_SELTEMP "thermostat_seltemp"                    // selected temperature
+#define THERMOSTAT_HC "thermostat_hc"                              // which heating circuit number
+#define THERMOSTAT_MODE "thermostat_mode"                          // mode
+#define THERMOSTAT_DAYTEMP "thermostat_daytemp"                    // RC35 specific
+#define THERMOSTAT_NIGHTTEMP "thermostat_nighttemp"                // RC35 specific
+#define THERMOSTAT_HOLIDAYTEMP "thermostat_holidayttemp"           // RC35 specific
+#define THERMOSTAT_HEATINGTYPE "thermostat_heatingtype"            // RC35 specific (3=floorheating)
+#define THERMOSTAT_CIRCUITCALCTEMP "thermostat_circuitcalctemp"    // RC35 specific
 
 // MQTT for boiler
 #define TOPIC_BOILER_DATA "boiler_data"                // for sending boiler values to MQTT
@@ -39,12 +48,15 @@
 #define TOPIC_BOILER_CMD_WWTEMP "boiler_cmd_wwtemp"    // for received boiler wwtemp changes via MQTT
 #define TOPIC_BOILER_CMD_COMFORT "boiler_cmd_comfort"  // for received boiler ww comfort setting via MQTT
 
-// MQTT for SM10 Solar Module
-#define TOPIC_SM10_DATA "sm10_data"          // topic name
-#define SM10_COLLECTORTEMP "temp"            // collector temp
-#define SM10_BOTTOMTEMP "bottomtemp"         // bottom temp
-#define SM10_PUMPMODULATION "pumpmodulation" // pump modulation
-#define SM10_PUMP "pump"                     // pump active
+// MQTT for SM10/SM100 Solar Module
+#define TOPIC_SM_DATA "sm_data"            // topic name
+#define SM_COLLECTORTEMP "collectortemp"   // collector temp
+#define SM_BOTTOMTEMP "bottomtemp"         // bottom temp
+#define SM_PUMPMODULATION "pumpmodulation" // pump modulation
+#define SM_PUMP "pump"                     // pump active
+#define SM_ENERGYLASTHOUR "energylasthour" // energy last hour
+#define SM_ENERGYTODAY "energytoday"       // energy today
+#define SM_ENERGYTOTAL "energytotal"       // energy total
 
 // shower time
 #define TOPIC_SHOWERTIME "showertime"           // for sending shower time results

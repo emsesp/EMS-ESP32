@@ -346,6 +346,7 @@ void TelnetSpy::begin(unsigned long baud, SerialConfig config, SerialMode mode, 
     if (usedSer) {
         usedSer->begin(baud, config, mode, tx_pin);
     }
+
     started = true;
 }
 
@@ -435,7 +436,6 @@ TelnetSpy::operator bool() const {
 void TelnetSpy::setDebugOutput(bool en) {
     debugOutput = en;
 
-    // TODO: figure out how to disable system printing for the ESP32
     if (debugOutput) {
         actualObject = this;
 
@@ -446,7 +446,6 @@ void TelnetSpy::setDebugOutput(bool en) {
 
     } else {
         if (actualObject == this) {
-
 #ifdef ESP8266
             system_set_os_print(false);
             os_install_putc1((void *)TelnetSpy_ignore_putc); // Ignore system printing

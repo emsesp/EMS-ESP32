@@ -72,7 +72,7 @@ static void emsuart_rx_intr_handler(void * para) {
  */
 static void ICACHE_FLASH_ATTR emsuart_recvTask(os_event_t * events) {
     _EMSRxBuf * pCurrent = pEMSRxBuf;
-    ems_parseTelegram((uint8_t *)pCurrent->buffer, (pCurrent->writePtr) - 1); //  transmit EMS buffer, excluding the BRK
+    ems_parseTelegram((uint8_t *)pCurrent->buffer, (pCurrent->writePtr) - 1); // transmit EMS buffer, excluding the BRK
     pEMSRxBuf = paEMSRxBuf[++emsRxBufIdx % EMS_MAXBUFFERS];                   // next free EMS Receive buffer
 }
 
@@ -109,8 +109,9 @@ void ICACHE_FLASH_ATTR emsuart_init() {
     // UCTOE = RX TimeOut enable (default is 1)
     // UCTOT = RX TimeOut Threshold (7bit) = want this when no more data after 2 characters. (default is 2)
     // UCFFT = RX FIFO Full Threshold (7 bit) = want this to be 31 for 32 bytes of buffer. (default was 127).
+    // see https://www.espressif.com/sites/default/files/documentation/esp8266-technical_reference_en.pdf
     USC1(EMSUART_UART) = 0;                                              // reset config first
-    USC1(EMSUART_UART) = (31 << UCFFT) | (0x02 << UCTOT) | (1 << UCTOE); // enable interupts
+    USC1(EMSUART_UART) = (EMS_MAX_TELEGRAM_LENGTH << UCFFT) | (0x02 << UCTOT) | (1 << UCTOE); // enable interupts
 
     // set interrupts for triggers
     USIC(EMSUART_UART) = 0xffff; // clear all interupts
@@ -177,8 +178,14 @@ void ICACHE_FLASH_ATTR emsuart_tx_brk() {
 void ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
     for (uint8_t i = 0; i < len; i++) {
         USF(EMSUART_UART) = buf[i];
+
+        // check if we need to force a delay to slow down Tx
+        // https://github.com/proddy/EMS-ESP/issues/23#
+        if (EMS_Sys_Status.emsTxDelay) {
+          delayMicroseconds(EMS_TX_BRK_WAIT);
+        }
     }
-    emsuart_tx_brk();
+    emsuart_tx_brk(); // send <BRK>
 }
 
 /*
@@ -186,5 +193,5 @@ void ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
  */
 void ICACHE_FLASH_ATTR emsaurt_tx_poll() {
     USF(EMSUART_UART) = EMS_ID_ME;
-    emsuart_tx_brk();
+    emsuart_tx_brk(); // send <BRK>
 }

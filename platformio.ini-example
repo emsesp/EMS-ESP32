@@ -8,11 +8,11 @@ flash_mode = dout
 build_flags = -g -w
 
 ; for debug use these...
-; build_flags = -g -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-parameter -Wno-unused-variable -DCRASH
+; build_flags = -g -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-parameter -Wno-unused-variable -DCRASH -DTESTS
 
 wifi_settings =
 ; hard code if you prefer. Recommendation is to set from within the app when in Serial or AP mode
-;wifi_settings = '-DWIFI_SSID="XXXX"' '-DWIFI_PASSWORD="XXXX"'
+; wifi_settings = '-DWIFI_SSID="XXXX"' '-DWIFI_PASSWORD="XXXX"'
 
 lib_deps =
   CRC32
@@ -35,6 +35,4 @@ monitor_speed = 115200
 ; for OTA comment out these sections
 ;upload_protocol = espota
 ;upload_port = ems-esp.local
-;upload_port = <add here your ip of the device>
-
-
+;upload_port = <or add here the IP of the ESP8266>

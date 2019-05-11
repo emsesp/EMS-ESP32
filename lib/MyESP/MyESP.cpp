@@ -155,8 +155,6 @@ void MyESP::_wifiCallback(justwifi_messages_t code, char * parameter) {
         // finally if we don't want Serial anymore, turn it off
         if (!_use_serial) {
             myDebug_P(PSTR("Disabling serial port"));
-            Serial.flush();
-            Serial.end();
             SerialAndTelnet.setSerial(NULL);
         } else {
             myDebug_P(PSTR("Using serial port output"));
@@ -231,6 +229,22 @@ void MyESP::_mqttOnMessage(char * topic, char * payload, size_t len) {
         topic = topic_magnitude + 1;
     }
 
+    // check for standard messages
+    // Restart the device
+    if (strcmp(topic, MQTT_TOPIC_RESTART) == 0) {
+        myDebug_P(PSTR("[MQTT] Received restart command"), message);
+        myESP.resetESP();
+        return;
+    }
+
+    // handle response from a start message
+    // for example with HA it sends the system time from the server
+    if (strcmp(topic, MQTT_TOPIC_START) == 0) {
+        myDebug_P(PSTR("[MQTT] Received boottime: %s"), message);
+        myESP.setBoottime(message);
+        return;
+    }
+
     // Send message event to custom service
     (_mqtt_callback)(MQTT_MESSAGE_EVENT, topic, message);
 }
@@ -268,6 +282,13 @@ void MyESP::_mqttOnConnect() {
 
     // say we're alive to the Last Will topic
     mqttClient.publish(_mqttTopic(_mqtt_will_topic), 1, true, _mqtt_will_online_payload);
+
+    // subscribe to general subs
+    mqttSubscribe(MQTT_TOPIC_RESTART);
+
+    // subscribe to a start message and send the first publish
+    myESP.mqttSubscribe(MQTT_TOPIC_START);
+    myESP.mqttPublish(MQTT_TOPIC_START, MQTT_TOPIC_START_PAYLOAD);
 
     // call custom function to handle mqtt receives
     (_mqtt_callback)(MQTT_CONNECT_EVENT, NULL, NULL);
@@ -308,10 +329,9 @@ void MyESP::_mqtt_setup() {
 
     //mqttClient.onPublish([this](uint16_t packetId) { myDebug_P(PSTR("[MQTT] Publish ACK for PID %d"), packetId); });
 
-    mqttClient.onMessage(
-        [this](char * topic, char * payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) {
-            _mqttOnMessage(topic, payload, len);
-        });
+    mqttClient.onMessage([this](char * topic, char * payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) {
+        _mqttOnMessage(topic, payload, len);
+    });
 }
 
 // WiFI setup
@@ -428,8 +448,23 @@ void MyESP::setTelnet(command_t * cmds, uint8_t count, telnetcommand_callback_f 
 void MyESP::_telnetConnected() {
     myDebug_P(PSTR("[TELNET] Telnet connection established"));
     _consoleShowHelp(); // Show the initial message
+
+    // show crash dump if just restarted after a fatal crash
+#ifdef CRASH
+    uint32_t crash_time;
+    EEPROMr.get(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_CRASH_TIME, crash_time);
+    if ((crash_time != 0) && (crash_time != 0xFFFFFFFF)) {
+        crashDump();
+        // clear crash data
+        crash_time = 0xFFFFFFFF;
+        EEPROMr.put(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_CRASH_TIME, crash_time);
+        EEPROMr.commit();
+    }
+#endif
+
+    // call callback
     if (_telnet_callback) {
-        (_telnet_callback)(TELNET_EVENT_CONNECT); // call callback
+        (_telnet_callback)(TELNET_EVENT_CONNECT);
     }
 }
 
@@ -467,7 +502,7 @@ void MyESP::_consoleShowHelp() {
 
     myDebug_P(PSTR("*"));
     myDebug_P(PSTR("* Commands:"));
-    myDebug_P(PSTR("*  ?=help, CTRL-D=quit telnet"));
+    myDebug_P(PSTR("*  ?=help, CTRL-D/quit=exit telnet session"));
     myDebug_P(PSTR("*  set, system, reboot"));
 #ifdef CRASH
     myDebug_P(PSTR("*  crash <dump | clear | test [n]>"));
@@ -679,9 +714,25 @@ bool MyESP::_changeSetting(uint8_t wc, const char * setting, const char * value)
     return ok;
 }
 
+// force the serial on/off
+void MyESP::setUseSerial(bool toggle) {
+    //(void)fs_saveConfig(); // save the setting for next reboot
+
+    if (toggle) {
+        SerialAndTelnet.setSerial(&Serial);
+        _use_serial = true;
+    } else {
+        SerialAndTelnet.setSerial(NULL);
+        _use_serial = false;
+    }
+}
+
 void MyESP::_telnetCommand(char * commandLine) {
     char * str   = commandLine;
     bool   state = false;
+
+    if (strlen(commandLine) == 0)
+        return;
 
     // count the number of arguments
     unsigned wc = 0;
@@ -731,6 +782,14 @@ void MyESP::_telnetCommand(char * commandLine) {
         showSystemStats();
         return;
     }
+
+    // show system stats
+    if ((strcmp(ptrToCommandName, "quit") == 0) && (wc == 1)) {
+        myDebug_P(PSTR("[TELNET] exiting telnet session"));
+        SerialAndTelnet.disconnectClient();
+        return;
+    }
+
 
 // crash command
 #ifdef CRASH
@@ -820,12 +879,16 @@ void MyESP::showSystemStats() {
     if (_boottime != NULL) {
         myDebug_P(PSTR(" [APP] Boot time: %s"), _boottime);
     }
+
+    // uptime
     uint32_t t   = _getUptime(); // seconds
-    uint32_t h   = (uint32_t)t / (uint32_t)3600L;
-    uint32_t rem = (uint32_t)t % (uint32_t)3600L;
-    uint32_t m   = rem / 60;
-    uint32_t s   = rem % 60;
-    myDebug_P(PSTR(" [APP] Uptime: %d seconds (%02d:%02d:%02d)"), t, h, m, s);
+    uint32_t d   = t / 86400L;
+    uint32_t h   = (t / 3600L) % 60;
+    uint32_t rem = t % 3600L;
+    uint8_t  m   = rem / 60;
+    uint8_t  s   = rem % 60;
+    myDebug_P(PSTR(" [APP] Uptime: %d days, %d hours, %d minutes, %d seconds"), d, h, m, s);
+
     myDebug_P(PSTR(" [APP] System Load: %d%%"), getSystemLoadAverage());
 
     if (isAPmode()) {
@@ -873,8 +936,7 @@ void MyESP::showSystemStats() {
     myDebug_P(PSTR(" [FLASH] Flash chip ID: 0x%06X"), ESP.getFlashChipId());
 #endif
     myDebug_P(PSTR(" [FLASH] Flash speed: %u Hz"), ESP.getFlashChipSpeed());
-    myDebug_P(PSTR(" [FLASH] Flash mode: %s"),
-              mode == FM_QIO ? "QIO" : mode == FM_QOUT ? "QOUT" : mode == FM_DIO ? "DIO" : mode == FM_DOUT ? "DOUT" : "UNKNOWN");
+    myDebug_P(PSTR(" [FLASH] Flash mode: %s"), mode == FM_QIO ? "QIO" : mode == FM_QOUT ? "QOUT" : mode == FM_DIO ? "DIO" : mode == FM_DOUT ? "DOUT" : "UNKNOWN");
 #if defined(ESP8266)
     myDebug_P(PSTR(" [FLASH] Flash size (CHIP): %d"), ESP.getFlashChipRealSize());
 #endif
@@ -884,9 +946,6 @@ void MyESP::showSystemStats() {
     myDebug_P(PSTR(" [MEM] Max OTA size: %d"), (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000);
     myDebug_P(PSTR(" [MEM] OTA Reserved: %d"), 4 * SPI_FLASH_SEC_SIZE);
     myDebug_P(PSTR(" [MEM] Free Heap: %d"), ESP.getFreeHeap());
-#if defined(ESP8266)
-    myDebug_P(PSTR(" [MEM] Stack: %d"), ESP.getFreeContStack());
-#endif
     myDebug_P(PSTR(""));
 }
 
@@ -899,12 +958,16 @@ void MyESP::_telnetHandle() {
     while (SerialAndTelnet.available()) {
         char c = SerialAndTelnet.read();
 
+        if (c == 0)
+            return;
+
         SerialAndTelnet.serialPrint(c); // echo to Serial (if connected)
 
         switch (c) {
         case '\r': // likely have full command in buffer now, commands are terminated by CR and/or LF
         case '\n':
             _command[charsRead] = '\0'; // null terminate our command char array
+
             if (charsRead > 0) {
                 charsRead      = 0; // is static, so have to reset
                 _suspendOutput = false;
@@ -948,7 +1011,7 @@ void MyESP::_telnetHandle() {
     }
 }
 
-// ensure we have a connection to MQTT broker
+// make sure we have a connection to MQTT broker
 void MyESP::_mqttConnect() {
     if (!_mqtt_host)
         return; // MQTT not enabled
@@ -1155,7 +1218,7 @@ bool MyESP::_fs_loadConfig() {
     // Deserialize the JSON document
     DeserializationError error = deserializeJson(doc, configFile);
     if (error) {
-        Serial.println(F("[FS] Failed to read file"));
+        myDebug_P(PSTR("[FS] Failed to read config file. Error %s"), error.c_str());
         return false;
     }
 
@@ -1360,15 +1423,15 @@ extern "C" void custom_crash_callback(struct rst_info * rst_info, uint32_t stack
 
 void MyESP::crashTest(uint8_t t) {
     if (t == 1) {
-        myDebug("[CRASH] Attempting to divide by zero ...");
+        myDebug_P(PSTR("[CRASH] Attempting to divide by zero ..."));
         int result, zero;
         zero   = 0;
         result = 1 / zero;
-        myDebug("Result = %d", result);
+        myDebug_P(PSTR("Result = %d"), result);
     }
 
     if (t == 2) {
-        myDebug("[CRASH] Attempting to read through a pointer to no object ...");
+        myDebug_P(PSTR("[CRASH] Attempting to read through a pointer to no object ..."));
         int * nullPointer;
         nullPointer = NULL;
         // null pointer dereference - read
@@ -1377,7 +1440,7 @@ void MyESP::crashTest(uint8_t t) {
     }
 
     if (t == 3) {
-        Serial.printf("[CRASH] Crashing with hardware WDT (%ld ms) ...\n", millis());
+        myDebug_P(PSTR("[CRASH] Crashing with hardware WDT (%ld ms) ...\n"), millis());
         ESP.wdtDisable();
         while (true) {
             // stay in an infinite loop doing nothing
@@ -1390,7 +1453,7 @@ void MyESP::crashTest(uint8_t t) {
     }
 
     if (t == 4) {
-        Serial.printf("[CRASH] Crashing with software WDT (%ld ms) ...\n", millis());
+        myDebug_P(PSTR("[CRASH] Crashing with software WDT (%ld ms) ...\n"), millis());
         while (true) {
             // stay in an infinite loop doing nothing
             // this way other process can not be executed
@@ -1444,7 +1507,7 @@ void MyESP::crashDump() {
 
     uint32_t stack_trace;
 
-    myDebug(">>>stack>>>");
+    myDebug_P(PSTR(">>>stack>>>"));
 
     for (int16_t i = 0; i < stack_len; i += 0x10) {
         SerialAndTelnet.printf("%08x: ", stack_start + i);
@@ -1455,7 +1518,7 @@ void MyESP::crashDump() {
         }
         SerialAndTelnet.println();
     }
-    myDebug("<<<stack<<<");
+    myDebug_P(PSTR("<<<stack<<<"));
 }
 #else
 void MyESP::crashTest(uint8_t t) {
@@ -1478,7 +1541,7 @@ void MyESP::begin(const char * app_hostname, const char * app_name, const char *
     _eeprom_setup(); // set up eeprom for storing crash data
     _fs_setup();     // SPIFFS setup, do this first to get values
     _wifi_setup();   // WIFI setup
-    _ota_setup();
+    _ota_setup();    // init OTA
 }
 
 /*

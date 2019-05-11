@@ -50,7 +50,7 @@ uint8_t DS18::setup(uint8_t gpio, bool parasite) {
 
 // scan every 2 seconds
 void DS18::loop() {
-    static unsigned long last = 0;
+    static uint32_t last = 0;
     if (millis() - last < DS18_READ_INTERVAL)
         return;
     last = millis();

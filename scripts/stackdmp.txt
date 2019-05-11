@@ -1,0 +1,11 @@
+>>>stack>>>
+3fffff30: 00000020 3fff4dcc 0000000d 40216e4e
+3fffff40: 00000020 3fff4dcc 3fff4db8 3fff4e3c
+3fffff50: 0000000d 3fff4db8 3fff4b64 4021280d
+3fffff60: 0000000d 3fff5094 3ffe8560 3fff5038
+3fffff70: 3fff4b64 3fff316c 3fff4b54 3fff5038
+3fffff80: 3fffdad0 3fff316c 3fff4b64 402128df
+3fffff90: 3fffdad0 00000000 3fff316c 4020bc20
+3fffffa0: 3fffdad0 00000000 3fff5008 402143d4
+3fffffb0: feefeffe feefeffe 3ffe8560 40100b01
+<<<stack<<<
