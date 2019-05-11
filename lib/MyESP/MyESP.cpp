@@ -388,7 +388,7 @@ void MyESP::_ota_setup() {
         return;
     }
 
-    //ArduinoOTA.setPort(OTA_PORT);
+    ArduinoOTA.setPort(OTA_PORT);
     ArduinoOTA.setHostname(_app_hostname);
 
     ArduinoOTA.onStart([this]() { _OTACallback(); });
@@ -946,7 +946,6 @@ void MyESP::showSystemStats() {
     myDebug_P(PSTR(" [MEM] Max OTA size: %d"), (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000);
     myDebug_P(PSTR(" [MEM] OTA Reserved: %d"), 4 * SPI_FLASH_SEC_SIZE);
     myDebug_P(PSTR(" [MEM] Free Heap: %d"), ESP.getFreeHeap());
-
     myDebug_P(PSTR(""));
 }
 
@@ -1554,10 +1553,12 @@ void MyESP::loop() {
 
     jw.loop(); // WiFi
 
+    /*
     // do nothing else until we've got a wifi connection
     if (WiFi.getMode() & WIFI_AP) {
         return;
     }
+    */
 
     ArduinoOTA.handle(); // OTA
     _mqttConnect();      // MQTT
