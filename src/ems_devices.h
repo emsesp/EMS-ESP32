@@ -166,6 +166,7 @@ const _Other_Type Other_Types[] = {
     {EMS_MODEL_OTHER, 250, 0x11, "WM10 Switch Module"}, // warning, fake product id!
     {EMS_MODEL_OTHER, 160, 0x20, "MM100 Mixing Module"},
     {EMS_MODEL_OTHER, 160, 0x21, "MM100 Mixing Module"},
+    {EMS_MODEL_OTHER, 159, 0x21, "MM50 Mixing Module"},
     {EMS_MODEL_OTHER, 68, 0x09, "BC10/RFM20 Receiver"},
     {EMS_MODEL_OTHER, 190, 0x09, "BC10 Base Controller"},
     {EMS_MODEL_OTHER, 114, 0x09, "BC10 Base Controller"},
