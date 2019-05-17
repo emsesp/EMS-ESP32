@@ -906,14 +906,14 @@ void MyESP::showSystemStats() {
     char buffer[16]     = {0};
     /* Crash info */
     myDebug_P(PSTR(" [EEPROM] EEPROM size: %u"), EEPROMr.reserved() * SPI_FLASH_SEC_SIZE);
-    strlcpy(output_str, PSTR(" [EEPROM] EEPROM Sector pool size is "), sizeof(output_str));
+    strlcpy(output_str, " [EEPROM] EEPROM Sector pool size is ", sizeof(output_str));
     strlcat(output_str, itoa(EEPROMr.size(), buffer, 10), sizeof(output_str));
-    strlcat(output_str, PSTR(", and in use are: "), sizeof(output_str));
+    strlcat(output_str, ", and in use are: ", sizeof(output_str));
     for (uint32_t i = 0; i < EEPROMr.size(); i++) {
         strlcat(output_str, itoa(EEPROMr.base() - i, buffer, 10), sizeof(output_str));
-        strlcat(output_str, PSTR(" "), sizeof(output_str));
+        strlcat(output_str, " ", sizeof(output_str));
     }
-    myDebug_P(output_str);
+    myDebug(output_str);
 #endif
 
 #ifdef ARDUINO_BOARD

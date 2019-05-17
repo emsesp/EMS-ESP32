@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- MM50 Mixer
+
+### Fixed
+
+- runtime exceptions with latest 2.5.1 arduino core
+
 ### Changed
 
 ## [1.7.0] 2019-05-11

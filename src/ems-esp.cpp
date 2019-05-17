@@ -93,7 +93,7 @@ typedef struct {
     bool     doingColdShot; // true if we've just sent a jolt of cold water
 } _EMSESP_Shower;
 
-command_t PROGMEM project_cmds[] = {
+command_t project_cmds[] = {
 
     {true, "led <on | off>", "toggle status LED on/off"},
     {true, "led_gpio <gpio>", "set the LED pin. Default is the onboard LED (D1=5)"},
