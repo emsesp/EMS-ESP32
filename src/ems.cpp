@@ -697,7 +697,7 @@ void _ems_readTelegram(uint8_t * telegram, uint8_t length) {
             } else {
                 // nothing to send so just send a poll acknowledgement back
                 if (EMS_Sys_Status.emsPollEnabled) {
-                    emsaurt_tx_poll();
+                    emsuart_tx_poll();
                 }
             }
         } else if (EMS_Sys_Status.emsTxStatus == EMS_TX_STATUS_WAIT) {
@@ -705,14 +705,14 @@ void _ems_readTelegram(uint8_t * telegram, uint8_t length) {
             if (value == EMS_TX_SUCCESS) {
                 EMS_Sys_Status.emsTxPkgs++;
                 // got a success 01. Send a validate to check the value of the last write
-                emsaurt_tx_poll(); // send a poll to free the EMS bus
+                emsuart_tx_poll(); // send a poll to free the EMS bus
                 _createValidate(); // create a validate Tx request (if needed)
             } else if (value == EMS_TX_ERROR) {
                 // last write failed (04), delete it from queue and dont bother to retry
                 if (EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_VERBOSE) {
                     myDebug_P(PSTR("** Write command failed from host"));
                 }
-                emsaurt_tx_poll(); // send a poll to free the EMS bus
+                emsuart_tx_poll(); // send a poll to free the EMS bus
                 _removeTxQueue();  // remove from queue
             }
         }
@@ -1052,7 +1052,7 @@ void _processType(_EMS_RxTelegram * EMS_RxTelegram) {
         }
     }
 
-    emsaurt_tx_poll(); // send Acknowledgement back to free the EMS bus since we have the telegram
+    emsuart_tx_poll(); // send Acknowledgement back to free the EMS bus since we have the telegram
 }
 
 
