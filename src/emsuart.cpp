@@ -40,8 +40,7 @@ static void emsuart_rx_intr_handler(void * para) {
         }
 
         // clear Rx FIFO full and Rx FIFO timeout interrupts
-        U0IC = (1 << UIFF);
-        U0IC = (1 << UITO);
+        U0IC = (1 << UIFF) | (1 << UITO);
     }
 
     // BREAK detection = End of EMS data block
@@ -76,6 +75,13 @@ static void ICACHE_FLASH_ATTR emsuart_recvTask(os_event_t * events) {
     pEMSRxBuf = paEMSRxBuf[++emsRxBufIdx % EMS_MAXBUFFERS];                   // next free EMS Receive buffer
 }
 
+static inline void ICACHE_FLASH_ATTR emsuart_flush_fifos() {
+    // flush everything left over in buffer, this clears both rx and tx FIFOs
+    uint32_t tmp = ((1 << UCRXRST) | (1 << UCTXRST)); // bit mask
+    USC0(EMSUART_UART) |= (tmp);                      // set bits
+    USC0(EMSUART_UART) &= ~(tmp);                     // clear bits
+}
+
 /*
  * init UART0 driver
  */
@@ -100,11 +106,8 @@ void ICACHE_FLASH_ATTR emsuart_init() {
     USD(EMSUART_UART)  = (UART_CLK_FREQ / EMSUART_BAUD);
     USC0(EMSUART_UART) = EMSUART_CONFIG; // 8N1
 
-    // flush everything left over in buffer, this clears both rx and tx FIFOs
-    uint32_t tmp = ((1 << UCRXRST) | (1 << UCTXRST)); // bit mask
-    USC0(EMSUART_UART) |= (tmp);                      // set bits
-    USC0(EMSUART_UART) &= ~(tmp);                     // clear bits
-
+    emsuart_flush_fifos();
+ 
     // conf1 params
     // UCTOE = RX TimeOut enable (default is 1)
     // UCTOT = RX TimeOut Threshold (7bit) = want this when no more data after 2 characters. (default is 2)
@@ -128,7 +131,9 @@ void ICACHE_FLASH_ATTR emsuart_init() {
     system_set_os_print(0); // https://github.com/espruino/Espruino/issues/655
 
     // swap Rx and Tx pins to use GPIO13 (D7) and GPIO15 (D8) respectively
+    #ifndef NO_UART_SWAP
     system_uart_swap();
+    #endif
 
     ETS_UART_INTR_ATTACH(emsuart_rx_intr_handler, NULL);
     ETS_UART_INTR_ENABLE();
@@ -173,25 +178,83 @@ void ICACHE_FLASH_ATTR emsuart_tx_brk() {
 }
 
 /*
+ * set loopback mode and clear Tx/Rx FIFO
+ */
+static inline void ICACHE_FLASH_ATTR emsuart_loopback(boolean enable) {
+    uint32_t tmp = (1 << UCLBE);                     // Loopback mask
+    if (enable)
+        USC0(EMSUART_UART) |= (tmp);        // enable loopback
+    else
+        USC0(EMSUART_UART) &= ~(tmp);       // disable loopback
+}
+
+/*
  * Send to Tx, ending with a <BRK>
  */
 void ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
-    for (uint8_t i = 0; i < len; i++) {
-        USF(EMSUART_UART) = buf[i];
+    uint32_t tmp;
+    
+    // backward compatibility
+    if (EMS_Sys_Status.emsTxDelay<2) {
+        for (uint8_t i = 0; i < len; i++) {
+            USF(EMSUART_UART) = buf[i];
 
-        // check if we need to force a delay to slow down Tx
-        // https://github.com/proddy/EMS-ESP/issues/23#
-        if (EMS_Sys_Status.emsTxDelay) {
-          delayMicroseconds(EMS_TX_BRK_WAIT);
+            // check if we need to force a delay to slow down Tx
+            // https://github.com/proddy/EMS-ESP/issues/23#
+            if (EMS_Sys_Status.emsTxDelay==1) {
+                delayMicroseconds(EMS_TX_BRK_WAIT);
+            }
         }
+        emsuart_tx_brk(); // send <BRK>
+    } else {
+        // smart Tx
+        #define UART_BIT_TIME 104   // bit time @9600 baud
+
+        ETS_UART_INTR_DISABLE();    // disable rx interrupt
+        emsuart_flush_fifos();
+        emsuart_loopback(true);     // reset FIFOs & enable loopback
+
+        for (uint8_t i = 0; i < len; i++) {
+            USF(EMSUART_UART) = buf[i];     // send byte
+            delayMicroseconds(10*UART_BIT_TIME);
+
+            /* wait until
+             * ° loopback char is received
+             * ° Rx-FIFO full (unlikely)
+             * ° Rx-TimeOut (unlikely)
+             * ° Break detected (bus collision) - not handled now...
+             */
+            for (uint8_t l = 0; l < 13; l++) {
+                if (((USS(EMSUART_UART) >> USRXC) & 0xFF) 
+                  || (U0IS & ((1 << UIFF) | (1 << UITO) | (1 << UIBD))))
+                    break;
+                delayMicroseconds(UART_BIT_TIME / 8);   // ~13µs
+            }
+        
+            uint32_t break_detect = (U0IS & (1 << UIBD));       // keep break detect interrupt
+            (void) (USF(EMSUART_UART));                         // read out fifo, also clears FIFO counter
+            U0IC = (1 << UIFF) | (1 << UITO) | (1 << UIBD);     // clear pending interrupts
+            if (break_detect)
+                break;                                          // collision / abort from master
+        }
+
+        // send <BRK> - wait until <BRK> detect
+        USC0(EMSUART_UART) |= (1 << UCBRK);         // send <BRK>
+        while (!(U0IS & (1 << UIBD)))
+            delayMicroseconds(UART_BIT_TIME / 8);   // ~13µs
+        USC0(EMSUART_UART) &= ~(1 << UCBRK);        // clear <BRK>
+
+        U0IC = (1 << UIFF) | (1 << UITO) | (1 << UIBD);       // clear pending interrupts
+        emsuart_flush_fifos();
+        emsuart_loopback(false);                // disable loopback mode
+        ETS_UART_INTR_ENABLE();         // enable rx interrupt
     }
-    emsuart_tx_brk(); // send <BRK>
 }
 
 /*
  * Send the Poll (our own ID) to Tx as a single byte and end with a <BRK>
  */
-void ICACHE_FLASH_ATTR emsaurt_tx_poll() {
-    USF(EMSUART_UART) = EMS_ID_ME;
-    emsuart_tx_brk(); // send <BRK>
+void ICACHE_FLASH_ATTR emsuart_tx_poll() {
+    static uint8_t buf[] = {EMS_ID_ME};
+    emsuart_tx_buffer(buf,1);
 }
