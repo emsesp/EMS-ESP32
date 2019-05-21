@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Improved Tx code, by @Susis Strolch [(pull request 113)](https://github.com/proddy/EMS-ESP/pull/113). Use `set_txdelay 2`
+
 ## [1.7.0] 2019-05-11
 
 ### Added

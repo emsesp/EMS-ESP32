@@ -107,13 +107,13 @@ void ICACHE_FLASH_ATTR emsuart_init() {
     USC0(EMSUART_UART) = EMSUART_CONFIG; // 8N1
 
     emsuart_flush_fifos();
- 
+
     // conf1 params
     // UCTOE = RX TimeOut enable (default is 1)
     // UCTOT = RX TimeOut Threshold (7bit) = want this when no more data after 2 characters. (default is 2)
     // UCFFT = RX FIFO Full Threshold (7 bit) = want this to be 31 for 32 bytes of buffer. (default was 127).
     // see https://www.espressif.com/sites/default/files/documentation/esp8266-technical_reference_en.pdf
-    USC1(EMSUART_UART) = 0;                                              // reset config first
+    USC1(EMSUART_UART) = 0;                                                                   // reset config first
     USC1(EMSUART_UART) = (EMS_MAX_TELEGRAM_LENGTH << UCFFT) | (0x02 << UCTOT) | (1 << UCTOE); // enable interupts
 
     // set interrupts for triggers
@@ -130,10 +130,10 @@ void ICACHE_FLASH_ATTR emsuart_init() {
     // disable esp debug which will go to Tx and mess up the line
     system_set_os_print(0); // https://github.com/espruino/Espruino/issues/655
 
-    // swap Rx and Tx pins to use GPIO13 (D7) and GPIO15 (D8) respectively
-    #ifndef NO_UART_SWAP
+// swap Rx and Tx pins to use GPIO13 (D7) and GPIO15 (D8) respectively
+#ifndef NO_UART_SWAP
     system_uart_swap();
-    #endif
+#endif
 
     ETS_UART_INTR_ATTACH(emsuart_rx_intr_handler, NULL);
     ETS_UART_INTR_ENABLE();
@@ -181,11 +181,11 @@ void ICACHE_FLASH_ATTR emsuart_tx_brk() {
  * set loopback mode and clear Tx/Rx FIFO
  */
 static inline void ICACHE_FLASH_ATTR emsuart_loopback(boolean enable) {
-    uint32_t tmp = (1 << UCLBE);                     // Loopback mask
+    uint32_t tmp = (1 << UCLBE); // Loopback mask
     if (enable)
-        USC0(EMSUART_UART) |= (tmp);        // enable loopback
+        USC0(EMSUART_UART) |= (tmp); // enable loopback
     else
-        USC0(EMSUART_UART) &= ~(tmp);       // disable loopback
+        USC0(EMSUART_UART) &= ~(tmp); // disable loopback
 }
 
 /*
@@ -193,30 +193,30 @@ static inline void ICACHE_FLASH_ATTR emsuart_loopback(boolean enable) {
  */
 void ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
     uint32_t tmp;
-    
+
     // backward compatibility
-    if (EMS_Sys_Status.emsTxDelay<2) {
+    if (EMS_Sys_Status.emsTxDelay < 2) {
         for (uint8_t i = 0; i < len; i++) {
             USF(EMSUART_UART) = buf[i];
 
             // check if we need to force a delay to slow down Tx
             // https://github.com/proddy/EMS-ESP/issues/23#
-            if (EMS_Sys_Status.emsTxDelay==1) {
+            if (EMS_Sys_Status.emsTxDelay == 1) {
                 delayMicroseconds(EMS_TX_BRK_WAIT);
             }
         }
         emsuart_tx_brk(); // send <BRK>
     } else {
-        // smart Tx
-        #define UART_BIT_TIME 104   // bit time @9600 baud
+// smart Tx
+#define UART_BIT_TIME 104 // bit time @9600 baud
 
-        ETS_UART_INTR_DISABLE();    // disable rx interrupt
+        ETS_UART_INTR_DISABLE(); // disable rx interrupt
         emsuart_flush_fifos();
-        emsuart_loopback(true);     // reset FIFOs & enable loopback
+        emsuart_loopback(true); // reset FIFOs & enable loopback
 
         for (uint8_t i = 0; i < len; i++) {
-            USF(EMSUART_UART) = buf[i];     // send byte
-            delayMicroseconds(10*UART_BIT_TIME);
+            USF(EMSUART_UART) = buf[i]; // send byte
+            delayMicroseconds(10 * UART_BIT_TIME);
 
             /* wait until
              * ° loopback char is received
@@ -225,29 +225,28 @@ void ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
              * ° Break detected (bus collision) - not handled now...
              */
             for (uint8_t l = 0; l < 13; l++) {
-                if (((USS(EMSUART_UART) >> USRXC) & 0xFF) 
-                  || (U0IS & ((1 << UIFF) | (1 << UITO) | (1 << UIBD))))
+                if (((USS(EMSUART_UART) >> USRXC) & 0xFF) || (U0IS & ((1 << UIFF) | (1 << UITO) | (1 << UIBD))))
                     break;
-                delayMicroseconds(UART_BIT_TIME / 8);   // ~13µs
+                delayMicroseconds(UART_BIT_TIME / 8); // ~13µs
             }
-        
-            uint32_t break_detect = (U0IS & (1 << UIBD));       // keep break detect interrupt
-            (void) (USF(EMSUART_UART));                         // read out fifo, also clears FIFO counter
-            U0IC = (1 << UIFF) | (1 << UITO) | (1 << UIBD);     // clear pending interrupts
+
+            uint32_t break_detect = (U0IS & (1 << UIBD));   // keep break detect interrupt
+            (void)(USF(EMSUART_UART));                      // read out fifo, also clears FIFO counter
+            U0IC = (1 << UIFF) | (1 << UITO) | (1 << UIBD); // clear pending interrupts
             if (break_detect)
-                break;                                          // collision / abort from master
+                break; // collision / abort from master
         }
 
         // send <BRK> - wait until <BRK> detect
-        USC0(EMSUART_UART) |= (1 << UCBRK);         // send <BRK>
+        USC0(EMSUART_UART) |= (1 << UCBRK); // send <BRK>
         while (!(U0IS & (1 << UIBD)))
-            delayMicroseconds(UART_BIT_TIME / 8);   // ~13µs
-        USC0(EMSUART_UART) &= ~(1 << UCBRK);        // clear <BRK>
+            delayMicroseconds(UART_BIT_TIME / 8); // ~13µs
+        USC0(EMSUART_UART) &= ~(1 << UCBRK);      // clear <BRK>
 
-        U0IC = (1 << UIFF) | (1 << UITO) | (1 << UIBD);       // clear pending interrupts
+        U0IC = (1 << UIFF) | (1 << UITO) | (1 << UIBD); // clear pending interrupts
         emsuart_flush_fifos();
-        emsuart_loopback(false);                // disable loopback mode
-        ETS_UART_INTR_ENABLE();         // enable rx interrupt
+        emsuart_loopback(false); // disable loopback mode
+        ETS_UART_INTR_ENABLE();  // enable rx interrupt
     }
 }
 
@@ -256,5 +255,5 @@ void ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
  */
 void ICACHE_FLASH_ATTR emsuart_tx_poll() {
     static uint8_t buf[] = {EMS_ID_ME};
-    emsuart_tx_buffer(buf,1);
+    emsuart_tx_buffer(buf, 1);
 }

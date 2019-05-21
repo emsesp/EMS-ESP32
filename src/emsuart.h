@@ -13,8 +13,8 @@
 #define EMSUART_CONFIG 0x1C // 8N1 (8 bits, no stop bits, 1 parity)
 #define EMSUART_BAUD 9600   // uart baud rate for the EMS circuit
 
-#define EMS_MAXBUFFERS 10     // 4 buffers for circular filling to avoid collisions
-#define EMS_MAXBUFFERSIZE 32  // max size of the buffer. packets are max 32 bytes
+#define EMS_MAXBUFFERS 10    // 4 buffers for circular filling to avoid collisions
+#define EMS_MAXBUFFERSIZE 32 // max size of the buffer. packets are max 32 bytes
 
 // this is how long we drop the Tx signal to create a 11-bit Break of zeros (BRK)
 // At 9600 baud, 11 bits will be 1144 microseconds

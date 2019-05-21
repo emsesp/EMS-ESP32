@@ -687,7 +687,7 @@ void _ems_readTelegram(uint8_t * telegram, uint8_t length) {
         _last_emsPollFrequency          = EMS_RxTelegram.timestamp;
 
         // check first for a Poll for us
-        if (value == (EMS_ID_ME | 0x80)) {
+        if ((value & 0x7F) == EMS_ID_ME) {
             EMS_Sys_Status.emsTxCapable = true;
 
             // do we have something to send thats waiting in the Tx queue?
