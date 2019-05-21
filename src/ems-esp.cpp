@@ -106,7 +106,7 @@ command_t project_cmds[] = {
     {true, "shower_alert <on | off>", "send a warning of cold water after shower time is exceeded"},
     {true, "publish_wait <seconds>", "set frequency for publishing to MQTT"},
     {true, "heating_circuit <1 | 2>", "set the thermostat HC to work with if using multiple heating circuits"},
-    {true, "tx_delay <on | off>", "turn on if Tx not working on newer boilers"},
+    {true, "tx_delay <n>", "0=normal, 1=ems+, 2=new logic"},
 
     {false, "info", "show data captured on the EMS bus"},
     {false, "log <n | b | t | r | v>", "set logging mode to none, basic, thermostat only, raw or verbose"},
@@ -342,7 +342,7 @@ void showInfo() {
         myDebug_P(PSTR("  Rx: Poll=%d ms, # Rx telegrams read=%d, # CRC errors=%d"), ems_getPollFrequency(), EMS_Sys_Status.emsRxPgks, EMS_Sys_Status.emxCrcErr);
 
         if (ems_getTxCapable()) {
-            myDebug_P(PSTR("  Tx: available, Tx delay is %s, # Tx telegrams sent=%d"), (ems_getTxDelay() ? "on" : "off"), EMS_Sys_Status.emsTxPkgs);
+            myDebug_P(PSTR("  Tx: available, Tx delay is %d, # Tx telegrams sent=%d"), ems_getTxDelay(), EMS_Sys_Status.emsTxPkgs);
         } else {
             myDebug_P(PSTR("  Tx: no signal"));
         }
@@ -1182,15 +1182,8 @@ bool SettingsCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, c
 
         // tx delay
         if ((strcmp(setting, "tx_delay") == 0) && (wc == 2)) {
-            if (strcmp(value, "on") == 0) {
-                ems_setTxDelay(true);
-                ok = true;
-            } else if (strcmp(value, "off") == 0) {
-                ems_setTxDelay(false);
-                ok = true;
-            } else {
-                myDebug_P(PSTR("Error. Usage: set tx_delay <on | off>"));
-            }
+            ems_setTxDelay(atoi(value));
+            ok = true;
         }
     }
 
@@ -1218,7 +1211,7 @@ bool SettingsCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, c
         myDebug_P(PSTR("  shower_timer=%s"), EMSESP_Status.shower_timer ? "on" : "off");
         myDebug_P(PSTR("  shower_alert=%s"), EMSESP_Status.shower_alert ? "on" : "off");
         myDebug_P(PSTR("  publish_wait=%d"), EMSESP_Status.publish_wait);
-        myDebug_P(PSTR("  tx_delay=%s"), ems_getTxDelay() ? "on" : "off");
+        myDebug_P(PSTR("  tx_delay=%d"), ems_getTxDelay());
     }
 
     return ok;

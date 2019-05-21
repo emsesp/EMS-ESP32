@@ -220,7 +220,7 @@ void ems_init() {
     EMS_Sys_Status.emsTxDisabled    = false;
     EMS_Sys_Status.emsPollFrequency = 0;
     EMS_Sys_Status.txRetryCount     = 0;
-    EMS_Sys_Status.emsTxDelay       = false;
+    EMS_Sys_Status.emsTxDelay       = 0;
 
     // thermostat
     EMS_Thermostat.setpoint_roomTemp = EMS_VALUE_SHORT_NOTSET;
@@ -329,12 +329,12 @@ bool ems_getPoll() {
     return EMS_Sys_Status.emsPollEnabled;
 }
 
-void ems_setTxDelay(bool b) {
-    EMS_Sys_Status.emsTxDelay = b;
-    myDebug_P(PSTR("EMS Tx delay is %s"), EMS_Sys_Status.emsTxDelay ? "enabled" : "disabled");
+void ems_setTxDelay(uint8_t delay) {
+    EMS_Sys_Status.emsTxDelay = delay;
+    myDebug_P(PSTR("EMS Tx delay is %d"), EMS_Sys_Status.emsTxDelay);
 }
 
-bool ems_getTxDelay() {
+uint8_t ems_getTxDelay() {
     return EMS_Sys_Status.emsTxDelay;
 }
 
