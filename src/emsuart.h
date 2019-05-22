@@ -19,7 +19,8 @@
 // this is how long we drop the Tx signal to create a 11-bit Break of zeros (BRK)
 // At 9600 baud, 11 bits will be 1144 microseconds
 // the BRK from Boiler master is roughly 1.039ms, so accounting for hardware lag using around 2078 (for half-duplex) - 8 (lag)
-#define EMS_TX_BRK_WAIT 2070
+#define EMSUART_TX_BRK_WAIT 2070
+#define EMSUART_BIT_TIME 104 // bit time @9600 baud
 
 #define EMSUART_recvTaskPrio 1
 #define EMSUART_recvTaskQueueLen 64

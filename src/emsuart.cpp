@@ -75,8 +75,10 @@ static void ICACHE_FLASH_ATTR emsuart_recvTask(os_event_t * events) {
     pEMSRxBuf = paEMSRxBuf[++emsRxBufIdx % EMS_MAXBUFFERS];                   // next free EMS Receive buffer
 }
 
+/*
+ * flush everything left over in buffer, this clears both rx and tx FIFOs
+ */
 static inline void ICACHE_FLASH_ATTR emsuart_flush_fifos() {
-    // flush everything left over in buffer, this clears both rx and tx FIFOs
     uint32_t tmp = ((1 << UCRXRST) | (1 << UCTXRST)); // bit mask
     USC0(EMSUART_UART) |= (tmp);                      // set bits
     USC0(EMSUART_UART) &= ~(tmp);                     // clear bits
@@ -144,10 +146,12 @@ void ICACHE_FLASH_ATTR emsuart_init() {
  */
 void ICACHE_FLASH_ATTR emsuart_stop() {
     ETS_UART_INTR_DISABLE();
-    //ETS_UART_INTR_ATTACH(NULL, NULL);
-    //system_uart_swap(); // to be sure, swap Tx/Rx back.
+    ETS_UART_INTR_ATTACH(NULL, NULL);
+    noInterrupts();
+#ifndef NO_UART_SWAP
     //detachInterrupt(digitalPinToInterrupt(D7));
-    //noInterrupts();
+    system_uart_swap(); // to be sure, swap Tx/Rx back.
+#endif
 }
 
 /*
@@ -162,30 +166,32 @@ void ICACHE_FLASH_ATTR emsuart_start() {
  * Which is a 11-bit set of zero's (11 cycles)
  */
 void ICACHE_FLASH_ATTR emsuart_tx_brk() {
+    uint32_t tmp;
+
     // must make sure Tx FIFO is empty
     while (((USS(EMSUART_UART) >> USTXC) & 0xff) != 0)
         ;
 
-    uint32_t tmp = ((1 << UCRXRST) | (1 << UCTXRST)); // bit mask
-    USC0(EMSUART_UART) |= (tmp);                      // set bits
-    USC0(EMSUART_UART) &= ~(tmp);                     // clear bits
+    tmp = ((1 << UCRXRST) | (1 << UCTXRST)); // bit mask
+    USC0(EMSUART_UART) |= (tmp);             // set bits
+    USC0(EMSUART_UART) &= ~(tmp);            // clear bits
 
     // To create a 11-bit <BRK> we set TXD_BRK bit so the break signal will
     // automatically be sent when the tx fifo is empty
-    USC0(EMSUART_UART) |= (1 << UCBRK);  // set bit
-    delayMicroseconds(EMS_TX_BRK_WAIT);  // 2070 - based on trial and error using an oscilloscope
-    USC0(EMSUART_UART) &= ~(1 << UCBRK); // clear bit
+    tmp = (1 << UCBRK);
+    USC0(EMSUART_UART) |= (tmp); // set bit
+    delayMicroseconds(EMSUART_TX_BRK_WAIT);
+    USC0(EMSUART_UART) &= ~(tmp); // clear bit
 }
 
 /*
  * set loopback mode and clear Tx/Rx FIFO
  */
-static inline void ICACHE_FLASH_ATTR emsuart_loopback(boolean enable) {
-    uint32_t tmp = (1 << UCLBE); // Loopback mask
+static inline void ICACHE_FLASH_ATTR emsuart_loopback(bool enable) {
     if (enable)
-        USC0(EMSUART_UART) |= (tmp); // enable loopback
+        USC0(EMSUART_UART) |= (1 << UCLBE); // enable loopback
     else
-        USC0(EMSUART_UART) &= ~(tmp); // disable loopback
+        USC0(EMSUART_UART) &= ~(1 << UCLBE); // disable loopback
 }
 
 /*
@@ -202,13 +208,12 @@ void ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
             // check if we need to force a delay to slow down Tx
             // https://github.com/proddy/EMS-ESP/issues/23#
             if (EMS_Sys_Status.emsTxDelay == 1) {
-                delayMicroseconds(EMS_TX_BRK_WAIT);
+                delayMicroseconds(EMSUART_TX_BRK_WAIT);
             }
         }
         emsuart_tx_brk(); // send <BRK>
     } else {
-// smart Tx
-#define UART_BIT_TIME 104 // bit time @9600 baud
+        // smart Tx
 
         ETS_UART_INTR_DISABLE(); // disable rx interrupt
         emsuart_flush_fifos();
@@ -216,7 +221,8 @@ void ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
 
         for (uint8_t i = 0; i < len; i++) {
             USF(EMSUART_UART) = buf[i]; // send byte
-            delayMicroseconds(10 * UART_BIT_TIME);
+
+            delayMicroseconds(10 * EMSUART_BIT_TIME);
 
             /* wait until
              * ° loopback char is received
@@ -227,7 +233,7 @@ void ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
             for (uint8_t l = 0; l < 13; l++) {
                 if (((USS(EMSUART_UART) >> USRXC) & 0xFF) || (U0IS & ((1 << UIFF) | (1 << UITO) | (1 << UIBD))))
                     break;
-                delayMicroseconds(UART_BIT_TIME / 8); // ~13µs
+                delayMicroseconds(EMSUART_BIT_TIME / 8); // ~13µs
             }
 
             uint32_t break_detect = (U0IS & (1 << UIBD));   // keep break detect interrupt
@@ -240,8 +246,8 @@ void ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
         // send <BRK> - wait until <BRK> detect
         USC0(EMSUART_UART) |= (1 << UCBRK); // send <BRK>
         while (!(U0IS & (1 << UIBD)))
-            delayMicroseconds(UART_BIT_TIME / 8); // ~13µs
-        USC0(EMSUART_UART) &= ~(1 << UCBRK);      // clear <BRK>
+            delayMicroseconds(EMSUART_BIT_TIME / 8); // ~13µs
+        USC0(EMSUART_UART) &= ~(1 << UCBRK);         // clear <BRK>
 
         U0IC = (1 << UIFF) | (1 << UITO) | (1 << UIBD); // clear pending interrupts
         emsuart_flush_fifos();
