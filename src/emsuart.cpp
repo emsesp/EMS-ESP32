@@ -237,7 +237,7 @@ void ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
             emsuart_loopback(true);
             USC0(EMSUART_UART) |= (1 << UCBRK); // set <BRK>
 
-            while (!(U0IS & (1 << UIBD)))                // wait until BRK detected...
+            while (!(U0IS & (1 << UIBD)))          ;      // wait until BRK detected...
                 delayMicroseconds(EMSUART_BIT_TIME / 8); // ~13µs
             USC0(EMSUART_UART) &= ~(1 << UCBRK);         // clear <BRK>
 
@@ -245,6 +245,7 @@ void ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
             emsuart_loopback(false); // disable loopback mode
         }
 
+        emsuart_flush_fifos(); // flush Rx buffer to be sure
         ETS_UART_INTR_ENABLE(); // receive anything from FIFO...
 
     }
