@@ -193,7 +193,6 @@ static inline void ICACHE_FLASH_ATTR emsuart_loopback(bool enable) {
  * Send to Tx, ending with a <BRK>
  */
 void ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
-
     // backwards compatibility
     if (EMS_Sys_Status.emsTxDelay < 2) {
         for (uint8_t i = 0; i < len; i++) {
@@ -225,8 +224,10 @@ void ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
         }
 
         // wait until we received sizeof(telegram) or RxBRK (== collision detect)
-        while ((((USS(EMSUART_UART) >> USRXC) & 0xFF) < len) || (U0IS & (1 << UIBD)))
+        // while ((((USS(EMSUART_UART) >> USRXC) & 0xFF) < len) || !(USIS(EMSUART_UART) & (1 << UIBD)))
+        while ((((USS(EMSUART_UART) >> USRXC) & 0xFF) < len) || (U0IS & (1 << UIBD))) {
             delayMicroseconds(11 * EMSUART_BIT_TIME); // burn CPU cycles...
+        }
 
         // we got the whole telegram in Rx buffer
         // on Rx-BRK (bus collision), we simply enable Rx and leave
@@ -237,17 +238,17 @@ void ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
             emsuart_loopback(true);
             USC0(EMSUART_UART) |= (1 << UCBRK); // set <BRK>
 
-            while (!(U0IS & (1 << UIBD)))          ;      // wait until BRK detected...
-                delayMicroseconds(EMSUART_BIT_TIME / 8); // ~13µs
-            USC0(EMSUART_UART) &= ~(1 << UCBRK);         // clear <BRK>
+            while (!(USIS(EMSUART_UART) & (1 << UIBD)))
+                ;                                    // wait until BRK detected...
+            delayMicroseconds(EMSUART_BIT_TIME / 8); // ~13µs
+            USC0(EMSUART_UART) &= ~(1 << UCBRK);     // clear <BRK>
 
-            U0IC = (1 << UIBD);      // clear BRK detect IRQ
-            emsuart_loopback(false); // disable loopback mode
+            USIC(EMSUART_UART) = (1 << UIBD); // clear BRK detect IRQ
+            emsuart_loopback(false);          // disable loopback mode
         }
 
-        emsuart_flush_fifos(); // flush Rx buffer to be sure
+        emsuart_flush_fifos();  // flush Rx buffer to be sure
         ETS_UART_INTR_ENABLE(); // receive anything from FIFO...
-
     }
 }
 
