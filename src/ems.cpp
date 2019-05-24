@@ -331,7 +331,6 @@ bool ems_getPoll() {
 
 void ems_setTxDelay(uint8_t delay) {
     EMS_Sys_Status.emsTxDelay = delay;
-    myDebug_P(PSTR("EMS Tx delay is %d"), EMS_Sys_Status.emsTxDelay);
 }
 
 uint8_t ems_getTxDelay() {

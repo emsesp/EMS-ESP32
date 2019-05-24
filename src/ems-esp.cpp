@@ -1539,7 +1539,7 @@ void WIFICallback() {
     // This is done after we have a WiFi signal to avoid any resource conflicts
 
     if (myESP.getUseSerial()) {
-        myDebug_P(PSTR("Warning! EMS bus disabled when in Serial mode. Use 'set serial off' to start EMS."));
+        myDebug_P(PSTR("Warning! EMS bus communication disabled when Serial mode enabled. Use 'set serial off' to start communication."));
     } else {
         emsuart_init();
         myDebug_P(PSTR("[UART] Opened Rx/Tx connection"));

@@ -119,7 +119,7 @@ void ICACHE_FLASH_ATTR emsuart_init() {
     USC1(EMSUART_UART) = (EMS_MAX_TELEGRAM_LENGTH << UCFFT) | (0x02 << UCTOT) | (1 << UCTOE); // enable interupts
 
     // set interrupts for triggers
-    USIC(EMSUART_UART) = 0xffff; // clear all interupts
+    USIC(EMSUART_UART) = 0xFFFF; // clear all interupts
     USIE(EMSUART_UART) = 0;      // disable all interrupts
 
     // enable rx break, fifo full and timeout.
@@ -143,15 +143,10 @@ void ICACHE_FLASH_ATTR emsuart_init() {
 
 /*
  * stop UART0 driver
+ * This is called prior to an OTA upload and also before a save to SPIFFS to prevent conflicts
  */
 void ICACHE_FLASH_ATTR emsuart_stop() {
     ETS_UART_INTR_DISABLE();
-    ETS_UART_INTR_ATTACH(NULL, NULL);
-    noInterrupts();
-#ifndef NO_UART_SWAP
-    //detachInterrupt(digitalPinToInterrupt(D7));
-    system_uart_swap(); // to be sure, swap Tx/Rx back.
-#endif
 }
 
 /*
@@ -169,7 +164,7 @@ void ICACHE_FLASH_ATTR emsuart_tx_brk() {
     uint32_t tmp;
 
     // must make sure Tx FIFO is empty
-    while (((USS(EMSUART_UART) >> USTXC) & 0xff) != 0)
+    while (((USS(EMSUART_UART) >> USTXC) & 0xFF) != 0)
         ;
 
     tmp = ((1 << UCRXRST) | (1 << UCTXRST)); // bit mask
@@ -198,7 +193,6 @@ static inline void ICACHE_FLASH_ATTR emsuart_loopback(bool enable) {
  * Send to Tx, ending with a <BRK>
  */
 void ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
-    uint32_t tmp;
 
     // backwards compatibility
     if (EMS_Sys_Status.emsTxDelay < 2) {
@@ -221,8 +215,6 @@ void ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
         * - <BRK> is detected
         * At end of receive we re-enable Rx-INT and send a Tx-BRK in loopback mode.
         */
-
-        /* COMMENTED OUT - NOT WORKING
 
         ETS_UART_INTR_DISABLE(); // disable rx interrupt
         emsuart_flush_fifos();
@@ -253,10 +245,8 @@ void ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
             emsuart_loopback(false); // disable loopback mode
         }
 
-
         ETS_UART_INTR_ENABLE(); // receive anything from FIFO...
 
-        */
     }
 }
 
