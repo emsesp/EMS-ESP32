@@ -1,9 +1,10 @@
 ;
 ; PlatformIO Project Configuration File for EMS-ESP
-; Uses PlatformIO 4.0
+; Uses PlatformIO 4.0 (pio upgrade --dev)
 ;
 
 [platformio]
+;env_default = release
 env_default = debug
 
 [common]
@@ -12,12 +13,11 @@ env_default = debug
 wifi_settings =
 
 [env]
-platform = espressif8266
-; platform = https://github.com/platformio/platform-espressif8266.git
 board = d1_mini
 ; board = nodemcuv2
 ; board = d1_mini_pro
 framework = arduino
+platform = espressif8266
 lib_deps =
   CRC32
   CircularBuffer
@@ -26,12 +26,8 @@ lib_deps =
   ArduinoJson
   OneWire
   EEPROM_rotate
-lib_ignore = 
-;lib_extra_dirs = D:\dev\lib
 upload_speed = 921600
 monitor_speed = 115200
-; Set the ESP8266 clock frequency to 160MHz
-;board_f_cpu = 160000000L
 upload_protocol = espota
 upload_port = ems-esp.local
 
