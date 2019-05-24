@@ -216,6 +216,9 @@ void ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
         */
 
         ETS_UART_INTR_DISABLE(); // disable rx interrupt
+
+        // clear Rx status register - https://github.com/proddy/EMS-ESP/issues/103#issuecomment-495605798
+        USC0(EMSUART_UART) |= (1 << UCRXRST); // reset uart rx fifo
         emsuart_flush_fifos();
 
         // throw out the telegram...
