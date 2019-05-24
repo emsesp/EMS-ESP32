@@ -226,8 +226,11 @@ void ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
         emsuart_flush_fifos();
 
         // throw out the telegram...
-        for (uint8_t i = 0; i < len; i++)
-            USF(EMSUART_UART) = buf[i]; // send byte
+        for (uint8_t i = 0; i < len; i++) {
+            USF(EMSUART_UART) = buf[i]; // send each Tx byte
+        }
+
+        /* COMMENTED OUT - NOT WORKING
 
         // wait until we received sizeof(telegram) or RxBRK (== collision detect)
         while ((((USS(EMSUART_UART) >> USRXC) & 0xFF) < len) || (U0IS & (1 << UIBD)))
@@ -249,6 +252,9 @@ void ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
             U0IC = (1 << UIBD);      // clear BRK detect IRQ
             emsuart_loopback(false); // disable loopback mode
         }
+
+        */
+
         ETS_UART_INTR_ENABLE(); // receive anything from FIFO...
     }
 }
