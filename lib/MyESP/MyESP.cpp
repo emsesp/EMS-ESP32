@@ -154,10 +154,9 @@ void MyESP::_wifiCallback(justwifi_messages_t code, char * parameter) {
 
         // finally if we don't want Serial anymore, turn it off
         if (!_use_serial) {
-            myDebug_P(PSTR("Disabling serial port"));
+            myDebug_P(PSTR("Disabling serial port communication."));
+            SerialAndTelnet.flush(); // flush so all buffer is printed to serial
             SerialAndTelnet.setSerial(NULL);
-        } else {
-            myDebug_P(PSTR("Using serial port output"));
         }
 
         // call any final custom settings
@@ -1537,11 +1536,15 @@ void MyESP::begin(const char * app_hostname, const char * app_name, const char *
     _app_name     = strdup(app_name);
     _app_version  = strdup(app_version);
 
-    _telnet_setup(); // Telnet setup, does first to set Serial
-    _eeprom_setup(); // set up eeprom for storing crash data
+    _telnet_setup(); // Telnet setup, called first to set Serial
+    _eeprom_setup(); // set up eeprom for storing crash data, if compiled with -DCRASH
     _fs_setup();     // SPIFFS setup, do this first to get values
     _wifi_setup();   // WIFI setup
     _ota_setup();    // init OTA
+
+    // print a welcome message
+    myDebug_P(PSTR("\n* %s version %s"), _app_name, _app_version);
+    SerialAndTelnet.flush();
 }
 
 /*
