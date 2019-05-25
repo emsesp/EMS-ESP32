@@ -241,10 +241,11 @@ void ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
             emsuart_loopback(true);
             USC0(EMSUART_UART) |= (1 << UCBRK); // set <BRK>
 
-            while (!(USIS(EMSUART_UART) & (1 << UIBD)))
-                ;                                    // wait until BRK detected...
-            delayMicroseconds(EMSUART_BIT_TIME / 8); // ~13µs
-            USC0(EMSUART_UART) &= ~(1 << UCBRK);     // clear <BRK>
+            // wait until BRK detected...
+            while (!(USIS(EMSUART_UART) & (1 << UIBD))) {
+                delayMicroseconds(EMSUART_BIT_TIME / 8); // ~13µs
+            }
+            USC0(EMSUART_UART) &= ~(1 << UCBRK); // clear <BRK>
 
             USIC(EMSUART_UART) = (1 << UIBD); // clear BRK detect IRQ
             emsuart_loopback(false);          // disable loopback mode
