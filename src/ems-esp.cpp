@@ -339,7 +339,7 @@ void showInfo() {
     if (ems_getBusConnected()) {
         myDebug_P(PSTR("  Bus is connected"));
 
-        myDebug_P(PSTR("  Rx: Poll=%d ms, # Rx telegrams read=%d, # CRC errors=%d"), ems_getPollFrequency(), EMS_Sys_Status.emsRxPgks, EMS_Sys_Status.emxCrcErr);
+        myDebug_P(PSTR("  Rx: Poll=%d microsecs, # Rx telegrams read=%d, # CRC errors=%d"), ems_getPollFrequency(), EMS_Sys_Status.emsRxPgks, EMS_Sys_Status.emxCrcErr);
 
         if (ems_getTxCapable()) {
             myDebug_P(PSTR("  Tx: available, Tx delay is %d, # Tx telegrams sent=%d"), ems_getTxDelay(), EMS_Sys_Status.emsTxPkgs);

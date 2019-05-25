@@ -680,12 +680,13 @@ void _ems_readTelegram(uint8_t * telegram, uint8_t length) {
     // it could well be a Poll request from the boiler for us, which will have a value of 0x8B (0x0B | 0x80)
     // or either a return code like 0x01 or 0x04 from the last Write command
     if (length == 1) {
-        uint8_t value = telegram[0]; // 1st byte of data package
-
-        EMS_Sys_Status.emsPollFrequency = (EMS_RxTelegram.timestamp - _last_emsPollFrequency);
-        _last_emsPollFrequency          = EMS_RxTelegram.timestamp;
+        uint32_t timenow_microsecs      = micros();
+        EMS_Sys_Status.emsPollFrequency = (timenow_microsecs - _last_emsPollFrequency);
+        _last_emsPollFrequency          = timenow_microsecs;
 
         // check first for a Poll for us
+        uint8_t value = telegram[0]; // 1st byte of data package
+
         if ((value & 0x7F) == EMS_ID_ME) {
             EMS_Sys_Status.emsTxCapable = true;
 
