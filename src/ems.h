@@ -95,6 +95,7 @@ typedef struct {
     bool             emsTxDisabled;    // true to prevent all Tx
     uint8_t          txRetryCount;     // # times the last Tx was re-sent
     uint8_t          emsTxDelay;       // handles Tx logic
+    bool             emsReverse;       // if true, poll logic is reversed
 } _EMS_Sys_Status;
 
 // The Tx send package

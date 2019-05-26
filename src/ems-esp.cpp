@@ -106,7 +106,7 @@ command_t project_cmds[] = {
     {true, "shower_alert <on | off>", "send a warning of cold water after shower time is exceeded"},
     {true, "publish_wait <seconds>", "set frequency for publishing to MQTT"},
     {true, "heating_circuit <1 | 2>", "set the thermostat HC to work with if using multiple heating circuits"},
-    {true, "tx_delay <n>", "0=normal, 1=ems+, 2=new logic"},
+    {true, "tx_delay <n>", "0=classic ems logic, 1=@kwertie01 ems+ logic, 2=@susisstrolch logic, 3=@philrich logic for Junkers"},
 
     {false, "info", "show data captured on the EMS bus"},
     {false, "log <n | b | t | r | v>", "set logging mode to none, basic, thermostat only, raw or verbose"},
@@ -339,10 +339,10 @@ void showInfo() {
     if (ems_getBusConnected()) {
         myDebug_P(PSTR("  Bus is connected"));
 
-        myDebug_P(PSTR("  Rx: Poll=%d microsecs, # Rx telegrams read=%d, # CRC errors=%d"), ems_getPollFrequency(), EMS_Sys_Status.emsRxPgks, EMS_Sys_Status.emxCrcErr);
+        myDebug_P(PSTR("  Rx: Poll=%d microseconds, # Rx telegrams read=%d, # CRC errors=%d"), ems_getPollFrequency(), EMS_Sys_Status.emsRxPgks, EMS_Sys_Status.emxCrcErr);
 
         if (ems_getTxCapable()) {
-            myDebug_P(PSTR("  Tx: available, Tx delay is %d, # Tx telegrams sent=%d"), ems_getTxDelay(), EMS_Sys_Status.emsTxPkgs);
+            myDebug_P(PSTR("  Tx: available, Tx delay is %d, # successful write commands=%d"), ems_getTxDelay(), EMS_Sys_Status.emsTxPkgs);
         } else {
             myDebug_P(PSTR("  Tx: no signal"));
         }

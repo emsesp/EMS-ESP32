@@ -221,6 +221,7 @@ void ems_init() {
     EMS_Sys_Status.emsPollFrequency = 0;
     EMS_Sys_Status.txRetryCount     = 0;
     EMS_Sys_Status.emsTxDelay       = 0;
+    EMS_Sys_Status.emsReverse       = false;
 
     // thermostat
     EMS_Thermostat.setpoint_roomTemp = EMS_VALUE_SHORT_NOTSET;
@@ -331,6 +332,13 @@ bool ems_getPoll() {
 
 void ems_setTxDelay(uint8_t delay) {
     EMS_Sys_Status.emsTxDelay = delay;
+
+    // special case for Junkers. If tx_delay is 3 then set the reverse poll flag
+    // https://github.com/proddy/EMS-ESP/issues/103#issuecomment-495945850
+    if (delay == 3) {
+        EMS_Sys_Status.emsReverse = true;
+        myDebug_P(PSTR("Setting for Tx Junkers logic and enabled the poll reverse flag"));
+    }
 }
 
 uint8_t ems_getTxDelay() {
@@ -557,8 +565,9 @@ void _ems_sendTelegram() {
         return;
     }
 
-    // create header
-    EMS_TxTelegram.data[0] = EMS_ID_ME; // src
+    // create the header
+    EMS_TxTelegram.data[0] = (EMS_Sys_Status.emsReverse) ? EMS_ID_ME | 0x80 : EMS_ID_ME; // src
+
     // dest
     if (EMS_TxTelegram.action == EMS_TX_TELEGRAM_WRITE) {
         EMS_TxTelegram.data[1] = EMS_TxTelegram.dest;
@@ -672,9 +681,10 @@ void _ems_readTelegram(uint8_t * telegram, uint8_t length) {
     // create the Rx package
     static _EMS_RxTelegram EMS_RxTelegram;
     static uint32_t        _last_emsPollFrequency = 0;
-    EMS_RxTelegram.telegram                       = telegram;
-    EMS_RxTelegram.timestamp                      = millis();
-    EMS_RxTelegram.length                         = length;
+
+    EMS_RxTelegram.telegram  = telegram;
+    EMS_RxTelegram.timestamp = millis();
+    EMS_RxTelegram.length    = length;
 
     // check if we just received a single byte
     // it could well be a Poll request from the boiler for us, which will have a value of 0x8B (0x0B | 0x80)
@@ -684,12 +694,11 @@ void _ems_readTelegram(uint8_t * telegram, uint8_t length) {
         EMS_Sys_Status.emsPollFrequency = (timenow_microsecs - _last_emsPollFrequency);
         _last_emsPollFrequency          = timenow_microsecs;
 
-        // check first for a Poll for us
         uint8_t value = telegram[0]; // 1st byte of data package
 
-        if ((value & 0x7F) == EMS_ID_ME) {
-            EMS_Sys_Status.emsTxCapable = true;
-
+        // check first for a Poll for us
+        // the poll has the MSB set - seems to work on both EMS and Junkers
+        if (value == (EMS_ID_ME | 0x80)) {
             // do we have something to send thats waiting in the Tx queue?
             // if so send it if the Queue is not in a wait state
             if ((!EMS_TxQueue.isEmpty()) && (EMS_Sys_Status.emsTxStatus == EMS_TX_STATUS_IDLE)) {

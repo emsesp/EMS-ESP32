@@ -175,7 +175,11 @@ void ICACHE_FLASH_ATTR emsuart_tx_brk() {
     // automatically be sent when the tx fifo is empty
     tmp = (1 << UCBRK);
     USC0(EMSUART_UART) |= (tmp); // set bit
-    delayMicroseconds(EMSUART_TX_BRK_WAIT);
+    if (EMS_Sys_Status.emsTxDelay <= 2) {
+        delayMicroseconds(EMSUART_TX_BRK_WAIT); // classic mode
+    } else if (EMS_Sys_Status.emsTxDelay == 3) {
+        delayMicroseconds(EMSUART_TX_WAIT_BRK - EMSUART_TX_LAG); // 1144 (11 Bits)
+    }
     USC0(EMSUART_UART) &= ~(tmp); // clear bit
 }
 
@@ -193,21 +197,32 @@ static inline void ICACHE_FLASH_ATTR emsuart_loopback(bool enable) {
  * Send to Tx, ending with a <BRK>
  */
 void ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
-    // backwards compatibility
-    if (EMS_Sys_Status.emsTxDelay < 2) {
+    if (EMS_Sys_Status.emsTxDelay == 0) { // Classic logic
+        for (uint8_t i = 0; i < len; i++) {
+            USF(EMSUART_UART) = buf[i];
+        }
+        emsuart_tx_brk();                        // send <BRK>
+    } else if (EMS_Sys_Status.emsTxDelay == 1) { // With extra tx delay for EMS+
+        for (uint8_t i = 0; i < len; i++) {
+            USF(EMSUART_UART) = buf[i];
+            delayMicroseconds(EMSUART_TX_BRK_WAIT); // https://github.com/proddy/EMS-ESP/issues/23#
+        }
+        emsuart_tx_brk();                        // send <BRK>
+    } else if (EMS_Sys_Status.emsTxDelay == 3) { // Junkers logic by @philrich
         for (uint8_t i = 0; i < len; i++) {
             USF(EMSUART_UART) = buf[i];
 
-            // check if we need to force a delay to slow down Tx
-            // https://github.com/proddy/EMS-ESP/issues/23#
-            if (EMS_Sys_Status.emsTxDelay == 1) {
-                delayMicroseconds(EMSUART_TX_BRK_WAIT);
-            }
+            // just to be safe wait for tx fifo empty (needed?)
+            while (((USS(EMSUART_UART) >> USTXC) & 0xff) != 0)
+                ;
+
+            // wait until bits are sent on wire
+            delayMicroseconds(EMSUART_TX_WAIT_BYTE - EMSUART_TX_LAG + EMSUART_TX_WAIT_GAP);
         }
-        emsuart_tx_brk(); // send <BRK>
-    } else {
-        /* smart Tx - take two - https://github.com/proddy/EMS-ESP/issues/103 by @susisstrolch
-        * changed logic...
+        emsuart_tx_brk();                        // send <BRK>
+    } else if (EMS_Sys_Status.emsTxDelay == 2) { // smart Tx - take two - https://github.com/proddy/EMS-ESP/issues/103 by @susisstrolch
+
+        /*
         * we emit the whole telegram, with Rx interrupt disabled, collecting busmaster response in FIFO.
         * after sending the last char we poll the Rx status until either
         * - size(Rx FIFO) == size(Tx-Telegram)
@@ -227,8 +242,7 @@ void ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
         }
 
         // wait until we received sizeof(telegram) or RxBRK (== collision detect)
-        // while ((((USS(EMSUART_UART) >> USRXC) & 0xFF) < len) || !(USIS(EMSUART_UART) & (1 << UIBD)))
-        while ((((USS(EMSUART_UART) >> USRXC) & 0xFF) < len) || (U0IS & (1 << UIBD))) {
+        while ((((USS(EMSUART_UART) >> USRXC) & 0xFF) < len) || (USIS(EMSUART_UART) & (1 << UIBD))) {
             delayMicroseconds(11 * EMSUART_BIT_TIME); // burn CPU cycles...
         }
 
@@ -236,7 +250,7 @@ void ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
         // on Rx-BRK (bus collision), we simply enable Rx and leave
         // otherwise, we send the final Tx-BRK in loopback and enable Rx-INT.
         // worst case, we'll see an additional Rx-BRK...
-        if (!(U0IS & (1 << UIBD))) {
+        if (!(USIS(EMSUART_UART) & (1 << UIBD))) {
             // no bus collision - send terminating BRK signal
             emsuart_loopback(true);
             USC0(EMSUART_UART) |= (1 << UCBRK); // set <BRK>
@@ -260,6 +274,11 @@ void ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
  * Send the Poll (our own ID) to Tx as a single byte and end with a <BRK>
  */
 void ICACHE_FLASH_ATTR emsuart_tx_poll() {
-    static uint8_t buf[] = {EMS_ID_ME};
+    static uint8_t buf[1];
+    if (EMS_Sys_Status.emsReverse) {
+        buf[0] = {EMS_ID_ME | 0x80};
+    } else {
+        buf[0] = {EMS_ID_ME};
+    }
     emsuart_tx_buffer(buf, 1);
 }

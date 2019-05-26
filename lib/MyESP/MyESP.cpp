@@ -496,7 +496,7 @@ void MyESP::_consoleShowHelp() {
     } else {
         myDebug_P(PSTR("* Hostname: %s (%s)"), _getESPhostname().c_str(), WiFi.localIP().toString().c_str());
         myDebug_P(PSTR("* WiFi SSID: %s (signal %d%%)"), WiFi.SSID().c_str(), getWifiQuality());
-        myDebug_P(PSTR("* MQTT is %s"), mqttClient.connected() ? "connected" : "disconnected");
+        myDebug_P(PSTR("* MQTT %s"), mqttClient.connected() ? "connected" : "disconnected");
     }
 
     myDebug_P(PSTR("*"));
