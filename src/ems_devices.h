@@ -46,6 +46,8 @@
 #define EMS_TYPE_SM100Status 0x0264  // SM100Status
 #define EMS_TYPE_SM100Status2 0x026A // SM100Status2
 #define EMS_TYPE_SM100Energy 0x028E  // SM100Energy
+#define EMS_TYPE_HPMonitor1 0xE3     // HeatPump Monitor 1
+#define EMS_TYPE_HPMonitor2 0xE5     // HeatPump Monitor 2
 
 /*
  * Thermostats...

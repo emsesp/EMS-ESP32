@@ -50,7 +50,6 @@ void _process_UBAMonitorWWMessage(_EMS_RxTelegram * EMS_RxTelegram);
 void _process_UBAParameterWW(_EMS_RxTelegram * EMS_RxTelegram);
 void _process_UBATotalUptimeMessage(_EMS_RxTelegram * EMS_RxTelegram);
 void _process_UBAParametersMessage(_EMS_RxTelegram * EMS_RxTelegram);
-
 void _process_SetPoints(_EMS_RxTelegram * EMS_RxTelegram);
 
 // SM10
@@ -61,6 +60,10 @@ void _process_SM100Monitor(_EMS_RxTelegram * EMS_RxTelegram);
 void _process_SM100Status(_EMS_RxTelegram * EMS_RxTelegram);
 void _process_SM100Status2(_EMS_RxTelegram * EMS_RxTelegram);
 void _process_SM100Energy(_EMS_RxTelegram * EMS_RxTelegram);
+
+// HeatPump HP
+void _process_HPMonitor1(_EMS_RxTelegram * EMS_RxTelegram);
+void _process_HPMonitor2(_EMS_RxTelegram * EMS_RxTelegram);
 
 // Common for most thermostats
 void _process_RCTime(_EMS_RxTelegram * EMS_RxTelegram);
@@ -120,6 +123,8 @@ const _EMS_Type EMS_Types[] = {
     {EMS_MODEL_OTHER, EMS_TYPE_SM100Status, "SM100Status", _process_SM100Status},
     {EMS_MODEL_OTHER, EMS_TYPE_SM100Status2, "SM100Status2", _process_SM100Status2},
     {EMS_MODEL_OTHER, EMS_TYPE_SM100Energy, "SM100Energy", _process_SM100Energy},
+    {EMS_MODEL_OTHER, EMS_TYPE_HPMonitor1, "HeatPumpMonitor1", _process_HPMonitor1},
+    {EMS_MODEL_OTHER, EMS_TYPE_HPMonitor2, "HeatPumpMonitor2", _process_HPMonitor2},
 
     // RC10
     {EMS_MODEL_RC10, EMS_TYPE_RCTime, "RCTime", _process_RCTime},
@@ -299,6 +304,8 @@ void ems_init() {
     EMS_Other.SMEnergyLastHour = EMS_VALUE_SHORT_NOTSET;
     EMS_Other.SMEnergyToday    = EMS_VALUE_SHORT_NOTSET;
     EMS_Other.SMEnergyTotal    = EMS_VALUE_SHORT_NOTSET;
+    EMS_Other.HPModulation     = EMS_VALUE_INT_NOTSET;
+    EMS_Other.HPSpeed          = EMS_VALUE_INT_NOTSET;
 
     // calculated values
     EMS_Boiler.tapwaterActive = EMS_VALUE_INT_NOTSET; // Hot tap water is on/off
@@ -315,6 +322,7 @@ void ems_init() {
 
     // set other types
     EMS_Other.SM = false;
+    EMS_Other.HP = false;
 
     // default logging is none
     ems_setLogging(EMS_SYS_LOGGING_DEFAULT);
@@ -695,7 +703,6 @@ void _ems_readTelegram(uint8_t * telegram, uint8_t length) {
         // check first for a Poll for us
         // the poll has the MSB set - seems to work on both EMS and Junkers
         if (value == (EMS_ID_ME | 0x80)) {
-            
             EMS_Sys_Status.emsTxCapable     = true;
             uint32_t timenow_microsecs      = micros();
             EMS_Sys_Status.emsPollFrequency = (timenow_microsecs - _last_emsPollFrequency);
@@ -1427,15 +1434,34 @@ void _process_SM100Status2(_EMS_RxTelegram * EMS_RxTelegram) {
 
 /*
  * SM100Energy - type 0x028E EMS+ for energy readings
+ * e.g. 30 00 FF 00 02 8E 00 00 00 00 00 00 06 C5 00 00 76 35
  */
 void _process_SM100Energy(_EMS_RxTelegram * EMS_RxTelegram) {
-    // e.g. 30 00 FF 00 02 8E 00 00 00 00 00 00 06 C5 00 00 76 35
-
     EMS_Other.SMEnergyLastHour = _toShort(2);  // last hour / 10 in Wh
     EMS_Other.SMEnergyToday    = _toShort(6);  // todays in Wh
     EMS_Other.SMEnergyTotal    = _toShort(10); // total / 10 in kWh
 
     EMS_Other.SM                = true;
+    EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
+}
+
+/*
+ * Type 0xE3 - HeatPump Monitor 1
+ */
+void _process_HPMonitor1(_EMS_RxTelegram * EMS_RxTelegram) {
+    EMS_Other.HPModulation = _toByte(14); // modulation %
+
+    EMS_Other.HP                = true;
+    EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
+}
+
+/*
+ * Type 0xE5 - HeatPump Monitor 2
+ */
+void _process_HPMonitor2(_EMS_RxTelegram * EMS_RxTelegram) {
+    EMS_Other.HPSpeed = _toByte(25); // speed %
+
+    EMS_Other.HP                = true;
     EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
 }
 
@@ -1629,6 +1655,12 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
         if (Other_Types[i].device_id == EMS_ID_SM) {
             EMS_Other.SM = true; // we have detected a SM10
             myDebug_P(PSTR("SM10 Solar Module support enabled."));
+        }
+
+        // see if this is a HeatPump
+        if (Other_Types[i].device_id == EMS_ID_HP) {
+            EMS_Other.HP = true; // we have detected a HP
+            myDebug_P(PSTR("HeatPump support enabled."));
         }
 
         // fetch other values

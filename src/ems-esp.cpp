@@ -110,6 +110,11 @@ command_t project_cmds[] = {
 
     {false, "info", "show data captured on the EMS bus"},
     {false, "log <n | b | t | r | v>", "set logging mode to none, basic, thermostat only, raw or verbose"},
+    
+#ifdef TESTS
+    {false, "test <n>", "insert a test telegram on to the EMS bus"},
+#endif
+
     {false, "publish", "publish all values to MQTT"},
     {false, "refresh", "fetch values from the EMS devices"},
     {false, "devices", "list all supported and detected EMS devices and types IDs"},
@@ -449,13 +454,21 @@ void showInfo() {
     if (EMS_Other.SM) {
         myDebug_P(PSTR("")); // newline
         myDebug_P(PSTR("%sSolar Module stats:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
-        _renderShortValue("  Collector temperature", "C", EMS_Other.SMcollectorTemp);
-        _renderShortValue("  Bottom temperature", "C", EMS_Other.SMbottomTemp);
-        _renderIntValue("  Pump modulation", "%", EMS_Other.SMpumpModulation);
-        _renderBoolValue("  Pump active", EMS_Other.SMpump);
-        _renderShortValue("  Energy Last Hour", "Wh", EMS_Other.SMEnergyLastHour, 1); // *10
-        _renderShortValue("  Energy Today", "Wh", EMS_Other.SMEnergyToday, 0);
-        _renderShortValue("  Energy Total", "kWH", EMS_Other.SMEnergyTotal, 1); // *10
+        _renderShortValue("Collector temperature", "C", EMS_Other.SMcollectorTemp);
+        _renderShortValue("Bottom temperature", "C", EMS_Other.SMbottomTemp);
+        _renderIntValue("Pump modulation", "%", EMS_Other.SMpumpModulation);
+        _renderBoolValue("Pump active", EMS_Other.SMpump);
+        _renderShortValue("Energy Last Hour", "Wh", EMS_Other.SMEnergyLastHour, 1); // *10
+        _renderShortValue("Energy Today", "Wh", EMS_Other.SMEnergyToday, 0);
+        _renderShortValue("Energy Total", "kWH", EMS_Other.SMEnergyTotal, 1); // *10
+    }
+
+    // For HeatPumps
+    if (EMS_Other.HP) {
+        myDebug_P(PSTR("")); // newline
+        myDebug_P(PSTR("%sHeat Pump stats:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
+        _renderIntValue("Pump modulation", "%", EMS_Other.HPModulation);
+        _renderIntValue("Pump speed", "%", EMS_Other.HPSpeed);
     }
 
     // Thermostat stats
@@ -567,6 +580,7 @@ void publishSensorValues() {
 // CRC check is done to see if there are changes in the values since the last send to avoid too much wifi traffic
 // a check is done against the previous values and if there are changes only then they are published. Unless force=true
 void publishValues(bool force) {
+
     // don't send if MQTT is connected
     if (!myESP.isMQTTConnected()) {
         return;
@@ -751,6 +765,7 @@ void publishValues(bool force) {
     }
 
     // handle the other values separately
+
     // For SM10 and SM100 Solar Modules
     if (EMS_Other.SM) {
         // build new json object
@@ -795,6 +810,27 @@ void publishValues(bool force) {
             // send values via MQTT
             myESP.mqttPublish(TOPIC_SM_DATA, data);
         }
+    }
+
+    // handle HeatPump
+    if (EMS_Other.HP) {
+        // build new json object
+        doc.clear();
+        JsonObject rootSM = doc.to<JsonObject>();
+
+        if (EMS_Other.HPModulation != EMS_VALUE_INT_NOTSET)
+            rootSM[HP_PUMPMODULATION] = EMS_Other.HPModulation;
+
+        if (EMS_Other.HPSpeed != EMS_VALUE_INT_NOTSET)
+            rootSM[HP_PUMPSPEED] = EMS_Other.HPSpeed;
+
+        data[0] = '\0'; // reset data for next package
+        serializeJson(doc, data, sizeof(data));
+
+        myDebugLog("Publishing HeatPump data via MQTT");
+
+        // send values via MQTT
+        myESP.mqttPublish(TOPIC_HP_DATA, data);
     }
 }
 
@@ -977,7 +1013,7 @@ void runUnitTest(uint8_t test_num) {
     publishValuesTimer.detach();
     systemCheckTimer.detach();
     regularUpdatesTimer.detach();
-    EMSESP_Status.listen_mode = true; // temporary go into listen mode to disable Tx
+    // EMSESP_Status.listen_mode = true; // temporary go into listen mode to disable Tx
     ems_testTelegram(test_num);
 }
 
@@ -1092,7 +1128,7 @@ bool SettingsCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, c
                 EMSESP_Status.listen_mode = false;
                 ok                        = true;
                 ems_setTxDisabled(false);
-                myDebug_P(PSTR("* out of listen mode. Tx is enabled."));
+                myDebug_P(PSTR("* out of listen mode. Tx is now enabled."));
             } else {
                 myDebug_P(PSTR("Error. Usage: set listen_mode <on | off>"));
             }
@@ -1451,7 +1487,6 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
             if ((hc >= 1) && (hc <= 2)) {
                 EMSESP_Status.heating_circuit = hc;
                 ems_setThermostatHC(hc);
-                // TODO: save setting to SPIFFS??
             }
         }
 

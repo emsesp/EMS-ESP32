@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- HeatPump (e.g. Nefit Enviline)
 - MM50 Mixer
 - tx_mode takes a value from 0 to 3 for the different Tx logic
   

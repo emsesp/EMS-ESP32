@@ -18,6 +18,7 @@
 #define EMS_ID_ME 0x0B        // Fixed - our device, hardcoded as the "Service Key"
 #define EMS_ID_DEFAULT_BOILER 0x08
 #define EMS_ID_SM 0x30      // Solar Module SM10 and SM100
+#define EMS_ID_HP 0x38      // HeatPump
 #define EMS_ID_GATEWAY 0x48 // KM200 Web Gateway
 
 #define EMS_MIN_TELEGRAM_LENGTH 6 // minimal length for a validation telegram, including CRC
@@ -242,7 +243,8 @@ typedef struct {           // UBAParameterWW
 
 // SM Solar Module - SM10Monitor/SM100Monitor
 typedef struct {
-    bool    SM;               // set true if there is a SM available
+    bool    SM;               // set true if there is a Solar Module available
+    bool    HP;               // set true if there is a Heat Pump available
     int16_t SMcollectorTemp;  // collector temp
     int16_t SMbottomTemp;     // bottom temp
     uint8_t SMpumpModulation; // modulation solar pump
@@ -250,6 +252,8 @@ typedef struct {
     int16_t SMEnergyLastHour;
     int16_t SMEnergyToday;
     int16_t SMEnergyTotal;
+    uint8_t HPModulation; // heatpump modulation in %
+    uint8_t HPSpeed;      // speed 0-100 %
 } _EMS_Other;
 
 // Thermostat data

@@ -46,7 +46,11 @@ static const char * TEST_DATA[] = {
     "10 48 F7 00 FF 01 A5 DF FF F7 7F 1F",                                                          // test 41 - gateway
     "30 00 FF 09 02 64 1E",                                                                         // test 42 - SM100
     "08 00 18 00 05 03 30 00 00 00 00 04 40 80 00 02 17 80 00 00 00 FF 30 48 00 CB 00 00 00",       // test 43 - sys pressure
-    "90 00 FF 00 00 6F 03 01 00 BE 00 BF"                                                           // test 44 - FR10
+    "90 00 FF 00 00 6F 03 01 00 BE 00 BF",                                                          // test 44 - FR10
+    "08 00 E3 00 01 00 01 00 00 00 00 00 00 00 00 00 DF 00 64 55",                                  // test 45 - heatpump Enviline
+    "08 00 E5 00 00 00 20 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 0A",    // test 46 - heatpump Enviline
+    "38 10 FF 00 03 2B 00 C7 07 C3 01"                                                              // test 47 - heatpump Enviline
+
 
 };
 
