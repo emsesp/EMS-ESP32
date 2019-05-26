@@ -1186,7 +1186,7 @@ void MyESP::_fs_eraseConfig() {
                    "automatically restart when finished."));
 
     if (SPIFFS.format()) {
-        delay(1000); // wait 1 seconds
+        delay(1000); // wait 1 second
         resetESP();
     }
 }

@@ -199,9 +199,9 @@ const uint8_t ems_crc_table[] = {0x00, 0x02, 0x04, 0x06, 0x08, 0x0A, 0x0C, 0x0E,
                                  0xA1, 0xA3, 0xA5, 0xA7, 0xD9, 0xDB, 0xDD, 0xDF, 0xD1, 0xD3, 0xD5, 0xD7, 0xC9, 0xCB, 0xCD, 0xCF, 0xC1, 0xC3, 0xC5, 0xC7,
                                  0xF9, 0xFB, 0xFD, 0xFF, 0xF1, 0xF3, 0xF5, 0xF7, 0xE9, 0xEB, 0xED, 0xEF, 0xE1, 0xE3, 0xE5, 0xE7};
 
-const uint8_t  TX_WRITE_TIMEOUT_COUNT = 2;     // 3 retries before timeout
-const uint32_t EMS_BUS_TIMEOUT        = 15000; // timeout in ms before recognizing the ems bus is offline (15 seconds)
-const uint32_t EMS_POLL_TIMEOUT       = 5000;  // timeout in ms before recognizing the ems bus is offline (5 seconds)
+const uint8_t  TX_WRITE_TIMEOUT_COUNT = 2;       // 3 retries before timeout
+const uint32_t EMS_BUS_TIMEOUT        = 15000;   // timeout in ms before recognizing the ems bus is offline (15 seconds)
+const uint32_t EMS_POLL_TIMEOUT       = 5000000; // timeout in microseconds before recognizing the ems bus is offline (5 seconds)
 
 // init stats and counters and buffers
 // uses -255 or 255 for values that haven't been set yet (EMS_VALUE_INT_NOTSET and EMS_VALUE_FLOAT_NOTSET)
@@ -220,7 +220,7 @@ void ems_init() {
     EMS_Sys_Status.emsTxDisabled    = false;
     EMS_Sys_Status.emsPollFrequency = 0;
     EMS_Sys_Status.txRetryCount     = 0;
-    EMS_Sys_Status.emsTxDelay       = 0;
+    EMS_Sys_Status.emsTxMode        = 0;
     EMS_Sys_Status.emsReverse       = false;
 
     // thermostat
@@ -330,19 +330,19 @@ bool ems_getPoll() {
     return EMS_Sys_Status.emsPollEnabled;
 }
 
-void ems_setTxDelay(uint8_t delay) {
-    EMS_Sys_Status.emsTxDelay = delay;
+void ems_setTxMode(uint8_t mode) {
+    EMS_Sys_Status.emsTxMode = mode;
 
-    // special case for Junkers. If tx_delay is 3 then set the reverse poll flag
+    // special case for Junkers. If tx_mode is 3 then set the reverse poll flag
     // https://github.com/proddy/EMS-ESP/issues/103#issuecomment-495945850
-    if (delay == 3) {
+    if (mode == 3) {
         EMS_Sys_Status.emsReverse = true;
         myDebug_P(PSTR("Setting for Tx Junkers logic and enabled the poll reverse flag"));
     }
 }
 
-uint8_t ems_getTxDelay() {
-    return EMS_Sys_Status.emsTxDelay;
+uint8_t ems_getTxMode() {
+    return EMS_Sys_Status.emsTxMode;
 }
 
 bool ems_getEmsRefreshed() {
@@ -690,15 +690,17 @@ void _ems_readTelegram(uint8_t * telegram, uint8_t length) {
     // it could well be a Poll request from the boiler for us, which will have a value of 0x8B (0x0B | 0x80)
     // or either a return code like 0x01 or 0x04 from the last Write command
     if (length == 1) {
-        uint32_t timenow_microsecs      = micros();
-        EMS_Sys_Status.emsPollFrequency = (timenow_microsecs - _last_emsPollFrequency);
-        _last_emsPollFrequency          = timenow_microsecs;
-
         uint8_t value = telegram[0]; // 1st byte of data package
 
         // check first for a Poll for us
         // the poll has the MSB set - seems to work on both EMS and Junkers
         if (value == (EMS_ID_ME | 0x80)) {
+            
+            EMS_Sys_Status.emsTxCapable     = true;
+            uint32_t timenow_microsecs      = micros();
+            EMS_Sys_Status.emsPollFrequency = (timenow_microsecs - _last_emsPollFrequency);
+            _last_emsPollFrequency          = timenow_microsecs;
+
             // do we have something to send thats waiting in the Tx queue?
             // if so send it if the Queue is not in a wait state
             if ((!EMS_TxQueue.isEmpty()) && (EMS_Sys_Status.emsTxStatus == EMS_TX_STATUS_IDLE)) {

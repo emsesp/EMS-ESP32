@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - MM50 Mixer
-- tx_delay takes a value from 0 to 3 for the different Tx logic
+- tx_mode takes a value from 0 to 3 for the different Tx logic
   
   0 = original classic ems logic
 

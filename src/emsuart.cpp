@@ -175,9 +175,9 @@ void ICACHE_FLASH_ATTR emsuart_tx_brk() {
     // automatically be sent when the tx fifo is empty
     tmp = (1 << UCBRK);
     USC0(EMSUART_UART) |= (tmp); // set bit
-    if (EMS_Sys_Status.emsTxDelay <= 2) {
+    if (EMS_Sys_Status.emsTxMode <= 2) {
         delayMicroseconds(EMSUART_TX_BRK_WAIT); // classic mode
-    } else if (EMS_Sys_Status.emsTxDelay == 3) {
+    } else if (EMS_Sys_Status.emsTxMode == 3) {
         delayMicroseconds(EMSUART_TX_WAIT_BRK - EMSUART_TX_LAG); // 1144 (11 Bits)
     }
     USC0(EMSUART_UART) &= ~(tmp); // clear bit
@@ -197,18 +197,18 @@ static inline void ICACHE_FLASH_ATTR emsuart_loopback(bool enable) {
  * Send to Tx, ending with a <BRK>
  */
 void ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
-    if (EMS_Sys_Status.emsTxDelay == 0) { // Classic logic
+    if (EMS_Sys_Status.emsTxMode == 0) { // Classic logic
         for (uint8_t i = 0; i < len; i++) {
             USF(EMSUART_UART) = buf[i];
         }
         emsuart_tx_brk();                        // send <BRK>
-    } else if (EMS_Sys_Status.emsTxDelay == 1) { // With extra tx delay for EMS+
+    } else if (EMS_Sys_Status.emsTxMode == 1) { // With extra tx delay for EMS+
         for (uint8_t i = 0; i < len; i++) {
             USF(EMSUART_UART) = buf[i];
             delayMicroseconds(EMSUART_TX_BRK_WAIT); // https://github.com/proddy/EMS-ESP/issues/23#
         }
         emsuart_tx_brk();                        // send <BRK>
-    } else if (EMS_Sys_Status.emsTxDelay == 3) { // Junkers logic by @philrich
+    } else if (EMS_Sys_Status.emsTxMode == 3) { // Junkers logic by @philrich
         for (uint8_t i = 0; i < len; i++) {
             USF(EMSUART_UART) = buf[i];
 
@@ -220,7 +220,7 @@ void ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
             delayMicroseconds(EMSUART_TX_WAIT_BYTE - EMSUART_TX_LAG + EMSUART_TX_WAIT_GAP);
         }
         emsuart_tx_brk();                        // send <BRK>
-    } else if (EMS_Sys_Status.emsTxDelay == 2) { // smart Tx - take two - https://github.com/proddy/EMS-ESP/issues/103 by @susisstrolch
+    } else if (EMS_Sys_Status.emsTxMode == 2) { // smart Tx - take two - https://github.com/proddy/EMS-ESP/issues/103 by @susisstrolch
 
         /*
         * we emit the whole telegram, with Rx interrupt disabled, collecting busmaster response in FIFO.

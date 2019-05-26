@@ -106,7 +106,7 @@ command_t project_cmds[] = {
     {true, "shower_alert <on | off>", "send a warning of cold water after shower time is exceeded"},
     {true, "publish_wait <seconds>", "set frequency for publishing to MQTT"},
     {true, "heating_circuit <1 | 2>", "set the thermostat HC to work with if using multiple heating circuits"},
-    {true, "tx_delay <n>", "0=classic ems logic, 1=@kwertie01 ems+ logic, 2=@susisstrolch logic, 3=@philrich logic for Junkers"},
+    {true, "tx_mode <n>", "0=classic ems logic, 1=@kwertie01 ems+ logic, 2=@susisstrolch logic, 3=@philrich logic for Junkers"},
 
     {false, "info", "show data captured on the EMS bus"},
     {false, "log <n | b | t | r | v>", "set logging mode to none, basic, thermostat only, raw or verbose"},
@@ -338,11 +338,13 @@ void showInfo() {
 
     if (ems_getBusConnected()) {
         myDebug_P(PSTR("  Bus is connected"));
-
-        myDebug_P(PSTR("  Rx: Poll=%d microseconds, # Rx telegrams read=%d, # CRC errors=%d"), ems_getPollFrequency(), EMS_Sys_Status.emsRxPgks, EMS_Sys_Status.emxCrcErr);
+        myDebug_P(PSTR("  Rx: # successful read requests=%d, # CRC errors=%d"), EMS_Sys_Status.emsRxPgks, EMS_Sys_Status.emxCrcErr);
 
         if (ems_getTxCapable()) {
-            myDebug_P(PSTR("  Tx: available, Tx delay is %d, # successful write commands=%d"), ems_getTxDelay(), EMS_Sys_Status.emsTxPkgs);
+            char valuestr[8] = {0}; // for formatting floats
+            myDebug_P(PSTR("  Tx: Last poll=%s seconds ago, Tx mode=%d, # successful write requests=%d"),
+                      _float_to_char(valuestr, (ems_getPollFrequency() / (float)1000000), 3),
+                      EMS_Sys_Status.emsTxPkgs);
         } else {
             myDebug_P(PSTR("  Tx: no signal"));
         }
@@ -1020,8 +1022,8 @@ bool FSCallback(MYESP_FSACTION action, const JsonObject json) {
         // shower_alert
         EMSESP_Status.shower_alert = json["shower_alert"];
 
-        // tx delay
-        ems_setTxDelay(json["tx_delay"]);
+        // tx mode
+        ems_setTxMode(json["tx_mode"]);
 
         // publish_wait
         if (!(EMSESP_Status.publish_wait = json["publish_wait"])) {
@@ -1049,7 +1051,7 @@ bool FSCallback(MYESP_FSACTION action, const JsonObject json) {
         json["shower_alert"]    = EMSESP_Status.shower_alert;
         json["publish_wait"]    = EMSESP_Status.publish_wait;
         json["heating_circuit"] = EMSESP_Status.heating_circuit;
-        json["tx_delay"]        = ems_getTxDelay();
+        json["tx_mode"]         = ems_getTxMode();
 
         return true;
     }
@@ -1180,9 +1182,9 @@ bool SettingsCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, c
             }
         }
 
-        // tx delay
-        if ((strcmp(setting, "tx_delay") == 0) && (wc == 2)) {
-            ems_setTxDelay(atoi(value));
+        // tx delay/ tx mode
+        if (((strcmp(setting, "tx_mode") == 0) || (strcmp(setting, "tx_delay") == 0)) && (wc == 2)) {
+            ems_setTxMode(atoi(value));
             ok = true;
         }
     }
@@ -1211,7 +1213,7 @@ bool SettingsCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, c
         myDebug_P(PSTR("  shower_timer=%s"), EMSESP_Status.shower_timer ? "on" : "off");
         myDebug_P(PSTR("  shower_alert=%s"), EMSESP_Status.shower_alert ? "on" : "off");
         myDebug_P(PSTR("  publish_wait=%d"), EMSESP_Status.publish_wait);
-        myDebug_P(PSTR("  tx_delay=%d"), ems_getTxDelay());
+        myDebug_P(PSTR("  tx_mode=%d"), ems_getTxMode());
     }
 
     return ok;
