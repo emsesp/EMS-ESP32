@@ -345,7 +345,7 @@ void ems_setTxMode(uint8_t mode) {
     // https://github.com/proddy/EMS-ESP/issues/103#issuecomment-495945850
     if (mode == 3) {
         EMS_Sys_Status.emsReverse = true;
-        myDebug_P(PSTR("Setting for Tx Junkers logic and enabled the poll reverse flag"));
+        myDebug_P(PSTR("Forcing emsReverse"));
     }
 }
 
@@ -1553,27 +1553,28 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
 
     if (typeFound) {
         // its a boiler
-        myDebug_P(PSTR("Boiler found. Model %s (DeviceID:0x%02X ProductID:%d Version:%s)"),
-                  Boiler_Types[i].model_string,
-                  Boiler_Types[i].device_id,
-                  product_id,
-                  version);
+        myDebug_P(PSTR("Boiler found. Model %s (DeviceID:0x%02X ProductID:%d Version:%s)"), Boiler_Types[i].model_string, EMS_ID_BOILER, product_id, version);
 
         // add to list
-        _addDevice(product_id, Boiler_Types[i].device_id, version, Boiler_Types[i].model_string);
+        _addDevice(product_id, EMS_ID_BOILER, version, Boiler_Types[i].model_string);
 
         // if its a boiler set it, unless it already has been set by checking for a productID
         // it will take the first one found in the list
-        if (((EMS_Boiler.device_id == EMS_ID_NONE) || (EMS_Boiler.device_id == Boiler_Types[i].device_id)) && EMS_Boiler.product_id == EMS_ID_NONE) {
+        if ((EMS_Boiler.device_id == EMS_ID_NONE) || ((EMS_Boiler.device_id == EMS_ID_BOILER) && EMS_Boiler.product_id == EMS_ID_NONE)) {
             myDebug_P(PSTR("* Setting Boiler to model %s (DeviceID:0x%02X ProductID:%d Version:%s)"),
                       Boiler_Types[i].model_string,
-                      Boiler_Types[i].device_id,
+                      EMS_ID_BOILER,
                       product_id,
                       version);
 
-            EMS_Boiler.device_id  = Boiler_Types[i].device_id;
+            EMS_Boiler.device_id  = EMS_ID_BOILER;
             EMS_Boiler.product_id = Boiler_Types[i].product_id;
             strlcpy(EMS_Boiler.version, version, sizeof(EMS_Boiler.version));
+
+            // check to see if its a Junkers Heatronic3, which has a different poll'ing logic
+            if (EMS_Boiler.product_id == EMS_PRODUCTID_HEATRONICS) {
+                EMS_Sys_Status.emsReverse = true;
+            }
 
             myESP.fs_saveConfig(); // save config to SPIFFS
 
@@ -1603,7 +1604,7 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
         }
 
         // add to list
-        _addDevice(product_id, Boiler_Types[i].device_id, version, Thermostat_Types[i].model_string);
+        _addDevice(product_id, Thermostat_Types[i].device_id, version, Thermostat_Types[i].model_string);
 
         // if we don't have a thermostat set, use this one
         if (((EMS_Thermostat.device_id == EMS_ID_NONE) || (EMS_Thermostat.model_id == EMS_MODEL_NONE)
@@ -1895,10 +1896,8 @@ void ems_scanDevices() {
 
     std::list<uint8_t> Device_Ids; // create a new list
 
-    // copy over boilers
-    for (_Boiler_Type bt : Boiler_Types) {
-        Device_Ids.push_back(bt.device_id);
-    }
+    // add boiler device_id which is always 0x08
+    Device_Ids.push_back(EMS_ID_BOILER);
 
     // copy over thermostats
     for (_Thermostat_Type tt : Thermostat_Types) {
@@ -1933,7 +1932,7 @@ void ems_printAllDevices() {
                   COLOR_BOLD_ON,
                   Boiler_Types[i].model_string,
                   COLOR_BOLD_OFF,
-                  Boiler_Types[i].device_id,
+                  EMS_ID_BOILER,
                   Boiler_Types[i].product_id);
     }
 

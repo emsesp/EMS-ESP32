@@ -146,18 +146,19 @@ typedef enum {
 } _EMS_MODEL_ID;
 
 // EMS types for known Buderus/Bosch devices. This list will be extended when new devices are recognized.
-// format is MODEL_ID, PRODUCT ID, TYPE_ID, DESCRIPTION
+// The device_id is always 0x08
+// format is MODEL_ID, PRODUCT ID, DESCRIPTION
 const _Boiler_Type Boiler_Types[] = {
 
-    {EMS_MODEL_UBA, 72, 0x08, "MC10 Module"},
-    {EMS_MODEL_UBA, 123, 0x08, "Buderus GB172/Nefit Trendline"},
-    {EMS_MODEL_UBA, 115, 0x08, "Nefit Topline Compact/Buderus GB162"},
-    {EMS_MODEL_UBA, 203, 0x08, "Buderus Logamax U122/Junkers Cerapur"},
-    {EMS_MODEL_UBA, 208, 0x08, "Buderus Logamax plus/GB192"},
-    {EMS_MODEL_UBA, 64, 0x08, "Sieger BK15 Boiler/Nefit Smartline"},
-    {EMS_MODEL_UBA, 95, 0x08, "Bosch Condens 2500/Junkers Heatronics3"},
-    {EMS_MODEL_UBA, 122, 0x08, "Nefit Proline"},
-    {EMS_MODEL_UBA, 172, 0x08, "Nefit Enviline"}
+    {EMS_MODEL_UBA, 72, "MC10 Module"},
+    {EMS_MODEL_UBA, 123, "Buderus GB172/Nefit Trendline"},
+    {EMS_MODEL_UBA, 115, "Nefit Topline Compact/Buderus GB162"},
+    {EMS_MODEL_UBA, 203, "Buderus Logamax U122/Junkers Cerapur"},
+    {EMS_MODEL_UBA, 208, "Buderus Logamax plus/GB192"},
+    {EMS_MODEL_UBA, 64, "Sieger BK15 Boiler/Nefit Smartline"},
+    {EMS_MODEL_UBA, EMS_PRODUCTID_HEATRONICS, "Bosch Condens 2500/Junkers Heatronics3"}, // Junkers
+    {EMS_MODEL_UBA, 122, "Nefit Proline"},
+    {EMS_MODEL_UBA, 172, "Nefit Enviline"}
 
 };
 

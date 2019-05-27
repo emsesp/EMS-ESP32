@@ -12,14 +12,16 @@
 
 #include <Arduino.h>
 
-// EMS IDs
-#define EMS_ID_NONE 0x00      // Fixed - used as a dest in broadcast messages and empty device IDs
-#define EMS_PLUS_ID_NONE 0x01 // Fixed - used as a dest in broadcast messages and empty device IDs
-#define EMS_ID_ME 0x0B        // Fixed - our device, hardcoded as the "Service Key"
-#define EMS_ID_DEFAULT_BOILER 0x08
+#define EMS_ID_NONE 0x00 // used as a dest in broadcast messages and empty device IDs
+
+// Fixed EMS IDs
+#define EMS_ID_ME 0x0B      // our device, hardcoded as the "Service Key"
+#define EMS_ID_BOILER 0x08  // all UBA Boilers have 0x08
 #define EMS_ID_SM 0x30      // Solar Module SM10 and SM100
 #define EMS_ID_HP 0x38      // HeatPump
 #define EMS_ID_GATEWAY 0x48 // KM200 Web Gateway
+
+#define EMS_PRODUCTID_HEATRONICS 95 // ProductID for a Junkers Heatronic3 device
 
 #define EMS_MIN_TELEGRAM_LENGTH 6 // minimal length for a validation telegram, including CRC
 
@@ -150,7 +152,6 @@ const _EMS_TxTelegram EMS_TX_TELEGRAM_NEW = {
 typedef struct {
     uint8_t model_id;
     uint8_t product_id;
-    uint8_t device_id;
     char    model_string[50];
 } _Boiler_Type;
 
