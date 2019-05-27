@@ -16,6 +16,7 @@
 _EMSRxBuf * pEMSRxBuf;
 _EMSRxBuf * paEMSRxBuf[EMS_MAXBUFFERS];
 uint8_t     emsRxBufIdx = 0;
+uint8_t     phantomBrk = 0; // tells Rx about upcoming phantom break from Tx
 
 os_event_t recvTaskQueue[EMSUART_recvTaskQueueLen]; // our Rx queue
 
@@ -48,6 +49,12 @@ static void emsuart_rx_intr_handler(void * para) {
         ETS_UART_INTR_DISABLE(); // disable all interrupts and clear them
 
         U0IC = (1 << UIBD); // INT clear the BREAK detect interrupt
+
+        // we've send a BRK with loopback enabled, so we must compensate the phantom break
+        if (phantomBrk) {
+            length--;       // compensate buffer length
+            phantomBrk = 0; // clear flag
+        }
 
         // copy data into transfer buffer
         pEMSRxBuf->writePtr = length;
@@ -251,6 +258,8 @@ void ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
         // otherwise, we send the final Tx-BRK in loopback and enable Rx-INT.
         // worst case, we'll see an additional Rx-BRK...
         if (!(USIS(EMSUART_UART) & (1 << UIBD))) {
+            phantomBrk = 1;     // tell Rx to expect a phantom BRK
+
             // no bus collision - send terminating BRK signal
             emsuart_loopback(true);
             USC0(EMSUART_UART) |= (1 << UCBRK); // set <BRK>
