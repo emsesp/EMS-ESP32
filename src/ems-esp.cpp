@@ -348,7 +348,7 @@ void showInfo() {
         if (ems_getTxCapable()) {
             char valuestr[8] = {0}; // for formatting floats
             myDebug_P(PSTR("  Tx: Last poll=%s seconds ago, Tx mode=%d, # successful write requests=%d"),
-                      _float_to_char(valuestr, (ems_getPollFrequency() / (float)1000000), 3),
+                      _float_to_char(valuestr, (ems_getPollFrequency() / (float)1000000), 3), ems_getTxMode(),
                       EMS_Sys_Status.emsTxPkgs);
         } else {
             myDebug_P(PSTR("  Tx: no signal"));

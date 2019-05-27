@@ -16,7 +16,7 @@
 _EMSRxBuf * pEMSRxBuf;
 _EMSRxBuf * paEMSRxBuf[EMS_MAXBUFFERS];
 uint8_t     emsRxBufIdx = 0;
-uint8_t     phantomBrk = 0; // tells Rx about upcoming phantom break from Tx
+uint8_t     phantomBrk  = 0; // tells Rx about upcoming phantom break from Tx
 
 os_event_t recvTaskQueue[EMSUART_recvTaskQueueLen]; // our Rx queue
 
@@ -208,13 +208,13 @@ void ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
         for (uint8_t i = 0; i < len; i++) {
             USF(EMSUART_UART) = buf[i];
         }
-        emsuart_tx_brk();                        // send <BRK>
+        emsuart_tx_brk();                       // send <BRK>
     } else if (EMS_Sys_Status.emsTxMode == 1) { // With extra tx delay for EMS+
         for (uint8_t i = 0; i < len; i++) {
             USF(EMSUART_UART) = buf[i];
             delayMicroseconds(EMSUART_TX_BRK_WAIT); // https://github.com/proddy/EMS-ESP/issues/23#
         }
-        emsuart_tx_brk();                        // send <BRK>
+        emsuart_tx_brk();                       // send <BRK>
     } else if (EMS_Sys_Status.emsTxMode == 3) { // Junkers logic by @philrich
         for (uint8_t i = 0; i < len; i++) {
             USF(EMSUART_UART) = buf[i];
@@ -226,7 +226,7 @@ void ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
             // wait until bits are sent on wire
             delayMicroseconds(EMSUART_TX_WAIT_BYTE - EMSUART_TX_LAG + EMSUART_TX_WAIT_GAP);
         }
-        emsuart_tx_brk();                        // send <BRK>
+        emsuart_tx_brk();                       // send <BRK>
     } else if (EMS_Sys_Status.emsTxMode == 2) { // smart Tx - take two - https://github.com/proddy/EMS-ESP/issues/103 by @susisstrolch
 
         /*
@@ -249,7 +249,6 @@ void ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
             // wait for echo from busmaster
             while ((((USS(EMSUART_UART) >> USRXC) & 0xFF) < i || (USIS(EMSUART_UART) & (1 << UIBD)))) {
                 delayMicroseconds(EMSUART_BIT_TIME); // burn CPU cycles...
-
             }
         }
 
@@ -258,7 +257,7 @@ void ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
         // otherwise, we send the final Tx-BRK in loopback and enable Rx-INT.
         // worst case, we'll see an additional Rx-BRK...
         if (!(USIS(EMSUART_UART) & (1 << UIBD))) {
-            phantomBrk = 1;     // tell Rx to expect a phantom BRK
+            phantomBrk = 1; // tell Rx to expect a phantom BRK
 
             // no bus collision - send terminating BRK signal
             emsuart_loopback(true);
