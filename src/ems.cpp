@@ -828,6 +828,8 @@ void _printMessage(_EMS_RxTelegram * EMS_RxTelegram) {
         strlcpy(output_str, "Thermostat", sizeof(output_str));
     } else if (src == EMS_ID_SM) {
         strlcpy(output_str, "SM", sizeof(output_str));
+    } else if (src == EMS_ID_HP) {
+        strlcpy(output_str, "HP", sizeof(output_str));
     } else if (src == EMS_ID_GATEWAY) {
         strlcpy(output_str, "Gateway", sizeof(output_str));
     } else {
@@ -849,6 +851,9 @@ void _printMessage(_EMS_RxTelegram * EMS_RxTelegram) {
         strlcpy(color_s, COLOR_MAGENTA, sizeof(color_s));
     } else if (dest == EMS_ID_SM) {
         strlcat(output_str, "SM", sizeof(output_str));
+        strlcpy(color_s, COLOR_MAGENTA, sizeof(color_s));
+    } else if (dest == EMS_ID_HP) {
+        strlcat(output_str, "HP", sizeof(output_str));
         strlcpy(color_s, COLOR_MAGENTA, sizeof(color_s));
     } else if (dest == EMS_ID_GATEWAY) {
         strlcat(output_str, "Gateway", sizeof(output_str));
@@ -914,13 +919,6 @@ void _ems_processTelegram(_EMS_RxTelegram * EMS_RxTelegram) {
                 typeFound = true;
                 break;
             }
-
-            /*
-            if ((EMS_Types[i].model_id == EMS_MODEL_ALL) || ((src == EMS_Boiler.device_id) || (src == EMS_Thermostat.device_id) || (src == EMS_ID_SM))) {
-                typeFound = true;
-                break;
-            }
-            */
         }
         i++;
     }
@@ -1687,6 +1685,9 @@ void ems_discoverModels() {
     // solar module
     ems_doReadCommand(EMS_TYPE_Version, EMS_ID_SM); // check if there is Solar Module available
 
+    // heatpump module
+    ems_doReadCommand(EMS_TYPE_Version, EMS_ID_HP); // check if there is HeatPump Module available
+
     // thermostat
     // if it hasn't been set, auto discover it
     if (EMS_Thermostat.device_id == EMS_ID_NONE) {
@@ -1799,7 +1800,7 @@ void ems_getBoilerValues() {
  */
 void ems_getOtherValues() {
     if (EMS_Other.SM) {
-        ems_doReadCommand(EMS_TYPE_SM10Monitor, EMS_ID_SM); // fetch all from SM10Monitor, e.g. 0B B0 97 00 16
+        ems_doReadCommand(EMS_TYPE_SM10Monitor, EMS_ID_SM); // fetch all from SM10Monitor
     }
 }
 

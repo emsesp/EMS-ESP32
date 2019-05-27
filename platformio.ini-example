@@ -1,19 +1,23 @@
+;
+; PlatformIO Project Configuration File for EMS-ESP
+; Uses PlatformIO 4.0 (pio upgrade --dev)
+;
+
 [platformio]
-; add here your board, e.g. nodemcuv2, d1_mini, d1_mini_pro
-env_default = d1_mini
+env_default = release
+;env_default = debug
 
 [common]
-flash_mode = dout
-
-build_flags = -g -w
-
-; for debug use these...
-; build_flags = -g -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-parameter -Wno-unused-variable -DCRASH -DTESTS
-
-wifi_settings =
 ; hard code if you prefer. Recommendation is to set from within the app when in Serial or AP mode
 ; wifi_settings = '-DWIFI_SSID="XXXX"' '-DWIFI_PASSWORD="XXXX"'
+wifi_settings =
 
+[env]
+board = d1_mini
+; board = nodemcuv2
+; board = d1_mini_pro
+framework = arduino
+platform = espressif8266
 lib_deps =
   CRC32
   CircularBuffer
@@ -22,17 +26,21 @@ lib_deps =
   ArduinoJson
   OneWire
   EEPROM_rotate
-
-[env:d1_mini]
-board = d1_mini
-platform = espressif8266
-framework = arduino
-lib_deps = ${common.lib_deps}
-build_flags = ${common.build_flags} ${common.wifi_settings}
-board_build.flash_mode = ${common.flash_mode}
 upload_speed = 921600
 monitor_speed = 115200
-; for OTA comment out these sections
-;upload_protocol = espota
-;upload_port = ems-esp.local
-;upload_port = <or add here the IP of the ESP8266>
+upload_protocol = espota
+upload_port = ems-esp.local
+
+[env:debug]
+build_flags = -g -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-parameter -Wno-unused-variable -DCRASH -DTESTS ${common.wifi_settings}
+
+[env:clean]
+extra_scripts = pre:scripts/clean_fw.py
+
+[env:release]
+build_flags = -g -w
+extra_scripts = pre:scripts/rename_fw.py
+
+[env:checkcode]
+build_flags = -g -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-parameter -Wno-unused-variable -DCRASH -DTESTS
+extra_scripts = scripts/checkcode.py
