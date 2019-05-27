@@ -178,6 +178,7 @@ const _Other_Type Other_Types[] = {
     {EMS_MODEL_OTHER, 73, EMS_ID_SM, "SM10 Solar Module"},
     {EMS_MODEL_OTHER, 163, EMS_ID_SM, "SM100 Solar Module"},
     {EMS_MODEL_OTHER, 171, 0x02, "EMS-OT OpenTherm converter"},
+    {EMS_MODEL_OTHER, 252, EMS_ID_HP, "HeatPump Module"}, // warning, fake product id!
     {EMS_MODEL_OTHER, 189, EMS_ID_GATEWAY, "Web Gateway KM200"}
 
 };
