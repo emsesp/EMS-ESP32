@@ -237,13 +237,13 @@ void ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
         emsuart_flush_fifos();
 
         // throw out the telegram...
-        for (uint8_t i = 0; i < len; i++) {
-            USF(EMSUART_UART) = buf[i]; // send each Tx byte
-        }
+        for (uint8_t i = 0; i < len;) {
+            USF(EMSUART_UART) = buf[i++]; // send each Tx byte
+            // wait for echo from busmaster
+            while ((((USS(EMSUART_UART) >> USRXC) & 0xFF) < i || (USIS(EMSUART_UART) & (1 << UIBD)))) {
+                delayMicroseconds(EMSUART_BIT_TIME); // burn CPU cycles...
 
-        // wait until we received sizeof(telegram) or RxBRK (== collision detect)
-        while ((((USS(EMSUART_UART) >> USRXC) & 0xFF) < len) || (USIS(EMSUART_UART) & (1 << UIBD))) {
-            delayMicroseconds(11 * EMSUART_BIT_TIME); // burn CPU cycles...
+            }
         }
 
         // we got the whole telegram in Rx buffer
@@ -257,7 +257,7 @@ void ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
 
             // wait until BRK detected...
             while (!(USIS(EMSUART_UART) & (1 << UIBD))) {
-                delayMicroseconds(EMSUART_BIT_TIME / 8); // ~13µs
+                delayMicroseconds(EMSUART_BIT_TIME);
             }
             USC0(EMSUART_UART) &= ~(1 << UCBRK); // clear <BRK>
 
@@ -265,7 +265,8 @@ void ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
             emsuart_loopback(false);          // disable loopback mode
         }
 
-        emsuart_flush_fifos();  // flush Rx buffer to be sure
+        // w/o flushing the Rx FIFO we will get a trailing \0 from our loopback BRK
+        // emsuart_flush_fifos();  // flush Rx buffer to be sure
         ETS_UART_INTR_ENABLE(); // receive anything from FIFO...
     }
 }
