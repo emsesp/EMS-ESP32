@@ -1025,7 +1025,7 @@ void _processType(_EMS_RxTelegram * EMS_RxTelegram) {
                 _removeTxQueue();
             } else {
                 if (EMS_Sys_Status.emsLogging >= EMS_SYS_LOGGING_BASIC) {
-                    myDebug_P(PSTR("...Retrying read. Attempt %d/%d..."), EMS_Sys_Status.txRetryCount, TX_WRITE_TIMEOUT_COUNT);
+                    myDebug_P(PSTR("Read failed. Retrying attempt %d/%d..."), EMS_Sys_Status.txRetryCount, TX_WRITE_TIMEOUT_COUNT);
                 }
             }
         }
@@ -1680,6 +1680,16 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
 }
 
 /*
+ * See if we have a Junkers Heatronic3 compatible device
+ * Do a read command for the version with the src having the MSB set
+ */
+void _ems_detectJunkers() {
+    char s[20] = {0};
+    snprintf(s, sizeof(s), "%02X %02X %02X 00 %02X", (EMS_ID_ME | 0x80), EMS_ID_BOILER, (EMS_TYPE_Version | 0x80), EMS_MAX_TELEGRAM_LENGTH);
+    ems_sendRawTelegram(s);
+}
+
+/*
  * Figure out the boiler and thermostat types
  */
 void ems_discoverModels() {
@@ -1688,10 +1698,7 @@ void ems_discoverModels() {
     // boiler...
     ems_doReadCommand(EMS_TYPE_Version, EMS_ID_BOILER);
 
-    // special hack for Junkers. Do a read command for the version with the src having the MSB set
-    char s[20] = {0};
-    snprintf(s, sizeof(s), "%02X %02X %02X 00 %02X", (EMS_ID_ME | 0x80), EMS_ID_BOILER, (EMS_TYPE_Version | 0x80), EMS_MAX_TELEGRAM_LENGTH);
-    ems_sendRawTelegram(s);
+    _ems_detectJunkers(); // special hack for Junkers.
 
     // solar module...
     ems_doReadCommand(EMS_TYPE_Version, EMS_ID_SM); // check if there is Solar Module available
@@ -1928,6 +1935,9 @@ void ems_scanDevices() {
     for (uint8_t device_id : Device_Ids) {
         ems_doReadCommand(EMS_TYPE_Version, device_id);
     }
+
+    // add a check for Junkers onto the queue
+    _ems_detectJunkers();
 }
 
 /**
@@ -2362,7 +2372,6 @@ void ems_setWarmTapWaterActivated(bool activated) {
     EMS_TxTelegram.dest   = EMS_Boiler.device_id;
     EMS_TxTelegram.type   = EMS_TYPE_UBAFunctionTest;
     EMS_TxTelegram.offset = 0;
-    EMS_TxTelegram.length = 22; // 17 bytes of data including header and CRC
 
     EMS_TxTelegram.type_validate      = EMS_TxTelegram.type;
     EMS_TxTelegram.comparisonOffset   = 0;                   // 1st byte
@@ -2378,13 +2387,19 @@ void ems_setWarmTapWaterActivated(bool activated) {
 
     // we use the special test mode 0x1D for this. Setting the first data to 5A puts the system into test mode and
     // a setting of 0x00 puts it back into normal operarting mode
-    // when in test mode we're able to mess around with the core 3-way valve settings
+    // when in test mode we're able to mess around with the 3-way valve settings
     if (!activated) {
         // on
         EMS_TxTelegram.data[4] = 0x5A; // test mode on
         EMS_TxTelegram.data[5] = 0x00; // burner output 0%
         EMS_TxTelegram.data[7] = 0x64; // boiler pump capacity 100%
         EMS_TxTelegram.data[8] = 0xFF; // 3-way valve hot water only
+        EMS_TxTelegram.length  = 22;   // 17 bytes of data including header and CRC. We send all zeros just to be sure.
+    } else {
+        // get out of test mode
+        // telegram: 0B 08 1D 00 00
+        EMS_TxTelegram.data[4] = 0x00; // test mode off
+        EMS_TxTelegram.length  = EMS_MIN_TELEGRAM_LENGTH;
     }
 
     EMS_TxQueue.push(EMS_TxTelegram); // add to queue
