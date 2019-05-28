@@ -1681,7 +1681,8 @@ void ems_discoverModels() {
     myDebug_P(PSTR("Starting auto discover of EMS devices..."));
 
     // boiler
-    ems_doReadCommand(EMS_TYPE_Version, EMS_Boiler.device_id); // get version details of boiler
+    ems_doReadCommand(EMS_TYPE_Version, EMS_ID_BOILER);
+    ems_doReadCommand(EMS_TYPE_Version, EMS_ID_BOILER | 0x80); // special for Junkers Heatronics3. Write commands need the src to have the MSB set
 
     // solar module
     ems_doReadCommand(EMS_TYPE_Version, EMS_ID_SM); // check if there is Solar Module available
