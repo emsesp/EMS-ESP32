@@ -345,7 +345,9 @@ void ems_setTxMode(uint8_t mode) {
     // https://github.com/proddy/EMS-ESP/issues/103#issuecomment-495945850
     if (mode == 3) {
         EMS_Sys_Status.emsReverse = true;
-        myDebug_P(PSTR("Forcing emsReverse"));
+        myDebug_P(PSTR("Forcing emsReverse for Junkers"));
+    } else {
+        EMS_Sys_Status.emsReverse = false;
     }
 }
 
@@ -566,10 +568,12 @@ void _ems_sendTelegram() {
         EMS_TxTelegram.data[EMS_TxTelegram.length - 1] = _crcCalculator(EMS_TxTelegram.data, EMS_TxTelegram.length); // add the CRC
         EMS_RxTelegram.length                          = EMS_TxTelegram.length;                                      // full length of telegram
         EMS_RxTelegram.telegram                        = EMS_TxTelegram.data;
-        EMS_RxTelegram.timestamp                       = millis();               // now
-        _debugPrintTelegram("Sending raw: ", &EMS_RxTelegram, COLOR_CYAN, true); // always show
-        emsuart_tx_buffer(EMS_TxTelegram.data, EMS_TxTelegram.length);           // send the telegram to the UART Tx
-        EMS_TxQueue.shift();                                                     // remove from queue
+        EMS_RxTelegram.timestamp                       = millis(); // now
+        if (EMS_Sys_Status.emsLogging != EMS_SYS_LOGGING_NONE) {
+            _debugPrintTelegram("Sending raw: ", &EMS_RxTelegram, COLOR_CYAN, true);
+        }
+        emsuart_tx_buffer(EMS_TxTelegram.data, EMS_TxTelegram.length); // send the telegram to the UART Tx
+        EMS_TxQueue.shift();                                           // remove from queue
         return;
     }
 
@@ -1003,7 +1007,8 @@ void _processType(_EMS_RxTelegram * EMS_RxTelegram) {
     // if WRITE, should not happen
     // if VALIDATE, check the contents
     if (EMS_TxTelegram.action == EMS_TX_TELEGRAM_READ) {
-        if ((EMS_RxTelegram->src == EMS_TxTelegram.dest) && (EMS_RxTelegram->type == EMS_TxTelegram.type)) {
+        // remove MSB from src/dest
+        if (((EMS_RxTelegram->src & 0x7F) == (EMS_TxTelegram.dest & 0x7F)) && (EMS_RxTelegram->type == EMS_TxTelegram.type)) {
             // all checks out, read was successful, remove tx from queue and continue to process telegram
             _removeTxQueue();
             EMS_Sys_Status.emsRxPgks++;                       // increment counter
@@ -1680,17 +1685,21 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
 void ems_discoverModels() {
     myDebug_P(PSTR("Starting auto discover of EMS devices..."));
 
-    // boiler
+    // boiler...
     ems_doReadCommand(EMS_TYPE_Version, EMS_ID_BOILER);
-    ems_doReadCommand(EMS_TYPE_Version, EMS_ID_BOILER | 0x80); // special for Junkers Heatronics3. Write commands need the src to have the MSB set
 
-    // solar module
+    // special hack for Junkers. Do a read command for the version with the src having the MSB set
+    char s[20] = {0};
+    snprintf(s, sizeof(s), "%02X %02X %02X 00 %02X", (EMS_ID_ME | 0x80), EMS_ID_BOILER, (EMS_TYPE_Version | 0x80), EMS_MAX_TELEGRAM_LENGTH);
+    ems_sendRawTelegram(s);
+
+    // solar module...
     ems_doReadCommand(EMS_TYPE_Version, EMS_ID_SM); // check if there is Solar Module available
 
-    // heatpump module
+    // heatpump module...
     ems_doReadCommand(EMS_TYPE_Version, EMS_ID_HP); // check if there is HeatPump Module available
 
-    // thermostat
+    // thermostat...
     // if it hasn't been set, auto discover it
     if (EMS_Thermostat.device_id == EMS_ID_NONE) {
         ems_scanDevices(); // auto-discover it
@@ -2023,7 +2032,7 @@ void ems_doReadCommand(uint16_t type, uint8_t dest, bool forceRefresh) {
         }
     }
     EMS_TxTelegram.action             = EMS_TX_TELEGRAM_READ;    // read command
-    EMS_TxTelegram.dest               = dest;                    // set 8th bit to indicate a read
+    EMS_TxTelegram.dest               = dest;                    // 8th bit will be set to indicate a read
     EMS_TxTelegram.offset             = 0;                       // 0 for all data
     EMS_TxTelegram.length             = EMS_MIN_TELEGRAM_LENGTH; // is always 6 bytes long (including CRC at end)
     EMS_TxTelegram.type               = type;
