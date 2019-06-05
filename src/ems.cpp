@@ -706,7 +706,7 @@ void _ems_readTelegram(uint8_t * telegram, uint8_t length) {
 
         // check first for a Poll for us
         // the poll has the MSB set - seems to work on both EMS and Junkers
-        if (value == (EMS_ID_ME | 0x80)) {
+        if ((value & 0x7F) == EMS_ID_ME) {
             EMS_Sys_Status.emsTxCapable     = true;
             uint32_t timenow_microsecs      = micros();
             EMS_Sys_Status.emsPollFrequency = (timenow_microsecs - _last_emsPollFrequency);
@@ -1685,7 +1685,7 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
  */
 void _ems_detectJunkers() {
     char s[20] = {0};
-    snprintf(s, sizeof(s), "%02X %02X %02X 00 %02X", (EMS_ID_ME | 0x80), EMS_ID_BOILER, (EMS_TYPE_Version | 0x80), EMS_MAX_TELEGRAM_LENGTH);
+    snprintf(s, sizeof(s), "%02X %02X %02X 00 %02X", (EMS_ID_ME | 0x80), (EMS_ID_BOILER | 0x080), EMS_TYPE_Version, EMS_MAX_TELEGRAM_LENGTH);
     ems_sendRawTelegram(s);
 }
 
