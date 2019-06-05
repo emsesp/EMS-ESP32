@@ -95,8 +95,8 @@ void _process_RCPLUSStatusHeating(_EMS_RxTelegram * EMS_RxTelegram);
 void _process_RCPLUSStatusHeating(_EMS_RxTelegram * EMS_RxTelegram);
 void _process_RCPLUSStatusMode(_EMS_RxTelegram * EMS_RxTelegram);
 
-// Junkers FR10
-void _process_FR10StatusMessage(_EMS_RxTelegram * EMS_RxTelegram);
+// Junkers FR10 & FW100
+void _process_JunkersStatusMessage(_EMS_RxTelegram * EMS_RxTelegram);
 
 /**
  * Recognized EMS types and the functions they call to process the telegrams
@@ -173,7 +173,7 @@ const _EMS_Type EMS_Types[] = {
     {EMS_MODEL_ALL, EMS_TYPE_RCPLUSStatusMode, "RCPLUSStatusMode", _process_RCPLUSStatusMode},
 
     // Junkers FR10
-    {EMS_MODEL_ALL, EMS_TYPE_FR10StatusMessage, "FR10StatusMessage", _process_FR10StatusMessage}
+    {EMS_MODEL_ALL, EMS_TYPE_JunkersStatusMessage, "JunkersStatusMessage", _process_JunkersStatusMessage}
 
 
 };
@@ -1304,12 +1304,11 @@ void _process_RCPLUSStatusMode(_EMS_RxTelegram * EMS_RxTelegram) {
 /**
  * FR10 Junkers - type x6F01
  */
-void _process_FR10StatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
-    if (EMS_RxTelegram->data_length == 6) {
-        // e.g. 90 00 FF 00 00 6F 03 01 00 BE 00 BF
-        EMS_Thermostat.curr_roomTemp     = _toByte(EMS_OFFSET_FR10StatusMessage_curr);     // value is * 10
-        EMS_Thermostat.setpoint_roomTemp = _toByte(EMS_OFFSET_FR10StatusMessage_setpoint); // value is * 10, which is different from other EMS+ devices
-    }
+void _process_JunkersStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
+        // e.g. for FR10:  90 00 FF 00 00 6F 03 01 00 BE 00 BF
+        // e.g. for FW100: 90 00 FF 00 00 6F 03 02 00 D7 00 DA F3 34 00 C4
+        EMS_Thermostat.curr_roomTemp     = _toShort(EMS_OFFSET_JunkersStatusMessage_curr);     // value is * 10
+        EMS_Thermostat.setpoint_roomTemp = _toShort(EMS_OFFSET_JunkersStatusMessage_setpoint); // value is * 10
 }
 
 /**

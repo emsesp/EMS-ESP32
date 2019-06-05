@@ -109,10 +109,10 @@
 #define EMS_OFFSET_RCPLUSStatusMessage_curr 0     // current temp
 #define EMS_OFFSET_RCPLUSGet_mode_day 8           // day/night mode
 
-// Junkers FR10 (EMS Plus)
-#define EMS_TYPE_FR10StatusMessage 0x6F         // is an automatic thermostat broadcast giving us temps
-#define EMS_OFFSET_FR10StatusMessage_setpoint 3 // setpoint temp
-#define EMS_OFFSET_FR10StatusMessage_curr 5     // current temp
+// Junkers FR10, FW100 (EMS Plus)
+#define EMS_TYPE_JunkersStatusMessage 0x6F         // is an automatic thermostat broadcast giving us temps
+#define EMS_OFFSET_JunkersStatusMessage_setpoint 2 // setpoint temp
+#define EMS_OFFSET_JunkersStatusMessage_curr 4     // current temp
 
 
 // Known EMS types
@@ -139,6 +139,7 @@ typedef enum {
     EMS_MODEL_CW100,
     EMS_MODEL_1010,
     EMS_MODEL_OT,
+    EMS_MODEL_FW100,
     EMS_MODEL_FR10,
     EMS_MODEL_FR100,
     EMS_MODEL_FR110
@@ -207,6 +208,7 @@ const _Thermostat_Type Thermostat_Types[] = {
     {EMS_MODEL_ES73, 76, 0x10, "Sieger ES73", EMS_THERMOSTAT_WRITE_YES},
 
     // Junkers
+    {EMS_MODEL_FW100, 105, 0x10, "Junkers FW100", EMS_THERMOSTAT_WRITE_NO},
     {EMS_MODEL_FR10, 111, 0x18, "Junkers FR10", EMS_THERMOSTAT_WRITE_NO},
     {EMS_MODEL_FR100, 105, 0x18, "Junkers FR100", EMS_THERMOSTAT_WRITE_NO},
     {EMS_MODEL_FR110, 108, 0x18, "Junkers FR110", EMS_THERMOSTAT_WRITE_NO}
