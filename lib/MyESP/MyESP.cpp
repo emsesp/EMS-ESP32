@@ -454,10 +454,12 @@ void MyESP::_telnetConnected() {
     EEPROMr.get(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_CRASH_TIME, crash_time);
     if ((crash_time != 0) && (crash_time != 0xFFFFFFFF)) {
         crashDump();
+        /*
         // clear crash data
         crash_time = 0xFFFFFFFF;
         EEPROMr.put(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_CRASH_TIME, crash_time);
         EEPROMr.commit();
+        */
     }
 #endif
 
@@ -504,7 +506,7 @@ void MyESP::_consoleShowHelp() {
     myDebug_P(PSTR("*  ?=help, CTRL-D/quit=exit telnet session"));
     myDebug_P(PSTR("*  set, system, reboot"));
 #ifdef CRASH
-    myDebug_P(PSTR("*  crash <dump | clear | test [n]>"));
+    myDebug_P(PSTR("*  crash <dump | clear>"));
 #endif
 
     // print custom commands if available. Taken from progmem
@@ -792,15 +794,14 @@ void MyESP::_telnetCommand(char * commandLine) {
 
 // crash command
 #ifdef CRASH
-    if ((strcmp(ptrToCommandName, "crash") == 0) && (wc >= 2)) {
+    if ((strcmp(ptrToCommandName, "crash") == 0) && (wc == 2)) {
         char * cmd = _telnet_readWord(false);
         if (strcmp(cmd, "dump") == 0) {
             crashDump();
         } else if (strcmp(cmd, "clear") == 0) {
             crashClear();
-        } else if ((strcmp(cmd, "test") == 0) && (wc == 3)) {
-            char * value = _telnet_readWord(false);
-            crashTest(atoi(value));
+        } else {
+            myDebug_P(PSTR("Error. Usage: crash <dump | clear>"));
         }
         return; // don't call custom command line callback
     }
@@ -1420,46 +1421,6 @@ extern "C" void custom_crash_callback(struct rst_info * rst_info, uint32_t stack
     EEPROMr.commit();
 }
 
-void MyESP::crashTest(uint8_t t) {
-    if (t == 1) {
-        myDebug_P(PSTR("[CRASH] Attempting to divide by zero ..."));
-        int result, zero;
-        zero   = 0;
-        result = 1 / zero;
-        myDebug_P(PSTR("Result = %d"), result);
-    }
-
-    if (t == 2) {
-        myDebug_P(PSTR("[CRASH] Attempting to read through a pointer to no object ..."));
-        int * nullPointer;
-        nullPointer = NULL;
-        // null pointer dereference - read
-        // attempt to read a value through a null pointer
-        Serial.println(*nullPointer);
-    }
-
-    if (t == 3) {
-        myDebug_P(PSTR("[CRASH] Crashing with hardware WDT (%ld ms) ...\n"), millis());
-        ESP.wdtDisable();
-        while (true) {
-            // stay in an infinite loop doing nothing
-            // this way other process can not be executed
-            //
-            // Note:
-            // Hardware wdt kicks in if software wdt is unable to perfrom
-            // Nothing will be saved in EEPROM for the hardware wdt
-        }
-    }
-
-    if (t == 4) {
-        myDebug_P(PSTR("[CRASH] Crashing with software WDT (%ld ms) ...\n"), millis());
-        while (true) {
-            // stay in an infinite loop doing nothing
-            // this way other process can not be executed
-        }
-    }
-}
-
 /**
  * Clears crash info
  */
@@ -1520,8 +1481,6 @@ void MyESP::crashDump() {
     myDebug_P(PSTR("<<<stack<<<"));
 }
 #else
-void MyESP::crashTest(uint8_t t) {
-}
 void MyESP::crashClear() {
 }
 void MyESP::crashDump() {
