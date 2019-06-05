@@ -4,8 +4,8 @@
 ;
 
 [platformio]
-env_default = release
-;env_default = debug
+;default_envs = debug
+default_envs = release
 
 [common]
 ; hard code if you prefer. Recommendation is to set from within the app when in Serial or AP mode
