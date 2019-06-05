@@ -141,11 +141,12 @@ typedef enum {
     EMS_MODEL_OT,
     EMS_MODEL_FR10,
     EMS_MODEL_FR100,
-    EMS_MODEL_FR110
+    EMS_MODEL_FR110,
+    EMS_MODEL_FW120
 
 } _EMS_MODEL_ID;
 
-// EMS types for known Buderus/Bosch devices. This list will be extended when new devices are recognized.
+// EMS types for known devices. This list will be extended when new devices are recognized.
 // The device_id is always 0x08
 // format is MODEL_ID, PRODUCT ID, DESCRIPTION
 const _Boiler_Type Boiler_Types[] = {
@@ -155,7 +156,7 @@ const _Boiler_Type Boiler_Types[] = {
     {EMS_MODEL_UBA, 115, "Nefit Topline Compact/Buderus GB162"},
     {EMS_MODEL_UBA, 203, "Buderus Logamax U122/Junkers Cerapur"},
     {EMS_MODEL_UBA, 208, "Buderus Logamax plus/GB192"},
-    {EMS_MODEL_UBA, 64, "Sieger BK15 Boiler/Nefit Smartline"},
+    {EMS_MODEL_UBA, 64, "Sieger BK15 Boiler/Nefit Smartline/Buderus GB152"},
     {EMS_MODEL_UBA, EMS_PRODUCTID_HEATRONICS, "Bosch Condens 2500/Junkers Heatronics3"}, // Junkers
     {EMS_MODEL_UBA, 122, "Nefit Proline"},
     {EMS_MODEL_UBA, 172, "Nefit Enviline"}
@@ -165,8 +166,8 @@ const _Boiler_Type Boiler_Types[] = {
 // Other EMS devices which are not considered boilers or thermostats
 const _Other_Type Other_Types[] = {
 
-    {EMS_MODEL_OTHER, 251, 0x21, "MM10 Mixer Module"},  // warning, fake product id!
-    {EMS_MODEL_OTHER, 250, 0x11, "WM10 Switch Module"}, // warning, fake product id!
+    {EMS_MODEL_OTHER, 69, 0x21, "MM10 Mixer Module"},
+    {EMS_MODEL_OTHER, 71, 0x11, "WM10 Switch Module"},
     {EMS_MODEL_OTHER, 160, 0x20, "MM100 Mixing Module"},
     {EMS_MODEL_OTHER, 160, 0x21, "MM100 Mixing Module"},
     {EMS_MODEL_OTHER, 159, 0x21, "MM50 Mixing Module"},
@@ -209,7 +210,8 @@ const _Thermostat_Type Thermostat_Types[] = {
     // Junkers
     {EMS_MODEL_FR10, 111, 0x18, "Junkers FR10", EMS_THERMOSTAT_WRITE_NO},
     {EMS_MODEL_FR100, 105, 0x18, "Junkers FR100", EMS_THERMOSTAT_WRITE_NO},
-    {EMS_MODEL_FR110, 108, 0x18, "Junkers FR110", EMS_THERMOSTAT_WRITE_NO}
+    {EMS_MODEL_FR110, 108, 0x18, "Junkers FR110", EMS_THERMOSTAT_WRITE_NO},
+    {EMS_MODEL_FW120, 192, 0x10, "Junkers FW120", EMS_THERMOSTAT_WRITE_NO}
 
 
 };
