@@ -852,13 +852,14 @@ String MyESP::_buildTime() {
 
 // returns system uptime in seconds - copied for espurna. see (c)
 unsigned long MyESP::_getUptime() {
-    static unsigned long last_uptime      = 0;
-    static unsigned char uptime_overflows = 0;
+    static uint32_t last_uptime      = 0;
+    static uint8_t  uptime_overflows = 0;
 
-    if (millis() < last_uptime)
+    if (millis() < last_uptime) {
         ++uptime_overflows;
-    last_uptime                  = millis();
-    unsigned long uptime_seconds = uptime_overflows * (UPTIME_OVERFLOW / 1000) + (last_uptime / 1000);
+    }
+    last_uptime             = millis();
+    uint32_t uptime_seconds = uptime_overflows * (UPTIME_OVERFLOW / 1000) + (last_uptime / 1000);
 
     return uptime_seconds;
 }
@@ -887,7 +888,7 @@ void MyESP::showSystemStats() {
     uint32_t rem = t % 3600L;
     uint8_t  m   = rem / 60;
     uint8_t  s   = rem % 60;
-    myDebug_P(PSTR(" [APP] Uptime: %d days, %d hours, %d minutes, %d seconds"), d, h, m, s);
+    myDebug_P(PSTR(" [APP] Uptime: %d days %d hours %d minutes %d seconds"), d, h, m, s);
 
     myDebug_P(PSTR(" [APP] System Load: %d%%"), getSystemLoadAverage());
 
@@ -904,7 +905,6 @@ void MyESP::showSystemStats() {
 #ifdef CRASH
     char output_str[80] = {0};
     char buffer[16]     = {0};
-    /* Crash info */
     myDebug_P(PSTR(" [EEPROM] EEPROM size: %u"), EEPROMr.reserved() * SPI_FLASH_SEC_SIZE);
     strlcpy(output_str, " [EEPROM] EEPROM Sector pool size is ", sizeof(output_str));
     strlcat(output_str, itoa(EEPROMr.size(), buffer, 10), sizeof(output_str));
@@ -1433,18 +1433,71 @@ void MyESP::crashClear() {
 
 /**
  * Print out crash information that has been previously saved in EEPROM
+ * Copied from https://github.com/krzychb/EspSaveCrash
  */
 void MyESP::crashDump() {
     uint32_t crash_time;
     EEPROMr.get(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_CRASH_TIME, crash_time);
     if ((crash_time == 0) || (crash_time == 0xFFFFFFFF)) {
-        myDebug_P(PSTR("[CRASH] No crash info"));
+        myDebug_P(PSTR("[CRASH] No crash data captured."));
         return;
     }
 
-    myDebug_P(PSTR("[CRASH] Latest crash was at %lu ms after boot"), crash_time);
-    myDebug_P(PSTR("[CRASH] Reason of restart: %u"), EEPROMr.read(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_RESTART_REASON));
-    myDebug_P(PSTR("[CRASH] Exception cause: %u"), EEPROMr.read(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_EXCEPTION_CAUSE));
+    uint32_t t   = crash_time / 1000; // convert to seconds
+    uint32_t d   = t / 86400L;
+    uint32_t h   = (t / 3600L) % 60;
+    uint32_t rem = t % 3600L;
+    uint8_t  m   = rem / 60;
+    uint8_t  s   = rem % 60;
+    myDebug_P(PSTR("[CRASH] Last crash was %d days %d hours %d minutes %d seconds since boot time"), d, h, m, s);
+
+    // get reason and exception
+    // https://www.espressif.com/sites/default/files/documentation/esp8266_reset_causes_and_common_fatal_exception_causes_en.pdf
+    char buffer[80] = {0};
+    char ss[16]     = {0};
+    strlcpy(buffer, "[CRASH] Reason of restart: ", sizeof(buffer));
+
+    uint8_t reason = EEPROMr.read(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_RESTART_REASON);
+    switch (reason) {
+    case REASON_WDT_RST:
+        strlcat(buffer, "1 - Hardware WDT reset", sizeof(buffer));
+        break;
+    case REASON_EXCEPTION_RST:
+        strlcat(buffer, "2 - Fatal exception", sizeof(buffer));
+        break;
+    case REASON_SOFT_WDT_RST:
+        strlcat(buffer, "3 - Software watchdog reset", sizeof(buffer));
+        break;
+    case REASON_EXT_SYS_RST:
+        strlcat(buffer, "6 - Hardware reset", sizeof(buffer));
+        break;
+    case REASON_SOFT_RESTART:
+        strlcat(buffer, "4 - Software reset", sizeof(buffer));
+        break;
+    default:
+        strlcat(buffer, itoa(reason, ss, 10), sizeof(buffer));
+    }
+    myDebug(buffer);
+
+    // check for exception
+    // see https://github.com/esp8266/Arduino/blob/master/doc/exception_causes.rst
+    if (reason == REASON_EXCEPTION_RST) {
+        // get exception cause
+        uint8_t cause = EEPROMr.read(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_EXCEPTION_CAUSE);
+        strlcpy(buffer, "[CRASH] Exception cause: ", sizeof(buffer));
+        if (cause == 0) {
+            strlcat(buffer, "0 - IllegalInstructionCause", sizeof(buffer));
+        } else if (cause == 3) {
+            strlcat(buffer, "3 - LoadStoreErrorCause", sizeof(buffer));
+        } else if (cause == 6) {
+            strlcat(buffer, "6 - IntegerDivideByZeroCause", sizeof(buffer));
+        } else if (cause == 9) {
+            strlcat(buffer, "9 - LoadStoreAlignmentCause", sizeof(buffer));
+        } else {
+            strlcat(buffer, itoa(cause, ss, 10), sizeof(buffer));
+        }
+    }
+    myDebug(buffer);
 
     uint32_t epc1, epc2, epc3, excvaddr, depc;
     EEPROMr.get(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_EPC1, epc1);
@@ -1479,6 +1532,7 @@ void MyESP::crashDump() {
         SerialAndTelnet.println();
     }
     myDebug_P(PSTR("<<<stack<<<"));
+    myDebug_P(PSTR("\nTo clean this dump use the command: %scrash clear%s\n"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
 }
 #else
 void MyESP::crashClear() {
