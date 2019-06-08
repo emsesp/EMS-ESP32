@@ -476,50 +476,53 @@ void showInfo() {
         myDebug_P(PSTR("")); // newline
         myDebug_P(PSTR("%sThermostat stats:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
         myDebug_P(PSTR("  Thermostat: %s"), ems_getThermostatDescription(buffer_type));
-        if ((ems_getThermostatModel() == EMS_MODEL_EASY) || (ems_getThermostatModel() == EMS_MODEL_BOSCHEASY)) {
-            // for easy temps are * 100, also we don't have the time or mode
+        
+        // Render Current & Setpoint Room Temperature
+        if (    (ems_getThermostatModel() == EMS_MODEL_EASY) 
+                || (ems_getThermostatModel() == EMS_MODEL_BOSCHEASY) 
+                || (ems_getThermostatModel() == EMS_MODEL_FR10) 
+                || (ems_getThermostatModel() == EMS_MODEL_FW100)) {
+            // Temperatures are *10
             _renderShortValue("Set room temperature", "C", EMS_Thermostat.setpoint_roomTemp, 10); // *100
             _renderShortValue("Current room temperature", "C", EMS_Thermostat.curr_roomTemp, 10); // *100
-        } else if (ems_getThermostatModel() == EMS_MODEL_FR10) {
-            // Junkers are *10
-            _renderIntValue("Set room temperature", "C", EMS_Thermostat.setpoint_roomTemp, 10); // *10
-            _renderIntValue("Current room temperature", "C", EMS_Thermostat.curr_roomTemp, 10); // *10
-        } else {
+            }  
+        else {
             // because we store in 2 bytes short, when converting to a single byte we'll loose the negative value if its unset
-            if (EMS_Thermostat.setpoint_roomTemp <= 0) {
+            if (EMS_Thermostat.setpoint_roomTemp <= 0) { 
                 EMS_Thermostat.setpoint_roomTemp = EMS_VALUE_INT_NOTSET;
             }
-
             if (EMS_Thermostat.curr_roomTemp <= 0) {
                 EMS_Thermostat.curr_roomTemp = EMS_VALUE_INT_NOTSET;
             }
-
             _renderIntValue("Setpoint room temperature", "C", EMS_Thermostat.setpoint_roomTemp, 2); // convert to a single byte * 2
             _renderIntValue("Current room temperature", "C", EMS_Thermostat.curr_roomTemp, 10);     // is *10
+        }
 
-            if ((EMS_Thermostat.holidaytemp > 0) && (EMSESP_Status.heating_circuit == 2)) {  // only if we are on a RC35 we show more info
-                _renderIntValue("Day temperature", "C", EMS_Thermostat.daytemp, 2);          // convert to a single byte * 2
-                _renderIntValue("Night temperature", "C", EMS_Thermostat.nighttemp, 2);      // convert to a single byte * 2
-                _renderIntValue("Vacation temperature", "C", EMS_Thermostat.holidaytemp, 2); // convert to a single byte * 2
-            }
+        // Render Day/Night/Holiday Temperature
+        if ((EMS_Thermostat.holidaytemp > 0) && (EMSESP_Status.heating_circuit == 2)) {  // only if we are on a RC35 we show more info
+            _renderIntValue("Day temperature", "C", EMS_Thermostat.daytemp, 2);          // convert to a single byte * 2
+            _renderIntValue("Night temperature", "C", EMS_Thermostat.nighttemp, 2);      // convert to a single byte * 2
+            _renderIntValue("Vacation temperature", "C", EMS_Thermostat.holidaytemp, 2); // convert to a single byte * 2
+        }
 
-            myDebug_P(PSTR("  Thermostat time is %02d:%02d:%02d %d/%d/%d"),
-                      EMS_Thermostat.hour,
-                      EMS_Thermostat.minute,
-                      EMS_Thermostat.second,
-                      EMS_Thermostat.day,
-                      EMS_Thermostat.month,
-                      EMS_Thermostat.year + 2000);
-
-            if (EMS_Thermostat.mode == 0) {
-                myDebug_P(PSTR("  Mode is set to low"));
-            } else if (EMS_Thermostat.mode == 1) {
-                myDebug_P(PSTR("  Mode is set to manual"));
-            } else if (EMS_Thermostat.mode == 2) {
-                myDebug_P(PSTR("  Mode is set to auto"));
-            } else {
-                myDebug_P(PSTR("  Mode is set to ?"));
-            }
+        // Render Thermostat Date & Time
+        myDebug_P(PSTR("  Thermostat time is %02d:%02d:%02d %d/%d/%d"),
+                    EMS_Thermostat.hour,
+                    EMS_Thermostat.minute,
+                    EMS_Thermostat.second,
+                    EMS_Thermostat.day,
+                    EMS_Thermostat.month,
+                    EMS_Thermostat.year + 2000);
+        
+        // Render Termostat Mode
+        if (EMS_Thermostat.mode == 0) {
+            myDebug_P(PSTR("  Mode is set to low"));
+        } else if (EMS_Thermostat.mode == 1) {
+            myDebug_P(PSTR("  Mode is set to manual"));
+        } else if (EMS_Thermostat.mode == 2) {
+            myDebug_P(PSTR("  Mode is set to auto"));
+        } else {
+            myDebug_P(PSTR("  Mode is set to ?"));
         }
     }
 
@@ -695,13 +698,7 @@ void publishValues(bool force) {
         rootThermostat[THERMOSTAT_HC] = _int_to_char(s, EMSESP_Status.heating_circuit);
 
         // different logic depending on thermostat types
-        if ((ems_getThermostatModel() == EMS_MODEL_EASY) || (ems_getThermostatModel() == EMS_MODEL_BOSCHEASY)) {
-            if (abs(EMS_Thermostat.setpoint_roomTemp) < EMS_VALUE_SHORT_NOTSET)
-                rootThermostat[THERMOSTAT_SELTEMP] = (double)EMS_Thermostat.setpoint_roomTemp / 10;
-            if (abs(EMS_Thermostat.curr_roomTemp) < EMS_VALUE_SHORT_NOTSET)
-                rootThermostat[THERMOSTAT_CURRTEMP] = (double)EMS_Thermostat.curr_roomTemp / 10;
-
-        } else if (ems_getThermostatModel() == EMS_MODEL_FR10) {
+        if ((ems_getThermostatModel() == EMS_MODEL_EASY) || (ems_getThermostatModel() == EMS_MODEL_BOSCHEASY) || (ems_getThermostatModel() == EMS_MODEL_FR10) || (ems_getThermostatModel() == EMS_MODEL_FW100)) {
             if (abs(EMS_Thermostat.setpoint_roomTemp) < EMS_VALUE_SHORT_NOTSET)
                 rootThermostat[THERMOSTAT_SELTEMP] = (double)EMS_Thermostat.setpoint_roomTemp / 10;
             if (abs(EMS_Thermostat.curr_roomTemp) < EMS_VALUE_SHORT_NOTSET)
