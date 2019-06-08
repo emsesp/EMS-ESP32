@@ -41,14 +41,14 @@
 #define EMS_OFFSET_UBASetPoints_flowtemp 0 // flow temp
 
 // Other
-#define EMS_TYPE_SM10Monitor 0x97    // SM10Monitor
-#define EMS_TYPE_SM100Monitor 0x0262 // SM100Monitor
-#define EMS_TYPE_SM100Status 0x0264  // SM100Status
-#define EMS_TYPE_SM100Status2 0x026A // SM100Status2
-#define EMS_TYPE_SM100Energy 0x028E  // SM100Energy
-#define EMS_TYPE_HPMonitor1 0xE3     // HeatPump Monitor 1
-#define EMS_TYPE_HPMonitor2 0xE5     // HeatPump Monitor 2
-#define EMS_TYPE_ISM1StatusMessage 0x0003  // Solar Module Junkers ISM1 Status
+#define EMS_TYPE_SM10Monitor 0x97         // SM10Monitor
+#define EMS_TYPE_SM100Monitor 0x0262      // SM100Monitor
+#define EMS_TYPE_SM100Status 0x0264       // SM100Status
+#define EMS_TYPE_SM100Status2 0x026A      // SM100Status2
+#define EMS_TYPE_SM100Energy 0x028E       // SM100Energy
+#define EMS_TYPE_HPMonitor1 0xE3          // HeatPump Monitor 1
+#define EMS_TYPE_HPMonitor2 0xE5          // HeatPump Monitor 2
+#define EMS_TYPE_ISM1StatusMessage 0x0003 // Solar Module Junkers ISM1 Status
 
 /*
  * Thermostats...
@@ -183,7 +183,7 @@ const _Other_Type Other_Types[] = {
     {EMS_MODEL_OTHER, 163, EMS_ID_SM, "SM100 Solar Module"},
     {EMS_MODEL_OTHER, 171, 0x02, "EMS-OT OpenTherm converter"},
     {EMS_MODEL_OTHER, 252, EMS_ID_HP, "HeatPump Module"}, // warning, fake product id!
-    {EMS_MODEL_OTHER, 101, 0x30, "Junkers ISM1 Solar Controller"}, 
+    {EMS_MODEL_OTHER, 101, 0x30, "Junkers ISM1 Solar Controller"},
     {EMS_MODEL_OTHER, 189, EMS_ID_GATEWAY, "Web Gateway KM200"}
 
 };

@@ -185,10 +185,10 @@ void ICACHE_FLASH_ATTR emsuart_tx_brk() {
 
     if (EMS_Sys_Status.emsTxMode <= 2) { // classic mode
         delayMicroseconds(EMSUART_TX_BRK_WAIT);
-    } else if (EMS_Sys_Status.emsTxMode == 3) { // junkers mode
+    } else if (EMS_Sys_Status.emsTxMode == 3) {                  // junkers mode
         delayMicroseconds(EMSUART_TX_WAIT_BRK - EMSUART_TX_LAG); // 1144 (11 Bits)
     }
-    
+
     USC0(EMSUART_UART) &= ~(tmp); // clear bit
 }
 

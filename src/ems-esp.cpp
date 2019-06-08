@@ -110,7 +110,7 @@ command_t project_cmds[] = {
 
     {false, "info", "show data captured on the EMS bus"},
     {false, "log <n | b | t | r | v>", "set logging mode to none, basic, thermostat only, raw or verbose"},
-    
+
 #ifdef TESTS
     {false, "test <n>", "insert a test telegram on to the EMS bus"},
 #endif
@@ -348,7 +348,8 @@ void showInfo() {
         if (ems_getTxCapable()) {
             char valuestr[8] = {0}; // for formatting floats
             myDebug_P(PSTR("  Tx: Last poll=%s seconds ago, Tx mode=%d, # successful write requests=%d"),
-                      _float_to_char(valuestr, (ems_getPollFrequency() / (float)1000000), 3), ems_getTxMode(),
+                      _float_to_char(valuestr, (ems_getPollFrequency() / (float)1000000), 3),
+                      ems_getTxMode(),
                       EMS_Sys_Status.emsTxPkgs);
         } else {
             myDebug_P(PSTR("  Tx: no signal"));
@@ -476,19 +477,16 @@ void showInfo() {
         myDebug_P(PSTR("")); // newline
         myDebug_P(PSTR("%sThermostat stats:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
         myDebug_P(PSTR("  Thermostat: %s"), ems_getThermostatDescription(buffer_type));
-        
+
         // Render Current & Setpoint Room Temperature
-        if (    (ems_getThermostatModel() == EMS_MODEL_EASY) 
-                || (ems_getThermostatModel() == EMS_MODEL_BOSCHEASY) 
-                || (ems_getThermostatModel() == EMS_MODEL_FR10) 
-                || (ems_getThermostatModel() == EMS_MODEL_FW100)) {
+        if ((ems_getThermostatModel() == EMS_MODEL_EASY) || (ems_getThermostatModel() == EMS_MODEL_BOSCHEASY) || (ems_getThermostatModel() == EMS_MODEL_FR10)
+            || (ems_getThermostatModel() == EMS_MODEL_FW100)) {
             // Temperatures are *10
             _renderShortValue("Set room temperature", "C", EMS_Thermostat.setpoint_roomTemp, 10); // *100
             _renderShortValue("Current room temperature", "C", EMS_Thermostat.curr_roomTemp, 10); // *100
-            }  
-        else {
+        } else {
             // because we store in 2 bytes short, when converting to a single byte we'll loose the negative value if its unset
-            if (EMS_Thermostat.setpoint_roomTemp <= 0) { 
+            if (EMS_Thermostat.setpoint_roomTemp <= 0) {
                 EMS_Thermostat.setpoint_roomTemp = EMS_VALUE_INT_NOTSET;
             }
             if (EMS_Thermostat.curr_roomTemp <= 0) {
@@ -507,13 +505,13 @@ void showInfo() {
 
         // Render Thermostat Date & Time
         myDebug_P(PSTR("  Thermostat time is %02d:%02d:%02d %d/%d/%d"),
-                    EMS_Thermostat.hour,
-                    EMS_Thermostat.minute,
-                    EMS_Thermostat.second,
-                    EMS_Thermostat.day,
-                    EMS_Thermostat.month,
-                    EMS_Thermostat.year + 2000);
-        
+                  EMS_Thermostat.hour,
+                  EMS_Thermostat.minute,
+                  EMS_Thermostat.second,
+                  EMS_Thermostat.day,
+                  EMS_Thermostat.month,
+                  EMS_Thermostat.year + 2000);
+
         // Render Termostat Mode
         if (EMS_Thermostat.mode == 0) {
             myDebug_P(PSTR("  Mode is set to low"));
@@ -583,7 +581,6 @@ void publishSensorValues() {
 // CRC check is done to see if there are changes in the values since the last send to avoid too much wifi traffic
 // a check is done against the previous values and if there are changes only then they are published. Unless force=true
 void publishValues(bool force) {
-
     // don't send if MQTT is connected
     if (!myESP.isMQTTConnected()) {
         return;
@@ -698,7 +695,8 @@ void publishValues(bool force) {
         rootThermostat[THERMOSTAT_HC] = _int_to_char(s, EMSESP_Status.heating_circuit);
 
         // different logic depending on thermostat types
-        if ((ems_getThermostatModel() == EMS_MODEL_EASY) || (ems_getThermostatModel() == EMS_MODEL_BOSCHEASY) || (ems_getThermostatModel() == EMS_MODEL_FR10) || (ems_getThermostatModel() == EMS_MODEL_FW100)) {
+        if ((ems_getThermostatModel() == EMS_MODEL_EASY) || (ems_getThermostatModel() == EMS_MODEL_BOSCHEASY) || (ems_getThermostatModel() == EMS_MODEL_FR10)
+            || (ems_getThermostatModel() == EMS_MODEL_FW100)) {
             if (abs(EMS_Thermostat.setpoint_roomTemp) < EMS_VALUE_SHORT_NOTSET)
                 rootThermostat[THERMOSTAT_SELTEMP] = (double)EMS_Thermostat.setpoint_roomTemp / 10;
             if (abs(EMS_Thermostat.curr_roomTemp) < EMS_VALUE_SHORT_NOTSET)
