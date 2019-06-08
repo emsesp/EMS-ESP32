@@ -550,6 +550,15 @@ void _ems_sendTelegram() {
         return;
     }
 
+    // if we're preventing all outbound traffic, quit
+    if (EMS_Sys_Status.emsTxDisabled) {
+        EMS_TxQueue.shift(); // remove from queue
+        if (ems_getLogging() != EMS_SYS_LOGGING_NONE) {
+            myDebug_P(PSTR("in Listen Mode. All Tx is disabled."));
+        }
+        return;
+    }
+
     // get the first in the queue, which is at the head
     // we don't remove from the queue yet
     _EMS_TxTelegram EMS_TxTelegram = EMS_TxQueue.first();
@@ -561,19 +570,18 @@ void _ems_sendTelegram() {
     }
 
     // if we're in raw mode just fire and forget
-    // e.g. send 0B 88 02 00 20
     if (EMS_TxTelegram.action == EMS_TX_TELEGRAM_RAW) {
-        _EMS_RxTelegram EMS_RxTelegram; // create new Rx object
-
-        EMS_TxTelegram.data[EMS_TxTelegram.length - 1] = _crcCalculator(EMS_TxTelegram.data, EMS_TxTelegram.length); // add the CRC
-        EMS_RxTelegram.length                          = EMS_TxTelegram.length;                                      // full length of telegram
-        EMS_RxTelegram.telegram                        = EMS_TxTelegram.data;
-        EMS_RxTelegram.timestamp                       = millis(); // now
         if (EMS_Sys_Status.emsLogging != EMS_SYS_LOGGING_NONE) {
+            _EMS_RxTelegram EMS_RxTelegram;                   // create new Rx object
+            EMS_RxTelegram.length    = EMS_TxTelegram.length; // full length of telegram
+            EMS_RxTelegram.telegram  = EMS_TxTelegram.data;
+            EMS_RxTelegram.timestamp = millis(); // now
             _debugPrintTelegram("Sending raw: ", &EMS_RxTelegram, COLOR_CYAN, true);
         }
+
+        EMS_TxTelegram.data[EMS_TxTelegram.length - 1] = _crcCalculator(EMS_TxTelegram.data, EMS_TxTelegram.length); // add the CRC
         emsuart_tx_buffer(EMS_TxTelegram.data, EMS_TxTelegram.length); // send the telegram to the UART Tx
-        EMS_TxQueue.shift();                                           // remove from queue
+        EMS_TxQueue.shift();                                           // and remove from queue
         return;
     }
 
@@ -2023,7 +2031,9 @@ void ems_doReadCommand(uint16_t type, uint8_t dest, bool forceRefresh) {
 
     // if we're preventing all outbound traffic, quit
     if (EMS_Sys_Status.emsTxDisabled) {
-        myDebug_P(PSTR("in Listen Mode. All Tx is disabled."));
+        if (ems_getLogging() != EMS_SYS_LOGGING_NONE) {
+            myDebug_P(PSTR("in Listen Mode. All Tx is disabled."));
+        }
         return;
     }
 

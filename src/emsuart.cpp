@@ -182,11 +182,13 @@ void ICACHE_FLASH_ATTR emsuart_tx_brk() {
     // automatically be sent when the tx fifo is empty
     tmp = (1 << UCBRK);
     USC0(EMSUART_UART) |= (tmp); // set bit
-    if (EMS_Sys_Status.emsTxMode <= 2) {
-        delayMicroseconds(EMSUART_TX_BRK_WAIT); // classic mode
-    } else if (EMS_Sys_Status.emsTxMode == 3) {
+
+    if (EMS_Sys_Status.emsTxMode <= 2) { // classic mode
+        delayMicroseconds(EMSUART_TX_BRK_WAIT);
+    } else if (EMS_Sys_Status.emsTxMode == 3) { // junkers mode
         delayMicroseconds(EMSUART_TX_WAIT_BRK - EMSUART_TX_LAG); // 1144 (11 Bits)
     }
+    
     USC0(EMSUART_UART) &= ~(tmp); // clear bit
 }
 
@@ -204,7 +206,7 @@ static inline void ICACHE_FLASH_ATTR emsuart_loopback(bool enable) {
  * Send to Tx, ending with a <BRK>
  */
 void ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
-    if (EMS_Sys_Status.emsTxMode == 0) { // Classic logic
+    if (EMS_Sys_Status.emsTxMode == 0) { // classic mode logic
         for (uint8_t i = 0; i < len; i++) {
             USF(EMSUART_UART) = buf[i];
         }
