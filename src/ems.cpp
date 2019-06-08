@@ -1530,6 +1530,13 @@ void _process_RCTime(_EMS_RxTelegram * EMS_RxTelegram) {
 }
 
 /*
+ * Clear devices list
+ */
+void ems_clearDeviceList() {
+    Devices.clear();
+}
+
+/*
  * add an EMS device to our list of detected devices
  */
 void _addDevice(uint8_t product_id, uint8_t device_id, char * version, const char * model_string) {

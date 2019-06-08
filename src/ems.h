@@ -314,6 +314,7 @@ void ems_setWarmWaterModeComfort(uint8_t comfort);
 bool ems_checkEMSBUSAlive();
 void ems_setModels();
 void ems_setTxDisabled(bool b);
+void ems_clearDeviceList();
 
 void             ems_getThermostatValues();
 void             ems_getBoilerValues();

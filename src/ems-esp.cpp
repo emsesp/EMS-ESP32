@@ -964,6 +964,7 @@ void startDeviceScan() {
     regularUpdatesTimer.detach();
     publishSensorValuesTimer.detach();
     scanDevices_count = 1; // starts at 1
+    ems_clearDeviceList(); // empty the current list
     ems_setLogging(EMS_SYS_LOGGING_NONE);
     myDebug_P(PSTR("Starting a deep EMS device scan. This can take up to 2 minutes. Please wait..."));
     scanThermostat.attach_ms(SCANDEVICES_TIME, do_scanDevices);
