@@ -5,21 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.8.0dev] 2019-05-26
+## [1.8.0dev] 2019-06-08
 
 ### Added
 
-- HeatPump (e.g. Nefit Enviline)
-- MM50 Mixer
+- Support for HeatPump (e.g. the Nefit Enviline)
+- new device: Buderus MM50 Mixer
+- new devices: Junkers FW100 and ISM1 (thanks @Vuego123)
 - tx_mode takes a value from 0 to 3 for the different Tx logic
-  
+  ```
   0 = original classic ems logic
-
   1 = @kwertie01 ems+ logic (https://github.com/proddy/EMS-ESP/issues/23#issuecomment-476872291)
-
   2 = @susisstrolch logic [(pull request 113)](https://github.com/proddy/EMS-ESP/pull/113)
-
   3 = @philrich logic for Junkers (https://github.com/proddy/EMS-ESP/files/3190563/ems-delay-rev-poll.patch.txt)
+  ```
 
 ### Fixed
 
