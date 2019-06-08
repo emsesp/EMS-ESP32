@@ -8,3 +8,4 @@ lib/readme.txt
 .travis.yml
 ;stackdmp.txt
 ;*.jar
+scripts/stackdmp.txt
