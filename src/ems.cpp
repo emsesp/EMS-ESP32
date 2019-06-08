@@ -61,6 +61,9 @@ void _process_SM100Status(_EMS_RxTelegram * EMS_RxTelegram);
 void _process_SM100Status2(_EMS_RxTelegram * EMS_RxTelegram);
 void _process_SM100Energy(_EMS_RxTelegram * EMS_RxTelegram);
 
+// ISM1
+void _process_ISM1StatusMessage(_EMS_RxTelegram * EMS_RxTelegram);
+
 // HeatPump HP
 void _process_HPMonitor1(_EMS_RxTelegram * EMS_RxTelegram);
 void _process_HPMonitor2(_EMS_RxTelegram * EMS_RxTelegram);
@@ -125,6 +128,7 @@ const _EMS_Type EMS_Types[] = {
     {EMS_MODEL_OTHER, EMS_TYPE_SM100Energy, "SM100Energy", _process_SM100Energy},
     {EMS_MODEL_OTHER, EMS_TYPE_HPMonitor1, "HeatPumpMonitor1", _process_HPMonitor1},
     {EMS_MODEL_OTHER, EMS_TYPE_HPMonitor2, "HeatPumpMonitor2", _process_HPMonitor2},
+    {EMS_MODEL_OTHER, EMS_TYPE_ISM1StatusMessage, "ISM1StatusMessage", _process_ISM1StatusMessage},
 
     // RC10
     {EMS_MODEL_RC10, EMS_TYPE_RCTime, "RCTime", _process_RCTime},
@@ -1473,6 +1477,16 @@ void _process_HPMonitor2(_EMS_RxTelegram * EMS_RxTelegram) {
 
     EMS_Other.HP                = true;
     EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
+}
+
+/*
+ * Junkers ISM1 Solar Module - type 0x0003 EMS+ for energy readings
+ */
+void _process_ISM1StatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
+    // e.g. B0 00 FF 00 00 03 32 00 00 00 00 13 00 D6 00 00 00 FB D0 F0
+    EMS_Other.SMcollectorTemp  = _toShort(4); // Collector Temperature
+    EMS_Other.SMbottomTemp  = _toShort(6); // Temperature Bottom of Solar Boiler
+    EMS_Other.SM                = true;
 }
 
 /**
