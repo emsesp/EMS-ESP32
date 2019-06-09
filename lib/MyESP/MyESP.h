@@ -9,7 +9,7 @@
 #ifndef MyEMS_h
 #define MyEMS_h
 
-#define MYESP_VERSION "1.1.13"
+#define MYESP_VERSION "1.1.14"
 
 #include <ArduinoJson.h>
 #include <ArduinoOTA.h>
@@ -18,13 +18,14 @@
 #include <FS.h>
 #include <JustWifi.h>  // https://github.com/xoseperez/justwifi
 #include <TelnetSpy.h> // modified from https://github.com/yasheena/telnetspy
+#include <Ticker.h>
 
-#ifdef CRASH
 #include <EEPROM_Rotate.h>
 extern "C" {
-void custom_crash_callback(struct rst_info *, uint32_t, uint32_t);
+#include "user_interface.h"
+void                   custom_crash_callback(struct rst_info *, uint32_t, uint32_t);
+extern struct rst_info resetInfo;
 }
-#endif
 
 #if defined(ARDUINO_ARCH_ESP32)
 //#include <ESPmDNS.h>
@@ -86,6 +87,18 @@ void custom_crash_callback(struct rst_info *, uint32_t, uint32_t);
 #define COLOR_BRIGHT_CYAN "\x1B[0;96m"
 #define COLOR_BRIGHT_WHITE "\x1B[0;97m"
 
+// reset reason codes
+PROGMEM const char         custom_reset_hardware[] = "Hardware button";
+PROGMEM const char         custom_reset_terminal[] = "Reboot from terminal";
+PROGMEM const char         custom_reset_mqtt[]     = "Reboot from MQTT";
+PROGMEM const char         custom_reset_ota[]      = "Reboot after successful OTA update";
+PROGMEM const char * const custom_reset_string[]   = {custom_reset_hardware, custom_reset_terminal, custom_reset_mqtt, custom_reset_ota};
+#define CUSTOM_RESET_HARDWARE 1 // Reset from hardware button
+#define CUSTOM_RESET_TERMINAL 2 // Reset from terminal
+#define CUSTOM_RESET_MQTT 3     // Reset via MQTT
+#define CUSTOM_RESET_OTA 4      // Reset after successful OTA update
+#define CUSTOM_RESET_MAX 4
+
 // SPIFFS
 #define SPIFFS_MAXSIZE 800 // https://arduinojson.org/v6/assistant/
 
@@ -118,6 +131,30 @@ void custom_crash_callback(struct rst_info *, uint32_t, uint32_t);
 #define SAVE_CRASH_STACK_START 0x1A     // 4 bytes
 #define SAVE_CRASH_STACK_END 0x1E       // 4 bytes
 #define SAVE_CRASH_STACK_TRACE 0x22     // variable
+
+// Base address of USER RTC memory
+// https://github.com/esp8266/esp8266-wiki/wiki/Memory-Map#memmory-mapped-io-registers
+#define RTCMEM_ADDR_BASE (0x60001200)
+
+// RTC memory is accessed using blocks of 4 bytes.
+// Blocks 0..63 are reserved by the SDK, 64..192 are available to the user.
+// Blocks 64..96 are reserved by the eboot 'struct eboot_command' (128 -> (128 / 4) -> 32):
+// https://github.com/esp8266/Arduino/blob/master/bootloaders/eboot/eboot_command.h
+#define RTCMEM_OFFSET 32u
+#define RTCMEM_ADDR (RTCMEM_ADDR_BASE + (RTCMEM_OFFSET * 4u))
+#define RTCMEM_BLOCKS 96u
+#define RTCMEM_MAGIC 0x45535075
+
+struct RtcmemData {
+    uint32_t magic;  // RTCMEM_MAGIC
+    uint32_t sys;    // system reset reason (1-4)
+    uint32_t energy; // store energy count
+};
+
+static_assert(sizeof(RtcmemData) <= (RTCMEM_BLOCKS * 4u), "RTCMEM struct is too big");
+
+#define SYSTEM_CHECK_TIME 60000 // The system is considered stable after these many millis
+#define SYSTEM_CHECK_MAX 5      // After this many crashes on boot
 
 typedef struct {
     bool set; // is it a set command
@@ -202,6 +239,10 @@ class MyESP {
     int      getWifiQuality();
     void     showSystemStats();
 
+    // rtcmem and reset reason
+    bool     rtcmemStatus();
+    uint32_t getSystemResetReason();
+
   private:
     // mqtt
     AsyncMqttClient mqttClient;
@@ -226,6 +267,7 @@ class MyESP {
     char *          _mqtt_topic;
     unsigned long   _mqtt_last_connection;
     bool            _mqtt_connecting;
+    bool            _rtcmem_status;
 
     // wifi
     DNSServer       dnsServer; // For Access Point (AP) support
@@ -282,6 +324,29 @@ class MyESP {
     bool          _use_serial;
     unsigned long _getUptime();
     String        _buildTime();
+
+    // reset reason and rtcmem
+    bool _rtcmemStatus();
+    void _rtcmemInit();
+    void _rtcmemSetup();
+
+    void _deferredReset(unsigned long delay, uint8_t reason);
+
+    uint8_t _getSystemStabilityCounter();
+    void    _setSystemStabilityCounter(uint8_t counter);
+
+    uint8_t _getSystemResetReason();
+    void    _setSystemResetReason(uint8_t reason);
+
+    unsigned char _getCustomResetReason();
+    void          _setCustomResetReason(unsigned char reason);
+
+    bool _systemStable;
+
+    bool getSystemCheck();
+    void _systemCheckLoop();
+    void _setSystemCheck(bool stable);
+
 
     // load average (0..100)
     void               _calculateLoad();

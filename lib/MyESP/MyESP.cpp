@@ -8,9 +8,19 @@
 
 #include "MyESP.h"
 
-#ifdef CRASH
 EEPROM_Rotate EEPROMr;
-#endif
+
+union system_rtcmem_t {
+    struct {
+        uint8_t  stability_counter;
+        uint8_t  reset_reason;
+        uint16_t _reserved_;
+    } parts;
+    uint32_t value;
+};
+
+uint8_t RtcmemSize = (sizeof(RtcmemData) / 4u);
+auto    Rtcmem     = reinterpret_cast<volatile RtcmemData *>(RTCMEM_ADDR);
 
 // constructor
 MyESP::MyESP() {
@@ -57,6 +67,9 @@ MyESP::MyESP() {
     _ota_post_callback = NULL;
 
     _suspendOutput = false;
+
+    _rtcmem_status = false;
+    _systemStable  = true;
 }
 
 MyESP::~MyESP() {
@@ -361,7 +374,6 @@ void MyESP::setOTA(ota_callback_f OTACallback_pre, ota_callback_f OTACallback_po
 void MyESP::_OTACallback() {
     myDebug_P(PSTR("[OTA] Start"));
 
-#ifdef CRASH
     // If we are not specifically reserving the sectors we are using as
     // EEPROM in the memory layout then any OTA upgrade will overwrite
     // all but the last one.
@@ -374,7 +386,6 @@ void MyESP::_OTACallback() {
     // See onError callback below.
     EEPROMr.rotate(false);
     EEPROMr.commit();
-#endif
 
     if (_ota_pre_callback) {
         (_ota_pre_callback)(); // call custom function
@@ -391,7 +402,11 @@ void MyESP::_ota_setup() {
     ArduinoOTA.setHostname(_app_hostname);
 
     ArduinoOTA.onStart([this]() { _OTACallback(); });
-    ArduinoOTA.onEnd([this]() { myDebug_P(PSTR("[OTA] Done, restarting...")); });
+    ArduinoOTA.onEnd([this]() {
+        myDebug_P(PSTR("[OTA] Done, restarting..."));
+        _deferredReset(100, CUSTOM_RESET_OTA);
+    });
+
     ArduinoOTA.onProgress([this](unsigned int progress, unsigned int total) {
         static unsigned int _progOld;
         unsigned int        _prog = (progress / (total / 100));
@@ -413,10 +428,8 @@ void MyESP::_ota_setup() {
         else if (error == OTA_END_ERROR)
             myDebug_P(PSTR("[OTA] End Failed"));
 
-#ifdef CRASH
         // There's been an error, reenable rotation
         EEPROMr.rotate(true);
-#endif
     });
 }
 
@@ -430,10 +443,8 @@ void MyESP::setBoottime(const char * boottime) {
 
 // eeprom
 void MyESP::_eeprom_setup() {
-#ifdef CRASH
     EEPROMr.size(4);
     EEPROMr.begin(SPI_FLASH_SEC_SIZE);
-#endif
 }
 
 // Set callback of sketch function to process project messages
@@ -449,7 +460,6 @@ void MyESP::_telnetConnected() {
     _consoleShowHelp(); // Show the initial message
 
     // show crash dump if just restarted after a fatal crash
-#ifdef CRASH
     uint32_t crash_time;
     EEPROMr.get(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_CRASH_TIME, crash_time);
     if ((crash_time != 0) && (crash_time != 0xFFFFFFFF)) {
@@ -461,7 +471,6 @@ void MyESP::_telnetConnected() {
         EEPROMr.commit();
         */
     }
-#endif
 
     // call callback
     if (_telnet_callback) {
@@ -505,9 +514,7 @@ void MyESP::_consoleShowHelp() {
     myDebug_P(PSTR("* Commands:"));
     myDebug_P(PSTR("*  ?=help, CTRL-D/quit=exit telnet session"));
     myDebug_P(PSTR("*  set, system, reboot"));
-#ifdef CRASH
     myDebug_P(PSTR("*  crash <dump | clear>"));
-#endif
 
     // print custom commands if available. Taken from progmem
     if (_telnetcommand_callback) {
@@ -601,6 +608,7 @@ void MyESP::_printSetCommands() {
 // reset / restart
 void MyESP::resetESP() {
     myDebug_P(PSTR("* Reboot ESP..."));
+    _deferredReset(100, CUSTOM_RESET_TERMINAL);
     end();
 #if defined(ARDUINO_ARCH_ESP32)
     ESP.restart();
@@ -792,8 +800,7 @@ void MyESP::_telnetCommand(char * commandLine) {
     }
 
 
-// crash command
-#ifdef CRASH
+    // crash command
     if ((strcmp(ptrToCommandName, "crash") == 0) && (wc == 2)) {
         char * cmd = _telnet_readWord(false);
         if (strcmp(cmd, "dump") == 0) {
@@ -805,7 +812,6 @@ void MyESP::_telnetCommand(char * commandLine) {
         }
         return; // don't call custom command line callback
     }
-#endif
 
     // call callback function
     (_telnetcommand_callback)(wc, commandLine);
@@ -864,6 +870,137 @@ unsigned long MyESP::_getUptime() {
     return uptime_seconds;
 }
 
+// reason code
+void MyESP::_rtcmemInit() {
+    memset((uint32_t *)RTCMEM_ADDR, 0, sizeof(uint32_t) * RTCMEM_BLOCKS);
+    Rtcmem->magic = RTCMEM_MAGIC;
+}
+
+uint8_t MyESP::_getSystemStabilityCounter() {
+    system_rtcmem_t data;
+    data.value = Rtcmem->sys;
+    return data.parts.stability_counter;
+}
+
+void MyESP::_setSystemStabilityCounter(uint8_t counter) {
+    system_rtcmem_t data;
+    data.value                   = Rtcmem->sys;
+    data.parts.stability_counter = counter;
+    Rtcmem->sys                  = data.value;
+}
+
+uint8_t MyESP::_getSystemResetReason() {
+    system_rtcmem_t data;
+    data.value = Rtcmem->sys;
+    return data.parts.reset_reason;
+}
+
+void MyESP::_setSystemResetReason(uint8_t reason) {
+    system_rtcmem_t data;
+    data.value              = Rtcmem->sys;
+    data.parts.reset_reason = reason;
+    Rtcmem->sys             = data.value;
+}
+
+uint32_t MyESP::getSystemResetReason() {
+    return resetInfo.reason;
+}
+
+void MyESP::_rtcmemSetup() {
+    _rtcmem_status = _rtcmemStatus();
+    if (!_rtcmem_status) {
+        _rtcmemInit();
+    }
+}
+
+void MyESP::_setCustomResetReason(uint8_t reason) {
+    _setSystemResetReason(reason);
+}
+
+// Treat memory as dirty on cold boot, hardware wdt reset and rst pin
+bool MyESP::_rtcmemStatus() {
+    bool readable;
+
+    switch (getSystemResetReason()) {
+    case REASON_EXT_SYS_RST:
+    case REASON_WDT_RST:
+    case REASON_DEFAULT_RST:
+        readable = false;
+        break;
+    default:
+        readable = true;
+    }
+
+    readable = readable and (RTCMEM_MAGIC == Rtcmem->magic);
+
+    return readable;
+}
+
+bool MyESP::rtcmemStatus() {
+    return _rtcmem_status;
+}
+
+unsigned char MyESP::_getCustomResetReason() {
+    static unsigned char status = 255;
+    if (status == 255) {
+        if (_rtcmemStatus())
+            status = _getSystemResetReason();
+        if (status > 0)
+            _setCustomResetReason(0);
+        if (status > CUSTOM_RESET_MAX)
+            status = 0;
+    }
+    return status;
+}
+
+void MyESP::_deferredReset(unsigned long delaytime, unsigned char reason) {
+    delay(delaytime);
+    _setCustomResetReason(reason);
+}
+
+// Call this method on boot with start=true to increase the crash counter
+// Call it again once the system is stable to decrease the counter
+// If the counter reaches SYSTEM_CHECK_MAX then the system is flagged as unstable
+// setting _systemOK = false;
+//
+// An unstable system will only have serial access, WiFi in AP mode and OTA
+void MyESP::_setSystemCheck(bool stable) {
+    uint8_t value = 0;
+
+    if (stable) {
+        value = 0; // system is ok
+        // myDebug_P(PSTR("[SYSTEM] System OK\n"));
+    } else {
+        if (!rtcmemStatus()) {
+            _setSystemStabilityCounter(1);
+            return;
+        }
+
+        value = _getSystemStabilityCounter();
+
+        if (++value > SYSTEM_CHECK_MAX) {
+            _systemStable = false;
+            value         = 0; // system is unstable
+            myDebug_P(PSTR("[SYSTEM] Warning, system UNSTABLE\n"));
+        }
+    }
+
+    _setSystemStabilityCounter(value);
+}
+
+bool MyESP::getSystemCheck() {
+    return _systemStable;
+}
+
+void MyESP::_systemCheckLoop() {
+    static bool checked = false;
+    if (!checked && (millis() > SYSTEM_CHECK_TIME)) {
+        _setSystemCheck(true); // Flag system as stable
+        checked = true;
+    }
+}
+
+
 // print out ESP system stats
 // for battery power is ESP.getVcc()
 void MyESP::showSystemStats() {
@@ -892,6 +1029,10 @@ void MyESP::showSystemStats() {
 
     myDebug_P(PSTR(" [APP] System Load: %d%%"), getSystemLoadAverage());
 
+    if (!getSystemCheck()) {
+        myDebug_P(PSTR(" [SYSTEM] Device is in SAFE MODE"));
+    }
+
     if (isAPmode()) {
         myDebug_P(PSTR(" [WIFI] Device is in AP mode with SSID %s"), jw.getAPSSID().c_str());
     } else {
@@ -902,7 +1043,6 @@ void MyESP::showSystemStats() {
 
     myDebug_P(PSTR(" [WIFI] WiFi MAC: %s"), WiFi.macAddress().c_str());
 
-#ifdef CRASH
     char output_str[80] = {0};
     char buffer[16]     = {0};
     myDebug_P(PSTR(" [EEPROM] EEPROM size: %u"), EEPROMr.reserved() * SPI_FLASH_SEC_SIZE);
@@ -914,7 +1054,6 @@ void MyESP::showSystemStats() {
         strlcat(output_str, " ", sizeof(output_str));
     }
     myDebug(output_str);
-#endif
 
 #ifdef ARDUINO_BOARD
     myDebug_P(PSTR(" [SYSTEM] Board: %s"), ARDUINO_BOARD);
@@ -929,6 +1068,21 @@ void MyESP::showSystemStats() {
     myDebug_P(PSTR(" [SYSTEM] Boot version: %d"), ESP.getBootVersion());
     myDebug_P(PSTR(" [SYSTEM] Boot mode: %d"), ESP.getBootMode());
     //myDebug_P(PSTR("[SYSTEM] Firmware MD5: %s"), (char *)ESP.getSketchMD5().c_str());
+    unsigned char reason = _getCustomResetReason();
+    if (reason > 0) {
+        char buffer[32];
+        strcpy_P(buffer, custom_reset_string[reason - 1]);
+        myDebug_P(PSTR(" [SYSTEM] Last reset reason: %s"), buffer);
+    } else {
+        myDebug_P(PSTR(" [SYSTEM] Last reset reason: %s"), (char *)ESP.getResetReason().c_str());
+        myDebug_P(PSTR(" [SYSTEM] Last reset info: %s"), (char *)ESP.getResetInfo().c_str());
+    }
+    myDebug_P(PSTR(" [SYSTEM] Restart count: %d"), _getSystemStabilityCounter());
+
+    myDebug_P(PSTR(" [SYSTEM] rtcmem status:%u blocks:%u addr:0x%p"), _rtcmemStatus(), RtcmemSize, Rtcmem);
+    for (uint8_t block = 0; block < RtcmemSize; ++block) {
+        myDebug_P(PSTR(" [SYSTEM] rtcmem %02u: %u"), block, reinterpret_cast<volatile uint32_t *>(RTCMEM_ADDR)[block]);
+    }
 #endif
 
     FlashMode_t mode = ESP.getFlashChipMode();
@@ -942,10 +1096,10 @@ void MyESP::showSystemStats() {
 #endif
     myDebug_P(PSTR(" [FLASH] Flash size (SDK): %d"), ESP.getFlashChipSize());
     myDebug_P(PSTR(" [FLASH] Flash Reserved: %d"), 1 * SPI_FLASH_SEC_SIZE);
-    myDebug_P(PSTR(" [MEM] Firmware size: %d"), ESP.getSketchSize());
+    //myDebug_P(PSTR(" [MEM] Firmware size: %d"), ESP.getSketchSize()); // TODO: commented out because it causes a crash with 2.5.2
     myDebug_P(PSTR(" [MEM] Max OTA size: %d"), (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000);
     myDebug_P(PSTR(" [MEM] OTA Reserved: %d"), 4 * SPI_FLASH_SEC_SIZE);
-    //myDebug_P(PSTR(" [MEM] Free Heap: %d"), ESP.getFreeHeap());
+    myDebug_P(PSTR(" [MEM] Free Heap: %d"), ESP.getFreeHeap());
     myDebug_P(PSTR(""));
 }
 
@@ -1385,7 +1539,6 @@ int MyESP::getWifiQuality() {
     return 2 * (dBm + 100);
 }
 
-#ifdef CRASH
 /**
  * Save crash information in EEPROM
  * This function is called automatically if ESP8266 suffers an exception
@@ -1534,14 +1687,6 @@ void MyESP::crashDump() {
     myDebug_P(PSTR("<<<stack<<<"));
     myDebug_P(PSTR("\nTo clean this dump use the command: %scrash clear%s\n"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
 }
-#else
-void MyESP::crashClear() {
-}
-void MyESP::crashDump() {
-}
-void MyESP::crashInfo() {
-}
-#endif
 
 // setup MyESP
 void MyESP::begin(const char * app_hostname, const char * app_name, const char * app_version) {
@@ -1549,6 +1694,7 @@ void MyESP::begin(const char * app_hostname, const char * app_name, const char *
     _app_name     = strdup(app_name);
     _app_version  = strdup(app_version);
 
+    _rtcmemSetup();
     _telnet_setup(); // Telnet setup, called first to set Serial
     _eeprom_setup(); // set up eeprom for storing crash data, if compiled with -DCRASH
     _fs_setup();     // SPIFFS setup, do this first to get values
@@ -1558,6 +1704,8 @@ void MyESP::begin(const char * app_hostname, const char * app_name, const char *
     // print a welcome message
     myDebug_P(PSTR("\n* %s version %s"), _app_name, _app_version);
     SerialAndTelnet.flush();
+
+    _setSystemCheck(false); // reset system check
 }
 
 /*
@@ -1565,16 +1713,11 @@ void MyESP::begin(const char * app_hostname, const char * app_name, const char *
  */
 void MyESP::loop() {
     _calculateLoad();
+    _systemCheckLoop();
+
     _telnetHandle();
 
     jw.loop(); // WiFi
-
-    /*
-    // do nothing else until we've got a wifi connection
-    if (WiFi.getMode() & WIFI_AP) {
-        return;
-    }
-    */
 
     ArduinoOTA.handle(); // OTA
     _mqttConnect();      // MQTT

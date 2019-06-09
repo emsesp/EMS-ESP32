@@ -32,7 +32,7 @@ upload_protocol = espota
 upload_port = ems-esp.local
 
 [env:debug]
-build_flags = -g -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-parameter -Wno-unused-variable -DCRASH -DTESTS ${common.wifi_settings}
+build_flags = -g -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-parameter -Wno-unused-variable -DTESTS -DNO_GLOBAL_EEPROM ${common.wifi_settings}
 
 [env:clean]
 extra_scripts = pre:scripts/clean_fw.py
@@ -42,5 +42,5 @@ build_flags = -g -w
 extra_scripts = pre:scripts/rename_fw.py
 
 [env:checkcode]
-build_flags = -g -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-parameter -Wno-unused-variable -DCRASH -DTESTS
+build_flags = -g -w
 extra_scripts = scripts/checkcode.py

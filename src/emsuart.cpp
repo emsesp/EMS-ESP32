@@ -183,7 +183,7 @@ void ICACHE_FLASH_ATTR emsuart_tx_brk() {
     tmp = (1 << UCBRK);
     USC0(EMSUART_UART) |= (tmp); // set bit
 
-    if (EMS_Sys_Status.emsTxMode <= 2) { // classic mode
+    if (EMS_Sys_Status.emsTxMode <= 1) { // classic mode and ems+ (0, 1)
         delayMicroseconds(EMSUART_TX_BRK_WAIT);
     } else if (EMS_Sys_Status.emsTxMode == 3) {                  // junkers mode
         delayMicroseconds(EMSUART_TX_WAIT_BRK - EMSUART_TX_LAG); // 1144 (11 Bits)
@@ -238,10 +238,9 @@ void ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
         * - <BRK> is detected
         * At end of receive we re-enable Rx-INT and send a Tx-BRK in loopback mode.
         */
-
         ETS_UART_INTR_DISABLE(); // disable rx interrupt
 
-        // clear Rx status register - https://github.com/proddy/EMS-ESP/issues/103#issuecomment-495605798
+        // clear Rx status register
         USC0(EMSUART_UART) |= (1 << UCRXRST); // reset uart rx fifo
         emsuart_flush_fifos();
 
@@ -254,9 +253,9 @@ void ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
             }
         }
 
-        // we got the whole telegram in Rx buffer
-        // on Rx-BRK (bus collision), we simply enable Rx and leave
-        // otherwise, we send the final Tx-BRK in loopback and enable Rx-INT.
+        // we got the whole telegram in the Rx buffer
+        // on Rx-BRK (bus collision), we simply enable Rx and leave it
+        // otherwise we send the final Tx-BRK in the loopback and re=enable Rx-INT.
         // worst case, we'll see an additional Rx-BRK...
         if (!(USIS(EMSUART_UART) & (1 << UIBD))) {
             phantomBrk = 1; // tell Rx to expect a phantom BRK
@@ -276,7 +275,6 @@ void ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
         }
 
         // w/o flushing the Rx FIFO we will get a trailing \0 from our loopback BRK
-        // emsuart_flush_fifos();  // flush Rx buffer to be sure
         ETS_UART_INTR_ENABLE(); // receive anything from FIFO...
     }
 }
