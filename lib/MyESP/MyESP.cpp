@@ -1096,10 +1096,10 @@ void MyESP::showSystemStats() {
 #endif
     myDebug_P(PSTR(" [FLASH] Flash size (SDK): %d"), ESP.getFlashChipSize());
     myDebug_P(PSTR(" [FLASH] Flash Reserved: %d"), 1 * SPI_FLASH_SEC_SIZE);
-    //myDebug_P(PSTR(" [MEM] Firmware size: %d"), ESP.getSketchSize()); // TODO: commented out because it causes a crash with 2.5.2
-    myDebug_P(PSTR(" [MEM] Max OTA size: %d"), (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000);
-    myDebug_P(PSTR(" [MEM] OTA Reserved: %d"), 4 * SPI_FLASH_SEC_SIZE);
-    myDebug_P(PSTR(" [MEM] Free Heap: %d"), ESP.getFreeHeap());
+    myDebug(" [MEM] Firmware size: %d", ESP.getSketchSize()); // TODO: commented out because it causes a crash with 2.5.2
+    myDebug(" [MEM] Max OTA size: %d", (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000);
+    myDebug(" [MEM] OTA Reserved: %d", 4 * SPI_FLASH_SEC_SIZE);
+    myDebug(" [MEM] Free Heap: %d", ESP.getFreeHeap());
     myDebug_P(PSTR(""));
 }
 
