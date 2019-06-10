@@ -168,7 +168,6 @@ const _EMS_Type EMS_Types[] = {
 
     // Easy
     {EMS_MODEL_EASY, EMS_TYPE_EasyStatusMessage, "EasyStatusMessage", _process_EasyStatusMessage},
-    {EMS_MODEL_BOSCHEASY, EMS_TYPE_EasyStatusMessage, "EasyStatusMessage", _process_EasyStatusMessage},
 
     // Nefit 1010, RC300, RC310 (EMS Plus)
     {EMS_MODEL_ALL, EMS_TYPE_RCPLUSStatusMessage, "RCPLUSStatusMessage", _process_RCPLUSStatusMessage},
@@ -584,8 +583,8 @@ void _ems_sendTelegram() {
         }
 
         EMS_TxTelegram.data[EMS_TxTelegram.length - 1] = _crcCalculator(EMS_TxTelegram.data, EMS_TxTelegram.length); // add the CRC
-        emsuart_tx_buffer(EMS_TxTelegram.data, EMS_TxTelegram.length); // send the telegram to the UART Tx
-        EMS_TxQueue.shift();                                           // and remove from queue
+        emsuart_tx_buffer(EMS_TxTelegram.data, EMS_TxTelegram.length);                                               // send the telegram to the UART Tx
+        EMS_TxQueue.shift();                                                                                         // and remove from queue
         return;
     }
 
@@ -1317,10 +1316,10 @@ void _process_RCPLUSStatusMode(_EMS_RxTelegram * EMS_RxTelegram) {
  * FR10 Junkers - type x6F01
  */
 void _process_JunkersStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
-        // e.g. for FR10:  90 00 FF 00 00 6F 03 01 00 BE 00 BF
-        // e.g. for FW100: 90 00 FF 00 00 6F 03 02 00 D7 00 DA F3 34 00 C4
-        EMS_Thermostat.curr_roomTemp     = _toShort(EMS_OFFSET_JunkersStatusMessage_curr);     // value is * 10
-        EMS_Thermostat.setpoint_roomTemp = _toShort(EMS_OFFSET_JunkersStatusMessage_setpoint); // value is * 10
+    // e.g. for FR10:  90 00 FF 00 00 6F 03 01 00 BE 00 BF
+    // e.g. for FW100: 90 00 FF 00 00 6F 03 02 00 D7 00 DA F3 34 00 C4
+    EMS_Thermostat.curr_roomTemp     = _toShort(EMS_OFFSET_JunkersStatusMessage_curr);     // value is * 10
+    EMS_Thermostat.setpoint_roomTemp = _toShort(EMS_OFFSET_JunkersStatusMessage_setpoint); // value is * 10
 }
 
 /**
@@ -1484,9 +1483,9 @@ void _process_HPMonitor2(_EMS_RxTelegram * EMS_RxTelegram) {
  */
 void _process_ISM1StatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     // e.g. B0 00 FF 00 00 03 32 00 00 00 00 13 00 D6 00 00 00 FB D0 F0
-    EMS_Other.SMcollectorTemp  = _toShort(4); // Collector Temperature
-    EMS_Other.SMbottomTemp  = _toShort(6); // Temperature Bottom of Solar Boiler
-    EMS_Other.SM                = true;
+    EMS_Other.SMcollectorTemp = _toShort(4); // Collector Temperature
+    EMS_Other.SMbottomTemp    = _toShort(6); // Temperature Bottom of Solar Boiler
+    EMS_Other.SM              = true;
 }
 
 /**
@@ -1517,7 +1516,7 @@ void _process_SetPoints(_EMS_RxTelegram * EMS_RxTelegram) {
  * common for all thermostats
  */
 void _process_RCTime(_EMS_RxTelegram * EMS_RxTelegram) {
-    if ((EMS_Thermostat.model_id == EMS_MODEL_EASY) || (EMS_Thermostat.model_id == EMS_MODEL_BOSCHEASY)) {
+    if ((EMS_Thermostat.model_id == EMS_MODEL_EASY)) {
         return; // not supported
     }
 
@@ -1569,15 +1568,16 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
         return;
     }
 
-    uint8_t product_id  = _toByte(0);
-    char    version[10] = {0};
+    uint8_t product_id = _toByte(0);
+
+    char version[10] = {0};
     snprintf(version, sizeof(version), "%02d.%02d", _toByte(1), _toByte(2));
 
     // see if its a known boiler
     int  i         = 0;
     bool typeFound = false;
     while (i < _Boiler_Types_max) {
-        if (Boiler_Types[i].product_id == product_id) {
+        if ((Boiler_Types[i].product_id == product_id) && ((EMS_RxTelegram->src & 0x7F) == EMS_ID_BOILER)) {
             typeFound = true; // we have a matching product id. i is the index.
             break;
         }
@@ -1586,7 +1586,7 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
 
     if (typeFound) {
         // its a boiler
-        myDebug_P(PSTR("Boiler found. Model %s (DeviceID:0x%02X ProductID:%d Version:%s)"), Boiler_Types[i].model_string, EMS_ID_BOILER, product_id, version);
+        myDebug_P(PSTR("Boiler found: %s (DeviceID:0x%02X ProductID:%d Version:%s)"), Boiler_Types[i].model_string, EMS_ID_BOILER, product_id, version);
 
         // add to list
         _addDevice(product_id, EMS_ID_BOILER, version, Boiler_Types[i].model_string);
@@ -1629,7 +1629,7 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
     if (typeFound) {
         // its a known thermostat
         if (EMS_Sys_Status.emsLogging >= EMS_SYS_LOGGING_BASIC) {
-            myDebug_P(PSTR("Thermostat found. Model %s (DeviceID:0x%02X ProductID:%d Version:%s)"),
+            myDebug_P(PSTR("Thermostat found: %s (DeviceID:0x%02X ProductID:%d Version:%s)"),
                       Thermostat_Types[i].model_string,
                       Thermostat_Types[i].device_id,
                       product_id,
@@ -1643,7 +1643,7 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
         if (((EMS_Thermostat.device_id == EMS_ID_NONE) || (EMS_Thermostat.model_id == EMS_MODEL_NONE)
              || (EMS_Thermostat.device_id == Thermostat_Types[i].device_id))
             && EMS_Thermostat.product_id == EMS_ID_NONE) {
-            myDebug_P(PSTR("* Setting Thermostat model to %s (DeviceID:0x%02X ProductID:%d Version:%s)"),
+            myDebug_P(PSTR("* Setting Thermostat to %s (DeviceID:0x%02X ProductID:%d Version:%s)"),
                       Thermostat_Types[i].model_string,
                       Thermostat_Types[i].device_id,
                       product_id,
@@ -1674,7 +1674,7 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
     }
 
     if (typeFound) {
-        myDebug_P(PSTR("Device found. Model %s with DeviceID 0x%02X, ProductID %d, Version %s"),
+        myDebug_P(PSTR("Device found: %s with DeviceID 0x%02X, ProductID %d, Version %s"),
                   Other_Types[i].model_string,
                   Other_Types[i].device_id,
                   product_id,
@@ -1700,7 +1700,7 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
         return;
 
     } else {
-        myDebug_P(PSTR("Unrecognized device found. DeviceID 0x%02X, ProductID %d, Version %s"), EMS_RxTelegram->src, product_id, version);
+        myDebug_P(PSTR("Unrecognized device found: DeviceID 0x%02X, ProductID %d, Version %s"), EMS_RxTelegram->src, product_id, version);
 
         // add to list
         _addDevice(product_id, EMS_RxTelegram->src, version, "unknown?");
@@ -1712,7 +1712,7 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
  * Do a read command for the version with the src having the MSB set
  */
 void _ems_detectJunkers() {
-    char s[20] = {0};
+    char s[30] = {0};
     snprintf(s, sizeof(s), "%02X %02X %02X 00 %02X", (EMS_ID_ME | 0x80), (EMS_ID_BOILER | 0x080), EMS_TYPE_Version, EMS_MAX_TELEGRAM_LENGTH);
     ems_sendRawTelegram(s);
 }
@@ -1725,8 +1725,7 @@ void ems_discoverModels() {
 
     // boiler...
     ems_doReadCommand(EMS_TYPE_Version, EMS_ID_BOILER);
-
-    _ems_detectJunkers(); // special hack for Junkers.
+    _ems_detectJunkers(); // special hack for Junkers detection
 
     // solar module...
     ems_doReadCommand(EMS_TYPE_Version, EMS_ID_SM); // check if there is Solar Module available
@@ -1823,7 +1822,7 @@ void ems_getThermostatValues() {
             ems_doReadCommand(EMS_TYPE_RC35StatusMessage_HC2, type); // to get the setpoint temp
             ems_doReadCommand(EMS_TYPE_RC35Set_HC2, type);           // to get the mode
         }
-    } else if ((model_id == EMS_MODEL_EASY) || (model_id == EMS_MODEL_BOSCHEASY)) {
+    } else if ((model_id == EMS_MODEL_EASY)) {
         ems_doReadCommand(EMS_TYPE_EasyStatusMessage, type);
     }
 

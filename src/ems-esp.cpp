@@ -479,8 +479,7 @@ void showInfo() {
         myDebug_P(PSTR("  Thermostat: %s"), ems_getThermostatDescription(buffer_type));
 
         // Render Current & Setpoint Room Temperature
-        if ((ems_getThermostatModel() == EMS_MODEL_EASY) || (ems_getThermostatModel() == EMS_MODEL_BOSCHEASY) || (ems_getThermostatModel() == EMS_MODEL_FR10)
-            || (ems_getThermostatModel() == EMS_MODEL_FW100)) {
+        if ((ems_getThermostatModel() == EMS_MODEL_EASY) || (ems_getThermostatModel() == EMS_MODEL_FR10) || (ems_getThermostatModel() == EMS_MODEL_FW100)) {
             // Temperatures are *10
             _renderShortValue("Set room temperature", "C", EMS_Thermostat.setpoint_roomTemp, 10); // *100
             _renderShortValue("Current room temperature", "C", EMS_Thermostat.curr_roomTemp, 10); // *100
@@ -695,8 +694,7 @@ void publishValues(bool force) {
         rootThermostat[THERMOSTAT_HC] = _int_to_char(s, EMSESP_Status.heating_circuit);
 
         // different logic depending on thermostat types
-        if ((ems_getThermostatModel() == EMS_MODEL_EASY) || (ems_getThermostatModel() == EMS_MODEL_BOSCHEASY) || (ems_getThermostatModel() == EMS_MODEL_FR10)
-            || (ems_getThermostatModel() == EMS_MODEL_FW100)) {
+        if ((ems_getThermostatModel() == EMS_MODEL_EASY) || (ems_getThermostatModel() == EMS_MODEL_FR10) || (ems_getThermostatModel() == EMS_MODEL_FW100)) {
             if (abs(EMS_Thermostat.setpoint_roomTemp) < EMS_VALUE_SHORT_NOTSET)
                 rootThermostat[THERMOSTAT_SELTEMP] = (double)EMS_Thermostat.setpoint_roomTemp / 10;
             if (abs(EMS_Thermostat.curr_roomTemp) < EMS_VALUE_SHORT_NOTSET)

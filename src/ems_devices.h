@@ -135,7 +135,6 @@ typedef enum {
     EMS_MODEL_RC30,
     EMS_MODEL_RC35,
     EMS_MODEL_EASY,
-    EMS_MODEL_BOSCHEASY,
     EMS_MODEL_RC310,
     EMS_MODEL_CW100,
     EMS_MODEL_1010,
@@ -154,7 +153,7 @@ typedef enum {
 const _Boiler_Type Boiler_Types[] = {
 
     {EMS_MODEL_UBA, 72, "MC10 Module"},
-    {EMS_MODEL_UBA, 123, "Buderus GB172/Nefit Trendline"},
+    {EMS_MODEL_UBA, 123, "Buderus GB172/Nefit Trendline/Junkers Cerapur"},
     {EMS_MODEL_UBA, 115, "Nefit Topline Compact/Buderus GB162"},
     {EMS_MODEL_UBA, 203, "Buderus Logamax U122/Junkers Cerapur"},
     {EMS_MODEL_UBA, 208, "Buderus Logamax plus/GB192"},
@@ -195,7 +194,8 @@ const _Thermostat_Type Thermostat_Types[] = {
 
     // Easy devices - not currently supporting write operations
     {EMS_MODEL_EASY, 202, 0x18, "TC100/Nefit Easy", EMS_THERMOSTAT_WRITE_NO},
-    {EMS_MODEL_BOSCHEASY, 206, 0x02, "Bosch Easy", EMS_THERMOSTAT_WRITE_NO},
+    {EMS_MODEL_EASY, 203, 0x18, "Bosch EasyControl CT200", EMS_THERMOSTAT_WRITE_NO},
+    {EMS_MODEL_EASY, 206, 0x02, "Bosch Easy", EMS_THERMOSTAT_WRITE_NO},
     {EMS_MODEL_CW100, 157, 0x18, "CW100", EMS_THERMOSTAT_WRITE_NO},
 
     // Buderus/Nefit
