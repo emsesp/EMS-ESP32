@@ -479,11 +479,17 @@ void showInfo() {
         myDebug_P(PSTR("  Thermostat: %s"), ems_getThermostatDescription(buffer_type));
 
         // Render Current & Setpoint Room Temperature
-        if ((ems_getThermostatModel() == EMS_MODEL_EASY) || (ems_getThermostatModel() == EMS_MODEL_FR10) || (ems_getThermostatModel() == EMS_MODEL_FW100)) {
-            // Temperatures are *10
+        if ((ems_getThermostatModel() == EMS_MODEL_EASY)) {
+            // Temperatures are *100
             _renderShortValue("Set room temperature", "C", EMS_Thermostat.setpoint_roomTemp, 10); // *100
             _renderShortValue("Current room temperature", "C", EMS_Thermostat.curr_roomTemp, 10); // *100
-        } else {
+        } 
+        else if ((ems_getThermostatModel() == EMS_MODEL_FR10) || (ems_getThermostatModel() == EMS_MODEL_FW100)) {
+            // Temperatures are *10
+            _renderShortValue("Set room temperature", "C", EMS_Thermostat.setpoint_roomTemp, 1); // *10
+            _renderShortValue("Current room temperature", "C", EMS_Thermostat.curr_roomTemp, 1); // *10
+        }
+        else {
             // because we store in 2 bytes short, when converting to a single byte we'll loose the negative value if its unset
             if (EMS_Thermostat.setpoint_roomTemp <= 0) {
                 EMS_Thermostat.setpoint_roomTemp = EMS_VALUE_INT_NOTSET;
