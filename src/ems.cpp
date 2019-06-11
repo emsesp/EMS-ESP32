@@ -682,25 +682,11 @@ void _createValidate() {
 
 /**
  * Entry point triggered by an interrupt in emsuart.cpp
- * length is size of all the telegram bytes including the CRC, excluding the BRK at the end
+ * length is the number of all the telegram bytes up to and including the CRC at the end
  * Read commands are asynchronous as they're handled by the interrupt
  * When a telegram is processed we forcefully erase it from the stack to prevent overflow
  */
 void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
-    if ((length != 0) && (telegram[0] != 0x00)) {
-        _ems_readTelegram(telegram, length);
-    }
-
-    // clear the Rx buffer just be safe and prevent duplicates
-    memset(telegram, 0, EMS_MAXBUFFERSIZE);
-}
-
-/**
- * the main logic that parses the telegram message
- * When we receive a Poll Request we need to send any Tx packages quickly within a 200ms window
- * length is total number of bytes of the telegram including the CRC byte at the end (if it exists)
- */
-void _ems_readTelegram(uint8_t * telegram, uint8_t length) {
     // create the Rx package
     static _EMS_RxTelegram EMS_RxTelegram;
     static uint32_t        _last_emsPollFrequency = 0;
@@ -980,7 +966,7 @@ void _removeTxQueue() {
 void _processType(_EMS_RxTelegram * EMS_RxTelegram) {
     uint8_t * telegram = EMS_RxTelegram->telegram;
 
-    // if its an echo of ourselves from the master UBA, ignore
+    // if its an echo of ourselves from the master UBA, ignore. This should never happen mind you
     if (EMS_RxTelegram->src == EMS_ID_ME) {
         // _debugPrintTelegram("echo:", EMS_RxTelegram, COLOR_WHITE);
         return;
@@ -1674,11 +1660,7 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
     }
 
     if (typeFound) {
-        myDebug_P(PSTR("Device found: %s with DeviceID 0x%02X, ProductID %d, Version %s"),
-                  Other_Types[i].model_string,
-                  Other_Types[i].device_id,
-                  product_id,
-                  version);
+        myDebug_P(PSTR("Device found: %s (DeviceID:0x%02X ProductID:%d Version:%s)"), Other_Types[i].model_string, Other_Types[i].device_id, product_id, version);
 
         // add to list
         _addDevice(product_id, Other_Types[i].device_id, version, Other_Types[i].model_string);
@@ -1700,7 +1682,7 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
         return;
 
     } else {
-        myDebug_P(PSTR("Unrecognized device found: DeviceID 0x%02X, ProductID %d, Version %s"), EMS_RxTelegram->src, product_id, version);
+        myDebug_P(PSTR("Unrecognized device found: %s (DeviceID:0x%02X ProductID:%d Version:%s)"), EMS_RxTelegram->src, product_id, version);
 
         // add to list
         _addDevice(product_id, EMS_RxTelegram->src, version, "unknown?");
@@ -1767,6 +1749,8 @@ void ems_printTxQueue() {
             strlcpy(sType, "read", sizeof(sType));
         } else if (EMS_TxTelegram.action == EMS_TX_TELEGRAM_VALIDATE) {
             strlcpy(sType, "validate", sizeof(sType));
+        } else if (EMS_TxTelegram.action == EMS_TX_TELEGRAM_RAW) {
+            strlcpy(sType, "raw", sizeof(sType));
         } else {
             strlcpy(sType, "?", sizeof(sType));
         }
@@ -2501,7 +2485,7 @@ void ems_testTelegram(uint8_t test_num) {
     myDebug_P(PSTR("[TEST %d] Injecting telegram %s"), test_num, TEST_DATA[test_num - 1]);
 
     // go an parse it
-    _ems_readTelegram(telegram, length + 1); // include CRC in length
+    ems_parseTelegram(telegram, length + 1); // include CRC in length
 #else
     myDebug_P(PSTR("Firmware not compiled with test data set"));
 #endif

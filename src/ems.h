@@ -298,6 +298,14 @@ extern void ems_parseTelegram(uint8_t * telegram, uint8_t len);
 void        ems_init();
 void        ems_doReadCommand(uint16_t type, uint8_t dest, bool forceRefresh = false);
 void        ems_sendRawTelegram(char * telegram);
+void        ems_scanDevices();
+void        ems_printAllDevices();
+void        ems_printDevices();
+void        ems_printTxQueue();
+void        ems_testTelegram(uint8_t test_num);
+void        ems_startupTelegrams();
+bool        ems_checkEMSBUSAlive();
+void        ems_clearDeviceList();
 
 void ems_setThermostatTemp(float temperature, uint8_t temptype = 0);
 void ems_setThermostatMode(uint8_t mode);
@@ -311,11 +319,11 @@ void ems_setTxMode(uint8_t mode);
 void ems_setLogging(_EMS_SYS_LOGGING loglevel);
 void ems_setEmsRefreshed(bool b);
 void ems_setWarmWaterModeComfort(uint8_t comfort);
-bool ems_checkEMSBUSAlive();
 void ems_setModels();
 void ems_setTxDisabled(bool b);
-void ems_clearDeviceList();
 
+char *           ems_getThermostatDescription(char * buffer);
+char *           ems_getBoilerDescription(char * buffer);
 void             ems_getThermostatValues();
 void             ems_getBoilerValues();
 void             ems_getOtherValues();
@@ -332,15 +340,6 @@ void             ems_discoverModels();
 bool             ems_getTxCapable();
 uint32_t         ems_getPollFrequency();
 
-void   ems_scanDevices();
-void   ems_printAllDevices();
-void   ems_printDevices();
-char * ems_getThermostatDescription(char * buffer);
-void   ems_printTxQueue();
-char * ems_getBoilerDescription(char * buffer);
-void   ems_testTelegram(uint8_t test_num);
-void   ems_startupTelegrams();
-
 // private functions
 uint8_t _crcCalculator(uint8_t * data, uint8_t len);
 void    _processType(_EMS_RxTelegram * EMS_RxTelegram);
@@ -349,7 +348,6 @@ void    _ems_clearTxData();
 int     _ems_findBoilerModel(uint8_t model_id);
 bool    _ems_setModel(uint8_t model_id);
 void    _removeTxQueue();
-void    _ems_readTelegram(uint8_t * telegram, uint8_t length);
 
 // global so can referenced in other classes
 extern _EMS_Sys_Status EMS_Sys_Status;

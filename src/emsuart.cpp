@@ -7,16 +7,12 @@
 
 #include "emsuart.h"
 #include "ems.h"
-#include "ets_sys.h"
-#include "osapi.h"
-
 #include <Arduino.h>
 #include <user_interface.h>
 
 _EMSRxBuf * pEMSRxBuf;
 _EMSRxBuf * paEMSRxBuf[EMS_MAXBUFFERS];
 uint8_t     emsRxBufIdx = 0;
-uint8_t     phantomBrk  = 0; // tells Rx about upcoming phantom break from Tx
 
 os_event_t recvTaskQueue[EMSUART_recvTaskQueueLen]; // our Rx queue
 
@@ -35,39 +31,28 @@ static void emsuart_rx_intr_handler(void * para) {
     }
 
     // fill IRQ buffer, by emptying Rx FIFO
-    if (U0IS & ((1 << UIFF) | (1 << UITO) | (1 << UIBD))) {
+    if (USIS(EMSUART_UART) & ((1 << UIFF) | (1 << UITO) | (1 << UIBD))) {
         while ((USS(EMSUART_UART) >> USRXC) & 0xFF) {
             uart_buffer[length++] = USF(EMSUART_UART);
         }
 
         // clear Rx FIFO full and Rx FIFO timeout interrupts
-        U0IC = (1 << UIFF) | (1 << UITO);
+        USIC(EMSUART_UART) = (1 << UIFF) | (1 << UITO);
     }
 
     // BREAK detection = End of EMS data block
     if (USIS(EMSUART_UART) & ((1 << UIBD))) {
         ETS_UART_INTR_DISABLE(); // disable all interrupts and clear them
 
-        U0IC = (1 << UIBD); // INT clear the BREAK detect interrupt
+        USIC(EMSUART_UART) = (1 << UIBD); // INT clear the BREAK detect interrupt
 
-        // we've send a BRK with loopback enabled, so we must compensate the phantom break
-        if (phantomBrk) {
-            length--;       // compensate buffer length
-            phantomBrk = 0; // clear flag
-        }
+        pEMSRxBuf->length = length;
+        os_memcpy((void *)pEMSRxBuf->buffer, (void *)&uart_buffer, length); // copy data into transfer buffer, including the BRK 0x00 at the end
+        EMS_Sys_Status.emsRxStatus = EMS_RX_STATUS_IDLE;                    // set the status flag stating BRK has been received and we can start a new package
 
-        // copy data into transfer buffer
-        pEMSRxBuf->writePtr = length;
-        os_memcpy((void *)pEMSRxBuf->buffer, (void *)&uart_buffer, length);
+        system_os_post(EMSUART_recvTaskPrio, 0, 0); // call emsuart_recvTask() at next opportunity
 
-        // set the status flag stating BRK has been received and we can start a new package
-        EMS_Sys_Status.emsRxStatus = EMS_RX_STATUS_IDLE;
-
-        // call emsuart_recvTask() at next opportunity
-        system_os_post(EMSUART_recvTaskPrio, 0, 0);
-
-        // re-enable UART interrupts
-        ETS_UART_INTR_ENABLE();
+        ETS_UART_INTR_ENABLE(); // re-enable UART interrupts
     }
 }
 
@@ -78,8 +63,21 @@ static void emsuart_rx_intr_handler(void * para) {
  */
 static void ICACHE_FLASH_ATTR emsuart_recvTask(os_event_t * events) {
     _EMSRxBuf * pCurrent = pEMSRxBuf;
-    ems_parseTelegram((uint8_t *)pCurrent->buffer, (pCurrent->writePtr) - 1); // transmit EMS buffer, excluding the BRK
-    pEMSRxBuf = paEMSRxBuf[++emsRxBufIdx % EMS_MAXBUFFERS];                   // next free EMS Receive buffer
+    uint8_t     length   = pCurrent->length; // number of bytes including the BRK at the end
+
+    // validate and transmit the EMS buffer, excluding the BRK
+    if (length == 2) {
+        // it's a poll or status code, single byte
+        ems_parseTelegram((uint8_t *)pCurrent->buffer, 1);
+    } else if ((length > 4) && (pCurrent->buffer[length - 2] != 0x00)) {
+        // ignore double BRK at the end, possibly from the Tx loopback
+        // also telegrams with no data value
+        ems_parseTelegram((uint8_t *)pCurrent->buffer, length - 1); // transmit EMS buffer, excluding the BRK
+    }
+
+    memset(pCurrent->buffer, 0x00, EMS_MAXBUFFERSIZE); // wipe memory just to be safe
+
+    pEMSRxBuf = paEMSRxBuf[++emsRxBufIdx % EMS_MAXBUFFERS]; // next free EMS Receive buffer
 }
 
 /*
@@ -119,8 +117,8 @@ void ICACHE_FLASH_ATTR emsuart_init() {
 
     // conf1 params
     // UCTOE = RX TimeOut enable (default is 1)
-    // UCTOT = RX TimeOut Threshold (7bit) = want this when no more data after 2 characters. (default is 2)
-    // UCFFT = RX FIFO Full Threshold (7 bit) = want this to be 31 for 32 bytes of buffer. (default was 127).
+    // UCTOT = RX TimeOut Threshold (7 bit) = want this when no more data after 2 characters (default is 2)
+    // UCFFT = RX FIFO Full Threshold (7 bit) = want this to be 31 for 32 bytes of buffer (default was 127)
     // see https://www.espressif.com/sites/default/files/documentation/esp8266-technical_reference_en.pdf
     USC1(EMSUART_UART) = 0;                                                                   // reset config first
     USC1(EMSUART_UART) = (EMS_MAX_TELEGRAM_LENGTH << UCFFT) | (0x02 << UCTOT) | (1 << UCTOE); // enable interupts
@@ -130,14 +128,14 @@ void ICACHE_FLASH_ATTR emsuart_init() {
     USIE(EMSUART_UART) = 0;      // disable all interrupts
 
     // enable rx break, fifo full and timeout.
-    // not frame error UIFR (because they are too frequent) or overflow UIOF because our buffer is only max 32 bytes
+    // but not frame error UIFR (because they are too frequent) or overflow UIOF because our buffer is only max 32 bytes
     USIE(EMSUART_UART) = (1 << UIBD) | (1 << UIFF) | (1 << UITO);
 
     // set up interrupt callbacks for Rx
     system_os_task(emsuart_recvTask, EMSUART_recvTaskPrio, recvTaskQueue, EMSUART_recvTaskQueueLen);
 
-    // disable esp debug which will go to Tx and mess up the line
-    system_set_os_print(0); // https://github.com/espruino/Espruino/issues/655
+    // disable esp debug which will go to Tx and mess up the line - see https://github.com/espruino/Espruino/issues/655
+    system_set_os_print(0);
 
 // swap Rx and Tx pins to use GPIO13 (D7) and GPIO15 (D8) respectively
 #ifndef NO_UART_SWAP
@@ -206,6 +204,9 @@ static inline void ICACHE_FLASH_ATTR emsuart_loopback(bool enable) {
  * Send to Tx, ending with a <BRK>
  */
 void ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
+    if (len == 0)
+        return;
+
     if (EMS_Sys_Status.emsTxMode == 0) { // classic mode logic
         for (uint8_t i = 0; i < len; i++) {
             USF(EMSUART_UART) = buf[i];
@@ -258,8 +259,6 @@ void ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
         // otherwise we send the final Tx-BRK in the loopback and re=enable Rx-INT.
         // worst case, we'll see an additional Rx-BRK...
         if (!(USIS(EMSUART_UART) & (1 << UIBD))) {
-            phantomBrk = 1; // tell Rx to expect a phantom BRK
-
             // no bus collision - send terminating BRK signal
             emsuart_loopback(true);
             USC0(EMSUART_UART) |= (1 << UCBRK); // set <BRK>
@@ -268,13 +267,13 @@ void ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
             while (!(USIS(EMSUART_UART) & (1 << UIBD))) {
                 delayMicroseconds(EMSUART_BIT_TIME);
             }
+
             USC0(EMSUART_UART) &= ~(1 << UCBRK); // clear <BRK>
 
             USIC(EMSUART_UART) = (1 << UIBD); // clear BRK detect IRQ
             emsuart_loopback(false);          // disable loopback mode
         }
 
-        // w/o flushing the Rx FIFO we will get a trailing \0 from our loopback BRK
         ETS_UART_INTR_ENABLE(); // receive anything from FIFO...
     }
 }
