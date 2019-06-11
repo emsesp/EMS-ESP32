@@ -157,7 +157,7 @@ const _Boiler_Type Boiler_Types[] = {
     {EMS_MODEL_UBA, 115, "Nefit Topline Compact/Buderus GB162"},
     {EMS_MODEL_UBA, 203, "Buderus Logamax U122/Junkers Cerapur"},
     {EMS_MODEL_UBA, 208, "Buderus Logamax plus/GB192"},
-    {EMS_MODEL_UBA, 64, "Sieger BK15 Boiler/Nefit Smartline/Buderus GB152"},
+    {EMS_MODEL_UBA, 64, "Sieger BK15/Nefit Smartline/Buderus GB152"},
     {EMS_MODEL_UBA, EMS_PRODUCTID_HEATRONICS, "Bosch Condens 2500/Junkers Heatronics3"}, // Junkers
     {EMS_MODEL_UBA, 122, "Nefit Proline"},
     {EMS_MODEL_UBA, 172, "Nefit Enviline"}
