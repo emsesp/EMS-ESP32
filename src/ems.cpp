@@ -348,7 +348,7 @@ void ems_setTxMode(uint8_t mode) {
     // https://github.com/proddy/EMS-ESP/issues/103#issuecomment-495945850
     if (mode == 3) {
         EMS_Sys_Status.emsReverse = true;
-        myDebug_P(PSTR("Forcing emsReverse for Junkers"));
+        myDebug_P(PSTR("Forcing emsReverse for Junkers")); // TODO: remove at some point when 2 is the standard
     } else {
         EMS_Sys_Status.emsReverse = false;
     }
