@@ -17,11 +17,4 @@ import os
 # 3fffffb0: feefeffe feefeffe 3ffe8558 40100b01
 # <<<stack<<<
 
-# two ways of analyzing the dumps
-# 1. java -jar .\EspStackTraceDecoder.jar C:\Users\Paul\.platformio\packages\toolchain-xtensa\bin\xtensa-lx106-elf-addr2line.exe .pioenvs/d1_mini/firmware_d1_mini.elf stackdmp.txt
-# 2. python decoder.py -p ESP8266 -t C:\Users\Paul\.platformio\packages\toolchain-xtensa -e .pioenvs/nodemcuv2/firmware.elf stackdmp.txt
-
-# for linux use
-# /mnt/c/users/paul/.platformio/packages/toolchain-xtensa/bin
-
-call(['python', 'decoder.py ', '-s', '-e', os.getcwd()+"/.pioenvs/d1_mini/firmware_d1_mini.elf", 'stackdmp.txt'])
+call(['python', 'scripts/decoder.py ', '-s', '-e', os.getcwd()+"/.pio/build/debug/firmware_d1_mini.elf", 'scripts/stackdmp.txt'])

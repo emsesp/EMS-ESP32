@@ -12,13 +12,16 @@
 
 #include <Arduino.h>
 
-// EMS IDs
-#define EMS_ID_NONE 0x00      // Fixed - used as a dest in broadcast messages and empty device IDs
-#define EMS_PLUS_ID_NONE 0x01 // Fixed - used as a dest in broadcast messages and empty device IDs
-#define EMS_ID_ME 0x0B        // Fixed - our device, hardcoded as the "Service Key"
-#define EMS_ID_DEFAULT_BOILER 0x08
+#define EMS_ID_NONE 0x00 // used as a dest in broadcast messages and empty device IDs
+
+// Fixed EMS IDs
+#define EMS_ID_ME 0x0B      // our device, hardcoded as the "Service Key"
+#define EMS_ID_BOILER 0x08  // all UBA Boilers have 0x08
 #define EMS_ID_SM 0x30      // Solar Module SM10 and SM100
+#define EMS_ID_HP 0x38      // HeatPump
 #define EMS_ID_GATEWAY 0x48 // KM200 Web Gateway
+
+#define EMS_PRODUCTID_HEATRONICS 95 // ProductID for a Junkers Heatronic3 device
 
 #define EMS_MIN_TELEGRAM_LENGTH 6 // minimal length for a validation telegram, including CRC
 
@@ -44,7 +47,7 @@
 
 #define EMS_TX_TELEGRAM_QUEUE_MAX 100 // max size of Tx FIFO queue
 
-// #define EMS_SYS_LOGGING_DEFAULT EMS_SYS_LOGGING_VERBOSE
+//#define EMS_SYS_LOGGING_DEFAULT EMS_SYS_LOGGING_VERBOSE
 #define EMS_SYS_LOGGING_DEFAULT EMS_SYS_LOGGING_NONE
 
 /* EMS UART transfer status */
@@ -94,7 +97,7 @@ typedef struct {
     bool             emsTxCapable;     // able to send via Tx
     bool             emsTxDisabled;    // true to prevent all Tx
     uint8_t          txRetryCount;     // # times the last Tx was re-sent
-    bool             emsTxDelay;       // if true, slows down the Tx transmit
+    bool             emsReverse;       // if true, poll logic is reversed
 } _EMS_Sys_Status;
 
 // The Tx send package
@@ -148,7 +151,6 @@ const _EMS_TxTelegram EMS_TX_TELEGRAM_NEW = {
 typedef struct {
     uint8_t model_id;
     uint8_t product_id;
-    uint8_t device_id;
     char    model_string[50];
 } _Boiler_Type;
 
@@ -241,7 +243,8 @@ typedef struct {           // UBAParameterWW
 
 // SM Solar Module - SM10Monitor/SM100Monitor
 typedef struct {
-    bool    SM;               // set true if there is a SM available
+    bool    SM;               // set true if there is a Solar Module available
+    bool    HP;               // set true if there is a Heat Pump available
     int16_t SMcollectorTemp;  // collector temp
     int16_t SMbottomTemp;     // bottom temp
     uint8_t SMpumpModulation; // modulation solar pump
@@ -249,6 +252,8 @@ typedef struct {
     int16_t SMEnergyLastHour;
     int16_t SMEnergyToday;
     int16_t SMEnergyTotal;
+    uint8_t HPModulation; // heatpump modulation in %
+    uint8_t HPSpeed;      // speed 0-100 %
 } _EMS_Other;
 
 // Thermostat data
@@ -292,6 +297,14 @@ extern void ems_parseTelegram(uint8_t * telegram, uint8_t len);
 void        ems_init();
 void        ems_doReadCommand(uint16_t type, uint8_t dest, bool forceRefresh = false);
 void        ems_sendRawTelegram(char * telegram);
+void        ems_scanDevices();
+void        ems_printAllDevices();
+void        ems_printDevices();
+void        ems_printTxQueue();
+void        ems_testTelegram(uint8_t test_num);
+void        ems_startupTelegrams();
+bool        ems_checkEMSBUSAlive();
+void        ems_clearDeviceList();
 
 void ems_setThermostatTemp(float temperature, uint8_t temptype = 0);
 void ems_setThermostatMode(uint8_t mode);
@@ -301,14 +314,14 @@ void ems_setFlowTemp(uint8_t temperature);
 void ems_setWarmWaterActivated(bool activated);
 void ems_setWarmTapWaterActivated(bool activated);
 void ems_setPoll(bool b);
-void ems_setTxDelay(bool b);
 void ems_setLogging(_EMS_SYS_LOGGING loglevel);
 void ems_setEmsRefreshed(bool b);
 void ems_setWarmWaterModeComfort(uint8_t comfort);
-bool ems_checkEMSBUSAlive();
 void ems_setModels();
 void ems_setTxDisabled(bool b);
 
+char *           ems_getThermostatDescription(char * buffer);
+char *           ems_getBoilerDescription(char * buffer);
 void             ems_getThermostatValues();
 void             ems_getBoilerValues();
 void             ems_getOtherValues();
@@ -316,7 +329,6 @@ bool             ems_getPoll();
 bool             ems_getTxEnabled();
 bool             ems_getThermostatEnabled();
 bool             ems_getBoilerEnabled();
-bool             ems_getTxDelay();
 bool             ems_getBusConnected();
 _EMS_SYS_LOGGING ems_getLogging();
 bool             ems_getEmsRefreshed();
@@ -324,17 +336,6 @@ uint8_t          ems_getThermostatModel();
 void             ems_discoverModels();
 bool             ems_getTxCapable();
 uint32_t         ems_getPollFrequency();
-
-void   ems_scanDevices();
-void   ems_printAllDevices();
-void   ems_printDevices();
-char * ems_getThermostatDescription(char * buffer);
-void   ems_printTxQueue();
-char * ems_getBoilerDescription(char * buffer);
-void   ems_testTelegram(uint8_t test_num);
-void   ems_startupTelegrams();
-
-void ems_startupTelegrams();
 
 // private functions
 uint8_t _crcCalculator(uint8_t * data, uint8_t len);
@@ -344,7 +345,6 @@ void    _ems_clearTxData();
 int     _ems_findBoilerModel(uint8_t model_id);
 bool    _ems_setModel(uint8_t model_id);
 void    _removeTxQueue();
-void    _ems_readTelegram(uint8_t * telegram, uint8_t length);
 
 // global so can referenced in other classes
 extern _EMS_Sys_Status EMS_Sys_Status;

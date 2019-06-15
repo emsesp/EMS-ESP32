@@ -1,7 +1,23 @@
 # EMS-ESP
 
-EMS-ESP is a project to build an electronic controller circuit using an Espressif ESP8266 microcontroller to communicate with EMS (Energy Management System) based Boilers and Thermostats from the Bosch range and compatibles such as Buderus, Nefit, Junkers etc.
+EMS-ESP is a open-source system to communicate with **EMS** (Energy Management System) based boilers, thermostats and other modules from manufacturers like Bosch, Buderus, Nefit, Junkers and Sieger.
 
-There are 3 parts to this project, first the design of the circuit, secondly the code for the ESP8266 microcontroller firmware with telnet and MQTT support, and lastly an example configuration for Home Assistant to monitor the data and issue direct commands via a MQTT broker.
+The code is writen for the Espressif **ESP8266** microcontroller and supports a telnet console for real-time monitoring and configuration and customizable MQTT support for publishing the information to a home automation system such as Home Assistant or Domoticz.
 
-Please refer to the [Wiki](https://github.com/proddy/EMS-ESP/wiki) for further documentation.
+###  Please reference the [Wiki](https://github.com/proddy/EMS-ESP/wiki) for further details and instructions on how to build and configure the firmware.
+
+---
+
+**An example of the Home Assistant integration:**
+
+![ha](https://github.com/proddy/EMS-ESP/raw/dev/doc/home_assistant/ha.png)
+
+**Using BBQKees' [EMS Gateway](https://shop.hotgoodies.nl/ems/) circuit:**
+
+| ![on boiler](https://github.com/proddy/EMS-ESP/raw/dev/doc/ems%20gateway/on-boiler.jpg) | ![kit](https://github.com/proddy/EMS-ESP/raw/dev/doc/ems%20gateway/ems-kit-2.jpg) | ![basic circuit](https://github.com/proddy/EMS-ESP/raw/dev/doc/ems%20gateway/ems-board-white.jpg) |
+| - | - | - |
+
+**Example of the EMS-ESP's telnet console:**
+
+| ![telnet menu](https://github.com/proddy/EMS-ESP/raw/dev/doc/telnet/telnet_menu.jpg) | ![telnet menu](https://github.com/proddy/EMS-ESP/raw/dev/doc/telnet/telnet_stats.PNG) |
+| - | - |

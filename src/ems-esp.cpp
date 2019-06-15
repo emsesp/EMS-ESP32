@@ -106,10 +106,14 @@ command_t project_cmds[] = {
     {true, "shower_alert <on | off>", "send a warning of cold water after shower time is exceeded"},
     {true, "publish_wait <seconds>", "set frequency for publishing to MQTT"},
     {true, "heating_circuit <1 | 2>", "set the thermostat HC to work with if using multiple heating circuits"},
-    {true, "tx_delay <on | off>", "turn on if Tx not working on newer boilers"},
 
     {false, "info", "show data captured on the EMS bus"},
     {false, "log <n | b | t | r | v>", "set logging mode to none, basic, thermostat only, raw or verbose"},
+
+#ifdef TESTS
+    {false, "test <n>", "insert a test telegram on to the EMS bus"},
+#endif
+
     {false, "publish", "publish all values to MQTT"},
     {false, "refresh", "fetch values from the EMS devices"},
     {false, "devices", "list all supported and detected EMS devices and types IDs"},
@@ -338,11 +342,13 @@ void showInfo() {
 
     if (ems_getBusConnected()) {
         myDebug_P(PSTR("  Bus is connected"));
-
-        myDebug_P(PSTR("  Rx: Poll=%d ms, # Rx telegrams read=%d, # CRC errors=%d"), ems_getPollFrequency(), EMS_Sys_Status.emsRxPgks, EMS_Sys_Status.emxCrcErr);
+        myDebug_P(PSTR("  Rx: # successful read requests=%d, # CRC errors=%d"), EMS_Sys_Status.emsRxPgks, EMS_Sys_Status.emxCrcErr);
 
         if (ems_getTxCapable()) {
-            myDebug_P(PSTR("  Tx: available, Tx delay is %s, # Tx telegrams sent=%d"), (ems_getTxDelay() ? "on" : "off"), EMS_Sys_Status.emsTxPkgs);
+            char valuestr[8] = {0}; // for formatting floats
+            myDebug_P(PSTR("  Tx: Last poll=%s seconds ago, # successful write requests=%d"),
+                      _float_to_char(valuestr, (ems_getPollFrequency() / (float)1000000), 3),
+                      EMS_Sys_Status.emsTxPkgs);
         } else {
             myDebug_P(PSTR("  Tx: no signal"));
         }
@@ -447,13 +453,21 @@ void showInfo() {
     if (EMS_Other.SM) {
         myDebug_P(PSTR("")); // newline
         myDebug_P(PSTR("%sSolar Module stats:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
-        _renderShortValue("  Collector temperature", "C", EMS_Other.SMcollectorTemp);
-        _renderShortValue("  Bottom temperature", "C", EMS_Other.SMbottomTemp);
-        _renderIntValue("  Pump modulation", "%", EMS_Other.SMpumpModulation);
-        _renderBoolValue("  Pump active", EMS_Other.SMpump);
-        _renderShortValue("  Energy Last Hour", "Wh", EMS_Other.SMEnergyLastHour, 1); // *10
-        _renderShortValue("  Energy Today", "Wh", EMS_Other.SMEnergyToday, 0);
-        _renderShortValue("  Energy Total", "kWH", EMS_Other.SMEnergyTotal, 1); // *10
+        _renderShortValue("Collector temperature", "C", EMS_Other.SMcollectorTemp);
+        _renderShortValue("Bottom temperature", "C", EMS_Other.SMbottomTemp);
+        _renderIntValue("Pump modulation", "%", EMS_Other.SMpumpModulation);
+        _renderBoolValue("Pump active", EMS_Other.SMpump);
+        _renderShortValue("Energy Last Hour", "Wh", EMS_Other.SMEnergyLastHour, 1); // *10
+        _renderShortValue("Energy Today", "Wh", EMS_Other.SMEnergyToday, 0);
+        _renderShortValue("Energy Total", "kWH", EMS_Other.SMEnergyTotal, 1); // *10
+    }
+
+    // For HeatPumps
+    if (EMS_Other.HP) {
+        myDebug_P(PSTR("")); // newline
+        myDebug_P(PSTR("%sHeat Pump stats:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
+        _renderIntValue("Pump modulation", "%", EMS_Other.HPModulation);
+        _renderIntValue("Pump speed", "%", EMS_Other.HPSpeed);
     }
 
     // Thermostat stats
@@ -461,50 +475,55 @@ void showInfo() {
         myDebug_P(PSTR("")); // newline
         myDebug_P(PSTR("%sThermostat stats:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
         myDebug_P(PSTR("  Thermostat: %s"), ems_getThermostatDescription(buffer_type));
-        if ((ems_getThermostatModel() == EMS_MODEL_EASY) || (ems_getThermostatModel() == EMS_MODEL_BOSCHEASY)) {
-            // for easy temps are * 100, also we don't have the time or mode
+
+        // Render Current & Setpoint Room Temperature
+        if ((ems_getThermostatModel() == EMS_MODEL_EASY)) {
+            // Temperatures are *100
             _renderShortValue("Set room temperature", "C", EMS_Thermostat.setpoint_roomTemp, 10); // *100
             _renderShortValue("Current room temperature", "C", EMS_Thermostat.curr_roomTemp, 10); // *100
-        } else if (ems_getThermostatModel() == EMS_MODEL_FR10) {
-            // Junkers are *10
-            _renderIntValue("Set room temperature", "C", EMS_Thermostat.setpoint_roomTemp, 10); // *10
-            _renderIntValue("Current room temperature", "C", EMS_Thermostat.curr_roomTemp, 10); // *10
-        } else {
+        } 
+        else if ((ems_getThermostatModel() == EMS_MODEL_FR10) || (ems_getThermostatModel() == EMS_MODEL_FW100)) {
+            // Temperatures are *10
+            _renderShortValue("Set room temperature", "C", EMS_Thermostat.setpoint_roomTemp, 1); // *10
+            _renderShortValue("Current room temperature", "C", EMS_Thermostat.curr_roomTemp, 1); // *10
+        }
+        else {
             // because we store in 2 bytes short, when converting to a single byte we'll loose the negative value if its unset
             if (EMS_Thermostat.setpoint_roomTemp <= 0) {
                 EMS_Thermostat.setpoint_roomTemp = EMS_VALUE_INT_NOTSET;
             }
-
             if (EMS_Thermostat.curr_roomTemp <= 0) {
                 EMS_Thermostat.curr_roomTemp = EMS_VALUE_INT_NOTSET;
             }
-
             _renderIntValue("Setpoint room temperature", "C", EMS_Thermostat.setpoint_roomTemp, 2); // convert to a single byte * 2
             _renderIntValue("Current room temperature", "C", EMS_Thermostat.curr_roomTemp, 10);     // is *10
+        }
 
-            if ((EMS_Thermostat.holidaytemp > 0) && (EMSESP_Status.heating_circuit == 2)) {  // only if we are on a RC35 we show more info
-                _renderIntValue("Day temperature", "C", EMS_Thermostat.daytemp, 2);          // convert to a single byte * 2
-                _renderIntValue("Night temperature", "C", EMS_Thermostat.nighttemp, 2);      // convert to a single byte * 2
-                _renderIntValue("Vacation temperature", "C", EMS_Thermostat.holidaytemp, 2); // convert to a single byte * 2
-            }
+        // Render Day/Night/Holiday Temperature
+        if ((EMS_Thermostat.holidaytemp > 0) && (EMSESP_Status.heating_circuit == 2)) {  // only if we are on a RC35 we show more info
+            _renderIntValue("Day temperature", "C", EMS_Thermostat.daytemp, 2);          // convert to a single byte * 2
+            _renderIntValue("Night temperature", "C", EMS_Thermostat.nighttemp, 2);      // convert to a single byte * 2
+            _renderIntValue("Vacation temperature", "C", EMS_Thermostat.holidaytemp, 2); // convert to a single byte * 2
+        }
 
-            myDebug_P(PSTR("  Thermostat time is %02d:%02d:%02d %d/%d/%d"),
-                      EMS_Thermostat.hour,
-                      EMS_Thermostat.minute,
-                      EMS_Thermostat.second,
-                      EMS_Thermostat.day,
-                      EMS_Thermostat.month,
-                      EMS_Thermostat.year + 2000);
+        // Render Thermostat Date & Time
+        myDebug_P(PSTR("  Thermostat time is %02d:%02d:%02d %d/%d/%d"),
+                  EMS_Thermostat.hour,
+                  EMS_Thermostat.minute,
+                  EMS_Thermostat.second,
+                  EMS_Thermostat.day,
+                  EMS_Thermostat.month,
+                  EMS_Thermostat.year + 2000);
 
-            if (EMS_Thermostat.mode == 0) {
-                myDebug_P(PSTR("  Mode is set to low"));
-            } else if (EMS_Thermostat.mode == 1) {
-                myDebug_P(PSTR("  Mode is set to manual"));
-            } else if (EMS_Thermostat.mode == 2) {
-                myDebug_P(PSTR("  Mode is set to auto"));
-            } else {
-                myDebug_P(PSTR("  Mode is set to ?"));
-            }
+        // Render Termostat Mode
+        if (EMS_Thermostat.mode == 0) {
+            myDebug_P(PSTR("  Mode is set to low"));
+        } else if (EMS_Thermostat.mode == 1) {
+            myDebug_P(PSTR("  Mode is set to manual"));
+        } else if (EMS_Thermostat.mode == 2) {
+            myDebug_P(PSTR("  Mode is set to auto"));
+        } else {
+            myDebug_P(PSTR("  Mode is set to ?"));
         }
     }
 
@@ -679,13 +698,7 @@ void publishValues(bool force) {
         rootThermostat[THERMOSTAT_HC] = _int_to_char(s, EMSESP_Status.heating_circuit);
 
         // different logic depending on thermostat types
-        if ((ems_getThermostatModel() == EMS_MODEL_EASY) || (ems_getThermostatModel() == EMS_MODEL_BOSCHEASY)) {
-            if (abs(EMS_Thermostat.setpoint_roomTemp) < EMS_VALUE_SHORT_NOTSET)
-                rootThermostat[THERMOSTAT_SELTEMP] = (double)EMS_Thermostat.setpoint_roomTemp / 10;
-            if (abs(EMS_Thermostat.curr_roomTemp) < EMS_VALUE_SHORT_NOTSET)
-                rootThermostat[THERMOSTAT_CURRTEMP] = (double)EMS_Thermostat.curr_roomTemp / 10;
-
-        } else if (ems_getThermostatModel() == EMS_MODEL_FR10) {
+        if ((ems_getThermostatModel() == EMS_MODEL_EASY) || (ems_getThermostatModel() == EMS_MODEL_FR10) || (ems_getThermostatModel() == EMS_MODEL_FW100)) {
             if (abs(EMS_Thermostat.setpoint_roomTemp) < EMS_VALUE_SHORT_NOTSET)
                 rootThermostat[THERMOSTAT_SELTEMP] = (double)EMS_Thermostat.setpoint_roomTemp / 10;
             if (abs(EMS_Thermostat.curr_roomTemp) < EMS_VALUE_SHORT_NOTSET)
@@ -749,6 +762,7 @@ void publishValues(bool force) {
     }
 
     // handle the other values separately
+
     // For SM10 and SM100 Solar Modules
     if (EMS_Other.SM) {
         // build new json object
@@ -793,6 +807,27 @@ void publishValues(bool force) {
             // send values via MQTT
             myESP.mqttPublish(TOPIC_SM_DATA, data);
         }
+    }
+
+    // handle HeatPump
+    if (EMS_Other.HP) {
+        // build new json object
+        doc.clear();
+        JsonObject rootSM = doc.to<JsonObject>();
+
+        if (EMS_Other.HPModulation != EMS_VALUE_INT_NOTSET)
+            rootSM[HP_PUMPMODULATION] = EMS_Other.HPModulation;
+
+        if (EMS_Other.HPSpeed != EMS_VALUE_INT_NOTSET)
+            rootSM[HP_PUMPSPEED] = EMS_Other.HPSpeed;
+
+        data[0] = '\0'; // reset data for next package
+        serializeJson(doc, data, sizeof(data));
+
+        myDebugLog("Publishing HeatPump data via MQTT");
+
+        // send values via MQTT
+        myESP.mqttPublish(TOPIC_HP_DATA, data);
     }
 }
 
@@ -931,6 +966,7 @@ void startDeviceScan() {
     regularUpdatesTimer.detach();
     publishSensorValuesTimer.detach();
     scanDevices_count = 1; // starts at 1
+    ems_clearDeviceList(); // empty the current list
     ems_setLogging(EMS_SYS_LOGGING_NONE);
     myDebug_P(PSTR("Starting a deep EMS device scan. This can take up to 2 minutes. Please wait..."));
     scanThermostat.attach_ms(SCANDEVICES_TIME, do_scanDevices);
@@ -975,7 +1011,7 @@ void runUnitTest(uint8_t test_num) {
     publishValuesTimer.detach();
     systemCheckTimer.detach();
     regularUpdatesTimer.detach();
-    EMSESP_Status.listen_mode = true; // temporary go into listen mode to disable Tx
+    // EMSESP_Status.listen_mode = true; // temporary go into listen mode to disable Tx
     ems_testTelegram(test_num);
 }
 
@@ -1020,9 +1056,6 @@ bool FSCallback(MYESP_FSACTION action, const JsonObject json) {
         // shower_alert
         EMSESP_Status.shower_alert = json["shower_alert"];
 
-        // tx delay
-        ems_setTxDelay(json["tx_delay"]);
-
         // publish_wait
         if (!(EMSESP_Status.publish_wait = json["publish_wait"])) {
             EMSESP_Status.publish_wait = DEFAULT_PUBLISHWAIT; // default value
@@ -1049,7 +1082,6 @@ bool FSCallback(MYESP_FSACTION action, const JsonObject json) {
         json["shower_alert"]    = EMSESP_Status.shower_alert;
         json["publish_wait"]    = EMSESP_Status.publish_wait;
         json["heating_circuit"] = EMSESP_Status.heating_circuit;
-        json["tx_delay"]        = ems_getTxDelay();
 
         return true;
     }
@@ -1090,7 +1122,7 @@ bool SettingsCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, c
                 EMSESP_Status.listen_mode = false;
                 ok                        = true;
                 ems_setTxDisabled(false);
-                myDebug_P(PSTR("* out of listen mode. Tx is enabled."));
+                myDebug_P(PSTR("* out of listen mode. Tx is now enabled."));
             } else {
                 myDebug_P(PSTR("Error. Usage: set listen_mode <on | off>"));
             }
@@ -1180,18 +1212,6 @@ bool SettingsCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, c
             }
         }
 
-        // tx delay
-        if ((strcmp(setting, "tx_delay") == 0) && (wc == 2)) {
-            if (strcmp(value, "on") == 0) {
-                ems_setTxDelay(true);
-                ok = true;
-            } else if (strcmp(value, "off") == 0) {
-                ems_setTxDelay(false);
-                ok = true;
-            } else {
-                myDebug_P(PSTR("Error. Usage: set tx_delay <on | off>"));
-            }
-        }
     }
 
     if (action == MYESP_FSACTION_LIST) {
@@ -1218,7 +1238,6 @@ bool SettingsCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, c
         myDebug_P(PSTR("  shower_timer=%s"), EMSESP_Status.shower_timer ? "on" : "off");
         myDebug_P(PSTR("  shower_alert=%s"), EMSESP_Status.shower_alert ? "on" : "off");
         myDebug_P(PSTR("  publish_wait=%d"), EMSESP_Status.publish_wait);
-        myDebug_P(PSTR("  tx_delay=%s"), ems_getTxDelay() ? "on" : "off");
     }
 
     return ok;
@@ -1456,7 +1475,6 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
             if ((hc >= 1) && (hc <= 2)) {
                 EMSESP_Status.heating_circuit = hc;
                 ems_setThermostatHC(hc);
-                // TODO: save setting to SPIFFS??
             }
         }
 
@@ -1546,7 +1564,7 @@ void WIFICallback() {
     // This is done after we have a WiFi signal to avoid any resource conflicts
 
     if (myESP.getUseSerial()) {
-        myDebug_P(PSTR("Warning! EMS bus disabled when in Serial mode. Use 'set serial off' to start EMS."));
+        myDebug_P(PSTR("Warning! EMS bus communication disabled when Serial mode enabled. Use 'set serial off' to start communication."));
     } else {
         emsuart_init();
         myDebug_P(PSTR("[UART] Opened Rx/Tx connection"));
@@ -1659,11 +1677,7 @@ void setup() {
 
     // set up myESP for Wifi, MQTT, MDNS and Telnet
     myESP.setTelnet(project_cmds, ArraySize(project_cmds), TelnetCommandCallback, TelnetCallback); // set up Telnet commands
-#ifdef WIFI_SSID
-    myESP.setWIFI(WIFI_SSID, WIFI_PASSWORD, WIFICallback);
-#else
-    myESP.setWIFI(NULL, NULL, WIFICallback); // pull the wifi settings from the SPIFFS stored settings
-#endif
+    myESP.setWIFI(NULL, NULL, WIFICallback);
 
     // MQTT host, username and password taken from the SPIFFS settings
     myESP.setMQTT(

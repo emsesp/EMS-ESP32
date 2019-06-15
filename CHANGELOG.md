@@ -5,15 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.7.1] 2019-05-17
+## [1.8.0] 2019-06-15
 
 ### Added
 
-- new device: MM50 Mixer ([thanks GARLAGANDIS](https://github.com/proddy/EMS-ESP/issues/111))
+- HeatPump support (e.g. the Nefit Enviline)
+- new device: Buderus MM50 Mixer
+- new devices: Junkers FW100 and ISM1 (thanks Vuego123)
+- Improved Tx logic to support EMS, EMS+ and Heatronics (thanks kwertie01, susisstrolch, philrich)
+- MQTT heartbeat
 
 ### Fixed
 
-- runtime exceptions with latest 2.5.1 arduino core library
+- runtime exceptions with latest 2.5.1 arduino core
 
 ## [1.7.0] 2019-05-11
 

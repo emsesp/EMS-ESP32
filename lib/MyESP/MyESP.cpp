@@ -8,9 +8,19 @@
 
 #include "MyESP.h"
 
-#ifdef CRASH
 EEPROM_Rotate EEPROMr;
-#endif
+
+union system_rtcmem_t {
+    struct {
+        uint8_t  stability_counter;
+        uint8_t  reset_reason;
+        uint16_t _reserved_;
+    } parts;
+    uint32_t value;
+};
+
+uint8_t RtcmemSize = (sizeof(RtcmemData) / 4u);
+auto    Rtcmem     = reinterpret_cast<volatile RtcmemData *>(RTCMEM_ADDR);
 
 // constructor
 MyESP::MyESP() {
@@ -33,6 +43,7 @@ MyESP::MyESP() {
     _helpProjectCmds_count = 0;
 
     _use_serial                = false;
+    _heartbeat                 = false;
     _mqtt_host                 = NULL;
     _mqtt_password             = NULL;
     _mqtt_username             = NULL;
@@ -57,6 +68,9 @@ MyESP::MyESP() {
     _ota_post_callback = NULL;
 
     _suspendOutput = false;
+
+    _rtcmem_status = false;
+    _systemStable  = true;
 }
 
 MyESP::~MyESP() {
@@ -124,6 +138,26 @@ bool MyESP::getUseSerial() {
     return (_use_serial);
 }
 
+// heartbeat
+bool MyESP::getHeartbeat() {
+    return (_heartbeat);
+}
+
+// init heap ram
+uint32_t MyESP::getInitialFreeHeap() {
+    static uint32_t _heap = 0;
+
+    if (0 == _heap) {
+        _heap = ESP.getFreeHeap();
+    }
+
+    return _heap;
+}
+
+uint32_t MyESP::getUsedHeap() {
+    return getInitialFreeHeap() - ESP.getFreeHeap();
+}
+
 // called when WiFi is connected, and used to start OTA, MQTT
 void MyESP::_wifiCallback(justwifi_messages_t code, char * parameter) {
     if ((code == MESSAGE_CONNECTED)) {
@@ -154,10 +188,9 @@ void MyESP::_wifiCallback(justwifi_messages_t code, char * parameter) {
 
         // finally if we don't want Serial anymore, turn it off
         if (!_use_serial) {
-            myDebug_P(PSTR("Disabling serial port"));
+            myDebug_P(PSTR("Disabling serial port communication."));
+            SerialAndTelnet.flush(); // flush so all buffer is printed to serial
             SerialAndTelnet.setSerial(NULL);
-        } else {
-            myDebug_P(PSTR("Using serial port output"));
         }
 
         // call any final custom settings
@@ -362,7 +395,6 @@ void MyESP::setOTA(ota_callback_f OTACallback_pre, ota_callback_f OTACallback_po
 void MyESP::_OTACallback() {
     myDebug_P(PSTR("[OTA] Start"));
 
-#ifdef CRASH
     // If we are not specifically reserving the sectors we are using as
     // EEPROM in the memory layout then any OTA upgrade will overwrite
     // all but the last one.
@@ -375,7 +407,6 @@ void MyESP::_OTACallback() {
     // See onError callback below.
     EEPROMr.rotate(false);
     EEPROMr.commit();
-#endif
 
     if (_ota_pre_callback) {
         (_ota_pre_callback)(); // call custom function
@@ -392,7 +423,11 @@ void MyESP::_ota_setup() {
     ArduinoOTA.setHostname(_app_hostname);
 
     ArduinoOTA.onStart([this]() { _OTACallback(); });
-    ArduinoOTA.onEnd([this]() { myDebug_P(PSTR("[OTA] Done, restarting...")); });
+    ArduinoOTA.onEnd([this]() {
+        myDebug_P(PSTR("[OTA] Done, restarting..."));
+        _deferredReset(100, CUSTOM_RESET_OTA);
+    });
+
     ArduinoOTA.onProgress([this](unsigned int progress, unsigned int total) {
         static unsigned int _progOld;
         unsigned int        _prog = (progress / (total / 100));
@@ -414,10 +449,8 @@ void MyESP::_ota_setup() {
         else if (error == OTA_END_ERROR)
             myDebug_P(PSTR("[OTA] End Failed"));
 
-#ifdef CRASH
         // There's been an error, reenable rotation
         EEPROMr.rotate(true);
-#endif
     });
 }
 
@@ -431,10 +464,8 @@ void MyESP::setBoottime(const char * boottime) {
 
 // eeprom
 void MyESP::_eeprom_setup() {
-#ifdef CRASH
     EEPROMr.size(4);
     EEPROMr.begin(SPI_FLASH_SEC_SIZE);
-#endif
 }
 
 // Set callback of sketch function to process project messages
@@ -450,17 +481,17 @@ void MyESP::_telnetConnected() {
     _consoleShowHelp(); // Show the initial message
 
     // show crash dump if just restarted after a fatal crash
-#ifdef CRASH
     uint32_t crash_time;
     EEPROMr.get(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_CRASH_TIME, crash_time);
     if ((crash_time != 0) && (crash_time != 0xFFFFFFFF)) {
         crashDump();
+        /*
         // clear crash data
         crash_time = 0xFFFFFFFF;
         EEPROMr.put(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_CRASH_TIME, crash_time);
         EEPROMr.commit();
+        */
     }
-#endif
 
     // call callback
     if (_telnet_callback) {
@@ -497,16 +528,18 @@ void MyESP::_consoleShowHelp() {
     } else {
         myDebug_P(PSTR("* Hostname: %s (%s)"), _getESPhostname().c_str(), WiFi.localIP().toString().c_str());
         myDebug_P(PSTR("* WiFi SSID: %s (signal %d%%)"), WiFi.SSID().c_str(), getWifiQuality());
-        myDebug_P(PSTR("* MQTT is %s"), mqttClient.connected() ? "connected" : "disconnected");
+        if (isMQTTConnected()) {
+            myDebug_P(PSTR("* MQTT connected (heartbeat %s)"), getHeartbeat() ? "enabled" : "disabled");
+        } else {
+            myDebug_P(PSTR("* MQTT disconnected"));
+        }
     }
 
     myDebug_P(PSTR("*"));
     myDebug_P(PSTR("* Commands:"));
     myDebug_P(PSTR("*  ?=help, CTRL-D/quit=exit telnet session"));
     myDebug_P(PSTR("*  set, system, reboot"));
-#ifdef CRASH
-    myDebug_P(PSTR("*  crash <dump | clear | test [n]>"));
-#endif
+    myDebug_P(PSTR("*  crash <dump | clear>"));
 
     // print custom commands if available. Taken from progmem
     if (_telnetcommand_callback) {
@@ -590,6 +623,7 @@ void MyESP::_printSetCommands() {
 
     myDebug_P(PSTR("")); // newline
     myDebug_P(PSTR("  serial=%s"), (_use_serial) ? "on" : "off");
+    myDebug_P(PSTR("  heartbeat=%s"), (_heartbeat) ? "on" : "off");
 
     // print any custom settings
     (_fs_settings_callback)(MYESP_FSACTION_LIST, 0, NULL, NULL);
@@ -600,6 +634,7 @@ void MyESP::_printSetCommands() {
 // reset / restart
 void MyESP::resetESP() {
     myDebug_P(PSTR("* Reboot ESP..."));
+    _deferredReset(100, CUSTOM_RESET_TERMINAL);
     end();
 #if defined(ARDUINO_ARCH_ESP32)
     ESP.restart();
@@ -638,7 +673,7 @@ bool MyESP::_changeSetting(uint8_t wc, const char * setting, const char * value)
         }
         ok = true;
         jw.enableSTA(false);
-        myDebug_P(PSTR("Note: please reboot to apply new WiFi settings"));
+        myDebug_P(PSTR("Note: please 'reboot' ESP to apply new WiFi settings"));
     } else if (strcmp(setting, "wifi_password") == 0) {
         if (_wifi_password)
             free(_wifi_password);
@@ -648,7 +683,7 @@ bool MyESP::_changeSetting(uint8_t wc, const char * setting, const char * value)
         }
         ok = true;
         jw.enableSTA(false);
-        myDebug_P(PSTR("Note: please reboot to apply new WiFi settings"));
+        myDebug_P(PSTR("Note: please 'reboot' ESP to apply new WiFi settings"));
 
     } else if (strcmp(setting, "mqtt_host") == 0) {
         if (_mqtt_host)
@@ -687,6 +722,23 @@ bool MyESP::_changeSetting(uint8_t wc, const char * setting, const char * value)
                 _use_serial = false;
                 ok          = true;
                 myDebug_P(PSTR("Reboot ESP to deactivate Serial mode."));
+            } else {
+                ok = false;
+            }
+        }
+
+    } else if (strcmp(setting, "heartbeat") == 0) {
+        ok         = true;
+        _heartbeat = false;
+        if (value) {
+            if (strcmp(value, "on") == 0) {
+                _heartbeat = true;
+                ok         = true;
+                myDebug_P(PSTR("Heartbeat on"));
+            } else if (strcmp(value, "off") == 0) {
+                _heartbeat = false;
+                ok         = true;
+                myDebug_P(PSTR("Heartbeat off"));
             } else {
                 ok = false;
             }
@@ -791,21 +843,18 @@ void MyESP::_telnetCommand(char * commandLine) {
     }
 
 
-// crash command
-#ifdef CRASH
-    if ((strcmp(ptrToCommandName, "crash") == 0) && (wc >= 2)) {
+    // crash command
+    if ((strcmp(ptrToCommandName, "crash") == 0) && (wc == 2)) {
         char * cmd = _telnet_readWord(false);
         if (strcmp(cmd, "dump") == 0) {
             crashDump();
         } else if (strcmp(cmd, "clear") == 0) {
             crashClear();
-        } else if ((strcmp(cmd, "test") == 0) && (wc == 3)) {
-            char * value = _telnet_readWord(false);
-            crashTest(atoi(value));
+        } else {
+            myDebug_P(PSTR("Error. Usage: crash <dump | clear>"));
         }
         return; // don't call custom command line callback
     }
-#endif
 
     // call callback function
     (_telnetcommand_callback)(wc, commandLine);
@@ -852,16 +901,144 @@ String MyESP::_buildTime() {
 
 // returns system uptime in seconds - copied for espurna. see (c)
 unsigned long MyESP::_getUptime() {
-    static unsigned long last_uptime      = 0;
-    static unsigned char uptime_overflows = 0;
+    static uint32_t last_uptime      = 0;
+    static uint8_t  uptime_overflows = 0;
 
-    if (millis() < last_uptime)
+    if (millis() < last_uptime) {
         ++uptime_overflows;
-    last_uptime                  = millis();
-    unsigned long uptime_seconds = uptime_overflows * (UPTIME_OVERFLOW / 1000) + (last_uptime / 1000);
+    }
+    last_uptime             = millis();
+    uint32_t uptime_seconds = uptime_overflows * (UPTIME_OVERFLOW / 1000) + (last_uptime / 1000);
 
     return uptime_seconds;
 }
+
+// reason code
+void MyESP::_rtcmemInit() {
+    memset((uint32_t *)RTCMEM_ADDR, 0, sizeof(uint32_t) * RTCMEM_BLOCKS);
+    Rtcmem->magic = RTCMEM_MAGIC;
+}
+
+uint8_t MyESP::_getSystemStabilityCounter() {
+    system_rtcmem_t data;
+    data.value = Rtcmem->sys;
+    return data.parts.stability_counter;
+}
+
+void MyESP::_setSystemStabilityCounter(uint8_t counter) {
+    system_rtcmem_t data;
+    data.value                   = Rtcmem->sys;
+    data.parts.stability_counter = counter;
+    Rtcmem->sys                  = data.value;
+}
+
+uint8_t MyESP::_getSystemResetReason() {
+    system_rtcmem_t data;
+    data.value = Rtcmem->sys;
+    return data.parts.reset_reason;
+}
+
+void MyESP::_setSystemResetReason(uint8_t reason) {
+    system_rtcmem_t data;
+    data.value              = Rtcmem->sys;
+    data.parts.reset_reason = reason;
+    Rtcmem->sys             = data.value;
+}
+
+uint32_t MyESP::getSystemResetReason() {
+    return resetInfo.reason;
+}
+
+void MyESP::_rtcmemSetup() {
+    _rtcmem_status = _rtcmemStatus();
+    if (!_rtcmem_status) {
+        _rtcmemInit();
+    }
+}
+
+void MyESP::_setCustomResetReason(uint8_t reason) {
+    _setSystemResetReason(reason);
+}
+
+bool MyESP::_rtcmemStatus() {
+    bool readable;
+
+    switch (getSystemResetReason()) {
+    case REASON_EXT_SYS_RST:
+    case REASON_WDT_RST:
+    case REASON_DEFAULT_RST:
+        readable = false;
+        break;
+    default:
+        readable = true;
+    }
+
+    readable = readable and (RTCMEM_MAGIC == Rtcmem->magic);
+
+    return readable;
+}
+
+bool MyESP::rtcmemStatus() {
+    return _rtcmem_status;
+}
+
+unsigned char MyESP::_getCustomResetReason() {
+    static unsigned char status = 255;
+    if (status == 255) {
+        if (_rtcmemStatus())
+            status = _getSystemResetReason();
+        if (status > 0)
+            _setCustomResetReason(0);
+        if (status > CUSTOM_RESET_MAX)
+            status = 0;
+    }
+    return status;
+}
+
+void MyESP::_deferredReset(unsigned long delaytime, unsigned char reason) {
+    delay(delaytime);
+    _setCustomResetReason(reason);
+}
+
+// Call this method on boot with start=true to increase the crash counter
+// Call it again once the system is stable to decrease the counter
+// If the counter reaches SYSTEM_CHECK_MAX then the system is flagged as unstable
+void MyESP::_setSystemCheck(bool stable) {
+    uint8_t value = 0;
+
+    if (stable) {
+        value = 0; // system is ok
+        // myDebug_P(PSTR("[SYSTEM] System OK\n"));
+    } else {
+        if (!rtcmemStatus()) {
+            _setSystemStabilityCounter(1);
+            return;
+        }
+
+        value = _getSystemStabilityCounter();
+
+        if (++value > SYSTEM_CHECK_MAX) {
+            _systemStable = false;
+            value         = 0; // system is unstable
+            myDebug_P(PSTR("[SYSTEM] Warning, system UNSTABLE\n"));
+        }
+    }
+
+    _setSystemStabilityCounter(value);
+}
+
+bool MyESP::getSystemCheck() {
+    return _systemStable;
+}
+
+void MyESP::_systemCheckLoop() {
+    static bool checked = false;
+    if (!checked && (millis() > SYSTEM_CHECK_TIME)) {
+        _setSystemCheck(true); // Flag system as stable
+        checked = true;
+    }
+}
+
 
 // print out ESP system stats
 // for battery power is ESP.getVcc()
@@ -881,15 +1058,20 @@ void MyESP::showSystemStats() {
     }
 
     // uptime
-    uint32_t t   = _getUptime(); // seconds
+    uint32_t t = _getUptime(); // seconds
+
     uint32_t d   = t / 86400L;
-    uint32_t h   = (t / 3600L) % 60;
+    uint32_t h   = ((t % 86400L) / 3600L) % 60;
     uint32_t rem = t % 3600L;
     uint8_t  m   = rem / 60;
     uint8_t  s   = rem % 60;
-    myDebug_P(PSTR(" [APP] Uptime: %d days, %d hours, %d minutes, %d seconds"), d, h, m, s);
+    myDebug_P(PSTR(" [APP] Uptime: %d days %d hours %d minutes %d seconds"), d, h, m, s);
 
     myDebug_P(PSTR(" [APP] System Load: %d%%"), getSystemLoadAverage());
+
+    if (!getSystemCheck()) {
+        myDebug_P(PSTR(" [SYSTEM] Device is in SAFE MODE"));
+    }
 
     if (isAPmode()) {
         myDebug_P(PSTR(" [WIFI] Device is in AP mode with SSID %s"), jw.getAPSSID().c_str());
@@ -901,10 +1083,8 @@ void MyESP::showSystemStats() {
 
     myDebug_P(PSTR(" [WIFI] WiFi MAC: %s"), WiFi.macAddress().c_str());
 
-#ifdef CRASH
     char output_str[80] = {0};
     char buffer[16]     = {0};
-    /* Crash info */
     myDebug_P(PSTR(" [EEPROM] EEPROM size: %u"), EEPROMr.reserved() * SPI_FLASH_SEC_SIZE);
     strlcpy(output_str, " [EEPROM] EEPROM Sector pool size is ", sizeof(output_str));
     strlcat(output_str, itoa(EEPROMr.size(), buffer, 10), sizeof(output_str));
@@ -914,7 +1094,6 @@ void MyESP::showSystemStats() {
         strlcat(output_str, " ", sizeof(output_str));
     }
     myDebug(output_str);
-#endif
 
 #ifdef ARDUINO_BOARD
     myDebug_P(PSTR(" [SYSTEM] Board: %s"), ARDUINO_BOARD);
@@ -929,6 +1108,21 @@ void MyESP::showSystemStats() {
     myDebug_P(PSTR(" [SYSTEM] Boot version: %d"), ESP.getBootVersion());
     myDebug_P(PSTR(" [SYSTEM] Boot mode: %d"), ESP.getBootMode());
     //myDebug_P(PSTR("[SYSTEM] Firmware MD5: %s"), (char *)ESP.getSketchMD5().c_str());
+    unsigned char reason = _getCustomResetReason();
+    if (reason > 0) {
+        char buffer[32];
+        strcpy_P(buffer, custom_reset_string[reason - 1]);
+        myDebug_P(PSTR(" [SYSTEM] Last reset reason: %s"), buffer);
+    } else {
+        myDebug_P(PSTR(" [SYSTEM] Last reset reason: %s"), (char *)ESP.getResetReason().c_str());
+        myDebug_P(PSTR(" [SYSTEM] Last reset info: %s"), (char *)ESP.getResetInfo().c_str());
+    }
+    myDebug_P(PSTR(" [SYSTEM] Restart count: %d"), _getSystemStabilityCounter());
+
+    myDebug_P(PSTR(" [SYSTEM] rtcmem status:%u blocks:%u addr:0x%p"), _rtcmemStatus(), RtcmemSize, Rtcmem);
+    for (uint8_t block = 0; block < RtcmemSize; ++block) {
+        myDebug_P(PSTR(" [SYSTEM] rtcmem %02u: %u"), block, reinterpret_cast<volatile uint32_t *>(RTCMEM_ADDR)[block]);
+    }
 #endif
 
     FlashMode_t mode = ESP.getFlashChipMode();
@@ -945,8 +1139,56 @@ void MyESP::showSystemStats() {
     myDebug_P(PSTR(" [MEM] Firmware size: %d"), ESP.getSketchSize());
     myDebug_P(PSTR(" [MEM] Max OTA size: %d"), (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000);
     myDebug_P(PSTR(" [MEM] OTA Reserved: %d"), 4 * SPI_FLASH_SEC_SIZE);
-    myDebug_P(PSTR(" [MEM] Free Heap: %d"), ESP.getFreeHeap());
+
+    uint32_t total_memory = getInitialFreeHeap();
+    uint32_t free_memory  = ESP.getFreeHeap();
+
+    myDebug(" [MEM] Free Heap: %d bytes initially | %d bytes used (%2u%%) | %d bytes free (%2u%%)",
+            total_memory,
+            total_memory - free_memory,
+            100 * (total_memory - free_memory) / total_memory,
+            free_memory,
+            100 * free_memory / total_memory);
+
     myDebug_P(PSTR(""));
+}
+
+/*
+ * Send heartbeat via MQTT with all system data
+ */
+void MyESP::_heartbeatCheck(bool force = false) {
+    static uint32_t last_heartbeat = 0;
+
+    if ((millis() - last_heartbeat > HEARTBEAT_INTERVAL) || force) {
+        last_heartbeat = millis();
+
+        if (!isMQTTConnected() || !(_heartbeat)) {
+            return;
+        }
+
+        uint32_t total_memory  = getInitialFreeHeap();
+        uint32_t free_memory   = ESP.getFreeHeap();
+        uint8_t  mem_available = 100 * free_memory / total_memory; // as a %
+
+        char payload[300] = {0};
+        char s[10];
+        strlcpy(payload, "version=", sizeof(payload));
+        strlcat(payload, _app_version, sizeof(payload)); // version
+        strlcat(payload, ", IP=", sizeof(payload));
+        strlcat(payload, WiFi.localIP().toString().c_str(), sizeof(payload)); // IP address
+        strlcat(payload, ", rssid=", sizeof(payload));
+        strlcat(payload, itoa(getWifiQuality(), s, 10), sizeof(payload)); // rssi %
+        strlcat(payload, "%, load=", sizeof(payload));
+        strlcat(payload, ltoa(getSystemLoadAverage(), s, 10), sizeof(payload)); // load
+        strlcat(payload, "%, uptime=", sizeof(payload));
+        strlcat(payload, ltoa(_getUptime(), s, 10), sizeof(payload)); // uptime in secs
+        strlcat(payload, "secs, freemem=", sizeof(payload));
+        strlcat(payload, itoa(mem_available, s, 10), sizeof(payload)); // free mem as a %
+        strlcat(payload, "%", sizeof(payload));
+
+        // send to MQTT
+        myESP.mqttPublish(MQTT_TOPIC_HEARTBEAT, payload);
+    }
 }
 
 // handler for Telnet
@@ -1187,7 +1429,7 @@ void MyESP::_fs_eraseConfig() {
                    "automatically restart when finished."));
 
     if (SPIFFS.format()) {
-        delay(1000); // wait 1 seconds
+        delay(1000); // wait 1 second
         resetESP();
     }
 }
@@ -1242,6 +1484,8 @@ bool MyESP::_fs_loadConfig() {
 
     _use_serial = (bool)json["use_serial"];
 
+    _heartbeat = (bool)json["heartbeat"];
+
     // callback for loading custom settings
     // ok is false if there's a problem loading a custom setting (e.g. does not exist)
     bool ok = (_fs_callback)(MYESP_FSACTION_LOAD, json);
@@ -1270,6 +1514,7 @@ bool MyESP::fs_saveConfig() {
     json["mqtt_username"] = _mqtt_username;
     json["mqtt_password"] = _mqtt_password;
     json["use_serial"]    = _use_serial;
+    json["heartbeat"]     = _heartbeat;
 
     // callback for saving custom settings
     (void)(_fs_callback)(MYESP_FSACTION_SAVE, json);
@@ -1321,19 +1566,19 @@ void MyESP::_fs_setup() {
     // _fs_printConfig(); // enable for debugging
 }
 
-uint16_t MyESP::getSystemLoadAverage() {
+uint32_t MyESP::getSystemLoadAverage() {
     return _load_average;
 }
 
 // calculate load average
 void MyESP::_calculateLoad() {
-    static unsigned long last_loadcheck    = 0;
-    static unsigned long load_counter_temp = 0;
+    static uint32_t last_loadcheck    = 0;
+    static uint32_t load_counter_temp = 0;
     load_counter_temp++;
 
     if (millis() - last_loadcheck > LOADAVG_INTERVAL) {
-        static unsigned long load_counter     = 0;
-        static unsigned long load_counter_max = 1;
+        static uint32_t load_counter     = 0;
+        static uint32_t load_counter_max = 1;
 
         load_counter      = load_counter_temp;
         load_counter_temp = 0;
@@ -1385,7 +1630,6 @@ int MyESP::getWifiQuality() {
     return 2 * (dBm + 100);
 }
 
-#ifdef CRASH
 /**
  * Save crash information in EEPROM
  * This function is called automatically if ESP8266 suffers an exception
@@ -1421,46 +1665,6 @@ extern "C" void custom_crash_callback(struct rst_info * rst_info, uint32_t stack
     EEPROMr.commit();
 }
 
-void MyESP::crashTest(uint8_t t) {
-    if (t == 1) {
-        myDebug_P(PSTR("[CRASH] Attempting to divide by zero ..."));
-        int result, zero;
-        zero   = 0;
-        result = 1 / zero;
-        myDebug_P(PSTR("Result = %d"), result);
-    }
-
-    if (t == 2) {
-        myDebug_P(PSTR("[CRASH] Attempting to read through a pointer to no object ..."));
-        int * nullPointer;
-        nullPointer = NULL;
-        // null pointer dereference - read
-        // attempt to read a value through a null pointer
-        Serial.println(*nullPointer);
-    }
-
-    if (t == 3) {
-        myDebug_P(PSTR("[CRASH] Crashing with hardware WDT (%ld ms) ...\n"), millis());
-        ESP.wdtDisable();
-        while (true) {
-            // stay in an infinite loop doing nothing
-            // this way other process can not be executed
-            //
-            // Note:
-            // Hardware wdt kicks in if software wdt is unable to perfrom
-            // Nothing will be saved in EEPROM for the hardware wdt
-        }
-    }
-
-    if (t == 4) {
-        myDebug_P(PSTR("[CRASH] Crashing with software WDT (%ld ms) ...\n"), millis());
-        while (true) {
-            // stay in an infinite loop doing nothing
-            // this way other process can not be executed
-        }
-    }
-}
-
 /**
  * Clears crash info
  */
@@ -1473,18 +1677,71 @@ void MyESP::crashClear() {
 
 /**
  * Print out crash information that has been previously saved in EEPROM
+ * Copied from https://github.com/krzychb/EspSaveCrash
  */
 void MyESP::crashDump() {
     uint32_t crash_time;
     EEPROMr.get(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_CRASH_TIME, crash_time);
     if ((crash_time == 0) || (crash_time == 0xFFFFFFFF)) {
-        myDebug_P(PSTR("[CRASH] No crash info"));
+        myDebug_P(PSTR("[CRASH] No crash data captured."));
         return;
     }
 
-    myDebug_P(PSTR("[CRASH] Latest crash was at %lu ms after boot"), crash_time);
-    myDebug_P(PSTR("[CRASH] Reason of restart: %u"), EEPROMr.read(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_RESTART_REASON));
-    myDebug_P(PSTR("[CRASH] Exception cause: %u"), EEPROMr.read(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_EXCEPTION_CAUSE));
+    uint32_t t   = crash_time / 1000; // convert to seconds
+    uint32_t d   = t / 86400L;
+    uint32_t h   = (t / 3600L) % 60;
+    uint32_t rem = t % 3600L;
+    uint8_t  m   = rem / 60;
+    uint8_t  s   = rem % 60;
+    myDebug_P(PSTR("[CRASH] Last crash was %d days %d hours %d minutes %d seconds since boot time"), d, h, m, s);
+
+    // get reason and exception
+    // https://www.espressif.com/sites/default/files/documentation/esp8266_reset_causes_and_common_fatal_exception_causes_en.pdf
+    char buffer[80] = {0};
+    char ss[16]     = {0};
+    strlcpy(buffer, "[CRASH] Reason of restart: ", sizeof(buffer));
+
+    uint8_t reason = EEPROMr.read(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_RESTART_REASON);
+    switch (reason) {
+    case REASON_WDT_RST:
+        strlcat(buffer, "1 - Hardware WDT reset", sizeof(buffer));
+        break;
+    case REASON_EXCEPTION_RST:
+        strlcat(buffer, "2 - Fatal exception", sizeof(buffer));
+        break;
+    case REASON_SOFT_WDT_RST:
+        strlcat(buffer, "3 - Software watchdog reset", sizeof(buffer));
+        break;
+    case REASON_EXT_SYS_RST:
+        strlcat(buffer, "6 - Hardware reset", sizeof(buffer));
+        break;
+    case REASON_SOFT_RESTART:
+        strlcat(buffer, "4 - Software reset", sizeof(buffer));
+        break;
+    default:
+        strlcat(buffer, itoa(reason, ss, 10), sizeof(buffer));
+    }
+    myDebug(buffer);
+
+    // check for exception
+    // see https://github.com/esp8266/Arduino/blob/master/doc/exception_causes.rst
+    if (reason == REASON_EXCEPTION_RST) {
+        // get exception cause
+        uint8_t cause = EEPROMr.read(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_EXCEPTION_CAUSE);
+        strlcpy(buffer, "[CRASH] Exception cause: ", sizeof(buffer));
+        if (cause == 0) {
+            strlcat(buffer, "0 - IllegalInstructionCause", sizeof(buffer));
+        } else if (cause == 3) {
+            strlcat(buffer, "3 - LoadStoreErrorCause", sizeof(buffer));
+        } else if (cause == 6) {
+            strlcat(buffer, "6 - IntegerDivideByZeroCause", sizeof(buffer));
+        } else if (cause == 9) {
+            strlcat(buffer, "9 - LoadStoreAlignmentCause", sizeof(buffer));
+        } else {
+            strlcat(buffer, itoa(cause, ss, 10), sizeof(buffer));
+        }
+    }
+    myDebug(buffer);
 
     uint32_t epc1, epc2, epc3, excvaddr, depc;
     EEPROMr.get(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_EPC1, epc1);
@@ -1519,17 +1776,8 @@ void MyESP::crashDump() {
         SerialAndTelnet.println();
     }
     myDebug_P(PSTR("<<<stack<<<"));
+    myDebug_P(PSTR("\nTo clean this dump use the command: %scrash clear%s\n"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
 }
-#else
-void MyESP::crashTest(uint8_t t) {
-}
-void MyESP::crashClear() {
-}
-void MyESP::crashDump() {
-}
-void MyESP::crashInfo() {
-}
-#endif
 
 // setup MyESP
 void MyESP::begin(const char * app_hostname, const char * app_name, const char * app_version) {
@@ -1537,11 +1785,21 @@ void MyESP::begin(const char * app_hostname, const char * app_name, const char *
     _app_name     = strdup(app_name);
     _app_version  = strdup(app_version);
 
-    _telnet_setup(); // Telnet setup, does first to set Serial
-    _eeprom_setup(); // set up eeprom for storing crash data
+    getInitialFreeHeap(); // get initial free mem
+
+    _rtcmemSetup();
+    _telnet_setup(); // Telnet setup, called first to set Serial
+    _eeprom_setup(); // set up EEPROM for storing crash data, if compiled with -DCRASH
     _fs_setup();     // SPIFFS setup, do this first to get values
     _wifi_setup();   // WIFI setup
     _ota_setup();    // init OTA
+
+    // print a welcome message
+    myDebug_P(PSTR("\n* %s version %s"), _app_name, _app_version);
+    SerialAndTelnet.flush();
+
+    _setSystemCheck(false); // reset system check
+    _heartbeatCheck(true);  // force heartbeat
 }
 
 /*
@@ -1549,17 +1807,11 @@ void MyESP::begin(const char * app_hostname, const char * app_name, const char *
  */
 void MyESP::loop() {
     _calculateLoad();
+    _systemCheckLoop();
+    _heartbeatCheck();
+
     _telnetHandle();
-
-    jw.loop(); // WiFi
-
-    /*
-    // do nothing else until we've got a wifi connection
-    if (WiFi.getMode() & WIFI_AP) {
-        return;
-    }
-    */
-
+    jw.loop();           // WiFi
     ArduinoOTA.handle(); // OTA
     _mqttConnect();      // MQTT
 

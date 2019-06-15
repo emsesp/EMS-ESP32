@@ -41,11 +41,14 @@
 #define EMS_OFFSET_UBASetPoints_flowtemp 0 // flow temp
 
 // Other
-#define EMS_TYPE_SM10Monitor 0x97    // SM10Monitor
-#define EMS_TYPE_SM100Monitor 0x0262 // SM100Monitor
-#define EMS_TYPE_SM100Status 0x0264  // SM100Status
-#define EMS_TYPE_SM100Status2 0x026A // SM100Status2
-#define EMS_TYPE_SM100Energy 0x028E  // SM100Energy
+#define EMS_TYPE_SM10Monitor 0x97         // SM10Monitor
+#define EMS_TYPE_SM100Monitor 0x0262      // SM100Monitor
+#define EMS_TYPE_SM100Status 0x0264       // SM100Status
+#define EMS_TYPE_SM100Status2 0x026A      // SM100Status2
+#define EMS_TYPE_SM100Energy 0x028E       // SM100Energy
+#define EMS_TYPE_HPMonitor1 0xE3          // HeatPump Monitor 1
+#define EMS_TYPE_HPMonitor2 0xE5          // HeatPump Monitor 2
+#define EMS_TYPE_ISM1StatusMessage 0x0003 // Solar Module Junkers ISM1 Status
 
 /*
  * Thermostats...
@@ -107,10 +110,10 @@
 #define EMS_OFFSET_RCPLUSStatusMessage_curr 0     // current temp
 #define EMS_OFFSET_RCPLUSGet_mode_day 8           // day/night mode
 
-// Junkers FR10 (EMS Plus)
-#define EMS_TYPE_FR10StatusMessage 0x6F         // is an automatic thermostat broadcast giving us temps
-#define EMS_OFFSET_FR10StatusMessage_setpoint 3 // setpoint temp
-#define EMS_OFFSET_FR10StatusMessage_curr 5     // current temp
+// Junkers FR10, FW100 (EMS Plus)
+#define EMS_TYPE_JunkersStatusMessage 0x6F         // is an automatic thermostat broadcast giving us temps
+#define EMS_OFFSET_JunkersStatusMessage_setpoint 2 // setpoint temp
+#define EMS_OFFSET_JunkersStatusMessage_curr 4     // current temp
 
 
 // Known EMS types
@@ -132,38 +135,40 @@ typedef enum {
     EMS_MODEL_RC30,
     EMS_MODEL_RC35,
     EMS_MODEL_EASY,
-    EMS_MODEL_BOSCHEASY,
     EMS_MODEL_RC310,
     EMS_MODEL_CW100,
     EMS_MODEL_1010,
     EMS_MODEL_OT,
+    EMS_MODEL_FW100,
     EMS_MODEL_FR10,
     EMS_MODEL_FR100,
-    EMS_MODEL_FR110
+    EMS_MODEL_FR110,
+    EMS_MODEL_FW120
 
 } _EMS_MODEL_ID;
 
-// EMS types for known Buderus/Bosch devices. This list will be extended when new devices are recognized.
-// format is MODEL_ID, PRODUCT ID, TYPE_ID, DESCRIPTION
+// EMS types for known devices. This list will be extended when new devices are recognized.
+// The device_id is always 0x08
+// format is MODEL_ID, PRODUCT ID, DESCRIPTION
 const _Boiler_Type Boiler_Types[] = {
 
-    {EMS_MODEL_UBA, 72, 0x08, "MC10 Module"},
-    {EMS_MODEL_UBA, 123, 0x08, "Buderus GB172/Nefit Trendline"},
-    {EMS_MODEL_UBA, 115, 0x08, "Nefit Topline Compact/Buderus GB162"},
-    {EMS_MODEL_UBA, 203, 0x08, "Buderus Logamax U122"},
-    {EMS_MODEL_UBA, 208, 0x08, "Buderus Logamax plus/GB192"},
-    {EMS_MODEL_UBA, 64, 0x08, "Sieger BK15 Boiler/Nefit Smartline"},
-    {EMS_MODEL_UBA, 95, 0x08, "Bosch Condens 2500/Junkers Heatronics3"},
-    {EMS_MODEL_UBA, 122, 0x08, "Nefit Proline"},
-    {EMS_MODEL_UBA, 172, 0x08, "Nefit Enviline"}
+    {EMS_MODEL_UBA, 72, "MC10 Module"},
+    {EMS_MODEL_UBA, 123, "Buderus GB172/Nefit Trendline/Junkers Cerapur"},
+    {EMS_MODEL_UBA, 115, "Nefit Topline Compact/Buderus GB162"},
+    {EMS_MODEL_UBA, 203, "Buderus Logamax U122/Junkers Cerapur"},
+    {EMS_MODEL_UBA, 208, "Buderus Logamax plus/GB192"},
+    {EMS_MODEL_UBA, 64, "Sieger BK15/Nefit Smartline/Buderus GB152"},
+    {EMS_MODEL_UBA, EMS_PRODUCTID_HEATRONICS, "Bosch Condens 2500/Junkers Heatronics3"}, // Junkers
+    {EMS_MODEL_UBA, 122, "Nefit Proline"},
+    {EMS_MODEL_UBA, 172, "Nefit Enviline"}
 
 };
 
 // Other EMS devices which are not considered boilers or thermostats
 const _Other_Type Other_Types[] = {
 
-    {EMS_MODEL_OTHER, 251, 0x21, "MM10 Mixer Module"},  // warning, fake product id!
-    {EMS_MODEL_OTHER, 250, 0x11, "WM10 Switch Module"}, // warning, fake product id!
+    {EMS_MODEL_OTHER, 69, 0x21, "MM10 Mixer Module"},
+    {EMS_MODEL_OTHER, 71, 0x11, "WM10 Switch Module"},
     {EMS_MODEL_OTHER, 160, 0x20, "MM100 Mixing Module"},
     {EMS_MODEL_OTHER, 160, 0x21, "MM100 Mixing Module"},
     {EMS_MODEL_OTHER, 159, 0x21, "MM50 Mixing Module"},
@@ -171,10 +176,13 @@ const _Other_Type Other_Types[] = {
     {EMS_MODEL_OTHER, 190, 0x09, "BC10 Base Controller"},
     {EMS_MODEL_OTHER, 114, 0x09, "BC10 Base Controller"},
     {EMS_MODEL_OTHER, 125, 0x09, "BC25 Base Controller"},
+    {EMS_MODEL_OTHER, 152, 0x09, "Junkers Controller"},
     {EMS_MODEL_OTHER, 205, 0x02, "Nefit Moduline Easy Connect"},
     {EMS_MODEL_OTHER, 73, EMS_ID_SM, "SM10 Solar Module"},
     {EMS_MODEL_OTHER, 163, EMS_ID_SM, "SM100 Solar Module"},
     {EMS_MODEL_OTHER, 171, 0x02, "EMS-OT OpenTherm converter"},
+    {EMS_MODEL_OTHER, 252, EMS_ID_HP, "HeatPump Module"}, // warning, fake product id!
+    {EMS_MODEL_OTHER, 101, 0x30, "Junkers ISM1 Solar Controller"},
     {EMS_MODEL_OTHER, 189, EMS_ID_GATEWAY, "Web Gateway KM200"}
 
 };
@@ -186,7 +194,8 @@ const _Thermostat_Type Thermostat_Types[] = {
 
     // Easy devices - not currently supporting write operations
     {EMS_MODEL_EASY, 202, 0x18, "TC100/Nefit Easy", EMS_THERMOSTAT_WRITE_NO},
-    {EMS_MODEL_BOSCHEASY, 206, 0x02, "Bosch Easy", EMS_THERMOSTAT_WRITE_NO},
+    {EMS_MODEL_EASY, 203, 0x18, "Bosch EasyControl CT200", EMS_THERMOSTAT_WRITE_NO},
+    {EMS_MODEL_EASY, 206, 0x02, "Bosch Easy", EMS_THERMOSTAT_WRITE_NO},
     {EMS_MODEL_CW100, 157, 0x18, "CW100", EMS_THERMOSTAT_WRITE_NO},
 
     // Buderus/Nefit
@@ -202,9 +211,11 @@ const _Thermostat_Type Thermostat_Types[] = {
     {EMS_MODEL_ES73, 76, 0x10, "Sieger ES73", EMS_THERMOSTAT_WRITE_YES},
 
     // Junkers
+    {EMS_MODEL_FW100, 105, 0x10, "Junkers FW100", EMS_THERMOSTAT_WRITE_NO},
     {EMS_MODEL_FR10, 111, 0x18, "Junkers FR10", EMS_THERMOSTAT_WRITE_NO},
     {EMS_MODEL_FR100, 105, 0x18, "Junkers FR100", EMS_THERMOSTAT_WRITE_NO},
-    {EMS_MODEL_FR110, 108, 0x18, "Junkers FR110", EMS_THERMOSTAT_WRITE_NO}
+    {EMS_MODEL_FR110, 108, 0x18, "Junkers FR110", EMS_THERMOSTAT_WRITE_NO},
+    {EMS_MODEL_FW120, 192, 0x10, "Junkers FW120", EMS_THERMOSTAT_WRITE_NO}
 
 
 };

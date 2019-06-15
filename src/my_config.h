@@ -58,6 +58,11 @@
 #define SM_ENERGYTODAY "energytoday"       // energy today
 #define SM_ENERGYTOTAL "energytotal"       // energy total
 
+// MQTT for HP (HeatPump)
+#define TOPIC_HP_DATA "hp_data"            // topic name
+#define HP_PUMPMODULATION "pumpmodulation" // pump modulation
+#define HP_PUMPSPEED "pumpspeed"           // pump speed
+
 // shower time
 #define TOPIC_SHOWERTIME "showertime"           // for sending shower time results
 #define TOPIC_SHOWER_TIMER "shower_timer"       // toggle switch for enabling the shower logic
