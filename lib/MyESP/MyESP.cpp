@@ -673,7 +673,7 @@ bool MyESP::_changeSetting(uint8_t wc, const char * setting, const char * value)
         }
         ok = true;
         jw.enableSTA(false);
-        myDebug_P(PSTR("Note: please reboot to apply new WiFi settings"));
+        myDebug_P(PSTR("Note: please 'reboot' ESP to apply new WiFi settings"));
     } else if (strcmp(setting, "wifi_password") == 0) {
         if (_wifi_password)
             free(_wifi_password);
@@ -683,7 +683,7 @@ bool MyESP::_changeSetting(uint8_t wc, const char * setting, const char * value)
         }
         ok = true;
         jw.enableSTA(false);
-        myDebug_P(PSTR("Note: please reboot to apply new WiFi settings"));
+        myDebug_P(PSTR("Note: please 'reboot' ESP to apply new WiFi settings"));
 
     } else if (strcmp(setting, "mqtt_host") == 0) {
         if (_mqtt_host)

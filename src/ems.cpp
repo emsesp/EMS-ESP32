@@ -228,7 +228,6 @@ void ems_init() {
     EMS_Sys_Status.emsTxDisabled    = false;
     EMS_Sys_Status.emsPollFrequency = 0;
     EMS_Sys_Status.txRetryCount     = 0;
-    EMS_Sys_Status.emsTxMode        = 0;
     EMS_Sys_Status.emsReverse       = false;
 
     // thermostat
@@ -339,23 +338,6 @@ void ems_setPoll(bool b) {
 
 bool ems_getPoll() {
     return EMS_Sys_Status.emsPollEnabled;
-}
-
-void ems_setTxMode(uint8_t mode) {
-    EMS_Sys_Status.emsTxMode = mode;
-
-    // special case for Junkers. If tx_mode is 3 then set the reverse poll flag
-    // https://github.com/proddy/EMS-ESP/issues/103#issuecomment-495945850
-    if (mode == 3) {
-        EMS_Sys_Status.emsReverse = true;
-        myDebug_P(PSTR("Forcing emsReverse for Junkers")); // TODO: remove at some point when 2 is the standard
-    } else {
-        EMS_Sys_Status.emsReverse = false;
-    }
-}
-
-uint8_t ems_getTxMode() {
-    return EMS_Sys_Status.emsTxMode;
 }
 
 bool ems_getEmsRefreshed() {
@@ -2455,7 +2437,7 @@ void ems_testTelegram(uint8_t test_num) {
         EMS_Sys_Status.emsTxStatus = EMS_TX_STATUS_IDLE;
     }
 
-    static uint8_t * telegram = (uint8_t *)malloc(EMS_MAX_TELEGRAM_LENGTH); // warning, memory is not free'd so use only for debugging
+    static uint8_t * telegram = (uint8_t *)malloc(EMS_MAX_TELEGRAM_LENGTH); // warning, memory is never set free so use only for debugging
 
     char telegram_string[200];
     strlcpy(telegram_string, TEST_DATA[test_num - 1], sizeof(telegram_string));

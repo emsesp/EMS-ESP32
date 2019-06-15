@@ -97,7 +97,6 @@ typedef struct {
     bool             emsTxCapable;     // able to send via Tx
     bool             emsTxDisabled;    // true to prevent all Tx
     uint8_t          txRetryCount;     // # times the last Tx was re-sent
-    uint8_t          emsTxMode;        // handles Tx logic
     bool             emsReverse;       // if true, poll logic is reversed
 } _EMS_Sys_Status;
 
@@ -315,7 +314,6 @@ void ems_setFlowTemp(uint8_t temperature);
 void ems_setWarmWaterActivated(bool activated);
 void ems_setWarmTapWaterActivated(bool activated);
 void ems_setPoll(bool b);
-void ems_setTxMode(uint8_t mode);
 void ems_setLogging(_EMS_SYS_LOGGING loglevel);
 void ems_setEmsRefreshed(bool b);
 void ems_setWarmWaterModeComfort(uint8_t comfort);
@@ -331,7 +329,6 @@ bool             ems_getPoll();
 bool             ems_getTxEnabled();
 bool             ems_getThermostatEnabled();
 bool             ems_getBoilerEnabled();
-uint8_t          ems_getTxMode();
 bool             ems_getBusConnected();
 _EMS_SYS_LOGGING ems_getLogging();
 bool             ems_getEmsRefreshed();
