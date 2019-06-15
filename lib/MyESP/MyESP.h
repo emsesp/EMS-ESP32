@@ -9,7 +9,7 @@
 #ifndef MyEMS_h
 #define MyEMS_h
 
-#define MYESP_VERSION "1.1.14"
+#define MYESP_VERSION "1.1.16"
 
 #include <ArduinoJson.h>
 #include <ArduinoOTA.h>
@@ -18,7 +18,6 @@
 #include <FS.h>
 #include <JustWifi.h>  // https://github.com/xoseperez/justwifi
 #include <TelnetSpy.h> // modified from https://github.com/yasheena/telnetspy
-#include <Ticker.h>
 
 #include <EEPROM_Rotate.h>
 extern "C" {
@@ -50,8 +49,9 @@ extern struct rst_info resetInfo;
 #define MQTT_RECONNECT_DELAY_MIN 2000   // Try to reconnect in 3 seconds upon disconnection
 #define MQTT_RECONNECT_DELAY_STEP 3000  // Increase the reconnect delay in 3 seconds after each failed attempt
 #define MQTT_RECONNECT_DELAY_MAX 120000 // Set reconnect time to 2 minutes at most
-#define MQTT_MAX_TOPIC_SIZE 50          // max length of MQTT message
+#define MQTT_MAX_TOPIC_SIZE 50          // max length of MQTT topic
 #define MQTT_TOPIC_START "start"
+#define MQTT_TOPIC_HEARTBEAT "heartbeat"
 #define MQTT_TOPIC_START_PAYLOAD "start"
 #define MQTT_TOPIC_RESTART "restart"
 
@@ -153,8 +153,9 @@ struct RtcmemData {
 
 static_assert(sizeof(RtcmemData) <= (RTCMEM_BLOCKS * 4u), "RTCMEM struct is too big");
 
-#define SYSTEM_CHECK_TIME 60000 // The system is considered stable after these many millis
-#define SYSTEM_CHECK_MAX 5      // After this many crashes on boot
+#define SYSTEM_CHECK_TIME 60000   // The system is considered stable after these many millis (1 minute)
+#define SYSTEM_CHECK_MAX 5        // After this many crashes on boot
+#define HEARTBEAT_INTERVAL 120000 // in milliseconds, how often the MQTT heartbeat is sent (2 mins)
 
 typedef struct {
     bool set; // is it a set command
@@ -230,14 +231,14 @@ class MyESP {
     void crashInfo();
 
     // general
-    void     end();
-    void     loop();
-    void     begin(const char * app_hostname, const char * app_name, const char * app_version);
-    void     setBoottime(const char * boottime);
-    void     resetESP();
-    uint16_t getSystemLoadAverage();
-    int      getWifiQuality();
-    void     showSystemStats();
+    void end();
+    void loop();
+    void begin(const char * app_hostname, const char * app_name, const char * app_version);
+    void setBoottime(const char * boottime);
+    void resetESP();
+    int  getWifiQuality();
+    void showSystemStats();
+    bool getHeartbeat();
 
     // rtcmem and reset reason
     bool     rtcmemStatus();
@@ -322,6 +323,7 @@ class MyESP {
     char *        _boottime;
     bool          _suspendOutput;
     bool          _use_serial;
+    bool          _heartbeat;
     unsigned long _getUptime();
     String        _buildTime();
 
@@ -347,10 +349,15 @@ class MyESP {
     void _systemCheckLoop();
     void _setSystemCheck(bool stable);
 
+    // load average (0..100) and heap ram
+    uint32_t getSystemLoadAverage();
+    void     _calculateLoad();
+    uint32_t _load_average;
+    uint32_t getInitialFreeHeap();
+    uint32_t getUsedHeap();
 
-    // load average (0..100)
-    void               _calculateLoad();
-    unsigned short int _load_average;
+    // heartbeat
+    void _heartbeatCheck(bool force);
 };
 
 extern MyESP myESP;

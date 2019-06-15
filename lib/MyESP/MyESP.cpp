@@ -43,6 +43,7 @@ MyESP::MyESP() {
     _helpProjectCmds_count = 0;
 
     _use_serial                = false;
+    _heartbeat                 = false;
     _mqtt_host                 = NULL;
     _mqtt_password             = NULL;
     _mqtt_username             = NULL;
@@ -135,6 +136,26 @@ void MyESP::myDebug_P(PGM_P format_P, ...) {
 // use Serial?
 bool MyESP::getUseSerial() {
     return (_use_serial);
+}
+
+// heartbeat
+bool MyESP::getHeartbeat() {
+    return (_heartbeat);
+}
+
+// init heap ram
+uint32_t MyESP::getInitialFreeHeap() {
+    static uint32_t _heap = 0;
+
+    if (0 == _heap) {
+        _heap = ESP.getFreeHeap();
+    }
+
+    return _heap;
+}
+
+uint32_t MyESP::getUsedHeap() {
+    return getInitialFreeHeap() - ESP.getFreeHeap();
 }
 
 // called when WiFi is connected, and used to start OTA, MQTT
@@ -507,7 +528,11 @@ void MyESP::_consoleShowHelp() {
     } else {
         myDebug_P(PSTR("* Hostname: %s (%s)"), _getESPhostname().c_str(), WiFi.localIP().toString().c_str());
         myDebug_P(PSTR("* WiFi SSID: %s (signal %d%%)"), WiFi.SSID().c_str(), getWifiQuality());
-        myDebug_P(PSTR("* MQTT %s"), mqttClient.connected() ? "connected" : "disconnected");
+        if (isMQTTConnected()) {
+            myDebug_P(PSTR("* MQTT connected (heartbeat %s)"), getHeartbeat() ? "enabled" : "disabled");
+        } else {
+            myDebug_P(PSTR("* MQTT disconnected"));
+        }
     }
 
     myDebug_P(PSTR("*"));
@@ -598,6 +623,7 @@ void MyESP::_printSetCommands() {
 
     myDebug_P(PSTR("")); // newline
     myDebug_P(PSTR("  serial=%s"), (_use_serial) ? "on" : "off");
+    myDebug_P(PSTR("  heartbeat=%s"), (_heartbeat) ? "on" : "off");
 
     // print any custom settings
     (_fs_settings_callback)(MYESP_FSACTION_LIST, 0, NULL, NULL);
@@ -696,6 +722,23 @@ bool MyESP::_changeSetting(uint8_t wc, const char * setting, const char * value)
                 _use_serial = false;
                 ok          = true;
                 myDebug_P(PSTR("Reboot ESP to deactivate Serial mode."));
+            } else {
+                ok = false;
+            }
+        }
+
+    } else if (strcmp(setting, "heartbeat") == 0) {
+        ok         = true;
+        _heartbeat = false;
+        if (value) {
+            if (strcmp(value, "on") == 0) {
+                _heartbeat = true;
+                ok         = true;
+                myDebug_P(PSTR("Heartbeat on"));
+            } else if (strcmp(value, "off") == 0) {
+                _heartbeat = false;
+                ok         = true;
+                myDebug_P(PSTR("Heartbeat off"));
             } else {
                 ok = false;
             }
@@ -917,7 +960,6 @@ void MyESP::_setCustomResetReason(uint8_t reason) {
     _setSystemResetReason(reason);
 }
 
-// Treat memory as dirty on cold boot, hardware wdt reset and rst pin
 bool MyESP::_rtcmemStatus() {
     bool readable;
 
@@ -961,9 +1003,6 @@ void MyESP::_deferredReset(unsigned long delaytime, unsigned char reason) {
 // Call this method on boot with start=true to increase the crash counter
 // Call it again once the system is stable to decrease the counter
 // If the counter reaches SYSTEM_CHECK_MAX then the system is flagged as unstable
-// setting _systemOK = false;
-//
-// An unstable system will only have serial access, WiFi in AP mode and OTA
 void MyESP::_setSystemCheck(bool stable) {
     uint8_t value = 0;
 
@@ -1019,9 +1058,10 @@ void MyESP::showSystemStats() {
     }
 
     // uptime
-    uint32_t t   = _getUptime(); // seconds
+    uint32_t t = _getUptime(); // seconds
+
     uint32_t d   = t / 86400L;
-    uint32_t h   = (t / 3600L) % 60;
+    uint32_t h   = ((t % 86400L) / 3600L) % 60;
     uint32_t rem = t % 3600L;
     uint8_t  m   = rem / 60;
     uint8_t  s   = rem % 60;
@@ -1099,8 +1139,56 @@ void MyESP::showSystemStats() {
     myDebug_P(PSTR(" [MEM] Firmware size: %d"), ESP.getSketchSize());
     myDebug_P(PSTR(" [MEM] Max OTA size: %d"), (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000);
     myDebug_P(PSTR(" [MEM] OTA Reserved: %d"), 4 * SPI_FLASH_SEC_SIZE);
-    myDebug_P(PSTR(" [MEM] Free Heap: %d"), ESP.getFreeHeap());
+
+    uint32_t total_memory = getInitialFreeHeap();
+    uint32_t free_memory  = ESP.getFreeHeap();
+
+    myDebug(" [MEM] Free Heap: %d bytes initially | %d bytes used (%2u%%) | %d bytes free (%2u%%)",
+            total_memory,
+            total_memory - free_memory,
+            100 * (total_memory - free_memory) / total_memory,
+            free_memory,
+            100 * free_memory / total_memory);
+
     myDebug_P(PSTR(""));
+}
+
+/*
+ * Send heartbeat via MQTT with all system data
+ */
+void MyESP::_heartbeatCheck(bool force = false) {
+    static uint32_t last_heartbeat = 0;
+
+    if ((millis() - last_heartbeat > HEARTBEAT_INTERVAL) || force) {
+        last_heartbeat = millis();
+
+        if (!isMQTTConnected() || !(_heartbeat)) {
+            return;
+        }
+
+        uint32_t total_memory  = getInitialFreeHeap();
+        uint32_t free_memory   = ESP.getFreeHeap();
+        uint8_t  mem_available = 100 * free_memory / total_memory; // as a %
+
+        char payload[300] = {0};
+        char s[10];
+        strlcpy(payload, "version=", sizeof(payload));
+        strlcat(payload, _app_version, sizeof(payload)); // version
+        strlcat(payload, ", IP=", sizeof(payload));
+        strlcat(payload, WiFi.localIP().toString().c_str(), sizeof(payload)); // IP address
+        strlcat(payload, ", rssid=", sizeof(payload));
+        strlcat(payload, itoa(getWifiQuality(), s, 10), sizeof(payload)); // rssi %
+        strlcat(payload, "%, load=", sizeof(payload));
+        strlcat(payload, ltoa(getSystemLoadAverage(), s, 10), sizeof(payload)); // load
+        strlcat(payload, "%, uptime=", sizeof(payload));
+        strlcat(payload, ltoa(_getUptime(), s, 10), sizeof(payload)); // uptime in secs
+        strlcat(payload, "secs, freemem=", sizeof(payload));
+        strlcat(payload, itoa(mem_available, s, 10), sizeof(payload)); // free mem as a %
+        strlcat(payload, "%", sizeof(payload));
+
+        // send to MQTT
+        myESP.mqttPublish(MQTT_TOPIC_HEARTBEAT, payload);
+    }
 }
 
 // handler for Telnet
@@ -1396,6 +1484,8 @@ bool MyESP::_fs_loadConfig() {
 
     _use_serial = (bool)json["use_serial"];
 
+    _heartbeat = (bool)json["heartbeat"];
+
     // callback for loading custom settings
     // ok is false if there's a problem loading a custom setting (e.g. does not exist)
     bool ok = (_fs_callback)(MYESP_FSACTION_LOAD, json);
@@ -1424,6 +1514,7 @@ bool MyESP::fs_saveConfig() {
     json["mqtt_username"] = _mqtt_username;
     json["mqtt_password"] = _mqtt_password;
     json["use_serial"]    = _use_serial;
+    json["heartbeat"]     = _heartbeat;
 
     // callback for saving custom settings
     (void)(_fs_callback)(MYESP_FSACTION_SAVE, json);
@@ -1475,19 +1566,19 @@ void MyESP::_fs_setup() {
     // _fs_printConfig(); // enable for debugging
 }
 
-uint16_t MyESP::getSystemLoadAverage() {
+uint32_t MyESP::getSystemLoadAverage() {
     return _load_average;
 }
 
 // calculate load average
 void MyESP::_calculateLoad() {
-    static unsigned long last_loadcheck    = 0;
-    static unsigned long load_counter_temp = 0;
+    static uint32_t last_loadcheck    = 0;
+    static uint32_t load_counter_temp = 0;
     load_counter_temp++;
 
     if (millis() - last_loadcheck > LOADAVG_INTERVAL) {
-        static unsigned long load_counter     = 0;
-        static unsigned long load_counter_max = 1;
+        static uint32_t load_counter     = 0;
+        static uint32_t load_counter_max = 1;
 
         load_counter      = load_counter_temp;
         load_counter_temp = 0;
@@ -1694,9 +1785,11 @@ void MyESP::begin(const char * app_hostname, const char * app_name, const char *
     _app_name     = strdup(app_name);
     _app_version  = strdup(app_version);
 
+    getInitialFreeHeap(); // get initial free mem
+
     _rtcmemSetup();
     _telnet_setup(); // Telnet setup, called first to set Serial
-    _eeprom_setup(); // set up eeprom for storing crash data, if compiled with -DCRASH
+    _eeprom_setup(); // set up EEPROM for storing crash data, if compiled with -DCRASH
     _fs_setup();     // SPIFFS setup, do this first to get values
     _wifi_setup();   // WIFI setup
     _ota_setup();    // init OTA
@@ -1706,6 +1799,7 @@ void MyESP::begin(const char * app_hostname, const char * app_name, const char *
     SerialAndTelnet.flush();
 
     _setSystemCheck(false); // reset system check
+    _heartbeatCheck(true);  // force heartbeat
 }
 
 /*
@@ -1714,11 +1808,10 @@ void MyESP::begin(const char * app_hostname, const char * app_name, const char *
 void MyESP::loop() {
     _calculateLoad();
     _systemCheckLoop();
+    _heartbeatCheck();
 
     _telnetHandle();
-
-    jw.loop(); // WiFi
-
+    jw.loop();           // WiFi
     ArduinoOTA.handle(); // OTA
     _mqttConnect();      // MQTT
 
