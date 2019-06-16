@@ -1284,10 +1284,12 @@ void _process_RCPLUSStatusMode(_EMS_RxTelegram * EMS_RxTelegram) {
  * FR10 Junkers - type x6F01
  */
 void _process_JunkersStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
+    if (EMS_RxTelegram->offset == 0) {
     // e.g. for FR10:  90 00 FF 00 00 6F 03 01 00 BE 00 BF
     // e.g. for FW100: 90 00 FF 00 00 6F 03 02 00 D7 00 DA F3 34 00 C4
     EMS_Thermostat.curr_roomTemp     = _toShort(EMS_OFFSET_JunkersStatusMessage_curr);     // value is * 10
     EMS_Thermostat.setpoint_roomTemp = _toShort(EMS_OFFSET_JunkersStatusMessage_setpoint); // value is * 10
+    }
 }
 
 /**
@@ -1450,10 +1452,21 @@ void _process_HPMonitor2(_EMS_RxTelegram * EMS_RxTelegram) {
  * Junkers ISM1 Solar Module - type 0x0003 EMS+ for energy readings
  */
 void _process_ISM1StatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
-    // e.g. B0 00 FF 00 00 03 32 00 00 00 00 13 00 D6 00 00 00 FB D0 F0
+
+    if (EMS_RxTelegram->offset == 0) {
+            // e.g. B0 00 FF 00 00 03 32 00 00 00 00 13 00 D6 00 00 00 FB D0 F0
     EMS_Other.SMcollectorTemp = _toShort(4); // Collector Temperature
     EMS_Other.SMbottomTemp    = _toShort(6); // Temperature Bottom of Solar Boiler
+    EMS_Other.SMEnergyLastHour = _toShort(2) * 10;  // Solar Energy produced in last hour
+    EMS_Other.SMpump = _bitRead(8,0); // Solar pump on (1) or off (0)
     EMS_Other.SM              = true;
+    }
+
+    if (EMS_RxTelegram->offset == 4) {
+            // e.g. B0 00 FF 04 00 03 02 E5
+    EMS_Other.SMcollectorTemp = _toShort(0); // Collector Temperature
+    EMS_Other.SM              = true;
+    }
 }
 
 /**
