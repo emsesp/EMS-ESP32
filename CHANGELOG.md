@@ -5,11 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.9.0dev] 2019-06-
+## [1.8.1dev] 2019-06-17
 
 ### Added
 
+- Added back -DCRASH in Debug build target for capturing any ESP8266 stack dumps during crashes
+
 ### Fixed
+
+### Changed
+
+- `publish_wait` renamed to `publish_time`, a value of 0 means no sending to MQTT
 
 ## [1.8.0] 2019-06-15
 
