@@ -8,7 +8,7 @@
 default_envs = debug
 
 [common]
-debug_flags = -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-parameter -Wno-unused-variable -DTESTS 
+debug_flags = -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-unused-parameter -Wno-unused-variable -DTESTS -DCRASH
 general_flags = -g -w -DNO_GLOBAL_EEPROM
 
 arduino_core_2_3_0 = espressif8266@1.5.0
