@@ -8,7 +8,9 @@
 
 #include "MyESP.h"
 
+#ifdef CRASH
 EEPROM_Rotate EEPROMr;
+#endif
 
 union system_rtcmem_t {
     struct {
@@ -144,7 +146,7 @@ bool MyESP::getHeartbeat() {
 }
 
 // init heap ram
-uint32_t MyESP::getInitialFreeHeap() {
+uint32_t MyESP::_getInitialFreeHeap() {
     static uint32_t _heap = 0;
 
     if (0 == _heap) {
@@ -154,8 +156,10 @@ uint32_t MyESP::getInitialFreeHeap() {
     return _heap;
 }
 
-uint32_t MyESP::getUsedHeap() {
-    return getInitialFreeHeap() - ESP.getFreeHeap();
+// used heap mem
+// note calls to getFreeHeap sometimes causes some ESPs to crash
+uint32_t MyESP::_getUsedHeap() {
+    return _getInitialFreeHeap() - ESP.getFreeHeap();
 }
 
 // called when WiFi is connected, and used to start OTA, MQTT
@@ -198,7 +202,7 @@ void MyESP::_wifiCallback(justwifi_messages_t code, char * parameter) {
             _wifi_callback();
         }
 
-        jw.enableAPFallback(false); // Disable AP mode after initial connect was succesfull. Thanks @JewelZB
+        jw.enableAPFallback(false); // Disable AP mode after initial connect was successful
     }
 
     if (code == MESSAGE_ACCESSPOINT_CREATED) {
@@ -236,6 +240,66 @@ void MyESP::_wifiCallback(justwifi_messages_t code, char * parameter) {
     if (code == MESSAGE_DISCONNECTED) {
         myDebug_P(PSTR("[WIFI] Disconnected"));
         _wifi_connected = false;
+    }
+
+    if (code == MESSAGE_SCANNING) {
+        myDebug_P(PSTR("[WIFI] Scanning\n"));
+    }
+
+    if (code == MESSAGE_SCAN_FAILED) {
+        myDebug_P(PSTR("[WIFI] Scan failed\n"));
+    }
+
+    if (code == MESSAGE_NO_NETWORKS) {
+        myDebug_P(PSTR("[WIFI] No networks found\n"));
+    }
+
+    if (code == MESSAGE_NO_KNOWN_NETWORKS) {
+        myDebug_P(PSTR("[WIFI] No known networks found\n"));
+    }
+
+    if (code == MESSAGE_FOUND_NETWORK) {
+        myDebug_P(PSTR("[WIFI] %s\n"), parameter);
+    }
+
+    if (code == MESSAGE_CONNECT_WAITING) {
+        // too much noise
+    }
+
+    if (code == MESSAGE_ACCESSPOINT_CREATING) {
+        myDebug_P(PSTR("[WIFI] Creating access point\n"));
+    }
+
+    if (code == MESSAGE_ACCESSPOINT_FAILED) {
+        myDebug_P(PSTR("[WIFI] Could not create access point\n"));
+    }
+
+    if (code == MESSAGE_ACCESSPOINT_DESTROYED) {
+        myDebug_P(PSTR("[WIFI] Access point destroyed\n"));
+    }
+
+    if (code == MESSAGE_WPS_START) {
+        myDebug_P(PSTR("[WIFI] WPS started\n"));
+    }
+
+    if (code == MESSAGE_WPS_SUCCESS) {
+        myDebug_P(PSTR("[WIFI] WPS succeeded!\n"));
+    }
+
+    if (code == MESSAGE_WPS_ERROR) {
+        myDebug_P(PSTR("[WIFI] WPS failed\n"));
+    }
+
+    if (code == MESSAGE_SMARTCONFIG_START) {
+        myDebug_P(PSTR("[WIFI] Smart Config started\n"));
+    }
+
+    if (code == MESSAGE_SMARTCONFIG_SUCCESS) {
+        myDebug_P(PSTR("[WIFI] Smart Config succeeded!\n"));
+    }
+
+    if (code == MESSAGE_SMARTCONFIG_ERROR) {
+        myDebug_P(PSTR("[WIFI] Smart Config failed\n"));
     }
 }
 
@@ -395,6 +459,7 @@ void MyESP::setOTA(ota_callback_f OTACallback_pre, ota_callback_f OTACallback_po
 void MyESP::_OTACallback() {
     myDebug_P(PSTR("[OTA] Start"));
 
+#ifdef CRASH
     // If we are not specifically reserving the sectors we are using as
     // EEPROM in the memory layout then any OTA upgrade will overwrite
     // all but the last one.
@@ -407,6 +472,7 @@ void MyESP::_OTACallback() {
     // See onError callback below.
     EEPROMr.rotate(false);
     EEPROMr.commit();
+#endif
 
     if (_ota_pre_callback) {
         (_ota_pre_callback)(); // call custom function
@@ -449,8 +515,10 @@ void MyESP::_ota_setup() {
         else if (error == OTA_END_ERROR)
             myDebug_P(PSTR("[OTA] End Failed"));
 
-        // There's been an error, reenable rotation
+#ifdef CRASH
+        // There's been an error, reenable eeprom rotation
         EEPROMr.rotate(true);
+#endif
     });
 }
 
@@ -464,8 +532,10 @@ void MyESP::setBoottime(const char * boottime) {
 
 // eeprom
 void MyESP::_eeprom_setup() {
+#ifdef CRASH
     EEPROMr.size(4);
     EEPROMr.begin(SPI_FLASH_SEC_SIZE);
+#endif
 }
 
 // Set callback of sketch function to process project messages
@@ -480,6 +550,7 @@ void MyESP::_telnetConnected() {
     myDebug_P(PSTR("[TELNET] Telnet connection established"));
     _consoleShowHelp(); // Show the initial message
 
+#ifdef CRASH
     // show crash dump if just restarted after a fatal crash
     uint32_t crash_time;
     EEPROMr.get(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_CRASH_TIME, crash_time);
@@ -492,6 +563,7 @@ void MyESP::_telnetConnected() {
         EEPROMr.commit();
         */
     }
+#endif
 
     // call callback
     if (_telnet_callback) {
@@ -539,7 +611,9 @@ void MyESP::_consoleShowHelp() {
     myDebug_P(PSTR("* Commands:"));
     myDebug_P(PSTR("*  ?=help, CTRL-D/quit=exit telnet session"));
     myDebug_P(PSTR("*  set, system, reboot"));
-    myDebug_P(PSTR("*  crash <dump | clear>"));
+#ifdef CRASH
+    myDebug_P(PSTR("*  crash <dump | clear | test [n]>"));
+#endif
 
     // print custom commands if available. Taken from progmem
     if (_telnetcommand_callback) {
@@ -842,19 +916,23 @@ void MyESP::_telnetCommand(char * commandLine) {
         return;
     }
 
-
+#ifdef CRASH
     // crash command
-    if ((strcmp(ptrToCommandName, "crash") == 0) && (wc == 2)) {
+    if ((strcmp(ptrToCommandName, "crash") == 0) && (wc >= 2)) {
         char * cmd = _telnet_readWord(false);
         if (strcmp(cmd, "dump") == 0) {
             crashDump();
         } else if (strcmp(cmd, "clear") == 0) {
             crashClear();
+        } else if ((strcmp(cmd, "test") == 0) && (wc == 3)) {
+            char * value = _telnet_readWord(false);
+            crashTest(atoi(value));
         } else {
-            myDebug_P(PSTR("Error. Usage: crash <dump | clear>"));
+            myDebug_P(PSTR("Error. Usage: crash <dump | clear | test [n]>"));
         }
         return; // don't call custom command line callback
     }
+#endif
 
     // call callback function
     (_telnetcommand_callback)(wc, commandLine);
@@ -960,6 +1038,7 @@ void MyESP::_setCustomResetReason(uint8_t reason) {
     _setSystemResetReason(reason);
 }
 
+// returns false if not set and needs to be intialized
 bool MyESP::_rtcmemStatus() {
     bool readable;
 
@@ -978,12 +1057,12 @@ bool MyESP::_rtcmemStatus() {
     return readable;
 }
 
-bool MyESP::rtcmemStatus() {
+bool MyESP::_getRtcmemStatus() {
     return _rtcmem_status;
 }
 
-unsigned char MyESP::_getCustomResetReason() {
-    static unsigned char status = 255;
+uint8_t MyESP::_getCustomResetReason() {
+    static uint8_t status = 255;
     if (status == 255) {
         if (_rtcmemStatus())
             status = _getSystemResetReason();
@@ -995,7 +1074,7 @@ unsigned char MyESP::_getCustomResetReason() {
     return status;
 }
 
-void MyESP::_deferredReset(unsigned long delaytime, unsigned char reason) {
+void MyESP::_deferredReset(unsigned long delaytime, uint8_t reason) {
     delay(delaytime);
     _setCustomResetReason(reason);
 }
@@ -1010,7 +1089,7 @@ void MyESP::_setSystemCheck(bool stable) {
         value = 0; // system is ok
         // myDebug_P(PSTR("[SYSTEM] System OK\n"));
     } else {
-        if (!rtcmemStatus()) {
+        if (!_getRtcmemStatus()) {
             _setSystemStabilityCounter(1);
             return;
         }
@@ -1083,6 +1162,7 @@ void MyESP::showSystemStats() {
 
     myDebug_P(PSTR(" [WIFI] WiFi MAC: %s"), WiFi.macAddress().c_str());
 
+#ifdef CRASH
     char output_str[80] = {0};
     char buffer[16]     = {0};
     myDebug_P(PSTR(" [EEPROM] EEPROM size: %u"), EEPROMr.reserved() * SPI_FLASH_SEC_SIZE);
@@ -1094,6 +1174,7 @@ void MyESP::showSystemStats() {
         strlcat(output_str, " ", sizeof(output_str));
     }
     myDebug(output_str);
+#endif
 
 #ifdef ARDUINO_BOARD
     myDebug_P(PSTR(" [SYSTEM] Board: %s"), ARDUINO_BOARD);
@@ -1107,7 +1188,6 @@ void MyESP::showSystemStats() {
     myDebug_P(PSTR(" [SYSTEM] Core version: %s"), ESP.getCoreVersion().c_str());
     myDebug_P(PSTR(" [SYSTEM] Boot version: %d"), ESP.getBootVersion());
     myDebug_P(PSTR(" [SYSTEM] Boot mode: %d"), ESP.getBootMode());
-    //myDebug_P(PSTR("[SYSTEM] Firmware MD5: %s"), (char *)ESP.getSketchMD5().c_str());
     unsigned char reason = _getCustomResetReason();
     if (reason > 0) {
         char buffer[32];
@@ -1140,7 +1220,7 @@ void MyESP::showSystemStats() {
     myDebug_P(PSTR(" [MEM] Max OTA size: %d"), (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000);
     myDebug_P(PSTR(" [MEM] OTA Reserved: %d"), 4 * SPI_FLASH_SEC_SIZE);
 
-    uint32_t total_memory = getInitialFreeHeap();
+    uint32_t total_memory = _getInitialFreeHeap();
     uint32_t free_memory  = ESP.getFreeHeap();
 
     myDebug(" [MEM] Free Heap: %d bytes initially | %d bytes used (%2u%%) | %d bytes free (%2u%%)",
@@ -1166,7 +1246,7 @@ void MyESP::_heartbeatCheck(bool force = false) {
             return;
         }
 
-        uint32_t total_memory  = getInitialFreeHeap();
+        uint32_t total_memory  = _getInitialFreeHeap();
         uint32_t free_memory   = ESP.getFreeHeap();
         uint8_t  mem_available = 100 * free_memory / total_memory; // as a %
 
@@ -1531,7 +1611,6 @@ bool MyESP::fs_saveConfig() {
         return false;
     }
 
-
     // Serialize JSON to file
     if (serializeJson(json, configFile) == 0) {
         myDebug_P(PSTR("[FS] Failed to write config file"));
@@ -1630,6 +1709,7 @@ int MyESP::getWifiQuality() {
     return 2 * (dBm + 100);
 }
 
+#ifdef CRASH
 /**
  * Save crash information in EEPROM
  * This function is called automatically if ESP8266 suffers an exception
@@ -1779,15 +1859,66 @@ void MyESP::crashDump() {
     myDebug_P(PSTR("\nTo clean this dump use the command: %scrash clear%s\n"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
 }
 
+void MyESP::crashTest(uint8_t t) {
+    if (t == 1) {
+        myDebug_P(PSTR("[CRASH] Attempting to divide by zero ..."));
+        int result, zero;
+        zero   = 0;
+        result = 1 / zero;
+        Serial.printf("Result = %d", result);
+    }
+
+    if (t == 2) {
+        myDebug_P(PSTR("[CRASH] Attempting to read through a pointer to no object ..."));
+        int * nullPointer;
+        nullPointer = NULL;
+        // null pointer dereference - read
+        // attempt to read a value through a null pointer
+        Serial.println(*nullPointer);
+    }
+
+    if (t == 3) {
+        myDebug_P(PSTR("[CRASH] Crashing with hardware WDT (%ld ms) ...\n"), millis());
+        ESP.wdtDisable();
+        while (true) {
+            // stay in an infinite loop doing nothing
+            // this way other process can not be executed
+            //
+            // Note:
+            // Hardware wdt kicks in if software wdt is unable to perfrom
+            // Nothing will be saved in EEPROM for the hardware wdt
+        }
+    }
+
+    if (t == 4) {
+        myDebug_P(PSTR("[CRASH] Crashing with software WDT (%ld ms) ...\n"), millis());
+        while (true) {
+            // stay in an infinite loop doing nothing
+            // this way other process can not be executed
+        }
+    }
+}
+
+#else
+void MyESP::crashTest(uint8_t t) {
+}
+void MyESP::crashClear() {
+}
+void MyESP::crashDump() {
+}
+void MyESP::crashInfo() {
+}
+#endif
+
 // setup MyESP
 void MyESP::begin(const char * app_hostname, const char * app_name, const char * app_version) {
     _app_hostname = strdup(app_hostname);
     _app_name     = strdup(app_name);
     _app_version  = strdup(app_version);
 
-    getInitialFreeHeap(); // get initial free mem
+    _getInitialFreeHeap(); // get initial free mem
 
-    _rtcmemSetup();
+    _rtcmemSetup();  // rtc internal mem setup
     _telnet_setup(); // Telnet setup, called first to set Serial
     _eeprom_setup(); // set up EEPROM for storing crash data, if compiled with -DCRASH
     _fs_setup();     // SPIFFS setup, do this first to get values

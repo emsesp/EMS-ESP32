@@ -37,7 +37,7 @@ DS18 ds18;
 #define DEFAULT_HEATINGCIRCUIT 1 // default to HC1 for thermostats that support multiple heating circuits like the RC35
 
 // timers, all values are in seconds
-#define DEFAULT_PUBLISHWAIT 120 // every 2 minutes publish MQTT values, including Dallas sensors
+#define DEFAULT_PUBLISHTIME 120 // every 2 minutes publish MQTT values, including Dallas sensors
 Ticker publishValuesTimer;
 Ticker publishSensorValuesTimer;
 
@@ -78,7 +78,7 @@ typedef struct {
     bool     shower_alert;    // true if we want the alert of cold water
     bool     led;             // LED on/off
     bool     listen_mode;     // stop automatic Tx on/off
-    uint16_t publish_wait;    // frequency of MQTT publish in seconds
+    uint16_t publish_time;    // frequency of MQTT publish in seconds
     uint8_t  led_gpio;        // pin for LED
     uint8_t  dallas_gpio;     // pin for attaching external dallas temperature sensors
     bool     dallas_parasite; // on/off is using parasite
@@ -104,7 +104,7 @@ command_t project_cmds[] = {
     {true, "listen_mode <on | off>", "when on all automatic Tx is disabled"},
     {true, "shower_timer <on | off>", "notify via MQTT all shower durations"},
     {true, "shower_alert <on | off>", "send a warning of cold water after shower time is exceeded"},
-    {true, "publish_wait <seconds>", "set frequency for publishing to MQTT"},
+    {true, "publish_time <seconds>", "set frequency for publishing to MQTT (0=off)"},
     {true, "heating_circuit <1 | 2>", "set the thermostat HC to work with if using multiple heating circuits"},
 
     {false, "info", "show data captured on the EMS bus"},
@@ -481,13 +481,11 @@ void showInfo() {
             // Temperatures are *100
             _renderShortValue("Set room temperature", "C", EMS_Thermostat.setpoint_roomTemp, 10); // *100
             _renderShortValue("Current room temperature", "C", EMS_Thermostat.curr_roomTemp, 10); // *100
-        } 
-        else if ((ems_getThermostatModel() == EMS_MODEL_FR10) || (ems_getThermostatModel() == EMS_MODEL_FW100)) {
+        } else if ((ems_getThermostatModel() == EMS_MODEL_FR10) || (ems_getThermostatModel() == EMS_MODEL_FW100)) {
             // Temperatures are *10
             _renderShortValue("Set room temperature", "C", EMS_Thermostat.setpoint_roomTemp, 1); // *10
             _renderShortValue("Current room temperature", "C", EMS_Thermostat.curr_roomTemp, 1); // *10
-        }
-        else {
+        } else {
             // because we store in 2 bytes short, when converting to a single byte we'll loose the negative value if its unset
             if (EMS_Thermostat.setpoint_roomTemp <= 0) {
                 EMS_Thermostat.setpoint_roomTemp = EMS_VALUE_INT_NOTSET;
@@ -888,7 +886,7 @@ void do_publishSensorValues() {
 // call PublishValues without forcing, so using CRC to see if we really need to publish
 void do_publishValues() {
     // don't publish if we're not connected to the EMS bus
-    if ((ems_getBusConnected()) && (!myESP.getUseSerial()) && myESP.isMQTTConnected()) {
+    if ((ems_getBusConnected()) && (!myESP.getUseSerial()) && myESP.isMQTTConnected() && EMSESP_Status.publish_time != 0) {
         publishValues(true); // force publish
     }
 }
@@ -935,8 +933,8 @@ void do_regularUpdates() {
 
 // stop devices scan and restart all other timers
 void stopDeviceScan() {
-    publishValuesTimer.attach(EMSESP_Status.publish_wait, do_publishValues);             // post MQTT EMS values
-    publishSensorValuesTimer.attach(EMSESP_Status.publish_wait, do_publishSensorValues); // post MQTT sensor values
+    publishValuesTimer.attach(EMSESP_Status.publish_time, do_publishValues);             // post MQTT EMS values
+    publishSensorValuesTimer.attach(EMSESP_Status.publish_time, do_publishSensorValues); // post MQTT sensor values
     regularUpdatesTimer.attach(REGULARUPDATES_TIME, do_regularUpdates);                  // regular reads from the EMS
     systemCheckTimer.attach(SYSTEMCHECK_TIME, do_systemCheck);                           // check if Boiler is online
     scanThermostat_count = 0;
@@ -1056,9 +1054,9 @@ bool FSCallback(MYESP_FSACTION action, const JsonObject json) {
         // shower_alert
         EMSESP_Status.shower_alert = json["shower_alert"];
 
-        // publish_wait
-        if (!(EMSESP_Status.publish_wait = json["publish_wait"])) {
-            EMSESP_Status.publish_wait = DEFAULT_PUBLISHWAIT; // default value
+        // publish_time
+        if (!(EMSESP_Status.publish_time = json["publish_time"])) {
+            EMSESP_Status.publish_time = DEFAULT_PUBLISHTIME; // default value
         }
 
         // heating_circuit
@@ -1080,7 +1078,7 @@ bool FSCallback(MYESP_FSACTION action, const JsonObject json) {
         json["listen_mode"]     = EMSESP_Status.listen_mode;
         json["shower_timer"]    = EMSESP_Status.shower_timer;
         json["shower_alert"]    = EMSESP_Status.shower_alert;
-        json["publish_wait"]    = EMSESP_Status.publish_wait;
+        json["publish_time"]    = EMSESP_Status.publish_time;
         json["heating_circuit"] = EMSESP_Status.heating_circuit;
 
         return true;
@@ -1194,9 +1192,9 @@ bool SettingsCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, c
             }
         }
 
-        // publish_wait
-        if ((strcmp(setting, "publish_wait") == 0) && (wc == 2)) {
-            EMSESP_Status.publish_wait = atoi(value);
+        // publish_time
+        if ((strcmp(setting, "publish_time") == 0) && (wc == 2)) {
+            EMSESP_Status.publish_time = atoi(value);
             ok                         = true;
         }
 
@@ -1211,7 +1209,6 @@ bool SettingsCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, c
                 myDebug_P(PSTR("Error. Usage: set heating_circuit <1 | 2>"));
             }
         }
-
     }
 
     if (action == MYESP_FSACTION_LIST) {
@@ -1237,7 +1234,7 @@ bool SettingsCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, c
         myDebug_P(PSTR("  listen_mode=%s"), EMSESP_Status.listen_mode ? "on" : "off");
         myDebug_P(PSTR("  shower_timer=%s"), EMSESP_Status.shower_timer ? "on" : "off");
         myDebug_P(PSTR("  shower_alert=%s"), EMSESP_Status.shower_alert ? "on" : "off");
-        myDebug_P(PSTR("  publish_wait=%d"), EMSESP_Status.publish_wait);
+        myDebug_P(PSTR("  publish_time=%d"), EMSESP_Status.publish_time);
     }
 
     return ok;
@@ -1583,7 +1580,7 @@ void initEMSESP() {
     EMSESP_Status.shower_alert    = false;
     EMSESP_Status.led             = true; // LED is on by default
     EMSESP_Status.listen_mode     = false;
-    EMSESP_Status.publish_wait    = DEFAULT_PUBLISHWAIT;
+    EMSESP_Status.publish_time    = DEFAULT_PUBLISHTIME;
     EMSESP_Status.timestamp       = millis();
     EMSESP_Status.dallas_sensors  = 0;
     EMSESP_Status.led_gpio        = EMSESP_LED_GPIO;
@@ -1696,8 +1693,8 @@ void setup() {
 
     // enable regular checks if not in test mode
     if (!EMSESP_Status.listen_mode) {
-        publishValuesTimer.attach(EMSESP_Status.publish_wait, do_publishValues);             // post MQTT EMS values
-        publishSensorValuesTimer.attach(EMSESP_Status.publish_wait, do_publishSensorValues); // post MQTT sensor values
+        publishValuesTimer.attach(EMSESP_Status.publish_time, do_publishValues);             // post MQTT EMS values
+        publishSensorValuesTimer.attach(EMSESP_Status.publish_time, do_publishSensorValues); // post MQTT sensor values
         regularUpdatesTimer.attach(REGULARUPDATES_TIME, do_regularUpdates);                  // regular reads from the EMS
     }
 

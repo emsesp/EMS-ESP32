@@ -9,7 +9,7 @@
 #ifndef MyEMS_h
 #define MyEMS_h
 
-#define MYESP_VERSION "1.1.16"
+#define MYESP_VERSION "1.1.17"
 
 #include <ArduinoJson.h>
 #include <ArduinoOTA.h>
@@ -231,17 +231,15 @@ class MyESP {
     void crashInfo();
 
     // general
-    void end();
-    void loop();
-    void begin(const char * app_hostname, const char * app_name, const char * app_version);
-    void setBoottime(const char * boottime);
-    void resetESP();
-    int  getWifiQuality();
-    void showSystemStats();
-    bool getHeartbeat();
-
-    // rtcmem and reset reason
-    bool     rtcmemStatus();
+    void     end();
+    void     loop();
+    void     begin(const char * app_hostname, const char * app_name, const char * app_version);
+    void     setBoottime(const char * boottime);
+    void     resetESP();
+    int      getWifiQuality();
+    void     showSystemStats();
+    bool     getHeartbeat();
+    uint32_t getSystemLoadAverage();
     uint32_t getSystemResetReason();
 
   private:
@@ -328,33 +326,29 @@ class MyESP {
     String        _buildTime();
 
     // reset reason and rtcmem
-    bool _rtcmemStatus();
-    void _rtcmemInit();
-    void _rtcmemSetup();
-
-    void _deferredReset(unsigned long delay, uint8_t reason);
-
+    bool    _rtcmemStatus();
+    void    _rtcmemInit();
+    void    _rtcmemSetup();
+    void    _deferredReset(unsigned long delay, uint8_t reason);
     uint8_t _getSystemStabilityCounter();
     void    _setSystemStabilityCounter(uint8_t counter);
-
-    uint8_t _getSystemResetReason();
     void    _setSystemResetReason(uint8_t reason);
+    uint8_t _getCustomResetReason();
+    void    _setCustomResetReason(uint8_t reason);
+    bool    _systemStable;
 
-    unsigned char _getCustomResetReason();
-    void          _setCustomResetReason(unsigned char reason);
-
-    bool _systemStable;
-
-    bool getSystemCheck();
-    void _systemCheckLoop();
-    void _setSystemCheck(bool stable);
+    // rtcmem and reset reason
+    bool    _getRtcmemStatus();
+    uint8_t _getSystemResetReason();
+    bool    getSystemCheck();
+    void    _systemCheckLoop();
+    void    _setSystemCheck(bool stable);
 
     // load average (0..100) and heap ram
-    uint32_t getSystemLoadAverage();
     void     _calculateLoad();
     uint32_t _load_average;
-    uint32_t getInitialFreeHeap();
-    uint32_t getUsedHeap();
+    uint32_t _getInitialFreeHeap();
+    uint32_t _getUsedHeap();
 
     // heartbeat
     void _heartbeatCheck(bool force);
