@@ -274,10 +274,6 @@ void MyESP::_wifiCallback(justwifi_messages_t code, char * parameter) {
         myDebug_P(PSTR("[WIFI] Could not create access point\n"));
     }
 
-    if (code == MESSAGE_ACCESSPOINT_DESTROYED) {
-        myDebug_P(PSTR("[WIFI] Access point destroyed\n"));
-    }
-
     if (code == MESSAGE_WPS_START) {
         myDebug_P(PSTR("[WIFI] WPS started\n"));
     }
@@ -1562,9 +1558,9 @@ bool MyESP::_fs_loadConfig() {
     value          = json["mqtt_password"];
     _mqtt_password = (value) ? strdup(value) : NULL;
 
-    _use_serial = (bool)json["use_serial"];
+    _use_serial = (bool)json["use_serial"]; // defaults to off
 
-    _heartbeat = (bool)json["heartbeat"];
+    _heartbeat = (bool)json["heartbeat"]; // defaults to off
 
     // callback for loading custom settings
     // ok is false if there's a problem loading a custom setting (e.g. does not exist)

@@ -96,18 +96,18 @@ typedef struct {
 command_t project_cmds[] = {
 
     {true, "led <on | off>", "toggle status LED on/off"},
-    {true, "led_gpio <gpio>", "set the LED pin. Default is the onboard LED (D1=5)"},
-    {true, "dallas_gpio <gpio>", "set the pin for external Dallas temperature sensors (D5=14)"},
-    {true, "dallas_parasite <on | off>", "set to on if powering Dallas via parasite"},
-    {true, "thermostat_type <device ID>", "set the thermostat type id (e.g. 10 for 0x10)"},
-    {true, "boiler_type <device ID>", "set the boiler type id (e.g. 8 for 0x08)"},
-    {true, "listen_mode <on | off>", "when on all automatic Tx is disabled"},
-    {true, "shower_timer <on | off>", "notify via MQTT all shower durations"},
-    {true, "shower_alert <on | off>", "send a warning of cold water after shower time is exceeded"},
-    {true, "publish_time <seconds>", "set frequency for publishing to MQTT (0=off)"},
-    {true, "heating_circuit <1 | 2>", "set the thermostat HC to work with if using multiple heating circuits"},
+    {true, "led_gpio <gpio>", "set the LED pin. Default is the onboard LED 2. For external D1 use 5"},
+    {true, "dallas_gpio <gpio>", "set the external Dallas temperature sensors pin. Default is 14 for D5"},
+    {true, "dallas_parasite <on | off>", "set to on if powering Dallas sesnsors via parasite power"},
+    {true, "thermostat_type <device ID>", "set the thermostat type ID (e.g. 10 for 0x10)"},
+    {true, "boiler_type <device ID>", "set the boiler type ID (e.g. 8 for 0x08)"},
+    {true, "listen_mode <on | off>", "when set to on all automatic Tx are disabled"},
+    {true, "shower_timer <on | off>", "send MQTT notification on all shower durations"},
+    {true, "shower_alert <on | off>", "stop hot water to send 3 cold burst warnings after max shower time is exceeded"},
+    {true, "publish_time <seconds>", "set frequency for publishing data to MQTT (0=off)"},
+    {true, "heating_circuit <1 | 2>", "set the main thermostat HC to work with (if using multiple heating circuits)"},
 
-    {false, "info", "show data captured on the EMS bus"},
+    {false, "info", "show current captured on the devices"},
     {false, "log <n | b | t | r | v>", "set logging mode to none, basic, thermostat only, raw or verbose"},
 
 #ifdef TESTS
@@ -1016,56 +1016,25 @@ void runUnitTest(uint8_t test_num) {
 // callback for loading/saving settings to the file system (SPIFFS)
 bool FSCallback(MYESP_FSACTION action, const JsonObject json) {
     if (action == MYESP_FSACTION_LOAD) {
-        bool recreate_config = true;
-
-        // led
-        EMSESP_Status.led = json["led"];
-
-        // led_gpio
-        if (!(EMSESP_Status.led_gpio = json["led_gpio"])) {
-            EMSESP_Status.led_gpio = EMSESP_LED_GPIO; // default value
-        }
-
-        // dallas_gpio
-        if (!(EMSESP_Status.dallas_gpio = json["dallas_gpio"])) {
-            EMSESP_Status.dallas_gpio = EMSESP_DALLAS_GPIO; // default value
-        }
-
-        // dallas_parasite
+        EMSESP_Status.led             = json["led"];
+        EMSESP_Status.led_gpio        = json["led_gpio"] | EMSESP_LED_GPIO;
+        EMSESP_Status.dallas_gpio     = json["dallas_gpio"] | EMSESP_DALLAS_GPIO;
         EMSESP_Status.dallas_parasite = json["dallas_parasite"];
 
-        // thermostat_type
-        if (!(EMS_Thermostat.device_id = json["thermostat_type"])) {
-            EMS_Thermostat.device_id = EMSESP_THERMOSTAT_TYPE; // set default
-        }
+        EMS_Thermostat.device_id = json["thermostat_type"] | EMSESP_THERMOSTAT_TYPE;
+        EMS_Boiler.device_id     = json["boiler_type"] | EMSESP_BOILER_TYPE;
 
-        // boiler_type
-        if (!(EMS_Boiler.device_id = json["boiler_type"])) {
-            EMS_Boiler.device_id = EMSESP_BOILER_TYPE; // set default
-        }
+        EMSESP_Status.shower_timer = json["shower_timer"];
+        EMSESP_Status.shower_alert = json["shower_alert"];
+        EMSESP_Status.publish_time = json["publish_time"] | DEFAULT_PUBLISHTIME;
 
-        // listen mode
         EMSESP_Status.listen_mode = json["listen_mode"];
         ems_setTxDisabled(EMSESP_Status.listen_mode);
 
-        // shower_timer
-        EMSESP_Status.shower_timer = json["shower_timer"];
-
-        // shower_alert
-        EMSESP_Status.shower_alert = json["shower_alert"];
-
-        // publish_time
-        if (!(EMSESP_Status.publish_time = json["publish_time"])) {
-            EMSESP_Status.publish_time = DEFAULT_PUBLISHTIME; // default value
-        }
-
-        // heating_circuit
-        if (!(EMSESP_Status.heating_circuit = json["heating_circuit"])) {
-            EMSESP_Status.heating_circuit = DEFAULT_HEATINGCIRCUIT; // default value
-        }
+        EMSESP_Status.heating_circuit = json["heating_circuit"] | DEFAULT_HEATINGCIRCUIT;
         ems_setThermostatHC(EMSESP_Status.heating_circuit);
 
-        return recreate_config; // return false if some settings are missing and we need to rebuild the file
+        return true; // return false if some settings are missing and we need to rebuild the file
     }
 
     if (action == MYESP_FSACTION_SAVE) {
