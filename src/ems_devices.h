@@ -124,6 +124,9 @@ typedef enum {
     // generic ID for the boiler
     EMS_MODEL_UBA,
 
+    // generic ID for the solar module
+    EMS_MODEL_SOLAR_MODULE,
+
     // generic ID for all the other weird devices
     EMS_MODEL_OTHER,
 
@@ -147,7 +150,7 @@ typedef enum {
 
 } _EMS_MODEL_ID;
 
-// EMS types for known devices. This list will be extended when new devices are recognized.
+// EMS types for known boilers. This list will be extended when new devices are recognized.
 // The device_id is always 0x08
 // format is MODEL_ID, PRODUCT ID, DESCRIPTION
 const _Boiler_Type Boiler_Types[] = {
@@ -164,7 +167,19 @@ const _Boiler_Type Boiler_Types[] = {
 
 };
 
-// Other EMS devices which are not considered boilers or thermostats
+/*
+ * Known Solar Module types
+ */
+const _SolarModule_Type SolarModule_Types[] = {    
+
+    {EMS_MODEL_OTHER, EMS_PRODUCTID_SM10, EMS_ID_SM, "SM10 Solar Module"},
+    {EMS_MODEL_OTHER, EMS_PRODUCTID_SM100, EMS_ID_SM, "SM100 Solar Module"},
+    {EMS_MODEL_OTHER, EMS_PRODUCTID_ISM1, EMS_ID_SM, "Junkers ISM1 Solar Module"}
+
+};
+
+
+// Other EMS devices which are not considered boilers, thermostats or solar modules
 const _Other_Type Other_Types[] = {
 
     {EMS_MODEL_OTHER, 69, 0x21, "MM10 Mixer Module"},
@@ -178,11 +193,8 @@ const _Other_Type Other_Types[] = {
     {EMS_MODEL_OTHER, 125, 0x09, "BC25 Base Controller"},
     {EMS_MODEL_OTHER, 152, 0x09, "Junkers Controller"},
     {EMS_MODEL_OTHER, 205, 0x02, "Nefit Moduline Easy Connect"},
-    {EMS_MODEL_OTHER, 73, EMS_ID_SM, "SM10 Solar Module"},
-    {EMS_MODEL_OTHER, 163, EMS_ID_SM, "SM100 Solar Module"},
     {EMS_MODEL_OTHER, 171, 0x02, "EMS-OT OpenTherm converter"},
     {EMS_MODEL_OTHER, 252, EMS_ID_HP, "HeatPump Module"}, // warning, fake product id!
-    {EMS_MODEL_OTHER, 101, 0x30, "Junkers ISM1 Solar Controller"},
     {EMS_MODEL_OTHER, 189, EMS_ID_GATEWAY, "Web Gateway KM200"}
 
 };
