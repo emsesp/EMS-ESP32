@@ -193,7 +193,7 @@ const _Other_Type Other_Types[] = {
 const _Thermostat_Type Thermostat_Types[] = {
 
     // Easy devices - not currently supporting write operations
-    {EMS_MODEL_EASY, 202, 0x18, "TC100/Nefit Easy", EMS_THERMOSTAT_WRITE_NO},
+    {EMS_MODEL_EASY, 202, 0x18, "Logamatic TC100/Nefit Easy", EMS_THERMOSTAT_WRITE_NO},
     {EMS_MODEL_EASY, 203, 0x18, "Bosch EasyControl CT200", EMS_THERMOSTAT_WRITE_NO},
     {EMS_MODEL_EASY, 206, 0x02, "Bosch Easy", EMS_THERMOSTAT_WRITE_NO},
     {EMS_MODEL_CW100, 157, 0x18, "CW100", EMS_THERMOSTAT_WRITE_NO},
