@@ -18,3 +18,7 @@ import os
 # <<<stack<<<
 
 call(['python', 'scripts/decoder.py ', '-s', '-e', os.getcwd()+"/.pio/build/debug/firmware_d1_mini.elf", 'scripts/stackdmp.txt'])
+
+# example for linux:
+# % cd EMS-ESP
+# % python scripts/decoder_linux.py -s -e .pio/build/debug/firmware_d1_mini.elf scripts/stackdmp.txt
