@@ -1829,7 +1829,8 @@ void ems_getOtherValues() {
 }
 
 /**
- *  returns current thermostat type as a string
+ * returns current thermostat type as a string
+ * by looking up the product_id
  */
 char * ems_getThermostatDescription(char * buffer) {
     uint8_t size = 128;
