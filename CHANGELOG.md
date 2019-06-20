@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.8.1dev] 2019-06-17
+## [1.8.1dev] 2019-06-20
 
 ### Added
 
@@ -13,9 +13,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Detecting unset values in the SPIFFS and setting default values
+- Bosch Easy Connect wrongly classified as a thermostat
+
 ### Changed
 
-- `publish_wait` renamed to `publish_time`, a value of 0 means no sending to MQTT
+- Improved handling of Solar Modules (thanks @Vuego123)
+- `publish_wait` renamed to `publish_time`, a value of 0 means disabling all MQTT sending
 
 ## [1.8.0] 2019-06-15
 
