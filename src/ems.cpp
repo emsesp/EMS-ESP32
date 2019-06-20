@@ -182,17 +182,17 @@ const _EMS_Type EMS_Types[] = {
 };
 
 // calculate sizes of arrays at compile
-uint8_t _EMS_Types_max              = ArraySize(EMS_Types);        // number of defined types
-uint8_t _Boiler_Types_max           = ArraySize(Boiler_Types);     // number of boiler models
-uint8_t _Solar_Module_Types_max     = ArraySize(SolarModule_Types);// number of solar module types
-uint8_t _Other_Types_max            = ArraySize(Other_Types);      // number of other ems devices
-uint8_t _Thermostat_Types_max       = ArraySize(Thermostat_Types); // number of defined thermostat types
+uint8_t _EMS_Types_max          = ArraySize(EMS_Types);         // number of defined types
+uint8_t _Boiler_Types_max       = ArraySize(Boiler_Types);      // number of boiler models
+uint8_t _Solar_Module_Types_max = ArraySize(SolarModule_Types); // number of solar module types
+uint8_t _Other_Types_max        = ArraySize(Other_Types);       // number of other ems devices
+uint8_t _Thermostat_Types_max   = ArraySize(Thermostat_Types);  // number of defined thermostat types
 
 // these structs contain the data we store from the Boiler and Thermostat
-_EMS_Boiler     EMS_Boiler;       // for boiler
-_EMS_Thermostat EMS_Thermostat;   // for thermostat
+_EMS_Boiler      EMS_Boiler;      // for boiler
+_EMS_Thermostat  EMS_Thermostat;  // for thermostat
 _EMS_SolarModule EMS_SolarModule; // for solar modules
-_EMS_Other      EMS_Other;        // for other known EMS devices
+_EMS_Other       EMS_Other;       // for other known EMS devices
 
 // CRC lookup table with poly 12 for faster checking
 const uint8_t ems_crc_table[] = {0x00, 0x02, 0x04, 0x06, 0x08, 0x0A, 0x0C, 0x0E, 0x10, 0x12, 0x14, 0x16, 0x18, 0x1A, 0x1C, 0x1E, 0x20, 0x22, 0x24, 0x26,
@@ -308,16 +308,16 @@ void ems_init() {
     EMS_SolarModule.EnergyLastHour = EMS_VALUE_SHORT_NOTSET;
     EMS_SolarModule.EnergyToday    = EMS_VALUE_SHORT_NOTSET;
     EMS_SolarModule.EnergyTotal    = EMS_VALUE_SHORT_NOTSET;
-    EMS_SolarModule.device_id      = EMS_ID_NONE; 
-    EMS_SolarModule.model_id       = EMS_MODEL_NONE;  
-    EMS_SolarModule.product_id     = EMS_ID_NONE; 
-    
+    EMS_SolarModule.device_id      = EMS_ID_NONE;
+    EMS_SolarModule.model_id       = EMS_MODEL_NONE;
+    EMS_SolarModule.product_id     = EMS_ID_NONE;
+
     // Other EMS devices values
-    EMS_Other.HPModulation     = EMS_VALUE_INT_NOTSET;
-    EMS_Other.HPSpeed          = EMS_VALUE_INT_NOTSET;
-    EMS_Other.device_id        = EMS_ID_NONE; 
-    EMS_Other.model_id         = EMS_MODEL_NONE;  
-    EMS_Other.product_id       = EMS_ID_NONE; 
+    EMS_Other.HPModulation = EMS_VALUE_INT_NOTSET;
+    EMS_Other.HPSpeed      = EMS_VALUE_INT_NOTSET;
+    EMS_Other.device_id    = EMS_ID_NONE;
+    EMS_Other.model_id     = EMS_MODEL_NONE;
+    EMS_Other.product_id   = EMS_ID_NONE;
 
     // calculated values
     EMS_Boiler.tapwaterActive = EMS_VALUE_INT_NOTSET; // Hot tap water is on/off
@@ -1306,10 +1306,10 @@ void _process_RCPLUSStatusMode(_EMS_RxTelegram * EMS_RxTelegram) {
  */
 void _process_JunkersStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     if (EMS_RxTelegram->offset == 0) {
-    // e.g. for FR10:  90 00 FF 00 00 6F 03 01 00 BE 00 BF
-    // e.g. for FW100: 90 00 FF 00 00 6F 03 02 00 D7 00 DA F3 34 00 C4
-    EMS_Thermostat.curr_roomTemp     = _toShort(EMS_OFFSET_JunkersStatusMessage_curr);     // value is * 10
-    EMS_Thermostat.setpoint_roomTemp = _toShort(EMS_OFFSET_JunkersStatusMessage_setpoint); // value is * 10
+        // e.g. for FR10:  90 00 FF 00 00 6F 03 01 00 BE 00 BF
+        // e.g. for FW100: 90 00 FF 00 00 6F 03 02 00 D7 00 DA F3 34 00 C4
+        EMS_Thermostat.curr_roomTemp     = _toShort(EMS_OFFSET_JunkersStatusMessage_curr);     // value is * 10
+        EMS_Thermostat.setpoint_roomTemp = _toShort(EMS_OFFSET_JunkersStatusMessage_setpoint); // value is * 10
     }
 }
 
@@ -1473,20 +1473,19 @@ void _process_HPMonitor2(_EMS_RxTelegram * EMS_RxTelegram) {
  * Junkers ISM1 Solar Module - type 0x0003 EMS+ for energy readings
  */
 void _process_ISM1StatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
-
     if (EMS_RxTelegram->offset == 0) {
-            // e.g. B0 00 FF 00 00 03 32 00 00 00 00 13 00 D6 00 00 00 FB D0 F0
-    EMS_SolarModule.collectorTemp = _toShort(4); // Collector Temperature
-    EMS_SolarModule.bottomTemp    = _toShort(6); // Temperature Bottom of Solar Boiler
-    EMS_SolarModule.EnergyLastHour = _toShort(2) * 10;  // Solar Energy produced in last hour
-    EMS_SolarModule.pump = _bitRead(8,0); // Solar pump on (1) or off (0)
-    // EMS_Other.SM              = true;
+        // e.g. B0 00 FF 00 00 03 32 00 00 00 00 13 00 D6 00 00 00 FB D0 F0
+        EMS_SolarModule.collectorTemp  = _toShort(4);      // Collector Temperature
+        EMS_SolarModule.bottomTemp     = _toShort(6);      // Temperature Bottom of Solar Boiler
+        EMS_SolarModule.EnergyLastHour = _toShort(2) * 10; // Solar Energy produced in last hour
+        EMS_SolarModule.pump           = _bitRead(8, 0);   // Solar pump on (1) or off (0)
+        // EMS_Other.SM              = true;
     }
 
     if (EMS_RxTelegram->offset == 4) {
-            // e.g. B0 00 FF 04 00 03 02 E5
-    EMS_SolarModule.collectorTemp = _toShort(0); // Collector Temperature
-    // EMS_Other.SM              = true;
+        // e.g. B0 00 FF 04 00 03 02 E5
+        EMS_SolarModule.collectorTemp = _toShort(0); // Collector Temperature
+        // EMS_Other.SM              = true;
     }
 }
 
@@ -1675,22 +1674,25 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
     }
 
     if (typeFound) {
-        myDebug_P(PSTR("Solar Module found: %s (DeviceID:0x%02X ProductID:%d Version:%s)"), SolarModule_Types[i].model_string, SolarModule_Types[i].device_id, product_id, version);
+        myDebug_P(PSTR("Solar Module found: %s (DeviceID:0x%02X ProductID:%d Version:%s)"),
+                  SolarModule_Types[i].model_string,
+                  SolarModule_Types[i].device_id,
+                  product_id,
+                  version);
 
         // add to list
         _addDevice(product_id, SolarModule_Types[i].device_id, version, SolarModule_Types[i].model_string);
 
         // EMS_Other.SM = true; // we have detected a Solar Module (SM10, SM100, ISM1 ...)
         myDebug_P(PSTR("Solar Module support enabled."));
-        EMS_SolarModule.model_id        = Other_Types[i].model_id;
-        EMS_SolarModule.device_id       = Other_Types[i].device_id;
-        EMS_SolarModule.product_id      = product_id;
+        EMS_SolarModule.model_id   = Other_Types[i].model_id;
+        EMS_SolarModule.device_id  = Other_Types[i].device_id;
+        EMS_SolarModule.product_id = product_id;
         strlcpy(EMS_SolarModule.version, version, sizeof(EMS_SolarModule.version));
-        
+
         // fetch Solar Module values
         ems_getSolarModuleValues();
         return;
-
     }
 
 
@@ -1714,12 +1716,11 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
         if (Other_Types[i].device_id == EMS_ID_HP) {
             EMS_Other.HP = true; // we have detected a HP
             myDebug_P(PSTR("HeatPump support enabled."));
-            EMS_Other.model_id        = Other_Types[i].model_id;
-            EMS_Other.device_id       = Other_Types[i].device_id;
-            EMS_Other.product_id      = product_id;
+            EMS_Other.model_id   = Other_Types[i].model_id;
+            EMS_Other.device_id  = Other_Types[i].device_id;
+            EMS_Other.product_id = product_id;
             strlcpy(EMS_Other.version, version, sizeof(EMS_Other.version));
             // fetch Solar Module values > not yet implemented
-
         }
 
         return;
@@ -1871,17 +1872,14 @@ void ems_getBoilerValues() {
  * Get other values from EMS devices
  */
 void ems_getSolarModuleValues() {
-
     uint8_t product_id = EMS_SolarModule.product_id;
 
     if (ems_getSolarModuleEnabled()) {
         if (product_id == EMS_PRODUCTID_SM10) {
             ems_doReadCommand(EMS_TYPE_SM10Monitor, EMS_ID_SM); // fetch all from SM10Monitor
-        }
-        else if (product_id == EMS_PRODUCTID_SM100) {
+        } else if (product_id == EMS_PRODUCTID_SM100) {
             ems_doReadCommand(EMS_TYPE_SM100Monitor, EMS_ID_SM); // fetch all from SM100Monitor
         }
-        
     }
 }
 
