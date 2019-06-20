@@ -450,22 +450,24 @@ void showInfo() {
     }
 
     // For SM10/SM100 Solar Module
-    if (EMS_Other.SM) {
+    if (ems_getThermostatEnabled()) {
         myDebug_P(PSTR("")); // newline
         myDebug_P(PSTR("%sSolar Module stats:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
-        _renderShortValue("Collector temperature", "C", EMS_Other.SMcollectorTemp);
-        _renderShortValue("Bottom temperature", "C", EMS_Other.SMbottomTemp);
-        _renderIntValue("Pump modulation", "%", EMS_Other.SMpumpModulation);
-        _renderBoolValue("Pump active", EMS_Other.SMpump);
-        _renderShortValue("Energy Last Hour", "Wh", EMS_Other.SMEnergyLastHour, 1); // *10
-        _renderShortValue("Energy Today", "Wh", EMS_Other.SMEnergyToday, 0);
-        _renderShortValue("Energy Total", "kWH", EMS_Other.SMEnergyTotal, 1); // *10
+        myDebug_P(PSTR("  Solar Module: %s"), ems_getSolarModuleDescription(buffer_type));
+        _renderShortValue("Collector temperature", "C", EMS_SolarModule.collectorTemp);
+        _renderShortValue("Bottom temperature", "C", EMS_SolarModule.bottomTemp);
+        _renderIntValue("Pump modulation", "%", EMS_SolarModule.pumpModulation);
+        _renderBoolValue("Pump active", EMS_SolarModule.pump);
+        _renderShortValue("Energy Last Hour", "Wh", EMS_SolarModule.EnergyLastHour, 1); // *10
+        _renderShortValue("Energy Today", "Wh", EMS_SolarModule.EnergyToday, 0);
+        _renderShortValue("Energy Total", "kWH", EMS_SolarModule.EnergyTotal, 1); // *10
     }
 
     // For HeatPumps
     if (EMS_Other.HP) {
         myDebug_P(PSTR("")); // newline
         myDebug_P(PSTR("%sHeat Pump stats:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
+        myDebug_P(PSTR("  Solar Module: %s"), ems_getHeatPumpDescription(buffer_type));
         _renderIntValue("Pump modulation", "%", EMS_Other.HPModulation);
         _renderIntValue("Pump speed", "%", EMS_Other.HPSpeed);
     }
@@ -762,32 +764,32 @@ void publishValues(bool force) {
     // handle the other values separately
 
     // For SM10 and SM100 Solar Modules
-    if (EMS_Other.SM) {
+    if (ems_getSolarModuleEnabled()) {
         // build new json object
         doc.clear();
         JsonObject rootSM = doc.to<JsonObject>();
 
-        if (abs(EMS_Other.SMcollectorTemp) != EMS_VALUE_SHORT_NOTSET)
-            rootSM[SM_COLLECTORTEMP] = (double)EMS_Other.SMcollectorTemp / 10;
+        if (abs(EMS_SolarModule.collectorTemp) != EMS_VALUE_SHORT_NOTSET)
+            rootSM[SM_COLLECTORTEMP] = (double)EMS_SolarModule.collectorTemp / 10;
 
-        if (abs(EMS_Other.SMbottomTemp) != EMS_VALUE_SHORT_NOTSET)
-            rootSM[SM_BOTTOMTEMP] = (double)EMS_Other.SMbottomTemp / 10;
+        if (abs(EMS_SolarModule.bottomTemp) != EMS_VALUE_SHORT_NOTSET)
+            rootSM[SM_BOTTOMTEMP] = (double)EMS_SolarModule.bottomTemp / 10;
 
-        if (EMS_Other.SMpumpModulation != EMS_VALUE_INT_NOTSET)
-            rootSM[SM_PUMPMODULATION] = EMS_Other.SMpumpModulation;
+        if (EMS_SolarModule.pumpModulation != EMS_VALUE_INT_NOTSET)
+            rootSM[SM_PUMPMODULATION] = EMS_SolarModule.pumpModulation;
 
-        if (EMS_Other.SMpump != EMS_VALUE_INT_NOTSET) {
-            rootSM[SM_PUMP] = _bool_to_char(s, EMS_Other.SMpump);
+        if (EMS_SolarModule.pump != EMS_VALUE_INT_NOTSET) {
+            rootSM[SM_PUMP] = _bool_to_char(s, EMS_SolarModule.pump);
         }
 
-        if (abs(EMS_Other.SMEnergyLastHour) != EMS_VALUE_SHORT_NOTSET)
-            rootSM[SM_ENERGYLASTHOUR] = (double)EMS_Other.SMEnergyLastHour / 10;
+        if (abs(EMS_SolarModule.EnergyLastHour) != EMS_VALUE_SHORT_NOTSET)
+            rootSM[SM_ENERGYLASTHOUR] = (double)EMS_SolarModule.EnergyLastHour / 10;
 
-        if (abs(EMS_Other.SMEnergyToday) != EMS_VALUE_SHORT_NOTSET)
-            rootSM[SM_ENERGYTODAY] = EMS_Other.SMEnergyToday;
+        if (abs(EMS_SolarModule.EnergyToday) != EMS_VALUE_SHORT_NOTSET)
+            rootSM[SM_ENERGYTODAY] = EMS_SolarModule.EnergyToday;
 
-        if (abs(EMS_Other.SMEnergyTotal) != EMS_VALUE_SHORT_NOTSET)
-            rootSM[SM_ENERGYTOTAL] = (double)EMS_Other.SMEnergyTotal / 10;
+        if (abs(EMS_SolarModule.EnergyTotal) != EMS_VALUE_SHORT_NOTSET)
+            rootSM[SM_ENERGYTOTAL] = (double)EMS_SolarModule.EnergyTotal / 10;
 
         data[0] = '\0'; // reset data for next package
         serializeJson(doc, data, sizeof(data));
@@ -927,7 +929,7 @@ void do_regularUpdates() {
         myDebugLog("Requesting scheduled EMS device data");
         ems_getThermostatValues();
         ems_getBoilerValues();
-        ems_getOtherValues();
+        ems_getSolarModuleValues();
     }
 }
 

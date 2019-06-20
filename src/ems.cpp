@@ -182,15 +182,17 @@ const _EMS_Type EMS_Types[] = {
 };
 
 // calculate sizes of arrays at compile
-uint8_t _EMS_Types_max        = ArraySize(EMS_Types);        // number of defined types
-uint8_t _Boiler_Types_max     = ArraySize(Boiler_Types);     // number of boiler models
-uint8_t _Other_Types_max      = ArraySize(Other_Types);      // number of other ems devices
-uint8_t _Thermostat_Types_max = ArraySize(Thermostat_Types); // number of defined thermostat types
+uint8_t _EMS_Types_max              = ArraySize(EMS_Types);        // number of defined types
+uint8_t _Boiler_Types_max           = ArraySize(Boiler_Types);     // number of boiler models
+uint8_t _Solar_Module_Types_max     = ArraySize(SolarModule_Types);// number of solar module types
+uint8_t _Other_Types_max            = ArraySize(Other_Types);      // number of other ems devices
+uint8_t _Thermostat_Types_max       = ArraySize(Thermostat_Types); // number of defined thermostat types
 
 // these structs contain the data we store from the Boiler and Thermostat
-_EMS_Boiler     EMS_Boiler;     // for boiler
-_EMS_Thermostat EMS_Thermostat; // for thermostat
-_EMS_Other      EMS_Other;      // for other known EMS devices
+_EMS_Boiler     EMS_Boiler;       // for boiler
+_EMS_Thermostat EMS_Thermostat;   // for thermostat
+_EMS_SolarModule EMS_SolarModule; // for solar modules
+_EMS_Other      EMS_Other;        // for other known EMS devices
 
 // CRC lookup table with poly 12 for faster checking
 const uint8_t ems_crc_table[] = {0x00, 0x02, 0x04, 0x06, 0x08, 0x0A, 0x0C, 0x0E, 0x10, 0x12, 0x14, 0x16, 0x18, 0x1A, 0x1C, 0x1E, 0x20, 0x22, 0x24, 0x26,
@@ -298,16 +300,24 @@ void ems_init() {
     EMS_Boiler.pump_mod_max = EMS_VALUE_INT_NOTSET; // Boiler circuit pump modulation max. power
     EMS_Boiler.pump_mod_min = EMS_VALUE_INT_NOTSET; // Boiler circuit pump modulation min. power
 
+    // Solar Module values
+    EMS_SolarModule.collectorTemp  = EMS_VALUE_SHORT_NOTSET; // collector temp from SM10/SM100
+    EMS_SolarModule.bottomTemp     = EMS_VALUE_SHORT_NOTSET; // bottom temp from SM10/SM100
+    EMS_SolarModule.pumpModulation = EMS_VALUE_INT_NOTSET;   // modulation solar pump SM10/SM100
+    EMS_SolarModule.pump           = EMS_VALUE_INT_NOTSET;   // pump active
+    EMS_SolarModule.EnergyLastHour = EMS_VALUE_SHORT_NOTSET;
+    EMS_SolarModule.EnergyToday    = EMS_VALUE_SHORT_NOTSET;
+    EMS_SolarModule.EnergyTotal    = EMS_VALUE_SHORT_NOTSET;
+    EMS_SolarModule.device_id      = EMS_ID_NONE; 
+    EMS_SolarModule.model_id       = EMS_MODEL_NONE;  
+    EMS_SolarModule.product_id     = EMS_ID_NONE; 
+    
     // Other EMS devices values
-    EMS_Other.SMcollectorTemp  = EMS_VALUE_SHORT_NOTSET; // collector temp from SM10/SM100
-    EMS_Other.SMbottomTemp     = EMS_VALUE_SHORT_NOTSET; // bottom temp from SM10/SM100
-    EMS_Other.SMpumpModulation = EMS_VALUE_INT_NOTSET;   // modulation solar pump SM10/SM100
-    EMS_Other.SMpump           = EMS_VALUE_INT_NOTSET;   // pump active
-    EMS_Other.SMEnergyLastHour = EMS_VALUE_SHORT_NOTSET;
-    EMS_Other.SMEnergyToday    = EMS_VALUE_SHORT_NOTSET;
-    EMS_Other.SMEnergyTotal    = EMS_VALUE_SHORT_NOTSET;
     EMS_Other.HPModulation     = EMS_VALUE_INT_NOTSET;
     EMS_Other.HPSpeed          = EMS_VALUE_INT_NOTSET;
+    EMS_Other.device_id        = EMS_ID_NONE; 
+    EMS_Other.model_id         = EMS_MODEL_NONE;  
+    EMS_Other.product_id       = EMS_ID_NONE; 
 
     // calculated values
     EMS_Boiler.tapwaterActive = EMS_VALUE_INT_NOTSET; // Hot tap water is on/off
@@ -323,7 +333,6 @@ void ems_init() {
     strlcpy(EMS_Thermostat.version, "?", sizeof(EMS_Thermostat.version));
 
     // set other types
-    EMS_Other.SM = false;
     EMS_Other.HP = false;
 
     // default logging is none
@@ -360,8 +369,20 @@ bool ems_getThermostatEnabled() {
     return (EMS_Thermostat.device_id != EMS_ID_NONE);
 }
 
+bool ems_getSolarModuleEnabled() {
+    return (EMS_SolarModule.device_id != EMS_ID_NONE);
+}
+
 uint8_t ems_getThermostatModel() {
     return (EMS_Thermostat.model_id);
+}
+
+uint8_t ems_getOtherModel() {
+    return (EMS_Other.model_id);
+}
+
+uint8_t ems_getSolarModuleModel() {
+    return (EMS_SolarModule.model_id);
 }
 
 void ems_setTxDisabled(bool b) {
@@ -1350,12 +1371,12 @@ void _process_RCOutdoorTempMessage(_EMS_RxTelegram * EMS_RxTelegram) {
  * SM10Monitor - type 0x97
  */
 void _process_SM10Monitor(_EMS_RxTelegram * EMS_RxTelegram) {
-    EMS_Other.SMcollectorTemp  = _toShort(2);    // collector temp from SM10, is *10
-    EMS_Other.SMbottomTemp     = _toShort(5);    // bottom temp from SM10, is *10
-    EMS_Other.SMpumpModulation = _toByte(4);     // modulation solar pump
-    EMS_Other.SMpump           = _bitRead(7, 1); // active if bit 1 is set
+    EMS_SolarModule.collectorTemp  = _toShort(2);    // collector temp from SM10, is *10
+    EMS_SolarModule.bottomTemp     = _toShort(5);    // bottom temp from SM10, is *10
+    EMS_SolarModule.pumpModulation = _toByte(4);     // modulation solar pump
+    EMS_SolarModule.pump           = _bitRead(7, 1); // active if bit 1 is set
 
-    EMS_Other.SM                = true;
+    // EMS_Other.SM                = true;
     EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
 }
 
@@ -1371,13 +1392,13 @@ void _process_SM100Monitor(_EMS_RxTelegram * EMS_RxTelegram) {
         return;
     }
 
-    EMS_Other.SMcollectorTemp = _toShort(0); // collector temp from SM100, is *10
+    EMS_SolarModule.collectorTemp = _toShort(0); // collector temp from SM100, is *10
 
     if (EMS_RxTelegram->data_length > 2) {
-        EMS_Other.SMbottomTemp = _toShort(2); // bottom temp from SM100, is *10
+        EMS_SolarModule.bottomTemp = _toShort(2); // bottom temp from SM100, is *10
     }
 
-    EMS_Other.SM                = true;
+    // EMS_Other.SM                = true;
     EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
 }
 
@@ -1389,13 +1410,13 @@ void _process_SM100Monitor(_EMS_RxTelegram * EMS_RxTelegram) {
 void _process_SM100Status(_EMS_RxTelegram * EMS_RxTelegram) {
     // check for complete telegram
     if (EMS_RxTelegram->offset == 0) {
-        EMS_Other.SMpumpModulation = _toByte(9); // modulation solar pump
+        EMS_SolarModule.pumpModulation = _toByte(9); // modulation solar pump
     } else if (EMS_RxTelegram->offset == 0x09) {
         // or short telegram with a single byte with offset 09
-        EMS_Other.SMpumpModulation = _toByte(0); // modulation solar pump
+        EMS_SolarModule.pumpModulation = _toByte(0); // modulation solar pump
     }
 
-    EMS_Other.SM                = true;
+    // EMS_Other.SM                = true;
     EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
 }
 
@@ -1405,13 +1426,13 @@ void _process_SM100Status(_EMS_RxTelegram * EMS_RxTelegram) {
 void _process_SM100Status2(_EMS_RxTelegram * EMS_RxTelegram) {
     // check for complete telegram
     if (EMS_RxTelegram->offset == 0) {
-        EMS_Other.SMpump = _bitRead(10, 2); // 03=off 04=on at offset 10 which is byte 10
+        EMS_SolarModule.pump = _bitRead(10, 2); // 03=off 04=on at offset 10 which is byte 10
     } else if (EMS_RxTelegram->offset == 0x0A) {
         // or short telegram with a single byte with offset 0A
-        EMS_Other.SMpump = _bitRead(0, 2); // 03=off 04=on
+        EMS_SolarModule.pump = _bitRead(0, 2); // 03=off 04=on
     }
 
-    EMS_Other.SM                = true;
+    // EMS_Other.SM                = true;
     EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
 }
 
@@ -1420,11 +1441,11 @@ void _process_SM100Status2(_EMS_RxTelegram * EMS_RxTelegram) {
  * e.g. 30 00 FF 00 02 8E 00 00 00 00 00 00 06 C5 00 00 76 35
  */
 void _process_SM100Energy(_EMS_RxTelegram * EMS_RxTelegram) {
-    EMS_Other.SMEnergyLastHour = _toShort(2);  // last hour / 10 in Wh
-    EMS_Other.SMEnergyToday    = _toShort(6);  // todays in Wh
-    EMS_Other.SMEnergyTotal    = _toShort(10); // total / 10 in kWh
+    EMS_SolarModule.EnergyLastHour = _toShort(2);  // last hour / 10 in Wh
+    EMS_SolarModule.EnergyToday    = _toShort(6);  // todays in Wh
+    EMS_SolarModule.EnergyTotal    = _toShort(10); // total / 10 in kWh
 
-    EMS_Other.SM                = true;
+    // EMS_Other.SM                = true;
     EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
 }
 
@@ -1455,17 +1476,17 @@ void _process_ISM1StatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
 
     if (EMS_RxTelegram->offset == 0) {
             // e.g. B0 00 FF 00 00 03 32 00 00 00 00 13 00 D6 00 00 00 FB D0 F0
-    EMS_Other.SMcollectorTemp = _toShort(4); // Collector Temperature
-    EMS_Other.SMbottomTemp    = _toShort(6); // Temperature Bottom of Solar Boiler
-    EMS_Other.SMEnergyLastHour = _toShort(2) * 10;  // Solar Energy produced in last hour
-    EMS_Other.SMpump = _bitRead(8,0); // Solar pump on (1) or off (0)
-    EMS_Other.SM              = true;
+    EMS_SolarModule.collectorTemp = _toShort(4); // Collector Temperature
+    EMS_SolarModule.bottomTemp    = _toShort(6); // Temperature Bottom of Solar Boiler
+    EMS_SolarModule.EnergyLastHour = _toShort(2) * 10;  // Solar Energy produced in last hour
+    EMS_SolarModule.pump = _bitRead(8,0); // Solar pump on (1) or off (0)
+    // EMS_Other.SM              = true;
     }
 
     if (EMS_RxTelegram->offset == 4) {
             // e.g. B0 00 FF 04 00 03 02 E5
-    EMS_Other.SMcollectorTemp = _toShort(0); // Collector Temperature
-    EMS_Other.SM              = true;
+    EMS_SolarModule.collectorTemp = _toShort(0); // Collector Temperature
+    // EMS_Other.SM              = true;
     }
 }
 
@@ -1521,7 +1542,6 @@ void ems_clearDeviceList() {
  */
 void _addDevice(uint8_t product_id, uint8_t device_id, char * version, const char * model_string) {
     _Generic_Type device;
-
     // if its a duplicate don't add
     bool found = false;
     for (std::list<_Generic_Type>::iterator it = Devices.begin(); it != Devices.end(); it++) {
@@ -1529,7 +1549,6 @@ void _addDevice(uint8_t product_id, uint8_t device_id, char * version, const cha
             found = true;
         }
     }
-
     if (!found) {
         device.product_id = product_id;
         device.device_id  = device_id;
@@ -1644,6 +1663,37 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
         return;
     }
 
+
+    // finally look for Solar Modules
+    i = 0;
+    while (i < _Solar_Module_Types_max) {
+        if (SolarModule_Types[i].product_id == product_id) {
+            typeFound = true; // we have a matching product id. i is the index.
+            break;
+        }
+        i++;
+    }
+
+    if (typeFound) {
+        myDebug_P(PSTR("Solar Module found: %s (DeviceID:0x%02X ProductID:%d Version:%s)"), SolarModule_Types[i].model_string, SolarModule_Types[i].device_id, product_id, version);
+
+        // add to list
+        _addDevice(product_id, SolarModule_Types[i].device_id, version, SolarModule_Types[i].model_string);
+
+        // EMS_Other.SM = true; // we have detected a Solar Module (SM10, SM100, ISM1 ...)
+        myDebug_P(PSTR("Solar Module support enabled."));
+        EMS_SolarModule.model_id        = Other_Types[i].model_id;
+        EMS_SolarModule.device_id       = Other_Types[i].device_id;
+        EMS_SolarModule.product_id      = product_id;
+        strlcpy(EMS_SolarModule.version, version, sizeof(EMS_SolarModule.version));
+        
+        // fetch Solar Module values
+        ems_getSolarModuleValues();
+        return;
+
+    }
+
+
     // finally look for the other EMS devices
     i = 0;
     while (i < _Other_Types_max) {
@@ -1660,20 +1710,18 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
         // add to list
         _addDevice(product_id, Other_Types[i].device_id, version, Other_Types[i].model_string);
 
-        // see if this is a Solar Module SM10
-        if (Other_Types[i].device_id == EMS_ID_SM) {
-            EMS_Other.SM = true; // we have detected a SM10
-            myDebug_P(PSTR("SM10 Solar Module support enabled."));
-        }
-
         // see if this is a HeatPump
         if (Other_Types[i].device_id == EMS_ID_HP) {
             EMS_Other.HP = true; // we have detected a HP
             myDebug_P(PSTR("HeatPump support enabled."));
+            EMS_Other.model_id        = Other_Types[i].model_id;
+            EMS_Other.device_id       = Other_Types[i].device_id;
+            EMS_Other.product_id      = product_id;
+            strlcpy(EMS_Other.version, version, sizeof(EMS_Other.version));
+            // fetch Solar Module values > not yet implemented
+
         }
 
-        // fetch other values
-        ems_getOtherValues();
         return;
 
     } else {
@@ -1822,9 +1870,18 @@ void ems_getBoilerValues() {
 /*
  * Get other values from EMS devices
  */
-void ems_getOtherValues() {
-    if (EMS_Other.SM) {
-        ems_doReadCommand(EMS_TYPE_SM10Monitor, EMS_ID_SM); // fetch all from SM10Monitor
+void ems_getSolarModuleValues() {
+
+    uint8_t product_id = EMS_SolarModule.product_id;
+
+    if (ems_getSolarModuleEnabled()) {
+        if (product_id == EMS_PRODUCTID_SM10) {
+            ems_doReadCommand(EMS_TYPE_SM10Monitor, EMS_ID_SM); // fetch all from SM10Monitor
+        }
+        else if (product_id == EMS_PRODUCTID_SM100) {
+            ems_doReadCommand(EMS_TYPE_SM100Monitor, EMS_ID_SM); // fetch all from SM100Monitor
+        }
+        
     }
 }
 
@@ -1913,6 +1970,88 @@ char * ems_getBoilerDescription(char * buffer) {
 }
 
 /**
+ *  returns current Solar Module type as a string
+ */
+char * ems_getSolarModuleDescription(char * buffer) {
+    uint8_t size = 128;
+    if (!ems_getSolarModuleEnabled()) {
+        strlcpy(buffer, "<not enabled>", size);
+    } else {
+        int  i      = 0;
+        bool found  = false;
+        char tmp[6] = {0};
+
+        // scan through known ID types
+        while (i < _Solar_Module_Types_max) {
+            if (SolarModule_Types[i].product_id == EMS_SolarModule.product_id) {
+                found = true; // we have a match
+                break;
+            }
+            i++;
+        }
+        if (found) {
+            strlcpy(buffer, SolarModule_Types[i].model_string, size);
+        } else {
+            strlcpy(buffer, "DeviceID: 0x", size);
+            strlcat(buffer, _hextoa(EMS_SolarModule.device_id, tmp), size);
+        }
+
+        strlcat(buffer, " (ProductID:", size);
+        if (EMS_SolarModule.product_id == EMS_ID_NONE) {
+            strlcat(buffer, "?", size);
+        } else {
+            strlcat(buffer, itoa(EMS_SolarModule.product_id, tmp, 10), size);
+        }
+        strlcat(buffer, " Version:", size);
+        strlcat(buffer, EMS_SolarModule.version, size);
+        strlcat(buffer, ")", size);
+    }
+
+    return buffer;
+}
+
+/**
+ *  returns current Heat Pump type as a string
+ */
+char * ems_getHeatPumpDescription(char * buffer) {
+    uint8_t size = 128;
+    if (!EMS_Other.HP) {
+        strlcpy(buffer, "<not enabled>", size);
+    } else {
+        int  i      = 0;
+        bool found  = false;
+        char tmp[6] = {0};
+
+        // scan through known ID types
+        while (i < _Other_Types_max) {
+            if (Other_Types[i].product_id == EMS_Other.product_id) {
+                found = true; // we have a match
+                break;
+            }
+            i++;
+        }
+        if (found) {
+            strlcpy(buffer, Other_Types[i].model_string, size);
+        } else {
+            strlcpy(buffer, "DeviceID: 0x", size);
+            strlcat(buffer, _hextoa(EMS_Other.device_id, tmp), size);
+        }
+
+        strlcat(buffer, " (ProductID:", size);
+        if (EMS_Other.product_id == EMS_ID_NONE) {
+            strlcat(buffer, "?", size);
+        } else {
+            strlcat(buffer, itoa(EMS_Other.product_id, tmp, 10), size);
+        }
+        strlcat(buffer, " Version:", size);
+        strlcat(buffer, EMS_Other.version, size);
+        strlcat(buffer, ")", size);
+    }
+
+    return buffer;
+}
+
+/**
  * Find the versions of our connected devices
  */
 void ems_scanDevices() {
@@ -1926,6 +2065,11 @@ void ems_scanDevices() {
     // copy over thermostats
     for (_Thermostat_Type tt : Thermostat_Types) {
         Device_Ids.push_back(tt.device_id);
+    }
+
+    // copy over solar modules
+    for (_SolarModule_Type sm : SolarModule_Types) {
+        Device_Ids.push_back(sm.device_id);
     }
 
     // copy over others
@@ -1961,6 +2105,16 @@ void ems_printAllDevices() {
                   COLOR_BOLD_OFF,
                   EMS_ID_BOILER,
                   Boiler_Types[i].product_id);
+    }
+
+    myDebug_P(PSTR("\nThese %d devices are supported as solar module devices:"), _Solar_Module_Types_max);
+    for (i = 0; i < _Solar_Module_Types_max; i++) {
+        myDebug_P(PSTR(" %s%s%s (DeviceID:0x%02X ProductID:%d)"),
+                  COLOR_BOLD_ON,
+                  SolarModule_Types[i].model_string,
+                  COLOR_BOLD_OFF,
+                  SolarModule_Types[i].device_id,
+                  SolarModule_Types[i].product_id);
     }
 
     myDebug_P(PSTR("\nThese %d devices are supported as other known EMS devices:"), _Other_Types_max);

@@ -17,11 +17,16 @@
 // Fixed EMS IDs
 #define EMS_ID_ME 0x0B      // our device, hardcoded as the "Service Key"
 #define EMS_ID_BOILER 0x08  // all UBA Boilers have 0x08
-#define EMS_ID_SM 0x30      // Solar Module SM10 and SM100
+#define EMS_ID_SM 0x30      // Solar Module SM10, SM100 and ISM1
 #define EMS_ID_HP 0x38      // HeatPump
 #define EMS_ID_GATEWAY 0x48 // KM200 Web Gateway
 
 #define EMS_PRODUCTID_HEATRONICS 95 // ProductID for a Junkers Heatronic3 device
+
+#define EMS_PRODUCTID_SM10 73 // ProductID for SM10 solar module
+#define EMS_PRODUCTID_SM100 163 // ProductID for SM10 solar module
+#define EMS_PRODUCTID_ISM1 101 // ProductID for SM10 solar module
+
 
 #define EMS_MIN_TELEGRAM_LENGTH 6 // minimal length for a validation telegram, including CRC
 
@@ -159,6 +164,13 @@ typedef struct {
     uint8_t product_id;
     uint8_t device_id;
     char    model_string[50];
+} _SolarModule_Type;
+
+typedef struct {
+    uint8_t model_id;
+    uint8_t product_id;
+    uint8_t device_id;
+    char    model_string[50];
 } _Other_Type;
 
 // Definition for thermostat devices
@@ -241,20 +253,31 @@ typedef struct {           // UBAParameterWW
  * Telegram package defintions for Other EMS devices
  */
 
-// SM Solar Module - SM10Monitor/SM100Monitor
+// Other ems devices than solar modules, thermostats and boilers
 typedef struct {
-    bool    SM;               // set true if there is a Solar Module available
     bool    HP;               // set true if there is a Heat Pump available
-    int16_t SMcollectorTemp;  // collector temp
-    int16_t SMbottomTemp;     // bottom temp
-    uint8_t SMpumpModulation; // modulation solar pump
-    uint8_t SMpump;           // pump active
-    int16_t SMEnergyLastHour;
-    int16_t SMEnergyToday;
-    int16_t SMEnergyTotal;
     uint8_t HPModulation; // heatpump modulation in %
     uint8_t HPSpeed;      // speed 0-100 %
+    uint8_t device_id; // the device ID of the Solar Module / Heat Pump (e.g. 0x30)
+    uint8_t model_id;  // Solar Module / Heat Pump model (e.g. 3 > EMS_MODEL_OTHER )
+    uint8_t product_id; // (e.g. 101)
+    char    version[10];
 } _EMS_Other;
+
+// SM Solar Module - SM10/SM100/ISM1
+typedef struct {
+    int16_t collectorTemp;  // collector temp
+    int16_t bottomTemp;     // bottom temp
+    uint8_t pumpModulation; // modulation solar pump
+    uint8_t pump;           // pump active
+    int16_t EnergyLastHour;
+    int16_t EnergyToday;
+    int16_t EnergyTotal;
+    uint8_t device_id; // the device ID of the Solar Module / Heat Pump (e.g. 0x30)
+    uint8_t model_id;  // Solar Module / Heat Pump model (e.g. 3 > EMS_MODEL_OTHER )
+    uint8_t product_id; // (e.g. 101)
+    char    version[10];
+} _EMS_SolarModule;
 
 // Thermostat data
 typedef struct {
@@ -322,17 +345,22 @@ void ems_setTxDisabled(bool b);
 
 char *           ems_getThermostatDescription(char * buffer);
 char *           ems_getBoilerDescription(char * buffer);
+char *           ems_getSolarModuleDescription(char * buffer);
+char *           ems_getHeatPumpDescription(char * buffer);
 void             ems_getThermostatValues();
 void             ems_getBoilerValues();
-void             ems_getOtherValues();
+void             ems_getSolarModuleValues();
 bool             ems_getPoll();
 bool             ems_getTxEnabled();
 bool             ems_getThermostatEnabled();
 bool             ems_getBoilerEnabled();
+bool             ems_getSolarModuleEnabled();
 bool             ems_getBusConnected();
 _EMS_SYS_LOGGING ems_getLogging();
 bool             ems_getEmsRefreshed();
 uint8_t          ems_getThermostatModel();
+uint8_t          ems_getSolarModuleModel();
+uint8_t          ems_getOtherModel();
 void             ems_discoverModels();
 bool             ems_getTxCapable();
 uint32_t         ems_getPollFrequency();
@@ -350,4 +378,5 @@ void    _removeTxQueue();
 extern _EMS_Sys_Status EMS_Sys_Status;
 extern _EMS_Boiler     EMS_Boiler;
 extern _EMS_Thermostat EMS_Thermostat;
+extern _EMS_SolarModule EMS_SolarModule;
 extern _EMS_Other      EMS_Other;
