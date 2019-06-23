@@ -67,9 +67,9 @@ static void ICACHE_FLASH_ATTR emsuart_recvTask(os_event_t * events) {
 
     // validate and transmit the EMS buffer, excluding the BRK
     if (length == 2) {
-        // it's a poll or status code, single byte
+        // it's a poll or status code, single byte and ok to send on
         ems_parseTelegram((uint8_t *)pCurrent->buffer, 1);
-    } else if ((length > 4) && (pCurrent->buffer[length - 2] != 0x00)) {
+    } else if ((length > 4) && (length <= EMS_MAXBUFFERSIZE) && (pCurrent->buffer[length - 2] != 0x00)) {
         // ignore double BRK at the end, possibly from the Tx loopback
         // also telegrams with no data value
         ems_parseTelegram((uint8_t *)pCurrent->buffer, length - 1); // transmit EMS buffer, excluding the BRK
@@ -160,16 +160,6 @@ void ICACHE_FLASH_ATTR emsuart_start() {
 }
 
 /*
- * set loopback mode and clear Tx/Rx FIFO
- */
-static inline void ICACHE_FLASH_ATTR emsuart_loopback(bool enable) {
-    if (enable)
-        USC0(EMSUART_UART) |= (1 << UCLBE); // enable loopback
-    else
-        USC0(EMSUART_UART) &= ~(1 << UCLBE); // disable loopback
-}
-
-/*
  * Send to Tx, ending with a <BRK>
  */
 void ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
@@ -205,7 +195,7 @@ void ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
     // worst case, we'll see an additional Rx-BRK...
     if (!(USIS(EMSUART_UART) & (1 << UIBD))) {
         // no bus collision - send terminating BRK signal
-        emsuart_loopback(true);
+        USC0(EMSUART_UART) |= (1 << UCLBE); // enable loopback
         USC0(EMSUART_UART) |= (1 << UCBRK); // set <BRK>
 
         // wait until BRK detected...
@@ -215,8 +205,8 @@ void ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
 
         USC0(EMSUART_UART) &= ~(1 << UCBRK); // clear <BRK>
 
-        USIC(EMSUART_UART) = (1 << UIBD); // clear BRK detect IRQ
-        emsuart_loopback(false);          // disable loopback mode
+        USIC(EMSUART_UART) = (1 << UIBD);    // clear BRK detect IRQ
+        USC0(EMSUART_UART) &= ~(1 << UCLBE); // disable loopback
     }
 
     ETS_UART_INTR_ENABLE(); // receive anything from FIFO...
