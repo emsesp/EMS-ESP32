@@ -63,6 +63,7 @@ void _process_SM100Energy(_EMS_RxTelegram * EMS_RxTelegram);
 
 // ISM1
 void _process_ISM1StatusMessage(_EMS_RxTelegram * EMS_RxTelegram);
+void _process_ISM1Set(_EMS_RxTelegram * EMS_RxTelegram);
 
 // HeatPump HP
 void _process_HPMonitor1(_EMS_RxTelegram * EMS_RxTelegram);
@@ -129,6 +130,8 @@ const _EMS_Type EMS_Types[] = {
     {EMS_MODEL_OTHER, EMS_TYPE_HPMonitor1, "HeatPumpMonitor1", _process_HPMonitor1},
     {EMS_MODEL_OTHER, EMS_TYPE_HPMonitor2, "HeatPumpMonitor2", _process_HPMonitor2},
     {EMS_MODEL_OTHER, EMS_TYPE_ISM1StatusMessage, "ISM1StatusMessage", _process_ISM1StatusMessage},
+    {EMS_MODEL_OTHER, EMS_TYPE_ISM1Set, "ISM1Set", _process_ISM1Set},
+
 
     // RC10
     {EMS_MODEL_RC10, EMS_TYPE_RCTime, "RCTime", _process_RCTime},
@@ -301,16 +304,17 @@ void ems_init() {
     EMS_Boiler.pump_mod_min = EMS_VALUE_INT_NOTSET; // Boiler circuit pump modulation min. power
 
     // Solar Module values
-    EMS_SolarModule.collectorTemp  = EMS_VALUE_SHORT_NOTSET; // collector temp from SM10/SM100
-    EMS_SolarModule.bottomTemp     = EMS_VALUE_SHORT_NOTSET; // bottom temp from SM10/SM100
-    EMS_SolarModule.pumpModulation = EMS_VALUE_INT_NOTSET;   // modulation solar pump SM10/SM100
-    EMS_SolarModule.pump           = EMS_VALUE_INT_NOTSET;   // pump active
-    EMS_SolarModule.EnergyLastHour = EMS_VALUE_SHORT_NOTSET;
-    EMS_SolarModule.EnergyToday    = EMS_VALUE_SHORT_NOTSET;
-    EMS_SolarModule.EnergyTotal    = EMS_VALUE_SHORT_NOTSET;
-    EMS_SolarModule.device_id      = EMS_ID_NONE;
-    EMS_SolarModule.model_id       = EMS_MODEL_NONE;
-    EMS_SolarModule.product_id     = EMS_ID_NONE;
+    EMS_SolarModule.collectorTemp           = EMS_VALUE_SHORT_NOTSET; // collector temp from SM10/SM100
+    EMS_SolarModule.bottomTemp              = EMS_VALUE_SHORT_NOTSET; // bottom temp from SM10/SM100
+    EMS_SolarModule.pumpModulation          = EMS_VALUE_INT_NOTSET;   // modulation solar pump SM10/SM100
+    EMS_SolarModule.pump                    = EMS_VALUE_INT_NOTSET;   // pump active
+    EMS_SolarModule.setpoint_maxBottomTemp  = EMS_VALUE_SHORT_NOTSET; //setpoint for maximum solar boiler temperature
+    EMS_SolarModule.EnergyLastHour          = EMS_VALUE_SHORT_NOTSET;
+    EMS_SolarModule.EnergyToday             = EMS_VALUE_SHORT_NOTSET;
+    EMS_SolarModule.EnergyTotal             = EMS_VALUE_SHORT_NOTSET;
+    EMS_SolarModule.device_id               = EMS_ID_NONE;
+    EMS_SolarModule.model_id                = EMS_MODEL_NONE;
+    EMS_SolarModule.product_id              = EMS_ID_NONE;
 
     // Other EMS devices values
     EMS_Other.HPModulation = EMS_VALUE_INT_NOTSET;
@@ -422,11 +426,13 @@ void ems_setLogging(_EMS_SYS_LOGGING loglevel) {
             myDebug_P(PSTR("System Logging set to Verbose"));
         } else if (loglevel == EMS_SYS_LOGGING_THERMOSTAT) {
             myDebug_P(PSTR("System Logging set to Thermostat only"));
-        } else if (loglevel == EMS_SYS_LOGGING_RAW) {
+        } else if (loglevel == EMS_SYS_LOGGING_SOLARMODULE) {
+            myDebug_P(PSTR("System Logging set to Solar Module only"));
+        }else if (loglevel == EMS_SYS_LOGGING_RAW) {
             myDebug_P(PSTR("System Logging set to Raw mode"));
         }
     }
-}
+} 
 
 /**
  * Calculate CRC checksum using lookup table for speed
@@ -886,11 +892,17 @@ void _printMessage(_EMS_RxTelegram * EMS_RxTelegram) {
         if ((src == EMS_Thermostat.device_id) || (dest == EMS_Thermostat.device_id)) {
             _debugPrintTelegram(output_str, EMS_RxTelegram, color_s);
         }
+    } else if (EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_SOLARMODULE) {
+        // only print ones to/from thermostat if logging is set to thermostat only
+        if ((src == EMS_SolarModule.device_id) || (dest == EMS_SolarModule.device_id)) {
+            _debugPrintTelegram(output_str, EMS_RxTelegram, color_s);
+        }
     } else {
         // always print
         _debugPrintTelegram(output_str, EMS_RxTelegram, color_s);
     }
 }
+
 
 /**
  * print detailed telegram
@@ -1489,6 +1501,20 @@ void _process_ISM1StatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     }
 }
 
+
+/*
+ * Junkers ISM1 Solar Module - type 0x0001 EMS+ for setting values
+ */
+void _process_ISM1Set(_EMS_RxTelegram * EMS_RxTelegram) {
+
+
+    if (EMS_RxTelegram->offset == 6) {
+    // e.g. 90 30 FF 06 00 01 50 (CRC=2C)
+    // to implement: change max solar boiler temperature
+    EMS_SolarModule.setpoint_maxBottomTemp = _toByte(0);
+    }
+}
+
 /**
  * UBASetPoint 0x1A
  */
@@ -1685,8 +1711,8 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
 
         // EMS_Other.SM = true; // we have detected a Solar Module (SM10, SM100, ISM1 ...)
         myDebug_P(PSTR("Solar Module support enabled."));
-        EMS_SolarModule.model_id   = Other_Types[i].model_id;
-        EMS_SolarModule.device_id  = Other_Types[i].device_id;
+        EMS_SolarModule.model_id   = SolarModule_Types[i].model_id;
+        EMS_SolarModule.device_id  = SolarModule_Types[i].device_id;
         EMS_SolarModule.product_id = product_id;
         strlcpy(EMS_SolarModule.version, version, sizeof(EMS_SolarModule.version));
 

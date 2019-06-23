@@ -323,6 +323,8 @@ void showInfo() {
         myDebug_P(PSTR("  System logging set to Verbose"));
     } else if (sysLog == EMS_SYS_LOGGING_THERMOSTAT) {
         myDebug_P(PSTR("  System logging set to Thermostat only"));
+    } else if (sysLog == EMS_SYS_LOGGING_SOLARMODULE ) {
+        myDebug_P(PSTR("  System logging set to Solar Module only"));
     } else {
         myDebug_P(PSTR("  System logging set to None"));
     }
@@ -1298,7 +1300,10 @@ void TelnetCommandCallback(uint8_t wc, const char * commandLine) {
         } else if (strcmp(second_cmd, "t") == 0) {
             ems_setLogging(EMS_SYS_LOGGING_THERMOSTAT);
             ok = true;
-        } else if (strcmp(second_cmd, "r") == 0) {
+        } else if (strcmp(second_cmd, "s") == 0) {
+            ems_setLogging(EMS_SYS_LOGGING_SOLARMODULE );
+            ok = true;
+        }else if (strcmp(second_cmd, "r") == 0) {
             ems_setLogging(EMS_SYS_LOGGING_RAW);
             ok = true;
         } else if (strcmp(second_cmd, "n") == 0) {
