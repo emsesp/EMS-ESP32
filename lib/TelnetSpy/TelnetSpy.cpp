@@ -573,6 +573,7 @@ void TelnetSpy::handle() {
         return;
     }
     if (!listening) {
+        
         if ((WiFi.status() == WL_DISCONNECTED) && (WiFi.getMode() & WIFI_AP)) {
             if (usedSer) {
                 usedSer->println("[TELNET] in AP mode"); // added by Proddy

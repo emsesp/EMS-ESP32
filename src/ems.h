@@ -23,9 +23,9 @@
 
 #define EMS_PRODUCTID_HEATRONICS 95 // ProductID for a Junkers Heatronic3 device
 
-#define EMS_PRODUCTID_SM10 73 // ProductID for SM10 solar module
+#define EMS_PRODUCTID_SM10 73   // ProductID for SM10 solar module
 #define EMS_PRODUCTID_SM100 163 // ProductID for SM10 solar module
-#define EMS_PRODUCTID_ISM1 101 // ProductID for SM10 solar module
+#define EMS_PRODUCTID_ISM1 101  // ProductID for SM10 solar module
 
 
 #define EMS_MIN_TELEGRAM_LENGTH 6 // minimal length for a validation telegram, including CRC
@@ -255,12 +255,12 @@ typedef struct {           // UBAParameterWW
 
 // Other ems devices than solar modules, thermostats and boilers
 typedef struct {
-    bool    HP;               // set true if there is a Heat Pump available
+    bool    HP;           // set true if there is a Heat Pump available
     uint8_t HPModulation; // heatpump modulation in %
     uint8_t HPSpeed;      // speed 0-100 %
-    uint8_t device_id; // the device ID of the Solar Module / Heat Pump (e.g. 0x30)
-    uint8_t model_id;  // Solar Module / Heat Pump model (e.g. 3 > EMS_MODEL_OTHER )
-    uint8_t product_id; // (e.g. 101)
+    uint8_t device_id;    // the device ID of the Solar Module / Heat Pump (e.g. 0x30)
+    uint8_t model_id;     // Solar Module / Heat Pump model (e.g. 3 > EMS_MODEL_OTHER )
+    uint8_t product_id;   // (e.g. 101)
     char    version[10];
 } _EMS_Other;
 
@@ -273,8 +273,8 @@ typedef struct {
     int16_t EnergyLastHour;
     int16_t EnergyToday;
     int16_t EnergyTotal;
-    uint8_t device_id; // the device ID of the Solar Module / Heat Pump (e.g. 0x30)
-    uint8_t model_id;  // Solar Module / Heat Pump model (e.g. 3 > EMS_MODEL_OTHER )
+    uint8_t device_id;  // the device ID of the Solar Module / Heat Pump (e.g. 0x30)
+    uint8_t model_id;   // Solar Module / Heat Pump model (e.g. 3 > EMS_MODEL_OTHER )
     uint8_t product_id; // (e.g. 101)
     char    version[10];
 } _EMS_SolarModule;
@@ -323,6 +323,7 @@ void        ems_sendRawTelegram(char * telegram);
 void        ems_scanDevices();
 void        ems_printAllDevices();
 void        ems_printDevices();
+uint8_t     ems_printDevices_s(char * buffer, uint16_t len);
 void        ems_printTxQueue();
 void        ems_testTelegram(uint8_t test_num);
 void        ems_startupTelegrams();
@@ -375,8 +376,8 @@ bool    _ems_setModel(uint8_t model_id);
 void    _removeTxQueue();
 
 // global so can referenced in other classes
-extern _EMS_Sys_Status EMS_Sys_Status;
-extern _EMS_Boiler     EMS_Boiler;
-extern _EMS_Thermostat EMS_Thermostat;
+extern _EMS_Sys_Status  EMS_Sys_Status;
+extern _EMS_Boiler      EMS_Boiler;
+extern _EMS_Thermostat  EMS_Thermostat;
 extern _EMS_SolarModule EMS_SolarModule;
-extern _EMS_Other      EMS_Other;
+extern _EMS_Other       EMS_Other;

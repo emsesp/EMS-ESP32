@@ -2170,6 +2170,23 @@ void ems_printDevices() {
     }
 }
 
+/*
+ * prints the device list to a string for html parsing
+ */
+uint8_t ems_printDevices_s(char * buffer, uint16_t len) {
+    if (Devices.size() == 0) {
+        return 0;
+    }
+
+    char s[100];
+    for (std::list<_Generic_Type>::iterator it = Devices.begin(); it != Devices.end(); it++) {
+        sprintf(s, "%s (DeviceID:0x%02X ProductID:%d Version:%s)<br>", (it)->model_string, (it)->device_id, (it)->product_id, (it)->version);
+        strlcat(buffer, s, len);
+    }
+
+    return Devices.size();
+}
+
 /**
  * Send a command to UART Tx to Read from another device
  * Read commands when sent must respond by the destination (target) immediately (or within 10ms)

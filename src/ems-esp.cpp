@@ -41,7 +41,7 @@ DS18 ds18;
 Ticker publishValuesTimer;
 Ticker publishSensorValuesTimer;
 
-#define SYSTEMCHECK_TIME 10 // every 10 seconds check if EMS can be reached
+#define SYSTEMCHECK_TIME 30 // every 30 seconds check if EMS can be reached
 Ticker systemCheckTimer;
 
 #define REGULARUPDATES_TIME 60 // every minute a call is made to fetch data from EMS devices manually
@@ -888,15 +888,15 @@ void do_publishSensorValues() {
 // call PublishValues without forcing, so using CRC to see if we really need to publish
 void do_publishValues() {
     // don't publish if we're not connected to the EMS bus
-    if ((ems_getBusConnected()) && (!myESP.getUseSerial()) && myESP.isMQTTConnected() && EMSESP_Status.publish_time != 0) {
+    if ((ems_getBusConnected()) && myESP.isMQTTConnected() && EMSESP_Status.publish_time != 0) {
         publishValues(true); // force publish
     }
 }
 
 // callback to light up the LED, called via Ticker every second
-// fast way is to use WRITE_PERI_REG(PERIPHS_GPIO_BASEADDR + (state ? 4 : 8), (1 << EMSESP_Status.led_gpio)); // 4 is on, 8 is off
+// when ESP is booting up, ignore this as the LED is being used for something else
 void do_ledcheck() {
-    if (EMSESP_Status.led) {
+    if ((EMSESP_Status.led) && (myESP.getSystemBootStatus() == MYESP_BOOTSTATUS_BOOTED)) {
         if (ems_getBusConnected()) {
             digitalWrite(EMSESP_Status.led_gpio, (EMSESP_Status.led_gpio == LED_BUILTIN) ? LOW : HIGH); // light on. For onboard LED high=off
         } else {
@@ -908,7 +908,7 @@ void do_ledcheck() {
 
 // Thermostat scan
 void do_scanThermostat() {
-    if ((ems_getBusConnected()) && (!myESP.getUseSerial())) {
+    if (ems_getBusConnected()) {
         myDebug_P(PSTR("> Scanning thermostat message type #0x%02X..."), scanThermostat_count);
         ems_doReadCommand(scanThermostat_count, EMS_Thermostat.device_id);
         scanThermostat_count++;
@@ -917,7 +917,7 @@ void do_scanThermostat() {
 
 // do a system health check every now and then to see if we all connections
 void do_systemCheck() {
-    if ((!ems_getBusConnected()) && (!myESP.getUseSerial())) {
+    if (!ems_getBusConnected()) {
         myDebug_P(PSTR("Error! Unable to read the EMS bus."));
     }
 }
@@ -925,7 +925,7 @@ void do_systemCheck() {
 // force calls to get data from EMS for the types that aren't sent as broadcasts
 // only if we have a EMS connection
 void do_regularUpdates() {
-    if ((ems_getBusConnected()) && (!myESP.getUseSerial())) {
+    if (ems_getBusConnected()) {
         myDebugLog("Requesting scheduled EMS device data");
         ems_getThermostatValues();
         ems_getBoilerValues();
@@ -954,7 +954,7 @@ void do_scanDevices() {
         return;
     }
 
-    if ((ems_getBusConnected()) && (!myESP.getUseSerial())) {
+    if (ems_getBusConnected()) {
         ems_doReadCommand(EMS_TYPE_Version, scanDevices_count++); // ask for version
     }
 }
@@ -1526,6 +1526,40 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
     }
 }
 
+// web information for diagnostics
+void WebCallback(char * body) {
+    strlcpy(body, "<b>EMS stats:</b><br>", MYESP_MAXCHARBUFFER);
+
+    if (ems_getBusConnected()) {
+        char s[10];
+        strlcat(body, "EMS Bus is connected<br>", MYESP_MAXCHARBUFFER);
+        strlcat(body, "Rx: # successful read requests=", MYESP_MAXCHARBUFFER);
+        strlcat(body, itoa(EMS_Sys_Status.emsRxPgks, s, 10), MYESP_MAXCHARBUFFER);
+        strlcat(body, ", # CRC errors=", MYESP_MAXCHARBUFFER);
+        strlcat(body, itoa(EMS_Sys_Status.emxCrcErr, s, 10), MYESP_MAXCHARBUFFER);
+        if (ems_getTxCapable()) {
+            strlcat(body, "<br>Tx: # successful write requests=", MYESP_MAXCHARBUFFER);
+            strlcat(body, itoa(EMS_Sys_Status.emsTxPkgs, s, 10), MYESP_MAXCHARBUFFER);
+        } else {
+            strlcat(body, "<br>Tx: no signal<br><br>", MYESP_MAXCHARBUFFER);
+        }
+
+        // show device list
+        strlcpy(body, "<b>EMS devices found:</b><br>", MYESP_MAXCHARBUFFER);
+
+        char    buffer[MYESP_MAXCHARBUFFER] = {0};
+        uint8_t num_devices = ems_printDevices_s(buffer, MYESP_MAXCHARBUFFER);
+        if (num_devices == 0) {
+            strlcat(body, "no compatible EMS devices detected yet. (wait a few seconds)", MYESP_MAXCHARBUFFER);
+        } else {
+            strlcat(body, buffer, MYESP_MAXCHARBUFFER);
+        }
+
+    } else {
+        strlcat(body, "Unable to establish a connection to the EMS Bus.", MYESP_MAXCHARBUFFER);
+    }
+}
+
 // Init callback, which is used to set functions and call methods after a wifi connection has been established
 void WIFICallback() {
     // This is where we enable the UART service to scan the incoming serial Tx/Rx bus signals
@@ -1641,11 +1675,11 @@ void setup() {
     // call ems.cpp's init function to set all the internal params
     ems_init();
 
-    systemCheckTimer.attach(SYSTEMCHECK_TIME, do_systemCheck); // check if Boiler is online
+    systemCheckTimer.attach(SYSTEMCHECK_TIME, do_systemCheck); // check if EMS is reachable
 
     // set up myESP for Wifi, MQTT, MDNS and Telnet
     myESP.setTelnet(project_cmds, ArraySize(project_cmds), TelnetCommandCallback, TelnetCallback); // set up Telnet commands
-    myESP.setWIFI(NULL, NULL, WIFICallback);
+    myESP.setWIFI(NULL, NULL, WIFICallback); // empty ssid and password as we take this from the config file
 
     // MQTT host, username and password taken from the SPIFFS settings
     myESP.setMQTT(
@@ -1656,6 +1690,9 @@ void setup() {
 
     // custom settings in SPIFFS
     myESP.setSettings(FSCallback, SettingsCallback);
+
+    // web custom settings
+    myESP.setWeb(WebCallback);
 
     // start up all the services
     myESP.begin(APP_HOSTNAME, APP_NAME, APP_VERSION);
