@@ -614,12 +614,12 @@ void MyESP::_consoleShowHelp() {
 
         for (uint8_t i = 0; i < _helpProjectCmds_count; i++) {
             if (!_helpProjectCmds[i].set) {
-                SerialAndTelnet.print(FPSTR("*  "));
-                SerialAndTelnet.print(FPSTR(_helpProjectCmds[i].key));
+                SerialAndTelnet.print("*  ");
+                SerialAndTelnet.print(_helpProjectCmds[i].key);
                 for (uint8_t j = 0; j < ((max_len + 5) - strlen(_helpProjectCmds[i].key)); j++) { // account for longest string length
-                    SerialAndTelnet.print(FPSTR(" "));                                            // padding
+                    SerialAndTelnet.print(" ");                                                   // padding
                 }
-                SerialAndTelnet.println(FPSTR(_helpProjectCmds[i].description));
+                SerialAndTelnet.println(_helpProjectCmds[i].description);
             }
         }
     }

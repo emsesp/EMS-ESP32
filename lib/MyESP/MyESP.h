@@ -216,7 +216,8 @@ const char webResetPage_form[] = "<form id='form' action='/reset' method='post'>
                                  "<input type='submit' value='Save and reboot'>"
                                  "</form>";
 
-const char webResetPage_post[] = "<p>New wifi credentials set. System is now rebooting. Please wait a few seconds and then reconnect via telnet or browser to its new IP given address.</p>";
+const char webResetPage_post[] =
+    "<p>New wifi credentials set. System is now rebooting. Please wait a few seconds and then reconnect via telnet or browser to its new IP given address.</p>";
 
 const char webResetAllPage_form[] = "<form id='resetform' action='/resetall' method='post'>"
                                     "<input name='confirm' type='text' minlength='3' maxlength='16' placeholder='yes'>"
