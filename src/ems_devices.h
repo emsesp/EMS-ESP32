@@ -48,7 +48,10 @@
 #define EMS_TYPE_SM100Energy 0x028E       // SM100Energy
 #define EMS_TYPE_HPMonitor1 0xE3          // HeatPump Monitor 1
 #define EMS_TYPE_HPMonitor2 0xE5          // HeatPump Monitor 2
+
 #define EMS_TYPE_ISM1StatusMessage 0x0003 // Solar Module Junkers ISM1 Status
+#define EMS_TYPE_ISM1Set 0x0001           // for setting values of the solar module like max boiler temp
+#define EMS_OFFSET_ISM1Set_MaxBoilerTemp 6   // position of max boiler temp  e.g. 50 in the following example: 90 30 FF 06 00 01 50 (CRC=2C)
 
 /*
  * Thermostats...

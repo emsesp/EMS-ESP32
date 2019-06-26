@@ -83,6 +83,7 @@ typedef enum {
     EMS_SYS_LOGGING_RAW,        // raw data mode
     EMS_SYS_LOGGING_BASIC,      // only basic read/write messages
     EMS_SYS_LOGGING_THERMOSTAT, // only telegrams sent from thermostat
+    EMS_SYS_LOGGING_SOLARMODULE, // only telegrams sent from thermostat
     EMS_SYS_LOGGING_VERBOSE     // everything
 } _EMS_SYS_LOGGING;
 
@@ -270,6 +271,7 @@ typedef struct {
     int16_t bottomTemp;     // bottom temp
     uint8_t pumpModulation; // modulation solar pump
     uint8_t pump;           // pump active
+    int16_t setpoint_maxBottomTemp;  // setpoint for maximum collector temp
     int16_t EnergyLastHour;
     int16_t EnergyToday;
     int16_t EnergyTotal;
