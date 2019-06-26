@@ -79,12 +79,12 @@ typedef enum {
 
 /* EMS logging */
 typedef enum {
-    EMS_SYS_LOGGING_NONE,       // no messages
-    EMS_SYS_LOGGING_RAW,        // raw data mode
-    EMS_SYS_LOGGING_BASIC,      // only basic read/write messages
-    EMS_SYS_LOGGING_THERMOSTAT, // only telegrams sent from thermostat
+    EMS_SYS_LOGGING_NONE,        // no messages
+    EMS_SYS_LOGGING_RAW,         // raw data mode
+    EMS_SYS_LOGGING_BASIC,       // only basic read/write messages
+    EMS_SYS_LOGGING_THERMOSTAT,  // only telegrams sent from thermostat
     EMS_SYS_LOGGING_SOLARMODULE, // only telegrams sent from thermostat
-    EMS_SYS_LOGGING_VERBOSE     // everything
+    EMS_SYS_LOGGING_VERBOSE      // everything
 } _EMS_SYS_LOGGING;
 
 // status/counters since last power on
@@ -104,6 +104,7 @@ typedef struct {
     bool             emsTxDisabled;    // true to prevent all Tx
     uint8_t          txRetryCount;     // # times the last Tx was re-sent
     bool             emsReverse;       // if true, poll logic is reversed
+    uint8_t          emsTxMode;        // handles Tx logic
 } _EMS_Sys_Status;
 
 // The Tx send package
@@ -267,11 +268,11 @@ typedef struct {
 
 // SM Solar Module - SM10/SM100/ISM1
 typedef struct {
-    int16_t collectorTemp;  // collector temp
-    int16_t bottomTemp;     // bottom temp
-    uint8_t pumpModulation; // modulation solar pump
-    uint8_t pump;           // pump active
-    int16_t setpoint_maxBottomTemp;  // setpoint for maximum collector temp
+    int16_t collectorTemp;          // collector temp
+    int16_t bottomTemp;             // bottom temp
+    uint8_t pumpModulation;         // modulation solar pump
+    uint8_t pump;                   // pump active
+    int16_t setpoint_maxBottomTemp; // setpoint for maximum collector temp
     int16_t EnergyLastHour;
     int16_t EnergyToday;
     int16_t EnergyTotal;
@@ -331,20 +332,22 @@ void        ems_testTelegram(uint8_t test_num);
 void        ems_startupTelegrams();
 bool        ems_checkEMSBUSAlive();
 void        ems_clearDeviceList();
+void        ems_setTxMode(uint8_t mode);
 
-void ems_setThermostatTemp(float temperature, uint8_t temptype = 0);
-void ems_setThermostatMode(uint8_t mode);
-void ems_setThermostatHC(uint8_t hc);
-void ems_setWarmWaterTemp(uint8_t temperature);
-void ems_setFlowTemp(uint8_t temperature);
-void ems_setWarmWaterActivated(bool activated);
-void ems_setWarmTapWaterActivated(bool activated);
-void ems_setPoll(bool b);
-void ems_setLogging(_EMS_SYS_LOGGING loglevel);
-void ems_setEmsRefreshed(bool b);
-void ems_setWarmWaterModeComfort(uint8_t comfort);
-void ems_setModels();
-void ems_setTxDisabled(bool b);
+void    ems_setThermostatTemp(float temperature, uint8_t temptype = 0);
+void    ems_setThermostatMode(uint8_t mode);
+void    ems_setThermostatHC(uint8_t hc);
+void    ems_setWarmWaterTemp(uint8_t temperature);
+void    ems_setFlowTemp(uint8_t temperature);
+void    ems_setWarmWaterActivated(bool activated);
+void    ems_setWarmTapWaterActivated(bool activated);
+void    ems_setPoll(bool b);
+void    ems_setLogging(_EMS_SYS_LOGGING loglevel);
+void    ems_setEmsRefreshed(bool b);
+void    ems_setWarmWaterModeComfort(uint8_t comfort);
+void    ems_setModels();
+void    ems_setTxDisabled(bool b);
+uint8_t ems_getTxMode();
 
 char *           ems_getThermostatDescription(char * buffer);
 char *           ems_getBoilerDescription(char * buffer);

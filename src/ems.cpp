@@ -234,6 +234,7 @@ void ems_init() {
     EMS_Sys_Status.emsPollFrequency = 0;
     EMS_Sys_Status.txRetryCount     = 0;
     EMS_Sys_Status.emsReverse       = false;
+    EMS_Sys_Status.emsTxMode        = 0;
 
     // thermostat
     EMS_Thermostat.setpoint_roomTemp = EMS_VALUE_SHORT_NOTSET;
@@ -304,17 +305,17 @@ void ems_init() {
     EMS_Boiler.pump_mod_min = EMS_VALUE_INT_NOTSET; // Boiler circuit pump modulation min. power
 
     // Solar Module values
-    EMS_SolarModule.collectorTemp           = EMS_VALUE_SHORT_NOTSET; // collector temp from SM10/SM100
-    EMS_SolarModule.bottomTemp              = EMS_VALUE_SHORT_NOTSET; // bottom temp from SM10/SM100
-    EMS_SolarModule.pumpModulation          = EMS_VALUE_INT_NOTSET;   // modulation solar pump SM10/SM100
-    EMS_SolarModule.pump                    = EMS_VALUE_INT_NOTSET;   // pump active
-    EMS_SolarModule.setpoint_maxBottomTemp  = EMS_VALUE_SHORT_NOTSET; //setpoint for maximum solar boiler temperature
-    EMS_SolarModule.EnergyLastHour          = EMS_VALUE_SHORT_NOTSET;
-    EMS_SolarModule.EnergyToday             = EMS_VALUE_SHORT_NOTSET;
-    EMS_SolarModule.EnergyTotal             = EMS_VALUE_SHORT_NOTSET;
-    EMS_SolarModule.device_id               = EMS_ID_NONE;
-    EMS_SolarModule.model_id                = EMS_MODEL_NONE;
-    EMS_SolarModule.product_id              = EMS_ID_NONE;
+    EMS_SolarModule.collectorTemp          = EMS_VALUE_SHORT_NOTSET; // collector temp from SM10/SM100
+    EMS_SolarModule.bottomTemp             = EMS_VALUE_SHORT_NOTSET; // bottom temp from SM10/SM100
+    EMS_SolarModule.pumpModulation         = EMS_VALUE_INT_NOTSET;   // modulation solar pump SM10/SM100
+    EMS_SolarModule.pump                   = EMS_VALUE_INT_NOTSET;   // pump active
+    EMS_SolarModule.setpoint_maxBottomTemp = EMS_VALUE_SHORT_NOTSET; //setpoint for maximum solar boiler temperature
+    EMS_SolarModule.EnergyLastHour         = EMS_VALUE_SHORT_NOTSET;
+    EMS_SolarModule.EnergyToday            = EMS_VALUE_SHORT_NOTSET;
+    EMS_SolarModule.EnergyTotal            = EMS_VALUE_SHORT_NOTSET;
+    EMS_SolarModule.device_id              = EMS_ID_NONE;
+    EMS_SolarModule.model_id               = EMS_MODEL_NONE;
+    EMS_SolarModule.product_id             = EMS_ID_NONE;
 
     // Other EMS devices values
     EMS_Other.HPModulation = EMS_VALUE_INT_NOTSET;
@@ -351,6 +352,23 @@ void ems_setPoll(bool b) {
 
 bool ems_getPoll() {
     return EMS_Sys_Status.emsPollEnabled;
+}
+
+void ems_setTxMode(uint8_t mode) {
+    EMS_Sys_Status.emsTxMode = mode;
+
+    // special case for Junkers. If tx_mode is 3 then set the reverse poll flag
+    // https://github.com/proddy/EMS-ESP/issues/103#issuecomment-495945850
+    if (mode == 3) {
+        EMS_Sys_Status.emsReverse = true;
+        myDebug_P(PSTR("Forcing emsReverse for Junkers"));
+    } else {
+        EMS_Sys_Status.emsReverse = false;
+    }
+}
+
+uint8_t ems_getTxMode() {
+    return EMS_Sys_Status.emsTxMode;
 }
 
 bool ems_getEmsRefreshed() {
@@ -428,11 +446,11 @@ void ems_setLogging(_EMS_SYS_LOGGING loglevel) {
             myDebug_P(PSTR("System Logging set to Thermostat only"));
         } else if (loglevel == EMS_SYS_LOGGING_SOLARMODULE) {
             myDebug_P(PSTR("System Logging set to Solar Module only"));
-        }else if (loglevel == EMS_SYS_LOGGING_RAW) {
+        } else if (loglevel == EMS_SYS_LOGGING_RAW) {
             myDebug_P(PSTR("System Logging set to Raw mode"));
         }
     }
-} 
+}
 
 /**
  * Calculate CRC checksum using lookup table for speed
@@ -1506,12 +1524,10 @@ void _process_ISM1StatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
  * Junkers ISM1 Solar Module - type 0x0001 EMS+ for setting values
  */
 void _process_ISM1Set(_EMS_RxTelegram * EMS_RxTelegram) {
-
-
     if (EMS_RxTelegram->offset == 6) {
-    // e.g. 90 30 FF 06 00 01 50 (CRC=2C)
-    // to implement: change max solar boiler temperature
-    EMS_SolarModule.setpoint_maxBottomTemp = _toByte(0);
+        // e.g. 90 30 FF 06 00 01 50 (CRC=2C)
+        // to implement: change max solar boiler temperature
+        EMS_SolarModule.setpoint_maxBottomTemp = _toByte(0);
     }
 }
 

@@ -106,6 +106,7 @@ command_t project_cmds[] = {
     {true, "shower_alert <on | off>", "stop hot water to send 3 cold burst warnings after max shower time is exceeded"},
     {true, "publish_time <seconds>", "set frequency for publishing data to MQTT (0=off)"},
     {true, "heating_circuit <1 | 2>", "set the main thermostat HC to work with (if using multiple heating circuits)"},
+    {true, "tx_mode <n>", "0=classic ems logic, 1=@kwertie01 ems+ logic, 2=@susisstrolch logic, 3=@philrich logic for Junkers"},
 
     {false, "info", "show current captured on the devices"},
     {false, "log <n | b | t | r | v>", "set logging mode to none, basic, thermostat only, raw or verbose"},
@@ -323,7 +324,7 @@ void showInfo() {
         myDebug_P(PSTR("  System logging set to Verbose"));
     } else if (sysLog == EMS_SYS_LOGGING_THERMOSTAT) {
         myDebug_P(PSTR("  System logging set to Thermostat only"));
-    } else if (sysLog == EMS_SYS_LOGGING_SOLARMODULE ) {
+    } else if (sysLog == EMS_SYS_LOGGING_SOLARMODULE) {
         myDebug_P(PSTR("  System logging set to Solar Module only"));
     } else {
         myDebug_P(PSTR("  System logging set to None"));
@@ -1032,6 +1033,8 @@ bool FSCallback(MYESP_FSACTION action, const JsonObject json) {
         EMSESP_Status.shower_alert = json["shower_alert"];
         EMSESP_Status.publish_time = json["publish_time"] | DEFAULT_PUBLISHTIME;
 
+        ems_setTxMode(json["tx_mode"]);
+
         EMSESP_Status.listen_mode = json["listen_mode"];
         ems_setTxDisabled(EMSESP_Status.listen_mode);
 
@@ -1053,6 +1056,7 @@ bool FSCallback(MYESP_FSACTION action, const JsonObject json) {
         json["shower_alert"]    = EMSESP_Status.shower_alert;
         json["publish_time"]    = EMSESP_Status.publish_time;
         json["heating_circuit"] = EMSESP_Status.heating_circuit;
+        json["tx_mode"]         = ems_getTxMode();
 
         return true;
     }
@@ -1182,6 +1186,12 @@ bool SettingsCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, c
                 myDebug_P(PSTR("Error. Usage: set heating_circuit <1 | 2>"));
             }
         }
+
+        // tx delay/ tx mode
+        if (((strcmp(setting, "tx_mode") == 0) || (strcmp(setting, "tx_delay") == 0)) && (wc == 2)) {
+            ems_setTxMode(atoi(value));
+            ok = true;
+        }
     }
 
     if (action == MYESP_FSACTION_LIST) {
@@ -1208,6 +1218,7 @@ bool SettingsCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, c
         myDebug_P(PSTR("  shower_timer=%s"), EMSESP_Status.shower_timer ? "on" : "off");
         myDebug_P(PSTR("  shower_alert=%s"), EMSESP_Status.shower_alert ? "on" : "off");
         myDebug_P(PSTR("  publish_time=%d"), EMSESP_Status.publish_time);
+        myDebug_P(PSTR("  tx_mode=%d"), ems_getTxMode());
     }
 
     return ok;
@@ -1301,9 +1312,9 @@ void TelnetCommandCallback(uint8_t wc, const char * commandLine) {
             ems_setLogging(EMS_SYS_LOGGING_THERMOSTAT);
             ok = true;
         } else if (strcmp(second_cmd, "s") == 0) {
-            ems_setLogging(EMS_SYS_LOGGING_SOLARMODULE );
+            ems_setLogging(EMS_SYS_LOGGING_SOLARMODULE);
             ok = true;
-        }else if (strcmp(second_cmd, "r") == 0) {
+        } else if (strcmp(second_cmd, "r") == 0) {
             ems_setLogging(EMS_SYS_LOGGING_RAW);
             ok = true;
         } else if (strcmp(second_cmd, "n") == 0) {
@@ -1553,7 +1564,7 @@ void WebCallback(char * body) {
         strlcpy(body, "<b>EMS devices found:</b><br>", MYESP_MAXCHARBUFFER);
 
         char    buffer[MYESP_MAXCHARBUFFER] = {0};
-        uint8_t num_devices = ems_printDevices_s(buffer, MYESP_MAXCHARBUFFER);
+        uint8_t num_devices                 = ems_printDevices_s(buffer, MYESP_MAXCHARBUFFER);
         if (num_devices == 0) {
             strlcat(body, "no compatible EMS devices detected yet. (wait a few seconds)", MYESP_MAXCHARBUFFER);
         } else {
