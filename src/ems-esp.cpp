@@ -461,7 +461,7 @@ void showInfo() {
         _renderShortValue("Bottom temperature", "C", EMS_SolarModule.bottomTemp);
         _renderIntValue("Pump modulation", "%", EMS_SolarModule.pumpModulation);
         _renderBoolValue("Pump active", EMS_SolarModule.pump);
-        myDebug_P(PSTR("Pump working time: %d days %d hours %d minutes"),
+        myDebug_P(PSTR("  Pump working time: %d days %d hours %d minutes"),
                   EMS_SolarModule.pumpWorkMin / 1440,
                   (EMS_SolarModule.pumpWorkMin % 1440) / 60,
                   EMS_SolarModule.pumpWorkMin % 60);
