@@ -276,6 +276,7 @@ typedef struct {
     int16_t EnergyLastHour;
     int16_t EnergyToday;
     int16_t EnergyTotal;
+    uint32_t pumpWorkMin; // Total solar pump operating time
     uint8_t device_id;  // the device ID of the Solar Module / Heat Pump (e.g. 0x30)
     uint8_t model_id;   // Solar Module / Heat Pump model (e.g. 3 > EMS_MODEL_OTHER )
     uint8_t product_id; // (e.g. 101)

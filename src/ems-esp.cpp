@@ -461,6 +461,10 @@ void showInfo() {
         _renderShortValue("Bottom temperature", "C", EMS_SolarModule.bottomTemp);
         _renderIntValue("Pump modulation", "%", EMS_SolarModule.pumpModulation);
         _renderBoolValue("Pump active", EMS_SolarModule.pump);
+        myDebug_P(PSTR("Pump working time: %d days %d hours %d minutes"),
+                  EMS_SolarModule.pumpWorkMin / 1440,
+                  (EMS_SolarModule.pumpWorkMin % 1440) / 60,
+                  EMS_SolarModule.pumpWorkMin % 60);
         _renderShortValue("Energy Last Hour", "Wh", EMS_SolarModule.EnergyLastHour, 1); // *10
         _renderShortValue("Energy Today", "Wh", EMS_SolarModule.EnergyToday, 0);
         _renderShortValue("Energy Total", "kWH", EMS_SolarModule.EnergyTotal, 1); // *10
@@ -783,6 +787,10 @@ void publishValues(bool force) {
 
         if (EMS_SolarModule.pump != EMS_VALUE_INT_NOTSET) {
             rootSM[SM_PUMP] = _bool_to_char(s, EMS_SolarModule.pump);
+        }
+
+        if (EMS_SolarModule.pumpWorkMin != EMS_VALUE_LONG_NOTSET) {
+            rootSM[SM_PUMPWORKMIN] = (double)EMS_SolarModule.pumpWorkMin;
         }
 
         if (abs(EMS_SolarModule.EnergyLastHour) != EMS_VALUE_SHORT_NOTSET)
