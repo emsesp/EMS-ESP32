@@ -305,17 +305,17 @@ void ems_init() {
     EMS_Boiler.pump_mod_min = EMS_VALUE_INT_NOTSET; // Boiler circuit pump modulation min. power
 
     // Solar Module values
-    EMS_SolarModule.collectorTemp          = EMS_VALUE_SHORT_NOTSET; // collector temp from SM10/SM100
-    EMS_SolarModule.bottomTemp             = EMS_VALUE_SHORT_NOTSET; // bottom temp from SM10/SM100
-    EMS_SolarModule.pumpModulation         = EMS_VALUE_INT_NOTSET;   // modulation solar pump SM10/SM100
-    EMS_SolarModule.pump                   = EMS_VALUE_INT_NOTSET;   // pump active
-    EMS_SolarModule.setpoint_maxBottomTemp = EMS_VALUE_SHORT_NOTSET; //setpoint for maximum solar boiler temperature
-    EMS_SolarModule.EnergyLastHour         = EMS_VALUE_SHORT_NOTSET;
-    EMS_SolarModule.EnergyToday            = EMS_VALUE_SHORT_NOTSET;
-    EMS_SolarModule.EnergyTotal            = EMS_VALUE_SHORT_NOTSET;
-    EMS_SolarModule.device_id              = EMS_ID_NONE;
-    EMS_SolarModule.model_id               = EMS_MODEL_NONE;
-    EMS_SolarModule.product_id             = EMS_ID_NONE;
+    EMS_SolarModule.collectorTemp  = EMS_VALUE_SHORT_NOTSET; // collector temp from SM10/SM100
+    EMS_SolarModule.bottomTemp     = EMS_VALUE_SHORT_NOTSET; // bottom temp from SM10/SM100
+    EMS_SolarModule.pumpModulation = EMS_VALUE_INT_NOTSET;   // modulation solar pump SM10/SM100
+    EMS_SolarModule.pump           = EMS_VALUE_INT_NOTSET;   // pump active
+    EMS_SolarModule.EnergyLastHour = EMS_VALUE_SHORT_NOTSET;
+    EMS_SolarModule.EnergyToday    = EMS_VALUE_SHORT_NOTSET;
+    EMS_SolarModule.EnergyTotal    = EMS_VALUE_SHORT_NOTSET;
+    EMS_SolarModule.device_id      = EMS_ID_NONE;
+    EMS_SolarModule.model_id       = EMS_MODEL_NONE;
+    EMS_SolarModule.product_id     = EMS_ID_NONE;
+    EMS_SolarModule.pumpWorkMin    = EMS_VALUE_LONG_NOTSET;
 
     // Other EMS devices values
     EMS_Other.HPModulation = EMS_VALUE_INT_NOTSET;
@@ -1509,6 +1509,7 @@ void _process_ISM1StatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
         EMS_SolarModule.bottomTemp     = _toShort(6);      // Temperature Bottom of Solar Boiler
         EMS_SolarModule.EnergyLastHour = _toShort(2) * 10; // Solar Energy produced in last hour
         EMS_SolarModule.pump           = _bitRead(8, 0);   // Solar pump on (1) or off (0)
+        EMS_SolarModule.pumpWorkMin    = _toLong(10);
         // EMS_Other.SM              = true;
     }
 
