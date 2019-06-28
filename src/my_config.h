@@ -57,6 +57,7 @@
 #define SM_ENERGYLASTHOUR "energylasthour" // energy last hour
 #define SM_ENERGYTODAY "energytoday"       // energy today
 #define SM_ENERGYTOTAL "energytotal"       // energy total
+#define SM_PUMPWORKMIN "pumpWorkMin"       // Total minutes
 
 // MQTT for HP (HeatPump)
 #define TOPIC_HP_DATA "hp_data"            // topic name
