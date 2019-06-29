@@ -335,9 +335,10 @@ void showInfo() {
         myDebug_P(PSTR("  %d external temperature sensor%s found"), EMSESP_Status.dallas_sensors, (EMSESP_Status.dallas_sensors == 1) ? "" : "s");
     }
 
-    myDebug_P(PSTR("  Thermostat is %s, Boiler is %s, Shower Timer is %s, Shower Alert is %s"),
-              (ems_getThermostatEnabled() ? "enabled" : "disabled"),
+    myDebug_P(PSTR("  Boiler is %s, Thermostat is %s, Solar Module is %s, Shower Timer is %s, Shower Alert is %s"),
               (ems_getBoilerEnabled() ? "enabled" : "disabled"),
+              (ems_getThermostatEnabled() ? "enabled" : "disabled"),
+              (ems_getSolarModuleEnabled() ? "enabled" : "disabled"),
               ((EMSESP_Status.shower_timer) ? "enabled" : "disabled"),
               ((EMSESP_Status.shower_alert) ? "enabled" : "disabled"));
 
@@ -453,7 +454,7 @@ void showInfo() {
     }
 
     // For SM10/SM100 Solar Module
-    if (ems_getThermostatEnabled()) {
+    if (ems_getSolarModuleEnabled()) {
         myDebug_P(PSTR("")); // newline
         myDebug_P(PSTR("%sSolar Module stats:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
         myDebug_P(PSTR("  Solar Module: %s"), ems_getSolarModuleDescription(buffer_type));
