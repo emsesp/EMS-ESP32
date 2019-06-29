@@ -49,7 +49,8 @@ static const char * TEST_DATA[] = {
     "90 00 FF 00 00 6F 03 01 00 BE 00 BF",                                                          // test 44 - FR10
     "08 00 E3 00 01 00 01 00 00 00 00 00 00 00 00 00 DF 00 64 55",                                  // test 45 - heatpump Enviline
     "08 00 E5 00 00 00 20 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 0A",    // test 46 - heatpump Enviline
-    "38 10 FF 00 03 2B 00 C7 07 C3 01"                                                              // test 47 - heatpump Enviline
+    "38 10 FF 00 03 2B 00 C7 07 C3 01",                                                             // test 47 - heatpump Enviline
+    "08 0B 19 00 00 F7 80 00 80 00 00 00 00 00 03 58 97 0C 7B 1F 00 00 00 06 C4 DF 02 64 48 80 00"  // test 48 - outdoor temp check
 
 
 };
