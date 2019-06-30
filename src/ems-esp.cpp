@@ -1575,7 +1575,7 @@ void WebCallback(char * body) {
         char    buffer[MYESP_MAXCHARBUFFER] = {0};
         uint8_t num_devices                 = ems_printDevices_s(buffer, MYESP_MAXCHARBUFFER);
         if (num_devices == 0) {
-            strlcat(body, "no compatible EMS devices detected yet. (wait a few seconds)", MYESP_MAXCHARBUFFER);
+            strlcat(body, "(any detected and compatible EMS devices will show up here)", MYESP_MAXCHARBUFFER);
         } else {
             strlcat(body, buffer, MYESP_MAXCHARBUFFER);
         }

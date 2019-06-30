@@ -192,7 +192,8 @@ constexpr size_t ArraySize(T (&)[N]) {
 #define UPTIME_OVERFLOW 4294967295 // Uptime overflow value
 
 // web min and max length of wifi ssid and password
-#define MAX_STR_LEN 16
+#define MAX_SSID_LEN 32
+#define MAX_PWD_LEN 64
 
 #define MYESP_BOOTUP_FLASHDELAY 50 // flash duration for LED at bootup sequence
 #define MYESP_BOOTUP_DELAY 2000    // time before we open the window to reset. This is to stop resetting values when uploading firmware via USB
@@ -204,15 +205,18 @@ constexpr size_t ArraySize(T (&)[N]) {
 const char webCommonPage_start[] = "<html>"
                                    "<head>"
                                    "<style>input {font-size: 1.2em; width: 100%; max-width: 350px; display: block; margin: 5px auto; }"
-                                   "body {background-color: #FFA500;font: normal 18px Verdana, Arial, sans-serif;} </style>"
-                                   "<meta http-equiv='refresh' content='5'>"
-                                   "</head><body>";
+                                   "body {background-color: #FFA500;font: normal 18px Verdana, Arial, sans-serif;} </style>";
+
+
+const char webCommonPage_start_refresh[] = "<meta http-equiv='refresh' content='5'>";
+
+const char webCommonPage_start_body[] = "</head><body>";
 
 const char webCommonPage_end[] = "</body></html>";
 
 const char webResetPage_form[] = "<form id='form' action='/reset' method='post'>"
-                                 "<input name='newssid' type='text' maxlength='16' placeholder='SSID'>"
-                                 "<input name='newpassword' id='password1' type='password' maxlength='16' placeholder='Password'>"
+                                 "<input name='newssid' type='text' maxlength='32' placeholder='SSID'>"
+                                 "<input name='newpassword' id='password1' type='password' maxlength='64' placeholder='Password'>"
                                  "<input type='submit' value='Save and reboot'>"
                                  "</form>";
 

@@ -467,6 +467,9 @@ void MyESP::_OTACallback() {
     EEPROMr.commit();
 #endif
 
+    // stop the web server
+    webServer.close();
+
     if (_ota_pre_callback) {
         (_ota_pre_callback)(); // call custom function
     }
@@ -1411,14 +1414,14 @@ void MyESP::_mqttConnect() {
 // Setup everything we need
 void MyESP::setWIFI(const char * wifi_ssid, const char * wifi_password, wifi_callback_f callback) {
     // Check SSID too long or missing
-    if (!wifi_ssid || *wifi_ssid == 0x00 || strlen(wifi_ssid) > MAX_STR_LEN) {
+    if (!wifi_ssid || *wifi_ssid == 0x00 || strlen(wifi_ssid) > MAX_SSID_LEN) {
         _wifi_ssid = NULL;
     } else {
         _wifi_ssid = strdup(wifi_ssid);
     }
 
     // Check PASS too long
-    if (!wifi_password || *wifi_ssid == 0x00 || strlen(wifi_password) > MAX_STR_LEN) {
+    if (!wifi_password || *wifi_ssid == 0x00 || strlen(wifi_password) > MAX_PWD_LEN) {
         _wifi_password = NULL;
     } else {
         _wifi_password = strdup(wifi_password);
@@ -1959,6 +1962,8 @@ void MyESP::_webRootPage() {
     char s[1000] = {0};
 
     strlcpy(s, webCommonPage_start, sizeof(s));
+    strlcat(s, webCommonPage_start_refresh, sizeof(s));
+    strlcat(s, webCommonPage_start_body, sizeof(s));
 
     strlcat(s, "<h1>", sizeof(s));
     strlcat(s, _app_name, sizeof(s));
@@ -2012,6 +2017,7 @@ void MyESP::_webResetPage() {
     char s[1000] = {0};
 
     strlcpy(s, webCommonPage_start, sizeof(s));
+    strlcat(s, webCommonPage_start_body, sizeof(s));
 
     strlcat(s, "<h1>", sizeof(s));
     strlcat(s, _app_name, sizeof(s));
@@ -2039,7 +2045,7 @@ void MyESP::_webResetPage() {
     } else {
         // Create a string containing all the arguments
         // Check to see if there are new values (also doubles to check the length of the new value is long enough)
-        if (webServer.arg("newssid").length() < MAX_STR_LEN) {
+        if (webServer.arg("newssid").length() < MAX_SSID_LEN) {
             if (webServer.arg("newssid").length() == 0) {
                 _wifi_ssid = NULL;
             } else {
@@ -2047,7 +2053,7 @@ void MyESP::_webResetPage() {
             }
         }
 
-        if (webServer.arg("newpassword").length() < MAX_STR_LEN) {
+        if (webServer.arg("newpassword").length() < MAX_PWD_LEN) {
             if (webServer.arg("newpassword").length() == 0) {
                 _wifi_password = NULL;
             } else {
@@ -2074,6 +2080,7 @@ void MyESP::_webResetAllPage() {
     char s[1000] = {0};
 
     strlcpy(s, webCommonPage_start, sizeof(s));
+    strlcat(s, webCommonPage_start_body, sizeof(s));
 
     strlcat(s, "<h1>", sizeof(s));
     strlcat(s, _app_name, sizeof(s));
