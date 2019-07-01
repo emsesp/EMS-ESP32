@@ -73,6 +73,7 @@ MyESP::MyESP() {
 
     _ota_pre_callback  = NULL;
     _ota_post_callback = NULL;
+    _ota_doing_update  = false;
 
     _suspendOutput = false;
 
@@ -470,6 +471,8 @@ void MyESP::_OTACallback() {
     // stop the web server
     webServer.close();
 
+    _ota_doing_update = true;
+
     if (_ota_pre_callback) {
         (_ota_pre_callback)(); // call custom function
     }
@@ -487,9 +490,11 @@ void MyESP::_ota_setup() {
     ArduinoOTA.onStart([this]() { _OTACallback(); });
     ArduinoOTA.onEnd([this]() {
         myDebug_P(PSTR("[OTA] Done, restarting..."));
+        _ota_doing_update = false;
         _deferredReset(500, CUSTOM_RESET_OTA);
     });
 
+    /* 
     ArduinoOTA.onProgress([this](unsigned int progress, unsigned int total) {
         static unsigned int _progOld;
         unsigned int        _prog = (progress / (total / 100));
@@ -498,6 +503,7 @@ void MyESP::_ota_setup() {
             _progOld = _prog;
         }
     });
+    */
 
     ArduinoOTA.onError([this](ota_error_t error) {
         if (error == OTA_AUTH_ERROR)
@@ -2186,6 +2192,13 @@ void MyESP::_bootupSequence() {
  * Loop. This is called as often as possible and it handles wifi, telnet, mqtt etc
  */
 void MyESP::loop() {
+    jw.loop();           // WiFi
+    ArduinoOTA.handle(); // OTA
+
+    if (_ota_doing_update) {
+        return; // quit if in the middle of an update
+    }
+
     _calculateLoad();
     _systemCheckLoop();
     _heartbeatCheck();
@@ -2197,9 +2210,7 @@ void MyESP::loop() {
         _telnetHandle();
     }
 
-    jw.loop();           // WiFi
-    ArduinoOTA.handle(); // OTA
-    _mqttConnect();      // MQTT
+    _mqttConnect(); // MQTT
 
     yield(); // ...and breath
 }

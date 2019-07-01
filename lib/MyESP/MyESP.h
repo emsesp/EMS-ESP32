@@ -9,7 +9,7 @@
 #ifndef MyEMS_h
 #define MyEMS_h
 
-#define MYESP_VERSION "1.1.19"
+#define MYESP_VERSION "1.1.20"
 
 #include <ArduinoJson.h>
 #include <ArduinoOTA.h>
@@ -335,6 +335,7 @@ class MyESP {
     ota_callback_f _ota_post_callback;
     void           _ota_setup();
     void           _OTACallback();
+    bool           _ota_doing_update;
 
     // crash
     void _eeprom_setup();
