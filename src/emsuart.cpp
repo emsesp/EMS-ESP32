@@ -69,7 +69,7 @@ static void ICACHE_FLASH_ATTR emsuart_recvTask(os_event_t * events) {
     if (length == 2) {
         // it's a poll or status code, single byte and ok to send on
         ems_parseTelegram((uint8_t *)pCurrent->buffer, 1);
-    } else if ((length > 4) && (length <= EMS_MAXBUFFERSIZE) && (pCurrent->buffer[length - 2] != 0x00)) {
+    } else if ((length > 4) && (length <= EMS_MAXBUFFERSIZE + 1) && (pCurrent->buffer[length - 2] != 0x00)) {
         // ignore double BRK at the end, possibly from the Tx loopback
         // also telegrams with no data value
         ems_parseTelegram((uint8_t *)pCurrent->buffer, length - 1); // transmit EMS buffer, excluding the BRK

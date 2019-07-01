@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.8.1dev] 2019-06-24
+## [1.8.1dev] 2019-07-01
 
 ### Added
 
@@ -19,11 +19,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Detecting unset values in the SPIFFS and setting default values
 - Bosch Easy Connect wrongly classified as a thermostat
+- Correctly handle telegrams who's size are exactly 32 bytes (e.g. 0x19 MonitorSlow)
 
 ### Changed
 
 - Improved handling of Solar Modules (thanks @Vuego123)
 - `publish_wait` renamed to `publish_time`, a value of 0 means disabling all MQTT sending
+- How signed shorts are handled such as the current and setpoint temps on RC300s
 
 ## [1.8.0] 2019-06-15
 
