@@ -174,11 +174,12 @@ char * _bool_to_char(char * s, uint8_t value) {
 }
 
 // convert short (two bytes) to text string
-// decimals: 0 = no division, 1=divide value by 10, 10=divide value by 100
+// decimals: 0 = no division, 1=divide value by 10, 2=divide by 2, 10=divide value by 100
 // negative values are assumed stored as 1-compliment (https://medium.com/@LeeJulija/how-integers-are-stored-in-memory-using-twos-complement-5ba04d61a56c)
 char * _short_to_char(char * s, int16_t value, uint8_t decimals = 1) {
+
     // remove errors or invalid values
-    if (abs(value) >= EMS_VALUE_SHORT_NOTSET) {
+    if (value == EMS_VALUE_SHORT_NOTSET) {
         strlcpy(s, "?", 10);
         return (s);
     }
@@ -194,18 +195,25 @@ char * _short_to_char(char * s, int16_t value, uint8_t decimals = 1) {
     // check for negative values
     if (value < 0) {
         strlcpy(s, "-", 10);
-        value = abs(value);
+        value *= -1; // convert to positive
     }
 
-    strlcpy(s, ltoa(value / (decimals * 10), s2, 10), 10);
-    strlcat(s, ".", 10);
-    strlcat(s, ltoa(value % (decimals * 10), s2, 10), 10);
+    if (decimals == 2) {
+        // divide by 2
+        strlcpy(s, ltoa(value / 2, s2, 10), 10);
+        strlcat(s, ".", 10);
+        strlcat(s, ltoa(value % 2, s2, 10), 10);
+    } else {
+        strlcpy(s, ltoa(value / (decimals * 10), s2, 10), 10);
+        strlcat(s, ".", 10);
+        strlcat(s, ltoa(value % (decimals * 10), s2, 10), 10);
+    }
 
     return s;
 }
 
 // takes a short value (2 bytes), converts to a fraction
-// decimals: 0 = no division, 1=divide value by 10, 10=divide value by 100
+// decimals: 0 = no division, 1=divide value by 10, 2=divide by 2, 10=divide value by 100
 void _renderShortValue(const char * prefix, const char * postfix, int16_t value, uint8_t decimals = 1) {
     static char buffer[200] = {0};
     static char s[20]       = {0};
@@ -428,7 +436,7 @@ void showInfo() {
     _renderIntValue("Boiler circuit pump modulation min power", "%", EMS_Boiler.pump_mod_min);
 
     // UBAMonitorSlow
-    if (EMS_Boiler.extTemp != (int16_t)EMS_VALUE_SHORT_NOTSET) {
+    if (EMS_Boiler.extTemp != EMS_VALUE_SHORT_NOTSET) {
         _renderShortValue("Outside temperature", "C", EMS_Boiler.extTemp);
     }
     _renderShortValue("Boiler temperature", "C", EMS_Boiler.boilTemp);
@@ -497,14 +505,8 @@ void showInfo() {
             _renderShortValue("Current room temperature", "C", EMS_Thermostat.curr_roomTemp, 1); // *10
         } else {
             // because we store in 2 bytes short, when converting to a single byte we'll loose the negative value if its unset
-            if (EMS_Thermostat.setpoint_roomTemp <= 0) {
-                EMS_Thermostat.setpoint_roomTemp = EMS_VALUE_INT_NOTSET;
-            }
-            if (EMS_Thermostat.curr_roomTemp <= 0) {
-                EMS_Thermostat.curr_roomTemp = EMS_VALUE_INT_NOTSET;
-            }
-            _renderIntValue("Setpoint room temperature", "C", EMS_Thermostat.setpoint_roomTemp, 2); // convert to a single byte * 2
-            _renderIntValue("Current room temperature", "C", EMS_Thermostat.curr_roomTemp, 10);     // is *10
+            _renderShortValue("Setpoint room temperature", "C", EMS_Thermostat.setpoint_roomTemp, 2); // convert to a single byte * 2
+            _renderShortValue("Current room temperature", "C", EMS_Thermostat.curr_roomTemp, 1);      // is *10
         }
 
         // Render Day/Night/Holiday Temperature
@@ -629,19 +631,19 @@ void publishValues(bool force) {
     if (EMS_Boiler.pumpMod != EMS_VALUE_INT_NOTSET)
         rootBoiler["pumpMod"] = EMS_Boiler.pumpMod;
 
-    if (abs(EMS_Boiler.extTemp) < EMS_VALUE_SHORT_NOTSET)
+    if (EMS_Boiler.extTemp != EMS_VALUE_SHORT_NOTSET)
         rootBoiler["outdoorTemp"] = (double)EMS_Boiler.extTemp / 10;
-    if (abs(EMS_Boiler.wWCurTmp) < EMS_VALUE_SHORT_NOTSET)
+    if (EMS_Boiler.wWCurTmp != EMS_VALUE_SHORT_NOTSET)
         rootBoiler["wWCurTmp"] = (double)EMS_Boiler.wWCurTmp / 10;
-    if (abs(EMS_Boiler.wWCurFlow) != EMS_VALUE_INT_NOTSET)
+    if (EMS_Boiler.wWCurFlow != EMS_VALUE_INT_NOTSET)
         rootBoiler["wWCurFlow"] = (double)EMS_Boiler.wWCurFlow / 10;
-    if (abs(EMS_Boiler.curFlowTemp) < EMS_VALUE_SHORT_NOTSET)
+    if (EMS_Boiler.curFlowTemp != EMS_VALUE_SHORT_NOTSET)
         rootBoiler["curFlowTemp"] = (double)EMS_Boiler.curFlowTemp / 10;
-    if (abs(EMS_Boiler.retTemp) < EMS_VALUE_SHORT_NOTSET)
+    if (EMS_Boiler.retTemp != EMS_VALUE_SHORT_NOTSET)
         rootBoiler["retTemp"] = (double)EMS_Boiler.retTemp / 10;
-    if (abs(EMS_Boiler.sysPress) != EMS_VALUE_INT_NOTSET)
+    if (EMS_Boiler.sysPress != EMS_VALUE_INT_NOTSET)
         rootBoiler["sysPress"] = (double)EMS_Boiler.sysPress / 10;
-    if (abs(EMS_Boiler.boilTemp) < EMS_VALUE_SHORT_NOTSET)
+    if (EMS_Boiler.boilTemp != EMS_VALUE_SHORT_NOTSET)
         rootBoiler["boilTemp"] = (double)EMS_Boiler.boilTemp / 10;
 
     if (EMS_Boiler.wWActivated != EMS_VALUE_INT_NOTSET)
@@ -696,7 +698,7 @@ void publishValues(bool force) {
     // handle the thermostat values separately
     if (ems_getThermostatEnabled()) {
         // only send thermostat values if we actually have them
-        if ((EMS_Thermostat.curr_roomTemp <= 0) && (EMS_Thermostat.setpoint_roomTemp <= 0))
+        if ((EMS_Thermostat.curr_roomTemp == EMS_VALUE_SHORT_NOTSET) || (EMS_Thermostat.setpoint_roomTemp == EMS_VALUE_SHORT_NOTSET))
             return;
 
         // build new json object
@@ -707,15 +709,15 @@ void publishValues(bool force) {
 
         // different logic depending on thermostat types
         if ((ems_getThermostatModel() == EMS_MODEL_EASY) || (ems_getThermostatModel() == EMS_MODEL_FR10) || (ems_getThermostatModel() == EMS_MODEL_FW100)) {
-            if (abs(EMS_Thermostat.setpoint_roomTemp) < EMS_VALUE_SHORT_NOTSET)
+            if (EMS_Thermostat.setpoint_roomTemp != EMS_VALUE_SHORT_NOTSET)
                 rootThermostat[THERMOSTAT_SELTEMP] = (double)EMS_Thermostat.setpoint_roomTemp / 10;
-            if (abs(EMS_Thermostat.curr_roomTemp) < EMS_VALUE_SHORT_NOTSET)
+            if (EMS_Thermostat.curr_roomTemp != EMS_VALUE_SHORT_NOTSET)
                 rootThermostat[THERMOSTAT_CURRTEMP] = (double)EMS_Thermostat.curr_roomTemp / 10;
 
         } else {
-            if (EMS_Thermostat.setpoint_roomTemp != EMS_VALUE_INT_NOTSET)
+            if (EMS_Thermostat.setpoint_roomTemp != EMS_VALUE_SHORT_NOTSET)
                 rootThermostat[THERMOSTAT_SELTEMP] = (double)EMS_Thermostat.setpoint_roomTemp / 2;
-            if (EMS_Thermostat.curr_roomTemp != EMS_VALUE_INT_NOTSET)
+            if (EMS_Thermostat.curr_roomTemp != EMS_VALUE_SHORT_NOTSET)
                 rootThermostat[THERMOSTAT_CURRTEMP] = (double)EMS_Thermostat.curr_roomTemp / 10;
 
             if (EMS_Thermostat.daytemp != EMS_VALUE_INT_NOTSET)
@@ -777,10 +779,10 @@ void publishValues(bool force) {
         doc.clear();
         JsonObject rootSM = doc.to<JsonObject>();
 
-        if (abs(EMS_SolarModule.collectorTemp) != EMS_VALUE_SHORT_NOTSET)
+        if (EMS_SolarModule.collectorTemp != EMS_VALUE_SHORT_NOTSET)
             rootSM[SM_COLLECTORTEMP] = (double)EMS_SolarModule.collectorTemp / 10;
 
-        if (abs(EMS_SolarModule.bottomTemp) != EMS_VALUE_SHORT_NOTSET)
+        if (EMS_SolarModule.bottomTemp != EMS_VALUE_SHORT_NOTSET)
             rootSM[SM_BOTTOMTEMP] = (double)EMS_SolarModule.bottomTemp / 10;
 
         if (EMS_SolarModule.pumpModulation != EMS_VALUE_INT_NOTSET)
@@ -794,13 +796,13 @@ void publishValues(bool force) {
             rootSM[SM_PUMPWORKMIN] = (double)EMS_SolarModule.pumpWorkMin;
         }
 
-        if (abs(EMS_SolarModule.EnergyLastHour) != EMS_VALUE_SHORT_NOTSET)
+        if (EMS_SolarModule.EnergyLastHour != EMS_VALUE_SHORT_NOTSET)
             rootSM[SM_ENERGYLASTHOUR] = (double)EMS_SolarModule.EnergyLastHour / 10;
 
-        if (abs(EMS_SolarModule.EnergyToday) != EMS_VALUE_SHORT_NOTSET)
+        if (EMS_SolarModule.EnergyToday != EMS_VALUE_SHORT_NOTSET)
             rootSM[SM_ENERGYTODAY] = EMS_SolarModule.EnergyToday;
 
-        if (abs(EMS_SolarModule.EnergyTotal) != EMS_VALUE_SHORT_NOTSET)
+        if (EMS_SolarModule.EnergyTotal != EMS_VALUE_SHORT_NOTSET)
             rootSM[SM_ENERGYTOTAL] = (double)EMS_SolarModule.EnergyTotal / 10;
 
         data[0] = '\0'; // reset data for next package
