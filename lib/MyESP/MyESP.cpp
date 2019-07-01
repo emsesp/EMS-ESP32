@@ -2051,7 +2051,7 @@ void MyESP::_webResetPage() {
     } else {
         // Create a string containing all the arguments
         // Check to see if there are new values (also doubles to check the length of the new value is long enough)
-        if (webServer.arg("newssid").length() < MAX_SSID_LEN) {
+        if (webServer.arg("newssid").length() <= MAX_SSID_LEN) {
             if (webServer.arg("newssid").length() == 0) {
                 _wifi_ssid = NULL;
             } else {
@@ -2059,7 +2059,7 @@ void MyESP::_webResetPage() {
             }
         }
 
-        if (webServer.arg("newpassword").length() < MAX_PWD_LEN) {
+        if (webServer.arg("newpassword").length() <= MAX_PWD_LEN) {
             if (webServer.arg("newpassword").length() == 0) {
                 _wifi_password = NULL;
             } else {
