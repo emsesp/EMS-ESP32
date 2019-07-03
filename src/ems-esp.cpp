@@ -201,7 +201,8 @@ char * _short_to_char(char * s, int16_t value, uint8_t decimals = 1) {
         // divide by 2
         strlcpy(s, ltoa(value / 2, s2, 10), 10);
         strlcat(s, ".", 10);
-        strlcat(s, ltoa(value % 2, s2, 10), 10);
+        strlcat(s, ((value & 0x01) ? "5" : "0"), 10);
+
     } else {
         strlcpy(s, ltoa(value / (decimals * 10), s2, 10), 10);
         strlcat(s, ".", 10);

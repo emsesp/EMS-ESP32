@@ -41,17 +41,17 @@
 #define EMS_OFFSET_UBASetPoints_flowtemp 0 // flow temp
 
 // Other
-#define EMS_TYPE_SM10Monitor 0x97         // SM10Monitor
-#define EMS_TYPE_SM100Monitor 0x0262      // SM100Monitor
-#define EMS_TYPE_SM100Status 0x0264       // SM100Status
-#define EMS_TYPE_SM100Status2 0x026A      // SM100Status2
-#define EMS_TYPE_SM100Energy 0x028E       // SM100Energy
-#define EMS_TYPE_HPMonitor1 0xE3          // HeatPump Monitor 1
-#define EMS_TYPE_HPMonitor2 0xE5          // HeatPump Monitor 2
+#define EMS_TYPE_SM10Monitor 0x97    // SM10Monitor
+#define EMS_TYPE_SM100Monitor 0x0262 // SM100Monitor
+#define EMS_TYPE_SM100Status 0x0264  // SM100Status
+#define EMS_TYPE_SM100Status2 0x026A // SM100Status2
+#define EMS_TYPE_SM100Energy 0x028E  // SM100Energy
+#define EMS_TYPE_HPMonitor1 0xE3     // HeatPump Monitor 1
+#define EMS_TYPE_HPMonitor2 0xE5     // HeatPump Monitor 2
 
-#define EMS_TYPE_ISM1StatusMessage 0x0003 // Solar Module Junkers ISM1 Status
-#define EMS_TYPE_ISM1Set 0x0001           // for setting values of the solar module like max boiler temp
-#define EMS_OFFSET_ISM1Set_MaxBoilerTemp 6   // position of max boiler temp  e.g. 50 in the following example: 90 30 FF 06 00 01 50 (CRC=2C)
+#define EMS_TYPE_ISM1StatusMessage 0x0003  // Solar Module Junkers ISM1 Status
+#define EMS_TYPE_ISM1Set 0x0001            // for setting values of the solar module like max boiler temp
+#define EMS_OFFSET_ISM1Set_MaxBoilerTemp 6 // position of max boiler temp  e.g. 50 in the following example: 90 30 FF 06 00 01 50 (CRC=2C)
 
 /*
  * Thermostats...
@@ -219,7 +219,7 @@ const _Thermostat_Type Thermostat_Types[] = {
     {EMS_MODEL_RC20F, 93, 0x18, "RC20F", EMS_THERMOSTAT_WRITE_YES},
     {EMS_MODEL_RC30, 78, 0x10, "RC30/Nefit Moduline 400", EMS_THERMOSTAT_WRITE_YES},
     {EMS_MODEL_RC35, 86, 0x10, "RC35", EMS_THERMOSTAT_WRITE_YES},
-    {EMS_MODEL_RC310, 158, 0x10, "RC3x0/Nefit Moduline 1010H", EMS_THERMOSTAT_WRITE_NO},
+    {EMS_MODEL_RC310, 158, 0x10, "RC300/RC310/Nefit Moduline 1010/3000", EMS_THERMOSTAT_WRITE_NO},
     {EMS_MODEL_1010, 165, 0x18, "Nefit Moduline 1010", EMS_THERMOSTAT_WRITE_NO},
 
     // Sieger
