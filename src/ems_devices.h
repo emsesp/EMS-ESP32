@@ -121,19 +121,19 @@
 
 // Known EMS types
 typedef enum {
-    EMS_MODEL_NONE,
+    EMS_MODEL_NONE, // unset
     EMS_MODEL_ALL, // common for all devices
 
-    // generic ID for the boiler
+    // heatpump
+    EMS_MODEL_HP,
+
+    // solar module
+    EMS_MODEL_SM,
+
+    // boiler
     EMS_MODEL_UBA,
 
-    // generic ID for the solar module
-    EMS_MODEL_SOLAR_MODULE,
-
-    // generic ID for all the other weird devices
-    EMS_MODEL_OTHER,
-
-    // and finally the thermostats
+    // and the thermostats
     EMS_MODEL_ES73,
     EMS_MODEL_RC10,
     EMS_MODEL_RC20,
@@ -155,56 +155,65 @@ typedef enum {
 
 // EMS types for known boilers. This list will be extended when new devices are recognized.
 // The device_id is always 0x08
-// format is MODEL_ID, PRODUCT ID, DESCRIPTION
+// format is PRODUCT ID, DESCRIPTION
 const _Boiler_Type Boiler_Types[] = {
 
-    {EMS_MODEL_UBA, 72, "MC10 Module"},
-    {EMS_MODEL_UBA, 123, "Buderus GB172/Nefit Trendline/Junkers Cerapur"},
-    {EMS_MODEL_UBA, 115, "Nefit Topline Compact/Buderus GB162"},
-    {EMS_MODEL_UBA, 203, "Buderus Logamax U122/Junkers Cerapur"},
-    {EMS_MODEL_UBA, 208, "Buderus Logamax plus/GB192"},
-    {EMS_MODEL_UBA, 64, "Sieger BK15/Nefit Smartline/Buderus GB152"},
-    {EMS_MODEL_UBA, EMS_PRODUCTID_HEATRONICS, "Bosch Condens 2500/Junkers Heatronics3"},
-    {EMS_MODEL_UBA, 122, "Nefit Proline"},
-    {EMS_MODEL_UBA, 172, "Nefit Enviline"}
+    {72, "MC10 Module"},
+    {123, "Buderus GB172/Nefit Trendline/Junkers Cerapur"},
+    {115, "Nefit Topline Compact/Buderus GB162"},
+    {203, "Buderus Logamax U122/Junkers Cerapur"},
+    {208, "Buderus Logamax plus/GB192"},
+    {64, "Sieger BK15/Nefit Smartline/Buderus GB152"},
+    {EMS_PRODUCTID_HEATRONICS, "Bosch Condens 2500/Junkers Heatronics3"},
+    {122, "Nefit Proline"},
+    {172, "Nefit Enviline"}
 
 };
 
 /*
  * Known Solar Module types
+ * format is PRODUCT ID, DEVICE ID, DESCRIPTION
  */
 const _SolarModule_Type SolarModule_Types[] = {
 
-    {EMS_MODEL_OTHER, EMS_PRODUCTID_SM10, EMS_ID_SM, "SM10 Solar Module"},
-    {EMS_MODEL_OTHER, EMS_PRODUCTID_SM100, EMS_ID_SM, "SM100 Solar Module"},
-    {EMS_MODEL_OTHER, EMS_PRODUCTID_ISM1, EMS_ID_SM, "Junkers ISM1 Solar Module"}
+    {EMS_PRODUCTID_SM10, EMS_ID_SM, "SM10 Solar Module"},
+    {EMS_PRODUCTID_SM100, EMS_ID_SM, "SM100 Solar Module"},
+    {EMS_PRODUCTID_ISM1, EMS_ID_SM, "Junkers ISM1 Solar Module"}
 
 };
 
 
 // Other EMS devices which are not considered boilers, thermostats or solar modules
+// format is PRODUCT ID, DEVICE ID, DESCRIPTION
 const _Other_Type Other_Types[] = {
 
-    {EMS_MODEL_OTHER, 69, 0x21, "MM10 Mixer Module"},
-    {EMS_MODEL_OTHER, 71, 0x11, "WM10 Switch Module"},
-    {EMS_MODEL_OTHER, 160, 0x20, "MM100 Mixing Module"},
-    {EMS_MODEL_OTHER, 160, 0x21, "MM100 Mixing Module"},
-    {EMS_MODEL_OTHER, 159, 0x21, "MM50 Mixing Module"},
-    {EMS_MODEL_OTHER, 68, 0x09, "BC10/RFM20 Receiver"},
-    {EMS_MODEL_OTHER, 190, 0x09, "BC10 Base Controller"},
-    {EMS_MODEL_OTHER, 114, 0x09, "BC10 Base Controller"},
-    {EMS_MODEL_OTHER, 125, 0x09, "BC25 Base Controller"},
-    {EMS_MODEL_OTHER, 152, 0x09, "Junkers Controller"},
-    {EMS_MODEL_OTHER, 205, 0x02, "Nefit Moduline Easy Connect"},
-    {EMS_MODEL_EASY, 206, 0x02, "Bosch Easy Connect"},
-    {EMS_MODEL_OTHER, 171, 0x02, "EMS-OT OpenTherm converter"},
-    {EMS_MODEL_OTHER, 252, EMS_ID_HP, "HeatPump Module"},
-    {EMS_MODEL_OTHER, 189, EMS_ID_GATEWAY, "Web Gateway KM200"}
+    {69, 0x21, "MM10 Mixer Module"},
+    {71, 0x11, "WM10 Switch Module"},
+    {160, 0x20, "MM100 Mixing Module"},
+    {160, 0x21, "MM100 Mixing Module"},
+    {159, 0x21, "MM50 Mixing Module"},
+    {68, 0x09, "BC10/RFM20 Receiver"},
+    {190, 0x09, "BC10 Base Controller"},
+    {114, 0x09, "BC10 Base Controller"},
+    {125, 0x09, "BC25 Base Controller"},
+    {152, 0x09, "Junkers Controller"},
+    {205, 0x02, "Nefit Moduline Easy Connect"},
+    {206, 0x02, "Bosch Easy Connect"},
+    {171, 0x02, "EMS-OT OpenTherm converter"},
+    {252, EMS_ID_HP, "HeatPump Module"},
+    {189, EMS_ID_GATEWAY, "Web Gateway KM200"}
 
+};
+
+// heatpump
+// format is PRODUCT ID, DEVICE ID, DESCRIPTION
+const _HeatPump_Type HeatPump_Types[] = {
+    {252, EMS_ID_HP, "HeatPump Module"}
 };
 
 /*
  * Known thermostat types and their capabilities
+ * format is MODEL_ID, PRODUCT ID, DEVICE ID, DESCRIPTION
  */
 const _Thermostat_Type Thermostat_Types[] = {
 

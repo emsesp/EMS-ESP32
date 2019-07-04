@@ -156,27 +156,30 @@ const _EMS_TxTelegram EMS_TX_TELEGRAM_NEW = {
     {0x00}                // data
 };
 
+// where defintions are stored
 typedef struct {
-    uint8_t model_id;
     uint8_t product_id;
     char    model_string[50];
 } _Boiler_Type;
 
 typedef struct {
-    uint8_t model_id;
     uint8_t product_id;
     uint8_t device_id;
     char    model_string[50];
 } _SolarModule_Type;
 
 typedef struct {
-    uint8_t model_id;
     uint8_t product_id;
     uint8_t device_id;
     char    model_string[50];
 } _Other_Type;
 
-// Definition for thermostat devices
+typedef struct {
+    uint8_t product_id;
+    uint8_t device_id;
+    char    model_string[50];
+} _HeatPump_Type;
+
 typedef struct {
     uint8_t model_id;
     uint8_t product_id;
@@ -185,6 +188,8 @@ typedef struct {
     bool    write_supported;
 } _Thermostat_Type;
 
+
+// for consolidating all types
 typedef struct {
     uint8_t product_id;
     uint8_t device_id;
@@ -256,14 +261,19 @@ typedef struct {           // UBAParameterWW
  * Telegram package defintions for Other EMS devices
  */
 
-// Other ems devices than solar modules, thermostats and boilers
 typedef struct {
-    bool    HP;           // set true if there is a Heat Pump available
     uint8_t HPModulation; // heatpump modulation in %
     uint8_t HPSpeed;      // speed 0-100 %
-    uint8_t device_id;    // the device ID of the Solar Module / Heat Pump (e.g. 0x30)
+    uint8_t device_id;    // the device ID of the Heat Pump (e.g. 0x30)
     uint8_t model_id;     // Solar Module / Heat Pump model (e.g. 3 > EMS_MODEL_OTHER )
-    uint8_t product_id;   // (e.g. 101)
+    uint8_t product_id;
+    char    version[10];
+} _EMS_HeatPump;
+
+typedef struct {
+    uint8_t device_id;
+    uint8_t model_id;
+    uint8_t product_id;
     char    version[10];
 } _EMS_Other;
 
@@ -278,9 +288,9 @@ typedef struct {
     int16_t  EnergyToday;
     int16_t  EnergyTotal;
     uint32_t pumpWorkMin; // Total solar pump operating time
-    uint8_t  device_id;   // the device ID of the Solar Module / Heat Pump (e.g. 0x30)
-    uint8_t  model_id;    // Solar Module / Heat Pump model (e.g. 3 > EMS_MODEL_OTHER )
-    uint8_t  product_id;  // (e.g. 101)
+    uint8_t  device_id;   // the device ID of the Solar Module
+    uint8_t  model_id;    // Solar Module
+    uint8_t  product_id;
     char     version[10];
 } _EMS_SolarModule;
 
@@ -363,12 +373,12 @@ bool             ems_getTxEnabled();
 bool             ems_getThermostatEnabled();
 bool             ems_getBoilerEnabled();
 bool             ems_getSolarModuleEnabled();
+bool             ems_getHeatPumpEnabled();
 bool             ems_getBusConnected();
 _EMS_SYS_LOGGING ems_getLogging();
 bool             ems_getEmsRefreshed();
 uint8_t          ems_getThermostatModel();
 uint8_t          ems_getSolarModuleModel();
-uint8_t          ems_getOtherModel();
 void             ems_discoverModels();
 bool             ems_getTxCapable();
 uint32_t         ems_getPollFrequency();
@@ -378,8 +388,6 @@ uint8_t _crcCalculator(uint8_t * data, uint8_t len);
 void    _processType(_EMS_RxTelegram * EMS_RxTelegram);
 void    _debugPrintPackage(const char * prefix, _EMS_RxTelegram * EMS_RxTelegram, const char * color);
 void    _ems_clearTxData();
-int     _ems_findBoilerModel(uint8_t model_id);
-bool    _ems_setModel(uint8_t model_id);
 void    _removeTxQueue();
 
 // global so can referenced in other classes
@@ -387,4 +395,5 @@ extern _EMS_Sys_Status  EMS_Sys_Status;
 extern _EMS_Boiler      EMS_Boiler;
 extern _EMS_Thermostat  EMS_Thermostat;
 extern _EMS_SolarModule EMS_SolarModule;
+extern _EMS_HeatPump    EMS_HeatPump;
 extern _EMS_Other       EMS_Other;

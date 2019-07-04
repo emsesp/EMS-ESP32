@@ -480,12 +480,12 @@ void showInfo() {
     }
 
     // For HeatPumps
-    if (EMS_Other.HP) {
+    if (ems_getHeatPumpEnabled()) {
         myDebug_P(PSTR("")); // newline
         myDebug_P(PSTR("%sHeat Pump stats:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
         myDebug_P(PSTR("  Solar Module: %s"), ems_getHeatPumpDescription(buffer_type));
-        _renderIntValue("Pump modulation", "%", EMS_Other.HPModulation);
-        _renderIntValue("Pump speed", "%", EMS_Other.HPSpeed);
+        _renderIntValue("Pump modulation", "%", EMS_HeatPump.HPModulation);
+        _renderIntValue("Pump speed", "%", EMS_HeatPump.HPSpeed);
     }
 
     // Thermostat stats
@@ -824,16 +824,16 @@ void publishValues(bool force) {
     }
 
     // handle HeatPump
-    if (EMS_Other.HP) {
+    if (ems_getHeatPumpEnabled()) {
         // build new json object
         doc.clear();
         JsonObject rootSM = doc.to<JsonObject>();
 
-        if (EMS_Other.HPModulation != EMS_VALUE_INT_NOTSET)
-            rootSM[HP_PUMPMODULATION] = EMS_Other.HPModulation;
+        if (EMS_HeatPump.HPModulation != EMS_VALUE_INT_NOTSET)
+            rootSM[HP_PUMPMODULATION] = EMS_HeatPump.HPModulation;
 
-        if (EMS_Other.HPSpeed != EMS_VALUE_INT_NOTSET)
-            rootSM[HP_PUMPSPEED] = EMS_Other.HPSpeed;
+        if (EMS_HeatPump.HPSpeed != EMS_VALUE_INT_NOTSET)
+            rootSM[HP_PUMPSPEED] = EMS_HeatPump.HPSpeed;
 
         data[0] = '\0'; // reset data for next package
         serializeJson(doc, data, sizeof(data));
@@ -1720,6 +1720,13 @@ void setup() {
 
     // web custom settings
     myESP.setWeb(WebCallback);
+
+// serial off as default for fresh installs
+#ifdef NO_SERIAL
+    myESP.setUseSerial(false);
+#else
+    myESP.setUseSerial(true);
+#endif
 
     // start up all the services
     myESP.begin(APP_HOSTNAME, APP_NAME, APP_VERSION);
