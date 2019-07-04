@@ -47,7 +47,9 @@ MyESP::MyESP() {
     _helpProjectCmds       = NULL;
     _helpProjectCmds_count = 0;
 
-    _serial                    = false;
+    _serial         = false;
+    _serial_default = false;
+
     _heartbeat                 = false;
     _mqtt_host                 = NULL;
     _mqtt_password             = NULL;
@@ -198,7 +200,7 @@ void MyESP::_wifiCallback(justwifi_messages_t code, char * parameter) {
 
         // finally if we don't want Serial anymore, turn it off
         if (!_serial) {
-            myDebug_P(PSTR("Disabling serial port communication."));
+            myDebug_P(PSTR("[SYSTEM] Disabling serial port communication."));
             SerialAndTelnet.flush(); // flush so all buffer is printed to serial
             SerialAndTelnet.setSerial(NULL);
         }
@@ -837,16 +839,9 @@ bool MyESP::_changeSetting(uint8_t wc, const char * setting, const char * value)
 }
 
 // force the serial on/off
-void MyESP::setUseSerial(bool toggle) {
-    //(void)fs_saveConfig(); // save the setting for next reboot
-
-    if (toggle) {
-        SerialAndTelnet.setSerial(&Serial);
-        _serial = true;
-    } else {
-        SerialAndTelnet.setSerial(NULL);
-        _serial = false;
-    }
+void MyESP::setUseSerial(bool b) {
+    _serial_default = _serial = b;
+    SerialAndTelnet.setSerial(b ? &Serial : NULL);
 }
 
 void MyESP::_telnetCommand(char * commandLine) {
@@ -1604,9 +1599,7 @@ bool MyESP::_fs_loadConfig() {
     value          = json["mqtt_password"];
     _mqtt_password = (value) ? strdup(value) : NULL;
 
-    _serial = (bool)json["serial"]; // defaults to off
-
-    // _serial = true; // uncomment for debugging everything to serial
+    _serial = json["serial"] | _serial_default;
 
     _heartbeat = (bool)json["heartbeat"]; // defaults to off
 
@@ -2122,6 +2115,38 @@ void MyESP::_webserver_setup() {
     webServer.on("/resetall", [this]() { _webResetAllPage(); });
 
     webServer.begin();
+
+    myDebug_P(PSTR("[WEB] Web server started."));
+}
+
+// bootup sequence
+// quickly flash LED until we get a Wifi connection, or AP established
+// fast way is to use WRITE_PERI_REG(PERIPHS_GPIO_BASEADDR + (state ? 4 : 8), (1 << EMSESP_Status.led_gpio)); // 4 is on, 8 is off
+void MyESP::_bootupSequence() {
+    uint8_t boot_status = getSystemBootStatus();
+
+    if ((boot_status == MYESP_BOOTSTATUS_BOOTED) || (millis() <= MYESP_BOOTUP_DELAY)) {
+        return; // already booted, or still starting up
+    }
+
+    // only kick in after a few seconds
+    if (boot_status == MYESP_BOOTSTATUS_POWERON) {
+        _setSystemBootStatus(MYESP_BOOTSTATUS_BOOTING);
+    }
+
+    static uint32_t last_bootupflash = 0;
+
+    // flash LED quickly
+    if ((millis() - last_bootupflash > MYESP_BOOTUP_FLASHDELAY)) {
+        last_bootupflash = millis();
+        int state        = digitalRead(LED_BUILTIN);
+        digitalWrite(LED_BUILTIN, !state);
+    }
+
+    if (isWifiConnected()) {
+        _setSystemBootStatus(MYESP_BOOTSTATUS_BOOTED); // completed, reset flag
+        digitalWrite(LED_BUILTIN, LOW);                // turn off LED
+    }
 }
 
 // setup MyESP
@@ -2156,36 +2181,6 @@ void MyESP::begin(const char * app_hostname, const char * app_name, const char *
 
     _setSystemCheck(false); // reset system check
     _heartbeatCheck(true);  // force heartbeat
-}
-
-// bootup sequence
-// quickly flash LED until we get a Wifi connection, or AP established
-// fast way is to use WRITE_PERI_REG(PERIPHS_GPIO_BASEADDR + (state ? 4 : 8), (1 << EMSESP_Status.led_gpio)); // 4 is on, 8 is off
-void MyESP::_bootupSequence() {
-    uint8_t boot_status = getSystemBootStatus();
-
-    if ((boot_status == MYESP_BOOTSTATUS_BOOTED) || (millis() <= MYESP_BOOTUP_DELAY)) {
-        return; // already booted, or still starting up
-    }
-
-    // only kick in after a few seconds
-    if (boot_status == MYESP_BOOTSTATUS_POWERON) {
-        _setSystemBootStatus(MYESP_BOOTSTATUS_BOOTING);
-    }
-
-    static uint32_t last_bootupflash = 0;
-
-    // flash LED quickly
-    if ((millis() - last_bootupflash > MYESP_BOOTUP_FLASHDELAY)) {
-        last_bootupflash = millis();
-        int state        = digitalRead(LED_BUILTIN);
-        digitalWrite(LED_BUILTIN, !state);
-    }
-
-    if (isWifiConnected()) {
-        _setSystemBootStatus(MYESP_BOOTSTATUS_BOOTED); // completed, reset flag
-        digitalWrite(LED_BUILTIN, LOW);                // turn off LED
-    }
 }
 
 /*

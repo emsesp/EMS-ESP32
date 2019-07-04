@@ -9,7 +9,7 @@
 #ifndef MyEMS_h
 #define MyEMS_h
 
-#define MYESP_VERSION "1.1.20"
+#define MYESP_VERSION "1.1.21"
 
 #include <ArduinoJson.h>
 #include <ArduinoOTA.h>
@@ -377,6 +377,7 @@ class MyESP {
     char *        _boottime;
     bool          _suspendOutput;
     bool          _serial;
+    bool          _serial_default;
     bool          _heartbeat;
     unsigned long _getUptime();
     String        _buildTime();
