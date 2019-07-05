@@ -122,7 +122,7 @@
 // Known EMS types
 typedef enum {
     EMS_MODEL_NONE, // unset
-    EMS_MODEL_ALL, // common for all devices
+    EMS_MODEL_ALL,  // common for all devices
 
     // heatpump
     EMS_MODEL_HP,
@@ -207,9 +207,7 @@ const _Other_Type Other_Types[] = {
 
 // heatpump
 // format is PRODUCT ID, DEVICE ID, DESCRIPTION
-const _HeatPump_Type HeatPump_Types[] = {
-    {252, EMS_ID_HP, "HeatPump Module"}
-};
+const _HeatPump_Type HeatPump_Types[] = {{252, EMS_ID_HP, "HeatPump Module"}};
 
 /*
  * Known thermostat types and their capabilities

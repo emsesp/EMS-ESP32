@@ -212,7 +212,40 @@ char * _short_to_char(char * s, int16_t value, uint8_t decimals = 1) {
     return s;
 }
 
-// takes a short value (2 bytes), converts to a fraction
+// convert short (two bytes) to text string
+// decimals: 0 = no division, 1=divide value by 10, 2=divide by 2, 10=divide value by 100
+char * _ushort_to_char(char * s, uint16_t value, uint8_t decimals = 1) {
+    // remove errors or invalid values
+    if (value == EMS_VALUE_USHORT_NOTSET) {
+        strlcpy(s, "?", 10);
+        return (s);
+    }
+
+    // just print
+    if (decimals == 0) {
+        ltoa(value, s, 10);
+        return (s);
+    }
+
+    // do floating point
+    char s2[10] = {0};
+
+    if (decimals == 2) {
+        // divide by 2
+        strlcpy(s, ltoa(value / 2, s2, 10), 10);
+        strlcat(s, ".", 10);
+        strlcat(s, ((value & 0x01) ? "5" : "0"), 10);
+
+    } else {
+        strlcpy(s, ltoa(value / (decimals * 10), s2, 10), 10);
+        strlcat(s, ".", 10);
+        strlcat(s, ltoa(value % (decimals * 10), s2, 10), 10);
+    }
+
+    return s;
+}
+
+// takes a signed short value (2 bytes), converts to a fraction
 // decimals: 0 = no division, 1=divide value by 10, 2=divide by 2, 10=divide value by 100
 void _renderShortValue(const char * prefix, const char * postfix, int16_t value, uint8_t decimals = 1) {
     static char buffer[200] = {0};
@@ -222,6 +255,25 @@ void _renderShortValue(const char * prefix, const char * postfix, int16_t value,
     strlcat(buffer, ": ", sizeof(buffer));
 
     strlcat(buffer, _short_to_char(s, value, decimals), sizeof(buffer));
+
+    if (postfix != NULL) {
+        strlcat(buffer, " ", sizeof(buffer));
+        strlcat(buffer, postfix, sizeof(buffer));
+    }
+
+    myDebug(buffer);
+}
+
+// takes a unsigned short value (2 bytes), converts to a fraction
+// decimals: 0 = no division, 1=divide value by 10, 2=divide by 2, 10=divide value by 100
+void _renderUShortValue(const char * prefix, const char * postfix, uint16_t value, uint8_t decimals = 1) {
+    static char buffer[200] = {0};
+    static char s[20]       = {0};
+    strlcpy(buffer, "  ", sizeof(buffer));
+    strlcat(buffer, prefix, sizeof(buffer));
+    strlcat(buffer, ": ", sizeof(buffer));
+
+    strlcat(buffer, _ushort_to_char(s, value, decimals), sizeof(buffer));
 
     if (postfix != NULL) {
         strlcat(buffer, " ", sizeof(buffer));
@@ -400,7 +452,7 @@ void showInfo() {
     _renderIntValue("Warm Water desired temperature", "C", EMS_Boiler.wWDesiredTemp);
 
     // UBAMonitorWWMessage
-    _renderShortValue("Warm Water current temperature", "C", EMS_Boiler.wWCurTmp);
+    _renderUShortValue("Warm Water current temperature", "C", EMS_Boiler.wWCurTmp);
     _renderIntValue("Warm Water current tap water flow", "l/min", EMS_Boiler.wWCurFlow, 10);
     _renderLongValue("Warm Water # starts", "times", EMS_Boiler.wWStarts);
     if (EMS_Boiler.wWWorkM != EMS_VALUE_LONG_NOTSET) {
@@ -413,8 +465,8 @@ void showInfo() {
 
     // UBAMonitorFast
     _renderIntValue("Selected flow temperature", "C", EMS_Boiler.selFlowTemp);
-    _renderShortValue("Current flow temperature", "C", EMS_Boiler.curFlowTemp);
-    _renderShortValue("Return temperature", "C", EMS_Boiler.retTemp);
+    _renderUShortValue("Current flow temperature", "C", EMS_Boiler.curFlowTemp);
+    _renderUShortValue("Return temperature", "C", EMS_Boiler.retTemp);
     _renderBoolValue("Gas", EMS_Boiler.burnGas);
     _renderBoolValue("Boiler pump", EMS_Boiler.heatPmp);
     _renderBoolValue("Fan", EMS_Boiler.fanWork);
@@ -439,7 +491,7 @@ void showInfo() {
     if (EMS_Boiler.extTemp != EMS_VALUE_SHORT_NOTSET) {
         _renderShortValue("Outside temperature", "C", EMS_Boiler.extTemp);
     }
-    _renderShortValue("Boiler temperature", "C", EMS_Boiler.boilTemp);
+    _renderUShortValue("Boiler temperature", "C", EMS_Boiler.boilTemp);
     _renderIntValue("Pump modulation", "%", EMS_Boiler.pumpMod);
     _renderLongValue("Burner # starts", "times", EMS_Boiler.burnStarts);
     if (EMS_Boiler.burnWorkMin != EMS_VALUE_LONG_NOTSET) {
@@ -470,13 +522,15 @@ void showInfo() {
         _renderShortValue("Bottom temperature", "C", EMS_SolarModule.bottomTemp);
         _renderIntValue("Pump modulation", "%", EMS_SolarModule.pumpModulation);
         _renderBoolValue("Pump active", EMS_SolarModule.pump);
-        myDebug_P(PSTR("  Pump working time: %d days %d hours %d minutes"),
-                  EMS_SolarModule.pumpWorkMin / 1440,
-                  (EMS_SolarModule.pumpWorkMin % 1440) / 60,
-                  EMS_SolarModule.pumpWorkMin % 60);
-        _renderShortValue("Energy Last Hour", "Wh", EMS_SolarModule.EnergyLastHour, 1); // *10
-        _renderShortValue("Energy Today", "Wh", EMS_SolarModule.EnergyToday, 0);
-        _renderShortValue("Energy Total", "kWH", EMS_SolarModule.EnergyTotal, 1); // *10
+        if (EMS_SolarModule.pumpWorkMin != EMS_VALUE_LONG_NOTSET) {
+            myDebug_P(PSTR("  Pump working time: %d days %d hours %d minutes"),
+                      EMS_SolarModule.pumpWorkMin / 1440,
+                      (EMS_SolarModule.pumpWorkMin % 1440) / 60,
+                      EMS_SolarModule.pumpWorkMin % 60);
+        }
+        _renderUShortValue("Energy Last Hour", "Wh", EMS_SolarModule.EnergyLastHour, 1); // *10
+        _renderUShortValue("Energy Today", "Wh", EMS_SolarModule.EnergyToday, 0);
+        _renderUShortValue("Energy Total", "kWH", EMS_SolarModule.EnergyTotal, 1); // *10
     }
 
     // For HeatPumps
@@ -633,17 +687,17 @@ void publishValues(bool force) {
 
     if (EMS_Boiler.extTemp != EMS_VALUE_SHORT_NOTSET)
         rootBoiler["outdoorTemp"] = (double)EMS_Boiler.extTemp / 10;
-    if (EMS_Boiler.wWCurTmp != EMS_VALUE_SHORT_NOTSET)
+    if (EMS_Boiler.wWCurTmp != EMS_VALUE_USHORT_NOTSET)
         rootBoiler["wWCurTmp"] = (double)EMS_Boiler.wWCurTmp / 10;
     if (EMS_Boiler.wWCurFlow != EMS_VALUE_INT_NOTSET)
         rootBoiler["wWCurFlow"] = (double)EMS_Boiler.wWCurFlow / 10;
-    if (EMS_Boiler.curFlowTemp != EMS_VALUE_SHORT_NOTSET)
+    if (EMS_Boiler.curFlowTemp != EMS_VALUE_USHORT_NOTSET)
         rootBoiler["curFlowTemp"] = (double)EMS_Boiler.curFlowTemp / 10;
-    if (EMS_Boiler.retTemp != EMS_VALUE_SHORT_NOTSET)
+    if (EMS_Boiler.retTemp != EMS_VALUE_USHORT_NOTSET)
         rootBoiler["retTemp"] = (double)EMS_Boiler.retTemp / 10;
     if (EMS_Boiler.sysPress != EMS_VALUE_INT_NOTSET)
         rootBoiler["sysPress"] = (double)EMS_Boiler.sysPress / 10;
-    if (EMS_Boiler.boilTemp != EMS_VALUE_SHORT_NOTSET)
+    if (EMS_Boiler.boilTemp != EMS_VALUE_USHORT_NOTSET)
         rootBoiler["boilTemp"] = (double)EMS_Boiler.boilTemp / 10;
 
     if (EMS_Boiler.wWActivated != EMS_VALUE_INT_NOTSET)
@@ -796,13 +850,13 @@ void publishValues(bool force) {
             rootSM[SM_PUMPWORKMIN] = (double)EMS_SolarModule.pumpWorkMin;
         }
 
-        if (EMS_SolarModule.EnergyLastHour != EMS_VALUE_SHORT_NOTSET)
+        if (EMS_SolarModule.EnergyLastHour != EMS_VALUE_USHORT_NOTSET)
             rootSM[SM_ENERGYLASTHOUR] = (double)EMS_SolarModule.EnergyLastHour / 10;
 
-        if (EMS_SolarModule.EnergyToday != EMS_VALUE_SHORT_NOTSET)
+        if (EMS_SolarModule.EnergyToday != EMS_VALUE_USHORT_NOTSET)
             rootSM[SM_ENERGYTODAY] = EMS_SolarModule.EnergyToday;
 
-        if (EMS_SolarModule.EnergyTotal != EMS_VALUE_SHORT_NOTSET)
+        if (EMS_SolarModule.EnergyTotal != EMS_VALUE_USHORT_NOTSET)
             rootSM[SM_ENERGYTOTAL] = (double)EMS_SolarModule.EnergyTotal / 10;
 
         data[0] = '\0'; // reset data for next package
@@ -1035,7 +1089,7 @@ bool FSCallback(MYESP_FSACTION action, const JsonObject json) {
         EMSESP_Status.led             = json["led"];
         EMSESP_Status.led_gpio        = json["led_gpio"] | EMSESP_LED_GPIO;
         EMSESP_Status.dallas_gpio     = json["dallas_gpio"] | EMSESP_DALLAS_GPIO;
-        EMSESP_Status.dallas_parasite = json["dallas_parasite"];
+        EMSESP_Status.dallas_parasite = json["dallas_parasite"] | EMSESP_DALLAS_PARASITE;
 
         EMS_Thermostat.device_id = json["thermostat_type"] | EMSESP_THERMOSTAT_TYPE;
         EMS_Boiler.device_id     = json["boiler_type"] | EMSESP_BOILER_TYPE;
@@ -1720,13 +1774,6 @@ void setup() {
 
     // web custom settings
     myESP.setWeb(WebCallback);
-
-// serial off as default for fresh installs
-#ifdef NO_SERIAL
-    myESP.setUseSerial(false);
-#else
-    myESP.setUseSerial(true);
-#endif
 
     // start up all the services
     myESP.begin(APP_HOSTNAME, APP_NAME, APP_VERSION);

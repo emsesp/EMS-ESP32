@@ -34,11 +34,11 @@
 #define EMS_MAX_TELEGRAM_LENGTH 32
 
 // default values
-#define EMS_VALUE_INT_ON 1        // boolean true
-#define EMS_VALUE_INT_OFF 0       // boolean false
-#define EMS_VALUE_INT_NOTSET 0xFF // for 8-bit unsigned ints/bytes
-//#define EMS_VALUE_SHORT_NOTSET 0x8000  // for 2-byte signed shorts
+#define EMS_VALUE_INT_ON 1             // boolean true
+#define EMS_VALUE_INT_OFF 0            // boolean false
+#define EMS_VALUE_INT_NOTSET 0xFF      // for 8-bit unsigned ints/bytes
 #define EMS_VALUE_SHORT_NOTSET -32768  // for 2-byte signed shorts
+#define EMS_VALUE_USHORT_NOTSET 0xFFFF // for 2-byte unsigned shorts
 #define EMS_VALUE_LONG_NOTSET 0xFFFFFF // for 3-byte longs
 
 #define EMS_THERMOSTAT_WRITE_YES true
@@ -188,7 +188,6 @@ typedef struct {
     bool    write_supported;
 } _Thermostat_Type;
 
-
 // for consolidating all types
 typedef struct {
     uint8_t product_id;
@@ -209,8 +208,8 @@ typedef struct {           // UBAParameterWW
 
     // UBAMonitorFast
     uint8_t  selFlowTemp;        // Selected flow temperature
-    int16_t  curFlowTemp;        // Current flow temperature
-    int16_t  retTemp;            // Return temperature
+    uint16_t curFlowTemp;        // Current flow temperature
+    uint16_t retTemp;            // Return temperature
     uint8_t  burnGas;            // Gas on/off
     uint8_t  fanWork;            // Fan on/off
     uint8_t  ignWork;            // Ignition on/off
@@ -226,14 +225,14 @@ typedef struct {           // UBAParameterWW
 
     // UBAMonitorSlow
     int16_t  extTemp;     // Outside temperature
-    int16_t  boilTemp;    // Boiler temperature
+    uint16_t boilTemp;    // Boiler temperature
     uint8_t  pumpMod;     // Pump modulation
     uint32_t burnStarts;  // # burner starts
     uint32_t burnWorkMin; // Total burner operating time
     uint32_t heatWorkMin; // Total heat operating time
 
     // UBAMonitorWWMessage
-    int16_t  wWCurTmp;  // Warm Water current temperature:
+    uint16_t wWCurTmp;  // Warm Water current temperature
     uint32_t wWStarts;  // Warm Water # starts
     uint32_t wWWorkM;   // Warm Water # minutes
     uint8_t  wWOneTime; // Warm Water one time function on/off
@@ -284,9 +283,9 @@ typedef struct {
     uint8_t  pumpModulation;         // modulation solar pump
     uint8_t  pump;                   // pump active
     int16_t  setpoint_maxBottomTemp; // setpoint for maximum collector temp
-    int16_t  EnergyLastHour;
-    int16_t  EnergyToday;
-    int16_t  EnergyTotal;
+    uint16_t EnergyLastHour;
+    uint16_t EnergyToday;
+    uint16_t EnergyTotal;
     uint32_t pumpWorkMin; // Total solar pump operating time
     uint8_t  device_id;   // the device ID of the Solar Module
     uint8_t  model_id;    // Solar Module

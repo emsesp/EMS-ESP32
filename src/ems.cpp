@@ -268,35 +268,35 @@ void ems_init() {
     EMS_Boiler.wWComfort     = EMS_VALUE_INT_NOTSET;
 
     // UBAMonitorFast
-    EMS_Boiler.selFlowTemp = EMS_VALUE_INT_NOTSET;   // Selected flow temperature
-    EMS_Boiler.curFlowTemp = EMS_VALUE_SHORT_NOTSET; // Current flow temperature
-    EMS_Boiler.retTemp     = EMS_VALUE_SHORT_NOTSET; // Return temperature
-    EMS_Boiler.burnGas     = EMS_VALUE_INT_NOTSET;   // Gas on/off
-    EMS_Boiler.fanWork     = EMS_VALUE_INT_NOTSET;   // Fan on/off
-    EMS_Boiler.ignWork     = EMS_VALUE_INT_NOTSET;   // Ignition on/off
-    EMS_Boiler.heatPmp     = EMS_VALUE_INT_NOTSET;   // Boiler pump on/off
-    EMS_Boiler.wWHeat      = EMS_VALUE_INT_NOTSET;   // 3-way valve on WW
-    EMS_Boiler.wWCirc      = EMS_VALUE_INT_NOTSET;   // Circulation on/off
-    EMS_Boiler.selBurnPow  = EMS_VALUE_INT_NOTSET;   // Burner max power
-    EMS_Boiler.curBurnPow  = EMS_VALUE_INT_NOTSET;   // Burner current power
-    EMS_Boiler.flameCurr   = EMS_VALUE_SHORT_NOTSET; // Flame current in micro amps
-    EMS_Boiler.sysPress    = EMS_VALUE_INT_NOTSET;   // System pressure
+    EMS_Boiler.selFlowTemp = EMS_VALUE_INT_NOTSET;    // Selected flow temperature
+    EMS_Boiler.curFlowTemp = EMS_VALUE_USHORT_NOTSET; // Current flow temperature
+    EMS_Boiler.retTemp     = EMS_VALUE_USHORT_NOTSET; // Return temperature
+    EMS_Boiler.burnGas     = EMS_VALUE_INT_NOTSET;    // Gas on/off
+    EMS_Boiler.fanWork     = EMS_VALUE_INT_NOTSET;    // Fan on/off
+    EMS_Boiler.ignWork     = EMS_VALUE_INT_NOTSET;    // Ignition on/off
+    EMS_Boiler.heatPmp     = EMS_VALUE_INT_NOTSET;    // Boiler pump on/off
+    EMS_Boiler.wWHeat      = EMS_VALUE_INT_NOTSET;    // 3-way valve on WW
+    EMS_Boiler.wWCirc      = EMS_VALUE_INT_NOTSET;    // Circulation on/off
+    EMS_Boiler.selBurnPow  = EMS_VALUE_INT_NOTSET;    // Burner max power
+    EMS_Boiler.curBurnPow  = EMS_VALUE_INT_NOTSET;    // Burner current power
+    EMS_Boiler.flameCurr   = EMS_VALUE_SHORT_NOTSET;  // Flame current in micro amps
+    EMS_Boiler.sysPress    = EMS_VALUE_INT_NOTSET;    // System pressure
     strlcpy(EMS_Boiler.serviceCodeChar, "??", sizeof(EMS_Boiler.serviceCodeChar));
     EMS_Boiler.serviceCode = EMS_VALUE_SHORT_NOTSET;
 
     // UBAMonitorSlow
-    EMS_Boiler.extTemp     = EMS_VALUE_SHORT_NOTSET; // Outside temperature
-    EMS_Boiler.boilTemp    = EMS_VALUE_SHORT_NOTSET; // Boiler temperature
-    EMS_Boiler.pumpMod     = EMS_VALUE_INT_NOTSET;   // Pump modulation
-    EMS_Boiler.burnStarts  = EMS_VALUE_LONG_NOTSET;  // # burner restarts
-    EMS_Boiler.burnWorkMin = EMS_VALUE_LONG_NOTSET;  // Total burner operating time
-    EMS_Boiler.heatWorkMin = EMS_VALUE_LONG_NOTSET;  // Total heat operating time
+    EMS_Boiler.extTemp     = EMS_VALUE_SHORT_NOTSET;  // Outside temperature
+    EMS_Boiler.boilTemp    = EMS_VALUE_USHORT_NOTSET; // Boiler temperature
+    EMS_Boiler.pumpMod     = EMS_VALUE_INT_NOTSET;    // Pump modulation
+    EMS_Boiler.burnStarts  = EMS_VALUE_LONG_NOTSET;   // # burner restarts
+    EMS_Boiler.burnWorkMin = EMS_VALUE_LONG_NOTSET;   // Total burner operating time
+    EMS_Boiler.heatWorkMin = EMS_VALUE_LONG_NOTSET;   // Total heat operating time
 
     // UBAMonitorWWMessage
-    EMS_Boiler.wWCurTmp  = EMS_VALUE_SHORT_NOTSET; // Warm Water current temperature
-    EMS_Boiler.wWStarts  = EMS_VALUE_LONG_NOTSET;  // Warm Water # starts
-    EMS_Boiler.wWWorkM   = EMS_VALUE_LONG_NOTSET;  // Warm Water # minutes
-    EMS_Boiler.wWOneTime = EMS_VALUE_INT_NOTSET;   // Warm Water one time function on/off
+    EMS_Boiler.wWCurTmp  = EMS_VALUE_USHORT_NOTSET; // Warm Water current temperature
+    EMS_Boiler.wWStarts  = EMS_VALUE_LONG_NOTSET;   // Warm Water # starts
+    EMS_Boiler.wWWorkM   = EMS_VALUE_LONG_NOTSET;   // Warm Water # minutes
+    EMS_Boiler.wWOneTime = EMS_VALUE_INT_NOTSET;    // Warm Water one time function on/off
     EMS_Boiler.wWCurFlow = EMS_VALUE_INT_NOTSET;
 
     // UBATotalUptimeMessage
@@ -308,17 +308,18 @@ void ems_init() {
     EMS_Boiler.pump_mod_min = EMS_VALUE_INT_NOTSET; // Boiler circuit pump modulation min. power
 
     // Solar Module values
-    EMS_SolarModule.collectorTemp  = EMS_VALUE_SHORT_NOTSET; // collector temp from SM10/SM100
-    EMS_SolarModule.bottomTemp     = EMS_VALUE_SHORT_NOTSET; // bottom temp from SM10/SM100
-    EMS_SolarModule.pumpModulation = EMS_VALUE_INT_NOTSET;   // modulation solar pump SM10/SM100
-    EMS_SolarModule.pump           = EMS_VALUE_INT_NOTSET;   // pump active
-    EMS_SolarModule.EnergyLastHour = EMS_VALUE_SHORT_NOTSET;
-    EMS_SolarModule.EnergyToday    = EMS_VALUE_SHORT_NOTSET;
-    EMS_SolarModule.EnergyTotal    = EMS_VALUE_SHORT_NOTSET;
-    EMS_SolarModule.device_id      = EMS_ID_NONE;
-    EMS_SolarModule.model_id       = EMS_MODEL_NONE;
-    EMS_SolarModule.product_id     = EMS_ID_NONE;
-    EMS_SolarModule.pumpWorkMin    = EMS_VALUE_LONG_NOTSET;
+    EMS_SolarModule.collectorTemp          = EMS_VALUE_SHORT_NOTSET; // collector temp from SM10/SM100
+    EMS_SolarModule.bottomTemp             = EMS_VALUE_SHORT_NOTSET; // bottom temp from SM10/SM100
+    EMS_SolarModule.pumpModulation         = EMS_VALUE_INT_NOTSET;   // modulation solar pump SM10/SM100
+    EMS_SolarModule.pump                   = EMS_VALUE_INT_NOTSET;   // pump active
+    EMS_SolarModule.EnergyLastHour         = EMS_VALUE_USHORT_NOTSET;
+    EMS_SolarModule.EnergyToday            = EMS_VALUE_USHORT_NOTSET;
+    EMS_SolarModule.EnergyTotal            = EMS_VALUE_USHORT_NOTSET;
+    EMS_SolarModule.device_id              = EMS_ID_NONE;
+    EMS_SolarModule.model_id               = EMS_MODEL_NONE;
+    EMS_SolarModule.product_id             = EMS_ID_NONE;
+    EMS_SolarModule.pumpWorkMin            = EMS_VALUE_LONG_NOTSET;
+    EMS_SolarModule.setpoint_maxBottomTemp = EMS_VALUE_SHORT_NOTSET;
 
     // Other EMS devices values
     EMS_HeatPump.HPModulation = EMS_VALUE_INT_NOTSET;
@@ -1480,6 +1481,7 @@ void _process_SM100Energy(_EMS_RxTelegram * EMS_RxTelegram) {
  */
 void _process_HPMonitor1(_EMS_RxTelegram * EMS_RxTelegram) {
     EMS_HeatPump.HPModulation   = _toByte(14); // modulation %
+
     EMS_Sys_Status.emsRefreshed = true;        // triggers a send the values back via MQTT
 }
 
@@ -1488,6 +1490,7 @@ void _process_HPMonitor1(_EMS_RxTelegram * EMS_RxTelegram) {
  */
 void _process_HPMonitor2(_EMS_RxTelegram * EMS_RxTelegram) {
     EMS_HeatPump.HPSpeed        = _toByte(25); // speed %
+    
     EMS_Sys_Status.emsRefreshed = true;        // triggers a send the values back via MQTT
 }
 
@@ -1497,10 +1500,10 @@ void _process_HPMonitor2(_EMS_RxTelegram * EMS_RxTelegram) {
 void _process_ISM1StatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     if (EMS_RxTelegram->offset == 0) {
         // e.g. B0 00 FF 00 00 03 32 00 00 00 00 13 00 D6 00 00 00 FB D0 F0
-        EMS_SolarModule.collectorTemp  = _toShort(4);      // Collector Temperature
-        EMS_SolarModule.bottomTemp     = _toShort(6);      // Temperature Bottom of Solar Boiler
-        EMS_SolarModule.EnergyLastHour = _toShort(2) * 10; // Solar Energy produced in last hour
-        EMS_SolarModule.pump           = _bitRead(8, 0);   // Solar pump on (1) or off (0)
+        EMS_SolarModule.collectorTemp  = _toShort(4);    // Collector Temperature
+        EMS_SolarModule.bottomTemp     = _toShort(6);    // Temperature Bottom of Solar Boiler
+        EMS_SolarModule.EnergyLastHour = _toShort(2);    // Solar Energy produced in last hour - is * 10 and handled in ems-esp.cpp
+        EMS_SolarModule.pump           = _bitRead(8, 0); // Solar pump on (1) or off (0)
         EMS_SolarModule.pumpWorkMin    = _toLong(10);
     }
 
