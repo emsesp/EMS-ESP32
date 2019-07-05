@@ -750,11 +750,8 @@ void publishValues(bool force) {
     }
 
     // handle the thermostat values separately
-    if (ems_getThermostatEnabled()) {
-        // only send thermostat values if we actually have them
-        if ((EMS_Thermostat.curr_roomTemp == EMS_VALUE_SHORT_NOTSET) || (EMS_Thermostat.setpoint_roomTemp == EMS_VALUE_SHORT_NOTSET))
-            return;
-
+    // only send thermostat values if we actually have them
+    if (ems_getThermostatEnabled() && ((EMS_Thermostat.curr_roomTemp != EMS_VALUE_SHORT_NOTSET) && (EMS_Thermostat.setpoint_roomTemp != EMS_VALUE_SHORT_NOTSET))) {
         // build new json object
         doc.clear();
         JsonObject rootThermostat = doc.to<JsonObject>();
@@ -824,8 +821,6 @@ void publishValues(bool force) {
             myESP.mqttPublish(TOPIC_THERMOSTAT_DATA, data);
         }
     }
-
-    // handle the other values separately
 
     // For SM10 and SM100 Solar Modules
     if (ems_getSolarModuleEnabled()) {
