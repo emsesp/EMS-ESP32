@@ -221,6 +221,13 @@ void MyESP::_wifiCallback(justwifi_messages_t code, char * parameter) {
         myDebug_P(PSTR("[WIFI] IP    %s"), WiFi.softAPIP().toString().c_str());
         myDebug_P(PSTR("[WIFI] MAC   %s"), WiFi.softAPmacAddress().c_str());
 
+        // finally if we don't want Serial anymore, turn it off
+        if (!_serial) {
+            myDebug_P(PSTR("[SYSTEM] Disabling serial port communication."));
+            SerialAndTelnet.flush(); // flush so all buffer is printed to serial
+            SerialAndTelnet.setSerial(NULL);
+        }
+
         // call any final custom settings
         if (_wifi_callback) {
             _wifi_callback();
@@ -583,6 +590,13 @@ void MyESP::_telnet_setup() {
     SerialAndTelnet.setCallbackOnDisconnect([this]() { _telnetDisconnected(); });
     SerialAndTelnet.setDebugOutput(false);
     SerialAndTelnet.begin(TELNET_SERIAL_BAUD); // default baud is 115200
+
+// serial is only on when booting
+#ifdef DEFAULT_NO_SERIAL
+    _serial_default = false;
+#else
+    _serial_default = true;
+#endif
 
     // init command buffer for console commands
     memset(_command, 0, TELNET_MAX_COMMAND_LENGTH);
@@ -1567,7 +1581,6 @@ bool MyESP::_fs_loadConfig() {
         myDebug_P(PSTR("[FS] Config file size is too large"));
         return false;
     } else if (size == 0) {
-        myDebug_P(PSTR("[FS] Failed to open config file"));
         return false;
     }
 
@@ -1683,7 +1696,7 @@ void MyESP::_fs_setup() {
 
     // load the config file. if it doesn't exist (function returns false) create it
     if (!_fs_loadConfig()) {
-        //myDebug_P(PSTR("[FS] Re-creating config file"));
+        myDebug_P(PSTR("[FS] Re-creating config file"));
         fs_saveConfig();
         _firstInstall = true; // flag as a first install
     }
@@ -2155,12 +2168,13 @@ void MyESP::begin(const char * app_hostname, const char * app_name, const char *
     _app_name     = strdup(app_name);
     _app_version  = strdup(app_version);
 
+    _telnet_setup(); // Telnet setup, called first to set Serial
+
     // set up onboard LED
     pinMode(LED_BUILTIN, OUTPUT);
     digitalWrite(LED_BUILTIN, HIGH);
 
     _getInitialFreeHeap(); // get initial free mem
-    _telnet_setup();       // Telnet setup, called first to set Serial
     _rtcmemSetup();        // rtc internal mem setup
 
     if (getSystemBootStatus() == MYESP_BOOTSTATUS_RESETNEEDED) {
