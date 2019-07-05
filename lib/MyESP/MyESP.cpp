@@ -397,7 +397,7 @@ void MyESP::_mqttOnConnect() {
 // MQTT setup
 void MyESP::_mqtt_setup() {
     if (!_mqtt_host) {
-        myDebug_P(PSTR("[MQTT] disabled"));
+        myDebug_P(PSTR("[MQTT] is disabled"));
     }
 
     mqttClient.onConnect([this](bool sessionPresent) { _mqttOnConnect(); });
@@ -1204,9 +1204,9 @@ void MyESP::showSystemStats() {
     myDebug_P(PSTR(" [WIFI] WiFi MAC: %s"), WiFi.macAddress().c_str());
 
     if (isMQTTConnected()) {
-        myDebug_P(PSTR(" [MQTT] connected (heartbeat %s)"), getHeartbeat() ? "enabled" : "disabled");
+        myDebug_P(PSTR(" [MQTT] is connected (with heartbeat %s)"), getHeartbeat() ? "enabled" : "disabled");
     } else {
-        myDebug_P(PSTR(" [MQTT] disconnected"));
+        myDebug_P(PSTR(" [MQTT] is disconnected"));
     }
 
 #ifdef CRASH
