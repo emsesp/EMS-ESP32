@@ -33,12 +33,12 @@
 // max length of a telegram, including CRC, for Rx and Tx.
 #define EMS_MAX_TELEGRAM_LENGTH 32
 
-// default values
+// default values for null values
 #define EMS_VALUE_INT_ON 1             // boolean true
 #define EMS_VALUE_INT_OFF 0            // boolean false
 #define EMS_VALUE_INT_NOTSET 0xFF      // for 8-bit unsigned ints/bytes
 #define EMS_VALUE_SHORT_NOTSET -32768  // for 2-byte signed shorts
-#define EMS_VALUE_USHORT_NOTSET 0xFFFF // for 2-byte unsigned shorts
+#define EMS_VALUE_USHORT_NOTSET 0x8000 // for 2-byte unsigned shorts
 #define EMS_VALUE_LONG_NOTSET 0xFFFFFF // for 3-byte longs
 
 #define EMS_THERMOSTAT_WRITE_YES true

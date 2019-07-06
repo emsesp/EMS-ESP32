@@ -178,7 +178,7 @@ char * _bool_to_char(char * s, uint8_t value) {
 // negative values are assumed stored as 1-compliment (https://medium.com/@LeeJulija/how-integers-are-stored-in-memory-using-twos-complement-5ba04d61a56c)
 char * _short_to_char(char * s, int16_t value, uint8_t decimals = 1) {
     // remove errors or invalid values
-    if ((value == EMS_VALUE_SHORT_NOTSET) || (value == 0x8000)) {
+    if (value == EMS_VALUE_SHORT_NOTSET) {
         strlcpy(s, "?", 10);
         return (s);
     }
@@ -216,7 +216,7 @@ char * _short_to_char(char * s, int16_t value, uint8_t decimals = 1) {
 // decimals: 0 = no division, 1=divide value by 10, 2=divide by 2, 10=divide value by 100
 char * _ushort_to_char(char * s, uint16_t value, uint8_t decimals = 1) {
     // remove errors or invalid values
-    if ((value == EMS_VALUE_USHORT_NOTSET) || (value == 0x8000)) {
+    if (value == EMS_VALUE_USHORT_NOTSET) {
         strlcpy(s, "?", 10);
         return (s);
     }
@@ -642,6 +642,8 @@ void publishSensorValues() {
         myESP.mqttPublish(TOPIC_EXTERNAL_SENSORS, data);
     }
 }
+
+
 
 // send values via MQTT
 // a json object is created for the boiler and one for the thermostat
