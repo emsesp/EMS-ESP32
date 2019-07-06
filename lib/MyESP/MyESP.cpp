@@ -503,7 +503,6 @@ void MyESP::_ota_setup() {
         _deferredReset(500, CUSTOM_RESET_OTA);
     });
 
-    /* 
     ArduinoOTA.onProgress([this](unsigned int progress, unsigned int total) {
         static unsigned int _progOld;
         unsigned int        _prog = (progress / (total / 100));
@@ -512,8 +511,7 @@ void MyESP::_ota_setup() {
             _progOld = _prog;
         }
     });
-    */
-
+  
     ArduinoOTA.onError([this](ota_error_t error) {
         if (error == OTA_AUTH_ERROR)
             myDebug_P(PSTR("[OTA] Auth Failed"));
