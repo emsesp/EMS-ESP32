@@ -511,7 +511,7 @@ void MyESP::_ota_setup() {
             _progOld = _prog;
         }
     });
-  
+
     ArduinoOTA.onError([this](ota_error_t error) {
         if (error == OTA_AUTH_ERROR)
             myDebug_P(PSTR("[OTA] Auth Failed"));
@@ -1982,8 +1982,22 @@ void MyESP::_webRootPage() {
     strlcat(s, "</h1>", sizeof(s));
 
     strlcat(s, "<p><b>System stats:</b><br>", sizeof(s));
-    strlcat(s, isMQTTConnected() ? " MQTT is connected\n" : " MQTT is disconnected\n", sizeof(s));
-    strlcat(s, "<br>", sizeof(s));
+
+    if (isAPmode()) {
+        strlcat(s, " Device is in Wifi Access Point mode with SSID <b>", sizeof(s));
+        strlcat(s, jw.getAPSSID().c_str(), sizeof(s));
+        strlcat(s, "</b>", sizeof(s));
+    } else {
+        char buf[4];
+        strlcat(s, " Connected to wireless network <b>", sizeof(s));
+        strlcat(s, _getESPhostname().c_str(), sizeof(s));
+        strlcat(s, "</b> with signal strength <b>", sizeof(s));
+        strlcat(s, itoa(getWifiQuality(), buf, 10), sizeof(s));
+        strlcat(s, "%</b>", sizeof(s));
+    }
+
+    strlcat(s, isMQTTConnected() ? "<br> MQTT is connected\n" : " MQTT is disconnected\n", sizeof(s));
+    strlcat(s, "</br>", sizeof(s));
 
     // uptime
     char     buffer[200];
@@ -1993,14 +2007,14 @@ void MyESP::_webRootPage() {
     uint32_t rem = t % 3600L;
     uint8_t  m   = rem / 60;
     uint8_t  sec = rem % 60;
-    sprintf(buffer, " System uptime: %d days %d hours %d minutes %d seconds<br>", d, h, m, sec);
+    sprintf(buffer, " System uptime: %d days %d hours %d minutes %d seconds", d, h, m, sec);
     strlcat(s, buffer, sizeof(s));
 
     // memory
-    uint32_t total_memory = _getInitialFreeHeap();
-    uint32_t free_memory  = ESP.getFreeHeap();
-    sprintf(buffer, " Memory: %d bytes free (%2u%%)<br>", free_memory, 100 * free_memory / total_memory);
-    strlcat(s, buffer, sizeof(s));
+    //uint32_t total_memory = _getInitialFreeHeap();
+    //uint32_t free_memory  = ESP.getFreeHeap();
+    //sprintf(buffer, " Memory: %d bytes free (%2u%%)<br>", free_memory, 100 * free_memory / total_memory);
+    //strlcat(s, buffer, sizeof(s));
 
     strlcat(s, "<p>", sizeof(s));
     if (_web_callback) {

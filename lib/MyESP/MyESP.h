@@ -208,7 +208,7 @@ const char webCommonPage_start[] = "<html>"
                                    "body {background-color: #FFA500;font: normal 18px Verdana, Arial, sans-serif;} </style>";
 
 
-const char webCommonPage_start_refresh[] = "<meta http-equiv='refresh' content='5'>";
+const char webCommonPage_start_refresh[] = "<meta http-equiv='refresh' content='30'>";
 
 const char webCommonPage_start_body[] = "</head><body>";
 
