@@ -9,9 +9,9 @@ default_envs = debug
 
 [common]
 ; -DMYESP_TIMESTAMP -DTESTS -DCRASH -DNO_SERIAL
-; -DNO_SERIAL if you want a fresh install to use the Serial port 
+; -DDEFAULT_NO_SERIAL if you want a fresh install to use the Serial port 
 debug_flags = -Wall -DCRASH
-release_flags = -w -DDNO_SERIAL
+release_flags = -w -DDEFAULT_NO_SERIAL
 general_flags = -g -DNO_GLOBAL_EEPROM
 
 arduino_core_2_3_0 = espressif8266@1.5.0
