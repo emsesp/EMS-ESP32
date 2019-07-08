@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.8.1dev] 2019-07-01
+## [1.8.1dev] 2019-07-08
 
 ### Added
 
@@ -14,18 +14,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - reset firmware option. If the reset button on the ESP is pressed during boot up sequence (the LED is flashing very fast) all settings are erased and goes into AP mode.
 - Added tx_mode back with options 0,1 and 2 until we've fixed option 2 that works for everyone and doesn't reset ESP
 - More solar module data captured, thanks to @Vuego123
+- -DNO_SERIAL option added to determine if the Serial port should be enabled on fresh installs
 
 ### Fixed
 
 - Detecting unset values in the SPIFFS and setting default values
 - Bosch Easy Connect wrongly classified as a thermostat
 - Correctly handle telegrams who's size are exactly 32 bytes (e.g. 0x19 MonitorSlow)
+- Telnet also available when in AP mode
 
 ### Changed
 
 - Improved handling of Solar Modules (thanks @Vuego123)
 - `publish_wait` renamed to `publish_time`, a value of 0 means disabling all MQTT sending
 - How signed shorts are handled such as the current and setpoint temps on RC300s
+- Stopped automatic refresh of web page, which causes crashes/memory loss after a short time
 
 ## [1.8.0] 2019-06-15
 

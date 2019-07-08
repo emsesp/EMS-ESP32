@@ -9,7 +9,7 @@
 #ifndef MyEMS_h
 #define MyEMS_h
 
-#define MYESP_VERSION "1.1.21"
+#define MYESP_VERSION "1.1.22"
 
 #include <ArduinoJson.h>
 #include <ArduinoOTA.h>
@@ -206,9 +206,6 @@ const char webCommonPage_start[] = "<html>"
                                    "<head>"
                                    "<style>input {font-size: 1.2em; width: 100%; max-width: 350px; display: block; margin: 5px auto; }"
                                    "body {background-color: #FFA500;font: normal 18px Verdana, Arial, sans-serif;} </style>";
-
-
-const char webCommonPage_start_refresh[] = "<meta http-equiv='refresh' content='30'>";
 
 const char webCommonPage_start_body[] = "</head><body>";
 

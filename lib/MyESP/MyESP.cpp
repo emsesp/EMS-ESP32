@@ -1972,7 +1972,7 @@ void MyESP::_webRootPage() {
     char s[1000] = {0};
 
     strlcpy(s, webCommonPage_start, sizeof(s));
-    strlcat(s, webCommonPage_start_refresh, sizeof(s));
+    // strlcat(s, webCommonPage_start_refresh, sizeof(s));
     strlcat(s, webCommonPage_start_body, sizeof(s));
 
     strlcat(s, "<h1>", sizeof(s));
@@ -2217,7 +2217,7 @@ void MyESP::loop() {
     ArduinoOTA.handle(); // OTA
 
     if (_ota_doing_update) {
-        return; // quit if in the middle of an update
+        return; // quit if in the middle of an OTA update
     }
 
     _calculateLoad();
@@ -2225,12 +2225,7 @@ void MyESP::loop() {
     _heartbeatCheck();
     _bootupSequence();
     webServer.handleClient(); // web server client requests
-
-    // if we're in AP mode, use the web server, otherwise switch to telnet
-    if (!isAPmode()) {
-        _telnetHandle();
-    }
-
+    _telnetHandle();
     _mqttConnect(); // MQTT
 
     yield(); // ...and breath
