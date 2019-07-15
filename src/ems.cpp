@@ -1300,9 +1300,7 @@ void _process_RCPLUSStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
 
         EMS_Thermostat.day_mode = _bitRead(EMS_OFFSET_RCPLUSGet_mode_day, 1); // get day mode flag
 
-        // room night setpoint is _toByte(2) (value is *2)
-        // boiler set temp is _toByte(4) (value is *2)
-        // day night is byte(8), 0x01 for night, 0x00 for day
+        EMS_Thermostat.mode = _bitRead(EMS_OFFSET_RCPLUSStatusMessage_mode, 1); // bit 1, mode (auto or manual)
     }
 
     // actual set point
@@ -1315,6 +1313,13 @@ void _process_RCPLUSStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     // e.g. Thermostat -> all, telegram: 18 00 FF 06 01 A5 22
     if (EMS_RxTelegram->offset == 6) {
         // to add...
+    }
+
+    // thermostat mode auto/manual, examples:
+    // manual : 10 00 FF 0A 01 A5 02 (CRC=16) #data=1
+    // auto : Thermostat -> all, type 0x01A5 telegram: 10 00 FF 0A 01 A5 03 (CRC=17) #data=1
+    if (EMS_RxTelegram->offset == EMS_OFFSET_RCPLUSStatusMessage_mode) {
+        EMS_Thermostat.mode = _bitRead(0, 1); // bit 1
     }
 }
 
@@ -1480,18 +1485,18 @@ void _process_SM100Energy(_EMS_RxTelegram * EMS_RxTelegram) {
  * Type 0xE3 - HeatPump Monitor 1
  */
 void _process_HPMonitor1(_EMS_RxTelegram * EMS_RxTelegram) {
-    EMS_HeatPump.HPModulation   = _toByte(14); // modulation %
+    EMS_HeatPump.HPModulation = _toByte(14); // modulation %
 
-    EMS_Sys_Status.emsRefreshed = true;        // triggers a send the values back via MQTT
+    EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
 }
 
 /*
  * Type 0xE5 - HeatPump Monitor 2
  */
 void _process_HPMonitor2(_EMS_RxTelegram * EMS_RxTelegram) {
-    EMS_HeatPump.HPSpeed        = _toByte(25); // speed %
-    
-    EMS_Sys_Status.emsRefreshed = true;        // triggers a send the values back via MQTT
+    EMS_HeatPump.HPSpeed = _toByte(25); // speed %
+
+    EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
 }
 
 /*

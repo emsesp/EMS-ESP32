@@ -112,6 +112,7 @@
 #define EMS_OFFSET_RCPLUSStatusMessage_setpoint 3 // setpoint temp
 #define EMS_OFFSET_RCPLUSStatusMessage_curr 0     // current temp
 #define EMS_OFFSET_RCPLUSGet_mode_day 8           // day/night mode
+#define EMS_OFFSET_RCPLUSStatusMessage_mode 0x0A  // thermostat mode (auto, manual)
 
 // Junkers FR10, FW100 (EMS Plus)
 #define EMS_TYPE_JunkersStatusMessage 0x6F         // is an automatic thermostat broadcast giving us temps
