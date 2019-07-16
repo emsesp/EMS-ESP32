@@ -6,8 +6,7 @@ bag = {}
 exprs = [
     (re.compile(r'^#define APP_VERSION\s+"(\S+)"'), 'app_version'),
     (re.compile(r'^#define APP_NAME\s+"(\S+)"'), 'app_name'),
-    (re.compile(r'^#define APP_HOSTNAME\s+"(\S+)"'), 'app_hostname'),
-
+    (re.compile(r'^#define APP_HOSTNAME\s+"(\S+)"'), 'app_hostname')
 ]
 with open('./src/version.h', 'r') as f:
     for l in f.readlines():
