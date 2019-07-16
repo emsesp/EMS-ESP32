@@ -590,7 +590,7 @@ void showInfo() {
             } else {
                 thermoMode = 2; // auto
             }
-        } else if (ems_getThermostatModel() == EMS_MODEL_1010) {
+        } else if (ems_getThermostatModel() == EMS_MODEL_RC300) {
             if (EMS_Thermostat.mode == 0) {
                 thermoMode = 1; // manual
             } else if (EMS_Thermostat.mode == 1) {
@@ -829,7 +829,7 @@ void publishValues(bool force) {
             } else {
                 thermoMode = 2; // auto
             }
-        } else if (ems_getThermostatModel() == EMS_MODEL_1010) {
+        } else if (ems_getThermostatModel() == EMS_MODEL_RC300) {
             if (EMS_Thermostat.mode == 0) {
                 thermoMode = 1; // manual
             } else if (EMS_Thermostat.mode == 1) {
