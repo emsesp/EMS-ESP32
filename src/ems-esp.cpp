@@ -579,13 +579,44 @@ void showInfo() {
                   EMS_Thermostat.month,
                   EMS_Thermostat.year + 2000);
 
+        // thermostat mode (-1=unknown, 0=low, 1=manual, 2=auto, 3=night, 4=day)
+        int thermoMode = -1;
+
+        if (ems_getThermostatModel() == EMS_MODEL_RC20) {
+            if (EMS_Thermostat.mode == 0) {
+                thermoMode = 0; // low
+            } else if (EMS_Thermostat.mode == 1) {
+                thermoMode = 1; // manual
+            } else {
+                thermoMode = 2; // auto
+            }
+        } else if (ems_getThermostatModel() == EMS_MODEL_1010) {
+            if (EMS_Thermostat.mode == 0) {
+                thermoMode = 1; // manual
+            } else if (EMS_Thermostat.mode == 1) {
+                thermoMode = 2; // auto
+            }
+        } else { // default for all thermostats
+            if (EMS_Thermostat.mode == 0) {
+                thermoMode = 3; // night
+            } else if (EMS_Thermostat.mode == 1) {
+                thermoMode = 4; // day
+            } else {
+                thermoMode = 2; // auto
+            }
+        }
+
         // Render Termostat Mode
-        if (EMS_Thermostat.mode == 0) {
+        if (thermoMode == 0) {
             myDebug_P(PSTR("  Mode is set to low"));
-        } else if (EMS_Thermostat.mode == 1) {
+        } else if (thermoMode == 1) {
             myDebug_P(PSTR("  Mode is set to manual"));
-        } else if (EMS_Thermostat.mode == 2) {
+        } else if (thermoMode == 2) {
             myDebug_P(PSTR("  Mode is set to auto"));
+        } else if (thermoMode == 3) {
+            myDebug_P(PSTR("  Mode is set to night"));
+        } else if (thermoMode == 4) {
+            myDebug_P(PSTR("  Mode is set to day"));
         } else {
             myDebug_P(PSTR("  Mode is set to ?"));
         }
@@ -787,23 +818,44 @@ void publishValues(bool force) {
                 rootThermostat[THERMOSTAT_CIRCUITCALCTEMP] = EMS_Thermostat.circuitcalctemp;
         }
 
-        // RC20 has different mode settings
+        // thermostat mode (-1=unknown, 0=low, 1=manual, 2=auto, 3=night, 4=day)
+        int thermoMode = -1;
+
         if (ems_getThermostatModel() == EMS_MODEL_RC20) {
             if (EMS_Thermostat.mode == 0) {
-                rootThermostat[THERMOSTAT_MODE] = "low";
+                thermoMode = 0; // low
             } else if (EMS_Thermostat.mode == 1) {
-                rootThermostat[THERMOSTAT_MODE] = "manual";
+                thermoMode = 1; // manual
             } else {
-                rootThermostat[THERMOSTAT_MODE] = "auto";
+                thermoMode = 2; // auto
             }
-        } else {
+        } else if (ems_getThermostatModel() == EMS_MODEL_1010) {
             if (EMS_Thermostat.mode == 0) {
-                rootThermostat[THERMOSTAT_MODE] = "night";
+                thermoMode = 1; // manual
             } else if (EMS_Thermostat.mode == 1) {
-                rootThermostat[THERMOSTAT_MODE] = "day";
-            } else {
-                rootThermostat[THERMOSTAT_MODE] = "auto";
+                thermoMode = 2; // auto
             }
+        } else { // default for all thermostats
+            if (EMS_Thermostat.mode == 0) {
+                thermoMode = 3; // night
+            } else if (EMS_Thermostat.mode == 1) {
+                thermoMode = 4; // day
+            } else {
+                thermoMode = 2; // auto
+            }
+        }
+
+        // Termostat Mode
+        if (thermoMode == 0) {
+            rootThermostat[THERMOSTAT_MODE] = "low";
+        } else if (thermoMode == 1) {
+            rootThermostat[THERMOSTAT_MODE] = "manual";
+        } else if (thermoMode == 2) {
+            rootThermostat[THERMOSTAT_MODE] = "auto";
+        } else if (thermoMode == 3) {
+            rootThermostat[THERMOSTAT_MODE] = "night";
+        } else if (thermoMode == 4) {
+            rootThermostat[THERMOSTAT_MODE] = "day";
         }
 
         data[0] = '\0'; // reset data for next package
