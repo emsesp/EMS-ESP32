@@ -1300,7 +1300,7 @@ void _process_RCPLUSStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
 
         EMS_Thermostat.day_mode = _bitRead(EMS_OFFSET_RCPLUSGet_mode_day, 1); // get day mode flag
 
-        EMS_Thermostat.mode = _bitRead(EMS_OFFSET_RCPLUSStatusMessage_mode, 1); // bit 1, mode (auto or manual)
+        EMS_Thermostat.mode = _bitRead(EMS_OFFSET_RCPLUSStatusMessage_mode, 0); // bit 1, mode (auto=1 or manual=0)
     }
 
     // actual set point
@@ -1319,7 +1319,7 @@ void _process_RCPLUSStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     // manual : 10 00 FF 0A 01 A5 02 (CRC=16) #data=1
     // auto : Thermostat -> all, type 0x01A5 telegram: 10 00 FF 0A 01 A5 03 (CRC=17) #data=1
     if (EMS_RxTelegram->offset == EMS_OFFSET_RCPLUSStatusMessage_mode) {
-        EMS_Thermostat.mode = _bitRead(0, 1); // bit 1
+        EMS_Thermostat.mode = _bitRead(0, 0); // bit 0
     }
 }
 
