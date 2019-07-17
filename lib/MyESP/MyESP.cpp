@@ -2195,16 +2195,11 @@ void MyESP::begin(const char * app_hostname, const char * app_name, const char *
     }
 
     _eeprom_setup(); // set up EEPROM for storing crash data, if compiled with -DCRASH
-
     _fs_setup();        // SPIFFS setup, do this first to get values
     _wifi_setup();      // WIFI setup
     _ota_setup();       // init OTA
     _webserver_setup(); // init web server
-
-    // print a welcome message
-    myDebug_P(PSTR("\n* %s version %s"), _app_name, _app_version);
     SerialAndTelnet.flush();
-
     _setSystemCheck(false); // reset system check
     _heartbeatCheck(true);  // force heartbeat
 }

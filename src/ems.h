@@ -12,6 +12,47 @@
 
 #include <Arduino.h>
 
+/* debug helper for logic analyzer 
+ * create marker puls on GPIOx
+ *   ° for Rx, we use GPIO14
+ *   ° for Tx, we use GPIO12
+ */
+#define LOGICANALYZER
+#ifdef LOGICANALYZER
+    #define RX_MARK_PIN 14
+    #define TX_MARK_PIN 12
+
+    #define RX_MARK_MASK (1<<RX_MARK_PIN)
+    #define TX_MARK_MASK (1<<TX_MARK_PIN)
+    #define MARKERS_MASK (RX_MARK_PIN|TX_MARK_PIN)
+
+    #define GPIO_H(mask)  (GPIO_REG_WRITE(GPIO_OUT_W1TS_ADDRESS, (mask)))
+    #define GPIO_L(mask)  (GPIO_REG_WRITE(GPIO_OUT_W1TC_ADDRESS, (mask)))
+
+    #define RX_PULSE(pulse) do { GPIO_H(RX_MARK_MASK);  \
+                                 delayMicroseconds(pulse);   \
+                                 GPIO_L(RX_MARK_MASK);  \
+                                } while (0)
+    #define TX_PULSE(pulse) do { GPIO_H(TX_MARK_MASK);  \
+                                 delayMicroseconds(pulse);   \
+                                 GPIO_L(TX_MARK_MASK);  \
+                                } while (0)
+    #define LA_PULSE(pulse)     do { GPIO_H(MARKERS_MASK); \
+                                 delayMicroseconds(pulse);   \
+                                  GPIO_L(MARKERS_MASK); \
+                                } while (0)
+
+    #define INIT_MARKERS(void)  do { pinMode(RX_MARK_PIN, OUTPUT);\
+                                     pinMode(TX_MARK_PIN, OUTPUT);\
+                                     GPIO_L(MARKERS_MASK);        \
+                                } while (0)
+#else
+    #define RX_PULSE(pulse)
+    #define TX_PULSE(pulse)
+    #define LA_PULSE(pulse)
+    #define INIT_MARKERS(void)
+#endif
+
 #define EMS_ID_NONE 0x00 // used as a dest in broadcast messages and empty device IDs
 
 // Fixed EMS IDs
@@ -64,7 +105,9 @@ typedef enum {
 
 typedef enum {
     EMS_TX_STATUS_IDLE, // ready
-    EMS_TX_STATUS_WAIT  // waiting for response from last Tx
+    EMS_TX_STATUS_WAIT, // waiting for response from last Tx
+    EMS_TX_WTD_TIMEOUT, // watchdog timeout during send
+    EMS_TX_BRK_DETECT   // incoming BRK during Tx
 } _EMS_TX_STATUS;
 
 #define EMS_TX_SUCCESS 0x01 // EMS single byte after a Tx Write indicating a success

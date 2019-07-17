@@ -43,6 +43,7 @@ static void emsuart_rx_intr_handler(void * para) {
     // BREAK detection = End of EMS data block
     if (USIS(EMSUART_UART) & ((1 << UIBD))) {
         ETS_UART_INTR_DISABLE(); // disable all interrupts and clear them
+        RX_PULSE(EMSUART_BIT_TIME/2);
 
         USIC(EMSUART_UART) = (1 << UIBD); // INT clear the BREAK detect interrupt
 
@@ -170,6 +171,7 @@ void ICACHE_FLASH_ATTR emsuart_tx_brk() {
     while (((USS(EMSUART_UART) >> USTXC) & 0xFF) != 0)
         ;
 
+    TX_PULSE(EMSUART_BIT_TIME/2);
     tmp = ((1 << UCRXRST) | (1 << UCTXRST)); // bit mask
     USC0(EMSUART_UART) |= (tmp);             // set bits
     USC0(EMSUART_UART) &= ~(tmp);            // clear bits
@@ -199,17 +201,20 @@ void ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
 
     if (EMS_Sys_Status.emsTxMode == 0) { // classic mode logic
         for (uint8_t i = 0; i < len; i++) {
+            TX_PULSE(EMSUART_BIT_TIME/4);
             USF(EMSUART_UART) = buf[i];
         }
         emsuart_tx_brk();                       // send <BRK>
     } else if (EMS_Sys_Status.emsTxMode == 1) { // With extra tx delay for EMS+
         for (uint8_t i = 0; i < len; i++) {
+            TX_PULSE(EMSUART_BIT_TIME/4);
             USF(EMSUART_UART) = buf[i];
             delayMicroseconds(EMSUART_TX_BRK_WAIT); // https://github.com/proddy/EMS-ESP/issues/23#
         }
         emsuart_tx_brk();                       // send <BRK>
     } else if (EMS_Sys_Status.emsTxMode == 3) { // Junkers logic by @philrich
         for (uint8_t i = 0; i < len; i++) {
+            TX_PULSE(EMSUART_BIT_TIME/4);
             USF(EMSUART_UART) = buf[i];
 
             // just to be safe wait for tx fifo empty (needed?)
@@ -237,6 +242,7 @@ void ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
 
         // throw out the telegram...
         for (uint8_t i = 0; i < len;) {
+            TX_PULSE(EMSUART_BIT_TIME/4);
             USF(EMSUART_UART) = buf[i++]; // send each Tx byte
             // wait for echo from busmaster
             while ((((USS(EMSUART_UART) >> USRXC) & 0xFF) < i || (USIS(EMSUART_UART) & (1 << UIBD)))) {
@@ -249,6 +255,7 @@ void ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
         // otherwise we send the final Tx-BRK in the loopback and re=enable Rx-INT.
         // worst case, we'll see an additional Rx-BRK...
         if (!(USIS(EMSUART_UART) & (1 << UIBD))) {
+            TX_PULSE(EMSUART_BIT_TIME/2);
             // no bus collision - send terminating BRK signal
             USC0(EMSUART_UART) |= (1 << UCLBE); // enable loopback
             USC0(EMSUART_UART) |= (1 << UCBRK); // set <BRK>

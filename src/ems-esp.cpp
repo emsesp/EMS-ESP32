@@ -1799,6 +1799,10 @@ void showerCheck() {
 // SETUP
 //
 void setup() {
+    // LA trigger create a small puls to show setup is starting...
+    INIT_MARKERS(0);
+    LA_PULSE(50);
+
     // init our own parameters
     initEMSESP();
 
