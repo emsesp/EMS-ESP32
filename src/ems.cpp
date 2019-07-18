@@ -1887,22 +1887,32 @@ void ems_getThermostatValues() {
     uint8_t type     = EMS_Thermostat.device_id;
     uint8_t hc       = EMS_Thermostat.hc;
 
-    if (model_id == EMS_MODEL_RC20) {
-        ems_doReadCommand(EMS_TYPE_RC20StatusMessage, type); // to get the setpoint temp
+    switch (model_id) {
+    case EMS_MODEL_RC20:
+        ems_doReadCommand(EMS_TYPE_RC20StatusMessage, type); // to get the temps
         ems_doReadCommand(EMS_TYPE_RC20Set, type);           // to get the mode
-    } else if (model_id == EMS_MODEL_RC30) {
-        ems_doReadCommand(EMS_TYPE_RC30StatusMessage, type); // to get the setpoint temp
+        break;
+    case EMS_MODEL_RC30:
+        ems_doReadCommand(EMS_TYPE_RC30StatusMessage, type); // to get the temps
         ems_doReadCommand(EMS_TYPE_RC30Set, type);           // to get the mode
-    } else if ((model_id == EMS_MODEL_RC35) || (model_id == EMS_MODEL_ES73)) {
+        break;
+    case EMS_MODEL_EASY:
+        ems_doReadCommand(EMS_TYPE_EasyStatusMessage, type);
+        break;
+    case EMS_MODEL_RC35:
+    case EMS_MODEL_ES73:
         if (hc == 1) {
-            ems_doReadCommand(EMS_TYPE_RC35StatusMessage_HC1, type); // to get the setpoint temp
+            ems_doReadCommand(EMS_TYPE_RC35StatusMessage_HC1, type); // to get the temps
             ems_doReadCommand(EMS_TYPE_RC35Set_HC1, type);           // to get the mode
         } else if (hc == 2) {
-            ems_doReadCommand(EMS_TYPE_RC35StatusMessage_HC2, type); // to get the setpoint temp
+            ems_doReadCommand(EMS_TYPE_RC35StatusMessage_HC2, type); // to get the temps
             ems_doReadCommand(EMS_TYPE_RC35Set_HC2, type);           // to get the mode
         }
-    } else if ((model_id == EMS_MODEL_EASY)) {
-        ems_doReadCommand(EMS_TYPE_EasyStatusMessage, type);
+        break;
+    case EMS_MODEL_RC300:
+        ems_doReadCommand(EMS_TYPE_RCPLUSStatusMessage, type);
+    default:
+        break;
     }
 
     ems_doReadCommand(EMS_TYPE_RCTime, type); // get Thermostat time
