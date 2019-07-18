@@ -1602,7 +1602,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
 
         // wwActivated
         if (strcmp(topic, TOPIC_BOILER_WWACTIVATED) == 0) {
-            if (message[0] == '1' || strcmp(message, "on") == 0) {
+            if ((message[0] == '1' || strcmp(message, "on") == 0) || (strcmp(message, "auto") == 0)) {
                 ems_setWarmWaterActivated(true);
             } else if (message[0] == '0' || strcmp(message, "off") == 0) {
                 ems_setWarmWaterActivated(false);
