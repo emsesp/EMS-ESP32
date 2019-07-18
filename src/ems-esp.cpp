@@ -754,6 +754,14 @@ void publishValues(bool force) {
     if (EMS_Boiler.wWHeat != EMS_VALUE_INT_NOTSET)
         rootBoiler["wWHeat"] = _bool_to_char(s, EMS_Boiler.wWHeat);
 
+    // **** also add burnStarts, burnWorkMin, heatWorkMin
+    if (abs(EMS_Boiler.burnStarts) != EMS_VALUE_LONG_NOTSET)
+        rootBoiler["burnStarts"] = (double)EMS_Boiler.burnStarts;
+    if (abs(EMS_Boiler.burnWorkMin) != EMS_VALUE_LONG_NOTSET)
+        rootBoiler["burnWorkMin"] = (double)EMS_Boiler.burnWorkMin;
+    if (abs(EMS_Boiler.heatWorkMin) != EMS_VALUE_LONG_NOTSET)
+        rootBoiler["heatWorkMin"] = (double)EMS_Boiler.heatWorkMin;
+
     rootBoiler["ServiceCode"]       = EMS_Boiler.serviceCodeChar;
     rootBoiler["ServiceCodeNumber"] = EMS_Boiler.serviceCode;
 
