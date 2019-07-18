@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.8.1dev] 2019-07-08
+## [1.8.1dev] 2019-07-19
 
 ### Added
 
@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added tx_mode back with options 0,1 and 2 until we've fixed option 2 that works for everyone and doesn't reset ESP
 - More solar module data captured, thanks to @Vuego123
 - -DDEFAULT_NO_SERIAL option added to determine if the Serial port should be enabled on fresh installs
+- Detect thermostat mode for EMS+ RC300/Moduline 3000
 
 ### Fixed
 
@@ -29,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `publish_wait` renamed to `publish_time`, a value of 0 means disabling all MQTT sending
 - How signed shorts are handled such as the current and setpoint temps on RC300s
 - Stopped automatic refresh of web page, which causes crashes/memory loss after a short time
+- Support HA 0.96 climate component changes
 
 ## [1.8.0] 2019-06-15
 
