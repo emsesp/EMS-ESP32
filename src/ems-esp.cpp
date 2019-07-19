@@ -1811,6 +1811,10 @@ void setup() {
     INIT_MARKERS(0);
     LA_PULSE(50);
 
+    // GPIO15 has a pull down, so we must set it to HIGH 
+    pinMode(15, OUTPUT);
+    digitalWrite(15,1);
+
     // init our own parameters
     initEMSESP();
 
