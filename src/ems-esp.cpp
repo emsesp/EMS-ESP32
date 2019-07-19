@@ -93,7 +93,7 @@ typedef struct {
     bool     doingColdShot; // true if we've just sent a jolt of cold water
 } _EMSESP_Shower;
 
-command_t project_cmds[] = {
+static const command_t project_cmds[] PROGMEM = {
 
     {true, "led <on | off>", "toggle status LED on/off"},
     {true, "led_gpio <gpio>", "set the LED pin. Default is the onboard LED 2. For external D1 use 5"},
@@ -133,6 +133,7 @@ command_t project_cmds[] = {
     {false, "boiler comfort <hot | eco | intelligent>", "set boiler warm water comfort setting"}
 
 };
+uint8_t _project_cmds_count = ArraySize(project_cmds);
 
 // store for overall system status
 _EMSESP_Status EMSESP_Status;
@@ -980,13 +981,13 @@ float _readFloatNumber() {
     return atof(numTextPtr);
 }
 
-// used to read the next string from an input buffer as a hex value and convert to an 8 bit int
-uint8_t _readHexNumber() {
+// used to read the next string from an input buffer as a hex value and convert to a 16 bit int
+uint16_t _readHexNumber() {
     char * numTextPtr = strtok(NULL, ", \n");
     if (numTextPtr == nullptr) {
         return 0;
     }
-    return (uint8_t)strtol(numTextPtr, 0, 16);
+    return (uint16_t)strtol(numTextPtr, 0, 16);
 }
 
 // used to read the next string from an input buffer
@@ -1338,6 +1339,40 @@ bool SettingsCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, c
     return ok;
 }
 
+// print settings
+void _showCommands(uint8_t event) {
+    bool      mode = (event == TELNET_EVENT_SHOWSET); // show set commands or normal commands
+    command_t cmd;
+
+    // find the longest key length so we can right-align the text
+    uint8_t max_len = 0;
+    uint8_t i;
+    for (i = 0; i < _project_cmds_count; i++) {
+        memcpy_P(&cmd, &project_cmds[i], sizeof(cmd));
+        if ((strlen(cmd.key) > max_len) && (cmd.set == mode)) {
+            max_len = strlen(cmd.key);
+        }
+    }
+
+    char line[200] = {0};
+    for (i = 0; i < _project_cmds_count; i++) {
+        memcpy_P(&cmd, &project_cmds[i], sizeof(cmd));
+        if (cmd.set == mode) {
+            if (event == TELNET_EVENT_SHOWSET) {
+                strlcpy(line, "  set ", sizeof(line));
+            } else {
+                strlcpy(line, "*  ", sizeof(line));
+            }
+            strlcat(line, cmd.key, sizeof(line));
+            for (uint8_t j = 0; j < ((max_len + 5) - strlen(cmd.key)); j++) { // account for longest string length
+                strlcat(line, " ", sizeof(line));                             // padding
+            }
+            strlcat(line, cmd.description, sizeof(line));
+            myDebug(line); // print the line
+        }
+    }
+}
+
 // call back when a telnet client connects or disconnects
 // we set the logging here
 void TelnetCallback(uint8_t event) {
@@ -1345,6 +1380,8 @@ void TelnetCallback(uint8_t event) {
         ems_setLogging(EMS_SYS_LOGGING_DEFAULT);
     } else if (event == TELNET_EVENT_DISCONNECT) {
         ems_setLogging(EMS_SYS_LOGGING_NONE);
+    } else if ((event == TELNET_EVENT_SHOWCMD) || (event == TELNET_EVENT_SHOWSET)) {
+        _showCommands(event);
     }
 }
 
@@ -1694,7 +1731,9 @@ void WebCallback(char * body) {
 void WIFICallback() {
     // This is where we enable the UART service to scan the incoming serial Tx/Rx bus signals
     // This is done after we have a WiFi signal to avoid any resource conflicts
+    system_uart_swap(); // TODO check
 
+    /*
     if (myESP.getUseSerial()) {
         myDebug_P(PSTR("Warning! EMS bus communication disabled when Serial mode enabled. Use 'set serial off' to start communication."));
     } else {
@@ -1705,6 +1744,7 @@ void WIFICallback() {
             ems_discoverModels();
         }
     }
+    */
 }
 
 // Initialize the boiler settings and shower settings
@@ -1727,6 +1767,9 @@ void initEMSESP() {
     EMSESP_Shower.timerPause    = 0;
     EMSESP_Shower.duration      = 0;
     EMSESP_Shower.doingColdShot = false;
+
+    // call ems.cpp's init function to set all the internal params
+    ems_init();
 }
 
 /*
@@ -1799,35 +1842,40 @@ void showerCheck() {
 // SETUP
 //
 void setup() {
-    // init our own parameters
-    initEMSESP();
+    initEMSESP(); // init parameters
 
-    // call ems.cpp's init function to set all the internal params
-    ems_init();
-
-    systemCheckTimer.attach(SYSTEMCHECK_TIME, do_systemCheck); // check if EMS is reachable
-
-    // set up myESP for Wifi, MQTT, MDNS and Telnet
-    myESP.setTelnet(project_cmds, ArraySize(project_cmds), TelnetCommandCallback, TelnetCallback); // set up Telnet commands
-    myESP.setWIFI(NULL, NULL, WIFICallback); // empty ssid and password as we take this from the config file
-
-    // MQTT host, username and password taken from the SPIFFS settings
-    myESP.setMQTT(
-        NULL, NULL, NULL, MQTT_BASE, MQTT_KEEPALIVE, MQTT_QOS, MQTT_RETAIN, MQTT_WILL_TOPIC, MQTT_WILL_ONLINE_PAYLOAD, MQTT_WILL_OFFLINE_PAYLOAD, MQTTCallback);
-
-    // OTA callback which is called when OTA is starting and stopping
-    myESP.setOTA(OTACallback_pre, OTACallback_post);
-
-    // custom settings in SPIFFS
-    myESP.setSettings(FSCallback, SettingsCallback);
-
-    // web custom settings
-    myESP.setWeb(WebCallback);
-
-    // start up all the services
-    myESP.begin(APP_HOSTNAME, APP_NAME, APP_VERSION);
+    myESP.setTelnet(TelnetCommandCallback, TelnetCallback); // set up Telnet commands
+    myESP.setWIFI(NULL, NULL, WIFICallback);                // empty ssid and password as we take this from the config file
+    myESP.setMQTT(NULL,
+                  NULL,
+                  NULL,
+                  MQTT_BASE,
+                  MQTT_KEEPALIVE,
+                  MQTT_QOS,
+                  MQTT_RETAIN,
+                  MQTT_WILL_TOPIC,
+                  MQTT_WILL_ONLINE_PAYLOAD,
+                  MQTT_WILL_OFFLINE_PAYLOAD,
+                  MQTTCallback);                      // MQTT host, username and password taken from the SPIFFS settings
+    myESP.setOTA(OTACallback_pre, OTACallback_post);  // OTA callback which is called when OTA is starting and stopping
+    myESP.setSettings(FSCallback, SettingsCallback);  // custom settings in SPIFFS
+    myESP.setWeb(WebCallback);                        // web custom settings
+    myESP.begin(APP_HOSTNAME, APP_NAME, APP_VERSION); // start up all the services
 
     // at this point we have all the settings from our internall SPIFFS config file
+    // fire up the UART now
+    if (myESP.getUseSerial()) {
+        myDebug_P(PSTR("Warning! EMS bus communication disabled when Serial mode enabled. Use 'set serial off' to start communication."));
+    } else {
+        Serial.println("Note: Serial output will now be disabled. Please use Telnet.");
+        Serial.flush();
+        emsuart_init();
+        myDebug_P(PSTR("[UART] Opened Rx/Tx connection"));
+        if (!EMSESP_Status.listen_mode) {
+            // go and find the boiler and thermostat types, if not in listen mode
+            ems_discoverModels();
+        }
+    }
 
     // enable regular checks if not in test mode
     if (!EMSESP_Status.listen_mode) {
@@ -1845,6 +1893,8 @@ void setup() {
 
     // check for Dallas sensors
     EMSESP_Status.dallas_sensors = ds18.setup(EMSESP_Status.dallas_gpio, EMSESP_Status.dallas_parasite); // returns #sensors
+
+    systemCheckTimer.attach(SYSTEMCHECK_TIME, do_systemCheck); // check if EMS is reachable
 }
 
 //

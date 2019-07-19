@@ -44,9 +44,6 @@ MyESP::MyESP() {
 
     _web_callback = NULL;
 
-    _helpProjectCmds       = NULL;
-    _helpProjectCmds_count = 0;
-
     _serial         = false;
     _serial_default = false;
 
@@ -250,23 +247,23 @@ void MyESP::_wifiCallback(justwifi_messages_t code, char * parameter) {
     }
 
     if (code == MESSAGE_SCANNING) {
-        myDebug_P(PSTR("[WIFI] Scanning\n"));
+        myDebug_P(PSTR("[WIFI] Scanning"));
     }
 
     if (code == MESSAGE_SCAN_FAILED) {
-        myDebug_P(PSTR("[WIFI] Scan failed\n"));
+        myDebug_P(PSTR("[WIFI] Scan failed"));
     }
 
     if (code == MESSAGE_NO_NETWORKS) {
-        myDebug_P(PSTR("[WIFI] No networks found\n"));
+        myDebug_P(PSTR("[WIFI] No networks found"));
     }
 
     if (code == MESSAGE_NO_KNOWN_NETWORKS) {
-        myDebug_P(PSTR("[WIFI] No known networks found\n"));
+        myDebug_P(PSTR("[WIFI] No known networks found"));
     }
 
     if (code == MESSAGE_FOUND_NETWORK) {
-        myDebug_P(PSTR("[WIFI] %s\n"), parameter);
+        myDebug_P(PSTR("[WIFI] %s"), parameter);
     }
 
     if (code == MESSAGE_CONNECT_WAITING) {
@@ -274,35 +271,11 @@ void MyESP::_wifiCallback(justwifi_messages_t code, char * parameter) {
     }
 
     if (code == MESSAGE_ACCESSPOINT_CREATING) {
-        myDebug_P(PSTR("[WIFI] Creating access point\n"));
+        myDebug_P(PSTR("[WIFI] Creating access point"));
     }
 
     if (code == MESSAGE_ACCESSPOINT_FAILED) {
-        myDebug_P(PSTR("[WIFI] Could not create access point\n"));
-    }
-
-    if (code == MESSAGE_WPS_START) {
-        myDebug_P(PSTR("[WIFI] WPS started\n"));
-    }
-
-    if (code == MESSAGE_WPS_SUCCESS) {
-        myDebug_P(PSTR("[WIFI] WPS succeeded!\n"));
-    }
-
-    if (code == MESSAGE_WPS_ERROR) {
-        myDebug_P(PSTR("[WIFI] WPS failed\n"));
-    }
-
-    if (code == MESSAGE_SMARTCONFIG_START) {
-        myDebug_P(PSTR("[WIFI] Smart Config started\n"));
-    }
-
-    if (code == MESSAGE_SMARTCONFIG_SUCCESS) {
-        myDebug_P(PSTR("[WIFI] Smart Config succeeded!\n"));
-    }
-
-    if (code == MESSAGE_SMARTCONFIG_ERROR) {
-        myDebug_P(PSTR("[WIFI] Smart Config failed\n"));
+        myDebug_P(PSTR("[WIFI] Could not create access point"));
     }
 }
 
@@ -548,9 +521,7 @@ void MyESP::_eeprom_setup() {
 }
 
 // Set callback of sketch function to process project messages
-void MyESP::setTelnet(command_t * cmds, uint8_t count, telnetcommand_callback_f callback_cmd, telnet_callback_f callback) {
-    _helpProjectCmds        = cmds;         // command list
-    _helpProjectCmds_count  = count;        // number of commands
+void MyESP::setTelnet(telnetcommand_callback_f callback_cmd, telnet_callback_f callback) {
     _telnetcommand_callback = callback_cmd; // external function to handle commands
     _telnet_callback        = callback;
 }
@@ -625,27 +596,11 @@ void MyESP::_consoleShowHelp() {
     myDebug_P(PSTR("*  crash <dump | clear | test [n]>"));
 #endif
 
-    // print custom commands if available. Taken from progmem
-    if (_telnetcommand_callback) {
-        // find the longest key length so we can right align it
-        uint8_t max_len = 0;
-        for (uint8_t i = 0; i < _helpProjectCmds_count; i++) {
-            if ((strlen(_helpProjectCmds[i].key) > max_len) && (!_helpProjectCmds[i].set)) {
-                max_len = strlen(_helpProjectCmds[i].key);
-            }
-        }
-
-        for (uint8_t i = 0; i < _helpProjectCmds_count; i++) {
-            if (!_helpProjectCmds[i].set) {
-                SerialAndTelnet.print("*  ");
-                SerialAndTelnet.print(_helpProjectCmds[i].key);
-                for (uint8_t j = 0; j < ((max_len + 5) - strlen(_helpProjectCmds[i].key)); j++) { // account for longest string length
-                    SerialAndTelnet.print(" ");                                                   // padding
-                }
-                SerialAndTelnet.println(_helpProjectCmds[i].description);
-            }
-        }
+    // call callback function
+    if (_telnet_callback) {
+        (_telnet_callback)(TELNET_EVENT_SHOWCMD);
     }
+
     myDebug_P(PSTR("")); // newline
 }
 
@@ -654,31 +609,14 @@ void MyESP::_printSetCommands() {
     myDebug_P(PSTR("")); // newline
     myDebug_P(PSTR("The following set commands are available:"));
     myDebug_P(PSTR("")); // newline
-    myDebug_P(PSTR("*  set erase"));
-    myDebug_P(PSTR("*  set <wifi_ssid | wifi_password> [value]"));
-    myDebug_P(PSTR("*  set <mqtt_host | mqtt_username | mqtt_password> [value]"));
-    myDebug_P(PSTR("*  set serial <on | off>"));
+    myDebug_P(PSTR("  set erase"));
+    myDebug_P(PSTR("  set <wifi_ssid | wifi_password> [value]"));
+    myDebug_P(PSTR("  set <mqtt_host | mqtt_username | mqtt_password> [value]"));
+    myDebug_P(PSTR("  set serial <on | off>"));
 
-    // print custom commands if available. Taken from progmem
-    if (_telnetcommand_callback) {
-        // find the longest key length so we can right align it
-        uint8_t max_len = 0;
-        for (uint8_t i = 0; i < _helpProjectCmds_count; i++) {
-            if ((strlen(_helpProjectCmds[i].key) > max_len) && (_helpProjectCmds[i].set)) {
-                max_len = strlen(_helpProjectCmds[i].key);
-            }
-        }
-
-        for (uint8_t i = 0; i < _helpProjectCmds_count; i++) {
-            if (_helpProjectCmds[i].set) {
-                SerialAndTelnet.print(FPSTR("*  set "));
-                SerialAndTelnet.print(FPSTR(_helpProjectCmds[i].key));
-                for (uint8_t j = 0; j < ((max_len + 5) - strlen(_helpProjectCmds[i].key)); j++) { // account for longest string length
-                    SerialAndTelnet.print(FPSTR(" "));                                            // padding
-                }
-                SerialAndTelnet.println(FPSTR(_helpProjectCmds[i].description));
-            }
-        }
+    // call callback function
+    if (_telnet_callback) {
+        (_telnet_callback)(TELNET_EVENT_SHOWSET);
     }
 
     myDebug_P(PSTR("")); // newline
@@ -938,7 +876,9 @@ void MyESP::_telnetCommand(char * commandLine) {
 #endif
 
     // call callback function
-    (_telnetcommand_callback)(wc, commandLine);
+    if (_telnetcommand_callback) {
+        (_telnetcommand_callback)(wc, commandLine);
+    }
 }
 
 // returns WiFi hostname as a String object
@@ -1118,7 +1058,6 @@ void MyESP::_setSystemCheck(bool stable) {
 
     if (stable) {
         value = 0; // system is ok
-        // myDebug_P(PSTR("[SYSTEM] System OK\n"));
     } else {
         if (!_getRtcmemStatus()) {
             _setSystemStabilityCounter(1);
@@ -1704,6 +1643,8 @@ void MyESP::_fs_setup() {
         _firstInstall = true; // flag as a first install
     }
 
+    myDebug_P(PSTR("[FS] Settings loaded from SPIFFS"));
+
     // _fs_printConfig(); // enable for debugging
 }
 
@@ -2141,7 +2082,7 @@ void MyESP::_webserver_setup() {
 
     webServer.begin();
 
-    myDebug_P(PSTR("[WEB] Web server started."));
+    myDebug_P(PSTR("[WEB] Web server started"));
 }
 
 // bootup sequence
@@ -2182,6 +2123,9 @@ void MyESP::begin(const char * app_hostname, const char * app_name, const char *
 
     _telnet_setup(); // Telnet setup, called first to set Serial
 
+    // print a welcome message
+    myDebug_P(PSTR("\n\n* %s version %s"), _app_name, _app_version);
+
     // set up onboard LED
     pinMode(LED_BUILTIN, OUTPUT);
     digitalWrite(LED_BUILTIN, HIGH);
@@ -2194,19 +2138,16 @@ void MyESP::begin(const char * app_hostname, const char * app_name, const char *
         _firstInstall = true; // flag as an initial install so the config file will be recreated
     }
 
-    _eeprom_setup(); // set up EEPROM for storing crash data, if compiled with -DCRASH
-
+    _eeprom_setup();    // set up EEPROM for storing crash data, if compiled with -DCRASH
     _fs_setup();        // SPIFFS setup, do this first to get values
     _wifi_setup();      // WIFI setup
     _ota_setup();       // init OTA
     _webserver_setup(); // init web server
 
-    // print a welcome message
-    myDebug_P(PSTR("\n* %s version %s"), _app_name, _app_version);
-    SerialAndTelnet.flush();
-
     _setSystemCheck(false); // reset system check
-    _heartbeatCheck(true);  // force heartbeat
+    _heartbeatCheck(true);  // force heartbeat check (not the MQTT one)
+
+    SerialAndTelnet.flush();
 }
 
 /*

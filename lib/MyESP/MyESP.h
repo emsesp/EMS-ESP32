@@ -9,7 +9,7 @@
 #ifndef MyEMS_h
 #define MyEMS_h
 
-#define MYESP_VERSION "1.1.22"
+#define MYESP_VERSION "1.1.23"
 
 #include <ArduinoJson.h>
 #include <ArduinoOTA.h>
@@ -68,6 +68,8 @@ extern struct rst_info resetInfo;
 #define TELNET_MAX_COMMAND_LENGTH 80 // length of a command
 #define TELNET_EVENT_CONNECT 1
 #define TELNET_EVENT_DISCONNECT 0
+#define TELNET_EVENT_SHOWCMD 10
+#define TELNET_EVENT_SHOWSET 20
 
 // ANSI Colors
 #define COLOR_RESET "\x1B[0m"
@@ -189,6 +191,11 @@ constexpr size_t ArraySize(T (&)[N]) {
     return N;
 }
 
+template <typename T>
+void PROGMEM_readAnything(const T * sce, T & dest) {
+    memcpy_P(&dest, sce, sizeof(T));
+}
+
 #define UPTIME_OVERFLOW 4294967295 // Uptime overflow value
 
 // web min and max length of wifi ssid and password
@@ -262,7 +269,7 @@ class MyESP {
     // debug & telnet
     void myDebug(const char * format, ...);
     void myDebug_P(PGM_P format_P, ...);
-    void setTelnet(command_t * cmds, uint8_t count, telnetcommand_callback_f callback_cmd, telnet_callback_f callback);
+    void setTelnet(telnetcommand_callback_f callback_cmd, telnet_callback_f callback);
     bool getUseSerial();
     void setUseSerial(bool toggle);
 
@@ -346,8 +353,6 @@ class MyESP {
     char *                   _telnet_readWord(bool allow_all_chars);
     void                     _telnet_setup();
     char                     _command[TELNET_MAX_COMMAND_LENGTH]; // the input command from either Serial or Telnet
-    command_t *              _helpProjectCmds;                    // Help of commands setted by project
-    uint8_t                  _helpProjectCmds_count;              // # available commands
     void                     _consoleShowHelp();
     telnetcommand_callback_f _telnetcommand_callback; // Callable for projects commands
     telnet_callback_f        _telnet_callback;        // callback for connect/disconnect
