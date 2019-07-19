@@ -504,7 +504,7 @@ char * _smallitoa3(uint16_t value, char * buffer) {
  * Find the pointer to the EMS_Types array for a given type ID
  * or -1 if not found
  */
-int _ems_findType(uint8_t type) {
+int _ems_findType(uint16_t type) {
     uint8_t i         = 0;
     bool    typeFound = false;
     // scan through known ID types
@@ -545,7 +545,7 @@ void _debugPrintTelegram(const char * prefix, _EMS_RxTelegram * EMS_RxTelegram, 
     strlcat(output_str, prefix, sizeof(output_str));
 
     if (!raw) {
-        strlcat(output_str, " telegram: ", sizeof(output_str));
+        strlcat(output_str, "telegram: ", sizeof(output_str));
     }
 
     for (int i = 0; i < (length - 1); i++) {
@@ -627,19 +627,27 @@ void _ems_sendTelegram() {
         // for a READ or VALIDATE
         EMS_TxTelegram.data[1] = EMS_TxTelegram.dest | 0x80; // read has 8th bit set
     }
-    EMS_TxTelegram.data[2] = EMS_TxTelegram.type;   // type
-    EMS_TxTelegram.data[3] = EMS_TxTelegram.offset; // offset
 
-    // see if it has data, add the single data value byte
-    // otherwise leave it alone and assume the data has been pre-populated
-    if (EMS_TxTelegram.length == EMS_MIN_TELEGRAM_LENGTH) {
-        // for reading this is #bytes we want to read (the size)
-        // for writing its the value we want to write
-        EMS_TxTelegram.data[4] = EMS_TxTelegram.dataValue;
+    // complete the rest of the header depending on EMS or EMS+
+    if (EMS_TxTelegram.type > 0xFF) {
+        // EMS 2.0 / emsplus
+        EMS_TxTelegram.data[2] = 0xFF; // fixed value indicating an extended message
+        EMS_TxTelegram.data[3] = EMS_TxTelegram.offset;
+        EMS_TxTelegram.data[4] = EMS_TxTelegram.dataValue;   // for read its #bytes to return, for write it the value to set
+        EMS_TxTelegram.data[5] = EMS_TxTelegram.type >> 8;   // type, 1st byte
+        EMS_TxTelegram.data[6] = EMS_TxTelegram.type & 0xFF; // type, 2nd byte
+        EMS_TxTelegram.length += 2;                          // add 2 bytes to length to compensate the extra FF and byte for the type
+    } else {
+        // EMS 1.0
+        EMS_TxTelegram.data[2] = EMS_TxTelegram.type;   // type
+        EMS_TxTelegram.data[3] = EMS_TxTelegram.offset; // offset
+        if (EMS_TxTelegram.length == EMS_MIN_TELEGRAM_LENGTH) {
+            EMS_TxTelegram.data[4] = EMS_TxTelegram.dataValue; // for read its #bytes to return, for write it the value to set
+        }
     }
+
     // finally calculate CRC and add it to the end
-    uint8_t crc                                    = _crcCalculator(EMS_TxTelegram.data, EMS_TxTelegram.length);
-    EMS_TxTelegram.data[EMS_TxTelegram.length - 1] = crc;
+    EMS_TxTelegram.data[EMS_TxTelegram.length - 1] = _crcCalculator(EMS_TxTelegram.data, EMS_TxTelegram.length);
 
     // print debug info
     if (EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_VERBOSE) {
@@ -843,9 +851,10 @@ void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
  */
 void _printMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     // header info
-    uint8_t  src  = EMS_RxTelegram->src;
-    uint8_t  dest = EMS_RxTelegram->dest;
-    uint16_t type = EMS_RxTelegram->type;
+    uint8_t  src    = EMS_RxTelegram->src;
+    uint8_t  dest   = EMS_RxTelegram->dest;
+    uint16_t type   = EMS_RxTelegram->type;
+    uint8_t  length = EMS_RxTelegram->data_length;
 
     char output_str[200] = {0};
     char buffer[16]      = {0};
@@ -897,15 +906,20 @@ void _printMessage(_EMS_RxTelegram * EMS_RxTelegram) {
         strlcpy(color_s, COLOR_MAGENTA, sizeof(color_s));
     }
 
-    // type
-    strlcat(output_str, ", type 0x", sizeof(output_str));
+    if (length != 0) {
+        // type
+        strlcat(output_str, ", type 0x", sizeof(output_str));
 
-    if (EMS_RxTelegram->emsplus) {
-        strlcat(output_str, _hextoa(type >> 8, buffer), sizeof(output_str));
-        strlcat(output_str, _hextoa(type & 0xFF, buffer), sizeof(output_str));
-    } else {
-        strlcat(output_str, _hextoa(type, buffer), sizeof(output_str));
+        if (EMS_RxTelegram->emsplus) {
+            strlcat(output_str, _hextoa(type >> 8, buffer), sizeof(output_str));
+            strlcat(output_str, _hextoa(type & 0xFF, buffer), sizeof(output_str));
+        } else {
+            strlcat(output_str, _hextoa(type, buffer), sizeof(output_str));
+        }
     }
+
+    strlcat(output_str, ", ", sizeof(output_str));
+
 
     if (EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_THERMOSTAT) {
         // only print ones to/from thermostat if logging is set to thermostat only
@@ -1043,21 +1057,27 @@ void _processType(_EMS_RxTelegram * EMS_RxTelegram) {
         if (((EMS_RxTelegram->src & 0x7F) == (EMS_TxTelegram.dest & 0x7F)) && (EMS_RxTelegram->type == EMS_TxTelegram.type)) {
             // all checks out, read was successful, remove tx from queue and continue to process telegram
             _removeTxQueue();
-            EMS_Sys_Status.emsRxPgks++;                       // increment counter
+            EMS_Sys_Status.emsRxPgks++;                       // increment Rx happy counter
             ems_setEmsRefreshed(EMS_TxTelegram.forceRefresh); // does mqtt need refreshing?
         } else {
             // read not OK, we didn't get back a telegram we expected
-            // leave on queue and try again, but continue to process what we received as it may be important
-            EMS_Sys_Status.txRetryCount++;
-            // if retried too many times, give up and remove it
-            if (EMS_Sys_Status.txRetryCount >= TX_WRITE_TIMEOUT_COUNT) {
-                if (EMS_Sys_Status.emsLogging >= EMS_SYS_LOGGING_BASIC) {
-                    myDebug_P(PSTR("Read failed. Giving up, removing from queue"));
-                }
+
+            // first see if we got a response back from the sender saying its an unknown command
+            if (EMS_RxTelegram->data_length == 0) {
                 _removeTxQueue();
             } else {
-                if (EMS_Sys_Status.emsLogging >= EMS_SYS_LOGGING_BASIC) {
-                    myDebug_P(PSTR("Read failed. Retrying attempt %d/%d..."), EMS_Sys_Status.txRetryCount, TX_WRITE_TIMEOUT_COUNT);
+                // leave on queue and try again, but continue to process what we received as it may be important
+                EMS_Sys_Status.txRetryCount++;
+                // if retried too many times, give up and remove it
+                if (EMS_Sys_Status.txRetryCount >= TX_WRITE_TIMEOUT_COUNT) {
+                    if (EMS_Sys_Status.emsLogging >= EMS_SYS_LOGGING_BASIC) {
+                        myDebug_P(PSTR("Read failed. Giving up, removing from queue"));
+                    }
+                    _removeTxQueue();
+                } else {
+                    if (EMS_Sys_Status.emsLogging >= EMS_SYS_LOGGING_BASIC) {
+                        myDebug_P(PSTR("Read failed. Retrying attempt %d/%d..."), EMS_Sys_Status.txRetryCount, TX_WRITE_TIMEOUT_COUNT);
+                    }
                 }
             }
         }
@@ -1066,7 +1086,7 @@ void _processType(_EMS_RxTelegram * EMS_RxTelegram) {
 
     if (EMS_TxTelegram.action == EMS_TX_TELEGRAM_WRITE) {
         // should not get here, since this is handled earlier receiving a 01 or 04
-        myDebug_P(PSTR("** Error ! Write - should not be here"));
+        myDebug_P(PSTR("** Error! Write - should not be here"));
     }
 
     if (EMS_TxTelegram.action == EMS_TX_TELEGRAM_VALIDATE) {
@@ -2280,17 +2300,17 @@ void ems_doReadCommand(uint16_t type, uint8_t dest, bool forceRefresh) {
             myDebug_P(PSTR("Requesting type %s(0x%02X) from dest 0x%02X"), EMS_Types[i].typeString, type, dest);
         }
     }
-    EMS_TxTelegram.action             = EMS_TX_TELEGRAM_READ;    // read command
-    EMS_TxTelegram.dest               = dest;                    // 8th bit will be set to indicate a read
-    EMS_TxTelegram.offset             = 0;                       // 0 for all data
-    EMS_TxTelegram.length             = EMS_MIN_TELEGRAM_LENGTH; // is always 6 bytes long (including CRC at end)
+    EMS_TxTelegram.action             = EMS_TX_TELEGRAM_READ; // read command
+    EMS_TxTelegram.dest               = dest;                 // 8th bit will be set to indicate a read
+    EMS_TxTelegram.offset             = 0;                    // 0 for all data
     EMS_TxTelegram.type               = type;
+    EMS_TxTelegram.length             = EMS_MIN_TELEGRAM_LENGTH; // EMS 1.0: 6 bytes long (including CRC at end), EMS+ will add 2 bytes. includes CRC
     EMS_TxTelegram.dataValue          = EMS_MAX_TELEGRAM_LENGTH; // for a read this is the # bytes we want back
     EMS_TxTelegram.type_validate      = EMS_ID_NONE;
     EMS_TxTelegram.comparisonValue    = 0;
     EMS_TxTelegram.comparisonOffset   = 0;
     EMS_TxTelegram.comparisonPostRead = EMS_ID_NONE;
-    EMS_TxTelegram.forceRefresh       = forceRefresh; // should we send to MQTT after a successful read?
+    EMS_TxTelegram.forceRefresh       = forceRefresh; // send to MQTT after a successful read
 
     EMS_TxQueue.push(EMS_TxTelegram);
 }
