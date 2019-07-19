@@ -724,9 +724,23 @@ void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
     EMS_RxTelegram.timestamp = millis();
     EMS_RxTelegram.length    = length;
 
-    // check if we just received a single byte
-    // it could well be a Poll request from the boiler for us, which will have a value of 0x8B (0x0B | 0x80)
-    // or either a return code like 0x01 or 0x04 from the last Write command
+    /*
+     * check if we just received a single byte
+     * it could well be a Poll request from the boiler for us, which will have a value of 0x8B (0x0B | 0x80)
+     * or either a return code like 0x01 or 0x04 from the last Write command
+     * Roger Wilco: we have different types here:
+     *  EMS_ID_ME && length == 1 && EMS_TX_STATUS_IDLE && EMS_RX_STATUS_IDLE: polling request
+     *  EMS_ID_ME && length >  1 && EMS_TX_STATUS_IDLE && EMS_RX_STATUS_IDLE: direct telegram
+     *  (EMS_TX_SUCCESS || EMS_TX_ERROR) && EMS_TX_STATUS_WAIT: response, free the EMS bus
+     * 
+     * In addition, it may happen that we where interrupted (f.e. by WIFI activity) and the 
+     * buffer isn't valid anymore, so we must not answer at all...
+     */
+    if (EMS_Sys_Status.emsRxStatus != EMS_RX_STATUS_IDLE) {
+        myDebug_P(PSTR("** We missed the bus - Rx non-idle!"));
+        return;
+    }
+
     if (length == 1) {
         uint8_t value = telegram[0]; // 1st byte of data package
 
@@ -816,6 +830,7 @@ void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
     // Assume at this point we have something that vaguely resembles a telegram in the format [src] [dest] [type] [offset] [data] [crc]
     // validate the CRC, if it's bad ignore it
     if (telegram[length - 1] != _crcCalculator(telegram, length)) {
+        LA_PULSE(200);
         EMS_Sys_Status.emxCrcErr++;
         if (EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_VERBOSE) {
             _debugPrintTelegram("Corrupt telegram: ", &EMS_RxTelegram, COLOR_RED, true);

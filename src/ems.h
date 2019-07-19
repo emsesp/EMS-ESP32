@@ -17,7 +17,6 @@
  *   ° for Rx, we use GPIO14
  *   ° for Tx, we use GPIO12
  */
-#define LOGICANALYZER
 #ifdef LOGICANALYZER
     #define RX_MARK_PIN 14
     #define TX_MARK_PIN 12
@@ -47,10 +46,10 @@
                                      GPIO_L(MARKERS_MASK);        \
                                 } while (0)
 #else
-    #define RX_PULSE(pulse)
-    #define TX_PULSE(pulse)
-    #define LA_PULSE(pulse)
-    #define INIT_MARKERS(void)
+    #define RX_PULSE(pulse) {}
+    #define TX_PULSE(pulse) {}
+    #define LA_PULSE(pulse) {}
+    #define INIT_MARKERS(void)  {}
 #endif
 
 #define EMS_ID_NONE 0x00 // used as a dest in broadcast messages and empty device IDs
@@ -104,6 +103,7 @@ typedef enum {
 } _EMS_RX_STATUS;
 
 typedef enum {
+    EMS_TX_STATUS_OK,  
     EMS_TX_STATUS_IDLE, // ready
     EMS_TX_STATUS_WAIT, // waiting for response from last Tx
     EMS_TX_WTD_TIMEOUT, // watchdog timeout during send

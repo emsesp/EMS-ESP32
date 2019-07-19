@@ -84,10 +84,15 @@
 // can be enabled and disabled via the 'set led' command and pin set by 'set led_gpio'
 #define EMSESP_LED_GPIO LED_BUILTIN
 
+#ifdef LOGICANALYZER
+#define EMSESP_DALLAS_GPIO D1
+#define EMSESP_DALLAS_PARASITE false
+#else
 // set this if using an external temperature sensor like a DS18B20
 // D5 is the default on a bbqkees board
 #define EMSESP_DALLAS_GPIO D5
 #define EMSESP_DALLAS_PARASITE false
+#endif
 
 // By default the EMS bus will be scanned for known devices based on the product ids in ems_devices.h
 // You can override the Thermostat and Boiler types here
