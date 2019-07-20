@@ -251,7 +251,7 @@ _EMS_TX_STATUS ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
         * We set EMS_Sys_Status.emsTxStatus to EMS_TX_BRK_DETECT and return
         * 
         */
-       
+
 // shorter busy poll...
 #define EMSUART_BUSY_WAIT (EMSUART_BIT_TIME / 8)
 #define EMS_TX_TO_COUNT ((20 + 10000 / EMSUART_BIT_TIME) * 8)
