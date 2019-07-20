@@ -2165,9 +2165,9 @@ void MyESP::loop() {
     _systemCheckLoop();
     _heartbeatCheck();
     _bootupSequence();
-    webServer.handleClient(); // web server client requests
+    webServer.handleClient();
     _telnetHandle();
-    _mqttConnect(); // MQTT
+    _mqttConnect();
 
     yield(); // ...and breath
 }

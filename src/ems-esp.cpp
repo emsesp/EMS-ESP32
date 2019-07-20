@@ -755,6 +755,14 @@ void publishValues(bool force) {
     if (EMS_Boiler.wWHeat != EMS_VALUE_INT_NOTSET)
         rootBoiler["wWHeat"] = _bool_to_char(s, EMS_Boiler.wWHeat);
 
+    // **** also add burnStarts, burnWorkMin, heatWorkMin
+    if (abs(EMS_Boiler.burnStarts) != EMS_VALUE_LONG_NOTSET)
+        rootBoiler["burnStarts"] = (double)EMS_Boiler.burnStarts;
+    if (abs(EMS_Boiler.burnWorkMin) != EMS_VALUE_LONG_NOTSET)
+        rootBoiler["burnWorkMin"] = (double)EMS_Boiler.burnWorkMin;
+    if (abs(EMS_Boiler.heatWorkMin) != EMS_VALUE_LONG_NOTSET)
+        rootBoiler["heatWorkMin"] = (double)EMS_Boiler.heatWorkMin;
+
     rootBoiler["ServiceCode"]       = EMS_Boiler.serviceCodeChar;
     rootBoiler["ServiceCodeNumber"] = EMS_Boiler.serviceCode;
 
@@ -1842,25 +1850,41 @@ void showerCheck() {
 // SETUP
 //
 void setup() {
-    initEMSESP(); // init parameters
+    // LA trigger create a small puls to show setup is starting...
+    INIT_MARKERS(0);
+    LA_PULSE(50);
 
+    // GPIO15 has a pull down, so we must set it to HIGH 
+    pinMode(15, OUTPUT);
+    digitalWrite(15,1);
+
+    // init our own parameters
+    initEMSESP();
+
+    // call ems.cpp's init function to set all the internal params
+    ems_init();
+
+    systemCheckTimer.attach(SYSTEMCHECK_TIME, do_systemCheck); // check if EMS is reachable
+
+    // set up myESP for Wifi, MQTT, MDNS and Telnet
     myESP.setTelnet(TelnetCommandCallback, TelnetCallback); // set up Telnet commands
-    myESP.setWIFI(NULL, NULL, WIFICallback);                // empty ssid and password as we take this from the config file
-    myESP.setMQTT(NULL,
-                  NULL,
-                  NULL,
-                  MQTT_BASE,
-                  MQTT_KEEPALIVE,
-                  MQTT_QOS,
-                  MQTT_RETAIN,
-                  MQTT_WILL_TOPIC,
-                  MQTT_WILL_ONLINE_PAYLOAD,
-                  MQTT_WILL_OFFLINE_PAYLOAD,
-                  MQTTCallback);                      // MQTT host, username and password taken from the SPIFFS settings
-    myESP.setOTA(OTACallback_pre, OTACallback_post);  // OTA callback which is called when OTA is starting and stopping
-    myESP.setSettings(FSCallback, SettingsCallback);  // custom settings in SPIFFS
-    myESP.setWeb(WebCallback);                        // web custom settings
-    myESP.begin(APP_HOSTNAME, APP_NAME, APP_VERSION); // start up all the services
+    myESP.setWIFI(NULL, NULL, WIFICallback); // empty ssid and password as we take this from the config file
+
+    // MQTT host, username and password taken from the SPIFFS settings
+    myESP.setMQTT(
+        NULL, NULL, NULL, MQTT_BASE, MQTT_KEEPALIVE, MQTT_QOS, MQTT_RETAIN, MQTT_WILL_TOPIC, MQTT_WILL_ONLINE_PAYLOAD, MQTT_WILL_OFFLINE_PAYLOAD, MQTTCallback);
+
+    // OTA callback which is called when OTA is starting and stopping
+    myESP.setOTA(OTACallback_pre, OTACallback_post);
+
+    // custom settings in SPIFFS
+    myESP.setSettings(FSCallback, SettingsCallback);
+
+    // web custom settings
+    myESP.setWeb(WebCallback);
+
+    // start up all the services
+    myESP.begin(APP_HOSTNAME, APP_NAME, APP_VERSION);
 
     // at this point we have all the settings from our internall SPIFFS config file
     // fire up the UART now
