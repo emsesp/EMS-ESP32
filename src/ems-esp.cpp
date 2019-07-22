@@ -371,6 +371,38 @@ void _renderBoolValue(const char * prefix, uint8_t value) {
     myDebug(buffer);
 }
 
+// figures out the thermostat mode
+// returns 0xFF=unknown, 0=low, 1=manual, 2=auto, 3=night, 4=day
+uint8_t _getThermostatMode() {
+    int thermoMode = EMS_VALUE_INT_NOTSET;
+
+    if (ems_getThermostatModel() == EMS_MODEL_RC20) {
+        if (EMS_Thermostat.mode == 0) {
+            thermoMode = 0; // low
+        } else if (EMS_Thermostat.mode == 1) {
+            thermoMode = 1; // manual
+        } else if (EMS_Thermostat.mode == 2) {
+            thermoMode = 2; // auto
+        }
+    } else if (ems_getThermostatModel() == EMS_MODEL_RC300) {
+        if (EMS_Thermostat.mode == 0) {
+            thermoMode = 1; // manual
+        } else if (EMS_Thermostat.mode == 1) {
+            thermoMode = 2; // auto
+        }
+    } else { // default for all thermostats
+        if (EMS_Thermostat.mode == 0) {
+            thermoMode = 3; // night
+        } else if (EMS_Thermostat.mode == 1) {
+            thermoMode = 4; // day
+        } else if (EMS_Thermostat.mode == 2) {
+            thermoMode = 2; // auto
+        }
+    }
+
+    return thermoMode;
+}
+
 // Show command - display stats on an 's' command
 void showInfo() {
     // General stats from EMS bus
@@ -550,7 +582,7 @@ void showInfo() {
         myDebug_P(PSTR("  Thermostat: %s"), ems_getThermostatDescription(buffer_type));
 
         // Render Current & Setpoint Room Temperature
-        if ((ems_getThermostatModel() == EMS_MODEL_EASY)) {
+        if (ems_getThermostatModel() == EMS_MODEL_EASY) {
             // Temperatures are *100
             _renderShortValue("Set room temperature", "C", EMS_Thermostat.setpoint_roomTemp, 10); // *100
             _renderShortValue("Current room temperature", "C", EMS_Thermostat.curr_roomTemp, 10); // *100
@@ -572,42 +604,20 @@ void showInfo() {
         }
 
         // Render Thermostat Date & Time
-        myDebug_P(PSTR("  Thermostat time is %02d:%02d:%02d %d/%d/%d"),
-                  EMS_Thermostat.hour,
-                  EMS_Thermostat.minute,
-                  EMS_Thermostat.second,
-                  EMS_Thermostat.day,
-                  EMS_Thermostat.month,
-                  EMS_Thermostat.year + 2000);
-
-        // thermostat mode (-1=unknown, 0=low, 1=manual, 2=auto, 3=night, 4=day)
-        int thermoMode = -1;
-
-        if (ems_getThermostatModel() == EMS_MODEL_RC20) {
-            if (EMS_Thermostat.mode == 0) {
-                thermoMode = 0; // low
-            } else if (EMS_Thermostat.mode == 1) {
-                thermoMode = 1; // manual
-            } else {
-                thermoMode = 2; // auto
-            }
-        } else if (ems_getThermostatModel() == EMS_MODEL_RC300) {
-            if (EMS_Thermostat.mode == 0) {
-                thermoMode = 1; // manual
-            } else if (EMS_Thermostat.mode == 1) {
-                thermoMode = 2; // auto
-            }
-        } else { // default for all thermostats
-            if (EMS_Thermostat.mode == 0) {
-                thermoMode = 3; // night
-            } else if (EMS_Thermostat.mode == 1) {
-                thermoMode = 4; // day
-            } else {
-                thermoMode = 2; // auto
-            }
+        // not for EASY
+        if ((ems_getThermostatModel() != EMS_MODEL_EASY)) {
+            myDebug_P(PSTR("  Thermostat time is %02d:%02d:%02d %d/%d/%d"),
+                      EMS_Thermostat.hour,
+                      EMS_Thermostat.minute,
+                      EMS_Thermostat.second,
+                      EMS_Thermostat.day,
+                      EMS_Thermostat.month,
+                      EMS_Thermostat.year + 2000);
         }
 
-        // Render Termostat Mode
+        // Render Termostat Mode, if we have a mode
+        uint8_t thermoMode = _getThermostatMode(); // 0xFF=unknown, 0=low, 1=manual, 2=auto, 3=night, 4=day
+
         if (thermoMode == 0) {
             myDebug_P(PSTR("  Mode is set to low"));
         } else if (thermoMode == 1) {
@@ -618,8 +628,6 @@ void showInfo() {
             myDebug_P(PSTR("  Mode is set to night"));
         } else if (thermoMode == 4) {
             myDebug_P(PSTR("  Mode is set to day"));
-        } else {
-            myDebug_P(PSTR("  Mode is set to ?"));
         }
     }
 
@@ -801,12 +809,16 @@ void publishValues(bool force) {
         rootThermostat[THERMOSTAT_HC] = _int_to_char(s, EMSESP_Status.heating_circuit);
 
         // different logic depending on thermostat types
-        if ((ems_getThermostatModel() == EMS_MODEL_EASY) || (ems_getThermostatModel() == EMS_MODEL_FR10) || (ems_getThermostatModel() == EMS_MODEL_FW100)) {
+        if (ems_getThermostatModel() == EMS_MODEL_EASY) {
+            if (EMS_Thermostat.setpoint_roomTemp != EMS_VALUE_SHORT_NOTSET)
+                rootThermostat[THERMOSTAT_SELTEMP] = (double)EMS_Thermostat.setpoint_roomTemp / 100;
+            if (EMS_Thermostat.curr_roomTemp != EMS_VALUE_SHORT_NOTSET)
+                rootThermostat[THERMOSTAT_CURRTEMP] = (double)EMS_Thermostat.curr_roomTemp / 100;
+        } else if ((ems_getThermostatModel() == EMS_MODEL_FR10) || (ems_getThermostatModel() == EMS_MODEL_FW100)) {
             if (EMS_Thermostat.setpoint_roomTemp != EMS_VALUE_SHORT_NOTSET)
                 rootThermostat[THERMOSTAT_SELTEMP] = (double)EMS_Thermostat.setpoint_roomTemp / 10;
             if (EMS_Thermostat.curr_roomTemp != EMS_VALUE_SHORT_NOTSET)
                 rootThermostat[THERMOSTAT_CURRTEMP] = (double)EMS_Thermostat.curr_roomTemp / 10;
-
         } else {
             if (EMS_Thermostat.setpoint_roomTemp != EMS_VALUE_SHORT_NOTSET)
                 rootThermostat[THERMOSTAT_SELTEMP] = (double)EMS_Thermostat.setpoint_roomTemp / 2;
@@ -827,32 +839,7 @@ void publishValues(bool force) {
                 rootThermostat[THERMOSTAT_CIRCUITCALCTEMP] = EMS_Thermostat.circuitcalctemp;
         }
 
-        // thermostat mode (-1=unknown, 0=low, 1=manual, 2=auto, 3=night, 4=day)
-        int thermoMode = -1;
-
-        if (ems_getThermostatModel() == EMS_MODEL_RC20) {
-            if (EMS_Thermostat.mode == 0) {
-                thermoMode = 0; // low
-            } else if (EMS_Thermostat.mode == 1) {
-                thermoMode = 1; // manual
-            } else {
-                thermoMode = 2; // auto
-            }
-        } else if (ems_getThermostatModel() == EMS_MODEL_RC300) {
-            if (EMS_Thermostat.mode == 0) {
-                thermoMode = 1; // manual
-            } else if (EMS_Thermostat.mode == 1) {
-                thermoMode = 2; // auto
-            }
-        } else { // default for all thermostats
-            if (EMS_Thermostat.mode == 0) {
-                thermoMode = 3; // night
-            } else if (EMS_Thermostat.mode == 1) {
-                thermoMode = 4; // day
-            } else {
-                thermoMode = 2; // auto
-            }
-        }
+        uint8_t thermoMode = _getThermostatMode(); // 0xFF=unknown, 0=low, 1=manual, 2=auto, 3=night, 4=day
 
         // Termostat Mode
         if (thermoMode == 0) {
@@ -1854,9 +1841,9 @@ void setup() {
     INIT_MARKERS(0);
     LA_PULSE(50);
 
-    // GPIO15 has a pull down, so we must set it to HIGH 
+    // GPIO15 has a pull down, so we must set it to HIGH
     pinMode(15, OUTPUT);
-    digitalWrite(15,1);
+    digitalWrite(15, 1);
 
     // init our own parameters
     initEMSESP();
@@ -1868,7 +1855,7 @@ void setup() {
 
     // set up myESP for Wifi, MQTT, MDNS and Telnet
     myESP.setTelnet(TelnetCommandCallback, TelnetCallback); // set up Telnet commands
-    myESP.setWIFI(NULL, NULL, WIFICallback); // empty ssid and password as we take this from the config file
+    myESP.setWIFI(NULL, NULL, WIFICallback);                // empty ssid and password as we take this from the config file
 
     // MQTT host, username and password taken from the SPIFFS settings
     myESP.setMQTT(

@@ -220,7 +220,6 @@ const uint32_t EMS_BUS_TIMEOUT        = 15000;   // timeout in ms before recogni
 const uint32_t EMS_POLL_TIMEOUT       = 5000000; // timeout in microseconds before recognizing the ems bus is offline (5 seconds)
 
 // init stats and counters and buffers
-// uses -255 or 255 for values that haven't been set yet (EMS_VALUE_INT_NOTSET and EMS_VALUE_FLOAT_NOTSET)
 void ems_init() {
     // overall status
     EMS_Sys_Status.emsRxPgks        = 0;
@@ -248,8 +247,8 @@ void ems_init() {
     EMS_Thermostat.day               = 0;
     EMS_Thermostat.month             = 0;
     EMS_Thermostat.year              = 0;
-    EMS_Thermostat.mode              = 255; // dummy value
-    EMS_Thermostat.day_mode          = 255; // dummy value
+    EMS_Thermostat.mode              = EMS_VALUE_INT_NOTSET;
+    EMS_Thermostat.day_mode          = EMS_VALUE_INT_NOTSET;
     EMS_Thermostat.device_id         = EMS_ID_NONE;
     EMS_Thermostat.write_supported   = false;
     EMS_Thermostat.hc                = 1;                    // default heating circuit is 1
