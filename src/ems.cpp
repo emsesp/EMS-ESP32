@@ -226,7 +226,7 @@ void ems_init() {
     EMS_Sys_Status.emsTxPkgs        = 0;
     EMS_Sys_Status.emxCrcErr        = 0;
     EMS_Sys_Status.emsRxStatus      = EMS_RX_STATUS_IDLE;
-    EMS_Sys_Status.emsTxStatus      = EMS_TX_STATUS_IDLE;
+    EMS_Sys_Status.emsTxStatus      = EMS_TX_REV_DETECT;
     EMS_Sys_Status.emsRefreshed     = false;
     EMS_Sys_Status.emsPollEnabled   = false; // start up with Poll disabled
     EMS_Sys_Status.emsBusConnected  = false;
@@ -235,8 +235,9 @@ void ems_init() {
     EMS_Sys_Status.emsTxDisabled    = false;
     EMS_Sys_Status.emsPollFrequency = 0;
     EMS_Sys_Status.txRetryCount     = 0;
-    EMS_Sys_Status.emsReverse       = false;
     EMS_Sys_Status.emsTxMode        = 0;
+    EMS_Sys_Status.emsIDMask        = 0x00;
+    EMS_Sys_Status.emsPollAck[0]    = EMS_ID_ME;
 
     // thermostat
     EMS_Thermostat.setpoint_roomTemp = EMS_VALUE_SHORT_NOTSET;
@@ -361,11 +362,12 @@ void ems_setTxMode(uint8_t mode) {
     // special case for Junkers. If tx_mode is 3 then set the reverse poll flag
     // https://github.com/proddy/EMS-ESP/issues/103#issuecomment-495945850
     if (mode == 3) {
-        EMS_Sys_Status.emsReverse = true;
+        EMS_Sys_Status.emsIDMask = 0x80;
         myDebug_P(PSTR("Forcing emsReverse for Junkers"));
     } else {
-        EMS_Sys_Status.emsReverse = false;
+        EMS_Sys_Status.emsIDMask = 0x00;
     }
+    EMS_Sys_Status.emsPollAck[0] = EMS_ID_ME ^ EMS_Sys_Status.emsIDMask;
 }
 
 uint8_t ems_getTxMode() {
@@ -453,8 +455,17 @@ void ems_setLogging(_EMS_SYS_LOGGING loglevel) {
             myDebug_P(PSTR("System Logging set to Solar Module only"));
         } else if (loglevel == EMS_SYS_LOGGING_RAW) {
             myDebug_P(PSTR("System Logging set to Raw mode"));
+        } else if (loglevel == EMS_SYS_LOGGING_JABBER) {
+            myDebug_P(PSTR("System Logging set to Jabber mode"));
         }
     }
+}
+
+/**
+ * send a poll acknowledge
+ */
+void ems_tx_pollAck() {
+    emsuart_tx_buffer(&EMS_Sys_Status.emsPollAck[0], 1);
 }
 
 /**
@@ -615,20 +626,26 @@ void _ems_sendTelegram() {
         }
 
         EMS_TxTelegram.data[EMS_TxTelegram.length - 1] = _crcCalculator(EMS_TxTelegram.data, EMS_TxTelegram.length); // add the CRC
-        emsuart_tx_buffer(EMS_TxTelegram.data, EMS_TxTelegram.length);                                               // send the telegram to the UART Tx
-        EMS_TxQueue.shift();                                                                                         // and remove from queue
+        _EMS_TX_STATUS _txStatus = emsuart_tx_buffer(EMS_TxTelegram.data, EMS_TxTelegram.length);                       // send the telegram to the UART Tx
+        if (EMS_TX_BRK_DETECT == _txStatus || EMS_TX_WTD_TIMEOUT == _txStatus) {
+            // Tx Error!
+            myDebug_P(PSTR("** error sending buffer: %s"),_txStatus == EMS_TX_BRK_DETECT ?
+                            "BRK" : "WDTO");
+            // EMS_Sys_Status.emsTxStatus = EMS_TX_STATUS_IDLE;
+        }
+        EMS_TxQueue.shift();                                                                                     // and remove from queue
         return;
     }
 
     // create the header
-    EMS_TxTelegram.data[0] = (EMS_Sys_Status.emsReverse) ? EMS_ID_ME | 0x80 : EMS_ID_ME; // src
+    EMS_TxTelegram.data[0] = EMS_ID_ME ^ EMS_Sys_Status.emsIDMask; // src
 
     // dest
     if (EMS_TxTelegram.action == EMS_TX_TELEGRAM_WRITE) {
         EMS_TxTelegram.data[1] = EMS_TxTelegram.dest;
     } else {
         // for a READ or VALIDATE
-        EMS_TxTelegram.data[1] = EMS_TxTelegram.dest | 0x80; // read has 8th bit set
+        EMS_TxTelegram.data[1] = (EMS_TxTelegram.dest ^ 0x80 ^ EMS_Sys_Status.emsIDMask); // read has 8th bit set
     }
 
     // complete the rest of the header depending on EMS or EMS+
@@ -671,9 +688,17 @@ void _ems_sendTelegram() {
     }
 
     // send the telegram to the UART Tx
-    emsuart_tx_buffer(EMS_TxTelegram.data, EMS_TxTelegram.length);
+    _EMS_TX_STATUS _txStatus = emsuart_tx_buffer(EMS_TxTelegram.data, EMS_TxTelegram.length);                       // send the telegram to the UART Tx
+        if (EMS_TX_STATUS_OK == _txStatus || EMS_TX_STATUS_IDLE == _txStatus)
+        EMS_Sys_Status.emsTxStatus = EMS_TX_STATUS_WAIT;
+    else {
+        // Tx Error!
+             // Tx Error!
+        myDebug_P(PSTR("** error sending buffer: %s"),_txStatus == EMS_TX_BRK_DETECT ?
+                            "BRK" : "WDTO");
+        EMS_Sys_Status.emsTxStatus = EMS_TX_STATUS_IDLE;
+    }
 
-    EMS_Sys_Status.emsTxStatus = EMS_TX_STATUS_WAIT;
 }
 
 
@@ -721,6 +746,57 @@ void _createValidate() {
 }
 
 /**
+ * dump a UART Tx or Rx buffer to console...
+ */
+void ems_dumpBuffer(const char *prefix, uint8_t *telegram, uint8_t length) {
+    uint32_t timestamp = millis();
+    static char output_str[200] = {0};
+    static char buffer[16]      = {0};
+
+    if (EMS_Sys_Status.emsLogging != EMS_SYS_LOGGING_JABBER)
+        return;
+
+    // we only care about known devices
+    if (length) {
+        uint8_t dev = telegram[0] & 0x7F;
+        if (!((dev == 0x04)||(dev == 0x08)||(dev == 0x09)||(dev == 0x0a)
+            ||(dev == 0x01)||(dev == 0x0b)||(dev == 0x10)))
+            return;
+    }
+
+    strlcpy(output_str, "(", sizeof(output_str));
+    strlcat(output_str, COLOR_CYAN, sizeof(output_str));
+    strlcat(output_str, _smallitoa((uint8_t)((timestamp / 3600000) % 24), buffer), sizeof(output_str));
+    strlcat(output_str, ":", sizeof(output_str));
+    strlcat(output_str, _smallitoa((uint8_t)((timestamp / 60000) % 60), buffer), sizeof(output_str));
+    strlcat(output_str, ":", sizeof(output_str));
+    strlcat(output_str, _smallitoa((uint8_t)((timestamp / 1000) % 60), buffer), sizeof(output_str));
+    strlcat(output_str, ".", sizeof(output_str));
+    strlcat(output_str, _smallitoa3(timestamp % 1000, buffer), sizeof(output_str));
+    strlcat(output_str, COLOR_RESET, sizeof(output_str));
+    strlcat(output_str, ") ", sizeof(output_str));
+
+    strlcat(output_str, COLOR_YELLOW, sizeof(output_str));
+    strlcat(output_str, prefix, sizeof(output_str));
+
+    // show some EMS_Sys_Status entries
+    strlcat(output_str, _hextoa(EMS_Sys_Status.emsRxStatus, buffer), sizeof(output_str));
+    strlcat(output_str, " ", sizeof(output_str));
+    strlcat(output_str, _hextoa(EMS_Sys_Status.emsTxStatus, buffer), sizeof(output_str));
+    strlcat(output_str, ": ", sizeof(output_str));
+
+
+    // print whole buffer, don't interpret any data
+    for (int i = 0; i < (length); i++) {
+        strlcat(output_str, _hextoa(telegram[i], buffer), sizeof(output_str));
+        strlcat(output_str, " ", sizeof(output_str));
+    }
+
+    strlcat(output_str, COLOR_RESET, sizeof(output_str));
+
+    myDebug(output_str);
+}
+/**
  * Entry point triggered by an interrupt in emsuart.cpp
  * length is the number of all the telegram bytes up to and including the CRC at the end
  * Read commands are asynchronous as they're handled by the interrupt
@@ -729,16 +805,28 @@ void _createValidate() {
 void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
     static uint32_t _last_emsPollFrequency = 0;
 
+    ems_dumpBuffer("** [DEBUG MODE] ems_parseTelegram: ", telegram, length);
     /*
      * check if we just received a single byte
      * it could well be a Poll request from the boiler for us, which will have a value of 0x8B (0x0B | 0x80)
      * or either a return code like 0x01 or 0x04 from the last Write command
-     * Roger Wilco: we have different types here:
-     *  EMS_ID_ME && length == 1 && EMS_TX_STATUS_IDLE && EMS_RX_STATUS_IDLE: polling request
-     *  EMS_ID_ME && length >  1 && EMS_TX_STATUS_IDLE && EMS_RX_STATUS_IDLE: direct telegram
-     *  (EMS_TX_SUCCESS || EMS_TX_ERROR) && EMS_TX_STATUS_WAIT: response, free the EMS bus
-     * 
-     * In addition, it may happen that we where interrupted (f.e. by WIFI activity) and the 
+     */
+
+    /*
+     * Detect the EMS bus type - Buderus or Junkers - and set emsIDMask accordingly.
+     *  we wait for the first valid telegram and look at the SourceID.
+     *  If Bit 7 is set we have a Buderus, otherwise a Junkers
+     */
+    if (EMS_Sys_Status.emsTxStatus == EMS_TX_REV_DETECT) {
+        if ((length >= 5) && (telegram[length - 1] == _crcCalculator(telegram, length))) {
+            EMS_Sys_Status.emsTxStatus = EMS_TX_STATUS_IDLE;
+            EMS_Sys_Status.emsIDMask = telegram[0] & 0x80;
+            EMS_Sys_Status.emsPollAck[0] = EMS_ID_ME ^ EMS_Sys_Status.emsIDMask;
+        } else 
+            return;    // ignore the whole telegram Rx Telegram while in DETECT mode
+    }
+
+    /* It may happen that we where interrupted (f.e. by WIFI activity) and the 
      * buffer isn't valid anymore, so we must not answer at all...
      */
     if (EMS_Sys_Status.emsRxStatus != EMS_RX_STATUS_IDLE) {
@@ -752,8 +840,7 @@ void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
         uint8_t value = telegram[0]; // 1st byte of data package
 
         // check first for a Poll for us
-        // the poll has the MSB set - seems to work on both EMS and Junkers
-        if ((value & 0x7F) == EMS_ID_ME) {
+        if ((value ^ 0x80 ^ EMS_Sys_Status.emsIDMask) == EMS_ID_ME) {
             EMS_Sys_Status.emsTxCapable     = true;
             uint32_t timenow_microsecs      = micros();
             EMS_Sys_Status.emsPollFrequency = (timenow_microsecs - _last_emsPollFrequency);
@@ -766,7 +853,7 @@ void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
             } else {
                 // nothing to send so just send a poll acknowledgement back
                 if (EMS_Sys_Status.emsPollEnabled) {
-                    emsuart_tx_poll();
+                    ems_tx_pollAck();
                 }
             }
         } else if (EMS_Sys_Status.emsTxStatus == EMS_TX_STATUS_WAIT) {
@@ -774,14 +861,14 @@ void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
             if (value == EMS_TX_SUCCESS) {
                 EMS_Sys_Status.emsTxPkgs++;
                 // got a success 01. Send a validate to check the value of the last write
-                emsuart_tx_poll(); // send a poll to free the EMS bus
+                ems_tx_pollAck(); // send a poll to free the EMS bus
                 _createValidate(); // create a validate Tx request (if needed)
             } else if (value == EMS_TX_ERROR) {
                 // last write failed (04), delete it from queue and dont bother to retry
                 if (EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_VERBOSE) {
                     myDebug_P(PSTR("** Write command failed from host"));
                 }
-                emsuart_tx_poll(); // send a poll to free the EMS bus
+                ems_tx_pollAck(); // send a poll to free the EMS bus
                 _removeTxQueue();  // remove from queue
             }
         }
@@ -792,7 +879,7 @@ void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
     // ignore anything that doesn't resemble a proper telegram package
     // minimal is 5 bytes, excluding CRC at the end
     if (length <= 4) {
-        //_debugPrintTelegram("Noisy data:", &EMS_RxTelegram COLOR_RED);
+        _debugPrintTelegram("Noisy data:", &EMS_RxTelegram, COLOR_RED);
         return;
     }
 
@@ -1035,7 +1122,7 @@ void _processType(_EMS_RxTelegram * EMS_RxTelegram) {
 
     // if its an echo of ourselves from the master UBA, ignore. This should never happen mind you
     if (EMS_RxTelegram->src == EMS_ID_ME) {
-        // _debugPrintTelegram("echo:", EMS_RxTelegram, COLOR_WHITE);
+        _debugPrintTelegram("echo:", EMS_RxTelegram, COLOR_WHITE);
         return;
     }
 
@@ -1143,9 +1230,8 @@ void _processType(_EMS_RxTelegram * EMS_RxTelegram) {
         }
     }
 
-    emsuart_tx_poll(); // send Acknowledgement back to free the EMS bus since we have the telegram
+    ems_tx_pollAck(); // send Acknowledgement back to free the EMS bus since we have the telegram
 }
-
 
 /**
  * Check if hot tap water or heating is active
@@ -1684,7 +1770,8 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
 
             // check to see if its a Junkers Heatronic3, which has a different poll'ing logic
             if (EMS_Boiler.product_id == EMS_PRODUCTID_HEATRONICS) {
-                EMS_Sys_Status.emsReverse = true;
+                EMS_Sys_Status.emsIDMask = 0x80;
+                EMS_Sys_Status.emsPollAck[0] = EMS_ID_ME ^ EMS_Sys_Status.emsIDMask;
             }
 
             myESP.fs_saveConfig(); // save config to SPIFFS

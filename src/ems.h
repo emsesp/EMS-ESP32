@@ -29,39 +29,39 @@
 #define GPIO_H(mask) (GPIO_REG_WRITE(GPIO_OUT_W1TS_ADDRESS, (mask)))
 #define GPIO_L(mask) (GPIO_REG_WRITE(GPIO_OUT_W1TC_ADDRESS, (mask)))
 
-#define RX_PULSE(pulse)                                                                                                                                        \
-    do {                                                                                                                                                       \
-        GPIO_H(RX_MARK_MASK);                                                                                                                                  \
-        delayMicroseconds(pulse);                                                                                                                              \
-        GPIO_L(RX_MARK_MASK);                                                                                                                                  \
+#define RX_PULSE(pulse)             \
+    do {                            \
+        GPIO_H(RX_MARK_MASK);       \
+        delayMicroseconds(pulse);   \
+        GPIO_L(RX_MARK_MASK);       \
     } while (0)
-#define TX_PULSE(pulse)                                                                                                                                        \
-    do {                                                                                                                                                       \
-        GPIO_H(TX_MARK_MASK);                                                                                                                                  \
-        delayMicroseconds(pulse);                                                                                                                              \
-        GPIO_L(TX_MARK_MASK);                                                                                                                                  \
+#define TX_PULSE(pulse)             \
+    do {                            \
+        GPIO_H(TX_MARK_MASK);       \
+        delayMicroseconds(pulse);   \
+        GPIO_L(TX_MARK_MASK);       \
     } while (0)
-#define LA_PULSE(pulse)                                                                                                                                        \
-    do {                                                                                                                                                       \
-        GPIO_H(MARKERS_MASK);                                                                                                                                  \
-        delayMicroseconds(pulse);                                                                                                                              \
-        GPIO_L(MARKERS_MASK);                                                                                                                                  \
+#define LA_PULSE(pulse)             \
+    do {                            \
+        GPIO_H(MARKERS_MASK);       \
+        delayMicroseconds(pulse);   \
+        GPIO_L(MARKERS_MASK);       \
     } while (0)
 
-#define INIT_MARKERS(void)                                                                                                                                     \
-    do {                                                                                                                                                       \
-        pinMode(RX_MARK_PIN, OUTPUT);                                                                                                                          \
-        pinMode(TX_MARK_PIN, OUTPUT);                                                                                                                          \
-        GPIO_L(MARKERS_MASK);                                                                                                                                  \
+#define INIT_MARKERS(void)              \
+    do {                                \
+        pinMode(RX_MARK_PIN, OUTPUT);   \
+        pinMode(TX_MARK_PIN, OUTPUT);   \
+        GPIO_L(MARKERS_MASK);           \
     } while (0)
 #else
-#define RX_PULSE(pulse)                                                                                                                                        \
+#define RX_PULSE(pulse)     \
     {}
-#define TX_PULSE(pulse)                                                                                                                                        \
+#define TX_PULSE(pulse)     \
     {}
-#define LA_PULSE(pulse)                                                                                                                                        \
+#define LA_PULSE(pulse)     \
     {}
-#define INIT_MARKERS(void)                                                                                                                                     \
+#define INIT_MARKERS(void)  \
     {}
 #define RX_MARK_MASK
 #define TX_MARK_MASK
@@ -124,7 +124,8 @@ typedef enum {
     EMS_TX_STATUS_IDLE, // ready
     EMS_TX_STATUS_WAIT, // waiting for response from last Tx
     EMS_TX_WTD_TIMEOUT, // watchdog timeout during send
-    EMS_TX_BRK_DETECT   // incoming BRK during Tx
+    EMS_TX_BRK_DETECT,  // incoming BRK during Tx
+    EMS_TX_REV_DETECT    // waiting to detect reverse bit
 } _EMS_TX_STATUS;
 
 #define EMS_TX_SUCCESS 0x01 // EMS single byte after a Tx Write indicating a success
@@ -145,7 +146,8 @@ typedef enum {
     EMS_SYS_LOGGING_BASIC,       // only basic read/write messages
     EMS_SYS_LOGGING_THERMOSTAT,  // only telegrams sent from thermostat
     EMS_SYS_LOGGING_SOLARMODULE, // only telegrams sent from thermostat
-    EMS_SYS_LOGGING_VERBOSE      // everything
+    EMS_SYS_LOGGING_VERBOSE,     // everything
+    EMS_SYS_LOGGING_JABBER       // lots of debug output...
 } _EMS_SYS_LOGGING;
 
 // status/counters since last power on
@@ -164,8 +166,9 @@ typedef struct {
     bool             emsTxCapable;     // able to send via Tx
     bool             emsTxDisabled;    // true to prevent all Tx
     uint8_t          txRetryCount;     // # times the last Tx was re-sent
-    bool             emsReverse;       // if true, poll logic is reversed
     uint8_t          emsTxMode;        // handles Tx logic
+    uint8_t          emsIDMask;        // Buderus: 0x00, Junkers: 0x80
+    uint8_t          emsPollAck[1];    // acknowledge buffer
 } _EMS_Sys_Status;
 
 // The Tx send package
@@ -390,6 +393,7 @@ typedef struct {
 } _EMS_Type;
 
 // function definitions
+extern void ems_dumpBuffer(const char *prefix, uint8_t *telegram, uint8_t length);
 extern void ems_parseTelegram(uint8_t * telegram, uint8_t len);
 void        ems_init();
 void        ems_doReadCommand(uint16_t type, uint8_t dest, bool forceRefresh = false);
