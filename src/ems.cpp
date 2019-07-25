@@ -2747,6 +2747,6 @@ void ems_testTelegram(uint8_t test_num) {
     // go an parse it
     ems_parseTelegram(telegram, length + 1); // include CRC in length
 #else
-    myDebug_P(PSTR("Firmware not compiled with test data set"));
+    myDebug_P(PSTR("Firmware not compiled with test data. Use -DTESTS"));
 #endif
 }

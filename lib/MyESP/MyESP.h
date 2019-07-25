@@ -379,7 +379,6 @@ class MyESP {
     char *        _boottime;
     bool          _suspendOutput;
     bool          _serial;
-    bool          _serial_default;
     bool          _heartbeat;
     unsigned long _getUptime();
     String        _buildTime();

@@ -44,8 +44,7 @@ MyESP::MyESP() {
 
     _web_callback = NULL;
 
-    _serial         = false;
-    _serial_default = false;
+    _serial = false;
 
     _heartbeat                 = false;
     _mqtt_host                 = NULL;
@@ -560,13 +559,6 @@ void MyESP::_telnet_setup() {
     SerialAndTelnet.setDebugOutput(false);
     SerialAndTelnet.begin(TELNET_SERIAL_BAUD); // default baud is 115200
 
-// serial is only on when booting
-#ifdef DEFAULT_NO_SERIAL
-    _serial_default = false;
-#else
-    _serial_default = true;
-#endif
-
     // init command buffer for console commands
     memset(_command, 0, TELNET_MAX_COMMAND_LENGTH);
 }
@@ -790,7 +782,7 @@ bool MyESP::_changeSetting(uint8_t wc, const char * setting, const char * value)
 
 // force the serial on/off
 void MyESP::setUseSerial(bool b) {
-    _serial_default = _serial = b;
+    _serial = b;
     SerialAndTelnet.setSerial(b ? &Serial : NULL);
 }
 
@@ -1549,10 +1541,14 @@ bool MyESP::_fs_loadConfig() {
     value          = json["mqtt_password"];
     _mqtt_password = (value) ? strdup(value) : NULL;
 
-    _serial = json["serial"] | _serial_default;
-
     _heartbeat = (bool)json["heartbeat"]; // defaults to off
 
+// serial is only on when booting
+#ifdef FORCE_SERIAL
+    _serial_ = true;
+#else
+    _serial = json["serial"];
+#endif
 
     // callback for loading custom settings
     // ok is false if there's a problem loading a custom setting (e.g. does not exist)
