@@ -481,7 +481,7 @@ void showInfo() {
             // Temperatures are *100
             _renderShortValue("Set room temperature", "C", EMS_Thermostat.setpoint_roomTemp, 10); // *100
             _renderShortValue("Current room temperature", "C", EMS_Thermostat.curr_roomTemp, 10); // *100
-        } 
+        }
         else if ((ems_getThermostatModel() == EMS_MODEL_FR10) || (ems_getThermostatModel() == EMS_MODEL_FW100)) {
             // Temperatures are *10
             _renderShortValue("Set room temperature", "C", EMS_Thermostat.setpoint_roomTemp, 1); // *10
@@ -495,8 +495,8 @@ void showInfo() {
             if (EMS_Thermostat.curr_roomTemp <= 0) {
                 EMS_Thermostat.curr_roomTemp = EMS_VALUE_INT_NOTSET;
             }
-            _renderIntValue("Setpoint room temperature", "C", EMS_Thermostat.setpoint_roomTemp, 2); // convert to a single byte * 2
-            _renderIntValue("Current room temperature", "C", EMS_Thermostat.curr_roomTemp, 10);     // is *10
+            _renderShortValue("Setpoint room temperature", "C", (EMS_Thermostat.setpoint_roomTemp * 5), 1); // convert to a single byte * 2 (1 decimal but the value is original)
+            _renderShortValue("Current room temperature", "C", EMS_Thermostat.curr_roomTemp, 1);     // is *10
         }
 
         // Render Day/Night/Holiday Temperature
