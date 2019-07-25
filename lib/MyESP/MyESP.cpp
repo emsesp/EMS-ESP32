@@ -1545,7 +1545,7 @@ bool MyESP::_fs_loadConfig() {
 
 // serial is only on when booting
 #ifdef FORCE_SERIAL
-    _serial_ = true;
+    _serial = true;
 #else
     _serial = json["serial"];
 #endif
