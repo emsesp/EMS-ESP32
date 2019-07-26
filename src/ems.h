@@ -17,6 +17,7 @@
  *   ° for Rx, we use GPIO14
  *   ° for Tx, we use GPIO12
  */
+// clang-format off
 #ifdef LOGICANALYZER
 #define RX_MARK_PIN 14
 #define TX_MARK_PIN 12
@@ -67,6 +68,7 @@
 #define GPIO_H(mask)
 #define GPIO_L(mask)
 #endif
+// clang-format on
 
 #define EMS_ID_NONE 0x00 // used as a dest in broadcast messages and empty device IDs
 
@@ -82,7 +84,6 @@
 #define EMS_PRODUCTID_SM10 73   // ProductID for SM10 solar module
 #define EMS_PRODUCTID_SM100 163 // ProductID for SM10 solar module
 #define EMS_PRODUCTID_ISM1 101  // ProductID for SM10 solar module
-
 
 #define EMS_MIN_TELEGRAM_LENGTH 6 // minimal length for a validation telegram, including CRC
 
