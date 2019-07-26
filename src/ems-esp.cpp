@@ -1038,7 +1038,7 @@ void do_systemCheck() {
 // force calls to get data from EMS for the types that aren't sent as broadcasts
 // only if we have a EMS connection
 void do_regularUpdates() {
-    if (ems_getBusConnected() & !ems_getTxDisabled()) {
+    if (ems_getBusConnected() && !ems_getTxDisabled()) {
         myDebugLog("Requesting scheduled EMS device data");
         ems_getThermostatValues();
         ems_getBoilerValues();
