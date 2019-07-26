@@ -412,6 +412,10 @@ void ems_setTxDisabled(bool b) {
     EMS_Sys_Status.emsTxDisabled = b;
 }
 
+bool ems_getTxDisabled() {
+    return (EMS_Sys_Status.emsTxDisabled);
+}
+
 uint32_t ems_getPollFrequency() {
     return EMS_Sys_Status.emsPollFrequency;
 }
@@ -723,13 +727,7 @@ void _createValidate() {
  * When a telegram is processed we forcefully erase it from the stack to prevent overflow
  */
 void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
-    // create the Rx package
-    static _EMS_RxTelegram EMS_RxTelegram;
-    static uint32_t        _last_emsPollFrequency = 0;
-
-    EMS_RxTelegram.telegram  = telegram;
-    EMS_RxTelegram.timestamp = millis();
-    EMS_RxTelegram.length    = length;
+    static uint32_t _last_emsPollFrequency = 0;
 
     /*
      * check if we just received a single byte
@@ -744,7 +742,7 @@ void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
      * buffer isn't valid anymore, so we must not answer at all...
      */
     if (EMS_Sys_Status.emsRxStatus != EMS_RX_STATUS_IDLE) {
-        myDebug_P(PSTR("** We missed the bus - Rx non-idle!"));
+        myDebug_P(PSTR("** We missed the bus - Rx non-idle!")); //TODO tidy up error logging
         return;
     }
 
@@ -796,7 +794,11 @@ void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
         return;
     }
 
-    // fill in the rest of the telegram
+    static _EMS_RxTelegram EMS_RxTelegram; // create the Rx package
+    EMS_RxTelegram.telegram  = telegram;
+    EMS_RxTelegram.timestamp = millis();
+    EMS_RxTelegram.length    = length;
+
     EMS_RxTelegram.src    = telegram[0] & 0x7F; // removing 8th bit as we deal with both reads and writes here
     EMS_RxTelegram.dest   = telegram[1] & 0x7F; // remove 8th bit (don't care if read or write)
     EMS_RxTelegram.offset = telegram[3];        // offset is always 4th byte
@@ -834,6 +836,12 @@ void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
         EMS_RxTelegram.data_length = length - 5; // remove 4 bytes header plus CRC
     }
 
+    // if we are in raw logging mode then just print out the telegram as it is
+    // but still continue to process it
+    if (EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_RAW) {
+        _debugPrintTelegram("", &EMS_RxTelegram, COLOR_WHITE, true);
+    }
+
     // Assume at this point we have something that vaguely resembles a telegram in the format [src] [dest] [type] [offset] [data] [crc]
     // validate the CRC, if it's bad ignore it
     if (telegram[length - 1] != _crcCalculator(telegram, length)) {
@@ -843,12 +851,6 @@ void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
             _debugPrintTelegram("Corrupt telegram: ", &EMS_RxTelegram, COLOR_RED, true);
         }
         return;
-    }
-
-    // if we are in raw logging mode then just print out the telegram as it is
-    // but still continue to process it
-    if (EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_RAW) {
-        _debugPrintTelegram("", &EMS_RxTelegram, COLOR_WHITE, true);
     }
 
     // here we know its a valid incoming telegram of at least 6 bytes
@@ -1260,7 +1262,7 @@ void _process_UBAMonitorSlow(_EMS_RxTelegram * EMS_RxTelegram) {
  */
 void _process_RC10StatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     EMS_Thermostat.setpoint_roomTemp = _toByte(EMS_OFFSET_RC10StatusMessage_setpoint); // is * 2
-    EMS_Thermostat.curr_roomTemp     = _toByte(EMS_OFFSET_RC10StatusMessage_curr);     // is * 10
+    EMS_Thermostat.curr_roomTemp     = _toShort(EMS_OFFSET_RC10StatusMessage_curr);    // is * 10
 
     EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
 }
