@@ -212,7 +212,7 @@ void MyESP::_wifiCallback(justwifi_messages_t code, char * parameter) {
     if (code == MESSAGE_ACCESSPOINT_CREATED) {
         _wifi_connected = true;
 
-        myDebug_P(PSTR("[WIFI] MODE AP --------------------------------------"));
+        myDebug_P(PSTR("[WIFI] MODE AP"));
         myDebug_P(PSTR("[WIFI] SSID  %s"), jw.getAPSSID().c_str());
         myDebug_P(PSTR("[WIFI] IP    %s"), WiFi.softAPIP().toString().c_str());
         myDebug_P(PSTR("[WIFI] MAC   %s"), WiFi.softAPmacAddress().c_str());
@@ -1061,13 +1061,15 @@ void MyESP::_setSystemCheck(bool stable) {
         if (++value > SYSTEM_CHECK_MAX) {
             _systemStable = false;
             value         = 0; // system is unstable
-            myDebug_P(PSTR("[SYSTEM] Warning, system UNSTABLE. Serial mode is enabled."));
+            myDebug_P(PSTR("[SYSTEM] Warning, system UNSTABLE."));
 
+            /*
             // enable Serial again
             if (!_serial) {
                 SerialAndTelnet.setSerial(&Serial);
                 _serial = true;
             }
+            */
         }
     }
 
