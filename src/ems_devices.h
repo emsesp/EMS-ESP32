@@ -66,7 +66,7 @@
 #define EMS_TYPE_RC10Set 0xB0                   // for setting values like temp and mode
 #define EMS_OFFSET_RC10Set_temp 4               // position of thermostat setpoint temperature
 #define EMS_OFFSET_RC10StatusMessage_setpoint 1 // setpoint temp
-#define EMS_OFFSET_RC10StatusMessage_curr 3     // current temp
+#define EMS_OFFSET_RC10StatusMessage_curr 2     // current temp
 
 // RC20 specific
 #define EMS_TYPE_RC20StatusMessage 0x91         // is an automatic thermostat broadcast giving us temps

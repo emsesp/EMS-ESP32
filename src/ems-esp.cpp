@@ -106,7 +106,7 @@ static const command_t project_cmds[] PROGMEM = {
     {true, "shower_alert <on | off>", "stop hot water to send 3 cold burst warnings after max shower time is exceeded"},
     {true, "publish_time <seconds>", "set frequency for publishing data to MQTT (0=off)"},
     {true, "heating_circuit <1 | 2>", "set the main thermostat HC to work with (if using multiple heating circuits)"},
-    {true, "tx_mode <n>", "0=classic ems logic, 1=@kwertie01 ems+ logic, 2=@susisstrolch logic, 3=@philrich logic for Junkers"},
+    {true, "tx_mode <n>", "changes Tx logic. 0=ems 1.0, 1=ems+, 2=generic (experimental!), 3=HT3"},
 
     {false, "info", "show current captured on the devices"},
     {false, "log <n | b | t | r | v>", "set logging mode to none, basic, thermostat only, raw or verbose"},
@@ -141,7 +141,7 @@ _EMSESP_Shower EMSESP_Shower;
 
 // logging messages with fixed strings
 void myDebugLog(const char * s) {
-    if (ems_getLogging() >= EMS_SYS_LOGGING_BASIC) {
+    if (ems_getLogging() != EMS_SYS_LOGGING_NONE) {
         myDebug(s);
     }
 }
@@ -1038,11 +1038,13 @@ void do_systemCheck() {
 // force calls to get data from EMS for the types that aren't sent as broadcasts
 // only if we have a EMS connection
 void do_regularUpdates() {
-    if (ems_getBusConnected()) {
+    if (ems_getBusConnected() & !ems_getTxDisabled()) {
         myDebugLog("Requesting scheduled EMS device data");
         ems_getThermostatValues();
         ems_getBoilerValues();
         ems_getSolarModuleValues();
+    } else {
+        myDebugLog("System is either not connect to the EMS bus or listen_mode is enabled");
     }
 }
 
@@ -1398,7 +1400,6 @@ void TelnetCommandCallback(uint8_t wc, const char * commandLine) {
     }
 
     if (strcmp(first_cmd, "refresh") == 0) {
-        myDebug_P(PSTR("Fetching data from EMS devices..."));
         do_regularUpdates();
         ok = true;
     }
