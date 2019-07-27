@@ -41,12 +41,13 @@
 #define THERMOSTAT_CIRCUITCALCTEMP "thermostat_circuitcalctemp"    // RC35 specific
 
 // MQTT for boiler
-#define TOPIC_BOILER_DATA "boiler_data"                // for sending boiler values to MQTT
-#define TOPIC_BOILER_TAPWATER_ACTIVE "tapwater_active" // if hot tap water is running
-#define TOPIC_BOILER_HEATING_ACTIVE "heating_active"   // if heating is on
-#define TOPIC_BOILER_WWACTIVATED "wwactivated"         // for receiving MQTT message to change water on/off
-#define TOPIC_BOILER_CMD_WWTEMP "boiler_cmd_wwtemp"    // for received boiler wwtemp changes via MQTT
-#define TOPIC_BOILER_CMD_COMFORT "boiler_cmd_comfort"  // for received boiler ww comfort setting via MQTT
+#define TOPIC_BOILER_DATA "boiler_data"                 // for sending boiler values to MQTT
+#define TOPIC_BOILER_TAPWATER_ACTIVE "tapwater_active"  // if hot tap water is running
+#define TOPIC_BOILER_HEATING_ACTIVE "heating_active"    // if heating is on
+#define TOPIC_BOILER_WWACTIVATED "wwactivated"          // for receiving MQTT message to change water on/off
+#define TOPIC_BOILER_CMD_WWTEMP "boiler_cmd_wwtemp"     // for received boiler wwtemp changes via MQTT
+#define TOPIC_BOILER_CMD_COMFORT "boiler_cmd_comfort"   // for received boiler ww comfort setting via MQTT
+#define TOPIC_BOILER_CMD_FLOWTEMP "boiler_cmd_flowtemp" // for received boiler flowtemp value via MQTT
 
 // MQTT for SM10/SM100 Solar Module
 #define TOPIC_SM_DATA "sm_data"            // topic name

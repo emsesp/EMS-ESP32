@@ -257,7 +257,7 @@ void _renderShortValue(const char * prefix, const char * postfix, int16_t value,
 
     strlcat(buffer, _short_to_char(s, value, decimals), sizeof(buffer));
 
-    if (postfix != NULL) {
+    if (postfix != nullptr) {
         strlcat(buffer, " ", sizeof(buffer));
         strlcat(buffer, postfix, sizeof(buffer));
     }
@@ -276,7 +276,7 @@ void _renderUShortValue(const char * prefix, const char * postfix, uint16_t valu
 
     strlcat(buffer, _ushort_to_char(s, value, decimals), sizeof(buffer));
 
-    if (postfix != NULL) {
+    if (postfix != nullptr) {
         strlcat(buffer, " ", sizeof(buffer));
         strlcat(buffer, postfix, sizeof(buffer));
     }
@@ -328,7 +328,7 @@ void _renderIntValue(const char * prefix, const char * postfix, uint8_t value, u
 
     strlcat(buffer, _int_to_char(s, value, div), sizeof(buffer));
 
-    if (postfix != NULL) {
+    if (postfix != nullptr) {
         strlcat(buffer, " ", sizeof(buffer));
         strlcat(buffer, postfix, sizeof(buffer));
     }
@@ -350,7 +350,7 @@ void _renderLongValue(const char * prefix, const char * postfix, uint32_t value)
         strlcat(buffer, ltoa(value, s, 10), sizeof(buffer));
     }
 
-    if (postfix != NULL) {
+    if (postfix != nullptr) {
         strlcat(buffer, " ", sizeof(buffer));
         strlcat(buffer, postfix, sizeof(buffer));
     }
@@ -960,7 +960,7 @@ void set_showerAlert() {
 
 // used to read the next string from an input buffer and convert to an 8 bit int
 uint8_t _readIntNumber() {
-    char * numTextPtr = strtok(NULL, ", \n");
+    char * numTextPtr = strtok(nullptr, ", \n");
     if (numTextPtr == nullptr) {
         return 0;
     }
@@ -969,7 +969,7 @@ uint8_t _readIntNumber() {
 
 // used to read the next string from an input buffer and convert to a double
 float _readFloatNumber() {
-    char * numTextPtr = strtok(NULL, ", \n");
+    char * numTextPtr = strtok(nullptr, ", \n");
     if (numTextPtr == nullptr) {
         return 0;
     }
@@ -978,7 +978,7 @@ float _readFloatNumber() {
 
 // used to read the next string from an input buffer as a hex value and convert to a 16 bit int
 uint16_t _readHexNumber() {
-    char * numTextPtr = strtok(NULL, ", \n");
+    char * numTextPtr = strtok(nullptr, ", \n");
     if (numTextPtr == nullptr) {
         return 0;
     }
@@ -987,7 +987,7 @@ uint16_t _readHexNumber() {
 
 // used to read the next string from an input buffer
 char * _readWord() {
-    char * word = strtok(NULL, ", \n");
+    char * word = strtok(nullptr, ", \n");
     return word;
 }
 
@@ -1563,6 +1563,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
         myESP.mqttSubscribe(TOPIC_BOILER_WWACTIVATED);
         myESP.mqttSubscribe(TOPIC_BOILER_CMD_WWTEMP);
         myESP.mqttSubscribe(TOPIC_BOILER_CMD_COMFORT);
+        myESP.mqttSubscribe(TOPIC_BOILER_CMD_FLOWTEMP);
         myESP.mqttSubscribe(TOPIC_SHOWER_TIMER);
         myESP.mqttSubscribe(TOPIC_SHOWER_ALERT);
         myESP.mqttSubscribe(TOPIC_SHOWER_COLDSHOT);
@@ -1660,6 +1661,13 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
             } else if (strcmp((char *)message, "intelligent") == 0) {
                 ems_setWarmWaterModeComfort(3);
             }
+        }
+
+        // boiler flowtemp setting
+        if (strcmp(topic, TOPIC_BOILER_CMD_FLOWTEMP) == 0) {
+            uint8_t t = atoi((char *)message);
+            myDebug_P(PSTR("MQTT topic: boiler flowtemp value %d"), t);
+            ems_setFlowTemp(t);
         }
 
         // shower timer

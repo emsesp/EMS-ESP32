@@ -183,7 +183,6 @@ const _SolarModule_Type SolarModule_Types[] = {
 
 };
 
-
 // Other EMS devices which are not considered boilers, thermostats or solar modules
 // format is PRODUCT ID, DEVICE ID, DESCRIPTION
 const _Other_Type Other_Types[] = {
