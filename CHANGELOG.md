@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.8.1dev] 2019-07-26
+## [1.8.1dev] 2019-07-27
 
 ### Added
 
@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added tx_mode back with options 0,1 and 2 until we've fixed option 2 that works for everyone and doesn't reset ESP
 - More solar module data captured, thanks to @Vuego123
 - Detect thermostat mode for EMS+ RC300/Moduline 3000
+- MQTT message to set boiler flowtemp (`boiler_cmd_flowtemp`). See [wiki](https://github.com/proddy/EMS-ESP/wiki/MQTT).
 
 ### Fixed
 
@@ -32,6 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Stopped automatic refresh of web page, which causes crashes/memory loss after a short time
 - Support HA 0.96 climate component changes
 - -DDEFAULT_NO_SERIAL changed to -DFORCE_SERIAL
+- some code cleanups, removing NULLS and moving some things fron heap to stack to prevent memory fragmentation
 
 ## [1.8.0] 2019-06-15
 
