@@ -11,7 +11,7 @@
 std::vector<ds_device_t> _devices;
 
 DS18::DS18() {
-    _wire     = NULL;
+    _wire     = nullptr;
     _count    = 0;
     _gpio     = GPIO_NONE;
     _parasite = 0;

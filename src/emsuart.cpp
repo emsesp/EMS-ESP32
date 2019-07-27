@@ -95,7 +95,7 @@ static inline void ICACHE_FLASH_ATTR emsuart_flush_fifos() {
  */
 void ICACHE_FLASH_ATTR emsuart_init() {
     ETS_UART_INTR_DISABLE();
-    ETS_UART_INTR_ATTACH(NULL, NULL);
+    ETS_UART_INTR_ATTACH(nullptr, nullptr);
 
     // allocate and preset EMS Receive buffers
     for (int i = 0; i < EMS_MAXBUFFERS; i++) {
@@ -144,7 +144,7 @@ void ICACHE_FLASH_ATTR emsuart_init() {
     // swap Rx and Tx pins to use GPIO13 (D7) and GPIO15 (D8) respectively
     //system_uart_swap();
 
-    ETS_UART_INTR_ATTACH(emsuart_rx_intr_handler, NULL);
+    ETS_UART_INTR_ATTACH(emsuart_rx_intr_handler, nullptr);
     ETS_UART_INTR_ENABLE();
 }
 

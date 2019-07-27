@@ -117,7 +117,7 @@ const _EMS_Type EMS_Types[] = {
     {EMS_MODEL_UBA, EMS_TYPE_UBAMonitorWWMessage, "UBAMonitorWWMessage", _process_UBAMonitorWWMessage},
     {EMS_MODEL_UBA, EMS_TYPE_UBAParameterWW, "UBAParameterWW", _process_UBAParameterWW},
     {EMS_MODEL_UBA, EMS_TYPE_UBATotalUptimeMessage, "UBATotalUptimeMessage", _process_UBATotalUptimeMessage},
-    {EMS_MODEL_UBA, EMS_TYPE_UBAMaintenanceSettingsMessage, "UBAMaintenanceSettingsMessage", NULL},
+    {EMS_MODEL_UBA, EMS_TYPE_UBAMaintenanceSettingsMessage, "UBAMaintenanceSettingsMessage", nullptr},
     {EMS_MODEL_UBA, EMS_TYPE_UBAParametersMessage, "UBAParametersMessage", _process_UBAParametersMessage},
     {EMS_MODEL_UBA, EMS_TYPE_UBASetPoints, "UBASetPoints", _process_SetPoints},
 
@@ -742,7 +742,7 @@ void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
      * buffer isn't valid anymore, so we must not answer at all...
      */
     if (EMS_Sys_Status.emsRxStatus != EMS_RX_STATUS_IDLE) {
-        myDebug_P(PSTR("** We missed the bus - Rx non-idle!")); //TODO tidy up error logging
+        myDebug_P(PSTR("** [DEBUG MODE] We missed the bus - Rx non-idle!")); //TODO tidy up error logging
         return;
     }
 
@@ -992,7 +992,7 @@ void _ems_processTelegram(_EMS_RxTelegram * EMS_RxTelegram) {
     // if it's a common type (across ems devices) or something specifically for us process it.
     // dest will be EMS_ID_NONE and offset 0x00 for a broadcast message
     if (typeFound) {
-        if ((EMS_Types[i].processType_cb) != (void *)NULL) {
+        if ((EMS_Types[i].processType_cb) != nullptr) {
             // print non-verbose message
             if ((EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_BASIC) || (EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_VERBOSE)) {
                 myDebug_P(PSTR("<--- %s(0x%02X)"), EMS_Types[i].typeString, type);
@@ -2355,7 +2355,7 @@ void ems_sendRawTelegram(char * telegram) {
     }
     // and interate until end
     while (p != 0) {
-        if ((p = strtok(NULL, " ,"))) {
+        if ((p = strtok(nullptr, " ,"))) {
             strlcpy(value, p, sizeof(value));
             uint8_t val                  = (uint8_t)strtol(value, 0, 16);
             EMS_TxTelegram.data[++count] = val;
@@ -2734,7 +2734,7 @@ void ems_testTelegram(uint8_t test_num) {
 
     // and interate until end
     while (p != 0) {
-        if ((p = strtok(NULL, " ,"))) {
+        if ((p = strtok(nullptr, " ,"))) {
             strlcpy(value, p, sizeof(value));
             uint8_t val        = (uint8_t)strtol(value, 0, 16);
             telegram[++length] = val;
