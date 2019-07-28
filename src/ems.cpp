@@ -742,7 +742,9 @@ void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
      * buffer isn't valid anymore, so we must not answer at all...
      */
     if (EMS_Sys_Status.emsRxStatus != EMS_RX_STATUS_IDLE) {
-        myDebug_P(PSTR("** [DEBUG MODE] We missed the bus - Rx non-idle!")); //TODO tidy up error logging
+        if (EMS_Sys_Status.emsLogging > EMS_SYS_LOGGING_NONE) {
+            myDebug_P(PSTR("** [DEBUG MODE] We missed the bus - Rx non-idle!")); //TODO tidy up error logging
+        }
         return;
     }
 
