@@ -6,23 +6,26 @@
 
 #pragma once
 
-#ifndef MyEMS_h
-#define MyEMS_h
+#ifndef MyESP_h
+#define MyESP_h
 
-#define MYESP_VERSION "1.1.16"
+#define MYESP_VERSION "1.1.24"
 
 #include <ArduinoJson.h>
 #include <ArduinoOTA.h>
 #include <AsyncMqttClient.h> // https://github.com/marvinroger/async-mqtt-client and for ESP32 see https://github.com/marvinroger/async-mqtt-client/issues/127
-#include <DNSServer.h>
+#include <ESP8266WebServer.h>
 #include <FS.h>
 #include <JustWifi.h>  // https://github.com/xoseperez/justwifi
 #include <TelnetSpy.h> // modified from https://github.com/yasheena/telnetspy
 
+#ifdef CRASH
 #include <EEPROM_Rotate.h>
+#endif
+
 extern "C" {
+void custom_crash_callback(struct rst_info *, uint32_t, uint32_t);
 #include "user_interface.h"
-void                   custom_crash_callback(struct rst_info *, uint32_t, uint32_t);
 extern struct rst_info resetInfo;
 }
 
@@ -38,10 +41,10 @@ extern struct rst_info resetInfo;
 
 #define MYEMS_CONFIG_FILE "/config.json"
 
-#define LOADAVG_INTERVAL 30000 // Interval between calculating load average (in ms)
+#define LOADAVG_INTERVAL 30000 // Interval between calculating load average (in ms) = 30 seconds
 
 // WIFI
-#define WIFI_CONNECT_TIMEOUT 10000     // Connecting timeout for WIFI in ms
+#define WIFI_CONNECT_TIMEOUT 10000     // Connecting timeout for WIFI in ms (10 seconds)
 #define WIFI_RECONNECT_INTERVAL 600000 // If could not connect to WIFI, retry after this time in ms. 10 minutes
 
 // MQTT
@@ -65,6 +68,8 @@ extern struct rst_info resetInfo;
 #define TELNET_MAX_COMMAND_LENGTH 80 // length of a command
 #define TELNET_EVENT_CONNECT 1
 #define TELNET_EVENT_DISCONNECT 0
+#define TELNET_EVENT_SHOWCMD 10
+#define TELNET_EVENT_SHOWSET 20
 
 // ANSI Colors
 #define COLOR_RESET "\x1B[0m"
@@ -143,12 +148,11 @@ PROGMEM const char * const custom_reset_string[]   = {custom_reset_hardware, cus
 #define RTCMEM_OFFSET 32u
 #define RTCMEM_ADDR (RTCMEM_ADDR_BASE + (RTCMEM_OFFSET * 4u))
 #define RTCMEM_BLOCKS 96u
-#define RTCMEM_MAGIC 0x45535075
+#define RTCMEM_MAGIC 0x45535076
 
 struct RtcmemData {
-    uint32_t magic;  // RTCMEM_MAGIC
-    uint32_t sys;    // system reset reason (1-4)
-    uint32_t energy; // store energy count
+    uint32_t magic; // RTCMEM_MAGIC
+    uint32_t sys;   // system details
 };
 
 static_assert(sizeof(RtcmemData) <= (RTCMEM_BLOCKS * 4u), "RTCMEM struct is too big");
@@ -165,6 +169,13 @@ typedef struct {
 
 typedef enum { MYESP_FSACTION_SET, MYESP_FSACTION_LIST, MYESP_FSACTION_SAVE, MYESP_FSACTION_LOAD } MYESP_FSACTION;
 
+typedef enum {
+    MYESP_BOOTSTATUS_POWERON     = 0,
+    MYESP_BOOTSTATUS_BOOTED      = 1,
+    MYESP_BOOTSTATUS_BOOTING     = 2,
+    MYESP_BOOTSTATUS_RESETNEEDED = 3
+} MYESP_BOOTSTATUS; // boot messages
+
 typedef std::function<void(unsigned int, const char *, const char *)>            mqtt_callback_f;
 typedef std::function<void()>                                                    wifi_callback_f;
 typedef std::function<void()>                                                    ota_callback_f;
@@ -172,6 +183,7 @@ typedef std::function<void(uint8_t, const char *)>                              
 typedef std::function<void(uint8_t)>                                             telnet_callback_f;
 typedef std::function<bool(MYESP_FSACTION, const JsonObject json)>               fs_callback_f;
 typedef std::function<bool(MYESP_FSACTION, uint8_t, const char *, const char *)> fs_settings_callback_f;
+typedef std::function<void(char *)>                                              web_callback_f;
 
 // calculates size of an 2d array at compile time
 template <typename T, size_t N>
@@ -179,13 +191,54 @@ constexpr size_t ArraySize(T (&)[N]) {
     return N;
 }
 
+template <typename T>
+void PROGMEM_readAnything(const T * sce, T & dest) {
+    memcpy_P(&dest, sce, sizeof(T));
+}
+
 #define UPTIME_OVERFLOW 4294967295 // Uptime overflow value
+
+// web min and max length of wifi ssid and password
+#define MAX_SSID_LEN 32
+#define MAX_PWD_LEN 64
+
+#define MYESP_BOOTUP_FLASHDELAY 50 // flash duration for LED at bootup sequence
+#define MYESP_BOOTUP_DELAY 2000    // time before we open the window to reset. This is to stop resetting values when uploading firmware via USB
+
+// max size of char buffer for storing web page
+#define MYESP_MAXCHARBUFFER 800
+
+// Holds the admin webpage in the program memory
+const char webCommonPage_start[] = "<html>"
+                                   "<head>"
+                                   "<style>input {font-size: 1.2em; width: 100%; max-width: 350px; display: block; margin: 5px auto; }"
+                                   "body {background-color: #FFA500;font: normal 18px Verdana, Arial, sans-serif;} </style>";
+
+const char webCommonPage_start_body[] = "</head><body>";
+
+const char webCommonPage_end[] = "</body></html>";
+
+const char webResetPage_form[] = "<form id='form' action='/reset' method='post'>"
+                                 "<input name='newssid' type='text' maxlength='32' placeholder='SSID'>"
+                                 "<input name='newpassword' id='password1' type='password' maxlength='64' placeholder='Password'>"
+                                 "<input type='submit' value='Save and reboot'>"
+                                 "</form>";
+
+const char webResetPage_post[] =
+    "<p>New wifi credentials set. System is now rebooting. Please wait a few seconds and then reconnect via telnet or browser to its new IP given address.</p>";
+
+const char webResetAllPage_form[] = "<form id='resetform' action='/resetall' method='post'>"
+                                    "<input name='confirm' type='text' minlength='3' maxlength='16' placeholder='yes'>"
+                                    "<input type='submit' value='Reset All'>"
+                                    "</form>";
 
 // class definition
 class MyESP {
   public:
     MyESP();
     ~MyESP();
+
+    ESP8266WebServer webServer; // Web server on port 80
 
     // wifi
     void setWIFICallback(void (*callback)());
@@ -216,13 +269,16 @@ class MyESP {
     // debug & telnet
     void myDebug(const char * format, ...);
     void myDebug_P(PGM_P format_P, ...);
-    void setTelnet(command_t * cmds, uint8_t count, telnetcommand_callback_f callback_cmd, telnet_callback_f callback);
+    void setTelnet(telnetcommand_callback_f callback_cmd, telnet_callback_f callback);
     bool getUseSerial();
     void setUseSerial(bool toggle);
 
     // FS
     void setSettings(fs_callback_f callback, fs_settings_callback_f fs_settings_callback);
     bool fs_saveConfig();
+
+    // Web
+    void setWeb(web_callback_f callback_web);
 
     // Crash
     void crashClear();
@@ -231,18 +287,17 @@ class MyESP {
     void crashInfo();
 
     // general
-    void end();
-    void loop();
-    void begin(const char * app_hostname, const char * app_name, const char * app_version);
-    void setBoottime(const char * boottime);
-    void resetESP();
-    int  getWifiQuality();
-    void showSystemStats();
-    bool getHeartbeat();
-
-    // rtcmem and reset reason
-    bool     rtcmemStatus();
+    void     end();
+    void     loop();
+    void     begin(const char * app_hostname, const char * app_name, const char * app_version);
+    void     setBoottime(const char * boottime);
+    void     resetESP();
+    int      getWifiQuality();
+    void     showSystemStats();
+    bool     getHeartbeat();
+    uint32_t getSystemLoadAverage();
     uint32_t getSystemResetReason();
+    uint8_t  getSystemBootStatus();
 
   private:
     // mqtt
@@ -271,7 +326,6 @@ class MyESP {
     bool            _rtcmem_status;
 
     // wifi
-    DNSServer       dnsServer; // For Access Point (AP) support
     void            _wifiCallback(justwifi_messages_t code, char * parameter);
     void            _wifi_setup();
     wifi_callback_f _wifi_callback;
@@ -285,6 +339,7 @@ class MyESP {
     ota_callback_f _ota_post_callback;
     void           _ota_setup();
     void           _OTACallback();
+    bool           _ota_doing_update;
 
     // crash
     void _eeprom_setup();
@@ -298,8 +353,6 @@ class MyESP {
     char *                   _telnet_readWord(bool allow_all_chars);
     void                     _telnet_setup();
     char                     _command[TELNET_MAX_COMMAND_LENGTH]; // the input command from either Serial or Telnet
-    command_t *              _helpProjectCmds;                    // Help of commands setted by project
-    uint8_t                  _helpProjectCmds_count;              // # available commands
     void                     _consoleShowHelp();
     telnetcommand_callback_f _telnetcommand_callback; // Callable for projects commands
     telnet_callback_f        _telnet_callback;        // callback for connect/disconnect
@@ -316,19 +369,25 @@ class MyESP {
     fs_settings_callback_f _fs_settings_callback;
     void                   _printSetCommands();
 
+    // web
+    web_callback_f _web_callback;
+
     // general
     char *        _app_hostname;
     char *        _app_name;
     char *        _app_version;
     char *        _boottime;
     bool          _suspendOutput;
-    bool          _use_serial;
+    bool          _serial;
     bool          _heartbeat;
     unsigned long _getUptime();
     String        _buildTime();
+    bool          _firstInstall;
 
     // reset reason and rtcmem
     bool _rtcmemStatus();
+    bool _getRtcmemStatus();
+
     void _rtcmemInit();
     void _rtcmemSetup();
 
@@ -337,27 +396,33 @@ class MyESP {
     uint8_t _getSystemStabilityCounter();
     void    _setSystemStabilityCounter(uint8_t counter);
 
-    uint8_t _getSystemResetReason();
     void    _setSystemResetReason(uint8_t reason);
+    uint8_t _getCustomResetReason();
+    void    _setCustomResetReason(uint8_t reason);
+    uint8_t _getSystemResetReason();
 
-    unsigned char _getCustomResetReason();
-    void          _setCustomResetReason(unsigned char reason);
+    void _setSystemBootStatus(uint8_t status);
 
     bool _systemStable;
-
-    bool getSystemCheck();
+    void _bootupSequence();
+    bool _getSystemCheck();
     void _systemCheckLoop();
     void _setSystemCheck(bool stable);
 
     // load average (0..100) and heap ram
-    uint32_t getSystemLoadAverage();
     void     _calculateLoad();
     uint32_t _load_average;
-    uint32_t getInitialFreeHeap();
-    uint32_t getUsedHeap();
+    uint32_t _getInitialFreeHeap();
+    uint32_t _getUsedHeap();
 
     // heartbeat
     void _heartbeatCheck(bool force);
+
+    // webserver
+    void _webserver_setup();
+    void _webRootPage();
+    void _webResetPage();
+    void _webResetAllPage();
 };
 
 extern MyESP myESP;

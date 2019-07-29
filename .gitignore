@@ -3,7 +3,9 @@
 .gcc-flags.json
 .vscode
 .env
+.DS_Store
 platformio.ini
 lib/readme.txt
 .travis.yml
 scripts/stackdmp.txt
+*.bin

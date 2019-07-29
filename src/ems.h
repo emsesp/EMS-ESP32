@@ -12,27 +12,90 @@
 
 #include <Arduino.h>
 
+/* debug helper for logic analyzer 
+ * create marker puls on GPIOx
+ *   ° for Rx, we use GPIO14
+ *   ° for Tx, we use GPIO12
+ */
+// clang-format off
+#ifdef LOGICANALYZER
+#define RX_MARK_PIN 14
+#define TX_MARK_PIN 12
+
+#define RX_MARK_MASK (1 << RX_MARK_PIN)
+#define TX_MARK_MASK (1 << TX_MARK_PIN)
+#define MARKERS_MASK (RX_MARK_PIN | TX_MARK_PIN)
+
+#define GPIO_H(mask) (GPIO_REG_WRITE(GPIO_OUT_W1TS_ADDRESS, (mask)))
+#define GPIO_L(mask) (GPIO_REG_WRITE(GPIO_OUT_W1TC_ADDRESS, (mask)))
+
+#define RX_PULSE(pulse)                                                                                                                                        \
+    do {                                                                                                                                                       \
+        GPIO_H(RX_MARK_MASK);                                                                                                                                  \
+        delayMicroseconds(pulse);                                                                                                                              \
+        GPIO_L(RX_MARK_MASK);                                                                                                                                  \
+    } while (0)
+#define TX_PULSE(pulse)                                                                                                                                        \
+    do {                                                                                                                                                       \
+        GPIO_H(TX_MARK_MASK);                                                                                                                                  \
+        delayMicroseconds(pulse);                                                                                                                              \
+        GPIO_L(TX_MARK_MASK);                                                                                                                                  \
+    } while (0)
+#define LA_PULSE(pulse)                                                                                                                                        \
+    do {                                                                                                                                                       \
+        GPIO_H(MARKERS_MASK);                                                                                                                                  \
+        delayMicroseconds(pulse);                                                                                                                              \
+        GPIO_L(MARKERS_MASK);                                                                                                                                  \
+    } while (0)
+
+#define INIT_MARKERS(void)                                                                                                                                     \
+    do {                                                                                                                                                       \
+        pinMode(RX_MARK_PIN, OUTPUT);                                                                                                                          \
+        pinMode(TX_MARK_PIN, OUTPUT);                                                                                                                          \
+        GPIO_L(MARKERS_MASK);                                                                                                                                  \
+    } while (0)
+#else
+#define RX_PULSE(pulse)                                                                                                                                        \
+    {}
+#define TX_PULSE(pulse)                                                                                                                                        \
+    {}
+#define LA_PULSE(pulse)                                                                                                                                        \
+    {}
+#define INIT_MARKERS(void)                                                                                                                                     \
+    {}
+#define RX_MARK_MASK
+#define TX_MARK_MASK
+#define GPIO_H(mask)
+#define GPIO_L(mask)
+#endif
+// clang-format on
+
 #define EMS_ID_NONE 0x00 // used as a dest in broadcast messages and empty device IDs
 
 // Fixed EMS IDs
 #define EMS_ID_ME 0x0B      // our device, hardcoded as the "Service Key"
 #define EMS_ID_BOILER 0x08  // all UBA Boilers have 0x08
-#define EMS_ID_SM 0x30      // Solar Module SM10 and SM100
+#define EMS_ID_SM 0x30      // Solar Module SM10, SM100 and ISM1
 #define EMS_ID_HP 0x38      // HeatPump
 #define EMS_ID_GATEWAY 0x48 // KM200 Web Gateway
 
 #define EMS_PRODUCTID_HEATRONICS 95 // ProductID for a Junkers Heatronic3 device
+
+#define EMS_PRODUCTID_SM10 73   // ProductID for SM10 solar module
+#define EMS_PRODUCTID_SM100 163 // ProductID for SM10 solar module
+#define EMS_PRODUCTID_ISM1 101  // ProductID for SM10 solar module
 
 #define EMS_MIN_TELEGRAM_LENGTH 6 // minimal length for a validation telegram, including CRC
 
 // max length of a telegram, including CRC, for Rx and Tx.
 #define EMS_MAX_TELEGRAM_LENGTH 32
 
-// default values
+// default values for null values
 #define EMS_VALUE_INT_ON 1             // boolean true
 #define EMS_VALUE_INT_OFF 0            // boolean false
-#define EMS_VALUE_INT_NOTSET 0xFF      // for 8-bit ints
-#define EMS_VALUE_SHORT_NOTSET 0x8000  // for 2-byte signed shorts
+#define EMS_VALUE_INT_NOTSET 0xFF      // for 8-bit unsigned ints/bytes
+#define EMS_VALUE_SHORT_NOTSET -32768  // for 2-byte signed shorts
+#define EMS_VALUE_USHORT_NOTSET 0x8000 // for 2-byte unsigned shorts
 #define EMS_VALUE_LONG_NOTSET 0xFFFFFF // for 3-byte longs
 
 #define EMS_THERMOSTAT_WRITE_YES true
@@ -57,8 +120,11 @@ typedef enum {
 } _EMS_RX_STATUS;
 
 typedef enum {
+    EMS_TX_STATUS_OK,
     EMS_TX_STATUS_IDLE, // ready
-    EMS_TX_STATUS_WAIT  // waiting for response from last Tx
+    EMS_TX_STATUS_WAIT, // waiting for response from last Tx
+    EMS_TX_WTD_TIMEOUT, // watchdog timeout during send
+    EMS_TX_BRK_DETECT   // incoming BRK during Tx
 } _EMS_TX_STATUS;
 
 #define EMS_TX_SUCCESS 0x01 // EMS single byte after a Tx Write indicating a success
@@ -74,11 +140,12 @@ typedef enum {
 
 /* EMS logging */
 typedef enum {
-    EMS_SYS_LOGGING_NONE,       // no messages
-    EMS_SYS_LOGGING_RAW,        // raw data mode
-    EMS_SYS_LOGGING_BASIC,      // only basic read/write messages
-    EMS_SYS_LOGGING_THERMOSTAT, // only telegrams sent from thermostat
-    EMS_SYS_LOGGING_VERBOSE     // everything
+    EMS_SYS_LOGGING_NONE,        // no messages
+    EMS_SYS_LOGGING_RAW,         // raw data mode
+    EMS_SYS_LOGGING_BASIC,       // only basic read/write messages
+    EMS_SYS_LOGGING_THERMOSTAT,  // only telegrams sent from thermostat
+    EMS_SYS_LOGGING_SOLARMODULE, // only telegrams sent from thermostat
+    EMS_SYS_LOGGING_VERBOSE      // everything
 } _EMS_SYS_LOGGING;
 
 // status/counters since last power on
@@ -98,6 +165,7 @@ typedef struct {
     bool             emsTxDisabled;    // true to prevent all Tx
     uint8_t          txRetryCount;     // # times the last Tx was re-sent
     bool             emsReverse;       // if true, poll logic is reversed
+    uint8_t          emsTxMode;        // handles Tx logic
 } _EMS_Sys_Status;
 
 // The Tx send package
@@ -148,20 +216,30 @@ const _EMS_TxTelegram EMS_TX_TELEGRAM_NEW = {
     {0x00}                // data
 };
 
+// where defintions are stored
 typedef struct {
-    uint8_t model_id;
     uint8_t product_id;
     char    model_string[50];
 } _Boiler_Type;
 
 typedef struct {
-    uint8_t model_id;
+    uint8_t product_id;
+    uint8_t device_id;
+    char    model_string[50];
+} _SolarModule_Type;
+
+typedef struct {
     uint8_t product_id;
     uint8_t device_id;
     char    model_string[50];
 } _Other_Type;
 
-// Definition for thermostat devices
+typedef struct {
+    uint8_t product_id;
+    uint8_t device_id;
+    char    model_string[50];
+} _HeatPump_Type;
+
 typedef struct {
     uint8_t model_id;
     uint8_t product_id;
@@ -170,6 +248,7 @@ typedef struct {
     bool    write_supported;
 } _Thermostat_Type;
 
+// for consolidating all types
 typedef struct {
     uint8_t product_id;
     uint8_t device_id;
@@ -189,8 +268,8 @@ typedef struct {           // UBAParameterWW
 
     // UBAMonitorFast
     uint8_t  selFlowTemp;        // Selected flow temperature
-    int16_t  curFlowTemp;        // Current flow temperature
-    int16_t  retTemp;            // Return temperature
+    uint16_t curFlowTemp;        // Current flow temperature
+    uint16_t retTemp;            // Return temperature
     uint8_t  burnGas;            // Gas on/off
     uint8_t  fanWork;            // Fan on/off
     uint8_t  ignWork;            // Ignition on/off
@@ -206,14 +285,14 @@ typedef struct {           // UBAParameterWW
 
     // UBAMonitorSlow
     int16_t  extTemp;     // Outside temperature
-    int16_t  boilTemp;    // Boiler temperature
+    uint16_t boilTemp;    // Boiler temperature
     uint8_t  pumpMod;     // Pump modulation
     uint32_t burnStarts;  // # burner starts
     uint32_t burnWorkMin; // Total burner operating time
     uint32_t heatWorkMin; // Total heat operating time
 
     // UBAMonitorWWMessage
-    int16_t  wWCurTmp;  // Warm Water current temperature:
+    uint16_t wWCurTmp;  // Warm Water current temperature
     uint32_t wWStarts;  // Warm Water # starts
     uint32_t wWWorkM;   // Warm Water # minutes
     uint8_t  wWOneTime; // Warm Water one time function on/off
@@ -241,20 +320,38 @@ typedef struct {           // UBAParameterWW
  * Telegram package defintions for Other EMS devices
  */
 
-// SM Solar Module - SM10Monitor/SM100Monitor
 typedef struct {
-    bool    SM;               // set true if there is a Solar Module available
-    bool    HP;               // set true if there is a Heat Pump available
-    int16_t SMcollectorTemp;  // collector temp
-    int16_t SMbottomTemp;     // bottom temp
-    uint8_t SMpumpModulation; // modulation solar pump
-    uint8_t SMpump;           // pump active
-    int16_t SMEnergyLastHour;
-    int16_t SMEnergyToday;
-    int16_t SMEnergyTotal;
     uint8_t HPModulation; // heatpump modulation in %
     uint8_t HPSpeed;      // speed 0-100 %
+    uint8_t device_id;    // the device ID of the Heat Pump (e.g. 0x30)
+    uint8_t model_id;     // Solar Module / Heat Pump model (e.g. 3 > EMS_MODEL_OTHER )
+    uint8_t product_id;
+    char    version[10];
+} _EMS_HeatPump;
+
+typedef struct {
+    uint8_t device_id;
+    uint8_t model_id;
+    uint8_t product_id;
+    char    version[10];
 } _EMS_Other;
+
+// SM Solar Module - SM10/SM100/ISM1
+typedef struct {
+    int16_t  collectorTemp;          // collector temp
+    int16_t  bottomTemp;             // bottom temp
+    uint8_t  pumpModulation;         // modulation solar pump
+    uint8_t  pump;                   // pump active
+    int16_t  setpoint_maxBottomTemp; // setpoint for maximum collector temp
+    uint16_t EnergyLastHour;
+    uint16_t EnergyToday;
+    uint16_t EnergyTotal;
+    uint32_t pumpWorkMin; // Total solar pump operating time
+    uint8_t  device_id;   // the device ID of the Solar Module
+    uint8_t  model_id;    // Solar Module
+    uint8_t  product_id;
+    char     version[10];
+} _EMS_SolarModule;
 
 // Thermostat data
 typedef struct {
@@ -300,39 +397,48 @@ void        ems_sendRawTelegram(char * telegram);
 void        ems_scanDevices();
 void        ems_printAllDevices();
 void        ems_printDevices();
+uint8_t     ems_printDevices_s(char * buffer, uint16_t len);
 void        ems_printTxQueue();
 void        ems_testTelegram(uint8_t test_num);
 void        ems_startupTelegrams();
 bool        ems_checkEMSBUSAlive();
 void        ems_clearDeviceList();
+void        ems_setTxMode(uint8_t mode);
 
-void ems_setThermostatTemp(float temperature, uint8_t temptype = 0);
-void ems_setThermostatMode(uint8_t mode);
-void ems_setThermostatHC(uint8_t hc);
-void ems_setWarmWaterTemp(uint8_t temperature);
-void ems_setFlowTemp(uint8_t temperature);
-void ems_setWarmWaterActivated(bool activated);
-void ems_setWarmTapWaterActivated(bool activated);
-void ems_setPoll(bool b);
-void ems_setLogging(_EMS_SYS_LOGGING loglevel);
-void ems_setEmsRefreshed(bool b);
-void ems_setWarmWaterModeComfort(uint8_t comfort);
-void ems_setModels();
-void ems_setTxDisabled(bool b);
+void    ems_setThermostatTemp(float temperature, uint8_t temptype = 0);
+void    ems_setThermostatMode(uint8_t mode);
+void    ems_setThermostatHC(uint8_t hc);
+void    ems_setWarmWaterTemp(uint8_t temperature);
+void    ems_setFlowTemp(uint8_t temperature);
+void    ems_setWarmWaterActivated(bool activated);
+void    ems_setWarmTapWaterActivated(bool activated);
+void    ems_setPoll(bool b);
+void    ems_setLogging(_EMS_SYS_LOGGING loglevel);
+void    ems_setEmsRefreshed(bool b);
+void    ems_setWarmWaterModeComfort(uint8_t comfort);
+void    ems_setModels();
+void    ems_setTxDisabled(bool b);
+bool    ems_getTxDisabled();
+uint8_t ems_getTxMode();
 
 char *           ems_getThermostatDescription(char * buffer);
 char *           ems_getBoilerDescription(char * buffer);
+char *           ems_getSolarModuleDescription(char * buffer);
+char *           ems_getHeatPumpDescription(char * buffer);
 void             ems_getThermostatValues();
 void             ems_getBoilerValues();
-void             ems_getOtherValues();
+void             ems_getSolarModuleValues();
 bool             ems_getPoll();
 bool             ems_getTxEnabled();
 bool             ems_getThermostatEnabled();
 bool             ems_getBoilerEnabled();
+bool             ems_getSolarModuleEnabled();
+bool             ems_getHeatPumpEnabled();
 bool             ems_getBusConnected();
 _EMS_SYS_LOGGING ems_getLogging();
 bool             ems_getEmsRefreshed();
 uint8_t          ems_getThermostatModel();
+uint8_t          ems_getSolarModuleModel();
 void             ems_discoverModels();
 bool             ems_getTxCapable();
 uint32_t         ems_getPollFrequency();
@@ -342,12 +448,12 @@ uint8_t _crcCalculator(uint8_t * data, uint8_t len);
 void    _processType(_EMS_RxTelegram * EMS_RxTelegram);
 void    _debugPrintPackage(const char * prefix, _EMS_RxTelegram * EMS_RxTelegram, const char * color);
 void    _ems_clearTxData();
-int     _ems_findBoilerModel(uint8_t model_id);
-bool    _ems_setModel(uint8_t model_id);
 void    _removeTxQueue();
 
 // global so can referenced in other classes
-extern _EMS_Sys_Status EMS_Sys_Status;
-extern _EMS_Boiler     EMS_Boiler;
-extern _EMS_Thermostat EMS_Thermostat;
-extern _EMS_Other      EMS_Other;
+extern _EMS_Sys_Status  EMS_Sys_Status;
+extern _EMS_Boiler      EMS_Boiler;
+extern _EMS_Thermostat  EMS_Thermostat;
+extern _EMS_SolarModule EMS_SolarModule;
+extern _EMS_HeatPump    EMS_HeatPump;
+extern _EMS_Other       EMS_Other;
