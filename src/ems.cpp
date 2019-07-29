@@ -235,7 +235,6 @@ void ems_init() {
     EMS_Sys_Status.emsTxDisabled    = false;
     EMS_Sys_Status.emsPollFrequency = 0;
     EMS_Sys_Status.txRetryCount     = 0;
-    EMS_Sys_Status.emsTxMode        = 0;
     EMS_Sys_Status.emsIDMask        = 0x00;
     EMS_Sys_Status.emsPollAck[0]    = EMS_ID_ME;
 
@@ -354,24 +353,6 @@ void ems_setPoll(bool b) {
 
 bool ems_getPoll() {
     return EMS_Sys_Status.emsPollEnabled;
-}
-
-void ems_setTxMode(uint8_t mode) {
-    EMS_Sys_Status.emsTxMode = mode;
-
-    // special case for Junkers. If tx_mode is 3 then set the reverse poll flag
-    // https://github.com/proddy/EMS-ESP/issues/103#issuecomment-495945850
-    if (mode == 3) {
-        EMS_Sys_Status.emsIDMask = 0x80;
-        myDebug_P(PSTR("Forcing emsReverse for Junkers"));
-    } else {
-        EMS_Sys_Status.emsIDMask = 0x00;
-    }
-    EMS_Sys_Status.emsPollAck[0] = EMS_ID_ME ^ EMS_Sys_Status.emsIDMask;
-}
-
-uint8_t ems_getTxMode() {
-    return EMS_Sys_Status.emsTxMode;
 }
 
 bool ems_getEmsRefreshed() {

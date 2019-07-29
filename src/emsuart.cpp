@@ -171,36 +171,6 @@ void ICACHE_FLASH_ATTR emsuart_start() {
     ETS_UART_INTR_ENABLE();
 }
 
-/*
- * Send a BRK signal
- * Which is a 11-bit set of zero's (11 cycles)
- */
-void ICACHE_FLASH_ATTR emsuart_tx_brk() {
-    uint32_t tmp;
-
-    // must make sure Tx FIFO is empty
-    while (((USS(EMSUART_UART) >> USTXC) & 0xFF) != 0)
-        ;
-
-    tmp = ((1 << UCRXRST) | (1 << UCTXRST)); // bit mask
-    USC0(EMSUART_UART) |= (tmp);             // set bits
-    USC0(EMSUART_UART) &= ~(tmp);            // clear bits
-
-    // To create a 11-bit <BRK> we set TXD_BRK bit so the break signal will
-    // automatically be sent when the tx fifo is empty
-    tmp = (1 << UCBRK);
-    GPIO_H(TX_MARK_MASK);
-    USC0(EMSUART_UART) |= (tmp); // set bit
-
-    if (EMS_Sys_Status.emsTxMode <= 1) { // classic mode and ems+ (0, 1)
-        delayMicroseconds(EMSUART_TX_BRK_WAIT);
-    } else if (EMS_Sys_Status.emsTxMode == 3) {                  // junkers mode
-        delayMicroseconds(EMSUART_TX_WAIT_BRK - EMSUART_TX_LAG); // 1144 (11 Bits)
-    }
-
-    USC0(EMSUART_UART) &= ~(tmp); // clear bit
-    GPIO_L(TX_MARK_MASK);
-}
 
 /*
  * Send to Tx, ending with a <BRK>
@@ -210,35 +180,7 @@ _EMS_TX_STATUS ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
     ems_dumpBuffer("emsuart_tx_buffer: ", buf, len);    // validate and transmit the EMS buffer, excluding the BRK
     if (len) {
         LA_PULSE(50);
-        // temp code until we get mode 2 working without resets
-        if (EMS_Sys_Status.emsTxMode == 0) { // classic mode logic
-            for (uint8_t i = 0; i < len; i++) {
-                TX_PULSE(EMSUART_BIT_TIME / 4);
-                USF(EMSUART_UART) = buf[i];
-            }
-            emsuart_tx_brk();                       // send <BRK>
-        } else if (EMS_Sys_Status.emsTxMode == 1) { // With extra tx delay for EMS+
-            for (uint8_t i = 0; i < len; i++) {
-                TX_PULSE(EMSUART_BIT_TIME / 4);
-                USF(EMSUART_UART) = buf[i];
-                delayMicroseconds(EMSUART_TX_BRK_WAIT); // https://github.com/proddy/EMS-ESP/issues/23#
-            }
-            emsuart_tx_brk();                       // send <BRK>
-        } else if (EMS_Sys_Status.emsTxMode == 3) { // Junkers logic by @philrich
-            for (uint8_t i = 0; i < len; i++) {
-                TX_PULSE(EMSUART_BIT_TIME / 4);
-                USF(EMSUART_UART) = buf[i];
-
-                // just to be safe wait for tx fifo empty (needed?)
-                while (((USS(EMSUART_UART) >> USTXC) & 0xff) != 0)
-                    ;
-
-                // wait until bits are sent on wire
-                delayMicroseconds(EMSUART_TX_WAIT_BYTE - EMSUART_TX_LAG + EMSUART_TX_WAIT_GAP);
-            }
-            emsuart_tx_brk(); // send <BRK>
-        } else if (EMS_Sys_Status.emsTxMode == 2) {
-            /* 
+       /* 
         *
         * based on code from https://github.com/proddy/EMS-ESP/issues/103 by @susisstrolch
         * we emit the whole telegram, with Rx interrupt disabled, collecting busmaster response in FIFO.
@@ -321,14 +263,6 @@ _EMS_TX_STATUS ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
             }
             ETS_UART_INTR_ENABLE(); // receive anything from FIFO...
         }
-    }
     return result;
 }
 
-/*
- * Send the Poll (our own ID) to Tx as a single byte and end with a <BRK>
- * *** moved to ems.cpp, renamed to ems_tx_pollAck
-void ICACHE_FLASH_ATTR emsuart_tx_poll() {
-    static uint8_t buf[1] = {EMS_ID_ME ^ EMS_Sys_Status.emsIDMask};
-}
- */

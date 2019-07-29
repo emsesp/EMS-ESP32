@@ -1147,8 +1147,6 @@ bool FSCallback(MYESP_FSACTION action, const JsonObject json) {
         EMSESP_Status.shower_alert = json["shower_alert"];
         EMSESP_Status.publish_time = json["publish_time"] | DEFAULT_PUBLISHTIME;
 
-        ems_setTxMode(json["tx_mode"]);
-
         EMSESP_Status.listen_mode = json["listen_mode"];
         ems_setTxDisabled(EMSESP_Status.listen_mode);
 
@@ -1170,8 +1168,6 @@ bool FSCallback(MYESP_FSACTION action, const JsonObject json) {
         json["shower_alert"]    = EMSESP_Status.shower_alert;
         json["publish_time"]    = EMSESP_Status.publish_time;
         json["heating_circuit"] = EMSESP_Status.heating_circuit;
-        json["tx_mode"]         = ems_getTxMode();
-
         return true;
     }
 
@@ -1300,12 +1296,6 @@ bool SettingsCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, c
                 myDebug_P(PSTR("Error. Usage: set heating_circuit <1 | 2>"));
             }
         }
-
-        // tx delay/ tx mode
-        if (((strcmp(setting, "tx_mode") == 0) || (strcmp(setting, "tx_delay") == 0)) && (wc == 2)) {
-            ems_setTxMode(atoi(value));
-            ok = true;
-        }
     }
 
     if (action == MYESP_FSACTION_LIST) {
@@ -1332,7 +1322,6 @@ bool SettingsCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, c
         myDebug_P(PSTR("  shower_timer=%s"), EMSESP_Status.shower_timer ? "on" : "off");
         myDebug_P(PSTR("  shower_alert=%s"), EMSESP_Status.shower_alert ? "on" : "off");
         myDebug_P(PSTR("  publish_time=%d"), EMSESP_Status.publish_time);
-        myDebug_P(PSTR("  tx_mode=%d"), ems_getTxMode());
     }
 
     return ok;
