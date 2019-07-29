@@ -34,7 +34,7 @@ The code is writen for the Espressif **ESP8266** microcontroller and supports a 
 * RC20F
 * RC30/Nefit Moduline 400
 * RC35 (only a single HC)
-* RC300/RC310
+* RC300/RC310/Nefit Moduline 3000
 * Nefit Moduline 1010
 * Junkers FR10
 * TC100/Nefit Easy (read-only)
