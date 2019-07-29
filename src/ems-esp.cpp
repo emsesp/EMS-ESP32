@@ -419,6 +419,8 @@ void showInfo() {
         myDebug_P(PSTR("  System logging set to Thermostat only"));
     } else if (sysLog == EMS_SYS_LOGGING_SOLARMODULE) {
         myDebug_P(PSTR("  System logging set to Solar Module only"));
+    } else if (sysLog == EMS_SYS_LOGGING_JABBER) {
+        myDebug_P(PSTR("  System logging set to Jabber"));
     } else {
         myDebug_P(PSTR("  System logging set to None"));
     }

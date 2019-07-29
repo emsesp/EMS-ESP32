@@ -441,7 +441,7 @@ _EMS_SYS_LOGGING ems_getLogging() {
 }
 
 void ems_setLogging(_EMS_SYS_LOGGING loglevel) {
-    if (loglevel <= EMS_SYS_LOGGING_VERBOSE) {
+    if (loglevel <= EMS_SYS_LOGGING_JABBER) {
         EMS_Sys_Status.emsLogging = loglevel;
         if (loglevel == EMS_SYS_LOGGING_NONE) {
             myDebug_P(PSTR("System Logging set to None"));
@@ -642,7 +642,7 @@ void _ems_sendTelegram() {
 
     // dest
     if (EMS_TxTelegram.action == EMS_TX_TELEGRAM_WRITE) {
-        EMS_TxTelegram.data[1] = EMS_TxTelegram.dest;
+        EMS_TxTelegram.data[1] = EMS_TxTelegram.dest ^ EMS_Sys_Status.emsIDMask;
     } else {
         // for a READ or VALIDATE
         EMS_TxTelegram.data[1] = (EMS_TxTelegram.dest ^ 0x80 ^ EMS_Sys_Status.emsIDMask); // read has 8th bit set
@@ -756,6 +756,7 @@ void ems_dumpBuffer(const char *prefix, uint8_t *telegram, uint8_t length) {
     if (EMS_Sys_Status.emsLogging != EMS_SYS_LOGGING_JABBER)
         return;
 
+/*
     // we only care about known devices
     if (length) {
         uint8_t dev = telegram[0] & 0x7F;
@@ -763,6 +764,7 @@ void ems_dumpBuffer(const char *prefix, uint8_t *telegram, uint8_t length) {
             ||(dev == 0x01)||(dev == 0x0b)||(dev == 0x10)))
             return;
     }
+*/
 
     strlcpy(output_str, "(", sizeof(output_str));
     strlcat(output_str, COLOR_CYAN, sizeof(output_str));
@@ -796,6 +798,7 @@ void ems_dumpBuffer(const char *prefix, uint8_t *telegram, uint8_t length) {
 
     myDebug(output_str);
 }
+
 /**
  * Entry point triggered by an interrupt in emsuart.cpp
  * length is the number of all the telegram bytes up to and including the CRC at the end
@@ -805,7 +808,7 @@ void ems_dumpBuffer(const char *prefix, uint8_t *telegram, uint8_t length) {
 void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
     static uint32_t _last_emsPollFrequency = 0;
 
-    ems_dumpBuffer("** [DEBUG MODE] ems_parseTelegram: ", telegram, length);
+    ems_dumpBuffer("ems_parseTelegram: ", telegram, length);
     /*
      * check if we just received a single byte
      * it could well be a Poll request from the boiler for us, which will have a value of 0x8B (0x0B | 0x80)
@@ -927,7 +930,7 @@ void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
 
     // if we are in raw logging mode then just print out the telegram as it is
     // but still continue to process it
-    if (EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_RAW) {
+    if ((EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_RAW)) {
         _debugPrintTelegram("", &EMS_RxTelegram, COLOR_WHITE, true);
     }
 
@@ -1915,9 +1918,11 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
  * Do a read command for the version with the src having the MSB set
  */
 void _ems_detectJunkers() {
+#ifdef JUNKERS_DETECT
     char s[30] = {0};
     snprintf(s, sizeof(s), "%02X %02X %02X 00 %02X", (EMS_ID_ME | 0x80), (EMS_ID_BOILER | 0x080), EMS_TYPE_Version, EMS_MAX_TELEGRAM_LENGTH);
     ems_sendRawTelegram(s);
+#endif
 }
 
 /*
