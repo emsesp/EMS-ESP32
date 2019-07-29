@@ -9,7 +9,6 @@
 #include "ems.h"
 #include "ems_devices.h"
 #include "emsuart.h"
-#include <Arduino.h>
 #include <CircularBuffer.h> // https://github.com/rlogiacco/CircularBuffer
 #include <MyESP.h>
 #include <list> // std::list

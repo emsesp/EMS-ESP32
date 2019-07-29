@@ -7,7 +7,6 @@
 
 #include "emsuart.h"
 #include "ems.h"
-#include <Arduino.h>
 #include <user_interface.h>
 
 _EMSRxBuf * pEMSRxBuf;

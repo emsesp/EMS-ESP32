@@ -7,7 +7,6 @@
  */
 #pragma once
 
-#include <Arduino.h>
 #include <ems.h>
 
 #define EMSUART_UART 0      // UART 0
