@@ -5,12 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.8.1dev] 2019-07-27
+## [1.8.1] 2019-07-29
 
 ### Added
 
 - Added back -DCRASH in Debug build target for capturing any ESP8266 stack dumps during crashes
-- Web Interface, for checking stats and setting wifi credentials. See wiki for more details.
+- Basic Web Interface, for checking stats and setting wifi credentials. See wiki for more details.
 - reset firmware option. If the reset button on the ESP is pressed during boot up sequence (the LED is flashing very fast) all settings are erased and goes into AP mode.
 - Added tx_mode back with options 0,1 and 2 until we've fixed option 2 that works for everyone and doesn't reset ESP
 - More solar module data captured, thanks to @Vuego123
