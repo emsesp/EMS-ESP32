@@ -1468,7 +1468,7 @@ void TelnetCommandCallback(uint8_t wc, const char * commandLine) {
             ems_setLogging(EMS_SYS_LOGGING_NONE);
             ok = true;
         } else if (strcmp(second_cmd, "j") == 0) {
-            ems_setLogging(EMS_SYS_LOGGING_NONE);
+            ems_setLogging(EMS_SYS_LOGGING_JABBER);
             ok = true;
         }
     }

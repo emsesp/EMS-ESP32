@@ -879,7 +879,7 @@ void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
     // ignore anything that doesn't resemble a proper telegram package
     // minimal is 5 bytes, excluding CRC at the end
     if (length <= 4) {
-        _debugPrintTelegram("Noisy data:", &EMS_RxTelegram, COLOR_RED);
+        // _debugPrintTelegram("Noisy data:", &EMS_RxTelegram, COLOR_RED);
         return;
     }
 
@@ -1122,7 +1122,8 @@ void _processType(_EMS_RxTelegram * EMS_RxTelegram) {
 
     // if its an echo of ourselves from the master UBA, ignore. This should never happen mind you
     if (EMS_RxTelegram->src == EMS_ID_ME) {
-        _debugPrintTelegram("echo:", EMS_RxTelegram, COLOR_WHITE);
+        if (EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_JABBER)
+            _debugPrintTelegram("echo:", EMS_RxTelegram, COLOR_WHITE);
         return;
     }
 
