@@ -28,7 +28,7 @@ _EMS_Sys_Status EMS_Sys_Status; // EMS Status
 CircularBuffer<_EMS_TxTelegram, EMS_TX_TELEGRAM_QUEUE_MAX> EMS_TxQueue; // FIFO queue for Tx send buffer
 
 // for storing all detected EMS devices
-std::list<_Generic_Type> Devices;
+std::list<_Generic_Device> Devices;
 
 // macros used in the _process* functions
 #define _toByte(i) (EMS_RxTelegram->data[i])
@@ -95,8 +95,6 @@ void _process_EasyStatusMessage(_EMS_RxTelegram * EMS_RxTelegram);
 // RC1010, RC300, RC310
 void _process_RCPLUSStatusMessage(_EMS_RxTelegram * EMS_RxTelegram);
 void _process_RCPLUSSetMessage(_EMS_RxTelegram * EMS_RxTelegram);
-void _process_RCPLUSStatusHeating(_EMS_RxTelegram * EMS_RxTelegram);
-void _process_RCPLUSStatusHeating(_EMS_RxTelegram * EMS_RxTelegram);
 void _process_RCPLUSStatusMode(_EMS_RxTelegram * EMS_RxTelegram);
 
 // Junkers FR10 & FW100
@@ -176,7 +174,6 @@ const _EMS_Type EMS_Types[] = {
     // Nefit 1010, RC300, RC310 (EMS Plus)
     {EMS_MODEL_ALL, EMS_TYPE_RCPLUSStatusMessage, "RCPLUSStatusMessage", _process_RCPLUSStatusMessage},
     {EMS_MODEL_ALL, EMS_TYPE_RCPLUSSet, "RCPLUSSetMessage", _process_RCPLUSSetMessage},
-    {EMS_MODEL_ALL, EMS_TYPE_RCPLUSStatusHeating, "RCPLUSStatusHeating", _process_RCPLUSStatusHeating},
     {EMS_MODEL_ALL, EMS_TYPE_RCPLUSStatusMode, "RCPLUSStatusMode", _process_RCPLUSStatusMode},
 
     // Junkers FR10
@@ -186,12 +183,12 @@ const _EMS_Type EMS_Types[] = {
 };
 
 // calculate sizes of arrays at compile
-uint8_t _EMS_Types_max          = ArraySize(EMS_Types);         // number of defined types
-uint8_t _Boiler_Types_max       = ArraySize(Boiler_Types);      // number of boiler models
-uint8_t _Solar_Module_Types_max = ArraySize(SolarModule_Types); // number of solar module types
-uint8_t _Other_Types_max        = ArraySize(Other_Types);       // number of other ems devices
-uint8_t _Thermostat_Types_max   = ArraySize(Thermostat_Types);  // number of defined thermostat types
-uint8_t _HeatPump_Types_max     = ArraySize(HeatPump_Types);    // number of defined heatpuimp types
+uint8_t _EMS_Types_max          = ArraySize(EMS_Types);           // number of defined types
+uint8_t _Boiler_Devices_max     = ArraySize(Boiler_Devices);      // number of boiler models
+uint8_t _SolarModule_Types_max  = ArraySize(SolarModule_Devices); // number of solar module types
+uint8_t _Other_Devices_max      = ArraySize(Other_Devices);       // number of other ems devices
+uint8_t _Thermostat_Devices_max = ArraySize(Thermostat_Devices);  // number of defined thermostat types
+uint8_t _HeatPump_Devices_max   = ArraySize(HeatPump_Devices);    // number of defined heatpuimp types
 
 // these structs contain the data we store from the specific EMS devices
 _EMS_Boiler      EMS_Boiler;      // for boiler
@@ -1325,7 +1322,7 @@ void _process_EasyStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
 }
 
 /**
- * type 0x01A5 - data from the Nefit RC1010 thermostat (0x18) and RC300/310s on 0x10
+ * type 0x01A5 - data from the Nefit RC1010/3000 thermostat (0x18) and RC300/310s on 0x10
  * EMS+ messages may come in with different offsets so handle them here
  */
 void _process_RCPLUSStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
@@ -1362,14 +1359,6 @@ void _process_RCPLUSStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
 }
 
 /**
- * type 0x01B9 - heating data from the Nefit RC1010 thermostat (0x18) and RC300/310s on 0x10
- */
-void _process_RCPLUSStatusHeating(_EMS_RxTelegram * EMS_RxTelegram) {
-    // see wiki
-    // operation mode, comfort levels 1,2,3, eco level
-}
-
-/**
  * type 0x01AF - summer/winter mode from the Nefit RC1010 thermostat (0x18) and RC300/310s on 0x10
  */
 void _process_RCPLUSStatusMode(_EMS_RxTelegram * EMS_RxTelegram) {
@@ -1389,10 +1378,14 @@ void _process_JunkersStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
 }
 
 /**
- * to complete....
+ * type 0x01B9 EMS+ for reading the mode from RC300/RC310 thermostat
  */
 void _process_RCPLUSSetMessage(_EMS_RxTelegram * EMS_RxTelegram) {
-    // to complete
+    EMS_Thermostat.mode      = _toByte(EMS_OFFSET_RCPLUSSet_mode);
+    EMS_Thermostat.daytemp   = _toByte(EMS_OFFSET_RCPLUSSet_temp_comfort2); // is * 2
+    EMS_Thermostat.nighttemp = _toByte(EMS_OFFSET_RCPLUSSet_temp_eco);      // is * 2
+
+    EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
 }
 
 /**
@@ -1619,10 +1612,10 @@ void ems_clearDeviceList() {
  * add an EMS device to our list of detected devices
  */
 void _addDevice(uint8_t product_id, uint8_t device_id, char * version, const char * model_string) {
-    _Generic_Type device;
+    _Generic_Device device;
     // if its a duplicate don't add
     bool found = false;
-    for (std::list<_Generic_Type>::iterator it = Devices.begin(); it != Devices.end(); it++) {
+    for (std::list<_Generic_Device>::iterator it = Devices.begin(); it != Devices.end(); it++) {
         if (((it)->product_id == product_id) && ((it)->device_id == device_id)) {
             found = true;
         }
@@ -1654,8 +1647,8 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
     // see if its a known boiler
     int  i         = 0;
     bool typeFound = false;
-    while (i < _Boiler_Types_max) {
-        if ((Boiler_Types[i].product_id == product_id) && ((EMS_RxTelegram->src & 0x7F) == EMS_ID_BOILER)) {
+    while (i < _Boiler_Devices_max) {
+        if ((Boiler_Devices[i].product_id == product_id) && ((EMS_RxTelegram->src & 0x7F) == EMS_ID_BOILER)) {
             typeFound = true; // we have a matching product id. i is the index.
             break;
         }
@@ -1664,22 +1657,22 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
 
     if (typeFound) {
         // its a boiler
-        myDebug_P(PSTR("Boiler found: %s (DeviceID:0x%02X ProductID:%d Version:%s)"), Boiler_Types[i].model_string, EMS_ID_BOILER, product_id, version);
+        myDebug_P(PSTR("Boiler found: %s (DeviceID:0x%02X ProductID:%d Version:%s)"), Boiler_Devices[i].model_string, EMS_ID_BOILER, product_id, version);
 
         // add to list
-        _addDevice(product_id, EMS_ID_BOILER, version, Boiler_Types[i].model_string);
+        _addDevice(product_id, EMS_ID_BOILER, version, Boiler_Devices[i].model_string);
 
         // if its a boiler set it, unless it already has been set by checking for a productID
         // it will take the first one found in the list
         if ((EMS_Boiler.device_id == EMS_ID_NONE) || ((EMS_Boiler.device_id == EMS_ID_BOILER) && EMS_Boiler.product_id == EMS_ID_NONE)) {
             myDebug_P(PSTR("* Setting Boiler to model %s (DeviceID:0x%02X ProductID:%d Version:%s)"),
-                      Boiler_Types[i].model_string,
+                      Boiler_Devices[i].model_string,
                       EMS_ID_BOILER,
                       product_id,
                       version);
 
             EMS_Boiler.device_id  = EMS_ID_BOILER;
-            EMS_Boiler.product_id = Boiler_Types[i].product_id;
+            EMS_Boiler.product_id = Boiler_Devices[i].product_id;
             strlcpy(EMS_Boiler.version, version, sizeof(EMS_Boiler.version));
 
             // check to see if its a Junkers Heatronic3, which has a different poll'ing logic
@@ -1696,8 +1689,8 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
 
     // its not a boiler, maybe its a known thermostat?
     i = 0;
-    while (i < _Thermostat_Types_max) {
-        if (Thermostat_Types[i].product_id == product_id) {
+    while (i < _Thermostat_Devices_max) {
+        if (Thermostat_Devices[i].product_id == product_id) {
             typeFound = true; // we have a matching product id. i is the index.
             break;
         }
@@ -1708,28 +1701,28 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
         // its a known thermostat
         if (EMS_Sys_Status.emsLogging >= EMS_SYS_LOGGING_BASIC) {
             myDebug_P(PSTR("Thermostat found: %s (DeviceID:0x%02X ProductID:%d Version:%s)"),
-                      Thermostat_Types[i].model_string,
-                      Thermostat_Types[i].device_id,
+                      Thermostat_Devices[i].model_string,
+                      Thermostat_Devices[i].device_id,
                       product_id,
                       version);
         }
 
         // add to list
-        _addDevice(product_id, Thermostat_Types[i].device_id, version, Thermostat_Types[i].model_string);
+        _addDevice(product_id, Thermostat_Devices[i].device_id, version, Thermostat_Devices[i].model_string);
 
         // if we don't have a thermostat set, use this one
         if (((EMS_Thermostat.device_id == EMS_ID_NONE) || (EMS_Thermostat.model_id == EMS_MODEL_NONE)
-             || (EMS_Thermostat.device_id == Thermostat_Types[i].device_id))
+             || (EMS_Thermostat.device_id == Thermostat_Devices[i].device_id))
             && EMS_Thermostat.product_id == EMS_ID_NONE) {
             myDebug_P(PSTR("* Setting Thermostat to %s (DeviceID:0x%02X ProductID:%d Version:%s)"),
-                      Thermostat_Types[i].model_string,
-                      Thermostat_Types[i].device_id,
+                      Thermostat_Devices[i].model_string,
+                      Thermostat_Devices[i].device_id,
                       product_id,
                       version);
 
-            EMS_Thermostat.model_id        = Thermostat_Types[i].model_id;
-            EMS_Thermostat.device_id       = Thermostat_Types[i].device_id;
-            EMS_Thermostat.write_supported = Thermostat_Types[i].write_supported;
+            EMS_Thermostat.model_id        = Thermostat_Devices[i].model_id;
+            EMS_Thermostat.device_id       = Thermostat_Devices[i].device_id;
+            EMS_Thermostat.write_supported = Thermostat_Devices[i].write_supported;
             EMS_Thermostat.product_id      = product_id;
             strlcpy(EMS_Thermostat.version, version, sizeof(EMS_Thermostat.version));
 
@@ -1744,8 +1737,8 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
 
     // look for Solar Modules
     i = 0;
-    while (i < _Solar_Module_Types_max) {
-        if (SolarModule_Types[i].product_id == product_id) {
+    while (i < _SolarModule_Types_max) {
+        if (SolarModule_Devices[i].product_id == product_id) {
             typeFound = true; // we have a matching product id. i is the index.
             break;
         }
@@ -1754,16 +1747,16 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
 
     if (typeFound) {
         myDebug_P(PSTR("Solar Module found: %s (DeviceID:0x%02X ProductID:%d Version:%s)"),
-                  SolarModule_Types[i].model_string,
-                  SolarModule_Types[i].device_id,
+                  SolarModule_Devices[i].model_string,
+                  SolarModule_Devices[i].device_id,
                   product_id,
                   version);
 
         // add to list
-        _addDevice(product_id, SolarModule_Types[i].device_id, version, SolarModule_Types[i].model_string);
+        _addDevice(product_id, SolarModule_Devices[i].device_id, version, SolarModule_Devices[i].model_string);
 
         myDebug_P(PSTR("Solar Module support enabled."));
-        EMS_SolarModule.device_id  = SolarModule_Types[i].device_id;
+        EMS_SolarModule.device_id  = SolarModule_Devices[i].device_id;
         EMS_SolarModule.product_id = product_id;
         strlcpy(EMS_SolarModule.version, version, sizeof(EMS_SolarModule.version));
 
@@ -1774,8 +1767,8 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
 
     // look for heatpumps
     i = 0;
-    while (i < _HeatPump_Types_max) {
-        if (HeatPump_Types[i].product_id == product_id) {
+    while (i < _HeatPump_Devices_max) {
+        if (HeatPump_Devices[i].product_id == product_id) {
             typeFound = true; // we have a matching product id. i is the index.
             break;
         }
@@ -1784,16 +1777,16 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
 
     if (typeFound) {
         myDebug_P(PSTR("Heat Pump found: %s (DeviceID:0x%02X ProductID:%d Version:%s)"),
-                  HeatPump_Types[i].model_string,
-                  HeatPump_Types[i].device_id,
+                  HeatPump_Devices[i].model_string,
+                  HeatPump_Devices[i].device_id,
                   product_id,
                   version);
 
         // add to list
-        _addDevice(product_id, HeatPump_Types[i].device_id, version, HeatPump_Types[i].model_string);
+        _addDevice(product_id, HeatPump_Devices[i].device_id, version, HeatPump_Devices[i].model_string);
 
         myDebug_P(PSTR("Heat Pump support enabled."));
-        EMS_HeatPump.device_id  = SolarModule_Types[i].device_id;
+        EMS_HeatPump.device_id  = SolarModule_Devices[i].device_id;
         EMS_HeatPump.product_id = product_id;
         strlcpy(EMS_HeatPump.version, version, sizeof(EMS_HeatPump.version));
         return;
@@ -1801,8 +1794,8 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
 
     // finally look for the other EMS devices
     i = 0;
-    while (i < _Other_Types_max) {
-        if (Other_Types[i].product_id == product_id) {
+    while (i < _Other_Devices_max) {
+        if (Other_Devices[i].product_id == product_id) {
             typeFound = true; // we have a matching product id. i is the index.
             break;
         }
@@ -1810,10 +1803,10 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
     }
 
     if (typeFound) {
-        myDebug_P(PSTR("Device found: %s (DeviceID:0x%02X ProductID:%d Version:%s)"), Other_Types[i].model_string, Other_Types[i].device_id, product_id, version);
+        myDebug_P(PSTR("Device found: %s (DeviceID:0x%02X ProductID:%d Version:%s)"), Other_Devices[i].model_string, Other_Devices[i].device_id, product_id, version);
 
         // add to list
-        _addDevice(product_id, Other_Types[i].device_id, version, Other_Types[i].model_string);
+        _addDevice(product_id, Other_Devices[i].device_id, version, Other_Devices[i].model_string);
         return;
     } else {
         myDebug_P(PSTR("Unrecognized device found: %s (DeviceID:0x%02X ProductID:%d Version:%s)"), EMS_RxTelegram->src, product_id, version);
@@ -1921,39 +1914,39 @@ void ems_getThermostatValues() {
         return;
     }
 
-    uint8_t model_id = EMS_Thermostat.model_id;
-    uint8_t type     = EMS_Thermostat.device_id;
-    uint8_t hc       = EMS_Thermostat.hc;
+    uint8_t model_id  = EMS_Thermostat.model_id;
+    uint8_t device_id = EMS_Thermostat.device_id;
+    uint8_t hc        = EMS_Thermostat.hc;
 
     switch (model_id) {
     case EMS_MODEL_RC20:
-        ems_doReadCommand(EMS_TYPE_RC20StatusMessage, type); // to get the temps
-        ems_doReadCommand(EMS_TYPE_RC20Set, type);           // to get the mode
+        ems_doReadCommand(EMS_TYPE_RC20StatusMessage, device_id); // to get the temps
+        ems_doReadCommand(EMS_TYPE_RC20Set, device_id);           // to get the mode
         break;
     case EMS_MODEL_RC30:
-        ems_doReadCommand(EMS_TYPE_RC30StatusMessage, type); // to get the temps
-        ems_doReadCommand(EMS_TYPE_RC30Set, type);           // to get the mode
+        ems_doReadCommand(EMS_TYPE_RC30StatusMessage, device_id); // to get the temps
+        ems_doReadCommand(EMS_TYPE_RC30Set, device_id);           // to get the mode
         break;
     case EMS_MODEL_EASY:
-        ems_doReadCommand(EMS_TYPE_EasyStatusMessage, type);
+        ems_doReadCommand(EMS_TYPE_EasyStatusMessage, device_id);
         break;
     case EMS_MODEL_RC35:
     case EMS_MODEL_ES73:
         if (hc == 1) {
-            ems_doReadCommand(EMS_TYPE_RC35StatusMessage_HC1, type); // to get the temps
-            ems_doReadCommand(EMS_TYPE_RC35Set_HC1, type);           // to get the mode
+            ems_doReadCommand(EMS_TYPE_RC35StatusMessage_HC1, device_id); // to get the temps
+            ems_doReadCommand(EMS_TYPE_RC35Set_HC1, device_id);           // to get the mode
         } else if (hc == 2) {
-            ems_doReadCommand(EMS_TYPE_RC35StatusMessage_HC2, type); // to get the temps
-            ems_doReadCommand(EMS_TYPE_RC35Set_HC2, type);           // to get the mode
+            ems_doReadCommand(EMS_TYPE_RC35StatusMessage_HC2, device_id); // to get the temps
+            ems_doReadCommand(EMS_TYPE_RC35Set_HC2, device_id);           // to get the mode
         }
         break;
     case EMS_MODEL_RC300:
-        ems_doReadCommand(EMS_TYPE_RCPLUSStatusMessage, type);
+        ems_doReadCommand(EMS_TYPE_RCPLUSStatusMessage, device_id);
     default:
         break;
     }
 
-    ems_doReadCommand(EMS_TYPE_RCTime, type); // get Thermostat time
+    ems_doReadCommand(EMS_TYPE_RCTime, device_id); // get Thermostat time
 }
 
 /**
@@ -1996,8 +1989,8 @@ char * ems_getThermostatDescription(char * buffer) {
         char tmp[6] = {0};
 
         // scan through known ID types
-        while (i < _Thermostat_Types_max) {
-            if (Thermostat_Types[i].product_id == EMS_Thermostat.product_id) {
+        while (i < _Thermostat_Devices_max) {
+            if (Thermostat_Devices[i].product_id == EMS_Thermostat.product_id) {
                 found = true; // we have a match
                 break;
             }
@@ -2005,7 +1998,7 @@ char * ems_getThermostatDescription(char * buffer) {
         }
 
         if (found) {
-            strlcpy(buffer, Thermostat_Types[i].model_string, size);
+            strlcpy(buffer, Thermostat_Devices[i].model_string, size);
         } else {
             strlcpy(buffer, "DeviceID: 0x", size);
             strlcat(buffer, _hextoa(EMS_Thermostat.device_id, tmp), size);
@@ -2038,15 +2031,15 @@ char * ems_getBoilerDescription(char * buffer) {
         char tmp[6] = {0};
 
         // scan through known ID types
-        while (i < _Boiler_Types_max) {
-            if (Boiler_Types[i].product_id == EMS_Boiler.product_id) {
+        while (i < _Boiler_Devices_max) {
+            if (Boiler_Devices[i].product_id == EMS_Boiler.product_id) {
                 found = true; // we have a match
                 break;
             }
             i++;
         }
         if (found) {
-            strlcpy(buffer, Boiler_Types[i].model_string, size);
+            strlcpy(buffer, Boiler_Devices[i].model_string, size);
         } else {
             strlcpy(buffer, "DeviceID: 0x", size);
             strlcat(buffer, _hextoa(EMS_Boiler.device_id, tmp), size);
@@ -2079,15 +2072,15 @@ char * ems_getSolarModuleDescription(char * buffer) {
         char tmp[6] = {0};
 
         // scan through known ID types
-        while (i < _Solar_Module_Types_max) {
-            if (SolarModule_Types[i].product_id == EMS_SolarModule.product_id) {
+        while (i < _SolarModule_Types_max) {
+            if (SolarModule_Devices[i].product_id == EMS_SolarModule.product_id) {
                 found = true; // we have a match
                 break;
             }
             i++;
         }
         if (found) {
-            strlcpy(buffer, SolarModule_Types[i].model_string, size);
+            strlcpy(buffer, SolarModule_Devices[i].model_string, size);
         } else {
             strlcpy(buffer, "DeviceID: 0x", size);
             strlcat(buffer, _hextoa(EMS_SolarModule.device_id, tmp), size);
@@ -2120,15 +2113,15 @@ char * ems_getHeatPumpDescription(char * buffer) {
         char tmp[6] = {0};
 
         // scan through known ID types
-        while (i < _HeatPump_Types_max) {
-            if (HeatPump_Types[i].product_id == EMS_HeatPump.product_id) {
+        while (i < _HeatPump_Devices_max) {
+            if (HeatPump_Devices[i].product_id == EMS_HeatPump.product_id) {
                 found = true; // we have a match
                 break;
             }
             i++;
         }
         if (found) {
-            strlcpy(buffer, HeatPump_Types[i].model_string, size);
+            strlcpy(buffer, HeatPump_Devices[i].model_string, size);
         } else {
             strlcpy(buffer, "DeviceID: 0x", size);
             strlcat(buffer, _hextoa(EMS_HeatPump.device_id, tmp), size);
@@ -2160,17 +2153,17 @@ void ems_scanDevices() {
     Device_Ids.push_back(EMS_ID_BOILER);
 
     // copy over thermostats
-    for (_Thermostat_Type tt : Thermostat_Types) {
+    for (_Thermostat_Device tt : Thermostat_Devices) {
         Device_Ids.push_back(tt.device_id);
     }
 
     // copy over solar modules
-    for (_SolarModule_Type sm : SolarModule_Types) {
+    for (_SolarModule_Device sm : SolarModule_Devices) {
         Device_Ids.push_back(sm.device_id);
     }
 
     // copy over others
-    for (_Other_Type ot : Other_Types) {
+    for (_Other_Device ot : Other_Devices) {
         Device_Ids.push_back(ot.device_id);
     }
 
@@ -2194,34 +2187,34 @@ void ems_scanDevices() {
 void ems_printAllDevices() {
     uint8_t i;
 
-    myDebug_P(PSTR("\nThese %d devices are supported as boiler units:"), _Boiler_Types_max);
-    for (i = 0; i < _Boiler_Types_max; i++) {
+    myDebug_P(PSTR("\nThese %d devices are supported as boiler units:"), _Boiler_Devices_max);
+    for (i = 0; i < _Boiler_Devices_max; i++) {
         myDebug_P(PSTR(" %s%s%s (DeviceID:0x%02X ProductID:%d)"),
                   COLOR_BOLD_ON,
-                  Boiler_Types[i].model_string,
+                  Boiler_Devices[i].model_string,
                   COLOR_BOLD_OFF,
                   EMS_ID_BOILER,
-                  Boiler_Types[i].product_id);
+                  Boiler_Devices[i].product_id);
     }
 
-    myDebug_P(PSTR("\nThese %d devices are supported as solar module devices:"), _Solar_Module_Types_max);
-    for (i = 0; i < _Solar_Module_Types_max; i++) {
+    myDebug_P(PSTR("\nThese %d devices are supported as solar module devices:"), _SolarModule_Types_max);
+    for (i = 0; i < _SolarModule_Types_max; i++) {
         myDebug_P(PSTR(" %s%s%s (DeviceID:0x%02X ProductID:%d)"),
                   COLOR_BOLD_ON,
-                  SolarModule_Types[i].model_string,
+                  SolarModule_Devices[i].model_string,
                   COLOR_BOLD_OFF,
-                  SolarModule_Types[i].device_id,
-                  SolarModule_Types[i].product_id);
+                  SolarModule_Devices[i].device_id,
+                  SolarModule_Devices[i].product_id);
     }
 
-    myDebug_P(PSTR("\nThese %d devices are supported as other known EMS devices:"), _Other_Types_max);
-    for (i = 0; i < _Other_Types_max; i++) {
+    myDebug_P(PSTR("\nThese %d devices are supported as other known EMS devices:"), _Other_Devices_max);
+    for (i = 0; i < _Other_Devices_max; i++) {
         myDebug_P(PSTR(" %s%s%s (DeviceID:0x%02X ProductID:%d)"),
                   COLOR_BOLD_ON,
-                  Other_Types[i].model_string,
+                  Other_Devices[i].model_string,
                   COLOR_BOLD_OFF,
-                  Other_Types[i].device_id,
-                  Other_Types[i].product_id);
+                  Other_Devices[i].device_id,
+                  Other_Devices[i].product_id);
     }
 
     myDebug_P(PSTR("\nThe following telegram type IDs are supported:"));
@@ -2231,15 +2224,15 @@ void ems_printAllDevices() {
         }
     }
 
-    myDebug_P(PSTR("\nThese %d thermostat devices are supported:"), _Thermostat_Types_max);
-    for (i = 0; i < _Thermostat_Types_max; i++) {
+    myDebug_P(PSTR("\nThese %d thermostat devices are supported:"), _Thermostat_Devices_max);
+    for (i = 0; i < _Thermostat_Devices_max; i++) {
         myDebug_P(PSTR(" %s%s%s (DeviceID:0x%02X ProductID:%d) can write:%c"),
                   COLOR_BOLD_ON,
-                  Thermostat_Types[i].model_string,
+                  Thermostat_Devices[i].model_string,
                   COLOR_BOLD_OFF,
-                  Thermostat_Types[i].device_id,
-                  Thermostat_Types[i].product_id,
-                  (Thermostat_Types[i].write_supported) ? 'y' : 'n');
+                  Thermostat_Devices[i].device_id,
+                  Thermostat_Devices[i].product_id,
+                  (Thermostat_Devices[i].write_supported) ? 'y' : 'n');
     }
 
     // print out known devices
@@ -2254,7 +2247,7 @@ void ems_printAllDevices() {
 void ems_printDevices() {
     if (Devices.size() != 0) {
         myDebug_P(PSTR("\nThese %d EMS devices were detected:"), Devices.size());
-        for (std::list<_Generic_Type>::iterator it = Devices.begin(); it != Devices.end(); it++) {
+        for (std::list<_Generic_Device>::iterator it = Devices.begin(); it != Devices.end(); it++) {
             myDebug_P(PSTR(" %s%s%s (DeviceID:0x%02X ProductID:%d Version:%s)"),
                       COLOR_BOLD_ON,
                       (it)->model_string,
@@ -2278,7 +2271,7 @@ uint8_t ems_printDevices_s(char * buffer, uint16_t len) {
     }
 
     char s[100];
-    for (std::list<_Generic_Type>::iterator it = Devices.begin(); it != Devices.end(); it++) {
+    for (std::list<_Generic_Device>::iterator it = Devices.begin(); it != Devices.end(); it++) {
         sprintf(s, "%s (DeviceID:0x%02X ProductID:%d Version:%s)<br>", (it)->model_string, (it)->device_id, (it)->product_id, (it)->version);
         strlcat(buffer, s, len);
     }
@@ -2394,7 +2387,7 @@ void ems_setThermostatTemp(float temperature, uint8_t temptype) {
     }
 
     if (!EMS_Thermostat.write_supported) {
-        myDebug_P(PSTR("Write not supported for this model Thermostat"));
+        myDebug_P(PSTR("Write not supported for this Thermostat model"));
         return;
     }
 
@@ -2402,16 +2395,14 @@ void ems_setThermostatTemp(float temperature, uint8_t temptype) {
     EMS_TxTelegram.timestamp       = millis();            // set timestamp
     EMS_Sys_Status.txRetryCount    = 0;                   // reset retry counter
 
-    uint8_t model_id = EMS_Thermostat.model_id;
-    uint8_t type     = EMS_Thermostat.device_id;
-    uint8_t hc       = EMS_Thermostat.hc; // heating circuit
+    uint8_t model_id  = EMS_Thermostat.model_id;
+    uint8_t device_id = EMS_Thermostat.device_id;
+    uint8_t hc        = EMS_Thermostat.hc; // heating circuit
 
     EMS_TxTelegram.action = EMS_TX_TELEGRAM_WRITE;
-    EMS_TxTelegram.dest   = type;
+    EMS_TxTelegram.dest   = device_id;
 
     myDebug_P(PSTR("Setting new thermostat temperature"));
-
-    // when doing a comparison  to validate the new temperature we call a different type
 
     if (model_id == EMS_MODEL_RC20) {
         EMS_TxTelegram.type               = EMS_TYPE_RC20Set;
@@ -2425,6 +2416,15 @@ void ems_setThermostatTemp(float temperature, uint8_t temptype) {
         EMS_TxTelegram.type               = EMS_TYPE_RC30Set;
         EMS_TxTelegram.offset             = EMS_OFFSET_RC30Set_temp;
         EMS_TxTelegram.comparisonPostRead = EMS_TYPE_RC30StatusMessage;
+
+    } else if (model_id == EMS_MODEL_RC300) {
+        EMS_TxTelegram.type = EMS_TYPE_RCPLUSSet; // for 3000 and 1010, e.g. 0B 10 FF (0A | 08) 01 89 2B
+        // check mode
+        if (EMS_Thermostat.mode == 1) {        // auto
+            EMS_TxTelegram.offset = 0x08;      // auto offset
+        } else if (EMS_Thermostat.mode == 0) { // manuaL
+            EMS_TxTelegram.offset = 0x0A;      // manual offset
+        }
     } else if ((model_id == EMS_MODEL_RC35) || (model_id == EMS_MODEL_ES73)) {
         switch (temptype) {
         case 1: // change the night temp
@@ -2445,7 +2445,6 @@ void ems_setThermostatTemp(float temperature, uint8_t temptype) {
             }
             break;
         }
-
         if (hc == 1) {
             // heating circuit 1
             EMS_TxTelegram.type               = EMS_TYPE_RC35Set_HC1;
@@ -2458,7 +2457,7 @@ void ems_setThermostatTemp(float temperature, uint8_t temptype) {
     }
 
     EMS_TxTelegram.length           = EMS_MIN_TELEGRAM_LENGTH;
-    EMS_TxTelegram.dataValue        = (uint8_t)((float)temperature * (float)2); // value
+    EMS_TxTelegram.dataValue        = (uint8_t)((float)temperature * (float)2); // value * 2
     EMS_TxTelegram.type_validate    = EMS_TxTelegram.type;
     EMS_TxTelegram.comparisonOffset = EMS_TxTelegram.offset;
     EMS_TxTelegram.comparisonValue  = EMS_TxTelegram.dataValue;
@@ -2468,8 +2467,9 @@ void ems_setThermostatTemp(float temperature, uint8_t temptype) {
 }
 
 /**
- * Set the thermostat working mode (0=low/night, 1=manual/day, 2=auto/clock)
- * 0xA8 on a RC20 and 0xA7 on RC30
+ * Set the thermostat working mode
+ *  (0=low/night, 1=manual/day, 2=auto/clock),  0xA8 on a RC20 and 0xA7 on RC30
+ *  0x01B9 for EMS+ 300/1000/3000, Auto=0xFF Manual=0x00. See https://github.com/proddy/EMS-ESP/wiki/RC3xx-Thermostats
  */
 void ems_setThermostatMode(uint8_t mode) {
     if (!ems_getThermostatEnabled()) {
@@ -2481,9 +2481,18 @@ void ems_setThermostatMode(uint8_t mode) {
         return;
     }
 
-    uint8_t model_id = EMS_Thermostat.model_id;
-    uint8_t type     = EMS_Thermostat.device_id;
-    uint8_t hc       = EMS_Thermostat.hc;
+    uint8_t model_id  = EMS_Thermostat.model_id;
+    uint8_t device_id = EMS_Thermostat.device_id;
+    uint8_t hc        = EMS_Thermostat.hc;
+
+    // RC300/1000/3000 have different settings
+    if (model_id == EMS_MODEL_RC300) {
+        if (mode == 1) {
+            mode = 0; // manual
+        } else {
+            mode = 0xFF; // auto
+        }
+    }
 
     myDebug_P(PSTR("Setting thermostat mode to %d"), mode);
 
@@ -2492,7 +2501,7 @@ void ems_setThermostatMode(uint8_t mode) {
     EMS_Sys_Status.txRetryCount    = 0;                   // reset retry counter
 
     EMS_TxTelegram.action    = EMS_TX_TELEGRAM_WRITE;
-    EMS_TxTelegram.dest      = type;
+    EMS_TxTelegram.dest      = device_id;
     EMS_TxTelegram.length    = EMS_MIN_TELEGRAM_LENGTH;
     EMS_TxTelegram.dataValue = mode;
 
@@ -2506,6 +2515,9 @@ void ems_setThermostatMode(uint8_t mode) {
     } else if ((model_id == EMS_MODEL_RC35) || (model_id == EMS_MODEL_ES73)) {
         EMS_TxTelegram.type   = (hc == 2) ? EMS_TYPE_RC35Set_HC2 : EMS_TYPE_RC35Set_HC1;
         EMS_TxTelegram.offset = EMS_OFFSET_RC35Set_mode;
+    } else if (model_id == EMS_MODEL_RC300) {
+        EMS_TxTelegram.type   = EMS_TYPE_RCPLUSSet; // for 3000 and 1010, e.g. 48 10 FF 00 01 B9 00 for manual
+        EMS_TxTelegram.offset = EMS_OFFSET_RCPLUSSet_mode;
     }
 
     EMS_TxTelegram.type_validate      = EMS_TxTelegram.type; // callback to EMS_TYPE_RC30Temperature to fetch temps

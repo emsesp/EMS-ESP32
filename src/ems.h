@@ -220,25 +220,25 @@ const _EMS_TxTelegram EMS_TX_TELEGRAM_NEW = {
 typedef struct {
     uint8_t product_id;
     char    model_string[50];
-} _Boiler_Type;
+} _Boiler_Device;
 
 typedef struct {
     uint8_t product_id;
     uint8_t device_id;
     char    model_string[50];
-} _SolarModule_Type;
+} _SolarModule_Device;
 
 typedef struct {
     uint8_t product_id;
     uint8_t device_id;
     char    model_string[50];
-} _Other_Type;
+} _Other_Device;
 
 typedef struct {
     uint8_t product_id;
     uint8_t device_id;
     char    model_string[50];
-} _HeatPump_Type;
+} _HeatPump_Device;
 
 typedef struct {
     uint8_t model_id;
@@ -246,7 +246,7 @@ typedef struct {
     uint8_t device_id;
     char    model_string[50];
     bool    write_supported;
-} _Thermostat_Type;
+} _Thermostat_Device;
 
 // for consolidating all types
 typedef struct {
@@ -254,7 +254,7 @@ typedef struct {
     uint8_t device_id;
     char    version[10];
     char    model_string[50];
-} _Generic_Type;
+} _Generic_Device;
 
 /*
  * Telegram package defintions
