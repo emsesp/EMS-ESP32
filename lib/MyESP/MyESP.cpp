@@ -188,6 +188,8 @@ void MyESP::_wifiCallback(justwifi_messages_t code, char * parameter) {
         // start OTA
         ArduinoOTA.begin(); // moved to support esp32
         myDebug_P(PSTR("[OTA] listening to %s.local:%u"), ArduinoOTA.getHostname().c_str(), OTA_PORT);
+        // unconditionaly show the last reset reason
+        myDebug_P(PSTR("[SYSTEM] Last reset info: %s"), (char *)ESP.getResetInfo().c_str());
 
         // MQTT Setup
         _mqtt_setup();
@@ -1005,9 +1007,10 @@ bool MyESP::_rtcmemStatus() {
     }
 
     switch (reason) {
-    //case REASON_EXT_SYS_RST: // external system reset
-    case REASON_WDT_RST:     // hardware watch dog reset
-    case REASON_DEFAULT_RST: // normal startup by power on
+    //case REASON_EXT_SYS_RST:  // external system reset
+    case REASON_WDT_RST:        // hardware watch dog reset
+    case REASON_DEFAULT_RST:    // normal startup by power on
+    case REASON_SOFT_WDT_RST:   // Software watchdog
         readable = false;
         break;
     default:
@@ -2159,12 +2162,14 @@ void MyESP::loop() {
         return; // quit if in the middle of an OTA update
     }
 
+    ESP.wdtFeed();              // feed the watchdog...
     _calculateLoad();
     _systemCheckLoop();
     _heartbeatCheck();
     _bootupSequence();
     webServer.handleClient();
     _telnetHandle();
+    ESP.wdtFeed();              // feed the watchdog...
     _mqttConnect();
 
     yield(); // ...and breath
