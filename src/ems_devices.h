@@ -13,12 +13,12 @@
 #include "ems.h"
 
 /*
- * Common
+ * Common Type
  */
 #define EMS_TYPE_Version 0x02
 
 /*
- * Boiler...
+ * Boiler Telegram Types...
  */
 #define EMS_TYPE_UBAMonitorFast 0x18              // is an automatic monitor broadcast
 #define EMS_TYPE_UBAMonitorSlow 0x19              // is an automatic monitor broadcast
@@ -40,7 +40,7 @@
 
 #define EMS_OFFSET_UBASetPoints_flowtemp 0 // flow temp
 
-// Other
+// SM and HP Types
 #define EMS_TYPE_SM10Monitor 0x97    // SM10Monitor
 #define EMS_TYPE_SM100Monitor 0x0262 // SM100Monitor
 #define EMS_TYPE_SM100Status 0x0264  // SM100Status
@@ -54,7 +54,7 @@
 #define EMS_OFFSET_ISM1Set_MaxBoilerTemp 6 // position of max boiler temp  e.g. 50 in the following example: 90 30 FF 06 00 01 50 (CRC=2C)
 
 /*
- * Thermostats...
+ * Thermostat Types
  */
 
 // Common for all thermostats
@@ -106,13 +106,17 @@
 
 // RC1010, RC310 and RC300 specific (EMS Plus)
 #define EMS_TYPE_RCPLUSStatusMessage 0x01A5       // is an automatic thermostat broadcast giving us temps
-#define EMS_TYPE_RCPLUSStatusHeating 0x01B9       // heating mode
 #define EMS_TYPE_RCPLUSStatusMode 0x1AF           // summer/winter mode
-#define EMS_TYPE_RCPLUSSet 0x03                   // setpoint temp message
+#define EMS_TYPE_RCPLUSSet 0x01B9                 // setpoint temp message and mode
 #define EMS_OFFSET_RCPLUSStatusMessage_setpoint 3 // setpoint temp
 #define EMS_OFFSET_RCPLUSStatusMessage_curr 0     // current temp
-#define EMS_OFFSET_RCPLUSGet_mode_day 8           // day/night mode
+#define EMS_OFFSET_RCPLUSGet_mode_day 10          // day/night mode
+#define EMS_OFFSET_RCPLUSSet_mode 0	              // operation mode	(Auto=xFF, Manual=x00)
 #define EMS_OFFSET_RCPLUSStatusMessage_mode 0x0A  // thermostat mode (auto, manual)
+#define EMS_OFFSET_RCPLUSSet_temp_comfort3 1	  // comfort3 level		
+#define EMS_OFFSET_RCPLUSSet_temp_comfort2 2	  // comfort2 level		
+#define EMS_OFFSET_RCPLUSSet_temp_comfort1 3	  // comfort1 level		
+#define EMS_OFFSET_RCPLUSSet_temp_eco 4	          //  eco level	
 
 // Junkers FR10, FW100 (EMS Plus)
 #define EMS_TYPE_JunkersStatusMessage 0x6F         // is an automatic thermostat broadcast giving us temps
@@ -120,7 +124,7 @@
 #define EMS_OFFSET_JunkersStatusMessage_curr 4     // current temp
 
 
-// Known EMS types
+// Known EMS devices
 typedef enum {
     EMS_MODEL_NONE, // unset
     EMS_MODEL_ALL,  // common for all devices
@@ -157,7 +161,7 @@ typedef enum {
 // EMS types for known boilers. This list will be extended when new devices are recognized.
 // The device_id is always 0x08
 // format is PRODUCT ID, DESCRIPTION
-const _Boiler_Type Boiler_Types[] = {
+const _Boiler_Device Boiler_Devices[] = {
 
     {72, "MC10 Module"},
     {123, "Buderus GB172/Nefit Trendline/Junkers Cerapur"},
@@ -175,7 +179,7 @@ const _Boiler_Type Boiler_Types[] = {
  * Known Solar Module types
  * format is PRODUCT ID, DEVICE ID, DESCRIPTION
  */
-const _SolarModule_Type SolarModule_Types[] = {
+const _SolarModule_Device SolarModule_Devices[] = {
 
     {EMS_PRODUCTID_SM10, EMS_ID_SM, "SM10 Solar Module"},
     {EMS_PRODUCTID_SM100, EMS_ID_SM, "SM100 Solar Module"},
@@ -185,7 +189,7 @@ const _SolarModule_Type SolarModule_Types[] = {
 
 // Other EMS devices which are not considered boilers, thermostats or solar modules
 // format is PRODUCT ID, DEVICE ID, DESCRIPTION
-const _Other_Type Other_Types[] = {
+const _Other_Device Other_Devices[] = {
 
     {69, 0x21, "MM10 Mixer Module"},
     {71, 0x11, "WM10 Switch Module"},
@@ -207,13 +211,13 @@ const _Other_Type Other_Types[] = {
 
 // heatpump
 // format is PRODUCT ID, DEVICE ID, DESCRIPTION
-const _HeatPump_Type HeatPump_Types[] = {{252, EMS_ID_HP, "HeatPump Module"}};
+const _HeatPump_Device HeatPump_Devices[] = {{252, EMS_ID_HP, "HeatPump Module"}};
 
 /*
  * Known thermostat types and their capabilities
  * format is MODEL_ID, PRODUCT ID, DEVICE ID, DESCRIPTION
  */
-const _Thermostat_Type Thermostat_Types[] = {
+const _Thermostat_Device Thermostat_Devices[] = {
 
     // Easy devices - not currently supporting write operations
     {EMS_MODEL_EASY, 202, 0x18, "Logamatic TC100/Nefit Moduline Easy", EMS_THERMOSTAT_WRITE_NO},
@@ -226,7 +230,7 @@ const _Thermostat_Type Thermostat_Types[] = {
     {EMS_MODEL_RC20F, 93, 0x18, "RC20F", EMS_THERMOSTAT_WRITE_YES},
     {EMS_MODEL_RC30, 78, 0x10, "RC30/Nefit Moduline 400", EMS_THERMOSTAT_WRITE_YES},
     {EMS_MODEL_RC35, 86, 0x10, "RC35", EMS_THERMOSTAT_WRITE_YES},
-    {EMS_MODEL_RC300, 158, 0x10, "RC300/RC310/Nefit Moduline 3000", EMS_THERMOSTAT_WRITE_NO},
+    {EMS_MODEL_RC300, 158, 0x10, "RC300/RC310/Nefit Moduline 3000", EMS_THERMOSTAT_WRITE_YES},
     {EMS_MODEL_1010, 165, 0x18, "Nefit Moduline 1010", EMS_THERMOSTAT_WRITE_NO},
 
     // Sieger
