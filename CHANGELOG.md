@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.9.0b_web] 2019-07-31
+## [1.9.0b1_web] 2019-08-02
 
 ### Breaking changes for first time use
 - Make sure you update your local platformio.ini using the example one and set the target to 'debug'
@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `gulp` wil build the files. This is also done automatically in the platformio target
   - Navigate to the folder tools/wsemulator
   - `npm install ws` (from https://github.com/websockets/ws)
-  - ./run or ./run.sh will start the mock web server. Follow the instructions listed.
+  - `./run` (win) or `./run.sh` (linux/osx) will start the mock web server. Follow the instructions shown.
 
 ### Added
 
@@ -27,11 +27,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - New MyESP code optimizations
 - Magic Fairy dust
 
+### Changed
+
+- reboot command renamed to restart to keep consistent with web
+
 ### Know issues
 
-- SPIFFS event log may wear out ROM ?
+- SPIFFS event log may wear out ROM. This could be a problem
+- Leaving Web page active causes a ESP reset sometimes (like in 1.8.1)
 - Timezone not working 100%
 - Building with EEPROM and -DCRASH causes web to fail
+- firmware size is getting too big, the heap is huge with all the web so need to shrink it
 
 ## [1.8.1] 2019-07-27
 
