@@ -2606,7 +2606,7 @@ void MyESP::begin(const char * app_hostname, const char * app_name, const char *
 
     //_fs_printFile(MYESP_CONFIG_FILE);       // for debugging
     //_fs_printFile(MYESP_CUSTOMCONFIG_FILE); // for debugging
-    _fs_printFile(MYESP_EVENTLOG_FILE); // for debugging
+    //_fs_printFile(MYESP_EVENTLOG_FILE); // for debugging
 }
 
 /*

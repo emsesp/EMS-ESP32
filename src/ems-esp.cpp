@@ -1040,7 +1040,7 @@ void do_regularUpdates() {
         ems_getBoilerValues();
         ems_getSolarModuleValues();
     } else {
-        myDebugLog("System is either not connect to the EMS bus or listen_mode is enabled");
+        myDebug_P(PSTR("System is either not connected to the EMS bus or listen_mode is enabled."));
     }
 }
 
@@ -1681,12 +1681,15 @@ void WebCallback(JsonObject root) {
         emsbus["msg"] = "EMS Bus is disabled when in Serial mode. Check Settings->General Settings";
     } else {
         if (ems_getBusConnected()) {
-            if (ems_getTxCapable()) {
+            if (ems_getTxDisabled()) {
+                emsbus["ok"]  = false;
+                emsbus["msg"] = "EMS Bus Connected, Rx active but Tx has been disabled (listen mode)";
+            } else if (ems_getTxCapable()) {
                 emsbus["ok"]  = true;
                 emsbus["msg"] = "EMS Bus Connected, Rx and Tx active";
             } else {
                 emsbus["ok"]  = false;
-                emsbus["msg"] = "EMS Bus Connected, Tx is failing";
+                emsbus["msg"] = "EMS Bus Connected, Tx is not working";
             }
         } else {
             emsbus["ok"]  = false;

@@ -581,7 +581,7 @@ void _ems_sendTelegram() {
     }
 
     // if we're preventing all outbound traffic, quit
-    if (EMS_Sys_Status.emsTxDisabled) {
+    if (ems_getTxDisabled()) {
         EMS_TxQueue.shift(); // remove from queue
         if (ems_getLogging() != EMS_SYS_LOGGING_NONE) {
             myDebug_P(PSTR("in Listen Mode. All Tx is disabled."));
@@ -2320,7 +2320,7 @@ void ems_sendRawTelegram(char * telegram) {
     char *  p;
     char    value[10] = {0};
 
-    if (EMS_Sys_Status.emsTxDisabled) {
+    if (ems_getTxDisabled()) {
         return; // user has disabled all Tx
     }
 
@@ -2684,7 +2684,7 @@ void ems_setWarmTapWaterActivated(bool activated) {
  * Still experimental and not used yet!
  */
 void ems_startupTelegrams() {
-    if ((EMS_Sys_Status.emsTxDisabled) || (!EMS_Sys_Status.emsBusConnected)) {
+    if ((ems_getTxDisabled()) || (!ems_getBusConnected())) {
         myDebug_P(PSTR("Unable to send startup sequence when in listen mode or the bus is disabled"));
     }
 
