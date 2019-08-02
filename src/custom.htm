@@ -165,7 +165,11 @@
     <div class="row text-center">
         <div class="col-md-8 col-md-offset-2">
             <h1>Dashboard</h1>
-            <p>Real-time values from the EMS-ESP device are shown here.</p>
+            <p>Real-time values from the EMS-ESP device are shown here.
+                <div class="row form-group">
+                    <button onclick="refreshEMS()" class="btn btn-primary">Refresh Data</button>
+                </div>
+            </p>
         </div>
         <div class="col-md-8 col-md-offset-2">
             <div class="panel panel-default table-responsive">
@@ -173,7 +177,7 @@
                     <caption>EMS Bus stats</caption>
                     <tr>
                         <td colspan="2">
-                            <h3><span id="msg"></span></h3>
+                            <b><div id="msg" role="alert"></div></b>
                         </td>
                     </tr>
                     <tr>
@@ -207,7 +211,7 @@
                 </table>
             </div>
 
-            <div class="panel panel-success table-responsive" id="thermostat_show">
+            <div class="panel panel-warning table-responsive" id="thermostat_show">
                 <div class="panel-heading">Thermostat</div>
                 <table class="table table-hover table-bordered table-condensed">
                     <tr>
@@ -227,13 +231,6 @@
                 </table>
             </div>
 
-        </div>
-        <br>
-        <br>
-        <div class="row form-group">
-            <div class="col-xs-9 col-md-8">
-                <button onclick="refreshEMS()" class="btn btn-primary btn-sm pull-center">Refresh...</button>
-            </div>
         </div>
     </div>
 </div>

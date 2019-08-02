@@ -82,9 +82,9 @@ function savecustom() {
 function listCustomStats() {
     document.getElementById("msg").innerHTML = ajaxobj.emsbus.msg;
     if (ajaxobj.emsbus.ok) {
-        document.getElementById("msg").className = "label label-success";
+        document.getElementById("msg").className = "alert alert-success";
     } else {
-        document.getElementById("msg").className = "label label-danger";
+        document.getElementById("msg").className = "alert alert-danger";
         document.getElementById("thermostat_show").style.display = "none";
         document.getElementById("boiler_show").style.display = "none";
         return;
@@ -98,11 +98,7 @@ function listCustomStats() {
         if (type == 1) {
             var color = "info";
         } else if (type == 2) {
-            var color = "success";
-        } else if (type == 3) {
             var color = "warning";
-        } else if (type == 4) {
-            var color = "danger";
         } else {
             var color = "";
         }
