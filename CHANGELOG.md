@@ -31,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - SPIFFS event log may wear out ROM ?
 - Timezone not working 100%
+- Building with EEPROM and -DCRASH causes web to fail
 
 ## [1.8.1] 2019-07-27
 

@@ -3,12 +3,12 @@
 ;
 
 [platformio]
-default_envs = release
-;default_envs = debug
+;default_envs = release
+default_envs = debug
 
 [common]
 ; -DMYESP_TIMESTAMP -DTESTS -DCRASH -DFORCE_SERIAL -DNO_GLOBAL_EEPROM -DLOGICANALYZER
-general_flags = -DNO_GLOBAL_EEPROM
+general_flags =
 
 [env]
 board = d1_mini
@@ -40,9 +40,23 @@ upload_port = ems-esp.local
 [env:buildweb]
 extra_scripts = pre:scripts/buildweb.py
 
+[env:test]
+build_type = debug
+build_flags = ${common.general_flags} -DTESTS
+extra_scripts =
+  pre:scripts/rename_fw.py
+  pre:scripts/buildweb.py
+
+[env:crash]
+build_type = debug
+build_flags = ${common.general_flags} -DNO_GLOBAL_EEPROM -DCRASH
+extra_scripts =
+  pre:scripts/rename_fw.py
+  pre:scripts/buildweb.py
+
 [env:debug]
 build_type = debug
-build_flags = ${common.general_flags} -DCRASH -DTESTS
+build_flags = ${common.general_flags}
 extra_scripts =
   pre:scripts/rename_fw.py
   pre:scripts/buildweb.py
