@@ -5,7 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.8.1dev] 2019-07-27
+## [1.9.0b_web] 2019-07-31
+
+### Breaking changes for first time use
+- Make sure you update your local platformio.ini using the example one and set the target to 'debug'
+- On first boot it will re-build the SPIFFS config file so all <1.9 settings will be lost. Connect to AP 'ems-esp' and use the web to enter your wifi settings.
+- Default web admin password is 'admin'
+- When building the firmware using the `debug` target the web front-end code is assembled and compressed. You'll need node and gulp for this.
+  - Download and install NodeJS from https://nodejs.org/en/download/
+  - Navigate to the folder tools/webfilesbuilder
+  - `npm install --global gulp-cli`
+  - `npm install --save-dev gulp`
+  - `gulp` wil build the files. This is also done automatically in the platformio target
+  - Navigate to the folder tools/wsemulator
+  - `npm install ws` (from https://github.com/websockets/ws)
+  - ./run or ./run.sh will start the mock web server. Follow the instructions listed.
+
+### Added
+
+- New web code
+- New MyESP code optimizations
+- Magic Fairy dust
+
+### Know issues
+
+- SPIFFS event log may wear out ROM ?
+- Timezone not working 100%
+
+## [1.8.1] 2019-07-27
 
 ### Added
 
