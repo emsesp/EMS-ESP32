@@ -1608,7 +1608,7 @@ void ems_clearDeviceList() {
 
 /*
  * add an EMS device to our list of detected devices
- * model_type = 1=info=boiler, 2=success=thermostat, 3=warning=sm, 4=danger=other, 5=none=unknown
+ * model_type : 1=boiler, 2=thermostat, 3=sm, 4=other, 5=unknown
  */
 void _addDevice(uint8_t model_type, uint8_t product_id, uint8_t device_id, char * version, const char * model_string) {
     _Generic_Device device;

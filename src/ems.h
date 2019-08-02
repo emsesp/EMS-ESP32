@@ -251,7 +251,7 @@ typedef struct {
 
 // for consolidating all types
 typedef struct {
-    uint8_t model_type; // 1=info=boiler, 2=success=thermostat, 3=warning=sm, 4=danger=other, 5=none=unknown
+    uint8_t model_type; // 1=boiler, 2=thermostat, 3=sm, 4=other, 5=unknown
     uint8_t product_id;
     uint8_t device_id;
     char    version[10];
