@@ -1,9 +1,9 @@
 /*
- * MyESP - my ESP helper class to handle WiFi, MQTT and Telnet
+ * MyESP - my ESP helper class to handle WiFi, MQTT, Telnet, Web and other utils
  * 
  * Paul Derbyshire - first revision: December 2018
  *
- * Ideas borrowed from Espurna https://github.com/xoseperez/espurna
+ * with ideas borrowed from Espurna https://github.com/xoseperez/espurna
  */
 
 #include "MyESP.h"
@@ -22,61 +22,85 @@ union system_rtcmem_t {
     uint32_t value;
 };
 
+
+// nasty global variables that are called from internal ws functions
+static char * _general_password = nullptr;
+static bool   _shouldReboot     = false;
+
 uint8_t RtcmemSize = (sizeof(RtcmemData) / 4u);
 auto    Rtcmem     = reinterpret_cast<volatile RtcmemData *>(RTCMEM_ADDR);
 
 // constructor
 MyESP::MyESP() {
-    _app_hostname = strdup("MyESP");
-    _app_name     = strdup("MyESP");
-    _app_version  = strdup(MYESP_VERSION);
+    _general_hostname = strdup("myesp");
+    _app_name         = strdup("MyESP");
+    _app_version      = strdup(MYESP_VERSION);
 
-    _boottime     = NULL;
-    _load_average = 100; // calculated load average
+    // general
+    _timerequest         = false;
+    _formatreq           = false;
+    _suspendOutput       = false;
+    _ota_pre_callback_f  = nullptr;
+    _ota_post_callback_f = nullptr;
+    _load_average        = 100;  // calculated load average
+    _general_serial      = true; // serial is set to on as default
+    _have_ntp_time       = false;
 
-    _telnetcommand_callback = NULL;
-    _telnet_callback        = NULL;
+    // telnet
+    _command[0]               = '\0';
+    _telnetcommand_callback_f = nullptr;
+    _telnet_callback_f        = nullptr;
 
-    _command[0] = '\0';
+    // fs
+    _fs_loadsave_callback_f = nullptr;
+    _fs_setlist_callback_f  = nullptr;
 
-    _fs_callback          = NULL;
-    _fs_settings_callback = NULL;
-
-    _web_callback = NULL;
-
-    _serial = false;
-
-    _heartbeat                 = false;
-    _mqtt_host                 = NULL;
-    _mqtt_password             = NULL;
-    _mqtt_username             = NULL;
-    _mqtt_retain               = false;
-    _mqtt_keepalive            = 300;
-    _mqtt_will_topic           = NULL;
-    _mqtt_will_online_payload  = NULL;
-    _mqtt_will_offline_payload = NULL;
-    _mqtt_base                 = NULL;
-    _mqtt_topic                = NULL;
-    _mqtt_qos                  = 0;
+    // mqtt
+    _mqtt_ip                   = nullptr;
+    _mqtt_password             = nullptr;
+    _mqtt_user                 = nullptr;
+    _mqtt_port                 = MQTT_PORT;
+    _mqtt_base                 = nullptr;
     _mqtt_reconnect_delay      = MQTT_RECONNECT_DELAY_MIN;
     _mqtt_last_connection      = 0;
     _mqtt_connecting           = false;
+    _mqtt_enabled              = false;
+    _mqtt_heartbeat            = false;
+    _mqtt_keepalive            = MQTT_KEEPALIVE;
+    _mqtt_qos                  = MQTT_QOS;
+    _mqtt_retain               = MQTT_RETAIN;
+    _mqtt_will_topic           = strdup(MQTT_WILL_TOPIC);
+    _mqtt_will_online_payload  = strdup(MQTT_WILL_ONLINE_PAYLOAD);
+    _mqtt_will_offline_payload = strdup(MQTT_WILL_OFFLINE_PAYLOAD);
 
-    _firstInstall = false;
+    // network
+    _network_password = nullptr;
+    _network_ssid     = nullptr;
+    _network_wmode    = 1; // default AP
 
-    _wifi_password  = NULL;
-    _wifi_ssid      = NULL;
-    _wifi_callback  = NULL;
-    _wifi_connected = false;
+    _wifi_callback_f = nullptr;
+    _wifi_connected  = false;
 
-    _ota_pre_callback  = NULL;
-    _ota_post_callback = NULL;
-    _ota_doing_update  = false;
+    // web
+    _web_callback_f   = nullptr;
+    _webServer        = new AsyncWebServer(80);
+    _ws               = new AsyncWebSocket("/ws");
+    _http_username    = strdup("admin");
+    _general_password = strdup(MYESP_HTTP_PASSWORD); // default naughty password
 
-    _suspendOutput = false;
-
+    // system
     _rtcmem_status = false;
     _systemStable  = true;
+
+    // ntp
+    _ntp_server = strdup(MYESP_NTP_SERVER);
+    ;
+    _ntp_interval = 60;
+    _ntp_timezone = 1;
+    _ntp_enabled  = false;
+
+    // get the build time
+    _buildTime = _getBuildTime();
 }
 
 MyESP::~MyESP() {
@@ -85,6 +109,10 @@ MyESP::~MyESP() {
 
 // end
 void MyESP::end() {
+    SPIFFS.end();
+    _ws->enable(false);
+    delete _webServer;
+    delete _ws;
     SerialAndTelnet.end();
     jw.disconnect();
 }
@@ -141,12 +169,12 @@ void MyESP::myDebug_P(PGM_P format_P, ...) {
 
 // use Serial?
 bool MyESP::getUseSerial() {
-    return (_serial);
+    return (_general_serial);
 }
 
 // heartbeat
 bool MyESP::getHeartbeat() {
-    return (_heartbeat);
+    return (_mqtt_heartbeat);
 }
 
 // init heap ram
@@ -169,12 +197,6 @@ uint32_t MyESP::_getUsedHeap() {
 // called when WiFi is connected, and used to start OTA, MQTT
 void MyESP::_wifiCallback(justwifi_messages_t code, char * parameter) {
     if ((code == MESSAGE_CONNECTED)) {
-#if defined(ARDUINO_ARCH_ESP32)
-        String hostname = String(WiFi.getHostname());
-#else
-        String hostname = WiFi.hostname();
-#endif
-
         myDebug_P(PSTR("[WIFI] SSID  %s"), WiFi.SSID().c_str());
         myDebug_P(PSTR("[WIFI] CH    %d"), WiFi.channel());
         myDebug_P(PSTR("[WIFI] RSSI  %d"), WiFi.RSSI());
@@ -183,7 +205,7 @@ void MyESP::_wifiCallback(justwifi_messages_t code, char * parameter) {
         myDebug_P(PSTR("[WIFI] GW    %s"), WiFi.gatewayIP().toString().c_str());
         myDebug_P(PSTR("[WIFI] MASK  %s"), WiFi.subnetMask().toString().c_str());
         myDebug_P(PSTR("[WIFI] DNS   %s"), WiFi.dnsIP().toString().c_str());
-        myDebug_P(PSTR("[WIFI] HOST  %s"), hostname.c_str());
+        myDebug_P(PSTR("[WIFI] HOST  %s"), _getESPhostname().c_str());
 
         // start OTA
         ArduinoOTA.begin(); // moved to support esp32
@@ -192,41 +214,51 @@ void MyESP::_wifiCallback(justwifi_messages_t code, char * parameter) {
         // MQTT Setup
         _mqtt_setup();
 
-        _wifi_connected = true;
-
-        // finally if we don't want Serial anymore, turn it off
-        if (!_serial) {
+        // if we don't want Serial anymore, turn it off
+        if (!_general_serial) {
             myDebug_P(PSTR("[SYSTEM] Disabling serial port communication."));
             SerialAndTelnet.flush(); // flush so all buffer is printed to serial
-            SerialAndTelnet.setSerial(NULL);
+            setUseSerial(false);
+        } else {
+            myDebug_P(PSTR("[SYSTEM] Serial port communication is enabled."));
         }
 
-        // call any final custom settings
-        if (_wifi_callback) {
-            _wifi_callback();
+        _wifi_connected = true;
+
+        // NTP now that we have a WiFi connection
+        if (_ntp_enabled) {
+            NTP.Ntp(_ntp_server, _ntp_timezone, _ntp_interval * 60); // set up NTP server
+            myDebug_P(PSTR("[NTP] NTP internet time enabled via server %s"), _ntp_server);
+        }
+
+        // call any final custom stuff
+        if (_wifi_callback_f) {
+            _wifi_callback_f();
         }
 
         jw.enableAPFallback(false); // Disable AP mode after initial connect was successful
     }
 
     if (code == MESSAGE_ACCESSPOINT_CREATED) {
-        _wifi_connected = true;
-
         myDebug_P(PSTR("[WIFI] MODE AP"));
         myDebug_P(PSTR("[WIFI] SSID  %s"), jw.getAPSSID().c_str());
         myDebug_P(PSTR("[WIFI] IP    %s"), WiFi.softAPIP().toString().c_str());
         myDebug_P(PSTR("[WIFI] MAC   %s"), WiFi.softAPmacAddress().c_str());
 
-        // finally if we don't want Serial anymore, turn it off
-        if (!_serial) {
+        // if we don't want Serial anymore, turn it off
+        if (!_general_serial) {
             myDebug_P(PSTR("[SYSTEM] Disabling serial port communication."));
             SerialAndTelnet.flush(); // flush so all buffer is printed to serial
-            SerialAndTelnet.setSerial(NULL);
+            setUseSerial(false);
+        } else {
+            myDebug_P(PSTR("[SYSTEM] Serial port communication is enabled."));
         }
 
-        // call any final custom settings
-        if (_wifi_callback) {
-            _wifi_callback();
+        _wifi_connected = true;
+
+        // call any final custom stuff
+        if (_wifi_callback_f) {
+            _wifi_callback_f();
         }
     }
 
@@ -309,16 +341,8 @@ void MyESP::_mqttOnMessage(char * topic, char * payload, size_t len) {
         return;
     }
 
-    // handle response from a start message
-    // for example with HA it sends the system time from the server
-    if (strcmp(topic, MQTT_TOPIC_START) == 0) {
-        myDebug_P(PSTR("[MQTT] Received boottime: %s"), message);
-        setBoottime(message);
-        return;
-    }
-
     // Send message event to custom service
-    (_mqtt_callback)(MQTT_MESSAGE_EVENT, topic, message);
+    (_mqtt_callback_f)(MQTT_MESSAGE_EVENT, topic, message);
 }
 
 // MQTT subscribe
@@ -331,7 +355,7 @@ void MyESP::mqttSubscribe(const char * topic) {
 }
 
 // MQTT unsubscribe
-// to MQTT_BASE/app_hostname/topic
+// to MQTT_BASE with app_hostname/topic
 void MyESP::mqttUnsubscribe(const char * topic) {
     if (mqttClient.connected() && (strlen(topic) > 0)) {
         unsigned int packetId = mqttClient.unsubscribe(_mqttTopic(topic));
@@ -341,13 +365,13 @@ void MyESP::mqttUnsubscribe(const char * topic) {
 
 // MQTT Publish
 void MyESP::mqttPublish(const char * topic, const char * payload) {
-    // myDebug_P(PSTR("[MQTT] Sending pubish to %s with payload %s"), _mqttTopic(topic), payload);
+    // myDebug_P(PSTR("[MQTT] Sending pubish to %s with payload %s"), _mqttTopic(topic), payload); // for debugging
     mqttClient.publish(_mqttTopic(topic), _mqtt_qos, _mqtt_retain, payload);
 }
 
 // MQTT onConnect - when a connect is established
 void MyESP::_mqttOnConnect() {
-    myDebug_P(PSTR("[MQTT] Connected"));
+    myDebug_P(PSTR("[MQTT] is connected"));
     _mqtt_reconnect_delay = MQTT_RECONNECT_DELAY_MIN;
 
     _mqtt_last_connection = millis();
@@ -359,16 +383,16 @@ void MyESP::_mqttOnConnect() {
     mqttSubscribe(MQTT_TOPIC_RESTART);
 
     // subscribe to a start message and send the first publish
-    myESP.mqttSubscribe(MQTT_TOPIC_START);
-    myESP.mqttPublish(MQTT_TOPIC_START, MQTT_TOPIC_START_PAYLOAD);
+    mqttSubscribe(MQTT_TOPIC_START);
+    mqttPublish(MQTT_TOPIC_START, MQTT_TOPIC_START_PAYLOAD);
 
     // call custom function to handle mqtt receives
-    (_mqtt_callback)(MQTT_CONNECT_EVENT, NULL, NULL);
+    (_mqtt_callback_f)(MQTT_CONNECT_EVENT, nullptr, nullptr);
 }
 
 // MQTT setup
 void MyESP::_mqtt_setup() {
-    if (!_mqtt_host) {
+    if (!_mqtt_enabled) {
         myDebug_P(PSTR("[MQTT] is disabled"));
     }
 
@@ -377,7 +401,7 @@ void MyESP::_mqtt_setup() {
     mqttClient.onDisconnect([this](AsyncMqttClientDisconnectReason reason) {
         if (reason == AsyncMqttClientDisconnectReason::TCP_DISCONNECTED) {
             myDebug_P(PSTR("[MQTT] TCP Disconnected"));
-            (_mqtt_callback)(MQTT_DISCONNECT_EVENT, NULL, NULL); // call callback with disconnect
+            (_mqtt_callback_f)(MQTT_DISCONNECT_EVENT, nullptr, nullptr); // call callback with disconnect
         }
         if (reason == AsyncMqttClientDisconnectReason::MQTT_IDENTIFIER_REJECTED) {
             myDebug_P(PSTR("[MQTT] Identifier Rejected"));
@@ -398,7 +422,6 @@ void MyESP::_mqtt_setup() {
     });
 
     //mqttClient.onSubscribe([this](uint16_t packetId, uint8_t qos) { myDebug_P(PSTR("[MQTT] Subscribe ACK for PID %d"), packetId); });
-
     //mqttClient.onPublish([this](uint16_t packetId) { myDebug_P(PSTR("[MQTT] Publish ACK for PID %d"), packetId); });
 
     mqttClient.onMessage([this](char * topic, char * payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) {
@@ -408,16 +431,22 @@ void MyESP::_mqtt_setup() {
 
 // WiFI setup
 void MyESP::_wifi_setup() {
-    jw.setHostname(_app_hostname); // Set WIFI hostname
+    jw.setHostname(_general_hostname); // Set WIFI hostname
     jw.subscribe([this](justwifi_messages_t code, char * parameter) { _wifiCallback(code, parameter); });
-    jw.enableAP(false);
-    jw.setConnectTimeout(WIFI_CONNECT_TIMEOUT);
-    jw.setReconnectTimeout(WIFI_RECONNECT_INTERVAL);
-    jw.enableAPFallback(true);                 // AP mode only as fallback
-    jw.enableSTA(true);                        // Enable STA mode (connecting to a router)
-    jw.enableScan(false);                      // Configure it to scan available networks and connect in order of dBm
-    jw.cleanNetworks();                        // Clean existing network configuration
-    jw.addNetwork(_wifi_ssid, _wifi_password); // Add a network
+    jw.setConnectTimeout(MYESP_WIFI_CONNECT_TIMEOUT);
+    jw.setReconnectTimeout(MYESP_WIFI_RECONNECT_INTERVAL);
+    jw.enableAPFallback(true); // AP mode only as fallback
+    jw.enableSTA(true);        // Enable STA mode (connecting to a router)
+    jw.enableScan(false);      // Configure it to scan available networks and connect in order of dBm
+    jw.cleanNetworks();        // Clean existing network configuration
+
+    /// wmode 1 is AP, 0 is client
+    if (_network_wmode == 1) {
+        jw.enableAP(true);
+    } else {
+        jw.enableAP(false);
+        jw.addNetwork(_network_ssid, _network_password); // Add a network
+    }
 
 #if defined(ESP8266)
     WiFi.setSleepMode(WIFI_NONE_SLEEP); // added to possibly fix wifi dropouts in arduino core 2.5.0
@@ -426,8 +455,8 @@ void MyESP::_wifi_setup() {
 
 // set the callback function for the OTA onstart
 void MyESP::setOTA(ota_callback_f OTACallback_pre, ota_callback_f OTACallback_post) {
-    _ota_pre_callback  = OTACallback_pre;
-    _ota_post_callback = OTACallback_post;
+    _ota_pre_callback_f  = OTACallback_pre;
+    _ota_post_callback_f = OTACallback_post;
 }
 
 // OTA callback when the upload process starts
@@ -450,28 +479,27 @@ void MyESP::_OTACallback() {
 #endif
 
     // stop the web server
-    webServer.close();
+    // TODO: check if we need to stop webserver on OTA
+    _ws->closeAll();
+    _webServer->end();
 
-    _ota_doing_update = true;
-
-    if (_ota_pre_callback) {
-        (_ota_pre_callback)(); // call custom function
+    if (_ota_pre_callback_f) {
+        (_ota_pre_callback_f)(); // call custom function
     }
 }
 
 // OTA Setup
 void MyESP::_ota_setup() {
-    if (!_wifi_ssid) {
+    if (!_network_ssid) {
         return;
     }
 
     ArduinoOTA.setPort(OTA_PORT);
-    ArduinoOTA.setHostname(_app_hostname);
+    ArduinoOTA.setHostname(_general_hostname);
 
     ArduinoOTA.onStart([this]() { _OTACallback(); });
     ArduinoOTA.onEnd([this]() {
         myDebug_P(PSTR("[OTA] Done, restarting..."));
-        _ota_doing_update = false;
         _deferredReset(500, CUSTOM_RESET_OTA);
     });
 
@@ -503,14 +531,6 @@ void MyESP::_ota_setup() {
     });
 }
 
-// sets boottime
-void MyESP::setBoottime(const char * boottime) {
-    if (_boottime) {
-        free(_boottime);
-    }
-    _boottime = strdup(boottime);
-}
-
 // eeprom
 void MyESP::_eeprom_setup() {
 #ifdef CRASH
@@ -521,8 +541,8 @@ void MyESP::_eeprom_setup() {
 
 // Set callback of sketch function to process project messages
 void MyESP::setTelnet(telnetcommand_callback_f callback_cmd, telnet_callback_f callback) {
-    _telnetcommand_callback = callback_cmd; // external function to handle commands
-    _telnet_callback        = callback;
+    _telnetcommand_callback_f = callback_cmd; // external function to handle commands
+    _telnet_callback_f        = callback;
 }
 
 void MyESP::_telnetConnected() {
@@ -539,15 +559,15 @@ void MyESP::_telnetConnected() {
 #endif
 
     // call callback
-    if (_telnet_callback) {
-        (_telnet_callback)(TELNET_EVENT_CONNECT);
+    if (_telnet_callback_f) {
+        (_telnet_callback_f)(TELNET_EVENT_CONNECT);
     }
 }
 
 void MyESP::_telnetDisconnected() {
     myDebug_P(PSTR("[TELNET] Telnet connection closed"));
-    if (_telnet_callback) {
-        (_telnet_callback)(TELNET_EVENT_DISCONNECT); // call callback
+    if (_telnet_callback_f) {
+        (_telnet_callback_f)(TELNET_EVENT_DISCONNECT); // call callback
     }
 }
 
@@ -589,58 +609,93 @@ void MyESP::_consoleShowHelp() {
 #endif
 
     // call callback function
-    if (_telnet_callback) {
-        (_telnet_callback)(TELNET_EVENT_SHOWCMD);
+    if (_telnet_callback_f) {
+        (_telnet_callback_f)(TELNET_EVENT_SHOWCMD);
     }
 
     myDebug_P(PSTR("")); // newline
 }
 
+// see if a char * string is empty. It could not be initialized yet.
+// return true if there is a value
+bool MyESP::_hasValue(char * s) {
+    if (s == nullptr) {
+        return false;
+    }
+    return (s[0] != '\0');
+}
+
 // print all set commands and current values
 void MyESP::_printSetCommands() {
-    myDebug_P(PSTR("")); // newline
-    myDebug_P(PSTR("The following set commands are available:"));
-    myDebug_P(PSTR("")); // newline
+    myDebug_P(PSTR("\nThe following set commands are available:\n"));
     myDebug_P(PSTR("  set erase"));
+    myDebug_P(PSTR("  set <wifi_mode <ap | client>"));
     myDebug_P(PSTR("  set <wifi_ssid | wifi_password> [value]"));
-    myDebug_P(PSTR("  set <mqtt_host | mqtt_username | mqtt_password> [value]"));
+    myDebug_P(PSTR("  set mqtt_enabled <on | off>"));
+    myDebug_P(PSTR("  set <mqtt_ip | mqtt_username | mqtt_password> [value]"));
+    myDebug_P(PSTR("  set mqtt_base [value]"));
+    myDebug_P(PSTR("  set mqtt_port [value]"));
+    myDebug_P(PSTR("  set ntp_enabled <on | off>"));
     myDebug_P(PSTR("  set serial <on | off>"));
 
     // call callback function
-    if (_telnet_callback) {
-        (_telnet_callback)(TELNET_EVENT_SHOWSET);
+    if (_telnet_callback_f) {
+        (_telnet_callback_f)(TELNET_EVENT_SHOWSET);
     }
 
-    myDebug_P(PSTR("")); // newline
-    myDebug_P(PSTR("Stored settings:"));
-    myDebug_P(PSTR("")); // newline
-    myDebug_P(PSTR("  wifi_ssid=%s "), (!_wifi_ssid) ? "<not set>" : _wifi_ssid);
-    SerialAndTelnet.print(FPSTR("  wifi_password="));
-    if (!_wifi_password) {
-        SerialAndTelnet.print(FPSTR("<not set>"));
+    myDebug_P(PSTR("\nStored settings:\n"));
+
+    if (_network_wmode == 0) {
+        myDebug_P(PSTR("  wifi_mode=client"));
     } else {
-        for (uint8_t i = 0; i < strlen(_wifi_password); i++) {
+        myDebug_P(PSTR("  wifi_mode=ap"));
+    }
+
+    if (_hasValue(_network_ssid)) {
+        myDebug_P(PSTR("  wifi_ssid=%s"), _network_ssid);
+    } else {
+        myDebug_P(PSTR("  wifi_ssid="));
+    }
+    SerialAndTelnet.print(FPSTR("  wifi_password="));
+    if (_hasValue(_network_password)) {
+        for (uint8_t i = 0; i < strlen(_network_password); i++) {
             SerialAndTelnet.print(FPSTR("*"));
         }
     }
-    myDebug_P(PSTR("")); // newline
-    myDebug_P(PSTR("  mqtt_host=%s"), (!_mqtt_host) ? "<not set>" : _mqtt_host);
-    myDebug_P(PSTR("  mqtt_username=%s"), (!_mqtt_username) ? "<not set>" : _mqtt_username);
-    SerialAndTelnet.print(FPSTR("  mqtt_password="));
-    if (!_mqtt_password) {
-        SerialAndTelnet.print(FPSTR("<not set>"));
+    myDebug_P(PSTR(""));
+    myDebug_P(PSTR("  mqtt_enabled=%s"), (_mqtt_enabled) ? "on" : "off");
+    if (_hasValue(_mqtt_ip)) {
+        myDebug_P(PSTR("  mqtt_ip=%s"), _mqtt_ip);
     } else {
+        myDebug_P(PSTR("  mqtt_ip="));
+    }
+    if (_hasValue(_mqtt_user)) {
+        myDebug_P(PSTR("  mqtt_username=%s"), _mqtt_user);
+    } else {
+        myDebug_P(PSTR("  mqtt_username="));
+    }
+    SerialAndTelnet.print(FPSTR("  mqtt_password="));
+    if (_hasValue(_mqtt_password)) {
         for (uint8_t i = 0; i < strlen(_mqtt_password); i++) {
             SerialAndTelnet.print(FPSTR("*"));
         }
     }
+    myDebug_P(PSTR(""));
+    if (_hasValue(_mqtt_base)) {
+        myDebug_P(PSTR("  mqtt_base=%s"), _mqtt_base);
+    } else {
+        myDebug_P(PSTR("  mqtt_base="));
+    }
+    myDebug_P(PSTR("  mqtt_port=%d"), _mqtt_port);
 
-    myDebug_P(PSTR("")); // newline
-    myDebug_P(PSTR("  serial=%s"), (_serial) ? "on" : "off");
-    myDebug_P(PSTR("  heartbeat=%s"), (_heartbeat) ? "on" : "off");
+    myDebug_P(PSTR("  serial=%s"), (_general_serial) ? "on" : "off");
+    myDebug_P(PSTR("  heartbeat=%s"), (_mqtt_heartbeat) ? "on" : "off");
+    myDebug_P(PSTR("  ntp_enabled=%s"), (_ntp_enabled) ? "on" : "off");
 
     // print any custom settings
-    (_fs_settings_callback)(MYESP_FSACTION_LIST, 0, NULL, NULL);
+    if (_fs_setlist_callback_f) {
+        (_fs_setlist_callback_f)(MYESP_FSACTION_LIST, 0, nullptr, nullptr);
+    }
 
     myDebug_P(PSTR("")); // newline
 }
@@ -661,9 +716,9 @@ void MyESP::resetESP() {
 // if parameter true then a word is only terminated by a newline
 char * MyESP::_telnet_readWord(bool allow_all_chars) {
     if (allow_all_chars) {
-        return (strtok(NULL, "\n")); // allow only newline
+        return (strtok(nullptr, "\n")); // allow only newline
     } else {
-        return (strtok(NULL, ", \n")); // allow space and comma
+        return (strtok(nullptr, ", \n")); // allow space and comma
     }
 }
 
@@ -671,7 +726,8 @@ char * MyESP::_telnet_readWord(bool allow_all_chars) {
 // messy code but effective since we don't have too many settings
 // wc is word count, number of parameters after the 'set' command
 bool MyESP::_changeSetting(uint8_t wc, const char * setting, const char * value) {
-    bool ok = false;
+    bool save_config        = false;
+    bool save_custom_config = false;
 
     // check for our internal commands first
     if (strcmp(setting, "erase") == 0) {
@@ -679,91 +735,137 @@ bool MyESP::_changeSetting(uint8_t wc, const char * setting, const char * value)
         return true;
 
     } else if (strcmp(setting, "wifi_ssid") == 0) {
-        if (_wifi_ssid)
-            free(_wifi_ssid);
-        _wifi_ssid = NULL; // just to be sure
         if (value) {
-            _wifi_ssid = strdup(value);
+            free(_network_ssid);
+            _network_ssid = strdup(value);
         }
-        ok = true;
-        jw.enableSTA(false);
+        save_config = true;
+        //jw.enableSTA(false);
         myDebug_P(PSTR("Note: please 'reboot' ESP to apply new WiFi settings"));
     } else if (strcmp(setting, "wifi_password") == 0) {
-        if (_wifi_password)
-            free(_wifi_password);
-        _wifi_password = NULL; // just to be sure
         if (value) {
-            _wifi_password = strdup(value);
+            free(_network_password);
+            _network_password = strdup(value);
         }
-        ok = true;
-        jw.enableSTA(false);
+        save_config = true;
+        //jw.enableSTA(false);
         myDebug_P(PSTR("Note: please 'reboot' ESP to apply new WiFi settings"));
 
-    } else if (strcmp(setting, "mqtt_host") == 0) {
-        if (_mqtt_host)
-            free(_mqtt_host);
-        _mqtt_host = NULL; // just to be sure
+    } else if (strcmp(setting, "wifi_mode") == 0) {
         if (value) {
-            _mqtt_host = strdup(value);
+            if (strcmp(value, "ap") == 0) {
+                _network_wmode = 1;
+                save_config    = true;
+                myDebug_P(PSTR("Note: please 'reboot' ESP to apply new WiFi settings"));
+            } else if (strcmp(value, "client") == 0) {
+                _network_wmode = 0;
+                save_config    = true;
+                myDebug_P(PSTR("Note: please 'reboot' ESP to apply new WiFi settings"));
+            } else {
+                save_config = false;
+            }
         }
-        ok = true;
+
+    } else if (strcmp(setting, "mqtt_ip") == 0) {
+        if (value) {
+            free(_mqtt_ip);
+            _mqtt_ip = strdup(value);
+        }
+        save_config = true;
     } else if (strcmp(setting, "mqtt_username") == 0) {
-        if (_mqtt_username)
-            free(_mqtt_username);
-        _mqtt_username = NULL; // just to be sure
         if (value) {
-            _mqtt_username = strdup(value);
+            free(_mqtt_user);
+            _mqtt_user = strdup(value);
         }
-        ok = true;
+        save_config = true;
     } else if (strcmp(setting, "mqtt_password") == 0) {
-        if (_mqtt_password)
-            free(_mqtt_password);
-        _mqtt_password = NULL; // just to be sure
         if (value) {
+            free(_mqtt_password);
             _mqtt_password = strdup(value);
         }
-        ok = true;
-
-    } else if (strcmp(setting, "serial") == 0) {
-        ok      = true;
-        _serial = false;
+        save_config = true;
+    } else if (strcmp(setting, "mqtt_base") == 0) {
+        if (value) {
+            free(_mqtt_base);
+            _mqtt_base = strdup(value);
+        }
+        save_config = true;
+    } else if (strcmp(setting, "mqtt_port") == 0) {
+        if (value) {
+            _mqtt_port = atoi(value);
+        }
+        save_config = true;
+    } else if (strcmp(setting, "mqtt_enabled") == 0) {
+        save_config = true;
         if (value) {
             if (strcmp(value, "on") == 0) {
-                _serial = true;
-                ok      = true;
+                _mqtt_enabled = true;
+                save_config   = true;
+            } else if (strcmp(value, "off") == 0) {
+                _mqtt_enabled = false;
+                save_config   = true;
+            } else {
+                save_config = false;
+            }
+        }
+
+    } else if (strcmp(setting, "serial") == 0) {
+        save_config = true;
+        if (value) {
+            if (strcmp(value, "on") == 0) {
+                _general_serial = true;
+                save_config     = true;
                 myDebug_P(PSTR("Reboot ESP to activate Serial mode."));
             } else if (strcmp(value, "off") == 0) {
-                _serial = false;
-                ok      = true;
+                _general_serial = false;
+                save_config     = true;
                 myDebug_P(PSTR("Reboot ESP to deactivate Serial mode."));
             } else {
-                ok = false;
+                save_config = false;
             }
         }
 
     } else if (strcmp(setting, "heartbeat") == 0) {
-        ok         = true;
-        _heartbeat = false;
+        save_config = true;
         if (value) {
             if (strcmp(value, "on") == 0) {
-                _heartbeat = true;
-                ok         = true;
+                _mqtt_heartbeat = true;
+                save_config     = true;
                 myDebug_P(PSTR("Heartbeat on"));
             } else if (strcmp(value, "off") == 0) {
-                _heartbeat = false;
-                ok         = true;
+                _mqtt_heartbeat = false;
+                save_config     = true;
                 myDebug_P(PSTR("Heartbeat off"));
             } else {
-                ok = false;
+                save_config = false;
+            }
+        }
+    } else if (strcmp(setting, "ntp_enabled") == 0) {
+        save_config = true;
+        if (value) {
+            if (strcmp(value, "on") == 0) {
+                _ntp_enabled = true;
+                save_config  = true;
+                myDebug_P(PSTR("NTP on"));
+            } else if (strcmp(value, "off") == 0) {
+                _ntp_enabled = false;
+                save_config  = true;
+                myDebug_P(PSTR("NTP off"));
+            } else {
+                save_config = false;
             }
         }
     } else {
         // finally check for any custom commands
-        ok = (_fs_settings_callback)(MYESP_FSACTION_SET, wc, setting, value);
+        if (_fs_setlist_callback_f) {
+            save_custom_config = (_fs_setlist_callback_f)(MYESP_FSACTION_SET, wc, setting, value);
+        }
     }
 
+    bool ok = false;
+
     // if we were able to recognize the set command, continue
-    if (ok) {
+    if ((save_config || save_custom_config)) {
         // check for 2 params
         if (value == nullptr) {
             myDebug_P(PSTR("%s setting reset to its default value."), setting);
@@ -771,10 +873,16 @@ bool MyESP::_changeSetting(uint8_t wc, const char * setting, const char * value)
             // must be 3 params
             myDebug_P(PSTR("%s changed."), setting);
         }
+    }
 
-        myDebug_P(PSTR("")); // newline
+    // now do the saving for system config if something has changed
+    if (save_config) {
+        ok = _fs_writeConfig();
+    }
 
-        (void)fs_saveConfig(); // always save the values
+    // and see if we need to also save for custom config
+    if (save_custom_config) {
+        ok = _fs_createCustomConfig();
     }
 
     return ok;
@@ -782,8 +890,8 @@ bool MyESP::_changeSetting(uint8_t wc, const char * setting, const char * value)
 
 // force the serial on/off
 void MyESP::setUseSerial(bool b) {
-    _serial = b;
-    SerialAndTelnet.setSerial(b ? &Serial : NULL);
+    _general_serial = b;
+    SerialAndTelnet.setSerial(b ? &Serial : nullptr);
 }
 
 void MyESP::_telnetCommand(char * commandLine) {
@@ -815,10 +923,10 @@ void MyESP::_telnetCommand(char * commandLine) {
         if (wc == 1) {
             _printSetCommands();
             ok = true;
-        } else if (wc == 2) { // set <xxx>
+        } else if (wc == 2) { // set <something>
             char * setting = _telnet_readWord(false);
-            ok             = _changeSetting(wc - 1, setting, NULL);
-        } else { // set <xxx> <yyy>
+            ok             = _changeSetting(wc - 1, setting, nullptr);
+        } else { // set <something> <values...>
             char * setting = _telnet_readWord(false);
             char * value   = _telnet_readWord(true); // allow strange characters
             ok             = _changeSetting(wc - 1, setting, value);
@@ -868,8 +976,8 @@ void MyESP::_telnetCommand(char * commandLine) {
 #endif
 
     // call callback function
-    if (_telnetcommand_callback) {
-        (_telnetcommand_callback)(wc, commandLine);
+    if (_telnetcommand_callback_f) {
+        (_telnetcommand_callback_f)(wc, commandLine);
     }
 }
 
@@ -886,33 +994,32 @@ String MyESP::_getESPhostname() {
     return (hostname);
 }
 
-// returns build time as a String - copied for espurna. see (c)
 // takes the time from the gcc during compilation
-String MyESP::_buildTime() {
-    const char   time_now[] = __TIME__; // hh:mm:ss
-    unsigned int hour       = atoi(&time_now[0]);
-    unsigned int minute     = atoi(&time_now[3]);
-    unsigned int second     = atoi(&time_now[6]);
+char * MyESP::_getBuildTime() {
+    const char time_now[] = __TIME__; // hh:mm:ss
+    uint8_t    hour       = atoi(&time_now[0]);
+    uint8_t    minute     = atoi(&time_now[3]);
+    uint8_t    second     = atoi(&time_now[6]);
 
     const char   date_now[] = __DATE__; // Mmm dd yyyy
     const char * months[]   = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
-    unsigned int month      = 0;
+    uint8_t      month      = 0;
     for (int i = 0; i < 12; i++) {
         if (strncmp(date_now, months[i], 3) == 0) {
             month = i + 1;
             break;
         }
     }
-    unsigned int day  = atoi(&date_now[3]);
-    unsigned int year = atoi(&date_now[7]);
+    uint8_t  day  = atoi(&date_now[3]);
+    uint16_t year = atoi(&date_now[7]);
 
-    char buffer[20];
+    char buffer[30];
     snprintf_P(buffer, sizeof(buffer), PSTR("%04d-%02d-%02d %02d:%02d:%02d"), year, month, day, hour, minute, second);
 
-    return String(buffer);
+    return (strdup(buffer));
 }
 
-// returns system uptime in seconds - copied for espurna. see (c)
+// returns system uptime in seconds
 unsigned long MyESP::_getUptime() {
     static uint32_t last_uptime      = 0;
     static uint8_t  uptime_overflows = 0;
@@ -921,7 +1028,7 @@ unsigned long MyESP::_getUptime() {
         ++uptime_overflows;
     }
     last_uptime             = millis();
-    uint32_t uptime_seconds = uptime_overflows * (UPTIME_OVERFLOW / 1000) + (last_uptime / 1000);
+    uint32_t uptime_seconds = uptime_overflows * (MYESP_UPTIME_OVERFLOW / 1000) + (last_uptime / 1000);
 
     return uptime_seconds;
 }
@@ -999,6 +1106,7 @@ bool MyESP::_rtcmemStatus() {
     if (reason == REASON_EXT_SYS_RST) { // external system reset
         if (getSystemBootStatus() == MYESP_BOOTSTATUS_BOOTING) {
             _setSystemBootStatus(MYESP_BOOTSTATUS_RESETNEEDED);
+            _formatreq = true; // do a wipe next in the loop()
         } else {
             _setSystemBootStatus(MYESP_BOOTSTATUS_POWERON);
         }
@@ -1044,7 +1152,7 @@ void MyESP::_deferredReset(unsigned long delaytime, uint8_t reason) {
 
 // Call this method on boot with stable=true to reset the crash counter
 // Each call increments the counter
-// If the counter reaches SYSTEM_CHECK_MAX then the system is flagged as unstable
+// If the counter reaches MYESP_SYSTEM_CHECK_MAX then the system is flagged as unstable
 void MyESP::_setSystemCheck(bool stable) {
     uint8_t value = 0;
 
@@ -1058,18 +1166,16 @@ void MyESP::_setSystemCheck(bool stable) {
 
         value = _getSystemStabilityCounter();
 
-        if (++value > SYSTEM_CHECK_MAX) {
+        if (++value > MYESP_SYSTEM_CHECK_MAX) {
             _systemStable = false;
             value         = 0; // system is unstable
-            myDebug_P(PSTR("[SYSTEM] Warning, system UNSTABLE."));
+            myDebug_P(PSTR("[SYSTEM] Warning, system UNSTABLE. Serial mode is enabled."));
 
-            /*
             // enable Serial again
-            if (!_serial) {
+            if (!_general_serial) {
                 SerialAndTelnet.setSerial(&Serial);
-                _serial = true;
+                _general_serial = true;
             }
-            */
         }
     }
 
@@ -1084,7 +1190,7 @@ bool MyESP::_getSystemCheck() {
 // periodically check if system is stable
 void MyESP::_systemCheckLoop() {
     static bool checked = false;
-    if (!checked && (millis() > SYSTEM_CHECK_TIME)) {
+    if (!checked && (millis() > MYESP_SYSTEM_CHECK_TIME)) {
         _setSystemCheck(true); // Flag system as stable
         checked = true;
     }
@@ -1103,10 +1209,7 @@ void MyESP::showSystemStats() {
 
     myDebug_P(PSTR(" [APP] %s version: %s"), _app_name, _app_version);
     myDebug_P(PSTR(" [APP] MyESP version: %s"), MYESP_VERSION);
-    myDebug_P(PSTR(" [APP] Build timestamp: %s"), _buildTime().c_str());
-    if (_boottime != NULL) {
-        myDebug_P(PSTR(" [APP] Boot time: %s"), _boottime);
-    }
+    myDebug_P(PSTR(" [APP] Build timestamp: %s"), _buildTime);
 
     // uptime
     uint32_t t = _getUptime(); // seconds
@@ -1135,9 +1238,13 @@ void MyESP::showSystemStats() {
     myDebug_P(PSTR(" [WIFI] WiFi MAC: %s"), WiFi.macAddress().c_str());
 
     if (isMQTTConnected()) {
-        myDebug_P(PSTR(" [MQTT] is connected (with heartbeat %s)"), getHeartbeat() ? "enabled" : "disabled");
+        myDebug_P(PSTR(" [MQTT] is connected (heartbeat %s)"), getHeartbeat() ? "enabled" : "disabled");
     } else {
         myDebug_P(PSTR(" [MQTT] is disconnected"));
+    }
+
+    if (_ntp_enabled) {
+        myDebug_P(PSTR(" [NTP] Time in UTC is %02d:%02d:%02d"), hour(now()), minute(now()), second(now()));
     }
 
 #ifdef CRASH
@@ -1153,6 +1260,8 @@ void MyESP::showSystemStats() {
     }
     myDebug(output_str);
 #endif
+
+    myDebug_P(PSTR(" [SYSTEM] System is %s"), _getSystemCheck() ? "Stable" : "Unstable!");
 
 #ifdef ARDUINO_BOARD
     myDebug_P(PSTR(" [SYSTEM] Board: %s"), ARDUINO_BOARD);
@@ -1217,10 +1326,10 @@ void MyESP::showSystemStats() {
 void MyESP::_heartbeatCheck(bool force = false) {
     static uint32_t last_heartbeat = 0;
 
-    if ((millis() - last_heartbeat > HEARTBEAT_INTERVAL) || force) {
+    if ((millis() - last_heartbeat > MYESP_HEARTBEAT_INTERVAL) || force) {
         last_heartbeat = millis();
 
-        if (!isMQTTConnected() || !(_heartbeat)) {
+        if (!isMQTTConnected() || !(_mqtt_heartbeat)) {
             return;
         }
 
@@ -1244,8 +1353,7 @@ void MyESP::_heartbeatCheck(bool force = false) {
         strlcat(payload, itoa(mem_available, s, 10), sizeof(payload)); // free mem as a %
         strlcat(payload, "%", sizeof(payload));
 
-        // send to MQTT
-        myESP.mqttPublish(MQTT_TOPIC_HEARTBEAT, payload);
+        mqttPublish(MQTT_TOPIC_HEARTBEAT, payload); // send to MQTT
     }
 }
 
@@ -1271,13 +1379,12 @@ void MyESP::_telnetHandle() {
             if (charsRead > 0) {
                 charsRead      = 0; // is static, so have to reset
                 _suspendOutput = false;
-                if (_serial) {
+                if (_general_serial) {
                     SerialAndTelnet.serialPrint('\n'); // force newline if in Serial
                 }
                 _telnetCommand(_command);
             }
             break;
-
         case '\b': // (^H)
         case 0x7F: // (^?)
             if (charsRead > 0) {
@@ -1286,9 +1393,7 @@ void MyESP::_telnetHandle() {
                 SerialAndTelnet.write(' ');
                 SerialAndTelnet.write('\b');
             }
-
             break;
-
         case '?':
             if (!_suspendOutput) {
                 _consoleShowHelp();
@@ -1311,10 +1416,11 @@ void MyESP::_telnetHandle() {
     }
 }
 
-// make sure we have a connection to MQTT broker
+// make sure we have a connection to MQTT broker and the MQTT IP is set
 void MyESP::_mqttConnect() {
-    if (!_mqtt_host)
+    if ((!_mqtt_enabled) || (!_hasValue(_mqtt_ip))) {
         return; // MQTT not enabled
+    }
 
     // Do not connect if already connected or still trying to connect
     if (mqttClient.connected() || _mqtt_connecting || (WiFi.status() != WL_CONNECTED)) {
@@ -1334,21 +1440,21 @@ void MyESP::_mqttConnect() {
         _mqtt_reconnect_delay = MQTT_RECONNECT_DELAY_MAX;
     }
 
-    mqttClient.setServer(_mqtt_host, MQTT_PORT);
-    mqttClient.setClientId(_app_hostname);
+    mqttClient.setServer(_mqtt_ip, _mqtt_port);
+    mqttClient.setClientId(_general_hostname);
     mqttClient.setKeepAlive(_mqtt_keepalive);
     mqttClient.setCleanSession(false);
 
     // last will
-    if (_mqtt_will_topic) {
+    if (_hasValue(_mqtt_will_topic)) {
         //myDebug_P(PSTR("[MQTT] Setting last will topic %s"), _mqttTopic(_mqtt_will_topic));
         mqttClient.setWill(_mqttTopic(_mqtt_will_topic), 1, true,
                            _mqtt_will_offline_payload); // retain always true
     }
 
-    if (_mqtt_username && _mqtt_password) {
-        myDebug_P(PSTR("[MQTT] Connecting to MQTT using user %s..."), _mqtt_username);
-        mqttClient.setCredentials(_mqtt_username, _mqtt_password);
+    if (_hasValue(_mqtt_user)) {
+        myDebug_P(PSTR("[MQTT] Connecting to MQTT using user %s..."), _mqtt_user);
+        mqttClient.setCredentials(_mqtt_user, _mqtt_password);
     } else {
         myDebug_P(PSTR("[MQTT] Connecting to MQTT..."));
     }
@@ -1358,292 +1464,366 @@ void MyESP::_mqttConnect() {
 }
 
 // Setup everything we need
-void MyESP::setWIFI(const char * wifi_ssid, const char * wifi_password, wifi_callback_f callback) {
-    // Check SSID too long or missing
-    if (!wifi_ssid || *wifi_ssid == 0x00 || strlen(wifi_ssid) > MAX_SSID_LEN) {
-        _wifi_ssid = NULL;
-    } else {
-        _wifi_ssid = strdup(wifi_ssid);
-    }
-
-    // Check PASS too long
-    if (!wifi_password || *wifi_ssid == 0x00 || strlen(wifi_password) > MAX_PWD_LEN) {
-        _wifi_password = NULL;
-    } else {
-        _wifi_password = strdup(wifi_password);
-    }
-
+void MyESP::setWIFI(wifi_callback_f callback) {
     // callback
-    _wifi_callback = callback;
+    _wifi_callback_f = callback;
 }
 
 // init MQTT settings
-void MyESP::setMQTT(const char *    mqtt_host,
-                    const char *    mqtt_username,
-                    const char *    mqtt_password,
-                    const char *    mqtt_base,
-                    unsigned long   mqtt_keepalive,
-                    unsigned char   mqtt_qos,
-                    bool            mqtt_retain,
-                    const char *    mqtt_will_topic,
-                    const char *    mqtt_will_online_payload,
-                    const char *    mqtt_will_offline_payload,
-                    mqtt_callback_f callback) {
-    // can be empty
-    if (!mqtt_host || *mqtt_host == 0x00) {
-        _mqtt_host = NULL;
-    } else {
-        _mqtt_host = strdup(mqtt_host);
-    }
-
-    // mqtt username and password can be empty
-    if (!mqtt_username || *mqtt_username == 0x00) {
-        _mqtt_username = NULL;
-    } else {
-        _mqtt_username = strdup(mqtt_username);
-    }
-
-    // can be empty
-    if (!mqtt_password || *mqtt_password == 0x00) {
-        _mqtt_password = NULL;
-    } else {
-        _mqtt_password = strdup(mqtt_password);
-    }
-
-    // base
-    if (_mqtt_base) {
-        free(_mqtt_base);
-    }
-    _mqtt_base = strdup(mqtt_base);
-
-    // callback
-    _mqtt_callback = callback;
-
-    // various mqtt settings
-    _mqtt_keepalive = mqtt_keepalive;
-    _mqtt_qos       = mqtt_qos;
-    _mqtt_retain    = mqtt_retain;
-
-    // last will
-    if (!mqtt_will_topic || *mqtt_will_topic == 0x00) {
-        _mqtt_will_topic = NULL;
-    } else {
-        _mqtt_will_topic = strdup(mqtt_will_topic);
-    }
-
-    if (!mqtt_will_online_payload || *mqtt_will_online_payload == 0x00) {
-        _mqtt_will_online_payload = NULL;
-    } else {
-        _mqtt_will_online_payload = strdup(mqtt_will_online_payload);
-    }
-
-    if (!mqtt_will_offline_payload || *mqtt_will_offline_payload == 0x00) {
-        _mqtt_will_offline_payload = NULL;
-    } else {
-        _mqtt_will_offline_payload = strdup(mqtt_will_offline_payload);
-    }
+void MyESP::setMQTT(mqtt_callback_f callback) {
+    _mqtt_callback_f = callback; // callback
 }
 
 // builds up a topic by prefixing the base and hostname
 char * MyESP::_mqttTopic(const char * topic) {
-    char buffer[MQTT_MAX_TOPIC_SIZE] = {0};
+    static char buffer[MQTT_MAX_TOPIC_SIZE] = {0};
 
-    strlcpy(buffer, _mqtt_base, sizeof(buffer));
-    strlcat(buffer, "/", sizeof(buffer));
-    strlcat(buffer, _app_hostname, sizeof(buffer));
+    if (_hasValue(_mqtt_base)) {
+        strlcpy(buffer, _mqtt_base, sizeof(buffer));
+        strlcat(buffer, "/", sizeof(buffer));
+        strlcat(buffer, _general_hostname, sizeof(buffer));
+    } else {
+        strlcpy(buffer, _general_hostname, sizeof(buffer));
+    }
+
     strlcat(buffer, "/", sizeof(buffer));
     strlcat(buffer, topic, sizeof(buffer));
 
-    if (_mqtt_topic) {
-        free(_mqtt_topic);
-    }
-    _mqtt_topic = strdup(buffer);
-
-    return _mqtt_topic;
+    return buffer;
 }
 
 // print contents of file
 // assumes Serial is open
-void MyESP::_fs_printConfig() {
-    myDebug_P(PSTR("[FS] Contents:"));
-
-    File configFile = SPIFFS.open(MYEMS_CONFIG_FILE, "r");
+void MyESP::_fs_printFile(const char * file) {
+    File configFile = SPIFFS.open(file, "r");
     if (!configFile) {
         myDebug_P(PSTR("[FS] Failed to read file for printing"));
         return;
     }
 
+    myDebug_P(PSTR("[FS] File: %s, Size: %d"), file, configFile.size());
+
     while (configFile.available()) {
         SerialAndTelnet.print((char)configFile.read());
     }
-    myDebug_P(PSTR("")); // newline
+    myDebug_P(PSTR("[FS] end")); // newline
 
     configFile.close();
 }
 
 // format File System
 void MyESP::_fs_eraseConfig() {
-    myDebug_P(PSTR("[FS] Erasing all settings, please wait a few seconds. ESP will "
-                   "automatically restart when finished."));
-
-    if (SPIFFS.remove(MYEMS_CONFIG_FILE)) {
-        delay(1000); // wait 1 second
-        SerialAndTelnet.flush();
-        resetESP(); // hard reset
-    }
+    myDebug_P(PSTR("[FS] Doing a factory reset."));
+    _formatreq = true;
 }
 
 // custom callback for web info
 void MyESP::setWeb(web_callback_f callback_web) {
-    _web_callback = callback_web;
+    _web_callback_f = callback_web;
 }
 
-void MyESP::setSettings(fs_callback_f callback_fs, fs_settings_callback_f callback_settings_fs) {
-    _fs_callback          = callback_fs;
-    _fs_settings_callback = callback_settings_fs;
+void MyESP::setSettings(fs_loadsave_callback_f loadsave, fs_setlist_callback_f setlist, bool useSerial) {
+    _fs_loadsave_callback_f = loadsave;
+    _fs_setlist_callback_f  = setlist;
+    _general_serial         = useSerial;
 }
 
-// load from spiffs
+// load system config from SPIFFS
+// returns false on error or the file needs to be recreated
 bool MyESP::_fs_loadConfig() {
-    File configFile = SPIFFS.open(MYEMS_CONFIG_FILE, "r");
+    // see if old file exists and delete it
+    if (SPIFFS.exists("/config.json")) {
+        SPIFFS.remove("/config.json");
+        myDebug_P(PSTR("[FS] Removed obsolete version"));
+    }
 
+    File configFile = SPIFFS.open(MYESP_CONFIG_FILE, "r");
+    if (!configFile) {
+        configFile.close();
+        myDebug_P(PSTR("[FS] No system config file"));
+        return false;
+    }
+
+    // check size
     size_t size = configFile.size();
-    if (size > 1024) {
-        myDebug_P(PSTR("[FS] Config file size is too large"));
+    if (size > MYESP_SPIFFS_MAXSIZE) {
+        configFile.close();
+        myDebug_P(PSTR("[FS] System config file size is too large"));
         return false;
     } else if (size == 0) {
+        configFile.close();
+        myDebug_P(PSTR("[FS] Corrupted system config file"));
         return false;
     }
 
-    StaticJsonDocument<SPIFFS_MAXSIZE> doc;
-    JsonObject                         json = doc.to<JsonObject>();
+    // read file from SPIFFS into a char array
+    char json[MYESP_SPIFFS_MAXSIZE] = {0};
+    if (configFile.readBytes(json, size) != size) {
+        configFile.close();
+        myDebug_P(PSTR("[FS] File sizes don't match with system config file"));
+        return false;
+    }
+    configFile.close();
 
-    // Deserialize the JSON document
-    DeserializationError error = deserializeJson(doc, configFile);
+    StaticJsonDocument<MYESP_SPIFFS_MAXSIZE> doc;
+
+    DeserializationError error = deserializeJson(doc, json); // Deserialize the JSON document
     if (error) {
-        myDebug_P(PSTR("[FS] Failed to read config file. Error %s"), error.c_str());
+        myDebug_P(PSTR("[FS] Failed to deserialize json, error %s"), error.c_str());
+        configFile.close();
         return false;
     }
 
-    const char * value;
+    JsonObject network = doc["network"];
+    _network_ssid      = strdup(network["ssid"] | "");
+    _network_password  = strdup(network["password"] | "");
+    _network_wmode     = network["wmode"]; // 0 is client, 1 is AP
 
-    // fetch the standard system parameters
-    value      = json["wifi_ssid"];
-    _wifi_ssid = (value) ? strdup(value) : NULL;
+    JsonObject general = doc["general"];
 
-    value          = json["wifi_password"];
-    _wifi_password = (value) ? strdup(value) : NULL;
+    _general_password = strdup(general["password"] | MYESP_HTTP_PASSWORD);
+    _ws->setAuthentication("admin", _general_password);
+    _general_hostname = strdup(general["hostname"]);
 
-    value      = json["mqtt_host"];
-    _mqtt_host = (value) ? strdup(value) : NULL;
-
-    value          = json["mqtt_username"];
-    _mqtt_username = (value) ? strdup(value) : NULL;
-
-    value          = json["mqtt_password"];
-    _mqtt_password = (value) ? strdup(value) : NULL;
-
-    _heartbeat = (bool)json["heartbeat"]; // defaults to off
-
-// serial is only on when booting
+    // serial is only on when booting
 #ifdef FORCE_SERIAL
-    _serial = true;
+    _general_serial = true;
 #else
-    _serial = json["serial"];
+    _general_serial = general["serial"];
 #endif
 
-    // callback for loading custom settings
-    // ok is false if there's a problem loading a custom setting (e.g. does not exist)
-    bool ok = (_fs_callback)(MYESP_FSACTION_LOAD, json);
+    JsonObject mqtt = doc["mqtt"];
+    _mqtt_enabled   = mqtt["enabled"];
+    _mqtt_heartbeat = mqtt["heartbeat"];
+    _mqtt_ip        = strdup(mqtt["ip"] | "");
+    _mqtt_user      = strdup(mqtt["user"] | "");
+    _mqtt_port      = mqtt["port"] | MQTT_PORT;
+    _mqtt_password  = strdup(mqtt["password"] | "");
+    _mqtt_base      = strdup(mqtt["base"] | "");
 
+    JsonObject ntp = doc["ntp"];
+    _ntp_server    = strdup(ntp["server"] | "");
+    _ntp_interval  = ntp["interval"] | 60;
+    if (_ntp_interval == 0)
+        _ntp_interval = 60;
+    _ntp_timezone = ntp["timezone"] | 0;
+    _ntp_enabled  = ntp["enabled"];
+
+    myDebug_P(PSTR("[FS] System settings loaded"));
+    // serializeJsonPretty(doc, Serial); // turn on for debugging
+
+    return true;
+}
+
+// load custom settings
+bool MyESP::_fs_loadCustomConfig() {
+    File configFile = SPIFFS.open(MYESP_CUSTOMCONFIG_FILE, "r");
+    if (!configFile) {
+        myDebug_P(PSTR("[FS] No custom config file"));
+        return false;
+    }
+
+    // check size
+    size_t size = configFile.size();
+    if (size > MYESP_SPIFFS_MAXSIZE) {
+        configFile.close();
+        myDebug_P(PSTR("[FS] Custom config file size is too large"));
+        return false;
+    } else if (size == 0) {
+        configFile.close();
+        myDebug_P(PSTR("[FS] Corrupted custom config file"));
+        return false;
+    }
+
+    // read file from SPIFFS into a char array
+    char data[MYESP_SPIFFS_MAXSIZE] = {0};
+    if (configFile.readBytes(data, size) != size) {
+        myDebug_P(PSTR("[FS] File sizes don't match with custom config file"));
+        configFile.close();
+        return false;
+    }
     configFile.close();
+
+    // create the JSON doc and pass it back to the callback function
+    StaticJsonDocument<MYESP_SPIFFS_MAXSIZE> doc;
+    JsonObject                               json = doc.to<JsonObject>(); // create empty object
+
+    DeserializationError error = deserializeJson(doc, data); // Deserialize the JSON document
+
+    if (error) {
+        myDebug_P(PSTR("[FS] Failed to deserialize json for custom config, error %s"), error.c_str());
+        configFile.close();
+        return false;
+    }
+
+    if (_fs_loadsave_callback_f) {
+        if (!(_fs_loadsave_callback_f)(MYESP_FSACTION_LOAD, json)) {
+            myDebug_P(PSTR("[FS] Error reading custom config"));
+            return false;
+        } else {
+            myDebug_P(PSTR("[FS] Custom config loaded"));
+            //serializeJsonPretty(doc, Serial); // added for debugging
+        }
+    }
+
+    return true;
+}
+
+// save custom config to spiffs
+bool MyESP::fs_saveCustomConfig(JsonObject root) {
+    bool ok = false;
+
+    // open for writing
+    File configFile = SPIFFS.open(MYESP_CUSTOMCONFIG_FILE, "w");
+    if (!configFile) {
+        myDebug_P(PSTR("[FS] Failed to open custom config file for writing"));
+        return false;
+    }
+
+    // call any custom functions before handling SPIFFS
+    if (_ota_pre_callback_f) {
+        (_ota_pre_callback_f)();
+    }
+
+    // Serialize JSON to file
+    size_t n = serializeJson(root, configFile);
+    configFile.close();
+
+    if (n) {
+        // reload the settings
+        if (_fs_loadsave_callback_f) {
+            if (!(_fs_loadsave_callback_f)(MYESP_FSACTION_LOAD, root)) {
+                myDebug_P(PSTR("[FS] Error parsing custom config json"));
+            }
+        }
+
+        _writeEvent("INFO", "sys", "Custom config stored in the SPIFFS", "");
+        myDebug_P(PSTR("[FS] custom config file saved"));
+        ok = true;
+    }
+
+    if (_ota_pre_callback_f) {
+        (_ota_pre_callback_f)();
+    }
 
     return ok;
 }
 
-// save settings to spiffs
-bool MyESP::fs_saveConfig() {
-    bool ok = true;
-
-    // call any custom functions before handling SPIFFS
-    if (_ota_pre_callback) {
-        (_ota_pre_callback)();
-    }
-
-    StaticJsonDocument<SPIFFS_MAXSIZE> doc;
-    JsonObject                         json = doc.to<JsonObject>();
-
-    json["app_version"]   = _app_version;
-    json["wifi_ssid"]     = _wifi_ssid;
-    json["wifi_password"] = _wifi_password;
-    json["mqtt_host"]     = _mqtt_host;
-    json["mqtt_username"] = _mqtt_username;
-    json["mqtt_password"] = _mqtt_password;
-    json["serial"]        = _serial;
-    json["heartbeat"]     = _heartbeat;
-
-    // callback for saving custom settings
-    (void)(_fs_callback)(MYESP_FSACTION_SAVE, json);
-
-    // if file exists, remove it just to be safe
-    if (SPIFFS.exists(MYEMS_CONFIG_FILE)) {
-        SPIFFS.remove(MYEMS_CONFIG_FILE);
-    }
+// save system config to spiffs
+bool MyESP::fs_saveConfig(JsonObject root) {
+    bool ok = false;
 
     // open for writing
-    File configFile = SPIFFS.open(MYEMS_CONFIG_FILE, "w");
+    File configFile = SPIFFS.open(MYESP_CONFIG_FILE, "w");
     if (!configFile) {
-        myDebug_P(PSTR("[FS] Failed to open config file for writing"));
+        myDebug_P(PSTR("[FS] Failed to open system config file for writing"));
         return false;
     }
 
-    // Serialize JSON to file
-    if (serializeJson(json, configFile) == 0) {
-        myDebug_P(PSTR("[FS] Failed to write config file"));
-        ok = false;
+    // call any custom functions before handling SPIFFS
+    if (_ota_pre_callback_f) {
+        (_ota_pre_callback_f)();
     }
 
+    // Serialize JSON to file
+    size_t n = serializeJson(root, configFile);
     configFile.close();
 
-    // call any custom functions before handling SPIFFS
-    if (_ota_post_callback) {
-        (_ota_post_callback)();
+    if (n) {
+        _writeEvent("INFO", "sys", "System config stored in the SPIFFS", "");
+        myDebug_P(PSTR("[FS] system config file saved"));
+        ok = true;
     }
 
-    return ok; // it worked
+    // serializeJsonPretty(root, Serial); // for debugging
+
+    if (_ota_pre_callback_f) {
+        (_ota_pre_callback_f)();
+    }
+
+    return ok;
 }
+
+// create an initial system config file using default settings
+bool MyESP::_fs_writeConfig() {
+    StaticJsonDocument<MYESP_SPIFFS_MAXSIZE> doc;
+    JsonObject                               root = doc.to<JsonObject>();
+
+    root["command"] = "configfile"; // header, important!
+
+    JsonObject network  = doc.createNestedObject("network");
+    network["ssid"]     = _network_ssid;
+    network["password"] = _network_password;
+    network["wmode"]    = _network_wmode;
+
+    JsonObject general  = doc.createNestedObject("general");
+    general["password"] = _general_password;
+    general["serial"]   = _general_serial;
+    general["hostname"] = _general_hostname;
+
+    JsonObject mqtt   = doc.createNestedObject("mqtt");
+    mqtt["enabled"]   = _mqtt_enabled;
+    mqtt["heartbeat"] = _mqtt_heartbeat;
+    mqtt["ip"]        = _mqtt_ip;
+    mqtt["user"]      = _mqtt_user;
+    mqtt["port"]      = _mqtt_port;
+    mqtt["password"]  = _mqtt_password;
+    mqtt["base"]      = _mqtt_base;
+
+    JsonObject ntp  = doc.createNestedObject("ntp");
+    ntp["server"]   = _ntp_server;
+    ntp["interval"] = _ntp_interval;
+    ntp["timezone"] = _ntp_timezone;
+    ntp["enabled"]  = _ntp_enabled;
+
+    bool ok = fs_saveConfig(root); // save it
+
+    return ok;
+}
+
+// create an empty json doc for the custom config and call callback to populate it
+bool MyESP::_fs_createCustomConfig() {
+    StaticJsonDocument<MYESP_SPIFFS_MAXSIZE> doc;
+    JsonObject                               json = doc.to<JsonObject>();
+
+    json["command"] = "custom_configfile"; // header, important!
+
+    if (_fs_loadsave_callback_f) {
+        if (!(_fs_loadsave_callback_f)(MYESP_FSACTION_SAVE, json)) {
+            myDebug_P(PSTR("[FS] Error building custom config json"));
+        }
+    } else {
+        myDebug_P(PSTR("[FS] Created custom config file"));
+    }
+
+    bool ok = fs_saveCustomConfig(json);
+
+    return ok;
+}
+
 
 // init the SPIFF file system and load the config
 // if it doesn't exist try and create it
 void MyESP::_fs_setup() {
     if (!SPIFFS.begin()) {
-        myDebug_P(PSTR("[FS] Failed to mount the file system. Erasing..."));
-        _fs_eraseConfig(); // fix for ESP32
-        return;
+        Serial.print(F("[WARN] Formatting filesystem..."));
+        if (SPIFFS.format()) {
+            _writeEvent("WARN", "sys", "File system formatted", "");
+        } else {
+            myDebug_P(PSTR("[FS] Failed to format file system"));
+        }
     }
 
-    // if its flagged as a first install, re-create the initial config file and quit function
-    if (_firstInstall) {
-        myDebug_P(PSTR("[FS] Re-creating config file for initial install"));
-        fs_saveConfig();
-        return;
-    }
-
-    // load the config file. if it doesn't exist (function returns false) create it
+    // load the main system config file if we can. Otherwise create it and expect user to configure in web interface
     if (!_fs_loadConfig()) {
-        myDebug_P(PSTR("[FS] Re-creating config file"));
-        fs_saveConfig();
-        _firstInstall = true; // flag as a first install
+        myDebug_P(PSTR("[FS] Creating a new system config file"));
+        _fs_writeConfig(); // create the initial config file
     }
 
-    // assume if the wifi ssid is empty, its a fresh install too
-    if ((_wifi_ssid == NULL)) {
-        _firstInstall = true; // flag as a first install
+    // load system and custom config
+    if (!_fs_loadCustomConfig()) {
+        _fs_createCustomConfig(); // create the initial config file
     }
-
-    myDebug_P(PSTR("[FS] Settings loaded from SPIFFS"));
-
-    // _fs_printConfig(); // enable for debugging
 }
 
 uint32_t MyESP::getSystemLoadAverage() {
@@ -1656,7 +1836,7 @@ void MyESP::_calculateLoad() {
     static uint32_t load_counter_temp = 0;
     load_counter_temp++;
 
-    if (millis() - last_loadcheck > LOADAVG_INTERVAL) {
+    if (millis() - last_loadcheck > MYESP_LOADAVG_INTERVAL) {
         static uint32_t load_counter     = 0;
         static uint32_t load_counter_max = 1;
 
@@ -1853,7 +2033,7 @@ void MyESP::crashDump() {
 }
 
 /*
- * Force some crashes to test if stack collection and debugging works
+ * Force some crashes to test if stack collection works
  */
 void MyESP::crashTest(uint8_t t) {
     if (t == 1) {
@@ -1867,7 +2047,7 @@ void MyESP::crashTest(uint8_t t) {
     if (t == 2) {
         myDebug_P(PSTR("[CRASH] Attempting to read through a pointer to no object ..."));
         int * nullPointer;
-        nullPointer = NULL;
+        nullPointer = nullptr;
         // null pointer dereference - read
         // attempt to read a value through a null pointer
         Serial.println(*nullPointer);
@@ -1906,181 +2086,436 @@ void MyESP::crashInfo() {
 }
 #endif
 
-// default home web page
-void MyESP::_webRootPage() {
-    char s[1000] = {0};
-
-    strlcpy(s, webCommonPage_start, sizeof(s));
-    // strlcat(s, webCommonPage_start_refresh, sizeof(s));
-    strlcat(s, webCommonPage_start_body, sizeof(s));
-
-    strlcat(s, "<h1>", sizeof(s));
-    strlcat(s, _app_name, sizeof(s));
-    strlcat(s, " version ", sizeof(s));
-    strlcat(s, _app_version, sizeof(s));
-    strlcat(s, "</h1>", sizeof(s));
-
-    strlcat(s, "<p><b>System stats:</b><br>", sizeof(s));
-
-    if (isAPmode()) {
-        strlcat(s, " Device is in Wifi Access Point mode with SSID <b>", sizeof(s));
-        strlcat(s, jw.getAPSSID().c_str(), sizeof(s));
-        strlcat(s, "</b>", sizeof(s));
-    } else {
-        char buf[4];
-        strlcat(s, " Connected to wireless network <b>", sizeof(s));
-        strlcat(s, _getESPhostname().c_str(), sizeof(s));
-        strlcat(s, "</b> with signal strength <b>", sizeof(s));
-        strlcat(s, itoa(getWifiQuality(), buf, 10), sizeof(s));
-        strlcat(s, "%</b>", sizeof(s));
+// write a log entry to SPIFFS
+void MyESP::_writeEvent(const char * type, const char * src, const char * desc, const char * data) {
+    File eventlog = SPIFFS.open(MYESP_EVENTLOG_FILE, "a");
+    if (!eventlog) {
+        return;
     }
 
-    strlcat(s, isMQTTConnected() ? "<br> MQTT is connected\n" : " MQTT is disconnected\n", sizeof(s));
-    strlcat(s, "</br>", sizeof(s));
+    DynamicJsonDocument doc(300);
+    JsonObject          root = doc.to<JsonObject>(); // TODO do I need to convert to root? read docs
 
-    // uptime
-    char     buffer[200];
+    root["type"] = type;
+    root["src"]  = src;
+    root["desc"] = desc;
+    root["data"] = data;
+    root["time"] = now(); // is relative if we're not using NTP
+
+    // Serialize JSON to file
+    size_t n = serializeJson(root, eventlog);
+
+    if (n) {
+        eventlog.print("\n"); // this indicates end of the entry
+    }
+
+    eventlog.close();
+}
+
+// send a paged list (10 items) to the ws
+void MyESP::_sendEventLog(uint8_t page) {
+    File eventlog = SPIFFS.open(MYESP_EVENTLOG_FILE, "r");
+    if (!eventlog) {
+        eventlog.close();
+        return; // file can't be opened
+    }
+
+    // the size of the json will be quite big so best not to use stack (StaticJsonDocument)
+    DynamicJsonDocument doc(MYESP_JSON_MAXSIZE);
+    JsonObject          root = doc.to<JsonObject>();
+    root["command"]          = "eventlist";
+    root["page"]             = page;
+
+    JsonArray list = doc.createNestedArray("list");
+
+    uint8_t first = (page - 1) * 10;
+    uint8_t last  = page * 10;
+    uint8_t i     = 0;
+
+    while (eventlog.available()) {
+        String item = String(); // TODO replace String with char*
+        item        = eventlog.readStringUntil('\n');
+        if (i >= first && i < last) {
+            list.add(item);
+        }
+        i++;
+    }
+    eventlog.close();
+
+    float pages      = i / 10.0;
+    root["haspages"] = ceil(pages);
+
+    char   buffer[MYESP_JSON_MAXSIZE];
+    size_t len = serializeJson(root, buffer);
+
+    _ws->textAll(buffer, len);
+    _ws->textAll("{\"command\":\"result\",\"resultof\":\"eventlist\",\"result\": true}");
+}
+
+// Handles WebSocket Events
+void MyESP::_onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t * data, size_t len) {
+    if (type == WS_EVT_ERROR) {
+        myDebug("[WEB] WebSocket[%s][%u] error(%u): %s\r\n", server->url(), client->id(), *((uint16_t *)arg), (char *)data);
+    } else if (type == WS_EVT_DATA) {
+        AwsFrameInfo * info    = (AwsFrameInfo *)arg;
+        uint64_t       index   = info->index;
+        uint64_t       infolen = info->len;
+        if (info->final && info->index == 0 && infolen == len) {
+            // the whole message is in a single frame and we got all of it's data
+            client->_tempObject = malloc(len);
+            if (client->_tempObject != NULL) {
+                memcpy((uint8_t *)(client->_tempObject), data, len);
+            }
+            _procMsg(client, infolen);
+        } else {
+            // message is comprised of multiple frames or the frame is split into multiple packets
+            if (index == 0) {
+                if (info->num == 0 && client->_tempObject == NULL) {
+                    client->_tempObject = malloc(infolen);
+                }
+            }
+            if (client->_tempObject != NULL) {
+                memcpy((uint8_t *)(client->_tempObject) + index, data, len);
+            }
+            if ((index + len) == infolen) {
+                if (info->final) {
+                    _procMsg(client, infolen);
+                }
+            }
+        }
+    }
+}
+
+// handle ws from browser
+void MyESP::_procMsg(AsyncWebSocketClient * client, size_t sz) {
+    // We should always get a JSON object from browser, so parse it
+    StaticJsonDocument<400> doc;
+    char                    json[sz + 1];
+    memcpy(json, (char *)(client->_tempObject), sz);
+    json[sz] = '\0';
+
+    JsonObject           root  = doc.to<JsonObject>();       // create empty object
+    DeserializationError error = deserializeJson(doc, json); // Deserialize the JSON document
+    if (error) {
+        myDebug_P(PSTR("[WEB] Couldn't parse WebSocket message, error %s"), error.c_str());
+        free(client->_tempObject);
+        client->_tempObject = NULL;
+        return;
+    }
+
+    const char * command = doc["command"];
+    // Serial.printf("*** Got command: %s\n", command); // turn on for debugging
+
+    // Check whatever the command is and act accordingly
+    if (strcmp(command, "configfile") == 0) {
+        fs_saveConfig(root);
+        _shouldReboot = true;
+    } else if (strcmp(command, "custom_configfile") == 0) {
+        fs_saveCustomConfig(root);
+    } else if (strcmp(command, "status") == 0) {
+        _sendStatus();
+    } else if (strcmp(command, "custom_status") == 0) {
+        _sendCustomStatus();
+    } else if (strcmp(command, "restart") == 0) {
+        _shouldReboot = true;
+    } else if (strcmp(command, "destroy") == 0) {
+        _formatreq = true;
+    } else if (strcmp(command, "geteventlog") == 0) {
+        uint8_t page = doc["page"];
+        _sendEventLog(page);
+    } else if (strcmp(command, "clearevent") == 0) {
+        SPIFFS.remove(MYESP_EVENTLOG_FILE);
+        _writeEvent("WARN", "sys", "Event log cleared", "");
+    } else if (strcmp(command, "scan") == 0) {
+        WiFi.scanNetworksAsync(std::bind(&MyESP::_printScanResult, this, std::placeholders::_1), true);
+    } else if (strcmp(command, "gettime") == 0) {
+        _timerequest = true;
+    } else if (strcmp(command, "settime") == 0) {
+        time_t t = doc["epoch"];
+        setTime(t);
+        _timerequest = true;
+    } else if (strcmp(command, "getconf") == 0) {
+        _fs_sendConfig();
+    }
+
+    free(client->_tempObject);
+    client->_tempObject = NULL;
+}
+
+// read both system config and the custom config and send as json to web socket
+bool MyESP::_fs_sendConfig() {
+    File   configFile;
+    size_t size;
+    char   json[MYESP_SPIFFS_MAXSIZE] = {0};
+
+    configFile = SPIFFS.open(MYESP_CONFIG_FILE, "r");
+    if (!configFile) {
+        myDebug_P(PSTR("[FS] No system config file found to load"));
+        return false;
+    }
+    size = configFile.size();
+
+    // read file from SPIFFS into a char array
+    if (configFile.readBytes(json, size) != size) {
+        configFile.close();
+        return false;
+    }
+    configFile.close();
+
+    //Serial.printf("_fs_sendConfig() sending system (%d): %s\n", size, json); // turn on for debugging
+    _ws->textAll(json, size);
+
+    configFile = SPIFFS.open(MYESP_CUSTOMCONFIG_FILE, "r");
+    if (!configFile) {
+        myDebug_P(PSTR("[FS] No custom config file found to load"));
+        return false;
+    }
+    size = configFile.size();
+
+    // read file from SPIFFS into the same char array
+    memset(json, 0, MYESP_SPIFFS_MAXSIZE);
+    if (configFile.readBytes(json, size) != size) {
+        configFile.close();
+        return false;
+    }
+    configFile.close();
+
+    //Serial.printf("_fs_sendConfig() sending custom (%d): %s\n", size, json); // turn on for debugging
+    _ws->textAll(json, size);
+
+    return true;
+}
+
+// send custom status via ws
+void MyESP::_sendCustomStatus() {
+    // StaticJsonDocument<300> doc;
+    DynamicJsonDocument doc(MYESP_JSON_MAXSIZE);
+
+    JsonObject root = doc.to<JsonObject>();
+
+    root["command"]    = "custom_status";
+    root["version"]    = _app_version;
+    root["customname"] = _app_name;
+    root["helpurl"]    = _app_helpurl;
+    root["updateurl"]  = _app_updateurl;
+
+    // add specific custom stuff
+    if (_web_callback_f) {
+        (_web_callback_f)(root);
+    }
+
+    char   buffer[MYESP_JSON_MAXSIZE];
+    size_t len = serializeJson(root, buffer);
+    // Serial.printf("_sendCustomStatus() sending: %s\n", buffer); // turn on for debugging
+
+    _ws->textAll(buffer, len);
+}
+
+// send system status via ws
+void MyESP::_sendStatus() {
+    StaticJsonDocument<400> doc;
+    JsonObject              root = doc.to<JsonObject>();
+
+    FSInfo fsinfo;
+    if (!SPIFFS.info(fsinfo)) {
+        myDebug("[SYSTEM] Error getting info on SPIFFS");
+    }
+
+    root["command"] = "status";
+
+    // all sizes in bytes converted to KB
+    root["heap"]        = ESP.getFreeHeap() / 1000;
+    root["sketchsize"]  = ESP.getSketchSize() / 1000;
+    root["availsize"]   = ESP.getFreeSketchSpace() / 1000;
+    root["availspiffs"] = (fsinfo.totalBytes - fsinfo.usedBytes) / 1000;
+    root["spiffssize"]  = (fsinfo.totalBytes / 1000);
+
+    if (isAPmode()) {
+        root["ip"]   = WiFi.softAPIP().toString();
+        root["ssid"] = jw.getAPSSID();
+        root["mac"]  = WiFi.softAPmacAddress();
+    } else {
+        root["ip"]   = WiFi.localIP().toString();
+        root["ssid"] = WiFi.SSID();
+        root["mac"]  = WiFi.macAddress();
+    }
+
+    root["signalstr"]  = getWifiQuality();
+    root["systemload"] = getSystemLoadAverage();
+
+    root["mqttconnected"] = isMQTTConnected();
+    root["mqttheartbeat"] = getHeartbeat();
+
+    char     uptime[200];
     uint32_t t   = _getUptime(); // seconds
     uint32_t d   = t / 86400L;
     uint32_t h   = ((t % 86400L) / 3600L) % 60;
     uint32_t rem = t % 3600L;
     uint8_t  m   = rem / 60;
     uint8_t  sec = rem % 60;
-    sprintf(buffer, " System uptime: %d days %d hours %d minutes %d seconds", d, h, m, sec);
-    strlcat(s, buffer, sizeof(s));
+    sprintf(uptime, "%d days %d hours %d minutes %d seconds", d, h, m, sec);
+    root["uptime"] = uptime;
 
-    // memory
-    //uint32_t total_memory = _getInitialFreeHeap();
-    //uint32_t free_memory  = ESP.getFreeHeap();
-    //sprintf(buffer, " Memory: %d bytes free (%2u%%)<br>", free_memory, 100 * free_memory / total_memory);
-    //strlcat(s, buffer, sizeof(s));
-
-    strlcat(s, "<p>", sizeof(s));
-    if (_web_callback) {
-        char custom[MYESP_MAXCHARBUFFER];
-        (_web_callback)(custom);
-        strlcat(s, custom, sizeof(s));
-    }
-    strlcat(s, "</p><br>", sizeof(s));
-
-    // check why we're here
-    if ((_firstInstall) || (_wifi_ssid == NULL)) {
-        strlcat(s, "<p>Looks like a first install! Go <a href=/reset>here</a> to connect the System to your network.</p>", sizeof(s));
-    } else {
-        strlcat(s, "<p>Go <a href=/reset>here</a> to connect the System to your wireless network.</p>", sizeof(s));
-    }
-
-    strlcat(s, webCommonPage_end, sizeof(s));
-    webServer.sendHeader("Content-Length", String(strlen(s)));
-    webServer.send(200, "text/html", s);
+    char   buffer[400];
+    size_t len = serializeJson(root, buffer);
+    _ws->textAll(buffer, len);
 }
 
-// Creates a webpage that allows the user to change the SSID and Password from the browser
-void MyESP::_webResetPage() {
-    char s[1000] = {0};
+// print top5 wifi
+void MyESP::_printScanResult(int networksFound) {
+    int n = networksFound;
+    int indices[n];
+    for (int i = 0; i < networksFound; i++) {
+        indices[i] = i;
+    }
 
-    strlcpy(s, webCommonPage_start, sizeof(s));
-    strlcat(s, webCommonPage_start_body, sizeof(s));
-
-    strlcat(s, "<h1>", sizeof(s));
-    strlcat(s, _app_name, sizeof(s));
-    strlcat(s, " version ", sizeof(s));
-    strlcat(s, _app_version, sizeof(s));
-    strlcat(s, "</h1>", sizeof(s));
-
-    // Check to see if we've been sent any arguments and instantly return if not
-    if (webServer.args() == 0) {
-        strlcat(s, "<p>", sizeof(s));
-
-        if (_wifi_ssid != NULL) {
-            strlcat(s, "Current wifi SSID is ", sizeof(s));
-            strlcat(s, _wifi_ssid, sizeof(s));
-            strlcat(s, ".<br>", sizeof(s));
-        }
-
-        strlcat(s, "<br>Please enter your new wifi credentials below.</p>", sizeof(s));
-
-        strlcat(s, webResetPage_form, sizeof(s));
-        strlcat(s, webCommonPage_end, sizeof(s));
-        webServer.sendHeader("Content-Length", String(strlen(s)));
-        webServer.send(200, "text/html", s);
-
-    } else {
-        // Create a string containing all the arguments
-        // Check to see if there are new values (also doubles to check the length of the new value is long enough)
-        if (webServer.arg("newssid").length() <= MAX_SSID_LEN) {
-            if (webServer.arg("newssid").length() == 0) {
-                _wifi_ssid = NULL;
-            } else {
-                _wifi_ssid = strdup(webServer.arg("newssid").c_str());
+    // sort by RSSI
+    int skip[n];
+    for (int i = 0; i < networksFound; i++) {
+        for (int j = i + 1; j < networksFound; j++) {
+            if (WiFi.RSSI(indices[j]) > WiFi.RSSI(indices[i])) {
+                std::swap(indices[i], indices[j]);
+                std::swap(skip[i], skip[j]);
             }
         }
-
-        if (webServer.arg("newpassword").length() <= MAX_PWD_LEN) {
-            if (webServer.arg("newpassword").length() == 0) {
-                _wifi_password = NULL;
-            } else {
-                _wifi_password = strdup(webServer.arg("newpassword").c_str());
-            }
-        }
-
-        // Store the new settings
-        fs_saveConfig();
-
-        // Reply with a web page to indicate success or failure
-        strlcat(s, webResetPage_post, sizeof(s));
-        strlcat(s, webCommonPage_end, sizeof(s));
-        webServer.sendHeader("Content-Length", String(strlen(s)));
-        webServer.send(200, "text/html", s);
-
-        delay(500);
-        resetESP();
     }
-}
 
-// reset all settings
-void MyESP::_webResetAllPage() {
-    char s[1000] = {0};
+    StaticJsonDocument<400> doc;
+    JsonObject              root = doc.to<JsonObject>();
+    root["command"]              = "ssidlist";
 
-    strlcpy(s, webCommonPage_start, sizeof(s));
-    strlcat(s, webCommonPage_start_body, sizeof(s));
-
-    strlcat(s, "<h1>", sizeof(s));
-    strlcat(s, _app_name, sizeof(s));
-    strlcat(s, " version ", sizeof(s));
-    strlcat(s, _app_version, sizeof(s));
-    strlcat(s, "</h1>", sizeof(s));
-
-    // Check to see if we've been sent any arguments and instantly return if not
-    if (webServer.args() == 0) {
-        strlcat(s,
-                "<p>Are you absolutely sure you want to erase all settings?<br>Typing 'yes' will restart the System and you'll need to reconnect to the wifi "
-                "Access Point called ems-esp.</p>",
-                sizeof(s));
-
-        strlcat(s, webResetAllPage_form, sizeof(s));
-        strlcat(s, webCommonPage_end, sizeof(s));
-        webServer.sendHeader("Content-Length", String(strlen(s)));
-        webServer.send(200, "text/html", s);
-    } else {
-        // delete all settings
-        if (webServer.arg("confirm") == "yes") {
-            _fs_eraseConfig();
-            delay(1000); // wait 1 sec
-            resetESP();
-        }
+    JsonArray list = doc.createNestedArray("list");
+    for (int i = 0; i <= 5 && i < networksFound; ++i) {
+        JsonObject item = list.createNestedObject();
+        item["ssid"]    = WiFi.SSID(indices[i]);
+        item["bssid"]   = WiFi.BSSIDstr(indices[i]);
+        item["rssi"]    = WiFi.RSSI(indices[i]);
     }
+
+    char   buffer[400];
+    size_t len = serializeJson(root, buffer);
+    _ws->textAll(buffer, len);
 }
 
 // set up web server
 void MyESP::_webserver_setup() {
-    webServer.on("/", [this]() { _webRootPage(); });
-    webServer.on("/reset", [this]() { _webResetPage(); });
-    webServer.on("/resetall", [this]() { _webResetAllPage(); });
+    _ws->onEvent(std::bind(&MyESP::_onWsEvent,
+                           this,
+                           std::placeholders::_1,
+                           std::placeholders::_2,
+                           std::placeholders::_3,
+                           std::placeholders::_4,
+                           std::placeholders::_5,
+                           std::placeholders::_6));
+    _webServer->addHandler(_ws);
 
-    webServer.begin();
+    _webServer->onNotFound([](AsyncWebServerRequest * request) {
+        AsyncWebServerResponse * response = request->beginResponse(404, "text/plain", "Not found");
+        request->send(response);
+    });
+
+    _webServer->on("/update",
+                   HTTP_POST,
+                   [](AsyncWebServerRequest * request) {
+                       AsyncWebServerResponse * response = request->beginResponse(200, "text/plain", _shouldReboot ? "OK" : "FAIL");
+                       response->addHeader("Connection", "close");
+                       request->send(response);
+                   },
+                   [](AsyncWebServerRequest * request, String filename, size_t index, uint8_t * data, size_t len, bool final) {
+                       if (!request->authenticate(MYESP_HTTP_USERNAME, _general_password)) {
+                           return;
+                       }
+                       if (!index) {
+                           _writeEvent("INFO", "updt", "Firmware update started", "");
+                           //Serial.printf("[ UPDT ] Firmware update started: %s\n", filename.c_str()); // enable for debugging
+                           Update.runAsync(true);
+                           if (!Update.begin((ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000)) {
+                               _writeEvent("ERRO", "updt", "Not enough space to update", "");
+                               //Update.printError(Serial); // enable for debugging
+                           }
+                       }
+                       if (!Update.hasError()) {
+                           if (Update.write(data, len) != len) {
+                               _writeEvent("ERRO", "updt", "Writing to flash failed", "");
+                               //Update.printError(Serial);  // enable for debugging
+                           }
+                       }
+                       if (final) {
+                           if (Update.end(true)) {
+                               _writeEvent("INFO", "updt", "Firmware update finished", "");
+                               //Serial.printf("[SYSTEM] Firmware update finished: %uB\n", index + len); // enable for debugging
+                               _shouldReboot = !Update.hasError();
+                           } else {
+                               _writeEvent("ERRO", "updt", "Firmware update failed", "");
+                               //Update.printError(Serial); // enable for debugging
+                           }
+                       }
+                   });
+
+    _webServer->on("/fonts/glyphicons-halflings-regular.woff", HTTP_GET, [](AsyncWebServerRequest * request) {
+        AsyncWebServerResponse * response =
+            request->beginResponse_P(200, "font/woff", glyphicons_halflings_regular_woff_gz, glyphicons_halflings_regular_woff_gz_len);
+        response->addHeader("Content-Encoding", "gzip");
+        request->send(response);
+    });
+    _webServer->on("/css/required.css", HTTP_GET, [](AsyncWebServerRequest * request) {
+        AsyncWebServerResponse * response = request->beginResponse_P(200, "text/css", required_css_gz, required_css_gz_len);
+        response->addHeader("Content-Encoding", "gzip");
+        request->send(response);
+    });
+    _webServer->on("/js/required.js", HTTP_GET, [](AsyncWebServerRequest * request) {
+        AsyncWebServerResponse * response = request->beginResponse_P(200, "text/javascript", required_js_gz, required_js_gz_len);
+        response->addHeader("Content-Encoding", "gzip");
+        request->send(response);
+    });
+    _webServer->on("/js/myesp.js", HTTP_GET, [](AsyncWebServerRequest * request) {
+        AsyncWebServerResponse * response = request->beginResponse_P(200, "text/javascript", myesp_js_gz, myesp_js_gz_len);
+        response->addHeader("Content-Encoding", "gzip");
+        request->send(response);
+    });
+
+    _webServer->on("/index.html", HTTP_GET, [](AsyncWebServerRequest * request) {
+        AsyncWebServerResponse * response = request->beginResponse_P(200, "text/html", index_html_gz, index_html_gz_len);
+        response->addHeader("Content-Encoding", "gzip");
+        request->send(response);
+    });
+
+    _webServer->on("/myesp.html", HTTP_GET, [](AsyncWebServerRequest * request) {
+        AsyncWebServerResponse * response = request->beginResponse_P(200, "text/html", myesp_html_gz, myesp_html_gz_len);
+        response->addHeader("Content-Encoding", "gzip");
+        request->send(response);
+    });
+
+    _webServer->on("/login", HTTP_GET, [](AsyncWebServerRequest * request) {
+        //IPAddress     address  = request->client()->remoteIP();
+        //static String remoteIP = (String)address[0] + "." + (String)address[1] + "." + (String)address[2] + "." + (String)address[3];
+
+        if (!request->authenticate(MYESP_HTTP_USERNAME, _general_password)) {
+            //_writeEvent("WARN", "websrv", "New login attempt", remoteIP);
+            return request->requestAuthentication();
+        }
+        request->send(200, "text/plain", "Success");
+        // _writeEvent("INFO", "websrv", "Login successful", remoteIP);
+    });
+
+    _webServer->rewrite("/", "/index.html");
+    _webServer->begin();
 
     myDebug_P(PSTR("[WEB] Web server started"));
+}
+
+
+// send UTC time via ws
+void MyESP::_sendTime() {
+    StaticJsonDocument<100> doc;
+    JsonObject              root = doc.to<JsonObject>();
+    root["command"]              = "gettime";
+    root["epoch"]                = now();
+    root["timezone"]             = _ntp_timezone;
+
+    char   buffer[100];
+    size_t len = serializeJson(root, buffer);
+    _ws->textAll(buffer, len);
 }
 
 // bootup sequence
@@ -2089,7 +2524,21 @@ void MyESP::_webserver_setup() {
 void MyESP::_bootupSequence() {
     uint8_t boot_status = getSystemBootStatus();
 
-    if ((boot_status == MYESP_BOOTSTATUS_BOOTED) || (millis() <= MYESP_BOOTUP_DELAY)) {
+    // check if its booted
+    if (boot_status == MYESP_BOOTSTATUS_BOOTED) {
+        if (!_ntp_enabled) {
+            _writeEvent("INFO", "sys", "System booted", "elapsed time");
+        } else {
+            // wait until we have a real time, after 10 seconds
+            if ((!_have_ntp_time) && (now() > 10000)) {
+                _have_ntp_time = true;
+                _writeEvent("INFO", "sys", "System booted", "");
+            }
+            return;
+        }
+    }
+
+    if (millis() <= MYESP_BOOTUP_DELAY) {
         return; // already booted, or still starting up
     }
 
@@ -2114,10 +2563,12 @@ void MyESP::_bootupSequence() {
 }
 
 // setup MyESP
-void MyESP::begin(const char * app_hostname, const char * app_name, const char * app_version) {
-    _app_hostname = strdup(app_hostname);
-    _app_name     = strdup(app_name);
-    _app_version  = strdup(app_version);
+void MyESP::begin(const char * app_hostname, const char * app_name, const char * app_version, const char * app_helpurl, const char * app_updateurl) {
+    _general_hostname = strdup(app_hostname);
+    _app_name         = strdup(app_name);
+    _app_version      = strdup(app_version);
+    _app_helpurl      = strdup(app_helpurl);
+    _app_updateurl    = strdup(app_updateurl);
 
     _telnet_setup(); // Telnet setup, called first to set Serial
 
@@ -2130,44 +2581,60 @@ void MyESP::begin(const char * app_hostname, const char * app_name, const char *
 
     _getInitialFreeHeap(); // get initial free mem
     _rtcmemSetup();        // rtc internal mem setup
-
-    if (getSystemBootStatus() == MYESP_BOOTSTATUS_RESETNEEDED) {
-        myDebug_P(PSTR("** resetting all settings"));
-        _firstInstall = true; // flag as an initial install so the config file will be recreated
-    }
-
-    _eeprom_setup();    // set up EEPROM for storing crash data, if compiled with -DCRASH
-    _fs_setup();        // SPIFFS setup, do this first to get values
-    _wifi_setup();      // WIFI setup
-    _ota_setup();       // init OTA
-    _webserver_setup(); // init web server
+    _eeprom_setup();       // set up EEPROM for storing crash data, if compiled with -DCRASH
+    _fs_setup();           // SPIFFS setup, do this first to get values
+    _wifi_setup();         // WIFI setup
+    _ota_setup();          // init OTA
+    _webserver_setup();    // init web server
 
     _setSystemCheck(false); // reset system check
-    _heartbeatCheck(true);  // force heartbeat check (not the MQTT one)
+    _heartbeatCheck(true);  // force heartbeat
 
     SerialAndTelnet.flush();
+
+    //_fs_printFile(MYESP_EVENTLOG_FILE); // for debugging
+    //_fs_printFile(MYESP_EVENTLOG_FILE); // for debugging
+    //_fs_printFile(MYESP_CUSTOMCONFIG_FILE); // for debugging
 }
 
 /*
  * Loop. This is called as often as possible and it handles wifi, telnet, mqtt etc
  */
 void MyESP::loop() {
-    jw.loop();           // WiFi
-    ArduinoOTA.handle(); // OTA
-
-    if (_ota_doing_update) {
-        return; // quit if in the middle of an OTA update
-    }
-
     _calculateLoad();
     _systemCheckLoop();
     _heartbeatCheck();
-    _bootupSequence();
-    webServer.handleClient();
-    _telnetHandle();
-    _mqttConnect();
+    _bootupSequence(); // see if a reset was pressed during bootup
+    _telnetHandle();   // telnet
 
-    yield(); // ...and breath
+    ESP.wdtFeed(); // TODO see if this helps with WDT resets
+
+    jw.loop();           // WiFi
+    ArduinoOTA.handle(); // OTA
+    _mqttConnect();      // MQTT
+
+    if (_timerequest) {
+        _timerequest = false;
+        _sendTime();
+    }
+
+    if (_formatreq) {
+        myDebug("[SYSTEM] Factory reset initiated");
+        SPIFFS.end();
+        _ws->enable(false);
+        SPIFFS.format();
+        _deferredReset(500, CUSTOM_RESET_FACTORY);
+        ESP.restart();
+    }
+
+    if (_shouldReboot) {
+        _writeEvent("INFO", "sys", "System is rebooting", "");
+        myDebug("[SYSTEM] Rebooting...");
+        _deferredReset(500, CUSTOM_RESET_TERMINAL);
+        ESP.restart();
+    }
+
+    yield(); // ... and breath.
 }
 
-MyESP myESP; // create instance
+MyESP myESP;

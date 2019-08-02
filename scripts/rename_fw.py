@@ -1,6 +1,12 @@
 #!/usr/bin/env python
+from subprocess import call
+import os
 import re
 Import("env")
+
+def build_web(source, target, env):
+    print("\n** Build web...")
+    call(["gulp", "-f", os.getcwd()+"/tools/webfilesbuilder/gulpfile.js"])
 
 bag = {}
 exprs = [
@@ -22,5 +28,9 @@ app_hostname = bag.get('app_hostname')
 board = env['BOARD']
 branch = env['PIOENV']
 
+# build the web files
+env.AddPreAction("buildprog", build_web)
+
 # build filename, replacing . with _ for the version
 env.Replace(PROGNAME="firmware_%s" % branch + "_" + app_version.replace(".", "_"))
+

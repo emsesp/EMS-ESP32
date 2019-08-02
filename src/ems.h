@@ -11,6 +11,7 @@
 #pragma once
 
 #include <Arduino.h>
+#include <list> // std::list
 
 /* debug helper for logic analyzer 
  * create marker puls on GPIOx
@@ -250,6 +251,7 @@ typedef struct {
 
 // for consolidating all types
 typedef struct {
+    uint8_t model_type; // 1=info=boiler, 2=success=thermostat, 3=warning=sm, 4=danger=other, 5=none=unknown
     uint8_t product_id;
     uint8_t device_id;
     char    version[10];
@@ -421,8 +423,8 @@ void    ems_setTxDisabled(bool b);
 bool    ems_getTxDisabled();
 uint8_t ems_getTxMode();
 
-char *           ems_getThermostatDescription(char * buffer);
-char *           ems_getBoilerDescription(char * buffer);
+char *           ems_getThermostatDescription(char * buffer, bool name_only = false);
+char *           ems_getBoilerDescription(char * buffer, bool name_only = false);
 char *           ems_getSolarModuleDescription(char * buffer);
 char *           ems_getHeatPumpDescription(char * buffer);
 void             ems_getThermostatValues();
@@ -457,3 +459,5 @@ extern _EMS_Thermostat  EMS_Thermostat;
 extern _EMS_SolarModule EMS_SolarModule;
 extern _EMS_HeatPump    EMS_HeatPump;
 extern _EMS_Other       EMS_Other;
+
+extern std::list<_Generic_Device> Devices;

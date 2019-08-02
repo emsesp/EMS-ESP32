@@ -8,18 +8,16 @@
  */
 
 // local libraries
-#include "ds18.h"
 #include "ems.h"
 #include "ems_devices.h"
 #include "emsuart.h"
 #include "my_config.h"
 #include "version.h"
+#include <MyESP.h>
 
 // Dallas external temp sensors
+#include "ds18.h"
 DS18 ds18;
-
-// shared libraries
-#include <MyESP.h>
 
 // public libraries
 #include <ArduinoJson.h> // https://github.com/bblanchon/ArduinoJson
@@ -32,7 +30,7 @@ DS18 ds18;
 #define myDebug_P(...) myESP.myDebug_P(__VA_ARGS__)
 
 // set to value >0 if the ESP is overheating or there are timing issues. Recommend a value of 1.
-#define EMSESP_DELAY 1 // initially set to 0 for no delay
+#define EMSESP_DELAY 1 // initially set to 0 for no delay // TODO change delay to 0?
 
 #define DEFAULT_HEATINGCIRCUIT 1 // default to HC1 for thermostats that support multiple heating circuits like the RC35
 
@@ -69,6 +67,8 @@ Ticker showerColdShotStopTimer;
 #define SHOWER_COLDSHOT_DURATION 10 // in seconds. 10 seconds for cold water before turning back hot water
 #define SHOWER_MAX_DURATION 420000  // in ms. 7 minutes, before trigger a shot of cold water
 
+#define MQTT_MAX_SIZE 700 // max size of a JSON object. See https://arduinojson.org/v6/assistant/
+
 typedef struct {
     uint32_t timestamp;      // for internal timings, via millis()
     uint8_t  dallas_sensors; // count of dallas sensors
@@ -98,9 +98,7 @@ static const command_t project_cmds[] PROGMEM = {
     {true, "led <on | off>", "toggle status LED on/off"},
     {true, "led_gpio <gpio>", "set the LED pin. Default is the onboard LED 2. For external D1 use 5"},
     {true, "dallas_gpio <gpio>", "set the external Dallas temperature sensors pin. Default is 14 for D5"},
-    {true, "dallas_parasite <on | off>", "set to on if powering Dallas sesnsors via parasite power"},
-    {true, "thermostat_type <device ID>", "set the thermostat type ID (e.g. 10 for 0x10)"},
-    {true, "boiler_type <device ID>", "set the boiler type ID (e.g. 8 for 0x08)"},
+    {true, "dallas_parasite <on | off>", "set to on if powering Dallas sensors via parasite power"},
     {true, "listen_mode <on | off>", "when set to on all automatic Tx are disabled"},
     {true, "shower_timer <on | off>", "send MQTT notification on all shower durations"},
     {true, "shower_alert <on | off>", "stop hot water to send 3 cold burst warnings after max shower time is exceeded"},
@@ -550,7 +548,7 @@ void showInfo() {
     if (ems_getSolarModuleEnabled()) {
         myDebug_P(PSTR("")); // newline
         myDebug_P(PSTR("%sSolar Module stats:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
-        myDebug_P(PSTR("  Solar Module: %s"), ems_getSolarModuleDescription(buffer_type));
+        myDebug_P(PSTR("  Solar module: %s"), ems_getSolarModuleDescription(buffer_type));
         _renderShortValue("Collector temperature", "C", EMS_SolarModule.collectorTemp);
         _renderShortValue("Bottom temperature", "C", EMS_SolarModule.bottomTemp);
         _renderIntValue("Pump modulation", "%", EMS_SolarModule.pumpModulation);
@@ -561,16 +559,16 @@ void showInfo() {
                       (EMS_SolarModule.pumpWorkMin % 1440) / 60,
                       EMS_SolarModule.pumpWorkMin % 60);
         }
-        _renderUShortValue("Energy Last Hour", "Wh", EMS_SolarModule.EnergyLastHour, 1); // *10
-        _renderUShortValue("Energy Today", "Wh", EMS_SolarModule.EnergyToday, 0);
-        _renderUShortValue("Energy Total", "kWH", EMS_SolarModule.EnergyTotal, 1); // *10
+        _renderUShortValue("Energy last hour", "Wh", EMS_SolarModule.EnergyLastHour, 1); // *10
+        _renderUShortValue("Energy today", "Wh", EMS_SolarModule.EnergyToday, 0);
+        _renderUShortValue("Energy total", "kWH", EMS_SolarModule.EnergyTotal, 1); // *10
     }
 
     // For HeatPumps
     if (ems_getHeatPumpEnabled()) {
         myDebug_P(PSTR("")); // newline
         myDebug_P(PSTR("%sHeat Pump stats:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
-        myDebug_P(PSTR("  Solar Module: %s"), ems_getHeatPumpDescription(buffer_type));
+        myDebug_P(PSTR("  Heat Pump module: %s"), ems_getHeatPumpDescription(buffer_type));
         _renderIntValue("Pump modulation", "%", EMS_HeatPump.HPModulation);
         _renderIntValue("Pump speed", "%", EMS_HeatPump.HPSpeed);
     }
@@ -579,7 +577,7 @@ void showInfo() {
     if (ems_getThermostatEnabled()) {
         myDebug_P(PSTR("")); // newline
         myDebug_P(PSTR("%sThermostat stats:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
-        myDebug_P(PSTR("  Thermostat: %s"), ems_getThermostatDescription(buffer_type));
+        myDebug_P(PSTR("  Thermostat: %s"), ems_getThermostatDescription(buffer_type, false));
 
         // Render Current & Setpoint Room Temperature
         if (ems_getThermostatModel() == EMS_MODEL_EASY) {
@@ -682,8 +680,6 @@ void publishSensorValues() {
         myESP.mqttPublish(TOPIC_EXTERNAL_SENSORS, data);
     }
 }
-
-
 
 // send values via MQTT
 // a json object is created for the boiler and one for the thermostat
@@ -1131,44 +1127,42 @@ void runUnitTest(uint8_t test_num) {
 }
 
 // callback for loading/saving settings to the file system (SPIFFS)
-bool FSCallback(MYESP_FSACTION action, const JsonObject json) {
+bool LoadSaveCallback(MYESP_FSACTION action, JsonObject json) {
     if (action == MYESP_FSACTION_LOAD) {
-        EMSESP_Status.led             = json["led"];
-        EMSESP_Status.led_gpio        = json["led_gpio"] | EMSESP_LED_GPIO;
-        EMSESP_Status.dallas_gpio     = json["dallas_gpio"] | EMSESP_DALLAS_GPIO;
-        EMSESP_Status.dallas_parasite = json["dallas_parasite"] | EMSESP_DALLAS_PARASITE;
+        const JsonObject & settings = json["settings"];
 
-        EMS_Thermostat.device_id = json["thermostat_type"] | EMSESP_THERMOSTAT_TYPE;
-        EMS_Boiler.device_id     = json["boiler_type"] | EMSESP_BOILER_TYPE;
+        EMSESP_Status.led             = settings["led"];
+        EMSESP_Status.led_gpio        = settings["led_gpio"] | EMSESP_LED_GPIO;
+        EMSESP_Status.dallas_gpio     = settings["dallas_gpio"] | EMSESP_DALLAS_GPIO;
+        EMSESP_Status.dallas_parasite = settings["dallas_parasite"] | EMSESP_DALLAS_PARASITE;
+        EMSESP_Status.shower_timer    = settings["shower_timer"];
+        EMSESP_Status.shower_alert    = settings["shower_alert"];
+        EMSESP_Status.publish_time    = settings["publish_time"] | DEFAULT_PUBLISHTIME;
 
-        EMSESP_Status.shower_timer = json["shower_timer"];
-        EMSESP_Status.shower_alert = json["shower_alert"];
-        EMSESP_Status.publish_time = json["publish_time"] | DEFAULT_PUBLISHTIME;
+        ems_setTxMode(settings["tx_mode"]);
 
-        ems_setTxMode(json["tx_mode"]);
-
-        EMSESP_Status.listen_mode = json["listen_mode"];
+        EMSESP_Status.listen_mode = settings["listen_mode"];
         ems_setTxDisabled(EMSESP_Status.listen_mode);
 
-        EMSESP_Status.heating_circuit = json["heating_circuit"] | DEFAULT_HEATINGCIRCUIT;
+        EMSESP_Status.heating_circuit = settings["heating_circuit"] | DEFAULT_HEATINGCIRCUIT;
         ems_setThermostatHC(EMSESP_Status.heating_circuit);
 
-        return true; // return false if some settings are missing and we need to rebuild the file
+        return true;
     }
 
     if (action == MYESP_FSACTION_SAVE) {
-        json["thermostat_type"] = EMS_Thermostat.device_id;
-        json["boiler_type"]     = EMS_Boiler.device_id;
-        json["led"]             = EMSESP_Status.led;
-        json["led_gpio"]        = EMSESP_Status.led_gpio;
-        json["dallas_gpio"]     = EMSESP_Status.dallas_gpio;
-        json["dallas_parasite"] = EMSESP_Status.dallas_parasite;
-        json["listen_mode"]     = EMSESP_Status.listen_mode;
-        json["shower_timer"]    = EMSESP_Status.shower_timer;
-        json["shower_alert"]    = EMSESP_Status.shower_alert;
-        json["publish_time"]    = EMSESP_Status.publish_time;
-        json["heating_circuit"] = EMSESP_Status.heating_circuit;
-        json["tx_mode"]         = ems_getTxMode();
+        JsonObject settings = json.createNestedObject("settings");
+
+        settings["led"]             = EMSESP_Status.led;
+        settings["led_gpio"]        = EMSESP_Status.led_gpio;
+        settings["dallas_gpio"]     = EMSESP_Status.dallas_gpio;
+        settings["dallas_parasite"] = EMSESP_Status.dallas_parasite;
+        settings["listen_mode"]     = EMSESP_Status.listen_mode;
+        settings["shower_timer"]    = EMSESP_Status.shower_timer;
+        settings["shower_alert"]    = EMSESP_Status.shower_alert;
+        settings["publish_time"]    = EMSESP_Status.publish_time;
+        settings["heating_circuit"] = EMSESP_Status.heating_circuit;
+        settings["tx_mode"]         = ems_getTxMode();
 
         return true;
     }
@@ -1179,7 +1173,7 @@ bool FSCallback(MYESP_FSACTION action, const JsonObject json) {
 // callback for custom settings when showing Stored Settings with the 'set' command
 // wc is number of arguments after the 'set' command
 // returns true if the setting was recognized and changed and should be saved back to SPIFFs
-bool SettingsCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, const char * value) {
+bool SetListCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, const char * value) {
     bool ok = false;
 
     if (action == MYESP_FSACTION_SET) {
@@ -1243,18 +1237,6 @@ bool SettingsCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, c
             }
         }
 
-        // thermostat_type
-        if (strcmp(setting, "thermostat_type") == 0) {
-            EMS_Thermostat.device_id = ((wc == 2) ? (uint8_t)strtol(value, 0, 16) : EMS_ID_NONE);
-            ok                       = true;
-        }
-
-        // boiler_type
-        if (strcmp(setting, "boiler_type") == 0) {
-            EMS_Boiler.device_id = ((wc == 2) ? (uint8_t)strtol(value, 0, 16) : EMS_ID_NONE);
-            ok                   = true;
-        }
-
         // shower timer
         if ((strcmp(setting, "shower_timer") == 0) && (wc == 2)) {
             if (strcmp(value, "on") == 0) {
@@ -1311,21 +1293,7 @@ bool SettingsCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, c
         myDebug_P(PSTR("  led_gpio=%d"), EMSESP_Status.led_gpio);
         myDebug_P(PSTR("  dallas_gpio=%d"), EMSESP_Status.dallas_gpio);
         myDebug_P(PSTR("  dallas_parasite=%s"), EMSESP_Status.dallas_parasite ? "on" : "off");
-
-        if (EMS_Thermostat.device_id == EMS_ID_NONE) {
-            myDebug_P(PSTR("  thermostat_type=<not set>"));
-        } else {
-            myDebug_P(PSTR("  thermostat_type=%02X"), EMS_Thermostat.device_id);
-        }
-
         myDebug_P(PSTR("  heating_circuit=%d"), EMSESP_Status.heating_circuit);
-
-        if (EMS_Boiler.device_id == EMS_ID_NONE) {
-            myDebug_P(PSTR("  boiler_type=<not set>"));
-        } else {
-            myDebug_P(PSTR("  boiler_type=%02X"), EMS_Boiler.device_id);
-        }
-
         myDebug_P(PSTR("  listen_mode=%s"), EMSESP_Status.listen_mode ? "on" : "off");
         myDebug_P(PSTR("  shower_timer=%s"), EMSESP_Status.shower_timer ? "on" : "off");
         myDebug_P(PSTR("  shower_alert=%s"), EMSESP_Status.shower_alert ? "on" : "off");
@@ -1697,58 +1665,110 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
     }
 }
 
-// web information for diagnostics
-void WebCallback(char * body) {
-    strlcpy(body, "<b>EMS stats:</b><br>", MYESP_MAXCHARBUFFER);
-
-    if (ems_getBusConnected()) {
-        char s[10];
-        strlcat(body, "EMS Bus is connected<br>", MYESP_MAXCHARBUFFER);
-        strlcat(body, "Rx: # successful read requests=", MYESP_MAXCHARBUFFER);
-        strlcat(body, itoa(EMS_Sys_Status.emsRxPgks, s, 10), MYESP_MAXCHARBUFFER);
-        strlcat(body, ", # CRC errors=", MYESP_MAXCHARBUFFER);
-        strlcat(body, itoa(EMS_Sys_Status.emxCrcErr, s, 10), MYESP_MAXCHARBUFFER);
-        if (ems_getTxCapable()) {
-            strlcat(body, "<br>Tx: # successful write requests=", MYESP_MAXCHARBUFFER);
-            strlcat(body, itoa(EMS_Sys_Status.emsTxPkgs, s, 10), MYESP_MAXCHARBUFFER);
-        } else {
-            strlcat(body, "<br>Tx: no signal<br><br>", MYESP_MAXCHARBUFFER);
-        }
-
-        // show device list
-        strlcpy(body, "<b>EMS devices found:</b><br>", MYESP_MAXCHARBUFFER);
-
-        char    buffer[MYESP_MAXCHARBUFFER] = {0};
-        uint8_t num_devices                 = ems_printDevices_s(buffer, MYESP_MAXCHARBUFFER);
-        if (num_devices == 0) {
-            strlcat(body, "(any detected and compatible EMS devices will show up here)", MYESP_MAXCHARBUFFER);
-        } else {
-            strlcat(body, buffer, MYESP_MAXCHARBUFFER);
-        }
-
-    } else {
-        strlcat(body, "Unable to establish a connection to the EMS Bus.", MYESP_MAXCHARBUFFER);
-    }
-}
-
 // Init callback, which is used to set functions and call methods after a wifi connection has been established
 void WIFICallback() {
     // This is where we enable the UART service to scan the incoming serial Tx/Rx bus signals
     // This is done after we have a WiFi signal to avoid any resource conflicts
-    system_uart_swap(); // TODO check
+    // system_uart_swap(); // TODO see if this still blocks the EMS lines
+}
 
-    /*
+// web information for diagnostics
+void WebCallback(JsonObject root) {
+    JsonObject emsbus = root.createNestedObject("emsbus");
+
     if (myESP.getUseSerial()) {
-        myDebug_P(PSTR("Warning! EMS bus communication disabled when Serial mode enabled. Use 'set serial off' to start communication."));
+        emsbus["ok"]  = false;
+        emsbus["msg"] = "EMS Bus is disabled when in Serial mode. Check Settings->General Settings";
     } else {
-        emsuart_init();
-        myDebug_P(PSTR("[UART] Opened Rx/Tx connection"));
-        if (!EMSESP_Status.listen_mode) {
-            // go and find the boiler and thermostat types, if not in listen mode
-            ems_discoverModels();
+        if (ems_getBusConnected()) {
+            if (ems_getTxCapable()) {
+                emsbus["ok"]  = true;
+                emsbus["msg"] = "EMS Bus Connected, Rx and Tx active";
+            } else {
+                emsbus["ok"]  = false;
+                emsbus["msg"] = "EMS Bus Connected, Tx is failing";
+            }
+        } else {
+            emsbus["ok"]  = false;
+            emsbus["msg"] = "EMS Bus is not connected. Check event logs for errors.";
         }
     }
-    */
+
+    JsonArray list = emsbus.createNestedArray("devices");
+
+    for (std::list<_Generic_Device>::iterator it = Devices.begin(); it != Devices.end(); it++) {
+        JsonObject item   = list.createNestedObject();
+        item["type"]      = (it)->model_type;
+        item["model"]     = (it)->model_string;
+        item["deviceid"]  = (it)->device_id;
+        item["version"]   = (it)->version;
+        item["productid"] = (it)->product_id;
+    }
+
+    JsonObject thermostat = root.createNestedObject("thermostat");
+
+    if (ems_getThermostatEnabled()) {
+        thermostat["ok"] = true;
+
+        char buffer[200];
+        thermostat["tm"] = ems_getThermostatDescription(buffer, true);
+
+        // Render Current & Setpoint Room Temperature
+        if (ems_getThermostatModel() == EMS_MODEL_EASY) {
+            if (EMS_Thermostat.setpoint_roomTemp != EMS_VALUE_SHORT_NOTSET)
+                thermostat["ts"] = (double)EMS_Thermostat.setpoint_roomTemp / 100;
+            if (EMS_Thermostat.curr_roomTemp != EMS_VALUE_SHORT_NOTSET)
+                thermostat["tc"] = (double)EMS_Thermostat.curr_roomTemp / 100;
+        } else if ((ems_getThermostatModel() == EMS_MODEL_FR10) || (ems_getThermostatModel() == EMS_MODEL_FW100)) {
+            if (EMS_Thermostat.setpoint_roomTemp != EMS_VALUE_SHORT_NOTSET)
+                thermostat["ts"] = (double)EMS_Thermostat.setpoint_roomTemp / 10;
+            if (EMS_Thermostat.curr_roomTemp != EMS_VALUE_SHORT_NOTSET)
+                thermostat["tc"] = (double)EMS_Thermostat.curr_roomTemp / 10;
+        } else {
+            if (EMS_Thermostat.setpoint_roomTemp != EMS_VALUE_SHORT_NOTSET)
+                thermostat["ts"] = (double)EMS_Thermostat.setpoint_roomTemp / 2;
+            if (EMS_Thermostat.curr_roomTemp != EMS_VALUE_SHORT_NOTSET)
+                thermostat["tc"] = (double)EMS_Thermostat.curr_roomTemp / 10;
+        }
+
+        // Render Termostat Mode, if we have a mode
+        uint8_t thermoMode = _getThermostatMode(); // 0xFF=unknown, 0=low, 1=manual, 2=auto, 3=night, 4=day
+        if (thermoMode == 0) {
+            thermostat["tmode"] = "low";
+        } else if (thermoMode == 1) {
+            thermostat["tmode"] = "manual";
+        } else if (thermoMode == 2) {
+            thermostat["tmode"] = "auto";
+        } else if (thermoMode == 3) {
+            thermostat["tmode"] = "night";
+        } else if (thermoMode == 4) {
+            thermostat["tmode"] = "day";
+        }
+    } else {
+        thermostat["ok"] = false;
+    }
+
+    JsonObject boiler = root.createNestedObject("boiler");
+    if (ems_getBoilerEnabled()) {
+        boiler["ok"] = true;
+
+        char buffer[200];
+        boiler["bm"] = ems_getBoilerDescription(buffer, true);
+
+        boiler["b1"] = (EMS_Boiler.tapwaterActive ? "running" : "off");
+        boiler["b2"] = (EMS_Boiler.heatingActive ? "active" : "off");
+
+        if (EMS_Boiler.selFlowTemp != EMS_VALUE_INT_NOTSET)
+            boiler["b3"] = EMS_Boiler.selFlowTemp;
+
+        if (EMS_Boiler.boilTemp != EMS_VALUE_USHORT_NOTSET)
+            boiler["b4"] = (double)EMS_Boiler.boilTemp / 10;
+
+    } else {
+        boiler["ok"] = false;
+    }
+
+    // serializeJsonPretty(root, Serial); // turn on for debugging
 }
 
 // Initialize the boiler settings and shower settings
@@ -1862,25 +1882,14 @@ void setup() {
 
     systemCheckTimer.attach(SYSTEMCHECK_TIME, do_systemCheck); // check if EMS is reachable
 
-    // set up myESP for Wifi, MQTT, MDNS and Telnet
-    myESP.setTelnet(TelnetCommandCallback, TelnetCallback); // set up Telnet commands
-    myESP.setWIFI(NULL, NULL, WIFICallback);                // empty ssid and password as we take this from the config file
-
-    // MQTT host, username and password taken from the SPIFFS settings
-    myESP.setMQTT(
-        NULL, NULL, NULL, MQTT_BASE, MQTT_KEEPALIVE, MQTT_QOS, MQTT_RETAIN, MQTT_WILL_TOPIC, MQTT_WILL_ONLINE_PAYLOAD, MQTT_WILL_OFFLINE_PAYLOAD, MQTTCallback);
-
-    // OTA callback which is called when OTA is starting and stopping
-    myESP.setOTA(OTACallback_pre, OTACallback_post);
-
-    // custom settings in SPIFFS
-    myESP.setSettings(FSCallback, SettingsCallback);
-
-    // web custom settings
-    myESP.setWeb(WebCallback);
-
-    // start up all the services
-    myESP.begin(APP_HOSTNAME, APP_NAME, APP_VERSION);
+    // set up myESP for Wifi, MQTT, MDNS and Telnet callbacks
+    myESP.setTelnet(TelnetCommandCallback, TelnetCallback);     // set up Telnet commands
+    myESP.setWIFI(WIFICallback);                                // wifi callback
+    myESP.setMQTT(MQTTCallback);                                // MQTT ip, username and password taken from the SPIFFS settings
+    myESP.setSettings(LoadSaveCallback, SetListCallback, true); // default is Serial off
+    myESP.setWeb(WebCallback);                                  // web custom settings
+    myESP.setOTA(OTACallback_pre, OTACallback_post);            // OTA callback which is called when OTA is starting and stopping
+    myESP.begin(APP_HOSTNAME, APP_NAME, APP_VERSION, APP_HELPURL, APP_UPDATEURL);
 
     // at this point we have all the settings from our internall SPIFFS config file
     // fire up the UART now
@@ -1889,7 +1898,8 @@ void setup() {
     } else {
         Serial.println("Note: Serial output will now be disabled. Please use Telnet.");
         Serial.flush();
-        emsuart_init();
+        myESP.setUseSerial(false);
+        emsuart_init(); // start EMS bus transmissions
         myDebug_P(PSTR("[UART] Opened Rx/Tx connection"));
         if (!EMSESP_Status.listen_mode) {
             // go and find the boiler and thermostat types, if not in listen mode

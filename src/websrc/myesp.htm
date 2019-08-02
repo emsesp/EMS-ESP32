@@ -1,0 +1,484 @@
+<div id="backupcontent">
+    <br>
+    <br>
+    <div class="row">
+        <div class="col-sm-6">
+            <legend>Backup</legend>
+            <h6 class="text-muted">Please make sure that you have made a backup on regular basis.</h6>
+            <div>
+                <button class="btn btn-link btn-sm" onclick="backupset();">Backup System Settings</button>
+                <a id="downloadSet" style="display:none"></a>
+                <button class="btn btn-link btn-sm" onclick="backupCustomSet();">Backup Custom Settings</button>
+                <a id="downloadCustomSet" style="display:none"></a>
+            </div>
+            <br>
+            <div>
+                <legend>Restore</legend>
+                <h6 class="text-muted">Restore system and custom settings.</h6>
+                <label for="restoreSet" class="btn btn-link btn-sm">Restore System Settings</label>
+                <input id="restoreSet" type="file" accept="text/json" onchange="restoreSet();" style="display:none;">
+                <label for="restoreCustomSet" class="btn btn-link btn-sm">Restore Custom Settings</label>
+                <input id="restoreCustomSet" type="file" accept="text/json" onchange="restoreCustomSet();"
+                    style="display:none;">
+            </div>
+            <br>
+            <div>
+                <legend>Restart</legend>
+                <h6 class="text-muted">Click to restart your device without saving changes.</h6>
+                <label for="restart" class="btn btn-link btn-sm">Restart Device</label>
+                <button id="restart" class="btn btn-link btn-sm" onclick="restartESP();" style="display:none;"></button>
+            </div>
+            <br>
+            <div id="restoremodal" class="modal fade" role="dialog">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            <h4 class="modal-title">Please wait while data is restoring...</h4>
+                        </div>
+                        <div class="modal-body">
+                            <div id="pbar" class="progress">
+                                <div id="dynamic" class="progress-bar progress-bar-primary progress-bar-striped active">
+                                    Restoring...</div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" id="restoreclose" style="display:none;" class="btn btn-default"
+                                data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <br>
+    <br>
+</div>
+
+<div id="progresscontent">
+    <br>
+    <br>
+    <div class="container">
+        <div class="row">
+            <br>
+            <div class="col-md-8 col-md-offset-2">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Please wait about 10 seconds while the system restarts...</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div class="progress">
+                            <div id="updateprog" class="progress-bar progress-bar-striped active" role="progressbar"
+                                aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width:0%">0%
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-footer text-center" id="reconnect" style="display:none;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="generalcontent">
+    <br>
+    <br>
+    <legend>General Settings</legend>
+    <br>
+    <div class="row form-group">
+        <label class="col-xs-3">Admin Password<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign"
+                aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right"
+                data-content="Log On password"></i></label>
+        <span class="col-xs-9 col-md-5">
+            <input class="form-control input-sm" placeholder="Administrator Password" id="adminpwd" type="password">
+        </span>
+        <br>
+    </div>
+    <div class="row form-group">
+        <label class="col-xs-3">Host Name<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign"
+                aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right"
+                data-content="Hostname. When Bonjour is installed on your computer you can access via http://hostname.local"></i></label>
+        <span class="col-xs-9 col-md-5">
+            <input class="form-control input-sm" placeholder="Hostname" id="hostname" type="text">
+        </span>
+        <br>
+    </div>
+
+    <div class="row form-group">
+        <label class="col-xs-3">Serial<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign"
+                aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right"
+                data-content="Please choose if you want to enable Serial output for debugging"></i></label>
+        <div class="col-xs-9">
+            <form>
+                <label class="radio-inline">
+                    <input type="radio" value="1" name="serialenabled">Enabled</label>
+                <label class="radio-inline">
+                    <input type="radio" value="0" name="serialenabled" checked>Disabled</label>
+            </form>
+        </div>
+        <br>
+        <br>
+        <div class="col-xs-9 col-md-8">
+            <button onclick="savegeneral()" class="btn btn-primary btn-sm pull-right">Save</button>
+        </div>
+    </div>
+    <div style="clear:both;">
+        <br>
+        <br>
+    </div>
+</div>
+<br>
+<br>
+</div>
+
+<div id="eventcontent">
+    <br>
+    <br>
+    <div class="text-center" id="loading-img">
+        <h5>Please wait while fetching data...<span id="loadpages"></span></h5>
+        <br>
+    </div>
+    <div>
+        <legend>Event Log</legend>
+        <div class="panel panel-default">
+            <div>
+                <table id="eventtable" class="table" data-paging="true" data-filtering="true" data-sorting="true"
+                    data-editing="false" data-state="true"></table>
+            </div>
+        </div>
+        <button onclick="clearevent()" class="btn btn-primary btn-sm">Clear Log</button>
+        <div style="clear:both;">
+            <br>
+            <br>
+        </div>
+    </div>
+</div>
+
+<div id="mqttcontent">
+    <br>
+    <br>
+    <legend>MQTT Settings</legend>
+    <br>
+    <div class="row form-group">
+        <label class="col-xs-3">MQTT<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign"
+                aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right"
+                data-content="Please choose if you want to enable MQTT"></i></label>
+        <div class="col-xs-9">
+            <form>
+                <label class="radio-inline">
+                    <input type="radio" value="1" name="mqttenabled">Enabled</label>
+                <label class="radio-inline">
+                    <input type="radio" value="0" name="mqttenabled" checked>Disabled</label>
+            </form>
+        </div>
+    </div>
+    <div class="row form-group">
+        <label class="col-xs-3">IP<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign" aria-hidden="true"
+                data-toggle="popover" data-trigger="hover" data-placement="right"
+                data-content="MQTT server IP Address"></i></label>
+        <span class="col-xs-9">
+            <input class="form-control input-sm" placeholder="MQTT IP" style="display:inline;max-width:185px"
+                id="mqttip" type="text">
+        </span>
+        <br>
+    </div>
+    <div class="row form-group">
+        <label class="col-xs-3">Port<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign"
+                aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right"
+                data-content="MQTT server port"></i></label>
+        <span class="col-xs-9">
+            <input class="form-control input-sm" placeholder="MQTT Port" value="" style="display:inline;max-width:185px"
+                id="mqttport" type="text">
+        </span>
+        <br>
+    </div>
+    <div class="row form-group">
+        <label class="col-xs-3">Username<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign"
+                aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right"
+                data-content="MQTT username"></i></label>
+        <span class="col-xs-9">
+            <input class="form-control input-sm" placeholder="" value="" style="display:inline;max-width:185px"
+                id="mqttuser" type="text">
+        </span>
+        <br>
+    </div>
+    <div class="row form-group">
+        <label class="col-xs-3">Password<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign"
+                aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right"
+                data-content="MQTT server password if any"></i></label>
+        <span class="col-xs-9">
+            <input class="form-control input-sm" placeholder="" value="" style="display:inline;max-width:185px"
+                id="mqttpwd" type="password">
+        </span>
+        <br>
+    </div>
+    <div class="row form-group">
+        <label class="col-xs-3">Base<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign"
+                aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right"
+                data-content="MQTT base prefix (optional)"></i></label>
+        <span class="col-xs-9">
+            <input class="form-control input-sm" placeholder="MQTT base" value="" style="display:inline;max-width:185px"
+                id="mqttbase" type="text">
+        </span>
+    </div>
+    <div class="row form-group">
+        <label class="col-xs-3">Heartbeat<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign"
+                aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right"
+                data-content="Please choose if you want to enable the MQTT heartbeat"></i></label>
+        <div class="col-xs-9">
+            <form>
+                <label class="radio-inline">
+                    <input type="radio" value="1" name="mqttheartbeat">Enabled</label>
+                <label class="radio-inline">
+                    <input type="radio" value="0" name="mqttheartbeat" checked>Disabled</label>
+            </form>
+        </div>
+    </div>
+    <br>
+    <div class="col-xs-9 col-md-8">
+        <button onclick="savemqtt()" class="btn btn-primary btn-sm pull-right">Save</button>
+    </div>
+</div>
+
+<div id="networkcontent">
+    <br>
+    <br>
+    <legend>Wi-Fi Settings</legend>
+    <h6 class="text-muted">Type your Wi-Fi Network's SSID or Scan for nerby Wireless Networks to join.</h6>
+    <br>
+    <div class="row form-group">
+        <label class="col-xs-3">Wi-Fi Mode<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign"
+                aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right"
+                data-content="You can run your ESP in AP Mode or Client Mode. In client mode you will need to connect to an existing Wi-Fi network, in AP Mode ESP creates a Wi-Fi network itself."></i></label>
+        <div class="col-xs-9">
+            <form>
+                <label class="radio-inline">
+                    <input type="radio" value="1" name="wmode" id="wmodeap" onclick="handleAP();" checked>Access Point
+                </label>
+                <label class="radio-inline">
+                    <input type="radio" value="0" name="wmode" id="wmodesta" onclick="handleSTA();">Client</label>
+            </form>
+        </div>
+    </div>
+    <div class="row form-group" style="display:none" id="hidessid">
+        <label class="col-xs-3">SSID<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign"
+                aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right"
+                data-content="Wi-Fi Network's Name"></i></label>
+        <span class="col-xs-7 col-md-5">
+            <input class="form-control input-sm" id="inputtohide" type="text" name="ap_ssid">
+            <select class="form-control input-sm" style="display:none;" id="ssid" onchange="listBSSID();"></select>
+        </span>
+        <span class="col-xs-2">
+            <button id="scanb" type="button" class="btn btn-primary btn-xs" style="display:none;"
+                onclick="scanWifi()">Scan</button>
+        </span>
+    </div>
+    <div class="row form-group" style="display:none" id="hidepasswd">
+        <label class="col-xs-3">Password<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign"
+                aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right"
+                data-content="Wi-Fi Password"></i></label>
+        <span class="col-xs-9 col-md-5">
+            <input id="wifipass" class="form-control input-sm" name="ap_passwd" type="password">
+        </span>
+    </div>
+    <br>
+    <div class="col-xs-9 col-md-8">
+        <button onclick="savenetwork()" class="btn btn-primary btn-sm pull-right">Save</button>
+    </div>
+</div>
+
+<div id="ntpcontent">
+    <br>
+    <br>
+    <legend>Time Settings</legend>
+    <h6 class="text-muted">Daylight saving times are taken into account</h6>
+    <br>
+    <div class="row form-group">
+        <label class="col-xs-3">Device Time</label>
+        <span id="utc" class="col-xs-9 col-md-5">
+        </span>
+    </div>
+    <div class="row form-group">
+        <label class="col-xs-3">Browser Time</label>
+        <span id="rtc" class="col-xs-9 col-md-5">
+        </span>
+    </div>
+    <div class="row form-group">
+        <div class="col-xs-3">
+            <button onclick="syncBrowserTime()" class="btn btn-link btn-sm">Sync Browser Time to Device</button><i
+                style="margin-left: 10px;" class="glyphicon glyphicon-info-sign" aria-hidden="true"
+                data-toggle="popover" data-trigger="hover" data-placement="right"
+                data-content="Use your browser time. Useful when the system does not have an internet connection."></i>
+        </div>
+    </div>
+    <div class="row form-group">
+        <label class="col-xs-3">NTP<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign"
+                aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right"
+                data-content="Enable NTP - requires an internet connection"></i></label>
+        <div class="col-xs-9">
+            <form>
+                <label class="radio-inline">
+                    <input type="radio" value="1" name="ntpenabled">Enabled</label>
+                <label class="radio-inline">
+                    <input type="radio" value="0" name="ntpenabled" checked>Disabled</label>
+            </form>
+        </div>
+    </div>
+    <div class="row form-group">
+        <label class="col-xs-3">NTP Server<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign"
+                aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right"
+                data-content="The server for the time sync. Choose nearest server for better accuracy, see https://www.ntppool.org for servers nearby."></i></label>
+        <span class="col-xs-9 col-md-5">
+            <input class="form-control input-sm" placeholder="eg. pool.ntp.org" value="pool.ntp.org" id="ntpserver"
+                type="text">
+        </span>
+        <br>
+    </div>
+    <div class="row form-group">
+        <label class="col-xs-3">Intervals<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign"
+                aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right"
+                data-content="Intervals between Time Sync in Minutes"></i></label>
+        <span class="col-xs-9 col-md-5">
+            <input class="form-control input-sm" placeholder="in Minutes" value="30" id="intervals" type="text">
+        </span>
+        <br>
+    </div>
+    <div class="row form-group">
+        <label class="col-xs-3">Time Zone</label>
+        <span class="col-xs-9 col-md-5">
+            <select class="form-control input-sm" name="DropDownTimezone" id="DropDownTimezone">
+                <option value="-12">(GMT -12:00) Eniwetok, Kwajalein</option>
+                <option value="-11">(GMT -11:00) Midway Island, Samoa</option>
+                <option value="-10">(GMT -10:00) Hawaii</option>
+                <option value="-9">(GMT -9:00) Alaska</option>
+                <option value="-8">(GMT -8:00) Pacific Time (US &amp; Canada)</option>
+                <option value="-7">(GMT -7:00) Mountain Time (US &amp; Canada)</option>
+                <option value="-6">(GMT -6:00) Central Time (US &amp; Canada), Mexico City</option>
+                <option value="-5">(GMT -5:00) Eastern Time (US &amp; Canada), Bogota, Lima</option>
+                <option value="-4">(GMT -4:00) Atlantic Time (Canada), Caracas, La Paz</option>
+                <option value="-3.5">(GMT -3:30) Newfoundland</option>
+                <option value="-3">(GMT -3:00) Brazil, Buenos Aires, Georgetown</option>
+                <option value="-2">(GMT -2:00) Mid-Atlantic</option>
+                <option value="-1">(GMT -1:00 hour) Azores, Cape Verde Islands</option>
+                <option value="0">(GMT) Western Europe Time, London, Lisbon, Casablanca</option>
+                <option selected="selected" value="1">(GMT +1:00 hour) Brussels, Copenhagen, Madrid, Paris</option>
+                <option value="2">(GMT +2:00) Kaliningrad, South Africa</option>
+                <option value="3">(GMT +3:00) Baghdad, Riyadh, Moscow, St. Petersburg</option>
+                <option value="3.5">(GMT +3:30) Tehran</option>
+                <option value="4">(GMT +4:00) Abu Dhabi, Muscat, Baku, Tbilisi</option>
+                <option value="4.5">(GMT +4:30) Kabul</option>
+                <option value="5">(GMT +5:00) Ekaterinburg, Islamabad, Karachi, Tashkent</option>
+                <option value="5.5">(GMT +5:30) Bombay, Calcutta, Madras, New Delhi</option>
+                <option value="5.75">(GMT +5:45) Kathmandu</option>
+                <option value="6">(GMT +6:00) Almaty, Dhaka, Colombo</option>
+                <option value="7">(GMT +7:00) Bangkok, Hanoi, Jakarta</option>
+                <option value="8">(GMT +8:00) Beijing, Perth, Singapore, Hong Kong</option>
+                <option value="9">(GMT +9:00) Tokyo, Seoul, Osaka, Sapporo, Yakutsk</option>
+                <option value="9.5">(GMT +9:30) Adelaide, Darwin</option>
+                <option value="10">(GMT +10:00) Eastern Australia, Guam, Vladivostok</option>
+                <option value="11">(GMT +11:00) Magadan, Solomon Islands, New Caledonia</option>
+                <option value="12">(GMT +12:00) Auckland, Wellington, Fiji, Kamchatka</option>
+            </select>
+        </span>
+    </div>
+    <br>
+    <div class="col-xs-9 col-md-8">
+        <button onclick="saventp()" class="btn btn-primary btn-sm pull-right">Save</button>
+    </div>
+</div>
+
+<div id="statuscontent">
+    <br><br>
+    <legend>System Status</legend>
+    <br>
+    <div class="row text-center">
+        <div class="col-md-8 col-md-offset-2">
+            <div class="panel panel-default table-responsive">
+                <table class="table table-hover table-striped table-condensed">
+                    <caption>System</caption>
+                    <tr>
+                        <th>Uptime</th>
+                        <td id="uptime"></td>
+                    </tr>
+                    <tr>
+                        <th>System Load</th>
+                        <td id="systemload"> %</td>
+                    </tr>
+
+                </table>
+            </div>
+            <div class="panel panel-default table-responsive">
+                <table class="table table-hover table-striped table-condensed">
+                    <caption>Storage</caption>
+                    <tr>
+                        <th>Free Heap</th>
+                        <td>
+                            <div class="progress" style="margin-bottom: 0 !important;">
+                                <div id="heap" class="progress-bar progress-bar-primary" role="progressbar">
+                                    Progress
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Free Flash</th>
+                        <td>
+                            <div class='progress' style="margin-bottom: 0 !important;">
+                                <div id="flash" class="progress-bar progress-bar-primary" role="progressbar">
+                                    Progress
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Free SPIFFS</th>
+                        <td>
+                            <div class='progress' style="margin-bottom: 0 !important;">
+                                <div id="spiffs" class="progress-bar progress-bar-primary" role="progressbar">
+                                    Progress
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div class="panel panel-default table-responsive">
+                <table class="table table-hover table-striped table-condensed">
+                    <caption>Wireless Network</caption>
+                    <tr>
+                        <th>SSID</th>
+                        <td id="ssidstat"></td>
+                    </tr>
+                    <tr>
+                        <th>IP Address</th>
+                        <td id="ip"></td>
+                    </tr>
+                    <tr>
+                        <th>MAC Address</th>
+                        <td id="mac"></td>
+                    </tr>
+                    <tr>
+                        <th>Signal Strength</th>
+                        <td id="signalstr"> %</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="panel panel-default table-responsive">
+                <table class="table">
+                    <caption>MQTT</caption>
+                    <tr>
+                        <td>
+                            <div id="mqttconnected"></div>
+                        </td>
+                        <td>
+                            <div id="mqttheartbeat"></div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <br>
+        <br>
+    </div>
+</div>

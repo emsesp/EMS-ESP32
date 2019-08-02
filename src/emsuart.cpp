@@ -121,7 +121,7 @@ void ICACHE_FLASH_ATTR emsuart_init() {
     // UCFFT = RX FIFO Full Threshold (7 bit) = want this to be 31 for 32 bytes of buffer (default was 127)
     // see https://www.espressif.com/sites/default/files/documentation/esp8266-technical_reference_en.pdf
     //
-    // change: we set UCFFT to 1 to get an immediate indicator about incoming trafffic.
+    // change: we set UCFFT to 1 to get an immediate indicator about incoming traffic.
     //         Otherwise, we're only noticed by UCTOT or RxBRK!
     USC1(EMSUART_UART) = 0;                                                // reset config first
     USC1(EMSUART_UART) = (0x01 << UCFFT) | (0x01 << UCTOT) | (1 << UCTOE); // enable interupts
@@ -141,7 +141,7 @@ void ICACHE_FLASH_ATTR emsuart_init() {
     system_set_os_print(0);
 
     // swap Rx and Tx pins to use GPIO13 (D7) and GPIO15 (D8) respectively
-    //system_uart_swap();
+    system_uart_swap();
 
     ETS_UART_INTR_ATTACH(emsuart_rx_intr_handler, nullptr);
     ETS_UART_INTR_ENABLE();

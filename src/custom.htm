@@ -1,0 +1,239 @@
+<div id="customcontent">
+    <br>
+    <br>
+    <legend>Custom Settings</legend>
+    <h6 class="text-muted">Please refer to the Help for configuration options.</h6>
+    <br>
+
+    <div class="row form-group">
+        <label class="col-xs-3">LED<i style="margin-left: 10px;"
+                class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true" data-toggle="popover"
+                data-trigger="hover" data-placement="right"
+                data-content="Please choose if you want to enable the LED"></i></label>
+        <div class="col-xs-9">
+            <form>
+                <label class="radio-inline">
+                    <input type="radio" value="1" name="led">Enabled</label>
+                <label class="radio-inline">
+                    <input type="radio" value="0" name="led" checked>Disabled</label>
+            </form>
+        </div>
+    </div>
+
+    <div class="row form-group">
+        <label class="col-xs-3">LED pin<i style="margin-left: 10px;"
+                class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true" data-toggle="popover"
+                data-trigger="hover" data-placement="right" data-content="Choose &quot;LED pin&quot; pin"></i></label>
+        <span class="col-xs-9 col-md-5">
+            <select class="form-control input-sm" id="led_gpio">
+                <option value="0">GPIO-0</option>
+                <option selected="selected" value="2">GPIO-2 (LED_BUILTIN)</option>
+                <option value="4">GPIO-4</option>
+                <option value="5">GPIO-5</option>
+                <option value="12">GPIO-12</option>
+                <option value="14">GPIO-14</option>
+                <option value="16">GPIO-16</option>
+            </select>
+        </span>
+    </div>
+
+    <div class="row form-group">
+        <label class="col-xs-3">Dallas parasite<i style="margin-left: 10px;"
+                class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true" data-toggle="popover"
+                data-trigger="hover" data-placement="right"
+                data-content="Enable if Dallas sensors powered via parasite"></i></label>
+        <div class="col-xs-9">
+            <form>
+                <label class="radio-inline">
+                    <input type="radio" value="1" name="dallas_parasite">Enabled</label>
+                <label class="radio-inline">
+                    <input type="radio" value="0" name="dallas_parasite" checked>Disabled</label>
+            </form>
+        </div>
+    </div>
+
+    <div class="row form-group">
+        <label class="col-xs-3">Dallas pin<i style="margin-left: 10px;"
+                class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true" data-toggle="popover"
+                data-trigger="hover" data-placement="right"
+                data-content="Choose &quot;Dallas pin&quot; pin."></i></label>
+        <span class="col-xs-9 col-md-5">
+            <select class="form-control input-sm" id="dallas_gpio">
+                <option value="0">GPIO-0</option>
+                <option value="4">GPIO-4</option>
+                <option value="5">GPIO-5</option>
+                <option value="12">GPIO-12</option>
+                <option selected="selected" value="14">GPIO-14</option>
+                <option value="16">GPIO-16</option>
+            </select>
+        </span>
+    </div>
+
+    <div class="row form-group">
+        <label class="col-xs-3">Listen mode<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign"
+                aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right"
+                data-content="Listen mode disables Tx"></i></label>
+        <div class="col-xs-9">
+            <form>
+                <label class="radio-inline">
+                    <input type="radio" value="1" name="listen_mode">Enabled</label>
+                <label class="radio-inline">
+                    <input type="radio" value="0" name="listen_mode" checked>Disabled</label>
+            </form>
+        </div>
+    </div>
+
+    <div class="row form-group">
+        <label class="col-xs-3">Shower timer<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign"
+                aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right"
+                data-content="Monitors and alerts on shower duration"></i></label>
+        <div class="col-xs-9">
+            <form>
+                <label class="radio-inline">
+                    <input type="radio" value="1" name="shower_timer">Enabled</label>
+                <label class="radio-inline">
+                    <input type="radio" value="0" name="shower_timer" checked>Disabled</label>
+            </form>
+        </div>
+    </div>
+
+    <div class="row form-group">
+        <label class="col-xs-3">Shower alert<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign"
+                aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right"
+                data-content="Sends blasts of cold water after a fixed shower duration"></i></label>
+        <div class="col-xs-9">
+            <form>
+                <label class="radio-inline">
+                    <input type="radio" value="1" name="shower_alert">Enabled</label>
+                <label class="radio-inline">
+                    <input type="radio" value="0" name="shower_alert" checked>Disabled</label>
+            </form>
+        </div>
+    </div>
+
+    <div class="row form-group">
+        <label class="col-xs-3">Publish time<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign"
+                aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right"
+                data-content="Publish Time in seconds"></i></label>
+        <span class="col-xs-9">
+            <input class="form-control input-sm" placeholder="120" value="" style="display:inline;max-width:185px"
+                id="publish_time" type="text">
+        </span>
+        <br>
+    </div>
+
+    <div class="row form-group">
+        <label class="col-xs-3">Heating circuit<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign"
+                aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right"
+                data-content="Select main heating circuit to use"></i></label>
+        <span class="col-xs-9 col-md-5">
+            <select class="form-control input-sm" id="heating_circuit">
+                <option selected="selected" value="1">HC1 (default)</option>
+                <option value="2">HC2</option>
+                <option value="3">HC3</option>
+            </select>
+        </span>
+    </div>
+
+    <div class="row form-group">
+        <label class="col-xs-3">TX mode<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign"
+                aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right"
+                data-content="TX mode settings for various EMS brands"></i></label>
+        <span class="col-xs-9 col-md-5">
+            <select class="form-control input-sm" id="tx_mode">
+                <option selected="selected" value="0">0=EMS 1.0 (default)</option>
+                <option value="1">1=EMS+</option>
+                <option value="2">2=Generic (experimental!)</option>
+                <option value="3">3=Junkers</option>
+            </select>
+        </span>
+    </div>
+
+    <br>
+    <div class="row form-group">
+        <div class="col-xs-9 col-md-8">
+            <button onclick="savecustom()" class="btn btn-primary btn-sm pull-right">Save</button>
+        </div>
+    </div>
+
+    <h6 class="text-muted">Note: any setting marked with a <span
+            class="glyphicon glyphicon-exclamation-sign text-danger"></span> requires a restart after saving.</h6>
+</div>
+
+<div id="custom_statuscontent">
+    <br>
+    <div class="row text-center">
+        <div class="col-md-8 col-md-offset-2">
+            <h1>Dashboard</h1>
+            <p>Real-time values from the EMS-ESP device are shown here.</p>
+        </div>
+        <div class="col-md-8 col-md-offset-2">
+            <div class="panel panel-default table-responsive">
+                <table class="table table-hover table-striped table-condensed">
+                    <caption>EMS Bus stats</caption>
+                    <tr>
+                        <td colspan="2">
+                            <h3><span id="msg"></span></h3>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Detected Devices:</th>
+                        <td>
+                            <ul class="list-group">
+                                <div id="devices"></div>
+                            </ul>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div class="panel panel-info table-responsive" id="boiler_show">
+                <div class="panel-heading">Boiler</div>
+                <table class="table table-hover table-bordered table-condensed">
+                    <tr>
+                        <th>Model:</th>
+                        <td colspan="3" id="bm"></td>
+                    </tr>
+                    <tr>
+                        <th>Hot Tap Water:</th>
+                        <td id="b1"></td>
+                        <th>Central Heating:</th>
+                        <td id="b2"></td>
+                    </tr>
+                    <th>Selected Flow Temperature:</th>
+                    <td id="b3"></td>
+                    <th>Boiler Temperature:</th>
+                    <td id="b4"></td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="panel panel-success table-responsive" id="thermostat_show">
+                <div class="panel-heading">Thermostat</div>
+                <table class="table table-hover table-bordered table-condensed">
+                    <tr>
+                        <th>Model:</th>
+                        <td colspan="3" id="tm"></td>
+                    </tr>
+                    <tr>
+                        <th>Setpoint Temperature:</th>
+                        <td id="ts"></td>
+                        <th>Current Temperature:</th>
+                        <td id="tc"></td>
+                    </tr>
+                    <tr>
+                        <th>Mode:</th>
+                        <td colspan="3" id="tmode"></td>
+                    </tr>
+                </table>
+            </div>
+
+        </div>
+        <br>
+        <br>
+        <div class="row form-group">
+            <div class="col-xs-9 col-md-8">
+                <button onclick="refreshEMS()" class="btn btn-primary btn-sm pull-center">Refresh...</button>
+            </div>
+        </div>
+    </div>
+</div>
