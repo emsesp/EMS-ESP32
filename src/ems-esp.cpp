@@ -30,7 +30,7 @@ DS18 ds18;
 #define myDebug_P(...) myESP.myDebug_P(__VA_ARGS__)
 
 // set to value >0 if the ESP is overheating or there are timing issues. Recommend a value of 1.
-#define EMSESP_DELAY 1 // initially set to 0 for no delay // TODO change delay to 0?
+#define EMSESP_DELAY 0 // initially set to 0 for no delay // TODO change delay to 0?
 
 #define DEFAULT_HEATINGCIRCUIT 1 // default to HC1 for thermostats that support multiple heating circuits like the RC35
 
@@ -1883,12 +1883,12 @@ void setup() {
     systemCheckTimer.attach(SYSTEMCHECK_TIME, do_systemCheck); // check if EMS is reachable
 
     // set up myESP for Wifi, MQTT, MDNS and Telnet callbacks
-    myESP.setTelnet(TelnetCommandCallback, TelnetCallback);     // set up Telnet commands
-    myESP.setWIFI(WIFICallback);                                // wifi callback
-    myESP.setMQTT(MQTTCallback);                                // MQTT ip, username and password taken from the SPIFFS settings
-    myESP.setSettings(LoadSaveCallback, SetListCallback, true); // default is Serial off
-    myESP.setWeb(WebCallback);                                  // web custom settings
-    myESP.setOTA(OTACallback_pre, OTACallback_post);            // OTA callback which is called when OTA is starting and stopping
+    myESP.setTelnet(TelnetCommandCallback, TelnetCallback);      // set up Telnet commands
+    myESP.setWIFI(WIFICallback);                                 // wifi callback
+    myESP.setMQTT(MQTTCallback);                                 // MQTT ip, username and password taken from the SPIFFS settings
+    myESP.setSettings(LoadSaveCallback, SetListCallback, false); // default is Serial off
+    myESP.setWeb(WebCallback);                                   // web custom settings
+    myESP.setOTA(OTACallback_pre, OTACallback_post);             // OTA callback which is called when OTA is starting and stopping
     myESP.begin(APP_HOSTNAME, APP_NAME, APP_VERSION, APP_HELPURL, APP_UPDATEURL);
 
     // at this point we have all the settings from our internall SPIFFS config file
