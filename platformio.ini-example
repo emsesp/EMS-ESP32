@@ -8,11 +8,12 @@ default_envs = debug
 
 [common]
 ; -DMYESP_TIMESTAMP -DTESTS -DCRASH -DFORCE_SERIAL -DNO_GLOBAL_EEPROM -DLOGICANALYZER
+;general_flags = -Wl,-Teagle.flash.4m2m.ld
 general_flags =
 
 [env]
+;board = esp12e
 board = d1_mini
-; board = nodemcuv2
 framework = arduino
 platform = espressif8266
 lib_deps =
@@ -34,8 +35,8 @@ monitor_speed = 115200
 ;upload_port = /dev/cu.usbserial-1440
 
 ; uncomment next 2 lines for OTA
-upload_protocol = espota
-upload_port = ems-esp.local
+;upload_protocol = espota
+;upload_port = ems-esp.local
 
 [env:buildweb]
 extra_scripts = pre:scripts/buildweb.py
