@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Navigate to the folder tools/webfilesbuilder
   - `npm install --global gulp-cli`
   - `npm install --save-dev gulp`
+  - You will see errors since as the gulp version needed old (3.9.1) and needs migrating to version 4.1.
   - `gulp` wil build the files. This is also done automatically in the platformio target
   - Navigate to the folder tools/wsemulator
   - `npm install ws` (from https://github.com/websockets/ws)
@@ -33,11 +34,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Know issues
 
-- SPIFFS event log may wear out ROM. This could be a problem
-- Leaving Web page active causes a ESP reset sometimes (like in 1.8.1)
-- Timezone not working 100%
-- Building with EEPROM and -DCRASH causes web to fail
-- firmware size is getting too big, the heap is huge with all the web so need to shrink it
+- SPIFFS event log may wear out ROM. This could be a problem so needs investigating.
+- Still getting WDT resets between 10-20mins with Tx (with `set listen_mode off` it's stable) in all modes.
+- Timezone not working 100%. Have a fix that'll go in soon.
+- Building with EEPROM (-DCRASH option) causes web to fail so its disabled. Means no stacks!
+- firmware size is getting too big, the heap is huge with all the web so need to shrink it.
 
 ## [1.8.1] 2019-07-27
 
