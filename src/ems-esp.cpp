@@ -584,7 +584,8 @@ void showInfo() {
             // Temperatures are *100
             _renderShortValue("Set room temperature", "C", EMS_Thermostat.setpoint_roomTemp, 10); // *100
             _renderShortValue("Current room temperature", "C", EMS_Thermostat.curr_roomTemp, 10); // *100
-        } else if ((ems_getThermostatModel() == EMS_MODEL_FR10) || (ems_getThermostatModel() == EMS_MODEL_FW100)) {
+        } else if ((ems_getThermostatModel() == EMS_MODEL_FR10) || (ems_getThermostatModel() == EMS_MODEL_FW100)
+                   || (ems_getThermostatModel() == EMS_MODEL_FW120)) {
             // Temperatures are *10
             _renderShortValue("Set room temperature", "C", EMS_Thermostat.setpoint_roomTemp, 1); // *10
             _renderShortValue("Current room temperature", "C", EMS_Thermostat.curr_roomTemp, 1); // *10
@@ -810,7 +811,8 @@ void publishValues(bool force) {
                 rootThermostat[THERMOSTAT_SELTEMP] = (double)EMS_Thermostat.setpoint_roomTemp / 100;
             if (EMS_Thermostat.curr_roomTemp != EMS_VALUE_SHORT_NOTSET)
                 rootThermostat[THERMOSTAT_CURRTEMP] = (double)EMS_Thermostat.curr_roomTemp / 100;
-        } else if ((ems_getThermostatModel() == EMS_MODEL_FR10) || (ems_getThermostatModel() == EMS_MODEL_FW100)) {
+        } else if ((ems_getThermostatModel() == EMS_MODEL_FR10) || (ems_getThermostatModel() == EMS_MODEL_FW100)
+                   || (ems_getThermostatModel() == EMS_MODEL_FW120)) {
             if (EMS_Thermostat.setpoint_roomTemp != EMS_VALUE_SHORT_NOTSET)
                 rootThermostat[THERMOSTAT_SELTEMP] = (double)EMS_Thermostat.setpoint_roomTemp / 10;
             if (EMS_Thermostat.curr_roomTemp != EMS_VALUE_SHORT_NOTSET)
@@ -1722,7 +1724,8 @@ void WebCallback(JsonObject root) {
                 thermostat["ts"] = (double)EMS_Thermostat.setpoint_roomTemp / 100;
             if (EMS_Thermostat.curr_roomTemp != EMS_VALUE_SHORT_NOTSET)
                 thermostat["tc"] = (double)EMS_Thermostat.curr_roomTemp / 100;
-        } else if ((ems_getThermostatModel() == EMS_MODEL_FR10) || (ems_getThermostatModel() == EMS_MODEL_FW100)) {
+        } else if ((ems_getThermostatModel() == EMS_MODEL_FR10) || (ems_getThermostatModel() == EMS_MODEL_FW100)
+                   || (ems_getThermostatModel() == EMS_MODEL_FW120)) {
             if (EMS_Thermostat.setpoint_roomTemp != EMS_VALUE_SHORT_NOTSET)
                 thermostat["ts"] = (double)EMS_Thermostat.setpoint_roomTemp / 10;
             if (EMS_Thermostat.curr_roomTemp != EMS_VALUE_SHORT_NOTSET)
