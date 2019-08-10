@@ -2565,7 +2565,7 @@ void MyESP::_bootupSequence() {
 
     if (isWifiConnected()) {
         _setSystemBootStatus(MYESP_BOOTSTATUS_BOOTED); // completed, reset flag
-        digitalWrite(LED_BUILTIN, LOW);                // turn off LED
+        digitalWrite(LED_BUILTIN, HIGH);                // turn off LED
 
         // write a log message if we're not using NTP, otherwise wait for the internet time to arrive
         if (!_ntp_enabled) {
