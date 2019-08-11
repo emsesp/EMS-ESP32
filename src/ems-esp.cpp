@@ -30,7 +30,7 @@ DS18 ds18;
 #define myDebug_P(...) myESP.myDebug_P(__VA_ARGS__)
 
 // set to value >0 if the ESP is overheating or there are timing issues. Recommend a value of 1.
-#define EMSESP_DELAY 0 // initially set to 0 for no delay // TODO change delay to 0?
+#define EMSESP_DELAY 0 // initially set to 0 for no delay. Change to 1 if getting WDT resets from wifi
 
 #define DEFAULT_HEATINGCIRCUIT 1 // default to HC1 for thermostats that support multiple heating circuits like the RC35
 
@@ -1042,8 +1042,6 @@ void do_regularUpdates() {
         ems_getThermostatValues();
         ems_getBoilerValues();
         ems_getSolarModuleValues();
-    } else {
-        myDebug_P(PSTR("System is either not connected to the EMS bus or listen_mode is enabled."));
     }
 }
 
@@ -1665,7 +1663,8 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
 void WIFICallback() {
     // This is where we enable the UART service to scan the incoming serial Tx/Rx bus signals
     // This is done after we have a WiFi signal to avoid any resource conflicts
-    // system_uart_swap(); // TODO see if this still blocks the EMS lines
+    // TODO see if EMS bus is blocked during startup and whether we still need to delay the UART with the swap below?
+    // system_uart_swap();
 }
 
 // web information for diagnostics
