@@ -509,7 +509,7 @@ void MyESP::_ota_setup() {
         static unsigned int _progOld;
         unsigned int        _prog = (progress / (total / 100));
         if (_prog != _progOld) {
-            myDebug_P(PSTR("[OTA] Progress: %u%%\r"), _prog);
+            myDebug_P(PSTR("[OTA] Progress: %u%%"), _prog);
             _progOld = _prog;
         }
     });
@@ -2096,14 +2096,12 @@ void MyESP::crashInfo() {
 void MyESP::_writeEvent(const char * type, const char * src, const char * desc, const char * data) {
     File eventlog = SPIFFS.open(MYESP_EVENTLOG_FILE, "a");
     if (!eventlog) {
-        // Serial.println("[SYSTEM] Error opening event log for writing"); // for debugging
+        //Serial.println("[SYSTEM] Error opening event log for writing"); // for debugging
         eventlog.close();
         return;
     }
 
-    DynamicJsonDocument doc(300);
-    JsonObject          root = doc.to<JsonObject>(); // TODO do I need to convert to root? read docs
-
+    StaticJsonDocument<300> root;
     root["type"] = type;
     root["src"]  = src;
     root["desc"] = desc;
@@ -2115,14 +2113,13 @@ void MyESP::_writeEvent(const char * type, const char * src, const char * desc, 
     eventlog.print("\n"); // this indicates end of the entry
 
     if (!n) {
-        // Serial.println("[SYSTEM] Error writing to event log"); // for debugging
+        //Serial.println("[SYSTEM] Error writing to event log"); // for debugging
     }
 
     eventlog.close();
 }
 
 // send a paged list (10 items) to the ws
-// limit to 10 pages
 void MyESP::_sendEventLog(uint8_t page) {
     File eventlog = SPIFFS.open(MYESP_EVENTLOG_FILE, "r");
     if (!eventlog) {
@@ -2143,9 +2140,8 @@ void MyESP::_sendEventLog(uint8_t page) {
     uint8_t last  = page * 10;
     uint8_t i     = 0;
 
-    // TODO event is limited to 50 entries. implement purge
-    while (eventlog.available() && (i < 50)) {
-        String item = String(); // TODO replace String with char*
+    while (eventlog.available()) {
+        String item = String();
         item        = eventlog.readStringUntil('\n');
         if (i >= first && i < last) {
             list.add(item);
@@ -2160,7 +2156,8 @@ void MyESP::_sendEventLog(uint8_t page) {
     char   buffer[MYESP_JSON_MAXSIZE];
     size_t len = serializeJson(root, buffer);
 
-    // serializeJson(root, Serial); // turn on for debugging
+    //Serial.printf("\nEVENTLLOG: page %d\n", page); // turn on for debugging
+    //serializeJson(root, Serial);                   // turn on for debugging
 
     _ws->textAll(buffer, len);
     _ws->textAll("{\"command\":\"result\",\"resultof\":\"eventlist\",\"result\": true}");
