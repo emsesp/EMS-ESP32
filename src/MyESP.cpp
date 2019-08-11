@@ -210,6 +210,8 @@ void MyESP::_wifiCallback(justwifi_messages_t code, char * parameter) {
         // start OTA
         ArduinoOTA.begin(); // moved to support esp32
         myDebug_P(PSTR("[OTA] listening to %s.local:%u"), ArduinoOTA.getHostname().c_str(), OTA_PORT);
+        // unconditionaly show the last reset reason
+        myDebug_P(PSTR("[SYSTEM] Last reset info: %s"), (char *)ESP.getResetInfo().c_str());
 
         // MQTT Setup
         _mqtt_setup();
@@ -1111,9 +1113,10 @@ bool MyESP::_rtcmemStatus() {
     }
 
     switch (reason) {
-    //case REASON_EXT_SYS_RST: // external system reset
-    case REASON_WDT_RST:     // hardware watch dog reset
-    case REASON_DEFAULT_RST: // normal startup by power on
+    //case REASON_EXT_SYS_RST:  // external system reset
+    case REASON_WDT_RST:      // hardware watch dog reset
+    case REASON_DEFAULT_RST:  // normal startup by power on
+    case REASON_SOFT_WDT_RST: // Software watchdog
         readable = false;
         break;
     default:
@@ -2565,7 +2568,7 @@ void MyESP::_bootupSequence() {
 
     if (isWifiConnected()) {
         _setSystemBootStatus(MYESP_BOOTSTATUS_BOOTED); // completed, reset flag
-        digitalWrite(LED_BUILTIN, HIGH);                // turn off LED
+        digitalWrite(LED_BUILTIN, HIGH);               // turn off LED, 1=OFF with LED_BULLETIN
 
         // write a log message if we're not using NTP, otherwise wait for the internet time to arrive
         if (!_ntp_enabled) {
@@ -2617,13 +2620,15 @@ void MyESP::loop() {
     _systemCheckLoop();
     _heartbeatCheck();
     _bootupSequence(); // see if a reset was pressed during bootup
-    _telnetHandle();   // telnet
-
-    ESP.wdtFeed(); // TODO see if this helps with WDT resets
 
     jw.loop();           // WiFi
     ArduinoOTA.handle(); // OTA
-    _mqttConnect();      // MQTT
+
+    ESP.wdtFeed();   // feed the watchdog...
+    _telnetHandle(); // telnet
+    ESP.wdtFeed();   // feed the watchdog...
+
+    _mqttConnect(); // MQTT
 
     if (_timerequest) {
         _timerequest = false;

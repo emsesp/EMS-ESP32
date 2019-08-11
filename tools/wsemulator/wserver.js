@@ -106,8 +106,7 @@ var custom_configfile = {
         "shower_timer": false,
         "shower_alert": false,
         "publish_time": 120,
-        "heating_circuit": 1,
-        "tx_mode": 2
+        "heating_circuit": 1
     }
 };
 
