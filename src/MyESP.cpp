@@ -212,8 +212,9 @@ void MyESP::_wifiCallback(justwifi_messages_t code, char * parameter) {
         // start OTA
         ArduinoOTA.begin(); // moved to support esp32
         myDebug_P(PSTR("[OTA] listening to %s.local:%u"), ArduinoOTA.getHostname().c_str(), OTA_PORT);
-        // unconditionaly show the last reset reason
-        myDebug_P(PSTR("[SYSTEM] Last reset info: %s"), (char *)ESP.getResetInfo().c_str());
+
+
+        myDebug_P(PSTR("[SYSTEM] Last reset info: %s"), (char *)ESP.getResetInfo().c_str()); // unconditionally show the last reset reason
 
         // MQTT Setup
         _mqtt_setup();
@@ -2156,7 +2157,7 @@ void MyESP::_sendEventLog(uint8_t page) {
     char   buffer[MYESP_JSON_MAXSIZE];
     size_t len = serializeJson(root, buffer);
 
-    //Serial.printf("\nEVENTLLOG: page %d\n", page); // turn on for debugging
+    //Serial.printf("\nEVENTLOG: page %d\n", page); // turn on for debugging
     //serializeJson(root, Serial);                   // turn on for debugging
 
     _ws->textAll(buffer, len);
