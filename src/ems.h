@@ -167,7 +167,6 @@ typedef struct {
     bool             emsTxCapable;     // able to send via Tx
     bool             emsTxDisabled;    // true to prevent all Tx
     uint8_t          txRetryCount;     // # times the last Tx was re-sent
-    uint8_t          emsTxMode;        // handles Tx logic
     uint8_t          emsIDMask;        // Buderus: 0x00, Junkers: 0x80
     uint8_t          emsPollAck[1];    // acknowledge buffer
 } _EMS_Sys_Status;
@@ -409,7 +408,6 @@ void        ems_testTelegram(uint8_t test_num);
 void        ems_startupTelegrams();
 bool        ems_checkEMSBUSAlive();
 void        ems_clearDeviceList();
-void        ems_setTxMode(uint8_t mode);
 
 void    ems_setThermostatTemp(float temperature, uint8_t temptype = 0);
 void    ems_setThermostatMode(uint8_t mode);
@@ -425,7 +423,6 @@ void    ems_setWarmWaterModeComfort(uint8_t comfort);
 void    ems_setModels();
 void    ems_setTxDisabled(bool b);
 bool    ems_getTxDisabled();
-uint8_t ems_getTxMode();
 
 char *           ems_getThermostatDescription(char * buffer, bool name_only = false);
 char *           ems_getBoilerDescription(char * buffer, bool name_only = false);

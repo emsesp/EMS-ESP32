@@ -726,9 +726,6 @@ void ems_dumpBuffer(const char * prefix, uint8_t * telegram, uint8_t length) {
     static char output_str[200] = {0};
     static char buffer[16]      = {0};
 
-    if (EMS_Sys_Status.emsLogging != EMS_SYS_LOGGING_JABBER)
-        return;
-
     /*
     // we only care about known devices
     if (length) {
@@ -779,14 +776,9 @@ void ems_dumpBuffer(const char * prefix, uint8_t * telegram, uint8_t length) {
  * When a telegram is processed we forcefully erase it from the stack to prevent overflow
  */
 void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
-    static uint32_t _last_emsPollFrequency = 0;
-
-    ems_dumpBuffer("ems_parseTelegram: ", telegram, length);
-    /*
-     * check if we just received a single byte
-     * it could well be a Poll request from the boiler for us, which will have a value of 0x8B (0x0B | 0x80)
-     * or either a return code like 0x01 or 0x04 from the last Write command
-     */
+    if (EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_JABBER) {
+        ems_dumpBuffer("ems_parseTelegram: ", telegram, length);
+    }
 
     /*
      * Detect the EMS bus type - Buderus or Junkers - and set emsIDMask accordingly.
@@ -812,8 +804,14 @@ void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
         return;
     }
 
+    /*
+     * check if we just received a single byte
+     * it could well be a Poll request from the boiler for us, which will have a value of 0x8B (0x0B | 0x80)
+     * or either a return code like 0x01 or 0x04 from the last Write command
+     */
     if (length == 1) {
-        uint8_t value = telegram[0]; // 1st byte of data package
+        uint8_t         value                  = telegram[0]; // 1st byte of data package
+        static uint32_t _last_emsPollFrequency = 0;
 
         // check first for a Poll for us
         if ((value ^ 0x80 ^ EMS_Sys_Status.emsIDMask) == EMS_ID_ME) {

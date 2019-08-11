@@ -175,7 +175,11 @@ void ICACHE_FLASH_ATTR emsuart_start() {
  */
 _EMS_TX_STATUS ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
     _EMS_TX_STATUS result = EMS_TX_STATUS_OK;
-    ems_dumpBuffer("emsuart_tx_buffer: ", buf, len); // validate and transmit the EMS buffer, excluding the BRK
+
+    if (EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_JABBER) {
+        ems_dumpBuffer("emsuart_tx_buffer: ", buf, len); // validate and transmit the EMS buffer, excluding the BRK
+    }
+
     if (len) {
         LA_PULSE(50);
         /* 

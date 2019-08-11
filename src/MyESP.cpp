@@ -35,6 +35,8 @@ MyESP::MyESP() {
     _general_hostname = strdup("myesp");
     _app_name         = strdup("MyESP");
     _app_version      = strdup(MYESP_VERSION);
+    _app_helpurl      = nullptr;
+    _app_updateurl    = nullptr;
 
     // general
     _timerequest         = false;
@@ -633,6 +635,7 @@ void MyESP::_printSetCommands() {
     myDebug_P(PSTR("  set <wifi_ssid | wifi_password> [value]"));
     myDebug_P(PSTR("  set mqtt_enabled <on | off>"));
     myDebug_P(PSTR("  set <mqtt_ip | mqtt_username | mqtt_password> [value]"));
+    myDebug_P(PSTR("  set mqtt_heartbeat <on | off>"));
     myDebug_P(PSTR("  set mqtt_base [value]"));
     myDebug_P(PSTR("  set mqtt_port [value]"));
     myDebug_P(PSTR("  set ntp_enabled <on | off>"));
@@ -687,9 +690,9 @@ void MyESP::_printSetCommands() {
         myDebug_P(PSTR("  mqtt_base="));
     }
     myDebug_P(PSTR("  mqtt_port=%d"), _mqtt_port);
+    myDebug_P(PSTR("  mqtt_heartbeat=%s"), (_mqtt_heartbeat) ? "on" : "off");
 
     myDebug_P(PSTR("  serial=%s"), (_general_serial) ? "on" : "off");
-    myDebug_P(PSTR("  heartbeat=%s"), (_mqtt_heartbeat) ? "on" : "off");
     myDebug_P(PSTR("  ntp_enabled=%s"), (_ntp_enabled) ? "on" : "off");
 
     // print any custom settings
@@ -825,7 +828,7 @@ bool MyESP::_changeSetting(uint8_t wc, const char * setting, const char * value)
             }
         }
 
-    } else if (strcmp(setting, "heartbeat") == 0) {
+    } else if (strcmp(setting, "mqtt_heartbeat") == 0) {
         save_config = true;
         if (value) {
             if (strcmp(value, "on") == 0) {
@@ -2362,8 +2365,8 @@ void MyESP::_sendStatus() {
 
     char     uptime[200];
     uint32_t t   = _getUptime(); // seconds
-    uint32_t d   = t / 86400L;
-    uint32_t h   = ((t % 86400L) / 3600L) % 60;
+    uint8_t  d   = t / 86400L;
+    uint8_t  h   = ((t % 86400L) / 3600L) % 60;
     uint32_t rem = t % 3600L;
     uint8_t  m   = rem / 60;
     uint8_t  sec = rem % 60;

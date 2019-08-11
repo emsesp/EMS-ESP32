@@ -5,15 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.9.0b2_web] 2019-08-11
+## Important!! Known Issues with the latest web version:
 
-### Changed
-
-- Merged with @susisstrolch's TxMode2 branch for improved support for sending EMS packages
-
-## [1.9.0b1_web] 2019-08-02
-
-### Breaking changes for first time use
+- TODO: SPIFFS event log may wear out ROM. This could be a problem so needs investigating.
+- TODO: Timezone not fully implemented in javascript yet
+- TODO: Building with EEPROM (-DCRASH option) causes web to fail so its disabled for now, meaning no stacks for debugging
+- TODO: firmware size is getting too big, the heap is huge with all the web so need to shrink it.
+## How to install for first time use
 - Make sure you update your local platformio.ini using the example one and set the target to 'debug'
 - On first boot it will re-build the SPIFFS config file so all <1.9 settings will be lost. Connect to AP 'ems-esp' and use the web to enter your wifi settings.
 - Default web admin password is 'admin'
@@ -28,6 +26,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `npm install ws` (from https://github.com/websockets/ws)
   - `./run` (win) or `./run.sh` (linux/osx) will start the mock web server. Follow the instructions shown.
 
+---
+
+## [1.9.0b2_web] 2019-08-11
+
+### Changed
+
+- Merged with @susisstrolch's TxMode2 branch for improved support for sending EMS packages, and removed tx_mode command
+- Renamed heartbeat to mqtt_heartbeat
+
+## [1.9.0b1_web] 2019-08-02
+
+### Breaking changes for first time use
+
+
 ### Added
 
 - New web code
@@ -37,14 +49,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - reboot command renamed to restart to keep consistent with web
-
-### Know issues
-
-- SPIFFS event log may wear out ROM. This could be a problem so needs investigating.
-- Still getting WDT resets between 10-20mins with Tx (with `set listen_mode off` it's stable) in all modes.
-- Timezone not working 100%. Have a fix that'll go in soon.
-- Building with EEPROM (-DCRASH option) causes web to fail so its disabled. Means no stacks!
-- firmware size is getting too big, the heap is huge with all the web so need to shrink it.
 
 ## [1.8.1] 2019-07-27
 
