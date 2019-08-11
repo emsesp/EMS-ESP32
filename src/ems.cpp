@@ -799,7 +799,7 @@ void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
      */
     if (EMS_Sys_Status.emsRxStatus != EMS_RX_STATUS_IDLE) {
         if (EMS_Sys_Status.emsLogging > EMS_SYS_LOGGING_NONE) {
-            myDebug_P(PSTR("** [DEBUG MODE] Warning, we missed the bus - Rx non-idle!")); // TODO tidy up error logging
+            myDebug_P(PSTR("** [DEBUG MODE] Warning, we missed the bus - Rx non-idle!"));
         }
         return;
     }
