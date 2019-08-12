@@ -285,7 +285,7 @@ class MyESP {
     // general
     void     end();
     void     loop();
-    void     begin(const char * app_hostname, const char * app_name, const char * app_version, const char * app_helpurl, const char * app_updateurl);
+    void     begin(const char * app_hostname, const char * app_name, const char * app_version, const char * app_url, const char * app_updateurl);
     void     resetESP();
     int      getWifiQuality();
     void     showSystemStats();
@@ -373,7 +373,7 @@ class MyESP {
     char *        _general_hostname;
     char *        _app_name;
     char *        _app_version;
-    char *        _app_helpurl;
+    char *        _app_url;
     char *        _app_updateurl;
     bool          _suspendOutput;
     bool          _general_serial;

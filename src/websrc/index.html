@@ -72,12 +72,28 @@
             </ul>
             <ul class="list-unstyled CTAs">
                 <li>
-                    <a id="helpurl" href="https://github.com/proddy" class="download">Help</a>
+                    <a id="helpurl" target="_blank" class="download">Help</a>
                 </li>
                 <li>
                     <a href="#" class="article" onclick="logout();">Logout</a>
                 </li>
             </ul>
+
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-xs-3">
+                        <div style="position:fixed; top:0; bottom:40px; overflow-y:scroll; float:none;">
+                            <hr>
+                            </hr>
+                            <footer style="position:fixed; bottom: 0; height:40px;"><a id="appurl"
+                                    href="https://github.com/proddy" target="_blank">
+                                    <h6 id="appurl2"></h6>
+                                </a></footer>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </nav>
 
         <!-- Page Content Holder -->
@@ -142,7 +158,7 @@
                         <div class="alert alert-warning">
                             <h5><b>Warning!</b> This action <strong>cannot</strong> be undone. This will permanently
                                 delete <strong>all
-                                    the settings and logs.</strong> Please make sure you've made a backup first.</h5>
+                                    the settings and logs.</strong> Please make sure you've made a backup before resetting!</h5>
                         </div>
                         <div class="modal-body">
                             <h5>Please type in the hostname of the device to confirm.</h5>
@@ -222,7 +238,7 @@
                             <h4 class="modal-title">Update Firmware</h4>
                         </div>
                         <div class="alert alert-warning">
-                            <strong>Warning!</strong> Please make sure you've made a backup first
+                            <strong>Warning!</strong> Please make sure you've made a backup first before updating
                         </div>
                         <div class="modal-body">
                             <div>
@@ -267,9 +283,7 @@
         </div>
 
         <footer class="footer">
-            <div id="commit" class="container">
-                <h6 class="text-muted">(running on <a href="https://github.com/proddy/MyESP">MyESP</a>)</h6>
-            </div>
+            <div id="commit" class="container"></div>
         </footer>
         <div class="overlay"></div>
         <script src="js/required.js"></script>

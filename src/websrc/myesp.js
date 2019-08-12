@@ -419,8 +419,20 @@ function getContent(contentname) {
                     $("#customname").text(ajaxobj.customname);
                     var customname2 = " " + ajaxobj.customname;
                     $("#customname2").text(customname2);
-                    var elem = document.getElementById("helpurl");
-                    elem.setAttribute("href", ajaxobj.helpurl);
+
+                    if (config.network.wmode === 0) {
+                        var elem = document.getElementById("helpurl");
+                        var helpurl = ajaxobj.appurl + "/wiki"
+                        elem.setAttribute("href", helpurl);
+                        document.getElementById("helpurl").style.display = "block";
+                    } else {
+                        document.getElementById("helpurl").style.display = "none";
+                    }
+
+                    var elem = document.getElementById("appurl");
+                    elem.setAttribute("href", ajaxobj.appurl);
+                    $("#appurl2").text(ajaxobj.appurl);
+
                     updateurl = ajaxobj.updateurl;
                     listCustomStats();
                     break;

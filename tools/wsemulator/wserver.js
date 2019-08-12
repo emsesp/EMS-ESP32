@@ -70,7 +70,7 @@ var configfile = {
     "command": "configfile",
     "network": {
         "ssid": "myssid",
-        "wmode": "0",
+        "wmode": 0,
         "password": "password"
     },
     "general": {
@@ -145,7 +145,7 @@ function sendCustomStatus() {
         "command": "custom_status",
         "version": "1.9.0b",
         "customname": "ems-esp",
-        "helpurl": "https://github.com/proddy/EMS-ESP/wiki",
+        "appurl": "https://github.com/proddy/EMS-ESP",
         "updateurl": "https://api.github.com/repos/proddy/EMS-ESP/releases/latest",
 
         "emsbus": {
@@ -174,8 +174,10 @@ function sendCustomStatus() {
             "bm": "mode boiler",
             "b1": "on",
             "b2": "off",
-            "b3": 5.8,
-            "b4": 61.5
+            "b3": 15.8,
+            "b4": 61.5,
+            "b5": 35.8,
+            "b6": 47.1
         }
 
     };

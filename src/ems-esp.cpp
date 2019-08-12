@@ -1522,17 +1522,19 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
     if (type == MQTT_CONNECT_EVENT) {
         myESP.mqttSubscribe(TOPIC_THERMOSTAT_CMD_TEMP);
         myESP.mqttSubscribe(TOPIC_THERMOSTAT_CMD_MODE);
-        myESP.mqttSubscribe(TOPIC_BOILER_WWACTIVATED);
-        myESP.mqttSubscribe(TOPIC_BOILER_CMD_WWTEMP);
-        myESP.mqttSubscribe(TOPIC_BOILER_CMD_COMFORT);
-        myESP.mqttSubscribe(TOPIC_BOILER_CMD_FLOWTEMP);
-        myESP.mqttSubscribe(TOPIC_SHOWER_TIMER);
-        myESP.mqttSubscribe(TOPIC_SHOWER_ALERT);
-        myESP.mqttSubscribe(TOPIC_SHOWER_COLDSHOT);
         myESP.mqttSubscribe(TOPIC_THERMOSTAT_CMD_HC);
         myESP.mqttSubscribe(TOPIC_THERMOSTAT_CMD_DAYTEMP);
         myESP.mqttSubscribe(TOPIC_THERMOSTAT_CMD_NIGHTTEMP);
         myESP.mqttSubscribe(TOPIC_THERMOSTAT_CMD_HOLIDAYTEMP);
+
+        myESP.mqttSubscribe(TOPIC_BOILER_CMD_WWACTIVATED);
+        myESP.mqttSubscribe(TOPIC_BOILER_CMD_WWTEMP);
+        myESP.mqttSubscribe(TOPIC_BOILER_CMD_COMFORT);
+        myESP.mqttSubscribe(TOPIC_BOILER_CMD_FLOWTEMP);
+
+        myESP.mqttSubscribe(TOPIC_SHOWER_TIMER);
+        myESP.mqttSubscribe(TOPIC_SHOWER_ALERT);
+        myESP.mqttSubscribe(TOPIC_SHOWER_COLDSHOT);
 
         // publish the status of the Shower parameters
         myESP.mqttPublish(TOPIC_SHOWER_TIMER, EMSESP_Status.shower_timer ? "1" : "0");
@@ -1597,7 +1599,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
         }
 
         // wwActivated
-        if (strcmp(topic, TOPIC_BOILER_WWACTIVATED) == 0) {
+        if (strcmp(topic, TOPIC_BOILER_CMD_WWACTIVATED) == 0) {
             if ((message[0] == '1' || strcmp(message, "on") == 0) || (strcmp(message, "auto") == 0)) {
                 ems_setWarmWaterActivated(true);
             } else if (message[0] == '0' || strcmp(message, "off") == 0) {
@@ -1678,13 +1680,13 @@ void WebCallback(JsonObject root) {
         if (ems_getBusConnected()) {
             if (ems_getTxDisabled()) {
                 emsbus["ok"]  = false;
-                emsbus["msg"] = "EMS Bus Connected, Rx active but Tx has been disabled (listen mode)";
+                emsbus["msg"] = "EMS Bus Connected with Rx active but Tx has been disabled (in listen only mode).";
             } else if (ems_getTxCapable()) {
                 emsbus["ok"]  = true;
-                emsbus["msg"] = "EMS Bus Connected, Rx and Tx active";
+                emsbus["msg"] = "EMS Bus Connected with both Rx and Tx active.";
             } else {
                 emsbus["ok"]  = false;
-                emsbus["msg"] = "EMS Bus Connected, Tx is not working";
+                emsbus["msg"] = "EMS Bus Connected but Tx is not working.";
             }
         } else {
             emsbus["ok"]  = false;
@@ -1760,8 +1762,14 @@ void WebCallback(JsonObject root) {
         if (EMS_Boiler.selFlowTemp != EMS_VALUE_INT_NOTSET)
             boiler["b3"] = EMS_Boiler.selFlowTemp;
 
+        if (EMS_Boiler.curFlowTemp != EMS_VALUE_INT_NOTSET)
+            boiler["b4"] = EMS_Boiler.curFlowTemp / 10;
+
         if (EMS_Boiler.boilTemp != EMS_VALUE_USHORT_NOTSET)
-            boiler["b4"] = (double)EMS_Boiler.boilTemp / 10;
+            boiler["b5"] = (double)EMS_Boiler.boilTemp / 10;
+
+        if (EMS_Boiler.retTemp != EMS_VALUE_USHORT_NOTSET)
+            boiler["b6"] = (double)EMS_Boiler.retTemp / 10;
 
     } else {
         boiler["ok"] = false;
@@ -1888,7 +1896,7 @@ void setup() {
     myESP.setSettings(LoadSaveCallback, SetListCallback, false); // default is Serial off
     myESP.setWeb(WebCallback);                                   // web custom settings
     myESP.setOTA(OTACallback_pre, OTACallback_post);             // OTA callback which is called when OTA is starting and stopping
-    myESP.begin(APP_HOSTNAME, APP_NAME, APP_VERSION, APP_HELPURL, APP_UPDATEURL);
+    myESP.begin(APP_HOSTNAME, APP_NAME, APP_VERSION, APP_URL, APP_UPDATEURL);
 
     // at this point we have all the settings from our internall SPIFFS config file
     // fire up the UART now

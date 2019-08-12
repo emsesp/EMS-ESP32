@@ -35,7 +35,7 @@ MyESP::MyESP() {
     _general_hostname = strdup("myesp");
     _app_name         = strdup("MyESP");
     _app_version      = strdup(MYESP_VERSION);
-    _app_helpurl      = nullptr;
+    _app_url          = nullptr;
     _app_updateurl    = nullptr;
 
     // general
@@ -351,7 +351,6 @@ void MyESP::_mqttOnMessage(char * topic, char * payload, size_t len) {
 }
 
 // MQTT subscribe
-// to MQTT_BASE/app_hostname/topic
 void MyESP::mqttSubscribe(const char * topic) {
     if (mqttClient.connected() && (strlen(topic) > 0)) {
         unsigned int packetId = mqttClient.subscribe(_mqttTopic(topic), _mqtt_qos);
@@ -360,7 +359,6 @@ void MyESP::mqttSubscribe(const char * topic) {
 }
 
 // MQTT unsubscribe
-// to MQTT_BASE with app_hostname/topic
 void MyESP::mqttUnsubscribe(const char * topic) {
     if (mqttClient.connected() && (strlen(topic) > 0)) {
         unsigned int packetId = mqttClient.unsubscribe(_mqttTopic(topic));
@@ -1224,7 +1222,15 @@ void MyESP::showSystemStats() {
     uint32_t rem = t % 3600L;
     uint8_t  m   = rem / 60;
     uint8_t  s   = rem % 60;
-    myDebug_P(PSTR(" [APP] Uptime: %d days %d hours %d minutes %d seconds"), d, h, m, s);
+    myDebug_P(PSTR(" [APP] Uptime: %d day%s %d hour%s %d minute%s %d second%s"),
+              d,
+              (d == 1) ? "" : "s",
+              h,
+              (h == 1) ? "" : "s",
+              m,
+              (m == 1) ? "" : "s",
+              s,
+              (s == 1) ? "" : "s");
 
     myDebug_P(PSTR(" [APP] System Load: %d%%"), getSystemLoadAverage());
 
@@ -2311,7 +2317,7 @@ void MyESP::_sendCustomStatus() {
     root["command"]    = "custom_status";
     root["version"]    = _app_version;
     root["customname"] = _app_name;
-    root["helpurl"]    = _app_helpurl;
+    root["appurl"]     = _app_url;
     root["updateurl"]  = _app_updateurl;
 
     // add specific custom stuff
@@ -2368,7 +2374,7 @@ void MyESP::_sendStatus() {
     uint32_t rem = t % 3600L;
     uint8_t  m   = rem / 60;
     uint8_t  sec = rem % 60;
-    sprintf(uptime, "%d days %d hours %d minutes %d seconds", d, h, m, sec);
+    sprintf(uptime, "%d day%s %d hour%s %d minute%s %d second%s", d, (d == 1) ? "" : "s", h, (h == 1) ? "" : "s", m, (m == 1) ? "" : "s", sec, (sec == 1) ? "" : "s");
     root["uptime"] = uptime;
 
     char   buffer[400];
@@ -2579,11 +2585,11 @@ void MyESP::_bootupSequence() {
 }
 
 // setup MyESP
-void MyESP::begin(const char * app_hostname, const char * app_name, const char * app_version, const char * app_helpurl, const char * app_updateurl) {
+void MyESP::begin(const char * app_hostname, const char * app_name, const char * app_version, const char * app_url, const char * app_updateurl) {
     _general_hostname = strdup(app_hostname);
     _app_name         = strdup(app_name);
     _app_version      = strdup(app_version);
-    _app_helpurl      = strdup(app_helpurl);
+    _app_url          = strdup(app_url);
     _app_updateurl    = strdup(app_updateurl);
 
     _telnet_setup(); // Telnet setup, called first to set Serial
