@@ -17,7 +17,7 @@
 uint8_t _TEST_DATA_max = ArraySize(TEST_DATA);
 #endif
 
-// myESP for logging to telnet and serial
+// MyESP class for logging to telnet and serial
 #define myDebug(...) myESP.myDebug(__VA_ARGS__)
 #define myDebug_P(...) myESP.myDebug_P(__VA_ARGS__)
 
@@ -625,7 +625,7 @@ void _ems_sendTelegram() {
 
     // complete the rest of the header depending on EMS or EMS+
     if (EMS_TxTelegram.type > 0xFF) {
-        // EMS 2.0 / emsplus
+        // EMS 2.0 / EMS+
         EMS_TxTelegram.data[2] = 0xFF; // fixed value indicating an extended message
         EMS_TxTelegram.data[3] = EMS_TxTelegram.offset;
         EMS_TxTelegram.data[4] = EMS_TxTelegram.dataValue;   // for read its #bytes to return, for write it the value to set
@@ -2470,7 +2470,6 @@ void ems_setThermostatTemp(float temperature, uint8_t temptype) {
         EMS_TxTelegram.type               = EMS_TYPE_RC30Set;
         EMS_TxTelegram.offset             = EMS_OFFSET_RC30Set_temp;
         EMS_TxTelegram.comparisonPostRead = EMS_TYPE_RC30StatusMessage;
-
     } else if (model_id == EMS_MODEL_RC300) {
         EMS_TxTelegram.type = EMS_TYPE_RCPLUSSet; // for 3000 and 1010, e.g. 0B 10 FF (0A | 08) 01 89 2B
         // check mode
@@ -2509,6 +2508,10 @@ void ems_setThermostatTemp(float temperature, uint8_t temptype) {
             EMS_TxTelegram.comparisonPostRead = EMS_TYPE_RC35StatusMessage_HC2;
         }
     }
+
+    // TODO XXX hack, please remove
+    EMS_TxTelegram.type   = EMS_TYPE_RCPLUSSet; // for 3000 and 1010, e.g. 0B 10 FF (0A | 08) 01 89 2B
+    EMS_TxTelegram.offset = 0x08;               // auto offset
 
     EMS_TxTelegram.length           = EMS_MIN_TELEGRAM_LENGTH;
     EMS_TxTelegram.dataValue        = (uint8_t)((float)temperature * (float)2); // value * 2

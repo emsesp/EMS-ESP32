@@ -4,7 +4,7 @@
  * Paul Derbyshire - https://github.com/proddy/EMS-ESP
  *
  * See ChangeLog.md for history
- * See README.md for Acknowledgments
+ * See wiki at https://github.com/proddy/EMS-ESP/Wiki for Acknowledgments
  */
 
 // local libraries
