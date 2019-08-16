@@ -7,28 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Important!! Known Issues with the latest web version:
 
-- TODO: SPIFFS event log may wear out ROM. This could be a problem so needs investigating.
-- TODO: Timezone not fully implemented in javascript yet
-- TODO: Building with EEPROM (-DCRASH option) causes web to fail so its disabled for now, meaning no stacks for debugging
-- TODO: firmware size is getting too big, the heap is huge with all the web so need to shrink it.
+- Timezone not is obsolete and will be replaced with a JavaScript version since all times are in UTC
+- Building with EEPROM (-DCRASH option) causes web to fail so its disabled for now, meaning no stacks for debugging for now.
 ## How to install for first time use
 - Make sure you update your local platformio.ini using the example one and set the target to 'debug'
-- On first boot it will re-build the SPIFFS config file so all <1.9 settings will be lost. Connect to AP 'ems-esp' and use the web to enter your wifi settings.
+- On first boot it will re-build the SPIFFS config file so all <1.9 settings will be lost. Connect to AP 'ems-esp' and use the web to enter your wifi settings or compile with -DFORCE_SERIAL and use the serial monitor.
 - Default web admin password is 'admin'
-- When building the firmware using the `debug` target the web front-end code is assembled and compressed. You'll need node and gulp for this.
+- When building the firmware using the `debug` target the web front-end code is assembled and compressed. You'll need nodeJS and gulp for this.
   - Download and install NodeJS from https://nodejs.org/en/download/
   - Navigate to the folder tools/webfilesbuilder
   - `npm install --global gulp-cli`
-  - `npm install --save-dev gulp`
-  - You will see errors since as the gulp version needed old (3.9.1) and needs migrating to version 4.1.
-  - `gulp` wil build the files. This is also done automatically in the platformio target
-  - Navigate to the folder tools/wsemulator
-  - `npm install ws` (from https://github.com/websockets/ws)
-  - `./run` (win) or `./run.sh` (linux/osx) will start the mock web server. Follow the instructions shown.
+  - `npm install gulp`
+  - Ignore any errors as I need to upgrade the gulp file to 4.1 (it's 3.9.1)
+  - `gulp` wil build the files. This is also done automatically in the platformio target..
 
 ---
 
-## [1.9.0b2_web] 2019-08-11
+## [1.9.0b1] 2019-08-16
 
 ### Changed
 
