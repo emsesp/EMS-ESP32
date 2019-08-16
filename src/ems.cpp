@@ -273,10 +273,10 @@ void ems_init() {
     EMS_Boiler.wWCirc      = EMS_VALUE_INT_NOTSET;    // Circulation on/off
     EMS_Boiler.selBurnPow  = EMS_VALUE_INT_NOTSET;    // Burner max power
     EMS_Boiler.curBurnPow  = EMS_VALUE_INT_NOTSET;    // Burner current power
-    EMS_Boiler.flameCurr   = EMS_VALUE_SHORT_NOTSET;  // Flame current in micro amps
+    EMS_Boiler.flameCurr   = EMS_VALUE_USHORT_NOTSET; // Flame current in micro amps
     EMS_Boiler.sysPress    = EMS_VALUE_INT_NOTSET;    // System pressure
     strlcpy(EMS_Boiler.serviceCodeChar, "??", sizeof(EMS_Boiler.serviceCodeChar));
-    EMS_Boiler.serviceCode = EMS_VALUE_SHORT_NOTSET;
+    EMS_Boiler.serviceCode = EMS_VALUE_USHORT_NOTSET;
 
     // UBAMonitorSlow
     EMS_Boiler.extTemp     = EMS_VALUE_SHORT_NOTSET;  // Outside temperature
@@ -334,7 +334,6 @@ void ems_init() {
     EMS_Thermostat.model_id   = EMS_MODEL_NONE;
     EMS_Thermostat.product_id = EMS_ID_NONE;
     strlcpy(EMS_Thermostat.version, "?", sizeof(EMS_Thermostat.version));
-
 
     // default logging is none
     ems_setLogging(EMS_SYS_LOGGING_DEFAULT);
@@ -605,7 +604,9 @@ void _ems_sendTelegram() {
         _EMS_TX_STATUS _txStatus                       = emsuart_tx_buffer(EMS_TxTelegram.data, EMS_TxTelegram.length); // send the telegram to the UART Tx
         if (EMS_TX_BRK_DETECT == _txStatus || EMS_TX_WTD_TIMEOUT == _txStatus) {
             // Tx Error!
-            myDebug_P(PSTR("** error sending buffer: %s"), _txStatus == EMS_TX_BRK_DETECT ? "BRK" : "WDTO");
+            if (EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_VERBOSE) {
+                myDebug_P(PSTR("** error sending buffer: %s"), _txStatus == EMS_TX_BRK_DETECT ? "BRK" : "WDTO");
+            }
             // EMS_Sys_Status.emsTxStatus = EMS_TX_STATUS_IDLE;
         }
         EMS_TxQueue.shift(); // and remove from queue
@@ -668,8 +669,9 @@ void _ems_sendTelegram() {
         EMS_Sys_Status.emsTxStatus = EMS_TX_STATUS_WAIT;
     else {
         // Tx Error!
-        // Tx Error!
-        myDebug_P(PSTR("** error sending buffer: %s"), _txStatus == EMS_TX_BRK_DETECT ? "BRK" : "WDTO");
+        if (EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_VERBOSE) {
+            myDebug_P(PSTR("** error sending buffer: %s"), _txStatus == EMS_TX_BRK_DETECT ? "BRK" : "WDTO");
+        }
         EMS_Sys_Status.emsTxStatus = EMS_TX_STATUS_IDLE;
     }
 }
@@ -2508,10 +2510,6 @@ void ems_setThermostatTemp(float temperature, uint8_t temptype) {
             EMS_TxTelegram.comparisonPostRead = EMS_TYPE_RC35StatusMessage_HC2;
         }
     }
-
-    // TODO XXX hack, please remove
-    EMS_TxTelegram.type   = EMS_TYPE_RCPLUSSet; // for 3000 and 1010, e.g. 0B 10 FF (0A | 08) 01 89 2B
-    EMS_TxTelegram.offset = 0x08;               // auto offset
 
     EMS_TxTelegram.length           = EMS_MIN_TELEGRAM_LENGTH;
     EMS_TxTelegram.dataValue        = (uint8_t)((float)temperature * (float)2); // value * 2

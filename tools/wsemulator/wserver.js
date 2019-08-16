@@ -123,20 +123,32 @@ function sendEventLog() {
 function sendStatus() {
     var stats = {
         "command": "status",
-        "heap": 30,
-        "availsize": 555,
-        "availspiffs": 445,
-        "spiffssize": 888,
-        "sketchsize": 222,
-        "uptime": "1 Day 6 Hours",
-        "ssid": "SSID",
-        "mac": "EM:44:11:33:22",
-        "ip": "192.168.2.2",
-        "signalstr": 66,
-        "systemload": 10,
+        "availspiffs": 948,
+        "spiffssize": 957,
+        "initheap": 25392,
+        "heap": 13944,
+        "sketchsize": 673,
+        "availsize": 2469,
+        "ip": "10.10.10.198",
+        "ssid": "derbyshire",
+        "mac": "DC:4F:11:22:93:06",
+        "signalstr": 62,
+        "systemload": 0,
         "mqttconnected": true,
-        "mqttheartbeat": false
+        "mqttheartbeat": false,
+        "uptime": "0 days 0 hours 1 minute 45 seconds",
+        "mqttloghdr": "home/ems-esp/",
+        "mqttlog": [
+            { "topic": "start", "payload": "start", "time": 1565956388 },
+            { "topic": "shower_timer", "payload": "1", "time": 1565956388 },
+            { "topic": "shower_alert", "payload": "0", "time": 1565956388 },
+            { "topic": "boiler_data", "payload": "{\"wWComfort\":\"Hot\",\"wWSelTemp\":60,\"selFlowTemp\":5,\"selBurnPow\":0,\"curBurnPow\":0,\"pumpMod\":0,\"wWCurTmp\":48.4,\"wWCurFlow\":0,\"curFlowTemp\":49.3,\"retTemp\":49.3,\"sysPress\":1.8,\"boilTemp\":50.5,\"wWActivated\":\"on\",\"burnGas\":\"off\",\"heatPmp\":\"off\",\"fanWork\":\"off\",\"ignWork\":\"off\",\"wWCirc\":\"off\",\"wWHeat\":\"on\",\"burnStarts\":223397,\"burnWorkMin\":366019,\"heatWorkMin\":294036,\"ServiceCode\":\"0H\",\"ServiceCodeNumber\":203}", "time": 1565956463 },
+            { "topic": "tapwater_active", "payload": "0", "time": 1565956408 },
+            { "topic": "heating_active", "payload": "0", "time": 1565956408 },
+            { "topic": "thermostat_data", "payload": "{\"thermostat_hc\":\"1\",\"thermostat_seltemp\":15,\"thermostat_currtemp\":23,\"thermostat_mode\":\"auto\"}", "time": 1565956444 }
+        ]
     };
+
     wss.broadcast(stats);
 }
 
@@ -157,7 +169,6 @@ function sendCustomStatus() {
                 { "type": 3, "model": "model 3", "deviceid": "device id3", "version": "version id3", "productid": "product id3" },
                 { "type": 4, "model": "model 4", "deviceid": "device id3", "version": "version id3", "productid": "product id3" },
                 { "type": 5, "model": "model 5", "deviceid": "device id3", "version": "version id3", "productid": "product id3" }
-
             ]
         },
 
@@ -181,6 +192,7 @@ function sendCustomStatus() {
         }
 
     };
+
     wss.broadcast(stats);
 }
 

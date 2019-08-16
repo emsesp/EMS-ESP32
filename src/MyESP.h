@@ -72,7 +72,6 @@ extern struct rst_info resetInfo;
 #define MQTT_RECONNECT_DELAY_MIN 2000   // Try to reconnect in 3 seconds upon disconnection
 #define MQTT_RECONNECT_DELAY_STEP 3000  // Increase the reconnect delay in 3 seconds after each failed attempt
 #define MQTT_RECONNECT_DELAY_MAX 120000 // Set reconnect time to 2 minutes at most
-#define MQTT_MAX_TOPIC_SIZE 50          // max length of MQTT topic
 #define MQTT_TOPIC_START "start"
 #define MQTT_TOPIC_HEARTBEAT "heartbeat"
 #define MQTT_TOPIC_START_PAYLOAD "start"
@@ -82,7 +81,13 @@ extern struct rst_info resetInfo;
 #define MQTT_RETAIN false
 #define MQTT_KEEPALIVE 60 // 1 minute
 #define MQTT_QOS 1
-#define MQTT_WILL_TOPIC "status" // for last will & testament topic name
+#define MQTT_WILL_TOPIC "status"         // for last will & testament topic name
+#define MQTT_MAX_TOPIC_SIZE 50           // max length of MQTT topic
+#define MQTT_MAX_PAYLOAD_SIZE 500        // max size of a JSON object. See https://arduinojson.org/v6/assistant/
+#define MQTT_MAX_PAYLOAD_SIZE_LARGE 2000 // max size of a large JSON object, like for sending MQTT log
+#define MYESP_JSON_MAXSIZE 2000          // for large Dynamic json files
+#define MYESP_MQTTLOG_MAX 20             // max number of log entries for MQTT publishes
+#define MYESP_JSON_LOG_MAXSIZE 300       // max size of an JSON log entry
 
 // Internal MQTT events
 #define MQTT_CONNECT_EVENT 0
@@ -134,7 +139,6 @@ PROGMEM const char * const custom_reset_string[]   = {custom_reset_hardware, cus
 
 // SPIFFS
 #define MYESP_SPIFFS_MAXSIZE 800 // https://arduinojson.org/v6/assistant/
-#define MYESP_JSON_MAXSIZE 2000  // for large Dynamic json files
 
 // CRASH
 /**
@@ -186,8 +190,8 @@ struct RtcmemData {
 
 static_assert(sizeof(RtcmemData) <= (RTCMEM_BLOCKS * 4u), "RTCMEM struct is too big");
 
-#define MYESP_SYSTEM_CHECK_TIME 60000   // The system is considered stable after these many millis (1 minute)
-#define MYESP_SYSTEM_CHECK_MAX 10       // After this many crashes on boot
+#define MYESP_SYSTEM_CHECK_TIME 60000 // The system is considered stable after these many millis (1 minute)
+#define MYESP_SYSTEM_CHECK_MAX 10     // After this many crashes on boot
 #define MYESP_HEARTBEAT_INTERVAL 120000 // in milliseconds, how often the MQTT heartbeat is sent (2 mins)
 
 typedef struct {
@@ -204,6 +208,13 @@ typedef enum {
     MYESP_BOOTSTATUS_BOOTING     = 2,
     MYESP_BOOTSTATUS_RESETNEEDED = 3
 } MYESP_BOOTSTATUS; // boot messages
+
+// for storing all MQTT publish messages
+typedef struct {
+    char * topic;
+    char * payload;
+    time_t timestamp;
+} _MQTT_Log;
 
 typedef std::function<void(unsigned int, const char *, const char *)>            mqtt_callback_f;
 typedef std::function<void()>                                                    wifi_callback_f;
@@ -297,28 +308,34 @@ class MyESP {
 
   private:
     // mqtt
-    AsyncMqttClient mqttClient;
-    unsigned long   _mqtt_reconnect_delay;
-    void            _mqttOnMessage(char * topic, char * payload, size_t len);
-    void            _mqttConnect();
-    void            _mqtt_setup();
+    void   _mqttOnMessage(char * topic, char * payload, size_t len);
+    void   _mqttConnect();
+    void   _mqtt_setup();
+    void   _mqttOnConnect();
+    void   _sendStart();
+    char * _mqttTopic(const char * topic);
+
+    // mqtt log
+    _MQTT_Log MQTT_log[MYESP_MQTTLOG_MAX]; // log for publish messages
+    void      _printMQTTLog();
+    void      _addMQTTLog(const char * topic, const char * payload);
+
+    AsyncMqttClient mqttClient; // the MQTT class
+    uint32_t        _mqtt_reconnect_delay;
     mqtt_callback_f _mqtt_callback_f;
-    void            _mqttOnConnect();
-    void            _sendStart();
-    char *          _mqttTopic(const char * topic);
     char *          _mqtt_ip;
     char *          _mqtt_user;
     char *          _mqtt_password;
     int             _mqtt_port;
     char *          _mqtt_base;
     bool            _mqtt_enabled;
-    unsigned long   _mqtt_keepalive;
-    unsigned char   _mqtt_qos;
+    uint32_t        _mqtt_keepalive;
+    uint8_t         _mqtt_qos;
     bool            _mqtt_retain;
     char *          _mqtt_will_topic;
     char *          _mqtt_will_online_payload;
     char *          _mqtt_will_offline_payload;
-    unsigned long   _mqtt_last_connection;
+    uint32_t        _mqtt_last_connection;
     bool            _mqtt_connecting;
     bool            _mqtt_heartbeat;
 
@@ -383,6 +400,7 @@ class MyESP {
     bool          _timerequest;
     bool          _formatreq;
     bool          _hasValue(char * s);
+    void          _printHeap(const char * s);
 
     // reset reason and rtcmem
     bool _rtcmem_status;

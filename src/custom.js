@@ -82,6 +82,7 @@ function listCustomStats() {
         document.getElementById("msg").className = "alert alert-success";
     } else {
         document.getElementById("msg").className = "alert alert-danger";
+        document.getElementById("devicesshow").style.display = "none";
         document.getElementById("thermostat_show").style.display = "none";
         document.getElementById("boiler_show").style.display = "none";
         return;
@@ -89,6 +90,9 @@ function listCustomStats() {
 
     var list = document.getElementById("devices");
     var obj = ajaxobj.emsbus.devices;
+
+    document.getElementById("devicesshow").style.display = "block";
+
     for (var i = 0; i < obj.length; i++) {
         var l = document.createElement("li");
         var type = obj[i].type;

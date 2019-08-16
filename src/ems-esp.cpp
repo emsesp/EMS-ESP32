@@ -67,8 +67,6 @@ Ticker showerColdShotStopTimer;
 #define SHOWER_COLDSHOT_DURATION 10 // in seconds. 10 seconds for cold water before turning back hot water
 #define SHOWER_MAX_DURATION 420000  // in ms. 7 minutes, before trigger a shot of cold water
 
-#define MQTT_MAX_SIZE 700 // max size of a JSON object. See https://arduinojson.org/v6/assistant/
-
 typedef struct {
     uint32_t timestamp;      // for internal timings, via millis()
     uint8_t  dallas_sensors; // count of dallas sensors
@@ -508,7 +506,7 @@ void showInfo() {
     _renderIntValue("Burner current power", "%", EMS_Boiler.curBurnPow);
     _renderShortValue("Flame current", "uA", EMS_Boiler.flameCurr);
     _renderIntValue("System pressure", "bar", EMS_Boiler.sysPress, 10);
-    if (EMS_Boiler.serviceCode == EMS_VALUE_SHORT_NOTSET) {
+    if (EMS_Boiler.serviceCode == EMS_VALUE_USHORT_NOTSET) {
         myDebug_P(PSTR("  System service code: %s"), EMS_Boiler.serviceCodeChar);
     } else {
         myDebug_P(PSTR("  System service code: %s (%d)"), EMS_Boiler.serviceCodeChar, EMS_Boiler.serviceCode);
@@ -688,16 +686,17 @@ void publishSensorValues() {
 // CRC check is done to see if there are changes in the values since the last send to avoid too much wifi traffic
 // a check is done against the previous values and if there are changes only then they are published. Unless force=true
 void publishValues(bool force) {
-    // don't send if MQTT is connected
+    // don't send if MQTT is not connected
     if (!myESP.isMQTTConnected()) {
         return;
     }
 
-    char                              s[20] = {0}; // for formatting strings
-    StaticJsonDocument<MQTT_MAX_SIZE> doc;
-    char                              data[MQTT_MAX_SIZE] = {0};
-    CRC32                             crc;
-    uint32_t                          fchecksum;
+    char                                      s[20] = {0}; // for formatting strings
+    StaticJsonDocument<MQTT_MAX_PAYLOAD_SIZE> doc;
+    char                                      data[MQTT_MAX_PAYLOAD_SIZE] = {0};
+    CRC32                                     crc;
+    uint32_t                                  fchecksum;
+    uint8_t                                   jsonSize;
 
     static uint8_t  last_boilerActive            = 0xFF; // for remembering last setting of the tap water or heating on/off
     static uint32_t previousBoilerPublishCRC     = 0;    // CRC check for boiler values
@@ -769,22 +768,28 @@ void publishValues(bool force) {
     if (abs(EMS_Boiler.heatWorkMin) != EMS_VALUE_LONG_NOTSET)
         rootBoiler["heatWorkMin"] = (double)EMS_Boiler.heatWorkMin;
 
-    rootBoiler["ServiceCode"]       = EMS_Boiler.serviceCodeChar;
-    rootBoiler["ServiceCodeNumber"] = EMS_Boiler.serviceCode;
+    if (EMS_Boiler.serviceCode != EMS_VALUE_USHORT_NOTSET) {
+        rootBoiler["ServiceCode"]       = EMS_Boiler.serviceCodeChar;
+        rootBoiler["ServiceCodeNumber"] = EMS_Boiler.serviceCode;
+    }
 
     serializeJson(doc, data, sizeof(data));
 
-    // calculate hash and send values if something has changed, to save unnecessary wifi traffic
-    for (size_t i = 0; i < measureJson(doc) - 1; i++) {
-        crc.update(data[i]);
-    }
-    fchecksum = crc.finalize();
-    if ((previousBoilerPublishCRC != fchecksum) || force) {
-        previousBoilerPublishCRC = fchecksum;
-        myDebugLog("Publishing boiler data via MQTT");
+    // check for empty json
+    jsonSize = measureJson(doc);
+    if (jsonSize > 2) {
+        // calculate hash and send values if something has changed, to save unnecessary wifi traffic
+        for (uint8_t i = 0; i < (jsonSize - 1); i++) {
+            crc.update(data[i]);
+        }
+        fchecksum = crc.finalize();
+        if ((previousBoilerPublishCRC != fchecksum) || force) {
+            previousBoilerPublishCRC = fchecksum;
+            myDebugLog("Publishing boiler data via MQTT");
 
-        // send values via MQTT
-        myESP.mqttPublish(TOPIC_BOILER_DATA, data);
+            // send values via MQTT
+            myESP.mqttPublish(TOPIC_BOILER_DATA, data);
+        }
     }
 
     // see if the heating or hot tap water has changed, if so send
@@ -856,18 +861,22 @@ void publishValues(bool force) {
         data[0] = '\0'; // reset data for next package
         serializeJson(doc, data, sizeof(data));
 
-        // calculate new CRC
-        crc.reset();
-        for (size_t i = 0; i < measureJson(doc) - 1; i++) {
-            crc.update(data[i]);
-        }
-        fchecksum = crc.finalize();
-        if ((previousThermostatPublishCRC != fchecksum) || force) {
-            previousThermostatPublishCRC = fchecksum;
-            myDebugLog("Publishing thermostat data via MQTT");
+        // check for empty json
+        jsonSize = measureJson(doc);
+        if (jsonSize > 2) {
+            // calculate new CRC
+            crc.reset();
+            for (uint8_t i = 0; i < (jsonSize - 1); i++) {
+                crc.update(data[i]);
+            }
+            fchecksum = crc.finalize();
+            if ((previousThermostatPublishCRC != fchecksum) || force) {
+                previousThermostatPublishCRC = fchecksum;
+                myDebugLog("Publishing thermostat data via MQTT");
 
-            // send values via MQTT
-            myESP.mqttPublish(TOPIC_THERMOSTAT_DATA, data);
+                // send values via MQTT
+                myESP.mqttPublish(TOPIC_THERMOSTAT_DATA, data);
+            }
         }
     }
 
@@ -906,18 +915,22 @@ void publishValues(bool force) {
         data[0] = '\0'; // reset data for next package
         serializeJson(doc, data, sizeof(data));
 
-        // calculate new CRC
-        crc.reset();
-        for (size_t i = 0; i < measureJson(doc) - 1; i++) {
-            crc.update(data[i]);
-        }
-        fchecksum = crc.finalize();
-        if ((previousSMPublishCRC != fchecksum) || force) {
-            previousSMPublishCRC = fchecksum;
-            myDebugLog("Publishing SM data via MQTT");
+        // check for empty json
+        jsonSize = measureJson(doc);
+        if (jsonSize > 2) {
+            // calculate new CRC
+            crc.reset();
+            for (uint8_t i = 0; i < (jsonSize - 1); i++) {
+                crc.update(data[i]);
+            }
+            fchecksum = crc.finalize();
+            if ((previousSMPublishCRC != fchecksum) || force) {
+                previousSMPublishCRC = fchecksum;
+                myDebugLog("Publishing SM data via MQTT");
 
-            // send values via MQTT
-            myESP.mqttPublish(TOPIC_SM_DATA, data);
+                // send values via MQTT
+                myESP.mqttPublish(TOPIC_SM_DATA, data);
+            }
         }
     }
 
@@ -1675,7 +1688,7 @@ void WebCallback(JsonObject root) {
 
     if (myESP.getUseSerial()) {
         emsbus["ok"]  = false;
-        emsbus["msg"] = "EMS Bus is disabled when in Serial mode. Check Settings->General Settings";
+        emsbus["msg"] = "EMS Bus is disabled when in Serial mode. Check Settings->General Settings->Serial Port";
     } else {
         if (ems_getBusConnected()) {
             if (ems_getTxDisabled()) {

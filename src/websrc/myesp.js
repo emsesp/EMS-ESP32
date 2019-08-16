@@ -346,8 +346,8 @@ function listStats() {
 
     document.getElementById("uptime").innerHTML = ajaxobj.uptime;
 
-    document.getElementById("heap").innerHTML = ajaxobj.heap + " KB";
-    document.getElementById("heap").style.width = (ajaxobj.heap * 100) / 41 + "%";
+    document.getElementById("heap").innerHTML = ajaxobj.heap + " bytes";
+    document.getElementById("heap").style.width = (ajaxobj.heap * 100) / ajaxobj.initheap + "%";
     colorStatusbar(document.getElementById("heap"));
 
     document.getElementById("flash").innerHTML = ajaxobj.availsize + " KB";
@@ -379,6 +379,8 @@ function listStats() {
         document.getElementById("mqttheartbeat").innerHTML = "MQTT hearbeat is disabled";
         document.getElementById("mqttheartbeat").className = "label label-primary";
     }
+
+    document.getElementById("mqttloghdr").innerHTML = "MQTT Publish Log: (topics are prefixed with <b>" + ajaxobj.mqttloghdr + "</b>)";
 
 }
 
@@ -605,6 +607,55 @@ function initEventTable() {
     });
 }
 
+function initMQTTLogTable() {
+    var newlist = [];
+    for (var i = 0; i < ajaxobj.mqttlog.length; i++) {
+        var data = JSON.stringify(ajaxobj.mqttlog[i]);
+        newlist[i] = {};
+        newlist[i].options = {};
+        newlist[i].value = {};
+        newlist[i].value = JSON.parse(data);
+        newlist[i].options.classes = "warning";
+        newlist[i].options.style = "color: blue";
+    }
+    jQuery(function ($) {
+        window.FooTable.init("#mqttlogtable", {
+            columns: [{
+                "name": "time",
+                "title": "Last Published",
+                "style": { "min-width": "160px" },
+                "parser": function (value) {
+                    if (value < 1563300000) {
+                        return "(" + value + ")";
+                    } else {
+                        var comp = new Date();
+                        value = Math.floor(value + ((comp.getTimezoneOffset() * 60) * -1));
+                        var vuepoch = new Date(value * 1000);
+                        var formatted = vuepoch.getUTCFullYear() +
+                            "-" + twoDigits(vuepoch.getUTCMonth() + 1) +
+                            "-" + twoDigits(vuepoch.getUTCDate()) +
+                            " " + twoDigits(vuepoch.getUTCHours()) +
+                            ":" + twoDigits(vuepoch.getUTCMinutes()) +
+                            ":" + twoDigits(vuepoch.getUTCSeconds());
+                        return formatted;
+                    }
+                },
+                "breakpoints": "xs sm"
+            },
+            {
+                "name": "topic",
+                "title": "Topic",
+            },
+            {
+                "name": "payload",
+                "title": "Payload",
+            },
+            ],
+            rows: newlist
+        });
+    });
+}
+
 function restartESP() {
     inProgress("restart");
 }
@@ -617,6 +668,7 @@ function socketMessageListener(evt) {
         switch (obj.command) {
             case "status":
                 ajaxobj = obj;
+                initMQTTLogTable();
                 getContent("#statuscontent");
                 break;
             case "custom_settings":

@@ -9,7 +9,7 @@
         <label class="col-xs-3">LED<i style="margin-left: 10px;"
                 class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true" data-toggle="popover"
                 data-trigger="hover" data-placement="right"
-                data-content="Please choose if you want to enable the LED"></i></label>
+                data-content="Please choose if you want to enable an LED to show status"></i></label>
         <div class="col-xs-9">
             <form>
                 <label class="radio-inline">
@@ -148,19 +148,15 @@
 
 <div id="custom_statuscontent">
     <br>
-    <div class="row text-center">
+    <div class="row text-left">
         <div class="col-md-8 col-md-offset-2">
-            <h1>Dashboard</h1>
-            <p>Real-time values from the EMS-ESP device are shown here.
-                <div class="row form-group">
-                    <button onclick="refreshEMS()" class="btn btn-primary">Refresh Data</button>
-                </div>
-            </p>
+            <h2>EMS Dashboard</h2>
+            <p>Real-time values from the EMS-ESP device are shown here.</p>
         </div>
         <div class="col-md-8 col-md-offset-2">
             <div class="panel panel-default table-responsive">
                 <table class="table table-hover table-striped table-condensed">
-                    <caption>EMS Bus stats</caption>
+                    <caption>EMS Bus Status</caption>
                     <tr>
                         <td colspan="2">
                             <b>
@@ -169,7 +165,7 @@
                         </td>
                     </tr>
                     <tr>
-                        <th>Detected Devices:</th>
+                        <th id="devicesshow">Discovered Devices:</th>
                         <td>
                             <ul class="list-group">
                                 <div id="devices"></div>
@@ -227,5 +223,8 @@
             </div>
 
         </div>
+    </div>
+    <div class="row form-group" style="text-align: center;">
+        <button onclick="refreshEMS()" class="btn btn-primary">Refresh Data</button>
     </div>
 </div>
