@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `npm install --global gulp-cli`
   - `npm install gulp`
   - Ignore any errors as I need to upgrade the gulp file to 4.1 (it's 3.9.1)
-  - `gulp` wil build the files. This is also done automatically in the platformio target..
+  - `gulp` wil build the files. This is also done automatically in the platformio target.
 
 ---
 
