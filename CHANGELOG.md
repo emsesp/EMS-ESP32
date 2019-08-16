@@ -30,15 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Merged with @susisstrolch's TxMode2 branch for improved support for sending EMS packages, and removed tx_mode command
 - Renamed heartbeat to mqtt_heartbeat
 - Renamed MQTT topic "wwactivated" to "boiler_cmd_wwactivated"
-
-## [1.9.0b1_web] 2019-08-02
-
-### Breaking changes for first time use
-
-
-### Added
-
-- New web code
+- Completely new web code with more features
 - New MyESP code optimizations
 - Magic Fairy dust
 

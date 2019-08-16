@@ -190,8 +190,8 @@ struct RtcmemData {
 
 static_assert(sizeof(RtcmemData) <= (RTCMEM_BLOCKS * 4u), "RTCMEM struct is too big");
 
-#define MYESP_SYSTEM_CHECK_TIME 60000 // The system is considered stable after these many millis (1 minute)
-#define MYESP_SYSTEM_CHECK_MAX 10     // After this many crashes on boot
+#define MYESP_SYSTEM_CHECK_TIME 60000   // The system is considered stable after these many millis (1 minute)
+#define MYESP_SYSTEM_CHECK_MAX 10       // After this many crashes on boot
 #define MYESP_HEARTBEAT_INTERVAL 120000 // in milliseconds, how often the MQTT heartbeat is sent (2 mins)
 
 typedef struct {

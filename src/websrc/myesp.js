@@ -994,5 +994,9 @@ function refreshEMS() {
     websock.send("{\"command\":\"custom_status\"}");
 }
 
+function refreshStatus() {
+    websock.send("{\"command\":\"status\"}");
+}
+
 document.addEventListener("touchstart", handleTouchStart, false);
 document.addEventListener("touchmove", handleTouchMove, false);

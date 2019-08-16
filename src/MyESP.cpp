@@ -2215,7 +2215,7 @@ void MyESP::_sendEventLog(uint8_t page) {
     char   buffer[MYESP_JSON_MAXSIZE];
     size_t len = serializeJson(root, buffer);
 
-    //Serial.printf("\nEVENTLOG: page %d\n", page); // turn on for debugging XXX
+    //Serial.printf("\nEVENTLOG: page %d\n", page); // turn on for debugging
     //serializeJson(root, Serial);                  // turn on for debugging
 
     _ws->textAll(buffer, len);
@@ -2282,10 +2282,21 @@ void MyESP::_procMsg(AsyncWebSocketClient * client, size_t sz) {
 
     // Check whatever the command is and act accordingly
     if (strcmp(command, "configfile") == 0) {
-        fs_saveConfig(root);
-        _shouldRestart = true;
+        if (_ota_pre_callback_f) {
+            (_ota_pre_callback_f)();
+        }
+        _shouldRestart = fs_saveConfig(root);
+        if (_ota_post_callback_f) {
+            (_ota_post_callback_f)();
+        }
     } else if (strcmp(command, "custom_configfile") == 0) {
-        fs_saveCustomConfig(root);
+        if (_ota_pre_callback_f) {
+            (_ota_pre_callback_f)();
+        }
+        (void)fs_saveCustomConfig(root);
+        if (_ota_post_callback_f) {
+            (_ota_post_callback_f)();
+        }
     } else if (strcmp(command, "status") == 0) {
         _sendStatus();
     } else if (strcmp(command, "custom_status") == 0) {
