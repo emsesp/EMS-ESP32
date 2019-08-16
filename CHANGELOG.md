@@ -5,11 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Important!! Known Issues with the latest web version:
+## Important!! Known Issues when migrating from 1.8.x to 1.9:
 
 - Timezone not is obsolete and will be replaced with a JavaScript version since all times are in UTC
 - Building with EEPROM (-DCRASH option) causes web to fail so its disabled for now, meaning no stacks for debugging for now.
-## How to install for first time use
+## How to build with 1.9.x
 - Make sure you update your local platformio.ini using the example one and set the target to 'debug'
 - On first boot it will re-build the SPIFFS config file so all <1.9 settings will be lost. Connect to AP 'ems-esp' and use the web to enter your wifi settings or compile with -DFORCE_SERIAL and use the serial monitor.
 - Default web admin password is 'admin'
