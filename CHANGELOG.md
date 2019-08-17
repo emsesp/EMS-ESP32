@@ -5,21 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Important!! Known Issues when migrating from 1.8.x to 1.9:
+## Important!! Known Issues in 1.9 beta:
 
-- Timezone not is obsolete and will be replaced with a JavaScript version since all times are in UTC
+- The Timezone is the NTP section is obsolete and will be replaced with a JavaScript version since all times are in UTC. Ignore that for now.
 - Building with EEPROM (-DCRASH option) causes web to fail so its disabled for now, meaning no stacks for debugging for now.
-## How to build with 1.9.x
-- Make sure you update your local platformio.ini using the example one and set the target to 'debug'
-- On first boot it will re-build the SPIFFS config file so all <1.9 settings will be lost. Connect to AP 'ems-esp' and use the web to enter your wifi settings or compile with -DFORCE_SERIAL and use the serial monitor.
-- Default web admin password is 'admin'
-- When building the firmware using the `debug` target the web front-end code is assembled and compressed. You'll need nodeJS and gulp for this.
+## How to build the firmware with 1.9.x
+- Make sure you update your local `platformio.ini` using the example one and set the target to `debug`.
+- On first boot it will re-build the SPIFFS config file so if you're upgrading from 1.8.x all the settings will be deleted and you will need to re-enter. This can be doen now via the web interface by connecting to WiFi AP called 'ems-esp'.
+- Default web admin password is `admin`.
+- When building the firmware with the `debug` target all the web front-end code is assembled and compressed. It only takes a second or two. However you'll need nodeJS and the gulp module installed for this.
   - Download and install NodeJS from https://nodejs.org/en/download/
-  - Navigate to the folder tools/webfilesbuilder
-  - `npm install --global gulp-cli`
-  - `npm install gulp`
-  - Ignore any errors as I need to upgrade the gulp file to 4.1 (it's 3.9.1)
-  - `gulp` wil build the files. This is also done automatically in the platformio target.
+  - Navigate to the folder tools/webfilesbuilder, and in that folder do a:
+   ```
+   npm install --global gulp-cli
+   npm install gulp
+   ```
+   (ignore any errors as I need to upgrade the gulp file to the latest 4.1 format)
+  - You can test if it worked by then typing `gulp`.
 
 ---
 
