@@ -629,9 +629,9 @@ void _ems_sendTelegram() {
         // EMS 2.0 / EMS+
         EMS_TxTelegram.data[2] = 0xFF; // fixed value indicating an extended message
         EMS_TxTelegram.data[3] = EMS_TxTelegram.offset;
-        EMS_TxTelegram.data[4] = EMS_TxTelegram.dataValue;   // for read its #bytes to return, for write it the value to set
-        EMS_TxTelegram.data[5] = EMS_TxTelegram.type >> 8;   // type, 1st byte
-        EMS_TxTelegram.data[6] = EMS_TxTelegram.type & 0xFF; // type, 2nd byte
+        EMS_TxTelegram.data[4] = EMS_TxTelegram.type >> 8;   // type, 1st byte
+        EMS_TxTelegram.data[5] = EMS_TxTelegram.type & 0xFF; // type, 2nd byte
+        EMS_TxTelegram.data[6] = EMS_TxTelegram.dataValue;   // for read its #bytes to return, for write it the value to set
         EMS_TxTelegram.length += 2;                          // add 2 bytes to length to compensate the extra FF and byte for the type
     } else {
         // EMS 1.0
