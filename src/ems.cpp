@@ -2455,8 +2455,9 @@ void ems_setThermostatTemp(float temperature, uint8_t temptype) {
     uint8_t device_id = EMS_Thermostat.device_id;
     uint8_t hc        = EMS_Thermostat.hc; // heating circuit
 
-    EMS_TxTelegram.action = EMS_TX_TELEGRAM_WRITE;
-    EMS_TxTelegram.dest   = device_id;
+    EMS_TxTelegram.action        = EMS_TX_TELEGRAM_WRITE;
+    EMS_TxTelegram.dest          = device_id;
+    EMS_TxTelegram.type_validate = EMS_TxTelegram.type;
 
     myDebug_P(PSTR("Setting new thermostat temperature"));
 
@@ -2480,6 +2481,8 @@ void ems_setThermostatTemp(float temperature, uint8_t temptype) {
         } else if (EMS_Thermostat.mode == 0) { // manuaL
             EMS_TxTelegram.offset = 0x0A;      // manual offset
         }
+        EMS_TxTelegram.type_validate = EMS_ID_NONE; // don't validate after the write
+
     } else if ((model_id == EMS_MODEL_RC35) || (model_id == EMS_MODEL_ES73)) {
         switch (temptype) {
         case 1: // change the night temp
@@ -2513,7 +2516,6 @@ void ems_setThermostatTemp(float temperature, uint8_t temptype) {
 
     EMS_TxTelegram.length           = EMS_MIN_TELEGRAM_LENGTH;
     EMS_TxTelegram.dataValue        = (uint8_t)((float)temperature * (float)2); // value * 2
-    EMS_TxTelegram.type_validate    = EMS_TxTelegram.type;
     EMS_TxTelegram.comparisonOffset = EMS_TxTelegram.offset;
     EMS_TxTelegram.comparisonValue  = EMS_TxTelegram.dataValue;
 
@@ -2555,10 +2557,11 @@ void ems_setThermostatMode(uint8_t mode) {
     EMS_TxTelegram.timestamp       = millis();            // set timestamp
     EMS_Sys_Status.txRetryCount    = 0;                   // reset retry counter
 
-    EMS_TxTelegram.action    = EMS_TX_TELEGRAM_WRITE;
-    EMS_TxTelegram.dest      = device_id;
-    EMS_TxTelegram.length    = EMS_MIN_TELEGRAM_LENGTH;
-    EMS_TxTelegram.dataValue = mode;
+    EMS_TxTelegram.action        = EMS_TX_TELEGRAM_WRITE;
+    EMS_TxTelegram.dest          = device_id;
+    EMS_TxTelegram.length        = EMS_MIN_TELEGRAM_LENGTH;
+    EMS_TxTelegram.dataValue     = mode;
+    EMS_TxTelegram.type_validate = EMS_TxTelegram.type;
 
     // handle different thermostat types
     if (model_id == EMS_MODEL_RC20) {
@@ -2571,11 +2574,11 @@ void ems_setThermostatMode(uint8_t mode) {
         EMS_TxTelegram.type   = (hc == 2) ? EMS_TYPE_RC35Set_HC2 : EMS_TYPE_RC35Set_HC1;
         EMS_TxTelegram.offset = EMS_OFFSET_RC35Set_mode;
     } else if (model_id == EMS_MODEL_RC300) {
-        EMS_TxTelegram.type   = EMS_TYPE_RCPLUSSet; // for 3000 and 1010, e.g. 48 10 FF 00 01 B9 00 for manual
-        EMS_TxTelegram.offset = EMS_OFFSET_RCPLUSSet_mode;
+        EMS_TxTelegram.type          = EMS_TYPE_RCPLUSSet; // for 3000 and 1010, e.g. 48 10 FF 00 01 B9 00 for manual
+        EMS_TxTelegram.offset        = EMS_OFFSET_RCPLUSSet_mode;
+        EMS_TxTelegram.type_validate = EMS_ID_NONE; // don't validate after the write
     }
 
-    EMS_TxTelegram.type_validate      = EMS_TxTelegram.type; // callback to EMS_TYPE_RC30Temperature to fetch temps
     EMS_TxTelegram.comparisonOffset   = EMS_TxTelegram.offset;
     EMS_TxTelegram.comparisonValue    = EMS_TxTelegram.dataValue;
     EMS_TxTelegram.comparisonPostRead = EMS_TxTelegram.type;
