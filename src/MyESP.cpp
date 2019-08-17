@@ -2544,7 +2544,7 @@ void MyESP::_webserver_setup() {
                        }
                        if (!index) {
                            _writeEvent("INFO", "updt", "Firmware update started", "");
-                           //Serial.printf("[ UPDT ] Firmware update started: %s\n", filename.c_str()); // enable for debugging
+                           //Serial.printf("[SYSTEM] Firmware update started: %s\n", filename.c_str()); // enable for debugging
                            Update.runAsync(true);
                            if (!Update.begin((ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000)) {
                                _writeEvent("ERRO", "updt", "Not enough space to update", "");

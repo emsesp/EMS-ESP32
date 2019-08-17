@@ -189,7 +189,7 @@ function inProgress(callback) {
                     clearInterval(prg);
                     var a = document.createElement("a");
                     a.href = "http://" + config.general.hostname + ".local";
-                    a.innerText = "Try to reconnect ESP";
+                    a.innerText = "Re-connect...";
                     document.getElementById("reconnect").appendChild(a);
                     document.getElementById("reconnect").style.display = "block";
                     document.getElementById("updateprog").className = "progress-bar progress-bar-success";
