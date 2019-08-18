@@ -177,7 +177,7 @@ typedef struct {
     uint8_t                 dest;
     uint16_t                type;
     uint8_t                 offset;
-    uint8_t                 length;             // full length of complete telegram
+    uint8_t                 length;             // full length of complete telegram, including CRC
     uint8_t                 dataValue;          // value to validate against
     uint16_t                type_validate;      // type to call after a successful Write command
     uint8_t                 comparisonValue;    // value to compare against during a validate
