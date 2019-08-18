@@ -543,7 +543,7 @@ void _debugPrintTelegram(const char * prefix, _EMS_RxTelegram * EMS_RxTelegram, 
     }
 
     if (raw) {
-        strlcat(output_str, _hextoa(data[length - 1], buffer), sizeof(output_str));
+        strlcat(output_str, _hextoa(data[length - 1], buffer), sizeof(output_str)); // CRC
     } else {
         strlcat(output_str, "(CRC=", sizeof(output_str));
         strlcat(output_str, _hextoa(data[length - 1], buffer), sizeof(output_str));
@@ -592,6 +592,8 @@ void _ems_sendTelegram() {
 
     // if we're in raw mode just fire and forget
     if (EMS_TxTelegram.action == EMS_TX_TELEGRAM_RAW) {
+        EMS_TxTelegram.data[EMS_TxTelegram.length - 1] = _crcCalculator(EMS_TxTelegram.data, EMS_TxTelegram.length); // add the CRC
+
         if (EMS_Sys_Status.emsLogging != EMS_SYS_LOGGING_NONE) {
             _EMS_RxTelegram EMS_RxTelegram;                   // create new Rx object
             EMS_RxTelegram.length    = EMS_TxTelegram.length; // full length of telegram
@@ -600,8 +602,7 @@ void _ems_sendTelegram() {
             _debugPrintTelegram("Sending raw: ", &EMS_RxTelegram, COLOR_CYAN, true);
         }
 
-        EMS_TxTelegram.data[EMS_TxTelegram.length - 1] = _crcCalculator(EMS_TxTelegram.data, EMS_TxTelegram.length);    // add the CRC
-        _EMS_TX_STATUS _txStatus                       = emsuart_tx_buffer(EMS_TxTelegram.data, EMS_TxTelegram.length); // send the telegram to the UART Tx
+        _EMS_TX_STATUS _txStatus = emsuart_tx_buffer(EMS_TxTelegram.data, EMS_TxTelegram.length); // send the telegram to the UART Tx
         if (EMS_TX_BRK_DETECT == _txStatus || EMS_TX_WTD_TIMEOUT == _txStatus) {
             // Tx Error!
             if (EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_VERBOSE) {
@@ -657,9 +658,10 @@ void _ems_sendTelegram() {
         }
 
         _EMS_RxTelegram EMS_RxTelegram;
-        EMS_RxTelegram.length    = EMS_TxTelegram.length; // complete length of telegram
-        EMS_RxTelegram.telegram  = EMS_TxTelegram.data;
-        EMS_RxTelegram.timestamp = millis(); // now
+        EMS_RxTelegram.length      = EMS_TxTelegram.length;       // complete length of telegram incl CRC
+        EMS_RxTelegram.data_length = (EMS_TxTelegram.length - 5); // note EMS+ will be 2 bytes more
+        EMS_RxTelegram.telegram    = EMS_TxTelegram.data;
+        EMS_RxTelegram.timestamp   = millis(); // now
         _debugPrintTelegram(s, &EMS_RxTelegram, COLOR_CYAN);
     }
 
@@ -1173,6 +1175,9 @@ void _processType(_EMS_RxTelegram * EMS_RxTelegram) {
 
     if (EMS_TxTelegram.action == EMS_TX_TELEGRAM_VALIDATE) {
         // this is a read telegram which we use to validate the last write
+
+        // TODO fix for EMS+ as data will be in a different address. See https://github.com/proddy/EMS-ESP/issues/145
+
         uint8_t * data         = telegram + 4; // data block starts at position 5
         uint8_t   dataReceived = data[0];      // only a single byte is returned after a read
         if (EMS_TxTelegram.comparisonValue == dataReceived) {
@@ -2391,10 +2396,6 @@ void ems_sendRawTelegram(char * telegram) {
     char *  p;
     char    value[10] = {0};
 
-    if (ems_getTxDisabled()) {
-        return; // user has disabled all Tx
-    }
-
     _EMS_TxTelegram EMS_TxTelegram = EMS_TX_TELEGRAM_NEW; // create new Tx
     EMS_TxTelegram.timestamp       = millis();            // set timestamp
     EMS_Sys_Status.txRetryCount    = 0;                   // reset retry counter
@@ -2424,7 +2425,6 @@ void ems_sendRawTelegram(char * telegram) {
         return; // nothing to send
     }
 
-    // calculate length including header and CRC
     EMS_TxTelegram.length        = count + 2;
     EMS_TxTelegram.type_validate = EMS_ID_NONE;
     EMS_TxTelegram.action        = EMS_TX_TELEGRAM_RAW;
