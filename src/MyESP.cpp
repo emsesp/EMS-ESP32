@@ -583,6 +583,7 @@ void MyESP::_telnet_setup() {
     SerialAndTelnet.setCallbackOnConnect([this]() { _telnetConnected(); });
     SerialAndTelnet.setCallbackOnDisconnect([this]() { _telnetDisconnected(); });
     SerialAndTelnet.setDebugOutput(false);
+    SerialAndTelnet.setPingTime(0); // default is 1500ms (1.5 seconds)
     SerialAndTelnet.begin(TELNET_SERIAL_BAUD); // default baud is 115200
 
     // init command buffer for console commands
