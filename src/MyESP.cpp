@@ -583,7 +583,7 @@ void MyESP::_telnet_setup() {
     SerialAndTelnet.setCallbackOnConnect([this]() { _telnetConnected(); });
     SerialAndTelnet.setCallbackOnDisconnect([this]() { _telnetDisconnected(); });
     SerialAndTelnet.setDebugOutput(false);
-    SerialAndTelnet.setPingTime(0); // default is 1500ms (1.5 seconds)
+    SerialAndTelnet.setPingTime(0);            // default is 1500ms (1.5 seconds)
     SerialAndTelnet.begin(TELNET_SERIAL_BAUD); // default baud is 115200
 
     // init command buffer for console commands
@@ -2649,7 +2649,7 @@ void MyESP::_printMQTTLog() {
     myDebug_P(PSTR("")); // newline
 }
 
-// add an MQTT log entry
+// add an MQTT log entry to our buffer
 void MyESP::_addMQTTLog(const char * topic, const char * payload) {
     static uint8_t logCount   = 0;
     uint8_t        logPointer = 0;
@@ -2742,7 +2742,7 @@ void MyESP::_bootupSequence() {
 
         // write a log message if we're not using NTP, otherwise wait for the internet time to arrive
         if (!_ntp_enabled) {
-            _writeEvent("INFO", "sys", "System booted", "elapsed time");
+            _writeEvent("INFO", "sys", "System booted", "(elapsed time shown)");
         }
     }
 }
@@ -2758,8 +2758,8 @@ void MyESP::begin(const char * app_hostname, const char * app_name, const char *
     _telnet_setup(); // Telnet setup, called first to set Serial
 
     // _fs_printFile(MYESP_CONFIG_FILE); // for debugging
-    //_fs_printFile(MYESP_CUSTOMCONFIG_FILE); // for debugging
-    //_fs_printFile(MYESP_EVENTLOG_FILE);     // for debugging
+    // _fs_printFile(MYESP_CUSTOMCONFIG_FILE); // for debugging
+    // _fs_printFile(MYESP_EVENTLOG_FILE);     // for debugging
 
     // print a welcome message
     myDebug_P(PSTR("\n\n* %s version %s"), _app_name, _app_version);
