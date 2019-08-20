@@ -622,15 +622,22 @@ void _ems_sendTelegram() {
     }
 
     // complete the rest of the header depending on EMS or EMS+
-    // TODO change depending on read or write operation !
     if (EMS_TxTelegram.type > 0xFF) {
         // EMS 2.0 / EMS+
         EMS_TxTelegram.data[2] = 0xFF; // fixed value indicating an extended message
         EMS_TxTelegram.data[3] = EMS_TxTelegram.offset;
-        EMS_TxTelegram.data[4] = EMS_TxTelegram.type >> 8;   // type, 1st byte
-        EMS_TxTelegram.data[5] = EMS_TxTelegram.type & 0xFF; // type, 2nd byte
-        EMS_TxTelegram.data[6] = EMS_TxTelegram.dataValue;   // for read its #bytes to return, for write it the value to set
-        EMS_TxTelegram.length += 2;                          // add 2 bytes to length to compensate the extra FF and byte for the type
+        EMS_TxTelegram.length += 2; // add 2 bytes to length to compensate the extra FF and byte for the type
+
+        // EMS+ has different format for read and write. See https://github.com/proddy/EMS-ESP/wiki/RC3xx-Thermostats
+        if ((EMS_TxTelegram.action == EMS_TX_TELEGRAM_READ) || (EMS_TxTelegram.action == EMS_TX_TELEGRAM_VALIDATE)) {
+            EMS_TxTelegram.data[4] = EMS_TxTelegram.dataValue;   // for read its #bytes to return
+            EMS_TxTelegram.data[5] = EMS_TxTelegram.type >> 8;   // type, 1st byte
+            EMS_TxTelegram.data[6] = EMS_TxTelegram.type & 0xFF; // type, 2nd byte
+        } else if (EMS_TxTelegram.action == EMS_TX_TELEGRAM_WRITE) {
+            EMS_TxTelegram.data[4] = EMS_TxTelegram.type >> 8;   // type, 1st byte
+            EMS_TxTelegram.data[5] = EMS_TxTelegram.type & 0xFF; // type, 2nd byte
+            EMS_TxTelegram.data[6] = EMS_TxTelegram.dataValue;   // for write it the value to set
+        }
     } else {
         // EMS 1.0
         EMS_TxTelegram.data[2] = EMS_TxTelegram.type;   // type
@@ -655,8 +662,8 @@ void _ems_sendTelegram() {
         }
 
         _EMS_RxTelegram EMS_RxTelegram;
-        EMS_RxTelegram.length      = EMS_TxTelegram.length;       // complete length of telegram incl CRC
-        EMS_RxTelegram.data_length = (EMS_TxTelegram.length - 5); // note EMS+ will be 2 bytes more
+        EMS_RxTelegram.length      = EMS_TxTelegram.length; // complete length of telegram incl CRC
+        EMS_RxTelegram.data_length = 0;                     // ignore the data length for read and writes. only used for incoming.
         EMS_RxTelegram.telegram    = EMS_TxTelegram.data;
         EMS_RxTelegram.timestamp   = millis(); // now
         _debugPrintTelegram(s, &EMS_RxTelegram, COLOR_CYAN);
@@ -867,7 +874,7 @@ void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
     EMS_RxTelegram.dest   = telegram[1] & 0x7F; // remove 8th bit (don't care if read or write)
     EMS_RxTelegram.offset = telegram[3];        // offset is always 4th byte
 
-    // determing if its normal ems or ems plus
+    // determing if its normal ems or ems plus, check for marker
     if (telegram[2] >= 0xF0) {
         // its EMS plus / EMS 2.0
         EMS_RxTelegram.emsplus = true;
@@ -1173,10 +1180,10 @@ void _processType(_EMS_RxTelegram * EMS_RxTelegram) {
     if (EMS_TxTelegram.action == EMS_TX_TELEGRAM_VALIDATE) {
         // this is a read telegram which we use to validate the last write
 
-        // TODO fix for EMS+ as data will be in a different address. See https://github.com/proddy/EMS-ESP/issues/145
+        // data block starts at position 5 for EMS1.0 and 6 for EMS2.0.
+        // See https://github.com/proddy/EMS-ESP/wiki/RC3xx-Thermostats
+        uint8_t dataReceived = (EMS_RxTelegram->emsplus) ? telegram[6] : telegram[4];
 
-        uint8_t * data         = telegram + 4; // data block starts at position 5
-        uint8_t   dataReceived = data[0];      // only a single byte is returned after a read
         if (EMS_TxTelegram.comparisonValue == dataReceived) {
             // validate was successful, the write changed the value
             _removeTxQueue(); // now we can remove the Tx validate command the queue
@@ -1910,6 +1917,12 @@ void ems_discoverModels() {
     // heatpump module...
     ems_doReadCommand(EMS_TYPE_Version, EMS_ID_HP); // check if there is HeatPump Module available
 
+    // TODO remove! test for EMS+
+    //EMS_Thermostat.model_id        = EMS_MODEL_RC300;
+    //EMS_Thermostat.device_id       = 0x10;
+    //EMS_Thermostat.write_supported = true;
+    //EMS_Thermostat.product_id      = 158;
+
     // thermostat...
     // if it hasn't been set, auto discover it
     if (EMS_Thermostat.device_id == EMS_ID_NONE) {
@@ -2452,9 +2465,8 @@ void ems_setThermostatTemp(float temperature, uint8_t temptype) {
     uint8_t device_id = EMS_Thermostat.device_id;
     uint8_t hc        = EMS_Thermostat.hc; // heating circuit
 
-    EMS_TxTelegram.action        = EMS_TX_TELEGRAM_WRITE;
-    EMS_TxTelegram.dest          = device_id;
-    EMS_TxTelegram.type_validate = EMS_TxTelegram.type;
+    EMS_TxTelegram.action = EMS_TX_TELEGRAM_WRITE;
+    EMS_TxTelegram.dest   = device_id;
 
     myDebug_P(PSTR("Setting new thermostat temperature"));
 
@@ -2462,14 +2474,20 @@ void ems_setThermostatTemp(float temperature, uint8_t temptype) {
         EMS_TxTelegram.type               = EMS_TYPE_RC20Set;
         EMS_TxTelegram.offset             = EMS_OFFSET_RC20Set_temp;
         EMS_TxTelegram.comparisonPostRead = EMS_TYPE_RC20StatusMessage;
+        EMS_TxTelegram.type_validate      = EMS_TxTelegram.type;
+
     } else if (model_id == EMS_MODEL_RC10) {
         EMS_TxTelegram.type               = EMS_TYPE_RC10Set;
         EMS_TxTelegram.offset             = EMS_OFFSET_RC10Set_temp;
         EMS_TxTelegram.comparisonPostRead = EMS_TYPE_RC10StatusMessage;
+        EMS_TxTelegram.type_validate      = EMS_TxTelegram.type;
+
     } else if (model_id == EMS_MODEL_RC30) {
         EMS_TxTelegram.type               = EMS_TYPE_RC30Set;
         EMS_TxTelegram.offset             = EMS_OFFSET_RC30Set_temp;
         EMS_TxTelegram.comparisonPostRead = EMS_TYPE_RC30StatusMessage;
+        EMS_TxTelegram.type_validate      = EMS_TxTelegram.type;
+
     } else if (model_id == EMS_MODEL_RC300) {
         EMS_TxTelegram.type = EMS_TYPE_RCPLUSSet; // for 3000 and 1010, e.g. 0B 10 FF (0A | 08) 01 89 2B
         // check mode
@@ -2478,7 +2496,7 @@ void ems_setThermostatTemp(float temperature, uint8_t temptype) {
         } else if (EMS_Thermostat.mode == 0) { // manuaL
             EMS_TxTelegram.offset = 0x0A;      // manual offset
         }
-        EMS_TxTelegram.type_validate = EMS_ID_NONE; // don't validate after the write
+        EMS_TxTelegram.type_validate = EMS_TYPE_RCPLUSStatusMessage; // validate by reading from a different telegram
 
     } else if ((model_id == EMS_MODEL_RC35) || (model_id == EMS_MODEL_ES73)) {
         switch (temptype) {
@@ -2504,10 +2522,12 @@ void ems_setThermostatTemp(float temperature, uint8_t temptype) {
             // heating circuit 1
             EMS_TxTelegram.type               = EMS_TYPE_RC35Set_HC1;
             EMS_TxTelegram.comparisonPostRead = EMS_TYPE_RC35StatusMessage_HC1;
+            EMS_TxTelegram.type_validate      = EMS_TxTelegram.type;
         } else {
             // heating circuit 2
             EMS_TxTelegram.type               = EMS_TYPE_RC35Set_HC2;
             EMS_TxTelegram.comparisonPostRead = EMS_TYPE_RC35StatusMessage_HC2;
+            EMS_TxTelegram.type_validate      = EMS_TxTelegram.type;
         }
     }
 

@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Important!! Known Issues in 1.9 beta:
 
-- Building with EEPROM (-DCRASH option) causes web to fail so its disabled for now, meaning no stacks for debugging for now.
+- Building with EEPROM (-DCRASH option) to capture stack dumps doesn't work with the web server, so only compile for debugging and use Telnet.
 
 
 ## How to build the firmware with 1.9.x
@@ -26,20 +26,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.9.0b1] 2019-08-16
+## [1.9.0b4] 2019-08-20
 
 ### Changed
 
+- Completely new web code with more features
 - Merged with @susisstrolch's TxMode2 branch for improved support for sending EMS packages, and removed tx_mode command
+- New MyESP library optimizations to WiFi and AP
+- reboot command renamed to restart to keep consistent with web
 - Renamed heartbeat to mqtt_heartbeat
 - Renamed MQTT topic "wwactivated" to "boiler_cmd_wwactivated"
-- Completely new web code with more features
-- New MyESP code optimizations
-- Magic Fairy dust
 
-### Changed
+### Fixed
 
-- reboot command renamed to restart to keep consistent with web
+- HAndle Read and Write to EMS+ device logic changed. 
 
 ## [1.8.1] 2019-07-27
 
