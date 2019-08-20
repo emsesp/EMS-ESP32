@@ -90,7 +90,6 @@ var configfile = {
     "ntp": {
         "server": "pool.ntp.org",
         "interval": "30",
-        "timezone": "0",
         "enabled": false
     }
 };
@@ -227,7 +226,6 @@ wss.on('connection', function connection(ws) {
                 var res = {};
                 res.command = "gettime";
                 res.epoch = Math.floor((new Date).getTime() / 1000);
-                res.timezone = configfile.timezone;
                 wss.broadcast(res);
                 break;
             case "settime":
@@ -235,7 +233,6 @@ wss.on('connection', function connection(ws) {
                 var res = {};
                 res.command = "gettime";
                 res.epoch = Math.floor((new Date).getTime() / 1000);
-                res.timezone = configfile.timezone;
                 wss.broadcast(res);
                 break;
             case "getconf":

@@ -3,7 +3,6 @@ var version = "";
 var websock = null;
 var wsUri = "ws://" + window.location.host + "/ws";
 var utcSeconds;
-var timezone;
 var data = [];
 var ajaxobj;
 
@@ -31,7 +30,6 @@ var config = {
     "ntp": {
         "server": "pool.ntp.org",
         "interval": 30,
-        "timezone": 1,
         "enabled": true
     }
 };
@@ -74,7 +72,6 @@ function listntp() {
 
     document.getElementById("ntpserver").value = config.ntp.server;
     document.getElementById("intervals").value = config.ntp.interval;
-    document.getElementById("DropDownTimezone").value = config.ntp.timezone;
 
     if (config.ntp.enabled) {
         $("input[name=\"ntpenabled\"][value=\"1\"]").prop("checked", true);
@@ -108,7 +105,6 @@ function custom_uncommited() {
 function saventp() {
     config.ntp.server = document.getElementById("ntpserver").value;
     config.ntp.interval = parseInt(document.getElementById("intervals").value);
-    config.ntp.timezone = parseInt(document.getElementById("DropDownTimezone").value);
 
     config.ntp.enabled = false;
     if (parseInt($("input[name=\"ntpenabled\"]:checked").val()) === 1) {
@@ -689,7 +685,6 @@ function socketMessageListener(evt) {
                 break;
             case "gettime":
                 utcSeconds = obj.epoch;
-                timezone = obj.timezone;
                 deviceTime();
                 break;
             case "ssidlist":
@@ -958,7 +953,6 @@ function getLatestReleaseInfo() {
         $("#releasehead").text(releaseInfo);
         $("#releasebody").text(release.body);
         $("#releaseinfo").fadeIn("slow");
-        $("#versionhead").text(version);
     }).error(function () { $("#onlineupdate").html("<h5>Couldn't get release details. Make sure there is an Internet connection.</h5>"); });
 }
 

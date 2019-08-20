@@ -1,8 +1,7 @@
 <div id="customcontent">
     <br>
-    <br>
     <legend>Custom Settings</legend>
-    <h6 class="text-muted">Please refer to the Help for configuration options.</h6>
+    <h6 class="text-muted">Please refer to the Help for configuration options</h6>
     <br>
 
     <div class="row form-group">
@@ -21,13 +20,14 @@
     </div>
 
     <div class="row form-group">
-        <label class="col-xs-3">LED pin<i style="margin-left: 10px;"
+        <label class="col-xs-3">LED Pin<i style="margin-left: 10px;"
                 class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true" data-toggle="popover"
-                data-trigger="hover" data-placement="right" data-content="Choose &quot;LED pin&quot; pin"></i></label>
+                data-trigger="hover" data-placement="right"
+                data-content="Select with GPIO pin the LED is on"></i></label>
         <span class="col-xs-9 col-md-5">
             <select class="form-control input-sm" id="led_gpio">
                 <option value="0">GPIO-0</option>
-                <option selected="selected" value="2">GPIO-2 (LED_BUILTIN)</option>
+                <option selected="selected" value="2">GPIO-2 (onboard LED)</option>
                 <option value="4">GPIO-4</option>
                 <option value="5">GPIO-5</option>
                 <option value="12">GPIO-12</option>
@@ -38,10 +38,10 @@
     </div>
 
     <div class="row form-group">
-        <label class="col-xs-3">Dallas parasite<i style="margin-left: 10px;"
+        <label class="col-xs-3">Dallas Parasite<i style="margin-left: 10px;"
                 class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true" data-toggle="popover"
                 data-trigger="hover" data-placement="right"
-                data-content="Enable if Dallas sensors powered via parasite"></i></label>
+                data-content="Enable if Dallas sensors are powered via parasite"></i></label>
         <div class="col-xs-9">
             <form>
                 <label class="radio-inline">
@@ -53,10 +53,10 @@
     </div>
 
     <div class="row form-group">
-        <label class="col-xs-3">Dallas pin<i style="margin-left: 10px;"
+        <label class="col-xs-3">Dallas Pin<i style="margin-left: 10px;"
                 class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true" data-toggle="popover"
                 data-trigger="hover" data-placement="right"
-                data-content="Choose &quot;Dallas pin&quot; pin."></i></label>
+                data-content="Select GPIO pin to where the Dallas sensor is connected"></i></label>
         <span class="col-xs-9 col-md-5">
             <select class="form-control input-sm" id="dallas_gpio">
                 <option value="0">GPIO-0</option>
@@ -70,9 +70,9 @@
     </div>
 
     <div class="row form-group">
-        <label class="col-xs-3">Listen mode<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign"
+        <label class="col-xs-3">Listen Mode<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign"
                 aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right"
-                data-content="Listen mode disables Tx"></i></label>
+                data-content="Listen mode disables Tx. Used when debugging."></i></label>
         <div class="col-xs-9">
             <form>
                 <label class="radio-inline">
@@ -84,9 +84,9 @@
     </div>
 
     <div class="row form-group">
-        <label class="col-xs-3">Shower timer<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign"
+        <label class="col-xs-3">Shower Timer<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign"
                 aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right"
-                data-content="Monitors and alerts on shower duration"></i></label>
+                data-content="Monitors and sends MQTT message on shower duration"></i></label>
         <div class="col-xs-9">
             <form>
                 <label class="radio-inline">
@@ -98,9 +98,9 @@
     </div>
 
     <div class="row form-group">
-        <label class="col-xs-3">Shower alert<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign"
+        <label class="col-xs-3">Shower Alert<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign"
                 aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right"
-                data-content="Sends blasts of cold water after a fixed shower duration"></i></label>
+                data-content="Tells boiler to blast 3 shots of cold water after a specific duration has exceeded (7 mins)"></i></label>
         <div class="col-xs-9">
             <form>
                 <label class="radio-inline">
@@ -112,9 +112,9 @@
     </div>
 
     <div class="row form-group">
-        <label class="col-xs-3">Publish time<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign"
+        <label class="col-xs-3">Publish Time<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign"
                 aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right"
-                data-content="Publish Time in seconds"></i></label>
+                data-content="How often to send MQTT topics with stats (in seconds)"></i></label>
         <span class="col-xs-9">
             <input class="form-control input-sm" placeholder="120" value="" style="display:inline;max-width:185px"
                 id="publish_time" type="text">
@@ -123,9 +123,9 @@
     </div>
 
     <div class="row form-group">
-        <label class="col-xs-3">Heating circuit<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign"
+        <label class="col-xs-3">Heating Circuit<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign"
                 aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right"
-                data-content="Select main heating circuit to use"></i></label>
+                data-content="Select the main heating circuit to use. Default is HC1."></i></label>
         <span class="col-xs-9 col-md-5">
             <select class="form-control input-sm" id="heating_circuit">
                 <option selected="selected" value="1">HC1 (default)</option>
@@ -143,7 +143,7 @@
     </div>
 
     <h6 class="text-muted">Note: any setting marked with a <span
-            class="glyphicon glyphicon-exclamation-sign text-danger"></span> requires a restart after saving.</h6>
+            class="glyphicon glyphicon-exclamation-sign text-danger"></span> requires a system restart after saving.</h6>
 </div>
 
 <div id="custom_statuscontent">
@@ -151,7 +151,7 @@
     <div class="row text-left">
         <div class="col-md-8 col-md-offset-2">
             <h2>EMS Dashboard</h2>
-            <p>Real-time values from the EMS-ESP device are shown here.</p>
+            <h6>Real-time values from the EMS-ESP device are shown here</h6>
         </div>
         <div class="col-md-8 col-md-offset-2">
             <div class="panel panel-default table-responsive">
@@ -228,4 +228,3 @@
         <button onclick="refreshStatus()" class="btn btn-primary">Refresh</button>
     </div>
 </div>
-

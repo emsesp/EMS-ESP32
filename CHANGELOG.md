@@ -7,8 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Important!! Known Issues in 1.9 beta:
 
-- The Timezone is the NTP section is obsolete and will be replaced with a JavaScript version since all times are in UTC. Ignore that for now.
 - Building with EEPROM (-DCRASH option) causes web to fail so its disabled for now, meaning no stacks for debugging for now.
+
+
 ## How to build the firmware with 1.9.x
 - Make sure you update your local `platformio.ini` using the example one and set the target to `debug`.
 - On first boot it will re-build the SPIFFS config file so if you're upgrading from 1.8.x all the settings will be deleted and you will need to re-enter. This can be doen now via the web interface by connecting to WiFi AP called 'ems-esp'.
