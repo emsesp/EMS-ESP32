@@ -1,7 +1,7 @@
 /*
  * MyESP.h
  *
- * Paul Derbyshire - December 2018
+ * Paul Derbyshire - first version December 2018
  */
 
 #pragma once
@@ -9,7 +9,7 @@
 #ifndef MyESP_h
 #define MyESP_h
 
-#define MYESP_VERSION "1.2"
+#define MYESP_VERSION "1.2.0"
 
 #include <ArduinoJson.h>
 #include <ArduinoOTA.h>
