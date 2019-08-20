@@ -78,6 +78,7 @@ extern struct rst_info resetInfo;
 #define MQTT_TOPIC_RESTART "restart"
 #define MQTT_WILL_ONLINE_PAYLOAD "online"   // for last will & testament payload
 #define MQTT_WILL_OFFLINE_PAYLOAD "offline" // for last will & testament payload
+#define MQTT_BASE_DEFAULT "home"            // default MQTT prefix to topics
 #define MQTT_RETAIN false
 #define MQTT_KEEPALIVE 60 // 1 minute
 #define MQTT_QOS 1
@@ -457,7 +458,6 @@ class MyESP {
     void _webResetAllPage();
 
     // ntp
-    uint8_t _ntp_timezone;
     char *  _ntp_server;
     uint8_t _ntp_interval;
     bool    _ntp_enabled;

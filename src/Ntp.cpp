@@ -5,17 +5,14 @@
 #include "Ntp.h"
 
 char *    NtpClient::TimeServerName;
-int8_t    NtpClient::timezone;
 time_t    NtpClient::syncInterval;
 IPAddress NtpClient::timeServer;
+AsyncUDP  NtpClient::udpListener;
+byte      NtpClient::NTPpacket[NTP_PACKET_SIZE];
 
-AsyncUDP NtpClient::udpListener;
-byte     NtpClient::NTPpacket[NTP_PACKET_SIZE];
-
-void ICACHE_FLASH_ATTR NtpClient::Ntp(const char * server, int8_t tz, time_t syncSecs) {
+void ICACHE_FLASH_ATTR NtpClient::Ntp(const char * server, time_t syncMins) {
     TimeServerName = strdup(server);
-    timezone       = tz;
-    syncInterval   = syncSecs;
+    syncInterval   = syncMins * 60; // convert to seconds
     WiFi.hostByName(TimeServerName, timeServer);
     setSyncProvider(getNtpTime);
     setSyncInterval(syncInterval);

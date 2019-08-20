@@ -16,12 +16,11 @@
 
 class NtpClient {
   public:
-    void ICACHE_FLASH_ATTR Ntp(const char * server, int8_t tz, time_t syncSecs);
+    void ICACHE_FLASH_ATTR Ntp(const char * server, time_t syncMins);
     ICACHE_FLASH_ATTR virtual ~NtpClient();
 
     static char *    TimeServerName;
     static IPAddress timeServer;
-    static int8_t    timezone;
     static time_t    syncInterval;
 
     static AsyncUDP udpListener;

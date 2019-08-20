@@ -97,7 +97,6 @@ MyESP::MyESP() {
     _ntp_server = strdup(MYESP_NTP_SERVER);
     ;
     _ntp_interval = 60;
-    _ntp_timezone = 1;
     _ntp_enabled  = false;
 
     // get the build time
@@ -232,7 +231,7 @@ void MyESP::_wifiCallback(justwifi_messages_t code, char * parameter) {
 
         // NTP now that we have a WiFi connection
         if (_ntp_enabled) {
-            NTP.Ntp(_ntp_server, _ntp_timezone, _ntp_interval * 60); // set up NTP server
+            NTP.Ntp(_ntp_server, _ntp_interval); // set up NTP server
             myDebug_P(PSTR("[NTP] NTP internet time enabled via server %s"), _ntp_server);
         }
 
@@ -1626,15 +1625,14 @@ bool MyESP::_fs_loadConfig() {
     _mqtt_user      = strdup(mqtt["user"] | "");
     _mqtt_port      = mqtt["port"] | MQTT_PORT;
     _mqtt_password  = strdup(mqtt["password"] | "");
-    _mqtt_base      = strdup(mqtt["base"] | "");
+    _mqtt_base      = strdup(mqtt["base"] | MQTT_BASE_DEFAULT);
 
     JsonObject ntp = doc["ntp"];
     _ntp_server    = strdup(ntp["server"] | "");
     _ntp_interval  = ntp["interval"] | 60;
     if (_ntp_interval == 0)
         _ntp_interval = 60;
-    _ntp_timezone = ntp["timezone"] | 0;
-    _ntp_enabled  = ntp["enabled"];
+    _ntp_enabled = ntp["enabled"];
 
     myDebug_P(PSTR("[FS] System settings loaded"));
     // serializeJsonPretty(doc, Serial); // turn on for debugging
@@ -1800,7 +1798,6 @@ bool MyESP::_fs_writeConfig() {
     JsonObject ntp  = doc.createNestedObject("ntp");
     ntp["server"]   = _ntp_server;
     ntp["interval"] = _ntp_interval;
-    ntp["timezone"] = _ntp_timezone;
     ntp["enabled"]  = _ntp_enabled;
 
     bool ok = fs_saveConfig(root); // save it
@@ -2695,7 +2692,6 @@ void MyESP::_sendTime() {
     JsonObject              root = doc.to<JsonObject>();
     root["command"]              = "gettime";
     root["epoch"]                = now();
-    root["timezone"]             = _ntp_timezone;
 
     char   buffer[100];
     size_t len = serializeJson(root, buffer);
@@ -2742,7 +2738,7 @@ void MyESP::_bootupSequence() {
 
         // write a log message if we're not using NTP, otherwise wait for the internet time to arrive
         if (!_ntp_enabled) {
-            _writeEvent("INFO", "sys", "System booted", "(elapsed time shown)");
+            _writeEvent("INFO", "sys", "System booted", "");
         }
     }
 }
