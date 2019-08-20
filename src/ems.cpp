@@ -542,18 +542,14 @@ void _debugPrintTelegram(const char * prefix, _EMS_RxTelegram * EMS_RxTelegram, 
         strlcat(output_str, " ", sizeof(output_str)); // add space
     }
 
-    if (raw) {
-        strlcat(output_str, _hextoa(data[length - 1], buffer), sizeof(output_str)); // CRC
-    } else {
-        strlcat(output_str, "(CRC=", sizeof(output_str));
-        strlcat(output_str, _hextoa(data[length - 1], buffer), sizeof(output_str));
-        strlcat(output_str, ")", sizeof(output_str));
+    strlcat(output_str, "(CRC=", sizeof(output_str));
+    strlcat(output_str, _hextoa(data[length - 1], buffer), sizeof(output_str));
+    strlcat(output_str, ")", sizeof(output_str));
 
-        // print number of data bytes only if its a valid telegram
-        if (data_len) {
-            strlcat(output_str, " #data=", sizeof(output_str));
-            strlcat(output_str, itoa(data_len, buffer, 10), sizeof(output_str));
-        }
+    // print number of data bytes only if its a valid telegram
+    if (data_len) {
+        strlcat(output_str, " #data=", sizeof(output_str));
+        strlcat(output_str, itoa(data_len, buffer, 10), sizeof(output_str));
     }
 
     strlcat(output_str, COLOR_RESET, sizeof(output_str));
@@ -626,6 +622,7 @@ void _ems_sendTelegram() {
     }
 
     // complete the rest of the header depending on EMS or EMS+
+    // TODO change depending on read or write operation !
     if (EMS_TxTelegram.type > 0xFF) {
         // EMS 2.0 / EMS+
         EMS_TxTelegram.data[2] = 0xFF; // fixed value indicating an extended message
@@ -650,11 +647,11 @@ void _ems_sendTelegram() {
     if (EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_VERBOSE) {
         char s[64] = {0};
         if (EMS_TxTelegram.action == EMS_TX_TELEGRAM_WRITE) {
-            snprintf(s, sizeof(s), "Sending write of type 0x%02X to 0x%02X:", EMS_TxTelegram.type, EMS_TxTelegram.dest & 0x7F);
+            snprintf(s, sizeof(s), "Sending write of type 0x%02X to 0x%02X, ", EMS_TxTelegram.type, EMS_TxTelegram.dest & 0x7F);
         } else if (EMS_TxTelegram.action == EMS_TX_TELEGRAM_READ) {
-            snprintf(s, sizeof(s), "Sending read of type 0x%02X to 0x%02X:", EMS_TxTelegram.type, EMS_TxTelegram.dest & 0x7F);
+            snprintf(s, sizeof(s), "Sending read of type 0x%02X to 0x%02X, ", EMS_TxTelegram.type, EMS_TxTelegram.dest & 0x7F);
         } else if (EMS_TxTelegram.action == EMS_TX_TELEGRAM_VALIDATE) {
-            snprintf(s, sizeof(s), "Sending validate of type 0x%02X to 0x%02X:", EMS_TxTelegram.type, EMS_TxTelegram.dest & 0x7F);
+            snprintf(s, sizeof(s), "Sending validate of type 0x%02X to 0x%02X, ", EMS_TxTelegram.type, EMS_TxTelegram.dest & 0x7F);
         }
 
         _EMS_RxTelegram EMS_RxTelegram;

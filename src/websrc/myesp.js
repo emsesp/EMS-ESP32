@@ -578,7 +578,7 @@ function initEventTable() {
             },
             {
                 "name": "time",
-                "title": "Date",
+                "title": "Date/Time",
                 "parser": function (value) {
                     if (value < 1563300000) {
                         return "(" + value + ")";

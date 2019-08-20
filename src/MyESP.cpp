@@ -1722,7 +1722,7 @@ bool MyESP::fs_saveCustomConfig(JsonObject root) {
             }
         }
 
-        _writeEvent("INFO", "sys", "Custom config stored in the SPIFFS", "");
+        _writeEvent("INFO", "system", "Custom config stored in the SPIFFS", "");
         myDebug_P(PSTR("[FS] custom config file saved"));
         ok = true;
     }
@@ -1755,7 +1755,7 @@ bool MyESP::fs_saveConfig(JsonObject root) {
     configFile.close();
 
     if (n) {
-        _writeEvent("INFO", "sys", "System config stored in the SPIFFS", "");
+        _writeEvent("INFO", "system", "System config stored in the SPIFFS", "");
         myDebug_P(PSTR("[FS] system config file saved"));
         ok = true;
     }
@@ -1832,7 +1832,7 @@ void MyESP::_fs_setup() {
     if (!SPIFFS.begin()) {
         myDebug_P(PSTR("[FS] Formatting filesystem..."));
         if (SPIFFS.format()) {
-            _writeEvent("WARN", "sys", "File system formatted", "");
+            _writeEvent("WARN", "system", "File system formatted", "");
         } else {
             myDebug_P(PSTR("[FS] Failed to format file system"));
         }
@@ -2308,7 +2308,7 @@ void MyESP::_procMsg(AsyncWebSocketClient * client, size_t sz) {
         _sendEventLog(page);
     } else if (strcmp(command, "clearevent") == 0) {
         if (SPIFFS.remove(MYESP_EVENTLOG_FILE)) {
-            _writeEvent("WARN", "sys", "Event log cleared", "");
+            _writeEvent("WARN", "system", "Event log cleared", "");
         } else {
             myDebug_P(PSTR("[WEB] Couldn't clear log file"));
         }
@@ -2541,27 +2541,27 @@ void MyESP::_webserver_setup() {
                            return;
                        }
                        if (!index) {
-                           _writeEvent("INFO", "updt", "Firmware update started", "");
+                           _writeEvent("INFO", "system", "Firmware update started", "");
                            //Serial.printf("[SYSTEM] Firmware update started: %s\n", filename.c_str()); // enable for debugging
                            Update.runAsync(true);
                            if (!Update.begin((ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000)) {
-                               _writeEvent("ERRO", "updt", "Not enough space to update", "");
+                               _writeEvent("ERRO", "system", "Not enough space to update", "");
                                //Update.printError(Serial); // enable for debugging
                            }
                        }
                        if (!Update.hasError()) {
                            if (Update.write(data, len) != len) {
-                               _writeEvent("ERRO", "updt", "Writing to flash failed", "");
+                               _writeEvent("ERRO", "system", "Writing to flash failed", "");
                                //Update.printError(Serial);  // enable for debugging
                            }
                        }
                        if (final) {
                            if (Update.end(true)) {
-                               _writeEvent("INFO", "updt", "Firmware update finished", "");
+                               _writeEvent("INFO", "system", "Firmware update finished", "");
                                //Serial.printf("[SYSTEM] Firmware update finished: %uB\n", index + len); // enable for debugging
                                _shouldRestart = !Update.hasError();
                            } else {
-                               _writeEvent("ERRO", "updt", "Firmware update failed", "");
+                               _writeEvent("ERRO", "system", "Firmware update failed", "");
                                //Update.printError(Serial); // enable for debugging
                            }
                        }
@@ -2606,11 +2606,11 @@ void MyESP::_webserver_setup() {
         //static String remoteIP = (String)address[0] + "." + (String)address[1] + "." + (String)address[2] + "." + (String)address[3];
 
         if (!request->authenticate(MYESP_HTTP_USERNAME, _general_password)) {
-            //_writeEvent("WARN", "websrv", "New login attempt", remoteIP);
+            //_writeEvent("WARN", "system", "New login attempt", remoteIP);
             return request->requestAuthentication();
         }
         request->send(200, "text/plain", "Success");
-        // _writeEvent("INFO", "websrv", "Login successful", remoteIP);
+        // _writeEvent("INFO", "system", "Login successful", remoteIP);
     });
 
     _webServer->rewrite("/", "/index.html");
@@ -2708,7 +2708,7 @@ void MyESP::_bootupSequence() {
     if (boot_status == MYESP_BOOTSTATUS_BOOTED) {
         if ((_ntp_enabled) && (now() > 10000) && !_have_ntp_time) {
             _have_ntp_time = true;
-            _writeEvent("INFO", "sys", "System booted", "");
+            _writeEvent("INFO", "system", "System booted", "");
         }
         return;
     }
@@ -2738,7 +2738,7 @@ void MyESP::_bootupSequence() {
 
         // write a log message if we're not using NTP, otherwise wait for the internet time to arrive
         if (!_ntp_enabled) {
-            _writeEvent("INFO", "sys", "System booted", "");
+            _writeEvent("INFO", "system", "System booted", "");
         }
     }
 }
@@ -2811,7 +2811,7 @@ void MyESP::loop() {
     }
 
     if (_shouldRestart) {
-        _writeEvent("INFO", "sys", "System is restarting", "");
+        _writeEvent("INFO", "system", "System is restarting", "");
         myDebug("[SYSTEM] Restarting...");
         _deferredReset(500, CUSTOM_RESET_TERMINAL);
         ESP.restart();
