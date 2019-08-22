@@ -63,41 +63,46 @@
 
 // RC10 specific
 #define EMS_TYPE_RC10StatusMessage 0xB1         // is an automatic thermostat broadcast giving us temps
-#define EMS_TYPE_RC10Set 0xB0                   // for setting values like temp and mode
-#define EMS_OFFSET_RC10Set_temp 4               // position of thermostat setpoint temperature
 #define EMS_OFFSET_RC10StatusMessage_setpoint 1 // setpoint temp
 #define EMS_OFFSET_RC10StatusMessage_curr 2     // current temp
 
+#define EMS_TYPE_RC10Set 0xB0     // for setting values like temp and mode
+#define EMS_OFFSET_RC10Set_temp 4 // position of thermostat setpoint temperature
+
 // RC20 specific
 #define EMS_TYPE_RC20StatusMessage 0x91         // is an automatic thermostat broadcast giving us temps
-#define EMS_TYPE_RC20Set 0xA8                   // for setting values like temp and mode
-#define EMS_OFFSET_RC20Set_mode 23              // position of thermostat mode
-#define EMS_OFFSET_RC20Set_temp 28              // position of thermostat setpoint temperature
 #define EMS_OFFSET_RC20StatusMessage_setpoint 1 // setpoint temp
 #define EMS_OFFSET_RC20StatusMessage_curr 2     // current temp
 
+#define EMS_TYPE_RC20Set 0xA8      // for setting values like temp and mode
+#define EMS_OFFSET_RC20Set_mode 23 // position of thermostat mode
+#define EMS_OFFSET_RC20Set_temp 28 // position of thermostat setpoint temperature
+
 // RC30 specific
 #define EMS_TYPE_RC30StatusMessage 0x41         // is an automatic thermostat broadcast giving us temps
-#define EMS_TYPE_RC30Set 0xA7                   // for setting values like temp and mode
-#define EMS_OFFSET_RC30Set_mode 23              // position of thermostat mode
-#define EMS_OFFSET_RC30Set_temp 28              // position of thermostat setpoint temperature
 #define EMS_OFFSET_RC30StatusMessage_setpoint 1 // setpoint temp
 #define EMS_OFFSET_RC30StatusMessage_curr 2     // current temp
+
+#define EMS_TYPE_RC30Set 0xA7      // for setting values like temp and mode
+#define EMS_OFFSET_RC30Set_mode 23 // position of thermostat mode
+#define EMS_OFFSET_RC30Set_temp 28 // position of thermostat setpoint temperature
+
 
 // RC35 specific
 #define EMS_TYPE_RC35StatusMessage_HC1 0x3E     // is an automatic thermostat broadcast giving us temps on HC1
 #define EMS_TYPE_RC35StatusMessage_HC2 0x48     // is an automatic thermostat broadcast giving us temps on HC2
-#define EMS_TYPE_RC35Set_HC1 0x3D               // for setting values like temp and mode (Working mode HC1)
-#define EMS_TYPE_RC35Set_HC2 0x47               // for setting values like temp and mode (Working mode HC2)
 #define EMS_OFFSET_RC35StatusMessage_setpoint 2 // desired temp
 #define EMS_OFFSET_RC35StatusMessage_curr 3     // current temp
-#define EMS_OFFSET_RC35Set_mode 7               // position of thermostat mode
-#define EMS_OFFSET_RC35Set_temp_day 2           // position of thermostat setpoint temperature for day time
-#define EMS_OFFSET_RC35Set_temp_night 1         // position of thermostat setpoint temperature for night time
-#define EMS_OFFSET_RC35Get_mode_day 1           // position of thermostat day mode
-#define EMS_OFFSET_RC35Set_temp_holiday 3       // temp during holiday 0x47
-#define EMS_OFFSET_RC35Set_heatingtype 0        // floor heating = 3 0x47
-#define EMS_OFFSET_RC35Set_circuitcalctemp 14   // calculated circuit temperature 0x48
+#define EMS_OFFSET_RC35StatusMessage_mode 1     //day mode
+
+#define EMS_TYPE_RC35Set_HC1 0x3D             // for setting values like temp and mode (Working mode HC1)
+#define EMS_TYPE_RC35Set_HC2 0x47             // for setting values like temp and mode (Working mode HC2)
+#define EMS_OFFSET_RC35Set_mode 7             // position of thermostat mode
+#define EMS_OFFSET_RC35Set_temp_day 2         // position of thermostat setpoint temperature for day time
+#define EMS_OFFSET_RC35Set_temp_night 1       // position of thermostat setpoint temperature for night time
+#define EMS_OFFSET_RC35Set_temp_holiday 3     // temp during holiday 0x47
+#define EMS_OFFSET_RC35Set_heatingtype 0      // floor heating = 3 0x47
+#define EMS_OFFSET_RC35Set_circuitcalctemp 14 // calculated circuit temperature 0x48
 
 // Easy specific
 #define EMS_TYPE_EasyStatusMessage 0x0A          // reading values on an Easy Thermostat
@@ -105,18 +110,20 @@
 #define EMS_OFFSET_EasyStatusMessage_curr 8      // current temp
 
 // RC1010, RC310 and RC300 specific (EMS Plus)
-#define EMS_TYPE_RCPLUSStatusMessage 0x01A5       // is an automatic thermostat broadcast giving us temps
+#define EMS_TYPE_RCPLUSStatusMessage 0x01A5       // is an automatic thermostat broadcast giving us temps, also reading
 #define EMS_TYPE_RCPLUSStatusMode 0x1AF           // summer/winter mode
-#define EMS_TYPE_RCPLUSSet 0x01B9                 // setpoint temp message and mode
+#define EMS_OFFSET_RCPLUSStatusMessage_mode 10    // thermostat mode (auto, manual)
 #define EMS_OFFSET_RCPLUSStatusMessage_setpoint 3 // setpoint temp
 #define EMS_OFFSET_RCPLUSStatusMessage_curr 0     // current temp
-#define EMS_OFFSET_RCPLUSGet_mode_day 10          // day/night mode
-#define EMS_OFFSET_RCPLUSSet_mode 0               // operation mode	(Auto=xFF, Manual=x00)
-#define EMS_OFFSET_RCPLUSStatusMessage_mode 0x0A  // thermostat mode (auto, manual)
-#define EMS_OFFSET_RCPLUSSet_temp_comfort3 1      // comfort3 level
-#define EMS_OFFSET_RCPLUSSet_temp_comfort2 2      // comfort2 level
-#define EMS_OFFSET_RCPLUSSet_temp_comfort1 3      // comfort1 level
-#define EMS_OFFSET_RCPLUSSet_temp_eco 4           //  eco level
+
+#define EMS_TYPE_RCPLUSSet 0x01B9               // setpoint temp message and mode
+#define EMS_OFFSET_RCPLUSSet_mode 0             // operation mode(Auto=0xFF, Manual=0x00)
+#define EMS_OFFSET_RCPLUSSet_temp_comfort3 1    // comfort3 level
+#define EMS_OFFSET_RCPLUSSet_temp_comfort2 2    // comfort2 level
+#define EMS_OFFSET_RCPLUSSet_temp_comfort1 3    // comfort1 level
+#define EMS_OFFSET_RCPLUSSet_temp_eco 4         // eco level
+#define EMS_OFFSET_RCPLUSSet_temp_setpoint 8    // temp setpoint, when changing of templevel (in auto) value is reset and set to FF
+#define EMS_OFFSET_RCPLUSSet_manual_setpoint 10 // manual setpoint
 
 // Junkers FR10, FW100 (EMS Plus)
 #define EMS_TYPE_JunkersStatusMessage 0x6F         // is an automatic thermostat broadcast giving us temps

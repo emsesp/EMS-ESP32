@@ -685,7 +685,7 @@ void _ems_sendTelegram() {
 
 /**
  * Takes the last write command and turns into a validate request
- * placing it on the queue
+ * placing it on the Tx queue
  */
 void _createValidate() {
     if (EMS_TxQueue.isEmpty()) {
@@ -709,9 +709,10 @@ void _createValidate() {
     new_EMS_TxTelegram.action = EMS_TX_TELEGRAM_VALIDATE;
 
     // copy old Write record
-    new_EMS_TxTelegram.type_validate      = EMS_TxTelegram.type_validate;
+    new_EMS_TxTelegram.type_validate = EMS_TxTelegram.type;          // save the original type in the type_validate, increase we need to re-try
+    new_EMS_TxTelegram.type          = EMS_TxTelegram.type_validate; // new type is the validate type
+
     new_EMS_TxTelegram.dest               = EMS_TxTelegram.dest;
-    new_EMS_TxTelegram.type               = EMS_TxTelegram.type;
     new_EMS_TxTelegram.comparisonValue    = EMS_TxTelegram.comparisonValue;
     new_EMS_TxTelegram.comparisonPostRead = EMS_TxTelegram.comparisonPostRead;
     new_EMS_TxTelegram.comparisonOffset   = EMS_TxTelegram.comparisonOffset;
@@ -802,7 +803,7 @@ void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
             return; // ignore the whole telegram Rx Telegram while in DETECT mode
     }
 
-    /* It may happen that we where interrupted (f.e. by WIFI activity) and the 
+    /* It may happen that we where interrupted (for instance by WIFI activity) and the 
      * buffer isn't valid anymore, so we must not answer at all...
      */
     if (EMS_Sys_Status.emsRxStatus != EMS_RX_STATUS_IDLE) {
@@ -820,6 +821,7 @@ void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
     if (length == 1) {
         uint8_t         value                  = telegram[0]; // 1st byte of data package
         static uint32_t _last_emsPollFrequency = 0;
+        static uint8_t  delay_tx               = 0; // TODO remove, experimental
 
         // check first for a Poll for us
         if ((value ^ 0x80 ^ EMS_Sys_Status.emsIDMask) == EMS_ID_ME) {
@@ -830,7 +832,9 @@ void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
 
             // do we have something to send thats waiting in the Tx queue?
             // if so send it if the Queue is not in a wait state
-            if ((!EMS_TxQueue.isEmpty()) && (EMS_Sys_Status.emsTxStatus == EMS_TX_STATUS_IDLE)) {
+            // TODO: but only do this at defined rate otherwise it'll be too quick, so skip a few polls
+            if ((!EMS_TxQueue.isEmpty()) && (EMS_Sys_Status.emsTxStatus == EMS_TX_STATUS_IDLE) && (++delay_tx == 2)) {
+                delay_tx = 0;
                 _ems_sendTelegram(); // perform the read/write command immediately
             } else {
                 // nothing to send so just send a poll acknowledgement back
@@ -848,7 +852,7 @@ void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
             } else if (value == EMS_TX_ERROR) {
                 // last write failed (04), delete it from queue and dont bother to retry
                 if (EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_VERBOSE) {
-                    myDebug_P(PSTR("** Write command failed from host"));
+                    myDebug_P(PSTR("-> Error: Write command failed from host"));
                 }
                 ems_tx_pollAck(); // send a poll to free the EMS bus
                 _removeTxQueue(); // remove from queue
@@ -859,7 +863,7 @@ void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
     }
 
     // ignore anything that doesn't resemble a proper telegram package
-    // minimal is 5 bytes, excluding CRC at the end
+    // minimal is 5 bytes, excluding CRC at the end (for EMS1.0)
     if (length <= 4) {
         // _debugPrintTelegram("Noisy data:", &EMS_RxTelegram, COLOR_RED);
         return;
@@ -1118,8 +1122,8 @@ void _processType(_EMS_RxTelegram * EMS_RxTelegram) {
     // release the lock on the TxQueue
     EMS_Sys_Status.emsTxStatus = EMS_TX_STATUS_IDLE;
 
-    // at this point we can assume Txstatus is EMS_TX_STATUS_WAIT so we just sent a read/write/validate
-    // for READ, WRITE or VALIDATE the dest (telegram[1]) is always us, so check for this
+    // at this point we can assume TxStatus is EMS_TX_STATUS_WAIT as we just sent a read or validate
+    // for READ or VALIDATE the dest (telegram[1]) is always us, so check for this
     // and if not we probably didn't get any response so remove the last Tx from the queue and process the telegram anyway
     if ((telegram[1] & 0x7F) != EMS_ID_ME) {
         _removeTxQueue();
@@ -1159,12 +1163,12 @@ void _processType(_EMS_RxTelegram * EMS_RxTelegram) {
                 // if retried too many times, give up and remove it
                 if (EMS_Sys_Status.txRetryCount >= TX_WRITE_TIMEOUT_COUNT) {
                     if (EMS_Sys_Status.emsLogging >= EMS_SYS_LOGGING_BASIC) {
-                        myDebug_P(PSTR("Read failed. Giving up, removing from queue"));
+                        myDebug_P(PSTR("-> Read failed. Giving up and removing write from queue"));
                     }
                     _removeTxQueue();
                 } else {
                     if (EMS_Sys_Status.emsLogging >= EMS_SYS_LOGGING_BASIC) {
-                        myDebug_P(PSTR("Read failed. Retrying attempt %d/%d..."), EMS_Sys_Status.txRetryCount, TX_WRITE_TIMEOUT_COUNT);
+                        myDebug_P(PSTR("-> Read failed. Retrying (%d/%d)..."), EMS_Sys_Status.txRetryCount, TX_WRITE_TIMEOUT_COUNT);
                     }
                 }
             }
@@ -1174,7 +1178,7 @@ void _processType(_EMS_RxTelegram * EMS_RxTelegram) {
 
     if (EMS_TxTelegram.action == EMS_TX_TELEGRAM_WRITE) {
         // should not get here, since this is handled earlier receiving a 01 or 04
-        myDebug_P(PSTR("** Error! Write - should not be here"));
+        myDebug_P(PSTR("-> Write error - panic! should never get here"));
     }
 
     if (EMS_TxTelegram.action == EMS_TX_TELEGRAM_VALIDATE) {
@@ -1188,30 +1192,32 @@ void _processType(_EMS_RxTelegram * EMS_RxTelegram) {
             // validate was successful, the write changed the value
             _removeTxQueue(); // now we can remove the Tx validate command the queue
             if (EMS_Sys_Status.emsLogging >= EMS_SYS_LOGGING_BASIC) {
-                myDebug_P(PSTR("Write to 0x%02X was successful"), EMS_TxTelegram.dest);
+                myDebug_P(PSTR("-> Validate confirmed, last Write to 0x%02X was successful"), EMS_TxTelegram.dest);
             }
             // follow up with the post read command
             ems_doReadCommand(EMS_TxTelegram.comparisonPostRead, EMS_TxTelegram.dest, true);
         } else {
             // write failed
             if (EMS_Sys_Status.emsLogging >= EMS_SYS_LOGGING_BASIC) {
-                myDebug_P(PSTR("Last write failed. Compared set value 0x%02X with received value 0x%02X"), EMS_TxTelegram.comparisonValue, dataReceived);
+                myDebug_P(PSTR("-> Write failed. Compared set value 0x%02X with received value of 0x%02X"), EMS_TxTelegram.comparisonValue, dataReceived);
             }
             if (++EMS_Sys_Status.txRetryCount > TX_WRITE_TIMEOUT_COUNT) {
                 if (EMS_Sys_Status.emsLogging >= EMS_SYS_LOGGING_BASIC) {
-                    myDebug_P(PSTR("Write failed. Giving up, removing from queue"));
+                    myDebug_P(PSTR("-> Write failed. Giving up, removing from queue"));
                 }
                 _removeTxQueue();
             } else {
                 // retry, turn the validate back into a write and try again
                 if (EMS_Sys_Status.emsLogging >= EMS_SYS_LOGGING_BASIC) {
-                    myDebug_P(PSTR("...Retrying write. Attempt %d/%d..."), EMS_Sys_Status.txRetryCount, TX_WRITE_TIMEOUT_COUNT);
+                    myDebug_P(PSTR("-> Write didn't work, retrying (%d/%d)..."), EMS_Sys_Status.txRetryCount, TX_WRITE_TIMEOUT_COUNT);
                 }
                 EMS_TxTelegram.action    = EMS_TX_TELEGRAM_WRITE;
                 EMS_TxTelegram.dataValue = EMS_TxTelegram.comparisonValue;  // restore old value
                 EMS_TxTelegram.offset    = EMS_TxTelegram.comparisonOffset; // restore old value
-                EMS_TxQueue.shift();                                        // remove validate from queue
-                EMS_TxQueue.unshift(EMS_TxTelegram);                        // add back to queue making it next in line
+                EMS_TxTelegram.type      = EMS_TxTelegram.type_validate;    // restore old value, we swapped them to save the original type
+
+                EMS_TxQueue.shift();                 // remove validate from queue
+                EMS_TxQueue.unshift(EMS_TxTelegram); // add back to queue making it next in line
             }
         }
     }
@@ -1378,7 +1384,7 @@ void _process_RC35StatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     } else {
         EMS_Thermostat.curr_roomTemp = _toShort(EMS_OFFSET_RC35StatusMessage_curr);
     }
-    EMS_Thermostat.day_mode = _bitRead(EMS_OFFSET_RC35Get_mode_day, 1); // get day mode flag
+    EMS_Thermostat.day_mode = _bitRead(EMS_OFFSET_RC35StatusMessage_mode, 1); // get day mode flag
 
     EMS_Thermostat.circuitcalctemp = _toByte(EMS_OFFSET_RC35Set_circuitcalctemp); // 0x48 calculated temperature
 
@@ -1408,7 +1414,7 @@ void _process_RCPLUSStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
         EMS_Thermostat.curr_roomTemp     = _toShort(EMS_OFFSET_RCPLUSStatusMessage_curr);    // value is * 10
         EMS_Thermostat.setpoint_roomTemp = _toByte(EMS_OFFSET_RCPLUSStatusMessage_setpoint); // value is * 2
 
-        EMS_Thermostat.day_mode = _bitRead(EMS_OFFSET_RCPLUSGet_mode_day, 1); // get day mode flag
+        EMS_Thermostat.day_mode = _bitRead(EMS_OFFSET_RCPLUSStatusMessage_mode, 1); // get day mode flag
 
         EMS_Thermostat.mode = _bitRead(EMS_OFFSET_RCPLUSStatusMessage_mode, 0); // bit 1, mode (auto=1 or manual=0)
     }
@@ -1456,11 +1462,25 @@ void _process_JunkersStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
  * type 0x01B9 EMS+ for reading the mode from RC300/RC310 thermostat
  */
 void _process_RCPLUSSetMessage(_EMS_RxTelegram * EMS_RxTelegram) {
-    EMS_Thermostat.mode      = _toByte(EMS_OFFSET_RCPLUSSet_mode);
-    EMS_Thermostat.daytemp   = _toByte(EMS_OFFSET_RCPLUSSet_temp_comfort2); // is * 2
-    EMS_Thermostat.nighttemp = _toByte(EMS_OFFSET_RCPLUSSet_temp_eco);      // is * 2
+    if (EMS_RxTelegram->offset == 0) {
+        EMS_Thermostat.mode         = _toByte(EMS_OFFSET_RCPLUSSet_mode);
+        EMS_Thermostat.daytemp      = _toByte(EMS_OFFSET_RCPLUSSet_temp_comfort2); // is * 2
+        EMS_Thermostat.nighttemp    = _toByte(EMS_OFFSET_RCPLUSSet_temp_eco);      // is * 2
+        EMS_Sys_Status.emsRefreshed = true;                                        // triggers a send the values back via MQTT
+    }
 
-    EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
+    if (EMS_RxTelegram->data_length == 1) {
+        // check for setpoint temps, e.g. Thermostat -> all, type 0x01B9, telegram: 10 00 FF 08 01 B9 26 (CRC=1A) #data=1
+        if ((EMS_RxTelegram->offset == EMS_OFFSET_RCPLUSSet_temp_setpoint) || (EMS_RxTelegram->offset == EMS_OFFSET_RCPLUSSet_manual_setpoint)) {
+            EMS_Thermostat.setpoint_roomTemp = _toByte(0); // value is * 2
+            EMS_Sys_Status.emsRefreshed      = true;       // triggers a send the values back via MQTT
+
+            // check for mode, eg.  10 00 FF 08 01 B9 FF
+        } else if (EMS_RxTelegram->offset == EMS_OFFSET_RCPLUSSet_mode) {
+            EMS_Thermostat.mode         = (_toByte(0) == 0xFF); // Auto = xFF, Manual = x00   (auto=1 or manual=0)
+            EMS_Sys_Status.emsRefreshed = true;                 // triggers a send the values back via MQTT
+        }
+    }
 }
 
 /**
@@ -1916,12 +1936,6 @@ void ems_discoverModels() {
 
     // heatpump module...
     ems_doReadCommand(EMS_TYPE_Version, EMS_ID_HP); // check if there is HeatPump Module available
-
-    // TODO remove! test for EMS+
-    //EMS_Thermostat.model_id        = EMS_MODEL_RC300;
-    //EMS_Thermostat.device_id       = 0x10;
-    //EMS_Thermostat.write_supported = true;
-    //EMS_Thermostat.product_id      = 158;
 
     // thermostat...
     // if it hasn't been set, auto discover it
@@ -2496,7 +2510,11 @@ void ems_setThermostatTemp(float temperature, uint8_t temptype) {
         } else if (EMS_Thermostat.mode == 0) { // manuaL
             EMS_TxTelegram.offset = 0x0A;      // manual offset
         }
-        EMS_TxTelegram.type_validate = EMS_TYPE_RCPLUSStatusMessage; // validate by reading from a different telegram
+        // TODO: commented out because it's too fast
+        // EMS_TxTelegram.type_validate = EMS_TYPE_RCPLUSStatusMessage; // validate by reading from a different telegram
+        EMS_TxTelegram.type_validate = EMS_ID_NONE; // validate by reading from a different telegram
+
+        EMS_TxTelegram.comparisonPostRead = EMS_TYPE_RCPLUSStatusMessage; // after write, do a full fetch of all values
 
     } else if ((model_id == EMS_MODEL_RC35) || (model_id == EMS_MODEL_ES73)) {
         switch (temptype) {
@@ -2574,32 +2592,47 @@ void ems_setThermostatMode(uint8_t mode) {
     EMS_TxTelegram.timestamp       = millis();            // set timestamp
     EMS_Sys_Status.txRetryCount    = 0;                   // reset retry counter
 
-    EMS_TxTelegram.action        = EMS_TX_TELEGRAM_WRITE;
-    EMS_TxTelegram.dest          = device_id;
-    EMS_TxTelegram.length        = EMS_MIN_TELEGRAM_LENGTH;
-    EMS_TxTelegram.dataValue     = mode;
-    EMS_TxTelegram.type_validate = EMS_TxTelegram.type;
+    EMS_TxTelegram.action    = EMS_TX_TELEGRAM_WRITE;
+    EMS_TxTelegram.dest      = device_id;
+    EMS_TxTelegram.length    = EMS_MIN_TELEGRAM_LENGTH;
+    EMS_TxTelegram.dataValue = mode;
 
     // handle different thermostat types
     if (model_id == EMS_MODEL_RC20) {
-        EMS_TxTelegram.type   = EMS_TYPE_RC20Set;
-        EMS_TxTelegram.offset = EMS_OFFSET_RC20Set_mode;
+        EMS_TxTelegram.type               = EMS_TYPE_RC20Set;
+        EMS_TxTelegram.offset             = EMS_OFFSET_RC20Set_mode;
+        EMS_TxTelegram.type_validate      = EMS_TxTelegram.type;
+        EMS_TxTelegram.comparisonPostRead = EMS_TYPE_RC20StatusMessage;
+
     } else if (model_id == EMS_MODEL_RC30) {
-        EMS_TxTelegram.type   = EMS_TYPE_RC30Set;
-        EMS_TxTelegram.offset = EMS_OFFSET_RC30Set_mode;
+        EMS_TxTelegram.type               = EMS_TYPE_RC30Set;
+        EMS_TxTelegram.offset             = EMS_OFFSET_RC30Set_mode;
+        EMS_TxTelegram.type_validate      = EMS_TxTelegram.type;
+        EMS_TxTelegram.comparisonPostRead = EMS_TYPE_RC30StatusMessage;
+
     } else if ((model_id == EMS_MODEL_RC35) || (model_id == EMS_MODEL_ES73)) {
-        EMS_TxTelegram.type   = (hc == 2) ? EMS_TYPE_RC35Set_HC2 : EMS_TYPE_RC35Set_HC1;
-        EMS_TxTelegram.offset = EMS_OFFSET_RC35Set_mode;
+        EMS_TxTelegram.type          = (hc == 2) ? EMS_TYPE_RC35Set_HC2 : EMS_TYPE_RC35Set_HC1;
+        EMS_TxTelegram.offset        = EMS_OFFSET_RC35Set_mode;
+        EMS_TxTelegram.type_validate = EMS_TxTelegram.type;
+        if (hc == 1) {
+            EMS_TxTelegram.comparisonPostRead = EMS_TYPE_RC35StatusMessage_HC1;
+        } else {
+            EMS_TxTelegram.comparisonPostRead = EMS_TYPE_RC35StatusMessage_HC2;
+        }
+
     } else if (model_id == EMS_MODEL_RC300) {
-        EMS_TxTelegram.type          = EMS_TYPE_RCPLUSSet; // for 3000 and 1010, e.g. 48 10 FF 00 01 B9 00 for manual
-        EMS_TxTelegram.offset        = EMS_OFFSET_RCPLUSSet_mode;
-        EMS_TxTelegram.type_validate = EMS_ID_NONE; // don't validate after the write
+        EMS_TxTelegram.type   = EMS_TYPE_RCPLUSSet; // for 3000 and 1010, e.g. 48 10 FF 00 01 B9 00 for manual
+        EMS_TxTelegram.offset = EMS_OFFSET_RCPLUSSet_mode;
+
+        // TODO: commented out because it's too fast
+        // EMS_TxTelegram.type_validate = EMS_TYPE_RCPLUSStatusMessage; // validate by reading from a different telegram
+        EMS_TxTelegram.type_validate      = EMS_ID_NONE;                  // don't validate after the write
+        EMS_TxTelegram.comparisonPostRead = EMS_TYPE_RCPLUSStatusMessage; // after write, do a full fetch of all values
     }
 
-    EMS_TxTelegram.comparisonOffset   = EMS_TxTelegram.offset;
-    EMS_TxTelegram.comparisonValue    = EMS_TxTelegram.dataValue;
-    EMS_TxTelegram.comparisonPostRead = EMS_TxTelegram.type;
-    EMS_TxTelegram.forceRefresh       = false; // send to MQTT is done automatically in 0xA8 process
+    EMS_TxTelegram.comparisonOffset = EMS_TxTelegram.offset;
+    EMS_TxTelegram.comparisonValue  = EMS_TxTelegram.dataValue;
+    EMS_TxTelegram.forceRefresh     = false; // send to MQTT is done automatically in 0xA8 process
 
     EMS_TxQueue.push(EMS_TxTelegram);
 }

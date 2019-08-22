@@ -155,8 +155,8 @@ typedef enum {
 typedef struct {
     _EMS_RX_STATUS   emsRxStatus;
     _EMS_TX_STATUS   emsTxStatus;
-    uint16_t         emsRxPgks;        // received
-    uint16_t         emsTxPkgs;        // sent
+    uint16_t         emsRxPgks;        // # successfull received
+    uint16_t         emsTxPkgs;        // # successfull sent
     uint16_t         emxCrcErr;        // CRC errors
     bool             emsPollEnabled;   // flag enable the response to poll messages
     _EMS_SYS_LOGGING emsLogging;       // logging
@@ -168,7 +168,7 @@ typedef struct {
     bool             emsTxDisabled;    // true to prevent all Tx
     uint8_t          txRetryCount;     // # times the last Tx was re-sent
     uint8_t          emsIDMask;        // Buderus: 0x00, Junkers: 0x80
-    uint8_t          emsPollAck[1];    // acknowledge buffer
+    uint8_t          emsPollAck[1];    // acknowledge buffer for Poll
 } _EMS_Sys_Status;
 
 // The Tx send package
@@ -180,9 +180,9 @@ typedef struct {
     uint8_t                 length;             // full length of complete telegram, including CRC
     uint8_t                 dataValue;          // value to validate against
     uint16_t                type_validate;      // type to call after a successful Write command
-    uint8_t                 comparisonValue;    // value to compare against during a validate
-    uint8_t                 comparisonOffset;   // offset of where the byte is we want to compare too later
-    uint16_t                comparisonPostRead; // after a successful write call this to read from this type ID
+    uint8_t                 comparisonValue;    // value to compare against during a validate command
+    uint8_t                 comparisonOffset;   // offset of where the byte is we want to compare too during validation
+    uint16_t                comparisonPostRead; // after a successful write, do a read from this type ID
     bool                    forceRefresh;       // should we send to MQTT after a successful Tx?
     uint32_t                timestamp;          // when created
     uint8_t                 data[EMS_MAX_TELEGRAM_LENGTH];

@@ -9,7 +9,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Building with EEPROM (-DCRASH option) to capture stack dumps doesn't work with the web server, so only compile for debugging and use Telnet.
 
-
 ## How to build the firmware with 1.9.x
 - Make sure you update your local `platformio.ini` using the example one and set the target to `debug`.
 - On first boot it will re-build the SPIFFS config file so if you're upgrading from 1.8.x all the settings will be deleted and you will need to re-enter. This can be doen now via the web interface by connecting to WiFi AP called 'ems-esp'.
@@ -17,12 +16,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - When building the firmware with the `debug` target all the web front-end code is assembled and compressed. It only takes a second or two. However you'll need nodeJS and the gulp module installed for this.
   - Download and install NodeJS from https://nodejs.org/en/download/
   - Navigate to the folder tools/webfilesbuilder, and in that folder do a:
-   ```
+  
+```
    npm install --global gulp-cli
    npm install gulp
-   ```
+```
+  
    (ignore any errors as I need to upgrade the gulp file to the latest 4.1 format)
-  - You can test if it worked by then typing `gulp`.
+   
+   You can test if it worked by then typing `gulp`.
 
 ---
 
@@ -39,7 +41,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- HAndle Read and Write to EMS+ device logic changed. 
+- Handle Read and Write to EMS+ device logic changed.
 
 ## [1.8.1] 2019-07-27
 
