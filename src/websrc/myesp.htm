@@ -131,7 +131,7 @@
     <div>
         <br>
         <legend>Event Log</legend>
-        <h6 class="text-muted">Dates shown in () represent elapsed time in seconds when NTP is disabled</h6>
+        <h6 class="text-muted">Dates shown in () represent elapsed time in seconds when NTP Time is disabled</h6>
         <br>
         <div class="panel panel-default">
             <div>
@@ -282,11 +282,12 @@
 <div id="ntpcontent">
     <br>
     <legend>Time Settings</legend>
-    <h6 class="text-muted">With NTP enabled, all times are adjusted to the local timezone and respect daylight saving
+    <h6 class="text-muted">With Network Time Protocol (NTP) enabled, all times are adjusted to the local timezone and
+        respect daylight saving
         time (DST)</h6>
     <br>
     <div class="row form-group">
-        <label class="col-xs-3">Device Time</label>
+        <label class="col-xs-3">Device Time (UTC)</label>
         <span id="utc" class="col-xs-9 col-md-5">
         </span>
     </div>
@@ -310,10 +311,12 @@
         <div class="col-xs-9">
             <form>
                 <label class="radio-inline">
-                    <input type="radio" value="1" name="ntpenabled">Enabled</label>
+                    <input type="radio" value="1" onclick="handleNTPON();" name="ntpenabled">Enabled</label>
                 <label class="radio-inline">
-                    <input type="radio" value="0" name="ntpenabled" checked>Disabled</label>
+                    <input type="radio" value="0" onclick="handleNTPOFF();" name="ntpenabled" checked>Disabled</label>
             </form>
+            <button onclick="forcentp()" id="forcentp" class="btn btn-primary btn-xs">Fetch internet time</button>
+
         </div>
     </div>
     <div class="row form-group">
@@ -327,7 +330,7 @@
         <br>
     </div>
     <div class="row form-group">
-        <label class="col-xs-3">Refresh Time<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign"
+        <label class="col-xs-3">Recalibrate Time<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign"
                 aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right"
                 data-content="Time in minutes between scheduled NTP refreshes"></i></label>
         <span class="col-xs-9 col-md-5">

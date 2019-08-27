@@ -51,7 +51,7 @@ function browserTime() {
 }
 
 function deviceTime() {
-    var t = new Date(0); // The 0 there is the key, which sets the date to the epoch,
+    var t = new Date(0); // The 0 there is the key, which sets the date to the epoch
     var devTime = Math.floor(utcSeconds + ((t.getTimezoneOffset() * 60) * -1));
     t.setUTCSeconds(devTime);
     document.getElementById("utc").innerHTML = t.toUTCString().slice(0, -3);
@@ -75,6 +75,9 @@ function listntp() {
 
     if (config.ntp.enabled) {
         $("input[name=\"ntpenabled\"][value=\"1\"]").prop("checked", true);
+        handleNTPON();
+    } else {
+        handleNTPOFF();
     }
 
     browserTime();
@@ -113,6 +116,11 @@ function saventp() {
 
     uncommited();
 }
+
+function forcentp() {
+    websock.send("{\"command\":\"forcentp\"}");
+}
+
 
 function savegeneral() {
     var a = document.getElementById("adminpwd").value;
@@ -236,6 +244,14 @@ function handleAP() {
     document.getElementById("hidepasswd").style.display = "none";
 
     document.getElementById("inputtohide").style.display = "block";
+}
+
+function handleNTPON() {
+    document.getElementById("forcentp").style.display = "block";
+}
+
+function handleNTPOFF() {
+    document.getElementById("forcentp").style.display = "none";
 }
 
 function listnetwork() {

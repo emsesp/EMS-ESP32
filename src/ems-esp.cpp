@@ -1713,9 +1713,13 @@ void WebCallback(JsonObject root) {
         JsonObject item   = list.createNestedObject();
         item["type"]      = (it)->model_type;
         item["model"]     = (it)->model_string;
-        item["deviceid"]  = (it)->device_id;
         item["version"]   = (it)->version;
         item["productid"] = (it)->product_id;
+
+        char s[10];
+        itoa((it)->device_id,s, 16);
+        item["deviceid"]  = s; // convert to hex
+
     }
 
     JsonObject thermostat = root.createNestedObject("thermostat");

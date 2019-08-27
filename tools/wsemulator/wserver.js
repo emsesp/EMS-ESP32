@@ -252,6 +252,9 @@ wss.on('connection', function connection(ws) {
             case "destroy":
                 console.log("[INFO] Destroy");
                 break;
+            case "forcentp":
+                console.log("[INFO] getting ntp time");
+                break;
             default:
                 console.log("[WARN] Unknown command ");
                 break;

@@ -103,7 +103,7 @@ function listCustomStats() {
         } else {
             var color = "";
         }
-        l.innerHTML = obj[i].model + ", Version:" + obj[i].version + ", ProductID:" + obj[i].productid + ", DeviceID:" + obj[i].deviceid;
+        l.innerHTML = obj[i].model + " (Version:" + obj[i].version + " ProductID:" + obj[i].productid + " DeviceID:0x" + obj[i].deviceid + ")";
         l.className = "list-group-item list-group-item-" + color;
         list.appendChild(l);
     }

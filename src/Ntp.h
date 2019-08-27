@@ -27,7 +27,6 @@ class NtpClient {
 
     static byte NTPpacket[NTP_PACKET_SIZE];
 
-  private:
     static ICACHE_FLASH_ATTR time_t getNtpTime();
 };
 
