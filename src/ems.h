@@ -190,19 +190,20 @@ typedef struct {
 
 // The Rx receive package
 typedef struct {
-    uint32_t  timestamp;   // timestamp from millis()
-    uint8_t * telegram;    // the full data package
-    uint8_t   data_length; // length in bytes of the data
-    uint8_t   length;      // full length of the complete telegram
-    uint8_t   src;         // source ID
-    uint8_t   dest;        // destination ID
-    uint16_t  type;        // type ID as a double byte to support EMS+
-    uint8_t   offset;      // offset
-    uint8_t * data;        // pointer to where telegram data starts
-    bool      emsplus;     // true if ems+/ems 2.0
+    uint32_t  timestamp;    // timestamp from millis()
+    uint8_t * telegram;     // the full data package
+    uint8_t   data_length;  // length in bytes of the data
+    uint8_t   length;       // full length of the complete telegram
+    uint8_t   src;          // source ID
+    uint8_t   dest;         // destination ID
+    uint16_t  type;         // type ID as a double byte to support EMS+
+    uint8_t   offset;       // offset
+    uint8_t * data;         // pointer to where telegram data starts
+    bool      emsplus;      // true if ems+/ems 2.0
+    uint8_t   emsplus_type; // FF, F7 or F9
 } _EMS_RxTelegram;
 
-// default empty Tx
+// default empty Tx, must match struct
 const _EMS_TxTelegram EMS_TX_TELEGRAM_NEW = {
     EMS_TX_TELEGRAM_INIT, // action
     EMS_ID_NONE,          // dest

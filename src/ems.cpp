@@ -881,9 +881,10 @@ void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
     // determing if its normal ems or ems plus, check for marker
     if (telegram[2] >= 0xF0) {
         // its EMS plus / EMS 2.0
-        EMS_RxTelegram.emsplus = true;
+        EMS_RxTelegram.emsplus      = true;
+        EMS_RxTelegram.emsplus_type = telegram[2]; // 0xFF, 0xF7 or 0xF9
 
-        if (telegram[2] == 0xFF) {
+        if (EMS_RxTelegram.emsplus_type == 0xFF) {
             EMS_RxTelegram.type = (telegram[4] << 8) + telegram[5]; // is a long in bytes 5 & 6
             EMS_RxTelegram.data = telegram + 6;
 
@@ -1462,6 +1463,11 @@ void _process_JunkersStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
  * type 0x01B9 EMS+ for reading the mode from RC300/RC310 thermostat
  */
 void _process_RCPLUSSetMessage(_EMS_RxTelegram * EMS_RxTelegram) {
+        // ignore F7 and F9
+    if (EMS_RxTelegram->emsplus_type != 0xFF) {
+        return;
+    }
+
     if (EMS_RxTelegram->offset == 0) {
         EMS_Thermostat.mode         = _toByte(EMS_OFFSET_RCPLUSSet_mode);
         EMS_Thermostat.daytemp      = _toByte(EMS_OFFSET_RCPLUSSet_temp_comfort2); // is * 2
