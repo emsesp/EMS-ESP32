@@ -10,7 +10,7 @@
 #include "ems_devices.h"
 #include "emsuart.h"
 #include <CircularBuffer.h> // https://github.com/rlogiacco/CircularBuffer
-#include <MyESP.h>
+#include "MyESP.h"
 
 #ifdef TESTS
 #include "test_data.h"
@@ -803,7 +803,8 @@ void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
             return; // ignore the whole telegram Rx Telegram while in DETECT mode
     }
 
-    /* It may happen that we where interrupted (for instance by WIFI activity) and the 
+    /* 
+     * It may happen that we where interrupted (for instance by WIFI activity) and the 
      * buffer isn't valid anymore, so we must not answer at all...
      */
     if (EMS_Sys_Status.emsRxStatus != EMS_RX_STATUS_IDLE) {
@@ -825,7 +826,6 @@ void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
 
         // check first for a Poll for us
         if ((value ^ 0x80 ^ EMS_Sys_Status.emsIDMask) == EMS_ID_ME) {
-            EMS_Sys_Status.emsTxCapable     = true;
             uint32_t timenow_microsecs      = micros();
             EMS_Sys_Status.emsPollFrequency = (timenow_microsecs - _last_emsPollFrequency);
             _last_emsPollFrequency          = timenow_microsecs;
@@ -1100,7 +1100,7 @@ void _removeTxQueue() {
 }
 
 /**
- * deciphers the telegram packet, which has already been checked for valid CRC and has a complete header (min of 5 bytes)
+ * deciphers the telegram packet, which has already been checked for valid CRC and has a complete header
  * length is only data bytes, excluding the BRK
  * We only remove from the Tx queue if the read or write was successful
  */
@@ -1132,7 +1132,7 @@ void _processType(_EMS_RxTelegram * EMS_RxTelegram) {
         return;
     }
 
-    // first double check we actually have something in the queue
+    // first double check we actually have something in the Tx queue that we're waiting upon
     if (EMS_TxQueue.isEmpty()) {
         _ems_processTelegram(EMS_RxTelegram);
         return;
@@ -1142,7 +1142,7 @@ void _processType(_EMS_RxTelegram * EMS_RxTelegram) {
     _EMS_TxTelegram EMS_TxTelegram = EMS_TxQueue.first();
 
     // check action
-    // if READ, match the current inbound telegram to what we sent
+    // if READ, match the current inbound telegram to what we just sent
     // if WRITE, should not happen
     // if VALIDATE, check the contents
     if (EMS_TxTelegram.action == EMS_TX_TELEGRAM_READ) {
@@ -1151,10 +1151,10 @@ void _processType(_EMS_RxTelegram * EMS_RxTelegram) {
             // all checks out, read was successful, remove tx from queue and continue to process telegram
             _removeTxQueue();
             EMS_Sys_Status.emsRxPgks++;                       // increment Rx happy counter
+            EMS_Sys_Status.emsTxCapable = true;               // we're able to transmit a telegram on the Tx
             ems_setEmsRefreshed(EMS_TxTelegram.forceRefresh); // does mqtt need refreshing?
         } else {
-            // read not OK, we didn't get back a telegram we expected
-
+            // read not OK, we didn't get back a telegram we expected.
             // first see if we got a response back from the sender saying its an unknown command
             if (EMS_RxTelegram->data_length == 0) {
                 _removeTxQueue();
@@ -1420,16 +1420,14 @@ void _process_RCPLUSStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
         EMS_Thermostat.mode = _bitRead(EMS_OFFSET_RCPLUSStatusMessage_mode, 0); // bit 1, mode (auto=1 or manual=0)
     }
 
-    // actual set point
-    // e.g. Thermostat -> all, telegram: 10 00 FF 07 01 A5 32
-    if (EMS_RxTelegram->offset == 7) {
-        // to add...
+    // current target temp
+    if (EMS_RxTelegram->offset == EMS_OFFSET_RCPLUSStatusMessage_setpoint) {
+        EMS_Thermostat.setpoint_roomTemp = _toByte(0); // value is * 2
     }
 
-    // next set point
-    // e.g. Thermostat -> all, telegram: 18 00 FF 06 01 A5 22
+    // current setpoint temp,  e.g. Thermostat -> all, telegram: 10 00 FF 06 01 A5 22
     if (EMS_RxTelegram->offset == 6) {
-        // to add...
+        EMS_Thermostat.setpoint_roomTemp = _toByte(0); // value is * 2
     }
 
     // thermostat mode auto/manual, examples:
@@ -1438,6 +1436,8 @@ void _process_RCPLUSStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     if (EMS_RxTelegram->offset == EMS_OFFSET_RCPLUSStatusMessage_mode) {
         EMS_Thermostat.mode = _bitRead(0, 0); // bit 0
     }
+
+    EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
 }
 
 /**
@@ -1463,20 +1463,16 @@ void _process_JunkersStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
  * type 0x01B9 EMS+ for reading the mode from RC300/RC310 thermostat
  */
 void _process_RCPLUSSetMessage(_EMS_RxTelegram * EMS_RxTelegram) {
-        // ignore F7 and F9
+    // ignore F7 and F9
     if (EMS_RxTelegram->emsplus_type != 0xFF) {
         return;
     }
 
-    if (EMS_RxTelegram->offset == 0) {
-        EMS_Thermostat.mode         = _toByte(EMS_OFFSET_RCPLUSSet_mode);
-        EMS_Thermostat.daytemp      = _toByte(EMS_OFFSET_RCPLUSSet_temp_comfort2); // is * 2
-        EMS_Thermostat.nighttemp    = _toByte(EMS_OFFSET_RCPLUSSet_temp_eco);      // is * 2
-        EMS_Sys_Status.emsRefreshed = true;                                        // triggers a send the values back via MQTT
-    }
-
-    if (EMS_RxTelegram->data_length == 1) {
+    // check for single values
+    // but ignore values of 0xFF, e.g.  10 00 FF 08 01 B9 FF
+    if ((EMS_RxTelegram->data_length == 1) && (_toByte(0) != 0xFF)) {
         // check for setpoint temps, e.g. Thermostat -> all, type 0x01B9, telegram: 10 00 FF 08 01 B9 26 (CRC=1A) #data=1
+
         if ((EMS_RxTelegram->offset == EMS_OFFSET_RCPLUSSet_temp_setpoint) || (EMS_RxTelegram->offset == EMS_OFFSET_RCPLUSSet_manual_setpoint)) {
             EMS_Thermostat.setpoint_roomTemp = _toByte(0); // value is * 2
             EMS_Sys_Status.emsRefreshed      = true;       // triggers a send the values back via MQTT
@@ -1486,6 +1482,16 @@ void _process_RCPLUSSetMessage(_EMS_RxTelegram * EMS_RxTelegram) {
             EMS_Thermostat.mode         = (_toByte(0) == 0xFF); // Auto = xFF, Manual = x00   (auto=1 or manual=0)
             EMS_Sys_Status.emsRefreshed = true;                 // triggers a send the values back via MQTT
         }
+
+        return; // quit
+    }
+
+    // check for long broadcasts
+    if (EMS_RxTelegram->offset == 0) {
+        EMS_Thermostat.mode         = _toByte(EMS_OFFSET_RCPLUSSet_mode);
+        EMS_Thermostat.daytemp      = _toByte(EMS_OFFSET_RCPLUSSet_temp_comfort2); // is * 2
+        EMS_Thermostat.nighttemp    = _toByte(EMS_OFFSET_RCPLUSSet_temp_eco);      // is * 2
+        EMS_Sys_Status.emsRefreshed = true;                                        // triggers a send the values back via MQTT
     }
 }
 

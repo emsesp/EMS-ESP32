@@ -18,6 +18,7 @@
  *   ° for Rx, we use GPIO14
  *   ° for Tx, we use GPIO12
  */
+
 // clang-format off
 #ifdef LOGICANALYZER
 #define RX_MARK_PIN 14
