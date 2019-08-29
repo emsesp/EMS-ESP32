@@ -51,8 +51,9 @@ function browserTime() {
 }
 
 function deviceTime() {
+    var c = new Date();
     var t = new Date(0); // The 0 there is the key, which sets the date to the epoch
-    var devTime = Math.floor(utcSeconds + ((t.getTimezoneOffset() * 60) * -1));
+    var devTime = Math.floor(utcSeconds + ((c.getTimezoneOffset() * 60) * -1));
     t.setUTCSeconds(devTime);
     document.getElementById("utc").innerHTML = t.toUTCString().slice(0, -3);
 }
@@ -308,7 +309,7 @@ function listSSID(obj) {
         opt.innerHTML = "BSSID: " + obj.list[i].bssid + ", Signal Strength: %" + percentage + ", Network: " + obj.list[i].ssid;
         select.appendChild(opt);
     }
-    document.getElementById("scanb").innerHTML = "Re-Scan";
+    document.getElementById("scanb").innerHTML = "Re-scan...";
     listBSSID();
 }
 

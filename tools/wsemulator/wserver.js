@@ -226,6 +226,7 @@ wss.on('connection', function connection(ws) {
                 var res = {};
                 res.command = "gettime";
                 res.epoch = Math.floor((new Date).getTime() / 1000);
+                //res.epoch = 1567107755;
                 wss.broadcast(res);
                 break;
             case "settime":

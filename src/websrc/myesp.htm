@@ -261,8 +261,8 @@
             <select class="form-control input-sm" style="display:none;" id="ssid" onchange="listBSSID();"></select>
         </span>
         <span class="col-xs-2">
-            <button id="scanb" type="button" class="btn btn-primary btn-xs" style="display:none;"
-                onclick="scanWifi()">Scan</button>
+            <button id="scanb" type="button" class="btn btn-info btn-xs" style="display:none;"
+                onclick="scanWifi()">Scan...</button>
         </span>
     </div>
     <div class="row form-group" style="display:none" id="hidepasswd">
@@ -287,7 +287,7 @@
         time (DST)</h6>
     <br>
     <div class="row form-group">
-        <label class="col-xs-3">Device Time (UTC)</label>
+        <label class="col-xs-3">Device Time</label>
         <span id="utc" class="col-xs-9 col-md-5">
         </span>
     </div>
@@ -298,7 +298,7 @@
     </div>
     <div class="row form-group">
         <div class="col-xs-3">
-            <button onclick="syncBrowserTime()" class="btn btn-link btn-sm">Sync Browser Time to Device</button><i
+            <button onclick="syncBrowserTime()" class="btn btn-info btn-sm">Sync Browser Time to Device</button><i
                 style="margin-left: 10px;" class="glyphicon glyphicon-info-sign" aria-hidden="true"
                 data-toggle="popover" data-trigger="hover" data-placement="right"
                 data-content="Use your browser time. Useful when the system does not have an internet connection."></i>
@@ -315,8 +315,8 @@
                 <label class="radio-inline">
                     <input type="radio" value="0" onclick="handleNTPOFF();" name="ntpenabled" checked>Disabled</label>
             </form>
-            <button onclick="forcentp()" id="forcentp" class="btn btn-primary btn-xs">Fetch internet time</button>
-
+            <button onclick="forcentp()" id="forcentp" class="btn btn-info btn-sm">Sync Device with Internet
+                Time</button>
         </div>
     </div>
     <div class="row form-group">
