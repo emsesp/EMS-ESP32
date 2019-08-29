@@ -4,6 +4,7 @@
  * Paul Derbyshire - first revision: December 2018
  *
  * with ideas borrowed from Espurna https://github.com/xoseperez/espurna
+ * and web from https://github.com/esprfid/esp-rfid
  */
 
 #include "MyESP.h"

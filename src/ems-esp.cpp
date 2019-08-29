@@ -13,7 +13,7 @@
 #include "emsuart.h"
 #include "my_config.h"
 #include "version.h"
-#include <MyESP.h>
+#include "MyESP.h"
 
 // Dallas external temp sensors
 #include "ds18.h"
@@ -26,6 +26,13 @@ DS18 ds18;
 // standard arduino libs
 #include <Ticker.h> // https://github.com/esp8266/Arduino/tree/master/libraries/Ticker
 
+// default APP params
+#define APP_NAME "EMS-ESP"
+#define APP_HOSTNAME "ems-esp"
+#define APP_URL "https://github.com/proddy/EMS-ESP"
+#define APP_UPDATEURL "https://api.github.com/repos/proddy/EMS-ESP/releases/latest"
+
+// macros for easy debugging
 #define myDebug(...) myESP.myDebug(__VA_ARGS__)
 #define myDebug_P(...) myESP.myDebug_P(__VA_ARGS__)
 
@@ -1717,9 +1724,8 @@ void WebCallback(JsonObject root) {
         item["productid"] = (it)->product_id;
 
         char s[10];
-        itoa((it)->device_id,s, 16);
-        item["deviceid"]  = s; // convert to hex
-
+        itoa((it)->device_id, s, 16);
+        item["deviceid"] = s; // convert to hex
     }
 
     JsonObject thermostat = root.createNestedObject("thermostat");
