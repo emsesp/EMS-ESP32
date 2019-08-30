@@ -110,11 +110,12 @@
 #define EMS_OFFSET_EasyStatusMessage_curr 8      // current temp
 
 // RC1010, RC310 and RC300 specific (EMS Plus)
-#define EMS_TYPE_RCPLUSStatusMessage 0x01A5       // is an automatic thermostat broadcast giving us temps, also reading
-#define EMS_TYPE_RCPLUSStatusMode 0x1AF           // summer/winter mode
-#define EMS_OFFSET_RCPLUSStatusMessage_mode 10    // thermostat mode (auto, manual)
-#define EMS_OFFSET_RCPLUSStatusMessage_setpoint 3 // setpoint temp
-#define EMS_OFFSET_RCPLUSStatusMessage_curr 0     // current temp
+#define EMS_TYPE_RCPLUSStatusMessage 0x01A5           // is an automatic thermostat broadcast giving us temps, also reading
+#define EMS_TYPE_RCPLUSStatusMode 0x1AF               // summer/winter mode
+#define EMS_OFFSET_RCPLUSStatusMessage_mode 10        // thermostat mode (auto, manual)
+#define EMS_OFFSET_RCPLUSStatusMessage_setpoint 3     // setpoint temp
+#define EMS_OFFSET_RCPLUSStatusMessage_curr 0         // current temp
+#define EMS_OFFSET_RCPLUSStatusMessage_currsetpoint 6 // target setpoint temp
 
 #define EMS_TYPE_RCPLUSSet 0x01B9               // setpoint temp message and mode
 #define EMS_OFFSET_RCPLUSSet_mode 0             // operation mode(Auto=0xFF, Manual=0x00)
