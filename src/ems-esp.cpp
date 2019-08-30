@@ -8,12 +8,12 @@
  */
 
 // local libraries
+#include "MyESP.h"
 #include "ems.h"
 #include "ems_devices.h"
 #include "emsuart.h"
 #include "my_config.h"
 #include "version.h"
-#include "MyESP.h"
 
 // Dallas external temp sensors
 #include "ds18.h"
@@ -88,6 +88,7 @@ typedef struct {
     uint8_t  dallas_gpio;     // pin for attaching external dallas temperature sensors
     bool     dallas_parasite; // on/off is using parasite
     uint8_t  heating_circuit; // number of heating circuit, 1 or 2
+    uint8_t  tx_mode;         // TX mode 1,2 or 3
 } _EMSESP_Status;
 
 typedef struct {
@@ -109,6 +110,7 @@ static const command_t project_cmds[] PROGMEM = {
     {true, "shower_alert <on | off>", "stop hot water to send 3 cold burst warnings after max shower time is exceeded"},
     {true, "publish_time <seconds>", "set frequency for publishing data to MQTT (0=off)"},
     {true, "heating_circuit <1 | 2>", "set the main thermostat HC to work with (if using multiple heating circuits)"},
+    {true, "tx_mode <n>", "changes Tx logic. 1=ems generic, 2=ems+, 3=Junkers HT3"},
 
     {false, "info", "show current captured on the devices"},
     {false, "log <n | b | t | r | v>", "set logging mode to none, basic, thermostat only, raw or verbose"},
@@ -1166,6 +1168,9 @@ bool LoadSaveCallback(MYESP_FSACTION action, JsonObject json) {
         EMSESP_Status.heating_circuit = settings["heating_circuit"] | DEFAULT_HEATINGCIRCUIT;
         ems_setThermostatHC(EMSESP_Status.heating_circuit);
 
+        EMSESP_Status.tx_mode = settings["tx_mode"] | 1; // default to 1 (generic)
+        ems_setTxMode(EMSESP_Status.tx_mode);
+
         return true;
     }
 
@@ -1181,6 +1186,7 @@ bool LoadSaveCallback(MYESP_FSACTION action, JsonObject json) {
         settings["shower_alert"]    = EMSESP_Status.shower_alert;
         settings["publish_time"]    = EMSESP_Status.publish_time;
         settings["heating_circuit"] = EMSESP_Status.heating_circuit;
+        settings["tx_mode"]         = EMSESP_Status.tx_mode;
 
         return true;
     }
@@ -1298,6 +1304,18 @@ bool SetListCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, co
                 myDebug_P(PSTR("Error. Usage: set heating_circuit <1 | 2>"));
             }
         }
+
+        // tx_mode
+        if ((strcmp(setting, "tx_mode") == 0) && (wc == 2)) {
+            uint8_t mode = atoi(value);
+            if ((mode >= 1) && (mode <= 3)) {
+                EMSESP_Status.tx_mode = mode;
+                ems_setTxMode(mode);
+                ok = true;
+            } else {
+                myDebug_P(PSTR("Error. Usage: set tx_mode <1 | 2 | 3>"));
+            }
+        }
     }
 
     if (action == MYESP_FSACTION_LIST) {
@@ -1306,6 +1324,7 @@ bool SetListCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, co
         myDebug_P(PSTR("  dallas_gpio=%d"), EMSESP_Status.dallas_gpio);
         myDebug_P(PSTR("  dallas_parasite=%s"), EMSESP_Status.dallas_parasite ? "on" : "off");
         myDebug_P(PSTR("  heating_circuit=%d"), EMSESP_Status.heating_circuit);
+        myDebug_P(PSTR("  tx_mode=%d"), EMSESP_Status.tx_mode);
         myDebug_P(PSTR("  listen_mode=%s"), EMSESP_Status.listen_mode ? "on" : "off");
         myDebug_P(PSTR("  shower_timer=%s"), EMSESP_Status.shower_timer ? "on" : "off");
         myDebug_P(PSTR("  shower_alert=%s"), EMSESP_Status.shower_alert ? "on" : "off");

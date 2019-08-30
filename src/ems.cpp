@@ -7,10 +7,10 @@
  */
 
 #include "ems.h"
+#include "MyESP.h"
 #include "ems_devices.h"
 #include "emsuart.h"
 #include <CircularBuffer.h> // https://github.com/rlogiacco/CircularBuffer
-#include "MyESP.h"
 
 #ifdef TESTS
 #include "test_data.h"
@@ -507,6 +507,11 @@ int _ems_findType(uint16_t type) {
 
     return (typeFound ? i : -1);
 }
+
+void ems_setTxMode(uint8_t mode) {
+    EMS_Sys_Status.emsTxMode = mode;
+}
+
 
 /**
  * debug print a telegram to telnet/serial including the CRC
@@ -1408,33 +1413,34 @@ void _process_EasyStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
  * EMS+ messages may come in with different offsets so handle them here
  */
 void _process_RCPLUSStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
-    if (EMS_RxTelegram->offset == 0) {
+    // handle single data values
+    if (EMS_RxTelegram->data_length == 1) {
+        switch (EMS_RxTelegram->offset) {
+        case EMS_OFFSET_RCPLUSStatusMessage_curr:       // setpoint target temp
+            EMS_Thermostat.curr_roomTemp = _toShort(0); // value is * 10
+            break;
+        case EMS_OFFSET_RCPLUSStatusMessage_setpoint:      // current target temp
+            EMS_Thermostat.setpoint_roomTemp = _toByte(0); // value is * 2
+            break;
+        case EMS_OFFSET_RCPLUSStatusMessage_currsetpoint:  // current setpoint temp,  e.g. Thermostat -> all, telegram: 10 00 FF 06 01 A5 22
+            EMS_Thermostat.setpoint_roomTemp = _toByte(0); // value is * 2
+            break;
+        case EMS_OFFSET_RCPLUSStatusMessage_mode:     // thermostat mode auto/manual
+                                                      // manual : 10 00 FF 0A 01 A5 02
+                                                      // auto : Thermostat -> all, type 0x01A5 telegram: 10 00 FF 0A 01 A5 03
+            EMS_Thermostat.mode     = _bitRead(0, 0); // bit 1, mode (auto=1 or manual=0)
+            EMS_Thermostat.day_mode = _bitRead(0, 1); // get day mode flag
+
+            break;
+        }
+    } else if (EMS_RxTelegram->data_length > 20) {
         // the whole telegram
         // e.g. Thermostat -> all, telegram: 10 00 FF 00 01 A5 00 D7 21 00 00 00 00 30 01 84 01 01 03 01 84 01 F1 00 00 11 01 00 08 63 00
         //                                   10 00 FF 00 01 A5 80 00 01 30 28 00 30 28 01 54 03 03 01 01 54 02 A8 00 00 11 01 03 FF FF 00
         EMS_Thermostat.curr_roomTemp     = _toShort(EMS_OFFSET_RCPLUSStatusMessage_curr);    // value is * 10
         EMS_Thermostat.setpoint_roomTemp = _toByte(EMS_OFFSET_RCPLUSStatusMessage_setpoint); // value is * 2
-
-        EMS_Thermostat.day_mode = _bitRead(EMS_OFFSET_RCPLUSStatusMessage_mode, 1); // get day mode flag
-
-        EMS_Thermostat.mode = _bitRead(EMS_OFFSET_RCPLUSStatusMessage_mode, 0); // bit 1, mode (auto=1 or manual=0)
-    }
-
-    // current target temp
-    if (EMS_RxTelegram->offset == EMS_OFFSET_RCPLUSStatusMessage_setpoint) {
-        EMS_Thermostat.setpoint_roomTemp = _toByte(0); // value is * 2
-    }
-
-    // current setpoint temp,  e.g. Thermostat -> all, telegram: 10 00 FF 06 01 A5 22
-    if (EMS_RxTelegram->offset == 6) {
-        EMS_Thermostat.setpoint_roomTemp = _toByte(0); // value is * 2
-    }
-
-    // thermostat mode auto/manual, examples:
-    // manual : 10 00 FF 0A 01 A5 02 (CRC=16) #data=1
-    // auto : Thermostat -> all, type 0x01A5 telegram: 10 00 FF 0A 01 A5 03 (CRC=17) #data=1
-    if (EMS_RxTelegram->offset == EMS_OFFSET_RCPLUSStatusMessage_mode) {
-        EMS_Thermostat.mode = _bitRead(0, 0); // bit 0
+        EMS_Thermostat.day_mode          = _bitRead(EMS_OFFSET_RCPLUSStatusMessage_mode, 1); // get day mode flag
+        EMS_Thermostat.mode              = _bitRead(EMS_OFFSET_RCPLUSStatusMessage_mode, 0); // bit 1, mode (auto=1 or manual=0)
     }
 
     EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT

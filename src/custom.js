@@ -23,6 +23,7 @@ function listcustom() {
     document.getElementById("dallas_gpio").value = custom_config.settings.dallas_gpio;
     document.getElementById("publish_time").value = custom_config.settings.publish_time;
     document.getElementById("heating_circuit").value = custom_config.settings.heating_circuit;
+    document.getElementById("tx_mode").value = custom_config.settings.tx_mode;
 
     if (custom_config.settings.led) {
         $("input[name=\"led\"][value=\"1\"]").prop("checked", true);
@@ -72,6 +73,7 @@ function savecustom() {
 
     custom_config.settings.publish_time = parseInt(document.getElementById("publish_time").value);
     custom_config.settings.heating_circuit = parseInt(document.getElementById("heating_circuit").value);
+    custom_config.settings.tx_mode = parseInt(document.getElementById("tx_mode").value);
 
     custom_uncommited();
 }

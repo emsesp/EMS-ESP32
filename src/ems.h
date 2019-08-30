@@ -170,6 +170,7 @@ typedef struct {
     uint8_t          txRetryCount;     // # times the last Tx was re-sent
     uint8_t          emsIDMask;        // Buderus: 0x00, Junkers: 0x80
     uint8_t          emsPollAck[1];    // acknowledge buffer for Poll
+    uint8_t          emsTxMode;        // Tx mode 1, 2 or 3
 } _EMS_Sys_Status;
 
 // The Tx send package
@@ -425,6 +426,7 @@ void ems_setWarmWaterModeComfort(uint8_t comfort);
 void ems_setModels();
 void ems_setTxDisabled(bool b);
 bool ems_getTxDisabled();
+void ems_setTxMode(uint8_t mode);
 
 char *           ems_getThermostatDescription(char * buffer, bool name_only = false);
 char *           ems_getBoilerDescription(char * buffer, bool name_only = false);
