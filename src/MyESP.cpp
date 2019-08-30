@@ -2305,7 +2305,6 @@ void MyESP::_procMsg(AsyncWebSocketClient * client, size_t sz) {
     } else if (strcmp(command, "destroy") == 0) {
         _formatreq = true;
     } else if (strcmp(command, "forcentp") == 0) {
-        myDebug("HHHH"); // XXX
         NTP.getNtpTime();
     } else if (strcmp(command, "geteventlog") == 0) {
         uint8_t page = doc["page"];
