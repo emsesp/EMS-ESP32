@@ -28,12 +28,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.9.0b4] 2019-08-20
+## [1.9.0b7] 2019-08-30
 
 ### Changed
 
 - Completely new web code with more features
-- Merged with @susisstrolch's TxMode2 branch for improved support for sending EMS packages, and removed tx_mode command
+- Merged with @susisstrolch's TxMode2 branch for improved support for sending EMS packages
 - New MyESP library optimizations to WiFi and AP
 - reboot command renamed to restart to keep consistent with web
 - Renamed heartbeat to mqtt_heartbeat
@@ -41,7 +41,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Handle Read and Write to EMS+ device logic changed.
+- Handle Read and Write to EMS+ device logic changed, tested with RC3000
 
 ## [1.8.1] 2019-07-27
 
