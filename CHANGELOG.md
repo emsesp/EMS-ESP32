@@ -32,7 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Completely new web code with more features
+- Completely new web code with more features showing Boiler, Thermostat, Solar Module and Heat Pump
 - Merged with @susisstrolch's TxMode2 branch for improved support for sending EMS packages
 - New MyESP library optimizations to WiFi and AP
 - reboot command renamed to restart to keep consistent with web
