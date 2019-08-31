@@ -188,7 +188,7 @@
                     </tr>
                 </table>
             </div>
-            <div class="panel panel-info table-responsive" id="boiler_show">
+            <div class="panel panel-success table-responsive" id="boiler_show">
                 <div class="panel-heading"><b>Boiler</b>:&nbsp;<span id="bm"></span></div>
                 <table class="table table-hover table-bordered table-condensed">
                     <tr>
@@ -212,7 +212,7 @@
                 </table>
             </div>
 
-            <div class="panel panel-warning table-responsive" id="thermostat_show">
+            <div class="panel panel-info table-responsive" id="thermostat_show">
                 <div class="panel-heading"><b>Thermostat</b>:&nbsp;<span id="tm"></span></div>
                 <table class="table table-hover table-bordered table-condensed">
                     <tr>
@@ -228,9 +228,47 @@
                 </table>
             </div>
 
+            <div class="panel panel-warning table-responsive" id="sm_show">
+                <div class="panel-heading"><b>Solar Module</b>:&nbsp;<span id="sm"></span></div>
+                <table class="table table-hover table-bordered table-condensed">
+                    <tr>
+                        <th>Colector Temperature:</th>
+                        <td id="sm1"></td>
+                        <th>Bottom Temperature:</th>
+                        <td id="sm2"></td>
+                    </tr>
+                    <tr>
+                        <th>Pump Modulation:</th>
+                        <td id="sm3"></td>
+                        <th>Pump Active:</th>
+                        <td id="sm4"></td>
+                    </tr>
+                    <tr>
+                        <th>Energy Last Hour:</th>
+                        <td id="sm5"></td>
+                        <th>Energy Today:</th>
+                        <td id="sm6"></td>
+                        <th>Energy Total:</th>
+                        <td id="sm7"></td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="panel panel-success table-responsive" id="hp_show">
+                <div class="panel-heading"><b>Heat Pump</b>:&nbsp;<span id="hm"></span></div>
+                <table class="table table-hover table-bordered table-condensed">
+                    <tr>
+                        <th>Pump Modulation:</th>
+                        <td id="hp1"></td>
+                        <th>Pump Speed:</th>
+                        <td id="hp2"></td>
+                    </tr>
+                </table>
+            </div>
+
         </div>
     </div>
     <div class="row form-group" style="text-align: center;">
-        <button onclick="refreshStatus()" class="btn btn-primary">Refresh</button>
+        <button onclick="refreshEMS()" class="btn btn-info">Refresh</button>
     </div>
 </div>

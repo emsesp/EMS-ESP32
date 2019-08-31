@@ -115,6 +115,13 @@
 //#define EMS_SYS_LOGGING_DEFAULT EMS_SYS_LOGGING_VERBOSE
 #define EMS_SYS_LOGGING_DEFAULT EMS_SYS_LOGGING_NONE
 
+// define the model types which get rendered to html colors in the web interface
+#define EMS_MODELTYPE_BOILER 1 // success color
+#define EMS_MODELTYPE_THERMOSTAT 2 // info color
+#define EMS_MODELTYPE_SM 3 // warning color
+#define EMS_MODELTYPE_HP 4 // success color
+#define EMS_MODELTYPE_OTHER 5 // no color
+
 /* EMS UART transfer status */
 typedef enum {
     EMS_RX_STATUS_IDLE,
@@ -430,8 +437,8 @@ void ems_setTxMode(uint8_t mode);
 
 char *           ems_getThermostatDescription(char * buffer, bool name_only = false);
 char *           ems_getBoilerDescription(char * buffer, bool name_only = false);
-char *           ems_getSolarModuleDescription(char * buffer);
-char *           ems_getHeatPumpDescription(char * buffer);
+char *           ems_getSolarModuleDescription(char * buffer, bool name_only = false);
+char *           ems_getHeatPumpDescription(char * buffer, bool name_only = false);
 void             ems_getThermostatValues();
 void             ems_getBoilerValues();
 void             ems_getSolarModuleValues();

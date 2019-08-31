@@ -99,14 +99,18 @@ function listCustomStats() {
         var l = document.createElement("li");
         var type = obj[i].type;
         if (type == 1) {
-            var color = "info";
+            var color = "list-group-item-success";
         } else if (type == 2) {
-            var color = "warning";
+            var color = "list-group-item-info";
+        } else if (type == 3) {
+            var color = "list-group-item-warning";
+        } else if (type == 4) {
+            var color = "list-group-item-success";
         } else {
             var color = "";
         }
         l.innerHTML = obj[i].model + " (Version:" + obj[i].version + " ProductID:" + obj[i].productid + " DeviceID:0x" + obj[i].deviceid + ")";
-        l.className = "list-group-item list-group-item-" + color;
+        l.className = "list-group-item " + color;
         list.appendChild(l);
     }
 
@@ -133,9 +137,32 @@ function listCustomStats() {
         document.getElementById("tmode").innerHTML = ajaxobj.thermostat.tmode;
     } else {
         document.getElementById("thermostat_show").style.display = "none";
-
     }
 
+    if (ajaxobj.sm.ok) {
+        document.getElementById("sm_show").style.display = "block";
+
+        document.getElementById("sm").innerHTML = ajaxobj.sm.sm;
+        document.getElementById("sm1").innerHTML = ajaxobj.sm.sm1 + " &#8451;";
+        document.getElementById("sm2").innerHTML = ajaxobj.sm.sm2 + " &#8451;";
+        document.getElementById("sm3").innerHTML = ajaxobj.sm.sm3 + " &#37;";
+        document.getElementById("sm4").innerHTML = ajaxobj.sm.sm4;
+        document.getElementById("sm5").innerHTML = ajaxobj.sm.sm4 + " Wh";
+        document.getElementById("sm6").innerHTML = ajaxobj.sm.sm4 + " Wh";
+        document.getElementById("sm7").innerHTML = ajaxobj.sm.sm4 + " KWh";
+    } else {
+        document.getElementById("sm_show").style.display = "none";
+    }
+
+    if (ajaxobj.hp.ok) {
+        document.getElementById("hp_show").style.display = "block";
+
+        document.getElementById("hm").innerHTML = ajaxobj.hp.hm;
+        document.getElementById("hp1").innerHTML = ajaxobj.hp.hp1 + " &#37;";
+        document.getElementById("hp2").innerHTML = ajaxobj.hp.hp2 + " &#37;";      
+    } else {
+        document.getElementById("hp_show").style.display = "none";
+    }
 
 
 }

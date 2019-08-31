@@ -102,7 +102,7 @@ var custom_configfile = {
         "dallas_gpio": 14,
         "dallas_parasite": false,
         "listen_mode": false,
-        "shower_timer": false,
+        "shower_timer": true,
         "shower_alert": false,
         "publish_time": 120,
         "heating_circuit": 1,
@@ -130,7 +130,7 @@ function sendStatus() {
         "sketchsize": 673,
         "availsize": 2469,
         "ip": "10.10.10.198",
-        "ssid": "derbyshire",
+        "ssid": "my_ssid",
         "mac": "DC:4F:11:22:93:06",
         "signalstr": 62,
         "systemload": 0,
@@ -155,40 +155,59 @@ function sendStatus() {
 function sendCustomStatus() {
     var stats = {
         "command": "custom_status",
-        "version": "1.9.0b",
-        "customname": "ems-esp",
+        "version": "1.9.0b7",
+        "customname": "EMS-ESP",
         "appurl": "https://github.com/proddy/EMS-ESP",
         "updateurl": "https://api.github.com/repos/proddy/EMS-ESP/releases/latest",
 
         "emsbus": {
             "ok": true,
-            "msg": "everything is OK",
+            "msg": "EMS Bus Connected with both Rx and Tx active.",
             "devices": [
-                { "type": 1, "model": "model 1", "deviceid": "device id1", "version": "version id1", "productid": "product id1" },
-                { "type": 2, "model": "model 2", "deviceid": "device id2", "version": "version id2", "productid": "product id2" },
-                { "type": 3, "model": "model 3", "deviceid": "device id3", "version": "version id3", "productid": "product id3" },
-                { "type": 4, "model": "model 4", "deviceid": "device id3", "version": "version id3", "productid": "product id3" },
-                { "type": 5, "model": "model 5", "deviceid": "device id3", "version": "version id3", "productid": "product id3" }
+                { "type": 1, "model": "Buderus GB172/Nefit Trendline/Junkers Cerapur", "version": "06.01", "productid": 123, "deviceid": "8" },
+                { "type": 5, "model": "BC10 Base Controller", "version": "01.03", "productid": 190, "deviceid": "9" },
+                { "type": 2, "model": "RC20/Nefit Moduline 300", "version": "03.03", "productid": 77, "deviceid": "17" },
+                { "type": 3, "model": "SM100 Solar Module", "version": "01.01", "productid": 163, "deviceid": "30" },
+                { "type": 4, "model": "HeatPump Module", "version": "01.01", "productid": 252, "deviceid": "38" }
             ]
         },
 
         "thermostat": {
             "ok": true,
-            "tm": "model abc",
-            "ts": "23",
-            "tc": "27.5",
-            "tmode": "manual"
+            "tm": "RC20/Nefit Moduline 300",
+            "ts": 15,
+            "tc": 24.5,
+            "tmode": "auto"
         },
 
         "boiler": {
             "ok": true,
-            "bm": "mode boiler",
-            "b1": "on",
+            "bm": "Buderus GB172/Nefit Trendline/Junkers Cerapur",
+            "b1": "off",
             "b2": "off",
-            "b3": 15.8,
-            "b4": 61.5,
-            "b5": 35.8,
-            "b6": 47.1
+            "b3": 0,
+            "b4": 53,
+            "b5": 54.4,
+            "b6": 53.3
+        },
+
+        "sm": {
+            "ok": true,
+            "sm": "SM100 Solar Module",
+            "sm1": 34,
+            "sm2": 24,
+            "sm3": 60,
+            "sm4": "on",
+            "sm5": 2000,
+            "sm6": 3000,
+            "sm7": 123456
+        },
+
+        "hp": {
+            "ok": true,
+            "hm": "HeatPump Module",
+            "hp1": 66,
+            "hp2": 77
         }
 
     };

@@ -74,6 +74,21 @@ Ticker showerColdShotStopTimer;
 #define SHOWER_COLDSHOT_DURATION 10 // in seconds. 10 seconds for cold water before turning back hot water
 #define SHOWER_MAX_DURATION 420000  // in ms. 7 minutes, before trigger a shot of cold water
 
+#ifdef LOGICANALYZER
+#define EMSESP_DALLAS_GPIO D1
+#define EMSESP_DALLAS_PARASITE false
+#else
+// set this if using an external temperature sensor like a DS18B20
+// D5 is the default on a bbqkees board
+#define EMSESP_DALLAS_GPIO D5
+#define EMSESP_DALLAS_PARASITE false
+#endif
+
+// Set LED pin used for showing the EMS bus connection status. Solid means EMS bus working, flashing is an error
+// can be either the onboard LED on the ESP8266 (LED_BULLETIN) or external via an external pull-up LED (e.g. D1 on a bbqkees' board)
+// can be enabled and disabled via the 'set led' command and pin set by 'set led_gpio'
+#define EMSESP_LED_GPIO LED_BUILTIN
+
 typedef struct {
     uint32_t timestamp;      // for internal timings, via millis()
     uint8_t  dallas_sensors; // count of dallas sensors
@@ -569,7 +584,7 @@ void showInfo() {
         }
         _renderUShortValue("Energy last hour", "Wh", EMS_SolarModule.EnergyLastHour, 1); // *10
         _renderUShortValue("Energy today", "Wh", EMS_SolarModule.EnergyToday, 0);
-        _renderUShortValue("Energy total", "kWH", EMS_SolarModule.EnergyTotal, 1); // *10
+        _renderUShortValue("Energy total", "kWh", EMS_SolarModule.EnergyTotal, 1); // *10
     }
 
     // For HeatPumps
@@ -1816,6 +1831,57 @@ void WebCallback(JsonObject root) {
     } else {
         boiler["ok"] = false;
     }
+
+    // For SM10/SM100 Solar Module
+    JsonObject sm = root.createNestedObject("sm");
+    if (ems_getSolarModuleEnabled()) {
+        sm["ok"] = true;
+
+        char buffer[200];
+        sm["sm"] = ems_getSolarModuleDescription(buffer, true);
+
+        if (EMS_SolarModule.collectorTemp != EMS_VALUE_SHORT_NOTSET)
+            sm["sm1"] = (double)EMS_SolarModule.collectorTemp / 10; // Collector temperature oC
+
+        if (EMS_SolarModule.bottomTemp != EMS_VALUE_SHORT_NOTSET)
+            sm["sm2"] = (double)EMS_SolarModule.bottomTemp / 10; // Bottom temperature oC
+
+        if (EMS_SolarModule.pumpModulation != EMS_VALUE_INT_NOTSET)
+            sm["sm3"] = EMS_SolarModule.pumpModulation; // Pump modulation %
+
+        if (EMS_SolarModule.pump != EMS_VALUE_INT_NOTSET) {
+            char s[10];
+            sm["sm4"] = _bool_to_char(s, EMS_SolarModule.pump); // Pump active on/off
+        }
+
+        if (EMS_SolarModule.EnergyLastHour != EMS_VALUE_USHORT_NOTSET)
+            sm["sm5"] = (double)EMS_SolarModule.EnergyLastHour / 10; // Energy last hour Wh
+
+        if (EMS_SolarModule.EnergyToday != EMS_VALUE_USHORT_NOTSET) // Energy today Wh
+            sm["sm6"] = EMS_SolarModule.EnergyToday;
+
+        if (EMS_SolarModule.EnergyTotal != EMS_VALUE_USHORT_NOTSET) // Energy total KWh
+            sm["sm7"] = (double)EMS_SolarModule.EnergyTotal / 10;
+    } else {
+        sm["ok"] = false;
+    }
+
+    // For HeatPumps
+    JsonObject hp = root.createNestedObject("hp");
+    if (ems_getHeatPumpEnabled()) {
+        hp["ok"] = true;
+        char buffer[200];
+        hp["hm"] = ems_getHeatPumpDescription(buffer, true);
+
+        if (EMS_HeatPump.HPModulation != EMS_VALUE_INT_NOTSET)
+            hp["hp1"] = EMS_HeatPump.HPModulation; // Pump modulation %
+
+        if (EMS_HeatPump.HPSpeed != EMS_VALUE_INT_NOTSET)
+            hp["hp2"] = EMS_HeatPump.HPSpeed; // Pump speed %
+    } else {
+        hp["ok"] = false;
+    }
+
 
     // serializeJsonPretty(root, Serial); // turn on for debugging
 }

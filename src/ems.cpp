@@ -1775,7 +1775,7 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
         myDebug_P(PSTR("Boiler found: %s (DeviceID:0x%02X ProductID:%d Version:%s)"), Boiler_Devices[i].model_string, EMS_ID_BOILER, product_id, version);
 
         // add to list
-        _addDevice(1, product_id, EMS_ID_BOILER, version, Boiler_Devices[i].model_string); // type 1 = boiler
+        _addDevice(EMS_MODELTYPE_BOILER, product_id, EMS_ID_BOILER, version, Boiler_Devices[i].model_string); // type 1 = boiler
 
         // if its a boiler set it, unless it already has been set by checking for a productID
         // it will take the first one found in the list
@@ -1822,7 +1822,7 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
         }
 
         // add to list
-        _addDevice(2, product_id, Thermostat_Devices[i].device_id, version, Thermostat_Devices[i].model_string); // type 2 = thermostat
+        _addDevice(EMS_MODELTYPE_THERMOSTAT, product_id, Thermostat_Devices[i].device_id, version, Thermostat_Devices[i].model_string); // type 2 = thermostat
 
         // if we don't have a thermostat set, use this one
         if (((EMS_Thermostat.device_id == EMS_ID_NONE) || (EMS_Thermostat.model_id == EMS_MODEL_NONE)
@@ -1865,7 +1865,7 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
                   version);
 
         // add to list
-        _addDevice(3, product_id, SolarModule_Devices[i].device_id, version, SolarModule_Devices[i].model_string); // type 3 = other
+        _addDevice(EMS_MODELTYPE_SM, product_id, SolarModule_Devices[i].device_id, version, SolarModule_Devices[i].model_string); // type 3 = other
 
         myDebug_P(PSTR("Solar Module support enabled."));
         EMS_SolarModule.device_id  = SolarModule_Devices[i].device_id;
@@ -1895,7 +1895,7 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
                   version);
 
         // add to list
-        _addDevice(3, product_id, HeatPump_Devices[i].device_id, version, HeatPump_Devices[i].model_string); // type 3 = other
+        _addDevice(EMS_MODELTYPE_HP, product_id, HeatPump_Devices[i].device_id, version, HeatPump_Devices[i].model_string); // type 3 = other
 
         myDebug_P(PSTR("Heat Pump support enabled."));
         EMS_HeatPump.device_id  = SolarModule_Devices[i].device_id;
@@ -1918,12 +1918,12 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
         myDebug_P(PSTR("Device found: %s (DeviceID:0x%02X ProductID:%d Version:%s)"), Other_Devices[i].model_string, Other_Devices[i].device_id, product_id, version);
 
         // add to list
-        _addDevice(4, product_id, Other_Devices[i].device_id, version, Other_Devices[i].model_string); // type 3 = other
+        _addDevice(EMS_MODELTYPE_OTHER, product_id, Other_Devices[i].device_id, version, Other_Devices[i].model_string); // type 3 = other
         return;
     } else {
         myDebug_P(PSTR("Unrecognized device found: %s (DeviceID:0x%02X ProductID:%d Version:%s)"), EMS_RxTelegram->src, product_id, version);
         // add to list
-        _addDevice(5, product_id, EMS_RxTelegram->src, version, "unknown?"); // type 4 = unknown
+        _addDevice(EMS_MODELTYPE_OTHER, product_id, EMS_RxTelegram->src, version, "unknown?"); // type 4 = unknown
     }
 }
 
@@ -2182,7 +2182,7 @@ char * ems_getBoilerDescription(char * buffer, bool name_only) {
 /**
  *  returns current Solar Module type as a string
  */
-char * ems_getSolarModuleDescription(char * buffer) {
+char * ems_getSolarModuleDescription(char * buffer, bool name_only) {
     uint8_t size = 128;
     if (!ems_getSolarModuleEnabled()) {
         strlcpy(buffer, "<not enabled>", size);
@@ -2201,6 +2201,9 @@ char * ems_getSolarModuleDescription(char * buffer) {
         }
         if (found) {
             strlcpy(buffer, SolarModule_Devices[i].model_string, size);
+            if (name_only) {
+                return buffer; // only interested in the model name
+            }
         } else {
             strlcpy(buffer, "DeviceID: 0x", size);
             strlcat(buffer, _hextoa(EMS_SolarModule.device_id, tmp), size);
@@ -2223,7 +2226,7 @@ char * ems_getSolarModuleDescription(char * buffer) {
 /**
  *  returns current Heat Pump type as a string
  */
-char * ems_getHeatPumpDescription(char * buffer) {
+char * ems_getHeatPumpDescription(char * buffer, bool name_only) {
     uint8_t size = 128;
     if (!ems_getHeatPumpEnabled()) {
         strlcpy(buffer, "<not enabled>", size);
@@ -2242,6 +2245,9 @@ char * ems_getHeatPumpDescription(char * buffer) {
         }
         if (found) {
             strlcpy(buffer, HeatPump_Devices[i].model_string, size);
+            if (name_only) {
+                return buffer; // only interested in the model name
+            }
         } else {
             strlcpy(buffer, "DeviceID: 0x", size);
             strlcat(buffer, _hextoa(EMS_HeatPump.device_id, tmp), size);
