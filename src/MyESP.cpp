@@ -1566,7 +1566,7 @@ bool MyESP::_fs_loadConfig() {
     File configFile = SPIFFS.open(MYESP_CONFIG_FILE, "r");
     if (!configFile) {
         configFile.close();
-        myDebug_P(PSTR("[FS] No system config file"));
+        myDebug_P(PSTR("[FS] No system config found"));
         return false;
     }
 
@@ -1574,11 +1574,11 @@ bool MyESP::_fs_loadConfig() {
     size_t size = configFile.size();
     if (size > MYESP_SPIFFS_MAXSIZE) {
         configFile.close();
-        myDebug_P(PSTR("[FS] System config file size is too large"));
+        myDebug_P(PSTR("[FS] System config size is too large"));
         return false;
     } else if (size == 0) {
         configFile.close();
-        myDebug_P(PSTR("[FS] Corrupted system config file"));
+        myDebug_P(PSTR("[FS] Corrupted system config"));
         return false;
     }
 
@@ -1586,7 +1586,7 @@ bool MyESP::_fs_loadConfig() {
     char json[MYESP_SPIFFS_MAXSIZE] = {0};
     if (configFile.readBytes(json, size) != size) {
         configFile.close();
-        myDebug_P(PSTR("[FS] File sizes don't match with system config file"));
+        myDebug_P(PSTR("[FS] Error, file sizes don't match with system config"));
         return false;
     }
     configFile.close();
@@ -1645,7 +1645,7 @@ bool MyESP::_fs_loadConfig() {
 bool MyESP::_fs_loadCustomConfig() {
     File configFile = SPIFFS.open(MYESP_CUSTOMCONFIG_FILE, "r");
     if (!configFile) {
-        myDebug_P(PSTR("[FS] No custom config file"));
+        myDebug_P(PSTR("[FS] No custom config found"));
         return false;
     }
 
@@ -1653,18 +1653,18 @@ bool MyESP::_fs_loadCustomConfig() {
     size_t size = configFile.size();
     if (size > MYESP_SPIFFS_MAXSIZE) {
         configFile.close();
-        myDebug_P(PSTR("[FS] Custom config file size is too large"));
+        myDebug_P(PSTR("[FS] Custom config size is too large"));
         return false;
     } else if (size == 0) {
         configFile.close();
-        myDebug_P(PSTR("[FS] Corrupted custom config file"));
+        myDebug_P(PSTR("[FS] Corrupted custom config"));
         return false;
     }
 
     // read file from SPIFFS into a char array
     char data[MYESP_SPIFFS_MAXSIZE] = {0};
     if (configFile.readBytes(data, size) != size) {
-        myDebug_P(PSTR("[FS] File sizes don't match with custom config file"));
+        myDebug_P(PSTR("[FS] File sizes don't match with custom config"));
         configFile.close();
         return false;
     }
@@ -1702,7 +1702,7 @@ bool MyESP::fs_saveCustomConfig(JsonObject root) {
     // open for writing
     File configFile = SPIFFS.open(MYESP_CUSTOMCONFIG_FILE, "w");
     if (!configFile) {
-        myDebug_P(PSTR("[FS] Failed to open custom config file for writing"));
+        myDebug_P(PSTR("[FS] Failed to open custom config for writing"));
         return false;
     }
 
@@ -1724,7 +1724,7 @@ bool MyESP::fs_saveCustomConfig(JsonObject root) {
         }
 
         _writeEvent("INFO", "system", "Custom config stored in the SPIFFS", "");
-        myDebug_P(PSTR("[FS] custom config file saved"));
+        myDebug_P(PSTR("[FS] custom config saved"));
         ok = true;
     }
 
@@ -1742,7 +1742,7 @@ bool MyESP::fs_saveConfig(JsonObject root) {
     // open for writing
     File configFile = SPIFFS.open(MYESP_CONFIG_FILE, "w");
     if (!configFile) {
-        myDebug_P(PSTR("[FS] Failed to open system config file for writing"));
+        myDebug_P(PSTR("[FS] Failed to open system config for writing"));
         return false;
     }
 
@@ -1757,7 +1757,7 @@ bool MyESP::fs_saveConfig(JsonObject root) {
 
     if (n) {
         _writeEvent("INFO", "system", "System config stored in the SPIFFS", "");
-        myDebug_P(PSTR("[FS] system config file saved"));
+        myDebug_P(PSTR("[FS] system config saved"));
         ok = true;
     }
 
@@ -1818,7 +1818,7 @@ bool MyESP::_fs_createCustomConfig() {
             myDebug_P(PSTR("[FS] Error building custom config json"));
         }
     } else {
-        myDebug_P(PSTR("[FS] Created custom config file"));
+        myDebug_P(PSTR("[FS] Created custom config"));
     }
 
     bool ok = fs_saveCustomConfig(json);
@@ -1841,7 +1841,7 @@ void MyESP::_fs_setup() {
 
     // load the main system config file if we can. Otherwise create it and expect user to configure in web interface
     if (!_fs_loadConfig()) {
-        myDebug_P(PSTR("[FS] Creating a new system config file"));
+        myDebug_P(PSTR("[FS] Creating a new system config"));
         _fs_writeConfig(); // create the initial config file
     }
 
@@ -2339,7 +2339,7 @@ bool MyESP::_fs_sendConfig() {
 
     configFile = SPIFFS.open(MYESP_CONFIG_FILE, "r");
     if (!configFile) {
-        myDebug_P(PSTR("[FS] No system config file found to load"));
+        myDebug_P(PSTR("[FS] No system config found to load"));
         return false;
     }
     size = configFile.size();
@@ -2356,7 +2356,7 @@ bool MyESP::_fs_sendConfig() {
 
     configFile = SPIFFS.open(MYESP_CUSTOMCONFIG_FILE, "r");
     if (!configFile) {
-        myDebug_P(PSTR("[FS] No custom config file found to load"));
+        myDebug_P(PSTR("[FS] No custom config found to load"));
         return false;
     }
     size = configFile.size();
