@@ -5,10 +5,6 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Important!! Known Issues in 1.9 beta:
-
-- Building with EEPROM (-DCRASH option) to capture stack dumps doesn't work with the web server, so only compile for debugging and use Telnet.
-
 ## How to build the firmware with 1.9.x
 - Make sure you update your local `platformio.ini` using the example one and set the target to `debug`.
 - On first boot it will re-build the SPIFFS config file so if you're upgrading from 1.8.x all the settings will be deleted and you will need to re-enter. This can be doen now via the web interface by connecting to WiFi AP called 'ems-esp'.
