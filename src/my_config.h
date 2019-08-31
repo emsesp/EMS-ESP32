@@ -62,28 +62,3 @@
 // MQTT for EXTERNAL SENSORS
 #define TOPIC_EXTERNAL_SENSORS "sensors"   // for sending sensor values to MQTT
 #define PAYLOAD_EXTERNAL_SENSORS "temp_%d" // for formatting the payload for each external dallas sensor
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-// THESE DEFAULT VALUES CAN ALSO BE SET AND STORED WITHTIN THE APPLICATION (see 'set' command)    //
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// Set LED pin used for showing the EMS bus connection status. Solid means EMS bus working, flashing is an error
-// can be either the onboard LED on the ESP8266 (LED_BULLETIN) or external via an external pull-up LED (e.g. D1 on a bbqkees' board)
-// can be enabled and disabled via the 'set led' command and pin set by 'set led_gpio'
-#define EMSESP_LED_GPIO LED_BUILTIN
-
-#ifdef LOGICANALYZER
-#define EMSESP_DALLAS_GPIO D1
-#define EMSESP_DALLAS_PARASITE false
-#else
-// set this if using an external temperature sensor like a DS18B20
-// D5 is the default on a bbqkees board
-#define EMSESP_DALLAS_GPIO D5
-#define EMSESP_DALLAS_PARASITE false
-#endif
-
-// By default the EMS bus will be scanned for known devices based on the product ids in ems_devices.h
-// You can override the Thermostat and Boiler types here
-#define EMSESP_BOILER_TYPE EMS_ID_NONE
-#define EMSESP_THERMOSTAT_TYPE EMS_ID_NONE
