@@ -226,7 +226,7 @@ wss.on('connection', function connection(ws) {
                 configfile = obj;
                 break;
             case "custom_configfile":
-                console.log("[INFO] New custom config file received");
+                console.log("[INFO] New custom config received");
                 custom_configfile = obj;
                 break;
             case "status":
