@@ -1,7 +1,7 @@
 {
   "name": "uglifier",
   "version": "0.0.1",
-  "description": "Combine all js and css files into one and gzip them for the myESP project",
+  "description": "Combine all js and css files into one and gzip them for the EMS-ESP project",
   "main": "unglify.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -10,6 +10,7 @@
   "author": "proddy",
   "license": "UNLICENSED",
   "dependencies": {
+    "gulp-cli": "^2.2.0",
     "gulp-concat": "^2.6.1",
     "gulp-flatmap": "^1.0.2",
     "gulp-gzip": "^1.4.2",
