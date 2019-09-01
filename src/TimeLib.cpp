@@ -105,28 +105,28 @@ void refreshCache(time_t t) {
 }
 
 int day(time_t t) { // the day for the given time (0-6)
-  refreshCache(t);
-  return tm.Day;
+    refreshCache(t);
+    return tm.Day;
 }
 
-int month(time_t t) {  // the month for the given time
-  refreshCache(t);
-  return tm.Month;
+int month(time_t t) { // the month for the given time
+    refreshCache(t);
+    return tm.Month;
 }
 
-int second(time_t t) {  // the second for the given time
-  refreshCache(t);
-  return tm.Second;
+int second(time_t t) { // the second for the given time
+    refreshCache(t);
+    return tm.Second;
 }
 
 int minute(time_t t) { // the minute for the given time
-  refreshCache(t);
-  return tm.Minute;  
+    refreshCache(t);
+    return tm.Minute;
 }
 
 int hour(time_t t) { // the hour for the given time
-  refreshCache(t);
-  return tm.Hour;  
+    refreshCache(t);
+    return tm.Hour;
 }
 
 int year(time_t t) { // the year for the given time
@@ -140,4 +140,3 @@ void setTime(time_t t) {
     Status       = timeSet;
     prevMillis   = millis(); // restart counting from now (thanks to Korman for this fix)
 }
-
