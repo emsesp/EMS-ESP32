@@ -147,9 +147,9 @@ function listCustomStats() {
         document.getElementById("sm2").innerHTML = ajaxobj.sm.sm2 + " &#8451;";
         document.getElementById("sm3").innerHTML = ajaxobj.sm.sm3 + " &#37;";
         document.getElementById("sm4").innerHTML = ajaxobj.sm.sm4;
-        document.getElementById("sm5").innerHTML = ajaxobj.sm.sm4 + " Wh";
-        document.getElementById("sm6").innerHTML = ajaxobj.sm.sm4 + " Wh";
-        document.getElementById("sm7").innerHTML = ajaxobj.sm.sm4 + " KWh";
+        document.getElementById("sm5").innerHTML = ajaxobj.sm.sm5 + " Wh";
+        document.getElementById("sm6").innerHTML = ajaxobj.sm.sm6 + " Wh";
+        document.getElementById("sm7").innerHTML = ajaxobj.sm.sm7 + " KWh";
     } else {
         document.getElementById("sm_show").style.display = "none";
     }

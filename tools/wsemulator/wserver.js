@@ -155,7 +155,7 @@ function sendStatus() {
 function sendCustomStatus() {
     var stats = {
         "command": "custom_status",
-        "version": "1.9.0b7",
+        "version": "1.9.0",
         "customname": "EMS-ESP",
         "appurl": "https://github.com/proddy/EMS-ESP",
         "updateurl": "https://api.github.com/repos/proddy/EMS-ESP/releases/latest",
