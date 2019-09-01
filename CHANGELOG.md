@@ -9,11 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Completely new web code with more features showing Boiler, Thermostat, Solar Module and Heat Pump. See https://github.com/proddy/EMS-ESP/wiki/Running-and-Monitoring
-- Merged with @susisstrolch's TxMode2 branch for improved support for sending EMS packages
-- New MyESP library optimizations to WiFi and AP
-- reboot command renamed to restart to keep consistent with web
-- Renamed heartbeat to mqtt_heartbeat
+- New web interface with more features showing Boiler, Thermostat, Solar Module and Heat Pump. See https://github.com/proddy/EMS-ESP/wiki/Running-and-Monitoring
+- Merged with @susisstrolch's TxMode2 branch for improved support for sending EMS packages. This is the default tx mode.
+- Upgraded MyESP library optimizations for WiFi, AP and error handling
+- `reboot` command renamed to `restart` to keep consistent with web interface
+- Renamed `heartbeat` to `mqtt_heartbeat` in config settings
 - Renamed MQTT topic "wwactivated" to "boiler_cmd_wwactivated"
 
 ### Fixed
