@@ -1,11 +1,50 @@
-.pio*
+# vscode
+.vscode
+.vscode/.browse.c_cpp.db*
+.vscode/c_cpp_properties.json
+.vscode/launch.json
+.vscode/*
+
+# platformio
+.pio
 .clang_complete
 .gcc-flags.json
-.vscode
-.env
-.DS_Store
 platformio.ini
 lib/readme.txt
 .travis.yml
+
+# web stuff compiled
+src/websrc/css/required.css
+src/websrc/js/required.js
+src/websrc/fonts
+src/websrc/gzipped
+src/websrc/temp
+*.gz.h
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Bower dependency directory (https://bower.io/)
+bower_components
+
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# Optional npm cache directory
+.npm
+
+# Output of 'npm pack'
+*.tgz
+
+# dotenv environment variables file
+.env
+
+# project specfic
+.DS_Store
 scripts/stackdmp.txt
 *.bin

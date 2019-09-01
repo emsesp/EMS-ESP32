@@ -7,7 +7,6 @@
  */
 #pragma once
 
-#include <Arduino.h>
 #include <ems.h>
 
 #define EMSUART_UART 0      // UART 0
@@ -37,4 +36,3 @@ void ICACHE_FLASH_ATTR emsuart_init();
 void ICACHE_FLASH_ATTR emsuart_stop();
 void ICACHE_FLASH_ATTR emsuart_start();
 _EMS_TX_STATUS ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len);
-void ICACHE_FLASH_ATTR emsuart_tx_poll();

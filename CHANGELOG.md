@@ -5,20 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.8.3] 2019-08-12
+## [1.9.0] 2019-09-01
+
+### Changed
+
+- New web interface with more features showing Boiler, Thermostat, Solar Module and Heat Pump. See https://github.com/proddy/EMS-ESP/wiki/Running-and-Monitoring
+- Merged with @susisstrolch's TxMode2 branch for improved support for sending EMS packages. This is the default tx mode.
+- Upgraded MyESP library optimizations for WiFi, AP and error handling
+- `reboot` command renamed to `restart` to keep consistent with web interface
+- Renamed `heartbeat` to `mqtt_heartbeat` in config settings
+- Renamed MQTT topic "wwactivated" to "boiler_cmd_wwactivated"
 
 ### Fixed
 
-- Added write support for RC3000
+- Handle Read and Write to EMS+ device logic changed, tested with RC3000
 
-## [1.8.2] 2019-08-10
-
-### Fixed
-
-- Show correct temperatures for FW120. [Issue 166](https://github.com/proddy/EMS-ESP/pull/166)
-- LED off works after reboot [Issue 167](https://github.com/proddy/EMS-ESP/issues/167)
-
-## [1.8.1] 2019-07-29
+## [1.8.1] 2019-07-27
 
 ### Added
 

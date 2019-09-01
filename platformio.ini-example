@@ -8,40 +8,69 @@ default_envs = release
 
 [common]
 ; -DMYESP_TIMESTAMP -DTESTS -DCRASH -DFORCE_SERIAL -DNO_GLOBAL_EEPROM -DLOGICANALYZER
-extra_flags = -DNO_GLOBAL_EEPROM
+;general_flags = -Wl,-Teagle.flash.4m2m.ld
+general_flags =
 
 [env]
+;board = esp12e
 board = d1_mini
-; board = nodemcuv2
-; board = d1_mini_pro
 framework = arduino
 platform = espressif8266
 lib_deps =
   CRC32
   CircularBuffer
+  OneWire
   JustWifi
   AsyncMqttClient
   ArduinoJson
-  OneWire
   EEPROM_rotate
+  ESP Async WebServer
+  ESPAsyncTCP
+  ESPAsyncUDP
 upload_speed = 921600
 monitor_speed = 115200
+
+; example ports for OSX
+;upload_port = /dev/cu.wchusbserial14403
+;upload_port = /dev/cu.usbserial-1440
+
 ; uncomment next 2 lines for OTA
 ;upload_protocol = espota
 ;upload_port = ems-esp.local
 
+[env:buildweb]
+extra_scripts = pre:scripts/buildweb.py
+
+[env:test]
+build_type = debug
+build_flags = ${common.general_flags} -DTESTS
+extra_scripts =
+  pre:scripts/rename_fw.py
+  pre:scripts/buildweb.py
+
+[env:crash]
+build_type = debug
+build_flags = ${common.general_flags} -DNO_GLOBAL_EEPROM -DCRASH
+extra_scripts =
+  pre:scripts/rename_fw.py
+  pre:scripts/buildweb.py
+
 [env:debug]
 build_type = debug
-build_flags = ${common.extra_flags} -DCRASH
-extra_scripts = pre:scripts/rename_fw.py
+build_flags = ${common.general_flags}
+extra_scripts =
+  pre:scripts/rename_fw.py
+  pre:scripts/buildweb.py
 
 [env:clean]
 extra_scripts = pre:scripts/clean_fw.py
 
 [env:release]
-build_flags = ${common.extra_flags}
+build_flags = ${common.general_flags}
 extra_scripts = pre:scripts/rename_fw.py
 
 [env:checkcode]
-build_flags = ${common.extra_flags}
+build_type = debug
+build_flags = ${common.general_flags} -Wall
 extra_scripts = scripts/checkcode.py
+

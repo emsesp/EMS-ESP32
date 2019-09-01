@@ -13,12 +13,12 @@
 #include "ems.h"
 
 /*
- * Common
+ * Common Type
  */
 #define EMS_TYPE_Version 0x02
 
 /*
- * Boiler...
+ * Boiler Telegram Types...
  */
 #define EMS_TYPE_UBAMonitorFast 0x18              // is an automatic monitor broadcast
 #define EMS_TYPE_UBAMonitorSlow 0x19              // is an automatic monitor broadcast
@@ -40,7 +40,7 @@
 
 #define EMS_OFFSET_UBASetPoints_flowtemp 0 // flow temp
 
-// Other
+// SM and HP Types
 #define EMS_TYPE_SM10Monitor 0x97    // SM10Monitor
 #define EMS_TYPE_SM100Monitor 0x0262 // SM100Monitor
 #define EMS_TYPE_SM100Status 0x0264  // SM100Status
@@ -54,7 +54,7 @@
 #define EMS_OFFSET_ISM1Set_MaxBoilerTemp 6 // position of max boiler temp  e.g. 50 in the following example: 90 30 FF 06 00 01 50 (CRC=2C)
 
 /*
- * Thermostats...
+ * Thermostat Types
  */
 
 // Common for all thermostats
@@ -63,41 +63,46 @@
 
 // RC10 specific
 #define EMS_TYPE_RC10StatusMessage 0xB1         // is an automatic thermostat broadcast giving us temps
-#define EMS_TYPE_RC10Set 0xB0                   // for setting values like temp and mode
-#define EMS_OFFSET_RC10Set_temp 4               // position of thermostat setpoint temperature
 #define EMS_OFFSET_RC10StatusMessage_setpoint 1 // setpoint temp
 #define EMS_OFFSET_RC10StatusMessage_curr 2     // current temp
 
+#define EMS_TYPE_RC10Set 0xB0     // for setting values like temp and mode
+#define EMS_OFFSET_RC10Set_temp 4 // position of thermostat setpoint temperature
+
 // RC20 specific
 #define EMS_TYPE_RC20StatusMessage 0x91         // is an automatic thermostat broadcast giving us temps
-#define EMS_TYPE_RC20Set 0xA8                   // for setting values like temp and mode
-#define EMS_OFFSET_RC20Set_mode 23              // position of thermostat mode
-#define EMS_OFFSET_RC20Set_temp 28              // position of thermostat setpoint temperature
 #define EMS_OFFSET_RC20StatusMessage_setpoint 1 // setpoint temp
 #define EMS_OFFSET_RC20StatusMessage_curr 2     // current temp
 
+#define EMS_TYPE_RC20Set 0xA8      // for setting values like temp and mode
+#define EMS_OFFSET_RC20Set_mode 23 // position of thermostat mode
+#define EMS_OFFSET_RC20Set_temp 28 // position of thermostat setpoint temperature
+
 // RC30 specific
 #define EMS_TYPE_RC30StatusMessage 0x41         // is an automatic thermostat broadcast giving us temps
-#define EMS_TYPE_RC30Set 0xA7                   // for setting values like temp and mode
-#define EMS_OFFSET_RC30Set_mode 23              // position of thermostat mode
-#define EMS_OFFSET_RC30Set_temp 28              // position of thermostat setpoint temperature
 #define EMS_OFFSET_RC30StatusMessage_setpoint 1 // setpoint temp
 #define EMS_OFFSET_RC30StatusMessage_curr 2     // current temp
+
+#define EMS_TYPE_RC30Set 0xA7      // for setting values like temp and mode
+#define EMS_OFFSET_RC30Set_mode 23 // position of thermostat mode
+#define EMS_OFFSET_RC30Set_temp 28 // position of thermostat setpoint temperature
+
 
 // RC35 specific
 #define EMS_TYPE_RC35StatusMessage_HC1 0x3E     // is an automatic thermostat broadcast giving us temps on HC1
 #define EMS_TYPE_RC35StatusMessage_HC2 0x48     // is an automatic thermostat broadcast giving us temps on HC2
-#define EMS_TYPE_RC35Set_HC1 0x3D               // for setting values like temp and mode (Working mode HC1)
-#define EMS_TYPE_RC35Set_HC2 0x47               // for setting values like temp and mode (Working mode HC2)
 #define EMS_OFFSET_RC35StatusMessage_setpoint 2 // desired temp
 #define EMS_OFFSET_RC35StatusMessage_curr 3     // current temp
-#define EMS_OFFSET_RC35Set_mode 7               // position of thermostat mode
-#define EMS_OFFSET_RC35Set_temp_day 2           // position of thermostat setpoint temperature for day time
-#define EMS_OFFSET_RC35Set_temp_night 1         // position of thermostat setpoint temperature for night time
-#define EMS_OFFSET_RC35Get_mode_day 1           // position of thermostat day mode
-#define EMS_OFFSET_RC35Set_temp_holiday 3       // temp during holiday 0x47
-#define EMS_OFFSET_RC35Set_heatingtype 0        // floor heating = 3 0x47
-#define EMS_OFFSET_RC35Set_circuitcalctemp 14   // calculated circuit temperature 0x48
+#define EMS_OFFSET_RC35StatusMessage_mode 1     //day mode
+
+#define EMS_TYPE_RC35Set_HC1 0x3D             // for setting values like temp and mode (Working mode HC1)
+#define EMS_TYPE_RC35Set_HC2 0x47             // for setting values like temp and mode (Working mode HC2)
+#define EMS_OFFSET_RC35Set_mode 7             // position of thermostat mode
+#define EMS_OFFSET_RC35Set_temp_day 2         // position of thermostat setpoint temperature for day time
+#define EMS_OFFSET_RC35Set_temp_night 1       // position of thermostat setpoint temperature for night time
+#define EMS_OFFSET_RC35Set_temp_holiday 3     // temp during holiday 0x47
+#define EMS_OFFSET_RC35Set_heatingtype 0      // floor heating = 3 0x47
+#define EMS_OFFSET_RC35Set_circuitcalctemp 14 // calculated circuit temperature 0x48
 
 // Easy specific
 #define EMS_TYPE_EasyStatusMessage 0x0A          // reading values on an Easy Thermostat
@@ -105,14 +110,21 @@
 #define EMS_OFFSET_EasyStatusMessage_curr 8      // current temp
 
 // RC1010, RC310 and RC300 specific (EMS Plus)
-#define EMS_TYPE_RCPLUSStatusMessage 0x01A5       // is an automatic thermostat broadcast giving us temps
-#define EMS_TYPE_RCPLUSStatusHeating 0x01B9       // heating mode
-#define EMS_TYPE_RCPLUSStatusMode 0x1AF           // summer/winter mode
-#define EMS_TYPE_RCPLUSSet 0x03                   // setpoint temp message
-#define EMS_OFFSET_RCPLUSStatusMessage_setpoint 3 // setpoint temp
-#define EMS_OFFSET_RCPLUSStatusMessage_curr 0     // current temp
-#define EMS_OFFSET_RCPLUSGet_mode_day 8           // day/night mode
-#define EMS_OFFSET_RCPLUSStatusMessage_mode 0x0A  // thermostat mode (auto, manual)
+#define EMS_TYPE_RCPLUSStatusMessage 0x01A5           // is an automatic thermostat broadcast giving us temps, also reading
+#define EMS_TYPE_RCPLUSStatusMode 0x1AF               // summer/winter mode
+#define EMS_OFFSET_RCPLUSStatusMessage_mode 10        // thermostat mode (auto, manual)
+#define EMS_OFFSET_RCPLUSStatusMessage_setpoint 3     // setpoint temp
+#define EMS_OFFSET_RCPLUSStatusMessage_curr 0         // current temp
+#define EMS_OFFSET_RCPLUSStatusMessage_currsetpoint 6 // target setpoint temp
+
+#define EMS_TYPE_RCPLUSSet 0x01B9               // setpoint temp message and mode
+#define EMS_OFFSET_RCPLUSSet_mode 0             // operation mode(Auto=0xFF, Manual=0x00)
+#define EMS_OFFSET_RCPLUSSet_temp_comfort3 1    // comfort3 level
+#define EMS_OFFSET_RCPLUSSet_temp_comfort2 2    // comfort2 level
+#define EMS_OFFSET_RCPLUSSet_temp_comfort1 3    // comfort1 level
+#define EMS_OFFSET_RCPLUSSet_temp_eco 4         // eco level
+#define EMS_OFFSET_RCPLUSSet_temp_setpoint 8    // temp setpoint, when changing of templevel (in auto) value is reset and set to FF
+#define EMS_OFFSET_RCPLUSSet_manual_setpoint 10 // manual setpoint
 
 // Junkers FR10, FW100 (EMS Plus)
 #define EMS_TYPE_JunkersStatusMessage 0x6F         // is an automatic thermostat broadcast giving us temps
@@ -120,7 +132,7 @@
 #define EMS_OFFSET_JunkersStatusMessage_curr 4     // current temp
 
 
-// Known EMS types
+// Known EMS devices
 typedef enum {
     EMS_MODEL_NONE, // unset
     EMS_MODEL_ALL,  // common for all devices
@@ -157,7 +169,7 @@ typedef enum {
 // EMS types for known boilers. This list will be extended when new devices are recognized.
 // The device_id is always 0x08
 // format is PRODUCT ID, DESCRIPTION
-const _Boiler_Type Boiler_Types[] = {
+const _Boiler_Device Boiler_Devices[] = {
 
     {72, "MC10 Module"},
     {123, "Buderus GB172/Nefit Trendline/Junkers Cerapur"},
@@ -175,7 +187,7 @@ const _Boiler_Type Boiler_Types[] = {
  * Known Solar Module types
  * format is PRODUCT ID, DEVICE ID, DESCRIPTION
  */
-const _SolarModule_Type SolarModule_Types[] = {
+const _SolarModule_Device SolarModule_Devices[] = {
 
     {EMS_PRODUCTID_SM10, EMS_ID_SM, "SM10 Solar Module"},
     {EMS_PRODUCTID_SM100, EMS_ID_SM, "SM100 Solar Module"},
@@ -185,7 +197,7 @@ const _SolarModule_Type SolarModule_Types[] = {
 
 // Other EMS devices which are not considered boilers, thermostats or solar modules
 // format is PRODUCT ID, DEVICE ID, DESCRIPTION
-const _Other_Type Other_Types[] = {
+const _Other_Device Other_Devices[] = {
 
     {69, 0x21, "MM10 Mixer Module"},
     {71, 0x11, "WM10 Switch Module"},
@@ -207,13 +219,13 @@ const _Other_Type Other_Types[] = {
 
 // heatpump
 // format is PRODUCT ID, DEVICE ID, DESCRIPTION
-const _HeatPump_Type HeatPump_Types[] = {{252, EMS_ID_HP, "HeatPump Module"}};
+const _HeatPump_Device HeatPump_Devices[] = {{252, EMS_ID_HP, "HeatPump Module"}};
 
 /*
  * Known thermostat types and their capabilities
  * format is MODEL_ID, PRODUCT ID, DEVICE ID, DESCRIPTION
  */
-const _Thermostat_Type Thermostat_Types[] = {
+const _Thermostat_Device Thermostat_Devices[] = {
 
     // Easy devices - not currently supporting write operations
     {EMS_MODEL_EASY, 202, 0x18, "Logamatic TC100/Nefit Moduline Easy", EMS_THERMOSTAT_WRITE_NO},

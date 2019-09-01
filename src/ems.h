@@ -11,12 +11,14 @@
 #pragma once
 
 #include <Arduino.h>
+#include <list> // std::list
 
 /* debug helper for logic analyzer 
  * create marker puls on GPIOx
  *   ° for Rx, we use GPIO14
  *   ° for Tx, we use GPIO12
  */
+
 // clang-format off
 #ifdef LOGICANALYZER
 #define RX_MARK_PIN 14
@@ -29,39 +31,39 @@
 #define GPIO_H(mask) (GPIO_REG_WRITE(GPIO_OUT_W1TS_ADDRESS, (mask)))
 #define GPIO_L(mask) (GPIO_REG_WRITE(GPIO_OUT_W1TC_ADDRESS, (mask)))
 
-#define RX_PULSE(pulse)                                                                                                                                        \
-    do {                                                                                                                                                       \
-        GPIO_H(RX_MARK_MASK);                                                                                                                                  \
-        delayMicroseconds(pulse);                                                                                                                              \
-        GPIO_L(RX_MARK_MASK);                                                                                                                                  \
+#define RX_PULSE(pulse)             \
+    do {                            \
+        GPIO_H(RX_MARK_MASK);       \
+        delayMicroseconds(pulse);   \
+        GPIO_L(RX_MARK_MASK);       \
     } while (0)
-#define TX_PULSE(pulse)                                                                                                                                        \
-    do {                                                                                                                                                       \
-        GPIO_H(TX_MARK_MASK);                                                                                                                                  \
-        delayMicroseconds(pulse);                                                                                                                              \
-        GPIO_L(TX_MARK_MASK);                                                                                                                                  \
+#define TX_PULSE(pulse)             \
+    do {                            \
+        GPIO_H(TX_MARK_MASK);       \
+        delayMicroseconds(pulse);   \
+        GPIO_L(TX_MARK_MASK);       \
     } while (0)
-#define LA_PULSE(pulse)                                                                                                                                        \
-    do {                                                                                                                                                       \
-        GPIO_H(MARKERS_MASK);                                                                                                                                  \
-        delayMicroseconds(pulse);                                                                                                                              \
-        GPIO_L(MARKERS_MASK);                                                                                                                                  \
+#define LA_PULSE(pulse)             \
+    do {                            \
+        GPIO_H(MARKERS_MASK);       \
+        delayMicroseconds(pulse);   \
+        GPIO_L(MARKERS_MASK);       \
     } while (0)
 
-#define INIT_MARKERS(void)                                                                                                                                     \
-    do {                                                                                                                                                       \
-        pinMode(RX_MARK_PIN, OUTPUT);                                                                                                                          \
-        pinMode(TX_MARK_PIN, OUTPUT);                                                                                                                          \
-        GPIO_L(MARKERS_MASK);                                                                                                                                  \
+#define INIT_MARKERS(void)              \
+    do {                                \
+        pinMode(RX_MARK_PIN, OUTPUT);   \
+        pinMode(TX_MARK_PIN, OUTPUT);   \
+        GPIO_L(MARKERS_MASK);           \
     } while (0)
 #else
-#define RX_PULSE(pulse)                                                                                                                                        \
+#define RX_PULSE(pulse)     \
     {}
-#define TX_PULSE(pulse)                                                                                                                                        \
+#define TX_PULSE(pulse)     \
     {}
-#define LA_PULSE(pulse)                                                                                                                                        \
+#define LA_PULSE(pulse)     \
     {}
-#define INIT_MARKERS(void)                                                                                                                                     \
+#define INIT_MARKERS(void)  \
     {}
 #define RX_MARK_MASK
 #define TX_MARK_MASK
@@ -113,6 +115,13 @@
 //#define EMS_SYS_LOGGING_DEFAULT EMS_SYS_LOGGING_VERBOSE
 #define EMS_SYS_LOGGING_DEFAULT EMS_SYS_LOGGING_NONE
 
+// define the model types which get rendered to html colors in the web interface
+#define EMS_MODELTYPE_BOILER 1 // success color
+#define EMS_MODELTYPE_THERMOSTAT 2 // info color
+#define EMS_MODELTYPE_SM 3 // warning color
+#define EMS_MODELTYPE_HP 4 // success color
+#define EMS_MODELTYPE_OTHER 5 // no color
+
 /* EMS UART transfer status */
 typedef enum {
     EMS_RX_STATUS_IDLE,
@@ -124,7 +133,8 @@ typedef enum {
     EMS_TX_STATUS_IDLE, // ready
     EMS_TX_STATUS_WAIT, // waiting for response from last Tx
     EMS_TX_WTD_TIMEOUT, // watchdog timeout during send
-    EMS_TX_BRK_DETECT   // incoming BRK during Tx
+    EMS_TX_BRK_DETECT,  // incoming BRK during Tx
+    EMS_TX_REV_DETECT   // waiting to detect reverse bit
 } _EMS_TX_STATUS;
 
 #define EMS_TX_SUCCESS 0x01 // EMS single byte after a Tx Write indicating a success
@@ -145,15 +155,16 @@ typedef enum {
     EMS_SYS_LOGGING_BASIC,       // only basic read/write messages
     EMS_SYS_LOGGING_THERMOSTAT,  // only telegrams sent from thermostat
     EMS_SYS_LOGGING_SOLARMODULE, // only telegrams sent from thermostat
-    EMS_SYS_LOGGING_VERBOSE      // everything
+    EMS_SYS_LOGGING_VERBOSE,     // everything
+    EMS_SYS_LOGGING_JABBER       // lots of debug output...
 } _EMS_SYS_LOGGING;
 
 // status/counters since last power on
 typedef struct {
     _EMS_RX_STATUS   emsRxStatus;
     _EMS_TX_STATUS   emsTxStatus;
-    uint16_t         emsRxPgks;        // received
-    uint16_t         emsTxPkgs;        // sent
+    uint16_t         emsRxPgks;        // # successfull received
+    uint16_t         emsTxPkgs;        // # successfull sent
     uint16_t         emxCrcErr;        // CRC errors
     bool             emsPollEnabled;   // flag enable the response to poll messages
     _EMS_SYS_LOGGING emsLogging;       // logging
@@ -164,8 +175,9 @@ typedef struct {
     bool             emsTxCapable;     // able to send via Tx
     bool             emsTxDisabled;    // true to prevent all Tx
     uint8_t          txRetryCount;     // # times the last Tx was re-sent
-    bool             emsReverse;       // if true, poll logic is reversed
-    uint8_t          emsTxMode;        // handles Tx logic
+    uint8_t          emsIDMask;        // Buderus: 0x00, Junkers: 0x80
+    uint8_t          emsPollAck[1];    // acknowledge buffer for Poll
+    uint8_t          emsTxMode;        // Tx mode 1, 2 or 3
 } _EMS_Sys_Status;
 
 // The Tx send package
@@ -174,12 +186,12 @@ typedef struct {
     uint8_t                 dest;
     uint16_t                type;
     uint8_t                 offset;
-    uint8_t                 length;             // full length of complete telegram
+    uint8_t                 length;             // full length of complete telegram, including CRC
     uint8_t                 dataValue;          // value to validate against
     uint16_t                type_validate;      // type to call after a successful Write command
-    uint8_t                 comparisonValue;    // value to compare against during a validate
-    uint8_t                 comparisonOffset;   // offset of where the byte is we want to compare too later
-    uint16_t                comparisonPostRead; // after a successful write call this to read from this type ID
+    uint8_t                 comparisonValue;    // value to compare against during a validate command
+    uint8_t                 comparisonOffset;   // offset of where the byte is we want to compare too during validation
+    uint16_t                comparisonPostRead; // after a successful write, do a read from this type ID
     bool                    forceRefresh;       // should we send to MQTT after a successful Tx?
     uint32_t                timestamp;          // when created
     uint8_t                 data[EMS_MAX_TELEGRAM_LENGTH];
@@ -187,19 +199,20 @@ typedef struct {
 
 // The Rx receive package
 typedef struct {
-    uint32_t  timestamp;   // timestamp from millis()
-    uint8_t * telegram;    // the full data package
-    uint8_t   data_length; // length in bytes of the data
-    uint8_t   length;      // full length of the complete telegram
-    uint8_t   src;         // source ID
-    uint8_t   dest;        // destination ID
-    uint16_t  type;        // type ID as a double byte to support EMS+
-    uint8_t   offset;      // offset
-    uint8_t * data;        // pointer to where telegram data starts
-    bool      emsplus;     // true if ems+/ems 2.0
+    uint32_t  timestamp;    // timestamp from millis()
+    uint8_t * telegram;     // the full data package
+    uint8_t   data_length;  // length in bytes of the data
+    uint8_t   length;       // full length of the complete telegram
+    uint8_t   src;          // source ID
+    uint8_t   dest;         // destination ID
+    uint16_t  type;         // type ID as a double byte to support EMS+
+    uint8_t   offset;       // offset
+    uint8_t * data;         // pointer to where telegram data starts
+    bool      emsplus;      // true if ems+/ems 2.0
+    uint8_t   emsplus_type; // FF, F7 or F9
 } _EMS_RxTelegram;
 
-// default empty Tx
+// default empty Tx, must match struct
 const _EMS_TxTelegram EMS_TX_TELEGRAM_NEW = {
     EMS_TX_TELEGRAM_INIT, // action
     EMS_ID_NONE,          // dest
@@ -220,25 +233,25 @@ const _EMS_TxTelegram EMS_TX_TELEGRAM_NEW = {
 typedef struct {
     uint8_t product_id;
     char    model_string[50];
-} _Boiler_Type;
+} _Boiler_Device;
 
 typedef struct {
     uint8_t product_id;
     uint8_t device_id;
     char    model_string[50];
-} _SolarModule_Type;
+} _SolarModule_Device;
 
 typedef struct {
     uint8_t product_id;
     uint8_t device_id;
     char    model_string[50];
-} _Other_Type;
+} _Other_Device;
 
 typedef struct {
     uint8_t product_id;
     uint8_t device_id;
     char    model_string[50];
-} _HeatPump_Type;
+} _HeatPump_Device;
 
 typedef struct {
     uint8_t model_id;
@@ -246,15 +259,16 @@ typedef struct {
     uint8_t device_id;
     char    model_string[50];
     bool    write_supported;
-} _Thermostat_Type;
+} _Thermostat_Device;
 
 // for consolidating all types
 typedef struct {
+    uint8_t model_type; // 1=boiler, 2=thermostat, 3=sm, 4=other, 5=unknown
     uint8_t product_id;
     uint8_t device_id;
     char    version[10];
     char    model_string[50];
-} _Generic_Type;
+} _Generic_Device;
 
 /*
  * Telegram package defintions
@@ -390,6 +404,7 @@ typedef struct {
 } _EMS_Type;
 
 // function definitions
+extern void ems_dumpBuffer(const char * prefix, uint8_t * telegram, uint8_t length);
 extern void ems_parseTelegram(uint8_t * telegram, uint8_t len);
 void        ems_init();
 void        ems_doReadCommand(uint16_t type, uint8_t dest, bool forceRefresh = false);
@@ -403,28 +418,27 @@ void        ems_testTelegram(uint8_t test_num);
 void        ems_startupTelegrams();
 bool        ems_checkEMSBUSAlive();
 void        ems_clearDeviceList();
-void        ems_setTxMode(uint8_t mode);
 
-void    ems_setThermostatTemp(float temperature, uint8_t temptype = 0);
-void    ems_setThermostatMode(uint8_t mode);
-void    ems_setThermostatHC(uint8_t hc);
-void    ems_setWarmWaterTemp(uint8_t temperature);
-void    ems_setFlowTemp(uint8_t temperature);
-void    ems_setWarmWaterActivated(bool activated);
-void    ems_setWarmTapWaterActivated(bool activated);
-void    ems_setPoll(bool b);
-void    ems_setLogging(_EMS_SYS_LOGGING loglevel);
-void    ems_setEmsRefreshed(bool b);
-void    ems_setWarmWaterModeComfort(uint8_t comfort);
-void    ems_setModels();
-void    ems_setTxDisabled(bool b);
-bool    ems_getTxDisabled();
-uint8_t ems_getTxMode();
+void ems_setThermostatTemp(float temperature, uint8_t temptype = 0);
+void ems_setThermostatMode(uint8_t mode);
+void ems_setThermostatHC(uint8_t hc);
+void ems_setWarmWaterTemp(uint8_t temperature);
+void ems_setFlowTemp(uint8_t temperature);
+void ems_setWarmWaterActivated(bool activated);
+void ems_setWarmTapWaterActivated(bool activated);
+void ems_setPoll(bool b);
+void ems_setLogging(_EMS_SYS_LOGGING loglevel);
+void ems_setEmsRefreshed(bool b);
+void ems_setWarmWaterModeComfort(uint8_t comfort);
+void ems_setModels();
+void ems_setTxDisabled(bool b);
+bool ems_getTxDisabled();
+void ems_setTxMode(uint8_t mode);
 
-char *           ems_getThermostatDescription(char * buffer);
-char *           ems_getBoilerDescription(char * buffer);
-char *           ems_getSolarModuleDescription(char * buffer);
-char *           ems_getHeatPumpDescription(char * buffer);
+char *           ems_getThermostatDescription(char * buffer, bool name_only = false);
+char *           ems_getBoilerDescription(char * buffer, bool name_only = false);
+char *           ems_getSolarModuleDescription(char * buffer, bool name_only = false);
+char *           ems_getHeatPumpDescription(char * buffer, bool name_only = false);
 void             ems_getThermostatValues();
 void             ems_getBoilerValues();
 void             ems_getSolarModuleValues();
@@ -457,3 +471,5 @@ extern _EMS_Thermostat  EMS_Thermostat;
 extern _EMS_SolarModule EMS_SolarModule;
 extern _EMS_HeatPump    EMS_HeatPump;
 extern _EMS_Other       EMS_Other;
+
+extern std::list<_Generic_Device> Devices;
