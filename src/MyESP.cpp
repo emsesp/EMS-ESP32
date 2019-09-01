@@ -2658,7 +2658,7 @@ void MyESP::_addMQTTLog(const char * topic, const char * payload) {
     // myDebug("Publish [#%d] %s (%d) %s (%d)", logCount, topic, strlen(topic), payload, strlen(payload)); // for debugging
 
     // find the topic
-    while ((_hasValue(MQTT_log[logPointer].topic) && logPointer < MYESP_MQTTLOG_MAX)) {
+    while ((logPointer < MYESP_MQTTLOG_MAX) && (_hasValue(MQTT_log[logPointer].topic))) {
         if (strcmp(MQTT_log[logPointer].topic, topic) == 0) {
             found = true;
             break;
