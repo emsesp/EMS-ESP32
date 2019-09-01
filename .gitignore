@@ -21,22 +21,11 @@ src/websrc/gzipped
 src/websrc/temp
 *.gz.h
 
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Bower dependency directory (https://bower.io/)
-bower_components
-
-# Dependency directories
+# NPM directories
 node_modules/
 jspm_packages/
-
-# Optional npm cache directory
 .npm
+package-lock.json
 
 # Output of 'npm pack'
 *.tgz
