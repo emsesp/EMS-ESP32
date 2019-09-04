@@ -790,62 +790,6 @@ $(".noimp").on("click", function () {
     $("#noimp").modal("show");
 });
 
-window.FooTable.MyFiltering = window.FooTable.Filtering.extend({
-    construct: function (instance) {
-        this._super(instance);
-        this.acctypes = ["1", "99", "0"];
-        this.acctypesstr = ["Always", "Admin", "Disabled"];
-        this.def = "Access Type";
-        this.$acctype = null;
-    },
-    $create: function () {
-        this._super();
-        var self = this,
-            $formgrp = $("<div/>", {
-                "class": "form-group"
-            })
-                .append($("<label/>", {
-                    "class": "sr-only",
-                    text: "Status"
-                }))
-                .prependTo(self.$form);
-
-        self.$acctype = $("<select/>", {
-            "class": "form-control"
-        })
-            .on("change", {
-                self: self
-            }, self._onStatusDropdownChanged)
-            .append($("<option/>", {
-                text: self.def
-            }))
-            .appendTo($formgrp);
-
-        $.each(self.acctypes, function (i, acctype) {
-            self.$acctype.append($("<option/>").text(self.acctypesstr[i]).val(self.acctypes[i]));
-        });
-    },
-    _onStatusDropdownChanged: function (e) {
-        var self = e.data.self,
-            selected = $(this).val();
-        if (selected !== self.def) {
-            self.addFilter("acctype", selected, ["acctype"]);
-        } else {
-            self.removeFilter("acctype");
-        }
-        self.filter();
-    },
-    draw: function () {
-        this._super();
-        var acctype = this.find("acctype");
-        if (acctype instanceof window.FooTable.Filter) {
-            this.$acctype.val(acctype.query.val());
-        } else {
-            this.$acctype.val(this.def);
-        }
-    }
-});
-
 var xDown = null;
 var yDown = null;
 
