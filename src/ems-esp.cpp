@@ -104,7 +104,7 @@ typedef struct {
     bool     dallas_parasite; // on/off is using parasite
     uint8_t  heating_circuit; // number of heating circuit, 1 or 2
     uint8_t  tx_mode;         // TX mode 1,2 or 3
-} _EMSESP_Status;
+} _EMSESP_Settings;
 
 typedef struct {
     bool     showerOn;
@@ -155,8 +155,8 @@ static const command_t project_cmds[] PROGMEM = {
 uint8_t _project_cmds_count = ArraySize(project_cmds);
 
 // store for overall system status
-_EMSESP_Status EMSESP_Status;
-_EMSESP_Shower EMSESP_Shower;
+_EMSESP_Settings EMSESP_Settings;
+_EMSESP_Shower   EMSESP_Shower;
 
 // logging messages with fixed strings
 void myDebugLog(const char * s) {
@@ -444,17 +444,17 @@ void showInfo() {
         myDebug_P(PSTR("  System logging set to None"));
     }
 
-    myDebug_P(PSTR("  LED is %s, Listen mode is %s"), EMSESP_Status.led ? "on" : "off", EMSESP_Status.listen_mode ? "on" : "off");
-    if (EMSESP_Status.dallas_sensors > 0) {
-        myDebug_P(PSTR("  %d external temperature sensor%s found"), EMSESP_Status.dallas_sensors, (EMSESP_Status.dallas_sensors == 1) ? "" : "s");
+    myDebug_P(PSTR("  LED is %s, Listen mode is %s"), EMSESP_Settings.led ? "on" : "off", EMSESP_Settings.listen_mode ? "on" : "off");
+    if (EMSESP_Settings.dallas_sensors > 0) {
+        myDebug_P(PSTR("  %d external temperature sensor%s found"), EMSESP_Settings.dallas_sensors, (EMSESP_Settings.dallas_sensors == 1) ? "" : "s");
     }
 
     myDebug_P(PSTR("  Boiler is %s, Thermostat is %s, Solar Module is %s, Shower Timer is %s, Shower Alert is %s"),
               (ems_getBoilerEnabled() ? "enabled" : "disabled"),
               (ems_getThermostatEnabled() ? "enabled" : "disabled"),
               (ems_getSolarModuleEnabled() ? "enabled" : "disabled"),
-              ((EMSESP_Status.shower_timer) ? "enabled" : "disabled"),
-              ((EMSESP_Status.shower_alert) ? "enabled" : "disabled"));
+              ((EMSESP_Settings.shower_timer) ? "enabled" : "disabled"),
+              ((EMSESP_Settings.shower_alert) ? "enabled" : "disabled"));
 
     myDebug_P(PSTR("\n%sEMS Bus stats:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
 
@@ -619,10 +619,10 @@ void showInfo() {
         }
 
         // Render Day/Night/Holiday Temperature
-        if ((EMS_Thermostat.holidaytemp > 0) && (EMSESP_Status.heating_circuit == 2)) {  // only if we are on a RC35 we show more info
-            _renderIntValue("Day temperature", "C", EMS_Thermostat.daytemp, 2);          // convert to a single byte * 2
-            _renderIntValue("Night temperature", "C", EMS_Thermostat.nighttemp, 2);      // convert to a single byte * 2
-            _renderIntValue("Vacation temperature", "C", EMS_Thermostat.holidaytemp, 2); // convert to a single byte * 2
+        if ((EMS_Thermostat.holidaytemp > 0) && (EMSESP_Settings.heating_circuit == 2)) { // only if we are on a RC35 we show more info
+            _renderIntValue("Day temperature", "C", EMS_Thermostat.daytemp, 2);           // convert to a single byte * 2
+            _renderIntValue("Night temperature", "C", EMS_Thermostat.nighttemp, 2);       // convert to a single byte * 2
+            _renderIntValue("Vacation temperature", "C", EMS_Thermostat.holidaytemp, 2);  // convert to a single byte * 2
         }
 
         // Render Thermostat Date & Time
@@ -654,18 +654,18 @@ void showInfo() {
     }
 
     // Dallas
-    if (EMSESP_Status.dallas_sensors != 0) {
+    if (EMSESP_Settings.dallas_sensors != 0) {
         myDebug_P(PSTR("")); // newline
         char buffer[128] = {0};
         char valuestr[8] = {0}; // for formatting temp
         myDebug_P(PSTR("%sExternal temperature sensors:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
-        for (uint8_t i = 0; i < EMSESP_Status.dallas_sensors; i++) {
+        for (uint8_t i = 0; i < EMSESP_Settings.dallas_sensors; i++) {
             myDebug_P(PSTR("  Sensor #%d %s: %s C"), i + 1, ds18.getDeviceString(buffer, i), _float_to_char(valuestr, ds18.getValue(i)));
         }
     }
 
     // show the Shower Info
-    if (EMSESP_Status.shower_timer) {
+    if (EMSESP_Settings.shower_timer) {
         myDebug_P(PSTR("")); // newline
         myDebug_P(PSTR("%sShower stats:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
         myDebug_P(PSTR("  Shower is %s"), (EMSESP_Shower.showerOn ? "running" : "off"));
@@ -689,7 +689,7 @@ void publishSensorValues() {
     char valuestr[8] = {0}; // for formatting temp
 
     // see if the sensor values have changed, if so send
-    for (uint8_t i = 0; i < EMSESP_Status.dallas_sensors; i++) {
+    for (uint8_t i = 0; i < EMSESP_Settings.dallas_sensors; i++) {
         double sensorValue = ds18.getValue(i);
         if (sensorValue != DS18_DISCONNECTED && sensorValue != DS18_CRC_ERROR) {
             sprintf(label, PAYLOAD_EXTERNAL_SENSORS, (i + 1));
@@ -833,7 +833,7 @@ void publishValues(bool force) {
         doc.clear();
         JsonObject rootThermostat = doc.to<JsonObject>();
 
-        rootThermostat[THERMOSTAT_HC] = _int_to_char(s, EMSESP_Status.heating_circuit);
+        rootThermostat[THERMOSTAT_HC] = _int_to_char(s, EMSESP_Settings.heating_circuit);
 
         // different logic depending on thermostat types
         if (ems_getThermostatModel() == EMS_MODEL_EASY) {
@@ -983,14 +983,14 @@ void publishValues(bool force) {
 // sets the shower timer on/off
 void set_showerTimer() {
     if (ems_getLogging() != EMS_SYS_LOGGING_NONE) {
-        myDebug_P(PSTR("Shower timer has been set to %s"), EMSESP_Status.shower_timer ? "enabled" : "disabled");
+        myDebug_P(PSTR("Shower timer has been set to %s"), EMSESP_Settings.shower_timer ? "enabled" : "disabled");
     }
 }
 
 // sets the shower alert on/off
 void set_showerAlert() {
     if (ems_getLogging() != EMS_SYS_LOGGING_NONE) {
-        myDebug_P(PSTR("Shower alert has been set to %s"), EMSESP_Status.shower_alert ? "enabled" : "disabled");
+        myDebug_P(PSTR("Shower alert has been set to %s"), EMSESP_Settings.shower_alert ? "enabled" : "disabled");
     }
 }
 
@@ -1029,7 +1029,7 @@ char * _readWord() {
 
 // publish external dallas sensor temperature values to MQTT
 void do_publishSensorValues() {
-    if (EMSESP_Status.dallas_sensors != 0) {
+    if (EMSESP_Settings.dallas_sensors != 0) {
         publishSensorValues();
     }
 }
@@ -1037,7 +1037,7 @@ void do_publishSensorValues() {
 // call PublishValues without forcing, so using CRC to see if we really need to publish
 void do_publishValues() {
     // don't publish if we're not connected to the EMS bus
-    if ((ems_getBusConnected()) && myESP.isMQTTConnected() && EMSESP_Status.publish_time != 0) {
+    if ((ems_getBusConnected()) && myESP.isMQTTConnected() && EMSESP_Settings.publish_time != 0) {
         publishValues(true); // force publish
     }
 }
@@ -1045,12 +1045,12 @@ void do_publishValues() {
 // callback to light up the LED, called via Ticker every second
 // when ESP is booting up, ignore this as the LED is being used for something else
 void do_ledcheck() {
-    if ((EMSESP_Status.led) && (myESP.getSystemBootStatus() == MYESP_BOOTSTATUS_BOOTED)) {
+    if ((EMSESP_Settings.led) && (myESP.getSystemBootStatus() == MYESP_BOOTSTATUS_BOOTED)) {
         if (ems_getBusConnected()) {
-            digitalWrite(EMSESP_Status.led_gpio, (EMSESP_Status.led_gpio == LED_BUILTIN) ? LOW : HIGH); // light on. For onboard LED high=off
+            digitalWrite(EMSESP_Settings.led_gpio, (EMSESP_Settings.led_gpio == LED_BUILTIN) ? LOW : HIGH); // light on. For onboard LED high=off
         } else {
-            int state = digitalRead(EMSESP_Status.led_gpio);
-            digitalWrite(EMSESP_Status.led_gpio, !state);
+            int state = digitalRead(EMSESP_Settings.led_gpio);
+            digitalWrite(EMSESP_Settings.led_gpio, !state);
         }
     }
 }
@@ -1084,10 +1084,10 @@ void do_regularUpdates() {
 
 // stop devices scan and restart all other timers
 void stopDeviceScan() {
-    publishValuesTimer.attach(EMSESP_Status.publish_time, do_publishValues);             // post MQTT EMS values
-    publishSensorValuesTimer.attach(EMSESP_Status.publish_time, do_publishSensorValues); // post MQTT sensor values
-    regularUpdatesTimer.attach(REGULARUPDATES_TIME, do_regularUpdates);                  // regular reads from the EMS
-    systemCheckTimer.attach(SYSTEMCHECK_TIME, do_systemCheck);                           // check if Boiler is online
+    publishValuesTimer.attach(EMSESP_Settings.publish_time, do_publishValues);             // post MQTT EMS values
+    publishSensorValuesTimer.attach(EMSESP_Settings.publish_time, do_publishSensorValues); // post MQTT sensor values
+    regularUpdatesTimer.attach(REGULARUPDATES_TIME, do_regularUpdates);                    // regular reads from the EMS
+    systemCheckTimer.attach(SYSTEMCHECK_TIME, do_systemCheck);                             // check if Boiler is online
     scanThermostat_count = 0;
     scanThermostat.detach();
 }
@@ -1145,7 +1145,7 @@ void _showerColdShotStop() {
 
 // turn off hot water to send a shot of cold
 void _showerColdShotStart() {
-    if (EMSESP_Status.shower_alert) {
+    if (EMSESP_Settings.shower_alert) {
         myDebugLog("[Shower] doing a shot of cold water");
         ems_setWarmTapWaterActivated(false);
         EMSESP_Shower.doingColdShot = true;
@@ -1160,7 +1160,7 @@ void runUnitTest(uint8_t test_num) {
     publishValuesTimer.detach();
     systemCheckTimer.detach();
     regularUpdatesTimer.detach();
-    // EMSESP_Status.listen_mode = true; // temporary go into listen mode to disable Tx
+    // EMSESP_Settings.listen_mode = true; // temporary go into listen mode to disable Tx
     ems_testTelegram(test_num);
 }
 
@@ -1169,22 +1169,22 @@ bool LoadSaveCallback(MYESP_FSACTION action, JsonObject json) {
     if (action == MYESP_FSACTION_LOAD) {
         const JsonObject & settings = json["settings"];
 
-        EMSESP_Status.led             = settings["led"];
-        EMSESP_Status.led_gpio        = settings["led_gpio"] | EMSESP_LED_GPIO;
-        EMSESP_Status.dallas_gpio     = settings["dallas_gpio"] | EMSESP_DALLAS_GPIO;
-        EMSESP_Status.dallas_parasite = settings["dallas_parasite"] | EMSESP_DALLAS_PARASITE;
-        EMSESP_Status.shower_timer    = settings["shower_timer"];
-        EMSESP_Status.shower_alert    = settings["shower_alert"];
-        EMSESP_Status.publish_time    = settings["publish_time"] | DEFAULT_PUBLISHTIME;
+        EMSESP_Settings.led             = settings["led"];
+        EMSESP_Settings.led_gpio        = settings["led_gpio"] | EMSESP_LED_GPIO;
+        EMSESP_Settings.dallas_gpio     = settings["dallas_gpio"] | EMSESP_DALLAS_GPIO;
+        EMSESP_Settings.dallas_parasite = settings["dallas_parasite"] | EMSESP_DALLAS_PARASITE;
+        EMSESP_Settings.shower_timer    = settings["shower_timer"];
+        EMSESP_Settings.shower_alert    = settings["shower_alert"];
+        EMSESP_Settings.publish_time    = settings["publish_time"] | DEFAULT_PUBLISHTIME;
 
-        EMSESP_Status.listen_mode = settings["listen_mode"];
-        ems_setTxDisabled(EMSESP_Status.listen_mode);
+        EMSESP_Settings.listen_mode = settings["listen_mode"];
+        ems_setTxDisabled(EMSESP_Settings.listen_mode);
 
-        EMSESP_Status.heating_circuit = settings["heating_circuit"] | DEFAULT_HEATINGCIRCUIT;
-        ems_setThermostatHC(EMSESP_Status.heating_circuit);
+        EMSESP_Settings.heating_circuit = settings["heating_circuit"] | DEFAULT_HEATINGCIRCUIT;
+        ems_setThermostatHC(EMSESP_Settings.heating_circuit);
 
-        EMSESP_Status.tx_mode = settings["tx_mode"] | 1; // default to 1 (generic)
-        ems_setTxMode(EMSESP_Status.tx_mode);
+        EMSESP_Settings.tx_mode = settings["tx_mode"] | 1; // default to 1 (generic)
+        ems_setTxMode(EMSESP_Settings.tx_mode);
 
         return true;
     }
@@ -1192,16 +1192,16 @@ bool LoadSaveCallback(MYESP_FSACTION action, JsonObject json) {
     if (action == MYESP_FSACTION_SAVE) {
         JsonObject settings = json.createNestedObject("settings");
 
-        settings["led"]             = EMSESP_Status.led;
-        settings["led_gpio"]        = EMSESP_Status.led_gpio;
-        settings["dallas_gpio"]     = EMSESP_Status.dallas_gpio;
-        settings["dallas_parasite"] = EMSESP_Status.dallas_parasite;
-        settings["listen_mode"]     = EMSESP_Status.listen_mode;
-        settings["shower_timer"]    = EMSESP_Status.shower_timer;
-        settings["shower_alert"]    = EMSESP_Status.shower_alert;
-        settings["publish_time"]    = EMSESP_Status.publish_time;
-        settings["heating_circuit"] = EMSESP_Status.heating_circuit;
-        settings["tx_mode"]         = EMSESP_Status.tx_mode;
+        settings["led"]             = EMSESP_Settings.led;
+        settings["led_gpio"]        = EMSESP_Settings.led_gpio;
+        settings["dallas_gpio"]     = EMSESP_Settings.dallas_gpio;
+        settings["dallas_parasite"] = EMSESP_Settings.dallas_parasite;
+        settings["listen_mode"]     = EMSESP_Settings.listen_mode;
+        settings["shower_timer"]    = EMSESP_Settings.shower_timer;
+        settings["shower_alert"]    = EMSESP_Settings.shower_alert;
+        settings["publish_time"]    = EMSESP_Settings.publish_time;
+        settings["heating_circuit"] = EMSESP_Settings.heating_circuit;
+        settings["tx_mode"]         = EMSESP_Settings.tx_mode;
 
         return true;
     }
@@ -1219,13 +1219,13 @@ bool SetListCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, co
         // led
         if ((strcmp(setting, "led") == 0) && (wc == 2)) {
             if (strcmp(value, "on") == 0) {
-                EMSESP_Status.led = true;
-                ok                = true;
+                EMSESP_Settings.led = true;
+                ok                  = true;
             } else if (strcmp(value, "off") == 0) {
-                EMSESP_Status.led = false;
-                ok                = true;
+                EMSESP_Settings.led = false;
+                ok                  = true;
                 // let's make sure LED is really off - For onboard high=off
-                digitalWrite(EMSESP_Status.led_gpio, (EMSESP_Status.led_gpio == LED_BUILTIN) ? HIGH : LOW);
+                digitalWrite(EMSESP_Settings.led_gpio, (EMSESP_Settings.led_gpio == LED_BUILTIN) ? HIGH : LOW);
             } else {
                 myDebug_P(PSTR("Error. Usage: set led <on | off>"));
             }
@@ -1234,13 +1234,13 @@ bool SetListCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, co
         // test mode
         if ((strcmp(setting, "listen_mode") == 0) && (wc == 2)) {
             if (strcmp(value, "on") == 0) {
-                EMSESP_Status.listen_mode = true;
-                ok                        = true;
+                EMSESP_Settings.listen_mode = true;
+                ok                          = true;
                 myDebug_P(PSTR("* in listen mode. All Tx is disabled."));
                 ems_setTxDisabled(true);
             } else if (strcmp(value, "off") == 0) {
-                EMSESP_Status.listen_mode = false;
-                ok                        = true;
+                EMSESP_Settings.listen_mode = false;
+                ok                          = true;
                 ems_setTxDisabled(false);
                 myDebug_P(PSTR("* out of listen mode. Tx is now enabled."));
             } else {
@@ -1250,27 +1250,27 @@ bool SetListCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, co
 
         // led_gpio
         if ((strcmp(setting, "led_gpio") == 0) && (wc == 2)) {
-            EMSESP_Status.led_gpio = atoi(value);
+            EMSESP_Settings.led_gpio = atoi(value);
             // reset pin
-            pinMode(EMSESP_Status.led_gpio, OUTPUT);
-            digitalWrite(EMSESP_Status.led_gpio, (EMSESP_Status.led_gpio == LED_BUILTIN) ? HIGH : LOW); // light off. For onboard high=off
+            pinMode(EMSESP_Settings.led_gpio, OUTPUT);
+            digitalWrite(EMSESP_Settings.led_gpio, (EMSESP_Settings.led_gpio == LED_BUILTIN) ? HIGH : LOW); // light off. For onboard high=off
             ok = true;
         }
 
         // dallas_gpio
         if ((strcmp(setting, "dallas_gpio") == 0) && (wc == 2)) {
-            EMSESP_Status.dallas_gpio = atoi(value);
-            ok                        = true;
+            EMSESP_Settings.dallas_gpio = atoi(value);
+            ok                          = true;
         }
 
         // dallas_parasite
         if ((strcmp(setting, "dallas_parasite") == 0) && (wc == 2)) {
             if (strcmp(value, "on") == 0) {
-                EMSESP_Status.dallas_parasite = true;
-                ok                            = true;
+                EMSESP_Settings.dallas_parasite = true;
+                ok                              = true;
             } else if (strcmp(value, "off") == 0) {
-                EMSESP_Status.dallas_parasite = false;
-                ok                            = true;
+                EMSESP_Settings.dallas_parasite = false;
+                ok                              = true;
             } else {
                 myDebug_P(PSTR("Error. Usage: set dallas_parasite <on | off>"));
             }
@@ -1279,11 +1279,11 @@ bool SetListCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, co
         // shower timer
         if ((strcmp(setting, "shower_timer") == 0) && (wc == 2)) {
             if (strcmp(value, "on") == 0) {
-                EMSESP_Status.shower_timer = true;
-                ok                         = true;
+                EMSESP_Settings.shower_timer = true;
+                ok                           = true;
             } else if (strcmp(value, "off") == 0) {
-                EMSESP_Status.shower_timer = false;
-                ok                         = true;
+                EMSESP_Settings.shower_timer = false;
+                ok                           = true;
             } else {
                 myDebug_P(PSTR("Error. Usage: set shower_timer <on | off>"));
             }
@@ -1292,11 +1292,11 @@ bool SetListCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, co
         // shower alert
         if ((strcmp(setting, "shower_alert") == 0) && (wc == 2)) {
             if (strcmp(value, "on") == 0) {
-                EMSESP_Status.shower_alert = true;
-                ok                         = true;
+                EMSESP_Settings.shower_alert = true;
+                ok                           = true;
             } else if (strcmp(value, "off") == 0) {
-                EMSESP_Status.shower_alert = false;
-                ok                         = true;
+                EMSESP_Settings.shower_alert = false;
+                ok                           = true;
             } else {
                 myDebug_P(PSTR("Error. Usage: set shower_alert <on | off>"));
             }
@@ -1304,15 +1304,15 @@ bool SetListCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, co
 
         // publish_time
         if ((strcmp(setting, "publish_time") == 0) && (wc == 2)) {
-            EMSESP_Status.publish_time = atoi(value);
-            ok                         = true;
+            EMSESP_Settings.publish_time = atoi(value);
+            ok                           = true;
         }
 
         // heating_circuit
         if ((strcmp(setting, "heating_circuit") == 0) && (wc == 2)) {
             uint8_t hc = atoi(value);
             if ((hc >= 1) && (hc <= 2)) {
-                EMSESP_Status.heating_circuit = hc;
+                EMSESP_Settings.heating_circuit = hc;
                 ems_setThermostatHC(hc);
                 ok = true;
             } else {
@@ -1324,7 +1324,7 @@ bool SetListCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, co
         if ((strcmp(setting, "tx_mode") == 0) && (wc == 2)) {
             uint8_t mode = atoi(value);
             if ((mode >= 1) && (mode <= 3)) {
-                EMSESP_Status.tx_mode = mode;
+                EMSESP_Settings.tx_mode = mode;
                 ems_setTxMode(mode);
                 ok = true;
             } else {
@@ -1334,16 +1334,16 @@ bool SetListCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, co
     }
 
     if (action == MYESP_FSACTION_LIST) {
-        myDebug_P(PSTR("  led=%s"), EMSESP_Status.led ? "on" : "off");
-        myDebug_P(PSTR("  led_gpio=%d"), EMSESP_Status.led_gpio);
-        myDebug_P(PSTR("  dallas_gpio=%d"), EMSESP_Status.dallas_gpio);
-        myDebug_P(PSTR("  dallas_parasite=%s"), EMSESP_Status.dallas_parasite ? "on" : "off");
-        myDebug_P(PSTR("  heating_circuit=%d"), EMSESP_Status.heating_circuit);
-        myDebug_P(PSTR("  tx_mode=%d"), EMSESP_Status.tx_mode);
-        myDebug_P(PSTR("  listen_mode=%s"), EMSESP_Status.listen_mode ? "on" : "off");
-        myDebug_P(PSTR("  shower_timer=%s"), EMSESP_Status.shower_timer ? "on" : "off");
-        myDebug_P(PSTR("  shower_alert=%s"), EMSESP_Status.shower_alert ? "on" : "off");
-        myDebug_P(PSTR("  publish_time=%d"), EMSESP_Status.publish_time);
+        myDebug_P(PSTR("  led=%s"), EMSESP_Settings.led ? "on" : "off");
+        myDebug_P(PSTR("  led_gpio=%d"), EMSESP_Settings.led_gpio);
+        myDebug_P(PSTR("  dallas_gpio=%d"), EMSESP_Settings.dallas_gpio);
+        myDebug_P(PSTR("  dallas_parasite=%s"), EMSESP_Settings.dallas_parasite ? "on" : "off");
+        myDebug_P(PSTR("  heating_circuit=%d"), EMSESP_Settings.heating_circuit);
+        myDebug_P(PSTR("  tx_mode=%d"), EMSESP_Settings.tx_mode);
+        myDebug_P(PSTR("  listen_mode=%s"), EMSESP_Settings.listen_mode ? "on" : "off");
+        myDebug_P(PSTR("  shower_timer=%s"), EMSESP_Settings.shower_timer ? "on" : "off");
+        myDebug_P(PSTR("  shower_alert=%s"), EMSESP_Settings.shower_alert ? "on" : "off");
+        myDebug_P(PSTR("  publish_time=%d"), EMSESP_Settings.publish_time);
     }
 
     return ok;
@@ -1449,12 +1449,12 @@ void TelnetCommandCallback(uint8_t wc, const char * commandLine) {
     if ((strcmp(first_cmd, "shower") == 0) && (wc == 2)) {
         char * second_cmd = _readWord();
         if (strcmp(second_cmd, "timer") == 0) {
-            EMSESP_Status.shower_timer = !EMSESP_Status.shower_timer;
-            myESP.mqttPublish(TOPIC_SHOWER_TIMER, EMSESP_Status.shower_timer ? "1" : "0");
+            EMSESP_Settings.shower_timer = !EMSESP_Settings.shower_timer;
+            myESP.mqttPublish(TOPIC_SHOWER_TIMER, EMSESP_Settings.shower_timer ? "1" : "0");
             ok = true;
         } else if (strcmp(second_cmd, "alert") == 0) {
-            EMSESP_Status.shower_alert = !EMSESP_Status.shower_alert;
-            myESP.mqttPublish(TOPIC_SHOWER_ALERT, EMSESP_Status.shower_alert ? "1" : "0");
+            EMSESP_Settings.shower_alert = !EMSESP_Settings.shower_alert;
+            myESP.mqttPublish(TOPIC_SHOWER_ALERT, EMSESP_Settings.shower_alert ? "1" : "0");
             ok = true;
         }
     }
@@ -1591,8 +1591,8 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
         myESP.mqttSubscribe(TOPIC_SHOWER_COLDSHOT);
 
         // publish the status of the Shower parameters
-        myESP.mqttPublish(TOPIC_SHOWER_TIMER, EMSESP_Status.shower_timer ? "1" : "0");
-        myESP.mqttPublish(TOPIC_SHOWER_ALERT, EMSESP_Status.shower_alert ? "1" : "0");
+        myESP.mqttPublish(TOPIC_SHOWER_TIMER, EMSESP_Settings.shower_timer ? "1" : "0");
+        myESP.mqttPublish(TOPIC_SHOWER_ALERT, EMSESP_Settings.shower_alert ? "1" : "0");
     }
 
     // handle incoming MQTT publish events
@@ -1623,7 +1623,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
             myDebug_P(PSTR("MQTT topic: thermostat heating circuit value %s"), message);
             uint8_t hc = atoi((char *)message);
             if ((hc >= 1) && (hc <= 2)) {
-                EMSESP_Status.heating_circuit = hc;
+                EMSESP_Settings.heating_circuit = hc;
                 ems_setThermostatHC(hc);
             }
         }
@@ -1691,9 +1691,9 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
         // shower timer
         if (strcmp(topic, TOPIC_SHOWER_TIMER) == 0) {
             if (message[0] == '1') {
-                EMSESP_Status.shower_timer = true;
+                EMSESP_Settings.shower_timer = true;
             } else if (message[0] == '0') {
-                EMSESP_Status.shower_timer = false;
+                EMSESP_Settings.shower_timer = false;
             }
             set_showerTimer();
         }
@@ -1701,9 +1701,9 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
         // shower alert
         if (strcmp(topic, TOPIC_SHOWER_ALERT) == 0) {
             if (message[0] == '1') {
-                EMSESP_Status.shower_alert = true;
+                EMSESP_Settings.shower_alert = true;
             } else if (message[0] == '0') {
-                EMSESP_Status.shower_alert = false;
+                EMSESP_Settings.shower_alert = false;
             }
             set_showerAlert();
         }
@@ -1890,16 +1890,17 @@ void WebCallback(JsonObject root) {
 // Most of these will be overwritten after the SPIFFS config file is loaded
 void initEMSESP() {
     // general settings
-    EMSESP_Status.shower_timer    = false;
-    EMSESP_Status.shower_alert    = false;
-    EMSESP_Status.led             = true; // LED is on by default
-    EMSESP_Status.listen_mode     = false;
-    EMSESP_Status.publish_time    = DEFAULT_PUBLISHTIME;
-    EMSESP_Status.timestamp       = millis();
-    EMSESP_Status.dallas_sensors  = 0;
-    EMSESP_Status.led_gpio        = EMSESP_LED_GPIO;
-    EMSESP_Status.dallas_gpio     = EMSESP_DALLAS_GPIO;
-    EMSESP_Status.heating_circuit = 1; // default heating circuit to HC1
+    EMSESP_Settings.shower_timer    = false;
+    EMSESP_Settings.shower_alert    = false;
+    EMSESP_Settings.led             = true; // LED is on by default
+    EMSESP_Settings.listen_mode     = false;
+    EMSESP_Settings.publish_time    = DEFAULT_PUBLISHTIME;
+    EMSESP_Settings.timestamp       = millis();
+    EMSESP_Settings.dallas_sensors  = 0;
+    EMSESP_Settings.led_gpio        = EMSESP_LED_GPIO;
+    EMSESP_Settings.dallas_gpio     = EMSESP_DALLAS_GPIO;
+    EMSESP_Settings.heating_circuit = 1; // default heating circuit to HC1
+    EMSESP_Settings.tx_mode         = 1; // default tx mode
 
     // shower settings
     EMSESP_Shower.timerStart    = 0;
@@ -1922,7 +1923,7 @@ void showerCheck() {
             // if heater was previously off, start the timer
             if (EMSESP_Shower.timerStart == 0) {
                 // hot water just started...
-                EMSESP_Shower.timerStart    = EMSESP_Status.timestamp;
+                EMSESP_Shower.timerStart    = EMSESP_Settings.timestamp;
                 EMSESP_Shower.timerPause    = 0; // remove any last pauses
                 EMSESP_Shower.doingColdShot = false;
                 EMSESP_Shower.duration      = 0;
@@ -1930,13 +1931,13 @@ void showerCheck() {
             } else {
                 // hot water has been  on for a while
                 // first check to see if hot water has been on long enough to be recognized as a Shower/Bath
-                if (!EMSESP_Shower.showerOn && (EMSESP_Status.timestamp - EMSESP_Shower.timerStart) > SHOWER_MIN_DURATION) {
+                if (!EMSESP_Shower.showerOn && (EMSESP_Settings.timestamp - EMSESP_Shower.timerStart) > SHOWER_MIN_DURATION) {
                     EMSESP_Shower.showerOn = true;
                     myDebugLog("[Shower] hot water still running, starting shower timer");
                 }
                 // check if the shower has been on too long
-                else if ((((EMSESP_Status.timestamp - EMSESP_Shower.timerStart) > SHOWER_MAX_DURATION) && !EMSESP_Shower.doingColdShot)
-                         && EMSESP_Status.shower_alert) {
+                else if ((((EMSESP_Settings.timestamp - EMSESP_Shower.timerStart) > SHOWER_MAX_DURATION) && !EMSESP_Shower.doingColdShot)
+                         && EMSESP_Settings.shower_alert) {
                     myDebugLog("[Shower] exceeded max shower time");
                     _showerColdShotStart();
                 }
@@ -1944,11 +1945,11 @@ void showerCheck() {
         } else { // hot water is off
             // if it just turned off, record the time as it could be a short pause
             if ((EMSESP_Shower.timerStart != 0) && (EMSESP_Shower.timerPause == 0)) {
-                EMSESP_Shower.timerPause = EMSESP_Status.timestamp;
+                EMSESP_Shower.timerPause = EMSESP_Settings.timestamp;
             }
 
             // if shower has been off for longer than the wait time
-            if ((EMSESP_Shower.timerPause != 0) && ((EMSESP_Status.timestamp - EMSESP_Shower.timerPause) > SHOWER_PAUSE_TIME)) {
+            if ((EMSESP_Shower.timerPause != 0) && ((EMSESP_Settings.timestamp - EMSESP_Shower.timerPause) > SHOWER_PAUSE_TIME)) {
                 // it is over the wait period, so assume that the shower has finished and calculate the total time and publish
                 // because its unsigned long, can't have negative so check if length is less than OFFSET_TIME
                 if ((EMSESP_Shower.timerPause - EMSESP_Shower.timerStart) > SHOWER_OFFSET_TIME) {
@@ -2016,28 +2017,28 @@ void setup() {
         myESP.setUseSerial(false);
         emsuart_init(); // start EMS bus transmissions
         myDebug_P(PSTR("[UART] Opened Rx/Tx connection"));
-        if (!EMSESP_Status.listen_mode) {
+        if (!EMSESP_Settings.listen_mode) {
             // go and find the boiler and thermostat types, if not in listen mode
             ems_discoverModels();
         }
     }
 
     // enable regular checks if not in test mode
-    if (!EMSESP_Status.listen_mode) {
-        publishValuesTimer.attach(EMSESP_Status.publish_time, do_publishValues);             // post MQTT EMS values
-        publishSensorValuesTimer.attach(EMSESP_Status.publish_time, do_publishSensorValues); // post MQTT sensor values
-        regularUpdatesTimer.attach(REGULARUPDATES_TIME, do_regularUpdates);                  // regular reads from the EMS
+    if (!EMSESP_Settings.listen_mode) {
+        publishValuesTimer.attach(EMSESP_Settings.publish_time, do_publishValues);             // post MQTT EMS values
+        publishSensorValuesTimer.attach(EMSESP_Settings.publish_time, do_publishSensorValues); // post MQTT sensor values
+        regularUpdatesTimer.attach(REGULARUPDATES_TIME, do_regularUpdates);                    // regular reads from the EMS
     }
 
     // set pin for LED
-    if (EMSESP_Status.led_gpio != EMS_VALUE_INT_NOTSET) {
-        pinMode(EMSESP_Status.led_gpio, OUTPUT);
-        digitalWrite(EMSESP_Status.led_gpio, (EMSESP_Status.led_gpio == LED_BUILTIN) ? HIGH : LOW); // light off. For onboard high=off
-        ledcheckTimer.attach_ms(LEDCHECK_TIME, do_ledcheck);                                        // blink heartbeat LED
+    if (EMSESP_Settings.led_gpio != EMS_VALUE_INT_NOTSET) {
+        pinMode(EMSESP_Settings.led_gpio, OUTPUT);
+        digitalWrite(EMSESP_Settings.led_gpio, (EMSESP_Settings.led_gpio == LED_BUILTIN) ? HIGH : LOW); // light off. For onboard high=off
+        ledcheckTimer.attach_ms(LEDCHECK_TIME, do_ledcheck);                                            // blink heartbeat LED
     }
 
     // check for Dallas sensors
-    EMSESP_Status.dallas_sensors = ds18.setup(EMSESP_Status.dallas_gpio, EMSESP_Status.dallas_parasite); // returns #sensors
+    EMSESP_Settings.dallas_sensors = ds18.setup(EMSESP_Settings.dallas_gpio, EMSESP_Settings.dallas_parasite); // returns #sensors
 
     systemCheckTimer.attach(SYSTEMCHECK_TIME, do_systemCheck); // check if EMS is reachable
 }
@@ -2046,26 +2047,26 @@ void setup() {
 // Main loop
 //
 void loop() {
-    EMSESP_Status.timestamp = millis();
+    EMSESP_Settings.timestamp = millis();
 
     // the main loop
     myESP.loop();
 
     // check Dallas sensors, every 2 seconds
     // these values are published to MQTT separately via the timer publishSensorValuesTimer
-    if (EMSESP_Status.dallas_sensors != 0) {
+    if (EMSESP_Settings.dallas_sensors != 0) {
         ds18.loop();
     }
 
     // publish the values to MQTT, only if the values have changed
     // although we don't want to publish when doing a deep scan of the thermostat
-    if (ems_getEmsRefreshed() && (scanThermostat_count == 0) && (!EMSESP_Status.listen_mode)) {
+    if (ems_getEmsRefreshed() && (scanThermostat_count == 0) && (!EMSESP_Settings.listen_mode)) {
         publishValues(false);
         ems_setEmsRefreshed(false); // reset
     }
 
     // do shower logic, if enabled
-    if (EMSESP_Status.shower_timer) {
+    if (EMSESP_Settings.shower_timer) {
         showerCheck();
     }
 
