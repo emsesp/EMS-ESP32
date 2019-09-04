@@ -3,8 +3,8 @@
 ;
 
 [platformio]
-;default_envs = release
-default_envs = debug
+default_envs = release
+;default_envs = debug
 
 [common]
 ; -DMYESP_TIMESTAMP -DTESTS -DCRASH -DFORCE_SERIAL -DNO_GLOBAL_EEPROM -DLOGICANALYZER
