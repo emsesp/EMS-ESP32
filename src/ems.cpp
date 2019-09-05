@@ -827,7 +827,6 @@ void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
     if (length == 1) {
         uint8_t         value                  = telegram[0]; // 1st byte of data package
         static uint32_t _last_emsPollFrequency = 0;
-        static uint8_t  delay_tx               = 0; // TODO remove, experimental
 
         // check first for a Poll for us
         if ((value ^ 0x80 ^ EMS_Sys_Status.emsIDMask) == EMS_ID_ME) {
@@ -837,9 +836,7 @@ void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
 
             // do we have something to send thats waiting in the Tx queue?
             // if so send it if the Queue is not in a wait state
-            // TODO: but only do this at defined rate otherwise it'll be too quick, so skip a few polls
-            if ((!EMS_TxQueue.isEmpty()) && (EMS_Sys_Status.emsTxStatus == EMS_TX_STATUS_IDLE) && (++delay_tx == 2)) {
-                delay_tx = 0;
+            if ((!EMS_TxQueue.isEmpty()) && (EMS_Sys_Status.emsTxStatus == EMS_TX_STATUS_IDLE)) {
                 _ems_sendTelegram(); // perform the read/write command immediately
             } else {
                 // nothing to send so just send a poll acknowledgement back
@@ -2534,7 +2531,6 @@ void ems_setThermostatTemp(float temperature, uint8_t temptype) {
         } else if (EMS_Thermostat.mode == 0) { // manuaL
             EMS_TxTelegram.offset = 0x0A;      // manual offset
         }
-        // TODO: commented out because it's too fast
         // EMS_TxTelegram.type_validate = EMS_TYPE_RCPLUSStatusMessage; // validate by reading from a different telegram
         EMS_TxTelegram.type_validate = EMS_ID_NONE; // validate by reading from a different telegram
 
@@ -2648,7 +2644,6 @@ void ems_setThermostatMode(uint8_t mode) {
         EMS_TxTelegram.type   = EMS_TYPE_RCPLUSSet; // for 3000 and 1010, e.g. 48 10 FF 00 01 B9 00 for manual
         EMS_TxTelegram.offset = EMS_OFFSET_RCPLUSSet_mode;
 
-        // TODO: commented out because it's too fast
         // EMS_TxTelegram.type_validate = EMS_TYPE_RCPLUSStatusMessage; // validate by reading from a different telegram
         EMS_TxTelegram.type_validate      = EMS_ID_NONE;                  // don't validate after the write
         EMS_TxTelegram.comparisonPostRead = EMS_TYPE_RCPLUSStatusMessage; // after write, do a full fetch of all values
