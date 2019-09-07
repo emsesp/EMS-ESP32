@@ -81,16 +81,14 @@
 #define EMS_ID_HP 0x38      // HeatPump
 #define EMS_ID_GATEWAY 0x48 // KM200 Web Gateway
 
-#define EMS_PRODUCTID_HEATRONICS 95 // ProductID for a Junkers Heatronic3 device
+// Product IDs
+#define EMS_PRODUCTID_HEATRONICS 95 // Junkers Heatronic3 device
+#define EMS_PRODUCTID_SM10 73       // SM10 solar module
+#define EMS_PRODUCTID_SM100 163     // SM100 solar module
+#define EMS_PRODUCTID_ISM1 101      // Junkers ISM1 solar module
 
-#define EMS_PRODUCTID_SM10 73   // ProductID for SM10 solar module
-#define EMS_PRODUCTID_SM100 163 // ProductID for SM10 solar module
-#define EMS_PRODUCTID_ISM1 101  // ProductID for SM10 solar module
-
-#define EMS_MIN_TELEGRAM_LENGTH 6 // minimal length for a validation telegram, including CRC
-
-// max length of a telegram, including CRC, for Rx and Tx.
-#define EMS_MAX_TELEGRAM_LENGTH 32
+#define EMS_MIN_TELEGRAM_LENGTH 6  // minimal length for a validation telegram, including CRC
+#define EMS_MAX_TELEGRAM_LENGTH 32 // max length of a telegram, including CRC, for Rx and Tx.
 
 // default values for null values
 #define EMS_VALUE_INT_ON 1             // boolean true
@@ -100,6 +98,8 @@
 #define EMS_VALUE_USHORT_NOTSET 0x8000 // for 2-byte unsigned shorts
 #define EMS_VALUE_LONG_NOTSET 0xFFFFFF // for 3-byte longs
 
+#define EMS_THERMOSTAT_MAXHC 4     // max number of heating circuits
+#define EMS_THERMOSTAT_DEFAULTHC 1 // default heating circuit is 1
 #define EMS_THERMOSTAT_WRITE_YES true
 #define EMS_THERMOSTAT_WRITE_NO false
 
@@ -116,11 +116,11 @@
 #define EMS_SYS_LOGGING_DEFAULT EMS_SYS_LOGGING_NONE
 
 // define the model types which get rendered to html colors in the web interface
-#define EMS_MODELTYPE_BOILER 1 // success color
+#define EMS_MODELTYPE_BOILER 1     // success color
 #define EMS_MODELTYPE_THERMOSTAT 2 // info color
-#define EMS_MODELTYPE_SM 3 // warning color
-#define EMS_MODELTYPE_HP 4 // success color
-#define EMS_MODELTYPE_OTHER 5 // no color
+#define EMS_MODELTYPE_SM 3         // warning color
+#define EMS_MODELTYPE_HP 4         // success color
+#define EMS_MODELTYPE_OTHER 5      // no color
 
 /* EMS UART transfer status */
 typedef enum {
@@ -273,7 +273,13 @@ typedef struct {
 /*
  * Telegram package defintions
  */
-typedef struct {           // UBAParameterWW
+typedef struct {
+    // settings
+    uint8_t device_id; // this is typically always 0x08
+    uint8_t product_id;
+    char    version[10];
+
+    // UBAParameterWW
     uint8_t wWActivated;   // Warm Water activated
     uint8_t wWSelTemp;     // Warm Water selected temperature
     uint8_t wWCircPump;    // Warm Water circulation pump Available
@@ -324,23 +330,19 @@ typedef struct {           // UBAParameterWW
     uint8_t tapwaterActive; // Hot tap water is on/off
     uint8_t heatingActive;  // Central heating is on/off
 
-    // settings
-    char    version[10];
-    uint8_t device_id; // this is typically always 0x08
-    uint8_t product_id;
 } _EMS_Boiler;
 
 /*
  * Telegram package defintions for Other EMS devices
  */
-
 typedef struct {
-    uint8_t HPModulation; // heatpump modulation in %
-    uint8_t HPSpeed;      // speed 0-100 %
-    uint8_t device_id;    // the device ID of the Heat Pump (e.g. 0x30)
-    uint8_t model_id;     // Solar Module / Heat Pump model (e.g. 3 > EMS_MODEL_OTHER )
+    uint8_t device_id; // the device ID of the Heat Pump (e.g. 0x30)
+    uint8_t model_id;  // Solar Module / Heat Pump model
     uint8_t product_id;
     char    version[10];
+
+    uint8_t HPModulation; // heatpump modulation in %
+    uint8_t HPSpeed;      // speed 0-100 %
 } _EMS_HeatPump;
 
 typedef struct {
@@ -352,6 +354,11 @@ typedef struct {
 
 // SM Solar Module - SM10/SM100/ISM1
 typedef struct {
+    uint8_t device_id; // the device ID of the Solar Module
+    uint8_t model_id;  // Solar Module
+    uint8_t product_id;
+    char    version[10];
+
     int16_t  collectorTemp;          // collector temp
     int16_t  bottomTemp;             // bottom temp
     uint8_t  pumpModulation;         // modulation solar pump
@@ -361,35 +368,35 @@ typedef struct {
     uint16_t EnergyToday;
     uint16_t EnergyTotal;
     uint32_t pumpWorkMin; // Total solar pump operating time
-    uint8_t  device_id;   // the device ID of the Solar Module
-    uint8_t  model_id;    // Solar Module
-    uint8_t  product_id;
-    char     version[10];
 } _EMS_SolarModule;
+
+// heating circuit
+typedef struct {
+    uint8_t hc;                // heating circuit 1,2, 3 or 4
+    bool    active;            // true if there is data for this HC
+    int16_t setpoint_roomTemp; // current set temp
+    int16_t curr_roomTemp;     // current room temp
+    uint8_t mode;              // 0=low, 1=manual, 2=auto
+    bool    day_mode;          // 0=night, 1=day
+    uint8_t daytemp;
+    uint8_t nighttemp;
+    uint8_t holidaytemp;
+    uint8_t heatingtype;     // type of heating: 1 radiator, 2 convectors, 3 floors, 4 room supply
+    uint8_t circuitcalctemp; // calculated setpoint flow temperature
+} _EMS_Thermostat_HC;
 
 // Thermostat data
 typedef struct {
     uint8_t device_id; // the device ID of the thermostat
     uint8_t model_id;  // thermostat model
     uint8_t product_id;
-    bool    write_supported;
-    uint8_t hc; // heating circuit 1 or 2
     char    version[10];
-    int16_t setpoint_roomTemp; // current set temp
-    int16_t curr_roomTemp;     // current room temp
-    uint8_t mode;              // 0=low, 1=manual, 2=auto
-    bool    day_mode;          // 0=night, 1=day
-    uint8_t hour;
-    uint8_t minute;
-    uint8_t second;
-    uint8_t day;
-    uint8_t month;
-    uint8_t year;
-    uint8_t daytemp;
-    uint8_t nighttemp;
-    uint8_t holidaytemp;
-    uint8_t heatingtype;
-    uint8_t circuitcalctemp;
+
+    char datetime[25]; // HH:MM:SS DD/MM/YYYY
+    bool write_supported;
+
+    _EMS_Thermostat_HC hc[EMS_THERMOSTAT_MAXHC - 1]; // array for the 4 heating circuits
+
 } _EMS_Thermostat;
 
 // call back function signature for processing telegram types
@@ -419,9 +426,8 @@ void        ems_startupTelegrams();
 bool        ems_checkEMSBUSAlive();
 void        ems_clearDeviceList();
 
-void ems_setThermostatTemp(float temperature, uint8_t temptype = 0);
-void ems_setThermostatMode(uint8_t mode);
-void ems_setThermostatHC(uint8_t hc);
+void ems_setThermostatTemp(float temperature, uint8_t hc, uint8_t temptype = 0);
+void ems_setThermostatMode(uint8_t mode, uint8_t hc);
 void ems_setWarmWaterTemp(uint8_t temperature);
 void ems_setFlowTemp(uint8_t temperature);
 void ems_setWarmWaterActivated(bool activated);
@@ -432,8 +438,9 @@ void ems_setEmsRefreshed(bool b);
 void ems_setWarmWaterModeComfort(uint8_t comfort);
 void ems_setModels();
 void ems_setTxDisabled(bool b);
-bool ems_getTxDisabled();
 void ems_setTxMode(uint8_t mode);
+
+uint8_t _getHeatingCircuit(_EMS_RxTelegram * EMS_RxTelegram);
 
 char *           ems_getThermostatDescription(char * buffer, bool name_only = false);
 char *           ems_getBoilerDescription(char * buffer, bool name_only = false);
@@ -456,6 +463,8 @@ uint8_t          ems_getSolarModuleModel();
 void             ems_discoverModels();
 bool             ems_getTxCapable();
 uint32_t         ems_getPollFrequency();
+bool             ems_getTxDisabled();
+
 
 // private functions
 uint8_t _crcCalculator(uint8_t * data, uint8_t len);

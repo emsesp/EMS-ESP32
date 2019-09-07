@@ -39,8 +39,6 @@ DS18 ds18;
 // set to value >0 if the ESP is overheating or there are timing issues. Recommend a value of 1.
 #define EMSESP_DELAY 0 // initially set to 0 for no delay. Change to 1 if getting WDT resets from wifi
 
-#define DEFAULT_HEATINGCIRCUIT 1 // default to HC1 for thermostats that support multiple heating circuits like the RC35
-
 // timers, all values are in seconds
 #define DEFAULT_PUBLISHTIME 120 // every 2 minutes publish MQTT values, including Dallas sensors
 Ticker publishValuesTimer;
@@ -102,7 +100,6 @@ typedef struct {
     uint8_t  led_gpio;        // pin for LED
     uint8_t  dallas_gpio;     // pin for attaching external dallas temperature sensors
     bool     dallas_parasite; // on/off is using parasite
-    uint8_t  heating_circuit; // number of heating circuit, 1 or 2
     uint8_t  tx_mode;         // TX mode 1,2 or 3
 } _EMSESP_Settings;
 
@@ -141,9 +138,9 @@ static const command_t project_cmds[] PROGMEM = {
     {false, "autodetect [deep]", "detect EMS devices and attempt to automatically set boiler and thermostat types"},
     {false, "shower <timer | alert>", "toggle either timer or alert on/off"},
     {false, "send XX ...", "send raw telegram data as hex to EMS bus"},
-    {false, "thermostat read <type ID>", "send read request to the thermostat"},
-    {false, "thermostat temp <degrees>", "set current thermostat temperature"},
-    {false, "thermostat mode <mode>", "set mode (0=low/night, 1=manual/day, 2=auto)"},
+    {false, "thermostat read <type ID>", "send read request to the thermostat for heating circuit hc 1-4"},
+    {false, "thermostat temp [hc] <degrees>", "set current thermostat temperature"},
+    {false, "thermostat mode [hc] <mode>", "set mode (0=low/night, 1=manual/day, 2=auto) for heating circuit hc 1-4"},
     {false, "thermostat scan <type ID>", "probe thermostat on all type id responses"},
     {false, "boiler read <type ID>", "send read request to boiler"},
     {false, "boiler wwtemp <degrees>", "set boiler warm water temperature"},
@@ -392,29 +389,33 @@ void _renderBoolValue(const char * prefix, uint8_t value) {
 
 // figures out the thermostat mode
 // returns 0xFF=unknown, 0=low, 1=manual, 2=auto, 3=night, 4=day
-uint8_t _getThermostatMode() {
-    int thermoMode = EMS_VALUE_INT_NOTSET;
+// hc_num is 1 to 4
+uint8_t _getThermostatMode(uint8_t hc_num) {
+    int     thermoMode = EMS_VALUE_INT_NOTSET;
+    uint8_t model      = ems_getThermostatModel();
 
-    if (ems_getThermostatModel() == EMS_MODEL_RC20) {
-        if (EMS_Thermostat.mode == 0) {
+    uint8_t mode = EMS_Thermostat.hc[hc_num - 1].mode;
+
+    if (model == EMS_MODEL_RC20) {
+        if (mode == 0) {
             thermoMode = 0; // low
-        } else if (EMS_Thermostat.mode == 1) {
+        } else if (mode == 1) {
             thermoMode = 1; // manual
-        } else if (EMS_Thermostat.mode == 2) {
+        } else if (mode == 2) {
             thermoMode = 2; // auto
         }
-    } else if (ems_getThermostatModel() == EMS_MODEL_RC300) {
-        if (EMS_Thermostat.mode == 0) {
+    } else if (model == EMS_MODEL_RC300) {
+        if (mode == 0) {
             thermoMode = 1; // manual
-        } else if (EMS_Thermostat.mode == 1) {
+        } else if (mode == 1) {
             thermoMode = 2; // auto
         }
-    } else { // default for all thermostats
-        if (EMS_Thermostat.mode == 0) {
+    } else { // default for all other thermostats
+        if (mode == 0) {
             thermoMode = 3; // night
-        } else if (EMS_Thermostat.mode == 1) {
+        } else if (mode == 1) {
             thermoMode = 4; // day
-        } else if (EMS_Thermostat.mode == 2) {
+        } else if (mode == 2) {
             thermoMode = 2; // auto
         }
     }
@@ -602,58 +603,64 @@ void showInfo() {
         myDebug_P(PSTR("%sThermostat stats:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
         myDebug_P(PSTR("  Thermostat: %s"), ems_getThermostatDescription(buffer_type, false));
 
-        // Render Current & Setpoint Room Temperature
-        if (ems_getThermostatModel() == EMS_MODEL_EASY) {
-            // Temperatures are *100
-            _renderShortValue("Set room temperature", "C", EMS_Thermostat.setpoint_roomTemp, 10); // *100
-            _renderShortValue("Current room temperature", "C", EMS_Thermostat.curr_roomTemp, 10); // *100
-        } else if ((ems_getThermostatModel() == EMS_MODEL_FR10) || (ems_getThermostatModel() == EMS_MODEL_FW100)
-                   || (ems_getThermostatModel() == EMS_MODEL_FW120)) {
-            // Temperatures are *10
-            _renderShortValue("Set room temperature", "C", EMS_Thermostat.setpoint_roomTemp, 1); // *10
-            _renderShortValue("Current room temperature", "C", EMS_Thermostat.curr_roomTemp, 1); // *10
-        } else {
-            // because we store in 2 bytes short, when converting to a single byte we'll loose the negative value if its unset
-            _renderShortValue("Setpoint room temperature", "C", EMS_Thermostat.setpoint_roomTemp, 2); // convert to a single byte * 2
-            _renderShortValue("Current room temperature", "C", EMS_Thermostat.curr_roomTemp, 1);      // is *10
-        }
-
-        // Render Day/Night/Holiday Temperature
-        if ((EMS_Thermostat.holidaytemp > 0) && (EMSESP_Settings.heating_circuit == 2)) { // only if we are on a RC35 we show more info
-            _renderIntValue("Day temperature", "C", EMS_Thermostat.daytemp, 2);           // convert to a single byte * 2
-            _renderIntValue("Night temperature", "C", EMS_Thermostat.nighttemp, 2);       // convert to a single byte * 2
-            _renderIntValue("Vacation temperature", "C", EMS_Thermostat.holidaytemp, 2);  // convert to a single byte * 2
-        }
-
         // Render Thermostat Date & Time
-        // not for EASY
-        if ((ems_getThermostatModel() != EMS_MODEL_EASY)) {
-            myDebug_P(PSTR("  Thermostat time is %02d:%02d:%02d %d/%d/%d"),
-                      EMS_Thermostat.hour,
-                      EMS_Thermostat.minute,
-                      EMS_Thermostat.second,
-                      EMS_Thermostat.day,
-                      EMS_Thermostat.month,
-                      EMS_Thermostat.year + 2000);
+        uint8_t model = ems_getThermostatModel();
+        if ((model != EMS_MODEL_EASY)) {
+            myDebug_P(PSTR("  Thermostat time is %s"), EMS_Thermostat.datetime);
         }
 
-        // Render Termostat Mode, if we have a mode
-        uint8_t thermoMode = _getThermostatMode(); // 0xFF=unknown, 0=low, 1=manual, 2=auto, 3=night, 4=day
+        uint8_t _m_setpoint, _m_curr;
+        switch (model) {
+        case EMS_MODEL_EASY:
+            _m_setpoint = 10; // *100
+            _m_curr     = 10; // *100
+            break;
+        case EMS_MODEL_FR10:
+        case EMS_MODEL_FW100:
+        case EMS_MODEL_FW120:
+            _m_setpoint = 1; // *10
+            _m_curr     = 1; // *10
+            break;
+        default:             // RC30,RC35 etc...
+            _m_setpoint = 2; // *2
+            _m_curr     = 1; // *10
+            break;
+        }
 
-        if (thermoMode == 0) {
-            myDebug_P(PSTR("  Mode is set to low"));
-        } else if (thermoMode == 1) {
-            myDebug_P(PSTR("  Mode is set to manual"));
-        } else if (thermoMode == 2) {
-            myDebug_P(PSTR("  Mode is set to auto"));
-        } else if (thermoMode == 3) {
-            myDebug_P(PSTR("  Mode is set to night"));
-        } else if (thermoMode == 4) {
-            myDebug_P(PSTR("  Mode is set to day"));
+        // go through all Heating Circuits
+        for (uint8_t hc_num = 1; hc_num <= EMS_THERMOSTAT_MAXHC; hc_num++) {
+            // only show if we have data for the Heating Circuit
+            if (EMS_Thermostat.hc[hc_num - 1].active) {
+                myDebug_P(PSTR("  Heating Circuit %d"), hc_num);
+                // Render Current & Setpoint Room Temperature for each thermostat type
+                _renderShortValue(" Setpoint room temperature", "C", EMS_Thermostat.hc[hc_num - 1].setpoint_roomTemp, _m_setpoint);
+                _renderShortValue(" Current room temperature", "C", EMS_Thermostat.hc[hc_num - 1].curr_roomTemp, _m_curr);
+
+                // Render Day/Night/Holiday Temperature on RC35s
+                if (model == EMS_MODEL_RC35) {
+                    _renderIntValue(" Day temperature", "C", EMS_Thermostat.hc[hc_num - 1].daytemp, 2);          // convert to a single byte * 2
+                    _renderIntValue(" Night temperature", "C", EMS_Thermostat.hc[hc_num - 1].nighttemp, 2);      // convert to a single byte * 2
+                    _renderIntValue(" Vacation temperature", "C", EMS_Thermostat.hc[hc_num - 1].holidaytemp, 2); // convert to a single byte * 2
+                }
+
+                // Render Termostat Mode, if we have a mode
+                uint8_t thermoMode = _getThermostatMode(hc_num); // 0xFF=unknown, 0=low, 1=manual, 2=auto, 3=night, 4=day
+                if (thermoMode == 0) {
+                    myDebug_P(PSTR("   Mode is set to low"));
+                } else if (thermoMode == 1) {
+                    myDebug_P(PSTR("   Mode is set to manual"));
+                } else if (thermoMode == 2) {
+                    myDebug_P(PSTR("   Mode is set to auto"));
+                } else if (thermoMode == 3) {
+                    myDebug_P(PSTR("   Mode is set to night"));
+                } else if (thermoMode == 4) {
+                    myDebug_P(PSTR("   Mode is set to day"));
+                }
+            }
         }
     }
 
-    // Dallas
+    // Dallas external temp sensors
     if (EMSESP_Settings.dallas_sensors != 0) {
         myDebug_P(PSTR("")); // newline
         char buffer[128] = {0};
@@ -826,80 +833,97 @@ void publishValues(bool force) {
         last_boilerActive = ((EMS_Boiler.tapwaterActive << 1) + EMS_Boiler.heatingActive); // remember last state
     }
 
-    // handle the thermostat values separately
-    // only send thermostat values if we actually have them
-    if (ems_getThermostatEnabled() && ((EMS_Thermostat.curr_roomTemp != EMS_VALUE_SHORT_NOTSET) && (EMS_Thermostat.setpoint_roomTemp != EMS_VALUE_SHORT_NOTSET))) {
-        // build new json object
-        doc.clear();
-        JsonObject rootThermostat = doc.to<JsonObject>();
+    // handle the thermostat values
+    if (ems_getThermostatEnabled()) {
+        uint8_t total_active_hc = 0; // number of HCs
+        for (uint8_t hc_v = 0; hc_v < EMS_THERMOSTAT_MAXHC; hc_v++) {
+            _EMS_Thermostat_HC * thermostat = &EMS_Thermostat.hc[hc_v];
 
-        rootThermostat[THERMOSTAT_HC] = _int_to_char(s, EMSESP_Settings.heating_circuit);
+            total_active_hc++; // increase count for #HCs we encounter
 
-        // different logic depending on thermostat types
-        if (ems_getThermostatModel() == EMS_MODEL_EASY) {
-            if (EMS_Thermostat.setpoint_roomTemp != EMS_VALUE_SHORT_NOTSET)
-                rootThermostat[THERMOSTAT_SELTEMP] = (double)EMS_Thermostat.setpoint_roomTemp / 100;
-            if (EMS_Thermostat.curr_roomTemp != EMS_VALUE_SHORT_NOTSET)
-                rootThermostat[THERMOSTAT_CURRTEMP] = (double)EMS_Thermostat.curr_roomTemp / 100;
-        } else if ((ems_getThermostatModel() == EMS_MODEL_FR10) || (ems_getThermostatModel() == EMS_MODEL_FW100)
-                   || (ems_getThermostatModel() == EMS_MODEL_FW120)) {
-            if (EMS_Thermostat.setpoint_roomTemp != EMS_VALUE_SHORT_NOTSET)
-                rootThermostat[THERMOSTAT_SELTEMP] = (double)EMS_Thermostat.setpoint_roomTemp / 10;
-            if (EMS_Thermostat.curr_roomTemp != EMS_VALUE_SHORT_NOTSET)
-                rootThermostat[THERMOSTAT_CURRTEMP] = (double)EMS_Thermostat.curr_roomTemp / 10;
-        } else {
-            if (EMS_Thermostat.setpoint_roomTemp != EMS_VALUE_SHORT_NOTSET)
-                rootThermostat[THERMOSTAT_SELTEMP] = (double)EMS_Thermostat.setpoint_roomTemp / 2;
-            if (EMS_Thermostat.curr_roomTemp != EMS_VALUE_SHORT_NOTSET)
-                rootThermostat[THERMOSTAT_CURRTEMP] = (double)EMS_Thermostat.curr_roomTemp / 10;
+            // only send if we have an active Heating Circuit with real data
+            if ((thermostat->active) && (thermostat->curr_roomTemp != EMS_VALUE_SHORT_NOTSET) && (thermostat->setpoint_roomTemp != EMS_VALUE_SHORT_NOTSET)) {
+                // build new json object
+                doc.clear();
+                JsonObject rootThermostat = doc.to<JsonObject>();
 
-            if (EMS_Thermostat.daytemp != EMS_VALUE_INT_NOTSET)
-                rootThermostat[THERMOSTAT_DAYTEMP] = (double)EMS_Thermostat.daytemp / 2;
-            if (EMS_Thermostat.nighttemp != EMS_VALUE_INT_NOTSET)
-                rootThermostat[THERMOSTAT_NIGHTTEMP] = (double)EMS_Thermostat.nighttemp / 2;
-            if (EMS_Thermostat.holidaytemp != EMS_VALUE_INT_NOTSET)
-                rootThermostat[THERMOSTAT_HOLIDAYTEMP] = (double)EMS_Thermostat.holidaytemp / 2;
+                rootThermostat[THERMOSTAT_HC] = _int_to_char(s, (thermostat->hc) + 1); // heating circuit 1..4
 
-            if (EMS_Thermostat.heatingtype != EMS_VALUE_INT_NOTSET)
-                rootThermostat[THERMOSTAT_HEATINGTYPE] = EMS_Thermostat.heatingtype;
+                // different logic depending on thermostat types
+                if (ems_getThermostatModel() == EMS_MODEL_EASY) {
+                    if (thermostat->setpoint_roomTemp != EMS_VALUE_SHORT_NOTSET)
+                        rootThermostat[THERMOSTAT_SELTEMP] = (double)thermostat->setpoint_roomTemp / 100;
+                    if (thermostat->curr_roomTemp != EMS_VALUE_SHORT_NOTSET)
+                        rootThermostat[THERMOSTAT_CURRTEMP] = (double)thermostat->curr_roomTemp / 100;
+                } else if ((ems_getThermostatModel() == EMS_MODEL_FR10) || (ems_getThermostatModel() == EMS_MODEL_FW100)
+                           || (ems_getThermostatModel() == EMS_MODEL_FW120)) {
+                    if (thermostat->setpoint_roomTemp != EMS_VALUE_SHORT_NOTSET)
+                        rootThermostat[THERMOSTAT_SELTEMP] = (double)thermostat->setpoint_roomTemp / 10;
+                    if (thermostat->curr_roomTemp != EMS_VALUE_SHORT_NOTSET)
+                        rootThermostat[THERMOSTAT_CURRTEMP] = (double)thermostat->curr_roomTemp / 10;
+                } else {
+                    if (thermostat->setpoint_roomTemp != EMS_VALUE_SHORT_NOTSET)
+                        rootThermostat[THERMOSTAT_SELTEMP] = (double)thermostat->setpoint_roomTemp / 2;
+                    if (thermostat->curr_roomTemp != EMS_VALUE_SHORT_NOTSET)
+                        rootThermostat[THERMOSTAT_CURRTEMP] = (double)thermostat->curr_roomTemp / 10;
 
-            if (EMS_Thermostat.circuitcalctemp != EMS_VALUE_INT_NOTSET)
-                rootThermostat[THERMOSTAT_CIRCUITCALCTEMP] = EMS_Thermostat.circuitcalctemp;
-        }
+                    if (thermostat->daytemp != EMS_VALUE_INT_NOTSET)
+                        rootThermostat[THERMOSTAT_DAYTEMP] = (double)thermostat->daytemp / 2;
+                    if (thermostat->nighttemp != EMS_VALUE_INT_NOTSET)
+                        rootThermostat[THERMOSTAT_NIGHTTEMP] = (double)thermostat->nighttemp / 2;
+                    if (thermostat->holidaytemp != EMS_VALUE_INT_NOTSET)
+                        rootThermostat[THERMOSTAT_HOLIDAYTEMP] = (double)thermostat->holidaytemp / 2;
 
-        uint8_t thermoMode = _getThermostatMode(); // 0xFF=unknown, 0=low, 1=manual, 2=auto, 3=night, 4=day
+                    if (thermostat->heatingtype != EMS_VALUE_INT_NOTSET)
+                        rootThermostat[THERMOSTAT_HEATINGTYPE] = thermostat->heatingtype;
 
-        // Termostat Mode
-        if (thermoMode == 0) {
-            rootThermostat[THERMOSTAT_MODE] = "low";
-        } else if (thermoMode == 1) {
-            rootThermostat[THERMOSTAT_MODE] = "manual";
-        } else if (thermoMode == 2) {
-            rootThermostat[THERMOSTAT_MODE] = "auto";
-        } else if (thermoMode == 3) {
-            rootThermostat[THERMOSTAT_MODE] = "night";
-        } else if (thermoMode == 4) {
-            rootThermostat[THERMOSTAT_MODE] = "day";
-        }
+                    if (thermostat->circuitcalctemp != EMS_VALUE_INT_NOTSET)
+                        rootThermostat[THERMOSTAT_CIRCUITCALCTEMP] = thermostat->circuitcalctemp;
+                }
 
-        data[0] = '\0'; // reset data for next package
-        serializeJson(doc, data, sizeof(data));
+                uint8_t thermoMode = _getThermostatMode(hc_v + 1); // 0xFF=unknown, 0=low, 1=manual, 2=auto, 3=night, 4=day
 
-        // check for empty json
-        jsonSize = measureJson(doc);
-        if (jsonSize > 2) {
-            // calculate new CRC
-            crc.reset();
-            for (uint8_t i = 0; i < (jsonSize - 1); i++) {
-                crc.update(data[i]);
-            }
-            fchecksum = crc.finalize();
-            if ((previousThermostatPublishCRC != fchecksum) || force) {
-                previousThermostatPublishCRC = fchecksum;
-                myDebugLog("Publishing thermostat data via MQTT");
+                // Termostat Mode
+                if (thermoMode == 0) {
+                    rootThermostat[THERMOSTAT_MODE] = "low";
+                } else if (thermoMode == 1) {
+                    rootThermostat[THERMOSTAT_MODE] = "manual";
+                } else if (thermoMode == 2) {
+                    rootThermostat[THERMOSTAT_MODE] = "auto";
+                } else if (thermoMode == 3) {
+                    rootThermostat[THERMOSTAT_MODE] = "night";
+                } else if (thermoMode == 4) {
+                    rootThermostat[THERMOSTAT_MODE] = "day";
+                }
 
-                // send values via MQTT
-                myESP.mqttPublish(TOPIC_THERMOSTAT_DATA, data);
+                data[0] = '\0'; // reset data for next package
+                serializeJson(doc, data, sizeof(data));
+
+                // check for empty json
+                jsonSize = measureJson(doc);
+                if (jsonSize > 2) {
+                    // calculate new CRC
+                    crc.reset();
+                    for (uint8_t i = 0; i < (jsonSize - 1); i++) {
+                        crc.update(data[i]);
+                    }
+                    fchecksum = crc.finalize();
+                    if ((previousThermostatPublishCRC != fchecksum) || force) {
+                        previousThermostatPublishCRC = fchecksum;
+                        myDebugLog("Publishing thermostat data via MQTT");
+
+                        // send values via MQTT
+
+                        char thermostat_topicname[20];
+                        strlcpy(thermostat_topicname, TOPIC_THERMOSTAT_DATA, sizeof(thermostat_topicname)); // "thermostat_data"
+                        // if we have more than 1 active Heating Circuit, postfix with the HC number
+                        if (total_active_hc > 1) {
+                            char buffer[4];
+                            strlcat(thermostat_topicname, itoa(total_active_hc, buffer, 10), sizeof(thermostat_topicname));
+                        }
+                        myESP.mqttPublish(thermostat_topicname, data);
+                    }
+                }
             }
         }
     }
@@ -1066,7 +1090,7 @@ void do_scanThermostat() {
 
 // do a system health check every now and then to see if we all connections
 void do_systemCheck() {
-    if (!ems_getBusConnected()) {
+    if (!ems_getBusConnected() && !myESP.getUseSerial()) {
         myDebug_P(PSTR("Error! Unable to read the EMS bus."));
     }
 }
@@ -1180,9 +1204,6 @@ bool LoadSaveCallback(MYESP_FSACTION action, JsonObject json) {
         EMSESP_Settings.listen_mode = settings["listen_mode"];
         ems_setTxDisabled(EMSESP_Settings.listen_mode);
 
-        EMSESP_Settings.heating_circuit = settings["heating_circuit"] | DEFAULT_HEATINGCIRCUIT;
-        ems_setThermostatHC(EMSESP_Settings.heating_circuit);
-
         EMSESP_Settings.tx_mode = settings["tx_mode"] | 1; // default to 1 (generic)
         ems_setTxMode(EMSESP_Settings.tx_mode);
 
@@ -1200,7 +1221,6 @@ bool LoadSaveCallback(MYESP_FSACTION action, JsonObject json) {
         settings["shower_timer"]    = EMSESP_Settings.shower_timer;
         settings["shower_alert"]    = EMSESP_Settings.shower_alert;
         settings["publish_time"]    = EMSESP_Settings.publish_time;
-        settings["heating_circuit"] = EMSESP_Settings.heating_circuit;
         settings["tx_mode"]         = EMSESP_Settings.tx_mode;
 
         return true;
@@ -1308,18 +1328,6 @@ bool SetListCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, co
             ok                           = true;
         }
 
-        // heating_circuit
-        if ((strcmp(setting, "heating_circuit") == 0) && (wc == 2)) {
-            uint8_t hc = atoi(value);
-            if ((hc >= 1) && (hc <= 2)) {
-                EMSESP_Settings.heating_circuit = hc;
-                ems_setThermostatHC(hc);
-                ok = true;
-            } else {
-                myDebug_P(PSTR("Error. Usage: set heating_circuit <1 | 2>"));
-            }
-        }
-
         // tx_mode
         if ((strcmp(setting, "tx_mode") == 0) && (wc == 2)) {
             uint8_t mode = atoi(value);
@@ -1338,7 +1346,6 @@ bool SetListCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, co
         myDebug_P(PSTR("  led_gpio=%d"), EMSESP_Settings.led_gpio);
         myDebug_P(PSTR("  dallas_gpio=%d"), EMSESP_Settings.dallas_gpio);
         myDebug_P(PSTR("  dallas_parasite=%s"), EMSESP_Settings.dallas_parasite ? "on" : "off");
-        myDebug_P(PSTR("  heating_circuit=%d"), EMSESP_Settings.heating_circuit);
         myDebug_P(PSTR("  tx_mode=%d"), EMSESP_Settings.tx_mode);
         myDebug_P(PSTR("  listen_mode=%s"), EMSESP_Settings.listen_mode ? "on" : "off");
         myDebug_P(PSTR("  shower_timer=%s"), EMSESP_Settings.shower_timer ? "on" : "off");
@@ -1487,13 +1494,21 @@ void TelnetCommandCallback(uint8_t wc, const char * commandLine) {
     }
 
     // thermostat commands
-    if ((strcmp(first_cmd, "thermostat") == 0) && (wc == 3)) {
-        char * second_cmd = _readWord();
+    if ((strcmp(first_cmd, "thermostat") == 0) && (wc >= 3)) {
+        char *  second_cmd = _readWord();
+        uint8_t hc         = EMS_THERMOSTAT_DEFAULTHC;
+
         if (strcmp(second_cmd, "temp") == 0) {
-            ems_setThermostatTemp(_readFloatNumber());
+            if (wc == 4) {
+                hc = _readIntNumber(); // next parameter is the heating circuit
+            }
+            ems_setThermostatTemp(_readFloatNumber(), hc);
             ok = true;
         } else if (strcmp(second_cmd, "mode") == 0) {
-            ems_setThermostatMode(_readIntNumber());
+            if (wc == 4) {
+                hc = _readIntNumber(); // next parameter is the heating circuit
+            }
+            ems_setThermostatMode(_readIntNumber(), hc);
             ok = true;
         } else if (strcmp(second_cmd, "read") == 0) {
             ems_doReadCommand(_readHexNumber(), EMS_Thermostat.device_id);
@@ -1602,7 +1617,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
             float f     = strtof((char *)message, 0);
             char  s[10] = {0};
             myDebug_P(PSTR("MQTT topic: thermostat temperature value %s"), _float_to_char(s, f));
-            ems_setThermostatTemp(f);
+            ems_setThermostatTemp(f, EMS_THERMOSTAT_DEFAULTHC);
             publishValues(true); // publish back immediately, can't remember why I do this?!
         }
 
@@ -1610,21 +1625,11 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
         if (strcmp(topic, TOPIC_THERMOSTAT_CMD_MODE) == 0) {
             myDebug_P(PSTR("MQTT topic: thermostat mode value %s"), message);
             if (strcmp((char *)message, "auto") == 0) {
-                ems_setThermostatMode(2);
+                ems_setThermostatMode(2, EMS_THERMOSTAT_DEFAULTHC);
             } else if (strcmp((char *)message, "day") == 0 || strcmp((char *)message, "manual") == 0) {
-                ems_setThermostatMode(1);
+                ems_setThermostatMode(1, EMS_THERMOSTAT_DEFAULTHC);
             } else if (strcmp((char *)message, "night") == 0 || strcmp((char *)message, "off") == 0) {
-                ems_setThermostatMode(0);
-            }
-        }
-
-        // thermostat heating circuit change
-        if (strcmp(topic, TOPIC_THERMOSTAT_CMD_HC) == 0) {
-            myDebug_P(PSTR("MQTT topic: thermostat heating circuit value %s"), message);
-            uint8_t hc = atoi((char *)message);
-            if ((hc >= 1) && (hc <= 2)) {
-                EMSESP_Settings.heating_circuit = hc;
-                ems_setThermostatHC(hc);
+                ems_setThermostatMode(0, EMS_THERMOSTAT_DEFAULTHC);
             }
         }
 
@@ -1633,7 +1638,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
             float f     = strtof((char *)message, 0);
             char  s[10] = {0};
             myDebug_P(PSTR("MQTT topic: new thermostat night temperature value %s"), _float_to_char(s, f));
-            ems_setThermostatTemp(f, 1);
+            ems_setThermostatTemp(f, EMS_THERMOSTAT_DEFAULTHC, 1);
         }
 
         // set daytemp value
@@ -1641,7 +1646,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
             float f     = strtof((char *)message, 0);
             char  s[10] = {0};
             myDebug_P(PSTR("MQTT topic: new thermostat day temperature value %s"), _float_to_char(s, f));
-            ems_setThermostatTemp(f, 2);
+            ems_setThermostatTemp(f, EMS_THERMOSTAT_DEFAULTHC, 2);
         }
 
         // set holiday value
@@ -1649,7 +1654,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
             float f     = strtof((char *)message, 0);
             char  s[10] = {0};
             myDebug_P(PSTR("MQTT topic: new thermostat holiday temperature value %s"), _float_to_char(s, f));
-            ems_setThermostatTemp(f, 3);
+            ems_setThermostatTemp(f, EMS_THERMOSTAT_DEFAULTHC, 3);
         }
 
         // wwActivated
@@ -1770,27 +1775,30 @@ void WebCallback(JsonObject root) {
         char buffer[200];
         thermostat["tm"] = ems_getThermostatDescription(buffer, true);
 
+        // TODO: enable support multiple HCs
+        uint8_t hc_num = EMS_THERMOSTAT_DEFAULTHC; // default to HC1
+
         // Render Current & Setpoint Room Temperature
         if (ems_getThermostatModel() == EMS_MODEL_EASY) {
-            if (EMS_Thermostat.setpoint_roomTemp != EMS_VALUE_SHORT_NOTSET)
-                thermostat["ts"] = (double)EMS_Thermostat.setpoint_roomTemp / 100;
-            if (EMS_Thermostat.curr_roomTemp != EMS_VALUE_SHORT_NOTSET)
-                thermostat["tc"] = (double)EMS_Thermostat.curr_roomTemp / 100;
+            if (EMS_Thermostat.hc[hc_num - 1].setpoint_roomTemp != EMS_VALUE_SHORT_NOTSET)
+                thermostat["ts"] = (double)EMS_Thermostat.hc[hc_num - 1].setpoint_roomTemp / 100;
+            if (EMS_Thermostat.hc[hc_num - 1].curr_roomTemp != EMS_VALUE_SHORT_NOTSET)
+                thermostat["tc"] = (double)EMS_Thermostat.hc[hc_num - 1].curr_roomTemp / 100;
         } else if ((ems_getThermostatModel() == EMS_MODEL_FR10) || (ems_getThermostatModel() == EMS_MODEL_FW100)
                    || (ems_getThermostatModel() == EMS_MODEL_FW120)) {
-            if (EMS_Thermostat.setpoint_roomTemp != EMS_VALUE_SHORT_NOTSET)
-                thermostat["ts"] = (double)EMS_Thermostat.setpoint_roomTemp / 10;
-            if (EMS_Thermostat.curr_roomTemp != EMS_VALUE_SHORT_NOTSET)
-                thermostat["tc"] = (double)EMS_Thermostat.curr_roomTemp / 10;
+            if (EMS_Thermostat.hc[hc_num - 1].setpoint_roomTemp != EMS_VALUE_SHORT_NOTSET)
+                thermostat["ts"] = (double)EMS_Thermostat.hc[hc_num - 1].setpoint_roomTemp / 10;
+            if (EMS_Thermostat.hc[hc_num - 1].curr_roomTemp != EMS_VALUE_SHORT_NOTSET)
+                thermostat["tc"] = (double)EMS_Thermostat.hc[hc_num - 1].curr_roomTemp / 10;
         } else {
-            if (EMS_Thermostat.setpoint_roomTemp != EMS_VALUE_SHORT_NOTSET)
-                thermostat["ts"] = (double)EMS_Thermostat.setpoint_roomTemp / 2;
-            if (EMS_Thermostat.curr_roomTemp != EMS_VALUE_SHORT_NOTSET)
-                thermostat["tc"] = (double)EMS_Thermostat.curr_roomTemp / 10;
+            if (EMS_Thermostat.hc[hc_num - 1].setpoint_roomTemp != EMS_VALUE_SHORT_NOTSET)
+                thermostat["ts"] = (double)EMS_Thermostat.hc[hc_num - 1].setpoint_roomTemp / 2;
+            if (EMS_Thermostat.hc[hc_num - 1].curr_roomTemp != EMS_VALUE_SHORT_NOTSET)
+                thermostat["tc"] = (double)EMS_Thermostat.hc[hc_num - 1].curr_roomTemp / 10;
         }
 
         // Render Termostat Mode, if we have a mode
-        uint8_t thermoMode = _getThermostatMode(); // 0xFF=unknown, 0=low, 1=manual, 2=auto, 3=night, 4=day
+        uint8_t thermoMode = _getThermostatMode(hc_num); // 0xFF=unknown, 0=low, 1=manual, 2=auto, 3=night, 4=day
         if (thermoMode == 0) {
             thermostat["tmode"] = "low";
         } else if (thermoMode == 1) {
@@ -1890,17 +1898,16 @@ void WebCallback(JsonObject root) {
 // Most of these will be overwritten after the SPIFFS config file is loaded
 void initEMSESP() {
     // general settings
-    EMSESP_Settings.shower_timer    = false;
-    EMSESP_Settings.shower_alert    = false;
-    EMSESP_Settings.led             = true; // LED is on by default
-    EMSESP_Settings.listen_mode     = false;
-    EMSESP_Settings.publish_time    = DEFAULT_PUBLISHTIME;
-    EMSESP_Settings.timestamp       = millis();
-    EMSESP_Settings.dallas_sensors  = 0;
-    EMSESP_Settings.led_gpio        = EMSESP_LED_GPIO;
-    EMSESP_Settings.dallas_gpio     = EMSESP_DALLAS_GPIO;
-    EMSESP_Settings.heating_circuit = 1; // default heating circuit to HC1
-    EMSESP_Settings.tx_mode         = 1; // default tx mode
+    EMSESP_Settings.shower_timer   = false;
+    EMSESP_Settings.shower_alert   = false;
+    EMSESP_Settings.led            = true; // LED is on by default
+    EMSESP_Settings.listen_mode    = false;
+    EMSESP_Settings.publish_time   = DEFAULT_PUBLISHTIME;
+    EMSESP_Settings.timestamp      = millis();
+    EMSESP_Settings.dallas_sensors = 0;
+    EMSESP_Settings.led_gpio       = EMSESP_LED_GPIO;
+    EMSESP_Settings.dallas_gpio    = EMSESP_DALLAS_GPIO;
+    EMSESP_Settings.tx_mode        = 1; // default tx mode
 
     // shower settings
     EMSESP_Shower.timerStart    = 0;
