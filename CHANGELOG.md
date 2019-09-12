@@ -5,11 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.9.1 beta] 2019-09-07
+## [1.9.1 beta] 2019-09-12
 
 ### Added
 
 - Support for multiple Heating Circuits (RC35 only for now and writing via telnet) - https://github.com/proddy/EMS-ESP/issues/162
+
+### Fixed
+
+- fixed zero values (0.0) for setpoint temperature with the RC35 thermostat when in Auto mode - https://github.com/proddy/EMS-ESP/issues/180
   
 ### Removed
 
