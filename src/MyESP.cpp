@@ -353,8 +353,10 @@ void MyESP::_mqttOnMessage(char * topic, char * payload, size_t len) {
 // MQTT subscribe
 void MyESP::mqttSubscribe(const char * topic) {
     if (mqttClient.connected() && (strlen(topic) > 0)) {
-        char topic_s[MQTT_MAX_TOPIC_SIZE];
-        strlcpy(topic_s, _mqttTopic(topic), sizeof(topic_s));
+        char * topic_s = _mqttTopic(topic);
+
+        //char topic_s[MQTT_MAX_TOPIC_SIZE];
+        //strlcpy(topic_s, _mqttTopic(topic), sizeof(topic_s));
         (void)mqttClient.subscribe(topic_s, _mqtt_qos);
         myDebug_P(PSTR("[MQTT] Subscribing to %s"), topic_s);
 
@@ -702,7 +704,11 @@ void MyESP::_printSetCommands() {
     myDebug_P(PSTR("  mqtt_port=%d"), _mqtt_port);
     myDebug_P(PSTR("  mqtt_heartbeat=%s"), (_mqtt_heartbeat) ? "on" : "off");
 
+#ifdef FORCE_SERIAL
+    myDebug_P(PSTR("  serial=%s (this is always when compiled with -DFORCE_SERIAL)"), (_general_serial) ? "on" : "off");
+#else
     myDebug_P(PSTR("  serial=%s"), (_general_serial) ? "on" : "off");
+#endif
     myDebug_P(PSTR("  ntp_enabled=%s"), (_ntp_enabled) ? "on" : "off");
 
     // print any custom settings

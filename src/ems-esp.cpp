@@ -1584,6 +1584,32 @@ void OTACallback_post() {
     emsuart_start();
 }
 
+
+// see's if a topic is appended with an interger value
+// used to identify a heating circuit
+// returns HC number
+uint8_t _hasHCspecified(const char * topic, const char * input) {
+    int orig_len = strlen(topic); // original length of the topic we're comparing too
+
+    // check if the strings match ignoring any suffix
+    if (strncmp(input, topic, orig_len) == 0) {
+        // see if we have additional chars at the end, we want none or 1
+        uint8_t diff = (strlen(input) - orig_len);
+        if (diff > 1) {
+            return 0; // invalid
+        }
+
+        if (diff == 0) {
+            return EMS_THERMOSTAT_DEFAULTHC; // identical, use default
+        }
+
+        // return the value of the last char
+        return input[orig_len] - '0';
+    }
+
+    return 0; // invalid
+}
+
 // MQTT Callback to handle incoming/outgoing changes
 void MQTTCallback(unsigned int type, const char * topic, const char * message) {
     // we're connected. lets subscribe to some topics
@@ -1611,49 +1637,55 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
 
     // handle incoming MQTT publish events
     if (type == MQTT_MESSAGE_EVENT) {
+        uint8_t hc;
         // thermostat temp changes
-        if (strcmp(topic, TOPIC_THERMOSTAT_CMD_TEMP) == 0) {
+        hc = _hasHCspecified(TOPIC_THERMOSTAT_CMD_TEMP, topic);
+        if (hc) {
             float f     = strtof((char *)message, 0);
             char  s[10] = {0};
-            myDebug_P(PSTR("MQTT topic: thermostat temperature value %s"), _float_to_char(s, f));
-            ems_setThermostatTemp(f, EMS_THERMOSTAT_DEFAULTHC);
-            publishValues(true); // publish back immediately, can't remember why I do this?!
+            myDebug_P(PSTR("MQTT topic: thermostat HC%d temperature value %s"), hc, _float_to_char(s, f));
+            ems_setThermostatTemp(f, hc);
+            publishValues(true); // publish back immediately
         }
 
         // thermostat mode changes
-        if (strcmp(topic, TOPIC_THERMOSTAT_CMD_MODE) == 0) {
-            myDebug_P(PSTR("MQTT topic: thermostat mode value %s"), message);
+        hc = _hasHCspecified(TOPIC_THERMOSTAT_CMD_MODE, topic);
+        if (hc) {
+            myDebug_P(PSTR("MQTT topic: thermostat HC%d mode value %s"), hc, message);
             if (strcmp((char *)message, "auto") == 0) {
-                ems_setThermostatMode(2, EMS_THERMOSTAT_DEFAULTHC);
+                ems_setThermostatMode(2, hc);
             } else if (strcmp((char *)message, "day") == 0 || strcmp((char *)message, "manual") == 0) {
-                ems_setThermostatMode(1, EMS_THERMOSTAT_DEFAULTHC);
+                ems_setThermostatMode(1, hc);
             } else if (strcmp((char *)message, "night") == 0 || strcmp((char *)message, "off") == 0) {
-                ems_setThermostatMode(0, EMS_THERMOSTAT_DEFAULTHC);
+                ems_setThermostatMode(0, hc);
             }
         }
 
         // set night temp value
-        if (strcmp(topic, TOPIC_THERMOSTAT_CMD_NIGHTTEMP) == 0) {
+        hc = _hasHCspecified(TOPIC_THERMOSTAT_CMD_NIGHTTEMP, topic);
+        if (hc) {
             float f     = strtof((char *)message, 0);
             char  s[10] = {0};
-            myDebug_P(PSTR("MQTT topic: new thermostat night temperature value %s"), _float_to_char(s, f));
-            ems_setThermostatTemp(f, EMS_THERMOSTAT_DEFAULTHC, 1);
+            myDebug_P(PSTR("MQTT topic: new thermostat HC%d night temperature value %s"), hc, _float_to_char(s, f));
+            ems_setThermostatTemp(f, hc, 1);
         }
 
         // set daytemp value
-        if (strcmp(topic, TOPIC_THERMOSTAT_CMD_DAYTEMP) == 0) {
+        hc = _hasHCspecified(TOPIC_THERMOSTAT_CMD_DAYTEMP, topic);
+        if (hc) {
             float f     = strtof((char *)message, 0);
             char  s[10] = {0};
-            myDebug_P(PSTR("MQTT topic: new thermostat day temperature value %s"), _float_to_char(s, f));
-            ems_setThermostatTemp(f, EMS_THERMOSTAT_DEFAULTHC, 2);
+            myDebug_P(PSTR("MQTT topic: new thermostat HC%d day temperature value %s"), hc, _float_to_char(s, f));
+            ems_setThermostatTemp(f, hc, 2);
         }
 
         // set holiday value
-        if (strcmp(topic, TOPIC_THERMOSTAT_CMD_HOLIDAYTEMP) == 0) {
+        hc = _hasHCspecified(TOPIC_THERMOSTAT_CMD_HOLIDAYTEMP, topic);
+        if (hc) {
             float f     = strtof((char *)message, 0);
             char  s[10] = {0};
-            myDebug_P(PSTR("MQTT topic: new thermostat holiday temperature value %s"), _float_to_char(s, f));
-            ems_setThermostatTemp(f, EMS_THERMOSTAT_DEFAULTHC, 3);
+            myDebug_P(PSTR("MQTT topic: new thermostat HC%d holiday temperature value %s"), hc, _float_to_char(s, f));
+            ems_setThermostatTemp(f, hc, 3);
         }
 
         // wwActivated
@@ -1752,6 +1784,7 @@ void WebCallback(JsonObject root) {
         }
     }
 
+    // send over EMS devices
     JsonArray list = emsbus.createNestedArray("devices");
 
     for (std::list<_Generic_Device>::iterator it = Devices.begin(); it != Devices.end(); it++) {
@@ -1762,10 +1795,11 @@ void WebCallback(JsonObject root) {
         item["productid"] = (it)->product_id;
 
         char s[10];
-        itoa((it)->device_id, s, 16);
-        item["deviceid"] = s; // convert to hex
+        itoa((it)->device_id, s, 16); // convert to hex
+        item["deviceid"] = s;
     }
 
+    // send over Thermostat data
     JsonObject thermostat = root.createNestedObject("thermostat");
 
     if (ems_getThermostatEnabled()) {
@@ -1774,7 +1808,6 @@ void WebCallback(JsonObject root) {
         char buffer[200];
         thermostat["tm"] = ems_getThermostatDescription(buffer, true);
 
-        // TODO: enable support multiple HCs
         uint8_t hc_num = EMS_THERMOSTAT_DEFAULTHC; // default to HC1
 
         // Render Current & Setpoint Room Temperature
@@ -2047,6 +2080,7 @@ void setup() {
     EMSESP_Settings.dallas_sensors = ds18.setup(EMSESP_Settings.dallas_gpio, EMSESP_Settings.dallas_parasite); // returns #sensors
 
     systemCheckTimer.attach(SYSTEMCHECK_TIME, do_systemCheck); // check if EMS is reachable
+
 }
 
 //

@@ -2561,6 +2561,7 @@ void ems_sendRawTelegram(char * telegram) {
 
 /**
  * Set the temperature of the thermostat
+ * hc_num is 1 to 4
  * temptype 0 = normal, 1=night temp, 2=day temp, 3=holiday temp
  */
 void ems_setThermostatTemp(float temperature, uint8_t hc_num, uint8_t temptype) {
