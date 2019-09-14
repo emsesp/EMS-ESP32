@@ -359,7 +359,7 @@ void MyESP::mqttSubscribe(const char * topic) {
         myDebug_P(PSTR("[MQTT] Subscribing to %s"), topic_s);
 
         // add to mqtt log
-        _addMQTTLog(topic_s, "", 2); // type of 2 means Subscribe. Has an empty payload for now XXX
+        _addMQTTLog(topic_s, "", 2); // type of 2 means Subscribe. Has an empty payload for now
     }
 }
 

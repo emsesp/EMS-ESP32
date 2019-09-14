@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Support for multiple Heating Circuits (RC35 only for now and writing via telnet) - https://github.com/proddy/EMS-ESP/issues/162
+- mqttlog command also shows which MQTT topics it is subscribed too
 
 ### Fixed
 

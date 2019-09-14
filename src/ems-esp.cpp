@@ -121,7 +121,6 @@ static const command_t project_cmds[] PROGMEM = {
     {true, "shower_timer <on | off>", "send MQTT notification on all shower durations"},
     {true, "shower_alert <on | off>", "stop hot water to send 3 cold burst warnings after max shower time is exceeded"},
     {true, "publish_time <seconds>", "set frequency for publishing data to MQTT (0=off)"},
-    {true, "heating_circuit <1 | 2>", "set the main thermostat HC to work with (if using multiple heating circuits)"},
     {true, "tx_mode <n>", "changes Tx logic. 1=ems generic, 2=ems+, 3=Junkers HT3"},
 
     {false, "info", "show current captured on the devices"},
