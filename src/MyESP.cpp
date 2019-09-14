@@ -95,8 +95,7 @@ MyESP::MyESP() {
     _systemStable  = true;
 
     // ntp
-    _ntp_server = strdup(MYESP_NTP_SERVER);
-    ;
+    _ntp_server   = strdup(MYESP_NTP_SERVER);
     _ntp_interval = 60;
     _ntp_enabled  = false;
 
@@ -105,6 +104,7 @@ MyESP::MyESP() {
 
     // MQTT log
     for (uint8_t i = 0; i < MYESP_MQTTLOG_MAX; i++) {
+        MQTT_log[i].type      = 0;
         MQTT_log[i].timestamp = 0;
         MQTT_log[i].topic     = nullptr;
         MQTT_log[i].payload   = nullptr;
@@ -353,16 +353,21 @@ void MyESP::_mqttOnMessage(char * topic, char * payload, size_t len) {
 // MQTT subscribe
 void MyESP::mqttSubscribe(const char * topic) {
     if (mqttClient.connected() && (strlen(topic) > 0)) {
-        unsigned int packetId = mqttClient.subscribe(_mqttTopic(topic), _mqtt_qos);
-        myDebug_P(PSTR("[MQTT] Subscribing to %s (PID %d)"), _mqttTopic(topic), packetId);
+        char topic_s[MQTT_MAX_TOPIC_SIZE];
+        strlcpy(topic_s, _mqttTopic(topic), sizeof(topic_s));
+        (void)mqttClient.subscribe(topic_s, _mqtt_qos);
+        myDebug_P(PSTR("[MQTT] Subscribing to %s"), topic_s);
+
+        // add to mqtt log
+        _addMQTTLog(topic_s, "", 2); // type of 2 means Subscribe. Has an empty payload for now XXX
     }
 }
 
 // MQTT unsubscribe
 void MyESP::mqttUnsubscribe(const char * topic) {
     if (mqttClient.connected() && (strlen(topic) > 0)) {
-        unsigned int packetId = mqttClient.unsubscribe(_mqttTopic(topic));
-        myDebug_P(PSTR("[MQTT] Unsubscribing to %s (PID %d)"), _mqttTopic(topic), packetId);
+        (void)mqttClient.unsubscribe(_mqttTopic(topic));
+        myDebug_P(PSTR("[MQTT] Unsubscribing to %s"), _mqttTopic(topic));
     }
 }
 
@@ -371,7 +376,7 @@ void MyESP::mqttPublish(const char * topic, const char * payload) {
     // myDebug_P(PSTR("[MQTT] Sending pubish to %s with payload %s"), _mqttTopic(topic), payload); // for debugging
     mqttClient.publish(_mqttTopic(topic), _mqtt_qos, _mqtt_retain, payload);
 
-    _addMQTTLog(topic, payload); // add to the log
+    _addMQTTLog(topic, payload, 1); // add to the log, using type of 1 for Publish
 }
 
 // MQTT onConnect - when a connect is established
@@ -626,7 +631,7 @@ void MyESP::_consoleShowHelp() {
 // see if a char * string is empty. It could not be initialized yet.
 // return true if there is a value
 bool MyESP::_hasValue(char * s) {
-    if (s == nullptr) {
+    if ((s == nullptr) || (strlen(s) == 0)) {
         return false;
     }
     return (s[0] != '\0');
@@ -2464,8 +2469,9 @@ void MyESP::_sendStatus() {
     // create MQTT log
     JsonArray list = root.createNestedArray("mqttlog");
 
+    // only send Publish
     for (uint8_t i = 0; i < MYESP_MQTTLOG_MAX; i++) {
-        if (MQTT_log[i].topic != nullptr) {
+        if ((MQTT_log[i].type == 1) && (MQTT_log[i].topic != nullptr)) {
             JsonObject item = list.createNestedObject();
             item["topic"]   = MQTT_log[i].topic;
             item["payload"] = MQTT_log[i].payload;
@@ -2639,10 +2645,24 @@ void MyESP::_printHeap(const char * s) {
 // print MQTT log - everything that was published last per topic
 void MyESP::_printMQTTLog() {
     myDebug_P(PSTR("MQTT publish log:"));
+    uint8_t i;
 
-    for (uint8_t i = 0; i < MYESP_MQTTLOG_MAX; i++) {
-        if (MQTT_log[i].topic != nullptr) {
-            myDebug_P(PSTR("(%d) [%lu] Topic:%s Payload:%s"), i, MQTT_log[i].timestamp, MQTT_log[i].topic, MQTT_log[i].payload);
+    for (i = 0; i < MYESP_MQTTLOG_MAX; i++) {
+        if ((MQTT_log[i].topic != nullptr) && (MQTT_log[i].type == 1)) {
+            myDebug_P(PSTR("  Topic:%s Payload:%s"), MQTT_log[i].topic, MQTT_log[i].payload);
+        }
+    }
+
+    myDebug_P(PSTR("")); // newline
+    myDebug_P(PSTR("MQTT subscribe log:"));
+
+    for (i = 0; i < MYESP_MQTTLOG_MAX; i++) {
+        if ((MQTT_log[i].topic != nullptr) && (MQTT_log[i].type == 2)) {
+            if (_hasValue(MQTT_log[i].payload)) {
+                myDebug_P(PSTR("  Topic:%s Last Payload:%s"), MQTT_log[i].topic, MQTT_log[i].payload);
+            } else {
+                myDebug_P(PSTR("  Topic:%s"), MQTT_log[i].topic);
+            }
         }
     }
 
@@ -2650,16 +2670,18 @@ void MyESP::_printMQTTLog() {
 }
 
 // add an MQTT log entry to our buffer
-void MyESP::_addMQTTLog(const char * topic, const char * payload) {
+// type 0=none, 1=publish, 2=subscribe
+void MyESP::_addMQTTLog(const char * topic, const char * payload, const uint8_t type) {
     static uint8_t logCount   = 0;
     uint8_t        logPointer = 0;
     bool           found      = false;
 
-    // myDebug("Publish [#%d] %s (%d) %s (%d)", logCount, topic, strlen(topic), payload, strlen(payload)); // for debugging
+    // myDebug("_addMQTTLog [#%d] %s (%d) [%s] (%d)", logCount, topic, strlen(topic), payload, strlen(payload)); // for debugging
 
     // find the topic
+    // topics must be unique for either publish or subscribe
     while ((logPointer < MYESP_MQTTLOG_MAX) && (_hasValue(MQTT_log[logPointer].topic))) {
-        if (strcmp(MQTT_log[logPointer].topic, topic) == 0) {
+        if ((strcmp(MQTT_log[logPointer].topic, topic) == 0) && (MQTT_log[logPointer].type == type)) {
             found = true;
             break;
         }
@@ -2678,12 +2700,12 @@ void MyESP::_addMQTTLog(const char * topic, const char * payload) {
     if (MQTT_log[logPointer].topic) {
         free(MQTT_log[logPointer].topic);
     }
-
     if (MQTT_log[logPointer].payload) {
         free(MQTT_log[logPointer].payload);
     }
 
-    // add new record
+    // and add new record
+    MQTT_log[logPointer].type      = type; // 0=none, 1=publish, 2=subscribe
     MQTT_log[logPointer].topic     = strdup(topic);
     MQTT_log[logPointer].payload   = strdup(payload);
     MQTT_log[logPointer].timestamp = now();
