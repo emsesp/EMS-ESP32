@@ -9,7 +9,7 @@
 #ifndef MyESP_h
 #define MyESP_h
 
-#define MYESP_VERSION "1.2.1"
+#define MYESP_VERSION "1.2.2"
 
 #include <ArduinoJson.h>
 #include <ArduinoOTA.h>
@@ -139,7 +139,9 @@ PROGMEM const char * const custom_reset_string[]   = {custom_reset_hardware, cus
 #define CUSTOM_RESET_MAX 5
 
 // SPIFFS
-#define MYESP_SPIFFS_MAXSIZE 800 // https://arduinojson.org/v6/assistant/
+// https://arduinojson.org/v6/assistant/
+#define MYESP_SPIFFS_MAXSIZE_CONFIG 800     // max size for a config file
+#define MYESP_SPIFFS_MAXSIZE_EVENTLOG 20000 // max size for the eventlog in bytes
 
 // CRASH
 /**
@@ -376,14 +378,16 @@ class MyESP {
     bool                     _changeSetting(uint8_t wc, const char * setting, const char * value);
 
     // fs and settings
-    void                   _fs_setup();
-    bool                   _fs_loadConfig();
-    bool                   _fs_loadCustomConfig();
-    void                   _fs_printFile(const char * file);
-    void                   _fs_eraseConfig();
-    bool                   _fs_writeConfig();
-    bool                   _fs_createCustomConfig();
-    bool                   _fs_sendConfig();
+    void _fs_setup();
+    bool _fs_loadConfig();
+    bool _fs_loadCustomConfig();
+    void _fs_eraseConfig();
+    bool _fs_writeConfig();
+    bool _fs_createCustomConfig();
+    bool _fs_sendConfig();
+    bool _fs_validateConfigFile(const char * filename, size_t maxsize, JsonDocument & doc);
+    bool _fs_validateLogFile(const char * filename);
+
     fs_loadsave_callback_f _fs_loadsave_callback_f;
     fs_setlist_callback_f  _fs_setlist_callback_f;
 
