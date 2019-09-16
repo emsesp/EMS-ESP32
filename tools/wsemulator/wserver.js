@@ -51,18 +51,11 @@ var eventlog = {
     "command": "eventlist",
     "page": 1,
     "haspages": 1,
-    "list": [
-        "{ \"type\": \"WARN\", \"src\": \"sys\", \"desc\": \"Event log cleared!\", \"data\": \"\", \"time\": 1563371160 }",
-        "{ \"type\": \"WARN\", \"src\": \"sys\", \"desc\": \"Event log cleared!\", \"data\": \"\", \"time\": 1563371160 }",
-        "{ \"type\": \"INFO\", \"src\": \"wifi\", \"desc\": \"WiFi is connected\", \"data\": \"SMC\", \"time\": 13 }",
-        "{ \"type\": \"INFO\", \"src\": \"sys\", \"desc\": \"System setup completed, running\", \"data\": \"\", \"time\": 13 }",
-        "{ \"type\": \"INFO\", \"src\": \"wifi\", \"desc\": \"WiFi is connected\", \"data\": \"SMC\", \"time\": 13 }",
-        "{ \"type\": \"INFO\", \"src\": \"sys\", \"desc\": \"System setup completed, running\", \"data\": \"\", \"time\": 13 }",
-        "{ \"type\": \"WARN\", \"src\": \"websrv\", \"desc\": \"New login attempt\", \"data\": \"\", \"time\": 1563371160 }",
-        "{ \"type\": \"INFO\", \"src\": \"websrv\", \"desc\": \"Login success!\", \"data\": \"\", \"time\": 1563371160 }",
-        "{ \"type\": \"INFO\", \"src\": \"wifi\", \"desc\": \"WiFi is connected\", \"data\": \"SMC\", \"time\": 13 }",
-        "{ \"type\": \"INFO\", \"src\": \"sys\", \"desc\": \"System setup completed, running\", \"data\": \"\", \"time\": 13 }",
-        "{ \"type\": \"WARN\", \"src\": \"websrv\", \"desc\": \"New login attempt\", \"data\": \"\", \"time\": 1563371160 }"
+    "list":[
+        "{\"type\":\"WARN\",\"src\":\"system\",\"desc\":\"test data\",\"data\":\"Record #1\",\"time\": 1563371160}",
+        "{\"type\":\"WARN\",\"src\":\"system\",\"desc\":\"test data\",\"data\":\"Record #2\",\"time\":0}",
+        "{\"type\":\"INFO\",\"src\":\"system\",\"desc\":\"System booted\",\"data\":\"\",\"time\":1568660479}",
+        "{\"type\":\"WARN\",\"src\":\"system\",\"desc\":\"test data\",\"data\":\"Record #3\",\"time\":0}"
     ]
 }
 

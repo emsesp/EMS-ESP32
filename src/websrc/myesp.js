@@ -544,12 +544,17 @@ function twoDigits(value) {
 function initEventTable() {
     var newlist = [];
     for (var i = 0; i < data.length; i++) {
-        var dup = JSON.parse(data[i]);
-        dup.uid = i;
         newlist[i] = {};
         newlist[i].options = {};
         newlist[i].value = {};
+        try {
+            var dup = JSON.parse(data[i]);
+            dup.uid = i + 1;
+        } catch (e) {
+            var dup = { "uid": i, "type": "ERRO", "src": "SYS", "desc": "Error in logfile entry", "data": data[i], "time": 1 }
+        }
         newlist[i].value = dup;
+
         var c = dup.type;
         switch (c) {
             case "WARN":
@@ -564,7 +569,6 @@ function initEventTable() {
             default:
                 break;
         }
-
     }
     jQuery(function ($) {
         window.FooTable.init("#eventtable", {
