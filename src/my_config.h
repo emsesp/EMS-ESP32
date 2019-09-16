@@ -14,9 +14,8 @@
 // EMS-ESP will subscribe to these topics
 
 // MQTT for thermostat
+// these topics can be suffixed with a Heating Circuit number, e.g. thermostat_cmd_temp1 and thermostat_data1
 #define TOPIC_THERMOSTAT_DATA "thermostat_data"                    // for sending thermostat values to MQTT
-
-// these topics can be suffixed with a Heating Circuit number, e.g. thermostat_cmd_temp1
 #define TOPIC_THERMOSTAT_CMD_TEMP "thermostat_cmd_temp"            // temp changes via MQTT
 #define TOPIC_THERMOSTAT_CMD_MODE "thermostat_cmd_mode"            // mode changes via MQTT
 #define TOPIC_THERMOSTAT_CMD_HC "thermostat_cmd_hc"                // hc number changes via MQTT
