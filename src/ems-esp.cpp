@@ -1188,9 +1188,15 @@ void runUnitTest(uint8_t test_num) {
 }
 
 // callback for loading/saving settings to the file system (SPIFFS)
-bool LoadSaveCallback(MYESP_FSACTION action, JsonObject json) {
+bool LoadSaveCallback(MYESP_FSACTION action, JsonObject settings) {
     if (action == MYESP_FSACTION_LOAD) {
-        const JsonObject & settings = json["settings"];
+        // check for valid json
+        if (settings.isNull()) {
+            myDebug_P(PSTR("Error processing json settings"));
+            return false;
+        }
+
+        // serializeJsonPretty(settings, Serial); // for debugging
 
         EMSESP_Settings.led             = settings["led"];
         EMSESP_Settings.led_gpio        = settings["led_gpio"] | EMSESP_LED_GPIO;
@@ -1210,8 +1216,6 @@ bool LoadSaveCallback(MYESP_FSACTION action, JsonObject json) {
     }
 
     if (action == MYESP_FSACTION_SAVE) {
-        JsonObject settings = json.createNestedObject("settings");
-
         settings["led"]             = EMSESP_Settings.led;
         settings["led_gpio"]        = EMSESP_Settings.led_gpio;
         settings["dallas_gpio"]     = EMSESP_Settings.dallas_gpio;
@@ -1755,7 +1759,6 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
 void WIFICallback() {
     // This is where we enable the UART service to scan the incoming serial Tx/Rx bus signals
     // This is done after we have a WiFi signal to avoid any resource conflicts
-    // TODO see if EMS bus is blocked during startup and whether we still need to delay the UART with the swap below?
     // system_uart_swap();
 }
 
@@ -2080,7 +2083,6 @@ void setup() {
     EMSESP_Settings.dallas_sensors = ds18.setup(EMSESP_Settings.dallas_gpio, EMSESP_Settings.dallas_parasite); // returns #sensors
 
     systemCheckTimer.attach(SYSTEMCHECK_TIME, do_systemCheck); // check if EMS is reachable
-
 }
 
 //
