@@ -11,13 +11,11 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <title id="customname"></title>
-    <!-- Bootstrap core CSS -->
     <link href="css/required.css" rel="stylesheet">
 </head>
 
 <body>
     <div class="wrapper">
-        <!-- Sidebar Holder -->
         <nav id="sidebar">
             <div id="dismiss">
                 <i class="glyphicon glyphicon-arrow-left"></i>
@@ -96,7 +94,6 @@
 
         </nav>
 
-        <!-- Page Content Holder -->
         <div id="content">
             <button type="button" id="sidebarCollapse" class="btn btn-info navbar-btn">
                 <i class="glyphicon glyphicon-menu-hamburger"></i>
@@ -107,7 +104,6 @@
 
             <div id="revcommit" class="modal fade" role="dialog">
                 <div class="modal-dialog">
-                    <!-- Modal content-->
                     <div class="modal-content">
                         <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal">&times;</button>
@@ -127,7 +123,6 @@
 
             <div id="custom_revcommit" class="modal fade" role="dialog">
                 <div class="modal-dialog">
-                    <!-- Modal content-->
                     <div class="modal-content">
                         <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal">&times;</button>
@@ -149,7 +144,6 @@
 
             <div id="destroy" class="modal fade" role="dialog">
                 <div class="modal-dialog">
-                    <!-- Modal content-->
                     <div class="modal-content">
                         <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal">&times;</button>
@@ -181,7 +175,6 @@
 
             <div id="reboot" class="modal fade" role="dialog">
                 <div class="modal-dialog">
-                    <!-- Modal content-->
                     <div class="modal-content">
                         <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal">&times;</button>
@@ -198,13 +191,12 @@
                 </div>
             </div>
 
-            <div id="signin" class="modal fade" role="dialog">
+            <div id="signin" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog"
+                aria-labelledby="myModalLabel" aria-hidden="true">
                 <div class="modal-dialog">
-                    <!-- Modal content-->
                     <div class="modal-content">
                         <div class="modal-header">
-                            <button type="button" class="close" data-dismiss="modal">&times;</button>
-                            <h4 class="modal-title">Please log in</h4>
+                            <h4 class="modal-title">Please enter password to login to the system</h4>
                         </div>
                         <div class="row">
                             <br>
@@ -216,7 +208,7 @@
                                                 <div class="form-group">
                                                     <input id="password" class="form-control" placeholder="Password"
                                                         name="password" type="password" value="" required=""
-                                                        title="Please enter your password">
+                                                        title="Please enter the password">
                                                 </div>
                                                 <button type="submit"
                                                     class="btn btn-success btn-md pull-right">Login</button>
@@ -232,7 +224,6 @@
 
             <div id="update" class="modal fade" role="dialog">
                 <div class="modal-dialog">
-                    <!-- Modal content-->
                     <div class="modal-content">
                         <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal">&times;</button>
