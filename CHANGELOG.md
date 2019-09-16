@@ -5,16 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.9.1 beta] 2019-09-12
+## [1.9.1 beta] 2019-09-16
 
 ### Added
 
 - Support for multiple Heating Circuits (RC35 only for now and writing via telnet) - https://github.com/proddy/EMS-ESP/issues/162
 - mqttlog command also shows which MQTT topics it is subscribed too
+- Optimized event log loading in web and added integrity checks on all config and log files
 
 ### Fixed
 
 - fixed zero values (0.0) for setpoint temperature with the RC35 thermostat when in Auto mode - https://github.com/proddy/EMS-ESP/issues/180
+- added check for corrupted event log
+
+### Changed
+
+- Web login password is now mandatory
   
 ### Removed
 
