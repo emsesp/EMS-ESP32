@@ -213,7 +213,7 @@ void MyESP::_wifiCallback(justwifi_messages_t code, char * parameter) {
         ArduinoOTA.begin(); // moved to support esp32
         myDebug_P(PSTR("[OTA] listening to %s.local:%u"), ArduinoOTA.getHostname().c_str(), OTA_PORT);
 
-        //myDebug_P(PSTR("[SYSTEM] Last reset info: %s"), (char *)ESP.getResetInfo().c_str()); // unconditionally show the last reset reason
+        myDebug_P(PSTR("[SYSTEM] Last reset info: %s"), (char *)ESP.getResetInfo().c_str()); // unconditionally show the last reset reason
 
         _mqtt_setup(); // MQTT Setup
 
