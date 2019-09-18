@@ -813,7 +813,7 @@ void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
      */
     if (EMS_Sys_Status.emsRxStatus != EMS_RX_STATUS_IDLE) {
         if (EMS_Sys_Status.emsLogging > EMS_SYS_LOGGING_NONE) {
-            myDebug_P(PSTR("** [DEBUG MODE] Warning, we missed the bus - Rx non-idle!"));
+            myDebug_P(PSTR("** Warning, we missed the bus - Rx non-idle!"));
         }
         return;
     }
@@ -1383,18 +1383,17 @@ void _process_RC30StatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
 
 /**
  * type 0x3E (HC1), 0x48 (HC2), 0x52 (HC3), 0x5C (HC4) - HK1MonitorMessage - data from the RC35 thermostat (0x10) - 16 bytes
+ * examples:
+ * 10 0B 3E 00   00 00 00 7D 00 00 00 00 00 00 00 00 00 11 05 04
+ * 10 00 48 00   00 00 00 00 E4 00 00 00 00 00 00 00 00 11 05 04
+ * 10 0B 52 00   00 00 00 00 00 00 00 00 00 00 00 00 00 11 00 00
+ * 10 0B 5C 00   00 00 00 00 00 00 00 00 00 00 00 00 00 11 00 00
  * 
  * For reading the temp values only
  * received every 60 seconds
  */
 void _process_RC35StatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
-
-    // ignore if first byte is 0x00
-    if (EMS_RxTelegram->data[0] == 0x00) {
-        return;
-    }
-    
-    uint8_t hc_num = _getHeatingCircuit(EMS_RxTelegram); // which HC is it?
+    uint8_t hc_num = _getHeatingCircuit(EMS_RxTelegram) - 1; // which HC is it?
 
     // check if setpoint temp sensor is unavailable
     if (EMS_RxTelegram->data[EMS_OFFSET_RC35StatusMessage_setpoint] != 0x7D) {
@@ -1402,13 +1401,15 @@ void _process_RC35StatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     }
 
     // check if current temp sensor is unavailable
-    if (EMS_RxTelegram->data[EMS_OFFSET_RC35StatusMessage_curr] != 0x7D) {
+    if (EMS_RxTelegram->data[EMS_OFFSET_RC35StatusMessage_curr] == 0x7D) {
+        EMS_Thermostat.hc[hc_num].curr_roomTemp = EMS_VALUE_SHORT_NOTSET;
+    } else {
         EMS_Thermostat.hc[hc_num].curr_roomTemp = _toShort(EMS_OFFSET_RC35StatusMessage_curr); // is * 10
     }
 
     EMS_Thermostat.hc[hc_num].day_mode = _bitRead(EMS_OFFSET_RC35StatusMessage_mode, 1); // get day mode flag
 
-    EMS_Thermostat.hc[hc_num].circuitcalctemp = _toByte(EMS_OFFSET_RC35Set_circuitcalctemp); // 0x48 calculated temperature
+    EMS_Thermostat.hc[hc_num].circuitcalctemp = _toByte(EMS_OFFSET_RC35Set_circuitcalctemp); // calculated temperature
 
     EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
 }
@@ -1589,7 +1590,7 @@ uint8_t _getHeatingCircuit(_EMS_RxTelegram * EMS_RxTelegram) {
  * received only after requested
  */
 void _process_RC35Set(_EMS_RxTelegram * EMS_RxTelegram) {
-    uint8_t hc_num = _getHeatingCircuit(EMS_RxTelegram); // which HC is it?
+    uint8_t hc_num = _getHeatingCircuit(EMS_RxTelegram) - 1; // which HC is it?
 
     EMS_Thermostat.hc[hc_num].mode        = _toByte(EMS_OFFSET_RC35Set_mode);
     EMS_Thermostat.hc[hc_num].daytemp     = _toByte(EMS_OFFSET_RC35Set_temp_day);     // is * 2
