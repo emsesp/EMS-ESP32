@@ -1388,20 +1388,22 @@ void _process_RC30StatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
  * received every 60 seconds
  */
 void _process_RC35StatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
+
+    // ignore if first byte is 0x00
+    if (EMS_RxTelegram->data[0] == 0x00) {
+        return;
+    }
+    
     uint8_t hc_num = _getHeatingCircuit(EMS_RxTelegram); // which HC is it?
 
     // check if setpoint temp sensor is unavailable
-    if (EMS_RxTelegram->data[EMS_OFFSET_RC35StatusMessage_setpoint] == 0x7D) {
-        EMS_Thermostat.hc[hc_num].setpoint_roomTemp = EMS_VALUE_SHORT_NOTSET;
-    } else {
-        EMS_Thermostat.hc[hc_num].setpoint_roomTemp = _toShort(EMS_OFFSET_RC35StatusMessage_setpoint); // is * 2
+    if (EMS_RxTelegram->data[EMS_OFFSET_RC35StatusMessage_setpoint] != 0x7D) {
+        EMS_Thermostat.hc[hc_num].setpoint_roomTemp = _toByte(EMS_OFFSET_RC35StatusMessage_setpoint); // is * 2
     }
 
     // check if current temp sensor is unavailable
-    if (EMS_RxTelegram->data[EMS_OFFSET_RC35StatusMessage_curr] == 0x7D) {
-        EMS_Thermostat.hc[hc_num].curr_roomTemp = EMS_VALUE_SHORT_NOTSET;
-    } else {
-        EMS_Thermostat.hc[hc_num].curr_roomTemp = _toShort(EMS_OFFSET_RC35StatusMessage_curr);
+    if (EMS_RxTelegram->data[EMS_OFFSET_RC35StatusMessage_curr] != 0x7D) {
+        EMS_Thermostat.hc[hc_num].curr_roomTemp = _toShort(EMS_OFFSET_RC35StatusMessage_curr); // is * 10
     }
 
     EMS_Thermostat.hc[hc_num].day_mode = _bitRead(EMS_OFFSET_RC35StatusMessage_mode, 1); // get day mode flag
@@ -1474,15 +1476,15 @@ void _process_RCPLUSStatusMode(_EMS_RxTelegram * EMS_RxTelegram) {
 }
 
 /**
- * FR10 Junkers - type x6F01
+ * FR10 Junkers - type x006F
  */
 void _process_JunkersStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     if (EMS_RxTelegram->offset == 0) {
         uint8_t hc                   = EMS_THERMOSTAT_DEFAULTHC - 1; // use HC1
         EMS_Thermostat.hc[hc].active = true;
 
-        // e.g. for FR10:  90 00 FF 00 00 6F 03 01 00 BE 00 BF
-        // e.g. for FW100: 90 00 FF 00 00 6F 03 02 00 D7 00 DA F3 34 00 C4
+        // e.g. for FR10:  90 00 FF 00 00 6F   03 01 00 BE 00 BF
+        // e.g. for FW100: 90 00 FF 00 00 6F   03 02 00 D7 00 DA F3 34 00 C4
         EMS_Thermostat.hc[hc].curr_roomTemp     = _toShort(EMS_OFFSET_JunkersStatusMessage_curr);     // value is * 10
         EMS_Thermostat.hc[hc].setpoint_roomTemp = _toShort(EMS_OFFSET_JunkersStatusMessage_setpoint); // value is * 10
     }
