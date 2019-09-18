@@ -1393,6 +1393,11 @@ void _process_RC30StatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
  * received every 60 seconds
  */
 void _process_RC35StatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
+    // ignore if first byte is 0x00
+    if (EMS_RxTelegram->data[0] == 0x00) {
+        return;
+    }
+
     uint8_t hc_num = _getHeatingCircuit(EMS_RxTelegram) - 1; // which HC is it?
 
     // check if setpoint temp sensor is unavailable
@@ -1402,8 +1407,6 @@ void _process_RC35StatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
 
     // check if current temp sensor is unavailable
     if (EMS_RxTelegram->data[EMS_OFFSET_RC35StatusMessage_curr] == 0x7D) {
-        EMS_Thermostat.hc[hc_num].curr_roomTemp = EMS_VALUE_SHORT_NOTSET;
-    } else {
         EMS_Thermostat.hc[hc_num].curr_roomTemp = _toShort(EMS_OFFSET_RC35StatusMessage_curr); // is * 10
     }
 
