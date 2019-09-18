@@ -244,7 +244,7 @@ void ems_init() {
 
     // init all heating circuits
     for (uint8_t i = 0; i < EMS_THERMOSTAT_MAXHC; i++) {
-        EMS_Thermostat.hc[i].hc                = i;
+        EMS_Thermostat.hc[i].hc                = i+1;
         EMS_Thermostat.hc[i].active            = false;
         EMS_Thermostat.hc[i].mode              = EMS_VALUE_INT_NOTSET;
         EMS_Thermostat.hc[i].day_mode          = EMS_VALUE_INT_NOTSET;
@@ -1569,7 +1569,7 @@ uint8_t _getHeatingCircuit(_EMS_RxTelegram * EMS_RxTelegram) {
     case EMS_TYPE_RC35StatusMessage_HC1:
     case EMS_TYPE_RC35Set_HC1:
     default:
-        hc_num = 1;
+        hc_num = 1; // also default
         break;
     case EMS_TYPE_RC35StatusMessage_HC2:
     case EMS_TYPE_RC35Set_HC2:
@@ -1584,6 +1584,8 @@ uint8_t _getHeatingCircuit(_EMS_RxTelegram * EMS_RxTelegram) {
         hc_num = 4;
         break;
     }
+
+    EMS_Thermostat.hc[hc_num-1].active = true;
 
     return (hc_num);
 }
