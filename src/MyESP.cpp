@@ -213,9 +213,19 @@ void MyESP::_wifiCallback(justwifi_messages_t code, char * parameter) {
         ArduinoOTA.begin(); // moved to support esp32
         myDebug_P(PSTR("[OTA] listening to %s.local:%u"), ArduinoOTA.getHostname().c_str(), OTA_PORT);
 
-        myDebug_P(PSTR("[SYSTEM] Last reset info: %s"), (char *)ESP.getResetInfo().c_str()); // unconditionally show the last reset reason
+        // show reason for the restart if any
+        unsigned char reason = _getCustomResetReason();
+        if (reason > 0) {
+            char buffer[32];
+            strcpy_P(buffer, custom_reset_string[reason - 1]);
+            myDebug_P(PSTR("[SYSTEM] Last reset reason: %s (count %d)"), buffer, _getSystemStabilityCounter());
+        } else {
+            myDebug_P(PSTR("[SYSTEM] Last reset reason: %s (count %d)"), (char *)ESP.getResetReason().c_str(), _getSystemStabilityCounter());
+            myDebug_P(PSTR("[SYSTEM] Last reset info: %s"), (char *)ESP.getResetInfo().c_str());
+        }
 
-        _mqtt_setup(); // MQTT Setup
+        // MQTT Setup
+        _mqtt_setup();
 
         // if we don't want Serial anymore, turn it off
         if (!_general_serial) {
@@ -1747,8 +1757,8 @@ bool MyESP::fs_saveCustomConfig(JsonObject root) {
         ok = true;
     }
 
-    if (_ota_pre_callback_f) {
-        (_ota_pre_callback_f)();
+    if (_ota_post_callback_f) {
+        (_ota_post_callback_f)();
     }
 
     return ok;
@@ -1782,8 +1792,8 @@ bool MyESP::fs_saveConfig(JsonObject root) {
 
     // serializeJsonPretty(root, Serial); // for debugging
 
-    if (_ota_pre_callback_f) {
-        (_ota_pre_callback_f)();
+    if (_ota_post_callback_f) {
+        (_ota_post_callback_f)();
     }
 
     return ok;
@@ -1850,6 +1860,10 @@ bool MyESP::_fs_createCustomConfig() {
 // init the SPIFF file system and load the config
 // if it doesn't exist try and create it
 void MyESP::_fs_setup() {
+    if (_ota_pre_callback_f) {
+        (_ota_pre_callback_f)(); // call custom function
+    }
+
     if (!SPIFFS.begin()) {
         myDebug_P(PSTR("[FS] Formatting filesystem..."));
         if (SPIFFS.format()) {
@@ -1889,6 +1903,10 @@ void MyESP::_fs_setup() {
         myDebug_P(PSTR("[FS] Resetting event log"));
         SPIFFS.remove(MYESP_EVENTLOG_FILE);
         _writeEvent("WARN", "system", "Event Log", "Log was reset due to corruption somewhere");
+    }
+
+    if (_ota_post_callback_f) {
+        (_ota_post_callback_f)(); // call custom function
     }
 }
 
@@ -2358,10 +2376,16 @@ void MyESP::_procMsg(AsyncWebSocketClient * client, size_t sz) {
         uint8_t page = doc["page"];
         _sendEventLog(page);
     } else if (strcmp(command, "clearevent") == 0) {
+        if (_ota_pre_callback_f) {
+            (_ota_pre_callback_f)(); // call custom function
+        }
         if (SPIFFS.remove(MYESP_EVENTLOG_FILE)) {
             _writeEvent("WARN", "system", "Event log cleared", "");
         } else {
-            myDebug_P(PSTR("[WEB] Couldn't clear log file"));
+            myDebug_P(PSTR("[WEB] Could not clear event log"));
+        }
+        if (_ota_post_callback_f) {
+            (_ota_post_callback_f)(); // call custom function
         }
     } else if (strcmp(command, "scan") == 0) {
         WiFi.scanNetworksAsync(std::bind(&MyESP::_printScanResult, this, std::placeholders::_1), true);
