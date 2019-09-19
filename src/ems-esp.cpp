@@ -835,8 +835,8 @@ void publishValues(bool force) {
     // handle the thermostat values
     if (ems_getThermostatEnabled()) {
         uint8_t total_active_hc = 0; // number of HCs
-        for (uint8_t hc_v = 0; hc_v < EMS_THERMOSTAT_MAXHC; hc_v++) {
-            _EMS_Thermostat_HC * thermostat = &EMS_Thermostat.hc[hc_v];
+        for (uint8_t hc_v = 1; hc_v <= EMS_THERMOSTAT_MAXHC; hc_v++) {
+            _EMS_Thermostat_HC * thermostat = &EMS_Thermostat.hc[hc_v - 1];
 
             total_active_hc++; // increase count for #HCs we encounter
 
@@ -846,7 +846,7 @@ void publishValues(bool force) {
                 doc.clear();
                 JsonObject rootThermostat = doc.to<JsonObject>();
 
-                rootThermostat[THERMOSTAT_HC] = _int_to_char(s, (thermostat->hc) + 1); // heating circuit 1..4
+                rootThermostat[THERMOSTAT_HC] = _int_to_char(s, thermostat->hc); // heating circuit 1..4
 
                 // different logic depending on thermostat types
                 if (ems_getThermostatModel() == EMS_MODEL_EASY) {
@@ -880,7 +880,7 @@ void publishValues(bool force) {
                         rootThermostat[THERMOSTAT_CIRCUITCALCTEMP] = thermostat->circuitcalctemp;
                 }
 
-                uint8_t thermoMode = _getThermostatMode(hc_v + 1); // 0xFF=unknown, 0=low, 1=manual, 2=auto, 3=night, 4=day
+                uint8_t thermoMode = _getThermostatMode(hc_v); // 0xFF=unknown, 0=low, 1=manual, 2=auto, 3=night, 4=day
 
                 // Termostat Mode
                 if (thermoMode == 0) {
@@ -1448,11 +1448,6 @@ void TelnetCommandCallback(uint8_t wc, const char * commandLine) {
             ems_scanDevices();
             ok = true;
         }
-    }
-
-    if (strcmp(first_cmd, "startup") == 0) {
-        ems_startupTelegrams();
-        ok = true;
     }
 
     // shower settings
