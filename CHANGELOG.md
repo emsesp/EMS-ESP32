@@ -78,7 +78,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - HeatPump support (e.g. the Nefit Enviline)
 - new device: Buderus MM50 Mixer
 - new devices: Junkers FW100 and ISM1 (thanks Vuego123)
-- Improved Tx logic to support EMS, EMS+ and Heatronics (thanks kwertie01, susisstrolch, philrich)
+- Improved Tx logic to support EMS, EMS+ and Heatronic 3 (thanks kwertie01, susisstrolch, philrich)
 - MQTT heartbeat
 
 ### Fixed
