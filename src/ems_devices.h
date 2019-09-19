@@ -20,6 +20,7 @@
 /*
  * Boiler Telegram Types...
  */
+#define EMS_TYPE_UBADevices 0x07                  // EMS connected devices
 #define EMS_TYPE_UBAMonitorFast 0x18              // is an automatic monitor broadcast
 #define EMS_TYPE_UBAMonitorSlow 0x19              // is an automatic monitor broadcast
 #define EMS_TYPE_UBAMonitorWWMessage 0x34         // is an automatic monitor broadcast
@@ -89,19 +90,19 @@
 
 
 // RC35 specific
-#define EMS_TYPE_RC35StatusMessage_HC1 0x3E     // is an automatic thermostat broadcast giving us temps on HC1
-#define EMS_TYPE_RC35StatusMessage_HC2 0x48     // is an automatic thermostat broadcast giving us temps on HC2
-#define EMS_TYPE_RC35StatusMessage_HC3 0x52     // is an automatic thermostat broadcast giving us temps on HC3
-#define EMS_TYPE_RC35StatusMessage_HC4 0x5C     // is an automatic thermostat broadcast giving us temps on HC4
+#define EMS_TYPE_RC35StatusMessage_HC1 0x3E // is an automatic thermostat broadcast giving us temps on HC1
+#define EMS_TYPE_RC35StatusMessage_HC2 0x48 // is an automatic thermostat broadcast giving us temps on HC2
+#define EMS_TYPE_RC35StatusMessage_HC3 0x52 // is an automatic thermostat broadcast giving us temps on HC3
+#define EMS_TYPE_RC35StatusMessage_HC4 0x5C // is an automatic thermostat broadcast giving us temps on HC4
 
 #define EMS_OFFSET_RC35StatusMessage_setpoint 2 // desired temp
 #define EMS_OFFSET_RC35StatusMessage_curr 3     // current temp
 #define EMS_OFFSET_RC35StatusMessage_mode 1     //day mode
 
-#define EMS_TYPE_RC35Set_HC1 0x3D             // for setting values like temp and mode (Working mode HC1)
-#define EMS_TYPE_RC35Set_HC2 0x47             // for setting values like temp and mode (Working mode HC2)
-#define EMS_TYPE_RC35Set_HC3 0x51             // for setting values like temp and mode (Working mode HC3)
-#define EMS_TYPE_RC35Set_HC4 0x5B             // for setting values like temp and mode (Working mode HC4)
+#define EMS_TYPE_RC35Set_HC1 0x3D // for setting values like temp and mode (Working mode HC1)
+#define EMS_TYPE_RC35Set_HC2 0x47 // for setting values like temp and mode (Working mode HC2)
+#define EMS_TYPE_RC35Set_HC3 0x51 // for setting values like temp and mode (Working mode HC3)
+#define EMS_TYPE_RC35Set_HC4 0x5B // for setting values like temp and mode (Working mode HC4)
 
 #define EMS_OFFSET_RC35Set_mode 7             // position of thermostat mode
 #define EMS_OFFSET_RC35Set_temp_day 2         // position of thermostat setpoint temperature for day time
@@ -183,7 +184,7 @@ const _Boiler_Device Boiler_Devices[] = {
     {203, "Buderus Logamax U122/Junkers Cerapur"},
     {208, "Buderus Logamax plus/GB192"},
     {64, "Sieger BK15/Nefit Smartline/Buderus GB152"},
-    {EMS_PRODUCTID_HEATRONICS, "Bosch Condens 2500/Junkers Heatronics3"},
+    {EMS_PRODUCTID_HEATRONIC, "Bosch Condens 2500/Junkers Heatronic 3"},
     {122, "Nefit Proline"},
     {172, "Nefit Enviline"}
 

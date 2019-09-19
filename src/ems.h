@@ -82,10 +82,10 @@
 #define EMS_ID_GATEWAY 0x48 // KM200 Web Gateway
 
 // Product IDs
-#define EMS_PRODUCTID_HEATRONICS 95 // Junkers Heatronic3 device
-#define EMS_PRODUCTID_SM10 73       // SM10 solar module
-#define EMS_PRODUCTID_SM100 163     // SM100 solar module
-#define EMS_PRODUCTID_ISM1 101      // Junkers ISM1 solar module
+#define EMS_PRODUCTID_HEATRONIC 95 // Junkers Heatronic 3 device
+#define EMS_PRODUCTID_SM10 73      // SM10 solar module
+#define EMS_PRODUCTID_SM100 163    // SM100 solar module
+#define EMS_PRODUCTID_ISM1 101     // Junkers ISM1 solar module
 
 #define EMS_MIN_TELEGRAM_LENGTH 6  // minimal length for a validation telegram, including CRC
 #define EMS_MAX_TELEGRAM_LENGTH 32 // max length of a telegram, including CRC, for Rx and Tx.
@@ -98,6 +98,8 @@
 #define EMS_VALUE_USHORT_NOTSET 0x8000 // for 2-byte unsigned shorts
 #define EMS_VALUE_LONG_NOTSET 0xFFFFFF // for 3-byte longs
 
+
+// thermostat specific
 #define EMS_THERMOSTAT_MAXHC 4     // max number of heating circuits
 #define EMS_THERMOSTAT_DEFAULTHC 1 // default heating circuit is 1
 #define EMS_THERMOSTAT_WRITE_YES true
@@ -107,13 +109,15 @@
 #define EMS_BOILER_BURNPOWER_TAPWATER 100
 #define EMS_BOILER_SELFLOWTEMP_HEATING 70
 
-// define maximum settable tapwater temperature
+// define maximum setable tapwater temperature
 #define EMS_BOILER_TAPWATER_TEMPERATURE_MAX 60
 
-#define EMS_TX_TELEGRAM_QUEUE_MAX 100 // max size of Tx FIFO queue
+#define EMS_TX_TELEGRAM_QUEUE_MAX 50 // max size of Tx FIFO queue. Number of Tx records to send.
 
-//#define EMS_SYS_LOGGING_DEFAULT EMS_SYS_LOGGING_VERBOSE
+//#define EMS_SYS_LOGGING_DEFAULT EMS_SYS_LOGGING_VERBOSE // turn on for debugging
 #define EMS_SYS_LOGGING_DEFAULT EMS_SYS_LOGGING_NONE
+
+#define EMS_SYS_DEVICEMAP_LENGTH 13 // size of the 0x07 telegram data part which stores all active EMS devices
 
 // define the model types which get rendered to html colors in the web interface
 #define EMS_MODELTYPE_BOILER 1     // success color
@@ -163,21 +167,22 @@ typedef enum {
 typedef struct {
     _EMS_RX_STATUS   emsRxStatus;
     _EMS_TX_STATUS   emsTxStatus;
-    uint16_t         emsRxPgks;        // # successfull received
-    uint16_t         emsTxPkgs;        // # successfull sent
-    uint16_t         emxCrcErr;        // CRC errors
-    bool             emsPollEnabled;   // flag enable the response to poll messages
-    _EMS_SYS_LOGGING emsLogging;       // logging
-    bool             emsRefreshed;     // fresh data, needs to be pushed out to MQTT
-    bool             emsBusConnected;  // is there an active bus
-    uint32_t         emsRxTimestamp;   // timestamp of last EMS message received
-    uint32_t         emsPollFrequency; // time between EMS polls
-    bool             emsTxCapable;     // able to send via Tx
-    bool             emsTxDisabled;    // true to prevent all Tx
-    uint8_t          txRetryCount;     // # times the last Tx was re-sent
-    uint8_t          emsIDMask;        // Buderus: 0x00, Junkers: 0x80
-    uint8_t          emsPollAck[1];    // acknowledge buffer for Poll
-    uint8_t          emsTxMode;        // Tx mode 1, 2 or 3
+    uint16_t         emsRxPgks;                               // # successfull received
+    uint16_t         emsTxPkgs;                               // # successfull sent
+    uint16_t         emxCrcErr;                               // CRC errors
+    bool             emsPollEnabled;                          // flag enable the response to poll messages
+    _EMS_SYS_LOGGING emsLogging;                              // logging
+    bool             emsRefreshed;                            // fresh data, needs to be pushed out to MQTT
+    bool             emsBusConnected;                         // is there an active bus
+    uint32_t         emsRxTimestamp;                          // timestamp of last EMS message received
+    uint32_t         emsPollFrequency;                        // time between EMS polls
+    bool             emsTxCapable;                            // able to send via Tx
+    bool             emsTxDisabled;                           // true to prevent all Tx
+    uint8_t          txRetryCount;                            // # times the last Tx was re-sent
+    uint8_t          emsIDMask;                               // Buderus: 0x00, Junkers: 0x80
+    uint8_t          emsPollAck[1];                           // acknowledge buffer for Poll
+    uint8_t          emsTxMode;                               // Tx mode 1, 2 or 3
+    char             emsDevicemMap[EMS_SYS_DEVICEMAP_LENGTH]; // contents of 0x07 telegram with bitmasks for all active EMS devices
 } _EMS_Sys_Status;
 
 // The Tx send package
@@ -387,16 +392,13 @@ typedef struct {
 
 // Thermostat data
 typedef struct {
-    uint8_t device_id; // the device ID of the thermostat
-    uint8_t model_id;  // thermostat model
-    uint8_t product_id;
-    char    version[10];
-
-    char datetime[25]; // HH:MM:SS DD/MM/YYYY
-    bool write_supported;
-
+    uint8_t            device_id; // the device ID of the thermostat
+    uint8_t            model_id;  // thermostat model
+    uint8_t            product_id;
+    char               version[10];
+    char               datetime[25]; // HH:MM:SS DD/MM/YYYY
+    bool               write_supported;
     _EMS_Thermostat_HC hc[EMS_THERMOSTAT_MAXHC - 1]; // array for the 4 heating circuits
-
 } _EMS_Thermostat;
 
 // call back function signature for processing telegram types
