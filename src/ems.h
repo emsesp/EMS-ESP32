@@ -167,22 +167,22 @@ typedef enum {
 typedef struct {
     _EMS_RX_STATUS   emsRxStatus;
     _EMS_TX_STATUS   emsTxStatus;
-    uint16_t         emsRxPgks;                               // # successfull received
-    uint16_t         emsTxPkgs;                               // # successfull sent
-    uint16_t         emxCrcErr;                               // CRC errors
-    bool             emsPollEnabled;                          // flag enable the response to poll messages
-    _EMS_SYS_LOGGING emsLogging;                              // logging
-    bool             emsRefreshed;                            // fresh data, needs to be pushed out to MQTT
-    bool             emsBusConnected;                         // is there an active bus
-    uint32_t         emsRxTimestamp;                          // timestamp of last EMS message received
-    uint32_t         emsPollFrequency;                        // time between EMS polls
-    bool             emsTxCapable;                            // able to send via Tx
-    bool             emsTxDisabled;                           // true to prevent all Tx
-    uint8_t          txRetryCount;                            // # times the last Tx was re-sent
-    uint8_t          emsIDMask;                               // Buderus: 0x00, Junkers: 0x80
-    uint8_t          emsPollAck[1];                           // acknowledge buffer for Poll
-    uint8_t          emsTxMode;                               // Tx mode 1, 2 or 3
-    char             emsDevicemMap[EMS_SYS_DEVICEMAP_LENGTH]; // contents of 0x07 telegram with bitmasks for all active EMS devices
+    uint16_t         emsRxPgks;                              // # successfull received
+    uint16_t         emsTxPkgs;                              // # successfull sent
+    uint16_t         emxCrcErr;                              // CRC errors
+    bool             emsPollEnabled;                         // flag enable the response to poll messages
+    _EMS_SYS_LOGGING emsLogging;                             // logging
+    bool             emsRefreshed;                           // fresh data, needs to be pushed out to MQTT
+    bool             emsBusConnected;                        // is there an active bus
+    uint32_t         emsRxTimestamp;                         // timestamp of last EMS message received
+    uint32_t         emsPollFrequency;                       // time between EMS polls
+    bool             emsTxCapable;                           // able to send via Tx
+    bool             emsTxDisabled;                          // true to prevent all Tx
+    uint8_t          txRetryCount;                           // # times the last Tx was re-sent
+    uint8_t          emsIDMask;                              // Buderus: 0x00, Junkers: 0x80
+    uint8_t          emsPollAck[1];                          // acknowledge buffer for Poll
+    uint8_t          emsTxMode;                              // Tx mode 1, 2 or 3
+    char             emsDeviceMap[EMS_SYS_DEVICEMAP_LENGTH]; // contents of 0x07 telegram with bitmasks for all active EMS devices
 } _EMS_Sys_Status;
 
 // The Tx send package
