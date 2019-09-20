@@ -454,6 +454,11 @@ void ems_tx_pollAck() {
  * len is length of all the data in bytes (including the header & CRC byte at end)
  */
 uint8_t _crcCalculator(uint8_t * data, uint8_t len) {
+
+    if (len <= 1) {
+        return 0;
+    }
+    
     uint8_t crc = 0;
 
     // read data and stop before the CRC
