@@ -624,7 +624,7 @@ void MyESP::_consoleShowHelp() {
 
     myDebug_P(PSTR("*"));
     myDebug_P(PSTR("* Commands:"));
-    myDebug_P(PSTR("*  ?=help, CTRL-D/quit=exit telnet session"));
+    myDebug_P(PSTR("*  ?/help=show commands, CTRL-D/quit=close telnet session"));
     myDebug_P(PSTR("*  set, system, restart, mqttlog"));
 #ifdef CRASH
     myDebug_P(PSTR("*  crash <dump | clear | test [n]>"));
@@ -649,7 +649,7 @@ bool MyESP::_hasValue(char * s) {
 
 // print all set commands and current values
 void MyESP::_printSetCommands() {
-    myDebug_P(PSTR("\nThe following set commands are available:\n"));
+    myDebug_P(PSTR("\nset commands:\n"));
     myDebug_P(PSTR("  set erase"));
     myDebug_P(PSTR("  set <wifi_mode <ap | client>"));
     myDebug_P(PSTR("  set <wifi_ssid | wifi_password> [value]"));
@@ -666,7 +666,7 @@ void MyESP::_printSetCommands() {
         (_telnet_callback_f)(TELNET_EVENT_SHOWSET);
     }
 
-    myDebug_P(PSTR("\nStored settings:\n"));
+    myDebug_P(PSTR("\nCurrent settings:\n"));
 
     if (_network_wmode == 0) {
         myDebug_P(PSTR("  wifi_mode=client"));
@@ -960,9 +960,16 @@ void MyESP::_telnetCommand(char * commandLine) {
         }
 
         if (!ok) {
-            myDebug_P(PSTR("\nInvalid parameter for set command."));
+            myDebug_P(PSTR("")); // newline
+            myDebug_P(PSTR("Unknown set command or wrong number of arguments."));
         }
 
+        return;
+    }
+
+    // help command
+    if ((strcmp(ptrToCommandName, "help") == 0) && (wc == 1)) {
+        _consoleShowHelp();
         return;
     }
 
@@ -1579,7 +1586,7 @@ bool MyESP::_fs_validateConfigFile(const char * filename, size_t maxsize, JsonDo
         return false;
     }
 
-    //serializeJsonPretty(doc, Serial); // enable for debugging
+    // serializeJsonPretty(doc, Serial); // enable for debugging
 
     file.close();
     delete[] buffer;
@@ -1726,24 +1733,23 @@ bool MyESP::_fs_loadCustomConfig() {
 bool MyESP::fs_saveCustomConfig(JsonObject root) {
     bool ok = false;
 
-    // open for writing
-    File configFile = SPIFFS.open(MYESP_CUSTOMCONFIG_FILE, "w");
-    if (!configFile) {
-        myDebug_P(PSTR("[FS] Failed to open custom config for writing"));
-        return false;
-    }
-
     // call any custom functions before handling SPIFFS
     if (_ota_pre_callback_f) {
         (_ota_pre_callback_f)();
     }
 
-    // Serialize JSON to file
-    size_t n = serializeJson(root, configFile);
-    configFile.close();
+    // open for writing
+    File configFile = SPIFFS.open(MYESP_CUSTOMCONFIG_FILE, "w");
+    if (!configFile) {
+        myDebug_P(PSTR("[FS] Failed to open custom config for writing"));
+        ok = false;
+    } else {
+        // Serialize JSON to file
+        size_t n = serializeJson(root, configFile);
+        configFile.close();
 
-    if (n) {
-        /*
+        if (n) {
+            /*
         // reload the settings, not sure why?
         if (_fs_loadsave_callback_f) {
             if (!(_fs_loadsave_callback_f)(MYESP_FSACTION_LOAD, root)) {
@@ -1752,9 +1758,10 @@ bool MyESP::fs_saveCustomConfig(JsonObject root) {
         }
         */
 
-        _writeEvent("INFO", "system", "Custom config stored in the SPIFFS", "");
-        myDebug_P(PSTR("[FS] custom config saved"));
-        ok = true;
+            _writeEvent("INFO", "system", "Custom config stored in the SPIFFS", "");
+            myDebug_P(PSTR("[FS] custom config saved"));
+            ok = true;
+        }
     }
 
     if (_ota_post_callback_f) {
@@ -1768,29 +1775,29 @@ bool MyESP::fs_saveCustomConfig(JsonObject root) {
 bool MyESP::fs_saveConfig(JsonObject root) {
     bool ok = false;
 
-    // open for writing
-    File configFile = SPIFFS.open(MYESP_CONFIG_FILE, "w");
-    if (!configFile) {
-        myDebug_P(PSTR("[FS] Failed to open system config for writing"));
-        return false;
-    }
-
     // call any custom functions before handling SPIFFS
     if (_ota_pre_callback_f) {
         (_ota_pre_callback_f)();
     }
 
-    // Serialize JSON to file
-    size_t n = serializeJson(root, configFile);
-    configFile.close();
+    // open for writing
+    File configFile = SPIFFS.open(MYESP_CONFIG_FILE, "w");
+    if (!configFile) {
+        myDebug_P(PSTR("[FS] Failed to open system config for writing"));
+        ok = false;
+    } else {
+        // Serialize JSON to file
+        size_t n = serializeJson(root, configFile);
+        configFile.close();
 
-    if (n) {
-        _writeEvent("INFO", "system", "System config stored in the SPIFFS", "");
-        myDebug_P(PSTR("[FS] system config saved"));
-        ok = true;
+        if (n) {
+            _writeEvent("INFO", "system", "System config stored in the SPIFFS", "");
+            myDebug_P(PSTR("[FS] system config saved"));
+            ok = true;
+        }
+
+        // serializeJsonPretty(root, Serial); // for debugging
     }
-
-    // serializeJsonPretty(root, Serial); // for debugging
 
     if (_ota_post_callback_f) {
         (_ota_post_callback_f)();
@@ -2347,21 +2354,9 @@ void MyESP::_procMsg(AsyncWebSocketClient * client, size_t sz) {
 
     // Check whatever the command is and act accordingly
     if (strcmp(command, "configfile") == 0) {
-        if (_ota_pre_callback_f) {
-            (_ota_pre_callback_f)();
-        }
         _shouldRestart = fs_saveConfig(root);
-        if (_ota_post_callback_f) {
-            (_ota_post_callback_f)();
-        }
     } else if (strcmp(command, "custom_configfile") == 0) {
-        if (_ota_pre_callback_f) {
-            (_ota_pre_callback_f)();
-        }
         (void)fs_saveCustomConfig(root);
-        if (_ota_post_callback_f) {
-            (_ota_post_callback_f)();
-        }
     } else if (strcmp(command, "status") == 0) {
         _sendStatus();
     } else if (strcmp(command, "custom_status") == 0) {

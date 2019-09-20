@@ -9,7 +9,7 @@
 #ifndef MyESP_h
 #define MyESP_h
 
-#define MYESP_VERSION "1.2.3"
+#define MYESP_VERSION "1.2.4"
 
 #include <ArduinoJson.h>
 #include <ArduinoOTA.h>
