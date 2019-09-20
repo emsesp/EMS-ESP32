@@ -1052,7 +1052,7 @@ char * _readWord() {
 
 // publish external dallas sensor temperature values to MQTT
 void do_publishSensorValues() {
-    if (EMSESP_Settings.dallas_sensors != 0) {
+    if ((EMSESP_Settings.dallas_sensors != 0) && (EMSESP_Settings.publish_time != 0)) {
         publishSensorValues();
     }
 }
@@ -2060,11 +2060,15 @@ void setup() {
         }
     }
 
-    // enable regular checks if not in test mode
+    // enable regular checks
     if (!EMSESP_Settings.listen_mode) {
+        regularUpdatesTimer.attach(REGULARUPDATES_TIME, do_regularUpdates); // regular reads from the EMS
+    }
+
+    // set timers for MQTT publish
+    if (EMSESP_Settings.publish_time != 0) {
         publishValuesTimer.attach(EMSESP_Settings.publish_time, do_publishValues);             // post MQTT EMS values
-        publishSensorValuesTimer.attach(EMSESP_Settings.publish_time, do_publishSensorValues); // post MQTT sensor values
-        regularUpdatesTimer.attach(REGULARUPDATES_TIME, do_regularUpdates);                    // regular reads from the EMS
+        publishSensorValuesTimer.attach(EMSESP_Settings.publish_time, do_publishSensorValues); // post MQTT dallas sensor values
     }
 
     // set pin for LED

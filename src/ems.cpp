@@ -224,7 +224,7 @@ const uint32_t EMS_POLL_TIMEOUT       = 5000000; // timeout in microseconds befo
 void ems_init() {
     // init the device map
     for (uint8_t i = 0; i < EMS_SYS_DEVICEMAP_LENGTH; i++) {
-        EMS_Sys_Status.emsDevicemMap[i] = 0x00;
+        EMS_Sys_Status.emsDeviceMap[i] = 0x00;
     }
 
     // overall status
@@ -873,7 +873,7 @@ void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
     // ignore anything that doesn't resemble a proper telegram package
     // minimal is 5 bytes, excluding CRC at the end (for EMS1.0)
     if (length <= 4) {
-        // _debugPrintTelegram("Noisy data:", &EMS_RxTelegram, COLOR_RED);
+        // _debugPrintTelegram("Noisy data: ", &EMS_RxTelegram, COLOR_RED);
         return;
     }
 
@@ -1118,7 +1118,7 @@ void _processType(_EMS_RxTelegram * EMS_RxTelegram) {
     // if its an echo of ourselves from the master UBA, ignore. This should never happen mind you
     if (EMS_RxTelegram->src == EMS_ID_ME) {
         if (EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_JABBER)
-            _debugPrintTelegram("echo:", EMS_RxTelegram, COLOR_WHITE);
+            _debugPrintTelegram("echo: ", EMS_RxTelegram, COLOR_WHITE);
         return;
     }
 
@@ -1848,12 +1848,12 @@ void _process_UBADevices(_EMS_RxTelegram * EMS_RxTelegram) {
 
     for (uint8_t data_byte = 0; data_byte < EMS_RxTelegram->data_length; data_byte++) {
         uint8_t byte       = EMS_RxTelegram->data[data_byte];
-        uint8_t saved_byte = EMS_Sys_Status.emsDevicemMap[data_byte];
+        uint8_t saved_byte = EMS_Sys_Status.emsDeviceMap[data_byte];
 
         // see if this matches what we already have stored
         if (byte != saved_byte) {
             // we have something new
-            EMS_Sys_Status.emsDevicemMap[data_byte] = byte; // save new value
+            EMS_Sys_Status.emsDeviceMap[data_byte] = byte; // save new value
             // go through all bits
             // myDebug("Byte #%d 0x%02X", data_byte, byte); // for debugging
             if (byte) {
@@ -2226,12 +2226,10 @@ void ems_getBoilerValues() {
  * Get other values from EMS devices
  */
 void ems_getSolarModuleValues() {
-    uint8_t product_id = EMS_SolarModule.product_id;
-
     if (ems_getSolarModuleEnabled()) {
-        if (product_id == EMS_PRODUCTID_SM10) {
+        if (EMS_SolarModule.product_id == EMS_PRODUCTID_SM10) {
             ems_doReadCommand(EMS_TYPE_SM10Monitor, EMS_ID_SM); // fetch all from SM10Monitor
-        } else if (product_id == EMS_PRODUCTID_SM100) {
+        } else if (EMS_SolarModule.product_id == EMS_PRODUCTID_SM100) {
             ems_doReadCommand(EMS_TYPE_SM100Monitor, EMS_ID_SM); // fetch all from SM100Monitor
         }
     }
@@ -2471,7 +2469,7 @@ void ems_printAllDevices() {
                   Boiler_Devices[i].product_id);
     }
 
-    myDebug_P(PSTR("\nThese %d devices are supported as solar module devices:"), _SolarModule_Types_max);
+    myDebug_P(PSTR("\nThese %d devices are supported under solar module devices:"), _SolarModule_Types_max);
     for (i = 0; i < _SolarModule_Types_max; i++) {
         myDebug_P(PSTR(" %s%s%s (DeviceID:0x%02X ProductID:%d)"),
                   COLOR_BOLD_ON,
@@ -2481,7 +2479,7 @@ void ems_printAllDevices() {
                   SolarModule_Devices[i].product_id);
     }
 
-    myDebug_P(PSTR("\nThese %d devices are supported as other known EMS devices:"), _Other_Devices_max);
+    myDebug_P(PSTR("\nThese %d devices are supported as other EMS devices:"), _Other_Devices_max);
     for (i = 0; i < _Other_Devices_max; i++) {
         myDebug_P(PSTR(" %s%s%s (DeviceID:0x%02X ProductID:%d)"),
                   COLOR_BOLD_ON,
@@ -2494,7 +2492,7 @@ void ems_printAllDevices() {
     myDebug_P(PSTR("\nThe following telegram type IDs are supported:"));
     for (i = 0; i < _EMS_Types_max; i++) {
         if ((EMS_Types[i].model_id == EMS_MODEL_ALL) || (EMS_Types[i].model_id == EMS_MODEL_UBA)) {
-            myDebug_P(PSTR(" type %02X (%s)"), EMS_Types[i].type, EMS_Types[i].typeString);
+            myDebug_P(PSTR(" type 0x%04X (%s)"), EMS_Types[i].type, EMS_Types[i].typeString);
         }
     }
 
@@ -2520,16 +2518,22 @@ void ems_printAllDevices() {
  */
 void ems_printDevices() {
     // print out the device map, which is sent from the UBA master and shows all the connected IDs
-    myDebug_P(PSTR("\nThese device IDs are on the EMS Bus:"));
+    char s[100];
+    char buffer[16] = {0};
+
+    strlcpy(s, "These device IDs are on the EMS Bus:", sizeof(s));
+    strlcat(s, COLOR_BOLD_ON, sizeof(s));
+
     for (uint8_t data_byte = 0; data_byte < EMS_SYS_DEVICEMAP_LENGTH; data_byte++) {
-        uint8_t byte = EMS_Sys_Status.emsDevicemMap[data_byte];
+        uint8_t byte = EMS_Sys_Status.emsDeviceMap[data_byte];
         if (byte) {
             // go through all bits
             for (uint8_t bit = 0; bit < 8; bit++) {
                 if (byte & 0x01) {
                     uint8_t device_id = ((data_byte + 1) * 8) + bit;
                     if (device_id != EMS_ID_ME) {
-                        myDebug(" 0x%02X", device_id);
+                        strlcat(s, " 0x", sizeof(s));
+                        strlcat(s, _hextoa(device_id, buffer), sizeof(s));
                     }
                 }
                 byte = byte >> 1;
@@ -2537,9 +2541,13 @@ void ems_printDevices() {
         }
     }
 
+    strlcat(s, COLOR_BOLD_OFF, sizeof(s));
+    myDebug_P(PSTR("")); // newline
+    myDebug(s);
+
     // print out the ones we recognized
     if (Devices.size() != 0) {
-        myDebug_P(PSTR("\nThese known %d EMS devices were detected:"), Devices.size());
+        myDebug_P(PSTR("and from these %d were recognized as:"), Devices.size());
         for (std::list<_Generic_Device>::iterator it = Devices.begin(); it != Devices.end(); it++) {
             myDebug_P(PSTR(" %s%s%s (DeviceID:0x%02X ProductID:%d Version:%s)"),
                       COLOR_BOLD_ON,
