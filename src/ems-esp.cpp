@@ -721,6 +721,11 @@ void publishValues(bool force) {
         return;
     }
 
+    // don't publish is publish time is set to 0
+    if (EMSESP_Settings.publish_time == 0) {
+        return;
+    }
+
     char                                      s[20] = {0}; // for formatting strings
     StaticJsonDocument<MQTT_MAX_PAYLOAD_SIZE> doc;
     char                                      data[MQTT_MAX_PAYLOAD_SIZE] = {0};
@@ -2101,7 +2106,7 @@ void loop() {
 
     // publish the values to MQTT, only if the values have changed
     // although we don't want to publish when doing a deep scan of the thermostat
-    if (ems_getEmsRefreshed() && (scanThermostat_count == 0) && (!EMSESP_Settings.listen_mode)) {
+    if (ems_getEmsRefreshed() && (scanThermostat_count == 0)) {
         publishValues(false);
         ems_setEmsRefreshed(false); // reset
     }

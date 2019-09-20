@@ -581,9 +581,6 @@ void _ems_sendTelegram() {
     // if we're preventing all outbound traffic, quit
     if (ems_getTxDisabled()) {
         EMS_TxQueue.shift(); // remove from queue
-        if (ems_getLogging() != EMS_SYS_LOGGING_NONE) {
-            myDebug_P(PSTR("in Listen Mode. All Tx is disabled."));
-        }
         return;
     }
 
@@ -1861,8 +1858,10 @@ void _process_UBADevices(_EMS_RxTelegram * EMS_RxTelegram) {
                     if ((byte & 0x01) && ((saved_byte & 0x01) == 0)) {
                         uint8_t device_id = ((data_byte + 1) * 8) + bit;
                         if (device_id != EMS_ID_ME) {
-                            myDebug("[EMS] Querying EMS Device ID 0x%02X", device_id);
-                            ems_doReadCommand(EMS_TYPE_Version, device_id); // get version, but ignore ourselves
+                            myDebug("[EMS] Detected new EMS Device with ID 0x%02X", device_id);
+                            if (!ems_getTxDisabled()) {
+                                ems_doReadCommand(EMS_TYPE_Version, device_id); // get version, but ignore ourselves
+                            }
                         }
                     }
                     byte       = byte >> 1;
@@ -2562,7 +2561,7 @@ void ems_printDevices() {
         myDebug_P(PSTR("Note: if any devices are marked as 'unknown?' please report this as a GitHub issue so the EMS devices list can be "
                        "updated."));
     } else {
-        myDebug_P(PSTR("No devices detected."));
+        myDebug_P(PSTR("No devices recognized. This could be because Tx is disabled or failing."));
     }
 
     myDebug_P(PSTR("")); // newline
@@ -2620,6 +2619,10 @@ void ems_doReadCommand(uint16_t type, uint8_t dest, bool forceRefresh) {
  * telegram is a string of hex values
  */
 void ems_sendRawTelegram(char * telegram) {
+    if (ems_getLogging() != EMS_SYS_LOGGING_NONE) {
+        myDebug_P(PSTR("in Listen Mode. All Tx is disabled."));
+    }
+
     uint8_t count = 0;
     char *  p;
     char    value[10] = {0};
