@@ -2547,7 +2547,7 @@ void ems_printDevices() {
 
     // print out the ones we recognized
     if (Devices.size() != 0) {
-        myDebug_P(PSTR("and from these %d were recognized as:"), Devices.size());
+        myDebug_P(PSTR("and from those these %d were recognized as:"), Devices.size());
         for (std::list<_Generic_Device>::iterator it = Devices.begin(); it != Devices.end(); it++) {
             myDebug_P(PSTR(" %s%s%s (DeviceID:0x%02X ProductID:%d Version:%s)"),
                       COLOR_BOLD_ON,
@@ -2558,9 +2558,14 @@ void ems_printDevices() {
                       (it)->version);
         }
 
-        myDebug_P(PSTR("\nNote: if any devices are marked as 'unknown?' please report this as a GitHub issue so the EMS devices list can be "
-                       "updated.\n"));
+        myDebug_P(PSTR("")); // newline
+        myDebug_P(PSTR("Note: if any devices are marked as 'unknown?' please report this as a GitHub issue so the EMS devices list can be "
+                       "updated."));
+    } else {
+        myDebug_P(PSTR("No devices detected."));
     }
+
+    myDebug_P(PSTR("")); // newline
 }
 
 /**

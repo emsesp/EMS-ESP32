@@ -1554,7 +1554,7 @@ void TelnetCommandCallback(uint8_t wc, const char * commandLine) {
     }
 
     // send raw
-    if (strcmp(first_cmd, "send") == 0) {
+    if ((strcmp(first_cmd, "send") == 0) && (wc > 1)) {
         ems_sendRawTelegram((char *)&commandLine[5]);
         ok = true;
     }
@@ -1567,7 +1567,7 @@ void TelnetCommandCallback(uint8_t wc, const char * commandLine) {
 
     // check for invalid command
     if (!ok) {
-        myDebug_P(PSTR("Unknown command. Use ? for help."));
+        myDebug_P(PSTR("Unknown command or wrong number of arguments. Use ? for help."));
     }
 }
 

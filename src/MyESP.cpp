@@ -1430,9 +1430,13 @@ void MyESP::_telnetHandle() {
             if (charsRead > 0) {
                 charsRead      = 0; // is static, so have to reset
                 _suspendOutput = false;
+                /*
                 if (_general_serial) {
                     SerialAndTelnet.serialPrint('\n'); // force newline if in Serial
                 }
+                */
+                SerialAndTelnet.write('\n'); // force NL
+
                 _telnetCommand(_command);
             }
             break;
