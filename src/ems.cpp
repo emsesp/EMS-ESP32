@@ -454,11 +454,10 @@ void ems_tx_pollAck() {
  * len is length of all the data in bytes (including the header & CRC byte at end)
  */
 uint8_t _crcCalculator(uint8_t * data, uint8_t len) {
-
     if (len <= 1) {
         return 0;
     }
-    
+
     uint8_t crc = 0;
 
     // read data and stop before the CRC
@@ -1887,10 +1886,23 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
         return;
     }
 
-    uint8_t product_id = _toByte(0);
+    uint8_t offset = 0;
+
+    // check for 2nd subscriber
+    // e.g. 18 0B 02 00 00 00 00 5E 02 01
+    if (EMS_RxTelegram->data[0] == 0x00) {
+        // see if we have a 2nd subscriber
+        if (EMS_RxTelegram->data[3] != 0x00) {
+            offset = 3;
+        } else {
+            return; // ignore telegram
+        }
+    }
+
+    uint8_t product_id = _toByte(offset);
 
     char version[10] = {0};
-    snprintf(version, sizeof(version), "%02d.%02d", _toByte(1), _toByte(2));
+    snprintf(version, sizeof(version), "%02d.%02d", _toByte(offset + 1), _toByte(offset + 2));
 
     // see if its a known boiler
     int  i         = 0;
@@ -2053,12 +2065,10 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
 
     if (typeFound) {
         myDebug_P(PSTR("Device found: %s (DeviceID:0x%02X ProductID:%d Version:%s)"), Other_Devices[i].model_string, Other_Devices[i].device_id, product_id, version);
-
         // add to list
         _addDevice(EMS_MODELTYPE_OTHER, product_id, Other_Devices[i].device_id, version, Other_Devices[i].model_string); // type 3 = other
-        return;
     } else {
-        myDebug_P(PSTR("Unrecognized device found: %s (DeviceID:0x%02X ProductID:%d Version:%s)"), EMS_RxTelegram->src, product_id, version);
+        myDebug_P(PSTR("Unrecognized device found: (DeviceID:0x%02X ProductID:%d Version:%s)"), EMS_RxTelegram->src, product_id, version);
         // add to list
         _addDevice(EMS_MODELTYPE_OTHER, product_id, EMS_RxTelegram->src, version, "unknown?"); // type 4 = unknown
     }
@@ -2624,8 +2634,11 @@ void ems_doReadCommand(uint16_t type, uint8_t dest, bool forceRefresh) {
  * telegram is a string of hex values
  */
 void ems_sendRawTelegram(char * telegram) {
-    if (ems_getLogging() != EMS_SYS_LOGGING_NONE) {
-        myDebug_P(PSTR("in Listen Mode. All Tx is disabled."));
+    if (EMS_Sys_Status.emsTxDisabled) {
+        if (ems_getLogging() != EMS_SYS_LOGGING_NONE) {
+            myDebug_P(PSTR("in Listen Mode. All Tx is disabled."));
+        }
+        return;
     }
 
     uint8_t count = 0;

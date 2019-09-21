@@ -136,7 +136,7 @@ static const command_t project_cmds[] PROGMEM = {
     {false, "queue", "show current Tx queue"},
     {false, "autodetect [deep]", "detect EMS devices and attempt to automatically set boiler and thermostat types"},
     {false, "shower <timer | alert>", "toggle either timer or alert on/off"},
-    {false, "send XX ...", "send raw telegram data as hex to EMS bus"},
+    {false, "send XX ...", "send raw telegram data to EMS bus (XX are hex values)"},
     {false, "thermostat read <type ID>", "send read request to the thermostat for heating circuit hc 1-4"},
     {false, "thermostat temp [hc] <degrees>", "set current thermostat temperature"},
     {false, "thermostat mode [hc] <mode>", "set mode (0=low/night, 1=manual/day, 2=auto) for heating circuit hc 1-4"},
@@ -1103,7 +1103,7 @@ void do_systemCheck() {
 // only if we have a EMS connection
 void do_regularUpdates() {
     if (ems_getBusConnected() && !ems_getTxDisabled()) {
-        myDebugLog("Requesting scheduled EMS device data");
+        myDebugLog("Starting scheduled query from EMS devices");
         ems_getThermostatValues();
         ems_getBoilerValues();
         ems_getSolarModuleValues();
