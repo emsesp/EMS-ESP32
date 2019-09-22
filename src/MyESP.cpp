@@ -316,6 +316,9 @@ void MyESP::_wifiCallback(justwifi_messages_t code, char * parameter) {
 
     if (code == MESSAGE_ACCESSPOINT_CREATING) {
         myDebug_P(PSTR("[WIFI] Creating access point"));
+        // for setting of wifi mode to AP and save
+        _network_wmode = 1;
+        (void)_fs_writeConfig();
     }
 
     if (code == MESSAGE_ACCESSPOINT_FAILED) {
