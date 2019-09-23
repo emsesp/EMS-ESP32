@@ -1823,7 +1823,7 @@ void _addDevice(uint8_t model_type, uint8_t product_id, uint8_t device_id, char 
     _Generic_Device device;
     // if its a duplicate don't add
     bool found = false;
-    for (std::list<_Generic_Device>::iterator it = Devices.begin(); it != Devices.end(); it++) {
+    for (std::list<_Generic_Device>::iterator it = Devices.begin(); it != Devices.end(); ++it) {
         if (((it)->product_id == product_id) && ((it)->device_id == device_id)) {
             found = true;
         }
@@ -2560,9 +2560,9 @@ void ems_printDevices() {
     myDebug(s);
 
     // print out the ones we recognized
-    if (Devices.size() != 0) {
+    if (!Devices.empty()) {
         myDebug_P(PSTR("and from those these %d were recognized as:"), Devices.size());
-        for (std::list<_Generic_Device>::iterator it = Devices.begin(); it != Devices.end(); it++) {
+        for (std::list<_Generic_Device>::iterator it = Devices.begin(); it != Devices.end(); ++it) {
             myDebug_P(PSTR(" %s%s%s (DeviceID:0x%02X ProductID:%d Version:%s)"),
                       COLOR_BOLD_ON,
                       (it)->model_string,

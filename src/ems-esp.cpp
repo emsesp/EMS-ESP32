@@ -1790,7 +1790,7 @@ void WebCallback(JsonObject root) {
     // send over EMS devices
     JsonArray list = emsbus.createNestedArray("devices");
 
-    for (std::list<_Generic_Device>::iterator it = Devices.begin(); it != Devices.end(); it++) {
+    for (std::list<_Generic_Device>::iterator it = Devices.begin(); it != Devices.end(); ++it) {
         JsonObject item   = list.createNestedObject();
         item["type"]      = (it)->model_type;
         item["model"]     = (it)->model_string;

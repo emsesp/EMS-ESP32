@@ -398,7 +398,7 @@ typedef struct {
     char               version[10];
     char               datetime[25]; // HH:MM:SS DD/MM/YYYY
     bool               write_supported;
-    _EMS_Thermostat_HC hc[EMS_THERMOSTAT_MAXHC - 1]; // array for the 4 heating circuits
+    _EMS_Thermostat_HC hc[EMS_THERMOSTAT_MAXHC]; // array for the 4 heating circuits
 } _EMS_Thermostat;
 
 // call back function signature for processing telegram types
