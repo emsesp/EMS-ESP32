@@ -1414,7 +1414,7 @@ void _process_RC35StatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     }
 
     // check if current temp sensor is unavailable
-    if (EMS_RxTelegram->data[EMS_OFFSET_RC35StatusMessage_curr] == 0x7D) {
+    if (EMS_RxTelegram->data[EMS_OFFSET_RC35StatusMessage_curr] != 0x7D) {
         EMS_Thermostat.hc[hc_num - 1].curr_roomTemp = _toShort(EMS_OFFSET_RC35StatusMessage_curr); // is * 10
     }
 
