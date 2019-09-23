@@ -294,7 +294,6 @@ class MyESP {
     // Crash
     void crashClear();
     void crashDump();
-    void crashTest(uint8_t t);
     void crashInfo();
 
     // general

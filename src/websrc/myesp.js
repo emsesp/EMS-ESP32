@@ -6,6 +6,8 @@ var utcSeconds;
 var data = [];
 var ajaxobj;
 
+var custom_config = {};
+
 var config = {
     "command": "configfile",
     "network": {
@@ -66,6 +68,14 @@ function syncBrowserTime() {
     datatosend.epoch = timestamp;
     websock.send(JSON.stringify(datatosend));
     $("#ntp").click();
+}
+
+function handleNTPON() {
+    document.getElementById("forcentp").style.display = "block";
+}
+
+function handleNTPOFF() {
+    document.getElementById("forcentp").style.display = "none";
 }
 
 function listntp() {
@@ -245,14 +255,6 @@ function handleAP() {
     document.getElementById("hidepasswd").style.display = "none";
 
     document.getElementById("inputtohide").style.display = "block";
-}
-
-function handleNTPON() {
-    document.getElementById("forcentp").style.display = "block";
-}
-
-function handleNTPOFF() {
-    document.getElementById("forcentp").style.display = "none";
 }
 
 function listnetwork() {
@@ -435,16 +437,18 @@ function getContent(contentname) {
                     var customname2 = " " + ajaxobj.customname;
                     $("#customname2").text(customname2);
 
+                    var elem;
+
                     if (config.network.wmode === 0) {
-                        var elem = document.getElementById("helpurl");
-                        var helpurl = ajaxobj.appurl + "/wiki"
+                        elem = document.getElementById("helpurl");
+                        var helpurl = ajaxobj.appurl + "/wiki";
                         elem.setAttribute("href", helpurl);
                         document.getElementById("helpurl").style.display = "block";
                     } else {
                         document.getElementById("helpurl").style.display = "none";
                     }
 
-                    var elem = document.getElementById("appurl");
+                    elem = document.getElementById("appurl");
                     elem.setAttribute("href", ajaxobj.appurl);
                     $("#appurl2").text(ajaxobj.appurl);
 

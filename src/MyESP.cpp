@@ -1009,9 +1009,6 @@ void MyESP::_telnetCommand(char * commandLine) {
             crashDump();
         } else if (strcmp(cmd, "clear") == 0) {
             crashClear();
-        } else if ((strcmp(cmd, "test") == 0) && (wc == 3)) {
-            char * value = _telnet_readWord(false);
-            crashTest(atoi(value));
         } else {
             myDebug_P(PSTR("Error. Usage: crash <dump | clear | test [n]>"));
         }
@@ -1705,7 +1702,7 @@ bool MyESP::_fs_loadConfig() {
     JsonObject ntp = doc["ntp"];
     _ntp_server    = strdup(ntp["server"] | "");
     _ntp_interval  = ntp["interval"] | 60;
-    if (_ntp_interval == 0)
+    if (_ntp_interval < 2)
         _ntp_interval = 60;
     _ntp_enabled = ntp["enabled"];
 
@@ -2131,52 +2128,7 @@ void MyESP::crashDump() {
     myDebug_P(PSTR("\nTo clean this dump use the command: %scrash clear%s\n"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
 }
 
-/*
- * Force some crashes to test if stack collection works
- */
-void MyESP::crashTest(uint8_t t) {
-    if (t == 1) {
-        myDebug_P(PSTR("[CRASH] Attempting to divide by zero ..."));
-        int result, zero;
-        zero   = 0;
-        result = 1 / zero;
-        Serial.printf("Result = %d", result);
-    }
-
-    if (t == 2) {
-        myDebug_P(PSTR("[CRASH] Attempting to read through a pointer to no object ..."));
-        int * nullPointer;
-        nullPointer = nullptr;
-        // null pointer dereference - read
-        // attempt to read a value through a null pointer
-        Serial.println(*nullPointer);
-    }
-
-    if (t == 3) {
-        myDebug_P(PSTR("[CRASH] Crashing with hardware WDT (%ld ms) ...\n"), millis());
-        ESP.wdtDisable();
-        while (true) {
-            // stay in an infinite loop doing nothing
-            // this way other process can not be executed
-            //
-            // Note:
-            // Hardware wdt kicks in if software wdt is unable to perfrom
-            // Nothing will be saved in EEPROM for the hardware wdt
-        }
-    }
-
-    if (t == 4) {
-        myDebug_P(PSTR("[CRASH] Crashing with software WDT (%ld ms) ...\n"), millis());
-        while (true) {
-            // stay in an infinite loop doing nothing
-            // this way other process can not be executed
-        }
-    }
-}
-
 #else
-void MyESP::crashTest(uint8_t t) {
-}
 void MyESP::crashClear() {
 }
 void MyESP::crashDump() {

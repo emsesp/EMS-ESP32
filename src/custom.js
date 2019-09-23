@@ -10,7 +10,7 @@ var custom_config = {
         "shower_alert": false,
         "publish_time": 120
     }
-}
+};
 
 function custom_commit() {
     websock.send(JSON.stringify(custom_config));
@@ -95,16 +95,15 @@ function listCustomStats() {
     for (var i = 0; i < obj.length; i++) {
         var l = document.createElement("li");
         var type = obj[i].type;
-        if (type == 1) {
-            var color = "list-group-item-success";
-        } else if (type == 2) {
-            var color = "list-group-item-info";
-        } else if (type == 3) {
-            var color = "list-group-item-warning";
-        } else if (type == 4) {
-            var color = "list-group-item-success";
-        } else {
-            var color = "";
+        var color = "";
+        if (type === 1) {
+            color = "list-group-item-success";
+        } else if (type === 2) {
+            color = "list-group-item-info";
+        } else if (type === 3) {
+            color = "list-group-item-warning";
+        } else if (type === 4) {
+            color = "list-group-item-success";
         }
         l.innerHTML = obj[i].model + " (Version:" + obj[i].version + " ProductID:" + obj[i].productid + " DeviceID:0x" + obj[i].deviceid + ")";
         l.className = "list-group-item " + color;
