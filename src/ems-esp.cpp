@@ -1684,7 +1684,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
             myDebug_P(PSTR("MQTT topic: thermostat HC%d mode value %s"), hc, message);
             if (strcmp((char *)message, "auto") == 0) {
                 ems_setThermostatMode(2, hc);
-            } else if (strcmp((char *)message, "day") == 0 || strcmp((char *)message, "manual") == 0) {
+            } else if (strcmp((char *)message, "day") == 0 || (strcmp((char *)message, "manual") == 0) || (strcmp((char *)message, "heat") == 0)) {
                 ems_setThermostatMode(1, hc);
             } else if (strcmp((char *)message, "night") == 0 || strcmp((char *)message, "off") == 0) {
                 ems_setThermostatMode(0, hc);
@@ -1698,7 +1698,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
             float f     = strtof((char *)message, 0);
             char  s[10] = {0};
             myDebug_P(PSTR("MQTT topic: new thermostat HC%d night temperature value %s"), hc, _float_to_char(s, f));
-            ems_setThermostatTemp(f, hc, 1);
+            ems_setThermostatTemp(f, hc, 1); // night
             return;
         }
 
@@ -1708,7 +1708,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
             float f     = strtof((char *)message, 0);
             char  s[10] = {0};
             myDebug_P(PSTR("MQTT topic: new thermostat HC%d day temperature value %s"), hc, _float_to_char(s, f));
-            ems_setThermostatTemp(f, hc, 2);
+            ems_setThermostatTemp(f, hc, 2); // day
             return;
         }
 
@@ -1718,7 +1718,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
             float f     = strtof((char *)message, 0);
             char  s[10] = {0};
             myDebug_P(PSTR("MQTT topic: new thermostat HC%d holiday temperature value %s"), hc, _float_to_char(s, f));
-            ems_setThermostatTemp(f, hc, 3);
+            ems_setThermostatTemp(f, hc, 3); // holiday
             return;
         }
 

@@ -2713,7 +2713,7 @@ void ems_setThermostatTemp(float temperature, uint8_t hc_num, uint8_t temptype) 
     EMS_TxTelegram.action = EMS_TX_TELEGRAM_WRITE;
     EMS_TxTelegram.dest   = device_id;
 
-    myDebug_P(PSTR("Setting new thermostat temperature for heating circuit %d"), hc_num);
+    myDebug_P(PSTR("Setting new thermostat temperature for heating circuit %d type %d (0=none,1=night,2=day,3=holiday)"), hc_num, temptype);
 
     if (model_id == EMS_MODEL_RC20) {
         EMS_TxTelegram.type               = EMS_TYPE_RC20Set;
@@ -2825,7 +2825,7 @@ void ems_setThermostatMode(uint8_t mode, uint8_t hc_num) {
         }
     }
 
-    myDebug_P(PSTR("Setting thermostat mode to %d for heating circuit"), mode, hc_num);
+    myDebug_P(PSTR("Setting thermostat mode to %d for heating circuit %d"), mode, hc_num);
 
     _EMS_TxTelegram EMS_TxTelegram = EMS_TX_TELEGRAM_NEW; // create new Tx
     EMS_TxTelegram.timestamp       = millis();            // set timestamp
