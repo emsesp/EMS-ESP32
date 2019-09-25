@@ -1211,7 +1211,7 @@ bool LoadSaveCallback(MYESP_FSACTION action, JsonObject settings) {
         EMSESP_Settings.listen_mode = settings["listen_mode"];
         ems_setTxDisabled(EMSESP_Settings.listen_mode);
 
-        EMSESP_Settings.tx_mode = settings["tx_mode"] | 1; // default to 1 (generic)
+        EMSESP_Settings.tx_mode = settings["tx_mode"] | EMS_TXMODE_DEFAULT; // default to 1 (generic)
         ems_setTxMode(EMSESP_Settings.tx_mode);
 
         return true;
@@ -1336,7 +1336,7 @@ bool SetListCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, co
         // tx_mode
         if ((strcmp(setting, "tx_mode") == 0) && (wc == 2)) {
             uint8_t mode = atoi(value);
-            if ((mode >= 1) && (mode <= 3)) {
+            if ((mode >= 1) && (mode <= 3)) { // see ems.h for definitions
                 EMSESP_Settings.tx_mode = mode;
                 ems_setTxMode(mode);
                 ok = true;
@@ -1979,7 +1979,7 @@ void initEMSESP() {
     EMSESP_Settings.dallas_sensors = 0;
     EMSESP_Settings.led_gpio       = EMSESP_LED_GPIO;
     EMSESP_Settings.dallas_gpio    = EMSESP_DALLAS_GPIO;
-    EMSESP_Settings.tx_mode        = 1; // default tx mode
+    EMSESP_Settings.tx_mode        = EMS_TXMODE_DEFAULT; // default tx mode
 
     // shower settings
     EMSESP_Shower.timerStart    = 0;

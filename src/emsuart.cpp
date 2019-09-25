@@ -191,9 +191,9 @@ void ICACHE_FLASH_ATTR emsuart_tx_brk() {
     GPIO_H(TX_MARK_MASK);
     USC0(EMSUART_UART) |= (tmp); // set bit
 
-    if (EMS_Sys_Status.emsTxMode <= 1) { // classic mode and ems+ (0, 1)
+    if (EMS_Sys_Status.emsTxMode == EMS_TXMODE_EMSPLUS) { // EMS+ mode
         delayMicroseconds(EMSUART_TX_BRK_WAIT);
-    } else if (EMS_Sys_Status.emsTxMode == 3) {                  // junkers mode
+    } else if (EMS_Sys_Status.emsTxMode == EMS_TXMODE_HT3) {     // junkers mode
         delayMicroseconds(EMSUART_TX_WAIT_BRK - EMSUART_TX_LAG); // 1144 (11 Bits)
     }
 
@@ -214,14 +214,14 @@ _EMS_TX_STATUS ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
     if (len) {
         LA_PULSE(50);
 
-        if (EMS_Sys_Status.emsTxMode == 2) { // With extra tx delay for EMS+
+        if (EMS_Sys_Status.emsTxMode == EMS_TXMODE_EMSPLUS) { // With extra tx delay for EMS+
             for (uint8_t i = 0; i < len; i++) {
                 TX_PULSE(EMSUART_BIT_TIME / 4);
                 USF(EMSUART_UART) = buf[i];
                 delayMicroseconds(EMSUART_TX_BRK_WAIT); // https://github.com/proddy/EMS-ESP/issues/23#
             }
             emsuart_tx_brk();                       // send <BRK>
-        } else if (EMS_Sys_Status.emsTxMode == 3) { // Junkers logic by @philrich
+        } else if (EMS_Sys_Status.emsTxMode == EMS_TXMODE_HT3) { // Junkers logic by @philrich
             for (uint8_t i = 0; i < len; i++) {
                 TX_PULSE(EMSUART_BIT_TIME / 4);
                 USF(EMSUART_UART) = buf[i];
@@ -234,7 +234,7 @@ _EMS_TX_STATUS ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
                 delayMicroseconds(EMSUART_TX_WAIT_BYTE - EMSUART_TX_LAG + EMSUART_TX_WAIT_GAP);
             }
             emsuart_tx_brk(); // send <BRK>
-        } else if (EMS_Sys_Status.emsTxMode == 1) {
+        } else if (EMS_Sys_Status.emsTxMode == EMS_TXMODE_DEFAULT) {
             /* 
         * based on code from https://github.com/proddy/EMS-ESP/issues/103 by @susisstrolch
         * we emit the whole telegram, with Rx interrupt disabled, collecting busmaster response in FIFO.

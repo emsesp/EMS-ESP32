@@ -72,6 +72,11 @@
 #endif
 // clang-format on
 
+// EMS tx_mode types
+#define EMS_TXMODE_DEFAULT 1 // Default (was previously known as tx_mode 2)
+#define EMS_TXMODE_EMSPLUS 2 // EMS+
+#define EMS_TXMODE_HT3 3     // Junkers HT3
+
 #define EMS_ID_NONE 0x00 // used as a dest in broadcast messages and empty device IDs
 
 // Fixed EMS IDs
@@ -97,7 +102,6 @@
 #define EMS_VALUE_SHORT_NOTSET -32768  // for 2-byte signed shorts
 #define EMS_VALUE_USHORT_NOTSET 0x8000 // for 2-byte unsigned shorts
 #define EMS_VALUE_LONG_NOTSET 0xFFFFFF // for 3-byte longs
-
 
 // thermostat specific
 #define EMS_THERMOSTAT_MAXHC 4     // max number of heating circuits

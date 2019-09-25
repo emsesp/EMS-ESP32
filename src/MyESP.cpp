@@ -369,7 +369,7 @@ void MyESP::mqttSubscribe(const char * topic) {
         //char topic_s[MQTT_MAX_TOPIC_SIZE];
         //strlcpy(topic_s, _mqttTopic(topic), sizeof(topic_s));
         (void)mqttClient.subscribe(topic_s, _mqtt_qos);
-        myDebug_P(PSTR("[MQTT] Subscribing to %s"), topic_s);
+        // myDebug_P(PSTR("[MQTT] Subscribing to %s"), topic_s);
 
         // add to mqtt log
         _addMQTTLog(topic_s, "", 2); // type of 2 means Subscribe. Has an empty payload for now
