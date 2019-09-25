@@ -18,7 +18,6 @@
 #define TOPIC_THERMOSTAT_DATA "thermostat_data"                    // for sending thermostat values to MQTT
 #define TOPIC_THERMOSTAT_CMD_TEMP "thermostat_cmd_temp"            // temp changes via MQTT
 #define TOPIC_THERMOSTAT_CMD_MODE "thermostat_cmd_mode"            // mode changes via MQTT
-#define TOPIC_THERMOSTAT_CMD_HC "thermostat_cmd_hc"                // hc number changes via MQTT
 #define TOPIC_THERMOSTAT_CMD_DAYTEMP "thermostat_daytemp"          // day temp (RC35 specific)
 #define TOPIC_THERMOSTAT_CMD_NIGHTTEMP "thermostat_nighttemp"      // night temp (RC35 specific)
 #define TOPIC_THERMOSTAT_CMD_HOLIDAYTEMP "thermostat_holidayttemp" // holiday temp (RC35 specific)

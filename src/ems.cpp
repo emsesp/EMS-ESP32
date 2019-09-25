@@ -1571,6 +1571,7 @@ void _process_RC30Set(_EMS_RxTelegram * EMS_RxTelegram) {
 }
 
 // return which heating circuit it is, 1-4
+// based on type 0x3E (HC1), 0x48 (HC2), 0x52 (HC3), 0x5C (HC4)
 uint8_t _getHeatingCircuit(_EMS_RxTelegram * EMS_RxTelegram) {
     uint8_t hc_num;
     switch (EMS_RxTelegram->type) {

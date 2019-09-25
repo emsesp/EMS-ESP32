@@ -914,10 +914,6 @@ void publishValues(bool force) {
                     fchecksum = crc.finalize();
                     if ((previousThermostatPublishCRC != fchecksum) || force) {
                         previousThermostatPublishCRC = fchecksum;
-                        myDebugLog("Publishing thermostat data via MQTT");
-
-                        // send values via MQTT
-
                         char thermostat_topicname[20];
                         strlcpy(thermostat_topicname, TOPIC_THERMOSTAT_DATA, sizeof(thermostat_topicname)); // "thermostat_data"
                         // if we have more than 1 active Heating Circuit, postfix with the HC number
@@ -925,6 +921,7 @@ void publishValues(bool force) {
                             char buffer[4];
                             strlcat(thermostat_topicname, itoa(total_active_hc, buffer, 10), sizeof(thermostat_topicname));
                         }
+                        myDebugLog("Publishing thermostat data via MQTT");
                         myESP.mqttPublish(thermostat_topicname, data);
                     }
                 }
@@ -1607,7 +1604,7 @@ uint8_t _hasHCspecified(const char * topic, const char * input) {
             return EMS_THERMOSTAT_DEFAULTHC; // identical, use default
         }
 
-        // return the value of the last char
+        // return the value of the last char, 0-9
         return input[orig_len] - '0';
     }
 
@@ -1618,12 +1615,40 @@ uint8_t _hasHCspecified(const char * topic, const char * input) {
 void MQTTCallback(unsigned int type, const char * topic, const char * message) {
     // we're connected. lets subscribe to some topics
     if (type == MQTT_CONNECT_EVENT) {
-        myESP.mqttSubscribe(TOPIC_THERMOSTAT_CMD_TEMP);
-        myESP.mqttSubscribe(TOPIC_THERMOSTAT_CMD_MODE);
-        myESP.mqttSubscribe(TOPIC_THERMOSTAT_CMD_HC);
-        myESP.mqttSubscribe(TOPIC_THERMOSTAT_CMD_DAYTEMP);
-        myESP.mqttSubscribe(TOPIC_THERMOSTAT_CMD_NIGHTTEMP);
-        myESP.mqttSubscribe(TOPIC_THERMOSTAT_CMD_HOLIDAYTEMP);
+        // subscribe to the 4 heating circuits
+        char topic_s[50];
+        char buffer[4];
+        for (uint8_t hc = 0; hc < EMS_THERMOSTAT_MAXHC; hc++) {
+            strlcpy(topic_s, TOPIC_THERMOSTAT_CMD_TEMP, sizeof(topic_s));
+            if (hc) {
+                strlcat(topic_s, itoa(hc, buffer, 10), sizeof(topic_s)); // add 1-4 at the end
+            }
+            myESP.mqttSubscribe(topic_s);
+
+            strlcpy(topic_s, TOPIC_THERMOSTAT_CMD_MODE, sizeof(topic_s));
+            if (hc) {
+                strlcat(topic_s, itoa(hc, buffer, 10), sizeof(topic_s)); // add 1-4 at the end
+            }
+            myESP.mqttSubscribe(topic_s);
+
+            strlcpy(topic_s, TOPIC_THERMOSTAT_CMD_DAYTEMP, sizeof(topic_s));
+            if (hc) {
+                strlcat(topic_s, itoa(hc, buffer, 10), sizeof(topic_s)); // add 1-4 at the end
+            }
+            myESP.mqttSubscribe(topic_s);
+
+            strlcpy(topic_s, TOPIC_THERMOSTAT_CMD_NIGHTTEMP, sizeof(topic_s));
+            if (hc) {
+                strlcat(topic_s, itoa(hc, buffer, 10), sizeof(topic_s)); // add 1-4 at the end
+            }
+            myESP.mqttSubscribe(topic_s);
+
+            strlcpy(topic_s, TOPIC_THERMOSTAT_CMD_HOLIDAYTEMP, sizeof(topic_s));
+            if (hc) {
+                strlcat(topic_s, itoa(hc, buffer, 10), sizeof(topic_s)); // add 1-4 at the end
+            }
+            myESP.mqttSubscribe(topic_s);
+        }
 
         myESP.mqttSubscribe(TOPIC_BOILER_CMD_WWACTIVATED);
         myESP.mqttSubscribe(TOPIC_BOILER_CMD_WWTEMP);
@@ -1650,6 +1675,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
             myDebug_P(PSTR("MQTT topic: thermostat HC%d temperature value %s"), hc, _float_to_char(s, f));
             ems_setThermostatTemp(f, hc);
             publishValues(true); // publish back immediately
+            return;
         }
 
         // thermostat mode changes
@@ -1663,6 +1689,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
             } else if (strcmp((char *)message, "night") == 0 || strcmp((char *)message, "off") == 0) {
                 ems_setThermostatMode(0, hc);
             }
+            return;
         }
 
         // set night temp value
@@ -1672,6 +1699,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
             char  s[10] = {0};
             myDebug_P(PSTR("MQTT topic: new thermostat HC%d night temperature value %s"), hc, _float_to_char(s, f));
             ems_setThermostatTemp(f, hc, 1);
+            return;
         }
 
         // set daytemp value
@@ -1681,6 +1709,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
             char  s[10] = {0};
             myDebug_P(PSTR("MQTT topic: new thermostat HC%d day temperature value %s"), hc, _float_to_char(s, f));
             ems_setThermostatTemp(f, hc, 2);
+            return;
         }
 
         // set holiday value
@@ -1690,6 +1719,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
             char  s[10] = {0};
             myDebug_P(PSTR("MQTT topic: new thermostat HC%d holiday temperature value %s"), hc, _float_to_char(s, f));
             ems_setThermostatTemp(f, hc, 3);
+            return;
         }
 
         // wwActivated
@@ -1699,6 +1729,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
             } else if (message[0] == '0' || strcmp(message, "off") == 0) {
                 ems_setWarmWaterActivated(false);
             }
+            return;
         }
 
         // boiler wwtemp changes
@@ -1707,6 +1738,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
             myDebug_P(PSTR("MQTT topic: boiler warm water temperature value %d"), t);
             ems_setWarmWaterTemp(t);
             publishValues(true); // publish back immediately, can't remember why I do this?!
+            return;
         }
 
         // boiler ww comfort setting
@@ -1719,6 +1751,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
             } else if (strcmp((char *)message, "intelligent") == 0) {
                 ems_setWarmWaterModeComfort(3);
             }
+            return;
         }
 
         // boiler flowtemp setting
@@ -1726,6 +1759,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
             uint8_t t = atoi((char *)message);
             myDebug_P(PSTR("MQTT topic: boiler flowtemp value %d"), t);
             ems_setFlowTemp(t);
+            return;
         }
 
         // shower timer
@@ -1736,6 +1770,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
                 EMSESP_Settings.shower_timer = false;
             }
             set_showerTimer();
+            return;
         }
 
         // shower alert
@@ -1746,11 +1781,13 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
                 EMSESP_Settings.shower_alert = false;
             }
             set_showerAlert();
+            return;
         }
 
         // shower cold shot
         if (strcmp(topic, TOPIC_SHOWER_COLDSHOT) == 0) {
             _showerColdShotStart();
+            return;
         }
     }
 }

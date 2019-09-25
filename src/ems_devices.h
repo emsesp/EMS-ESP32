@@ -16,11 +16,11 @@
  * Common Type
  */
 #define EMS_TYPE_Version 0x02
+#define EMS_TYPE_UBADevices 0x07 // EMS connected devices
 
 /*
  * Boiler Telegram Types...
  */
-#define EMS_TYPE_UBADevices 0x07                  // EMS connected devices
 #define EMS_TYPE_UBAMonitorFast 0x18              // is an automatic monitor broadcast
 #define EMS_TYPE_UBAMonitorSlow 0x19              // is an automatic monitor broadcast
 #define EMS_TYPE_UBAMonitorWWMessage 0x34         // is an automatic monitor broadcast
