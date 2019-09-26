@@ -176,7 +176,10 @@ const _EMS_Type EMS_Types[] = {
     {EMS_MODEL_EASY, EMS_TYPE_EasyStatusMessage, "EasyStatusMessage", _process_EasyStatusMessage},
 
     // Nefit 1010, RC300, RC310 (EMS Plus)
-    {EMS_MODEL_ALL, EMS_TYPE_RCPLUSStatusMessage, "RCPLUSStatusMessage", _process_RCPLUSStatusMessage},
+    {EMS_MODEL_ALL, EMS_TYPE_RCPLUSStatusMessage1, "RCPLUSStatusMessage", _process_RCPLUSStatusMessage},
+    {EMS_MODEL_ALL, EMS_TYPE_RCPLUSStatusMessage2, "RCPLUSStatusMessage", _process_RCPLUSStatusMessage},
+    {EMS_MODEL_ALL, EMS_TYPE_RCPLUSStatusMessage3, "RCPLUSStatusMessage", _process_RCPLUSStatusMessage},
+    {EMS_MODEL_ALL, EMS_TYPE_RCPLUSStatusMessage4, "RCPLUSStatusMessage", _process_RCPLUSStatusMessage},
     {EMS_MODEL_ALL, EMS_TYPE_RCPLUSSet, "RCPLUSSetMessage", _process_RCPLUSSetMessage},
     {EMS_MODEL_ALL, EMS_TYPE_RCPLUSStatusMode, "RCPLUSStatusMode", _process_RCPLUSStatusMode},
 
@@ -1444,7 +1447,11 @@ void _process_EasyStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
  * EMS+ messages may come in with different offsets so handle them here
  */
 void _process_RCPLUSStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
-    uint8_t hc                   = EMS_THERMOSTAT_DEFAULTHC - 1; // use HC1
+    // figure out which heating circuit
+    uint8_t hc = (EMS_RxTelegram->type - EMS_TYPE_RCPLUSStatusMessage1); // 0 to 3
+    if (hc > 4) {
+        return; // invalid type
+    }
     EMS_Thermostat.hc[hc].active = true;
 
     // handle single data values
@@ -2218,7 +2225,10 @@ void ems_getThermostatValues() {
         }
         break;
     case EMS_MODEL_RC300:
-        ems_doReadCommand(EMS_TYPE_RCPLUSStatusMessage, device_id);
+        ems_doReadCommand(EMS_TYPE_RCPLUSStatusMessage1, device_id);
+        ems_doReadCommand(EMS_TYPE_RCPLUSStatusMessage2, device_id);
+        ems_doReadCommand(EMS_TYPE_RCPLUSStatusMessage3, device_id);
+        ems_doReadCommand(EMS_TYPE_RCPLUSStatusMessage4, device_id);
     default:
         break;
     }
@@ -2744,7 +2754,7 @@ void ems_setThermostatTemp(float temperature, uint8_t hc_num, uint8_t temptype) 
         // EMS_TxTelegram.type_validate = EMS_TYPE_RCPLUSStatusMessage; // validate by reading from a different telegram
         EMS_TxTelegram.type_validate = EMS_ID_NONE; // validate by reading from a different telegram
 
-        EMS_TxTelegram.comparisonPostRead = EMS_TYPE_RCPLUSStatusMessage; // after write, do a full fetch of all values
+        EMS_TxTelegram.comparisonPostRead = EMS_TYPE_RCPLUSStatusMessage1 + hc_num - 1; // after write, do a full fetch of all values
 
     } else if ((model_id == EMS_MODEL_RC35) || (model_id == EMS_MODEL_ES73)) {
         switch (temptype) {
@@ -2871,8 +2881,8 @@ void ems_setThermostatMode(uint8_t mode, uint8_t hc_num) {
         EMS_TxTelegram.offset = EMS_OFFSET_RCPLUSSet_mode;
 
         // EMS_TxTelegram.type_validate = EMS_TYPE_RCPLUSStatusMessage; // validate by reading from a different telegram
-        EMS_TxTelegram.type_validate      = EMS_ID_NONE;                  // don't validate after the write
-        EMS_TxTelegram.comparisonPostRead = EMS_TYPE_RCPLUSStatusMessage; // after write, do a full fetch of all values
+        EMS_TxTelegram.type_validate      = EMS_ID_NONE;                                // don't validate after the write
+        EMS_TxTelegram.comparisonPostRead = EMS_TYPE_RCPLUSStatusMessage1 + hc_num - 1; // after write, do a full fetch of all values
     }
 
     EMS_TxTelegram.comparisonOffset = EMS_TxTelegram.offset;
