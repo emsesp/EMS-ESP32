@@ -843,10 +843,10 @@ void publishValues(bool force) {
         for (uint8_t hc_v = 1; hc_v <= EMS_THERMOSTAT_MAXHC; hc_v++) {
             _EMS_Thermostat_HC * thermostat = &EMS_Thermostat.hc[hc_v - 1];
 
-            total_active_hc++; // increase count for #HCs we encounter
-
             // only send if we have an active Heating Circuit with real data
             if ((thermostat->active) && (thermostat->curr_roomTemp != EMS_VALUE_SHORT_NOTSET) && (thermostat->setpoint_roomTemp != EMS_VALUE_SHORT_NOTSET)) {
+                total_active_hc++; // increase count for #HCs we encounter
+
                 // build new json object
                 doc.clear();
                 JsonObject rootThermostat = doc.to<JsonObject>();
