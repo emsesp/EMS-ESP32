@@ -97,7 +97,9 @@
 
 #define EMS_OFFSET_RC35StatusMessage_setpoint 2 // desired temp
 #define EMS_OFFSET_RC35StatusMessage_curr 3     // current temp
-#define EMS_OFFSET_RC35StatusMessage_mode 1     //day mode
+#define EMS_OFFSET_RC35StatusMessage_mode 1     // day mode, also summer on RC3's
+#define EMS_OFFSET_RC35StatusMessage_mode1 0    // for holiday mode
+
 
 #define EMS_TYPE_RC35Set_HC1 0x3D // for setting values like temp and mode (Working mode HC1)
 #define EMS_TYPE_RC35Set_HC2 0x47 // for setting values like temp and mode (Working mode HC2)

@@ -385,8 +385,10 @@ typedef struct {
     bool    active;            // true if there is data for this HC
     int16_t setpoint_roomTemp; // current set temp
     int16_t curr_roomTemp;     // current room temp
-    uint8_t mode;              // 0=low, 1=manual, 2=auto
-    bool    day_mode;          // 0=night, 1=day
+    uint8_t mode;              // 0=low, 1=manual, 2=auto (or night, day on RC35s)
+    uint8_t day_mode;          // 0=night, 1=day
+    uint8_t summer_mode;
+    uint8_t holiday_mode;
     uint8_t daytemp;
     uint8_t nighttemp;
     uint8_t holidaytemp;

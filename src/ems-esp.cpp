@@ -631,15 +631,22 @@ void showInfo() {
             // only show if we have data for the Heating Circuit
             if (EMS_Thermostat.hc[hc_num - 1].active) {
                 myDebug_P(PSTR("  Heating Circuit %d"), hc_num);
-                // Render Current & Setpoint Room Temperature for each thermostat type
-                _renderShortValue(" Setpoint room temperature", "C", EMS_Thermostat.hc[hc_num - 1].setpoint_roomTemp, _m_setpoint);
                 _renderShortValue(" Current room temperature", "C", EMS_Thermostat.hc[hc_num - 1].curr_roomTemp, _m_curr);
 
                 // Render Day/Night/Holiday Temperature on RC35s
+                // there is no single setpoint temp, but one for day, night and vacation
                 if (model == EMS_MODEL_RC35) {
+                    if (EMS_Thermostat.hc[hc_num - 1].summer_mode) {
+                        myDebug_P(PSTR("   Program is set to Summer mode"));
+                    } else if (EMS_Thermostat.hc[hc_num - 1].holiday_mode) {
+                        myDebug_P(PSTR("   Program is set to Holiday mode"));
+                    }
+
                     _renderIntValue(" Day temperature", "C", EMS_Thermostat.hc[hc_num - 1].daytemp, 2);          // convert to a single byte * 2
                     _renderIntValue(" Night temperature", "C", EMS_Thermostat.hc[hc_num - 1].nighttemp, 2);      // convert to a single byte * 2
                     _renderIntValue(" Vacation temperature", "C", EMS_Thermostat.hc[hc_num - 1].holidaytemp, 2); // convert to a single byte * 2
+                } else {
+                    _renderShortValue(" Setpoint room temperature", "C", EMS_Thermostat.hc[hc_num - 1].setpoint_roomTemp, _m_setpoint);
                 }
 
                 // Render Termostat Mode, if we have a mode

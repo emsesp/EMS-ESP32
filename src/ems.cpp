@@ -256,8 +256,10 @@ void ems_init() {
     for (uint8_t i = 0; i < EMS_THERMOSTAT_MAXHC; i++) {
         EMS_Thermostat.hc[i].hc                = i + 1;
         EMS_Thermostat.hc[i].active            = false;
-        EMS_Thermostat.hc[i].mode              = EMS_VALUE_INT_NOTSET;
+        EMS_Thermostat.hc[i].mode              = EMS_VALUE_INT_NOTSET; // night, day, auto
         EMS_Thermostat.hc[i].day_mode          = EMS_VALUE_INT_NOTSET;
+        EMS_Thermostat.hc[i].summer_mode       = EMS_VALUE_INT_NOTSET;
+        EMS_Thermostat.hc[i].holiday_mode      = EMS_VALUE_INT_NOTSET;
         EMS_Thermostat.hc[i].daytemp           = EMS_VALUE_INT_NOTSET;
         EMS_Thermostat.hc[i].nighttemp         = EMS_VALUE_INT_NOTSET;
         EMS_Thermostat.hc[i].holidaytemp       = EMS_VALUE_INT_NOTSET;
@@ -1400,28 +1402,37 @@ void _process_RC30StatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
  * 10 0B 52 00   00 00 00 00 00 00 00 00 00 00 00 00 00 11 00 00
  * 10 0B 5C 00   00 00 00 00 00 00 00 00 00 00 00 00 00 11 00 00
  * 
- * For reading the temp values only
+ * night mode:
+ * 10 00 3E 00   04 03 00 7D 00 00 00 00 00 00 00 00 00 11 05 00
+ * 10 00 48 00   00 00 10 00 E9 00 00 00 00 00 00 00 00 11 05 00
+ * 
+ * day mode:
+ * 10 0B 3E 00   04 03 00 7D 00 00 00 00 00 00 00 00 00 11 05 00
+ * 10 0B 48 00   00 00 10 00 E8 00 00 00 00 00 00 00 00 11 05 00
+ * 
+ * auto day:
+ * 10 00 3E 00   04 03 00 7D 00 00 00 00 00 00 00 00 00 11 05 00
+ * 10 0B 48 00   04 03 00 00 EB 00 00 00 00 00 00 00 00 11 05 00
+ * 
+ * For reading the current room temperature only and picking up the modes
  * received every 60 seconds
  */
 void _process_RC35StatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
-    // ignore if first byte is 0x00
-    if (EMS_RxTelegram->data[0] == 0x00) {
+    // ignore if 14th byte is 0x00, which I think is flow temp?
+    if (EMS_RxTelegram->data[14] == 0x00) {
         return;
     }
 
     uint8_t hc_num = _getHeatingCircuit(EMS_RxTelegram); // which HC is it?
-
-    // check if setpoint temp sensor is unavailable
-    if (EMS_RxTelegram->data[EMS_OFFSET_RC35StatusMessage_setpoint] != 0x7D) {
-        EMS_Thermostat.hc[hc_num - 1].setpoint_roomTemp = _toByte(EMS_OFFSET_RC35StatusMessage_setpoint); // is * 2
-    }
 
     // check if current temp sensor is unavailable
     if (EMS_RxTelegram->data[EMS_OFFSET_RC35StatusMessage_curr] != 0x7D) {
         EMS_Thermostat.hc[hc_num - 1].curr_roomTemp = _toShort(EMS_OFFSET_RC35StatusMessage_curr); // is * 10
     }
 
-    EMS_Thermostat.hc[hc_num - 1].day_mode = _bitRead(EMS_OFFSET_RC35StatusMessage_mode, 1); // get day mode flag
+    EMS_Thermostat.hc[hc_num - 1].day_mode     = _bitRead(EMS_OFFSET_RC35StatusMessage_mode, 1);  // get day mode flag
+    EMS_Thermostat.hc[hc_num - 1].summer_mode  = _bitRead(EMS_OFFSET_RC35StatusMessage_mode, 0);  // summer mode?
+    EMS_Thermostat.hc[hc_num - 1].holiday_mode = _bitRead(EMS_OFFSET_RC35StatusMessage_mode1, 5); // holiday mode?
 
     EMS_Thermostat.hc[hc_num - 1].circuitcalctemp = _toByte(EMS_OFFSET_RC35Set_circuitcalctemp); // calculated temperature
 
@@ -1623,7 +1634,7 @@ void _process_RC35Set(_EMS_RxTelegram * EMS_RxTelegram) {
 
     uint8_t hc_num = _getHeatingCircuit(EMS_RxTelegram); // which HC is it?
 
-    EMS_Thermostat.hc[hc_num - 1].mode        = _toByte(EMS_OFFSET_RC35Set_mode);
+    EMS_Thermostat.hc[hc_num - 1].mode        = _toByte(EMS_OFFSET_RC35Set_mode);         // night, day, auto
     EMS_Thermostat.hc[hc_num - 1].daytemp     = _toByte(EMS_OFFSET_RC35Set_temp_day);     // is * 2
     EMS_Thermostat.hc[hc_num - 1].nighttemp   = _toByte(EMS_OFFSET_RC35Set_temp_night);   // is * 2
     EMS_Thermostat.hc[hc_num - 1].holidaytemp = _toByte(EMS_OFFSET_RC35Set_temp_holiday); // is * 2
