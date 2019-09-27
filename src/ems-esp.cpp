@@ -846,13 +846,13 @@ void publishValues(bool force) {
 
     // handle the thermostat values
     if (ems_getThermostatEnabled()) {
-        uint8_t total_active_hc = 0;                           // number of HCs
-        bool    hc_1_active     = EMS_Thermostat.hc[0].active; // do we have HC1 active?
+        uint8_t total_active_hc = 0;                                                      // number of HCs
+        bool    hc_1_active     = EMS_Thermostat.hc[EMS_THERMOSTAT_DEFAULTHC - 1].active; // do we have HC1 active?
         for (uint8_t hc_v = 1; hc_v <= EMS_THERMOSTAT_MAXHC; hc_v++) {
             _EMS_Thermostat_HC * thermostat = &EMS_Thermostat.hc[hc_v - 1];
 
             // only send if we have an active Heating Circuit with real data
-            if ((thermostat->active) && (thermostat->curr_roomTemp != EMS_VALUE_SHORT_NOTSET) && (thermostat->setpoint_roomTemp != EMS_VALUE_SHORT_NOTSET)) {
+            if (thermostat->active) {
                 total_active_hc++; // increase count for #HCs we encounter
 
                 // build new json object
