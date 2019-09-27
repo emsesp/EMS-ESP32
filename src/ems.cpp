@@ -1979,13 +1979,11 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
 
     if (typeFound) {
         // its a known thermostat
-        if (EMS_Sys_Status.emsLogging >= EMS_SYS_LOGGING_BASIC) {
-            myDebug_P(PSTR("Thermostat found: %s (DeviceID:0x%02X ProductID:%d Version:%s)"),
-                      Thermostat_Devices[i].model_string,
-                      Thermostat_Devices[i].device_id,
-                      product_id,
-                      version);
-        }
+        myDebug_P(PSTR("Thermostat found: %s (DeviceID:0x%02X ProductID:%d Version:%s)"),
+                  Thermostat_Devices[i].model_string,
+                  Thermostat_Devices[i].device_id,
+                  product_id,
+                  version);
 
         // add to list
         _addDevice(EMS_MODELTYPE_THERMOSTAT, product_id, Thermostat_Devices[i].device_id, version, Thermostat_Devices[i].model_string); // type 2 = thermostat

@@ -1628,35 +1628,33 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
         // subscribe to the 4 heating circuits
         char topic_s[50];
         char buffer[4];
-        for (uint8_t hc = 0; hc < EMS_THERMOSTAT_MAXHC; hc++) {
+
+        // subscribe to the normal batch to be backwards compatible
+        myESP.mqttSubscribe(TOPIC_THERMOSTAT_CMD_TEMP);
+        myESP.mqttSubscribe(TOPIC_THERMOSTAT_CMD_MODE);
+        myESP.mqttSubscribe(TOPIC_THERMOSTAT_CMD_DAYTEMP);
+        myESP.mqttSubscribe(TOPIC_THERMOSTAT_CMD_NIGHTTEMP);
+        myESP.mqttSubscribe(TOPIC_THERMOSTAT_CMD_HOLIDAYTEMP);
+
+        for (uint8_t hc = 1; hc <= EMS_THERMOSTAT_MAXHC; hc++) {
             strlcpy(topic_s, TOPIC_THERMOSTAT_CMD_TEMP, sizeof(topic_s));
-            if (hc) {
-                strlcat(topic_s, itoa(hc, buffer, 10), sizeof(topic_s)); // add 1-4 at the end
-            }
+            strlcat(topic_s, itoa(hc, buffer, 10), sizeof(topic_s)); // add 1-4 at the end
             myESP.mqttSubscribe(topic_s);
 
             strlcpy(topic_s, TOPIC_THERMOSTAT_CMD_MODE, sizeof(topic_s));
-            if (hc) {
-                strlcat(topic_s, itoa(hc, buffer, 10), sizeof(topic_s)); // add 1-4 at the end
-            }
+            strlcat(topic_s, itoa(hc, buffer, 10), sizeof(topic_s)); // add 1-4 at the end
             myESP.mqttSubscribe(topic_s);
 
             strlcpy(topic_s, TOPIC_THERMOSTAT_CMD_DAYTEMP, sizeof(topic_s));
-            if (hc) {
-                strlcat(topic_s, itoa(hc, buffer, 10), sizeof(topic_s)); // add 1-4 at the end
-            }
+            strlcat(topic_s, itoa(hc, buffer, 10), sizeof(topic_s)); // add 1-4 at the end
             myESP.mqttSubscribe(topic_s);
 
             strlcpy(topic_s, TOPIC_THERMOSTAT_CMD_NIGHTTEMP, sizeof(topic_s));
-            if (hc) {
-                strlcat(topic_s, itoa(hc, buffer, 10), sizeof(topic_s)); // add 1-4 at the end
-            }
+            strlcat(topic_s, itoa(hc, buffer, 10), sizeof(topic_s)); // add 1-4 at the end
             myESP.mqttSubscribe(topic_s);
 
             strlcpy(topic_s, TOPIC_THERMOSTAT_CMD_HOLIDAYTEMP, sizeof(topic_s));
-            if (hc) {
-                strlcat(topic_s, itoa(hc, buffer, 10), sizeof(topic_s)); // add 1-4 at the end
-            }
+            strlcat(topic_s, itoa(hc, buffer, 10), sizeof(topic_s)); // add 1-4 at the end
             myESP.mqttSubscribe(topic_s);
         }
 
