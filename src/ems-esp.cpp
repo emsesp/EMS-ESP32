@@ -839,7 +839,8 @@ void publishValues(bool force) {
 
     // handle the thermostat values
     if (ems_getThermostatEnabled()) {
-        uint8_t total_active_hc = 0; // number of HCs
+        uint8_t total_active_hc = 0;                           // number of HCs
+        bool    hc_1_active     = EMS_Thermostat.hc[0].active; // do we have HC1 active?
         for (uint8_t hc_v = 1; hc_v <= EMS_THERMOSTAT_MAXHC; hc_v++) {
             _EMS_Thermostat_HC * thermostat = &EMS_Thermostat.hc[hc_v - 1];
 
@@ -916,8 +917,10 @@ void publishValues(bool force) {
                         previousThermostatPublishCRC = fchecksum;
                         char thermostat_topicname[20];
                         strlcpy(thermostat_topicname, TOPIC_THERMOSTAT_DATA, sizeof(thermostat_topicname)); // "thermostat_data"
-                        // if we have more than 1 active Heating Circuit, postfix with the HC number
-                        if (total_active_hc > 1) {
+                        // if we have more than 1 active Heating Circuit
+                        // or this is single HC and its not HC1
+                        // append topic name with the HC number
+                        if ((total_active_hc > 1) || ((total_active_hc == 1) && (!hc_1_active))) {
                             char buffer[4];
                             strlcat(thermostat_topicname, itoa(total_active_hc, buffer, 10), sizeof(thermostat_topicname));
                         }
