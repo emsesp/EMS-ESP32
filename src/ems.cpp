@@ -1852,13 +1852,16 @@ void ems_clearDeviceList() {
  */
 void _addDevice(uint8_t model_type, uint8_t product_id, uint8_t device_id, char * version, const char * model_string) {
     _Generic_Device device;
-    // if its a duplicate don't add
+
+    // check for duplicates
     bool found = false;
     for (std::list<_Generic_Device>::iterator it = Devices.begin(); it != Devices.end(); ++it) {
         if (((it)->product_id == product_id) && ((it)->device_id == device_id)) {
-            found = true;
+            found = true; // it already exists in the list
         }
     }
+
+
     if (!found) {
         device.model_type = model_type;
         device.product_id = product_id;
@@ -1948,7 +1951,7 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
 
     if (typeFound) {
         // its a boiler
-        myDebug_P(PSTR("Boiler found: %s (DeviceID:0x%02X ProductID:%d Version:%s)"), Boiler_Devices[i].model_string, EMS_ID_BOILER, product_id, version);
+        myDebug_P(PSTR("EMS Device found, Boiler: %s (DeviceID:0x%02X ProductID:%d Version:%s)"), Boiler_Devices[i].model_string, EMS_ID_BOILER, product_id, version);
 
         // add to list
         _addDevice(EMS_MODELTYPE_BOILER, product_id, EMS_ID_BOILER, version, Boiler_Devices[i].model_string); // type 1 = boiler
@@ -1991,7 +1994,7 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
 
     if (typeFound) {
         // its a known thermostat
-        myDebug_P(PSTR("Thermostat found: %s (DeviceID:0x%02X ProductID:%d Version:%s)"),
+        myDebug_P(PSTR("EMS Device found, Thermostat: %s (DeviceID:0x%02X ProductID:%d Version:%s)"),
                   Thermostat_Devices[i].model_string,
                   Thermostat_Devices[i].device_id,
                   product_id,
@@ -2036,7 +2039,7 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
     }
 
     if (typeFound) {
-        myDebug_P(PSTR("Solar Module found: %s (DeviceID:0x%02X ProductID:%d Version:%s)"),
+        myDebug_P(PSTR("EMS Device found, Solar Module: %s (DeviceID:0x%02X ProductID:%d Version:%s)"),
                   SolarModule_Devices[i].model_string,
                   SolarModule_Devices[i].device_id,
                   product_id,
@@ -2066,7 +2069,7 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
     }
 
     if (typeFound) {
-        myDebug_P(PSTR("Heat Pump found: %s (DeviceID:0x%02X ProductID:%d Version:%s)"),
+        myDebug_P(PSTR("EMS Device found, Heat Pump: %s (DeviceID:0x%02X ProductID:%d Version:%s)"),
                   HeatPump_Devices[i].model_string,
                   HeatPump_Devices[i].device_id,
                   product_id,
@@ -2093,11 +2096,15 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
     }
 
     if (typeFound) {
-        myDebug_P(PSTR("Device found: %s (DeviceID:0x%02X ProductID:%d Version:%s)"), Other_Devices[i].model_string, Other_Devices[i].device_id, product_id, version);
+        myDebug_P(PSTR("EMS Device found: %s (DeviceID:0x%02X ProductID:%d Version:%s)"),
+                  Other_Devices[i].model_string,
+                  Other_Devices[i].device_id,
+                  product_id,
+                  version);
         // add to list
         _addDevice(EMS_MODELTYPE_OTHER, product_id, Other_Devices[i].device_id, version, Other_Devices[i].model_string); // type 3 = other
     } else {
-        myDebug_P(PSTR("Unrecognized device found: (DeviceID:0x%02X ProductID:%d Version:%s)"), EMS_RxTelegram->src, product_id, version);
+        myDebug_P(PSTR("EMS Device found: ? (DeviceID:0x%02X ProductID:%d Version:%s)"), EMS_RxTelegram->src, product_id, version);
         // add to list
         _addDevice(EMS_MODELTYPE_OTHER, product_id, EMS_RxTelegram->src, version, "unknown?"); // type 4 = unknown
     }
@@ -2593,7 +2600,7 @@ void ems_printDevices() {
 
     // print out the ones we recognized
     if (!Devices.empty()) {
-        myDebug_P(PSTR("and from those these %d were recognized as:"), Devices.size());
+        myDebug_P(PSTR("and %d were recognized by EMS-ESP as:"), Devices.size());
         for (std::list<_Generic_Device>::iterator it = Devices.begin(); it != Devices.end(); ++it) {
             myDebug_P(PSTR(" %s%s%s (DeviceID:0x%02X ProductID:%d Version:%s)"),
                       COLOR_BOLD_ON,
