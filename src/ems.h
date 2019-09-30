@@ -123,12 +123,14 @@
 
 #define EMS_SYS_DEVICEMAP_LENGTH 13 // size of the 0x07 telegram data part which stores all active EMS devices
 
-// define the model types which get rendered to html colors in the web interface
+// define the model types
+// which get rendered to html colors in the web interface in file custom.js in function listCustomStats()
 #define EMS_MODELTYPE_BOILER 1     // success color
 #define EMS_MODELTYPE_THERMOSTAT 2 // info color
 #define EMS_MODELTYPE_SM 3         // warning color
 #define EMS_MODELTYPE_HP 4         // success color
 #define EMS_MODELTYPE_OTHER 5      // no color
+#define EMS_MODELTYPE_UNKNOWN 6    // no color
 
 /* EMS UART transfer status */
 typedef enum {
@@ -273,6 +275,7 @@ typedef struct {
 // for consolidating all types
 typedef struct {
     uint8_t model_type; // 1=boiler, 2=thermostat, 3=sm, 4=other, 5=unknown
+    uint8_t src;
     uint8_t product_id;
     uint8_t device_id;
     char    version[10];
