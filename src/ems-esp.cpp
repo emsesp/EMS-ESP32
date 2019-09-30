@@ -134,7 +134,7 @@ static const command_t project_cmds[] PROGMEM = {
     {false, "refresh", "fetch values from the EMS devices"},
     {false, "devices [all]", "list all supported and detected EMS devices"},
     {false, "queue", "show current Tx queue"},
-    {false, "autodetect [deep]", "detect EMS devices and attempt to automatically set boiler and thermostat types"},
+    {false, "autodetect [quick | deep]", "detect EMS devices and attempt to automatically set boiler and thermostat types"},
     {false, "shower <timer | alert>", "toggle either timer or alert on/off"},
     {false, "send XX ...", "send raw telegram data to EMS bus (XX are hex values)"},
     {false, "thermostat read <type ID>", "send read request to the thermostat for heating circuit hc 1-4"},
@@ -1460,10 +1460,12 @@ void TelnetCommandCallback(uint8_t wc, const char * commandLine) {
             char * second_cmd = _readWord();
             if (strcmp(second_cmd, "deep") == 0) {
                 startDeviceScan();
-                ok = true;
+            } else if (strcmp(second_cmd, "quick") == 0) {
+                ems_clearDeviceList();
+                ems_doReadCommand(EMS_TYPE_UBADevices, EMS_Boiler.device_id);
+            } else {
+                ems_scanDevices();
             }
-        } else {
-            ems_scanDevices();
             ok = true;
         }
     }

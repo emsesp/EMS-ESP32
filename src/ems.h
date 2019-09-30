@@ -268,8 +268,8 @@ typedef struct {
     uint8_t model_id;
     uint8_t product_id;
     uint8_t device_id;
-    char model_string[50];
-    bool write_supported;
+    char    model_string[50];
+    bool    write_supported;
 } _Thermostat_Device;
 
 // for consolidating all types

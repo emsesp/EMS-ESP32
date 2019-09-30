@@ -223,12 +223,10 @@ const uint8_t  TX_WRITE_TIMEOUT_COUNT = 2;       // 3 retries before timeout
 const uint32_t EMS_BUS_TIMEOUT        = 15000;   // timeout in ms before recognizing the ems bus is offline (15 seconds)
 const uint32_t EMS_POLL_TIMEOUT       = 5000000; // timeout in microseconds before recognizing the ems bus is offline (5 seconds)
 
+
 // init stats and counters and buffers
 void ems_init() {
-    // init the device map
-    for (uint8_t i = 0; i < EMS_SYS_DEVICEMAP_LENGTH; i++) {
-        EMS_Sys_Status.emsDeviceMap[i] = 0x00;
-    }
+    ems_clearDeviceList(); // init the device map
 
     // overall status
     EMS_Sys_Status.emsRxPgks        = 0;
@@ -1844,6 +1842,10 @@ void _process_RCTime(_EMS_RxTelegram * EMS_RxTelegram) {
  */
 void ems_clearDeviceList() {
     Devices.clear();
+
+    for (uint8_t i = 0; i < EMS_SYS_DEVICEMAP_LENGTH; i++) {
+        EMS_Sys_Status.emsDeviceMap[i] = 0x00;
+    }
 }
 
 /*
@@ -1856,7 +1858,7 @@ void _addDevice(uint8_t model_type, uint8_t src, uint8_t product_id, char * vers
     // check for duplicates
     bool found = false;
     for (std::list<_Generic_Device>::iterator it = Devices.begin(); it != Devices.end(); ++it) {
-        if (((it)->product_id == product_id) && ((it)->device_id == src) ) {
+        if (((it)->product_id == product_id) && ((it)->device_id == src)) {
             found = true; // it already exists in the list
         }
     }
