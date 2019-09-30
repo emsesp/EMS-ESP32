@@ -132,7 +132,7 @@ static const command_t project_cmds[] PROGMEM = {
 
     {false, "publish", "publish all values to MQTT"},
     {false, "refresh", "fetch values from the EMS devices"},
-    {false, "devices", "list all supported and detected EMS devices and types IDs"},
+    {false, "devices [all]", "list all supported and detected EMS devices"},
     {false, "queue", "show current Tx queue"},
     {false, "autodetect [deep]", "detect EMS devices and attempt to automatically set boiler and thermostat types"},
     {false, "shower <timer | alert>", "toggle either timer or alert on/off"},
@@ -1439,7 +1439,14 @@ void TelnetCommandCallback(uint8_t wc, const char * commandLine) {
     }
 
     if (strcmp(first_cmd, "devices") == 0) {
-        ems_printAllDevices();
+        if (wc == 2) {
+            char * second_cmd = _readWord();
+            if (strcmp(second_cmd, "all") == 0) {
+                ems_printAllDevices(); // verbose
+            }
+        } else {
+            ems_printDevices();
+        }
         ok = true;
     }
 
