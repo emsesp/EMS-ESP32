@@ -213,6 +213,7 @@ void MyESP::_wifiCallback(justwifi_messages_t code, char * parameter) {
         ArduinoOTA.begin(); // moved to support esp32
         myDebug_P(PSTR("[OTA] listening to %s.local:%u"), ArduinoOTA.getHostname().c_str(), OTA_PORT);
 
+        /*
         // show reason for the restart if any
         unsigned char reason = _getCustomResetReason();
         if (reason > 0) {
@@ -223,6 +224,7 @@ void MyESP::_wifiCallback(justwifi_messages_t code, char * parameter) {
             myDebug_P(PSTR("[SYSTEM] Last reset reason: %s (count %d)"), (char *)ESP.getResetReason().c_str(), _getSystemStabilityCounter());
             myDebug_P(PSTR("[SYSTEM] Last reset info: %s"), (char *)ESP.getResetInfo().c_str());
         }
+        */
 
         // MQTT Setup
         _mqtt_setup();
@@ -1559,7 +1561,7 @@ bool MyESP::_fs_validateConfigFile(const char * filename, size_t maxsize, JsonDo
     // check size
     size_t size = file.size();
 
-    myDebug_P(PSTR("[FS] Checking file %s, Size: %d bytes"), filename, size); // remove for debugging
+    myDebug_P(PSTR("[FS] Checking file %s (size %d bytes)"), filename, size); // remove for debugging
 
     if (size > maxsize) {
         file.close();
@@ -1610,7 +1612,7 @@ bool MyESP::_fs_validateLogFile(const char * filename) {
     size_t size    = file.size();
     size_t maxsize = ESP.getFreeHeap() - 2000; // reserve some buffer
 
-    myDebug_P(PSTR("[FS] Checking file %s, Size: %d bytes (max is %d)"), filename, size, maxsize); // remove for debugging
+    myDebug_P(PSTR("[FS] Checking file %s (size %d bytes, max is %d)"), filename, size, maxsize); // remove for debugging
 
     if (size > maxsize) {
         file.close();
@@ -1640,7 +1642,7 @@ bool MyESP::_fs_validateLogFile(const char * filename) {
 
 // format File System
 void MyESP::_fs_eraseConfig() {
-    myDebug_P(PSTR("[FS] Doing a factory reset."));
+    myDebug_P(PSTR("[FS] Performing a factory reset..."));
     _formatreq = true;
 }
 
