@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 
 - Removed `heating_circuit` config setting
+- Removed showing the JSON config files when Saving from the Web
 
 ## [1.9.0] 2019-09-01
 

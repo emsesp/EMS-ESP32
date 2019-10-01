@@ -51,7 +51,7 @@ var eventlog = {
     "command": "eventlist",
     "page": 1,
     "haspages": 1,
-    "list":[
+    "list": [
         "{\"type\":\"WARN\",\"src\":\"system\",\"desc\":\"test data\",\"data\":\"Record #1\",\"time\": 1563371160}",
         "{\"type\":\"WARN\",\"src\":\"system\",\"desc\":\"test data\",\"data\":\"Record #2\",\"time\":0}",
         "{\"type\":\"INFO\",\"src\":\"system\",\"desc\":\"System booted\",\"data\":\"\",\"time\":1568660479}",
@@ -147,7 +147,7 @@ function sendStatus() {
 function sendCustomStatus() {
     var stats = {
         "command": "custom_status",
-        "version": "1.9.0",
+        "version": "1.9.1",
         "customname": "EMS-ESP",
         "appurl": "https://github.com/proddy/EMS-ESP",
         "updateurl": "https://api.github.com/repos/proddy/EMS-ESP/releases/latest",
@@ -214,7 +214,7 @@ wss.on('connection', function connection(ws) {
         console.log("[INFO] Got Command: " + obj.command);
         switch (obj.command) {
             case "configfile":
-                console.log("[INFO] New system settings file received");
+                console.log("[INFO] New system config received");
                 configfile = obj;
                 break;
             case "custom_configfile":
@@ -269,7 +269,7 @@ wss.on('connection', function connection(ws) {
                 console.log("[INFO] getting ntp time");
                 break;
             default:
-                console.log("[WARN] Unknown command ");
+                console.log("[WARN] Unknown command");
                 break;
         }
     });

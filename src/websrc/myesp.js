@@ -95,25 +95,30 @@ function listntp() {
     deviceTime();
 }
 
-function revcommit() {
-    document.getElementById("jsonholder").innerText = JSON.stringify(config, null, 2);
-    $("#revcommit").modal("show");
+function home() {
+    window.location = '/';
 }
 
-function uncommited() {
+function restart_alert() {
     $("#commit").fadeOut(200, function () {
         $(this).css("background", "gold").fadeIn(1000);
     });
-    document.getElementById("commit").innerHTML = "<h6>Settings have changed. Click here to review and save.</h6>";
+    document.getElementById("commit").innerHTML = "<h6>Settings have changed. It's recommended to reboot the system. Click here to restart.</h6>";
+
     $("#commit").click(function () {
-        revcommit();
+        $("#reboot").modal("show");
         return false;
     });
 }
 
-function custom_uncommited() {
-    document.getElementById("jsonholder2").innerText = JSON.stringify(custom_config.settings, null, 2);
-    $("#custom_revcommit").modal("show");
+function saveconfig() {
+    websock.send(JSON.stringify(config));
+    restart_alert();
+}
+
+function custom_saveconfig() {
+    websock.send(JSON.stringify(custom_config));
+    restart_alert();
 }
 
 function saventp() {
@@ -125,13 +130,12 @@ function saventp() {
         config.ntp.enabled = true;
     }
 
-    uncommited();
+    saveconfig();
 }
 
 function forcentp() {
     websock.send("{\"command\":\"forcentp\"}");
 }
-
 
 function savegeneral() {
     var a = document.getElementById("adminpwd").value;
@@ -147,7 +151,7 @@ function savegeneral() {
         config.general.serial = true;
     }
 
-    uncommited();
+    saveconfig();
 }
 
 function savemqtt() {
@@ -167,7 +171,7 @@ function savemqtt() {
     config.mqtt.user = document.getElementById("mqttuser").value;
     config.mqtt.password = document.getElementById("mqttpwd").value;
 
-    uncommited();
+    saveconfig();
 }
 
 function savenetwork() {
@@ -186,7 +190,7 @@ function savenetwork() {
     config.network.wmode = wmode;
     config.network.password = document.getElementById("wifipass").value;
 
-    uncommited();
+    saveconfig();
 }
 
 var formData = new FormData();
@@ -199,8 +203,8 @@ function inProgress(callback) {
             var i = 0;
             var prg = setInterval(function () {
                 $(".progress-bar").css("width", i + "%").attr("aria-valuenow", i).html(i + "%");
-                i++;
-                if (i === 101) {
+                i = i + 5;
+                if (i === 105) {
                     clearInterval(prg);
                     var a = document.createElement("a");
                     a.href = "http://" + config.general.hostname + ".local";
@@ -221,9 +225,6 @@ function inProgress(callback) {
                         contentType: false
                     });
                     break;
-                case "commit":
-                    websock.send(JSON.stringify(config));
-                    break;
                 case "destroy":
                     websock.send("{\"command\":\"destroy\"}");
                     break;
@@ -236,10 +237,6 @@ function inProgress(callback) {
             }
         }
     }).hide().fadeIn();
-}
-
-function commit() {
-    inProgress("commit");
 }
 
 function handleSTA() {
@@ -498,10 +495,10 @@ function restoreSet() {
                     return;
                 }
                 if (json.command === "configfile") {
-                    var x = confirm("File seems to be valid, do you wish to continue?");
+                    var x = confirm("System Config file seems to be valid, do you wish to continue?");
                     if (x) {
                         config = json;
-                        uncommited();
+                        saveconfig();
                     }
                 }
             };
@@ -526,10 +523,10 @@ function restoreCustomSet() {
                     return;
                 }
                 if (json.command === "custom_configfile") {
-                    var x = confirm("File seems to be valid, do you wish to continue?");
+                    var x = confirm("Custom Config file seems to be valid, do you wish to continue?");
                     if (x) {
                         custom_config = json;
-                        custom_uncommited();
+                        custom_saveconfig();
                     }
                 }
             };
@@ -675,10 +672,6 @@ function initMQTTLogTable() {
             rows: newlist
         });
     });
-}
-
-function restartESP() {
-    inProgress("restart");
 }
 
 var nextIsNotJson = false;

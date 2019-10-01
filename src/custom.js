@@ -8,13 +8,10 @@ var custom_config = {
         "listen_mode": false,
         "shower_timer": false,
         "shower_alert": false,
-        "publish_time": 120
+        "publish_time": 120,
+        "tx_mode": 1
     }
 };
-
-function custom_commit() {
-    websock.send(JSON.stringify(custom_config));
-}
 
 function listcustom() {
 
@@ -72,7 +69,7 @@ function savecustom() {
     custom_config.settings.publish_time = parseInt(document.getElementById("publish_time").value);
     custom_config.settings.tx_mode = parseInt(document.getElementById("tx_mode").value);
 
-    custom_uncommited();
+    custom_saveconfig();
 }
 
 function listCustomStats() {
@@ -84,6 +81,8 @@ function listCustomStats() {
         document.getElementById("devicesshow").style.display = "none";
         document.getElementById("thermostat_show").style.display = "none";
         document.getElementById("boiler_show").style.display = "none";
+        document.getElementById("sm_show").style.display = "none";
+        document.getElementById("hp_show").style.display = "none";
         return;
     }
 
