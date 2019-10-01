@@ -1600,33 +1600,32 @@ bool MyESP::_fs_validateConfigFile(const char * filename, size_t maxsize, JsonDo
 }
 
 // validates a log file in SPIFFS
+// returns true if all OK
 bool MyESP::_fs_validateLogFile(const char * filename) {
     // see if we can open it
-    File file = SPIFFS.open(filename, "r");
-    if (!file) {
+    File eventlog = SPIFFS.open(filename, "r");
+    if (!eventlog) {
         myDebug_P(PSTR("[FS] File %s not found"), filename);
         return false;
     }
 
-    // check size
-    size_t size    = file.size();
-    size_t maxsize = ESP.getFreeHeap() - 2000; // reserve some buffer
-
+    // check sizes
+    size_t size    = eventlog.size();
+    size_t maxsize = ESP.getFreeHeap() - 2000;                                                    // reserve some buffer
     myDebug_P(PSTR("[FS] Checking file %s (size %d bytes, max is %d)"), filename, size, maxsize); // remove for debugging
-
     if (size > maxsize) {
-        file.close();
+        eventlog.close();
         myDebug_P(PSTR("[FS] File %s size %d is too large (max %d)"), filename, size, maxsize);
         return false;
     } else if (size == 0) {
-        file.close();
+        eventlog.close();
         myDebug_P(PSTR("[FS] Corrupted file %s"), filename);
         return false;
     }
 
+    /*
     // check integrity by reading file from SPIFFS into the char array
     char * buffer = new char[size + 2]; // reserve some memory to read in the file
-
     size_t real_size = file.readBytes(buffer, size);
     if (real_size != size) {
         file.close();
@@ -1634,10 +1633,55 @@ bool MyESP::_fs_validateLogFile(const char * filename) {
         delete[] buffer;
         return false;
     }
-
     file.close();
     delete[] buffer;
-    return true;
+    */
+
+    /*
+    File configFile = SPIFFS.open(filename, "r");
+    myDebug_P(PSTR("[FS] File: "));
+    while (configFile.available()) {
+        SerialAndTelnet.print((char)configFile.read());
+    }
+    myDebug_P(PSTR("[FS] end")); // newline
+    configFile.close();
+    */
+
+    // parse it to check JSON validity
+    // its slow but the only reliable way to check integrity of the file
+    uint8_t                                    char_count = 0;
+    bool                                       abort      = false;
+    char                                       char_buffer[MYESP_JSON_LOG_MAXSIZE];
+    char                                       c;
+    StaticJsonDocument<MYESP_JSON_LOG_MAXSIZE> doc;
+
+    eventlog.seek(0);
+    while (eventlog.available() && !abort) {
+        c = eventlog.read(); // read a char
+
+        // see if we have reached the end of the string
+        if (c == '\0' || c == '\n') {
+            char_buffer[char_count] = '\0'; // terminate and add it to the list
+            // Serial.printf("Got line: %s\n", char_buffer); // for debugging
+            // validate it by looking at JSON structure
+            DeserializationError error = deserializeJson(doc, char_buffer);
+            if (error) {
+                myDebug_P(PSTR("[FS] Event log has a corrupted entry (error %s)"), error.c_str());
+                abort = true;
+            }
+            char_count = 0; // start new record
+        } else {
+            // add the char to the buffer if recording, checking for overrun
+            if (char_count < MYESP_JSON_LOG_MAXSIZE) {
+                char_buffer[char_count++] = c;
+            } else {
+                abort = true; // reached limit of our line buffer
+            }
+        }
+    }
+
+    eventlog.close();
+    return !abort;
 }
 
 // format File System
@@ -2315,7 +2359,7 @@ void MyESP::_procMsg(AsyncWebSocketClient * client, size_t sz) {
 
     // Check whatever the command is and act accordingly
     if (strcmp(command, "configfile") == 0) {
-        _shouldRestart = fs_saveConfig(root);
+        (void)fs_saveConfig(root);
     } else if (strcmp(command, "custom_configfile") == 0) {
         (void)fs_saveCustomConfig(root);
     } else if (strcmp(command, "status") == 0) {
