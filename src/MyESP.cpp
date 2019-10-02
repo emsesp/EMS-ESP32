@@ -2754,7 +2754,7 @@ void MyESP::_printMQTTLog() {
     }
 
     myDebug_P(PSTR("")); // newline
-    myDebug_P(PSTR("MQTT subscribe log:"));
+    myDebug_P(PSTR("MQTT subscriptions:"));
 
     for (i = 0; i < MYESP_MQTTLOG_MAX; i++) {
         if ((MQTT_log[i].topic != nullptr) && (MQTT_log[i].type == 2)) {
