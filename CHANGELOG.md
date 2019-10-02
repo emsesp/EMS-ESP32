@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - new `mqttlog` command also shows which MQTT topics it is subscribed too
 - Optimized event log loading in web and added integrity checks on all config and log files during boot
 - `autodetect quick` 
+- `log_events` option, now optional to save the log events to SPIFFS
 
 ### Fixed
 
@@ -25,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Faster detection of EMS devices on bus by using the 0x07 telegram instead of the brute-force scan
 - Fixes to the default HA climate component .yaml file to support latest Home Assistance ('heat' added)
 - Update documentation in Wiki on MQTT and troubleshooting
+- Slowed down firmware upload via the Web to prevent users rebooting too early
   
 ### Removed
 

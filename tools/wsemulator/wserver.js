@@ -69,7 +69,8 @@ var configfile = {
     "general": {
         "hostname": "myesp",
         "password": "admin",
-        "serial": true
+        "serial": true,
+        "log_events": true
     },
     "mqtt": {
         "enabled": false,

@@ -400,11 +400,12 @@ class MyESP {
     char *        _app_updateurl;
     bool          _suspendOutput;
     bool          _general_serial;
-    unsigned long _getUptime();
-    char *        _getBuildTime();
+    bool          _general_log_events;
     char *        _buildTime;
     bool          _timerequest;
     bool          _formatreq;
+    unsigned long _getUptime();
+    char *        _getBuildTime();
     bool          _hasValue(char * s);
     void          _printHeap(const char * s);
 

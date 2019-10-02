@@ -46,6 +46,7 @@ MyESP::MyESP() {
     _ota_post_callback_f = nullptr;
     _load_average        = 100;  // calculated load average
     _general_serial      = true; // serial is set to on as default
+    _general_log_events  = true; // all logs are written to an event log in SPIFFS
     _have_ntp_time       = false;
 
     // telnet
@@ -665,6 +666,7 @@ void MyESP::_printSetCommands() {
     myDebug_P(PSTR("  set mqtt_port [value]"));
     myDebug_P(PSTR("  set ntp_enabled <on | off>"));
     myDebug_P(PSTR("  set serial <on | off>"));
+    myDebug_P(PSTR("  set log_events <on | off>"));
 
     // call callback function
     if (_telnet_callback_f) {
@@ -722,7 +724,9 @@ void MyESP::_printSetCommands() {
 #else
     myDebug_P(PSTR("  serial=%s"), (_general_serial) ? "on" : "off");
 #endif
+
     myDebug_P(PSTR("  ntp_enabled=%s"), (_ntp_enabled) ? "on" : "off");
+    myDebug_P(PSTR("  log_events=%s"), (_general_log_events) ? "on" : "off");
 
     // print any custom settings
     if (_fs_setlist_callback_f) {
@@ -883,6 +887,21 @@ bool MyESP::_changeSetting(uint8_t wc, const char * setting, const char * value)
                 _ntp_enabled = false;
                 save_config  = true;
                 myDebug_P(PSTR("NTP off"));
+            } else {
+                save_config = false;
+            }
+        }
+    } else if (strcmp(setting, "log_events") == 0) {
+        save_config = true;
+        if (value) {
+            if (strcmp(value, "on") == 0) {
+                _general_log_events = true;
+                save_config         = true;
+                myDebug_P(PSTR("Event logging on"));
+            } else if (strcmp(value, "off") == 0) {
+                _general_log_events = false;
+                save_config         = true;
+                myDebug_P(PSTR("Event logging off"));
             } else {
                 save_config = false;
             }
@@ -1599,9 +1618,14 @@ bool MyESP::_fs_validateConfigFile(const char * filename, size_t maxsize, JsonDo
     return true;
 }
 
-// validates a log file in SPIFFS
+// validates the event log file in SPIFFS
 // returns true if all OK
 bool MyESP::_fs_validateLogFile(const char * filename) {
+    // exit if we have disabled logging
+    if (!_general_log_events) {
+        return true;
+    }
+
     // see if we can open it
     File eventlog = SPIFFS.open(filename, "r");
     if (!eventlog) {
@@ -1726,7 +1750,8 @@ bool MyESP::_fs_loadConfig() {
     JsonObject general = doc["general"];
     _general_password  = strdup(general["password"] | MYESP_HTTP_PASSWORD);
     _ws->setAuthentication("admin", _general_password);
-    _general_hostname = strdup(general["hostname"]);
+    _general_hostname   = strdup(general["hostname"]);
+    _general_log_events = general["log_events"] | false; // default is off
 
     // serial is only on when booting
 #ifdef FORCE_SERIAL
@@ -1808,7 +1833,10 @@ bool MyESP::fs_saveCustomConfig(JsonObject root) {
         }
         */
 
-            _writeEvent("INFO", "system", "Custom config stored in the SPIFFS", "");
+            if (_general_log_events) {
+                _writeEvent("INFO", "system", "Custom config stored in the SPIFFS", "");
+            }
+
             myDebug_P(PSTR("[FS] custom config saved"));
             ok = true;
         }
@@ -1841,7 +1869,9 @@ bool MyESP::fs_saveConfig(JsonObject root) {
         configFile.close();
 
         if (n) {
-            _writeEvent("INFO", "system", "System config stored in the SPIFFS", "");
+            if (_general_log_events) {
+                _writeEvent("INFO", "system", "System config stored in the SPIFFS", "");
+            }
             myDebug_P(PSTR("[FS] system config saved"));
             ok = true;
         }
@@ -1924,7 +1954,9 @@ void MyESP::_fs_setup() {
     if (!SPIFFS.begin()) {
         myDebug_P(PSTR("[FS] Formatting filesystem..."));
         if (SPIFFS.format()) {
-            _writeEvent("WARN", "system", "File system formatted", "");
+            if (_general_log_events) {
+                _writeEvent("WARN", "system", "File system formatted", "");
+            }
         } else {
             myDebug_P(PSTR("[FS] Failed to format file system"));
         }
@@ -1959,7 +1991,9 @@ void MyESP::_fs_setup() {
     } else {
         myDebug_P(PSTR("[FS] Resetting event log"));
         SPIFFS.remove(MYESP_EVENTLOG_FILE);
-        _writeEvent("WARN", "system", "Event Log", "Log was reset due to corruption somewhere");
+        if (_general_log_events) {
+            _writeEvent("WARN", "system", "Event Log", "Log was erased due to probable file corruption");
+        }
     }
 
     if (_ota_post_callback_f) {
@@ -2184,6 +2218,7 @@ void MyESP::crashInfo() {
 #endif
 
 // write a log entry to SPIFFS
+// assumes we have "log_events" on
 void MyESP::_writeEvent(const char * type, const char * src, const char * desc, const char * data) {
     // this will also create the file if its doesn't exist
     File eventlog = SPIFFS.open(MYESP_EVENTLOG_FILE, "a");
@@ -2617,8 +2652,9 @@ void MyESP::_webserver_setup() {
                            return;
                        }
                        if (!index) {
+                           ETS_UART_INTR_DISABLE(); // disable all UART interrupts to be safe
                            _writeEvent("INFO", "system", "Firmware update started", "");
-                           //Serial.printf("[SYSTEM] Firmware update started: %s\n", filename.c_str()); // enable for debugging
+                           //Serial.printf("[SYSTEM] Firmware update started: %s\n", filename.c_str()); // enable for debugging XXX
                            Update.runAsync(true);
                            if (!Update.begin((ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000)) {
                                _writeEvent("ERRO", "system", "Not enough space to update", "");
@@ -2634,7 +2670,6 @@ void MyESP::_webserver_setup() {
                        if (final) {
                            if (Update.end(true)) {
                                _writeEvent("INFO", "system", "Firmware update finished", "");
-                               //Serial.printf("[SYSTEM] Firmware update finished: %uB\n", index + len); // enable for debugging
                                _shouldRestart = !Update.hasError();
                            } else {
                                _writeEvent("ERRO", "system", "Firmware update failed", "");
@@ -2682,11 +2717,9 @@ void MyESP::_webserver_setup() {
         //static String remoteIP = (String)address[0] + "." + (String)address[1] + "." + (String)address[2] + "." + (String)address[3];
 
         if (!request->authenticate(MYESP_HTTP_USERNAME, _general_password)) {
-            //_writeEvent("WARN", "system", "New login attempt", remoteIP);
             return request->requestAuthentication();
         }
         request->send(200, "text/plain", "Success");
-        // _writeEvent("INFO", "system", "Login successful", remoteIP);
     });
 
     _webServer->rewrite("/", "/index.html");
@@ -2799,7 +2832,9 @@ void MyESP::_bootupSequence() {
     if (boot_status == MYESP_BOOTSTATUS_BOOTED) {
         if ((_ntp_enabled) && (now() > 10000) && !_have_ntp_time) {
             _have_ntp_time = true;
-            _writeEvent("INFO", "system", "System booted", "");
+            if (_general_log_events) {
+                _writeEvent("INFO", "system", "System booted", "");
+            }
         }
         return;
     }
@@ -2829,7 +2864,9 @@ void MyESP::_bootupSequence() {
 
         // write a log message if we're not using NTP, otherwise wait for the internet time to arrive
         if (!_ntp_enabled) {
-            _writeEvent("INFO", "system", "System booted", "");
+            if (_general_log_events) {
+                _writeEvent("INFO", "system", "System booted", "");
+            }
         }
     }
 }
@@ -2898,7 +2935,9 @@ void MyESP::loop() {
     }
 
     if (_shouldRestart) {
-        _writeEvent("INFO", "system", "System is restarting", "");
+        if (_general_log_events) {
+            _writeEvent("INFO", "system", "System is restarting", "");
+        }
         myDebug("[SYSTEM] Restarting...");
         _deferredReset(500, CUSTOM_RESET_TERMINAL);
         ESP.restart();

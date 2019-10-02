@@ -18,7 +18,8 @@ var config = {
     "general": {
         "hostname": "",
         "serial": false,
-        "password": "admin"
+        "password": "admin",
+        "log_events": true
     },
     "mqtt": {
         "enabled": false,
@@ -151,6 +152,11 @@ function savegeneral() {
         config.general.serial = true;
     }
 
+    config.general.log_events = false;
+    if (parseInt($("input[name=\"logeventsenabled\"]:checked").val()) === 1) {
+        config.general.log_events = true;
+    }
+
     saveconfig();
 }
 
@@ -239,6 +245,32 @@ function inProgress(callback) {
     }).hide().fadeIn();
 }
 
+function inProgressUpload() {
+    $("body").load("myesp.html #progressupload", function (responseTxt, statusTxt, xhr) {
+        if (statusTxt === "success") {
+            $(".progress").css("height", "40");
+            $(".progress").css("font-size", "xx-large");
+            var i = 0;
+            var prg = setInterval(function () {
+                $(".progress-bar").css("width", i + "%").attr("aria-valuenow", i).html(i + "%");
+                i = i + 1;
+                if (i === 101) {
+                    clearInterval(prg);
+                    document.getElementById("updateprog").className = "progress-bar progress-bar-success";
+                    document.getElementById("updateprog").innerHTML = "Completed";
+                }
+            }, 500);
+            $.ajax({
+                url: "/update",
+                type: "POST",
+                data: formData,
+                processData: false,
+                contentType: false
+            });
+        }
+    }).hide().fadeIn();
+}
+
 function handleSTA() {
     document.getElementById("scanb").style.display = "block";
     document.getElementById("hidessid").style.display = "block";
@@ -273,6 +305,10 @@ function listgeneral() {
 
     if (config.general.serial) {
         $("input[name=\"serialenabled\"][value=\"1\"]").prop("checked", true);
+    }
+
+    if (config.general.log_events) {
+        $("input[name=\"logeventsenabled\"][value=\"1\"]").prop("checked", true);
     }
 }
 
@@ -423,7 +459,15 @@ function getContent(contentname) {
                     page = 1;
                     data = [];
                     getEvents();
+
+                    if (config.general.log_events) {
+                        document.getElementById("logevents").style.display = "none";
+                    } else {
+                        document.getElementById("logevents").style.display = "block";
+                    }
+
                     break;
+
                 case "#customcontent":
                     listcustom();
                     break;
@@ -552,7 +596,7 @@ function initEventTable() {
             var dup = JSON.parse(data[i]);
             dup.uid = i + 1;
         } catch (e) {
-            var dup = { "uid": i, "type": "ERRO", "src": "SYS", "desc": "Error in logfile entry", "data": data[i], "time": 1 }
+            var dup = { "uid": i + 1, "type": "ERRO", "src": "SYS", "desc": "Error in log file", "data": data[i], "time": 1 }
         }
         newlist[i].value = dup;
 
@@ -866,7 +910,7 @@ function connectWS() {
 
 function upload() {
     formData.append("bin", $("#binform")[0].files[0]);
-    inProgress("upload");
+    inProgressUpload();
 }
 
 function login() {
