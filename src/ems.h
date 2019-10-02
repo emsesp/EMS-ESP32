@@ -121,7 +121,7 @@
 //#define EMS_SYS_LOGGING_DEFAULT EMS_SYS_LOGGING_VERBOSE // turn on for debugging
 #define EMS_SYS_LOGGING_DEFAULT EMS_SYS_LOGGING_NONE
 
-#define EMS_SYS_DEVICEMAP_LENGTH 13 // size of the 0x07 telegram data part which stores all active EMS devices
+#define EMS_SYS_DEVICEMAP_LENGTH 15 // size of the 0x07 telegram data part which stores all active EMS devices
 
 // define the model types
 // which get rendered to html colors in the web interface in file custom.js in function listCustomStats()

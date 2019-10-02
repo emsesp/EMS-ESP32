@@ -1922,10 +1922,11 @@ void _addDevice(uint8_t model_type, uint8_t src, uint8_t product_id, char * vers
 /**
  * type 0x07 - shows us the connected EMS devices
  * e.g. 08 00 07 00 0B 80 00 00 00 00 00 00 00 00 00 00 00 (CRC=47) #data=13  
+ * Junkers is 15 (I think)
  */
 void _process_UBADevices(_EMS_RxTelegram * EMS_RxTelegram) {
-    if (EMS_RxTelegram->data_length != EMS_SYS_DEVICEMAP_LENGTH) {
-        return; // should be 13 bytes long
+    if (EMS_RxTelegram->data_length > EMS_SYS_DEVICEMAP_LENGTH) {
+        return; // should be 13 or 15 bytes long
     }
 
     for (uint8_t data_byte = 0; data_byte < EMS_RxTelegram->data_length; data_byte++) {
