@@ -1420,18 +1420,13 @@ void _process_RC30StatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
  * received every 60 seconds
  */
 void _process_RC35StatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
-    // ignore if 14th byte is 0x00, which I think is flow temp, means HC is not is use
-    if (EMS_RxTelegram->data[14] == 0x00) {
-        return;
-    }
-
-    // only process broadcasts for now
-    if (EMS_RxTelegram->dest != EMS_ID_NONE) {
-        return;
-    }
-
-    // if we have 0x7D00 as current room temp also ignore
-    if (EMS_RxTelegram->data[EMS_OFFSET_RC35StatusMessage_curr] == 0x7D) {
+    // exit if...
+    // a) the 14th byte is 0x00, which I think is flow temp, means HC is not is use
+    // b) its not a broadcast
+    // c) we have 0x7D00 as current room temp
+    // d) the 5th bit of the 2nd data byte is not set (e.g. x13 is ok, x03 is not) - based on examples above
+    if ((EMS_RxTelegram->data[14] == 0x00) || (EMS_RxTelegram->dest != EMS_ID_NONE) || (EMS_RxTelegram->data[EMS_OFFSET_RC35StatusMessage_curr] == 0x7D)
+        || (_bitRead(1, 4) == 1)) {
         return;
     }
 
