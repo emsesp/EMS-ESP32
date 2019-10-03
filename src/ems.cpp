@@ -1398,6 +1398,8 @@ void _process_RC30StatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
  * broadcasts when manually setting HC2 to 14 degrees:
  * 10 00 3E 00   04 03 00 7D 00 00 00 00 00 00 00 00 00 11 05 00
  * 10 00 48 00   04 13 1C 00 E4 00 00 00 00 00 00 00 64 11 0F 00
+ * 
+ * 10 00 3E 00   80 02 1A 7D 00 00 00 00 00 00 00 00 64 11 16 00
  *
  * 10 0B 3E 00   00 00 00 7D 00 00 00 00 00 00 00 00 00 11 05 04
  * 10 00 48 00   00 00 00 00 E4 00 00 00 00 00 00 00 00 11 05 04
@@ -1421,19 +1423,23 @@ void _process_RC30StatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
  */
 void _process_RC35StatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     // exit if...
-    // a) the 14th byte is 0x00, which I think is flow temp, means HC is not is use
-    // b) its not a broadcast
-    // c) we have 0x7D00 as current room temp
-    // d) the 5th bit of the 2nd data byte is not set (e.g. x13 is ok, x03 is not) - based on examples above
-    if ((EMS_RxTelegram->data[14] == 0x00) || (EMS_RxTelegram->dest != EMS_ID_NONE) || (EMS_RxTelegram->data[EMS_OFFSET_RC35StatusMessage_curr] == 0x7D)
-        || (_bitRead(1, 4) == 1)) {
+    // - the 15th byte (second from last) is 0x00, which I think is flow temp, means HC is not is use
+    // - its not a broadcast, so destination is 0x00
+    if ((EMS_RxTelegram->data[14] == 0x00) || (EMS_RxTelegram->dest != EMS_ID_NONE)) {
         return;
     }
 
     uint8_t hc_num = _getHeatingCircuit(EMS_RxTelegram) - 1; // which HC is it, 0-3
 
-    EMS_Thermostat.hc[hc_num].setpoint_roomTemp = _toByte(EMS_OFFSET_RC35StatusMessage_setpoint); // is * 2
-    EMS_Thermostat.hc[hc_num].curr_roomTemp     = _toShort(EMS_OFFSET_RC35StatusMessage_curr);    // is * 10
+    // ignore if the value is 0 (see https://github.com/proddy/EMS-ESP/commit/ccc30738c00f12ae6c89177113bd15af9826b836)
+    if (EMS_RxTelegram->data[EMS_OFFSET_RC35StatusMessage_setpoint] != 0x00) {
+        EMS_Thermostat.hc[hc_num].setpoint_roomTemp = _toByte(EMS_OFFSET_RC35StatusMessage_setpoint); // is * 2
+    }
+
+    // ignore if the value is unset. Hopefully it will be picked up via a later message
+    if (EMS_RxTelegram->data[EMS_OFFSET_RC35StatusMessage_curr] != 0x7D) {
+        EMS_Thermostat.hc[hc_num].curr_roomTemp = _toShort(EMS_OFFSET_RC35StatusMessage_curr); // is * 10
+    }
 
     EMS_Thermostat.hc[hc_num].day_mode     = _bitRead(EMS_OFFSET_RC35StatusMessage_mode, 1);  // get day mode flag
     EMS_Thermostat.hc[hc_num].summer_mode  = _bitRead(EMS_OFFSET_RC35StatusMessage_mode, 0);  // summer mode?
