@@ -2654,7 +2654,7 @@ void MyESP::_webserver_setup() {
                        if (!index) {
                            ETS_UART_INTR_DISABLE(); // disable all UART interrupts to be safe
                            _writeEvent("INFO", "system", "Firmware update started", "");
-                           //Serial.printf("[SYSTEM] Firmware update started: %s\n", filename.c_str()); // enable for debugging XXX
+                           //Serial.printf("[SYSTEM] Firmware update started: %s\n", filename.c_str()); // enable for debugging
                            Update.runAsync(true);
                            if (!Update.begin((ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000)) {
                                _writeEvent("ERRO", "system", "Not enough space to update", "");
