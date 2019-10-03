@@ -190,12 +190,12 @@ const _EMS_Type EMS_Types[] = {
 };
 
 // calculate sizes of arrays at compile
-uint8_t _EMS_Types_max          = ArraySize(EMS_Types);           // number of defined types
-uint8_t _Boiler_Devices_max     = ArraySize(Boiler_Devices);      // number of boiler models
-uint8_t _SolarModule_Types_max  = ArraySize(SolarModule_Devices); // number of solar module types
-uint8_t _Other_Devices_max      = ArraySize(Other_Devices);       // number of other ems devices
-uint8_t _Thermostat_Devices_max = ArraySize(Thermostat_Devices);  // number of defined thermostat types
-uint8_t _HeatPump_Devices_max   = ArraySize(HeatPump_Devices);    // number of defined heatpuimp types
+uint8_t _EMS_Types_max           = ArraySize(EMS_Types);           // number of defined types
+uint8_t _Boiler_Devices_max      = ArraySize(Boiler_Devices);      // number of boiler models
+uint8_t _SolarModule_Devices_max = ArraySize(SolarModule_Devices); // number of solar module types
+uint8_t _Other_Devices_max       = ArraySize(Other_Devices);       // number of other ems devices
+uint8_t _Thermostat_Devices_max  = ArraySize(Thermostat_Devices);  // number of defined thermostat types
+uint8_t _HeatPump_Devices_max    = ArraySize(HeatPump_Devices);    // number of defined heatpump types
 
 // these structs contain the data we store from the specific EMS devices
 _EMS_Boiler      EMS_Boiler;      // for boiler
@@ -2078,7 +2078,7 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
 
     // look for Solar Modules
     i = 0;
-    while (i < _SolarModule_Types_max) {
+    while (i < _SolarModule_Devices_max) {
         if (SolarModule_Devices[i].product_id == product_id) {
             typeFound = true; // we have a matching product id. i is the index.
             break;
@@ -2091,7 +2091,7 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
         _addDevice(EMS_MODELTYPE_SM, EMS_RxTelegram->src, product_id, version, i);
 
         // myDebug_P(PSTR("Solar Module support enabled."));
-        EMS_SolarModule.device_id  = SolarModule_Devices[i].device_id;
+        EMS_SolarModule.device_id  = EMS_ID_SM;
         EMS_SolarModule.product_id = product_id;
         strlcpy(EMS_SolarModule.version, version, sizeof(EMS_SolarModule.version));
 
@@ -2115,7 +2115,7 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
         _addDevice(EMS_MODELTYPE_HP, EMS_RxTelegram->src, product_id, version, i);
 
         // myDebug_P(PSTR("Heat Pump support enabled."));
-        EMS_HeatPump.device_id  = SolarModule_Devices[i].device_id;
+        EMS_HeatPump.device_id  = EMS_ID_HP;
         EMS_HeatPump.product_id = product_id;
         strlcpy(EMS_HeatPump.version, version, sizeof(EMS_HeatPump.version));
         return;
@@ -2312,7 +2312,7 @@ void ems_getSolarModuleValues() {
     if (ems_getSolarModuleEnabled()) {
         if (EMS_SolarModule.product_id == EMS_PRODUCTID_SM10) {
             ems_doReadCommand(EMS_TYPE_SM10Monitor, EMS_ID_SM); // fetch all from SM10Monitor
-        } else if (EMS_SolarModule.product_id == EMS_PRODUCTID_SM100) {
+        } else if ((EMS_SolarModule.product_id == EMS_PRODUCTID_SM100) || (EMS_SolarModule.product_id == EMS_PRODUCTID_SM50)) {
             ems_doReadCommand(EMS_TYPE_SM100Monitor, EMS_ID_SM); // fetch all from SM100Monitor
         }
     }
@@ -2421,7 +2421,7 @@ char * ems_getSolarModuleDescription(char * buffer, bool name_only) {
         char tmp[6] = {0};
 
         // scan through known ID types
-        while (i < _SolarModule_Types_max) {
+        while (i < _SolarModule_Devices_max) {
             if (SolarModule_Devices[i].product_id == EMS_SolarModule.product_id) {
                 found = true; // we have a match
                 break;
@@ -2512,15 +2512,13 @@ void ems_scanDevices() {
         Device_Ids.push_back(tt.device_id);
     }
 
-    // copy over solar modules
-    for (_SolarModule_Device sm : SolarModule_Devices) {
-        Device_Ids.push_back(sm.device_id);
-    }
-
     // copy over others
     for (_Other_Device ot : Other_Devices) {
         Device_Ids.push_back(ot.device_id);
     }
+
+    Device_Ids.push_back(EMS_ID_HP); // add heat pump
+    Device_Ids.push_back(EMS_ID_SM); // add solar module
 
     // remove duplicates and reserved IDs (like our own device)
     Device_Ids.sort();
@@ -2552,14 +2550,24 @@ void ems_printAllDevices() {
                   Boiler_Devices[i].product_id);
     }
 
-    myDebug_P(PSTR("\nThese %d devices are supported under solar module devices:"), _SolarModule_Types_max);
-    for (i = 0; i < _SolarModule_Types_max; i++) {
+    myDebug_P(PSTR("\nThese %d devices are supported under solar module devices:"), _SolarModule_Devices_max);
+    for (i = 0; i < _SolarModule_Devices_max; i++) {
         myDebug_P(PSTR(" %s%s%s (DeviceID:0x%02X ProductID:%d)"),
                   COLOR_BOLD_ON,
                   SolarModule_Devices[i].model_string,
                   COLOR_BOLD_OFF,
-                  SolarModule_Devices[i].device_id,
+                  EMS_ID_SM,
                   SolarModule_Devices[i].product_id);
+    }
+
+    myDebug_P(PSTR("\nThese %d devices are supported under heat pump devices:"), _HeatPump_Devices_max);
+    for (i = 0; i < _HeatPump_Devices_max; i++) {
+        myDebug_P(PSTR(" %s%s%s (DeviceID:0x%02X ProductID:%d)"),
+                  COLOR_BOLD_ON,
+                  HeatPump_Devices[i].model_string,
+                  COLOR_BOLD_OFF,
+                  EMS_ID_HP,
+                  HeatPump_Devices[i].product_id);
     }
 
     myDebug_P(PSTR("\nThese %d devices are supported as other EMS devices:"), _Other_Devices_max);

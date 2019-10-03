@@ -191,19 +191,21 @@ const _Boiler_Device Boiler_Devices[] = {
     {64, "Sieger BK15/Nefit Smartline/Buderus GB152"},
     {EMS_PRODUCTID_HEATRONIC, "Bosch Condens 2500/Junkers Heatronic 3"},
     {122, "Nefit Proline"},
+    {170, "Buderus Logano GB212"},
     {172, "Nefit Enviline"}
 
 };
 
 /*
- * Known Solar Module types
- * format is PRODUCT ID, DEVICE ID, DESCRIPTION
+ * Known Solar Module types, device type 0x30
+ * format is PRODUCT ID, DESCRIPTION
  */
 const _SolarModule_Device SolarModule_Devices[] = {
 
-    {EMS_PRODUCTID_SM10, EMS_ID_SM, "SM10 Solar Module"},
-    {EMS_PRODUCTID_SM100, EMS_ID_SM, "SM100 Solar Module"},
-    {EMS_PRODUCTID_ISM1, EMS_ID_SM, "Junkers ISM1 Solar Module"}
+    {EMS_PRODUCTID_SM10, "SM10 Solar Module"},
+    {EMS_PRODUCTID_SM100, "SM100 Solar Module"},
+    {EMS_PRODUCTID_ISM1, "Junkers ISM1 Solar Module"},
+    {EMS_PRODUCTID_SM50, "SM50 Solar Module"}
 
 };
 
@@ -211,27 +213,31 @@ const _SolarModule_Device SolarModule_Devices[] = {
 // format is PRODUCT ID, DEVICE ID, DESCRIPTION
 const _Other_Device Other_Devices[] = {
 
-    {69, 0x21, "MM10 Mixer Module"},
     {71, 0x11, "WM10 Switch Module"},
+
+    {69, 0x21, "MM10 Mixer Module"},
     {160, 0x20, "MM100 Mixing Module"},
     {160, 0x21, "MM100 Mixing Module"},
     {159, 0x21, "MM50 Mixing Module"},
+
     {68, 0x09, "BC10/RFM20 Receiver"},
     {190, 0x09, "BC10 Base Controller"},
     {114, 0x09, "BC10 Base Controller"},
     {125, 0x09, "BC25 Base Controller"},
+    {169, 0x09, "BC40 Base Controller"},
     {152, 0x09, "Junkers Controller"},
+
     {205, 0x02, "Nefit Moduline Easy Connect"},
     {206, 0x02, "Bosch Easy Connect"},
     {171, 0x02, "EMS-OT OpenTherm converter"},
-    {252, EMS_ID_HP, "HeatPump Module"},
+
     {189, EMS_ID_GATEWAY, "Web Gateway KM200"}
 
 };
 
-// heatpump
+// heatpump, device ID 0x38
 // format is PRODUCT ID, DEVICE ID, DESCRIPTION
-const _HeatPump_Device HeatPump_Devices[] = {{252, EMS_ID_HP, "HeatPump Module"}};
+const _HeatPump_Device HeatPump_Devices[] = {{252, "HeatPump Module"}};
 
 /*
  * Known thermostat types and their capabilities

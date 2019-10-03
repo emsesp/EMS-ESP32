@@ -89,6 +89,7 @@
 // Product IDs
 #define EMS_PRODUCTID_HEATRONIC 95 // Junkers Heatronic 3 device
 #define EMS_PRODUCTID_SM10 73      // SM10 solar module
+#define EMS_PRODUCTID_SM50 162     // SM50 solar module
 #define EMS_PRODUCTID_SM100 163    // SM100 solar module
 #define EMS_PRODUCTID_ISM1 101     // Junkers ISM1 solar module
 
@@ -248,7 +249,6 @@ typedef struct {
 
 typedef struct {
     uint8_t product_id;
-    uint8_t device_id;
     char    model_string[50];
 } _SolarModule_Device;
 
@@ -260,7 +260,6 @@ typedef struct {
 
 typedef struct {
     uint8_t product_id;
-    uint8_t device_id;
     char    model_string[50];
 } _HeatPump_Device;
 
