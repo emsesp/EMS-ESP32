@@ -459,7 +459,7 @@ void showInfo() {
     myDebug_P(PSTR("\n%sEMS Bus stats:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
 
     if (ems_getBusConnected()) {
-        myDebug_P(PSTR("  Bus is connected"));
+        myDebug_P(PSTR("  Bus is connected, protocol: %s"), ((EMS_Sys_Status.emsIDMask == 0x80) ? "Junkers HT3" : "Buderus"));
         myDebug_P(PSTR("  Rx: # successful read requests=%d, # CRC errors=%d"), EMS_Sys_Status.emsRxPgks, EMS_Sys_Status.emxCrcErr);
 
         if (ems_getTxCapable()) {
