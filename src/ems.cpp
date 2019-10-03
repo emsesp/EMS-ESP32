@@ -1966,7 +1966,7 @@ void _process_UBADevices(_EMS_RxTelegram * EMS_RxTelegram) {
 
 /**
  * type 0x02 - get the firmware version and type of an EMS device
- * look up known devices via the product id and setup if not already set
+ * look up known devices via the product id and make it active if not already setup
  */
 void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
     // ignore short messages that we can't interpret
@@ -1983,7 +1983,7 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
         if (EMS_RxTelegram->data[3] != 0x00) {
             offset = 3;
         } else {
-            return; // ignore telegram
+            return; // ignore whole telegram
         }
     }
 
@@ -2049,7 +2049,7 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
 
     if (typeFound) {
         // its a known thermostat, add to list
-        _addDevice(EMS_MODELTYPE_THERMOSTAT, EMS_RxTelegram->src, product_id, version, i); // type 2 = thermostat
+        _addDevice(EMS_MODELTYPE_THERMOSTAT, EMS_RxTelegram->src, product_id, version, i);
 
         // if we don't have a thermostat set, use this one. it will pick the first one.
         if (((EMS_Thermostat.device_id == EMS_ID_NONE) || (EMS_Thermostat.model_id == EMS_MODEL_NONE)
@@ -2088,7 +2088,7 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
 
     if (typeFound) {
         // its a known SM, add to list
-        _addDevice(EMS_MODELTYPE_SM, EMS_RxTelegram->src, product_id, version, i); // type 3 = other
+        _addDevice(EMS_MODELTYPE_SM, EMS_RxTelegram->src, product_id, version, i);
 
         // myDebug_P(PSTR("Solar Module support enabled."));
         EMS_SolarModule.device_id  = SolarModule_Devices[i].device_id;
@@ -2112,7 +2112,7 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
 
     if (typeFound) {
         // its a known SM, add to list
-        _addDevice(EMS_MODELTYPE_HP, EMS_RxTelegram->src, product_id, version, i); // type 3 = other
+        _addDevice(EMS_MODELTYPE_HP, EMS_RxTelegram->src, product_id, version, i);
 
         // myDebug_P(PSTR("Heat Pump support enabled."));
         EMS_HeatPump.device_id  = SolarModule_Devices[i].device_id;
@@ -2133,10 +2133,10 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
 
     if (typeFound) {
         // its a known other device, add to list
-        _addDevice(EMS_MODELTYPE_OTHER, EMS_RxTelegram->src, product_id, version, i); // type 3 = other
+        _addDevice(EMS_MODELTYPE_OTHER, EMS_RxTelegram->src, product_id, version, i);
     } else {
         // didn't recognize, add to list anyway
-        _addDevice(EMS_MODELTYPE_UNKNOWN, EMS_RxTelegram->src, product_id, version, 0); // type 4 = unknown
+        _addDevice(EMS_MODELTYPE_UNKNOWN, EMS_RxTelegram->src, product_id, version, 0);
     }
 }
 

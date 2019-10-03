@@ -1850,9 +1850,16 @@ void WebCallback(JsonObject root) {
         item["version"]   = (it)->version;
         item["productid"] = (it)->product_id;
 
-        char s[10];
-        itoa((it)->device_id, s, 16); // convert to hex
-        item["deviceid"] = s;
+        char buffer[10];
+        // copy of my _hextoa() function from ems.cpp
+        // to convert device_id into a 0xXX hex value string
+        char * p         = buffer;
+        byte   nib1      = ((it)->device_id >> 4) & 0x0F;
+        byte   nib2      = ((it)->device_id >> 0) & 0x0F;
+        *p++             = nib1 < 0xA ? '0' + nib1 : 'A' + nib1 - 0xA;
+        *p++             = nib2 < 0xA ? '0' + nib2 : 'A' + nib2 - 0xA;
+        *p               = '\0'; // null terminate just in case
+        item["deviceid"] = buffer;
     }
 
     // send over Thermostat data
