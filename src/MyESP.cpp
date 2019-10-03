@@ -1673,13 +1673,13 @@ bool MyESP::_fs_validateLogFile(const char * filename) {
 
     // parse it to check JSON validity
     // its slow but the only reliable way to check integrity of the file
-    uint8_t                                    char_count = 0;
+    uint16_t                                   char_count = 0;
     bool                                       abort      = false;
     char                                       char_buffer[MYESP_JSON_LOG_MAXSIZE];
     char                                       c;
     StaticJsonDocument<MYESP_JSON_LOG_MAXSIZE> doc;
 
-    eventlog.seek(0);
+    // eventlog.seek(0);
     while (eventlog.available() && !abort) {
         c = eventlog.read(); // read a char
 
