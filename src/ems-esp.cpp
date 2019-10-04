@@ -1460,15 +1460,18 @@ void TelnetCommandCallback(uint8_t wc, const char * commandLine) {
             char * second_cmd = _readWord();
             if (strcmp(second_cmd, "deep") == 0) {
                 startDeviceScan();
+                ok = true;
             } else if (strcmp(second_cmd, "quick") == 0) {
                 ems_clearDeviceList();
                 ems_doReadCommand(EMS_TYPE_UBADevices, EMS_Boiler.device_id);
-            } else {
-                ems_scanDevices();
+                ok = true;
             }
+        } else {
+            ems_scanDevices(); // normal known device scan
             ok = true;
         }
     }
+
 
     // shower settings
     if ((strcmp(first_cmd, "shower") == 0) && (wc == 2)) {
