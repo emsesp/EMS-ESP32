@@ -133,6 +133,8 @@
 #define EMS_MODELTYPE_OTHER 5      // no color
 #define EMS_MODELTYPE_UNKNOWN 6    // no color
 
+#define EMS_MODELTYPE_UNKNOWN_STRING "unknown?" // model type text to use when discovering an unknown device
+
 /* EMS UART transfer status */
 typedef enum {
     EMS_RX_STATUS_IDLE,

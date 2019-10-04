@@ -1864,11 +1864,6 @@ void _addDevice(uint8_t model_type, uint8_t src, uint8_t product_id, char * vers
         }
     }
 
-    if (found) {
-        return; // don't add duplicate
-    }
-
-    // print it like "EMS Device found, Heat Pump: %s (DeviceID:0x%02X ProductID:%d Version:%s)"
     char device_type[500];
     strlcpy(device_type, "EMS Device recognized as ", sizeof(device_type));
 
@@ -1896,7 +1891,7 @@ void _addDevice(uint8_t model_type, uint8_t src, uint8_t product_id, char * vers
     case EMS_MODELTYPE_UNKNOWN:
     default:
         strlcat(device_type, "?", sizeof(device_type));
-        strlcpy(device.model_string, "unknown?", sizeof(device.model_string));
+        strlcpy(device.model_string, EMS_MODELTYPE_UNKNOWN_STRING, sizeof(device.model_string));
         break;
     }
 
@@ -1914,6 +1909,13 @@ void _addDevice(uint8_t model_type, uint8_t src, uint8_t product_id, char * vers
     strlcat(device_type, version, sizeof(device_type));
 
     strlcat(device_type, ")", sizeof(device_type));
+
+    // if already exists mention it
+    if (found) {
+        strlcat(device_type, " **already active**", sizeof(device_type));
+        myDebug(device_type); // print it
+        return;               // exit
+    }
 
     myDebug(device_type); // print it
 
@@ -2500,7 +2502,7 @@ char * ems_getHeatPumpDescription(char * buffer, bool name_only) {
  * Find the versions of our connected devices
  */
 void ems_scanDevices() {
-    myDebug_P(PSTR("Started scan on EMS bus for known devices"));
+    myDebug_P(PSTR("Started scanning the EMS bus for known devices"));
 
     std::list<uint8_t> Device_Ids; // create a new list
 
@@ -2637,6 +2639,7 @@ void ems_printDevices() {
     myDebug(s);
 
     // print out the ones we recognized
+    bool unknown = false;
     if (!Devices.empty()) {
         myDebug_P(PSTR("and %d were recognized by EMS-ESP as:"), Devices.size());
         for (std::list<_Generic_Device>::iterator it = Devices.begin(); it != Devices.end(); ++it) {
@@ -2647,11 +2650,18 @@ void ems_printDevices() {
                       (it)->device_id,
                       (it)->product_id,
                       (it)->version);
+            // check for unknowns
+            if (strcmp((it)->model_string, EMS_MODELTYPE_UNKNOWN_STRING) == 0) {
+                unknown = true;
+            }
         }
 
         myDebug_P(PSTR("")); // newline
-        myDebug_P(PSTR("Note: if any devices are marked as 'unknown?' please report this as a GitHub issue so the EMS devices list can be "
-                       "updated."));
+
+        if (unknown) {
+            myDebug_P(PSTR("You have a device is that is not known by EMS-ESP. Please report this as a GitHub issue so we can expand the EMS device library."));
+        }
+
     } else {
         myDebug_P(PSTR("No devices recognized. This could be because Tx is disabled or failing."));
     }
@@ -2789,7 +2799,7 @@ void ems_setThermostatTemp(float temperature, uint8_t hc_num, uint8_t temptype) 
     EMS_TxTelegram.action = EMS_TX_TELEGRAM_WRITE;
     EMS_TxTelegram.dest   = device_id;
 
-    myDebug_P(PSTR("Setting new thermostat temperature for heating circuit %d type %d (0=none,1=night,2=day,3=holiday)"), hc_num, temptype);
+    myDebug_P(PSTR("Setting new thermostat temperature for heating circuit %d type %d (0=auto,1=night,2=day,3=holiday)"), hc_num, temptype);
 
     if (model_id == EMS_MODEL_RC20) {
         EMS_TxTelegram.type               = EMS_TYPE_RC20Set;
@@ -2827,11 +2837,11 @@ void ems_setThermostatTemp(float temperature, uint8_t hc_num, uint8_t temptype) 
         case 1: // change the night temp
             EMS_TxTelegram.offset = EMS_OFFSET_RC35Set_temp_night;
             break;
-        case 2: //  change the day temp
+        case 2: // change the day temp
             EMS_TxTelegram.offset = EMS_OFFSET_RC35Set_temp_day;
             break;
-        case 3:                        // change the holiday temp
-            EMS_TxTelegram.offset = 3; //holiday on RC35
+        case 3: // change the holiday temp
+            EMS_TxTelegram.offset = EMS_OFFSET_RC35Set_temp_holiday;
             break;
         default:
         case 0: // automatic selection, if no type is defined, we use the standard code
