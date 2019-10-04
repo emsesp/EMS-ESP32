@@ -252,7 +252,7 @@ void MyESP::_wifiCallback(justwifi_messages_t code, char * parameter) {
             _wifi_callback_f();
         }
 
-        jw.enableAPFallback(false); // Disable AP mode after initial connect was successful
+        // jw.enableAPFallback(false); // Disable AP mode after initial connect was successful - test for https://github.com/proddy/EMS-ESP/issues/187
     }
 
     if (code == MESSAGE_ACCESSPOINT_CREATED) {
@@ -464,18 +464,19 @@ void MyESP::_wifi_setup() {
     jw.subscribe([this](justwifi_messages_t code, char * parameter) { _wifiCallback(code, parameter); });
     jw.setConnectTimeout(MYESP_WIFI_CONNECT_TIMEOUT);
     jw.setReconnectTimeout(MYESP_WIFI_RECONNECT_INTERVAL);
-    jw.enableAPFallback(true); // AP mode only as fallback
-    jw.enableSTA(true);        // Enable STA mode (connecting to a router)
-    jw.enableScan(false);      // Configure it to scan available networks and connect in order of dBm
-    jw.cleanNetworks();        // Clean existing network configuration
 
     /// wmode 1 is AP, 0 is client
     if (_network_wmode == 1) {
         jw.enableAP(true);
     } else {
         jw.enableAP(false);
-        jw.addNetwork(_network_ssid, _network_password); // Add a network
     }
+
+    jw.enableAPFallback(true);                       // AP mode only as fallback
+    jw.enableSTA(true);                              // Enable STA mode (connecting to a router)
+    jw.enableScan(false);                            // Configure it to not scan available networks and connect in order of dBm
+    jw.cleanNetworks();                              // Clean existing network configuration
+    jw.addNetwork(_network_ssid, _network_password); // Add a network
 
 #if defined(ESP8266)
     WiFi.setSleepMode(WIFI_NONE_SLEEP); // added to possibly fix wifi dropouts in arduino core 2.5.0
