@@ -2639,8 +2639,8 @@ void ems_printDevices() {
     myDebug(s);
 
     // print out the ones we recognized
-    bool unknown = false;
     if (!Devices.empty()) {
+        bool unknown = false;
         myDebug_P(PSTR("and %d were recognized by EMS-ESP as:"), Devices.size());
         for (std::list<_Generic_Device>::iterator it = Devices.begin(); it != Devices.end(); ++it) {
             myDebug_P(PSTR(" %s%s%s (DeviceID:0x%02X ProductID:%d Version:%s)"),
@@ -2663,7 +2663,7 @@ void ems_printDevices() {
         }
 
     } else {
-        myDebug_P(PSTR("No devices recognized. This could be because Tx is disabled or failing."));
+        myDebug_P(PSTR("No were devices recognized. This may be because Tx is disabled or failing."));
     }
 
     myDebug_P(PSTR("")); // newline
