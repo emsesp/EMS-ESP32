@@ -9,9 +9,7 @@
 .pio
 .clang_complete
 .gcc-flags.json
-platformio.ini
 lib/readme.txt
-.travis.yml
 
 # web stuff compiled
 src/websrc/css/required.css

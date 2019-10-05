@@ -10,14 +10,17 @@
 
 #include "ems.h"
 
+// TOPICS with _CMD_ are used for receiving commands from an MQTT Broker
+// EMS-ESP will subscribe to these topics
+
 // MQTT for thermostat
+// these topics can be suffixed with a Heating Circuit number, e.g. thermostat_cmd_temp1 and thermostat_data1
 #define TOPIC_THERMOSTAT_DATA "thermostat_data"                    // for sending thermostat values to MQTT
-#define TOPIC_THERMOSTAT_CMD_TEMP "thermostat_cmd_temp"            // for received thermostat temp changes via MQTT
-#define TOPIC_THERMOSTAT_CMD_MODE "thermostat_cmd_mode"            // for received thermostat mode changes via MQTT
-#define TOPIC_THERMOSTAT_CMD_HC "thermostat_cmd_hc"                // for received thermostat hc number changes via MQTT
-#define TOPIC_THERMOSTAT_CMD_DAYTEMP "thermostat_daytemp"          // for received thermostat day temp (RC35 specific)
-#define TOPIC_THERMOSTAT_CMD_NIGHTTEMP "thermostat_nighttemp"      // for received thermostat night temp (RC35 specific)
-#define TOPIC_THERMOSTAT_CMD_HOLIDAYTEMP "thermostat_holidayttemp" // for received thermostat holiday temp (RC35 specific)
+#define TOPIC_THERMOSTAT_CMD_TEMP "thermostat_cmd_temp"            // temp changes via MQTT
+#define TOPIC_THERMOSTAT_CMD_MODE "thermostat_cmd_mode"            // mode changes via MQTT
+#define TOPIC_THERMOSTAT_CMD_DAYTEMP "thermostat_daytemp"          // day temp (RC35 specific)
+#define TOPIC_THERMOSTAT_CMD_NIGHTTEMP "thermostat_nighttemp"      // night temp (RC35 specific)
+#define TOPIC_THERMOSTAT_CMD_HOLIDAYTEMP "thermostat_holidayttemp" // holiday temp (RC35 specific)
 #define THERMOSTAT_CURRTEMP "thermostat_currtemp"                  // current temperature
 #define THERMOSTAT_SELTEMP "thermostat_seltemp"                    // selected temperature
 #define THERMOSTAT_HC "thermostat_hc"                              // which heating circuit number
@@ -32,10 +35,10 @@
 #define TOPIC_BOILER_DATA "boiler_data"                       // for sending boiler values to MQTT
 #define TOPIC_BOILER_TAPWATER_ACTIVE "tapwater_active"        // if hot tap water is running
 #define TOPIC_BOILER_HEATING_ACTIVE "heating_active"          // if heating is on
-#define TOPIC_BOILER_CMD_WWACTIVATED "boiler_cmd_wwactivated" // for received message to change water on/off
-#define TOPIC_BOILER_CMD_WWTEMP "boiler_cmd_wwtemp"           // for received boiler wwtemp changes via MQTT
-#define TOPIC_BOILER_CMD_COMFORT "boiler_cmd_comfort"         // for received boiler ww comfort setting via MQTT
-#define TOPIC_BOILER_CMD_FLOWTEMP "boiler_cmd_flowtemp"       // for received boiler flowtemp value via MQTT
+#define TOPIC_BOILER_CMD_WWACTIVATED "boiler_cmd_wwactivated" // change water on/off
+#define TOPIC_BOILER_CMD_WWTEMP "boiler_cmd_wwtemp"           // wwtemp changes via MQTT
+#define TOPIC_BOILER_CMD_COMFORT "boiler_cmd_comfort"         // ww comfort setting via MQTT
+#define TOPIC_BOILER_CMD_FLOWTEMP "boiler_cmd_flowtemp"       // flowtemp value via MQTT
 
 // MQTT for SM10/SM100 Solar Module
 #define TOPIC_SM_DATA "sm_data"            // topic name

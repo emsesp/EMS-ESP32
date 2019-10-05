@@ -5,6 +5,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.1] 2019-10-05
+
+### Added
+
+- Support for multiple Heating Circuits - https://github.com/proddy/EMS-ESP/issues/162
+- new `mqttlog` command also shows which MQTT topics it is subscribed too
+- Optimized event log loading in web and added integrity checks on all config and log files during boot
+- `autodetect quick` 
+- `log_events` option, now optional to save the log events to SPIFFS
+
+### Fixed
+
+- fixed zero values (0.0) for setpoint temperature with the RC35 thermostat when in Auto mode - https://github.com/proddy/EMS-ESP/issues/180
+- added check for corrupted event log, which could happen due to SPIFFS writing while UART is active
+- made Junkers work again (broke in 1.9.0)
+
+### Changed
+
+- Web login password is now mandatory
+- Faster detection of EMS devices on bus by using the 0x07 telegram instead of the brute-force scan
+- Fixes to the default HA climate component .yaml file to support latest Home Assistance ('heat' added)
+- Update documentation in Wiki on MQTT and troubleshooting
+- Slowed down firmware upload via the Web to prevent users rebooting too early
+- Change way WiFi is intialized to prevent dual AP and Client
+  
+### Removed
+
+- Removed `heating_circuit` config setting
+- Removed showing the JSON config files when Saving from the Web
+
 ## [1.9.0] 2019-09-01
 
 ### Changed
@@ -57,7 +87,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - HeatPump support (e.g. the Nefit Enviline)
 - new device: Buderus MM50 Mixer
 - new devices: Junkers FW100 and ISM1 (thanks Vuego123)
-- Improved Tx logic to support EMS, EMS+ and Heatronics (thanks kwertie01, susisstrolch, philrich)
+- Improved Tx logic to support EMS, EMS+ and Heatronic 3 (thanks kwertie01, susisstrolch, philrich)
 - MQTT heartbeat
 
 ### Fixed

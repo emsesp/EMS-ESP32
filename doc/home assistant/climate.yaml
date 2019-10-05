@@ -2,7 +2,7 @@
    name: Thermostat
    modes:
      - "auto"
-     - "manual"
+     - "heat"
      - "off"
 
    mode_state_topic: "home/ems-esp/thermostat_data"

@@ -9,20 +9,15 @@ var custom_config = {
         "shower_timer": false,
         "shower_alert": false,
         "publish_time": 120,
-        "heating_circuit": 1
+        "tx_mode": 1
     }
-}
-
-function custom_commit() {
-    websock.send(JSON.stringify(custom_config));
-}
+};
 
 function listcustom() {
 
     document.getElementById("led_gpio").value = custom_config.settings.led_gpio;
     document.getElementById("dallas_gpio").value = custom_config.settings.dallas_gpio;
     document.getElementById("publish_time").value = custom_config.settings.publish_time;
-    document.getElementById("heating_circuit").value = custom_config.settings.heating_circuit;
     document.getElementById("tx_mode").value = custom_config.settings.tx_mode;
 
     if (custom_config.settings.led) {
@@ -72,10 +67,9 @@ function savecustom() {
     }
 
     custom_config.settings.publish_time = parseInt(document.getElementById("publish_time").value);
-    custom_config.settings.heating_circuit = parseInt(document.getElementById("heating_circuit").value);
     custom_config.settings.tx_mode = parseInt(document.getElementById("tx_mode").value);
 
-    custom_uncommited();
+    custom_saveconfig();
 }
 
 function listCustomStats() {
@@ -87,6 +81,8 @@ function listCustomStats() {
         document.getElementById("devicesshow").style.display = "none";
         document.getElementById("thermostat_show").style.display = "none";
         document.getElementById("boiler_show").style.display = "none";
+        document.getElementById("sm_show").style.display = "none";
+        document.getElementById("hp_show").style.display = "none";
         return;
     }
 
@@ -98,16 +94,15 @@ function listCustomStats() {
     for (var i = 0; i < obj.length; i++) {
         var l = document.createElement("li");
         var type = obj[i].type;
-        if (type == 1) {
-            var color = "list-group-item-success";
-        } else if (type == 2) {
-            var color = "list-group-item-info";
-        } else if (type == 3) {
-            var color = "list-group-item-warning";
-        } else if (type == 4) {
-            var color = "list-group-item-success";
-        } else {
-            var color = "";
+        var color = "";
+        if (type === 1) {
+            color = "list-group-item-success";
+        } else if (type === 2) {
+            color = "list-group-item-info";
+        } else if (type === 3) {
+            color = "list-group-item-warning";
+        } else if (type === 4) {
+            color = "list-group-item-success";
         }
         l.innerHTML = obj[i].model + " (Version:" + obj[i].version + " ProductID:" + obj[i].productid + " DeviceID:0x" + obj[i].deviceid + ")";
         l.className = "list-group-item " + color;
@@ -159,7 +154,7 @@ function listCustomStats() {
 
         document.getElementById("hm").innerHTML = ajaxobj.hp.hm;
         document.getElementById("hp1").innerHTML = ajaxobj.hp.hp1 + " &#37;";
-        document.getElementById("hp2").innerHTML = ajaxobj.hp.hp2 + " &#37;";      
+        document.getElementById("hp2").innerHTML = ajaxobj.hp.hp2 + " &#37;";
     } else {
         document.getElementById("hp_show").style.display = "none";
     }

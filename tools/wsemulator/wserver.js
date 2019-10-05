@@ -52,17 +52,10 @@ var eventlog = {
     "page": 1,
     "haspages": 1,
     "list": [
-        "{ \"type\": \"WARN\", \"src\": \"sys\", \"desc\": \"Event log cleared!\", \"data\": \"\", \"time\": 1563371160 }",
-        "{ \"type\": \"WARN\", \"src\": \"sys\", \"desc\": \"Event log cleared!\", \"data\": \"\", \"time\": 1563371160 }",
-        "{ \"type\": \"INFO\", \"src\": \"wifi\", \"desc\": \"WiFi is connected\", \"data\": \"SMC\", \"time\": 13 }",
-        "{ \"type\": \"INFO\", \"src\": \"sys\", \"desc\": \"System setup completed, running\", \"data\": \"\", \"time\": 13 }",
-        "{ \"type\": \"INFO\", \"src\": \"wifi\", \"desc\": \"WiFi is connected\", \"data\": \"SMC\", \"time\": 13 }",
-        "{ \"type\": \"INFO\", \"src\": \"sys\", \"desc\": \"System setup completed, running\", \"data\": \"\", \"time\": 13 }",
-        "{ \"type\": \"WARN\", \"src\": \"websrv\", \"desc\": \"New login attempt\", \"data\": \"\", \"time\": 1563371160 }",
-        "{ \"type\": \"INFO\", \"src\": \"websrv\", \"desc\": \"Login success!\", \"data\": \"\", \"time\": 1563371160 }",
-        "{ \"type\": \"INFO\", \"src\": \"wifi\", \"desc\": \"WiFi is connected\", \"data\": \"SMC\", \"time\": 13 }",
-        "{ \"type\": \"INFO\", \"src\": \"sys\", \"desc\": \"System setup completed, running\", \"data\": \"\", \"time\": 13 }",
-        "{ \"type\": \"WARN\", \"src\": \"websrv\", \"desc\": \"New login attempt\", \"data\": \"\", \"time\": 1563371160 }"
+        "{\"type\":\"WARN\",\"src\":\"system\",\"desc\":\"test data\",\"data\":\"Record #1\",\"time\": 1563371160}",
+        "{\"type\":\"WARN\",\"src\":\"system\",\"desc\":\"test data\",\"data\":\"Record #2\",\"time\":0}",
+        "{\"type\":\"INFO\",\"src\":\"system\",\"desc\":\"System booted\",\"data\":\"\",\"time\":1568660479}",
+        "{\"type\":\"WARN\",\"src\":\"system\",\"desc\":\"test data\",\"data\":\"Record #3\",\"time\":0}"
     ]
 }
 
@@ -76,7 +69,8 @@ var configfile = {
     "general": {
         "hostname": "myesp",
         "password": "admin",
-        "serial": true
+        "serial": true,
+        "log_events": true
     },
     "mqtt": {
         "enabled": false,
@@ -105,7 +99,6 @@ var custom_configfile = {
         "shower_timer": true,
         "shower_alert": false,
         "publish_time": 120,
-        "heating_circuit": 1,
         "tx_mode": 1
     }
 };
@@ -155,7 +148,7 @@ function sendStatus() {
 function sendCustomStatus() {
     var stats = {
         "command": "custom_status",
-        "version": "1.9.0",
+        "version": "1.9.1",
         "customname": "EMS-ESP",
         "appurl": "https://github.com/proddy/EMS-ESP",
         "updateurl": "https://api.github.com/repos/proddy/EMS-ESP/releases/latest",
@@ -222,7 +215,7 @@ wss.on('connection', function connection(ws) {
         console.log("[INFO] Got Command: " + obj.command);
         switch (obj.command) {
             case "configfile":
-                console.log("[INFO] New system settings file received");
+                console.log("[INFO] New system config received");
                 configfile = obj;
                 break;
             case "custom_configfile":
@@ -277,7 +270,7 @@ wss.on('connection', function connection(ws) {
                 console.log("[INFO] getting ntp time");
                 break;
             default:
-                console.log("[WARN] Unknown command ");
+                console.log("[WARN] Unknown command");
                 break;
         }
     });

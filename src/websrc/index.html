@@ -11,19 +11,17 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <title id="customname"></title>
-    <!-- Bootstrap core CSS -->
     <link href="css/required.css" rel="stylesheet">
 </head>
 
 <body>
     <div class="wrapper">
-        <!-- Sidebar Holder -->
         <nav id="sidebar">
             <div id="dismiss">
                 <i class="glyphicon glyphicon-arrow-left"></i>
             </div>
             <div class="sidebar-header">
-                <h1 id="customname2" class="text-center"></h1>
+                <h1 id="customname2" class="text-center" onclick="home();"></h1>
                 <h6 id="mainver" class="text-center"></h6>
             </div>
             <ul class="list-unstyled components">
@@ -72,7 +70,7 @@
             </ul>
             <ul class="list-unstyled CTAs">
                 <li>
-                    <a id="helpurl" target="_blank" class="download">Help</a>
+                    <a id="helpurl" target="_blank" class="article">Help</a>
                 </li>
                 <li>
                     <a href="#" class="article" onclick="logout();">Logout</a>
@@ -96,7 +94,6 @@
 
         </nav>
 
-        <!-- Page Content Holder -->
         <div id="content">
             <button type="button" id="sidebarCollapse" class="btn btn-info navbar-btn">
                 <i class="glyphicon glyphicon-menu-hamburger"></i>
@@ -105,51 +102,8 @@
             <div id="ajaxcontent">
             </div>
 
-            <div id="revcommit" class="modal fade" role="dialog">
-                <div class="modal-dialog">
-                    <!-- Modal content-->
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <button type="button" class="close" data-dismiss="modal">&times;</button>
-                            <h4 class="modal-title">Please review your system changes</h4>
-                        </div>
-                        <div class="modal-body">
-                            <pre id="jsonholder"></pre>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                            <button type="button" onclick="commit();" class="btn btn-success" data-dismiss="modal">Save
-                                & Restart</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="custom_revcommit" class="modal fade" role="dialog">
-                <div class="modal-dialog">
-                    <!-- Modal content-->
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <button type="button" class="close" data-dismiss="modal">&times;</button>
-                            <h4 class="modal-title">Please review your custom changes</h4>
-                        </div>
-                        <div class="modal-body">
-                            <pre id="jsonholder2"></pre>
-                            Note: some settings my require a <b>Restart System</b> first to take effect.
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                            <button type="button" onclick="custom_commit();" class="btn btn-success"
-                                data-dismiss="modal">Save
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <div id="destroy" class="modal fade" role="dialog">
                 <div class="modal-dialog">
-                    <!-- Modal content-->
                     <div class="modal-content">
                         <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal">&times;</button>
@@ -181,7 +135,6 @@
 
             <div id="reboot" class="modal fade" role="dialog">
                 <div class="modal-dialog">
-                    <!-- Modal content-->
                     <div class="modal-content">
                         <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal">&times;</button>
@@ -198,13 +151,12 @@
                 </div>
             </div>
 
-            <div id="signin" class="modal fade" role="dialog">
+            <div id="signin" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog"
+                aria-labelledby="myModalLabel" aria-hidden="true">
                 <div class="modal-dialog">
-                    <!-- Modal content-->
                     <div class="modal-content">
                         <div class="modal-header">
-                            <button type="button" class="close" data-dismiss="modal">&times;</button>
-                            <h4 class="modal-title">Please log in</h4>
+                            <h4 class="modal-title">Please enter password to login to the system</h4>
                         </div>
                         <div class="row">
                             <br>
@@ -216,7 +168,7 @@
                                                 <div class="form-group">
                                                     <input id="password" class="form-control" placeholder="Password"
                                                         name="password" type="password" value="" required=""
-                                                        title="Please enter your password">
+                                                        title="Please enter the password">
                                                 </div>
                                                 <button type="submit"
                                                     class="btn btn-success btn-md pull-right">Login</button>
@@ -232,7 +184,6 @@
 
             <div id="update" class="modal fade" role="dialog">
                 <div class="modal-dialog">
-                    <!-- Modal content-->
                     <div class="modal-content">
                         <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal">&times;</button>

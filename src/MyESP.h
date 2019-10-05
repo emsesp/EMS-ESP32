@@ -9,7 +9,7 @@
 #ifndef MyESP_h
 #define MyESP_h
 
-#define MYESP_VERSION "1.2.0"
+#define MYESP_VERSION "1.2.6"
 
 #include <ArduinoJson.h>
 #include <ArduinoOTA.h>
@@ -87,7 +87,7 @@ extern struct rst_info resetInfo;
 #define MQTT_MAX_PAYLOAD_SIZE 500        // max size of a JSON object. See https://arduinojson.org/v6/assistant/
 #define MQTT_MAX_PAYLOAD_SIZE_LARGE 2000 // max size of a large JSON object, like for sending MQTT log
 #define MYESP_JSON_MAXSIZE 2000          // for large Dynamic json files
-#define MYESP_MQTTLOG_MAX 20             // max number of log entries for MQTT publishes
+#define MYESP_MQTTLOG_MAX 40             // max number of log entries for MQTT publishes and subscribes
 #define MYESP_JSON_LOG_MAXSIZE 300       // max size of an JSON log entry
 
 // Internal MQTT events
@@ -139,7 +139,9 @@ PROGMEM const char * const custom_reset_string[]   = {custom_reset_hardware, cus
 #define CUSTOM_RESET_MAX 5
 
 // SPIFFS
-#define MYESP_SPIFFS_MAXSIZE 800 // https://arduinojson.org/v6/assistant/
+// https://arduinojson.org/v6/assistant/
+#define MYESP_SPIFFS_MAXSIZE_CONFIG 800     // max size for a config file
+#define MYESP_SPIFFS_MAXSIZE_EVENTLOG 20000 // max size for the eventlog in bytes
 
 // CRASH
 /**
@@ -212,9 +214,10 @@ typedef enum {
 
 // for storing all MQTT publish messages
 typedef struct {
-    char * topic;
-    char * payload;
-    time_t timestamp;
+    uint8_t type; // 0=none, 1=publish, 2=subscribe
+    char *  topic;
+    char *  payload;
+    time_t  timestamp;
 } _MQTT_Log;
 
 typedef std::function<void(unsigned int, const char *, const char *)>            mqtt_callback_f;
@@ -291,7 +294,6 @@ class MyESP {
     // Crash
     void crashClear();
     void crashDump();
-    void crashTest(uint8_t t);
     void crashInfo();
 
     // general
@@ -317,9 +319,10 @@ class MyESP {
     char * _mqttTopic(const char * topic);
 
     // mqtt log
-    _MQTT_Log MQTT_log[MYESP_MQTTLOG_MAX]; // log for publish messages
-    void      _printMQTTLog();
-    void      _addMQTTLog(const char * topic, const char * payload);
+    _MQTT_Log MQTT_log[MYESP_MQTTLOG_MAX]; // log for publish and subscribe messages
+
+    void _printMQTTLog();
+    void _addMQTTLog(const char * topic, const char * payload, const uint8_t type);
 
     AsyncMqttClient mqttClient; // the MQTT class
     uint32_t        _mqtt_reconnect_delay;
@@ -374,14 +377,16 @@ class MyESP {
     bool                     _changeSetting(uint8_t wc, const char * setting, const char * value);
 
     // fs and settings
-    void                   _fs_setup();
-    bool                   _fs_loadConfig();
-    bool                   _fs_loadCustomConfig();
-    void                   _fs_printFile(const char * file);
-    void                   _fs_eraseConfig();
-    bool                   _fs_writeConfig();
-    bool                   _fs_createCustomConfig();
-    bool                   _fs_sendConfig();
+    void _fs_setup();
+    bool _fs_loadConfig();
+    bool _fs_loadCustomConfig();
+    void _fs_eraseConfig();
+    bool _fs_writeConfig();
+    bool _fs_createCustomConfig();
+    bool _fs_sendConfig();
+    bool _fs_validateConfigFile(const char * filename, size_t maxsize, JsonDocument & doc);
+    bool _fs_validateLogFile(const char * filename);
+
     fs_loadsave_callback_f _fs_loadsave_callback_f;
     fs_setlist_callback_f  _fs_setlist_callback_f;
 
@@ -395,11 +400,12 @@ class MyESP {
     char *        _app_updateurl;
     bool          _suspendOutput;
     bool          _general_serial;
-    unsigned long _getUptime();
-    char *        _getBuildTime();
+    bool          _general_log_events;
     char *        _buildTime;
     bool          _timerequest;
     bool          _formatreq;
+    unsigned long _getUptime();
+    char *        _getBuildTime();
     bool          _hasValue(char * s);
     void          _printHeap(const char * s);
 

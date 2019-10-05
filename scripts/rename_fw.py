@@ -21,6 +21,13 @@ with open('./src/version.h', 'r') as f:
             if m and len(m.groups()) > 0:
                 bag[var] = m.group(1)
 
+with open('./src/ems-esp.cpp', 'r') as f:
+    for l in f.readlines():
+        for expr, var in exprs:
+            m = expr.match(l)
+            if m and len(m.groups()) > 0:
+                bag[var] = m.group(1)
+
 app_version = bag.get('app_version')
 app_name = bag.get('app_name')
 app_hostname = bag.get('app_hostname')
@@ -32,5 +39,8 @@ branch = env['PIOENV']
 env.AddPreAction("buildprog", build_web)
 
 # build filename, replacing . with _ for the version
-env.Replace(PROGNAME="firmware_%s" % branch + "_" + app_version.replace(".", "_"))
+#env.Replace(PROGNAME="firmware_%s" % branch + "_" + app_version.replace(".", "_"))
+env.Replace(PROGNAME=app_name + "-" + app_version.replace(".", "_") + "-" + board + "-" + branch)
+#env.Replace(PROGNAME=app_name + "-" + app_version)
+
 

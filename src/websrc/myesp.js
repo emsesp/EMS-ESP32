@@ -6,6 +6,8 @@ var utcSeconds;
 var data = [];
 var ajaxobj;
 
+var custom_config = {};
+
 var config = {
     "command": "configfile",
     "network": {
@@ -16,7 +18,8 @@ var config = {
     "general": {
         "hostname": "",
         "serial": false,
-        "password": "admin"
+        "password": "admin",
+        "log_events": true
     },
     "mqtt": {
         "enabled": false,
@@ -68,6 +71,14 @@ function syncBrowserTime() {
     $("#ntp").click();
 }
 
+function handleNTPON() {
+    document.getElementById("forcentp").style.display = "block";
+}
+
+function handleNTPOFF() {
+    document.getElementById("forcentp").style.display = "none";
+}
+
 function listntp() {
     websock.send("{\"command\":\"gettime\"}");
 
@@ -85,25 +96,30 @@ function listntp() {
     deviceTime();
 }
 
-function revcommit() {
-    document.getElementById("jsonholder").innerText = JSON.stringify(config, null, 2);
-    $("#revcommit").modal("show");
+function home() {
+    window.location = '/';
 }
 
-function uncommited() {
+function restart_alert() {
     $("#commit").fadeOut(200, function () {
         $(this).css("background", "gold").fadeIn(1000);
     });
-    document.getElementById("commit").innerHTML = "<h6>Settings have changed. Click here to review and save.</h6>";
+    document.getElementById("commit").innerHTML = "<h6>Settings have changed. It's recommended to reboot the system. Click here to restart.</h6>";
+
     $("#commit").click(function () {
-        revcommit();
+        $("#reboot").modal("show");
         return false;
     });
 }
 
-function custom_uncommited() {
-    document.getElementById("jsonholder2").innerText = JSON.stringify(custom_config.settings, null, 2);
-    $("#custom_revcommit").modal("show");
+function saveconfig() {
+    websock.send(JSON.stringify(config));
+    restart_alert();
+}
+
+function custom_saveconfig() {
+    websock.send(JSON.stringify(custom_config));
+    restart_alert();
 }
 
 function saventp() {
@@ -115,13 +131,12 @@ function saventp() {
         config.ntp.enabled = true;
     }
 
-    uncommited();
+    saveconfig();
 }
 
 function forcentp() {
     websock.send("{\"command\":\"forcentp\"}");
 }
-
 
 function savegeneral() {
     var a = document.getElementById("adminpwd").value;
@@ -137,7 +152,12 @@ function savegeneral() {
         config.general.serial = true;
     }
 
-    uncommited();
+    config.general.log_events = false;
+    if (parseInt($("input[name=\"logeventsenabled\"]:checked").val()) === 1) {
+        config.general.log_events = true;
+    }
+
+    saveconfig();
 }
 
 function savemqtt() {
@@ -157,7 +177,7 @@ function savemqtt() {
     config.mqtt.user = document.getElementById("mqttuser").value;
     config.mqtt.password = document.getElementById("mqttpwd").value;
 
-    uncommited();
+    saveconfig();
 }
 
 function savenetwork() {
@@ -176,7 +196,7 @@ function savenetwork() {
     config.network.wmode = wmode;
     config.network.password = document.getElementById("wifipass").value;
 
-    uncommited();
+    saveconfig();
 }
 
 var formData = new FormData();
@@ -189,8 +209,8 @@ function inProgress(callback) {
             var i = 0;
             var prg = setInterval(function () {
                 $(".progress-bar").css("width", i + "%").attr("aria-valuenow", i).html(i + "%");
-                i++;
-                if (i === 101) {
+                i = i + 5;
+                if (i === 105) {
                     clearInterval(prg);
                     var a = document.createElement("a");
                     a.href = "http://" + config.general.hostname + ".local";
@@ -211,9 +231,6 @@ function inProgress(callback) {
                         contentType: false
                     });
                     break;
-                case "commit":
-                    websock.send(JSON.stringify(config));
-                    break;
                 case "destroy":
                     websock.send("{\"command\":\"destroy\"}");
                     break;
@@ -228,8 +245,30 @@ function inProgress(callback) {
     }).hide().fadeIn();
 }
 
-function commit() {
-    inProgress("commit");
+function inProgressUpload() {
+    $("body").load("myesp.html #progressupload", function (responseTxt, statusTxt, xhr) {
+        if (statusTxt === "success") {
+            $(".progress").css("height", "40");
+            $(".progress").css("font-size", "xx-large");
+            var i = 0;
+            var prg = setInterval(function () {
+                $(".progress-bar").css("width", i + "%").attr("aria-valuenow", i).html(i + "%");
+                i = i + 1;
+                if (i === 101) {
+                    clearInterval(prg);
+                    document.getElementById("updateprog").className = "progress-bar progress-bar-success";
+                    document.getElementById("updateprog").innerHTML = "Completed";
+                }
+            }, 500);
+            $.ajax({
+                url: "/update",
+                type: "POST",
+                data: formData,
+                processData: false,
+                contentType: false
+            });
+        }
+    }).hide().fadeIn();
 }
 
 function handleSTA() {
@@ -245,14 +284,6 @@ function handleAP() {
     document.getElementById("hidepasswd").style.display = "none";
 
     document.getElementById("inputtohide").style.display = "block";
-}
-
-function handleNTPON() {
-    document.getElementById("forcentp").style.display = "block";
-}
-
-function handleNTPOFF() {
-    document.getElementById("forcentp").style.display = "none";
 }
 
 function listnetwork() {
@@ -274,6 +305,10 @@ function listgeneral() {
 
     if (config.general.serial) {
         $("input[name=\"serialenabled\"][value=\"1\"]").prop("checked", true);
+    }
+
+    if (config.general.log_events) {
+        $("input[name=\"logeventsenabled\"][value=\"1\"]").prop("checked", true);
     }
 }
 
@@ -424,7 +459,15 @@ function getContent(contentname) {
                     page = 1;
                     data = [];
                     getEvents();
+
+                    if (config.general.log_events) {
+                        document.getElementById("logevents").style.display = "none";
+                    } else {
+                        document.getElementById("logevents").style.display = "block";
+                    }
+
                     break;
+
                 case "#customcontent":
                     listcustom();
                     break;
@@ -435,16 +478,18 @@ function getContent(contentname) {
                     var customname2 = " " + ajaxobj.customname;
                     $("#customname2").text(customname2);
 
+                    var elem;
+
                     if (config.network.wmode === 0) {
-                        var elem = document.getElementById("helpurl");
-                        var helpurl = ajaxobj.appurl + "/wiki"
+                        elem = document.getElementById("helpurl");
+                        var helpurl = ajaxobj.appurl + "/wiki";
                         elem.setAttribute("href", helpurl);
                         document.getElementById("helpurl").style.display = "block";
                     } else {
                         document.getElementById("helpurl").style.display = "none";
                     }
 
-                    var elem = document.getElementById("appurl");
+                    elem = document.getElementById("appurl");
                     elem.setAttribute("href", ajaxobj.appurl);
                     $("#appurl2").text(ajaxobj.appurl);
 
@@ -494,10 +539,10 @@ function restoreSet() {
                     return;
                 }
                 if (json.command === "configfile") {
-                    var x = confirm("File seems to be valid, do you wish to continue?");
+                    var x = confirm("System Config file seems to be valid, do you wish to continue?");
                     if (x) {
                         config = json;
-                        uncommited();
+                        saveconfig();
                     }
                 }
             };
@@ -522,10 +567,10 @@ function restoreCustomSet() {
                     return;
                 }
                 if (json.command === "custom_configfile") {
-                    var x = confirm("File seems to be valid, do you wish to continue?");
+                    var x = confirm("Custom Config file seems to be valid, do you wish to continue?");
                     if (x) {
                         custom_config = json;
-                        custom_uncommited();
+                        custom_saveconfig();
                     }
                 }
             };
@@ -544,12 +589,17 @@ function twoDigits(value) {
 function initEventTable() {
     var newlist = [];
     for (var i = 0; i < data.length; i++) {
-        var dup = JSON.parse(data[i]);
-        dup.uid = i;
         newlist[i] = {};
         newlist[i].options = {};
         newlist[i].value = {};
+        try {
+            var dup = JSON.parse(data[i]);
+            dup.uid = i + 1;
+        } catch (e) {
+            var dup = { "uid": i + 1, "type": "ERRO", "src": "SYS", "desc": "Error in log file", "data": data[i], "time": 1 }
+        }
         newlist[i].value = dup;
+
         var c = dup.type;
         switch (c) {
             case "WARN":
@@ -564,7 +614,6 @@ function initEventTable() {
             default:
                 break;
         }
-
     }
     jQuery(function ($) {
         window.FooTable.init("#eventtable", {
@@ -667,10 +716,6 @@ function initMQTTLogTable() {
             rows: newlist
         });
     });
-}
-
-function restartESP() {
-    inProgress("restart");
 }
 
 var nextIsNotJson = false;
@@ -790,62 +835,6 @@ $(".noimp").on("click", function () {
     $("#noimp").modal("show");
 });
 
-window.FooTable.MyFiltering = window.FooTable.Filtering.extend({
-    construct: function (instance) {
-        this._super(instance);
-        this.acctypes = ["1", "99", "0"];
-        this.acctypesstr = ["Always", "Admin", "Disabled"];
-        this.def = "Access Type";
-        this.$acctype = null;
-    },
-    $create: function () {
-        this._super();
-        var self = this,
-            $formgrp = $("<div/>", {
-                "class": "form-group"
-            })
-                .append($("<label/>", {
-                    "class": "sr-only",
-                    text: "Status"
-                }))
-                .prependTo(self.$form);
-
-        self.$acctype = $("<select/>", {
-            "class": "form-control"
-        })
-            .on("change", {
-                self: self
-            }, self._onStatusDropdownChanged)
-            .append($("<option/>", {
-                text: self.def
-            }))
-            .appendTo($formgrp);
-
-        $.each(self.acctypes, function (i, acctype) {
-            self.$acctype.append($("<option/>").text(self.acctypesstr[i]).val(self.acctypes[i]));
-        });
-    },
-    _onStatusDropdownChanged: function (e) {
-        var self = e.data.self,
-            selected = $(this).val();
-        if (selected !== self.def) {
-            self.addFilter("acctype", selected, ["acctype"]);
-        } else {
-            self.removeFilter("acctype");
-        }
-        self.filter();
-    },
-    draw: function () {
-        this._super();
-        var acctype = this.find("acctype");
-        if (acctype instanceof window.FooTable.Filter) {
-            this.$acctype.val(acctype.query.val());
-        } else {
-            this.$acctype.val(this.def);
-        }
-    }
-});
-
 var xDown = null;
 var yDown = null;
 
@@ -921,7 +910,7 @@ function connectWS() {
 
 function upload() {
     formData.append("bin", $("#binform")[0].files[0]);
-    inProgress("upload");
+    inProgressUpload();
 }
 
 function login() {
