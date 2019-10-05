@@ -1854,8 +1854,7 @@ void WebCallback(JsonObject root) {
         item["productid"] = (it)->product_id;
 
         char buffer[10];
-        // copy of my _hextoa() function from ems.cpp
-        // to convert device_id into a 0xXX hex value string
+        // copy of my _hextoa() function from ems.cpp, to convert device_id into a 0xNN hex value string
         char * p         = buffer;
         byte   nib1      = ((it)->device_id >> 4) & 0x0F;
         byte   nib2      = ((it)->device_id >> 0) & 0x0F;

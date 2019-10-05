@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.9.1 beta] 2019-09-30
+## [1.9.1] 2019-10-05
 
 ### Added
 
@@ -18,7 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - fixed zero values (0.0) for setpoint temperature with the RC35 thermostat when in Auto mode - https://github.com/proddy/EMS-ESP/issues/180
-- added check for corrupted event log
+- added check for corrupted event log, which could happen due to SPIFFS writing while UART is active
+- made Junkers work again (broke in 1.9.0)
 
 ### Changed
 
@@ -27,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixes to the default HA climate component .yaml file to support latest Home Assistance ('heat' added)
 - Update documentation in Wiki on MQTT and troubleshooting
 - Slowed down firmware upload via the Web to prevent users rebooting too early
+- Change way WiFi is intialized to prevent dual AP and Client
   
 ### Removed
 
