@@ -630,10 +630,10 @@ void _ems_sendTelegram() {
 
     // dest
     if (EMS_TxTelegram.action == EMS_TX_TELEGRAM_WRITE) {
-        EMS_TxTelegram.data[1] = EMS_TxTelegram.dest ^ EMS_Sys_Status.emsIDMask;
+        EMS_TxTelegram.data[1] = EMS_TxTelegram.dest;
     } else {
         // for a READ or VALIDATE
-        EMS_TxTelegram.data[1] = (EMS_TxTelegram.dest ^ 0x80 ^ EMS_Sys_Status.emsIDMask); // read has 8th bit set
+        EMS_TxTelegram.data[1] = (EMS_TxTelegram.dest | 0x80); // read has 8th bit set, always 
     }
 
     // complete the rest of the header depending on EMS or EMS+
