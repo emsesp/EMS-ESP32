@@ -395,7 +395,7 @@ void MyESP::mqttPublish(const char * topic, const char * payload) {
     if (packet_id) {
         _addMQTTLog(topic, payload, 1); // add to the log, using type of 1 for Publish
     } else {
-        myDebug_P(PSTR("[MQTT] Error publishing to %s with payload %s"), _mqttTopic(topic), payload);
+        myDebug_P(PSTR("[MQTT] Error publishing to %s with payload %s, error %d"), _mqttTopic(topic), payload, packet_id);
     }
 }
 
@@ -1585,7 +1585,7 @@ bool MyESP::_fs_validateConfigFile(const char * filename, size_t maxsize, JsonDo
     // check size
     size_t size = file.size();
 
-    myDebug_P(PSTR("[FS] Checking file %s (size %d bytes)"), filename, size); // remove for debugging
+    myDebug_P(PSTR("[FS] Checking file %s (%d bytes)"), filename, size); // remove for debugging
 
     if (size > maxsize) {
         file.close();
@@ -1640,11 +1640,11 @@ bool MyESP::_fs_validateLogFile(const char * filename) {
 
     // check sizes
     size_t size    = eventlog.size();
-    size_t maxsize = ESP.getFreeHeap() - 2000;                                                    // reserve some buffer
-    myDebug_P(PSTR("[FS] Checking file %s (size %d bytes, max is %d)"), filename, size, maxsize); // remove for debugging
+    size_t maxsize = ESP.getFreeHeap() - 2000;                                       // reserve some buffer
+    myDebug_P(PSTR("[FS] Checking file %s (%d/%d bytes)"), filename, size, maxsize); // remove for debugging
     if (size > maxsize) {
         eventlog.close();
-        myDebug_P(PSTR("[FS] File %s size %d is too large (max %d)"), filename, size, maxsize);
+        myDebug_P(PSTR("[FS] File %s size %d is too large"), filename, size);
         return false;
     } else if (size == 0) {
         eventlog.close();
@@ -1756,7 +1756,7 @@ bool MyESP::_fs_loadConfig() {
     _general_password  = strdup(general["password"] | MYESP_HTTP_PASSWORD);
     _ws->setAuthentication("admin", _general_password);
     _general_hostname   = strdup(general["hostname"]);
-    _general_log_events = general["log_events"] | false; // default is off
+    _general_log_events = general["log_events"];
 
     // serial is only on when booting
 #ifdef FORCE_SERIAL
@@ -1903,10 +1903,11 @@ bool MyESP::_fs_writeConfig() {
     network["password"] = _network_password;
     network["wmode"]    = _network_wmode;
 
-    JsonObject general  = doc.createNestedObject("general");
-    general["password"] = _general_password;
-    general["serial"]   = _general_serial;
-    general["hostname"] = _general_hostname;
+    JsonObject general    = doc.createNestedObject("general");
+    general["password"]   = _general_password;
+    general["serial"]     = _general_serial;
+    general["hostname"]   = _general_hostname;
+    general["log_events"] = _general_log_events;
 
     JsonObject mqtt   = doc.createNestedObject("mqtt");
     mqtt["enabled"]   = _mqtt_enabled;
