@@ -458,10 +458,11 @@ void showInfo() {
         myDebug_P(PSTR("  %d external temperature sensor%s found"), EMSESP_Settings.dallas_sensors, (EMSESP_Settings.dallas_sensors == 1) ? "" : "s");
     }
 
-    myDebug_P(PSTR("  Boiler is %s, Thermostat is %s, Solar Module is %s, Shower Timer is %s, Shower Alert is %s"),
+    myDebug_P(PSTR("  Boiler is %s, Thermostat is %s, Solar Module is %s, Mixing Module is %s, Shower Timer is %s, Shower Alert is %s"),
               (ems_getBoilerEnabled() ? "enabled" : "disabled"),
               (ems_getThermostatEnabled() ? "enabled" : "disabled"),
               (ems_getSolarModuleEnabled() ? "enabled" : "disabled"),
+              (ems_getMixingDeviceEnabled() ? "enabled" : "disabled"),
               ((EMSESP_Settings.shower_timer) ? "enabled" : "disabled"),
               ((EMSESP_Settings.shower_alert) ? "enabled" : "disabled"));
 
@@ -530,7 +531,6 @@ void showInfo() {
     _renderIntValue("Selected flow temperature", "C", EMS_Boiler.selFlowTemp);
     _renderUShortValue("Current flow temperature", "C", EMS_Boiler.curFlowTemp);
     _renderUShortValue("Return temperature", "C", EMS_Boiler.retTemp);
-    _renderUShortValue("Switch temperature", "C", EMS_Boiler.switchTemp);
     _renderBoolValue("Gas", EMS_Boiler.burnGas);
     _renderBoolValue("Boiler pump", EMS_Boiler.heatPmp);
     _renderBoolValue("Fan", EMS_Boiler.fanWork);
@@ -671,6 +671,20 @@ void showInfo() {
                 } else if (thermoMode == 4) {
                     myDebug_P(PSTR("   Mode is set to day"));
                 }
+            }
+        }
+    }
+
+    // Mixing modules sensors
+    if (ems_getMixingDeviceEnabled()) {
+        myDebug_P(PSTR("")); // newline
+        myDebug_P(PSTR("%sMixing module stats:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
+        _renderUShortValue("Switch temperature", "C", EMS_Boiler.switchTemp);
+
+        for (uint8_t hc_num = 1; hc_num <= EMS_THERMOSTAT_MAXHC; hc_num++) {
+            if (EMS_Mixing.hc[hc_num - 1].active) {
+                myDebug_P(PSTR("  Mixing Circuit %d"), hc_num);  
+                _renderShortValue(" Current flow temperature", "C", EMS_Mixing.hc[hc_num - 1].flowTemp); 
             }
         }
     }
