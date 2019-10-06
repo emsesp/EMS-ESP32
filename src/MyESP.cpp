@@ -389,10 +389,14 @@ void MyESP::mqttUnsubscribe(const char * topic) {
 
 // MQTT Publish
 void MyESP::mqttPublish(const char * topic, const char * payload) {
-    // myDebug_P(PSTR("[MQTT] Sending pubish to %s with payload %s"), _mqttTopic(topic), payload); // for debugging
-    mqttClient.publish(_mqttTopic(topic), _mqtt_qos, _mqtt_retain, payload);
+    // myDebug_P(PSTR("[MQTT] Sending publish to %s with payload %s"), _mqttTopic(topic), payload); // for debugging
+    uint16_t packet_id = mqttClient.publish(_mqttTopic(topic), _mqtt_qos, _mqtt_retain, payload);
 
-    _addMQTTLog(topic, payload, 1); // add to the log, using type of 1 for Publish
+    if (packet_id) {
+        _addMQTTLog(topic, payload, 1); // add to the log, using type of 1 for Publish
+    } else {
+        myDebug_P(PSTR("[MQTT] Error publishing to %s with payload %s"), _mqttTopic(topic), payload);
+    }
 }
 
 // MQTT onConnect - when a connect is established

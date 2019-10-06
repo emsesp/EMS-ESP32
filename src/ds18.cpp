@@ -112,6 +112,7 @@ char * DS18::getDeviceString(char * buffer, unsigned char index) {
             strlcpy(buffer, "Unknown", size);
         }
 
+/*
         char a[30] = {0};
         snprintf(a,
                  sizeof(a),
@@ -127,6 +128,7 @@ char * DS18::getDeviceString(char * buffer, unsigned char index) {
                  _gpio);
 
         strlcat(buffer, a, size);
+        */
     } else {
         strlcpy(buffer, "invalid", size);
     }

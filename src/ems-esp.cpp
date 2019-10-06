@@ -697,17 +697,18 @@ void publishSensorValues() {
     StaticJsonDocument<200> doc;
     JsonObject              sensors = doc.to<JsonObject>();
 
-    bool hasdata     = false;
-    char label[8]    = {0};
-    char valuestr[8] = {0}; // for formatting temp
+    bool hasdata  = false;
+    char label[8] = {0};
+    // char valuestr[8] = {0}; // for formatting temp
 
     // see if the sensor values have changed, if so send
     for (uint8_t i = 0; i < EMSESP_Settings.dallas_sensors; i++) {
         double sensorValue = ds18.getValue(i);
         if (sensorValue != DS18_DISCONNECTED && sensorValue != DS18_CRC_ERROR) {
             sprintf(label, PAYLOAD_EXTERNAL_SENSORS, (i + 1));
-            sensors[label] = _float_to_char(valuestr, sensorValue);
-            hasdata        = true;
+            // sensors[label] = _float_to_char(valuestr, sensorValue);
+            sensors[label] = sensorValue; // TODO check if works
+            hasdata = true;
         }
     }
 
