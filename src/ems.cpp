@@ -1489,7 +1489,7 @@ void _process_EasyStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
 
 void _process_MMPLUSStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     uint8_t hc = (EMS_RxTelegram->type - EMS_TYPE_MMPLUSStatusMessage_HC1); // 0 to 3
-    if (hc > EMS_THERMOSTAT_MAXHC) {
+    if (hc >= EMS_THERMOSTAT_MAXHC) {
         return; // invalid type
     }
     EMS_Mixing.hc[hc].active = true;
@@ -1507,7 +1507,7 @@ void _process_MMPLUSStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
 void _process_RCPLUSStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     // figure out which heating circuit
     uint8_t hc = (EMS_RxTelegram->type - EMS_TYPE_RCPLUSStatusMessage_HC1); // 0 to 3
-    if (hc > EMS_THERMOSTAT_MAXHC) {
+    if (hc >= EMS_THERMOSTAT_MAXHC) {
         return; // invalid type
     }
     EMS_Thermostat.hc[hc].active = true;
