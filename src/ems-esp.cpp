@@ -521,6 +521,7 @@ void showInfo() {
     _renderIntValue("Selected flow temperature", "C", EMS_Boiler.selFlowTemp);
     _renderUShortValue("Current flow temperature", "C", EMS_Boiler.curFlowTemp);
     _renderUShortValue("Return temperature", "C", EMS_Boiler.retTemp);
+    _renderUShortValue("Switch temperature", "C", EMS_Boiler.switchTemp);
     _renderBoolValue("Gas", EMS_Boiler.burnGas);
     _renderBoolValue("Boiler pump", EMS_Boiler.heatPmp);
     _renderBoolValue("Fan", EMS_Boiler.fanWork);
@@ -775,6 +776,8 @@ void publishValues(bool force) {
         rootBoiler["curFlowTemp"] = (double)EMS_Boiler.curFlowTemp / 10;
     if (EMS_Boiler.retTemp != EMS_VALUE_USHORT_NOTSET)
         rootBoiler["retTemp"] = (double)EMS_Boiler.retTemp / 10;
+    if (EMS_Boiler.switchTemp != EMS_VALUE_USHORT_NOTSET)
+        rootBoiler["switchTemp"] = (double)EMS_Boiler.switchTemp / 10;
     if (EMS_Boiler.sysPress != EMS_VALUE_INT_NOTSET)
         rootBoiler["sysPress"] = (double)EMS_Boiler.sysPress / 10;
     if (EMS_Boiler.boilTemp != EMS_VALUE_USHORT_NOTSET)

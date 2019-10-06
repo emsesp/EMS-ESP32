@@ -322,6 +322,7 @@ typedef struct {
     uint32_t burnStarts;  // # burner starts
     uint32_t burnWorkMin; // Total burner operating time
     uint32_t heatWorkMin; // Total heat operating time
+    uint16_t switchTemp;  // Switch temperature
 
     // UBAMonitorWWMessage
     uint16_t wWCurTmp;  // Warm Water current temperature
