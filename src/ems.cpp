@@ -1497,7 +1497,6 @@ void _process_MMPLUSStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     if (EMS_RxTelegram->data_length == 1) {
 
     } else if (EMS_RxTelegram->data_length > 8) {
-        uint8_t hc_temp = _toShort(3);
         EMS_Mixing.hc[hc].flowTemp = _toShort(EMS_OFFSET_MMPLUSStatusMessage_flow_temp);
     }
 }
