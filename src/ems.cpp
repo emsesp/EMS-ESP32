@@ -99,6 +99,9 @@ void _process_RCPLUSStatusMode(_EMS_RxTelegram * EMS_RxTelegram);
 // Junkers FR10 & FW100
 void _process_JunkersStatusMessage(_EMS_RxTelegram * EMS_RxTelegram);
 
+// Mixers MM100
+void _process_MMPLUSStatusMessage(_EMS_RxTelegram * EMS_RxTelegram);
+
 /**
  * Recognized EMS types and the functions they call to process the telegrams
  * Format: MODEL ID, TYPE ID, Description, function, emsplus
@@ -184,8 +187,11 @@ const _EMS_Type EMS_Types[] = {
     {EMS_MODEL_ALL, EMS_TYPE_RCPLUSStatusMode, "RCPLUSStatusMode", _process_RCPLUSStatusMode},
 
     // Junkers FR10
-    {EMS_MODEL_ALL, EMS_TYPE_JunkersStatusMessage, "JunkersStatusMessage", _process_JunkersStatusMessage}
+    {EMS_MODEL_ALL, EMS_TYPE_JunkersStatusMessage, "JunkersStatusMessage", _process_JunkersStatusMessage},
 
+    // Mixing devices
+    {EMS_MODEL_MM100, EMS_TYPE_MMPLUSStatusMessage_HC1, "MMPLUSStatusMessage_HC1", _process_MMPLUSStatusMessage},
+    {EMS_MODEL_MM100, EMS_TYPE_MMPLUSStatusMessage_HC2, "MMPLUSStatusMessage_HC2", _process_MMPLUSStatusMessage},
 
 };
 
@@ -196,13 +202,15 @@ uint8_t _SolarModule_Devices_max = ArraySize(SolarModule_Devices); // number of 
 uint8_t _Other_Devices_max       = ArraySize(Other_Devices);       // number of other ems devices
 uint8_t _Thermostat_Devices_max  = ArraySize(Thermostat_Devices);  // number of defined thermostat types
 uint8_t _HeatPump_Devices_max    = ArraySize(HeatPump_Devices);    // number of defined heatpump types
+uint8_t _Mixing_Devices_max      = ArraySize(Mixing_Devices);      // number of mixing device types
 
 // these structs contain the data we store from the specific EMS devices
 _EMS_Boiler      EMS_Boiler;      // for boiler
 _EMS_Thermostat  EMS_Thermostat;  // for thermostat
 _EMS_SolarModule EMS_SolarModule; // for solar modules
 _EMS_HeatPump    EMS_HeatPump;    // for heatpumps
-_EMS_Other       EMS_Other;       // for other known EMS devices
+_EMS_Mixing      EMS_Mixing;      // for mixing devices
+_EMS_Other       EMS_Other; // for other known EMS devices
 
 // CRC lookup table with poly 12 for faster checking
 const uint8_t ems_crc_table[] = {0x00, 0x02, 0x04, 0x06, 0x08, 0x0A, 0x0C, 0x0E, 0x10, 0x12, 0x14, 0x16, 0x18, 0x1A, 0x1C, 0x1E, 0x20, 0x22, 0x24, 0x26,
@@ -265,6 +273,16 @@ void ems_init() {
         EMS_Thermostat.hc[i].circuitcalctemp   = EMS_VALUE_INT_NOTSET;
         EMS_Thermostat.hc[i].setpoint_roomTemp = EMS_VALUE_SHORT_NOTSET;
         EMS_Thermostat.hc[i].curr_roomTemp     = EMS_VALUE_SHORT_NOTSET;
+    }
+
+    EMS_Mixing.detected = false;
+    // init all mixing modules
+    for (uint8_t i = 0; i < EMS_THERMOSTAT_MAXHC; i++) {
+        EMS_Mixing.hc[i].hc         = i + 1;
+        EMS_Mixing.hc[i].flowTemp   = EMS_VALUE_SHORT_NOTSET;
+        EMS_Mixing.hc[i].device_id  = EMS_ID_NONE;
+        EMS_Mixing.hc[i].model_id   = EMS_MODEL_NONE;
+        EMS_Mixing.hc[i].product_id = EMS_ID_NONE;
     }
 
     // UBAParameterWW
@@ -376,6 +394,10 @@ bool ems_getBoilerEnabled() {
 
 bool ems_getThermostatEnabled() {
     return (EMS_Thermostat.device_id != EMS_ID_NONE);
+}
+
+bool ems_getMixingDeviceEnabled() {
+    return EMS_Mixing.detected;
 }
 
 bool ems_getSolarModuleEnabled() {
@@ -1465,6 +1487,21 @@ void _process_EasyStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
 }
 
+void _process_MMPLUSStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
+    uint8_t hc = (EMS_RxTelegram->type - EMS_TYPE_MMPLUSStatusMessage_HC1); // 0 to 3
+    if (hc > 4) {
+        return; // invalid type
+    }
+    EMS_Mixing.hc[hc].active = true;
+    
+    if (EMS_RxTelegram->data_length == 1) {
+
+    } else if (EMS_RxTelegram->data_length > 8) {
+        uint8_t hc_temp = _toShort(3);
+        EMS_Mixing.hc[hc].flowTemp = _toShort(EMS_OFFSET_MMPLUSStatusMessage_flow_temp);
+    }
+}
+
 /**
  * type 0x01A5 - data from the Nefit RC1010/3000 thermostat (0x18) and RC300/310s on 0x10
  * EMS+ messages may come in with different offsets so handle them here
@@ -1885,6 +1922,10 @@ void _addDevice(uint8_t model_type, uint8_t src, uint8_t product_id, char * vers
         strlcat(device_type, "Heat Pump", sizeof(device_type));
         strlcpy(device.model_string, HeatPump_Devices[i].model_string, sizeof(device.model_string));
         break;
+    case EMS_MODELTYPE_MIXING:
+        strlcat(device_type, "Mixing Device", sizeof(device_type));
+        strlcpy(device.model_string, Mixing_Devices[i].model_string, sizeof(device.model_string));
+        break;
     case EMS_MODELTYPE_OTHER:
         strlcat(device_type, "Other", sizeof(device_type));
         strlcpy(device.model_string, Other_Devices[i].model_string, sizeof(device.model_string));
@@ -2121,6 +2162,23 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
         EMS_HeatPump.device_id  = EMS_ID_HP;
         EMS_HeatPump.product_id = product_id;
         strlcpy(EMS_HeatPump.version, version, sizeof(EMS_HeatPump.version));
+        return;
+    }
+
+    // look for mixing devices
+    i = 0;
+    while (i < _Mixing_Devices_max) {
+        if (Mixing_Devices[i].product_id == product_id) {
+            typeFound = true;
+            break;
+        }
+        i++;
+    }
+
+    if (typeFound) {
+        _addDevice(EMS_MODELTYPE_MIXING, EMS_RxTelegram->src, product_id, version, i);
+        ems_doReadCommand(EMS_TYPE_MMPLUSStatusMessage_HC1, EMS_RxTelegram->src);
+        EMS_Mixing.detected = true;
         return;
     }
 

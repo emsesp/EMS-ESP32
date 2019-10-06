@@ -132,6 +132,7 @@
 #define EMS_MODELTYPE_HP 4         // success color
 #define EMS_MODELTYPE_OTHER 5      // no color
 #define EMS_MODELTYPE_UNKNOWN 6    // no color
+#define EMS_MODELTYPE_MIXING 7
 
 #define EMS_MODELTYPE_UNKNOWN_STRING "unknown?" // model type text to use when discovering an unknown device
 
@@ -273,6 +274,12 @@ typedef struct {
     bool    write_supported;
 } _Thermostat_Device;
 
+typedef struct {
+    uint8_t product_id;
+    uint8_t device_id;
+    char    model_string[50];
+} _Mixing_Device;
+
 // for consolidating all types
 typedef struct {
     uint8_t model_type; // 1=boiler, 2=thermostat, 3=sm, 4=other, 5=unknown
@@ -281,6 +288,7 @@ typedef struct {
     char    version[10];
     char    model_string[50];
 } _Generic_Device;
+
 
 /*
  * Telegram package defintions
@@ -364,6 +372,23 @@ typedef struct {
     uint8_t product_id;
     char    version[10];
 } _EMS_Other;
+
+typedef struct {
+    uint8_t device_id;
+    uint8_t model_id;
+    uint8_t product_id;
+    char    version[10];
+    uint8_t hc;                // heating circuit 1,2, 3 or 4
+    bool    active;            // true if there is data for this HC
+
+    uint8_t flowTemp;
+} _EMS_Mixing_HC;
+
+// Mixer data
+typedef struct {
+    bool           detected;
+    _EMS_Mixing_HC hc[EMS_THERMOSTAT_MAXHC]; // array for the 4 heating circuits
+} _EMS_Mixing;
 
 // SM Solar Module - SM10/SM100/ISM1
 typedef struct {
@@ -464,6 +489,7 @@ void             ems_getSolarModuleValues();
 bool             ems_getPoll();
 bool             ems_getTxEnabled();
 bool             ems_getThermostatEnabled();
+bool             ems_getMixingDeviceEnabled();
 bool             ems_getBoilerEnabled();
 bool             ems_getSolarModuleEnabled();
 bool             ems_getHeatPumpEnabled();
@@ -492,5 +518,6 @@ extern _EMS_Thermostat  EMS_Thermostat;
 extern _EMS_SolarModule EMS_SolarModule;
 extern _EMS_HeatPump    EMS_HeatPump;
 extern _EMS_Other       EMS_Other;
+extern _EMS_Mixing      EMS_Mixing;
 
 extern std::list<_Generic_Device> Devices;
