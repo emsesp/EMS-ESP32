@@ -87,7 +87,7 @@ extern struct rst_info resetInfo;
 #define MQTT_MAX_PAYLOAD_SIZE 500        // max size of a JSON object. See https://arduinojson.org/v6/assistant/
 #define MQTT_MAX_PAYLOAD_SIZE_LARGE 2000 // max size of a large JSON object, like for sending MQTT log
 #define MYESP_JSON_MAXSIZE 2000          // for large Dynamic json files
-#define MYESP_MQTTLOG_MAX 40             // max number of log entries for MQTT publishes and subscribes
+#define MYESP_MQTTLOG_MAX 60             // max number of log entries for MQTT publishes and subscribes
 #define MYESP_JSON_LOG_MAXSIZE 300       // max size of an JSON log entry
 
 // Internal MQTT events
