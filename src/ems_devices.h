@@ -140,16 +140,16 @@
 
 // Junkers FR10, FW100 (EMS Plus)
 #define EMS_TYPE_JunkersStatusMessage 0x6F         // is an automatic thermostat broadcast giving us temps
-#define EMS_OFFSET_JunkersStatusMessage_mode 0    // current mode
+#define EMS_OFFSET_JunkersStatusMessage_mode 0     // current mode
 #define EMS_OFFSET_JunkersStatusMessage_setpoint 2 // setpoint temp
 #define EMS_OFFSET_JunkersStatusMessage_curr 4     // current temp
 
 // MM100 (EMS Plus)
-#define EMS_TYPE_MMPLUSStatusMessage_HC1 0x01D7     // mixer status HC1
-#define EMS_TYPE_MMPLUSStatusMessage_HC2 0x01D8     // mixer status HC2
-#define EMS_TYPE_MMPLUSStatusMessage_HC3 0x01D9     // mixer status HC3
-#define EMS_TYPE_MMPLUSStatusMessage_HC4 0x01DA     // mixer status HC4
-#define EMS_OFFSET_MMPLUSStatusMessage_flow_temp 3  // flow temperature
+#define EMS_TYPE_MMPLUSStatusMessage_HC1 0x01D7    // mixer status HC1
+#define EMS_TYPE_MMPLUSStatusMessage_HC2 0x01D8    // mixer status HC2
+#define EMS_TYPE_MMPLUSStatusMessage_HC3 0x01D9    // mixer status HC3
+#define EMS_TYPE_MMPLUSStatusMessage_HC4 0x01DA    // mixer status HC4
+#define EMS_OFFSET_MMPLUSStatusMessage_flow_temp 3 // flow temperature
 
 
 // Known EMS devices
@@ -208,7 +208,7 @@ const _Boiler_Device Boiler_Devices[] = {
 };
 
 /*
- * Known Solar Module types, device type 0x30
+ * Known Solar Module types, device id is 0x30
  * format is PRODUCT ID, DESCRIPTION
  */
 const _SolarModule_Device SolarModule_Devices[] = {
@@ -220,9 +220,15 @@ const _SolarModule_Device SolarModule_Devices[] = {
 
 };
 
+/*
+ * Mixing Units
+ * Typically device id is 0x20 or 0x21
+ * format is PRODUCT ID, DESCRIPTION
+ */
 const _Mixing_Device Mixing_Devices[] = {
-    {160, 0x20, "MM100 Mixing Module"},
-    {160, 0x21, "MM100 Mixing Module"},
+    {160, "MM100 Mixing Module"},
+    {69, "MM10 Mixer Module"},
+    {159, "MM50 Mixing Module"},
 };
 
 // Other EMS devices which are not considered boilers, thermostats or solar modules
@@ -230,9 +236,6 @@ const _Mixing_Device Mixing_Devices[] = {
 const _Other_Device Other_Devices[] = {
 
     {71, 0x11, "WM10 Switch Module"},
-
-    {69, 0x21, "MM10 Mixer Module"},
-    {159, 0x21, "MM50 Mixing Module"},
 
     {68, 0x09, "BC10/RFM20 Receiver"},
     {190, 0x09, "BC10 Base Controller"},
