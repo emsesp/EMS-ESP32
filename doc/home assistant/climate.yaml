@@ -5,12 +5,12 @@
      - "heat"
      - "off"
 
-   mode_state_topic: "home/ems-esp/thermostat_data"
-   current_temperature_topic: "home/ems-esp/thermostat_data"
-   temperature_state_topic: "home/ems-esp/thermostat_data"
+   mode_state_topic: "home/ems-esp/thermostat_data1"
+   current_temperature_topic: "home/ems-esp/thermostat_data1"
+   temperature_state_topic: "home/ems-esp/thermostat_data1"
 
-   temperature_command_topic: "home/ems-esp/thermostat_cmd_temp"
-   mode_command_topic: "home/ems-esp/thermostat_cmd_mode"
+   temperature_command_topic: "home/ems-esp/thermostat_cmd_temp1"
+   mode_command_topic: "home/ems-esp/thermostat_cmd_mode1"
 
    mode_state_template: "{{ value_json.thermostat_mode }}"
    current_temperature_template: "{{ value_json.thermostat_currtemp }}"

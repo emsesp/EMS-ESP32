@@ -276,7 +276,6 @@ typedef struct {
 
 typedef struct {
     uint8_t product_id;
-    uint8_t device_id;
     char    model_string[50];
 } _Mixing_Device;
 
@@ -378,10 +377,10 @@ typedef struct {
     uint8_t model_id;
     uint8_t product_id;
     char    version[10];
-    uint8_t hc;                // heating circuit 1,2, 3 or 4
-    bool    active;            // true if there is data for this HC
+    uint8_t hc;     // heating circuit 1, 2, 3 or 4
+    bool    active; // true if there is data for this HC
 
-    uint8_t flowTemp;
+    uint16_t flowTemp;
 } _EMS_Mixing_HC;
 
 // Mixer data

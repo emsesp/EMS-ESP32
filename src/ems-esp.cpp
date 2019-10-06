@@ -417,8 +417,7 @@ uint8_t _getThermostatMode(uint8_t hc_num) {
         } else if (mode == 1) {
             thermoMode = 0;
         }
-    }
-    else { // default for all other thermostats
+    } else { // default for all other thermostats
         if (mode == 0) {
             thermoMode = 3; // night
         } else if (mode == 1) {
@@ -683,8 +682,8 @@ void showInfo() {
 
         for (uint8_t hc_num = 1; hc_num <= EMS_THERMOSTAT_MAXHC; hc_num++) {
             if (EMS_Mixing.hc[hc_num - 1].active) {
-                myDebug_P(PSTR("  Mixing Circuit %d"), hc_num);  
-                _renderShortValue(" Current flow temperature", "C", EMS_Mixing.hc[hc_num - 1].flowTemp); 
+                myDebug_P(PSTR("  Mixing Circuit %d"), hc_num);
+                _renderUShortValue(" Current flow temperature", "C", EMS_Mixing.hc[hc_num - 1].flowTemp);
             }
         }
     }
@@ -722,22 +721,22 @@ void publishSensorValues() {
 
     bool hasdata  = false;
     char label[8] = {0};
-    // char valuestr[8] = {0}; // for formatting temp
 
-    // see if the sensor values have changed, if so send
+    // see if the sensor values have changed, if so send it on
     for (uint8_t i = 0; i < EMSESP_Settings.dallas_sensors; i++) {
-        double sensorValue = ds18.getValue(i);
+        // round to 2 decimal places. from https://arduinojson.org/v6/faq/how-to-configure-the-serialization-of-floats/
+        double sensorValue = (int)(ds18.getValue(i) * 100 + 0.5) / 100.0;
         if (sensorValue != DS18_DISCONNECTED && sensorValue != DS18_CRC_ERROR) {
             sprintf(label, PAYLOAD_EXTERNAL_SENSORS, (i + 1));
-            // sensors[label] = _float_to_char(valuestr, sensorValue);
-            sensors[label] = sensorValue; // TODO check if works
-            hasdata = true;
+            sensors[label] = sensorValue;
+            hasdata        = true;
         }
     }
 
     if (hasdata) {
         char data[200] = {0};
         serializeJson(doc, data, sizeof(data));
+        myDebugLog("Publishing external sensor data via MQTT");
         myESP.mqttPublish(TOPIC_EXTERNAL_SENSORS, data);
     }
 }
@@ -872,20 +871,16 @@ void publishValues(bool force) {
 
     // handle the thermostat values
     if (ems_getThermostatEnabled()) {
-        uint8_t total_active_hc = 0;                                                      // number of HCs
-        bool    hc_1_active     = EMS_Thermostat.hc[EMS_THERMOSTAT_DEFAULTHC - 1].active; // do we have HC1 active?
         for (uint8_t hc_v = 1; hc_v <= EMS_THERMOSTAT_MAXHC; hc_v++) {
             _EMS_Thermostat_HC * thermostat = &EMS_Thermostat.hc[hc_v - 1];
 
             // only send if we have an active Heating Circuit with real data
             if (thermostat->active) {
-                total_active_hc++; // increase count for #HCs we encounter
-
                 // build new json object
                 doc.clear();
                 JsonObject rootThermostat = doc.to<JsonObject>();
 
-                rootThermostat[THERMOSTAT_HC] = _int_to_char(s, thermostat->hc); // heating circuit 1..4
+                // rootThermostat[THERMOSTAT_HC] = _int_to_char(s, thermostat->hc); // heating circuit 1..4
 
                 // different logic depending on thermostat types
                 if (ems_getThermostatModel() == EMS_MODEL_EASY) {
@@ -949,14 +944,10 @@ void publishValues(bool force) {
                     if ((previousThermostatPublishCRC != fchecksum) || force) {
                         previousThermostatPublishCRC = fchecksum;
                         char thermostat_topicname[20];
-                        strlcpy(thermostat_topicname, TOPIC_THERMOSTAT_DATA, sizeof(thermostat_topicname)); // "thermostat_data"
-                        // if we have more than 1 active Heating Circuit
-                        // or this is single HC and its not HC1
-                        // append topic name with the HC number
-                        if ((total_active_hc > 1) || ((total_active_hc == 1) && (!hc_1_active))) {
-                            char buffer[4];
-                            strlcat(thermostat_topicname, itoa(total_active_hc, buffer, 10), sizeof(thermostat_topicname));
-                        }
+                        char buffer[4];
+                        // "thermostat_data" + Heating Cicruit #
+                        strlcpy(thermostat_topicname, TOPIC_THERMOSTAT_DATA, sizeof(thermostat_topicname));
+                        strlcat(thermostat_topicname, itoa(hc_v, buffer, 10), sizeof(thermostat_topicname));
                         myDebugLog("Publishing thermostat data via MQTT");
                         myESP.mqttPublish(thermostat_topicname, data);
                     }
@@ -1456,7 +1447,8 @@ void TelnetCommandCallback(uint8_t wc, const char * commandLine) {
     }
 
     if (strcmp(first_cmd, "publish") == 0) {
-        publishValues(true);
+        do_publishValues();
+        do_publishSensorValues();
         ok = true;
     }
 
@@ -1666,33 +1658,25 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
         // subscribe to the 4 heating circuits
         char topic_s[50];
         char buffer[4];
-
-        // subscribe to the normal batch to be backwards compatible
-        myESP.mqttSubscribe(TOPIC_THERMOSTAT_CMD_TEMP);
-        myESP.mqttSubscribe(TOPIC_THERMOSTAT_CMD_MODE);
-        myESP.mqttSubscribe(TOPIC_THERMOSTAT_CMD_DAYTEMP);
-        myESP.mqttSubscribe(TOPIC_THERMOSTAT_CMD_NIGHTTEMP);
-        myESP.mqttSubscribe(TOPIC_THERMOSTAT_CMD_HOLIDAYTEMP);
-
         for (uint8_t hc = 1; hc <= EMS_THERMOSTAT_MAXHC; hc++) {
             strlcpy(topic_s, TOPIC_THERMOSTAT_CMD_TEMP, sizeof(topic_s));
-            strlcat(topic_s, itoa(hc, buffer, 10), sizeof(topic_s)); // add 1-4 at the end
+            strlcat(topic_s, itoa(hc, buffer, 10), sizeof(topic_s));
             myESP.mqttSubscribe(topic_s);
 
             strlcpy(topic_s, TOPIC_THERMOSTAT_CMD_MODE, sizeof(topic_s));
-            strlcat(topic_s, itoa(hc, buffer, 10), sizeof(topic_s)); // add 1-4 at the end
+            strlcat(topic_s, itoa(hc, buffer, 10), sizeof(topic_s));
             myESP.mqttSubscribe(topic_s);
 
             strlcpy(topic_s, TOPIC_THERMOSTAT_CMD_DAYTEMP, sizeof(topic_s));
-            strlcat(topic_s, itoa(hc, buffer, 10), sizeof(topic_s)); // add 1-4 at the end
+            strlcat(topic_s, itoa(hc, buffer, 10), sizeof(topic_s));
             myESP.mqttSubscribe(topic_s);
 
             strlcpy(topic_s, TOPIC_THERMOSTAT_CMD_NIGHTTEMP, sizeof(topic_s));
-            strlcat(topic_s, itoa(hc, buffer, 10), sizeof(topic_s)); // add 1-4 at the end
+            strlcat(topic_s, itoa(hc, buffer, 10), sizeof(topic_s));
             myESP.mqttSubscribe(topic_s);
 
             strlcpy(topic_s, TOPIC_THERMOSTAT_CMD_HOLIDAYTEMP, sizeof(topic_s));
-            strlcat(topic_s, itoa(hc, buffer, 10), sizeof(topic_s)); // add 1-4 at the end
+            strlcat(topic_s, itoa(hc, buffer, 10), sizeof(topic_s));
             myESP.mqttSubscribe(topic_s);
         }
 
@@ -2187,16 +2171,17 @@ void loop() {
     // the main loop
     myESP.loop();
 
-    // check Dallas sensors, every 2 seconds
+    // check Dallas sensors, using same schedule as publish_time (default 2 mins)
     // these values are published to MQTT separately via the timer publishSensorValuesTimer
     if (EMSESP_Settings.dallas_sensors != 0) {
         ds18.loop();
     }
 
-    // publish the values to MQTT, only if the values have changed
+    // publish all the values to MQTT, only if the values have changed
     // although we don't want to publish when doing a deep scan of the thermostat
     if (ems_getEmsRefreshed() && (scanThermostat_count == 0)) {
         publishValues(false);
+        do_publishSensorValues();
         ems_setEmsRefreshed(false); // reset
     }
 

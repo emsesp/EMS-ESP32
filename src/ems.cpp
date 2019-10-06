@@ -210,7 +210,7 @@ _EMS_Thermostat  EMS_Thermostat;  // for thermostat
 _EMS_SolarModule EMS_SolarModule; // for solar modules
 _EMS_HeatPump    EMS_HeatPump;    // for heatpumps
 _EMS_Mixing      EMS_Mixing;      // for mixing devices
-_EMS_Other       EMS_Other; // for other known EMS devices
+_EMS_Other       EMS_Other;       // for other known EMS devices
 
 // CRC lookup table with poly 12 for faster checking
 const uint8_t ems_crc_table[] = {0x00, 0x02, 0x04, 0x06, 0x08, 0x0A, 0x0C, 0x0E, 0x10, 0x12, 0x14, 0x16, 0x18, 0x1A, 0x1C, 0x1E, 0x20, 0x22, 0x24, 0x26,
@@ -655,7 +655,7 @@ void _ems_sendTelegram() {
         EMS_TxTelegram.data[1] = EMS_TxTelegram.dest;
     } else {
         // for a READ or VALIDATE
-        EMS_TxTelegram.data[1] = (EMS_TxTelegram.dest | 0x80); // read has 8th bit set, always 
+        EMS_TxTelegram.data[1] = (EMS_TxTelegram.dest | 0x80); // read has 8th bit set, always
     }
 
     // complete the rest of the header depending on EMS or EMS+
@@ -1489,13 +1489,12 @@ void _process_EasyStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
 
 void _process_MMPLUSStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     uint8_t hc = (EMS_RxTelegram->type - EMS_TYPE_MMPLUSStatusMessage_HC1); // 0 to 3
-    if (hc > 4) {
+    if (hc > EMS_THERMOSTAT_MAXHC) {
         return; // invalid type
     }
     EMS_Mixing.hc[hc].active = true;
-    
-    if (EMS_RxTelegram->data_length == 1) {
 
+    if (EMS_RxTelegram->data_length == 1) {
     } else if (EMS_RxTelegram->data_length > 8) {
         EMS_Mixing.hc[hc].flowTemp = _toShort(EMS_OFFSET_MMPLUSStatusMessage_flow_temp);
     }
@@ -1508,7 +1507,7 @@ void _process_MMPLUSStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
 void _process_RCPLUSStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     // figure out which heating circuit
     uint8_t hc = (EMS_RxTelegram->type - EMS_TYPE_RCPLUSStatusMessage_HC1); // 0 to 3
-    if (hc > 4) {
+    if (hc > EMS_THERMOSTAT_MAXHC) {
         return; // invalid type
     }
     EMS_Thermostat.hc[hc].active = true;
@@ -1567,7 +1566,7 @@ void _process_JunkersStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
         EMS_Thermostat.hc[hc].curr_roomTemp     = _toShort(EMS_OFFSET_JunkersStatusMessage_curr);     // value is * 10
         EMS_Thermostat.hc[hc].setpoint_roomTemp = _toShort(EMS_OFFSET_JunkersStatusMessage_setpoint); // value is * 10
         EMS_Thermostat.hc[hc].mode              = _toByte(EMS_OFFSET_JunkersStatusMessage_mode);
-        EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
+        EMS_Sys_Status.emsRefreshed             = true; // triggers a send the values back via MQTT
     }
 }
 
@@ -2204,46 +2203,11 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
 }
 
 /*
- * See if we have a Junkers Heatronic 3 compatible device
- * Do a read command for the version with the src having the MSB set
- */
-void _ems_detectJunkers() {
-#ifdef JUNKERS_DETECT
-    char s[30] = {0};
-    snprintf(s, sizeof(s), "%02X %02X %02X 00 %02X", (EMS_ID_ME | 0x80), (EMS_ID_BOILER | 0x080), EMS_TYPE_Version, EMS_MAX_TELEGRAM_LENGTH);
-    ems_sendRawTelegram(s);
-#endif
-}
-
-/*
  * Figure out the boiler and thermostat types
  */
 void ems_discoverModels() {
     myDebug_P(PSTR("Starting auto discover of EMS devices..."));
     ems_doReadCommand(EMS_TYPE_UBADevices, EMS_ID_BOILER);
-
-    // ems_startupTelegrams();
-
-    // TODO remove this part eventually, ems_discoverModels()
-    /*
-
-    // boiler...
-    // ems_doReadCommand(EMS_TYPE_Version, EMS_ID_BOILER);
-    // _ems_detectJunkers(); // special hack for Junkers detection
-
-    ems_doReadCommand(EMS_TYPE_Version, EMS_ID_SM); // check if there is Solar Module available
-    ems_doReadCommand(EMS_TYPE_Version, EMS_ID_HP); // check if there is HeatPump Module available
-
-    // thermostat...
-    // if it hasn't been set, auto discover it
-    if (EMS_Thermostat.device_id == EMS_ID_NONE) {
-        ems_scanDevices(); // auto-discover it
-    } else {
-        // set the model as hardcoded (see my_devices.h) and fetch the version and product id
-        ems_doReadCommand(EMS_TYPE_Version, EMS_Thermostat.device_id);
-    }
-
-    */
 }
 
 /**
@@ -2592,9 +2556,6 @@ void ems_scanDevices() {
     for (uint8_t device_id : Device_Ids) {
         ems_doReadCommand(EMS_TYPE_Version, device_id);
     }
-
-    // add a check for Junkers onto the queue
-    _ems_detectJunkers();
 }
 
 /**
@@ -2845,7 +2806,7 @@ void ems_setThermostatTemp(float temperature, uint8_t hc_num, uint8_t temptype) 
         return;
     }
 
-    if (hc_num < 1 || hc_num > 4) {
+    if (hc_num < 1 || hc_num > EMS_THERMOSTAT_MAXHC) {
         myDebug_P(PSTR("Invalid HC number"));
         return;
     }
@@ -2955,7 +2916,7 @@ void ems_setThermostatMode(uint8_t mode, uint8_t hc_num) {
         return;
     }
 
-    if (hc_num < 1 || hc_num > 4) {
+    if (hc_num < 1 || hc_num > EMS_THERMOSTAT_MAXHC) {
         myDebug_P(PSTR("Invalid HC number"));
         return;
     }
