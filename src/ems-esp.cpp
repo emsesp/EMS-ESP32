@@ -522,7 +522,6 @@ void showInfo() {
     _renderIntValue("Selected flow temperature", "C", EMS_Boiler.selFlowTemp);
     _renderUShortValue("Current flow temperature", "C", EMS_Boiler.curFlowTemp);
     _renderUShortValue("Return temperature", "C", EMS_Boiler.retTemp);
-    _renderUShortValue("Switch temperature", "C", EMS_Boiler.switchTemp);
     _renderBoolValue("Gas", EMS_Boiler.burnGas);
     _renderBoolValue("Boiler pump", EMS_Boiler.heatPmp);
     _renderBoolValue("Fan", EMS_Boiler.fanWork);
@@ -671,11 +670,12 @@ void showInfo() {
     if (ems_getMixingDeviceEnabled()) {
         myDebug_P(PSTR("")); // newline
         myDebug_P(PSTR("%sMixing module stats:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
+        _renderUShortValue("Switch temperature", "C", EMS_Boiler.switchTemp);
 
         for (uint8_t hc_num = 1; hc_num <= EMS_THERMOSTAT_MAXHC; hc_num++) {
             if (EMS_Mixing.hc[hc_num - 1].active) {
-                myDebug_P(PSTR(" Mixing Circuit %d"), hc_num);  
-                _renderShortValue("  Current flow temperature", "C", EMS_Mixing.hc[hc_num - 1].flowTemp); 
+                myDebug_P(PSTR("  Mixing Circuit %d"), hc_num);  
+                _renderShortValue(" Current flow temperature", "C", EMS_Mixing.hc[hc_num - 1].flowTemp); 
             }
         }
     }
