@@ -409,7 +409,16 @@ uint8_t _getThermostatMode(uint8_t hc_num) {
         } else if (mode == 1) {
             thermoMode = 2; // auto
         }
-    } else { // default for all other thermostats
+    } else if (model == EMS_MODEL_FW100 || model == EMS_MODEL_FW120) {
+        if (mode == 3) {
+            thermoMode = 4;
+        } else if (mode == 2) {
+            thermoMode = 3;
+        } else if (mode == 1) {
+            thermoMode = 0;
+        }
+    }
+    else { // default for all other thermostats
         if (mode == 0) {
             thermoMode = 3; // night
         } else if (mode == 1) {
