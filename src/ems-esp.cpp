@@ -135,7 +135,6 @@ static const command_t project_cmds[] PROGMEM = {
     {false, "devices [all]", "list all supported and detected EMS devices"},
     {false, "queue", "show current Tx queue"},
     {false, "autodetect [quick | deep]", "detect EMS devices and attempt to automatically set boiler and thermostat types"},
-    {false, "shower <timer | alert>", "toggle either timer or alert on/off"},
     {false, "send XX ...", "send raw telegram data to EMS bus (XX are hex values)"},
     {false, "thermostat read <type ID>", "send read request to the thermostat for heating circuit hc 1-4"},
     {false, "thermostat temp [hc] <degrees>", "set current thermostat temperature"},
@@ -682,7 +681,7 @@ void showInfo() {
 
         for (uint8_t hc_num = 1; hc_num <= EMS_THERMOSTAT_MAXHC; hc_num++) {
             if (EMS_Mixing.hc[hc_num - 1].active) {
-                myDebug_P(PSTR("  Mixing Circuit %d"), hc_num);  
+                myDebug_P(PSTR("  Mixing Circuit %d"), hc_num);
                 _renderUShortValue(" Current flow temperature", "C", EMS_Mixing.hc[hc_num - 1].flowTemp);
                 _renderIntValue(" Current pump modulation", "%", EMS_Mixing.hc[hc_num - 1].pumpMod);
                 _renderIntValue(" Current valve status", "%", EMS_Mixing.hc[hc_num - 1].valveStatus);
@@ -1334,10 +1333,12 @@ bool SetListCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, co
         if ((strcmp(setting, "shower_timer") == 0) && (wc == 2)) {
             if (strcmp(value, "on") == 0) {
                 EMSESP_Settings.shower_timer = true;
-                ok                           = true;
+                myESP.mqttPublish(TOPIC_SHOWER_TIMER, EMSESP_Settings.shower_timer ? "1" : "0");
+                ok = true;
             } else if (strcmp(value, "off") == 0) {
                 EMSESP_Settings.shower_timer = false;
-                ok                           = true;
+                myESP.mqttPublish(TOPIC_SHOWER_TIMER, EMSESP_Settings.shower_timer ? "1" : "0");
+                ok = true;
             } else {
                 myDebug_P(PSTR("Error. Usage: set shower_timer <on | off>"));
             }
@@ -1347,10 +1348,12 @@ bool SetListCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, co
         if ((strcmp(setting, "shower_alert") == 0) && (wc == 2)) {
             if (strcmp(value, "on") == 0) {
                 EMSESP_Settings.shower_alert = true;
-                ok                           = true;
+                myESP.mqttPublish(TOPIC_SHOWER_ALERT, EMSESP_Settings.shower_alert ? "1" : "0");
+                ok = true;
             } else if (strcmp(value, "off") == 0) {
                 EMSESP_Settings.shower_alert = false;
-                ok                           = true;
+                myESP.mqttPublish(TOPIC_SHOWER_ALERT, EMSESP_Settings.shower_alert ? "1" : "0");
+                ok = true;
             } else {
                 myDebug_P(PSTR("Error. Usage: set shower_alert <on | off>"));
             }
@@ -1489,21 +1492,6 @@ void TelnetCommandCallback(uint8_t wc, const char * commandLine) {
             }
         } else {
             ems_scanDevices(); // normal known device scan
-            ok = true;
-        }
-    }
-
-
-    // shower settings
-    if ((strcmp(first_cmd, "shower") == 0) && (wc == 2)) {
-        char * second_cmd = _readWord();
-        if (strcmp(second_cmd, "timer") == 0) {
-            EMSESP_Settings.shower_timer = !EMSESP_Settings.shower_timer;
-            myESP.mqttPublish(TOPIC_SHOWER_TIMER, EMSESP_Settings.shower_timer ? "1" : "0");
-            ok = true;
-        } else if (strcmp(second_cmd, "alert") == 0) {
-            EMSESP_Settings.shower_alert = !EMSESP_Settings.shower_alert;
-            myESP.mqttPublish(TOPIC_SHOWER_ALERT, EMSESP_Settings.shower_alert ? "1" : "0");
             ok = true;
         }
     }
@@ -1657,6 +1645,10 @@ uint8_t _hasHCspecified(const char * topic, const char * input) {
 void MQTTCallback(unsigned int type, const char * topic, const char * message) {
     // we're connected. lets subscribe to some topics
     if (type == MQTT_CONNECT_EVENT) {
+        myESP.mqttSubscribe(TOPIC_SHOWER_TIMER);
+        myESP.mqttSubscribe(TOPIC_SHOWER_ALERT);
+        myESP.mqttSubscribe(TOPIC_SHOWER_COLDSHOT);
+
         // subscribe to the 4 heating circuits
         char topic_s[50];
         char buffer[4];
@@ -1687,13 +1679,9 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
         myESP.mqttSubscribe(TOPIC_BOILER_CMD_COMFORT);
         myESP.mqttSubscribe(TOPIC_BOILER_CMD_FLOWTEMP);
 
-        myESP.mqttSubscribe(TOPIC_SHOWER_TIMER);
-        myESP.mqttSubscribe(TOPIC_SHOWER_ALERT);
-        myESP.mqttSubscribe(TOPIC_SHOWER_COLDSHOT);
-
         // publish the status of the Shower parameters
-        myESP.mqttPublish(TOPIC_SHOWER_TIMER, EMSESP_Settings.shower_timer ? "1" : "0");
-        myESP.mqttPublish(TOPIC_SHOWER_ALERT, EMSESP_Settings.shower_alert ? "1" : "0");
+        // myESP.mqttPublish(TOPIC_SHOWER_TIMER, EMSESP_Settings.shower_timer ? "1" : "0");
+        // myESP.mqttPublish(TOPIC_SHOWER_ALERT, EMSESP_Settings.shower_alert ? "1" : "0");
     }
 
     // handle incoming MQTT publish events
