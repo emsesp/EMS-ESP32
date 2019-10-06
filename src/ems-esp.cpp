@@ -682,8 +682,10 @@ void showInfo() {
 
         for (uint8_t hc_num = 1; hc_num <= EMS_THERMOSTAT_MAXHC; hc_num++) {
             if (EMS_Mixing.hc[hc_num - 1].active) {
-                myDebug_P(PSTR("  Mixing Circuit %d"), hc_num);
+                myDebug_P(PSTR("  Mixing Circuit %d"), hc_num);  
                 _renderUShortValue(" Current flow temperature", "C", EMS_Mixing.hc[hc_num - 1].flowTemp);
+                _renderIntValue(" Current pump modulation", "%", EMS_Mixing.hc[hc_num - 1].pumpMod);
+                _renderIntValue(" Current valve status", "%", EMS_Mixing.hc[hc_num - 1].valveStatus);
             }
         }
     }

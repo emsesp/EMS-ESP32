@@ -145,11 +145,13 @@
 #define EMS_OFFSET_JunkersStatusMessage_curr 4     // current temp
 
 // MM100 (EMS Plus)
-#define EMS_TYPE_MMPLUSStatusMessage_HC1 0x01D7    // mixer status HC1
-#define EMS_TYPE_MMPLUSStatusMessage_HC2 0x01D8    // mixer status HC2
-#define EMS_TYPE_MMPLUSStatusMessage_HC3 0x01D9    // mixer status HC3
-#define EMS_TYPE_MMPLUSStatusMessage_HC4 0x01DA    // mixer status HC4
-#define EMS_OFFSET_MMPLUSStatusMessage_flow_temp 3 // flow temperature
+#define EMS_TYPE_MMPLUSStatusMessage_HC1 0x01D7       // mixer status HC1
+#define EMS_TYPE_MMPLUSStatusMessage_HC2 0x01D8       // mixer status HC2
+#define EMS_TYPE_MMPLUSStatusMessage_HC3 0x01D9       // mixer status HC3
+#define EMS_TYPE_MMPLUSStatusMessage_HC4 0x01DA       // mixer status HC4
+#define EMS_OFFSET_MMPLUSStatusMessage_flow_temp 3    // flow temperature
+#define EMS_OFFSET_MMPLUSStatusMessage_pump_mod 5     // pump modulation
+#define EMS_OFFSET_MMPLUSStatusMessage_valve_status 2 // valve in percent
 
 
 // Known EMS devices

@@ -278,11 +278,13 @@ void ems_init() {
     EMS_Mixing.detected = false;
     // init all mixing modules
     for (uint8_t i = 0; i < EMS_THERMOSTAT_MAXHC; i++) {
-        EMS_Mixing.hc[i].hc         = i + 1;
-        EMS_Mixing.hc[i].flowTemp   = EMS_VALUE_SHORT_NOTSET;
-        EMS_Mixing.hc[i].device_id  = EMS_ID_NONE;
-        EMS_Mixing.hc[i].model_id   = EMS_MODEL_NONE;
-        EMS_Mixing.hc[i].product_id = EMS_ID_NONE;
+        EMS_Mixing.hc[i].hc          = i + 1;
+        EMS_Mixing.hc[i].flowTemp    = EMS_VALUE_SHORT_NOTSET;
+        EMS_Mixing.hc[i].pumpMod     = EMS_VALUE_INT_NOTSET;
+        EMS_Mixing.hc[i].valveStatus = EMS_VALUE_INT_NOTSET;
+        EMS_Mixing.hc[i].device_id   = EMS_ID_NONE;
+        EMS_Mixing.hc[i].model_id    = EMS_MODEL_NONE;
+        EMS_Mixing.hc[i].product_id  = EMS_ID_NONE;
     }
 
     // UBAParameterWW
@@ -1496,7 +1498,9 @@ void _process_MMPLUSStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
 
     if (EMS_RxTelegram->data_length == 1) {
     } else if (EMS_RxTelegram->data_length > 8) {
-        EMS_Mixing.hc[hc].flowTemp = _toShort(EMS_OFFSET_MMPLUSStatusMessage_flow_temp);
+        EMS_Mixing.hc[hc].flowTemp    = _toShort(EMS_OFFSET_MMPLUSStatusMessage_flow_temp);
+        EMS_Mixing.hc[hc].pumpMod     = _toByte(EMS_OFFSET_MMPLUSStatusMessage_pump_mod);
+        EMS_Mixing.hc[hc].valveStatus = _toByte(EMS_OFFSET_MMPLUSStatusMessage_valve_status);
     }
 }
 
