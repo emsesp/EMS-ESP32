@@ -381,6 +381,8 @@ typedef struct {
     bool    active; // true if there is data for this HC
 
     uint16_t flowTemp;
+    uint8_t  pumpMod;
+    uint8_t  valveStatus;
 } _EMS_Mixing_HC;
 
 // Mixer data
