@@ -1345,6 +1345,7 @@ void _process_UBAMonitorSlow(_EMS_RxTelegram * EMS_RxTelegram) {
     EMS_Boiler.burnStarts  = _toLong(10);
     EMS_Boiler.burnWorkMin = _toLong(13);
     EMS_Boiler.heatWorkMin = _toLong(19);
+    EMS_Boiler.switchTemp  = _toShort(25);
 }
 
 /**
