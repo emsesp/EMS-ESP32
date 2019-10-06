@@ -1521,14 +1521,17 @@ void _process_RCPLUSStatusMode(_EMS_RxTelegram * EMS_RxTelegram) {
  * FR10 Junkers - type x006F
  */
 void _process_JunkersStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
-    if (EMS_RxTelegram->offset == 0) {
+    if (EMS_RxTelegram->offset == 0 && EMS_RxTelegram->data_length > 1) {
         uint8_t hc                   = EMS_THERMOSTAT_DEFAULTHC - 1; // use HC1
         EMS_Thermostat.hc[hc].active = true;
 
         // e.g. for FR10:  90 00 FF 00 00 6F   03 01 00 BE 00 BF
         // e.g. for FW100: 90 00 FF 00 00 6F   03 02 00 D7 00 DA F3 34 00 C4
+
         EMS_Thermostat.hc[hc].curr_roomTemp     = _toShort(EMS_OFFSET_JunkersStatusMessage_curr);     // value is * 10
         EMS_Thermostat.hc[hc].setpoint_roomTemp = _toShort(EMS_OFFSET_JunkersStatusMessage_setpoint); // value is * 10
+        EMS_Thermostat.hc[hc].mode              = _toByte(EMS_OFFSET_JunkersStatusMessage_mode);
+        EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
     }
 }
 
