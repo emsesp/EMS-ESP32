@@ -1616,9 +1616,10 @@ void OTACallback_post() {
 }
 
 
-// see's if a topic is appended with an interger value
+// see's if a topic string is appended with an interger value
 // used to identify a heating circuit
-// returns HC number
+// returns HC number 1 - 4
+// or the default (1) is no suffix can be found
 uint8_t _hasHCspecified(const char * topic, const char * input) {
     int orig_len = strlen(topic); // original length of the topic we're comparing too
 
@@ -1631,7 +1632,7 @@ uint8_t _hasHCspecified(const char * topic, const char * input) {
         }
 
         if (diff == 0) {
-            return EMS_THERMOSTAT_DEFAULTHC; // identical, use default
+            return EMS_THERMOSTAT_DEFAULTHC; // identical, use default which is 1
         }
 
         // return the value of the last char, 0-9
