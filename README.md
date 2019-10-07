@@ -40,54 +40,50 @@ The code is written for the Espressif **ESP8266** microcontroller and supports a
 
 ### Thermostats:
 
+* Buderus RC10, RC20, RC20F, RC30, R35, RC300, RC310, RC3000
+* Buderus Logamatic TC100 (read-only)
+* Nefit Moduline 100, 300, 400, 1010, 3000
+* Nefit Moduline Easy (read-only)
+* Bosch Easy, CW100 (read-only)
+* Junkers FR10, FR100, FR110, FW100, FW120
 * Sieger ES73
-* RC10/Nefit Moduline 100
-* RC20/Nefit Moduline 300
-* RC20F
-* RC30/Nefit Moduline 400
-* RC35 (only a single HC)
-* RC300/RC310/RC3000
-* Nefit Moduline 1010
-* Junkers FR10
-* TC100/Nefit Easy (read-only)
-* Bosch Easy (read-only)
-* Bosch CW100 (read-only)
 
 ### Boilers:
 
-* Buderus GB172/Nefit Trendline
-* Nefit Topline Compact/Buderus GB162
-* Buderus Logamax U122
-* Buderus Logamax plus/GB192
-* Sieger BK15 Boiler/Nefit Smartline
-* Bosch Condens 2500/Junkers Cerapur Comfort
-* Nefit Proline
+* Buderus GBx72, GB162, GB152, Logamax U122, Logamax plus/GB192, Logano
+* Bosch Condens 2500
+* Junkers Cerapur, Heatronic 3 boilers
+* Nefit Proline, Trendline, Topline, Enviline, Smartline
+* Sieger BK15 Boiler
 
 ### Solar Modules:
 
-* SM10 Solar Module
-* SM100 Solar Module
+* Buderus SM10, SM50, SM100 Solar Module
 * Junkers ISM1 Solar Module
+
+### Mixing Modules:
+
+* Buderus MM10, MM50, MM100 Mixer Module
+
+### Heat Pump Modules:
+
+* Buderus HeatPump Module
 
 ### Other devices:
 
-* MM10 Mixer Module
-* MC10 Module
-* WM10 Switch Module
-* MM100 Mixing Module
-* MM100 Mixing Module
-* BC10/RFM20 Receiver
-* BC10 Base Controller
-* BC25 Base Controller
+* Generic Buderus MC10 Module
+* Buderus WM10 Switch Module
+* Buderus RFM20 Receiver
+* Buderus BC10, BC25 Base Controller
+* Buderus Web Gateway KM200
 * Nefit Moduline Easy Connect
 * Bosch Easy Connect
 * EMS-OT OpenTherm converter
-* Web Gateway KM200
-* HeatPump Module
+* Junkers Controller
 
 ## Compatible with EMS Gateway
 
-Using BBQKees' [EMS Gateway](https://shop.hotgoodies.nl/ems/) board with integrated Wemos D1:
+Using BBQKees' [EMS Gateway](https://shop.hotgoodies.nl/ems/) board with integrated Wemos D1 ESP8266:
 
 | ![on boiler](https://github.com/proddy/EMS-ESP/raw/master/doc/ems%20gateway/on-boiler.jpg) | ![kit](https://github.com/proddy/EMS-ESP/raw/master/doc/ems%20gateway/ems-kit-2.jpg) | ![basic circuit](https://github.com/proddy/EMS-ESP/raw/master/doc/ems%20gateway/ems-board-white.jpg) |
 | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
