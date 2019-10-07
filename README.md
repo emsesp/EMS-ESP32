@@ -52,6 +52,8 @@ The code is written for the Espressif **ESP8266** microcontroller and supports a
 
 * Buderus GBx72, GB162, GB152, Logamax U122, Logamax plus/GB192, Logano
 * Bosch Condens 2500
+* Worcester-Bosch Greenstar 550CDi
+* Worcester Bosch Greenstar 24i
 * Junkers Cerapur, Heatronic 3 boilers
 * Nefit Proline, Trendline, Topline, Enviline, Smartline
 * Sieger BK15 Boiler
