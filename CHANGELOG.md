@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.9.2 beta]
 
+Important! This build has breaking changes:
+ - the MQTT `thermostat_data` topic is always suffixed with the heat countroller number, e.g. `thermostat_data1`
+ - the web builder has been upgraded to use gulp 4. Delete the `tools/webfilesbuilder/node_modules` and re-install the libraries using `npm i` from within the `tools/webfilesbuilder` folder.
+
 ### Added
 
 - Handling of MM100 Status Messages (thanks @kstaniek)
