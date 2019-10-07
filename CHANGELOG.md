@@ -7,26 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.9.2 beta]
 
-Important! This build has breaking changes:
- - the MQTT `thermostat_data` topic is always suffixed with the heat countroller number, e.g. `thermostat_data1`
- - the web builder has been upgraded to use gulp 4. Delete the `tools/webfilesbuilder/node_modules` and re-install the libraries using `npm i` from within the `tools/webfilesbuilder` folder.
+#### Important! This build has breaking changes:
+ - the Thermostat MQTT topics are all always suffixed with the heat controller number, e.g. `thermostat_data1`
+ - the web builder has been upgraded to use Gulp 4. Remove `tools/webfilesbuilder/node_modules` and re-install the libraries using `npm i` from within the `tools/webfilesbuilder` folder.
 
 ### Added
 
 - Handling of MM100 Status Messages (thanks @kstaniek)
-- retrieve/display mode for Junkers FW100/120 thermostats (thanks @Neonox31)
+- Retrieve/display mode for Junkers FW100/120 thermostats (thanks @Neonox31)
+- Added error fall-back for MQTT publishes that fail
 
 ### Fixed
 
 - `publish` command also sends Dallas external temperature sensor values
-
+- `log_events` setting wasn't persisted in config file
 
 ### Changed
 
 - External dallas sensor values sent in MQTT payload as float values and not strings
-- Breaking change! all MQTT topics for the Thermostat have the Heating Circuit appended (e.g. `thermostat_data1`)
-- Breaking change! Removed the heatingcircuit from the MQTT Thermostat topic payload
+- All MQTT topics for the Thermostat have the Heating Circuit appended (e.g. `thermostat_data1`). This includes the commands.
+- Shower timer and shower alert and not MQTT published at boot up
 
+### Removed
+
+- Removed telnet command `shower timer` and `shower alert` to toggle the switches
+- Removed the heatingcircuit key/value from the MQTT Thermostat topic payload
 
 ## [1.9.1] 2019-10-05
 
