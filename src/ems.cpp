@@ -633,6 +633,7 @@ void _ems_sendTelegram() {
             _EMS_RxTelegram EMS_RxTelegram;                   // create new Rx object
             EMS_RxTelegram.length    = EMS_TxTelegram.length; // full length of telegram
             EMS_RxTelegram.telegram  = EMS_TxTelegram.data;
+            EMS_RxTelegram.data_length = 0; // ignore #data=
             EMS_RxTelegram.timestamp = millis(); // now
             _debugPrintTelegram("Sending raw: ", &EMS_RxTelegram, COLOR_CYAN, true);
         }
