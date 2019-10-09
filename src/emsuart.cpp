@@ -220,7 +220,7 @@ _EMS_TX_STATUS ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
                 USF(EMSUART_UART) = buf[i];
                 delayMicroseconds(EMSUART_TX_BRK_WAIT); // https://github.com/proddy/EMS-ESP/issues/23#
             }
-            emsuart_tx_brk();                       // send <BRK>
+            emsuart_tx_brk();                                    // send <BRK>
         } else if (EMS_Sys_Status.emsTxMode == EMS_TXMODE_HT3) { // Junkers logic by @philrich
             for (uint8_t i = 0; i < len; i++) {
                 TX_PULSE(EMSUART_BIT_TIME / 4);

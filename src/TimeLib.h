@@ -1,5 +1,5 @@
-#ifndef _Time_h
-#define _Time_h
+#ifndef _TimeLib_h
+#define _TimeLib_h
 
 #include <Arduino.h>
 
@@ -27,7 +27,7 @@ typedef struct {
     uint8_t Day;
     uint8_t Month;
     uint8_t Year; // offset from 1970;
-} tmElements_t, TimeElements, *tmElementsPtr_t;
+} tmElements_t;
 
 typedef time_t (*getExternalTime)();
 
@@ -38,12 +38,8 @@ void         setSyncProvider(getExternalTime getTimeFunction); // identify the e
 void         setSyncInterval(time_t interval);                 // set the number of seconds between re-sync
 time_t       makeTime(const tmElements_t & tm);                // convert time elements into time_t
 
-int hour(time_t t);    // the hour for the given time
-int minute(time_t t);  // the minute for the given time
-int second(time_t t);  // the second for the given time
-int day(time_t t);     // the day for the given time
-int month(time_t t);   // the month for the given time
-int weekday(time_t t); // the weekday for the given time
-int year(time_t t);    // the year for the given time
+uint8_t to_hour(time_t t);   // the hour for the given time
+uint8_t to_minute(time_t t); // the minute for the given time
+uint8_t to_second(time_t t); // the second for the given time
 }
 #endif

@@ -1228,7 +1228,7 @@ void MyESP::showSystemStats() {
     }
 
     if (_ntp_enabled) {
-        myDebug_P(PSTR(" [NTP] Time in UTC is %02d:%02d:%02d"), hour(now()), minute(now()), second(now()));
+        myDebug_P(PSTR(" [NTP] Time in UTC is %02d:%02d:%02d"), to_hour(now()), to_minute(now()), to_second(now()));
     }
 
 #ifdef CRASH
@@ -1590,12 +1590,11 @@ bool MyESP::_fs_validateLogFile(const char * filename) {
     uint16_t                                   char_count = 0;
     bool                                       abort      = false;
     char                                       char_buffer[MYESP_JSON_LOG_MAXSIZE];
-    char                                       c;
     StaticJsonDocument<MYESP_JSON_LOG_MAXSIZE> doc;
 
     // eventlog.seek(0);
     while (eventlog.available() && !abort) {
-        c = eventlog.read(); // read a char
+        char c = eventlog.read(); // read a char
 
         // see if we have reached the end of the string
         if (c == '\0' || c == '\n') {
@@ -1700,7 +1699,7 @@ bool MyESP::_fs_loadConfig() {
 // returns true if successful
 bool MyESP::fs_setSettingValue(char ** setting, const char * value, const char * value_default) {
     if (*setting == nullptr) {
-        free(setting); // first free any allocated memory
+        free(*setting); // first free any allocated memory
     }
 
     if (_hasValue(value)) {
@@ -2244,12 +2243,11 @@ void MyESP::_sendEventLog(uint8_t page) {
     uint8_t line_count = 0;
     bool    abort      = false;
     char    char_buffer[MYESP_JSON_LOG_MAXSIZE];
-    char    c;
     float   pages;
 
     // start at top and read until we find the page we want (sets of 10)
     while (eventlog.available() && !abort) {
-        c = eventlog.read();
+        char c = eventlog.read();
 
         // see if we have reached the end of the string
         if (c == '\0' || c == '\n') {
