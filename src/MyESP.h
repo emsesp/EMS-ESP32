@@ -9,7 +9,7 @@
 #ifndef MyESP_h
 #define MyESP_h
 
-#define MYESP_VERSION "1.2.8"
+#define MYESP_VERSION "1.2.9"
 
 #include <ArduinoJson.h>
 #include <ArduinoOTA.h>
@@ -287,6 +287,9 @@ class MyESP {
     void setSettings(fs_loadsave_callback_f loadsave, fs_setlist_callback_f setlist, bool useSerial = true);
     bool fs_saveConfig(JsonObject root);
     bool fs_saveCustomConfig(JsonObject root);
+    bool fs_setSettingValue(char ** setting, const char * value, const char * value_default);
+    bool fs_setSettingValue(uint16_t * setting, const char * value, uint16_t value_default);
+    bool fs_setSettingValue(bool * setting, const char * value, bool value_default);
 
     // Web
     void setWeb(web_callback_f callback_web);
@@ -330,7 +333,7 @@ class MyESP {
     char *          _mqtt_ip;
     char *          _mqtt_user;
     char *          _mqtt_password;
-    int             _mqtt_port;
+    uint16_t        _mqtt_port;
     char *          _mqtt_base;
     bool            _mqtt_enabled;
     uint32_t        _mqtt_keepalive;
@@ -406,7 +409,7 @@ class MyESP {
     bool          _formatreq;
     unsigned long _getUptime();
     char *        _getBuildTime();
-    bool          _hasValue(char * s);
+    bool          _hasValue(const char * s);
     void          _printHeap(const char * s);
 
     // reset reason and rtcmem

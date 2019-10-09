@@ -651,7 +651,7 @@ void MyESP::_consoleShowHelp() {
 
 // see if a char * string is empty. It could not be initialized yet.
 // return true if there is a value
-bool MyESP::_hasValue(char * s) {
+bool MyESP::_hasValue(const char * s) {
     if ((s == nullptr) || (strlen(s) == 0)) {
         return false;
     }
@@ -769,153 +769,62 @@ char * MyESP::_telnet_readWord(bool allow_all_chars) {
 bool MyESP::_changeSetting(uint8_t wc, const char * setting, const char * value) {
     bool save_config        = false;
     bool save_custom_config = false;
+    bool restart            = false;
 
     // check for our internal commands first
     if (strcmp(setting, "erase") == 0) {
         _fs_eraseConfig();
         return true;
-
     } else if (strcmp(setting, "wifi_ssid") == 0) {
-        if (value) {
-            free(_network_ssid);
-            _network_ssid = strdup(value);
-        }
-        save_config = true;
+        save_config = fs_setSettingValue(&_network_ssid, value, "");
+        restart     = save_config;
         //jw.enableSTA(false);
-        myDebug_P(PSTR("Note: please 'restart' to apply new WiFi settings"));
     } else if (strcmp(setting, "wifi_password") == 0) {
-        if (value) {
-            free(_network_password);
-            _network_password = strdup(value);
-        }
-        save_config = true;
+        save_config = fs_setSettingValue(&_network_password, value, "");
+        restart     = save_config;
         //jw.enableSTA(false);
-        myDebug_P(PSTR("Note: please 'restart' to apply new WiFi settings"));
-
     } else if (strcmp(setting, "wifi_mode") == 0) {
         if (value) {
             if (strcmp(value, "ap") == 0) {
                 _network_wmode = 1;
-                save_config    = true;
-                myDebug_P(PSTR("Note: please 'restart' to apply new WiFi settings"));
+                save_config = restart = true;
             } else if (strcmp(value, "client") == 0) {
                 _network_wmode = 0;
-                save_config    = true;
-                myDebug_P(PSTR("Note: please 'restart' to apply new WiFi settings"));
+                save_config = restart = true;
             } else {
                 save_config = false;
             }
         }
-
     } else if (strcmp(setting, "mqtt_ip") == 0) {
-        if (value) {
-            free(_mqtt_ip);
-            _mqtt_ip = strdup(value);
-        }
-        save_config = true;
+        save_config = fs_setSettingValue(&_mqtt_ip, value, "");
     } else if (strcmp(setting, "mqtt_username") == 0) {
-        if (value) {
-            free(_mqtt_user);
-            _mqtt_user = strdup(value);
-        }
-        save_config = true;
+        save_config = fs_setSettingValue(&_mqtt_user, value, "");
     } else if (strcmp(setting, "mqtt_password") == 0) {
-        if (value) {
-            free(_mqtt_password);
-            _mqtt_password = strdup(value);
-        }
-        save_config = true;
+        save_config = fs_setSettingValue(&_mqtt_password, value, "");
     } else if (strcmp(setting, "mqtt_base") == 0) {
-        if (value) {
-            free(_mqtt_base);
-            _mqtt_base = strdup(value);
-        }
-        save_config = true;
+        save_config = fs_setSettingValue(&_mqtt_base, value, MQTT_BASE_DEFAULT);
     } else if (strcmp(setting, "mqtt_port") == 0) {
-        if (value) {
-            _mqtt_port = atoi(value);
-        }
-        save_config = true;
+        save_config = fs_setSettingValue(&_mqtt_port, value, MQTT_PORT);
     } else if (strcmp(setting, "mqtt_enabled") == 0) {
-        save_config = true;
-        if (value) {
-            if (strcmp(value, "on") == 0) {
-                _mqtt_enabled = true;
-                save_config   = true;
-            } else if (strcmp(value, "off") == 0) {
-                _mqtt_enabled = false;
-                save_config   = true;
-            } else {
-                save_config = false;
-            }
-        }
-
+        save_config = fs_setSettingValue(&_mqtt_enabled, value, false);
     } else if (strcmp(setting, "serial") == 0) {
-        save_config = true;
-        if (value) {
-            if (strcmp(value, "on") == 0) {
-                _general_serial = true;
-                save_config     = true;
-                myDebug_P(PSTR("Type 'restart' to activate Serial mode."));
-            } else if (strcmp(value, "off") == 0) {
-                _general_serial = false;
-                save_config     = true;
-                myDebug_P(PSTR("Type 'restart' to deactivate Serial mode."));
-            } else {
-                save_config = false;
-            }
-        }
-
+        save_config = fs_setSettingValue(&_general_serial, value, false);
+        restart     = save_config;
     } else if (strcmp(setting, "mqtt_heartbeat") == 0) {
-        save_config = true;
-        if (value) {
-            if (strcmp(value, "on") == 0) {
-                _mqtt_heartbeat = true;
-                save_config     = true;
-                myDebug_P(PSTR("Heartbeat on"));
-            } else if (strcmp(value, "off") == 0) {
-                _mqtt_heartbeat = false;
-                save_config     = true;
-                myDebug_P(PSTR("Heartbeat off"));
-            } else {
-                save_config = false;
-            }
-        }
+        save_config = fs_setSettingValue(&_mqtt_heartbeat, value, false);
     } else if (strcmp(setting, "ntp_enabled") == 0) {
-        save_config = true;
-        if (value) {
-            if (strcmp(value, "on") == 0) {
-                _ntp_enabled = true;
-                save_config  = true;
-                myDebug_P(PSTR("NTP on"));
-            } else if (strcmp(value, "off") == 0) {
-                _ntp_enabled = false;
-                save_config  = true;
-                myDebug_P(PSTR("NTP off"));
-            } else {
-                save_config = false;
-            }
-        }
+        save_config = fs_setSettingValue(&_ntp_enabled, value, false);
     } else if (strcmp(setting, "log_events") == 0) {
-        save_config = true;
-        if (value) {
-            if (strcmp(value, "on") == 0) {
-                _general_log_events = true;
-                save_config         = true;
-                myDebug_P(PSTR("Event logging on"));
-            } else if (strcmp(value, "off") == 0) {
-                _general_log_events = false;
-                save_config         = true;
-                myDebug_P(PSTR("Event logging off"));
-            } else {
-                save_config = false;
-            }
-        }
+        save_config = fs_setSettingValue(&_general_log_events, value, false);
     } else {
         // finally check for any custom commands
         if (_fs_setlist_callback_f) {
             save_custom_config = (_fs_setlist_callback_f)(MYESP_FSACTION_SET, wc, setting, value);
         }
+    }
+
+    if (restart) {
+        myDebug_P(PSTR("Please 'restart' to apply new settings."));
     }
 
     bool ok = false;
@@ -924,7 +833,7 @@ bool MyESP::_changeSetting(uint8_t wc, const char * setting, const char * value)
     if ((save_config || save_custom_config)) {
         // check for 2 params
         if (value == nullptr) {
-            myDebug_P(PSTR("%s setting reset to its default value."), setting);
+            myDebug_P(PSTR("%s has been reset to its default value."), setting);
         } else {
             // must be 3 params
             myDebug_P(PSTR("%s changed."), setting);
@@ -1783,6 +1692,52 @@ bool MyESP::_fs_loadConfig() {
     _ntp_enabled = ntp["enabled"];
 
     myDebug_P(PSTR("[FS] System config loaded"));
+
+    return true;
+}
+
+// saves a string into a config setting, using default value if non set
+// returns true if successful
+bool MyESP::fs_setSettingValue(char ** setting, const char * value, const char * value_default) {
+    if (*setting == nullptr) {
+        free(setting); // first free any allocated memory
+    }
+
+    if (_hasValue(value)) {
+        *setting = strdup(value);
+    } else {
+        *setting = strdup(value_default); // use the default value
+    }
+
+    return true;
+}
+
+// saves a integer into a config setting, using default value if non set
+// returns true if successful
+bool MyESP::fs_setSettingValue(uint16_t * setting, const char * value, uint16_t value_default) {
+    if (_hasValue(value)) {
+        *setting = (uint16_t)atoi(value);
+    } else {
+        *setting = value_default; // use the default value
+    }
+
+    return true;
+}
+
+// saves a bool into a config setting, using default value if non set
+// returns true if successful
+bool MyESP::fs_setSettingValue(bool * setting, const char * value, bool value_default) {
+    if (_hasValue(value)) {
+        if ((strcmp(value, "on") == 0) || (strcmp(value, "yes") == 0) || (strcmp(value, "1") == 0)) {
+            *setting = true;
+        } else if ((strcmp(value, "off") == 0) || (strcmp(value, "no") == 0) || (strcmp(value, "0") == 0)) {
+            *setting = false;
+        } else {
+            return false; // invalid setting value
+        }
+    } else {
+        *setting = value_default; // use the default value
+    }
 
     return true;
 }
