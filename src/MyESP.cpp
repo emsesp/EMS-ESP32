@@ -369,13 +369,15 @@ void MyESP::mqttSubscribe(const char * topic) {
     if (mqttClient.connected() && (strlen(topic) > 0)) {
         char * topic_s = _mqttTopic(topic);
 
-        //char topic_s[MQTT_MAX_TOPIC_SIZE];
-        //strlcpy(topic_s, _mqttTopic(topic), sizeof(topic_s));
-        (void)mqttClient.subscribe(topic_s, _mqtt_qos);
+        uint16_t packet_id = mqttClient.subscribe(topic_s, _mqtt_qos);
         // myDebug_P(PSTR("[MQTT] Subscribing to %s"), topic_s);
 
-        // add to mqtt log
-        _addMQTTLog(topic_s, "", 2); // type of 2 means Subscribe. Has an empty payload for now
+        if (packet_id) {
+            // add to mqtt log
+            _addMQTTLog(topic_s, "", 2); // type of 2 means Subscribe. Has an empty payload for now
+        } else {
+            myDebug_P(PSTR("[MQTT] Error subscribing to %s, error %d"), _mqttTopic(topic), packet_id);
+        }
     }
 }
 
@@ -389,13 +391,15 @@ void MyESP::mqttUnsubscribe(const char * topic) {
 
 // MQTT Publish
 void MyESP::mqttPublish(const char * topic, const char * payload) {
-    // myDebug_P(PSTR("[MQTT] Sending publish to %s with payload %s"), _mqttTopic(topic), payload); // for debugging
-    uint16_t packet_id = mqttClient.publish(_mqttTopic(topic), _mqtt_qos, _mqtt_retain, payload);
+    if (mqttClient.connected() && (strlen(topic) > 0)) {
+        // myDebug_P(PSTR("[MQTT] Sending publish to %s with payload %s"), _mqttTopic(topic), payload); // for debugging
+        uint16_t packet_id = mqttClient.publish(_mqttTopic(topic), _mqtt_qos, _mqtt_retain, payload);
 
-    if (packet_id) {
-        _addMQTTLog(topic, payload, 1); // add to the log, using type of 1 for Publish
-    } else {
-        myDebug_P(PSTR("[MQTT] Error publishing to %s with payload %s, error %d"), _mqttTopic(topic), payload, packet_id);
+        if (packet_id) {
+            _addMQTTLog(topic, payload, 1); // add to the log, using type of 1 for Publish
+        } else {
+            myDebug_P(PSTR("[MQTT] Error publishing to %s with payload %s, error %d"), _mqttTopic(topic), payload, packet_id);
+        }
     }
 }
 
