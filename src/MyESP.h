@@ -64,7 +64,7 @@ extern struct rst_info resetInfo;
 #define MYESP_LOADAVG_INTERVAL 30000 // Interval between calculating load average (in ms) = 30 seconds
 
 // WIFI
-#define MYESP_WIFI_CONNECT_TIMEOUT 10000     // Connecting timeout for WIFI in ms (10 seconds)
+#define MYESP_WIFI_CONNECT_TIMEOUT 20000     // Connecting timeout for WIFI in ms (20 seconds)
 #define MYESP_WIFI_RECONNECT_INTERVAL 600000 // If could not connect to WIFI, retry after this time in ms. 10 minutes
 
 // MQTT
