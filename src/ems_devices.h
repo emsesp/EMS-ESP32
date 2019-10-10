@@ -202,7 +202,7 @@ const _Boiler_Device Boiler_Devices[] = {
     {203, "Buderus Logamax U122/Junkers Cerapur"},
     {208, "Buderus Logamax plus/GB192"},
     {64, "Sieger BK15/Nefit Smartline/Buderus GB152"},
-    {EMS_PRODUCTID_HEATRONIC, "Bosch Condens 2500/Junkers Heatronic 3"},
+    {95, "Bosch Condens 2500/Buderus Logamax GB062/Junkers Heatronic 3"},
     {122, "Nefit Proline"},
     {170, "Buderus Logano GB212"},
     {172, "Nefit Enviline"}

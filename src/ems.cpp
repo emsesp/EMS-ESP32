@@ -2076,12 +2076,6 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
             EMS_Boiler.product_id = Boiler_Devices[i].product_id;
             strlcpy(EMS_Boiler.version, version, sizeof(EMS_Boiler.version));
 
-            // check to see if its a Junkers Heatronic 3, which has a different poll'ing logic
-            if (EMS_Boiler.product_id == EMS_PRODUCTID_HEATRONIC) {
-                EMS_Sys_Status.emsIDMask     = 0x80;
-                EMS_Sys_Status.emsPollAck[0] = EMS_ID_ME ^ EMS_Sys_Status.emsIDMask;
-            }
-
             ems_getBoilerValues(); // get Boiler values that we would usually have to wait for
         }
         return;

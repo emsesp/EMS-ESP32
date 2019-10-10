@@ -87,7 +87,6 @@
 #define EMS_ID_GATEWAY 0x48 // KM200 Web Gateway
 
 // Product IDs
-#define EMS_PRODUCTID_HEATRONIC 95 // Junkers Heatronic 3 device
 #define EMS_PRODUCTID_SM10 73      // SM10 solar module
 #define EMS_PRODUCTID_SM50 162     // SM50 solar module
 #define EMS_PRODUCTID_SM100 163    // SM100 solar module
@@ -247,7 +246,7 @@ const _EMS_TxTelegram EMS_TX_TELEGRAM_NEW = {
 // where defintions are stored
 typedef struct {
     uint8_t product_id;
-    char    model_string[50];
+    char    model_string[70];
 } _Boiler_Device;
 
 typedef struct {
