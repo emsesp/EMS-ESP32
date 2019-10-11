@@ -40,6 +40,9 @@
 #define TOPIC_BOILER_CMD_COMFORT "boiler_cmd_comfort"         // ww comfort setting via MQTT
 #define TOPIC_BOILER_CMD_FLOWTEMP "boiler_cmd_flowtemp"       // flowtemp value via MQTT
 
+// MQTT for mixing device
+#define TOPIC_MIXING_DATA "mixing_data"                       // for sending mixing device values to MQTT
+
 // MQTT for SM10/SM100 Solar Module
 #define TOPIC_SM_DATA "sm_data"            // topic name
 #define SM_COLLECTORTEMP "collectortemp"   // collector temp
