@@ -766,7 +766,8 @@ void publishValues(bool force) {
 
     static uint8_t  last_boilerActive            = 0xFF; // for remembering last setting of the tap water or heating on/off
     static uint32_t previousBoilerPublishCRC     = 0;    // CRC check for boiler values
-    static uint32_t previousThermostatPublishCRC = 0;    // CRC check for thermostat values
+    static uint32_t previousThermostatPublishCRC[EMS_THERMOSTAT_MAXHC]; // CRC check for thermostat values
+    static uint32_t previousMixingPublishCRC[EMS_THERMOSTAT_MAXHC];     // CRC check for mixing values
     static uint32_t previousSMPublishCRC         = 0;    // CRC check for Solar Module values (e.g. SM10)
 
     JsonObject rootBoiler = doc.to<JsonObject>();
@@ -781,6 +782,8 @@ void publishValues(bool force) {
 
     if (EMS_Boiler.wWSelTemp != EMS_VALUE_INT_NOTSET)
         rootBoiler["wWSelTemp"] = EMS_Boiler.wWSelTemp;
+    if (EMS_Boiler.wWDesiredTemp != EMS_VALUE_INT_NOTSET)
+        rootBoiler["wWDesiredTemp"] = EMS_Boiler.wWDesiredTemp;
     if (EMS_Boiler.selFlowTemp != EMS_VALUE_INT_NOTSET)
         rootBoiler["selFlowTemp"] = EMS_Boiler.selFlowTemp;
     if (EMS_Boiler.selBurnPow != EMS_VALUE_INT_NOTSET)
@@ -789,6 +792,8 @@ void publishValues(bool force) {
         rootBoiler["curBurnPow"] = EMS_Boiler.curBurnPow;
     if (EMS_Boiler.pumpMod != EMS_VALUE_INT_NOTSET)
         rootBoiler["pumpMod"] = EMS_Boiler.pumpMod;
+    if (EMS_Boiler.wWCircPump != EMS_VALUE_INT_NOTSET)
+        rootBoiler["wWCircPump"] = EMS_Boiler.wWCircPump;
 
     if (EMS_Boiler.extTemp != EMS_VALUE_SHORT_NOTSET)
         rootBoiler["outdoorTemp"] = (double)EMS_Boiler.extTemp / 10;
@@ -813,6 +818,9 @@ void publishValues(bool force) {
     if (EMS_Boiler.burnGas != EMS_VALUE_INT_NOTSET)
         rootBoiler["burnGas"] = _bool_to_char(s, EMS_Boiler.burnGas);
 
+    if (EMS_Boiler.flameCurr != EMS_VALUE_USHORT_NOTSET)
+        rootBoiler["flameCurr"] = (double)(int16_t)EMS_Boiler.flameCurr / 10;
+
     if (EMS_Boiler.heatPmp != EMS_VALUE_INT_NOTSET)
         rootBoiler["heatPmp"] = _bool_to_char(s, EMS_Boiler.heatPmp);
 
@@ -825,8 +833,23 @@ void publishValues(bool force) {
     if (EMS_Boiler.wWCirc != EMS_VALUE_INT_NOTSET)
         rootBoiler["wWCirc"] = _bool_to_char(s, EMS_Boiler.wWCirc);
 
+    if (EMS_Boiler.heating_temp != EMS_VALUE_INT_NOTSET)
+        rootBoiler["heating_temp"] = EMS_Boiler.heating_temp;
+    if (EMS_Boiler.pump_mod_max != EMS_VALUE_INT_NOTSET)
+        rootBoiler["pump_mod_max"] = EMS_Boiler.pump_mod_max;
+    if (EMS_Boiler.pump_mod_min != EMS_VALUE_INT_NOTSET)
+        rootBoiler["pump_mod_min"] = EMS_Boiler.pump_mod_min;
+
     if (EMS_Boiler.wWHeat != EMS_VALUE_INT_NOTSET)
         rootBoiler["wWHeat"] = _bool_to_char(s, EMS_Boiler.wWHeat);
+
+    // **** also add burnStarts, burnWorkMin, heatWorkMin
+    if (abs(EMS_Boiler.wWStarts) != EMS_VALUE_LONG_NOTSET)
+        rootBoiler["wWStarts"] = (double)EMS_Boiler.wWStarts;
+    if (abs(EMS_Boiler.wWWorkM) != EMS_VALUE_LONG_NOTSET)
+        rootBoiler["wWWorkM"] = (double)EMS_Boiler.wWWorkM;
+    if (abs(EMS_Boiler.UBAuptime) != EMS_VALUE_LONG_NOTSET)
+        rootBoiler["UBAuptime"] = (double)EMS_Boiler.UBAuptime;
 
     // **** also add burnStarts, burnWorkMin, heatWorkMin
     if (abs(EMS_Boiler.burnStarts) != EMS_VALUE_LONG_NOTSET)
@@ -942,8 +965,8 @@ void publishValues(bool force) {
                         crc.update(data[i]);
                     }
                     fchecksum = crc.finalize();
-                    if ((previousThermostatPublishCRC != fchecksum) || force) {
-                        previousThermostatPublishCRC = fchecksum;
+                    if ((previousThermostatPublishCRC[hc_v - 1] != fchecksum) || force) {
+                        previousThermostatPublishCRC[hc_v - 1] = fchecksum;
                         char thermostat_topicname[20];
                         char buffer[4];
                         // "thermostat_data" + Heating Cicruit #
@@ -956,6 +979,53 @@ void publishValues(bool force) {
             }
         }
     }
+
+    // handle the thermostat values
+    if (ems_getMixingDeviceEnabled()) {
+        for (uint8_t hc_v = 1; hc_v <= EMS_THERMOSTAT_MAXHC; hc_v++) {
+            _EMS_Mixing_HC * mixing = &EMS_Mixing.hc[hc_v - 1];
+
+            // only send if we have an active Heating Circuit with real data
+            if (mixing->active) {
+                // build new json object
+                doc.clear();
+                JsonObject rootMixing = doc.to<JsonObject>();
+
+                if (mixing->flowTemp != EMS_VALUE_SHORT_NOTSET)
+                    rootMixing["flowTemp"] = (double)mixing->flowTemp / 10;
+                if (mixing->pumpMod != EMS_VALUE_INT_NOTSET)
+                    rootMixing["pumpMod"] = mixing->pumpMod;
+                if (mixing->valveStatus != EMS_VALUE_INT_NOTSET)
+                    rootMixing["valveStatus"] = mixing->valveStatus;
+
+                data[0] = '\0'; // reset data for next package
+                serializeJson(doc, data, sizeof(data));
+
+                // check for empty json
+                jsonSize = measureJson(doc);
+                if (jsonSize > 2) {
+                    // calculate new CRC
+                    crc.reset();
+                    for (uint8_t i = 0; i < (jsonSize - 1); i++) {
+                        crc.update(data[i]);
+                    }
+                    fchecksum = crc.finalize();
+                    if ((previousMixingPublishCRC[hc_v - 1] != fchecksum) || force) {
+                        previousMixingPublishCRC[hc_v - 1] = fchecksum;
+                        char mixing_topicname[20];
+                        char buffer[4];
+                        // "mixingt_data" + Heating Cicruit #
+                        strlcpy(mixing_topicname, TOPIC_MIXING_DATA, sizeof(mixing_topicname));
+                        strlcat(mixing_topicname, itoa(hc_v, buffer, 10), sizeof(mixing_topicname));
+                        myDebugLog("Publishing mixing device data via MQTT");
+                        myESP.mqttPublish(mixing_topicname, data);
+                    }
+                }
+            }
+        }
+    }
+
+
 
     // For SM10 and SM100 Solar Modules
     if (ems_getSolarModuleEnabled()) {
