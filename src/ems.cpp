@@ -7,6 +7,7 @@
  */
 
 #include "ems.h"
+#include "ems_utils.h"
 #include "MyESP.h"
 #include "ems_devices.h"
 #include "emsuart.h"
@@ -16,10 +17,6 @@
 #include "test_data.h"
 uint8_t _TEST_DATA_max = ArraySize(TEST_DATA);
 #endif
-
-// MyESP class for logging to telnet and serial
-#define myDebug(...) myESP.myDebug(__VA_ARGS__)
-#define myDebug_P(...) myESP.myDebug_P(__VA_ARGS__)
 
 _EMS_Sys_Status EMS_Sys_Status; // EMS Status
 
@@ -230,7 +227,6 @@ const uint8_t ems_crc_table[] = {0x00, 0x02, 0x04, 0x06, 0x08, 0x0A, 0x0C, 0x0E,
 const uint8_t  TX_WRITE_TIMEOUT_COUNT = 2;       // 3 retries before timeout
 const uint32_t EMS_BUS_TIMEOUT        = 15000;   // timeout in ms before recognizing the ems bus is offline (15 seconds)
 const uint32_t EMS_POLL_TIMEOUT       = 5000000; // timeout in microseconds before recognizing the ems bus is offline (5 seconds)
-
 
 // init stats and counters and buffers
 void ems_init() {
@@ -496,36 +492,6 @@ uint8_t _crcCalculator(uint8_t * data, uint8_t len) {
     return crc;
 }
 
-// like itoa but for hex, and quicker
-char * _hextoa(uint8_t value, char * buffer) {
-    char * p    = buffer;
-    byte   nib1 = (value >> 4) & 0x0F;
-    byte   nib2 = (value >> 0) & 0x0F;
-    *p++        = nib1 < 0xA ? '0' + nib1 : 'A' + nib1 - 0xA;
-    *p++        = nib2 < 0xA ? '0' + nib2 : 'A' + nib2 - 0xA;
-    *p          = '\0'; // null terminate just in case
-    return buffer;
-}
-
-// for decimals 0 to 99, printed as a 2 char string
-char * _smallitoa(uint8_t value, char * buffer) {
-    buffer[0] = ((value / 10) == 0) ? '0' : (value / 10) + '0';
-    buffer[1] = (value % 10) + '0';
-    buffer[2] = '\0';
-    return buffer;
-}
-
-/* for decimals 0 to 999, printed as a string
- * From @nomis
- */
-char * _smallitoa3(uint16_t value, char * buffer) {
-    buffer[0] = ((value / 100) == 0) ? '0' : (value / 100) + '0';
-    buffer[1] = (((value % 100) / 10) == 0) ? '0' : ((value % 100) / 10) + '0';
-    buffer[2] = (value % 10) + '0';
-    buffer[3] = '\0';
-    return buffer;
-}
-
 /**
  * Find the pointer to the EMS_Types array for a given type ID
  * or -1 if not found
@@ -630,11 +596,11 @@ void _ems_sendTelegram() {
         EMS_TxTelegram.data[EMS_TxTelegram.length - 1] = _crcCalculator(EMS_TxTelegram.data, EMS_TxTelegram.length); // add the CRC
 
         if (EMS_Sys_Status.emsLogging != EMS_SYS_LOGGING_NONE) {
-            _EMS_RxTelegram EMS_RxTelegram;                   // create new Rx object
-            EMS_RxTelegram.length    = EMS_TxTelegram.length; // full length of telegram
-            EMS_RxTelegram.telegram  = EMS_TxTelegram.data;
-            EMS_RxTelegram.data_length = 0; // ignore #data=
-            EMS_RxTelegram.timestamp = millis(); // now
+            _EMS_RxTelegram EMS_RxTelegram;                     // create new Rx object
+            EMS_RxTelegram.length      = EMS_TxTelegram.length; // full length of telegram
+            EMS_RxTelegram.telegram    = EMS_TxTelegram.data;
+            EMS_RxTelegram.data_length = 0;        // ignore #data=
+            EMS_RxTelegram.timestamp   = millis(); // now
             _debugPrintTelegram("Sending raw: ", &EMS_RxTelegram, COLOR_CYAN, true);
         }
 
@@ -1160,7 +1126,7 @@ void _processType(_EMS_RxTelegram * EMS_RxTelegram) {
     // release the lock on the TxQueue
     EMS_Sys_Status.emsTxStatus = EMS_TX_STATUS_IDLE;
 
-    // at this point we can assume TxStatus is EMS_TX_STATUS_WAIT as we just sent a read or validate
+    // at this point we can assume TxStatus was EMS_TX_STATUS_WAIT as we just sent a read or validate telegram
     // for READ or VALIDATE the dest (telegram[1]) is always us, so check for this
     // and if not we probably didn't get any response so remove the last Tx from the queue and process the telegram anyway
     if ((telegram[1] & 0x7F) != EMS_ID_ME) {
@@ -2820,7 +2786,11 @@ void ems_setThermostatTemp(float temperature, uint8_t hc_num, uint8_t temptype) 
     EMS_TxTelegram.action = EMS_TX_TELEGRAM_WRITE;
     EMS_TxTelegram.dest   = device_id;
 
-    myDebug_P(PSTR("Setting new thermostat temperature for heating circuit %d type %d (0=auto,1=night,2=day,3=holiday)"), hc_num, temptype);
+    char s[10] = {0};
+    myDebug_P(PSTR("Setting new thermostat temperature to %s for heating circuit %d type %d (0=auto,1=night,2=day,3=holiday)"),
+              _float_to_char(s, temperature),
+              hc_num,
+              temptype);
 
     if (model_id == EMS_MODEL_RC20) {
         EMS_TxTelegram.type               = EMS_TYPE_RC20Set;
@@ -2922,17 +2892,31 @@ void ems_setThermostatMode(uint8_t mode, uint8_t hc_num) {
 
     uint8_t model_id  = EMS_Thermostat.model_id;
     uint8_t device_id = EMS_Thermostat.device_id;
+    uint8_t set_mode;
 
     // RC300/1000/3000 have different settings
     if (model_id == EMS_MODEL_RC300) {
         if (mode == 1) {
-            mode = 0; // manual
+            set_mode = 0; // manual/heat
         } else {
-            mode = 0xFF; // auto
+            set_mode = 0xFF; // auto
         }
+    } else {
+        set_mode = mode;
     }
 
-    myDebug_P(PSTR("Setting thermostat mode to %d for heating circuit %d"), mode, hc_num);
+    // 0=off, 1=manual, 2=auto, 3=night, 4=day
+    if (mode == 0) {
+        myDebug_P(PSTR("Setting thermostat mode to off for heating circuit %d"), hc_num);
+    } else if (set_mode == 1) {
+        myDebug_P(PSTR("Setting thermostat mode to manual for heating circuit %d"), hc_num);
+    } else if (set_mode == 2) {
+        myDebug_P(PSTR("Setting thermostat mode to auto for heating circuit %d"), hc_num);
+    } else if (set_mode == 3) {
+        myDebug_P(PSTR("Setting thermostat mode to night for heating circuit %d"), hc_num);
+    } else if (set_mode == 4) {
+        myDebug_P(PSTR("Setting thermostat mode to day for heating circuit %d"), hc_num);
+    }
 
     _EMS_TxTelegram EMS_TxTelegram = EMS_TX_TELEGRAM_NEW; // create new Tx
     EMS_TxTelegram.timestamp       = millis();            // set timestamp
@@ -2941,7 +2925,7 @@ void ems_setThermostatMode(uint8_t mode, uint8_t hc_num) {
     EMS_TxTelegram.action    = EMS_TX_TELEGRAM_WRITE;
     EMS_TxTelegram.dest      = device_id;
     EMS_TxTelegram.length    = EMS_MIN_TELEGRAM_LENGTH;
-    EMS_TxTelegram.dataValue = mode;
+    EMS_TxTelegram.dataValue = set_mode;
 
     // handle different thermostat types
     if (model_id == EMS_MODEL_RC20) {

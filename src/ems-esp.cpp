@@ -11,6 +11,7 @@
 #include "MyESP.h"
 #include "ems.h"
 #include "ems_devices.h"
+#include "ems_utils.h"
 #include "emsuart.h"
 #include "my_config.h"
 #include "version.h"
@@ -31,10 +32,6 @@ DS18 ds18;
 #define APP_HOSTNAME "ems-esp"
 #define APP_URL "https://github.com/proddy/EMS-ESP"
 #define APP_UPDATEURL "https://api.github.com/repos/proddy/EMS-ESP/releases/latest"
-
-// macros for easy debugging
-#define myDebug(...) myESP.myDebug(__VA_ARGS__)
-#define myDebug_P(...) myESP.myDebug_P(__VA_ARGS__)
 
 // set to value >0 if the ESP is overheating or there are timing issues. Recommend a value of 1.
 #define EMSESP_DELAY 0 // initially set to 0 for no delay. Change to 1 if getting WDT resets from wifi
@@ -158,231 +155,6 @@ void myDebugLog(const char * s) {
     if (ems_getLogging() != EMS_SYS_LOGGING_NONE) {
         myDebug(s);
     }
-}
-
-// convert float to char
-char * _float_to_char(char * a, float f, uint8_t precision = 2) {
-    long p[] = {0, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000};
-
-    char * ret   = a;
-    long   whole = (long)f;
-    itoa(whole, a, 10);
-    while (*a != '\0')
-        a++;
-    *a++         = '.';
-    long decimal = abs((long)((f - whole) * p[precision]));
-    itoa(decimal, a, 10);
-
-    return ret;
-}
-
-// convert bool to text. bools are stored as bytes
-char * _bool_to_char(char * s, uint8_t value) {
-    if (value == EMS_VALUE_INT_ON) {
-        strlcpy(s, "on", sizeof(s));
-    } else if (value == EMS_VALUE_INT_OFF) {
-        strlcpy(s, "off", sizeof(s));
-    } else {
-        strlcpy(s, "?", sizeof(s));
-    }
-    return s;
-}
-
-// convert short (two bytes) to text string
-// decimals: 0 = no division, 1=divide value by 10, 2=divide by 2, 10=divide value by 100
-// negative values are assumed stored as 1-compliment (https://medium.com/@LeeJulija/how-integers-are-stored-in-memory-using-twos-complement-5ba04d61a56c)
-char * _short_to_char(char * s, int16_t value, uint8_t decimals = 1) {
-    // remove errors or invalid values
-    if (value == EMS_VALUE_SHORT_NOTSET) {
-        strlcpy(s, "?", 10);
-        return (s);
-    }
-
-    // just print
-    if (decimals == 0) {
-        ltoa(value, s, 10);
-        return (s);
-    }
-
-    // do floating point
-    char s2[10] = {0};
-    // check for negative values
-    if (value < 0) {
-        strlcpy(s, "-", 10);
-        value *= -1; // convert to positive
-    }
-
-    if (decimals == 2) {
-        // divide by 2
-        strlcpy(s, ltoa(value / 2, s2, 10), 10);
-        strlcat(s, ".", 10);
-        strlcat(s, ((value & 0x01) ? "5" : "0"), 10);
-
-    } else {
-        strlcpy(s, ltoa(value / (decimals * 10), s2, 10), 10);
-        strlcat(s, ".", 10);
-        strlcat(s, ltoa(value % (decimals * 10), s2, 10), 10);
-    }
-
-    return s;
-}
-
-// convert short (two bytes) to text string
-// decimals: 0 = no division, 1=divide value by 10, 2=divide by 2, 10=divide value by 100
-char * _ushort_to_char(char * s, uint16_t value, uint8_t decimals = 1) {
-    // remove errors or invalid values
-    if (value == EMS_VALUE_USHORT_NOTSET) {
-        strlcpy(s, "?", 10);
-        return (s);
-    }
-
-    // just print
-    if (decimals == 0) {
-        ltoa(value, s, 10);
-        return (s);
-    }
-
-    // do floating point
-    char s2[10] = {0};
-
-    if (decimals == 2) {
-        // divide by 2
-        strlcpy(s, ltoa(value / 2, s2, 10), 10);
-        strlcat(s, ".", 10);
-        strlcat(s, ((value & 0x01) ? "5" : "0"), 10);
-
-    } else {
-        strlcpy(s, ltoa(value / (decimals * 10), s2, 10), 10);
-        strlcat(s, ".", 10);
-        strlcat(s, ltoa(value % (decimals * 10), s2, 10), 10);
-    }
-
-    return s;
-}
-
-// takes a signed short value (2 bytes), converts to a fraction
-// decimals: 0 = no division, 1=divide value by 10, 2=divide by 2, 10=divide value by 100
-void _renderShortValue(const char * prefix, const char * postfix, int16_t value, uint8_t decimals = 1) {
-    static char buffer[200] = {0};
-    static char s[20]       = {0};
-    strlcpy(buffer, "  ", sizeof(buffer));
-    strlcat(buffer, prefix, sizeof(buffer));
-    strlcat(buffer, ": ", sizeof(buffer));
-
-    strlcat(buffer, _short_to_char(s, value, decimals), sizeof(buffer));
-
-    if (postfix != nullptr) {
-        strlcat(buffer, " ", sizeof(buffer));
-        strlcat(buffer, postfix, sizeof(buffer));
-    }
-
-    myDebug(buffer);
-}
-
-// takes a unsigned short value (2 bytes), converts to a fraction
-// decimals: 0 = no division, 1=divide value by 10, 2=divide by 2, 10=divide value by 100
-void _renderUShortValue(const char * prefix, const char * postfix, uint16_t value, uint8_t decimals = 1) {
-    static char buffer[200] = {0};
-    static char s[20]       = {0};
-    strlcpy(buffer, "  ", sizeof(buffer));
-    strlcat(buffer, prefix, sizeof(buffer));
-    strlcat(buffer, ": ", sizeof(buffer));
-
-    strlcat(buffer, _ushort_to_char(s, value, decimals), sizeof(buffer));
-
-    if (postfix != nullptr) {
-        strlcat(buffer, " ", sizeof(buffer));
-        strlcat(buffer, postfix, sizeof(buffer));
-    }
-
-    myDebug(buffer);
-}
-
-// convert int (single byte) to text value
-char * _int_to_char(char * s, uint8_t value, uint8_t div = 1) {
-    if (value == EMS_VALUE_INT_NOTSET) {
-        strlcpy(s, "?", sizeof(s));
-        return (s);
-    }
-
-    static char s2[5] = {0};
-
-    switch (div) {
-    case 1:
-        itoa(value, s, 10);
-        break;
-
-    case 2:
-        strlcpy(s, itoa(value >> 1, s2, 10), 5);
-        strlcat(s, ".", sizeof(s));
-        strlcat(s, ((value & 0x01) ? "5" : "0"), 5);
-        break;
-
-    case 10:
-        strlcpy(s, itoa(value / 10, s2, 10), 5);
-        strlcat(s, ".", sizeof(s));
-        strlcat(s, itoa(value % 10, s2, 10), 5);
-        break;
-
-    default:
-        itoa(value, s, 10);
-        break;
-    }
-
-    return s;
-}
-
-// takes an int value (1 byte), converts to a fraction
-void _renderIntValue(const char * prefix, const char * postfix, uint8_t value, uint8_t div = 1) {
-    static char buffer[200] = {0};
-    static char s[20]       = {0};
-    strlcpy(buffer, "  ", sizeof(buffer));
-    strlcat(buffer, prefix, sizeof(buffer));
-    strlcat(buffer, ": ", sizeof(buffer));
-
-    strlcat(buffer, _int_to_char(s, value, div), sizeof(buffer));
-
-    if (postfix != nullptr) {
-        strlcat(buffer, " ", sizeof(buffer));
-        strlcat(buffer, postfix, sizeof(buffer));
-    }
-
-    myDebug(buffer);
-}
-
-// takes a long value at prints it to debug log
-void _renderLongValue(const char * prefix, const char * postfix, uint32_t value) {
-    static char buffer[200] = {0};
-    strlcpy(buffer, "  ", sizeof(buffer));
-    strlcat(buffer, prefix, sizeof(buffer));
-    strlcat(buffer, ": ", sizeof(buffer));
-
-    if (value == EMS_VALUE_LONG_NOTSET) {
-        strlcat(buffer, "?", sizeof(buffer));
-    } else {
-        char s[20] = {0};
-        strlcat(buffer, ltoa(value, s, 10), sizeof(buffer));
-    }
-
-    if (postfix != nullptr) {
-        strlcat(buffer, " ", sizeof(buffer));
-        strlcat(buffer, postfix, sizeof(buffer));
-    }
-
-    myDebug(buffer);
-}
-
-// takes a bool value at prints it to debug log
-void _renderBoolValue(const char * prefix, uint8_t value) {
-    static char buffer[200] = {0};
-    static char s[20]       = {0};
-    strlcpy(buffer, "  ", sizeof(buffer));
-    strlcat(buffer, prefix, sizeof(buffer));
-    strlcat(buffer, ": ", sizeof(buffer));
-
-    strlcat(buffer, _bool_to_char(s, value), sizeof(buffer));
-
-    myDebug(buffer);
 }
 
 // figures out the thermostat mode
@@ -657,9 +429,9 @@ void showInfo() {
                 }
 
                 // Render Termostat Mode, if we have a mode
-                uint8_t thermoMode = _getThermostatMode(hc_num); // 0xFF=unknown, 0=low, 1=manual, 2=auto, 3=night, 4=day
+                uint8_t thermoMode = _getThermostatMode(hc_num); // 0xFF=unknown, 0=off, 1=manual, 2=auto, 3=night, 4=day
                 if (thermoMode == 0) {
-                    myDebug_P(PSTR("   Mode is set to low"));
+                    myDebug_P(PSTR("   Mode is set to off"));
                 } else if (thermoMode == 1) {
                     myDebug_P(PSTR("   Mode is set to manual"));
                 } else if (thermoMode == 2) {
@@ -764,11 +536,11 @@ void publishValues(bool force) {
     uint32_t                                  fchecksum;
     uint8_t                                   jsonSize;
 
-    static uint8_t  last_boilerActive            = 0xFF; // for remembering last setting of the tap water or heating on/off
-    static uint32_t previousBoilerPublishCRC     = 0;    // CRC check for boiler values
+    static uint8_t  last_boilerActive        = 0xFF;                    // for remembering last setting of the tap water or heating on/off
+    static uint32_t previousBoilerPublishCRC = 0;                       // CRC check for boiler values
     static uint32_t previousThermostatPublishCRC[EMS_THERMOSTAT_MAXHC]; // CRC check for thermostat values
     static uint32_t previousMixingPublishCRC[EMS_THERMOSTAT_MAXHC];     // CRC check for mixing values
-    static uint32_t previousSMPublishCRC         = 0;    // CRC check for Solar Module values (e.g. SM10)
+    static uint32_t previousSMPublishCRC = 0;                           // CRC check for Solar Module values (e.g. SM10)
 
     JsonObject rootBoiler = doc.to<JsonObject>();
 
@@ -904,53 +676,57 @@ void publishValues(bool force) {
                 doc.clear();
                 JsonObject rootThermostat = doc.to<JsonObject>();
 
-                // rootThermostat[THERMOSTAT_HC] = _int_to_char(s, thermostat->hc); // heating circuit 1..4
+                // hc{1-4}
+                char hc[10];
+                strncpy(hc, THERMOSTAT_HC, sizeof(hc));
+                strncat(hc, _int_to_char(s, thermostat->hc), sizeof(hc));
+                JsonObject dataThermostat = rootThermostat.createNestedObject(hc);
 
                 // different logic depending on thermostat types
                 if (ems_getThermostatModel() == EMS_MODEL_EASY) {
                     if (thermostat->setpoint_roomTemp != EMS_VALUE_SHORT_NOTSET)
-                        rootThermostat[THERMOSTAT_SELTEMP] = (double)thermostat->setpoint_roomTemp / 100;
+                        dataThermostat[THERMOSTAT_SELTEMP] = (double)thermostat->setpoint_roomTemp / 100;
                     if (thermostat->curr_roomTemp != EMS_VALUE_SHORT_NOTSET)
-                        rootThermostat[THERMOSTAT_CURRTEMP] = (double)thermostat->curr_roomTemp / 100;
+                        dataThermostat[THERMOSTAT_CURRTEMP] = (double)thermostat->curr_roomTemp / 100;
                 } else if ((ems_getThermostatModel() == EMS_MODEL_FR10) || (ems_getThermostatModel() == EMS_MODEL_FW100)
                            || (ems_getThermostatModel() == EMS_MODEL_FW120)) {
                     if (thermostat->setpoint_roomTemp != EMS_VALUE_SHORT_NOTSET)
-                        rootThermostat[THERMOSTAT_SELTEMP] = (double)thermostat->setpoint_roomTemp / 10;
+                        dataThermostat[THERMOSTAT_SELTEMP] = (double)thermostat->setpoint_roomTemp / 10;
                     if (thermostat->curr_roomTemp != EMS_VALUE_SHORT_NOTSET)
-                        rootThermostat[THERMOSTAT_CURRTEMP] = (double)thermostat->curr_roomTemp / 10;
+                        dataThermostat[THERMOSTAT_CURRTEMP] = (double)thermostat->curr_roomTemp / 10;
                 } else {
                     if (thermostat->setpoint_roomTemp != EMS_VALUE_SHORT_NOTSET)
-                        rootThermostat[THERMOSTAT_SELTEMP] = (double)thermostat->setpoint_roomTemp / 2;
+                        dataThermostat[THERMOSTAT_SELTEMP] = (double)thermostat->setpoint_roomTemp / 2;
                     if (thermostat->curr_roomTemp != EMS_VALUE_SHORT_NOTSET)
-                        rootThermostat[THERMOSTAT_CURRTEMP] = (double)thermostat->curr_roomTemp / 10;
+                        dataThermostat[THERMOSTAT_CURRTEMP] = (double)thermostat->curr_roomTemp / 10;
 
                     if (thermostat->daytemp != EMS_VALUE_INT_NOTSET)
-                        rootThermostat[THERMOSTAT_DAYTEMP] = (double)thermostat->daytemp / 2;
+                        dataThermostat[THERMOSTAT_DAYTEMP] = (double)thermostat->daytemp / 2;
                     if (thermostat->nighttemp != EMS_VALUE_INT_NOTSET)
-                        rootThermostat[THERMOSTAT_NIGHTTEMP] = (double)thermostat->nighttemp / 2;
+                        dataThermostat[THERMOSTAT_NIGHTTEMP] = (double)thermostat->nighttemp / 2;
                     if (thermostat->holidaytemp != EMS_VALUE_INT_NOTSET)
-                        rootThermostat[THERMOSTAT_HOLIDAYTEMP] = (double)thermostat->holidaytemp / 2;
+                        dataThermostat[THERMOSTAT_HOLIDAYTEMP] = (double)thermostat->holidaytemp / 2;
 
                     if (thermostat->heatingtype != EMS_VALUE_INT_NOTSET)
-                        rootThermostat[THERMOSTAT_HEATINGTYPE] = thermostat->heatingtype;
+                        dataThermostat[THERMOSTAT_HEATINGTYPE] = thermostat->heatingtype;
 
                     if (thermostat->circuitcalctemp != EMS_VALUE_INT_NOTSET)
-                        rootThermostat[THERMOSTAT_CIRCUITCALCTEMP] = thermostat->circuitcalctemp;
+                        dataThermostat[THERMOSTAT_CIRCUITCALCTEMP] = thermostat->circuitcalctemp;
                 }
 
                 uint8_t thermoMode = _getThermostatMode(hc_v); // 0xFF=unknown, 0=low, 1=manual, 2=auto, 3=night, 4=day
 
                 // Termostat Mode
                 if (thermoMode == 0) {
-                    rootThermostat[THERMOSTAT_MODE] = "low";
+                    dataThermostat[THERMOSTAT_MODE] = "off";
                 } else if (thermoMode == 1) {
-                    rootThermostat[THERMOSTAT_MODE] = "manual";
+                    dataThermostat[THERMOSTAT_MODE] = "heat";
                 } else if (thermoMode == 2) {
-                    rootThermostat[THERMOSTAT_MODE] = "auto";
+                    dataThermostat[THERMOSTAT_MODE] = "auto";
                 } else if (thermoMode == 3) {
-                    rootThermostat[THERMOSTAT_MODE] = "night";
+                    dataThermostat[THERMOSTAT_MODE] = "night";
                 } else if (thermoMode == 4) {
-                    rootThermostat[THERMOSTAT_MODE] = "day";
+                    dataThermostat[THERMOSTAT_MODE] = "day";
                 }
 
                 data[0] = '\0'; // reset data for next package
@@ -967,13 +743,8 @@ void publishValues(bool force) {
                     fchecksum = crc.finalize();
                     if ((previousThermostatPublishCRC[hc_v - 1] != fchecksum) || force) {
                         previousThermostatPublishCRC[hc_v - 1] = fchecksum;
-                        char thermostat_topicname[20];
-                        char buffer[4];
-                        // "thermostat_data" + Heating Cicruit #
-                        strlcpy(thermostat_topicname, TOPIC_THERMOSTAT_DATA, sizeof(thermostat_topicname));
-                        strlcat(thermostat_topicname, itoa(hc_v, buffer, 10), sizeof(thermostat_topicname));
                         myDebugLog("Publishing thermostat data via MQTT");
-                        myESP.mqttPublish(thermostat_topicname, data);
+                        myESP.mqttPublish(TOPIC_THERMOSTAT_DATA, data);
                     }
                 }
             }
@@ -1100,20 +871,6 @@ void publishValues(bool force) {
 
         // send values via MQTT
         myESP.mqttPublish(TOPIC_HP_DATA, data);
-    }
-}
-
-// sets the shower timer on/off
-void set_showerTimer() {
-    if (ems_getLogging() != EMS_SYS_LOGGING_NONE) {
-        myDebug_P(PSTR("Shower timer has been set to %s"), EMSESP_Settings.shower_timer ? "enabled" : "disabled");
-    }
-}
-
-// sets the shower alert on/off
-void set_showerAlert() {
-    if (ems_getLogging() != EMS_SYS_LOGGING_NONE) {
-        myDebug_P(PSTR("Shower alert has been set to %s"), EMSESP_Settings.shower_alert ? "enabled" : "disabled");
     }
 }
 
@@ -1332,6 +1089,33 @@ bool LoadSaveCallback(MYESP_FSACTION action, JsonObject settings) {
     return false;
 }
 
+// Publish shower data
+bool do_publishShowerData() {
+    StaticJsonDocument<200> doc;
+    JsonObject              rootShower = doc.to<JsonObject>();
+    rootShower[TOPIC_SHOWER_TIMER]     = EMSESP_Settings.shower_timer ? "1" : "0";
+    rootShower[TOPIC_SHOWER_ALERT]     = EMSESP_Settings.shower_alert ? "1" : "0";
+
+    char s[50] = {0};
+    if (EMSESP_Shower.duration > SHOWER_MIN_DURATION) {
+        char buffer[16] = {0};
+        strlcpy(s, itoa((uint8_t)((EMSESP_Shower.duration / (1000 * 60)) % 60), buffer, 10), sizeof(s));
+        strlcat(s, " minutes and ", sizeof(s));
+        strlcat(s, itoa((uint8_t)((EMSESP_Shower.duration / 1000) % 60), buffer, 10), sizeof(s));
+        strlcat(s, " seconds", sizeof(s));
+    } else {
+        strlcpy(s, "n/a", sizeof(s));
+    }
+    rootShower[TOPIC_SHOWER_DURATION] = s;
+
+    char data[300] = {0};
+    serializeJson(doc, data, sizeof(data));
+
+    myDebugLog("Publishing shower data via MQTT");
+
+    return (myESP.mqttPublish(TOPIC_SHOWER_DATA, data));
+}
+
 // callback for custom settings when showing Stored Settings with the 'set' command
 // wc is number of arguments after the 'set' command
 // returns true if the setting was recognized and changed and should be saved back to SPIFFs
@@ -1403,12 +1187,10 @@ bool SetListCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, co
         if ((strcmp(setting, "shower_timer") == 0) && (wc == 2)) {
             if (strcmp(value, "on") == 0) {
                 EMSESP_Settings.shower_timer = true;
-                myESP.mqttPublish(TOPIC_SHOWER_TIMER, EMSESP_Settings.shower_timer ? "1" : "0");
-                ok = true;
+                ok                           = do_publishShowerData();
             } else if (strcmp(value, "off") == 0) {
                 EMSESP_Settings.shower_timer = false;
-                myESP.mqttPublish(TOPIC_SHOWER_TIMER, EMSESP_Settings.shower_timer ? "1" : "0");
-                ok = true;
+                ok                           = do_publishShowerData();
             } else {
                 myDebug_P(PSTR("Error. Usage: set shower_timer <on | off>"));
             }
@@ -1418,12 +1200,10 @@ bool SetListCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, co
         if ((strcmp(setting, "shower_alert") == 0) && (wc == 2)) {
             if (strcmp(value, "on") == 0) {
                 EMSESP_Settings.shower_alert = true;
-                myESP.mqttPublish(TOPIC_SHOWER_ALERT, EMSESP_Settings.shower_alert ? "1" : "0");
-                ok = true;
+                ok                           = do_publishShowerData();
             } else if (strcmp(value, "off") == 0) {
                 EMSESP_Settings.shower_alert = false;
-                myESP.mqttPublish(TOPIC_SHOWER_ALERT, EMSESP_Settings.shower_alert ? "1" : "0");
-                ok = true;
+                ok                           = do_publishShowerData();
             } else {
                 myDebug_P(PSTR("Error. Usage: set shower_alert <on | off>"));
             }
@@ -1524,6 +1304,7 @@ void TelnetCommandCallback(uint8_t wc, const char * commandLine) {
     if (strcmp(first_cmd, "publish") == 0) {
         do_publishValues();
         do_publishSensorValues();
+        do_publishShowerData();
         ok = true;
     }
 
@@ -1690,11 +1471,11 @@ void OTACallback_post() {
 // used to identify a heating circuit
 // returns HC number 1 - 4
 // or the default (1) is no suffix can be found
-uint8_t _hasHCspecified(const char * topic, const char * input) {
-    int orig_len = strlen(topic); // original length of the topic we're comparing too
+uint8_t _hasHCspecified(const char * key, const char * input) {
+    int orig_len = strlen(key); // original length of the topic we're comparing too
 
     // check if the strings match ignoring any suffix
-    if (strncmp(input, topic, orig_len) == 0) {
+    if (strncmp(input, key, orig_len) == 0) {
         // see if we have additional chars at the end, we want none or 1
         uint8_t diff = (strlen(input) - orig_len);
         if (diff > 1) {
@@ -1716,11 +1497,7 @@ uint8_t _hasHCspecified(const char * topic, const char * input) {
 void MQTTCallback(unsigned int type, const char * topic, const char * message) {
     // we're connected. lets subscribe to some topics
     if (type == MQTT_CONNECT_EVENT) {
-        myESP.mqttSubscribe(TOPIC_SHOWER_TIMER);
-        myESP.mqttSubscribe(TOPIC_SHOWER_ALERT);
-        myESP.mqttSubscribe(TOPIC_SHOWER_COLDSHOT);
-
-        // subscribe to the 4 heating circuits
+        // subscribe to the 4 heating circuits for receiving setpoint temperature and modes
         char topic_s[50];
         char buffer[4];
         for (uint8_t hc = 1; hc <= EMS_THERMOSTAT_MAXHC; hc++) {
@@ -1731,157 +1508,228 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
             strlcpy(topic_s, TOPIC_THERMOSTAT_CMD_MODE, sizeof(topic_s));
             strlcat(topic_s, itoa(hc, buffer, 10), sizeof(topic_s));
             myESP.mqttSubscribe(topic_s);
-
-            strlcpy(topic_s, TOPIC_THERMOSTAT_CMD_DAYTEMP, sizeof(topic_s));
-            strlcat(topic_s, itoa(hc, buffer, 10), sizeof(topic_s));
-            myESP.mqttSubscribe(topic_s);
-
-            strlcpy(topic_s, TOPIC_THERMOSTAT_CMD_NIGHTTEMP, sizeof(topic_s));
-            strlcat(topic_s, itoa(hc, buffer, 10), sizeof(topic_s));
-            myESP.mqttSubscribe(topic_s);
-
-            strlcpy(topic_s, TOPIC_THERMOSTAT_CMD_HOLIDAYTEMP, sizeof(topic_s));
-            strlcat(topic_s, itoa(hc, buffer, 10), sizeof(topic_s));
-            myESP.mqttSubscribe(topic_s);
         }
 
+        // generic incoming MQTT command for Thermostat
+        // this is used for example for setting daytemp, nighttemp, holidaytemp
+        myESP.mqttSubscribe(TOPIC_THERMOSTAT_CMD);
+
+        // generic incoming MQTT command for Boiler
+        // this is used for example for comfort, flowtemp
+        myESP.mqttSubscribe(TOPIC_BOILER_CMD);
+
+        // these two need to be unqiue topics
         myESP.mqttSubscribe(TOPIC_BOILER_CMD_WWACTIVATED);
         myESP.mqttSubscribe(TOPIC_BOILER_CMD_WWTEMP);
-        myESP.mqttSubscribe(TOPIC_BOILER_CMD_COMFORT);
-        myESP.mqttSubscribe(TOPIC_BOILER_CMD_FLOWTEMP);
 
-        // publish the status of the Shower parameters
-        // myESP.mqttPublish(TOPIC_SHOWER_TIMER, EMSESP_Settings.shower_timer ? "1" : "0");
-        // myESP.mqttPublish(TOPIC_SHOWER_ALERT, EMSESP_Settings.shower_alert ? "1" : "0");
+        // generic incoming MQTT command for EMS-ESP
+        // this is used for example for shower_coldshot
+        myESP.mqttSubscribe(TOPIC_GENERIC_CMD);
+
+        // shower data
+        // for receiving shower_Timer and shower_alert switches
+        myESP.mqttSubscribe(TOPIC_SHOWER_DATA);
+
+        return;
     }
 
     // handle incoming MQTT publish events
-    if (type == MQTT_MESSAGE_EVENT) {
-        uint8_t hc;
-        // thermostat temp changes
-        hc = _hasHCspecified(TOPIC_THERMOSTAT_CMD_TEMP, topic);
-        if (hc) {
-            float f     = strtof((char *)message, 0);
-            char  s[10] = {0};
-            myDebug_P(PSTR("MQTT topic: thermostat HC%d temperature value %s"), hc, _float_to_char(s, f));
-            ems_setThermostatTemp(f, hc);
-            publishValues(true); // publish back immediately
+    if (type != MQTT_MESSAGE_EVENT) {
+        return;
+    }
+
+    // check first for generic commands
+    if (strcmp(topic, TOPIC_GENERIC_CMD) == 0) {
+        // convert JSON and get the command
+        StaticJsonDocument<100> doc;
+        JsonObject              root  = doc.to<JsonObject>();          // create empty object
+        DeserializationError    error = deserializeJson(doc, message); // Deserialize the JSON document
+        if (error) {
+            myDebug_P(PSTR("[MQTT] Invalid command from topic %s, payload %s, error %s"), topic, message, error.c_str());
+            return;
+        }
+        const char * command = doc["cmd"];
+
+        // Check whatever the command is and act accordingly
+        if (strcmp(command, TOPIC_SHOWER_COLDSHOT) == 0) {
+            _showerColdShotStart();
             return;
         }
 
-        // thermostat mode changes
-        hc = _hasHCspecified(TOPIC_THERMOSTAT_CMD_MODE, topic);
-        if (hc) {
-            myDebug_P(PSTR("MQTT topic: thermostat HC%d mode value %s"), hc, message);
-            if (strcmp((char *)message, "auto") == 0) {
-                ems_setThermostatMode(2, hc);
-            } else if (strcmp((char *)message, "day") == 0 || (strcmp((char *)message, "manual") == 0) || (strcmp((char *)message, "heat") == 0)) {
-                ems_setThermostatMode(1, hc);
-            } else if (strcmp((char *)message, "night") == 0 || strcmp((char *)message, "off") == 0) {
-                ems_setThermostatMode(0, hc);
+        return; // no match for generic commands
+    }
+
+    // check for shower commands
+    if (strcmp(topic, TOPIC_SHOWER_DATA) == 0) {
+        StaticJsonDocument<100> doc;
+        JsonObject              root  = doc.to<JsonObject>();          // create empty object
+        DeserializationError    error = deserializeJson(doc, message); // Deserialize the JSON document
+        if (error) {
+            myDebug_P(PSTR("[MQTT] Invalid command from topic %s, payload %s, error %s"), topic, message, error.c_str());
+            return;
+        }
+
+        // assumes payload is "1" or "0"
+        const char * shower_alert = doc[TOPIC_SHOWER_ALERT];
+        if (shower_alert) {
+            if ((shower_alert[0] - MYESP_MQTT_PAYLOAD_OFF) != EMSESP_Settings.shower_alert) {
+                EMSESP_Settings.shower_alert = shower_alert[0] - MYESP_MQTT_PAYLOAD_OFF;
+                myDebug_P(PSTR("Shower alert has been set to %s"), EMSESP_Settings.shower_alert ? "enabled" : "disabled");
             }
-            return;
         }
 
-        // set night temp value
-        hc = _hasHCspecified(TOPIC_THERMOSTAT_CMD_NIGHTTEMP, topic);
-        if (hc) {
-            float f     = strtof((char *)message, 0);
-            char  s[10] = {0};
-            myDebug_P(PSTR("MQTT topic: new thermostat HC%d night temperature value %s"), hc, _float_to_char(s, f));
-            ems_setThermostatTemp(f, hc, 1); // night
-            return;
-        }
-
-        // set daytemp value
-        hc = _hasHCspecified(TOPIC_THERMOSTAT_CMD_DAYTEMP, topic);
-        if (hc) {
-            float f     = strtof((char *)message, 0);
-            char  s[10] = {0};
-            myDebug_P(PSTR("MQTT topic: new thermostat HC%d day temperature value %s"), hc, _float_to_char(s, f));
-            ems_setThermostatTemp(f, hc, 2); // day
-            return;
-        }
-
-        // set holiday value
-        hc = _hasHCspecified(TOPIC_THERMOSTAT_CMD_HOLIDAYTEMP, topic);
-        if (hc) {
-            float f     = strtof((char *)message, 0);
-            char  s[10] = {0};
-            myDebug_P(PSTR("MQTT topic: new thermostat HC%d holiday temperature value %s"), hc, _float_to_char(s, f));
-            ems_setThermostatTemp(f, hc, 3); // holiday
-            return;
-        }
-
-        // wwActivated
-        if (strcmp(topic, TOPIC_BOILER_CMD_WWACTIVATED) == 0) {
-            if ((message[0] == '1' || strcmp(message, "on") == 0) || (strcmp(message, "auto") == 0)) {
-                ems_setWarmWaterActivated(true);
-            } else if (message[0] == '0' || strcmp(message, "off") == 0) {
-                ems_setWarmWaterActivated(false);
+        // assumes payload is "1" or "0"
+        const char * shower_timer = doc[TOPIC_SHOWER_TIMER];
+        if (shower_timer) {
+            if ((shower_timer[0] - MYESP_MQTT_PAYLOAD_OFF) != EMSESP_Settings.shower_timer) {
+                EMSESP_Settings.shower_timer = shower_timer[0] - MYESP_MQTT_PAYLOAD_OFF;
+                myDebug_P(PSTR("Shower timer has been set to %s"), EMSESP_Settings.shower_timer ? "enabled" : "disabled");
             }
-            return;
         }
 
-        // boiler wwtemp changes
-        if (strcmp(topic, TOPIC_BOILER_CMD_WWTEMP) == 0) {
-            uint8_t t = atoi((char *)message);
-            myDebug_P(PSTR("MQTT topic: boiler warm water temperature value %d"), t);
-            ems_setWarmWaterTemp(t);
-            publishValues(true); // publish back immediately, can't remember why I do this?!
+        return;
+    }
+
+    // check for boiler commands
+    if (strcmp(topic, TOPIC_BOILER_CMD) == 0) {
+        // convert JSON and get the command
+        StaticJsonDocument<100> doc;
+        JsonObject              root  = doc.to<JsonObject>();          // create empty object
+        DeserializationError    error = deserializeJson(doc, message); // Deserialize the JSON document
+        if (error) {
+            myDebug_P(PSTR("[MQTT] Invalid command from topic %s, payload %s, error %s"), topic, message, error.c_str());
             return;
         }
+        const char * command = doc["cmd"];
 
         // boiler ww comfort setting
-        if (strcmp(topic, TOPIC_BOILER_CMD_COMFORT) == 0) {
-            myDebug_P(PSTR("MQTT topic: boiler warm water comfort value is %s"), message);
-            if (strcmp((char *)message, "hot") == 0) {
+        if (strcmp(command, TOPIC_BOILER_CMD_COMFORT) == 0) {
+            const char * data = doc["data"];
+            if (strcmp((char *)data, "hot") == 0) {
                 ems_setWarmWaterModeComfort(1);
-            } else if (strcmp((char *)message, "comfort") == 0) {
+            } else if (strcmp((char *)data, "comfort") == 0) {
                 ems_setWarmWaterModeComfort(2);
-            } else if (strcmp((char *)message, "intelligent") == 0) {
+            } else if (strcmp((char *)data, "intelligent") == 0) {
                 ems_setWarmWaterModeComfort(3);
             }
             return;
         }
 
         // boiler flowtemp setting
-        if (strcmp(topic, TOPIC_BOILER_CMD_FLOWTEMP) == 0) {
-            uint8_t t = atoi((char *)message);
-            myDebug_P(PSTR("MQTT topic: boiler flowtemp value %d"), t);
+        if (strcmp(command, TOPIC_BOILER_CMD_FLOWTEMP) == 0) {
+            uint8_t t = doc["data"];
             ems_setFlowTemp(t);
             return;
         }
 
-        // shower timer
-        if (strcmp(topic, TOPIC_SHOWER_TIMER) == 0) {
-            if (message[0] == '1') {
-                EMSESP_Settings.shower_timer = true;
-            } else if (message[0] == '0') {
-                EMSESP_Settings.shower_timer = false;
-            }
-            set_showerTimer();
+        return; // unknown boiler command
+    }
+
+    // check for unique boiler commands
+
+    // wwActivated
+    if (strcmp(topic, TOPIC_BOILER_CMD_WWACTIVATED) == 0) {
+        if ((message[0] == MYESP_MQTT_PAYLOAD_ON || strcmp(message, "on") == 0) || (strcmp(message, "auto") == 0)) {
+            ems_setWarmWaterActivated(true);
+        } else if (message[0] == MYESP_MQTT_PAYLOAD_OFF || strcmp(message, "off") == 0) {
+            ems_setWarmWaterActivated(false);
+        }
+        return;
+    }
+
+    // boiler wwtemp changes
+    if (strcmp(topic, TOPIC_BOILER_CMD_WWTEMP) == 0) {
+        uint8_t t = atoi((char *)message);
+        ems_setWarmWaterTemp(t);
+        publishValues(true);
+        return;
+    }
+
+    uint8_t hc;
+    // thermostat temp changes
+    hc = _hasHCspecified(TOPIC_THERMOSTAT_CMD_TEMP, topic);
+    if (hc) {
+        float f = strtof((char *)message, 0);
+        ems_setThermostatTemp(f, hc);
+        publishValues(true); // publish back immediately
+        return;
+    }
+
+    // thermostat mode changes
+    hc = _hasHCspecified(TOPIC_THERMOSTAT_CMD_MODE, topic);
+    if (hc) {
+        if (strncmp(message, "auto", 4) == 0) {
+            ems_setThermostatMode(2, hc);
+        } else if ((strncmp(message, "day", 4) == 0) || (strncmp(message, "manual", 6) == 0) || (strncmp(message, "heat", 4) == 0)) {
+            ems_setThermostatMode(1, hc);
+        } else if ((strncmp(message, "night", 5) == 0) || (strncmp(message, "off", 3) == 0)) {
+            ems_setThermostatMode(0, hc);
+        }
+        return;
+    }
+
+    // check for generic thermostat commands
+    if (strcmp(topic, TOPIC_THERMOSTAT_CMD) == 0) {
+        // convert JSON and get the command
+        StaticJsonDocument<100> doc;
+        JsonObject              root  = doc.to<JsonObject>();          // create empty object
+        DeserializationError    error = deserializeJson(doc, message); // Deserialize the JSON document
+        if (error) {
+            myDebug_P(PSTR("[MQTT] Invalid command from topic %s, payload %s, error %s"), topic, message, error.c_str());
+            return;
+        }
+        const char * command = doc["cmd"];
+
+        uint8_t hc;
+        // thermostat temp changes
+        hc = _hasHCspecified(TOPIC_THERMOSTAT_CMD_TEMP, command);
+        if (hc) {
+            float f = doc["data"];
+            ems_setThermostatTemp(f, hc);
+            publishValues(true); // publish back immediately
             return;
         }
 
-        // shower alert
-        if (strcmp(topic, TOPIC_SHOWER_ALERT) == 0) {
-            if (message[0] == '1') {
-                EMSESP_Settings.shower_alert = true;
-            } else if (message[0] == '0') {
-                EMSESP_Settings.shower_alert = false;
+        // thermostat mode changes
+        hc = _hasHCspecified(TOPIC_THERMOSTAT_CMD_MODE, command);
+        if (hc) {
+            const char * data = doc["data"];
+            if (strcmp(data, "auto") == 0) {
+                ems_setThermostatMode(2, hc);
+            } else if ((strcmp(data, "day") == 0) || (strcmp(data, "manual") == 0) || (strcmp(data, "heat") == 0)) {
+                ems_setThermostatMode(1, hc);
+            } else if ((strcmp(data, "night") == 0) || (strcmp(data, "off") == 0)) {
+                ems_setThermostatMode(0, hc);
             }
-            set_showerAlert();
             return;
         }
 
-        // shower cold shot
-        if (strcmp(topic, TOPIC_SHOWER_COLDSHOT) == 0) {
-            _showerColdShotStart();
+        // set night temp value
+        hc = _hasHCspecified(TOPIC_THERMOSTAT_CMD_NIGHTTEMP, command);
+        if (hc) {
+            float f = doc["data"];
+            ems_setThermostatTemp(f, hc, 1); // night
+            return;
+        }
+
+        // set daytemp value
+        hc = _hasHCspecified(TOPIC_THERMOSTAT_CMD_DAYTEMP, command);
+        if (hc) {
+            float f = doc["data"];
+            ems_setThermostatTemp(f, hc, 2); // day
+            return;
+        }
+
+        // set holiday value
+        hc = _hasHCspecified(TOPIC_THERMOSTAT_CMD_HOLIDAYTEMP, command);
+        if (hc) {
+            float f = doc["data"];
+            ems_setThermostatTemp(f, hc, 3); // holiday
             return;
         }
     }
 }
+
 
 // Init callback, which is used to set functions and call methods after a wifi connection has been established
 void WIFICallback() {
@@ -1967,11 +1815,11 @@ void WebCallback(JsonObject root) {
         }
 
         // Render Termostat Mode, if we have a mode
-        uint8_t thermoMode = _getThermostatMode(hc_num); // 0xFF=unknown, 0=low, 1=manual, 2=auto, 3=night, 4=day
+        uint8_t thermoMode = _getThermostatMode(hc_num); // 0xFF=unknown, 0=off, 1=manual, 2=auto, 3=night, 4=day
         if (thermoMode == 0) {
-            thermostat["tmode"] = "low";
+            thermostat["tmode"] = "off";
         } else if (thermoMode == 1) {
-            thermostat["tmode"] = "manual";
+            thermostat["tmode"] = "heat";
         } else if (thermoMode == 2) {
             thermostat["tmode"] = "auto";
         } else if (thermoMode == 3) {
@@ -2131,16 +1979,10 @@ void showerCheck() {
                 if ((EMSESP_Shower.timerPause - EMSESP_Shower.timerStart) > SHOWER_OFFSET_TIME) {
                     EMSESP_Shower.duration = (EMSESP_Shower.timerPause - EMSESP_Shower.timerStart - SHOWER_OFFSET_TIME);
                     if (EMSESP_Shower.duration > SHOWER_MIN_DURATION) {
-                        char s[50]      = {0};
-                        char buffer[16] = {0};
-                        strlcpy(s, itoa((uint8_t)((EMSESP_Shower.duration / (1000 * 60)) % 60), buffer, 10), sizeof(s));
-                        strlcat(s, " minutes and ", sizeof(s));
-                        strlcat(s, itoa((uint8_t)((EMSESP_Shower.duration / 1000) % 60), buffer, 10), sizeof(s));
-                        strlcat(s, " seconds", sizeof(s));
                         if (ems_getLogging() != EMS_SYS_LOGGING_NONE) {
-                            myDebug_P(PSTR("[Shower] finished with duration %s"), s);
+                            myDebug_P(PSTR("[Shower] finished with duration %d"), EMSESP_Shower.duration);
                         }
-                        myESP.mqttPublish(TOPIC_SHOWERTIME, s); // publish to MQTT
+                        do_publishShowerData(); // publish to MQTT
                     }
                 }
 

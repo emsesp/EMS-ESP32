@@ -87,10 +87,10 @@
 #define EMS_ID_GATEWAY 0x48 // KM200 Web Gateway
 
 // Product IDs
-#define EMS_PRODUCTID_SM10 73      // SM10 solar module
-#define EMS_PRODUCTID_SM50 162     // SM50 solar module
-#define EMS_PRODUCTID_SM100 163    // SM100 solar module
-#define EMS_PRODUCTID_ISM1 101     // Junkers ISM1 solar module
+#define EMS_PRODUCTID_SM10 73   // SM10 solar module
+#define EMS_PRODUCTID_SM50 162  // SM50 solar module
+#define EMS_PRODUCTID_SM100 163 // SM100 solar module
+#define EMS_PRODUCTID_ISM1 101  // Junkers ISM1 solar module
 
 #define EMS_MIN_TELEGRAM_LENGTH 6  // minimal length for a validation telegram, including CRC
 #define EMS_MAX_TELEGRAM_LENGTH 32 // max length of a telegram, including CRC, for Rx and Tx.
@@ -111,7 +111,7 @@
 
 // trigger settings to determine if hot tap water or the heating is active
 #define EMS_BOILER_BURNPOWER_TAPWATER 100
-#define EMS_BOILER_SELFLOWTEMP_HEATING 70
+#define EMS_BOILER_SELFLOWTEMP_HEATING 30 // was 70, changed to 30 for https://github.com/proddy/EMS-ESP/issues/193
 
 // define maximum setable tapwater temperature
 #define EMS_BOILER_TAPWATER_TEMPERATURE_MAX 60
@@ -502,7 +502,6 @@ void             ems_discoverModels();
 bool             ems_getTxCapable();
 uint32_t         ems_getPollFrequency();
 bool             ems_getTxDisabled();
-
 
 // private functions
 uint8_t _crcCalculator(uint8_t * data, uint8_t len);

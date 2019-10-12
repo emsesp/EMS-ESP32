@@ -8,14 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.9.2 beta]
 
 #### Important! This build has breaking changes:
- - the Thermostat MQTT topics are all always suffixed with the heat controller number, e.g. `thermostat_data1`
- - the web builder has been upgraded to use Gulp 4. Remove `tools/webfilesbuilder/node_modules` and re-install the libraries using `npm i` from within the `tools/webfilesbuilder` folder.
+ - MQTT topics have changed. Use `mqttlog` to see the names of the subscriptions and the format of the payload data
+ - the web builder has been upgraded to use Gulp 4. Remove `tools/webfilesbuilder/node_modules` and re-install the libraries using `npm ci` from within the `tools/webfilesbuilder` folder.
 
 ### Added
 
 - Handling of MM100 Status Messages (thanks @kstaniek)
 - Retrieve/display mode for Junkers FW100/120 thermostats (thanks @Neonox31)
-- Added error fall-back for MQTT publishes that fail
+- Added sending of Mixer Module data via MQTT (thanks @peclik)
+- Reporting of MQTT publish and subscribe errors
 
 ### Fixed
 
@@ -27,11 +28,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - External dallas sensor values sent in MQTT payload as float values and not strings
 - All MQTT topics for the Thermostat have the Heating Circuit appended (e.g. `thermostat_data1`). This includes the commands.
 - Shower timer and shower alert and not MQTT published at boot up
+- Heating Active logic change to use Selected Flow Temp of min 30 instead of 70 (https://github.com/proddy/EMS-ESP/issues/193)
 
 ### Removed
 
 - Removed telnet command `shower timer` and `shower alert` to toggle the switches
-- Removed the heatingcircuit key/value from the MQTT Thermostat topic payload
 
 ## [1.9.1] 2019-10-05
 
@@ -40,7 +41,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for multiple Heating Circuits - https://github.com/proddy/EMS-ESP/issues/162
 - new `mqttlog` command also shows which MQTT topics it is subscribed too
 - Optimized event log loading in web and added integrity checks on all config and log files during boot
-- `autodetect quick` 
+- `autodetect quick` for detecting known devices from our database list
 - `log_events` option, now optional to save the log events to SPIFFS
 
 ### Fixed

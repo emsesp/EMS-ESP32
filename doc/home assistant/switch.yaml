@@ -1,20 +1,20 @@
+# EMS-ESP
 - platform: mqtt
   name: "Shower Timer"
-  state_topic: "home/ems-esp/shower_timer"
-  command_topic: "home/ems-esp/shower_timer"
-  payload_on: "1"
-  payload_off: "0"
-  optimistic: false
-  qos: 1
-  retain: false
+  state_topic: "home/ems-esp/shower_data"
+  value_template: "{{ value_json.timer }}"
+  command_topic: "home/ems-esp/shower_data"
+  payload_on: '{"timer":"1"}'
+  payload_off: '{"timer":"0"}'
+  state_on: "1"
+  state_off: "0"
 
 - platform: mqtt
   name: "Long Shower Alert"
-  state_topic: "home/ems-esp/shower_alert"
-  command_topic: "home/ems-esp/shower_alert"
-  payload_on: "1"
-  payload_off: "0"
-  optimistic: false
-  qos: 1
-  retain: false
-
+  state_topic: "home/ems-esp/shower_data"
+  value_template: "{{ value_json.alert }}"
+  command_topic: "home/ems-esp/shower_data"
+  payload_on: '{"alert":"1"}'
+  payload_off: '{"alert":"0"}'
+  state_on: "1"
+  state_off: "0"
