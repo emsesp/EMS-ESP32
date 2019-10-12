@@ -9,7 +9,7 @@
 #ifndef MyESP_h
 #define MyESP_h
 
-#define MYESP_VERSION "1.2.9"
+#define MYESP_VERSION "1.2.10"
 
 #include <ArduinoJson.h>
 #include <ArduinoOTA.h>
@@ -86,14 +86,18 @@ extern struct rst_info resetInfo;
 #define MQTT_MAX_TOPIC_SIZE 50           // max length of MQTT topic
 #define MQTT_MAX_PAYLOAD_SIZE 700        // max size of a JSON object. See https://arduinojson.org/v6/assistant/
 #define MQTT_MAX_PAYLOAD_SIZE_LARGE 2000 // max size of a large JSON object, like for sending MQTT log
-#define MYESP_JSON_MAXSIZE 2000          // for large Dynamic json files
-#define MYESP_MQTTLOG_MAX 60             // max number of log entries for MQTT publishes and subscribes
-#define MYESP_JSON_LOG_MAXSIZE 300       // max size of an JSON log entry
 
 // Internal MQTT events
 #define MQTT_CONNECT_EVENT 0
 #define MQTT_DISCONNECT_EVENT 1
 #define MQTT_MESSAGE_EVENT 2
+
+#define MYESP_JSON_MAXSIZE 2000    // for large Dynamic json files
+#define MYESP_MQTTLOG_MAX 60       // max number of log entries for MQTT publishes and subscribes
+#define MYESP_JSON_LOG_MAXSIZE 300 // max size of an JSON log entry
+
+#define MYESP_MQTT_PAYLOAD_ON '1'  // for MQTT switch on
+#define MYESP_MQTT_PAYLOAD_OFF '0' // for MQTT switch off
 
 // Telnet
 #define TELNET_SERIAL_BAUD 115200
@@ -268,9 +272,9 @@ class MyESP {
 
     // mqtt
     bool isMQTTConnected();
-    void mqttSubscribe(const char * topic);
+    bool mqttSubscribe(const char * topic);
     void mqttUnsubscribe(const char * topic);
-    void mqttPublish(const char * topic, const char * payload);
+    bool mqttPublish(const char * topic, const char * payload);
     void setMQTT(mqtt_callback_f callback);
 
     // OTA

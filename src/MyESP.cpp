@@ -365,7 +365,8 @@ void MyESP::_mqttOnMessage(char * topic, char * payload, size_t len) {
 }
 
 // MQTT subscribe
-void MyESP::mqttSubscribe(const char * topic) {
+// returns false if failed
+bool MyESP::mqttSubscribe(const char * topic) {
     if (mqttClient.connected() && (strlen(topic) > 0)) {
         char * topic_s = _mqttTopic(topic);
 
@@ -375,8 +376,10 @@ void MyESP::mqttSubscribe(const char * topic) {
         if (packet_id) {
             // add to mqtt log
             _addMQTTLog(topic_s, "", 2); // type of 2 means Subscribe. Has an empty payload for now
+            return true;
         } else {
             myDebug_P(PSTR("[MQTT] Error subscribing to %s, error %d"), _mqttTopic(topic), packet_id);
+            return false;
         }
     }
 }
@@ -390,15 +393,18 @@ void MyESP::mqttUnsubscribe(const char * topic) {
 }
 
 // MQTT Publish
-void MyESP::mqttPublish(const char * topic, const char * payload) {
+// returns true if all good
+bool MyESP::mqttPublish(const char * topic, const char * payload) {
     if (mqttClient.connected() && (strlen(topic) > 0)) {
         // myDebug_P(PSTR("[MQTT] Sending publish to %s with payload %s"), _mqttTopic(topic), payload); // for debugging
         uint16_t packet_id = mqttClient.publish(_mqttTopic(topic), _mqtt_qos, _mqtt_retain, payload);
 
         if (packet_id) {
             _addMQTTLog(topic, payload, 1); // add to the log, using type of 1 for Publish
+            return true;
         } else {
             myDebug_P(PSTR("[MQTT] Error publishing to %s with payload %s, error %d"), _mqttTopic(topic), payload, packet_id);
+            return false;
         }
     }
 }
@@ -827,10 +833,6 @@ bool MyESP::_changeSetting(uint8_t wc, const char * setting, const char * value)
         }
     }
 
-    if (restart) {
-        myDebug_P(PSTR("Please 'restart' to apply new settings."));
-    }
-
     bool ok = false;
 
     // if we were able to recognize the set command, continue
@@ -852,6 +854,10 @@ bool MyESP::_changeSetting(uint8_t wc, const char * setting, const char * value)
     // and see if we need to also save for custom config
     if (save_custom_config) {
         ok = _fs_createCustomConfig();
+    }
+
+    if (restart) {
+        myDebug_P(PSTR("Please 'restart' to apply new settings."));
     }
 
     return ok;
@@ -1800,7 +1806,7 @@ bool MyESP::fs_saveCustomConfig(JsonObject root) {
                 _writeEvent("INFO", "system", "Custom config stored in the SPIFFS", "");
             }
 
-            myDebug_P(PSTR("[FS] custom config saved"));
+            // myDebug_P(PSTR("[FS] custom config saved"));
             ok = true;
         }
     }
@@ -1835,7 +1841,7 @@ bool MyESP::fs_saveConfig(JsonObject root) {
             if (_general_log_events) {
                 _writeEvent("INFO", "system", "System config stored in the SPIFFS", "");
             }
-            myDebug_P(PSTR("[FS] system config saved"));
+            // myDebug_P(PSTR("[FS] system config saved"));
             ok = true;
         }
 
