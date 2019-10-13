@@ -1529,6 +1529,9 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
         // for receiving shower_Timer and shower_alert switches
         myESP.mqttSubscribe(TOPIC_SHOWER_DATA);
 
+        // send Shower Alert and Timer switch settings
+        do_publishShowerData();
+
         return;
     }
 
@@ -2056,7 +2059,6 @@ void loop() {
     if (ems_getEmsRefreshed() && (scanThermostat_count == 0)) {
         publishValues(false);
         do_publishSensorValues();
-        do_publishShowerData();
         ems_setEmsRefreshed(false); // reset
     }
 

@@ -396,14 +396,14 @@ void MyESP::mqttUnsubscribe(const char * topic) {
 // returns true if all good
 bool MyESP::mqttPublish(const char * topic, const char * payload) {
     if (mqttClient.connected() && (strlen(topic) > 0)) {
-        // myDebug_P(PSTR("[MQTT] Sending publish to %s with payload %s"), _mqttTopic(topic), payload); // for debugging
+        //myDebug_P(PSTR("[MQTT] Sending publish to %s with payload %s"), _mqttTopic(topic), payload); // for debugging
         uint16_t packet_id = mqttClient.publish(_mqttTopic(topic), _mqtt_qos, _mqtt_retain, payload);
 
         if (packet_id) {
             _addMQTTLog(topic, payload, 1); // add to the log, using type of 1 for Publish
             return true;
         } else {
-            myDebug_P(PSTR("[MQTT] Error publishing to %s with payload %s, error %d"), _mqttTopic(topic), payload, packet_id);
+            myDebug_P(PSTR("[MQTT] Error publishing to %s with payload %s [error %d]"), _mqttTopic(topic), payload, packet_id);
             return false;
         }
     }
