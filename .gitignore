@@ -23,9 +23,6 @@ src/websrc/temp
 node_modules/
 jspm_packages/
 .npm
-package-lock.json
-tools/webfilesbuilder/package-lock.json
-tools/wsemulator/package-lock.json
 
 # Output of 'npm pack'
 *.tgz
