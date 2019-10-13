@@ -7,9 +7,9 @@
  */
 
 #include "ems.h"
-#include "ems_utils.h"
 #include "MyESP.h"
 #include "ems_devices.h"
+#include "ems_utils.h"
 #include "emsuart.h"
 #include <CircularBuffer.h> // https://github.com/rlogiacco/CircularBuffer
 
@@ -1001,7 +1001,7 @@ void _printMessage(_EMS_RxTelegram * EMS_RxTelegram) {
         strlcpy(color_s, COLOR_MAGENTA, sizeof(color_s));
     }
 
-    if (length != 0) {
+    if (length) {
         // type
         strlcat(output_str, ", type 0x", sizeof(output_str));
 
@@ -1691,7 +1691,7 @@ void _process_SM10Monitor(_EMS_RxTelegram * EMS_RxTelegram) {
  */
 void _process_SM100Monitor(_EMS_RxTelegram * EMS_RxTelegram) {
     // only process the complete telegram, not partial
-    if (EMS_RxTelegram->offset != 0) {
+    if (EMS_RxTelegram->offset) {
         return;
     }
 
@@ -1802,7 +1802,7 @@ void _process_ISM1Set(_EMS_RxTelegram * EMS_RxTelegram) {
  */
 void _process_SetPoints(_EMS_RxTelegram * EMS_RxTelegram) {
     if (EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_VERBOSE) {
-        if (EMS_RxTelegram->data_length != 0) {
+        if (EMS_RxTelegram->data_length) {
             uint8_t setpoint = EMS_RxTelegram->data[0]; // flow temp
             //uint8_t ww_power = data[2]; // power in %
 

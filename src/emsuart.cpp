@@ -178,7 +178,7 @@ void ICACHE_FLASH_ATTR emsuart_tx_brk() {
     uint32_t tmp;
 
     // must make sure Tx FIFO is empty
-    while (((USS(EMSUART_UART) >> USTXC) & 0xFF) != 0)
+    while (((USS(EMSUART_UART) >> USTXC) & 0xFF))
         ;
 
     tmp = ((1 << UCRXRST) | (1 << UCTXRST)); // bit mask
@@ -227,7 +227,7 @@ _EMS_TX_STATUS ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
                 USF(EMSUART_UART) = buf[i];
 
                 // just to be safe wait for tx fifo empty (needed?)
-                while (((USS(EMSUART_UART) >> USTXC) & 0xff) != 0)
+                while (((USS(EMSUART_UART) >> USTXC) & 0xff))
                     ;
 
                 // wait until bits are sent on wire

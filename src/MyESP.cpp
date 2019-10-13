@@ -595,7 +595,7 @@ void MyESP::_telnetConnected() {
     // show crash dump if just restarted after a fatal crash
     uint32_t crash_time;
     EEPROMr.get(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_CRASH_TIME, crash_time);
-    if ((crash_time != 0) && (crash_time != 0xFFFFFFFF)) {
+    if ((crash_time) && (crash_time != 0xFFFFFFFF)) {
         myDebug_P(PSTR("[SYSTEM] There is stack data available from the last system crash. Use 'crash dump' to view and 'crash clear' to reset"));
     }
 #endif

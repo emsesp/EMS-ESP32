@@ -462,7 +462,7 @@ void showInfo() {
     }
 
     // Dallas external temp sensors
-    if (EMSESP_Settings.dallas_sensors != 0) {
+    if (EMSESP_Settings.dallas_sensors) {
         myDebug_P(PSTR("")); // newline
         char buffer[128] = {0};
         char valuestr[8] = {0}; // for formatting temp
@@ -678,8 +678,8 @@ void publishValues(bool force) {
 
                 // hc{1-4}
                 char hc[10];
-                strncpy(hc, THERMOSTAT_HC, sizeof(hc));
-                strncat(hc, _int_to_char(s, thermostat->hc), sizeof(hc));
+                strlcpy(hc, THERMOSTAT_HC, sizeof(hc));
+                strlcat(hc, _int_to_char(s, thermostat->hc), sizeof(hc));
                 JsonObject dataThermostat = rootThermostat.createNestedObject(hc);
 
                 // different logic depending on thermostat types
@@ -909,7 +909,7 @@ char * _readWord() {
 
 // publish external dallas sensor temperature values to MQTT
 void do_publishSensorValues() {
-    if ((EMSESP_Settings.dallas_sensors != 0) && (EMSESP_Settings.publish_time != 0)) {
+    if ((EMSESP_Settings.dallas_sensors) && (EMSESP_Settings.publish_time)) {
         publishSensorValues();
     }
 }
@@ -917,7 +917,7 @@ void do_publishSensorValues() {
 // call PublishValues without forcing, so using CRC to see if we really need to publish
 void do_publishValues() {
     // don't publish if we're not connected to the EMS bus
-    if ((ems_getBusConnected()) && myESP.isMQTTConnected() && EMSESP_Settings.publish_time != 0) {
+    if ((ems_getBusConnected()) && myESP.isMQTTConnected() && EMSESP_Settings.publish_time) {
         publishValues(true); // force publish
     }
 }
@@ -1542,7 +1542,6 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
     if (strcmp(topic, TOPIC_GENERIC_CMD) == 0) {
         // convert JSON and get the command
         StaticJsonDocument<100> doc;
-        JsonObject              root  = doc.to<JsonObject>();          // create empty object
         DeserializationError    error = deserializeJson(doc, message); // Deserialize the JSON document
         if (error) {
             myDebug_P(PSTR("[MQTT] Invalid command from topic %s, payload %s, error %s"), topic, message, error.c_str());
@@ -1562,7 +1561,6 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
     // check for shower commands
     if (strcmp(topic, TOPIC_SHOWER_DATA) == 0) {
         StaticJsonDocument<100> doc;
-        JsonObject              root  = doc.to<JsonObject>();          // create empty object
         DeserializationError    error = deserializeJson(doc, message); // Deserialize the JSON document
         if (error) {
             myDebug_P(PSTR("[MQTT] Invalid command from topic %s, payload %s, error %s"), topic, message, error.c_str());
@@ -1594,7 +1592,6 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
     if (strcmp(topic, TOPIC_BOILER_CMD) == 0) {
         // convert JSON and get the command
         StaticJsonDocument<100> doc;
-        JsonObject              root  = doc.to<JsonObject>();          // create empty object
         DeserializationError    error = deserializeJson(doc, message); // Deserialize the JSON document
         if (error) {
             myDebug_P(PSTR("[MQTT] Invalid command from topic %s, payload %s, error %s"), topic, message, error.c_str());
@@ -1672,37 +1669,12 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
     if (strcmp(topic, TOPIC_THERMOSTAT_CMD) == 0) {
         // convert JSON and get the command
         StaticJsonDocument<100> doc;
-        JsonObject              root  = doc.to<JsonObject>();          // create empty object
         DeserializationError    error = deserializeJson(doc, message); // Deserialize the JSON document
         if (error) {
             myDebug_P(PSTR("[MQTT] Invalid command from topic %s, payload %s, error %s"), topic, message, error.c_str());
             return;
         }
         const char * command = doc["cmd"];
-
-        uint8_t hc;
-        // thermostat temp changes
-        hc = _hasHCspecified(TOPIC_THERMOSTAT_CMD_TEMP, command);
-        if (hc) {
-            float f = doc["data"];
-            ems_setThermostatTemp(f, hc);
-            publishValues(true); // publish back immediately
-            return;
-        }
-
-        // thermostat mode changes
-        hc = _hasHCspecified(TOPIC_THERMOSTAT_CMD_MODE, command);
-        if (hc) {
-            const char * data = doc["data"];
-            if (strcmp(data, "auto") == 0) {
-                ems_setThermostatMode(2, hc);
-            } else if ((strcmp(data, "day") == 0) || (strcmp(data, "manual") == 0) || (strcmp(data, "heat") == 0)) {
-                ems_setThermostatMode(1, hc);
-            } else if ((strcmp(data, "night") == 0) || (strcmp(data, "off") == 0)) {
-                ems_setThermostatMode(0, hc);
-            }
-            return;
-        }
 
         // set night temp value
         hc = _hasHCspecified(TOPIC_THERMOSTAT_CMD_NIGHTTEMP, command);
@@ -1968,12 +1940,12 @@ void showerCheck() {
             }
         } else { // hot water is off
             // if it just turned off, record the time as it could be a short pause
-            if ((EMSESP_Shower.timerStart != 0) && (EMSESP_Shower.timerPause == 0)) {
+            if ((EMSESP_Shower.timerStart) && (EMSESP_Shower.timerPause == 0)) {
                 EMSESP_Shower.timerPause = EMSESP_Settings.timestamp;
             }
 
             // if shower has been off for longer than the wait time
-            if ((EMSESP_Shower.timerPause != 0) && ((EMSESP_Settings.timestamp - EMSESP_Shower.timerPause) > SHOWER_PAUSE_TIME)) {
+            if ((EMSESP_Shower.timerPause) && ((EMSESP_Settings.timestamp - EMSESP_Shower.timerPause) > SHOWER_PAUSE_TIME)) {
                 // it is over the wait period, so assume that the shower has finished and calculate the total time and publish
                 // because its unsigned long, can't have negative so check if length is less than OFFSET_TIME
                 if ((EMSESP_Shower.timerPause - EMSESP_Shower.timerStart) > SHOWER_OFFSET_TIME) {
@@ -2047,7 +2019,7 @@ void setup() {
     }
 
     // set timers for MQTT publish
-    if (EMSESP_Settings.publish_time != 0) {
+    if (EMSESP_Settings.publish_time) {
         publishValuesTimer.attach(EMSESP_Settings.publish_time, do_publishValues);             // post MQTT EMS values
         publishSensorValuesTimer.attach(EMSESP_Settings.publish_time, do_publishSensorValues); // post MQTT dallas sensor values
     }
@@ -2076,7 +2048,7 @@ void loop() {
 
     // check Dallas sensors, using same schedule as publish_time (default 2 mins)
     // these values are published to MQTT separately via the timer publishSensorValuesTimer
-    if (EMSESP_Settings.dallas_sensors != 0) {
+    if (EMSESP_Settings.dallas_sensors) {
         ds18.loop();
     }
 
@@ -2085,6 +2057,7 @@ void loop() {
     if (ems_getEmsRefreshed() && (scanThermostat_count == 0)) {
         publishValues(false);
         do_publishSensorValues();
+        do_publishShowerData();
         ems_setEmsRefreshed(false); // reset
     }
 
@@ -2093,7 +2066,7 @@ void loop() {
         showerCheck();
     }
 
-    if (EMSESP_DELAY != 0) {
+    if (EMSESP_DELAY) {
         delay(EMSESP_DELAY); // some time to WiFi and everything else to catch up, and prevent overheating
     }
 }
