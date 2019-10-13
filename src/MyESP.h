@@ -80,8 +80,8 @@ extern struct rst_info resetInfo;
 #define MQTT_WILL_OFFLINE_PAYLOAD "offline" // for last will & testament payload
 #define MQTT_BASE_DEFAULT "home"            // default MQTT prefix to topics
 #define MQTT_RETAIN false
-#define MQTT_KEEPALIVE 60 // 1 minute
-#define MQTT_QOS 1
+#define MQTT_KEEPALIVE 60                // default keepalive 1 minute
+#define MQTT_QOS 1                       // default qos
 #define MQTT_WILL_TOPIC "status"         // for last will & testament topic name
 #define MQTT_MAX_TOPIC_SIZE 50           // max length of MQTT topic
 #define MQTT_MAX_PAYLOAD_SIZE 700        // max size of a JSON object. See https://arduinojson.org/v6/assistant/
@@ -293,6 +293,7 @@ class MyESP {
     bool fs_saveCustomConfig(JsonObject root);
     bool fs_setSettingValue(char ** setting, const char * value, const char * value_default);
     bool fs_setSettingValue(uint16_t * setting, const char * value, uint16_t value_default);
+    bool fs_setSettingValue(uint8_t * setting, const char * value, uint8_t value_default);
     bool fs_setSettingValue(bool * setting, const char * value, bool value_default);
 
     // Web
@@ -340,7 +341,7 @@ class MyESP {
     uint16_t        _mqtt_port;
     char *          _mqtt_base;
     bool            _mqtt_enabled;
-    uint32_t        _mqtt_keepalive;
+    uint16_t        _mqtt_keepalive;
     uint8_t         _mqtt_qos;
     bool            _mqtt_retain;
     char *          _mqtt_will_topic;

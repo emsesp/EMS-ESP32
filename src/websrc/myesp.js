@@ -25,6 +25,8 @@ var config = {
         "enabled": false,
         "ip": "",
         "port": 1883,
+        "qos": 1,
+        "keepalive": 60,
         "base": "",
         "user": "",
         "password": "",
@@ -173,6 +175,8 @@ function savemqtt() {
 
     config.mqtt.ip = document.getElementById("mqttip").value;
     config.mqtt.port = parseInt(document.getElementById("mqttport").value);
+    config.mqtt.qos = parseInt(document.getElementById("mqttqos").value);
+    config.mqtt.keepalive = parseInt(document.getElementById("mqttkeepalive").value);
     config.mqtt.base = document.getElementById("mqttbase").value;
     config.mqtt.user = document.getElementById("mqttuser").value;
     config.mqtt.password = document.getElementById("mqttpwd").value;
@@ -323,6 +327,8 @@ function listmqtt() {
 
     document.getElementById("mqttip").value = config.mqtt.ip;
     document.getElementById("mqttport").value = config.mqtt.port;
+    document.getElementById("mqttqos").value = config.mqtt.qos;
+    document.getElementById("mqttkeepalive").value = config.mqtt.keepalive;
     document.getElementById("mqttbase").value = config.mqtt.base;
     document.getElementById("mqttuser").value = config.mqtt.user;
     document.getElementById("mqttpwd").value = config.mqtt.password;

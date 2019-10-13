@@ -677,8 +677,10 @@ void MyESP::_printSetCommands() {
     myDebug_P(PSTR("  set mqtt_enabled <on | off>"));
     myDebug_P(PSTR("  set <mqtt_ip | mqtt_username | mqtt_password> [value]"));
     myDebug_P(PSTR("  set mqtt_heartbeat <on | off>"));
-    myDebug_P(PSTR("  set mqtt_base [value]"));
-    myDebug_P(PSTR("  set mqtt_port [value]"));
+    myDebug_P(PSTR("  set mqtt_base [string]"));
+    myDebug_P(PSTR("  set mqtt_port [number]"));
+    myDebug_P(PSTR("  set mqtt_qos [0,1,2,3]"));
+    myDebug_P(PSTR("  set mqtt_keepalive [seconds]"));
     myDebug_P(PSTR("  set ntp_enabled <on | off>"));
     myDebug_P(PSTR("  set serial <on | off>"));
     myDebug_P(PSTR("  set log_events <on | off>"));
@@ -732,6 +734,8 @@ void MyESP::_printSetCommands() {
         myDebug_P(PSTR("  mqtt_base="));
     }
     myDebug_P(PSTR("  mqtt_port=%d"), _mqtt_port);
+    myDebug_P(PSTR("  mqtt_keepalive=%d"), _mqtt_keepalive);
+    myDebug_P(PSTR("  mqtt_qos=%d"), _mqtt_qos);
     myDebug_P(PSTR("  mqtt_heartbeat=%s"), (_mqtt_heartbeat) ? "on" : "off");
 
 #ifdef FORCE_SERIAL
@@ -815,6 +819,10 @@ bool MyESP::_changeSetting(uint8_t wc, const char * setting, const char * value)
         save_config = fs_setSettingValue(&_mqtt_base, value, MQTT_BASE_DEFAULT);
     } else if (strcmp(setting, "mqtt_port") == 0) {
         save_config = fs_setSettingValue(&_mqtt_port, value, MQTT_PORT);
+    } else if (strcmp(setting, "mqtt_keepalive") == 0) {
+        save_config = fs_setSettingValue(&_mqtt_keepalive, value, MQTT_KEEPALIVE);
+    } else if (strcmp(setting, "mqtt_qos") == 0) {
+        save_config = fs_setSettingValue(&_mqtt_qos, value, MQTT_QOS);
     } else if (strcmp(setting, "mqtt_enabled") == 0) {
         save_config = fs_setSettingValue(&_mqtt_enabled, value, false);
     } else if (strcmp(setting, "serial") == 0) {
@@ -1690,6 +1698,8 @@ bool MyESP::_fs_loadConfig() {
     _mqtt_ip        = strdup(mqtt["ip"] | "");
     _mqtt_user      = strdup(mqtt["user"] | "");
     _mqtt_port      = mqtt["port"] | MQTT_PORT;
+    _mqtt_keepalive = mqtt["keepalive"] | MQTT_KEEPALIVE;
+    _mqtt_qos       = mqtt["qos"] | MQTT_QOS;
     _mqtt_password  = strdup(mqtt["password"] | "");
     _mqtt_base      = strdup(mqtt["base"] | MQTT_BASE_DEFAULT);
 
@@ -1721,11 +1731,23 @@ bool MyESP::fs_setSettingValue(char ** setting, const char * value, const char *
     return true;
 }
 
-// saves a integer into a config setting, using default value if non set
+// saves a 2-byte short integer into a config setting, using default value if non set
 // returns true if successful
 bool MyESP::fs_setSettingValue(uint16_t * setting, const char * value, uint16_t value_default) {
     if (_hasValue(value)) {
         *setting = (uint16_t)atoi(value);
+    } else {
+        *setting = value_default; // use the default value
+    }
+
+    return true;
+}
+
+// saves an 8-bit integer into a config setting, using default value if non set
+// returns true if successful
+bool MyESP::fs_setSettingValue(uint8_t * setting, const char * value, uint8_t value_default) {
+    if (_hasValue(value)) {
+        *setting = (uint8_t)atoi(value);
     } else {
         *setting = value_default; // use the default value
     }
@@ -1879,8 +1901,11 @@ bool MyESP::_fs_writeConfig() {
     mqtt["ip"]        = _mqtt_ip;
     mqtt["user"]      = _mqtt_user;
     mqtt["port"]      = _mqtt_port;
-    mqtt["password"]  = _mqtt_password;
-    mqtt["base"]      = _mqtt_base;
+    mqtt["qos"]       = _mqtt_qos;
+    mqtt["keepalive"] = _mqtt_keepalive;
+
+    mqtt["password"] = _mqtt_password;
+    mqtt["base"]     = _mqtt_base;
 
     JsonObject ntp  = doc.createNestedObject("ntp");
     ntp["server"]   = _ntp_server;

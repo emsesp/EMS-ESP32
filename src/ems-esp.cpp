@@ -873,39 +873,6 @@ void publishValues(bool force) {
     }
 }
 
-// used to read the next string from an input buffer and convert to an 8 bit int
-uint8_t _readIntNumber() {
-    char * numTextPtr = strtok(nullptr, ", \n");
-    if (numTextPtr == nullptr) {
-        return 0;
-    }
-    return atoi(numTextPtr);
-}
-
-// used to read the next string from an input buffer and convert to a double
-float _readFloatNumber() {
-    char * numTextPtr = strtok(nullptr, ", \n");
-    if (numTextPtr == nullptr) {
-        return 0;
-    }
-    return atof(numTextPtr);
-}
-
-// used to read the next string from an input buffer as a hex value and convert to a 16 bit int
-uint16_t _readHexNumber() {
-    char * numTextPtr = strtok(nullptr, ", \n");
-    if (numTextPtr == nullptr) {
-        return 0;
-    }
-    return (uint16_t)strtol(numTextPtr, 0, 16);
-}
-
-// used to read the next string from an input buffer
-char * _readWord() {
-    char * word = strtok(nullptr, ", \n");
-    return word;
-}
-
 // publish external dallas sensor temperature values to MQTT
 void do_publishSensorValues() {
     if ((EMSESP_Settings.dallas_sensors) && (EMSESP_Settings.publish_time)) {

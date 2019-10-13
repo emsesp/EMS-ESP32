@@ -76,6 +76,8 @@ var configfile = {
         "enabled": false,
         "ip": "ip",
         "port": "port",
+        "qos": "qos",
+        "keepalive": "keepalive",
         "base": "base",
         "user": "user",
         "password": "password",
