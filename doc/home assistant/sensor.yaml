@@ -2,18 +2,18 @@
   state_topic: 'home/ems-esp/thermostat_data'
   name: 'Current Room Temperature'
   unit_of_measurement: '°C'
-  value_template: "{{ value_json.thermostat_currtemp }}"
+  value_template: "{{ value_json.hc1.currtemp }}"
 
 - platform: mqtt
   state_topic: 'home/ems-esp/thermostat_data'
   name: 'Current Set Temperature'
   unit_of_measurement: '°C'
-  value_template: "{{ value_json.thermostat_seltemp }}"
+  value_template: "{{ value_json.hc1.seltemp }}" 
 
 - platform: mqtt
   state_topic: 'home/ems-esp/thermostat_data'
   name: 'Current Mode'
-  value_template: "{{ value_json.thermostat_mode }}"
+  value_template: "{{ value_json.hc1.mode }}" 
 
 # last time esp-esp was started
 - platform: template
