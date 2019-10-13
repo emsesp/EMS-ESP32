@@ -665,19 +665,18 @@ void publishValues(bool force) {
         last_boilerActive = ((EMS_Boiler.tapwaterActive << 1) + EMS_Boiler.heatingActive); // remember last state
     }
 
-    doc.clear();
     // handle the thermostat values
     if (ems_getThermostatEnabled()) {
+        doc.clear();
+        JsonObject rootThermostat = doc.to<JsonObject>();
+
         for (uint8_t hc_v = 1; hc_v <= EMS_THERMOSTAT_MAXHC; hc_v++) {
             _EMS_Thermostat_HC * thermostat = &EMS_Thermostat.hc[hc_v - 1];
 
             // only send if we have an active Heating Circuit with real data
             if (thermostat->active) {
                 // build new json object
-                JsonObject rootThermostat = doc.to<JsonObject>();
-
-                // hc{1-4}
-                char hc[10];
+                char hc[10]; // hc{1-4}
                 strlcpy(hc, THERMOSTAT_HC, sizeof(hc));
                 strlcat(hc, _int_to_char(s, thermostat->hc), sizeof(hc));
                 JsonObject dataThermostat = rootThermostat.createNestedObject(hc);
