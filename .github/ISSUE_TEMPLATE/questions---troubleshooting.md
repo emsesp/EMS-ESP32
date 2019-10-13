@@ -1,5 +1,5 @@
 ---
-name: Questions & troubleshooting
+name: Questions & Troubleshooting
 about: Anything not a bug or feature request
 title: ''
 labels: question
@@ -10,10 +10,10 @@ assignees: ''
 *Before creating a new issue please check that you have:*
 
 * *searched the existing [issues](https://github.com/proddy/EMS-ESP/issues) (both open and closed)*
-* *searched the [doc](https://github.com/proddy/EMS-ESP/blob/master/README.md)*
+* *searched the [wiki help pages](https://github.com/proddy/EMS-ESP/wiki/Troubleshooting)*
 
 
-*Fulfilling this template will help developers and contributors help you. Try to be as specific and extensive as possible. If the information provided is not enough the issue will likely be closed.*
+*Completing this template will help developers and contributors help you. Try to be as specific and extensive as possible. If the information provided is not enough the issue will likely be closed.*
 
 *You can now remove this line and the above ones. Text in italic is meant to be replaced by your own words. If any of the sections below are not relevant to the issue (for instance, the screenshots) then you can delete them.*
 
