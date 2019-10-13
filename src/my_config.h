@@ -72,7 +72,6 @@
 #define TOPIC_SHOWER_COLDSHOT "coldshot" // used to trigger a coldshot from an MQTT command
 #define TOPIC_SHOWER_DURATION "duration" // duration of the last shower
 
-
-// MQTT for EXTERNAL SENSORS
+// MQTT for External Sensors
 #define TOPIC_EXTERNAL_SENSORS "sensors"   // for sending sensor values to MQTT
 #define PAYLOAD_EXTERNAL_SENSORS "temp_%d" // for formatting the payload for each external dallas sensor

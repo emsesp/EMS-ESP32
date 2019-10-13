@@ -536,11 +536,11 @@ void publishValues(bool force) {
     uint32_t                                  fchecksum;
     uint8_t                                   jsonSize;
 
-    static uint8_t  last_boilerActive        = 0xFF;                    // for remembering last setting of the tap water or heating on/off
-    static uint32_t previousBoilerPublishCRC = 0;                       // CRC check for boiler values
-    static uint32_t previousThermostatPublishCRC[EMS_THERMOSTAT_MAXHC]; // CRC check for thermostat values
-    static uint32_t previousMixingPublishCRC[EMS_THERMOSTAT_MAXHC];     // CRC check for mixing values
-    static uint32_t previousSMPublishCRC = 0;                           // CRC check for Solar Module values (e.g. SM10)
+    static uint8_t  last_boilerActive        = 0xFF; // for remembering last setting of the tap water or heating on/off
+    static uint32_t previousBoilerPublishCRC = 0;    // CRC check for boiler values
+    static uint32_t previousThermostatPublishCRC;    // CRC check for thermostat values
+    static uint32_t previousMixingPublishCRC;        // CRC check for mixing values
+    static uint32_t previousSMPublishCRC = 0;        // CRC check for Solar Module values (e.g. SM10)
 
     JsonObject rootBoiler = doc.to<JsonObject>();
 
@@ -727,39 +727,44 @@ void publishValues(bool force) {
                 } else if (thermoMode == 4) {
                     dataThermostat[THERMOSTAT_MODE] = "day";
                 }
+            }
+        }
 
-                data[0] = '\0'; // reset data for next package
-                serializeJson(doc, data, sizeof(data));
+        data[0] = '\0'; // reset data for next package
+        serializeJson(doc, data, sizeof(data));
 
-                // check for empty json
-                jsonSize = measureJson(doc);
-                if (jsonSize > 2) {
-                    // calculate new CRC
-                    crc.reset();
-                    for (uint8_t i = 0; i < (jsonSize - 1); i++) {
-                        crc.update(data[i]);
-                    }
-                    fchecksum = crc.finalize();
-                    if ((previousThermostatPublishCRC[hc_v - 1] != fchecksum) || force) {
-                        previousThermostatPublishCRC[hc_v - 1] = fchecksum;
-                        myDebugLog("Publishing thermostat data via MQTT");
-                        myESP.mqttPublish(TOPIC_THERMOSTAT_DATA, data);
-                    }
-                }
+        // check for empty json
+        jsonSize = measureJson(doc);
+        if (jsonSize > 2) {
+            // calculate new CRC
+            crc.reset();
+            for (uint8_t i = 0; i < (jsonSize - 1); i++) {
+                crc.update(data[i]);
+            }
+            fchecksum = crc.finalize();
+            if ((previousThermostatPublishCRC != fchecksum) || force) {
+                previousThermostatPublishCRC = fchecksum;
+                myDebugLog("Publishing thermostat data via MQTT");
+                myESP.mqttPublish(TOPIC_THERMOSTAT_DATA, data);
             }
         }
     }
 
     // handle the thermostat values
     if (ems_getMixingDeviceEnabled()) {
+        doc.clear();
+        JsonObject rootMixing = doc.to<JsonObject>();
+
         for (uint8_t hc_v = 1; hc_v <= EMS_THERMOSTAT_MAXHC; hc_v++) {
             _EMS_Mixing_HC * mixing = &EMS_Mixing.hc[hc_v - 1];
 
             // only send if we have an active Heating Circuit with real data
             if (mixing->active) {
                 // build new json object
-                doc.clear();
-                JsonObject rootMixing = doc.to<JsonObject>();
+                char hc[10]; // hc{1-4}
+                strlcpy(hc, THERMOSTAT_HC, sizeof(hc));
+                strlcat(hc, _int_to_char(s, mixing->hc), sizeof(hc));
+                JsonObject dataThermostat = rootMixing.createNestedObject(hc);
 
                 if (mixing->flowTemp != EMS_VALUE_SHORT_NOTSET)
                     rootMixing["flowTemp"] = (double)mixing->flowTemp / 10;
@@ -767,35 +772,28 @@ void publishValues(bool force) {
                     rootMixing["pumpMod"] = mixing->pumpMod;
                 if (mixing->valveStatus != EMS_VALUE_INT_NOTSET)
                     rootMixing["valveStatus"] = mixing->valveStatus;
+            }
+        }
 
-                data[0] = '\0'; // reset data for next package
-                serializeJson(doc, data, sizeof(data));
+        data[0] = '\0'; // reset data for next package
+        serializeJson(doc, data, sizeof(data));
 
-                // check for empty json
-                jsonSize = measureJson(doc);
-                if (jsonSize > 2) {
-                    // calculate new CRC
-                    crc.reset();
-                    for (uint8_t i = 0; i < (jsonSize - 1); i++) {
-                        crc.update(data[i]);
-                    }
-                    fchecksum = crc.finalize();
-                    if ((previousMixingPublishCRC[hc_v - 1] != fchecksum) || force) {
-                        previousMixingPublishCRC[hc_v - 1] = fchecksum;
-                        char mixing_topicname[20];
-                        char buffer[4];
-                        // "mixingt_data" + Heating Cicruit #
-                        strlcpy(mixing_topicname, TOPIC_MIXING_DATA, sizeof(mixing_topicname));
-                        strlcat(mixing_topicname, itoa(hc_v, buffer, 10), sizeof(mixing_topicname));
-                        myDebugLog("Publishing mixing device data via MQTT");
-                        myESP.mqttPublish(mixing_topicname, data);
-                    }
-                }
+        // check for empty json
+        jsonSize = measureJson(doc);
+        if (jsonSize > 2) {
+            // calculate new CRC
+            crc.reset();
+            for (uint8_t i = 0; i < (jsonSize - 1); i++) {
+                crc.update(data[i]);
+            }
+            fchecksum = crc.finalize();
+            if ((previousMixingPublishCRC != fchecksum) || force) {
+                previousMixingPublishCRC = fchecksum;
+                myDebugLog("Publishing mixing device data via MQTT");
+                myESP.mqttPublish(TOPIC_MIXING_DATA, data);
             }
         }
     }
-
-
 
     // For SM10 and SM100 Solar Modules
     if (ems_getSolarModuleEnabled()) {
