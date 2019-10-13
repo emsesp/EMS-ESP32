@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.9.2 beta]
 
 #### Important! This build has breaking changes:
- - MQTT topics have changed. Use `mqttlog` to see the names of the subscriptions and the format of the payload data
+ - MQTT topics have changed. Use the `mqttlog` command to see the names of the subscriptions and the format of the payload data. Also reference the [Wiki page](https://github.com/proddy/EMS-ESP/wiki/MQTT).
  - the web builder has been upgraded to use Gulp 4. Remove `tools/webfilesbuilder/node_modules` and re-install the libraries using `npm ci` from within the `tools/webfilesbuilder` folder.
 
 ### Added
