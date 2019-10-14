@@ -4,7 +4,6 @@
  * Paul Derbyshire - https://github.com/proddy/EMS-ESP
  *
  * See ChangeLog.md for history
- * See README.md for Acknowledgments
  *
  */
 
@@ -13,67 +12,8 @@
 #include <Arduino.h>
 #include <list> // std::list
 
-/* debug helper for logic analyzer 
- * create marker puls on GPIOx
- *   ° for Rx, we use GPIO14
- *   ° for Tx, we use GPIO12
- */
-
-// clang-format off
-#ifdef LOGICANALYZER
-#define RX_MARK_PIN 14
-#define TX_MARK_PIN 12
-
-#define RX_MARK_MASK (1 << RX_MARK_PIN)
-#define TX_MARK_MASK (1 << TX_MARK_PIN)
-#define MARKERS_MASK (RX_MARK_PIN | TX_MARK_PIN)
-
-#define GPIO_H(mask) (GPIO_REG_WRITE(GPIO_OUT_W1TS_ADDRESS, (mask)))
-#define GPIO_L(mask) (GPIO_REG_WRITE(GPIO_OUT_W1TC_ADDRESS, (mask)))
-
-#define RX_PULSE(pulse)             \
-    do {                            \
-        GPIO_H(RX_MARK_MASK);       \
-        delayMicroseconds(pulse);   \
-        GPIO_L(RX_MARK_MASK);       \
-    } while (0)
-#define TX_PULSE(pulse)             \
-    do {                            \
-        GPIO_H(TX_MARK_MASK);       \
-        delayMicroseconds(pulse);   \
-        GPIO_L(TX_MARK_MASK);       \
-    } while (0)
-#define LA_PULSE(pulse)             \
-    do {                            \
-        GPIO_H(MARKERS_MASK);       \
-        delayMicroseconds(pulse);   \
-        GPIO_L(MARKERS_MASK);       \
-    } while (0)
-
-#define INIT_MARKERS(void)              \
-    do {                                \
-        pinMode(RX_MARK_PIN, OUTPUT);   \
-        pinMode(TX_MARK_PIN, OUTPUT);   \
-        GPIO_L(MARKERS_MASK);           \
-    } while (0)
-#else
-#define RX_PULSE(pulse)     \
-    {}
-#define TX_PULSE(pulse)     \
-    {}
-#define LA_PULSE(pulse)     \
-    {}
-#define INIT_MARKERS(void)  \
-    {}
-#define RX_MARK_MASK
-#define TX_MARK_MASK
-#define GPIO_H(mask)
-#define GPIO_L(mask)
-#endif
-// clang-format on
-
 // EMS tx_mode types
-#define EMS_TXMODE_DEFAULT 1 // Default (was previously known as tx_mode 2)
+#define EMS_TXMODE_DEFAULT 1 // Default (was previously known as tx_mode 2 in v1.8.x)
 #define EMS_TXMODE_EMSPLUS 2 // EMS+
 #define EMS_TXMODE_HT3 3     // Junkers HT3
 
