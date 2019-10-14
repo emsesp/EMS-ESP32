@@ -1,4 +1,4 @@
-| ![logo](https://github.com/proddy/EMS-ESP/raw/master/doc/ems gateway/logo-proddy-fw.jpg)
+![logo](https://github.com/proddy/EMS-ESP/raw/master/doc/ems%20gateway/logo-proddy-fw.jpg)
 # EMS-ESP
 
 [![version](https://img.shields.io/github/release/proddy/EMS-ESP.svg?label=Latest%20Release)](https://github.com/proddy/EMS-ESP/blob/master/CHANGELOG.md)
