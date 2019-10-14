@@ -7,19 +7,7 @@
     - service: notify.general_notify
       data_template:
         title: "Shower finished at {{states.sensor.time.state}}"
-        message: '{{trigger.payload}}'
-
-- id: boiler_shower_alarm
-  alias: Alert shower too long
-  trigger:
-    platform: mqtt
-    topic: home/ems-esp/command
-    payload: 'shower_alarm'
-  action:
-    - service: notify.admin_notify
-      data_template:
-        title: "Shower Alert!"
-        message: "Shower time exceeded limit"
+        message: "{{ trigger.payload_json['duration'] }}"
 
 # when ems-esp starts send boottime
 - id: boiler_restart

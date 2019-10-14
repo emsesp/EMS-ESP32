@@ -1060,6 +1060,7 @@ bool do_publishShowerData() {
     rootShower[TOPIC_SHOWER_TIMER]     = EMSESP_Settings.shower_timer ? "1" : "0";
     rootShower[TOPIC_SHOWER_ALERT]     = EMSESP_Settings.shower_alert ? "1" : "0";
 
+    // only publish shower duration if there is a value
     char s[50] = {0};
     if (EMSESP_Shower.duration > SHOWER_MIN_DURATION) {
         char buffer[16] = {0};
@@ -1067,10 +1068,8 @@ bool do_publishShowerData() {
         strlcat(s, " minutes and ", sizeof(s));
         strlcat(s, itoa((uint8_t)((EMSESP_Shower.duration / 1000) % 60), buffer, 10), sizeof(s));
         strlcat(s, " seconds", sizeof(s));
-    } else {
-        strlcpy(s, "n/a", sizeof(s));
+        rootShower[TOPIC_SHOWER_DURATION] = s;
     }
-    rootShower[TOPIC_SHOWER_DURATION] = s;
 
     char data[300] = {0};
     serializeJson(doc, data, sizeof(data));
@@ -1939,13 +1938,9 @@ void showerCheck() {
 // SETUP
 //
 void setup() {
-    // LA trigger create a small puls to show setup is starting...
-    INIT_MARKERS(0);
-    LA_PULSE(50);
-
-    // GPIO15 has a pull down, so we must set it to HIGH
-    pinMode(15, OUTPUT);
-    digitalWrite(15, 1);
+    // GPIO15/D8 has a pull down, so we must set it to HIGH so it doesn't bring the whole EMS bus down
+    pinMode(D8, OUTPUT);
+    digitalWrite(D8, 1);
 
     // init our own parameters
     initEMSESP();
