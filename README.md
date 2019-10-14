@@ -45,7 +45,7 @@ The code is written for the Espressif **ESP8266** microcontroller and supports a
 * Buderus Logamatic TC100 (read-only)
 * Nefit Moduline 100, 300, 400, 1010, 3000
 * Nefit Moduline Easy (read-only)
-* Bosch Easy, CW100 (read-only)
+* Bosch Easy, CW100, CT200  (read-only)
 * Junkers FR10, FR100, FR110, FW100, FW120
 * Sieger ES73
 
