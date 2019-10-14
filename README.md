@@ -28,7 +28,7 @@ The code is written for the Espressif **ESP8266** microcontroller and supports a
 
 #### MQTT support for Home Assistant and Domoticz
 
-![ha](https://github.com/proddy/EMS-ESP/raw/master/doc/home_assistant/ha.png)
+![ha](https://github.com/proddy/EMS-ESP/raw/master/doc/home%20assistant/ha.png)
 
 #### Telnet for advanced configuration and verbose traffic logging
 
