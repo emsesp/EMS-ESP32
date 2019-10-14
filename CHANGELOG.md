@@ -9,15 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### Important! This build has breaking changes:
  - MQTT topics have changed. Use the `mqttlog` command to see the names of the subscriptions and the format of the payload data. Also reference the [Wiki page](https://github.com/proddy/EMS-ESP/wiki/MQTT).
- - the web builder has been upgraded to use Gulp 4. Remove `tools/webfilesbuilder/node_modules` and re-install the libraries using `npm ci` from within the `tools/webfilesbuilder` folder.
+ - Home Assistant `.yaml` files need updating to reflect the recent MQTT changes
+ - The web builder has been upgraded to use Gulp 4. Remove `tools/webfilesbuilder/node_modules` and re-install the libraries using `npm ci` from within the `tools/webfilesbuilder` folder
 
 ### Added
 
-- Handling of MM100 Status Messages (thanks @kstaniek)
-- Retrieve/display mode for Junkers FW100/120 thermostats (thanks @Neonox31)
-- Added sending of Mixer Module data via MQTT (thanks @peclik)
-- Reporting of MQTT publish and subscribe errors
-- Added MQTT QOS (default 1) and Keep Alive (default 60 seconds) as parameters to both telnet and WebUI
+- Handling of Mixing Module MM100 Status Messages (thanks @kstaniek)
+- Retrieve/Set thermostat mode for Junkers FW100/120 thermostats (thanks @Neonox31)
+- Added sending of all Mixer Module data via MQTT (thanks @peclik)
+- Improved handling of MQTT publish and subscribe errors
+- Added MQTT QOS (`mqtt_qos`, default 1) and Keep Alive (`mqtt_keepalive`, default 60 seconds) as parameters to both telnet and WebUI
 
 ### Fixed
 
