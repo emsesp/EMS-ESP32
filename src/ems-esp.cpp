@@ -764,14 +764,14 @@ void publishValues(bool force) {
                 char hc[10]; // hc{1-4}
                 strlcpy(hc, THERMOSTAT_HC, sizeof(hc));
                 strlcat(hc, _int_to_char(s, mixing->hc), sizeof(hc));
-                JsonObject dataThermostat = rootMixing.createNestedObject(hc);
+                JsonObject dataMixing = rootMixing.createNestedObject(hc);
 
                 if (mixing->flowTemp != EMS_VALUE_SHORT_NOTSET)
-                    rootMixing["flowTemp"] = (double)mixing->flowTemp / 10;
+                    dataMixing["flowTemp"] = (double)mixing->flowTemp / 10;
                 if (mixing->pumpMod != EMS_VALUE_INT_NOTSET)
-                    rootMixing["pumpMod"] = mixing->pumpMod;
+                    dataMixing["pumpMod"] = mixing->pumpMod;
                 if (mixing->valveStatus != EMS_VALUE_INT_NOTSET)
-                    rootMixing["valveStatus"] = mixing->valveStatus;
+                    dataMixing["valveStatus"] = mixing->valveStatus;
             }
         }
 
