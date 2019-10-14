@@ -84,6 +84,8 @@ The code is written for the Espressif **ESP8266** microcontroller and supports a
 * EMS-OT OpenTherm converter
 * Junkers Controller
 
+See [the complete list here](https://github.com/proddy/EMS-ESP/wiki/Supported-EMS-Devices) from the Wiki.
+
 ## Compatible with EMS Gateway
 
 Using BBQKees' [EMS Gateway](https://shop.hotgoodies.nl/ems/) board with integrated Wemos D1 ESP8266:
