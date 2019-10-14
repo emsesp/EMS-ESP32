@@ -4,7 +4,6 @@
  * Paul Derbyshire - https://github.com/proddy/EMS-ESP
  *
  * See ChangeLog.md for History
- * See README.md for Acknowledgments
  *
  */
 
@@ -256,7 +255,12 @@ const _Other_Device Other_Devices[] = {
 
 // heatpump, device ID 0x38
 // format is PRODUCT ID, DEVICE ID, DESCRIPTION
-const _HeatPump_Device HeatPump_Devices[] = {{252, "HeatPump Module"}};
+const _HeatPump_Device HeatPump_Devices[] = {
+
+    {252, "HeatPump Module"},
+    {200, "HeatPump Module"}
+
+};
 
 /*
  * Known thermostat types and their capabilities
