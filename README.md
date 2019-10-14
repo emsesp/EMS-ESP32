@@ -37,7 +37,7 @@ The code is written for the Espressif **ESP8266** microcontroller and supports a
 
 ## Supported EMS devices
 
-More than **50** EMS devices are currently support. See [the complete list here](https://github.com/proddy/EMS-ESP/wiki/Supported-EMS-Devices) from the Wiki.
+More than **50** EMS devices are currently supported. See [the complete list here](https://github.com/proddy/EMS-ESP/wiki/Supported-EMS-Devices) from the Wiki.
 
 ## Compatible with bbqkees' EMS Gateway
 
