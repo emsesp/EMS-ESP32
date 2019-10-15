@@ -1,13 +1,14 @@
 - id: boiler_shower
   alias: Alert shower time
+  initial_state: true
   trigger:
     platform: mqtt
-    topic: home/ems-esp/showertime
+    topic: home/ems-esp/shower_data
   action:
-    - service: notify.general_notify
-      data_template:
-        title: "Shower finished at {{states.sensor.time.state}}"
-        message: "{{ trigger.payload_json['duration'] }}"
+  - service: notify.admin_notify
+    data_template:
+      title: Shower finished at {{states.sensor.time.state}}
+      message: "{{ trigger.payload_json['duration'] }}"
 
 # when ems-esp starts send boottime
 - id: boiler_restart
