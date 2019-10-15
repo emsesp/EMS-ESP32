@@ -79,9 +79,9 @@ extern struct rst_info resetInfo;
 #define MQTT_WILL_ONLINE_PAYLOAD "online"   // for last will & testament payload
 #define MQTT_WILL_OFFLINE_PAYLOAD "offline" // for last will & testament payload
 #define MQTT_BASE_DEFAULT "home"            // default MQTT prefix to topics
-#define MQTT_RETAIN false
+#define MQTT_RETAIN true
 #define MQTT_KEEPALIVE 60                // default keepalive 1 minute
-#define MQTT_QOS 1                       // default qos
+#define MQTT_QOS 0                       // default qos 0
 #define MQTT_WILL_TOPIC "status"         // for last will & testament topic name
 #define MQTT_MAX_TOPIC_SIZE 50           // max length of MQTT topic
 #define MQTT_MAX_PAYLOAD_SIZE 700        // max size of a JSON object. See https://arduinojson.org/v6/assistant/

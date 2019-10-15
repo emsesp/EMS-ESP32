@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Retrieve/Set thermostat mode for Junkers FW100/120 thermostats (thanks @Neonox31)
 - Added sending of all Mixer Module data via MQTT (thanks @peclik)
 - Improved handling of MQTT publish and subscribe errors
-- Added MQTT QOS (`mqtt_qos`, default 1) and Keep Alive (`mqtt_keepalive`, default 60 seconds) as parameters to both telnet and WebUI
+- Added MQTT QOS (`mqtt_qos`, default 1), Keep Alive (`mqtt_keepalive`, default 60 seconds) and Retain (`mqtt_retain`, default on) as parameters to both telnet and WebUI
 
 ### Fixed
 

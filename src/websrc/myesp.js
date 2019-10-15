@@ -27,6 +27,7 @@ var config = {
         "port": 1883,
         "qos": 1,
         "keepalive": 60,
+        "retain": true,
         "base": "",
         "user": "",
         "password": "",
@@ -171,6 +172,11 @@ function savemqtt() {
     config.mqtt.heartbeat = false;
     if (parseInt($("input[name=\"mqttheartbeat\"]:checked").val()) === 1) {
         config.mqtt.heartbeat = true;
+    }
+
+    config.mqtt.retain = false;
+    if (parseInt($("input[name=\"mqttretain\"]:checked").val()) === 1) {
+        config.mqtt.retain = true;
     }
 
     config.mqtt.ip = document.getElementById("mqttip").value;
@@ -323,6 +329,10 @@ function listmqtt() {
 
     if (config.mqtt.heartbeat) {
         $("input[name=\"mqttheartbeat\"][value=\"1\"]").prop("checked", true);
+    }
+
+    if (config.mqtt.retain) {
+        $("input[name=\"mqttretain\"][value=\"1\"]").prop("checked", true);
     }
 
     document.getElementById("mqttip").value = config.mqtt.ip;
