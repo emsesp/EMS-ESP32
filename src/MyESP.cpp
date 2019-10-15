@@ -405,9 +405,10 @@ bool MyESP::mqttPublish(const char * topic, const char * payload) {
             return true;
         } else {
             myDebug_P(PSTR("[MQTT] Error publishing to %s with payload %s [error %d]"), _mqttTopic(topic), payload, packet_id);
-            return false;
         }
     }
+
+    return false; // failed
 }
 
 // MQTT onConnect - when a connect is established
