@@ -723,9 +723,9 @@ void publishValues(bool force) {
                 } else if (thermoMode == 2) {
                     dataThermostat[THERMOSTAT_MODE] = "auto";
                 } else if (thermoMode == 3) {
-                    dataThermostat[THERMOSTAT_MODE] = "night";
+                    dataThermostat[THERMOSTAT_MODE] = "off"; // for night
                 } else if (thermoMode == 4) {
-                    dataThermostat[THERMOSTAT_MODE] = "day";
+                    dataThermostat[THERMOSTAT_MODE] = "heat"; // for day
                 }
             }
         }
