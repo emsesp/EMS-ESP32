@@ -196,7 +196,7 @@ typedef enum {
 const _Boiler_Device Boiler_Devices[] = {
 
     {72, "MC10 Module"},
-    {123, "Buderus GBx72/Nefit Trendline/Junkers Cerapur"},
+    {123, "Buderus GBx72/Nefit Trendline/Junkers Cerapur/Worcester Greenstar Si"},
     {115, "Nefit Topline/Buderus GB162"},
     {203, "Buderus Logamax U122/Junkers Cerapur"},
     {208, "Buderus Logamax plus/GB192/Bosch Condens GC9000"},
