@@ -1244,9 +1244,9 @@ void _showCommands(uint8_t event) {
 // we set the logging here
 void TelnetCallback(uint8_t event) {
     if (event == TELNET_EVENT_CONNECT) {
-        ems_setLogging(EMS_SYS_LOGGING_DEFAULT);
+        ems_setLogging(EMS_SYS_LOGGING_DEFAULT, true);
     } else if (event == TELNET_EVENT_DISCONNECT) {
-        ems_setLogging(EMS_SYS_LOGGING_NONE);
+        ems_setLogging(EMS_SYS_LOGGING_NONE, true);
     } else if ((event == TELNET_EVENT_SHOWCMD) || (event == TELNET_EVENT_SHOWSET)) {
         _showCommands(event);
     }
@@ -1968,7 +1968,7 @@ void setup() {
         Serial.flush();
         myESP.setUseSerial(false);
         emsuart_init(); // start EMS bus transmissions
-        myDebug_P(PSTR("[UART] Opened Rx/Tx connection"));
+        myDebug_P(PSTR("[UART] Rx/Tx connection established"));
         if (!EMSESP_Settings.listen_mode) {
             // go and find the boiler and thermostat types, if not in listen mode
             ems_discoverModels();

@@ -444,9 +444,13 @@ _EMS_SYS_LOGGING ems_getLogging() {
     return EMS_Sys_Status.emsLogging;
 }
 
-void ems_setLogging(_EMS_SYS_LOGGING loglevel) {
+void ems_setLogging(_EMS_SYS_LOGGING loglevel, bool silent) {
     if (loglevel <= EMS_SYS_LOGGING_JABBER) {
         EMS_Sys_Status.emsLogging = loglevel;
+        if (silent) {
+            return; // don't print to telnet/serial
+        }
+
         if (loglevel == EMS_SYS_LOGGING_NONE) {
             myDebug_P(PSTR("System Logging set to None"));
         } else if (loglevel == EMS_SYS_LOGGING_BASIC) {
@@ -2170,7 +2174,7 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
  * Figure out the boiler and thermostat types
  */
 void ems_discoverModels() {
-    myDebug_P(PSTR("Starting auto discover of EMS devices..."));
+    //myDebug_P(PSTR("Starting auto discover of EMS devices..."));
     ems_doReadCommand(EMS_TYPE_UBADevices, EMS_ID_BOILER);
 }
 

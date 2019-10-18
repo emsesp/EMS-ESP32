@@ -199,7 +199,10 @@ uint32_t MyESP::_getInitialFreeHeap() {
 
 // called when WiFi is connected, and used to start OTA, MQTT
 void MyESP::_wifiCallback(justwifi_messages_t code, char * parameter) {
-    if ((code == MESSAGE_CONNECTED)) {
+    if (code == MESSAGE_CONNECTED) {
+        myDebug_P(PSTR("[WIFI] Connected to SSID %s (hostname: %s, IP: %s)"), WiFi.SSID().c_str(), _getESPhostname().c_str(), WiFi.localIP().toString().c_str());
+
+        /*
         myDebug_P(PSTR("[WIFI] SSID  %s"), WiFi.SSID().c_str());
         myDebug_P(PSTR("[WIFI] CH    %d"), WiFi.channel());
         myDebug_P(PSTR("[WIFI] RSSI  %d"), WiFi.RSSI());
@@ -209,10 +212,11 @@ void MyESP::_wifiCallback(justwifi_messages_t code, char * parameter) {
         myDebug_P(PSTR("[WIFI] MASK  %s"), WiFi.subnetMask().toString().c_str());
         myDebug_P(PSTR("[WIFI] DNS   %s"), WiFi.dnsIP().toString().c_str());
         myDebug_P(PSTR("[WIFI] HOST  %s"), _getESPhostname().c_str());
+        */
 
         // start OTA
         ArduinoOTA.begin(); // moved to support esp32
-        myDebug_P(PSTR("[OTA] listening to %s.local:%u"), ArduinoOTA.getHostname().c_str(), OTA_PORT);
+        myDebug_P(PSTR("[OTA] Listening to firmware updates on %s.local:%u"), ArduinoOTA.getHostname().c_str(), OTA_PORT);
 
         /*
         // show reason for the restart if any
@@ -232,11 +236,11 @@ void MyESP::_wifiCallback(justwifi_messages_t code, char * parameter) {
 
         // if we don't want Serial anymore, turn it off
         if (!_general_serial) {
-            myDebug_P(PSTR("[SYSTEM] Disabling serial port communication."));
+            myDebug_P(PSTR("[SYSTEM] Disabling serial port communication"));
             SerialAndTelnet.flush(); // flush so all buffer is printed to serial
             setUseSerial(false);
         } else {
-            myDebug_P(PSTR("[SYSTEM] Serial port communication is enabled."));
+            myDebug_P(PSTR("[SYSTEM] Serial port communication is enabled"));
         }
 
         _wifi_connected = true;
@@ -263,11 +267,11 @@ void MyESP::_wifiCallback(justwifi_messages_t code, char * parameter) {
 
         // if we don't want Serial anymore, turn it off
         if (!_general_serial) {
-            myDebug_P(PSTR("[SYSTEM] Disabling serial port communication."));
+            myDebug_P(PSTR("[SYSTEM] Disabling serial port communication"));
             SerialAndTelnet.flush(); // flush so all buffer is printed to serial
             setUseSerial(false);
         } else {
-            myDebug_P(PSTR("[SYSTEM] Serial port communication is enabled."));
+            myDebug_P(PSTR("[SYSTEM] Serial port communication is enabled"));
         }
 
         _wifi_connected = true;
@@ -279,7 +283,7 @@ void MyESP::_wifiCallback(justwifi_messages_t code, char * parameter) {
     }
 
     if (code == MESSAGE_CONNECTING) {
-        myDebug_P(PSTR("[WIFI] Connecting to %s"), parameter);
+        myDebug_P(PSTR("[WIFI] Connecting to %s..."), parameter);
         _wifi_connected = false;
     }
 
@@ -413,7 +417,7 @@ bool MyESP::mqttPublish(const char * topic, const char * payload) {
 
 // MQTT onConnect - when a connect is established
 void MyESP::_mqttOnConnect() {
-    myDebug_P(PSTR("[MQTT] is connected"));
+    myDebug_P(PSTR("[MQTT] MQTT connected established"));
     _mqtt_reconnect_delay = MQTT_RECONNECT_DELAY_MIN;
 
     _mqtt_last_connection = millis();
@@ -590,17 +594,8 @@ void MyESP::setTelnet(telnetcommand_callback_f callback_cmd, telnet_callback_f c
 }
 
 void MyESP::_telnetConnected() {
-    myDebug_P(PSTR("[TELNET] Telnet connection established"));
-    _consoleShowHelp(); // Show the initial message
-
-#ifdef CRASH
-    // show crash dump if just restarted after a fatal crash
-    uint32_t crash_time;
-    EEPROMr.get(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_CRASH_TIME, crash_time);
-    if ((crash_time) && (crash_time != 0xFFFFFFFF)) {
-        myDebug_P(PSTR("[SYSTEM] There is stack data available from the last system crash. Use 'crash dump' to view and 'crash clear' to reset"));
-    }
-#endif
+    myDebug_P(PSTR("[TELNET] Connected to %s version %s. Type ? for commands."), _app_name, _app_version);
+    //_consoleShowHelp(); // Show the initial message
 
     // call callback
     if (_telnet_callback_f) {
@@ -609,7 +604,7 @@ void MyESP::_telnetConnected() {
 }
 
 void MyESP::_telnetDisconnected() {
-    myDebug_P(PSTR("[TELNET] Telnet connection closed"));
+    // myDebug_P(PSTR("[TELNET] Telnet connection closed"));
     if (_telnet_callback_f) {
         (_telnet_callback_f)(TELNET_EVENT_DISCONNECT); // call callback
     }
@@ -631,7 +626,7 @@ void MyESP::_telnet_setup() {
 // Show help of commands
 void MyESP::_consoleShowHelp() {
     myDebug_P(PSTR(""));
-    myDebug_P(PSTR("* Connected to: %s version %s"), _app_name, _app_version);
+    myDebug_P(PSTR("* %s version %s"), _app_name, _app_version);
 
     if (isAPmode()) {
         myDebug_P(PSTR("* Device is in AP mode with SSID %s"), jw.getAPSSID().c_str());
@@ -649,8 +644,15 @@ void MyESP::_consoleShowHelp() {
     myDebug_P(PSTR("* Commands:"));
     myDebug_P(PSTR("*  ?/help=show commands, CTRL-D/quit=close telnet session"));
     myDebug_P(PSTR("*  set, system, restart, mqttlog"));
+
 #ifdef CRASH
     myDebug_P(PSTR("*  crash <dump | clear | test [n]>"));
+    // show crash dump if just restarted after a fatal crash
+    uint32_t crash_time;
+    EEPROMr.get(SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_CRASH_TIME, crash_time);
+    if ((crash_time) && (crash_time != 0xFFFFFFFF)) {
+        myDebug_P(PSTR("[SYSTEM] There is stack data available from the last system crash. Use 'crash dump' to view and 'crash clear' to reset"));
+    }
 #endif
 
     // call callback function
@@ -1507,27 +1509,27 @@ char * MyESP::_mqttTopic(const char * topic) {
 }
 
 // validates a file in SPIFFS, loads it into the json buffer and returns true if ok
-bool MyESP::_fs_validateConfigFile(const char * filename, size_t maxsize, JsonDocument & doc) {
+size_t MyESP::_fs_validateConfigFile(const char * filename, size_t maxsize, JsonDocument & doc) {
     // see if we can open it
     File file = SPIFFS.open(filename, "r");
     if (!file) {
         myDebug_P(PSTR("[FS] File %s not found"), filename);
-        return false;
+        return 0;
     }
 
     // check size
     size_t size = file.size();
 
-    myDebug_P(PSTR("[FS] Checking file %s (%d bytes)"), filename, size); // remove for debugging
+    // myDebug_P(PSTR("[FS] Checking file %s (%d bytes)"), filename, size); // remove for debugging
 
     if (size > maxsize) {
         file.close();
-        myDebug_P(PSTR("[FS] File %s size %d is too large (max %d)"), filename, size, maxsize);
-        return false;
+        myDebug_P(PSTR("[FS] Error. File %s size %d is too large (max %d)"), filename, size, maxsize);
+        return 0;
     } else if (size == 0) {
         file.close();
-        myDebug_P(PSTR("[FS] Corrupted file %s"), filename);
-        return false;
+        myDebug_P(PSTR("[FS] Error. Corrupted file %s"), filename);
+        return 0;
     }
 
     // check integrity by reading file from SPIFFS into the char array
@@ -1536,53 +1538,53 @@ bool MyESP::_fs_validateConfigFile(const char * filename, size_t maxsize, JsonDo
     size_t real_size = file.readBytes(buffer, size);
     if (real_size != size) {
         file.close();
-        myDebug_P(PSTR("[FS] Error, file %s sizes don't match (%d/%d), looks corrupted"), filename, real_size, size);
+        myDebug_P(PSTR("[FS] Error. File %s sizes don't match (%d/%d), looks corrupted"), filename, real_size, size);
         delete[] buffer;
-        return false;
+        return 0;
     }
 
     // now read into the given json
     DeserializationError error = deserializeJson(doc, buffer);
     if (error) {
-        myDebug_P(PSTR("[FS] Failed to deserialize json, error %s"), error.c_str());
+        myDebug_P(PSTR("[FS] Error. Failed to deserialize json, error %s"), error.c_str());
         delete[] buffer;
-        return false;
+        return 0;
     }
 
     // serializeJsonPretty(doc, Serial); // enable for debugging
 
     file.close();
     delete[] buffer;
-    return true;
+    return size;
 }
 
 // validates the event log file in SPIFFS
 // returns true if all OK
-bool MyESP::_fs_validateLogFile(const char * filename) {
+size_t MyESP::_fs_validateLogFile(const char * filename) {
     // exit if we have disabled logging
     if (!_general_log_events) {
-        return true;
+        return 0;
     }
 
     // see if we can open it
     File eventlog = SPIFFS.open(filename, "r");
     if (!eventlog) {
         myDebug_P(PSTR("[FS] File %s not found"), filename);
-        return false;
+        return 0;
     }
 
     // check sizes
     size_t size    = eventlog.size();
-    size_t maxsize = ESP.getFreeHeap() - 2000;                                       // reserve some buffer
-    myDebug_P(PSTR("[FS] Checking file %s (%d/%d bytes)"), filename, size, maxsize); // remove for debugging
+    size_t maxsize = ESP.getFreeHeap() - 2000; // reserve some buffer
+    // myDebug_P(PSTR("[FS] Checking file %s (%d/%d bytes)"), filename, size, maxsize); // remove for debugging
     if (size > maxsize) {
         eventlog.close();
         myDebug_P(PSTR("[FS] File %s size %d is too large"), filename, size);
-        return false;
+        return 0;
     } else if (size == 0) {
         eventlog.close();
         myDebug_P(PSTR("[FS] Corrupted file %s"), filename);
-        return false;
+        return 0;
     }
 
     /*
@@ -1642,7 +1644,12 @@ bool MyESP::_fs_validateLogFile(const char * filename) {
     }
 
     eventlog.close();
-    return !abort;
+
+    if (abort) {
+        return 0;
+    }
+
+    return size;
 }
 
 // format File System
@@ -1674,8 +1681,9 @@ bool MyESP::_fs_loadConfig() {
     StaticJsonDocument<MYESP_SPIFFS_MAXSIZE_CONFIG> doc;
 
     // set to true to print out contents of file
-    if (!_fs_validateConfigFile(MYESP_CONFIG_FILE, MYESP_SPIFFS_MAXSIZE_CONFIG, doc)) {
-        myDebug_P(PSTR("[FS] Failed to open system config"));
+    size_t size = _fs_validateConfigFile(MYESP_CONFIG_FILE, MYESP_SPIFFS_MAXSIZE_CONFIG, doc);
+    if (!size) {
+        myDebug_P(PSTR("[FS] Error. Failed to open system config"));
         return false;
     }
 
@@ -1717,7 +1725,7 @@ bool MyESP::_fs_loadConfig() {
         _ntp_interval = 60;
     _ntp_enabled = ntp["enabled"];
 
-    myDebug_P(PSTR("[FS] System config loaded"));
+    myDebug_P(PSTR("[FS] System config loaded (%d bytes)"), size);
 
     return true;
 }
@@ -1784,8 +1792,9 @@ bool MyESP::fs_setSettingValue(bool * setting, const char * value, bool value_de
 bool MyESP::_fs_loadCustomConfig() {
     StaticJsonDocument<MYESP_SPIFFS_MAXSIZE_CONFIG> doc;
 
-    if (!_fs_validateConfigFile(MYESP_CUSTOMCONFIG_FILE, MYESP_SPIFFS_MAXSIZE_CONFIG, doc)) {
-        myDebug_P(PSTR("[FS] Failed to open custom config"));
+    size_t size = _fs_validateConfigFile(MYESP_CUSTOMCONFIG_FILE, MYESP_SPIFFS_MAXSIZE_CONFIG, doc);
+    if (!size) {
+        myDebug_P(PSTR("[FS] Error. Failed to open custom config"));
         return false;
     }
 
@@ -1795,7 +1804,7 @@ bool MyESP::_fs_loadCustomConfig() {
             myDebug_P(PSTR("[FS] Error reading custom config"));
             return false;
         } else {
-            myDebug_P(PSTR("[FS] Custom config loaded"));
+            myDebug_P(PSTR("[FS] Custom config loaded (%d bytes)"), size);
         }
     }
 
@@ -1989,8 +1998,9 @@ void MyESP::_fs_setup() {
     */
 
     // validate the event log. Sometimes it can can corrupted.
-    if (_fs_validateLogFile(MYESP_EVENTLOG_FILE)) {
-        myDebug_P(PSTR("[FS] Event log is healthy"));
+    size_t size = _fs_validateLogFile(MYESP_EVENTLOG_FILE);
+    if (size) {
+        myDebug_P(PSTR("[FS] Event log loaded (%d bytes)"), size);
     } else {
         myDebug_P(PSTR("[FS] Resetting event log"));
         SPIFFS.remove(MYESP_EVENTLOG_FILE);

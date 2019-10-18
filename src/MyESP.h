@@ -9,7 +9,7 @@
 #ifndef MyESP_h
 #define MyESP_h
 
-#define MYESP_VERSION "1.2.10"
+#define MYESP_VERSION "1.2.11"
 
 #include <ArduinoJson.h>
 #include <ArduinoOTA.h>
@@ -385,15 +385,15 @@ class MyESP {
     bool                     _changeSetting(uint8_t wc, const char * setting, const char * value);
 
     // fs and settings
-    void _fs_setup();
-    bool _fs_loadConfig();
-    bool _fs_loadCustomConfig();
-    void _fs_eraseConfig();
-    bool _fs_writeConfig();
-    bool _fs_createCustomConfig();
-    bool _fs_sendConfig();
-    bool _fs_validateConfigFile(const char * filename, size_t maxsize, JsonDocument & doc);
-    bool _fs_validateLogFile(const char * filename);
+    void   _fs_setup();
+    bool   _fs_loadConfig();
+    bool   _fs_loadCustomConfig();
+    void   _fs_eraseConfig();
+    bool   _fs_writeConfig();
+    bool   _fs_createCustomConfig();
+    bool   _fs_sendConfig();
+    size_t _fs_validateConfigFile(const char * filename, size_t maxsize, JsonDocument & doc);
+    size_t _fs_validateLogFile(const char * filename);
 
     fs_loadsave_callback_f _fs_loadsave_callback_f;
     fs_setlist_callback_f  _fs_setlist_callback_f;

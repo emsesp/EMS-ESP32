@@ -410,7 +410,7 @@ void ems_setFlowTemp(uint8_t temperature);
 void ems_setWarmWaterActivated(bool activated);
 void ems_setWarmTapWaterActivated(bool activated);
 void ems_setPoll(bool b);
-void ems_setLogging(_EMS_SYS_LOGGING loglevel);
+void ems_setLogging(_EMS_SYS_LOGGING loglevel, bool silent = false);
 void ems_setEmsRefreshed(bool b);
 void ems_setWarmWaterModeComfort(uint8_t comfort);
 void ems_setModels();
