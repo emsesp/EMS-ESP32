@@ -1541,19 +1541,15 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
         // assumes payload is "1" or "0"
         const char * shower_alert = doc[TOPIC_SHOWER_ALERT];
         if (shower_alert) {
-            if ((shower_alert[0] - MYESP_MQTT_PAYLOAD_OFF) != EMSESP_Settings.shower_alert) {
-                EMSESP_Settings.shower_alert = shower_alert[0] - MYESP_MQTT_PAYLOAD_OFF;
-                myDebug_P(PSTR("Shower alert has been set to %s"), EMSESP_Settings.shower_alert ? "enabled" : "disabled");
-            }
+            EMSESP_Settings.shower_alert = ((shower_alert[0] - MYESP_MQTT_PAYLOAD_OFF) == 1);
+            myDebug_P(PSTR("Shower alert has been set to %s"), EMSESP_Settings.shower_alert ? "enabled" : "disabled");
         }
 
         // assumes payload is "1" or "0"
         const char * shower_timer = doc[TOPIC_SHOWER_TIMER];
         if (shower_timer) {
-            if ((shower_timer[0] - MYESP_MQTT_PAYLOAD_OFF) != EMSESP_Settings.shower_timer) {
-                EMSESP_Settings.shower_timer = shower_timer[0] - MYESP_MQTT_PAYLOAD_OFF;
-                myDebug_P(PSTR("Shower timer has been set to %s"), EMSESP_Settings.shower_timer ? "enabled" : "disabled");
-            }
+            EMSESP_Settings.shower_timer = ((shower_timer[0] - MYESP_MQTT_PAYLOAD_OFF) == 1);
+            myDebug_P(PSTR("Shower timer has been set to %s"), EMSESP_Settings.shower_timer ? "enabled" : "disabled");
         }
 
         return;
