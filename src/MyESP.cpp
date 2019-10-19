@@ -397,12 +397,18 @@ void MyESP::mqttUnsubscribe(const char * topic) {
     }
 }
 
+// Publish using the user's custom retain flag
+bool MyESP::mqttPublish(const char * topic, const char * payload) {
+    // use the custom MQTT retain flag
+    return mqttPublish(topic, payload, _mqtt_retain);
+}
+
 // MQTT Publish
 // returns true if all good
-bool MyESP::mqttPublish(const char * topic, const char * payload) {
+bool MyESP::mqttPublish(const char * topic, const char * payload, bool retain) {
     if (mqttClient.connected() && (strlen(topic) > 0)) {
         //myDebug_P(PSTR("[MQTT] Sending publish to %s with payload %s"), _mqttTopic(topic), payload); // for debugging
-        uint16_t packet_id = mqttClient.publish(_mqttTopic(topic), _mqtt_qos, _mqtt_retain, payload);
+        uint16_t packet_id = mqttClient.publish(_mqttTopic(topic), _mqtt_qos, retain, payload);
 
         if (packet_id) {
             _addMQTTLog(topic, payload, 1); // add to the log, using type of 1 for Publish
@@ -423,7 +429,7 @@ void MyESP::_mqttOnConnect() {
     _mqtt_last_connection = millis();
 
     // say we're alive to the Last Will topic
-    mqttClient.publish(_mqttTopic(_mqtt_will_topic), 1, true, _mqtt_will_online_payload); // qos=1, retain=true
+    mqttPublish(_mqtt_will_topic, _mqtt_will_online_payload, true); // force retain on
 
     // subscribe to general subs
     mqttSubscribe(MQTT_TOPIC_RESTART);
@@ -1365,7 +1371,7 @@ void MyESP::_heartbeatCheck(bool force = false) {
         strlcat(payload, itoa(mem_available, s, 10), sizeof(payload)); // free mem as a %
         strlcat(payload, "%", sizeof(payload));
 
-        mqttPublish(MQTT_TOPIC_HEARTBEAT, payload); // send to MQTT
+        mqttPublish(MQTT_TOPIC_HEARTBEAT, payload, false); // send to MQTT with retain off
     }
 }
 

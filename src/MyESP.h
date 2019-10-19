@@ -9,7 +9,7 @@
 #ifndef MyESP_h
 #define MyESP_h
 
-#define MYESP_VERSION "1.2.11"
+#define MYESP_VERSION "1.2.12"
 
 #include <ArduinoJson.h>
 #include <ArduinoOTA.h>
@@ -275,6 +275,7 @@ class MyESP {
     bool mqttSubscribe(const char * topic);
     void mqttUnsubscribe(const char * topic);
     bool mqttPublish(const char * topic, const char * payload);
+    bool mqttPublish(const char * topic, const char * payload, bool retain);
     void setMQTT(mqtt_callback_f callback);
 
     // OTA

@@ -1076,7 +1076,8 @@ bool do_publishShowerData() {
 
     myDebugLog("Publishing shower data via MQTT");
 
-    return (myESP.mqttPublish(TOPIC_SHOWER_DATA, data));
+    // Publish MQTT forcing retain to be off
+    return (myESP.mqttPublish(TOPIC_SHOWER_DATA, data, false));
 }
 
 // callback for custom settings when showing Stored Settings with the 'set' command
