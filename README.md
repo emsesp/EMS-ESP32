@@ -37,7 +37,13 @@ The code is written for the Espressif **ESP8266** microcontroller and supports a
 
 ## Supported EMS devices
 
-More than **50** EMS devices are currently supported. See [the complete list here](https://github.com/proddy/EMS-ESP/wiki/Supported-EMS-Devices) from the Wiki.
+More than **50** EMS devices are currently supported. See the [complete list](https://github.com/proddy/EMS-ESP/wiki/Supported-EMS-Devices) from the [Wiki](https://github.com/proddy/EMS-ESP/wiki).
+
+## Uploading the firmware
+
+Latest stable firmware build can be found [here](https://github.com/proddy/EMS-ESP/releases/latest).
+
+Follow [these instructions](https://github.com/proddy/EMS-ESP/wiki/Building-and-Uploading-the-Firmware) on how to upload to the ESP8266.
 
 ## Compatible with bbqkees' EMS Gateway
 
@@ -45,4 +51,3 @@ The firmware fully supports BBQKees' [EMS Gateway](https://shop.hotgoodies.nl/em
 
 | ![on boiler](https://github.com/proddy/EMS-ESP/raw/master/doc/ems%20gateway/on-boiler.jpg) | ![kit](https://github.com/proddy/EMS-ESP/raw/master/doc/ems%20gateway/ems-kit-2.jpg) | ![basic circuit](https://github.com/proddy/EMS-ESP/raw/master/doc/ems%20gateway/ems-board-white.jpg) |
 | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
-
