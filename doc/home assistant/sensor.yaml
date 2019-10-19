@@ -132,11 +132,11 @@
   value_template: '{{ value_json.pumpMod }}'
 
   # shower time duration
+
 - platform: mqtt
   name: 'Last shower duration'
   state_topic: "home/ems-esp/shower_data"
-  value_template: "{{ value_json.duration }}"
-  force_update: true
+  value_template: "{{ value_json.duration | is_defined }}"
 
 - platform: template
   sensors:
@@ -148,3 +148,9 @@
 
     boiler_boottime:
       value_template: '{{ as_timestamp(states.automation.see_if_boiler_restarts.attributes.last_triggered) | timestamp_custom("%H:%M:%S %d/%m/%y") }}'
+
+# general
+
+- platform: mqtt
+  state_topic: 'home/ems-esp/status'
+  name: 'ems-esp status'
