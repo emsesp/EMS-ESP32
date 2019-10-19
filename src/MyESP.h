@@ -9,7 +9,7 @@
 #ifndef MyESP_h
 #define MyESP_h
 
-#define MYESP_VERSION "1.2.6"
+#define MYESP_VERSION "1.2.12"
 
 #include <ArduinoJson.h>
 #include <ArduinoOTA.h>
@@ -64,7 +64,7 @@ extern struct rst_info resetInfo;
 #define MYESP_LOADAVG_INTERVAL 30000 // Interval between calculating load average (in ms) = 30 seconds
 
 // WIFI
-#define MYESP_WIFI_CONNECT_TIMEOUT 10000     // Connecting timeout for WIFI in ms (10 seconds)
+#define MYESP_WIFI_CONNECT_TIMEOUT 20000     // Connecting timeout for WIFI in ms (20 seconds)
 #define MYESP_WIFI_RECONNECT_INTERVAL 600000 // If could not connect to WIFI, retry after this time in ms. 10 minutes
 
 // MQTT
@@ -79,21 +79,25 @@ extern struct rst_info resetInfo;
 #define MQTT_WILL_ONLINE_PAYLOAD "online"   // for last will & testament payload
 #define MQTT_WILL_OFFLINE_PAYLOAD "offline" // for last will & testament payload
 #define MQTT_BASE_DEFAULT "home"            // default MQTT prefix to topics
-#define MQTT_RETAIN false
-#define MQTT_KEEPALIVE 60 // 1 minute
-#define MQTT_QOS 1
-#define MQTT_WILL_TOPIC "status"         // for last will & testament topic name
-#define MQTT_MAX_TOPIC_SIZE 50           // max length of MQTT topic
-#define MQTT_MAX_PAYLOAD_SIZE 500        // max size of a JSON object. See https://arduinojson.org/v6/assistant/
-#define MQTT_MAX_PAYLOAD_SIZE_LARGE 2000 // max size of a large JSON object, like for sending MQTT log
-#define MYESP_JSON_MAXSIZE 2000          // for large Dynamic json files
-#define MYESP_MQTTLOG_MAX 40             // max number of log entries for MQTT publishes and subscribes
-#define MYESP_JSON_LOG_MAXSIZE 300       // max size of an JSON log entry
+#define MQTT_RETAIN false                   // default false
+#define MQTT_KEEPALIVE 60                   // default keepalive 1 minute
+#define MQTT_QOS 0                          // default qos 0
+#define MQTT_WILL_TOPIC "status"            // for last will & testament topic name
+#define MQTT_MAX_TOPIC_SIZE 50              // max length of MQTT topic
+#define MQTT_MAX_PAYLOAD_SIZE 700           // max size of a JSON object. See https://arduinojson.org/v6/assistant/
+#define MQTT_MAX_PAYLOAD_SIZE_LARGE 2000    // max size of a large JSON object, like for sending MQTT log
 
 // Internal MQTT events
 #define MQTT_CONNECT_EVENT 0
 #define MQTT_DISCONNECT_EVENT 1
 #define MQTT_MESSAGE_EVENT 2
+
+#define MYESP_JSON_MAXSIZE 2000    // for large Dynamic json files
+#define MYESP_MQTTLOG_MAX 60       // max number of log entries for MQTT publishes and subscribes
+#define MYESP_JSON_LOG_MAXSIZE 300 // max size of an JSON log entry
+
+#define MYESP_MQTT_PAYLOAD_ON '1'  // for MQTT switch on
+#define MYESP_MQTT_PAYLOAD_OFF '0' // for MQTT switch off
 
 // Telnet
 #define TELNET_SERIAL_BAUD 115200
@@ -268,9 +272,10 @@ class MyESP {
 
     // mqtt
     bool isMQTTConnected();
-    void mqttSubscribe(const char * topic);
+    bool mqttSubscribe(const char * topic);
     void mqttUnsubscribe(const char * topic);
-    void mqttPublish(const char * topic, const char * payload);
+    bool mqttPublish(const char * topic, const char * payload);
+    bool mqttPublish(const char * topic, const char * payload, bool retain);
     void setMQTT(mqtt_callback_f callback);
 
     // OTA
@@ -287,6 +292,10 @@ class MyESP {
     void setSettings(fs_loadsave_callback_f loadsave, fs_setlist_callback_f setlist, bool useSerial = true);
     bool fs_saveConfig(JsonObject root);
     bool fs_saveCustomConfig(JsonObject root);
+    bool fs_setSettingValue(char ** setting, const char * value, const char * value_default);
+    bool fs_setSettingValue(uint16_t * setting, const char * value, uint16_t value_default);
+    bool fs_setSettingValue(uint8_t * setting, const char * value, uint8_t value_default);
+    bool fs_setSettingValue(bool * setting, const char * value, bool value_default);
 
     // Web
     void setWeb(web_callback_f callback_web);
@@ -330,10 +339,10 @@ class MyESP {
     char *          _mqtt_ip;
     char *          _mqtt_user;
     char *          _mqtt_password;
-    int             _mqtt_port;
+    uint16_t        _mqtt_port;
     char *          _mqtt_base;
     bool            _mqtt_enabled;
-    uint32_t        _mqtt_keepalive;
+    uint16_t        _mqtt_keepalive;
     uint8_t         _mqtt_qos;
     bool            _mqtt_retain;
     char *          _mqtt_will_topic;
@@ -377,15 +386,15 @@ class MyESP {
     bool                     _changeSetting(uint8_t wc, const char * setting, const char * value);
 
     // fs and settings
-    void _fs_setup();
-    bool _fs_loadConfig();
-    bool _fs_loadCustomConfig();
-    void _fs_eraseConfig();
-    bool _fs_writeConfig();
-    bool _fs_createCustomConfig();
-    bool _fs_sendConfig();
-    bool _fs_validateConfigFile(const char * filename, size_t maxsize, JsonDocument & doc);
-    bool _fs_validateLogFile(const char * filename);
+    void   _fs_setup();
+    bool   _fs_loadConfig();
+    bool   _fs_loadCustomConfig();
+    void   _fs_eraseConfig();
+    bool   _fs_writeConfig();
+    bool   _fs_createCustomConfig();
+    bool   _fs_sendConfig();
+    size_t _fs_validateConfigFile(const char * filename, size_t maxsize, JsonDocument & doc);
+    size_t _fs_validateLogFile(const char * filename);
 
     fs_loadsave_callback_f _fs_loadsave_callback_f;
     fs_setlist_callback_f  _fs_setlist_callback_f;
@@ -406,7 +415,7 @@ class MyESP {
     bool          _formatreq;
     unsigned long _getUptime();
     char *        _getBuildTime();
-    bool          _hasValue(char * s);
+    bool          _hasValue(const char * s);
     void          _printHeap(const char * s);
 
     // reset reason and rtcmem

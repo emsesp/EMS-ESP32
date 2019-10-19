@@ -4,7 +4,6 @@
  * Paul Derbyshire - https://github.com/proddy/EMS-ESP
  *
  * See ChangeLog.md for history
- * See README.md for Acknowledgments
  *
  */
 
@@ -13,67 +12,8 @@
 #include <Arduino.h>
 #include <list> // std::list
 
-/* debug helper for logic analyzer 
- * create marker puls on GPIOx
- *   ° for Rx, we use GPIO14
- *   ° for Tx, we use GPIO12
- */
-
-// clang-format off
-#ifdef LOGICANALYZER
-#define RX_MARK_PIN 14
-#define TX_MARK_PIN 12
-
-#define RX_MARK_MASK (1 << RX_MARK_PIN)
-#define TX_MARK_MASK (1 << TX_MARK_PIN)
-#define MARKERS_MASK (RX_MARK_PIN | TX_MARK_PIN)
-
-#define GPIO_H(mask) (GPIO_REG_WRITE(GPIO_OUT_W1TS_ADDRESS, (mask)))
-#define GPIO_L(mask) (GPIO_REG_WRITE(GPIO_OUT_W1TC_ADDRESS, (mask)))
-
-#define RX_PULSE(pulse)             \
-    do {                            \
-        GPIO_H(RX_MARK_MASK);       \
-        delayMicroseconds(pulse);   \
-        GPIO_L(RX_MARK_MASK);       \
-    } while (0)
-#define TX_PULSE(pulse)             \
-    do {                            \
-        GPIO_H(TX_MARK_MASK);       \
-        delayMicroseconds(pulse);   \
-        GPIO_L(TX_MARK_MASK);       \
-    } while (0)
-#define LA_PULSE(pulse)             \
-    do {                            \
-        GPIO_H(MARKERS_MASK);       \
-        delayMicroseconds(pulse);   \
-        GPIO_L(MARKERS_MASK);       \
-    } while (0)
-
-#define INIT_MARKERS(void)              \
-    do {                                \
-        pinMode(RX_MARK_PIN, OUTPUT);   \
-        pinMode(TX_MARK_PIN, OUTPUT);   \
-        GPIO_L(MARKERS_MASK);           \
-    } while (0)
-#else
-#define RX_PULSE(pulse)     \
-    {}
-#define TX_PULSE(pulse)     \
-    {}
-#define LA_PULSE(pulse)     \
-    {}
-#define INIT_MARKERS(void)  \
-    {}
-#define RX_MARK_MASK
-#define TX_MARK_MASK
-#define GPIO_H(mask)
-#define GPIO_L(mask)
-#endif
-// clang-format on
-
 // EMS tx_mode types
-#define EMS_TXMODE_DEFAULT 1 // Default (was previously known as tx_mode 2)
+#define EMS_TXMODE_DEFAULT 1 // Default (was previously known as tx_mode 2 in v1.8.x)
 #define EMS_TXMODE_EMSPLUS 2 // EMS+
 #define EMS_TXMODE_HT3 3     // Junkers HT3
 
@@ -87,11 +27,10 @@
 #define EMS_ID_GATEWAY 0x48 // KM200 Web Gateway
 
 // Product IDs
-#define EMS_PRODUCTID_HEATRONIC 95 // Junkers Heatronic 3 device
-#define EMS_PRODUCTID_SM10 73      // SM10 solar module
-#define EMS_PRODUCTID_SM50 162     // SM50 solar module
-#define EMS_PRODUCTID_SM100 163    // SM100 solar module
-#define EMS_PRODUCTID_ISM1 101     // Junkers ISM1 solar module
+#define EMS_PRODUCTID_SM10 73   // SM10 solar module
+#define EMS_PRODUCTID_SM50 162  // SM50 solar module
+#define EMS_PRODUCTID_SM100 163 // SM100 solar module
+#define EMS_PRODUCTID_ISM1 101  // Junkers ISM1 solar module
 
 #define EMS_MIN_TELEGRAM_LENGTH 6  // minimal length for a validation telegram, including CRC
 #define EMS_MAX_TELEGRAM_LENGTH 32 // max length of a telegram, including CRC, for Rx and Tx.
@@ -112,7 +51,7 @@
 
 // trigger settings to determine if hot tap water or the heating is active
 #define EMS_BOILER_BURNPOWER_TAPWATER 100
-#define EMS_BOILER_SELFLOWTEMP_HEATING 70
+#define EMS_BOILER_SELFLOWTEMP_HEATING 30 // was 70, changed to 30 for https://github.com/proddy/EMS-ESP/issues/193
 
 // define maximum setable tapwater temperature
 #define EMS_BOILER_TAPWATER_TEMPERATURE_MAX 60
@@ -132,6 +71,7 @@
 #define EMS_MODELTYPE_HP 4         // success color
 #define EMS_MODELTYPE_OTHER 5      // no color
 #define EMS_MODELTYPE_UNKNOWN 6    // no color
+#define EMS_MODELTYPE_MIXING 7
 
 #define EMS_MODELTYPE_UNKNOWN_STRING "unknown?" // model type text to use when discovering an unknown device
 
@@ -246,7 +186,7 @@ const _EMS_TxTelegram EMS_TX_TELEGRAM_NEW = {
 // where defintions are stored
 typedef struct {
     uint8_t product_id;
-    char    model_string[50];
+    char    model_string[70];
 } _Boiler_Device;
 
 typedef struct {
@@ -273,6 +213,11 @@ typedef struct {
     bool    write_supported;
 } _Thermostat_Device;
 
+typedef struct {
+    uint8_t product_id;
+    char    model_string[50];
+} _Mixing_Device;
+
 // for consolidating all types
 typedef struct {
     uint8_t model_type; // 1=boiler, 2=thermostat, 3=sm, 4=other, 5=unknown
@@ -281,6 +226,7 @@ typedef struct {
     char    version[10];
     char    model_string[50];
 } _Generic_Device;
+
 
 /*
  * Telegram package defintions
@@ -322,6 +268,7 @@ typedef struct {
     uint32_t burnStarts;  // # burner starts
     uint32_t burnWorkMin; // Total burner operating time
     uint32_t heatWorkMin; // Total heat operating time
+    uint16_t switchTemp;  // Switch temperature
 
     // UBAMonitorWWMessage
     uint16_t wWCurTmp;  // Warm Water current temperature
@@ -363,6 +310,25 @@ typedef struct {
     uint8_t product_id;
     char    version[10];
 } _EMS_Other;
+
+typedef struct {
+    uint8_t device_id;
+    uint8_t model_id;
+    uint8_t product_id;
+    char    version[10];
+    uint8_t hc;     // heating circuit 1, 2, 3 or 4
+    bool    active; // true if there is data for this HC
+
+    uint16_t flowTemp;
+    uint8_t  pumpMod;
+    uint8_t  valveStatus;
+} _EMS_Mixing_HC;
+
+// Mixer data
+typedef struct {
+    bool           detected;
+    _EMS_Mixing_HC hc[EMS_THERMOSTAT_MAXHC]; // array for the 4 heating circuits
+} _EMS_Mixing;
 
 // SM Solar Module - SM10/SM100/ISM1
 typedef struct {
@@ -444,7 +410,7 @@ void ems_setFlowTemp(uint8_t temperature);
 void ems_setWarmWaterActivated(bool activated);
 void ems_setWarmTapWaterActivated(bool activated);
 void ems_setPoll(bool b);
-void ems_setLogging(_EMS_SYS_LOGGING loglevel);
+void ems_setLogging(_EMS_SYS_LOGGING loglevel, bool silent = false);
 void ems_setEmsRefreshed(bool b);
 void ems_setWarmWaterModeComfort(uint8_t comfort);
 void ems_setModels();
@@ -463,6 +429,7 @@ void             ems_getSolarModuleValues();
 bool             ems_getPoll();
 bool             ems_getTxEnabled();
 bool             ems_getThermostatEnabled();
+bool             ems_getMixingDeviceEnabled();
 bool             ems_getBoilerEnabled();
 bool             ems_getSolarModuleEnabled();
 bool             ems_getHeatPumpEnabled();
@@ -475,7 +442,6 @@ void             ems_discoverModels();
 bool             ems_getTxCapable();
 uint32_t         ems_getPollFrequency();
 bool             ems_getTxDisabled();
-
 
 // private functions
 uint8_t _crcCalculator(uint8_t * data, uint8_t len);
@@ -491,5 +457,6 @@ extern _EMS_Thermostat  EMS_Thermostat;
 extern _EMS_SolarModule EMS_SolarModule;
 extern _EMS_HeatPump    EMS_HeatPump;
 extern _EMS_Other       EMS_Other;
+extern _EMS_Mixing      EMS_Mixing;
 
 extern std::list<_Generic_Device> Devices;

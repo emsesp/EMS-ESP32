@@ -74,8 +74,11 @@ var configfile = {
     },
     "mqtt": {
         "enabled": false,
-        "ip": "ip",
-        "port": "port",
+        "ip": "10.10.10.10",
+        "port": 1883,
+        "qos": 1,
+        "keepalive": 60,
+        "retain": true,
         "base": "base",
         "user": "user",
         "password": "password",

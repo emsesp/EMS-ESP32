@@ -73,7 +73,6 @@ void breakTime(time_t timeInput, tmElements_t & tm) {
     days -= LEAP_YEAR(year) ? 366 : 365;
     time -= days; // now it is days in this year, starting at 0
 
-    days        = 0;
     month       = 0;
     monthLength = 0;
     for (month = 0; month < 12; month++) {
@@ -104,34 +103,19 @@ void refreshCache(time_t t) {
     }
 }
 
-int day(time_t t) { // the day for the given time (0-6)
-    refreshCache(t);
-    return tm.Day;
-}
-
-int month(time_t t) { // the month for the given time
-    refreshCache(t);
-    return tm.Month;
-}
-
-int second(time_t t) { // the second for the given time
+uint8_t to_second(time_t t) { // the second for the given time
     refreshCache(t);
     return tm.Second;
 }
 
-int minute(time_t t) { // the minute for the given time
+uint8_t to_minute(time_t t) { // the minute for the given time
     refreshCache(t);
     return tm.Minute;
 }
 
-int hour(time_t t) { // the hour for the given time
+uint8_t to_hour(time_t t) { // the hour for the given time
     refreshCache(t);
     return tm.Hour;
-}
-
-int year(time_t t) { // the year for the given time
-    refreshCache(t);
-    return tmYearToCalendar(tm.Year);
 }
 
 void setTime(time_t t) {

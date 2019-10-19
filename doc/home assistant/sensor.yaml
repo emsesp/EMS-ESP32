@@ -1,30 +1,24 @@
+
+# thermostat HC1
+
 - platform: mqtt
   state_topic: 'home/ems-esp/thermostat_data'
   name: 'Current Room Temperature'
   unit_of_measurement: '°C'
-  value_template: "{{ value_json.thermostat_currtemp }}"
+  value_template: "{{ value_json.hc1.currtemp }}"
 
 - platform: mqtt
   state_topic: 'home/ems-esp/thermostat_data'
   name: 'Current Set Temperature'
   unit_of_measurement: '°C'
-  value_template: "{{ value_json.thermostat_seltemp }}"
+  value_template: "{{ value_json.hc1.seltemp }}" 
 
 - platform: mqtt
   state_topic: 'home/ems-esp/thermostat_data'
   name: 'Current Mode'
-  value_template: "{{ value_json.thermostat_mode }}"
+  value_template: "{{ value_json.hc1.mode }}" 
 
-# last time esp-esp was started
-- platform: template
-  sensors:
-    boiler_boottime:
-      value_template: '{{ as_timestamp(states.automation.see_if_boiler_restarts.attributes.last_triggered) | timestamp_custom("%H:%M:%S %d/%m/%y") }}'
-
-- platform: mqtt
-  state_topic: 'home/ems-esp/showertime'
-  name: 'Last shower duration'
-  force_update: true
+  # boiler
 
 - platform: mqtt
   state_topic: 'home/ems-esp/boiler_data'
@@ -137,13 +131,20 @@
   unit_of_measurement: '%'
   value_template: '{{ value_json.pumpMod }}'
 
+  # shower time duration
+- platform: mqtt
+  name: 'Last shower duration'
+  state_topic: "home/ems-esp/shower_data"
+  value_template: "{{ value_json.duration }}"
+  force_update: true
+
 - platform: template
   sensors:
     showertime_time:
-      value_template: '{{ as_timestamp(states.sensor.last_shower_duration.last_updated) | int | timestamp_custom("%-I:%M %P on %a %-d %b") }}'
+      value_template: '{{ as_timestamp(states.sensor.last_shower_duration.last_updated) | int | timestamp_custom("%-I:%M on %a %-d %b") }}'
 
     boiler_updated:
       value_template: '{{ as_timestamp(states.sensor.boiler_temperature.last_updated) | timestamp_custom("%H:%M on %d/%b") }}'
 
-
-
+    boiler_boottime:
+      value_template: '{{ as_timestamp(states.automation.see_if_boiler_restarts.attributes.last_triggered) | timestamp_custom("%H:%M:%S %d/%m/%y") }}'

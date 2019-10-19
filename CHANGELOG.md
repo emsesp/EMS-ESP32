@@ -5,6 +5,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.2 beta]
+
+#### Important! This build has breaking changes:
+ - MQTT topics have changed. Use the `mqttlog` command to see the names of the subscriptions and the format of the payload data. Also reference the [Wiki page](https://github.com/proddy/EMS-ESP/wiki/MQTT).
+ - Home Assistant `.yaml` files need updating to reflect the recent MQTT changes
+ - The web builder has been upgraded to use Gulp 4. Remove `tools/webfilesbuilder/node_modules` and re-install the libraries using `npm ci` from within the `tools/webfilesbuilder` folder
+
+### Added
+
+- Handling of Mixing Module MM100 Status Messages (thanks @kstaniek)
+- Retrieve/Set thermostat mode for Junkers FW100/120 thermostats (thanks @Neonox31)
+- Added sending of all Mixer Module data via MQTT (thanks @peclik)
+- Improved handling of MQTT publish and subscribe errors
+- Added MQTT QOS (`mqtt_qos`, default 0), Keep Alive (`mqtt_keepalive`, default 60 seconds) and Retain (`mqtt_retain`, default off) as parameters to both telnet and WebUI
+
+### Fixed
+
+- `publish` command also sends Dallas external temperature sensor values
+- `log_events` setting wasn't persisted in config file
+
+### Changed
+
+- External dallas sensor values sent in MQTT payload as float values and not strings
+- All MQTT topics for the Thermostat have the Heating Circuit appended (e.g. `thermostat_data1`). This includes the commands.
+- Shower timer and shower alert and not MQTT published at boot up
+- Heating Active logic change to use Selected Flow Temp of min 30 instead of 70 (https://github.com/proddy/EMS-ESP/issues/193)
+
+### Removed
+
+- Removed telnet command `shower timer` and `shower alert` to toggle the switches
+
 ## [1.9.1] 2019-10-05
 
 ### Added
@@ -12,7 +43,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for multiple Heating Circuits - https://github.com/proddy/EMS-ESP/issues/162
 - new `mqttlog` command also shows which MQTT topics it is subscribed too
 - Optimized event log loading in web and added integrity checks on all config and log files during boot
-- `autodetect quick` 
+- `autodetect quick` for detecting known devices from our database list
 - `log_events` option, now optional to save the log events to SPIFFS
 
 ### Fixed

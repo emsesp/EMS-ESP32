@@ -19,10 +19,14 @@
 #define EMSUART_BIT_TIME 104 // bit time @9600 baud
 
 #define EMSUART_TX_BRK_WAIT 2070 // the BRK from Boiler master is roughly 1.039ms, so accounting for hardware lag using around 2078 (for half-duplex) - 8 (lag)
-#define EMSUART_TX_WAIT_BYTE EMSUART_BIT_TIME * 10 // Time to send one Byte (8 Bits, 1 Start Bit, 1 Stop Bit)
-#define EMSUART_TX_WAIT_BRK EMSUART_BIT_TIME * 11  // Time to send a BRK Signal (11 Bit)
-#define EMSUART_TX_WAIT_GAP EMSUART_BIT_TIME * 7   // Gap between to Bytes
+#define EMSUART_TX_WAIT_BYTE (EMSUART_BIT_TIME * 10) // Time to send one Byte (8 Bits, 1 Start Bit, 1 Stop Bit)
+#define EMSUART_TX_WAIT_BRK (EMSUART_BIT_TIME * 11)  // Time to send a BRK Signal (11 Bit)
+#define EMSUART_TX_WAIT_GAP (EMSUART_BIT_TIME * 7)   // Gap between to Bytes
 #define EMSUART_TX_LAG 8
+
+#define EMSUART_BUSY_WAIT (EMSUART_BIT_TIME / 8)
+#define EMS_TX_TO_CHARS (2 + 20)
+#define EMS_TX_TO_COUNT ((EMS_TX_TO_CHARS)*10 * 8)
 
 #define EMSUART_recvTaskPrio 1
 #define EMSUART_recvTaskQueueLen 64

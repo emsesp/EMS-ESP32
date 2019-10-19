@@ -97,8 +97,6 @@ void DS18::loop() {
 char * DS18::getDeviceString(char * buffer, unsigned char index) {
     uint8_t size = 128;
     if (index < _count) {
-        uint8_t * address = _devices[index].address;
-
         unsigned char chip_id = chip(index);
         if (chip_id == DS18_CHIP_DS18S20) {
             strlcpy(buffer, "DS18S20", size);
@@ -112,6 +110,8 @@ char * DS18::getDeviceString(char * buffer, unsigned char index) {
             strlcpy(buffer, "Unknown", size);
         }
 
+        /*
+        uint8_t * address = _devices[index].address;
         char a[30] = {0};
         snprintf(a,
                  sizeof(a),
@@ -127,6 +127,7 @@ char * DS18::getDeviceString(char * buffer, unsigned char index) {
                  _gpio);
 
         strlcat(buffer, a, size);
+        */
     } else {
         strlcpy(buffer, "invalid", size);
     }

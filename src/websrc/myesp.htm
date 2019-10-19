@@ -191,7 +191,7 @@
                 data-toggle="popover" data-trigger="hover" data-placement="right"
                 data-content="MQTT Server IP Address"></i></label>
         <span class="col-xs-9">
-            <input class="form-control input-sm" placeholder="MQTT IP" style="display:inline;max-width:185px"
+            <input class="form-control input-sm" placeholder="IP address" style="display:inline;max-width:185px"
                 id="mqttip" type="text">
         </span>
         <br>
@@ -201,10 +201,43 @@
                 aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right"
                 data-content="MQTT Server port number"></i></label>
         <span class="col-xs-9">
-            <input class="form-control input-sm" placeholder="MQTT Port" value="" style="display:inline;max-width:185px"
+            <input class="form-control input-sm" placeholder="1883" value="" style="display:inline;max-width:185px"
                 id="mqttport" type="text">
         </span>
         <br>
+    </div>
+    <div class="row form-group">
+        <label class="col-xs-3">QOS<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign"
+                aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right"
+                data-content="MQTT QOS 0,1 or 2"></i></label>
+        <span class="col-xs-9">
+            <input class="form-control input-sm" placeholder="1" value="" style="display:inline;max-width:185px"
+                id="mqttqos" type="text">
+        </span>
+        <br>
+    </div>
+    <div class="row form-group">
+        <label class="col-xs-3">Keep Alive<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign"
+                aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right"
+                data-content="MQTT Keep Alive time in seconds"></i></label>
+        <span class="col-xs-9">
+            <input class="form-control input-sm" placeholder="60" value="" style="display:inline;max-width:185px"
+                id="mqttkeepalive" type="text">
+        </span>
+        <br>
+    </div>
+    <div class="row form-group">
+        <label class="col-xs-3">Retain<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign"
+                aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right"
+                data-content="MQTT Retain Flag"></i></label>
+        <div class="col-xs-9">
+            <form>
+                <label class="radio-inline">
+                    <input type="radio" value="1" name="mqttretain">Enabled</label>
+                <label class="radio-inline">
+                    <input type="radio" value="0" name="mqttretain" checked>Disabled</label>
+            </form>
+        </div>
     </div>
     <div class="row form-group">
         <label class="col-xs-3">Username<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign"
@@ -231,7 +264,7 @@
                 aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right"
                 data-content="MQTT topic prefix (&lt;mqtt base&gt;/&lt;host name&gt;/)"></i></label>
         <span class="col-xs-9">
-            <input class="form-control input-sm" placeholder="MQTT base" value="" style="display:inline;max-width:185px"
+            <input class="form-control input-sm" placeholder="home" value="" style="display:inline;max-width:185px"
                 id="mqttbase" type="text">
         </span>
     </div>

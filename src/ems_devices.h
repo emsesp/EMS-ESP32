@@ -4,7 +4,6 @@
  * Paul Derbyshire - https://github.com/proddy/EMS-ESP
  *
  * See ChangeLog.md for History
- * See README.md for Acknowledgments
  *
  */
 
@@ -140,8 +139,18 @@
 
 // Junkers FR10, FW100 (EMS Plus)
 #define EMS_TYPE_JunkersStatusMessage 0x6F         // is an automatic thermostat broadcast giving us temps
+#define EMS_OFFSET_JunkersStatusMessage_mode 0     // current mode
 #define EMS_OFFSET_JunkersStatusMessage_setpoint 2 // setpoint temp
 #define EMS_OFFSET_JunkersStatusMessage_curr 4     // current temp
+
+// MM100 (EMS Plus)
+#define EMS_TYPE_MMPLUSStatusMessage_HC1 0x01D7       // mixer status HC1
+#define EMS_TYPE_MMPLUSStatusMessage_HC2 0x01D8       // mixer status HC2
+#define EMS_TYPE_MMPLUSStatusMessage_HC3 0x01D9       // mixer status HC3
+#define EMS_TYPE_MMPLUSStatusMessage_HC4 0x01DA       // mixer status HC4
+#define EMS_OFFSET_MMPLUSStatusMessage_flow_temp 3    // flow temperature
+#define EMS_OFFSET_MMPLUSStatusMessage_pump_mod 5     // pump modulation
+#define EMS_OFFSET_MMPLUSStatusMessage_valve_status 2 // valve in percent
 
 
 // Known EMS devices
@@ -174,7 +183,10 @@ typedef enum {
     EMS_MODEL_FR10,
     EMS_MODEL_FR100,
     EMS_MODEL_FR110,
-    EMS_MODEL_FW120
+    EMS_MODEL_FW120,
+
+    // mixing devices
+    EMS_MODEL_MM100
 
 } _EMS_MODEL_ID;
 
@@ -184,12 +196,12 @@ typedef enum {
 const _Boiler_Device Boiler_Devices[] = {
 
     {72, "MC10 Module"},
-    {123, "Buderus GBx72/Nefit Trendline/Junkers Cerapur"},
-    {115, "Nefit Topline Compact/Buderus GB162"},
+    {123, "Buderus GBx72/Nefit Trendline/Junkers Cerapur/Worcester Greenstar Si"},
+    {115, "Nefit Topline/Buderus GB162"},
     {203, "Buderus Logamax U122/Junkers Cerapur"},
-    {208, "Buderus Logamax plus/GB192"},
+    {208, "Buderus Logamax plus/GB192/Bosch Condens GC9000"},
     {64, "Sieger BK15/Nefit Smartline/Buderus GB152"},
-    {EMS_PRODUCTID_HEATRONIC, "Bosch Condens 2500/Junkers Heatronic 3"},
+    {95, "Bosch Condens 2500/Buderus Logamax GB062/Junkers Heatronic 3"},
     {122, "Nefit Proline"},
     {170, "Buderus Logano GB212"},
     {172, "Nefit Enviline"}
@@ -197,7 +209,7 @@ const _Boiler_Device Boiler_Devices[] = {
 };
 
 /*
- * Known Solar Module types, device type 0x30
+ * Known Solar Module types, device id is 0x30
  * format is PRODUCT ID, DESCRIPTION
  */
 const _SolarModule_Device SolarModule_Devices[] = {
@@ -209,16 +221,22 @@ const _SolarModule_Device SolarModule_Devices[] = {
 
 };
 
+/*
+ * Mixing Units
+ * Typically device id is 0x20 or 0x21
+ * format is PRODUCT ID, DESCRIPTION
+ */
+const _Mixing_Device Mixing_Devices[] = {
+    {160, "MM100 Mixing Module"},
+    {69, "MM10 Mixer Module"},
+    {159, "MM50 Mixing Module"},
+};
+
 // Other EMS devices which are not considered boilers, thermostats or solar modules
 // format is PRODUCT ID, DEVICE ID, DESCRIPTION
 const _Other_Device Other_Devices[] = {
 
     {71, 0x11, "WM10 Switch Module"},
-
-    {69, 0x21, "MM10 Mixer Module"},
-    {160, 0x20, "MM100 Mixing Module"},
-    {160, 0x21, "MM100 Mixing Module"},
-    {159, 0x21, "MM50 Mixing Module"},
 
     {68, 0x09, "BC10/RFM20 Receiver"},
     {190, 0x09, "BC10 Base Controller"},
@@ -237,7 +255,12 @@ const _Other_Device Other_Devices[] = {
 
 // heatpump, device ID 0x38
 // format is PRODUCT ID, DEVICE ID, DESCRIPTION
-const _HeatPump_Device HeatPump_Devices[] = {{252, "HeatPump Module"}};
+const _HeatPump_Device HeatPump_Devices[] = {
+
+    {252, "HeatPump Module"},
+    {200, "HeatPump Module"}
+
+};
 
 /*
  * Known thermostat types and their capabilities
@@ -256,7 +279,7 @@ const _Thermostat_Device Thermostat_Devices[] = {
     {EMS_MODEL_RC20F, 93, 0x18, "RC20F", EMS_THERMOSTAT_WRITE_YES},
     {EMS_MODEL_RC30, 78, 0x10, "RC30/Moduline 400", EMS_THERMOSTAT_WRITE_YES},
     {EMS_MODEL_RC35, 86, 0x10, "RC35", EMS_THERMOSTAT_WRITE_YES},
-    {EMS_MODEL_RC300, 158, 0x10, "RC300/RC310/Moduline 3000", EMS_THERMOSTAT_WRITE_YES},
+    {EMS_MODEL_RC300, 158, 0x10, "RC300/RC310/Moduline 3000/Bosch CW400", EMS_THERMOSTAT_WRITE_YES},
     {EMS_MODEL_1010, 165, 0x18, "RC100/Moduline 1010", EMS_THERMOSTAT_WRITE_NO},
 
     // Sieger

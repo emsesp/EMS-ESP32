@@ -1,15 +1,82 @@
-var gulp = require('gulp');
-var fs = require('fs');
-var concat = require('gulp-concat');
-var gzip = require('gulp-gzip');
-var flatmap = require('gulp-flatmap');
-var path = require('path');
-var htmlmin = require('gulp-htmlmin');
-var uglify = require('gulp-uglify');
-var pump = require('pump');
+/*
+EMS-ESP web server file system builder
 
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-gulp.task('myespjs-concat', function () {
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+/*eslint quotes: ['error', 'single']*/
+/*eslint-env es6*/
+
+const gulp = require('gulp');
+const fs = require('fs');
+const concat = require('gulp-concat');
+const gzip = require('gulp-gzip');
+const flatmap = require('gulp-flatmap');
+const path = require('path');
+const htmlmin = require('gulp-htmlmin');
+const uglify = require('gulp-uglify');
+const pump = require('pump');
+const through = require('through2');
+
+// file name includes extension
+var buildHeader = function (name) {
+
+    return through.obj(function (source, encoding, callback) {
+
+        var parts = source.path.split(path.sep);
+        var filename = parts[parts.length - 1];
+        var extension = filename.split('.')[1];
+
+        // var safename = name.split('.').join('_');
+        var safename = name.replace(/\.|-/g, "_");
+
+        var destination = "../../src/webh/" + filename + ".h";
+
+        // html files go into root
+        if (extension === "html") {
+            var source = "../../src/websrc/temp/gzipped/" + name + ".gz";
+        } else {
+            var source = "../../src/websrc/temp/gzipped/" + extension + "/" + name + ".gz";
+        }
+
+        console.info('Creating file: ' + filename + ' Extension: ' + extension);
+
+        var wstream = fs.createWriteStream(destination);
+        wstream.on('error', function (err) {
+            console.log(err);
+        });
+
+        var data = fs.readFileSync(source);
+
+        wstream.write('#define ' + safename + '_gz_len ' + data.length + '\n');
+        wstream.write('const uint8_t ' + safename + '_gz[] PROGMEM = {');
+
+        for (i = 0; i < data.length; i++) {
+            if (i % 1000 == 0) wstream.write("\n");
+            wstream.write('0x' + ('00' + data[i].toString(16)).slice(-2));
+            if (i < data.length - 1) wstream.write(',');
+        }
+
+        wstream.write('\n};')
+        wstream.end();
+
+        callback(null, destination);
+
+    });
+};
+
+gulp.task('myespjs', function () {
     return gulp.src(['../../src/websrc/myesp.js', '../../src/custom.js'])
         .pipe(concat({
             path: 'myesp.js',
@@ -18,77 +85,16 @@ gulp.task('myespjs-concat', function () {
             }
         }))
         .pipe(gulp.dest('../../src/websrc/temp/js'))
-});
-
-gulp.task('myespjsminify', ["myespjs-concat"], function (cb) {
-    pump([
-        gulp.src('../../src/websrc/temp/js/myesp.js'),
-        uglify(),
-        gulp.dest('../../src/websrc/temp/js/ugly'),
-    ],
-        cb
-    );
-});
-
-gulp.task("myespjsgz", ["myespjsminify"], function () {
-    return gulp.src("../../src/websrc/temp/js/ugly/myesp.js")
+        .pipe(uglify())
+        .pipe(gulp.dest('../../src/websrc/temp/js/ugly'))
         .pipe(gzip({
             append: true
         }))
-        .pipe(gulp.dest('../../src/websrc/temp/gzipped/js'));
+        .pipe(gulp.dest('../../src/websrc/temp/gzipped/js'))
+        .pipe(buildHeader('myesp.js'));
 });
 
-gulp.task('myespjsgzh', ["myespjsgz"], function () {
-    var source = "../../src/websrc/temp/gzipped/js/" + "myesp.js.gz";
-    var destination = "../../src/webh/" + "myesp.js.gz.h";
-
-    var wstream = fs.createWriteStream(destination);
-    wstream.on('error', function (err) {
-        console.log(err);
-    });
-
-    var data = fs.readFileSync(source);
-
-    wstream.write('#define myesp_js_gz_len ' + data.length + '\n');
-    wstream.write('const uint8_t myesp_js_gz[] PROGMEM = {')
-
-    for (i = 0; i < data.length; i++) {
-        if (i % 1000 == 0) wstream.write("\n");
-        wstream.write('0x' + ('00' + data[i].toString(16)).slice(-2));
-        if (i < data.length - 1) wstream.write(',');
-    }
-
-    wstream.write('\n};')
-    wstream.end();
-});
-
-gulp.task("scripts", ["scripts-concat"], function () {
-
-    var source = "../../src/websrc/temp/gzipped/js/" + "required.js.gz";
-    var destination = "../../src/webh/" + "required.js.gz.h";
-
-    var wstream = fs.createWriteStream(destination);
-    wstream.on('error', function (err) {
-        console.log(err);
-    });
-
-    var data = fs.readFileSync(source);
-
-    wstream.write('#define required_js_gz_len ' + data.length + '\n');
-    wstream.write('const uint8_t required_js_gz[] PROGMEM = {')
-
-    for (i = 0; i < data.length; i++) {
-        if (i % 1000 == 0) wstream.write("\n");
-        wstream.write('0x' + ('00' + data[i].toString(16)).slice(-2));
-        if (i < data.length - 1) wstream.write(',');
-    }
-
-    wstream.write('\n};')
-    wstream.end();
-
-});
-
-gulp.task('scripts-concat', ["myespjsgzh"], function () {
+gulp.task('requiredjs', function () {
     return gulp.src(['../../src/websrc/3rdparty/js/jquery-1.12.4.min.js', '../../src/websrc/3rdparty/js/bootstrap-3.3.7.min.js', '../../src/websrc/3rdparty/js/footable-3.1.6.min.js'])
         .pipe(concat({
             path: 'required.js',
@@ -100,10 +106,12 @@ gulp.task('scripts-concat', ["myespjsgzh"], function () {
         .pipe(gzip({
             append: true
         }))
-        .pipe(gulp.dest('../../src/websrc/temp/gzipped/js/'));
+        .pipe(gulp.dest('../../src/websrc/temp/gzipped/js/'))
+        .pipe(buildHeader('required.js'));
 });
 
-gulp.task('styles-concat', function () {
+
+gulp.task('requiredcss', function () {
     return gulp.src(['../../src/websrc/3rdparty/css/bootstrap-3.3.7.min.css', '../../src/websrc/3rdparty/css/footable.bootstrap-3.1.6.min.css', '../../src/websrc/3rdparty/css/sidebar.css'])
         .pipe(concat({
             path: 'required.css',
@@ -115,70 +123,21 @@ gulp.task('styles-concat', function () {
         .pipe(gzip({
             append: true
         }))
-        .pipe(gulp.dest('../../src/websrc/temp/gzipped/css/'));
+        .pipe(gulp.dest('../../src/websrc/temp/gzipped/css/'))
+        .pipe(buildHeader('required.css'));
 });
 
-gulp.task("styles", ["styles-concat"], function () {
-
-    var source = "../../src/websrc/temp/gzipped/css/" + "required.css.gz";
-    var destination = "../../src/webh/" + "required.css.gz.h";
-
-    var wstream = fs.createWriteStream(destination);
-    wstream.on('error', function (err) {
-        console.log(err);
-    });
-
-    var data = fs.readFileSync(source);
-
-    wstream.write('#define required_css_gz_len ' + data.length + '\n');
-    wstream.write('const uint8_t required_css_gz[] PROGMEM = {')
-
-    for (i = 0; i < data.length; i++) {
-        if (i % 1000 == 0) wstream.write("\n");
-        wstream.write('0x' + ('00' + data[i].toString(16)).slice(-2));
-        if (i < data.length - 1) wstream.write(',');
-    }
-
-    wstream.write('\n};')
-    wstream.end();
-
-});
-
-gulp.task("fontgz", function () {
-    return gulp.src("../../src/websrc/3rdparty/fonts/*.*")
-        .pipe(gulp.dest("../../src/websrc/temp/fonts/"))
+gulp.task("fontwoff", function () {
+    return gulp.src("../../src/websrc/3rdparty/woff/*.*")
+        .pipe(gulp.dest("../../src/websrc/temp/woff/"))
         .pipe(gzip({
             append: true
         }))
-        .pipe(gulp.dest('../../src/websrc/temp/gzipped/fonts/'));
+        .pipe(gulp.dest('../../src/websrc/temp/gzipped/woff/'))
+        .pipe(buildHeader('glyphicons-halflings-regular.woff'));
 });
 
-gulp.task("fonts", ["fontgz"], function () {
-    return gulp.src("../../src/websrc/temp/gzipped/fonts/*.*")
-        .pipe(flatmap(function (stream, file) {
-            var filename = path.basename(file.path);
-            var wstream = fs.createWriteStream("../../src/webh/" + filename + ".h");
-            wstream.on("error", function (err) {
-                gutil.log(err);
-            });
-            var data = file.contents;
-            wstream.write("#define " + filename.replace(/\.|-/g, "_") + "_len " + data.length + "\n");
-            wstream.write("const uint8_t " + filename.replace(/\.|-/g, "_") + "[] PROGMEM = {")
-
-            for (i = 0; i < data.length; i++) {
-                if (i % 1000 == 0) wstream.write("\n");
-                wstream.write('0x' + ('00' + data[i].toString(16)).slice(-2));
-                if (i < data.length - 1) wstream.write(',');
-            }
-
-            wstream.write("\n};")
-            wstream.end();
-
-            return stream;
-        }));
-});
-
-gulp.task('html-concat', function () {
+gulp.task('myesphtml', function () {
     return gulp.src(['../../src/websrc/myesp.htm', '../../src/custom.htm'])
         .pipe(concat({
             path: 'myesp.html',
@@ -191,42 +150,20 @@ gulp.task('html-concat', function () {
         .pipe(gzip({
             append: true
         }))
-        .pipe(gulp.dest('../../src/websrc/temp/gzipped/'));
+        .pipe(gulp.dest('../../src/websrc/temp/gzipped/'))
+        .pipe(buildHeader('myesp.html'));
+
 });
 
-gulp.task('htmlsprep', ["html-concat"], function () {
+gulp.task('indexhtml', function () {
     return gulp.src('../../src/websrc/index.html')
         .pipe(htmlmin({ collapseWhitespace: true, minifyJS: true }))
         .pipe(gulp.dest('../../src/websrc/temp/'))
         .pipe(gzip({
             append: true
         }))
-        .pipe(gulp.dest('../../src/websrc/temp/gzipped/'));
+        .pipe(gulp.dest('../../src/websrc/temp/gzipped/'))
+        .pipe(buildHeader('index.html'));
 });
 
-gulp.task("htmls", ["htmlsprep"], function () {
-    return gulp.src("../../src/websrc/temp/gzipped/*.gz")
-        .pipe(flatmap(function (stream, file) {
-            var filename = path.basename(file.path);
-            var wstream = fs.createWriteStream("../../src/webh/" + filename + ".h");
-            wstream.on("error", function (err) {
-                gutil.log(err);
-            });
-            var data = file.contents;
-            wstream.write("#define " + filename.replace(/\.|-/g, "_") + "_len " + data.length + "\n");
-            wstream.write("const uint8_t " + filename.replace(/\.|-/g, "_") + "[] PROGMEM = {")
-
-            for (i = 0; i < data.length; i++) {
-                if (i % 1000 == 0) wstream.write("\n");
-                wstream.write('0x' + ('00' + data[i].toString(16)).slice(-2));
-                if (i < data.length - 1) wstream.write(',');
-            }
-
-            wstream.write("\n};")
-            wstream.end();
-
-            return stream;
-        }));
-});
-
-gulp.task('default', ['scripts', 'styles', "fonts", "htmls"]);
+gulp.task('default', gulp.parallel('myespjs', 'requiredjs', 'requiredcss', 'fontwoff', 'myesphtml', 'indexhtml'));

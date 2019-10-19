@@ -1,37 +1,39 @@
- - platform: mqtt
-   name: Thermostat
-   modes:
-     - "auto"
-     - "heat"
-     - "off"
-
-   mode_state_topic: "home/ems-esp/thermostat_data"
-   current_temperature_topic: "home/ems-esp/thermostat_data"
-   temperature_state_topic: "home/ems-esp/thermostat_data"
-
-   temperature_command_topic: "home/ems-esp/thermostat_cmd_temp"
-   mode_command_topic: "home/ems-esp/thermostat_cmd_mode"
-
-   mode_state_template: "{{ value_json.thermostat_mode }}"
-   current_temperature_template: "{{ value_json.thermostat_currtemp }}"
-   temperature_state_template: "{{ value_json.thermostat_seltemp }}"
-
-   temp_step: 0.5
-
- - platform: mqtt
-   name: boiler
-   modes:
-     - "auto"
-     - "off"
-   min_temp: 40
-   max_temp: 60
-   temp_step: 1
-   current_temperature_topic: "home/ems-esp/boiler_data"
-   temperature_state_topic: "home/ems-esp/boiler_data"
-   temperature_command_topic: "home/ems-esp/boiler_cmd_wwtemp"
-   current_temperature_template: "{{ value_json.wWCurTmp }}"
-   temperature_state_template: "{{ value_json.wWSelTemp }}"
-   mode_state_template: "{% if value_json.wWActivated == 'off' %} off {% else %} auto {% endif %}"
-   mode_state_topic: "home/ems-esp/boiler_data"
-   mode_command_topic: "home/ems-esp/wwactivated"
+- platform: mqtt
+  name: Thermostat
+  modes:
+    - "auto"
+    - "heat"
+    - "off"
+  mode_command_topic: "home/ems-esp/thermostat_cmd_mode1"
+  temperature_command_topic: "home/ems-esp/thermostat_cmd_temp1"
    
+  mode_state_topic: "home/ems-esp/thermostat_data"
+  current_temperature_topic: "home/ems-esp/thermostat_data"
+  temperature_state_topic: "home/ems-esp/thermostat_data"
+
+  mode_state_template: "{{ value_json.hc1.mode }}"
+  current_temperature_template: "{{ value_json.hc1.currtemp }}"
+  temperature_state_template: "{{ value_json.hc1.seltemp }}"
+   
+  temp_step: 0.5
+  
+- platform: mqtt
+  name: boiler
+  modes:
+    - "auto"
+    - "off"
+  min_temp: 40
+  max_temp: 60
+  temp_step: 1
+  
+  current_temperature_topic: "home/ems-esp/boiler_data"
+  temperature_state_topic: "home/ems-esp/boiler_data"
+  mode_state_topic: "home/ems-esp/boiler_data"
+
+  current_temperature_template: "{{ value_json.wWCurTmp }}"
+  temperature_state_template: "{{ value_json.wWSelTemp }}"
+  mode_state_template: "{% if value_json.wWActivated == 'off' %} off {% else %} auto {% endif %}"
+
+  temperature_command_topic: "home/ems-esp/boiler_cmd_wwtemp"
+  mode_command_topic: "home/ems-esp/boiler_cmd_wwactivated"
+  

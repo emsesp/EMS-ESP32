@@ -242,9 +242,8 @@ size_t TelnetSpy::write(uint8_t data) {
                     sendBlock();
                 }
                 if (bufUsed == bufLen) {
-                    char c;
                     while (bufUsed > 0) {
-                        c = pullTelnetBuf();
+                        char c = pullTelnetBuf();
                         if (c == '\n') {
                             addTelnetBuf('\r');
                             break;
@@ -573,7 +572,7 @@ void TelnetSpy::handle() {
         return;
     }
     if (!listening) {
-                if ((WiFi.status() == WL_DISCONNECTED) && (WiFi.getMode() & WIFI_AP)) {
+        if ((WiFi.status() == WL_DISCONNECTED) && (WiFi.getMode() & WIFI_AP)) {
             if (usedSer) {
                 usedSer->println("[TELNET] in AP mode"); // added by Proddy
             }
