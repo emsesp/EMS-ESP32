@@ -440,6 +440,8 @@ void showInfo() {
                     myDebug_P(PSTR("   Mode is set to night"));
                 } else if (thermoMode == 4) {
                     myDebug_P(PSTR("   Mode is set to day"));
+                } else {
+                    myDebug_P(PSTR("   Mode is unknown"));
                 }
             }
         }
@@ -726,6 +728,8 @@ void publishValues(bool force) {
                     dataThermostat[THERMOSTAT_MODE] = "off"; // for night
                 } else if (thermoMode == 4) {
                     dataThermostat[THERMOSTAT_MODE] = "heat"; // for day
+                } else {
+                    dataThermostat[THERMOSTAT_MODE] = "auto"; // default to auto so HA doesn't complain
                 }
             }
         }
