@@ -944,7 +944,7 @@ void MyESP::_telnetCommand(char * commandLine) {
     }
 
     // restart command
-    if ((strcmp(ptrToCommandName, "restart") == 0) && (wc == 1)) {
+    if (((strcmp(ptrToCommandName, "restart") == 0) || (strcmp(ptrToCommandName, "reboot") == 0)) && (wc == 1)) {
         resetESP();
         return;
     }
