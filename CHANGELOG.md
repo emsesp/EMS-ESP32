@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.9.2 beta]
+## [1.9.2] 2019-10-19
 
 #### Important! This build has breaking changes:
  - MQTT topics have changed. Use the `mqttlog` command to see the names of the subscriptions and the format of the payload data. Also reference the [Wiki page](https://github.com/proddy/EMS-ESP/wiki/MQTT).
