@@ -435,8 +435,9 @@ void MyESP::_mqttOnConnect() {
     mqttSubscribe(MQTT_TOPIC_RESTART);
 
     // subscribe to a start message and send the first publish
+    // forcing retain to off since we only want to send this once
     mqttSubscribe(MQTT_TOPIC_START);
-    mqttPublish(MQTT_TOPIC_START, MQTT_TOPIC_START_PAYLOAD);
+    mqttPublish(MQTT_TOPIC_START, MQTT_TOPIC_START_PAYLOAD, false);
 
     // send heartbeat if enabled
     _heartbeatCheck(true);
