@@ -9,9 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Report # TCP dropouts in the `system` command. These could be due to WiFI or MQTT disconnected.
+- Added temp and mode to the MQTT `thermostat_cmd` topic
+  
 ### Fixed
 
 ### Changed
+
+- Heartbeat MQTT payload is now in JSON
 
 ### Removed
 
@@ -41,6 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - All MQTT topics for the Thermostat have the Heating Circuit appended (e.g. `thermostat_data1`). This includes the commands.
 - Shower timer and shower alert and not MQTT published at boot up
 - Heating Active logic change to use Selected Flow Temp of min 30 instead of 70 (https://github.com/proddy/EMS-ESP/issues/193)
+- Cleaned up Telnet messages during bootup to only show key information.
 
 ### Removed
 
