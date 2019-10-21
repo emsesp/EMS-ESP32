@@ -749,7 +749,7 @@ void MyESP::_printSetCommands() {
     }
     myDebug_P(PSTR("  mqtt_port=%d"), _mqtt_port);
     myDebug_P(PSTR("  mqtt_keepalive=%d"), _mqtt_keepalive);
-    myDebug_P(PSTR("  mqtt_retain=%d"), (_mqtt_retain) ? "on" : "off");
+    myDebug_P(PSTR("  mqtt_retain=%s"), (_mqtt_retain) ? "on" : "off");
     myDebug_P(PSTR("  mqtt_qos=%d"), _mqtt_qos);
     myDebug_P(PSTR("  mqtt_heartbeat=%s"), (_mqtt_heartbeat) ? "on" : "off");
 
