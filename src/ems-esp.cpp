@@ -1611,7 +1611,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
 
     uint8_t hc;
     // thermostat temp changes
-    hc = _hasHCspecified(TOPIC_THERMOSTAT_CMD_TEMP, topic);
+    hc = _hasHCspecified(TOPIC_THERMOSTAT_CMD_TEMP_HA, topic);
     if (hc) {
         float f = strtof((char *)message, 0);
         ems_setThermostatTemp(f, hc);
@@ -1620,7 +1620,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
     }
 
     // thermostat mode changes
-    hc = _hasHCspecified(TOPIC_THERMOSTAT_CMD_MODE, topic);
+    hc = _hasHCspecified(TOPIC_THERMOSTAT_CMD_MODE_HA, topic);
     if (hc) {
         if (strncmp(message, "auto", 4) == 0) {
             ems_setThermostatMode(2, hc);
@@ -1642,6 +1642,29 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
             return;
         }
         const char * command = doc["cmd"];
+
+        // thermostat temp changes
+        hc = _hasHCspecified(TOPIC_THERMOSTAT_CMD_TEMP, command);
+        if (hc) {
+            float f = doc["data"];
+            ems_setThermostatTemp(f, hc);
+            publishValues(true); // publish back immediately
+            return;
+        }
+
+        // thermostat mode changes
+        hc = _hasHCspecified(TOPIC_THERMOSTAT_CMD_MODE, command);
+        if (hc) {
+            const char * data_cmd = doc["data"];
+            if (strncmp(data_cmd, "auto", 4) == 0) {
+                ems_setThermostatMode(2, hc);
+            } else if ((strncmp(data_cmd, "day", 4) == 0) || (strncmp(data_cmd, "manual", 6) == 0) || (strncmp(data_cmd, "heat", 4) == 0)) {
+                ems_setThermostatMode(1, hc);
+            } else if ((strncmp(data_cmd, "night", 5) == 0) || (strncmp(data_cmd, "off", 3) == 0)) {
+                ems_setThermostatMode(0, hc);
+            }
+            return;
+        }
 
         // set night temp value
         hc = _hasHCspecified(TOPIC_THERMOSTAT_CMD_NIGHTTEMP, command);

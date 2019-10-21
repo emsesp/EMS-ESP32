@@ -18,12 +18,14 @@
 // these topics can be suffixed with a Heating Circuit number, e.g. thermostat_cmd_temp1 and thermostat_data1
 #define TOPIC_THERMOSTAT_DATA "thermostat_data" // for sending thermostat values to MQTT
 
-#define TOPIC_THERMOSTAT_CMD "thermostat_cmd"           // for receiving thermostat commands via MQTT
-#define TOPIC_THERMOSTAT_CMD_TEMP "thermostat_cmd_temp" // temp changes via MQTT
-#define TOPIC_THERMOSTAT_CMD_MODE "thermostat_cmd_mode" // mode changes via MQTT
-#define TOPIC_THERMOSTAT_CMD_DAYTEMP "daytemp"          // day temp (RC35 specific)
-#define TOPIC_THERMOSTAT_CMD_NIGHTTEMP "nighttemp"      // night temp (RC35 specific)
-#define TOPIC_THERMOSTAT_CMD_HOLIDAYTEMP "holidayttemp" // holiday temp (RC35 specific)
+#define TOPIC_THERMOSTAT_CMD "thermostat_cmd"              // for receiving thermostat commands via MQTT
+#define TOPIC_THERMOSTAT_CMD_TEMP_HA "thermostat_cmd_temp" // temp changes via MQTT, for HA climate component
+#define TOPIC_THERMOSTAT_CMD_MODE_HA "thermostat_cmd_mode" // mode changes via MQTT, for HA climate component
+#define TOPIC_THERMOSTAT_CMD_TEMP "temp"                   // temp changes via MQTT
+#define TOPIC_THERMOSTAT_CMD_MODE "mode"                   // mode changes via MQTT
+#define TOPIC_THERMOSTAT_CMD_DAYTEMP "daytemp"             // day temp (RC35 specific)
+#define TOPIC_THERMOSTAT_CMD_NIGHTTEMP "nighttemp"         // night temp (RC35 specific)
+#define TOPIC_THERMOSTAT_CMD_HOLIDAYTEMP "holidayttemp"    // holiday temp (RC35 specific)
 
 #define THERMOSTAT_CURRTEMP "currtemp"               // current temperature
 #define THERMOSTAT_SELTEMP "seltemp"                 // selected temperature
