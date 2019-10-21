@@ -1755,7 +1755,7 @@ void _process_SM100Energy(_EMS_RxTelegram * EMS_RxTelegram) {
  * Type 0xE3 - HeatPump Monitor 1
  */
 void _process_HPMonitor1(_EMS_RxTelegram * EMS_RxTelegram) {
-    EMS_HeatPump.HPModulation = _toByte(14); // modulation %
+    EMS_HeatPump.HPModulation = _toByte(13); // modulation %
 
     EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
 }
