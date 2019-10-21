@@ -431,6 +431,10 @@ class MyESP {
     uint8_t _getSystemStabilityCounter();
     void    _setSystemStabilityCounter(uint8_t counter);
 
+    uint8_t _getSystemDropoutCounter();
+    void    _setSystemDropoutCounter(uint8_t counter);
+    void    _increaseSystemDropoutCounter();
+
     void    _setSystemResetReason(uint8_t reason);
     uint8_t _getCustomResetReason();
     void    _setCustomResetReason(uint8_t reason);

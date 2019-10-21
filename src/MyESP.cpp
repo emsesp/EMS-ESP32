@@ -18,7 +18,7 @@ union system_rtcmem_t {
         uint8_t stability_counter;
         uint8_t reset_reason;
         uint8_t boot_status;
-        uint8_t _reserved_;
+        uint8_t dropout_counter;
     } parts;
     uint32_t value;
 };
@@ -294,6 +294,7 @@ void MyESP::_wifiCallback(justwifi_messages_t code, char * parameter) {
 
     if (code == MESSAGE_DISCONNECTED) {
         myDebug_P(PSTR("[WIFI] Disconnected"));
+        _increaseSystemDropoutCounter(); // +1 to number of disconnects
         _wifi_connected = false;
     }
 
@@ -457,6 +458,7 @@ void MyESP::_mqtt_setup() {
     mqttClient.onDisconnect([this](AsyncMqttClientDisconnectReason reason) {
         if (reason == AsyncMqttClientDisconnectReason::TCP_DISCONNECTED) {
             myDebug_P(PSTR("[MQTT] TCP Disconnected"));
+            _increaseSystemDropoutCounter();                             // +1 to number of disconnects
             (_mqtt_callback_f)(MQTT_DISCONNECT_EVENT, nullptr, nullptr); // call callback with disconnect
         }
         if (reason == AsyncMqttClientDisconnectReason::MQTT_IDENTIFIER_REJECTED) {
@@ -1068,11 +1070,31 @@ uint8_t MyESP::_getSystemStabilityCounter() {
     return data.parts.stability_counter;
 }
 
+uint8_t MyESP::_getSystemDropoutCounter() {
+    system_rtcmem_t data;
+    data.value = Rtcmem->sys;
+    return data.parts.dropout_counter;
+}
+
 void MyESP::_setSystemStabilityCounter(uint8_t counter) {
     system_rtcmem_t data;
     data.value                   = Rtcmem->sys;
     data.parts.stability_counter = counter;
     Rtcmem->sys                  = data.value;
+}
+
+void MyESP::_setSystemDropoutCounter(uint8_t counter) {
+    system_rtcmem_t data;
+    data.value                 = Rtcmem->sys;
+    data.parts.dropout_counter = counter;
+    Rtcmem->sys                = data.value;
+}
+
+void MyESP::_increaseSystemDropoutCounter() {
+    system_rtcmem_t data;
+    data.value = Rtcmem->sys;
+    data.parts.dropout_counter++;
+    Rtcmem->sys = data.value;
 }
 
 uint8_t MyESP::_getSystemResetReason() {
@@ -1302,6 +1324,7 @@ void MyESP::showSystemStats() {
         myDebug_P(PSTR(" [SYSTEM] Last reset info: %s"), (char *)ESP.getResetInfo().c_str());
     }
     myDebug_P(PSTR(" [SYSTEM] Restart count: %d"), _getSystemStabilityCounter());
+    myDebug_P(PSTR(" [SYSTEM] # TCP disconnects: %d"), _getSystemDropoutCounter());
 
     myDebug_P(PSTR(" [SYSTEM] rtcmem status: blocks:%u addr:0x%p"), RtcmemSize, Rtcmem);
     for (uint8_t block = 0; block < RtcmemSize; ++block) {
@@ -2917,6 +2940,8 @@ void MyESP::begin(const char * app_hostname, const char * app_name, const char *
 
     _setSystemCheck(false); // reset system check
     _heartbeatCheck(true);  // force heartbeat
+
+    _setSystemDropoutCounter(0); // reset # TCP dropouts
 
     SerialAndTelnet.flush();
 }
