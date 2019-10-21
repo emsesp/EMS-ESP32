@@ -1388,6 +1388,7 @@ void MyESP::_heartbeatCheck(bool force = false) {
         rootHeartbeat["load"]    = getSystemLoadAverage();
         rootHeartbeat["uptime"]  = _getUptime();
         rootHeartbeat["freemem"] = mem_available;
+        rootHeartbeat["MQTTdisconnects"] = _getSystemDropoutCounter();
 
         char data[300] = {0};
         serializeJson(doc, data, sizeof(data));
