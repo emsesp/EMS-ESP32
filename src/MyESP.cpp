@@ -1383,7 +1383,7 @@ void MyESP::_heartbeatCheck(bool force = false) {
         JsonObject              rootHeartbeat = doc.to<JsonObject>();
 
         rootHeartbeat["version"] = _app_version;
-        rootHeartbeat["IP"]      = WiFi.localIP().toString().c_str();
+        rootHeartbeat["IP"]      = WiFi.localIP().toString();
         rootHeartbeat["rssid"]   = getWifiQuality();
         rootHeartbeat["load"]    = getSystemLoadAverage();
         rootHeartbeat["uptime"]  = _getUptime();
