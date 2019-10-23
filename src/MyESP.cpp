@@ -200,6 +200,12 @@ uint32_t MyESP::_getInitialFreeHeap() {
 // called when WiFi is connected, and used to start OTA, MQTT
 void MyESP::_wifiCallback(justwifi_messages_t code, char * parameter) {
     if (code == MESSAGE_CONNECTED) {
+#if defined(ESP8266)
+        WiFi.setSleepMode(WIFI_NONE_SLEEP); // added to possibly fix wifi dropouts in arduino core 2.5.0
+#endif
+
+        jw.enableAPFallback(false); // Disable AP mode after initial connect was successful - test for https://github.com/proddy/EMS-ESP/issues/187
+
         myDebug_P(PSTR("[WIFI] Connected to SSID %s (hostname: %s, IP: %s)"), WiFi.SSID().c_str(), _getESPhostname().c_str(), WiFi.localIP().toString().c_str());
 
         /*
@@ -243,8 +249,6 @@ void MyESP::_wifiCallback(justwifi_messages_t code, char * parameter) {
             myDebug_P(PSTR("[SYSTEM] Serial port communication is enabled"));
         }
 
-        _wifi_connected = true;
-
         // NTP now that we have a WiFi connection
         if (_ntp_enabled) {
             NTP.Ntp(_ntp_server, _ntp_interval); // set up NTP server
@@ -256,7 +260,7 @@ void MyESP::_wifiCallback(justwifi_messages_t code, char * parameter) {
             _wifi_callback_f();
         }
 
-        // jw.enableAPFallback(false); // Disable AP mode after initial connect was successful - test for https://github.com/proddy/EMS-ESP/issues/187
+        _wifi_connected = true;
     }
 
     if (code == MESSAGE_ACCESSPOINT_CREATED) {
@@ -506,10 +510,6 @@ void MyESP::_wifi_setup() {
     jw.enableScan(false);                            // Configure it to not scan available networks and connect in order of dBm
     jw.cleanNetworks();                              // Clean existing network configuration
     jw.addNetwork(_network_ssid, _network_password); // Add a network
-
-#if defined(ESP8266)
-    WiFi.setSleepMode(WIFI_NONE_SLEEP); // added to possibly fix wifi dropouts in arduino core 2.5.0
-#endif
 }
 
 // set the callback function for the OTA onstart
@@ -1382,12 +1382,12 @@ void MyESP::_heartbeatCheck(bool force = false) {
         StaticJsonDocument<200> doc;
         JsonObject              rootHeartbeat = doc.to<JsonObject>();
 
-        rootHeartbeat["version"] = _app_version;
-        rootHeartbeat["IP"]      = WiFi.localIP().toString();
-        rootHeartbeat["rssid"]   = getWifiQuality();
-        rootHeartbeat["load"]    = getSystemLoadAverage();
-        rootHeartbeat["uptime"]  = _getUptime();
-        rootHeartbeat["freemem"] = mem_available;
+        rootHeartbeat["version"]         = _app_version;
+        rootHeartbeat["IP"]              = WiFi.localIP().toString();
+        rootHeartbeat["rssid"]           = getWifiQuality();
+        rootHeartbeat["load"]            = getSystemLoadAverage();
+        rootHeartbeat["uptime"]          = _getUptime();
+        rootHeartbeat["freemem"]         = mem_available;
         rootHeartbeat["MQTTdisconnects"] = _getSystemDropoutCounter();
 
         char data[300] = {0};
