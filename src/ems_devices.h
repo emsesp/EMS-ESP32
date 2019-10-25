@@ -197,6 +197,7 @@ const _Boiler_Device Boiler_Devices[] = {
 
     {72, "MC10 Module"},
     {123, "Buderus GBx72/Nefit Trendline/Junkers Cerapur/Worcester Greenstar Si"},
+    {133, "Buderus GB133"},
     {115, "Nefit Topline/Buderus GB162"},
     {203, "Buderus Logamax U122/Junkers Cerapur"},
     {208, "Buderus Logamax plus/GB192/Bosch Condens GC9000"},
@@ -244,6 +245,7 @@ const _Other_Device Other_Devices[] = {
     {125, 0x09, "BC25 Base Controller"},
     {169, 0x09, "BC40 Base Controller"},
     {152, 0x09, "Junkers Controller"},
+    {230, 0x09, "BC Base Controller"},
 
     {205, 0x02, "Nefit Moduline Easy Connect"},
     {206, 0x02, "Bosch Easy Connect"},
