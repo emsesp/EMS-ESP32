@@ -5,12 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.9.3 beta] 2019-
+## [1.9.4 beta]
+
+### Added
+
+### Fixed
+
+### Changed
+
+### Removed
+
+## [1.9.3] 2019-10-26
 
 ### Added
 
 - Report # TCP dropouts in the `system` command. These could be due to WiFI or MQTT disconnected.
 - Added temp and mode to the MQTT `thermostat_cmd` topic
+- build scripts for automated CI with TravisCI
   
 ### Fixed
 
@@ -19,8 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Heartbeat MQTT payload is now in JSON
-
-### Removed
+- platformio.ini targets. Use `debug` for custom builds.
 
 ## [1.9.2] 2019-10-19
 
