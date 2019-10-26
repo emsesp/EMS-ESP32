@@ -69,15 +69,10 @@ Ticker showerColdShotStopTimer;
 #define SHOWER_COLDSHOT_DURATION 10 // in seconds. 10 seconds for cold water before turning back hot water
 #define SHOWER_MAX_DURATION 420000  // in ms. 7 minutes, before trigger a shot of cold water
 
-#ifdef LOGICANALYZER
-#define EMSESP_DALLAS_GPIO D1
-#define EMSESP_DALLAS_PARASITE false
-#else
 // set this if using an external temperature sensor like a DS18B20
 // D5 is the default on a bbqkees board
 #define EMSESP_DALLAS_GPIO D5
 #define EMSESP_DALLAS_PARASITE false
-#endif
 
 // Set LED pin used for showing the EMS bus connection status. Solid means EMS bus working, flashing is an error
 // can be either the onboard LED on the ESP8266 (LED_BULLETIN) or external via an external pull-up LED (e.g. D1 on a bbqkees' board)
