@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.3] 2019-10-26
+
+### Added
+
+- Report # TCP dropouts in the `system` command. These could be due to WiFI or MQTT disconnected.
+- Added temp and mode to the MQTT `thermostat_cmd` topic
+- build scripts for automated CI with TravisCI
+  
+### Fixed
+
+- vertical bar showing in WebUI sidebar menu using FireFox
+
+### Changed
+
+- Heartbeat MQTT payload is now in JSON
+- platformio.ini targets. Use `debug` for custom builds.
+
 ## [1.9.2] 2019-10-19
 
 #### Important! This build has breaking changes:
@@ -31,6 +48,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - All MQTT topics for the Thermostat have the Heating Circuit appended (e.g. `thermostat_data1`). This includes the commands.
 - Shower timer and shower alert and not MQTT published at boot up
 - Heating Active logic change to use Selected Flow Temp of min 30 instead of 70 (https://github.com/proddy/EMS-ESP/issues/193)
+- Cleaned up Telnet messages during bootup to only show key information.
 
 ### Removed
 

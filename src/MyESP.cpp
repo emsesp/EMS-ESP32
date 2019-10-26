@@ -18,7 +18,7 @@ union system_rtcmem_t {
         uint8_t stability_counter;
         uint8_t reset_reason;
         uint8_t boot_status;
-        uint8_t _reserved_;
+        uint8_t dropout_counter;
     } parts;
     uint32_t value;
 };
@@ -200,6 +200,12 @@ uint32_t MyESP::_getInitialFreeHeap() {
 // called when WiFi is connected, and used to start OTA, MQTT
 void MyESP::_wifiCallback(justwifi_messages_t code, char * parameter) {
     if (code == MESSAGE_CONNECTED) {
+#if defined(ESP8266)
+        WiFi.setSleepMode(WIFI_NONE_SLEEP); // added to possibly fix wifi dropouts in arduino core 2.5.0
+#endif
+
+        jw.enableAPFallback(false); // Disable AP mode after initial connect was successful - test for https://github.com/proddy/EMS-ESP/issues/187
+
         myDebug_P(PSTR("[WIFI] Connected to SSID %s (hostname: %s, IP: %s)"), WiFi.SSID().c_str(), _getESPhostname().c_str(), WiFi.localIP().toString().c_str());
 
         /*
@@ -243,8 +249,6 @@ void MyESP::_wifiCallback(justwifi_messages_t code, char * parameter) {
             myDebug_P(PSTR("[SYSTEM] Serial port communication is enabled"));
         }
 
-        _wifi_connected = true;
-
         // NTP now that we have a WiFi connection
         if (_ntp_enabled) {
             NTP.Ntp(_ntp_server, _ntp_interval); // set up NTP server
@@ -256,7 +260,7 @@ void MyESP::_wifiCallback(justwifi_messages_t code, char * parameter) {
             _wifi_callback_f();
         }
 
-        // jw.enableAPFallback(false); // Disable AP mode after initial connect was successful - test for https://github.com/proddy/EMS-ESP/issues/187
+        _wifi_connected = true;
     }
 
     if (code == MESSAGE_ACCESSPOINT_CREATED) {
@@ -294,6 +298,7 @@ void MyESP::_wifiCallback(justwifi_messages_t code, char * parameter) {
 
     if (code == MESSAGE_DISCONNECTED) {
         myDebug_P(PSTR("[WIFI] Disconnected"));
+        _increaseSystemDropoutCounter(); // +1 to number of disconnects
         _wifi_connected = false;
     }
 
@@ -457,6 +462,7 @@ void MyESP::_mqtt_setup() {
     mqttClient.onDisconnect([this](AsyncMqttClientDisconnectReason reason) {
         if (reason == AsyncMqttClientDisconnectReason::TCP_DISCONNECTED) {
             myDebug_P(PSTR("[MQTT] TCP Disconnected"));
+            _increaseSystemDropoutCounter();                             // +1 to number of disconnects
             (_mqtt_callback_f)(MQTT_DISCONNECT_EVENT, nullptr, nullptr); // call callback with disconnect
         }
         if (reason == AsyncMqttClientDisconnectReason::MQTT_IDENTIFIER_REJECTED) {
@@ -504,10 +510,6 @@ void MyESP::_wifi_setup() {
     jw.enableScan(false);                            // Configure it to not scan available networks and connect in order of dBm
     jw.cleanNetworks();                              // Clean existing network configuration
     jw.addNetwork(_network_ssid, _network_password); // Add a network
-
-#if defined(ESP8266)
-    WiFi.setSleepMode(WIFI_NONE_SLEEP); // added to possibly fix wifi dropouts in arduino core 2.5.0
-#endif
 }
 
 // set the callback function for the OTA onstart
@@ -747,7 +749,7 @@ void MyESP::_printSetCommands() {
     }
     myDebug_P(PSTR("  mqtt_port=%d"), _mqtt_port);
     myDebug_P(PSTR("  mqtt_keepalive=%d"), _mqtt_keepalive);
-    myDebug_P(PSTR("  mqtt_retain=%d"), (_mqtt_retain) ? "on" : "off");
+    myDebug_P(PSTR("  mqtt_retain=%s"), (_mqtt_retain) ? "on" : "off");
     myDebug_P(PSTR("  mqtt_qos=%d"), _mqtt_qos);
     myDebug_P(PSTR("  mqtt_heartbeat=%s"), (_mqtt_heartbeat) ? "on" : "off");
 
@@ -1068,11 +1070,31 @@ uint8_t MyESP::_getSystemStabilityCounter() {
     return data.parts.stability_counter;
 }
 
+uint8_t MyESP::_getSystemDropoutCounter() {
+    system_rtcmem_t data;
+    data.value = Rtcmem->sys;
+    return data.parts.dropout_counter;
+}
+
 void MyESP::_setSystemStabilityCounter(uint8_t counter) {
     system_rtcmem_t data;
     data.value                   = Rtcmem->sys;
     data.parts.stability_counter = counter;
     Rtcmem->sys                  = data.value;
+}
+
+void MyESP::_setSystemDropoutCounter(uint8_t counter) {
+    system_rtcmem_t data;
+    data.value                 = Rtcmem->sys;
+    data.parts.dropout_counter = counter;
+    Rtcmem->sys                = data.value;
+}
+
+void MyESP::_increaseSystemDropoutCounter() {
+    system_rtcmem_t data;
+    data.value = Rtcmem->sys;
+    data.parts.dropout_counter++;
+    Rtcmem->sys = data.value;
 }
 
 uint8_t MyESP::_getSystemResetReason() {
@@ -1302,6 +1324,7 @@ void MyESP::showSystemStats() {
         myDebug_P(PSTR(" [SYSTEM] Last reset info: %s"), (char *)ESP.getResetInfo().c_str());
     }
     myDebug_P(PSTR(" [SYSTEM] Restart count: %d"), _getSystemStabilityCounter());
+    myDebug_P(PSTR(" [SYSTEM] # TCP disconnects: %d"), _getSystemDropoutCounter());
 
     myDebug_P(PSTR(" [SYSTEM] rtcmem status: blocks:%u addr:0x%p"), RtcmemSize, Rtcmem);
     for (uint8_t block = 0; block < RtcmemSize; ++block) {
@@ -1356,23 +1379,23 @@ void MyESP::_heartbeatCheck(bool force = false) {
         uint32_t free_memory   = ESP.getFreeHeap();
         uint8_t  mem_available = 100 * free_memory / total_memory; // as a %
 
-        char payload[300] = {0};
-        char s[10];
-        strlcpy(payload, "version=", sizeof(payload));
-        strlcat(payload, _app_version, sizeof(payload)); // version
-        strlcat(payload, ", IP=", sizeof(payload));
-        strlcat(payload, WiFi.localIP().toString().c_str(), sizeof(payload)); // IP address
-        strlcat(payload, ", rssid=", sizeof(payload));
-        strlcat(payload, itoa(getWifiQuality(), s, 10), sizeof(payload)); // rssi %
-        strlcat(payload, "%, load=", sizeof(payload));
-        strlcat(payload, ltoa(getSystemLoadAverage(), s, 10), sizeof(payload)); // load
-        strlcat(payload, "%, uptime=", sizeof(payload));
-        strlcat(payload, ltoa(_getUptime(), s, 10), sizeof(payload)); // uptime in secs
-        strlcat(payload, "secs, freemem=", sizeof(payload));
-        strlcat(payload, itoa(mem_available, s, 10), sizeof(payload)); // free mem as a %
-        strlcat(payload, "%", sizeof(payload));
+        StaticJsonDocument<200> doc;
+        JsonObject              rootHeartbeat = doc.to<JsonObject>();
 
-        mqttPublish(MQTT_TOPIC_HEARTBEAT, payload, false); // send to MQTT with retain off
+        rootHeartbeat["version"]         = _app_version;
+        rootHeartbeat["IP"]              = WiFi.localIP().toString();
+        rootHeartbeat["rssid"]           = getWifiQuality();
+        rootHeartbeat["load"]            = getSystemLoadAverage();
+        rootHeartbeat["uptime"]          = _getUptime();
+        rootHeartbeat["freemem"]         = mem_available;
+        rootHeartbeat["MQTTdisconnects"] = _getSystemDropoutCounter();
+
+        char data[300] = {0};
+        serializeJson(doc, data, sizeof(data));
+
+        // myDebugLog("Publishing hearbeat via MQTT");
+
+        (void)mqttPublish(MQTT_TOPIC_HEARTBEAT, data, false); // send to MQTT with retain off
     }
 }
 
@@ -2917,6 +2940,8 @@ void MyESP::begin(const char * app_hostname, const char * app_name, const char *
 
     _setSystemCheck(false); // reset system check
     _heartbeatCheck(true);  // force heartbeat
+
+    _setSystemDropoutCounter(0); // reset # TCP dropouts
 
     SerialAndTelnet.flush();
 }

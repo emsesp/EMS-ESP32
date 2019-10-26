@@ -38,10 +38,17 @@ var buildHeader = function (name) {
         var filename = parts[parts.length - 1];
         var extension = filename.split('.')[1];
 
+        console.info('Creating file: ' + filename);
+
         // var safename = name.split('.').join('_');
         var safename = name.replace(/\.|-/g, "_");
 
         var destination = "../../src/webh/" + filename + ".h";
+
+        // check for woff files which should be fonts
+        if (extension === "woff") {
+            extension = "fonts";
+        }
 
         // html files go into root
         if (extension === "html") {
@@ -49,8 +56,6 @@ var buildHeader = function (name) {
         } else {
             var source = "../../src/websrc/temp/gzipped/" + extension + "/" + name + ".gz";
         }
-
-        console.info('Creating file: ' + filename + ' Extension: ' + extension);
 
         var wstream = fs.createWriteStream(destination);
         wstream.on('error', function (err) {
@@ -128,12 +133,12 @@ gulp.task('requiredcss', function () {
 });
 
 gulp.task("fontwoff", function () {
-    return gulp.src("../../src/websrc/3rdparty/woff/*.*")
-        .pipe(gulp.dest("../../src/websrc/temp/woff/"))
+    return gulp.src("../../src/websrc/3rdparty/fonts/*.*")
+        .pipe(gulp.dest("../../src/websrc/temp/fonts/"))
         .pipe(gzip({
             append: true
         }))
-        .pipe(gulp.dest('../../src/websrc/temp/gzipped/woff/'))
+        .pipe(gulp.dest('../../src/websrc/temp/gzipped/fonts/'))
         .pipe(buildHeader('glyphicons-halflings-regular.woff'));
 });
 

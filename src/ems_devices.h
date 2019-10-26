@@ -197,10 +197,11 @@ const _Boiler_Device Boiler_Devices[] = {
 
     {72, "MC10 Module"},
     {123, "Buderus GBx72/Nefit Trendline/Junkers Cerapur/Worcester Greenstar Si"},
+    {133, "Buderus GB125"},
     {115, "Nefit Topline/Buderus GB162"},
     {203, "Buderus Logamax U122/Junkers Cerapur"},
     {208, "Buderus Logamax plus/GB192/Bosch Condens GC9000"},
-    {64, "Sieger BK15/Nefit Smartline/Buderus GB152"},
+    {64, "Sieger BK13,BK15/Nefit Smartline/Buderus GB1x2"},
     {95, "Bosch Condens 2500/Buderus Logamax GB062/Junkers Heatronic 3"},
     {122, "Nefit Proline"},
     {170, "Buderus Logano GB212"},
@@ -244,6 +245,7 @@ const _Other_Device Other_Devices[] = {
     {125, 0x09, "BC25 Base Controller"},
     {169, 0x09, "BC40 Base Controller"},
     {152, 0x09, "Junkers Controller"},
+    {230, 0x09, "BC Base Controller"},
 
     {205, 0x02, "Nefit Moduline Easy Connect"},
     {206, 0x02, "Bosch Easy Connect"},
@@ -277,6 +279,7 @@ const _Thermostat_Device Thermostat_Devices[] = {
     {EMS_MODEL_RC10, 79, 0x17, "RC10/Moduline 100", EMS_THERMOSTAT_WRITE_YES},
     {EMS_MODEL_RC20, 77, 0x17, "RC20/Moduline 300", EMS_THERMOSTAT_WRITE_YES},
     {EMS_MODEL_RC20F, 93, 0x18, "RC20F", EMS_THERMOSTAT_WRITE_YES},
+    {EMS_MODEL_RC30, 67, 0x10, "RC30", EMS_THERMOSTAT_WRITE_YES},
     {EMS_MODEL_RC30, 78, 0x10, "RC30/Moduline 400", EMS_THERMOSTAT_WRITE_YES},
     {EMS_MODEL_RC35, 86, 0x10, "RC35", EMS_THERMOSTAT_WRITE_YES},
     {EMS_MODEL_RC300, 158, 0x10, "RC300/RC310/Moduline 3000/Bosch CW400", EMS_THERMOSTAT_WRITE_YES},
