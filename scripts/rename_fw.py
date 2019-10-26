@@ -40,7 +40,7 @@ env.AddPreAction("buildprog", build_web)
 
 # build filename, replacing . with _ for the version
 #env.Replace(PROGNAME="firmware_%s" % branch + "_" + app_version.replace(".", "_"))
-env.Replace(PROGNAME=app_name + "-" + app_version.replace(".", "_") + "-" + board + "-" + branch)
-#env.Replace(PROGNAME=app_name + "-" + app_version)
+#env.Replace(PROGNAME=app_name + "-" + app_version.replace(".", "_") + "-" + board + "-" + branch)
+env.Replace(PROGNAME=app_name + "-" + app_version.replace(".", "_") + "-" + board)
 
 
