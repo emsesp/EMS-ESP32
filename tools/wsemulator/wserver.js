@@ -102,6 +102,7 @@ var custom_configfile = {
         "shower_timer": true,
         "shower_alert": false,
         "publish_time": 120,
+        "publish_always": false,
         "tx_mode": 1
     }
 };

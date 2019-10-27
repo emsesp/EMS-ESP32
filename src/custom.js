@@ -9,6 +9,7 @@ var custom_config = {
         "shower_timer": false,
         "shower_alert": false,
         "publish_time": 120,
+        "publish_always": false,
         "tx_mode": 1
     }
 };
@@ -23,17 +24,25 @@ function listcustom() {
     if (custom_config.settings.led) {
         $("input[name=\"led\"][value=\"1\"]").prop("checked", true);
     }
+
     if (custom_config.settings.dallas_parasite) {
         $("input[name=\"dallas_parasite\"][value=\"1\"]").prop("checked", true);
     }
+
     if (custom_config.settings.listen_mode) {
         $("input[name=\"listen_mode\"][value=\"1\"]").prop("checked", true);
     }
+
     if (custom_config.settings.shower_timer) {
         $("input[name=\"shower_timer\"][value=\"1\"]").prop("checked", true);
     }
+
     if (custom_config.settings.shower_alert) {
         $("input[name=\"shower_alert\"][value=\"1\"]").prop("checked", true);
+    }
+
+    if (custom_config.settings.publish_always) {
+        $("input[name=\"publish_always\"][value=\"1\"]").prop("checked", true);
     }
 }
 
@@ -64,6 +73,11 @@ function savecustom() {
     custom_config.settings.led = false;
     if (parseInt($("input[name=\"led\"]:checked").val()) === 1) {
         custom_config.settings.led = true;
+    }
+
+    custom_config.settings.publish_always = false;
+    if (parseInt($("input[name=\"publish_always\"]:checked").val()) === 1) {
+        custom_config.settings.publish_always = true;
     }
 
     custom_config.settings.publish_time = parseInt(document.getElementById("publish_time").value);
