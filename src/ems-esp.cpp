@@ -390,6 +390,7 @@ void showInfo() {
             _m_curr     = 10; // *100
             break;
         case EMS_MODEL_FR10:
+        case EMS_MODEL_FR50:
         case EMS_MODEL_FW100:
         case EMS_MODEL_FW120:
             _m_setpoint = 1; // *10
@@ -684,8 +685,8 @@ void publishValues(bool force) {
                         dataThermostat[THERMOSTAT_SELTEMP] = (double)thermostat->setpoint_roomTemp / 100;
                     if (thermostat->curr_roomTemp != EMS_VALUE_SHORT_NOTSET)
                         dataThermostat[THERMOSTAT_CURRTEMP] = (double)thermostat->curr_roomTemp / 100;
-                } else if ((ems_getThermostatModel() == EMS_MODEL_FR10) || (ems_getThermostatModel() == EMS_MODEL_FW100)
-                           || (ems_getThermostatModel() == EMS_MODEL_FW120)) {
+                } else if ((ems_getThermostatModel() == EMS_MODEL_FR10) || (ems_getThermostatModel() == EMS_MODEL_FR50)
+                           || (ems_getThermostatModel() == EMS_MODEL_FW100) || (ems_getThermostatModel() == EMS_MODEL_FW120)) {
                     if (thermostat->setpoint_roomTemp != EMS_VALUE_SHORT_NOTSET)
                         dataThermostat[THERMOSTAT_SELTEMP] = (double)thermostat->setpoint_roomTemp / 10;
                     if (thermostat->curr_roomTemp != EMS_VALUE_SHORT_NOTSET)
@@ -1758,7 +1759,7 @@ void WebCallback(JsonObject root) {
                 thermostat["ts"] = (double)EMS_Thermostat.hc[hc_num - 1].setpoint_roomTemp / 100;
             if (EMS_Thermostat.hc[hc_num - 1].curr_roomTemp != EMS_VALUE_SHORT_NOTSET)
                 thermostat["tc"] = (double)EMS_Thermostat.hc[hc_num - 1].curr_roomTemp / 100;
-        } else if ((ems_getThermostatModel() == EMS_MODEL_FR10) || (ems_getThermostatModel() == EMS_MODEL_FW100)
+        } else if ((ems_getThermostatModel() == EMS_MODEL_FR10) || (ems_getThermostatModel() == EMS_MODEL_FR50) || (ems_getThermostatModel() == EMS_MODEL_FW100)
                    || (ems_getThermostatModel() == EMS_MODEL_FW120)) {
             if (EMS_Thermostat.hc[hc_num - 1].setpoint_roomTemp != EMS_VALUE_SHORT_NOTSET)
                 thermostat["ts"] = (double)EMS_Thermostat.hc[hc_num - 1].setpoint_roomTemp / 10;
