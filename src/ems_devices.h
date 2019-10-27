@@ -202,7 +202,7 @@ const _Boiler_Device Boiler_Devices[] = {
     {203, "Buderus Logamax U122/Junkers Cerapur"},
     {208, "Buderus Logamax plus/GB192/Bosch Condens GC9000"},
     {64, "Sieger BK13,BK15/Nefit Smartline/Buderus GB1x2"},
-    {95, "Bosch Condens 2500/Buderus Logamax GB062/Junkers Heatronic 3"},
+    {95, "Bosch Condens 2500/Buderus Logamax GB062/Junkers Cerapur Top/Junkers HT3"},
     {122, "Nefit Proline"},
     {170, "Buderus Logano GB212"},
     {172, "Nefit Enviline"}
@@ -228,9 +228,12 @@ const _SolarModule_Device SolarModule_Devices[] = {
  * format is PRODUCT ID, DESCRIPTION
  */
 const _Mixing_Device Mixing_Devices[] = {
+
     {160, "MM100 Mixing Module"},
+    {161, "MM200 Mixing Module"},
     {69, "MM10 Mixer Module"},
-    {159, "MM50 Mixing Module"},
+    {159, "MM50 Mixing Module"}
+
 };
 
 // Other EMS devices which are not considered boilers, thermostats or solar modules
@@ -245,6 +248,7 @@ const _Other_Device Other_Devices[] = {
     {125, 0x09, "BC25 Base Controller"},
     {169, 0x09, "BC40 Base Controller"},
     {152, 0x09, "Junkers Controller"},
+    {95, 0x09, "Junkers Controller"},
     {230, 0x09, "BC Base Controller"},
 
     {205, 0x02, "Nefit Moduline Easy Connect"},
@@ -273,7 +277,7 @@ const _Thermostat_Device Thermostat_Devices[] = {
     // Easy devices - not currently supporting write operations
     {EMS_MODEL_EASY, 202, 0x18, "Logamatic TC100/Nefit Moduline Easy", EMS_THERMOSTAT_WRITE_NO},
     {EMS_MODEL_EASY, 203, 0x18, "Bosch EasyControl CT200", EMS_THERMOSTAT_WRITE_NO},
-    {EMS_MODEL_CW100, 157, 0x18, "Bosch CW100", EMS_THERMOSTAT_WRITE_NO},
+    {EMS_MODEL_CW100, 157, 0x18, "Bosch CW100/Junkers CW100", EMS_THERMOSTAT_WRITE_NO},
 
     // Buderus/Nefit
     {EMS_MODEL_RC10, 79, 0x17, "RC10/Moduline 100", EMS_THERMOSTAT_WRITE_YES},
