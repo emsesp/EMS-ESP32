@@ -137,16 +137,16 @@ const _EMS_Type EMS_Types[] = {
     {EMS_MODEL_RC10, EMS_TYPE_RC10Set, "RC10Set", _process_RC10Set},
     {EMS_MODEL_RC10, EMS_TYPE_RC10StatusMessage, "RC10StatusMessage", _process_RC10StatusMessage},
 
-    // RC20 and RC20F
+    // RC20 and RC20RF
     {EMS_MODEL_RC20, EMS_TYPE_RCOutdoorTempMessage, "RCOutdoorTempMessage", _process_RCOutdoorTempMessage},
     {EMS_MODEL_RC20, EMS_TYPE_RCTime, "RCTime", _process_RCTime},
     {EMS_MODEL_RC20, EMS_TYPE_RC20Set, "RC20Set", _process_RC20Set},
     {EMS_MODEL_RC20, EMS_TYPE_RC20StatusMessage, "RC20StatusMessage", _process_RC20StatusMessage},
 
-    {EMS_MODEL_RC20F, EMS_TYPE_RCOutdoorTempMessage, "RCOutdoorTempMessage", _process_RCOutdoorTempMessage},
-    {EMS_MODEL_RC20F, EMS_TYPE_RCTime, "RCTime", _process_RCTime},
-    {EMS_MODEL_RC20F, EMS_TYPE_RC20Set, "RC20Set", _process_RC20Set},
-    {EMS_MODEL_RC20F, EMS_TYPE_RC20StatusMessage, "RC20StatusMessage", _process_RC20StatusMessage},
+    {EMS_MODEL_RC20RF, EMS_TYPE_RCOutdoorTempMessage, "RCOutdoorTempMessage", _process_RCOutdoorTempMessage},
+    {EMS_MODEL_RC20RF, EMS_TYPE_RCTime, "RCTime", _process_RCTime},
+    {EMS_MODEL_RC20RF, EMS_TYPE_RC20Set, "RC20Set", _process_RC20Set},
+    {EMS_MODEL_RC20RF, EMS_TYPE_RC20StatusMessage, "RC20StatusMessage", _process_RC20StatusMessage},
 
     // RC30
     {EMS_MODEL_RC30, EMS_TYPE_RCOutdoorTempMessage, "RCOutdoorTempMessage", _process_RCOutdoorTempMessage},
@@ -1290,6 +1290,28 @@ void _process_UBAMonitorWWMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     EMS_Boiler.wWWorkM   = _toLong(10);
     EMS_Boiler.wWOneTime = _bitRead(5, 1);
     EMS_Boiler.wWCurFlow = _toByte(9);
+}
+
+/**
+ * Activate / De-activate One Time warm water 0x35
+ * true = on, false = off
+ */
+void ems_setWarmWaterOnetime(bool activated) {
+    myDebug_P(PSTR("Setting boiler warm water OneTime loading %s"), activated ? "on" : "off");
+
+    _EMS_TxTelegram EMS_TxTelegram = EMS_TX_TELEGRAM_NEW; // create new Tx
+    EMS_TxTelegram.timestamp       = millis();            // set timestamp
+    EMS_Sys_Status.txRetryCount    = 0;                   // reset retry counter
+
+    EMS_TxTelegram.action        = EMS_TX_TELEGRAM_WRITE;
+    EMS_TxTelegram.dest          = EMS_Boiler.device_id;
+    EMS_TxTelegram.type          = EMS_TYPE_UBAFlags;
+    EMS_TxTelegram.offset        = EMS_OFFSET_UBAParameterWW_wwOneTime;
+    EMS_TxTelegram.length        = EMS_MIN_TELEGRAM_LENGTH;
+    EMS_TxTelegram.type_validate = EMS_ID_NONE;               // don't validate
+    EMS_TxTelegram.dataValue     = (activated ? 0x22 : 0x02); // 0x22 is on, 0x02 is off for RC20RF
+
+    EMS_TxQueue.push(EMS_TxTelegram);
 }
 
 /**

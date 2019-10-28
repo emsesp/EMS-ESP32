@@ -371,7 +371,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Renamed project from EMS-ESP-Boiler to EMS-ESP since it's kinda EMS generic now
-- Support for RC20F and RFM20 (https://github.com/proddy/EMS-ESP/issues/18)
+- Support for RC20RF and RFM20 (https://github.com/proddy/EMS-ESP/issues/18)
 - Moved all EMS device information into a separate file `ems_devices.h` so no longer need to touch `ems.h`
 - Telnet commands can be strings now and output is suspended when typing
 
@@ -392,7 +392,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Scanning known EMS Devices now ignores duplicates (https://github.com/proddy/EMS-ESP/pull/30)
 - ServiceCode stored as a two byte char
-- Support for RC20F and RFM20 (https://github.com/proddy/EMS-ESP/issues/18)
+- Support for RC20RF and RFM20 (https://github.com/proddy/EMS-ESP/issues/18)
 
 ## [1.2.3] 2019-01-03
 

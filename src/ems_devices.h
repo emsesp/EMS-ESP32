@@ -26,6 +26,7 @@
 #define EMS_TYPE_UBAMaintenanceStatusMessage 0x1C // is an automatic monitor broadcast
 #define EMS_TYPE_UBAParameterWW 0x33
 #define EMS_TYPE_UBATotalUptimeMessage 0x14
+#define EMS_TYPE_UBAFlags 0x35
 #define EMS_TYPE_UBAMaintenanceSettingsMessage 0x15
 #define EMS_TYPE_UBAParametersMessage 0x16
 #define EMS_TYPE_UBASetPoints 0x1A
@@ -33,6 +34,7 @@
 
 #define EMS_OFFSET_UBAParameterWW_wwtemp 2                  // WW Temperature
 #define EMS_OFFSET_UBAParameterWW_wwactivated 1             // WW Activated
+#define EMS_OFFSET_UBAParameterWW_wwOneTime 5               // WW OneTime loading
 #define EMS_OFFSET_UBAParameterWW_wwComfort 9               // WW is in comfort or eco mode
 #define EMS_VALUE_UBAParameterWW_wwComfort_Hot 0x00         // the value for hot
 #define EMS_VALUE_UBAParameterWW_wwComfort_Eco 0xD8         // the value for eco
@@ -171,7 +173,7 @@ typedef enum {
     EMS_MODEL_ES73,
     EMS_MODEL_RC10,
     EMS_MODEL_RC20,
-    EMS_MODEL_RC20F,
+    EMS_MODEL_RC20RF,
     EMS_MODEL_RC30,
     EMS_MODEL_RC35,
     EMS_MODEL_EASY,
@@ -283,7 +285,7 @@ const _Thermostat_Device Thermostat_Devices[] = {
     // Buderus/Nefit
     {EMS_MODEL_RC10, 79, 0x17, "RC10/Moduline 100", EMS_THERMOSTAT_WRITE_YES},
     {EMS_MODEL_RC20, 77, 0x17, "RC20/Moduline 300", EMS_THERMOSTAT_WRITE_YES},
-    {EMS_MODEL_RC20F, 93, 0x18, "RC20F", EMS_THERMOSTAT_WRITE_YES},
+    {EMS_MODEL_RC20RF, 93, 0x18, "RC20RF", EMS_THERMOSTAT_WRITE_YES},
     {EMS_MODEL_RC30, 67, 0x10, "RC30", EMS_THERMOSTAT_WRITE_YES},
     {EMS_MODEL_RC30, 78, 0x10, "RC30/Moduline 400", EMS_THERMOSTAT_WRITE_YES},
     {EMS_MODEL_RC35, 86, 0x10, "RC35", EMS_THERMOSTAT_WRITE_YES},
