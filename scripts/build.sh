@@ -76,13 +76,14 @@ build_webui() {
 build_environments() {
     echo "--------------------------------------------------------------"
     echo "Building firmware images..."
-    mkdir -p $destination/EMS-ESP-$version
+    # mkdir -p $destination
 
     for environment in $environments; do
         echo "* EMS-ESP-$version-$environment.bin"
         platformio run --silent --environment $environment || exit 1
         stat_bytes .pio/build/$environment/firmware.bin
-        mv .pio/build/$environment/firmware.bin $destination/EMS-ESP-$version/EMS-ESP-$version-$environment.bin
+        # mv .pio/build/$environment/firmware.bin $destination/EMS-ESP-$version-$environment.bin
+        mv .pio/build/$environment/firmware.bin EMS-ESP-$version-$environment.bin
     done
     echo "--------------------------------------------------------------" 
 }
