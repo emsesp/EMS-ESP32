@@ -592,6 +592,9 @@ void publishValues(bool force) {
 
     if (EMS_Boiler.wWActivated != EMS_VALUE_INT_NOTSET)
         rootBoiler["wWActivated"] = _bool_to_char(s, EMS_Boiler.wWActivated);
+    
+    if (EMS_Boiler.wWActivated != EMS_VALUE_INT_NOTSET)
+        rootBoiler["wWOnetime"] = _bool_to_char(s, EMS_Boiler.wWOneTime);
 
     if (EMS_Boiler.burnGas != EMS_VALUE_INT_NOTSET)
         rootBoiler["burnGas"] = _bool_to_char(s, EMS_Boiler.burnGas);
@@ -1506,8 +1509,9 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
         // this is used for example for comfort, flowtemp
         myESP.mqttSubscribe(TOPIC_BOILER_CMD);
 
-        // these two need to be unqiue topics
+        // these three need to be unqiue topics
         myESP.mqttSubscribe(TOPIC_BOILER_CMD_WWACTIVATED);
+        myESP.mqttSubscribe(TOPIC_BOILER_CMD_WWONETIME);
         myESP.mqttSubscribe(TOPIC_BOILER_CMD_WWTEMP);
 
         // generic incoming MQTT command for EMS-ESP
@@ -1617,6 +1621,16 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
             ems_setWarmWaterActivated(true);
         } else if (message[0] == MYESP_MQTT_PAYLOAD_OFF || strcmp(message, "off") == 0) {
             ems_setWarmWaterActivated(false);
+        }
+        return;
+    }
+
+    // wwOneTime
+    if (strcmp(topic, TOPIC_BOILER_CMD_WWONETIME) == 0) {
+        if (message[0] == '1' || strcmp(message, "on") == 0) {
+            ems_setWarmWaterOnetime(true);
+        } else if (message[0] == '0' || strcmp(message, "off") == 0) {
+            ems_setWarmWaterOnetime(false);
         }
         return;
     }

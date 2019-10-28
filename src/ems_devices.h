@@ -26,6 +26,7 @@
 #define EMS_TYPE_UBAMaintenanceStatusMessage 0x1C // is an automatic monitor broadcast
 #define EMS_TYPE_UBAParameterWW 0x33
 #define EMS_TYPE_UBATotalUptimeMessage 0x14
+#define EMS_TYPE_UBAFlags 0x35
 #define EMS_TYPE_UBAMaintenanceSettingsMessage 0x15
 #define EMS_TYPE_UBAParametersMessage 0x16
 #define EMS_TYPE_UBASetPoints 0x1A
@@ -33,6 +34,7 @@
 
 #define EMS_OFFSET_UBAParameterWW_wwtemp 2                  // WW Temperature
 #define EMS_OFFSET_UBAParameterWW_wwactivated 1             // WW Activated
+#define EMS_OFFSET_UBAParameterWW_wwOneTime 5               // WW OneTime loading
 #define EMS_OFFSET_UBAParameterWW_wwComfort 9               // WW is in comfort or eco mode
 #define EMS_VALUE_UBAParameterWW_wwComfort_Hot 0x00         // the value for hot
 #define EMS_VALUE_UBAParameterWW_wwComfort_Eco 0xD8         // the value for eco
