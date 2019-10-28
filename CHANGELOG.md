@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Added `publish_always` forcing MQTT topics to be always sent regardless if the data hasn't changed
+- Support for DHW once (OneTime water) heating command via MQTT [issue 195](https://github.com/proddy/EMS-ESP/issues/195)
 
 ### Fixed
 
