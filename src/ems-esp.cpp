@@ -89,6 +89,7 @@ typedef struct {
     bool     led;             // LED on/off
     bool     listen_mode;     // stop automatic Tx on/off
     uint16_t publish_time;    // frequency of MQTT publish in seconds
+    bool     publish_always;  // true if publish MQTT regardless if data has changed
     uint8_t  led_gpio;        // pin for LED
     uint8_t  dallas_gpio;     // pin for attaching external dallas temperature sensors
     bool     dallas_parasite; // on/off is using parasite
@@ -113,6 +114,8 @@ static const command_t project_cmds[] PROGMEM = {
     {true, "shower_timer <on | off>", "send MQTT notification on all shower durations"},
     {true, "shower_alert <on | off>", "stop hot water to send 3 cold burst warnings after max shower time is exceeded"},
     {true, "publish_time <seconds>", "set frequency for publishing data to MQTT (0=off)"},
+    {true, "publish_always <on | off>", "set to on to skip payload comparison since last publish"},
+
     {true, "tx_mode <n>", "changes Tx logic. 1=ems generic, 2=ems+, 3=Junkers HT3"},
 
     {false, "info", "show current captured on the devices"},
@@ -525,6 +528,11 @@ void publishValues(bool force) {
     // don't publish is publish time is set to 0
     if (EMSESP_Settings.publish_time == 0) {
         return;
+    }
+
+    // override force
+    if (EMSESP_Settings.publish_always) {
+        force = true;
     }
 
     char                                      s[20] = {0}; // for formatting strings
@@ -1026,6 +1034,7 @@ bool LoadSaveCallback(MYESP_FSACTION action, JsonObject settings) {
         EMSESP_Settings.shower_timer    = settings["shower_timer"];
         EMSESP_Settings.shower_alert    = settings["shower_alert"];
         EMSESP_Settings.publish_time    = settings["publish_time"] | DEFAULT_PUBLISHTIME;
+        EMSESP_Settings.publish_always  = settings["publish_always"];
 
         EMSESP_Settings.listen_mode = settings["listen_mode"];
         ems_setTxDisabled(EMSESP_Settings.listen_mode);
@@ -1045,6 +1054,7 @@ bool LoadSaveCallback(MYESP_FSACTION action, JsonObject settings) {
         settings["shower_timer"]    = EMSESP_Settings.shower_timer;
         settings["shower_alert"]    = EMSESP_Settings.shower_alert;
         settings["publish_time"]    = EMSESP_Settings.publish_time;
+        settings["publish_always"]  = EMSESP_Settings.publish_always;
         settings["tx_mode"]         = EMSESP_Settings.tx_mode;
 
         return true;
@@ -1179,6 +1189,19 @@ bool SetListCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, co
             ok                           = true;
         }
 
+        // publish_always
+        if ((strcmp(setting, "publish_always") == 0) && (wc == 2)) {
+            if (strcmp(value, "on") == 0) {
+                EMSESP_Settings.publish_always = true;
+                ok                             = true;
+            } else if (strcmp(value, "off") == 0) {
+                EMSESP_Settings.publish_always = false;
+                ok                             = true;
+            } else {
+                myDebug_P(PSTR("Error. Usage: set publish_always <on | off>"));
+            }
+        }
+
         // tx_mode
         if ((strcmp(setting, "tx_mode") == 0) && (wc == 2)) {
             uint8_t mode = atoi(value);
@@ -1202,6 +1225,7 @@ bool SetListCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, co
         myDebug_P(PSTR("  shower_timer=%s"), EMSESP_Settings.shower_timer ? "on" : "off");
         myDebug_P(PSTR("  shower_alert=%s"), EMSESP_Settings.shower_alert ? "on" : "off");
         myDebug_P(PSTR("  publish_time=%d"), EMSESP_Settings.publish_time);
+        myDebug_P(PSTR("  publish_always=%s"), EMSESP_Settings.publish_always ? "on" : "off");
     }
 
     return ok;
@@ -1878,6 +1902,7 @@ void initEMSESP() {
     EMSESP_Settings.led            = true; // LED is on by default
     EMSESP_Settings.listen_mode    = false;
     EMSESP_Settings.publish_time   = DEFAULT_PUBLISHTIME;
+    EMSESP_Settings.publish_always = false;
     EMSESP_Settings.timestamp      = millis();
     EMSESP_Settings.dallas_sensors = 0;
     EMSESP_Settings.led_gpio       = EMSESP_LED_GPIO;

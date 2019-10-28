@@ -123,6 +123,21 @@
     </div>
 
     <div class="row form-group">
+        <label class="col-xs-3">Publish Always<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign"
+                aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right"
+                data-content="Always send MQTT topics, regardless if the payload hasn't changed"></i></label>
+        <span class="col-xs-9">
+            <form>
+                <label class="radio-inline">
+                    <input type="radio" value="1" name="publish_always">Enabled</label>
+                <label class="radio-inline">
+                    <input type="radio" value="0" name="publish_always" checked>Disabled</label>
+            </form>
+        </span>
+        <br>
+    </div>
+
+    <div class="row form-group">
         <label class="col-xs-3">Tx mode<i style="margin-left: 10px;"
                 class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true" data-toggle="popover"
                 data-trigger="hover" data-placement="right"
