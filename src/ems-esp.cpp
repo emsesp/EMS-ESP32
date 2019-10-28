@@ -592,7 +592,7 @@ void publishValues(bool force) {
 
     if (EMS_Boiler.wWActivated != EMS_VALUE_INT_NOTSET)
         rootBoiler["wWActivated"] = _bool_to_char(s, EMS_Boiler.wWActivated);
-    
+
     if (EMS_Boiler.wWActivated != EMS_VALUE_INT_NOTSET)
         rootBoiler["wWOnetime"] = _bool_to_char(s, EMS_Boiler.wWOneTime);
 

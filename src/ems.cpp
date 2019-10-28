@@ -187,8 +187,8 @@ const _EMS_Type EMS_Types[] = {
     {EMS_MODEL_ALL, EMS_TYPE_JunkersStatusMessage, "JunkersStatusMessage", _process_JunkersStatusMessage},
 
     // Mixing devices
-    {EMS_MODEL_MM100, EMS_TYPE_MMPLUSStatusMessage_HC1, "MMPLUSStatusMessage_HC1", _process_MMPLUSStatusMessage},
-    {EMS_MODEL_MM100, EMS_TYPE_MMPLUSStatusMessage_HC2, "MMPLUSStatusMessage_HC2", _process_MMPLUSStatusMessage},
+    {EMS_MODEL_MM, EMS_TYPE_MMPLUSStatusMessage_HC1, "MMPLUSStatusMessage_HC1", _process_MMPLUSStatusMessage},
+    {EMS_MODEL_MM, EMS_TYPE_MMPLUSStatusMessage_HC2, "MMPLUSStatusMessage_HC2", _process_MMPLUSStatusMessage},
 
 };
 
@@ -2521,8 +2521,10 @@ void ems_scanDevices() {
 
     std::list<uint8_t> Device_Ids; // create a new list
 
-    // add boiler device_id which is always 0x08
-    Device_Ids.push_back(EMS_ID_BOILER);
+
+    Device_Ids.push_back(EMS_ID_BOILER); // add boiler device_id which is always 0x08
+    Device_Ids.push_back(EMS_ID_HP);     // add heat pump
+    Device_Ids.push_back(EMS_ID_SM);     // add solar module
 
     // copy over thermostats
     for (_Thermostat_Device tt : Thermostat_Devices) {
@@ -2533,9 +2535,6 @@ void ems_scanDevices() {
     for (_Other_Device ot : Other_Devices) {
         Device_Ids.push_back(ot.device_id);
     }
-
-    Device_Ids.push_back(EMS_ID_HP); // add heat pump
-    Device_Ids.push_back(EMS_ID_SM); // add solar module
 
     // remove duplicates and reserved IDs (like our own device)
     Device_Ids.sort();
