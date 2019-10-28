@@ -1492,11 +1492,11 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
         char topic_s[50];
         char buffer[4];
         for (uint8_t hc = 1; hc <= EMS_THERMOSTAT_MAXHC; hc++) {
-            strlcpy(topic_s, TOPIC_THERMOSTAT_CMD_TEMP, sizeof(topic_s));
+            strlcpy(topic_s, TOPIC_THERMOSTAT_CMD_TEMP_HA, sizeof(topic_s));
             strlcat(topic_s, itoa(hc, buffer, 10), sizeof(topic_s));
             myESP.mqttSubscribe(topic_s);
 
-            strlcpy(topic_s, TOPIC_THERMOSTAT_CMD_MODE, sizeof(topic_s));
+            strlcpy(topic_s, TOPIC_THERMOSTAT_CMD_MODE_HA, sizeof(topic_s));
             strlcat(topic_s, itoa(hc, buffer, 10), sizeof(topic_s));
             myESP.mqttSubscribe(topic_s);
         }
