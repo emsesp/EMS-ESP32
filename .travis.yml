@@ -58,9 +58,9 @@ deploy:
   token: ${GITHUB_TOKEN} 
   file_glob: true
   file: "*.bin"
-  name: EMS-ESP development build (${TRAVIS_BRANCH})
-  release_notes: Automatic EMS-ESP development build of $TRAVIS_BRANCH branch
-    (commit $TRAVIS_COMMIT) built by Travis CI on $(date +'%F %T %Z').
+  name: latest development build
+  release_notes: Automatic firmware builds of the latest EMS-ESP $TRAVIS_BRANCH branch
+    (commit $TRAVIS_COMMIT). Built by Travis CI on $(date +'%F %T %Z').
   cleanup: false
   prerelease: true
   overwrite: true
