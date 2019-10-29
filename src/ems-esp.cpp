@@ -116,7 +116,7 @@ static const command_t project_cmds[] PROGMEM = {
     {true, "publish_time <seconds>", "set frequency for publishing data to MQTT (0=off)"},
     {true, "publish_always <on | off>", "set to on to skip payload comparison since last publish"},
 
-    {true, "tx_mode <n>", "changes Tx logic. 1=ems generic, 2=ems+, 3=Junkers HT3"},
+    {true, "tx_mode <n>", "changes Tx logic. 1=EMS generic, 2=EMS+, 3=HT3"},
 
     {false, "info", "show current captured on the devices"},
     {false, "log <n | b | t | s | r | j | v>", "set logging mode to none, basic, thermostat only, solar module only, raw, jabber or verbose"},
@@ -237,7 +237,7 @@ void showInfo() {
     myDebug_P(PSTR("\n%sEMS Bus stats:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
 
     if (ems_getBusConnected()) {
-        myDebug_P(PSTR("  Bus is connected, protocol: %s"), ((EMS_Sys_Status.emsIDMask == 0x80) ? "Junkers HT3" : "Buderus"));
+        myDebug_P(PSTR("  Bus is connected, protocol: %s"), ((EMS_Sys_Status.emsIDMask == 0x80) ? "HT3" : "Buderus"));
         myDebug_P(PSTR("  Rx: # successful read requests=%d, # CRC errors=%d"), EMS_Sys_Status.emsRxPgks, EMS_Sys_Status.emxCrcErr);
 
         if (ems_getTxCapable()) {
