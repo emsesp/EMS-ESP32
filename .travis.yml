@@ -1,0 +1,82 @@
+os: linux
+language: python
+python:
+  - '2.7'
+
+cache:
+  directories:
+    - ${HOME}/.pio
+
+env:
+  global:
+#   - BUILDER_TOTAL_THREADS=4
+    - BUILDER_TOTAL_THREADS=1
+    - OWNER=${TRAVIS_REPO_SLUG%/*}
+    - DEV=${OWNER/proddy/dev}
+    - BRANCH=${TRAVIS_BRANCH/dev/}
+    - TAG=${DEV}${BRANCH:+_}${BRANCH}
+
+install:
+  - env | grep TRAVIS
+  - set -e
+  - pip install -U platformio
+  - pio platform update -p
+  - set +e
+
+branches:
+  except:
+    - /^travis-.*-build$/
+
+script:
+  - ./scripts/build.sh
+# - ./scripts/build.sh -p
+
+stages:
+  - name: Release
+#    if: type IN (cron, api)
+
+jobs:
+  include:
+  - stage: Release
+#    env: BUILDER_THREAD=0
+#  - env: BUILDER_THREAD=1
+#  - env: BUILDER_THREAD=2
+#  - env: BUILDER_THREAD=3
+
+before_deploy:
+  - git tag -f travis-${TAG}-build
+  - git remote add gh
+    https://${OWNER}:${GITHUB_TOKEN}@github.com/${TRAVIS_REPO_SLUG}.git
+  - git push gh :travis-${TAG}-build || true
+  - git push -f gh travis-${TAG}-build
+  - git remote remove gh
+
+deploy:
+  provider: releases
+  edge:
+    branch: master
+  token: ${GITHUB_TOKEN} 
+  file_glob: true
+  file: "*.bin"
+  name: EMS-ESP development build (${TRAVIS_BRANCH})
+  release_notes: Automatic EMS-ESP development build of $TRAVIS_BRANCH branch
+    (commit $TRAVIS_COMMIT) built by Travis CI on $(date +'%F %T %Z').
+  cleanup: false
+  prerelease: true
+  overwrite: true
+  target_commitish: $TRAVIS_COMMIT
+  on:
+    tags: false
+    branch: dev
+
+notifications:
+  email:
+    on_success: change
+    on_failure: change
+
+  #webhooks:
+  #  urls:
+  #    - https://webhooks.gitter.im/e/83e4c4ab123eca3082b4
+  #  on_success: change  # options: [always|never|change] default: always
+  #  on_failure: always  # options: [always|never|change] default: always
+  #  on_start: false     # default: false

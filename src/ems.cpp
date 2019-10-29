@@ -1520,9 +1520,11 @@ void _process_RCPLUSStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
         case EMS_OFFSET_RCPLUSStatusMessage_currsetpoint:         // current setpoint temp,  e.g. Thermostat -> all, telegram: 10 00 FF 06 01 A5 22
             EMS_Thermostat.hc[hc].setpoint_roomTemp = _toByte(0); // value is * 2
             break;
-        case EMS_OFFSET_RCPLUSStatusMessage_mode:            // thermostat mode auto/manual
-                                                             // manual : 10 00 FF 0A 01 A5 02
-                                                             // auto : Thermostat -> all, type 0x01A5 telegram: 10 00 FF 0A 01 A5 03
+        case EMS_OFFSET_RCPLUSStatusMessage_mode: // thermostat mode auto/manual
+                                                  // manual : 10 00 FF 0A 01 A5 02
+                                                  // auto : Thermostat -> all, type 0x01A5 telegram: 10 00 FF 0A 01 A5 03
+
+            // TODO this may be bit 2 instead of 1 on an RC300 - still to validate
             EMS_Thermostat.hc[hc].mode     = _bitRead(0, 0); // bit 1, mode (auto=1 or manual=0)
             EMS_Thermostat.hc[hc].day_mode = _bitRead(0, 1); // get day mode flag
 
