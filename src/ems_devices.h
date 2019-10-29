@@ -200,7 +200,7 @@ const _Boiler_Device Boiler_Devices[] = {
     {203, "Buderus Logamax U122/Junkers Cerapur"},
     {208, "Buderus Logamax plus/GB192/Bosch Condens GC9000"},
     {64, "Sieger BK13,BK15/Nefit Smartline/Buderus GB1x2"},
-    {95, "Bosch Condens 2500/Buderus Logamax GB062/Junkers Cerapur Top/Junkers HT3"},
+    {95, "Bosch Condens 2500/Buderus Logamax GB062/Junkers Cerapur Top/Worcester Greenstar i/Generic HT3"},
     {122, "Nefit Proline"},
     {170, "Buderus Logano GB212"},
     {172, "Nefit Enviline"}
@@ -249,7 +249,7 @@ const _Other_Device Other_Devices[] = {
     {125, 0x09, "BC25 Base Controller"},
     {169, 0x09, "BC40 Base Controller"},
     {152, 0x09, "Junkers Controller"},
-    {95, 0x09, "Junkers HT3 Controller"},
+    {95, 0x09, "HT3 Controller"},
     {230, 0x09, "BC Base Controller"},
 
     {205, 0x02, "Nefit Moduline Easy Connect"},

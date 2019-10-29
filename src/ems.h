@@ -186,7 +186,7 @@ const _EMS_TxTelegram EMS_TX_TELEGRAM_NEW = {
 // where defintions are stored
 typedef struct {
     uint8_t product_id;
-    char    model_string[80];
+    char    model_string[100];
 } _Boiler_Device;
 
 typedef struct {
