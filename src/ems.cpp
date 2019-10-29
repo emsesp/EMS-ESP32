@@ -589,11 +589,13 @@ void _ems_sendTelegram() {
     // we don't remove from the queue yet
     _EMS_TxTelegram EMS_TxTelegram = EMS_TxQueue.first();
 
+    /*
     // if there is no destination, also delete it from the queue
     if (EMS_TxTelegram.dest == EMS_ID_NONE) {
         EMS_TxQueue.shift(); // remove from queue
         return;
     }
+    */
 
     // if we're in raw mode just fire and forget
     if (EMS_TxTelegram.action == EMS_TX_TELEGRAM_RAW) {
