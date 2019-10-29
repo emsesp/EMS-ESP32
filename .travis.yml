@@ -44,6 +44,7 @@ jobs:
 #   - env: BUILDER_THREAD=3
 
 before_deploy:
+  - export FIRMWARE_VERSION=$(grep -E '^#define APP_VERSION' ./src/version.h | awk '{print $3}' | sed 's/"//g')
   - git tag -f travis-${TAG}-build
   - git remote add gh
     https://${OWNER}:${GITHUB_TOKEN}@github.com/${TRAVIS_REPO_SLUG}.git
@@ -61,8 +62,8 @@ deploy:
   file: "*.bin"
   name: latest development build
   release_notes:
-    Automatic firmware builds of the current EMS-ESP $TRAVIS_BRANCH branch
-    (commit $TRAVIS_COMMIT). Built by Travis CI on $(date +'%F %T %Z').
+    Automatic firmware builds of the current EMS-ESP branch for version $FIRMWARE_VERSION.
+    Built by Travis CI on $(date +'%F %T %Z') from commit $TRAVIS_COMMIT.
   cleanup: false
   prerelease: true
   overwrite: true

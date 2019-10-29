@@ -84,7 +84,8 @@ build_environments() {
         platformio run --silent --environment $environment || exit 1
         stat_bytes .pio/build/$environment/firmware.bin
         # mv .pio/build/$environment/firmware.bin $destination/EMS-ESP-$version-$environment.bin
-        mv .pio/build/$environment/firmware.bin EMS-ESP-$version-$environment.bin
+        # mv .pio/build/$environment/firmware.bin EMS-ESP-$version-$environment.bin
+        mv .pio/build/$environment/firmware.bin EMS-ESP-dev-$environment.bin
     done
     echo "--------------------------------------------------------------" 
 }
