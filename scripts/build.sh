@@ -76,6 +76,7 @@ build_webui() {
 build_environments() {
     echo "--------------------------------------------------------------"
     echo "Building firmware images..."
+    # don't move to firmware folder until Travis fixed (see https://github.com/travis-ci/dpl/issues/846#issuecomment-547157406)
     # mkdir -p $destination
 
     for environment in $environments; do
