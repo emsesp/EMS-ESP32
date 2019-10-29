@@ -31,7 +31,7 @@ DS18 ds18;
 #define APP_NAME "EMS-ESP"
 #define APP_HOSTNAME "ems-esp"
 #define APP_URL "https://github.com/proddy/EMS-ESP"
-#define APP_UPDATEURL "https://api.github.com/repos/proddy/EMS-ESP/releases/latest"
+#define APP_URL_API "https://api.github.com/repos/proddy/EMS-ESP"
 
 // set to value >0 if the ESP is overheating or there are timing issues. Recommend a value of 1.
 #define EMSESP_DELAY 0 // initially set to 0 for no delay. Change to 1 if getting WDT resets from wifi
@@ -2016,7 +2016,7 @@ void setup() {
     myESP.setSettings(LoadSaveCallback, SetListCallback, false); // default is Serial off
     myESP.setWeb(WebCallback);                                   // web custom settings
     myESP.setOTA(OTACallback_pre, OTACallback_post);             // OTA callback which is called when OTA is starting and stopping
-    myESP.begin(APP_HOSTNAME, APP_NAME, APP_VERSION, APP_URL, APP_UPDATEURL);
+    myESP.begin(APP_HOSTNAME, APP_NAME, APP_VERSION, APP_URL, APP_URL_API);
 
     // at this point we have all the settings from our internall SPIFFS config file
     // fire up the UART now
