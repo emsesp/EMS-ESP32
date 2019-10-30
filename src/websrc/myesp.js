@@ -922,11 +922,11 @@ function login() {
 
 function switchfirmware() {
     if (use_beta_firmware) {
-         use_beta_firmware = false;
-         document.getElementById("updateb").innerHTML = "Official Release";
+        use_beta_firmware = false;
+        document.getElementById("updateb").innerHTML = "Official Release";
     } else {
         use_beta_firmware = true;
-        document.getElementById("updateb").innerHTML = "Beta Build";
+        document.getElementById("updateb").innerHTML = "Development Build";
     }
     getLatestReleaseInfo();
 }
