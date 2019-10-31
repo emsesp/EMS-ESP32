@@ -9,7 +9,7 @@
 #ifndef MyESP_h
 #define MyESP_h
 
-#define MYESP_VERSION "1.2.12"
+#define MYESP_VERSION "1.2.13"
 
 #include <ArduinoJson.h>
 #include <ArduinoOTA.h>
@@ -308,7 +308,7 @@ class MyESP {
     // general
     void     end();
     void     loop();
-    void     begin(const char * app_hostname, const char * app_name, const char * app_version, const char * app_url, const char * app_updateurl);
+    void     begin(const char * app_hostname, const char * app_name, const char * app_version, const char * app_url, const char * app_url_api);
     void     resetESP();
     int      getWifiQuality();
     void     showSystemStats();
@@ -407,6 +407,7 @@ class MyESP {
     char *        _app_version;
     char *        _app_url;
     char *        _app_updateurl;
+    char *        _app_updateurl_dev;
     bool          _suspendOutput;
     bool          _general_serial;
     bool          _general_log_events;

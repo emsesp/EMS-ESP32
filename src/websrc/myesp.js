@@ -8,6 +8,24 @@ var ajaxobj;
 
 var custom_config = {};
 
+var xDown = null;
+var yDown = null;
+
+var page = 1;
+var haspages;
+var file = {};
+var backupstarted = false;
+var updateurl = "";
+var updateurl_dev = "";
+
+var use_beta_firmware = false;
+
+var myespcontent;
+
+var formData = new FormData();
+
+var nextIsNotJson = false;
+
 var config = {
     "command": "configfile",
     "network": {
@@ -39,14 +57,6 @@ var config = {
         "enabled": true
     }
 };
-
-var page = 1;
-var haspages;
-var file = {};
-var backupstarted = false;
-var updateurl = "";
-
-var myespcontent;
 
 function browserTime() {
     var d = new Date(0);
@@ -208,8 +218,6 @@ function savenetwork() {
 
     saveconfig();
 }
-
-var formData = new FormData();
 
 function inProgress(callback) {
     $("body").load("myesp.html #progresscontent", function (responseTxt, statusTxt, xhr) {
@@ -510,6 +518,7 @@ function getContent(contentname) {
                     $("#appurl2").text(ajaxobj.appurl);
 
                     updateurl = ajaxobj.updateurl;
+                    updateurl_dev = ajaxobj.updateurl_dev;
                     listCustomStats();
                     break;
                 default:
@@ -734,8 +743,6 @@ function initMQTTLogTable() {
     });
 }
 
-var nextIsNotJson = false;
-
 function socketMessageListener(evt) {
     var obj = JSON.parse(evt.data);
     if (obj.hasOwnProperty("command")) {
@@ -813,46 +820,6 @@ function destroy() {
 function restart() {
     inProgress("restart");
 }
-
-$("#dismiss, .overlay").on("click", function () {
-    $("#sidebar").removeClass("active");
-    $(".overlay").fadeOut();
-});
-
-$("#sidebarCollapse").on("click", function () {
-    $("#sidebar").addClass("active");
-    $(".overlay").fadeIn();
-    $(".collapse.in").toggleClass("in");
-    $("a[aria-expanded=true]").attr("aria-expanded", "false");
-});
-
-$("#custom_status").click(function () {
-    websock.send("{\"command\":\"custom_status\"}");
-    return false;
-});
-
-$("#status").click(function () {
-    websock.send("{\"command\":\"status\"}");
-    return false;
-});
-
-$("#custom").click(function () { getContent("#customcontent"); return false; });
-
-$("#network").on("click", (function () { getContent("#networkcontent"); return false; }));
-$("#general").click(function () { getContent("#generalcontent"); return false; });
-$("#mqtt").click(function () { getContent("#mqttcontent"); return false; });
-$("#ntp").click(function () { getContent("#ntpcontent"); return false; });
-$("#backup").click(function () { getContent("#backupcontent"); return false; });
-$("#reset").click(function () { $("#destroy").modal("show"); return false; });
-$("#restart").click(function () { $("#reboot").modal("show"); return false; });
-$("#eventlog").click(function () { getContent("#eventcontent"); return false; });
-
-$(".noimp").on("click", function () {
-    $("#noimp").modal("show");
-});
-
-var xDown = null;
-var yDown = null;
 
 function handleTouchStart(evt) {
     xDown = evt.touches[0].clientX;
@@ -953,8 +920,26 @@ function login() {
     }
 }
 
+function switchfirmware() {
+    if (use_beta_firmware) {
+        use_beta_firmware = false;
+        document.getElementById("updateb").innerHTML = "Official Release";
+    } else {
+        use_beta_firmware = true;
+        document.getElementById("updateb").innerHTML = "Development Build";
+    }
+    getLatestReleaseInfo();
+}
+
 function getLatestReleaseInfo() {
-    $.getJSON(updateurl).done(function (release) {
+
+    if (use_beta_firmware) {
+        var url = updateurl_dev;
+    } else {
+        var url = updateurl;
+    }
+
+    $.getJSON(url).done(function (release) {
         var asset = release.assets[0];
         var downloadCount = 0;
         for (var i = 0; i < release.assets.length; i++) {
@@ -977,10 +962,6 @@ function getLatestReleaseInfo() {
         $("#releaseinfo").fadeIn("slow");
     }).error(function () { $("#onlineupdate").html("<h5>Couldn't get release details. Make sure there is an Internet connection.</h5>"); });
 }
-
-$("#update").on("shown.bs.modal", function (e) {
-    getLatestReleaseInfo();
-});
 
 function allowUpload() {
     $("#upbtn").prop("disabled", false);
@@ -1013,6 +994,32 @@ function refreshEMS() {
 function refreshStatus() {
     websock.send("{\"command\":\"status\"}");
 }
+
+$("#dismiss, .overlay").on("click", function () {
+    $("#sidebar").removeClass("active");
+    $(".overlay").fadeOut();
+});
+
+$("#sidebarCollapse").on("click", function () {
+    $("#sidebar").addClass("active");
+    $(".overlay").fadeIn();
+    $(".collapse.in").toggleClass("in");
+    $("a[aria-expanded=true]").attr("aria-expanded", "false");
+});
+
+$("#custom_status").click(function () { websock.send("{\"command\":\"custom_status\"}"); return false; });
+$("#status").click(function () { websock.send("{\"command\":\"status\"}"); return false; });
+$("#custom").click(function () { getContent("#customcontent"); return false; });
+$("#network").on("click", (function () { getContent("#networkcontent"); return false; }));
+$("#general").click(function () { getContent("#generalcontent"); return false; });
+$("#mqtt").click(function () { getContent("#mqttcontent"); return false; });
+$("#ntp").click(function () { getContent("#ntpcontent"); return false; });
+$("#backup").click(function () { getContent("#backupcontent"); return false; });
+$("#reset").click(function () { $("#destroy").modal("show"); return false; });
+$("#restart").click(function () { $("#reboot").modal("show"); return false; });
+$("#eventlog").click(function () { getContent("#eventcontent"); return false; });
+$(".noimp").on("click", function () { $("#noimp").modal("show"); });
+$("#update").on("shown.bs.modal", function (e) { getLatestReleaseInfo(); });
 
 document.addEventListener("touchstart", handleTouchStart, false);
 document.addEventListener("touchmove", handleTouchMove, false);

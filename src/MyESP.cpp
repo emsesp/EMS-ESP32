@@ -2531,11 +2531,12 @@ void MyESP::_sendCustomStatus() {
 
     JsonObject root = doc.to<JsonObject>();
 
-    root["command"]    = "custom_status";
-    root["version"]    = _app_version;
-    root["customname"] = _app_name;
-    root["appurl"]     = _app_url;
-    root["updateurl"]  = _app_updateurl;
+    root["command"]       = "custom_status";
+    root["version"]       = _app_version;
+    root["customname"]    = _app_name;
+    root["appurl"]        = _app_url;
+    root["updateurl"]     = _app_updateurl;
+    root["updateurl_dev"] = _app_updateurl_dev;
 
     // add specific custom stuff
     if (_web_callback_f) {
@@ -2914,12 +2915,20 @@ void MyESP::_bootupSequence() {
 }
 
 // setup MyESP
-void MyESP::begin(const char * app_hostname, const char * app_name, const char * app_version, const char * app_url, const char * app_updateurl) {
+void MyESP::begin(const char * app_hostname, const char * app_name, const char * app_version, const char * app_url, const char * app_url_api) {
     _general_hostname = strdup(app_hostname);
     _app_name         = strdup(app_name);
     _app_version      = strdup(app_version);
     _app_url          = strdup(app_url);
-    _app_updateurl    = strdup(app_updateurl);
+
+    char s[100];
+    strlcpy(s, app_url_api, sizeof(s));
+    strlcat(s, "/releases/latest", sizeof(s)); // append "/releases/latest"
+    _app_updateurl = strdup(s);
+
+    strlcpy(s, app_url_api, sizeof(s));
+    strlcat(s, "/releases/tags/travis-dev-build", sizeof(s)); // append "/releases/tags/travis-dev-build"
+    _app_updateurl_dev = strdup(s);
 
     _telnet_setup(); // Telnet setup, called first to set Serial
 

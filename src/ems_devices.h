@@ -160,16 +160,12 @@ typedef enum {
     EMS_MODEL_NONE, // unset
     EMS_MODEL_ALL,  // common for all devices
 
-    // heatpump
-    EMS_MODEL_HP,
+    EMS_MODEL_HP,  // heatpump
+    EMS_MODEL_SM,  // solar module
+    EMS_MODEL_MM,  // mixer module
+    EMS_MODEL_UBA, // boiler
 
-    // solar module
-    EMS_MODEL_SM,
-
-    // boiler
-    EMS_MODEL_UBA,
-
-    // and the thermostats
+    // and the various thermostats
     EMS_MODEL_ES73,
     EMS_MODEL_RC10,
     EMS_MODEL_RC20,
@@ -187,9 +183,8 @@ typedef enum {
     EMS_MODEL_FR100,
     EMS_MODEL_FR110,
     EMS_MODEL_FW120,
-
-    // mixing devices
-    EMS_MODEL_MM100
+    EMS_MODEL_FW200,
+    EMS_MODEL_FR120
 
 } _EMS_MODEL_ID;
 
@@ -205,7 +200,7 @@ const _Boiler_Device Boiler_Devices[] = {
     {203, "Buderus Logamax U122/Junkers Cerapur"},
     {208, "Buderus Logamax plus/GB192/Bosch Condens GC9000"},
     {64, "Sieger BK13,BK15/Nefit Smartline/Buderus GB1x2"},
-    {95, "Bosch Condens 2500/Buderus Logamax GB062/Junkers Cerapur Top/Junkers HT3"},
+    {95, "Bosch Condens 2500/Buderus Logamax GB062/Junkers Cerapur Top/Worcester Greenstar i/Generic HT3"},
     {122, "Nefit Proline"},
     {170, "Buderus Logano GB212"},
     {172, "Nefit Enviline"}
@@ -235,7 +230,10 @@ const _Mixing_Device Mixing_Devices[] = {
     {160, "MM100 Mixing Module"},
     {161, "MM200 Mixing Module"},
     {69, "MM10 Mixer Module"},
-    {159, "MM50 Mixing Module"}
+    {159, "MM50 Mixing Module"},
+    {79, "MM100 Mixer Module"},
+    {80, "MM200 Mixer Module"},
+    {78, "MM400 Mixer Module"}
 
 };
 
@@ -251,7 +249,7 @@ const _Other_Device Other_Devices[] = {
     {125, 0x09, "BC25 Base Controller"},
     {169, 0x09, "BC40 Base Controller"},
     {152, 0x09, "Junkers Controller"},
-    {95, 0x09, "Junkers Controller"},
+    {95, 0x09, "HT3 Controller"},
     {230, 0x09, "BC Base Controller"},
 
     {205, 0x02, "Nefit Moduline Easy Connect"},
@@ -274,6 +272,7 @@ const _HeatPump_Device HeatPump_Devices[] = {
 /*
  * Known thermostat types and their capabilities
  * format is MODEL_ID, PRODUCT ID, DEVICE ID, DESCRIPTION
+ * Typically on DeviceID 0x10 or 0x18
  */
 const _Thermostat_Device Thermostat_Devices[] = {
 
@@ -297,9 +296,11 @@ const _Thermostat_Device Thermostat_Devices[] = {
 
     // Junkers
     {EMS_MODEL_FW100, 105, 0x10, "Junkers FW100", EMS_THERMOSTAT_WRITE_NO},
-    {EMS_MODEL_FR10, 111, 0x18, "Junkers FR10", EMS_THERMOSTAT_WRITE_NO},
-    {EMS_MODEL_FR100, 105, 0x18, "Junkers FR100", EMS_THERMOSTAT_WRITE_NO},
+    {EMS_MODEL_FW200, 106, 0x10, "Junkers FW200", EMS_THERMOSTAT_WRITE_NO},
+    {EMS_MODEL_FR100, 107, 0x18, "Junkers FR100", EMS_THERMOSTAT_WRITE_NO},
     {EMS_MODEL_FR110, 108, 0x18, "Junkers FR110", EMS_THERMOSTAT_WRITE_NO},
+    {EMS_MODEL_FR10, 111, 0x18, "Junkers FR10", EMS_THERMOSTAT_WRITE_NO},
+    {EMS_MODEL_FR120, 191, 0x10, "Junkers FR120", EMS_THERMOSTAT_WRITE_NO},
     {EMS_MODEL_FW120, 192, 0x10, "Junkers FW120", EMS_THERMOSTAT_WRITE_NO},
     {EMS_MODEL_FR50, 147, 0x10, "Junkers FR50", EMS_THERMOSTAT_WRITE_NO}
 

@@ -31,7 +31,7 @@ DS18 ds18;
 #define APP_NAME "EMS-ESP"
 #define APP_HOSTNAME "ems-esp"
 #define APP_URL "https://github.com/proddy/EMS-ESP"
-#define APP_UPDATEURL "https://api.github.com/repos/proddy/EMS-ESP/releases/latest"
+#define APP_URL_API "https://api.github.com/repos/proddy/EMS-ESP"
 
 // set to value >0 if the ESP is overheating or there are timing issues. Recommend a value of 1.
 #define EMSESP_DELAY 0 // initially set to 0 for no delay. Change to 1 if getting WDT resets from wifi
@@ -116,7 +116,7 @@ static const command_t project_cmds[] PROGMEM = {
     {true, "publish_time <seconds>", "set frequency for publishing data to MQTT (0=off)"},
     {true, "publish_always <on | off>", "set to on to skip payload comparison since last publish"},
 
-    {true, "tx_mode <n>", "changes Tx logic. 1=ems generic, 2=ems+, 3=Junkers HT3"},
+    {true, "tx_mode <n>", "changes Tx logic. 1=EMS generic, 2=EMS+, 3=HT3"},
 
     {false, "info", "show current captured on the devices"},
     {false, "log <n | b | t | s | r | j | v>", "set logging mode to none, basic, thermostat only, solar module only, raw, jabber or verbose"},
@@ -237,7 +237,7 @@ void showInfo() {
     myDebug_P(PSTR("\n%sEMS Bus stats:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
 
     if (ems_getBusConnected()) {
-        myDebug_P(PSTR("  Bus is connected, protocol: %s"), ((EMS_Sys_Status.emsIDMask == 0x80) ? "Junkers HT3" : "Buderus"));
+        myDebug_P(PSTR("  Bus is connected, protocol: %s"), ((EMS_Sys_Status.emsIDMask == 0x80) ? "HT3" : "Buderus"));
         myDebug_P(PSTR("  Rx: # successful read requests=%d, # CRC errors=%d"), EMS_Sys_Status.emsRxPgks, EMS_Sys_Status.emxCrcErr);
 
         if (ems_getTxCapable()) {
@@ -592,7 +592,7 @@ void publishValues(bool force) {
 
     if (EMS_Boiler.wWActivated != EMS_VALUE_INT_NOTSET)
         rootBoiler["wWActivated"] = _bool_to_char(s, EMS_Boiler.wWActivated);
-    
+
     if (EMS_Boiler.wWActivated != EMS_VALUE_INT_NOTSET)
         rootBoiler["wWOnetime"] = _bool_to_char(s, EMS_Boiler.wWOneTime);
 
@@ -1492,11 +1492,11 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
         char topic_s[50];
         char buffer[4];
         for (uint8_t hc = 1; hc <= EMS_THERMOSTAT_MAXHC; hc++) {
-            strlcpy(topic_s, TOPIC_THERMOSTAT_CMD_TEMP, sizeof(topic_s));
+            strlcpy(topic_s, TOPIC_THERMOSTAT_CMD_TEMP_HA, sizeof(topic_s));
             strlcat(topic_s, itoa(hc, buffer, 10), sizeof(topic_s));
             myESP.mqttSubscribe(topic_s);
 
-            strlcpy(topic_s, TOPIC_THERMOSTAT_CMD_MODE, sizeof(topic_s));
+            strlcpy(topic_s, TOPIC_THERMOSTAT_CMD_MODE_HA, sizeof(topic_s));
             strlcat(topic_s, itoa(hc, buffer, 10), sizeof(topic_s));
             myESP.mqttSubscribe(topic_s);
         }
@@ -2016,7 +2016,7 @@ void setup() {
     myESP.setSettings(LoadSaveCallback, SetListCallback, false); // default is Serial off
     myESP.setWeb(WebCallback);                                   // web custom settings
     myESP.setOTA(OTACallback_pre, OTACallback_post);             // OTA callback which is called when OTA is starting and stopping
-    myESP.begin(APP_HOSTNAME, APP_NAME, APP_VERSION, APP_URL, APP_UPDATEURL);
+    myESP.begin(APP_HOSTNAME, APP_NAME, APP_VERSION, APP_URL, APP_URL_API);
 
     // at this point we have all the settings from our internall SPIFFS config file
     // fire up the UART now

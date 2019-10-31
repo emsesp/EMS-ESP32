@@ -187,8 +187,8 @@ const _EMS_Type EMS_Types[] = {
     {EMS_MODEL_ALL, EMS_TYPE_JunkersStatusMessage, "JunkersStatusMessage", _process_JunkersStatusMessage},
 
     // Mixing devices
-    {EMS_MODEL_MM100, EMS_TYPE_MMPLUSStatusMessage_HC1, "MMPLUSStatusMessage_HC1", _process_MMPLUSStatusMessage},
-    {EMS_MODEL_MM100, EMS_TYPE_MMPLUSStatusMessage_HC2, "MMPLUSStatusMessage_HC2", _process_MMPLUSStatusMessage},
+    {EMS_MODEL_MM, EMS_TYPE_MMPLUSStatusMessage_HC1, "MMPLUSStatusMessage_HC1", _process_MMPLUSStatusMessage},
+    {EMS_MODEL_MM, EMS_TYPE_MMPLUSStatusMessage_HC2, "MMPLUSStatusMessage_HC2", _process_MMPLUSStatusMessage},
 
 };
 
@@ -589,11 +589,13 @@ void _ems_sendTelegram() {
     // we don't remove from the queue yet
     _EMS_TxTelegram EMS_TxTelegram = EMS_TxQueue.first();
 
+    /*
     // if there is no destination, also delete it from the queue
     if (EMS_TxTelegram.dest == EMS_ID_NONE) {
         EMS_TxQueue.shift(); // remove from queue
         return;
     }
+    */
 
     // if we're in raw mode just fire and forget
     if (EMS_TxTelegram.action == EMS_TX_TELEGRAM_RAW) {
@@ -1520,9 +1522,11 @@ void _process_RCPLUSStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
         case EMS_OFFSET_RCPLUSStatusMessage_currsetpoint:         // current setpoint temp,  e.g. Thermostat -> all, telegram: 10 00 FF 06 01 A5 22
             EMS_Thermostat.hc[hc].setpoint_roomTemp = _toByte(0); // value is * 2
             break;
-        case EMS_OFFSET_RCPLUSStatusMessage_mode:            // thermostat mode auto/manual
-                                                             // manual : 10 00 FF 0A 01 A5 02
-                                                             // auto : Thermostat -> all, type 0x01A5 telegram: 10 00 FF 0A 01 A5 03
+        case EMS_OFFSET_RCPLUSStatusMessage_mode: // thermostat mode auto/manual
+                                                  // manual : 10 00 FF 0A 01 A5 02
+                                                  // auto : Thermostat -> all, type 0x01A5 telegram: 10 00 FF 0A 01 A5 03
+
+            // TODO this may be bit 2 instead of 1 on an RC300 - still to validate
             EMS_Thermostat.hc[hc].mode     = _bitRead(0, 0); // bit 1, mode (auto=1 or manual=0)
             EMS_Thermostat.hc[hc].day_mode = _bitRead(0, 1); // get day mode flag
 
@@ -2521,8 +2525,10 @@ void ems_scanDevices() {
 
     std::list<uint8_t> Device_Ids; // create a new list
 
-    // add boiler device_id which is always 0x08
-    Device_Ids.push_back(EMS_ID_BOILER);
+
+    Device_Ids.push_back(EMS_ID_BOILER); // add boiler device_id which is always 0x08
+    Device_Ids.push_back(EMS_ID_HP);     // add heat pump
+    Device_Ids.push_back(EMS_ID_SM);     // add solar module
 
     // copy over thermostats
     for (_Thermostat_Device tt : Thermostat_Devices) {
@@ -2533,9 +2539,6 @@ void ems_scanDevices() {
     for (_Other_Device ot : Other_Devices) {
         Device_Ids.push_back(ot.device_id);
     }
-
-    Device_Ids.push_back(EMS_ID_HP); // add heat pump
-    Device_Ids.push_back(EMS_ID_SM); // add solar module
 
     // remove duplicates and reserved IDs (like our own device)
     Device_Ids.sort();

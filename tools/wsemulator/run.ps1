@@ -2,7 +2,7 @@ $ScriptDir = Split-Path $script:MyInvocation.MyCommand.Path
 
 # build web
 $webfilesbuilder = $ScriptDir + "\..\webfilesbuilder"
-node $webfilesbuilder\node_modules\gulp\bin\gulp.js --cwd $webfilesbuilder
+node $webfilesbuilder\node_modules\gulp\bin\gulp.js --silent --cwd $webfilesbuilder
 
 # run chrome
 $pathToChrome = 'C:\Program Files (x86)\Google\Chrome\Application\chrome.exe'

@@ -156,6 +156,7 @@ function sendCustomStatus() {
         "customname": "EMS-ESP",
         "appurl": "https://github.com/proddy/EMS-ESP",
         "updateurl": "https://api.github.com/repos/proddy/EMS-ESP/releases/latest",
+        "updateurl_dev": "https://api.github.com/repos/proddy/EMS-ESP/releases/tags/travis-dev-build",
 
         "emsbus": {
             "ok": true,
