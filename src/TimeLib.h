@@ -1,3 +1,8 @@
+/*
+ * customized version of Time library, originally Copyright (c) Michael Margolis 2009-2014
+ * modified by Paul S https://github.com/PaulStoffregen/Time
+ */
+
 #ifndef _TimeLib_h
 #define _TimeLib_h
 
@@ -38,8 +43,13 @@ void         setSyncProvider(getExternalTime getTimeFunction); // identify the e
 void         setSyncInterval(time_t interval);                 // set the number of seconds between re-sync
 time_t       makeTime(const tmElements_t & tm);                // convert time elements into time_t
 
-uint8_t to_hour(time_t t);   // the hour for the given time
-uint8_t to_minute(time_t t); // the minute for the given time
-uint8_t to_second(time_t t); // the second for the given time
+uint8_t  to_hour(time_t t);    // the hour for the given time
+uint8_t  to_minute(time_t t);  // the minute for the given time
+uint8_t  to_second(time_t t);  // the second for the given time
+uint8_t  to_day(time_t t);     // the day for the given time (0-6)
+uint8_t  to_month(time_t t);   // the month for the given time
+uint8_t  to_weekday(time_t t); // weekday, sunday is day 1
+uint16_t to_year(time_t t);    // the year for the given time
+
 }
 #endif

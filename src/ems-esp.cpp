@@ -70,7 +70,6 @@ Ticker showerColdShotStopTimer;
 #define SHOWER_MAX_DURATION 420000  // in ms. 7 minutes, before trigger a shot of cold water
 
 // set this if using an external temperature sensor like a DS18B20
-// D5 is the default on a bbqkees board
 #define EMSESP_DALLAS_GPIO D5
 #define EMSESP_DALLAS_PARASITE false
 
@@ -80,8 +79,7 @@ Ticker showerColdShotStopTimer;
 #define EMSESP_LED_GPIO LED_BUILTIN
 
 typedef struct {
-    uint32_t timestamp;      // for internal timings, via millis()
-    uint8_t  dallas_sensors; // count of dallas sensors
+    uint8_t dallas_sensors; // count of dallas sensors
 
     // custom params
     bool     shower_timer;    // true if we want to report back on shower times
@@ -930,7 +928,7 @@ void do_systemCheck() {
 // only if we have a EMS connection
 void do_regularUpdates() {
     if (ems_getBusConnected() && !ems_getTxDisabled()) {
-        myDebugLog("Starting scheduled query from EMS devices");
+        myDebugLog("Fetching data from EMS devices");
         ems_getThermostatValues();
         ems_getBoilerValues();
         ems_getSolarModuleValues();
@@ -1917,7 +1915,6 @@ void initEMSESP() {
     EMSESP_Settings.listen_mode    = false;
     EMSESP_Settings.publish_time   = DEFAULT_PUBLISHTIME;
     EMSESP_Settings.publish_always = false;
-    EMSESP_Settings.timestamp      = millis();
     EMSESP_Settings.dallas_sensors = 0;
     EMSESP_Settings.led_gpio       = EMSESP_LED_GPIO;
     EMSESP_Settings.dallas_gpio    = EMSESP_DALLAS_GPIO;
@@ -1937,6 +1934,7 @@ void initEMSESP() {
  *  Shower Logic
  */
 void showerCheck() {
+    uint32_t time_now = millis();
     // if already in cold mode, ignore all this logic until we're out of the cold blast
     if (!EMSESP_Shower.doingColdShot) {
         // is the hot water running?
@@ -1944,7 +1942,7 @@ void showerCheck() {
             // if heater was previously off, start the timer
             if (EMSESP_Shower.timerStart == 0) {
                 // hot water just started...
-                EMSESP_Shower.timerStart    = EMSESP_Settings.timestamp;
+                EMSESP_Shower.timerStart    = time_now;
                 EMSESP_Shower.timerPause    = 0; // remove any last pauses
                 EMSESP_Shower.doingColdShot = false;
                 EMSESP_Shower.duration      = 0;
@@ -1952,13 +1950,12 @@ void showerCheck() {
             } else {
                 // hot water has been  on for a while
                 // first check to see if hot water has been on long enough to be recognized as a Shower/Bath
-                if (!EMSESP_Shower.showerOn && (EMSESP_Settings.timestamp - EMSESP_Shower.timerStart) > SHOWER_MIN_DURATION) {
+                if (!EMSESP_Shower.showerOn && (time_now - EMSESP_Shower.timerStart) > SHOWER_MIN_DURATION) {
                     EMSESP_Shower.showerOn = true;
                     myDebugLog("[Shower] hot water still running, starting shower timer");
                 }
                 // check if the shower has been on too long
-                else if ((((EMSESP_Settings.timestamp - EMSESP_Shower.timerStart) > SHOWER_MAX_DURATION) && !EMSESP_Shower.doingColdShot)
-                         && EMSESP_Settings.shower_alert) {
+                else if ((((time_now - EMSESP_Shower.timerStart) > SHOWER_MAX_DURATION) && !EMSESP_Shower.doingColdShot) && EMSESP_Settings.shower_alert) {
                     myDebugLog("[Shower] exceeded max shower time");
                     _showerColdShotStart();
                 }
@@ -1966,11 +1963,11 @@ void showerCheck() {
         } else { // hot water is off
             // if it just turned off, record the time as it could be a short pause
             if ((EMSESP_Shower.timerStart) && (EMSESP_Shower.timerPause == 0)) {
-                EMSESP_Shower.timerPause = EMSESP_Settings.timestamp;
+                EMSESP_Shower.timerPause = time_now;
             }
 
             // if shower has been off for longer than the wait time
-            if ((EMSESP_Shower.timerPause) && ((EMSESP_Settings.timestamp - EMSESP_Shower.timerPause) > SHOWER_PAUSE_TIME)) {
+            if ((EMSESP_Shower.timerPause) && ((time_now - EMSESP_Shower.timerPause) > SHOWER_PAUSE_TIME)) {
                 // it is over the wait period, so assume that the shower has finished and calculate the total time and publish
                 // because its unsigned long, can't have negative so check if length is less than OFFSET_TIME
                 if ((EMSESP_Shower.timerPause - EMSESP_Shower.timerStart) > SHOWER_OFFSET_TIME) {
@@ -2062,8 +2059,6 @@ void setup() {
 // Main loop
 //
 void loop() {
-    EMSESP_Settings.timestamp = millis();
-
     // the main loop
     myESP.loop();
 

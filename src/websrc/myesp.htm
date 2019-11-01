@@ -391,10 +391,29 @@
                 aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right"
                 data-content="Time in minutes between scheduled NTP refreshes"></i></label>
         <span class="col-xs-9 col-md-5">
-            <input class="form-control input-sm" placeholder="in Minutes" value="30" id="intervals" type="text">
+            <input class="form-control input-sm" placeholder="in Minutes" value="30" id="interval" type="text">
         </span>
         <br>
     </div>
+
+    <div class="row form-group">
+        <label class="col-xs-3">Time Zone</label>
+        <span class="col-xs-9 col-md-5">
+            <select class="form-control input-sm" name="timzeone" id="timezone">
+                <option value="0">Australia Eastern (Sydney, Melbourne)</option>
+                <option value="1">Moscow (MSK, does not observe DST)</option>
+                <option selected="selected" value="2">Central European Time (Frankfurt, Paris, Amsterdam)</option>
+                <option value="3">United Kingdom (London, Belfast)</option>
+                <option value="4">UTC</option>
+                <option value="5">US Eastern (New York, Detroit)</option>
+                <option value="6">US Central (Chicago, Houston)</option>
+                <option value="7">US Mountain (Denver, Salt Lake City)</option>
+                <option value="8">Arizona (no DST)</option>
+                <option value="9">US Pacific (Las Vegas, Los Angeles)</option>
+            </select>
+        </span>
+    </div>
+
     <br>
     <div class="col-xs-9 col-md-8">
         <button onclick="saventp()" class="btn btn-primary btn-sm pull-right">Save</button>

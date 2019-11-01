@@ -519,7 +519,6 @@ void ems_setTxMode(uint8_t mode) {
     EMS_Sys_Status.emsTxMode = mode;
 }
 
-
 /**
  * debug print a telegram to telnet/serial including the CRC
  */
@@ -530,18 +529,42 @@ void _debugPrintTelegram(const char * prefix, _EMS_RxTelegram * EMS_RxTelegram, 
     uint8_t   data_len        = EMS_RxTelegram->data_length; // length of data block
     uint8_t   length          = EMS_RxTelegram->length;      // includes CRC
 
+    // get elapsed system time or internet time if available
+    uint8_t       t_sec, t_min, t_hour;
+    uint16_t      t_msec;
+    unsigned long timestamp   = EMS_RxTelegram->timestamp;
+    bool          haveNTPtime = (timestamp > 1572307205); // after Jan 1st 1970
+
+    if (haveNTPtime) {
+        t_sec = timestamp % 60;
+        timestamp /= 60; // now it is minutes
+        t_min = timestamp % 60;
+        timestamp /= 60; // now it is hours
+        t_hour = timestamp % 24;
+    } else {
+        t_hour = timestamp / 3600000;
+        t_min  = (timestamp / 60000) % 60;
+        t_sec  = (timestamp / 1000) % 60;
+        t_msec = timestamp % 1000;
+    }
+
     strlcpy(output_str, "(", sizeof(output_str));
     strlcat(output_str, COLOR_CYAN, sizeof(output_str));
-    strlcat(output_str, _smallitoa((uint8_t)((EMS_RxTelegram->timestamp / 3600000) % 24), buffer), sizeof(output_str));
+
+    strlcat(output_str, _smallitoa(t_hour, buffer), sizeof(output_str));
     strlcat(output_str, ":", sizeof(output_str));
-    strlcat(output_str, _smallitoa((uint8_t)((EMS_RxTelegram->timestamp / 60000) % 60), buffer), sizeof(output_str));
+    strlcat(output_str, _smallitoa(t_min, buffer), sizeof(output_str));
     strlcat(output_str, ":", sizeof(output_str));
-    strlcat(output_str, _smallitoa((uint8_t)((EMS_RxTelegram->timestamp / 1000) % 60), buffer), sizeof(output_str));
-    strlcat(output_str, ".", sizeof(output_str));
-    strlcat(output_str, _smallitoa3(EMS_RxTelegram->timestamp % 1000, buffer), sizeof(output_str));
+    strlcat(output_str, _smallitoa(t_sec, buffer), sizeof(output_str));
+
+    // internet time doesn't have millisecond precision, so ignore it
+    if (!haveNTPtime) {
+        strlcat(output_str, ".", sizeof(output_str));
+        strlcat(output_str, _smallitoa3(t_msec, buffer), sizeof(output_str));
+    }
+
     strlcat(output_str, COLOR_RESET, sizeof(output_str));
     strlcat(output_str, ") ", sizeof(output_str));
-
     strlcat(output_str, color, sizeof(output_str));
     strlcat(output_str, prefix, sizeof(output_str));
 
@@ -605,8 +628,8 @@ void _ems_sendTelegram() {
             _EMS_RxTelegram EMS_RxTelegram;                     // create new Rx object
             EMS_RxTelegram.length      = EMS_TxTelegram.length; // full length of telegram
             EMS_RxTelegram.telegram    = EMS_TxTelegram.data;
-            EMS_RxTelegram.data_length = 0;        // ignore #data=
-            EMS_RxTelegram.timestamp   = millis(); // now
+            EMS_RxTelegram.data_length = 0;                     // ignore #data=
+            EMS_RxTelegram.timestamp   = myESP.getSystemTime(); // now
             _debugPrintTelegram("Sending raw: ", &EMS_RxTelegram, COLOR_CYAN, true);
         }
 
@@ -677,7 +700,7 @@ void _ems_sendTelegram() {
         EMS_RxTelegram.length      = EMS_TxTelegram.length; // complete length of telegram incl CRC
         EMS_RxTelegram.data_length = 0;                     // ignore the data length for read and writes. only used for incoming.
         EMS_RxTelegram.telegram    = EMS_TxTelegram.data;
-        EMS_RxTelegram.timestamp   = millis(); // now
+        EMS_RxTelegram.timestamp   = myESP.getSystemTime(); // now
         _debugPrintTelegram(s, &EMS_RxTelegram, COLOR_CYAN);
     }
 
@@ -880,7 +903,7 @@ void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
 
     static _EMS_RxTelegram EMS_RxTelegram; // create the Rx package
     EMS_RxTelegram.telegram  = telegram;
-    EMS_RxTelegram.timestamp = millis();
+    EMS_RxTelegram.timestamp = myESP.getSystemTime();
     EMS_RxTelegram.length    = length;
 
     EMS_RxTelegram.src    = telegram[0] & 0x7F; // removing 8th bit as we deal with both reads and writes here
@@ -939,7 +962,7 @@ void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
 
     // here we know its a valid incoming telegram of at least 6 bytes
     // we use this to see if we always have a connection to the boiler, in case of drop outs
-    EMS_Sys_Status.emsRxTimestamp  = EMS_RxTelegram.timestamp; // timestamp of last read
+    EMS_Sys_Status.emsRxTimestamp  = millis(); // timestamp of last read
     EMS_Sys_Status.emsBusConnected = true;
 
     // now lets process it and see what to do next
@@ -1526,7 +1549,7 @@ void _process_RCPLUSStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
                                                   // manual : 10 00 FF 0A 01 A5 02
                                                   // auto : Thermostat -> all, type 0x01A5 telegram: 10 00 FF 0A 01 A5 03
 
-            // TODO this may be bit 2 instead of 1 on an RC300 - still to validate
+            // Note this may be bit 2 instead of 1 on an RC300 - still to validate
             EMS_Thermostat.hc[hc].mode     = _bitRead(0, 0); // bit 1, mode (auto=1 or manual=0)
             EMS_Thermostat.hc[hc].day_mode = _bitRead(0, 1); // get day mode flag
 
@@ -2791,6 +2814,7 @@ void ems_sendRawTelegram(char * telegram) {
  */
 void ems_setThermostatTemp(float temperature, uint8_t hc_num, uint8_t temptype) {
     if (!ems_getThermostatEnabled()) {
+        myDebug_P(PSTR("Thermostat not online."));
         return;
     }
 
@@ -2905,6 +2929,7 @@ void ems_setThermostatTemp(float temperature, uint8_t hc_num, uint8_t temptype) 
  */
 void ems_setThermostatMode(uint8_t mode, uint8_t hc_num) {
     if (!ems_getThermostatEnabled()) {
+        myDebug_P(PSTR("Thermostat not online."));
         return;
     }
 

@@ -147,23 +147,23 @@ typedef struct {
     uint8_t                 comparisonOffset;   // offset of where the byte is we want to compare too during validation
     uint16_t                comparisonPostRead; // after a successful write, do a read from this type ID
     bool                    forceRefresh;       // should we send to MQTT after a successful Tx?
-    uint32_t                timestamp;          // when created
+    unsigned long           timestamp;          // when created
     uint8_t                 data[EMS_MAX_TELEGRAM_LENGTH];
 } _EMS_TxTelegram;
 
 // The Rx receive package
 typedef struct {
-    uint32_t  timestamp;    // timestamp from millis()
-    uint8_t * telegram;     // the full data package
-    uint8_t   data_length;  // length in bytes of the data
-    uint8_t   length;       // full length of the complete telegram
-    uint8_t   src;          // source ID
-    uint8_t   dest;         // destination ID
-    uint16_t  type;         // type ID as a double byte to support EMS+
-    uint8_t   offset;       // offset
-    uint8_t * data;         // pointer to where telegram data starts
-    bool      emsplus;      // true if ems+/ems 2.0
-    uint8_t   emsplus_type; // FF, F7 or F9
+    unsigned long timestamp;    // timestamp from millis()
+    uint8_t *     telegram;     // the full data package
+    uint8_t       data_length;  // length in bytes of the data
+    uint8_t       length;       // full length of the complete telegram
+    uint8_t       src;          // source ID
+    uint8_t       dest;         // destination ID
+    uint16_t      type;         // type ID as a double byte to support EMS+
+    uint8_t       offset;       // offset
+    uint8_t *     data;         // pointer to where telegram data starts
+    bool          emsplus;      // true if ems+/ems 2.0
+    uint8_t       emsplus_type; // FF, F7 or F9
 } _EMS_RxTelegram;
 
 // default empty Tx, must match struct

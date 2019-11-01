@@ -9,7 +9,7 @@
 #ifndef MyESP_h
 #define MyESP_h
 
-#define MYESP_VERSION "1.2.13"
+#define MYESP_VERSION "1.2.14"
 
 #include <ArduinoJson.h>
 #include <ArduinoOTA.h>
@@ -295,6 +295,7 @@ class MyESP {
     bool fs_setSettingValue(char ** setting, const char * value, const char * value_default);
     bool fs_setSettingValue(uint16_t * setting, const char * value, uint16_t value_default);
     bool fs_setSettingValue(uint8_t * setting, const char * value, uint8_t value_default);
+    bool fs_setSettingValue(int8_t * setting, const char * value, int8_t value_default);
     bool fs_setSettingValue(bool * setting, const char * value, bool value_default);
 
     // Web
@@ -306,17 +307,18 @@ class MyESP {
     void crashInfo();
 
     // general
-    void     end();
-    void     loop();
-    void     begin(const char * app_hostname, const char * app_name, const char * app_version, const char * app_url, const char * app_url_api);
-    void     resetESP();
-    int      getWifiQuality();
-    void     showSystemStats();
-    bool     getHeartbeat();
-    uint32_t getSystemLoadAverage();
-    uint32_t getSystemResetReason();
-    uint8_t  getSystemBootStatus();
-    bool     _have_ntp_time;
+    void          end();
+    void          loop();
+    void          begin(const char * app_hostname, const char * app_name, const char * app_version, const char * app_url, const char * app_url_api);
+    void          resetESP();
+    int           getWifiQuality();
+    void          showSystemStats();
+    bool          getHeartbeat();
+    uint32_t      getSystemLoadAverage();
+    uint32_t      getSystemResetReason();
+    uint8_t       getSystemBootStatus();
+    bool          _have_ntp_time;
+    unsigned long getSystemTime();
 
   private:
     // mqtt
@@ -418,6 +420,7 @@ class MyESP {
     char *        _getBuildTime();
     bool          _hasValue(const char * s);
     void          _printHeap(const char * s);
+    void          _kick();
 
     // reset reason and rtcmem
     bool _rtcmem_status;
@@ -464,6 +467,7 @@ class MyESP {
 
     // log
     void _sendEventLog(uint8_t page);
+    void _emptyEventLog();
 
     // web
     void _onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t * data, size_t len);
@@ -481,6 +485,7 @@ class MyESP {
     char *  _ntp_server;
     uint8_t _ntp_interval;
     bool    _ntp_enabled;
+    uint8_t _ntp_timezone;
 };
 
 extern MyESP myESP;

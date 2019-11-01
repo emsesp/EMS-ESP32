@@ -97,8 +97,9 @@ MyESP::MyESP() {
 
     // ntp
     _ntp_server   = strdup(MYESP_NTP_SERVER);
-    _ntp_interval = 60;
+    _ntp_interval = NTP_INTERVAL_DEFAULT;
     _ntp_enabled  = false;
+    _ntp_timezone = NTP_TIMEZONE_DEFAULT;
 
     // get the build time
     _buildTime = _getBuildTime();
@@ -251,8 +252,8 @@ void MyESP::_wifiCallback(justwifi_messages_t code, char * parameter) {
 
         // NTP now that we have a WiFi connection
         if (_ntp_enabled) {
-            NTP.Ntp(_ntp_server, _ntp_interval); // set up NTP server
-            myDebug_P(PSTR("[NTP] NTP internet time enabled via server %s"), _ntp_server);
+            NTP.Ntp(_ntp_server, _ntp_interval, _ntp_timezone); // set up NTP server
+            myDebug_P(PSTR("[NTP] NTP internet time enabled via server %s with timezone %d"), _ntp_server, _ntp_timezone);
         }
 
         // call any final custom stuff
@@ -632,6 +633,27 @@ void MyESP::_telnet_setup() {
     memset(_command, 0, TELNET_MAX_COMMAND_LENGTH);
 }
 
+// restart some services like web, mqtt, ntp etc...
+void MyESP::_kick() {
+    myDebug_P(PSTR("Kicking services..."));
+
+    // NTP - fetch new time
+    if (_ntp_enabled) {
+        myDebug_P(PSTR(" - Requesting NTP time"));
+        NTP.getNtpTime();
+    }
+
+    // kick web
+    myDebug_P(PSTR(" - Restart web server and web sockets"));
+    _ws->enable(false);
+    //_webServer->reset();
+    _ws->enable(true);
+
+    // kick mqtt
+    myDebug_P(PSTR(" - Restart MQTT"));
+    mqttClient.disconnect();
+}
+
 // Show help of commands
 void MyESP::_consoleShowHelp() {
     myDebug_P(PSTR(""));
@@ -652,7 +674,7 @@ void MyESP::_consoleShowHelp() {
     myDebug_P(PSTR("*"));
     myDebug_P(PSTR("* Commands:"));
     myDebug_P(PSTR("*  ?/help=show commands, CTRL-D/quit=close telnet session"));
-    myDebug_P(PSTR("*  set, system, restart, mqttlog"));
+    myDebug_P(PSTR("*  set, system, restart, mqttlog, kick"));
 
 #ifdef CRASH
     myDebug_P(PSTR("*  crash <dump | clear | test [n]>"));
@@ -696,6 +718,8 @@ void MyESP::_printSetCommands() {
     myDebug_P(PSTR("  set mqtt_keepalive [seconds]"));
     myDebug_P(PSTR("  set mqtt_retain [on | off]"));
     myDebug_P(PSTR("  set ntp_enabled <on | off>"));
+    myDebug_P(PSTR("  set ntp_interval [n]"));
+    myDebug_P(PSTR("  set ntp_timezone [n]"));
     myDebug_P(PSTR("  set serial <on | off>"));
     myDebug_P(PSTR("  set log_events <on | off>"));
 
@@ -760,6 +784,9 @@ void MyESP::_printSetCommands() {
 #endif
 
     myDebug_P(PSTR("  ntp_enabled=%s"), (_ntp_enabled) ? "on" : "off");
+    myDebug_P(PSTR("  ntp_interval=%d"), _ntp_interval);
+    myDebug_P(PSTR("  ntp_timezone=%d"), _ntp_timezone);
+
     myDebug_P(PSTR("  log_events=%s"), (_general_log_events) ? "on" : "off");
 
     // print any custom settings
@@ -849,6 +876,10 @@ bool MyESP::_changeSetting(uint8_t wc, const char * setting, const char * value)
         save_config = fs_setSettingValue(&_mqtt_heartbeat, value, false);
     } else if (strcmp(setting, "ntp_enabled") == 0) {
         save_config = fs_setSettingValue(&_ntp_enabled, value, false);
+    } else if (strcmp(setting, "ntp_interval") == 0) {
+        save_config = fs_setSettingValue(&_ntp_interval, value, NTP_INTERVAL_DEFAULT);
+    } else if (strcmp(setting, "ntp_timezone") == 0) {
+        save_config = fs_setSettingValue(&_ntp_timezone, value, NTP_TIMEZONE_DEFAULT);
     } else if (strcmp(setting, "log_events") == 0) {
         save_config = fs_setSettingValue(&_general_log_events, value, false);
     } else {
@@ -943,6 +974,12 @@ void MyESP::_telnetCommand(char * commandLine) {
     // help command
     if ((strcmp(ptrToCommandName, "help") == 0) && (wc == 1)) {
         _consoleShowHelp();
+        return;
+    }
+
+    // kick command
+    if ((strcmp(ptrToCommandName, "kick") == 0) && (wc == 1)) {
+        _kick();
         return;
     }
 
@@ -1282,8 +1319,9 @@ void MyESP::showSystemStats() {
         myDebug_P(PSTR(" [MQTT] is disconnected"));
     }
 
-    if (_ntp_enabled) {
-        myDebug_P(PSTR(" [NTP] Time in UTC is %02d:%02d:%02d"), to_hour(now()), to_minute(now()), to_second(now()));
+    if (_have_ntp_time) {
+        uint32_t real_time = getSystemTime();
+        myDebug_P(PSTR(" [NTP] Local Time is %02d:%02d:%02d %s (%d)"), to_hour(real_time), to_minute(real_time), to_second(real_time), NTP.tcr->abbrev, real_time);
     }
 
 #ifdef CRASH
@@ -1540,17 +1578,17 @@ char * MyESP::_mqttTopic(const char * topic) {
 
 // validates a file in SPIFFS, loads it into the json buffer and returns true if ok
 size_t MyESP::_fs_validateConfigFile(const char * filename, size_t maxsize, JsonDocument & doc) {
+    // myDebug_P(PSTR("[FS] Checking file %s"), filename); // remove for debugging
+
     // see if we can open it
     File file = SPIFFS.open(filename, "r");
     if (!file) {
-        myDebug_P(PSTR("[FS] File %s not found"), filename);
+        myDebug_P(PSTR("[FS] Cannot open config file %s for reading"), filename);
         return 0;
     }
 
     // check size
     size_t size = file.size();
-
-    // myDebug_P(PSTR("[FS] Checking file %s (%d bytes)"), filename, size); // remove for debugging
 
     if (size > maxsize) {
         file.close();
@@ -1752,8 +1790,9 @@ bool MyESP::_fs_loadConfig() {
     _ntp_server    = strdup(ntp["server"] | "");
     _ntp_interval  = ntp["interval"] | 60;
     if (_ntp_interval < 2)
-        _ntp_interval = 60;
-    _ntp_enabled = ntp["enabled"];
+        _ntp_interval = NTP_INTERVAL_DEFAULT;
+    _ntp_enabled  = ntp["enabled"];
+    _ntp_timezone = ntp["timezone"] | NTP_TIMEZONE_DEFAULT;
 
     myDebug_P(PSTR("[FS] System config loaded (%d bytes)"), size);
 
@@ -1800,6 +1839,18 @@ bool MyESP::fs_setSettingValue(uint8_t * setting, const char * value, uint8_t va
     return true;
 }
 
+// saves a signed 8-bit integer into a config setting, using default value if non set
+// returns true if successful
+bool MyESP::fs_setSettingValue(int8_t * setting, const char * value, int8_t value_default) {
+    if (_hasValue(value)) {
+        *setting = (int8_t)atoi(value);
+    } else {
+        *setting = value_default; // use the default value
+    }
+
+    return true;
+}
+
 // saves a bool into a config setting, using default value if non set
 // returns true if successful
 bool MyESP::fs_setSettingValue(bool * setting, const char * value, bool value_default) {
@@ -1830,6 +1881,7 @@ bool MyESP::_fs_loadCustomConfig() {
 
     if (_fs_loadsave_callback_f) {
         const JsonObject & json = doc["settings"];
+
         if (!(_fs_loadsave_callback_f)(MYESP_FSACTION_LOAD, json)) {
             myDebug_P(PSTR("[FS] Error reading custom config"));
             return false;
@@ -1852,6 +1904,7 @@ bool MyESP::fs_saveCustomConfig(JsonObject root) {
 
     // open for writing
     File configFile = SPIFFS.open(MYESP_CUSTOMCONFIG_FILE, "w");
+
     if (!configFile) {
         myDebug_P(PSTR("[FS] Failed to open custom config for writing"));
         ok = false;
@@ -1888,15 +1941,16 @@ bool MyESP::fs_saveCustomConfig(JsonObject root) {
 
 // save system config to spiffs
 bool MyESP::fs_saveConfig(JsonObject root) {
-    bool ok = false;
-
     // call any custom functions before handling SPIFFS
     if (_ota_pre_callback_f) {
         (_ota_pre_callback_f)();
     }
 
+    bool ok = false;
+
     // open for writing
     File configFile = SPIFFS.open(MYESP_CONFIG_FILE, "w");
+
     if (!configFile) {
         myDebug_P(PSTR("[FS] Failed to open system config for writing"));
         ok = false;
@@ -1940,6 +1994,7 @@ bool MyESP::_fs_writeConfig() {
     general["serial"]     = _general_serial;
     general["hostname"]   = _general_hostname;
     general["log_events"] = _general_log_events;
+    general["version"]    = _app_version;
 
     JsonObject mqtt   = doc.createNestedObject("mqtt");
     mqtt["enabled"]   = _mqtt_enabled;
@@ -1950,14 +2005,14 @@ bool MyESP::_fs_writeConfig() {
     mqtt["qos"]       = _mqtt_qos;
     mqtt["keepalive"] = _mqtt_keepalive;
     mqtt["retain"]    = _mqtt_retain;
-
-    mqtt["password"] = _mqtt_password;
-    mqtt["base"]     = _mqtt_base;
+    mqtt["password"]  = _mqtt_password;
+    mqtt["base"]      = _mqtt_base;
 
     JsonObject ntp  = doc.createNestedObject("ntp");
     ntp["server"]   = _ntp_server;
     ntp["interval"] = _ntp_interval;
     ntp["enabled"]  = _ntp_enabled;
+    ntp["timezone"] = _ntp_timezone;
 
     bool ok = fs_saveConfig(root); // save it
 
@@ -1993,28 +2048,15 @@ void MyESP::_fs_setup() {
         (_ota_pre_callback_f)(); // call custom function
     }
 
+    // check SPIFFS is OK
     if (!SPIFFS.begin()) {
-        myDebug_P(PSTR("[FS] Formatting filesystem..."));
         if (SPIFFS.format()) {
-            if (_general_log_events) {
-                _writeEvent("WARN", "system", "File system formatted", "");
-            }
+            myDebug_P(PSTR("[FS] File system formatted"));
         } else {
             myDebug_P(PSTR("[FS] Failed to format file system"));
         }
     }
-
-    // load the main system config file if we can. Otherwise create it and expect user to configure in web interface
-    if (!_fs_loadConfig()) {
-        myDebug_P(PSTR("[FS] Creating a new system config"));
-        _fs_writeConfig(); // create the initial config file
-    }
-
-    // load system and custom config
-    if (!_fs_loadCustomConfig()) {
-        _fs_createCustomConfig(); // create the initial config file
-    }
-
+    
     /*
     // fill event log with tests
     SPIFFS.remove(MYESP_EVENTLOG_FILE);
@@ -2037,6 +2079,17 @@ void MyESP::_fs_setup() {
         if (_general_log_events) {
             _writeEvent("WARN", "system", "Event Log", "Log was erased due to probable file corruption");
         }
+    }
+
+    // load the main system config file if we can. Otherwise create it and expect user to configure in web interface
+    if (!_fs_loadConfig()) {
+        myDebug_P(PSTR("[FS] Creating a new system config"));
+        _fs_writeConfig(); // create the initial config file
+    }
+
+    // load system and custom config
+    if (!_fs_loadCustomConfig()) {
+        _fs_createCustomConfig(); // create the initial config file
     }
 
     if (_ota_post_callback_f) {
@@ -2266,7 +2319,7 @@ void MyESP::_writeEvent(const char * type, const char * src, const char * desc, 
     // this will also create the file if its doesn't exist
     File eventlog = SPIFFS.open(MYESP_EVENTLOG_FILE, "a");
     if (!eventlog) {
-        //Serial.println("[SYSTEM] Error opening event log for writing"); // for debugging
+        // Serial.println("[SYSTEM] Error opening event log for writing"); // for debugging
         eventlog.close();
         return;
     }
@@ -2279,12 +2332,9 @@ void MyESP::_writeEvent(const char * type, const char * src, const char * desc, 
     root["time"] = now(); // is relative if we're not using NTP
 
     // Serialize JSON to file
-    size_t n = serializeJson(root, eventlog);
-    eventlog.print("\n"); // this indicates end of the entry
+    (void)serializeJson(root, eventlog);
 
-    if (!n) {
-        //Serial.println("[SYSTEM] Error writing to event log"); // for debugging
-    }
+    eventlog.print("\n"); // this indicates end of the entry
 
     eventlog.close();
 }
@@ -2453,17 +2503,7 @@ void MyESP::_procMsg(AsyncWebSocketClient * client, size_t sz) {
         uint8_t page = doc["page"];
         _sendEventLog(page);
     } else if (strcmp(command, "clearevent") == 0) {
-        if (_ota_pre_callback_f) {
-            (_ota_pre_callback_f)(); // call custom function
-        }
-        if (SPIFFS.remove(MYESP_EVENTLOG_FILE)) {
-            _writeEvent("WARN", "system", "Event log cleared", "");
-        } else {
-            myDebug_P(PSTR("[WEB] Could not clear event log"));
-        }
-        if (_ota_post_callback_f) {
-            (_ota_post_callback_f)(); // call custom function
-        }
+        _emptyEventLog();
     } else if (strcmp(command, "scan") == 0) {
         WiFi.scanNetworksAsync(std::bind(&MyESP::_printScanResult, this, std::placeholders::_1), true);
     } else if (strcmp(command, "gettime") == 0) {
@@ -2478,6 +2518,22 @@ void MyESP::_procMsg(AsyncWebSocketClient * client, size_t sz) {
 
     free(client->_tempObject);
     client->_tempObject = NULL;
+}
+
+// delete the event log
+void MyESP::_emptyEventLog() {
+    if (_ota_pre_callback_f) {
+        (_ota_pre_callback_f)(); // call custom function
+    }
+    if (SPIFFS.remove(MYESP_EVENTLOG_FILE)) {
+        _writeEvent("WARN", "system", "Event log cleared", "");
+        myDebug_P(PSTR("[WEB] Event log cleared"));
+    } else {
+        myDebug_P(PSTR("[WEB] Could not clear event log"));
+    }
+    if (_ota_post_callback_f) {
+        (_ota_post_callback_f)(); // call custom function
+    }
 }
 
 // read both system config and the custom config and send as json to web socket
@@ -2866,6 +2922,16 @@ void MyESP::_sendTime() {
     _ws->textAll(buffer, len);
 }
 
+// returns real time from the internet/NTP if availble
+// otherwise elapsed system time
+unsigned long MyESP::getSystemTime() {
+    if (_have_ntp_time) {
+        return now();
+    }
+
+    return millis(); // elapsed time
+}
+
 // bootup sequence
 // quickly flash LED until we get a Wifi connection, or AP established
 void MyESP::_bootupSequence() {
@@ -2964,7 +3030,8 @@ void MyESP::loop() {
     _heartbeatCheck();
     _bootupSequence(); // see if a reset was pressed during bootup
 
-    jw.loop();           // WiFi
+    jw.loop(); // WiFi
+
     ArduinoOTA.handle(); // OTA
 
     ESP.wdtFeed();   // feed the watchdog...

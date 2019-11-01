@@ -2,7 +2,7 @@ var version = "";
 
 var websock = null;
 var wsUri = "ws://" + window.location.host + "/ws";
-var utcSeconds;
+var ntpSeconds;
 var data = [];
 var ajaxobj;
 
@@ -37,7 +37,8 @@ var config = {
         "hostname": "",
         "serial": false,
         "password": "admin",
-        "log_events": true
+        "log_events": true,
+        "version": "1.0.0"
     },
     "mqtt": {
         "enabled": false,
@@ -53,13 +54,14 @@ var config = {
     },
     "ntp": {
         "server": "pool.ntp.org",
-        "interval": 30,
+        "interval": 60,
+        "timezone": 2,
         "enabled": true
     }
 };
 
 function browserTime() {
-    var d = new Date(0);
+    var d = new Date(0); // The 0 there is the key, which sets the date to the epoch
     var c = new Date();
     var timestamp = Math.floor((c.getTime() / 1000) + ((c.getTimezoneOffset() * 60) * -1));
     d.setUTCSeconds(timestamp);
@@ -67,10 +69,8 @@ function browserTime() {
 }
 
 function deviceTime() {
-    var c = new Date();
     var t = new Date(0); // The 0 there is the key, which sets the date to the epoch
-    var devTime = Math.floor(utcSeconds + ((c.getTimezoneOffset() * 60) * -1));
-    t.setUTCSeconds(devTime);
+    t.setUTCSeconds(ntpSeconds);
     document.getElementById("utc").innerHTML = t.toUTCString().slice(0, -3);
 }
 
@@ -96,7 +96,8 @@ function listntp() {
     websock.send("{\"command\":\"gettime\"}");
 
     document.getElementById("ntpserver").value = config.ntp.server;
-    document.getElementById("intervals").value = config.ntp.interval;
+    document.getElementById("interval").value = config.ntp.interval;
+    document.getElementById("timezone").value = config.ntp.timezone;
 
     if (config.ntp.enabled) {
         $("input[name=\"ntpenabled\"][value=\"1\"]").prop("checked", true);
@@ -137,7 +138,8 @@ function custom_saveconfig() {
 
 function saventp() {
     config.ntp.server = document.getElementById("ntpserver").value;
-    config.ntp.interval = parseInt(document.getElementById("intervals").value);
+    config.ntp.interval = parseInt(document.getElementById("interval").value);
+    config.ntp.timezone = parseInt(document.getElementById("timezone").value);
 
     config.ntp.enabled = false;
     if (parseInt($("input[name=\"ntpenabled\"]:checked").val()) === 1) {
@@ -674,8 +676,6 @@ function initEventTable() {
                     if (value < 1563300000) {
                         return "(" + value + ")";
                     } else {
-                        var comp = new Date();
-                        value = Math.floor(value + ((comp.getTimezoneOffset() * 60) * -1));
                         var vuepoch = new Date(value * 1000);
                         var formatted = vuepoch.getUTCFullYear() +
                             "-" + twoDigits(vuepoch.getUTCMonth() + 1) +
@@ -769,7 +769,7 @@ function socketMessageListener(evt) {
                 builddata(obj);
                 break;
             case "gettime":
-                utcSeconds = obj.epoch;
+                ntpSeconds = obj.epoch;
                 deviceTime();
                 break;
             case "ssidlist":

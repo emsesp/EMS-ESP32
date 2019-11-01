@@ -54,7 +54,7 @@ var eventlog = {
     "list": [
         "{\"type\":\"WARN\",\"src\":\"system\",\"desc\":\"test data\",\"data\":\"Record #1\",\"time\": 1563371160}",
         "{\"type\":\"WARN\",\"src\":\"system\",\"desc\":\"test data\",\"data\":\"Record #2\",\"time\":0}",
-        "{\"type\":\"INFO\",\"src\":\"system\",\"desc\":\"System booted\",\"data\":\"\",\"time\":1568660479}",
+        "{\"type\":\"INFO\",\"src\":\"system\",\"desc\":\"System booted Local Time is 13:02:54 CET\",\"data\":\"\",\"time\":1572613374}",
         "{\"type\":\"WARN\",\"src\":\"system\",\"desc\":\"test data\",\"data\":\"Record #3\",\"time\":0}"
     ]
 }
@@ -70,6 +70,7 @@ var configfile = {
         "hostname": "myesp",
         "password": "admin",
         "serial": true,
+        "version": "1.9.1",
         "log_events": true
     },
     "mqtt": {
@@ -86,7 +87,8 @@ var configfile = {
     },
     "ntp": {
         "server": "pool.ntp.org",
-        "interval": "30",
+        "interval": 60,
+        "timezone": 2,
         "enabled": false
     }
 };
@@ -128,7 +130,7 @@ function sendStatus() {
         "availsize": 2469,
         "ip": "10.10.10.198",
         "ssid": "my_ssid",
-        "mac": "DC:4F:11:22:93:06",
+        "mac": "DC:4F:12:22:13:06",
         "signalstr": 62,
         "systemload": 0,
         "mqttconnected": true,
@@ -243,8 +245,7 @@ wss.on('connection', function connection(ws) {
                 console.log("[INFO] Sending time");
                 var res = {};
                 res.command = "gettime";
-                res.epoch = Math.floor((new Date).getTime() / 1000);
-                //res.epoch = 1567107755;
+                res.epoch = 1572613374; // this is 13:02:54 CET
                 wss.broadcast(res);
                 break;
             case "settime":
