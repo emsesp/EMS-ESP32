@@ -13,6 +13,12 @@ IPAddress        NtpClient::timeServer;
 AsyncUDP         NtpClient::udpListener;
 byte             NtpClient::NTPpacket[NTP_PACKET_SIZE];
 
+// references:
+// https://github.com/filipdanic/compact-timezone-list/blob/master/index.js
+// https://github.com/sanohin/google-timezones-json/blob/master/timezones.json
+// https://github.com/dmfilipenko/timezones.json/blob/master/timezones.json
+// https://home.kpn.nl/vanadovv/time/TZworld.html
+
 // Australia Eastern Time Zone (Sydney, Melbourne)
 TimeChangeRule aEDT = {"AEDT", First, Sun, Oct, 2, 660}; // UTC + 11 hours
 TimeChangeRule aEST = {"AEST", First, Sun, Apr, 3, 600}; // UTC + 10 hours

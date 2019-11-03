@@ -89,7 +89,7 @@ var configfile = {
         "server": "pool.ntp.org",
         "interval": 60,
         "timezone": 2,
-        "enabled": false
+        "enabled": true
     }
 };
 

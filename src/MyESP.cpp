@@ -2467,7 +2467,7 @@ void MyESP::_onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, A
 // handle ws from browser
 void MyESP::_procMsg(AsyncWebSocketClient * client, size_t sz) {
     // We should always get a JSON object from browser, so parse it
-    StaticJsonDocument<400> doc;
+    StaticJsonDocument<500> doc;
     char                    json[sz + 1];
     memcpy(json, (char *)(client->_tempObject), sz);
     json[sz] = '\0';

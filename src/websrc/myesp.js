@@ -715,8 +715,6 @@ function initMQTTLogTable() {
                     if (value < 1563300000) {
                         return "(" + value + ")";
                     } else {
-                        var comp = new Date();
-                        value = Math.floor(value + ((comp.getTimezoneOffset() * 60) * -1));
                         var vuepoch = new Date(value * 1000);
                         var formatted = vuepoch.getUTCFullYear() +
                             "-" + twoDigits(vuepoch.getUTCMonth() + 1) +
