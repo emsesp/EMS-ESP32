@@ -2863,17 +2863,29 @@ void ems_setThermostatTemp(float temperature, uint8_t hc_num, uint8_t temptype) 
         EMS_TxTelegram.type_validate      = EMS_TxTelegram.type;
 
     } else if (model_id == EMS_MODEL_RC300) {
-        EMS_TxTelegram.type = EMS_TYPE_RCPLUSSet; // for 3000 and 1010, e.g. 0B 10 FF (0A | 08) 01 89 2B
-        // check mode
+        // check mode to determine offset
         if (EMS_Thermostat.hc[hc_num - 1].mode == 1) {        // auto
             EMS_TxTelegram.offset = 0x08;                     // auto offset
         } else if (EMS_Thermostat.hc[hc_num - 1].mode == 0) { // manuaL
             EMS_TxTelegram.offset = 0x0A;                     // manual offset
         }
+
+        if (hc_num == 1) {
+            EMS_TxTelegram.type               = EMS_TYPE_RCPLUSSet; // for 3000 and 1010, e.g. 0B 10 FF (0A | 08) 01 89 2B
+            EMS_TxTelegram.comparisonPostRead = EMS_TYPE_RCPLUSStatusMessage_HC1;
+        } else if (hc_num == 2) {
+            EMS_TxTelegram.type               = EMS_TYPE_RCPLUSSet + 1;
+            EMS_TxTelegram.comparisonPostRead = EMS_TYPE_RCPLUSStatusMessage_HC2;
+        } else if (hc_num == 3) {
+            EMS_TxTelegram.type               = EMS_TYPE_RCPLUSSet + 2;
+            EMS_TxTelegram.comparisonPostRead = EMS_TYPE_RCPLUSStatusMessage_HC3;
+        } else if (hc_num == 4) {
+            EMS_TxTelegram.type               = EMS_TYPE_RCPLUSSet + 3;
+            EMS_TxTelegram.comparisonPostRead = EMS_TYPE_RCPLUSStatusMessage_HC4;
+        }
+
         // EMS_TxTelegram.type_validate = EMS_TYPE_RCPLUSStatusMessage; // validate by reading from a different telegram
         EMS_TxTelegram.type_validate = EMS_ID_NONE; // validate by reading from a different telegram
-
-        EMS_TxTelegram.comparisonPostRead = EMS_TYPE_RCPLUSStatusMessage_HC1 + hc_num - 1; // after write, do a full fetch of all values
 
     } else if ((model_id == EMS_MODEL_RC35) || (model_id == EMS_MODEL_ES73)) {
         switch (temptype) {
