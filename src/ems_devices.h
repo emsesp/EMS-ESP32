@@ -195,7 +195,7 @@ const _Boiler_Device Boiler_Devices[] = {
 
     {72, "MC10 Module"},
     {123, "Buderus GBx72/Nefit Trendline/Junkers Cerapur/Worcester Greenstar Si"},
-    {133, "Buderus GB125"},
+    {133, "Buderus GB125/Logamatic MC110"},
     {115, "Nefit Topline/Buderus GB162"},
     {203, "Buderus Logamax U122/Junkers Cerapur"},
     {208, "Buderus Logamax plus/GB192/Bosch Condens GC9000"},
@@ -280,7 +280,7 @@ const _Thermostat_Device Thermostat_Devices[] = {
     // Easy devices - not currently supporting write operations
     {EMS_MODEL_EASY, 202, 0x18, "Logamatic TC100/Nefit Moduline Easy", EMS_THERMOSTAT_WRITE_NO},
     {EMS_MODEL_EASY, 203, 0x18, "Bosch EasyControl CT200", EMS_THERMOSTAT_WRITE_NO},
-    {EMS_MODEL_CW100, 157, 0x18, "Bosch CW100/Junkers CW100", EMS_THERMOSTAT_WRITE_NO},
+    {EMS_MODEL_CW100, 157, 0x18, "Buderus RC200/Bosch CW100/Junkers CW100", EMS_THERMOSTAT_WRITE_NO},
 
     // Buderus/Nefit
     {EMS_MODEL_RC10, 79, 0x17, "RC10/Moduline 100", EMS_THERMOSTAT_WRITE_YES},
