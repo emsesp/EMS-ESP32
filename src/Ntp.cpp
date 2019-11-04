@@ -18,6 +18,7 @@ byte             NtpClient::NTPpacket[NTP_PACKET_SIZE];
 // https://github.com/sanohin/google-timezones-json/blob/master/timezones.json
 // https://github.com/dmfilipenko/timezones.json/blob/master/timezones.json
 // https://home.kpn.nl/vanadovv/time/TZworld.html
+// https://www.timeanddate.com/time/zones/
 
 // Australia Eastern Time Zone (Sydney, Melbourne)
 TimeChangeRule aEDT = {"AEDT", First, Sun, Oct, 2, 660}; // UTC + 11 hours
@@ -26,7 +27,11 @@ Timezone       ausET(aEDT, aEST);
 
 // Moscow Standard Time (MSK, does not observe DST)
 TimeChangeRule msk = {"MSK", Last, Sun, Mar, 1, 180};
-Timezone       tzMSK(msk);
+Timezone       MSK(msk);
+
+// Turkey
+TimeChangeRule trt = {"TRT", Last, Sun, Mar, 1, 180};
+Timezone       TRT(trt);
 
 // Central European Time (Frankfurt, Paris)
 TimeChangeRule CEST = {"CEST", Last, Sun, Mar, 2, 120}; // Central European Summer Time
@@ -66,14 +71,14 @@ TimeChangeRule usPST = {"PST", First, Sun, Nov, 2, -480};
 Timezone       usPT(usPDT, usPST);
 
 // build index of all timezones
-Timezone * timezones[] = {&ausET, &tzMSK, &CE, &UK, &UTC, &usET, &usCT, &usMT, &usAZ, &usPT};
+Timezone * timezones[] = {&ausET, &MSK, &CE, &UK, &UTC, &usET, &usCT, &usMT, &usAZ, &usPT, &TRT};
 
 void ICACHE_FLASH_ATTR NtpClient::Ntp(const char * server, time_t syncMins, uint8_t tz_index) {
     TimeServerName = strdup(server);
     syncInterval   = syncMins * 60; // convert to seconds
 
     // check for out of bounds
-    if (tz_index > NTP_TIMEZONE_MAX) {
+    if (tz_index >= NTP_TIMEZONE_MAX) {
         tz_index = NTP_TIMEZONE_DEFAULT;
     }
     tz = timezones[tz_index]; // set timezone
