@@ -1,5 +1,5 @@
 /*
- * MyESP.h
+ * MyESP.h - does all the basics like WiFI/MQTT/NTP/Debug logs etc
  *
  * Paul Derbyshire - first version December 2018
  */
@@ -9,15 +9,14 @@
 #ifndef MyESP_h
 #define MyESP_h
 
-#define MYESP_VERSION "1.2.14"
+#define MYESP_VERSION "1.2.16"
 
 #include <ArduinoJson.h>
 #include <ArduinoOTA.h>
-#include <AsyncMqttClient.h> // https://github.com/marvinroger/async-mqtt-client and for ESP32 see https://github.com/marvinroger/async-mqtt-client/issues/127
-#include <ESPAsyncUDP.h>
+#include <AsyncMqttClient.h>
 #include <ESPAsyncWebServer.h>
 #include <FS.h>
-#include <JustWifi.h> // https://github.com/xoseperez/justwifi
+#include <JustWifi.h>
 
 #include "Ntp.h"
 #include "TelnetSpy.h" // modified from https://github.com/yasheena/telnetspy
@@ -207,14 +206,16 @@ typedef struct {
     char description[100];
 } command_t;
 
-typedef enum { MYESP_FSACTION_SET, MYESP_FSACTION_LIST, MYESP_FSACTION_SAVE, MYESP_FSACTION_LOAD } MYESP_FSACTION;
+typedef enum { MYESP_FSACTION_SET, MYESP_FSACTION_LIST, MYESP_FSACTION_SAVE, MYESP_FSACTION_LOAD } MYESP_FSACTION_t;
 
 typedef enum {
     MYESP_BOOTSTATUS_POWERON     = 0,
     MYESP_BOOTSTATUS_BOOTED      = 1,
     MYESP_BOOTSTATUS_BOOTING     = 2,
     MYESP_BOOTSTATUS_RESETNEEDED = 3
-} MYESP_BOOTSTATUS; // boot messages
+} MYESP_BOOTSTATUS_t; // boot messages
+
+typedef enum { MYESP_MQTTLOGTYPE_NONE, MYESP_MQTTLOGTYPE_PUBLISH, MYESP_MQTTLOGTYPE_SUBSCRIBE } MYESP_MQTTLOGTYPE_t;
 
 // for storing all MQTT publish messages
 typedef struct {
@@ -222,16 +223,16 @@ typedef struct {
     char *  topic;
     char *  payload;
     time_t  timestamp;
-} _MQTT_Log;
+} _MQTT_Log_t;
 
-typedef std::function<void(unsigned int, const char *, const char *)>            mqtt_callback_f;
-typedef std::function<void()>                                                    wifi_callback_f;
-typedef std::function<void()>                                                    ota_callback_f;
-typedef std::function<void(uint8_t, const char *)>                               telnetcommand_callback_f;
-typedef std::function<void(uint8_t)>                                             telnet_callback_f;
-typedef std::function<bool(MYESP_FSACTION, JsonObject json)>                     fs_loadsave_callback_f;
-typedef std::function<bool(MYESP_FSACTION, uint8_t, const char *, const char *)> fs_setlist_callback_f;
-typedef std::function<void(JsonObject root)>                                     web_callback_f;
+typedef std::function<void(unsigned int, const char *, const char *)>              mqtt_callback_f;
+typedef std::function<void()>                                                      wifi_callback_f;
+typedef std::function<void()>                                                      ota_callback_f;
+typedef std::function<void(uint8_t, const char *)>                                 telnetcommand_callback_f;
+typedef std::function<void(uint8_t)>                                               telnet_callback_f;
+typedef std::function<bool(MYESP_FSACTION_t, JsonObject json)>                     fs_loadsave_callback_f;
+typedef std::function<bool(MYESP_FSACTION_t, uint8_t, const char *, const char *)> fs_setlist_callback_f;
+typedef std::function<void(JsonObject root)>                                       web_callback_f;
 
 // calculates size of an 2d array at compile time
 template <typename T, size_t N>
@@ -319,6 +320,7 @@ class MyESP {
     uint8_t       getSystemBootStatus();
     bool          _have_ntp_time;
     unsigned long getSystemTime();
+    void          heartbeatPrint();
 
   private:
     // mqtt
@@ -330,10 +332,10 @@ class MyESP {
     char * _mqttTopic(const char * topic);
 
     // mqtt log
-    _MQTT_Log MQTT_log[MYESP_MQTTLOG_MAX]; // log for publish and subscribe messages
+    _MQTT_Log_t MQTT_log[MYESP_MQTTLOG_MAX]; // log for publish and subscribe messages
 
     void _printMQTTLog();
-    void _addMQTTLog(const char * topic, const char * payload, const uint8_t type);
+    void _addMQTTLog(const char * topic, const char * payload, const MYESP_MQTTLOGTYPE_t type);
 
     AsyncMqttClient mqttClient; // the MQTT class
     uint32_t        _mqtt_reconnect_delay;
