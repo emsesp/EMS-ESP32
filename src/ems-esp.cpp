@@ -219,16 +219,18 @@ void showInfo() {
         myDebug_P(PSTR("  System logging set to None"));
     }
 
-    myDebug_P(PSTR("  LED is %s, Listen mode is %s"), EMSESP_Settings.led ? "on" : "off", EMSESP_Settings.listen_mode ? "on" : "off");
+    myDebug_P(PSTR("  LED: %s, Listen mode: %s"), EMSESP_Settings.led ? "on" : "off", EMSESP_Settings.listen_mode ? "on" : "off");
     if (EMSESP_Settings.dallas_sensors > 0) {
         myDebug_P(PSTR("  %d external temperature sensor%s found"), EMSESP_Settings.dallas_sensors, (EMSESP_Settings.dallas_sensors == 1) ? "" : "s");
     }
 
-    myDebug_P(PSTR("  Boiler is %s, Thermostat is %s, Solar Module is %s, Mixing Module is %s, Shower Timer is %s, Shower Alert is %s"),
+    myDebug_P(PSTR("  Boiler: %s, Thermostat: %s, Solar Module: %s, Mixing Module: %s"),
               (ems_getBoilerEnabled() ? "enabled" : "disabled"),
               (ems_getThermostatEnabled() ? "enabled" : "disabled"),
               (ems_getSolarModuleEnabled() ? "enabled" : "disabled"),
-              (ems_getMixingDeviceEnabled() ? "enabled" : "disabled"),
+              (ems_getMixingDeviceEnabled() ? "enabled" : "disabled"));
+
+    myDebug_P(PSTR("  Shower Timer: %s, Shower Alert: %s"),
               ((EMSESP_Settings.shower_timer) ? "enabled" : "disabled"),
               ((EMSESP_Settings.shower_alert) ? "enabled" : "disabled"));
 
@@ -1018,7 +1020,7 @@ void runUnitTest(uint8_t test_num) {
 }
 
 // callback for loading/saving settings to the file system (SPIFFS)
-bool LoadSaveCallback(MYESP_FSACTION action, JsonObject settings) {
+bool LoadSaveCallback(MYESP_FSACTION_t action, JsonObject settings) {
     if (action == MYESP_FSACTION_LOAD) {
         // check for valid json
         if (settings.isNull()) {
@@ -1094,7 +1096,7 @@ bool do_publishShowerData() {
 // callback for custom settings when showing Stored Settings with the 'set' command
 // wc is number of arguments after the 'set' command
 // returns true if the setting was recognized and changed and should be saved back to SPIFFs
-bool SetListCallback(MYESP_FSACTION action, uint8_t wc, const char * setting, const char * value) {
+bool SetListCallback(MYESP_FSACTION_t action, uint8_t wc, const char * setting, const char * value) {
     bool ok = false;
 
     if (action == MYESP_FSACTION_SET) {
