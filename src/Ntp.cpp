@@ -110,12 +110,12 @@ time_t ICACHE_FLASH_ATTR NtpClient::getNtpTime() {
             time_t        UnixUTCtime  = (highWord << 16 | lowWord) - 2208988800UL;
             time_t        adjustedtime = (*tz).toLocal(UnixUTCtime, &tcr);
 
-            myESP.myDebug("[NTP] UTC internet time is %d/%d %02d:%02d:%02d. System time set to local timezone which is %02d:%02d:%02d %s\n",
-                          to_day(UnixUTCtime),
-                          to_month(UnixUTCtime),
+            myESP.myDebug("[NTP] Internet time: %02d:%02d:%02d UTC on %d/%d. Local time: %02d:%02d:%02d %s",
                           to_hour(UnixUTCtime),
                           to_minute(UnixUTCtime),
                           to_second(UnixUTCtime),
+                          to_day(UnixUTCtime),
+                          to_month(UnixUTCtime),
                           to_hour(adjustedtime),
                           to_minute(adjustedtime),
                           to_second(adjustedtime),
