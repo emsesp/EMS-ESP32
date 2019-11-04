@@ -270,7 +270,7 @@ uint8_t _readIntNumber() {
     return atoi(numTextPtr);
 }
 
-// used to read the next string from an input buffer and convert to a double
+// used to read the next string from an input buffer and convert to a float
 float _readFloatNumber() {
     char * numTextPtr = strtok(nullptr, ", \n");
     if (numTextPtr == nullptr) {

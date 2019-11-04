@@ -159,7 +159,7 @@ typedef struct {
     uint8_t       length;       // full length of the complete telegram
     uint8_t       src;          // source ID
     uint8_t       dest;         // destination ID
-    uint16_t      type;         // type ID as a double byte to support EMS+
+    uint16_t      type;         // type ID as a 2-byte to support EMS+
     uint8_t       offset;       // offset
     uint8_t *     data;         // pointer to where telegram data starts
     bool          emsplus;      // true if ems+/ems 2.0

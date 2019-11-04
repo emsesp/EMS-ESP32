@@ -39,7 +39,7 @@ class DS18 {
     uint8_t setup(uint8_t gpio, bool parasite);
     void    loop();
     char *  getDeviceString(char * s, unsigned char index);
-    double  getValue(unsigned char index);
+    float   getValue(unsigned char index);
     int16_t getRawValue(unsigned char index); // raw values, needs / 16
 
   protected:
