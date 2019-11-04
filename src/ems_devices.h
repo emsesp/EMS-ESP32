@@ -34,7 +34,7 @@
 
 #define EMS_OFFSET_UBAParameterWW_wwtemp 2                  // WW Temperature
 #define EMS_OFFSET_UBAParameterWW_wwactivated 1             // WW Activated
-#define EMS_OFFSET_UBAParameterWW_wwOneTime 5               // WW OneTime loading
+#define EMS_OFFSET_UBAParameterWW_wwOneTime 0x00             // WW OneTime loading
 #define EMS_OFFSET_UBAParameterWW_wwComfort 9               // WW is in comfort or eco mode
 #define EMS_VALUE_UBAParameterWW_wwComfort_Hot 0x00         // the value for hot
 #define EMS_VALUE_UBAParameterWW_wwComfort_Eco 0xD8         // the value for eco
