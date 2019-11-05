@@ -2962,7 +2962,7 @@ void ems_setThermostatMode(uint8_t mode, uint8_t hc_num) {
     // RC300/1000/3000 have different settings
     if (model_id == EMS_MODEL_RC300) {
         if (mode == 1) {
-            set_mode = 0; // manual/heat
+            set_mode = 0; // manual
         } else {
             set_mode = 0xFF; // auto
         }

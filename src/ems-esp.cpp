@@ -153,44 +153,44 @@ void myDebugLog(const char * s) {
     }
 }
 
-// figures out the thermostat mode
-// returns 0xFF=unknown, 0=low, 1=manual, 2=auto, 3=night, 4=day
+// figures out the thermostat mode depending on the thermostat type
+// returns {EMS_THERMOSTAT_MODE_UNKNOWN, EMS_THERMOSTAT_MODE_OFF, EMS_THERMOSTAT_MODE_MANUAL, EMS_THERMOSTAT_MODE_AUTO, EMS_THERMOSTAT_MODE_NIGHT, EMS_THERMOSTAT_MODE_DAY}
 // hc_num is 1 to 4
-uint8_t _getThermostatMode(uint8_t hc_num) {
-    int     thermoMode = EMS_VALUE_INT_NOTSET;
-    uint8_t model      = ems_getThermostatModel();
+_EMS_THERMOSTAT_MODE _getThermostatMode(uint8_t hc_num) {
+    _EMS_THERMOSTAT_MODE thermoMode = EMS_THERMOSTAT_MODE_UNKNOWN;
+    uint8_t              model      = ems_getThermostatModel();
 
     uint8_t mode = EMS_Thermostat.hc[hc_num - 1].mode;
 
     if (model == EMS_MODEL_RC20) {
         if (mode == 0) {
-            thermoMode = 0; // low
+            thermoMode = EMS_THERMOSTAT_MODE_OFF;
         } else if (mode == 1) {
-            thermoMode = 1; // manual
+            thermoMode = EMS_THERMOSTAT_MODE_MANUAL;
         } else if (mode == 2) {
-            thermoMode = 2; // auto
+            thermoMode = EMS_THERMOSTAT_MODE_AUTO;
         }
     } else if (model == EMS_MODEL_RC300) {
         if (mode == 0) {
-            thermoMode = 1; // manual
+            thermoMode = EMS_THERMOSTAT_MODE_MANUAL;
         } else if (mode == 1) {
-            thermoMode = 2; // auto
+            thermoMode = EMS_THERMOSTAT_MODE_AUTO;
         }
     } else if (model == EMS_MODEL_FW100 || model == EMS_MODEL_FW120) {
         if (mode == 3) {
-            thermoMode = 4;
+            thermoMode = EMS_THERMOSTAT_MODE_DAY;
         } else if (mode == 2) {
-            thermoMode = 3;
+            thermoMode = EMS_THERMOSTAT_MODE_NIGHT;
         } else if (mode == 1) {
-            thermoMode = 0;
+            thermoMode = EMS_THERMOSTAT_MODE_OFF;
         }
     } else { // default for all other thermostats
         if (mode == 0) {
-            thermoMode = 3; // night
+            thermoMode = EMS_THERMOSTAT_MODE_NIGHT;
         } else if (mode == 1) {
-            thermoMode = 4; // day
+            thermoMode = EMS_THERMOSTAT_MODE_DAY;
         } else if (mode == 2) {
-            thermoMode = 2; // auto
+            thermoMode = EMS_THERMOSTAT_MODE_AUTO;
         }
     }
 
@@ -428,16 +428,16 @@ void showInfo() {
                 }
 
                 // Render Termostat Mode, if we have a mode
-                uint8_t thermoMode = _getThermostatMode(hc_num); // 0xFF=unknown, 0=off, 1=manual, 2=auto, 3=night, 4=day
-                if (thermoMode == 0) {
+                _EMS_THERMOSTAT_MODE thermoMode = _getThermostatMode(hc_num);
+                if (thermoMode == EMS_THERMOSTAT_MODE_OFF) {
                     myDebug_P(PSTR("   Mode is set to off"));
-                } else if (thermoMode == 1) {
+                } else if (thermoMode == EMS_THERMOSTAT_MODE_MANUAL) {
                     myDebug_P(PSTR("   Mode is set to manual"));
-                } else if (thermoMode == 2) {
+                } else if (thermoMode == EMS_THERMOSTAT_MODE_AUTO) {
                     myDebug_P(PSTR("   Mode is set to auto"));
-                } else if (thermoMode == 3) {
+                } else if (thermoMode == EMS_THERMOSTAT_MODE_NIGHT) {
                     myDebug_P(PSTR("   Mode is set to night"));
-                } else if (thermoMode == 4) {
+                } else if (thermoMode == EMS_THERMOSTAT_MODE_DAY) {
                     myDebug_P(PSTR("   Mode is set to day"));
                 } else {
                     myDebug_P(PSTR("   Mode is unknown"));
@@ -722,19 +722,19 @@ void publishValues(bool force) {
                         dataThermostat[THERMOSTAT_CIRCUITCALCTEMP] = thermostat->circuitcalctemp;
                 }
 
-                uint8_t thermoMode = _getThermostatMode(hc_v); // 0xFF=unknown, 0=low, 1=manual, 2=auto, 3=night, 4=day
+                _EMS_THERMOSTAT_MODE thermoMode = _getThermostatMode(hc_v);
 
                 // Termostat Mode
-                if (thermoMode == 0) {
+                if (thermoMode == EMS_THERMOSTAT_MODE_OFF) {
                     dataThermostat[THERMOSTAT_MODE] = "off";
-                } else if (thermoMode == 1) {
-                    dataThermostat[THERMOSTAT_MODE] = "heat";
-                } else if (thermoMode == 2) {
+                } else if (thermoMode == EMS_THERMOSTAT_MODE_MANUAL) {
+                    dataThermostat[THERMOSTAT_MODE] = "manual";
+                } else if (thermoMode == EMS_THERMOSTAT_MODE_AUTO) {
                     dataThermostat[THERMOSTAT_MODE] = "auto";
-                } else if (thermoMode == 3) {
+                } else if (thermoMode == EMS_THERMOSTAT_MODE_NIGHT) {
                     dataThermostat[THERMOSTAT_MODE] = "off"; // for night
-                } else if (thermoMode == 4) {
-                    dataThermostat[THERMOSTAT_MODE] = "heat"; // for day
+                } else if (thermoMode == EMS_THERMOSTAT_MODE_DAY) {
+                    dataThermostat[THERMOSTAT_MODE] = "manual"; // for day
                 } else {
                     dataThermostat[THERMOSTAT_MODE] = "auto"; // default to auto so HA doesn't complain
                 }
@@ -1811,16 +1811,16 @@ void WebCallback(JsonObject root) {
         }
 
         // Render Termostat Mode, if we have a mode
-        uint8_t thermoMode = _getThermostatMode(hc_num); // 0xFF=unknown, 0=off, 1=manual, 2=auto, 3=night, 4=day
-        if (thermoMode == 0) {
+        _EMS_THERMOSTAT_MODE thermoMode = _getThermostatMode(hc_num);
+        if (thermoMode == EMS_THERMOSTAT_MODE_OFF) {
             thermostat["tmode"] = "off";
-        } else if (thermoMode == 1) {
-            thermostat["tmode"] = "heat";
-        } else if (thermoMode == 2) {
+        } else if (thermoMode == EMS_THERMOSTAT_MODE_MANUAL) {
+            thermostat["tmode"] = "manual";
+        } else if (thermoMode == EMS_THERMOSTAT_MODE_AUTO) {
             thermostat["tmode"] = "auto";
-        } else if (thermoMode == 3) {
+        } else if (thermoMode == EMS_THERMOSTAT_MODE_NIGHT) {
             thermostat["tmode"] = "night";
-        } else if (thermoMode == 4) {
+        } else if (thermoMode == EMS_THERMOSTAT_MODE_DAY) {
             thermostat["tmode"] = "day";
         }
     } else {

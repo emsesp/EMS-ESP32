@@ -11,7 +11,8 @@
   current_temperature_topic: "home/ems-esp/thermostat_data"
   temperature_state_topic: "home/ems-esp/thermostat_data"
 
-  mode_state_template: "{{ value_json.hc1.mode }}"
+  mode_state_template: "{% if value_json.hc1.mode == 'manual' %} heat {% else %} {{value_json.hc1.mode}} {% endif %}"
+
   current_temperature_template: "{{ value_json.hc1.currtemp }}"
   temperature_state_template: "{{ value_json.hc1.seltemp }}"
    

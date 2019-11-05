@@ -48,6 +48,14 @@
 #define EMS_THERMOSTAT_DEFAULTHC 1 // default heating circuit is 1
 #define EMS_THERMOSTAT_WRITE_YES true
 #define EMS_THERMOSTAT_WRITE_NO false
+typedef enum {
+    EMS_THERMOSTAT_MODE_UNKNOWN,
+    EMS_THERMOSTAT_MODE_OFF,
+    EMS_THERMOSTAT_MODE_MANUAL,
+    EMS_THERMOSTAT_MODE_AUTO,
+    EMS_THERMOSTAT_MODE_NIGHT,
+    EMS_THERMOSTAT_MODE_DAY
+} _EMS_THERMOSTAT_MODE;
 
 // trigger settings to determine if hot tap water or the heating is active
 #define EMS_BOILER_BURNPOWER_TAPWATER 100

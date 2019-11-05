@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Debug log times show real internet time (if NTP enabled)
 - `system` shows local time instead of UTC
 - fixed version numbers of libraries in `platformio.ini`
+- Normalized Heating modes to `off`, `manual`, `auto`, `night` and `day` to keep generic and not Home Assistant specific (like `heat`)
 
 ### Removed
 
