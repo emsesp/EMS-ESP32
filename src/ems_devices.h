@@ -139,9 +139,10 @@
 #define EMS_OFFSET_RCPLUSSet_temp_setpoint 8    // temp setpoint, when changing of templevel (in auto) value is reset and set to FF
 #define EMS_OFFSET_RCPLUSSet_manual_setpoint 10 // manual setpoint
 
-// Junkers FR10, FW100 (EMS Plus)
+// Junkers FR10, FR50, FW100 (EMS Plus)
 #define EMS_TYPE_JunkersStatusMessage 0x6F         // is an automatic thermostat broadcast giving us temps
-#define EMS_OFFSET_JunkersStatusMessage_mode 0     // current mode
+#define EMS_OFFSET_JunkersStatusMessage_daymode 0  // 3 = day, 2 = night
+#define EMS_OFFSET_JunkersStatusMessage_mode 1     // current mode, 1 = manual, 2 = auto
 #define EMS_OFFSET_JunkersStatusMessage_setpoint 2 // setpoint temp
 #define EMS_OFFSET_JunkersStatusMessage_curr 4     // current temp
 
@@ -175,7 +176,7 @@ typedef enum {
     EMS_MODEL_EASY,
     EMS_MODEL_RC300,
     EMS_MODEL_CW100,
-    EMS_MODEL_1010,
+    EMS_MODEL_RC100,
     EMS_MODEL_OT,
     EMS_MODEL_FW100,
     EMS_MODEL_FR10,
@@ -290,7 +291,7 @@ const _Thermostat_Device Thermostat_Devices[] = {
     {EMS_MODEL_RC30, 78, 0x10, "RC30/Moduline 400", EMS_THERMOSTAT_WRITE_YES},
     {EMS_MODEL_RC35, 86, 0x10, "RC35", EMS_THERMOSTAT_WRITE_YES},
     {EMS_MODEL_RC300, 158, 0x10, "RC300/RC310/Moduline 3000/Bosch CW400", EMS_THERMOSTAT_WRITE_YES},
-    {EMS_MODEL_1010, 165, 0x18, "RC100/Moduline 1010", EMS_THERMOSTAT_WRITE_NO},
+    {EMS_MODEL_RC100, 165, 0x18, "RC100/Moduline 1010", EMS_THERMOSTAT_WRITE_NO},
 
     // Sieger
     {EMS_MODEL_ES73, 76, 0x10, "Sieger ES73", EMS_THERMOSTAT_WRITE_YES},

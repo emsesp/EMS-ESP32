@@ -93,7 +93,7 @@ void _process_RCPLUSStatusMessage(_EMS_RxTelegram * EMS_RxTelegram);
 void _process_RCPLUSSetMessage(_EMS_RxTelegram * EMS_RxTelegram);
 void _process_RCPLUSStatusMode(_EMS_RxTelegram * EMS_RxTelegram);
 
-// Junkers FR10 & FW100
+// Junkers FR10, FR50, FW100
 void _process_JunkersStatusMessage(_EMS_RxTelegram * EMS_RxTelegram);
 
 // Mixers MM100
@@ -258,7 +258,7 @@ void ems_init() {
     for (uint8_t i = 0; i < EMS_THERMOSTAT_MAXHC; i++) {
         EMS_Thermostat.hc[i].hc                = i + 1;
         EMS_Thermostat.hc[i].active            = false;
-        EMS_Thermostat.hc[i].mode              = EMS_VALUE_INT_NOTSET; // night, day, auto
+        EMS_Thermostat.hc[i].mode              = EMS_VALUE_INT_NOTSET;
         EMS_Thermostat.hc[i].day_mode          = EMS_VALUE_INT_NOTSET;
         EMS_Thermostat.hc[i].summer_mode       = EMS_VALUE_INT_NOTSET;
         EMS_Thermostat.hc[i].holiday_mode      = EMS_VALUE_INT_NOTSET;
@@ -1576,7 +1576,7 @@ void _process_RCPLUSStatusMode(_EMS_RxTelegram * EMS_RxTelegram) {
 }
 
 /**
- * FR10 Junkers - type x006F
+ * FR10/FR50/FR100 Junkers - type x006F
  */
 void _process_JunkersStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     if (EMS_RxTelegram->offset == 0 && EMS_RxTelegram->data_length > 1) {
@@ -1588,8 +1588,11 @@ void _process_JunkersStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
 
         EMS_Thermostat.hc[hc].curr_roomTemp     = _toShort(EMS_OFFSET_JunkersStatusMessage_curr);     // value is * 10
         EMS_Thermostat.hc[hc].setpoint_roomTemp = _toShort(EMS_OFFSET_JunkersStatusMessage_setpoint); // value is * 10
-        EMS_Thermostat.hc[hc].mode              = _toByte(EMS_OFFSET_JunkersStatusMessage_mode);
-        EMS_Sys_Status.emsRefreshed             = true; // triggers a send the values back via MQTT
+
+        EMS_Thermostat.hc[hc].day_mode = _toByte(EMS_OFFSET_JunkersStatusMessage_daymode); // 3 = day, 2 = night
+        EMS_Thermostat.hc[hc].mode     = _toByte(EMS_OFFSET_JunkersStatusMessage_mode);    // 1 = manual, 2 = auto
+
+        EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
     }
 }
 
@@ -2935,7 +2938,7 @@ void ems_setThermostatTemp(float temperature, uint8_t hc_num, uint8_t temptype) 
 
 /**
  * Set the thermostat working mode
- *  (0=low/night, 1=manual/day, 2=auto/clock),  0xA8 on a RC20 and 0xA7 on RC30
+ *  0xA8 on a RC20 and 0xA7 on RC30
  *  0x01B9 for EMS+ 300/1000/3000, Auto=0xFF Manual=0x00. See https://github.com/proddy/EMS-ESP/wiki/RC3xx-Thermostats
  *  hc_num is 1 to 4
  */
@@ -2970,17 +2973,13 @@ void ems_setThermostatMode(uint8_t mode, uint8_t hc_num) {
         set_mode = mode;
     }
 
-    // 0=off, 1=manual, 2=auto, 3=night, 4=day
+    // 0=off, 1=manual, 2=auto
     if (mode == 0) {
         myDebug_P(PSTR("Setting thermostat mode to off for heating circuit %d"), hc_num);
     } else if (set_mode == 1) {
         myDebug_P(PSTR("Setting thermostat mode to manual for heating circuit %d"), hc_num);
     } else if (set_mode == 2) {
         myDebug_P(PSTR("Setting thermostat mode to auto for heating circuit %d"), hc_num);
-    } else if (set_mode == 3) {
-        myDebug_P(PSTR("Setting thermostat mode to night for heating circuit %d"), hc_num);
-    } else if (set_mode == 4) {
-        myDebug_P(PSTR("Setting thermostat mode to day for heating circuit %d"), hc_num);
     }
 
     _EMS_TxTelegram EMS_TxTelegram = EMS_TX_TELEGRAM_NEW; // create new Tx

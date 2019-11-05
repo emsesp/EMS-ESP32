@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `system` shows local time instead of UTC
 - fixed version numbers of libraries in `platformio.ini`
 - Normalized Heating modes to `off`, `manual`, `auto`, `night` and `day` to keep generic and not Home Assistant specific (like `heat`)
+- Keeping Thermostat day/night modes separate from off/auto/manual, and setting this for the Junkers FR50
 
 ### Removed
 

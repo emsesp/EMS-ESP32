@@ -131,7 +131,7 @@ static const command_t project_cmds[] PROGMEM = {
     {false, "send XX ...", "send raw telegram data to EMS bus (XX are hex values)"},
     {false, "thermostat read <type ID>", "send read request to the thermostat for heating circuit hc 1-4"},
     {false, "thermostat temp [hc] <degrees>", "set current thermostat temperature"},
-    {false, "thermostat mode [hc] <mode>", "set mode (0=low/night, 1=manual/day, 2=auto) for heating circuit hc 1-4"},
+    {false, "thermostat mode [hc] <mode>", "set mode (0=off, 1=manual, 2=auto) for heating circuit hc 1-4"},
     {false, "thermostat scan <type ID>", "probe thermostat on all type id responses"},
     {false, "boiler read <type ID>", "send read request to boiler"},
     {false, "boiler wwtemp <degrees>", "set boiler warm water temperature"},
@@ -153,7 +153,7 @@ void myDebugLog(const char * s) {
     }
 }
 
-// figures out the thermostat mode depending on the thermostat type
+// figures out the thermostat mode (manual/auto) depending on the thermostat type
 // returns {EMS_THERMOSTAT_MODE_UNKNOWN, EMS_THERMOSTAT_MODE_OFF, EMS_THERMOSTAT_MODE_MANUAL, EMS_THERMOSTAT_MODE_AUTO, EMS_THERMOSTAT_MODE_NIGHT, EMS_THERMOSTAT_MODE_DAY}
 // hc_num is 1 to 4
 _EMS_THERMOSTAT_MODE _getThermostatMode(uint8_t hc_num) {
@@ -176,28 +176,44 @@ _EMS_THERMOSTAT_MODE _getThermostatMode(uint8_t hc_num) {
         } else if (mode == 1) {
             thermoMode = EMS_THERMOSTAT_MODE_AUTO;
         }
-    } else if (model == EMS_MODEL_FW100 || model == EMS_MODEL_FW120) {
+    }
+
+    return thermoMode;
+}
+
+// figures out the thermostat day/night mode depending on the thermostat type
+// returns {EMS_THERMOSTAT_MODE_UNKNOWN, EMS_THERMOSTAT_MODE_OFF, EMS_THERMOSTAT_MODE_MANUAL, EMS_THERMOSTAT_MODE_AUTO, EMS_THERMOSTAT_MODE_NIGHT, EMS_THERMOSTAT_MODE_DAY}
+// hc_num is 1 to 4
+_EMS_THERMOSTAT_MODE _getThermostatDayMode(uint8_t hc_num) {
+    _EMS_THERMOSTAT_MODE thermoMode = EMS_THERMOSTAT_MODE_UNKNOWN;
+    uint8_t              model      = ems_getThermostatModel();
+
+    uint8_t mode = EMS_Thermostat.hc[hc_num - 1].day_mode;
+
+    if (model == EMS_MODEL_FW100 || model == EMS_MODEL_FW120 || model == EMS_MODEL_FR10 || model == EMS_MODEL_FR100 || model == EMS_MODEL_FR50) {
         if (mode == 3) {
             thermoMode = EMS_THERMOSTAT_MODE_DAY;
         } else if (mode == 2) {
             thermoMode = EMS_THERMOSTAT_MODE_NIGHT;
-        } else if (mode == 1) {
-            thermoMode = EMS_THERMOSTAT_MODE_OFF;
         }
-    } else { // default for all other thermostats
+    } else if (model == EMS_MODEL_RC35 || model == EMS_MODEL_ES73) {
         if (mode == 0) {
             thermoMode = EMS_THERMOSTAT_MODE_NIGHT;
         } else if (mode == 1) {
             thermoMode = EMS_THERMOSTAT_MODE_DAY;
-        } else if (mode == 2) {
-            thermoMode = EMS_THERMOSTAT_MODE_AUTO;
+        }
+    } else if (model == EMS_MODEL_RC100 || model == EMS_MODEL_RC300) {
+        if (mode == 0) {
+            thermoMode = EMS_THERMOSTAT_MODE_NIGHT;
+        } else if (mode == 1) {
+            thermoMode = EMS_THERMOSTAT_MODE_DAY;
         }
     }
 
     return thermoMode;
 }
 
-// Show command - display stats on an 's' command
+// Info - display stats on an 'info' command
 void showInfo() {
     // General stats from EMS bus
 
@@ -427,20 +443,23 @@ void showInfo() {
                     _renderIntValue(" Vacation temperature", "C", EMS_Thermostat.hc[hc_num - 1].holidaytemp, 2); // convert to a single byte * 2
                 }
 
-                // Render Termostat Mode, if we have a mode
-                _EMS_THERMOSTAT_MODE thermoMode = _getThermostatMode(hc_num);
+                // Render Thermostat Mode
+                _EMS_THERMOSTAT_MODE thermoMode;
+                thermoMode = _getThermostatMode(hc_num);
                 if (thermoMode == EMS_THERMOSTAT_MODE_OFF) {
                     myDebug_P(PSTR("   Mode is set to off"));
                 } else if (thermoMode == EMS_THERMOSTAT_MODE_MANUAL) {
                     myDebug_P(PSTR("   Mode is set to manual"));
                 } else if (thermoMode == EMS_THERMOSTAT_MODE_AUTO) {
                     myDebug_P(PSTR("   Mode is set to auto"));
-                } else if (thermoMode == EMS_THERMOSTAT_MODE_NIGHT) {
-                    myDebug_P(PSTR("   Mode is set to night"));
+                }
+
+                // Render Thermostat Day Mode
+                thermoMode = _getThermostatDayMode(hc_num);
+                if (thermoMode == EMS_THERMOSTAT_MODE_NIGHT) {
+                    myDebug_P(PSTR("   Day Mode is set to night"));
                 } else if (thermoMode == EMS_THERMOSTAT_MODE_DAY) {
-                    myDebug_P(PSTR("   Mode is set to day"));
-                } else {
-                    myDebug_P(PSTR("   Mode is unknown"));
+                    myDebug_P(PSTR("   Day Mode is set to day"));
                 }
             }
         }
@@ -722,21 +741,14 @@ void publishValues(bool force) {
                         dataThermostat[THERMOSTAT_CIRCUITCALCTEMP] = thermostat->circuitcalctemp;
                 }
 
+                // Thermostat Mode
                 _EMS_THERMOSTAT_MODE thermoMode = _getThermostatMode(hc_v);
-
-                // Termostat Mode
                 if (thermoMode == EMS_THERMOSTAT_MODE_OFF) {
                     dataThermostat[THERMOSTAT_MODE] = "off";
                 } else if (thermoMode == EMS_THERMOSTAT_MODE_MANUAL) {
                     dataThermostat[THERMOSTAT_MODE] = "manual";
                 } else if (thermoMode == EMS_THERMOSTAT_MODE_AUTO) {
                     dataThermostat[THERMOSTAT_MODE] = "auto";
-                } else if (thermoMode == EMS_THERMOSTAT_MODE_NIGHT) {
-                    dataThermostat[THERMOSTAT_MODE] = "off"; // for night
-                } else if (thermoMode == EMS_THERMOSTAT_MODE_DAY) {
-                    dataThermostat[THERMOSTAT_MODE] = "manual"; // for day
-                } else {
-                    dataThermostat[THERMOSTAT_MODE] = "auto"; // default to auto so HA doesn't complain
                 }
             }
         }
@@ -1810,7 +1822,7 @@ void WebCallback(JsonObject root) {
                 thermostat["tc"] = (float)EMS_Thermostat.hc[hc_num - 1].curr_roomTemp / 10;
         }
 
-        // Render Termostat Mode, if we have a mode
+        // Render Thermostat Mode
         _EMS_THERMOSTAT_MODE thermoMode = _getThermostatMode(hc_num);
         if (thermoMode == EMS_THERMOSTAT_MODE_OFF) {
             thermostat["tmode"] = "off";
@@ -1818,10 +1830,6 @@ void WebCallback(JsonObject root) {
             thermostat["tmode"] = "manual";
         } else if (thermoMode == EMS_THERMOSTAT_MODE_AUTO) {
             thermostat["tmode"] = "auto";
-        } else if (thermoMode == EMS_THERMOSTAT_MODE_NIGHT) {
-            thermostat["tmode"] = "night";
-        } else if (thermoMode == EMS_THERMOSTAT_MODE_DAY) {
-            thermostat["tmode"] = "day";
         }
     } else {
         thermostat["ok"] = false;
