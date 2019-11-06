@@ -176,6 +176,12 @@ _EMS_THERMOSTAT_MODE _getThermostatMode(uint8_t hc_num) {
         } else if (mode == 1) {
             thermoMode = EMS_THERMOSTAT_MODE_AUTO;
         }
+    } else if (model == EMS_MODEL_FR10 || model == EMS_MODEL_FR50 || model == EMS_MODEL_FR100) {
+        if (mode == 1) {
+            thermoMode = EMS_THERMOSTAT_MODE_MANUAL;
+        } else if (mode == 2) {
+            thermoMode = EMS_THERMOSTAT_MODE_AUTO;
+        }
     }
 
     return thermoMode;
