@@ -13,9 +13,9 @@
 #include "TimeLib.h" // customized version of the Time library
 #include "Timezone.h"
 
-#define NTP_PACKET_SIZE 48      // NTP time is in the first 48 bytes of the message
-#define NTP_INTERVAL_DEFAULT 60 // every hour
-#define NTP_TIMEZONE_DEFAULT 2  // CE
+#define NTP_PACKET_SIZE 48       // NTP time is in the first 48 bytes of the message
+#define NTP_INTERVAL_DEFAULT 720 // every 12 hours
+#define NTP_TIMEZONE_DEFAULT 2   // CE
 #define NTP_TIMEZONE_MAX 11
 
 class NtpClient {
