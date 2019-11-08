@@ -33,9 +33,6 @@ DS18 ds18;
 #define APP_URL "https://github.com/proddy/EMS-ESP"
 #define APP_URL_API "https://api.github.com/repos/proddy/EMS-ESP"
 
-// set to value >0 if the ESP is overheating or there are timing issues. Recommend a value of 1.
-#define EMSESP_DELAY 0 // initially set to 0 for no delay. Change to 1 if getting WDT resets from wifi
-
 // timers, all values are in seconds
 #define DEFAULT_PUBLISHTIME 120 // every 2 minutes publish MQTT values, including Dallas sensors
 Ticker publishValuesTimer;
@@ -49,16 +46,6 @@ Ticker regularUpdatesTimer;
 
 #define LEDCHECK_TIME 500 // every 1/2 second blink the heartbeat LED
 Ticker ledcheckTimer;
-
-// thermostat scan - for debugging
-Ticker scanThermostat;
-#define SCANTHERMOSTAT_TIME 1
-uint8_t scanThermostat_count = 0;
-
-// ems bus scan
-Ticker scanDevices;
-#define SCANDEVICES_TIME 350 // ms
-uint8_t scanDevices_count;
 
 Ticker showerColdShotStopTimer;
 
@@ -127,12 +114,11 @@ static const command_t project_cmds[] PROGMEM = {
     {false, "refresh", "fetch values from the EMS devices"},
     {false, "devices [all]", "list all supported and detected EMS devices"},
     {false, "queue", "show current Tx queue"},
-    {false, "autodetect [quick | deep]", "detect EMS devices and attempt to automatically set boiler and thermostat types"},
+    {false, "autodetect [quick]", "detect EMS devices and attempt to automatically set boiler and thermostat types"},
     {false, "send XX ...", "send raw telegram data to EMS bus (XX are hex values)"},
     {false, "thermostat read <type ID>", "send read request to the thermostat for heating circuit hc 1-4"},
     {false, "thermostat temp [hc] <degrees>", "set current thermostat temperature"},
     {false, "thermostat mode [hc] <mode>", "set mode (0=off, 1=manual, 2=auto) for heating circuit hc 1-4"},
-    {false, "thermostat scan <type ID>", "probe thermostat on all type id responses"},
     {false, "boiler read <type ID>", "send read request to boiler"},
     {false, "boiler wwtemp <degrees>", "set boiler warm water temperature"},
     {false, "boiler tapwater <on | off>", "set boiler warm tap water on/off"},
@@ -928,15 +914,6 @@ void do_ledcheck() {
     }
 }
 
-// Thermostat scan
-void do_scanThermostat() {
-    if (ems_getBusConnected()) {
-        myDebug_P(PSTR("> Scanning thermostat message type #0x%02X..."), scanThermostat_count);
-        ems_doReadCommand(scanThermostat_count, EMS_Thermostat.device_id);
-        scanThermostat_count++;
-    }
-}
-
 // do a system health check every now and then to see if we all connections
 void do_systemCheck() {
     if (!ems_getBusConnected() && !myESP.getUseSerial()) {
@@ -953,57 +930,6 @@ void do_regularUpdates() {
         ems_getBoilerValues();
         ems_getSolarModuleValues();
     }
-}
-
-// stop devices scan and restart all other timers
-void stopDeviceScan() {
-    publishValuesTimer.attach(EMSESP_Settings.publish_time, do_publishValues);             // post MQTT EMS values
-    publishSensorValuesTimer.attach(EMSESP_Settings.publish_time, do_publishSensorValues); // post MQTT sensor values
-    regularUpdatesTimer.attach(REGULARUPDATES_TIME, do_regularUpdates);                    // regular reads from the EMS
-    systemCheckTimer.attach(SYSTEMCHECK_TIME, do_systemCheck);                             // check if Boiler is online
-    scanThermostat_count = 0;
-    scanThermostat.detach();
-}
-
-// EMS device scan
-void do_scanDevices() {
-    if (scanDevices_count == 0) {
-        // we're at the finish line
-        myDebug_P(PSTR("Finished the deep EMS device scan."));
-        stopDeviceScan();
-        ems_printDevices();
-        ems_setLogging(EMS_SYS_LOGGING_NONE);
-        return;
-    }
-
-    if (ems_getBusConnected()) {
-        ems_doReadCommand(EMS_TYPE_Version, scanDevices_count++); // ask for version
-    }
-}
-
-// initiate a force scan by sending a version command to all type ids
-void startDeviceScan() {
-    publishValuesTimer.detach();
-    systemCheckTimer.detach();
-    regularUpdatesTimer.detach();
-    publishSensorValuesTimer.detach();
-    scanDevices_count = 1; // starts at 1
-    ems_clearDeviceList(); // empty the current list
-    ems_setLogging(EMS_SYS_LOGGING_NONE);
-    myDebug_P(PSTR("Starting a deep EMS device scan. This can take up to 2 minutes. Please wait..."));
-    scanThermostat.attach_ms(SCANDEVICES_TIME, do_scanDevices);
-}
-
-// initiate a force scan by sending type read requests from 0 to FF to the thermostat
-// used to analyze responses for debugging
-void startThermostatScan(uint8_t start) {
-    ems_setLogging(EMS_SYS_LOGGING_THERMOSTAT);
-    publishValuesTimer.detach();
-    systemCheckTimer.detach();
-    regularUpdatesTimer.detach();
-    scanThermostat_count = start;
-    myDebug_P(PSTR("Starting a deep message scan on thermostat"));
-    scanThermostat.attach(SCANTHERMOSTAT_TIME, do_scanThermostat);
 }
 
 // turn back on the hot water for the shower
@@ -1342,10 +1268,7 @@ void TelnetCommandCallback(uint8_t wc, const char * commandLine) {
     if (strcmp(first_cmd, "autodetect") == 0) {
         if (wc == 2) {
             char * second_cmd = _readWord();
-            if (strcmp(second_cmd, "deep") == 0) {
-                startDeviceScan();
-                ok = true;
-            } else if (strcmp(second_cmd, "quick") == 0) {
+            if (strcmp(second_cmd, "quick") == 0) {
                 ems_clearDeviceList();
                 ems_doReadCommand(EMS_TYPE_UBADevices, EMS_Boiler.device_id);
                 ok = true;
@@ -1402,9 +1325,6 @@ void TelnetCommandCallback(uint8_t wc, const char * commandLine) {
             ok = true;
         } else if (strcmp(second_cmd, "read") == 0) {
             ems_doReadCommand(_readHexNumber(), EMS_Thermostat.device_id);
-            ok = true;
-        } else if (strcmp(second_cmd, "scan") == 0) {
-            startThermostatScan(_readIntNumber());
             ok = true;
         }
     }
@@ -2086,7 +2006,7 @@ void loop() {
 
     // publish all the values to MQTT, only if the values have changed
     // although we don't want to publish when doing a deep scan of the thermostat
-    if (ems_getEmsRefreshed() && (scanThermostat_count == 0)) {
+    if (ems_getEmsRefreshed()) {
         publishValues(false);
         do_publishSensorValues();
         ems_setEmsRefreshed(false); // reset
@@ -2095,9 +2015,5 @@ void loop() {
     // do shower logic, if enabled
     if (EMSESP_Settings.shower_timer) {
         showerCheck();
-    }
-
-    if (EMSESP_DELAY) {
-        delay(EMSESP_DELAY); // some time to WiFi and everything else to catch up, and prevent overheating
     }
 }
