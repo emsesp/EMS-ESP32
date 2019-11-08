@@ -134,7 +134,7 @@ fi
 travis=$(list_envs | grep travis | sort)
 
 # get all taregts, excluding travis and debug
-available=$(list_envs | grep -Ev -- 'travis|debug' | sort)
+available=$(list_envs | grep -Ev -- 'travis|debug|release' | sort)
 
 export PLATFORMIO_BUILD_FLAGS="${PLATFORMIO_BUILD_FLAGS}"
 
