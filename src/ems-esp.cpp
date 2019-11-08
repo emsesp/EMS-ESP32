@@ -168,6 +168,14 @@ _EMS_THERMOSTAT_MODE _getThermostatMode(uint8_t hc_num) {
         } else if (mode == 2) {
             thermoMode = EMS_THERMOSTAT_MODE_AUTO;
         }
+    } else { // default for all other thermostats
+        if (mode == 0) {
+            thermoMode = EMS_THERMOSTAT_MODE_NIGHT;
+        } else if (mode == 1) {
+            thermoMode = EMS_THERMOSTAT_MODE_DAY;
+        } else if (mode == 2) {
+            thermoMode = EMS_THERMOSTAT_MODE_AUTO;
+        }
     }
 
     return thermoMode;
@@ -444,6 +452,10 @@ void showInfo() {
                     myDebug_P(PSTR("   Mode is set to manual"));
                 } else if (thermoMode == EMS_THERMOSTAT_MODE_AUTO) {
                     myDebug_P(PSTR("   Mode is set to auto"));
+                } else if (thermoMode == EMS_THERMOSTAT_MODE_NIGHT) {
+                    myDebug_P(PSTR("   Mode is set to night"));
+                } else if (thermoMode == EMS_THERMOSTAT_MODE_DAY) {
+                    myDebug_P(PSTR("   Mode is set to day"));
                 }
 
                 // Render Thermostat Day Mode
