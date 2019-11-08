@@ -3129,6 +3129,10 @@ void MyESP::loop() {
         ESP.restart();
     }
 
+    if (MYESP_DELAY) {
+        delay(MYESP_DELAY); // some time to WiFi and everything else to catch up, and prevent overheating
+    }
+
     yield(); // ... and breath.
 }
 

@@ -9,7 +9,7 @@
 #ifndef MyESP_h
 #define MyESP_h
 
-#define MYESP_VERSION "1.2.16"
+#define MYESP_VERSION "1.2.17"
 
 #include <ArduinoJson.h>
 #include <ArduinoOTA.h>
@@ -65,6 +65,10 @@ extern struct rst_info resetInfo;
 // WIFI
 #define MYESP_WIFI_CONNECT_TIMEOUT 20000     // Connecting timeout for WIFI in ms (20 seconds)
 #define MYESP_WIFI_RECONNECT_INTERVAL 600000 // If could not connect to WIFI, retry after this time in ms. 10 minutes
+
+// set to value >0 if the ESP is overheating or there are timing issues. Recommend a value of 1.
+// initially set to 0 for no delay. Change to 1 if getting WDT resets from wifi
+#define MYESP_DELAY 1
 
 // MQTT
 #define MQTT_PORT 1883                  // MQTT port
