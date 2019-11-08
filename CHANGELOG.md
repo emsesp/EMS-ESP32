@@ -19,6 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Stability for some Wemos clones by decreasing wifi Tx strength and adding small delay
+
 ### Changed
 
 - Debug log times show real internet time (if NTP enabled)
@@ -28,6 +30,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Keeping Thermostat day/night modes separate from off/auto/manual, and setting this for the Junkers FR50
 
 ### Removed
+
+- thermostat scan and autodetect deep functions
 
 ## [1.9.3] 2019-10-26
 
