@@ -735,14 +735,14 @@ void MyESP::_printSetCommands() {
     myDebug_P(PSTR("  set <wifi_ssid | wifi_password> [value]"));
     myDebug_P(PSTR("  set mqtt_enabled <on | off>"));
     myDebug_P(PSTR("  set <mqtt_ip | mqtt_username | mqtt_password> [value]"));
-    myDebug_P(PSTR("  set mqtt_heartbeat <on | off>"));
+    myDebug_P(PSTR("  set mqtt_heartbeat <on | off> (every 2 mins)"));
     myDebug_P(PSTR("  set mqtt_base [string]"));
     myDebug_P(PSTR("  set mqtt_port [number]"));
-    myDebug_P(PSTR("  set mqtt_qos [0,1,2,3]"));
+    myDebug_P(PSTR("  set mqtt_qos [0-3]"));
     myDebug_P(PSTR("  set mqtt_keepalive [seconds]"));
     myDebug_P(PSTR("  set mqtt_retain [on | off]"));
     myDebug_P(PSTR("  set ntp_enabled <on | off>"));
-    myDebug_P(PSTR("  set ntp_interval [n]"));
+    myDebug_P(PSTR("  set ntp_interval [minutes]"));
     myDebug_P(PSTR("  set ntp_timezone [n]"));
     myDebug_P(PSTR("  set serial <on | off>"));
     myDebug_P(PSTR("  set log_events <on | off>"));
@@ -3129,11 +3129,7 @@ void MyESP::loop() {
         ESP.restart();
     }
 
-    if (MYESP_DELAY) {
-        delay(MYESP_DELAY); // some time to WiFi and everything else to catch up, and prevent overheating
-    }
-
-    yield(); // ... and breath.
+    delay(MYESP_DELAY); // some time to WiFi and everything else to catch up, and prevent overheating
 }
 
 MyESP myESP;
