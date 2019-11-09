@@ -8,8 +8,7 @@ var custom_config = {
         "listen_mode": false,
         "shower_timer": false,
         "shower_alert": false,
-        "publish_time": 120,
-        "publish_always": false,
+        "publish_time": 0,
         "tx_mode": 1
     }
 };
@@ -40,10 +39,6 @@ function listcustom() {
     if (custom_config.settings.shower_alert) {
         $("input[name=\"shower_alert\"][value=\"1\"]").prop("checked", true);
     }
-
-    if (custom_config.settings.publish_always) {
-        $("input[name=\"publish_always\"][value=\"1\"]").prop("checked", true);
-    }
 }
 
 function savecustom() {
@@ -73,11 +68,6 @@ function savecustom() {
     custom_config.settings.led = false;
     if (parseInt($("input[name=\"led\"]:checked").val()) === 1) {
         custom_config.settings.led = true;
-    }
-
-    custom_config.settings.publish_always = false;
-    if (parseInt($("input[name=\"publish_always\"]:checked").val()) === 1) {
-        custom_config.settings.publish_always = true;
     }
 
     custom_config.settings.publish_time = parseInt(document.getElementById("publish_time").value);

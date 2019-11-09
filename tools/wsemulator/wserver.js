@@ -103,8 +103,7 @@ var custom_configfile = {
         "listen_mode": false,
         "shower_timer": true,
         "shower_alert": false,
-        "publish_time": 120,
-        "publish_always": false,
+        "publish_time": 0,
         "tx_mode": 1
     }
 };

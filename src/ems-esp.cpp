@@ -34,9 +34,11 @@ DS18 ds18;
 #define APP_URL_API "https://api.github.com/repos/proddy/EMS-ESP"
 
 // timers, all values are in seconds
-#define DEFAULT_PUBLISHTIME 120 // every 2 minutes publish MQTT values, including Dallas sensors
+#define DEFAULT_PUBLISHTIME 0
 Ticker publishValuesTimer;
 Ticker publishSensorValuesTimer;
+
+bool _need_first_publish = true; // this ensures on boot we always send out MQTT messages
 
 #define SYSTEMCHECK_TIME 30 // every 30 seconds check if EMS can be reached
 Ticker systemCheckTimer;
@@ -74,7 +76,6 @@ typedef struct {
     bool     led;             // LED on/off
     bool     listen_mode;     // stop automatic Tx on/off
     uint16_t publish_time;    // frequency of MQTT publish in seconds
-    bool     publish_always;  // true if publish MQTT regardless if data has changed
     uint8_t  led_gpio;        // pin for LED
     uint8_t  dallas_gpio;     // pin for attaching external dallas temperature sensors
     bool     dallas_parasite; // on/off is using parasite
@@ -98,9 +99,7 @@ static const command_t project_cmds[] PROGMEM = {
     {true, "listen_mode <on | off>", "when set to on all automatic Tx are disabled"},
     {true, "shower_timer <on | off>", "send MQTT notification on all shower durations"},
     {true, "shower_alert <on | off>", "stop hot water to send 3 cold burst warnings after max shower time is exceeded"},
-    {true, "publish_time <seconds>", "set frequency for publishing data to MQTT (0=off)"},
-    {true, "publish_always <on | off>", "set to on to skip payload comparison since last publish"},
-
+    {true, "publish_time <seconds>", "set frequency for publishing data to MQTT (0=automatic)"},
     {true, "tx_mode <n>", "changes Tx logic. 1=EMS generic, 2=EMS+, 3=HT3"},
 
     {false, "info", "show current captured on the devices"},
@@ -507,10 +506,14 @@ void showInfo() {
 }
 
 // send all dallas sensor values as a JSON package to MQTT
-void publishSensorValues() {
+void publishSensorValues(bool force) {
     // don't send if MQTT is connected
     if (!myESP.isMQTTConnected()) {
         return;
+    }
+
+    if (!EMSESP_Settings.dallas_sensors) {
+        return; // no sensors attached
     }
 
     StaticJsonDocument<200> doc;
@@ -530,11 +533,29 @@ void publishSensorValues() {
         }
     }
 
-    if (hasdata) {
-        char data[200] = {0};
-        serializeJson(doc, data, sizeof(data));
-        myDebugLog("Publishing external sensor data via MQTT");
-        myESP.mqttPublish(TOPIC_EXTERNAL_SENSORS, data);
+    if (!hasdata) {
+        return; // nothing to send
+    }
+
+    CRC32    crc;
+    uint32_t fchecksum;
+
+    char data[200] = {0};
+    serializeJson(doc, data, sizeof(data));
+
+    size_t jsonSize = measureJson(doc);
+    if (hasdata && (jsonSize > 2)) {
+        // calculate hash and send values if something has changed, to save unnecessary wifi traffic
+        for (uint8_t i = 0; i < (jsonSize - 1); i++) {
+            crc.update(data[i]);
+        }
+        fchecksum = crc.finalize();
+        static uint32_t previousSensorPublishCRC; // CRC check for new values
+        if ((previousSensorPublishCRC != fchecksum) || force) {
+            previousSensorPublishCRC = fchecksum;
+            myDebugLog("Publishing external sensor data via MQTT");
+            myESP.mqttPublish(TOPIC_EXTERNAL_SENSORS, data);
+        }
     }
 }
 
@@ -542,19 +563,18 @@ void publishSensorValues() {
 // a json object is created for the boiler and one for the thermostat
 // CRC check is done to see if there are changes in the values since the last send to avoid too much wifi traffic
 // a check is done against the previous values and if there are changes only then they are published. Unless force=true
-void publishValues(bool force) {
+void publishEMSValues(bool force) {
     // don't send if MQTT is not connected
     if (!myESP.isMQTTConnected()) {
         return;
     }
 
-    // don't publish is publish time is set to 0
-    if (EMSESP_Settings.publish_time == 0) {
-        return;
+    if (!ems_getBusConnected()) {
+        return; // EMS bus is not connected
     }
 
-    // override force
-    if (EMSESP_Settings.publish_always) {
+    // override force id not on automatic mode. Always send values is there is a publish_time set
+    if (EMSESP_Settings.publish_time != 0) {
         force = true;
     }
 
@@ -900,17 +920,12 @@ void publishValues(bool force) {
 
 // publish external dallas sensor temperature values to MQTT
 void do_publishSensorValues() {
-    if ((EMSESP_Settings.dallas_sensors) && (EMSESP_Settings.publish_time)) {
-        publishSensorValues();
-    }
+    publishSensorValues(true); // force publish
 }
 
 // call PublishValues without forcing, so using CRC to see if we really need to publish
 void do_publishValues() {
-    // don't publish if we're not connected to the EMS bus
-    if ((ems_getBusConnected()) && myESP.isMQTTConnected() && EMSESP_Settings.publish_time) {
-        publishValues(true); // force publish
-    }
+    publishEMSValues(true); // force publish
 }
 
 // callback to light up the LED, called via Ticker every second
@@ -993,7 +1008,6 @@ bool LoadSaveCallback(MYESP_FSACTION_t action, JsonObject settings) {
         EMSESP_Settings.shower_timer    = settings["shower_timer"];
         EMSESP_Settings.shower_alert    = settings["shower_alert"];
         EMSESP_Settings.publish_time    = settings["publish_time"] | DEFAULT_PUBLISHTIME;
-        EMSESP_Settings.publish_always  = settings["publish_always"];
 
         EMSESP_Settings.listen_mode = settings["listen_mode"];
         ems_setTxDisabled(EMSESP_Settings.listen_mode);
@@ -1013,7 +1027,6 @@ bool LoadSaveCallback(MYESP_FSACTION_t action, JsonObject settings) {
         settings["shower_timer"]    = EMSESP_Settings.shower_timer;
         settings["shower_alert"]    = EMSESP_Settings.shower_alert;
         settings["publish_time"]    = EMSESP_Settings.publish_time;
-        settings["publish_always"]  = EMSESP_Settings.publish_always;
         settings["tx_mode"]         = EMSESP_Settings.tx_mode;
 
         return true;
@@ -1148,19 +1161,6 @@ bool SetListCallback(MYESP_FSACTION_t action, uint8_t wc, const char * setting, 
             ok                           = true;
         }
 
-        // publish_always
-        if ((strcmp(setting, "publish_always") == 0) && (wc == 2)) {
-            if (strcmp(value, "on") == 0) {
-                EMSESP_Settings.publish_always = true;
-                ok                             = true;
-            } else if (strcmp(value, "off") == 0) {
-                EMSESP_Settings.publish_always = false;
-                ok                             = true;
-            } else {
-                myDebug_P(PSTR("Error. Usage: set publish_always <on | off>"));
-            }
-        }
-
         // tx_mode
         if ((strcmp(setting, "tx_mode") == 0) && (wc == 2)) {
             uint8_t mode = atoi(value);
@@ -1184,7 +1184,6 @@ bool SetListCallback(MYESP_FSACTION_t action, uint8_t wc, const char * setting, 
         myDebug_P(PSTR("  shower_timer=%s"), EMSESP_Settings.shower_timer ? "on" : "off");
         myDebug_P(PSTR("  shower_alert=%s"), EMSESP_Settings.shower_alert ? "on" : "off");
         myDebug_P(PSTR("  publish_time=%d"), EMSESP_Settings.publish_time);
-        myDebug_P(PSTR("  publish_always=%s"), EMSESP_Settings.publish_always ? "on" : "off");
     }
 
     return ok;
@@ -1589,7 +1588,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
     if (strcmp(topic, TOPIC_BOILER_CMD_WWTEMP) == 0) {
         uint8_t t = atoi((char *)message);
         ems_setWarmWaterTemp(t);
-        publishValues(true);
+        publishEMSValues(true);
         return;
     }
 
@@ -1599,7 +1598,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
     if (hc) {
         float f = strtof((char *)message, 0);
         ems_setThermostatTemp(f, hc);
-        publishValues(true); // publish back immediately
+        publishEMSValues(true); // publish back immediately
         return;
     }
 
@@ -1632,7 +1631,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
         if (hc) {
             float f = doc["data"];
             ems_setThermostatTemp(f, hc);
-            publishValues(true); // publish back immediately
+            publishEMSValues(true); // publish back immediately
             return;
         }
 
@@ -1862,7 +1861,6 @@ void initEMSESP() {
     EMSESP_Settings.led            = true; // LED is on by default
     EMSESP_Settings.listen_mode    = false;
     EMSESP_Settings.publish_time   = DEFAULT_PUBLISHTIME;
-    EMSESP_Settings.publish_always = false;
     EMSESP_Settings.dallas_sensors = 0;
     EMSESP_Settings.led_gpio       = EMSESP_LED_GPIO;
     EMSESP_Settings.dallas_gpio    = EMSESP_DALLAS_GPIO;
@@ -1985,6 +1983,7 @@ void setup() {
     }
 
     // set timers for MQTT publish
+    // only if publish_time is not 0 (automatic mode)
     if (EMSESP_Settings.publish_time) {
         publishValuesTimer.attach(EMSESP_Settings.publish_time, do_publishValues);             // post MQTT EMS values
         publishSensorValuesTimer.attach(EMSESP_Settings.publish_time, do_publishSensorValues); // post MQTT dallas sensor values
@@ -2007,8 +2006,7 @@ void setup() {
 // Main loop
 //
 void loop() {
-    // the main loop
-    myESP.loop();
+    myESP.loop(); // handle telnet, mqtt, wifi etc
 
     // check Dallas sensors, using same schedule as publish_time (default 2 mins)
     // these values are published to MQTT separately via the timer publishSensorValuesTimer
@@ -2016,12 +2014,25 @@ void loop() {
         ds18.loop();
     }
 
-    // publish all the values to MQTT, only if the values have changed
-    // although we don't want to publish when doing a deep scan of the thermostat
+    // check if we have data from the EMS bus
     if (ems_getEmsRefreshed()) {
-        publishValues(false);
-        do_publishSensorValues();
-        ems_setEmsRefreshed(false); // reset
+        // if we have an EMS connect go and fetch some data and publish it (by force)
+        if (_need_first_publish) {
+            do_regularUpdates();
+            publishEMSValues(true);
+            publishSensorValues(true);
+            _need_first_publish = false; // reset flag
+        }
+
+        // publish all the values to MQTT
+        // but only if the values have changed and publish_time is on automatic mode
+        // always publish when we get the first results, regardless of any publish_time setting
+        if (EMSESP_Settings.publish_time == 0) {
+            publishEMSValues(false);
+            publishSensorValues(false);
+        }
+
+        ems_setEmsRefreshed(false); // reset flag
     }
 
     // do shower logic, if enabled

@@ -2287,6 +2287,7 @@ void ems_printTxQueue() {
 
 /**
  * Generic function to return various settings from the thermostat
+ * This is called manually to fetch values which don't come from broadcast messages
  */
 void ems_getThermostatValues() {
     if (!ems_getThermostatEnabled()) {
@@ -2994,13 +2995,13 @@ void ems_setThermostatMode(uint8_t mode, uint8_t hc_num) {
     if (model_id == EMS_MODEL_RC20) {
         EMS_TxTelegram.type               = EMS_TYPE_RC20Set;
         EMS_TxTelegram.offset             = EMS_OFFSET_RC20Set_mode;
-        EMS_TxTelegram.type_validate      = EMS_TxTelegram.type;
+        EMS_TxTelegram.type_validate      = EMS_TYPE_RC20Set;
         EMS_TxTelegram.comparisonPostRead = EMS_TYPE_RC20StatusMessage;
 
     } else if (model_id == EMS_MODEL_RC30) {
         EMS_TxTelegram.type               = EMS_TYPE_RC30Set;
         EMS_TxTelegram.offset             = EMS_OFFSET_RC30Set_mode;
-        EMS_TxTelegram.type_validate      = EMS_TxTelegram.type;
+        EMS_TxTelegram.type_validate      = EMS_TYPE_RC30Set;
         EMS_TxTelegram.comparisonPostRead = EMS_TYPE_RC30StatusMessage;
 
     } else if ((model_id == EMS_MODEL_RC35) || (model_id == EMS_MODEL_ES73)) {

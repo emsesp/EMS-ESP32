@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.9.4 beta]
 
+There are breaking changes in this release. See `publish_time` below and make sure you set this value to 0.
+
 ### Added
 
 - Added `publish_always` forcing MQTT topics to be always sent regardless if the data hasn't changed
@@ -28,6 +30,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - fixed version numbers of libraries in `platformio.ini`
 - Normalized Heating modes to `off`, `manual`, `auto`, `night` and `day` to keep generic and not Home Assistant specific (like `heat`)
 - Keeping Thermostat day/night modes separate from off/auto/manual, and setting this for the Junkers FR50
+- Removed `publish_always` and use `publish_time`. For automatic mode you will need to change `publish_time` to 0 which will send MQTT every time data has changed (every 10 seconds).
+- Changed NTP interval from 1 hour to 12 hours
 
 ### Removed
 
@@ -201,7 +205,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - publish dallas external temp sensors to MQTT (thanks @JewelZB)
 - shower timer and shower alert options available via set commands
 - added support for warm water modes Hot, Comfort and Intelligent [(issue 67)](https://github.com/proddy/EMS-ESP/issues/67)
-- added `set publish_time` to set how often to publish MQTT
+- added `set publish_time` to set how often to force a publish of MQTT
 - support for SM10 Solar Module including MQTT [(issue 77)](https://github.com/proddy/EMS-ESP/issues/77)
 - `refresh` command to force a fetch of all known data from the connected EMS devices
 
