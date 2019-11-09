@@ -9,7 +9,7 @@
 #ifndef MyESP_h
 #define MyESP_h
 
-#define MYESP_VERSION "1.2.17"
+#define MYESP_VERSION "1.2.18"
 
 #include <ArduinoJson.h>
 #include <ArduinoOTA.h>
@@ -488,10 +488,10 @@ class MyESP {
     void _webResetAllPage();
 
     // ntp
-    char *  _ntp_server;
-    uint8_t _ntp_interval;
-    bool    _ntp_enabled;
-    uint8_t _ntp_timezone;
+    char *   _ntp_server;
+    uint16_t _ntp_interval;
+    bool     _ntp_enabled;
+    uint8_t  _ntp_timezone;
 };
 
 extern MyESP myESP;
