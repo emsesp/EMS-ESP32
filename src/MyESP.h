@@ -9,7 +9,7 @@
 #ifndef MyESP_h
 #define MyESP_h
 
-#define MYESP_VERSION "1.2.18"
+#define MYESP_VERSION "1.2.19"
 
 #include <ArduinoJson.h>
 #include <ArduinoOTA.h>
@@ -367,6 +367,10 @@ class MyESP {
     char *          _network_ssid;
     char *          _network_password;
     uint8_t         _network_wmode;
+    char *          _network_staticip;
+    char *          _network_gatewayip;
+    char *          _network_nmask;
+    char *          _network_dnsip;
     bool            _wifi_connected;
     String          _getESPhostname();
 

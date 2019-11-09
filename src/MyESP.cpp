@@ -77,9 +77,13 @@ MyESP::MyESP() {
     _mqtt_will_offline_payload = strdup(MQTT_WILL_OFFLINE_PAYLOAD);
 
     // network
-    _network_password = nullptr;
-    _network_ssid     = nullptr;
-    _network_wmode    = 1; // default AP
+    _network_password  = nullptr;
+    _network_ssid      = nullptr;
+    _network_wmode     = 1; // default AP
+    _network_staticip  = nullptr;
+    _network_gatewayip = nullptr;
+    _network_nmask     = nullptr;
+    _network_dnsip     = nullptr;
 
     _wifi_callback_f = nullptr;
     _wifi_connected  = false;
@@ -530,11 +534,19 @@ void MyESP::_wifi_setup() {
         jw.enableAP(false);
     }
 
-    jw.enableAPFallback(true);                       // AP mode only as fallback
-    jw.enableSTA(true);                              // Enable STA mode (connecting to a router)
-    jw.enableScan(false);                            // Configure it to not scan available networks and connect in order of dBm
-    jw.cleanNetworks();                              // Clean existing network configuration
-    jw.addNetwork(_network_ssid, _network_password); // Add a network
+    jw.enableAPFallback(true); // AP mode only as fallback
+    jw.enableSTA(true);        // Enable STA mode (connecting to a router)
+    jw.enableScan(false);      // Configure it to not scan available networks and connect in order of dBm
+    jw.cleanNetworks();        // Clean existing network configuration
+
+    if (_hasValue(_network_staticip)) {
+#if MYESP_DEBUG
+        myDebug_P(PSTR("[WIFI] Using fixed IP"));
+#endif
+        jw.addNetwork(_network_ssid, _network_password, _network_staticip, _network_gatewayip, _network_nmask, _network_dnsip); // fixed IP
+    } else {
+        jw.addNetwork(_network_ssid, _network_password); // use DHCP
+    }
 }
 
 // set the callback function for the OTA onstart
@@ -698,7 +710,7 @@ void MyESP::_consoleShowHelp() {
     myDebug_P(PSTR("*"));
     myDebug_P(PSTR("* Commands:"));
     myDebug_P(PSTR("*  ?/help=show commands, CTRL-D/quit=close telnet session"));
-    myDebug_P(PSTR("*  set, system, restart, mqttlog, kick"));
+    myDebug_P(PSTR("*  set, system, restart, mqttlog, kick, save"));
 
 #ifdef CRASH
     myDebug_P(PSTR("*  crash <dump | clear | test [n]>"));
@@ -772,6 +784,9 @@ void MyESP::_printSetCommands() {
         }
     }
     myDebug_P(PSTR(""));
+    if (_hasValue(_network_staticip)) {
+        myDebug_P(PSTR("  wifi_staticip=%s"), _network_staticip);
+    }
     myDebug_P(PSTR("  mqtt_enabled=%s"), (_mqtt_enabled) ? "on" : "off");
     if (_hasValue(_mqtt_ip)) {
         myDebug_P(PSTR("  mqtt_ip=%s"), _mqtt_ip);
@@ -1022,6 +1037,13 @@ void MyESP::_telnetCommand(char * commandLine) {
     // show system stats
     if ((strcmp(ptrToCommandName, "system") == 0) && (wc == 1)) {
         showSystemStats();
+        return;
+    }
+
+    // save everything
+    if ((strcmp(ptrToCommandName, "save") == 0) && (wc == 1)) {
+        _fs_writeConfig();
+        _fs_createCustomConfig();
         return;
     }
 
@@ -1793,6 +1815,10 @@ bool MyESP::_fs_loadConfig() {
     _network_ssid      = strdup(network["ssid"] | "");
     _network_password  = strdup(network["password"] | "");
     _network_wmode     = network["wmode"]; // 0 is client, 1 is AP
+    _network_staticip  = strdup(network["staticip"] | "");
+    _network_gatewayip = strdup(network["gatewayip"] | "");
+    _network_nmask     = strdup(network["nmask"] | "");
+    _network_dnsip     = strdup(network["dnsip"] | "");
 
     JsonObject general = doc["general"];
     _general_password  = strdup(general["password"] | MYESP_HTTP_PASSWORD);
@@ -2020,10 +2046,14 @@ bool MyESP::_fs_writeConfig() {
 
     root["command"] = "configfile"; // header, important!
 
-    JsonObject network  = doc.createNestedObject("network");
-    network["ssid"]     = _network_ssid;
-    network["password"] = _network_password;
-    network["wmode"]    = _network_wmode;
+    JsonObject network   = doc.createNestedObject("network");
+    network["ssid"]      = _network_ssid;
+    network["password"]  = _network_password;
+    network["wmode"]     = _network_wmode;
+    network["staticip"]  = _network_staticip;
+    network["gatewayip"] = _network_gatewayip;
+    network["nmask"]     = _network_nmask;
+    network["dnsip"]     = _network_dnsip;
 
     JsonObject general    = doc.createNestedObject("general");
     general["password"]   = _general_password;

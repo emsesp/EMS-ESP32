@@ -26,39 +26,7 @@ var formData = new FormData();
 
 var nextIsNotJson = false;
 
-var config = {
-    "command": "configfile",
-    "network": {
-        "ssid": "",
-        "wmode": 1,
-        "password": ""
-    },
-    "general": {
-        "hostname": "",
-        "serial": false,
-        "password": "admin",
-        "log_events": true,
-        "version": "1.0.0"
-    },
-    "mqtt": {
-        "enabled": false,
-        "ip": "",
-        "port": 1883,
-        "qos": 1,
-        "keepalive": 60,
-        "retain": true,
-        "base": "",
-        "user": "",
-        "password": "",
-        "heartbeat": false
-    },
-    "ntp": {
-        "server": "pool.ntp.org",
-        "interval": 60,
-        "timezone": 2,
-        "enabled": true
-    }
-};
+var config = {};
 
 function browserTime() {
     var d = new Date(0); // The 0 there is the key, which sets the date to the epoch
@@ -217,6 +185,10 @@ function savenetwork() {
 
     config.network.wmode = wmode;
     config.network.password = document.getElementById("wifipass").value;
+    config.network.staticip = document.getElementById("staticip").value;
+    config.network.gatewayip = document.getElementById("gatewayip").value;
+    config.network.nmask = document.getElementById("nmask").value;
+    config.network.dnsip = document.getElementById("dnsip").value;
 
     saveconfig();
 }
@@ -293,15 +265,13 @@ function inProgressUpload() {
 
 function handleSTA() {
     document.getElementById("scanb").style.display = "block";
-    document.getElementById("hidessid").style.display = "block";
-    document.getElementById("hidepasswd").style.display = "block";
+    document.getElementById("hideclient").style.display = "block";
 }
 
 function handleAP() {
     document.getElementById("ssid").style.display = "none";
     document.getElementById("scanb").style.display = "none";
-    document.getElementById("hidessid").style.display = "none";
-    document.getElementById("hidepasswd").style.display = "none";
+    document.getElementById("hideclient").style.display = "none";
 
     document.getElementById("inputtohide").style.display = "block";
 }
@@ -316,6 +286,11 @@ function listnetwork() {
         document.getElementById("wmodesta").checked = true;
         handleSTA();
     }
+
+    document.getElementById("staticip").value = config.network.staticip;
+    document.getElementById("gatewayip").value = config.network.gatewayip;
+    document.getElementById("nmask").value = config.network.nmask;
+    document.getElementById("dnsip").value = config.network.dnsip;
 
 }
 
@@ -985,7 +960,7 @@ function start() {
     });
 }
 
-function refreshEMS() {
+function refreshCustomStatus() {
     websock.send("{\"command\":\"custom_status\"}");
 }
 

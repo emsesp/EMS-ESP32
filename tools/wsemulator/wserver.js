@@ -64,13 +64,18 @@ var configfile = {
     "network": {
         "ssid": "myssid",
         "wmode": 0,
-        "password": "password"
+        "password": "password",
+        "password": "",
+        "staticip": "",
+        "gatewayip": "",
+        "nmask": "",
+        "dnsip": ""
     },
     "general": {
-        "hostname": "myesp",
+        "hostname": "ems-esp",
         "password": "admin",
         "serial": true,
-        "version": "1.9.1",
+        "version": "1.0.0",
         "log_events": true
     },
     "mqtt": {
@@ -87,7 +92,7 @@ var configfile = {
     },
     "ntp": {
         "server": "pool.ntp.org",
-        "interval": 60,
+        "interval": 720,
         "timezone": 2,
         "enabled": true
     }

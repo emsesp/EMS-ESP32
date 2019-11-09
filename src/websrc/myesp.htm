@@ -308,10 +308,10 @@
             </form>
         </div>
     </div>
-    <div class="row form-group" style="display:none" id="hidessid">
+    <div class="row form-group" style="display:none" id="hideclient">
         <label class="col-xs-3">SSID<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign"
                 aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right"
-                data-content="wifi Network Name"></i></label>
+                data-content="WiFi Network Name"></i></label>
         <span class="col-xs-7 col-md-5">
             <input class="form-control input-sm" id="inputtohide" type="text" name="ap_ssid">
             <select class="form-control input-sm" style="display:none;" id="ssid" onchange="listBSSID();"></select>
@@ -320,16 +320,51 @@
             <button id="scanb" type="button" class="btn btn-info btn-xs" style="display:none;"
                 onclick="scanWifi()">Scan...</button>
         </span>
-    </div>
-    <div class="row form-group" style="display:none" id="hidepasswd">
+
+        <br><br>
         <label class="col-xs-3">Password<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign"
                 aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right"
-                data-content="wifi Password"></i></label>
+                data-content="WiFi Password"></i></label>
         <span class="col-xs-9 col-md-5">
             <input id="wifipass" class="form-control input-sm" name="ap_passwd" type="password">
         </span>
+
+        <br><br>
+        <h6 style="margin-left: 10px;" class="text-muted">If you're not using DHCP and want a fixed IP address enter the values below:</h6>
+
+        <br>
+        <label class="col-xs-3">Static IP<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign"
+                aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right"
+                data-content="static IP address"></i></label>
+        <span class="col-xs-9 col-md-5">
+            <input type="text" class="form-control input-sm" id="staticip" placeholder="">
+        </span>
+
+        <br><br>
+        <label class="col-xs-3">Gateway IP<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign"
+                aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right"
+                data-content="gateway IP address"></i></label>
+        <span class="col-xs-9 col-md-5">
+            <input type="text" class="form-control input-sm" id="gatewayip" placeholder="">
+        </span>
+
+        <br><br>
+        <label class="col-xs-3">Network Mask<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign"
+                aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right"
+                data-content="network mask"></i></label>
+        <span class="col-xs-9 col-md-5">
+            <input type="text" class="form-control input-sm" id="nmask" placeholder="255.255.255.0">
+        </span>
+
+        <br><br>
+        <label class="col-xs-3">DNS IP<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign"
+                aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right"
+                data-content="DNS IP address"></i></label>
+        <span class="col-xs-9 col-md-5">
+            <input type="text" class="form-control input-sm" id="dnsip" placeholder="">
+        </span>
     </div>
-    <br>
+    <br><br>
     <div class="col-xs-9 col-md-8">
         <button onclick="savenetwork()" class="btn btn-primary btn-sm pull-right">Save</button>
     </div>
@@ -338,7 +373,8 @@
 <div id="ntpcontent">
     <br>
     <legend>Time Settings</legend>
-    <h6 class="text-muted">With Network Time Protocol (NTP) enabled, all times are adjusted to the local timezone and
+    <h6 class="text-muted">With Network Time Protocol (NTP) enabled, all times are adjusted to the local timezone
+        and
         respect daylight saving time (DST)</h6>
     <br>
     <div class="row form-group">
@@ -354,10 +390,7 @@
         <label class="col-xs-3">Browser Time</label>
         <span id="rtc" class="col-xs-9 col-md-5"></span>
         <div class="col-xs-3">
-            <button onclick="syncBrowserTime()" class="btn btn-info btn-sm">Sync Browser Time to Device</button><i
-                style="margin-left: 10px;" class="glyphicon glyphicon-info-sign" aria-hidden="true"
-                data-toggle="popover" data-trigger="hover" data-placement="right"
-                data-content="Use your browser time. Useful when the system does not have an internet connection."></i>
+            <button onclick="syncBrowserTime()" class="btn btn-info btn-sm">Sync Browser Time to Device</button>
         </div>
     </div>
 

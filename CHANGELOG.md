@@ -18,6 +18,7 @@ There are breaking changes in this release. See `publish_time` below and make su
 - Added build scripts for automated CI with TravisCI
 - Implemented timezone support and automatic adjustment, also taking daylight saving times into account
 - Added `kick` command to reset core services like NTP, Web, Web Sockets
+- Added WiFi static IP (setting done in WebUI only)
 
 ### Fixed
 
