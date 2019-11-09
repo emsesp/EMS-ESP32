@@ -773,6 +773,10 @@ void publishEMSValues(bool force) {
                     dataThermostat[THERMOSTAT_MODE] = "manual";
                 } else if (thermoMode == EMS_THERMOSTAT_MODE_AUTO) {
                     dataThermostat[THERMOSTAT_MODE] = "auto";
+                } else if (thermoMode == EMS_THERMOSTAT_MODE_DAY) {
+                    dataThermostat[THERMOSTAT_MODE] = "day";
+                } else if (thermoMode == EMS_THERMOSTAT_MODE_NIGHT) {
+                    dataThermostat[THERMOSTAT_MODE] = "night";
                 }
             }
         }
