@@ -100,7 +100,7 @@ gulp.task('myespjs', function () {
 });
 
 gulp.task('requiredjs', function () {
-    return gulp.src(['../../src/websrc/3rdparty/js/jquery-1.12.4.min.js', '../../src/websrc/3rdparty/js/bootstrap-3.3.7.min.js', '../../src/websrc/3rdparty/js/footable-3.1.6.min.js'])
+    return gulp.src(['../../src/websrc/3rdparty/js/jquery-1.12.4.min.js', '../../src/websrc/3rdparty/js/bootstrap-3.4.1.min.js', '../../src/websrc/3rdparty/js/footable-3.1.6.min.js'])
         .pipe(concat({
             path: 'required.js',
             stat: {
@@ -117,7 +117,7 @@ gulp.task('requiredjs', function () {
 
 
 gulp.task('requiredcss', function () {
-    return gulp.src(['../../src/websrc/3rdparty/css/bootstrap-3.3.7.min.css', '../../src/websrc/3rdparty/css/footable.bootstrap-3.1.6.min.css', '../../src/websrc/3rdparty/css/sidebar.css'])
+    return gulp.src(['../../src/websrc/3rdparty/css/bootstrap-3.4.1.min.css', '../../src/websrc/3rdparty/css/footable.bootstrap-3.1.6.min.css', '../../src/websrc/3rdparty/css/sidebar.css'])
         .pipe(concat({
             path: 'required.css',
             stat: {
