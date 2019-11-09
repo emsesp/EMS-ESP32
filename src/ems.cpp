@@ -1471,7 +1471,7 @@ void _process_RC35StatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
         return;
     }
 
-    uint8_t hc_num = _getHeatingCircuit(EMS_RxTelegram) - 1; // which HC is it, 0-3
+    uint8_t hc_num = _getHeatingCircuit(EMS_RxTelegram); // which HC is it, 0-3
 
     // ignore if the value is 0 (see https://github.com/proddy/EMS-ESP/commit/ccc30738c00f12ae6c89177113bd15af9826b836)
     if (EMS_RxTelegram->data[EMS_OFFSET_RC35StatusMessage_setpoint] != 0x00) {
@@ -1664,7 +1664,7 @@ void _process_RC30Set(_EMS_RxTelegram * EMS_RxTelegram) {
     EMS_Thermostat.hc[hc].mode   = _toByte(EMS_OFFSET_RC30Set_mode); // fixed for HC1
 }
 
-// return which heating circuit it is, 1-4
+// return which heating circuit it is, 0-3 for HC1 to HC4
 // based on type 0x3E (HC1), 0x48 (HC2), 0x52 (HC3), 0x5C (HC4)
 uint8_t _getHeatingCircuit(_EMS_RxTelegram * EMS_RxTelegram) {
     uint8_t hc_num;
@@ -1688,7 +1688,9 @@ uint8_t _getHeatingCircuit(_EMS_RxTelegram * EMS_RxTelegram) {
         break;
     }
 
-    EMS_Thermostat.hc[hc_num - 1].active = true;
+    hc_num--;
+
+    EMS_Thermostat.hc[hc_num].active = true;
 
     return (hc_num);
 }
@@ -1710,11 +1712,11 @@ void _process_RC35Set(_EMS_RxTelegram * EMS_RxTelegram) {
 
     uint8_t hc_num = _getHeatingCircuit(EMS_RxTelegram); // which HC is it?
 
-    EMS_Thermostat.hc[hc_num - 1].mode        = _toByte(EMS_OFFSET_RC35Set_mode);         // night, day, auto
-    EMS_Thermostat.hc[hc_num - 1].daytemp     = _toByte(EMS_OFFSET_RC35Set_temp_day);     // is * 2
-    EMS_Thermostat.hc[hc_num - 1].nighttemp   = _toByte(EMS_OFFSET_RC35Set_temp_night);   // is * 2
-    EMS_Thermostat.hc[hc_num - 1].holidaytemp = _toByte(EMS_OFFSET_RC35Set_temp_holiday); // is * 2
-    EMS_Thermostat.hc[hc_num - 1].heatingtype = _toByte(EMS_OFFSET_RC35Set_heatingtype);  // byte 0 bit floor heating = 3
+    EMS_Thermostat.hc[hc_num].mode        = _toByte(EMS_OFFSET_RC35Set_mode);         // night, day, auto
+    EMS_Thermostat.hc[hc_num].daytemp     = _toByte(EMS_OFFSET_RC35Set_temp_day);     // is * 2
+    EMS_Thermostat.hc[hc_num].nighttemp   = _toByte(EMS_OFFSET_RC35Set_temp_night);   // is * 2
+    EMS_Thermostat.hc[hc_num].holidaytemp = _toByte(EMS_OFFSET_RC35Set_temp_holiday); // is * 2
+    EMS_Thermostat.hc[hc_num].heatingtype = _toByte(EMS_OFFSET_RC35Set_heatingtype);  // byte 0 bit floor heating = 3
 
     EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
 }
