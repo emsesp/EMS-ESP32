@@ -20,17 +20,19 @@
 #define EMS_ID_NONE 0x00 // used as a dest in broadcast messages and empty device IDs
 
 // Fixed EMS IDs
-#define EMS_ID_ME 0x0B      // our device, hardcoded as the "Service Key"
-#define EMS_ID_BOILER 0x08  // all UBA Boilers have 0x08
-#define EMS_ID_SM 0x30      // Solar Module SM10, SM100 and ISM1
-#define EMS_ID_HP 0x38      // HeatPump
-#define EMS_ID_GATEWAY 0x48 // KM200 Web Gateway
-
-// Product IDs
-#define EMS_PRODUCTID_SM10 73   // SM10 solar module
-#define EMS_PRODUCTID_SM50 162  // SM50 solar module
-#define EMS_PRODUCTID_SM100 163 // SM100 solar module
-#define EMS_PRODUCTID_ISM1 101  // Junkers ISM1 solar module
+#define EMS_ID_ME 0x0B          // our device, hardcoded as the "Service Key"
+#define EMS_ID_BOILER 0x08      // all UBA Boilers have 0x08
+#define EMS_ID_SM 0x30          // Solar Module SM10, SM100 and ISM1
+#define EMS_ID_HP 0x38          // HeatPump
+#define EMS_ID_GATEWAY 0x48     // e.g. KM200 Web Gateway
+#define EMS_ID_MIXING1 0x20     // Mixing
+#define EMS_ID_MIXING2 0x21     // Mixing
+#define EMS_ID_SWITCH 0x11      // Switch
+#define EMS_ID_CONTROLLER 0x09  // Controller
+#define EMS_ID_CONNECT 0x02     // Connect
+#define EMS_ID_THERMOSTAT1 0x10 // Thermostat
+#define EMS_ID_THERMOSTAT2 0x17 // Thermostat
+#define EMS_ID_THERMOSTAT3 0x18 // Thermostat
 
 #define EMS_MIN_TELEGRAM_LENGTH 6  // minimal length for a validation telegram, including CRC
 #define EMS_MAX_TELEGRAM_LENGTH 32 // max length of a telegram, including CRC, for Rx and Tx.
@@ -191,50 +193,81 @@ const _EMS_TxTelegram EMS_TX_TELEGRAM_NEW = {
     {0x00}                // data
 };
 
-// where defintions are stored
-typedef struct {
-    uint8_t product_id;
-    char    model_string[100];
-} _Boiler_Device;
+typedef enum {
+    EMS_DEVICE_TYPE_NONE,
+    EMS_DEVICE_TYPE_SERVICEKEY,
+    EMS_DEVICE_TYPE_BOILER,
+    EMS_DEVICE_TYPE_THERMOSTAT,
+    EMS_DEVICE_TYPE_MIXING,
+    EMS_DEVICE_TYPE_SOLAR,
+    EMS_DEVICE_TYPE_HEATPUMP,
+    EMS_DEVICE_TYPE_GATEWAY,
+    EMS_DEVICE_TYPE_OTHER,
+    EMS_DEVICE_TYPE_SWITCH,
+    EMS_DEVICE_TYPE_CONTROLLER,
+    EMS_DEVICE_TYPE_CONNECT,
+    EMS_DEVICE_TYPE_UNKNOWN
+} _EMS_DEVICE_TYPE;
 
+// to store all know EMS devices
 typedef struct {
-    uint8_t product_id;
-    char    model_string[50];
-} _SolarModule_Device;
+    uint8_t          product_id;
+    _EMS_DEVICE_TYPE type;
+    char             device_desc[100];
+    uint8_t          flags;
+} _EMS_Device;
 
+// to store mapping of device_ids to their string name
 typedef struct {
-    uint8_t product_id;
-    uint8_t device_id;
-    char    model_string[50];
-} _Other_Device;
+    uint8_t          device_id;
+    _EMS_DEVICE_TYPE device_type;
+    char             device_type_string[30];
+} _EMS_Device_Types;
 
+// mapping for EMS_Devices_Type
+const _EMS_Device_Types EMS_Devices_Types[] = {
+
+    {EMS_ID_BOILER, EMS_DEVICE_TYPE_BOILER, "UBAMaster"},
+    {EMS_ID_THERMOSTAT1, EMS_DEVICE_TYPE_THERMOSTAT, "Thermostat"},
+    {EMS_ID_THERMOSTAT2, EMS_DEVICE_TYPE_THERMOSTAT, "Thermostat"},
+    {EMS_ID_THERMOSTAT3, EMS_DEVICE_TYPE_THERMOSTAT, "Thermostat"},
+    {EMS_ID_SM, EMS_DEVICE_TYPE_SOLAR, "Solar Module"},
+    {EMS_ID_HP, EMS_DEVICE_TYPE_HEATPUMP, "Heat Pump"},
+    {EMS_ID_GATEWAY, EMS_DEVICE_TYPE_GATEWAY, "Gateway"},
+    {EMS_ID_ME, EMS_DEVICE_TYPE_SERVICEKEY, "Me"},
+    {EMS_ID_NONE, EMS_DEVICE_TYPE_NONE, "All"},
+    {EMS_ID_MIXING1, EMS_DEVICE_TYPE_MIXING, "Mixing Module"},
+    {EMS_ID_MIXING2, EMS_DEVICE_TYPE_MIXING, "Mixing Module"},
+    {EMS_ID_SWITCH, EMS_DEVICE_TYPE_SWITCH, "Switching Module"},
+    {EMS_ID_CONTROLLER, EMS_DEVICE_TYPE_CONTROLLER, "Controller"},
+    {EMS_ID_CONNECT, EMS_DEVICE_TYPE_CONNECT, "Connect"}
+
+};
+
+// for storing all recognised EMS devices
 typedef struct {
-    uint8_t product_id;
-    char    model_string[50];
-} _HeatPump_Device;
+    _EMS_DEVICE_TYPE device_type;  // type
+    uint8_t          product_id;   // product id for looking up details in _EMS_Devices
+    uint8_t          device_id;    // the device_id
+    uint8_t          device_index; // where it is in the EMS_Devices table
+    char             version[10];  // the version number XX.XX
+    bool             known;        // is this a known device?
+} _Detected_Device;
 
-typedef struct {
-    uint8_t model_id;
-    uint8_t product_id;
-    uint8_t device_id;
-    char    model_string[50];
-    bool    write_supported;
-} _Thermostat_Device;
+#define EMS_DEVICE_FLAG_NONE 0 // no flags set
 
-typedef struct {
-    uint8_t product_id;
-    char    model_string[50];
-} _Mixing_Device;
+#define EMS_DEVICE_FLAG_SM10 10
+#define EMS_DEVICE_FLAG_SM100 11
 
-// for consolidating all types
-typedef struct {
-    uint8_t model_type; // 1=boiler, 2=thermostat, 3=sm, 4=other, 5=unknown
-    uint8_t product_id;
-    uint8_t device_id;
-    char    version[10];
-    char    model_string[50];
-} _Generic_Device;
-
+// group flags for thermostats
+#define EMS_DEVICE_FLAG_NO_WRITE 0x80 // top bit set if can't write yet
+#define EMS_DEVICE_FLAG_EASY 1
+#define EMS_DEVICE_FLAG_RC10 2
+#define EMS_DEVICE_FLAG_RC20 3
+#define EMS_DEVICE_FLAG_RC30 4
+#define EMS_DEVICE_FLAG_RC35 5
+#define EMS_DEVICE_FLAG_RC300 6
+#define EMS_DEVICE_FLAG_JUNKERS 7
 
 /*
  * Telegram package defintions
@@ -242,6 +275,8 @@ typedef struct {
 typedef struct {
     // settings
     uint8_t device_id; // this is typically always 0x08
+    uint8_t device_flags;
+    uint8_t device_index;
     uint8_t product_id;
     char    version[10];
 
@@ -304,29 +339,22 @@ typedef struct {
  */
 typedef struct {
     uint8_t device_id; // the device ID of the Heat Pump (e.g. 0x30)
-    uint8_t model_id;  // Solar Module / Heat Pump model
+    uint8_t device_flags;
+    uint8_t device_index;
     uint8_t product_id;
     char    version[10];
-
     uint8_t HPModulation; // heatpump modulation in %
     uint8_t HPSpeed;      // speed 0-100 %
 } _EMS_HeatPump;
 
 typedef struct {
-    uint8_t device_id;
-    uint8_t model_id;
-    uint8_t product_id;
-    char    version[10];
-} _EMS_Other;
-
-typedef struct {
-    uint8_t device_id;
-    uint8_t model_id;
-    uint8_t product_id;
-    char    version[10];
-    uint8_t hc;     // heating circuit 1, 2, 3 or 4
-    bool    active; // true if there is data for this HC
-
+    uint8_t  device_id;
+    uint8_t  device_flags;
+    uint8_t  device_index;
+    uint8_t  product_id;
+    char     version[10];
+    uint8_t  hc;     // heating circuit 1, 2, 3 or 4
+    bool     active; // true if there is data for this HC
     uint16_t flowTemp;
     uint8_t  pumpMod;
     uint8_t  valveStatus;
@@ -334,17 +362,21 @@ typedef struct {
 
 // Mixer data
 typedef struct {
+    uint8_t        device_id;
+    uint8_t        device_flags;
+    uint8_t        device_index;
+    uint8_t        product_id;
     bool           detected;
     _EMS_Mixing_HC hc[EMS_THERMOSTAT_MAXHC]; // array for the 4 heating circuits
 } _EMS_Mixing;
 
 // SM Solar Module - SM10/SM100/ISM1
 typedef struct {
-    uint8_t device_id; // the device ID of the Solar Module
-    uint8_t model_id;  // Solar Module
-    uint8_t product_id;
-    char    version[10];
-
+    uint8_t  device_id;    // the device ID of the Solar Module
+    uint8_t  device_flags; // Solar Module flags
+    uint8_t  device_index;
+    uint8_t  product_id;
+    char     version[10];
     int16_t  collectorTemp;          // collector temp
     int16_t  bottomTemp;             // bottom temp
     uint8_t  pumpModulation;         // modulation solar pump
@@ -375,8 +407,9 @@ typedef struct {
 
 // Thermostat data
 typedef struct {
-    uint8_t            device_id; // the device ID of the thermostat
-    uint8_t            model_id;  // thermostat model
+    uint8_t            device_id;    // the device ID of the thermostat
+    uint8_t            device_flags; // thermostat model flags
+    uint8_t            device_index;
     uint8_t            product_id;
     char               version[10];
     char               datetime[25]; // HH:MM:SS DD/MM/YYYY
@@ -389,9 +422,8 @@ typedef void (*EMS_processType_cb)(_EMS_RxTelegram * EMS_RxTelegram);
 
 // Definition for each EMS type, including the relative callback function
 typedef struct {
-    uint8_t            model_id;
-    uint16_t           type; // long to support EMS+ types
-    const char         typeString[50];
+    uint16_t           type;
+    const char         typeString[30];
     EMS_processType_cb processType_cb;
 } _EMS_Type;
 
@@ -402,7 +434,6 @@ void        ems_init();
 void        ems_doReadCommand(uint16_t type, uint8_t dest, bool forceRefresh = false);
 void        ems_sendRawTelegram(char * telegram);
 void        ems_scanDevices();
-void        ems_printAllDevices();
 void        ems_printDevices();
 uint8_t     ems_printDevices_s(char * buffer, uint16_t len);
 void        ems_printTxQueue();
@@ -428,10 +459,8 @@ void ems_setTxMode(uint8_t mode);
 
 uint8_t _getHeatingCircuit(_EMS_RxTelegram * EMS_RxTelegram);
 
-char *           ems_getThermostatDescription(char * buffer, bool name_only = false);
-char *           ems_getBoilerDescription(char * buffer, bool name_only = false);
-char *           ems_getSolarModuleDescription(char * buffer, bool name_only = false);
-char *           ems_getHeatPumpDescription(char * buffer, bool name_only = false);
+char *           ems_getDeviceDescription(_EMS_DEVICE_TYPE device_type, char * buffer, bool name_only = false);
+bool             ems_getDeviceTypeDescription(uint8_t device_id, char * buffer);
 void             ems_getThermostatValues();
 void             ems_getBoilerValues();
 void             ems_getSolarModuleValues();
@@ -465,7 +494,6 @@ extern _EMS_Boiler      EMS_Boiler;
 extern _EMS_Thermostat  EMS_Thermostat;
 extern _EMS_SolarModule EMS_SolarModule;
 extern _EMS_HeatPump    EMS_HeatPump;
-extern _EMS_Other       EMS_Other;
 extern _EMS_Mixing      EMS_Mixing;
 
-extern std::list<_Generic_Device> Devices;
+extern std::list<_Detected_Device> Devices;

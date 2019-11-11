@@ -102,7 +102,7 @@ static const command_t project_cmds[] PROGMEM = {
     {true, "publish_time <seconds>", "set frequency for publishing data to MQTT (0=automatic)"},
     {true, "tx_mode <n>", "changes Tx logic. 1=EMS generic, 2=EMS+, 3=HT3"},
 
-    {false, "info", "show current captured on the devices"},
+    {false, "info", "show current values deciphered from the EMS messages"},
     {false, "log <n | b | t | s | r | j | v>", "set logging mode to none, basic, thermostat only, solar module only, raw, jabber or verbose"},
 
 #ifdef TESTS
@@ -111,7 +111,7 @@ static const command_t project_cmds[] PROGMEM = {
 
     {false, "publish", "publish all values to MQTT"},
     {false, "refresh", "fetch values from the EMS devices"},
-    {false, "devices [all]", "list all supported and detected EMS devices"},
+    {false, "devices", "list detected EMS devices"},
     {false, "queue", "show current Tx queue"},
     {false, "autodetect [quick]", "detect EMS devices and attempt to automatically set boiler and thermostat types"},
     {false, "send XX ...", "send raw telegram data to EMS bus (XX are hex values)"},
@@ -143,11 +143,11 @@ void myDebugLog(const char * s) {
 // hc_num is 1 to 4
 _EMS_THERMOSTAT_MODE _getThermostatMode(uint8_t hc_num) {
     _EMS_THERMOSTAT_MODE thermoMode = EMS_THERMOSTAT_MODE_UNKNOWN;
-    uint8_t              model      = ems_getThermostatModel();
 
-    uint8_t mode = EMS_Thermostat.hc[hc_num - 1].mode;
+    uint8_t mode  = EMS_Thermostat.hc[hc_num - 1].mode;
+    uint8_t model = ems_getThermostatModel();
 
-    if (model == EMS_MODEL_RC20) {
+    if (model == EMS_DEVICE_FLAG_RC20) {
         if (mode == 0) {
             thermoMode = EMS_THERMOSTAT_MODE_OFF;
         } else if (mode == 1) {
@@ -155,13 +155,13 @@ _EMS_THERMOSTAT_MODE _getThermostatMode(uint8_t hc_num) {
         } else if (mode == 2) {
             thermoMode = EMS_THERMOSTAT_MODE_AUTO;
         }
-    } else if (model == EMS_MODEL_RC300) {
+    } else if (model == EMS_DEVICE_FLAG_RC300) {
         if (mode == 0) {
             thermoMode = EMS_THERMOSTAT_MODE_MANUAL;
         } else if (mode == 1) {
             thermoMode = EMS_THERMOSTAT_MODE_AUTO;
         }
-    } else if (model == EMS_MODEL_FR10 || model == EMS_MODEL_FR50 || model == EMS_MODEL_FR100) {
+    } else if (model == EMS_DEVICE_FLAG_JUNKERS) {
         if (mode == 1) {
             thermoMode = EMS_THERMOSTAT_MODE_MANUAL;
         } else if (mode == 2) {
@@ -181,7 +181,7 @@ _EMS_THERMOSTAT_MODE _getThermostatMode(uint8_t hc_num) {
 }
 
 // figures out the thermostat day/night mode depending on the thermostat type
-// returns {EMS_THERMOSTAT_MODE_UNKNOWN, EMS_THERMOSTAT_MODE_OFF, EMS_THERMOSTAT_MODE_MANUAL, EMS_THERMOSTAT_MODE_AUTO, EMS_THERMOSTAT_MODE_NIGHT, EMS_THERMOSTAT_MODE_DAY}
+// returns {EMS_THERMOSTAT_MODE_NIGHT, EMS_THERMOSTAT_MODE_DAY}
 // hc_num is 1 to 4
 _EMS_THERMOSTAT_MODE _getThermostatDayMode(uint8_t hc_num) {
     _EMS_THERMOSTAT_MODE thermoMode = EMS_THERMOSTAT_MODE_UNKNOWN;
@@ -189,19 +189,19 @@ _EMS_THERMOSTAT_MODE _getThermostatDayMode(uint8_t hc_num) {
 
     uint8_t mode = EMS_Thermostat.hc[hc_num - 1].day_mode;
 
-    if (model == EMS_MODEL_FW100 || model == EMS_MODEL_FW120 || model == EMS_MODEL_FR10 || model == EMS_MODEL_FR100 || model == EMS_MODEL_FR50) {
+    if (model == EMS_DEVICE_FLAG_JUNKERS) {
         if (mode == 3) {
             thermoMode = EMS_THERMOSTAT_MODE_DAY;
         } else if (mode == 2) {
             thermoMode = EMS_THERMOSTAT_MODE_NIGHT;
         }
-    } else if (model == EMS_MODEL_RC35 || model == EMS_MODEL_ES73) {
+    } else if (model == EMS_DEVICE_FLAG_RC35) {
         if (mode == 0) {
             thermoMode = EMS_THERMOSTAT_MODE_NIGHT;
         } else if (mode == 1) {
             thermoMode = EMS_THERMOSTAT_MODE_DAY;
         }
-    } else if (model == EMS_MODEL_RC100 || model == EMS_MODEL_RC300) {
+    } else if (model == EMS_DEVICE_FLAG_RC300) {
         if (mode == 0) {
             thermoMode = EMS_THERMOSTAT_MODE_NIGHT;
         } else if (mode == 1) {
@@ -271,7 +271,7 @@ void showInfo() {
     myDebug_P(PSTR("%sBoiler stats:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
 
     // version details
-    myDebug_P(PSTR("  Boiler: %s"), ems_getBoilerDescription(buffer_type));
+    myDebug_P(PSTR("  Boiler: %s"), ems_getDeviceDescription(EMS_DEVICE_TYPE_BOILER, buffer_type));
 
     // active stats
     if (ems_getBusConnected()) {
@@ -364,7 +364,7 @@ void showInfo() {
     if (ems_getSolarModuleEnabled()) {
         myDebug_P(PSTR("")); // newline
         myDebug_P(PSTR("%sSolar Module stats:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
-        myDebug_P(PSTR("  Solar module: %s"), ems_getSolarModuleDescription(buffer_type));
+        myDebug_P(PSTR("  Solar module: %s"), ems_getDeviceDescription(EMS_DEVICE_TYPE_SOLAR, buffer_type));
         _renderShortValue("Collector temperature", "C", EMS_SolarModule.collectorTemp);
         _renderShortValue("Bottom temperature", "C", EMS_SolarModule.bottomTemp);
         _renderIntValue("Pump modulation", "%", EMS_SolarModule.pumpModulation);
@@ -384,7 +384,7 @@ void showInfo() {
     if (ems_getHeatPumpEnabled()) {
         myDebug_P(PSTR("")); // newline
         myDebug_P(PSTR("%sHeat Pump stats:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
-        myDebug_P(PSTR("  Heat Pump module: %s"), ems_getHeatPumpDescription(buffer_type));
+        myDebug_P(PSTR("  Heat Pump module: %s"), ems_getDeviceDescription(EMS_DEVICE_TYPE_HEATPUMP, buffer_type));
         _renderIntValue("Pump modulation", "%", EMS_HeatPump.HPModulation);
         _renderIntValue("Pump speed", "%", EMS_HeatPump.HPSpeed);
     }
@@ -393,24 +393,21 @@ void showInfo() {
     if (ems_getThermostatEnabled()) {
         myDebug_P(PSTR("")); // newline
         myDebug_P(PSTR("%sThermostat stats:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
-        myDebug_P(PSTR("  Thermostat: %s"), ems_getThermostatDescription(buffer_type, false));
+        myDebug_P(PSTR("  Thermostat: %s"), ems_getDeviceDescription(EMS_DEVICE_TYPE_THERMOSTAT, buffer_type, false));
 
         // Render Thermostat Date & Time
         uint8_t model = ems_getThermostatModel();
-        if ((model != EMS_MODEL_EASY)) {
+        if ((model != EMS_DEVICE_FLAG_EASY)) {
             myDebug_P(PSTR("  Thermostat time is %s"), EMS_Thermostat.datetime);
         }
 
         uint8_t _m_setpoint, _m_curr;
         switch (model) {
-        case EMS_MODEL_EASY:
+        case EMS_DEVICE_FLAG_EASY:
             _m_setpoint = 10; // *100
             _m_curr     = 10; // *100
             break;
-        case EMS_MODEL_FR10:
-        case EMS_MODEL_FR50:
-        case EMS_MODEL_FW100:
-        case EMS_MODEL_FW120:
+        case EMS_DEVICE_FLAG_JUNKERS:
             _m_setpoint = 1; // *10
             _m_curr     = 1; // *10
             break;
@@ -430,7 +427,7 @@ void showInfo() {
 
                 // Render Day/Night/Holiday Temperature on RC35s
                 // there is no single setpoint temp, but one for day, night and vacation
-                if (model == EMS_MODEL_RC35) {
+                if (model == EMS_DEVICE_FLAG_RC35) {
                     if (EMS_Thermostat.hc[hc_num - 1].summer_mode) {
                         myDebug_P(PSTR("   Program is set to Summer mode"));
                     } else if (EMS_Thermostat.hc[hc_num - 1].holiday_mode) {
@@ -732,15 +729,15 @@ void publishEMSValues(bool force) {
                 strlcpy(hc, THERMOSTAT_HC, sizeof(hc));
                 strlcat(hc, _int_to_char(s, thermostat->hc), sizeof(hc));
                 JsonObject dataThermostat = rootThermostat.createNestedObject(hc);
+                uint8_t    model          = ems_getThermostatModel();
 
                 // different logic depending on thermostat types
-                if (ems_getThermostatModel() == EMS_MODEL_EASY) {
+                if (model == EMS_DEVICE_FLAG_EASY) {
                     if (thermostat->setpoint_roomTemp != EMS_VALUE_SHORT_NOTSET)
                         dataThermostat[THERMOSTAT_SELTEMP] = (float)thermostat->setpoint_roomTemp / 100;
                     if (thermostat->curr_roomTemp != EMS_VALUE_SHORT_NOTSET)
                         dataThermostat[THERMOSTAT_CURRTEMP] = (float)thermostat->curr_roomTemp / 100;
-                } else if ((ems_getThermostatModel() == EMS_MODEL_FR10) || (ems_getThermostatModel() == EMS_MODEL_FR50)
-                           || (ems_getThermostatModel() == EMS_MODEL_FW100) || (ems_getThermostatModel() == EMS_MODEL_FW120)) {
+                } else if (model == EMS_DEVICE_FLAG_JUNKERS) {
                     if (thermostat->setpoint_roomTemp != EMS_VALUE_SHORT_NOTSET)
                         dataThermostat[THERMOSTAT_SELTEMP] = (float)thermostat->setpoint_roomTemp / 10;
                     if (thermostat->curr_roomTemp != EMS_VALUE_SHORT_NOTSET)
@@ -1264,14 +1261,7 @@ void TelnetCommandCallback(uint8_t wc, const char * commandLine) {
     }
 
     if (strcmp(first_cmd, "devices") == 0) {
-        if (wc == 2) {
-            char * second_cmd = _readWord();
-            if (strcmp(second_cmd, "all") == 0) {
-                ems_printAllDevices(); // verbose
-            }
-        } else {
-            ems_printDevices();
-        }
+        ems_printDevices();
         ok = true;
     }
 
@@ -1714,23 +1704,32 @@ void WebCallback(JsonObject root) {
 
     // send over EMS devices
     JsonArray list = emsbus.createNestedArray("devices");
+    char      buffer[50];
 
-    for (std::list<_Generic_Device>::iterator it = Devices.begin(); it != Devices.end(); ++it) {
-        JsonObject item   = list.createNestedObject();
-        item["type"]      = (it)->model_type;
-        item["model"]     = (it)->model_string;
+    for (std::list<_Detected_Device>::iterator it = Devices.begin(); it != Devices.end(); ++it) {
+        JsonObject item = list.createNestedObject();
+
+        (void)ems_getDeviceTypeDescription((it)->device_id, buffer);
+        item["type"] = buffer;
+
+        if ((it)->known) {
+            item["model"] = EMS_Devices[(it)->device_index].device_desc;
+        } else {
+            item["model"] = EMS_MODELTYPE_UNKNOWN_STRING;
+        }
+
         item["version"]   = (it)->version;
         item["productid"] = (it)->product_id;
 
-        char buffer[10];
+        char tmp_hex[10];
         // copy of my _hextoa() function from ems.cpp, to convert device_id into a 0xNN hex value string
-        char * p         = buffer;
+        char * p         = tmp_hex;
         byte   nib1      = ((it)->device_id >> 4) & 0x0F;
         byte   nib2      = ((it)->device_id >> 0) & 0x0F;
         *p++             = nib1 < 0xA ? '0' + nib1 : 'A' + nib1 - 0xA;
         *p++             = nib2 < 0xA ? '0' + nib2 : 'A' + nib2 - 0xA;
         *p               = '\0'; // null terminate just in case
-        item["deviceid"] = buffer;
+        item["deviceid"] = tmp_hex;
     }
 
     // send over Thermostat data
@@ -1740,18 +1739,18 @@ void WebCallback(JsonObject root) {
         thermostat["ok"] = true;
 
         char buffer[200];
-        thermostat["tm"] = ems_getThermostatDescription(buffer, true);
+        thermostat["tm"] = ems_getDeviceDescription(EMS_DEVICE_TYPE_THERMOSTAT, buffer, true);
 
         uint8_t hc_num = EMS_THERMOSTAT_DEFAULTHC; // default to HC1
+        uint8_t model  = ems_getThermostatModel();
 
         // Render Current & Setpoint Room Temperature
-        if (ems_getThermostatModel() == EMS_MODEL_EASY) {
+        if (model == EMS_DEVICE_FLAG_EASY) {
             if (EMS_Thermostat.hc[hc_num - 1].setpoint_roomTemp != EMS_VALUE_SHORT_NOTSET)
                 thermostat["ts"] = (float)EMS_Thermostat.hc[hc_num - 1].setpoint_roomTemp / 100;
             if (EMS_Thermostat.hc[hc_num - 1].curr_roomTemp != EMS_VALUE_SHORT_NOTSET)
                 thermostat["tc"] = (float)EMS_Thermostat.hc[hc_num - 1].curr_roomTemp / 100;
-        } else if ((ems_getThermostatModel() == EMS_MODEL_FR10) || (ems_getThermostatModel() == EMS_MODEL_FR50) || (ems_getThermostatModel() == EMS_MODEL_FW100)
-                   || (ems_getThermostatModel() == EMS_MODEL_FW120)) {
+        } else if (model == EMS_DEVICE_FLAG_JUNKERS) {
             if (EMS_Thermostat.hc[hc_num - 1].setpoint_roomTemp != EMS_VALUE_SHORT_NOTSET)
                 thermostat["ts"] = (float)EMS_Thermostat.hc[hc_num - 1].setpoint_roomTemp / 10;
             if (EMS_Thermostat.hc[hc_num - 1].curr_roomTemp != EMS_VALUE_SHORT_NOTSET)
@@ -1781,7 +1780,7 @@ void WebCallback(JsonObject root) {
         boiler["ok"] = true;
 
         char buffer[200];
-        boiler["bm"] = ems_getBoilerDescription(buffer, true);
+        boiler["bm"] = ems_getDeviceDescription(EMS_DEVICE_TYPE_BOILER, buffer, true);
 
         boiler["b1"] = (EMS_Boiler.tapwaterActive ? "running" : "off");
         boiler["b2"] = (EMS_Boiler.heatingActive ? "active" : "off");
@@ -1808,7 +1807,7 @@ void WebCallback(JsonObject root) {
         sm["ok"] = true;
 
         char buffer[200];
-        sm["sm"] = ems_getSolarModuleDescription(buffer, true);
+        sm["sm"] = ems_getDeviceDescription(EMS_DEVICE_TYPE_SOLAR, buffer, true);
 
         if (EMS_SolarModule.collectorTemp != EMS_VALUE_SHORT_NOTSET)
             sm["sm1"] = (float)EMS_SolarModule.collectorTemp / 10; // Collector temperature oC
@@ -1841,7 +1840,7 @@ void WebCallback(JsonObject root) {
     if (ems_getHeatPumpEnabled()) {
         hp["ok"] = true;
         char buffer[200];
-        hp["hm"] = ems_getHeatPumpDescription(buffer, true);
+        hp["hm"] = ems_getDeviceDescription(EMS_DEVICE_TYPE_HEATPUMP, buffer, true);
 
         if (EMS_HeatPump.HPModulation != EMS_VALUE_INT_NOTSET)
             hp["hp1"] = EMS_HeatPump.HPModulation; // Pump modulation %

@@ -33,6 +33,7 @@ There are breaking changes in this release. See `publish_time` below and make su
 - Keeping Thermostat day/night modes separate from off/auto/manual, and setting this for the Junkers FR50
 - Removed `publish_always` and use `publish_time`. For automatic mode you will need to change `publish_time` to 0 which will send MQTT every time data has changed (every 10 seconds).
 - Changed NTP interval from 1 hour to 12 hours
+- Refactored EMS device library to make it support multi-EMS devices easier (e.g. multiple thermostats)
 
 ### Removed
 
