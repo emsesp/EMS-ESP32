@@ -1866,7 +1866,7 @@ bool _addDevice(_EMS_DEVICE_TYPE device_type, uint8_t product_id, uint8_t device
     Devices.push_back(device);
 
     char line[500];
-    strlcpy(line, "New EMS Device recognized as a", sizeof(line));
+    strlcpy(line, "New EMS device recognized as a ", sizeof(line));
 
     // get type as a string
     char type_s[50];
