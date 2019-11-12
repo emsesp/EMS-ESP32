@@ -709,18 +709,19 @@ void _createValidate() {
     new_EMS_TxTelegram.action = EMS_TX_TELEGRAM_VALIDATE;
 
     // copy old Write record
-    new_EMS_TxTelegram.type_validate = EMS_TxTelegram.type;          // save the original type in the type_validate, increase we need to re-try
-    new_EMS_TxTelegram.type          = EMS_TxTelegram.type_validate; // new type is the validate type
-
+    new_EMS_TxTelegram.type_validate      = EMS_TxTelegram.type;          // save the original type in the type_validate, increase we need to re-try
+    new_EMS_TxTelegram.type               = EMS_TxTelegram.type_validate; // new type is the validate type
     new_EMS_TxTelegram.dest               = EMS_TxTelegram.dest;
     new_EMS_TxTelegram.comparisonValue    = EMS_TxTelegram.comparisonValue;
     new_EMS_TxTelegram.comparisonPostRead = EMS_TxTelegram.comparisonPostRead;
     new_EMS_TxTelegram.comparisonOffset   = EMS_TxTelegram.comparisonOffset;
+    new_EMS_TxTelegram.forceRefresh       = EMS_TxTelegram.forceRefresh;
 
     // this is what is different
     new_EMS_TxTelegram.offset    = EMS_TxTelegram.comparisonOffset; // location of byte to fetch
     new_EMS_TxTelegram.dataValue = 1;                               // fetch single byte
     new_EMS_TxTelegram.length    = EMS_MIN_TELEGRAM_LENGTH;         // is always 6 bytes long (including CRC at end)
+    new_EMS_TxTelegram.timestamp = millis();
 
     // remove old telegram from queue and add this new read one
     EMS_TxQueue.shift();                     // remove from queue

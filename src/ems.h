@@ -247,19 +247,18 @@ const _EMS_Device_Types EMS_Devices_Types[] = {
 // for storing all recognised EMS devices
 typedef struct {
     _EMS_DEVICE_TYPE device_type;  // type
-    uint8_t          product_id;   // product id for looking up details in _EMS_Devices
+    uint8_t          product_id;   // product id for looking up details in EMS_Devices
     uint8_t          device_id;    // the device_id
     uint8_t          device_index; // where it is in the EMS_Devices table
     char             version[10];  // the version number XX.XX
     bool             known;        // is this a known device?
 } _Detected_Device;
 
-#define EMS_DEVICE_FLAG_NONE 0 // no flags set
+#define EMS_DEVICE_FLAG_NONE 0   // no flags set
+#define EMS_DEVICE_FLAG_SM10 10  // solar module1
+#define EMS_DEVICE_FLAG_SM100 11 // solar module2
 
-#define EMS_DEVICE_FLAG_SM10 10
-#define EMS_DEVICE_FLAG_SM100 11
-
-// group flags for thermostats
+// group flags specific for thermostats
 #define EMS_DEVICE_FLAG_NO_WRITE 0x80 // top bit set if can't write yet
 #define EMS_DEVICE_FLAG_EASY 1
 #define EMS_DEVICE_FLAG_RC10 2
