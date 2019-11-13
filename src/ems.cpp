@@ -256,8 +256,6 @@ void ems_init() {
         EMS_Mixing.hc[i].flowTemp    = EMS_VALUE_SHORT_NOTSET;
         EMS_Mixing.hc[i].pumpMod     = EMS_VALUE_INT_NOTSET;
         EMS_Mixing.hc[i].valveStatus = EMS_VALUE_INT_NOTSET;
-        EMS_Mixing.hc[i].device_id   = EMS_ID_NONE;
-        EMS_Mixing.hc[i].product_id  = EMS_ID_NONE;
     }
 
     // UBAParameterWW
@@ -1846,7 +1844,7 @@ void ems_clearDeviceList() {
  * add an EMS device to our list of detected devices if its unique
  * returns true if already in list
  */
-bool _addDevice(_EMS_DEVICE_TYPE device_type, uint8_t product_id, uint8_t device_id, uint8_t device_index, const char * version, const char * device_desc) {
+bool _addDevice(_EMS_DEVICE_TYPE device_type, uint8_t product_id, uint8_t device_id, const char * device_desc_p, const char * version) {
     _Detected_Device device;
 
     // check for duplicates
@@ -1858,10 +1856,10 @@ bool _addDevice(_EMS_DEVICE_TYPE device_type, uint8_t product_id, uint8_t device
     }
 
     // create a new record and add it to list
-    device.device_type  = device_type;
-    device.product_id   = product_id;
-    device.device_id    = device_id;
-    device.device_index = device_index; // where it is in the EMS_Devices table
+    device.device_type   = device_type;
+    device.product_id    = product_id;
+    device.device_id     = device_id;
+    device.device_desc_p = device_desc_p; // pointer to the description in the EMS_Devices table
     strlcpy(device.version, version, sizeof(device.version));
     device.known = (device_type != EMS_DEVICE_TYPE_UNKNOWN);
     Devices.push_back(device);
@@ -1879,8 +1877,11 @@ bool _addDevice(_EMS_DEVICE_TYPE device_type, uint8_t product_id, uint8_t device
 
     char tmp[6] = {0}; // for formatting numbers
 
-    strlcat(line, ": ", sizeof(line));
-    strlcat(line, device_desc, sizeof(line));
+    if (device_desc_p != nullptr) {
+        strlcat(line, ": ", sizeof(line));
+        strlcat(line, device_desc_p, sizeof(line));
+    }
+
     strlcat(line, " (DeviceID:0x", sizeof(line));
     strlcat(line, _hextoa(device_id, tmp), sizeof(line));
     strlcat(line, " ProductID:", sizeof(line));
@@ -1919,7 +1920,7 @@ void _process_UBADevices(_EMS_RxTelegram * EMS_RxTelegram) {
                     if ((byte & 0x01) && ((saved_byte & 0x01) == 0)) {
                         uint8_t device_id = ((data_byte + 1) * 8) + bit;
                         if (device_id != EMS_ID_ME) {
-                            myDebug("[EMS] Detected new EMS Device with ID 0x%02X", device_id);
+                            // myDebug("[EMS] Detected new EMS Device with ID 0x%02X", device_id);
                             if (!ems_getTxDisabled()) {
                                 ems_doReadCommand(EMS_TYPE_Version, device_id); // get version, but ignore ourselves
                             }
@@ -1979,52 +1980,54 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
 
     // if not found, just add it
     if (!typeFound) {
-        (void)_addDevice(EMS_DEVICE_TYPE_UNKNOWN, product_id, device_id, 0xFF, version, EMS_MODELTYPE_UNKNOWN_STRING); // use device_index of 255
+        (void)_addDevice(EMS_DEVICE_TYPE_UNKNOWN, product_id, device_id, nullptr, version);
         return;
     }
 
+    const char *     device_desc_p = (EMS_Devices[i].device_desc); // pointer to the full description of the device
+    _EMS_DEVICE_TYPE type          = EMS_Devices[i].type;          // type
+
     // we recognized it, see if we already have it in our recognized list
-    if (_addDevice(EMS_Devices[i].type, product_id, device_id, i, version, EMS_Devices[i].device_desc)) {
+    if (_addDevice(type, product_id, device_id, device_desc_p, version)) {
         return; // already in list
     }
 
-    // its a new entry, set the specifics
-    uint8_t flags = EMS_Devices[i].flags;
+    uint8_t flags = EMS_Devices[i].flags; // its a new entry, set the specifics
 
-    if (EMS_Devices[i].type == EMS_DEVICE_TYPE_BOILER) {
-        EMS_Boiler.device_id    = device_id;
-        EMS_Boiler.product_id   = product_id;
-        EMS_Boiler.device_flags = flags;
-        EMS_Boiler.device_index = i;
+    if (type == EMS_DEVICE_TYPE_BOILER) {
+        EMS_Boiler.device_id     = device_id;
+        EMS_Boiler.product_id    = product_id;
+        EMS_Boiler.device_flags  = flags;
+        EMS_Boiler.device_desc_p = device_desc_p;
         strlcpy(EMS_Boiler.version, version, sizeof(EMS_Boiler.version));
         ems_getBoilerValues(); // get Boiler values that we would usually have to wait for
-    } else if (EMS_Devices[i].type == EMS_DEVICE_TYPE_THERMOSTAT) {
+    } else if (type == EMS_DEVICE_TYPE_THERMOSTAT) {
         EMS_Thermostat.device_id       = device_id;
         EMS_Thermostat.device_flags    = (flags & 0x7F); // remove 7th bit
         EMS_Thermostat.write_supported = (flags & EMS_DEVICE_FLAG_NO_WRITE) == 0;
         EMS_Thermostat.product_id      = product_id;
-        EMS_Thermostat.device_index    = i;
+        EMS_Thermostat.device_desc_p   = device_desc_p;
         strlcpy(EMS_Thermostat.version, version, sizeof(EMS_Thermostat.version));
         ems_getThermostatValues(); // get Thermostat values
-    } else if (EMS_Devices[i].type == EMS_DEVICE_TYPE_SOLAR) {
-        EMS_SolarModule.device_id    = device_id;
-        EMS_SolarModule.product_id   = product_id;
-        EMS_SolarModule.device_flags = flags;
-        EMS_SolarModule.device_index = i;
+    } else if (type == EMS_DEVICE_TYPE_SOLAR) {
+        EMS_SolarModule.device_id     = device_id;
+        EMS_SolarModule.product_id    = product_id;
+        EMS_SolarModule.device_flags  = flags;
+        EMS_SolarModule.device_desc_p = device_desc_p;
         strlcpy(EMS_SolarModule.version, version, sizeof(EMS_SolarModule.version));
         ems_getSolarModuleValues(); // fetch Solar Module values
-    } else if (EMS_Devices[i].type == EMS_DEVICE_TYPE_HEATPUMP) {
-        EMS_HeatPump.device_id    = device_id;
-        EMS_HeatPump.product_id   = product_id;
-        EMS_HeatPump.device_flags = flags;
-        EMS_HeatPump.device_index = i;
+    } else if (type == EMS_DEVICE_TYPE_HEATPUMP) {
+        EMS_HeatPump.device_id     = device_id;
+        EMS_HeatPump.product_id    = product_id;
+        EMS_HeatPump.device_flags  = flags;
+        EMS_HeatPump.device_desc_p = device_desc_p;
         strlcpy(EMS_HeatPump.version, version, sizeof(EMS_HeatPump.version));
-    } else if (EMS_Devices[i].type == EMS_DEVICE_TYPE_MIXING) {
-        EMS_Mixing.device_id    = device_id;
-        EMS_Mixing.product_id   = product_id;
-        EMS_Mixing.device_index = i;
-        EMS_Mixing.device_flags = flags;
-        EMS_Mixing.detected     = true;
+    } else if (type == EMS_DEVICE_TYPE_MIXING) {
+        EMS_Mixing.device_id     = device_id;
+        EMS_Mixing.product_id    = product_id;
+        EMS_Mixing.device_desc_p = device_desc_p;
+        EMS_Mixing.device_flags  = flags;
+        EMS_Mixing.detected      = true;
         ems_doReadCommand(EMS_TYPE_MMPLUSStatusMessage_HC1, device_id); // fetch MM values
     }
 }
@@ -2209,29 +2212,34 @@ char * ems_getDeviceDescription(_EMS_DEVICE_TYPE device_type, char * buffer, boo
     const uint8_t size    = 128;
     bool          enabled = false;
     uint8_t       device_id;
-    uint8_t       device_index = 0;
+    uint8_t       product_id;
     char *        version;
+    const char *  device_desc_p;
 
     if (device_type == EMS_DEVICE_TYPE_THERMOSTAT) {
-        enabled      = ems_getThermostatEnabled();
-        device_id    = EMS_Thermostat.device_id;
-        device_index = EMS_Thermostat.device_index;
-        version      = EMS_Thermostat.version;
+        enabled       = ems_getThermostatEnabled();
+        device_id     = EMS_Thermostat.device_id;
+        product_id    = EMS_Thermostat.product_id;
+        device_desc_p = EMS_Thermostat.device_desc_p;
+        version       = EMS_Thermostat.version;
     } else if (device_type == EMS_DEVICE_TYPE_BOILER) {
-        enabled      = ems_getBoilerEnabled();
-        device_id    = EMS_Boiler.device_id;
-        device_index = EMS_Boiler.device_index;
-        version      = EMS_Boiler.version;
+        enabled       = ems_getBoilerEnabled();
+        device_id     = EMS_Boiler.device_id;
+        product_id    = EMS_Boiler.product_id;
+        device_desc_p = EMS_Boiler.device_desc_p;
+        version       = EMS_Boiler.version;
     } else if (device_type == EMS_DEVICE_TYPE_SOLAR) {
-        enabled      = ems_getSolarModuleEnabled();
-        device_id    = EMS_SolarModule.device_id;
-        device_index = EMS_SolarModule.device_index;
-        version      = EMS_SolarModule.version;
+        enabled       = ems_getSolarModuleEnabled();
+        device_id     = EMS_SolarModule.device_id;
+        product_id    = EMS_SolarModule.product_id;
+        device_desc_p = EMS_SolarModule.device_desc_p;
+        version       = EMS_SolarModule.version;
     } else if (device_type == EMS_DEVICE_TYPE_HEATPUMP) {
-        enabled      = ems_getHeatPumpEnabled();
-        device_id    = EMS_HeatPump.device_id;
-        device_index = EMS_HeatPump.device_index;
-        version      = EMS_HeatPump.version;
+        enabled       = ems_getHeatPumpEnabled();
+        device_id     = EMS_HeatPump.device_id;
+        product_id    = EMS_HeatPump.product_id;
+        device_desc_p = EMS_HeatPump.device_desc_p;
+        version       = EMS_HeatPump.version;
     }
 
     if (!enabled) {
@@ -2239,8 +2247,14 @@ char * ems_getDeviceDescription(_EMS_DEVICE_TYPE device_type, char * buffer, boo
         return buffer;
     }
 
+    // assume at this point we have a known device.
     // get device description
-    strlcpy(buffer, EMS_Devices[device_index].device_desc, size);
+    if (device_desc_p == nullptr) {
+        strlcpy(buffer, EMS_MODELTYPE_UNKNOWN_STRING, size);
+    } else {
+        strlcpy(buffer, device_desc_p, size);
+    }
+
     if (name_only) {
         return buffer; // only interested in the model name
     }
@@ -2249,7 +2263,7 @@ char * ems_getDeviceDescription(_EMS_DEVICE_TYPE device_type, char * buffer, boo
     char tmp[6] = {0};
     strlcat(buffer, _hextoa(device_id, tmp), size);
     strlcat(buffer, " ProductID:", size);
-    strlcat(buffer, itoa(EMS_Devices[device_index].product_id, tmp, 10), size);
+    strlcat(buffer, itoa(product_id, tmp, 10), size);
     strlcat(buffer, " Version:", size);
     strlcat(buffer, version, size);
     strlcat(buffer, ")", size);
@@ -2321,19 +2335,19 @@ void ems_printDevices() {
     // print out the ones we recognized
     if (!Devices.empty()) {
         bool have_unknowns = false;
-        char device_name[200];
+        char device_string[100];
         myDebug_P(PSTR("and %d were recognized by EMS-ESP as:"), Devices.size());
         for (std::list<_Detected_Device>::iterator it = Devices.begin(); it != Devices.end(); ++it) {
             if ((it)->known) {
-                strlcpy(device_name, EMS_Devices[(it)->device_index].device_desc, sizeof(device_name));
+                strlcpy(device_string, (it)->device_desc_p, sizeof(device_string));
             } else {
-                strlcpy(device_name, EMS_MODELTYPE_UNKNOWN_STRING, sizeof(device_name)); // Unknown
+                strlcpy(device_string, EMS_MODELTYPE_UNKNOWN_STRING, sizeof(device_string)); // Unknown
                 have_unknowns = true;
             }
 
             myDebug_P(PSTR(" %s%s%s (DeviceID:0x%02X ProductID:%d Version:%s)"),
                       COLOR_BOLD_ON,
-                      device_name,
+                      device_string,
                       COLOR_BOLD_OFF,
                       (it)->device_id,
                       (it)->product_id,
@@ -2343,7 +2357,8 @@ void ems_printDevices() {
         myDebug_P(PSTR("")); // newline
 
         if (have_unknowns) {
-            myDebug_P(PSTR("You have a device is that is not known by EMS-ESP. Please report this as a GitHub issue so we can expand the EMS device library."));
+            myDebug_P(
+                PSTR("You have a device is that is not yet known by EMS-ESP. Please report this as a GitHub issue so we can expand the EMS device library."));
         }
     } else {
         myDebug_P(PSTR("No were devices recognized. This may be because Tx is disabled or failing."));

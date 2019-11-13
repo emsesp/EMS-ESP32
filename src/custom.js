@@ -99,13 +99,13 @@ function listCustomStats() {
         var l = document.createElement("li");
         var type = obj[i].type;
         var color = "";
-        if (type === 1) {
+        if (type === "UBAMaster") {
             color = "list-group-item-success";
-        } else if (type === 2) {
+        } else if (type === "Thermostat") {
             color = "list-group-item-info";
-        } else if (type === 3) {
+        } else if (type === "Solar Module") {
             color = "list-group-item-warning";
-        } else if (type === 4) {
+        } else if (type === "Heat Pump") {
             color = "list-group-item-success";
         }
         l.innerHTML = obj[i].model + " (Version:" + obj[i].version + " ProductID:" + obj[i].productid + " DeviceID:0x" + obj[i].deviceid + ")";

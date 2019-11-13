@@ -159,7 +159,7 @@
  * Table of all known EMS Devices
  * ProductID, DeviceType, Description, Flags
  */
-const _EMS_Device EMS_Devices[] = {
+static const _EMS_Device EMS_Devices[] = {
 
     //
     // UBA Masters - typically with device_id of 0x08

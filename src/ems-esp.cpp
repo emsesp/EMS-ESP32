@@ -1669,7 +1669,6 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
     }
 }
 
-
 // Init callback, which is used to set functions and call methods after a wifi connection has been established
 void WIFICallback() {
     // This is where we enable the UART service to scan the incoming serial Tx/Rx bus signals
@@ -1712,8 +1711,8 @@ void WebCallback(JsonObject root) {
         (void)ems_getDeviceTypeDescription((it)->device_id, buffer);
         item["type"] = buffer;
 
-        if ((it)->known) {
-            item["model"] = EMS_Devices[(it)->device_index].device_desc;
+        if ((it)->known == true) {
+            item["model"] = (it)->device_desc_p;
         } else {
             item["model"] = EMS_MODELTYPE_UNKNOWN_STRING;
         }
