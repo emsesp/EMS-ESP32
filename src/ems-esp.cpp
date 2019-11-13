@@ -103,7 +103,7 @@ static const command_t project_cmds[] PROGMEM = {
     {true, "tx_mode <n>", "changes Tx logic. 1=EMS generic, 2=EMS+, 3=HT3"},
 
     {false, "info", "show current values deciphered from the EMS messages"},
-    {false, "log <n | b | t | s | r | j | v>", "set logging mode to none, basic, thermostat only, solar module only, raw, jabber or verbose"},
+    {false, "log <n | b | t | s | r | j | v | number>", "set logging to none, basic, thermostat, solar module, raw, jabber, verbose or specific type"},
 
 #ifdef TESTS
     {false, "test <n>", "insert a test telegram on to the EMS bus"},

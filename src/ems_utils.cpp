@@ -108,7 +108,7 @@ char * _ushort_to_char(char * s, uint16_t value, uint8_t decimals) {
 }
 
 // takes a signed short value (2 bytes), converts to a fraction and prints it
-// decimals: 0 = no division, 1=divide value by 10, 2=divide by 2, 10=divide value by 100
+// decimals: 0=no division, 1=divide value by 10 (default), 2=divide by 2, 10=divide value by 100
 void _renderShortValue(const char * prefix, const char * postfix, int16_t value, uint8_t decimals) {
     static char buffer[200] = {0};
     static char s[20]       = {0};

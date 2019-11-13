@@ -32,6 +32,9 @@
 #define EMS_TYPE_UBASetPoints 0x1A
 #define EMS_TYPE_UBAFunctionTest 0x1D
 
+// EMS+ specific
+#define EMS_TYPE_UBAOutdoorTemp 0xD1 // external temp
+
 #define EMS_OFFSET_UBAParameterWW_wwtemp 2                  // WW Temperature
 #define EMS_OFFSET_UBAParameterWW_wwactivated 1             // WW Activated
 #define EMS_OFFSET_UBAParameterWW_wwOneTime 0x00            // WW OneTime loading

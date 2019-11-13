@@ -48,6 +48,9 @@ void _process_UBATotalUptimeMessage(_EMS_RxTelegram * EMS_RxTelegram);
 void _process_UBAParametersMessage(_EMS_RxTelegram * EMS_RxTelegram);
 void _process_SetPoints(_EMS_RxTelegram * EMS_RxTelegram);
 
+// EMS+ specific
+void _process_UBAOutdoorTemp(_EMS_RxTelegram * EMS_RxTelegram);
+
 // SM10
 void _process_SM10Monitor(_EMS_RxTelegram * EMS_RxTelegram);
 
@@ -119,6 +122,9 @@ const _EMS_Type EMS_Types[] = {
     {EMS_TYPE_UBAMaintenanceSettingsMessage, "UBAMaintenanceSettingsMessage", nullptr},
     {EMS_TYPE_UBAParametersMessage, "UBAParametersMessage", _process_UBAParametersMessage},
     {EMS_TYPE_UBASetPoints, "UBASetPoints", _process_SetPoints},
+
+    // UBA/Boiler EMS+
+    {EMS_TYPE_UBAOutdoorTemp, "UBAOutdoorTemp", _process_UBAOutdoorTemp},
 
     // Solar Module devices
     {EMS_TYPE_SM10Monitor, "SM10Monitor", _process_SM10Monitor},
@@ -1307,9 +1313,12 @@ void _process_UBAMonitorFast(_EMS_RxTelegram * EMS_RxTelegram) {
 /**
  * UBAMonitorSlow - type 0x19 - central heating monitor part 2 (27 bytes long)
  * received every 60 seconds
+ * e.g. 08 00 19 00 80 00 02 41 80 00 00 00 00 00 03 91 7B 05 B8 40 00 00 00 04 92 AD 00 5E EE 80 00 (CRC=C9) #data=27
  */
 void _process_UBAMonitorSlow(_EMS_RxTelegram * EMS_RxTelegram) {
-    EMS_Boiler.extTemp = _toShort(0); // 0x8000 if not available
+    if (_toShort(0) != EMS_VALUE_USHORT_NOTSET) { // 0x8000 if not available
+        EMS_Boiler.extTemp = _toShort(0);
+    }
 
     // set boiler temp only if we actually have a real value
     if (_toShort(2) != EMS_VALUE_USHORT_NOTSET) {
@@ -1321,6 +1330,15 @@ void _process_UBAMonitorSlow(_EMS_RxTelegram * EMS_RxTelegram) {
     EMS_Boiler.burnWorkMin = _toLong(13);
     EMS_Boiler.heatWorkMin = _toLong(19);
     EMS_Boiler.switchTemp  = _toShort(25);
+}
+
+/**
+ * UBAOutdoorTemp - type 0xD1 - external temperature
+ */
+void _process_UBAOutdoorTemp(_EMS_RxTelegram * EMS_RxTelegram) {
+    if (_toShort(0) != EMS_VALUE_USHORT_NOTSET) { // 0x8000 if not available
+        EMS_Boiler.extTemp = _toShort(0);
+    }
 }
 
 /**
