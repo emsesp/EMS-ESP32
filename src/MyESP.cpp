@@ -1660,7 +1660,6 @@ size_t MyESP::_fs_validateConfigFile(const char * filename, size_t maxsize, Json
         delete[] buffer;
         return 0;
     }
-
     // now read into the given json
     DeserializationError error = deserializeJson(doc, buffer);
     if (error) {
