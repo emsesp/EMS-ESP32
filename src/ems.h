@@ -239,7 +239,7 @@ typedef struct {
     _EMS_DEVICE_TYPE device_type;   // type (see above)
     uint8_t          product_id;    // product id
     uint8_t          device_id;     // device_id
-    const char *           device_desc_p; // pointer to description string in EMS_Devices table
+    const char *     device_desc_p; // pointer to description string in EMS_Devices table
     char             version[10];   // the version number XX.XX
     bool             known;         // is this a known device?
 } _Detected_Device;
@@ -263,11 +263,11 @@ typedef struct {
  */
 typedef struct {
     // settings
-    uint8_t device_id; // this is typically always 0x08
-    uint8_t device_flags;
-    const char *  device_desc_p;
-    uint8_t product_id;
-    char    version[10];
+    uint8_t      device_id; // this is typically always 0x08
+    uint8_t      device_flags;
+    const char * device_desc_p;
+    uint8_t      product_id;
+    char         version[10];
 
     // UBAParameterWW
     uint8_t wWActivated;   // Warm Water activated
@@ -327,13 +327,13 @@ typedef struct {
  * Telegram package defintions for Other EMS devices
  */
 typedef struct {
-    uint8_t device_id; // the device ID of the Heat Pump (e.g. 0x30)
-    uint8_t device_flags;
-    const char *  device_desc_p;
-    uint8_t product_id;
-    char    version[10];
-    uint8_t HPModulation; // heatpump modulation in %
-    uint8_t HPSpeed;      // speed 0-100 %
+    uint8_t      device_id; // the device ID of the Heat Pump (e.g. 0x30)
+    uint8_t      device_flags;
+    const char * device_desc_p;
+    uint8_t      product_id;
+    char         version[10];
+    uint8_t      HPModulation; // heatpump modulation in %
+    uint8_t      HPSpeed;      // speed 0-100 %
 } _EMS_HeatPump;
 
 // Mixing Module per HC
@@ -349,7 +349,7 @@ typedef struct {
 typedef struct {
     uint8_t        device_id;
     uint8_t        device_flags;
-    const char *         device_desc_p;
+    const char *   device_desc_p;
     uint8_t        product_id;
     char           version[10];
     bool           detected;
@@ -358,20 +358,20 @@ typedef struct {
 
 // Solar Module - SM10/SM100/ISM1
 typedef struct {
-    uint8_t  device_id;    // the device ID of the Solar Module
-    uint8_t  device_flags; // Solar Module flags
-    const char *   device_desc_p;
-    uint8_t  product_id;
-    char     version[10];
-    int16_t  collectorTemp;          // collector temp
-    int16_t  bottomTemp;             // bottom temp
-    uint8_t  pumpModulation;         // modulation solar pump
-    uint8_t  pump;                   // pump active
-    int16_t  setpoint_maxBottomTemp; // setpoint for maximum collector temp
-    uint16_t EnergyLastHour;
-    uint16_t EnergyToday;
-    uint16_t EnergyTotal;
-    uint32_t pumpWorkMin; // Total solar pump operating time
+    uint8_t      device_id;    // the device ID of the Solar Module
+    uint8_t      device_flags; // Solar Module flags
+    const char * device_desc_p;
+    uint8_t      product_id;
+    char         version[10];
+    int16_t      collectorTemp;          // collector temp
+    int16_t      bottomTemp;             // bottom temp
+    uint8_t      pumpModulation;         // modulation solar pump
+    uint8_t      pump;                   // pump active
+    int16_t      setpoint_maxBottomTemp; // setpoint for maximum collector temp
+    uint16_t     EnergyLastHour;
+    uint16_t     EnergyToday;
+    uint16_t     EnergyTotal;
+    uint32_t     pumpWorkMin; // Total solar pump operating time
 } _EMS_SolarModule;
 
 // heating circuit
@@ -395,7 +395,7 @@ typedef struct {
 typedef struct {
     uint8_t            device_id;    // the device ID of the thermostat
     uint8_t            device_flags; // thermostat model flags
-    const char *             device_desc_p;
+    const char *       device_desc_p;
     uint8_t            product_id;
     char               version[10];
     char               datetime[25]; // HH:MM:SS DD/MM/YYYY
