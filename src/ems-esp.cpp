@@ -103,7 +103,7 @@ static const command_t project_cmds[] PROGMEM = {
     {true, "tx_mode <n>", "changes Tx logic. 1=EMS generic, 2=EMS+, 3=HT3"},
 
     {false, "info", "show current values deciphered from the EMS messages"},
-    {false, "log <n | b | t | s | r | j | v | number>", "set logging to none, basic, thermostat, solar module, raw, jabber, verbose or specific type"},
+    {false, "log <n | b | t | s | r | j | v | w [type ID]", "set logging to none, basic, thermostat, solar module, raw, jabber, verbose or watch a specific type"},
 
 #ifdef TESTS
     {false, "test <n>", "insert a test telegram on to the EMS bus"},
@@ -113,7 +113,7 @@ static const command_t project_cmds[] PROGMEM = {
     {false, "refresh", "fetch values from the EMS devices"},
     {false, "devices", "list detected EMS devices"},
     {false, "queue", "show current Tx queue"},
-    {false, "autodetect [quick]", "detect EMS devices and attempt to automatically set boiler and thermostat types"},
+    {false, "autodetect [scan]", "detect EMS devices and attempt to automatically set boiler and thermostat types"},
     {false, "send XX ...", "send raw telegram data to EMS bus (XX are hex values)"},
     {false, "thermostat read <type ID>", "send read request to the thermostat for heating circuit hc 1-4"},
     {false, "thermostat temp [hc] <degrees>", "set current thermostat temperature"},
@@ -230,6 +230,8 @@ void showInfo() {
         myDebug_P(PSTR("  System logging set to Solar Module only"));
     } else if (sysLog == EMS_SYS_LOGGING_JABBER) {
         myDebug_P(PSTR("  System logging set to Jabber"));
+    } else if (sysLog == EMS_SYS_LOGGING_WATCH) {
+        myDebug_P(PSTR("  System logging set to Watch"));
     } else {
         myDebug_P(PSTR("  System logging set to None"));
     }
@@ -1228,9 +1230,9 @@ void _showCommands(uint8_t event) {
 // we set the logging here
 void TelnetCallback(uint8_t event) {
     if (event == TELNET_EVENT_CONNECT) {
-        ems_setLogging(EMS_SYS_LOGGING_DEFAULT, true);
+        ems_setLogging(EMS_SYS_LOGGING_DEFAULT);
     } else if (event == TELNET_EVENT_DISCONNECT) {
-        ems_setLogging(EMS_SYS_LOGGING_NONE, true);
+        ems_setLogging(EMS_SYS_LOGGING_NONE);
     } else if ((event == TELNET_EVENT_SHOWCMD) || (event == TELNET_EVENT_SHOWSET)) {
         _showCommands(event);
     }
@@ -1273,19 +1275,19 @@ void TelnetCommandCallback(uint8_t wc, const char * commandLine) {
     if (strcmp(first_cmd, "autodetect") == 0) {
         if (wc == 2) {
             char * second_cmd = _readWord();
-            if (strcmp(second_cmd, "quick") == 0) {
-                ems_clearDeviceList();
-                ems_doReadCommand(EMS_TYPE_UBADevices, EMS_Boiler.device_id);
+            if (strcmp(second_cmd, "scan") == 0) {
+                ems_scanDevices(); // known device scan
                 ok = true;
             }
         } else {
-            ems_scanDevices(); // normal known device scan
+            ems_clearDeviceList();
+            ems_doReadCommand(EMS_TYPE_UBADevices, EMS_Boiler.device_id);
             ok = true;
         }
     }
 
     // logging
-    if ((strcmp(first_cmd, "log") == 0) && (wc == 2)) {
+    if ((strcmp(first_cmd, "log") == 0) && (wc >= 2)) {
         char * second_cmd = _readWord();
         if (strcmp(second_cmd, "v") == 0) {
             ems_setLogging(EMS_SYS_LOGGING_VERBOSE);
@@ -1307,6 +1309,9 @@ void TelnetCommandCallback(uint8_t wc, const char * commandLine) {
             ok = true;
         } else if (strcmp(second_cmd, "j") == 0) {
             ems_setLogging(EMS_SYS_LOGGING_JABBER);
+            ok = true;
+        } else if (strcmp(second_cmd, "w") == 0) {
+            ems_setLogging(EMS_SYS_LOGGING_WATCH, _readHexNumber()); // get type_id
             ok = true;
         }
     }

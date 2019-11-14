@@ -33,7 +33,9 @@
 #define EMS_TYPE_UBAFunctionTest 0x1D
 
 // EMS+ specific
-#define EMS_TYPE_UBAOutdoorTemp 0xD1 // external temp
+#define EMS_TYPE_UBAOutdoorTemp 0xD1  // external temp
+#define EMS_TYPE_UBAMonitorFast2 0xE4 // Monitor fast for newer EMS+
+#define EMS_TYPE_UBAMonitorSlow2 0xE5 // Monitor slow for newer EMS+
 
 #define EMS_OFFSET_UBAParameterWW_wwtemp 2                  // WW Temperature
 #define EMS_OFFSET_UBAParameterWW_wwactivated 1             // WW Activated
@@ -91,7 +93,6 @@
 #define EMS_TYPE_RC30Set 0xA7      // for setting values like temp and mode
 #define EMS_OFFSET_RC30Set_mode 23 // position of thermostat mode
 #define EMS_OFFSET_RC30Set_temp 28 // position of thermostat setpoint temperature
-
 
 // RC35 specific
 #define EMS_TYPE_RC35StatusMessage_HC1 0x3E // is an automatic thermostat broadcast giving us temps on HC1

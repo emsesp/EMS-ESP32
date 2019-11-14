@@ -105,6 +105,7 @@ typedef enum {
 typedef enum {
     EMS_SYS_LOGGING_NONE,        // no messages
     EMS_SYS_LOGGING_RAW,         // raw data mode
+    EMS_SYS_LOGGING_WATCH,       // watch a specific type ID
     EMS_SYS_LOGGING_BASIC,       // only basic read/write messages
     EMS_SYS_LOGGING_THERMOSTAT,  // only telegrams sent from thermostat
     EMS_SYS_LOGGING_SOLARMODULE, // only telegrams sent from thermostat
@@ -121,6 +122,7 @@ typedef struct {
     uint16_t         emxCrcErr;                              // CRC errors
     bool             emsPollEnabled;                         // flag enable the response to poll messages
     _EMS_SYS_LOGGING emsLogging;                             // logging
+    uint16_t         emsLogging_typeID;                      // the typeID to watch
     bool             emsRefreshed;                           // fresh data, needs to be pushed out to MQTT
     bool             emsBusConnected;                        // is there an active bus
     uint32_t         emsRxTimestamp;                         // timestamp of last EMS message received
@@ -435,7 +437,7 @@ void             ems_setWarmWaterActivated(bool activated);
 void             ems_setWarmWaterOnetime(bool activated);
 void             ems_setWarmTapWaterActivated(bool activated);
 void             ems_setPoll(bool b);
-void             ems_setLogging(_EMS_SYS_LOGGING loglevel, bool silent = false);
+void             ems_setLogging(_EMS_SYS_LOGGING loglevel, uint16_t type_id = 0);
 void             ems_setEmsRefreshed(bool b);
 void             ems_setWarmWaterModeComfort(uint8_t comfort);
 void             ems_setModels();

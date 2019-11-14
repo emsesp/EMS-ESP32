@@ -19,6 +19,8 @@ There are breaking changes in this release. See `publish_time` below and make su
 - Implemented timezone support and automatic adjustment, also taking daylight saving times into account
 - Added `kick` command to reset core services like NTP, Web, Web Sockets
 - Added WiFi static IP (setting done in WebUI only)
+- `log w <type_id>` for watching a specific telegram type ID
+- initial support for EMS+ GB125s and MC110's (https://github.com/proddy/EMS-ESP/wiki/MC110-controller)
 
 ### Fixed
 
@@ -34,6 +36,7 @@ There are breaking changes in this release. See `publish_time` below and make su
 - Removed `publish_always` and use `publish_time`. For automatic mode you will need to change `publish_time` to 0 which will send MQTT every time data has changed (every 10 seconds).
 - Changed NTP interval from 1 hour to 12 hours
 - Refactored EMS device library to make it support multi-EMS devices easier (e.g. multiple thermostats)
+- `autodetect deep` removed and replaced with `autodetect scan` for scanning known devices.
 
 ### Removed
 

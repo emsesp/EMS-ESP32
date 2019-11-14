@@ -50,6 +50,8 @@ void _process_SetPoints(_EMS_RxTelegram * EMS_RxTelegram);
 
 // EMS+ specific
 void _process_UBAOutdoorTemp(_EMS_RxTelegram * EMS_RxTelegram);
+void _process_UBAMonitorFast2(_EMS_RxTelegram * EMS_RxTelegram);
+void _process_UBAMonitorSlow2(_EMS_RxTelegram * EMS_RxTelegram);
 
 // SM10
 void _process_SM10Monitor(_EMS_RxTelegram * EMS_RxTelegram);
@@ -125,6 +127,8 @@ const _EMS_Type EMS_Types[] = {
 
     // UBA/Boiler EMS+
     {EMS_TYPE_UBAOutdoorTemp, "UBAOutdoorTemp", _process_UBAOutdoorTemp},
+    {EMS_TYPE_UBAMonitorFast2, "UBAMonitorFast2", _process_UBAMonitorFast2},
+    {EMS_TYPE_UBAMonitorSlow2, "UBAMonitorSlow2", _process_UBAMonitorSlow2},
 
     // Solar Module devices
     {EMS_TYPE_SM10Monitor, "SM10Monitor", _process_SM10Monitor},
@@ -422,12 +426,9 @@ _EMS_SYS_LOGGING ems_getLogging() {
     return EMS_Sys_Status.emsLogging;
 }
 
-void ems_setLogging(_EMS_SYS_LOGGING loglevel, bool silent) {
-    if (loglevel <= EMS_SYS_LOGGING_JABBER) {
+void ems_setLogging(_EMS_SYS_LOGGING loglevel, uint16_t type_id) {
+    if (loglevel <= EMS_SYS_LOGGING_WATCH) {
         EMS_Sys_Status.emsLogging = loglevel;
-        if (silent) {
-            return; // don't print to telnet/serial
-        }
 
         if (loglevel == EMS_SYS_LOGGING_NONE) {
             myDebug_P(PSTR("System Logging set to None"));
@@ -443,6 +444,9 @@ void ems_setLogging(_EMS_SYS_LOGGING loglevel, bool silent) {
             myDebug_P(PSTR("System Logging set to Raw mode"));
         } else if (loglevel == EMS_SYS_LOGGING_JABBER) {
             myDebug_P(PSTR("System Logging set to Jabber mode"));
+        } else if (loglevel == EMS_SYS_LOGGING_WATCH) {
+            EMS_Sys_Status.emsLogging_typeID = type_id;
+            myDebug_P(PSTR("System Logging set to Watch mode"));
         }
     }
 }
@@ -555,14 +559,16 @@ void _debugPrintTelegram(const char * prefix, _EMS_RxTelegram * EMS_RxTelegram, 
         strlcat(output_str, " ", sizeof(output_str)); // add space
     }
 
-    strlcat(output_str, "(CRC=", sizeof(output_str));
-    strlcat(output_str, _hextoa(data[length - 1], buffer), sizeof(output_str));
-    strlcat(output_str, ")", sizeof(output_str));
+    if (!raw) {
+        strlcat(output_str, "(CRC=", sizeof(output_str));
+        strlcat(output_str, _hextoa(data[length - 1], buffer), sizeof(output_str));
+        strlcat(output_str, ")", sizeof(output_str));
 
-    // print number of data bytes only if its a valid telegram
-    if (data_len) {
-        strlcat(output_str, " #data=", sizeof(output_str));
-        strlcat(output_str, itoa(data_len, buffer, 10), sizeof(output_str));
+        // print number of data bytes only if its a valid telegram
+        if (data_len) {
+            strlcat(output_str, " #data=", sizeof(output_str));
+            strlcat(output_str, itoa(data_len, buffer, 10), sizeof(output_str));
+        }
     }
 
     strlcat(output_str, COLOR_RESET, sizeof(output_str));
@@ -904,8 +910,11 @@ void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
     }
 
     // if we are in raw logging mode then just print out the telegram as it is
+    // or if we're watching a specific type ID show it
     // but still continue to process it
     if ((EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_RAW)) {
+        _debugPrintTelegram("", &EMS_RxTelegram, COLOR_WHITE, true);
+    } else if ((EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_WATCH) && (EMS_RxTelegram.type == EMS_Sys_Status.emsLogging_typeID)) {
         _debugPrintTelegram("", &EMS_RxTelegram, COLOR_WHITE, true);
     }
 
@@ -973,7 +982,6 @@ void _printMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     }
 
     strlcat(output_str, ", ", sizeof(output_str));
-
 
     if (EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_THERMOSTAT) {
         // only print ones to/from thermostat if logging is set to thermostat only
@@ -1311,6 +1319,42 @@ void _process_UBAMonitorFast(_EMS_RxTelegram * EMS_RxTelegram) {
 }
 
 /**
+ * UBAMonitorFast2 - type 0xE4 - central heating monitor
+ */
+void _process_UBAMonitorFast2(_EMS_RxTelegram * EMS_RxTelegram) {
+    EMS_Boiler.selFlowTemp = _toByte(6);
+    //EMS_Boiler.curFlowTemp = _toShort(1);
+    //EMS_Boiler.retTemp     = _toShort(13);
+
+    EMS_Boiler.burnGas = _bitRead(11, 0);
+    EMS_Boiler.wWHeat  = _bitRead(11, 2);
+
+    EMS_Boiler.curBurnPow = _toByte(10);
+    EMS_Boiler.selBurnPow = _toByte(9); // burn power max setting
+
+    // set boiler temp only if we actually have a real value
+    if (_toShort(7) != EMS_VALUE_USHORT_NOTSET) {
+        EMS_Boiler.boilTemp = _toShort(7); // 0x8000 if not available
+    }
+
+    EMS_Boiler.flameCurr = _toShort(19);
+
+    // system pressure. FF means missing
+    //EMS_Boiler.sysPress = _toByte(17); // this is *10
+
+    // read the service code / installation status as appears on the display
+    EMS_Boiler.serviceCodeChar[0] = char(_toByte(4)); // ascii character 1
+    EMS_Boiler.serviceCodeChar[1] = char(_toByte(5)); // ascii character 2
+    EMS_Boiler.serviceCodeChar[2] = '\0';             // null terminate string
+
+    // read error code
+    //EMS_Boiler.serviceCode = _toShort(20);
+
+    // at this point do a quick check to see if the hot water or heating is active
+    _checkActive();
+}
+
+/**
  * UBAMonitorSlow - type 0x19 - central heating monitor part 2 (27 bytes long)
  * received every 60 seconds
  * e.g. 08 00 19 00 80 00 02 41 80 00 00 00 00 00 03 91 7B 05 B8 40 00 00 00 04 92 AD 00 5E EE 80 00 (CRC=C9) #data=27
@@ -1330,6 +1374,21 @@ void _process_UBAMonitorSlow(_EMS_RxTelegram * EMS_RxTelegram) {
     EMS_Boiler.burnWorkMin = _toLong(13);
     EMS_Boiler.heatWorkMin = _toLong(19);
     EMS_Boiler.switchTemp  = _toShort(25);
+}
+
+/**
+ * UBAMonitorSlow2 - type 0xE5 - central heating monitor
+ */
+void _process_UBAMonitorSlow2(_EMS_RxTelegram * EMS_RxTelegram) {
+    EMS_Boiler.fanWork = _bitRead(2, 2);
+    EMS_Boiler.ignWork = _bitRead(2, 3);
+    EMS_Boiler.heatPmp = _bitRead(2, 5);
+    EMS_Boiler.wWCirc  = _bitRead(2, 7);
+
+    EMS_Boiler.burnStarts  = _toLong(10);
+    EMS_Boiler.burnWorkMin = _toLong(13);
+    EMS_Boiler.heatWorkMin = _toLong(19);
+    EMS_Boiler.pumpMod     = _toByte(25); // or is it switchTemp ?
 }
 
 /**
