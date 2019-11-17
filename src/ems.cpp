@@ -1323,7 +1323,6 @@ void _process_UBAMonitorFast(_EMS_RxTelegram * EMS_RxTelegram) {
  */
 void _process_UBAMonitorFast2(_EMS_RxTelegram * EMS_RxTelegram) {
     EMS_Boiler.selFlowTemp = _toByte(6);
-    //EMS_Boiler.curFlowTemp = _toShort(1);
     //EMS_Boiler.retTemp     = _toShort(13);
 
     EMS_Boiler.burnGas = _bitRead(11, 0);
@@ -1364,10 +1363,7 @@ void _process_UBAMonitorSlow(_EMS_RxTelegram * EMS_RxTelegram) {
         EMS_Boiler.extTemp = _toShort(0);
     }
 
-    // set boiler temp only if we actually have a real value
-    if (_toShort(2) != EMS_VALUE_USHORT_NOTSET) {
-        EMS_Boiler.boilTemp = _toShort(2); // 0x8000 if not available
-    }
+    EMS_Boiler.curFlowTemp = _toShort(2);
 
     EMS_Boiler.pumpMod     = _toByte(9);
     EMS_Boiler.burnStarts  = _toLong(10);
