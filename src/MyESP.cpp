@@ -1454,7 +1454,7 @@ void MyESP::_heartbeatCheck(bool force = false) {
         last_heartbeat = millis();
 
 #ifdef MYESP_DEBUG
-        _printHeap("Heartbeat");
+        _printHeap("HEARTBEAT");
 #endif
         if (!isMQTTConnected() || !(_mqtt_heartbeat)) {
             return;
