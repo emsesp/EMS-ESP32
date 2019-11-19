@@ -1323,7 +1323,7 @@ void _process_UBAMonitorFast(_EMS_RxTelegram * EMS_RxTelegram) {
  */
 void _process_UBAMonitorFast2(_EMS_RxTelegram * EMS_RxTelegram) {
     EMS_Boiler.selFlowTemp = _toByte(6);
-    //EMS_Boiler.retTemp     = _toShort(13);
+    // EMS_Boiler.retTemp     = _toShort(13);
 
     EMS_Boiler.burnGas = _bitRead(11, 0);
     EMS_Boiler.wWHeat  = _bitRead(11, 2);
@@ -1339,7 +1339,7 @@ void _process_UBAMonitorFast2(_EMS_RxTelegram * EMS_RxTelegram) {
     EMS_Boiler.flameCurr = _toShort(19);
 
     // system pressure. FF means missing
-    //EMS_Boiler.sysPress = _toByte(17); // this is *10
+    // EMS_Boiler.sysPress = _toByte(17); // this is *10
 
     // read the service code / installation status as appears on the display
     EMS_Boiler.serviceCodeChar[0] = char(_toByte(4)); // ascii character 1
@@ -1347,7 +1347,7 @@ void _process_UBAMonitorFast2(_EMS_RxTelegram * EMS_RxTelegram) {
     EMS_Boiler.serviceCodeChar[2] = '\0';             // null terminate string
 
     // read error code
-    //EMS_Boiler.serviceCode = _toShort(20);
+    // EMS_Boiler.serviceCode = _toShort(20);
 
     // at this point do a quick check to see if the hot water or heating is active
     _checkActive();

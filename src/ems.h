@@ -19,21 +19,6 @@
 
 #define EMS_ID_NONE 0x00 // used as a dest in broadcast messages and empty device IDs
 
-// Fixed EMS IDs
-#define EMS_ID_ME 0x0B          // our device, hardcoded as the "Service Key"
-#define EMS_ID_BOILER 0x08      // all UBA Boilers have 0x08
-#define EMS_ID_SM 0x30          // Solar Module SM10, SM100 and ISM1
-#define EMS_ID_HP 0x38          // HeatPump
-#define EMS_ID_GATEWAY 0x48     // e.g. KM200 Web Gateway
-#define EMS_ID_MIXING1 0x20     // Mixing
-#define EMS_ID_MIXING2 0x21     // Mixing
-#define EMS_ID_SWITCH 0x11      // Switch
-#define EMS_ID_CONTROLLER 0x09  // Controller
-#define EMS_ID_CONNECT 0x02     // Connect
-#define EMS_ID_THERMOSTAT1 0x10 // Thermostat
-#define EMS_ID_THERMOSTAT2 0x17 // Thermostat
-#define EMS_ID_THERMOSTAT3 0x18 // Thermostat
-
 #define EMS_MIN_TELEGRAM_LENGTH 6  // minimal length for a validation telegram, including CRC
 #define EMS_MAX_TELEGRAM_LENGTH 32 // max length of a telegram, including CRC, for Rx and Tx.
 
@@ -50,6 +35,23 @@
 #define EMS_THERMOSTAT_DEFAULTHC 1 // default heating circuit is 1
 #define EMS_THERMOSTAT_WRITE_YES true
 #define EMS_THERMOSTAT_WRITE_NO false
+
+// Device Flags
+
+#define EMS_DEVICE_FLAG_NONE 0   // no flags set
+#define EMS_DEVICE_FLAG_SM10 10  // solar module1
+#define EMS_DEVICE_FLAG_SM100 11 // solar module2
+
+// group flags specific for thermostats
+#define EMS_DEVICE_FLAG_NO_WRITE 0x80 // top bit set if write not supported
+#define EMS_DEVICE_FLAG_EASY 1
+#define EMS_DEVICE_FLAG_RC10 2
+#define EMS_DEVICE_FLAG_RC20 3
+#define EMS_DEVICE_FLAG_RC30 4
+#define EMS_DEVICE_FLAG_RC35 5
+#define EMS_DEVICE_FLAG_RC300 6
+#define EMS_DEVICE_FLAG_JUNKERS 7
+
 typedef enum {
     EMS_THERMOSTAT_MODE_UNKNOWN,
     EMS_THERMOSTAT_MODE_OFF,
@@ -216,26 +218,6 @@ typedef struct {
     char             device_type_string[30];
 } _EMS_Device_Types;
 
-// mapping for EMS_Devices_Type
-const _EMS_Device_Types EMS_Devices_Types[] = {
-
-    {EMS_ID_BOILER, EMS_DEVICE_TYPE_BOILER, "UBAMaster"},
-    {EMS_ID_THERMOSTAT1, EMS_DEVICE_TYPE_THERMOSTAT, "Thermostat"},
-    {EMS_ID_THERMOSTAT2, EMS_DEVICE_TYPE_THERMOSTAT, "Thermostat"},
-    {EMS_ID_THERMOSTAT3, EMS_DEVICE_TYPE_THERMOSTAT, "Thermostat"},
-    {EMS_ID_SM, EMS_DEVICE_TYPE_SOLAR, "Solar Module"},
-    {EMS_ID_HP, EMS_DEVICE_TYPE_HEATPUMP, "Heat Pump"},
-    {EMS_ID_GATEWAY, EMS_DEVICE_TYPE_GATEWAY, "Gateway"},
-    {EMS_ID_ME, EMS_DEVICE_TYPE_SERVICEKEY, "Me"},
-    {EMS_ID_NONE, EMS_DEVICE_TYPE_NONE, "All"},
-    {EMS_ID_MIXING1, EMS_DEVICE_TYPE_MIXING, "Mixing Module"},
-    {EMS_ID_MIXING2, EMS_DEVICE_TYPE_MIXING, "Mixing Module"},
-    {EMS_ID_SWITCH, EMS_DEVICE_TYPE_SWITCH, "Switching Module"},
-    {EMS_ID_CONTROLLER, EMS_DEVICE_TYPE_CONTROLLER, "Controller"},
-    {EMS_ID_CONNECT, EMS_DEVICE_TYPE_CONNECT, "Connect"}
-
-};
-
 // for storing all recognised EMS devices
 typedef struct {
     _EMS_DEVICE_TYPE device_type;   // type (see above)
@@ -245,20 +227,6 @@ typedef struct {
     char             version[10];   // the version number XX.XX
     bool             known;         // is this a known device?
 } _Detected_Device;
-
-#define EMS_DEVICE_FLAG_NONE 0   // no flags set
-#define EMS_DEVICE_FLAG_SM10 10  // solar module1
-#define EMS_DEVICE_FLAG_SM100 11 // solar module2
-
-// group flags specific for thermostats
-#define EMS_DEVICE_FLAG_NO_WRITE 0x80 // top bit set if can't write yet
-#define EMS_DEVICE_FLAG_EASY 1
-#define EMS_DEVICE_FLAG_RC10 2
-#define EMS_DEVICE_FLAG_RC20 3
-#define EMS_DEVICE_FLAG_RC30 4
-#define EMS_DEVICE_FLAG_RC35 5
-#define EMS_DEVICE_FLAG_RC300 6
-#define EMS_DEVICE_FLAG_JUNKERS 7
 
 /*
  * Telegram package defintions

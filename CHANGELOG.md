@@ -21,6 +21,7 @@ There are breaking changes in this release. See `publish_time` below and make su
 - Added WiFi static IP (setting done in WebUI only)
 - `log w <type_id>` for watching a specific telegram type ID
 - initial support for EMS+ GB125s and MC110's (https://github.com/proddy/EMS-ESP/wiki/MC110-controller)
+- Buderus RFM200 receiver
 
 ### Fixed
 
