@@ -28,28 +28,10 @@ var nextIsNotJson = false;
 
 var config = {};
 
-function browserTime() {
-    var d = new Date(0); // The 0 there is the key, which sets the date to the epoch
-    var c = new Date();
-    var timestamp = Math.floor((c.getTime() / 1000) + ((c.getTimezoneOffset() * 60) * -1));
-    d.setUTCSeconds(timestamp);
-    document.getElementById("rtc").innerHTML = d.toUTCString().slice(0, -3);
-}
-
 function deviceTime() {
     var t = new Date(0); // The 0 there is the key, which sets the date to the epoch
     t.setUTCSeconds(ntpSeconds);
     document.getElementById("utc").innerHTML = t.toUTCString().slice(0, -3);
-}
-
-function syncBrowserTime() {
-    var d = new Date();
-    var timestamp = Math.floor((d.getTime() / 1000));
-    var datatosend = {};
-    datatosend.command = "settime";
-    datatosend.epoch = timestamp;
-    websock.send(JSON.stringify(datatosend));
-    $("#ntp").click();
 }
 
 function handleNTPON() {
@@ -360,10 +342,6 @@ function scanWifi() {
     }
 }
 
-function getEvents() {
-    websock.send("{\"command\":\"geteventlog\", \"page\":" + page + "}");
-}
-
 function isVisible(e) {
     return !!(e.offsetWidth || e.offsetHeight || e.getClientRects().length);
 }
@@ -380,10 +358,6 @@ function getnextpage(mode) {
         commandtosend.page = page;
         websock.send(JSON.stringify(commandtosend));
     }
-}
-
-function builddata(obj) {
-    data = data.concat(obj.list);
 }
 
 function colorStatusbar(ref) {
@@ -588,87 +562,6 @@ function twoDigits(value) {
     return value;
 }
 
-function initEventTable() {
-    var newlist = [];
-    for (var i = 0; i < data.length; i++) {
-        newlist[i] = {};
-        newlist[i].options = {};
-        newlist[i].value = {};
-        try {
-            var dup = JSON.parse(data[i]);
-            dup.uid = i + 1;
-        } catch (e) {
-            var dup = { "uid": i + 1, "type": "ERRO", "src": "SYS", "desc": "Error in log file", "data": data[i], "time": 1 }
-        }
-        newlist[i].value = dup;
-
-        var c = dup.type;
-        switch (c) {
-            case "WARN":
-                newlist[i].options.classes = "warning";
-                break;
-            case "INFO":
-                newlist[i].options.classes = "info";
-                break;
-            case "ERRO":
-                newlist[i].options.classes = "danger";
-                break;
-            default:
-                break;
-        }
-    }
-    jQuery(function ($) {
-        window.FooTable.init("#eventtable", {
-            columns: [{
-                "name": "uid",
-                "title": "ID",
-                "type": "text",
-                "sorted": true,
-                "direction": "DESC"
-            },
-            {
-                "name": "type",
-                "title": "Event Type",
-                "type": "text"
-            },
-            {
-                "name": "src",
-                "title": "Source"
-            },
-            {
-                "name": "desc",
-                "title": "Description"
-            },
-            {
-                "name": "data",
-                "title": "Additional Data",
-                "breakpoints": "xs sm"
-            },
-            {
-                "name": "time",
-                "title": "Date/Time",
-                "parser": function (value) {
-                    if (value < 1563300000) {
-                        return "(" + value + ")";
-                    } else {
-                        var vuepoch = new Date(value * 1000);
-                        var formatted = vuepoch.getUTCFullYear() +
-                            "-" + twoDigits(vuepoch.getUTCMonth() + 1) +
-                            "-" + twoDigits(vuepoch.getUTCDate()) +
-                            " " + twoDigits(vuepoch.getUTCHours()) +
-                            ":" + twoDigits(vuepoch.getUTCMinutes()) +
-                            ":" + twoDigits(vuepoch.getUTCSeconds());
-                        return formatted;
-                    }
-                },
-                "breakpoints": "xs sm"
-            }
-            ],
-            rows: newlist
-        });
-    });
-}
-
 function initMQTTLogTable() {
     var newlist = [];
     for (var i = 0; i < ajaxobj.mqttlog.length; i++) {
@@ -732,15 +625,6 @@ function socketMessageListener(evt) {
                 ajaxobj = obj;
                 getContent("#custom_statuscontent");
                 break;
-            case "eventlist":
-                haspages = obj.haspages;
-                if (haspages === 0) {
-                    document.getElementById("loading-img").style.display = "none";
-                    initEventTable();
-                    break;
-                }
-                builddata(obj);
-                break;
             case "gettime":
                 ntpSeconds = obj.epoch;
                 deviceTime();
@@ -758,26 +642,6 @@ function socketMessageListener(evt) {
                 break;
         }
     }
-
-    if (obj.hasOwnProperty("resultof")) {
-        switch (obj.resultof) {
-            case "eventlist":
-                if (page < haspages && obj.result === true) {
-                    getnextpage("geteventlog");
-                } else if (page === haspages) {
-                    initEventTable();
-                    document.getElementById("loading-img").style.display = "none";
-                }
-                break;
-            default:
-                break;
-        }
-    }
-}
-
-function clearevent() {
-    websock.send("{\"command\":\"clearevent\"}");
-    $("#eventlog").click();
 }
 
 function compareDestroy() {
@@ -990,7 +854,6 @@ $("#ntp").click(function () { getContent("#ntpcontent"); return false; });
 $("#backup").click(function () { getContent("#backupcontent"); return false; });
 $("#reset").click(function () { $("#destroy").modal("show"); return false; });
 $("#restart").click(function () { $("#reboot").modal("show"); return false; });
-$("#eventlog").click(function () { getContent("#eventcontent"); return false; });
 $(".noimp").on("click", function () { $("#noimp").modal("show"); });
 $("#update").on("shown.bs.modal", function (e) { getLatestReleaseInfo(); });
 

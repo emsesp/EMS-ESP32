@@ -1323,7 +1323,6 @@ void _process_UBAMonitorFast(_EMS_RxTelegram * EMS_RxTelegram) {
  */
 void _process_UBAMonitorFast2(_EMS_RxTelegram * EMS_RxTelegram) {
     EMS_Boiler.selFlowTemp = _toByte(6);
-    // EMS_Boiler.retTemp     = _toShort(13);
 
     EMS_Boiler.burnGas = _bitRead(11, 0);
     EMS_Boiler.wWHeat  = _bitRead(11, 2);
@@ -1331,23 +1330,21 @@ void _process_UBAMonitorFast2(_EMS_RxTelegram * EMS_RxTelegram) {
     EMS_Boiler.curBurnPow = _toByte(10);
     EMS_Boiler.selBurnPow = _toByte(9); // burn power max setting
 
-    // set boiler temp only if we actually have a real value
     if (_toShort(7) != EMS_VALUE_USHORT_NOTSET) {
-        EMS_Boiler.boilTemp = _toShort(7); // 0x8000 if not available
+        EMS_Boiler.curFlowTemp = _toShort(7); // 0x8000 if not available
     }
 
     EMS_Boiler.flameCurr = _toShort(19);
-
-    // system pressure. FF means missing
-    // EMS_Boiler.sysPress = _toByte(17); // this is *10
 
     // read the service code / installation status as appears on the display
     EMS_Boiler.serviceCodeChar[0] = char(_toByte(4)); // ascii character 1
     EMS_Boiler.serviceCodeChar[1] = char(_toByte(5)); // ascii character 2
     EMS_Boiler.serviceCodeChar[2] = '\0';             // null terminate string
 
-    // read error code
-    // EMS_Boiler.serviceCode = _toShort(20);
+    // still to figure out:
+    //  EMS_Boiler.serviceCode
+    //  EMS_Boiler.retTemp
+    //  EMS_Boiler.sysPress
 
     // at this point do a quick check to see if the hot water or heating is active
     _checkActive();
@@ -1363,8 +1360,7 @@ void _process_UBAMonitorSlow(_EMS_RxTelegram * EMS_RxTelegram) {
         EMS_Boiler.extTemp = _toShort(0);
     }
 
-    EMS_Boiler.curFlowTemp = _toShort(2);
-
+    EMS_Boiler.boilTemp    = _toShort(2); // 0x8000 if not available
     EMS_Boiler.pumpMod     = _toByte(9);
     EMS_Boiler.burnStarts  = _toLong(10);
     EMS_Boiler.burnWorkMin = _toLong(13);

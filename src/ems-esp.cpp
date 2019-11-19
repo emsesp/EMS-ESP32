@@ -1702,7 +1702,7 @@ void WebCallback(JsonObject root) {
             }
         } else {
             emsbus["ok"]  = false;
-            emsbus["msg"] = "EMS Bus is not connected. Check event logs for errors.";
+            emsbus["msg"] = "EMS Bus is not connected.";
         }
     }
 

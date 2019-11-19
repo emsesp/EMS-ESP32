@@ -9,7 +9,7 @@
 #ifndef MyESP_h
 #define MyESP_h
 
-#define MYESP_VERSION "1.2.19"
+#define MYESP_VERSION "1.2.20"
 
 #include <ArduinoJson.h>
 #include <ArduinoOTA.h>
@@ -53,7 +53,8 @@ extern struct rst_info resetInfo;
 
 #define MYESP_CONFIG_FILE "/myesp.json"
 #define MYESP_CUSTOMCONFIG_FILE "/customconfig.json"
-#define MYESP_EVENTLOG_FILE "/eventlog.json"
+#define MYESP_EVENTLOG_FILE "/eventlog.json" // depreciated
+#define MYESP_OLD_CONFIG_FILE "/config.json" // depreciated
 
 #define MYESP_HTTP_USERNAME "admin" // HTTP username
 #define MYESP_HTTP_PASSWORD "admin" // default password
@@ -67,7 +68,6 @@ extern struct rst_info resetInfo;
 #define MYESP_WIFI_RECONNECT_INTERVAL 600000 // If could not connect to WIFI, retry after this time in ms. 10 minutes
 
 // set to value >0 if the ESP is overheating or there are timing issues. Recommend a value of 1.
-// initially set to 0 for no delay. Change to 1 if getting WDT resets from wifi
 #define MYESP_DELAY 1
 
 // MQTT
@@ -266,8 +266,8 @@ class MyESP {
     MyESP();
     ~MyESP();
 
-    // write event called from within lambda classs
-    static void _writeEvent(const char * type, const char * src, const char * desc, const char * data);
+    // write event called from within lambda class
+    static void _writeLogEvent(const char * type, const char * src, const char * desc, const char * data);
 
     // wifi
     void setWIFICallback(void (*callback)());
@@ -474,10 +474,6 @@ class MyESP {
     // web
     web_callback_f _web_callback_f;
     const char *   _http_username;
-
-    // log
-    void _sendEventLog(uint8_t page);
-    void _emptyEventLog();
 
     // web
     void _onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t * data, size_t len);

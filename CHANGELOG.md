@@ -42,6 +42,7 @@ There are breaking changes in this release. See `publish_time` below and make su
 ### Removed
 
 - thermostat scan and autodetect deep functions
+- removed Event Logging to SPIFFS (worried about wearing). Replaced with SysLog.
 
 ## [1.9.3] 2019-10-26
 

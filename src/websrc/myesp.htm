@@ -119,7 +119,7 @@
     <div class="row form-group">
         <label class="col-xs-3">Event Logging<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign"
                 aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right"
-                data-content="Enabling logging of all events to the device's storage"></i></label>
+                data-content="Enabling logging of all events to a remote SysLog"></i></label>
         <div class="col-xs-9">
             <form>
                 <label class="radio-inline">
@@ -140,32 +140,6 @@
     </div>
 </div>
 <br>
-</div>
-
-<div id="eventcontent">
-    <div class="text-center" id="loading-img">
-        <h5>Loading Logs. Please wait...<span id="loadpages"></span></h5>
-        <br>
-    </div>
-    <div>
-        <br>
-        <legend>Event Log</legend>
-        <h6 class="text-muted">Dates shown in () represent elapsed time in seconds when NTP Time is disabled</h6>
-        <div id="logevents" class="label label-danger">Event Logging has been disabled. See Settings->General Settings.
-        </div>
-        <br>
-        <div class="panel panel-default">
-            <div>
-                <table id="eventtable" class="table" data-paging="true" data-filtering="true" data-sorting="true"
-                    data-editing="false" data-state="true"></table>
-            </div>
-        </div>
-        <button onclick="clearevent()" class="btn btn-primary btn-sm">Clear Log</button>
-        <div style="clear:both;">
-            <br>
-            <br>
-        </div>
-    </div>
 </div>
 
 <div id="mqttcontent">
@@ -383,14 +357,6 @@
         <div class="col-xs-3">
             <button onclick="forcentp()" id="forcentp" class="btn btn-info btn-sm">Sync Device with Internet
                 Time</button>
-        </div>
-    </div>
-
-    <div class="row form-group">
-        <label class="col-xs-3">Browser Time</label>
-        <span id="rtc" class="col-xs-9 col-md-5"></span>
-        <div class="col-xs-3">
-            <button onclick="syncBrowserTime()" class="btn btn-info btn-sm">Sync Browser Time to Device</button>
         </div>
     </div>
 

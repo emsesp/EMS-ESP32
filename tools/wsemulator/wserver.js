@@ -47,18 +47,6 @@ var networks = {
     ]
 }
 
-var eventlog = {
-    "command": "eventlist",
-    "page": 1,
-    "haspages": 1,
-    "list": [
-        "{\"type\":\"WARN\",\"src\":\"system\",\"desc\":\"test data\",\"data\":\"Record #1\",\"time\": 1563371160}",
-        "{\"type\":\"WARN\",\"src\":\"system\",\"desc\":\"test data\",\"data\":\"Record #2\",\"time\":0}",
-        "{\"type\":\"INFO\",\"src\":\"system\",\"desc\":\"System booted Local Time is 13:02:54 CET\",\"data\":\"\",\"time\":1572613374}",
-        "{\"type\":\"WARN\",\"src\":\"system\",\"desc\":\"test data\",\"data\":\"Record #3\",\"time\":0}"
-    ]
-}
-
 var configfile = {
     "command": "configfile",
     "network": {
@@ -112,16 +100,6 @@ var custom_configfile = {
         "tx_mode": 1
     }
 };
-
-function sendEventLog() {
-    wss.broadcast(eventlog);
-    var res = {
-        "command": "result",
-        "resultof": "eventlist",
-        "result": true
-    };
-    wss.broadcast(res);
-}
 
 function sendStatus() {
     var stats = {
@@ -252,23 +230,9 @@ wss.on('connection', function connection(ws) {
                 res.epoch = 1572613374; // this is 13:02:54 CET
                 wss.broadcast(res);
                 break;
-            case "settime":
-                console.log("[INFO] Setting time (fake)");
-                var res = {};
-                res.command = "gettime";
-                res.epoch = Math.floor((new Date).getTime() / 1000);
-                wss.broadcast(res);
-                break;
             case "getconf":
                 console.log("[INFO] Sending system configuration file (if set any)");
                 wss.broadcast(configfile);
-                break;
-            case "geteventlog":
-                console.log("[INFO] Sending eventlog");
-                sendEventLog();
-                break;
-            case "clearevent":
-                console.log("[INFO] Clearing eventlog");
                 break;
             case "restart":
                 console.log("[INFO] Restart");
