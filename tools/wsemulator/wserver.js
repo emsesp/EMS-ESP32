@@ -64,7 +64,8 @@ var configfile = {
         "password": "admin",
         "serial": true,
         "version": "1.0.0",
-        "log_events": true
+        "log_events": false,
+        "log_ip": "10.11.12.13"
     },
     "mqtt": {
         "enabled": false,

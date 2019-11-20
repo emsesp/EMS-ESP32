@@ -427,7 +427,7 @@ _EMS_SYS_LOGGING ems_getLogging() {
 }
 
 void ems_setLogging(_EMS_SYS_LOGGING loglevel, uint16_t type_id) {
-    if (loglevel <= EMS_SYS_LOGGING_WATCH) {
+    if (loglevel <= EMS_SYS_LOGGING_JABBER) {
         EMS_Sys_Status.emsLogging = loglevel;
 
         if (loglevel == EMS_SYS_LOGGING_NONE) {

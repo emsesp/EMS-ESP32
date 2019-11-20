@@ -46,7 +46,8 @@ MyESP::MyESP() {
     _ota_post_callback_f = nullptr;
     _load_average        = 100;  // calculated load average
     _general_serial      = true; // serial is set to on as default
-    _general_log_events  = true; // all logs are written to an event log in SPIFFS
+    _general_log_events  = true; // all logs are sent to syslog
+    _general_log_ip      = nullptr;
     _have_ntp_time       = false;
 
     // telnet
@@ -830,6 +831,11 @@ void MyESP::_printSetCommands() {
     myDebug_P(PSTR("  ntp_timezone=%d"), _ntp_timezone);
 
     myDebug_P(PSTR("  log_events=%s"), (_general_log_events) ? "on" : "off");
+    if (_hasValue(_general_log_ip)) {
+        myDebug_P(PSTR("  log_ip=%s"), _general_log_ip);
+    } else {
+        myDebug_P(PSTR("  log_ip="));
+    }
 
     // print any custom settings
     if (_fs_setlist_callback_f) {
@@ -924,6 +930,8 @@ bool MyESP::_changeSetting(uint8_t wc, const char * setting, const char * value)
         save_config = fs_setSettingValue(&_ntp_timezone, value, NTP_TIMEZONE_DEFAULT);
     } else if (strcmp(setting, "log_events") == 0) {
         save_config = fs_setSettingValue(&_general_log_events, value, false);
+    } else if (strcmp(setting, "log_ip") == 0) {
+        save_config = fs_setSettingValue(&_general_log_ip, value, "");
     } else {
         // finally check for any custom commands
         if (_fs_setlist_callback_f) {
@@ -1722,6 +1730,7 @@ bool MyESP::_fs_loadConfig() {
     _ws->setAuthentication("admin", _general_password);
     _general_hostname   = strdup(general["hostname"]);
     _general_log_events = general["log_events"];
+    _general_log_ip     = strdup(general["log_ip"] | "");
 
     // serial is only on when booting
 #ifdef FORCE_SERIAL
@@ -1871,9 +1880,7 @@ bool MyESP::fs_saveCustomConfig(JsonObject root) {
         configFile.close();
 
         if (n) {
-            if (_general_log_events) {
-                _writeLogEvent("INFO", "system", "Custom config stored in the SPIFFS", "");
-            }
+            _writeLogEvent(MYESP_SYSLOG_INFO, "Custom config stored in the SPIFFS");
             ok = true;
         }
     }
@@ -1906,9 +1913,7 @@ bool MyESP::fs_saveConfig(JsonObject root) {
         configFile.close();
 
         if (n) {
-            if (_general_log_events) {
-                _writeLogEvent("INFO", "system", "System config stored in the SPIFFS", "");
-            }
+            _writeLogEvent(MYESP_SYSLOG_INFO, "System config stored in the SPIFFS");
             ok = true;
         }
 
@@ -1945,6 +1950,7 @@ bool MyESP::_fs_writeConfig() {
     general["serial"]     = _general_serial;
     general["hostname"]   = _general_hostname;
     general["log_events"] = _general_log_events;
+    general["log_ip"]     = _general_log_ip;
     general["version"]    = _app_version;
 
     JsonObject mqtt   = doc.createNestedObject("mqtt");
@@ -2013,22 +2019,20 @@ void MyESP::_fs_setup() {
         SPIFFS.remove(MYESP_OLD_CONFIG_FILE);
         myDebug_P(PSTR("[FS] Removed old config settings"));
     }
-
-    // see if old file exists and delete it
-    if (SPIFFS.exists(MYESP_OLD_CONFIG_FILE)) {
-        SPIFFS.remove(MYESP_OLD_CONFIG_FILE);
-        myDebug_P(PSTR("[FS] Removed old config settings"));
+    if (SPIFFS.exists(MYESP_OLD_EVENTLOG_FILE)) {
+        SPIFFS.remove(MYESP_OLD_EVENTLOG_FILE);
+        myDebug_P(PSTR("[FS] Removed old event log"));
     }
 
     // load the main system config file if we can. Otherwise create it and expect user to configure in web interface
     if (!_fs_loadConfig()) {
         myDebug_P(PSTR("[FS] Creating a new system config"));
-        _fs_writeConfig(); // create the initial config file
+        _fs_writeConfig();
     }
 
     // load system and custom config
     if (!_fs_loadCustomConfig()) {
-        _fs_createCustomConfig(); // create the initial config file
+        _fs_createCustomConfig();
     }
 
     if (_ota_post_callback_f) {
@@ -2253,11 +2257,23 @@ void MyESP::crashInfo() {
 #endif
 
 // write a log entry to SysLog via UDP
-// assumes we have "log_events" on
-void MyESP::_writeLogEvent(const char * type, const char * src, const char * desc, const char * data) {
-    // TODO: finish function
+void MyESP::_writeLogEvent(const uint8_t type, const char * msg) {
+    if (!_general_log_events) {
+        return;
+    }
+
+    static uuid::log::Logger logger{F("eventlog")};
+
+    // uuid::log::INFO
+    // uuid::log::ERROR
+    if (type == MYESP_SYSLOG_INFO) {
+        logger.info(msg);
+    } else if (type == MYESP_SYSLOG_ERROR) {
+        logger.err(msg);
+    }
+
 #ifdef MYESP_DEBUG
-    Serial.printf("%s: %s\n", type, desc);
+    Serial.printf("%d: %s\n", type, msg);
 #endif
 }
 
@@ -2569,10 +2585,10 @@ void MyESP::_webserver_setup() {
                        }
                        if (!index) {
                            ETS_UART_INTR_DISABLE(); // disable all UART interrupts to be safe
-                           _writeLogEvent("INFO", "system", "Firmware update started", "");
+                           //_writeLogEvent(MYESP_SYSLOG_INFO, "Firmware update started");
                            Update.runAsync(true);
                            if (!Update.begin((ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000)) {
-                               _writeLogEvent("ERRO", "system", "Not enough space to update", "");
+                //_writeLogEvent(MYESP_SYSLOG_ERROR, "Not enough space to update");
 #ifdef MYESP_DEBUG
                                Update.printError(Serial);
 #endif
@@ -2580,7 +2596,7 @@ void MyESP::_webserver_setup() {
                        }
                        if (!Update.hasError()) {
                            if (Update.write(data, len) != len) {
-                               _writeLogEvent("ERRO", "system", "Writing to flash failed", "");
+                //_writeLogEvent(MYESP_SYSLOG_ERROR, "Writing to flash failed");
 #ifdef MYESP_DEBUG
                                Update.printError(Serial);
 #endif
@@ -2588,10 +2604,10 @@ void MyESP::_webserver_setup() {
                        }
                        if (final) {
                            if (Update.end(true)) {
-                               _writeLogEvent("INFO", "system", "Firmware update finished", "");
+                               //_writeLogEvent(MYESP_SYSLOG_INFO, "Firmware update finished");
                                _shouldRestart = !Update.hasError();
                            } else {
-                               _writeLogEvent("ERRO", "system", "Firmware update failed", "");
+                //_writeLogEvent(MYESP_SYSLOG_ERROR, "Firmware update failed");
 #ifdef MYESP_DEBUG
                                Update.printError(Serial);
 #endif
@@ -2765,9 +2781,7 @@ void MyESP::_bootupSequence() {
     if (boot_status == MYESP_BOOTSTATUS_BOOTED) {
         if ((_ntp_enabled) && (now() > 10000) && !_have_ntp_time) {
             _have_ntp_time = true;
-            if (_general_log_events) {
-                _writeLogEvent("INFO", "system", "System booted", "");
-            }
+            _writeLogEvent(MYESP_SYSLOG_INFO, "System booted");
         }
         return;
     }
@@ -2797,11 +2811,30 @@ void MyESP::_bootupSequence() {
 
         // write a log message if we're not using NTP, otherwise wait for the internet time to arrive
         if (!_ntp_enabled) {
-            if (_general_log_events) {
-                _writeLogEvent("INFO", "system", "System booted", "");
-            }
+            _writeLogEvent(MYESP_SYSLOG_INFO, "System booted");
         }
     }
+}
+
+// set up SysLog
+void MyESP::_syslog_setup() {
+    // if not enabled or IP is empty, don't bother
+    if ( (!_hasValue(_general_log_ip)) || (!_general_log_events) ) {
+        return;
+    }
+
+    static uuid::log::Logger logger{F("setup")};
+
+    syslog.start();
+    syslog.hostname(_general_hostname);
+    syslog.log_level(uuid::log::DEBUG); // default log level
+    syslog.mark_interval(3600);
+
+    IPAddress syslog_ip;
+    syslog.destination(syslog_ip.fromString(_general_log_ip));
+
+    myDebug_P(PSTR("[SYSLOG] System event logging enabled"));
+
 }
 
 // setup MyESP
@@ -2815,7 +2848,6 @@ void MyESP::begin(const char * app_hostname, const char * app_name, const char *
     strlcpy(s, app_url_api, sizeof(s));
     strlcat(s, "/releases/latest", sizeof(s)); // append "/releases/latest"
     _app_updateurl = strdup(s);
-
     strlcpy(s, app_url_api, sizeof(s));
     strlcat(s, "/releases/tags/travis-dev-build", sizeof(s)); // append "/releases/tags/travis-dev-build"
     _app_updateurl_dev = strdup(s);
@@ -2824,6 +2856,8 @@ void MyESP::begin(const char * app_hostname, const char * app_name, const char *
 
     // print a welcome message
     myDebug_P(PSTR("\n\n* %s version %s"), _app_name, _app_version);
+
+    _syslog_setup(); // SysLog
 
     // set up onboard LED
     pinMode(LED_BUILTIN, OUTPUT);
@@ -2865,6 +2899,10 @@ void MyESP::loop() {
 
     _mqttConnect(); // MQTT
 
+    // SysLog
+    uuid::loop();
+    syslog.loop();
+
     if (_timerequest) {
         _timerequest = false;
         _sendTime();
@@ -2880,9 +2918,7 @@ void MyESP::loop() {
     }
 
     if (_shouldRestart) {
-        if (_general_log_events) {
-            _writeLogEvent("INFO", "system", "System is restarting", "");
-        }
+        _writeLogEvent(MYESP_SYSLOG_INFO, "System is restarting");
         myDebug("[SYSTEM] Restarting...");
         _deferredReset(500, CUSTOM_RESET_TERMINAL);
         ESP.restart();

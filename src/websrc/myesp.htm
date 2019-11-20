@@ -100,7 +100,6 @@
         </span>
         <br>
     </div>
-
     <div class="row form-group">
         <label class="col-xs-3">Serial Port<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign"
                 aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right"
@@ -115,7 +114,6 @@
         </div>
         <br>
     </div>
-
     <div class="row form-group">
         <label class="col-xs-3">Event Logging<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign"
                 aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right"
@@ -128,16 +126,26 @@
                     <input type="radio" value="0" name="logeventsenabled" checked>Disabled</label>
             </form>
         </div>
-        <br>
-        <br>
-        <div class="col-xs-9 col-md-8">
-            <button onclick="savegeneral()" class="btn btn-primary btn-sm pull-right">Save</button>
-        </div>
     </div>
-    <div style="clear:both;">
-        <br>
-        <br>
+    <div class="row form-group">
+        <label class="col-xs-3">Event Log Server IP<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign"
+                aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right"
+                data-content="IP address of the SysLog server"></i></label>
+        <span class="col-xs-9">
+            <input class="form-control input-sm" value="" style="display:inline;max-width:185px" id="log_ip"
+                type="text">
+        </span>
     </div>
+    <br>
+    <br>
+    <div class="col-xs-9 col-md-8">
+        <button onclick="savegeneral()" class="btn btn-primary btn-sm pull-right">Save</button>
+    </div>
+</div>
+<div style="clear:both;">
+    <br>
+    <br>
+</div>
 </div>
 <br>
 </div>
@@ -304,7 +312,8 @@
         </span>
 
         <br><br>
-        <h6 style="margin-left: 10px;" class="text-muted">If you're not using DHCP and want a fixed IP address enter the values below:</h6>
+        <h6 style="margin-left: 10px;" class="text-muted">If you're not using DHCP and want a fixed IP address enter the
+            values below:</h6>
 
         <br>
         <label class="col-xs-3">Static IP<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign"
@@ -494,26 +503,22 @@
                     </tr>
                 </table>
             </div>
-            <div class="panel panel-default table-responsive">
-                <table class="table">
-                    <caption>MQTT</caption>
-                    <tr>
-                        <td>
-                            <div id="mqttconnected"></div>
-                        </td>
-                        <td>
-                            <div id="mqttheartbeat"></div>
-                        </td>
-                    </tr>
-                </table>
 
-                <div class="panel-heading">
-                    <div class="panel-title" id="mqttloghdr"></div>
-                </div>
-                <div>
-                    <table id="mqttlogtable" class="table" data-paging="false" data-filtering="false"
-                        data-sorting="false" data-editing="false" data-state="true"></table>
-                </div>
+            <div class="panel panel-default table-responsive">
+                <table class="table table-hover table-striped table-condensed" border=1>
+                    <caption>MQTT&nbsp;&nbsp;<div id="mqttconnected"></div>&nbsp;<div id="mqttheartbeat"></div>
+                    </caption>
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Topic<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign"
+                                    aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right"
+                                    id="mqttloghdr"></i></th>
+                            <th>Payload</th>
+                        </tr>
+                    </thead>
+                    <tbody id="mqttlog"></tbody>
+                </table>
             </div>
         </div>
     </div>

@@ -3,7 +3,6 @@ var version = "";
 var websock = null;
 var wsUri = "ws://" + window.location.host + "/ws";
 var ntpSeconds;
-var data = [];
 var ajaxobj;
 
 var custom_config = {};
@@ -11,8 +10,6 @@ var custom_config = {};
 var xDown = null;
 var yDown = null;
 
-var page = 1;
-var haspages;
 var file = {};
 var backupstarted = false;
 var updateurl = "";
@@ -121,6 +118,8 @@ function savegeneral() {
     if (parseInt($("input[name=\"logeventsenabled\"]:checked").val()) === 1) {
         config.general.log_events = true;
     }
+
+    config.general.log_ip = document.getElementById("log_ip").value;
 
     saveconfig();
 }
@@ -287,6 +286,9 @@ function listgeneral() {
     if (config.general.log_events) {
         $("input[name=\"logeventsenabled\"][value=\"1\"]").prop("checked", true);
     }
+
+    document.getElementById("log_ip").value = config.general.log_ip;
+
 }
 
 function listmqtt() {
@@ -346,20 +348,6 @@ function isVisible(e) {
     return !!(e.offsetWidth || e.offsetHeight || e.getClientRects().length);
 }
 
-function getnextpage(mode) {
-    if (!backupstarted) {
-        document.getElementById("loadpages").innerHTML = "Loading " + page + "/" + haspages;
-    }
-
-    if (page < haspages) {
-        page = page + 1;
-        var commandtosend = {};
-        commandtosend.command = mode;
-        commandtosend.page = page;
-        websock.send(JSON.stringify(commandtosend));
-    }
-}
-
 function colorStatusbar(ref) {
     var percentage = ref.style.width.slice(0, -1);
     if (percentage > 50) { ref.className = "progress-bar progress-bar-success"; } else if (percentage > 25) { ref.className = "progress-bar progress-bar-warning"; } else { ref.class = "progress-bar progress-bar-danger"; }
@@ -403,8 +391,40 @@ function listStats() {
         document.getElementById("mqttheartbeat").className = "label label-primary";
     }
 
-    document.getElementById("mqttloghdr").innerHTML = "MQTT Publish Log: (topics are prefixed with <b>" + ajaxobj.mqttloghdr + "</b>)";
+    document.getElementById("mqttloghdr").setAttribute('data-content', "Topics are prefixed with " + ajaxobj.mqttloghdr);
 
+    var mtable = document.getElementById("mqttlog");
+    var obj = ajaxobj.mqttlog;
+    var tr, td;
+
+    for (var i = 0; i < obj.length; i++) {
+        tr = document.createElement("tr");
+
+        td = document.createElement("td");
+
+        if (obj[i].time < 1563300000) {
+            td.innerHTML = "(" + obj[i].time + ")";
+        } else {
+            var vuepoch = new Date(obj[i].time * 1000);
+            td.innerHTML = vuepoch.getUTCFullYear() +
+                "-" + twoDigits(vuepoch.getUTCMonth() + 1) +
+                "-" + twoDigits(vuepoch.getUTCDate()) +
+                " " + twoDigits(vuepoch.getUTCHours()) +
+                ":" + twoDigits(vuepoch.getUTCMinutes()) +
+                ":" + twoDigits(vuepoch.getUTCSeconds());
+        }
+        tr.appendChild(td);
+
+        td = document.createElement("td");
+        td.innerHTML = obj[i].topic
+        tr.appendChild(td);
+
+        td = document.createElement("td");
+        td.innerHTML = obj[i].payload
+        tr.appendChild(td);
+
+        mtable.appendChild(tr);
+    }
 }
 
 function getContent(contentname) {
@@ -430,19 +450,6 @@ function getContent(contentname) {
                 case "#networkcontent":
                     listnetwork();
                     break;
-                case "#eventcontent":
-                    page = 1;
-                    data = [];
-                    getEvents();
-
-                    if (config.general.log_events) {
-                        document.getElementById("logevents").style.display = "none";
-                    } else {
-                        document.getElementById("logevents").style.display = "block";
-                    }
-
-                    break;
-
                 case "#customcontent":
                     listcustom();
                     break;
@@ -562,60 +569,12 @@ function twoDigits(value) {
     return value;
 }
 
-function initMQTTLogTable() {
-    var newlist = [];
-    for (var i = 0; i < ajaxobj.mqttlog.length; i++) {
-        var data = JSON.stringify(ajaxobj.mqttlog[i]);
-        newlist[i] = {};
-        newlist[i].options = {};
-        newlist[i].value = {};
-        newlist[i].value = JSON.parse(data);
-        newlist[i].options.classes = "warning";
-        newlist[i].options.style = "color: blue";
-    }
-    jQuery(function ($) {
-        window.FooTable.init("#mqttlogtable", {
-            columns: [{
-                "name": "time",
-                "title": "Last Published",
-                "style": { "min-width": "160px" },
-                "parser": function (value) {
-                    if (value < 1563300000) {
-                        return "(" + value + ")";
-                    } else {
-                        var vuepoch = new Date(value * 1000);
-                        var formatted = vuepoch.getUTCFullYear() +
-                            "-" + twoDigits(vuepoch.getUTCMonth() + 1) +
-                            "-" + twoDigits(vuepoch.getUTCDate()) +
-                            " " + twoDigits(vuepoch.getUTCHours()) +
-                            ":" + twoDigits(vuepoch.getUTCMinutes()) +
-                            ":" + twoDigits(vuepoch.getUTCSeconds());
-                        return formatted;
-                    }
-                },
-                "breakpoints": "xs sm"
-            },
-            {
-                "name": "topic",
-                "title": "Topic",
-            },
-            {
-                "name": "payload",
-                "title": "Payload",
-            },
-            ],
-            rows: newlist
-        });
-    });
-}
-
 function socketMessageListener(evt) {
     var obj = JSON.parse(evt.data);
     if (obj.hasOwnProperty("command")) {
         switch (obj.command) {
             case "status":
                 ajaxobj = obj;
-                initMQTTLogTable();
                 getContent("#statuscontent");
                 break;
             case "custom_settings":
@@ -757,13 +716,13 @@ function login() {
     }
 }
 
-function switchfirmware() {
+function getfirmware() {
     if (use_beta_firmware) {
         use_beta_firmware = false;
-        document.getElementById("updateb").innerHTML = "Official Release";
+        document.getElementById("updateb").innerHTML = "Switch to Development build";
     } else {
         use_beta_firmware = true;
-        document.getElementById("updateb").innerHTML = "Development Build";
+        document.getElementById("updateb").innerHTML = "Switch to Stable release";
     }
     getLatestReleaseInfo();
 }
@@ -855,7 +814,7 @@ $("#backup").click(function () { getContent("#backupcontent"); return false; });
 $("#reset").click(function () { $("#destroy").modal("show"); return false; });
 $("#restart").click(function () { $("#reboot").modal("show"); return false; });
 $(".noimp").on("click", function () { $("#noimp").modal("show"); });
-$("#update").on("shown.bs.modal", function (e) { getLatestReleaseInfo(); });
+$("#update").on("shown.bs.modal", function (e) { getfirmware(); });
 
 document.addEventListener("touchstart", handleTouchStart, false);
 document.addEventListener("touchmove", handleTouchMove, false);
