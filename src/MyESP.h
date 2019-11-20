@@ -298,7 +298,7 @@ class MyESP {
     void setUseSerial(bool toggle);
 
     // syslog
-    void _writeLogEvent(const uint8_t type, const char * msg);
+    void writeLogEvent(const uint8_t type, const char * msg);
 
     // FS
     void setSettings(fs_loadsave_callback_f loadsave, fs_setlist_callback_f setlist, bool useSerial = true);

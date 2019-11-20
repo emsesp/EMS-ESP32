@@ -531,7 +531,9 @@ void _debugPrintTelegram(const char * prefix, _EMS_RxTelegram * EMS_RxTelegram, 
     }
 
     strlcpy(output_str, "(", sizeof(output_str));
-    strlcat(output_str, COLOR_CYAN, sizeof(output_str));
+
+    if (!raw)
+        strlcat(output_str, COLOR_CYAN, sizeof(output_str));
 
     strlcat(output_str, _smallitoa(t_hour, buffer), sizeof(output_str));
     strlcat(output_str, ":", sizeof(output_str));
@@ -545,9 +547,14 @@ void _debugPrintTelegram(const char * prefix, _EMS_RxTelegram * EMS_RxTelegram, 
         strlcat(output_str, _smallitoa3(t_msec, buffer), sizeof(output_str));
     }
 
-    strlcat(output_str, COLOR_RESET, sizeof(output_str));
+    if (!raw)
+        strlcat(output_str, COLOR_RESET, sizeof(output_str));
+
     strlcat(output_str, ") ", sizeof(output_str));
-    strlcat(output_str, color, sizeof(output_str));
+
+    if (!raw)
+        strlcat(output_str, color, sizeof(output_str));
+
     strlcat(output_str, prefix, sizeof(output_str));
 
     if (!raw) {
@@ -569,9 +576,12 @@ void _debugPrintTelegram(const char * prefix, _EMS_RxTelegram * EMS_RxTelegram, 
             strlcat(output_str, " #data=", sizeof(output_str));
             strlcat(output_str, itoa(data_len, buffer, 10), sizeof(output_str));
         }
-    }
 
-    strlcat(output_str, COLOR_RESET, sizeof(output_str));
+        strlcat(output_str, COLOR_RESET, sizeof(output_str));
+    } else {
+        // send it the SysLog
+        myESP.writeLogEvent(MYESP_SYSLOG_INFO, output_str);
+    }
 
     myDebug(output_str);
 }
@@ -910,7 +920,7 @@ void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
     }
 
     // if we are in raw logging mode then just print out the telegram as it is
-    // or if we're watching a specific type ID show it
+    // else if we're watching a specific type ID show it and also log an event to the SysLog
     // but still continue to process it
     if ((EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_RAW)) {
         _debugPrintTelegram("", &EMS_RxTelegram, COLOR_WHITE, true);

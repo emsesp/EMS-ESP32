@@ -44,9 +44,9 @@ MyESP::MyESP() {
     _suspendOutput       = false;
     _ota_pre_callback_f  = nullptr;
     _ota_post_callback_f = nullptr;
-    _load_average        = 100;  // calculated load average
-    _general_serial      = true; // serial is set to on as default
-    _general_log_events  = true; // all logs are sent to syslog
+    _load_average        = 100;   // calculated load average
+    _general_serial      = true;  // serial is set to on as default
+    _general_log_events  = false; // all logs are not sent to syslog by default
     _general_log_ip      = nullptr;
     _have_ntp_time       = false;
 
@@ -1729,7 +1729,7 @@ bool MyESP::_fs_loadConfig() {
     _general_password  = strdup(general["password"] | MYESP_HTTP_PASSWORD);
     _ws->setAuthentication("admin", _general_password);
     _general_hostname   = strdup(general["hostname"]);
-    _general_log_events = general["log_events"];
+    _general_log_events = general["log_events"] | false;
     _general_log_ip     = strdup(general["log_ip"] | "");
 
     // serial is only on when booting
@@ -1880,7 +1880,7 @@ bool MyESP::fs_saveCustomConfig(JsonObject root) {
         configFile.close();
 
         if (n) {
-            _writeLogEvent(MYESP_SYSLOG_INFO, "Custom config stored in the SPIFFS");
+            writeLogEvent(MYESP_SYSLOG_INFO, "Custom config stored in the SPIFFS");
             ok = true;
         }
     }
@@ -1913,7 +1913,7 @@ bool MyESP::fs_saveConfig(JsonObject root) {
         configFile.close();
 
         if (n) {
-            _writeLogEvent(MYESP_SYSLOG_INFO, "System config stored in the SPIFFS");
+            writeLogEvent(MYESP_SYSLOG_INFO, "System config stored in the SPIFFS");
             ok = true;
         }
 
@@ -2257,7 +2257,7 @@ void MyESP::crashInfo() {
 #endif
 
 // write a log entry to SysLog via UDP
-void MyESP::_writeLogEvent(const uint8_t type, const char * msg) {
+void MyESP::writeLogEvent(const uint8_t type, const char * msg) {
     if (!_general_log_events) {
         return;
     }
@@ -2781,7 +2781,7 @@ void MyESP::_bootupSequence() {
     if (boot_status == MYESP_BOOTSTATUS_BOOTED) {
         if ((_ntp_enabled) && (now() > 10000) && !_have_ntp_time) {
             _have_ntp_time = true;
-            _writeLogEvent(MYESP_SYSLOG_INFO, "System booted");
+            writeLogEvent(MYESP_SYSLOG_INFO, "System booted");
         }
         return;
     }
@@ -2811,7 +2811,7 @@ void MyESP::_bootupSequence() {
 
         // write a log message if we're not using NTP, otherwise wait for the internet time to arrive
         if (!_ntp_enabled) {
-            _writeLogEvent(MYESP_SYSLOG_INFO, "System booted");
+            writeLogEvent(MYESP_SYSLOG_INFO, "System booted");
         }
     }
 }
@@ -2819,7 +2819,7 @@ void MyESP::_bootupSequence() {
 // set up SysLog
 void MyESP::_syslog_setup() {
     // if not enabled or IP is empty, don't bother
-    if ( (!_hasValue(_general_log_ip)) || (!_general_log_events) ) {
+    if ((!_hasValue(_general_log_ip)) || (!_general_log_events)) {
         return;
     }
 
@@ -2831,10 +2831,12 @@ void MyESP::_syslog_setup() {
     syslog.mark_interval(3600);
 
     IPAddress syslog_ip;
-    syslog.destination(syslog_ip.fromString(_general_log_ip));
+    syslog_ip.fromString("192.168.1.4");
+    syslog.destination(syslog_ip);
+
+    logger.info(F("Application started"));
 
     myDebug_P(PSTR("[SYSLOG] System event logging enabled"));
-
 }
 
 // setup MyESP
@@ -2857,8 +2859,6 @@ void MyESP::begin(const char * app_hostname, const char * app_name, const char *
     // print a welcome message
     myDebug_P(PSTR("\n\n* %s version %s"), _app_name, _app_version);
 
-    _syslog_setup(); // SysLog
-
     // set up onboard LED
     pinMode(LED_BUILTIN, OUTPUT);
     digitalWrite(LED_BUILTIN, HIGH);
@@ -2870,6 +2870,7 @@ void MyESP::begin(const char * app_hostname, const char * app_name, const char *
     _wifi_setup();         // WIFI setup
     _mqtt_setup();         // MQTT setup
     _ota_setup();          // init OTA
+    _syslog_setup();       // SysLog
     _webserver_setup();    // init web server
 
     _setSystemCheck(false); // reset system check
@@ -2918,7 +2919,7 @@ void MyESP::loop() {
     }
 
     if (_shouldRestart) {
-        _writeLogEvent(MYESP_SYSLOG_INFO, "System is restarting");
+        writeLogEvent(MYESP_SYSLOG_INFO, "System is restarting");
         myDebug("[SYSTEM] Restarting...");
         _deferredReset(500, CUSTOM_RESET_TERMINAL);
         ESP.restart();
