@@ -9,7 +9,7 @@
 #ifndef MyESP_h
 #define MyESP_h
 
-#define MYESP_VERSION "1.2.21"
+#define MYESP_VERSION "1.2.22"
 
 #include <ArduinoJson.h>
 #include <ArduinoOTA.h>
@@ -113,6 +113,7 @@ extern struct rst_info resetInfo;
 // Telnet
 #define TELNET_SERIAL_BAUD 115200
 #define TELNET_MAX_COMMAND_LENGTH 80 // length of a command
+#define TELNET_MAX_BUFFER_LENGTH 300 // max length of telnet string
 #define TELNET_EVENT_CONNECT 1
 #define TELNET_EVENT_DISCONNECT 0
 #define TELNET_EVENT_SHOWCMD 10
@@ -252,12 +253,9 @@ constexpr size_t ArraySize(T (&)[N]) {
 }
 
 #define MYESP_UPTIME_OVERFLOW 4294967295 // Uptime overflow value
-
-// web min and max length of wifi ssid and password
-#define MYESP_MAX_STR_LEN 16
-
-#define MYESP_BOOTUP_FLASHDELAY 50 // flash duration for LED at bootup sequence
-#define MYESP_BOOTUP_DELAY 2000    // time before we open the window to reset. This is to stop resetting values when uploading firmware via USB
+#define MYESP_MAX_STR_LEN 16             // web min and max length of wifi ssid and password
+#define MYESP_BOOTUP_FLASHDELAY 50       // flash duration for LED at bootup sequence
+#define MYESP_BOOTUP_DELAY 2000          // time before we open the window to reset. This is to stop resetting values when uploading firmware via USB
 
 // class definition
 class MyESP {
@@ -480,7 +478,7 @@ class MyESP {
     uint32_t _getUsedHeap();
 
     // heartbeat
-    void _heartbeatCheck(bool force);
+    void _heartbeatCheck(bool force = false);
 
     // web
     web_callback_f _web_callback_f;
@@ -494,9 +492,6 @@ class MyESP {
     void _printScanResult(int networksFound);
     void _sendTime();
     void _webserver_setup();
-    void _webRootPage();
-    void _webResetPage();
-    void _webResetAllPage();
 
     // ntp
     char *   _ntp_server;

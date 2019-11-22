@@ -27,6 +27,8 @@ union system_rtcmem_t {
 static char * _general_password = nullptr;
 static bool   _shouldRestart    = false;
 
+static char _debug_buffer[TELNET_MAX_BUFFER_LENGTH];
+
 uint8_t RtcmemSize = (sizeof(RtcmemData) / 4u);
 auto    Rtcmem     = reinterpret_cast<volatile RtcmemData *>(RTCMEM_ADDR);
 
@@ -142,14 +144,14 @@ void MyESP::myDebug(const char * format, ...) {
     char test[1];
 
     int len = ets_vsnprintf(test, 1, format, args) + 1;
+    if (len > TELNET_MAX_BUFFER_LENGTH - 1) {
+        len = TELNET_MAX_BUFFER_LENGTH;
+    }
 
-    char * buffer = new char[len];
-    ets_vsnprintf(buffer, len, format, args);
+    ets_vsnprintf(_debug_buffer, len, format, args);
     va_end(args);
 
-    SerialAndTelnet.println(buffer);
-
-    delete[] buffer;
+    SerialAndTelnet.println(_debug_buffer);
 }
 
 // for flashmemory. Must use PSTR()
@@ -164,9 +166,11 @@ void MyESP::myDebug_P(PGM_P format_P, ...) {
     va_start(args, format_P);
     char test[1];
     int  len = ets_vsnprintf(test, 1, format, args) + 1;
+    if (len > TELNET_MAX_BUFFER_LENGTH - 1) {
+        len = TELNET_MAX_BUFFER_LENGTH;
+    }
 
-    char * buffer = new char[len];
-    ets_vsnprintf(buffer, len, format, args);
+    ets_vsnprintf(_debug_buffer, len, format, args);
 
     va_end(args);
 
@@ -177,9 +181,7 @@ void MyESP::myDebug_P(PGM_P format_P, ...) {
     SerialAndTelnet.print(timestamp);
 #endif
 
-    SerialAndTelnet.println(buffer);
-
-    delete[] buffer;
+    SerialAndTelnet.println(_debug_buffer);
 }
 
 // use Serial?
@@ -450,7 +452,7 @@ void MyESP::_mqttOnConnect() {
     mqttPublish(MQTT_TOPIC_START, MQTT_TOPIC_START_PAYLOAD, false);
 
     // send heartbeat if enabled
-    _heartbeatCheck(true);
+    _heartbeatCheck();
 
     // call custom function to handle mqtt receives
     (_mqtt_callback_f)(MQTT_CONNECT_EVENT, nullptr, nullptr);
@@ -684,13 +686,13 @@ void MyESP::_kick() {
     }
 
     // kick web
-    myDebug_P(PSTR(" - Restart web server and web sockets"));
+    myDebug_P(PSTR(" - Restarting web server and web sockets"));
     _ws->enable(false);
     //_webServer->reset();
     _ws->enable(true);
 
     // kick mqtt
-    myDebug_P(PSTR(" - Restart MQTT"));
+    myDebug_P(PSTR(" - Restarting MQTT"));
     mqttClient.disconnect();
 }
 
@@ -848,8 +850,8 @@ void MyESP::_printSetCommands() {
 // reset / restart
 void MyESP::resetESP() {
     myDebug_P(PSTR("* Restart ESP..."));
-    _deferredReset(500, CUSTOM_RESET_TERMINAL);
     end();
+    _deferredReset(500, CUSTOM_RESET_TERMINAL);
 #if defined(ARDUINO_ARCH_ESP32)
     ESP.restart();
 #else
@@ -1440,16 +1442,7 @@ void MyESP::showSystemStats() {
     myDebug_P(PSTR(" [MEM] Firmware size: %d"), ESP.getSketchSize());
     myDebug_P(PSTR(" [MEM] Max OTA size: %d"), (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000);
     myDebug_P(PSTR(" [MEM] OTA Reserved: %d"), 4 * SPI_FLASH_SEC_SIZE);
-
-    uint32_t total_memory = _getInitialFreeHeap();
-    uint32_t free_memory  = ESP.getFreeHeap();
-
-    myDebug(" [MEM] Free Heap: %d bytes initially | %d bytes used (%2u%%) | %d bytes free (%2u%%)",
-            total_memory,
-            total_memory - free_memory,
-            100 * (total_memory - free_memory) / total_memory,
-            free_memory,
-            100 * free_memory / total_memory);
+    _printHeap(" [MEM]");
 
     myDebug_P(PSTR(""));
 }
@@ -1457,14 +1450,19 @@ void MyESP::showSystemStats() {
 /*
  * Send heartbeat via MQTT with all system data
  */
-void MyESP::_heartbeatCheck(bool force = false) {
+void MyESP::_heartbeatCheck(bool force) {
     static uint32_t last_heartbeat = 0;
 
     if ((millis() - last_heartbeat > MYESP_HEARTBEAT_INTERVAL) || force) {
         last_heartbeat = millis();
 
+        // print to log if force is set, so at bootup
+        if (force) {
+            _printHeap("[SYSTEM]");
+        }
+
 #ifdef MYESP_DEBUG
-        _printHeap("HEARTBEAT");
+        _printHeap("[HEARTBEAT] ");
 #endif
         if (!isMQTTConnected() || !(_mqtt_heartbeat)) {
             return;
@@ -2666,12 +2664,12 @@ void MyESP::_webserver_setup() {
 }
 
 // print memory
-void MyESP::_printHeap(const char * s) {
+void MyESP::_printHeap(const char * prefix) {
     uint32_t total_memory = _getInitialFreeHeap();
     uint32_t free_memory  = ESP.getFreeHeap();
 
-    myDebug(" [%s] Free Heap: %d bytes initially | %d bytes used (%2u%%) | %d bytes free (%2u%%)",
-            s,
+    myDebug("%s Free Heap: %d bytes initially | %d bytes used (%2u%%) | %d bytes free (%2u%%)",
+            prefix,
             total_memory,
             total_memory - free_memory,
             100 * (total_memory - free_memory) / total_memory,
@@ -2831,7 +2829,7 @@ void MyESP::_syslog_setup() {
     syslog.mark_interval(3600);
 
     IPAddress syslog_ip;
-    syslog_ip.fromString("192.168.1.4");
+    syslog_ip.fromString(_general_log_ip);
     syslog.destination(syslog_ip);
 
     logger.info(F("Application started"));
@@ -2874,7 +2872,7 @@ void MyESP::begin(const char * app_hostname, const char * app_name, const char *
     _webserver_setup();    // init web server
 
     _setSystemCheck(false); // reset system check
-    _heartbeatCheck(true);  // force heartbeat
+    _heartbeatCheck(true);  // force heartbeat, will send out message to log too
 
     _setSystemDropoutCounter(0); // reset # TCP dropouts
 
@@ -2925,7 +2923,7 @@ void MyESP::loop() {
         ESP.restart();
     }
 
-    delay(MYESP_DELAY); // some time to WiFi and everything else to catch up, and prevent overheating
+    delay(MYESP_DELAY); // some time to WiFi and everything else to catch up, calls yield, and also prevent overheating
 }
 
 MyESP myESP;
