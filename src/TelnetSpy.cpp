@@ -24,16 +24,6 @@ extern "C" {
 
 static TelnetSpy * actualObject = NULL;
 
-static void TelnetSpy_putc(char c) {
-    if (actualObject) {
-        actualObject->write(c);
-    }
-}
-
-static void TelnetSpy_ignore_putc(char c) {
-    ;
-}
-
 TelnetSpy::TelnetSpy() {
     port               = TELNETSPY_PORT;
     telnetServer       = NULL;
@@ -437,19 +427,8 @@ void TelnetSpy::setDebugOutput(bool en) {
 
     if (debugOutput) {
         actualObject = this;
-
-#ifdef ESP8266
-        os_install_putc1((void *)TelnetSpy_putc); // Set system printing (os_printf) to TelnetSpy
-        system_set_os_print(true);
-#endif
-
     } else {
         if (actualObject == this) {
-#ifdef ESP8266
-            system_set_os_print(false);
-            os_install_putc1((void *)TelnetSpy_ignore_putc); // Ignore system printing
-#endif
-
             actualObject = NULL;
         }
     }
