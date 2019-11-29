@@ -572,10 +572,8 @@ void publishEMSValues(bool force) {
         return; // EMS bus is not connected
     }
 
-    // override force id not on automatic mode. Always send values is there is a publish_time set
-    if (EMSESP_Settings.publish_time != 0) {
-        force = true;
-    }
+    // Always send values is there is a publish_time is set to 0
+    force = !EMSESP_Settings.publish_time;
 
     char                                      s[20] = {0}; // for formatting strings
     StaticJsonDocument<MQTT_MAX_PAYLOAD_SIZE> doc;
@@ -1186,7 +1184,11 @@ bool SetListCallback(MYESP_FSACTION_t action, uint8_t wc, const char * setting, 
         myDebug_P(PSTR("  listen_mode=%s"), EMSESP_Settings.listen_mode ? "on" : "off");
         myDebug_P(PSTR("  shower_timer=%s"), EMSESP_Settings.shower_timer ? "on" : "off");
         myDebug_P(PSTR("  shower_alert=%s"), EMSESP_Settings.shower_alert ? "on" : "off");
-        myDebug_P(PSTR("  publish_time=%d"), EMSESP_Settings.publish_time);
+        if (EMSESP_Settings.publish_time) {
+            myDebug_P(PSTR("  publish_time=%d"), EMSESP_Settings.publish_time);
+        } else {
+            myDebug_P(PSTR("  publish_time=0 (always publish when data received)"), EMSESP_Settings.publish_time);
+        }
     }
 
     return ok;
