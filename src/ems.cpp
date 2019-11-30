@@ -25,12 +25,6 @@ CircularBuffer<_EMS_TxTelegram, EMS_TX_TELEGRAM_QUEUE_MAX> EMS_TxQueue; // FIFO 
 // for storing all detected EMS devices
 std::list<_Detected_Device> Devices;
 
-// macros used in the _process* functions
-#define _toByte(i) (EMS_RxTelegram->data[i])
-#define _toShort(i) ((EMS_RxTelegram->data[i] << 8) + EMS_RxTelegram->data[i + 1])
-#define _toLong(i) ((EMS_RxTelegram->data[i] << 16) + (EMS_RxTelegram->data[i + 1] << 8) + (EMS_RxTelegram->data[i + 2]))
-#define _bitRead(i, bit) (((EMS_RxTelegram->data[i]) >> (bit)) & 0x01)
-
 //
 // process callbacks per type
 //
@@ -476,6 +470,65 @@ uint8_t _crcCalculator(uint8_t * data, uint8_t len) {
     }
 
     return crc;
+}
+
+// unsigned short
+void _setValue(_EMS_RxTelegram * EMS_RxTelegram, uint16_t * param_op, uint8_t index) {
+    if (index >= EMS_RxTelegram->data_length) {
+        return;
+    }
+
+    uint16_t value = (EMS_RxTelegram->data[index] << 8) + EMS_RxTelegram->data[index + 1];
+
+    // check for undefined/unset values, 0x8000
+    if (value == EMS_VALUE_USHORT_NOTSET) {
+        return;
+    }
+
+    *param_op = value;
+}
+
+// signed short
+void _setValue(_EMS_RxTelegram * EMS_RxTelegram, int16_t * param_op, uint8_t index) {
+    if (index >= EMS_RxTelegram->data_length) {
+        return;
+    }
+
+    int16_t value = (EMS_RxTelegram->data[index] << 8) + EMS_RxTelegram->data[index + 1];
+
+    // check for undefined/unset values, 0x8000
+    if ((value == EMS_VALUE_SHORT_NOTSET) || (EMS_RxTelegram->data[index] == 0x7D)) {
+        return;
+    }
+
+    *param_op = value;
+}
+
+// Byte
+void _setValue(_EMS_RxTelegram * EMS_RxTelegram, uint8_t * param_op, uint8_t index) {
+    if (index >= EMS_RxTelegram->data_length) {
+        return;
+    }
+
+    *param_op = (uint8_t)EMS_RxTelegram->data[index];
+}
+
+// Long
+void _setValue(_EMS_RxTelegram * EMS_RxTelegram, uint32_t * param_op, uint8_t index) {
+    if (index >= EMS_RxTelegram->data_length) {
+        return;
+    }
+
+    *param_op = (uint32_t)((EMS_RxTelegram->data[index] << 16) + (EMS_RxTelegram->data[index + 1] << 8) + (EMS_RxTelegram->data[index + 2]));
+}
+
+// bit from a byte
+void _setValue(_EMS_RxTelegram * EMS_RxTelegram, uint8_t * param_op, uint8_t index, uint8_t bit) {
+    if (index >= EMS_RxTelegram->data_length) {
+        return;
+    }
+
+    *param_op = (uint8_t)(((EMS_RxTelegram->data[index]) >> (bit)) & 0x01);
 }
 
 /**
@@ -1226,11 +1279,12 @@ void _checkActive() {
  * received only after requested (not broadcasted)
  */
 void _process_UBAParameterWW(_EMS_RxTelegram * EMS_RxTelegram) {
-    EMS_Boiler.wWActivated   = (_toByte(1) == 0xFF); // 0xFF means on
-    EMS_Boiler.wWSelTemp     = _toByte(2);
-    EMS_Boiler.wWCircPump    = (_toByte(6) == 0xFF); // 0xFF means on
-    EMS_Boiler.wWDesiredTemp = _toByte(8);
-    EMS_Boiler.wWComfort     = _toByte(EMS_OFFSET_UBAParameterWW_wwComfort);
+    EMS_Boiler.wWActivated = (EMS_RxTelegram->data[1] == 0xFF); // 0xFF means on
+    EMS_Boiler.wWCircPump  = (EMS_RxTelegram->data[6] == 0xFF); // 0xFF means on
+
+    _setValue(EMS_RxTelegram, &EMS_Boiler.wWSelTemp, 2);
+    _setValue(EMS_RxTelegram, &EMS_Boiler.wWDesiredTemp, 8);
+    _setValue(EMS_RxTelegram, &EMS_Boiler.wWComfort, EMS_OFFSET_UBAParameterWW_wwComfort);
 
     EMS_Sys_Status.emsRefreshed = true; // when we receieve this, lets force an MQTT publish
 }
@@ -1240,7 +1294,7 @@ void _process_UBAParameterWW(_EMS_RxTelegram * EMS_RxTelegram) {
  * received only after requested (not broadcasted)
  */
 void _process_UBATotalUptimeMessage(_EMS_RxTelegram * EMS_RxTelegram) {
-    EMS_Boiler.UBAuptime        = _toLong(0);
+    _setValue(EMS_RxTelegram, &EMS_Boiler.UBAuptime, 0);
     EMS_Sys_Status.emsRefreshed = true; // when we receieve this, lets force an MQTT publish
 }
 
@@ -1248,9 +1302,9 @@ void _process_UBATotalUptimeMessage(_EMS_RxTelegram * EMS_RxTelegram) {
  * UBAParametersMessage - type 0x16
  */
 void _process_UBAParametersMessage(_EMS_RxTelegram * EMS_RxTelegram) {
-    EMS_Boiler.heating_temp = _toByte(1);
-    EMS_Boiler.pump_mod_max = _toByte(9);
-    EMS_Boiler.pump_mod_min = _toByte(10);
+    _setValue(EMS_RxTelegram, &EMS_Boiler.heating_temp, 1);
+    _setValue(EMS_RxTelegram, &EMS_Boiler.pump_mod_max, 9);
+    _setValue(EMS_RxTelegram, &EMS_Boiler.pump_mod_min, 10);
 }
 
 /**
@@ -1258,11 +1312,11 @@ void _process_UBAParametersMessage(_EMS_RxTelegram * EMS_RxTelegram) {
  * received every 10 seconds
  */
 void _process_UBAMonitorWWMessage(_EMS_RxTelegram * EMS_RxTelegram) {
-    EMS_Boiler.wWCurTmp  = _toShort(1);
-    EMS_Boiler.wWStarts  = _toLong(13);
-    EMS_Boiler.wWWorkM   = _toLong(10);
-    EMS_Boiler.wWOneTime = _bitRead(5, 1);
-    EMS_Boiler.wWCurFlow = _toByte(9);
+    _setValue(EMS_RxTelegram, &EMS_Boiler.wWCurTmp, 1);
+    _setValue(EMS_RxTelegram, &EMS_Boiler.wWStarts, 13);
+    _setValue(EMS_RxTelegram, &EMS_Boiler.wWWorkM, 10);
+    _setValue(EMS_RxTelegram, &EMS_Boiler.wWOneTime, 5, 1);
+    _setValue(EMS_RxTelegram, &EMS_Boiler.wWCurFlow, 9);
 }
 
 /**
@@ -1292,37 +1346,30 @@ void ems_setWarmWaterOnetime(bool activated) {
  * received every 10 seconds
  */
 void _process_UBAMonitorFast(_EMS_RxTelegram * EMS_RxTelegram) {
-    EMS_Boiler.selFlowTemp = _toByte(0);
-    EMS_Boiler.curFlowTemp = _toShort(1);
-    EMS_Boiler.retTemp     = _toShort(13);
+    _setValue(EMS_RxTelegram, &EMS_Boiler.selFlowTemp, 0);
+    _setValue(EMS_RxTelegram, &EMS_Boiler.curFlowTemp, 1);
+    _setValue(EMS_RxTelegram, &EMS_Boiler.selBurnPow, 3); // burn power max setting
+    _setValue(EMS_RxTelegram, &EMS_Boiler.curBurnPow, 4);
 
-    EMS_Boiler.burnGas = _bitRead(7, 0);
-    EMS_Boiler.fanWork = _bitRead(7, 2);
-    EMS_Boiler.ignWork = _bitRead(7, 3);
-    EMS_Boiler.heatPmp = _bitRead(7, 5);
-    EMS_Boiler.wWHeat  = _bitRead(7, 6);
-    EMS_Boiler.wWCirc  = _bitRead(7, 7);
+    _setValue(EMS_RxTelegram, &EMS_Boiler.burnGas, 7, 0);
+    _setValue(EMS_RxTelegram, &EMS_Boiler.fanWork, 7, 2);
+    _setValue(EMS_RxTelegram, &EMS_Boiler.ignWork, 7, 3);
+    _setValue(EMS_RxTelegram, &EMS_Boiler.heatPmp, 7, 5);
+    _setValue(EMS_RxTelegram, &EMS_Boiler.wWHeat, 7, 6);
+    _setValue(EMS_RxTelegram, &EMS_Boiler.wWCirc, 7, 7);
 
-    EMS_Boiler.curBurnPow = _toByte(4);
-    EMS_Boiler.selBurnPow = _toByte(3); // burn power max setting
-
-    // set boiler temp only if we actually have a real value
-    if (_toShort(11) != EMS_VALUE_USHORT_NOTSET) {
-        EMS_Boiler.boilTemp = _toShort(11); // 0x8000 if not available
-    }
-
-    EMS_Boiler.flameCurr = _toShort(15);
+    _setValue(EMS_RxTelegram, &EMS_Boiler.boilTemp, 11); // 0x8000 if not available
+    _setValue(EMS_RxTelegram, &EMS_Boiler.retTemp, 13);
+    _setValue(EMS_RxTelegram, &EMS_Boiler.flameCurr, 15);
+    _setValue(EMS_RxTelegram, &EMS_Boiler.serviceCode, 20);
 
     // system pressure. FF means missing
-    EMS_Boiler.sysPress = _toByte(17); // this is *10
+    _setValue(EMS_RxTelegram, &EMS_Boiler.sysPress, 17); // is *10
 
     // read the service code / installation status as appears on the display
-    EMS_Boiler.serviceCodeChar[0] = char(_toByte(18)); // ascii character 1
-    EMS_Boiler.serviceCodeChar[1] = char(_toByte(19)); // ascii character 2
-    EMS_Boiler.serviceCodeChar[2] = '\0';              // null terminate string
-
-    // read error code
-    EMS_Boiler.serviceCode = _toShort(20);
+    EMS_Boiler.serviceCodeChar[0] = char(EMS_RxTelegram->data[18]); // ascii character 1
+    EMS_Boiler.serviceCodeChar[1] = char(EMS_RxTelegram->data[19]); // ascii character 2
+    EMS_Boiler.serviceCodeChar[2] = '\0';                           // null terminate string
 
     // at this point do a quick check to see if the hot water or heating is active
     _checkActive();
@@ -1332,24 +1379,18 @@ void _process_UBAMonitorFast(_EMS_RxTelegram * EMS_RxTelegram) {
  * UBAMonitorFast2 - type 0xE4 - central heating monitor
  */
 void _process_UBAMonitorFast2(_EMS_RxTelegram * EMS_RxTelegram) {
-    EMS_Boiler.selFlowTemp = _toByte(6);
-
-    EMS_Boiler.burnGas = _bitRead(11, 0);
-    EMS_Boiler.wWHeat  = _bitRead(11, 2);
-
-    EMS_Boiler.curBurnPow = _toByte(10);
-    EMS_Boiler.selBurnPow = _toByte(9); // burn power max setting
-
-    if (_toShort(7) != EMS_VALUE_USHORT_NOTSET) {
-        EMS_Boiler.curFlowTemp = _toShort(7); // 0x8000 if not available
-    }
-
-    EMS_Boiler.flameCurr = _toShort(19);
+    _setValue(EMS_RxTelegram, &EMS_Boiler.selFlowTemp, 6);
+    _setValue(EMS_RxTelegram, &EMS_Boiler.burnGas, 11, 0);
+    _setValue(EMS_RxTelegram, &EMS_Boiler.wWHeat, 11, 2);
+    _setValue(EMS_RxTelegram, &EMS_Boiler.curBurnPow, 10);
+    _setValue(EMS_RxTelegram, &EMS_Boiler.selBurnPow, 9);
+    _setValue(EMS_RxTelegram, &EMS_Boiler.curFlowTemp, 7); // 0x8000 if not available
+    _setValue(EMS_RxTelegram, &EMS_Boiler.flameCurr, 19);
 
     // read the service code / installation status as appears on the display
-    EMS_Boiler.serviceCodeChar[0] = char(_toByte(4)); // ascii character 1
-    EMS_Boiler.serviceCodeChar[1] = char(_toByte(5)); // ascii character 2
-    EMS_Boiler.serviceCodeChar[2] = '\0';             // null terminate string
+    EMS_Boiler.serviceCodeChar[0] = char(EMS_RxTelegram->data[4]); // ascii character 1
+    EMS_Boiler.serviceCodeChar[1] = char(EMS_RxTelegram->data[5]); // ascii character 2
+    EMS_Boiler.serviceCodeChar[2] = '\0';
 
     // still to figure out:
     //  EMS_Boiler.serviceCode
@@ -1364,46 +1405,38 @@ void _process_UBAMonitorFast2(_EMS_RxTelegram * EMS_RxTelegram) {
  * UBAMonitorSlow - type 0x19 - central heating monitor part 2 (27 bytes long)
  * received every 60 seconds
  * e.g. 08 00 19 00 80 00 02 41 80 00 00 00 00 00 03 91 7B 05 B8 40 00 00 00 04 92 AD 00 5E EE 80 00 (CRC=C9) #data=27
+ *      08 0B 19 00 FF EA 02 47 80 00 00 00 00 62 03 CA 24 2C D6 23 00 00 00 27 4A B6 03 6E 43 
+ *                  00 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 17 19 20 21 22 23 24
  */
 void _process_UBAMonitorSlow(_EMS_RxTelegram * EMS_RxTelegram) {
-    if (_toShort(0) != EMS_VALUE_USHORT_NOTSET) { // 0x8000 if not available
-        EMS_Boiler.extTemp = _toShort(0);
-    }
-
-    // set boiler temp only if we actually have a real value
-    if (_toShort(2) != EMS_VALUE_USHORT_NOTSET) {
-        EMS_Boiler.boilTemp = _toShort(2); // 0x8000 if not available
-    }
-
-    EMS_Boiler.pumpMod     = _toByte(9);
-    EMS_Boiler.burnStarts  = _toLong(10);
-    EMS_Boiler.burnWorkMin = _toLong(13);
-    EMS_Boiler.heatWorkMin = _toLong(19);
-    EMS_Boiler.switchTemp  = _toShort(25);
+    _setValue(EMS_RxTelegram, &EMS_Boiler.extTemp, 0);
+    _setValue(EMS_RxTelegram, &EMS_Boiler.boilTemp, 2);
+    _setValue(EMS_RxTelegram, &EMS_Boiler.switchTemp, 25); // only if there is a mixer
+    _setValue(EMS_RxTelegram, &EMS_Boiler.pumpMod, 9);
+    _setValue(EMS_RxTelegram, &EMS_Boiler.burnStarts, 10);
+    _setValue(EMS_RxTelegram, &EMS_Boiler.burnWorkMin, 13);
+    _setValue(EMS_RxTelegram, &EMS_Boiler.heatWorkMin, 19);
 }
 
 /**
  * UBAMonitorSlow2 - type 0xE5 - central heating monitor
  */
 void _process_UBAMonitorSlow2(_EMS_RxTelegram * EMS_RxTelegram) {
-    EMS_Boiler.fanWork = _bitRead(2, 2);
-    EMS_Boiler.ignWork = _bitRead(2, 3);
-    EMS_Boiler.heatPmp = _bitRead(2, 5);
-    EMS_Boiler.wWCirc  = _bitRead(2, 7);
-
-    EMS_Boiler.burnStarts  = _toLong(10);
-    EMS_Boiler.burnWorkMin = _toLong(13);
-    EMS_Boiler.heatWorkMin = _toLong(19);
-    EMS_Boiler.pumpMod     = _toByte(25); // or is it switchTemp ?
+    _setValue(EMS_RxTelegram, &EMS_Boiler.fanWork, 2, 2);
+    _setValue(EMS_RxTelegram, &EMS_Boiler.ignWork, 2, 3);
+    _setValue(EMS_RxTelegram, &EMS_Boiler.heatPmp, 2, 5);
+    _setValue(EMS_RxTelegram, &EMS_Boiler.wWCirc, 2, 7);
+    _setValue(EMS_RxTelegram, &EMS_Boiler.burnStarts, 10);
+    _setValue(EMS_RxTelegram, &EMS_Boiler.burnWorkMin, 13);
+    _setValue(EMS_RxTelegram, &EMS_Boiler.heatWorkMin, 19);
+    _setValue(EMS_RxTelegram, &EMS_Boiler.pumpMod, 25); // or is it switchTemp ?
 }
 
 /**
  * UBAOutdoorTemp - type 0xD1 - external temperature
  */
 void _process_UBAOutdoorTemp(_EMS_RxTelegram * EMS_RxTelegram) {
-    if (_toShort(0) != EMS_VALUE_USHORT_NOTSET) { // 0x8000 if not available
-        EMS_Boiler.extTemp = _toShort(0);
-    }
+    _setValue(EMS_RxTelegram, &EMS_Boiler.extTemp, 0);
 }
 
 /**
@@ -1415,9 +1448,10 @@ void _process_UBAOutdoorTemp(_EMS_RxTelegram * EMS_RxTelegram) {
 void _process_RC10StatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     uint8_t hc = EMS_THERMOSTAT_DEFAULTHC - 1; // use HC1
 
-    EMS_Thermostat.hc[hc].active            = true;
-    EMS_Thermostat.hc[hc].setpoint_roomTemp = _toByte(EMS_OFFSET_RC10StatusMessage_setpoint); // is * 2
-    EMS_Thermostat.hc[hc].curr_roomTemp     = _toShort(EMS_OFFSET_RC10StatusMessage_curr);    // is * 10
+    EMS_Thermostat.hc[hc].active = true;
+
+    EMS_Thermostat.hc[hc].setpoint_roomTemp = EMS_RxTelegram->data[EMS_OFFSET_RC10StatusMessage_setpoint]; // store as a byte, is * 2
+    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].curr_roomTemp, EMS_OFFSET_RC10StatusMessage_curr);    // is * 10
 
     EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
 }
@@ -1430,9 +1464,10 @@ void _process_RC10StatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
 void _process_RC20StatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     uint8_t hc = EMS_THERMOSTAT_DEFAULTHC - 1; // use HC1
 
-    EMS_Thermostat.hc[hc].active            = true;
-    EMS_Thermostat.hc[hc].setpoint_roomTemp = _toByte(EMS_OFFSET_RC20StatusMessage_setpoint); // is * 2
-    EMS_Thermostat.hc[hc].curr_roomTemp     = _toShort(EMS_OFFSET_RC20StatusMessage_curr);    // is * 10
+    EMS_Thermostat.hc[hc].active = true;
+
+    EMS_Thermostat.hc[hc].setpoint_roomTemp = EMS_RxTelegram->data[EMS_OFFSET_RC20StatusMessage_setpoint]; // store as a byte, is * 2
+    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].curr_roomTemp, EMS_OFFSET_RC20StatusMessage_curr);    // is * 10
 
     EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
 }
@@ -1444,9 +1479,10 @@ void _process_RC20StatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
 void _process_RC30StatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     uint8_t hc = EMS_THERMOSTAT_DEFAULTHC - 1; // use HC1
 
-    EMS_Thermostat.hc[hc].active            = true;
-    EMS_Thermostat.hc[hc].setpoint_roomTemp = _toByte(EMS_OFFSET_RC30StatusMessage_setpoint); // is * 2
-    EMS_Thermostat.hc[hc].curr_roomTemp     = _toShort(EMS_OFFSET_RC30StatusMessage_curr);    // note, its 2 bytes here
+    EMS_Thermostat.hc[hc].active = true;
+
+    EMS_Thermostat.hc[hc].setpoint_roomTemp = EMS_RxTelegram->data[EMS_OFFSET_RC30StatusMessage_setpoint]; // store as a byte, is * 2
+    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].curr_roomTemp, EMS_OFFSET_RC30StatusMessage_curr);
 
     EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
 }
@@ -1492,19 +1528,17 @@ void _process_RC35StatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
 
     // ignore if the value is 0 (see https://github.com/proddy/EMS-ESP/commit/ccc30738c00f12ae6c89177113bd15af9826b836)
     if (EMS_RxTelegram->data[EMS_OFFSET_RC35StatusMessage_setpoint] != 0x00) {
-        EMS_Thermostat.hc[hc_num].setpoint_roomTemp = _toByte(EMS_OFFSET_RC35StatusMessage_setpoint); // is * 2
+        EMS_Thermostat.hc[hc_num].setpoint_roomTemp = EMS_RxTelegram->data[EMS_OFFSET_RC35StatusMessage_setpoint]; // is * 2
     }
 
     // ignore if the value is unset. Hopefully it will be picked up via a later message
-    if (EMS_RxTelegram->data[EMS_OFFSET_RC35StatusMessage_curr] != 0x7D) {
-        EMS_Thermostat.hc[hc_num].curr_roomTemp = _toShort(EMS_OFFSET_RC35StatusMessage_curr); // is * 10
-    }
+    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc_num].curr_roomTemp, EMS_OFFSET_RC35StatusMessage_curr); // is * 10
 
-    EMS_Thermostat.hc[hc_num].day_mode     = _bitRead(EMS_OFFSET_RC35StatusMessage_mode, 1);  // get day mode flag
-    EMS_Thermostat.hc[hc_num].summer_mode  = _bitRead(EMS_OFFSET_RC35StatusMessage_mode, 0);  // summer mode?
-    EMS_Thermostat.hc[hc_num].holiday_mode = _bitRead(EMS_OFFSET_RC35StatusMessage_mode1, 5); // holiday mode?
+    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc_num].day_mode, EMS_OFFSET_RC35StatusMessage_mode, 1);
+    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc_num].summer_mode, EMS_OFFSET_RC35StatusMessage_mode, 0);
+    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc_num].holiday_mode, EMS_OFFSET_RC35StatusMessage_mode1, 5);
 
-    EMS_Thermostat.hc[hc_num].circuitcalctemp = _toByte(EMS_OFFSET_RC35Set_circuitcalctemp); // calculated temperature
+    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc_num].circuitcalctemp, EMS_OFFSET_RC35Set_circuitcalctemp);
 
     EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
 }
@@ -1516,9 +1550,10 @@ void _process_RC35StatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
 void _process_EasyStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     uint8_t hc = EMS_THERMOSTAT_DEFAULTHC - 1; // use HC1
 
-    EMS_Thermostat.hc[hc].active            = true;
-    EMS_Thermostat.hc[hc].curr_roomTemp     = _toShort(EMS_OFFSET_EasyStatusMessage_curr);     // is *100
-    EMS_Thermostat.hc[hc].setpoint_roomTemp = _toShort(EMS_OFFSET_EasyStatusMessage_setpoint); // is *100
+    EMS_Thermostat.hc[hc].active = true;
+
+    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].curr_roomTemp, EMS_OFFSET_EasyStatusMessage_curr);         // is * 100
+    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].setpoint_roomTemp, EMS_OFFSET_EasyStatusMessage_setpoint); // is * 100
 
     EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
 }
@@ -1532,9 +1567,9 @@ void _process_MMPLUSStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
 
     if (EMS_RxTelegram->data_length == 1) {
     } else if (EMS_RxTelegram->data_length > 8) {
-        EMS_Mixing.hc[hc].flowTemp    = _toShort(EMS_OFFSET_MMPLUSStatusMessage_flow_temp);
-        EMS_Mixing.hc[hc].pumpMod     = _toByte(EMS_OFFSET_MMPLUSStatusMessage_pump_mod);
-        EMS_Mixing.hc[hc].valveStatus = _toByte(EMS_OFFSET_MMPLUSStatusMessage_valve_status);
+        _setValue(EMS_RxTelegram, &EMS_Mixing.hc[hc].flowTemp, EMS_OFFSET_MMPLUSStatusMessage_flow_temp);
+        _setValue(EMS_RxTelegram, &EMS_Mixing.hc[hc].pumpMod, EMS_OFFSET_MMPLUSStatusMessage_pump_mod);
+        _setValue(EMS_RxTelegram, &EMS_Mixing.hc[hc].valveStatus, EMS_OFFSET_MMPLUSStatusMessage_valve_status);
     }
 }
 
@@ -1550,25 +1585,24 @@ void _process_RCPLUSStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     }
     EMS_Thermostat.hc[hc].active = true;
 
-    // handle single data values
+    // handle single data values. data will always be a single byte a position data[0]
     if (EMS_RxTelegram->data_length == 1) {
         switch (EMS_RxTelegram->offset) {
-        case EMS_OFFSET_RCPLUSStatusMessage_curr:              // setpoint target temp
-            EMS_Thermostat.hc[hc].curr_roomTemp = _toShort(0); // value is * 10
+        case EMS_OFFSET_RCPLUSStatusMessage_curr:                               // setpoint target temp
+            _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].curr_roomTemp, 0); // value is * 10
             break;
-        case EMS_OFFSET_RCPLUSStatusMessage_setpoint:             // current target temp
-            EMS_Thermostat.hc[hc].setpoint_roomTemp = _toByte(0); // value is * 2
+        case EMS_OFFSET_RCPLUSStatusMessage_setpoint:                          // current target temp
+            EMS_Thermostat.hc[hc].setpoint_roomTemp = EMS_RxTelegram->data[0]; // convert to single byte, value is * 2
             break;
-        case EMS_OFFSET_RCPLUSStatusMessage_currsetpoint:         // current setpoint temp,  e.g. Thermostat -> all, telegram: 10 00 FF 06 01 A5 22
-            EMS_Thermostat.hc[hc].setpoint_roomTemp = _toByte(0); // value is * 2
+        case EMS_OFFSET_RCPLUSStatusMessage_currsetpoint:                      // current setpoint temp,  e.g. Thermostat -> all, telegram: 10 00 FF 06 01 A5 22
+            EMS_Thermostat.hc[hc].setpoint_roomTemp = EMS_RxTelegram->data[0]; // convert to single byte, value is * 2
             break;
         case EMS_OFFSET_RCPLUSStatusMessage_mode: // thermostat mode auto/manual
                                                   // manual : 10 00 FF 0A 01 A5 02
-                                                  // auto : Thermostat -> all, type 0x01A5 telegram: 10 00 FF 0A 01 A5 03
-
-            // Note this may be bit 2 instead of 1 on an RC300 - still to validate
-            EMS_Thermostat.hc[hc].mode     = _bitRead(0, 0); // bit 1, mode (auto=1 or manual=0)
-            EMS_Thermostat.hc[hc].day_mode = _bitRead(0, 1); // get day mode flag
+                                                  // auto :   10 00 FF 0A 01 A5 03
+            _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].mode, 0,
+                      0); // bit 1, mode (auto=1 or manual=0). Note this may be bit 2 - still need to validate
+            _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].day_mode, 0, 1); // get day mode flag
 
             break;
         }
@@ -1576,10 +1610,11 @@ void _process_RCPLUSStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
         // the whole telegram
         // e.g. Thermostat -> all, telegram: 10 00 FF 00 01 A5 00 D7 21 00 00 00 00 30 01 84 01 01 03 01 84 01 F1 00 00 11 01 00 08 63 00
         //                                   10 00 FF 00 01 A5 80 00 01 30 28 00 30 28 01 54 03 03 01 01 54 02 A8 00 00 11 01 03 FF FF 00
-        EMS_Thermostat.hc[hc].curr_roomTemp     = _toShort(EMS_OFFSET_RCPLUSStatusMessage_curr);    // value is * 10
-        EMS_Thermostat.hc[hc].setpoint_roomTemp = _toByte(EMS_OFFSET_RCPLUSStatusMessage_setpoint); // value is * 2
-        EMS_Thermostat.hc[hc].day_mode          = _bitRead(EMS_OFFSET_RCPLUSStatusMessage_mode, 1); // get day mode flag
-        EMS_Thermostat.hc[hc].mode              = _bitRead(EMS_OFFSET_RCPLUSStatusMessage_mode, 0); // bit 1, mode (auto=1 or manual=0)
+
+        _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].curr_roomTemp, EMS_OFFSET_RCPLUSStatusMessage_curr);    // value is * 10
+        EMS_Thermostat.hc[hc].setpoint_roomTemp = EMS_RxTelegram->data[EMS_OFFSET_RCPLUSStatusMessage_setpoint]; // convert to single byte, value is * 2
+        _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].day_mode, EMS_OFFSET_RCPLUSStatusMessage_mode, 1);
+        _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].mode, EMS_OFFSET_RCPLUSStatusMessage_mode, 0); // bit 1, mode (auto=1 or manual=0)
     }
 
     EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
@@ -1589,25 +1624,23 @@ void _process_RCPLUSStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
  * type 0x01AF - summer/winter mode from the Nefit RC1010 thermostat (0x18) and RC300/310s on 0x10
  */
 void _process_RCPLUSStatusMode(_EMS_RxTelegram * EMS_RxTelegram) {
-    // _toByte(0); // 0x00=OFF 0x01=Automatic 0x02=Forced
+    // data[0] // 0x00=OFF 0x01=Automatic 0x02=Forced
 }
 
 /**
  * FR10/FR50/FR100 Junkers - type x006F
+ *    e.g. for FR10:  90 00 FF 00 00 6F   03 01 00 BE 00 BF
+ *         for FW100: 90 00 FF 00 00 6F   03 02 00 D7 00 DA F3 34 00 C4
  */
 void _process_JunkersStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     if (EMS_RxTelegram->offset == 0 && EMS_RxTelegram->data_length > 1) {
         uint8_t hc                   = EMS_THERMOSTAT_DEFAULTHC - 1; // use HC1
         EMS_Thermostat.hc[hc].active = true;
 
-        // e.g. for FR10:  90 00 FF 00 00 6F   03 01 00 BE 00 BF
-        // e.g. for FW100: 90 00 FF 00 00 6F   03 02 00 D7 00 DA F3 34 00 C4
-
-        EMS_Thermostat.hc[hc].curr_roomTemp     = _toShort(EMS_OFFSET_JunkersStatusMessage_curr);     // value is * 10
-        EMS_Thermostat.hc[hc].setpoint_roomTemp = _toShort(EMS_OFFSET_JunkersStatusMessage_setpoint); // value is * 10
-
-        EMS_Thermostat.hc[hc].day_mode = _toByte(EMS_OFFSET_JunkersStatusMessage_daymode); // 3 = day, 2 = night
-        EMS_Thermostat.hc[hc].mode     = _toByte(EMS_OFFSET_JunkersStatusMessage_mode);    // 1 = manual, 2 = auto
+        _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].curr_roomTemp, EMS_OFFSET_JunkersStatusMessage_curr);         // value is * 10
+        _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].setpoint_roomTemp, EMS_OFFSET_JunkersStatusMessage_setpoint); // value is * 10
+        _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].day_mode, EMS_OFFSET_JunkersStatusMessage_daymode);           // 3 = day, 2 = night
+        _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].mode, EMS_OFFSET_JunkersStatusMessage_mode);                  // 1 = manual, 2 = auto
 
         EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
     }
@@ -1627,16 +1660,16 @@ void _process_RCPLUSSetMessage(_EMS_RxTelegram * EMS_RxTelegram) {
 
     // check for single values
     // but ignore values of 0xFF, e.g.  10 00 FF 08 01 B9 FF
-    if ((EMS_RxTelegram->data_length == 1) && (_toByte(0) != 0xFF)) {
-        // check for setpoint temps, e.g. Thermostat -> all, type 0x01B9, telegram: 10 00 FF 08 01 B9 26 (CRC=1A) #data=1
+    if ((EMS_RxTelegram->data_length == 1) && (EMS_RxTelegram->data[0] != 0xFF)) {
+        // check for setpoint temps, e.g. Thermostat -> all, type 0x01B9, telegram: 10 00 FF 08 01 B9 26
         if ((EMS_RxTelegram->offset == EMS_OFFSET_RCPLUSSet_temp_setpoint) || (EMS_RxTelegram->offset == EMS_OFFSET_RCPLUSSet_manual_setpoint)) {
-            EMS_Thermostat.hc[hc].setpoint_roomTemp = _toByte(0); // value is * 2
-            EMS_Sys_Status.emsRefreshed             = true;       // triggers a send the values back via MQTT
+            EMS_Thermostat.hc[hc].setpoint_roomTemp = EMS_RxTelegram->data[0]; // single byte conversion, value is * 2
+            EMS_Sys_Status.emsRefreshed             = true;                    // triggers a send the values back via MQTT
 
             // check for mode, eg.  10 00 FF 08 01 B9 FF
         } else if (EMS_RxTelegram->offset == EMS_OFFSET_RCPLUSSet_mode) {
-            EMS_Thermostat.hc[hc].mode  = (_toByte(0) == 0xFF); // Auto = xFF, Manual = x00   (auto=1 or manual=0)
-            EMS_Sys_Status.emsRefreshed = true;                 // triggers a send the values back via MQTT
+            EMS_Thermostat.hc[hc].mode  = (EMS_RxTelegram->data[0] == 0xFF); // Auto = xFF, Manual = x00   (auto=1 or manual=0)
+            EMS_Sys_Status.emsRefreshed = true;                              // triggers a send the values back via MQTT
         }
 
         return; // quit
@@ -1644,10 +1677,11 @@ void _process_RCPLUSSetMessage(_EMS_RxTelegram * EMS_RxTelegram) {
 
     // check for long broadcasts
     if (EMS_RxTelegram->offset == 0) {
-        EMS_Thermostat.hc[hc].mode      = _toByte(EMS_OFFSET_RCPLUSSet_mode);
-        EMS_Thermostat.hc[hc].daytemp   = _toByte(EMS_OFFSET_RCPLUSSet_temp_comfort2); // is * 2
-        EMS_Thermostat.hc[hc].nighttemp = _toByte(EMS_OFFSET_RCPLUSSet_temp_eco);      // is * 2
-        EMS_Sys_Status.emsRefreshed     = true;                                        // triggers a send the values back via MQTT
+        _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].mode, EMS_OFFSET_RCPLUSSet_mode);
+        _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].daytemp, EMS_OFFSET_RCPLUSSet_temp_comfort2); // is * 2
+        _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].nighttemp, EMS_OFFSET_RCPLUSSet_temp_eco);    // is * 2
+
+        EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
     }
 }
 
@@ -1667,7 +1701,7 @@ void _process_RC20Set(_EMS_RxTelegram * EMS_RxTelegram) {
     uint8_t hc = EMS_THERMOSTAT_DEFAULTHC - 1; // use HC1
 
     EMS_Thermostat.hc[hc].active = true;
-    EMS_Thermostat.hc[hc].mode   = _toByte(EMS_OFFSET_RC20Set_mode); // fixed for HC1
+    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].mode, EMS_OFFSET_RC20Set_mode); // note, fixed for HC1
 }
 
 /**
@@ -1678,7 +1712,7 @@ void _process_RC30Set(_EMS_RxTelegram * EMS_RxTelegram) {
     uint8_t hc = EMS_THERMOSTAT_DEFAULTHC - 1; // use HC1
 
     EMS_Thermostat.hc[hc].active = true;
-    EMS_Thermostat.hc[hc].mode   = _toByte(EMS_OFFSET_RC30Set_mode); // fixed for HC1
+    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].mode, EMS_OFFSET_RC30Set_mode); // note, fixed for HC1
 }
 
 // return which heating circuit it is, 0-3 for HC1 to HC4
@@ -1721,7 +1755,7 @@ uint8_t _getHeatingCircuit(_EMS_RxTelegram * EMS_RxTelegram) {
  * 10 0B 5B 00  00 13 15 26 00 28 00 02 00 05 05 2D 01 01 04 4B 05 4B 01 00 3C FF 11 05 05 03 02
  */
 void _process_RC35Set(_EMS_RxTelegram * EMS_RxTelegram) {
-    // check to see what type is it
+    // check to see we have a valid type
     // heating: 1 radiator, 2 convectors, 3 floors, 4 room supply
     if (EMS_RxTelegram->data[0] == 0x00) {
         return;
@@ -1729,11 +1763,11 @@ void _process_RC35Set(_EMS_RxTelegram * EMS_RxTelegram) {
 
     uint8_t hc_num = _getHeatingCircuit(EMS_RxTelegram); // which HC is it?
 
-    EMS_Thermostat.hc[hc_num].mode        = _toByte(EMS_OFFSET_RC35Set_mode);         // night, day, auto
-    EMS_Thermostat.hc[hc_num].daytemp     = _toByte(EMS_OFFSET_RC35Set_temp_day);     // is * 2
-    EMS_Thermostat.hc[hc_num].nighttemp   = _toByte(EMS_OFFSET_RC35Set_temp_night);   // is * 2
-    EMS_Thermostat.hc[hc_num].holidaytemp = _toByte(EMS_OFFSET_RC35Set_temp_holiday); // is * 2
-    EMS_Thermostat.hc[hc_num].heatingtype = _toByte(EMS_OFFSET_RC35Set_heatingtype);  // byte 0 bit floor heating = 3
+    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc_num].mode, EMS_OFFSET_RC35Set_mode);                // night, day, auto
+    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc_num].daytemp, EMS_OFFSET_RC35Set_temp_day);         // is * 2
+    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc_num].nighttemp, EMS_OFFSET_RC35Set_temp_night);     // is * 2
+    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc_num].holidaytemp, EMS_OFFSET_RC35Set_temp_holiday); // is * 2
+    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc_num].heatingtype, EMS_OFFSET_RC35Set_heatingtype);  // byte 0 bit floor heating = 3
 
     EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
 }
@@ -1749,10 +1783,10 @@ void _process_RCOutdoorTempMessage(_EMS_RxTelegram * EMS_RxTelegram) {
  * SM10Monitor - type 0x97
  */
 void _process_SM10Monitor(_EMS_RxTelegram * EMS_RxTelegram) {
-    EMS_SolarModule.collectorTemp  = _toShort(2);    // collector temp from SM10, is *10
-    EMS_SolarModule.bottomTemp     = _toShort(5);    // bottom temp from SM10, is *10
-    EMS_SolarModule.pumpModulation = _toByte(4);     // modulation solar pump
-    EMS_SolarModule.pump           = _bitRead(7, 1); // active if bit 1 is set
+    _setValue(EMS_RxTelegram, &EMS_SolarModule.collectorTemp, 2);  // collector temp from SM10, is *10
+    _setValue(EMS_RxTelegram, &EMS_SolarModule.bottomTemp, 5);     // bottom temp from SM10, is *10
+    _setValue(EMS_RxTelegram, &EMS_SolarModule.pumpModulation, 4); // modulation solar pump
+    _setValue(EMS_RxTelegram, &EMS_SolarModule.pump, 7, 1);        // active if bit 1 is set
 
     EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
 }
@@ -1769,11 +1803,8 @@ void _process_SM100Monitor(_EMS_RxTelegram * EMS_RxTelegram) {
         return;
     }
 
-    EMS_SolarModule.collectorTemp = _toShort(0); // collector temp from SM100, is *10
-
-    if (EMS_RxTelegram->data_length > 2) {
-        EMS_SolarModule.bottomTemp = _toShort(2); // bottom temp from SM100, is *10
-    }
+    _setValue(EMS_RxTelegram, &EMS_SolarModule.collectorTemp, 0); // is *10
+    _setValue(EMS_RxTelegram, &EMS_SolarModule.bottomTemp, 2);    // is *10
 
     EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
 }
@@ -1784,12 +1815,10 @@ void _process_SM100Monitor(_EMS_RxTelegram * EMS_RxTelegram) {
  *      30 00 FF 09 02 64 1E = 30%
  */
 void _process_SM100Status(_EMS_RxTelegram * EMS_RxTelegram) {
-    // check for complete telegram
     if (EMS_RxTelegram->offset == 0) {
-        EMS_SolarModule.pumpModulation = _toByte(9); // modulation solar pump
+        _setValue(EMS_RxTelegram, &EMS_SolarModule.pumpModulation, 9); // check for complete telegram
     } else if (EMS_RxTelegram->offset == 0x09) {
-        // or short telegram with a single byte with offset 09
-        EMS_SolarModule.pumpModulation = _toByte(0); // modulation solar pump
+        _setValue(EMS_RxTelegram, &EMS_SolarModule.pumpModulation, 0); // or short telegram with a single byte with offset 09
     }
 
     EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
@@ -1799,12 +1828,11 @@ void _process_SM100Status(_EMS_RxTelegram * EMS_RxTelegram) {
  * SM100Status2 - type 0x026A EMS+ for pump on/off at offset 0x0A
  */
 void _process_SM100Status2(_EMS_RxTelegram * EMS_RxTelegram) {
-    // check for complete telegram
     if (EMS_RxTelegram->offset == 0) {
-        EMS_SolarModule.pump = _bitRead(10, 2); // 03=off 04=on at offset 10 which is byte 10
+        _setValue(EMS_RxTelegram, &EMS_SolarModule.pump, 10, 2); // 03=off 04=on
     } else if (EMS_RxTelegram->offset == 0x0A) {
         // or short telegram with a single byte with offset 0A
-        EMS_SolarModule.pump = _bitRead(0, 2); // 03=off 04=on
+        _setValue(EMS_RxTelegram, &EMS_SolarModule.pump, 0, 2); // 03=off 04=on
     }
 
     EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
@@ -1815,9 +1843,9 @@ void _process_SM100Status2(_EMS_RxTelegram * EMS_RxTelegram) {
  * e.g. 30 00 FF 00 02 8E 00 00 00 00 00 00 06 C5 00 00 76 35
  */
 void _process_SM100Energy(_EMS_RxTelegram * EMS_RxTelegram) {
-    EMS_SolarModule.EnergyLastHour = _toShort(2);  // last hour / 10 in Wh
-    EMS_SolarModule.EnergyToday    = _toShort(6);  // todays in Wh
-    EMS_SolarModule.EnergyTotal    = _toShort(10); // total / 10 in kWh
+    _setValue(EMS_RxTelegram, &EMS_SolarModule.EnergyLastHour, 2); // last hour / 10 in Wh
+    _setValue(EMS_RxTelegram, &EMS_SolarModule.EnergyToday, 6);    //  todays in Wh
+    _setValue(EMS_RxTelegram, &EMS_SolarModule.EnergyTotal, 10);   //  total / 10 in kWh
 
     EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
 }
@@ -1826,7 +1854,7 @@ void _process_SM100Energy(_EMS_RxTelegram * EMS_RxTelegram) {
  * Type 0xE3 - HeatPump Monitor 1
  */
 void _process_HPMonitor1(_EMS_RxTelegram * EMS_RxTelegram) {
-    EMS_HeatPump.HPModulation = _toByte(13); // modulation %
+    _setValue(EMS_RxTelegram, &EMS_HeatPump.HPModulation, 13); // %
 
     EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
 }
@@ -1835,27 +1863,27 @@ void _process_HPMonitor1(_EMS_RxTelegram * EMS_RxTelegram) {
  * Type 0xE5 - HeatPump Monitor 2
  */
 void _process_HPMonitor2(_EMS_RxTelegram * EMS_RxTelegram) {
-    EMS_HeatPump.HPSpeed = _toByte(25); // speed %
+    _setValue(EMS_RxTelegram, &EMS_HeatPump.HPSpeed, 25); // %
 
     EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
 }
 
 /*
  * Junkers ISM1 Solar Module - type 0x0003 EMS+ for energy readings
+ *  e.g. B0 00 FF 00 00 03 32 00 00 00 00 13 00 D6 00 00 00 FB D0 F0
  */
 void _process_ISM1StatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     if (EMS_RxTelegram->offset == 0) {
-        // e.g. B0 00 FF 00 00 03 32 00 00 00 00 13 00 D6 00 00 00 FB D0 F0
-        EMS_SolarModule.collectorTemp  = _toShort(4);    // Collector Temperature
-        EMS_SolarModule.bottomTemp     = _toShort(6);    // Temperature Bottom of Solar Boiler
-        EMS_SolarModule.EnergyLastHour = _toShort(2);    // Solar Energy produced in last hour - is * 10 and handled in ems-esp.cpp
-        EMS_SolarModule.pump           = _bitRead(8, 0); // Solar pump on (1) or off (0)
-        EMS_SolarModule.pumpWorkMin    = _toLong(10);
+        _setValue(EMS_RxTelegram, &EMS_SolarModule.collectorTemp, 4);  // Collector Temperature
+        _setValue(EMS_RxTelegram, &EMS_SolarModule.bottomTemp, 6);     // Temperature Bottom of Solar Boiler
+        _setValue(EMS_RxTelegram, &EMS_SolarModule.EnergyLastHour, 2); // Solar Energy produced in last hour - is * 10 and handled in ems-esp.cpp
+        _setValue(EMS_RxTelegram, &EMS_SolarModule.pump, 8, 0);        // Solar pump on (1) or off (0)
+        _setValue(EMS_RxTelegram, &EMS_SolarModule.pumpWorkMin, 10);
     }
 
     if (EMS_RxTelegram->offset == 4) {
         // e.g. B0 00 FF 04 00 03 02 E5
-        EMS_SolarModule.collectorTemp = _toShort(0); // Collector Temperature
+        _setValue(EMS_RxTelegram, &EMS_SolarModule.collectorTemp, 0); // Collector Temperature
     }
 }
 
@@ -1867,7 +1895,7 @@ void _process_ISM1Set(_EMS_RxTelegram * EMS_RxTelegram) {
     if (EMS_RxTelegram->offset == 6) {
         // e.g. 90 30 FF 06 00 01 50 (CRC=2C)
         // to implement: change max solar boiler temperature
-        EMS_SolarModule.setpoint_maxBottomTemp = _toByte(0);
+        EMS_SolarModule.setpoint_maxBottomTemp = EMS_RxTelegram->data[0];
     }
 }
 
@@ -1907,17 +1935,17 @@ void _process_RCTime(_EMS_RxTelegram * EMS_RxTelegram) {
     char time_sp[25];
     char buffer[4];
 
-    strlcpy(time_sp, _smallitoa(_toByte(2), buffer), sizeof(time_sp)); // hour
+    strlcpy(time_sp, _smallitoa(EMS_RxTelegram->data[2], buffer), sizeof(time_sp)); // hour
     strlcat(time_sp, ":", sizeof(time_sp));
-    strlcat(time_sp, _smallitoa(_toByte(4), buffer), sizeof(time_sp)); // minute
+    strlcat(time_sp, _smallitoa(EMS_RxTelegram->data[4], buffer), sizeof(time_sp)); // minute
     strlcat(time_sp, ":", sizeof(time_sp));
-    strlcat(time_sp, _smallitoa(_toByte(5), buffer), sizeof(time_sp)); // second
+    strlcat(time_sp, _smallitoa(EMS_RxTelegram->data[5], buffer), sizeof(time_sp)); // second
     strlcat(time_sp, " ", sizeof(time_sp));
-    strlcat(time_sp, _smallitoa(_toByte(3), buffer), sizeof(time_sp)); // day
+    strlcat(time_sp, _smallitoa(EMS_RxTelegram->data[3], buffer), sizeof(time_sp)); // day
     strlcat(time_sp, "/", sizeof(time_sp));
-    strlcat(time_sp, _smallitoa(_toByte(1), buffer), sizeof(time_sp)); // month
+    strlcat(time_sp, _smallitoa(EMS_RxTelegram->data[1], buffer), sizeof(time_sp)); // month
     strlcat(time_sp, "/", sizeof(time_sp));
-    strlcat(time_sp, itoa(_toByte(0) + 2000, buffer, 10), sizeof(time_sp)); // year
+    strlcat(time_sp, itoa(EMS_RxTelegram->data[0] + 2000, buffer, 10), sizeof(time_sp)); // year
 
     strlcpy(EMS_Thermostat.datetime, time_sp, sizeof(time_sp)); // store
 }
@@ -2055,12 +2083,12 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
     // get version as XX.XX
     char version[10] = {0};
     char buf[6]      = {0};
-    strlcpy(version, _smallitoa(_toByte(offset + 1), buf), sizeof(version));
+    strlcpy(version, _smallitoa(EMS_RxTelegram->data[offset + 1], buf), sizeof(version));
     strlcat(version, ".", sizeof(version));
-    strlcat(version, _smallitoa(_toByte(offset + 2), buf), sizeof(version));
+    strlcat(version, _smallitoa(EMS_RxTelegram->data[offset + 2], buf), sizeof(version));
 
     // scan through known devices matching the productid
-    uint8_t product_id = _toByte(offset);
+    uint8_t product_id = EMS_RxTelegram->data[offset];
     uint8_t i          = 0;
     bool    typeFound  = false;
     while (i < _EMS_Devices_max) {
