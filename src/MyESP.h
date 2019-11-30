@@ -113,7 +113,7 @@ extern struct rst_info resetInfo;
 // Telnet
 #define TELNET_SERIAL_BAUD 115200
 #define TELNET_MAX_COMMAND_LENGTH 80 // length of a command
-#define TELNET_MAX_BUFFER_LENGTH 300 // max length of telnet string
+#define TELNET_MAX_BUFFER_LENGTH 700 // max length of telnet string
 #define TELNET_EVENT_CONNECT 1
 #define TELNET_EVENT_DISCONNECT 0
 #define TELNET_EVENT_SHOWCMD 10
