@@ -515,8 +515,8 @@ void publishSensorValues(bool force) {
         return; // no sensors attached
     }
 
-    StaticJsonDocument<200> doc;
-    JsonObject              sensors = doc.to<JsonObject>();
+    StaticJsonDocument<MYESP_JSON_MAXSIZE_SMALL> doc;
+    JsonObject                                   sensors = doc.to<JsonObject>();
 
     bool hasdata  = false;
     char label[8] = {0};
@@ -539,7 +539,7 @@ void publishSensorValues(bool force) {
     CRC32    crc;
     uint32_t fchecksum;
 
-    char data[200] = {0};
+    char data[MYESP_JSON_MAXSIZE_SMALL] = {0};
     serializeJson(doc, data, sizeof(data));
 
     size_t jsonSize = measureJson(doc);
@@ -1038,10 +1038,10 @@ bool LoadSaveCallback(MYESP_FSACTION_t action, JsonObject settings) {
 
 // Publish shower data
 bool do_publishShowerData() {
-    StaticJsonDocument<200> doc;
-    JsonObject              rootShower = doc.to<JsonObject>();
-    rootShower[TOPIC_SHOWER_TIMER]     = EMSESP_Settings.shower_timer ? "1" : "0";
-    rootShower[TOPIC_SHOWER_ALERT]     = EMSESP_Settings.shower_alert ? "1" : "0";
+    StaticJsonDocument<MYESP_JSON_MAXSIZE_SMALL> doc;
+    JsonObject                                   rootShower = doc.to<JsonObject>();
+    rootShower[TOPIC_SHOWER_TIMER]                          = EMSESP_Settings.shower_timer ? "1" : "0";
+    rootShower[TOPIC_SHOWER_ALERT]                          = EMSESP_Settings.shower_alert ? "1" : "0";
 
     // only publish shower duration if there is a value
     char s[50] = {0};
@@ -1486,8 +1486,8 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
     // check first for generic commands
     if (strcmp(topic, TOPIC_GENERIC_CMD) == 0) {
         // convert JSON and get the command
-        StaticJsonDocument<100> doc;
-        DeserializationError    error = deserializeJson(doc, message); // Deserialize the JSON document
+        StaticJsonDocument<MYESP_JSON_MAXSIZE_SMALL> doc;
+        DeserializationError                         error = deserializeJson(doc, message); // Deserialize the JSON document
         if (error) {
             myDebug_P(PSTR("[MQTT] Invalid command from topic %s, payload %s, error %s"), topic, message, error.c_str());
             return;
@@ -1505,8 +1505,8 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
 
     // check for shower commands
     if (strcmp(topic, TOPIC_SHOWER_DATA) == 0) {
-        StaticJsonDocument<100> doc;
-        DeserializationError    error = deserializeJson(doc, message); // Deserialize the JSON document
+        StaticJsonDocument<MYESP_JSON_MAXSIZE_SMALL> doc;
+        DeserializationError                         error = deserializeJson(doc, message); // Deserialize the JSON document
         if (error) {
             myDebug_P(PSTR("[MQTT] Invalid command from topic %s, payload %s, error %s"), topic, message, error.c_str());
             return;
@@ -1532,8 +1532,8 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
     // check for boiler commands
     if (strcmp(topic, TOPIC_BOILER_CMD) == 0) {
         // convert JSON and get the command
-        StaticJsonDocument<100> doc;
-        DeserializationError    error = deserializeJson(doc, message); // Deserialize the JSON document
+        StaticJsonDocument<MYESP_JSON_MAXSIZE_SMALL> doc;
+        DeserializationError                         error = deserializeJson(doc, message); // Deserialize the JSON document
         if (error) {
             myDebug_P(PSTR("[MQTT] Invalid command from topic %s, payload %s, error %s"), topic, message, error.c_str());
             return;
@@ -1619,8 +1619,8 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
     // check for generic thermostat commands
     if (strcmp(topic, TOPIC_THERMOSTAT_CMD) == 0) {
         // convert JSON and get the command
-        StaticJsonDocument<100> doc;
-        DeserializationError    error = deserializeJson(doc, message); // Deserialize the JSON document
+        StaticJsonDocument<MYESP_JSON_MAXSIZE_SMALL> doc;
+        DeserializationError                         error = deserializeJson(doc, message); // Deserialize the JSON document
         if (error) {
             myDebug_P(PSTR("[MQTT] Invalid command from topic %s, payload %s, error %s"), topic, message, error.c_str());
             return;
