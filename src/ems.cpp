@@ -1272,6 +1272,8 @@ void _checkActive() {
     if (EMS_Boiler.selFlowTemp != EMS_VALUE_INT_NOTSET && EMS_Boiler.burnGas != EMS_VALUE_INT_NOTSET) {
         EMS_Boiler.heatingActive = ((EMS_Boiler.selFlowTemp >= EMS_BOILER_SELFLOWTEMP_HEATING) && (EMS_Boiler.burnGas == EMS_VALUE_INT_ON));
     }
+
+    EMS_Sys_Status.emsRefreshed = true; // triggers a send the values back via MQTT
 }
 
 /**

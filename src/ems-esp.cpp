@@ -706,12 +706,12 @@ void publishEMSValues(bool force) {
 
     // see if the heating or hot tap water has changed, if so send
     // last_boilerActive stores heating in bit 1 and tap water in bit 2
-    if ((last_boilerActive != ((EMS_Boiler.tapwaterActive << 1) + EMS_Boiler.heatingActive)) || force) {
+    if ((last_boilerActive != ((EMS_Boiler.tapwaterActive << 1) | EMS_Boiler.heatingActive)) || force) {
         myDebugLog("Publishing hot water and heating states via MQTT");
         myESP.mqttPublish(TOPIC_BOILER_TAPWATER_ACTIVE, EMS_Boiler.tapwaterActive == 1 ? "1" : "0");
         myESP.mqttPublish(TOPIC_BOILER_HEATING_ACTIVE, EMS_Boiler.heatingActive == 1 ? "1" : "0");
 
-        last_boilerActive = ((EMS_Boiler.tapwaterActive << 1) + EMS_Boiler.heatingActive); // remember last state
+        last_boilerActive = ((EMS_Boiler.tapwaterActive << 1) | EMS_Boiler.heatingActive); // remember last state
     }
 
     // handle the thermostat values
@@ -2030,13 +2030,8 @@ void loop() {
             do_regularUpdates();
             publishEMSValues(true);
             publishSensorValues(true);
-            _need_first_publish = false; // reset flag
-        }
-
-        // publish all the values to MQTT
-        // but only if the values have changed and publish_time is on automatic mode
-        // always publish when we get the first results, regardless of any publish_time setting
-        if (EMSESP_Settings.publish_time == 0) {
+            _need_first_publish = false; // reset flag, so only do this once
+        } else {
             publishEMSValues(false);
             publishSensorValues(false);
         }
