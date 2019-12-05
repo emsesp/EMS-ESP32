@@ -55,6 +55,8 @@ char * _short_to_char(char * s, int16_t value, uint8_t decimals) {
     if (value < 0) {
         strlcpy(s, "-", 10);
         value *= -1; // convert to positive
+    } else {
+        strlcpy(s, "", 10);
     }
 
     // do floating point
