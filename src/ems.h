@@ -23,12 +23,14 @@
 #define EMS_MAX_TELEGRAM_LENGTH 32 // max length of a telegram, including CRC, for Rx and Tx.
 
 // default values for null values
-#define EMS_VALUE_INT_ON 1             // boolean true
-#define EMS_VALUE_INT_OFF 0            // boolean false
+#define EMS_VALUE_BOOL_ON 0x01         // boolean true
+#define EMS_VALUE_BOOL_ON2 0xFF        // boolean true, EMS sometimes uses 0xFF for TRUE
+#define EMS_VALUE_BOOL_OFF 0x00        // boolean false
 #define EMS_VALUE_INT_NOTSET 0xFF      // for 8-bit unsigned ints/bytes
 #define EMS_VALUE_SHORT_NOTSET -32768  // for 2-byte signed shorts
 #define EMS_VALUE_USHORT_NOTSET 0x8000 // for 2-byte unsigned shorts
 #define EMS_VALUE_LONG_NOTSET 0xFFFFFF // for 3-byte longs
+#define EMS_VALUE_BOOL_NOTSET 0xFE     // random number that's not 0, 1 or FF
 
 // thermostat specific
 #define EMS_THERMOSTAT_MAXHC 4     // max number of heating circuits
@@ -37,7 +39,6 @@
 #define EMS_THERMOSTAT_WRITE_NO false
 
 // Device Flags
-
 #define EMS_DEVICE_FLAG_NONE 0   // no flags set
 #define EMS_DEVICE_FLAG_SM10 10  // solar module1
 #define EMS_DEVICE_FLAG_SM100 11 // solar module2
@@ -125,7 +126,7 @@ typedef struct {
     bool             emsPollEnabled;                         // flag enable the response to poll messages
     _EMS_SYS_LOGGING emsLogging;                             // logging
     uint16_t         emsLogging_typeID;                      // the typeID to watch
-    bool             emsRefreshed;                           // fresh data, needs to be pushed out to MQTT
+    uint8_t          emsRefreshedFlags;                      // fresh data, needs to be pushed out to MQTT
     bool             emsBusConnected;                        // is there an active bus
     uint32_t         emsRxTimestamp;                         // timestamp of last EMS message received
     uint32_t         emsPollFrequency;                       // time between EMS polls
@@ -150,7 +151,6 @@ typedef struct {
     uint8_t                 comparisonValue;    // value to compare against during a validate command
     uint8_t                 comparisonOffset;   // offset of where the byte is we want to compare too during validation
     uint16_t                comparisonPostRead; // after a successful write, do a read from this type ID
-    bool                    forceRefresh;       // should we send to MQTT after a successful Tx?
     unsigned long           timestamp;          // when created
     uint8_t                 data[EMS_MAX_TELEGRAM_LENGTH];
 } _EMS_TxTelegram;
@@ -182,13 +182,22 @@ const _EMS_TxTelegram EMS_TX_TELEGRAM_NEW = {
     0,                    // comparisonValue
     0,                    // comparisonOffset
     EMS_ID_NONE,          // comparisonPostRead
-    false,                // forceRefresh
     0,                    // timestamp
     {0x00}                // data
 };
 
-typedef enum {
-    EMS_DEVICE_TYPE_NONE,
+// flags for triggering changes when EMS data is received
+typedef enum : uint8_t {
+    EMS_DEVICE_UPDATE_FLAG_NONE       = 0,
+    EMS_DEVICE_UPDATE_FLAG_BOILER     = (1 << 0),
+    EMS_DEVICE_UPDATE_FLAG_THERMOSTAT = (1 << 1),
+    EMS_DEVICE_UPDATE_FLAG_MIXING     = (1 << 2),
+    EMS_DEVICE_UPDATE_FLAG_SOLAR      = (1 << 3),
+    EMS_DEVICE_UPDATE_FLAG_HEATPUMP   = (1 << 4)
+} _EMS_DEVICE_UPDATE_FLAG;
+
+typedef enum : uint8_t {
+    EMS_DEVICE_TYPE_NONE = 0,
     EMS_DEVICE_TYPE_SERVICEKEY,
     EMS_DEVICE_TYPE_BOILER,
     EMS_DEVICE_TYPE_THERMOSTAT,
@@ -378,16 +387,17 @@ typedef void (*EMS_processType_cb)(_EMS_RxTelegram * EMS_RxTelegram);
 
 // Definition for each EMS type, including the relative callback function
 typedef struct {
-    uint16_t           type;
-    const char         typeString[30];
-    EMS_processType_cb processType_cb;
+    _EMS_DEVICE_UPDATE_FLAG device_flag;
+    uint16_t                type;
+    const char              typeString[30];
+    EMS_processType_cb      processType_cb;
 } _EMS_Type;
 
 // function definitions
 void             ems_dumpBuffer(const char * prefix, uint8_t * telegram, uint8_t length);
 void             ems_parseTelegram(uint8_t * telegram, uint8_t len);
 void             ems_init();
-void             ems_doReadCommand(uint16_t type, uint8_t dest, bool forceRefresh = false);
+void             ems_doReadCommand(uint16_t type, uint8_t dest);
 void             ems_sendRawTelegram(char * telegram);
 void             ems_scanDevices();
 void             ems_printDevices();
@@ -406,7 +416,6 @@ void             ems_setWarmWaterOnetime(bool activated);
 void             ems_setWarmTapWaterActivated(bool activated);
 void             ems_setPoll(bool b);
 void             ems_setLogging(_EMS_SYS_LOGGING loglevel, uint16_t type_id = 0);
-void             ems_setEmsRefreshed(bool b);
 void             ems_setWarmWaterModeComfort(uint8_t comfort);
 void             ems_setModels();
 void             ems_setTxDisabled(bool b);
@@ -425,13 +434,15 @@ bool             ems_getSolarModuleEnabled();
 bool             ems_getHeatPumpEnabled();
 bool             ems_getBusConnected();
 _EMS_SYS_LOGGING ems_getLogging();
-bool             ems_getEmsRefreshed();
 uint8_t          ems_getThermostatModel();
 uint8_t          ems_getSolarModuleModel();
 void             ems_discoverModels();
 bool             ems_getTxCapable();
 uint32_t         ems_getPollFrequency();
 bool             ems_getTxDisabled();
+void             ems_Device_add_flags(unsigned int flags);
+bool             ems_Device_has_flags(unsigned int flags);
+void             ems_Device_remove_flags(unsigned int flags);
 
 // private functions
 uint8_t _crcCalculator(uint8_t * data, uint8_t len);

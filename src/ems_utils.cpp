@@ -25,11 +25,11 @@ char * _float_to_char(char * a, float f, uint8_t precision) {
 
 // convert bool to text. bools are stored as bytes
 char * _bool_to_char(char * s, uint8_t value) {
-    if (value == EMS_VALUE_INT_ON) {
+    if ((value == EMS_VALUE_BOOL_ON) || (value == EMS_VALUE_BOOL_ON2)) {
         strlcpy(s, "on", sizeof(s));
-    } else if (value == EMS_VALUE_INT_OFF) {
+    } else if (value == EMS_VALUE_BOOL_OFF) {
         strlcpy(s, "off", sizeof(s));
-    } else {
+    } else { // EMS_VALUE_BOOL_NOTSET
         strlcpy(s, "?", sizeof(s));
     }
     return s;

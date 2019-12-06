@@ -34,10 +34,11 @@ There are breaking changes in this release. See `publish_time` below and make su
 - fixed version numbers of libraries in `platformio.ini`
 - Normalized Heating modes to `off`, `manual`, `auto`, `night` and `day` to keep generic and not Home Assistant specific (like `heat`)
 - Keeping Thermostat day/night modes separate from off/auto/manual, and setting this for the Junkers FR50
-- Removed `publish_always` and use `publish_time`. For automatic mode you will need to change `publish_time` to 0 which will send MQTT every time data has changed (every 10 seconds).
+- Removed `publish_always`
 - Changed NTP interval from 1 hour to 12 hours
 - Refactored EMS device library to make it support multi-EMS devices easier (e.g. multiple thermostats)
 - `autodetect deep` removed and replaced with `autodetect scan` for scanning known devices.
+- MQTT data will be sent when new data arrives. So `publish_time` is used to force a publish at a given frequency (2 mins is default), or 0 for off.
 
 ### Removed
 

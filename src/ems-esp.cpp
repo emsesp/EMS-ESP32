@@ -22,7 +22,6 @@ DS18 ds18;
 
 // public libraries
 #include <ArduinoJson.h> // https://github.com/bblanchon/ArduinoJson
-#include <CRC32.h>       // https://github.com/bakercp/CRC32
 
 // standard arduino libs
 #include <Ticker.h> // https://github.com/esp8266/Arduino/tree/master/libraries/Ticker
@@ -505,7 +504,7 @@ void showInfo() {
 }
 
 // send all dallas sensor values as a JSON package to MQTT
-void publishSensorValues(bool force) {
+void publishSensorValues() {
     // don't send if MQTT is connected
     if (!myESP.isMQTTConnected()) {
         return;
@@ -536,186 +535,145 @@ void publishSensorValues(bool force) {
         return; // nothing to send
     }
 
-    CRC32    crc;
-    uint32_t fchecksum;
-
     char data[200] = {0};
     serializeJson(doc, data, sizeof(data));
-
-    size_t jsonSize = measureJson(doc);
-    if (hasdata && (jsonSize > 2)) {
-        // calculate hash and send values if something has changed, to save unnecessary wifi traffic
-        for (uint8_t i = 0; i < (jsonSize - 1); i++) {
-            crc.update(data[i]);
-        }
-        fchecksum = crc.finalize();
-        static uint32_t previousSensorPublishCRC; // CRC check for new values
-        if ((previousSensorPublishCRC != fchecksum) || force) {
-            previousSensorPublishCRC = fchecksum;
-            myDebugLog("Publishing external sensor data via MQTT");
-            myESP.mqttPublish(TOPIC_EXTERNAL_SENSORS, data);
-        }
-    }
+    myDebugLog("Publishing external sensor data via MQTT");
+    myESP.mqttPublish(TOPIC_EXTERNAL_SENSORS, data);
 }
 
 // send values via MQTT
-// a json object is created for the boiler and one for the thermostat
-// CRC check is done to see if there are changes in the values since the last send to avoid too much wifi traffic
-// a check is done against the previous values and if there are changes only then they are published. Unless force=true
+// a json object is created for each device type
 void publishEMSValues(bool force) {
-    // don't send if MQTT is not connected
-    if (!myESP.isMQTTConnected()) {
+    // don't send if MQTT is not connected or EMS bus is not connected
+    if (!myESP.isMQTTConnected() || (!ems_getBusConnected())) {
         return;
     }
-
-    if (!ems_getBusConnected()) {
-        return; // EMS bus is not connected
-    }
-
-    // Always send values is there is a publish_time is set to 0
-    force = !EMSESP_Settings.publish_time;
 
     char                                      s[20] = {0}; // for formatting strings
     StaticJsonDocument<MQTT_MAX_PAYLOAD_SIZE> doc;
     char                                      data[MQTT_MAX_PAYLOAD_SIZE] = {0};
-    CRC32                                     crc;
-    uint32_t                                  fchecksum;
     uint8_t                                   jsonSize;
 
-    static uint8_t  last_boilerActive        = 0xFF; // for remembering last setting of the tap water or heating on/off
-    static uint32_t previousBoilerPublishCRC = 0;    // CRC check for boiler values
-    static uint32_t previousThermostatPublishCRC;    // CRC check for thermostat values
-    static uint32_t previousMixingPublishCRC;        // CRC check for mixing values
-    static uint32_t previousSMPublishCRC = 0;        // CRC check for Solar Module values (e.g. SM10)
+    static uint8_t last_boilerActive = 0xFF; // for remembering last setting of the tap water or heating on/off
 
-    JsonObject rootBoiler = doc.to<JsonObject>();
+    // do we have boiler changes?
+    if (ems_getBoilerEnabled() && (ems_Device_has_flags(EMS_DEVICE_UPDATE_FLAG_BOILER) || force)) {
+        JsonObject rootBoiler = doc.to<JsonObject>();
 
-    if (EMS_Boiler.wWComfort == EMS_VALUE_UBAParameterWW_wwComfort_Hot) {
-        rootBoiler["wWComfort"] = "Hot";
-    } else if (EMS_Boiler.wWComfort == EMS_VALUE_UBAParameterWW_wwComfort_Eco) {
-        rootBoiler["wWComfort"] = "Eco";
-    } else if (EMS_Boiler.wWComfort == EMS_VALUE_UBAParameterWW_wwComfort_Intelligent) {
-        rootBoiler["wWComfort"] = "Intelligent";
-    }
-
-    if (EMS_Boiler.wWSelTemp != EMS_VALUE_INT_NOTSET)
-        rootBoiler["wWSelTemp"] = EMS_Boiler.wWSelTemp;
-    if (EMS_Boiler.wWDesiredTemp != EMS_VALUE_INT_NOTSET)
-        rootBoiler["wWDesiredTemp"] = EMS_Boiler.wWDesiredTemp;
-    if (EMS_Boiler.selFlowTemp != EMS_VALUE_INT_NOTSET)
-        rootBoiler["selFlowTemp"] = EMS_Boiler.selFlowTemp;
-    if (EMS_Boiler.selBurnPow != EMS_VALUE_INT_NOTSET)
-        rootBoiler["selBurnPow"] = EMS_Boiler.selBurnPow;
-    if (EMS_Boiler.curBurnPow != EMS_VALUE_INT_NOTSET)
-        rootBoiler["curBurnPow"] = EMS_Boiler.curBurnPow;
-    if (EMS_Boiler.pumpMod != EMS_VALUE_INT_NOTSET)
-        rootBoiler["pumpMod"] = EMS_Boiler.pumpMod;
-    if (EMS_Boiler.wWCircPump != EMS_VALUE_INT_NOTSET)
-        rootBoiler["wWCircPump"] = EMS_Boiler.wWCircPump;
-
-    if (EMS_Boiler.extTemp != EMS_VALUE_SHORT_NOTSET)
-        rootBoiler["outdoorTemp"] = (float)EMS_Boiler.extTemp / 10;
-    if (EMS_Boiler.wWCurTmp != EMS_VALUE_USHORT_NOTSET)
-        rootBoiler["wWCurTmp"] = (float)EMS_Boiler.wWCurTmp / 10;
-    if (EMS_Boiler.wWCurFlow != EMS_VALUE_INT_NOTSET)
-        rootBoiler["wWCurFlow"] = (float)EMS_Boiler.wWCurFlow / 10;
-    if (EMS_Boiler.curFlowTemp != EMS_VALUE_USHORT_NOTSET)
-        rootBoiler["curFlowTemp"] = (float)EMS_Boiler.curFlowTemp / 10;
-    if (EMS_Boiler.retTemp != EMS_VALUE_USHORT_NOTSET)
-        rootBoiler["retTemp"] = (float)EMS_Boiler.retTemp / 10;
-    if (EMS_Boiler.switchTemp != EMS_VALUE_USHORT_NOTSET)
-        rootBoiler["switchTemp"] = (float)EMS_Boiler.switchTemp / 10;
-    if (EMS_Boiler.sysPress != EMS_VALUE_INT_NOTSET)
-        rootBoiler["sysPress"] = (float)EMS_Boiler.sysPress / 10;
-    if (EMS_Boiler.boilTemp != EMS_VALUE_USHORT_NOTSET)
-        rootBoiler["boilTemp"] = (float)EMS_Boiler.boilTemp / 10;
-
-    if (EMS_Boiler.wWActivated != EMS_VALUE_INT_NOTSET)
-        rootBoiler["wWActivated"] = _bool_to_char(s, EMS_Boiler.wWActivated);
-
-    if (EMS_Boiler.wWActivated != EMS_VALUE_INT_NOTSET)
-        rootBoiler["wWOnetime"] = _bool_to_char(s, EMS_Boiler.wWOneTime);
-
-    if (EMS_Boiler.burnGas != EMS_VALUE_INT_NOTSET)
-        rootBoiler["burnGas"] = _bool_to_char(s, EMS_Boiler.burnGas);
-
-    if (EMS_Boiler.flameCurr != EMS_VALUE_USHORT_NOTSET)
-        rootBoiler["flameCurr"] = (float)(int16_t)EMS_Boiler.flameCurr / 10;
-
-    if (EMS_Boiler.heatPmp != EMS_VALUE_INT_NOTSET)
-        rootBoiler["heatPmp"] = _bool_to_char(s, EMS_Boiler.heatPmp);
-
-    if (EMS_Boiler.fanWork != EMS_VALUE_INT_NOTSET)
-        rootBoiler["fanWork"] = _bool_to_char(s, EMS_Boiler.fanWork);
-
-    if (EMS_Boiler.ignWork != EMS_VALUE_INT_NOTSET)
-        rootBoiler["ignWork"] = _bool_to_char(s, EMS_Boiler.ignWork);
-
-    if (EMS_Boiler.wWCirc != EMS_VALUE_INT_NOTSET)
-        rootBoiler["wWCirc"] = _bool_to_char(s, EMS_Boiler.wWCirc);
-
-    if (EMS_Boiler.heating_temp != EMS_VALUE_INT_NOTSET)
-        rootBoiler["heating_temp"] = EMS_Boiler.heating_temp;
-    if (EMS_Boiler.pump_mod_max != EMS_VALUE_INT_NOTSET)
-        rootBoiler["pump_mod_max"] = EMS_Boiler.pump_mod_max;
-    if (EMS_Boiler.pump_mod_min != EMS_VALUE_INT_NOTSET)
-        rootBoiler["pump_mod_min"] = EMS_Boiler.pump_mod_min;
-
-    if (EMS_Boiler.wWHeat != EMS_VALUE_INT_NOTSET)
-        rootBoiler["wWHeat"] = _bool_to_char(s, EMS_Boiler.wWHeat);
-
-    // **** also add burnStarts, burnWorkMin, heatWorkMin
-    if (abs(EMS_Boiler.wWStarts) != EMS_VALUE_LONG_NOTSET)
-        rootBoiler["wWStarts"] = (float)EMS_Boiler.wWStarts;
-    if (abs(EMS_Boiler.wWWorkM) != EMS_VALUE_LONG_NOTSET)
-        rootBoiler["wWWorkM"] = (float)EMS_Boiler.wWWorkM;
-    if (abs(EMS_Boiler.UBAuptime) != EMS_VALUE_LONG_NOTSET)
-        rootBoiler["UBAuptime"] = (float)EMS_Boiler.UBAuptime;
-
-    // **** also add burnStarts, burnWorkMin, heatWorkMin
-    if (abs(EMS_Boiler.burnStarts) != EMS_VALUE_LONG_NOTSET)
-        rootBoiler["burnStarts"] = (float)EMS_Boiler.burnStarts;
-    if (abs(EMS_Boiler.burnWorkMin) != EMS_VALUE_LONG_NOTSET)
-        rootBoiler["burnWorkMin"] = (float)EMS_Boiler.burnWorkMin;
-    if (abs(EMS_Boiler.heatWorkMin) != EMS_VALUE_LONG_NOTSET)
-        rootBoiler["heatWorkMin"] = (float)EMS_Boiler.heatWorkMin;
-
-    if (EMS_Boiler.serviceCode != EMS_VALUE_USHORT_NOTSET) {
-        rootBoiler["ServiceCode"]       = EMS_Boiler.serviceCodeChar;
-        rootBoiler["ServiceCodeNumber"] = EMS_Boiler.serviceCode;
-    }
-
-    serializeJson(doc, data, sizeof(data));
-
-    // check for empty json
-    jsonSize = measureJson(doc);
-    if (jsonSize > 2) {
-        // calculate hash and send values if something has changed, to save unnecessary wifi traffic
-        for (uint8_t i = 0; i < (jsonSize - 1); i++) {
-            crc.update(data[i]);
+        if (EMS_Boiler.wWComfort == EMS_VALUE_UBAParameterWW_wwComfort_Hot) {
+            rootBoiler["wWComfort"] = "Hot";
+        } else if (EMS_Boiler.wWComfort == EMS_VALUE_UBAParameterWW_wwComfort_Eco) {
+            rootBoiler["wWComfort"] = "Eco";
+        } else if (EMS_Boiler.wWComfort == EMS_VALUE_UBAParameterWW_wwComfort_Intelligent) {
+            rootBoiler["wWComfort"] = "Intelligent";
         }
-        fchecksum = crc.finalize();
-        if ((previousBoilerPublishCRC != fchecksum) || force) {
-            previousBoilerPublishCRC = fchecksum;
-            myDebugLog("Publishing boiler data via MQTT");
 
-            // send values via MQTT
-            myESP.mqttPublish(TOPIC_BOILER_DATA, data);
+        if (EMS_Boiler.wWSelTemp != EMS_VALUE_INT_NOTSET)
+            rootBoiler["wWSelTemp"] = EMS_Boiler.wWSelTemp;
+        if (EMS_Boiler.wWDesiredTemp != EMS_VALUE_INT_NOTSET)
+            rootBoiler["wWDesiredTemp"] = EMS_Boiler.wWDesiredTemp;
+        if (EMS_Boiler.selFlowTemp != EMS_VALUE_INT_NOTSET)
+            rootBoiler["selFlowTemp"] = EMS_Boiler.selFlowTemp;
+        if (EMS_Boiler.selBurnPow != EMS_VALUE_INT_NOTSET)
+            rootBoiler["selBurnPow"] = EMS_Boiler.selBurnPow;
+        if (EMS_Boiler.curBurnPow != EMS_VALUE_INT_NOTSET)
+            rootBoiler["curBurnPow"] = EMS_Boiler.curBurnPow;
+        if (EMS_Boiler.pumpMod != EMS_VALUE_INT_NOTSET)
+            rootBoiler["pumpMod"] = EMS_Boiler.pumpMod;
+        if (EMS_Boiler.wWCircPump != EMS_VALUE_BOOL_NOTSET)
+            rootBoiler["wWCircPump"] = EMS_Boiler.wWCircPump;
+
+        if (EMS_Boiler.extTemp != EMS_VALUE_SHORT_NOTSET)
+            rootBoiler["outdoorTemp"] = (float)EMS_Boiler.extTemp / 10;
+        if (EMS_Boiler.wWCurTmp != EMS_VALUE_USHORT_NOTSET)
+            rootBoiler["wWCurTmp"] = (float)EMS_Boiler.wWCurTmp / 10;
+        if (EMS_Boiler.wWCurFlow != EMS_VALUE_INT_NOTSET)
+            rootBoiler["wWCurFlow"] = (float)EMS_Boiler.wWCurFlow / 10;
+        if (EMS_Boiler.curFlowTemp != EMS_VALUE_USHORT_NOTSET)
+            rootBoiler["curFlowTemp"] = (float)EMS_Boiler.curFlowTemp / 10;
+        if (EMS_Boiler.retTemp != EMS_VALUE_USHORT_NOTSET)
+            rootBoiler["retTemp"] = (float)EMS_Boiler.retTemp / 10;
+        if (EMS_Boiler.switchTemp != EMS_VALUE_USHORT_NOTSET)
+            rootBoiler["switchTemp"] = (float)EMS_Boiler.switchTemp / 10;
+        if (EMS_Boiler.sysPress != EMS_VALUE_INT_NOTSET)
+            rootBoiler["sysPress"] = (float)EMS_Boiler.sysPress / 10;
+        if (EMS_Boiler.boilTemp != EMS_VALUE_USHORT_NOTSET)
+            rootBoiler["boilTemp"] = (float)EMS_Boiler.boilTemp / 10;
+
+        if (EMS_Boiler.wWActivated != EMS_VALUE_BOOL_NOTSET)
+            rootBoiler["wWActivated"] = _bool_to_char(s, EMS_Boiler.wWActivated);
+
+        if (EMS_Boiler.wWActivated != EMS_VALUE_BOOL_NOTSET)
+            rootBoiler["wWOnetime"] = _bool_to_char(s, EMS_Boiler.wWOneTime);
+
+        if (EMS_Boiler.burnGas != EMS_VALUE_BOOL_NOTSET)
+            rootBoiler["burnGas"] = _bool_to_char(s, EMS_Boiler.burnGas);
+
+        if (EMS_Boiler.flameCurr != EMS_VALUE_USHORT_NOTSET)
+            rootBoiler["flameCurr"] = (float)(int16_t)EMS_Boiler.flameCurr / 10;
+
+        if (EMS_Boiler.heatPmp != EMS_VALUE_BOOL_NOTSET)
+            rootBoiler["heatPmp"] = _bool_to_char(s, EMS_Boiler.heatPmp);
+
+        if (EMS_Boiler.fanWork != EMS_VALUE_BOOL_NOTSET)
+            rootBoiler["fanWork"] = _bool_to_char(s, EMS_Boiler.fanWork);
+
+        if (EMS_Boiler.ignWork != EMS_VALUE_BOOL_NOTSET)
+            rootBoiler["ignWork"] = _bool_to_char(s, EMS_Boiler.ignWork);
+
+        if (EMS_Boiler.wWCirc != EMS_VALUE_BOOL_NOTSET)
+            rootBoiler["wWCirc"] = _bool_to_char(s, EMS_Boiler.wWCirc);
+
+        if (EMS_Boiler.heating_temp != EMS_VALUE_INT_NOTSET)
+            rootBoiler["heating_temp"] = EMS_Boiler.heating_temp;
+        if (EMS_Boiler.pump_mod_max != EMS_VALUE_INT_NOTSET)
+            rootBoiler["pump_mod_max"] = EMS_Boiler.pump_mod_max;
+        if (EMS_Boiler.pump_mod_min != EMS_VALUE_INT_NOTSET)
+            rootBoiler["pump_mod_min"] = EMS_Boiler.pump_mod_min;
+
+        if (EMS_Boiler.wWHeat != EMS_VALUE_BOOL_NOTSET)
+            rootBoiler["wWHeat"] = _bool_to_char(s, EMS_Boiler.wWHeat);
+
+        /*
+        if (abs(EMS_Boiler.wWStarts) != EMS_VALUE_LONG_NOTSET)
+            rootBoiler["wWStarts"] = (float)EMS_Boiler.wWStarts;
+        if (abs(EMS_Boiler.wWWorkM) != EMS_VALUE_LONG_NOTSET)
+            rootBoiler["wWWorkM"] = (float)EMS_Boiler.wWWorkM;
+        if (abs(EMS_Boiler.UBAuptime) != EMS_VALUE_LONG_NOTSET)
+            rootBoiler["UBAuptime"] = (float)EMS_Boiler.UBAuptime;
+
+        if (abs(EMS_Boiler.burnStarts) != EMS_VALUE_LONG_NOTSET)
+            rootBoiler["burnStarts"] = (float)EMS_Boiler.burnStarts;
+        if (abs(EMS_Boiler.burnWorkMin) != EMS_VALUE_LONG_NOTSET)
+            rootBoiler["burnWorkMin"] = (float)EMS_Boiler.burnWorkMin;
+        if (abs(EMS_Boiler.heatWorkMin) != EMS_VALUE_LONG_NOTSET)
+            rootBoiler["heatWorkMin"] = (float)EMS_Boiler.heatWorkMin;
+            */
+
+        if (EMS_Boiler.serviceCode != EMS_VALUE_USHORT_NOTSET) {
+            rootBoiler["ServiceCode"]       = EMS_Boiler.serviceCodeChar;
+            rootBoiler["ServiceCodeNumber"] = EMS_Boiler.serviceCode;
         }
-    }
 
-    // see if the heating or hot tap water has changed, if so send
-    // last_boilerActive stores heating in bit 1 and tap water in bit 2
-    if ((last_boilerActive != ((EMS_Boiler.tapwaterActive << 1) + EMS_Boiler.heatingActive)) || force) {
-        myDebugLog("Publishing hot water and heating states via MQTT");
-        myESP.mqttPublish(TOPIC_BOILER_TAPWATER_ACTIVE, EMS_Boiler.tapwaterActive == 1 ? "1" : "0");
-        myESP.mqttPublish(TOPIC_BOILER_HEATING_ACTIVE, EMS_Boiler.heatingActive == 1 ? "1" : "0");
+        serializeJson(doc, data, sizeof(data));
+        myDebugLog("Publishing boiler data via MQTT");
+        myESP.mqttPublish(TOPIC_BOILER_DATA, data);
 
-        last_boilerActive = ((EMS_Boiler.tapwaterActive << 1) + EMS_Boiler.heatingActive); // remember last state
+        // see if the heating or hot tap water has changed, if so send
+        // last_boilerActive stores heating in bit 1 and tap water in bit 2
+        if ((last_boilerActive != ((EMS_Boiler.tapwaterActive << 1) + EMS_Boiler.heatingActive)) || force) {
+            myDebugLog("Publishing hot water and heating states via MQTT");
+            myESP.mqttPublish(TOPIC_BOILER_TAPWATER_ACTIVE, EMS_Boiler.tapwaterActive == 1 ? "1" : "0");
+            myESP.mqttPublish(TOPIC_BOILER_HEATING_ACTIVE, EMS_Boiler.heatingActive == 1 ? "1" : "0");
+
+            last_boilerActive = ((EMS_Boiler.tapwaterActive << 1) + EMS_Boiler.heatingActive); // remember last state
+        }
+
+        ems_Device_remove_flags(EMS_DEVICE_UPDATE_FLAG_BOILER); // unset flag
     }
 
     // handle the thermostat values
-    if (ems_getThermostatEnabled()) {
+    if (ems_getThermostatEnabled() && (ems_Device_has_flags(EMS_DEVICE_UPDATE_FLAG_THERMOSTAT) || force)) {
         doc.clear();
         JsonObject rootThermostat = doc.to<JsonObject>();
 
@@ -780,26 +738,13 @@ void publishEMSValues(bool force) {
 
         data[0] = '\0'; // reset data for next package
         serializeJson(doc, data, sizeof(data));
-
-        // check for empty json
-        jsonSize = measureJson(doc);
-        if (jsonSize > 2) {
-            // calculate new CRC
-            crc.reset();
-            for (uint8_t i = 0; i < (jsonSize - 1); i++) {
-                crc.update(data[i]);
-            }
-            fchecksum = crc.finalize();
-            if ((previousThermostatPublishCRC != fchecksum) || force) {
-                previousThermostatPublishCRC = fchecksum;
-                myDebugLog("Publishing thermostat data via MQTT");
-                myESP.mqttPublish(TOPIC_THERMOSTAT_DATA, data);
-            }
-        }
+        myDebugLog("Publishing thermostat data via MQTT");
+        myESP.mqttPublish(TOPIC_THERMOSTAT_DATA, data);
+        ems_Device_remove_flags(EMS_DEVICE_UPDATE_FLAG_THERMOSTAT); // unset flag
     }
 
     // handle the thermostat values
-    if (ems_getMixingDeviceEnabled()) {
+    if (ems_getMixingDeviceEnabled() && (ems_Device_has_flags(EMS_DEVICE_UPDATE_FLAG_MIXING) || force)) {
         doc.clear();
         JsonObject rootMixing = doc.to<JsonObject>();
 
@@ -825,26 +770,13 @@ void publishEMSValues(bool force) {
 
         data[0] = '\0'; // reset data for next package
         serializeJson(doc, data, sizeof(data));
-
-        // check for empty json
-        jsonSize = measureJson(doc);
-        if (jsonSize > 2) {
-            // calculate new CRC
-            crc.reset();
-            for (uint8_t i = 0; i < (jsonSize - 1); i++) {
-                crc.update(data[i]);
-            }
-            fchecksum = crc.finalize();
-            if ((previousMixingPublishCRC != fchecksum) || force) {
-                previousMixingPublishCRC = fchecksum;
-                myDebugLog("Publishing mixing device data via MQTT");
-                myESP.mqttPublish(TOPIC_MIXING_DATA, data);
-            }
-        }
+        myDebugLog("Publishing mixing device data via MQTT");
+        myESP.mqttPublish(TOPIC_MIXING_DATA, data);
+        ems_Device_remove_flags(EMS_DEVICE_UPDATE_FLAG_MIXING); // unset flag
     }
 
     // For SM10 and SM100 Solar Modules
-    if (ems_getSolarModuleEnabled()) {
+    if (ems_getSolarModuleEnabled() && (ems_Device_has_flags(EMS_DEVICE_UPDATE_FLAG_SOLAR) || force)) {
         // build new json object
         doc.clear();
         JsonObject rootSM = doc.to<JsonObject>();
@@ -858,7 +790,7 @@ void publishEMSValues(bool force) {
         if (EMS_SolarModule.pumpModulation != EMS_VALUE_INT_NOTSET)
             rootSM[SM_PUMPMODULATION] = EMS_SolarModule.pumpModulation;
 
-        if (EMS_SolarModule.pump != EMS_VALUE_INT_NOTSET) {
+        if (EMS_SolarModule.pump != EMS_VALUE_BOOL_NOTSET) {
             rootSM[SM_PUMP] = _bool_to_char(s, EMS_SolarModule.pump);
         }
 
@@ -877,28 +809,13 @@ void publishEMSValues(bool force) {
 
         data[0] = '\0'; // reset data for next package
         serializeJson(doc, data, sizeof(data));
-
-        // check for empty json
-        jsonSize = measureJson(doc);
-        if (jsonSize > 2) {
-            // calculate new CRC
-            crc.reset();
-            for (uint8_t i = 0; i < (jsonSize - 1); i++) {
-                crc.update(data[i]);
-            }
-            fchecksum = crc.finalize();
-            if ((previousSMPublishCRC != fchecksum) || force) {
-                previousSMPublishCRC = fchecksum;
-                myDebugLog("Publishing SM data via MQTT");
-
-                // send values via MQTT
-                myESP.mqttPublish(TOPIC_SM_DATA, data);
-            }
-        }
+        myDebugLog("Publishing SM data via MQTT");
+        myESP.mqttPublish(TOPIC_SM_DATA, data);
+        ems_Device_remove_flags(EMS_DEVICE_UPDATE_FLAG_SOLAR); // unset flag
     }
 
     // handle HeatPump
-    if (ems_getHeatPumpEnabled()) {
+    if (ems_getHeatPumpEnabled() && (ems_Device_has_flags(EMS_DEVICE_UPDATE_FLAG_HEATPUMP) || force)) {
         // build new json object
         doc.clear();
         JsonObject rootSM = doc.to<JsonObject>();
@@ -911,20 +828,13 @@ void publishEMSValues(bool force) {
 
         data[0] = '\0'; // reset data for next package
         serializeJson(doc, data, sizeof(data));
-
         myDebugLog("Publishing HeatPump data via MQTT");
-
-        // send values via MQTT
         myESP.mqttPublish(TOPIC_HP_DATA, data);
+        ems_Device_remove_flags(EMS_DEVICE_UPDATE_FLAG_HEATPUMP); // unset flag
     }
 }
 
-// publish external dallas sensor temperature values to MQTT
-void do_publishSensorValues() {
-    publishSensorValues(true); // force publish
-}
-
-// call PublishValues without forcing, so using CRC to see if we really need to publish
+// call PublishValues without forcing
 void do_publishValues() {
     publishEMSValues(true); // force publish
 }
@@ -1254,7 +1164,7 @@ void TelnetCommandCallback(uint8_t wc, const char * commandLine) {
 
     if (strcmp(first_cmd, "publish") == 0) {
         do_publishValues();
-        do_publishSensorValues();
+        publishSensorValues();
         do_publishShowerData();
         ok = true;
     }
@@ -1824,7 +1734,7 @@ void WebCallback(JsonObject root) {
         if (EMS_SolarModule.pumpModulation != EMS_VALUE_INT_NOTSET)
             sm["sm3"] = EMS_SolarModule.pumpModulation; // Pump modulation %
 
-        if (EMS_SolarModule.pump != EMS_VALUE_INT_NOTSET) {
+        if (EMS_SolarModule.pump != EMS_VALUE_BOOL_NOTSET) {
             char s[10];
             sm["sm4"] = _bool_to_char(s, EMS_SolarModule.pump); // Pump active on/off
         }
@@ -1994,8 +1904,8 @@ void setup() {
     // set timers for MQTT publish
     // only if publish_time is not 0 (automatic mode)
     if (EMSESP_Settings.publish_time) {
-        publishValuesTimer.attach(EMSESP_Settings.publish_time, do_publishValues);             // post MQTT EMS values
-        publishSensorValuesTimer.attach(EMSESP_Settings.publish_time, do_publishSensorValues); // post MQTT dallas sensor values
+        publishValuesTimer.attach(EMSESP_Settings.publish_time, do_publishValues);          // post MQTT EMS values
+        publishSensorValuesTimer.attach(EMSESP_Settings.publish_time, publishSensorValues); // post MQTT dallas sensor values
     }
 
     // set pin for LED
@@ -2017,31 +1927,20 @@ void setup() {
 void loop() {
     myESP.loop(); // handle telnet, mqtt, wifi etc
 
-    // check Dallas sensors, using same schedule as publish_time (default 2 mins)
+    // check Dallas sensors, using same schedule as publish_time (default 2 mins in DS18_READ_INTERVAL)
     // these values are published to MQTT separately via the timer publishSensorValuesTimer
     if (EMSESP_Settings.dallas_sensors) {
         ds18.loop();
     }
 
-    // check if we have data from the EMS bus
-    if (ems_getEmsRefreshed()) {
-        // if we have an EMS connect go and fetch some data and publish it (by force)
-        if (_need_first_publish) {
-            do_regularUpdates();
-            publishEMSValues(true);
-            publishSensorValues(true);
-            _need_first_publish = false; // reset flag
-        }
+    // publish EMS data to MQTT
+    // because of the force=false argument, it will see if there is anything received that must be published
+    publishEMSValues(false);
 
-        // publish all the values to MQTT
-        // but only if the values have changed and publish_time is on automatic mode
-        // always publish when we get the first results, regardless of any publish_time setting
-        if (EMSESP_Settings.publish_time == 0) {
-            publishEMSValues(false);
-            publishSensorValues(false);
-        }
-
-        ems_setEmsRefreshed(false); // reset flag
+    // if we have an EMS connect go and fetch some data and MQTT publish it
+    if (_need_first_publish) {
+        publishSensorValues();
+        _need_first_publish = false; // reset flag
     }
 
     // do shower logic, if enabled
