@@ -205,7 +205,6 @@ static const _EMS_Device EMS_Devices[] = {
     //
     // UBA Masters - typically with device_id of 0x08
     //
-
     {72, EMS_DEVICE_TYPE_BOILER, "MC10 Module", EMS_DEVICE_FLAG_NONE},
     {123, EMS_DEVICE_TYPE_BOILER, "Buderus GBx72/Nefit Trendline/Junkers Cerapur/Worcester Greenstar Si/27i", EMS_DEVICE_FLAG_NONE},
     {133, EMS_DEVICE_TYPE_BOILER, "Buderus GB125/Logamatic MC110", EMS_DEVICE_FLAG_NONE},
@@ -222,7 +221,6 @@ static const _EMS_Device EMS_Devices[] = {
     //
     // Solar Modules - type 0x30
     //
-
     {73, EMS_DEVICE_TYPE_SOLAR, "SM10 Solar Module", EMS_DEVICE_FLAG_SM10},
     {163, EMS_DEVICE_TYPE_SOLAR, "SM100 Solar Module", EMS_DEVICE_FLAG_SM100},
     {101, EMS_DEVICE_TYPE_SOLAR, "Junkers ISM1 Solar Module", EMS_DEVICE_FLAG_SM100},
@@ -231,7 +229,6 @@ static const _EMS_Device EMS_Devices[] = {
     //
     // Mixing Devices - type 0x20 or 0x21
     //
-
     {160, EMS_DEVICE_TYPE_MIXING, "MM100 Mixing Module", EMS_DEVICE_FLAG_NONE},
     {161, EMS_DEVICE_TYPE_MIXING, "MM200 Mixing Module", EMS_DEVICE_FLAG_NONE},
     {69, EMS_DEVICE_TYPE_MIXING, "MM10 Mixer Module", EMS_DEVICE_FLAG_NONE},
@@ -243,14 +240,12 @@ static const _EMS_Device EMS_Devices[] = {
     //
     // HeatPump - type 0x38
     //
-
     {252, EMS_DEVICE_TYPE_HEATPUMP, "HeatPump Module", EMS_DEVICE_FLAG_NONE},
     {200, EMS_DEVICE_TYPE_HEATPUMP, "HeatPump Module", EMS_DEVICE_FLAG_NONE},
 
     //
     // Other devices, like 0x11 for Switching, 0x09 for controllers, 0x02 for Connect, 0x48 for Gateway
     //
-
     {71, EMS_DEVICE_TYPE_SWITCH, "WM10 Switch Module", EMS_DEVICE_FLAG_NONE},                        // 0x11
     {68, EMS_DEVICE_TYPE_CONTROLLER, "BC10/RFM20 Receiver", EMS_DEVICE_FLAG_NONE},                   // 0x09
     {218, EMS_DEVICE_TYPE_CONTROLLER, "Junkers M200/Buderus RFM200 Receiver", EMS_DEVICE_FLAG_NONE}, // 0x50
