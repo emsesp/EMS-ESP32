@@ -493,13 +493,6 @@ void showInfo() {
         }
     }
 
-    // show the Shower Info
-    if (EMSESP_Settings.shower_timer) {
-        myDebug_P(PSTR("")); // newline
-        myDebug_P(PSTR("%sShower stats:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
-        myDebug_P(PSTR("  Shower is %s"), (EMSESP_Shower.showerOn ? "running" : "off"));
-    }
-
     myDebug_P(PSTR("")); // newline
 }
 
