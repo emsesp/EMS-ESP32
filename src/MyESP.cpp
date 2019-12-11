@@ -1472,8 +1472,8 @@ void MyESP::_heartbeatCheck(bool force) {
         uint32_t free_memory   = ESP.getFreeHeap();
         uint8_t  mem_available = 100 * free_memory / total_memory; // as a %
 
-        StaticJsonDocument<200> doc;
-        JsonObject              rootHeartbeat = doc.to<JsonObject>();
+        StaticJsonDocument<MYESP_JSON_MAXSIZE_SMALL> doc;
+        JsonObject                                   rootHeartbeat = doc.to<JsonObject>();
 
         rootHeartbeat["version"]         = _app_version;
         rootHeartbeat["IP"]              = WiFi.localIP().toString();
@@ -2312,8 +2312,8 @@ void MyESP::_onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, A
 // handle ws from browser
 void MyESP::_procMsg(AsyncWebSocketClient * client, size_t sz) {
     // We should always get a JSON object from browser, so parse it
-    StaticJsonDocument<500> doc;
-    char                    json[sz + 1];
+    StaticJsonDocument<MYESP_JSON_MAXSIZE_MEDIUM> doc;
+    char                                          json[sz + 1];
     memcpy(json, (char *)(client->_tempObject), sz);
     json[sz] = '\0';
 
@@ -2410,8 +2410,7 @@ bool MyESP::_fs_sendConfig() {
 
 // send custom status via ws
 void MyESP::_sendCustomStatus() {
-    // StaticJsonDocument<300> doc;
-    DynamicJsonDocument doc(MYESP_JSON_MAXSIZE);
+    DynamicJsonDocument doc(MYESP_JSON_MAXSIZE_LARGE);
 
     JsonObject root = doc.to<JsonObject>();
 
@@ -2427,7 +2426,7 @@ void MyESP::_sendCustomStatus() {
         (_web_callback_f)(root);
     }
 
-    char   buffer[MYESP_JSON_MAXSIZE];
+    char   buffer[MYESP_JSON_MAXSIZE_LARGE];
     size_t len = serializeJson(root, buffer);
 
 #ifdef MYESP_DEBUG
@@ -2536,9 +2535,9 @@ void MyESP::_printScanResult(int networksFound) {
         }
     }
 
-    StaticJsonDocument<400> doc;
-    JsonObject              root = doc.to<JsonObject>();
-    root["command"]              = "ssidlist";
+    StaticJsonDocument<MYESP_JSON_MAXSIZE_MEDIUM> doc;
+    JsonObject                                    root = doc.to<JsonObject>();
+    root["command"]                                    = "ssidlist";
 
     JsonArray list = doc.createNestedArray("list");
     for (int i = 0; i <= 5 && i < networksFound; ++i) {
@@ -2548,7 +2547,7 @@ void MyESP::_printScanResult(int networksFound) {
         item["rssi"]    = WiFi.RSSI(indices[i]);
     }
 
-    char   buffer[400];
+    char   buffer[MYESP_JSON_MAXSIZE_MEDIUM];
     size_t len = serializeJson(root, buffer);
     _ws->textAll(buffer, len);
 }
@@ -2750,12 +2749,12 @@ void MyESP::_addMQTTLog(const char * topic, const char * payload, const MYESP_MQ
 
 // send UTC time via ws
 void MyESP::_sendTime() {
-    StaticJsonDocument<100> doc;
-    JsonObject              root = doc.to<JsonObject>();
-    root["command"]              = "gettime";
-    root["epoch"]                = now();
+    StaticJsonDocument<MYESP_JSON_MAXSIZE_SMALL> doc;
+    JsonObject                                   root = doc.to<JsonObject>();
+    root["command"]                                   = "gettime";
+    root["epoch"]                                     = now();
 
-    char   buffer[100];
+    char   buffer[MYESP_JSON_MAXSIZE_SMALL];
     size_t len = serializeJson(root, buffer);
     _ws->textAll(buffer, len);
 }
