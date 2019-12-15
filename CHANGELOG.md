@@ -5,13 +5,52 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.4] 2019-12-15
+
+There are breaking changes in this release. Make you sure you adjust the MQTT topics as described in the wiki.
+
+### Added
+
+- Added `publish_always` forcing MQTT topics to be always sent regardless if the data hasn't changed
+- Support for DHW once (OneTime water) heating command via MQTT [issue 195](https://github.com/proddy/EMS-ESP/issues/195)
+- Added scripts to automatically build firmware images on every Commit/Pull and nightly builds using TravisCI
+- Added option to WebUI to also download the latest development build
+- Added build scripts for automated CI with TravisCI
+- Implemented timezone support and automatic adjustment, also taking daylight saving times into account
+- Added `kick` command to reset core services like NTP, Web, Web Sockets
+- Added WiFi static IP (setting done in WebUI only)
+- `log w <type_id>` for watching a specific telegram type ID
+- initial support for EMS+ GB125s and MC110's (https://github.com/proddy/EMS-ESP/wiki/MC110-controller)
+- Buderus RFM200 receiver
+
+### Fixed
+
+- Stability for some Wemos clones by decreasing wifi Tx strength and adding small delay
+
+### Changed
+
+- Debug log times show real internet time (if NTP enabled)
+- `system` shows local time instead of UTC
+- fixed version numbers of libraries in `platformio.ini`
+- Normalized Heating modes to `off`, `manual`, `auto`, `night` and `day` to keep generic and not Home Assistant specific (like `heat`)
+- Keeping Thermostat day/night modes separate from off/auto/manual, and setting this for the Junkers FR50
+- Removed `publish_always`
+- Changed NTP interval from 1 hour to 12 hours
+- Refactored EMS device library to make it support multi-EMS devices easier (e.g. multiple thermostats)
+- `autodetect deep` removed and replaced with `autodetect scan` for scanning known devices.
+- MQTT data will be sent when new data arrives. So `publish_time` is used to force a publish at a given frequency (2 mins is default), or 0 for off.
+
+### Removed
+
+- thermostat scan and autodetect deep functions
+- removed Event Logging to SPIFFS (worried about wearing). Replaced with SysLog.
+
 ## [1.9.3] 2019-10-26
 
 ### Added
 
 - Report # TCP dropouts in the `system` command. These could be due to WiFI or MQTT disconnected.
 - Added temp and mode to the MQTT `thermostat_cmd` topic
-- build scripts for automated CI with TravisCI
   
 ### Fixed
 
@@ -174,7 +213,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - publish dallas external temp sensors to MQTT (thanks @JewelZB)
 - shower timer and shower alert options available via set commands
 - added support for warm water modes Hot, Comfort and Intelligent [(issue 67)](https://github.com/proddy/EMS-ESP/issues/67)
-- added `set publish_time` to set how often to publish MQTT
+- added `set publish_time` to set how often to force a publish of MQTT
 - support for SM10 Solar Module including MQTT [(issue 77)](https://github.com/proddy/EMS-ESP/issues/77)
 - `refresh` command to force a fetch of all known data from the connected EMS devices
 
@@ -359,7 +398,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Renamed project from EMS-ESP-Boiler to EMS-ESP since it's kinda EMS generic now
-- Support for RC20F and RFM20 (https://github.com/proddy/EMS-ESP/issues/18)
+- Support for RC20RF and RFM20 (https://github.com/proddy/EMS-ESP/issues/18)
 - Moved all EMS device information into a separate file `ems_devices.h` so no longer need to touch `ems.h`
 - Telnet commands can be strings now and output is suspended when typing
 
@@ -380,7 +419,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Scanning known EMS Devices now ignores duplicates (https://github.com/proddy/EMS-ESP/pull/30)
 - ServiceCode stored as a two byte char
-- Support for RC20F and RFM20 (https://github.com/proddy/EMS-ESP/issues/18)
+- Support for RC20RF and RFM20 (https://github.com/proddy/EMS-ESP/issues/18)
 
 ## [1.2.3] 2019-01-03
 

@@ -8,7 +8,7 @@ var custom_config = {
         "listen_mode": false,
         "shower_timer": false,
         "shower_alert": false,
-        "publish_time": 120,
+        "publish_time": 0,
         "tx_mode": 1
     }
 };
@@ -23,15 +23,19 @@ function listcustom() {
     if (custom_config.settings.led) {
         $("input[name=\"led\"][value=\"1\"]").prop("checked", true);
     }
+
     if (custom_config.settings.dallas_parasite) {
         $("input[name=\"dallas_parasite\"][value=\"1\"]").prop("checked", true);
     }
+
     if (custom_config.settings.listen_mode) {
         $("input[name=\"listen_mode\"][value=\"1\"]").prop("checked", true);
     }
+
     if (custom_config.settings.shower_timer) {
         $("input[name=\"shower_timer\"][value=\"1\"]").prop("checked", true);
     }
+
     if (custom_config.settings.shower_alert) {
         $("input[name=\"shower_alert\"][value=\"1\"]").prop("checked", true);
     }
@@ -95,13 +99,13 @@ function listCustomStats() {
         var l = document.createElement("li");
         var type = obj[i].type;
         var color = "";
-        if (type === 1) {
+        if (type === "UBAMaster") {
             color = "list-group-item-success";
-        } else if (type === 2) {
+        } else if (type === "Thermostat") {
             color = "list-group-item-info";
-        } else if (type === 3) {
+        } else if (type === "Solar Module") {
             color = "list-group-item-warning";
-        } else if (type === 4) {
+        } else if (type === "Heat Pump") {
             color = "list-group-item-success";
         }
         l.innerHTML = obj[i].model + " (Version:" + obj[i].version + " ProductID:" + obj[i].productid + " DeviceID:0x" + obj[i].deviceid + ")";

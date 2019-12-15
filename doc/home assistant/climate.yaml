@@ -4,14 +4,16 @@
     - "auto"
     - "heat"
     - "off"
+    
   mode_command_topic: "home/ems-esp/thermostat_cmd_mode1"
   temperature_command_topic: "home/ems-esp/thermostat_cmd_temp1"
    
   mode_state_topic: "home/ems-esp/thermostat_data"
   current_temperature_topic: "home/ems-esp/thermostat_data"
   temperature_state_topic: "home/ems-esp/thermostat_data"
+  
+  mode_state_template: "{% if value_json.hc1.mode in ['manual', 'day'] %} heat {% elif value_json.hc1.mode in ['night', 'off'] %} off {% else %} auto {% endif %}"
 
-  mode_state_template: "{{ value_json.hc1.mode }}"
   current_temperature_template: "{{ value_json.hc1.currtemp }}"
   temperature_state_template: "{{ value_json.hc1.seltemp }}"
    

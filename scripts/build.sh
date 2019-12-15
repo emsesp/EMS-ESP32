@@ -11,16 +11,13 @@ is_git() {
 }
 
 stat_bytes() {
-    echo "size is:"
-    case "$(uname -s)" in
-        Darwin) stat -f %z "$1";;
-        *) stat -c %s "$1";;
-    esac
+	filesize=`du -k "$1" | cut -f1;`
+	echo 'size:' $filesize 'bytes'
 }
 
 # Available environments
 list_envs() {
-    grep env: ../platformio.ini | sed 's/\[env:\(.*\)\]/\1/g'
+    grep env: platformio.ini | sed 's/\[env:\(.*\)\]/\1/g'
 }
 
 print_available() {
@@ -59,7 +56,7 @@ set_default_environments() {
 }
 
 build_webui() {
-    cd ../tools/webfilesbuilder
+    cd ./tools/webfilesbuilder
 
     # Build system uses gulpscript.js to build web interface
     if [ ! -e node_modules/gulp/bin/gulp.js ]; then
@@ -73,26 +70,22 @@ build_webui() {
     echo "Building web interface..."
     node node_modules/gulp/bin/gulp.js || exit
 
-    # TODO: do something if webui files are different
-    # for now, just print in travis log
-    if ${TRAVIS:-false}; then
-        git --no-pager diff --stat
-    fi
-
     cd ../..
 }
 
 build_environments() {
     echo "--------------------------------------------------------------"
     echo "Building firmware images..."
-    mkdir -p $destination/EMS-ESP-$version
+    # don't move to firmware folder until Travis fixed (see https://github.com/travis-ci/dpl/issues/846#issuecomment-547157406)
+    # mkdir -p $destination
 
     for environment in $environments; do
-        echo -n "* EMS-ESP-$version-$environment.bin --- "
+        echo "* EMS-ESP-$version-$environment.bin"
         platformio run --silent --environment $environment || exit 1
         stat_bytes .pio/build/$environment/firmware.bin
-        [[ "${TRAVIS_BUILD_STAGE_NAME}" = "Test" ]] || \
-            mv .pio/build/$environment/firmware.bin $destination/EMS-ESP-$version/EMS-ESP-$version-$environment.bin
+        # mv .pio/build/$environment/firmware.bin $destination/EMS-ESP-$version-$environment.bin
+        # mv .pio/build/$environment/firmware.bin EMS-ESP-$version-$environment.bin
+        mv .pio/build/$environment/firmware.bin EMS-ESP-dev-$environment.bin
     done
     echo "--------------------------------------------------------------" 
 }
@@ -101,7 +94,7 @@ build_environments() {
 ####### MAIN
 
 destination=firmware
-version_file=../src/version.h
+version_file=./src/version.h
 version=$(grep -E '^#define APP_VERSION' $version_file | awk '{print $3}' | sed 's/"//g')
 
 if ${TRAVIS:-false}; then
@@ -114,6 +107,8 @@ else
     git_revision=unknown
     git_tag=
 fi
+
+echo $git_tag
 
 if [[ -n $git_tag ]]; then
     new_version=${version/-*}
@@ -139,7 +134,7 @@ fi
 travis=$(list_envs | grep travis | sort)
 
 # get all taregts, excluding travis and debug
-available=$(list_envs | grep -Ev -- 'travis|debug' | sort)
+available=$(list_envs | grep -Ev -- 'travis|debug|release' | sort)
 
 export PLATFORMIO_BUILD_FLAGS="${PLATFORMIO_BUILD_FLAGS}"
 
@@ -183,7 +178,7 @@ fi
 # for debugging
 echo "* git_revision = $git_revision"
 echo "* git_tag = $git_tag"
-echo "* TRAVIS_EVENT_TYPE = $TRAVIS_EVENT_TYPE"
+echo "* TRAVIS_COMMIT = $TRAVIS_COMMIT"
 echo "* TRAVIS_TAG = $TRAVIS_TAG"
 echo "* TRAVIS_BRANCH = $TRAVIS_BRANCH"
 echo "* TRAVIS_BUILD_STAGE_NAME = $TRAVIS_BUILD_STAGE_NAME"

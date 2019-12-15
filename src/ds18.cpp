@@ -182,10 +182,10 @@ int16_t DS18::getRawValue(unsigned char index) {
     return raw;
 }
 
-// return real value as a double
+// return real value as a float
 // The raw temperature data is in units of sixteenths of a degree, so the value must be divided by 16 in order to convert it to degrees.
-double DS18::getValue(unsigned char index) {
-    double value = (float)getRawValue(index) / 16.0;
+float DS18::getValue(unsigned char index) {
+    float value = (float)getRawValue(index) / 16.0;
     return value;
 }
 

@@ -100,7 +100,6 @@
         </span>
         <br>
     </div>
-
     <div class="row form-group">
         <label class="col-xs-3">Serial Port<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign"
                 aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right"
@@ -115,11 +114,10 @@
         </div>
         <br>
     </div>
-
     <div class="row form-group">
         <label class="col-xs-3">Event Logging<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign"
                 aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right"
-                data-content="Enabling logging of all events to the device's storage"></i></label>
+                data-content="Enabling logging of all events to a remote SysLog"></i></label>
         <div class="col-xs-9">
             <form>
                 <label class="radio-inline">
@@ -128,44 +126,28 @@
                     <input type="radio" value="0" name="logeventsenabled" checked>Disabled</label>
             </form>
         </div>
-        <br>
-        <br>
-        <div class="col-xs-9 col-md-8">
-            <button onclick="savegeneral()" class="btn btn-primary btn-sm pull-right">Save</button>
-        </div>
     </div>
-    <div style="clear:both;">
-        <br>
-        <br>
+    <div class="row form-group">
+        <label class="col-xs-3">Event Log Server IP<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign"
+                aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right"
+                data-content="IP address of the SysLog server running on UDP port 514"></i></label>
+        <span class="col-xs-9">
+            <input class="form-control input-sm" value="" style="display:inline;max-width:185px" id="log_ip"
+                type="text">
+        </span>
     </div>
+    <br>
+    <br>
+    <div class="col-xs-9 col-md-8">
+        <button onclick="savegeneral()" class="btn btn-primary btn-sm pull-right">Save</button>
+    </div>
+</div>
+<div style="clear:both;">
+    <br>
+    <br>
+</div>
 </div>
 <br>
-</div>
-
-<div id="eventcontent">
-    <div class="text-center" id="loading-img">
-        <h5>Loading Logs. Please wait...<span id="loadpages"></span></h5>
-        <br>
-    </div>
-    <div>
-        <br>
-        <legend>Event Log</legend>
-        <h6 class="text-muted">Dates shown in () represent elapsed time in seconds when NTP Time is disabled</h6>
-        <div id="logevents" class="label label-danger">Event Logging has been disabled. See Settings->General Settings.
-        </div>
-        <br>
-        <div class="panel panel-default">
-            <div>
-                <table id="eventtable" class="table" data-paging="true" data-filtering="true" data-sorting="true"
-                    data-editing="false" data-state="true"></table>
-            </div>
-        </div>
-        <button onclick="clearevent()" class="btn btn-primary btn-sm">Clear Log</button>
-        <div style="clear:both;">
-            <br>
-            <br>
-        </div>
-    </div>
 </div>
 
 <div id="mqttcontent">
@@ -308,10 +290,10 @@
             </form>
         </div>
     </div>
-    <div class="row form-group" style="display:none" id="hidessid">
+    <div class="row form-group" style="display:none" id="hideclient">
         <label class="col-xs-3">SSID<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign"
                 aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right"
-                data-content="wifi Network Name"></i></label>
+                data-content="WiFi Network Name"></i></label>
         <span class="col-xs-7 col-md-5">
             <input class="form-control input-sm" id="inputtohide" type="text" name="ap_ssid">
             <select class="form-control input-sm" style="display:none;" id="ssid" onchange="listBSSID();"></select>
@@ -320,16 +302,52 @@
             <button id="scanb" type="button" class="btn btn-info btn-xs" style="display:none;"
                 onclick="scanWifi()">Scan...</button>
         </span>
-    </div>
-    <div class="row form-group" style="display:none" id="hidepasswd">
+
+        <br><br>
         <label class="col-xs-3">Password<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign"
                 aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right"
-                data-content="wifi Password"></i></label>
+                data-content="WiFi Password"></i></label>
         <span class="col-xs-9 col-md-5">
             <input id="wifipass" class="form-control input-sm" name="ap_passwd" type="password">
         </span>
+
+        <br><br>
+        <h6 style="margin-left: 10px;" class="text-muted">If you're not using DHCP and want a fixed IP address enter the
+            values below:</h6>
+
+        <br>
+        <label class="col-xs-3">Static IP<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign"
+                aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right"
+                data-content="static IP address"></i></label>
+        <span class="col-xs-9 col-md-5">
+            <input type="text" class="form-control input-sm" id="staticip" placeholder="">
+        </span>
+
+        <br><br>
+        <label class="col-xs-3">Gateway IP<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign"
+                aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right"
+                data-content="gateway IP address"></i></label>
+        <span class="col-xs-9 col-md-5">
+            <input type="text" class="form-control input-sm" id="gatewayip" placeholder="">
+        </span>
+
+        <br><br>
+        <label class="col-xs-3">Network Mask<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign"
+                aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right"
+                data-content="network mask"></i></label>
+        <span class="col-xs-9 col-md-5">
+            <input type="text" class="form-control input-sm" id="nmask" placeholder="255.255.255.0">
+        </span>
+
+        <br><br>
+        <label class="col-xs-3">DNS IP<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign"
+                aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right"
+                data-content="DNS IP address"></i></label>
+        <span class="col-xs-9 col-md-5">
+            <input type="text" class="form-control input-sm" id="dnsip" placeholder="">
+        </span>
     </div>
-    <br>
+    <br><br>
     <div class="col-xs-9 col-md-8">
         <button onclick="savenetwork()" class="btn btn-primary btn-sm pull-right">Save</button>
     </div>
@@ -340,27 +358,17 @@
     <legend>Time Settings</legend>
     <h6 class="text-muted">With Network Time Protocol (NTP) enabled, all times are adjusted to the local timezone
         and
-        respect daylight saving
-        time (DST)</h6>
+        respect daylight saving time (DST)</h6>
     <br>
     <div class="row form-group">
         <label class="col-xs-3">Device Time</label>
-        <span id="utc" class="col-xs-9 col-md-5">
-        </span>
-    </div>
-    <div class="row form-group">
-        <label class="col-xs-3">Browser Time</label>
-        <span id="rtc" class="col-xs-9 col-md-5">
-        </span>
-    </div>
-    <div class="row form-group">
+        <span id="utc" class="col-xs-9 col-md-5"></span>
         <div class="col-xs-3">
-            <button onclick="syncBrowserTime()" class="btn btn-info btn-sm">Sync Browser Time to Device</button><i
-                style="margin-left: 10px;" class="glyphicon glyphicon-info-sign" aria-hidden="true"
-                data-toggle="popover" data-trigger="hover" data-placement="right"
-                data-content="Use your browser time. Useful when the system does not have an internet connection."></i>
+            <button onclick="forcentp()" id="forcentp" class="btn btn-info btn-sm">Sync Device with Internet
+                Time</button>
         </div>
     </div>
+
     <div class="row form-group">
         <label class="col-xs-3">NTP<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign"
                 aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right"
@@ -372,8 +380,6 @@
                 <label class="radio-inline">
                     <input type="radio" value="0" onclick="handleNTPOFF();" name="ntpenabled" checked>Disabled</label>
             </form>
-            <button onclick="forcentp()" id="forcentp" class="btn btn-info btn-sm">Sync Device with Internet
-                Time</button>
         </div>
     </div>
     <div class="row form-group">
@@ -391,10 +397,30 @@
                 aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right"
                 data-content="Time in minutes between scheduled NTP refreshes"></i></label>
         <span class="col-xs-9 col-md-5">
-            <input class="form-control input-sm" placeholder="in Minutes" value="30" id="intervals" type="text">
+            <input class="form-control input-sm" placeholder="in Minutes" value="30" id="interval" type="text">
         </span>
         <br>
     </div>
+
+    <div class="row form-group">
+        <label class="col-xs-3">Time Zone</label>
+        <span class="col-xs-9 col-md-5">
+            <select class="form-control input-sm" name="timzeone" id="timezone">
+                <option value="0">Australia Eastern (Sydney, Melbourne)</option>
+                <option value="1">Moscow (MSK, does not observe DST)</option>
+                <option selected="selected" value="2">Central European Time (Frankfurt, Paris, Amsterdam)</option>
+                <option value="3">United Kingdom (London, Belfast)</option>
+                <option value="4">UTC</option>
+                <option value="5">US Eastern (New York, Detroit)</option>
+                <option value="6">US Central (Chicago, Houston)</option>
+                <option value="7">US Mountain (Denver, Salt Lake City)</option>
+                <option value="8">Arizona (no DST)</option>
+                <option value="9">US Pacific (Las Vegas, Los Angeles)</option>
+                <option value="10">Turkey</option>
+            </select>
+        </span>
+    </div>
+
     <br>
     <div class="col-xs-9 col-md-8">
         <button onclick="saventp()" class="btn btn-primary btn-sm pull-right">Save</button>
@@ -477,26 +503,22 @@
                     </tr>
                 </table>
             </div>
-            <div class="panel panel-default table-responsive">
-                <table class="table">
-                    <caption>MQTT</caption>
-                    <tr>
-                        <td>
-                            <div id="mqttconnected"></div>
-                        </td>
-                        <td>
-                            <div id="mqttheartbeat"></div>
-                        </td>
-                    </tr>
-                </table>
 
-                <div class="panel-heading">
-                    <div class="panel-title" id="mqttloghdr"></div>
-                </div>
-                <div>
-                    <table id="mqttlogtable" class="table" data-paging="false" data-filtering="false"
-                        data-sorting="false" data-editing="false" data-state="true"></table>
-                </div>
+            <div class="panel panel-default table-responsive">
+                <table class="table table-hover table-striped table-condensed" border=1>
+                    <caption>MQTT&nbsp;&nbsp;<div id="mqttconnected"></div>&nbsp;<div id="mqttheartbeat"></div>
+                    </caption>
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Topic<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign"
+                                    aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right"
+                                    id="mqttloghdr"></i></th>
+                            <th>Payload</th>
+                        </tr>
+                    </thead>
+                    <tbody id="mqttlog"></tbody>
+                </table>
             </div>
         </div>
     </div>

@@ -19,35 +19,48 @@
 
 #define EMS_ID_NONE 0x00 // used as a dest in broadcast messages and empty device IDs
 
-// Fixed EMS IDs
-#define EMS_ID_ME 0x0B      // our device, hardcoded as the "Service Key"
-#define EMS_ID_BOILER 0x08  // all UBA Boilers have 0x08
-#define EMS_ID_SM 0x30      // Solar Module SM10, SM100 and ISM1
-#define EMS_ID_HP 0x38      // HeatPump
-#define EMS_ID_GATEWAY 0x48 // KM200 Web Gateway
-
-// Product IDs
-#define EMS_PRODUCTID_SM10 73   // SM10 solar module
-#define EMS_PRODUCTID_SM50 162  // SM50 solar module
-#define EMS_PRODUCTID_SM100 163 // SM100 solar module
-#define EMS_PRODUCTID_ISM1 101  // Junkers ISM1 solar module
-
 #define EMS_MIN_TELEGRAM_LENGTH 6  // minimal length for a validation telegram, including CRC
 #define EMS_MAX_TELEGRAM_LENGTH 32 // max length of a telegram, including CRC, for Rx and Tx.
 
 // default values for null values
-#define EMS_VALUE_INT_ON 1             // boolean true
-#define EMS_VALUE_INT_OFF 0            // boolean false
+#define EMS_VALUE_BOOL_ON 0x01         // boolean true
+#define EMS_VALUE_BOOL_ON2 0xFF        // boolean true, EMS sometimes uses 0xFF for TRUE
+#define EMS_VALUE_BOOL_OFF 0x00        // boolean false
 #define EMS_VALUE_INT_NOTSET 0xFF      // for 8-bit unsigned ints/bytes
 #define EMS_VALUE_SHORT_NOTSET -32768  // for 2-byte signed shorts
 #define EMS_VALUE_USHORT_NOTSET 0x8000 // for 2-byte unsigned shorts
 #define EMS_VALUE_LONG_NOTSET 0xFFFFFF // for 3-byte longs
+#define EMS_VALUE_BOOL_NOTSET 0xFE     // random number that's not 0, 1 or FF
 
 // thermostat specific
 #define EMS_THERMOSTAT_MAXHC 4     // max number of heating circuits
 #define EMS_THERMOSTAT_DEFAULTHC 1 // default heating circuit is 1
 #define EMS_THERMOSTAT_WRITE_YES true
 #define EMS_THERMOSTAT_WRITE_NO false
+
+// Device Flags
+#define EMS_DEVICE_FLAG_NONE 0   // no flags set
+#define EMS_DEVICE_FLAG_SM10 10  // solar module1
+#define EMS_DEVICE_FLAG_SM100 11 // solar module2
+
+// group flags specific for thermostats
+#define EMS_DEVICE_FLAG_NO_WRITE 0x80 // top bit set if write not supported
+#define EMS_DEVICE_FLAG_EASY 1
+#define EMS_DEVICE_FLAG_RC10 2
+#define EMS_DEVICE_FLAG_RC20 3
+#define EMS_DEVICE_FLAG_RC30 4
+#define EMS_DEVICE_FLAG_RC35 5
+#define EMS_DEVICE_FLAG_RC300 6
+#define EMS_DEVICE_FLAG_JUNKERS 7
+
+typedef enum {
+    EMS_THERMOSTAT_MODE_UNKNOWN,
+    EMS_THERMOSTAT_MODE_OFF,
+    EMS_THERMOSTAT_MODE_MANUAL,
+    EMS_THERMOSTAT_MODE_AUTO,
+    EMS_THERMOSTAT_MODE_NIGHT,
+    EMS_THERMOSTAT_MODE_DAY
+} _EMS_THERMOSTAT_MODE;
 
 // trigger settings to determine if hot tap water or the heating is active
 #define EMS_BOILER_BURNPOWER_TAPWATER 100
@@ -62,16 +75,6 @@
 #define EMS_SYS_LOGGING_DEFAULT EMS_SYS_LOGGING_NONE
 
 #define EMS_SYS_DEVICEMAP_LENGTH 15 // size of the 0x07 telegram data part which stores all active EMS devices
-
-// define the model types
-// which get rendered to html colors in the web interface in file custom.js in function listCustomStats()
-#define EMS_MODELTYPE_BOILER 1     // success color
-#define EMS_MODELTYPE_THERMOSTAT 2 // info color
-#define EMS_MODELTYPE_SM 3         // warning color
-#define EMS_MODELTYPE_HP 4         // success color
-#define EMS_MODELTYPE_OTHER 5      // no color
-#define EMS_MODELTYPE_UNKNOWN 6    // no color
-#define EMS_MODELTYPE_MIXING 7
 
 #define EMS_MODELTYPE_UNKNOWN_STRING "unknown?" // model type text to use when discovering an unknown device
 
@@ -105,6 +108,7 @@ typedef enum {
 typedef enum {
     EMS_SYS_LOGGING_NONE,        // no messages
     EMS_SYS_LOGGING_RAW,         // raw data mode
+    EMS_SYS_LOGGING_WATCH,       // watch a specific type ID
     EMS_SYS_LOGGING_BASIC,       // only basic read/write messages
     EMS_SYS_LOGGING_THERMOSTAT,  // only telegrams sent from thermostat
     EMS_SYS_LOGGING_SOLARMODULE, // only telegrams sent from thermostat
@@ -121,7 +125,8 @@ typedef struct {
     uint16_t         emxCrcErr;                              // CRC errors
     bool             emsPollEnabled;                         // flag enable the response to poll messages
     _EMS_SYS_LOGGING emsLogging;                             // logging
-    bool             emsRefreshed;                           // fresh data, needs to be pushed out to MQTT
+    uint16_t         emsLogging_typeID;                      // the typeID to watch
+    uint8_t          emsRefreshedFlags;                      // fresh data, needs to be pushed out to MQTT
     bool             emsBusConnected;                        // is there an active bus
     uint32_t         emsRxTimestamp;                         // timestamp of last EMS message received
     uint32_t         emsPollFrequency;                       // time between EMS polls
@@ -146,24 +151,23 @@ typedef struct {
     uint8_t                 comparisonValue;    // value to compare against during a validate command
     uint8_t                 comparisonOffset;   // offset of where the byte is we want to compare too during validation
     uint16_t                comparisonPostRead; // after a successful write, do a read from this type ID
-    bool                    forceRefresh;       // should we send to MQTT after a successful Tx?
-    uint32_t                timestamp;          // when created
+    unsigned long           timestamp;          // when created
     uint8_t                 data[EMS_MAX_TELEGRAM_LENGTH];
 } _EMS_TxTelegram;
 
 // The Rx receive package
 typedef struct {
-    uint32_t  timestamp;    // timestamp from millis()
-    uint8_t * telegram;     // the full data package
-    uint8_t   data_length;  // length in bytes of the data
-    uint8_t   length;       // full length of the complete telegram
-    uint8_t   src;          // source ID
-    uint8_t   dest;         // destination ID
-    uint16_t  type;         // type ID as a double byte to support EMS+
-    uint8_t   offset;       // offset
-    uint8_t * data;         // pointer to where telegram data starts
-    bool      emsplus;      // true if ems+/ems 2.0
-    uint8_t   emsplus_type; // FF, F7 or F9
+    unsigned long timestamp;    // timestamp from millis()
+    uint8_t *     telegram;     // the full data package
+    uint8_t       data_length;  // length in bytes of the data
+    uint8_t       length;       // full length of the complete telegram
+    uint8_t       src;          // source ID
+    uint8_t       dest;         // destination ID
+    uint16_t      type;         // type ID as a 2-byte to support EMS+
+    uint8_t       offset;       // offset
+    uint8_t *     data;         // pointer to where telegram data starts
+    bool          emsplus;      // true if ems+/ems 2.0
+    uint8_t       emsplus_type; // FF, F7 or F9
 } _EMS_RxTelegram;
 
 // default empty Tx, must match struct
@@ -178,64 +182,71 @@ const _EMS_TxTelegram EMS_TX_TELEGRAM_NEW = {
     0,                    // comparisonValue
     0,                    // comparisonOffset
     EMS_ID_NONE,          // comparisonPostRead
-    false,                // forceRefresh
     0,                    // timestamp
     {0x00}                // data
 };
 
-// where defintions are stored
-typedef struct {
-    uint8_t product_id;
-    char    model_string[70];
-} _Boiler_Device;
+// flags for triggering changes when EMS data is received
+typedef enum : uint8_t {
+    EMS_DEVICE_UPDATE_FLAG_NONE       = 0,
+    EMS_DEVICE_UPDATE_FLAG_BOILER     = (1 << 0),
+    EMS_DEVICE_UPDATE_FLAG_THERMOSTAT = (1 << 1),
+    EMS_DEVICE_UPDATE_FLAG_MIXING     = (1 << 2),
+    EMS_DEVICE_UPDATE_FLAG_SOLAR      = (1 << 3),
+    EMS_DEVICE_UPDATE_FLAG_HEATPUMP   = (1 << 4)
+} _EMS_DEVICE_UPDATE_FLAG;
 
-typedef struct {
-    uint8_t product_id;
-    char    model_string[50];
-} _SolarModule_Device;
+typedef enum : uint8_t {
+    EMS_DEVICE_TYPE_NONE = 0,
+    EMS_DEVICE_TYPE_SERVICEKEY,
+    EMS_DEVICE_TYPE_BOILER,
+    EMS_DEVICE_TYPE_THERMOSTAT,
+    EMS_DEVICE_TYPE_MIXING,
+    EMS_DEVICE_TYPE_SOLAR,
+    EMS_DEVICE_TYPE_HEATPUMP,
+    EMS_DEVICE_TYPE_GATEWAY,
+    EMS_DEVICE_TYPE_OTHER,
+    EMS_DEVICE_TYPE_SWITCH,
+    EMS_DEVICE_TYPE_CONTROLLER,
+    EMS_DEVICE_TYPE_CONNECT,
+    EMS_DEVICE_TYPE_UNKNOWN
+} _EMS_DEVICE_TYPE;
 
+// to store all known EMS devices to date
 typedef struct {
-    uint8_t product_id;
-    uint8_t device_id;
-    char    model_string[50];
-} _Other_Device;
+    uint8_t          product_id;
+    _EMS_DEVICE_TYPE type;
+    char             device_desc[100];
+    uint8_t          flags;
+} _EMS_Device;
 
+// to store mapping of device_ids to their string name
 typedef struct {
-    uint8_t product_id;
-    char    model_string[50];
-} _HeatPump_Device;
+    uint8_t          device_id;
+    _EMS_DEVICE_TYPE device_type;
+    char             device_type_string[30];
+} _EMS_Device_Types;
 
+// for storing all recognised EMS devices
 typedef struct {
-    uint8_t model_id;
-    uint8_t product_id;
-    uint8_t device_id;
-    char    model_string[50];
-    bool    write_supported;
-} _Thermostat_Device;
-
-typedef struct {
-    uint8_t product_id;
-    char    model_string[50];
-} _Mixing_Device;
-
-// for consolidating all types
-typedef struct {
-    uint8_t model_type; // 1=boiler, 2=thermostat, 3=sm, 4=other, 5=unknown
-    uint8_t product_id;
-    uint8_t device_id;
-    char    version[10];
-    char    model_string[50];
-} _Generic_Device;
-
+    _EMS_DEVICE_TYPE device_type;   // type (see above)
+    uint8_t          product_id;    // product id
+    uint8_t          device_id;     // device_id
+    const char *     device_desc_p; // pointer to description string in EMS_Devices table
+    char             version[10];   // the version number XX.XX
+    bool             known;         // is this a known device?
+} _Detected_Device;
 
 /*
  * Telegram package defintions
  */
 typedef struct {
     // settings
-    uint8_t device_id; // this is typically always 0x08
-    uint8_t product_id;
-    char    version[10];
+    uint8_t      device_id; // this is typically always 0x08
+    uint8_t      device_flags;
+    const char * device_desc_p;
+    uint8_t      product_id;
+    char         version[10];
 
     // UBAParameterWW
     uint8_t wWActivated;   // Warm Water activated
@@ -295,30 +306,19 @@ typedef struct {
  * Telegram package defintions for Other EMS devices
  */
 typedef struct {
-    uint8_t device_id; // the device ID of the Heat Pump (e.g. 0x30)
-    uint8_t model_id;  // Solar Module / Heat Pump model
-    uint8_t product_id;
-    char    version[10];
-
-    uint8_t HPModulation; // heatpump modulation in %
-    uint8_t HPSpeed;      // speed 0-100 %
+    uint8_t      device_id; // the device ID of the Heat Pump (e.g. 0x30)
+    uint8_t      device_flags;
+    const char * device_desc_p;
+    uint8_t      product_id;
+    char         version[10];
+    uint8_t      HPModulation; // heatpump modulation in %
+    uint8_t      HPSpeed;      // speed 0-100 %
 } _EMS_HeatPump;
 
+// Mixing Module per HC
 typedef struct {
-    uint8_t device_id;
-    uint8_t model_id;
-    uint8_t product_id;
-    char    version[10];
-} _EMS_Other;
-
-typedef struct {
-    uint8_t device_id;
-    uint8_t model_id;
-    uint8_t product_id;
-    char    version[10];
-    uint8_t hc;     // heating circuit 1, 2, 3 or 4
-    bool    active; // true if there is data for this HC
-
+    uint8_t  hc;     // heating circuit 1, 2, 3 or 4
+    bool     active; // true if there is data for this HC
     uint16_t flowTemp;
     uint8_t  pumpMod;
     uint8_t  valveStatus;
@@ -326,26 +326,31 @@ typedef struct {
 
 // Mixer data
 typedef struct {
+    uint8_t        device_id;
+    uint8_t        device_flags;
+    const char *   device_desc_p;
+    uint8_t        product_id;
+    char           version[10];
     bool           detected;
     _EMS_Mixing_HC hc[EMS_THERMOSTAT_MAXHC]; // array for the 4 heating circuits
 } _EMS_Mixing;
 
-// SM Solar Module - SM10/SM100/ISM1
+// Solar Module - SM10/SM100/ISM1
 typedef struct {
-    uint8_t device_id; // the device ID of the Solar Module
-    uint8_t model_id;  // Solar Module
-    uint8_t product_id;
-    char    version[10];
-
-    int16_t  collectorTemp;          // collector temp
-    int16_t  bottomTemp;             // bottom temp
-    uint8_t  pumpModulation;         // modulation solar pump
-    uint8_t  pump;                   // pump active
-    int16_t  setpoint_maxBottomTemp; // setpoint for maximum collector temp
-    uint16_t EnergyLastHour;
-    uint16_t EnergyToday;
-    uint16_t EnergyTotal;
-    uint32_t pumpWorkMin; // Total solar pump operating time
+    uint8_t      device_id;    // the device ID of the Solar Module
+    uint8_t      device_flags; // Solar Module flags
+    const char * device_desc_p;
+    uint8_t      product_id;
+    char         version[10];
+    int16_t      collectorTemp;          // collector temp
+    int16_t      bottomTemp;             // bottom temp
+    uint8_t      pumpModulation;         // modulation solar pump
+    uint8_t      pump;                   // pump active
+    int16_t      setpoint_maxBottomTemp; // setpoint for maximum collector temp
+    uint16_t     EnergyLastHour;
+    uint16_t     EnergyToday;
+    uint16_t     EnergyTotal;
+    uint32_t     pumpWorkMin; // Total solar pump operating time
 } _EMS_SolarModule;
 
 // heating circuit
@@ -367,8 +372,9 @@ typedef struct {
 
 // Thermostat data
 typedef struct {
-    uint8_t            device_id; // the device ID of the thermostat
-    uint8_t            model_id;  // thermostat model
+    uint8_t            device_id;    // the device ID of the thermostat
+    uint8_t            device_flags; // thermostat model flags
+    const char *       device_desc_p;
     uint8_t            product_id;
     char               version[10];
     char               datetime[25]; // HH:MM:SS DD/MM/YYYY
@@ -381,48 +387,41 @@ typedef void (*EMS_processType_cb)(_EMS_RxTelegram * EMS_RxTelegram);
 
 // Definition for each EMS type, including the relative callback function
 typedef struct {
-    uint8_t            model_id;
-    uint16_t           type; // long to support EMS+ types
-    const char         typeString[50];
-    EMS_processType_cb processType_cb;
+    _EMS_DEVICE_UPDATE_FLAG device_flag;
+    uint16_t                type;
+    const char              typeString[30];
+    EMS_processType_cb      processType_cb;
 } _EMS_Type;
 
 // function definitions
-extern void ems_dumpBuffer(const char * prefix, uint8_t * telegram, uint8_t length);
-extern void ems_parseTelegram(uint8_t * telegram, uint8_t len);
-void        ems_init();
-void        ems_doReadCommand(uint16_t type, uint8_t dest, bool forceRefresh = false);
-void        ems_sendRawTelegram(char * telegram);
-void        ems_scanDevices();
-void        ems_printAllDevices();
-void        ems_printDevices();
-uint8_t     ems_printDevices_s(char * buffer, uint16_t len);
-void        ems_printTxQueue();
-void        ems_testTelegram(uint8_t test_num);
-void        ems_startupTelegrams();
-bool        ems_checkEMSBUSAlive();
-void        ems_clearDeviceList();
-
-void ems_setThermostatTemp(float temperature, uint8_t hc, uint8_t temptype = 0);
-void ems_setThermostatMode(uint8_t mode, uint8_t hc);
-void ems_setWarmWaterTemp(uint8_t temperature);
-void ems_setFlowTemp(uint8_t temperature);
-void ems_setWarmWaterActivated(bool activated);
-void ems_setWarmTapWaterActivated(bool activated);
-void ems_setPoll(bool b);
-void ems_setLogging(_EMS_SYS_LOGGING loglevel, bool silent = false);
-void ems_setEmsRefreshed(bool b);
-void ems_setWarmWaterModeComfort(uint8_t comfort);
-void ems_setModels();
-void ems_setTxDisabled(bool b);
-void ems_setTxMode(uint8_t mode);
-
-uint8_t _getHeatingCircuit(_EMS_RxTelegram * EMS_RxTelegram);
-
-char *           ems_getThermostatDescription(char * buffer, bool name_only = false);
-char *           ems_getBoilerDescription(char * buffer, bool name_only = false);
-char *           ems_getSolarModuleDescription(char * buffer, bool name_only = false);
-char *           ems_getHeatPumpDescription(char * buffer, bool name_only = false);
+void             ems_dumpBuffer(const char * prefix, uint8_t * telegram, uint8_t length);
+void             ems_parseTelegram(uint8_t * telegram, uint8_t len);
+void             ems_init();
+void             ems_doReadCommand(uint16_t type, uint8_t dest);
+void             ems_sendRawTelegram(char * telegram);
+void             ems_scanDevices();
+void             ems_printDevices();
+uint8_t          ems_printDevices_s(char * buffer, uint16_t len);
+void             ems_printTxQueue();
+void             ems_testTelegram(uint8_t test_num);
+void             ems_startupTelegrams();
+bool             ems_checkEMSBUSAlive();
+void             ems_clearDeviceList();
+void             ems_setThermostatTemp(float temperature, uint8_t hc, uint8_t temptype = 0);
+void             ems_setThermostatMode(uint8_t mode, uint8_t hc);
+void             ems_setWarmWaterTemp(uint8_t temperature);
+void             ems_setFlowTemp(uint8_t temperature);
+void             ems_setWarmWaterActivated(bool activated);
+void             ems_setWarmWaterOnetime(bool activated);
+void             ems_setWarmTapWaterActivated(bool activated);
+void             ems_setPoll(bool b);
+void             ems_setLogging(_EMS_SYS_LOGGING loglevel, uint16_t type_id = 0);
+void             ems_setWarmWaterModeComfort(uint8_t comfort);
+void             ems_setModels();
+void             ems_setTxDisabled(bool b);
+void             ems_setTxMode(uint8_t mode);
+char *           ems_getDeviceDescription(_EMS_DEVICE_TYPE device_type, char * buffer, bool name_only = false);
+bool             ems_getDeviceTypeDescription(uint8_t device_id, char * buffer);
 void             ems_getThermostatValues();
 void             ems_getBoilerValues();
 void             ems_getSolarModuleValues();
@@ -435,13 +434,15 @@ bool             ems_getSolarModuleEnabled();
 bool             ems_getHeatPumpEnabled();
 bool             ems_getBusConnected();
 _EMS_SYS_LOGGING ems_getLogging();
-bool             ems_getEmsRefreshed();
 uint8_t          ems_getThermostatModel();
 uint8_t          ems_getSolarModuleModel();
 void             ems_discoverModels();
 bool             ems_getTxCapable();
 uint32_t         ems_getPollFrequency();
 bool             ems_getTxDisabled();
+void             ems_Device_add_flags(unsigned int flags);
+bool             ems_Device_has_flags(unsigned int flags);
+void             ems_Device_remove_flags(unsigned int flags);
 
 // private functions
 uint8_t _crcCalculator(uint8_t * data, uint8_t len);
@@ -449,6 +450,7 @@ void    _processType(_EMS_RxTelegram * EMS_RxTelegram);
 void    _debugPrintPackage(const char * prefix, _EMS_RxTelegram * EMS_RxTelegram, const char * color);
 void    _ems_clearTxData();
 void    _removeTxQueue();
+uint8_t _getHeatingCircuit(_EMS_RxTelegram * EMS_RxTelegram);
 
 // global so can referenced in other classes
 extern _EMS_Sys_Status  EMS_Sys_Status;
@@ -456,7 +458,6 @@ extern _EMS_Boiler      EMS_Boiler;
 extern _EMS_Thermostat  EMS_Thermostat;
 extern _EMS_SolarModule EMS_SolarModule;
 extern _EMS_HeatPump    EMS_HeatPump;
-extern _EMS_Other       EMS_Other;
 extern _EMS_Mixing      EMS_Mixing;
 
-extern std::list<_Generic_Device> Devices;
+extern std::list<_Detected_Device> Devices;

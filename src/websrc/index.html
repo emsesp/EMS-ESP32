@@ -53,9 +53,6 @@
                     </ul>
                 </li>
                 <li>
-                    <a href="#" id="eventlog"><i class="glyphicon glyphicon-transfer"></i>Event Log</a>
-                </li>
-                <li>
                     <a href="#" id="backup"><i class="glyphicon glyphicon-floppy-disk"></i>Backup & Restore</a>
                 </li>
                 <li>
@@ -194,7 +191,10 @@
                         </div>
                         <div class="modal-body">
                             <div>
-                                <h4>Latest Stable Release</h4>
+                                <div>
+                                    <button id="updateb" onclick="switchfirmware()" type="submit" class="btn btn-success btn-sm pull-right">Release</button>
+                                </div>
+
                                 <div id="onlineupdate">
                                     <h5 id=releasehead></h5>
                                     <div style="clear:both;">
@@ -209,7 +209,7 @@
                                 </div>
                             </div>
                             <div style="clear:both;">
-                                <br>
+                              <br>
                             </div>
                             <div>
                                 <div class="form-group">

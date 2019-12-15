@@ -2,76 +2,33 @@ var version = "";
 
 var websock = null;
 var wsUri = "ws://" + window.location.host + "/ws";
-var utcSeconds;
-var data = [];
+var ntpSeconds;
 var ajaxobj;
 
 var custom_config = {};
 
-var config = {
-    "command": "configfile",
-    "network": {
-        "ssid": "",
-        "wmode": 1,
-        "password": ""
-    },
-    "general": {
-        "hostname": "",
-        "serial": false,
-        "password": "admin",
-        "log_events": true
-    },
-    "mqtt": {
-        "enabled": false,
-        "ip": "",
-        "port": 1883,
-        "qos": 1,
-        "keepalive": 60,
-        "retain": true,
-        "base": "",
-        "user": "",
-        "password": "",
-        "heartbeat": false
-    },
-    "ntp": {
-        "server": "pool.ntp.org",
-        "interval": 30,
-        "enabled": true
-    }
-};
+var xDown = null;
+var yDown = null;
 
-var page = 1;
-var haspages;
 var file = {};
 var backupstarted = false;
 var updateurl = "";
+var updateurl_dev = "";
+
+var use_beta_firmware = false;
 
 var myespcontent;
 
-function browserTime() {
-    var d = new Date(0);
-    var c = new Date();
-    var timestamp = Math.floor((c.getTime() / 1000) + ((c.getTimezoneOffset() * 60) * -1));
-    d.setUTCSeconds(timestamp);
-    document.getElementById("rtc").innerHTML = d.toUTCString().slice(0, -3);
-}
+var formData = new FormData();
+
+var nextIsNotJson = false;
+
+var config = {};
 
 function deviceTime() {
-    var c = new Date();
     var t = new Date(0); // The 0 there is the key, which sets the date to the epoch
-    var devTime = Math.floor(utcSeconds + ((c.getTimezoneOffset() * 60) * -1));
-    t.setUTCSeconds(devTime);
+    t.setUTCSeconds(ntpSeconds);
     document.getElementById("utc").innerHTML = t.toUTCString().slice(0, -3);
-}
-
-function syncBrowserTime() {
-    var d = new Date();
-    var timestamp = Math.floor((d.getTime() / 1000));
-    var datatosend = {};
-    datatosend.command = "settime";
-    datatosend.epoch = timestamp;
-    websock.send(JSON.stringify(datatosend));
-    $("#ntp").click();
 }
 
 function handleNTPON() {
@@ -86,7 +43,8 @@ function listntp() {
     websock.send("{\"command\":\"gettime\"}");
 
     document.getElementById("ntpserver").value = config.ntp.server;
-    document.getElementById("intervals").value = config.ntp.interval;
+    document.getElementById("interval").value = config.ntp.interval;
+    document.getElementById("timezone").value = config.ntp.timezone;
 
     if (config.ntp.enabled) {
         $("input[name=\"ntpenabled\"][value=\"1\"]").prop("checked", true);
@@ -127,7 +85,8 @@ function custom_saveconfig() {
 
 function saventp() {
     config.ntp.server = document.getElementById("ntpserver").value;
-    config.ntp.interval = parseInt(document.getElementById("intervals").value);
+    config.ntp.interval = parseInt(document.getElementById("interval").value);
+    config.ntp.timezone = parseInt(document.getElementById("timezone").value);
 
     config.ntp.enabled = false;
     if (parseInt($("input[name=\"ntpenabled\"]:checked").val()) === 1) {
@@ -159,6 +118,8 @@ function savegeneral() {
     if (parseInt($("input[name=\"logeventsenabled\"]:checked").val()) === 1) {
         config.general.log_events = true;
     }
+
+    config.general.log_ip = document.getElementById("log_ip").value;
 
     saveconfig();
 }
@@ -205,11 +166,13 @@ function savenetwork() {
 
     config.network.wmode = wmode;
     config.network.password = document.getElementById("wifipass").value;
+    config.network.staticip = document.getElementById("staticip").value;
+    config.network.gatewayip = document.getElementById("gatewayip").value;
+    config.network.nmask = document.getElementById("nmask").value;
+    config.network.dnsip = document.getElementById("dnsip").value;
 
     saveconfig();
 }
-
-var formData = new FormData();
 
 function inProgress(callback) {
     $("body").load("myesp.html #progresscontent", function (responseTxt, statusTxt, xhr) {
@@ -283,15 +246,13 @@ function inProgressUpload() {
 
 function handleSTA() {
     document.getElementById("scanb").style.display = "block";
-    document.getElementById("hidessid").style.display = "block";
-    document.getElementById("hidepasswd").style.display = "block";
+    document.getElementById("hideclient").style.display = "block";
 }
 
 function handleAP() {
     document.getElementById("ssid").style.display = "none";
     document.getElementById("scanb").style.display = "none";
-    document.getElementById("hidessid").style.display = "none";
-    document.getElementById("hidepasswd").style.display = "none";
+    document.getElementById("hideclient").style.display = "none";
 
     document.getElementById("inputtohide").style.display = "block";
 }
@@ -307,6 +268,11 @@ function listnetwork() {
         handleSTA();
     }
 
+    document.getElementById("staticip").value = config.network.staticip;
+    document.getElementById("gatewayip").value = config.network.gatewayip;
+    document.getElementById("nmask").value = config.network.nmask;
+    document.getElementById("dnsip").value = config.network.dnsip;
+
 }
 
 function listgeneral() {
@@ -320,6 +286,9 @@ function listgeneral() {
     if (config.general.log_events) {
         $("input[name=\"logeventsenabled\"][value=\"1\"]").prop("checked", true);
     }
+
+    document.getElementById("log_ip").value = config.general.log_ip;
+
 }
 
 function listmqtt() {
@@ -375,30 +344,8 @@ function scanWifi() {
     }
 }
 
-function getEvents() {
-    websock.send("{\"command\":\"geteventlog\", \"page\":" + page + "}");
-}
-
 function isVisible(e) {
     return !!(e.offsetWidth || e.offsetHeight || e.getClientRects().length);
-}
-
-function getnextpage(mode) {
-    if (!backupstarted) {
-        document.getElementById("loadpages").innerHTML = "Loading " + page + "/" + haspages;
-    }
-
-    if (page < haspages) {
-        page = page + 1;
-        var commandtosend = {};
-        commandtosend.command = mode;
-        commandtosend.page = page;
-        websock.send(JSON.stringify(commandtosend));
-    }
-}
-
-function builddata(obj) {
-    data = data.concat(obj.list);
 }
 
 function colorStatusbar(ref) {
@@ -444,8 +391,40 @@ function listStats() {
         document.getElementById("mqttheartbeat").className = "label label-primary";
     }
 
-    document.getElementById("mqttloghdr").innerHTML = "MQTT Publish Log: (topics are prefixed with <b>" + ajaxobj.mqttloghdr + "</b>)";
+    document.getElementById("mqttloghdr").setAttribute('data-content', "Topics are prefixed with " + ajaxobj.mqttloghdr);
 
+    var mtable = document.getElementById("mqttlog");
+    var obj = ajaxobj.mqttlog;
+    var tr, td;
+
+    for (var i = 0; i < obj.length; i++) {
+        tr = document.createElement("tr");
+
+        td = document.createElement("td");
+
+        if (obj[i].time < 1563300000) {
+            td.innerHTML = "(" + obj[i].time + ")";
+        } else {
+            var vuepoch = new Date(obj[i].time * 1000);
+            td.innerHTML = vuepoch.getUTCFullYear() +
+                "-" + twoDigits(vuepoch.getUTCMonth() + 1) +
+                "-" + twoDigits(vuepoch.getUTCDate()) +
+                " " + twoDigits(vuepoch.getUTCHours()) +
+                ":" + twoDigits(vuepoch.getUTCMinutes()) +
+                ":" + twoDigits(vuepoch.getUTCSeconds());
+        }
+        tr.appendChild(td);
+
+        td = document.createElement("td");
+        td.innerHTML = obj[i].topic
+        tr.appendChild(td);
+
+        td = document.createElement("td");
+        td.innerHTML = obj[i].payload
+        tr.appendChild(td);
+
+        mtable.appendChild(tr);
+    }
 }
 
 function getContent(contentname) {
@@ -471,19 +450,6 @@ function getContent(contentname) {
                 case "#networkcontent":
                     listnetwork();
                     break;
-                case "#eventcontent":
-                    page = 1;
-                    data = [];
-                    getEvents();
-
-                    if (config.general.log_events) {
-                        document.getElementById("logevents").style.display = "none";
-                    } else {
-                        document.getElementById("logevents").style.display = "block";
-                    }
-
-                    break;
-
                 case "#customcontent":
                     listcustom();
                     break;
@@ -510,6 +476,7 @@ function getContent(contentname) {
                     $("#appurl2").text(ajaxobj.appurl);
 
                     updateurl = ajaxobj.updateurl;
+                    updateurl_dev = ajaxobj.updateurl_dev;
                     listCustomStats();
                     break;
                 default:
@@ -602,147 +569,12 @@ function twoDigits(value) {
     return value;
 }
 
-function initEventTable() {
-    var newlist = [];
-    for (var i = 0; i < data.length; i++) {
-        newlist[i] = {};
-        newlist[i].options = {};
-        newlist[i].value = {};
-        try {
-            var dup = JSON.parse(data[i]);
-            dup.uid = i + 1;
-        } catch (e) {
-            var dup = { "uid": i + 1, "type": "ERRO", "src": "SYS", "desc": "Error in log file", "data": data[i], "time": 1 }
-        }
-        newlist[i].value = dup;
-
-        var c = dup.type;
-        switch (c) {
-            case "WARN":
-                newlist[i].options.classes = "warning";
-                break;
-            case "INFO":
-                newlist[i].options.classes = "info";
-                break;
-            case "ERRO":
-                newlist[i].options.classes = "danger";
-                break;
-            default:
-                break;
-        }
-    }
-    jQuery(function ($) {
-        window.FooTable.init("#eventtable", {
-            columns: [{
-                "name": "uid",
-                "title": "ID",
-                "type": "text",
-                "sorted": true,
-                "direction": "DESC"
-            },
-            {
-                "name": "type",
-                "title": "Event Type",
-                "type": "text"
-            },
-            {
-                "name": "src",
-                "title": "Source"
-            },
-            {
-                "name": "desc",
-                "title": "Description"
-            },
-            {
-                "name": "data",
-                "title": "Additional Data",
-                "breakpoints": "xs sm"
-            },
-            {
-                "name": "time",
-                "title": "Date/Time",
-                "parser": function (value) {
-                    if (value < 1563300000) {
-                        return "(" + value + ")";
-                    } else {
-                        var comp = new Date();
-                        value = Math.floor(value + ((comp.getTimezoneOffset() * 60) * -1));
-                        var vuepoch = new Date(value * 1000);
-                        var formatted = vuepoch.getUTCFullYear() +
-                            "-" + twoDigits(vuepoch.getUTCMonth() + 1) +
-                            "-" + twoDigits(vuepoch.getUTCDate()) +
-                            " " + twoDigits(vuepoch.getUTCHours()) +
-                            ":" + twoDigits(vuepoch.getUTCMinutes()) +
-                            ":" + twoDigits(vuepoch.getUTCSeconds());
-                        return formatted;
-                    }
-                },
-                "breakpoints": "xs sm"
-            }
-            ],
-            rows: newlist
-        });
-    });
-}
-
-function initMQTTLogTable() {
-    var newlist = [];
-    for (var i = 0; i < ajaxobj.mqttlog.length; i++) {
-        var data = JSON.stringify(ajaxobj.mqttlog[i]);
-        newlist[i] = {};
-        newlist[i].options = {};
-        newlist[i].value = {};
-        newlist[i].value = JSON.parse(data);
-        newlist[i].options.classes = "warning";
-        newlist[i].options.style = "color: blue";
-    }
-    jQuery(function ($) {
-        window.FooTable.init("#mqttlogtable", {
-            columns: [{
-                "name": "time",
-                "title": "Last Published",
-                "style": { "min-width": "160px" },
-                "parser": function (value) {
-                    if (value < 1563300000) {
-                        return "(" + value + ")";
-                    } else {
-                        var comp = new Date();
-                        value = Math.floor(value + ((comp.getTimezoneOffset() * 60) * -1));
-                        var vuepoch = new Date(value * 1000);
-                        var formatted = vuepoch.getUTCFullYear() +
-                            "-" + twoDigits(vuepoch.getUTCMonth() + 1) +
-                            "-" + twoDigits(vuepoch.getUTCDate()) +
-                            " " + twoDigits(vuepoch.getUTCHours()) +
-                            ":" + twoDigits(vuepoch.getUTCMinutes()) +
-                            ":" + twoDigits(vuepoch.getUTCSeconds());
-                        return formatted;
-                    }
-                },
-                "breakpoints": "xs sm"
-            },
-            {
-                "name": "topic",
-                "title": "Topic",
-            },
-            {
-                "name": "payload",
-                "title": "Payload",
-            },
-            ],
-            rows: newlist
-        });
-    });
-}
-
-var nextIsNotJson = false;
-
 function socketMessageListener(evt) {
     var obj = JSON.parse(evt.data);
     if (obj.hasOwnProperty("command")) {
         switch (obj.command) {
             case "status":
                 ajaxobj = obj;
-                initMQTTLogTable();
                 getContent("#statuscontent");
                 break;
             case "custom_settings":
@@ -752,17 +584,8 @@ function socketMessageListener(evt) {
                 ajaxobj = obj;
                 getContent("#custom_statuscontent");
                 break;
-            case "eventlist":
-                haspages = obj.haspages;
-                if (haspages === 0) {
-                    document.getElementById("loading-img").style.display = "none";
-                    initEventTable();
-                    break;
-                }
-                builddata(obj);
-                break;
             case "gettime":
-                utcSeconds = obj.epoch;
+                ntpSeconds = obj.epoch;
                 deviceTime();
                 break;
             case "ssidlist":
@@ -778,26 +601,6 @@ function socketMessageListener(evt) {
                 break;
         }
     }
-
-    if (obj.hasOwnProperty("resultof")) {
-        switch (obj.resultof) {
-            case "eventlist":
-                if (page < haspages && obj.result === true) {
-                    getnextpage("geteventlog");
-                } else if (page === haspages) {
-                    initEventTable();
-                    document.getElementById("loading-img").style.display = "none";
-                }
-                break;
-            default:
-                break;
-        }
-    }
-}
-
-function clearevent() {
-    websock.send("{\"command\":\"clearevent\"}");
-    $("#eventlog").click();
 }
 
 function compareDestroy() {
@@ -813,46 +616,6 @@ function destroy() {
 function restart() {
     inProgress("restart");
 }
-
-$("#dismiss, .overlay").on("click", function () {
-    $("#sidebar").removeClass("active");
-    $(".overlay").fadeOut();
-});
-
-$("#sidebarCollapse").on("click", function () {
-    $("#sidebar").addClass("active");
-    $(".overlay").fadeIn();
-    $(".collapse.in").toggleClass("in");
-    $("a[aria-expanded=true]").attr("aria-expanded", "false");
-});
-
-$("#custom_status").click(function () {
-    websock.send("{\"command\":\"custom_status\"}");
-    return false;
-});
-
-$("#status").click(function () {
-    websock.send("{\"command\":\"status\"}");
-    return false;
-});
-
-$("#custom").click(function () { getContent("#customcontent"); return false; });
-
-$("#network").on("click", (function () { getContent("#networkcontent"); return false; }));
-$("#general").click(function () { getContent("#generalcontent"); return false; });
-$("#mqtt").click(function () { getContent("#mqttcontent"); return false; });
-$("#ntp").click(function () { getContent("#ntpcontent"); return false; });
-$("#backup").click(function () { getContent("#backupcontent"); return false; });
-$("#reset").click(function () { $("#destroy").modal("show"); return false; });
-$("#restart").click(function () { $("#reboot").modal("show"); return false; });
-$("#eventlog").click(function () { getContent("#eventcontent"); return false; });
-
-$(".noimp").on("click", function () {
-    $("#noimp").modal("show");
-});
-
-var xDown = null;
-var yDown = null;
 
 function handleTouchStart(evt) {
     xDown = evt.touches[0].clientX;
@@ -953,8 +716,26 @@ function login() {
     }
 }
 
+function getfirmware() {
+    if (use_beta_firmware) {
+        use_beta_firmware = false;
+        document.getElementById("updateb").innerHTML = "Switch to Development build";
+    } else {
+        use_beta_firmware = true;
+        document.getElementById("updateb").innerHTML = "Switch to Stable release";
+    }
+    getLatestReleaseInfo();
+}
+
 function getLatestReleaseInfo() {
-    $.getJSON(updateurl).done(function (release) {
+
+    if (use_beta_firmware) {
+        var url = updateurl_dev;
+    } else {
+        var url = updateurl;
+    }
+
+    $.getJSON(url).done(function (release) {
         var asset = release.assets[0];
         var downloadCount = 0;
         for (var i = 0; i < release.assets.length; i++) {
@@ -977,10 +758,6 @@ function getLatestReleaseInfo() {
         $("#releaseinfo").fadeIn("slow");
     }).error(function () { $("#onlineupdate").html("<h5>Couldn't get release details. Make sure there is an Internet connection.</h5>"); });
 }
-
-$("#update").on("shown.bs.modal", function (e) {
-    getLatestReleaseInfo();
-});
 
 function allowUpload() {
     $("#upbtn").prop("disabled", false);
@@ -1006,13 +783,38 @@ function start() {
     });
 }
 
-function refreshEMS() {
+function refreshCustomStatus() {
     websock.send("{\"command\":\"custom_status\"}");
 }
 
 function refreshStatus() {
     websock.send("{\"command\":\"status\"}");
 }
+
+$("#dismiss, .overlay").on("click", function () {
+    $("#sidebar").removeClass("active");
+    $(".overlay").fadeOut();
+});
+
+$("#sidebarCollapse").on("click", function () {
+    $("#sidebar").addClass("active");
+    $(".overlay").fadeIn();
+    $(".collapse.in").toggleClass("in");
+    $("a[aria-expanded=true]").attr("aria-expanded", "false");
+});
+
+$("#custom_status").click(function () { websock.send("{\"command\":\"custom_status\"}"); return false; });
+$("#status").click(function () { websock.send("{\"command\":\"status\"}"); return false; });
+$("#custom").click(function () { getContent("#customcontent"); return false; });
+$("#network").on("click", (function () { getContent("#networkcontent"); return false; }));
+$("#general").click(function () { getContent("#generalcontent"); return false; });
+$("#mqtt").click(function () { getContent("#mqttcontent"); return false; });
+$("#ntp").click(function () { getContent("#ntpcontent"); return false; });
+$("#backup").click(function () { getContent("#backupcontent"); return false; });
+$("#reset").click(function () { $("#destroy").modal("show"); return false; });
+$("#restart").click(function () { $("#reboot").modal("show"); return false; });
+$(".noimp").on("click", function () { $("#noimp").modal("show"); });
+$("#update").on("shown.bs.modal", function (e) { getfirmware(); });
 
 document.addEventListener("touchstart", handleTouchStart, false);
 document.addEventListener("touchmove", handleTouchMove, false);

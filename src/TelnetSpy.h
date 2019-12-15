@@ -151,13 +151,13 @@
 #ifndef TelnetSpy_h
 #define TelnetSpy_h
 
-#define TELNETSPY_BUFFER_LEN 3000
+#define TELNETSPY_BUFFER_LEN 1000 // was 3000
 #define TELNETSPY_MIN_BLOCK_SIZE 64
 #define TELNETSPY_COLLECTING_TIME 100
 #define TELNETSPY_MAX_BLOCK_SIZE 512
 #define TELNETSPY_PING_TIME 1500
 #define TELNETSPY_PORT 23
-#define TELNETSPY_CAPTURE_OS_PRINT true
+#define TELNETSPY_CAPTURE_OS_PRINT false
 #define TELNETSPY_WELCOME_MSG "Connection established via Telnet.\n"
 #define TELNETSPY_REJECT_MSG "Telnet: Only one connection possible.\n"
 

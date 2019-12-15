@@ -44,6 +44,7 @@
 
 #define TOPIC_BOILER_CMD "boiler_cmd"                         // for receiving boiler commands via MQTT
 #define TOPIC_BOILER_CMD_WWACTIVATED "boiler_cmd_wwactivated" // change water on/off
+#define TOPIC_BOILER_CMD_WWONETIME "boiler_cmd_wwonetime"     // warm warter one time loading
 #define TOPIC_BOILER_CMD_WWTEMP "boiler_cmd_wwtemp"           // wwtemp changes via MQTT
 #define TOPIC_BOILER_CMD_COMFORT "comfort"                    // ww comfort setting via MQTT
 #define TOPIC_BOILER_CMD_FLOWTEMP "flowtemp"                  // flowtemp value via MQTT

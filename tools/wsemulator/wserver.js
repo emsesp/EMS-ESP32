@@ -47,30 +47,25 @@ var networks = {
     ]
 }
 
-var eventlog = {
-    "command": "eventlist",
-    "page": 1,
-    "haspages": 1,
-    "list": [
-        "{\"type\":\"WARN\",\"src\":\"system\",\"desc\":\"test data\",\"data\":\"Record #1\",\"time\": 1563371160}",
-        "{\"type\":\"WARN\",\"src\":\"system\",\"desc\":\"test data\",\"data\":\"Record #2\",\"time\":0}",
-        "{\"type\":\"INFO\",\"src\":\"system\",\"desc\":\"System booted\",\"data\":\"\",\"time\":1568660479}",
-        "{\"type\":\"WARN\",\"src\":\"system\",\"desc\":\"test data\",\"data\":\"Record #3\",\"time\":0}"
-    ]
-}
-
 var configfile = {
     "command": "configfile",
     "network": {
         "ssid": "myssid",
         "wmode": 0,
-        "password": "password"
+        "password": "password",
+        "password": "",
+        "staticip": "",
+        "gatewayip": "",
+        "nmask": "",
+        "dnsip": ""
     },
     "general": {
-        "hostname": "myesp",
+        "hostname": "ems-esp",
         "password": "admin",
         "serial": true,
-        "log_events": true
+        "version": "1.0.0",
+        "log_events": false,
+        "log_ip": "10.11.12.13"
     },
     "mqtt": {
         "enabled": false,
@@ -86,8 +81,9 @@ var configfile = {
     },
     "ntp": {
         "server": "pool.ntp.org",
-        "interval": "30",
-        "enabled": false
+        "interval": 720,
+        "timezone": 2,
+        "enabled": true
     }
 };
 
@@ -101,20 +97,10 @@ var custom_configfile = {
         "listen_mode": false,
         "shower_timer": true,
         "shower_alert": false,
-        "publish_time": 120,
+        "publish_time": 0,
         "tx_mode": 1
     }
 };
-
-function sendEventLog() {
-    wss.broadcast(eventlog);
-    var res = {
-        "command": "result",
-        "resultof": "eventlist",
-        "result": true
-    };
-    wss.broadcast(res);
-}
 
 function sendStatus() {
     var stats = {
@@ -127,7 +113,7 @@ function sendStatus() {
         "availsize": 2469,
         "ip": "10.10.10.198",
         "ssid": "my_ssid",
-        "mac": "DC:4F:11:22:93:06",
+        "mac": "DC:4F:12:22:13:06",
         "signalstr": 62,
         "systemload": 0,
         "mqttconnected": true,
@@ -155,6 +141,7 @@ function sendCustomStatus() {
         "customname": "EMS-ESP",
         "appurl": "https://github.com/proddy/EMS-ESP",
         "updateurl": "https://api.github.com/repos/proddy/EMS-ESP/releases/latest",
+        "updateurl_dev": "https://api.github.com/repos/proddy/EMS-ESP/releases/tags/travis-dev-build",
 
         "emsbus": {
             "ok": true,
@@ -241,27 +228,12 @@ wss.on('connection', function connection(ws) {
                 console.log("[INFO] Sending time");
                 var res = {};
                 res.command = "gettime";
-                res.epoch = Math.floor((new Date).getTime() / 1000);
-                //res.epoch = 1567107755;
-                wss.broadcast(res);
-                break;
-            case "settime":
-                console.log("[INFO] Setting time (fake)");
-                var res = {};
-                res.command = "gettime";
-                res.epoch = Math.floor((new Date).getTime() / 1000);
+                res.epoch = 1572613374; // this is 13:02:54 CET
                 wss.broadcast(res);
                 break;
             case "getconf":
                 console.log("[INFO] Sending system configuration file (if set any)");
                 wss.broadcast(configfile);
-                break;
-            case "geteventlog":
-                console.log("[INFO] Sending eventlog");
-                sendEventLog();
-                break;
-            case "clearevent":
-                console.log("[INFO] Clearing eventlog");
                 break;
             case "restart":
                 console.log("[INFO] Restart");

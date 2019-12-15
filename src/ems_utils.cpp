@@ -25,11 +25,11 @@ char * _float_to_char(char * a, float f, uint8_t precision) {
 
 // convert bool to text. bools are stored as bytes
 char * _bool_to_char(char * s, uint8_t value) {
-    if (value == EMS_VALUE_INT_ON) {
+    if ((value == EMS_VALUE_BOOL_ON) || (value == EMS_VALUE_BOOL_ON2)) {
         strlcpy(s, "on", sizeof(s));
-    } else if (value == EMS_VALUE_INT_OFF) {
+    } else if (value == EMS_VALUE_BOOL_OFF) {
         strlcpy(s, "off", sizeof(s));
-    } else {
+    } else { // EMS_VALUE_BOOL_NOTSET
         strlcpy(s, "?", sizeof(s));
     }
     return s;
@@ -51,22 +51,24 @@ char * _short_to_char(char * s, int16_t value, uint8_t decimals) {
         return (s);
     }
 
-    // do floating point
-    char s2[10] = {0};
     // check for negative values
     if (value < 0) {
         strlcpy(s, "-", 10);
         value *= -1; // convert to positive
+    } else {
+        strlcpy(s, "", 10);
     }
 
+    // do floating point
+    char s2[10] = {0};
     if (decimals == 2) {
         // divide by 2
-        strlcpy(s, ltoa(value / 2, s2, 10), 10);
+        strlcat(s, ltoa(value / 2, s2, 10), 10);
         strlcat(s, ".", 10);
         strlcat(s, ((value & 0x01) ? "5" : "0"), 10);
 
     } else {
-        strlcpy(s, ltoa(value / (decimals * 10), s2, 10), 10);
+        strlcat(s, ltoa(value / (decimals * 10), s2, 10), 10);
         strlcat(s, ".", 10);
         strlcat(s, ltoa(value % (decimals * 10), s2, 10), 10);
     }
@@ -108,7 +110,7 @@ char * _ushort_to_char(char * s, uint16_t value, uint8_t decimals) {
 }
 
 // takes a signed short value (2 bytes), converts to a fraction and prints it
-// decimals: 0 = no division, 1=divide value by 10, 2=divide by 2, 10=divide value by 100
+// decimals: 0=no division, 1=divide value by 10 (default), 2=divide by 2, 10=divide value by 100
 void _renderShortValue(const char * prefix, const char * postfix, int16_t value, uint8_t decimals) {
     static char buffer[200] = {0};
     static char s[20]       = {0};
@@ -270,7 +272,7 @@ uint8_t _readIntNumber() {
     return atoi(numTextPtr);
 }
 
-// used to read the next string from an input buffer and convert to a double
+// used to read the next string from an input buffer and convert to a float
 float _readFloatNumber() {
     char * numTextPtr = strtok(nullptr, ", \n");
     if (numTextPtr == nullptr) {

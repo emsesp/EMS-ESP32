@@ -1,3 +1,8 @@
+/*
+ * customized version of Time library, originally Copyright (c) Michael Margolis 2009-2014
+ * modified by Paul S https://github.com/PaulStoffregen/Time
+ */
+
 #include "TimeLib.h"
 
 static tmElements_t tm;                 // a cache of time elements
@@ -96,6 +101,34 @@ void breakTime(time_t timeInput, tmElements_t & tm) {
     tm.Day   = time + 1;  // day of month
 }
 
+// assemble time elements into time_t
+time_t makeTime(const tmElements_t & tm) {
+    int      i;
+    uint32_t seconds;
+
+    // seconds from 1970 till 1 jan 00:00:00 of the given year
+    seconds = tm.Year * (SECS_PER_DAY * 365);
+    for (i = 0; i < tm.Year; i++) {
+        if (LEAP_YEAR(i)) {
+            seconds += SECS_PER_DAY; // add extra days for leap years
+        }
+    }
+
+    // add days for this year, months start from 1
+    for (i = 1; i < tm.Month; i++) {
+        if ((i == 2) && LEAP_YEAR(tm.Year)) {
+            seconds += SECS_PER_DAY * 29;
+        } else {
+            seconds += SECS_PER_DAY * monthDays[i - 1]; // monthDay array starts from 0
+        }
+    }
+    seconds += (tm.Day - 1) * SECS_PER_DAY;
+    seconds += tm.Hour * SECS_PER_HOUR;
+    seconds += tm.Minute * SECS_PER_MIN;
+    seconds += tm.Second;
+    return (time_t)seconds;
+}
+
 void refreshCache(time_t t) {
     if (t != cacheTime) {
         breakTime(t, tm);
@@ -116,6 +149,26 @@ uint8_t to_minute(time_t t) { // the minute for the given time
 uint8_t to_hour(time_t t) { // the hour for the given time
     refreshCache(t);
     return tm.Hour;
+}
+
+uint8_t to_day(time_t t) { // the day for the given time (0-6)
+    refreshCache(t);
+    return tm.Day;
+}
+
+uint8_t to_month(time_t t) { // the month for the given time
+    refreshCache(t);
+    return tm.Month;
+}
+
+uint8_t to_weekday(time_t t) {
+    refreshCache(t);
+    return tm.Wday;
+}
+
+uint16_t to_year(time_t t) { // the year for the given time
+    refreshCache(t);
+    return tm.Year + 1970;
 }
 
 void setTime(time_t t) {

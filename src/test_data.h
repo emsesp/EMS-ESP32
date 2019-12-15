@@ -54,7 +54,8 @@ static const char * TEST_DATA[] = {
     "88 00 19 00 00 DC 80 00 80 00 FF FF 00 00 00 21 9A 06 E1 7C 00 00 00 06 C2 13 00 1E 90 80 00", // test 49 - check max length
     "30 00 FF 00 02 8E 00 00 41 82 00 00 28 36 00 00 82 21",                                        // test 50 - SM100
     "10 00 FF 08 01 B9 26",                                                                         // test 51 - EMS+ 0x1B9 set temp
-    "10 00 F7 00 FF 01 B9 21 E9"                                                                    // test 52 - EMS+ 0x1B9 F7 test
+    "10 00 F7 00 FF 01 B9 21 E9",                                                                   // test 52 - EMS+ 0x1B9 F7 test
+    "08 00 D1 00 00 80"                                                                             // test 53 - outdoor temp
 
 
 };
