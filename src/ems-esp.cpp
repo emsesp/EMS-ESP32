@@ -545,7 +545,6 @@ void publishEMSValues(bool force) {
     char                                      s[20] = {0}; // for formatting strings
     StaticJsonDocument<MQTT_MAX_PAYLOAD_SIZE> doc;
     char                                      data[MQTT_MAX_PAYLOAD_SIZE] = {0};
-    uint8_t                                   jsonSize;
 
     static uint8_t last_boilerActive = 0xFF; // for remembering last setting of the tap water or heating on/off
 
