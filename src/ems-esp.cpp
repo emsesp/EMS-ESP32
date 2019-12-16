@@ -545,7 +545,6 @@ void publishEMSValues(bool force) {
     char                                      s[20] = {0}; // for formatting strings
     StaticJsonDocument<MQTT_MAX_PAYLOAD_SIZE> doc;
     char                                      data[MQTT_MAX_PAYLOAD_SIZE] = {0};
-    uint8_t                                   jsonSize;
 
     static uint8_t last_boilerActive = 0xFF; // for remembering last setting of the tap water or heating on/off
 
@@ -1924,12 +1923,14 @@ void loop() {
         ds18.loop();
     }
 
-    // publish EMS data to MQTT
-    // because of the force=false argument, it will see if there is anything received that must be published
-    publishEMSValues(false);
+    // publish EMS data to MQTT, only if in automatic mode (publish_time=0) otherwise it'll use the timer
+    if (EMSESP_Settings.publish_time == 0) {
+        publishEMSValues(false);
+    }
 
     // if we have an EMS connect go and fetch some data and MQTT publish it
     if (_need_first_publish) {
+        publishEMSValues(false);
         publishSensorValues();
         _need_first_publish = false; // reset flag
     }
