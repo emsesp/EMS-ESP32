@@ -66,8 +66,9 @@ typedef enum {
 #define EMS_BOILER_BURNPOWER_TAPWATER 100
 #define EMS_BOILER_SELFLOWTEMP_HEATING 30 // was 70, changed to 30 for https://github.com/proddy/EMS-ESP/issues/193
 
-// define maximum setable tapwater temperature
+// define min & maximum setable tapwater temperature
 #define EMS_BOILER_TAPWATER_TEMPERATURE_MAX 60
+#define EMS_BOILER_TAPWATER_TEMPERATURE_MIN 30
 
 #define EMS_TX_TELEGRAM_QUEUE_MAX 50 // max size of Tx FIFO queue. Number of Tx records to send.
 

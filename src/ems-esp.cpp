@@ -33,9 +33,8 @@ DS18 ds18;
 #define APP_URL_API "https://api.github.com/repos/proddy/EMS-ESP"
 
 // timers, all values are in seconds
-#define DEFAULT_PUBLISHTIME 0
+#define DEFAULT_PUBLISHTIME 10 // 10 seconds
 Ticker publishValuesTimer;
-Ticker publishSensorValuesTimer;
 
 bool _need_first_publish = true; // this ensures on boot we always send out MQTT messages
 
@@ -824,9 +823,39 @@ void publishEMSValues(bool force) {
     }
 }
 
-// call PublishValues without forcing
+// Publish shower data
+bool do_publishShowerData() {
+    StaticJsonDocument<200> doc;
+    JsonObject              rootShower = doc.to<JsonObject>();
+    rootShower[TOPIC_SHOWER_TIMER]     = EMSESP_Settings.shower_timer ? "1" : "0";
+    rootShower[TOPIC_SHOWER_ALERT]     = EMSESP_Settings.shower_alert ? "1" : "0";
+
+    // only publish shower duration if there is a value
+    char s[50] = {0};
+    if (EMSESP_Shower.duration > SHOWER_MIN_DURATION) {
+        char buffer[16] = {0};
+        strlcpy(s, itoa((uint8_t)((EMSESP_Shower.duration / (1000 * 60)) % 60), buffer, 10), sizeof(s));
+        strlcat(s, " minutes and ", sizeof(s));
+        strlcat(s, itoa((uint8_t)((EMSESP_Shower.duration / 1000) % 60), buffer, 10), sizeof(s));
+        strlcat(s, " seconds", sizeof(s));
+        rootShower[TOPIC_SHOWER_DURATION] = s;
+    }
+
+    char data[300] = {0};
+    serializeJson(doc, data, sizeof(data));
+
+    myDebugLog("Publishing shower data via MQTT");
+
+    // Publish MQTT forcing retain to be off
+    return (myESP.mqttPublish(TOPIC_SHOWER_DATA, data, false));
+}
+
+// call PublishValues with forcing forcing
 void do_publishValues() {
-    publishEMSValues(true); // force publish
+    myDebugLog("Starting scheduled MQTT publish...");
+    publishEMSValues(false);
+    publishSensorValues();
+    do_publishShowerData();
 }
 
 // callback to light up the LED, called via Ticker every second
@@ -851,6 +880,7 @@ void do_systemCheck() {
 
 // force calls to get data from EMS for the types that aren't sent as broadcasts
 // only if we have a EMS connection
+// which will cause the values to get published
 void do_regularUpdates() {
     if (ems_getBusConnected() && !ems_getTxDisabled()) {
         myDebugLog("Fetching data from EMS devices");
@@ -934,33 +964,6 @@ bool LoadSaveCallback(MYESP_FSACTION_t action, JsonObject settings) {
     }
 
     return false;
-}
-
-// Publish shower data
-bool do_publishShowerData() {
-    StaticJsonDocument<200> doc;
-    JsonObject              rootShower = doc.to<JsonObject>();
-    rootShower[TOPIC_SHOWER_TIMER]     = EMSESP_Settings.shower_timer ? "1" : "0";
-    rootShower[TOPIC_SHOWER_ALERT]     = EMSESP_Settings.shower_alert ? "1" : "0";
-
-    // only publish shower duration if there is a value
-    char s[50] = {0};
-    if (EMSESP_Shower.duration > SHOWER_MIN_DURATION) {
-        char buffer[16] = {0};
-        strlcpy(s, itoa((uint8_t)((EMSESP_Shower.duration / (1000 * 60)) % 60), buffer, 10), sizeof(s));
-        strlcat(s, " minutes and ", sizeof(s));
-        strlcat(s, itoa((uint8_t)((EMSESP_Shower.duration / 1000) % 60), buffer, 10), sizeof(s));
-        strlcat(s, " seconds", sizeof(s));
-        rootShower[TOPIC_SHOWER_DURATION] = s;
-    }
-
-    char data[300] = {0};
-    serializeJson(doc, data, sizeof(data));
-
-    myDebugLog("Publishing shower data via MQTT");
-
-    // Publish MQTT forcing retain to be off
-    return (myESP.mqttPublish(TOPIC_SHOWER_DATA, data, false));
 }
 
 // callback for custom settings when showing Stored Settings with the 'set' command
@@ -1087,7 +1090,7 @@ bool SetListCallback(MYESP_FSACTION_t action, uint8_t wc, const char * setting, 
         if (EMSESP_Settings.publish_time) {
             myDebug_P(PSTR("  publish_time=%d"), EMSESP_Settings.publish_time);
         } else {
-            myDebug_P(PSTR("  publish_time=0 (always publish when data received)"), EMSESP_Settings.publish_time);
+            myDebug_P(PSTR("  publish_time=0 (always publish on data received)"), EMSESP_Settings.publish_time);
         }
     }
 
@@ -1154,8 +1157,6 @@ void TelnetCommandCallback(uint8_t wc, const char * commandLine) {
 
     if (strcmp(first_cmd, "publish") == 0) {
         do_publishValues();
-        publishSensorValues();
-        do_publishShowerData();
         ok = true;
     }
 
@@ -1886,16 +1887,14 @@ void setup() {
         }
     }
 
-    // enable regular checks
+    // enable regular checks to fetch data and publish
     if (!EMSESP_Settings.listen_mode) {
         regularUpdatesTimer.attach(REGULARUPDATES_TIME, do_regularUpdates); // regular reads from the EMS
     }
 
-    // set timers for MQTT publish
-    // only if publish_time is not 0 (automatic mode)
+    // set timers for MQTT publish, only if publish_time is not 0 (automatic mode)
     if (EMSESP_Settings.publish_time) {
-        publishValuesTimer.attach(EMSESP_Settings.publish_time, do_publishValues);          // post MQTT EMS values
-        publishSensorValuesTimer.attach(EMSESP_Settings.publish_time, publishSensorValues); // post MQTT dallas sensor values
+        publishValuesTimer.attach(EMSESP_Settings.publish_time, do_publishValues); // post MQTT EMS values
     }
 
     // set pin for LED
@@ -1905,10 +1904,11 @@ void setup() {
         ledcheckTimer.attach_ms(LEDCHECK_TIME, do_ledcheck);                                            // blink heartbeat LED
     }
 
+    // system check
+    systemCheckTimer.attach(SYSTEMCHECK_TIME, do_systemCheck); // check if EMS is reachable
+
     // check for Dallas sensors
     EMSESP_Settings.dallas_sensors = ds18.setup(EMSESP_Settings.dallas_gpio, EMSESP_Settings.dallas_parasite); // returns #sensors
-
-    systemCheckTimer.attach(SYSTEMCHECK_TIME, do_systemCheck); // check if EMS is reachable
 }
 
 //
@@ -1918,7 +1918,6 @@ void loop() {
     myESP.loop(); // handle telnet, mqtt, wifi etc
 
     // check Dallas sensors, using same schedule as publish_time (default 2 mins in DS18_READ_INTERVAL)
-    // these values are published to MQTT separately via the timer publishSensorValuesTimer
     if (EMSESP_Settings.dallas_sensors) {
         ds18.loop();
     }
