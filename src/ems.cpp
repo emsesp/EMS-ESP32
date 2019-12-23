@@ -1023,7 +1023,10 @@ void _process_UBAMonitorFast(_EMS_RxTelegram * EMS_RxTelegram) {
     _setValue(EMS_RxTelegram, &EMS_Boiler.wWHeat, 7, 6);
     _setValue(EMS_RxTelegram, &EMS_Boiler.wWCirc, 7, 7);
 
-    _setValue(EMS_RxTelegram, &EMS_Boiler.boilTemp, 11); // 0x8000 if not available
+    // there may also be an BoilTemp here but can't remember what it is, so commenting out for now
+    // we use the one from UBAMonitorSlow
+    // _setValue(EMS_RxTelegram, &EMS_Boiler.boilTemp, 11); // 0x8000 if not available
+
     _setValue(EMS_RxTelegram, &EMS_Boiler.retTemp, 13);
     _setValue(EMS_RxTelegram, &EMS_Boiler.flameCurr, 15);
     _setValue(EMS_RxTelegram, &EMS_Boiler.serviceCode, 20);
