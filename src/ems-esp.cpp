@@ -1887,7 +1887,7 @@ void setup() {
         }
     }
 
-    // enable regular checks to fetch data and publish
+    // enable regular checks to fetch data and publish using Tx (unless listen_mode is enabled)
     if (!EMSESP_Settings.listen_mode) {
         regularUpdatesTimer.attach(REGULARUPDATES_TIME, do_regularUpdates); // regular reads from the EMS
     }
