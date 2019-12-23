@@ -501,10 +501,18 @@ void MyESP::_mqtt_setup() {
     mqttClient.setCleanSession(false);
 
     // last will
+
+    /****************
+     * 
+     * disabling last will, since version 1.9.5
+     *
+
     if (_hasValue(_mqtt_will_topic)) {
         mqttClient.setWill(_mqttTopic(_mqtt_will_topic), 1, true,
                            _mqtt_will_offline_payload); // retain always true
     }
+
+    */
 
     // set credentials if we have them
     if (_hasValue(_mqtt_user)) {
