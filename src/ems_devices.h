@@ -235,7 +235,7 @@ static const _EMS_Device EMS_Devices[] = {
     {159, EMS_DEVICE_TYPE_MIXING, "MM50 Mixing Module", EMS_DEVICE_FLAG_NONE},
     {79, EMS_DEVICE_TYPE_MIXING, "MM100 Mixer Module", EMS_DEVICE_FLAG_NONE},
     {80, EMS_DEVICE_TYPE_MIXING, "MM200 Mixer Module", EMS_DEVICE_FLAG_NONE},
-    {78, EMS_DEVICE_TYPE_MIXING, "MM400 Mixer Module", EMS_DEVICE_FLAG_NONE},
+    //{78, EMS_DEVICE_TYPE_MIXING, "MM400 Mixer Module", EMS_DEVICE_FLAG_NONE},
 
     //
     // HeatPump - type 0x38
