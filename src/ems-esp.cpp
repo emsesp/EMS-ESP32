@@ -478,12 +478,11 @@ void showInfo() {
             if (EMS_Mixing.hc[hc_num - 1].active) {
                 myDebug_P(PSTR("  Mixing Circuit %d"), hc_num);
                 _renderUShortValue(" Current flow temperature", "C", EMS_Mixing.hc[hc_num - 1].flowTemp);
-                if (EMS_Mixing.hc[hc_num - 1].flowSetTemp != EMS_VALUE_INT_NOTSET) 
+                if (EMS_Mixing.hc[hc_num - 1].flowSetTemp != EMS_VALUE_INT_NOTSET)
                     _renderIntValue(" Setpoint flow temperature", "C", EMS_Mixing.hc[hc_num - 1].flowSetTemp);
                 _renderIntValue(" Current pump modulation", "%", EMS_Mixing.hc[hc_num - 1].pumpMod);
-                if (EMS_Mixing.hc[hc_num - 1].valveStatus != EMS_VALUE_INT_NOTSET) 
+                if (EMS_Mixing.hc[hc_num - 1].valveStatus != EMS_VALUE_INT_NOTSET)
                     _renderIntValue(" Current valve status", "", EMS_Mixing.hc[hc_num - 1].valveStatus);
-                
             }
         }
     }
@@ -597,7 +596,7 @@ void publishEMSValues(bool force) {
             rootBoiler["sysPress"] = (float)EMS_Boiler.sysPress / 10;
         if (EMS_Boiler.boilTemp != EMS_VALUE_USHORT_NOTSET)
             rootBoiler["boilTemp"] = (float)EMS_Boiler.boilTemp / 10;
-       if (EMS_Boiler.exhaustTemp != EMS_VALUE_USHORT_NOTSET)
+        if (EMS_Boiler.exhaustTemp != EMS_VALUE_USHORT_NOTSET)
             rootBoiler["exhaustTemp"] = (float)EMS_Boiler.exhaustTemp / 10;
         if (EMS_Boiler.wWActivated != EMS_VALUE_BOOL_NOTSET)
             rootBoiler["wWActivated"] = _bool_to_char(s, EMS_Boiler.wWActivated);

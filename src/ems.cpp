@@ -130,11 +130,11 @@ void ems_init() {
     }
 
     // UBAParameterWW
-    EMS_Boiler.wWActivated   = EMS_VALUE_BOOL_NOTSET; // Warm Water activated
-    EMS_Boiler.wWSelTemp     = EMS_VALUE_INT_NOTSET;  // Warm Water selected temperature
-    EMS_Boiler.wWCircPump    = EMS_VALUE_BOOL_NOTSET; // Warm Water circulation pump available
+    EMS_Boiler.wWActivated     = EMS_VALUE_BOOL_NOTSET; // Warm Water activated
+    EMS_Boiler.wWSelTemp       = EMS_VALUE_INT_NOTSET;  // Warm Water selected temperature
+    EMS_Boiler.wWCircPump      = EMS_VALUE_BOOL_NOTSET; // Warm Water circulation pump available
     EMS_Boiler.wWDesinfectTemp = EMS_VALUE_INT_NOTSET;  // Warm Water desinfection temperature to prevent infection
-    EMS_Boiler.wWComfort     = EMS_VALUE_INT_NOTSET;  // WW comfort mode
+    EMS_Boiler.wWComfort       = EMS_VALUE_INT_NOTSET;  // WW comfort mode
 
     // UBAMonitorFast
     EMS_Boiler.selFlowTemp = EMS_VALUE_INT_NOTSET;    // Selected flow temperature
@@ -1239,8 +1239,8 @@ void _process_MMPLUSStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
 }
 
 void _process_MMStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
-    uint8_t hc = (EMS_RxTelegram->type - EMS_TYPE_MMStatusMessage); 
-    if (hc!=0) {
+    uint8_t hc = (EMS_RxTelegram->type - EMS_TYPE_MMStatusMessage);
+    if (hc != 0) {
         return; // invalid type
     }
     EMS_Mixing.hc[hc].active = true;

@@ -251,11 +251,11 @@ typedef struct {
     char         version[10];
 
     // UBAParameterWW
-    uint8_t wWActivated;   // Warm Water activated
-    uint8_t wWSelTemp;     // Warm Water selected temperature
-    uint8_t wWCircPump;    // Warm Water circulation pump Available
+    uint8_t wWActivated;     // Warm Water activated
+    uint8_t wWSelTemp;       // Warm Water selected temperature
+    uint8_t wWCircPump;      // Warm Water circulation pump Available
     uint8_t wWDesinfectTemp; // Warm Water desinfection temperature
-    uint8_t wWComfort;     // Warm water comfort or ECO mode
+    uint8_t wWComfort;       // Warm water comfort or ECO mode
 
     // UBAMonitorFast
     uint8_t  selFlowTemp;        // Selected flow temperature
