@@ -1106,6 +1106,9 @@ bool SetListCallback(MYESP_FSACTION_t action, uint8_t wc, const char * setting, 
                 uint8_t pid                       = atoi(value);
                 EMSESP_Settings.master_thermostat = pid;
                 ems_setMasterThermostat(pid);
+                // force a scan
+                ems_clearDeviceList();
+                ems_doReadCommand(EMS_TYPE_UBADevices, EMS_Boiler.device_id);
                 ok = true;
             }
         }
