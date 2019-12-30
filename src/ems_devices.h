@@ -198,7 +198,7 @@ const _EMS_Device_Types EMS_Devices_Types[] = {
 #define EMS_OFFSET_MMPLUSStatusMessage_valve_status 2 // valve in percent
 
 // MM10
-#define EMS_TYPE_MMStatusMessage 0xAB       // mixer status
+#define EMS_TYPE_MMStatusMessage 0xAB             // mixer status
 #define EMS_OFFSET_MMStatusMessage_flow_set 0     // flow setpoint
 #define EMS_OFFSET_MMStatusMessage_flow_temp 1    // flow temperature
 #define EMS_OFFSET_MMStatusMessage_pump_mod 3     // pump modulation in percent
@@ -264,6 +264,7 @@ static const _EMS_Device EMS_Devices[] = {
     {169, EMS_DEVICE_TYPE_CONTROLLER, "BC40 Base Controller", EMS_DEVICE_FLAG_NONE},                 // 0x09
     {152, EMS_DEVICE_TYPE_CONTROLLER, "Controller", EMS_DEVICE_FLAG_NONE},                           // 0x09
     {95, EMS_DEVICE_TYPE_CONTROLLER, "HT3 Controller", EMS_DEVICE_FLAG_NONE},                        // 0x09
+    {209, EMS_DEVICE_TYPE_CONTROLLER, "W-B Greenstar Erp Controller", EMS_DEVICE_FLAG_NONE},         // 0x09
     {230, EMS_DEVICE_TYPE_CONTROLLER, "BC Base Controller", EMS_DEVICE_FLAG_NONE},                   // 0x09
     {205, EMS_DEVICE_TYPE_CONNECT, "Nefit Moduline Easy Connect", EMS_DEVICE_FLAG_NONE},             // 0x02
     {206, EMS_DEVICE_TYPE_CONNECT, "Bosch Easy Connect", EMS_DEVICE_FLAG_NONE},                      // 0x02
