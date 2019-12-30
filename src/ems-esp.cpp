@@ -296,7 +296,7 @@ void showInfo() {
     }
 
     _renderIntValue("Warm Water selected temperature", "C", EMS_Boiler.wWSelTemp);
-    _renderIntValue("Warm Water desired temperature", "C", EMS_Boiler.wWDesiredTemp);
+    _renderIntValue("Warm Water desinfection temperature", "C", EMS_Boiler.wWDesinfectTemp);
 
     // UBAMonitorWWMessage
     _renderUShortValue("Warm Water current temperature", "C", EMS_Boiler.wWCurTmp);
@@ -339,6 +339,7 @@ void showInfo() {
         _renderShortValue("Outside temperature", "C", EMS_Boiler.extTemp);
     }
     _renderUShortValue("Boiler temperature", "C", EMS_Boiler.boilTemp);
+    _renderUShortValue("Exhaust temperature", "C", EMS_Boiler.exhaustTemp);
     _renderIntValue("Pump modulation", "%", EMS_Boiler.pumpMod);
     _renderLongValue("Burner # starts", "times", EMS_Boiler.burnStarts);
     if (EMS_Boiler.burnWorkMin != EMS_VALUE_LONG_NOTSET) {
@@ -475,8 +476,12 @@ void showInfo() {
             if (EMS_Mixing.hc[hc_num - 1].active) {
                 myDebug_P(PSTR("  Mixing Circuit %d"), hc_num);
                 _renderUShortValue(" Current flow temperature", "C", EMS_Mixing.hc[hc_num - 1].flowTemp);
+                if (EMS_Mixing.hc[hc_num - 1].flowSetTemp != EMS_VALUE_INT_NOTSET) 
+                    _renderIntValue(" Setpoint flow temperature", "C", EMS_Mixing.hc[hc_num - 1].flowSetTemp);
                 _renderIntValue(" Current pump modulation", "%", EMS_Mixing.hc[hc_num - 1].pumpMod);
-                _renderIntValue(" Current valve status", "%", EMS_Mixing.hc[hc_num - 1].valveStatus);
+                if (EMS_Mixing.hc[hc_num - 1].valveStatus != EMS_VALUE_INT_NOTSET) 
+                    _renderIntValue(" Current valve status", "", EMS_Mixing.hc[hc_num - 1].valveStatus);
+                
             }
         }
     }
@@ -561,8 +566,8 @@ void publishEMSValues(bool force) {
 
         if (EMS_Boiler.wWSelTemp != EMS_VALUE_INT_NOTSET)
             rootBoiler["wWSelTemp"] = EMS_Boiler.wWSelTemp;
-        if (EMS_Boiler.wWDesiredTemp != EMS_VALUE_INT_NOTSET)
-            rootBoiler["wWDesiredTemp"] = EMS_Boiler.wWDesiredTemp;
+        if (EMS_Boiler.wWDesinfectTemp != EMS_VALUE_INT_NOTSET)
+            rootBoiler["wWDesinfectionTemp"] = EMS_Boiler.wWDesinfectTemp;
         if (EMS_Boiler.selFlowTemp != EMS_VALUE_INT_NOTSET)
             rootBoiler["selFlowTemp"] = EMS_Boiler.selFlowTemp;
         if (EMS_Boiler.selBurnPow != EMS_VALUE_INT_NOTSET)
@@ -590,7 +595,8 @@ void publishEMSValues(bool force) {
             rootBoiler["sysPress"] = (float)EMS_Boiler.sysPress / 10;
         if (EMS_Boiler.boilTemp != EMS_VALUE_USHORT_NOTSET)
             rootBoiler["boilTemp"] = (float)EMS_Boiler.boilTemp / 10;
-
+       if (EMS_Boiler.exhaustTemp != EMS_VALUE_USHORT_NOTSET)
+            rootBoiler["exhaustTemp"] = (float)EMS_Boiler.exhaustTemp / 10;
         if (EMS_Boiler.wWActivated != EMS_VALUE_BOOL_NOTSET)
             rootBoiler["wWActivated"] = _bool_to_char(s, EMS_Boiler.wWActivated);
 
@@ -750,6 +756,8 @@ void publishEMSValues(bool force) {
 
                 if (mixing->flowTemp != EMS_VALUE_SHORT_NOTSET)
                     dataMixing["flowTemp"] = (float)mixing->flowTemp / 10;
+                if (mixing->flowSetTemp != EMS_VALUE_INT_NOTSET)
+                    dataMixing["setflowTemp"] = mixing->flowSetTemp;
                 if (mixing->pumpMod != EMS_VALUE_INT_NOTSET)
                     dataMixing["pumpMod"] = mixing->pumpMod;
                 if (mixing->valveStatus != EMS_VALUE_INT_NOTSET)

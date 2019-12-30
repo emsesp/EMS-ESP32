@@ -196,6 +196,13 @@ const _EMS_Device_Types EMS_Devices_Types[] = {
 #define EMS_OFFSET_MMPLUSStatusMessage_pump_mod 5     // pump modulation
 #define EMS_OFFSET_MMPLUSStatusMessage_valve_status 2 // valve in percent
 
+// MM10
+#define EMS_TYPE_MMStatusMessage 0xAB       // mixer status
+#define EMS_OFFSET_MMStatusMessage_flow_set 0     // flow setpoint
+#define EMS_OFFSET_MMStatusMessage_flow_temp 1    // flow temperature
+#define EMS_OFFSET_MMStatusMessage_pump_mod 3     // pump modulation in percent
+#define EMS_OFFSET_MMStatusMessage_valve_status 4 // valve 0..255
+
 /*
  * Table of all known EMS Devices
  * ProductID, DeviceType, Description, Flags
