@@ -524,7 +524,7 @@ void MyESP::_wifi_setup() {
     WiFi.setSleepMode(WIFI_NONE_SLEEP); // added to possibly fix wifi dropouts in arduino core 2.5.0
     // ref: https://github.com/esp8266/Arduino/issues/6471
     // ref: https://github.com/esp8266/Arduino/issues/6366
-    // high tx power causing weird behavior, slighly lowering from 20.5 to 20.0 may help stability
+    // high tx power causing weird behavior, slightly lowering from 20.5 to 20.0 may help stability
     WiFi.setOutputPower(20.0); // in DBM
 #endif
 

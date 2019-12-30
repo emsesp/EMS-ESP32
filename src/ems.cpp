@@ -71,6 +71,11 @@ void ems_Device_remove_flags(unsigned int flags) {
     EMS_Sys_Status.emsRefreshedFlags &= ~flags;
 }
 
+// returns true if HT3, other Buderus protocol
+bool ems_isHT3() {
+    return (EMS_Sys_Status.emsIDMask == 0x80);
+}
+
 // init stats and counters and buffers
 void ems_init() {
     ems_clearDeviceList(); // init the device map
@@ -173,9 +178,9 @@ void ems_init() {
     EMS_Boiler.pump_mod_min = EMS_VALUE_INT_NOTSET; // Boiler circuit pump modulation min. power %
 
     // Solar Module values
-    EMS_SolarModule.collectorTemp          = EMS_VALUE_SHORT_NOTSET; // collector temp from SM10/SM100
-    EMS_SolarModule.bottomTemp             = EMS_VALUE_SHORT_NOTSET; // bottom temp from SM10/SM100
-    EMS_SolarModule.pumpModulation         = EMS_VALUE_INT_NOTSET;   // modulation solar pump SM10/SM100
+    EMS_SolarModule.collectorTemp          = EMS_VALUE_SHORT_NOTSET; // collector temp from SM10/SM100/SM200
+    EMS_SolarModule.bottomTemp             = EMS_VALUE_SHORT_NOTSET; // bottom temp from SM10/SM100/SM200
+    EMS_SolarModule.pumpModulation         = EMS_VALUE_INT_NOTSET;   // modulation solar pump SM10/SM100/SM200
     EMS_SolarModule.pump                   = EMS_VALUE_BOOL_NOTSET;  // pump active
     EMS_SolarModule.EnergyLastHour         = EMS_VALUE_USHORT_NOTSET;
     EMS_SolarModule.EnergyToday            = EMS_VALUE_USHORT_NOTSET;
@@ -410,6 +415,10 @@ void _setValue(_EMS_RxTelegram * EMS_RxTelegram, uint8_t * param_op, uint8_t ind
 
 void ems_setTxMode(uint8_t mode) {
     EMS_Sys_Status.emsTxMode = mode;
+}
+
+void ems_setMasterThermostat(uint8_t product_id) {
+    EMS_Sys_Status.emsMasterThermostat = product_id;
 }
 
 /**
@@ -1257,7 +1266,7 @@ void _process_RCPLUSStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     // the whole telegram
     // e.g. Thermostat -> all, telegram: 10 00 FF 00 01 A5 00 D7 21 00 00 00 00 30 01 84 01 01 03 01 84 01 F1 00 00 11 01 00 08 63 00
     //                                   10 00 FF 00 01 A5 80 00 01 30 28 00 30 28 01 54 03 03 01 01 54 02 A8 00 00 11 01 03 FF FF 00
-    // or prtial, e.g. for modes:
+    // or partial, e.g. for modes:
     //   manual : 10 00 FF 0A 01 A5 02
     //   auto :   10 00 FF 0A 01 A5 03
     _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].curr_roomTemp, EMS_OFFSET_RCPLUSStatusMessage_curr);          // value is * 10
@@ -1681,6 +1690,17 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
     strlcat(version, ".", sizeof(version));
     strlcat(version, _smallitoa(EMS_RxTelegram->data[offset + 2], buf), sizeof(version));
 
+    // some devices store the protocol type (HT3, Buderus) in tbe last byte
+    // we don't do anything with this yet.
+    if (EMS_RxTelegram->data_length >= 10) {
+        uint8_t protocol_type = EMS_RxTelegram->data[9];
+        if (protocol_type == 2) {
+            // it's a junkers
+        } else if (protocol_type >= 3) {
+            // it's buderus
+        }
+    }
+
     // scan through known devices matching the productid
     uint8_t product_id = EMS_RxTelegram->data[offset];
     uint8_t i          = 0;
@@ -1693,7 +1713,7 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
         i++;
     }
 
-    // if not found, just add it
+    // if not found, just add it as an unknown device
     if (!typeFound) {
         (void)_addDevice(EMS_DEVICE_TYPE_UNKNOWN, product_id, device_id, nullptr, version);
         return;
@@ -1717,13 +1737,17 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
         strlcpy(EMS_Boiler.version, version, sizeof(EMS_Boiler.version));
         ems_getBoilerValues(); // get Boiler values that we would usually have to wait for
     } else if (type == EMS_DEVICE_TYPE_THERMOSTAT) {
-        EMS_Thermostat.device_id       = device_id;
-        EMS_Thermostat.device_flags    = (flags & 0x7F); // remove 7th bit
-        EMS_Thermostat.write_supported = (flags & EMS_DEVICE_FLAG_NO_WRITE) == 0;
-        EMS_Thermostat.product_id      = product_id;
-        EMS_Thermostat.device_desc_p   = device_desc_p;
-        strlcpy(EMS_Thermostat.version, version, sizeof(EMS_Thermostat.version));
-        ems_getThermostatValues(); // get Thermostat values
+        // we can only support a single thermostat currently, so check which product_id we may have chosen
+        // to be the master - see https://github.com/proddy/EMS-ESP/issues/238
+        if ((EMS_Sys_Status.emsMasterThermostat == 0) || (EMS_Sys_Status.emsMasterThermostat == product_id)) {
+            EMS_Thermostat.device_id       = device_id;
+            EMS_Thermostat.device_flags    = (flags & 0x7F); // remove 7th bit
+            EMS_Thermostat.write_supported = (flags & EMS_DEVICE_FLAG_NO_WRITE) == 0;
+            EMS_Thermostat.product_id      = product_id;
+            EMS_Thermostat.device_desc_p   = device_desc_p;
+            strlcpy(EMS_Thermostat.version, version, sizeof(EMS_Thermostat.version));
+            ems_getThermostatValues(); // get Thermostat values
+        }
     } else if (type == EMS_DEVICE_TYPE_SOLAR) {
         EMS_SolarModule.device_id     = device_id;
         EMS_SolarModule.product_id    = product_id;
@@ -2475,8 +2499,14 @@ void ems_setWarmWaterActivated(bool activated) {
     EMS_TxTelegram.type          = EMS_TYPE_UBAParameterWW;
     EMS_TxTelegram.offset        = EMS_OFFSET_UBAParameterWW_wwactivated;
     EMS_TxTelegram.length        = EMS_MIN_TELEGRAM_LENGTH;
-    EMS_TxTelegram.type_validate = EMS_ID_NONE;               // don't validate
-    EMS_TxTelegram.dataValue     = (activated ? 0xFF : 0x00); // 0xFF is on, 0x00 is off
+    EMS_TxTelegram.type_validate = EMS_ID_NONE; // don't validate
+
+    // https://github.com/proddy/EMS-ESP/issues/268
+    if (ems_isHT3()) {
+        EMS_TxTelegram.dataValue = (activated ? 0x08 : 0x00); // 0x08 is on, 0x00 is off
+    } else {
+        EMS_TxTelegram.dataValue = (activated ? 0xFF : 0x00); // 0xFF is on, 0x00 is off
+    }
 
     EMS_TxQueue.push(EMS_TxTelegram);
 }

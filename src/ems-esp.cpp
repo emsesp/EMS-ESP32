@@ -69,15 +69,16 @@ typedef struct {
     uint8_t dallas_sensors; // count of dallas sensors
 
     // custom params
-    bool     shower_timer;    // true if we want to report back on shower times
-    bool     shower_alert;    // true if we want the alert of cold water
-    bool     led;             // LED on/off
-    bool     listen_mode;     // stop automatic Tx on/off
-    uint16_t publish_time;    // frequency of MQTT publish in seconds
-    uint8_t  led_gpio;        // pin for LED
-    uint8_t  dallas_gpio;     // pin for attaching external dallas temperature sensors
-    bool     dallas_parasite; // on/off is using parasite
-    uint8_t  tx_mode;         // TX mode 1,2 or 3
+    bool     shower_timer;      // true if we want to report back on shower times
+    bool     shower_alert;      // true if we want the alert of cold water
+    bool     led;               // LED on/off
+    bool     listen_mode;       // stop automatic Tx on/off
+    uint16_t publish_time;      // frequency of MQTT publish in seconds
+    uint8_t  led_gpio;          // pin for LED
+    uint8_t  dallas_gpio;       // pin for attaching external dallas temperature sensors
+    bool     dallas_parasite;   // on/off is using parasite
+    uint8_t  tx_mode;           // TX mode 1,2 or 3
+    uint8_t  master_thermostat; // Product ID of master thermostat to use
 } _EMSESP_Settings;
 
 typedef struct {
@@ -99,6 +100,7 @@ static const command_t project_cmds[] PROGMEM = {
     {true, "shower_alert <on | off>", "stop hot water to send 3 cold burst warnings after max shower time is exceeded"},
     {true, "publish_time <seconds>", "set frequency for publishing data to MQTT (0=automatic)"},
     {true, "tx_mode <n>", "changes Tx logic. 1=EMS generic, 2=EMS+, 3=HT3"},
+    {true, "master_thermostat [product id]", "product id to use as the master thermostat. Use no args for list."},
 
     {false, "info", "show current values deciphered from the EMS messages"},
     {false, "log <n | b | t | s | r | j | v | w [type ID]", "set logging to none, basic, thermostat, solar module, raw, jabber, verbose or watch a specific type"},
@@ -252,7 +254,7 @@ void showInfo() {
     myDebug_P(PSTR("\n%sEMS Bus stats:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
 
     if (ems_getBusConnected()) {
-        myDebug_P(PSTR("  Bus is connected, protocol: %s"), ((EMS_Sys_Status.emsIDMask == 0x80) ? "HT3" : "Buderus"));
+        myDebug_P(PSTR("  Bus is connected, protocol: %s"), (ems_isHT3() ? "HT3" : "Buderus"));
         myDebug_P(PSTR("  Rx: # successful read requests=%d, # CRC errors=%d"), EMS_Sys_Status.emsRxPgks, EMS_Sys_Status.emxCrcErr);
 
         if (ems_getTxCapable()) {
@@ -361,7 +363,7 @@ void showInfo() {
                   EMS_Boiler.UBAuptime % 60);
     }
 
-    // For SM10/SM100 Solar Module
+    // For SM10/SM100/SM200 Solar Module
     if (ems_getSolarModuleEnabled()) {
         myDebug_P(PSTR("")); // newline
         myDebug_P(PSTR("%sSolar Module stats:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
@@ -772,7 +774,7 @@ void publishEMSValues(bool force) {
         ems_Device_remove_flags(EMS_DEVICE_UPDATE_FLAG_MIXING); // unset flag
     }
 
-    // For SM10 and SM100 Solar Modules
+    // For SM10 and SM100/SM200 Solar Modules
     if (ems_getSolarModuleEnabled() && (ems_Device_has_flags(EMS_DEVICE_UPDATE_FLAG_SOLAR) || force)) {
         // build new json object
         doc.clear();
@@ -863,7 +865,6 @@ void do_publishValues() {
     myDebugLog("Starting scheduled MQTT publish...");
     publishEMSValues(false);
     publishSensorValues();
-    do_publishShowerData();
 }
 
 // callback to light up the LED, called via Ticker every second
@@ -954,19 +955,23 @@ bool LoadSaveCallback(MYESP_FSACTION_t action, JsonObject settings) {
         EMSESP_Settings.tx_mode = settings["tx_mode"] | EMS_TXMODE_DEFAULT; // default to 1 (generic)
         ems_setTxMode(EMSESP_Settings.tx_mode);
 
+        EMSESP_Settings.master_thermostat = settings["master_thermostat"] | 0; // default to 0 (none)
+        ems_setMasterThermostat(EMSESP_Settings.master_thermostat);
+
         return true;
     }
 
     if (action == MYESP_FSACTION_SAVE) {
-        settings["led"]             = EMSESP_Settings.led;
-        settings["led_gpio"]        = EMSESP_Settings.led_gpio;
-        settings["dallas_gpio"]     = EMSESP_Settings.dallas_gpio;
-        settings["dallas_parasite"] = EMSESP_Settings.dallas_parasite;
-        settings["listen_mode"]     = EMSESP_Settings.listen_mode;
-        settings["shower_timer"]    = EMSESP_Settings.shower_timer;
-        settings["shower_alert"]    = EMSESP_Settings.shower_alert;
-        settings["publish_time"]    = EMSESP_Settings.publish_time;
-        settings["tx_mode"]         = EMSESP_Settings.tx_mode;
+        settings["led"]               = EMSESP_Settings.led;
+        settings["led_gpio"]          = EMSESP_Settings.led_gpio;
+        settings["dallas_gpio"]       = EMSESP_Settings.dallas_gpio;
+        settings["dallas_parasite"]   = EMSESP_Settings.dallas_parasite;
+        settings["listen_mode"]       = EMSESP_Settings.listen_mode;
+        settings["shower_timer"]      = EMSESP_Settings.shower_timer;
+        settings["shower_alert"]      = EMSESP_Settings.shower_alert;
+        settings["publish_time"]      = EMSESP_Settings.publish_time;
+        settings["tx_mode"]           = EMSESP_Settings.tx_mode;
+        settings["master_thermostat"] = EMSESP_Settings.master_thermostat;
 
         return true;
     }
@@ -1084,6 +1089,27 @@ bool SetListCallback(MYESP_FSACTION_t action, uint8_t wc, const char * setting, 
                 myDebug_P(PSTR("Error. Usage: set tx_mode <1 | 2 | 3>"));
             }
         }
+
+        // master_thermostat
+        if (strcmp(setting, "master_thermostat") == 0) {
+            if (wc == 1) {
+                // show list
+                char device_string[100];
+                myDebug_P(PSTR("Available thermostat Product ids:"));
+                for (std::list<_Detected_Device>::iterator it = Devices.begin(); it != Devices.end(); ++it) {
+                    if (it->device_type == EMS_DEVICE_TYPE_THERMOSTAT) {
+                        strlcpy(device_string, (it)->device_desc_p, sizeof(device_string));
+                        myDebug_P(PSTR(" %d = %s"), (it)->product_id, device_string);
+                    }
+                }
+                myDebug_P(PSTR("Usage: set master_thermostat <product id>"));
+            } else if (wc == 2) {
+                uint8_t pid                       = atoi(value);
+                EMSESP_Settings.master_thermostat = pid;
+                ems_setMasterThermostat(pid);
+                ok = true;
+            }
+        }
     }
 
     if (action == MYESP_FSACTION_LIST) {
@@ -1095,10 +1121,17 @@ bool SetListCallback(MYESP_FSACTION_t action, uint8_t wc, const char * setting, 
         myDebug_P(PSTR("  listen_mode=%s"), EMSESP_Settings.listen_mode ? "on" : "off");
         myDebug_P(PSTR("  shower_timer=%s"), EMSESP_Settings.shower_timer ? "on" : "off");
         myDebug_P(PSTR("  shower_alert=%s"), EMSESP_Settings.shower_alert ? "on" : "off");
+
         if (EMSESP_Settings.publish_time) {
             myDebug_P(PSTR("  publish_time=%d"), EMSESP_Settings.publish_time);
         } else {
             myDebug_P(PSTR("  publish_time=0 (always publish on data received)"), EMSESP_Settings.publish_time);
+        }
+
+        if (EMSESP_Settings.master_thermostat) {
+            myDebug_P(PSTR("  master_thermostat=%d"), EMSESP_Settings.master_thermostat);
+        } else {
+            myDebug_P(PSTR("  master_thermostat=0 (use first one detected)"), EMSESP_Settings.master_thermostat);
         }
     }
 
@@ -1368,7 +1401,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
         // this is used for example for comfort, flowtemp
         myESP.mqttSubscribe(TOPIC_BOILER_CMD);
 
-        // these three need to be unqiue topics
+        // these three need to be unique topics
         myESP.mqttSubscribe(TOPIC_BOILER_CMD_WWACTIVATED);
         myESP.mqttSubscribe(TOPIC_BOILER_CMD_WWONETIME);
         myESP.mqttSubscribe(TOPIC_BOILER_CMD_WWTEMP);
@@ -1404,6 +1437,8 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
         const char * command = doc["cmd"];
 
         // Check whatever the command is and act accordingly
+
+        // we only have one now, this is for the shower coldshot
         if (strcmp(command, TOPIC_SHOWER_COLDSHOT) == 0) {
             _showerColdShotStart();
             return;
@@ -1716,7 +1751,7 @@ void WebCallback(JsonObject root) {
         boiler["ok"] = false;
     }
 
-    // For SM10/SM100 Solar Module
+    // For SM10/SM100/SM200 Solar Module
     JsonObject sm = root.createNestedObject("sm");
     if (ems_getSolarModuleEnabled()) {
         sm["ok"] = true;
@@ -1774,15 +1809,16 @@ void WebCallback(JsonObject root) {
 // Most of these will be overwritten after the SPIFFS config file is loaded
 void initEMSESP() {
     // general settings
-    EMSESP_Settings.shower_timer   = false;
-    EMSESP_Settings.shower_alert   = false;
-    EMSESP_Settings.led            = true; // LED is on by default
-    EMSESP_Settings.listen_mode    = false;
-    EMSESP_Settings.publish_time   = DEFAULT_PUBLISHTIME;
-    EMSESP_Settings.dallas_sensors = 0;
-    EMSESP_Settings.led_gpio       = EMSESP_LED_GPIO;
-    EMSESP_Settings.dallas_gpio    = EMSESP_DALLAS_GPIO;
-    EMSESP_Settings.tx_mode        = EMS_TXMODE_DEFAULT; // default tx mode
+    EMSESP_Settings.shower_timer      = false;
+    EMSESP_Settings.shower_alert      = false;
+    EMSESP_Settings.led               = true; // LED is on by default
+    EMSESP_Settings.listen_mode       = false;
+    EMSESP_Settings.publish_time      = DEFAULT_PUBLISHTIME;
+    EMSESP_Settings.dallas_sensors    = 0;
+    EMSESP_Settings.led_gpio          = EMSESP_LED_GPIO;
+    EMSESP_Settings.dallas_gpio       = EMSESP_DALLAS_GPIO;
+    EMSESP_Settings.tx_mode           = EMS_TXMODE_DEFAULT; // default tx mode
+    EMSESP_Settings.master_thermostat = 0;
 
     // shower settings
     EMSESP_Shower.timerStart    = 0;

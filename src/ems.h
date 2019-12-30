@@ -137,6 +137,7 @@ typedef struct {
     uint8_t          emsIDMask;                              // Buderus: 0x00, Junkers: 0x80
     uint8_t          emsPollAck[1];                          // acknowledge buffer for Poll
     uint8_t          emsTxMode;                              // Tx mode 1, 2 or 3
+    uint8_t          emsMasterThermostat;                    // product ID for the default thermostat to use
     char             emsDeviceMap[EMS_SYS_DEVICEMAP_LENGTH]; // contents of 0x07 telegram with bitmasks for all active EMS devices
 } _EMS_Sys_Status;
 
@@ -338,7 +339,7 @@ typedef struct {
     _EMS_Mixing_HC hc[EMS_THERMOSTAT_MAXHC]; // array for the 4 heating circuits
 } _EMS_Mixing;
 
-// Solar Module - SM10/SM100/ISM1
+// Solar Module - SM10/SM100/SM200/ISM1
 typedef struct {
     uint8_t      device_id;    // the device ID of the Solar Module
     uint8_t      device_flags; // Solar Module flags
@@ -423,6 +424,7 @@ void             ems_setWarmWaterModeComfort(uint8_t comfort);
 void             ems_setModels();
 void             ems_setTxDisabled(bool b);
 void             ems_setTxMode(uint8_t mode);
+void             ems_setMasterThermostat(uint8_t product_id);
 char *           ems_getDeviceDescription(_EMS_DEVICE_TYPE device_type, char * buffer, bool name_only = false);
 bool             ems_getDeviceTypeDescription(uint8_t device_id, char * buffer);
 void             ems_getThermostatValues();
@@ -446,6 +448,7 @@ bool             ems_getTxDisabled();
 void             ems_Device_add_flags(unsigned int flags);
 bool             ems_Device_has_flags(unsigned int flags);
 void             ems_Device_remove_flags(unsigned int flags);
+bool             ems_isHT3();
 
 // private functions
 uint8_t _crcCalculator(uint8_t * data, uint8_t len);

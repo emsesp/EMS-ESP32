@@ -14,7 +14,7 @@
 // Fixed EMS Device IDs
 #define EMS_ID_ME 0x0B          // our device, hardcoded as the "Service Key"
 #define EMS_ID_BOILER 0x08      // all UBA Boilers have 0x08
-#define EMS_ID_SM 0x30          // Solar Module SM10, SM100 and ISM1
+#define EMS_ID_SM 0x30          // Solar Module SM10, SM100, SM200 and ISM1
 #define EMS_ID_HP 0x38          // HeatPump
 #define EMS_ID_GATEWAY 0x48     // Gateway e.g. KM200 Web Gateway
 #define EMS_ID_MIXING1 0x20     // Mixing
@@ -85,6 +85,7 @@ const _EMS_Device_Types EMS_Devices_Types[] = {
 #define EMS_OFFSET_UBASetPoints_flowtemp 0 // flow temp
 
 // SM and HP Types
+// Assuming SM100 behaves like SM200
 #define EMS_TYPE_SM10Monitor 0x97    // SM10Monitor
 #define EMS_TYPE_SM100Monitor 0x0262 // SM100Monitor
 #define EMS_TYPE_SM100Status 0x0264  // SM100Status
@@ -230,6 +231,7 @@ static const _EMS_Device EMS_Devices[] = {
     //
     {73, EMS_DEVICE_TYPE_SOLAR, "SM10 Solar Module", EMS_DEVICE_FLAG_SM10},
     {163, EMS_DEVICE_TYPE_SOLAR, "SM100 Solar Module", EMS_DEVICE_FLAG_SM100},
+    {164, EMS_DEVICE_TYPE_SOLAR, "SM200 Solar Module", EMS_DEVICE_FLAG_SM100},
     {101, EMS_DEVICE_TYPE_SOLAR, "Junkers ISM1 Solar Module", EMS_DEVICE_FLAG_SM100},
     {162, EMS_DEVICE_TYPE_SOLAR, "SM50 Solar Module", EMS_DEVICE_FLAG_SM100},
 
@@ -269,7 +271,7 @@ static const _EMS_Device EMS_Devices[] = {
     {189, EMS_DEVICE_TYPE_GATEWAY, "Web Gateway KM200", EMS_DEVICE_FLAG_NONE},                       // 0x48
 
     //
-    // Thermostats, typically device id of 0x10, 0x17 and 0x18
+    // Thermostats, typically device id of 0x10, 0x17, 0x18 and 0x39 (easy)
     //
 
     // Easy devices - not currently supporting write operations

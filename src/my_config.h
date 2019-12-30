@@ -52,7 +52,7 @@
 // MQTT for mixing device
 #define TOPIC_MIXING_DATA "mixing_data" // for sending mixing device values to MQTT
 
-// MQTT for SM10/SM100 Solar Module
+// MQTT for SM10/SM100/SM200 Solar Module
 #define TOPIC_SM_DATA "sm_data"            // topic name
 #define SM_COLLECTORTEMP "collectortemp"   // collector temp
 #define SM_BOTTOMTEMP "bottomtemp"         // bottom temp
