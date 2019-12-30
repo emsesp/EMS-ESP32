@@ -254,7 +254,7 @@ typedef struct {
     uint8_t wWActivated;   // Warm Water activated
     uint8_t wWSelTemp;     // Warm Water selected temperature
     uint8_t wWCircPump;    // Warm Water circulation pump Available
-    uint8_t wWDesiredTemp; // Warm Water desired temperature
+    uint8_t wWDesinfectTemp; // Warm Water desinfection temperature
     uint8_t wWComfort;     // Warm water comfort or ECO mode
 
     // UBAMonitorFast
@@ -277,6 +277,7 @@ typedef struct {
     // UBAMonitorSlow
     int16_t  extTemp;     // Outside temperature
     uint16_t boilTemp;    // Boiler temperature
+    uint16_t exhaustTemp; // Exhaust temperature
     uint8_t  pumpMod;     // Pump modulation
     uint32_t burnStarts;  // # burner starts
     uint32_t burnWorkMin; // Total burner operating time
@@ -324,6 +325,7 @@ typedef struct {
     uint16_t flowTemp;
     uint8_t  pumpMod;
     uint8_t  valveStatus;
+    uint8_t  flowSetTemp;
 } _EMS_Mixing_HC;
 
 // Mixer data

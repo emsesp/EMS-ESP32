@@ -126,13 +126,14 @@ void ems_init() {
         EMS_Mixing.hc[i].flowTemp    = EMS_VALUE_SHORT_NOTSET;
         EMS_Mixing.hc[i].pumpMod     = EMS_VALUE_INT_NOTSET;
         EMS_Mixing.hc[i].valveStatus = EMS_VALUE_INT_NOTSET;
+        EMS_Mixing.hc[i].flowSetTemp = EMS_VALUE_INT_NOTSET;
     }
 
     // UBAParameterWW
     EMS_Boiler.wWActivated   = EMS_VALUE_BOOL_NOTSET; // Warm Water activated
     EMS_Boiler.wWSelTemp     = EMS_VALUE_INT_NOTSET;  // Warm Water selected temperature
     EMS_Boiler.wWCircPump    = EMS_VALUE_BOOL_NOTSET; // Warm Water circulation pump available
-    EMS_Boiler.wWDesiredTemp = EMS_VALUE_INT_NOTSET;  // Warm Water desired temperature to prevent infection
+    EMS_Boiler.wWDesinfectTemp = EMS_VALUE_INT_NOTSET;  // Warm Water desinfection temperature to prevent infection
     EMS_Boiler.wWComfort     = EMS_VALUE_INT_NOTSET;  // WW comfort mode
 
     // UBAMonitorFast
@@ -155,6 +156,7 @@ void ems_init() {
     // UBAMonitorSlow
     EMS_Boiler.extTemp     = EMS_VALUE_SHORT_NOTSET;  // Outside temperature
     EMS_Boiler.boilTemp    = EMS_VALUE_USHORT_NOTSET; // Boiler temperature
+    EMS_Boiler.exhaustTemp = EMS_VALUE_USHORT_NOTSET; // Exhaust temperature
     EMS_Boiler.pumpMod     = EMS_VALUE_INT_NOTSET;    // Pump modulation %
     EMS_Boiler.burnStarts  = EMS_VALUE_LONG_NOTSET;   // # burner restarts
     EMS_Boiler.burnWorkMin = EMS_VALUE_LONG_NOTSET;   // Total burner operating time
@@ -960,7 +962,7 @@ void _process_UBAParameterWW(_EMS_RxTelegram * EMS_RxTelegram) {
     _setValue(EMS_RxTelegram, &EMS_Boiler.wWActivated, 1); // 0xFF means on
     _setValue(EMS_RxTelegram, &EMS_Boiler.wWCircPump, 6);  // 0xFF means on
     _setValue(EMS_RxTelegram, &EMS_Boiler.wWSelTemp, 2);
-    _setValue(EMS_RxTelegram, &EMS_Boiler.wWDesiredTemp, 8);
+    _setValue(EMS_RxTelegram, &EMS_Boiler.wWDesinfectTemp, 8);
     _setValue(EMS_RxTelegram, &EMS_Boiler.wWComfort, EMS_OFFSET_UBAParameterWW_wwComfort);
 }
 
@@ -1092,6 +1094,7 @@ void _process_UBAMonitorFast2(_EMS_RxTelegram * EMS_RxTelegram) {
 void _process_UBAMonitorSlow(_EMS_RxTelegram * EMS_RxTelegram) {
     _setValue(EMS_RxTelegram, &EMS_Boiler.extTemp, 0);
     _setValue(EMS_RxTelegram, &EMS_Boiler.boilTemp, 2);
+    _setValue(EMS_RxTelegram, &EMS_Boiler.exhaustTemp, 4);
     _setValue(EMS_RxTelegram, &EMS_Boiler.switchTemp, 25); // only if there is a mixer
     _setValue(EMS_RxTelegram, &EMS_Boiler.pumpMod, 9);
     _setValue(EMS_RxTelegram, &EMS_Boiler.burnStarts, 10);
@@ -1233,6 +1236,19 @@ void _process_MMPLUSStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     _setValue(EMS_RxTelegram, &EMS_Mixing.hc[hc].flowTemp, EMS_OFFSET_MMPLUSStatusMessage_flow_temp);
     _setValue(EMS_RxTelegram, &EMS_Mixing.hc[hc].pumpMod, EMS_OFFSET_MMPLUSStatusMessage_pump_mod);
     _setValue(EMS_RxTelegram, &EMS_Mixing.hc[hc].valveStatus, EMS_OFFSET_MMPLUSStatusMessage_valve_status);
+}
+
+void _process_MMStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
+    uint8_t hc = (EMS_RxTelegram->type - EMS_TYPE_MMStatusMessage); 
+    if (hc!=0) {
+        return; // invalid type
+    }
+    EMS_Mixing.hc[hc].active = true;
+
+    _setValue(EMS_RxTelegram, &EMS_Mixing.hc[hc].flowTemp, EMS_OFFSET_MMStatusMessage_flow_temp);
+    _setValue(EMS_RxTelegram, &EMS_Mixing.hc[hc].pumpMod, EMS_OFFSET_MMStatusMessage_pump_mod);
+    //_setValue(EMS_RxTelegram, &EMS_Mixing.hc[hc].valveStatus, EMS_OFFSET_MMStatusMessage_valve_status);
+    _setValue(EMS_RxTelegram, &EMS_Mixing.hc[hc].flowSetTemp, EMS_OFFSET_MMStatusMessage_flow_set);
 }
 
 /**
@@ -2697,7 +2713,8 @@ const _EMS_Type EMS_Types[] = {
 
     // Mixing devices
     {EMS_DEVICE_UPDATE_FLAG_MIXING, EMS_TYPE_MMPLUSStatusMessage_HC1, "MMPLUSStatusMessage_HC1", _process_MMPLUSStatusMessage},
-    {EMS_DEVICE_UPDATE_FLAG_MIXING, EMS_TYPE_MMPLUSStatusMessage_HC2, "MMPLUSStatusMessage_HC2", _process_MMPLUSStatusMessage}
+    {EMS_DEVICE_UPDATE_FLAG_MIXING, EMS_TYPE_MMPLUSStatusMessage_HC2, "MMPLUSStatusMessage_HC2", _process_MMPLUSStatusMessage},
+    {EMS_DEVICE_UPDATE_FLAG_MIXING, EMS_TYPE_MMStatusMessage, "MMStatusMessage", _process_MMStatusMessage}
 
 };
 
