@@ -749,14 +749,14 @@ void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
      * or either a return code like 0x01 or 0x04 from the last Write command
      */
     if (length == 1) {
-        uint8_t         value                  = telegram[0]; // 1st byte of data package
-        static uint32_t _last_emsPollFrequency = 0;
+        uint8_t value = telegram[0]; // 1st byte of data package
 
         // check first for a Poll for us
         if ((value ^ 0x80 ^ EMS_Sys_Status.emsIDMask) == EMS_ID_ME) {
-            uint32_t timenow_microsecs      = micros();
-            EMS_Sys_Status.emsPollFrequency = (timenow_microsecs - _last_emsPollFrequency);
-            _last_emsPollFrequency          = timenow_microsecs;
+            static uint32_t _last_emsPollFrequency = 0;
+            uint32_t        timenow_microsecs      = micros();
+            EMS_Sys_Status.emsPollFrequency        = (timenow_microsecs - _last_emsPollFrequency);
+            _last_emsPollFrequency                 = timenow_microsecs;
 
             // do we have something to send thats waiting in the Tx queue?
             // if so send it if the Queue is not in a wait state
@@ -877,7 +877,6 @@ void _printMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     uint8_t  length = EMS_RxTelegram->data_length;
 
     char output_str[200] = {0};
-    char buffer[16]      = {0};
     char color_s[20]     = {0};
     char type_s[30];
 
@@ -899,6 +898,7 @@ void _printMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     }
 
     if (length) {
+        char buffer[16] = {0};
         // type
         strlcat(output_str, ", type 0x", sizeof(output_str));
 
