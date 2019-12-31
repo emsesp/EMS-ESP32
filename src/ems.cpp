@@ -1729,7 +1729,8 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
 
     uint8_t flags = EMS_Devices[i].flags; // its a new entry, set the specifics
 
-    if (type == EMS_DEVICE_TYPE_BOILER) {
+    if ((type == EMS_DEVICE_TYPE_BOILER) && (device_id == EMS_ID_BOILER)) {
+        // with UBAMasters, there is only one device_id 0x08. To avoid https://github.com/proddy/EMS-ESP/issues/271
         EMS_Boiler.device_id     = device_id;
         EMS_Boiler.product_id    = product_id;
         EMS_Boiler.device_flags  = flags;
@@ -2018,17 +2019,19 @@ void ems_scanDevices() {
 
     std::list<uint8_t> Device_Ids; // create a new list
 
-    Device_Ids.push_back(EMS_ID_BOILER); // UBAMaster/Boilers - 0x08
-    Device_Ids.push_back(EMS_ID_HP);     // HeatPump - 0x38
-    Device_Ids.push_back(EMS_ID_SM);     // Solar Module - 0x30
-    Device_Ids.push_back(0x09);          // Controllers - 0x09
-    Device_Ids.push_back(0x02);          // Connect - 0x02
-    Device_Ids.push_back(0x48);          // Gateway - 0x48
-    Device_Ids.push_back(0x20);          // Mixing Devices - 0x20, 0x21
-    Device_Ids.push_back(0x21);          // Mixing Devices - 0x20, 0x21
-    Device_Ids.push_back(0x10);          // Thermostats - 0x10, 0x17, 0x18
-    Device_Ids.push_back(0x17);          // Thermostats - 0x10, 0x17, 0x18
-    Device_Ids.push_back(0x18);          // Thermostats - 0x10, 0x17, 0x18
+    Device_Ids.push_back(EMS_ID_BOILER);      // UBAMaster/Boilers - 0x08
+    Device_Ids.push_back(EMS_ID_HP);          // HeatPump - 0x38
+    Device_Ids.push_back(EMS_ID_SM);          // Solar Module - 0x30
+    Device_Ids.push_back(EMS_ID_CONTROLLER);  // Controllers - 0x09
+    Device_Ids.push_back(EMS_ID_CONNECT1);    // Connect - 0x02
+    Device_Ids.push_back(EMS_ID_CONNECT2);    // Connect - 0x50
+    Device_Ids.push_back(EMS_ID_GATEWAY);     // Gateway - 0x48
+    Device_Ids.push_back(EMS_ID_MIXING1);     // Mixing Devices - 0x20, 0x21
+    Device_Ids.push_back(EMS_ID_MIXING2);     // Mixing Devices - 0x20, 0x21
+    Device_Ids.push_back(EMS_ID_THERMOSTAT1); // Thermostats - 0x10, 0x17, 0x18
+    Device_Ids.push_back(EMS_ID_THERMOSTAT2); // Thermostats - 0x10, 0x17, 0x18
+    Device_Ids.push_back(EMS_ID_THERMOSTAT3); // Thermostats - 0x10, 0x17, 0x18
+    Device_Ids.push_back(EMS_ID_SWITCH);      // Switch - 0x11
 
     // remove duplicates and reserved IDs (like our own device)
     Device_Ids.sort();
@@ -2075,22 +2078,26 @@ void ems_printDevices() {
     if (!Devices.empty()) {
         bool have_unknowns = false;
         char device_string[100];
+        char device_type[30];
         myDebug_P(PSTR("and %d were recognized by EMS-ESP as:"), Devices.size());
         for (std::list<_Detected_Device>::iterator it = Devices.begin(); it != Devices.end(); ++it) {
-            if ((it)->known) {
-                strlcpy(device_string, (it)->device_desc_p, sizeof(device_string));
+            ems_getDeviceTypeDescription(it->device_id, device_type); // get type string, e.g. "Boiler"
+
+            if (it->known) {
+                strlcpy(device_string, it->device_desc_p, sizeof(device_string));
             } else {
                 strlcpy(device_string, EMS_MODELTYPE_UNKNOWN_STRING, sizeof(device_string)); // Unknown
                 have_unknowns = true;
             }
 
-            myDebug_P(PSTR(" %s%s%s (DeviceID:0x%02X ProductID:%d Version:%s)"),
+            myDebug_P(PSTR(" %s: %s%s%s (DeviceID:0x%02X ProductID:%d Version:%s)"),
+                      device_type,
                       COLOR_BOLD_ON,
                       device_string,
                       COLOR_BOLD_OFF,
-                      (it)->device_id,
-                      (it)->product_id,
-                      (it)->version);
+                      it->device_id,
+                      it->product_id,
+                      it->version);
         }
 
         myDebug_P(PSTR("")); // newline
