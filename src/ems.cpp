@@ -123,7 +123,7 @@ void ems_init() {
     // init all mixing modules
     for (uint8_t i = 0; i < EMS_THERMOSTAT_MAXHC; i++) {
         EMS_Mixing.hc[i].hc          = i + 1;
-        EMS_Mixing.hc[i].flowTemp    = EMS_VALUE_SHORT_NOTSET;
+        EMS_Mixing.hc[i].flowTemp    = EMS_VALUE_USHORT_NOTSET;
         EMS_Mixing.hc[i].pumpMod     = EMS_VALUE_INT_NOTSET;
         EMS_Mixing.hc[i].valveStatus = EMS_VALUE_INT_NOTSET;
         EMS_Mixing.hc[i].flowSetTemp = EMS_VALUE_INT_NOTSET;
