@@ -264,7 +264,7 @@ static const _EMS_Device EMS_Devices[] = {
     {169, EMS_DEVICE_TYPE_CONTROLLER, "BC40 Base Controller", EMS_DEVICE_FLAG_NONE},                 // 0x09
     {152, EMS_DEVICE_TYPE_CONTROLLER, "Controller", EMS_DEVICE_FLAG_NONE},                           // 0x09
     {95, EMS_DEVICE_TYPE_CONTROLLER, "HT3 Controller", EMS_DEVICE_FLAG_NONE},                        // 0x09
-    {209, EMS_DEVICE_TYPE_CONTROLLER, "W-B Greenstar Erp Controller", EMS_DEVICE_FLAG_NONE},         // 0x09
+    {209, EMS_DEVICE_TYPE_CONTROLLER, "W-B ErP Boiler Control Panel", EMS_DEVICE_FLAG_NONE},         // 0x09
     {230, EMS_DEVICE_TYPE_CONTROLLER, "BC Base Controller", EMS_DEVICE_FLAG_NONE},                   // 0x09
     {205, EMS_DEVICE_TYPE_CONNECT, "Nefit Moduline Easy Connect", EMS_DEVICE_FLAG_NONE},             // 0x02
     {206, EMS_DEVICE_TYPE_CONNECT, "Bosch Easy Connect", EMS_DEVICE_FLAG_NONE},                      // 0x02
