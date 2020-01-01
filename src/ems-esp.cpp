@@ -557,8 +557,6 @@ void publishEMSValues(bool force) {
     StaticJsonDocument<MQTT_MAX_PAYLOAD_SIZE> doc;
     char                                      data[MQTT_MAX_PAYLOAD_SIZE] = {0};
 
-    static uint8_t last_boilerActive = 0xFF; // for remembering last setting of the tap water or heating on/off
-
     // do we have boiler changes?
     if (ems_getBoilerEnabled() && (ems_Device_has_flags(EMS_DEVICE_UPDATE_FLAG_BOILER) || force)) {
         JsonObject rootBoiler = doc.to<JsonObject>();
@@ -663,6 +661,7 @@ void publishEMSValues(bool force) {
 
         // see if the heating or hot tap water has changed, if so send
         // last_boilerActive stores heating in bit 1 and tap water in bit 2
+        static uint8_t last_boilerActive = 0xFF; // for remembering last setting of the tap water or heating on/off
         if ((last_boilerActive != ((EMS_Boiler.tapwaterActive << 1) + EMS_Boiler.heatingActive)) || force) {
             myDebugLog("Publishing hot water and heating states via MQTT");
             myESP.mqttPublish(TOPIC_BOILER_TAPWATER_ACTIVE, EMS_Boiler.tapwaterActive == 1 ? "1" : "0");
@@ -1112,6 +1111,9 @@ bool SetListCallback(MYESP_FSACTION_t action, uint8_t wc, const char * setting, 
                 uint8_t pid                       = atoi(value);
                 EMSESP_Settings.master_thermostat = pid;
                 ems_setMasterThermostat(pid);
+                // force a scan
+                ems_clearDeviceList();
+                ems_doReadCommand(EMS_TYPE_UBADevices, EMS_Boiler.device_id);
                 ok = true;
             }
         }
