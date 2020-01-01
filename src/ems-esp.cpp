@@ -441,6 +441,8 @@ void showInfo() {
                     _renderIntValue(" Night temperature", "C", EMS_Thermostat.hc[hc_num - 1].nighttemp, 2);      // convert to a single byte * 2
                     _renderIntValue(" Vacation temperature", "C", EMS_Thermostat.hc[hc_num - 1].holidaytemp, 2); // convert to a single byte * 2
                 }
+                if (EMS_Thermostat.hc[hc_num - 1].circuitcalctemp != EMS_VALUE_USHORT_NOTSET)
+                    _renderIntValue(" calculatet flow temperature", "C",EMS_Thermostat.hc[hc_num - 1].circuitcalctemp);
 
                 // Render Thermostat Mode
                 _EMS_THERMOSTAT_MODE thermoMode;
@@ -472,15 +474,19 @@ void showInfo() {
     if (ems_getMixingDeviceEnabled()) {
         myDebug_P(PSTR("")); // newline
         myDebug_P(PSTR("%sMixing module stats:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
-        _renderUShortValue("Switch temperature", "C", EMS_Boiler.switchTemp);
+        myDebug_P(PSTR("  Mixing: %s"), ems_getDeviceDescription(EMS_DEVICE_TYPE_MIXING, buffer_type,false));
+        if (EMS_Boiler.switchTemp != EMS_VALUE_SHORT_NOTSET)
+           _renderShortValue("Switch temperature", "C", EMS_Boiler.switchTemp);
 
         for (uint8_t hc_num = 1; hc_num <= EMS_THERMOSTAT_MAXHC; hc_num++) {
             if (EMS_Mixing.hc[hc_num - 1].active) {
                 myDebug_P(PSTR("  Mixing Circuit %d"), hc_num);
-                _renderUShortValue(" Current flow temperature", "C", EMS_Mixing.hc[hc_num - 1].flowTemp);
+                if (EMS_Mixing.hc[hc_num - 1].flowTemp != EMS_VALUE_SHORT_NOTSET)
+                    _renderShortValue(" Current flow temperature", "C", EMS_Mixing.hc[hc_num - 1].flowTemp);
                 if (EMS_Mixing.hc[hc_num - 1].flowSetTemp != EMS_VALUE_INT_NOTSET)
                     _renderIntValue(" Setpoint flow temperature", "C", EMS_Mixing.hc[hc_num - 1].flowSetTemp);
-                _renderIntValue(" Current pump modulation", "%", EMS_Mixing.hc[hc_num - 1].pumpMod);
+                if (EMS_Mixing.hc[hc_num - 1].pumpMod != EMS_VALUE_INT_NOTSET)
+                    _renderIntValue(" Current pump modulation", "%", EMS_Mixing.hc[hc_num - 1].pumpMod);
                 if (EMS_Mixing.hc[hc_num - 1].valveStatus != EMS_VALUE_INT_NOTSET)
                     _renderIntValue(" Current valve status", "", EMS_Mixing.hc[hc_num - 1].valveStatus);
             }

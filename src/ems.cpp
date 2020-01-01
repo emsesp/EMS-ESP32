@@ -161,6 +161,7 @@ void ems_init() {
     EMS_Boiler.burnStarts  = EMS_VALUE_LONG_NOTSET;   // # burner restarts
     EMS_Boiler.burnWorkMin = EMS_VALUE_LONG_NOTSET;   // Total burner operating time
     EMS_Boiler.heatWorkMin = EMS_VALUE_LONG_NOTSET;   // Total heat operating time
+    EMS_Boiler.switchTemp  = EMS_VALUE_SHORT_NOTSET;
 
     // UBAMonitorWWMessage
     EMS_Boiler.wWCurTmp  = EMS_VALUE_USHORT_NOTSET; // Warm Water current temperature
@@ -1243,6 +1244,7 @@ void _process_MMStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     if (hc != 0) {
         return; // invalid type
     }
+    //hc++;
     EMS_Mixing.hc[hc].active = true;
 
     _setValue(EMS_RxTelegram, &EMS_Mixing.hc[hc].flowTemp, EMS_OFFSET_MMStatusMessage_flow_temp);
@@ -1767,6 +1769,7 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
         EMS_Mixing.device_desc_p = device_desc_p;
         EMS_Mixing.device_flags  = flags;
         EMS_Mixing.detected      = true;
+        strlcpy(EMS_Mixing.version, version, sizeof(EMS_Mixing.version));
         ems_doReadCommand(EMS_TYPE_MMPLUSStatusMessage_HC1, device_id); // fetch MM values
     }
 }
@@ -1979,6 +1982,12 @@ char * ems_getDeviceDescription(_EMS_DEVICE_TYPE device_type, char * buffer, boo
         product_id    = EMS_HeatPump.product_id;
         device_desc_p = EMS_HeatPump.device_desc_p;
         version       = EMS_HeatPump.version;
+    } else if (device_type == EMS_DEVICE_TYPE_MIXING) {
+        enabled       = ems_getMixingDeviceEnabled();
+        device_id     = EMS_Mixing.device_id;
+        product_id    = EMS_Mixing.product_id;
+        device_desc_p = EMS_Mixing.device_desc_p;
+        version       = EMS_Mixing.version;
     }
 
     if (!enabled) {
