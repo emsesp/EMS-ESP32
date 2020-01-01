@@ -349,7 +349,7 @@ void _setValue(_EMS_RxTelegram * EMS_RxTelegram, uint16_t * param_op, uint8_t in
     uint16_t value = (EMS_RxTelegram->data[pos] << 8) + EMS_RxTelegram->data[pos + 1];
 
     // check for undefined/unset values, 0x8000
-    if (value == EMS_VALUE_USHORT_NOTSET) {
+    if (value >= EMS_VALUE_USHORT_NOTSET) {
         return;
     }
 
@@ -1226,6 +1226,7 @@ void _process_EasyStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].setpoint_roomTemp, EMS_OFFSET_EasyStatusMessage_setpoint); // is * 100
 }
 
+// 0x01D7, 0x01D8
 void _process_MMPLUSStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     uint8_t hc = (EMS_RxTelegram->type - EMS_TYPE_MMPLUSStatusMessage_HC1); // 0 to 3
     if (hc >= EMS_THERMOSTAT_MAXHC) {
@@ -1238,17 +1239,19 @@ void _process_MMPLUSStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     _setValue(EMS_RxTelegram, &EMS_Mixing.hc[hc].valveStatus, EMS_OFFSET_MMPLUSStatusMessage_valve_status);
 }
 
+// 0xAB, 0xAC - for MM10 HC1 and HC2 on a switch
 void _process_MMStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
-    uint8_t hc = (EMS_RxTelegram->type - EMS_TYPE_MMStatusMessage);
-    if (hc != 0) {
+    uint8_t hc = (EMS_RxTelegram->type - EMS_TYPE_MMStatusMessage_HC1); // 0 to 3
+    if (hc >= EMS_THERMOSTAT_MAXHC) {
         return; // invalid type
     }
     EMS_Mixing.hc[hc].active = true;
 
     _setValue(EMS_RxTelegram, &EMS_Mixing.hc[hc].flowTemp, EMS_OFFSET_MMStatusMessage_flow_temp);
     _setValue(EMS_RxTelegram, &EMS_Mixing.hc[hc].pumpMod, EMS_OFFSET_MMStatusMessage_pump_mod);
-    //_setValue(EMS_RxTelegram, &EMS_Mixing.hc[hc].valveStatus, EMS_OFFSET_MMStatusMessage_valve_status);
     _setValue(EMS_RxTelegram, &EMS_Mixing.hc[hc].flowSetTemp, EMS_OFFSET_MMStatusMessage_flow_set);
+
+    //_setValue(EMS_RxTelegram, &EMS_Mixing.hc[hc].valveStatus, EMS_OFFSET_MMStatusMessage_valve_status);
 }
 
 /**
@@ -2718,10 +2721,11 @@ const _EMS_Type EMS_Types[] = {
     // Junkers FR10
     {EMS_DEVICE_UPDATE_FLAG_THERMOSTAT, EMS_TYPE_JunkersStatusMessage, "JunkersStatusMessage", _process_JunkersStatusMessage},
 
-    // Mixing devices
+    // Mixing devices MM10 - MM400
     {EMS_DEVICE_UPDATE_FLAG_MIXING, EMS_TYPE_MMPLUSStatusMessage_HC1, "MMPLUSStatusMessage_HC1", _process_MMPLUSStatusMessage},
     {EMS_DEVICE_UPDATE_FLAG_MIXING, EMS_TYPE_MMPLUSStatusMessage_HC2, "MMPLUSStatusMessage_HC2", _process_MMPLUSStatusMessage},
-    {EMS_DEVICE_UPDATE_FLAG_MIXING, EMS_TYPE_MMStatusMessage, "MMStatusMessage", _process_MMStatusMessage}
+    {EMS_DEVICE_UPDATE_FLAG_MIXING, EMS_TYPE_MMStatusMessage_HC1, "MMStatusMessage", _process_MMStatusMessage},
+    {EMS_DEVICE_UPDATE_FLAG_MIXING, EMS_TYPE_MMStatusMessage_HC2, "MMStatusMessage", _process_MMStatusMessage}
 
 };
 
