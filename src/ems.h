@@ -27,7 +27,7 @@
 #define EMS_VALUE_BOOL_ON2 0xFF        // boolean true, EMS sometimes uses 0xFF for TRUE
 #define EMS_VALUE_BOOL_OFF 0x00        // boolean false
 #define EMS_VALUE_INT_NOTSET 0xFF      // for 8-bit unsigned ints/bytes
-#define EMS_VALUE_SHORT_NOTSET -32000  //-32768  // for 2-byte signed shorts
+#define EMS_VALUE_SHORT_NOTSET -32000  // was -32768 for 2-byte signed shorts
 #define EMS_VALUE_USHORT_NOTSET 0x8000 // for 2-byte unsigned shorts
 #define EMS_VALUE_LONG_NOTSET 0xFFFFFF // for 3-byte longs
 #define EMS_VALUE_BOOL_NOTSET 0xFE     // random number that's not 0, 1 or FF
@@ -282,7 +282,7 @@ typedef struct {
     uint32_t burnStarts;  // # burner starts
     uint32_t burnWorkMin; // Total burner operating time
     uint32_t heatWorkMin; // Total heat operating time
-    int16_t switchTemp;  // Switch temperature
+    int16_t switchTemp;   // Switch temperature
 
     // UBAMonitorWWMessage
     uint16_t wWCurTmp;  // Warm Water current temperature
@@ -322,7 +322,7 @@ typedef struct {
 typedef struct {
     uint8_t  hc;     // heating circuit 1, 2, 3 or 4
     bool     active; // true if there is data for this HC
-    int16_t flowTemp;
+    int16_t  flowTemp;
     uint8_t  pumpMod;
     uint8_t  valveStatus;
     uint8_t  flowSetTemp;

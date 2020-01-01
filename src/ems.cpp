@@ -1244,7 +1244,6 @@ void _process_MMStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     if (hc != 0) {
         return; // invalid type
     }
-    //hc++;
     EMS_Mixing.hc[hc].active = true;
 
     _setValue(EMS_RxTelegram, &EMS_Mixing.hc[hc].flowTemp, EMS_OFFSET_MMStatusMessage_flow_temp);
