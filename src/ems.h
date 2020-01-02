@@ -28,7 +28,7 @@
 #define EMS_VALUE_BOOL_OFF 0x00        // boolean false
 #define EMS_VALUE_INT_NOTSET 0xFF      // for 8-bit unsigned ints/bytes
 #define EMS_VALUE_SHORT_NOTSET -32000  // was -32768 for 2-byte signed shorts
-#define EMS_VALUE_USHORT_NOTSET 0x8000 // for 2-byte unsigned shorts
+#define EMS_VALUE_USHORT_NOTSET 32000  // was 0x8000 for 2-byte unsigned shorts
 #define EMS_VALUE_LONG_NOTSET 0xFFFFFF // for 3-byte longs
 #define EMS_VALUE_BOOL_NOTSET 0xFE     // random number that's not 0, 1 or FF
 
