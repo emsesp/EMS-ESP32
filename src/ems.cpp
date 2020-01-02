@@ -1199,7 +1199,10 @@ void _process_RC35StatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
         return;
     }
 
-    uint8_t hc_num = _getHeatingCircuit(EMS_RxTelegram); // which HC is it, 0-3
+    int8_t hc_num = _getHeatingCircuit(EMS_RxTelegram); // which HC is it, 0-3
+    if (hc_num == -1) {
+        return;
+    }
 
     // ignore if the value is 0 (see https://github.com/proddy/EMS-ESP/commit/ccc30738c00f12ae6c89177113bd15af9826b836)
     if (EMS_RxTelegram->data[EMS_OFFSET_RC35StatusMessage_setpoint] != 0x00) {
@@ -1357,29 +1360,25 @@ void _process_RC30Set(_EMS_RxTelegram * EMS_RxTelegram) {
 
 // return which heating circuit it is, 0-3 for HC1 to HC4
 // based on type 0x3E (HC1), 0x48 (HC2), 0x52 (HC3), 0x5C (HC4)
-uint8_t _getHeatingCircuit(_EMS_RxTelegram * EMS_RxTelegram) {
-    uint8_t hc_num;
-    switch (EMS_RxTelegram->type) {
-    case EMS_TYPE_RC35StatusMessage_HC1:
-    case EMS_TYPE_RC35Set_HC1:
-    default:
-        hc_num = 1; // also default
-        break;
-    case EMS_TYPE_RC35StatusMessage_HC2:
-    case EMS_TYPE_RC35Set_HC2:
-        hc_num = 2;
-        break;
-    case EMS_TYPE_RC35StatusMessage_HC3:
-    case EMS_TYPE_RC35Set_HC3:
-        hc_num = 3;
-        break;
-    case EMS_TYPE_RC35StatusMessage_HC4:
-    case EMS_TYPE_RC35Set_HC4:
-        hc_num = 4;
-        break;
+int8_t _getHeatingCircuit(_EMS_RxTelegram * EMS_RxTelegram) {
+    // check to see we have an active HC. Assuming first byte must have some bit status set.
+    // see https://github.com/proddy/EMS-ESP/issues/238
+    if (EMS_RxTelegram->data[0] == 0x00) {
+        return -1;
     }
 
-    hc_num--;
+    int8_t hc_num = 0; // default is HC1
+
+    if ((EMS_RxTelegram->type == EMS_TYPE_RC35StatusMessage_HC2) || (EMS_RxTelegram->type = EMS_TYPE_RC35Set_HC2)) {
+        hc_num = 1;
+    } else if ((EMS_RxTelegram->type == EMS_TYPE_RC35StatusMessage_HC3) || (EMS_RxTelegram->type = EMS_TYPE_RC35Set_HC3)) {
+        hc_num = 2;
+    } else if ((EMS_RxTelegram->type == EMS_TYPE_RC35StatusMessage_HC4) || (EMS_RxTelegram->type = EMS_TYPE_RC35Set_HC4)) {
+        hc_num = 3;
+    } else {
+        return -1; // not a valid HC
+    }
+
     EMS_Thermostat.hc[hc_num].active = true;
 
     return (hc_num);
@@ -1400,7 +1399,10 @@ void _process_RC35Set(_EMS_RxTelegram * EMS_RxTelegram) {
         return;
     }
 
-    uint8_t hc_num = _getHeatingCircuit(EMS_RxTelegram); // which HC is it?
+    int8_t hc_num = _getHeatingCircuit(EMS_RxTelegram); // which HC is it, 0-3
+    if (hc_num == -1) {
+        return;
+    }
 
     _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc_num].mode, EMS_OFFSET_RC35Set_mode);                // night, day, auto
     _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc_num].daytemp, EMS_OFFSET_RC35Set_temp_day);         // is * 2
