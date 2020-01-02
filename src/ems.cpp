@@ -1199,22 +1199,22 @@ void _process_RC35StatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
         return;
     }
 
-    int8_t hc_num = _getHeatingCircuit(EMS_RxTelegram); // which HC is it, 0-3
-    if (hc_num == -1) {
+    int8_t hc = _getHeatingCircuit(EMS_RxTelegram); // which HC is it, 0-3
+    if (hc == -1) {
         return;
     }
 
     // ignore if the value is 0 (see https://github.com/proddy/EMS-ESP/commit/ccc30738c00f12ae6c89177113bd15af9826b836)
     if (EMS_RxTelegram->data[EMS_OFFSET_RC35StatusMessage_setpoint] != 0x00) {
-        _setValue8(EMS_RxTelegram, &EMS_Thermostat.hc[hc_num].setpoint_roomTemp, EMS_OFFSET_RC35StatusMessage_setpoint); // is * 2, force to single byte
+        _setValue8(EMS_RxTelegram, &EMS_Thermostat.hc[hc].setpoint_roomTemp, EMS_OFFSET_RC35StatusMessage_setpoint); // is * 2, force to single byte
     }
 
     // ignore if the value is unset. Hopefully it will be picked up via a later message
-    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc_num].curr_roomTemp, EMS_OFFSET_RC35StatusMessage_curr); // is * 10
-    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc_num].day_mode, EMS_OFFSET_RC35StatusMessage_mode, 1);
-    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc_num].summer_mode, EMS_OFFSET_RC35StatusMessage_mode, 0);
-    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc_num].holiday_mode, EMS_OFFSET_RC35StatusMessage_mode1, 5);
-    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc_num].circuitcalctemp, EMS_OFFSET_RC35Set_circuitcalctemp);
+    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].curr_roomTemp, EMS_OFFSET_RC35StatusMessage_curr); // is * 10
+    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].day_mode, EMS_OFFSET_RC35StatusMessage_mode, 1);
+    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].summer_mode, EMS_OFFSET_RC35StatusMessage_mode, 0);
+    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].holiday_mode, EMS_OFFSET_RC35StatusMessage_mode1, 5);
+    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].circuitcalctemp, EMS_OFFSET_RC35Set_circuitcalctemp);
 }
 
 /**
@@ -1367,21 +1367,23 @@ int8_t _getHeatingCircuit(_EMS_RxTelegram * EMS_RxTelegram) {
         return -1;
     }
 
-    int8_t hc_num = 0; // default is HC1
+    int8_t hc;
 
-    if ((EMS_RxTelegram->type == EMS_TYPE_RC35StatusMessage_HC2) || (EMS_RxTelegram->type = EMS_TYPE_RC35Set_HC2)) {
-        hc_num = 1;
+    if ((EMS_RxTelegram->type == EMS_TYPE_RC35StatusMessage_HC1) || (EMS_RxTelegram->type = EMS_TYPE_RC35Set_HC1)) {
+        hc = 0;
+    } else if ((EMS_RxTelegram->type == EMS_TYPE_RC35StatusMessage_HC2) || (EMS_RxTelegram->type = EMS_TYPE_RC35Set_HC2)) {
+        hc = 1;
     } else if ((EMS_RxTelegram->type == EMS_TYPE_RC35StatusMessage_HC3) || (EMS_RxTelegram->type = EMS_TYPE_RC35Set_HC3)) {
-        hc_num = 2;
+        hc = 2;
     } else if ((EMS_RxTelegram->type == EMS_TYPE_RC35StatusMessage_HC4) || (EMS_RxTelegram->type = EMS_TYPE_RC35Set_HC4)) {
-        hc_num = 3;
+        hc = 3;
     } else {
         return -1; // not a valid HC
     }
 
-    EMS_Thermostat.hc[hc_num].active = true;
+    EMS_Thermostat.hc[hc].active = true;
 
-    return (hc_num);
+    return (hc);
 }
 
 /**
@@ -1399,16 +1401,16 @@ void _process_RC35Set(_EMS_RxTelegram * EMS_RxTelegram) {
         return;
     }
 
-    int8_t hc_num = _getHeatingCircuit(EMS_RxTelegram); // which HC is it, 0-3
-    if (hc_num == -1) {
+    int8_t hc = _getHeatingCircuit(EMS_RxTelegram); // which HC is it, 0-3
+    if (hc == -1) {
         return;
     }
 
-    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc_num].mode, EMS_OFFSET_RC35Set_mode);                // night, day, auto
-    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc_num].daytemp, EMS_OFFSET_RC35Set_temp_day);         // is * 2
-    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc_num].nighttemp, EMS_OFFSET_RC35Set_temp_night);     // is * 2
-    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc_num].holidaytemp, EMS_OFFSET_RC35Set_temp_holiday); // is * 2
-    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc_num].heatingtype, EMS_OFFSET_RC35Set_heatingtype);  // byte 0 bit floor heating = 3
+    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].mode, EMS_OFFSET_RC35Set_mode);                // night, day, auto
+    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].daytemp, EMS_OFFSET_RC35Set_temp_day);         // is * 2
+    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].nighttemp, EMS_OFFSET_RC35Set_temp_night);     // is * 2
+    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].holidaytemp, EMS_OFFSET_RC35Set_temp_holiday); // is * 2
+    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].heatingtype, EMS_OFFSET_RC35Set_heatingtype);  // byte 0 bit floor heating = 3
 }
 
 /**
