@@ -1707,13 +1707,22 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
     }
 
     // scan through known devices matching the productid
-    uint8_t product_id = EMS_RxTelegram->data[offset];
-    uint8_t i          = 0;
-    bool    typeFound  = false;
-    while (i < _EMS_Devices_max) {
+    uint8_t product_id  = EMS_RxTelegram->data[offset];
+    uint8_t i           = 0;
+    uint8_t found_index = 0;
+    bool    typeFound   = false;
+    while ((i < _EMS_Devices_max) || (!typeFound)) {
         if (EMS_Devices[i].product_id == product_id) {
-            typeFound = true; // we have a matching product id. i is the index.
-            break;
+            // we have a matching product id
+            // now lets see if there is a matching device_id since product_id can be on multiple devices
+            // e.g. with UBAMasters, there is only one device_id 0x08. To avoid https://github.com/proddy/EMS-ESP/issues/271
+            _EMS_DEVICE_TYPE device_type = EMS_Devices[i].type;
+            for (uint8_t j = 0; j < _EMS_Devices_Types_max; j++) {
+                if ((EMS_Devices_Types[j].device_type == device_type) && (EMS_Devices_Types[j].device_id == device_id)) {
+                    typeFound   = true;
+                    found_index = i;
+                }
+            }
         }
         i++;
     }
@@ -1724,18 +1733,17 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
         return;
     }
 
-    const char *     device_desc_p = (EMS_Devices[i].device_desc); // pointer to the full description of the device
-    _EMS_DEVICE_TYPE type          = EMS_Devices[i].type;          // type
+    const char *     device_desc_p = (EMS_Devices[found_index].device_desc); // pointer to the full description of the device
+    _EMS_DEVICE_TYPE type          = EMS_Devices[found_index].type;          // type
 
     // we recognized it, see if we already have it in our recognized list
     if (_addDevice(type, product_id, device_id, device_desc_p, version)) {
         return; // already in list
     }
 
-    uint8_t flags = EMS_Devices[i].flags; // its a new entry, set the specifics
+    uint8_t flags = EMS_Devices[found_index].flags; // it's a new entry, set the specifics
 
-    if ((type == EMS_DEVICE_TYPE_BOILER) && (device_id == EMS_ID_BOILER)) {
-        // with UBAMasters, there is only one device_id 0x08. To avoid https://github.com/proddy/EMS-ESP/issues/271
+    if (type == EMS_DEVICE_TYPE_BOILER) {
         EMS_Boiler.device_id     = device_id;
         EMS_Boiler.product_id    = product_id;
         EMS_Boiler.device_flags  = flags;

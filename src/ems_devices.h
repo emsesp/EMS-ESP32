@@ -26,6 +26,7 @@
 #define EMS_ID_THERMOSTAT1 0x10 // Thermostat
 #define EMS_ID_THERMOSTAT2 0x17 // Thermostat
 #define EMS_ID_THERMOSTAT3 0x18 // Thermostat
+#define EMS_ID_MODEM 0x19       // Modem
 
 // mapping for EMS_Devices_Type
 const _EMS_Device_Types EMS_Devices_Types[] = {
@@ -44,7 +45,8 @@ const _EMS_Device_Types EMS_Devices_Types[] = {
     {EMS_ID_SWITCH, EMS_DEVICE_TYPE_SWITCH, "Switching Module"},
     {EMS_ID_CONTROLLER, EMS_DEVICE_TYPE_CONTROLLER, "Controller"},
     {EMS_ID_CONNECT1, EMS_DEVICE_TYPE_CONNECT, "Connect"},
-    {EMS_ID_CONNECT2, EMS_DEVICE_TYPE_CONNECT, "Connect"}
+    {EMS_ID_CONNECT2, EMS_DEVICE_TYPE_CONNECT, "Connect"},
+    {EMS_ID_MODEM, EMS_DEVICE_TYPE_MODEM, "Modem"}
 
 };
 
@@ -257,7 +259,7 @@ static const _EMS_Device EMS_Devices[] = {
     {159, EMS_DEVICE_TYPE_MIXING, "MM50 Mixing Module", EMS_DEVICE_FLAG_NONE},
     {79, EMS_DEVICE_TYPE_MIXING, "MM100 Mixer Module", EMS_DEVICE_FLAG_NONE},
     {80, EMS_DEVICE_TYPE_MIXING, "MM200 Mixer Module", EMS_DEVICE_FLAG_NONE},
-    //{78, EMS_DEVICE_TYPE_MIXING, "MM400 Mixer Module", EMS_DEVICE_FLAG_NONE},
+    {78, EMS_DEVICE_TYPE_MIXING, "MM400 Mixer Module", EMS_DEVICE_FLAG_NONE},
 
     //
     // HeatPump - type 0x38
@@ -266,7 +268,8 @@ static const _EMS_Device EMS_Devices[] = {
     {200, EMS_DEVICE_TYPE_HEATPUMP, "HeatPump Module", EMS_DEVICE_FLAG_NONE},
 
     //
-    // Other devices, like 0x11 for Switching, 0x09 for controllers, 0x02 for Connect, 0x48 for Gateway
+    // Other devices like controllers and modems
+    // such as 0x11 for Switching, 0x09 for controllers, 0x02 for Connect, 0x48 for Gateway
     //
     {71, EMS_DEVICE_TYPE_SWITCH, "WM10 Switch Module", EMS_DEVICE_FLAG_NONE},                        // 0x11
     {68, EMS_DEVICE_TYPE_CONTROLLER, "BC10/RFM20 Receiver", EMS_DEVICE_FLAG_NONE},                   // 0x09
@@ -283,6 +286,7 @@ static const _EMS_Device EMS_Devices[] = {
     {206, EMS_DEVICE_TYPE_CONNECT, "Bosch Easy Connect", EMS_DEVICE_FLAG_NONE},                      // 0x02
     {171, EMS_DEVICE_TYPE_CONNECT, "EMS-OT OpenTherm converter", EMS_DEVICE_FLAG_NONE},              // 0x02
     {189, EMS_DEVICE_TYPE_GATEWAY, "Web Gateway KM200", EMS_DEVICE_FLAG_NONE},                       // 0x48
+    {94, EMS_DEVICE_TYPE_MODEM, "RC Remote Device", EMS_DEVICE_FLAG_NONE},                           // 0x19
 
     //
     // Thermostats, typically device id of 0x10, 0x17, 0x18 and 0x39 (easy)
@@ -296,10 +300,10 @@ static const _EMS_Device EMS_Devices[] = {
     // Buderus/Nefit
     {79, EMS_DEVICE_TYPE_THERMOSTAT, "RC10/Moduline 100", EMS_DEVICE_FLAG_RC10},                                    // 0x17
     {77, EMS_DEVICE_TYPE_THERMOSTAT, "RC20/Moduline 300", EMS_DEVICE_FLAG_RC20},                                    // 0x17
-    {93, EMS_DEVICE_TYPE_THERMOSTAT, "RC20RF", EMS_DEVICE_FLAG_RC20},                                               // 0x18
     {67, EMS_DEVICE_TYPE_THERMOSTAT, "RC30", EMS_DEVICE_FLAG_RC30},                                                 // 0x10
     {78, EMS_DEVICE_TYPE_THERMOSTAT, "RC30/Moduline 400", EMS_DEVICE_FLAG_RC30},                                    // 0x10
     {86, EMS_DEVICE_TYPE_THERMOSTAT, "RC35", EMS_DEVICE_FLAG_RC35},                                                 // 0x10
+    {93, EMS_DEVICE_TYPE_THERMOSTAT, "RC20RF", EMS_DEVICE_FLAG_RC20},                                               // 0x18
     {158, EMS_DEVICE_TYPE_THERMOSTAT, "RC300/RC310/Moduline 3000/Bosch CW400/W-B Sense II", EMS_DEVICE_FLAG_RC300}, // 0x10
     {165, EMS_DEVICE_TYPE_THERMOSTAT, "RC100/Moduline 1010", EMS_DEVICE_FLAG_RC300 | EMS_DEVICE_FLAG_NO_WRITE},     // 0x18, cannot write
 
