@@ -534,7 +534,7 @@ void _ems_sendTelegram() {
             _EMS_RxTelegram EMS_RxTelegram;                     // create new Rx object
             EMS_RxTelegram.length      = EMS_TxTelegram.length; // full length of telegram
             EMS_RxTelegram.telegram    = EMS_TxTelegram.data;
-            EMS_RxTelegram.data_length = 0;                     // ignore #data=
+            EMS_RxTelegram.data_length = 0;                     // surpress #data=
             EMS_RxTelegram.timestamp   = myESP.getSystemTime(); // now
             _debugPrintTelegram("Sending raw: ", &EMS_RxTelegram, COLOR_CYAN, true);
         }
@@ -1209,7 +1209,6 @@ void _process_RC35StatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
         _setValue8(EMS_RxTelegram, &EMS_Thermostat.hc[hc].setpoint_roomTemp, EMS_OFFSET_RC35StatusMessage_setpoint); // is * 2, force to single byte
     }
 
-    // ignore if the value is unset. Hopefully it will be picked up via a later message
     _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].curr_roomTemp, EMS_OFFSET_RC35StatusMessage_curr); // is * 10
     _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].day_mode, EMS_OFFSET_RC35StatusMessage_mode, 1);
     _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].summer_mode, EMS_OFFSET_RC35StatusMessage_mode, 0);
@@ -1290,13 +1289,15 @@ void _process_RCPLUSStatusMode(_EMS_RxTelegram * EMS_RxTelegram) {
 }
 
 /**
- * FR10/FR50/FR100 Junkers - type x006F
+ * FR10/FR50/FR100 Junkers - type x6F
  *    e.g. for FR10:  90 00 FF 00 00 6F   03 01 00 BE 00 BF
  *         for FW100: 90 00 FF 00 00 6F   03 02 00 D7 00 DA F3 34 00 C4
  */
 void _process_JunkersStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
-    uint8_t hc                   = EMS_THERMOSTAT_DEFAULTHC - 1; // use HC1
-    EMS_Thermostat.hc[hc].active = true;
+    int8_t hc = _getHeatingCircuit(EMS_RxTelegram); // which HC is it, 0-3
+    if (hc == -1) {
+        return;
+    }
 
     _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].curr_roomTemp, EMS_OFFSET_JunkersStatusMessage_curr);         // value is * 10
     _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].setpoint_roomTemp, EMS_OFFSET_JunkersStatusMessage_setpoint); // value is * 10
@@ -2286,6 +2287,44 @@ void ems_setThermostatTemp(float temperature, uint8_t hc_num, uint8_t temptype) 
         EMS_TxTelegram.type_validate = EMS_TxTelegram.type;
     }
 
+    else if (model == EMS_DEVICE_FLAG_JUNKERS) {
+        switch (temptype) {
+        case 1: // change the no frost temp
+            EMS_TxTelegram.offset = EMS_OFFSET_JunkersSetMessage_no_frost_temp;
+            break;
+        case 2: // change the night temp
+            EMS_TxTelegram.offset = EMS_OFFSET_JunkersSetMessage_night_temp;
+            break;
+        case 3: // change the day temp
+            EMS_TxTelegram.offset = EMS_OFFSET_JunkersSetMessage_day_temp;
+            break;
+        default:
+        case 0: // automatic selection, if no type is defined, we use the standard code
+            // not sure if this is correct for Junkers
+            if (EMS_Thermostat.hc[hc_num - 1].day_mode == 0) {
+                EMS_TxTelegram.offset = EMS_OFFSET_JunkersSetMessage_night_temp;
+            } else if (EMS_Thermostat.hc[hc_num - 1].day_mode == 1) {
+                EMS_TxTelegram.offset = EMS_OFFSET_JunkersSetMessage_day_temp;
+            }
+            break;
+        }
+
+        if (hc_num == 1) {
+            EMS_TxTelegram.type               = EMS_TYPE_JunkersSetMessage_HC1;
+            EMS_TxTelegram.comparisonPostRead = EMS_TYPE_JunkersStatusMessage_HC1;
+        } else if (hc_num == 2) {
+            EMS_TxTelegram.type               = EMS_TYPE_JunkersSetMessage_HC1;
+            EMS_TxTelegram.comparisonPostRead = EMS_TYPE_JunkersStatusMessage_HC1;
+        } else if (hc_num == 3) {
+            EMS_TxTelegram.type               = EMS_TYPE_JunkersSetMessage_HC1;
+            EMS_TxTelegram.comparisonPostRead = EMS_TYPE_JunkersStatusMessage_HC1;
+        } else if (hc_num == 4) {
+            EMS_TxTelegram.type               = EMS_TYPE_JunkersSetMessage_HC1;
+            EMS_TxTelegram.comparisonPostRead = EMS_TYPE_JunkersStatusMessage_HC1;
+        }
+        EMS_TxTelegram.type_validate = EMS_TxTelegram.type;
+    }
+
     EMS_TxTelegram.length           = EMS_MIN_TELEGRAM_LENGTH;
     EMS_TxTelegram.dataValue        = (uint8_t)((float)temperature * (float)2); // value * 2
     EMS_TxTelegram.comparisonOffset = EMS_TxTelegram.offset;
@@ -2377,6 +2416,23 @@ void ems_setThermostatMode(uint8_t mode, uint8_t hc_num) {
             EMS_TxTelegram.comparisonPostRead = EMS_TYPE_RC35StatusMessage_HC4;
         }
         EMS_TxTelegram.offset        = EMS_OFFSET_RC35Set_mode;
+        EMS_TxTelegram.type_validate = EMS_TxTelegram.type;
+
+    } else if (model == EMS_DEVICE_FLAG_JUNKERS) {
+        if (hc_num == 1) {
+            EMS_TxTelegram.type               = EMS_TYPE_JunkersSetMessage_HC1;
+            EMS_TxTelegram.comparisonPostRead = EMS_TYPE_JunkersStatusMessage_HC1;
+        } else if (hc_num == 2) {
+            EMS_TxTelegram.type               = EMS_TYPE_JunkersSetMessage_HC2;
+            EMS_TxTelegram.comparisonPostRead = EMS_TYPE_JunkersStatusMessage_HC2;
+        } else if (hc_num == 3) {
+            EMS_TxTelegram.type               = EMS_TYPE_JunkersSetMessage_HC3;
+            EMS_TxTelegram.comparisonPostRead = EMS_TYPE_JunkersStatusMessage_HC3;
+        } else if (hc_num == 4) {
+            EMS_TxTelegram.type               = EMS_TYPE_JunkersSetMessage_HC4;
+            EMS_TxTelegram.comparisonPostRead = EMS_TYPE_JunkersStatusMessage_HC4;
+        }
+        EMS_TxTelegram.offset        = EMS_OFFSET_JunkersSetMessage_set_mode;
         EMS_TxTelegram.type_validate = EMS_TxTelegram.type;
 
     } else if (model == EMS_DEVICE_FLAG_RC300) {
@@ -2720,7 +2776,10 @@ const _EMS_Type EMS_Types[] = {
     {EMS_DEVICE_UPDATE_FLAG_THERMOSTAT, EMS_TYPE_RCPLUSStatusMode, "RCPLUSStatusMode", _process_RCPLUSStatusMode},
 
     // Junkers FR10
-    {EMS_DEVICE_UPDATE_FLAG_THERMOSTAT, EMS_TYPE_JunkersStatusMessage, "JunkersStatusMessage", _process_JunkersStatusMessage},
+    {EMS_DEVICE_UPDATE_FLAG_THERMOSTAT, EMS_TYPE_JunkersStatusMessage_HC1, "JunkersStatusMessage_HC1", _process_JunkersStatusMessage},
+    {EMS_DEVICE_UPDATE_FLAG_THERMOSTAT, EMS_TYPE_JunkersStatusMessage_HC2, "JunkersStatusMessage_HC2", _process_JunkersStatusMessage},
+    {EMS_DEVICE_UPDATE_FLAG_THERMOSTAT, EMS_TYPE_JunkersStatusMessage_HC3, "JunkersStatusMessage_HC3", _process_JunkersStatusMessage},
+    {EMS_DEVICE_UPDATE_FLAG_THERMOSTAT, EMS_TYPE_JunkersStatusMessage_HC4, "JunkersStatusMessage_HC4", _process_JunkersStatusMessage},
 
     // Mixing devices MM10 - MM400
     {EMS_DEVICE_UPDATE_FLAG_MIXING, EMS_TYPE_MMPLUSStatusMessage_HC1, "MMPLUSStatusMessage_HC1", _process_MMPLUSStatusMessage},

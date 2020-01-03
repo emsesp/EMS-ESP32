@@ -181,12 +181,25 @@ const _EMS_Device_Types EMS_Devices_Types[] = {
 #define EMS_OFFSET_RCPLUSSet_temp_setpoint 8    // temp setpoint, when changing of templevel (in auto) value is reset and set to FF
 #define EMS_OFFSET_RCPLUSSet_manual_setpoint 10 // manual setpoint
 
-// Junkers FR10, FR50, FW100 (EMS Plus)
-#define EMS_TYPE_JunkersStatusMessage 0x6F         // is an automatic thermostat broadcast giving us temps
+// Junkers FR10, FR50, FW100, FW120 (EMS Plus)
+#define EMS_TYPE_JunkersStatusMessage_HC1 0x6F // is an automatic thermostat broadcast giving us temps
+#define EMS_TYPE_JunkersStatusMessage_HC2 0x70 // is an automatic thermostat broadcast giving us temps
+#define EMS_TYPE_JunkersStatusMessage_HC3 0x71 // is an automatic thermostat broadcast giving us temps
+#define EMS_TYPE_JunkersStatusMessage_HC4 0x72 // is an automatic thermostat broadcast giving us temps
+
 #define EMS_OFFSET_JunkersStatusMessage_daymode 0  // 3 = day, 2 = night
 #define EMS_OFFSET_JunkersStatusMessage_mode 1     // current mode, 1 = manual, 2 = auto
 #define EMS_OFFSET_JunkersStatusMessage_setpoint 2 // setpoint temp
 #define EMS_OFFSET_JunkersStatusMessage_curr 4     // current temp
+
+#define EMS_TYPE_JunkersSetMessage_HC1 0x65             // EMS type to set temperature on thermostat for heating circuit 1
+#define EMS_TYPE_JunkersSetMessage_HC2 0x66             // EMS type to set temperature on thermostat for heating circuit 2
+#define EMS_TYPE_JunkersSetMessage_HC3 0x67             // EMS type to set temperature on thermostat for heating circuit 3
+#define EMS_TYPE_JunkersSetMessage_HC4 0x68             // EMS type to set temperature on thermostat for heating circuit 4
+#define EMS_OFFSET_JunkersSetMessage_day_temp 0x11      // EMS offset to set temperature on thermostat for day mode
+#define EMS_OFFSET_JunkersSetMessage_night_temp 0x10    // EMS offset to set temperature on thermostat for night mode
+#define EMS_OFFSET_JunkersSetMessage_no_frost_temp 0x0F // EMS offset to set temperature on thermostat for no frost mode
+#define EMS_OFFSET_JunkersSetMessage_set_mode 0x0E      // EMS offset to set mode on thermostat
 
 // MM100 (EMS Plus)
 #define EMS_TYPE_MMPLUSStatusMessage_HC1 0x01D7       // mixer status HC1
@@ -294,14 +307,14 @@ static const _EMS_Device EMS_Devices[] = {
     {76, EMS_DEVICE_TYPE_THERMOSTAT, "Sieger ES73", EMS_DEVICE_FLAG_RC35}, // 0x10
 
     // Junkers
-    {105, EMS_DEVICE_TYPE_THERMOSTAT, "Junkers FW100", EMS_DEVICE_FLAG_JUNKERS | EMS_DEVICE_FLAG_NO_WRITE}, // 0x10, cannot write
+    {105, EMS_DEVICE_TYPE_THERMOSTAT, "Junkers FW100", EMS_DEVICE_FLAG_JUNKERS},                            // 0x10
     {106, EMS_DEVICE_TYPE_THERMOSTAT, "Junkers FW200", EMS_DEVICE_FLAG_JUNKERS | EMS_DEVICE_FLAG_NO_WRITE}, // 0x10, cannot write
     {107, EMS_DEVICE_TYPE_THERMOSTAT, "Junkers FR100", EMS_DEVICE_FLAG_JUNKERS | EMS_DEVICE_FLAG_NO_WRITE}, // 0x10, cannot write
     {108, EMS_DEVICE_TYPE_THERMOSTAT, "Junkers FR110", EMS_DEVICE_FLAG_JUNKERS | EMS_DEVICE_FLAG_NO_WRITE}, // 0x10, cannot write
-    {111, EMS_DEVICE_TYPE_THERMOSTAT, "Junkers FR10", EMS_DEVICE_FLAG_JUNKERS | EMS_DEVICE_FLAG_NO_WRITE},  // 0x10, cannot write
+    {111, EMS_DEVICE_TYPE_THERMOSTAT, "Junkers FR10", EMS_DEVICE_FLAG_JUNKERS},                             // 0x10
+    {147, EMS_DEVICE_TYPE_THERMOSTAT, "Junkers FR50", EMS_DEVICE_FLAG_JUNKERS | EMS_DEVICE_FLAG_NO_WRITE},  // 0x10, cannot write
     {191, EMS_DEVICE_TYPE_THERMOSTAT, "Junkers FR120", EMS_DEVICE_FLAG_JUNKERS | EMS_DEVICE_FLAG_NO_WRITE}, // 0x10, cannot write
-    {192, EMS_DEVICE_TYPE_THERMOSTAT, "Junkers FW120", EMS_DEVICE_FLAG_JUNKERS | EMS_DEVICE_FLAG_NO_WRITE}, // 0x10, cannot write
-    {147, EMS_DEVICE_TYPE_THERMOSTAT, "Junkers FR50", EMS_DEVICE_FLAG_JUNKERS | EMS_DEVICE_FLAG_NO_WRITE}   // 0x10, cannot write
+    {192, EMS_DEVICE_TYPE_THERMOSTAT, "Junkers FW120", EMS_DEVICE_FLAG_JUNKERS}                             // 0x10
 
 
 };
