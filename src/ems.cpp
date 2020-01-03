@@ -1711,7 +1711,7 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
     uint8_t i           = 0;
     uint8_t found_index = 0;
     bool    typeFound   = false;
-    while ((i < _EMS_Devices_max) || (!typeFound)) {
+    while ((i < _EMS_Devices_max) && (!typeFound)) {
         if (EMS_Devices[i].product_id == product_id) {
             // we have a matching product id
             // now lets see if there is a matching device_id since product_id can be on multiple devices
@@ -1721,6 +1721,7 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
                 if ((EMS_Devices_Types[j].device_type == device_type) && (EMS_Devices_Types[j].device_id == device_id)) {
                     typeFound   = true;
                     found_index = i;
+                    break;
                 }
             }
         }
