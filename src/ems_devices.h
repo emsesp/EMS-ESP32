@@ -16,7 +16,7 @@
 #define EMS_ID_BOILER 0x08      // all UBA Boilers have 0x08
 #define EMS_ID_SM 0x30          // Solar Module SM10, SM100, SM200 and ISM1
 #define EMS_ID_HP 0x38          // HeatPump
-#define EMS_ID_GATEWAY 0x48     // Gateway e.g. KM200 Web Gateway
+#define EMS_ID_GATEWAY 0x48     // Gateway Modem e.g. KM200 Web Gateway. Also on 0x0A->0x0D
 #define EMS_ID_MIXING1 0x20     // Mixing
 #define EMS_ID_MIXING2 0x21     // Mixing
 #define EMS_ID_SWITCH 0x11      // Switch
@@ -26,7 +26,6 @@
 #define EMS_ID_THERMOSTAT1 0x10 // Thermostat
 #define EMS_ID_THERMOSTAT2 0x17 // Thermostat
 #define EMS_ID_THERMOSTAT3 0x18 // Thermostat
-#define EMS_ID_MODEM 0x19       // Modem
 
 // mapping for EMS_Devices_Type
 const _EMS_Device_Types EMS_Devices_Types[] = {
@@ -45,8 +44,7 @@ const _EMS_Device_Types EMS_Devices_Types[] = {
     {EMS_ID_SWITCH, EMS_DEVICE_TYPE_SWITCH, "Switching Module"},
     {EMS_ID_CONTROLLER, EMS_DEVICE_TYPE_CONTROLLER, "Controller"},
     {EMS_ID_CONNECT1, EMS_DEVICE_TYPE_CONNECT, "Connect"},
-    {EMS_ID_CONNECT2, EMS_DEVICE_TYPE_CONNECT, "Connect"},
-    {EMS_ID_MODEM, EMS_DEVICE_TYPE_MODEM, "Modem"}
+    {EMS_ID_CONNECT2, EMS_DEVICE_TYPE_CONNECT, "Connect"}
 
 };
 
@@ -226,7 +224,7 @@ const _EMS_Device_Types EMS_Devices_Types[] = {
 static const _EMS_Device EMS_Devices[] = {
 
     //
-    // UBA Masters - typically with device_id of 0x08
+    // UBA Masters - must have device_id of 0x08
     //
     {72, EMS_DEVICE_TYPE_BOILER, "MC10 Module", EMS_DEVICE_FLAG_NONE},
     {123, EMS_DEVICE_TYPE_BOILER, "Buderus GBx72/Nefit Trendline/Junkers Cerapur/Worcester Greenstar Si/27i", EMS_DEVICE_FLAG_NONE},
@@ -257,9 +255,8 @@ static const _EMS_Device EMS_Devices[] = {
     {161, EMS_DEVICE_TYPE_MIXING, "MM200 Mixing Module", EMS_DEVICE_FLAG_NONE},
     {69, EMS_DEVICE_TYPE_MIXING, "MM10 Mixer Module", EMS_DEVICE_FLAG_NONE},
     {159, EMS_DEVICE_TYPE_MIXING, "MM50 Mixing Module", EMS_DEVICE_FLAG_NONE},
-    {79, EMS_DEVICE_TYPE_MIXING, "MM100 Mixer Module", EMS_DEVICE_FLAG_NONE},
-    {80, EMS_DEVICE_TYPE_MIXING, "MM200 Mixer Module", EMS_DEVICE_FLAG_NONE},
-    {78, EMS_DEVICE_TYPE_MIXING, "MM400 Mixer Module", EMS_DEVICE_FLAG_NONE},
+    {79, EMS_DEVICE_TYPE_MIXING, "Junkers M100", EMS_DEVICE_FLAG_NONE},
+    {80, EMS_DEVICE_TYPE_MIXING, "Junkers M200", EMS_DEVICE_FLAG_NONE},
 
     //
     // HeatPump - type 0x38
@@ -286,10 +283,10 @@ static const _EMS_Device EMS_Devices[] = {
     {206, EMS_DEVICE_TYPE_CONNECT, "Bosch Easy Connect", EMS_DEVICE_FLAG_NONE},                      // 0x02
     {171, EMS_DEVICE_TYPE_CONNECT, "EMS-OT OpenTherm converter", EMS_DEVICE_FLAG_NONE},              // 0x02
     {189, EMS_DEVICE_TYPE_GATEWAY, "Web Gateway KM200", EMS_DEVICE_FLAG_NONE},                       // 0x48
-    {94, EMS_DEVICE_TYPE_MODEM, "RC Remote Device", EMS_DEVICE_FLAG_NONE},                           // 0x19
+    {94, EMS_DEVICE_TYPE_MODEM, "RC Remote Device", EMS_DEVICE_FLAG_NONE},                           // 0x18
 
     //
-    // Thermostats, typically device id of 0x10, 0x17, 0x18 and 0x39 (easy)
+    // Thermostats, typically device id of 0x10, 0x17, 0x18, 0x38 (RC100), 0x39 (Easy)
     //
 
     // Easy devices - not currently supporting write operations
@@ -303,9 +300,9 @@ static const _EMS_Device EMS_Devices[] = {
     {67, EMS_DEVICE_TYPE_THERMOSTAT, "RC30", EMS_DEVICE_FLAG_RC30},                                                 // 0x10
     {78, EMS_DEVICE_TYPE_THERMOSTAT, "RC30/Moduline 400", EMS_DEVICE_FLAG_RC30},                                    // 0x10
     {86, EMS_DEVICE_TYPE_THERMOSTAT, "RC35", EMS_DEVICE_FLAG_RC35},                                                 // 0x10
-    {93, EMS_DEVICE_TYPE_THERMOSTAT, "RC20RF", EMS_DEVICE_FLAG_RC20},                                               // 0x18
+    {93, EMS_DEVICE_TYPE_THERMOSTAT, "RC20RF", EMS_DEVICE_FLAG_RC20},                                               // 0x19
     {158, EMS_DEVICE_TYPE_THERMOSTAT, "RC300/RC310/Moduline 3000/Bosch CW400/W-B Sense II", EMS_DEVICE_FLAG_RC300}, // 0x10
-    {165, EMS_DEVICE_TYPE_THERMOSTAT, "RC100/Moduline 1010", EMS_DEVICE_FLAG_RC300 | EMS_DEVICE_FLAG_NO_WRITE},     // 0x18, cannot write
+    {165, EMS_DEVICE_TYPE_THERMOSTAT, "RC100/Moduline 1010", EMS_DEVICE_FLAG_RC300 | EMS_DEVICE_FLAG_NO_WRITE},     // 0x18, 0x38 - cannot write
 
     // Sieger
     {76, EMS_DEVICE_TYPE_THERMOSTAT, "Sieger ES73", EMS_DEVICE_FLAG_RC35}, // 0x10
