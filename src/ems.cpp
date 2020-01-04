@@ -1244,7 +1244,7 @@ void _process_MMPLUSStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
 
 // 0xAB
 void _process_MMStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
-    uint8_t hc               = 0; // fixed, for 0xAB
+    uint8_t hc               = 1; // fixed, for 0xAB
     EMS_Mixing.hc[hc].active = true;
 
     _setValue(EMS_RxTelegram, &EMS_Mixing.hc[hc].flowTemp, EMS_OFFSET_MMStatusMessage_flow_temp);
@@ -1371,13 +1371,13 @@ int8_t _getHeatingCircuit(_EMS_RxTelegram * EMS_RxTelegram) {
 
     int8_t hc;
 
-    if ((EMS_RxTelegram->type == EMS_TYPE_RC35StatusMessage_HC1) || (EMS_RxTelegram->type = EMS_TYPE_RC35Set_HC1)) {
+    if ((EMS_RxTelegram->type == EMS_TYPE_RC35StatusMessage_HC1) || (EMS_RxTelegram->type == EMS_TYPE_RC35Set_HC1)) {
         hc = 0;
-    } else if ((EMS_RxTelegram->type == EMS_TYPE_RC35StatusMessage_HC2) || (EMS_RxTelegram->type = EMS_TYPE_RC35Set_HC2)) {
+    } else if ((EMS_RxTelegram->type == EMS_TYPE_RC35StatusMessage_HC2) || (EMS_RxTelegram->type == EMS_TYPE_RC35Set_HC2)) {
         hc = 1;
-    } else if ((EMS_RxTelegram->type == EMS_TYPE_RC35StatusMessage_HC3) || (EMS_RxTelegram->type = EMS_TYPE_RC35Set_HC3)) {
+    } else if ((EMS_RxTelegram->type == EMS_TYPE_RC35StatusMessage_HC3) || (EMS_RxTelegram->type == EMS_TYPE_RC35Set_HC3)) {
         hc = 2;
-    } else if ((EMS_RxTelegram->type == EMS_TYPE_RC35StatusMessage_HC4) || (EMS_RxTelegram->type = EMS_TYPE_RC35Set_HC4)) {
+    } else if ((EMS_RxTelegram->type == EMS_TYPE_RC35StatusMessage_HC4) || (EMS_RxTelegram->type == EMS_TYPE_RC35Set_HC4)) {
         hc = 3;
     } else {
         return -1; // not a valid HC
@@ -2776,7 +2776,7 @@ const _EMS_Type EMS_Types[] = {
     {EMS_DEVICE_UPDATE_FLAG_THERMOSTAT, EMS_TYPE_RC35StatusMessage_HC1, "RC35StatusMessage_HC1", _process_RC35StatusMessage},
     {EMS_DEVICE_UPDATE_FLAG_THERMOSTAT, EMS_TYPE_RC35Set_HC2, "RC35Set_HC2", _process_RC35Set},
     {EMS_DEVICE_UPDATE_FLAG_THERMOSTAT, EMS_TYPE_RC35StatusMessage_HC2, "RC35StatusMessage_HC2", _process_RC35StatusMessage},
-    {EMS_DEVICE_UPDATE_FLAG_THERMOSTAT, EMS_TYPE_RC35Set_HC3, "RC35Set_HC2", _process_RC35Set},
+    {EMS_DEVICE_UPDATE_FLAG_THERMOSTAT, EMS_TYPE_RC35Set_HC3, "RC35Set_HC3", _process_RC35Set},
     {EMS_DEVICE_UPDATE_FLAG_THERMOSTAT, EMS_TYPE_RC35StatusMessage_HC3, "RC35StatusMessage_HC3", _process_RC35StatusMessage},
     {EMS_DEVICE_UPDATE_FLAG_THERMOSTAT, EMS_TYPE_RC35Set_HC4, "RC35Set_HC4", _process_RC35Set},
     {EMS_DEVICE_UPDATE_FLAG_THERMOSTAT, EMS_TYPE_RC35StatusMessage_HC4, "RC35StatusMessage_HC4", _process_RC35StatusMessage},
