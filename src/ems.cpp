@@ -161,6 +161,7 @@ void ems_init() {
     EMS_Boiler.burnStarts  = EMS_VALUE_LONG_NOTSET;   // # burner restarts
     EMS_Boiler.burnWorkMin = EMS_VALUE_LONG_NOTSET;   // Total burner operating time
     EMS_Boiler.heatWorkMin = EMS_VALUE_LONG_NOTSET;   // Total heat operating time
+    EMS_Boiler.switchTemp  = EMS_VALUE_SHORT_NOTSET;
 
     // UBAMonitorWWMessage
     EMS_Boiler.wWCurTmp  = EMS_VALUE_USHORT_NOTSET; // Warm Water current temperature
@@ -1243,7 +1244,7 @@ void _process_MMPLUSStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
 
 // 0xAB
 void _process_MMStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
-    uint8_t hc               = 0; // fixed, for 0xAB
+    uint8_t hc               = 1; // fixed, for 0xAB
     EMS_Mixing.hc[hc].active = true;
 
     _setValue(EMS_RxTelegram, &EMS_Mixing.hc[hc].flowTemp, EMS_OFFSET_MMStatusMessage_flow_temp);
@@ -1735,7 +1736,7 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
     uint8_t i           = 0;
     uint8_t found_index = 0;
     bool    typeFound   = false;
-    while (i++ < _EMS_Devices_max) {
+    while (i < _EMS_Devices_max) {
         if (EMS_Devices[i].product_id == product_id) {
             // we have a matching product id
             /*
@@ -1755,6 +1756,7 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
             found_index = i;
             break;
         }
+        i++;
     }
 
     // if not found, just add it as an unknown device and exit
@@ -1812,6 +1814,7 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
         EMS_Mixing.device_desc_p = device_desc_p;
         EMS_Mixing.device_flags  = flags;
         EMS_Mixing.detected      = true;
+        strlcpy(EMS_Mixing.version, version, sizeof(EMS_Mixing.version));
         ems_doReadCommand(EMS_TYPE_MMPLUSStatusMessage_HC1, device_id); // fetch MM values
     }
 }
@@ -2024,6 +2027,12 @@ char * ems_getDeviceDescription(_EMS_DEVICE_TYPE device_type, char * buffer, boo
         product_id    = EMS_HeatPump.product_id;
         device_desc_p = EMS_HeatPump.device_desc_p;
         version       = EMS_HeatPump.version;
+    } else if (device_type == EMS_DEVICE_TYPE_MIXING) {
+        enabled       = ems_getMixingDeviceEnabled();
+        device_id     = EMS_Mixing.device_id;
+        product_id    = EMS_Mixing.product_id;
+        device_desc_p = EMS_Mixing.device_desc_p;
+        version       = EMS_Mixing.version;
     }
 
     if (!enabled) {
@@ -2798,7 +2807,7 @@ const _EMS_Type EMS_Types[] = {
     {EMS_DEVICE_UPDATE_FLAG_THERMOSTAT, EMS_TYPE_RC35StatusMessage_HC1, "RC35StatusMessage_HC1", _process_RC35StatusMessage},
     {EMS_DEVICE_UPDATE_FLAG_THERMOSTAT, EMS_TYPE_RC35Set_HC2, "RC35Set_HC2", _process_RC35Set},
     {EMS_DEVICE_UPDATE_FLAG_THERMOSTAT, EMS_TYPE_RC35StatusMessage_HC2, "RC35StatusMessage_HC2", _process_RC35StatusMessage},
-    {EMS_DEVICE_UPDATE_FLAG_THERMOSTAT, EMS_TYPE_RC35Set_HC3, "RC35Set_HC2", _process_RC35Set},
+    {EMS_DEVICE_UPDATE_FLAG_THERMOSTAT, EMS_TYPE_RC35Set_HC3, "RC35Set_HC3", _process_RC35Set},
     {EMS_DEVICE_UPDATE_FLAG_THERMOSTAT, EMS_TYPE_RC35StatusMessage_HC3, "RC35StatusMessage_HC3", _process_RC35StatusMessage},
     {EMS_DEVICE_UPDATE_FLAG_THERMOSTAT, EMS_TYPE_RC35Set_HC4, "RC35Set_HC4", _process_RC35Set},
     {EMS_DEVICE_UPDATE_FLAG_THERMOSTAT, EMS_TYPE_RC35StatusMessage_HC4, "RC35StatusMessage_HC4", _process_RC35StatusMessage},
