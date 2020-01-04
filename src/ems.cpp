@@ -1735,7 +1735,7 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
     uint8_t i           = 0;
     uint8_t found_index = 0;
     bool    typeFound   = false;
-    while (i++ < _EMS_Devices_max) {
+    while (i < _EMS_Devices_max) {
         if (EMS_Devices[i].product_id == product_id) {
             // we have a matching product id
             /*
@@ -1755,6 +1755,7 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
             found_index = i;
             break;
         }
+        i++;
     }
 
     // if not found, just add it as an unknown device and exit
