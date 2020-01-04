@@ -211,6 +211,7 @@ typedef enum : uint8_t {
     EMS_DEVICE_TYPE_SWITCH,
     EMS_DEVICE_TYPE_CONTROLLER,
     EMS_DEVICE_TYPE_CONNECT,
+    EMS_DEVICE_TYPE_MODEM,
     EMS_DEVICE_TYPE_UNKNOWN
 } _EMS_DEVICE_TYPE;
 
@@ -456,7 +457,7 @@ void    _processType(_EMS_RxTelegram * EMS_RxTelegram);
 void    _debugPrintPackage(const char * prefix, _EMS_RxTelegram * EMS_RxTelegram, const char * color);
 void    _ems_clearTxData();
 void    _removeTxQueue();
-uint8_t _getHeatingCircuit(_EMS_RxTelegram * EMS_RxTelegram);
+int8_t  _getHeatingCircuit(_EMS_RxTelegram * EMS_RxTelegram);
 
 // global so can referenced in other classes
 extern _EMS_Sys_Status  EMS_Sys_Status;

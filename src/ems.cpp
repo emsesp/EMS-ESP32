@@ -535,7 +535,7 @@ void _ems_sendTelegram() {
             _EMS_RxTelegram EMS_RxTelegram;                     // create new Rx object
             EMS_RxTelegram.length      = EMS_TxTelegram.length; // full length of telegram
             EMS_RxTelegram.telegram    = EMS_TxTelegram.data;
-            EMS_RxTelegram.data_length = 0;                     // ignore #data=
+            EMS_RxTelegram.data_length = 0;                     // surpress #data=
             EMS_RxTelegram.timestamp   = myESP.getSystemTime(); // now
             _debugPrintTelegram("Sending raw: ", &EMS_RxTelegram, COLOR_CYAN, true);
         }
@@ -1200,19 +1200,21 @@ void _process_RC35StatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
         return;
     }
 
-    uint8_t hc_num = _getHeatingCircuit(EMS_RxTelegram); // which HC is it, 0-3
+    int8_t hc = _getHeatingCircuit(EMS_RxTelegram); // which HC is it, 0-3
+    if (hc == -1) {
+        return;
+    }
 
     // ignore if the value is 0 (see https://github.com/proddy/EMS-ESP/commit/ccc30738c00f12ae6c89177113bd15af9826b836)
     if (EMS_RxTelegram->data[EMS_OFFSET_RC35StatusMessage_setpoint] != 0x00) {
-        _setValue8(EMS_RxTelegram, &EMS_Thermostat.hc[hc_num].setpoint_roomTemp, EMS_OFFSET_RC35StatusMessage_setpoint); // is * 2, force to single byte
+        _setValue8(EMS_RxTelegram, &EMS_Thermostat.hc[hc].setpoint_roomTemp, EMS_OFFSET_RC35StatusMessage_setpoint); // is * 2, force to single byte
     }
 
-    // ignore if the value is unset. Hopefully it will be picked up via a later message
-    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc_num].curr_roomTemp, EMS_OFFSET_RC35StatusMessage_curr); // is * 10
-    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc_num].day_mode, EMS_OFFSET_RC35StatusMessage_mode, 1);
-    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc_num].summer_mode, EMS_OFFSET_RC35StatusMessage_mode, 0);
-    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc_num].holiday_mode, EMS_OFFSET_RC35StatusMessage_mode1, 5);
-    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc_num].circuitcalctemp, EMS_OFFSET_RC35Set_circuitcalctemp);
+    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].curr_roomTemp, EMS_OFFSET_RC35StatusMessage_curr); // is * 10
+    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].day_mode, EMS_OFFSET_RC35StatusMessage_mode, 1);
+    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].summer_mode, EMS_OFFSET_RC35StatusMessage_mode, 0);
+    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].holiday_mode, EMS_OFFSET_RC35StatusMessage_mode1, 5);
+    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].circuitcalctemp, EMS_OFFSET_RC35Set_circuitcalctemp);
 }
 
 /**
@@ -1288,13 +1290,15 @@ void _process_RCPLUSStatusMode(_EMS_RxTelegram * EMS_RxTelegram) {
 }
 
 /**
- * FR10/FR50/FR100 Junkers - type x006F
+ * FR10/FR50/FR100 Junkers - type x6F
  *    e.g. for FR10:  90 00 FF 00 00 6F   03 01 00 BE 00 BF
  *         for FW100: 90 00 FF 00 00 6F   03 02 00 D7 00 DA F3 34 00 C4
  */
 void _process_JunkersStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
-    uint8_t hc                   = EMS_THERMOSTAT_DEFAULTHC - 1; // use HC1
-    EMS_Thermostat.hc[hc].active = true;
+    int8_t hc = _getHeatingCircuit(EMS_RxTelegram); // which HC is it, 0-3
+    if (hc == -1) {
+        return;
+    }
 
     _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].curr_roomTemp, EMS_OFFSET_JunkersStatusMessage_curr);         // value is * 10
     _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].setpoint_roomTemp, EMS_OFFSET_JunkersStatusMessage_setpoint); // value is * 10
@@ -1358,32 +1362,30 @@ void _process_RC30Set(_EMS_RxTelegram * EMS_RxTelegram) {
 
 // return which heating circuit it is, 0-3 for HC1 to HC4
 // based on type 0x3E (HC1), 0x48 (HC2), 0x52 (HC3), 0x5C (HC4)
-uint8_t _getHeatingCircuit(_EMS_RxTelegram * EMS_RxTelegram) {
-    uint8_t hc_num;
-    switch (EMS_RxTelegram->type) {
-    case EMS_TYPE_RC35StatusMessage_HC1:
-    case EMS_TYPE_RC35Set_HC1:
-    default:
-        hc_num = 1; // also default
-        break;
-    case EMS_TYPE_RC35StatusMessage_HC2:
-    case EMS_TYPE_RC35Set_HC2:
-        hc_num = 2;
-        break;
-    case EMS_TYPE_RC35StatusMessage_HC3:
-    case EMS_TYPE_RC35Set_HC3:
-        hc_num = 3;
-        break;
-    case EMS_TYPE_RC35StatusMessage_HC4:
-    case EMS_TYPE_RC35Set_HC4:
-        hc_num = 4;
-        break;
+int8_t _getHeatingCircuit(_EMS_RxTelegram * EMS_RxTelegram) {
+    // check to see we have an active HC. Assuming first byte must have some bit status set.
+    // see https://github.com/proddy/EMS-ESP/issues/238
+    if (EMS_RxTelegram->data[0] == 0x00) {
+        return -1;
     }
 
-    hc_num--;
-    EMS_Thermostat.hc[hc_num].active = true;
+    int8_t hc;
 
-    return (hc_num);
+    if ((EMS_RxTelegram->type == EMS_TYPE_RC35StatusMessage_HC1) || (EMS_RxTelegram->type = EMS_TYPE_RC35Set_HC1)) {
+        hc = 0;
+    } else if ((EMS_RxTelegram->type == EMS_TYPE_RC35StatusMessage_HC2) || (EMS_RxTelegram->type = EMS_TYPE_RC35Set_HC2)) {
+        hc = 1;
+    } else if ((EMS_RxTelegram->type == EMS_TYPE_RC35StatusMessage_HC3) || (EMS_RxTelegram->type = EMS_TYPE_RC35Set_HC3)) {
+        hc = 2;
+    } else if ((EMS_RxTelegram->type == EMS_TYPE_RC35StatusMessage_HC4) || (EMS_RxTelegram->type = EMS_TYPE_RC35Set_HC4)) {
+        hc = 3;
+    } else {
+        return -1; // not a valid HC
+    }
+
+    EMS_Thermostat.hc[hc].active = true;
+
+    return (hc);
 }
 
 /**
@@ -1401,13 +1403,16 @@ void _process_RC35Set(_EMS_RxTelegram * EMS_RxTelegram) {
         return;
     }
 
-    uint8_t hc_num = _getHeatingCircuit(EMS_RxTelegram); // which HC is it?
+    int8_t hc = _getHeatingCircuit(EMS_RxTelegram); // which HC is it, 0-3
+    if (hc == -1) {
+        return;
+    }
 
-    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc_num].mode, EMS_OFFSET_RC35Set_mode);                // night, day, auto
-    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc_num].daytemp, EMS_OFFSET_RC35Set_temp_day);         // is * 2
-    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc_num].nighttemp, EMS_OFFSET_RC35Set_temp_night);     // is * 2
-    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc_num].holidaytemp, EMS_OFFSET_RC35Set_temp_holiday); // is * 2
-    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc_num].heatingtype, EMS_OFFSET_RC35Set_heatingtype);  // byte 0 bit floor heating = 3
+    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].mode, EMS_OFFSET_RC35Set_mode);                // night, day, auto
+    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].daytemp, EMS_OFFSET_RC35Set_temp_day);         // is * 2
+    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].nighttemp, EMS_OFFSET_RC35Set_temp_night);     // is * 2
+    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].holidaytemp, EMS_OFFSET_RC35Set_temp_holiday); // is * 2
+    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].heatingtype, EMS_OFFSET_RC35Set_heatingtype);  // byte 0 bit floor heating = 3
 }
 
 /**
@@ -1703,13 +1708,23 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
     }
 
     // scan through known devices matching the productid
-    uint8_t product_id = EMS_RxTelegram->data[offset];
-    uint8_t i          = 0;
-    bool    typeFound  = false;
-    while (i < _EMS_Devices_max) {
+    uint8_t product_id  = EMS_RxTelegram->data[offset];
+    uint8_t i           = 0;
+    uint8_t found_index = 0;
+    bool    typeFound   = false;
+    while ((i < _EMS_Devices_max) && (!typeFound)) {
         if (EMS_Devices[i].product_id == product_id) {
-            typeFound = true; // we have a matching product id. i is the index.
-            break;
+            // we have a matching product id
+            // now lets see if there is a matching device_id since product_id can be on multiple devices
+            // e.g. with UBAMasters, there is only one device_id 0x08. To avoid https://github.com/proddy/EMS-ESP/issues/271
+            _EMS_DEVICE_TYPE device_type = EMS_Devices[i].type;
+            for (uint8_t j = 0; j < _EMS_Devices_Types_max; j++) {
+                if ((EMS_Devices_Types[j].device_type == device_type) && (EMS_Devices_Types[j].device_id == device_id)) {
+                    typeFound   = true;
+                    found_index = i;
+                    break;
+                }
+            }
         }
         i++;
     }
@@ -1720,18 +1735,17 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
         return;
     }
 
-    const char *     device_desc_p = (EMS_Devices[i].device_desc); // pointer to the full description of the device
-    _EMS_DEVICE_TYPE type          = EMS_Devices[i].type;          // type
+    const char *     device_desc_p = (EMS_Devices[found_index].device_desc); // pointer to the full description of the device
+    _EMS_DEVICE_TYPE type          = EMS_Devices[found_index].type;          // type
 
     // we recognized it, see if we already have it in our recognized list
     if (_addDevice(type, product_id, device_id, device_desc_p, version)) {
         return; // already in list
     }
 
-    uint8_t flags = EMS_Devices[i].flags; // its a new entry, set the specifics
+    uint8_t flags = EMS_Devices[found_index].flags; // it's a new entry, set the specifics
 
-    if ((type == EMS_DEVICE_TYPE_BOILER) && (device_id == EMS_ID_BOILER)) {
-        // with UBAMasters, there is only one device_id 0x08. To avoid https://github.com/proddy/EMS-ESP/issues/271
+    if (type == EMS_DEVICE_TYPE_BOILER) {
         EMS_Boiler.device_id     = device_id;
         EMS_Boiler.product_id    = product_id;
         EMS_Boiler.device_flags  = flags;
@@ -2290,6 +2304,44 @@ void ems_setThermostatTemp(float temperature, uint8_t hc_num, uint8_t temptype) 
         EMS_TxTelegram.type_validate = EMS_TxTelegram.type;
     }
 
+    else if (model == EMS_DEVICE_FLAG_JUNKERS) {
+        switch (temptype) {
+        case 1: // change the no frost temp
+            EMS_TxTelegram.offset = EMS_OFFSET_JunkersSetMessage_no_frost_temp;
+            break;
+        case 2: // change the night temp
+            EMS_TxTelegram.offset = EMS_OFFSET_JunkersSetMessage_night_temp;
+            break;
+        case 3: // change the day temp
+            EMS_TxTelegram.offset = EMS_OFFSET_JunkersSetMessage_day_temp;
+            break;
+        default:
+        case 0: // automatic selection, if no type is defined, we use the standard code
+            // not sure if this is correct for Junkers
+            if (EMS_Thermostat.hc[hc_num - 1].day_mode == 0) {
+                EMS_TxTelegram.offset = EMS_OFFSET_JunkersSetMessage_night_temp;
+            } else if (EMS_Thermostat.hc[hc_num - 1].day_mode == 1) {
+                EMS_TxTelegram.offset = EMS_OFFSET_JunkersSetMessage_day_temp;
+            }
+            break;
+        }
+
+        if (hc_num == 1) {
+            EMS_TxTelegram.type               = EMS_TYPE_JunkersSetMessage_HC1;
+            EMS_TxTelegram.comparisonPostRead = EMS_TYPE_JunkersStatusMessage_HC1;
+        } else if (hc_num == 2) {
+            EMS_TxTelegram.type               = EMS_TYPE_JunkersSetMessage_HC1;
+            EMS_TxTelegram.comparisonPostRead = EMS_TYPE_JunkersStatusMessage_HC1;
+        } else if (hc_num == 3) {
+            EMS_TxTelegram.type               = EMS_TYPE_JunkersSetMessage_HC1;
+            EMS_TxTelegram.comparisonPostRead = EMS_TYPE_JunkersStatusMessage_HC1;
+        } else if (hc_num == 4) {
+            EMS_TxTelegram.type               = EMS_TYPE_JunkersSetMessage_HC1;
+            EMS_TxTelegram.comparisonPostRead = EMS_TYPE_JunkersStatusMessage_HC1;
+        }
+        EMS_TxTelegram.type_validate = EMS_TxTelegram.type;
+    }
+
     EMS_TxTelegram.length           = EMS_MIN_TELEGRAM_LENGTH;
     EMS_TxTelegram.dataValue        = (uint8_t)((float)temperature * (float)2); // value * 2
     EMS_TxTelegram.comparisonOffset = EMS_TxTelegram.offset;
@@ -2381,6 +2433,23 @@ void ems_setThermostatMode(uint8_t mode, uint8_t hc_num) {
             EMS_TxTelegram.comparisonPostRead = EMS_TYPE_RC35StatusMessage_HC4;
         }
         EMS_TxTelegram.offset        = EMS_OFFSET_RC35Set_mode;
+        EMS_TxTelegram.type_validate = EMS_TxTelegram.type;
+
+    } else if (model == EMS_DEVICE_FLAG_JUNKERS) {
+        if (hc_num == 1) {
+            EMS_TxTelegram.type               = EMS_TYPE_JunkersSetMessage_HC1;
+            EMS_TxTelegram.comparisonPostRead = EMS_TYPE_JunkersStatusMessage_HC1;
+        } else if (hc_num == 2) {
+            EMS_TxTelegram.type               = EMS_TYPE_JunkersSetMessage_HC2;
+            EMS_TxTelegram.comparisonPostRead = EMS_TYPE_JunkersStatusMessage_HC2;
+        } else if (hc_num == 3) {
+            EMS_TxTelegram.type               = EMS_TYPE_JunkersSetMessage_HC3;
+            EMS_TxTelegram.comparisonPostRead = EMS_TYPE_JunkersStatusMessage_HC3;
+        } else if (hc_num == 4) {
+            EMS_TxTelegram.type               = EMS_TYPE_JunkersSetMessage_HC4;
+            EMS_TxTelegram.comparisonPostRead = EMS_TYPE_JunkersStatusMessage_HC4;
+        }
+        EMS_TxTelegram.offset        = EMS_OFFSET_JunkersSetMessage_set_mode;
         EMS_TxTelegram.type_validate = EMS_TxTelegram.type;
 
     } else if (model == EMS_DEVICE_FLAG_RC300) {
@@ -2724,7 +2793,10 @@ const _EMS_Type EMS_Types[] = {
     {EMS_DEVICE_UPDATE_FLAG_THERMOSTAT, EMS_TYPE_RCPLUSStatusMode, "RCPLUSStatusMode", _process_RCPLUSStatusMode},
 
     // Junkers FR10
-    {EMS_DEVICE_UPDATE_FLAG_THERMOSTAT, EMS_TYPE_JunkersStatusMessage, "JunkersStatusMessage", _process_JunkersStatusMessage},
+    {EMS_DEVICE_UPDATE_FLAG_THERMOSTAT, EMS_TYPE_JunkersStatusMessage_HC1, "JunkersStatusMessage_HC1", _process_JunkersStatusMessage},
+    {EMS_DEVICE_UPDATE_FLAG_THERMOSTAT, EMS_TYPE_JunkersStatusMessage_HC2, "JunkersStatusMessage_HC2", _process_JunkersStatusMessage},
+    {EMS_DEVICE_UPDATE_FLAG_THERMOSTAT, EMS_TYPE_JunkersStatusMessage_HC3, "JunkersStatusMessage_HC3", _process_JunkersStatusMessage},
+    {EMS_DEVICE_UPDATE_FLAG_THERMOSTAT, EMS_TYPE_JunkersStatusMessage_HC4, "JunkersStatusMessage_HC4", _process_JunkersStatusMessage},
 
     // Mixing devices MM10 - MM400
     {EMS_DEVICE_UPDATE_FLAG_MIXING, EMS_TYPE_MMPLUSStatusMessage_HC1, "MMPLUSStatusMessage_HC1", _process_MMPLUSStatusMessage},
