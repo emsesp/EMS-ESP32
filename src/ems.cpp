@@ -881,7 +881,7 @@ void _printMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     char type_s[30];
 
     // source
-    ems_getDeviceTypeDescription(src, type_s);
+    (void)ems_getDeviceTypeDescription(src, type_s);
     strlcpy(output_str, type_s, sizeof(output_str));
     strlcat(output_str, " -> ", sizeof(output_str));
 
@@ -1622,10 +1622,8 @@ bool _addDevice(_EMS_DEVICE_TYPE device_type, uint8_t product_id, uint8_t device
 
     // get type as a string
     char type_s[50];
-    if (ems_getDeviceTypeDescription(device_id, type_s)) {
+    if (ems_getDeviceTypeName(device_type, type_s)) {
         strlcat(line, type_s, sizeof(line));
-    } else {
-        strlcat(line, "?", sizeof(line));
     }
 
     char tmp[6] = {0}; // for formatting numbers
@@ -1738,19 +1736,6 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
     while (i < _EMS_Devices_max) {
         if (EMS_Devices[i].product_id == product_id) {
             // we have a matching product id
-            /*
-            // this code is to check also that we have a matching device type (e.g. boiler, thermostat etc)
-            // now lets see if there is a matching device_id since product_id can be on multiple devices
-            // e.g. with UBAMasters, there is only one device_id 0x08. To avoid https://github.com/proddy/EMS-ESP/issues/271
-            _EMS_DEVICE_TYPE device_type = EMS_Devices[i].type;
-            for (uint8_t j = 0; j < _EMS_Devices_Types_max; j++) {
-                if ((EMS_Devices_Types[j].device_type == device_type) && (EMS_Devices_Types[j].device_id == device_id)) {
-                    typeFound   = true;
-                    found_index = i;
-                    break;
-                }
-            }
-            */
             typeFound   = true;
             found_index = i;
             break;
@@ -1960,35 +1945,67 @@ void ems_getSolarModuleValues() {
     }
 }
 
-/**
- * takes a device_id and tries to find the corresponding type name (e.g. Boiler)
- * If it can't find it, it will use the hex value and function returns false
- */
-bool ems_getDeviceTypeDescription(uint8_t device_id, char * buffer) {
+// takes a device type (e.g. EMS_DEVICE_TYPE_MIXING) and stores the english name in the given buffer
+// returns buffer or "unknown"
+char * ems_getDeviceTypeName(_EMS_DEVICE_TYPE device_type, char * buffer) {
     uint8_t i         = 0;
     bool    typeFound = false;
-
     // scan through known ID types
     while (i < _EMS_Devices_Types_max) {
-        if (EMS_Devices_Types[i].device_id == device_id) {
+        if (EMS_Devices_Types[i].device_type == device_type) {
             typeFound = true; // we have a match
             break;
         }
         i++;
     }
 
-    if (typeFound) {
-        strlcpy(buffer, EMS_Devices_Types[i].device_type_string, 30);
-        return true;
-    } else {
-        // print as hex value
-        char hexbuffer[16] = {0};
-        strlcpy(buffer, "0x", 30);
-        strlcat(buffer, _hextoa(device_id, hexbuffer), 30);
-        return false;
+    if (!typeFound) {
+        i = 0; // this will point to "Unknown" in the lookup
     }
+
+    strlcpy(buffer, EMS_Devices_Types[i].device_type_string, 30);
+
+    return buffer;
 }
 
+/**
+ * takes a device_id and tries to find the corresponding type name (e.g. Boiler)
+ * If it can't find it, it will use the hex value and function returns false
+ */
+bool ems_getDeviceTypeDescription(uint8_t device_id, char * buffer) {
+    _EMS_DEVICE_TYPE device_type = EMS_DEVICE_TYPE_UNKNOWN;
+
+    // check for the fixed device IDs we already know about, like 0x00 for broadcast, 0x0B for me, 0x08 for Boiler
+    if (device_id == EMS_ID_BOILER) {
+        device_type = EMS_DEVICE_TYPE_BOILER;
+    } else if (device_id == EMS_ID_ME) {
+        device_type = EMS_DEVICE_TYPE_SERVICEKEY;
+    } else if (device_id == EMS_ID_NONE) {
+        device_type = EMS_DEVICE_TYPE_NONE;
+    } else {
+        // see if its a device we already know about (via earlier detection)
+        if (!Devices.empty()) {
+            for (std::list<_Detected_Device>::iterator it = Devices.begin(); it != Devices.end(); ++it) {
+                if (it->device_id == device_id) {
+                    device_type = it->device_type;
+                    break;
+                }
+            }
+        }
+    }
+
+    // if its not unknown, fetch the real name of the type
+    if (device_type != EMS_DEVICE_TYPE_UNKNOWN) {
+        ems_getDeviceTypeName(device_type, buffer);
+        return true;
+    }
+
+    // we didn't find anything. Use the hex value of the device ID
+    char hexbuffer[16] = {0};
+    strlcpy(buffer, "0x", 30);
+    strlcat(buffer, _hextoa(device_id, hexbuffer), 30);
+    return false;
+}
 
 /**
  * returns current device details as a string for known thermostat,boiler,solar and heatpump
@@ -2057,38 +2074,6 @@ char * ems_getDeviceDescription(_EMS_DEVICE_TYPE device_type, char * buffer, boo
 }
 
 /**
- * Find the versions of our connected devices
- */
-void ems_scanDevices() {
-    myDebug_P(PSTR("Started scanning the EMS bus for known devices"));
-
-    std::list<uint8_t> Device_Ids; // create a new list
-
-    Device_Ids.push_back(EMS_ID_BOILER);      // UBAMaster/Boilers - 0x08
-    Device_Ids.push_back(EMS_ID_HP);          // HeatPump - 0x38
-    Device_Ids.push_back(EMS_ID_SM);          // Solar Module - 0x30
-    Device_Ids.push_back(EMS_ID_CONTROLLER);  // Controllers - 0x09
-    Device_Ids.push_back(EMS_ID_CONNECT1);    // Connect - 0x02
-    Device_Ids.push_back(EMS_ID_CONNECT2);    // Connect - 0x50
-    Device_Ids.push_back(EMS_ID_GATEWAY);     // Gateway - 0x48
-    Device_Ids.push_back(EMS_ID_MIXING1);     // Mixing Devices - 0x20, 0x21
-    Device_Ids.push_back(EMS_ID_MIXING2);     // Mixing Devices - 0x20, 0x21
-    Device_Ids.push_back(EMS_ID_THERMOSTAT1); // Thermostats - 0x10, 0x17, 0x18
-    Device_Ids.push_back(EMS_ID_THERMOSTAT2); // Thermostats - 0x10, 0x17, 0x18
-    Device_Ids.push_back(EMS_ID_THERMOSTAT3); // Thermostats - 0x10, 0x17, 0x18
-    Device_Ids.push_back(EMS_ID_SWITCH);      // Switch - 0x11
-
-    // remove duplicates and reserved IDs (like our own device)
-    Device_Ids.sort();
-    // Device_Ids.unique();
-
-    // send the read command with Version command
-    for (uint8_t device_id : Device_Ids) {
-        ems_doReadCommand(EMS_TYPE_Version, device_id);
-    }
-}
-
-/**
  * print out contents of the device list that was captured
  */
 void ems_printDevices() {
@@ -2126,8 +2111,7 @@ void ems_printDevices() {
         char device_type[30];
         myDebug_P(PSTR("and %d were recognized by EMS-ESP as:"), Devices.size());
         for (std::list<_Detected_Device>::iterator it = Devices.begin(); it != Devices.end(); ++it) {
-            ems_getDeviceTypeDescription(it->device_id, device_type); // get type string, e.g. "Boiler"
-
+            ems_getDeviceTypeName(it->device_type, device_type); // get type string, e.g. "Boiler"
             if (it->known) {
                 strlcpy(device_string, it->device_desc_p, sizeof(device_string));
             } else {
