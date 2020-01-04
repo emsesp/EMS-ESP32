@@ -1370,19 +1370,43 @@ int8_t _getHeatingCircuit(_EMS_RxTelegram * EMS_RxTelegram) {
 
     int8_t hc;
 
-    if ((EMS_RxTelegram->type == EMS_TYPE_RC35StatusMessage_HC1) || (EMS_RxTelegram->type = EMS_TYPE_RC35Set_HC1)) {
+    switch (EMS_RxTelegram->type) {
+    case EMS_TYPE_RC35StatusMessage_HC1:
+    case EMS_TYPE_RC35Set_HC1:
+    case EMS_TYPE_JunkersStatusMessage_HC1:
+    case EMS_TYPE_JunkersSetMessage_HC1:
         hc = 0;
-    } else if ((EMS_RxTelegram->type == EMS_TYPE_RC35StatusMessage_HC2) || (EMS_RxTelegram->type = EMS_TYPE_RC35Set_HC2)) {
+        break;
+
+    case EMS_TYPE_RC35StatusMessage_HC2:
+    case EMS_TYPE_RC35Set_HC2:
+    case EMS_TYPE_JunkersStatusMessage_HC2:
+    case EMS_TYPE_JunkersSetMessage_HC2:
         hc = 1;
-    } else if ((EMS_RxTelegram->type == EMS_TYPE_RC35StatusMessage_HC3) || (EMS_RxTelegram->type = EMS_TYPE_RC35Set_HC3)) {
+        break;
+
+    case EMS_TYPE_RC35StatusMessage_HC3:
+    case EMS_TYPE_RC35Set_HC3:
+    case EMS_TYPE_JunkersStatusMessage_HC3:
+    case EMS_TYPE_JunkersSetMessage_HC3:
         hc = 2;
-    } else if ((EMS_RxTelegram->type == EMS_TYPE_RC35StatusMessage_HC4) || (EMS_RxTelegram->type = EMS_TYPE_RC35Set_HC4)) {
+        break;
+
+    case EMS_TYPE_RC35StatusMessage_HC4:
+    case EMS_TYPE_RC35Set_HC4:
+    case EMS_TYPE_JunkersStatusMessage_HC4:
+    case EMS_TYPE_JunkersSetMessage_HC4:
         hc = 3;
-    } else {
-        return -1; // not a valid HC
+        break;
+
+    default:
+        hc = -1; // not a valid HC
+        break;
     }
 
-    EMS_Thermostat.hc[hc].active = true;
+    if (hc != -1) {
+        EMS_Thermostat.hc[hc].active = true;
+    }
 
     return (hc);
 }
@@ -1577,7 +1601,7 @@ bool _addDevice(_EMS_DEVICE_TYPE device_type, uint8_t product_id, uint8_t device
     _Detected_Device device;
 
     // check for duplicates
-    // a combi of product_id and device_id make it unique
+    // a pair of product_id and device_id together make it unique
     for (std::list<_Detected_Device>::iterator it = Devices.begin(); it != Devices.end(); ++it) {
         if (((it)->product_id == product_id) && ((it)->device_id == device_id)) {
             return (true); // it already exists in the list, don't add
@@ -1711,9 +1735,11 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
     uint8_t i           = 0;
     uint8_t found_index = 0;
     bool    typeFound   = false;
-    while ((i < _EMS_Devices_max) && (!typeFound)) {
+    while (i++ < _EMS_Devices_max) {
         if (EMS_Devices[i].product_id == product_id) {
             // we have a matching product id
+            /*
+            // this code is to check also that we have a matching device type (e.g. boiler, thermostat etc)
             // now lets see if there is a matching device_id since product_id can be on multiple devices
             // e.g. with UBAMasters, there is only one device_id 0x08. To avoid https://github.com/proddy/EMS-ESP/issues/271
             _EMS_DEVICE_TYPE device_type = EMS_Devices[i].type;
@@ -1724,27 +1750,31 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
                     break;
                 }
             }
+            */
+            typeFound   = true;
+            found_index = i;
+            break;
         }
-        i++;
     }
 
-    // if not found, just add it as an unknown device
+    // if not found, just add it as an unknown device and exit
     if (!typeFound) {
         (void)_addDevice(EMS_DEVICE_TYPE_UNKNOWN, product_id, device_id, nullptr, version);
         return;
     }
 
     const char *     device_desc_p = (EMS_Devices[found_index].device_desc); // pointer to the full description of the device
-    _EMS_DEVICE_TYPE type          = EMS_Devices[found_index].type;          // type
+    _EMS_DEVICE_TYPE type          = EMS_Devices[found_index].type;          // device type
 
     // we recognized it, see if we already have it in our recognized list
     if (_addDevice(type, product_id, device_id, device_desc_p, version)) {
         return; // already in list
     }
 
-    uint8_t flags = EMS_Devices[found_index].flags; // it's a new entry, set the specifics
+    uint8_t flags = EMS_Devices[found_index].flags; // it's a new entry, get the specifics
 
-    if (type == EMS_DEVICE_TYPE_BOILER) {
+    // for a boiler, sometimes we get a device_id of 0x09 with the same product_id, so lets make sure it is the UBA Master
+    if ((type == EMS_DEVICE_TYPE_BOILER) && (device_id == EMS_ID_BOILER)) {
         EMS_Boiler.device_id     = device_id;
         EMS_Boiler.product_id    = product_id;
         EMS_Boiler.device_flags  = flags;
