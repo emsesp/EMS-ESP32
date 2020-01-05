@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - improved MQTT publishing to stop flooding
 
 ### Removed
+ - `autodetect scan`
 
 
 ## [1.9.4] 15-12-2019

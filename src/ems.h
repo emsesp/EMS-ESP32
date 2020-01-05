@@ -207,13 +207,35 @@ typedef enum : uint8_t {
     EMS_DEVICE_TYPE_SOLAR,
     EMS_DEVICE_TYPE_HEATPUMP,
     EMS_DEVICE_TYPE_GATEWAY,
-    EMS_DEVICE_TYPE_OTHER,
     EMS_DEVICE_TYPE_SWITCH,
     EMS_DEVICE_TYPE_CONTROLLER,
     EMS_DEVICE_TYPE_CONNECT,
-    EMS_DEVICE_TYPE_MODEM,
     EMS_DEVICE_TYPE_UNKNOWN
 } _EMS_DEVICE_TYPE;
+
+// to store mapping of device_ids to their string name
+typedef struct {
+    _EMS_DEVICE_TYPE device_type;
+    char             device_type_string[30];
+} _EMS_Device_Types;
+
+// mapping for EMS_Devices_Type
+const _EMS_Device_Types EMS_Devices_Types[] = {
+
+    {EMS_DEVICE_TYPE_UNKNOWN, EMS_MODELTYPE_UNKNOWN_STRING}, // the first, at index 0 is reserved for "unknown"
+    {EMS_DEVICE_TYPE_NONE, "All"},
+    {EMS_DEVICE_TYPE_SERVICEKEY, "Me"},
+    {EMS_DEVICE_TYPE_BOILER, "UBAMaster"},
+    {EMS_DEVICE_TYPE_THERMOSTAT, "Thermostat"},
+    {EMS_DEVICE_TYPE_MIXING, "Mixing Module"},
+    {EMS_DEVICE_TYPE_SOLAR, "Solar Module"},
+    {EMS_DEVICE_TYPE_HEATPUMP, "Heat Pump"},
+    {EMS_DEVICE_TYPE_GATEWAY, "Gateway"},
+    {EMS_DEVICE_TYPE_SWITCH, "Switching Module"},
+    {EMS_DEVICE_TYPE_CONTROLLER, "Controller"},
+    {EMS_DEVICE_TYPE_CONNECT, "Connect"}
+
+};
 
 // to store all known EMS devices to date
 typedef struct {
@@ -222,13 +244,6 @@ typedef struct {
     char             device_desc[100];
     uint8_t          flags;
 } _EMS_Device;
-
-// to store mapping of device_ids to their string name
-typedef struct {
-    uint8_t          device_id;
-    _EMS_DEVICE_TYPE device_type;
-    char             device_type_string[30];
-} _EMS_Device_Types;
 
 // for storing all recognised EMS devices
 typedef struct {
@@ -404,7 +419,6 @@ void             ems_parseTelegram(uint8_t * telegram, uint8_t len);
 void             ems_init();
 void             ems_doReadCommand(uint16_t type, uint8_t dest);
 void             ems_sendRawTelegram(char * telegram);
-void             ems_scanDevices();
 void             ems_printDevices();
 uint8_t          ems_printDevices_s(char * buffer, uint16_t len);
 void             ems_printTxQueue();
@@ -428,6 +442,7 @@ void             ems_setTxMode(uint8_t mode);
 void             ems_setMasterThermostat(uint8_t product_id);
 char *           ems_getDeviceDescription(_EMS_DEVICE_TYPE device_type, char * buffer, bool name_only = false);
 bool             ems_getDeviceTypeDescription(uint8_t device_id, char * buffer);
+char *           ems_getDeviceTypeName(_EMS_DEVICE_TYPE device_type, char * buffer);
 void             ems_getThermostatValues();
 void             ems_getBoilerValues();
 void             ems_getSolarModuleValues();
