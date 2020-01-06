@@ -44,6 +44,7 @@ jobs:
 #   - env: BUILDER_THREAD=3
 
 before_deploy:
+  - gem install 'faraday:<0.16'
   - export FIRMWARE_VERSION=$(grep -E '^#define APP_VERSION' ./src/version.h | awk '{print $3}' | sed 's/"//g')
   - git tag -f travis-${TAG}-build
   - git remote add gh
@@ -54,8 +55,8 @@ before_deploy:
 
 deploy:
   provider: releases
-  #edge:
-  #  branch: master
+  edge:
+    branch: master
   token: ${GITHUB_TOKEN}
   file_glob: true
   # file: "firmware/*.bin"
