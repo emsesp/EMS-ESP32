@@ -1194,8 +1194,9 @@ void _process_RC30StatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
 void _process_RC35StatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     // exit if...
     // - the 15th byte (second from last) is 0x00, which I think is flow temp, means HC is not is use
-    // - its not a broadcast, so destination is 0x00
-    if ((EMS_RxTelegram->data[14] == 0x00) || (EMS_RxTelegram->dest != EMS_ID_NONE)) {
+    // - its not a broadcast, so destination is 0x00 (not in use since 6/1/2020 - issue #238)
+    // if ((EMS_RxTelegram->data[14] == 0x00) || (EMS_RxTelegram->dest != EMS_ID_NONE)) {
+    if (EMS_RxTelegram->data[14] == 0x00) {
         return;
     }
 
@@ -1365,6 +1366,11 @@ int8_t _getHeatingCircuit(_EMS_RxTelegram * EMS_RxTelegram) {
     // check to see we have an active HC. Assuming first byte must have some bit status set.
     // see https://github.com/proddy/EMS-ESP/issues/238
     if (EMS_RxTelegram->data[0] == 0x00) {
+        return -1;
+    }
+
+    // ignore telegrams that have no data, or only a single byte
+    if (EMS_RxTelegram->data_length <= 1) {
         return -1;
     }
 
