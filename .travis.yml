@@ -54,8 +54,8 @@ before_deploy:
 
 deploy:
   provider: releases
-  edge:
-    branch: master
+  #edge:
+  #  branch: master
   token: ${GITHUB_TOKEN}
   file_glob: true
   # file: "firmware/*.bin"
