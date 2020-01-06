@@ -12,10 +12,10 @@
 #include "ems.h"
 
 // Fixed EMS Device IDs
-#define EMS_ID_ME 0x0B          // our device, hardcoded as the "Service Key"
-#define EMS_ID_BOILER 0x08      // all UBA Boilers have 0x08
+#define EMS_ID_ME 0x0B     // our device, hardcoded as the "Service Key"
+#define EMS_ID_BOILER 0x08 // all UBA Boilers have 0x08
 
-#define EMS_ID_SM 0x30          // Solar Module SM10, SM100, SM200 and ISM1
+#define EMS_ID_SM 0x30 // Solar Module SM10, SM100, SM200 and ISM1
 
 /*
  * Common Type
@@ -237,22 +237,23 @@ static const _EMS_Device EMS_Devices[] = {
     // Other devices like controllers and modems
     // such as 0x11 for Switching, 0x09 for controllers, 0x02 for Connect, 0x48 for Gateway
     //
-    {71, EMS_DEVICE_TYPE_SWITCH, "WM10 Switch Module", EMS_DEVICE_FLAG_NONE},                        // 0x11
-    {68, EMS_DEVICE_TYPE_CONTROLLER, "BC10/RFM20 Receiver", EMS_DEVICE_FLAG_NONE},                   // 0x09
-    {218, EMS_DEVICE_TYPE_CONTROLLER, "Junkers M200/Buderus RFM200 Receiver", EMS_DEVICE_FLAG_NONE}, // 0x50
-    {190, EMS_DEVICE_TYPE_CONTROLLER, "BC10 Base Controller", EMS_DEVICE_FLAG_NONE},                 // 0x09
-    {114, EMS_DEVICE_TYPE_CONTROLLER, "BC10 Base Controller", EMS_DEVICE_FLAG_NONE},                 // 0x09
-    {125, EMS_DEVICE_TYPE_CONTROLLER, "BC25 Base Controller", EMS_DEVICE_FLAG_NONE},                 // 0x09
-    {169, EMS_DEVICE_TYPE_CONTROLLER, "BC40 Base Controller", EMS_DEVICE_FLAG_NONE},                 // 0x09
-    {152, EMS_DEVICE_TYPE_CONTROLLER, "Controller", EMS_DEVICE_FLAG_NONE},                           // 0x09
-    {95, EMS_DEVICE_TYPE_CONTROLLER, "HT3 Controller", EMS_DEVICE_FLAG_NONE},                        // 0x09
-    {209, EMS_DEVICE_TYPE_CONTROLLER, "W-B ErP Boiler Control Panel", EMS_DEVICE_FLAG_NONE},         // 0x09
-    {230, EMS_DEVICE_TYPE_CONTROLLER, "BC Base Controller", EMS_DEVICE_FLAG_NONE},                   // 0x09
-    {205, EMS_DEVICE_TYPE_CONNECT, "Nefit Moduline Easy Connect", EMS_DEVICE_FLAG_NONE},             // 0x02
-    {206, EMS_DEVICE_TYPE_CONNECT, "Bosch Easy Connect", EMS_DEVICE_FLAG_NONE},                      // 0x02
-    {171, EMS_DEVICE_TYPE_CONNECT, "EMS-OT OpenTherm converter", EMS_DEVICE_FLAG_NONE},              // 0x02
-    {189, EMS_DEVICE_TYPE_GATEWAY, "Web Gateway KM200", EMS_DEVICE_FLAG_NONE},                       // 0x48
-    {94, EMS_DEVICE_TYPE_GATEWAY, "RC Remote Device", EMS_DEVICE_FLAG_NONE},                           // 0x18
+    {71, EMS_DEVICE_TYPE_SWITCH, "WM10 Switch Module", EMS_DEVICE_FLAG_NONE},                                   // 0x11
+    {68, EMS_DEVICE_TYPE_CONTROLLER, "BC10/RFM20 Receiver", EMS_DEVICE_FLAG_NONE},                              // 0x09
+    {218, EMS_DEVICE_TYPE_CONTROLLER, "Junkers M200/Buderus RFM200 Receiver", EMS_DEVICE_FLAG_NONE},            // 0x50
+    {190, EMS_DEVICE_TYPE_CONTROLLER, "BC10 Base Controller", EMS_DEVICE_FLAG_NONE},                            // 0x09
+    {114, EMS_DEVICE_TYPE_CONTROLLER, "BC10 Base Controller", EMS_DEVICE_FLAG_NONE},                            // 0x09
+    {125, EMS_DEVICE_TYPE_CONTROLLER, "BC25 Base Controller", EMS_DEVICE_FLAG_NONE},                            // 0x09
+    {169, EMS_DEVICE_TYPE_CONTROLLER, "BC40 Base Controller", EMS_DEVICE_FLAG_NONE},                            // 0x09
+    {152, EMS_DEVICE_TYPE_CONTROLLER, "Controller", EMS_DEVICE_FLAG_NONE},                                      // 0x09
+    {95, EMS_DEVICE_TYPE_CONTROLLER, "HT3 Controller", EMS_DEVICE_FLAG_NONE},                                   // 0x09
+    {209, EMS_DEVICE_TYPE_CONTROLLER, "W-B ErP Boiler Control Panel", EMS_DEVICE_FLAG_NONE},                    // 0x09
+    {230, EMS_DEVICE_TYPE_CONTROLLER, "BC Base Controller", EMS_DEVICE_FLAG_NONE},                              // 0x09
+    {205, EMS_DEVICE_TYPE_CONNECT, "Nefit Moduline Easy Connect", EMS_DEVICE_FLAG_NONE},                        // 0x02
+    {206, EMS_DEVICE_TYPE_CONNECT, "Bosch Easy Connect", EMS_DEVICE_FLAG_NONE},                                 // 0x02
+    {171, EMS_DEVICE_TYPE_CONNECT, "EMS-OT OpenTherm converter", EMS_DEVICE_FLAG_NONE},                         // 0x02
+    {189, EMS_DEVICE_TYPE_GATEWAY, "Web Gateway KM200", EMS_DEVICE_FLAG_NONE},                                  // 0x48
+    {94, EMS_DEVICE_TYPE_GATEWAY, "RC Remote Device", EMS_DEVICE_FLAG_NONE},                                    // 0x18
+    {207, EMS_DEVICE_TYPE_CONTROLLER, "Worcester Sense II/Bosch CS100 Solar Controller", EMS_DEVICE_FLAG_NONE}, // 0x10
 
     //
     // Thermostats, typically device id of 0x10, 0x17, 0x18, 0x38 (RC100), 0x39 (Easy)
@@ -263,7 +264,7 @@ static const _EMS_Device EMS_Devices[] = {
     {203, EMS_DEVICE_TYPE_THERMOSTAT, "Bosch EasyControl CT200", EMS_DEVICE_FLAG_EASY | EMS_DEVICE_FLAG_NO_WRITE},             // 0x18, cannot write
     {157, EMS_DEVICE_TYPE_THERMOSTAT, "Buderus RC200/Bosch CW100/Junkers CW100", EMS_DEVICE_FLAG_NO_WRITE},                    // 0x18, cannot write
 
-    // Buderus/Nefit
+    // Buderus/Nefit specific
     {79, EMS_DEVICE_TYPE_THERMOSTAT, "RC10/Moduline 100", EMS_DEVICE_FLAG_RC10},                                    // 0x17
     {77, EMS_DEVICE_TYPE_THERMOSTAT, "RC20/Moduline 300", EMS_DEVICE_FLAG_RC20},                                    // 0x17
     {67, EMS_DEVICE_TYPE_THERMOSTAT, "RC30", EMS_DEVICE_FLAG_RC30},                                                 // 0x10
