@@ -253,7 +253,7 @@ static const _EMS_Device EMS_Devices[] = {
     {171, EMS_DEVICE_TYPE_CONNECT, "EMS-OT OpenTherm converter", EMS_DEVICE_FLAG_NONE},                         // 0x02
     {189, EMS_DEVICE_TYPE_GATEWAY, "Web Gateway KM200", EMS_DEVICE_FLAG_NONE},                                  // 0x48
     {94, EMS_DEVICE_TYPE_GATEWAY, "RC Remote Device", EMS_DEVICE_FLAG_NONE},                                    // 0x18
-    {207, EMS_DEVICE_TYPE_CONTROLLER, "Worcester Sense II/Bosch CS100 Solar Controller", EMS_DEVICE_FLAG_NONE}, // 0x10
+    {207, EMS_DEVICE_TYPE_CONTROLLER, "Worcester Sense II/Bosch CS200 Solar Controller", EMS_DEVICE_FLAG_NONE}, // 0x10
 
     //
     // Thermostats, typically device id of 0x10, 0x17, 0x18, 0x38 (RC100), 0x39 (Easy)
