@@ -1,1 +1,143 @@
-hello
+<!DOCTYPE html>
+<html>
+<head>
+      <meta charset="UTF-8">
+      <title>EMS_ESP Documentation</title>
+      <link rel="icon" href="favicon.ico">
+      <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+      <meta name="description" content="EMS-ESP">
+      <meta name="keywords" content="EMS-ESP EMS esp8266 flash firmware help installation flash">  
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+      <meta property="og:title" content="EMS-ESP">
+      <meta property="og:description" content="An EMS interface">
+      <meta property="og:image" content="https://proddy.github.io/ems-esp/_media/logo-proddy-fw.jpg">
+      <meta property="og:url" content="https://proddy.github.io/ems-esp/#/Home">
+
+<!-- Theme: Simple Dark -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple-dark.css">
+<link rel="stylesheet" href="_assets/theme-custom.css">
+<!-- PrismJS theme -->
+<link rel="stylesheet" href="_assets/prism.css">
+</head>
+<body>
+  <div id="app"></div>
+  <script>
+    window.$docsify = {
+      basePath   : './',
+      themeColor : '#1FA3EC',
+      name       : 'EMS-ESP',
+      nameLink   : './#/Home',
+      homepage   : 'Home.md',
+      logo       : '/_media/logo-proddy-fw.jpg',
+      repo       : 'https://github.com/proddy/EMS-ESP',
+      onlyCover  : true,
+      relativePath: false,
+      coverpage  : false,
+      auto2top   : true,
+      mergeNavbar: true,
+      notFoundPage: true,
+      maxLevel   : 2,
+      loadSidebar: true,
+      autoHeader : true,
+      loadNavbar: true,
+      alias: {
+        '/.*/_navbar.md': '_navbar.md'
+      }, 
+      subMaxLevel: 3,     
+      editLink: {
+      text: 'Improve this article',
+      repo: 'https://github.com/proddy.github.io/ems-esp/blob/master/',
+      cssClass: ''
+      },
+      ga: 'UA-140681905-2',
+      formatUpdated: 'Last updated {DD}.{MM}.{YYYY}',
+      tabs: {
+        persist    : true,      // default
+        sync       : true,      // default
+        theme      : 'classic', // default
+        tabComments: true,      // default
+        tabHeadings: true       // default
+      },
+      'flexibleAlerts': {
+      style: 'ems-esp',
+      example: {
+        label: "Example",
+        icon: "fas fa-chalkboard-teacher",
+        className: "example"
+        },
+      },
+      search: {
+      maxAge: 86400000,
+      namespace: 'docs-0',
+      depth: 3,
+      paths: [
+        '/',
+'/help.md',
+'/Home.md',
+'/README.md',
+'/sidebar.md',
+'/FAQ.md',
+'/Troubleshooting.md',
+'/wish-list.md',
+'/Web-test.md',
+'/Uploading-firmware.md',
+'/Thermostat-Modes-RC35-vs-RC300.md',
+'/Supported-EMS-Devices.md',
+'/SM100.md',
+'/Running-and-Monitoring.md',
+'/RC3xx-Thermostats.md',
+'/MQTT.md',
+'/MC110-controller.md',
+'/How-the-EMS-bus-works.md',
+'/How-the-Code-Works.md',
+'/Home-Assistant.md',
+'/getting_started.md',
+'/EMS-Telegram-Types.md',
+'/Domoticz.md',
+'/Deciphering-EMS-Plus.md',
+'/Contributing.md',
+'/Configure-firmware.md',
+'/Building-your-own-test-circuit.md',
+'/Building-firmware.md'
+      ],
+      },
+    };
+  
+  </script>
+  <!-- Latest v2.x.x -->
+  <script src="//unpkg.com/docsify/lib/docsify.min.js"></script>
+  <!-- docsify-tabs -->
+  <script src="https://cdn.jsdelivr.net/npm/docsify-tabs@1"></script>
+  <!-- docsify-example-panels (latest) -->
+  <!-- <script src="https://cdn.jsdelivr.net/npm/docsify-example-panels@1"></script> -->
+  <!-- Prism search plugin -->
+  <script src="//unpkg.com/docsify/lib/plugins/search.js"></script>
+  <!-- <script src="//unpkg.com/lunr/lunr.js"></script>
+  <script src="search.min.js"></script> -->
+  <!-- Flexible alerts -->
+  <script src="//unpkg.com/docsify-plugin-flexible-alerts"></script>
+  <!-- Remote Markdown -->
+   <script src="//unpkg.com/docsify-remote-markdown/dist/docsify-remote-markdown.min.js"></script>
+  <!-- copy code snippet script -->
+  <script src="https://unpkg.com/docsify-copy-code@2"></script>
+  <!-- Edit on Github on every page -->
+  <script src="_assets/edit-link.js"></script>
+  <!-- Beautiful Alerts plugin - Custom blockquote alerts -->
+  <script src="https://unpkg.com/docsify-plugin-flexible-alerts"></script>
+  <!-- Sidebar Collapse -->
+  <script src="//unpkg.com/docsify-sidebar-collapse/dist/docsify-sidebar-collapse.min.js"></script> 
+  <!-- Image zoom -->
+  <script src="//unpkg.com/docsify/lib/plugins/zoom-image.min.js"></script>
+  <!-- GA -->
+  <script src="//unpkg.com/docsify/lib/plugins/ga.min.js"></script>
+  <!-- Pagination -->
+  <script src="//unpkg.com/docsify-pagination/dist/docsify-pagination.min.js"></script>
+
+  <!-- Prism additional components -->
+  <script src="_assets/prism-bash.min.js"></script>
+  <script src="_assets/prism-yaml.min.js"></script>
+  <script src="_assets/prism-json.min.js"></script>
+  <script src="_assets/prism-ems-esp.js"></script>
+</body>
+</html>
