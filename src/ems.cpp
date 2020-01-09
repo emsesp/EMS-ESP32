@@ -49,7 +49,7 @@ const uint8_t ems_crc_table[] = {0x00, 0x02, 0x04, 0x06, 0x08, 0x0A, 0x0C, 0x0E,
                                  0xF9, 0xFB, 0xFD, 0xFF, 0xF1, 0xF3, 0xF5, 0xF7, 0xE9, 0xEB, 0xED, 0xEF, 0xE1, 0xE3, 0xE5, 0xE7};
 
 const uint8_t  TX_WRITE_TIMEOUT_COUNT = 2;       // 3 retries before timeout
-const uint32_t EMS_BUS_TIMEOUT        = 15000;   // timeout in ms before recognizing the ems bus is offline (15 seconds)
+const uint32_t EMS_BUS_TIMEOUT        = 45000;   // timeout in ms before recognizing the ems bus is offline (45 seconds)
 const uint32_t EMS_POLL_TIMEOUT       = 5000000; // timeout in microseconds before recognizing the ems bus is offline (5 seconds)
 
 /*
@@ -1195,8 +1195,9 @@ void _process_RC30StatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
 void _process_RC35StatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     // exit if...
     // - the 15th byte (second from last) is 0x00, which I think is flow temp, means HC is not is use
-    // - its not a broadcast, so destination is 0x00
-    if ((EMS_RxTelegram->data[14] == 0x00) || (EMS_RxTelegram->dest != EMS_ID_NONE)) {
+    // - its not a broadcast, so destination is 0x00 (not in use since 6/1/2020 - issue #238)
+    // if ((EMS_RxTelegram->data[14] == 0x00) || (EMS_RxTelegram->dest != EMS_ID_NONE)) {
+    if (EMS_RxTelegram->data[14] == 0x00) {
         return;
     }
 
@@ -1366,6 +1367,11 @@ int8_t _getHeatingCircuit(_EMS_RxTelegram * EMS_RxTelegram) {
     // check to see we have an active HC. Assuming first byte must have some bit status set.
     // see https://github.com/proddy/EMS-ESP/issues/238
     if (EMS_RxTelegram->data[0] == 0x00) {
+        return -1;
+    }
+
+    // ignore telegrams that have no data, or only a single byte
+    if (EMS_RxTelegram->data_length <= 1) {
         return -1;
     }
 

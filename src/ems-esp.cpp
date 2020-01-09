@@ -270,97 +270,101 @@ void showInfo() {
     }
 
     myDebug_P(PSTR(""));
-    myDebug_P(PSTR("%sBoiler stats:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
 
-    // version details
-    myDebug_P(PSTR("  Boiler: %s"), ems_getDeviceDescription(EMS_DEVICE_TYPE_BOILER, buffer_type));
+    // show boiler stats if connected
+    if (ems_getBoilerEnabled()) {
+        myDebug_P(PSTR("%sBoiler stats:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
 
-    // active stats
-    if (ems_getBusConnected()) {
-        if (EMS_Boiler.tapwaterActive != EMS_VALUE_INT_NOTSET) {
-            myDebug_P(PSTR("  Hot tap water: %s"), EMS_Boiler.tapwaterActive ? "running" : "off");
+        // version details
+        myDebug_P(PSTR("  Boiler: %s"), ems_getDeviceDescription(EMS_DEVICE_TYPE_BOILER, buffer_type));
+
+        // active stats
+        if (ems_getBusConnected()) {
+            if (EMS_Boiler.tapwaterActive != EMS_VALUE_INT_NOTSET) {
+                myDebug_P(PSTR("  Hot tap water: %s"), EMS_Boiler.tapwaterActive ? "running" : "off");
+            }
+
+            if (EMS_Boiler.heatingActive != EMS_VALUE_INT_NOTSET) {
+                myDebug_P(PSTR("  Central heating: %s"), EMS_Boiler.heatingActive ? "active" : "off");
+            }
         }
 
-        if (EMS_Boiler.heatingActive != EMS_VALUE_INT_NOTSET) {
-            myDebug_P(PSTR("  Central heating: %s"), EMS_Boiler.heatingActive ? "active" : "off");
+        // UBAParameterWW
+        _renderBoolValue("Warm Water activated", EMS_Boiler.wWActivated);
+        _renderBoolValue("Warm Water circulation pump available", EMS_Boiler.wWCircPump);
+        if (EMS_Boiler.wWComfort == EMS_VALUE_UBAParameterWW_wwComfort_Hot) {
+            myDebug_P(PSTR("  Warm Water comfort setting: Hot"));
+        } else if (EMS_Boiler.wWComfort == EMS_VALUE_UBAParameterWW_wwComfort_Eco) {
+            myDebug_P(PSTR("  Warm Water comfort setting: Eco"));
+        } else if (EMS_Boiler.wWComfort == EMS_VALUE_UBAParameterWW_wwComfort_Intelligent) {
+            myDebug_P(PSTR("  Warm Water comfort setting: Intelligent"));
         }
-    }
 
-    // UBAParameterWW
-    _renderBoolValue("Warm Water activated", EMS_Boiler.wWActivated);
-    _renderBoolValue("Warm Water circulation pump available", EMS_Boiler.wWCircPump);
-    if (EMS_Boiler.wWComfort == EMS_VALUE_UBAParameterWW_wwComfort_Hot) {
-        myDebug_P(PSTR("  Warm Water comfort setting: Hot"));
-    } else if (EMS_Boiler.wWComfort == EMS_VALUE_UBAParameterWW_wwComfort_Eco) {
-        myDebug_P(PSTR("  Warm Water comfort setting: Eco"));
-    } else if (EMS_Boiler.wWComfort == EMS_VALUE_UBAParameterWW_wwComfort_Intelligent) {
-        myDebug_P(PSTR("  Warm Water comfort setting: Intelligent"));
-    }
+        _renderIntValue("Warm Water selected temperature", "C", EMS_Boiler.wWSelTemp);
+        _renderIntValue("Warm Water desinfection temperature", "C", EMS_Boiler.wWDesinfectTemp);
 
-    _renderIntValue("Warm Water selected temperature", "C", EMS_Boiler.wWSelTemp);
-    _renderIntValue("Warm Water desinfection temperature", "C", EMS_Boiler.wWDesinfectTemp);
+        // UBAMonitorWWMessage
+        _renderUShortValue("Warm Water current temperature", "C", EMS_Boiler.wWCurTmp);
+        _renderIntValue("Warm Water current tap water flow", "l/min", EMS_Boiler.wWCurFlow, 10);
+        _renderLongValue("Warm Water # starts", "times", EMS_Boiler.wWStarts);
+        if (EMS_Boiler.wWWorkM != EMS_VALUE_LONG_NOTSET) {
+            myDebug_P(PSTR("  Warm Water active time: %d days %d hours %d minutes"),
+                      EMS_Boiler.wWWorkM / 1440,
+                      (EMS_Boiler.wWWorkM % 1440) / 60,
+                      EMS_Boiler.wWWorkM % 60);
+        }
+        _renderBoolValue("Warm Water 3-way valve", EMS_Boiler.wWHeat);
 
-    // UBAMonitorWWMessage
-    _renderUShortValue("Warm Water current temperature", "C", EMS_Boiler.wWCurTmp);
-    _renderIntValue("Warm Water current tap water flow", "l/min", EMS_Boiler.wWCurFlow, 10);
-    _renderLongValue("Warm Water # starts", "times", EMS_Boiler.wWStarts);
-    if (EMS_Boiler.wWWorkM != EMS_VALUE_LONG_NOTSET) {
-        myDebug_P(PSTR("  Warm Water active time: %d days %d hours %d minutes"),
-                  EMS_Boiler.wWWorkM / 1440,
-                  (EMS_Boiler.wWWorkM % 1440) / 60,
-                  EMS_Boiler.wWWorkM % 60);
-    }
-    _renderBoolValue("Warm Water 3-way valve", EMS_Boiler.wWHeat);
+        // UBAMonitorFast
+        _renderIntValue("Selected flow temperature", "C", EMS_Boiler.selFlowTemp);
+        _renderUShortValue("Current flow temperature", "C", EMS_Boiler.curFlowTemp);
+        _renderUShortValue("Return temperature", "C", EMS_Boiler.retTemp);
+        _renderBoolValue("Gas", EMS_Boiler.burnGas);
+        _renderBoolValue("Boiler pump", EMS_Boiler.heatPmp);
+        _renderBoolValue("Fan", EMS_Boiler.fanWork);
+        _renderBoolValue("Ignition", EMS_Boiler.ignWork);
+        _renderBoolValue("Circulation pump", EMS_Boiler.wWCirc);
+        _renderIntValue("Burner selected max power", "%", EMS_Boiler.selBurnPow);
+        _renderIntValue("Burner current power", "%", EMS_Boiler.curBurnPow);
+        _renderShortValue("Flame current", "uA", EMS_Boiler.flameCurr);
+        _renderIntValue("System pressure", "bar", EMS_Boiler.sysPress, 10);
+        if (EMS_Boiler.serviceCode == EMS_VALUE_USHORT_NOTSET) {
+            myDebug_P(PSTR("  System service code: %s"), EMS_Boiler.serviceCodeChar);
+        } else {
+            myDebug_P(PSTR("  System service code: %s (%d)"), EMS_Boiler.serviceCodeChar, EMS_Boiler.serviceCode);
+        }
 
-    // UBAMonitorFast
-    _renderIntValue("Selected flow temperature", "C", EMS_Boiler.selFlowTemp);
-    _renderUShortValue("Current flow temperature", "C", EMS_Boiler.curFlowTemp);
-    _renderUShortValue("Return temperature", "C", EMS_Boiler.retTemp);
-    _renderBoolValue("Gas", EMS_Boiler.burnGas);
-    _renderBoolValue("Boiler pump", EMS_Boiler.heatPmp);
-    _renderBoolValue("Fan", EMS_Boiler.fanWork);
-    _renderBoolValue("Ignition", EMS_Boiler.ignWork);
-    _renderBoolValue("Circulation pump", EMS_Boiler.wWCirc);
-    _renderIntValue("Burner selected max power", "%", EMS_Boiler.selBurnPow);
-    _renderIntValue("Burner current power", "%", EMS_Boiler.curBurnPow);
-    _renderShortValue("Flame current", "uA", EMS_Boiler.flameCurr);
-    _renderIntValue("System pressure", "bar", EMS_Boiler.sysPress, 10);
-    if (EMS_Boiler.serviceCode == EMS_VALUE_USHORT_NOTSET) {
-        myDebug_P(PSTR("  System service code: %s"), EMS_Boiler.serviceCodeChar);
-    } else {
-        myDebug_P(PSTR("  System service code: %s (%d)"), EMS_Boiler.serviceCodeChar, EMS_Boiler.serviceCode);
-    }
+        // UBAParametersMessage
+        _renderIntValue("Heating temperature setting on the boiler", "C", EMS_Boiler.heating_temp);
+        _renderIntValue("Boiler circuit pump modulation max power", "%", EMS_Boiler.pump_mod_max);
+        _renderIntValue("Boiler circuit pump modulation min power", "%", EMS_Boiler.pump_mod_min);
 
-    // UBAParametersMessage
-    _renderIntValue("Heating temperature setting on the boiler", "C", EMS_Boiler.heating_temp);
-    _renderIntValue("Boiler circuit pump modulation max power", "%", EMS_Boiler.pump_mod_max);
-    _renderIntValue("Boiler circuit pump modulation min power", "%", EMS_Boiler.pump_mod_min);
-
-    // UBAMonitorSlow
-    if (EMS_Boiler.extTemp != EMS_VALUE_SHORT_NOTSET) {
-        _renderShortValue("Outside temperature", "C", EMS_Boiler.extTemp);
-    }
-    _renderUShortValue("Boiler temperature", "C", EMS_Boiler.boilTemp);
-    _renderUShortValue("Exhaust temperature", "C", EMS_Boiler.exhaustTemp);
-    _renderIntValue("Pump modulation", "%", EMS_Boiler.pumpMod);
-    _renderLongValue("Burner # starts", "times", EMS_Boiler.burnStarts);
-    if (EMS_Boiler.burnWorkMin != EMS_VALUE_LONG_NOTSET) {
-        myDebug_P(PSTR("  Total burner operating time: %d days %d hours %d minutes"),
-                  EMS_Boiler.burnWorkMin / 1440,
-                  (EMS_Boiler.burnWorkMin % 1440) / 60,
-                  EMS_Boiler.burnWorkMin % 60);
-    }
-    if (EMS_Boiler.heatWorkMin != EMS_VALUE_LONG_NOTSET) {
-        myDebug_P(PSTR("  Total heat operating time: %d days %d hours %d minutes"),
-                  EMS_Boiler.heatWorkMin / 1440,
-                  (EMS_Boiler.heatWorkMin % 1440) / 60,
-                  EMS_Boiler.heatWorkMin % 60);
-    }
-    if (EMS_Boiler.UBAuptime != EMS_VALUE_LONG_NOTSET) {
-        myDebug_P(PSTR("  Total UBA working time: %d days %d hours %d minutes"),
-                  EMS_Boiler.UBAuptime / 1440,
-                  (EMS_Boiler.UBAuptime % 1440) / 60,
-                  EMS_Boiler.UBAuptime % 60);
+        // UBAMonitorSlow
+        if (EMS_Boiler.extTemp != EMS_VALUE_SHORT_NOTSET) {
+            _renderShortValue("Outside temperature", "C", EMS_Boiler.extTemp);
+        }
+        _renderUShortValue("Boiler temperature", "C", EMS_Boiler.boilTemp);
+        _renderUShortValue("Exhaust temperature", "C", EMS_Boiler.exhaustTemp);
+        _renderIntValue("Pump modulation", "%", EMS_Boiler.pumpMod);
+        _renderLongValue("Burner # starts", "times", EMS_Boiler.burnStarts);
+        if (EMS_Boiler.burnWorkMin != EMS_VALUE_LONG_NOTSET) {
+            myDebug_P(PSTR("  Total burner operating time: %d days %d hours %d minutes"),
+                      EMS_Boiler.burnWorkMin / 1440,
+                      (EMS_Boiler.burnWorkMin % 1440) / 60,
+                      EMS_Boiler.burnWorkMin % 60);
+        }
+        if (EMS_Boiler.heatWorkMin != EMS_VALUE_LONG_NOTSET) {
+            myDebug_P(PSTR("  Total heat operating time: %d days %d hours %d minutes"),
+                      EMS_Boiler.heatWorkMin / 1440,
+                      (EMS_Boiler.heatWorkMin % 1440) / 60,
+                      EMS_Boiler.heatWorkMin % 60);
+        }
+        if (EMS_Boiler.UBAuptime != EMS_VALUE_LONG_NOTSET) {
+            myDebug_P(PSTR("  Total UBA working time: %d days %d hours %d minutes"),
+                      EMS_Boiler.UBAuptime / 1440,
+                      (EMS_Boiler.UBAuptime % 1440) / 60,
+                      EMS_Boiler.UBAuptime % 60);
+        }
     }
 
     // For SM10/SM100/SM200 Solar Module
