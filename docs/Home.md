@@ -28,9 +28,11 @@ Happy new year everyone! 1.9.5 has been in development for a while now but it's 
 - MM10 Mixer support
 - SM200 Solar module support
 
-Thanks to everyone providing feedback.
+Thanks to everyone for providing feedback.
 
-Make sure you check out the full [ChangeLog](https://github.com/proddy/EMS-ESP/blob/dev/CHANGELOG.md).
+Also make sure you check out the full [ChangeLog](https://github.com/proddy/EMS-ESP/blob/dev/CHANGELOG.md).
+
+Paul.
 
 #### **Version 2.0**
 **January 6 2020**
