@@ -1,4 +1,4 @@
-![logo](https://github.com/proddy/EMS-ESP/raw/master/doc/ems%20gateway/logo-proddy-fw.jpg)
+![logo](docs/_media/logo-proddy-fw.jpg)
 # EMS-ESP
 
 [![version](https://img.shields.io/github/release/proddy/EMS-ESP.svg?label=Latest%20Release)](https://github.com/proddy/EMS-ESP/blob/master/CHANGELOG.md)
@@ -15,7 +15,7 @@ EMS-ESP is a open-source system to communicate with **EMS** (Energy Management S
 
 The code is written for the Espressif **ESP8266** microcontroller and supports a telnet console for real-time monitoring and configuration and customizable MQTT support for publishing the information to a home automation system such as Home Assistant or Domoticz.
 
-####  Please reference the [Wiki](https://github.com/proddy/EMS-ESP/wiki) for further details and instructions on how to build and configure the firmware.
+####  Please reference the [Wiki](https://proddy.github.io/EMS-ESP) for further details and instructions on how to build and configure the firmware.
 
 ---
 
@@ -23,31 +23,25 @@ The code is written for the Espressif **ESP8266** microcontroller and supports a
 
 #### A web interface for easy configuration and real-time monitoring of the EMS bus
 
-| ![web menu](https://github.com/proddy/EMS-ESP/raw/master/doc/web/system_status.PNG) | ![web menu](https://github.com/proddy/EMS-ESP/raw/master/doc/web/ems_dashboard.PNG) |
+| ![web menu](docs/_media/web/system_status.PNG) | ![web menu](docs/_media/web/ems_dashboard.PNG) |
 | -------------------------------------------------------- | ---------------------------------------------------------- |
 
 #### MQTT support for Home Assistant and Domoticz
 
-![ha](https://github.com/proddy/EMS-ESP/raw/master/doc/home%20assistant/ha.png)
+![ha](docs/_media/home%20assistant/ha.png)
 
 #### Telnet for advanced configuration and verbose traffic logging
 
-| ![telnet menu](https://github.com/proddy/EMS-ESP/raw/master/doc/telnet/telnet_menu.jpg) | ![telnet menu](https://github.com/proddy/EMS-ESP/raw/master/doc/telnet/telnet_stats.PNG) |
+| ![telnet menu](docs/_media/telnet/telnet_menu.jpg) | ![telnet menu](docs/_media/telnet/telnet_stats.PNG) |
 | ------------------------------------------------------------ | -------------------------------------------------------- |
 
 ## Supported EMS devices
 
-More than **50** EMS devices are currently supported. See the [complete list](https://github.com/proddy/EMS-ESP/wiki/Supported-EMS-Devices) from the [Wiki](https://github.com/proddy/EMS-ESP/wiki).
-
-## Uploading the firmware
-
-Latest stable firmware build can be found [here](https://github.com/proddy/EMS-ESP/releases/latest).
-
-Follow [these instructions](https://github.com/proddy/EMS-ESP/wiki/Building-and-Uploading-the-Firmware) on how to upload to the ESP8266.
+More than **50** EMS devices are currently supported. See the [complete list](https://proddy.github.io/EMS-ESP/#/Supported-EMS-Devices).
 
 ## Compatible with bbqkees' EMS Gateway
 
-The firmware fully supports BBQKees' [EMS Gateway](https://shop.hotgoodies.nl/ems/) board with integrated Wemos D1 ESP8266.
+The firmware fully supports BBQKees' [EMS Gateway](https://bbqkees-electronics.nl/) board with integrated Wemos D1 ESP8266.
 
-| ![on boiler](https://github.com/proddy/EMS-ESP/raw/master/doc/ems%20gateway/on-boiler.jpg) | ![kit](https://github.com/proddy/EMS-ESP/raw/master/doc/ems%20gateway/ems-kit-2.jpg) | ![basic circuit](https://github.com/proddy/EMS-ESP/raw/master/doc/ems%20gateway/ems-board-white.jpg) |
+| ![on boiler](docs/_media/ems%20gateway/on-boiler.jpg) | ![kit](docs/_media/ems%20gateway/ems-kit-2.jpg) | ![basic circuit](docs/_media/ems%20gateway/ems-board-white.jpg) |
 | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------- |

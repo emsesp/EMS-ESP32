@@ -1,0 +1,78 @@
+:root {
+    --mono-hue                             : 201;
+    --mono-saturation                      : 18%;
+    --mono-shade4                       : hsl(var(--mono-hue), var(--mono-saturation), 10%);
+    --base-line-height                  : 1.5;
+    --content-max-width                 : 70em;
+    --cover-background-blend-mode       : darken ;
+    --cover-background-color            : var(--base-background-color);
+    --cover-background-mask-opacity     : 0.8;
+    --cover-blockquote-color            : #1fa3ec;
+    --code-theme-text                   : #e4e4e4 ;
+    --table-cell-padding                : 0.4em 0.75em;
+    --table-head-background             : var(--mono-shade4);
+    --table-row-even-background         : var(--mono-shade2);
+    --table-row-odd-background          : var(--mono-shade3);
+  /* Sidebar
+  ============================================================================= */
+      --sidebar-background              : var(--mono-shade2);
+      --sidebar-padding                 : 0 25px;
+      --sidebar-transition-duration     : var(--duration-fast);
+      --sidebar-width                   : 18rem;
+      --sidebar-nav-indent              : 0.6em;
+      --sidebar-nav-margin              : 0 0 0;
+      --sidebar-nav-link-padding        : 0 0;
+      --sidebar-nav-link-before-margin  : 0 0 0 0;  
+}
+
+.alert.ems-esp {  
+    border: 1px solid var(--mono-shade2);
+    border-left-width: .25rem;
+    border-radius: .25rem;
+    background: var(--mono-shade2);
+    padding: .25rem 1.25rem !important;
+    margin-bottom: 0.25rem !important;
+}
+
+.medium-zoom-overlay, .medium-zoom-image--open {
+    z-index: 0 !important;
+}
+.alert.ems-esp.warning {
+    border-left-color: #f0ad4e !important;
+}
+
+.alert.ems-esp.warning .title {
+    color: #f0ad4e;
+}
+
+.alert.ems-esp.tip {
+    border-left-color: #28a745 !important;
+}
+
+.alert.ems-esp.tip .title {
+    color: #28a745;
+}
+
+.alert.ems-esp.info {
+    border-left-color: #E0FFFF  !important;
+}
+
+.alert.ems-esp.info .title {
+    color: #E0FFFF;
+}
+
+.alert.ems-esp.danger {
+    border-left-color: #dc3545  !important;
+}
+
+.alert.ems-esp.danger .title {
+    color: #dc3545;
+}
+
+.alert.ems-esp.example {
+    border-left-color: #1FA3EC  !important;
+}
+
+.alert.ems-esp.example .title {
+    color: #1FA3EC;
+}
