@@ -21,4 +21,4 @@ The EMS circuit will work with both 3.3V and 5V. It's easiest though to power di
 
 | With Power Circuit                              |
 | ------------------------------------------ |
-| ![Power circuit](https://github.com/proddy/EMS-ESP/raw/master/doc/schematics/Schematic_EMS-ESP.png) |
+| ![Power circuit](_media/schematics/Schematic_EMS-ESP.png) |
