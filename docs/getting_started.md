@@ -1,4 +1,4 @@
-<img style="margin: 10px 10px; float:right; width:40%" src="_media/boiler.svg" alt="EMS-ESP Logo"></img>
+<img style="margin: 10px 10px; float:right; width:10%" src="_media/logo-proddy-fw.jpg" alt="EMS-ESP Logo"></img>
 
 Welcome to EMS-ESP! A small project to read and write to EMS controller heating devices.
 <br>

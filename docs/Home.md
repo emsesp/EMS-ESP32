@@ -1,6 +1,8 @@
 
 # EMS-ESP
 
+<img style="margin: 10px 10px; float:right; width:20%" src="_media/boiler.svg" alt="EMS-ESP Logo"></img>
+
 [![version](https://img.shields.io/github/release/proddy/EMS-ESP.svg?label=Latest%20Release)](https://github.com/proddy/EMS-ESP/blob/master/CHANGELOG.md)
 [![release-date](https://img.shields.io/github/release-date/proddy/EMS-ESP.svg?label=Released)](https://github.com/proddy/EMS-ESP/commits/master)
 [![license](https://img.shields.io/github/license/proddy/EMS-ESP.svg)](LICENSE)
