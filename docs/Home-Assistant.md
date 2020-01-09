@@ -1,24 +1,10 @@
-## Example Dashboard
+The files to read MQTT and parse as sensors and thermostat components into HA can be found [here](integrations/homeassistant/ha) along with a LoveLace dashboard which looks like:
 
-In the `doc` folder there is a basic template for a HA dashboard which looks like:
-
-![Home Assistant panel)](_media/home%20assistant/ha.png)
+![Home Assistant panel](_media/home%20assistant/ha.png ':size=500')
 
 and the alerts on an iOS/Android device using PushBullet, PushOver or any notification service would look like:
 
-![Home Assistant iPhone notify)](_media/home%20assistant/ha_notify.jpg)
-
-You can find the `.yaml` configuration files under `doc/ha`. See also this [HA forum post](https://community.home-assistant.io/t/thermostat-and-boiler-controller-for-ems-based-boilers-nefit-buderus-bosch-using-esp/53382). Make sure you include these YAML files in your `configuration.yaml` file, e.g.
-
-```yaml
-script: !include script.yaml
-sensor: !include sensor.yaml
-switch: !include switch.yaml
-notify: !include notify.yaml
-climate: !include climate.yaml
-automation: !include automation.yaml
-binary_sensor: !include binary_sensor.yaml
-```
+![Home Assistant iPhone notify](_media/home%20assistant/ha_notify.jpg ':size=300')
 
 ## Supporting multiple thermostat heating circuits
 
