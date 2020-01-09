@@ -1,6 +1,3 @@
-
-# EMS-ESP
-
 <img style="margin: 10px 10px; float:right; width:20%" src="_media/boiler.svg" alt="EMS-ESP Logo"></img>
 
 [![version](https://img.shields.io/github/release/proddy/EMS-ESP.svg?label=Latest%20Release)](https://github.com/proddy/EMS-ESP/blob/master/CHANGELOG.md)
@@ -45,15 +42,12 @@ The next major version is in the works. Here are some of the changes:
  
 <!-- tabs:end -->
 
-### Community
+### Community Support
 Go to [Gitter](https://gitter.im/EMS-ESP/community) for quick feedback, questions and troubleshooting.
-
-### Contributing
-You too can [contribute](Contributing) to the project.
 
 ### Acknowledgments
 
-Acknowledgments and kudos to the following people who have open-sourced their work and helped me build this project:
+Kudos out to the following people who have open-sourced their work and helped me build this project:
 
  **susisstrolch** - One of the first working versions of the EMS bridge circuit I found designed for specifically for the ESP8266. I borrowed Juergen's [schematic](https://github.com/susisstrolch/EMS-ESP12) and parts of his code ideas for reading telegrams.
 
