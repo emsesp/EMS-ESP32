@@ -18,23 +18,30 @@ DS18::DS18() {
 }
 
 DS18::~DS18() {
-    if (_wire)
+    if (_wire) {
         delete _wire;
+    }
 }
 
 // init
-uint8_t DS18::setup(uint8_t gpio, bool parasite) {
-    uint8_t count;
-
+void DS18::setup(uint8_t gpio, bool parasite) {
     _gpio     = gpio;
     _parasite = (parasite ? 1 : 0);
 
     // OneWire
-    if (_wire)
+    if (_wire) {
         delete _wire;
+    }
     _wire = new OneWire(_gpio);
+}
 
-    // Search devices
+// clear list and scan for devices
+uint8_t DS18::scan() {
+    _devices.clear();
+
+    uint8_t count;
+    
+    // start the search
     count = loadDevices();
 
     // If no devices found check again pulling up the line
@@ -47,6 +54,7 @@ uint8_t DS18::setup(uint8_t gpio, bool parasite) {
 
     return count;
 }
+
 
 // scan every 2 seconds
 void DS18::loop() {

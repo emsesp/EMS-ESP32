@@ -100,7 +100,7 @@ static const command_t project_cmds[] PROGMEM = {
     {true, "shower_alert <on | off>", "stop hot water to send 3 cold burst warnings after max shower time is exceeded"},
     {true, "publish_time <seconds>", "set frequency for publishing data to MQTT (0=automatic)"},
     {true, "tx_mode <n>", "changes Tx logic. 1=EMS generic, 2=EMS+, 3=HT3"},
-    {true, "master_thermostat [product id]", "product id to use as the master thermostat. Use no args for list."},
+    {true, "master_thermostat [product id]", "set default thermostat to use. Omit [product id] to show options."},
 
     {false, "info", "show current values deciphered from the EMS messages"},
     {false, "log <n | b | t | s | r | j | v | w [type ID]", "set logging to none, basic, thermostat, solar module, raw, jabber, verbose or watch a specific type"},
@@ -113,7 +113,7 @@ static const command_t project_cmds[] PROGMEM = {
     {false, "refresh", "fetch values from the EMS devices"},
     {false, "devices", "list detected EMS devices"},
     {false, "queue", "show current Tx queue"},
-    {false, "autodetect", "detect EMS devices and attempt to automatically set boiler and thermostat types"},
+    {false, "autodetect", "scan for EMS devices and external sensors"},
     {false, "send XX ...", "send raw telegram data to EMS bus (XX are hex values)"},
     {false, "thermostat read <type ID>", "send read request to the thermostat for heating circuit hc 1-4"},
     {false, "thermostat temp [hc] <degrees>", "set current thermostat temperature"},
@@ -503,6 +503,17 @@ void showInfo() {
     }
 
     myDebug_P(PSTR("")); // newline
+}
+
+// scan for external Dallas sensors and display
+void scanDallas() {
+    EMSESP_Settings.dallas_sensors = ds18.scan();
+    if (EMSESP_Settings.dallas_sensors) {
+        char buffer[128] = {0};
+        for (uint8_t i = 0; i < EMSESP_Settings.dallas_sensors; i++) {
+            myDebug_P(PSTR("External temperature sensor %s found"), ds18.getDeviceString(buffer, i));
+        }
+    }
 }
 
 // send all dallas sensor values as a JSON package to MQTT
@@ -1222,6 +1233,8 @@ void TelnetCommandCallback(uint8_t wc, const char * commandLine) {
     }
 
     if (strcmp(first_cmd, "autodetect") == 0) {
+        myDebug("Scanning for new EMS devices and attached external sensors...");
+        scanDallas();
         ems_clearDeviceList();
         ems_doReadCommand(EMS_TYPE_UBADevices, EMS_Boiler.device_id);
         ok = true;
@@ -1457,14 +1470,18 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
         const char * shower_alert = doc[TOPIC_SHOWER_ALERT];
         if (shower_alert) {
             EMSESP_Settings.shower_alert = ((shower_alert[0] - MYESP_MQTT_PAYLOAD_OFF) == 1);
-            myDebug_P(PSTR("Shower alert has been set to %s"), EMSESP_Settings.shower_alert ? "enabled" : "disabled");
+            if (ems_getLogging() != EMS_SYS_LOGGING_NONE) {
+                myDebug_P(PSTR("Shower alert has been set to %s"), EMSESP_Settings.shower_alert ? "enabled" : "disabled");
+            }
         }
 
         // assumes payload is "1" or "0"
         const char * shower_timer = doc[TOPIC_SHOWER_TIMER];
         if (shower_timer) {
             EMSESP_Settings.shower_timer = ((shower_timer[0] - MYESP_MQTT_PAYLOAD_OFF) == 1);
-            myDebug_P(PSTR("Shower timer has been set to %s"), EMSESP_Settings.shower_timer ? "enabled" : "disabled");
+            if (ems_getLogging() != EMS_SYS_LOGGING_NONE) {
+                myDebug_P(PSTR("Shower timer has been set to %s"), EMSESP_Settings.shower_timer ? "enabled" : "disabled");
+            }
         }
 
         return;
@@ -1949,7 +1966,8 @@ void setup() {
     systemCheckTimer.attach(SYSTEMCHECK_TIME, do_systemCheck); // check if EMS is reachable
 
     // check for Dallas sensors
-    EMSESP_Settings.dallas_sensors = ds18.setup(EMSESP_Settings.dallas_gpio, EMSESP_Settings.dallas_parasite); // returns #sensors
+    ds18.setup(EMSESP_Settings.dallas_gpio, EMSESP_Settings.dallas_parasite);
+    scanDallas();
 }
 
 //

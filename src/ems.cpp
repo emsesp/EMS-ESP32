@@ -2125,21 +2125,31 @@ void ems_printDevices() {
                 have_unknowns = true;
             }
 
-            myDebug_P(PSTR(" %s: %s%s%s (DeviceID:0x%02X ProductID:%d Version:%s)"),
-                      device_type,
-                      COLOR_BOLD_ON,
-                      device_string,
-                      COLOR_BOLD_OFF,
-                      it->device_id,
-                      it->product_id,
-                      it->version);
-        }
+            if ((it->device_type == EMS_DEVICE_TYPE_THERMOSTAT) && (EMS_Sys_Status.emsMasterThermostat == it->product_id)) {
+                myDebug_P(PSTR(" %s: %s%s%s (DeviceID:0x%02X ProductID:%d Version:%s) [master]"),
+                          device_type,
+                          COLOR_BOLD_ON,
+                          device_string,
+                          COLOR_BOLD_OFF,
+                          it->device_id,
+                          it->product_id,
+                          it->version);
 
+            } else {
+                myDebug_P(PSTR(" %s: %s%s%s (DeviceID:0x%02X ProductID:%d Version:%s)"),
+                          device_type,
+                          COLOR_BOLD_ON,
+                          device_string,
+                          COLOR_BOLD_OFF,
+                          it->device_id,
+                          it->product_id,
+                          it->version);
+            }
+        }
         myDebug_P(PSTR("")); // newline
 
         if (have_unknowns) {
-            myDebug_P(
-                PSTR("You have a device is that is not yet known by EMS-ESP. Please report this as a GitHub issue so we can expand the EMS device library."));
+            myDebug_P(PSTR("One or more devices are not recognized by EMS-ESP. Please report this in GitHub."));
         }
     } else {
         myDebug_P(PSTR("No were devices recognized. This may be because Tx is disabled or failing."));
