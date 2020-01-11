@@ -1474,13 +1474,13 @@ void MyESP::_heartbeatCheck(bool force) {
         StaticJsonDocument<MYESP_JSON_MAXSIZE_SMALL> doc;
         JsonObject                                   rootHeartbeat = doc.to<JsonObject>();
 
-        rootHeartbeat["version"]         = _app_version;
-        rootHeartbeat["IP"]              = WiFi.localIP().toString();
-        rootHeartbeat["rssid"]           = getWifiQuality();
-        rootHeartbeat["load"]            = getSystemLoadAverage();
-        rootHeartbeat["uptime"]          = _getUptime();
-        rootHeartbeat["freemem"]         = mem_available;
-        rootHeartbeat["MQTTdisconnects"] = _getSystemDropoutCounter();
+        //rootHeartbeat["version"]         = _app_version;
+        //rootHeartbeat["IP"]              = WiFi.localIP().toString();
+        rootHeartbeat["rssid"]   = getWifiQuality();
+        rootHeartbeat["load"]    = getSystemLoadAverage();
+        rootHeartbeat["uptime"]  = _getUptime();
+        rootHeartbeat["freemem"] = mem_available;
+        //rootHeartbeat["MQTTdisconnects"] = _getSystemDropoutCounter();
 
         char data[300] = {0};
         serializeJson(doc, data, sizeof(data));

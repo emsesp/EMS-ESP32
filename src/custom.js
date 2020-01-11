@@ -8,7 +8,7 @@ var custom_config = {
         "listen_mode": false,
         "shower_timer": false,
         "shower_alert": false,
-        "publish_time": 0,
+        "publish_time": 10,
         "tx_mode": 1
     }
 };
