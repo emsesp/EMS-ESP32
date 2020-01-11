@@ -38,7 +38,7 @@ The code is written for the Espressif **ESP8266** microcontroller and supports a
 
 ## Supported EMS devices
 
-More than **50** EMS 1.0 and 2.0 devices are currently supported. See the [complete list](https://proddy.github.io/EMS-ESP/#/Supported-EMS-Devices).
+More than **50** EMS 1.0 and 2.0 devices are currently supported. See the [complete list](https://emsesp.github.io/docs/#/Supported-EMS-Devices).
 
 
 ---
