@@ -1,5 +1,4 @@
-![logo](docs/_media/logo-proddy-fw.jpg)
-# EMS-ESP
+![logo](docs/_media/logo/EMS-ESP_logo.png)
 
 [![version](https://img.shields.io/github/release/proddy/EMS-ESP.svg?label=Latest%20Release)](https://github.com/proddy/EMS-ESP/blob/master/CHANGELOG.md)
 [![release-date](https://img.shields.io/github/release-date/proddy/EMS-ESP.svg?label=Released)](https://github.com/proddy/EMS-ESP/commits/master)
@@ -10,12 +9,14 @@
 [![downloads](https://img.shields.io/github/downloads/proddy/EMS-ESP/total.svg)](https://github.com/proddy/EMS-ESP/releases)
 <br />
 [![gitter](https://img.shields.io/gitter/room/EMS-ESP/EMS-ESP.svg)](https://gitter.im/EMS-ESP/community)
+<br>
+-------------
 
 EMS-ESP is a open-source system to communicate with **EMS** (Energy Management System) based boilers, thermostats and other modules from manufacturers like Bosch, Buderus, Nefit, Junkers and Sieger.
 
 The code is written for the Espressif **ESP8266** microcontroller and supports a telnet console for real-time monitoring and configuration and customizable MQTT support for publishing the information to a home automation system such as Home Assistant or Domoticz.
 
-####  Please reference the [Wiki](https://proddy.github.io/EMS-ESP) for further details and instructions on how to build and configure the firmware.
+####  Please reference the [Wiki](https://emsesp.github.io/docs) for further details and instructions on how to build and configure the firmware.
 
 ---
 
@@ -37,11 +38,14 @@ The code is written for the Espressif **ESP8266** microcontroller and supports a
 
 ## Supported EMS devices
 
-More than **50** EMS devices are currently supported. See the [complete list](https://proddy.github.io/EMS-ESP/#/Supported-EMS-Devices).
+More than **50** EMS 1.0 and 2.0 devices are currently supported. See the [complete list](https://proddy.github.io/EMS-ESP/#/Supported-EMS-Devices).
 
-## Compatible with bbqkees' EMS Gateway
 
-The firmware fully supports BBQKees' [EMS Gateway](https://bbqkees-electronics.nl/) board with integrated Wemos D1 ESP8266.
+---
+
+## Native compatibility with bbqkees' **EMS Gateway**
+
+All firmware versions fully support BBQKees' [EMS Gateway](https://bbqkees-electronics.nl/) board with integrated Wemos D1 ESP8266.
 
 | ![on boiler](docs/_media/ems%20gateway/on-boiler.jpg) | ![kit](docs/_media/ems%20gateway/ems-kit-2.jpg) | ![basic circuit](docs/_media/ems%20gateway/ems-board-white.jpg) |
 | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
