@@ -494,11 +494,15 @@ void showInfo() {
     // Dallas external temp sensors
     if (EMSESP_Settings.dallas_sensors) {
         myDebug_P(PSTR("")); // newline
-        char buffer[128] = {0};
-        char valuestr[8] = {0}; // for formatting temp
+        char  buffer[128] = {0};
+        char  valuestr[8] = {0}; // for formatting temp
+        float sensorValue;
         myDebug_P(PSTR("%sExternal temperature sensors:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
         for (uint8_t i = 0; i < EMSESP_Settings.dallas_sensors; i++) {
-            myDebug_P(PSTR("  Sensor #%d %s: %s C"), i + 1, ds18.getDeviceString(buffer, i), _float_to_char(valuestr, ds18.getValue(i)));
+            sensorValue = ds18.getValue(i);
+            if (sensorValue != DS18_DISCONNECTED) {
+                myDebug_P(PSTR("  Sensor #%d %s: %s C"), i + 1, ds18.getDeviceString(buffer, i), _float_to_char(valuestr, sensorValue));
+            }
         }
     }
 
@@ -535,9 +539,8 @@ void publishSensorValues() {
 
     // see if the sensor values have changed, if so send it on
     for (uint8_t i = 0; i < EMSESP_Settings.dallas_sensors; i++) {
-        // round to 2 decimal places. from https://arduinojson.org/v6/faq/how-to-configure-the-serialization-of-floats/
-        float sensorValue = (int)(ds18.getValue(i) * 100 + 0.5) / 100.0;
-        if (sensorValue != DS18_DISCONNECTED && sensorValue != DS18_CRC_ERROR) {
+        float sensorValue = ds18.getValue(i);
+        if (sensorValue != DS18_DISCONNECTED) {
             sprintf(label, PAYLOAD_EXTERNAL_SENSORS, (i + 1));
             sensors[label] = sensorValue;
             hasdata        = true;
@@ -1192,9 +1195,9 @@ void _showCommands(uint8_t event) {
 // we set the logging here
 void TelnetCallback(uint8_t event) {
     if (event == TELNET_EVENT_CONNECT) {
-        ems_setLogging(EMS_SYS_LOGGING_DEFAULT);
+        ems_setLogging(EMS_SYS_LOGGING_DEFAULT, true);
     } else if (event == TELNET_EVENT_DISCONNECT) {
-        ems_setLogging(EMS_SYS_LOGGING_NONE);
+        ems_setLogging(EMS_SYS_LOGGING_NONE, true);
     } else if ((event == TELNET_EVENT_SHOWCMD) || (event == TELNET_EVENT_SHOWSET)) {
         _showCommands(event);
     }

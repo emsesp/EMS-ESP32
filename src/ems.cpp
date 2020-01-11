@@ -209,7 +209,7 @@ void ems_init() {
     strlcpy(EMS_Thermostat.version, "?", sizeof(EMS_Thermostat.version));
 
     // default logging is none
-    ems_setLogging(EMS_SYS_LOGGING_DEFAULT);
+    ems_setLogging(EMS_SYS_LOGGING_DEFAULT, true);
 }
 
 // Getters and Setters for parameters
@@ -281,27 +281,33 @@ _EMS_SYS_LOGGING ems_getLogging() {
 }
 
 void ems_setLogging(_EMS_SYS_LOGGING loglevel, uint16_t type_id) {
-    if (loglevel <= EMS_SYS_LOGGING_JABBER) {
-        EMS_Sys_Status.emsLogging = loglevel;
+    EMS_Sys_Status.emsLogging_typeID = type_id;
+    ems_setLogging(EMS_SYS_LOGGING_WATCH, false);
+}
 
-        if (loglevel == EMS_SYS_LOGGING_NONE) {
-            myDebug_P(PSTR("System Logging set to None"));
-        } else if (loglevel == EMS_SYS_LOGGING_BASIC) {
-            myDebug_P(PSTR("System Logging set to Basic"));
-        } else if (loglevel == EMS_SYS_LOGGING_VERBOSE) {
-            myDebug_P(PSTR("System Logging set to Verbose"));
-        } else if (loglevel == EMS_SYS_LOGGING_THERMOSTAT) {
-            myDebug_P(PSTR("System Logging set to Thermostat only"));
-        } else if (loglevel == EMS_SYS_LOGGING_SOLARMODULE) {
-            myDebug_P(PSTR("System Logging set to Solar Module only"));
-        } else if (loglevel == EMS_SYS_LOGGING_RAW) {
-            myDebug_P(PSTR("System Logging set to Raw mode"));
-        } else if (loglevel == EMS_SYS_LOGGING_JABBER) {
-            myDebug_P(PSTR("System Logging set to Jabber mode"));
-        } else if (loglevel == EMS_SYS_LOGGING_WATCH) {
-            EMS_Sys_Status.emsLogging_typeID = type_id;
-            myDebug_P(PSTR("System Logging set to Watch mode"));
-        }
+void ems_setLogging(_EMS_SYS_LOGGING loglevel, bool quiet) {
+    EMS_Sys_Status.emsLogging = loglevel;
+
+    if (quiet) {
+        return; // no reporting to console
+    }
+
+    if (loglevel == EMS_SYS_LOGGING_NONE) {
+        myDebug_P(PSTR("System Logging set to None"));
+    } else if (loglevel == EMS_SYS_LOGGING_BASIC) {
+        myDebug_P(PSTR("System Logging set to Basic"));
+    } else if (loglevel == EMS_SYS_LOGGING_VERBOSE) {
+        myDebug_P(PSTR("System Logging set to Verbose"));
+    } else if (loglevel == EMS_SYS_LOGGING_THERMOSTAT) {
+        myDebug_P(PSTR("System Logging set to Thermostat only"));
+    } else if (loglevel == EMS_SYS_LOGGING_SOLARMODULE) {
+        myDebug_P(PSTR("System Logging set to Solar Module only"));
+    } else if (loglevel == EMS_SYS_LOGGING_RAW) {
+        myDebug_P(PSTR("System Logging set to Raw mode"));
+    } else if (loglevel == EMS_SYS_LOGGING_JABBER) {
+        myDebug_P(PSTR("System Logging set to Jabber mode"));
+    } else if (loglevel == EMS_SYS_LOGGING_WATCH) {
+        myDebug_P(PSTR("System Logging set to Watch mode"));
     }
 }
 
