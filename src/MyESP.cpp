@@ -78,6 +78,7 @@ MyESP::MyESP() {
     _mqtt_will_topic           = strdup(MQTT_WILL_TOPIC);
     _mqtt_will_online_payload  = strdup(MQTT_WILL_ONLINE_PAYLOAD);
     _mqtt_will_offline_payload = strdup(MQTT_WILL_OFFLINE_PAYLOAD);
+    _mqtt_publish_fails        = 0; // count of number of failed MQTT topic publishes
 
     // network
     _network_password  = nullptr;
@@ -425,9 +426,19 @@ bool MyESP::mqttPublish(const char * topic, const char * payload, bool retain) {
         if (packet_id) {
             _addMQTTLog(topic, payload, MYESP_MQTTLOGTYPE_PUBLISH); // add to the log
             return true;
-        } else {
-            myDebug_P(PSTR("[MQTT] Error publishing to %s with payload %s [error %d]"), _mqttTopic(topic), payload, packet_id);
         }
+
+        // it failed, try again https://github.com/proddy/EMS-ESP/issues/264
+        delay(100); // this is blocking and probably not a good idea
+        packet_id = mqttClient.publish(_mqttTopic(topic), _mqtt_qos, retain, payload);
+        if (packet_id) {
+            _addMQTTLog(topic, payload, MYESP_MQTTLOGTYPE_PUBLISH); // add to the log
+            return true;                                            // ok this time
+        }
+
+        // it didn't work again, will return false
+        myDebug_P(PSTR("[MQTT] Error publishing to %s with payload %s [error %d]"), _mqttTopic(topic), payload, packet_id);
+        _mqtt_publish_fails++; // increment failure counter
     }
 
     return false; // failed
@@ -1372,6 +1383,7 @@ void MyESP::showSystemStats() {
 
     if (isMQTTConnected()) {
         myDebug_P(PSTR(" [MQTT] is connected (heartbeat %s)"), getHeartbeat() ? "enabled" : "disabled");
+        myDebug_P(PSTR(" [MQTT] # failed topic publishes: %d"), _mqtt_publish_fails);
     } else {
         myDebug_P(PSTR(" [MQTT] is disconnected"));
     }
