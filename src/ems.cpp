@@ -123,7 +123,7 @@ void ems_init() {
     // init all mixing modules
     for (uint8_t i = 0; i < EMS_THERMOSTAT_MAXHC; i++) {
         EMS_Mixing.hc[i].hc          = i + 1;
-        EMS_Mixing.hc[i].flowTemp    = EMS_VALUE_USHORT_NOTSET;
+        EMS_Mixing.hc[i].flowTemp    = EMS_VALUE_SHORT_NOTSET;
         EMS_Mixing.hc[i].pumpMod     = EMS_VALUE_INT_NOTSET;
         EMS_Mixing.hc[i].valveStatus = EMS_VALUE_INT_NOTSET;
         EMS_Mixing.hc[i].flowSetTemp = EMS_VALUE_INT_NOTSET;
@@ -1011,9 +1011,11 @@ void ems_setWarmWaterOnetime(bool activated) {
     EMS_TxTelegram.dest          = EMS_Boiler.device_id;
     EMS_TxTelegram.type          = EMS_TYPE_UBAFlags;
     EMS_TxTelegram.offset        = EMS_OFFSET_UBAParameterWW_wwOneTime;
-    EMS_TxTelegram.length        = EMS_MIN_TELEGRAM_LENGTH;
+    EMS_TxTelegram.length        = EMS_MIN_TELEGRAM_LENGTH+1;
     EMS_TxTelegram.type_validate = EMS_ID_NONE;               // don't validate
-    EMS_TxTelegram.dataValue     = (activated ? 0x22 : 0x02); // 0x22 is on, 0x02 is off for RC20RF
+//    EMS_TxTelegram.dataValue     = (activated ? 0x22 : 0x02); // 0x22 is on, 0x02 is off for RC20RF
+    EMS_TxTelegram.data[4]       = 0x11;
+    EMS_TxTelegram.data[5]       = (activated ? 0x33 : 0x11); 
 
     EMS_TxQueue.push(EMS_TxTelegram);
 }

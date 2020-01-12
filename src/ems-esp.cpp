@@ -302,6 +302,7 @@ void showInfo() {
 
         _renderIntValue("Warm Water selected temperature", "C", EMS_Boiler.wWSelTemp);
         _renderIntValue("Warm Water desinfection temperature", "C", EMS_Boiler.wWDesinfectTemp);
+        _renderBoolValue("Warm Water Circulation active",EMS_Boiler.wWCirc);
 
         // UBAMonitorWWMessage
         _renderUShortValue("Warm Water current temperature", "C", EMS_Boiler.wWCurTmp);
@@ -340,7 +341,7 @@ void showInfo() {
         _renderIntValue("Boiler circuit pump modulation min power", "%", EMS_Boiler.pump_mod_min);
 
         // UBAMonitorSlow
-        if (EMS_Boiler.extTemp != EMS_VALUE_SHORT_NOTSET) {
+        if (EMS_Boiler.extTemp > EMS_VALUE_SHORT_NOTSET) {
             _renderShortValue("Outside temperature", "C", EMS_Boiler.extTemp);
         }
         _renderUShortValue("Boiler temperature", "C", EMS_Boiler.boilTemp);
@@ -445,7 +446,7 @@ void showInfo() {
                     _renderIntValue(" Night temperature", "C", EMS_Thermostat.hc[hc_num - 1].nighttemp, 2);      // convert to a single byte * 2
                     _renderIntValue(" Vacation temperature", "C", EMS_Thermostat.hc[hc_num - 1].holidaytemp, 2); // convert to a single byte * 2
                 }
-                if (EMS_Thermostat.hc[hc_num - 1].circuitcalctemp != EMS_VALUE_USHORT_NOTSET)
+                if (EMS_Thermostat.hc[hc_num - 1].circuitcalctemp < EMS_VALUE_USHORT_NOTSET)
                     _renderIntValue(" Calculatet flow temperature", "C",EMS_Thermostat.hc[hc_num - 1].circuitcalctemp);
 
                 // Render Thermostat Mode
@@ -479,13 +480,13 @@ void showInfo() {
         myDebug_P(PSTR("")); // newline
         myDebug_P(PSTR("%sMixing module stats:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
         myDebug_P(PSTR("  Mixing: %s"), ems_getDeviceDescription(EMS_DEVICE_TYPE_MIXING, buffer_type,false));
-        //if (EMS_Boiler.switchTemp != EMS_VALUE_SHORT_NOTSET)
+        //if (EMS_Boiler.switchTemp > EMS_VALUE_SHORT_NOTSET)
            _renderShortValue("Switch temperature", "C", EMS_Boiler.switchTemp);
 
         for (uint8_t hc_num = 1; hc_num <= EMS_THERMOSTAT_MAXHC; hc_num++) {
             if (EMS_Mixing.hc[hc_num - 1].active) {
                 myDebug_P(PSTR("  Mixing Circuit %d"), hc_num);
-                //if (EMS_Mixing.hc[hc_num - 1].flowTemp != EMS_VALUE_SHORT_NOTSET)
+                //if (EMS_Mixing.hc[hc_num - 1].flowTemp > EMS_VALUE_SHORT_NOTSET)
                     _renderShortValue(" Current flow temperature", "C", EMS_Mixing.hc[hc_num - 1].flowTemp);
                 //if (EMS_Mixing.hc[hc_num - 1].flowSetTemp != EMS_VALUE_INT_NOTSET)
                     _renderIntValue(" Setpoint flow temperature", "C", EMS_Mixing.hc[hc_num - 1].flowSetTemp);
@@ -588,23 +589,23 @@ void publishEMSValues(bool force) {
         if (EMS_Boiler.wWCircPump != EMS_VALUE_BOOL_NOTSET)
             rootBoiler["wWCircPump"] = EMS_Boiler.wWCircPump;
 
-        if (EMS_Boiler.extTemp != EMS_VALUE_SHORT_NOTSET)
+        if (EMS_Boiler.extTemp > EMS_VALUE_SHORT_NOTSET)
             rootBoiler["outdoorTemp"] = (float)EMS_Boiler.extTemp / 10;
-        if (EMS_Boiler.wWCurTmp != EMS_VALUE_USHORT_NOTSET)
+        if (EMS_Boiler.wWCurTmp < EMS_VALUE_USHORT_NOTSET)
             rootBoiler["wWCurTmp"] = (float)EMS_Boiler.wWCurTmp / 10;
         if (EMS_Boiler.wWCurFlow != EMS_VALUE_INT_NOTSET)
             rootBoiler["wWCurFlow"] = (float)EMS_Boiler.wWCurFlow / 10;
-        if (EMS_Boiler.curFlowTemp != EMS_VALUE_USHORT_NOTSET)
+        if (EMS_Boiler.curFlowTemp < EMS_VALUE_USHORT_NOTSET)
             rootBoiler["curFlowTemp"] = (float)EMS_Boiler.curFlowTemp / 10;
-        if (EMS_Boiler.retTemp != EMS_VALUE_USHORT_NOTSET)
+        if (EMS_Boiler.retTemp < EMS_VALUE_USHORT_NOTSET)
             rootBoiler["retTemp"] = (float)EMS_Boiler.retTemp / 10;
-        if (EMS_Boiler.switchTemp != EMS_VALUE_USHORT_NOTSET)
+        if (EMS_Boiler.switchTemp > EMS_VALUE_SHORT_NOTSET)
             rootBoiler["switchTemp"] = (float)EMS_Boiler.switchTemp / 10;
         if (EMS_Boiler.sysPress != EMS_VALUE_INT_NOTSET)
             rootBoiler["sysPress"] = (float)EMS_Boiler.sysPress / 10;
-        if (EMS_Boiler.boilTemp != EMS_VALUE_USHORT_NOTSET)
+        if (EMS_Boiler.boilTemp < EMS_VALUE_USHORT_NOTSET)
             rootBoiler["boilTemp"] = (float)EMS_Boiler.boilTemp / 10;
-        if (EMS_Boiler.exhaustTemp != EMS_VALUE_USHORT_NOTSET)
+        if (EMS_Boiler.exhaustTemp < EMS_VALUE_USHORT_NOTSET)
             rootBoiler["exhaustTemp"] = (float)EMS_Boiler.exhaustTemp / 10;
         if (EMS_Boiler.wWActivated != EMS_VALUE_BOOL_NOTSET)
             rootBoiler["wWActivated"] = _bool_to_char(s, EMS_Boiler.wWActivated);
@@ -612,10 +613,13 @@ void publishEMSValues(bool force) {
         if (EMS_Boiler.wWActivated != EMS_VALUE_BOOL_NOTSET)
             rootBoiler["wWOnetime"] = _bool_to_char(s, EMS_Boiler.wWOneTime);
 
+        if (EMS_Boiler.wWCirc != EMS_VALUE_BOOL_NOTSET)
+            rootBoiler["wWCirc"] = _bool_to_char(s, EMS_Boiler.wWCirc);
+
         if (EMS_Boiler.burnGas != EMS_VALUE_BOOL_NOTSET)
             rootBoiler["burnGas"] = _bool_to_char(s, EMS_Boiler.burnGas);
 
-        if (EMS_Boiler.flameCurr != EMS_VALUE_USHORT_NOTSET)
+        if (EMS_Boiler.flameCurr < EMS_VALUE_USHORT_NOTSET)
             rootBoiler["flameCurr"] = (float)(int16_t)EMS_Boiler.flameCurr / 10;
 
         if (EMS_Boiler.heatPmp != EMS_VALUE_BOOL_NOTSET)
@@ -626,9 +630,6 @@ void publishEMSValues(bool force) {
 
         if (EMS_Boiler.ignWork != EMS_VALUE_BOOL_NOTSET)
             rootBoiler["ignWork"] = _bool_to_char(s, EMS_Boiler.ignWork);
-
-        if (EMS_Boiler.wWCirc != EMS_VALUE_BOOL_NOTSET)
-            rootBoiler["wWCirc"] = _bool_to_char(s, EMS_Boiler.wWCirc);
 
         if (EMS_Boiler.heating_temp != EMS_VALUE_INT_NOTSET)
             rootBoiler["heating_temp"] = EMS_Boiler.heating_temp;
@@ -654,7 +655,7 @@ void publishEMSValues(bool force) {
         if (abs(EMS_Boiler.heatWorkMin) != EMS_VALUE_LONG_NOTSET)
             rootBoiler["heatWorkMin"] = (float)EMS_Boiler.heatWorkMin;
 
-        if (EMS_Boiler.serviceCode != EMS_VALUE_USHORT_NOTSET) {
+        if (EMS_Boiler.serviceCode < EMS_VALUE_USHORT_NOTSET) {
             rootBoiler["ServiceCode"]       = EMS_Boiler.serviceCodeChar;
             rootBoiler["ServiceCodeNumber"] = EMS_Boiler.serviceCode;
         }
@@ -696,19 +697,19 @@ void publishEMSValues(bool force) {
 
                 // different logic depending on thermostat types
                 if (model == EMS_DEVICE_FLAG_EASY) {
-                    if (thermostat->setpoint_roomTemp != EMS_VALUE_SHORT_NOTSET)
+                    if (thermostat->setpoint_roomTemp > EMS_VALUE_SHORT_NOTSET)
                         dataThermostat[THERMOSTAT_SELTEMP] = (float)thermostat->setpoint_roomTemp / 100;
-                    if (thermostat->curr_roomTemp != EMS_VALUE_SHORT_NOTSET)
+                    if (thermostat->curr_roomTemp > EMS_VALUE_SHORT_NOTSET)
                         dataThermostat[THERMOSTAT_CURRTEMP] = (float)thermostat->curr_roomTemp / 100;
                 } else if (model == EMS_DEVICE_FLAG_JUNKERS) {
-                    if (thermostat->setpoint_roomTemp != EMS_VALUE_SHORT_NOTSET)
+                    if (thermostat->setpoint_roomTemp > EMS_VALUE_SHORT_NOTSET)
                         dataThermostat[THERMOSTAT_SELTEMP] = (float)thermostat->setpoint_roomTemp / 10;
-                    if (thermostat->curr_roomTemp != EMS_VALUE_SHORT_NOTSET)
+                    if (thermostat->curr_roomTemp > EMS_VALUE_SHORT_NOTSET)
                         dataThermostat[THERMOSTAT_CURRTEMP] = (float)thermostat->curr_roomTemp / 10;
                 } else {
-                    if (thermostat->setpoint_roomTemp != EMS_VALUE_SHORT_NOTSET)
+                    if (thermostat->setpoint_roomTemp > EMS_VALUE_SHORT_NOTSET)
                         dataThermostat[THERMOSTAT_SELTEMP] = (float)thermostat->setpoint_roomTemp / 2;
-                    if (thermostat->curr_roomTemp != EMS_VALUE_SHORT_NOTSET)
+                    if (thermostat->curr_roomTemp > EMS_VALUE_SHORT_NOTSET)
                         dataThermostat[THERMOSTAT_CURRTEMP] = (float)thermostat->curr_roomTemp / 10;
 
                     if (thermostat->daytemp != EMS_VALUE_INT_NOTSET)
@@ -764,7 +765,7 @@ void publishEMSValues(bool force) {
                 strlcat(hc, _int_to_char(s, mixing->hc), sizeof(hc));
                 JsonObject dataMixing = rootMixing.createNestedObject(hc);
 
-                if (mixing->flowTemp != EMS_VALUE_SHORT_NOTSET)
+                if (mixing->flowTemp > EMS_VALUE_SHORT_NOTSET)
                     dataMixing["flowTemp"] = (float)mixing->flowTemp / 10;
                 if (mixing->flowSetTemp != EMS_VALUE_INT_NOTSET)
                     dataMixing["setflowTemp"] = mixing->flowSetTemp;
@@ -788,10 +789,10 @@ void publishEMSValues(bool force) {
         doc.clear();
         JsonObject rootSM = doc.to<JsonObject>();
 
-        if (EMS_SolarModule.collectorTemp != EMS_VALUE_SHORT_NOTSET)
+        if (EMS_SolarModule.collectorTemp > EMS_VALUE_SHORT_NOTSET)
             rootSM[SM_COLLECTORTEMP] = (float)EMS_SolarModule.collectorTemp / 10;
 
-        if (EMS_SolarModule.bottomTemp != EMS_VALUE_SHORT_NOTSET)
+        if (EMS_SolarModule.bottomTemp > EMS_VALUE_SHORT_NOTSET)
             rootSM[SM_BOTTOMTEMP] = (float)EMS_SolarModule.bottomTemp / 10;
 
         if (EMS_SolarModule.pumpModulation != EMS_VALUE_INT_NOTSET)
@@ -805,13 +806,13 @@ void publishEMSValues(bool force) {
             rootSM[SM_PUMPWORKMIN] = (float)EMS_SolarModule.pumpWorkMin;
         }
 
-        if (EMS_SolarModule.EnergyLastHour != EMS_VALUE_USHORT_NOTSET)
+        if (EMS_SolarModule.EnergyLastHour < EMS_VALUE_USHORT_NOTSET)
             rootSM[SM_ENERGYLASTHOUR] = (float)EMS_SolarModule.EnergyLastHour / 10;
 
-        if (EMS_SolarModule.EnergyToday != EMS_VALUE_USHORT_NOTSET)
+        if (EMS_SolarModule.EnergyToday < EMS_VALUE_USHORT_NOTSET)
             rootSM[SM_ENERGYTODAY] = EMS_SolarModule.EnergyToday;
 
-        if (EMS_SolarModule.EnergyTotal != EMS_VALUE_USHORT_NOTSET)
+        if (EMS_SolarModule.EnergyTotal < EMS_VALUE_USHORT_NOTSET)
             rootSM[SM_ENERGYTOTAL] = (float)EMS_SolarModule.EnergyTotal / 10;
 
         data[0] = '\0'; // reset data for next package
@@ -1694,24 +1695,24 @@ void WebCallback(JsonObject root) {
         char buffer[200];
         thermostat["tm"] = ems_getDeviceDescription(EMS_DEVICE_TYPE_THERMOSTAT, buffer, true);
 
-        uint8_t hc_num = EMS_THERMOSTAT_DEFAULTHC; // default to HC1
+        uint8_t hc_num = 1; // default to HC1
         uint8_t model  = ems_getThermostatModel();
-
+        while (hc_num <= EMS_THERMOSTAT_MAXHC && !EMS_Thermostat.hc[hc_num - 1].active) hc_num++;
         // Render Current & Setpoint Room Temperature
         if (model == EMS_DEVICE_FLAG_EASY) {
-            if (EMS_Thermostat.hc[hc_num - 1].setpoint_roomTemp != EMS_VALUE_SHORT_NOTSET)
+            if (EMS_Thermostat.hc[hc_num - 1].setpoint_roomTemp > EMS_VALUE_SHORT_NOTSET)
                 thermostat["ts"] = (float)EMS_Thermostat.hc[hc_num - 1].setpoint_roomTemp / 100;
-            if (EMS_Thermostat.hc[hc_num - 1].curr_roomTemp != EMS_VALUE_SHORT_NOTSET)
+            if (EMS_Thermostat.hc[hc_num - 1].curr_roomTemp > EMS_VALUE_SHORT_NOTSET)
                 thermostat["tc"] = (float)EMS_Thermostat.hc[hc_num - 1].curr_roomTemp / 100;
         } else if (model == EMS_DEVICE_FLAG_JUNKERS) {
-            if (EMS_Thermostat.hc[hc_num - 1].setpoint_roomTemp != EMS_VALUE_SHORT_NOTSET)
+            if (EMS_Thermostat.hc[hc_num - 1].setpoint_roomTemp > EMS_VALUE_SHORT_NOTSET)
                 thermostat["ts"] = (float)EMS_Thermostat.hc[hc_num - 1].setpoint_roomTemp / 10;
-            if (EMS_Thermostat.hc[hc_num - 1].curr_roomTemp != EMS_VALUE_SHORT_NOTSET)
+            if (EMS_Thermostat.hc[hc_num - 1].curr_roomTemp > EMS_VALUE_SHORT_NOTSET)
                 thermostat["tc"] = (float)EMS_Thermostat.hc[hc_num - 1].curr_roomTemp / 10;
         } else {
-            if (EMS_Thermostat.hc[hc_num - 1].setpoint_roomTemp != EMS_VALUE_SHORT_NOTSET)
+            if (EMS_Thermostat.hc[hc_num - 1].setpoint_roomTemp > EMS_VALUE_SHORT_NOTSET)
                 thermostat["ts"] = (float)EMS_Thermostat.hc[hc_num - 1].setpoint_roomTemp / 2;
-            if (EMS_Thermostat.hc[hc_num - 1].curr_roomTemp != EMS_VALUE_SHORT_NOTSET)
+            if (EMS_Thermostat.hc[hc_num - 1].curr_roomTemp > EMS_VALUE_SHORT_NOTSET)
                 thermostat["tc"] = (float)EMS_Thermostat.hc[hc_num - 1].curr_roomTemp / 10;
         }
 
@@ -1744,10 +1745,10 @@ void WebCallback(JsonObject root) {
         if (EMS_Boiler.curFlowTemp != EMS_VALUE_INT_NOTSET)
             boiler["b4"] = EMS_Boiler.curFlowTemp / 10;
 
-        if (EMS_Boiler.boilTemp != EMS_VALUE_USHORT_NOTSET)
+        if (EMS_Boiler.boilTemp < EMS_VALUE_USHORT_NOTSET)
             boiler["b5"] = (float)EMS_Boiler.boilTemp / 10;
 
-        if (EMS_Boiler.retTemp != EMS_VALUE_USHORT_NOTSET)
+        if (EMS_Boiler.retTemp < EMS_VALUE_USHORT_NOTSET)
             boiler["b6"] = (float)EMS_Boiler.retTemp / 10;
 
     } else {
@@ -1762,10 +1763,10 @@ void WebCallback(JsonObject root) {
         char buffer[200];
         sm["sm"] = ems_getDeviceDescription(EMS_DEVICE_TYPE_SOLAR, buffer, true);
 
-        if (EMS_SolarModule.collectorTemp != EMS_VALUE_SHORT_NOTSET)
+        if (EMS_SolarModule.collectorTemp > EMS_VALUE_SHORT_NOTSET)
             sm["sm1"] = (float)EMS_SolarModule.collectorTemp / 10; // Collector temperature oC
 
-        if (EMS_SolarModule.bottomTemp != EMS_VALUE_SHORT_NOTSET)
+        if (EMS_SolarModule.bottomTemp > EMS_VALUE_SHORT_NOTSET)
             sm["sm2"] = (float)EMS_SolarModule.bottomTemp / 10; // Bottom temperature oC
 
         if (EMS_SolarModule.pumpModulation != EMS_VALUE_INT_NOTSET)
@@ -1776,13 +1777,13 @@ void WebCallback(JsonObject root) {
             sm["sm4"] = _bool_to_char(s, EMS_SolarModule.pump); // Pump active on/off
         }
 
-        if (EMS_SolarModule.EnergyLastHour != EMS_VALUE_USHORT_NOTSET)
+        if (EMS_SolarModule.EnergyLastHour < EMS_VALUE_USHORT_NOTSET)
             sm["sm5"] = (float)EMS_SolarModule.EnergyLastHour / 10; // Energy last hour Wh
 
-        if (EMS_SolarModule.EnergyToday != EMS_VALUE_USHORT_NOTSET) // Energy today Wh
+        if (EMS_SolarModule.EnergyToday < EMS_VALUE_USHORT_NOTSET) // Energy today Wh
             sm["sm6"] = EMS_SolarModule.EnergyToday;
 
-        if (EMS_SolarModule.EnergyTotal != EMS_VALUE_USHORT_NOTSET) // Energy total KWh
+        if (EMS_SolarModule.EnergyTotal < EMS_VALUE_USHORT_NOTSET) // Energy total KWh
             sm["sm7"] = (float)EMS_SolarModule.EnergyTotal / 10;
     } else {
         sm["ok"] = false;
