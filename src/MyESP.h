@@ -335,12 +335,12 @@ class MyESP {
 
   private:
     // mqtt
-    void   _mqttOnMessage(char * topic, char * payload, size_t len);
-    void   _mqttConnect();
-    void   _mqtt_setup();
-    void   _mqttOnConnect();
-    void   _sendStart();
-    char * _mqttTopic(const char * topic);
+    void     _mqttOnMessage(char * topic, char * payload, size_t len);
+    void     _mqttConnect();
+    void     _mqtt_setup();
+    void     _mqttOnConnect();
+    void     _sendStart();
+    char *   _mqttTopic(const char * topic);
 
     // mqtt log
     _MQTT_Log_t MQTT_log[MYESP_MQTTLOG_MAX]; // log for publish and subscribe messages
@@ -366,6 +366,7 @@ class MyESP {
     uint32_t        _mqtt_last_connection;
     bool            _mqtt_connecting;
     bool            _mqtt_heartbeat;
+    uint16_t        _mqtt_publish_fails;
 
     // wifi
     void            _wifiCallback(justwifi_messages_t code, char * parameter);

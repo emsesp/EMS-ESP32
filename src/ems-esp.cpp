@@ -480,17 +480,17 @@ void showInfo() {
         myDebug_P(PSTR("")); // newline
         myDebug_P(PSTR("%sMixing module stats:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
         myDebug_P(PSTR("  Mixing: %s"), ems_getDeviceDescription(EMS_DEVICE_TYPE_MIXING, buffer_type,false));
-        //if (EMS_Boiler.switchTemp > EMS_VALUE_SHORT_NOTSET)
+        if (EMS_Boiler.switchTemp < EMS_VALUE_USHORT_NOTSET)
            _renderShortValue("Switch temperature", "C", EMS_Boiler.switchTemp);
 
         for (uint8_t hc_num = 1; hc_num <= EMS_THERMOSTAT_MAXHC; hc_num++) {
             if (EMS_Mixing.hc[hc_num - 1].active) {
                 myDebug_P(PSTR("  Mixing Circuit %d"), hc_num);
-                //if (EMS_Mixing.hc[hc_num - 1].flowTemp > EMS_VALUE_SHORT_NOTSET)
-                    _renderShortValue(" Current flow temperature", "C", EMS_Mixing.hc[hc_num - 1].flowTemp);
-                //if (EMS_Mixing.hc[hc_num - 1].flowSetTemp != EMS_VALUE_INT_NOTSET)
+                if (EMS_Mixing.hc[hc_num - 1].flowTemp < EMS_VALUE_USHORT_NOTSET)
+                    _renderUShortValue(" Current flow temperature", "C", EMS_Mixing.hc[hc_num - 1].flowTemp);
+                if (EMS_Mixing.hc[hc_num - 1].flowSetTemp != EMS_VALUE_INT_NOTSET)
                     _renderIntValue(" Setpoint flow temperature", "C", EMS_Mixing.hc[hc_num - 1].flowSetTemp);
-                //if (EMS_Mixing.hc[hc_num - 1].pumpMod != EMS_VALUE_INT_NOTSET)
+                if (EMS_Mixing.hc[hc_num - 1].pumpMod != EMS_VALUE_INT_NOTSET)
                     _renderIntValue(" Current pump modulation", "%", EMS_Mixing.hc[hc_num - 1].pumpMod);
                 if (EMS_Mixing.hc[hc_num - 1].valveStatus != EMS_VALUE_INT_NOTSET)
                     _renderIntValue(" Current valve status", "", EMS_Mixing.hc[hc_num - 1].valveStatus);
@@ -612,7 +612,7 @@ void publishEMSValues(bool force) {
             rootBoiler["curFlowTemp"] = (float)EMS_Boiler.curFlowTemp / 10;
         if (EMS_Boiler.retTemp < EMS_VALUE_USHORT_NOTSET)
             rootBoiler["retTemp"] = (float)EMS_Boiler.retTemp / 10;
-        if (EMS_Boiler.switchTemp > EMS_VALUE_SHORT_NOTSET)
+        if (EMS_Boiler.switchTemp < EMS_VALUE_USHORT_NOTSET)
             rootBoiler["switchTemp"] = (float)EMS_Boiler.switchTemp / 10;
         if (EMS_Boiler.sysPress != EMS_VALUE_INT_NOTSET)
             rootBoiler["sysPress"] = (float)EMS_Boiler.sysPress / 10;
@@ -668,7 +668,7 @@ void publishEMSValues(bool force) {
         if (abs(EMS_Boiler.heatWorkMin) != EMS_VALUE_LONG_NOTSET)
             rootBoiler["heatWorkMin"] = (float)EMS_Boiler.heatWorkMin;
 
-        if (EMS_Boiler.serviceCode < EMS_VALUE_USHORT_NOTSET) {
+        if (EMS_Boiler.serviceCode != EMS_VALUE_USHORT_NOTSET) {
             rootBoiler["ServiceCode"]       = EMS_Boiler.serviceCodeChar;
             rootBoiler["ServiceCodeNumber"] = EMS_Boiler.serviceCode;
         }
@@ -778,11 +778,7 @@ void publishEMSValues(bool force) {
                 strlcat(hc, _int_to_char(s, mixing->hc), sizeof(hc));
                 JsonObject dataMixing = rootMixing.createNestedObject(hc);
 
-<<<<<<< HEAD
-                if (mixing->flowTemp > EMS_VALUE_SHORT_NOTSET)
-=======
-                if (mixing->flowTemp != EMS_VALUE_USHORT_NOTSET)
->>>>>>> upstream/dev
+                if (mixing->flowTemp < EMS_VALUE_USHORT_NOTSET)
                     dataMixing["flowTemp"] = (float)mixing->flowTemp / 10;
                 if (mixing->flowSetTemp != EMS_VALUE_INT_NOTSET)
                     dataMixing["setflowTemp"] = mixing->flowSetTemp;

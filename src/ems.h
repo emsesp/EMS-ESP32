@@ -298,7 +298,7 @@ typedef struct {
     uint32_t burnStarts;  // # burner starts
     uint32_t burnWorkMin; // Total burner operating time
     uint32_t heatWorkMin; // Total heat operating time
-    int16_t switchTemp;   // Switch temperature
+    uint16_t switchTemp;  // Switch temperature
 
     // UBAMonitorWWMessage
     uint16_t wWCurTmp;  // Warm Water current temperature
@@ -338,7 +338,7 @@ typedef struct {
 typedef struct {
     uint8_t  hc;     // heating circuit 1, 2, 3 or 4
     bool     active; // true if there is data for this HC
-    int16_t  flowTemp;
+    uint16_t flowTemp;
     uint8_t  pumpMod;
     uint8_t  valveStatus;
     uint8_t  flowSetTemp;

@@ -123,7 +123,7 @@ void ems_init() {
     // init all mixing modules
     for (uint8_t i = 0; i < EMS_THERMOSTAT_MAXHC; i++) {
         EMS_Mixing.hc[i].hc          = i + 1;
-        EMS_Mixing.hc[i].flowTemp    = EMS_VALUE_SHORT_NOTSET;
+        EMS_Mixing.hc[i].flowTemp    = EMS_VALUE_USHORT_NOTSET;
         EMS_Mixing.hc[i].pumpMod     = EMS_VALUE_INT_NOTSET;
         EMS_Mixing.hc[i].valveStatus = EMS_VALUE_INT_NOTSET;
         EMS_Mixing.hc[i].flowSetTemp = EMS_VALUE_INT_NOTSET;
@@ -161,7 +161,7 @@ void ems_init() {
     EMS_Boiler.burnStarts  = EMS_VALUE_LONG_NOTSET;   // # burner restarts
     EMS_Boiler.burnWorkMin = EMS_VALUE_LONG_NOTSET;   // Total burner operating time
     EMS_Boiler.heatWorkMin = EMS_VALUE_LONG_NOTSET;   // Total heat operating time
-    EMS_Boiler.switchTemp  = EMS_VALUE_SHORT_NOTSET;
+    EMS_Boiler.switchTemp  = EMS_VALUE_USHORT_NOTSET;
 
     // UBAMonitorWWMessage
     EMS_Boiler.wWCurTmp  = EMS_VALUE_USHORT_NOTSET; // Warm Water current temperature
@@ -1273,11 +1273,7 @@ void _process_MMPLUSStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
 
 // Mixer - 0xAB
 void _process_MMStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
-<<<<<<< HEAD
     uint8_t hc               = 1; // fixed, for 0xAB
-=======
-    uint8_t hc               = 0; // fixed, for 0xAB (HC1 only
->>>>>>> upstream/dev
     EMS_Mixing.hc[hc].active = true;
 
     _setValue(EMS_RxTelegram, &EMS_Mixing.hc[hc].flowTemp, EMS_OFFSET_MMStatusMessage_flow_temp);
@@ -2865,7 +2861,6 @@ const _EMS_Type EMS_Types[] = {
     {EMS_DEVICE_UPDATE_FLAG_MIXING, EMS_TYPE_MMPLUSStatusMessage_HC1, "MMPLUSStatusMessage_HC1", _process_MMPLUSStatusMessage},
     {EMS_DEVICE_UPDATE_FLAG_MIXING, EMS_TYPE_MMPLUSStatusMessage_HC2, "MMPLUSStatusMessage_HC2", _process_MMPLUSStatusMessage},
     {EMS_DEVICE_UPDATE_FLAG_MIXING, EMS_TYPE_MMStatusMessage, "MMStatusMessage", _process_MMStatusMessage}
-
 };
 
 // calculate sizes of arrays at compile time
