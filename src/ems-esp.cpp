@@ -1423,6 +1423,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
         // these three need to be unique topics
         myESP.mqttSubscribe(TOPIC_BOILER_CMD_WWACTIVATED);
         myESP.mqttSubscribe(TOPIC_BOILER_CMD_WWONETIME);
+        myESP.mqttSubscribe(TOPIC_BOILER_CMD_WWCIRCULATION);
         myESP.mqttSubscribe(TOPIC_BOILER_CMD_WWTEMP);
 
         // generic incoming MQTT command for EMS-ESP
@@ -1548,6 +1549,16 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
             ems_setWarmWaterOnetime(true);
         } else if (message[0] == '0' || strcmp(message, "off") == 0) {
             ems_setWarmWaterOnetime(false);
+        }
+        return;
+    }
+
+    // wwCirculation
+    if (strcmp(topic, TOPIC_BOILER_CMD_WWCIRCULATION) == 0) {
+        if (message[0] == '1' || strcmp(message, "on") == 0) {
+            ems_setWarmWaterCirculation(true);
+        } else if (message[0] == '0' || strcmp(message, "off") == 0) {
+            ems_setWarmWaterCirculation(false);
         }
         return;
     }
