@@ -97,7 +97,7 @@ var custom_configfile = {
         "listen_mode": false,
         "shower_timer": true,
         "shower_alert": false,
-        "publish_time": 0,
+        "publish_time": 10,
         "tx_mode": 1
     }
 };

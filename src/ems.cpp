@@ -210,7 +210,7 @@ void ems_init() {
     strlcpy(EMS_Thermostat.version, "?", sizeof(EMS_Thermostat.version));
 
     // default logging is none
-    ems_setLogging(EMS_SYS_LOGGING_DEFAULT);
+    ems_setLogging(EMS_SYS_LOGGING_DEFAULT, true);
 }
 
 // Getters and Setters for parameters
@@ -282,27 +282,33 @@ _EMS_SYS_LOGGING ems_getLogging() {
 }
 
 void ems_setLogging(_EMS_SYS_LOGGING loglevel, uint16_t type_id) {
-    if (loglevel <= EMS_SYS_LOGGING_JABBER) {
-        EMS_Sys_Status.emsLogging = loglevel;
+    EMS_Sys_Status.emsLogging_typeID = type_id;
+    ems_setLogging(EMS_SYS_LOGGING_WATCH, false);
+}
 
-        if (loglevel == EMS_SYS_LOGGING_NONE) {
-            myDebug_P(PSTR("System Logging set to None"));
-        } else if (loglevel == EMS_SYS_LOGGING_BASIC) {
-            myDebug_P(PSTR("System Logging set to Basic"));
-        } else if (loglevel == EMS_SYS_LOGGING_VERBOSE) {
-            myDebug_P(PSTR("System Logging set to Verbose"));
-        } else if (loglevel == EMS_SYS_LOGGING_THERMOSTAT) {
-            myDebug_P(PSTR("System Logging set to Thermostat only"));
-        } else if (loglevel == EMS_SYS_LOGGING_SOLARMODULE) {
-            myDebug_P(PSTR("System Logging set to Solar Module only"));
-        } else if (loglevel == EMS_SYS_LOGGING_RAW) {
-            myDebug_P(PSTR("System Logging set to Raw mode"));
-        } else if (loglevel == EMS_SYS_LOGGING_JABBER) {
-            myDebug_P(PSTR("System Logging set to Jabber mode"));
-        } else if (loglevel == EMS_SYS_LOGGING_WATCH) {
-            EMS_Sys_Status.emsLogging_typeID = type_id;
-            myDebug_P(PSTR("System Logging set to Watch mode"));
-        }
+void ems_setLogging(_EMS_SYS_LOGGING loglevel, bool quiet) {
+    EMS_Sys_Status.emsLogging = loglevel;
+
+    if (quiet) {
+        return; // no reporting to console
+    }
+
+    if (loglevel == EMS_SYS_LOGGING_NONE) {
+        myDebug_P(PSTR("System Logging set to None"));
+    } else if (loglevel == EMS_SYS_LOGGING_BASIC) {
+        myDebug_P(PSTR("System Logging set to Basic"));
+    } else if (loglevel == EMS_SYS_LOGGING_VERBOSE) {
+        myDebug_P(PSTR("System Logging set to Verbose"));
+    } else if (loglevel == EMS_SYS_LOGGING_THERMOSTAT) {
+        myDebug_P(PSTR("System Logging set to Thermostat only"));
+    } else if (loglevel == EMS_SYS_LOGGING_SOLARMODULE) {
+        myDebug_P(PSTR("System Logging set to Solar Module only"));
+    } else if (loglevel == EMS_SYS_LOGGING_RAW) {
+        myDebug_P(PSTR("System Logging set to Raw mode"));
+    } else if (loglevel == EMS_SYS_LOGGING_JABBER) {
+        myDebug_P(PSTR("System Logging set to Jabber mode"));
+    } else if (loglevel == EMS_SYS_LOGGING_WATCH) {
+        myDebug_P(PSTR("System Logging set to Watch mode"));
     }
 }
 
@@ -2135,21 +2141,31 @@ void ems_printDevices() {
                 have_unknowns = true;
             }
 
-            myDebug_P(PSTR(" %s: %s%s%s (DeviceID:0x%02X ProductID:%d Version:%s)"),
-                      device_type,
-                      COLOR_BOLD_ON,
-                      device_string,
-                      COLOR_BOLD_OFF,
-                      it->device_id,
-                      it->product_id,
-                      it->version);
-        }
+            if ((it->device_type == EMS_DEVICE_TYPE_THERMOSTAT) && (EMS_Sys_Status.emsMasterThermostat == it->product_id)) {
+                myDebug_P(PSTR(" %s: %s%s%s (DeviceID:0x%02X ProductID:%d Version:%s) [master]"),
+                          device_type,
+                          COLOR_BOLD_ON,
+                          device_string,
+                          COLOR_BOLD_OFF,
+                          it->device_id,
+                          it->product_id,
+                          it->version);
 
+            } else {
+                myDebug_P(PSTR(" %s: %s%s%s (DeviceID:0x%02X ProductID:%d Version:%s)"),
+                          device_type,
+                          COLOR_BOLD_ON,
+                          device_string,
+                          COLOR_BOLD_OFF,
+                          it->device_id,
+                          it->product_id,
+                          it->version);
+            }
+        }
         myDebug_P(PSTR("")); // newline
 
         if (have_unknowns) {
-            myDebug_P(
-                PSTR("You have a device is that is not yet known by EMS-ESP. Please report this as a GitHub issue so we can expand the EMS device library."));
+            myDebug_P(PSTR("One or more devices are not recognized by EMS-ESP. Please report this in GitHub."));
         }
     } else {
         myDebug_P(PSTR("No were devices recognized. This may be because Tx is disabled or failing."));

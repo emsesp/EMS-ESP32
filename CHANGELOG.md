@@ -17,8 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - set boiler warm water temp on Junkers/Bosch HT3
 
 ### Changed
-
-- improved MQTT publishing to stop flooding
+- improved MQTT publishing to stop flooding. `publish_time` must be at least 1 (second)
 
 ### Removed
  - `autodetect scan`

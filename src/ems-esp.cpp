@@ -98,9 +98,9 @@ static const command_t project_cmds[] PROGMEM = {
     {true, "listen_mode <on | off>", "when set to on all automatic Tx are disabled"},
     {true, "shower_timer <on | off>", "send MQTT notification on all shower durations"},
     {true, "shower_alert <on | off>", "stop hot water to send 3 cold burst warnings after max shower time is exceeded"},
-    {true, "publish_time <seconds>", "set frequency for publishing data to MQTT (0=automatic)"},
+    {true, "publish_time <seconds>", "set frequency for publishing data to MQTT"},
     {true, "tx_mode <n>", "changes Tx logic. 1=EMS generic, 2=EMS+, 3=HT3"},
-    {true, "master_thermostat [product id]", "product id to use as the master thermostat. Use no args for list."},
+    {true, "master_thermostat [product id]", "set default thermostat to use. Omit [product id] to show options."},
 
     {false, "info", "show current values deciphered from the EMS messages"},
     {false, "log <n | b | t | s | r | j | v | w [type ID]", "set logging to none, basic, thermostat, solar module, raw, jabber, verbose or watch a specific type"},
@@ -113,7 +113,7 @@ static const command_t project_cmds[] PROGMEM = {
     {false, "refresh", "fetch values from the EMS devices"},
     {false, "devices", "list detected EMS devices"},
     {false, "queue", "show current Tx queue"},
-    {false, "autodetect", "detect EMS devices and attempt to automatically set boiler and thermostat types"},
+    {false, "autodetect", "scan for EMS devices and external sensors"},
     {false, "send XX ...", "send raw telegram data to EMS bus (XX are hex values)"},
     {false, "thermostat read <type ID>", "send read request to the thermostat for heating circuit hc 1-4"},
     {false, "thermostat temp [hc] <degrees>", "set current thermostat temperature"},
@@ -505,11 +505,25 @@ void showInfo() {
         char valuestr[8] = {0}; // for formatting temp
         myDebug_P(PSTR("%sExternal temperature sensors:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
         for (uint8_t i = 0; i < EMSESP_Settings.dallas_sensors; i++) {
-            myDebug_P(PSTR("  Sensor #%d %s: %s C"), i + 1, ds18.getDeviceString(buffer, i), _float_to_char(valuestr, ds18.getValue(i)));
+            float sensorValue = ds18.getValue(i);
+            if (sensorValue != DS18_DISCONNECTED) {
+                myDebug_P(PSTR("  Sensor #%d %s: %s C"), i + 1, ds18.getDeviceString(buffer, i), _float_to_char(valuestr, sensorValue));
+            }
         }
     }
 
     myDebug_P(PSTR("")); // newline
+}
+
+// scan for external Dallas sensors and display
+void scanDallas() {
+    EMSESP_Settings.dallas_sensors = ds18.scan();
+    if (EMSESP_Settings.dallas_sensors) {
+        char buffer[128] = {0};
+        for (uint8_t i = 0; i < EMSESP_Settings.dallas_sensors; i++) {
+            myDebug_P(PSTR("External temperature sensor %s found"), ds18.getDeviceString(buffer, i));
+        }
+    }
 }
 
 // send all dallas sensor values as a JSON package to MQTT
@@ -531,9 +545,8 @@ void publishSensorValues() {
 
     // see if the sensor values have changed, if so send it on
     for (uint8_t i = 0; i < EMSESP_Settings.dallas_sensors; i++) {
-        // round to 2 decimal places. from https://arduinojson.org/v6/faq/how-to-configure-the-serialization-of-floats/
-        float sensorValue = (int)(ds18.getValue(i) * 100 + 0.5) / 100.0;
-        if (sensorValue != DS18_DISCONNECTED && sensorValue != DS18_CRC_ERROR) {
+        float sensorValue = ds18.getValue(i);
+        if (sensorValue != DS18_DISCONNECTED) {
             sprintf(label, PAYLOAD_EXTERNAL_SENSORS, (i + 1));
             sensors[label] = sensorValue;
             hasdata        = true;
@@ -1083,8 +1096,13 @@ bool SetListCallback(MYESP_FSACTION_t action, uint8_t wc, const char * setting, 
 
         // publish_time
         if ((strcmp(setting, "publish_time") == 0) && (wc == 2)) {
-            EMSESP_Settings.publish_time = atoi(value);
-            ok                           = true;
+            int16_t val = atoi(value);
+            if (val > 0) {
+                EMSESP_Settings.publish_time = atoi(value);
+                ok                           = true;
+            } else {
+                myDebug_P(PSTR("Error. time must be at least 1 second"));
+            }
         }
 
         // tx_mode
@@ -1133,12 +1151,7 @@ bool SetListCallback(MYESP_FSACTION_t action, uint8_t wc, const char * setting, 
         myDebug_P(PSTR("  listen_mode=%s"), EMSESP_Settings.listen_mode ? "on" : "off");
         myDebug_P(PSTR("  shower_timer=%s"), EMSESP_Settings.shower_timer ? "on" : "off");
         myDebug_P(PSTR("  shower_alert=%s"), EMSESP_Settings.shower_alert ? "on" : "off");
-
-        if (EMSESP_Settings.publish_time) {
-            myDebug_P(PSTR("  publish_time=%d"), EMSESP_Settings.publish_time);
-        } else {
-            myDebug_P(PSTR("  publish_time=0 (always publish on data received)"), EMSESP_Settings.publish_time);
-        }
+        myDebug_P(PSTR("  publish_time=%d"), EMSESP_Settings.publish_time);
 
         if (EMSESP_Settings.master_thermostat) {
             myDebug_P(PSTR("  master_thermostat=%d"), EMSESP_Settings.master_thermostat);
@@ -1188,9 +1201,9 @@ void _showCommands(uint8_t event) {
 // we set the logging here
 void TelnetCallback(uint8_t event) {
     if (event == TELNET_EVENT_CONNECT) {
-        ems_setLogging(EMS_SYS_LOGGING_DEFAULT);
+        ems_setLogging(EMS_SYS_LOGGING_DEFAULT, true);
     } else if (event == TELNET_EVENT_DISCONNECT) {
-        ems_setLogging(EMS_SYS_LOGGING_NONE);
+        ems_setLogging(EMS_SYS_LOGGING_NONE, true);
     } else if ((event == TELNET_EVENT_SHOWCMD) || (event == TELNET_EVENT_SHOWSET)) {
         _showCommands(event);
     }
@@ -1229,6 +1242,8 @@ void TelnetCommandCallback(uint8_t wc, const char * commandLine) {
     }
 
     if (strcmp(first_cmd, "autodetect") == 0) {
+        myDebug("Scanning for new EMS devices and attached external sensors...");
+        scanDallas();
         ems_clearDeviceList();
         ems_doReadCommand(EMS_TYPE_UBADevices, EMS_Boiler.device_id);
         ok = true;
@@ -1464,14 +1479,18 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
         const char * shower_alert = doc[TOPIC_SHOWER_ALERT];
         if (shower_alert) {
             EMSESP_Settings.shower_alert = ((shower_alert[0] - MYESP_MQTT_PAYLOAD_OFF) == 1);
-            myDebug_P(PSTR("Shower alert has been set to %s"), EMSESP_Settings.shower_alert ? "enabled" : "disabled");
+            if (ems_getLogging() != EMS_SYS_LOGGING_NONE) {
+                myDebug_P(PSTR("Shower alert has been set to %s"), EMSESP_Settings.shower_alert ? "enabled" : "disabled");
+            }
         }
 
         // assumes payload is "1" or "0"
         const char * shower_timer = doc[TOPIC_SHOWER_TIMER];
         if (shower_timer) {
             EMSESP_Settings.shower_timer = ((shower_timer[0] - MYESP_MQTT_PAYLOAD_OFF) == 1);
-            myDebug_P(PSTR("Shower timer has been set to %s"), EMSESP_Settings.shower_timer ? "enabled" : "disabled");
+            if (ems_getLogging() != EMS_SYS_LOGGING_NONE) {
+                myDebug_P(PSTR("Shower timer has been set to %s"), EMSESP_Settings.shower_timer ? "enabled" : "disabled");
+            }
         }
 
         return;
@@ -1940,7 +1959,7 @@ void setup() {
         regularUpdatesTimer.attach(REGULARUPDATES_TIME, do_regularUpdates); // regular reads from the EMS
     }
 
-    // set timers for MQTT publish, only if publish_time is not 0 (automatic mode)
+    // set timers for MQTT publish
     if (EMSESP_Settings.publish_time) {
         publishValuesTimer.attach(EMSESP_Settings.publish_time, do_publishValues); // post MQTT EMS values
     }
@@ -1956,7 +1975,8 @@ void setup() {
     systemCheckTimer.attach(SYSTEMCHECK_TIME, do_systemCheck); // check if EMS is reachable
 
     // check for Dallas sensors
-    EMSESP_Settings.dallas_sensors = ds18.setup(EMSESP_Settings.dallas_gpio, EMSESP_Settings.dallas_parasite); // returns #sensors
+    ds18.setup(EMSESP_Settings.dallas_gpio, EMSESP_Settings.dallas_parasite);
+    scanDallas();
 }
 
 //
@@ -1968,11 +1988,6 @@ void loop() {
     // check Dallas sensors, using same schedule as publish_time (default 2 mins in DS18_READ_INTERVAL)
     if (EMSESP_Settings.dallas_sensors) {
         ds18.loop();
-    }
-
-    // publish EMS data to MQTT, only if in automatic mode (publish_time=0) otherwise it'll use the timer
-    if (EMSESP_Settings.publish_time == 0) {
-        publishEMSValues(false);
     }
 
     // if we have an EMS connect go and fetch some data and MQTT publish it
