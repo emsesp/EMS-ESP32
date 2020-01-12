@@ -771,7 +771,7 @@ void publishEMSValues(bool force) {
                 strlcat(hc, _int_to_char(s, mixing->hc), sizeof(hc));
                 JsonObject dataMixing = rootMixing.createNestedObject(hc);
 
-                if (mixing->flowTemp != EMS_VALUE_SHORT_NOTSET)
+                if (mixing->flowTemp != EMS_VALUE_USHORT_NOTSET)
                     dataMixing["flowTemp"] = (float)mixing->flowTemp / 10;
                 if (mixing->flowSetTemp != EMS_VALUE_INT_NOTSET)
                     dataMixing["setflowTemp"] = mixing->flowSetTemp;
