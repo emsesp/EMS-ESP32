@@ -452,7 +452,7 @@ void MyESP::_mqttOnConnect() {
     mqttPublish(MQTT_TOPIC_START, MQTT_TOPIC_START_PAYLOAD, false);
 
     // send heartbeat if enabled
-    _heartbeatCheck();
+    _heartbeatCheck(true);
 
     // call custom function to handle mqtt receives
     (_mqtt_callback_f)(MQTT_CONNECT_EVENT, nullptr, nullptr);
@@ -1455,16 +1455,16 @@ void MyESP::_heartbeatCheck(bool force) {
     if ((millis() - last_heartbeat > MYESP_HEARTBEAT_INTERVAL) || force) {
         last_heartbeat = millis();
 
-        // print to log if force is set, so at bootup
-        if (force) {
-            _printHeap("[SYSTEM]");
-        }
-
 #ifdef MYESP_DEBUG
         _printHeap("[HEARTBEAT] ");
 #endif
         if (!isMQTTConnected() || !(_mqtt_heartbeat)) {
             return;
+        }
+
+        // print to log if force is set
+        if (force) {
+            _printHeap("[SYSTEM]");
         }
 
         uint32_t total_memory  = _getInitialFreeHeap();
@@ -2870,7 +2870,6 @@ void MyESP::begin(const char * app_hostname, const char * app_name, const char *
     _webserver_setup();    // init web server
 
     _setSystemCheck(false); // reset system check
-    _heartbeatCheck(true);  // force heartbeat, will send out message to log too
 
     _setSystemDropoutCounter(0); // reset # TCP dropouts
 
