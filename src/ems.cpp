@@ -1037,11 +1037,10 @@ void ems_setWarmWaterCirculation(bool activated) {
     EMS_TxTelegram.action        = EMS_TX_TELEGRAM_WRITE;
     EMS_TxTelegram.dest          = EMS_Boiler.device_id;
     EMS_TxTelegram.type          = EMS_TYPE_UBAFlags;
-    EMS_TxTelegram.offset        = EMS_OFFSET_UBAParameterWW_wwOneTime;
-    EMS_TxTelegram.length        = EMS_MIN_TELEGRAM_LENGTH+1;
+    EMS_TxTelegram.offset        = EMS_OFFSET_UBAParameterWW_wwCirulation;
+    EMS_TxTelegram.length        = EMS_MIN_TELEGRAM_LENGTH;
     EMS_TxTelegram.type_validate = EMS_ID_NONE;               // don't validate
-    EMS_TxTelegram.data[4]       = 0x11;
-    EMS_TxTelegram.data[5]       = (activated ? 0x33 : 0x11); 
+    EMS_TxTelegram.dataValue     = (activated ? 0x22 : 0x02); 
 
     EMS_TxQueue.push(EMS_TxTelegram);
 }
