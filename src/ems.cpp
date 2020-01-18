@@ -128,6 +128,12 @@ void ems_init() {
         EMS_Mixing.hc[i].valveStatus = EMS_VALUE_INT_NOTSET;
         EMS_Mixing.hc[i].flowSetTemp = EMS_VALUE_INT_NOTSET;
     }
+    for (uint8_t i = 0; i < EMS_THERMOSTAT_MAXWWC; i++) {
+        EMS_Mixing.wwc[i].wwc          = i + 1;
+        EMS_Mixing.wwc[i].flowTemp    = EMS_VALUE_USHORT_NOTSET;
+        EMS_Mixing.wwc[i].pumpMod     = EMS_VALUE_INT_NOTSET;
+        EMS_Mixing.wwc[i].tempStatus  = EMS_VALUE_INT_NOTSET;
+    }
 
     // UBAParameterWW
     EMS_Boiler.wWActivated     = EMS_VALUE_BOOL_NOTSET; // Warm Water activated
@@ -281,9 +287,9 @@ _EMS_SYS_LOGGING ems_getLogging() {
     return EMS_Sys_Status.emsLogging;
 }
 
-void ems_setLogging(_EMS_SYS_LOGGING loglevel, uint16_t type_id) {
-    EMS_Sys_Status.emsLogging_typeID = type_id;
-    ems_setLogging(EMS_SYS_LOGGING_WATCH, false);
+void ems_setLogging(_EMS_SYS_LOGGING loglevel, uint16_t id) {
+    EMS_Sys_Status.emsLogging_ID = id;
+    ems_setLogging(loglevel, false);
 }
 
 void ems_setLogging(_EMS_SYS_LOGGING loglevel, bool quiet) {
@@ -309,6 +315,8 @@ void ems_setLogging(_EMS_SYS_LOGGING loglevel, bool quiet) {
         myDebug_P(PSTR("System Logging set to Jabber mode"));
     } else if (loglevel == EMS_SYS_LOGGING_WATCH) {
         myDebug_P(PSTR("System Logging set to Watch mode"));
+    } else if (loglevel == EMS_SYS_LOGGING_DEVICE) {
+        myDebug_P(PSTR("System Logging set to Device mode"));
     }
 }
 
@@ -850,8 +858,11 @@ void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
     // but still continue to process it
     if ((EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_RAW)) {
         _debugPrintTelegram("", &EMS_RxTelegram, COLOR_WHITE, true);
-    } else if ((EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_WATCH) && (EMS_RxTelegram.type == EMS_Sys_Status.emsLogging_typeID)) {
+    } else if ((EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_WATCH) && (EMS_RxTelegram.type == EMS_Sys_Status.emsLogging_ID)) {
         _debugPrintTelegram("", &EMS_RxTelegram, COLOR_WHITE, true);
+	// raw printout for log d [id] disabled, moved to _printMessage()   
+//    } else if ((EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_DEVICE) && ((EMS_RxTelegram.src == EMS_Sys_Status.emsLogging_ID) || (EMS_RxTelegram.dest == EMS_Sys_Status.emsLogging_ID))) {
+//        _debugPrintTelegram("", &EMS_RxTelegram, COLOR_WHITE, true);
     }
 
     // Assume at this point we have something that vaguely resembles a telegram in the format [src] [dest] [type] [offset] [data] [crc]
@@ -927,6 +938,11 @@ void _printMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     } else if (EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_SOLARMODULE) {
         // only print ones to/from thermostat if logging is set to thermostat only
         if ((src == EMS_SolarModule.device_id) || (dest == EMS_SolarModule.device_id)) {
+            _debugPrintTelegram(output_str, EMS_RxTelegram, color_s);
+        }
+    } else if (EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_DEVICE) {
+        // only print ones to/from DeviceID 
+        if ((src == EMS_Sys_Status.emsLogging_ID) || (dest == EMS_Sys_Status.emsLogging_ID)) {
             _debugPrintTelegram(output_str, EMS_RxTelegram, color_s);
         }
     } else {
@@ -1268,6 +1284,19 @@ void _process_MMPLUSStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     _setValue(EMS_RxTelegram, &EMS_Mixing.hc[hc].flowTemp, EMS_OFFSET_MMPLUSStatusMessage_flow_temp);
     _setValue(EMS_RxTelegram, &EMS_Mixing.hc[hc].pumpMod, EMS_OFFSET_MMPLUSStatusMessage_pump_mod);
     _setValue(EMS_RxTelegram, &EMS_Mixing.hc[hc].valveStatus, EMS_OFFSET_MMPLUSStatusMessage_valve_status);
+}
+// Mixer warm water loading - 0x0231, 0x0232
+
+void _process_MMPLUSStatusMessageWW(_EMS_RxTelegram * EMS_RxTelegram) {
+    uint8_t wwc = (EMS_RxTelegram->type - EMS_TYPE_MMPLUSStatusMessage_WWC1); // 0 to 3
+    if (wwc >= EMS_THERMOSTAT_MAXWWC) {
+        return; // invalid type
+    }
+    EMS_Mixing.wwc[wwc].active = true;
+
+    _setValue(EMS_RxTelegram, &EMS_Mixing.wwc[wwc].flowTemp, EMS_OFFSET_MMPLUSStatusMessage_WW_flow_temp);
+    _setValue(EMS_RxTelegram, &EMS_Mixing.wwc[wwc].pumpMod, EMS_OFFSET_MMPLUSStatusMessage_WW_pump_mod);
+    _setValue(EMS_RxTelegram, &EMS_Mixing.wwc[wwc].tempStatus, EMS_OFFSET_MMPLUSStatusMessage_WW_temp_status);
 }
 
 // Mixer - 0xAB
@@ -2859,6 +2888,10 @@ const _EMS_Type EMS_Types[] = {
     // Mixing devices MM10 - MM400
     {EMS_DEVICE_UPDATE_FLAG_MIXING, EMS_TYPE_MMPLUSStatusMessage_HC1, "MMPLUSStatusMessage_HC1", _process_MMPLUSStatusMessage},
     {EMS_DEVICE_UPDATE_FLAG_MIXING, EMS_TYPE_MMPLUSStatusMessage_HC2, "MMPLUSStatusMessage_HC2", _process_MMPLUSStatusMessage},
+    {EMS_DEVICE_UPDATE_FLAG_MIXING, EMS_TYPE_MMPLUSStatusMessage_HC3, "MMPLUSStatusMessage_HC3", _process_MMPLUSStatusMessage},
+    {EMS_DEVICE_UPDATE_FLAG_MIXING, EMS_TYPE_MMPLUSStatusMessage_HC4, "MMPLUSStatusMessage_HC4", _process_MMPLUSStatusMessage},
+    {EMS_DEVICE_UPDATE_FLAG_MIXING, EMS_TYPE_MMPLUSStatusMessage_WWC1, "MMPLUSStatusMessage_WWC1", _process_MMPLUSStatusMessageWW},
+    {EMS_DEVICE_UPDATE_FLAG_MIXING, EMS_TYPE_MMPLUSStatusMessage_WWC2, "MMPLUSStatusMessage_WWC2", _process_MMPLUSStatusMessageWW},
     {EMS_DEVICE_UPDATE_FLAG_MIXING, EMS_TYPE_MMStatusMessage, "MMStatusMessage", _process_MMStatusMessage}
 };
 

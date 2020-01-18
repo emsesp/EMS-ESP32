@@ -34,6 +34,7 @@
 
 // thermostat specific
 #define EMS_THERMOSTAT_MAXHC 4     // max number of heating circuits
+#define EMS_THERMOSTAT_MAXWWC 2     // max number of warm water circuits
 #define EMS_THERMOSTAT_DEFAULTHC 1 // default heating circuit is 1
 #define EMS_THERMOSTAT_WRITE_YES true
 #define EMS_THERMOSTAT_WRITE_NO false
@@ -112,9 +113,10 @@ typedef enum {
     EMS_SYS_LOGGING_WATCH,       // watch a specific type ID
     EMS_SYS_LOGGING_BASIC,       // only basic read/write messages
     EMS_SYS_LOGGING_THERMOSTAT,  // only telegrams sent from thermostat
-    EMS_SYS_LOGGING_SOLARMODULE, // only telegrams sent from thermostat
+    EMS_SYS_LOGGING_SOLARMODULE, // only telegrams sent from solarmodule
     EMS_SYS_LOGGING_VERBOSE,     // everything
-    EMS_SYS_LOGGING_JABBER       // lots of debug output...
+    EMS_SYS_LOGGING_JABBER,      // lots of debug output...
+    EMS_SYS_LOGGING_DEVICE       // watch the device ID
 } _EMS_SYS_LOGGING;
 
 // status/counters since last power on
@@ -126,7 +128,7 @@ typedef struct {
     uint16_t         emxCrcErr;                              // CRC errors
     bool             emsPollEnabled;                         // flag enable the response to poll messages
     _EMS_SYS_LOGGING emsLogging;                             // logging
-    uint16_t         emsLogging_typeID;                      // the typeID to watch
+    uint16_t         emsLogging_ID;                          // the type or device ID to watch
     uint8_t          emsRefreshedFlags;                      // fresh data, needs to be pushed out to MQTT
     bool             emsBusConnected;                        // is there an active bus
     uint32_t         emsRxTimestamp;                         // timestamp of last EMS message received
@@ -344,6 +346,15 @@ typedef struct {
     uint8_t  flowSetTemp;
 } _EMS_Mixing_HC;
 
+// Mixing Module per WWC
+typedef struct {
+    uint8_t  wwc;     // warm water circuit 1, 2
+    bool     active; // true if there is data for this WWC
+    uint16_t flowTemp;
+    uint8_t  pumpMod;
+    uint8_t  tempStatus;
+} _EMS_Mixing_WWC;
+
 // Mixer data
 typedef struct {
     uint8_t        device_id;
@@ -353,6 +364,7 @@ typedef struct {
     char           version[10];
     bool           detected;
     _EMS_Mixing_HC hc[EMS_THERMOSTAT_MAXHC]; // array for the 4 heating circuits
+    _EMS_Mixing_WWC wwc[EMS_THERMOSTAT_MAXWWC]; // array for the 2 ww circuits 
 } _EMS_Mixing;
 
 // Solar Module - SM10/SM100/SM200/ISM1

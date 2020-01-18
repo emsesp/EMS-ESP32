@@ -103,8 +103,8 @@ static const command_t project_cmds[] PROGMEM = {
     {true, "master_thermostat [product id]", "set default thermostat to use. Omit [product id] to show options."},
 
     {false, "info", "show current values deciphered from the EMS messages"},
-    {false, "log <n | b | t | s | r | j | v | w [type ID]", "set logging to none, basic, thermostat, solar module, raw, jabber, verbose or watch a specific type"},
-
+    {false, "log <n | b | t | s | r | j | v | w [ID] | d [ID]>", "logging: none, basic, thermo, solar, raw, jabber, verbose, watch a type or device"},
+ 
 #ifdef TESTS
     {false, "test <n>", "insert a test telegram on to the EMS bus"},
 #endif
@@ -120,6 +120,7 @@ static const command_t project_cmds[] PROGMEM = {
     {false, "thermostat mode [hc] <mode>", "set mode (0=off, 1=manual, 2=auto) for heating circuit hc 1-4"},
     {false, "boiler read <type ID>", "send read request to boiler"},
     {false, "boiler wwtemp <degrees>", "set boiler warm water temperature"},
+    {false, "boiler wwactive <on | off>", "set boiler warm water on/off"},
     {false, "boiler tapwater <on | off>", "set boiler warm tap water on/off"},
     {false, "boiler flowtemp <degrees>", "set boiler flow temperature"},
     {false, "boiler comfort <hot | eco | intelligent>", "set boiler warm water comfort setting"}
@@ -232,6 +233,8 @@ void showInfo() {
         myDebug_P(PSTR("  System logging set to Jabber"));
     } else if (sysLog == EMS_SYS_LOGGING_WATCH) {
         myDebug_P(PSTR("  System logging set to Watch"));
+    } else if (sysLog == EMS_SYS_LOGGING_DEVICE) {
+        myDebug_P(PSTR("  System logging set to device"));
     } else {
         myDebug_P(PSTR("  System logging set to None"));
     }
@@ -481,7 +484,7 @@ void showInfo() {
         myDebug_P(PSTR("%sMixing module stats:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
         myDebug_P(PSTR("  Mixing: %s"), ems_getDeviceDescription(EMS_DEVICE_TYPE_MIXING, buffer_type,false));
         if (EMS_Boiler.switchTemp < EMS_VALUE_USHORT_NOTSET)
-           _renderShortValue("Switch temperature", "C", EMS_Boiler.switchTemp);
+           _renderUShortValue("Switch temperature", "C", EMS_Boiler.switchTemp);
 
         for (uint8_t hc_num = 1; hc_num <= EMS_THERMOSTAT_MAXHC; hc_num++) {
             if (EMS_Mixing.hc[hc_num - 1].active) {
@@ -494,6 +497,17 @@ void showInfo() {
                     _renderIntValue(" Current pump modulation", "%", EMS_Mixing.hc[hc_num - 1].pumpMod);
                 if (EMS_Mixing.hc[hc_num - 1].valveStatus != EMS_VALUE_INT_NOTSET)
                     _renderIntValue(" Current valve status", "", EMS_Mixing.hc[hc_num - 1].valveStatus);
+            }
+        }
+        for (uint8_t wwc_num = 1; wwc_num <= EMS_THERMOSTAT_MAXWWC; wwc_num++) {
+            if (EMS_Mixing.wwc[wwc_num - 1].active) {
+                myDebug_P(PSTR("  Warm Water Buffer %d"), wwc_num);
+                if (EMS_Mixing.wwc[wwc_num - 1].flowTemp < EMS_VALUE_USHORT_NOTSET)
+                    _renderUShortValue(" Current warm water temperature", "C", EMS_Mixing.wwc[wwc_num - 1].flowTemp);
+                if (EMS_Mixing.wwc[wwc_num - 1].pumpMod != EMS_VALUE_INT_NOTSET)
+                    _renderIntValue(" Current pump status", "", EMS_Mixing.wwc[wwc_num - 1].pumpMod);
+                if (EMS_Mixing.wwc[wwc_num - 1].tempStatus != EMS_VALUE_INT_NOTSET)
+                    _renderIntValue(" Current temp status", "", EMS_Mixing.wwc[wwc_num - 1].tempStatus);
             }
         }
     }
@@ -777,7 +791,6 @@ void publishEMSValues(bool force) {
                 strlcpy(hc, THERMOSTAT_HC, sizeof(hc));
                 strlcat(hc, _int_to_char(s, mixing->hc), sizeof(hc));
                 JsonObject dataMixing = rootMixing.createNestedObject(hc);
-
                 if (mixing->flowTemp < EMS_VALUE_USHORT_NOTSET)
                     dataMixing["flowTemp"] = (float)mixing->flowTemp / 10;
                 if (mixing->flowSetTemp != EMS_VALUE_INT_NOTSET)
@@ -786,6 +799,23 @@ void publishEMSValues(bool force) {
                     dataMixing["pumpMod"] = mixing->pumpMod;
                 if (mixing->valveStatus != EMS_VALUE_INT_NOTSET)
                     dataMixing["valveStatus"] = mixing->valveStatus;
+            }
+        }
+        for (uint8_t wwc_v = 1; wwc_v <= EMS_THERMOSTAT_MAXWWC; wwc_v++) {
+            _EMS_Mixing_WWC * mixing = &EMS_Mixing.wwc[wwc_v - 1];
+            // only send if we have an active Warm water Circuit with real data
+            if (mixing->active) {
+                // build new json object
+                char wwc[10]; // wc{1-2}
+                strlcpy(wwc, "wwc", sizeof(wwc));
+                strlcat(wwc, _int_to_char(s, mixing->wwc), sizeof(wwc));
+                JsonObject dataMixing = rootMixing.createNestedObject(wwc);
+                if (mixing->flowTemp < EMS_VALUE_USHORT_NOTSET)
+                    dataMixing["wwTemp"] = (float)mixing->flowTemp / 10;
+                if (mixing->pumpMod != EMS_VALUE_INT_NOTSET)
+                    dataMixing["pumpStatus"] = mixing->pumpMod;
+                if (mixing->tempStatus != EMS_VALUE_INT_NOTSET)
+                    dataMixing["tempStatus"] = mixing->tempStatus;
             }
         }
 
@@ -1276,6 +1306,9 @@ void TelnetCommandCallback(uint8_t wc, const char * commandLine) {
         } else if ((strcmp(second_cmd, "w") == 0) && (wc == 3)) {
             ems_setLogging(EMS_SYS_LOGGING_WATCH, _readHexNumber()); // get type_id
             ok = true;
+        } else if ((strcmp(second_cmd, "d") == 0) && (wc == 3)) {
+            ems_setLogging(EMS_SYS_LOGGING_DEVICE, _readHexNumber()); // get device_id
+            ok = true;
         }
     }
 
@@ -1335,6 +1368,15 @@ void TelnetCommandCallback(uint8_t wc, const char * commandLine) {
         } else if (strcmp(second_cmd, "flowtemp") == 0) {
             ems_setFlowTemp(_readIntNumber());
             ok = true;
+        } else if (strcmp(second_cmd, "wwactive") == 0) {
+            char * third_cmd = _readWord();
+            if (strcmp(third_cmd, "on") == 0) {
+                ems_setWarmWaterActivated(true);
+                ok = true;
+            } else if (strcmp(third_cmd, "off") == 0) {
+                ems_setWarmWaterActivated(false);
+                ok = true;
+            }
         }
     }
 
@@ -1403,13 +1445,16 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
         char topic_s[50];
         char buffer[4];
         for (uint8_t hc = 1; hc <= EMS_THERMOSTAT_MAXHC; hc++) {
-            strlcpy(topic_s, TOPIC_THERMOSTAT_CMD_TEMP_HA, sizeof(topic_s));
-            strlcat(topic_s, itoa(hc, buffer, 10), sizeof(topic_s));
-            myESP.mqttSubscribe(topic_s);
+            // subscribe onlyto active hc
+            if(EMS_Thermostat.hc[hc - 1].active) {
+                strlcpy(topic_s, TOPIC_THERMOSTAT_CMD_TEMP_HA, sizeof(topic_s));
+                strlcat(topic_s, itoa(hc, buffer, 10), sizeof(topic_s));
+                myESP.mqttSubscribe(topic_s);
 
-            strlcpy(topic_s, TOPIC_THERMOSTAT_CMD_MODE_HA, sizeof(topic_s));
-            strlcat(topic_s, itoa(hc, buffer, 10), sizeof(topic_s));
-            myESP.mqttSubscribe(topic_s);
+                strlcpy(topic_s, TOPIC_THERMOSTAT_CMD_MODE_HA, sizeof(topic_s));
+                strlcat(topic_s, itoa(hc, buffer, 10), sizeof(topic_s));
+                myESP.mqttSubscribe(topic_s);
+            }
         }
 
         // generic incoming MQTT command for Thermostat
@@ -1574,7 +1619,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
     uint8_t hc;
     // thermostat temp changes
     hc = _hasHCspecified(TOPIC_THERMOSTAT_CMD_TEMP_HA, topic);
-    if (hc) {
+    if (hc && EMS_Thermostat.hc[hc - 1].active) {
         float f = strtof((char *)message, 0);
         ems_setThermostatTemp(f, hc);
         publishEMSValues(true); // publish back immediately
@@ -1583,7 +1628,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
 
     // thermostat mode changes
     hc = _hasHCspecified(TOPIC_THERMOSTAT_CMD_MODE_HA, topic);
-    if (hc) {
+    if (hc && EMS_Thermostat.hc[hc - 1].active) {
         if (strncmp(message, "auto", 4) == 0) {
             ems_setThermostatMode(2, hc);
         } else if ((strncmp(message, "day", 4) == 0) || (strncmp(message, "manual", 6) == 0) || (strncmp(message, "heat", 4) == 0)) {
@@ -1607,7 +1652,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
 
         // thermostat temp changes
         hc = _hasHCspecified(TOPIC_THERMOSTAT_CMD_TEMP, command);
-        if (hc) {
+        if (hc && EMS_Thermostat.hc[hc - 1].active) {
             float f = doc["data"];
             ems_setThermostatTemp(f, hc);
             publishEMSValues(true); // publish back immediately
@@ -1616,7 +1661,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
 
         // thermostat mode changes
         hc = _hasHCspecified(TOPIC_THERMOSTAT_CMD_MODE, command);
-        if (hc) {
+        if (hc && EMS_Thermostat.hc[hc - 1].active) {
             const char * data_cmd = doc["data"];
             if (strncmp(data_cmd, "auto", 4) == 0) {
                 ems_setThermostatMode(2, hc);
@@ -1630,7 +1675,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
 
         // set night temp value
         hc = _hasHCspecified(TOPIC_THERMOSTAT_CMD_NIGHTTEMP, command);
-        if (hc) {
+        if (hc && EMS_Thermostat.hc[hc - 1].active) {
             float f = doc["data"];
             ems_setThermostatTemp(f, hc, 1); // night
             return;
@@ -1638,7 +1683,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
 
         // set daytemp value
         hc = _hasHCspecified(TOPIC_THERMOSTAT_CMD_DAYTEMP, command);
-        if (hc) {
+        if (hc && EMS_Thermostat.hc[hc - 1].active) {
             float f = doc["data"];
             ems_setThermostatTemp(f, hc, 2); // day
             return;
@@ -1646,7 +1691,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
 
         // set holiday value
         hc = _hasHCspecified(TOPIC_THERMOSTAT_CMD_HOLIDAYTEMP, command);
-        if (hc) {
+        if (hc && EMS_Thermostat.hc[hc - 1].active) {
             float f = doc["data"];
             ems_setThermostatTemp(f, hc, 3); // holiday
             return;
@@ -1727,7 +1772,7 @@ void WebCallback(JsonObject root) {
 
         uint8_t hc_num = 1; // default to HC1
         uint8_t model  = ems_getThermostatModel();
-        while (hc_num <= EMS_THERMOSTAT_MAXHC && !EMS_Thermostat.hc[hc_num - 1].active) hc_num++;
+        while (hc_num < EMS_THERMOSTAT_MAXHC && !EMS_Thermostat.hc[hc_num - 1].active) hc_num++; // first active hc
         // Render Current & Setpoint Room Temperature
         if (model == EMS_DEVICE_FLAG_EASY) {
             if (EMS_Thermostat.hc[hc_num - 1].setpoint_roomTemp > EMS_VALUE_SHORT_NOTSET)
