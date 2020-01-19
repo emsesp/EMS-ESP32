@@ -212,13 +212,11 @@ _EMS_THERMOSTAT_MODE _getThermostatDayMode(uint8_t hc_num) {
     return thermoMode;
 }
 
-// Info - display stats on an 'info' command
+// Info - display status and data on an 'info' command
 void showInfo() {
-    // General stats from EMS bus
-
     static char buffer_type[128] = {0};
 
-    myDebug_P(PSTR("%sEMS-ESP system stats:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
+    myDebug_P(PSTR("%sEMS-ESP system status:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
     _EMS_SYS_LOGGING sysLog = ems_getLogging();
     if (sysLog == EMS_SYS_LOGGING_BASIC) {
         myDebug_P(PSTR("  System logging set to Basic"));
@@ -251,7 +249,7 @@ void showInfo() {
               ((EMSESP_Settings.shower_timer) ? "enabled" : "disabled"),
               ((EMSESP_Settings.shower_alert) ? "enabled" : "disabled"));
 
-    myDebug_P(PSTR("\n%sEMS Bus stats:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
+    myDebug_P(PSTR("\n%sEMS Bus status:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
 
     if (ems_getBusConnected()) {
         myDebug_P(PSTR("  Bus is connected, protocol: %s"), (ems_isHT3() ? "HT3" : "Buderus"));
@@ -271,14 +269,13 @@ void showInfo() {
 
     myDebug_P(PSTR(""));
 
-    // show boiler stats if connected
+    // show boiler data if connected
     if (ems_getBoilerEnabled()) {
-        myDebug_P(PSTR("%sBoiler stats:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
+        myDebug_P(PSTR("%sBoiler data:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
 
         // version details
         myDebug_P(PSTR("  Boiler: %s"), ems_getDeviceDescription(EMS_DEVICE_TYPE_BOILER, buffer_type));
 
-        // active stats
         if (ems_getBusConnected()) {
             if (EMS_Boiler.tapwaterActive != EMS_VALUE_INT_NOTSET) {
                 myDebug_P(PSTR("  Hot tap water: %s"), EMS_Boiler.tapwaterActive ? "running" : "off");
@@ -370,7 +367,7 @@ void showInfo() {
     // For SM10/SM100/SM200 Solar Module
     if (ems_getSolarModuleEnabled()) {
         myDebug_P(PSTR("")); // newline
-        myDebug_P(PSTR("%sSolar Module stats:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
+        myDebug_P(PSTR("%sSolar Module data:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
         myDebug_P(PSTR("  Solar module: %s"), ems_getDeviceDescription(EMS_DEVICE_TYPE_SOLAR, buffer_type));
         _renderShortValue("Collector temperature", "C", EMS_SolarModule.collectorTemp);
         _renderShortValue("Bottom temperature", "C", EMS_SolarModule.bottomTemp);
@@ -390,16 +387,16 @@ void showInfo() {
     // For HeatPumps
     if (ems_getHeatPumpEnabled()) {
         myDebug_P(PSTR("")); // newline
-        myDebug_P(PSTR("%sHeat Pump stats:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
+        myDebug_P(PSTR("%sHeat Pump data:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
         myDebug_P(PSTR("  Heat Pump module: %s"), ems_getDeviceDescription(EMS_DEVICE_TYPE_HEATPUMP, buffer_type));
         _renderIntValue("Pump modulation", "%", EMS_HeatPump.HPModulation);
         _renderIntValue("Pump speed", "%", EMS_HeatPump.HPSpeed);
     }
 
-    // Thermostat stats
+    // Thermostat data
     if (ems_getThermostatEnabled()) {
         myDebug_P(PSTR("")); // newline
-        myDebug_P(PSTR("%sThermostat stats:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
+        myDebug_P(PSTR("%sThermostat data:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
         myDebug_P(PSTR("  Thermostat: %s"), ems_getDeviceDescription(EMS_DEVICE_TYPE_THERMOSTAT, buffer_type, false));
 
         // Render Thermostat Date & Time
@@ -475,7 +472,7 @@ void showInfo() {
     // Mixing modules sensors
     if (ems_getMixingDeviceEnabled()) {
         myDebug_P(PSTR("")); // newline
-        myDebug_P(PSTR("%sMixing module stats:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
+        myDebug_P(PSTR("%sMixing module data:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
         _renderUShortValue("Switch temperature", "C", EMS_Boiler.switchTemp);
 
         for (uint8_t hc_num = 1; hc_num <= EMS_THERMOSTAT_MAXHC; hc_num++) {
@@ -963,6 +960,11 @@ bool LoadSaveCallback(MYESP_FSACTION_t action, JsonObject settings) {
         EMSESP_Settings.shower_timer    = settings["shower_timer"];
         EMSESP_Settings.shower_alert    = settings["shower_alert"];
         EMSESP_Settings.publish_time    = settings["publish_time"] | DEFAULT_PUBLISHTIME;
+
+        // can't be 0 which could be the case coming from earlier builds < 1.9.5b12
+        if (EMSESP_Settings.publish_time == 0) {
+            EMSESP_Settings.publish_time = DEFAULT_PUBLISHTIME;
+        }
 
         EMSESP_Settings.listen_mode = settings["listen_mode"];
         ems_setTxDisabled(EMSESP_Settings.listen_mode);
@@ -1978,7 +1980,7 @@ void setup() {
 void loop() {
     myESP.loop(); // handle telnet, mqtt, wifi etc
 
-    // check Dallas sensors, using same schedule as publish_time (default 2 mins in DS18_READ_INTERVAL)
+    // Dallas sensors which are polled every 2 seconds (see DS18_READ_INTERVAL)
     if (EMSESP_Settings.dallas_sensors) {
         ds18.loop();
     }
