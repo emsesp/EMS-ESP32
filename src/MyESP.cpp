@@ -725,8 +725,8 @@ void MyESP::_consoleShowHelp() {
 
     myDebug_P(PSTR("*"));
     myDebug_P(PSTR("* Commands:"));
-    myDebug_P(PSTR("*  ?/help=show commands, CTRL-D/quit=close telnet session"));
-    myDebug_P(PSTR("*  set, system, restart, mqttlog, kick, save"));
+    myDebug_P(PSTR("*  ?/help=show commands, CTRL-D/quit=end telnet session"));
+    myDebug_P(PSTR("*  set, system, restart, mqttlog [all], kick, save"));
 
 #ifdef CRASH
     myDebug_P(PSTR("*  crash <dump | clear | test [n]>"));
@@ -1052,12 +1052,12 @@ void MyESP::_telnetCommand(char * commandLine) {
     }
 
     // print mqtt log command
-    if ((strcmp(ptrToCommandName, "mqttlog") == 0) && (wc == 1)) {
-        _printMQTTLog();
+    if (strcmp(ptrToCommandName, "mqttlog") == 0) {
+        _printMQTTLog(wc != 1);
         return;
     }
 
-    // show system stats
+    // show system status
     if ((strcmp(ptrToCommandName, "system") == 0) && (wc == 1)) {
         showSystemStats();
         return;
@@ -1070,7 +1070,7 @@ void MyESP::_telnetCommand(char * commandLine) {
         return;
     }
 
-    // show system stats
+    // quit
     if ((strcmp(ptrToCommandName, "quit") == 0) && (wc == 1)) {
         myDebug_P(PSTR("[TELNET] exiting telnet session"));
         SerialAndTelnet.disconnectClient();
@@ -1333,13 +1333,13 @@ void MyESP::_systemCheckLoop() {
     }
 }
 
-// print out ESP system stats
+// print out ESP system status
 // for battery power is ESP.getVcc()
 void MyESP::showSystemStats() {
 #if defined(ESP8266)
-    myDebug_P(PSTR("%sESP8266 System stats:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
+    myDebug_P(PSTR("%sESP8266 System status:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
 #else
-    myDebug_P(PSTR("ESP32 System stats:"));
+    myDebug_P(PSTR("ESP32 System status:"));
 #endif
     myDebug_P(PSTR(""));
 
@@ -2688,13 +2688,13 @@ void MyESP::_printHeap(const char * prefix) {
 }
 
 // print MQTT log - everything that was published last per topic
-void MyESP::_printMQTTLog() {
+void MyESP::_printMQTTLog(bool show_sub = false) {
     myDebug_P(PSTR("MQTT publish log:"));
     uint8_t i;
 
     for (i = 0; i < MYESP_MQTTLOG_MAX; i++) {
         if ((MQTT_log[i].topic != nullptr) && (MQTT_log[i].type == MYESP_MQTTLOGTYPE_PUBLISH)) {
-            myDebug_P(PSTR("  Timestamp:%02d:%02d:%02d Topic:%s Payload:%s"),
+            myDebug_P(PSTR("  (%02d:%02d:%02d) Topic:%s Payload:%s"),
                       to_hour(MQTT_log[i].timestamp),
                       to_minute(MQTT_log[i].timestamp),
                       to_second(MQTT_log[i].timestamp),
@@ -2703,12 +2703,15 @@ void MyESP::_printMQTTLog() {
         }
     }
 
-    myDebug_P(PSTR("")); // newline
-    myDebug_P(PSTR("MQTT subscriptions:"));
+    // show subscriptions
+    if (show_sub) {
+        myDebug_P(PSTR("")); // newline
+        myDebug_P(PSTR("MQTT subscriptions:"));
 
-    for (i = 0; i < MYESP_MQTTLOG_MAX; i++) {
-        if ((MQTT_log[i].topic != nullptr) && (MQTT_log[i].type == MYESP_MQTTLOGTYPE_SUBSCRIBE)) {
-            myDebug_P(PSTR("  Topic:%s"), MQTT_log[i].topic);
+        for (i = 0; i < MYESP_MQTTLOG_MAX; i++) {
+            if ((MQTT_log[i].topic != nullptr) && (MQTT_log[i].type == MYESP_MQTTLOGTYPE_SUBSCRIBE)) {
+                myDebug_P(PSTR("  Topic:%s"), MQTT_log[i].topic);
+            }
         }
     }
 
