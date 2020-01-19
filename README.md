@@ -15,7 +15,7 @@ EMS-ESP is a open-source system built for the Espressif ESP8266 microcontroller 
 
 ## Features
 
-* Supporting more than [50 EMS devices](https://proddy.github.io/EMS-ESP/#/Supported-EMS-Devices) (EMS 1.0, 2.0 and Heatronics).
+* Supporting more than [50 EMS devices](https://emsesp.github.io/docs/#/Supported-EMS-Devices) (EMS 1, EMS 2.0/Plus and Heatronics 3).
 * A web interface for easy configuration and real-time monitoring of the EMS bus.
 * Telnet for advanced configuration and verbose traffic logging.
 * Configurable MQTT, with templates for Home Assistant and Domoticz.
