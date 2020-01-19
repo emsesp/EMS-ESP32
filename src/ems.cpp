@@ -76,7 +76,7 @@ bool ems_isHT3() {
     return (EMS_Sys_Status.emsIDMask == 0x80);
 }
 
-// init stats and counters and buffers
+// init EMS device values, counters and buffers
 void ems_init() {
     ems_clearDeviceList(); // init the device map
 
@@ -742,12 +742,14 @@ void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
      * It may happen that we were interrupted (for instance by WIFI activity) and the 
      * buffer isn't valid anymore, so we must not answer at all...
      */
+    /*
     if (EMS_Sys_Status.emsRxStatus != EMS_RX_STATUS_IDLE) {
         if (EMS_Sys_Status.emsLogging > EMS_SYS_LOGGING_NONE) {
             myDebug_P(PSTR("** Warning, we missed the bus - Rx non-idle!"));
         }
         return;
     }
+    */
 
     /*
      * check if we just received one byte
@@ -1250,7 +1252,7 @@ void _process_MMPLUSStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
 
 // Mixer - 0xAB
 void _process_MMStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
-    uint8_t hc               = 0; // fixed, for 0xAB (HC1 only
+    uint8_t hc               = 0; // fixed, for 0xAB (HC1 only)
     EMS_Mixing.hc[hc].active = true;
 
     _setValue(EMS_RxTelegram, &EMS_Mixing.hc[hc].flowTemp, EMS_OFFSET_MMStatusMessage_flow_temp);
@@ -1937,8 +1939,8 @@ void ems_getThermostatValues() {
  * Generic function to return various settings from the thermostat
  */
 void ems_getBoilerValues() {
-    ems_doReadCommand(EMS_TYPE_UBAMonitorFast, EMS_Boiler.device_id);        // get boiler stats, instead of waiting 10secs for the broadcast
-    ems_doReadCommand(EMS_TYPE_UBAMonitorSlow, EMS_Boiler.device_id);        // get more boiler stats, instead of waiting 60secs for the broadcast
+    ems_doReadCommand(EMS_TYPE_UBAMonitorFast, EMS_Boiler.device_id);        // get boiler data, instead of waiting 10secs for the broadcast
+    ems_doReadCommand(EMS_TYPE_UBAMonitorSlow, EMS_Boiler.device_id);        // get more boiler data, instead of waiting 60secs for the broadcast
     ems_doReadCommand(EMS_TYPE_UBAParameterWW, EMS_Boiler.device_id);        // get Warm Water values
     ems_doReadCommand(EMS_TYPE_UBAParametersMessage, EMS_Boiler.device_id);  // get MC10 boiler values
     ems_doReadCommand(EMS_TYPE_UBATotalUptimeMessage, EMS_Boiler.device_id); // get uptime from boiler
@@ -2567,6 +2569,7 @@ void ems_setFlowTemp(uint8_t temperature) {
 /**
  * Set the warm water mode to comfort to Eco/Comfort
  * 1 = Hot, 2 = Eco, 3 = Intelligent
+ * to 0x33
  */
 void ems_setWarmWaterModeComfort(uint8_t comfort) {
     _EMS_TxTelegram EMS_TxTelegram = EMS_TX_TELEGRAM_NEW; // create new Tx
