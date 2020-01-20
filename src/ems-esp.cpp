@@ -501,7 +501,7 @@ void showInfo() {
         }
         for (uint8_t wwc_num = 1; wwc_num <= EMS_THERMOSTAT_MAXWWC; wwc_num++) {
             if (EMS_Mixing.wwc[wwc_num - 1].active) {
-                myDebug_P(PSTR("  Warm Water Buffer %d"), wwc_num);
+                myDebug_P(PSTR("  Warm Water Circuit %d"), wwc_num);
                 if (EMS_Mixing.wwc[wwc_num - 1].flowTemp < EMS_VALUE_USHORT_NOTSET)
                     _renderUShortValue(" Current warm water temperature", "C", EMS_Mixing.wwc[wwc_num - 1].flowTemp);
                 if (EMS_Mixing.wwc[wwc_num - 1].pumpMod != EMS_VALUE_INT_NOTSET)
