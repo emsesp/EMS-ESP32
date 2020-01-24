@@ -56,7 +56,7 @@ before_deploy:
 deploy:
   provider: releases
   edge:
-    source: wenkokke/dpl
+  #  source: wenkokke/dpl
     branch: master
   token: ${GITHUB_TOKEN}
   file_glob: true
