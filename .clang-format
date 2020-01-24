@@ -37,3 +37,5 @@ SpaceAfterCStyleCast: false
 SpaceBeforeAssignmentOperators: true
 SpacesInCStyleCastParentheses: false
 SpacesInParentheses: false
+DerivePointerAlignment: false
+SortIncludes: false
