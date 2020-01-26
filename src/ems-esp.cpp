@@ -914,7 +914,7 @@ void do_regularUpdates() {
 // turn back on the hot water for the shower
 void _showerColdShotStop() {
     if (EMSESP_Shower.doingColdShot) {
-        myDebugLog("[Shower] finished shot of cold. hot water back on");
+        myDebugLog("[Shower] finished shot of cold water. Hot water turned back on");
         ems_setWarmTapWaterActivated(true);
         EMSESP_Shower.doingColdShot = false;
         showerColdShotStopTimer.detach(); // disable the timer
@@ -924,7 +924,7 @@ void _showerColdShotStop() {
 // turn off hot water to send a shot of cold
 void _showerColdShotStart() {
     if (EMSESP_Settings.shower_alert) {
-        myDebugLog("[Shower] doing a shot of cold water");
+        myDebugLog("[Shower] starting shot of cold water");
         ems_setWarmTapWaterActivated(false);
         EMSESP_Shower.doingColdShot = true;
         // start the timer for n seconds which will reset the water back to hot
@@ -1912,9 +1912,9 @@ void showerCheck() {
 // SETUP
 //
 void setup() {
-    // GPIO15/D8 has a pull down, so we must set it to HIGH so it doesn't bring the whole EMS bus down
+    // GPIO15/D8 has an onboard pull down resistor and we use this for Tx, so force it high so it doesn't bring the whole EMS bus down
     pinMode(D8, OUTPUT);
-    digitalWrite(D8, 1);
+    digitalWrite(D8, HIGH);
 
     // init our own parameters
     initEMSESP();

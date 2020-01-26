@@ -2311,11 +2311,15 @@ void ems_setThermostatTemp(float temperature, uint8_t hc_num, uint8_t temptype) 
             break;
         default:
         case 0: // automatic selection, if no type is defined, we use the standard code
+            EMS_TxTelegram.offset = EMS_OFFSET_RC35Set_seltemp;
+
+            /* commented out for https://github.com/proddy/EMS-ESP/issues/310
             if (EMS_Thermostat.hc[hc_num - 1].day_mode == 0) {
                 EMS_TxTelegram.offset = EMS_OFFSET_RC35Set_temp_night;
             } else if (EMS_Thermostat.hc[hc_num - 1].day_mode == 1) {
                 EMS_TxTelegram.offset = EMS_OFFSET_RC35Set_temp_day;
             }
+            */
             break;
         }
 
@@ -2661,7 +2665,7 @@ void ems_setWarmTapWaterActivated(bool activated) {
     EMS_TxTelegram.data[3] = EMS_TxTelegram.offset; // offset
 
     // we use the special test mode 0x1D for this. Setting the first data to 5A puts the system into test mode and
-    // a setting of 0x00 puts it back into normal operarting mode
+    // a setting of 0x00 puts it back into normal operating mode
     // when in test mode we're able to mess around with the 3-way valve settings
     if (!activated) {
         // on

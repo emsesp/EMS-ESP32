@@ -120,9 +120,10 @@
 #define EMS_OFFSET_RC35Set_mode 7             // position of thermostat mode
 #define EMS_OFFSET_RC35Set_temp_day 2         // position of thermostat setpoint temperature for day time
 #define EMS_OFFSET_RC35Set_temp_night 1       // position of thermostat setpoint temperature for night time
-#define EMS_OFFSET_RC35Set_temp_holiday 3     // temp during holiday 0x47
-#define EMS_OFFSET_RC35Set_heatingtype 0      // floor heating = 3 0x47
-#define EMS_OFFSET_RC35Set_circuitcalctemp 14 // calculated circuit temperature 0x48
+#define EMS_OFFSET_RC35Set_temp_holiday 3     // temp during holiday mode
+#define EMS_OFFSET_RC35Set_heatingtype 0      // e.g. floor heating = 3
+#define EMS_OFFSET_RC35Set_circuitcalctemp 14 // calculated circuit temperature
+#define EMS_OFFSET_RC35Set_seltemp 37         // selected temp
 
 // Easy specific
 #define EMS_TYPE_EasyStatusMessage 0x0A          // reading values on an Easy Thermostat
