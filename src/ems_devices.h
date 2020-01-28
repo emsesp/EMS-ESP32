@@ -203,6 +203,7 @@ static const _EMS_Device EMS_Devices[] = {
     {208, EMS_DEVICE_TYPE_BOILER, "Buderus Logamax plus/GB192/Bosch Condens GC9000", EMS_DEVICE_FLAG_NONE},
     {64, EMS_DEVICE_TYPE_BOILER, "Sieger BK13,BK15/Nefit Smartline/Buderus GB1x2", EMS_DEVICE_FLAG_NONE},
     {234, EMS_DEVICE_TYPE_BOILER, "Buderus Logamax Plus GB122", EMS_DEVICE_FLAG_NONE},
+    {84, EMS_DEVICE_TYPE_BOILER, "Buderus Logamax Plus GB022", EMS_DEVICE_FLAG_NONE},
     {95, EMS_DEVICE_TYPE_BOILER, "Bosch Condens 2500/Buderus Logamax GB062/Junkers Cerapur Top/Worcester Greenstar i/Generic HT3", EMS_DEVICE_FLAG_NONE},
     {122, EMS_DEVICE_TYPE_BOILER, "Nefit Proline", EMS_DEVICE_FLAG_NONE},
     {170, EMS_DEVICE_TYPE_BOILER, "Buderus Logano GB212", EMS_DEVICE_FLAG_NONE},
