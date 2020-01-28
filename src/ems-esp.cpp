@@ -1738,6 +1738,10 @@ void WebCallback(JsonObject root) {
             thermostat["tmode"] = "manual";
         } else if (thermoMode == EMS_THERMOSTAT_MODE_AUTO) {
             thermostat["tmode"] = "auto";
+        } else if (thermoMode == EMS_THERMOSTAT_MODE_DAY) {
+            thermostat["tmode"] = "day";
+        } else if (thermoMode == EMS_THERMOSTAT_MODE_NIGHT) {
+            thermostat["tmode"] = "night";
         }
     } else {
         thermostat["ok"] = false;
