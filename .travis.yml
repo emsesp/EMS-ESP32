@@ -1,4 +1,5 @@
 os: linux
+dist: bionic
 language: python
 python:
   - "3.8"
@@ -55,7 +56,7 @@ before_deploy:
 deploy:
   provider: releases
   edge:
-    source: wenkokke/dpl
+  #  source: wenkokke/dpl
     branch: master
   token: ${GITHUB_TOKEN}
   file_glob: true

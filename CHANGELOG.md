@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - set boiler warm water temp on Junkers/Bosch HT3
+- fixed detection of the Moduline 400 thermostat
+- RC35 setting temperature also forces the current select temp to change, irrespective of the mode
 
 ### Changed
 - improved MQTT publishing to stop flooding. `publish_time` must be at least 1 (second)
