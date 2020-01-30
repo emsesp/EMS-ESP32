@@ -42,13 +42,13 @@
 #define TOPIC_BOILER_TAPWATER_ACTIVE "tapwater_active" // if hot tap water is running
 #define TOPIC_BOILER_HEATING_ACTIVE "heating_active"   // if heating is on
 
-#define TOPIC_BOILER_CMD "boiler_cmd"                         // for receiving boiler commands via MQTT
-#define TOPIC_BOILER_CMD_WWACTIVATED "boiler_cmd_wwactivated" // change water on/off
-#define TOPIC_BOILER_CMD_WWONETIME "boiler_cmd_wwonetime"     // warm warter one time loading
+#define TOPIC_BOILER_CMD "boiler_cmd"                             // for receiving boiler commands via MQTT
+#define TOPIC_BOILER_CMD_WWACTIVATED "boiler_cmd_wwactivated"     // change water on/off
+#define TOPIC_BOILER_CMD_WWONETIME "boiler_cmd_wwonetime"         // warm warter one time loading
 #define TOPIC_BOILER_CMD_WWCIRCULATION "boiler_cmd_wwcirculation" // start warm warter circulation
-#define TOPIC_BOILER_CMD_WWTEMP "boiler_cmd_wwtemp"           // wwtemp changes via MQTT
-#define TOPIC_BOILER_CMD_COMFORT "comfort"                    // ww comfort setting via MQTT
-#define TOPIC_BOILER_CMD_FLOWTEMP "flowtemp"                  // flowtemp value via MQTT
+#define TOPIC_BOILER_CMD_WWTEMP "boiler_cmd_wwtemp"               // wwtemp changes via MQTT
+#define TOPIC_BOILER_CMD_COMFORT "comfort"                        // ww comfort setting via MQTT
+#define TOPIC_BOILER_CMD_FLOWTEMP "flowtemp"                      // flowtemp value via MQTT
 
 // MQTT for mixing device
 #define TOPIC_MIXING_DATA "mixing_data" // for sending mixing device values to MQTT
