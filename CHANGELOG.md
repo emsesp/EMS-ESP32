@@ -11,7 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Solar Module SM200 support
 - `set master_thermostat <product id>` to choose with thermostat is master when there are multiple on the bus
 - MM10 Mixer support (thanks @MichaelDvP)
+- MM200 warm water circuits (https://github.com/proddy/EMS-ESP/pull/315)
 - First implementation of writing to Junker Thermostats (thanks @Neonox31)
+- Added model type (Buderus, Sieger, Junkers, Nefit, Bosch, Worcester) to device names
 
 ### Fixed
 - set boiler warm water temp on Junkers/Bosch HT3

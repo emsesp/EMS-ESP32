@@ -54,16 +54,20 @@
 
 #define EMS_OFFSET_UBASetPoints_flowtemp 0 // flow temp
 
-// SM and HP Types
+// Solar Module
 // Assuming here that the SM200 behaves like SM100
 #define EMS_TYPE_SM10Monitor 0x97    // SM10Monitor
 #define EMS_TYPE_SM100Monitor 0x0262 // SM100Monitor
 #define EMS_TYPE_SM100Status 0x0264  // SM100Status
 #define EMS_TYPE_SM100Status2 0x026A // SM100Status2
 #define EMS_TYPE_SM100Energy 0x028E  // SM100Energy
-#define EMS_TYPE_HPMonitor1 0xE3     // HeatPump Monitor 1
-#define EMS_TYPE_HPMonitor2 0xE5     // HeatPump Monitor 2
 
+// Heat Pump
+#define EMS_TYPE_HPMonitor1 0xE3 // HeatPump Monitor 1
+#define EMS_TYPE_HPMonitor2 0xE5 // HeatPump Monitor 2
+
+
+// ISPM solar module
 #define EMS_TYPE_ISM1StatusMessage 0x0003  // Solar Module Junkers ISM1 Status
 #define EMS_TYPE_ISM1Set 0x0001            // for setting values of the solar module like max boiler temp
 #define EMS_OFFSET_ISM1Set_MaxBoilerTemp 6 // position of max boiler temp  e.g. 50 in the following example: 90 30 FF 06 00 01 50 (CRC=2C)
@@ -171,16 +175,16 @@
 #define EMS_OFFSET_JunkersSetMessage_no_frost_temp 0x0F // EMS offset to set temperature on thermostat for no frost mode
 #define EMS_OFFSET_JunkersSetMessage_set_mode 0x0E      // EMS offset to set mode on thermostat
 
-// MM100 (EMS Plus)
-#define EMS_TYPE_MMPLUSStatusMessage_HC1 0x01D7       // mixer status HC1
-#define EMS_TYPE_MMPLUSStatusMessage_HC2 0x01D8       // mixer status HC2
-#define EMS_TYPE_MMPLUSStatusMessage_HC3 0x01D9       // mixer status HC3
-#define EMS_TYPE_MMPLUSStatusMessage_HC4 0x01DA       // mixer status HC4
-#define EMS_TYPE_MMPLUSStatusMessage_WWC1 0x0231      // mixer status WWC1
-#define EMS_TYPE_MMPLUSStatusMessage_WWC2 0x0232      // mixer status WWC2
-#define EMS_OFFSET_MMPLUSStatusMessage_flow_temp 3    // flow temperature
-#define EMS_OFFSET_MMPLUSStatusMessage_pump_mod 5     // pump modulation
-#define EMS_OFFSET_MMPLUSStatusMessage_valve_status 2 // valve in percent
+// MM100/MM200 (EMS Plus)
+#define EMS_TYPE_MMPLUSStatusMessage_HC1 0x01D7          // mixer status HC1
+#define EMS_TYPE_MMPLUSStatusMessage_HC2 0x01D8          // mixer status HC2
+#define EMS_TYPE_MMPLUSStatusMessage_HC3 0x01D9          // mixer status HC3
+#define EMS_TYPE_MMPLUSStatusMessage_HC4 0x01DA          // mixer status HC4
+#define EMS_TYPE_MMPLUSStatusMessage_WWC1 0x0231         // mixer status WWC1
+#define EMS_TYPE_MMPLUSStatusMessage_WWC2 0x0232         // mixer status WWC2
+#define EMS_OFFSET_MMPLUSStatusMessage_flow_temp 3       // flow temperature
+#define EMS_OFFSET_MMPLUSStatusMessage_pump_mod 5        // pump modulation
+#define EMS_OFFSET_MMPLUSStatusMessage_valve_status 2    // valve in percent
 #define EMS_OFFSET_MMPLUSStatusMessage_WW_flow_temp 0    // flow temperature
 #define EMS_OFFSET_MMPLUSStatusMessage_WW_pump_mod 2     // pump on 6, off 0
 #define EMS_OFFSET_MMPLUSStatusMessage_WW_temp_status 11 // 0,1,2

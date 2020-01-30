@@ -34,7 +34,7 @@
 
 // thermostat specific
 #define EMS_THERMOSTAT_MAXHC 4     // max number of heating circuits
-#define EMS_THERMOSTAT_MAXWWC 2     // max number of warm water circuits
+#define EMS_THERMOSTAT_MAXWWC 2    // max number of warm water circuits
 #define EMS_THERMOSTAT_DEFAULTHC 1 // default heating circuit is 1
 #define EMS_THERMOSTAT_WRITE_YES true
 #define EMS_THERMOSTAT_WRITE_NO false
@@ -348,7 +348,7 @@ typedef struct {
 
 // Mixing Module per WWC
 typedef struct {
-    uint8_t  wwc;     // warm water circuit 1, 2
+    uint8_t  wwc;    // warm water circuit 1, 2
     bool     active; // true if there is data for this WWC
     uint16_t flowTemp;
     uint8_t  pumpMod;
@@ -357,14 +357,14 @@ typedef struct {
 
 // Mixer data
 typedef struct {
-    uint8_t        device_id;
-    uint8_t        device_flags;
-    const char *   device_desc_p;
-    uint8_t        product_id;
-    char           version[10];
-    bool           detected;
-    _EMS_Mixing_HC hc[EMS_THERMOSTAT_MAXHC]; // array for the 4 heating circuits
-    _EMS_Mixing_WWC wwc[EMS_THERMOSTAT_MAXWWC]; // array for the 2 ww circuits 
+    uint8_t         device_id;
+    uint8_t         device_flags;
+    const char *    device_desc_p;
+    uint8_t         product_id;
+    char            version[10];
+    bool            detected;
+    _EMS_Mixing_HC  hc[EMS_THERMOSTAT_MAXHC];   // array for the 4 heating circuits
+    _EMS_Mixing_WWC wwc[EMS_THERMOSTAT_MAXWWC]; // array for the 2 ww circuits
 } _EMS_Mixing;
 
 // Solar Module - SM10/SM100/SM200/ISM1
