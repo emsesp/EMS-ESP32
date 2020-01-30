@@ -104,7 +104,7 @@ static const command_t project_cmds[] PROGMEM = {
 
     {false, "info", "show current values deciphered from the EMS messages"},
     {false, "log <n | b | t | s | r | j | v | w [ID] | d [ID]>", "logging: none, basic, thermo, solar, raw, jabber, verbose, watch a type or device"},
- 
+
 #ifdef TESTS
     {false, "test <n>", "insert a test telegram on to the EMS bus"},
 #endif
@@ -302,7 +302,7 @@ void showInfo() {
 
         _renderIntValue("Warm Water selected temperature", "C", EMS_Boiler.wWSelTemp);
         _renderIntValue("Warm Water desinfection temperature", "C", EMS_Boiler.wWDesinfectTemp);
-        _renderBoolValue("Warm Water Circulation active",EMS_Boiler.wWCirc);
+        _renderBoolValue("Warm Water Circulation active", EMS_Boiler.wWCirc);
 
         // UBAMonitorWWMessage
         _renderUShortValue("Warm Water current temperature", "C", EMS_Boiler.wWCurTmp);
@@ -447,7 +447,7 @@ void showInfo() {
                     _renderIntValue(" Vacation temperature", "C", EMS_Thermostat.hc[hc_num - 1].holidaytemp, 2); // convert to a single byte * 2
                 }
                 if (EMS_Thermostat.hc[hc_num - 1].circuitcalctemp < EMS_VALUE_USHORT_NOTSET)
-                    _renderIntValue(" Calculatet flow temperature", "C",EMS_Thermostat.hc[hc_num - 1].circuitcalctemp);
+                    _renderIntValue(" Calculatet flow temperature", "C", EMS_Thermostat.hc[hc_num - 1].circuitcalctemp);
 
                 // Render Thermostat Mode
                 _EMS_THERMOSTAT_MODE thermoMode;
@@ -481,7 +481,7 @@ void showInfo() {
         myDebug_P(PSTR("%sMixing module data:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
         // myDebug_P(PSTR("  Mixing: %s"), ems_getDeviceDescription(EMS_DEVICE_TYPE_MIXING, buffer_type,false));
         if (EMS_Boiler.switchTemp < EMS_VALUE_USHORT_NOTSET)
-           _renderUShortValue("Switch temperature", "C", EMS_Boiler.switchTemp);
+            _renderUShortValue("Switch temperature", "C", EMS_Boiler.switchTemp);
 
         for (uint8_t hc_num = 1; hc_num <= EMS_THERMOSTAT_MAXHC; hc_num++) {
             if (EMS_Mixing.hc[hc_num - 1].active) {
@@ -1448,7 +1448,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
         char buffer[4];
         for (uint8_t hc = 1; hc <= EMS_THERMOSTAT_MAXHC; hc++) {
             // subscribe onlyto active hc
-            if(EMS_Thermostat.hc[hc - 1].active) {
+            if (EMS_Thermostat.hc[hc - 1].active) {
                 strlcpy(topic_s, TOPIC_THERMOSTAT_CMD_TEMP_HA, sizeof(topic_s));
                 strlcat(topic_s, itoa(hc, buffer, 10), sizeof(topic_s));
                 myESP.mqttSubscribe(topic_s);
@@ -1774,7 +1774,8 @@ void WebCallback(JsonObject root) {
 
         uint8_t hc_num = 1; // default to HC1
         uint8_t model  = ems_getThermostatModel();
-        while (hc_num < EMS_THERMOSTAT_MAXHC && !EMS_Thermostat.hc[hc_num - 1].active) hc_num++; // first active hc
+        while (hc_num < EMS_THERMOSTAT_MAXHC && !EMS_Thermostat.hc[hc_num - 1].active)
+            hc_num++; // first active hc
         // Render Current & Setpoint Room Temperature
         if (model == EMS_DEVICE_FLAG_EASY) {
             if (EMS_Thermostat.hc[hc_num - 1].setpoint_roomTemp > EMS_VALUE_SHORT_NOTSET)
