@@ -129,10 +129,10 @@ void ems_init() {
         EMS_Mixing.hc[i].flowSetTemp = EMS_VALUE_INT_NOTSET;
     }
     for (uint8_t i = 0; i < EMS_THERMOSTAT_MAXWWC; i++) {
-        EMS_Mixing.wwc[i].wwc          = i + 1;
-        EMS_Mixing.wwc[i].flowTemp    = EMS_VALUE_USHORT_NOTSET;
-        EMS_Mixing.wwc[i].pumpMod     = EMS_VALUE_INT_NOTSET;
-        EMS_Mixing.wwc[i].tempStatus  = EMS_VALUE_INT_NOTSET;
+        EMS_Mixing.wwc[i].wwc        = i + 1;
+        EMS_Mixing.wwc[i].flowTemp   = EMS_VALUE_USHORT_NOTSET;
+        EMS_Mixing.wwc[i].pumpMod    = EMS_VALUE_INT_NOTSET;
+        EMS_Mixing.wwc[i].tempStatus = EMS_VALUE_INT_NOTSET;
     }
 
     // UBAParameterWW
@@ -862,9 +862,9 @@ void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
         _debugPrintTelegram("", &EMS_RxTelegram, COLOR_WHITE, true);
     } else if ((EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_WATCH) && (EMS_RxTelegram.type == EMS_Sys_Status.emsLogging_ID)) {
         _debugPrintTelegram("", &EMS_RxTelegram, COLOR_WHITE, true);
-	// raw printout for log d [id] disabled, moved to _printMessage()   
-//    } else if ((EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_DEVICE) && ((EMS_RxTelegram.src == EMS_Sys_Status.emsLogging_ID) || (EMS_RxTelegram.dest == EMS_Sys_Status.emsLogging_ID))) {
-//        _debugPrintTelegram("", &EMS_RxTelegram, COLOR_WHITE, true);
+        // raw printout for log d [id] disabled, moved to _printMessage()
+        //    } else if ((EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_DEVICE) && ((EMS_RxTelegram.src == EMS_Sys_Status.emsLogging_ID) || (EMS_RxTelegram.dest == EMS_Sys_Status.emsLogging_ID))) {
+        //        _debugPrintTelegram("", &EMS_RxTelegram, COLOR_WHITE, true);
     }
 
     // Assume at this point we have something that vaguely resembles a telegram in the format [src] [dest] [type] [offset] [data] [crc]
@@ -943,7 +943,7 @@ void _printMessage(_EMS_RxTelegram * EMS_RxTelegram) {
             _debugPrintTelegram(output_str, EMS_RxTelegram, color_s);
         }
     } else if (EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_DEVICE) {
-        // only print ones to/from DeviceID 
+        // only print ones to/from DeviceID
         if ((src == EMS_Sys_Status.emsLogging_ID) || (dest == EMS_Sys_Status.emsLogging_ID)) {
             _debugPrintTelegram(output_str, EMS_RxTelegram, color_s);
         }
@@ -1057,8 +1057,8 @@ void ems_setWarmWaterCirculation(bool activated) {
     EMS_TxTelegram.type          = EMS_TYPE_UBAFlags;
     EMS_TxTelegram.offset        = EMS_OFFSET_UBAParameterWW_wwCirulation;
     EMS_TxTelegram.length        = EMS_MIN_TELEGRAM_LENGTH;
-    EMS_TxTelegram.type_validate = EMS_ID_NONE;               // don't validate
-    EMS_TxTelegram.dataValue     = (activated ? 0x22 : 0x02); 
+    EMS_TxTelegram.type_validate = EMS_ID_NONE; // don't validate
+    EMS_TxTelegram.dataValue     = (activated ? 0x22 : 0x02);
 
     EMS_TxQueue.push(EMS_TxTelegram);
 }
@@ -1303,7 +1303,7 @@ void _process_MMPLUSStatusMessageWW(_EMS_RxTelegram * EMS_RxTelegram) {
 
 // Mixer - 0xAB
 void _process_MMStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
-    uint8_t hc               = 1; // fixed, for 0xAB
+    uint8_t hc               = 0; // fixed, for 0xAB only
     EMS_Mixing.hc[hc].active = true;
 
     _setValue(EMS_RxTelegram, &EMS_Mixing.hc[hc].flowTemp, EMS_OFFSET_MMStatusMessage_flow_temp);
@@ -1662,7 +1662,7 @@ void ems_clearDeviceList() {
  * add an EMS device to our list of detected devices if its unique
  * returns true if already in list
  */
-bool _addDevice(_EMS_DEVICE_TYPE device_type, uint8_t product_id, uint8_t device_id, const char * device_desc_p, const char * version) {
+bool _addDevice(_EMS_DEVICE_TYPE device_type, uint8_t product_id, uint8_t device_id, const char * device_desc_p, const char * version, uint8_t brand) {
     _Detected_Device device;
 
     // check for duplicates
@@ -1684,6 +1684,20 @@ bool _addDevice(_EMS_DEVICE_TYPE device_type, uint8_t product_id, uint8_t device
 
     char line[500];
     strlcpy(line, "New EMS device recognized as a ", sizeof(line));
+
+    if (brand == 1) {
+        strlcat(line, "Bosch ", sizeof(line));
+    } else if (brand == 2) {
+        strlcat(line, "Junkers ", sizeof(line));
+    } else if (brand == 3) {
+        strlcat(line, "Buderus ", sizeof(line));
+    } else if (brand == 4) {
+        strlcat(line, "Nefit ", sizeof(line));
+    } else if (brand == 5) {
+        strlcat(line, "Sieger ", sizeof(line));
+    } else if (brand == 11) {
+        strlcat(line, "Worcester ", sizeof(line));
+    }
 
     // get type as a string
     char type_s[50];
@@ -1760,10 +1774,9 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
         return;
     }
 
-    uint8_t offset = 0;
-
     // check for 2nd subscriber
     // e.g. 18 0B 02 00 00 00 00 5E 02 01
+    uint8_t offset = 0;
     if (EMS_RxTelegram->data[0] == 0x00) {
         // see if we have a 2nd subscriber
         if (EMS_RxTelegram->data[3] != 0x00) {
@@ -1773,7 +1786,8 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
         }
     }
 
-    uint8_t device_id = EMS_RxTelegram->src; // device ID
+    uint8_t device_id  = EMS_RxTelegram->src;          // device ID
+    uint8_t product_id = EMS_RxTelegram->data[offset]; // product ID
 
     // get version as XX.XX
     char version[10] = {0};
@@ -1782,20 +1796,35 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
     strlcat(version, ".", sizeof(version));
     strlcat(version, _smallitoa(EMS_RxTelegram->data[offset + 2], buf), sizeof(version));
 
-    // some devices store the protocol type (HT3, Buderus) in tbe last byte
-    // we don't do anything with this yet.
+    // some devices store the protocol type (HT3, Buderus) in the last byte
+    // 0=unknown, 1=bosch, 2=junkers, 3=buderus, 4=nefit, 5=sieger, 11=worcester
+    uint8_t brand;
     if (EMS_RxTelegram->data_length >= 10) {
-        uint8_t protocol_type = EMS_RxTelegram->data[9];
-        if (protocol_type == 2) {
-            // it's a junkers
-        } else if (protocol_type >= 3) {
-            // it's buderus
-        }
+        brand = EMS_RxTelegram->data[9];
+    } else {
+        brand = 0; // unknown
     }
 
-    // scan through known devices matching the productid
-    uint8_t product_id  = EMS_RxTelegram->data[offset];
-    uint8_t i           = 0;
+    // first scan through matching boilers, as these are unique to DeviceID 0x08
+    uint8_t i = 0;
+    while (i < _EMS_Devices_max) {
+        if ((EMS_Devices[i].product_id == product_id) && (EMS_Devices[i].type == EMS_DEVICE_TYPE_BOILER) && (device_id == EMS_ID_BOILER)) {
+            // we have a matching boiler, add it then quit
+            EMS_Boiler.device_id     = EMS_ID_BOILER;
+            EMS_Boiler.device_flags  = EMS_DEVICE_FLAG_NONE;
+            EMS_Boiler.product_id    = product_id;
+            EMS_Boiler.device_desc_p = EMS_Devices[i].device_desc;
+            strlcpy(EMS_Boiler.version, version, sizeof(EMS_Boiler.version));
+            _addDevice(EMS_DEVICE_TYPE_BOILER, product_id, EMS_ID_BOILER, EMS_Devices[i].device_desc, version, brand);
+            ems_getBoilerValues(); // get Boiler values that we would usually have to wait for
+            return;                // quit
+            break;
+        }
+        i++;
+    }
+
+    // not a boiler
+    i                   = 0;
     uint8_t found_index = 0;
     bool    typeFound   = false;
     while (i < _EMS_Devices_max) {
@@ -1810,7 +1839,7 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
 
     // if not found, just add it as an unknown device and exit
     if (!typeFound) {
-        (void)_addDevice(EMS_DEVICE_TYPE_UNKNOWN, product_id, device_id, nullptr, version);
+        (void)_addDevice(EMS_DEVICE_TYPE_UNKNOWN, product_id, device_id, nullptr, version, 0);
         return;
     }
 
@@ -1818,21 +1847,13 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
     _EMS_DEVICE_TYPE type          = EMS_Devices[found_index].type;          // device type
 
     // we recognized it, see if we already have it in our recognized list
-    if (_addDevice(type, product_id, device_id, device_desc_p, version)) {
+    if (_addDevice(type, product_id, device_id, device_desc_p, version, brand)) {
         return; // already in list
     }
 
     uint8_t flags = EMS_Devices[found_index].flags; // it's a new entry, get the specifics
 
-    // for a boiler, sometimes we get a device_id of 0x09 with the same product_id, so lets make sure it is the UBA Master
-    if ((type == EMS_DEVICE_TYPE_BOILER) && (device_id == EMS_ID_BOILER)) {
-        EMS_Boiler.device_id     = device_id;
-        EMS_Boiler.product_id    = product_id;
-        EMS_Boiler.device_flags  = flags;
-        EMS_Boiler.device_desc_p = device_desc_p;
-        strlcpy(EMS_Boiler.version, version, sizeof(EMS_Boiler.version));
-        ems_getBoilerValues(); // get Boiler values that we would usually have to wait for
-    } else if (type == EMS_DEVICE_TYPE_THERMOSTAT) {
+    if (type == EMS_DEVICE_TYPE_THERMOSTAT) {
         // we can only support a single thermostat currently, so check which product_id we may have chosen
         // to be the master - see https://github.com/proddy/EMS-ESP/issues/238
         if ((EMS_Sys_Status.emsMasterThermostat == 0) || (EMS_Sys_Status.emsMasterThermostat == product_id)) {
@@ -2899,8 +2920,7 @@ const _EMS_Type EMS_Types[] = {
     {EMS_DEVICE_UPDATE_FLAG_MIXING, EMS_TYPE_MMPLUSStatusMessage_HC4, "MMPLUSStatusMessage_HC4", _process_MMPLUSStatusMessage},
     {EMS_DEVICE_UPDATE_FLAG_MIXING, EMS_TYPE_MMPLUSStatusMessage_WWC1, "MMPLUSStatusMessage_WWC1", _process_MMPLUSStatusMessageWW},
     {EMS_DEVICE_UPDATE_FLAG_MIXING, EMS_TYPE_MMPLUSStatusMessage_WWC2, "MMPLUSStatusMessage_WWC2", _process_MMPLUSStatusMessageWW},
-    {EMS_DEVICE_UPDATE_FLAG_MIXING, EMS_TYPE_MMStatusMessage, "MMStatusMessage", _process_MMStatusMessage}
-};
+    {EMS_DEVICE_UPDATE_FLAG_MIXING, EMS_TYPE_MMStatusMessage, "MMStatusMessage", _process_MMStatusMessage}};
 
 // calculate sizes of arrays at compile time
 uint8_t _EMS_Types_max = ArraySize(EMS_Types);
