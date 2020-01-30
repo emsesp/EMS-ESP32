@@ -46,6 +46,7 @@
 #define EMS_OFFSET_UBAParameterWW_wwtemp 2                  // WW Temperature
 #define EMS_OFFSET_UBAParameterWW_wwactivated 1             // WW Activated
 #define EMS_OFFSET_UBAParameterWW_wwOneTime 0x00            // WW OneTime loading
+#define EMS_OFFSET_UBAParameterWW_wwCirulation 1            // WW circulation
 #define EMS_OFFSET_UBAParameterWW_wwComfort 9               // WW is in comfort or eco mode
 #define EMS_VALUE_UBAParameterWW_wwComfort_Hot 0x00         // the value for hot
 #define EMS_VALUE_UBAParameterWW_wwComfort_Eco 0xD8         // the value for eco
@@ -175,9 +176,14 @@
 #define EMS_TYPE_MMPLUSStatusMessage_HC2 0x01D8       // mixer status HC2
 #define EMS_TYPE_MMPLUSStatusMessage_HC3 0x01D9       // mixer status HC3
 #define EMS_TYPE_MMPLUSStatusMessage_HC4 0x01DA       // mixer status HC4
+#define EMS_TYPE_MMPLUSStatusMessage_WWC1 0x0231      // mixer status WWC1
+#define EMS_TYPE_MMPLUSStatusMessage_WWC2 0x0232      // mixer status WWC2
 #define EMS_OFFSET_MMPLUSStatusMessage_flow_temp 3    // flow temperature
 #define EMS_OFFSET_MMPLUSStatusMessage_pump_mod 5     // pump modulation
 #define EMS_OFFSET_MMPLUSStatusMessage_valve_status 2 // valve in percent
+#define EMS_OFFSET_MMPLUSStatusMessage_WW_flow_temp 0    // flow temperature
+#define EMS_OFFSET_MMPLUSStatusMessage_WW_pump_mod 2     // pump on 6, off 0
+#define EMS_OFFSET_MMPLUSStatusMessage_WW_temp_status 11 // 0,1,2
 
 // MM10
 #define EMS_TYPE_MMStatusMessage 0xAB             // mixer status

@@ -27,13 +27,14 @@
 #define EMS_VALUE_BOOL_ON2 0xFF        // boolean true, EMS sometimes uses 0xFF for TRUE
 #define EMS_VALUE_BOOL_OFF 0x00        // boolean false
 #define EMS_VALUE_INT_NOTSET 0xFF      // for 8-bit unsigned ints/bytes
-#define EMS_VALUE_SHORT_NOTSET -32768  // for 2-byte signed shorts
-#define EMS_VALUE_USHORT_NOTSET 0x8000 // for 2-byte unsigned shorts
+#define EMS_VALUE_SHORT_NOTSET -32000  // was -32768 for 2-byte signed shorts
+#define EMS_VALUE_USHORT_NOTSET 32000  // was 0x8000 for 2-byte unsigned shorts
 #define EMS_VALUE_LONG_NOTSET 0xFFFFFF // for 3-byte longs
 #define EMS_VALUE_BOOL_NOTSET 0xFE     // random number that's not 0, 1 or FF
 
 // thermostat specific
 #define EMS_THERMOSTAT_MAXHC 4     // max number of heating circuits
+#define EMS_THERMOSTAT_MAXWWC 2     // max number of warm water circuits
 #define EMS_THERMOSTAT_DEFAULTHC 1 // default heating circuit is 1
 #define EMS_THERMOSTAT_WRITE_YES true
 #define EMS_THERMOSTAT_WRITE_NO false
@@ -112,9 +113,10 @@ typedef enum {
     EMS_SYS_LOGGING_WATCH,       // watch a specific type ID
     EMS_SYS_LOGGING_BASIC,       // only basic read/write messages
     EMS_SYS_LOGGING_THERMOSTAT,  // only telegrams sent from thermostat
-    EMS_SYS_LOGGING_SOLARMODULE, // only telegrams sent from thermostat
+    EMS_SYS_LOGGING_SOLARMODULE, // only telegrams sent from solarmodule
     EMS_SYS_LOGGING_VERBOSE,     // everything
-    EMS_SYS_LOGGING_JABBER       // lots of debug output...
+    EMS_SYS_LOGGING_JABBER,      // lots of debug output...
+    EMS_SYS_LOGGING_DEVICE       // watch the device ID
 } _EMS_SYS_LOGGING;
 
 // status/counters since last power on
@@ -126,7 +128,7 @@ typedef struct {
     uint16_t         emxCrcErr;                              // CRC errors
     bool             emsPollEnabled;                         // flag enable the response to poll messages
     _EMS_SYS_LOGGING emsLogging;                             // logging
-    uint16_t         emsLogging_typeID;                      // the typeID to watch
+    uint16_t         emsLogging_ID;                          // the type or device ID to watch
     uint8_t          emsRefreshedFlags;                      // fresh data, needs to be pushed out to MQTT
     bool             emsBusConnected;                        // is there an active bus
     uint32_t         emsRxTimestamp;                         // timestamp of last EMS message received
@@ -344,6 +346,15 @@ typedef struct {
     uint8_t  flowSetTemp;
 } _EMS_Mixing_HC;
 
+// Mixing Module per WWC
+typedef struct {
+    uint8_t  wwc;     // warm water circuit 1, 2
+    bool     active; // true if there is data for this WWC
+    uint16_t flowTemp;
+    uint8_t  pumpMod;
+    uint8_t  tempStatus;
+} _EMS_Mixing_WWC;
+
 // Mixer data
 typedef struct {
     uint8_t        device_id;
@@ -353,6 +364,7 @@ typedef struct {
     char           version[10];
     bool           detected;
     _EMS_Mixing_HC hc[EMS_THERMOSTAT_MAXHC]; // array for the 4 heating circuits
+    _EMS_Mixing_WWC wwc[EMS_THERMOSTAT_MAXWWC]; // array for the 2 ww circuits 
 } _EMS_Mixing;
 
 // Solar Module - SM10/SM100/SM200/ISM1
@@ -432,6 +444,7 @@ void             ems_setWarmWaterTemp(uint8_t temperature);
 void             ems_setFlowTemp(uint8_t temperature);
 void             ems_setWarmWaterActivated(bool activated);
 void             ems_setWarmWaterOnetime(bool activated);
+void             ems_setWarmWaterCirculation(bool activated);
 void             ems_setWarmTapWaterActivated(bool activated);
 void             ems_setPoll(bool b);
 void             ems_setLogging(_EMS_SYS_LOGGING loglevel, uint16_t type_id);

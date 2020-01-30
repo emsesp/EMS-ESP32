@@ -128,6 +128,12 @@ void ems_init() {
         EMS_Mixing.hc[i].valveStatus = EMS_VALUE_INT_NOTSET;
         EMS_Mixing.hc[i].flowSetTemp = EMS_VALUE_INT_NOTSET;
     }
+    for (uint8_t i = 0; i < EMS_THERMOSTAT_MAXWWC; i++) {
+        EMS_Mixing.wwc[i].wwc          = i + 1;
+        EMS_Mixing.wwc[i].flowTemp    = EMS_VALUE_USHORT_NOTSET;
+        EMS_Mixing.wwc[i].pumpMod     = EMS_VALUE_INT_NOTSET;
+        EMS_Mixing.wwc[i].tempStatus  = EMS_VALUE_INT_NOTSET;
+    }
 
     // UBAParameterWW
     EMS_Boiler.wWActivated     = EMS_VALUE_BOOL_NOTSET; // Warm Water activated
@@ -161,6 +167,7 @@ void ems_init() {
     EMS_Boiler.burnStarts  = EMS_VALUE_LONG_NOTSET;   // # burner restarts
     EMS_Boiler.burnWorkMin = EMS_VALUE_LONG_NOTSET;   // Total burner operating time
     EMS_Boiler.heatWorkMin = EMS_VALUE_LONG_NOTSET;   // Total heat operating time
+    EMS_Boiler.switchTemp  = EMS_VALUE_USHORT_NOTSET;
 
     // UBAMonitorWWMessage
     EMS_Boiler.wWCurTmp  = EMS_VALUE_USHORT_NOTSET; // Warm Water current temperature
@@ -280,9 +287,9 @@ _EMS_SYS_LOGGING ems_getLogging() {
     return EMS_Sys_Status.emsLogging;
 }
 
-void ems_setLogging(_EMS_SYS_LOGGING loglevel, uint16_t type_id) {
-    EMS_Sys_Status.emsLogging_typeID = type_id;
-    ems_setLogging(EMS_SYS_LOGGING_WATCH, false);
+void ems_setLogging(_EMS_SYS_LOGGING loglevel, uint16_t id) {
+    EMS_Sys_Status.emsLogging_ID = id;
+    ems_setLogging(loglevel, false);
 }
 
 void ems_setLogging(_EMS_SYS_LOGGING loglevel, bool quiet) {
@@ -308,6 +315,8 @@ void ems_setLogging(_EMS_SYS_LOGGING loglevel, bool quiet) {
         myDebug_P(PSTR("System Logging set to Jabber mode"));
     } else if (loglevel == EMS_SYS_LOGGING_WATCH) {
         myDebug_P(PSTR("System Logging set to Watch mode"));
+    } else if (loglevel == EMS_SYS_LOGGING_DEVICE) {
+        myDebug_P(PSTR("System Logging set to Device mode"));
     }
 }
 
@@ -851,8 +860,11 @@ void ems_parseTelegram(uint8_t * telegram, uint8_t length) {
     // but still continue to process it
     if ((EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_RAW)) {
         _debugPrintTelegram("", &EMS_RxTelegram, COLOR_WHITE, true);
-    } else if ((EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_WATCH) && (EMS_RxTelegram.type == EMS_Sys_Status.emsLogging_typeID)) {
+    } else if ((EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_WATCH) && (EMS_RxTelegram.type == EMS_Sys_Status.emsLogging_ID)) {
         _debugPrintTelegram("", &EMS_RxTelegram, COLOR_WHITE, true);
+	// raw printout for log d [id] disabled, moved to _printMessage()   
+//    } else if ((EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_DEVICE) && ((EMS_RxTelegram.src == EMS_Sys_Status.emsLogging_ID) || (EMS_RxTelegram.dest == EMS_Sys_Status.emsLogging_ID))) {
+//        _debugPrintTelegram("", &EMS_RxTelegram, COLOR_WHITE, true);
     }
 
     // Assume at this point we have something that vaguely resembles a telegram in the format [src] [dest] [type] [offset] [data] [crc]
@@ -928,6 +940,11 @@ void _printMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     } else if (EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_SOLARMODULE) {
         // only print ones to/from thermostat if logging is set to thermostat only
         if ((src == EMS_SolarModule.device_id) || (dest == EMS_SolarModule.device_id)) {
+            _debugPrintTelegram(output_str, EMS_RxTelegram, color_s);
+        }
+    } else if (EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_DEVICE) {
+        // only print ones to/from DeviceID 
+        if ((src == EMS_Sys_Status.emsLogging_ID) || (dest == EMS_Sys_Status.emsLogging_ID)) {
             _debugPrintTelegram(output_str, EMS_RxTelegram, color_s);
         }
     } else {
@@ -1021,6 +1038,27 @@ void ems_setWarmWaterOnetime(bool activated) {
     EMS_TxTelegram.length        = EMS_MIN_TELEGRAM_LENGTH;
     EMS_TxTelegram.type_validate = EMS_ID_NONE;               // don't validate
     EMS_TxTelegram.dataValue     = (activated ? 0x22 : 0x02); // 0x22 is on, 0x02 is off for RC20RF
+
+    EMS_TxQueue.push(EMS_TxTelegram);
+}
+/**
+ * Activate / De-activate circulation of warm water 0x35
+ * true = on, false = off
+ */
+void ems_setWarmWaterCirculation(bool activated) {
+    myDebug_P(PSTR("Setting boiler warm water circulation %s"), activated ? "on" : "off");
+
+    _EMS_TxTelegram EMS_TxTelegram = EMS_TX_TELEGRAM_NEW; // create new Tx
+    EMS_TxTelegram.timestamp       = millis();            // set timestamp
+    EMS_Sys_Status.txRetryCount    = 0;                   // reset retry counter
+
+    EMS_TxTelegram.action        = EMS_TX_TELEGRAM_WRITE;
+    EMS_TxTelegram.dest          = EMS_Boiler.device_id;
+    EMS_TxTelegram.type          = EMS_TYPE_UBAFlags;
+    EMS_TxTelegram.offset        = EMS_OFFSET_UBAParameterWW_wwCirulation;
+    EMS_TxTelegram.length        = EMS_MIN_TELEGRAM_LENGTH;
+    EMS_TxTelegram.type_validate = EMS_ID_NONE;               // don't validate
+    EMS_TxTelegram.dataValue     = (activated ? 0x22 : 0x02); 
 
     EMS_TxQueue.push(EMS_TxTelegram);
 }
@@ -1249,10 +1287,23 @@ void _process_MMPLUSStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     _setValue(EMS_RxTelegram, &EMS_Mixing.hc[hc].pumpMod, EMS_OFFSET_MMPLUSStatusMessage_pump_mod);
     _setValue(EMS_RxTelegram, &EMS_Mixing.hc[hc].valveStatus, EMS_OFFSET_MMPLUSStatusMessage_valve_status);
 }
+// Mixer warm water loading - 0x0231, 0x0232
+
+void _process_MMPLUSStatusMessageWW(_EMS_RxTelegram * EMS_RxTelegram) {
+    uint8_t wwc = (EMS_RxTelegram->type - EMS_TYPE_MMPLUSStatusMessage_WWC1); // 0 to 3
+    if (wwc >= EMS_THERMOSTAT_MAXWWC) {
+        return; // invalid type
+    }
+    EMS_Mixing.wwc[wwc].active = true;
+
+    _setValue(EMS_RxTelegram, &EMS_Mixing.wwc[wwc].flowTemp, EMS_OFFSET_MMPLUSStatusMessage_WW_flow_temp);
+    _setValue(EMS_RxTelegram, &EMS_Mixing.wwc[wwc].pumpMod, EMS_OFFSET_MMPLUSStatusMessage_WW_pump_mod);
+    _setValue(EMS_RxTelegram, &EMS_Mixing.wwc[wwc].tempStatus, EMS_OFFSET_MMPLUSStatusMessage_WW_temp_status);
+}
 
 // Mixer - 0xAB
 void _process_MMStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
-    uint8_t hc               = 0; // fixed, for 0xAB (HC1 only)
+    uint8_t hc               = 1; // fixed, for 0xAB
     EMS_Mixing.hc[hc].active = true;
 
     _setValue(EMS_RxTelegram, &EMS_Mixing.hc[hc].flowTemp, EMS_OFFSET_MMStatusMessage_flow_temp);
@@ -1812,6 +1863,7 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
         EMS_Mixing.device_desc_p = device_desc_p;
         EMS_Mixing.device_flags  = flags;
         EMS_Mixing.detected      = true;
+        strlcpy(EMS_Mixing.version, version, sizeof(EMS_Mixing.version));
         ems_doReadCommand(EMS_TYPE_MMPLUSStatusMessage_HC1, device_id); // fetch MM values
     }
 }
@@ -2056,6 +2108,12 @@ char * ems_getDeviceDescription(_EMS_DEVICE_TYPE device_type, char * buffer, boo
         product_id    = EMS_HeatPump.product_id;
         device_desc_p = EMS_HeatPump.device_desc_p;
         version       = EMS_HeatPump.version;
+    } else if (device_type == EMS_DEVICE_TYPE_MIXING) {
+        enabled       = ems_getMixingDeviceEnabled();
+        device_id     = EMS_Mixing.device_id;
+        product_id    = EMS_Mixing.product_id;
+        device_desc_p = EMS_Mixing.device_desc_p;
+        version       = EMS_Mixing.version;
     }
 
     if (!enabled) {
@@ -2812,7 +2870,7 @@ const _EMS_Type EMS_Types[] = {
     {EMS_DEVICE_UPDATE_FLAG_THERMOSTAT, EMS_TYPE_RC35StatusMessage_HC1, "RC35StatusMessage_HC1", _process_RC35StatusMessage},
     {EMS_DEVICE_UPDATE_FLAG_THERMOSTAT, EMS_TYPE_RC35Set_HC2, "RC35Set_HC2", _process_RC35Set},
     {EMS_DEVICE_UPDATE_FLAG_THERMOSTAT, EMS_TYPE_RC35StatusMessage_HC2, "RC35StatusMessage_HC2", _process_RC35StatusMessage},
-    {EMS_DEVICE_UPDATE_FLAG_THERMOSTAT, EMS_TYPE_RC35Set_HC3, "RC35Set_HC2", _process_RC35Set},
+    {EMS_DEVICE_UPDATE_FLAG_THERMOSTAT, EMS_TYPE_RC35Set_HC3, "RC35Set_HC3", _process_RC35Set},
     {EMS_DEVICE_UPDATE_FLAG_THERMOSTAT, EMS_TYPE_RC35StatusMessage_HC3, "RC35StatusMessage_HC3", _process_RC35StatusMessage},
     {EMS_DEVICE_UPDATE_FLAG_THERMOSTAT, EMS_TYPE_RC35Set_HC4, "RC35Set_HC4", _process_RC35Set},
     {EMS_DEVICE_UPDATE_FLAG_THERMOSTAT, EMS_TYPE_RC35StatusMessage_HC4, "RC35StatusMessage_HC4", _process_RC35StatusMessage},
@@ -2837,8 +2895,11 @@ const _EMS_Type EMS_Types[] = {
     // Mixing devices MM10 - MM400
     {EMS_DEVICE_UPDATE_FLAG_MIXING, EMS_TYPE_MMPLUSStatusMessage_HC1, "MMPLUSStatusMessage_HC1", _process_MMPLUSStatusMessage},
     {EMS_DEVICE_UPDATE_FLAG_MIXING, EMS_TYPE_MMPLUSStatusMessage_HC2, "MMPLUSStatusMessage_HC2", _process_MMPLUSStatusMessage},
+    {EMS_DEVICE_UPDATE_FLAG_MIXING, EMS_TYPE_MMPLUSStatusMessage_HC3, "MMPLUSStatusMessage_HC3", _process_MMPLUSStatusMessage},
+    {EMS_DEVICE_UPDATE_FLAG_MIXING, EMS_TYPE_MMPLUSStatusMessage_HC4, "MMPLUSStatusMessage_HC4", _process_MMPLUSStatusMessage},
+    {EMS_DEVICE_UPDATE_FLAG_MIXING, EMS_TYPE_MMPLUSStatusMessage_WWC1, "MMPLUSStatusMessage_WWC1", _process_MMPLUSStatusMessageWW},
+    {EMS_DEVICE_UPDATE_FLAG_MIXING, EMS_TYPE_MMPLUSStatusMessage_WWC2, "MMPLUSStatusMessage_WWC2", _process_MMPLUSStatusMessageWW},
     {EMS_DEVICE_UPDATE_FLAG_MIXING, EMS_TYPE_MMStatusMessage, "MMStatusMessage", _process_MMStatusMessage}
-
 };
 
 // calculate sizes of arrays at compile time
