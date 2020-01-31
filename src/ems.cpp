@@ -355,77 +355,83 @@ int8_t _getDataPosition(_EMS_RxTelegram * EMS_RxTelegram, uint8_t index) {
 }
 
 // unsigned short
-void _setValue(_EMS_RxTelegram * EMS_RxTelegram, uint16_t * param_op, uint8_t index) {
+bool _setValue(_EMS_RxTelegram * EMS_RxTelegram, uint16_t * param_op, uint8_t index) {
     int8_t pos = _getDataPosition(EMS_RxTelegram, index);
     if (pos < 0) {
-        return;
+        return false;
     }
 
     uint16_t value = (EMS_RxTelegram->data[pos] << 8) + EMS_RxTelegram->data[pos + 1];
 
     // check for undefined/unset values, 0x8000
     if (value >= EMS_VALUE_USHORT_NOTSET) {
-        return;
+        return false;
     }
 
     *param_op = value;
+    return true;
 }
 
 // signed short
-void _setValue(_EMS_RxTelegram * EMS_RxTelegram, int16_t * param_op, uint8_t index) {
+bool _setValue(_EMS_RxTelegram * EMS_RxTelegram, int16_t * param_op, uint8_t index) {
     int8_t pos = _getDataPosition(EMS_RxTelegram, index);
     if (pos < 0) {
-        return;
+        return false;
     }
 
     int16_t value = (EMS_RxTelegram->data[pos] << 8) + EMS_RxTelegram->data[pos + 1];
 
     // check for undefined/unset values, 0x8000
     if ((value == EMS_VALUE_SHORT_NOTSET) || (EMS_RxTelegram->data[pos] == 0x7D)) {
-        return;
+        return false;
     }
 
     *param_op = value;
+    return true;
 }
 
 // Byte
-void _setValue(_EMS_RxTelegram * EMS_RxTelegram, uint8_t * param_op, uint8_t index) {
+bool _setValue(_EMS_RxTelegram * EMS_RxTelegram, uint8_t * param_op, uint8_t index) {
     int8_t pos = _getDataPosition(EMS_RxTelegram, index);
     if (pos < 0) {
-        return;
+        return false;
     }
 
     *param_op = (uint8_t)EMS_RxTelegram->data[pos];
+    return true;
 }
 
 // convert signed short to single 8 byte, for setpoint thermostat temperatures that don't store their temps in 2 bytes
-void _setValue8(_EMS_RxTelegram * EMS_RxTelegram, int16_t * param_op, uint8_t index) {
+bool _setValue8(_EMS_RxTelegram * EMS_RxTelegram, int16_t * param_op, uint8_t index) {
     int8_t pos = _getDataPosition(EMS_RxTelegram, index);
     if (pos < 0) {
-        return;
+        return false;
     }
 
     *param_op = EMS_RxTelegram->data[pos];
+    return true;
 }
 
 // Long
-void _setValue(_EMS_RxTelegram * EMS_RxTelegram, uint32_t * param_op, uint8_t index) {
+bool _setValue(_EMS_RxTelegram * EMS_RxTelegram, uint32_t * param_op, uint8_t index) {
     int8_t pos = _getDataPosition(EMS_RxTelegram, index);
     if (pos < 0) {
-        return;
+        return false;
     }
 
     *param_op = (uint32_t)((EMS_RxTelegram->data[pos] << 16) + (EMS_RxTelegram->data[pos + 1] << 8) + (EMS_RxTelegram->data[pos + 2]));
+    return true;
 }
 
 // bit from a byte
-void _setValue(_EMS_RxTelegram * EMS_RxTelegram, uint8_t * param_op, uint8_t index, uint8_t bit) {
+bool _setValue(_EMS_RxTelegram * EMS_RxTelegram, uint8_t * param_op, uint8_t index, uint8_t bit) {
     int8_t pos = _getDataPosition(EMS_RxTelegram, index);
     if (pos < 0) {
-        return;
+        return false;
     }
 
     *param_op = (uint8_t)(((EMS_RxTelegram->data[pos]) >> (bit)) & 0x01);
+    return true;
 }
 
 void ems_setTxMode(uint8_t mode) {
@@ -1080,9 +1086,9 @@ void _process_UBAMonitorFast(_EMS_RxTelegram * EMS_RxTelegram) {
     _setValue(EMS_RxTelegram, &EMS_Boiler.wWHeat, 7, 6);
     _setValue(EMS_RxTelegram, &EMS_Boiler.wWCirc, 7, 7);
 
-    // there may also be an BoilTemp here but can't remember what it is, so commenting out for now
-    // we use the one from UBAMonitorSlow
-    // _setValue(EMS_RxTelegram, &EMS_Boiler.boilTemp, 11); // 0x8000 if not available
+    // there may also be a BoilTemp in this telgram for Bosch - see https://github.com/proddy/EMS-ESP/issues/206
+    // as well as the one from UBAMonitorSlow
+    _setValue(EMS_RxTelegram, &EMS_Boiler.boilTemp, 11); // 0x8000 if not available
 
     _setValue(EMS_RxTelegram, &EMS_Boiler.retTemp, 13);
     _setValue(EMS_RxTelegram, &EMS_Boiler.flameCurr, 15);
@@ -1302,8 +1308,10 @@ void _process_MMPLUSStatusMessageWW(_EMS_RxTelegram * EMS_RxTelegram) {
 }
 
 // Mixer - 0xAB
+// https://github.com/proddy/EMS-ESP/issues/270
+// We assume MM10 is on HC2 and WM10 is using HC1
 void _process_MMStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
-    uint8_t hc               = 0; // fixed, for 0xAB only
+    uint8_t hc               = 1; // fixed to HC2
     EMS_Mixing.hc[hc].active = true;
 
     _setValue(EMS_RxTelegram, &EMS_Mixing.hc[hc].flowTemp, EMS_OFFSET_MMStatusMessage_flow_temp);
