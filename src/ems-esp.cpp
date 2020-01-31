@@ -78,7 +78,7 @@ typedef struct {
     uint8_t  dallas_gpio;       // pin for attaching external dallas temperature sensors
     bool     dallas_parasite;   // on/off is using parasite
     uint8_t  tx_mode;           // TX mode 1,2 or 3
-    uint8_t  master_thermostat; // Product ID of master thermostat to use
+    uint8_t  master_thermostat; // Product ID of master thermostat to use, 0 for automatic
 } _EMSESP_Settings;
 
 typedef struct {
@@ -100,7 +100,7 @@ static const command_t project_cmds[] PROGMEM = {
     {true, "shower_alert <on | off>", "stop hot water to send 3 cold burst warnings after max shower time is exceeded"},
     {true, "publish_time <seconds>", "set frequency for publishing data to MQTT"},
     {true, "tx_mode <n>", "changes Tx logic. 1=EMS generic, 2=EMS+, 3=HT3"},
-    {true, "master_thermostat [product id]", "set default thermostat to use. Omit [product id] to show options."},
+    {true, "master_thermostat [product id]", "set default thermostat to use. No argument lists options"},
 
     {false, "info", "show current values deciphered from the EMS messages"},
     {false, "log <n | b | t | s | r | j | v | w [ID] | d [ID]>", "logging: none, basic, thermo, solar, raw, jabber, verbose, watch a type or device"},
@@ -1162,6 +1162,7 @@ bool SetListCallback(MYESP_FSACTION_t action, uint8_t wc, const char * setting, 
                     }
                 }
                 myDebug_P(PSTR("Usage: set master_thermostat <product id>"));
+                ok = true;
             } else if (wc == 2) {
                 uint8_t pid                       = atoi(value);
                 EMSESP_Settings.master_thermostat = pid;
@@ -1188,7 +1189,7 @@ bool SetListCallback(MYESP_FSACTION_t action, uint8_t wc, const char * setting, 
         if (EMSESP_Settings.master_thermostat) {
             myDebug_P(PSTR("  master_thermostat=%d"), EMSESP_Settings.master_thermostat);
         } else {
-            myDebug_P(PSTR("  master_thermostat=0 (use first one detected)"), EMSESP_Settings.master_thermostat);
+            myDebug_P(PSTR("  master_thermostat=0 (using first one detected)"), EMSESP_Settings.master_thermostat);
         }
     }
 
