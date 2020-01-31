@@ -1831,12 +1831,12 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
         i++;
     }
 
-    // not a boiler
+    // not a boiler, continue...
     i                   = 0;
     uint8_t found_index = 0;
     bool    typeFound   = false;
     while (i < _EMS_Devices_max) {
-        if (EMS_Devices[i].product_id == product_id) {
+        if ((EMS_Devices[i].product_id == product_id) && (EMS_Devices[i].type != EMS_DEVICE_TYPE_BOILER)) {
             // we have a matching product id
             typeFound   = true;
             found_index = i;
