@@ -759,13 +759,13 @@ bool MyESP::_hasValue(const char * s) {
 void MyESP::_printSetCommands() {
     myDebug_P(PSTR("\nset commands:\n"));
     myDebug_P(PSTR("  set erase"));
-    myDebug_P(PSTR("  set <wifi_mode <ap | client>"));
+    myDebug_P(PSTR("  set wifi_mode <ap | client>"));
     myDebug_P(PSTR("  set <wifi_ssid | wifi_password> [value]"));
-    myDebug_P(PSTR("  set mqtt_enabled <on | off>"));
+    myDebug_P(PSTR("  set mqtt_enabled [on | off]"));
     myDebug_P(PSTR("  set <mqtt_ip | mqtt_username | mqtt_password> [value]"));
     myDebug_P(PSTR("  set mqtt_heartbeat <on | off> (every 2 mins)"));
-    myDebug_P(PSTR("  set mqtt_base [string]"));
-    myDebug_P(PSTR("  set mqtt_port [number]"));
+    myDebug_P(PSTR("  set mqtt_base [prefix]"));
+    myDebug_P(PSTR("  set mqtt_port [n]"));
     myDebug_P(PSTR("  set mqtt_qos [0-3]"));
     myDebug_P(PSTR("  set mqtt_keepalive [seconds]"));
     myDebug_P(PSTR("  set mqtt_retain [on | off]"));
