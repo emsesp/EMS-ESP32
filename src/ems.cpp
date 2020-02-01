@@ -1432,9 +1432,12 @@ void _process_RC30Set(_EMS_RxTelegram * EMS_RxTelegram) {
 int8_t _getHeatingCircuit(_EMS_RxTelegram * EMS_RxTelegram) {
     // check to see we have an active HC. Assuming first byte must have some bit status set.
     // see https://github.com/proddy/EMS-ESP/issues/238
+    // and reverting on 1/2/2020 with https://github.com/proddy/EMS-ESP/issues/305#issuecomment-581006130
+    /*
     if (EMS_RxTelegram->data[0] == 0x00) {
         return -1;
     }
+    */
 
     // ignore telegrams that have no data, or only a single byte
     if (EMS_RxTelegram->data_length <= 1) {
