@@ -446,8 +446,8 @@ void showInfo() {
                     _renderIntValue(" Night temperature", "C", EMS_Thermostat.hc[hc_num - 1].nighttemp, 2);      // convert to a single byte * 2
                     _renderIntValue(" Vacation temperature", "C", EMS_Thermostat.hc[hc_num - 1].holidaytemp, 2); // convert to a single byte * 2
                 }
-                if (EMS_Thermostat.hc[hc_num - 1].circuitcalctemp < EMS_VALUE_USHORT_NOTSET)
-                    _renderIntValue(" Calculatet flow temperature", "C", EMS_Thermostat.hc[hc_num - 1].circuitcalctemp);
+                if (EMS_Thermostat.hc[hc_num - 1].circuitcalctemp < EMS_VALUE_INT_NOTSET)
+                    _renderIntValue(" Calculated flow temperature", "C", EMS_Thermostat.hc[hc_num - 1].circuitcalctemp);
 
                 // Render Thermostat Mode
                 _EMS_THERMOSTAT_MODE thermoMode;
