@@ -1637,7 +1637,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
             float f = strtof((char *)message, 0);
             if (f) {
                 ems_setThermostatTemp(f, hc);
-                publishEMSValues(true); // publish back immediately }
+                publishEMSValues(true); // publish back immediately
                 return;
             }
         }
@@ -1679,7 +1679,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
                 float f = doc["data"];
                 if (f) {
                     ems_setThermostatTemp(f, hc);
-                    publishEMSValues(true); // publish back immediately }
+                    publishEMSValues(true); // publish back immediately
                     return;
                 }
             }
@@ -1710,7 +1710,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
             if (EMS_Thermostat.hc[hc - 1].active) {
                 float f = doc["data"];
                 if (f) {
-                    ems_setThermostatTemp(f, hc, 1); // night }
+                    ems_setThermostatTemp(f, hc, 1); // night
                     return;
                 }
             }
