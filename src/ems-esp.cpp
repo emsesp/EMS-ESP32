@@ -1456,6 +1456,9 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
             strlcat(topic_s, itoa(hc, buffer, 10), sizeof(topic_s));
             myESP.mqttSubscribe(topic_s);
         }
+        // also subscribe without the HC appended to the end of the topic
+        myESP.mqttSubscribe(TOPIC_THERMOSTAT_CMD_TEMP_HA);
+        myESP.mqttSubscribe(TOPIC_THERMOSTAT_CMD_MODE_HA);
 
         // generic incoming MQTT command for Thermostat
         // this is used for example for setting daytemp, nighttemp, holidaytemp
@@ -1552,10 +1555,16 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
             return;
         }
         const char * command = doc["cmd"];
+        if (command == nullptr) {
+            return;
+        }
 
         // boiler ww comfort setting
         if (strcmp(command, TOPIC_BOILER_CMD_COMFORT) == 0) {
             const char * data = doc["data"];
+            if (data == nullptr) {
+                return;
+            }
             if (strcmp((char *)data, "hot") == 0) {
                 ems_setWarmWaterModeComfort(1);
             } else if (strcmp((char *)data, "comfort") == 0) {
@@ -1569,7 +1578,9 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
         // boiler flowtemp setting
         if (strcmp(command, TOPIC_BOILER_CMD_FLOWTEMP) == 0) {
             uint8_t t = doc["data"];
-            ems_setFlowTemp(t);
+            if (t) {
+                ems_setFlowTemp(t);
+            }
             return;
         }
 
@@ -1611,32 +1622,40 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
     // boiler wwtemp changes
     if (strcmp(topic, TOPIC_BOILER_CMD_WWTEMP) == 0) {
         uint8_t t = atoi((char *)message);
-        ems_setWarmWaterTemp(t);
-        publishEMSValues(true);
+        if (t) {
+            ems_setWarmWaterTemp(t);
+            publishEMSValues(true);
+        }
         return;
     }
 
     uint8_t hc;
     // thermostat temp changes
     hc = _hasHCspecified(TOPIC_THERMOSTAT_CMD_TEMP_HA, topic);
-    if (hc && EMS_Thermostat.hc[hc - 1].active) {
-        float f = strtof((char *)message, 0);
-        ems_setThermostatTemp(f, hc);
-        publishEMSValues(true); // publish back immediately
-        return;
+    if (hc) {
+        if (EMS_Thermostat.hc[hc - 1].active) {
+            float f = strtof((char *)message, 0);
+            if (f) {
+                ems_setThermostatTemp(f, hc);
+                publishEMSValues(true); // publish back immediately }
+                return;
+            }
+        }
     }
 
     // thermostat mode changes
     hc = _hasHCspecified(TOPIC_THERMOSTAT_CMD_MODE_HA, topic);
-    if (hc && EMS_Thermostat.hc[hc - 1].active) {
-        if (strncmp(message, "auto", 4) == 0) {
-            ems_setThermostatMode(2, hc);
-        } else if ((strncmp(message, "day", 4) == 0) || (strncmp(message, "manual", 6) == 0) || (strncmp(message, "heat", 4) == 0)) {
-            ems_setThermostatMode(1, hc);
-        } else if ((strncmp(message, "night", 5) == 0) || (strncmp(message, "off", 3) == 0)) {
-            ems_setThermostatMode(0, hc);
+    if (hc) {
+        if (EMS_Thermostat.hc[hc - 1].active) {
+            if (strncmp(message, "auto", 4) == 0) {
+                ems_setThermostatMode(2, hc);
+            } else if ((strncmp(message, "day", 4) == 0) || (strncmp(message, "manual", 6) == 0) || (strncmp(message, "heat", 4) == 0)) {
+                ems_setThermostatMode(1, hc);
+            } else if ((strncmp(message, "night", 5) == 0) || (strncmp(message, "off", 3) == 0)) {
+                ems_setThermostatMode(0, hc);
+            }
+            return;
         }
-        return;
     }
 
     // check for generic thermostat commands
@@ -1649,52 +1668,76 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
             return;
         }
         const char * command = doc["cmd"];
+        if (command == nullptr) {
+            return;
+        }
 
         // thermostat temp changes
         hc = _hasHCspecified(TOPIC_THERMOSTAT_CMD_TEMP, command);
-        if (hc && EMS_Thermostat.hc[hc - 1].active) {
-            float f = doc["data"];
-            ems_setThermostatTemp(f, hc);
-            publishEMSValues(true); // publish back immediately
-            return;
+        if (hc) {
+            if (EMS_Thermostat.hc[hc - 1].active) {
+                float f = doc["data"];
+                if (f) {
+                    ems_setThermostatTemp(f, hc);
+                    publishEMSValues(true); // publish back immediately }
+                    return;
+                }
+            }
         }
 
         // thermostat mode changes
         hc = _hasHCspecified(TOPIC_THERMOSTAT_CMD_MODE, command);
-        if (hc && EMS_Thermostat.hc[hc - 1].active) {
-            const char * data_cmd = doc["data"];
-            if (strncmp(data_cmd, "auto", 4) == 0) {
-                ems_setThermostatMode(2, hc);
-            } else if ((strncmp(data_cmd, "day", 4) == 0) || (strncmp(data_cmd, "manual", 6) == 0) || (strncmp(data_cmd, "heat", 4) == 0)) {
-                ems_setThermostatMode(1, hc);
-            } else if ((strncmp(data_cmd, "night", 5) == 0) || (strncmp(data_cmd, "off", 3) == 0)) {
-                ems_setThermostatMode(0, hc);
+        if (hc) {
+            if (EMS_Thermostat.hc[hc - 1].active) {
+                const char * data_cmd = doc["data"];
+                if (data_cmd == nullptr) {
+                    return;
+                }
+                if (strncmp(data_cmd, "auto", 4) == 0) {
+                    ems_setThermostatMode(2, hc);
+                } else if ((strncmp(data_cmd, "day", 4) == 0) || (strncmp(data_cmd, "manual", 6) == 0) || (strncmp(data_cmd, "heat", 4) == 0)) {
+                    ems_setThermostatMode(1, hc);
+                } else if ((strncmp(data_cmd, "night", 5) == 0) || (strncmp(data_cmd, "off", 3) == 0)) {
+                    ems_setThermostatMode(0, hc);
+                }
+                return;
             }
-            return;
         }
 
         // set night temp value
         hc = _hasHCspecified(TOPIC_THERMOSTAT_CMD_NIGHTTEMP, command);
-        if (hc && EMS_Thermostat.hc[hc - 1].active) {
-            float f = doc["data"];
-            ems_setThermostatTemp(f, hc, 1); // night
-            return;
+        if (hc) {
+            if (EMS_Thermostat.hc[hc - 1].active) {
+                float f = doc["data"];
+                if (f) {
+                    ems_setThermostatTemp(f, hc, 1); // night }
+                    return;
+                }
+            }
         }
 
         // set daytemp value
         hc = _hasHCspecified(TOPIC_THERMOSTAT_CMD_DAYTEMP, command);
-        if (hc && EMS_Thermostat.hc[hc - 1].active) {
-            float f = doc["data"];
-            ems_setThermostatTemp(f, hc, 2); // day
-            return;
+        if (hc) {
+            if (EMS_Thermostat.hc[hc - 1].active) {
+                float f = doc["data"];
+                if (f) {
+                    ems_setThermostatTemp(f, hc, 2); // day
+                }
+                return;
+            }
         }
 
         // set holiday value
         hc = _hasHCspecified(TOPIC_THERMOSTAT_CMD_HOLIDAYTEMP, command);
-        if (hc && EMS_Thermostat.hc[hc - 1].active) {
-            float f = doc["data"];
-            ems_setThermostatTemp(f, hc, 3); // holiday
-            return;
+        if (hc) {
+            if (EMS_Thermostat.hc[hc - 1].active) {
+                float f = doc["data"];
+                if (f) {
+                    ems_setThermostatTemp(f, hc, 3); // holiday
+                }
+                return;
+            }
         }
     }
 }
