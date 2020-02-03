@@ -196,7 +196,7 @@ _EMS_THERMOSTAT_MODE _getThermostatDayMode(uint8_t hc_num) {
         } else if (mode == 2) {
             thermoMode = EMS_THERMOSTAT_MODE_NIGHT;
         }
-    } else if (model == EMS_DEVICE_FLAG_RC35) {
+    } else if ((model == EMS_DEVICE_FLAG_RC35) || (model == EMS_DEVICE_FLAG_RC30N)) {
         if (mode == 0) {
             thermoMode = EMS_THERMOSTAT_MODE_NIGHT;
         } else if (mode == 1) {
@@ -435,7 +435,7 @@ void showInfo() {
 
                 // Render Day/Night/Holiday Temperature on RC35s
                 // there is no single setpoint temp, but one for day, night and vacation
-                if (model == EMS_DEVICE_FLAG_RC35) {
+                if ((model == EMS_DEVICE_FLAG_RC35) || (model == EMS_DEVICE_FLAG_RC30N)) {
                     if (EMS_Thermostat.hc[hc_num - 1].summer_mode) {
                         myDebug_P(PSTR("   Program is set to Summer mode"));
                     } else if (EMS_Thermostat.hc[hc_num - 1].holiday_mode) {
@@ -1278,7 +1278,8 @@ void TelnetCommandCallback(uint8_t wc, const char * commandLine) {
         if (wc == 2) {
             char * second_cmd = _readWord();
             if (strcmp(second_cmd, "scan") == 0) {
-                ems_scanDevices(); // known device scan
+                ems_clearDeviceList();
+                ems_scanDevices();
                 ok = true;
             }
         } else {

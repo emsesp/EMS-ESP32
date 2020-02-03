@@ -1995,6 +1995,7 @@ void ems_getThermostatValues() {
         ems_doReadCommand(EMS_TYPE_EasyStatusMessage, device_id);
         break;
     case EMS_DEVICE_FLAG_RC35:
+    case EMS_DEVICE_FLAG_RC30N:
         for (uint8_t hc_num = 1; hc_num <= EMS_THERMOSTAT_MAXHC; hc_num++) {
             if (hc_num == 1) {
                 statusMsg = EMS_TYPE_RC35StatusMessage_HC1;
@@ -2550,7 +2551,7 @@ void ems_setThermostatMode(uint8_t mode, uint8_t hc_num) {
         EMS_TxTelegram.type_validate      = EMS_TYPE_RC30Set;
         EMS_TxTelegram.comparisonPostRead = EMS_TYPE_RC30StatusMessage;
 
-    } else if (model == EMS_DEVICE_FLAG_RC35) {
+    } else if ((model == EMS_DEVICE_FLAG_RC35) || (model == EMS_DEVICE_FLAG_RC30N)) {
         if (hc_num == 1) {
             EMS_TxTelegram.type               = EMS_TYPE_RC35Set_HC1;
             EMS_TxTelegram.comparisonPostRead = EMS_TYPE_RC35StatusMessage_HC1;
@@ -3183,7 +3184,7 @@ void ems_doReadCommand(uint16_t type, uint8_t dest) {
  * Find the versions of our connected devices
  */
 void ems_scanDevices() {
-    myDebug_P(PSTR("Started scanning the EMS bus for known devices"));
+    myDebug_P(PSTR("Started scanning the EMS bus for known devices. This can take up to 10 seconds..."));
 
     std::list<uint8_t> Device_Ids; // create a new list
 
