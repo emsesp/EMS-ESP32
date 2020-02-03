@@ -215,7 +215,7 @@ _EMS_THERMOSTAT_MODE _getThermostatDayMode(uint8_t hc_num) {
 
 // Info - display status and data on an 'info' command
 void showInfo() {
-    static char buffer_type[128] = {0};
+    static char buffer_type[200] = {0};
 
     myDebug_P(PSTR("%sEMS-ESP system status:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
     _EMS_SYS_LOGGING sysLog = ems_getLogging();

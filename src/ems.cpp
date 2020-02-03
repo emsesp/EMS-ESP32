@@ -2115,7 +2115,7 @@ bool ems_getDeviceTypeDescription(uint8_t device_id, char * buffer) {
  * returns current device details as a string for known thermostat,boiler,solar and heatpump
  */
 char * ems_getDeviceDescription(_EMS_DEVICE_TYPE device_type, char * buffer, bool name_only) {
-    const uint8_t size    = 128;
+    const uint8_t size    = 200;
     bool          enabled = false;
     uint8_t       device_id;
     uint8_t       product_id;
