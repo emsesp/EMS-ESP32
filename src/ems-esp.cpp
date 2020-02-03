@@ -113,7 +113,7 @@ static const command_t project_cmds[] PROGMEM = {
     {false, "refresh", "fetch values from the EMS devices"},
     {false, "devices", "list detected EMS devices"},
     {false, "queue", "show current Tx queue"},
-    {false, "autodetect", "scan for EMS devices and external sensors"},
+    {false, "autodetect [scan]", "scan for EMS devices and external sensors. scan uses brute-force"},
     {false, "send XX ...", "send raw telegram data to EMS bus (XX are hex values)"},
     {false, "thermostat read <type ID>", "send read request to the thermostat for heating circuit hc 1-4"},
     {false, "thermostat temp [hc] <degrees>", "set current thermostat temperature"},
@@ -1275,11 +1275,19 @@ void TelnetCommandCallback(uint8_t wc, const char * commandLine) {
     }
 
     if (strcmp(first_cmd, "autodetect") == 0) {
-        myDebug("Scanning for new EMS devices and attached external sensors...");
-        scanDallas();
-        ems_clearDeviceList();
-        ems_doReadCommand(EMS_TYPE_UBADevices, EMS_Boiler.device_id);
-        ok = true;
+        if (wc == 2) {
+            char * second_cmd = _readWord();
+            if (strcmp(second_cmd, "scan") == 0) {
+                ems_scanDevices(); // known device scan
+                ok = true;
+            }
+        } else {
+            myDebug("Scanning for new EMS devices and attached external sensors...");
+            scanDallas();
+            ems_clearDeviceList();
+            ems_doReadCommand(EMS_TYPE_UBADevices, EMS_Boiler.device_id);
+            ok = true;
+        }
     }
 
     // logging

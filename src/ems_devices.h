@@ -12,10 +12,11 @@
 #include "ems.h"
 
 // Fixed EMS Device IDs
-#define EMS_ID_ME 0x0B     // our device, hardcoded as the "Service Key"
-#define EMS_ID_BOILER 0x08 // all UBA Boilers have 0x08
-
-#define EMS_ID_SM 0x30 // Solar Module SM10, SM100, SM200 and ISM1
+#define EMS_ID_ME 0x0B         // our device, hardcoded as the "Service Key"
+#define EMS_ID_BOILER 0x08     // all UBA Boilers have 0x08
+#define EMS_ID_SM 0x30         // Solar Module SM10, SM100, SM200 and ISM1
+#define EMS_ID_HP 0x38         // Heat Pump
+#define EMS_ID_CONTROLLER 0x09 // controllers, some are built in
 
 /*
  * Common Type
@@ -278,7 +279,7 @@ static const _EMS_Device EMS_Devices[] = {
     // Buderus/Nefit specific
     {79, EMS_DEVICE_TYPE_THERMOSTAT, "RC10/Moduline 100", EMS_DEVICE_FLAG_RC10},                                    // 0x17
     {77, EMS_DEVICE_TYPE_THERMOSTAT, "RC20/Moduline 300", EMS_DEVICE_FLAG_RC20},                                    // 0x17
-    {67, EMS_DEVICE_TYPE_THERMOSTAT, "RC30", EMS_DEVICE_FLAG_RC35},                                                 // 0x10 - based on RC35
+    {67, EMS_DEVICE_TYPE_THERMOSTAT, "RC30", EMS_DEVICE_FLAG_RC30N},                                                // 0x10 - based on RC35
     {78, EMS_DEVICE_TYPE_THERMOSTAT, "Moduline 400", EMS_DEVICE_FLAG_RC30},                                         // 0x10
     {86, EMS_DEVICE_TYPE_THERMOSTAT, "RC35", EMS_DEVICE_FLAG_RC35},                                                 // 0x10
     {93, EMS_DEVICE_TYPE_THERMOSTAT, "RC20RF", EMS_DEVICE_FLAG_RC20},                                               // 0x19

@@ -50,9 +50,10 @@
 #define EMS_DEVICE_FLAG_RC10 2
 #define EMS_DEVICE_FLAG_RC20 3
 #define EMS_DEVICE_FLAG_RC30 4
-#define EMS_DEVICE_FLAG_RC35 5
-#define EMS_DEVICE_FLAG_RC300 6
-#define EMS_DEVICE_FLAG_JUNKERS 7
+#define EMS_DEVICE_FLAG_RC30N 5 // newer type of RC30 with RC35 circuit
+#define EMS_DEVICE_FLAG_RC35 6
+#define EMS_DEVICE_FLAG_RC300 7
+#define EMS_DEVICE_FLAG_JUNKERS 8
 
 typedef enum {
     EMS_THERMOSTAT_MODE_UNKNOWN,
@@ -479,6 +480,7 @@ void             ems_Device_add_flags(unsigned int flags);
 bool             ems_Device_has_flags(unsigned int flags);
 void             ems_Device_remove_flags(unsigned int flags);
 bool             ems_isHT3();
+void             ems_scanDevices();
 
 // private functions
 uint8_t _crcCalculator(uint8_t * data, uint8_t len);

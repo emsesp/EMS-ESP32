@@ -1839,7 +1839,7 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
     uint8_t found_index = 0;
     bool    typeFound   = false;
     while (i < _EMS_Devices_max) {
-        if ((EMS_Devices[i].product_id == product_id) && (EMS_Devices[i].type != EMS_DEVICE_TYPE_BOILER)) {
+        if ((EMS_Devices[i].product_id == product_id)) {
             // we have a matching product id
             typeFound   = true;
             found_index = i;
@@ -1857,9 +1857,15 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
     const char *     device_desc_p = (EMS_Devices[found_index].device_desc); // pointer to the full description of the device
     _EMS_DEVICE_TYPE type          = EMS_Devices[found_index].type;          // device type
 
-    // we recognized it, see if we already have it in our recognized list
+    // sometimes boilers have a built-in controller on device ID 0x09
+    // we don't want this to appear as another boiler so switch them
+    if ((type == EMS_DEVICE_TYPE_BOILER) && (device_id = EMS_ID_CONTROLLER)) {
+        type = EMS_DEVICE_TYPE_CONTROLLER;
+    }
+
+    // we recognized it, add it to list
     if (_addDevice(type, product_id, device_id, device_desc_p, version, brand)) {
-        return; // already in list
+        return; // already in list, don't bother initializing it
     }
 
     uint8_t flags = EMS_Devices[found_index].flags; // it's a new entry, get the specifics
@@ -2388,7 +2394,7 @@ void ems_setThermostatTemp(float temperature, uint8_t hc_num, uint8_t temptype) 
 
         EMS_TxTelegram.type_validate = EMS_ID_NONE; // validate by reading from a different telegram
 
-    } else if (model == EMS_DEVICE_FLAG_RC35) {
+    } else if ((model == EMS_DEVICE_FLAG_RC35) || (model == EMS_DEVICE_FLAG_RC30N)) {
         switch (temptype) {
         case 1: // change the night temp
             EMS_TxTelegram.offset = EMS_OFFSET_RC35Set_temp_night;
@@ -2401,15 +2407,16 @@ void ems_setThermostatTemp(float temperature, uint8_t hc_num, uint8_t temptype) 
             break;
         default:
         case 0: // automatic selection, if no type is defined, we use the standard code
-            EMS_TxTelegram.offset = EMS_OFFSET_RC35Set_seltemp;
-
-            /* commented out for https://github.com/proddy/EMS-ESP/issues/310
-            if (EMS_Thermostat.hc[hc_num - 1].day_mode == 0) {
-                EMS_TxTelegram.offset = EMS_OFFSET_RC35Set_temp_night;
-            } else if (EMS_Thermostat.hc[hc_num - 1].day_mode == 1) {
-                EMS_TxTelegram.offset = EMS_OFFSET_RC35Set_temp_day;
+            if (model == EMS_DEVICE_FLAG_RC35) {
+                // https://github.com/proddy/EMS-ESP/issues/310
+                EMS_TxTelegram.offset = EMS_OFFSET_RC35Set_seltemp;
+            } else {
+                if (EMS_Thermostat.hc[hc_num - 1].day_mode == 0) {
+                    EMS_TxTelegram.offset = EMS_OFFSET_RC35Set_temp_night;
+                } else if (EMS_Thermostat.hc[hc_num - 1].day_mode == 1) {
+                    EMS_TxTelegram.offset = EMS_OFFSET_RC35Set_temp_day;
+                }
             }
-            */
             break;
         }
 
@@ -3170,4 +3177,34 @@ void ems_doReadCommand(uint16_t type, uint8_t dest) {
     EMS_TxTelegram.comparisonPostRead = EMS_ID_NONE;
 
     EMS_TxQueue.push(EMS_TxTelegram);
+}
+
+/**
+ * Find the versions of our connected devices
+ */
+void ems_scanDevices() {
+    myDebug_P(PSTR("Started scanning the EMS bus for known devices"));
+
+    std::list<uint8_t> Device_Ids; // create a new list
+
+    Device_Ids.push_back(EMS_ID_BOILER); // UBAMaster/Boilers - 0x08
+    Device_Ids.push_back(EMS_ID_HP);     // HeatPump - 0x38
+    Device_Ids.push_back(EMS_ID_SM);     // Solar Module - 0x30
+    Device_Ids.push_back(0x09);          // Controllers - 0x09
+    Device_Ids.push_back(0x02);          // Connect - 0x02
+    Device_Ids.push_back(0x48);          // Gateway - 0x48
+    Device_Ids.push_back(0x20);          // Mixing Devices - 0x20
+    Device_Ids.push_back(0x21);          // Mixing Devices - 0x21
+    Device_Ids.push_back(0x10);          // Thermostats - 0x10
+    Device_Ids.push_back(0x17);          // Thermostats - 0x17
+    Device_Ids.push_back(0x18);          // Thermostats - 0x18
+
+    // remove duplicates and reserved IDs (like our own device)
+    // Device_Ids.sort();
+    // Device_Ids.unique();
+
+    // send the read command with Version command
+    for (uint8_t device_id : Device_Ids) {
+        ems_doReadCommand(EMS_TYPE_Version, device_id);
+    }
 }
