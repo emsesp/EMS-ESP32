@@ -345,7 +345,7 @@ typedef struct {
     uint8_t  pumpMod;
     uint8_t  valveStatus;
     uint8_t  flowSetTemp;
-} _EMS_Mixing_HC;
+} _EMS_MixingModule_HC;
 
 // Mixing Module per WWC
 typedef struct {
@@ -354,19 +354,18 @@ typedef struct {
     uint16_t flowTemp;
     uint8_t  pumpMod;
     uint8_t  tempStatus;
-} _EMS_Mixing_WWC;
+} _EMS_MixingModule_WWC;
 
 // Mixer data
 typedef struct {
-    uint8_t         device_id;
-    uint8_t         device_flags;
-    const char *    device_desc_p;
-    uint8_t         product_id;
-    char            version[10];
-    bool            detected;
-    _EMS_Mixing_HC  hc[EMS_THERMOSTAT_MAXHC];   // array for the 4 heating circuits
-    _EMS_Mixing_WWC wwc[EMS_THERMOSTAT_MAXWWC]; // array for the 2 ww circuits
-} _EMS_Mixing;
+    uint8_t               device_id;
+    uint8_t               device_flags;
+    const char *          device_desc_p;
+    uint8_t               product_id;
+    char                  version[10];
+    _EMS_MixingModule_HC  hc[EMS_THERMOSTAT_MAXHC];   // array for the 4 heating circuits
+    _EMS_MixingModule_WWC wwc[EMS_THERMOSTAT_MAXWWC]; // array for the 2 ww circuits
+} _EMS_MixingModule;
 
 // Solar Module - SM10/SM100/SM200/ISM1
 typedef struct {
@@ -491,11 +490,11 @@ void    _removeTxQueue();
 int8_t  _getHeatingCircuit(_EMS_RxTelegram * EMS_RxTelegram);
 
 // global so can referenced in other classes
-extern _EMS_Sys_Status  EMS_Sys_Status;
-extern _EMS_Boiler      EMS_Boiler;
-extern _EMS_Thermostat  EMS_Thermostat;
-extern _EMS_SolarModule EMS_SolarModule;
-extern _EMS_HeatPump    EMS_HeatPump;
-extern _EMS_Mixing      EMS_Mixing;
+extern _EMS_Sys_Status   EMS_Sys_Status;
+extern _EMS_Boiler       EMS_Boiler;
+extern _EMS_Thermostat   EMS_Thermostat;
+extern _EMS_SolarModule  EMS_SolarModule;
+extern _EMS_HeatPump     EMS_HeatPump;
+extern _EMS_MixingModule EMS_MixingModule;
 
 extern std::list<_Detected_Device> Devices;
