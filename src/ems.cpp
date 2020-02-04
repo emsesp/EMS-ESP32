@@ -1834,12 +1834,12 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
         i++;
     }
 
-    // not a boiler, continue...
+    // not a boiler, continue by matching the product_id
     i                   = 0;
     uint8_t found_index = 0;
     bool    typeFound   = false;
     while (i < _EMS_Devices_max) {
-        if ((EMS_Devices[i].product_id == product_id)) {
+        if ((EMS_Devices[i].product_id == product_id) && (EMS_Devices[i].type != EMS_DEVICE_TYPE_BOILER)) {
             // we have a matching product id
             typeFound   = true;
             found_index = i;
@@ -1856,12 +1856,6 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
 
     const char *     device_desc_p = (EMS_Devices[found_index].device_desc); // pointer to the full description of the device
     _EMS_DEVICE_TYPE type          = EMS_Devices[found_index].type;          // device type
-
-    // sometimes boilers have a built-in controller on device ID 0x09
-    // we don't want this to appear as another boiler so switch them
-    if ((type == EMS_DEVICE_TYPE_BOILER) && (device_id = EMS_ID_CONTROLLER)) {
-        type = EMS_DEVICE_TYPE_CONTROLLER;
-    }
 
     // we recognized it, add it to list
     if (_addDevice(type, product_id, device_id, device_desc_p, version, brand)) {
