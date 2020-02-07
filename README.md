@@ -26,6 +26,11 @@ Please reference the [Wiki](https://emsesp.github.io/docs) for further details a
 
 ---
 
+## Say Thanks
+If you like EMS-ESP buy me a :coffee: via [PayPal](https://www.paypal.me/prderbyshire/2).
+
+---
+
 | ![web menu](https://emsesp.github.io/docs/_media/web/system_status.PNG) | ![web menu](https://emsesp.github.io/docs/_media/web/ems_dashboard.PNG) |
 | - | - |
 ![ha](https://emsesp.github.io/docs/_media/home%20assistant/ha.png)
