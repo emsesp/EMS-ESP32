@@ -1339,14 +1339,19 @@ void _process_RCPLUSStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     // or partial, e.g. for modes:
     //   manual : 10 00 FF 0A 01 A5 02
     //   auto :   10 00 FF 0A 01 A5 03
-    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].curr_roomTemp, EMS_OFFSET_RCPLUSStatusMessage_curr);          // value is * 10
-    _setValue8(EMS_RxTelegram, &EMS_Thermostat.hc[hc].setpoint_roomTemp, EMS_OFFSET_RCPLUSStatusMessage_setpoint); // convert to single byte, value is * 2
+
+    // current room temp
+    // quite often this is 0x8000 (n/a). still not sure why
+    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].curr_roomTemp, EMS_OFFSET_RCPLUSStatusMessage_curr); // value is * 10
+
     _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].day_mode, EMS_OFFSET_RCPLUSStatusMessage_mode, 1);
     _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].mode, EMS_OFFSET_RCPLUSStatusMessage_mode, 0); // bit 1, mode (auto=1 or manual=0)
 
-    // TODO figure out current setpoint temp at offset 6
-    // e.g. Thermostat -> all, telegram: 10 00 FF 06 01 A5 22
-    // EMS_Thermostat.hc[hc].setpoint_roomTemp = EMS_RxTelegram->data[EMS_OFFSET_RCPLUSStatusMessage_currsetpoint];
+    // setpoint as in position 3 and also 6 (EMS_OFFSET_RCPLUSStatusMessage_currsetpoint). We're sticking to 3 for now.
+    // don't fetch temp if in nightmode
+    if (EMS_Thermostat.hc[hc].day_mode) {
+        _setValue8(EMS_RxTelegram, &EMS_Thermostat.hc[hc].setpoint_roomTemp, EMS_OFFSET_RCPLUSStatusMessage_setpoint); // convert to single byte, value is * 2
+    }
 }
 
 /**
