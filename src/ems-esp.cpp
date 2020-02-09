@@ -484,7 +484,7 @@ void showInfo() {
             _renderUShortValue("Switch temperature", "C", EMS_Boiler.switchTemp);
         }
 
-        for (uint8_t hc_num = 1; hc_num <= EMS_THERMOSTAT_MAXHC; hc_num++) {
+        for (uint8_t hc_num = 1; hc_num <= EMS_MIXING_MAXHC; hc_num++) {
             if (EMS_MixingModule.hc[hc_num - 1].active) {
                 myDebug_P(PSTR("  Mixing Circuit %d"), hc_num);
                 if (EMS_MixingModule.hc[hc_num - 1].flowTemp < EMS_VALUE_USHORT_NOTSET)
@@ -497,7 +497,8 @@ void showInfo() {
                     _renderIntValue(" Current valve status", "", EMS_MixingModule.hc[hc_num - 1].valveStatus);
             }
         }
-        for (uint8_t wwc_num = 1; wwc_num <= EMS_THERMOSTAT_MAXWWC; wwc_num++) {
+
+        for (uint8_t wwc_num = 1; wwc_num <= EMS_MIXING_MAXWWC; wwc_num++) {
             if (EMS_MixingModule.wwc[wwc_num - 1].active) {
                 myDebug_P(PSTR("  Warm Water Circuit %d"), wwc_num);
                 if (EMS_MixingModule.wwc[wwc_num - 1].flowTemp < EMS_VALUE_USHORT_NOTSET)
@@ -774,19 +775,19 @@ void publishEMSValues(bool force) {
         ems_Device_remove_flags(EMS_DEVICE_UPDATE_FLAG_THERMOSTAT); // unset flag
     }
 
-    // handle the thermostat values
+    // handle the mixing values
     if (ems_getMixingDeviceEnabled() && (ems_Device_has_flags(EMS_DEVICE_UPDATE_FLAG_MIXING) || force)) {
         doc.clear();
         JsonObject rootMixing = doc.to<JsonObject>();
 
-        for (uint8_t hc_v = 1; hc_v <= EMS_THERMOSTAT_MAXHC; hc_v++) {
+        for (uint8_t hc_v = 1; hc_v <= EMS_MIXING_MAXHC; hc_v++) {
             _EMS_MixingModule_HC * mixing = &EMS_MixingModule.hc[hc_v - 1];
 
             // only send if we have an active Heating Circuit with real data
             if (mixing->active) {
                 // build new json object
                 char hc[10]; // hc{1-4}
-                strlcpy(hc, THERMOSTAT_HC, sizeof(hc));
+                strlcpy(hc, MIXING_HC, sizeof(hc));
                 strlcat(hc, _int_to_char(s, mixing->hc), sizeof(hc));
                 JsonObject dataMixing = rootMixing.createNestedObject(hc);
                 if (mixing->flowTemp < EMS_VALUE_USHORT_NOTSET)
@@ -799,13 +800,14 @@ void publishEMSValues(bool force) {
                     dataMixing["valveStatus"] = mixing->valveStatus;
             }
         }
-        for (uint8_t wwc_v = 1; wwc_v <= EMS_THERMOSTAT_MAXWWC; wwc_v++) {
+
+        for (uint8_t wwc_v = 1; wwc_v <= EMS_MIXING_MAXWWC; wwc_v++) {
             _EMS_MixingModule_WWC * mixing = &EMS_MixingModule.wwc[wwc_v - 1];
             // only send if we have an active Warm water Circuit with real data
             if (mixing->active) {
                 // build new json object
-                char wwc[10]; // wc{1-2}
-                strlcpy(wwc, "wwc", sizeof(wwc));
+                char wwc[10]; // wwc{1-2}
+                strlcpy(wwc, MIXING_WWC, sizeof(wwc));
                 strlcat(wwc, _int_to_char(s, mixing->wwc), sizeof(wwc));
                 JsonObject dataMixing = rootMixing.createNestedObject(wwc);
                 if (mixing->flowTemp < EMS_VALUE_USHORT_NOTSET)

@@ -121,15 +121,19 @@ void ems_init() {
 
     EMS_MixingModule.device_id = EMS_ID_NONE;
     // init all mixing modules
-    for (uint8_t i = 0; i < EMS_THERMOSTAT_MAXHC; i++) {
+    for (uint8_t i = 0; i < EMS_MIXING_MAXHC; i++) {
         EMS_MixingModule.hc[i].hc          = i + 1;
+        EMS_MixingModule.hc[i].active      = false;
         EMS_MixingModule.hc[i].flowTemp    = EMS_VALUE_USHORT_NOTSET;
         EMS_MixingModule.hc[i].pumpMod     = EMS_VALUE_INT_NOTSET;
         EMS_MixingModule.hc[i].valveStatus = EMS_VALUE_INT_NOTSET;
         EMS_MixingModule.hc[i].flowSetTemp = EMS_VALUE_INT_NOTSET;
     }
-    for (uint8_t i = 0; i < EMS_THERMOSTAT_MAXWWC; i++) {
+
+    // init ww circuits
+    for (uint8_t i = 0; i < EMS_MIXING_MAXWWC; i++) {
         EMS_MixingModule.wwc[i].wwc        = i + 1;
+        EMS_MixingModule.wwc[i].active     = false;
         EMS_MixingModule.wwc[i].flowTemp   = EMS_VALUE_USHORT_NOTSET;
         EMS_MixingModule.wwc[i].pumpMod    = EMS_VALUE_INT_NOTSET;
         EMS_MixingModule.wwc[i].tempStatus = EMS_VALUE_INT_NOTSET;
@@ -1086,9 +1090,12 @@ void _process_UBAMonitorFast(_EMS_RxTelegram * EMS_RxTelegram) {
     _setValue(EMS_RxTelegram, &EMS_Boiler.wWHeat, 7, 6);
     _setValue(EMS_RxTelegram, &EMS_Boiler.wWCirc, 7, 7);
 
-    // there may also be a BoilTemp in this telgram for Bosch - see https://github.com/proddy/EMS-ESP/issues/206
+    // there may also be a BoilTemp in this telegram for Bosch - see https://github.com/proddy/EMS-ESP/issues/206
     // as well as the one from UBAMonitorSlow
-    _setValue(EMS_RxTelegram, &EMS_Boiler.boilTemp, 11); // 0x8000 if not available
+    // brand is  0=unknown, 1=bosch, 2=junkers, 3=buderus, 4=nefit, 5=sieger, 11=worcester
+    if ((EMS_Boiler.brand == 1) || (EMS_Boiler.brand == 2) || (EMS_Boiler.brand == 11)) {
+        _setValue(EMS_RxTelegram, &EMS_Boiler.boilTemp, 11); // 0x8000 if not available
+    }
 
     _setValue(EMS_RxTelegram, &EMS_Boiler.retTemp, 13);
     _setValue(EMS_RxTelegram, &EMS_Boiler.flameCurr, 15);
@@ -1281,10 +1288,10 @@ void _process_EasyStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].setpoint_roomTemp, EMS_OFFSET_EasyStatusMessage_setpoint); // is * 100
 }
 
-// Mixer - 0x01D7, 0x01D8
+// Mixing module - 0x01D7, 0x01D8
 void _process_MMPLUSStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     uint8_t hc = (EMS_RxTelegram->type - EMS_TYPE_MMPLUSStatusMessage_HC1); // 0 to 3
-    if (hc >= EMS_THERMOSTAT_MAXHC) {
+    if (hc >= EMS_MIXING_MAXHC) {
         return; // invalid type
     }
     EMS_MixingModule.hc[hc].active = true;
@@ -1293,11 +1300,11 @@ void _process_MMPLUSStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     _setValue(EMS_RxTelegram, &EMS_MixingModule.hc[hc].pumpMod, EMS_OFFSET_MMPLUSStatusMessage_pump_mod);
     _setValue(EMS_RxTelegram, &EMS_MixingModule.hc[hc].valveStatus, EMS_OFFSET_MMPLUSStatusMessage_valve_status);
 }
-// Mixer warm water loading - 0x0231, 0x0232
 
+// Mixing module warm water loading - 0x0231, 0x0232
 void _process_MMPLUSStatusMessageWW(_EMS_RxTelegram * EMS_RxTelegram) {
-    uint8_t wwc = (EMS_RxTelegram->type - EMS_TYPE_MMPLUSStatusMessage_WWC1); // 0 to 3
-    if (wwc >= EMS_THERMOSTAT_MAXWWC) {
+    uint8_t wwc = (EMS_RxTelegram->type - EMS_TYPE_MMPLUSStatusMessage_WWC1); // 0 to 1
+    if (wwc >= EMS_MIXING_MAXWWC) {
         return; // invalid type
     }
     EMS_MixingModule.wwc[wwc].active = true;
@@ -1831,6 +1838,10 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
             EMS_Boiler.product_id    = product_id;
             EMS_Boiler.device_desc_p = EMS_Devices[i].device_desc;
             strlcpy(EMS_Boiler.version, version, sizeof(EMS_Boiler.version));
+
+            // set brand of boiler
+            EMS_Boiler.brand = brand;
+
             _addDevice(EMS_DEVICE_TYPE_BOILER, product_id, EMS_ID_BOILER, EMS_Devices[i].device_desc, version, brand);
             ems_getBoilerValues(); // get Boiler values that we would usually have to wait for
             return;                // quit
@@ -2937,7 +2948,10 @@ const _EMS_Type EMS_Types[] = {
     {EMS_DEVICE_UPDATE_FLAG_MIXING, EMS_TYPE_MMPLUSStatusMessage_HC4, "MMPLUSStatusMessage_HC4", _process_MMPLUSStatusMessage},
     {EMS_DEVICE_UPDATE_FLAG_MIXING, EMS_TYPE_MMPLUSStatusMessage_WWC1, "MMPLUSStatusMessage_WWC1", _process_MMPLUSStatusMessageWW},
     {EMS_DEVICE_UPDATE_FLAG_MIXING, EMS_TYPE_MMPLUSStatusMessage_WWC2, "MMPLUSStatusMessage_WWC2", _process_MMPLUSStatusMessageWW},
-    {EMS_DEVICE_UPDATE_FLAG_MIXING, EMS_TYPE_MMStatusMessage, "MMStatusMessage", _process_MMStatusMessage}};
+    {EMS_DEVICE_UPDATE_FLAG_MIXING, EMS_TYPE_MMStatusMessage, "MMStatusMessage", _process_MMStatusMessage}
+
+
+};
 
 // calculate sizes of arrays at compile time
 uint8_t _EMS_Types_max = ArraySize(EMS_Types);
