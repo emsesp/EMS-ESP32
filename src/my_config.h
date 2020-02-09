@@ -37,6 +37,10 @@
 #define THERMOSTAT_HEATINGTYPE "heatingtype"         // RC35 specific (3=floorheating)
 #define THERMOSTAT_CIRCUITCALCTEMP "circuitcalctemp" // RC35 specific
 
+// mixing module
+#define MIXING_HC "hc"   // which heating circuit number
+#define MIXING_WWC "wwc" // which warm water circuit number
+
 // MQTT for boiler
 #define TOPIC_BOILER_DATA "boiler_data"                // for sending boiler values to MQTT
 #define TOPIC_BOILER_TAPWATER_ACTIVE "tapwater_active" // if hot tap water is running
