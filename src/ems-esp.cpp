@@ -556,7 +556,7 @@ void publishSensorValues() {
         return; // no sensors attached
     }
 
-    StaticJsonDocument<200> doc;
+    StaticJsonDocument<600> doc;
     JsonObject              sensors = doc.to<JsonObject>();
 
     bool hasdata     = false;
