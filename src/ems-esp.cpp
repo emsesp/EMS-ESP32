@@ -514,13 +514,18 @@ void showInfo() {
     // Dallas external temp sensors
     if (EMSESP_Settings.dallas_sensors) {
         myDebug_P(PSTR("")); // newline
-        char buffer[128] = {0};
-        char valuestr[8] = {0}; // for formatting temp
+        char buffer[128]  = {0};
+        char buffer2[128] = {0};
+        char valuestr[8]  = {0}; // for formatting temp
         myDebug_P(PSTR("%sExternal temperature sensors:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
         for (uint8_t i = 0; i < EMSESP_Settings.dallas_sensors; i++) {
             float sensorValue = ds18.getValue(i);
             if (sensorValue != DS18_DISCONNECTED) {
-                myDebug_P(PSTR("  Sensor #%d %s: %s C"), i + 1, ds18.getDeviceString(buffer, i), _float_to_char(valuestr, sensorValue));
+                myDebug_P(PSTR("  Sensor #%d type:%s id:%s temperature: %s C"),
+                          i + 1,
+                          ds18.getDeviceType(buffer, i),
+                          ds18.getDeviceID(buffer2, i),
+                          _float_to_char(valuestr, sensorValue));
             }
         }
     }
@@ -532,9 +537,10 @@ void showInfo() {
 void scanDallas() {
     EMSESP_Settings.dallas_sensors = ds18.scan();
     if (EMSESP_Settings.dallas_sensors) {
-        char buffer[128] = {0};
+        char buffer[128];
+        char buffer2[128];
         for (uint8_t i = 0; i < EMSESP_Settings.dallas_sensors; i++) {
-            myDebug_P(PSTR("External temperature sensor %s found"), ds18.getDeviceString(buffer, i));
+            myDebug_P(PSTR("External temperature sensor type:%s id:%s found"), ds18.getDeviceType(buffer, i), ds18.getDeviceID(buffer2, i));
         }
     }
 }
@@ -553,16 +559,14 @@ void publishSensorValues() {
     StaticJsonDocument<200> doc;
     JsonObject              sensors = doc.to<JsonObject>();
 
-    bool hasdata  = false;
-    char label[8] = {0};
-
+    bool hasdata     = false;
+    char buffer[128] = {0};
     // see if the sensor values have changed, if so send it on
     for (uint8_t i = 0; i < EMSESP_Settings.dallas_sensors; i++) {
         float sensorValue = ds18.getValue(i);
         if (sensorValue != DS18_DISCONNECTED) {
-            sprintf(label, PAYLOAD_EXTERNAL_SENSORS, (i + 1));
-            sensors[label] = sensorValue;
-            hasdata        = true;
+            sensors[ds18.getDeviceID(buffer, i)] = sensorValue;
+            hasdata                              = true;
         }
     }
 
@@ -1001,11 +1005,6 @@ bool LoadSaveCallback(MYESP_FSACTION_t action, JsonObject settings) {
         EMSESP_Settings.shower_alert    = settings["shower_alert"];
         EMSESP_Settings.publish_time    = settings["publish_time"] | DEFAULT_PUBLISHTIME;
 
-        // can't be 0 which could be the case coming from earlier builds < 1.9.5b12
-        if (EMSESP_Settings.publish_time == 0) {
-            EMSESP_Settings.publish_time = DEFAULT_PUBLISHTIME;
-        }
-
         EMSESP_Settings.listen_mode = settings["listen_mode"];
         ems_setTxDisabled(EMSESP_Settings.listen_mode);
 
@@ -1164,8 +1163,11 @@ bool SetListCallback(MYESP_FSACTION_t action, uint8_t wc, const char * setting, 
                         myDebug_P(PSTR(" %d = %s"), (it)->product_id, device_string);
                     }
                 }
+                myDebug_P("");
                 myDebug_P(PSTR("Usage: set master_thermostat <product id>"));
-                ok = true;
+                ems_setMasterThermostat(0);            // default value
+                EMSESP_Settings.master_thermostat = 0; // back to default
+                ok                                = true;
             } else if (wc == 2) {
                 uint8_t pid                       = atoi(value);
                 EMSESP_Settings.master_thermostat = pid;

@@ -1354,7 +1354,7 @@ void _process_RCPLUSStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].day_mode, EMS_OFFSET_RCPLUSStatusMessage_mode, 1);
     _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].mode, EMS_OFFSET_RCPLUSStatusMessage_mode, 0); // bit 1, mode (auto=1 or manual=0)
 
-    // setpoint as in position 3 and also 6 (EMS_OFFSET_RCPLUSStatusMessage_currsetpoint). We're sticking to 3 for now.
+    // setpoint is in position 3 and also 6 (EMS_OFFSET_RCPLUSStatusMessage_currsetpoint). We're sticking to 3 for now.
     // don't fetch temp if in nightmode
     if (EMS_Thermostat.hc[hc].day_mode) {
         _setValue8(EMS_RxTelegram, &EMS_Thermostat.hc[hc].setpoint_roomTemp, EMS_OFFSET_RCPLUSStatusMessage_setpoint); // convert to single byte, value is * 2
