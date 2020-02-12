@@ -548,7 +548,7 @@ void scanDallas() {
 // send all dallas sensor values as a JSON package to MQTT
 void publishSensorValues() {
     // don't send if MQTT is connected
-    if (!myESP.isMQTTConnected()) {
+    if (!myESP.isMQTTConnected() || (!EMSESP_Settings.publish_time)) {
         return;
     }
 
@@ -584,7 +584,7 @@ void publishSensorValues() {
 // a json object is created for each device type
 void publishEMSValues(bool force) {
     // don't send if MQTT is not connected or EMS bus is not connected
-    if (!myESP.isMQTTConnected() || (!ems_getBusConnected())) {
+    if (!myESP.isMQTTConnected() || (!ems_getBusConnected()) || (!EMSESP_Settings.publish_time)) {
         return;
     }
 
@@ -918,6 +918,11 @@ bool do_publishShowerData() {
 
 // call PublishValues with forcing forcing
 void do_publishValues() {
+    if (!EMSESP_Settings.publish_time) {
+        myDebugLog("publish_time is set to 0. Publishing disabled.");
+        return;
+    }
+
     myDebugLog("Starting scheduled MQTT publish...");
     publishEMSValues(false);
     publishSensorValues();
@@ -1187,12 +1192,17 @@ bool SetListCallback(MYESP_FSACTION_t action, uint8_t wc, const char * setting, 
         myDebug_P(PSTR("  listen_mode=%s"), EMSESP_Settings.listen_mode ? "on" : "off");
         myDebug_P(PSTR("  shower_timer=%s"), EMSESP_Settings.shower_timer ? "on" : "off");
         myDebug_P(PSTR("  shower_alert=%s"), EMSESP_Settings.shower_alert ? "on" : "off");
-        myDebug_P(PSTR("  publish_time=%d"), EMSESP_Settings.publish_time);
+
+        if (EMSESP_Settings.publish_time) {
+            myDebug_P(PSTR("  publish_time=%d"), EMSESP_Settings.publish_time);
+        } else {
+            myDebug_P(PSTR("  publish_time=0 (no MQTT publishing)"));
+        }
 
         if (EMSESP_Settings.master_thermostat) {
             myDebug_P(PSTR("  master_thermostat=%d"), EMSESP_Settings.master_thermostat);
         } else {
-            myDebug_P(PSTR("  master_thermostat=0 (using first one detected)"), EMSESP_Settings.master_thermostat);
+            myDebug_P(PSTR("  master_thermostat=0 (using first one detected)"));
         }
     }
 
