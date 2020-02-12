@@ -1131,11 +1131,9 @@ bool SetListCallback(MYESP_FSACTION_t action, uint8_t wc, const char * setting, 
         // publish_time
         if ((strcmp(setting, "publish_time") == 0) && (wc == 2)) {
             int16_t val = atoi(value);
-            if (val > 0) {
+            if (val >= 0) {
                 EMSESP_Settings.publish_time = atoi(value);
                 ok                           = true;
-            } else {
-                myDebug_P(PSTR("Error. time must be at least 1 second"));
             }
         }
 
