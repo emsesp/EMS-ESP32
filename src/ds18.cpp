@@ -52,16 +52,8 @@ uint8_t DS18::scan() {
     return count;
 }
 
-
-// scan every 2 seconds
 void DS18::loop() {
-    static uint32_t last = 0;
-    if (millis() - last < DS18_READ_INTERVAL) {
-        return;
-    }
-    last = millis();
-
-    // Every second we either start a conversion or read the scratchpad
+    // we either start a conversion or read the scratchpad
     static bool conversion = true;
     if (conversion) {
         _wire->reset();

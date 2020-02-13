@@ -82,4 +82,3 @@
 
 // MQTT for External Sensors
 #define TOPIC_EXTERNAL_SENSORS "sensors"   // for sending sensor values to MQTT
-#define PAYLOAD_EXTERNAL_SENSORS "temp_%d" // for formatting the payload for each external dallas sensor
