@@ -107,7 +107,7 @@ void ems_init() {
         EMS_Thermostat.hc[i].hc                = i + 1;
         EMS_Thermostat.hc[i].active            = false;
         EMS_Thermostat.hc[i].mode              = EMS_VALUE_INT_NOTSET;
-        EMS_Thermostat.hc[i].day_mode          = EMS_VALUE_INT_NOTSET;
+        EMS_Thermostat.hc[i].mode_type         = EMS_VALUE_INT_NOTSET;
         EMS_Thermostat.hc[i].summer_mode       = EMS_VALUE_INT_NOTSET;
         EMS_Thermostat.hc[i].holiday_mode      = EMS_VALUE_INT_NOTSET;
         EMS_Thermostat.hc[i].daytemp           = EMS_VALUE_INT_NOTSET;
@@ -1270,7 +1270,7 @@ void _process_RC35StatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     }
 
     _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].curr_roomTemp, EMS_OFFSET_RC35StatusMessage_curr); // is * 10
-    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].day_mode, EMS_OFFSET_RC35StatusMessage_mode, 1);
+    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].mode_type, EMS_OFFSET_RC35StatusMessage_mode, 1);
     _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].summer_mode, EMS_OFFSET_RC35StatusMessage_mode, 0);
     _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].holiday_mode, EMS_OFFSET_RC35StatusMessage_mode1, 5);
     _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].circuitcalctemp, EMS_OFFSET_RC35Set_circuitcalctemp);
@@ -1351,12 +1351,13 @@ void _process_RCPLUSStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     // quite often this is 0x8000 (n/a). still not sure why
     _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].curr_roomTemp, EMS_OFFSET_RCPLUSStatusMessage_curr); // value is * 10
 
-    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].day_mode, EMS_OFFSET_RCPLUSStatusMessage_mode, 1);
+    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].mode_type, EMS_OFFSET_RCPLUSStatusMessage_mode, 1);
     _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].mode, EMS_OFFSET_RCPLUSStatusMessage_mode, 0); // bit 1, mode (auto=1 or manual=0)
 
     // setpoint is in position 3 and also 6 (EMS_OFFSET_RCPLUSStatusMessage_currsetpoint). We're sticking to 3 for now.
-    // don't fetch temp if in nightmode
-    if (EMS_Thermostat.hc[hc].day_mode) {
+    // only fetch temp if in comfort mode (not eco/night mode)
+    // also ignore if its 0 - see https://github.com/proddy/EMS-ESP/issues/256#issuecomment-585171426
+    if ((EMS_Thermostat.hc[hc].mode_type) && (EMS_RxTelegram->data[EMS_OFFSET_RCPLUSStatusMessage_setpoint] != 0)) {
         _setValue8(EMS_RxTelegram, &EMS_Thermostat.hc[hc].setpoint_roomTemp, EMS_OFFSET_RCPLUSStatusMessage_setpoint); // convert to single byte, value is * 2
     }
 }
@@ -1381,7 +1382,7 @@ void _process_JunkersStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
 
     _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].curr_roomTemp, EMS_OFFSET_JunkersStatusMessage_curr);         // value is * 10
     _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].setpoint_roomTemp, EMS_OFFSET_JunkersStatusMessage_setpoint); // value is * 10
-    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].day_mode, EMS_OFFSET_JunkersStatusMessage_daymode);           // 3 = day, 2 = night
+    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].mode_type, EMS_OFFSET_JunkersStatusMessage_daymode);          // 3 = day, 2 = night
     _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].mode, EMS_OFFSET_JunkersStatusMessage_mode);                  // 1 = manual, 2 = auto
 }
 
@@ -2328,7 +2329,7 @@ void ems_sendRawTelegram(char * telegram) {
 /**
  * Set the temperature of the thermostat
  * hc_num is 1 to 4
- * temptype 0 = normal, 1=night temp, 2=day temp, 3=holiday temp
+ * temptype 0=normal, 1=night temp, 2=day temp, 3=holiday temp
  */
 void ems_setThermostatTemp(float temperature, uint8_t hc_num, uint8_t temptype) {
     if (!ems_getThermostatEnabled()) {
@@ -2357,10 +2358,14 @@ void ems_setThermostatTemp(float temperature, uint8_t hc_num, uint8_t temptype) 
     EMS_TxTelegram.dest   = device_id;
 
     char s[10] = {0};
-    myDebug_P(PSTR("Setting new thermostat temperature to %s for heating circuit %d type %d (0=auto,1=night,2=day,3=holiday)"),
-              _float_to_char(s, temperature),
-              hc_num,
-              temptype);
+    if ((model == EMS_DEVICE_FLAG_RC35) || (model == EMS_DEVICE_FLAG_RC30N)) {
+        myDebug_P(PSTR("Setting new thermostat temperature to %s for heating circuit %d type %d (0=auto,1=night,2=day,3=holiday)"),
+                  _float_to_char(s, temperature),
+                  hc_num,
+                  temptype);
+    } else {
+        myDebug_P(PSTR("Setting new thermostat temperature to %s for heating circuit %d"), _float_to_char(s, temperature), hc_num);
+    }
 
     if (model == EMS_DEVICE_FLAG_RC20) {
         EMS_TxTelegram.type               = EMS_TYPE_RC20Set;
@@ -2421,9 +2426,9 @@ void ems_setThermostatTemp(float temperature, uint8_t hc_num, uint8_t temptype) 
                 // https://github.com/proddy/EMS-ESP/issues/310
                 EMS_TxTelegram.offset = EMS_OFFSET_RC35Set_seltemp;
             } else {
-                if (EMS_Thermostat.hc[hc_num - 1].day_mode == 0) {
+                if (EMS_Thermostat.hc[hc_num - 1].mode_type == 0) {
                     EMS_TxTelegram.offset = EMS_OFFSET_RC35Set_temp_night;
-                } else if (EMS_Thermostat.hc[hc_num - 1].day_mode == 1) {
+                } else if (EMS_Thermostat.hc[hc_num - 1].mode_type == 1) {
                     EMS_TxTelegram.offset = EMS_OFFSET_RC35Set_temp_day;
                 }
             }
@@ -2460,9 +2465,9 @@ void ems_setThermostatTemp(float temperature, uint8_t hc_num, uint8_t temptype) 
         default:
         case 0: // automatic selection, if no type is defined, we use the standard code
             // not sure if this is correct for Junkers
-            if (EMS_Thermostat.hc[hc_num - 1].day_mode == 0) {
+            if (EMS_Thermostat.hc[hc_num - 1].mode_type == 0) {
                 EMS_TxTelegram.offset = EMS_OFFSET_JunkersSetMessage_night_temp;
-            } else if (EMS_Thermostat.hc[hc_num - 1].day_mode == 1) {
+            } else if (EMS_Thermostat.hc[hc_num - 1].mode_type == 1) {
                 EMS_TxTelegram.offset = EMS_OFFSET_JunkersSetMessage_day_temp;
             }
             break;

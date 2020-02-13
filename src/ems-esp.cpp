@@ -183,13 +183,13 @@ _EMS_THERMOSTAT_MODE _getThermostatMode(uint8_t hc_num) {
 }
 
 // figures out the thermostat day/night mode depending on the thermostat type
-// returns {EMS_THERMOSTAT_MODE_NIGHT, EMS_THERMOSTAT_MODE_DAY}
+// returns {EMS_THERMOSTAT_MODE_NIGHT, EMS_THERMOSTAT_MODE_DAY, etc...}
 // hc_num is 1 to 4
-_EMS_THERMOSTAT_MODE _getThermostatDayMode(uint8_t hc_num) {
+_EMS_THERMOSTAT_MODE _getThermostatMode2(uint8_t hc_num) {
     _EMS_THERMOSTAT_MODE thermoMode = EMS_THERMOSTAT_MODE_UNKNOWN;
     uint8_t              model      = ems_getThermostatModel();
 
-    uint8_t mode = EMS_Thermostat.hc[hc_num - 1].day_mode;
+    uint8_t mode = EMS_Thermostat.hc[hc_num - 1].mode_type;
 
     if (model == EMS_DEVICE_FLAG_JUNKERS) {
         if (mode == 3) {
@@ -205,9 +205,9 @@ _EMS_THERMOSTAT_MODE _getThermostatDayMode(uint8_t hc_num) {
         }
     } else if (model == EMS_DEVICE_FLAG_RC300) {
         if (mode == 0) {
-            thermoMode = EMS_THERMOSTAT_MODE_NIGHT;
+            thermoMode = EMS_THERMOSTAT_MODE_ECO;
         } else if (mode == 1) {
-            thermoMode = EMS_THERMOSTAT_MODE_DAY;
+            thermoMode = EMS_THERMOSTAT_MODE_COMFORT;
         }
     }
 
@@ -447,6 +447,8 @@ void showInfo() {
                     _renderIntValue(" Night temperature", "C", EMS_Thermostat.hc[hc_num - 1].nighttemp, 2);      // convert to a single byte * 2
                     _renderIntValue(" Vacation temperature", "C", EMS_Thermostat.hc[hc_num - 1].holidaytemp, 2); // convert to a single byte * 2
                 }
+
+                // show flow temp if we have it
                 if (EMS_Thermostat.hc[hc_num - 1].circuitcalctemp < EMS_VALUE_INT_NOTSET)
                     _renderIntValue(" Calculated flow temperature", "C", EMS_Thermostat.hc[hc_num - 1].circuitcalctemp);
 
@@ -465,12 +467,18 @@ void showInfo() {
                     myDebug_P(PSTR("   Mode is set to day"));
                 }
 
-                // Render Thermostat Day Mode
-                thermoMode = _getThermostatDayMode(hc_num);
-                if (thermoMode == EMS_THERMOSTAT_MODE_NIGHT) {
-                    myDebug_P(PSTR("   Day Mode is set to night"));
-                } else if (thermoMode == EMS_THERMOSTAT_MODE_DAY) {
-                    myDebug_P(PSTR("   Day Mode is set to day"));
+                // Render Thermostat Mode2, only if its in Auto mode
+                if (thermoMode == EMS_THERMOSTAT_MODE_AUTO) {
+                    thermoMode = _getThermostatMode2(hc_num);
+                    if (thermoMode == EMS_THERMOSTAT_MODE_NIGHT) {
+                        myDebug_P(PSTR("   Mode type is set to night"));
+                    } else if (thermoMode == EMS_THERMOSTAT_MODE_DAY) {
+                        myDebug_P(PSTR("   Mode type is set to day"));
+                    } else if (thermoMode == EMS_THERMOSTAT_MODE_COMFORT) {
+                        myDebug_P(PSTR("   Mode type is set to comfort"));
+                    } else if (thermoMode == EMS_THERMOSTAT_MODE_ECO) {
+                        myDebug_P(PSTR("   Mode type is set to eco"));
+                    }
                 }
             }
         }

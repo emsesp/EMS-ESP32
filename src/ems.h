@@ -64,7 +64,9 @@ typedef enum {
     EMS_THERMOSTAT_MODE_MANUAL,
     EMS_THERMOSTAT_MODE_AUTO,
     EMS_THERMOSTAT_MODE_NIGHT,
-    EMS_THERMOSTAT_MODE_DAY
+    EMS_THERMOSTAT_MODE_DAY,
+    EMS_THERMOSTAT_MODE_ECO,
+    EMS_THERMOSTAT_MODE_COMFORT
 } _EMS_THERMOSTAT_MODE;
 
 // trigger settings to determine if hot tap water or the heating is active
@@ -397,7 +399,7 @@ typedef struct {
     int16_t setpoint_roomTemp; // current set temp
     int16_t curr_roomTemp;     // current room temp
     uint8_t mode;              // 0=low, 1=manual, 2=auto (or night, day on RC35s)
-    uint8_t day_mode;          // 0=night, 1=day
+    uint8_t mode_type;         // 0=night/eco, 1=day/comfort
     uint8_t summer_mode;
     uint8_t holiday_mode;
     uint8_t daytemp;
