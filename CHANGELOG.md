@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - MM200 warm water circuits (https://github.com/proddy/EMS-ESP/pull/315)
 - First implementation of writing to Junker Thermostats (thanks @Neonox31)
 - Added model type (Buderus, Sieger, Junkers, Nefit, Bosch, Worcester) to device names
+- `boiler wwonetime` command from Telnet
 
 ### Fixed
 - set boiler warm water temp on Junkers/Bosch HT3

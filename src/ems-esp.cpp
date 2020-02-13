@@ -121,6 +121,7 @@ static const command_t project_cmds[] PROGMEM = {
     {false, "boiler read <type ID>", "send read request to boiler"},
     {false, "boiler wwtemp <degrees>", "set boiler warm water temperature"},
     {false, "boiler wwactive <on | off>", "set boiler warm water on/off"},
+    {false, "boiler wwonetime <on | off>", "set boiler warm water onetime on/off"},
     {false, "boiler tapwater <on | off>", "set boiler warm tap water on/off"},
     {false, "boiler flowtemp <degrees>", "set boiler flow temperature"},
     {false, "boiler comfort <hot | eco | intelligent>", "set boiler warm water comfort setting"}
@@ -1400,6 +1401,15 @@ void TelnetCommandCallback(uint8_t wc, const char * commandLine) {
                 ok = true;
             } else if (strcmp(third_cmd, "off") == 0) {
                 ems_setWarmWaterActivated(false);
+                ok = true;
+            }
+        } else if (strcmp(second_cmd, "wwonetime") == 0) {
+            char * third_cmd = _readWord();
+            if (strcmp(third_cmd, "on") == 0) {
+                ems_setWarmWaterOnetime(true);
+                ok = true;
+            } else if (strcmp(third_cmd, "off") == 0) {
+                ems_setWarmWaterOnetime(false);
                 ok = true;
             }
         }
