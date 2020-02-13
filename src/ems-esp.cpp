@@ -556,7 +556,7 @@ void publishSensorValues() {
         return; // no sensors attached
     }
 
-    StaticJsonDocument<600> doc;
+    StaticJsonDocument<400> doc;
     JsonObject              sensors = doc.to<JsonObject>();
 
     bool hasdata     = false;
@@ -574,7 +574,7 @@ void publishSensorValues() {
         return; // nothing to send
     }
 
-    char data[200] = {0};
+    char data[400] = {0};
     serializeJson(doc, data, sizeof(data));
     myDebugLog("Publishing external sensor data via MQTT");
     myESP.mqttPublish(TOPIC_EXTERNAL_SENSORS, data);
