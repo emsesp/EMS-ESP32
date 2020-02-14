@@ -1092,10 +1092,10 @@ void _process_UBAMonitorFast(_EMS_RxTelegram * EMS_RxTelegram) {
 
     // there may also be a BoilTemp in this telegram for Bosch - see https://github.com/proddy/EMS-ESP/issues/206
     // as well as the one from UBAMonitorSlow
-    // brand is  0=unknown, 1=bosch, 2=junkers, 3=buderus, 4=nefit, 5=sieger, 11=worcester
-    if ((EMS_Boiler.brand == 1) || (EMS_Boiler.brand == 2) || (EMS_Boiler.brand == 11)) {
-        _setValue(EMS_RxTelegram, &EMS_Boiler.boilTemp, 11); // 0x8000 if not available
-    }
+    // brand is 0=unknown, 1=bosch, 2=junkers, 3=buderus, 4=nefit, 5=sieger, 11=worcester
+    //if ((EMS_Boiler.brand == 1) || (EMS_Boiler.brand == 2) || (EMS_Boiler.brand == 11)) {
+    _setValue(EMS_RxTelegram, &EMS_Boiler.boilTemp, 11); // 0x8000 if not available
+    //}
 
     _setValue(EMS_RxTelegram, &EMS_Boiler.retTemp, 13);
     _setValue(EMS_RxTelegram, &EMS_Boiler.flameCurr, 15);
