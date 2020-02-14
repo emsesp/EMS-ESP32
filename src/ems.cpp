@@ -1354,10 +1354,10 @@ void _process_RCPLUSStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].mode_type, EMS_OFFSET_RCPLUSStatusMessage_mode, 1);
     _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].mode, EMS_OFFSET_RCPLUSStatusMessage_mode, 0); // bit 1, mode (auto=1 or manual=0)
 
-    // setpoint is in position 3 and also 6 (EMS_OFFSET_RCPLUSStatusMessage_currsetpoint). We're sticking to 3 for now.
-    // only fetch temp if in comfort mode (not eco/night mode)
+    // setpoint is in offset 3 (EMS_OFFSET_RCPLUSStatusMessage_setpoint) and also 7 (EMS_OFFSET_RCPLUSStatusMessage_currsetpoint).
+    // We're sticking to 3 for now.
     // also ignore if its 0 - see https://github.com/proddy/EMS-ESP/issues/256#issuecomment-585171426
-    if ((EMS_Thermostat.hc[hc].mode_type) && (EMS_RxTelegram->data[EMS_OFFSET_RCPLUSStatusMessage_setpoint] != 0)) {
+    if (EMS_RxTelegram->data[EMS_OFFSET_RCPLUSStatusMessage_setpoint] != 0) {
         _setValue8(EMS_RxTelegram, &EMS_Thermostat.hc[hc].setpoint_roomTemp, EMS_OFFSET_RCPLUSStatusMessage_setpoint); // convert to single byte, value is * 2
     }
 }

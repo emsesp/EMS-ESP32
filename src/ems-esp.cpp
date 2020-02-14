@@ -2155,6 +2155,7 @@ void loop() {
         _need_first_publish = false; // reset flag
     } else {
         // check if we're on auto mode for publishing
+        // then send EMS values, only if its been flagged to update
         if (EMSESP_Settings.publish_time == 0) {
             publishEMSValues(false);
         }
