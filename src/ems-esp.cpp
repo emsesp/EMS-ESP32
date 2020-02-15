@@ -725,8 +725,8 @@ void publishEMSValues(bool force) {
         for (uint8_t hc_v = 1; hc_v <= EMS_THERMOSTAT_MAXHC; hc_v++) {
             _EMS_Thermostat_HC * thermostat = &EMS_Thermostat.hc[hc_v - 1];
 
-            // only send if we have an active Heating Circuit with actual temperature values
-            if ((thermostat->active) && (thermostat->setpoint_roomTemp > EMS_VALUE_SHORT_NOTSET) && (thermostat->curr_roomTemp > EMS_VALUE_SHORT_NOTSET)) {
+            // only send if we have an active Heating Circuit with an actual setpoint temp temperature values
+            if ((thermostat->active) && (thermostat->setpoint_roomTemp > EMS_VALUE_SHORT_NOTSET)) {
                 // build new json object
                 char hc[10]; // hc{1-4}
                 strlcpy(hc, THERMOSTAT_HC, sizeof(hc));
