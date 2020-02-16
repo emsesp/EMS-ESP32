@@ -2694,7 +2694,7 @@ void MyESP::_printMQTTLog(bool show_sub = false) {
 
     for (i = 0; i < MYESP_MQTTLOG_MAX; i++) {
         if ((MQTT_log[i].topic != nullptr) && (MQTT_log[i].type == MYESP_MQTTLOGTYPE_PUBLISH)) {
-            myDebug_P(PSTR("  (%02d:%02d:%02d) Topic:%s Payload:%s"),
+            myDebug_P(PSTR("  (%02d:%02d:%02d) Topic: %s Payload: %s"),
                       to_hour(MQTT_log[i].timestamp),
                       to_minute(MQTT_log[i].timestamp),
                       to_second(MQTT_log[i].timestamp),
@@ -2710,7 +2710,7 @@ void MyESP::_printMQTTLog(bool show_sub = false) {
 
         for (i = 0; i < MYESP_MQTTLOG_MAX; i++) {
             if ((MQTT_log[i].topic != nullptr) && (MQTT_log[i].type == MYESP_MQTTLOGTYPE_SUBSCRIBE)) {
-                myDebug_P(PSTR("  Topic:%s"), MQTT_log[i].topic);
+                myDebug_P(PSTR("  Topic: %s"), MQTT_log[i].topic);
             }
         }
     }

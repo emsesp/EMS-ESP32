@@ -247,7 +247,7 @@ void showInfo() {
               (ems_getBoilerEnabled() ? "enabled" : "disabled"),
               (ems_getThermostatEnabled() ? "enabled" : "disabled"),
               (ems_getSolarModuleEnabled() ? "enabled" : "disabled"),
-              (ems_getMixingDeviceEnabled() ? "enabled" : "disabled"));
+              (ems_getMixingModuleEnabled() ? "enabled" : "disabled"));
 
     myDebug_P(PSTR("  Shower Timer: %s, Shower Alert: %s"),
               ((EMSESP_Settings.shower_timer) ? "enabled" : "disabled"),
@@ -485,7 +485,7 @@ void showInfo() {
     }
 
     // Mixing modules sensors
-    if (ems_getMixingDeviceEnabled()) {
+    if (ems_getMixingModuleEnabled()) {
         myDebug_P(PSTR("")); // newline
         myDebug_P(PSTR("%sMixing module data:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
         myDebug_P(PSTR("  Mixing Module: %s"), ems_getDeviceDescription(EMS_DEVICE_TYPE_MIXING, buffer_type, false));
@@ -530,7 +530,7 @@ void showInfo() {
         for (uint8_t i = 0; i < EMSESP_Settings.dallas_sensors; i++) {
             float sensorValue = ds18.getValue(i);
             if (sensorValue != DS18_DISCONNECTED) {
-                myDebug_P(PSTR("  Sensor #%d type:%s id:%s temperature: %s C"),
+                myDebug_P(PSTR("  Sensor #%d type: %s id: %s temperature: %s C"),
                           i + 1,
                           ds18.getDeviceType(buffer, i),
                           ds18.getDeviceID(buffer2, i),
@@ -549,7 +549,7 @@ void scanDallas() {
         char buffer[128];
         char buffer2[128];
         for (uint8_t i = 0; i < EMSESP_Settings.dallas_sensors; i++) {
-            myDebug_P(PSTR("External temperature sensor type:%s id:%s found"), ds18.getDeviceType(buffer, i), ds18.getDeviceID(buffer2, i));
+            myDebug_P(PSTR("External temperature sensor type: %s id: %s found"), ds18.getDeviceType(buffer, i), ds18.getDeviceID(buffer2, i));
         }
     }
 }
@@ -789,7 +789,7 @@ void publishEMSValues(bool force) {
     }
 
     // handle the mixing values
-    if (ems_getMixingDeviceEnabled() && (ems_Device_has_flags(EMS_DEVICE_UPDATE_FLAG_MIXING) || force)) {
+    if (ems_getMixingModuleEnabled() && (ems_Device_has_flags(EMS_DEVICE_UPDATE_FLAG_MIXING) || force)) {
         doc.clear();
         JsonObject rootMixing = doc.to<JsonObject>();
 

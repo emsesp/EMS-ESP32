@@ -108,7 +108,7 @@ function listCustomStats() {
         } else if (type === "Heat Pump") {
             color = "list-group-item-success";
         }
-        l.innerHTML = obj[i].model + " (Version:" + obj[i].version + " ProductID:" + obj[i].productid + " DeviceID:0x" + obj[i].deviceid + ")";
+        l.innerHTML = obj[i].model + " (DeviceID: 0x" + obj[i].deviceid + ", ProductID: " + obj[i].productid + ", Version: " + obj[i].version + ")";
         l.className = "list-group-item " + color;
         list.appendChild(l);
     }

@@ -12,11 +12,8 @@
 #include "ems.h"
 
 // Fixed EMS Device IDs
-#define EMS_ID_ME 0x0B         // our device, hardcoded as the "Service Key"
-#define EMS_ID_BOILER 0x08     // all UBA Boilers have 0x08
-#define EMS_ID_SM 0x30         // Solar Module SM10, SM100, SM200 and ISM1
-#define EMS_ID_HP 0x38         // Heat Pump
-#define EMS_ID_CONTROLLER 0x09 // controllers, some are built in
+#define EMS_ID_ME 0x0B     // our device, hardcoded as the "Service Key"
+#define EMS_ID_BOILER 0x08 // all UBA Boilers have 0x08
 
 /*
  * Common Type
@@ -230,10 +227,10 @@ static const _EMS_Device EMS_Devices[] = {
     //
     // Mixing Devices - type 0x20 or 0x21
     //
-    {160, EMS_DEVICE_TYPE_MIXING, "MM100 Mixing Module", EMS_DEVICE_FLAG_NONE},
-    {161, EMS_DEVICE_TYPE_MIXING, "MM200 Mixing Module", EMS_DEVICE_FLAG_NONE},
-    {69, EMS_DEVICE_TYPE_MIXING, "MM10 Mixing Module", EMS_DEVICE_FLAG_NONE},
-    {159, EMS_DEVICE_TYPE_MIXING, "MM50 Mixing Module", EMS_DEVICE_FLAG_NONE},
+    {160, EMS_DEVICE_TYPE_MIXING, "MM100 Mixing Module", EMS_DEVICE_FLAG_MMPLUS},
+    {161, EMS_DEVICE_TYPE_MIXING, "MM200 Mixing Module", EMS_DEVICE_FLAG_MMPLUS},
+    {69, EMS_DEVICE_TYPE_MIXING, "MM10 Mixing Module", EMS_DEVICE_FLAG_MM10},
+    {159, EMS_DEVICE_TYPE_MIXING, "MM50 Mixing Module", EMS_DEVICE_FLAG_MM10},
 
     //
     // HeatPump - type 0x38

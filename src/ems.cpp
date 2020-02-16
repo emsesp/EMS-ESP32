@@ -241,7 +241,7 @@ bool ems_getThermostatEnabled() {
     return (EMS_Thermostat.device_id != EMS_ID_NONE);
 }
 
-bool ems_getMixingDeviceEnabled() {
+bool ems_getMixingModuleEnabled() {
     return EMS_MixingModule.device_id != EMS_ID_NONE;
 }
 
@@ -1737,11 +1737,11 @@ bool _addDevice(_EMS_DEVICE_TYPE device_type, uint8_t product_id, uint8_t device
         strlcat(line, device_desc_p, sizeof(line));
     }
 
-    strlcat(line, " (DeviceID:0x", sizeof(line));
+    strlcat(line, " (DeviceID: 0x", sizeof(line));
     strlcat(line, _hextoa(device_id, tmp), sizeof(line));
-    strlcat(line, " ProductID:", sizeof(line));
+    strlcat(line, ", ProductID: ", sizeof(line));
     strlcat(line, itoa(product_id, tmp, 10), sizeof(line));
-    strlcat(line, " Version:", sizeof(line));
+    strlcat(line, ", Version: ", sizeof(line));
     strlcat(line, version, sizeof(line));
     strlcat(line, ")", sizeof(line));
 
@@ -1913,7 +1913,7 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
         EMS_MixingModule.device_desc_p = device_desc_p;
         EMS_MixingModule.device_flags  = flags;
         strlcpy(EMS_MixingModule.version, version, sizeof(EMS_MixingModule.version));
-        ems_doReadCommand(EMS_TYPE_MMPLUSStatusMessage_HC1, device_id); // fetch MM values
+        ems_getMixingModuleValues(); // fetch Mixing Module values
     }
 }
 
@@ -2049,14 +2049,27 @@ void ems_getBoilerValues() {
 }
 
 /*
- * Get other values from EMS devices
+ * Get solar values from EMS devices
  */
 void ems_getSolarModuleValues() {
     if (ems_getSolarModuleEnabled()) {
         if (EMS_SolarModule.device_flags == EMS_DEVICE_FLAG_SM10) {
-            ems_doReadCommand(EMS_TYPE_SM10Monitor, EMS_ID_SM); // fetch all from SM10Monitor
+            ems_doReadCommand(EMS_TYPE_SM10Monitor, EMS_SolarModule.device_id); // fetch all from SM10Monitor
         } else if (EMS_SolarModule.device_flags == EMS_DEVICE_FLAG_SM100) {
-            ems_doReadCommand(EMS_TYPE_SM100Monitor, EMS_ID_SM); // fetch all from SM100Monitor
+            ems_doReadCommand(EMS_TYPE_SM100Monitor, EMS_SolarModule.device_id); // fetch all from SM100Monitor
+        }
+    }
+}
+
+/*
+ * Get mixing module values from EMS devices
+ */
+void ems_getMixingModuleValues() {
+    if (ems_getMixingModuleEnabled()) {
+        if (EMS_MixingModule.device_flags == EMS_DEVICE_FLAG_MMPLUS) {
+            ems_doReadCommand(EMS_TYPE_MMPLUSStatusMessage_HC1, EMS_MixingModule.device_id);
+        } else if (EMS_MixingModule.device_flags == EMS_DEVICE_FLAG_MM10) {
+            ems_doReadCommand(EMS_TYPE_MMStatusMessage, EMS_MixingModule.device_id);
         }
     }
 }
@@ -2159,7 +2172,7 @@ char * ems_getDeviceDescription(_EMS_DEVICE_TYPE device_type, char * buffer, boo
         device_desc_p = EMS_HeatPump.device_desc_p;
         version       = EMS_HeatPump.version;
     } else if (device_type == EMS_DEVICE_TYPE_MIXING) {
-        enabled       = ems_getMixingDeviceEnabled();
+        enabled       = ems_getMixingModuleEnabled();
         device_id     = EMS_MixingModule.device_id;
         product_id    = EMS_MixingModule.product_id;
         device_desc_p = EMS_MixingModule.device_desc_p;
@@ -2183,12 +2196,12 @@ char * ems_getDeviceDescription(_EMS_DEVICE_TYPE device_type, char * buffer, boo
         return buffer; // only interested in the model name
     }
 
-    strlcat(buffer, " (DeviceID:0x", size);
+    strlcat(buffer, " (DeviceID: 0x", size);
     char tmp[6] = {0};
     strlcat(buffer, _hextoa(device_id, tmp), size);
-    strlcat(buffer, " ProductID:", size);
+    strlcat(buffer, ", ProductID: ", size);
     strlcat(buffer, itoa(product_id, tmp, 10), size);
-    strlcat(buffer, " Version:", size);
+    strlcat(buffer, ", Version: ", size);
     strlcat(buffer, version, size);
     strlcat(buffer, ")", size);
 
@@ -2242,7 +2255,7 @@ void ems_printDevices() {
             }
 
             if ((it->device_type == EMS_DEVICE_TYPE_THERMOSTAT) && (EMS_Sys_Status.emsMasterThermostat == it->product_id)) {
-                myDebug_P(PSTR(" %s: %s%s%s (DeviceID:0x%02X ProductID:%d Version:%s) [master]"),
+                myDebug_P(PSTR(" %s: %s%s%s (DeviceID: 0x%02X, ProductID: %d, Version: %s) [master]"),
                           device_type,
                           COLOR_BOLD_ON,
                           device_string,
@@ -2252,7 +2265,7 @@ void ems_printDevices() {
                           it->version);
 
             } else {
-                myDebug_P(PSTR(" %s: %s%s%s (DeviceID:0x%02X ProductID:%d Version:%s)"),
+                myDebug_P(PSTR(" %s: %s%s%s (DeviceID: 0x%02X, ProductID: %d, Version: %s)"),
                           device_type,
                           COLOR_BOLD_ON,
                           device_string,
@@ -3207,8 +3220,9 @@ void ems_scanDevices() {
     std::list<uint8_t> Device_Ids; // create a new list
 
     Device_Ids.push_back(EMS_ID_BOILER); // UBAMaster/Boilers - 0x08
-    Device_Ids.push_back(EMS_ID_HP);     // HeatPump - 0x38
-    Device_Ids.push_back(EMS_ID_SM);     // Solar Module - 0x30
+    Device_Ids.push_back(0x09);          // Controllers - 0x09
+    Device_Ids.push_back(0x38);          // HeatPump - 0x38
+    Device_Ids.push_back(0x30);          // Solar Module - 0x30
     Device_Ids.push_back(0x09);          // Controllers - 0x09
     Device_Ids.push_back(0x02);          // Connect - 0x02
     Device_Ids.push_back(0x48);          // Gateway - 0x48
