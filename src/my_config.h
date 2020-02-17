@@ -10,8 +10,9 @@
 
 #include "ems.h"
 
-// TOPICS with _CMD_ are used for receiving commands from an MQTT Broker
+// TOPICS with *_CMD_* are used for receiving commands from an MQTT Broker
 // EMS-ESP will subscribe to these topics
+
 #define TOPIC_GENERIC_CMD "generic_cmd" // for receiving generic system commands via MQTT
 
 // MQTT for thermostat

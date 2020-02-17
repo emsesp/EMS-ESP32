@@ -19,6 +19,7 @@
 // Dallas external temp sensors
 #include "ds18.h"
 DS18 ds18;
+#define DS18_MQTT_PAYLOAD_MAXSIZE 400
 
 // public libraries
 #include <ArduinoJson.h> // https://github.com/bblanchon/ArduinoJson
@@ -565,8 +566,13 @@ void publishSensorValues() {
         return; // no sensors attached
     }
 
-    StaticJsonDocument<400> doc;
-    JsonObject              sensors = doc.to<JsonObject>();
+    // each payload per sensor is 30 bytes so calculate if we have enough space
+    if ((EMSESP_Settings.dallas_sensors * 30) > DS18_MQTT_PAYLOAD_MAXSIZE) {
+            myDebug("Error: too many Dallas sensors for MQTT payload");
+        }
+
+    StaticJsonDocument<DS18_MQTT_PAYLOAD_MAXSIZE> doc;
+    JsonObject                                    sensors = doc.to<JsonObject>();
 
     bool hasdata     = false;
     char buffer[128] = {0};
@@ -583,7 +589,7 @@ void publishSensorValues() {
         return; // nothing to send
     }
 
-    char data[400] = {0};
+    char data[DS18_MQTT_PAYLOAD_MAXSIZE] = {0};
     serializeJson(doc, data, sizeof(data));
     myDebugLog("Publishing external sensor data via MQTT");
     myESP.mqttPublish(TOPIC_EXTERNAL_SENSORS, data);
