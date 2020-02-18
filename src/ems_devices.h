@@ -12,7 +12,6 @@
 #include "ems.h"
 
 // Fixed EMS Device IDs
-#define EMS_ID_ME 0x0B     // our device, hardcoded as the "Service Key"
 #define EMS_ID_BOILER 0x08 // all UBA Boilers have 0x08
 
 /*

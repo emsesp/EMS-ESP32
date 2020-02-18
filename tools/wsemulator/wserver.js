@@ -98,7 +98,8 @@ var custom_configfile = {
         "shower_timer": true,
         "shower_alert": false,
         "publish_time": 10,
-        "tx_mode": 1
+        "tx_mode": 1,
+        "bus_id": 11
     }
 };
 

@@ -79,7 +79,9 @@ typedef struct {
     uint8_t dallas_gpio;       // pin for attaching external dallas temperature sensors
     bool    dallas_parasite;   // on/off is using parasite
     uint8_t tx_mode;           // TX mode 1,2 or 3
+    uint8_t bus_id;            // BUS ID, defaults to 0x0B for the service key
     uint8_t master_thermostat; // Product ID of master thermostat to use, 0 for automatic
+    char *  known_devices;     // list of known deviceIDs for quick boot
 } _EMSESP_Settings;
 
 typedef struct {
@@ -101,6 +103,7 @@ static const command_t project_cmds[] PROGMEM = {
     {true, "shower_alert <on | off>", "stop hot water to send 3 cold burst warnings after max shower time is exceeded"},
     {true, "publish_time <seconds>", "set frequency for publishing data to MQTT (-1=off, 0=automatic)"},
     {true, "tx_mode <n>", "changes Tx logic. 1=EMS generic, 2=EMS+, 3=HT3"},
+    {true, "bus_id <ID>", "EMS-ESP's deviceID. 0B=Service Key (default), 0D=Modem, 0A=Hand terminal, 0F=Time module, 12=Error module"},
     {true, "master_thermostat [product id]", "set default thermostat to use. No argument lists options"},
 
     {false, "info", "show current values deciphered from the EMS messages"},
@@ -112,9 +115,8 @@ static const command_t project_cmds[] PROGMEM = {
 
     {false, "publish", "publish all values to MQTT"},
     {false, "refresh", "fetch values from the EMS devices"},
-    {false, "devices", "list detected EMS devices"},
+    {false, "devices [scan [deep]]", "list, ask Master or perform deep scan of EMS devices"},
     {false, "queue", "show current Tx queue"},
-    {false, "autodetect [scan]", "scan for EMS devices and external sensors. scan uses brute-force"},
     {false, "send XX ...", "send raw telegram data to EMS bus (XX are hex values)"},
     {false, "thermostat read <type ID>", "send read request to the thermostat for heating circuit hc 1-4"},
     {false, "thermostat temp [hc] <degrees>", "set current thermostat temperature"},
@@ -259,6 +261,9 @@ void showInfo() {
     if (ems_getBusConnected()) {
         myDebug_P(PSTR("  Bus is connected, protocol: %s"), (ems_isHT3() ? "HT3" : "Buderus"));
         myDebug_P(PSTR("  Rx: # successful read requests=%d, # CRC errors=%d"), EMS_Sys_Status.emsRxPgks, EMS_Sys_Status.emxCrcErr);
+        if (strlen(EMSESP_Settings.known_devices) > 0) {
+            myDebug_P(PSTR("  Saved known device IDs: %s"), EMSESP_Settings.known_devices);
+        }
 
         if (ems_getTxCapable()) {
             char valuestr[8] = {0}; // for formatting floats
@@ -550,7 +555,7 @@ void scanDallas() {
         char buffer[128];
         char buffer2[128];
         for (uint8_t i = 0; i < EMSESP_Settings.dallas_sensors; i++) {
-            myDebug_P(PSTR("External temperature sensor type: %s id: %s found"), ds18.getDeviceType(buffer, i), ds18.getDeviceID(buffer2, i));
+            myDebug_P(PSTR("External temperature sensor found, type: %s id: %s"), ds18.getDeviceType(buffer, i), ds18.getDeviceID(buffer2, i));
         }
     }
 }
@@ -567,21 +572,28 @@ void publishSensorValues() {
     }
 
     // each payload per sensor is 30 bytes so calculate if we have enough space
-    if ((EMSESP_Settings.dallas_sensors * 30) > DS18_MQTT_PAYLOAD_MAXSIZE) {
-            myDebug("Error: too many Dallas sensors for MQTT payload");
-        }
+    if ((EMSESP_Settings.dallas_sensors * 50) > DS18_MQTT_PAYLOAD_MAXSIZE) {
+        myDebug("Error: too many Dallas sensors for MQTT payload");
+    }
 
     StaticJsonDocument<DS18_MQTT_PAYLOAD_MAXSIZE> doc;
     JsonObject                                    sensors = doc.to<JsonObject>();
 
     bool hasdata     = false;
-    char buffer[128] = {0};
+    char buffer[128] = {0}; // temp string buffer
     // see if the sensor values have changed, if so send it on
     for (uint8_t i = 0; i < EMSESP_Settings.dallas_sensors; i++) {
         float sensorValue = ds18.getValue(i);
         if (sensorValue != DS18_DISCONNECTED) {
-            sensors[ds18.getDeviceID(buffer, i)] = sensorValue;
-            hasdata                              = true;
+            hasdata = true;
+            // create a nested object
+            // https://github.com/proddy/EMS-ESP/issues/327
+            char sensorID[10]; // sensor{1-n}
+            strlcpy(sensorID, PAYLOAD_EXTERNAL_SENSOR_NUM, sizeof(sensorID));
+            strlcat(sensorID, _int_to_char(buffer, i + 1), sizeof(sensorID));
+            JsonObject dataSensor                    = sensors.createNestedObject(sensorID);
+            dataSensor[PAYLOAD_EXTERNAL_SENSOR_ID]   = ds18.getDeviceID(buffer, i);
+            dataSensor[PAYLOAD_EXTERNAL_SENSOR_TEMP] = sensorValue;
         }
     }
 
@@ -800,47 +812,45 @@ void publishEMSValues(bool force) {
         JsonObject rootMixing = doc.to<JsonObject>();
 
         for (uint8_t hc_v = 1; hc_v <= EMS_MIXING_MAXHC; hc_v++) {
-            _EMS_MixingModule_HC * mixing = &EMS_MixingModule.hc[hc_v - 1];
+            _EMS_MixingModule_HC * mixingHC = &EMS_MixingModule.hc[hc_v - 1];
 
             // only send if we have an active Heating Circuit with real data
-            if (mixing->active) {
-                // build new json object
+            if (mixingHC->active) {
                 char hc[10]; // hc{1-4}
                 strlcpy(hc, MIXING_HC, sizeof(hc));
-                strlcat(hc, _int_to_char(s, mixing->hc), sizeof(hc));
-                JsonObject dataMixing = rootMixing.createNestedObject(hc);
-                if (mixing->flowTemp < EMS_VALUE_USHORT_NOTSET)
-                    dataMixing["flowTemp"] = (float)mixing->flowTemp / 10;
-                if (mixing->flowSetTemp != EMS_VALUE_INT_NOTSET)
-                    dataMixing["setflowTemp"] = mixing->flowSetTemp;
-                if (mixing->pumpMod != EMS_VALUE_INT_NOTSET)
-                    dataMixing["pumpMod"] = mixing->pumpMod;
-                if (mixing->valveStatus != EMS_VALUE_INT_NOTSET)
-                    dataMixing["valveStatus"] = mixing->valveStatus;
+                strlcat(hc, _int_to_char(s, mixingHC->hc), sizeof(hc));
+                JsonObject dataMixingHC = rootMixing.createNestedObject(hc);
+                if (mixingHC->flowTemp < EMS_VALUE_USHORT_NOTSET)
+                    dataMixingHC["flowTemp"] = (float)mixingHC->flowTemp / 10;
+                if (mixingHC->flowSetTemp != EMS_VALUE_INT_NOTSET)
+                    dataMixingHC["setflowTemp"] = mixingHC->flowSetTemp;
+                if (mixingHC->pumpMod != EMS_VALUE_INT_NOTSET)
+                    dataMixingHC["pumpMod"] = mixingHC->pumpMod;
+                if (mixingHC->valveStatus != EMS_VALUE_INT_NOTSET)
+                    dataMixingHC["valveStatus"] = mixingHC->valveStatus;
             }
         }
 
         for (uint8_t wwc_v = 1; wwc_v <= EMS_MIXING_MAXWWC; wwc_v++) {
-            _EMS_MixingModule_WWC * mixing = &EMS_MixingModule.wwc[wwc_v - 1];
+            _EMS_MixingModule_WWC * mixingWWC = &EMS_MixingModule.wwc[wwc_v - 1];
             // only send if we have an active Warm water Circuit with real data
-            if (mixing->active) {
-                // build new json object
+            if (mixingWWC->active) {
                 char wwc[10]; // wwc{1-2}
                 strlcpy(wwc, MIXING_WWC, sizeof(wwc));
-                strlcat(wwc, _int_to_char(s, mixing->wwc), sizeof(wwc));
+                strlcat(wwc, _int_to_char(s, mixingWWC->wwc), sizeof(wwc));
                 JsonObject dataMixing = rootMixing.createNestedObject(wwc);
-                if (mixing->flowTemp < EMS_VALUE_USHORT_NOTSET)
-                    dataMixing["wwTemp"] = (float)mixing->flowTemp / 10;
-                if (mixing->pumpMod != EMS_VALUE_INT_NOTSET)
-                    dataMixing["pumpStatus"] = mixing->pumpMod;
-                if (mixing->tempStatus != EMS_VALUE_INT_NOTSET)
-                    dataMixing["tempStatus"] = mixing->tempStatus;
+                if (mixingWWC->flowTemp < EMS_VALUE_USHORT_NOTSET)
+                    dataMixing["wwTemp"] = (float)mixingWWC->flowTemp / 10;
+                if (mixingWWC->pumpMod != EMS_VALUE_INT_NOTSET)
+                    dataMixing["pumpStatus"] = mixingWWC->pumpMod;
+                if (mixingWWC->tempStatus != EMS_VALUE_INT_NOTSET)
+                    dataMixing["tempStatus"] = mixingWWC->tempStatus;
             }
         }
 
         data[0] = '\0'; // reset data for next package
         serializeJson(doc, data, sizeof(data));
-        myDebugLog("Publishing mixing device data via MQTT");
+        myDebugLog("Publishing mixing data via MQTT");
         myESP.mqttPublish(TOPIC_MIXING_DATA, data);
         ems_Device_remove_flags(EMS_DEVICE_UPDATE_FLAG_MIXING); // unset flag
     }
@@ -1039,6 +1049,11 @@ bool LoadSaveCallback(MYESP_FSACTION_t action, JsonObject settings) {
         EMSESP_Settings.master_thermostat = settings["master_thermostat"] | 0; // default to 0 (none)
         ems_setMasterThermostat(EMSESP_Settings.master_thermostat);
 
+        EMSESP_Settings.bus_id = settings["bus_id"] | EMS_BUSID_DEFAULT; // default to 0x0B (Service Key)
+        ems_setEMSbusid(EMSESP_Settings.bus_id);
+
+        EMSESP_Settings.known_devices = strdup(settings["known_devices"] | "");
+
         return true;
     }
 
@@ -1052,7 +1067,9 @@ bool LoadSaveCallback(MYESP_FSACTION_t action, JsonObject settings) {
         settings["shower_alert"]      = EMSESP_Settings.shower_alert;
         settings["publish_time"]      = EMSESP_Settings.publish_time;
         settings["tx_mode"]           = EMSESP_Settings.tx_mode;
+        settings["bus_id"]            = EMSESP_Settings.bus_id;
         settings["master_thermostat"] = EMSESP_Settings.master_thermostat;
+        settings["known_devices"]     = EMSESP_Settings.known_devices;
 
         return true;
     }
@@ -1171,6 +1188,18 @@ bool SetListCallback(MYESP_FSACTION_t action, uint8_t wc, const char * setting, 
             }
         }
 
+        // bus_id
+        if ((strcmp(setting, "bus_id") == 0) && (wc == 2)) {
+            uint8_t id = strtoul(value, 0, 16);
+            if ((id == 0x0B) || (id == 0x0D) || (id == 0x0A) || (id == 0x0F) || (id == 0x12)) {
+                EMSESP_Settings.bus_id = id;
+                ems_setEMSbusid(id);
+                ok = true;
+            } else {
+                myDebug_P(PSTR("Error. Usage: set bus_id <ID>, with ID=0B, 0D, 0A, 0F or 12"));
+            }
+        }
+
         // master_thermostat
         if (strcmp(setting, "master_thermostat") == 0) {
             if (wc == 1) {
@@ -1206,6 +1235,7 @@ bool SetListCallback(MYESP_FSACTION_t action, uint8_t wc, const char * setting, 
         myDebug_P(PSTR("  dallas_gpio=%d"), EMSESP_Settings.dallas_gpio);
         myDebug_P(PSTR("  dallas_parasite=%s"), EMSESP_Settings.dallas_parasite ? "on" : "off");
         myDebug_P(PSTR("  tx_mode=%d"), EMSESP_Settings.tx_mode);
+        myDebug_P(PSTR("  bus_id=0x%02X"), EMSESP_Settings.bus_id);
         myDebug_P(PSTR("  listen_mode=%s"), EMSESP_Settings.listen_mode ? "on" : "off");
         myDebug_P(PSTR("  shower_timer=%s"), EMSESP_Settings.shower_timer ? "on" : "off");
         myDebug_P(PSTR("  shower_alert=%s"), EMSESP_Settings.shower_alert ? "on" : "off");
@@ -1274,6 +1304,27 @@ void TelnetCallback(uint8_t event) {
     }
 }
 
+// get the list of know devices, as a string, and save them to the config file
+void saveEMSDevices() {
+    if (Devices.empty()) {
+        return;
+    }
+
+    char s[100];
+    char buffer[16] = {0};
+    s[0]            = '\0';
+
+    for (std::list<_Detected_Device>::iterator it = Devices.begin(); it != Devices.end(); ++it) {
+        strlcat(s, _hextoa(it->device_id, buffer), sizeof(s));
+        strlcat(s, " ", sizeof(s));
+    }
+
+    strlcpy(EMSESP_Settings.known_devices, s, sizeof(s));
+
+    myDebug("The device IDs %s%s%swill be automatically scanned when EMS-ESP boots up.", COLOR_BOLD_ON, EMSESP_Settings.known_devices, COLOR_BOLD_OFF);
+    myESP.saveSettings();
+}
+
 // extra commands options for telnet debug window
 // wc is the word count, i.e. number of arguments. Everything is in lower case.
 void TelnetCommandCallback(uint8_t wc, const char * commandLine) {
@@ -1297,30 +1348,44 @@ void TelnetCommandCallback(uint8_t wc, const char * commandLine) {
     }
 
     if (strcmp(first_cmd, "devices") == 0) {
-        ems_printDevices();
-        ok = true;
+        if (wc == 1) {
+            // print
+            ems_printDevices();
+            return;
+        }
+
+        // wc = 2 or more. check for "scan"
+        char * second_cmd = _readWord();
+        if (strcmp(second_cmd, "scan") == 0) {
+            if (wc == 2) {
+                // just scan use UBA 0x07 telegram
+                myDebug_P(PSTR("Requesting EMS bus master for its device list and scanning for external sensors..."));
+                scanDallas();
+                ems_clearDeviceList();
+                ems_doReadCommand(EMS_TYPE_UBADevices, EMS_Boiler.device_id);
+                return;
+            }
+
+            // wc is 3 or more. check for additional "force" argument
+            char * third_cmd = _readWord();
+            if (strcmp(third_cmd, "deep") == 0) {
+                myDebug_P(PSTR("Started deep scan of EMS bus for our known devices. This can take up to 10 seconds..."));
+                ems_clearDeviceList();
+                ems_scanDevices();
+                return;
+            }
+        } else if (strcmp(second_cmd, "save") == 0) {
+            saveEMSDevices();
+            return;
+        }
+
+        ok = false; // unknown command
     }
+
 
     if (strcmp(first_cmd, "queue") == 0) {
         ems_printTxQueue();
         ok = true;
-    }
-
-    if (strcmp(first_cmd, "autodetect") == 0) {
-        if (wc == 2) {
-            char * second_cmd = _readWord();
-            if (strcmp(second_cmd, "scan") == 0) {
-                ems_clearDeviceList();
-                ems_scanDevices();
-                ok = true;
-            }
-        } else {
-            myDebug("Scanning for new EMS devices and attached external sensors...");
-            scanDallas();
-            ems_clearDeviceList();
-            ems_doReadCommand(EMS_TYPE_UBADevices, EMS_Boiler.device_id);
-            ok = true;
-        }
     }
 
     // logging
@@ -1995,7 +2060,9 @@ void initEMSESP() {
     EMSESP_Settings.led_gpio          = EMSESP_LED_GPIO;
     EMSESP_Settings.dallas_gpio       = EMSESP_DALLAS_GPIO;
     EMSESP_Settings.tx_mode           = EMS_TXMODE_DEFAULT; // default tx mode
+    EMSESP_Settings.bus_id            = EMS_BUSID_DEFAULT;  // Service Key is default
     EMSESP_Settings.master_thermostat = 0;
+    EMSESP_Settings.known_devices     = nullptr;
 
     // shower settings
     EMSESP_Shower.timerStart    = 0;
@@ -2067,6 +2134,38 @@ void showerCheck() {
     }
 }
 
+// this is called when we've first established an EMS connection
+// go send out some spies to figure out what is on the bus and who's driving it
+void startupEMSscan() {
+    if (EMSESP_Settings.listen_mode) {
+        return;
+    }
+
+    // First scan anything we may have saved as known devices from a "devices save" command
+    if (strlen(EMSESP_Settings.known_devices) > 0) {
+        char * p;
+        char * temp      = strdup(EMSESP_Settings.known_devices); // because strlok is destructive, make a copy
+        char   value[10] = {0};
+        // get first value
+        if ((p = strtok(temp, " "))) { // delimiter
+            strlcpy(value, p, sizeof(value));
+            uint8_t val = (uint8_t)strtol(value, 0, 16);
+            ems_doReadCommand(EMS_TYPE_Version, val);
+        }
+        // and iterate until end
+        while (p != 0) {
+            if ((p = strtok(nullptr, " "))) {
+                strlcpy(value, p, sizeof(value));
+                uint8_t val = (uint8_t)strtol(value, 0, 16);
+                ems_doReadCommand(EMS_TYPE_Version, val);
+            }
+        }
+    }
+
+    // ask the Boiler to show us it's attached devices in case we missed anything
+    ems_discoverModels();
+}
+
 //
 // SETUP
 //
@@ -2102,11 +2201,9 @@ void setup() {
         myESP.setUseSerial(false);
         emsuart_init(); // start EMS bus transmissions
         myDebug_P(PSTR("[UART] Rx/Tx connection established"));
-        if (!EMSESP_Settings.listen_mode) {
-            // go and find the boiler and thermostat types, if not in listen mode
-            ems_discoverModels();
-        }
+        startupEMSscan();
     }
+
 
     // enable regular checks to fetch data and publish using Tx (unless listen_mode is enabled)
     if (!EMSESP_Settings.listen_mode) {

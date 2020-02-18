@@ -12,6 +12,9 @@
 #include <Arduino.h>
 #include <list> // std::list
 
+// EMS bus IDs
+#define EMS_BUSID_DEFAULT 0x0B // Default 0x0B (Service Key)
+
 // EMS tx_mode types
 #define EMS_TXMODE_DEFAULT 1 // Default (was previously known as tx_mode 2 in v1.8.x)
 #define EMS_TXMODE_EMSPLUS 2 // EMS+
@@ -147,6 +150,7 @@ typedef struct {
     uint8_t          emsIDMask;                              // Buderus: 0x00, Junkers: 0x80
     uint8_t          emsPollAck[1];                          // acknowledge buffer for Poll
     uint8_t          emsTxMode;                              // Tx mode 1, 2 or 3
+    uint8_t          emsbusid;                               // EMS bus ID, default 0x0B for Service Key
     uint8_t          emsMasterThermostat;                    // product ID for the default thermostat to use
     char             emsDeviceMap[EMS_SYS_DEVICEMAP_LENGTH]; // contents of 0x07 telegram with bitmasks for all active EMS devices
 } _EMS_Sys_Status;
@@ -235,7 +239,7 @@ const _EMS_Device_Types EMS_Devices_Types[] = {
     {EMS_DEVICE_TYPE_UNKNOWN, EMS_MODELTYPE_UNKNOWN_STRING}, // the first, at index 0 is reserved for "unknown"
     {EMS_DEVICE_TYPE_NONE, "All"},
     {EMS_DEVICE_TYPE_SERVICEKEY, "Me"},
-    {EMS_DEVICE_TYPE_BOILER, "UBAMaster"},
+    {EMS_DEVICE_TYPE_BOILER, "Boiler"},
     {EMS_DEVICE_TYPE_THERMOSTAT, "Thermostat"},
     {EMS_DEVICE_TYPE_MIXING, "Mixing Module"},
     {EMS_DEVICE_TYPE_SOLAR, "Solar Module"},
@@ -243,7 +247,7 @@ const _EMS_Device_Types EMS_Devices_Types[] = {
     {EMS_DEVICE_TYPE_GATEWAY, "Gateway"},
     {EMS_DEVICE_TYPE_SWITCH, "Switching Module"},
     {EMS_DEVICE_TYPE_CONTROLLER, "Controller"},
-    {EMS_DEVICE_TYPE_CONNECT, "Connect"}
+    {EMS_DEVICE_TYPE_CONNECT, "Connect Module"}
 
 };
 
@@ -462,6 +466,7 @@ void    ems_setWarmWaterModeComfort(uint8_t comfort);
 void    ems_setModels();
 void    ems_setTxDisabled(bool b);
 void    ems_setTxMode(uint8_t mode);
+void    ems_setEMSbusid(uint8_t id);
 void    ems_setMasterThermostat(uint8_t product_id);
 char *  ems_getDeviceDescription(_EMS_DEVICE_TYPE device_type, char * buffer, bool name_only = false);
 bool    ems_getDeviceTypeDescription(uint8_t device_id, char * buffer);
