@@ -149,6 +149,7 @@ void _renderUShortValue(const char * prefix, const char * postfix, uint16_t valu
 
 // convert int (single byte) to text value and returns it
 char * _int_to_char(char * s, uint8_t value, uint8_t div) {
+    s[0] = '\0'; // reset
     if (value == EMS_VALUE_INT_NOTSET) {
         strlcpy(s, "?", sizeof(s));
         return (s);
