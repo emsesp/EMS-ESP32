@@ -410,36 +410,29 @@ void MyESP::mqttUnsubscribe(const char * topic) {
 
 // Publish using the user's custom retain flag
 bool MyESP::mqttPublish(const char * topic, const char * payload) {
-    // use the custom MQTT retain flag
     return mqttPublish(topic, payload, _mqtt_retain);
 }
 
 // MQTT Publish
 // returns true if all good
 bool MyESP::mqttPublish(const char * topic, const char * payload, bool retain) {
-    if (mqttClient.connected() && (strlen(topic) > 0)) {
-#ifdef MYESP_DEBUG
-        myDebug_P(PSTR("[MQTT] Sending publish to %s with payload %s"), _mqttTopic(topic), payload);
-#endif
-        uint16_t packet_id = mqttClient.publish(_mqttTopic(topic), _mqtt_qos, retain, payload);
-
-        if (packet_id) {
-            _addMQTTLog(topic, payload, MYESP_MQTTLOGTYPE_PUBLISH); // add to the log
-            return true;
-        }
-
-        // it failed, try again https://github.com/proddy/EMS-ESP/issues/264
-        delay(100); // this is blocking and probably not a good idea
-        packet_id = mqttClient.publish(_mqttTopic(topic), _mqtt_qos, retain, payload);
-        if (packet_id) {
-            _addMQTTLog(topic, payload, MYESP_MQTTLOGTYPE_PUBLISH); // add to the log
-            return true;                                            // ok this time
-        }
-
-        // it didn't work again, will return false
-        myDebug_P(PSTR("[MQTT] Error publishing to %s with payload %s [error %d]"), _mqttTopic(topic), payload, packet_id);
-        _mqtt_publish_fails++; // increment failure counter
+    if (!mqttClient.connected() || !_hasValue(topic) || !_hasValue(payload)) {
+        return false;
     }
+
+#ifdef MYESP_DEBUG
+    myDebug_P(PSTR("[MQTT] Sending publish to %s with payload %s"), _mqttTopic(topic), payload);
+#endif
+    uint16_t packet_id = mqttClient.publish(_mqttTopic(topic), _mqtt_qos, retain, payload);
+
+    if (packet_id) {
+        _addMQTTLog(topic, payload, MYESP_MQTTLOGTYPE_PUBLISH); // add to the log
+        return true;
+    }
+
+    // it failed, we should try again https://github.com/proddy/EMS-ESP/issues/264
+    myDebug_P(PSTR("[MQTT] Error publishing to %s with payload %s [error %d]"), _mqttTopic(topic), payload, packet_id);
+    _mqtt_publish_fails++; // increment failure counter
 
     return false; // failed
 }
@@ -1065,8 +1058,7 @@ void MyESP::_telnetCommand(char * commandLine) {
 
     // save everything
     if ((strcmp(ptrToCommandName, "save") == 0) && (wc == 1)) {
-        _fs_writeConfig();
-        _fs_createCustomConfig();
+        saveSettings();
         return;
     }
 
@@ -1096,6 +1088,12 @@ void MyESP::_telnetCommand(char * commandLine) {
     if (_telnetcommand_callback_f) {
         (_telnetcommand_callback_f)(wc, commandLine);
     }
+}
+
+// public function so clients can save config
+void MyESP::saveSettings() {
+    _fs_writeConfig();
+    _fs_createCustomConfig();
 }
 
 // returns WiFi hostname as a String object

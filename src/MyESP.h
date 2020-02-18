@@ -9,7 +9,7 @@
 #ifndef MyESP_h
 #define MyESP_h
 
-#define MYESP_VERSION "1.2.26"
+#define MYESP_VERSION "1.2.27"
 
 #include <ArduinoJson.h>
 #include <ArduinoOTA.h>
@@ -215,9 +215,9 @@ static_assert(sizeof(RtcmemData) <= (RTCMEM_BLOCKS * 4u), "RTCMEM struct is too 
 #define MYESP_HEARTBEAT_INTERVAL 120000 // in milliseconds, how often the MQTT heartbeat is sent (2 mins)
 
 typedef struct {
-    bool set; // is it a set command
+    bool set; // is it a set command?
     char key[50];
-    char description[100];
+    char description[110];
 } command_t;
 
 typedef enum { MYESP_FSACTION_SET, MYESP_FSACTION_LIST, MYESP_FSACTION_SAVE, MYESP_FSACTION_LOAD } MYESP_FSACTION_t;
@@ -302,6 +302,7 @@ class MyESP {
 
     // FS
     void setSettings(fs_loadsave_callback_f loadsave, fs_setlist_callback_f setlist, bool useSerial = true);
+    void saveSettings();
     bool fs_saveConfig(JsonObject root);
     bool fs_saveCustomConfig(JsonObject root);
     bool fs_setSettingValue(char ** setting, const char * value, const char * value_default);

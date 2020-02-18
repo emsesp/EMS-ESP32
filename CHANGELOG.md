@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - First implementation of writing to Junker Thermostats (thanks @Neonox31)
 - Added model type (Buderus, Sieger, Junkers, Nefit, Bosch, Worcester) to device names
 - `boiler wwonetime` command from Telnet
+- `set bus_id <ID>` to support multiple EMS-ESP circuits. Default is 0x0B to mimic a service key.
 
 ### Fixed
 - set boiler warm water temp on Junkers/Bosch HT3
@@ -23,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - improved MQTT publishing to stop flooding. `publish_time` must be at least 1 (second)
+- External sensors (like dallas) are sent as a nested MQTT topic including their unqiue identifier
 
 ### Removed
  - `autodetect scan`
