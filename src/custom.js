@@ -99,7 +99,7 @@ function listCustomStats() {
         var l = document.createElement("li");
         var type = obj[i].type;
         var color = "";
-        if (type === "UBAMaster") {
+        if (type === "Boiler") {
             color = "list-group-item-success";
         } else if (type === "Thermostat") {
             color = "list-group-item-info";
