@@ -220,7 +220,15 @@ typedef struct {
     char description[110];
 } command_t;
 
-typedef enum { MYESP_FSACTION_SET, MYESP_FSACTION_LIST, MYESP_FSACTION_SAVE, MYESP_FSACTION_LOAD } MYESP_FSACTION_t;
+typedef enum {
+    MYESP_FSACTION_SET,
+    MYESP_FSACTION_LIST,
+    MYESP_FSACTION_SAVE,
+    MYESP_FSACTION_LOAD,
+    MYESP_FSACTION_ERR,
+    MYESP_FSACTION_OK,
+    MYESP_FSACTION_RESTART
+} MYESP_FSACTION_t;
 
 typedef enum {
     MYESP_BOOTSTATUS_POWERON     = 0,
@@ -239,14 +247,14 @@ typedef struct {
     time_t  timestamp;
 } _MQTT_Log_t;
 
-typedef std::function<void(unsigned int, const char *, const char *)>              mqtt_callback_f;
-typedef std::function<void()>                                                      wifi_callback_f;
-typedef std::function<void()>                                                      ota_callback_f;
-typedef std::function<void(uint8_t, const char *)>                                 telnetcommand_callback_f;
-typedef std::function<void(uint8_t)>                                               telnet_callback_f;
-typedef std::function<bool(MYESP_FSACTION_t, JsonObject json)>                     fs_loadsave_callback_f;
-typedef std::function<bool(MYESP_FSACTION_t, uint8_t, const char *, const char *)> fs_setlist_callback_f;
-typedef std::function<void(JsonObject root)>                                       web_callback_f;
+typedef std::function<void(unsigned int, const char *, const char *)>                          mqtt_callback_f;
+typedef std::function<void()>                                                                  wifi_callback_f;
+typedef std::function<void()>                                                                  ota_callback_f;
+typedef std::function<void(uint8_t, const char *)>                                             telnetcommand_callback_f;
+typedef std::function<void(uint8_t)>                                                           telnet_callback_f;
+typedef std::function<bool(MYESP_FSACTION_t, JsonObject json)>                                 fs_loadsave_callback_f;
+typedef std::function<MYESP_FSACTION_t(MYESP_FSACTION_t, uint8_t, const char *, const char *)> fs_setlist_callback_f;
+typedef std::function<void(JsonObject root)>                                                   web_callback_f;
 
 // calculates size of an 2d array at compile time
 template <typename T, size_t N>

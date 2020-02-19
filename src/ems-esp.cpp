@@ -1095,18 +1095,18 @@ bool LoadSaveCallback(MYESP_FSACTION_t action, JsonObject settings) {
 // callback for custom settings when showing Stored Settings with the 'set' command
 // wc is number of arguments after the 'set' command
 // returns true if the setting was recognized and changed and should be saved back to SPIFFs
-bool SetListCallback(MYESP_FSACTION_t action, uint8_t wc, const char * setting, const char * value) {
-    bool ok = false;
+MYESP_FSACTION_t SetListCallback(MYESP_FSACTION_t action, uint8_t wc, const char * setting, const char * value) {
+    MYESP_FSACTION_t ok = MYESP_FSACTION_ERR;
 
     if (action == MYESP_FSACTION_SET) {
         // led
         if ((strcmp(setting, "led") == 0) && (wc == 2)) {
             if (strcmp(value, "on") == 0) {
                 EMSESP_Settings.led = true;
-                ok                  = true;
+                ok                  = MYESP_FSACTION_RESTART;
             } else if (strcmp(value, "off") == 0) {
                 EMSESP_Settings.led = false;
-                ok                  = true;
+                ok                  = MYESP_FSACTION_RESTART;
                 // let's make sure LED is really off - For onboard high=off
                 digitalWrite(EMSESP_Settings.led_gpio, (EMSESP_Settings.led_gpio == LED_BUILTIN) ? HIGH : LOW);
             } else {
@@ -1118,12 +1118,12 @@ bool SetListCallback(MYESP_FSACTION_t action, uint8_t wc, const char * setting, 
         if ((strcmp(setting, "listen_mode") == 0) && (wc == 2)) {
             if (strcmp(value, "on") == 0) {
                 EMSESP_Settings.listen_mode = true;
-                ok                          = true;
+                ok                          = MYESP_FSACTION_OK;
                 myDebug_P(PSTR("* in listen mode. All Tx is disabled."));
                 ems_setTxDisabled(true);
             } else if (strcmp(value, "off") == 0) {
                 EMSESP_Settings.listen_mode = false;
-                ok                          = true;
+                ok                          = MYESP_FSACTION_OK;
                 ems_setTxDisabled(false);
                 myDebug_P(PSTR("* out of listen mode. Tx is now enabled."));
             } else {
@@ -1137,23 +1137,23 @@ bool SetListCallback(MYESP_FSACTION_t action, uint8_t wc, const char * setting, 
             // reset pin
             pinMode(EMSESP_Settings.led_gpio, OUTPUT);
             digitalWrite(EMSESP_Settings.led_gpio, (EMSESP_Settings.led_gpio == LED_BUILTIN) ? HIGH : LOW); // light off. For onboard high=off
-            ok = true;
+            ok = MYESP_FSACTION_OK;
         }
 
         // dallas_gpio
         if ((strcmp(setting, "dallas_gpio") == 0) && (wc == 2)) {
             EMSESP_Settings.dallas_gpio = atoi(value);
-            ok                          = true;
+            ok                          = MYESP_FSACTION_RESTART;
         }
 
         // dallas_parasite
         if ((strcmp(setting, "dallas_parasite") == 0) && (wc == 2)) {
             if (strcmp(value, "on") == 0) {
                 EMSESP_Settings.dallas_parasite = true;
-                ok                              = true;
+                ok                              = MYESP_FSACTION_RESTART;
             } else if (strcmp(value, "off") == 0) {
                 EMSESP_Settings.dallas_parasite = false;
-                ok                              = true;
+                ok                              = MYESP_FSACTION_RESTART;
             } else {
                 myDebug_P(PSTR("Error. Usage: set dallas_parasite <on | off>"));
             }
@@ -1163,10 +1163,10 @@ bool SetListCallback(MYESP_FSACTION_t action, uint8_t wc, const char * setting, 
         if ((strcmp(setting, "shower_timer") == 0) && (wc == 2)) {
             if (strcmp(value, "on") == 0) {
                 EMSESP_Settings.shower_timer = true;
-                ok                           = do_publishShowerData();
+                ok                           = do_publishShowerData() ? MYESP_FSACTION_OK : MYESP_FSACTION_ERR;
             } else if (strcmp(value, "off") == 0) {
                 EMSESP_Settings.shower_timer = false;
-                ok                           = do_publishShowerData();
+                ok                           = do_publishShowerData() ? MYESP_FSACTION_OK : MYESP_FSACTION_ERR;
             } else {
                 myDebug_P(PSTR("Error. Usage: set shower_timer <on | off>"));
             }
@@ -1176,19 +1176,23 @@ bool SetListCallback(MYESP_FSACTION_t action, uint8_t wc, const char * setting, 
         if ((strcmp(setting, "shower_alert") == 0) && (wc == 2)) {
             if (strcmp(value, "on") == 0) {
                 EMSESP_Settings.shower_alert = true;
-                ok                           = do_publishShowerData();
+                ok                           = do_publishShowerData() ? MYESP_FSACTION_OK : MYESP_FSACTION_ERR;
             } else if (strcmp(value, "off") == 0) {
                 EMSESP_Settings.shower_alert = false;
-                ok                           = do_publishShowerData();
+                ok                           = do_publishShowerData() ? MYESP_FSACTION_OK : MYESP_FSACTION_ERR;
             } else {
                 myDebug_P(PSTR("Error. Usage: set shower_alert <on | off>"));
             }
         }
 
         // publish_time
-        if ((strcmp(setting, "publish_time") == 0) && (wc == 2)) {
-            EMSESP_Settings.publish_time = atoi(value);
-            ok                           = true;
+        if (strcmp(setting, "publish_time") == 0) {
+            if (wc == 1) {
+                EMSESP_Settings.publish_time = 0;
+            } else {
+                EMSESP_Settings.publish_time = atoi(value);
+            }
+            ok = MYESP_FSACTION_RESTART;
         }
 
         // tx_mode
@@ -1197,7 +1201,7 @@ bool SetListCallback(MYESP_FSACTION_t action, uint8_t wc, const char * setting, 
             if ((mode >= 1) && (mode <= 3)) { // see ems.h for definitions
                 EMSESP_Settings.tx_mode = mode;
                 ems_setTxMode(mode);
-                ok = true;
+                ok = MYESP_FSACTION_RESTART;
             } else {
                 myDebug_P(PSTR("Error. Usage: set tx_mode <1 | 2 | 3>"));
             }
@@ -1209,7 +1213,7 @@ bool SetListCallback(MYESP_FSACTION_t action, uint8_t wc, const char * setting, 
             if ((id == 0x0B) || (id == 0x0D) || (id == 0x0A) || (id == 0x0F) || (id == 0x12)) {
                 EMSESP_Settings.bus_id = id;
                 ems_setEMSbusid(id);
-                ok = true;
+                ok = MYESP_FSACTION_RESTART;
             } else {
                 myDebug_P(PSTR("Error. Usage: set bus_id <ID>, with ID=0B, 0D, 0A, 0F or 12"));
             }
@@ -1231,15 +1235,15 @@ bool SetListCallback(MYESP_FSACTION_t action, uint8_t wc, const char * setting, 
                 myDebug_P(PSTR("Usage: set master_thermostat <product id>"));
                 ems_setMasterThermostat(0);            // default value
                 EMSESP_Settings.master_thermostat = 0; // back to default
-                ok                                = true;
+                ok                                = MYESP_FSACTION_OK;
             } else if (wc == 2) {
                 uint8_t pid                       = atoi(value);
                 EMSESP_Settings.master_thermostat = pid;
                 ems_setMasterThermostat(pid);
-                // force a scan
-                Devices.clear(); // init the device map
+                // force a scan again to detect and set the thermostat
+                Devices.clear();
                 ems_doReadCommand(EMS_TYPE_UBADevices, EMS_Boiler.device_id);
-                ok = true;
+                ok = MYESP_FSACTION_OK;
             }
         }
     }
