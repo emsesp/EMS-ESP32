@@ -1486,11 +1486,12 @@ void MyESP::_heartbeatCheck(bool force) {
 
         //rootHeartbeat["version"]         = _app_version;
         //rootHeartbeat["IP"]              = WiFi.localIP().toString();
-        rootHeartbeat["rssid"]   = getWifiQuality();
-        rootHeartbeat["load"]    = getSystemLoadAverage();
-        rootHeartbeat["uptime"]  = _getUptime();
-        rootHeartbeat["freemem"] = mem_available;
-        //rootHeartbeat["MQTTdisconnects"] = _getSystemDropoutCounter();
+        rootHeartbeat["rssid"]            = getWifiQuality();
+        rootHeartbeat["load"]             = getSystemLoadAverage();
+        rootHeartbeat["uptime"]           = _getUptime();
+        rootHeartbeat["freemem"]          = mem_available;
+        rootHeartbeat["tcpdrops"]         = _getSystemDropoutCounter();
+        rootHeartbeat["mqttpublishfails"] = _mqtt_publish_fails;
 
         char data[300] = {0};
         serializeJson(doc, data, sizeof(data));
