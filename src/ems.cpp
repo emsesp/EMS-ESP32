@@ -78,7 +78,7 @@ bool ems_isHT3() {
 
 // init EMS device values, counters and buffers
 void ems_init() {
-    ems_clearDeviceList(); // init the device map
+    Devices.clear(); // init the device map
 
     // overall status
     EMS_Sys_Status.emsRxPgks         = 0;
@@ -445,6 +445,10 @@ void ems_setTxMode(uint8_t mode) {
 }
 
 void ems_setEMSbusid(uint8_t id) {
+    if ((id != 0x0B) && (id != 0x0A) && (id != 0x0D) && (id != 0x0F) && (id != 0x12)) {
+        id = EMS_BUSID_DEFAULT;
+    }
+
     EMS_Sys_Status.emsbusid      = id;
     EMS_Sys_Status.emsPollAck[0] = id;
 }
@@ -1680,17 +1684,6 @@ void _process_RCTime(_EMS_RxTelegram * EMS_RxTelegram) {
 }
 
 /*
- * Clear devices list
- */
-void ems_clearDeviceList() {
-    Devices.clear();
-
-    for (uint8_t i = 0; i < EMS_SYS_DEVICEMAP_LENGTH; i++) {
-        EMS_Sys_Status.emsDeviceMap[i] = 0x00;
-    }
-}
-
-/*
  * add an EMS device to our list of detected devices if its unique
  * returns true if already in list
  */
@@ -1761,35 +1754,41 @@ bool _addDevice(_EMS_DEVICE_TYPE device_type, uint8_t product_id, uint8_t device
  * type 0x07 - shows us the connected EMS devices
  * e.g. 08 00 07 00 0B 80 00 00 00 00 00 00 00 00 00 00 00 (CRC=47) #data=13  
  * Junkers has 15 bytes of data
+ * each byte is a bitmask for which devices are active
+ * byte 1 = range 0x08 - 0x0F, byte 2=0x10 - 0x17 etc...
  */
 void _process_UBADevices(_EMS_RxTelegram * EMS_RxTelegram) {
-    if (EMS_RxTelegram->data_length > EMS_SYS_DEVICEMAP_LENGTH) {
-        return; // should be 13 or 15 bytes long
+    // exit it length is incorrect (13 or 15 bytes long)
+    // or didn't come from the boiler
+    // or we can't write to the EMS bus yet
+    if ((EMS_RxTelegram->data_length > EMS_SYS_DEVICEMAP_LENGTH) || (EMS_RxTelegram->src != EMS_ID_BOILER) || (ems_getTxDisabled())) {
+        return;
     }
 
+    // for each byte, check the bits and determine the device_id
     for (uint8_t data_byte = 0; data_byte < EMS_RxTelegram->data_length; data_byte++) {
-        uint8_t byte       = EMS_RxTelegram->data[data_byte];
-        uint8_t saved_byte = EMS_Sys_Status.emsDeviceMap[data_byte];
-
-        // see if this matches what we already have stored
-        if (byte != saved_byte) {
-            // we have something new
-            EMS_Sys_Status.emsDeviceMap[data_byte] = byte; // save new value
-            // go through all bits
-            // myDebug("Byte #%d 0x%02X", data_byte, byte); // for debugging
-            if (byte) {
-                for (uint8_t bit = 0; bit < 8; bit++) {
-                    if ((byte & 0x01) && ((saved_byte & 0x01) == 0)) {
-                        uint8_t device_id = ((data_byte + 1) * 8) + bit;
-                        if (device_id != EMS_Sys_Status.emsbusid) {
-                            myDebug("[EMS] Detected new EMS Device with ID 0x%02X. Fetching version information...", device_id);
-                            if (!ems_getTxDisabled()) {
-                                ems_doReadCommand(EMS_TYPE_Version, device_id); // get version, but ignore ourselves
+        uint8_t byte = EMS_RxTelegram->data[data_byte];
+        if (byte) {
+            for (uint8_t bit = 0; bit < 8; bit++) {
+                if (byte & 0x01) {
+                    uint8_t device_id = ((data_byte + 1) * 8) + bit;
+                    // ignore ourselves, we're not an EMS device
+                    if ((device_id != EMS_Sys_Status.emsbusid) && (!Devices.empty())) {
+                        // see if we already have this device in our list
+                        bool exists = false;
+                        for (std::list<_Detected_Device>::iterator it = Devices.begin(); it != Devices.end(); ++it) {
+                            if (it->device_id == device_id) {
+                                exists = true;
+                                break;
                             }
                         }
+                        if (!exists) {
+                            myDebug("[EMS] Detected new EMS Device with ID 0x%02X. Fetching version information...", device_id);
+                            ems_doReadCommand(EMS_TYPE_Version, device_id); // get version, but ignore ourselves
+                        }
                     }
-                    byte       = byte >> 1;
-                    saved_byte = saved_byte >> 1;
+                    // advance 1 bit
+                    byte = byte >> 1;
                 }
             }
         }
@@ -2219,38 +2218,12 @@ char * ems_getDeviceDescription(_EMS_DEVICE_TYPE device_type, char * buffer, boo
  * print out contents of the device list that was captured
  */
 void ems_printDevices() {
-    char s[100];
-    char buffer[16] = {0};
-
-    strlcpy(s, "These device IDs are on the EMS Bus:", sizeof(s));
-    strlcat(s, COLOR_BOLD_ON, sizeof(s));
-
-    for (uint8_t data_byte = 0; data_byte < EMS_SYS_DEVICEMAP_LENGTH; data_byte++) {
-        uint8_t byte = EMS_Sys_Status.emsDeviceMap[data_byte];
-        if (byte) {
-            // go through all bits
-            for (uint8_t bit = 0; bit < 8; bit++) {
-                if (byte & 0x01) {
-                    uint8_t device_id = ((data_byte + 1) * 8) + bit;
-                    if (device_id != EMS_Sys_Status.emsbusid) {
-                        strlcat(s, " 0x", sizeof(s));
-                        strlcat(s, _hextoa(device_id, buffer), sizeof(s));
-                    }
-                }
-                byte = byte >> 1;
-            }
-        }
-    }
-
-    strlcat(s, COLOR_BOLD_OFF, sizeof(s));
-    myDebug(s);
-
     // print out the ones we recognized
     if (!Devices.empty()) {
         bool have_unknowns = false;
         char device_string[100];
         char device_type[30];
-        myDebug_P(PSTR("and %d were recognized by EMS-ESP as:"), Devices.size());
+        myDebug_P(PSTR("These %d were recognized by EMS-ESP:"), Devices.size());
         for (std::list<_Detected_Device>::iterator it = Devices.begin(); it != Devices.end(); ++it) {
             ems_getDeviceTypeName(it->device_type, device_type); // get type string, e.g. "Boiler"
             if (it->known) {

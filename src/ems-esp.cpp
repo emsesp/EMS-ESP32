@@ -19,7 +19,7 @@
 // Dallas external temp sensors
 #include "ds18.h"
 DS18 ds18;
-#define DS18_MQTT_PAYLOAD_MAXSIZE 400
+#define DS18_MQTT_PAYLOAD_MAXSIZE 600
 
 // public libraries
 #include <ArduinoJson.h> // https://github.com/bblanchon/ArduinoJson
@@ -115,7 +115,7 @@ static const command_t project_cmds[] PROGMEM = {
 
     {false, "publish", "publish all values to MQTT"},
     {false, "refresh", "fetch values from the EMS devices"},
-    {false, "devices [scan [deep]]", "list, ask Master or perform deep scan of EMS devices"},
+    {false, "devices [scan] | [scan deep] | [save]", "list detected devices, quick scan or deep scan and save as known devices"},
     {false, "queue", "show current Tx queue"},
     {false, "send XX ...", "send raw telegram data to EMS bus (XX are hex values)"},
     {false, "thermostat read <type ID>", "send read request to the thermostat for heating circuit hc 1-4"},
@@ -581,6 +581,7 @@ void publishSensorValues() {
 
     bool hasdata     = false;
     char buffer[128] = {0}; // temp string buffer
+
     // see if the sensor values have changed, if so send it on
     for (uint8_t i = 0; i < EMSESP_Settings.dallas_sensors; i++) {
         float sensorValue = ds18.getValue(i);
@@ -597,12 +598,26 @@ void publishSensorValues() {
         }
     }
 
+    /* test code - https://github.com/proddy/EMS-ESP/issues/326
+    float sensorValue = 23.43;
+    hasdata           = true;
+    char sensorID[10]; // sensor{1-n}
+    for (uint8_t i = 0; i < 10; i++) {
+        strlcpy(sensorID, PAYLOAD_EXTERNAL_SENSOR_NUM, sizeof(sensorID));
+        strlcat(sensorID, _int_to_char(buffer, i + 1), sizeof(sensorID));
+        JsonObject dataSensor                    = sensors.createNestedObject(sensorID);
+        dataSensor[PAYLOAD_EXTERNAL_SENSOR_ID]   = "28D45A79A2190310";
+        dataSensor[PAYLOAD_EXTERNAL_SENSOR_TEMP] = sensorValue;
+    }
+    */
+
     if (!hasdata) {
         return; // nothing to send
     }
 
     char data[DS18_MQTT_PAYLOAD_MAXSIZE] = {0};
     serializeJson(doc, data, sizeof(data));
+
     myDebugLog("Publishing external sensor data via MQTT");
     myESP.mqttPublish(TOPIC_EXTERNAL_SENSORS, data);
 }
@@ -1222,7 +1237,7 @@ bool SetListCallback(MYESP_FSACTION_t action, uint8_t wc, const char * setting, 
                 EMSESP_Settings.master_thermostat = pid;
                 ems_setMasterThermostat(pid);
                 // force a scan
-                ems_clearDeviceList();
+                Devices.clear(); // init the device map
                 ems_doReadCommand(EMS_TYPE_UBADevices, EMS_Boiler.device_id);
                 ok = true;
             }
@@ -1361,7 +1376,7 @@ void TelnetCommandCallback(uint8_t wc, const char * commandLine) {
                 // just scan use UBA 0x07 telegram
                 myDebug_P(PSTR("Requesting EMS bus master for its device list and scanning for external sensors..."));
                 scanDallas();
-                ems_clearDeviceList();
+                Devices.clear(); // init the device map
                 ems_doReadCommand(EMS_TYPE_UBADevices, EMS_Boiler.device_id);
                 return;
             }
@@ -1370,7 +1385,7 @@ void TelnetCommandCallback(uint8_t wc, const char * commandLine) {
             char * third_cmd = _readWord();
             if (strcmp(third_cmd, "deep") == 0) {
                 myDebug_P(PSTR("Started deep scan of EMS bus for our known devices. This can take up to 10 seconds..."));
-                ems_clearDeviceList();
+                Devices.clear(); // init the device map
                 ems_scanDevices();
                 return;
             }
@@ -2203,7 +2218,6 @@ void setup() {
         myDebug_P(PSTR("[UART] Rx/Tx connection established"));
         startupEMSscan();
     }
-
 
     // enable regular checks to fetch data and publish using Tx (unless listen_mode is enabled)
     if (!EMSESP_Settings.listen_mode) {
