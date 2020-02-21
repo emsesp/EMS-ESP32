@@ -391,40 +391,6 @@ function listStats() {
         document.getElementById("mqttheartbeat").className = "label label-primary";
     }
 
-    document.getElementById("mqttloghdr").setAttribute('data-content', "Topics are prefixed with " + ajaxobj.mqttloghdr);
-
-    var mtable = document.getElementById("mqttlog");
-    var obj = ajaxobj.mqttlog;
-    var tr, td;
-
-    for (var i = 0; i < obj.length; i++) {
-        tr = document.createElement("tr");
-
-        td = document.createElement("td");
-
-        if (obj[i].time < 1563300000) {
-            td.innerHTML = "(" + obj[i].time + ")";
-        } else {
-            var vuepoch = new Date(obj[i].time * 1000);
-            td.innerHTML = vuepoch.getUTCFullYear() +
-                "-" + twoDigits(vuepoch.getUTCMonth() + 1) +
-                "-" + twoDigits(vuepoch.getUTCDate()) +
-                " " + twoDigits(vuepoch.getUTCHours()) +
-                ":" + twoDigits(vuepoch.getUTCMinutes()) +
-                ":" + twoDigits(vuepoch.getUTCSeconds());
-        }
-        tr.appendChild(td);
-
-        td = document.createElement("td");
-        td.innerHTML = obj[i].topic
-        tr.appendChild(td);
-
-        td = document.createElement("td");
-        td.innerHTML = obj[i].payload
-        tr.appendChild(td);
-
-        mtable.appendChild(tr);
-    }
 }
 
 function getContent(contentname) {

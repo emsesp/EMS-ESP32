@@ -9,7 +9,7 @@
 #ifndef MyESP_h
 #define MyESP_h
 
-#define MYESP_VERSION "1.2.28"
+#define MYESP_VERSION "1.2.29"
 
 #include <ArduinoJson.h>
 #include <ArduinoOTA.h>
@@ -17,6 +17,7 @@
 #include <ESPAsyncWebServer.h>
 #include <FS.h>
 #include <JustWifi.h>
+#include <deque> // for MQTT publish queue
 
 // SysLog
 #include <uuid/common.h>
@@ -97,6 +98,8 @@ extern struct rst_info resetInfo;
 #define MQTT_MAX_TOPIC_SIZE 50              // max length of MQTT topic
 #define MQTT_MAX_PAYLOAD_SIZE 700           // max size of a JSON object. See https://arduinojson.org/v6/assistant/
 #define MQTT_MAX_PAYLOAD_SIZE_LARGE 2000    // max size of a large JSON object, like for sending MQTT log
+#define MQTT_QUEUE_MAX_SIZE 20              // Size of the MQTT queue
+#define MQTT_PUBLISH_WAIT 1000              // every 2 seconds check MQTT queue
 
 // Internal MQTT events
 #define MQTT_CONNECT_EVENT 0
@@ -106,8 +109,6 @@ extern struct rst_info resetInfo;
 #define MYESP_JSON_MAXSIZE_LARGE 2000 // for large Dynamic json files
 #define MYESP_JSON_MAXSIZE_MEDIUM 800 // for medium Dynamic json files
 #define MYESP_JSON_MAXSIZE_SMALL 200  // for smaller Static json documents
-
-#define MYESP_MQTTLOG_MAX 60 // max number of log entries for MQTT publishes and subscribes
 
 #define MYESP_MQTT_PAYLOAD_ON '1'  // for MQTT switch on
 #define MYESP_MQTT_PAYLOAD_OFF '0' // for MQTT switch off
@@ -237,16 +238,6 @@ typedef enum {
     MYESP_BOOTSTATUS_RESETNEEDED = 3
 } MYESP_BOOTSTATUS_t; // boot messages
 
-typedef enum { MYESP_MQTTLOGTYPE_NONE, MYESP_MQTTLOGTYPE_PUBLISH, MYESP_MQTTLOGTYPE_SUBSCRIBE } MYESP_MQTTLOGTYPE_t;
-
-// for storing all MQTT publish messages
-typedef struct {
-    uint8_t type; // 0=none, 1=publish, 2=subscribe
-    char *  topic;
-    char *  payload;
-    time_t  timestamp;
-} _MQTT_Log_t;
-
 typedef std::function<void(unsigned int, const char *, const char *)>                          mqtt_callback_f;
 typedef std::function<void()>                                                                  wifi_callback_f;
 typedef std::function<void()>                                                                  ota_callback_f;
@@ -291,8 +282,8 @@ class MyESP {
     bool isMQTTConnected();
     bool mqttSubscribe(const char * topic);
     void mqttUnsubscribe(const char * topic);
-    bool mqttPublish(const char * topic, const char * payload);
-    bool mqttPublish(const char * topic, const char * payload, bool retain);
+    void mqttPublish(const char * topic, const char * payload);
+    void mqttPublish(const char * topic, const char * payload, bool retain);
     void setMQTT(mqtt_callback_f callback);
 
     // OTA
@@ -341,22 +332,21 @@ class MyESP {
     bool          _have_ntp_time;
     unsigned long getSystemTime();
     void          heartbeatPrint();
+    void          heartbeatCheck(bool force = false);
 
   private:
     // mqtt
-    void   _mqttOnMessage(char * topic, char * payload, size_t len);
-    void   _mqttConnect();
-    void   _mqtt_setup();
-    void   _mqttOnConnect();
-    void   _sendStart();
-    char * _mqttTopic(const char * topic);
-
-    // mqtt log
-    _MQTT_Log_t MQTT_log[MYESP_MQTTLOG_MAX]; // log for publish and subscribe messages
-
-    void _printMQTTLog(bool show_sub);
-    void _addMQTTLog(const char * topic, const char * payload, const MYESP_MQTTLOGTYPE_t type);
-
+    void            _mqttOnMessage(char * topic, char * payload, size_t len);
+    void            _mqttOnPublish(uint16_t packetId);
+    void            _mqttConnect();
+    void            _mqtt_setup();
+    void            _mqttOnConnect();
+    void            _sendStart();
+    char *          _mqttTopic(const char * topic);
+    bool            _mqttQueue(const char * topic, const char * payload, bool retain);
+    void            _printMQTTLog();
+    void            _mqttPublishQueue();
+    void            _mqttRemoveLastPublish();
     AsyncMqttClient mqttClient; // the MQTT class
     uint32_t        _mqtt_reconnect_delay;
     mqtt_callback_f _mqtt_callback_f;
@@ -488,9 +478,6 @@ class MyESP {
     uint32_t _load_average;
     uint32_t _getInitialFreeHeap();
     uint32_t _getUsedHeap();
-
-    // heartbeat
-    void _heartbeatCheck(bool force = false);
 
     // web
     web_callback_f _web_callback_f;

@@ -1628,7 +1628,7 @@ void _process_ISM1Set(_EMS_RxTelegram * EMS_RxTelegram) {
     // only trigger if at offset 6
     _setValue(EMS_RxTelegram, &EMS_SolarModule.setpoint_maxBottomTemp, 6);
 
-    // TODO: we may need to convert this to a single byte like
+    // Note: we may need to convert this to a single byte like
     // EMS_SolarModule.setpoint_maxBottomTemp = EMS_RxTelegram->data[0];
 }
 
@@ -1932,7 +1932,7 @@ void ems_discoverModels() {
 }
 
 /**
- * Print the Tx queue - for debugging
+ * Print the Tx queue
  */
 void ems_printTxQueue() {
     _EMS_TxTelegram EMS_TxTelegram;
@@ -2254,10 +2254,10 @@ void ems_printDevices() {
                           it->version);
             }
         }
-        myDebug_P(PSTR("")); // newline
 
         if (have_unknowns) {
-            myDebug_P(PSTR("One or more devices are not recognized by EMS-ESP. Please report this in GitHub."));
+            myDebug_P(PSTR("")); // newline
+            myDebug_P(PSTR("One or more devices are not recognized by EMS-ESP. Please report this back in GitHub."));
         }
     } else {
         myDebug_P(PSTR("No devices were recognized. This may be because Tx is disabled or failing."));
