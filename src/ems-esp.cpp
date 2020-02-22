@@ -867,7 +867,6 @@ void publishEMSValues_mixing() {
 
 // For SM10 and SM100/SM200 Solar Modules
 void publishEMSValues_solar() {
-    char                                      s[20] = {0}; // for formatting strings
     StaticJsonDocument<MQTT_MAX_PAYLOAD_SIZE> doc;
     char                                      data[MQTT_MAX_PAYLOAD_SIZE] = {0};
     JsonObject                                rootSM                      = doc.to<JsonObject>();
@@ -882,6 +881,7 @@ void publishEMSValues_solar() {
         rootSM[SM_PUMPMODULATION] = EMS_SolarModule.pumpModulation;
 
     if (EMS_SolarModule.pump != EMS_VALUE_BOOL_NOTSET) {
+        char s[20] = {0}; // for formatting strings
         rootSM[SM_PUMP] = _bool_to_char(s, EMS_SolarModule.pump);
     }
 

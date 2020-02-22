@@ -1880,7 +1880,7 @@ bool MyESP::_fs_loadConfig() {
     _mqtt_keepalive  = mqtt["keepalive"] | MQTT_KEEPALIVE;
     _mqtt_retain     = mqtt["retain"];
     _mqtt_qos        = mqtt["qos"] | MQTT_QOS;
-    _mqtt_nestedjson = mqtt["nestedjson"] | true; // default to on
+    _mqtt_nestedjson = mqtt["nestedjson"]; // default to on
     _mqtt_password   = strdup(mqtt["password"] | "");
     _mqtt_base       = strdup(mqtt["base"] | MQTT_BASE_DEFAULT);
 
