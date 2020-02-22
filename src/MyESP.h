@@ -97,9 +97,11 @@ extern struct rst_info resetInfo;
 #define MQTT_WILL_TOPIC "status"            // for last will & testament topic name
 #define MQTT_MAX_TOPIC_SIZE 50              // max length of MQTT topic
 #define MQTT_MAX_PAYLOAD_SIZE 700           // max size of a JSON object. See https://arduinojson.org/v6/assistant/
-#define MQTT_MAX_PAYLOAD_SIZE_LARGE 2000    // max size of a large JSON object, like for sending MQTT log
-#define MQTT_QUEUE_MAX_SIZE 20              // Size of the MQTT queue
-#define MQTT_PUBLISH_WAIT 1000              // every 2 seconds check MQTT queue
+#define MQTT_MAX_PAYLOAD_SIZE_LARGE 2000    // max size of a large JSON object
+#define MQTT_MAX_PAYLOAD_SIZE_SMALL 200
+#define MQTT_QUEUE_MAX_SIZE 20   // Size of the MQTT queue
+#define MQTT_PUBLISH_WAIT 1000   // every 1 second check MQTT queue
+#define MQTT_PUBLISH_MAX_RETRY 4 // max retries for giving up on publishing
 
 // Internal MQTT events
 #define MQTT_CONNECT_EVENT 0
@@ -285,6 +287,7 @@ class MyESP {
     void mqttPublish(const char * topic, const char * payload);
     void mqttPublish(const char * topic, const char * payload, bool retain);
     void setMQTT(mqtt_callback_f callback);
+    bool mqttUseNestedJson();
 
     // OTA
     void setOTA(ota_callback_f OTACallback_pre, ota_callback_f OTACallback_post);
@@ -329,7 +332,6 @@ class MyESP {
     uint32_t      getSystemLoadAverage();
     uint32_t      getSystemResetReason();
     uint8_t       getSystemBootStatus();
-    bool          _have_ntp_time;
     unsigned long getSystemTime();
     void          heartbeatPrint();
     void          heartbeatCheck(bool force = false);
@@ -365,6 +367,7 @@ class MyESP {
     uint32_t        _mqtt_last_connection;
     bool            _mqtt_connecting;
     bool            _mqtt_heartbeat;
+    bool            _mqtt_nestedjson;
     uint16_t        _mqtt_publish_fails;
 
     // wifi
@@ -408,20 +411,18 @@ class MyESP {
     void _syslog_setup();
 
     // fs and settings
-    void   _fs_setup();
-    bool   _fs_loadConfig();
-    bool   _fs_loadCustomConfig();
-    void   _fs_eraseConfig();
-    bool   _fs_writeConfig();
-    bool   _fs_createCustomConfig();
-    bool   _fs_sendConfig();
-    size_t _fs_validateConfigFile(const char * filename, size_t maxsize, JsonDocument & doc);
-    size_t _fs_validateLogFile(const char * filename);
-
+    void                   _fs_setup();
+    bool                   _fs_loadConfig();
+    bool                   _fs_loadCustomConfig();
+    void                   _fs_eraseConfig();
+    bool                   _fs_writeConfig();
+    bool                   _fs_createCustomConfig();
+    bool                   _fs_sendConfig();
+    size_t                 _fs_validateConfigFile(const char * filename, size_t maxsize, JsonDocument & doc);
+    size_t                 _fs_validateLogFile(const char * filename);
     fs_loadsave_callback_f _fs_loadsave_callback_f;
     fs_setlist_callback_f  _fs_setlist_callback_f;
-
-    void _printSetCommands();
+    void                   _printSetCommands();
 
     // general
     char *        _general_hostname;
@@ -444,34 +445,27 @@ class MyESP {
     void          _kick();
 
     // reset reason and rtcmem
-    bool _rtcmem_status;
-    bool _rtcmemStatus();
-    bool _getRtcmemStatus();
-
-    void _rtcmemInit();
-    void _rtcmemSetup();
-
-    void _deferredReset(unsigned long delay, uint8_t reason);
-
+    bool    _rtcmem_status;
+    bool    _rtcmemStatus();
+    bool    _getRtcmemStatus();
+    void    _rtcmemInit();
+    void    _rtcmemSetup();
+    void    _deferredReset(unsigned long delay, uint8_t reason);
     uint8_t _getSystemStabilityCounter();
     void    _setSystemStabilityCounter(uint8_t counter);
-
     uint8_t _getSystemDropoutCounter();
     void    _setSystemDropoutCounter(uint8_t counter);
     void    _increaseSystemDropoutCounter();
-
     void    _setSystemResetReason(uint8_t reason);
     uint8_t _getCustomResetReason();
     void    _setCustomResetReason(uint8_t reason);
     uint8_t _getSystemResetReason();
-
-    void _setSystemBootStatus(uint8_t status);
-
-    bool _systemStable;
-    void _bootupSequence();
-    bool _getSystemCheck();
-    void _systemCheckLoop();
-    void _setSystemCheck(bool stable);
+    void    _setSystemBootStatus(uint8_t status);
+    bool    _systemStable;
+    void    _bootupSequence();
+    bool    _getSystemCheck();
+    void    _systemCheckLoop();
+    void    _setSystemCheck(bool stable);
 
     // load average (0..100) and heap ram
     void     _calculateLoad();
@@ -497,6 +491,7 @@ class MyESP {
     uint16_t _ntp_interval;
     bool     _ntp_enabled;
     uint8_t  _ntp_timezone;
+    bool     _have_ntp_time;
 };
 
 extern MyESP myESP;

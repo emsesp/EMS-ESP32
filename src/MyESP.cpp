@@ -83,6 +83,7 @@ MyESP::MyESP() {
     _mqtt_heartbeat            = false;
     _mqtt_keepalive            = MQTT_KEEPALIVE;
     _mqtt_qos                  = MQTT_QOS;
+    _mqtt_nestedjson           = false;
     _mqtt_retain               = MQTT_RETAIN;
     _mqtt_will_topic           = strdup(MQTT_WILL_TOPIC);
     _mqtt_will_online_payload  = strdup(MQTT_WILL_ONLINE_PAYLOAD);
@@ -527,9 +528,8 @@ void MyESP::_mqttPublishQueue() {
 #endif
 
     if (packet_id == 0) {
-        // it failed
-        // if we retried 3 times, give up. remove from queue
-        if (element.retry_count == 2) {
+        // it failed. if we retried n times, give up. remove from queue
+        if (element.retry_count == (MQTT_PUBLISH_MAX_RETRY - 1)) {
             myDebug_P(PSTR("[MQTT] Failed to publish to %s with payload %s"), _mqttTopic(element.topic), element.payload);
             _mqtt_publish_fails++; // increment failure counter
             _mqttRemoveLastPublish();
@@ -879,6 +879,7 @@ void MyESP::_printSetCommands() {
     myDebug_P(PSTR("  set mqtt_qos [0-3]"));
     myDebug_P(PSTR("  set mqtt_keepalive [seconds]"));
     myDebug_P(PSTR("  set mqtt_retain [on | off]"));
+    myDebug_P(PSTR("  set mqtt_nestedjson [on | off]"));
     myDebug_P(PSTR("  set ntp_enabled <on | off>"));
     myDebug_P(PSTR("  set ntp_interval [minutes]"));
     myDebug_P(PSTR("  set ntp_timezone [n]"));
@@ -941,6 +942,7 @@ void MyESP::_printSetCommands() {
     myDebug_P(PSTR("  mqtt_retain=%s"), (_mqtt_retain) ? "on" : "off");
     myDebug_P(PSTR("  mqtt_qos=%d"), _mqtt_qos);
     myDebug_P(PSTR("  mqtt_heartbeat=%s"), (_mqtt_heartbeat) ? "on" : "off");
+    myDebug_P(PSTR("  mqtt_nestedjson=%s"), (_mqtt_nestedjson) ? "on" : "off");
 
 #ifdef FORCE_SERIAL
     myDebug_P(PSTR("  serial=%s (this is always when compiled with -DFORCE_SERIAL)"), (_general_serial) ? "on" : "off");
@@ -1045,6 +1047,8 @@ bool MyESP::_changeSetting(uint8_t wc, const char * setting, const char * value)
         restart     = save_config;
     } else if (strcmp(setting, "mqtt_heartbeat") == 0) {
         save_config = fs_setSettingValue(&_mqtt_heartbeat, value, false);
+    } else if (strcmp(setting, "mqtt_nestedjson") == 0) {
+        save_config = fs_setSettingValue(&_mqtt_nestedjson, value, false);
     } else if (strcmp(setting, "ntp_enabled") == 0) {
         save_config = fs_setSettingValue(&_ntp_enabled, value, false);
     } else if (strcmp(setting, "ntp_interval") == 0) {
@@ -1867,17 +1871,18 @@ bool MyESP::_fs_loadConfig() {
     _general_serial = general["serial"];
 #endif
 
-    JsonObject mqtt = doc["mqtt"];
-    _mqtt_enabled   = mqtt["enabled"];
-    _mqtt_heartbeat = mqtt["heartbeat"];
-    _mqtt_ip        = strdup(mqtt["ip"] | "");
-    _mqtt_user      = strdup(mqtt["user"] | "");
-    _mqtt_port      = mqtt["port"] | MQTT_PORT;
-    _mqtt_keepalive = mqtt["keepalive"] | MQTT_KEEPALIVE;
-    _mqtt_retain    = mqtt["retain"];
-    _mqtt_qos       = mqtt["qos"] | MQTT_QOS;
-    _mqtt_password  = strdup(mqtt["password"] | "");
-    _mqtt_base      = strdup(mqtt["base"] | MQTT_BASE_DEFAULT);
+    JsonObject mqtt  = doc["mqtt"];
+    _mqtt_enabled    = mqtt["enabled"];
+    _mqtt_heartbeat  = mqtt["heartbeat"];
+    _mqtt_ip         = strdup(mqtt["ip"] | "");
+    _mqtt_user       = strdup(mqtt["user"] | "");
+    _mqtt_port       = mqtt["port"] | MQTT_PORT;
+    _mqtt_keepalive  = mqtt["keepalive"] | MQTT_KEEPALIVE;
+    _mqtt_retain     = mqtt["retain"];
+    _mqtt_qos        = mqtt["qos"] | MQTT_QOS;
+    _mqtt_nestedjson = mqtt["nestedjson"] | true; // default to on
+    _mqtt_password   = strdup(mqtt["password"] | "");
+    _mqtt_base       = strdup(mqtt["base"] | MQTT_BASE_DEFAULT);
 
     JsonObject ntp = doc["ntp"];
     _ntp_server    = strdup(ntp["server"] | "");
@@ -2080,17 +2085,18 @@ bool MyESP::_fs_writeConfig() {
     general["log_ip"]     = _general_log_ip;
     general["version"]    = _app_version;
 
-    JsonObject mqtt   = doc.createNestedObject("mqtt");
-    mqtt["enabled"]   = _mqtt_enabled;
-    mqtt["heartbeat"] = _mqtt_heartbeat;
-    mqtt["ip"]        = _mqtt_ip;
-    mqtt["user"]      = _mqtt_user;
-    mqtt["port"]      = _mqtt_port;
-    mqtt["qos"]       = _mqtt_qos;
-    mqtt["keepalive"] = _mqtt_keepalive;
-    mqtt["retain"]    = _mqtt_retain;
-    mqtt["password"]  = _mqtt_password;
-    mqtt["base"]      = _mqtt_base;
+    JsonObject mqtt    = doc.createNestedObject("mqtt");
+    mqtt["enabled"]    = _mqtt_enabled;
+    mqtt["heartbeat"]  = _mqtt_heartbeat;
+    mqtt["ip"]         = _mqtt_ip;
+    mqtt["user"]       = _mqtt_user;
+    mqtt["port"]       = _mqtt_port;
+    mqtt["qos"]        = _mqtt_qos;
+    mqtt["keepalive"]  = _mqtt_keepalive;
+    mqtt["retain"]     = _mqtt_retain;
+    mqtt["password"]   = _mqtt_password;
+    mqtt["base"]       = _mqtt_base;
+    mqtt["nestedjson"] = _mqtt_nestedjson;
 
     JsonObject ntp  = doc.createNestedObject("ntp");
     ntp["server"]   = _ntp_server;
@@ -2190,6 +2196,11 @@ void MyESP::_calculateLoad() {
         _load_average  = 100 - (100 * load_counter / load_counter_max);
         last_loadcheck = millis();
     }
+}
+
+// returns true if nested JSON setting is enabled
+bool MyESP::mqttUseNestedJson() {
+    return _mqtt_nestedjson;
 }
 
 // returns true is MQTT is alive

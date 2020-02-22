@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `boiler wwonetime` command from Telnet
 - `set bus_id <ID>` to support multiple EMS-ESP circuits. Default is 0x0B to mimic a service key.
 - MQTT publish messages are queued and gracefully published every second to avoid TCP blocks
+- Added `mqtt_nestedjson` option to disable multiple data records being nested into a single JSON string
 
 ### Fixed
 - set boiler warm water temp on Junkers/Bosch HT3
@@ -29,7 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
  - `autodetect scan`
- - `mqttlog` and showing MQTT log in the web interface - no point showing history of previous mqtt publishes in ESP's precious memory. For debugging recommend using MQTT Explorer or another external tool.
+ - `mqttlog all` and showing MQTT log in the web interface - no point showing history of previous mqtt publishes in ESP's precious memory. For debugging I recommend using MQTT Explorer or another external tool.
 
 ## [1.9.4] 15-12-2019
 
