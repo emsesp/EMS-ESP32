@@ -1000,8 +1000,6 @@ void publishEMSValues(bool force) {
         ems_Device_remove_flags(EMS_DEVICE_UPDATE_FLAG_THERMOSTAT); // unset flag
     }
 
-    return; // XXX
-
     if (ems_getBoilerEnabled() && (ems_Device_has_flags(EMS_DEVICE_UPDATE_FLAG_BOILER) || force)) {
         publishEMSValues_boiler();
         ems_Device_remove_flags(EMS_DEVICE_UPDATE_FLAG_BOILER); // unset flag
