@@ -1784,7 +1784,7 @@ void _process_UBADevices(_EMS_RxTelegram * EMS_RxTelegram) {
                             }
                         }
                         if (!exists) {
-                            myDebug("[EMS] Detected new EMS Device with ID 0x%02X. Fetching version information...", device_id);
+                            myDebug_P(PSTR("[EMS] Detected new EMS Device with ID 0x%02X. Fetching version information..."), device_id);
                             ems_doReadCommand(EMS_TYPE_Version, device_id); // get version, but ignore ourselves
                         }
                     }
