@@ -573,14 +573,14 @@ void publishSensorValues() {
 
     // each payload per sensor is 30 bytes so calculate if we have enough space
     if ((EMSESP_Settings.dallas_sensors * 50) > DS18_MQTT_PAYLOAD_MAXSIZE) {
-        myDebug("Error: too many Dallas sensors for MQTT payload");
+        myDebug_P(PSTR("Error: too many Dallas sensors for MQTT payload"));
     }
 
     StaticJsonDocument<DS18_MQTT_PAYLOAD_MAXSIZE> doc;
     JsonObject                                    sensors = doc.to<JsonObject>();
 
-    bool hasdata     = false;
-    char buffer[128] = {0}; // temp string buffer
+    bool hasdata = false;
+    char buffer[128]; // temp string buffer
 
     // if we're not using nested JSON, send each sensor out seperately
     if (!myESP.mqttUseNestedJson()) {
@@ -593,9 +593,7 @@ void publishSensorValues() {
                 strlcat(topic, _int_to_char(buffer, i + 1), sizeof(topic));
                 sensors[PAYLOAD_EXTERNAL_SENSOR_ID]   = ds18.getDeviceID(buffer, i); // add ID
                 sensors[PAYLOAD_EXTERNAL_SENSOR_TEMP] = sensorValue;                 // add temp value
-                char data[100]                        = {0};
-                serializeJson(doc, data, sizeof(data)); // convert to string
-                myESP.mqttPublish(topic, data);         // and publish
+                myESP.mqttPublish(topic, doc);                                       // and publish
             }
         }
         if (hasdata) {
@@ -604,24 +602,25 @@ void publishSensorValues() {
         return; // exit
     }
 
-    // see if the sensor values have changed, if so send it on
+    // group all sensors together - https://github.com/proddy/EMS-ESP/issues/327
     for (uint8_t i = 0; i < EMSESP_Settings.dallas_sensors; i++) {
         float sensorValue = ds18.getValue(i);
         if (sensorValue != DS18_DISCONNECTED) {
             hasdata = true;
-            // create a nested object - https://github.com/proddy/EMS-ESP/issues/327
+#ifdef SENSOR_MQTT_USEID
+            sensors[ds18.getDeviceID(buffer, i)] = sensorValue;
+#else
             char sensorID[10]; // sensor{1-n}
             strlcpy(sensorID, PAYLOAD_EXTERNAL_SENSOR_NUM, sizeof(sensorID));
             strlcat(sensorID, _int_to_char(buffer, i + 1), sizeof(sensorID));
             JsonObject dataSensor                    = sensors.createNestedObject(sensorID);
             dataSensor[PAYLOAD_EXTERNAL_SENSOR_ID]   = ds18.getDeviceID(buffer, i);
             dataSensor[PAYLOAD_EXTERNAL_SENSOR_TEMP] = sensorValue;
+#endif
         }
     }
 
-    char data[DS18_MQTT_PAYLOAD_MAXSIZE] = {0};
-    serializeJson(doc, data, sizeof(data));
-    myESP.mqttPublish(TOPIC_EXTERNAL_SENSORS, data);
+    myESP.mqttPublish(TOPIC_EXTERNAL_SENSORS, doc);
 
     if (hasdata) {
         myDebugLog("Publishing external sensor data via MQTT");
@@ -630,10 +629,11 @@ void publishSensorValues() {
 
 // publish Boiler data via MQTT
 void publishEMSValues_boiler() {
-    char                                      s[20] = {0}; // for formatting strings
-    StaticJsonDocument<MQTT_MAX_PAYLOAD_SIZE> doc;
-    char                                      data[MQTT_MAX_PAYLOAD_SIZE] = {0};
-    JsonObject                                rootBoiler                  = doc.to<JsonObject>();
+    const size_t        capacity = JSON_OBJECT_SIZE(34); // must recalculate if more objects addded https://arduinojson.org/v6/assistant/
+    DynamicJsonDocument doc(capacity);
+    JsonObject          rootBoiler = doc.to<JsonObject>();
+
+    char s[20]; // for formatting strings
 
     if (EMS_Boiler.wWComfort == EMS_VALUE_UBAParameterWW_wwComfort_Hot) {
         rootBoiler["wWComfort"] = "Hot";
@@ -643,126 +643,153 @@ void publishEMSValues_boiler() {
         rootBoiler["wWComfort"] = "Intelligent";
     }
 
-    if (EMS_Boiler.wWSelTemp != EMS_VALUE_INT_NOTSET)
+    if (EMS_Boiler.wWSelTemp != EMS_VALUE_INT_NOTSET) {
         rootBoiler["wWSelTemp"] = EMS_Boiler.wWSelTemp;
-    if (EMS_Boiler.wWDesinfectTemp != EMS_VALUE_INT_NOTSET)
+    }
+    if (EMS_Boiler.wWDesinfectTemp != EMS_VALUE_INT_NOTSET) {
         rootBoiler["wWDesinfectionTemp"] = EMS_Boiler.wWDesinfectTemp;
-    if (EMS_Boiler.selFlowTemp != EMS_VALUE_INT_NOTSET)
+    }
+    if (EMS_Boiler.selFlowTemp != EMS_VALUE_INT_NOTSET) {
         rootBoiler["selFlowTemp"] = EMS_Boiler.selFlowTemp;
-    if (EMS_Boiler.selBurnPow != EMS_VALUE_INT_NOTSET)
+    }
+    if (EMS_Boiler.selBurnPow != EMS_VALUE_INT_NOTSET) {
         rootBoiler["selBurnPow"] = EMS_Boiler.selBurnPow;
-    if (EMS_Boiler.curBurnPow != EMS_VALUE_INT_NOTSET)
+    }
+    if (EMS_Boiler.curBurnPow != EMS_VALUE_INT_NOTSET) {
         rootBoiler["curBurnPow"] = EMS_Boiler.curBurnPow;
-    if (EMS_Boiler.pumpMod != EMS_VALUE_INT_NOTSET)
+    }
+    if (EMS_Boiler.pumpMod != EMS_VALUE_INT_NOTSET) {
         rootBoiler["pumpMod"] = EMS_Boiler.pumpMod;
-    if (EMS_Boiler.wWCircPump != EMS_VALUE_BOOL_NOTSET)
+    }
+    if (EMS_Boiler.wWCircPump != EMS_VALUE_BOOL_NOTSET) {
         rootBoiler["wWCircPump"] = EMS_Boiler.wWCircPump;
-
-    if (EMS_Boiler.extTemp > EMS_VALUE_SHORT_NOTSET)
+    }
+    if (EMS_Boiler.extTemp > EMS_VALUE_SHORT_NOTSET) {
         rootBoiler["outdoorTemp"] = (float)EMS_Boiler.extTemp / 10;
-    if (EMS_Boiler.wWCurTmp < EMS_VALUE_USHORT_NOTSET)
+    }
+    if (EMS_Boiler.wWCurTmp < EMS_VALUE_USHORT_NOTSET) {
         rootBoiler["wWCurTmp"] = (float)EMS_Boiler.wWCurTmp / 10;
-    if (EMS_Boiler.wWCurFlow != EMS_VALUE_INT_NOTSET)
+    }
+    if (EMS_Boiler.wWCurFlow != EMS_VALUE_INT_NOTSET) {
         rootBoiler["wWCurFlow"] = (float)EMS_Boiler.wWCurFlow / 10;
-    if (EMS_Boiler.curFlowTemp < EMS_VALUE_USHORT_NOTSET)
+    }
+    if (EMS_Boiler.curFlowTemp < EMS_VALUE_USHORT_NOTSET) {
         rootBoiler["curFlowTemp"] = (float)EMS_Boiler.curFlowTemp / 10;
-    if (EMS_Boiler.retTemp < EMS_VALUE_USHORT_NOTSET)
+    }
+    if (EMS_Boiler.retTemp < EMS_VALUE_USHORT_NOTSET) {
         rootBoiler["retTemp"] = (float)EMS_Boiler.retTemp / 10;
-    if (EMS_Boiler.switchTemp < EMS_VALUE_USHORT_NOTSET)
+    }
+    if (EMS_Boiler.switchTemp < EMS_VALUE_USHORT_NOTSET) {
         rootBoiler["switchTemp"] = (float)EMS_Boiler.switchTemp / 10;
-    if (EMS_Boiler.sysPress != EMS_VALUE_INT_NOTSET)
+    }
+    if (EMS_Boiler.sysPress != EMS_VALUE_INT_NOTSET) {
         rootBoiler["sysPress"] = (float)EMS_Boiler.sysPress / 10;
-    if (EMS_Boiler.boilTemp < EMS_VALUE_USHORT_NOTSET)
+    }
+    if (EMS_Boiler.boilTemp < EMS_VALUE_USHORT_NOTSET) {
         rootBoiler["boilTemp"] = (float)EMS_Boiler.boilTemp / 10;
-    if (EMS_Boiler.exhaustTemp < EMS_VALUE_USHORT_NOTSET)
+    }
+    if (EMS_Boiler.exhaustTemp < EMS_VALUE_USHORT_NOTSET) {
         rootBoiler["exhaustTemp"] = (float)EMS_Boiler.exhaustTemp / 10;
-    if (EMS_Boiler.wWActivated != EMS_VALUE_BOOL_NOTSET)
+    }
+    if (EMS_Boiler.wWActivated != EMS_VALUE_BOOL_NOTSET) {
         rootBoiler["wWActivated"] = _bool_to_char(s, EMS_Boiler.wWActivated);
-
-    if (EMS_Boiler.wWActivated != EMS_VALUE_BOOL_NOTSET)
+    }
+    if (EMS_Boiler.wWActivated != EMS_VALUE_BOOL_NOTSET) {
         rootBoiler["wWOnetime"] = _bool_to_char(s, EMS_Boiler.wWOneTime);
-
-    if (EMS_Boiler.wWCirc != EMS_VALUE_BOOL_NOTSET)
+    }
+    if (EMS_Boiler.wWCirc != EMS_VALUE_BOOL_NOTSET) {
         rootBoiler["wWCirc"] = _bool_to_char(s, EMS_Boiler.wWCirc);
-
-    if (EMS_Boiler.burnGas != EMS_VALUE_BOOL_NOTSET)
+    }
+    if (EMS_Boiler.burnGas != EMS_VALUE_BOOL_NOTSET) {
         rootBoiler["burnGas"] = _bool_to_char(s, EMS_Boiler.burnGas);
-
-    if (EMS_Boiler.flameCurr < EMS_VALUE_USHORT_NOTSET)
+    }
+    if (EMS_Boiler.flameCurr < EMS_VALUE_USHORT_NOTSET) {
         rootBoiler["flameCurr"] = (float)(int16_t)EMS_Boiler.flameCurr / 10;
-
-    if (EMS_Boiler.heatPmp != EMS_VALUE_BOOL_NOTSET)
+    }
+    if (EMS_Boiler.heatPmp != EMS_VALUE_BOOL_NOTSET) {
         rootBoiler["heatPmp"] = _bool_to_char(s, EMS_Boiler.heatPmp);
-
-    if (EMS_Boiler.fanWork != EMS_VALUE_BOOL_NOTSET)
+    }
+    if (EMS_Boiler.fanWork != EMS_VALUE_BOOL_NOTSET) {
         rootBoiler["fanWork"] = _bool_to_char(s, EMS_Boiler.fanWork);
-
-    if (EMS_Boiler.ignWork != EMS_VALUE_BOOL_NOTSET)
+    }
+    if (EMS_Boiler.ignWork != EMS_VALUE_BOOL_NOTSET) {
         rootBoiler["ignWork"] = _bool_to_char(s, EMS_Boiler.ignWork);
-
-    if (EMS_Boiler.heating_temp != EMS_VALUE_INT_NOTSET)
+    }
+    if (EMS_Boiler.heating_temp != EMS_VALUE_INT_NOTSET) {
         rootBoiler["heating_temp"] = EMS_Boiler.heating_temp;
-    if (EMS_Boiler.pump_mod_max != EMS_VALUE_INT_NOTSET)
+    }
+    if (EMS_Boiler.pump_mod_max != EMS_VALUE_INT_NOTSET) {
         rootBoiler["pump_mod_max"] = EMS_Boiler.pump_mod_max;
-    if (EMS_Boiler.pump_mod_min != EMS_VALUE_INT_NOTSET)
+    }
+    if (EMS_Boiler.pump_mod_min != EMS_VALUE_INT_NOTSET) {
         rootBoiler["pump_mod_min"] = EMS_Boiler.pump_mod_min;
-
-    if (EMS_Boiler.wWHeat != EMS_VALUE_BOOL_NOTSET)
+    }
+    if (EMS_Boiler.wWHeat != EMS_VALUE_BOOL_NOTSET) {
         rootBoiler["wWHeat"] = _bool_to_char(s, EMS_Boiler.wWHeat);
-
-    if (abs(EMS_Boiler.wWStarts) != EMS_VALUE_LONG_NOTSET)
+    }
+    if (abs(EMS_Boiler.wWStarts) != EMS_VALUE_LONG_NOTSET) {
         rootBoiler["wWStarts"] = (float)EMS_Boiler.wWStarts;
-    if (abs(EMS_Boiler.wWWorkM) != EMS_VALUE_LONG_NOTSET)
+    }
+    if (abs(EMS_Boiler.wWWorkM) != EMS_VALUE_LONG_NOTSET) {
         rootBoiler["wWWorkM"] = (float)EMS_Boiler.wWWorkM;
-    if (abs(EMS_Boiler.UBAuptime) != EMS_VALUE_LONG_NOTSET)
+    }
+    if (abs(EMS_Boiler.UBAuptime) != EMS_VALUE_LONG_NOTSET) {
         rootBoiler["UBAuptime"] = (float)EMS_Boiler.UBAuptime;
-
-    if (abs(EMS_Boiler.burnStarts) != EMS_VALUE_LONG_NOTSET)
+    }
+    if (abs(EMS_Boiler.burnStarts) != EMS_VALUE_LONG_NOTSET) {
         rootBoiler["burnStarts"] = (float)EMS_Boiler.burnStarts;
-    if (abs(EMS_Boiler.burnWorkMin) != EMS_VALUE_LONG_NOTSET)
+    }
+    if (abs(EMS_Boiler.burnWorkMin) != EMS_VALUE_LONG_NOTSET) {
         rootBoiler["burnWorkMin"] = (float)EMS_Boiler.burnWorkMin;
-    if (abs(EMS_Boiler.heatWorkMin) != EMS_VALUE_LONG_NOTSET)
+    }
+    if (abs(EMS_Boiler.heatWorkMin) != EMS_VALUE_LONG_NOTSET) {
         rootBoiler["heatWorkMin"] = (float)EMS_Boiler.heatWorkMin;
+    }
 
     if (EMS_Boiler.serviceCode != EMS_VALUE_USHORT_NOTSET) {
         rootBoiler["ServiceCode"]       = EMS_Boiler.serviceCodeChar;
         rootBoiler["ServiceCodeNumber"] = EMS_Boiler.serviceCode;
     }
 
-    serializeJson(doc, data, sizeof(data));
     myDebugLog("Publishing boiler data via MQTT");
-    myESP.mqttPublish(TOPIC_BOILER_DATA, data);
+    myESP.mqttPublish(TOPIC_BOILER_DATA, doc);
 
     // see if the heating or hot tap water has changed, if so send
     // last_boilerActive stores heating in bit 1 and tap water in bit 2
     static uint8_t last_boilerActive = 0xFF; // for remembering last setting of the tap water or heating on/off
     if (last_boilerActive != ((EMS_Boiler.tapwaterActive << 1) + EMS_Boiler.heatingActive)) {
-        myDebugLog("Publishing hot water and heating states via MQTT");
         myESP.mqttPublish(TOPIC_BOILER_TAPWATER_ACTIVE, EMS_Boiler.tapwaterActive == 1 ? "1" : "0");
         myESP.mqttPublish(TOPIC_BOILER_HEATING_ACTIVE, EMS_Boiler.heatingActive == 1 ? "1" : "0");
-
         last_boilerActive = ((EMS_Boiler.tapwaterActive << 1) + EMS_Boiler.heatingActive); // remember last state
     }
 }
 
 // handle the thermostat values
 void publishEMSValues_thermostat() {
-    char                                      s[20] = {0}; // for formatting strings
-    StaticJsonDocument<MQTT_MAX_PAYLOAD_SIZE> doc;
-    char                                      data[MQTT_MAX_PAYLOAD_SIZE] = {0};
-    JsonObject                                rootThermostat              = doc.to<JsonObject>();
+    StaticJsonDocument<MYESP_JSON_MAXSIZE_MEDIUM> doc;
+    JsonObject                                    rootThermostat = doc.to<JsonObject>();
+    JsonObject                                    dataThermostat;
+
+    bool has_data = false;
 
     for (uint8_t hc_v = 1; hc_v <= EMS_THERMOSTAT_MAXHC; hc_v++) {
         _EMS_Thermostat_HC * thermostat = &EMS_Thermostat.hc[hc_v - 1];
 
         // only send if we have an active Heating Circuit with an actual setpoint temp temperature values
         if ((thermostat->active) && (thermostat->setpoint_roomTemp > EMS_VALUE_SHORT_NOTSET)) {
-            // build new json object
-            char hc[10]; // hc{1-4}
-            strlcpy(hc, THERMOSTAT_HC, sizeof(hc));
-            strlcat(hc, _int_to_char(s, thermostat->hc), sizeof(hc));
-            JsonObject dataThermostat = rootThermostat.createNestedObject(hc);
-            uint8_t    model          = ems_getThermostatModel();
+            uint8_t model = ems_getThermostatModel(); // fetch model flags
+            has_data      = true;
+
+            if (myESP.mqttUseNestedJson()) {
+                // create nested json for each HC
+                char hc[10]; // hc{1-4}
+                strlcpy(hc, THERMOSTAT_HC, sizeof(hc));
+                char s[20]; // for formatting strings
+                strlcat(hc, _int_to_char(s, thermostat->hc), sizeof(hc));
+                dataThermostat = rootThermostat.createNestedObject(hc);
+            } else {
+                dataThermostat = rootThermostat;
+            }
 
             // different logic depending on thermostat types
             if (model == EMS_DEVICE_FLAG_EASY) {
@@ -808,26 +835,46 @@ void publishEMSValues_thermostat() {
             } else if (thermoMode == EMS_THERMOSTAT_MODE_NIGHT) {
                 dataThermostat[THERMOSTAT_MODE] = "night";
             }
+
+
+            // if its not nested, send immediately
+            if (!myESP.mqttUseNestedJson()) {
+                char topic[30];
+                char s[20]; // for formatting strings
+                strlcpy(topic, TOPIC_THERMOSTAT_DATA, sizeof(topic));
+                strlcat(topic, _int_to_char(s, thermostat->hc), sizeof(topic)); // append hc to topic
+                char data[MYESP_JSON_MAXSIZE_MEDIUM];
+                serializeJson(doc, data);
+                myESP.mqttPublish(topic, data);
+            }
         }
     }
 
-    serializeJson(doc, data, sizeof(data));
-    myDebugLog("Publishing thermostat data via MQTT");
-    myESP.mqttPublish(TOPIC_THERMOSTAT_DATA, data);
+    // if we're using nested json, send all in one go
+    if (myESP.mqttUseNestedJson() && has_data) {
+        char data[MYESP_JSON_MAXSIZE_MEDIUM];
+        serializeJson(doc, data);
+        myESP.mqttPublish(TOPIC_THERMOSTAT_DATA, data);
+    }
+
+    if (has_data) {
+        myDebugLog("Publishing thermostat data via MQTT");
+    }
 }
 
 // publish mixing data
+// only sending if we have an active hc
 void publishEMSValues_mixing() {
-    char                                      s[20] = {0}; // for formatting strings
-    StaticJsonDocument<MQTT_MAX_PAYLOAD_SIZE> doc;
-    char                                      data[MQTT_MAX_PAYLOAD_SIZE] = {0};
-    JsonObject                                rootMixing                  = doc.to<JsonObject>();
+    char                                          s[20]; // for formatting strings
+    StaticJsonDocument<MYESP_JSON_MAXSIZE_MEDIUM> doc;
+    JsonObject                                    rootMixing = doc.to<JsonObject>();
+    bool                                          has_data   = false;
 
     for (uint8_t hc_v = 1; hc_v <= EMS_MIXING_MAXHC; hc_v++) {
         _EMS_MixingModule_HC * mixingHC = &EMS_MixingModule.hc[hc_v - 1];
 
-        // only send if we have an active Heating Circuit with real data
         if (mixingHC->active) {
+            has_data = true;
             char hc[10]; // hc{1-4}
             strlcpy(hc, MIXING_HC, sizeof(hc));
             strlcat(hc, _int_to_char(s, mixingHC->hc), sizeof(hc));
@@ -845,8 +892,9 @@ void publishEMSValues_mixing() {
 
     for (uint8_t wwc_v = 1; wwc_v <= EMS_MIXING_MAXWWC; wwc_v++) {
         _EMS_MixingModule_WWC * mixingWWC = &EMS_MixingModule.wwc[wwc_v - 1];
-        // only send if we have an active Warm water Circuit with real data
+
         if (mixingWWC->active) {
+            has_data = true;
             char wwc[10]; // wwc{1-2}
             strlcpy(wwc, MIXING_WWC, sizeof(wwc));
             strlcat(wwc, _int_to_char(s, mixingWWC->wwc), sizeof(wwc));
@@ -860,72 +908,69 @@ void publishEMSValues_mixing() {
         }
     }
 
-    serializeJson(doc, data, sizeof(data));
-    myDebugLog("Publishing mixing data via MQTT");
-    myESP.mqttPublish(TOPIC_MIXING_DATA, data);
+    if (has_data) {
+        myDebugLog("Publishing mixing data via MQTT");
+        myESP.mqttPublish(TOPIC_MIXING_DATA, doc);
+    }
 }
 
 // For SM10 and SM100/SM200 Solar Modules
 void publishEMSValues_solar() {
-    StaticJsonDocument<MQTT_MAX_PAYLOAD_SIZE> doc;
-    char                                      data[MQTT_MAX_PAYLOAD_SIZE] = {0};
-    JsonObject                                rootSM                      = doc.to<JsonObject>();
+    StaticJsonDocument<MYESP_JSON_MAXSIZE_SMALL> doc;
+    JsonObject                                   rootSM = doc.to<JsonObject>();
 
-    if (EMS_SolarModule.collectorTemp > EMS_VALUE_SHORT_NOTSET)
+    if (EMS_SolarModule.collectorTemp > EMS_VALUE_SHORT_NOTSET) {
         rootSM[SM_COLLECTORTEMP] = (float)EMS_SolarModule.collectorTemp / 10;
-
-    if (EMS_SolarModule.bottomTemp > EMS_VALUE_SHORT_NOTSET)
+    }
+    if (EMS_SolarModule.bottomTemp > EMS_VALUE_SHORT_NOTSET) {
         rootSM[SM_BOTTOMTEMP] = (float)EMS_SolarModule.bottomTemp / 10;
-
-    if (EMS_SolarModule.pumpModulation != EMS_VALUE_INT_NOTSET)
+    }
+    if (EMS_SolarModule.pumpModulation != EMS_VALUE_INT_NOTSET) {
         rootSM[SM_PUMPMODULATION] = EMS_SolarModule.pumpModulation;
-
+    }
     if (EMS_SolarModule.pump != EMS_VALUE_BOOL_NOTSET) {
-        char s[20] = {0}; // for formatting strings
+        char s[20];
         rootSM[SM_PUMP] = _bool_to_char(s, EMS_SolarModule.pump);
     }
-
     if (EMS_SolarModule.pumpWorkMin != EMS_VALUE_LONG_NOTSET) {
         rootSM[SM_PUMPWORKMIN] = (float)EMS_SolarModule.pumpWorkMin;
     }
-
-    if (EMS_SolarModule.EnergyLastHour < EMS_VALUE_USHORT_NOTSET)
+    if (EMS_SolarModule.EnergyLastHour < EMS_VALUE_USHORT_NOTSET) {
         rootSM[SM_ENERGYLASTHOUR] = (float)EMS_SolarModule.EnergyLastHour / 10;
-
-    if (EMS_SolarModule.EnergyToday < EMS_VALUE_USHORT_NOTSET)
+    }
+    if (EMS_SolarModule.EnergyToday < EMS_VALUE_USHORT_NOTSET) {
         rootSM[SM_ENERGYTODAY] = EMS_SolarModule.EnergyToday;
-
-    if (EMS_SolarModule.EnergyTotal < EMS_VALUE_USHORT_NOTSET)
+    }
+    if (EMS_SolarModule.EnergyTotal < EMS_VALUE_USHORT_NOTSET) {
         rootSM[SM_ENERGYTOTAL] = (float)EMS_SolarModule.EnergyTotal / 10;
+    }
 
-    serializeJson(doc, data, sizeof(data));
-    myDebugLog("Publishing SM data via MQTT");
-    myESP.mqttPublish(TOPIC_SM_DATA, data);
+    myDebugLog("Publishing solar module data via MQTT");
+    myESP.mqttPublish(TOPIC_SM_DATA, doc);
 }
 
 // handle HeatPump
 void publishEMSValues_heatpump() {
-    StaticJsonDocument<MQTT_MAX_PAYLOAD_SIZE> doc;
-    char                                      data[MQTT_MAX_PAYLOAD_SIZE] = {0};
-    JsonObject                                rootHP                      = doc.to<JsonObject>();
+    StaticJsonDocument<MYESP_JSON_MAXSIZE_SMALL> doc;
+    JsonObject                                   rootHP = doc.to<JsonObject>();
 
-    if (EMS_HeatPump.HPModulation != EMS_VALUE_INT_NOTSET)
+    if (EMS_HeatPump.HPModulation != EMS_VALUE_INT_NOTSET) {
         rootHP[HP_PUMPMODULATION] = EMS_HeatPump.HPModulation;
-
-    if (EMS_HeatPump.HPSpeed != EMS_VALUE_INT_NOTSET)
+    }
+    if (EMS_HeatPump.HPSpeed != EMS_VALUE_INT_NOTSET) {
         rootHP[HP_PUMPSPEED] = EMS_HeatPump.HPSpeed;
+    }
 
-    serializeJson(doc, data, sizeof(data));
-    myDebugLog("Publishing HeatPump data via MQTT");
-    myESP.mqttPublish(TOPIC_HP_DATA, data);
+    myDebugLog("Publishing peat pump data via MQTT");
+    myESP.mqttPublish(TOPIC_HP_DATA, doc);
 }
 
 // Publish shower data
 void do_publishShowerData() {
-    StaticJsonDocument<MQTT_MAX_PAYLOAD_SIZE_SMALL> doc;
-    JsonObject                                      rootShower = doc.to<JsonObject>();
-    rootShower[TOPIC_SHOWER_TIMER]                             = EMSESP_Settings.shower_timer ? "1" : "0";
-    rootShower[TOPIC_SHOWER_ALERT]                             = EMSESP_Settings.shower_alert ? "1" : "0";
+    StaticJsonDocument<MYESP_JSON_MAXSIZE_SMALL> doc;
+    JsonObject                                   rootShower = doc.to<JsonObject>();
+    rootShower[TOPIC_SHOWER_TIMER]                          = EMSESP_Settings.shower_timer ? "1" : "0";
+    rootShower[TOPIC_SHOWER_ALERT]                          = EMSESP_Settings.shower_alert ? "1" : "0";
 
     // only publish shower duration if there is a value
     char s[50] = {0};
@@ -938,13 +983,8 @@ void do_publishShowerData() {
         rootShower[TOPIC_SHOWER_DURATION] = s;
     }
 
-    char data[300] = {0};
-    serializeJson(doc, data, sizeof(data));
-
     myDebugLog("Publishing shower data via MQTT");
-
-    // Publish MQTT forcing retain to be off
-    myESP.mqttPublish(TOPIC_SHOWER_DATA, data, false);
+    myESP.mqttPublish(TOPIC_SHOWER_DATA, doc, false); // Publish MQTT forcing retain to be off
 }
 
 // send values via MQTT
@@ -955,14 +995,16 @@ void publishEMSValues(bool force) {
         return;
     }
 
-    if (ems_getBoilerEnabled() && (ems_Device_has_flags(EMS_DEVICE_UPDATE_FLAG_BOILER) || force)) {
-        publishEMSValues_boiler();
-        ems_Device_remove_flags(EMS_DEVICE_UPDATE_FLAG_BOILER); // unset flag
-    }
-
     if (ems_getThermostatEnabled() && (ems_Device_has_flags(EMS_DEVICE_UPDATE_FLAG_THERMOSTAT) || force)) {
         publishEMSValues_thermostat();
         ems_Device_remove_flags(EMS_DEVICE_UPDATE_FLAG_THERMOSTAT); // unset flag
+    }
+
+    return; // XXX
+
+    if (ems_getBoilerEnabled() && (ems_Device_has_flags(EMS_DEVICE_UPDATE_FLAG_BOILER) || force)) {
+        publishEMSValues_boiler();
+        ems_Device_remove_flags(EMS_DEVICE_UPDATE_FLAG_BOILER); // unset flag
     }
 
     if (ems_getMixingModuleEnabled() && (ems_Device_has_flags(EMS_DEVICE_UPDATE_FLAG_MIXING) || force)) {
@@ -1072,8 +1114,6 @@ bool LoadSaveCallback(MYESP_FSACTION_t action, JsonObject settings) {
             myDebug_P(PSTR("Error processing json settings"));
             return false;
         }
-
-        // serializeJsonPretty(settings, Serial); // for debugging
 
         EMSESP_Settings.led             = settings["led"];
         EMSESP_Settings.led_gpio        = settings["led_gpio"] | EMSESP_LED_GPIO;
@@ -1372,7 +1412,7 @@ void saveEMSDevices() {
 
     strlcpy(EMSESP_Settings.known_devices, s, sizeof(s));
 
-    myDebug("The device IDs %s%s%swill be automatically scanned when EMS-ESP boots up.", COLOR_BOLD_ON, EMSESP_Settings.known_devices, COLOR_BOLD_OFF);
+    myDebug_P(PSTR("The device IDs %s%s%swill be automatically scanned when EMS-ESP boots up."), COLOR_BOLD_ON, EMSESP_Settings.known_devices, COLOR_BOLD_OFF);
     myESP.saveSettings();
 }
 

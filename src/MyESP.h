@@ -96,21 +96,17 @@ extern struct rst_info resetInfo;
 #define MQTT_QOS 0                          // default qos 0
 #define MQTT_WILL_TOPIC "status"            // for last will & testament topic name
 #define MQTT_MAX_TOPIC_SIZE 50              // max length of MQTT topic
-#define MQTT_MAX_PAYLOAD_SIZE 700           // max size of a JSON object. See https://arduinojson.org/v6/assistant/
-#define MQTT_MAX_PAYLOAD_SIZE_LARGE 2000    // max size of a large JSON object
-#define MQTT_MAX_PAYLOAD_SIZE_SMALL 200
-#define MQTT_QUEUE_MAX_SIZE 20   // Size of the MQTT queue
-#define MQTT_PUBLISH_WAIT 1000   // every 1 second check MQTT queue
-#define MQTT_PUBLISH_MAX_RETRY 4 // max retries for giving up on publishing
+#define MQTT_QUEUE_MAX_SIZE 50              // Size of the MQTT queue
+#define MQTT_PUBLISH_WAIT 750               // time in ms before sending MQTT messages
+#define MQTT_PUBLISH_MAX_RETRY 4            // max retries for giving up on publishing
+#define MYESP_JSON_MAXSIZE_LARGE 2000       // for large Dynamic json files - https://arduinojson.org/v6/assistant/
+#define MYESP_JSON_MAXSIZE_MEDIUM 800       // for medium Dynamic json files - https://arduinojson.org/v6/assistant/
+#define MYESP_JSON_MAXSIZE_SMALL 200        // for smaller Static json documents - https://arduinojson.org/v6/assistant/
 
 // Internal MQTT events
 #define MQTT_CONNECT_EVENT 0
 #define MQTT_DISCONNECT_EVENT 1
 #define MQTT_MESSAGE_EVENT 2
-
-#define MYESP_JSON_MAXSIZE_LARGE 2000 // for large Dynamic json files
-#define MYESP_JSON_MAXSIZE_MEDIUM 800 // for medium Dynamic json files
-#define MYESP_JSON_MAXSIZE_SMALL 200  // for smaller Static json documents
 
 #define MYESP_MQTT_PAYLOAD_ON '1'  // for MQTT switch on
 #define MYESP_MQTT_PAYLOAD_OFF '0' // for MQTT switch off
@@ -213,9 +209,9 @@ struct RtcmemData {
 
 static_assert(sizeof(RtcmemData) <= (RTCMEM_BLOCKS * 4u), "RTCMEM struct is too big");
 
-#define MYESP_SYSTEM_CHECK_TIME 60000   // The system is considered stable after these many millis (1 minute)
-#define MYESP_SYSTEM_CHECK_MAX 10       // After this many crashes on boot
-#define MYESP_HEARTBEAT_INTERVAL 120000 // in milliseconds, how often the MQTT heartbeat is sent (2 mins)
+#define MYESP_SYSTEM_CHECK_TIME 60000  // The system is considered stable after these many millis (1 min)
+#define MYESP_SYSTEM_CHECK_MAX 10      // After this many crashes on boot
+#define MYESP_HEARTBEAT_INTERVAL 60000 // in milliseconds, how often the MQTT heartbeat is sent (1 min)
 
 typedef struct {
     bool set; // is it a set command?
@@ -286,6 +282,8 @@ class MyESP {
     void mqttUnsubscribe(const char * topic);
     void mqttPublish(const char * topic, const char * payload);
     void mqttPublish(const char * topic, const char * payload, bool retain);
+    void mqttPublish(const char * topic, JsonDocument payload);
+    void mqttPublish(const char * topic, JsonDocument payload, bool retain);
     void setMQTT(mqtt_callback_f callback);
     bool mqttUseNestedJson();
 
@@ -346,6 +344,7 @@ class MyESP {
     void            _sendStart();
     char *          _mqttTopic(const char * topic);
     bool            _mqttQueue(const char * topic, const char * payload, bool retain);
+    bool            _mqttQueue(const char * topic, JsonDocument payload, bool retain);
     void            _printMQTTLog();
     void            _mqttPublishQueue();
     void            _mqttRemoveLastPublish();
