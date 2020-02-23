@@ -352,6 +352,9 @@ void showInfo() {
             _renderShortValue("Outside temperature", "C", EMS_Boiler.extTemp);
         }
         _renderUShortValue("Boiler temperature", "C", EMS_Boiler.boilTemp);
+        _renderUShortValue("Warm water storage temperature1", "C", EMS_Boiler.wwStorageTemp1);
+        _renderUShortValue("Warm water storage temperature2", "C", EMS_Boiler.wwStorageTemp2);
+
         _renderUShortValue("Exhaust temperature", "C", EMS_Boiler.exhaustTemp);
         _renderIntValue("Pump modulation", "%", EMS_Boiler.pumpMod);
         _renderLongValue("Burner # starts", "times", EMS_Boiler.burnStarts);
@@ -629,7 +632,7 @@ void publishSensorValues() {
 
 // publish Boiler data via MQTT
 void publishEMSValues_boiler() {
-    const size_t        capacity = JSON_OBJECT_SIZE(34); // must recalculate if more objects addded https://arduinojson.org/v6/assistant/
+    const size_t        capacity = JSON_OBJECT_SIZE(36); // must recalculate if more objects addded https://arduinojson.org/v6/assistant/
     DynamicJsonDocument doc(capacity);
     JsonObject          rootBoiler = doc.to<JsonObject>();
 
@@ -687,6 +690,12 @@ void publishEMSValues_boiler() {
     }
     if (EMS_Boiler.boilTemp < EMS_VALUE_USHORT_NOTSET) {
         rootBoiler["boilTemp"] = (float)EMS_Boiler.boilTemp / 10;
+    }
+    if (EMS_Boiler.wwStorageTemp1 < EMS_VALUE_USHORT_NOTSET) {
+        rootBoiler["wwStorageTemp1"] = (float)EMS_Boiler.wwStorageTemp1 / 10;
+    }
+    if (EMS_Boiler.wwStorageTemp2 < EMS_VALUE_USHORT_NOTSET) {
+        rootBoiler["wwStorageTemp2"] = (float)EMS_Boiler.wwStorageTemp2 / 10;
     }
     if (EMS_Boiler.exhaustTemp < EMS_VALUE_USHORT_NOTSET) {
         rootBoiler["exhaustTemp"] = (float)EMS_Boiler.exhaustTemp / 10;

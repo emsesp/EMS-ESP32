@@ -80,7 +80,7 @@ char * _short_to_char(char * s, int16_t value, uint8_t decimals) {
 // decimals: 0 = no division, 1=divide value by 10, 2=divide by 2, 10=divide value by 100
 char * _ushort_to_char(char * s, uint16_t value, uint8_t decimals) {
     // remove errors or invalid values
-    if (value >= EMS_VALUE_USHORT_NOTSET) {
+    if (value >= EMS_VALUE_USHORT_NOTSET) { // 0x7D00
         strlcpy(s, "?", 10);
         return (s);
     }

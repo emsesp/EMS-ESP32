@@ -291,6 +291,8 @@ typedef struct {
     // UBAMonitorFast
     uint8_t  selFlowTemp;        // Selected flow temperature
     uint16_t curFlowTemp;        // Current flow temperature
+    uint16_t wwStorageTemp1;     // warm water storage temp 1
+    uint16_t wwStorageTemp2;     // warm water storage temp 2
     uint16_t retTemp;            // Return temperature
     uint8_t  burnGas;            // Gas on/off
     uint8_t  fanWork;            // Fan on/off
@@ -505,6 +507,7 @@ void    _debugPrintPackage(const char * prefix, _EMS_RxTelegram * EMS_RxTelegram
 void    _ems_clearTxData();
 void    _removeTxQueue();
 int8_t  _getHeatingCircuit(_EMS_RxTelegram * EMS_RxTelegram);
+void    _printMessage(_EMS_RxTelegram * EMS_RxTelegram, const int show_type = -1);
 
 // global so can referenced in other classes
 extern _EMS_Sys_Status   EMS_Sys_Status;
