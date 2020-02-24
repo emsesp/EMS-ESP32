@@ -1905,15 +1905,16 @@ bool MyESP::_fs_loadConfig() {
     _mqtt_keepalive  = mqtt["keepalive"] | MQTT_KEEPALIVE;
     _mqtt_retain     = mqtt["retain"];
     _mqtt_qos        = mqtt["qos"] | MQTT_QOS;
-    _mqtt_nestedjson = mqtt["nestedjson"]; // default to on
+    _mqtt_nestedjson = mqtt["nestedjson"] | true; // default to on
     _mqtt_password   = strdup(mqtt["password"] | "");
     _mqtt_base       = strdup(mqtt["base"] | MQTT_BASE_DEFAULT);
 
     JsonObject ntp = doc["ntp"];
     _ntp_server    = strdup(ntp["server"] | "");
     _ntp_interval  = ntp["interval"] | 60;
-    if (_ntp_interval < 2)
+    if (_ntp_interval < 2) {
         _ntp_interval = NTP_INTERVAL_DEFAULT;
+    }
     _ntp_enabled  = ntp["enabled"];
     _ntp_timezone = ntp["timezone"] | NTP_TIMEZONE_DEFAULT;
 
@@ -2575,7 +2576,7 @@ bool MyESP::_fs_sendConfig() {
 
 // send custom status via ws
 void MyESP::_sendCustomStatus() {
-    DynamicJsonDocument doc(MYESP_JSON_MAXSIZE_MEDIUM);
+    DynamicJsonDocument doc(MYESP_JSON_MAXSIZE_LARGE);
 
     JsonObject root = doc.to<JsonObject>();
 
@@ -2591,7 +2592,7 @@ void MyESP::_sendCustomStatus() {
         (_web_callback_f)(root);
     }
 
-    char   buffer[MYESP_JSON_MAXSIZE_MEDIUM];
+    char   buffer[MYESP_JSON_MAXSIZE_LARGE];
     size_t len = serializeJson(root, buffer);
 
 #ifdef MYESP_DEBUG
