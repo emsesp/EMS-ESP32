@@ -1790,7 +1790,6 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
             _addDevice(EMS_DEVICE_TYPE_BOILER, product_id, EMS_ID_BOILER, EMS_Devices[i].device_desc, version, brand);
             ems_getBoilerValues(); // get Boiler values that we would usually have to wait for
             return;                // quit
-            break;
         }
         i++;
     }
