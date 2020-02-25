@@ -271,6 +271,7 @@ static const _EMS_Device EMS_Devices[] = {
     // Buderus/Nefit specific
     {79, EMS_DEVICE_TYPE_THERMOSTAT, "RC10/Moduline 100", EMS_DEVICE_FLAG_RC10},                                    // 0x17
     {77, EMS_DEVICE_TYPE_THERMOSTAT, "RC20/Moduline 300", EMS_DEVICE_FLAG_RC20},                                    // 0x17
+    {80, EMS_DEVICE_TYPE_THERMOSTAT, "Moduline 200", EMS_DEVICE_FLAG_RC20},                                         // 0x17
     {67, EMS_DEVICE_TYPE_THERMOSTAT, "RC30", EMS_DEVICE_FLAG_RC30N},                                                // 0x10 - based on RC35
     {78, EMS_DEVICE_TYPE_THERMOSTAT, "Moduline 400", EMS_DEVICE_FLAG_RC30},                                         // 0x10
     {86, EMS_DEVICE_TYPE_THERMOSTAT, "RC35", EMS_DEVICE_FLAG_RC35},                                                 // 0x10
@@ -279,7 +280,8 @@ static const _EMS_Device EMS_Devices[] = {
     {165, EMS_DEVICE_TYPE_THERMOSTAT, "RC100/Moduline 1010", EMS_DEVICE_FLAG_RC300 | EMS_DEVICE_FLAG_NO_WRITE},     // 0x18, 0x38 - cannot write
 
     // Sieger
-    {76, EMS_DEVICE_TYPE_THERMOSTAT, "Sieger ES73", EMS_DEVICE_FLAG_RC35}, // 0x10
+    {76, EMS_DEVICE_TYPE_THERMOSTAT, "Sieger ES73", EMS_DEVICE_FLAG_RC35},  // 0x10
+    {113, EMS_DEVICE_TYPE_THERMOSTAT, "Sieger ES72", EMS_DEVICE_FLAG_RC20}, // 0x17
 
     // Junkers
     {105, EMS_DEVICE_TYPE_THERMOSTAT, "Junkers FW100", EMS_DEVICE_FLAG_JUNKERS},                            // 0x10
