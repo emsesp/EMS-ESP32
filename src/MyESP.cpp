@@ -407,7 +407,7 @@ void MyESP::mqttUnsubscribe(const char * topic) {
 }
 
 // print MQTT log
-void MyESP::_printMQTTLog() {
+void MyESP::_printMQTTQueue() {
     myDebug_P(PSTR("MQTT publish queue:"));
 
     if (_mqtt_queue.empty()) {
@@ -865,7 +865,7 @@ void MyESP::_consoleShowHelp() {
     myDebug_P(PSTR("*"));
     myDebug_P(PSTR("* Commands:"));
     myDebug_P(PSTR("*  ?/help=show commands, CTRL-D/quit=end telnet session"));
-    myDebug_P(PSTR("*  set, system, restart, mqttlog, kick, save"));
+    myDebug_P(PSTR("*  set, system, restart, mqttqueue, kick, save"));
 
 #ifdef CRASH
     myDebug_P(PSTR("*  crash <dump | clear | test [n]>"));
@@ -1197,8 +1197,8 @@ void MyESP::_telnetCommand(char * commandLine) {
     }
 
     // print mqtt log command
-    if (strcmp(ptrToCommandName, "mqttlog") == 0) {
-        _printMQTTLog();
+    if (strcmp(ptrToCommandName, "mqttqueue") == 0) {
+        _printMQTTQueue();
         return;
     }
 
