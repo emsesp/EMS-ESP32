@@ -28,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - improved MQTT publishing to stop flooding. `publish_time` must be at least 1 (second)
 - External sensors (like dallas) are sent as a nested MQTT topic including their unqiue identifier
+- `mqttlog` console command renamed to `mqttqueue`
 
 ### Removed
  - `autodetect scan`

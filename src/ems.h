@@ -46,22 +46,23 @@
 #define EMS_MIXING_MAXWWC 2 // max number of warm water circuits
 
 // Device Flags
-#define EMS_DEVICE_FLAG_NONE 0    // no flags set
-#define EMS_DEVICE_FLAG_SM10 10   // solar module1
-#define EMS_DEVICE_FLAG_SM100 11  // solar module2
-#define EMS_DEVICE_FLAG_MMPLUS 12 // mixing module EMS+
-#define EMS_DEVICE_FLAG_MM10 13   // mixing modules MM10 and MM50
-
-// device flags specific for thermostats
-#define EMS_DEVICE_FLAG_NO_WRITE 0x80 // top bit set if write not supported
-#define EMS_DEVICE_FLAG_EASY 1
-#define EMS_DEVICE_FLAG_RC10 2
-#define EMS_DEVICE_FLAG_RC20 3
-#define EMS_DEVICE_FLAG_RC30 4
-#define EMS_DEVICE_FLAG_RC30N 5 // newer type of RC30 with RC35 circuit
-#define EMS_DEVICE_FLAG_RC35 6
-#define EMS_DEVICE_FLAG_RC300 7
-#define EMS_DEVICE_FLAG_JUNKERS 8
+// They are unique to the model type (mixing, solar, thermostat etc)
+enum EMS_DEVICE_FLAG_TYPES : uint8_t {
+    EMS_DEVICE_FLAG_NONE     = 0,
+    EMS_DEVICE_FLAG_MMPLUS   = 20, // mixing EMS+
+    EMS_DEVICE_FLAG_MM10     = 21, // mixing MM10, MM50
+    EMS_DEVICE_FLAG_SM10     = 10,
+    EMS_DEVICE_FLAG_SM100    = 11, // for SM100 and SM200
+    EMS_DEVICE_FLAG_EASY     = 1,
+    EMS_DEVICE_FLAG_RC10     = 2,
+    EMS_DEVICE_FLAG_RC20     = 3,
+    EMS_DEVICE_FLAG_RC30     = 4,
+    EMS_DEVICE_FLAG_RC30N    = 5, // newer type of RC30 with RC35 circuit
+    EMS_DEVICE_FLAG_RC35     = 6,
+    EMS_DEVICE_FLAG_RC300    = 7,
+    EMS_DEVICE_FLAG_JUNKERS  = (1 << 6), // 6th bit set if its junkers HT3
+    EMS_DEVICE_FLAG_NO_WRITE = (1 << 7)  // top bit set if thermostat write not supported
+};
 
 typedef enum {
     EMS_THERMOSTAT_MODE_UNKNOWN,
@@ -335,7 +336,6 @@ typedef struct {
     // calculated values
     uint8_t tapwaterActive; // Hot tap water is on/off
     uint8_t heatingActive;  // Central heating is on/off
-
 } _EMS_Boiler;
 
 /*
@@ -388,10 +388,12 @@ typedef struct {
     const char * device_desc_p;
     uint8_t      product_id;
     char         version[10];
-    int16_t      collectorTemp;          // collector temp
-    int16_t      bottomTemp;             // bottom temp
+    int16_t      collectorTemp;          // collector temp (TS1)
+    int16_t      bottomTemp;             // bottom temp (TS2)
+    int16_t      bottomTemp2;            // bottom temp cylinder 2 (TS5)
     uint8_t      pumpModulation;         // modulation solar pump
     uint8_t      pump;                   // pump active
+    uint8_t      valveStatus;            // valve status (VS2)
     int16_t      setpoint_maxBottomTemp; // setpoint for maximum collector temp
     uint16_t     EnergyLastHour;
     uint16_t     EnergyToday;

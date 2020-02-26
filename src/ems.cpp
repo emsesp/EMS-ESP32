@@ -195,8 +195,10 @@ void ems_init() {
     // Solar Module values
     EMS_SolarModule.collectorTemp          = EMS_VALUE_SHORT_NOTSET; // collector temp from SM10/SM100/SM200
     EMS_SolarModule.bottomTemp             = EMS_VALUE_SHORT_NOTSET; // bottom temp from SM10/SM100/SM200
+    EMS_SolarModule.bottomTemp2            = EMS_VALUE_SHORT_NOTSET; // bottom temp 2 from SM200
     EMS_SolarModule.pumpModulation         = EMS_VALUE_INT_NOTSET;   // modulation solar pump SM10/SM100/SM200
     EMS_SolarModule.pump                   = EMS_VALUE_BOOL_NOTSET;  // pump active
+    EMS_SolarModule.valveStatus            = EMS_VALUE_BOOL_NOTSET;  // valve status from SM200
     EMS_SolarModule.EnergyLastHour         = EMS_VALUE_USHORT_NOTSET;
     EMS_SolarModule.EnergyToday            = EMS_VALUE_USHORT_NOTSET;
     EMS_SolarModule.EnergyTotal            = EMS_VALUE_USHORT_NOTSET;
@@ -1494,18 +1496,23 @@ void _process_SM10Monitor(_EMS_RxTelegram * EMS_RxTelegram) {
 }
 
 /*
- * SM100Monitor - type 0x0262 EMS+
+ * SM100Monitor - type 0x0262 EMS+ - for SM100 and SM200
+ * e.g. B0 0B FF 00 02 62 00 44 02 7A 80 00 80 00 80 00 80 00 80 00 80 00 00 7C 80 00 80 00 80 00 80
  * e.g, 30 00 FF 00 02 62 01 AC
  *      30 00 FF 18 02 62 80 00
  *      30 00 FF 00 02 62 01 A1 - for bottom temps
+ * bytes 0+1 = TS1 Temperature sensor for collector
+ * bytes 2+3 = TS2 Temperature sensor bottom cylinder 1
+ * bytes 16+17 = TS5 Temperature sensor bottom cylinder 2
  */
 void _process_SM100Monitor(_EMS_RxTelegram * EMS_RxTelegram) {
     _setValue(EMS_RxTelegram, &EMS_SolarModule.collectorTemp, 0); // is *10
     _setValue(EMS_RxTelegram, &EMS_SolarModule.bottomTemp, 2);    // is *10
+    _setValue(EMS_RxTelegram, &EMS_SolarModule.bottomTemp2, 16);  // is *10
 }
 
 /*
- * SM100Status - type 0x0264 EMS+ for pump modulation
+ * SM100Status - type 0x0264 EMS+ for pump modulation - for SM100 and SM200
  * e.g. 30 00 FF 09 02 64 64 = 100%
  *      30 00 FF 09 02 64 1E = 30%
  */
@@ -1514,10 +1521,14 @@ void _process_SM100Status(_EMS_RxTelegram * EMS_RxTelegram) {
 }
 
 /*
- * SM100Status2 - type 0x026A EMS+ for pump on/off at offset 0x0A
+ * SM100Status2 - type 0x026A EMS+ for pump on/off at offset 0x0A - for SM100 and SM200
+ * e.g. B0 00 FF 00 02 6A 03 03 03 03 01 03 03 03 03 03 01 03 
+ * byte 4 = VS2 3-way valve for cylinder 2 : test=01, on=04 and off=03
+ * byte 10 = PS1 Solar circuit pump for collector array 1: test=01, on=04 and off=03
  */
 void _process_SM100Status2(_EMS_RxTelegram * EMS_RxTelegram) {
-    _setValue(EMS_RxTelegram, &EMS_SolarModule.pump, 10, 2); // 03=off 04=on
+    _setValue(EMS_RxTelegram, &EMS_SolarModule.valveStatus, 4, 2); // 03=off 04=on
+    _setValue(EMS_RxTelegram, &EMS_SolarModule.pump, 10, 2);       // 03=off 04=on
 }
 
 /*
@@ -1998,7 +2009,7 @@ void ems_getSolarModuleValues() {
         if (EMS_SolarModule.device_flags == EMS_DEVICE_FLAG_SM10) {
             ems_doReadCommand(EMS_TYPE_SM10Monitor, EMS_SolarModule.device_id); // fetch all from SM10Monitor
         } else if (EMS_SolarModule.device_flags == EMS_DEVICE_FLAG_SM100) {
-            ems_doReadCommand(EMS_TYPE_SM100Monitor, EMS_SolarModule.device_id); // fetch all from SM100Monitor
+            ems_doReadCommand(EMS_TYPE_SM100Monitor, EMS_SolarModule.device_id); // fetch all from SM100Monitor (also for SM200)
         }
     }
 }
@@ -2823,7 +2834,7 @@ const _EMS_Type EMS_Types[] = {
     {EMS_DEVICE_UPDATE_FLAG_BOILER, EMS_TYPE_UBAMonitorFast2, "UBAMonitorFast2", _process_UBAMonitorFast2},
     {EMS_DEVICE_UPDATE_FLAG_BOILER, EMS_TYPE_UBAMonitorSlow2, "UBAMonitorSlow2", _process_UBAMonitorSlow2},
 
-    // Solar Module devices
+    // Solar Module devices. Note SM100 also covers SM200
     {EMS_DEVICE_UPDATE_FLAG_SOLAR, EMS_TYPE_SM10Monitor, "SM10Monitor", _process_SM10Monitor},
     {EMS_DEVICE_UPDATE_FLAG_SOLAR, EMS_TYPE_SM100Monitor, "SM100Monitor", _process_SM100Monitor},
     {EMS_DEVICE_UPDATE_FLAG_SOLAR, EMS_TYPE_SM100Status, "SM100Status", _process_SM100Status},
