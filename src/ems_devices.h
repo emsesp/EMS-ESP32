@@ -27,6 +27,7 @@
 #define EMS_TYPE_UBAMonitorSlow 0x19              // is an automatic monitor broadcast
 #define EMS_TYPE_UBAMonitorWWMessage 0x34         // is an automatic monitor broadcast
 #define EMS_TYPE_UBAMaintenanceStatusMessage 0x1C // is an automatic monitor broadcast
+#define EMS_TYPE_MC10Status 0x2A
 #define EMS_TYPE_UBAParameterWW 0x33
 #define EMS_TYPE_UBATotalUptimeMessage 0x14
 #define EMS_TYPE_UBAFlags 0x35
@@ -108,6 +109,9 @@
 #define EMS_TYPE_RC20StatusMessage 0x91         // is an automatic thermostat broadcast giving us temps
 #define EMS_OFFSET_RC20StatusMessage_setpoint 1 // setpoint temp
 #define EMS_OFFSET_RC20StatusMessage_curr 2     // current temp
+
+#define EMS_TYPE_RC20StatusMessage2 0xAD
+#define EMS_TYPE_RC20StatusMessage3 0xAE
 
 #define EMS_TYPE_RC20Set 0xA8      // for setting values like temp and mode
 #define EMS_OFFSET_RC20Set_mode 23 // position of thermostat mode

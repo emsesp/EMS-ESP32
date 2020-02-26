@@ -566,14 +566,14 @@ void scanDallas() {
 }
 
 // send all dallas sensor values as a JSON package to MQTT
-void publishSensorValues() {
+bool publishSensorValues() {
     // don't send if MQTT is connected
     if (!myESP.isMQTTConnected() || (EMSESP_Settings.publish_time == -1)) {
-        return;
+        return false;
     }
 
     if (!EMSESP_Settings.dallas_sensors) {
-        return; // no sensors attached
+        return false; // no sensors attached
     }
 
     // each payload per sensor is 30 bytes so calculate if we have enough space
@@ -604,7 +604,7 @@ void publishSensorValues() {
         if (hasdata) {
             myDebugLog("Publishing external sensor data via MQTT");
         }
-        return; // exit
+        return true; // exit
     }
 
     // group all sensors together - https://github.com/proddy/EMS-ESP/issues/327
@@ -625,15 +625,16 @@ void publishSensorValues() {
         }
     }
 
-    myESP.mqttPublish(TOPIC_EXTERNAL_SENSORS, doc);
-
     if (hasdata) {
         myDebugLog("Publishing external sensor data via MQTT");
+        return (myESP.mqttPublish(TOPIC_EXTERNAL_SENSORS, doc));
     }
+
+    return false;
 }
 
 // publish Boiler data via MQTT
-void publishEMSValues_boiler() {
+bool publishEMSValues_boiler() {
     const size_t        capacity = JSON_OBJECT_SIZE(41); // must recalculate if more objects addded https://arduinojson.org/v6/assistant/
     DynamicJsonDocument doc(capacity);
     JsonObject          rootBoiler = doc.to<JsonObject>();
@@ -762,9 +763,6 @@ void publishEMSValues_boiler() {
         rootBoiler["ServiceCodeNumber"] = EMS_Boiler.serviceCode;
     }
 
-    myDebugLog("Publishing boiler data via MQTT");
-    myESP.mqttPublish(TOPIC_BOILER_DATA, doc);
-
     // see if the heating or hot tap water has changed, if so send
     // last_boilerActive stores heating in bit 1 and tap water in bit 2
     static uint8_t last_boilerActive = 0xFF; // for remembering last setting of the tap water or heating on/off
@@ -773,10 +771,12 @@ void publishEMSValues_boiler() {
         myESP.mqttPublish(TOPIC_BOILER_HEATING_ACTIVE, EMS_Boiler.heatingActive == 1 ? "1" : "0");
         last_boilerActive = ((EMS_Boiler.tapwaterActive << 1) + EMS_Boiler.heatingActive); // remember last state
     }
+
+    return (myESP.mqttPublish(TOPIC_BOILER_DATA, doc));
 }
 
 // handle the thermostat values
-void publishEMSValues_thermostat() {
+bool publishEMSValues_thermostat() {
     StaticJsonDocument<MYESP_JSON_MAXSIZE_MEDIUM> doc;
     JsonObject                                    rootThermostat = doc.to<JsonObject>();
     JsonObject                                    dataThermostat;
@@ -868,14 +868,12 @@ void publishEMSValues_thermostat() {
         myESP.mqttPublish(TOPIC_THERMOSTAT_DATA, data);
     }
 
-    if (has_data) {
-        myDebugLog("Publishing thermostat data via MQTT");
-    }
+    return (has_data);
 }
 
 // publish mixing data
 // only sending if we have an active hc
-void publishEMSValues_mixing() {
+bool publishEMSValues_mixing() {
     char                                          s[20]; // for formatting strings
     StaticJsonDocument<MYESP_JSON_MAXSIZE_MEDIUM> doc;
     JsonObject                                    rootMixing = doc.to<JsonObject>();
@@ -920,13 +918,15 @@ void publishEMSValues_mixing() {
     }
 
     if (has_data) {
-        myDebugLog("Publishing mixing data via MQTT");
         myESP.mqttPublish(TOPIC_MIXING_DATA, doc);
+        return true;
     }
+
+    return false;
 }
 
 // For SM10 and SM100/SM200 Solar Modules
-void publishEMSValues_solar() {
+bool publishEMSValues_solar() {
     StaticJsonDocument<MYESP_JSON_MAXSIZE_SMALL> doc;
     JsonObject                                   rootSM = doc.to<JsonObject>();
 
@@ -936,12 +936,19 @@ void publishEMSValues_solar() {
     if (EMS_SolarModule.bottomTemp > EMS_VALUE_SHORT_NOTSET) {
         rootSM[SM_BOTTOMTEMP] = (float)EMS_SolarModule.bottomTemp / 10;
     }
+    if (EMS_SolarModule.bottomTemp2 > EMS_VALUE_SHORT_NOTSET) {
+        rootSM[SM_BOTTOMTEMP2] = (float)EMS_SolarModule.bottomTemp2 / 10;
+    }
     if (EMS_SolarModule.pumpModulation != EMS_VALUE_INT_NOTSET) {
         rootSM[SM_PUMPMODULATION] = EMS_SolarModule.pumpModulation;
     }
     if (EMS_SolarModule.pump != EMS_VALUE_BOOL_NOTSET) {
         char s[20];
         rootSM[SM_PUMP] = _bool_to_char(s, EMS_SolarModule.pump);
+    }
+    if (EMS_SolarModule.valveStatus != EMS_VALUE_BOOL_NOTSET) {
+        char s[20];
+        rootSM[SM_VALVESTATUS] = _bool_to_char(s, EMS_SolarModule.valveStatus);
     }
     if (EMS_SolarModule.pumpWorkMin != EMS_VALUE_LONG_NOTSET) {
         rootSM[SM_PUMPWORKMIN] = (float)EMS_SolarModule.pumpWorkMin;
@@ -956,12 +963,12 @@ void publishEMSValues_solar() {
         rootSM[SM_ENERGYTOTAL] = (float)EMS_SolarModule.EnergyTotal / 10;
     }
 
-    myDebugLog("Publishing solar module data via MQTT");
-    myESP.mqttPublish(TOPIC_SM_DATA, doc);
+    return (myESP.mqttPublish(TOPIC_SM_DATA, doc));
 }
 
-// handle HeatPump
-void publishEMSValues_heatpump() {
+// handle Heat Pump
+// returns true if added to MQTT queue went ok
+bool publishEMSValues_heatpump() {
     StaticJsonDocument<MYESP_JSON_MAXSIZE_SMALL> doc;
     JsonObject                                   rootHP = doc.to<JsonObject>();
 
@@ -972,12 +979,13 @@ void publishEMSValues_heatpump() {
         rootHP[HP_PUMPSPEED] = EMS_HeatPump.HPSpeed;
     }
 
-    myDebugLog("Publishing peat pump data via MQTT");
-    myESP.mqttPublish(TOPIC_HP_DATA, doc);
+    myDebugLog("Publishing heat pump data via MQTT");
+    return (myESP.mqttPublish(TOPIC_HP_DATA, doc));
 }
 
 // Publish shower data
-void do_publishShowerData() {
+// returns true if added to MQTT queue went ok
+bool do_publishShowerData() {
     StaticJsonDocument<MYESP_JSON_MAXSIZE_SMALL> doc;
     JsonObject                                   rootShower = doc.to<JsonObject>();
     rootShower[TOPIC_SHOWER_TIMER]                          = EMSESP_Settings.shower_timer ? "1" : "0";
@@ -995,41 +1003,73 @@ void do_publishShowerData() {
     }
 
     myDebugLog("Publishing shower data via MQTT");
-    myESP.mqttPublish(TOPIC_SHOWER_DATA, doc, false); // Publish MQTT forcing retain to be off
+    return (myESP.mqttPublish(TOPIC_SHOWER_DATA, doc, false)); // Publish MQTT forcing retain to be off
 }
 
 // send values via MQTT
 // a json object is created for each device type
-void publishEMSValues(bool force) {
+bool publishEMSValues(bool force) {
     // don't send if MQTT is not connected or EMS bus is not connected
     if (!myESP.isMQTTConnected() || (!ems_getBusConnected()) || (EMSESP_Settings.publish_time == -1)) {
-        return;
+        return false;
     }
 
+    bool thermo   = false;
+    bool boiler   = false;
+    bool mixing   = false;
+    bool solar    = false;
+    bool heatpump = false;
+
     if (ems_getThermostatEnabled() && (ems_Device_has_flags(EMS_DEVICE_UPDATE_FLAG_THERMOSTAT) || force)) {
-        publishEMSValues_thermostat();
+        thermo = publishEMSValues_thermostat();
         ems_Device_remove_flags(EMS_DEVICE_UPDATE_FLAG_THERMOSTAT); // unset flag
     }
 
     if (ems_getBoilerEnabled() && (ems_Device_has_flags(EMS_DEVICE_UPDATE_FLAG_BOILER) || force)) {
-        publishEMSValues_boiler();
+        boiler = publishEMSValues_boiler();
         ems_Device_remove_flags(EMS_DEVICE_UPDATE_FLAG_BOILER); // unset flag
     }
 
     if (ems_getMixingModuleEnabled() && (ems_Device_has_flags(EMS_DEVICE_UPDATE_FLAG_MIXING) || force)) {
-        publishEMSValues_mixing();
+        mixing = publishEMSValues_mixing();
         ems_Device_remove_flags(EMS_DEVICE_UPDATE_FLAG_MIXING); // unset flag
     }
 
     if (ems_getSolarModuleEnabled() && (ems_Device_has_flags(EMS_DEVICE_UPDATE_FLAG_SOLAR) || force)) {
-        publishEMSValues_solar();
+        solar = publishEMSValues_solar();
         ems_Device_remove_flags(EMS_DEVICE_UPDATE_FLAG_SOLAR); // unset flag
     }
 
     if (ems_getHeatPumpEnabled() && (ems_Device_has_flags(EMS_DEVICE_UPDATE_FLAG_HEATPUMP) || force)) {
-        publishEMSValues_heatpump();
+        heatpump = publishEMSValues_heatpump();
         ems_Device_remove_flags(EMS_DEVICE_UPDATE_FLAG_HEATPUMP); // unset flag
     }
+
+    if (!thermo && !boiler && !mixing && !solar && !heatpump) {
+        return false; // nothing was sent
+    }
+
+    // print
+    char log_s[50];
+    strlcpy(log_s, "Publishing MQTT data for:", sizeof(log_s));
+    if (thermo) {
+        strlcat(log_s, " thermostat", sizeof(log_s));
+    }
+    if (boiler) {
+        strlcat(log_s, " boiler", sizeof(log_s));
+    }
+    if (mixing) {
+        strlcat(log_s, " mixing", sizeof(log_s));
+    }
+    if (solar) {
+        strlcat(log_s, " solar", sizeof(log_s));
+    }
+    if (heatpump) {
+        strlcat(log_s, " heatpump", sizeof(log_s));
+    }
+    myDebugLog(log_s);
+
+    return true;
 }
 
 // publishes value via MQTT
@@ -1038,7 +1078,7 @@ void publishValues(bool force, bool send_sensor) {
         return;
     }
 
-    myDebugLog("Starting scheduled MQTT publish...");
+    // myDebugLog("Starting scheduled MQTT publish...");
     publishEMSValues(force);
     if (send_sensor) {
         publishSensorValues();

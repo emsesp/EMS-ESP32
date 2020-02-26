@@ -432,22 +432,24 @@ void MyESP::_printMQTTQueue() {
 }
 
 // Publish using the user's custom retain flag
-void MyESP::mqttPublish(const char * topic, const char * payload) {
-    _mqttQueue(topic, payload, _mqtt_retain);
+bool MyESP::mqttPublish(const char * topic, const char * payload) {
+    return (_mqttQueue(topic, payload, _mqtt_retain));
 }
-void MyESP::mqttPublish(const char * topic, JsonDocument payload) {
-    _mqttQueue(topic, payload, _mqtt_retain);
+bool MyESP::mqttPublish(const char * topic, JsonDocument payload) {
+    return (_mqttQueue(topic, payload, _mqtt_retain));
 }
 
 // MQTT Publish
-void MyESP::mqttPublish(const char * topic, const char * payload, bool retain) {
-    _mqttQueue(topic, payload, retain);
+bool MyESP::mqttPublish(const char * topic, const char * payload, bool retain) {
+    return (_mqttQueue(topic, payload, retain));
 }
-void MyESP::mqttPublish(const char * topic, JsonDocument payload, bool retain) {
-    _mqttQueue(topic, payload, retain);
+bool MyESP::mqttPublish(const char * topic, JsonDocument payload, bool retain) {
+    return (_mqttQueue(topic, payload, retain));
 }
 
 // put a payload string into the queue
+// can't have empty topic
+// returns false if can't add to queue
 bool MyESP::_mqttQueue(const char * topic, const char * payload, bool retain) {
     if (!mqttClient.connected() || _mqtt_queue.size() >= MQTT_QUEUE_MAX_SIZE || !_hasValue(topic)) {
         return false;
@@ -471,8 +473,16 @@ bool MyESP::_mqttQueue(const char * topic, const char * payload, bool retain) {
 }
 
 // convert json doc to a string buffer and place on queue
+// can't have empty payload or topic
+// returns false if can't add to queue
 bool MyESP::_mqttQueue(const char * topic, JsonDocument payload, bool retain) {
     if (!mqttClient.connected() || _mqtt_queue.size() >= MQTT_QUEUE_MAX_SIZE || !_hasValue(topic)) {
+        return false;
+    }
+
+    // check for empty JSON doc - we don't like those
+    size_t capacity = measureJson(payload);
+    if (!capacity) {
         return false;
     }
 
@@ -484,11 +494,9 @@ bool MyESP::_mqttQueue(const char * topic, JsonDocument payload, bool retain) {
     element.retry_count = 0;
 
     // reserve space for buffer and serialize json into it
-    const size_t capacity = measureJson(payload) + 1;
-    if (capacity) {
-        element.payload = (char *)malloc(capacity);
-        serializeJson(payload, (char *)element.payload, capacity);
-    }
+    capacity++; // add one more to cover the EOL
+    element.payload = (char *)malloc(capacity);
+    serializeJson(payload, (char *)element.payload, capacity);
 
 #ifdef MYESP_DEBUG
     myDebug_P(PSTR("[MQTT] Adding to queue: #%d [%s] %s"), _mqtt_queue.size(), element.topic, element.payload);

@@ -1147,6 +1147,29 @@ void _process_RC10StatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
 }
 
 /**
+ * type 0xAD - data from the RC20 thermostat (0x17)
+ * e.g. 17 00 AD 0D 2E 
+ */
+void _process_RC20StatusMessage2(_EMS_RxTelegram * EMS_RxTelegram) {
+    uint8_t hc                   = EMS_THERMOSTAT_DEFAULTHC - 1; // use HC1
+    EMS_Thermostat.hc[hc].active = true;
+
+    _setValue8(EMS_RxTelegram, &EMS_Thermostat.hc[hc].setpoint_roomTemp, 0); // is * 2, force as single byte
+}
+
+/**
+ * type 0xAE - data from the RC20 thermostat (0x17)
+ * e.g. 17 00 AE 00 80 12 2E 00 D0 00 00 64
+ */
+void _process_RC20StatusMessage3(_EMS_RxTelegram * EMS_RxTelegram) {
+    uint8_t hc                   = EMS_THERMOSTAT_DEFAULTHC - 1; // use HC1
+    EMS_Thermostat.hc[hc].active = true;
+
+    // _setValue8(EMS_RxTelegram, &EMS_Thermostat.hc[hc].setpoint_roomTemp, EMS_OFFSET_RC20StatusMessage_setpoint); // is * 2, force as single byte
+    //_setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].curr_roomTemp, EMS_OFFSET_RC20StatusMessage_curr);          // is * 10
+}
+
+/**
  * type 0x91 - data from the RC20 thermostat (0x17) - 15 bytes long
  * For reading the temp values only
  * received every 60 seconds
@@ -2814,13 +2837,16 @@ void ems_testTelegram(uint8_t test_num) {
  */
 const _EMS_Type EMS_Types[] = {
 
+    // types that we know about but don't have handlers yet
+    {EMS_DEVICE_UPDATE_FLAG_NONE, EMS_TYPE_UBAFlags, "UBAFlags", nullptr},
+    {EMS_DEVICE_UPDATE_FLAG_NONE, EMS_TYPE_UBAMaintenanceStatusMessage, "UBAMaintenanceStatusMessage", nullptr},
+    {EMS_DEVICE_UPDATE_FLAG_NONE, EMS_TYPE_MC10Status, "MC10Status", nullptr},
+
     // common
     {EMS_DEVICE_UPDATE_FLAG_NONE, EMS_TYPE_Version, "Version", _process_Version},
-    {EMS_DEVICE_UPDATE_FLAG_NONE, EMS_TYPE_UBADevices, "UBADevices", _process_UBADevices},
-    {EMS_DEVICE_UPDATE_FLAG_NONE, EMS_TYPE_RCTime, "RCTime", _process_RCTime},
-    {EMS_DEVICE_UPDATE_FLAG_THERMOSTAT, EMS_TYPE_RCOutdoorTempMessage, "RCOutdoorTempMessage", _process_RCOutdoorTempMessage},
 
     // UBA/Boiler
+    {EMS_DEVICE_UPDATE_FLAG_NONE, EMS_TYPE_UBADevices, "UBADevices", _process_UBADevices},
     {EMS_DEVICE_UPDATE_FLAG_BOILER, EMS_TYPE_UBAMonitorFast, "UBAMonitorFast", _process_UBAMonitorFast},
     {EMS_DEVICE_UPDATE_FLAG_BOILER, EMS_TYPE_UBAMonitorSlow, "UBAMonitorSlow", _process_UBAMonitorSlow},
     {EMS_DEVICE_UPDATE_FLAG_BOILER, EMS_TYPE_UBAMonitorWWMessage, "UBAMonitorWWMessage", _process_UBAMonitorWWMessage},
@@ -2847,6 +2873,10 @@ const _EMS_Type EMS_Types[] = {
     {EMS_DEVICE_UPDATE_FLAG_HEATPUMP, EMS_TYPE_HPMonitor1, "HeatPumpMonitor1", _process_HPMonitor1},
     {EMS_DEVICE_UPDATE_FLAG_HEATPUMP, EMS_TYPE_HPMonitor2, "HeatPumpMonitor2", _process_HPMonitor2},
 
+    // Thermostats...
+    {EMS_DEVICE_UPDATE_FLAG_NONE, EMS_TYPE_RCTime, "RCTime", _process_RCTime},
+    {EMS_DEVICE_UPDATE_FLAG_THERMOSTAT, EMS_TYPE_RCOutdoorTempMessage, "RCOutdoorTempMessage", _process_RCOutdoorTempMessage},
+
     // RC10
     {EMS_DEVICE_UPDATE_FLAG_THERMOSTAT, EMS_TYPE_RC10Set, "RC10Set", _process_RC10Set},
     {EMS_DEVICE_UPDATE_FLAG_THERMOSTAT, EMS_TYPE_RC10StatusMessage, "RC10StatusMessage", _process_RC10StatusMessage},
@@ -2854,6 +2884,8 @@ const _EMS_Type EMS_Types[] = {
     // RC20 and RC20RF
     {EMS_DEVICE_UPDATE_FLAG_THERMOSTAT, EMS_TYPE_RC20Set, "RC20Set", _process_RC20Set},
     {EMS_DEVICE_UPDATE_FLAG_THERMOSTAT, EMS_TYPE_RC20StatusMessage, "RC20StatusMessage", _process_RC20StatusMessage},
+    {EMS_DEVICE_UPDATE_FLAG_THERMOSTAT, EMS_TYPE_RC20StatusMessage2, "RC20StatusMessage2", _process_RC20StatusMessage2},
+    {EMS_DEVICE_UPDATE_FLAG_THERMOSTAT, EMS_TYPE_RC20StatusMessage3, "RC20StatusMessage3", _process_RC20StatusMessage3},
 
     // RC30
     {EMS_DEVICE_UPDATE_FLAG_THERMOSTAT, EMS_TYPE_RC30Set, "RC30Set", _process_RC30Set},
@@ -2906,6 +2938,10 @@ uint8_t _EMS_Types_max = ArraySize(EMS_Types);
  * or -1 if not found
  */
 int8_t _ems_findType(uint16_t type) {
+    if (type == 0) {
+        return -1;
+    }
+
     uint8_t i         = 0;
     bool    typeFound = false;
     // scan through known ID types
@@ -2923,7 +2959,7 @@ int8_t _ems_findType(uint16_t type) {
 /**
  * print the telegram
  */
-void _printMessage(_EMS_RxTelegram * EMS_RxTelegram, const int show_type) {
+void _printMessage(_EMS_RxTelegram * EMS_RxTelegram, const int8_t show_type) {
     // only print if we have logging enabled
     if (EMS_Sys_Status.emsLogging < EMS_SYS_LOGGING_THERMOSTAT) {
         return;
@@ -2957,11 +2993,14 @@ void _printMessage(_EMS_RxTelegram * EMS_RxTelegram, const int show_type) {
     }
 
     // print type
+    // if we're been given an index to the type string, use that
     if (length) {
         char buffer[16];
         strlcat(output_str, ", ", sizeof(output_str));
         if (show_type != -1) {
             strlcat(output_str, EMS_Types[show_type].typeString, sizeof(output_str));
+        } else {
+            strlcat(output_str, "Type", sizeof(output_str));
         }
         strlcat(output_str, "(0x", sizeof(output_str));
 
@@ -3002,38 +3041,43 @@ void _printMessage(_EMS_RxTelegram * EMS_RxTelegram, const int show_type) {
  * and then call its callback if there is one defined
  */
 void _ems_processTelegram(_EMS_RxTelegram * EMS_RxTelegram) {
+    // first see if we know which type this. -1 if not found.
+    uint16_t type       = EMS_RxTelegram->type;
+    int8_t   type_index = _ems_findType(type);
+
     // ignore telegrams that don't have any data
     if (EMS_RxTelegram->data_length == 0) {
-        _printMessage(EMS_RxTelegram);
+        _printMessage(EMS_RxTelegram, type_index);
         return;
     }
 
-    // we're only interested in broadcast messages (dest is 0x00) or ones for us
+    // we're only interested in broadcast messages (dest is 0x00) or ones sent to us
     uint8_t dest = EMS_RxTelegram->dest;
     if ((dest != EMS_ID_NONE) && (dest != EMS_Sys_Status.emsbusid)) {
-        _printMessage(EMS_RxTelegram);
+        _printMessage(EMS_RxTelegram, type_index);
         return;
-    }
-
-    // see if we recognize the type first by scanning our known EMS types list
-    uint16_t type = EMS_RxTelegram->type;
-    int8_t   i    = _ems_findType(type);
-    if (i == -1) {
-        _printMessage(EMS_RxTelegram);
-        return; // not found
     }
 
     // we have a matching type ID, print the detailed telegram to the console
     if (EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_BASIC) {
-        myDebug_P(PSTR("<--- %s(0x%02X)"), EMS_Types[i].typeString, type);
+        if (type == -1) {
+            myDebug_P(PSTR("<--- Type(0x%02X)"), type);
+        } else {
+            myDebug_P(PSTR("<--- %s(0x%02X)"), EMS_Types[type_index].typeString, type);
+        }
     } else {
-        _printMessage(EMS_RxTelegram, i); // print with index to the Type string
+        _printMessage(EMS_RxTelegram, type_index); // print with index to the Type string
+    }
+
+    // quit if we don't know how to handle this type
+    if (type_index == -1) {
+        return;
     }
 
     // process it by calling its respective callback function
-    if ((EMS_Types[i].processType_cb) != nullptr) {
-        (void)EMS_Types[i].processType_cb(EMS_RxTelegram);
-        ems_Device_add_flags(EMS_Types[i].device_flag); // see if we need to flag something has changed
+    if ((EMS_Types[type_index].processType_cb) != nullptr) {
+        (void)EMS_Types[type_index].processType_cb(EMS_RxTelegram);
+        ems_Device_add_flags(EMS_Types[type_index].device_flag); // see if we need to flag something has changed
     }
 
     EMS_Sys_Status.emsTxStatus = EMS_TX_STATUS_IDLE;
