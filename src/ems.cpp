@@ -1527,8 +1527,8 @@ void _process_SM100Status(_EMS_RxTelegram * EMS_RxTelegram) {
  * byte 10 = PS1 Solar circuit pump for collector array 1: test=01, on=04 and off=03
  */
 void _process_SM100Status2(_EMS_RxTelegram * EMS_RxTelegram) {
-    _setValue(EMS_RxTelegram, &EMS_SolarModule.valveStatus, 4, 2); // 03=off 04=on
-    _setValue(EMS_RxTelegram, &EMS_SolarModule.pump, 10, 2);       // 03=off 04=on
+    _setValue(EMS_RxTelegram, &EMS_SolarModule.valveStatus, 4, 2); // on if bit 2 set
+    _setValue(EMS_RxTelegram, &EMS_SolarModule.pump, 10, 2);       // on if bit 2 set
 }
 
 /*

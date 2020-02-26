@@ -383,10 +383,12 @@ void showInfo() {
         myDebug_P(PSTR("")); // newline
         myDebug_P(PSTR("%sSolar Module data:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
         myDebug_P(PSTR("  Solar module: %s"), ems_getDeviceDescription(EMS_DEVICE_TYPE_SOLAR, buffer_type));
-        _renderShortValue("Collector temperature", "C", EMS_SolarModule.collectorTemp);
-        _renderShortValue("Bottom temperature", "C", EMS_SolarModule.bottomTemp);
+        _renderShortValue("Collector temperature (TS1)", "C", EMS_SolarModule.collectorTemp);
+        _renderShortValue("Bottom temperature (TS2)", "C", EMS_SolarModule.bottomTemp);
+        _renderShortValue("Bottom temperature (TS5)", "C", EMS_SolarModule.bottomTemp2);
         _renderIntValue("Pump modulation", "%", EMS_SolarModule.pumpModulation);
-        _renderBoolValue("Pump active", EMS_SolarModule.pump);
+        _renderBoolValue("Valve (VS2) status", EMS_SolarModule.valveStatus);
+        _renderBoolValue("Pump (PS1) active", EMS_SolarModule.pump);
         if (EMS_SolarModule.pumpWorkMin != EMS_VALUE_LONG_NOTSET) {
             myDebug_P(PSTR("  Pump working time: %d days %d hours %d minutes"),
                       EMS_SolarModule.pumpWorkMin / 1440,
