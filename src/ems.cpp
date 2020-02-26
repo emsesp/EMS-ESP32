@@ -1154,7 +1154,7 @@ void _process_RC20StatusMessage2(_EMS_RxTelegram * EMS_RxTelegram) {
     uint8_t hc                   = EMS_THERMOSTAT_DEFAULTHC - 1; // use HC1
     EMS_Thermostat.hc[hc].active = true;
 
-    _setValue8(EMS_RxTelegram, &EMS_Thermostat.hc[hc].setpoint_roomTemp, 0); // is * 2, force as single byte
+    // _setValue8(EMS_RxTelegram, &EMS_Thermostat.hc[hc].setpoint_roomTemp, 0); // is * 2, force as single byte
 }
 
 /**
@@ -1165,8 +1165,9 @@ void _process_RC20StatusMessage3(_EMS_RxTelegram * EMS_RxTelegram) {
     uint8_t hc                   = EMS_THERMOSTAT_DEFAULTHC - 1; // use HC1
     EMS_Thermostat.hc[hc].active = true;
 
-    // _setValue8(EMS_RxTelegram, &EMS_Thermostat.hc[hc].setpoint_roomTemp, EMS_OFFSET_RC20StatusMessage_setpoint); // is * 2, force as single byte
-    //_setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].curr_roomTemp, EMS_OFFSET_RC20StatusMessage_curr);          // is * 10
+    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].mode_type, 0, 7);       // day/night MSB 7th bit is day
+    _setValue8(EMS_RxTelegram, &EMS_Thermostat.hc[hc].setpoint_roomTemp, 2); // is * 2, force as single byte
+    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].curr_roomTemp, 3);      // is * 10
 }
 
 /**
