@@ -1546,9 +1546,9 @@ void MyESP::showSystemStats() {
         myDebug_P(PSTR(" [MQTT] is disconnected"));
     }
 
-    if (_have_ntp_time) {
+    if ((_have_ntp_time) && (NTP.tcr->abbrev != nullptr)) {
         uint32_t real_time = getSystemTime();
-        myDebug_P(PSTR(" [NTP] Local Time is %02d:%02d:%02d %s (%d)"), to_hour(real_time), to_minute(real_time), to_second(real_time), NTP.tcr->abbrev, real_time);
+        myDebug_P(PSTR(" [NTP] Local Time is %02d:%02d:%02d %s"), to_hour(real_time), to_minute(real_time), to_second(real_time), NTP.tcr->abbrev);
     }
 
 #ifdef CRASH
