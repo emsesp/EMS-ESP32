@@ -273,9 +273,9 @@ static const _EMS_Device EMS_Devices[] = {
     {157, EMS_DEVICE_TYPE_THERMOSTAT, "Buderus RC200/Bosch CW100/Junkers CW100", EMS_DEVICE_FLAG_NO_WRITE},                    // 0x18, cannot write
 
     // Buderus/Nefit specific
-    {79, EMS_DEVICE_TYPE_THERMOSTAT, "RC10/Moduline 100", EMS_DEVICE_FLAG_RC10},                                     // 0x17
+    {79, EMS_DEVICE_TYPE_THERMOSTAT, "RC10/Moduline 100", EMS_DEVICE_FLAG_RC10}, // 0x17
+    {80, EMS_DEVICE_TYPE_THERMOSTAT, "Moduline 200", EMS_DEVICE_FLAG_RC10},      // 0x17
     {77, EMS_DEVICE_TYPE_THERMOSTAT, "RC20/Moduline 300", EMS_DEVICE_FLAG_RC20},                                     // 0x17
-    {80, EMS_DEVICE_TYPE_THERMOSTAT, "Moduline 200", EMS_DEVICE_FLAG_RC20},                                          // 0x17
     {67, EMS_DEVICE_TYPE_THERMOSTAT, "RC30", EMS_DEVICE_FLAG_RC30N},                                                 // 0x10 - based on RC35
     {78, EMS_DEVICE_TYPE_THERMOSTAT, "Moduline 400", EMS_DEVICE_FLAG_RC30},                                          // 0x10
     {86, EMS_DEVICE_TYPE_THERMOSTAT, "RC35", EMS_DEVICE_FLAG_RC35},                                                  // 0x10
