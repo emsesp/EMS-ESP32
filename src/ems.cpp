@@ -2441,14 +2441,14 @@ void ems_setThermostatTemp(float temperature, uint8_t hc_num, uint8_t temptype) 
             EMS_TxTelegram.type               = EMS_TYPE_JunkersSetMessage_HC1;
             EMS_TxTelegram.comparisonPostRead = EMS_TYPE_JunkersStatusMessage_HC1;
         } else if (hc_num == 2) {
-            EMS_TxTelegram.type               = EMS_TYPE_JunkersSetMessage_HC1;
-            EMS_TxTelegram.comparisonPostRead = EMS_TYPE_JunkersStatusMessage_HC1;
+            EMS_TxTelegram.type               = EMS_TYPE_JunkersSetMessage_HC2;
+            EMS_TxTelegram.comparisonPostRead = EMS_TYPE_JunkersStatusMessage_HC2;
         } else if (hc_num == 3) {
-            EMS_TxTelegram.type               = EMS_TYPE_JunkersSetMessage_HC1;
-            EMS_TxTelegram.comparisonPostRead = EMS_TYPE_JunkersStatusMessage_HC1;
+            EMS_TxTelegram.type               = EMS_TYPE_JunkersSetMessage_HC3;
+            EMS_TxTelegram.comparisonPostRead = EMS_TYPE_JunkersStatusMessage_HC3;
         } else if (hc_num == 4) {
-            EMS_TxTelegram.type               = EMS_TYPE_JunkersSetMessage_HC1;
-            EMS_TxTelegram.comparisonPostRead = EMS_TYPE_JunkersStatusMessage_HC1;
+            EMS_TxTelegram.type               = EMS_TYPE_JunkersSetMessage_HC4;
+            EMS_TxTelegram.comparisonPostRead = EMS_TYPE_JunkersStatusMessage_HC4;
         }
         EMS_TxTelegram.type_validate = EMS_TxTelegram.type;
     }
