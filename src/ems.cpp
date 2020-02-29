@@ -146,7 +146,7 @@ void ems_init() {
     EMS_Boiler.wWSelTemp       = EMS_VALUE_INT_NOTSET;  // Warm Water selected temperature
     EMS_Boiler.wWCircPump      = EMS_VALUE_BOOL_NOTSET; // Warm Water circulation pump available
     EMS_Boiler.wWCircPumpMode  = EMS_VALUE_INT_NOTSET;  // Warm Water circulation pump mode
-    EMS_Boiler.wWCircPumpType  = EMS_VALUE_BOOL_NOTSET;  // Warm Water circulation pump mode
+    EMS_Boiler.wWCircPumpType  = EMS_VALUE_BOOL_NOTSET;  // Warm Water circulation pump type
     EMS_Boiler.wWDesinfectTemp = EMS_VALUE_INT_NOTSET;  // Warm Water desinfection temperature to prevent infection
     EMS_Boiler.wWComfort       = EMS_VALUE_INT_NOTSET;  // WW comfort mode
 
