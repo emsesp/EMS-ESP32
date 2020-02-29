@@ -145,6 +145,8 @@ void ems_init() {
     EMS_Boiler.wWActivated     = EMS_VALUE_BOOL_NOTSET; // Warm Water activated
     EMS_Boiler.wWSelTemp       = EMS_VALUE_INT_NOTSET;  // Warm Water selected temperature
     EMS_Boiler.wWCircPump      = EMS_VALUE_BOOL_NOTSET; // Warm Water circulation pump available
+    EMS_Boiler.wWCircPumpMode  = EMS_VALUE_INT_NOTSET;  // Warm Water circulation pump mode
+    EMS_Boiler.wWCircPumpType  = EMS_VALUE_BOOL_NOTSET;  // Warm Water circulation pump mode
     EMS_Boiler.wWDesinfectTemp = EMS_VALUE_INT_NOTSET;  // Warm Water desinfection temperature to prevent infection
     EMS_Boiler.wWComfort       = EMS_VALUE_INT_NOTSET;  // WW comfort mode
 
@@ -182,6 +184,11 @@ void ems_init() {
     EMS_Boiler.wWStarts  = EMS_VALUE_LONG_NOTSET;   // Warm Water # starts
     EMS_Boiler.wWWorkM   = EMS_VALUE_LONG_NOTSET;   // Warm Water # minutes
     EMS_Boiler.wWOneTime = EMS_VALUE_INT_NOTSET;    // Warm Water one time function on/off
+    EMS_Boiler.wWDesinfecting = EMS_VALUE_INT_NOTSET; // Warm Water desinfection on/off
+    EMS_Boiler.wWReadiness = EMS_VALUE_INT_NOTSET; // Warm Water readiness on/off
+    EMS_Boiler.wWRecharging = EMS_VALUE_INT_NOTSET; // Warm Water recharge on/off
+    EMS_Boiler.wWTemperaturOK = EMS_VALUE_INT_NOTSET; // Warm Water temperatur ok on/off
+
     EMS_Boiler.wWCurFlow = EMS_VALUE_INT_NOTSET;    // WW current flow temp
 
     // UBATotalUptimeMessage
@@ -927,7 +934,7 @@ void _removeTxQueue() {
 
 /**
  * Check if hot tap water or heating is active
- * using a quick hack for checking the heating. Selected Flow Temp >= 70
+ * using a quick hack for checking the heating. Selected Flow Temp >= 30
  */
 void _checkActive() {
     // hot tap water, using flow to check instead of the burner power
@@ -948,6 +955,8 @@ void _checkActive() {
 void _process_UBAParameterWW(_EMS_RxTelegram * EMS_RxTelegram) {
     _setValue(EMS_RxTelegram, &EMS_Boiler.wWActivated, 1); // 0xFF means on
     _setValue(EMS_RxTelegram, &EMS_Boiler.wWCircPump, 6);  // 0xFF means on
+    _setValue(EMS_RxTelegram, &EMS_Boiler.wWCircPumpMode, 7);   // 1=1x3min... 6=6x3min, 7=continuous
+    _setValue(EMS_RxTelegram, &EMS_Boiler.wWCircPumpType, 10);  // 0 = charge pump, 0xff = 3-way valve
     _setValue(EMS_RxTelegram, &EMS_Boiler.wWSelTemp, 2);
     _setValue(EMS_RxTelegram, &EMS_Boiler.wWDesinfectTemp, 8);
     _setValue(EMS_RxTelegram, &EMS_Boiler.wWComfort, EMS_OFFSET_UBAParameterWW_wwComfort);
@@ -979,6 +988,10 @@ void _process_UBAMonitorWWMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     _setValue(EMS_RxTelegram, &EMS_Boiler.wWStarts, 13);
     _setValue(EMS_RxTelegram, &EMS_Boiler.wWWorkM, 10);
     _setValue(EMS_RxTelegram, &EMS_Boiler.wWOneTime, 5, 1);
+    _setValue(EMS_RxTelegram, &EMS_Boiler.wWDesinfecting, 5, 2);
+    _setValue(EMS_RxTelegram, &EMS_Boiler.wWReadiness, 5, 3);
+    _setValue(EMS_RxTelegram, &EMS_Boiler.wWRecharging, 5, 4);
+    _setValue(EMS_RxTelegram, &EMS_Boiler.wWTemperaturOK, 5, 5);
     _setValue(EMS_RxTelegram, &EMS_Boiler.wWCurFlow, 9);
 }
 

@@ -286,6 +286,8 @@ typedef struct {
     uint8_t wWActivated;     // Warm Water activated
     uint8_t wWSelTemp;       // Warm Water selected temperature
     uint8_t wWCircPump;      // Warm Water circulation pump Available
+    uint8_t wWCircPumpMode;  // Warm Water circulation pump mode (1 = 1x3min, ..., 6=6x3min, 7 continuous)
+    uint8_t wWCircPumpType;  // Warm Water circulation pump type (0 = charge pump, 0xff = 3-way pump)
     uint8_t wWDesinfectTemp; // Warm Water desinfection temperature
     uint8_t wWComfort;       // Warm water comfort or ECO mode
 
@@ -323,6 +325,10 @@ typedef struct {
     uint32_t wWStarts;  // Warm Water # starts
     uint32_t wWWorkM;   // Warm Water # minutes
     uint8_t  wWOneTime; // Warm Water one time function on/off
+    uint8_t  wWDesinfecting; // Warm Water desinfection on/off
+    uint8_t  wWReadiness; // Warm Water readiness on/off
+    uint8_t  wWRecharging; // Warm Water recharge on/off
+    uint8_t  wWTemperaturOK; // Warm Water temperatur ok on/off
     uint8_t  wWCurFlow; // Warm Water current flow in l/min
 
     // UBATotalUptimeMessage
