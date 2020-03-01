@@ -105,14 +105,8 @@ static const command_t project_cmds[] PROGMEM = {
     {true, "tx_mode <n>", "changes Tx logic. 1=EMS generic, 2=EMS+, 3=HT3"},
     {true, "bus_id <ID>", "EMS-ESP's deviceID. 0B=Service Key (default), 0D=Modem, 0A=Hand terminal, 0F=Time module, 12=Error module"},
     {true, "master_thermostat [product id]", "set default thermostat to use. No argument lists options"},
-
     {false, "info", "show current values deciphered from the EMS messages"},
-    {false, "log <n | b | t | s | m | r | j | v | w [ID] | d [ID]>", "logging: none, basic, thermo, solar, mixer, raw, jabber, verbose, watch a type or device"},
-
-#ifdef TESTS
-    {false, "test <n>", "insert a test telegram on to the EMS bus"},
-#endif
-
+    {false, "log <n | b | t | s | m | r | j | v | w [ID] | d [ID]>", "logging: none, basic, thermo, solar, mixing, raw, jabber, verbose, watch a type or device"},
     {false, "publish", "publish all values to MQTT"},
     {false, "refresh", "fetch values from the EMS devices"},
     {false, "devices [scan] | [scan deep] | [save]", "list detected devices, quick scan or deep scan and save as known devices"},
@@ -231,8 +225,8 @@ void showInfo() {
         myDebug_P(PSTR("  System logging set to Thermostat only"));
     } else if (sysLog == EMS_SYS_LOGGING_SOLARMODULE) {
         myDebug_P(PSTR("  System logging set to Solar Module only"));
-    } else if (sysLog == EMS_SYS_LOGGING_MIXERMODULE) {
-        myDebug_P(PSTR("  System logging set to Mixer Module only"));
+    } else if (sysLog == EMS_SYS_LOGGING_MIXINGMODULE) {
+        myDebug_P(PSTR("  System logging set to Mixing Module only"));
     } else if (sysLog == EMS_SYS_LOGGING_JABBER) {
         myDebug_P(PSTR("  System logging set to Jabber"));
     } else if (sysLog == EMS_SYS_LOGGING_WATCH) {
@@ -1587,7 +1581,7 @@ void TelnetCommandCallback(uint8_t wc, const char * commandLine) {
             ems_setLogging(EMS_SYS_LOGGING_SOLARMODULE);
             ok = true;
         } else if (strcmp(second_cmd, "m") == 0) {
-            ems_setLogging(EMS_SYS_LOGGING_MIXERMODULE);
+            ems_setLogging(EMS_SYS_LOGGING_MIXINGMODULE);
             ok = true;
         } else if (strcmp(second_cmd, "r") == 0) {
             ems_setLogging(EMS_SYS_LOGGING_RAW);

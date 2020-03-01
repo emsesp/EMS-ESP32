@@ -120,16 +120,16 @@ typedef enum {
 
 /* EMS logging */
 typedef enum {
-    EMS_SYS_LOGGING_NONE,        // no messages
-    EMS_SYS_LOGGING_RAW,         // raw data mode
-    EMS_SYS_LOGGING_WATCH,       // watch a specific type ID
-    EMS_SYS_LOGGING_BASIC,       // only basic read/write messages
-    EMS_SYS_LOGGING_THERMOSTAT,  // only telegrams sent from thermostat
-    EMS_SYS_LOGGING_SOLARMODULE, // only telegrams sent from solar module
-    EMS_SYS_LOGGING_MIXERMODULE, // only telegrams sent from mixer module
-    EMS_SYS_LOGGING_VERBOSE,     // everything
-    EMS_SYS_LOGGING_JABBER,      // lots of debug output...
-    EMS_SYS_LOGGING_DEVICE       // watch the device ID
+    EMS_SYS_LOGGING_NONE,         // no messages
+    EMS_SYS_LOGGING_RAW,          // raw data mode
+    EMS_SYS_LOGGING_WATCH,        // watch a specific type ID
+    EMS_SYS_LOGGING_BASIC,        // only basic read/write messages
+    EMS_SYS_LOGGING_THERMOSTAT,   // only telegrams sent from thermostat
+    EMS_SYS_LOGGING_SOLARMODULE,  // only telegrams sent from solar module
+    EMS_SYS_LOGGING_MIXINGMODULE, // only telegrams sent from mixing module
+    EMS_SYS_LOGGING_VERBOSE,      // everything
+    EMS_SYS_LOGGING_JABBER,       // lots of debug output...
+    EMS_SYS_LOGGING_DEVICE        // watch the device ID
 } _EMS_SYS_LOGGING;
 
 // status/counters since last power on
@@ -324,15 +324,15 @@ typedef struct {
     uint16_t switchTemp;  // Switch temperature
 
     // UBAMonitorWWMessage
-    uint16_t wWCurTmp;  // Warm Water current temperature
-    uint32_t wWStarts;  // Warm Water # starts
-    uint32_t wWWorkM;   // Warm Water # minutes
-    uint8_t  wWOneTime; // Warm Water one time function on/off
+    uint16_t wWCurTmp;       // Warm Water current temperature
+    uint32_t wWStarts;       // Warm Water # starts
+    uint32_t wWWorkM;        // Warm Water # minutes
+    uint8_t  wWOneTime;      // Warm Water one time function on/off
     uint8_t  wWDesinfecting; // Warm Water desinfection on/off
-    uint8_t  wWReadiness; // Warm Water readiness on/off
-    uint8_t  wWRecharging; // Warm Water recharge on/off
+    uint8_t  wWReadiness;    // Warm Water readiness on/off
+    uint8_t  wWRecharging;   // Warm Water recharge on/off
     uint8_t  wWTemperaturOK; // Warm Water temperatur ok on/off
-    uint8_t  wWCurFlow; // Warm Water current flow in l/min
+    uint8_t  wWCurFlow;      // Warm Water current flow in l/min
 
     // UBATotalUptimeMessage
     uint32_t UBAuptime; // Total UBA working hours
@@ -379,7 +379,7 @@ typedef struct {
     uint8_t  tempStatus;
 } _EMS_MixingModule_WWC;
 
-// Mixer data
+// Mixing data
 typedef struct {
     uint8_t               device_id;
     uint8_t               device_flags;

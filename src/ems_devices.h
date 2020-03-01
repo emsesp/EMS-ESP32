@@ -54,12 +54,12 @@
 
 // Mixing Modules
 // MM100/MM200 (EMS Plus)
-#define EMS_TYPE_MMPLUSStatusMessage_HC1 0x01D7          // mixer status HC1
-#define EMS_TYPE_MMPLUSStatusMessage_HC2 0x01D8          // mixer status HC2
-#define EMS_TYPE_MMPLUSStatusMessage_HC3 0x01D9          // mixer status HC3
-#define EMS_TYPE_MMPLUSStatusMessage_HC4 0x01DA          // mixer status HC4
-#define EMS_TYPE_MMPLUSStatusMessage_WWC1 0x0231         // mixer status WWC1
-#define EMS_TYPE_MMPLUSStatusMessage_WWC2 0x0232         // mixer status WWC2
+#define EMS_TYPE_MMPLUSStatusMessage_HC1 0x01D7          // mixing status HC1
+#define EMS_TYPE_MMPLUSStatusMessage_HC2 0x01D8          // mixing status HC2
+#define EMS_TYPE_MMPLUSStatusMessage_HC3 0x01D9          // mixing status HC3
+#define EMS_TYPE_MMPLUSStatusMessage_HC4 0x01DA          // mixing status HC4
+#define EMS_TYPE_MMPLUSStatusMessage_WWC1 0x0231         // mixing status WWC1
+#define EMS_TYPE_MMPLUSStatusMessage_WWC2 0x0232         // mixing status WWC2
 #define EMS_OFFSET_MMPLUSStatusMessage_flow_temp 3       // flow temperature
 #define EMS_OFFSET_MMPLUSStatusMessage_pump_mod 5        // pump modulation
 #define EMS_OFFSET_MMPLUSStatusMessage_valve_status 2    // valve in percent
@@ -67,12 +67,12 @@
 #define EMS_OFFSET_MMPLUSStatusMessage_WW_pump_mod 2     // pump on 6, off 0
 #define EMS_OFFSET_MMPLUSStatusMessage_WW_temp_status 11 // 0,1,2
 // MM10
-#define EMS_TYPE_MMStatusMessage 0xAB             // mixer status
+#define EMS_TYPE_MMStatusMessage 0xAB             // mixing status
 #define EMS_OFFSET_MMStatusMessage_flow_set 0     // flow setpoint
 #define EMS_OFFSET_MMStatusMessage_flow_temp 1    // flow temperature
 #define EMS_OFFSET_MMStatusMessage_pump_mod 3     // pump modulation in percent
 #define EMS_OFFSET_MMStatusMessage_valve_status 4 // valve 0..255
-#define EMS_TYPE_MM10ParameterMessage 0xAC        // mixer parameters
+#define EMS_TYPE_MM10ParameterMessage 0xAC        // mixing parameters
 
 // Solar Module
 // Assuming here that the SM200 behaves like SM100

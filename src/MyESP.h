@@ -9,7 +9,7 @@
 #ifndef MyESP_h
 #define MyESP_h
 
-#define MYESP_VERSION "1.2.32"
+#define MYESP_VERSION "1.2.33"
 
 #include <ArduinoJson.h>
 #include <ArduinoOTA.h>
@@ -215,7 +215,7 @@ static_assert(sizeof(RtcmemData) <= (RTCMEM_BLOCKS * 4u), "RTCMEM struct is too 
 
 typedef struct {
     bool set; // is it a set command?
-    char key[55]; // longest is log (alternatively, the log command description could be shortened)
+    char key[60];
     char description[110];
 } command_t;
 
