@@ -26,9 +26,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - RC35 setting temperature also forces the current select temp to change, irrespective of the mode
 
 ### Changed
-- improved MQTT publishing to stop flooding. `publish_time` must be at least 1 (second)
-- External sensors (like dallas) are sent as a nested MQTT topic including their unqiue identifier
-- `mqttlog` console command renamed to `mqttqueue`
+- improved MQTT publishing to stop network flooding. `publish_time` of -1 is no publish, 0 is automatic otherwise its a time interval
+- External sensors (like Dallas DS18*) are sent as a nested MQTT topic including their unqiue identifier
+- `mqttlog` console command renamed to `mqttqueue` to only show the current publish queue
 
 ### Removed
  - `autodetect scan`

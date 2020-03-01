@@ -155,22 +155,6 @@ typedef struct {
     uint8_t          emsMasterThermostat; // product ID for the default thermostat to use
 } _EMS_Sys_Status;
 
-// The Tx send package
-typedef struct {
-    _EMS_TX_TELEGRAM_ACTION action; // read, write, validate, init
-    uint8_t                 dest;
-    uint16_t                type;
-    uint8_t                 offset;
-    uint8_t                 length;             // full length of complete telegram, including CRC
-    uint8_t                 dataValue;          // value to validate against
-    uint16_t                type_validate;      // type to call after a successful Write command
-    uint8_t                 comparisonValue;    // value to compare against during a validate command
-    uint8_t                 comparisonOffset;   // offset of where the byte is we want to compare too during validation
-    uint16_t                comparisonPostRead; // after a successful write, do a read from this type ID
-    unsigned long           timestamp;          // when created
-    uint8_t                 data[EMS_MAX_TELEGRAM_LENGTH];
-} _EMS_TxTelegram;
-
 // The Rx receive package
 typedef struct {
     unsigned long timestamp;    // timestamp from millis()
@@ -186,6 +170,23 @@ typedef struct {
     uint8_t       emsplus_type; // FF, F7 or F9
 } _EMS_RxTelegram;
 
+// The Tx send package
+typedef struct {
+    _EMS_TX_TELEGRAM_ACTION action; // read, write, validate, init
+    uint8_t                 dest;
+    uint16_t                type;
+    uint8_t                 offset;
+    uint8_t                 length;             // full length of complete telegram, including CRC
+    bool                    emsplus;            // true if ems+/ems 2.0
+    uint8_t                 dataValue;          // value to validate against
+    uint16_t                type_validate;      // type to call after a successful Write command
+    uint8_t                 comparisonValue;    // value to compare against during a validate command
+    uint8_t                 comparisonOffset;   // offset of where the byte is we want to compare too during validation
+    uint16_t                comparisonPostRead; // after a successful write, do a read from this type ID
+    unsigned long           timestamp;          // when created
+    uint8_t                 data[EMS_MAX_TELEGRAM_LENGTH];
+} _EMS_TxTelegram;
+
 // default empty Tx, must match struct
 const _EMS_TxTelegram EMS_TX_TELEGRAM_NEW = {
     EMS_TX_TELEGRAM_INIT, // action
@@ -193,7 +194,8 @@ const _EMS_TxTelegram EMS_TX_TELEGRAM_NEW = {
     EMS_ID_NONE,          // type
     0,                    // offset
     0,                    // length
-    0,                    // data value
+    false,                // emsplus (no)
+    0,                    // dataValue
     EMS_ID_NONE,          // type_validate
     0,                    // comparisonValue
     0,                    // comparisonOffset

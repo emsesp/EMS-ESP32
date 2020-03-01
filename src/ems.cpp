@@ -607,7 +607,8 @@ void _ems_sendTelegram() {
     }
 
     // complete the rest of the header depending on EMS or EMS+
-    if (EMS_TxTelegram.type > 0xFF) {
+    // or if we explicitly set EMS+ like with Junkers
+    if ((EMS_TxTelegram.type > 0xFF) || (EMS_TxTelegram.emsplus)) {
         // EMS 2.0 / EMS+
         EMS_TxTelegram.data[2] = 0xFF; // fixed value indicating an extended message
         EMS_TxTelegram.data[3] = EMS_TxTelegram.offset;
@@ -699,6 +700,7 @@ void _createValidate() {
     new_EMS_TxTelegram.comparisonValue    = EMS_TxTelegram.comparisonValue;
     new_EMS_TxTelegram.comparisonPostRead = EMS_TxTelegram.comparisonPostRead;
     new_EMS_TxTelegram.comparisonOffset   = EMS_TxTelegram.comparisonOffset;
+    new_EMS_TxTelegram.emsplus            = EMS_TxTelegram.emsplus;
 
     // this is what is different
     new_EMS_TxTelegram.offset    = EMS_TxTelegram.comparisonOffset; // location of byte to fetch
@@ -2420,6 +2422,8 @@ void ems_setThermostatTemp(float temperature, uint8_t hc_num, uint8_t temptype) 
     }
 
     else if (model == EMS_DEVICE_FLAG_JUNKERS) {
+        // All Junkers use EMS+. I think.
+        EMS_TxTelegram.emsplus = true;
         switch (temptype) {
         case 1: // change the no frost temp
             EMS_TxTelegram.offset = EMS_OFFSET_JunkersSetMessage_no_frost_temp;
@@ -2432,7 +2436,7 @@ void ems_setThermostatTemp(float temperature, uint8_t hc_num, uint8_t temptype) 
             break;
         default:
         case 0: // automatic selection, if no type is defined, we use the standard code
-            // not sure if this is correct for Junkers
+            // TODO: not sure if this is correct for Junkers
             if (EMS_Thermostat.hc[hc_num - 1].mode_type == 0) {
                 EMS_TxTelegram.offset = EMS_OFFSET_JunkersSetMessage_night_temp;
             } else if (EMS_Thermostat.hc[hc_num - 1].mode_type == 1) {
