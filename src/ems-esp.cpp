@@ -107,7 +107,7 @@ static const command_t project_cmds[] PROGMEM = {
     {true, "master_thermostat [product id]", "set default thermostat to use. No argument lists options"},
 
     {false, "info", "show current values deciphered from the EMS messages"},
-    {false, "log <n | b | t | s | r | j | v | w [ID] | d [ID]>", "logging: none, basic, thermo, solar, raw, jabber, verbose, watch a type or device"},
+    {false, "log <n | b | t | s | m | r | j | v | w [ID] | d [ID]>", "logging: none, basic, thermo, solar, mixer, raw, jabber, verbose, watch a type or device"},
 
 #ifdef TESTS
     {false, "test <n>", "insert a test telegram on to the EMS bus"},
@@ -231,6 +231,8 @@ void showInfo() {
         myDebug_P(PSTR("  System logging set to Thermostat only"));
     } else if (sysLog == EMS_SYS_LOGGING_SOLARMODULE) {
         myDebug_P(PSTR("  System logging set to Solar Module only"));
+    } else if (sysLog == EMS_SYS_LOGGING_MIXERMODULE) {
+        myDebug_P(PSTR("  System logging set to Mixer Module only"));
     } else if (sysLog == EMS_SYS_LOGGING_JABBER) {
         myDebug_P(PSTR("  System logging set to Jabber"));
     } else if (sysLog == EMS_SYS_LOGGING_WATCH) {
@@ -299,6 +301,18 @@ void showInfo() {
         // UBAParameterWW
         _renderBoolValue("Warm Water activated", EMS_Boiler.wWActivated);
         _renderBoolValue("Warm Water circulation pump available", EMS_Boiler.wWCircPump);
+        myDebug_P(PSTR("  Warm Water circulation pump type: %s"), EMS_Boiler.wWCircPumpType ? "charge pump" : "3-way pump");
+        if (EMS_Boiler.wWCircPumpMode == 7) {
+            myDebug_P(PSTR("  Warm Water circulation pump freq: continuous"));
+        } else {
+            char s[7];
+            char buffer[2];
+            buffer[0] = (EMS_Boiler.wWCircPumpMode % 10) + '0';
+            buffer[1] = '\0';
+            strlcpy(s, buffer, 3);
+            strlcat(s, "x3min", sizeof(s));
+            myDebug_P(PSTR("  Warm Water circulation pump freq: %s"), s);
+        }
         if (EMS_Boiler.wWComfort == EMS_VALUE_UBAParameterWW_wwComfort_Hot) {
             myDebug_P(PSTR("  Warm Water comfort setting: Hot"));
         } else if (EMS_Boiler.wWComfort == EMS_VALUE_UBAParameterWW_wwComfort_Eco) {
@@ -309,7 +323,7 @@ void showInfo() {
 
         _renderIntValue("Warm Water selected temperature", "C", EMS_Boiler.wWSelTemp);
         _renderIntValue("Warm Water desinfection temperature", "C", EMS_Boiler.wWDesinfectTemp);
-        _renderBoolValue("Warm Water Circulation active", EMS_Boiler.wWCirc);
+        _renderBoolValue("Warm Water circulation active", EMS_Boiler.wWCirc);
 
         // UBAMonitorWWMessage
         _renderUShortValue("Warm Water current temperature", "C", EMS_Boiler.wWCurTmp);
@@ -635,7 +649,7 @@ bool publishSensorValues() {
 
 // publish Boiler data via MQTT
 bool publishEMSValues_boiler() {
-    const size_t        capacity = JSON_OBJECT_SIZE(41); // must recalculate if more objects addded https://arduinojson.org/v6/assistant/
+    const size_t        capacity = JSON_OBJECT_SIZE(47); // must recalculate if more objects addded https://arduinojson.org/v6/assistant/
     DynamicJsonDocument doc(capacity);
     JsonObject          rootBoiler = doc.to<JsonObject>();
 
@@ -669,6 +683,12 @@ bool publishEMSValues_boiler() {
     }
     if (EMS_Boiler.wWCircPump != EMS_VALUE_BOOL_NOTSET) {
         rootBoiler["wWCircPump"] = EMS_Boiler.wWCircPump;
+    }
+    if (EMS_Boiler.wWCircPumpType != EMS_VALUE_BOOL_NOTSET) {
+        rootBoiler["wWCiPuType"] = EMS_Boiler.wWCircPumpType;
+    }
+    if (EMS_Boiler.wWCircPumpMode != EMS_VALUE_INT_NOTSET) {
+        rootBoiler["wWCiPuMode"] = EMS_Boiler.wWCircPumpMode;
     }
     if (EMS_Boiler.extTemp > EMS_VALUE_SHORT_NOTSET) {
         rootBoiler["outdoorTemp"] = (float)EMS_Boiler.extTemp / 10;
@@ -708,6 +728,18 @@ bool publishEMSValues_boiler() {
     }
     if (EMS_Boiler.wWActivated != EMS_VALUE_BOOL_NOTSET) {
         rootBoiler["wWOnetime"] = _bool_to_char(s, EMS_Boiler.wWOneTime);
+    }
+    if (EMS_Boiler.wWActivated != EMS_VALUE_BOOL_NOTSET) {
+        rootBoiler["wWDesinfecting"] = _bool_to_char(s, EMS_Boiler.wWDesinfecting);
+    }
+    if (EMS_Boiler.wWActivated != EMS_VALUE_BOOL_NOTSET) {
+        rootBoiler["wWReady"] = _bool_to_char(s, EMS_Boiler.wWReadiness);
+    }
+    if (EMS_Boiler.wWActivated != EMS_VALUE_BOOL_NOTSET) {
+        rootBoiler["wWRecharge"] = _bool_to_char(s, EMS_Boiler.wWRecharging);
+    }
+    if (EMS_Boiler.wWActivated != EMS_VALUE_BOOL_NOTSET) {
+        rootBoiler["wWTempOK"] = _bool_to_char(s, EMS_Boiler.wWTemperaturOK);
     }
     if (EMS_Boiler.wWCirc != EMS_VALUE_BOOL_NOTSET) {
         rootBoiler["wWCirc"] = _bool_to_char(s, EMS_Boiler.wWCirc);
@@ -846,7 +878,19 @@ bool publishEMSValues_thermostat() {
             } else if (thermoMode == EMS_THERMOSTAT_MODE_NIGHT) {
                 dataThermostat[THERMOSTAT_MODE] = "night";
             }
-
+            // Render Thermostat Mode2, only if its in Auto mode
+            if (thermoMode == EMS_THERMOSTAT_MODE_AUTO) {
+                thermoMode = _getThermostatMode2(hc_v);
+                if (thermoMode == EMS_THERMOSTAT_MODE_NIGHT) {
+                    dataThermostat[THERMOSTAT_MODETYPE] = "night";
+                } else if (thermoMode == EMS_THERMOSTAT_MODE_DAY) {
+                    dataThermostat[THERMOSTAT_MODETYPE] = "day";
+                } else if (thermoMode == EMS_THERMOSTAT_MODE_COMFORT) {
+                    dataThermostat[THERMOSTAT_MODETYPE] = "comfort";
+                } else if (thermoMode == EMS_THERMOSTAT_MODE_ECO) {
+                    dataThermostat[THERMOSTAT_MODETYPE] = "eco";
+                }
+            }
 
             // if its not nested, send immediately
             if (!myESP.mqttUseNestedJson()) {
@@ -1541,6 +1585,9 @@ void TelnetCommandCallback(uint8_t wc, const char * commandLine) {
             ok = true;
         } else if (strcmp(second_cmd, "s") == 0) {
             ems_setLogging(EMS_SYS_LOGGING_SOLARMODULE);
+            ok = true;
+        } else if (strcmp(second_cmd, "m") == 0) {
+            ems_setLogging(EMS_SYS_LOGGING_MIXERMODULE);
             ok = true;
         } else if (strcmp(second_cmd, "r") == 0) {
             ems_setLogging(EMS_SYS_LOGGING_RAW);
