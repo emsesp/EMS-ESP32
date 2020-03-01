@@ -32,6 +32,7 @@
 #define THERMOSTAT_SELTEMP "seltemp"                 // selected temperature
 #define THERMOSTAT_HC "hc"                           // which heating circuit number
 #define THERMOSTAT_MODE "mode"                       // mode
+#define THERMOSTAT_MODETYPE "modetype"               // mode type
 #define THERMOSTAT_DAYTEMP "daytemp"                 // RC35 specific
 #define THERMOSTAT_NIGHTTEMP "nighttemp"             // RC35 specific
 #define THERMOSTAT_HOLIDAYTEMP "holidayttemp"        // RC35 specific

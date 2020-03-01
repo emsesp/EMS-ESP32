@@ -72,6 +72,7 @@
 #define EMS_OFFSET_MMStatusMessage_flow_temp 1    // flow temperature
 #define EMS_OFFSET_MMStatusMessage_pump_mod 3     // pump modulation in percent
 #define EMS_OFFSET_MMStatusMessage_valve_status 4 // valve 0..255
+#define EMS_TYPE_MM10ParameterMessage 0xAC        // mixer parameters
 
 // Solar Module
 // Assuming here that the SM200 behaves like SM100

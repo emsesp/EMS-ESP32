@@ -215,7 +215,7 @@ static_assert(sizeof(RtcmemData) <= (RTCMEM_BLOCKS * 4u), "RTCMEM struct is too 
 
 typedef struct {
     bool set; // is it a set command?
-    char key[50];
+    char key[55]; // longest is log (alternatively, the log command description could be shortened)
     char description[110];
 } command_t;
 
