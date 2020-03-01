@@ -326,6 +326,8 @@ void ems_setLogging(_EMS_SYS_LOGGING loglevel, bool quiet) {
         myDebug_P(PSTR("System Logging set to Thermostat only"));
     } else if (loglevel == EMS_SYS_LOGGING_SOLARMODULE) {
         myDebug_P(PSTR("System Logging set to Solar Module only"));
+    } else if (loglevel == EMS_SYS_LOGGING_MIXERMODULE) {
+        myDebug_P(PSTR("System Logging set to Mixer Module only"));
     } else if (loglevel == EMS_SYS_LOGGING_RAW) {
         myDebug_P(PSTR("System Logging set to Raw mode"));
     } else if (loglevel == EMS_SYS_LOGGING_JABBER) {
@@ -1079,7 +1081,7 @@ void _process_UBAMonitorFast(_EMS_RxTelegram * EMS_RxTelegram) {
 }
 
 /**
- * UBAMonitorFast2 - type 0xE4 - central heating monitor
+ * UBAMonitorFast2 - type 0xE4 - central heating monitor EMS+
  */
 void _process_UBAMonitorFast2(_EMS_RxTelegram * EMS_RxTelegram) {
     _setValue(EMS_RxTelegram, &EMS_Boiler.selFlowTemp, 6);
@@ -1125,7 +1127,7 @@ void _process_UBAMonitorSlow(_EMS_RxTelegram * EMS_RxTelegram) {
 }
 
 /**
- * UBAMonitorSlow2 - type 0xE5 - central heating monitor
+ * UBAMonitorSlow2 - type 0xE5 - central heating monitor EMS+
  */
 void _process_UBAMonitorSlow2(_EMS_RxTelegram * EMS_RxTelegram) {
     _setValue(EMS_RxTelegram, &EMS_Boiler.fanWork, 2, 2);
@@ -1139,7 +1141,7 @@ void _process_UBAMonitorSlow2(_EMS_RxTelegram * EMS_RxTelegram) {
 }
 
 /**
- * UBAOutdoorTemp - type 0xD1 - external temperature
+ * UBAOutdoorTemp - type 0xD1 - external temperature EMS+
  */
 void _process_UBAOutdoorTemp(_EMS_RxTelegram * EMS_RxTelegram) {
     _setValue(EMS_RxTelegram, &EMS_Boiler.extTemp, 0);
@@ -1313,6 +1315,17 @@ void _process_MMStatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
     _setValue(EMS_RxTelegram, &EMS_MixingModule.hc[hc].flowSetTemp, EMS_OFFSET_MMStatusMessage_flow_set);
 
     //_setValue(EMS_RxTelegram, &EMS_MixingModule.hc[hc].valveStatus, EMS_OFFSET_MMStatusMessage_valve_status);
+}
+
+// Mixer Parameters - 0xAC
+// We assume MM10 is on HC2 and WM10 is using HC1
+void _process_MM10ParameterMessage(_EMS_RxTelegram * EMS_RxTelegram) {
+    //uint8_t hc                     = 1; // fixed to HC2
+    //EMS_MixingModule.hc[hc].active = true;
+
+    //_setValue(EMS_RxTelegram, &EMS_MixingModule.hc[hc].flowTemp, EMS_OFFSET_MMStatusMessage_flow_temp);
+    //_setValue(EMS_RxTelegram, &EMS_MixingModule.hc[hc].pumpMod, EMS_OFFSET_MMStatusMessage_pump_mod);
+    //_setValue(EMS_RxTelegram, &EMS_MixingModule.hc[hc].flowSetTemp, EMS_OFFSET_MMStatusMessage_flow_set);
 }
 
 /**
@@ -2943,9 +2956,8 @@ const _EMS_Type EMS_Types[] = {
     {EMS_DEVICE_UPDATE_FLAG_MIXING, EMS_TYPE_MMPLUSStatusMessage_HC4, "MMPLUSStatusMessage_HC4", _process_MMPLUSStatusMessage},
     {EMS_DEVICE_UPDATE_FLAG_MIXING, EMS_TYPE_MMPLUSStatusMessage_WWC1, "MMPLUSStatusMessage_WWC1", _process_MMPLUSStatusMessageWW},
     {EMS_DEVICE_UPDATE_FLAG_MIXING, EMS_TYPE_MMPLUSStatusMessage_WWC2, "MMPLUSStatusMessage_WWC2", _process_MMPLUSStatusMessageWW},
-    {EMS_DEVICE_UPDATE_FLAG_MIXING, EMS_TYPE_MMStatusMessage, "MMStatusMessage", _process_MMStatusMessage}
-
-
+    {EMS_DEVICE_UPDATE_FLAG_MIXING, EMS_TYPE_MMStatusMessage, "MMStatusMessage", _process_MMStatusMessage},
+    {EMS_DEVICE_UPDATE_FLAG_MIXING, EMS_TYPE_MM10ParameterMessage, "MM10ParameterMessage", _process_MM10ParameterMessage}
 };
 
 // calculate sizes of arrays at compile time
@@ -3039,8 +3051,17 @@ void _printMessage(_EMS_RxTelegram * EMS_RxTelegram, const int8_t show_type) {
             _debugPrintTelegram(output_str, EMS_RxTelegram, color_s);
         }
     } else if (EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_SOLARMODULE) {
-        // only print ones to/from thermostat if logging is set to thermostat only
+        // only print ones to/from solar module if logging is set to solar module only
         if ((src == EMS_SolarModule.device_id) || (dest == EMS_SolarModule.device_id)) {
+            _debugPrintTelegram(output_str, EMS_RxTelegram, color_s);
+        }
+    } else if (EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_MIXERMODULE) {
+        // only print ones to/from mixer module if logging is set to mixer module only
+        if ((src == EMS_MixingModule.device_id) || (dest == EMS_MixingModule.device_id)) {
+            _debugPrintTelegram(output_str, EMS_RxTelegram, color_s);
+        // also analyse the sequence of instructions prior to instructions to/from mixer module
+        // typically: EMS_TYPE_MM10ParameterMessage(0xAC) - EMS_TYPE_UBASetPoints(0x1A) - EMS_TYPE_UBAFlags(0x35)
+        } else if ((type == EMS_TYPE_MMStatusMessage) || (type == EMS_TYPE_MM10ParameterMessage) || (type == EMS_TYPE_UBASetPoints) || (type == EMS_TYPE_UBAFlags)) {
             _debugPrintTelegram(output_str, EMS_RxTelegram, color_s);
         }
     } else if (EMS_Sys_Status.emsLogging == EMS_SYS_LOGGING_DEVICE) {

@@ -107,7 +107,7 @@ static const command_t project_cmds[] PROGMEM = {
     {true, "master_thermostat [product id]", "set default thermostat to use. No argument lists options"},
 
     {false, "info", "show current values deciphered from the EMS messages"},
-    {false, "log <n | b | t | s | r | j | v | w [ID] | d [ID]>", "logging: none, basic, thermo, solar, raw, jabber, verbose, watch a type or device"},
+    {false, "log <n | b | t | s | m | r | j | v | w [ID] | d [ID]>", "logging: none, basic, thermo, solar, mixer, raw, jabber, verbose, watch a type or device"},
 
 #ifdef TESTS
     {false, "test <n>", "insert a test telegram on to the EMS bus"},
@@ -231,6 +231,8 @@ void showInfo() {
         myDebug_P(PSTR("  System logging set to Thermostat only"));
     } else if (sysLog == EMS_SYS_LOGGING_SOLARMODULE) {
         myDebug_P(PSTR("  System logging set to Solar Module only"));
+    } else if (sysLog == EMS_SYS_LOGGING_MIXERMODULE) {
+        myDebug_P(PSTR("  System logging set to Mixer Module only"));
     } else if (sysLog == EMS_SYS_LOGGING_JABBER) {
         myDebug_P(PSTR("  System logging set to Jabber"));
     } else if (sysLog == EMS_SYS_LOGGING_WATCH) {
@@ -1583,6 +1585,9 @@ void TelnetCommandCallback(uint8_t wc, const char * commandLine) {
             ok = true;
         } else if (strcmp(second_cmd, "s") == 0) {
             ems_setLogging(EMS_SYS_LOGGING_SOLARMODULE);
+            ok = true;
+        } else if (strcmp(second_cmd, "m") == 0) {
+            ems_setLogging(EMS_SYS_LOGGING_MIXERMODULE);
             ok = true;
         } else if (strcmp(second_cmd, "r") == 0) {
             ems_setLogging(EMS_SYS_LOGGING_RAW);

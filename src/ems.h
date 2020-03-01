@@ -125,7 +125,8 @@ typedef enum {
     EMS_SYS_LOGGING_WATCH,       // watch a specific type ID
     EMS_SYS_LOGGING_BASIC,       // only basic read/write messages
     EMS_SYS_LOGGING_THERMOSTAT,  // only telegrams sent from thermostat
-    EMS_SYS_LOGGING_SOLARMODULE, // only telegrams sent from solarmodule
+    EMS_SYS_LOGGING_SOLARMODULE, // only telegrams sent from solar module
+    EMS_SYS_LOGGING_MIXERMODULE, // only telegrams sent from mixer module
     EMS_SYS_LOGGING_VERBOSE,     // everything
     EMS_SYS_LOGGING_JABBER,      // lots of debug output...
     EMS_SYS_LOGGING_DEVICE       // watch the device ID
