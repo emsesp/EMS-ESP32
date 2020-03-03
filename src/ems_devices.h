@@ -177,24 +177,37 @@
 #define EMS_OFFSET_RCPLUSSet_manual_setpoint 10 // manual setpoint
 
 // Junkers FR10, FR50, FW100, FW120 (EMS Plus)
-#define EMS_TYPE_JunkersStatusMessage_HC1 0x6F // is an automatic thermostat broadcast giving us temps
-#define EMS_TYPE_JunkersStatusMessage_HC2 0x70 // is an automatic thermostat broadcast giving us temps
-#define EMS_TYPE_JunkersStatusMessage_HC3 0x71 // is an automatic thermostat broadcast giving us temps
-#define EMS_TYPE_JunkersStatusMessage_HC4 0x72 // is an automatic thermostat broadcast giving us temps
+// HC1 = 0x6F-0x72
+#define EMS_TYPE_JunkersStatusMessage_HC1 0x6F
+#define EMS_TYPE_JunkersStatusMessage_HC2 0x70
+#define EMS_TYPE_JunkersStatusMessage_HC3 0x71
+#define EMS_TYPE_JunkersStatusMessage_HC4 0x72
 
 #define EMS_OFFSET_JunkersStatusMessage_daymode 0  // 3 = day, 2 = night
 #define EMS_OFFSET_JunkersStatusMessage_mode 1     // current mode, 1 = manual, 2 = auto
 #define EMS_OFFSET_JunkersStatusMessage_setpoint 2 // setpoint temp
 #define EMS_OFFSET_JunkersStatusMessage_curr 4     // current temp
 
-#define EMS_TYPE_JunkersSetMessage_HC1 0x65             // EMS type to set temperature on thermostat for heating circuit 1
-#define EMS_TYPE_JunkersSetMessage_HC2 0x66             // EMS type to set temperature on thermostat for heating circuit 2
-#define EMS_TYPE_JunkersSetMessage_HC3 0x67             // EMS type to set temperature on thermostat for heating circuit 3
-#define EMS_TYPE_JunkersSetMessage_HC4 0x68             // EMS type to set temperature on thermostat for heating circuit 4
+// HC1-4 0x65-0x68 - EMS_DEVICE_FLAG_JUNKERS_CONFIG1
+// Junkers FR10, FR50, FW100, FW120
+#define EMS_TYPE_JunkersSetMessage1_HC1 0x65
+#define EMS_TYPE_JunkersSetMessage1_HC2 0x66
+#define EMS_TYPE_JunkersSetMessage1_HC3 0x67
+#define EMS_TYPE_JunkersSetMessage1_HC4 0x68
 #define EMS_OFFSET_JunkersSetMessage_day_temp 0x11      // EMS offset to set temperature on thermostat for day mode
 #define EMS_OFFSET_JunkersSetMessage_night_temp 0x10    // EMS offset to set temperature on thermostat for night mode
 #define EMS_OFFSET_JunkersSetMessage_no_frost_temp 0x0F // EMS offset to set temperature on thermostat for no frost mode
 #define EMS_OFFSET_JunkersSetMessage_set_mode 0x0E      // EMS offset to set mode on thermostat
+
+// HC1-4 0x79-0x7C - EMS_DEVICE_FLAG_JUNKERS_CONFIG2
+// Junkers FR100
+#define EMS_TYPE_JunkersSetMessage2_HC1 0x79
+#define EMS_TYPE_JunkersSetMessage2_HC2 0x7A
+#define EMS_TYPE_JunkersSetMessage2_HC3 0x7B
+#define EMS_TYPE_JunkersSetMessage2_HC4 0x7C
+#define EMS_OFFSET_JunkersSetMessage2_no_frost_temp 0x05
+#define EMS_OFFSET_JunkersSetMessage2_eco_temp 0x06
+#define EMS_OFFSET_JunkersSetMessage3_heat 0x07
 
 /*
  * Table of all known EMS Devices
@@ -289,14 +302,14 @@ static const _EMS_Device EMS_Devices[] = {
     {113, EMS_DEVICE_TYPE_THERMOSTAT, "Sieger ES72", EMS_DEVICE_FLAG_RC20}, // 0x17
 
     // Junkers - all 0x10
-    {105, EMS_DEVICE_TYPE_THERMOSTAT, "Junkers FW100", EMS_DEVICE_FLAG_JUNKERS}, // 0x10
-    {106, EMS_DEVICE_TYPE_THERMOSTAT, "Junkers FW200", EMS_DEVICE_FLAG_JUNKERS}, // 0x10
-    {107, EMS_DEVICE_TYPE_THERMOSTAT, "Junkers FR100", EMS_DEVICE_FLAG_JUNKERS}, // 0x10
-    {108, EMS_DEVICE_TYPE_THERMOSTAT, "Junkers FR110", EMS_DEVICE_FLAG_JUNKERS}, // 0x10
-    {111, EMS_DEVICE_TYPE_THERMOSTAT, "Junkers FR10", EMS_DEVICE_FLAG_JUNKERS},  // 0x10
-    {147, EMS_DEVICE_TYPE_THERMOSTAT, "Junkers FR50", EMS_DEVICE_FLAG_JUNKERS},  // 0x10
-    {191, EMS_DEVICE_TYPE_THERMOSTAT, "Junkers FR120", EMS_DEVICE_FLAG_JUNKERS}, // 0x10
-    {192, EMS_DEVICE_TYPE_THERMOSTAT, "Junkers FW120", EMS_DEVICE_FLAG_JUNKERS}  // 0x10
+    {105, EMS_DEVICE_TYPE_THERMOSTAT, "Junkers FW100", EMS_DEVICE_FLAG_JUNKERS | EMS_DEVICE_FLAG_JUNKERS_CONFIG1}, // 0x10
+    {106, EMS_DEVICE_TYPE_THERMOSTAT, "Junkers FW200", EMS_DEVICE_FLAG_JUNKERS | EMS_DEVICE_FLAG_JUNKERS_CONFIG1}, // 0x10
+    {107, EMS_DEVICE_TYPE_THERMOSTAT, "Junkers FR100", EMS_DEVICE_FLAG_JUNKERS | EMS_DEVICE_FLAG_JUNKERS_CONFIG2}, // 0x10
+    {108, EMS_DEVICE_TYPE_THERMOSTAT, "Junkers FR110", EMS_DEVICE_FLAG_JUNKERS | EMS_DEVICE_FLAG_JUNKERS_CONFIG2}, // 0x10
+    {111, EMS_DEVICE_TYPE_THERMOSTAT, "Junkers FR10", EMS_DEVICE_FLAG_JUNKERS | EMS_DEVICE_FLAG_JUNKERS_CONFIG1},  // 0x10
+    {147, EMS_DEVICE_TYPE_THERMOSTAT, "Junkers FR50", EMS_DEVICE_FLAG_JUNKERS | EMS_DEVICE_FLAG_JUNKERS_CONFIG1},  // 0x10
+    {191, EMS_DEVICE_TYPE_THERMOSTAT, "Junkers FR120", EMS_DEVICE_FLAG_JUNKERS | EMS_DEVICE_FLAG_JUNKERS_CONFIG1}, // 0x10
+    {192, EMS_DEVICE_TYPE_THERMOSTAT, "Junkers FW120", EMS_DEVICE_FLAG_JUNKERS | EMS_DEVICE_FLAG_JUNKERS_CONFIG1}  // 0x10
 
 
 };

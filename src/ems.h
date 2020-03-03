@@ -48,32 +48,23 @@
 // Device Flags
 // They are unique to the model type (mixing, solar, thermostat etc)
 enum EMS_DEVICE_FLAG_TYPES : uint8_t {
-    EMS_DEVICE_FLAG_NONE     = 0,
-    EMS_DEVICE_FLAG_MMPLUS   = 20, // mixing EMS+
-    EMS_DEVICE_FLAG_MM10     = 21, // mixing MM10, MM50
-    EMS_DEVICE_FLAG_SM10     = 10,
-    EMS_DEVICE_FLAG_SM100    = 11, // for SM100 and SM200
-    EMS_DEVICE_FLAG_EASY     = 1,
-    EMS_DEVICE_FLAG_RC10     = 2,
-    EMS_DEVICE_FLAG_RC20     = 3,
-    EMS_DEVICE_FLAG_RC30     = 4,
-    EMS_DEVICE_FLAG_RC30N    = 5, // newer type of RC30 with RC35 circuit
-    EMS_DEVICE_FLAG_RC35     = 6,
-    EMS_DEVICE_FLAG_RC300    = 7,
-    EMS_DEVICE_FLAG_JUNKERS  = (1 << 6), // 6th bit set if its junkers HT3
-    EMS_DEVICE_FLAG_NO_WRITE = (1 << 7)  // top bit set if thermostat write not supported
+    EMS_DEVICE_FLAG_NONE            = 0,
+    EMS_DEVICE_FLAG_MMPLUS          = 20, // mixing EMS+
+    EMS_DEVICE_FLAG_MM10            = 21, // mixing MM10, MM50
+    EMS_DEVICE_FLAG_SM10            = 10,
+    EMS_DEVICE_FLAG_SM100           = 11, // for SM100 and SM200
+    EMS_DEVICE_FLAG_EASY            = 1,
+    EMS_DEVICE_FLAG_RC10            = 2,
+    EMS_DEVICE_FLAG_RC20            = 3,
+    EMS_DEVICE_FLAG_RC30            = 4,
+    EMS_DEVICE_FLAG_RC30N           = 5, // newer type of RC30 with RC35 circuit
+    EMS_DEVICE_FLAG_RC35            = 6,
+    EMS_DEVICE_FLAG_RC300           = 7,
+    EMS_DEVICE_FLAG_JUNKERS_CONFIG1 = 1,        // use 0x65 for HC
+    EMS_DEVICE_FLAG_JUNKERS_CONFIG2 = 2,        // use 0x79 for HC, older models
+    EMS_DEVICE_FLAG_JUNKERS         = (1 << 6), // 6th bit set if its junkers HT3
+    EMS_DEVICE_FLAG_NO_WRITE        = (1 << 7)  // top bit set if thermostat write not supported
 };
-
-typedef enum {
-    EMS_THERMOSTAT_MODE_UNKNOWN,
-    EMS_THERMOSTAT_MODE_OFF,
-    EMS_THERMOSTAT_MODE_MANUAL,
-    EMS_THERMOSTAT_MODE_AUTO,
-    EMS_THERMOSTAT_MODE_NIGHT,
-    EMS_THERMOSTAT_MODE_DAY,
-    EMS_THERMOSTAT_MODE_ECO,
-    EMS_THERMOSTAT_MODE_COMFORT
-} _EMS_THERMOSTAT_MODE;
 
 // trigger settings to determine if hot tap water or the heating is active
 #define EMS_BOILER_BURNPOWER_TAPWATER 100
@@ -324,15 +315,15 @@ typedef struct {
     uint16_t switchTemp;  // Switch temperature
 
     // UBAMonitorWWMessage
-    uint16_t wWCurTmp;       // Warm Water current temperature
-    uint32_t wWStarts;       // Warm Water # starts
-    uint32_t wWWorkM;        // Warm Water # minutes
-    uint8_t  wWOneTime;      // Warm Water one time function on/off
-    uint8_t  wWDesinfecting; // Warm Water desinfection on/off
-    uint8_t  wWReadiness;    // Warm Water readiness on/off
-    uint8_t  wWRecharging;   // Warm Water recharge on/off
-    uint8_t  wWTemperaturOK; // Warm Water temperatur ok on/off
-    uint8_t  wWCurFlow;      // Warm Water current flow in l/min
+    uint16_t wWCurTmp;        // Warm Water current temperature
+    uint32_t wWStarts;        // Warm Water # starts
+    uint32_t wWWorkM;         // Warm Water # minutes
+    uint8_t  wWOneTime;       // Warm Water one time function on/off
+    uint8_t  wWDesinfecting;  // Warm Water desinfection on/off
+    uint8_t  wWReadiness;     // Warm Water readiness on/off
+    uint8_t  wWRecharging;    // Warm Water recharge on/off
+    uint8_t  wWTemperatureOK; // Warm Water temperature ok on/off
+    uint8_t  wWCurFlow;       // Warm Water current flow in l/min
 
     // UBATotalUptimeMessage
     uint32_t UBAuptime; // Total UBA working hours
@@ -450,6 +441,27 @@ typedef struct {
     EMS_processType_cb      processType_cb;
 } _EMS_Type;
 
+typedef enum : uint8_t {
+    THERMOSTAT_TEMP_MODE_AUTO = 0,
+    THERMOSTAT_TEMP_MODE_NIGHT,
+    THERMOSTAT_TEMP_MODE_DAY,
+    THERMOSTAT_TEMP_MODE_HOLIDAY,
+    THERMOSTAT_TEMP_MODE_NOFROST,
+    THERMOSTAT_TEMP_MODE_ECO, // 'sparen'
+    THERMOSTAT_TEMP_MODE_HEAT // 'heizen'
+} _THERMOSTAT_TEMP_MODE;
+
+typedef enum {
+    EMS_THERMOSTAT_MODE_UNKNOWN,
+    EMS_THERMOSTAT_MODE_OFF,
+    EMS_THERMOSTAT_MODE_MANUAL,
+    EMS_THERMOSTAT_MODE_AUTO,
+    EMS_THERMOSTAT_MODE_NIGHT,
+    EMS_THERMOSTAT_MODE_DAY,
+    EMS_THERMOSTAT_MODE_ECO,
+    EMS_THERMOSTAT_MODE_COMFORT
+} _EMS_THERMOSTAT_MODE;
+
 // function definitions
 void    ems_dumpBuffer(const char * prefix, uint8_t * telegram, uint8_t length);
 void    ems_parseTelegram(uint8_t * telegram, uint8_t len);
@@ -462,7 +474,7 @@ void    ems_printTxQueue();
 void    ems_testTelegram(uint8_t test_num);
 void    ems_startupTelegrams();
 bool    ems_checkEMSBUSAlive();
-void    ems_setThermostatTemp(float temperature, uint8_t hc, uint8_t temptype = 0);
+void    ems_setThermostatTemp(float temperature, uint8_t hc, _THERMOSTAT_TEMP_MODE temptype = THERMOSTAT_TEMP_MODE_AUTO);
 void    ems_setThermostatMode(uint8_t mode, uint8_t hc);
 void    ems_setWarmWaterTemp(uint8_t temperature);
 void    ems_setFlowTemp(uint8_t temperature);
@@ -499,8 +511,8 @@ bool ems_getHeatPumpEnabled();
 
 bool             ems_getBusConnected();
 _EMS_SYS_LOGGING ems_getLogging();
-uint8_t          ems_getThermostatModel();
-uint8_t          ems_getSolarModuleModel();
+uint8_t          ems_getThermostatFlags();
+uint8_t          ems_getSolarModuleFlags();
 void             ems_discoverModels();
 bool             ems_getTxCapable();
 uint32_t         ems_getPollFrequency();

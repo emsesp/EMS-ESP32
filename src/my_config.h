@@ -27,6 +27,9 @@
 #define TOPIC_THERMOSTAT_CMD_DAYTEMP "daytemp"             // day temp (RC35 specific)
 #define TOPIC_THERMOSTAT_CMD_NIGHTTEMP "nighttemp"         // night temp (RC35 specific)
 #define TOPIC_THERMOSTAT_CMD_HOLIDAYTEMP "holidayttemp"    // holiday temp (RC35 specific)
+#define TOPIC_THERMOSTAT_CMD_NOFROSTTEMP "nofrosttemp"     // frost temp (Junkers specific)
+#define TOPIC_THERMOSTAT_CMD_ECOTEMP "ecotemp"             // eco temp (Junkers specific)
+#define TOPIC_THERMOSTAT_CMD_HEATTEMP "heattemp"           // heat temp (Junkers specific)
 
 #define THERMOSTAT_CURRTEMP "currtemp"               // current temperature
 #define THERMOSTAT_SELTEMP "seltemp"                 // selected temperature
