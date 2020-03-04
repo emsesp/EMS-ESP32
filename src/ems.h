@@ -48,22 +48,22 @@
 // Device Flags
 // They are unique to the model type (mixing, solar, thermostat etc)
 enum EMS_DEVICE_FLAG_TYPES : uint8_t {
-    EMS_DEVICE_FLAG_NONE            = 0,
-    EMS_DEVICE_FLAG_MMPLUS          = 20, // mixing EMS+
-    EMS_DEVICE_FLAG_MM10            = 21, // mixing MM10, MM50
-    EMS_DEVICE_FLAG_SM10            = 10,
-    EMS_DEVICE_FLAG_SM100           = 11, // for SM100 and SM200
-    EMS_DEVICE_FLAG_EASY            = 1,
-    EMS_DEVICE_FLAG_RC10            = 2,
-    EMS_DEVICE_FLAG_RC20            = 3,
-    EMS_DEVICE_FLAG_RC30            = 4,
-    EMS_DEVICE_FLAG_RC30N           = 5, // newer type of RC30 with RC35 circuit
-    EMS_DEVICE_FLAG_RC35            = 6,
-    EMS_DEVICE_FLAG_RC300           = 7,
-    EMS_DEVICE_FLAG_JUNKERS_CONFIG1 = 1,        // use 0x65 for HC
-    EMS_DEVICE_FLAG_JUNKERS_CONFIG2 = 2,        // use 0x79 for HC, older models
-    EMS_DEVICE_FLAG_JUNKERS         = (1 << 6), // 6th bit set if its junkers HT3
-    EMS_DEVICE_FLAG_NO_WRITE        = (1 << 7)  // top bit set if thermostat write not supported
+    EMS_DEVICE_FLAG_NONE     = 0,
+    EMS_DEVICE_FLAG_MMPLUS   = 20, // mixing EMS+
+    EMS_DEVICE_FLAG_MM10     = 21, // mixing MM10, MM50
+    EMS_DEVICE_FLAG_SM10     = 10,
+    EMS_DEVICE_FLAG_SM100    = 11, // for SM100 and SM200
+    EMS_DEVICE_FLAG_EASY     = 1,
+    EMS_DEVICE_FLAG_RC10     = 2,
+    EMS_DEVICE_FLAG_RC20     = 3,
+    EMS_DEVICE_FLAG_RC30     = 4,
+    EMS_DEVICE_FLAG_RC30N    = 5, // newer type of RC30 with RC35 circuit
+    EMS_DEVICE_FLAG_RC35     = 6,
+    EMS_DEVICE_FLAG_RC300    = 7,
+    EMS_DEVICE_FLAG_JUNKERS1 = 31,       // use 0x65 for HC
+    EMS_DEVICE_FLAG_JUNKERS2 = 32,       // use 0x79 for HC, older models
+    EMS_DEVICE_FLAG_JUNKERS  = (1 << 6), // 6th bit set if its junkers HT3
+    EMS_DEVICE_FLAG_NO_WRITE = (1 << 7)  // top bit set if thermostat write not supported
 };
 
 // trigger settings to determine if hot tap water or the heating is active

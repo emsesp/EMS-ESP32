@@ -160,7 +160,7 @@ _EMS_THERMOSTAT_MODE _getThermostatMode(uint8_t hc_num) {
         } else if (mode == 1) {
             thermoMode = EMS_THERMOSTAT_MODE_AUTO;
         }
-    } else if (model == EMS_DEVICE_FLAG_JUNKERS) {
+    } else if ((model == EMS_DEVICE_FLAG_JUNKERS1) || (model == EMS_DEVICE_FLAG_JUNKERS2)) {
         if (mode == 1) {
             thermoMode = EMS_THERMOSTAT_MODE_MANUAL;
         } else if (mode == 2) {
@@ -188,7 +188,7 @@ _EMS_THERMOSTAT_MODE _getThermostatMode2(uint8_t hc_num) {
 
     uint8_t mode = EMS_Thermostat.hc[hc_num - 1].mode_type;
 
-    if (model == EMS_DEVICE_FLAG_JUNKERS) {
+    if ((model == EMS_DEVICE_FLAG_JUNKERS1) || (model == EMS_DEVICE_FLAG_JUNKERS2)) {
         if (mode == 3) {
             thermoMode = EMS_THERMOSTAT_MODE_DAY;
         } else if (mode == 2) {
@@ -435,7 +435,8 @@ void showInfo() {
             _m_setpoint = 10; // *100
             _m_curr     = 10; // *100
             break;
-        case EMS_DEVICE_FLAG_JUNKERS:
+        case EMS_DEVICE_FLAG_JUNKERS1:
+        case EMS_DEVICE_FLAG_JUNKERS2:
             _m_setpoint = 1; // *10
             _m_curr     = 1; // *10
             break;
@@ -834,7 +835,7 @@ bool publishEMSValues_thermostat() {
                     dataThermostat[THERMOSTAT_SELTEMP] = (float)thermostat->setpoint_roomTemp / 100;
                 if (thermostat->curr_roomTemp > EMS_VALUE_SHORT_NOTSET)
                     dataThermostat[THERMOSTAT_CURRTEMP] = (float)thermostat->curr_roomTemp / 100;
-            } else if (model == EMS_DEVICE_FLAG_JUNKERS) {
+            } else if ((model == EMS_DEVICE_FLAG_JUNKERS1) || (model == EMS_DEVICE_FLAG_JUNKERS2)) {
                 if (thermostat->setpoint_roomTemp > EMS_VALUE_SHORT_NOTSET)
                     dataThermostat[THERMOSTAT_SELTEMP] = (float)thermostat->setpoint_roomTemp / 10;
                 if (thermostat->curr_roomTemp > EMS_VALUE_SHORT_NOTSET)
@@ -2160,7 +2161,7 @@ void WebCallback(JsonObject root) {
                 thermostat["ts"] = (float)EMS_Thermostat.hc[hc_num - 1].setpoint_roomTemp / 100;
             if (EMS_Thermostat.hc[hc_num - 1].curr_roomTemp > EMS_VALUE_SHORT_NOTSET)
                 thermostat["tc"] = (float)EMS_Thermostat.hc[hc_num - 1].curr_roomTemp / 100;
-        } else if (model == EMS_DEVICE_FLAG_JUNKERS) {
+        } else if ((model == EMS_DEVICE_FLAG_JUNKERS1) || (model == EMS_DEVICE_FLAG_JUNKERS2)) {
             if (EMS_Thermostat.hc[hc_num - 1].setpoint_roomTemp > EMS_VALUE_SHORT_NOTSET)
                 thermostat["ts"] = (float)EMS_Thermostat.hc[hc_num - 1].setpoint_roomTemp / 10;
             if (EMS_Thermostat.hc[hc_num - 1].curr_roomTemp > EMS_VALUE_SHORT_NOTSET)

@@ -2461,14 +2461,13 @@ void ems_setThermostatTemp(float temperature, uint8_t hc_num, _THERMOSTAT_TEMP_M
         EMS_TxTelegram.type_validate = EMS_TxTelegram.type;
     }
 
-    else if (model & EMS_DEVICE_FLAG_JUNKERS) {
+    else if ((model == EMS_DEVICE_FLAG_JUNKERS1) || (model == EMS_DEVICE_FLAG_JUNKERS2)) {
         EMS_TxTelegram.emsplus = true; // Assuming here that all Junkers use EMS+
 
         // figure out if we have older or new thermostats
-        // Heating Circuits on 0x65 (EMS_DEVICE_FLAG_JUNKERS_CONFIG1) or 0x79 (EMS_DEVICE_FLAG_JUNKERS_CONFIG2)
+        // Heating Circuits on 0x65 or 0x79
         // see https://github.com/proddy/EMS-ESP/issues/335#issuecomment-593324716)
-        if ((model & 0x3F) == EMS_DEVICE_FLAG_JUNKERS_CONFIG1) {
-            // EMS_DEVICE_FLAG_JUNKERS_CONFIG1 - new models like the FW series
+        if (model == EMS_DEVICE_FLAG_JUNKERS1) {
             switch (temptype) {
             case THERMOSTAT_TEMP_MODE_NOFROST:
                 EMS_TxTelegram.offset = EMS_OFFSET_JunkersSetMessage_no_frost_temp;
@@ -2491,7 +2490,7 @@ void ems_setThermostatTemp(float temperature, uint8_t hc_num, _THERMOSTAT_TEMP_M
             EMS_TxTelegram.type               = EMS_TYPE_JunkersSetMessage1_HC1 + hc_num - 1; // 0x65
             EMS_TxTelegram.comparisonPostRead = EMS_TYPE_JunkersStatusMessage_HC1 + hc_num - 1;
         } else {
-            // EMS_DEVICE_FLAG_JUNKERS_CONFIG2
+            // EMS_DEVICE_FLAG_JUNKERS2
             switch (temptype) {
             case THERMOSTAT_TEMP_MODE_NOFROST:
                 EMS_TxTelegram.offset = EMS_OFFSET_JunkersSetMessage2_no_frost_temp;
@@ -2605,21 +2604,20 @@ void ems_setThermostatMode(uint8_t mode, uint8_t hc_num) {
         EMS_TxTelegram.offset        = EMS_OFFSET_RC35Set_mode;
         EMS_TxTelegram.type_validate = EMS_TxTelegram.type;
 
-    } else if (model == EMS_DEVICE_FLAG_JUNKERS) {
-        if ((model & 0x3F) == EMS_DEVICE_FLAG_JUNKERS_CONFIG1) {
-            // config 1
-            EMS_TxTelegram.type               = EMS_TYPE_JunkersSetMessage1_HC1 + hc_num - 1;
-            EMS_TxTelegram.comparisonPostRead = EMS_TYPE_JunkersStatusMessage_HC1;
-        } else {
-            // config 2
-            EMS_TxTelegram.type               = EMS_TYPE_JunkersSetMessage2_HC1 + hc_num - 1;
-            EMS_TxTelegram.comparisonPostRead = EMS_TYPE_JunkersStatusMessage_HC1;
-        }
+        // Junkers
+    } else if (model == EMS_DEVICE_FLAG_JUNKERS1) {
+        EMS_TxTelegram.type               = EMS_TYPE_JunkersSetMessage1_HC1 + hc_num - 1;
+        EMS_TxTelegram.comparisonPostRead = EMS_TYPE_JunkersStatusMessage_HC1;
+        EMS_TxTelegram.offset             = EMS_OFFSET_JunkersSetMessage_set_mode;
+        EMS_TxTelegram.type_validate      = EMS_TxTelegram.type;
+    } else if (model == EMS_DEVICE_FLAG_JUNKERS2) {
+        EMS_TxTelegram.type               = EMS_TYPE_JunkersSetMessage2_HC1 + hc_num - 1;
+        EMS_TxTelegram.comparisonPostRead = EMS_TYPE_JunkersStatusMessage_HC1;
+        EMS_TxTelegram.offset             = EMS_OFFSET_JunkersSetMessage_set_mode;
+        EMS_TxTelegram.type_validate      = EMS_TxTelegram.type;
+    }
 
-        EMS_TxTelegram.offset        = EMS_OFFSET_JunkersSetMessage_set_mode;
-        EMS_TxTelegram.type_validate = EMS_TxTelegram.type;
-
-    } else if (model == EMS_DEVICE_FLAG_RC300) {
+    else if (model == EMS_DEVICE_FLAG_RC300) {
         EMS_TxTelegram.offset = EMS_OFFSET_RCPLUSSet_mode;
 
         if (hc_num == 1) {
