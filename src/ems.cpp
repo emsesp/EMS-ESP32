@@ -266,8 +266,9 @@ bool ems_getHeatPumpEnabled() {
     return (EMS_HeatPump.device_id != EMS_ID_NONE);
 }
 
+// thermostat has already the 7th bit (to indicate write) stripped
 uint8_t ems_getThermostatFlags() {
-    return (EMS_Thermostat.device_flags & 0x7F); // strip 7th bit which is used to show whether Write is supported
+    return (EMS_Thermostat.device_flags);
 }
 
 uint8_t ems_getSolarModuleFlags() {
@@ -1840,6 +1841,15 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
         brand = 0; // unknown
     }
 
+    /*
+    // override to emulate other thermostats - FR100
+    if (device_id == 0x17) {
+        brand      = 2;
+        device_id  = 0x10;
+        product_id = 107;
+    }
+*/
+
     // first scan through matching boilers, as these are unique to DeviceID 0x08
     uint8_t i = 0;
     while (i < _EMS_Devices_max) {
@@ -2451,16 +2461,14 @@ void ems_setThermostatTemp(float temperature, uint8_t hc_num, _THERMOSTAT_TEMP_M
         EMS_TxTelegram.type_validate = EMS_TxTelegram.type;
     }
 
-    else if (model == EMS_DEVICE_FLAG_JUNKERS) {
+    else if (model & EMS_DEVICE_FLAG_JUNKERS) {
         EMS_TxTelegram.emsplus = true; // Assuming here that all Junkers use EMS+
 
         // figure out if we have older or new thermostats
-        // Heating Circuits on 0x65 or 0x79 (see https://github.com/proddy/EMS-ESP/issues/335#issuecomment-593324716)
-        // strip 7th (write) and 6th (junkers) bits to leave EMS_DEVICE_FLAG_JUNKERS_CONFIG1 or CONFIG2
-        bool newer_junkers = ((model & 0x3F) == EMS_DEVICE_FLAG_JUNKERS_CONFIG1);
-
-        if (newer_junkers) {
-            // new models like the FW series
+        // Heating Circuits on 0x65 (EMS_DEVICE_FLAG_JUNKERS_CONFIG1) or 0x79 (EMS_DEVICE_FLAG_JUNKERS_CONFIG2)
+        // see https://github.com/proddy/EMS-ESP/issues/335#issuecomment-593324716)
+        if ((model & 0x3F) == EMS_DEVICE_FLAG_JUNKERS_CONFIG1) {
+            // EMS_DEVICE_FLAG_JUNKERS_CONFIG1 - new models like the FW series
             switch (temptype) {
             case THERMOSTAT_TEMP_MODE_NOFROST:
                 EMS_TxTelegram.offset = EMS_OFFSET_JunkersSetMessage_no_frost_temp;
@@ -2483,6 +2491,7 @@ void ems_setThermostatTemp(float temperature, uint8_t hc_num, _THERMOSTAT_TEMP_M
             EMS_TxTelegram.type               = EMS_TYPE_JunkersSetMessage1_HC1 + hc_num - 1; // 0x65
             EMS_TxTelegram.comparisonPostRead = EMS_TYPE_JunkersStatusMessage_HC1 + hc_num - 1;
         } else {
+            // EMS_DEVICE_FLAG_JUNKERS_CONFIG2
             switch (temptype) {
             case THERMOSTAT_TEMP_MODE_NOFROST:
                 EMS_TxTelegram.offset = EMS_OFFSET_JunkersSetMessage2_no_frost_temp;

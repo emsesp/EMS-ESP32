@@ -113,7 +113,7 @@ static const command_t project_cmds[] PROGMEM = {
     {false, "queue", "show current Tx queue"},
     {false, "send XX ...", "send raw telegram data to EMS bus (XX are hex values)"},
     {false, "thermostat read <type ID>", "send read request to the thermostat for heating circuit hc 1-4"},
-    {false, "thermostat temp <hc> <degrees> [temp]", "set current thermostat temperature. temp=0-6 (see wiki)"},
+    {false, "thermostat temp <degrees> [mode] [hc]", "set current thermostat temperature. mode=0-6 (see wiki), hc=1-4"},
     {false, "thermostat mode <hc> <mode>", "set mode (0=off, 1=manual, 2=auto) for heating circuit hc 1-4"},
     {false, "boiler read <type ID>", "send read request to boiler"},
     {false, "boiler wwtemp <degrees>", "set boiler warm water temperature"},
@@ -1602,20 +1602,24 @@ void TelnetCommandCallback(uint8_t wc, const char * commandLine) {
     }
 
     // thermostat commands
+    // thermostat temp <tempvalue> <modevalue> <heatingcircuit>
     if ((strcmp(first_cmd, "thermostat") == 0) && (wc >= 3)) {
         char * second_cmd = _readWord();
 
         if (strcmp(second_cmd, "temp") == 0) {
-            uint8_t hc   = _readIntNumber();   // next parameter is the heating circuit
-            float   temp = _readFloatNumber(); // read in next param which is the temp
-            if (wc == 5) {
-                // we have a temp mode given
-                _THERMOSTAT_TEMP_MODE temp_mode = (_THERMOSTAT_TEMP_MODE)_readIntNumber(); // next parameter is the temp mode type
-                ems_setThermostatTemp(temp, hc, temp_mode);
+            float temp = _readFloatNumber(); // read in next param which is the temp
+
+            if (wc == 3) {
+                // no more params
+                ems_setThermostatTemp(temp, EMS_THERMOSTAT_DEFAULTHC);
+                ok = true;
             } else {
-                ems_setThermostatTemp(temp, hc);
+                // get modevalue and heatingcircuit
+                _THERMOSTAT_TEMP_MODE temp_mode = (_THERMOSTAT_TEMP_MODE)_readIntNumber(); // next parameter is the temp mode type
+                uint8_t               hc        = _readIntNumber();                        // next parameter is the heating circuit
+                ems_setThermostatTemp(temp, hc, temp_mode);
+                ok = true;
             }
-            ok = true;
         } else if (strcmp(second_cmd, "mode") == 0) {
             uint8_t hc = _readIntNumber(); // next parameter is the heating circuit
             ems_setThermostatMode(_readIntNumber(), hc);
