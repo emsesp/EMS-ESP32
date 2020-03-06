@@ -154,7 +154,7 @@ _EMS_THERMOSTAT_MODE _getThermostatMode(uint8_t hc_num) {
         } else if (mode == 2) {
             thermoMode = EMS_THERMOSTAT_MODE_AUTO;
         }
-    } else if (model == EMS_DEVICE_FLAG_RC300) {
+    } else if ((model == EMS_DEVICE_FLAG_RC300) || (model == EMS_DEVICE_FLAG_RC100)) {
         if (mode == 0) {
             thermoMode = EMS_THERMOSTAT_MODE_MANUAL;
         } else if (mode == 1) {
@@ -206,6 +206,8 @@ _EMS_THERMOSTAT_MODE _getThermostatMode2(uint8_t hc_num) {
         } else if (mode == 1) {
             thermoMode = EMS_THERMOSTAT_MODE_COMFORT;
         }
+    } else if (model == EMS_DEVICE_FLAG_RC100) {
+        thermoMode = EMS_THERMOSTAT_MODE_DAY; // no modes on these devices
     }
 
     return thermoMode;
@@ -425,7 +427,7 @@ void showInfo() {
 
         // Render Thermostat Date & Time
         uint8_t model = ems_getThermostatFlags();
-        if ((model != EMS_DEVICE_FLAG_EASY)) {
+        if (strlen(EMS_Thermostat.datetime) > 2) {
             myDebug_P(PSTR("  Thermostat time is %s"), EMS_Thermostat.datetime);
         }
 

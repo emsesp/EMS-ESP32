@@ -598,7 +598,14 @@ void MyESP::_mqttOnConnect() {
     _mqtt_last_connection = millis();
 
     // say we're alive to the Last Will topic
-    mqttPublish(_mqtt_will_topic, _mqtt_will_online_payload, true); // force retain on
+    // send online appended with the version information as JSON
+    const size_t                 capacity = JSON_OBJECT_SIZE(3);
+    StaticJsonDocument<capacity> doc;
+    JsonObject                   payload = doc.to<JsonObject>();
+    payload["status"]                    = _mqtt_will_online_payload;
+    payload["version"]                   = _app_version;
+    payload["IP"]                        = WiFi.localIP().toString();
+    mqttPublish(_mqtt_will_topic, doc, true); // force retain on
 
     // subscribe to general subs
     mqttSubscribe(MQTT_TOPIC_RESTART);
