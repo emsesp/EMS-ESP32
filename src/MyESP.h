@@ -9,7 +9,7 @@
 #ifndef MyESP_h
 #define MyESP_h
 
-#define MYESP_VERSION "1.2.34"
+#define MYESP_VERSION "1.2.35"
 
 #include <ArduinoJson.h>
 #include <ArduinoOTA.h>
@@ -86,7 +86,6 @@ extern struct rst_info resetInfo;
 #define MQTT_RECONNECT_DELAY_MAX 120000 // Set reconnect time to 2 minutes at most
 #define MQTT_TOPIC_START "start"
 #define MQTT_TOPIC_HEARTBEAT "heartbeat"
-#define MQTT_TOPIC_START_PAYLOAD "start"
 #define MQTT_TOPIC_RESTART "restart"
 #define MQTT_WILL_ONLINE_PAYLOAD "online"   // for last will & testament payload
 #define MQTT_WILL_OFFLINE_PAYLOAD "offline" // for last will & testament payload

@@ -597,15 +597,8 @@ void MyESP::_mqttOnConnect() {
     _mqtt_reconnect_delay = MQTT_RECONNECT_DELAY_MIN;
     _mqtt_last_connection = millis();
 
-    // say we're alive to the Last Will topic
-    // send online appended with the version information as JSON
-    const size_t                 capacity = JSON_OBJECT_SIZE(3);
-    StaticJsonDocument<capacity> doc;
-    JsonObject                   payload = doc.to<JsonObject>();
-    payload["status"]                    = _mqtt_will_online_payload;
-    payload["version"]                   = _app_version;
-    payload["IP"]                        = WiFi.localIP().toString();
-    mqttPublish(_mqtt_will_topic, doc, true); // force retain on
+    // say we're alive to the Last Will topic, with retain on
+    mqttPublish(_mqtt_will_topic, _mqtt_will_online_payload, true);
 
     // subscribe to general subs
     mqttSubscribe(MQTT_TOPIC_RESTART);
@@ -613,7 +606,20 @@ void MyESP::_mqttOnConnect() {
     // subscribe to a start message and send the first publish
     // forcing retain to off since we only want to send this once
     mqttSubscribe(MQTT_TOPIC_START);
-    mqttPublish(MQTT_TOPIC_START, MQTT_TOPIC_START_PAYLOAD, false);
+
+    // send online appended with the version information as JSON
+    StaticJsonDocument<MYESP_JSON_MAXSIZE_SMALL> doc;
+    JsonObject                                   payload = doc.to<JsonObject>();
+    payload["version"]                                   = _app_version;
+    payload["IP"]                                        = WiFi.localIP().toString();
+    // add time if we know it
+    if ((_ntp_enabled) && (NTP.tcr->abbrev != nullptr)) {
+        uint32_t real_time = getSystemTime();
+        char     s[30];
+        snprintf_P(s, 30, PSTR("%02d:%02d:%02d %s"), to_hour(real_time), to_minute(real_time), to_second(real_time), NTP.tcr->abbrev);
+        payload["boottime"] = s;
+    }
+    mqttPublish(MQTT_TOPIC_START, doc, false);
 
     // send heartbeat if enabled
     heartbeatCheck(true);
