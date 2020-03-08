@@ -34,6 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - External sensors (like Dallas DS18*) are sent as a nested MQTT topic including their unqiue identifier
 - `mqttlog` console command renamed to `mqttqueue` to only show the current publish queue
 - `status` payload on start-up shows the IP and Version of EMS-ESP
+- `thermostat mode` takes a string like manual,auto,heat,day,night,eco,comfort,holiday,nofrost
 
 ### Removed
  - `autodetect scan`

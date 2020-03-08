@@ -71,7 +71,7 @@ enum EMS_DEVICE_FLAG_TYPES : uint8_t {
 #define EMS_BOILER_BURNPOWER_TAPWATER 100
 #define EMS_BOILER_SELFLOWTEMP_HEATING 30 // was 70, changed to 30 for https://github.com/proddy/EMS-ESP/issues/193
 
-// define min & maximum setable tapwater temperature
+// define min & maximum setable tapwater temperatures
 #define EMS_BOILER_TAPWATER_TEMPERATURE_MAX 60
 #define EMS_BOILER_TAPWATER_TEMPERATURE_MIN 30
 
@@ -443,24 +443,17 @@ typedef struct {
 } _EMS_Type;
 
 typedef enum : uint8_t {
-    THERMOSTAT_TEMP_MODE_AUTO = 0,
-    THERMOSTAT_TEMP_MODE_NIGHT,
-    THERMOSTAT_TEMP_MODE_DAY,
-    THERMOSTAT_TEMP_MODE_HOLIDAY,
-    THERMOSTAT_TEMP_MODE_NOFROST,
-    THERMOSTAT_TEMP_MODE_ECO, // 'sparen'
-    THERMOSTAT_TEMP_MODE_HEAT // 'heizen'
-} _THERMOSTAT_TEMP_MODE;
-
-typedef enum {
-    EMS_THERMOSTAT_MODE_UNKNOWN,
+    EMS_THERMOSTAT_MODE_UNKNOWN = 0,
     EMS_THERMOSTAT_MODE_OFF,
     EMS_THERMOSTAT_MODE_MANUAL,
     EMS_THERMOSTAT_MODE_AUTO,
+    EMS_THERMOSTAT_MODE_HEAT, // 'heizen'
     EMS_THERMOSTAT_MODE_NIGHT,
     EMS_THERMOSTAT_MODE_DAY,
-    EMS_THERMOSTAT_MODE_ECO,
-    EMS_THERMOSTAT_MODE_COMFORT
+    EMS_THERMOSTAT_MODE_ECO, // 'sparen'
+    EMS_THERMOSTAT_MODE_COMFORT,
+    EMS_THERMOSTAT_MODE_HOLIDAY,
+    EMS_THERMOSTAT_MODE_NOFROST
 } _EMS_THERMOSTAT_MODE;
 
 // function definitions
@@ -475,8 +468,9 @@ void    ems_printTxQueue();
 void    ems_testTelegram(uint8_t test_num);
 void    ems_startupTelegrams();
 bool    ems_checkEMSBUSAlive();
-void    ems_setThermostatTemp(float temperature, uint8_t hc, _THERMOSTAT_TEMP_MODE temptype = THERMOSTAT_TEMP_MODE_AUTO);
-void    ems_setThermostatMode(uint8_t mode, uint8_t hc);
+void    ems_setThermostatTemp(float temperature, uint8_t hc, _EMS_THERMOSTAT_MODE temptype = EMS_THERMOSTAT_MODE_AUTO);
+void    ems_setThermostatMode(_EMS_THERMOSTAT_MODE mode, uint8_t hc);
+void    ems_setThermostatMode(const char * mode_s, uint8_t hc);
 void    ems_setWarmWaterTemp(uint8_t temperature);
 void    ems_setFlowTemp(uint8_t temperature);
 void    ems_setWarmWaterActivated(bool activated);

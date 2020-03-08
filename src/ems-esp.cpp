@@ -113,8 +113,8 @@ static const command_t project_cmds[] PROGMEM = {
     {false, "queue", "show current Tx queue"},
     {false, "send XX ...", "send raw telegram data to EMS bus (XX are hex values)"},
     {false, "thermostat read <type ID>", "send read request to the thermostat for heating circuit hc 1-4"},
-    {false, "thermostat temp <degrees> [mode] [hc]", "set current thermostat temperature. mode=0-6 (see wiki), hc=1-4"},
-    {false, "thermostat mode <hc> <mode>", "set mode (0=off, 1=manual, 2=auto) for heating circuit hc 1-4"},
+    {false, "thermostat temp <degrees> [mode] [hc]", "set current thermostat temperature. mode=0-6 (see wiki) for hc=1-4"},
+    {false, "thermostat mode <mode> [hc]", "set mode (manual,auto,heat,day,night,eco,comfort,holiday,nofrost)"},
     {false, "boiler read <type ID>", "send read request to boiler"},
     {false, "boiler wwtemp <degrees>", "set boiler warm water temperature"},
     {false, "boiler wwactive <on | off>", "set boiler warm water on/off"},
@@ -1618,14 +1618,15 @@ void TelnetCommandCallback(uint8_t wc, const char * commandLine) {
                 ok = true;
             } else {
                 // get modevalue and heatingcircuit
-                _THERMOSTAT_TEMP_MODE temp_mode = (_THERMOSTAT_TEMP_MODE)_readIntNumber(); // next parameter is the temp mode type
-                uint8_t               hc        = _readIntNumber();                        // next parameter is the heating circuit
+                _EMS_THERMOSTAT_MODE temp_mode = (_EMS_THERMOSTAT_MODE)_readIntNumber(); // next parameter is the temp mode type
+                uint8_t              hc        = _readIntNumber();                       // next parameter is the heating circuit
                 ems_setThermostatTemp(temp, hc, temp_mode);
                 ok = true;
             }
         } else if (strcmp(second_cmd, "mode") == 0) {
-            uint8_t hc = _readIntNumber(); // next parameter is the heating circuit
-            ems_setThermostatMode(_readIntNumber(), hc);
+            char *  mode_s = _readWord();
+            uint8_t hc     = (wc == 3) ? EMS_THERMOSTAT_DEFAULTHC : _readIntNumber();
+            ems_setThermostatMode(mode_s, hc);
             ok = true;
         } else if (strcmp(second_cmd, "read") == 0) {
             ems_doReadCommand(_readHexNumber(), EMS_Thermostat.device_id);
@@ -1951,13 +1952,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
     hc = _hasHCspecified(TOPIC_THERMOSTAT_CMD_MODE_HA, topic);
     if (hc) {
         if (EMS_Thermostat.hc[hc - 1].active) {
-            if (strncmp(message, "auto", 4) == 0) {
-                ems_setThermostatMode(2, hc);
-            } else if ((strncmp(message, "day", 4) == 0) || (strncmp(message, "manual", 6) == 0) || (strncmp(message, "heat", 4) == 0)) {
-                ems_setThermostatMode(1, hc);
-            } else if ((strncmp(message, "night", 5) == 0) || (strncmp(message, "off", 3) == 0)) {
-                ems_setThermostatMode(0, hc);
-            }
+            ems_setThermostatMode(message, hc);
             return;
         }
     }
@@ -1997,13 +1992,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
                 if (data_cmd == nullptr) {
                     return;
                 }
-                if (strncmp(data_cmd, "auto", 4) == 0) {
-                    ems_setThermostatMode(2, hc);
-                } else if ((strncmp(data_cmd, "day", 4) == 0) || (strncmp(data_cmd, "manual", 6) == 0) || (strncmp(data_cmd, "heat", 4) == 0)) {
-                    ems_setThermostatMode(1, hc);
-                } else if ((strncmp(data_cmd, "night", 5) == 0) || (strncmp(data_cmd, "off", 3) == 0)) {
-                    ems_setThermostatMode(0, hc);
-                }
+                ems_setThermostatMode(data_cmd, hc);
                 return;
             }
         }
@@ -2014,7 +2003,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
             if (EMS_Thermostat.hc[hc - 1].active) {
                 float f = doc["data"];
                 if (f) {
-                    ems_setThermostatTemp(f, hc, THERMOSTAT_TEMP_MODE_NIGHT); // night
+                    ems_setThermostatTemp(f, hc, EMS_THERMOSTAT_MODE_NIGHT); // night
                     return;
                 }
             }
@@ -2026,7 +2015,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
             if (EMS_Thermostat.hc[hc - 1].active) {
                 float f = doc["data"];
                 if (f) {
-                    ems_setThermostatTemp(f, hc, THERMOSTAT_TEMP_MODE_DAY); // day
+                    ems_setThermostatTemp(f, hc, EMS_THERMOSTAT_MODE_DAY); // day
                 }
                 return;
             }
@@ -2038,7 +2027,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
             if (EMS_Thermostat.hc[hc - 1].active) {
                 float f = doc["data"];
                 if (f) {
-                    ems_setThermostatTemp(f, hc, THERMOSTAT_TEMP_MODE_HOLIDAY); // holiday
+                    ems_setThermostatTemp(f, hc, EMS_THERMOSTAT_MODE_HOLIDAY); // holiday
                 }
                 return;
             }
@@ -2050,7 +2039,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
             if (EMS_Thermostat.hc[hc - 1].active) {
                 float f = doc["data"];
                 if (f) {
-                    ems_setThermostatTemp(f, hc, THERMOSTAT_TEMP_MODE_ECO); // holiday
+                    ems_setThermostatTemp(f, hc, EMS_THERMOSTAT_MODE_ECO); // holiday
                 }
                 return;
             }
@@ -2062,7 +2051,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
             if (EMS_Thermostat.hc[hc - 1].active) {
                 float f = doc["data"];
                 if (f) {
-                    ems_setThermostatTemp(f, hc, THERMOSTAT_TEMP_MODE_HEAT); // holiday
+                    ems_setThermostatTemp(f, hc, EMS_THERMOSTAT_MODE_HEAT); // holiday
                 }
                 return;
             }
@@ -2074,7 +2063,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
             if (EMS_Thermostat.hc[hc - 1].active) {
                 float f = doc["data"];
                 if (f) {
-                    ems_setThermostatTemp(f, hc, THERMOSTAT_TEMP_MODE_NOFROST); // holiday
+                    ems_setThermostatTemp(f, hc, EMS_THERMOSTAT_MODE_NOFROST); // holiday
                 }
                 return;
             }

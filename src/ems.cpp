@@ -2339,7 +2339,7 @@ void ems_sendRawTelegram(char * telegram) {
  * hc_num is 1 to 4
  * temptype 0=normal, 1=night temp, 2=day temp, 3=holiday temp
  */
-void ems_setThermostatTemp(float temperature, uint8_t hc_num, _THERMOSTAT_TEMP_MODE temptype) {
+void ems_setThermostatTemp(float temperature, uint8_t hc_num, _EMS_THERMOSTAT_MODE temptype) {
     if (!ems_getThermostatEnabled()) {
         myDebug_P(PSTR("Thermostat not online."));
         return;
@@ -2425,17 +2425,17 @@ void ems_setThermostatTemp(float temperature, uint8_t hc_num, _THERMOSTAT_TEMP_M
 
     else if ((model == EMS_DEVICE_FLAG_RC35) || (model == EMS_DEVICE_FLAG_RC30N)) {
         switch (temptype) {
-        case THERMOSTAT_TEMP_MODE_NIGHT: // change the night temp
+        case EMS_THERMOSTAT_MODE_NIGHT: // change the night temp
             EMS_TxTelegram.offset = EMS_OFFSET_RC35Set_temp_night;
             break;
-        case THERMOSTAT_TEMP_MODE_DAY: // change the day temp
+        case EMS_THERMOSTAT_MODE_DAY: // change the day temp
             EMS_TxTelegram.offset = EMS_OFFSET_RC35Set_temp_day;
             break;
-        case THERMOSTAT_TEMP_MODE_HOLIDAY: // change the holiday temp
+        case EMS_THERMOSTAT_MODE_HOLIDAY: // change the holiday temp
             EMS_TxTelegram.offset = EMS_OFFSET_RC35Set_temp_holiday;
             break;
         default:
-        case THERMOSTAT_TEMP_MODE_AUTO: // automatic selection, if no type is defined, we use the standard code
+        case EMS_THERMOSTAT_MODE_AUTO: // automatic selection, if no type is defined, we use the standard code
             if (model == EMS_DEVICE_FLAG_RC35) {
                 EMS_TxTelegram.offset = EMS_OFFSET_RC35Set_seltemp; // https://github.com/proddy/EMS-ESP/issues/310
             } else {
@@ -2468,17 +2468,17 @@ void ems_setThermostatTemp(float temperature, uint8_t hc_num, _THERMOSTAT_TEMP_M
         // see https://github.com/proddy/EMS-ESP/issues/335#issuecomment-593324716)
         if (model == EMS_DEVICE_FLAG_JUNKERS1) {
             switch (temptype) {
-            case THERMOSTAT_TEMP_MODE_NOFROST:
+            case EMS_THERMOSTAT_MODE_NOFROST:
                 EMS_TxTelegram.offset = EMS_OFFSET_JunkersSetMessage_no_frost_temp;
                 break;
-            case THERMOSTAT_TEMP_MODE_NIGHT:
+            case EMS_THERMOSTAT_MODE_NIGHT:
                 EMS_TxTelegram.offset = EMS_OFFSET_JunkersSetMessage_night_temp;
                 break;
-            case THERMOSTAT_TEMP_MODE_DAY:
+            case EMS_THERMOSTAT_MODE_DAY:
                 EMS_TxTelegram.offset = EMS_OFFSET_JunkersSetMessage_day_temp;
                 break;
             default:
-            case THERMOSTAT_TEMP_MODE_AUTO: // automatic selection, if no type is defined, we use the standard code
+            case EMS_THERMOSTAT_MODE_AUTO: // automatic selection, if no type is defined, we use the standard code
                 EMS_TxTelegram.offset =
                     (EMS_Thermostat.hc[hc_num - 1].mode_type == 0) ? EMS_OFFSET_JunkersSetMessage_night_temp : EMS_OFFSET_JunkersSetMessage_day_temp;
                 break;
@@ -2488,14 +2488,14 @@ void ems_setThermostatTemp(float temperature, uint8_t hc_num, _THERMOSTAT_TEMP_M
         } else {
             // EMS_DEVICE_FLAG_JUNKERS2
             switch (temptype) {
-            case THERMOSTAT_TEMP_MODE_NOFROST:
+            case EMS_THERMOSTAT_MODE_NOFROST:
                 EMS_TxTelegram.offset = EMS_OFFSET_JunkersSetMessage2_no_frost_temp;
                 break;
-            case THERMOSTAT_TEMP_MODE_ECO:
+            case EMS_THERMOSTAT_MODE_ECO:
                 EMS_TxTelegram.offset = EMS_OFFSET_JunkersSetMessage2_eco_temp;
                 break;
             default:
-            case THERMOSTAT_TEMP_MODE_HEAT:
+            case EMS_THERMOSTAT_MODE_HEAT:
                 EMS_TxTelegram.offset = EMS_OFFSET_JunkersSetMessage3_heat;
                 break;
             }
@@ -2515,13 +2515,38 @@ void ems_setThermostatTemp(float temperature, uint8_t hc_num, _THERMOSTAT_TEMP_M
     EMS_TxQueue.push(EMS_TxTelegram);
 }
 
+// wrapper for setting thermostat mode, taking a string as an argument
+void ems_setThermostatMode(const char * mode_s, uint8_t hc_num) {
+    if (strncmp(mode_s, "auto", 4) == 0) {
+        ems_setThermostatMode(EMS_THERMOSTAT_MODE_AUTO, hc_num);
+    } else if (strncmp(mode_s, "day", 3) == 0) {
+        ems_setThermostatMode(EMS_THERMOSTAT_MODE_DAY, hc_num);
+    } else if (strncmp(mode_s, "manual", 6) == 0) {
+        ems_setThermostatMode(EMS_THERMOSTAT_MODE_MANUAL, hc_num);
+    } else if (strncmp(mode_s, "heat", 4) == 0) {
+        ems_setThermostatMode(EMS_THERMOSTAT_MODE_HEAT, hc_num);
+    } else if (strncmp(mode_s, "night", 5) == 0) {
+        ems_setThermostatMode(EMS_THERMOSTAT_MODE_NIGHT, hc_num);
+    } else if (strncmp(mode_s, "off", 3) == 0) {
+        ems_setThermostatMode(EMS_THERMOSTAT_MODE_OFF, hc_num);
+    } else if (strncmp(mode_s, "comfort", 7) == 0) {
+        ems_setThermostatMode(EMS_THERMOSTAT_MODE_COMFORT, hc_num);
+    } else if (strncmp(mode_s, "holiday", 7) == 0) {
+        ems_setThermostatMode(EMS_THERMOSTAT_MODE_HOLIDAY, hc_num);
+    } else if (strncmp(mode_s, "nofrost", 7) == 0) {
+        ems_setThermostatMode(EMS_THERMOSTAT_MODE_NOFROST, hc_num);
+    } else if (strncmp(mode_s, "eco", 3) == 0) {
+        ems_setThermostatMode(EMS_THERMOSTAT_MODE_ECO, hc_num);
+    }
+}
+
 /**
  * Set the thermostat working mode
  *  0xA8 on a RC20 and 0xA7 on RC30
  *  0x01B9 for EMS+ 300/1000/3000, Auto=0xFF Manual=0x00. See https://github.com/proddy/EMS-ESP/wiki/RC3xx-Thermostats
  *  hc_num is 1 to 4
  */
-void ems_setThermostatMode(uint8_t mode, uint8_t hc_num) {
+void ems_setThermostatMode(_EMS_THERMOSTAT_MODE mode, uint8_t hc_num) {
     if (!ems_getThermostatEnabled()) {
         myDebug_P(PSTR("Thermostat not online."));
         return;
@@ -2537,28 +2562,85 @@ void ems_setThermostatMode(uint8_t mode, uint8_t hc_num) {
         return;
     }
 
-    uint8_t model     = ems_getThermostatFlags();
-    uint8_t device_id = EMS_Thermostat.device_id;
-    uint8_t set_mode;
-
-    // RC300/1000/3000 have different settings
-    if ((model == EMS_DEVICE_FLAG_RC300) || (model == EMS_DEVICE_FLAG_RC100)) {
-        if (mode == 1) {
-            set_mode = 0; // manual
+    // set the value to send via EMS depending on the mode type
+    uint8_t set_mode_value = 0x02; // default is 2 which is usually auto
+    char    mode_str[20];
+    switch (mode) {
+    case EMS_THERMOSTAT_MODE_AUTO:
+        strlcpy(mode_str, "auto", sizeof(mode_str));
+        set_mode_value = 2;
+        break;
+    case EMS_THERMOSTAT_MODE_NIGHT:
+        strlcpy(mode_str, "night", sizeof(mode_str));
+        set_mode_value = 0;
+        break;
+    case EMS_THERMOSTAT_MODE_DAY:
+        strlcpy(mode_str, "day", sizeof(mode_str));
+        set_mode_value = 1;
+        break;
+    case EMS_THERMOSTAT_MODE_HOLIDAY:
+        strlcpy(mode_str, "holiday", sizeof(mode_str));
+        set_mode_value = 2; // auto
+        break;
+    case EMS_THERMOSTAT_MODE_NOFROST:
+        strlcpy(mode_str, "nofrost", sizeof(mode_str));
+        set_mode_value = 1;
+        break;
+    case EMS_THERMOSTAT_MODE_ECO:
+        strlcpy(mode_str, "eco", sizeof(mode_str));
+        set_mode_value = 2; // same as auto
+        break;
+    case EMS_THERMOSTAT_MODE_HEAT:
+        strlcpy(mode_str, "heat", sizeof(mode_str));
+        set_mode_value = 1;
+        break;
+    case EMS_THERMOSTAT_MODE_OFF:
+        strlcpy(mode_str, "off", sizeof(mode_str));
+        set_mode_value = 0;
+        break;
+    case EMS_THERMOSTAT_MODE_MANUAL:
+        strlcpy(mode_str, "manual", sizeof(mode_str));
+        set_mode_value = 1;
+        break;
+    case EMS_THERMOSTAT_MODE_UNKNOWN:
+    default:
+        strlcpy(mode_str, "unknown", sizeof(mode_str));
+        set_mode_value = 2; // auto
+        break;
+    }
+    
+    // now override the mode value setting depending on the thermostat type
+    // handle the different mode values to send per thermostat type
+    uint8_t model = ems_getThermostatFlags();
+    switch (model) {
+    case EMS_DEVICE_FLAG_RC300:
+    case EMS_DEVICE_FLAG_RC100:
+        if (mode == EMS_THERMOSTAT_MODE_AUTO) {
+            set_mode_value = 0xFF; // special value for auto
         } else {
-            set_mode = 0xFF; // auto
+            set_mode_value = 0; // everything else, like manual/day etc..
         }
-    } else {
-        set_mode = mode;
+        break;
+    case EMS_DEVICE_FLAG_JUNKERS1:
+    case EMS_DEVICE_FLAG_JUNKERS2:
+        if (mode == EMS_THERMOSTAT_MODE_NOFROST) {
+            set_mode_value = 0x01;
+        } else if (mode == EMS_THERMOSTAT_MODE_ECO) {
+            set_mode_value = 0x02;
+        } else if ((mode == EMS_THERMOSTAT_MODE_DAY) || (mode == EMS_THERMOSTAT_MODE_HEAT)) {
+            set_mode_value = 0x03; // comfort
+        } else if (mode == EMS_THERMOSTAT_MODE_AUTO) {
+            set_mode_value = 0x04;
+        }
+        break;
+    default:
+        break;
     }
 
-    // 0=off, 1=manual, 2=auto
-    if (mode == 0) {
-        myDebug_P(PSTR("Setting thermostat mode to off for heating circuit %d"), hc_num);
-    } else if (set_mode == 1) {
-        myDebug_P(PSTR("Setting thermostat mode to manual for heating circuit %d"), hc_num);
-    } else if (set_mode == 2) {
-        myDebug_P(PSTR("Setting thermostat mode to auto for heating circuit %d"), hc_num);
+    if (hc_num == 1) {
+        myDebug_P(PSTR("Setting thermostat mode to %s"), mode_str);
+    } else {
+        myDebug_P(PSTR("Setting thermostat mode to %s for heating circuit %d"), mode_str, hc_num);
     }
 
     _EMS_TxTelegram EMS_TxTelegram = EMS_TX_TELEGRAM_NEW; // create new Tx
@@ -2566,9 +2648,9 @@ void ems_setThermostatMode(uint8_t mode, uint8_t hc_num) {
     EMS_Sys_Status.txRetryCount    = 0;                   // reset retry counter
 
     EMS_TxTelegram.action    = EMS_TX_TELEGRAM_WRITE;
-    EMS_TxTelegram.dest      = device_id;
+    EMS_TxTelegram.dest      = EMS_Thermostat.device_id;
     EMS_TxTelegram.length    = EMS_MIN_TELEGRAM_LENGTH;
-    EMS_TxTelegram.dataValue = set_mode;
+    EMS_TxTelegram.dataValue = set_mode_value;
 
     // handle different thermostat types
     if (model == EMS_DEVICE_FLAG_RC20) {
@@ -2602,11 +2684,13 @@ void ems_setThermostatMode(uint8_t mode, uint8_t hc_num) {
 
         // Junkers
     } else if (model == EMS_DEVICE_FLAG_JUNKERS1) {
+        EMS_TxTelegram.emsplus            = true; // Assuming here that all Junkers use EMS+
         EMS_TxTelegram.type               = EMS_TYPE_JunkersSetMessage1_HC1 + hc_num - 1;
         EMS_TxTelegram.comparisonPostRead = EMS_TYPE_JunkersStatusMessage_HC1;
         EMS_TxTelegram.offset             = EMS_OFFSET_JunkersSetMessage_set_mode;
         EMS_TxTelegram.type_validate      = EMS_TxTelegram.type;
     } else if (model == EMS_DEVICE_FLAG_JUNKERS2) {
+        EMS_TxTelegram.emsplus            = true; // Assuming here that all Junkers use EMS+
         EMS_TxTelegram.type               = EMS_TYPE_JunkersSetMessage2_HC1 + hc_num - 1;
         EMS_TxTelegram.comparisonPostRead = EMS_TYPE_JunkersStatusMessage_HC1;
         EMS_TxTelegram.offset             = EMS_OFFSET_JunkersSetMessage_set_mode;
