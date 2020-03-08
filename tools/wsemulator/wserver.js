@@ -161,8 +161,7 @@ function sendCustomStatus() {
             "b2": "off",
             "b3": 0,
             "b4": 53,
-            "b5": 54.4,
-            "b6": 53.3
+            "b5": 54.4
         },
 
         "sm": {

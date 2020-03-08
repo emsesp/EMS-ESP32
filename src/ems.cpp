@@ -180,7 +180,9 @@ void ems_init() {
     EMS_Boiler.switchTemp  = EMS_VALUE_USHORT_NOTSET;
 
     // UBAMonitorWWMessage
+    EMS_Boiler.wWSetTmp        = EMS_VALUE_INT_NOTSET;    // Warm Water set temperature
     EMS_Boiler.wWCurTmp        = EMS_VALUE_USHORT_NOTSET; // Warm Water current temperature
+    EMS_Boiler.wWCurTmp2       = EMS_VALUE_USHORT_NOTSET; // Warm Water current temperature storage
     EMS_Boiler.wWStarts        = EMS_VALUE_LONG_NOTSET;   // Warm Water # starts
     EMS_Boiler.wWWorkM         = EMS_VALUE_LONG_NOTSET;   // Warm Water # minutes
     EMS_Boiler.wWOneTime       = EMS_VALUE_INT_NOTSET;    // Warm Water one time function on/off
@@ -989,15 +991,17 @@ void _process_UBAParametersMessage(_EMS_RxTelegram * EMS_RxTelegram) {
  * received every 10 seconds
  */
 void _process_UBAMonitorWWMessage(_EMS_RxTelegram * EMS_RxTelegram) {
+    _setValue(EMS_RxTelegram, &EMS_Boiler.wWSetTmp, 0);
     _setValue(EMS_RxTelegram, &EMS_Boiler.wWCurTmp, 1);
-    _setValue(EMS_RxTelegram, &EMS_Boiler.wWStarts, 13);
+    _setValue(EMS_RxTelegram, &EMS_Boiler.wWCurTmp2, 3);
+    _setValue(EMS_RxTelegram, &EMS_Boiler.wWCurFlow, 9);
     _setValue(EMS_RxTelegram, &EMS_Boiler.wWWorkM, 10);
+    _setValue(EMS_RxTelegram, &EMS_Boiler.wWStarts, 13);
     _setValue(EMS_RxTelegram, &EMS_Boiler.wWOneTime, 5, 1);
     _setValue(EMS_RxTelegram, &EMS_Boiler.wWDesinfecting, 5, 2);
     _setValue(EMS_RxTelegram, &EMS_Boiler.wWReadiness, 5, 3);
     _setValue(EMS_RxTelegram, &EMS_Boiler.wWRecharging, 5, 4);
     _setValue(EMS_RxTelegram, &EMS_Boiler.wWTemperatureOK, 5, 5);
-    _setValue(EMS_RxTelegram, &EMS_Boiler.wWCurFlow, 9);
 }
 
 /**
@@ -2608,7 +2612,7 @@ void ems_setThermostatMode(_EMS_THERMOSTAT_MODE mode, uint8_t hc_num) {
         set_mode_value = 2; // auto
         break;
     }
-    
+
     // now override the mode value setting depending on the thermostat type
     // handle the different mode values to send per thermostat type
     uint8_t model = ems_getThermostatFlags();

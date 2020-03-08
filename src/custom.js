@@ -122,7 +122,6 @@ function listCustomStats() {
         document.getElementById("b3").innerHTML = ajaxobj.boiler.b3 + " &#8451;";
         document.getElementById("b4").innerHTML = ajaxobj.boiler.b4 + " &#8451;";
         document.getElementById("b5").innerHTML = ajaxobj.boiler.b5 + " &#8451;";
-        document.getElementById("b6").innerHTML = ajaxobj.boiler.b6 + " &#8451;";
     } else {
         document.getElementById("boiler_show").style.display = "none";
     }

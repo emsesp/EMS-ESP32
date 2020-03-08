@@ -322,7 +322,11 @@ void showInfo() {
         _renderBoolValue("Warm Water circulation active", EMS_Boiler.wWCirc);
 
         // UBAMonitorWWMessage
+        _renderIntValue("Warm Water set temperature", "C", EMS_Boiler.wWSetTmp);
         _renderUShortValue("Warm Water current temperature", "C", EMS_Boiler.wWCurTmp);
+        _renderUShortValue("Warm water temperature (intern)", "C", EMS_Boiler.wwStorageTemp1);
+        _renderUShortValue("Warm water temperature (extern)", "C", EMS_Boiler.wwStorageTemp2);
+        _renderUShortValue("Warm Water current temperature (extern)", "C", EMS_Boiler.wWCurTmp2);
         _renderIntValue("Warm Water current tap water flow", "l/min", EMS_Boiler.wWCurFlow, 10);
         _renderLongValue("Warm Water # starts", "times", EMS_Boiler.wWStarts);
         if (EMS_Boiler.wWWorkM != EMS_VALUE_LONG_NOTSET) {
@@ -336,6 +340,7 @@ void showInfo() {
         // UBAMonitorFast
         _renderIntValue("Selected flow temperature", "C", EMS_Boiler.selFlowTemp);
         _renderUShortValue("Current flow temperature", "C", EMS_Boiler.curFlowTemp);
+        _renderUShortValue("Max boiler temperature", "C", EMS_Boiler.boilTemp);
         _renderUShortValue("Return temperature", "C", EMS_Boiler.retTemp);
         _renderBoolValue("Gas", EMS_Boiler.burnGas);
         _renderBoolValue("Boiler pump", EMS_Boiler.heatPmp);
@@ -361,9 +366,6 @@ void showInfo() {
         if (EMS_Boiler.extTemp > EMS_VALUE_SHORT_NOTSET) {
             _renderShortValue("Outside temperature", "C", EMS_Boiler.extTemp);
         }
-        _renderUShortValue("Boiler temperature", "C", EMS_Boiler.boilTemp);
-        _renderUShortValue("Warm water storage temperature1", "C", EMS_Boiler.wwStorageTemp1);
-        _renderUShortValue("Warm water storage temperature2", "C", EMS_Boiler.wwStorageTemp2);
 
         _renderUShortValue("Exhaust temperature", "C", EMS_Boiler.exhaustTemp);
         _renderIntValue("Pump modulation", "%", EMS_Boiler.pumpMod);
@@ -2191,17 +2193,17 @@ void WebCallback(JsonObject root) {
         boiler["b1"] = (EMS_Boiler.tapwaterActive ? "running" : "off");
         boiler["b2"] = (EMS_Boiler.heatingActive ? "active" : "off");
 
-        if (EMS_Boiler.selFlowTemp != EMS_VALUE_INT_NOTSET)
+        if (EMS_Boiler.selFlowTemp != EMS_VALUE_INT_NOTSET) {
             boiler["b3"] = EMS_Boiler.selFlowTemp;
+        }
 
-        if (EMS_Boiler.curFlowTemp != EMS_VALUE_INT_NOTSET)
+        if (EMS_Boiler.curFlowTemp != EMS_VALUE_INT_NOTSET) {
             boiler["b4"] = EMS_Boiler.curFlowTemp / 10;
+        }
 
-        if (EMS_Boiler.boilTemp < EMS_VALUE_USHORT_NOTSET)
-            boiler["b5"] = (float)EMS_Boiler.boilTemp / 10;
-
-        if (EMS_Boiler.retTemp < EMS_VALUE_USHORT_NOTSET)
-            boiler["b6"] = (float)EMS_Boiler.retTemp / 10;
+        if (EMS_Boiler.wWCurTmp < EMS_VALUE_USHORT_NOTSET) {
+            boiler["b5"] = (float)EMS_Boiler.wWCurTmp / 10;
+        }
 
     } else {
         boiler["ok"] = false;

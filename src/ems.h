@@ -316,7 +316,9 @@ typedef struct {
     uint16_t switchTemp;  // Switch temperature
 
     // UBAMonitorWWMessage
+    uint8_t  wWSetTmp;        // set temp WW (DHW)
     uint16_t wWCurTmp;        // Warm Water current temperature
+    uint16_t wWCurTmp2;       // Warm Water current temperature storage
     uint32_t wWStarts;        // Warm Water # starts
     uint32_t wWWorkM;         // Warm Water # minutes
     uint8_t  wWOneTime;       // Warm Water one time function on/off
