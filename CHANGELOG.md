@@ -35,6 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `mqttlog` console command renamed to `mqttqueue` to only show the current publish queue
 - `status` payload on start-up shows the IP and Version of EMS-ESP
 - `thermostat mode` takes a string like manual,auto,heat,day,night,eco,comfort,holiday,nofrost
+- `thermostat temp` also takes a mode string, e.g. `thermostat temp 20 heat`
 
 ### Removed
  - `autodetect scan`

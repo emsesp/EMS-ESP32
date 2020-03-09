@@ -113,7 +113,7 @@ static const command_t project_cmds[] PROGMEM = {
     {false, "queue", "show current Tx queue"},
     {false, "send XX ...", "send raw telegram data to EMS bus (XX are hex values)"},
     {false, "thermostat read <type ID>", "send read request to the thermostat for heating circuit hc 1-4"},
-    {false, "thermostat temp <degrees> [mode] [hc]", "set current thermostat temperature. mode=0-6 (see wiki) for hc=1-4"},
+    {false, "thermostat temp <degrees> [mode] [hc]", "set thermostat temperature. mode is manual,auto,heat,day,night,eco,comfort,holiday,nofrost"},
     {false, "thermostat mode <mode> [hc]", "set mode (manual,auto,heat,day,night,eco,comfort,holiday,nofrost)"},
     {false, "boiler read <type ID>", "send read request to boiler"},
     {false, "boiler wwtemp <degrees>", "set boiler warm water temperature"},
@@ -1616,13 +1616,13 @@ void TelnetCommandCallback(uint8_t wc, const char * commandLine) {
 
             if (wc == 3) {
                 // no more params
-                ems_setThermostatTemp(temp, EMS_THERMOSTAT_DEFAULTHC);
+                ems_setThermostatTemp(temp, EMS_THERMOSTAT_DEFAULTHC, EMS_THERMOSTAT_MODE_AUTO);
                 ok = true;
             } else {
                 // get modevalue and heatingcircuit
-                _EMS_THERMOSTAT_MODE temp_mode = (_EMS_THERMOSTAT_MODE)_readIntNumber(); // next parameter is the temp mode type
-                uint8_t              hc        = _readIntNumber();                       // next parameter is the heating circuit
-                ems_setThermostatTemp(temp, hc, temp_mode);
+                char *  mode_s = _readWord(); // get mode string next
+                uint8_t hc     = (wc == 4) ? EMS_THERMOSTAT_DEFAULTHC : _readIntNumber();
+                ems_setThermostatTemp(temp, hc, mode_s);
                 ok = true;
             }
         } else if (strcmp(second_cmd, "mode") == 0) {
@@ -1943,7 +1943,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
         if (EMS_Thermostat.hc[hc - 1].active) {
             float f = strtof((char *)message, 0);
             if (f) {
-                ems_setThermostatTemp(f, hc);
+                ems_setThermostatTemp(f, hc, EMS_THERMOSTAT_MODE_AUTO);
                 publishEMSValues(true); // publish back immediately
                 return;
             }
@@ -1979,7 +1979,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
             if (EMS_Thermostat.hc[hc - 1].active) {
                 float f = doc["data"];
                 if (f) {
-                    ems_setThermostatTemp(f, hc);
+                    ems_setThermostatTemp(f, hc, EMS_THERMOSTAT_MODE_AUTO);
                     publishEMSValues(true); // publish back immediately
                     return;
                 }
