@@ -798,8 +798,8 @@ bool publishEMSValues_boiler() {
     // last_boilerActive stores heating in bit 1 and tap water in bit 2
     static uint8_t last_boilerActive = 0xFF; // for remembering last setting of the tap water or heating on/off
     if (last_boilerActive != ((EMS_Boiler.tapwaterActive << 1) + EMS_Boiler.heatingActive)) {
-        myESP.mqttPublish(TOPIC_BOILER_TAPWATER_ACTIVE, EMS_Boiler.tapwaterActive == 1 ? "1" : "0");
-        myESP.mqttPublish(TOPIC_BOILER_HEATING_ACTIVE, EMS_Boiler.heatingActive == 1 ? "1" : "0");
+        myESP.mqttPublish(TOPIC_BOILER_TAPWATER_ACTIVE, EMS_Boiler.tapwaterActive ? "1" : "0");
+        myESP.mqttPublish(TOPIC_BOILER_HEATING_ACTIVE, EMS_Boiler.heatingActive ? "1" : "0");
         last_boilerActive = ((EMS_Boiler.tapwaterActive << 1) + EMS_Boiler.heatingActive); // remember last state
     }
 
@@ -1908,9 +1908,9 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
 
     // wwOneTime
     if (strcmp(topic, TOPIC_BOILER_CMD_WWONETIME) == 0) {
-        if (message[0] == '1' || strcmp(message, "on") == 0) {
+        if (message[0] == MYESP_MQTT_PAYLOAD_ON || strcmp(message, "on") == 0) {
             ems_setWarmWaterOnetime(true);
-        } else if (message[0] == '0' || strcmp(message, "off") == 0) {
+        } else if (message[0] == MYESP_MQTT_PAYLOAD_OFF || strcmp(message, "off") == 0) {
             ems_setWarmWaterOnetime(false);
         }
         return;
@@ -1918,9 +1918,9 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
 
     // wwCirculation
     if (strcmp(topic, TOPIC_BOILER_CMD_WWCIRCULATION) == 0) {
-        if (message[0] == '1' || strcmp(message, "on") == 0) {
+        if (message[0] == MYESP_MQTT_PAYLOAD_ON || strcmp(message, "on") == 0) {
             ems_setWarmWaterCirculation(true);
-        } else if (message[0] == '0' || strcmp(message, "off") == 0) {
+        } else if (message[0] == MYESP_MQTT_PAYLOAD_OFF || strcmp(message, "off") == 0) {
             ems_setWarmWaterCirculation(false);
         }
         return;

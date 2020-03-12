@@ -9,7 +9,7 @@
 #ifndef MyESP_h
 #define MyESP_h
 
-#define MYESP_VERSION "1.2.35"
+#define MYESP_VERSION "1.2.36"
 
 #include <ArduinoJson.h>
 #include <ArduinoOTA.h>
@@ -347,6 +347,7 @@ class MyESP {
     void            _printMQTTQueue();
     void            _mqttPublishQueue();
     void            _mqttRemoveLastPublish();
+    void            _sendStartTopic();
     AsyncMqttClient mqttClient; // the MQTT class
     uint32_t        _mqtt_reconnect_delay;
     mqtt_callback_f _mqtt_callback_f;
