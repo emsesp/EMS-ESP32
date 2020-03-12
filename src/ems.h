@@ -29,11 +29,11 @@
 #define EMS_VALUE_BOOL_ON 0x01         // boolean true
 #define EMS_VALUE_BOOL_ON2 0xFF        // boolean true, EMS sometimes uses 0xFF for TRUE
 #define EMS_VALUE_BOOL_OFF 0x00        // boolean false
+#define EMS_VALUE_BOOL_NOTSET 0xFE     // random number that's not 0, 1 or FF
 #define EMS_VALUE_INT_NOTSET 0xFF      // for 8-bit unsigned ints/bytes
 #define EMS_VALUE_SHORT_NOTSET -32000  // was -32768 for 2-byte signed shorts
 #define EMS_VALUE_USHORT_NOTSET 32000  // was 0x8000 for 2-byte unsigned shorts
 #define EMS_VALUE_LONG_NOTSET 0xFFFFFF // for 3-byte longs
-#define EMS_VALUE_BOOL_NOTSET 0xFE     // random number that's not 0, 1 or FF
 
 // thermostat specific
 #define EMS_THERMOSTAT_MAXHC 4     // max number of heating circuits
@@ -69,7 +69,7 @@ enum EMS_DEVICE_FLAG_TYPES : uint8_t {
 
 // trigger settings to determine if hot tap water or the heating is active
 #define EMS_BOILER_BURNPOWER_TAPWATER 100
-#define EMS_BOILER_SELFLOWTEMP_HEATING 30 // was 70, changed to 30 for https://github.com/proddy/EMS-ESP/issues/193
+#define EMS_BOILER_SELFLOWTEMP_HEATING 20 // was originally 70, changed to 30 for issue #193, then to 20 with issue #344
 
 // define min & maximum setable tapwater temperatures
 #define EMS_BOILER_TAPWATER_TEMPERATURE_MAX 60
