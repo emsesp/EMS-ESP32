@@ -971,7 +971,7 @@ bool publishEMSValues_thermostat() {
 
 // publish Settings parameters via MQTT
 bool publishEMSValues_settings() {
-    const size_t        capacity = JSON_OBJECT_SIZE(5); // must recalculate if more objects added https://arduinojson.org/v6/assistant/
+    const size_t        capacity = JSON_OBJECT_SIZE(6); // must recalculate if more objects added https://arduinojson.org/v6/assistant/
     DynamicJsonDocument doc(capacity);
     JsonObject          rootSettings = doc.to<JsonObject>();
 
