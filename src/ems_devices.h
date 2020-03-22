@@ -52,6 +52,34 @@
 
 #define EMS_OFFSET_UBASetPoints_flowtemp 0 // flow temp
 
+// Installation settings
+#define EMS_TYPE_IBASettingsMessage 0xA5                 // installation settings
+#define EMS_OFFSET_IBASettings_Display 0                 // display
+#define EMS_OFFSET_IBASettings_Language 1                // language
+#define EMS_OFFSET_IBASettings_MinExtTemp 5              // min. ext. temperature
+#define EMS_OFFSET_IBASettings_Building 6                // building
+#define EMS_OFFSET_IBASettings_CalIntTemp 2              // cal. int. temperature
+#define EMS_OFFSET_IBASettings_ClockOffset 12            // clock offset
+
+#define EMS_VALUE_IBASettings_LANG_GERMAN 0
+#define EMS_VALUE_IBASettings_LANG_DUTCH 1
+#define EMS_VALUE_IBASettings_LANG_FRENCH 2
+#define EMS_VALUE_IBASettings_LANG_ITALIAN 3
+
+#define EMS_VALUE_IBASettings_BUILDING_LIGHT 0
+#define EMS_VALUE_IBASettings_BUILDING_MEDIUM 1
+#define EMS_VALUE_IBASettings_BUILDING_HEAVY 2
+
+#define EMS_VALUE_IBASettings_DISPLAY_INTTEMP 0
+#define EMS_VALUE_IBASettings_DISPLAY_INTSETPOINT 1
+#define EMS_VALUE_IBASettings_DISPLAY_EXTTEMP 2
+#define EMS_VALUE_IBASettings_DISPLAY_BURNERTEMP 3
+#define EMS_VALUE_IBASettings_DISPLAY_WWTEMP 4
+#define EMS_VALUE_IBASettings_DISPLAY_FUNCMODE 5
+#define EMS_VALUE_IBASettings_DISPLAY_TIME 6
+#define EMS_VALUE_IBASettings_DISPLAY_DATE 7
+#define EMS_VALUE_IBASettings_DISPLAY_SMOKETEMP 9
+
 // Mixing Modules
 // MM100/MM200 (EMS Plus)
 #define EMS_TYPE_MMPLUSStatusMessage_HC1 0x01D7          // mixing status HC1
@@ -66,6 +94,7 @@
 #define EMS_OFFSET_MMPLUSStatusMessage_WW_flow_temp 0    // flow temperature
 #define EMS_OFFSET_MMPLUSStatusMessage_WW_pump_mod 2     // pump on 6, off 0
 #define EMS_OFFSET_MMPLUSStatusMessage_WW_temp_status 11 // 0,1,2
+
 // MM10
 #define EMS_TYPE_MMStatusMessage 0xAB             // mixing status
 #define EMS_OFFSET_MMStatusMessage_flow_set 0     // flow setpoint

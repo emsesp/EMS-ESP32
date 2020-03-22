@@ -59,6 +59,14 @@
 #define TOPIC_BOILER_CMD_COMFORT "comfort"                        // ww comfort setting via MQTT
 #define TOPIC_BOILER_CMD_FLOWTEMP "flowtemp"                      // flowtemp value via MQTT
 
+// MQTT for settings
+#define TOPIC_SETTINGS_DATA "settings_data"                 // for sending settings values to MQTT
+#define TOPIC_SETTINGS_CMD "settings_cmd"                   // for receiving settings commands via MQTT
+#define TOPIC_SETTINGS_CMD_DISPLAY "display"        // change display
+#define TOPIC_SETTINGS_CMD_LANGUAGE "language"      // change language
+#define TOPIC_SETTINGS_CMD_BUILDING "building"      // change building
+#define TOPIC_SETTINGS_CMD_MINEXTTEMP "minextTemp"  // change min. ext. temp.
+
 // MQTT for mixing device
 #define TOPIC_MIXING_DATA "mixing_data" // for sending mixing device values to MQTT
 

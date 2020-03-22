@@ -45,6 +45,9 @@ Ticker systemCheckTimer;
 #define REGULARUPDATES_TIME 60 // every minute a call is made to fetch data from EMS devices manually
 Ticker regularUpdatesTimer;
 
+#define DAILYUPDATES_TIME 86400 // every day a call is made to fetch data from EMS devices manually
+Ticker dailyUpdatesTimer;
+
 #define LEDCHECK_TIME 500 // every 1/2 second blink the heartbeat LED
 Ticker ledcheckTimer;
 
@@ -433,6 +436,58 @@ void showInfo() {
             myDebug_P(PSTR("  Thermostat time is %s"), EMS_Thermostat.datetime);
         }
 
+        // settings parameters
+        if (EMS_Thermostat.ibaMainDisplay != EMS_VALUE_INT_NOTSET) {
+            if (EMS_Thermostat.ibaMainDisplay == EMS_VALUE_IBASettings_DISPLAY_INTTEMP) {
+                myDebug_P(PSTR("  Display: internal temperature"));
+            } else if (EMS_Thermostat.ibaMainDisplay == EMS_VALUE_IBASettings_DISPLAY_INTSETPOINT) {
+                myDebug_P(PSTR("  Display: internal setpoint"));
+            } else if (EMS_Thermostat.ibaMainDisplay == EMS_VALUE_IBASettings_DISPLAY_EXTTEMP) {
+                myDebug_P(PSTR("  Display: external temperature"));
+            } else if (EMS_Thermostat.ibaMainDisplay == EMS_VALUE_IBASettings_DISPLAY_BURNERTEMP) {
+                myDebug_P(PSTR("  Display: burner temperature"));
+            } else if (EMS_Thermostat.ibaMainDisplay == EMS_VALUE_IBASettings_DISPLAY_WWTEMP) {
+                myDebug_P(PSTR("  Display: WW temperature"));
+            } else if (EMS_Thermostat.ibaMainDisplay == EMS_VALUE_IBASettings_DISPLAY_FUNCMODE) {
+                myDebug_P(PSTR("  Display: functioning mode"));
+            } else if (EMS_Thermostat.ibaMainDisplay == EMS_VALUE_IBASettings_DISPLAY_TIME) {
+                myDebug_P(PSTR("  Display: time"));
+            } else if (EMS_Thermostat.ibaMainDisplay == EMS_VALUE_IBASettings_DISPLAY_DATE) {
+                myDebug_P(PSTR("  Display: date"));
+            } else if (EMS_Thermostat.ibaMainDisplay == EMS_VALUE_IBASettings_DISPLAY_SMOKETEMP) {
+                myDebug_P(PSTR("  Display: smoke temperature"));
+            }
+        }
+        if (EMS_Thermostat.ibaLanguage != EMS_VALUE_INT_NOTSET) {
+            if (EMS_Thermostat.ibaLanguage == EMS_VALUE_IBASettings_LANG_GERMAN) {
+                myDebug_P(PSTR("  Language: German"));
+            } else if (EMS_Thermostat.ibaLanguage == EMS_VALUE_IBASettings_LANG_DUTCH) {
+                myDebug_P(PSTR("  Language: Dutch"));
+            } else if (EMS_Thermostat.ibaLanguage == EMS_VALUE_IBASettings_LANG_FRENCH) {
+                myDebug_P(PSTR("  Language: French"));
+            } else if (EMS_Thermostat.ibaLanguage == EMS_VALUE_IBASettings_LANG_ITALIAN) {
+                myDebug_P(PSTR("  Language: Italian"));
+            }
+        }
+        if (EMS_Thermostat.ibaCalIntTemperature != EMS_VALUE_INT_NOTSET) {
+            _renderIntValue("Offset int. temperature", "K", EMS_Thermostat.ibaCalIntTemperature, 10); // offset int. temperature sensor, by * 0.1 Kelvin
+        }
+        if (EMS_Thermostat.ibaMinExtTemperature != EMS_VALUE_SHORT_NOTSET) {
+            _renderShortValue("Min ext. temperature", "C", EMS_Thermostat.ibaMinExtTemperature, 0);        // min ext temp for heating curve, in deg.
+        }
+        if (EMS_Thermostat.ibaBuildingType != EMS_VALUE_INT_NOTSET) {
+            if (EMS_Thermostat.ibaBuildingType == EMS_VALUE_IBASettings_BUILDING_LIGHT) {
+                myDebug_P(PSTR("  Building: light"));
+            } else if (EMS_Thermostat.ibaBuildingType == EMS_VALUE_IBASettings_BUILDING_MEDIUM) {
+                myDebug_P(PSTR("  Building: medium"));
+            } else if (EMS_Thermostat.ibaBuildingType == EMS_VALUE_IBASettings_BUILDING_HEAVY) {
+                myDebug_P(PSTR("  Building: heavy"));
+            }
+        }
+        if (EMS_Thermostat.ibaClockOffset != EMS_VALUE_INT_NOTSET) {
+            _renderIntValue("Offset clock", "s", EMS_Thermostat.ibaClockOffset);     // offset (in sec) to clock, 0xff = -1 s, 0x02 = 2 s
+        }
+
         uint8_t _m_setpoint, _m_curr;
         switch (model) {
         case EMS_DEVICE_FLAG_EASY:
@@ -580,7 +635,7 @@ void scanDallas() {
 
 // send all dallas sensor values as a JSON package to MQTT
 bool publishSensorValues() {
-    // don't send if MQTT is connected
+    // don't send if MQTT is not connected
     if (!myESP.isMQTTConnected() || (EMSESP_Settings.publish_time == -1)) {
         return false;
     }
@@ -914,6 +969,65 @@ bool publishEMSValues_thermostat() {
     return (has_data);
 }
 
+// publish Settings parameters via MQTT
+bool publishEMSValues_settings() {
+    const size_t        capacity = JSON_OBJECT_SIZE(5); // must recalculate if more objects added https://arduinojson.org/v6/assistant/
+    DynamicJsonDocument doc(capacity);
+    JsonObject          rootSettings = doc.to<JsonObject>();
+
+    if (EMS_Thermostat.ibaMainDisplay != EMS_VALUE_INT_NOTSET) {
+        if (EMS_Thermostat.ibaMainDisplay == EMS_VALUE_IBASettings_DISPLAY_INTTEMP) {
+            rootSettings["display"] = "int. temperature";
+        } else if (EMS_Thermostat.ibaMainDisplay == EMS_VALUE_IBASettings_DISPLAY_INTSETPOINT) {
+            rootSettings["display"] = "int. setpoint";
+        } else if (EMS_Thermostat.ibaMainDisplay == EMS_VALUE_IBASettings_DISPLAY_EXTTEMP) {
+            rootSettings["display"] = "ext. temperature";
+        } else if (EMS_Thermostat.ibaMainDisplay == EMS_VALUE_IBASettings_DISPLAY_BURNERTEMP) {
+            rootSettings["display"] = "burner temperature";
+        } else if (EMS_Thermostat.ibaMainDisplay == EMS_VALUE_IBASettings_DISPLAY_WWTEMP) {
+            rootSettings["display"] = "WW temperature";
+        } else if (EMS_Thermostat.ibaMainDisplay == EMS_VALUE_IBASettings_DISPLAY_FUNCMODE) {
+            rootSettings["display"] = "functioning mode";
+        } else if (EMS_Thermostat.ibaMainDisplay == EMS_VALUE_IBASettings_DISPLAY_TIME) {
+            rootSettings["display"] = "time";
+        } else if (EMS_Thermostat.ibaMainDisplay == EMS_VALUE_IBASettings_DISPLAY_DATE) {
+            rootSettings["display"] = "date";
+        } else if (EMS_Thermostat.ibaMainDisplay == EMS_VALUE_IBASettings_DISPLAY_SMOKETEMP) {
+            rootSettings["display"] = "smoke temperature";
+        }
+    }
+    if (EMS_Thermostat.ibaLanguage != EMS_VALUE_INT_NOTSET) {
+        if (EMS_Thermostat.ibaLanguage == EMS_VALUE_IBASettings_LANG_GERMAN) {
+            rootSettings["language"] = "German";
+        } else if (EMS_Thermostat.ibaLanguage == EMS_VALUE_IBASettings_LANG_DUTCH) {
+            rootSettings["language"] = "Dutch";
+        } else if (EMS_Thermostat.ibaLanguage == EMS_VALUE_IBASettings_LANG_FRENCH) {
+            rootSettings["language"] = "French";
+        } else if (EMS_Thermostat.ibaLanguage == EMS_VALUE_IBASettings_LANG_ITALIAN) {
+            rootSettings["language"] = "Italian";
+        }
+    }
+    if (EMS_Thermostat.ibaCalIntTemperature != EMS_VALUE_INT_NOTSET) {
+        rootSettings["CalIntTemperature"] = (float)EMS_Thermostat.ibaCalIntTemperature / 10;    // offset int. temperature sensor, by * 0.1 Kelvin
+    }
+    if (EMS_Thermostat.ibaMinExtTemperature != EMS_VALUE_SHORT_NOTSET) {
+        rootSettings["MinExtTemperature"] = EMS_Thermostat.ibaMinExtTemperature;                // min ext temp for heating curve, in deg., 0xF6=-10, 0x0 = 0, 0xFF=-1
+    }
+    if (EMS_Thermostat.ibaBuildingType != EMS_VALUE_INT_NOTSET) {
+        if (EMS_Thermostat.ibaBuildingType == EMS_VALUE_IBASettings_BUILDING_LIGHT) {
+            rootSettings["building"] = "light";
+        } else if (EMS_Thermostat.ibaBuildingType == EMS_VALUE_IBASettings_BUILDING_MEDIUM) {
+            rootSettings["building"] = "medium";
+        } else if (EMS_Thermostat.ibaBuildingType == EMS_VALUE_IBASettings_BUILDING_HEAVY) {
+            rootSettings["building"] = "heavy";
+        }
+    }
+    if (EMS_Thermostat.ibaClockOffset != EMS_VALUE_INT_NOTSET) {
+        rootSettings["clockOffset"] = EMS_Thermostat.ibaClockOffset;                // offset (in sec) to clock, 0xff = -1 s, 0x02 = 2 s
+    }
+    return (myESP.mqttPublish(TOPIC_SETTINGS_DATA, doc));
+}
+
 // publish mixing data
 // only sending if we have an active hc
 bool publishEMSValues_mixing() {
@@ -1059,6 +1173,7 @@ bool publishEMSValues(bool force) {
 
     bool thermo   = false;
     bool boiler   = false;
+    bool settings = false;
     bool mixing   = false;
     bool solar    = false;
     bool heatpump = false;
@@ -1071,6 +1186,12 @@ bool publishEMSValues(bool force) {
     if (ems_getBoilerEnabled() && (ems_Device_has_flags(EMS_DEVICE_UPDATE_FLAG_BOILER) || force)) {
         boiler = publishEMSValues_boiler();
         ems_Device_remove_flags(EMS_DEVICE_UPDATE_FLAG_BOILER); // unset flag
+    }
+
+    if (ems_getBoilerEnabled() && (ems_Device_has_flags(EMS_DEVICE_UPDATE_FLAG_SETTINGS))) {
+        // never force publication of settings 
+        settings = publishEMSValues_settings();
+        ems_Device_remove_flags(EMS_DEVICE_UPDATE_FLAG_SETTINGS); // unset flag
     }
 
     if (ems_getMixingModuleEnabled() && (ems_Device_has_flags(EMS_DEVICE_UPDATE_FLAG_MIXING) || force)) {
@@ -1093,13 +1214,16 @@ bool publishEMSValues(bool force) {
     }
 
     // print
-    char log_s[50];
+    char log_s[60];
     strlcpy(log_s, "Publishing MQTT data for:", sizeof(log_s));
     if (thermo) {
         strlcat(log_s, " thermostat", sizeof(log_s));
     }
     if (boiler) {
         strlcat(log_s, " boiler", sizeof(log_s));
+    }
+    if (settings) {
+        strlcat(log_s, " settings", sizeof(log_s));
     }
     if (mixing) {
         strlcat(log_s, " mixing", sizeof(log_s));
@@ -1167,6 +1291,16 @@ void do_regularUpdates() {
     }
 }
 
+// force low-frequency  (daily) calls to get data from EMS for the types that aren't sent as broadcasts
+// only if we have a EMS connection
+// which will cause the values to get published
+void do_dailyUpdates() {
+    if (ems_getBusConnected() && !ems_getTxDisabled()) {
+        myDebugLog("Fetching settings data");
+        ems_getSettingsValues();
+    }
+}
+
 // turn back on the hot water for the shower
 void _showerColdShotStop() {
     if (EMSESP_Shower.doingColdShot) {
@@ -1194,6 +1328,7 @@ void runUnitTest(uint8_t test_num) {
     publishValuesTimer.detach();
     systemCheckTimer.detach();
     regularUpdatesTimer.detach();
+    dailyUpdatesTimer.detach();
     // EMSESP_Settings.listen_mode = true; // temporary go into listen mode to disable Tx
     ems_testTelegram(test_num);
 }
@@ -1527,6 +1662,7 @@ void TelnetCommandCallback(uint8_t wc, const char * commandLine) {
 
     if (strcmp(first_cmd, "refresh") == 0) {
         do_regularUpdates();
+        do_dailyUpdates();        
         ok = true;
     }
 
@@ -1775,11 +1911,14 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
         // this is used for example for comfort, flowtemp
         myESP.mqttSubscribe(TOPIC_BOILER_CMD);
 
-        // these three need to be unique topics
+        // these need to be unique topics
         myESP.mqttSubscribe(TOPIC_BOILER_CMD_WWACTIVATED);
         myESP.mqttSubscribe(TOPIC_BOILER_CMD_WWONETIME);
         myESP.mqttSubscribe(TOPIC_BOILER_CMD_WWCIRCULATION);
         myESP.mqttSubscribe(TOPIC_BOILER_CMD_WWTEMP);
+
+        // generic incoming MQTT command for Settings
+        myESP.mqttSubscribe(TOPIC_SETTINGS_CMD);
 
         // generic incoming MQTT command for EMS-ESP
         // this is used for example for shower_coldshot
@@ -1935,6 +2074,66 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
         }
         return;
     }
+
+    // check for settings commands
+    if (strcmp(topic, TOPIC_SETTINGS_CMD) == 0) {
+        // convert JSON and get the command
+        StaticJsonDocument<100> doc;
+        DeserializationError    error = deserializeJson(doc, message); // Deserialize the JSON document
+        if (error) {
+            myDebug_P(PSTR("[MQTT] Invalid command from topic %s, payload %s, error %s"), topic, message, error.c_str());
+            return;
+        }
+        const char * command = doc["cmd"];
+        if (command == nullptr) {
+            return;
+        }
+
+        // language setting
+        if (strcmp(command, TOPIC_SETTINGS_CMD_LANGUAGE) == 0) {
+            const char * data = doc["data"];
+            if (data == nullptr) {
+                return;
+            }
+            if (strcasecmp((char *)data, "french") == 0) {
+                ems_setSettingsLanguage(EMS_VALUE_IBASettings_LANG_FRENCH);
+            } else if (strcasecmp((char *)data, "german") == 0) {
+                ems_setSettingsLanguage(EMS_VALUE_IBASettings_LANG_GERMAN);
+            } else if (strcasecmp((char *)data, "italian") == 0) {
+                ems_setSettingsLanguage(EMS_VALUE_IBASettings_LANG_ITALIAN);
+            }
+            return;
+        }
+        // building setting
+        if (strcmp(command, TOPIC_SETTINGS_CMD_BUILDING) == 0) {
+            const char * data = doc["data"];
+            if (data == nullptr) {
+                return;
+            }
+            if (strcasecmp((char *)data, "light") == 0) {
+                ems_setSettingsBuilding(EMS_VALUE_IBASettings_BUILDING_LIGHT);
+            } else if (strcasecmp((char *)data, "medium") == 0) {
+                ems_setSettingsBuilding(EMS_VALUE_IBASettings_BUILDING_MEDIUM);
+            } else if (strcasecmp((char *)data, "heavy") == 0) {
+                ems_setSettingsBuilding(EMS_VALUE_IBASettings_BUILDING_HEAVY);
+            }
+            return;
+        }
+        // display setting
+        if (strcmp(command, TOPIC_SETTINGS_CMD_DISPLAY) == 0) {
+            const char * data = doc["data"];
+            if (data == nullptr) {
+                return;
+            }
+            uint8_t t = atoi((char *)data);
+            if (t) {
+                ems_setSettingsDisplay(t-1);
+            }
+            return;
+        }
+        return; // unknown settings command
+    }
+
 
     uint8_t hc;
     // thermostat temp changes
@@ -2427,6 +2626,7 @@ void setup() {
     // enable regular checks to fetch data and publish using Tx (unless listen_mode is enabled)
     if (!EMSESP_Settings.listen_mode) {
         regularUpdatesTimer.attach(REGULARUPDATES_TIME, do_regularUpdates); // regular reads from the EMS
+        dailyUpdatesTimer.attach(DAILYUPDATES_TIME, do_dailyUpdates);       // daily reads from the EMS
     }
 
     // set timers for MQTT publish
