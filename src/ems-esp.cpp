@@ -476,7 +476,7 @@ void showInfo() {
             _renderIntValue("Offset int. temperature", "K", EMS_Thermostat.ibaCalIntTemperature, 10); // offset int. temperature sensor, by * 0.1 Kelvin
         }
         if (EMS_Thermostat.ibaMinExtTemperature != EMS_VALUE_SHORT_NOTSET) {
-            _renderShortValue("Min ext. temperature", "C", EMS_Thermostat.ibaMinExtTemperature, 0);        // min ext temp for heating curve, in deg.
+            _renderShortValue("Min ext. temperature", "C", EMS_Thermostat.ibaMinExtTemperature, 0); // min ext temp for heating curve, in deg.
         }
         if (EMS_Thermostat.ibaBuildingType != EMS_VALUE_INT_NOTSET) {
             if (EMS_Thermostat.ibaBuildingType == EMS_VALUE_IBASettings_BUILDING_LIGHT) {
@@ -488,7 +488,7 @@ void showInfo() {
             }
         }
         if (EMS_Thermostat.ibaClockOffset != EMS_VALUE_INT_NOTSET) {
-            _renderIntValue("Offset clock", "s", EMS_Thermostat.ibaClockOffset);     // offset (in sec) to clock, 0xff = -1 s, 0x02 = 2 s
+            _renderIntValue("Offset clock", "s", EMS_Thermostat.ibaClockOffset); // offset (in sec) to clock, 0xff = -1 s, 0x02 = 2 s
         }
 
         uint8_t _m_setpoint, _m_curr;
@@ -1011,10 +1011,10 @@ bool publishEMSValues_settings() {
         }
     }
     if (EMS_Thermostat.ibaCalIntTemperature != EMS_VALUE_INT_NOTSET) {
-        rootSettings["CalIntTemperature"] = (float)EMS_Thermostat.ibaCalIntTemperature / 10;    // offset int. temperature sensor, by * 0.1 Kelvin
+        rootSettings["CalIntTemperature"] = (float)EMS_Thermostat.ibaCalIntTemperature / 10; // offset int. temperature sensor, by * 0.1 Kelvin
     }
     if (EMS_Thermostat.ibaMinExtTemperature != EMS_VALUE_SHORT_NOTSET) {
-        rootSettings["MinExtTemperature"] = EMS_Thermostat.ibaMinExtTemperature;                // min ext temp for heating curve, in deg., 0xF6=-10, 0x0 = 0, 0xFF=-1
+        rootSettings["MinExtTemperature"] = EMS_Thermostat.ibaMinExtTemperature; // min ext temp for heating curve, in deg., 0xF6=-10, 0x0 = 0, 0xFF=-1
     }
     if (EMS_Thermostat.ibaBuildingType != EMS_VALUE_INT_NOTSET) {
         if (EMS_Thermostat.ibaBuildingType == EMS_VALUE_IBASettings_BUILDING_LIGHT) {
@@ -1026,7 +1026,7 @@ bool publishEMSValues_settings() {
         }
     }
     if (EMS_Thermostat.ibaClockOffset != EMS_VALUE_INT_NOTSET) {
-        rootSettings["clockOffset"] = EMS_Thermostat.ibaClockOffset;                // offset (in sec) to clock, 0xff = -1 s, 0x02 = 2 s
+        rootSettings["clockOffset"] = EMS_Thermostat.ibaClockOffset; // offset (in sec) to clock, 0xff = -1 s, 0x02 = 2 s
     }
     return (myESP.mqttPublish(TOPIC_SETTINGS_DATA, doc));
 }
@@ -1192,7 +1192,7 @@ bool publishEMSValues(bool force) {
     }
 
     if (ems_getBoilerEnabled() && (ems_Device_has_flags(EMS_DEVICE_UPDATE_FLAG_SETTINGS))) {
-        // never force publication of settings 
+        // never force publication of settings
         settings = publishEMSValues_settings();
         ems_Device_remove_flags(EMS_DEVICE_UPDATE_FLAG_SETTINGS); // unset flag
     }
@@ -1670,7 +1670,7 @@ void TelnetCommandCallback(uint8_t wc, const char * commandLine) {
 
     if (strcmp(first_cmd, "refresh") == 0) {
         do_regularUpdates();
-        do_dailyUpdates();        
+        do_dailyUpdates();
         ok = true;
     }
 
@@ -2130,7 +2130,7 @@ void MQTTCallback(unsigned int type, const char * topic, const char * message) {
             }
             uint8_t t = atoi((char *)data);
             if (t) {
-                ems_setSettingsDisplay(t-1);
+                ems_setSettingsDisplay(t - 1);
             }
             return;
         }

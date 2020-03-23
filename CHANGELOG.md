@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - MQTT publish messages are queued and gracefully published every second to avoid TCP blocks
 - Added features to WW messages (0x33, 0x34) to improve WW monitoring. (PR#338 by @ypaindaveine)
 - Added mixing log and stub for EMS type 0xAC (PR#338 by @ypaindaveine)
+- Added Thermostat retrieving settings (0xA5) (validated on RC30N) with MQTT support (thanks Yves @ypaindaveine. See #352)
 
 ### Fixed
 - set boiler warm water temp on Junkers/Bosch HT3
