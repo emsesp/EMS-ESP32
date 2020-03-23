@@ -204,7 +204,8 @@ typedef enum : uint8_t {
     EMS_DEVICE_UPDATE_FLAG_THERMOSTAT = (1 << 1),
     EMS_DEVICE_UPDATE_FLAG_MIXING     = (1 << 2),
     EMS_DEVICE_UPDATE_FLAG_SOLAR      = (1 << 3),
-    EMS_DEVICE_UPDATE_FLAG_HEATPUMP   = (1 << 4)
+    EMS_DEVICE_UPDATE_FLAG_HEATPUMP   = (1 << 4),
+    EMS_DEVICE_UPDATE_FLAG_SETTINGS   = (1 << 5)
 } _EMS_DEVICE_UPDATE_FLAG;
 
 typedef enum : uint8_t {
@@ -430,6 +431,15 @@ typedef struct {
     char               version[10];
     char               datetime[25]; // HH:MM:SS DD/MM/YYYY
     bool               write_supported;
+
+    // Installation parameters (tested on RC30)
+    uint8_t ibaMainDisplay;          // 00, display on Thermostat: 0 int. temp, 1 int. setpoint, 2 ext. temp., 3 burner temp., 4 ww temp, 5 functioning mode, 6 time, 7 data, 9 smoke temp 
+    uint8_t ibaLanguage;             // 01, language on Thermostat: 0 german, 1 dutch, 2 french, 3 italian
+    uint8_t ibaCalIntTemperature;    // 02, offset int. temperature sensor, by * 0.1 Kelvin
+    int16_t ibaMinExtTemperature;    // 05, min ext temp for heating curve, in deg., 0xF6=-10, 0x0 = 0, 0xFF=-1 (actually a int8_t, coded as int16_t to benefit from negative value rendering)
+    uint8_t ibaBuildingType;         // 06, building type: 0 = light, 1 = medium, 2 = heavy
+    uint8_t ibaClockOffset;          // 12, offset (in sec) to clock, 0xff = -1 s, 0x02 = 2 s
+
     _EMS_Thermostat_HC hc[EMS_THERMOSTAT_MAXHC]; // array for the 4 heating circuits
 } _EMS_Thermostat;
 
@@ -483,6 +493,10 @@ void    ems_testTelegram(uint8_t test_num);
 void    ems_startupTelegrams();
 bool    ems_checkEMSBUSAlive();
 
+void ems_setSettingsLanguage(uint8_t lg);
+void ems_setSettingsBuilding(uint8_t bg);
+void ems_setSettingsDisplay(uint8_t ds);
+
 void ems_setThermostatTemp(float temperature, uint8_t hc, _EMS_THERMOSTAT_MODE temptype);
 void ems_setThermostatTemp(float temperature, uint8_t hc, const char * mode_s);
 void ems_setThermostatMode(_EMS_THERMOSTAT_MODE mode, uint8_t hc);
@@ -509,6 +523,7 @@ char *               ems_getDeviceTypeName(_EMS_DEVICE_TYPE device_type, char * 
 _EMS_THERMOSTAT_MODE ems_getThermostatMode(const char * mode_s);
 void                 ems_getThermostatValues();
 void                 ems_getBoilerValues();
+void                 ems_getSettingsValues();
 void                 ems_getSolarModuleValues();
 void                 ems_getMixingModuleValues();
 char *               ems_getThermostatModeString(_EMS_THERMOSTAT_MODE mode, char * mode_str);
