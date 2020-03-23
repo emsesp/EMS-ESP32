@@ -435,7 +435,7 @@ void MyESP::_printMQTTQueue() {
 bool MyESP::mqttPublish(const char * topic, const char * payload) {
     return (_mqttQueue(topic, payload, _mqtt_retain));
 }
-bool MyESP::mqttPublish(const char * topic, JsonDocument payload) {
+bool MyESP::mqttPublish(const char * topic, JsonDocument & payload) {
     return (_mqttQueue(topic, payload, _mqtt_retain));
 }
 
@@ -443,7 +443,7 @@ bool MyESP::mqttPublish(const char * topic, JsonDocument payload) {
 bool MyESP::mqttPublish(const char * topic, const char * payload, bool retain) {
     return (_mqttQueue(topic, payload, retain));
 }
-bool MyESP::mqttPublish(const char * topic, JsonDocument payload, bool retain) {
+bool MyESP::mqttPublish(const char * topic, JsonDocument & payload, bool retain) {
     return (_mqttQueue(topic, payload, retain));
 }
 
@@ -475,7 +475,7 @@ bool MyESP::_mqttQueue(const char * topic, const char * payload, bool retain) {
 // convert json doc to a string buffer and place on queue
 // can't have empty payload or topic
 // returns false if can't add to queue
-bool MyESP::_mqttQueue(const char * topic, JsonDocument payload, bool retain) {
+bool MyESP::_mqttQueue(const char * topic, JsonDocument & payload, bool retain) {
     if (!mqttClient.connected() || _mqtt_queue.size() >= MQTT_QUEUE_MAX_SIZE || !_hasValue(topic)) {
         return false;
     }
@@ -2753,48 +2753,49 @@ void MyESP::_webserver_setup() {
         request->send(response);
     });
 
-    _webServer->on("/update",
-                   HTTP_POST,
-                   [](AsyncWebServerRequest * request) {
-                       AsyncWebServerResponse * response = request->beginResponse(200, "text/plain", _shouldRestart ? "OK" : "FAIL");
-                       response->addHeader("Connection", "close");
-                       request->send(response);
-                   },
-                   [](AsyncWebServerRequest * request, String filename, size_t index, uint8_t * data, size_t len, bool final) {
-                       if (!request->authenticate(MYESP_HTTP_USERNAME, _general_password)) {
-                           return;
-                       }
-                       if (!index) {
-                           ETS_UART_INTR_DISABLE(); // disable all UART interrupts to be safe
-                           //_writeLogEvent(MYESP_SYSLOG_INFO, "Firmware update started");
-                           Update.runAsync(true);
-                           if (!Update.begin((ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000)) {
+    _webServer->on(
+        "/update",
+        HTTP_POST,
+        [](AsyncWebServerRequest * request) {
+            AsyncWebServerResponse * response = request->beginResponse(200, "text/plain", _shouldRestart ? "OK" : "FAIL");
+            response->addHeader("Connection", "close");
+            request->send(response);
+        },
+        [](AsyncWebServerRequest * request, String filename, size_t index, uint8_t * data, size_t len, bool final) {
+            if (!request->authenticate(MYESP_HTTP_USERNAME, _general_password)) {
+                return;
+            }
+            if (!index) {
+                ETS_UART_INTR_DISABLE(); // disable all UART interrupts to be safe
+                //_writeLogEvent(MYESP_SYSLOG_INFO, "Firmware update started");
+                Update.runAsync(true);
+                if (!Update.begin((ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000)) {
                 //_writeLogEvent(MYESP_SYSLOG_ERROR, "Not enough space to update");
 #ifdef MYESP_DEBUG
-                               Update.printError(Serial);
+                    Update.printError(Serial);
 #endif
-                           }
-                       }
-                       if (!Update.hasError()) {
-                           if (Update.write(data, len) != len) {
+                }
+            }
+            if (!Update.hasError()) {
+                if (Update.write(data, len) != len) {
                 //_writeLogEvent(MYESP_SYSLOG_ERROR, "Writing to flash failed");
 #ifdef MYESP_DEBUG
-                               Update.printError(Serial);
+                    Update.printError(Serial);
 #endif
-                           }
-                       }
-                       if (final) {
-                           if (Update.end(true)) {
-                               //_writeLogEvent(MYESP_SYSLOG_INFO, "Firmware update finished");
-                               _shouldRestart = !Update.hasError();
-                           } else {
+                }
+            }
+            if (final) {
+                if (Update.end(true)) {
+                    //_writeLogEvent(MYESP_SYSLOG_INFO, "Firmware update finished");
+                    _shouldRestart = !Update.hasError();
+                } else {
                 //_writeLogEvent(MYESP_SYSLOG_ERROR, "Firmware update failed");
 #ifdef MYESP_DEBUG
-                               Update.printError(Serial);
+                    Update.printError(Serial);
 #endif
-                           }
-                       }
-                   });
+                }
+            }
+        });
 
     _webServer->on("/fonts/glyphicons-halflings-regular.woff", HTTP_GET, [](AsyncWebServerRequest * request) {
         AsyncWebServerResponse * response =

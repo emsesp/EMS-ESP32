@@ -9,7 +9,7 @@
 #ifndef MyESP_h
 #define MyESP_h
 
-#define MYESP_VERSION "1.2.36"
+#define MYESP_VERSION "1.2.37"
 
 #include <ArduinoJson.h>
 #include <ArduinoOTA.h>
@@ -281,8 +281,8 @@ class MyESP {
     void mqttUnsubscribe(const char * topic);
     bool mqttPublish(const char * topic, const char * payload);
     bool mqttPublish(const char * topic, const char * payload, bool retain);
-    bool mqttPublish(const char * topic, JsonDocument payload);
-    bool mqttPublish(const char * topic, JsonDocument payload, bool retain);
+    bool mqttPublish(const char * topic, JsonDocument & payload);
+    bool mqttPublish(const char * topic, JsonDocument & payload, bool retain);
     void setMQTT(mqtt_callback_f callback);
     bool mqttUseNestedJson();
 
@@ -343,7 +343,7 @@ class MyESP {
     void            _sendStart();
     char *          _mqttTopic(const char * topic);
     bool            _mqttQueue(const char * topic, const char * payload, bool retain);
-    bool            _mqttQueue(const char * topic, JsonDocument payload, bool retain);
+    bool            _mqttQueue(const char * topic, JsonDocument & payload, bool retain);
     void            _printMQTTQueue();
     void            _mqttPublishQueue();
     void            _mqttRemoveLastPublish();

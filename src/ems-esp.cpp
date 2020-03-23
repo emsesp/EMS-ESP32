@@ -109,8 +109,8 @@ static const command_t project_cmds[] PROGMEM = {
     {false, "log <n | b | t | s | m | r | j | v | w [ID] | d [ID]>", "logging: none, basic, thermo, solar, mixing, raw, jabber, verbose, watch a type or device"},
     {false, "publish", "publish all values to MQTT"},
     {false, "refresh", "fetch values from the EMS devices"},
-    {false, "devices [scan] | [scan deep] | [save]", "list detected devices, quick scan or deep scan and save as known devices"},
-    {false, "queue", "show current Tx queue"},
+    {false, "devices [scan] | [scan+] | [clear] | [save] ", "list detected devices, quick scan, deep scan, clear and and save"},
+    {false, "txqueue", "show current Tx queue"},
     {false, "send XX ...", "send raw telegram data to EMS bus (XX are hex values)"},
     {false, "thermostat read <type ID>", "send read request to the thermostat for heating circuit hc 1-4"},
     {false, "thermostat temp <degrees> [mode] [hc]", "set thermostat temperature. mode is manual,auto,heat,day,night,eco,comfort,holiday,nofrost"},
@@ -254,14 +254,17 @@ void showInfo() {
               ((EMSESP_Settings.shower_timer) ? "enabled" : "disabled"),
               ((EMSESP_Settings.shower_alert) ? "enabled" : "disabled"));
 
+    if (strlen(EMSESP_Settings.known_devices) > 0) {
+        myDebug_P(PSTR("  Saved known device IDs: %s"), EMSESP_Settings.known_devices);
+    } else {
+        myDebug_P(PSTR("  Saved known device IDs: none"));
+    }
+
     myDebug_P(PSTR("\n%sEMS Bus status:%s"), COLOR_BOLD_ON, COLOR_BOLD_OFF);
 
     if (ems_getBusConnected()) {
         myDebug_P(PSTR("  Bus is connected, protocol: %s"), (ems_isHT3() ? "HT3" : "Buderus"));
         myDebug_P(PSTR("  Rx: # successful read requests=%d, # CRC errors=%d"), EMS_Sys_Status.emsRxPgks, EMS_Sys_Status.emxCrcErr);
-        if (strlen(EMSESP_Settings.known_devices) > 0) {
-            myDebug_P(PSTR("  Saved known device IDs: %s"), EMSESP_Settings.known_devices);
-        }
 
         if (ems_getTxCapable()) {
             char valuestr[8] = {0}; // for formatting floats
@@ -1487,6 +1490,11 @@ void TelnetCallback(uint8_t event) {
     }
 }
 
+void clearEMSDevices() {
+    EMSESP_Settings.known_devices = strdup("");
+    myESP.saveSettings();
+}
+
 // get the list of know devices, as a string, and save them to the config file
 void saveEMSDevices() {
     if (Devices.empty()) {
@@ -1539,33 +1547,28 @@ void TelnetCommandCallback(uint8_t wc, const char * commandLine) {
         // wc = 2 or more. check for "scan"
         char * second_cmd = _readWord();
         if (strcmp(second_cmd, "scan") == 0) {
-            if (wc == 2) {
-                // just scan use UBA 0x07 telegram
-                myDebug_P(PSTR("Requesting EMS bus master for its device list and scanning for external sensors..."));
-                scanDallas();
-                Devices.clear(); // init the device map
-                ems_doReadCommand(EMS_TYPE_UBADevices, EMS_Boiler.device_id);
-                return;
-            }
-
-            // wc is 3 or more. check for additional "force" argument
-            char * third_cmd = _readWord();
-            if (strcmp(third_cmd, "deep") == 0) {
-                myDebug_P(PSTR("Started deep scan of EMS bus for our known devices. This can take up to 10 seconds..."));
-                Devices.clear(); // init the device map
-                ems_scanDevices();
-                return;
-            }
+            // just scan use UBA 0x07 telegram
+            myDebug_P(PSTR("Requesting EMS bus master for its device list and scanning for external sensors..."));
+            scanDallas();
+            Devices.clear(); // init the device map
+            ems_doReadCommand(EMS_TYPE_UBADevices, EMS_Boiler.device_id);
+            return;
+        } else if (strcmp(second_cmd, "scan+") == 0) {
+            myDebug_P(PSTR("Started deep scan of EMS bus for our known devices. This can take up to 10 seconds..."));
+            Devices.clear(); // init the device map
+            ems_scanDevices();
+            return;
         } else if (strcmp(second_cmd, "save") == 0) {
             saveEMSDevices();
             return;
+        } else if (strcmp(second_cmd, "clear") == 0) {
+            clearEMSDevices();
+            return;
         }
-
         ok = false; // unknown command
     }
 
-
-    if (strcmp(first_cmd, "queue") == 0) {
+    if (strcmp(first_cmd, "txqueue") == 0) {
         ems_printTxQueue();
         ok = true;
     }
@@ -2278,7 +2281,7 @@ void initEMSESP() {
     EMSESP_Settings.tx_mode           = EMS_TXMODE_DEFAULT; // default tx mode
     EMSESP_Settings.bus_id            = EMS_BUSID_DEFAULT;  // Service Key is default
     EMSESP_Settings.master_thermostat = 0;
-    EMSESP_Settings.known_devices     = nullptr;
+    EMSESP_Settings.known_devices     = strdup("");
 
     // shower settings
     EMSESP_Shower.timerStart    = 0;

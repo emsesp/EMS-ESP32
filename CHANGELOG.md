@@ -36,9 +36,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `status` payload on start-up shows the IP and Version of EMS-ESP
 - `thermostat mode` takes a string like manual,auto,heat,day,night,eco,comfort,holiday,nofrost
 - `thermostat temp` also takes a mode string, e.g. `thermostat temp 20 heat`
+- `queue` renamed to `txqueue`
 
 ### Removed
- - `autodetect scan`
+ - `autodetect scan`. Replaced with `devices scan` and `devices scan+` for deep scanning
  - `mqttlog all` and showing MQTT log in the web interface - no point showing history of previous mqtt publishes in ESP's precious memory. For debugging I recommend using MQTT Explorer or another external tool.
 
 ## [1.9.4] 15-12-2019
