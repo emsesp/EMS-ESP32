@@ -140,11 +140,11 @@
 #define EMS_OFFSET_RC20StatusMessage_setpoint 1 // setpoint temp
 #define EMS_OFFSET_RC20StatusMessage_curr 2     // current temp
 
-#define EMS_TYPE_RC20StatusMessage2 0xAD
-#define EMS_TYPE_RC20StatusMessage3 0xAE
-#define EMS_TYPE_RC20NSet 0xAD
+#define EMS_TYPE_RC20NStatusMessage 0xAE
 #define EMS_OFFSET_RC20NStatusMessage_setpoint 2 // setpoint temp in AE
 #define EMS_OFFSET_RC20NStatusMessage_curr 3     // current temp in AE
+
+#define EMS_TYPE_RC20NSet 0xAD
 #define EMS_OFFSET_RC20NSet_temp_day 2           // position of thermostat setpoint temperature for day time
 #define EMS_OFFSET_RC20NSet_temp_night 1         // position of thermostat setpoint temperature for night time
 #define EMS_OFFSET_RC20NSet_mode 3               // position mode
