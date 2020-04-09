@@ -61,6 +61,7 @@ enum EMS_DEVICE_FLAG_TYPES : uint8_t {
     EMS_DEVICE_FLAG_RC35     = 6,
     EMS_DEVICE_FLAG_RC100    = 7,
     EMS_DEVICE_FLAG_RC300    = 8,
+    EMS_DEVICE_FLAG_RC20N    = 9, 
     EMS_DEVICE_FLAG_JUNKERS1 = 31,       // use 0x65 for HC
     EMS_DEVICE_FLAG_JUNKERS2 = 32,       // use 0x79 for HC, older models
     EMS_DEVICE_FLAG_JUNKERS  = (1 << 6), // 6th bit set if its junkers HT3
