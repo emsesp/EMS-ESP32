@@ -145,9 +145,9 @@
 #define EMS_OFFSET_RC20NStatusMessage_curr 3     // current temp in AE
 
 #define EMS_TYPE_RC20NSet 0xAD
-#define EMS_OFFSET_RC20NSet_temp_day 2           // position of thermostat setpoint temperature for day time
-#define EMS_OFFSET_RC20NSet_temp_night 1         // position of thermostat setpoint temperature for night time
-#define EMS_OFFSET_RC20NSet_mode 3               // position mode
+#define EMS_OFFSET_RC20NSet_temp_day 2   // position of thermostat setpoint temperature for day time
+#define EMS_OFFSET_RC20NSet_temp_night 1 // position of thermostat setpoint temperature for night time
+#define EMS_OFFSET_RC20NSet_mode 3       // position mode
 #define EMS_OFFSET_RC20NSet_heatingtype 0
 
 #define EMS_TYPE_RC20Set 0xA8      // for setting values like temp and mode
@@ -334,8 +334,7 @@ static const _EMS_Device EMS_Devices[] = {
     {165, EMS_DEVICE_TYPE_THERMOSTAT, "RC100/Moduline 1000/1010", EMS_DEVICE_FLAG_RC100},                           // 0x18, 0x38
 
     // Sieger
-    {76, EMS_DEVICE_TYPE_THERMOSTAT, "Sieger ES73", EMS_DEVICE_FLAG_RC35},  // 0x10
-    {113, EMS_DEVICE_TYPE_THERMOSTAT, "RC20/Sieger ES72", EMS_DEVICE_FLAG_RC20N}, // 0x17
+    {76, EMS_DEVICE_TYPE_THERMOSTAT, "Sieger ES73", EMS_DEVICE_FLAG_RC35},                // 0x10
     {113, EMS_DEVICE_TYPE_THERMOSTAT, "Sieger ES72/Buderus RC20", EMS_DEVICE_FLAG_RC20N}, // 0x17
 
     // Junkers - all 0x10

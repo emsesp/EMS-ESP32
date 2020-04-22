@@ -1454,10 +1454,10 @@ void _process_RC10Set(_EMS_RxTelegram * EMS_RxTelegram) {
 void _process_RC20NSet(_EMS_RxTelegram * EMS_RxTelegram) {
     uint8_t hc                   = EMS_THERMOSTAT_DEFAULTHC - 1; // use HC1
     EMS_Thermostat.hc[hc].active = true;
-    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].mode, EMS_OFFSET_RC20NSet_mode); // note, fixed for HC1
-    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].daytemp, EMS_OFFSET_RC20NSet_temp_day);         // is * 2
-    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].nighttemp, EMS_OFFSET_RC20NSet_temp_night);     // is * 2
-    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].heatingtype, EMS_OFFSET_RC20NSet_heatingtype);  // byte 0 bit floor heating = 3
+    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].mode, EMS_OFFSET_RC20NSet_mode);               // note, fixed for HC1
+    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].daytemp, EMS_OFFSET_RC20NSet_temp_day);        // is * 2
+    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].nighttemp, EMS_OFFSET_RC20NSet_temp_night);    // is * 2
+    _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].heatingtype, EMS_OFFSET_RC20NSet_heatingtype); // byte 0 bit floor heating = 3
 }
 /**
  * type 0xA8 - for reading the mode from the RC20 thermostat (0x17)
@@ -1948,7 +1948,7 @@ void _process_Version(_EMS_RxTelegram * EMS_RxTelegram) {
             EMS_Thermostat.device_desc_p   = device_desc_p;
             strlcpy(EMS_Thermostat.version, version, sizeof(EMS_Thermostat.version));
             ems_getThermostatValues(); // get Thermostat values
-            ems_getSettingsValues() ;  // get Settings from Thermostat
+            ems_getSettingsValues();   // get Settings from Thermostat
         }
     } else if (type == EMS_DEVICE_TYPE_SOLAR) {
         EMS_SolarModule.device_id     = device_id;
@@ -2081,9 +2081,9 @@ void ems_getThermostatValues() {
                 statusMsg = EMS_TYPE_RC35StatusMessage_HC4;
                 opMode    = EMS_TYPE_RC35Set_HC4;
             }
-            ems_doReadCommand(statusMsg, device_id); // to get the temps
-            ems_doReadCommand(opMode, device_id);    // to get the mode
-            ems_doReadCommand(opMode, device_id, 27);  // to get the mode
+            ems_doReadCommand(statusMsg, device_id);  // to get the temps
+            ems_doReadCommand(opMode, device_id);     // to get the mode
+            ems_doReadCommand(opMode, device_id, 27); // to get the mode
         }
         break;
     case EMS_DEVICE_FLAG_RC300:
@@ -2441,26 +2441,26 @@ void ems_setThermostatTemp(float temperature, uint8_t hc, _EMS_THERMOSTAT_MODE t
     myDebug_P(PSTR("Setting thermostat temperature to %s for heating circuit %d, mode %s"), _float_to_char(s, temperature), hc, mode_str);
 
     if (model == EMS_DEVICE_FLAG_RC10) {
-        EMS_Thermostat.hc[hc- 1].setpoint_roomTemp = temperature * 2;
-        EMS_TxTelegram.type               = EMS_TYPE_RC10Set;
-        EMS_TxTelegram.offset             = EMS_OFFSET_RC10Set_temp;
-        EMS_TxTelegram.comparisonPostRead = EMS_TYPE_RC10StatusMessage;
-        EMS_TxTelegram.type_validate      = EMS_TxTelegram.type;
+        EMS_Thermostat.hc[hc - 1].setpoint_roomTemp = temperature * 2;
+        EMS_TxTelegram.type                         = EMS_TYPE_RC10Set;
+        EMS_TxTelegram.offset                       = EMS_OFFSET_RC10Set_temp;
+        EMS_TxTelegram.comparisonPostRead           = EMS_TYPE_RC10StatusMessage;
+        EMS_TxTelegram.type_validate                = EMS_TxTelegram.type;
     }
 
     else if (model == EMS_DEVICE_FLAG_RC20) {
-        EMS_Thermostat.hc[hc- 1].setpoint_roomTemp = temperature * 2;
-        EMS_TxTelegram.type               = EMS_TYPE_RC20Set;
-        EMS_TxTelegram.offset             = EMS_OFFSET_RC20Set_temp;
-        EMS_TxTelegram.comparisonPostRead = EMS_TYPE_RC20StatusMessage;
-        EMS_TxTelegram.type_validate      = EMS_TxTelegram.type;
+        EMS_Thermostat.hc[hc - 1].setpoint_roomTemp = temperature * 2;
+        EMS_TxTelegram.type                         = EMS_TYPE_RC20Set;
+        EMS_TxTelegram.offset                       = EMS_OFFSET_RC20Set_temp;
+        EMS_TxTelegram.comparisonPostRead           = EMS_TYPE_RC20StatusMessage;
+        EMS_TxTelegram.type_validate                = EMS_TxTelegram.type;
     }
 
     else if (model == EMS_DEVICE_FLAG_RC20N) {
-        EMS_Thermostat.hc[hc- 1].setpoint_roomTemp = temperature * 2;
-        EMS_TxTelegram.type               = EMS_TYPE_RC20NSet;
-        EMS_TxTelegram.comparisonPostRead = EMS_TYPE_RC20NStatusMessage;
-        EMS_TxTelegram.type_validate      = EMS_TxTelegram.type;
+        EMS_Thermostat.hc[hc - 1].setpoint_roomTemp = temperature * 2;
+        EMS_TxTelegram.type                         = EMS_TYPE_RC20NSet;
+        EMS_TxTelegram.comparisonPostRead           = EMS_TYPE_RC20NStatusMessage;
+        EMS_TxTelegram.type_validate                = EMS_TxTelegram.type;
         switch (temptype) {
         case EMS_THERMOSTAT_MODE_NIGHT: // change the night temp
             EMS_TxTelegram.offset = EMS_OFFSET_RC20NSet_temp_night;
@@ -2476,15 +2476,15 @@ void ems_setThermostatTemp(float temperature, uint8_t hc, _EMS_THERMOSTAT_MODE t
     }
 
     else if (model == EMS_DEVICE_FLAG_RC30) {
-        EMS_Thermostat.hc[hc- 1].setpoint_roomTemp = temperature * 2;
-        EMS_TxTelegram.type               = EMS_TYPE_RC30Set;
-        EMS_TxTelegram.offset             = EMS_OFFSET_RC30Set_temp;
-        EMS_TxTelegram.comparisonPostRead = EMS_TYPE_RC30StatusMessage;
-        EMS_TxTelegram.type_validate      = EMS_TxTelegram.type;
+        EMS_Thermostat.hc[hc - 1].setpoint_roomTemp = temperature * 2;
+        EMS_TxTelegram.type                         = EMS_TYPE_RC30Set;
+        EMS_TxTelegram.offset                       = EMS_OFFSET_RC30Set_temp;
+        EMS_TxTelegram.comparisonPostRead           = EMS_TYPE_RC30StatusMessage;
+        EMS_TxTelegram.type_validate                = EMS_TxTelegram.type;
     }
 
     else if ((model == EMS_DEVICE_FLAG_RC300) || (model == EMS_DEVICE_FLAG_RC100)) {
-        EMS_Thermostat.hc[hc- 1].setpoint_roomTemp = temperature * 2;
+        EMS_Thermostat.hc[hc - 1].setpoint_roomTemp = temperature * 2;
         // check mode to determine offset
         if (EMS_Thermostat.hc[hc - 1].mode == 1) {        // auto
             EMS_TxTelegram.offset = 0x08;                 // auto offset
@@ -2512,35 +2512,35 @@ void ems_setThermostatTemp(float temperature, uint8_t hc, _EMS_THERMOSTAT_MODE t
     else if ((model == EMS_DEVICE_FLAG_RC35) || (model == EMS_DEVICE_FLAG_RC30N)) {
         switch (temptype) {
         case EMS_THERMOSTAT_MODE_NIGHT: // change the night temp
-            EMS_Thermostat.hc[hc- 1].nighttemp = temperature * 2;
-            EMS_TxTelegram.offset = EMS_OFFSET_RC35Set_temp_night;
+            EMS_Thermostat.hc[hc - 1].nighttemp = temperature * 2;
+            EMS_TxTelegram.offset               = EMS_OFFSET_RC35Set_temp_night;
             break;
         case EMS_THERMOSTAT_MODE_DAY: // change the day temp
-            EMS_Thermostat.hc[hc- 1].daytemp = temperature * 2;
-            EMS_TxTelegram.offset = EMS_OFFSET_RC35Set_temp_day;
+            EMS_Thermostat.hc[hc - 1].daytemp = temperature * 2;
+            EMS_TxTelegram.offset             = EMS_OFFSET_RC35Set_temp_day;
             break;
         case EMS_THERMOSTAT_MODE_HOLIDAY: // change the holiday temp
-            EMS_Thermostat.hc[hc- 1].holidaytemp = temperature * 2;
-            EMS_TxTelegram.offset = EMS_OFFSET_RC35Set_temp_holiday;
+            EMS_Thermostat.hc[hc - 1].holidaytemp = temperature * 2;
+            EMS_TxTelegram.offset                 = EMS_OFFSET_RC35Set_temp_holiday;
             break;
         default:
         case EMS_THERMOSTAT_MODE_AUTO: // automatic selection, if no type is defined, we use the standard code
             if (model == EMS_DEVICE_FLAG_RC35) {
-                switch(EMS_Thermostat.hc[hc - 1].mode) {
-                case 0:    // if in nightmode, change nighttemp, seltemp is set automatically
+                switch (EMS_Thermostat.hc[hc - 1].mode) {
+                case 0: // if in nightmode, change nighttemp, seltemp is set automatically
                     EMS_TxTelegram.offset = EMS_OFFSET_RC35Set_temp_night;
                     break;
-                case 1:     // if in daymode, change daytemp, seltemp is set automatically
+                case 1: // if in daymode, change daytemp, seltemp is set automatically
                     EMS_TxTelegram.offset = EMS_OFFSET_RC35Set_temp_day;
                     break;
-                default:    // in automode change only seltemp
+                default:                                                // in automode change only seltemp
                     EMS_TxTelegram.offset = EMS_OFFSET_RC35Set_seltemp; // https://github.com/proddy/EMS-ESP/issues/310
                     break;
                 }
             } else {
                 EMS_TxTelegram.offset = (EMS_Thermostat.hc[hc - 1].mode_type == 0) ? EMS_OFFSET_RC35Set_temp_night : EMS_OFFSET_RC35Set_temp_day;
             }
-            EMS_Thermostat.hc[hc- 1].setpoint_roomTemp = temperature * 2; // set temperature for immediate publish back
+            EMS_Thermostat.hc[hc - 1].setpoint_roomTemp = temperature * 2; // set temperature for immediate publish back
             break;
         }
 
@@ -2561,8 +2561,8 @@ void ems_setThermostatTemp(float temperature, uint8_t hc, _EMS_THERMOSTAT_MODE t
     }
 
     else if ((model == EMS_DEVICE_FLAG_JUNKERS1) || (model == EMS_DEVICE_FLAG_JUNKERS2)) {
-        EMS_TxTelegram.emsplus = true; // Assuming here that all Junkers use EMS+
-        EMS_Thermostat.hc[hc- 1].setpoint_roomTemp = temperature * 2;
+        EMS_TxTelegram.emsplus                      = true; // Assuming here that all Junkers use EMS+
+        EMS_Thermostat.hc[hc - 1].setpoint_roomTemp = temperature * 2;
 
         // figure out if we have older or new thermostats
         // Heating Circuits on 0x65 or 0x79
@@ -2587,7 +2587,7 @@ void ems_setThermostatTemp(float temperature, uint8_t hc, _EMS_THERMOSTAT_MODE t
             EMS_TxTelegram.type               = EMS_TYPE_JunkersSetMessage1_HC1 + hc - 1; // 0x65
             EMS_TxTelegram.comparisonPostRead = EMS_TYPE_JunkersStatusMessage_HC1 + hc - 1;
         } else {
-            EMS_Thermostat.hc[hc- 1].setpoint_roomTemp = temperature * 2;
+            EMS_Thermostat.hc[hc - 1].setpoint_roomTemp = temperature * 2;
             // EMS_DEVICE_FLAG_JUNKERS2
             switch (temptype) {
             case EMS_THERMOSTAT_MODE_NOFROST:
@@ -2963,7 +2963,7 @@ void ems_setWarmWaterTemp(uint8_t temperature) {
     }
 
     myDebug_P(PSTR("Setting boiler warm water temperature to %d C"), temperature);
-    EMS_Boiler.wWSelTemp = temperature;
+    EMS_Boiler.wWSelTemp           = temperature;
     _EMS_TxTelegram EMS_TxTelegram = EMS_TX_TELEGRAM_NEW; // create new Tx
     EMS_TxTelegram.timestamp       = millis();            // set timestamp
     EMS_Sys_Status.txRetryCount    = 0;                   // reset retry counter
@@ -3620,7 +3620,7 @@ void ems_doReadCommand(uint16_t type, uint8_t dest, uint8_t offset) {
     }
     EMS_TxTelegram.action             = EMS_TX_TELEGRAM_READ; // read command
     EMS_TxTelegram.dest               = dest;                 // 8th bit will be set to indicate a read
-    EMS_TxTelegram.offset             = offset;               // defaults to 0 
+    EMS_TxTelegram.offset             = offset;               // defaults to 0
     EMS_TxTelegram.type               = type;
     EMS_TxTelegram.length             = EMS_MIN_TELEGRAM_LENGTH; // EMS 1.0: 6 bytes long (including CRC at end), EMS+ will add 2 bytes. includes CRC
     EMS_TxTelegram.dataValue          = EMS_MAX_TELEGRAM_LENGTH; // for a read this is the # bytes we want back
