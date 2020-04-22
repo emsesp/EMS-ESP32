@@ -263,7 +263,7 @@ static const _EMS_Device EMS_Devices[] = {
     {64, EMS_DEVICE_TYPE_BOILER, "Sieger BK13,BK15/Nefit Smartline/Buderus GB1x2", EMS_DEVICE_FLAG_NONE},
     {234, EMS_DEVICE_TYPE_BOILER, "Buderus Logamax Plus GB122", EMS_DEVICE_FLAG_NONE},
     {84, EMS_DEVICE_TYPE_BOILER, "Buderus Logamax Plus GB022", EMS_DEVICE_FLAG_NONE},
-    {95, EMS_DEVICE_TYPE_BOILER, "Bosch Condens 2500/Buderus Logamax GB062/Junkers Cerapur Top/Worcester Greenstar i/Generic HT3", EMS_DEVICE_FLAG_NONE},
+    {95, EMS_DEVICE_TYPE_BOILER, "Bosch Condens 2500/Buderus Logamax,Logomatic/Junkers Cerapur Top/Worcester Greenstar i/Generic HT3", EMS_DEVICE_FLAG_NONE},
     {122, EMS_DEVICE_TYPE_BOILER, "Nefit Proline", EMS_DEVICE_FLAG_NONE},
     {170, EMS_DEVICE_TYPE_BOILER, "Buderus Logano GB212", EMS_DEVICE_FLAG_NONE},
     {172, EMS_DEVICE_TYPE_BOILER, "Nefit Enviline", EMS_DEVICE_FLAG_NONE},
@@ -336,6 +336,7 @@ static const _EMS_Device EMS_Devices[] = {
     // Sieger
     {76, EMS_DEVICE_TYPE_THERMOSTAT, "Sieger ES73", EMS_DEVICE_FLAG_RC35},  // 0x10
     {113, EMS_DEVICE_TYPE_THERMOSTAT, "RC20/Sieger ES72", EMS_DEVICE_FLAG_RC20N}, // 0x17
+    {113, EMS_DEVICE_TYPE_THERMOSTAT, "Sieger ES72/Buderus RC20", EMS_DEVICE_FLAG_RC20N}, // 0x17
 
     // Junkers - all 0x10
     {105, EMS_DEVICE_TYPE_THERMOSTAT, "Junkers FW100", EMS_DEVICE_FLAG_JUNKERS1}, // 0x10

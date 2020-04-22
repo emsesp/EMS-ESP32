@@ -295,6 +295,7 @@ typedef struct {
     uint16_t wwStorageTemp2;     // warm water storage temp 2
     uint16_t retTemp;            // Return temperature
     uint8_t  burnGas;            // Gas on/off
+    uint8_t  wWMode;             // warm water mode
     uint8_t  fanWork;            // Fan on/off
     uint8_t  ignWork;            // Ignition on/off
     uint8_t  heatPmp;            // Circulating pump on/off
