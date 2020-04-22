@@ -349,6 +349,7 @@ void showInfo() {
         _renderUShortValue("Max boiler temperature", "C", EMS_Boiler.boilTemp);
         _renderUShortValue("Return temperature", "C", EMS_Boiler.retTemp);
         _renderBoolValue("Gas", EMS_Boiler.burnGas);
+        _renderBoolValue("Warm water mode", EMS_Boiler.wWMode);
         _renderBoolValue("Boiler pump", EMS_Boiler.heatPmp);
         _renderBoolValue("Fan", EMS_Boiler.fanWork);
         _renderBoolValue("Ignition", EMS_Boiler.ignWork);
@@ -829,22 +830,22 @@ bool publishEMSValues_boiler() {
         rootBoiler["wWHeat"] = _bool_to_char(s, EMS_Boiler.wWHeat);
     }
     if (abs(EMS_Boiler.wWStarts) != EMS_VALUE_LONG_NOTSET) {
-        rootBoiler["wWStarts"] = (float)EMS_Boiler.wWStarts;
+        rootBoiler["wWStarts"] = EMS_Boiler.wWStarts;
     }
     if (abs(EMS_Boiler.wWWorkM) != EMS_VALUE_LONG_NOTSET) {
-        rootBoiler["wWWorkM"] = (float)EMS_Boiler.wWWorkM;
+        rootBoiler["wWWorkM"] = EMS_Boiler.wWWorkM;
     }
     if (abs(EMS_Boiler.UBAuptime) != EMS_VALUE_LONG_NOTSET) {
-        rootBoiler["UBAuptime"] = (float)EMS_Boiler.UBAuptime;
+        rootBoiler["UBAuptime"] = EMS_Boiler.UBAuptime;
     }
     if (abs(EMS_Boiler.burnStarts) != EMS_VALUE_LONG_NOTSET) {
-        rootBoiler["burnStarts"] = (float)EMS_Boiler.burnStarts;
+        rootBoiler["burnStarts"] = EMS_Boiler.burnStarts;
     }
     if (abs(EMS_Boiler.burnWorkMin) != EMS_VALUE_LONG_NOTSET) {
-        rootBoiler["burnWorkMin"] = (float)EMS_Boiler.burnWorkMin;
+        rootBoiler["burnWorkMin"] = EMS_Boiler.burnWorkMin;
     }
     if (abs(EMS_Boiler.heatWorkMin) != EMS_VALUE_LONG_NOTSET) {
-        rootBoiler["heatWorkMin"] = (float)EMS_Boiler.heatWorkMin;
+        rootBoiler["heatWorkMin"] = EMS_Boiler.heatWorkMin;
     }
 
     if (EMS_Boiler.serviceCode != EMS_VALUE_USHORT_NOTSET) {

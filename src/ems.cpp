@@ -165,6 +165,7 @@ void ems_init() {
     EMS_Boiler.wwStorageTemp2 = EMS_VALUE_USHORT_NOTSET; // warm water storage temp 2
     EMS_Boiler.retTemp        = EMS_VALUE_USHORT_NOTSET; // Return temperature
     EMS_Boiler.burnGas        = EMS_VALUE_BOOL_NOTSET;   // Gas on/off
+    EMS_Boiler.wWMode         = EMS_VALUE_BOOL_NOTSET;   // Warm Water mode
     EMS_Boiler.fanWork        = EMS_VALUE_BOOL_NOTSET;   // Fan on/off
     EMS_Boiler.ignWork        = EMS_VALUE_BOOL_NOTSET;   // Ignition on/off
     EMS_Boiler.heatPmp        = EMS_VALUE_BOOL_NOTSET;   // Boiler pump on/off
@@ -1067,6 +1068,7 @@ void _process_UBAMonitorFast(_EMS_RxTelegram * EMS_RxTelegram) {
     _setValue(EMS_RxTelegram, &EMS_Boiler.curBurnPow, 4);
 
     _setValue(EMS_RxTelegram, &EMS_Boiler.burnGas, 7, 0);
+    _setValue(EMS_RxTelegram, &EMS_Boiler.wWMode, 7, 1);
     _setValue(EMS_RxTelegram, &EMS_Boiler.fanWork, 7, 2);
     _setValue(EMS_RxTelegram, &EMS_Boiler.ignWork, 7, 3);
     _setValue(EMS_RxTelegram, &EMS_Boiler.heatPmp, 7, 5);
@@ -1102,6 +1104,7 @@ void _process_UBAMonitorFast(_EMS_RxTelegram * EMS_RxTelegram) {
 void _process_UBAMonitorFast2(_EMS_RxTelegram * EMS_RxTelegram) {
     _setValue(EMS_RxTelegram, &EMS_Boiler.selFlowTemp, 6);
     _setValue(EMS_RxTelegram, &EMS_Boiler.burnGas, 11, 0);
+    _setValue(EMS_RxTelegram, &EMS_Boiler.wWMode, 11, 1);
     _setValue(EMS_RxTelegram, &EMS_Boiler.wWHeat, 11, 2);
     _setValue(EMS_RxTelegram, &EMS_Boiler.curBurnPow, 10);
     _setValue(EMS_RxTelegram, &EMS_Boiler.selBurnPow, 9);
