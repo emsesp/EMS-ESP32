@@ -33,6 +33,7 @@
 #define EMS_VALUE_INT_NOTSET 0xFF      // for 8-bit unsigned ints/bytes
 #define EMS_VALUE_SHORT_NOTSET -32000  // 0x8300 for 2-byte signed shorts
 #define EMS_VALUE_USHORT_NOTSET 32000  // 0x7D00 (was 0x8000) for 2-byte unsigned shorts
+#define EMS_VALUE_USHORT_NOTVALID 0x8000  // 0x8000 for 2-byte unsigned shorts
 #define EMS_VALUE_LONG_NOTSET 0xFFFFFF // for 3-byte longs
 
 // thermostat specific
@@ -401,9 +402,9 @@ typedef struct {
     uint8_t      pump;                   // pump active
     uint8_t      valveStatus;            // valve status (VS2)
     int16_t      setpoint_maxBottomTemp; // setpoint for maximum collector temp
-    uint16_t     EnergyLastHour;
-    uint16_t     EnergyToday;
-    uint16_t     EnergyTotal;
+    uint32_t     EnergyLastHour;
+    uint32_t     EnergyToday;
+    uint32_t     EnergyTotal;
     uint32_t     pumpWorkMin; // Total solar pump operating time
 } _EMS_SolarModule;
 

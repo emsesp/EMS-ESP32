@@ -303,7 +303,7 @@ void showInfo() {
         // UBAParameterWW
         _renderBoolValue("Warm Water activated", EMS_Boiler.wWActivated);
         _renderBoolValue("Warm Water circulation pump available", EMS_Boiler.wWCircPump);
-        myDebug_P(PSTR("  Warm Water circulation pump type: %s"), EMS_Boiler.wWCircPumpType ? "charge pump" : "3-way pump");
+        myDebug_P(PSTR("  Warm Water circulation pump type: %s"), EMS_Boiler.wWCircPumpType ? "3-way pump" : "charge pump");
         if (EMS_Boiler.wWCircPumpMode == 7) {
             myDebug_P(PSTR("  Warm Water circulation pump freq: continuous"));
         } else {
@@ -414,9 +414,9 @@ void showInfo() {
                       (EMS_SolarModule.pumpWorkMin % 1440) / 60,
                       EMS_SolarModule.pumpWorkMin % 60);
         }
-        _renderUShortValue("Energy last hour", "Wh", EMS_SolarModule.EnergyLastHour, 1); // *10
-        _renderUShortValue("Energy today", "Wh", EMS_SolarModule.EnergyToday, 0);
-        _renderUShortValue("Energy total", "kWh", EMS_SolarModule.EnergyTotal, 1); // *10
+        _renderLongValue("Energy last hour", "Wh", EMS_SolarModule.EnergyLastHour, 1); // *10
+        _renderLongValue("Energy today", "Wh", EMS_SolarModule.EnergyToday, 0);
+        _renderLongValue("Energy total", "kWh", EMS_SolarModule.EnergyTotal, 1); // *10
     }
 
     // For HeatPumps
@@ -532,7 +532,7 @@ void showInfo() {
                 }
 
                 // show flow temp if we have it
-                if (EMS_Thermostat.hc[hc_num - 1].circuitcalctemp < EMS_VALUE_INT_NOTSET)
+                if (EMS_Thermostat.hc[hc_num - 1].circuitcalctemp != EMS_VALUE_INT_NOTSET)
                     _renderIntValue(" Calculated flow temperature", "C", EMS_Thermostat.hc[hc_num - 1].circuitcalctemp);
 
                 // Render Thermostat Mode
@@ -896,7 +896,7 @@ bool publishEMSValues_thermostat() {
             if (model == EMS_DEVICE_FLAG_EASY) {
                 if (thermostat->setpoint_roomTemp != EMS_VALUE_SHORT_NOTSET)
                     dataThermostat[THERMOSTAT_SELTEMP] = (float)thermostat->setpoint_roomTemp / 100;
-                if (thermostat->curr_roomTemp > EMS_VALUE_SHORT_NOTSET)
+                if (thermostat->curr_roomTemp != EMS_VALUE_SHORT_NOTSET)
                     dataThermostat[THERMOSTAT_CURRTEMP] = (float)thermostat->curr_roomTemp / 100;
             } else if ((model == EMS_DEVICE_FLAG_JUNKERS1) || (model == EMS_DEVICE_FLAG_JUNKERS2)) {
                 if (thermostat->setpoint_roomTemp != EMS_VALUE_SHORT_NOTSET)
@@ -1114,13 +1114,13 @@ bool publishEMSValues_solar() {
     if (EMS_SolarModule.pumpWorkMin != EMS_VALUE_LONG_NOTSET) {
         rootSM[SM_PUMPWORKMIN] = (float)EMS_SolarModule.pumpWorkMin;
     }
-    if (EMS_SolarModule.EnergyLastHour != EMS_VALUE_USHORT_NOTSET) {
+    if (EMS_SolarModule.EnergyLastHour != EMS_VALUE_LONG_NOTSET) {
         rootSM[SM_ENERGYLASTHOUR] = (float)EMS_SolarModule.EnergyLastHour / 10;
     }
-    if (EMS_SolarModule.EnergyToday != EMS_VALUE_USHORT_NOTSET) {
+    if (EMS_SolarModule.EnergyToday != EMS_VALUE_LONG_NOTSET) {
         rootSM[SM_ENERGYTODAY] = EMS_SolarModule.EnergyToday;
     }
-    if (EMS_SolarModule.EnergyTotal != EMS_VALUE_USHORT_NOTSET) {
+    if (EMS_SolarModule.EnergyTotal != EMS_VALUE_LONG_NOTSET) {
         rootSM[SM_ENERGYTOTAL] = (float)EMS_SolarModule.EnergyTotal / 10;
     }
 
@@ -2434,13 +2434,13 @@ void WebCallback(JsonObject root) {
             sm["sm4"] = _bool_to_char(s, EMS_SolarModule.pump); // Pump active on/off
         }
 
-        if (EMS_SolarModule.EnergyLastHour != EMS_VALUE_USHORT_NOTSET)
+        if (EMS_SolarModule.EnergyLastHour != EMS_VALUE_LONG_NOTSET)
             sm["sm5"] = (float)EMS_SolarModule.EnergyLastHour / 10; // Energy last hour Wh
 
-        if (EMS_SolarModule.EnergyToday != EMS_VALUE_USHORT_NOTSET) // Energy today Wh
+        if (EMS_SolarModule.EnergyToday != EMS_VALUE_LONG_NOTSET) // Energy today Wh
             sm["sm6"] = EMS_SolarModule.EnergyToday;
 
-        if (EMS_SolarModule.EnergyTotal != EMS_VALUE_USHORT_NOTSET) // Energy total KWh
+        if (EMS_SolarModule.EnergyTotal != EMS_VALUE_LONG_NOTSET) // Energy total KWh
             sm["sm7"] = (float)EMS_SolarModule.EnergyTotal / 10;
     } else {
         sm["ok"] = false;
