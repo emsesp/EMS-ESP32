@@ -445,7 +445,7 @@ bool _setValue8(_EMS_RxTelegram * EMS_RxTelegram, int16_t * param_op, uint8_t in
     return true;
 }
 
-// Long
+// Long 24 bit
 bool _setValue(_EMS_RxTelegram * EMS_RxTelegram, uint32_t * param_op, uint8_t index) {
     int8_t pos = _getDataPosition(EMS_RxTelegram, index);
     if (pos < 0) {
@@ -453,6 +453,16 @@ bool _setValue(_EMS_RxTelegram * EMS_RxTelegram, uint32_t * param_op, uint8_t in
     }
 
     *param_op = (uint32_t)((EMS_RxTelegram->data[pos] << 16) + (EMS_RxTelegram->data[pos + 1] << 8) + (EMS_RxTelegram->data[pos + 2]));
+    return true;
+}
+// Long 32 bit
+bool _setValue32(_EMS_RxTelegram * EMS_RxTelegram, uint32_t * param_op, uint8_t index) {
+    int8_t pos = _getDataPosition(EMS_RxTelegram, index);
+    if (pos < 0) {
+        return false;
+    }
+
+    *param_op = (uint32_t)((EMS_RxTelegram->data[pos] << 24) +(EMS_RxTelegram->data[pos + 1] << 16) + (EMS_RxTelegram->data[pos + 2] << 8) + (EMS_RxTelegram->data[pos + 3]));
     return true;
 }
 
@@ -1626,9 +1636,9 @@ void _process_SM100Status2(_EMS_RxTelegram * EMS_RxTelegram) {
  * e.g. 30 00 FF 00 02 8E 00 00 00 00 00 00 06 C5 00 00 76 35
  */
 void _process_SM100Energy(_EMS_RxTelegram * EMS_RxTelegram) {
-    _setValue(EMS_RxTelegram, &EMS_SolarModule.EnergyLastHour, 0); // last hour / 10 in Wh
-    _setValue(EMS_RxTelegram, &EMS_SolarModule.EnergyToday, 4);    //  todays in Wh
-    _setValue(EMS_RxTelegram, &EMS_SolarModule.EnergyTotal, 8);    //  total / 10 in kWh
+    _setValue32(EMS_RxTelegram, &EMS_SolarModule.EnergyLastHour, 0); // last hour / 10 in Wh
+    _setValue32(EMS_RxTelegram, &EMS_SolarModule.EnergyToday, 4);    //  todays in Wh
+    _setValue32(EMS_RxTelegram, &EMS_SolarModule.EnergyTotal, 8);    //  total / 10 in kWh
 }
 
 /*
