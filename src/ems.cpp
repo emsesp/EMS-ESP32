@@ -217,9 +217,9 @@ void ems_init() {
     EMS_SolarModule.pumpModulation         = EMS_VALUE_INT_NOTSET;   // modulation solar pump SM10/SM100/SM200
     EMS_SolarModule.pump                   = EMS_VALUE_BOOL_NOTSET;  // pump active
     EMS_SolarModule.valveStatus            = EMS_VALUE_BOOL_NOTSET;  // valve status from SM200
-    EMS_SolarModule.EnergyLastHour         = EMS_VALUE_USHORT_NOTSET;
-    EMS_SolarModule.EnergyToday            = EMS_VALUE_USHORT_NOTSET;
-    EMS_SolarModule.EnergyTotal            = EMS_VALUE_USHORT_NOTSET;
+    EMS_SolarModule.EnergyLastHour         = EMS_VALUE_LONG_NOTSET;
+    EMS_SolarModule.EnergyToday            = EMS_VALUE_LONG_NOTSET;
+    EMS_SolarModule.EnergyTotal            = EMS_VALUE_LONG_NOTSET;
     EMS_SolarModule.device_id              = EMS_ID_NONE;
     EMS_SolarModule.product_id             = EMS_ID_NONE;
     EMS_SolarModule.pumpWorkMin            = EMS_VALUE_LONG_NOTSET;
@@ -394,8 +394,9 @@ bool _setValue(_EMS_RxTelegram * EMS_RxTelegram, uint16_t * param_op, uint8_t in
 
     uint16_t value = (EMS_RxTelegram->data[pos] << 8) + EMS_RxTelegram->data[pos + 1];
 
-    // check for undefined/unset values, 0x8000
-    if (value >= EMS_VALUE_USHORT_NOTSET) {
+    // check for undefined/unset values, 0x8000, 0x8300, 0x7D00
+    if ((value == EMS_VALUE_USHORT_NOTSET) || (value == EMS_VALUE_SHORT_NOTSET) || (value == EMS_VALUE_USHORT_NOTVALID)) {
+        *param_op = EMS_VALUE_USHORT_NOTSET; // make sure we render this right
         return false;
     }
 
@@ -412,8 +413,9 @@ bool _setValue(_EMS_RxTelegram * EMS_RxTelegram, int16_t * param_op, uint8_t ind
 
     int16_t value = (EMS_RxTelegram->data[pos] << 8) + EMS_RxTelegram->data[pos + 1];
 
-    // check for undefined/unset values, 0x8000
-    if ((value == EMS_VALUE_SHORT_NOTSET) || (EMS_RxTelegram->data[pos] == 0x7D)) {
+    // check for undefined/unset values, 0x8000, 0x8300, 0x7D00
+    if ((value == EMS_VALUE_USHORT_NOTSET) || (value == EMS_VALUE_SHORT_NOTSET) || (value == EMS_VALUE_USHORT_NOTVALID)) {
+        *param_op = EMS_VALUE_SHORT_NOTSET; // make sure we render this right
         return false;
     }
 
@@ -443,7 +445,7 @@ bool _setValue8(_EMS_RxTelegram * EMS_RxTelegram, int16_t * param_op, uint8_t in
     return true;
 }
 
-// Long
+// Long 24 bit
 bool _setValue(_EMS_RxTelegram * EMS_RxTelegram, uint32_t * param_op, uint8_t index) {
     int8_t pos = _getDataPosition(EMS_RxTelegram, index);
     if (pos < 0) {
@@ -451,6 +453,16 @@ bool _setValue(_EMS_RxTelegram * EMS_RxTelegram, uint32_t * param_op, uint8_t in
     }
 
     *param_op = (uint32_t)((EMS_RxTelegram->data[pos] << 16) + (EMS_RxTelegram->data[pos + 1] << 8) + (EMS_RxTelegram->data[pos + 2]));
+    return true;
+}
+// Long 32 bit
+bool _setValue32(_EMS_RxTelegram * EMS_RxTelegram, uint32_t * param_op, uint8_t index) {
+    int8_t pos = _getDataPosition(EMS_RxTelegram, index);
+    if (pos < 0) {
+        return false;
+    }
+
+    *param_op = (uint32_t)((EMS_RxTelegram->data[pos] << 24) +(EMS_RxTelegram->data[pos + 1] << 16) + (EMS_RxTelegram->data[pos + 2] << 8) + (EMS_RxTelegram->data[pos + 3]));
     return true;
 }
 
@@ -1261,11 +1273,7 @@ void _process_RC35StatusMessage(_EMS_RxTelegram * EMS_RxTelegram) {
         return;
     }
 
-    // ignore if the value is 0 (see https://github.com/proddy/EMS-ESP/commit/ccc30738c00f12ae6c89177113bd15af9826b836)
-    if (EMS_RxTelegram->data[EMS_OFFSET_RC35StatusMessage_setpoint] != 0x00) {
-        _setValue8(EMS_RxTelegram, &EMS_Thermostat.hc[hc].setpoint_roomTemp, EMS_OFFSET_RC35StatusMessage_setpoint); // is * 2, force to single byte
-    }
-
+    _setValue8(EMS_RxTelegram, &EMS_Thermostat.hc[hc].setpoint_roomTemp, EMS_OFFSET_RC35StatusMessage_setpoint); // is * 2, force to single byte
     _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].curr_roomTemp, EMS_OFFSET_RC35StatusMessage_curr); // is * 10 - or 0x7D00 if thermostat is mounted on boiler
     _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].mode_type, EMS_OFFSET_RC35StatusMessage_mode, 1);
     _setValue(EMS_RxTelegram, &EMS_Thermostat.hc[hc].summer_mode, EMS_OFFSET_RC35StatusMessage_mode, 0);
@@ -1628,9 +1636,9 @@ void _process_SM100Status2(_EMS_RxTelegram * EMS_RxTelegram) {
  * e.g. 30 00 FF 00 02 8E 00 00 00 00 00 00 06 C5 00 00 76 35
  */
 void _process_SM100Energy(_EMS_RxTelegram * EMS_RxTelegram) {
-    _setValue(EMS_RxTelegram, &EMS_SolarModule.EnergyLastHour, 2); // last hour / 10 in Wh
-    _setValue(EMS_RxTelegram, &EMS_SolarModule.EnergyToday, 6);    //  todays in Wh
-    _setValue(EMS_RxTelegram, &EMS_SolarModule.EnergyTotal, 10);   //  total / 10 in kWh
+    _setValue32(EMS_RxTelegram, &EMS_SolarModule.EnergyLastHour, 0); // last hour / 10 in Wh
+    _setValue32(EMS_RxTelegram, &EMS_SolarModule.EnergyToday, 4);    //  todays in Wh
+    _setValue32(EMS_RxTelegram, &EMS_SolarModule.EnergyTotal, 8);    //  total / 10 in kWh
 }
 
 /*
