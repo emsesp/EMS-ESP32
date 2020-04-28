@@ -211,12 +211,12 @@ void _renderLongValue(const char * prefix, const char * postfix, uint32_t value,
         strlcat(buffer, "?", sizeof(buffer));
     } else {
         char s[20] = {0};
-        if(div == 0) {
+        if (div == 0) {
             strlcat(buffer, ltoa(value, s, 10), sizeof(buffer));
         } else {
-            strlcat(buffer, ltoa(value/10, s, 10), sizeof(buffer));
+            strlcat(buffer, ltoa(value / 10, s, 10), sizeof(buffer));
             strlcat(buffer, ".", sizeof(buffer));
-            strlcat(buffer, ltoa(value%10, s, 10), sizeof(buffer));
+            strlcat(buffer, ltoa(value % 10, s, 10), sizeof(buffer));
         }
     }
 

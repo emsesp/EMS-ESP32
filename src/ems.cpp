@@ -455,6 +455,7 @@ bool _setValue(_EMS_RxTelegram * EMS_RxTelegram, uint32_t * param_op, uint8_t in
     *param_op = (uint32_t)((EMS_RxTelegram->data[pos] << 16) + (EMS_RxTelegram->data[pos + 1] << 8) + (EMS_RxTelegram->data[pos + 2]));
     return true;
 }
+
 // Long 32 bit
 bool _setValue32(_EMS_RxTelegram * EMS_RxTelegram, uint32_t * param_op, uint8_t index) {
     int8_t pos = _getDataPosition(EMS_RxTelegram, index);
@@ -462,7 +463,8 @@ bool _setValue32(_EMS_RxTelegram * EMS_RxTelegram, uint32_t * param_op, uint8_t 
         return false;
     }
 
-    *param_op = (uint32_t)((EMS_RxTelegram->data[pos] << 24) +(EMS_RxTelegram->data[pos + 1] << 16) + (EMS_RxTelegram->data[pos + 2] << 8) + (EMS_RxTelegram->data[pos + 3]));
+    *param_op = (uint32_t)((EMS_RxTelegram->data[pos] << 24) + (EMS_RxTelegram->data[pos + 1] << 16) + (EMS_RxTelegram->data[pos + 2] << 8)
+                           + (EMS_RxTelegram->data[pos + 3]));
     return true;
 }
 
