@@ -5,7 +5,46 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.9.4] 2019-12-15
+## [1.9.5] 30-04-2020
+
+### Added
+- Solar Module SM200 support
+- Support writing to Junkers FR100 thermostats
+- Support writing to RC100, Moduline 1000/1010 thermostats
+- MM10 Mixing module support (thanks @MichaelDvP)
+- MM200 warm water circuits (https://github.com/proddy/EMS-ESP/pull/315)
+- Support for Moduline 200 and Sieger ES72 thermostats
+- First implementation of writing to generic Junker Thermostats (thanks @Neonox31)
+- Added model type (Buderus, Sieger, Junkers, Nefit, Bosch, Worcester) to device names
+- `set master_thermostat <product id>` to choose with thermostat is master when there are multiple on the bus
+- `boiler wwonetime` command from Telnet
+- `set bus_id <ID>` to support multiple EMS-ESP circuits. Default is 0x0B to mimic a service key.
+- `mqtt_nestedjson` option to disable multiple data records being nested into a single JSON string
+- MQTT publish messages are queued and gracefully published every second to avoid TCP blocks
+- Added features to WW messages (0x33, 0x34) to improve WW monitoring. (PR#338 by @ypaindaveine)
+- Added mixing log and stub for EMS type 0xAC (PR#338 by @ypaindaveine)
+- Added Thermostat retrieving settings (0xA5) (validated on RC30N) with MQTT support (thanks Yves @ypaindaveine. See #352)
+- Merged with PR https://github.com/proddy/EMS-ESP/pull/366 from @MichaelDvP fixing RC20 and MM50
+
+### Fixed
+- set boiler warm water temp on Junkers/Bosch HT3
+- fixed detection of the Moduline 400 thermostat
+- RC35 setting temperature also forces the current select temp to change, irrespective of the mode
+
+### Changed
+- improved MQTT publishing to stop network flooding. `publish_time` of -1 is no publish, 0 is automatic otherwise its a time interval
+- External sensors (like Dallas DS18*) are sent as a nested MQTT topic including their unqiue identifier
+- `mqttlog` console command renamed to `mqttqueue` to only show the current publish queue
+- `status` payload on start-up shows the IP and Version of EMS-ESP
+- `thermostat mode` takes a string like manual,auto,heat,day,night,eco,comfort,holiday,nofrost
+- `thermostat temp` also takes a mode string, e.g. `thermostat temp 20 heat`
+- `queue` renamed to `txqueue`
+
+### Removed
+ - `autodetect scan`. Replaced with `devices scan` and `devices scan+` for deep scanning
+ - `mqttlog all` and showing MQTT log in the web interface - no point showing history of previous mqtt publishes in ESP's precious memory. For debugging I recommend using MQTT Explorer or another external tool.
+
+## [1.9.4] 15-12-2019
 
 There are breaking changes in this release. Make you sure you adjust the MQTT topics as described in the wiki.
 

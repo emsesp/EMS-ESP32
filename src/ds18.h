@@ -36,9 +36,11 @@ class DS18 {
     DS18();
     ~DS18();
 
-    uint8_t setup(uint8_t gpio, bool parasite);
+    void    setup(uint8_t gpio, bool parasite);
+    uint8_t scan();
     void    loop();
-    char *  getDeviceString(char * s, unsigned char index);
+    char *  getDeviceType(char * s, unsigned char index);
+    char *  getDeviceID(char * buffer, unsigned char index);
     float   getValue(unsigned char index);
     int16_t getRawValue(unsigned char index); // raw values, needs / 16
 

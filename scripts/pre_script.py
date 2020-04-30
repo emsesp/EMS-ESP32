@@ -7,7 +7,7 @@ Import("env")
 def build_web():
     print("** Building web...")
     env.Execute(
-        "node ./tools/webfilesbuilder/node_modules/gulp/bin/gulp.js --cwd ./tools/webfilesbuilder")
+        "node ./tools/webfilesbuilder/node_modules/gulp/bin/gulp.js --silent --cwd ./tools/webfilesbuilder")
 
 def code_check(source, target, env):
     print("** Starting cppcheck...")

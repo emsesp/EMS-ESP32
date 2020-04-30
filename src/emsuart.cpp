@@ -224,27 +224,27 @@ _EMS_TX_STATUS ICACHE_FLASH_ATTR emsuart_tx_buffer(uint8_t * buf, uint8_t len) {
             }
             emsuart_tx_brk(); // send <BRK>
         } else if (EMS_Sys_Status.emsTxMode == EMS_TXMODE_DEFAULT) {
-            /* 
-        * based on code from https://github.com/proddy/EMS-ESP/issues/103 by @susisstrolch
-        * we emit the whole telegram, with Rx interrupt disabled, collecting busmaster response in FIFO.
-        * after sending the last char we poll the Rx status until either
-        * - size(Rx FIFO) == size(Tx-Telegram)
-        * - <BRK> is detected
-        * At end of receive we re-enable Rx-INT and send a Tx-BRK in loopback mode.
-        * 
-        * EMS-Bus error handling
-        * 1. Busmaster stops echoing on Tx w/o permission
-        * 2. Busmaster cancel telegram by sending a BRK
-        * 
-        * Case 1. is handled by a watchdog counter which is reset on each
-        * Tx attempt. The timeout should be 20x EMSUART_BIT_TIME plus 
-        * some smart guess for processing time on targeted EMS device.
-        * We set EMS_Sys_Status.emsTxStatus to EMS_TX_WTD_TIMEOUT and return
-        * 
-        * Case 2. is handled via a BRK chk during transmission.
-        * We set EMS_Sys_Status.emsTxStatus to EMS_TX_BRK_DETECT and return
-        * 
-        */
+            /*
+             * based on code from https://github.com/proddy/EMS-ESP/issues/103 by @susisstrolch
+             * we emit the whole telegram, with Rx interrupt disabled, collecting busmaster response in FIFO.
+             * after sending the last char we poll the Rx status until either
+             * - size(Rx FIFO) == size(Tx-Telegram)
+             * - <BRK> is detected
+             * At end of receive we re-enable Rx-INT and send a Tx-BRK in loopback mode.
+             * 
+             * EMS-Bus error handling
+             * 1. Busmaster stops echoing on Tx w/o permission
+             * 2. Busmaster cancel telegram by sending a BRK
+             * 
+             * Case 1. is handled by a watchdog counter which is reset on each
+             * Tx attempt. The timeout should be 20x EMSUART_BIT_TIME plus 
+             * some smart guess for processing time on targeted EMS device.
+             * We set EMS_Sys_Status.emsTxStatus to EMS_TX_WTD_TIMEOUT and return
+             * 
+             * Case 2. is handled via a BRK chk during transmission.
+             * We set EMS_Sys_Status.emsTxStatus to EMS_TX_BRK_DETECT and return
+             * 
+             */
             uint16_t wdc = EMS_TX_TO_COUNT;
             ETS_UART_INTR_DISABLE(); // disable rx interrupt
 

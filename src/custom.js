@@ -8,7 +8,7 @@ var custom_config = {
         "listen_mode": false,
         "shower_timer": false,
         "shower_alert": false,
-        "publish_time": 0,
+        "publish_time": 10,
         "tx_mode": 1
     }
 };
@@ -99,7 +99,7 @@ function listCustomStats() {
         var l = document.createElement("li");
         var type = obj[i].type;
         var color = "";
-        if (type === "UBAMaster") {
+        if (type === "Boiler") {
             color = "list-group-item-success";
         } else if (type === "Thermostat") {
             color = "list-group-item-info";
@@ -108,7 +108,7 @@ function listCustomStats() {
         } else if (type === "Heat Pump") {
             color = "list-group-item-success";
         }
-        l.innerHTML = obj[i].model + " (Version:" + obj[i].version + " ProductID:" + obj[i].productid + " DeviceID:0x" + obj[i].deviceid + ")";
+        l.innerHTML = obj[i].model + " (DeviceID: 0x" + obj[i].deviceid + ", ProductID: " + obj[i].productid + ", Version: " + obj[i].version + ")";
         l.className = "list-group-item " + color;
         list.appendChild(l);
     }
@@ -122,7 +122,6 @@ function listCustomStats() {
         document.getElementById("b3").innerHTML = ajaxobj.boiler.b3 + " &#8451;";
         document.getElementById("b4").innerHTML = ajaxobj.boiler.b4 + " &#8451;";
         document.getElementById("b5").innerHTML = ajaxobj.boiler.b5 + " &#8451;";
-        document.getElementById("b6").innerHTML = ajaxobj.boiler.b6 + " &#8451;";
     } else {
         document.getElementById("boiler_show").style.display = "none";
     }

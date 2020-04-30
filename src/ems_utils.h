@@ -22,7 +22,7 @@ void     _renderShortValue(const char * prefix, const char * postfix, int16_t va
 void     _renderUShortValue(const char * prefix, const char * postfix, uint16_t value, uint8_t decimals = 1);
 char *   _int_to_char(char * s, uint8_t value, uint8_t div = 1);
 void     _renderIntValue(const char * prefix, const char * postfix, uint8_t value, uint8_t div = 1);
-void     _renderLongValue(const char * prefix, const char * postfix, uint32_t value);
+void     _renderLongValue(const char * prefix, const char * postfix, uint32_t value, uint8_t div = 0);
 void     _renderBoolValue(const char * prefix, uint8_t value);
 char *   _hextoa(uint8_t value, char * buffer);
 char *   _smallitoa(uint8_t value, char * buffer);

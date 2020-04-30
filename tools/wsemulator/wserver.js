@@ -97,8 +97,9 @@ var custom_configfile = {
         "listen_mode": false,
         "shower_timer": true,
         "shower_alert": false,
-        "publish_time": 0,
-        "tx_mode": 1
+        "publish_time": 10,
+        "tx_mode": 1,
+        "bus_id": 11
     }
 };
 
@@ -118,17 +119,7 @@ function sendStatus() {
         "systemload": 0,
         "mqttconnected": true,
         "mqttheartbeat": false,
-        "uptime": "0 days 0 hours 1 minute 45 seconds",
-        "mqttloghdr": "home/ems-esp/",
-        "mqttlog": [
-            { "topic": "start", "payload": "start", "time": 1565956388 },
-            { "topic": "shower_timer", "payload": "1", "time": 1565956388 },
-            { "topic": "shower_alert", "payload": "0", "time": 1565956388 },
-            { "topic": "boiler_data", "payload": "{\"wWComfort\":\"Hot\",\"wWSelTemp\":60,\"selFlowTemp\":5,\"selBurnPow\":0,\"curBurnPow\":0,\"pumpMod\":0,\"wWCurTmp\":48.4,\"wWCurFlow\":0,\"curFlowTemp\":49.3,\"retTemp\":49.3,\"sysPress\":1.8,\"boilTemp\":50.5,\"wWActivated\":\"on\",\"burnGas\":\"off\",\"heatPmp\":\"off\",\"fanWork\":\"off\",\"ignWork\":\"off\",\"wWCirc\":\"off\",\"wWHeat\":\"on\",\"burnStarts\":223397,\"burnWorkMin\":366019,\"heatWorkMin\":294036,\"ServiceCode\":\"0H\",\"ServiceCodeNumber\":203}", "time": 1565956463 },
-            { "topic": "tapwater_active", "payload": "0", "time": 1565956408 },
-            { "topic": "heating_active", "payload": "0", "time": 1565956408 },
-            { "topic": "thermostat_data", "payload": "{\"thermostat_hc\":\"1\",\"thermostat_seltemp\":15,\"thermostat_currtemp\":23,\"thermostat_mode\":\"auto\"}", "time": 1565956444 }
-        ]
+        "uptime": "0 days 0 hours 1 minute 45 seconds"
     };
 
     wss.broadcast(stats);
@@ -170,8 +161,7 @@ function sendCustomStatus() {
             "b2": "off",
             "b3": 0,
             "b4": 53,
-            "b5": 54.4,
-            "b6": 53.3
+            "b5": 54.4
         },
 
         "sm": {
