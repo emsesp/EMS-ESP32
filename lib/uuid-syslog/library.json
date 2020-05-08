@@ -1,0 +1,35 @@
+{
+	"name": "uuid-syslog",
+	"description": "Syslog service",
+	"keywords": "logging,syslog",
+	"authors": [
+		{
+			"name": "Simon Arlott",
+			"maintainer": true
+		}
+	],
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/nomis/mcu-uuid-syslog.git"
+	},
+	"version": "2.0.4",
+	"license": "GPL-3.0-or-later",
+	"homepage": "https://mcu-uuid-syslog.readthedocs.io/",
+	"export": {
+		"exclude": [
+			".travis.yml",
+			"test/*"
+		]
+	},
+	"frameworks": [
+		"arduino"
+	],
+	"dependencies": {
+		"uuid-common": "^1.0.2",
+		"uuid-log": "^2.0.3"
+	},
+	"build": {
+		"flags": "-Wall -Wextra",
+		"libLDFMode": "chain+"
+	}
+}

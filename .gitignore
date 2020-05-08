@@ -1,16 +1,12 @@
 # vscode
 .vscode
 
+# build
+build/
+
 # platformio
 .pio
-lib/readme.txt
-
-# web stuff compiled
-src/websrc/temp
-src/webh/*.gz.h
-
-# NPM directories
-node_modules
+pio_local.ini
 
 # OS specific
 .DS_Store
@@ -18,6 +14,8 @@ node_modules
 # project specfic
 scripts/stackdmp.txt
 firmware
-
-# firmware
 *.bin
+emsesp
+doc/github.txt
+doc/test_data.txt
+

@@ -1,0 +1,35 @@
+{
+	"name": "uuid-console",
+	"description": "Console shell",
+	"keywords": "console, shell, command line",
+	"authors": [
+		{
+			"name": "Simon Arlott",
+			"maintainer": true
+		}
+	],
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/nomis/mcu-uuid-console.git"
+	},
+	"version": "0.7.3",
+	"license": "GPL-3.0-or-later",
+	"homepage": "https://mcu-uuid-console.readthedocs.io/",
+	"export": {
+		"exclude": [
+			".travis.yml",
+			"test/*"
+		]
+	},
+	"frameworks": [
+		"arduino"
+	],
+	"dependencies": {
+		"uuid-common": "^1.0.0",
+		"uuid-log": "^2.0.3"
+	},
+	"build": {
+		"flags": "-Wall -Wextra",
+		"libLDFMode": "off"
+	}
+}

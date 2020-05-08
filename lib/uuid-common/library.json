@@ -1,0 +1,31 @@
+{
+	"name": "uuid-common",
+	"description": "Common utilities library",
+	"keywords": "utility, uptime",
+	"authors": [
+		{
+			"name": "Simon Arlott",
+			"maintainer": true
+		}
+	],
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/nomis/mcu-uuid-common.git"
+	},
+	"version": "1.1.0",
+	"license": "GPL-3.0-or-later",
+	"homepage": "https://mcu-uuid-common.readthedocs.io/",
+	"export": {
+		"exclude": [
+			".travis.yml",
+			"test/*"
+		]
+	},
+	"frameworks": [
+		"arduino"
+	],
+	"build": {
+		"flags": "-Wall -Wextra",
+		"libLDFMode": "off"
+	}
+}
