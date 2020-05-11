@@ -41,13 +41,11 @@
 #include "version.h"
 #include "console.h"
 
-// defaults
-#define EMSESP_DEFAULT_HOSTNAME "ems-esp2" // TODO rename to ems-esp
+// default settings - these can be customized from within the application
+#define EMSESP_DEFAULT_HOSTNAME "ems-esp"
 #define EMSESP_DEFAULT_ADMIN_PASSWORD "neo"
 #define EMSESP_DEFAULT_BUS_ID 0x0B
 #define EMSESP_DEFAULT_TX_MODE 1
-#define EMSESP_DEFAULT_NOTSET 0
-
 #define EMSESP_DEFAULT_MQTT_ENABLED true
 #define EMSESP_DEFAULT_MQTT_BASE "home"
 #define EMSESP_DEFAULT_MQTT_PORT 1883
@@ -55,6 +53,11 @@
 #define EMSESP_DEFAULT_MQTT_RETAIN false
 #define EMSESP_DEFAULT_MQTT_NESTEDJSON true
 #define EMSESP_DEFAULT_MQTT_HEARTBEAT true
+#define EMSESP_DEFAULT_EMS_READ_ONLY false
+#define EMSESP_DEFAULT_SHOWER_TIMER false
+#define EMSESP_DEFAULT_SHOWER_ALERT false
+#define EMSESP_DEFAULT_SYSLOG_INTERVAL 0
+#define EMSESP_DEFAULT_MASTER_THERMOSTAT 0 // not set
 
 #ifndef EMSESP_STANDALONE
 #define EMSESP_DEFAULT_MQTT_PUBLISH_TIME 10

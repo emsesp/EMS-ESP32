@@ -45,6 +45,17 @@ class Mixing : public EMSdevice {
     static uuid::log::Logger logger_;
 
     void console_commands();
+
+    void process_MMPLUSStatusMessage_HC(std::shared_ptr<const Telegram> telegram);
+    void process_MMPLUSStatusMessage_WWC(std::shared_ptr<const Telegram> telegram);
+    void process_MMStatusMessage(std::shared_ptr<const Telegram> telegram);
+
+  private:
+    uint16_t hc_          = EMS_VALUE_USHORT_NOTSET;
+    uint16_t flowTemp_    = EMS_VALUE_USHORT_NOTSET;
+    uint8_t  pumpMod_     = EMS_VALUE_UINT_NOTSET;
+    uint8_t  valveStatus_ = EMS_VALUE_UINT_NOTSET;
+    uint8_t  flowSetTemp_ = EMS_VALUE_UINT_NOTSET;
 };
 
 } // namespace emsesp

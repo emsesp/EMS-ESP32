@@ -54,7 +54,6 @@ class EMSESP {
     static void start();
     static void loop();
 
-    static void fetch_all_values();
     static void publish_all_values();
 
 #ifdef EMSESP_DEBUG
@@ -114,13 +113,14 @@ class EMSESP {
 
     static void console_commands();
 
+    static void fetch_device_values(const uint8_t device_id);
+    static void fetch_device_values();
 
   private:
     EMSESP() = delete;
 
     static uuid::log::Logger logger_;
 
-    static void        fetch_device_values(const uint8_t device_id);
     static bool        add_device(const uint8_t device_id, const uint8_t product_id, std::string & version, const uint8_t brand);
     static std::string device_tostring(const uint8_t device_id);
 

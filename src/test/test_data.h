@@ -37,6 +37,28 @@ void EMSESP::run_test(uuid::console::Shell & shell, const std::string & command)
         return;
     }
 
+    if (command == "solar") {
+        shell.printfln(F("Testing Solar"));
+
+        rxservice_.ems_mask(EMSbus::EMS_MASK_BUDERUS);
+
+        std::string version("1.2.3");
+        add_device(0x30, 163, version, EMSdevice::Brand::BUDERUS); // SM100
+
+        rxservice_.loop();
+
+        // SM100Monitor - type 0x0362 EMS+ - for SM100 and SM200
+        // B0 0B FF 00 02 62 00 44 02 7A 80 00 80 00 80 00 80 00 80 00 80 00 00 7C 80 00 80 00 80 00 80
+        uint8_t s1[] = {0xB0, 0x0B, 0xFF, 00, 0x02, 0x62, 00, 0x44, 0x02, 0x7A, 0x80, 00, 0x80, 0x00, 0x80, 00,
+                        0x80, 00,   0x80, 00, 0x80, 00,   00, 0x7C, 0x80, 00,   0x80, 00, 0x80, 00,   0x80, 0x89};
+        rxservice_.add(s1, sizeof(s1));
+        rxservice_.loop();
+
+        shell.loop_all();
+
+        return;
+    }
+
     if (command == "cr100") {
         shell.printfln(F("Testing CR100"));
 
@@ -259,7 +281,7 @@ void EMSESP::run_test(uuid::console::Shell & shell, const std::string & command)
         strcpy(payload, "{\"cmd\":\"temp\",\"hc\":2,\"data\":22}");
         mqtt_.incoming(topic, payload);
 
-        strcpy(topic, "home/ems-esp2/cmd");
+        strcpy(topic, "home/ems-esp/cmd");
         strcpy(payload, "restart");
         mqtt_.incoming(topic, payload);
 

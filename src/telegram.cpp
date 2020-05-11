@@ -602,4 +602,9 @@ void TxService::post_send_query() {
     }
 }
 
+// returns details of the last Tx message that was sent (for debugging)
+std::string TxService::last_tx_to_string() const {
+    return Helpers::data_to_hex(telegram_last_, telegram_last_length_);
+}
+
 } // namespace emsesp

@@ -128,7 +128,6 @@ void Shell::print_all_available_commands() {
         command_line.escape_initial_parameters(name.size());
         name.clear();
         arguments.clear();
-        print(" "); // added by proddy
         println(command_line.to_string(maximum_command_line_length()));
     });
     */

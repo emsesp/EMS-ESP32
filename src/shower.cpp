@@ -115,10 +115,9 @@ void Shower::shower_alert_start() {
 // Publish shower data
 // returns true if added to MQTT queue went ok
 void Shower::publish_values() {
-    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
-    JsonObject                                     rootShower = doc.to<JsonObject>();
-    rootShower["shower_timer"]                                = shower_timer_ ? "1" : "0";
-    rootShower["shower_alert"]                                = shower_alert_ ? "1" : "0";
+    StaticJsonDocument<90> doc;
+    doc["shower_timer"] = shower_timer_ ? "1" : "0";
+    doc["shower_alert"] = shower_alert_ ? "1" : "0";
 
     // only publish shower duration if there is a value
     char s[50];
@@ -126,9 +125,9 @@ void Shower::publish_values() {
         char buffer[16] = {0};
         strlcpy(s, Helpers::itoa(buffer, (uint8_t)((duration_ / (1000 * 60)) % 60), 10), 50);
         strlcat(s, " minutes and ", 50);
-        strlcat(s, Helpers::itoa(buffer,(uint8_t)((duration_ / 1000) % 60), 10), 50);
+        strlcat(s, Helpers::itoa(buffer, (uint8_t)((duration_ / 1000) % 60), 10), 50);
         strlcat(s, " seconds", 50);
-        rootShower["duration"] = s;
+        doc["duration"] = s;
     }
 
     Mqtt::publish("shower_data", doc);

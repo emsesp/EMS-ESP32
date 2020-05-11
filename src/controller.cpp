@@ -18,7 +18,7 @@
 
 #include "controller.h"
 
-MAKE_PSTR_WORD(controller)
+// MAKE_PSTR_WORD(controller)
 
 namespace emsesp {
 

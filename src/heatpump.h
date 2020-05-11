@@ -45,6 +45,9 @@ class Heatpump : public EMSdevice {
     static uuid::log::Logger logger_;
 
     void console_commands();
+
+    void process_HPMonitor1(std::shared_ptr<const Telegram> telegram);
+    void process_HPMonitor2(std::shared_ptr<const Telegram> telegram);
 };
 
 } // namespace emsesp

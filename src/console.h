@@ -52,7 +52,9 @@ using uuid::log::Level;
 // clang-format on
 
 // common words
+#ifdef EMSESP_DEBUG
 MAKE_PSTR_WORD(test)
+#endif
 MAKE_PSTR_WORD(exit)
 MAKE_PSTR_WORD(help)
 MAKE_PSTR_WORD(settings)

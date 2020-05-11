@@ -57,9 +57,8 @@ Shell::~Shell() {
 }
 
 void Shell::start() {
-    // Added by proddy - default log level
 #ifdef EMSESP_DEBUG
-    uuid::log::Logger::register_handler(this, uuid::log::Level::NOTICE); // was debug
+    uuid::log::Logger::register_handler(this, uuid::log::Level::DEBUG); // added by proddy
 #else
     uuid::log::Logger::register_handler(this, uuid::log::Level::NOTICE);
 #endif

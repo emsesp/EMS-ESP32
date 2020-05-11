@@ -34,13 +34,13 @@ namespace emsesp {
 		EMSESP_SETTINGS_SIMPLE(std::string, "", wifi_password, "", (), "") \
         EMSESP_SETTINGS_CUSTOM(std::string, "", syslog_host, "", (), "") \
 		EMSESP_SETTINGS_ENUM(uuid::log::Level, "", syslog_level, "", (), uuid::log::Level::OFF) \
-		EMSESP_SETTINGS_SIMPLE(unsigned long, "", syslog_mark_interval, "", (), 0) \
+		EMSESP_SETTINGS_SIMPLE(unsigned long, "", syslog_mark_interval, "", (), EMSESP_DEFAULT_SYSLOG_INTERVAL) \
         EMSESP_SETTINGS_SIMPLE(uint8_t, "", ems_bus_id, "", (), EMSESP_DEFAULT_BUS_ID) \
         EMSESP_SETTINGS_SIMPLE(uint8_t, "", ems_tx_mode, "", (), EMSESP_DEFAULT_TX_MODE) \
-        EMSESP_SETTINGS_SIMPLE(bool, "", ems_read_only, "", (), false) \
-        EMSESP_SETTINGS_SIMPLE(bool, "", shower_timer, "", (), false) \
-        EMSESP_SETTINGS_SIMPLE(bool, "", shower_alert, "", (), false) \
-        EMSESP_SETTINGS_SIMPLE(uint8_t, "", master_thermostat, "", (), EMSESP_DEFAULT_NOTSET) \
+        EMSESP_SETTINGS_SIMPLE(bool, "", ems_read_only, "", (), EMSESP_DEFAULT_EMS_READ_ONLY) \
+        EMSESP_SETTINGS_SIMPLE(bool, "", shower_timer, "", (), EMSESP_DEFAULT_SHOWER_TIMER) \
+        EMSESP_SETTINGS_SIMPLE(bool, "", shower_alert, "", (), EMSESP_DEFAULT_SHOWER_ALERT) \
+        EMSESP_SETTINGS_SIMPLE(uint8_t, "", master_thermostat, "", (), EMSESP_DEFAULT_MASTER_THERMOSTAT) \
         EMSESP_SETTINGS_SIMPLE(uint16_t, "", mqtt_publish_time, "", (), EMSESP_DEFAULT_MQTT_PUBLISH_TIME) \
 		EMSESP_SETTINGS_SIMPLE(std::string, "", mqtt_ip, "", (), "") \
 		EMSESP_SETTINGS_SIMPLE(std::string, "", mqtt_user, "", (), "") \

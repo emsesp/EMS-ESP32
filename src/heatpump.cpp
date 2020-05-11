@@ -18,7 +18,14 @@
 
 #include "heatpump.h"
 
-MAKE_PSTR_WORD(heatpump)
+// MAKE_PSTR_WORD(heatpump)
+
+/*
+ example telegrams 0x32B, 0x37B
+    "38 10 FF 00 03 7B 08 24 00 4B", 
+    "38 10 FF 00 03 2B 00 C7 07 C3 01",          
+    "38 10 FF 00 03 2B 00 D1 08 2A 01",                                                        
+*/
 
 namespace emsesp {
 
@@ -28,20 +35,25 @@ uuid::log::Logger Heatpump::logger_{F_(logger_name), uuid::log::Facility::CONSOL
 
 Heatpump::Heatpump(uint8_t device_type, uint8_t device_id, uint8_t product_id, const std::string & version, const std::string & name, uint8_t flags, uint8_t brand)
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
+    DEBUG_LOG(F("Registering new Heat Pump module with device ID 0x%02X"), device_id);
+
     // telegram handlers
-    // register_telegram_type(EMS_TYPE_XX, "XX", false, std::bind(&Heatpump::process_XX, this, _1));
+    register_telegram_type(0x047B, F("HP1"), true, std::bind(&Heatpump::process_HPMonitor1, this, _1));
+    register_telegram_type(0x042B, F("HP2"), true, std::bind(&Heatpump::process_HPMonitor2, this, _1));
 
     // MQTT callbacks
     // register_mqtt_topic("cmd", std::bind(&Heatpump::cmd, this, _1));
-
 }
 
+// context submenu
 void Heatpump::add_context_menu() {
 }
 
 // display all values into the shell console
 void Heatpump::show_values(uuid::console::Shell & shell) {
     EMSdevice::show_values(shell); // always call this to show header
+
+    shell.println();
 }
 
 // publish values via MQTT
@@ -56,5 +68,26 @@ bool Heatpump::updated_values() {
 // add console commands
 void Heatpump::console_commands() {
 }
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
+/*
+ * Type 0x42B- HeatPump Monitor 1
+ * e.g. "38 10 FF 00 03 2B 00 D1 08 2A 01"
+ */
+void Heatpump::process_HPMonitor1(std::shared_ptr<const Telegram> telegram) {
+    // still to implement
+}
+
+/*
+ * Type 0x47B - HeatPump Monitor 2
+ * e.g. "38 10 FF 00 03 7B 08 24 00 4B"
+ */
+void Heatpump::process_HPMonitor2(std::shared_ptr<const Telegram> telegram) {
+    // still to implement
+}
+
+#pragma GCC diagnostic pop
 
 } // namespace emsesp

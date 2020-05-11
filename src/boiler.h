@@ -32,9 +32,6 @@
 #include "helpers.h"
 #include "mqtt.h"
 
-MAKE_PSTR(logger_name2, "boiler")
-
-
 namespace emsesp {
 
 class Boiler : public EMSdevice {
@@ -53,10 +50,10 @@ class Boiler : public EMSdevice {
 
     uint8_t last_boilerState = 0xFF; // remember last state of heating and warm water on/off
 
-    static constexpr uint8_t EMS_TYPE_UBAParameterWW         = 0x33;
-    static constexpr uint8_t EMS_TYPE_UBAFunctionTest        = 0x1D;
-    static constexpr uint8_t EMS_TYPE_UBAFlags               = 0x35;
-    static constexpr uint8_t EMS_TYPE_UBASetPoints           = 0x1A;
+    static constexpr uint8_t EMS_TYPE_UBAParameterWW  = 0x33;
+    static constexpr uint8_t EMS_TYPE_UBAFunctionTest = 0x1D;
+    static constexpr uint8_t EMS_TYPE_UBAFlags        = 0x35;
+    static constexpr uint8_t EMS_TYPE_UBASetPoints    = 0x1A;
 
     static constexpr uint8_t EMS_BOILER_SELFLOWTEMP_HEATING = 20; // was originally 70, changed to 30 for issue #193, then to 20 with issue #344
 
@@ -122,6 +119,10 @@ class Boiler : public EMSdevice {
     uint8_t tap_water_active_ = EMS_VALUE_BOOL_NOTSET; // Hot tap water is on/off
     uint8_t heating_active_   = EMS_VALUE_BOOL_NOTSET; // Central heating is on/off
 
+    // heatpump boilers
+    uint8_t hpModulation_ = EMS_VALUE_UINT_NOTSET; // heatpump modulation in %
+    uint8_t hpSpeed_      = EMS_VALUE_UINT_NOTSET; // speed 0-100 %
+
     void process_UBAParameterWW(std::shared_ptr<const Telegram> telegram);
     void process_UBAMonitorFast(std::shared_ptr<const Telegram> telegram);
     void process_UBATotalUptime(std::shared_ptr<const Telegram> telegram);
@@ -136,7 +137,10 @@ class Boiler : public EMSdevice {
     void process_MC10Status(std::shared_ptr<const Telegram> telegram);
     void process_UBAMaintenanceStatus(std::shared_ptr<const Telegram> telegram);
     void process_UBAMaintenanceSettings(std::shared_ptr<const Telegram> telegram);
+
     void process_UBADHWStatus(std::shared_ptr<const Telegram> telegram);
+    void process_HPMonitor1(std::shared_ptr<const Telegram> telegram);
+    void process_HPMonitor2(std::shared_ptr<const Telegram> telegram);
 
     void check_active();
 

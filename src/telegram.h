@@ -82,7 +82,6 @@ class Telegram {
     void read_value8(int16_t & param, const uint8_t index) const;
     void read_value(int8_t & param, const uint8_t index) const;
 
-
   private:
     int8_t _getDataPosition(const uint8_t index) const;
 };
@@ -287,6 +286,9 @@ class TxService : public EMSbus {
     const std::deque<QueuedTxTelegram> queue() const {
         return tx_telegrams_;
     }
+
+    std::string last_tx_to_string() const;
+
 
   private:
     static constexpr uint8_t MAXIMUM_TX_RETRIES = 3;

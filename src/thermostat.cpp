@@ -118,7 +118,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
 
     // if we're on auto mode, register this first one we find as we may find multiple
     // or if its the master thermostat we defined
-    if (((num_devices == 1) && (actual_master_thermostat == EMSESP_DEFAULT_NOTSET)) || (master_thermostat == device_id)) {
+    if (((num_devices == 1) && (actual_master_thermostat == EMSESP_DEFAULT_MASTER_THERMOSTAT)) || (master_thermostat == device_id)) {
         EMSESP::actual_master_thermostat(device_id);
         DEBUG_LOG(F("Registering new thermostat with device ID 0x%02X (as the master)"), device_id);
 
@@ -150,7 +150,6 @@ void Thermostat::add_context_menu() {
 // general MQTT command for controlling thermostat
 // e.g. { "cmd":"daytemp2", "data": 20 }
 void Thermostat::thermostat_cmd(const char * message) {
-    // convert JSON and get the command
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
     DeserializationError                           error = deserializeJson(doc, message);
     if (error) {
@@ -296,18 +295,22 @@ void Thermostat::publish_values() {
     // optional, add external temp
     if (flags == EMS_DEVICE_FLAG_RC35) {
         if (dampedoutdoortemp != EMS_VALUE_INT_NOTSET) {
-            rootThermostat["dampedtemp"] = dampedoutdoortemp;
+            doc["dampedtemp"] = dampedoutdoortemp;
         }
         if (tempsensor1 != EMS_VALUE_USHORT_NOTSET) {
-            rootThermostat["tempsensor1"] = (float)tempsensor1 / 10;
+            doc["tempsensor1"] = (float)tempsensor1 / 10;
         }
         if (tempsensor2 != EMS_VALUE_USHORT_NOTSET) {
-            rootThermostat["tempsensor1"] = (float)tempsensor2 / 10;
+            doc["tempsensor1"] = (float)tempsensor2 / 10;
         }
     }
 
+    // go through all the heating circuits
     for (const auto & hc : heating_circuits_) {
-        // only send if we have an actual setpoint temp temperature values
+        if ((hc->setpoint_roomTemp == EMS_VALUE_SHORT_NOTSET) || (hc->curr_roomTemp == EMS_VALUE_SHORT_NOTSET)) {
+            break; // skip this HC as we don't have the temperature values yet
+        }
+
         has_data = true;
         if (mqtt_nested_json_) {
             // create nested json for each HC
@@ -367,8 +370,12 @@ void Thermostat::publish_values() {
             dataThermostat["designtemp"] = hc->designtemp;
         }
 
-        dataThermostat["mode"]     = mode_tostring(hc->get_mode(flags));
-        dataThermostat["modetype"] = mode_tostring(hc->get_mode_type(flags));
+        if (hc->mode != EMS_VALUE_UINT_NOTSET) {
+            dataThermostat["mode"] = mode_tostring(hc->get_mode(flags));
+        }
+        if (hc->mode_type != EMS_VALUE_UINT_NOTSET) {
+            dataThermostat["modetype"] = mode_tostring(hc->get_mode_type(flags));
+        }
 
         // if its not nested, send immediately
         if (!mqtt_nested_json_) {
@@ -376,18 +383,14 @@ void Thermostat::publish_values() {
             char s[3]; // for formatting strings
             strlcpy(topic, "thermostat_data", 30);
             strlcat(topic, Helpers::itoa(s, hc->hc_num()), 30); // append hc to topic
-            char data[EMSESP_MAX_JSON_SIZE];
-            serializeJson(doc, data);
-            Mqtt::publish(topic, data);
+            Mqtt::publish(topic, doc);
             return;
         }
     }
 
     // if we're using nested json, send all in one go
     if (mqtt_nested_json_ && has_data) {
-        char data[EMSESP_MAX_JSON_SIZE];
-        serializeJson(doc, data);
-        Mqtt::publish("thermostat_data", data);
+        Mqtt::publish("thermostat_data", doc);
     }
 }
 
@@ -1164,7 +1167,7 @@ void Thermostat::console_commands() {
                                        [](Shell & shell, const std::vector<std::string> & arguments) {
                                            uint8_t value;
                                            if (arguments.empty()) {
-                                               value = EMSESP_DEFAULT_NOTSET;
+                                               value = EMSESP_DEFAULT_MASTER_THERMOSTAT;
                                            } else {
                                                value = Helpers::hextoint(arguments.front().c_str());
                                            }

@@ -66,35 +66,12 @@ namespace uuid {
 #define COLOR_BRIGHT_CYAN "\x1B[0;96m"
 #define COLOR_BRIGHT_WHITE "\x1B[0;97m"
 #define COLOR_UNDERLINE "\x1B[4m"
-
-/*
-Background Black: \u001b[40m
-Background Red: \u001b[41m
-Background Green: \u001b[42m
-Background Yellow: \u001b[43m
-Background Blue: \u001b[44m
-Background Magenta: \u001b[45m
-Background Cyan: \u001b[46m
-Background White: \u001b[47m
-With the bright versions being:
-
-Background Bright Black: \u001b[40;1m
-Background Bright Red: \u001b[41;1m
-Background Bright Green: \u001b[42;1m
-Background Bright Yellow: \u001b[43;1m
-Background Bright Blue: \u001b[44;1m
-Background Bright Magenta: \u001b[45;1m
-Background Bright Cyan: \u001b[46;1m
-Background Bright White: \u001b[47;1m
-*/
-
 #define COLOR_BRIGHT_RED_BACKGROUND "\x1B[41;1m"
-
 
 namespace log {
 
 /**
- * Severity level of log messages. Proddy added a VERBOSE
+ * Severity level of log messages. Proddy switches trace & debug
  *
  * @since 1.0.0
  */
@@ -340,7 +317,7 @@ class Logger {
 	 *
 	 * @since 1.0.0
 	 */
-    static constexpr size_t MAX_LOG_LENGTH = 255; // proddy note, kept at 255
+    static constexpr size_t MAX_LOG_LENGTH = 255;
 
     /**
 	 * Create a new logger with the given name and logging facility.

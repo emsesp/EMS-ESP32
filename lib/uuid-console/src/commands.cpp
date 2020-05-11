@@ -79,10 +79,17 @@ void Commands::add_command(unsigned int                 context,
 }
 
 // added by proddy
-void Commands::remove_context_commands(unsigned int context) {
-     commands_.erase(context);
-     /*
+// note we should really iterate and free up the lambda code and any flashstrings
+void Commands::remove_all_commands() {
+    commands_.clear();
+}
 
+// added by proddy
+// note we should really iterate and free up the lambda code and any flashstrings
+void Commands::remove_context_commands(unsigned int context) {
+    commands_.erase(context);
+
+    /*
     auto commands = commands_.equal_range(context);
     for (auto command_it = commands.first; command_it != commands.second; command_it++) {
         shell.printf("Got: ");

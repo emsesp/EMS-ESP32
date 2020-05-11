@@ -23,7 +23,6 @@ MAKE_PSTR_WORD(tx_mode)
 MAKE_PSTR_WORD(read_only)
 MAKE_PSTR_WORD(emsbus)
 MAKE_PSTR_WORD(devices)
-MAKE_PSTR_WORD(deep)
 MAKE_PSTR_WORD(send)
 MAKE_PSTR_WORD(telegram)
 
@@ -56,9 +55,9 @@ Network   EMSESP::network_;   // WiFi
 Shower    EMSESP::shower_;    // Shower logic
 
 // static/common variables
-uint8_t  EMSESP::actual_master_thermostat_ = EMSESP_DEFAULT_NOTSET; // which thermostat leads when multiple found
-uint16_t EMSESP::trace_watch_id_           = 0;                     // for when log is TRACE
-bool     EMSESP::tap_water_active_         = false;                 // for when Boiler states we having running warm water. used in Shower()
+uint8_t  EMSESP::actual_master_thermostat_ = EMSESP_DEFAULT_MASTER_THERMOSTAT; // which thermostat leads when multiple found
+uint16_t EMSESP::trace_watch_id_           = 0;                                // for when log is TRACE
+bool     EMSESP::tap_water_active_         = false;                            // for when Boiler states we having running warm water. used in Shower()
 bool     EMSESP::ems_read_only_;
 
 #ifdef EMSESP_DEBUG
@@ -66,19 +65,16 @@ bool     EMSESP::ems_read_only_;
 #endif
 
 // for each associated EMS device go and request data values
-void EMSESP::fetch_all_values() {
-    for (const auto & emsdevice : emsdevices) {
-        if (emsdevice) {
-            emsdevice->fetch_values();
-        }
-    }
+void EMSESP::fetch_device_values() {
+    fetch_device_values(0); // fetch all
 }
 
 // for a specific EMS device go and request data values
+// or if device_id is 0 it will fetch from all known devices
 void EMSESP::fetch_device_values(const uint8_t device_id) {
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice) {
-            if (emsdevice->is_device_id(device_id)) {
+            if ((device_id == 0) || emsdevice->is_device_id(device_id)) {
                 emsdevice->fetch_values();
                 return;
             }
@@ -478,7 +474,7 @@ void EMSESP::show_devices(uuid::console::Shell & shell) {
     shell.println();
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice) {
-            shell.printf(F("%s%s%s"), COLOR_BOLD_ON, emsdevice->to_string().c_str(), COLOR_BOLD_OFF);
+            shell.printf(F("%s: %s"), emsdevice->device_type_name().c_str(), emsdevice->to_string().c_str());
             if ((emsdevice->device_type() == EMSdevice::DeviceType::THERMOSTAT) && (emsdevice->device_id() == actual_master_thermostat())) {
                 shell.printf(F(" ** master device **"));
             }
@@ -584,7 +580,7 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
                 txservice_.send_poll(); // close the bus
             } else {
 #ifdef EMSESP_DEBUG
-                logger_.err(F("Waiting for Tx ACK (1 or 4) but got 0x%02X"), first_value);
+                logger_.err(F("Expecting Tx ACK (1/4) but got 0x%02X. Tx:%s"), first_value, txservice_.last_tx_to_string().c_str());
 #endif
             }
 
@@ -611,7 +607,7 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
     }
 
     // check for poll, if so, send Tx from the queue immediately
-    // if ht3 poll must be ems_bus_id else if buderus poll must be (ems_bus_id | 0x80)
+    // if ht3 poll must be ems_bus_id else if Buderus poll must be (ems_bus_id | 0x80)
     if ((length == 1) && ((first_value ^ 0x80 ^ rxservice_.ems_mask()) == txservice_.ems_bus_id())) {
         EMSbus::last_bus_activity(millis()); // set the flag indication the EMS bus is active
         txservice_.send();
@@ -729,7 +725,9 @@ void EMSESP::console_commands() {
                                        CommandFlags::USER,
                                        flash_string_vector{F_(send), F_(telegram)},
                                        flash_string_vector{F_(data_mandatory)},
-                                       [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) { EMSESP::send_raw_telegram(arguments.front().c_str()); });
+                                       [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) {
+                                           EMSESP::send_raw_telegram(arguments.front().c_str());
+                                       });
 
     EMSESPShell::commands->add_command(ShellContext::EMS,
                                        CommandFlags::USER,
@@ -784,7 +782,6 @@ void EMSESP::start() {
     system_.start();
     network_.start();
     console_.start();
-    mqtt_.start();
     sensors_.start();
     rxservice_.start();
     txservice_.start();

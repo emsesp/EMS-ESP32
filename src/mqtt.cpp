@@ -47,11 +47,9 @@ MAKE_PSTR(logger_name, "mqtt")
 namespace emsesp {
 
 // exposing static stuff to compiler/linker
-
 #ifndef EMSESP_STANDALONE
 AsyncMqttClient Mqtt::mqttClient_;
 #endif
-
 std::vector<Mqtt::MQTTFunction>     Mqtt::mqtt_functions_;
 bool                                Mqtt::mqtt_retain_;
 uint8_t                             Mqtt::mqtt_qos_;
@@ -59,6 +57,7 @@ std::string                         Mqtt::mqtt_hostname_; // copy of hostname
 std::string                         Mqtt::mqtt_base_;
 uint16_t                            Mqtt::mqtt_publish_fails_    = 0;
 size_t                              Mqtt::maximum_mqtt_messages_ = Mqtt::MAX_MQTT_MESSAGES;
+bool                                Mqtt::force_publish_         = false;
 uint16_t                            Mqtt::mqtt_message_id_       = 0;
 std::deque<Mqtt::QueuedMqttMessage> Mqtt::mqtt_messages_;
 char                                will_topic_[Mqtt::MQTT_TOPIC_MAX_SIZE]; // because MQTT library keeps only char pointer
@@ -87,20 +86,22 @@ void Mqtt::flush_message_queue() {
 }
 
 // restart MQTT services
-void Mqtt ::reconnect() {
+void Mqtt::reconnect() {
 #ifndef EMSESP_STANDALONE
     mqttClient_.disconnect();
 #endif
-
     DEBUG_LOG(F("Reconnecting..."));
-
-    // flush_message_queue(); // clean the queues
-    // start();
 }
 
 // MQTT setup
 void Mqtt::start() {
-    // get some settings and store them locally. This is also because the asyncmqtt library uses references
+    // exit if already initialized
+    if (mqtt_start_) {
+        return;
+    }
+    mqtt_start_ = true;
+
+    // get some settings and store them locally. This is also because the asyncmqtt library uses references for char *
     Settings settings;
     mqtt_enabled_      = settings.mqtt_enabled();
     mqtt_hostname_     = settings.hostname();
@@ -119,9 +120,7 @@ void Mqtt::start() {
         mqtt_enabled_ = false;
     }
 
-    if (!mqtt_init_) {
-        init(); // set up call backs. only done once.
-    }
+    init(); // set up call backs. only done once.
 
 #ifdef EMSESP_STANDALONE
     mqtt_enabled_ = true; // force it on for debugging standalone
@@ -141,17 +140,24 @@ void Mqtt::start() {
     mqtt_connecting_      = false;
     mqtt_last_connection_ = millis();
     mqtt_reconnect_delay_ = Mqtt::MQTT_RECONNECT_DELAY_MIN;
+
+    DEBUG_LOG(F("Configuring MQTT service..."));
 }
 
 // MQTT init callbacks
 // This should only be executed once
 void Mqtt::init() {
+    if (mqtt_init_) {
+        return;
+    }
+    mqtt_init_ = true;
+
 #ifndef EMSESP_STANDALONE
     mqttClient_.onConnect([this](bool sessionPresent) { on_connect(); });
 
     mqttClient_.onDisconnect([this](AsyncMqttClientDisconnectReason reason) {
         if (reason == AsyncMqttClientDisconnectReason::TCP_DISCONNECTED) {
-            logger_.err(F("Cannot connect to server"));
+            logger_.err(F("Disconnected from server"));
         }
         if (reason == AsyncMqttClientDisconnectReason::MQTT_IDENTIFIER_REJECTED) {
             logger_.err(F("Server identifier Rejected"));
@@ -169,6 +175,7 @@ void Mqtt::init() {
         // Reset reconnection delay
         mqtt_last_connection_ = millis();
         mqtt_connecting_      = false;
+        mqtt_start_           = false; // will force a new start()
     });
 
     // mqttClient.onSubscribe([this](uint16_t packetId, uint8_t qos) { DEBUG_LOG(F("Subscribe ACK for PID %d"), packetId); });
@@ -179,8 +186,6 @@ void Mqtt::init() {
         on_message(topic, payload, len);
     });
 #endif
-
-    mqtt_init_ = true;
 }
 
 Mqtt::MQTTFunction::MQTTFunction(uint8_t device_id, const std::string && topic, mqtt_function_p mqtt_function)
@@ -192,8 +197,7 @@ Mqtt::MQTTFunction::MQTTFunction(uint8_t device_id, const std::string && topic, 
 // subscribe to an MQTT topic, and store the associated callback function
 void Mqtt::subscribe(const uint8_t device_id, const std::string & topic, mqtt_function_p cb) {
     mqtt_functions_.emplace_back(device_id, std::move(topic), cb); // register a call back function for a specific telegram type
-
-    queue_subscribe_message(topic); // add subscription to queue
+    queue_subscribe_message(topic);                                // add subscription to queue
 }
 
 // subscribe to an MQTT topic, and store the associated callback function. For generic functions not tied to a device
@@ -201,7 +205,9 @@ void Mqtt::subscribe(const std::string & topic, mqtt_function_p cb) {
     subscribe(0, topic, cb); // no device_id needed, if generic to EMS-ESP
 }
 
-// Main loops. Checks for connection, sends out top item on publish queue
+// Main MQTT loop
+// Checks for connection, establishes a connection if not
+// sends out top item on publish queue
 void Mqtt::loop() {
     // exit if MQTT is not enabled, there is no WIFI or we're still in the MQTT connection process
 #ifndef EMSESP_STANDALONE
@@ -214,6 +220,13 @@ void Mqtt::loop() {
 
     // if we're already connected....
     if (connected()) {
+        if (force_publish_) {
+            force_publish_ = false;
+            send_heartbeat();             // create a heartbeat payload
+            EMSESP::publish_all_values(); // add sensors and mqtt to queue
+            publish_all_queue();          // publish everything on queue
+        }
+
         // send out heartbeat
         uint32_t currentMillis = millis();
         if ((currentMillis - last_heartbeat_ > MQTT_HEARTBEAT_INTERVAL)) {
@@ -227,7 +240,7 @@ void Mqtt::loop() {
             EMSESP::publish_all_values();
         }
 
-        // publish top item from MQTT queue - this happens every 200ms to stop flooding
+        // publish top item from MQTT queue to stop flooding
         if ((uint32_t)(currentMillis - last_mqtt_poll_) > MQTT_PUBLISH_WAIT) {
             last_mqtt_poll_ = currentMillis;
             publish_queue();
@@ -236,24 +249,23 @@ void Mqtt::loop() {
         return;
     }
 
-    // We need to reconnect. Check when was the last time we tried.
-    if (millis() - mqtt_last_connection_ < mqtt_reconnect_delay_) {
+    // We need to reconnect. Check when was the last time we tried this
+    if (mqtt_last_connection_ && (millis() - mqtt_last_connection_ < mqtt_reconnect_delay_)) {
         return;
     }
 
-    mqtt_connecting_ = true; // we're doing a connection
+    mqtt_connecting_ = true; // we're doing a connection now
 
-    // Increase the reconnect delay
+    // Increase the reconnect delay for next time
     mqtt_reconnect_delay_ += MQTT_RECONNECT_DELAY_STEP;
     if (mqtt_reconnect_delay_ > MQTT_RECONNECT_DELAY_MAX) {
         mqtt_reconnect_delay_ = MQTT_RECONNECT_DELAY_MAX;
     }
 
-    // Connect to the MQTT broker
-    logger_.info(F("Connecting to MQTT server..."));
-
 #ifndef EMSESP_STANDALONE
-    mqttClient_.connect();
+    start();
+    logger_.info(F("Connecting to MQTT server..."));
+    mqttClient_.connect(); // Connect to the MQTT broker
 #endif
 }
 
@@ -270,7 +282,7 @@ void Mqtt::show_mqtt(uuid::console::Shell & shell) {
         return;
     }
 
-    shell.printfln(F("MQTT queue (%d items):"), mqtt_messages_.size());
+    shell.printfln(F("MQTT queue (%d messages):"), mqtt_messages_.size());
 
     for (const auto & message : mqtt_messages_) {
         auto content = message.content_;
@@ -400,14 +412,11 @@ char * Mqtt::make_topic(char * result, const std::string & topic) {
 
 // send online appended with the version information as JSON
 void Mqtt::send_start_topic() {
-    Settings settings;
-
-    StaticJsonDocument<200> doc; // length is actually about 60
-    JsonObject              payload = doc.to<JsonObject>();
-    payload["event"]                = "start";
-    payload["version"]              = settings.app_version();
+    StaticJsonDocument<90> doc;
+    doc["event"]   = "start";
+    doc["version"] = Settings().app_version();
 #ifndef EMSESP_STANDALONE
-    payload["IP"] = WiFi.localIP().toString();
+    doc["IP"] = WiFi.localIP().toString();
 #endif
 
     publish("info", doc, false); // send with retain off
@@ -434,13 +443,12 @@ void Mqtt::send_heartbeat() {
         return;
     }
 
-    StaticJsonDocument<100> doc; // length is 76
-    JsonObject              rootHeartbeat = doc.to<JsonObject>();
+    StaticJsonDocument<90> doc;
 
-    rootHeartbeat["rssid"]            = Network::wifi_quality();
-    rootHeartbeat["uptime"]           = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
-    rootHeartbeat["freemem"]          = System::free_mem();
-    rootHeartbeat["mqttpublishfails"] = mqtt_publish_fails_;
+    doc["rssid"]            = Network::wifi_quality();
+    doc["uptime"]           = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
+    doc["freemem"]          = System::free_mem();
+    doc["mqttpublishfails"] = mqtt_publish_fails_;
 
     publish("heartbeat", doc, false); // send to MQTT with retain off
 }
@@ -529,6 +537,13 @@ void Mqtt::publish(const char * topic, const bool value) {
     queue_publish_message(topic, value ? "1" : "0", mqtt_retain_);
 }
 
+// publish all queued messages to MQTT
+void Mqtt::publish_all_queue() {
+    while (!mqtt_messages_.empty()) {
+        publish_queue();
+    }
+}
+
 // take top from queue and try and publish it
 // assumes there is an MQTT connection
 void Mqtt::publish_queue() {
@@ -576,12 +591,14 @@ void Mqtt::publish_queue() {
     if (packet_id == 0) {
         // it failed. if we retried n times, give up. remove from queue
         if (mqtt_message.retry_count_ == (MQTT_PUBLISH_MAX_RETRY - 1)) {
-            DEBUG_LOG(F("Failed to publish to %s after %d attemps, payload %s"), full_topic, mqtt_message.retry_count_ + 1, message->payload.c_str());
+            logger_.err(F("Failed to publish to %s after %d attempts"), full_topic, mqtt_message.retry_count_ + 1);
             mqtt_publish_fails_++;      // increment failure counter
             mqtt_messages_.pop_front(); // delete
             return;
         } else {
             mqtt_messages_.front().retry_count_++;
+            // logger_.err(F("Failed to publish to %s. Trying again, #%d"), full_topic, mqtt_message.retry_count_ + 1);
+            DEBUG_LOG(F("Failed to publish to %s. Trying again, #%d"), full_topic, mqtt_message.retry_count_ + 1);
             return; // leave on queue for next time so it gets republished
         }
     }
@@ -728,11 +745,11 @@ void Mqtt::console_commands() {
                                        });
 
     EMSESPShell::commands->add_command(ShellContext::MQTT,
-                                       CommandFlags::ADMIN,
+                                       CommandFlags::USER,
                                        flash_string_vector{F_(publish)},
-                                       [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
+                                       [=](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
                                            shell.printfln(F("Publishing all values to MQTT"));
-                                           EMSESP::publish_all_values();
+                                           force_publish_ = true;
                                        });
 
     EMSESPShell::commands->add_command(ShellContext::MQTT,

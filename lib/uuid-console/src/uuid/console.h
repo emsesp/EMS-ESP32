@@ -1313,6 +1313,7 @@ class Commands {
     void for_each_available_command(Shell & shell, apply_function f) const;
 
     void remove_context_commands(unsigned int context); // added by proddy
+    void remove_all_commands();                         // added by proddy
 
   private:
     /**

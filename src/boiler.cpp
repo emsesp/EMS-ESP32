@@ -49,21 +49,24 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     DEBUG_LOG(F("Registering new Boiler with device ID 0x%02X"), device_id);
 
     // the telegram handlers...
-    register_telegram_type(0x18, F("UBAMonitorFast"), true, std::bind(&Boiler::process_UBAMonitorFast, this, _1));                  // 0x18
-    register_telegram_type(0x19, F("UBAMonitorSlow"), true, std::bind(&Boiler::process_UBAMonitorSlow, this, _1));                  // 0x19
-    register_telegram_type(0x34, F("UBAMonitorWW"), false, std::bind(&Boiler::process_UBAMonitorWW, this, _1));                     // 0x34
-    register_telegram_type(0x1C, F("UBAMaintenanceStatus"), false, std::bind(&Boiler::process_UBAMaintenanceStatus, this, _1));     // 0x1C
-    register_telegram_type(0x2A, F("MC10Status"), false, std::bind(&Boiler::process_MC10Status, this, _1));                         // 0x2A
-    register_telegram_type(0x33, F("UBAParameterWW"), true, std::bind(&Boiler::process_UBAParameterWW, this, _1));                  // 0x33
-    register_telegram_type(0x14, F("UBATotalUptime"), true, std::bind(&Boiler::process_UBATotalUptime, this, _1));                  // 0x14
-    register_telegram_type(0x35, F("UBAFlags"), false, std::bind(&Boiler::process_UBAFlags, this, _1));                             // 0x35
-    register_telegram_type(0x15, F("UBAMaintenanceSettings"), false, std::bind(&Boiler::process_UBAMaintenanceSettings, this, _1)); // 0x15
-    register_telegram_type(0x16, F("UBAParameters"), true, std::bind(&Boiler::process_UBAParameters, this, _1));                    // 0x16
-    register_telegram_type(0x1A, F("UBASetPoints"), false, std::bind(&Boiler::process_UBASetPoints, this, _1));                     // 0x1A
-    register_telegram_type(0xD1, F("UBAOutdoorTemp"), false, std::bind(&Boiler::process_UBAOutdoorTemp, this, _1));                 // 0xD1
-    register_telegram_type(0xE4, F("UBAMonitorFastPlus"), false, std::bind(&Boiler::process_UBAMonitorFastPlus, this, _1));         // 0xE4
-    register_telegram_type(0xE5, F("UBAMonitorSlowPlus"), false, std::bind(&Boiler::process_UBAMonitorSlowPlus, this, _1));         // 0xE5
-    register_telegram_type(0xE9, F("UBADHWStatus"), false, std::bind(&Boiler::process_UBADHWStatus, this, _1));                     // 0xE9
+    register_telegram_type(0x18, F("UBAMonitorFast"), true, std::bind(&Boiler::process_UBAMonitorFast, this, _1));
+    register_telegram_type(0x19, F("UBAMonitorSlow"), true, std::bind(&Boiler::process_UBAMonitorSlow, this, _1));
+    register_telegram_type(0x34, F("UBAMonitorWW"), false, std::bind(&Boiler::process_UBAMonitorWW, this, _1));
+    register_telegram_type(0x1C, F("UBAMaintenanceStatus"), false, std::bind(&Boiler::process_UBAMaintenanceStatus, this, _1));
+    register_telegram_type(0x2A, F("MC10Status"), false, std::bind(&Boiler::process_MC10Status, this, _1));
+    register_telegram_type(0x33, F("UBAParameterWW"), true, std::bind(&Boiler::process_UBAParameterWW, this, _1));
+    register_telegram_type(0x14, F("UBATotalUptime"), true, std::bind(&Boiler::process_UBATotalUptime, this, _1));
+    register_telegram_type(0x35, F("UBAFlags"), false, std::bind(&Boiler::process_UBAFlags, this, _1));
+    register_telegram_type(0x15, F("UBAMaintenanceSettings"), false, std::bind(&Boiler::process_UBAMaintenanceSettings, this, _1));
+    register_telegram_type(0x16, F("UBAParameters"), true, std::bind(&Boiler::process_UBAParameters, this, _1));
+    register_telegram_type(0x1A, F("UBASetPoints"), false, std::bind(&Boiler::process_UBASetPoints, this, _1));
+    register_telegram_type(0xD1, F("UBAOutdoorTemp"), false, std::bind(&Boiler::process_UBAOutdoorTemp, this, _1));
+    register_telegram_type(0xE4, F("UBAMonitorFastPlus"), false, std::bind(&Boiler::process_UBAMonitorFastPlus, this, _1));
+    register_telegram_type(0xE5, F("UBAMonitorSlowPlus"), false, std::bind(&Boiler::process_UBAMonitorSlowPlus, this, _1));
+
+    register_telegram_type(0xE9, F("UBADHWStatus"), false, std::bind(&Boiler::process_UBADHWStatus, this, _1));
+    register_telegram_type(0xE3, F("HeatPumpMonitor1"), true, std::bind(&Boiler::process_HPMonitor1, this, _1));
+    register_telegram_type(0xE5, F("HeatPumpMonitor2"), true, std::bind(&Boiler::process_HPMonitor2, this, _1));
 
     // MQTT callbacks
     register_mqtt_topic("boiler_cmd", std::bind(&Boiler::boiler_cmd, this, _1));
@@ -73,6 +76,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     register_mqtt_topic("boiler_cmd_wwtemp", std::bind(&Boiler::boiler_cmd_wwtemp, this, _1));
 }
 
+// add submenu context
 void Boiler::add_context_menu() {
     EMSESPShell::commands->add_command(ShellContext::MAIN,
                                        CommandFlags::USER,
@@ -83,8 +87,8 @@ void Boiler::add_context_menu() {
                                        });
 }
 
+// boiler_cmd topic
 void Boiler::boiler_cmd(const char * message) {
-    // convert JSON and get the command
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
     DeserializationError                           error = deserializeJson(doc, message);
     if (error) {
@@ -157,148 +161,155 @@ void Boiler::boiler_cmd_wwtemp(const char * message) {
 void Boiler::publish_values() {
     const size_t        capacity = JSON_OBJECT_SIZE(47); // must recalculate if more objects addded https://arduinojson.org/v6/assistant/
     DynamicJsonDocument doc(capacity);
-    JsonObject          rootBoiler = doc.to<JsonObject>();
 
     char s[10]; // for formatting strings
 
     if (wWComfort_ == 0x00) {
-        rootBoiler["wWComfort"] = "Hot";
+        doc["wWComfort"] = "Hot";
     } else if (wWComfort_ == 0xD8) {
-        rootBoiler["wWComfort"] = "Eco";
+        doc["wWComfort"] = "Eco";
     } else if (wWComfort_ == 0xEC) {
-        rootBoiler["wWComfort"] = "Intelligent";
+        doc["wWComfort"] = "Intelligent";
     }
 
     if (wWSelTemp_ != EMS_VALUE_UINT_NOTSET) {
-        rootBoiler["wWSelTemp"] = wWSelTemp_;
+        doc["wWSelTemp"] = wWSelTemp_;
     }
     if (wWDisinfectTemp_ != EMS_VALUE_UINT_NOTSET) {
-        rootBoiler["wWDisinfectionTemp"] = wWDisinfectTemp_;
+        doc["wWDisinfectionTemp"] = wWDisinfectTemp_;
     }
     if (selFlowTemp_ != EMS_VALUE_UINT_NOTSET) {
-        rootBoiler["selFlowTemp"] = selFlowTemp_;
+        doc["selFlowTemp"] = selFlowTemp_;
     }
     if (selBurnPow_ != EMS_VALUE_UINT_NOTSET) {
-        rootBoiler["selBurnPow"] = selBurnPow_;
+        doc["selBurnPow"] = selBurnPow_;
     }
     if (curBurnPow_ != EMS_VALUE_UINT_NOTSET) {
-        rootBoiler["curBurnPow"] = curBurnPow_;
+        doc["curBurnPow"] = curBurnPow_;
     }
     if (pumpMod_ != EMS_VALUE_UINT_NOTSET) {
-        rootBoiler["pumpMod"] = pumpMod_;
+        doc["pumpMod"] = pumpMod_;
     }
     if (wWCircPump_ != EMS_VALUE_BOOL_NOTSET) {
-        rootBoiler["wWCircPump"] = wWCircPump_;
+        doc["wWCircPump"] = wWCircPump_;
     }
     if (wWCircPumpType_ != EMS_VALUE_BOOL_NOTSET) {
-        rootBoiler["wWCiPuType"] = wWCircPumpType_;
+        doc["wWCiPuType"] = wWCircPumpType_;
     }
     if (wWCircPumpMode_ != EMS_VALUE_UINT_NOTSET) {
-        rootBoiler["wWCiPuMode"] = wWCircPumpMode_;
+        doc["wWCiPuMode"] = wWCircPumpMode_;
     }
     if (extTemp_ != EMS_VALUE_SHORT_NOTSET) {
-        rootBoiler["outdoorTemp"] = (float)extTemp_ / 10;
+        doc["outdoorTemp"] = (float)extTemp_ / 10;
     }
     if (wWCurTmp_ != EMS_VALUE_USHORT_NOTSET) {
-        rootBoiler["wWCurTmp"] = (float)wWCurTmp_ / 10;
+        doc["wWCurTmp"] = (float)wWCurTmp_ / 10;
     }
     if (wWCurFlow_ != EMS_VALUE_UINT_NOTSET) {
-        rootBoiler["wWCurFlow"] = (float)wWCurFlow_ / 10;
+        doc["wWCurFlow"] = (float)wWCurFlow_ / 10;
     }
     if (curFlowTemp_ != EMS_VALUE_USHORT_NOTSET) {
-        rootBoiler["curFlowTemp"] = (float)curFlowTemp_ / 10;
+        doc["curFlowTemp"] = (float)curFlowTemp_ / 10;
     }
     if (retTemp_ != EMS_VALUE_USHORT_NOTSET) {
-        rootBoiler["retTemp"] = (float)retTemp_ / 10;
+        doc["retTemp"] = (float)retTemp_ / 10;
     }
     if (switchTemp_ != EMS_VALUE_USHORT_NOTSET) {
-        rootBoiler["switchTemp"] = (float)switchTemp_ / 10;
+        doc["switchTemp"] = (float)switchTemp_ / 10;
     }
     if (sysPress_ != EMS_VALUE_UINT_NOTSET) {
-        rootBoiler["sysPress"] = (float)sysPress_ / 10;
+        doc["sysPress"] = (float)sysPress_ / 10;
     }
     if (boilTemp_ != EMS_VALUE_USHORT_NOTSET) {
-        rootBoiler["boilTemp"] = (float)boilTemp_ / 10;
+        doc["boilTemp"] = (float)boilTemp_ / 10;
     }
     if (wwStorageTemp1_ != EMS_VALUE_USHORT_NOTSET) {
-        rootBoiler["wwStorageTemp1"] = (float)wwStorageTemp1_ / 10;
+        doc["wwStorageTemp1"] = (float)wwStorageTemp1_ / 10;
     }
     if (wwStorageTemp2_ != EMS_VALUE_USHORT_NOTSET) {
-        rootBoiler["wwStorageTemp2"] = (float)wwStorageTemp2_ / 10;
+        doc["wwStorageTemp2"] = (float)wwStorageTemp2_ / 10;
     }
     if (exhaustTemp_ != EMS_VALUE_USHORT_NOTSET) {
-        rootBoiler["exhaustTemp"] = (float)exhaustTemp_ / 10;
+        doc["exhaustTemp"] = (float)exhaustTemp_ / 10;
     }
     if (wWActivated_ != EMS_VALUE_BOOL_NOTSET) {
-        rootBoiler["wWActivated"] = Helpers::render_value(s, wWActivated_, EMS_VALUE_BOOL);
+        doc["wWActivated"] = Helpers::render_value(s, wWActivated_, EMS_VALUE_BOOL);
     }
     if (wWOneTime_ != EMS_VALUE_BOOL_NOTSET) {
-        rootBoiler["wWOnetime"] = Helpers::render_value(s, wWOneTime_, EMS_VALUE_BOOL);
+        doc["wWOnetime"] = Helpers::render_value(s, wWOneTime_, EMS_VALUE_BOOL);
     }
     if (wWDesinfecting_ != EMS_VALUE_BOOL_NOTSET) {
-        rootBoiler["wWDesinfecting"] = Helpers::render_value(s, wWDesinfecting_, EMS_VALUE_BOOL);
+        doc["wWDesinfecting"] = Helpers::render_value(s, wWDesinfecting_, EMS_VALUE_BOOL);
     }
     if (wWReadiness_ != EMS_VALUE_BOOL_NOTSET) {
-        rootBoiler["wWReady"] = Helpers::render_value(s, wWReadiness_, EMS_VALUE_BOOL);
+        doc["wWReady"] = Helpers::render_value(s, wWReadiness_, EMS_VALUE_BOOL);
     }
     if (wWRecharging_ != EMS_VALUE_BOOL_NOTSET) {
-        rootBoiler["wWRecharge"] = Helpers::render_value(s, wWRecharging_, EMS_VALUE_BOOL);
+        doc["wWRecharge"] = Helpers::render_value(s, wWRecharging_, EMS_VALUE_BOOL);
     }
     if (wWTemperatureOK_ != EMS_VALUE_BOOL_NOTSET) {
-        rootBoiler["wWTempOK"] = Helpers::render_value(s, wWTemperatureOK_, EMS_VALUE_BOOL);
+        doc["wWTempOK"] = Helpers::render_value(s, wWTemperatureOK_, EMS_VALUE_BOOL);
     }
     if (wWCirc_ != EMS_VALUE_BOOL_NOTSET) {
-        rootBoiler["wWCirc"] = Helpers::render_value(s, wWCirc_, EMS_VALUE_BOOL);
+        doc["wWCirc"] = Helpers::render_value(s, wWCirc_, EMS_VALUE_BOOL);
     }
     if (burnGas_ != EMS_VALUE_BOOL_NOTSET) {
-        rootBoiler["burnGas"] = Helpers::render_value(s, burnGas_, EMS_VALUE_BOOL);
+        doc["burnGas"] = Helpers::render_value(s, burnGas_, EMS_VALUE_BOOL);
     }
     if (flameCurr_ != EMS_VALUE_USHORT_NOTSET) {
-        rootBoiler["flameCurr"] = (float)(int16_t)flameCurr_ / 10;
+        doc["flameCurr"] = (float)(int16_t)flameCurr_ / 10;
     }
     if (heatPmp_ != EMS_VALUE_BOOL_NOTSET) {
-        rootBoiler["heatPmp"] = Helpers::render_value(s, heatPmp_, EMS_VALUE_BOOL);
+        doc["heatPmp"] = Helpers::render_value(s, heatPmp_, EMS_VALUE_BOOL);
     }
     if (fanWork_ != EMS_VALUE_BOOL_NOTSET) {
-        rootBoiler["fanWork"] = Helpers::render_value(s, fanWork_, EMS_VALUE_BOOL);
+        doc["fanWork"] = Helpers::render_value(s, fanWork_, EMS_VALUE_BOOL);
     }
     if (ignWork_ != EMS_VALUE_BOOL_NOTSET) {
-        rootBoiler["ignWork"] = Helpers::render_value(s, ignWork_, EMS_VALUE_BOOL);
+        doc["ignWork"] = Helpers::render_value(s, ignWork_, EMS_VALUE_BOOL);
     }
     if (wWHeat_ != EMS_VALUE_BOOL_NOTSET) {
-        rootBoiler["wWHeat"] = Helpers::render_value(s, wWHeat_, EMS_VALUE_BOOL);
+        doc["wWHeat"] = Helpers::render_value(s, wWHeat_, EMS_VALUE_BOOL);
     }
     if (heating_temp_ != EMS_VALUE_UINT_NOTSET) {
-        rootBoiler["heating_temp"] = heating_temp_;
+        doc["heating_temp"] = heating_temp_;
     }
     if (pump_mod_max_ != EMS_VALUE_UINT_NOTSET) {
-        rootBoiler["pump_mod_max"] = pump_mod_max_;
+        doc["pump_mod_max"] = pump_mod_max_;
     }
     if (pump_mod_min_ != EMS_VALUE_UINT_NOTSET) {
-        rootBoiler["pump_mod_min"] = pump_mod_min_;
+        doc["pump_mod_min"] = pump_mod_min_;
     }
     if (wWStarts_ != EMS_VALUE_ULONG_NOTSET) {
-        rootBoiler["wWStarts"] = wWStarts_;
+        doc["wWStarts"] = wWStarts_;
     }
     if (wWWorkM_ != EMS_VALUE_ULONG_NOTSET) {
-        rootBoiler["wWWorkM"] = wWWorkM_;
+        doc["wWWorkM"] = wWWorkM_;
     }
     if (UBAuptime_ != EMS_VALUE_ULONG_NOTSET) {
-        rootBoiler["UBAuptime"] = UBAuptime_;
+        doc["UBAuptime"] = UBAuptime_;
     }
     if (burnStarts_ != EMS_VALUE_ULONG_NOTSET) {
-        rootBoiler["burnStarts"] = burnStarts_;
+        doc["burnStarts"] = burnStarts_;
     }
     if (burnWorkMin_ != EMS_VALUE_ULONG_NOTSET) {
-        rootBoiler["burnWorkMin"] = burnWorkMin_;
+        doc["burnWorkMin"] = burnWorkMin_;
     }
     if (heatWorkMin_ != EMS_VALUE_ULONG_NOTSET) {
-        rootBoiler["heatWorkMin"] = heatWorkMin_;
+        doc["heatWorkMin"] = heatWorkMin_;
     }
 
     if (serviceCode_ != EMS_VALUE_USHORT_NOTSET) {
-        rootBoiler["ServiceCode"]       = serviceCodeChar_;
-        rootBoiler["ServiceCodeNumber"] = serviceCode_;
+        doc["serviceCode"]       = serviceCodeChar_;
+        doc["serviceCodeNumber"] = serviceCode_;
+    }
+
+    // heatpump specific
+    if (hpModulation_ != EMS_VALUE_UINT_NOTSET) {
+        doc["pumpmodulation"] = hpModulation_;
+    }
+    if (hpSpeed_ != EMS_VALUE_UINT_NOTSET) {
+        doc["pumpspeed"] = hpSpeed_;
     }
 
 #ifdef EMSESP_DEBUG
@@ -408,6 +419,14 @@ void Boiler::show_values(uuid::console::Shell & shell) {
     }
     if (UBAuptime_ != EMS_VALUE_ULONG_NOTSET) {
         shell.printfln(F("  Total UBA working time: %d days %d hours %d minutes"), UBAuptime_ / 1440, (UBAuptime_ % 1440) / 60, UBAuptime_ % 60);
+    }
+
+    if (hpModulation_ != EMS_VALUE_UINT_NOTSET) {
+        print_value(shell, F("Heat Pump modulation"), F_(percent), Helpers::render_value(buffer, hpModulation_, 1));
+    }
+
+    if (hpSpeed_ != EMS_VALUE_UINT_NOTSET) {
+        print_value(shell, F("Heat Pump speed"), F_(percent), Helpers::render_value(buffer, hpSpeed_, 1));
     }
 
     shell.println();
@@ -583,6 +602,39 @@ void Boiler::process_UBAMonitorSlowPlus(std::shared_ptr<const Telegram> telegram
     telegram->read_value(pumpMod_, 25); // or is it switchTemp ?
 }
 
+/*
+ * Type 0xE3 - HeatPump Monitor 1
+ */
+void Boiler::process_HPMonitor1(std::shared_ptr<const Telegram> telegram) {
+    telegram->read_value(hpModulation_, 13);
+}
+
+/*
+ * Type 0xE5 - HeatPump Monitor 2
+ */
+void Boiler::process_HPMonitor2(std::shared_ptr<const Telegram> telegram) {
+    telegram->read_value(hpSpeed_, 25);
+}
+
+// 0xE9 - DHW Status
+// e.g. 08 00 E9 00 37 01 F6 01 ED 00 00 00 00 41 3C 00 00 00 00 00 00 00 00 00 00 00 00 37 00 00 00 (CRC=77) #data=27
+void Boiler::process_UBADHWStatus(std::shared_ptr<const Telegram> telegram) {
+    telegram->read_value(wWSetTmp_, 0);
+    telegram->read_value(wWCurTmp_, 1);
+    telegram->read_value(wWCurTmp2_, 3);
+    telegram->read_value(wWWorkM_, 17);
+    telegram->read_value(wWStarts_, 14);
+    telegram->read_value(wWOneTime_, 12, 2);
+    telegram->read_value(wWDesinfecting_, 12, 3);
+    telegram->read_value(wWReadiness_, 12, 4);
+    telegram->read_value(wWRecharging_, 13, 4);
+    telegram->read_value(wWTemperatureOK_, 13, 5);
+    telegram->read_value(wWActivated_, 20);
+    telegram->read_value(wWCircPump_, 13, 2);
+    telegram->read_value(wWSelTemp_, 10);
+    telegram->read_value(wWDisinfectTemp_, 9);
+}
+
 /**
  * UBAOutdoorTemp - type 0xD1 - external temperature EMS+
  */
@@ -592,11 +644,6 @@ void Boiler::process_UBAOutdoorTemp(std::shared_ptr<const Telegram> telegram) {
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-
-// 0xE9 - DHW Status
-void Boiler::process_UBADHWStatus(std::shared_ptr<const Telegram> telegram) {
-}
-
 
 // UBASetPoint 0x1A
 // not yet implemented

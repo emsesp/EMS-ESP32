@@ -50,6 +50,10 @@ void EMSESPShell::stopped() {
         logger().log(LogLevel::INFO, LogFacility::AUTH, F("Admin session closed on console %s"), console_name().c_str());
     }
     logger().log(LogLevel::INFO, LogFacility::CONSOLE, F("User session closed on console %s"), console_name().c_str());
+
+    // remove all custom contexts
+    commands->remove_all_commands();
+    _console_commands_loaded = false; // make sure they got loaded next time a console is opened
 }
 
 // show welcome banner
@@ -87,7 +91,9 @@ void EMSESPShell::add_console_commands() {
         return;
     }
 
-    commands->remove_context_commands(ShellContext::MAIN); // just in case, remove everything
+    // just in case, remove everything
+    // commands->remove_context_commands(ShellContext::MAIN);
+    commands->remove_all_commands();
 
     commands->add_command(ShellContext::MAIN,
                           CommandFlags::USER,
@@ -96,7 +102,7 @@ void EMSESPShell::add_console_commands() {
                               shell.printfln(F("Refreshing console and fetching device data"));
                               _console_commands_loaded = false;
                               add_console_commands();
-                              EMSESP::fetch_all_values();
+                              EMSESP::fetch_device_values();
                           });
 
     commands->add_command(ShellContext::MAIN,
@@ -119,7 +125,7 @@ void EMSESPShell::add_console_commands() {
                           });
 
     /*
-     * add the submenus...
+     * add the submenu contexts...
      */
 
     // MQTT
@@ -150,7 +156,7 @@ void EMSESPShell::add_console_commands() {
                           });
 
     // add all the context menus for the connected devices
-    // this assumes they have been loaded
+    // this assumes they devices have been detected and registered
     EMSESP::add_context_menu();
 
     enter_custom_context(ShellContext::MAIN); // add su, exit and help
@@ -223,7 +229,7 @@ void EMSESPShell::enter_custom_context(unsigned int context) {
                 uint16_t watch_id = 0; // no watch ID set
                 if ((arguments.size() == 2) && (level == uuid::log::Level::TRACE)) {
                     watch_id = Helpers::hextoint(arguments[1].c_str());
-                    shell.printfln(("Tracing only telegrams that match a device/telegram type ID of 0x%02X"), watch_id);
+                    shell.printfln(("Tracing only telegrams that match a device ID/telegram type ID of 0x%02X"), watch_id);
                 }
                 emsesp::EMSESP::trace_watch_id(watch_id);
             }
@@ -405,10 +411,10 @@ void Console::start() {
     }
 
 // always start the telnet service
+// default idle is 10 minutes, default write timeout is 0 (automatic)
 // note, this must be started after the network/wifi for ESP32 otherwise it'll crash
 #ifndef EMSESP_STANDALONE
     telnet_.start();
-    // default idle is 10 minutes, default write timeout is 0 (automatic)
     // telnet_.default_write_timeout(1000); // in ms, socket timeout 1 second
 #endif
 }
@@ -422,6 +428,8 @@ void Console::loop() {
 #endif
 
     Shell::loop_all();
+
+    // delay(0); // in EMS-ESP 1.9.5 this helped with stability
 }
 
 } // namespace emsesp

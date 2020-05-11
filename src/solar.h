@@ -45,6 +45,26 @@ class Solar : public EMSdevice {
     static uuid::log::Logger logger_;
 
     void console_commands();
+
+    int16_t  collectorTemp_          = EMS_VALUE_SHORT_NOTSET; // collector temp (TS1)
+    int16_t  bottomTemp_             = EMS_VALUE_SHORT_NOTSET; // bottom temp (TS2)
+    int16_t  bottomTemp2_            = EMS_VALUE_SHORT_NOTSET; // bottom temp cylinder 2 (TS5)
+    uint8_t  pumpModulation_         = EMS_VALUE_UINT_NOTSET;  // modulation solar pump
+    uint8_t  pump_                   = EMS_VALUE_BOOL_NOTSET;  // pump active
+    uint8_t  valveStatus_            = EMS_VALUE_BOOL_NOTSET;  // valve status (VS2)
+    int16_t  setpoint_maxBottomTemp_ = EMS_VALUE_SHORT_NOTSET; // setpoint for maximum collector temp
+    uint32_t energyLastHour_         = EMS_VALUE_ULONG_NOTSET;
+    uint32_t energyToday_            = EMS_VALUE_ULONG_NOTSET;
+    uint32_t energyTotal_            = EMS_VALUE_ULONG_NOTSET;
+    uint32_t pumpWorkMin_            = EMS_VALUE_ULONG_NOTSET; // Total solar pump operating time
+
+    void process_SM10Monitor(std::shared_ptr<const Telegram> telegram);
+    void process_SM100Monitor(std::shared_ptr<const Telegram> telegram);
+    void process_SM100Status(std::shared_ptr<const Telegram> telegram);
+    void process_SM100Status2(std::shared_ptr<const Telegram> telegram);
+    void process_SM100Energy(std::shared_ptr<const Telegram> telegram);
+    void process_ISM1StatusMessage(std::shared_ptr<const Telegram> telegram);
+    void process_ISM1Set(std::shared_ptr<const Telegram> telegram);
 };
 
 } // namespace emsesp

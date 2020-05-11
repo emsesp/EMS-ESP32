@@ -37,17 +37,15 @@ uint8_t               tx_mode_     = EMS_TXMODE_DEFAULT;
 // Important: must not use ICACHE_FLASH_ATTR
 //
 void ICACHE_RAM_ATTR EMSuart::emsuart_rx_intr_handler(void * para) {
-    static uint8_t length;
+    static uint8_t length   = 0;
+    static bool    rx_idle_ = true;
     static uint8_t uart_buffer[EMS_MAXBUFFERSIZE + 2];
 
-    // TODO check if need UART Rx idle/busy
-    /*
     // is a new buffer? if so init the thing for a new telegram
-    if (EMS_Sys_Status.emsRxStatus == EMS_RX_STATUS_IDLE) {
-        EMS_Sys_Status.emsRxStatus = EMS_RX_STATUS_BUSY; // status set to busy
-        length                     = 0;
+    if (rx_idle_) {
+        rx_idle_ = false; // status set to busy
+        length   = 0;
     }
-    */
 
     // fill IRQ buffer, by emptying Rx FIFO
     if (USIS(EMSUART_UART) & ((1 << UIFF) | (1 << UITO) | (1 << UIBD))) {
@@ -68,8 +66,7 @@ void ICACHE_RAM_ATTR EMSuart::emsuart_rx_intr_handler(void * para) {
 
         pEMSRxBuf->length = (length > EMS_MAXBUFFERSIZE) ? EMS_MAXBUFFERSIZE : length;
         os_memcpy((void *)pEMSRxBuf->buffer, (void *)&uart_buffer, pEMSRxBuf->length); // copy data into transfer buffer, including the BRK 0x00 at the end
-        length = 0;
-        // EMS_Sys_Status.emsRxStatus = EMS_RX_STATUS_IDLE; // TODO check set the status flag stating BRK has been received and we can start a new package
+        rx_idle_ = true;        // check set the status flag stating BRK has been received and we can start a new package
         ETS_UART_INTR_ENABLE(); // re-enable UART interrupts
 
         system_os_post(EMSUART_recvTaskPrio, 0, 0); // call emsuart_recvTask() at next opportunity

@@ -39,9 +39,9 @@
 
 #include <uuid/log.h>
 
-#define EMSESP_MAX_JSON_SIZE 800        // for json docs from ems devices
-#define EMSESP_MAX_JSON_SIZE_SMALL 200  // for smaller json docs from ems devices
-#define EMSESP_MAX_JSON_SIZE_MEDIUM 200 // for smaller json docs from ems devices
+#define EMSESP_MAX_JSON_SIZE_SMALL 200  // for smaller json docs
+#define EMSESP_MAX_JSON_SIZE_MEDIUM 800 // for smaller json docs from ems devices
+#define EMSESP_MAX_JSON_SIZE_LARGE 1500 // for large json docs from ems devices, like boiler or thermostat data
 
 namespace emsesp {
 
@@ -61,7 +61,6 @@ struct MqttMessage {
 
 class Mqtt {
   public:
-    void start();
     void loop();
     void send_heartbeat();
 
@@ -108,6 +107,7 @@ class Mqtt {
     };
     static std::deque<QueuedMqttMessage> mqtt_messages_;
 
+    void start();
 
 #ifndef EMSESP_STANDALONE
     static AsyncMqttClient mqttClient_;
@@ -120,8 +120,8 @@ class Mqtt {
     static uint16_t         mqtt_message_id_;
 
     static constexpr uint8_t  MQTT_QUEUE_MAX_SIZE       = 50;
-    static constexpr uint32_t MQTT_PUBLISH_WAIT         = 200; // delay between sending publishes, although it should be asynchronous!
-    static constexpr uint8_t  MQTT_PUBLISH_MAX_RETRY    = 4;   // max retries for giving up on publishing
+    static constexpr uint32_t MQTT_PUBLISH_WAIT         = 750; // delay between sending publishes, although it should be asynchronous!
+    static constexpr uint8_t  MQTT_PUBLISH_MAX_RETRY    = 3;   // max retries for giving up on publishing
     static constexpr uint8_t  MQTT_KEEP_ALIVE           = 60;
     static constexpr uint32_t MQTT_RECONNECT_DELAY_MIN  = 2000;   // Try to reconnect in 2 seconds upon disconnection
     static constexpr uint32_t MQTT_RECONNECT_DELAY_STEP = 3000;   // Increase the reconnect delay in 3 seconds after each failed attempt
@@ -140,6 +140,7 @@ class Mqtt {
     void          on_connect();
     static char * make_topic(char * result, const std::string & topic);
     void          publish_queue();
+    void          publish_all_queue();
     void          send_start_topic();
     static void   reconnect();
     void          init();
@@ -157,29 +158,31 @@ class Mqtt {
     };
     static std::vector<MQTTFunction> mqtt_functions_; // list of mqtt callbacks for all devices
 
-    static std::string mqtt_hostname_;
-    static std::string mqtt_base_;
-    static uint8_t     mqtt_qos_;
-
     static uint16_t mqtt_publish_fails_;
 
-    uint32_t mqtt_last_connection_;
+    uint32_t mqtt_last_connection_ = 0;
     uint32_t mqtt_reconnect_delay_ = MQTT_RECONNECT_DELAY_MIN;
     bool     mqtt_init_            = false;
-    bool     mqtt_connecting_;
+    bool     mqtt_start_           = false;
+    bool     mqtt_connecting_      = false;
     uint16_t mqtt_publish_time_;
 
     uint32_t last_heartbeat_ = 0;
     uint32_t last_mqtt_poll_ = 0;
     uint32_t last_publish_   = 0;
 
+    static bool force_publish_;
+
     // settings
-    std::string mqtt_ip_;
-    std::string mqtt_user_;
-    std::string mqtt_password_;
-    bool        mqtt_enabled_;
-    bool        mqtt_heartbeat_;
-    uint16_t    mqtt_port_;
+    static std::string mqtt_hostname_;
+    static std::string mqtt_base_;
+    static uint8_t     mqtt_qos_;
+    std::string        mqtt_ip_;
+    std::string        mqtt_user_;
+    std::string        mqtt_password_;
+    bool               mqtt_enabled_ = true; // start off assuming we want to connect
+    bool               mqtt_heartbeat_;
+    uint16_t           mqtt_port_;
 };
 
 } // namespace emsesp

@@ -58,7 +58,6 @@ int      System::reset_counter_;
 
 // handle generic system related MQTT commands
 void System::mqtt_commands(const char * message) {
-    // convert JSON and get the command
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
     DeserializationError                           error = deserializeJson(doc, message);
     if (error) {

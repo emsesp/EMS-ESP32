@@ -219,25 +219,31 @@ void Sensors::publish_values() {
 
     // if we're not using nested JSON, send each sensor out seperately
     // sensor1, sensor2 etc...
-    // e.g. {"sensor1":{"id":"28-EA41-9497-0E03-5F","temp":"21.81"}}
+    // e.g. sensor_1 = {"temp":20.2}
     if (!mqtt_nestedjson_) {
-        StaticJsonDocument<100> doc; // length of payload is 60 bytes
-        JsonObject              sensors = doc.to<JsonObject>();
+        StaticJsonDocument<20> doc;
         for (const auto & device : devices_) {
             char s[5];
-            sensors["temp"] = Helpers::render_value(s, device.temperature_c_, 2);
+            doc["temp"] = Helpers::render_value(s, device.temperature_c_, 2);
             char topic[60];                // sensors{1-n}
             strlcpy(topic, "sensor_", 50); // create topic
             strlcat(topic, device.to_string().c_str(), 50);
             Mqtt::publish(topic, doc);
+            doc.clear(); // clear json doc so we can reuse the buffer again
         }
         return;
     }
 
     // group all sensors together - https://github.com/proddy/EMS-ESP/issues/327
-    const size_t        capacity = JSON_OBJECT_SIZE(num_devices * 60); // must recalculate if more objects addded https://arduinojson.org/v6/assistant/
-    DynamicJsonDocument doc(capacity);
-    JsonObject          sensors = doc.to<JsonObject>();
+    // https://arduinojson.org/v6/assistant/
+    //  sensors = {
+    // "sensor1":{"id":"28-EA41-9497-0E03-5F","temp":"23.25"},
+    // "sensor2":{"id":"28-EA41-9497-0E03-5F","temp":"23.25"},
+    // "sensor3":{"id":"28-EA41-9497-0E03-5F","temp":"23.25"},
+    // "sensor4":{"id":"28-EA41-9497-0E03-5F","temp":"23.25"}
+    // }
+    // const size_t        capacity = num_devices * JSON_OBJECT_SIZE(2) + JSON_OBJECT_SIZE(num_devices);
+    DynamicJsonDocument doc(100 * num_devices);
 
     uint8_t i = 1;
     for (const auto & device : devices_) {
@@ -245,7 +251,7 @@ void Sensors::publish_values() {
         strlcpy(sensorID, "sensor", 10);
         char s[5];
         strlcat(sensorID, Helpers::itoa(s, i++), 10);
-        JsonObject dataSensor = sensors.createNestedObject(sensorID);
+        JsonObject dataSensor = doc.createNestedObject(sensorID);
         dataSensor["id"]      = device.to_string();
         dataSensor["temp"]    = Helpers::render_value(s, device.temperature_c_, 2);
     }
