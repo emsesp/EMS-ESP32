@@ -428,11 +428,9 @@ void Boiler::show_values(uuid::console::Shell & shell) {
     if (hpSpeed_ != EMS_VALUE_UINT_NOTSET) {
         print_value(shell, F("Heat Pump speed"), F_(percent), Helpers::render_value(buffer, hpSpeed_, 1));
     }
-
-    shell.println();
 }
 
-/**
+/*
  * Check if hot tap water or heating is active
  * If a value has changed, post it immediately to MQTT so we get real time data
  */
@@ -510,7 +508,7 @@ void Boiler::process_UBAMonitorFast(std::shared_ptr<const Telegram> telegram) {
     check_active();
 }
 
-/**
+/*
  * UBATotalUptime - type 0x14 - total uptime
  * received only after requested (not broadcasted)
  */
@@ -518,7 +516,7 @@ void Boiler::process_UBATotalUptime(std::shared_ptr<const Telegram> telegram) {
     telegram->read_value(UBAuptime_, 0);
 }
 
-/**
+/*
  * UBAParameters - type 0x16
  */
 void Boiler::process_UBAParameters(std::shared_ptr<const Telegram> telegram) {
@@ -527,7 +525,7 @@ void Boiler::process_UBAParameters(std::shared_ptr<const Telegram> telegram) {
     telegram->read_value(pump_mod_min_, 10);
 }
 
-/**
+/*
  * UBAMonitorWW - type 0x34 - warm water monitor. 19 bytes long
  * received every 10 seconds
  */
@@ -545,7 +543,7 @@ void Boiler::process_UBAMonitorWW(std::shared_ptr<const Telegram> telegram) {
     telegram->read_value(wWTemperatureOK_, 5, 5);
 }
 
-/**
+/*
  * UBAMonitorFastPlus - type 0xE4 - central heating monitor EMS+
  */
 void Boiler::process_UBAMonitorFastPlus(std::shared_ptr<const Telegram> telegram) {
@@ -570,7 +568,7 @@ void Boiler::process_UBAMonitorFastPlus(std::shared_ptr<const Telegram> telegram
     check_active();
 }
 
-/**
+/*
  * UBAMonitorSlow - type 0x19 - central heating monitor part 2 (27 bytes long)
  * received every 60 seconds
  * e.g. 08 00 19 00 80 00 02 41 80 00 00 00 00 00 03 91 7B 05 B8 40 00 00 00 04 92 AD 00 5E EE 80 00
@@ -588,7 +586,7 @@ void Boiler::process_UBAMonitorSlow(std::shared_ptr<const Telegram> telegram) {
     telegram->read_value(heatWorkMin_, 19);
 }
 
-/**
+/*
  * UBAMonitorSlowPlus - type 0xE5 - central heating monitor EMS+
  */
 void Boiler::process_UBAMonitorSlowPlus(std::shared_ptr<const Telegram> telegram) {
@@ -635,7 +633,7 @@ void Boiler::process_UBADHWStatus(std::shared_ptr<const Telegram> telegram) {
     telegram->read_value(wWDisinfectTemp_, 9);
 }
 
-/**
+/*
  * UBAOutdoorTemp - type 0xD1 - external temperature EMS+
  */
 void Boiler::process_UBAOutdoorTemp(std::shared_ptr<const Telegram> telegram) {

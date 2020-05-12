@@ -52,8 +52,6 @@ void Heatpump::add_context_menu() {
 // display all values into the shell console
 void Heatpump::show_values(uuid::console::Shell & shell) {
     EMSdevice::show_values(shell); // always call this to show header
-
-    shell.println();
 }
 
 // publish values via MQTT

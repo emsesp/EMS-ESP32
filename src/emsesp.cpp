@@ -194,6 +194,8 @@ void EMSESP::show_values(uuid::console::Shell & shell) {
             shell.println();
         }
     }
+
+    shell.println();
 }
 
 // publish all values from each EMS device to MQTT
@@ -301,7 +303,7 @@ std::string EMSESP::pretty_telegram(std::shared_ptr<const Telegram> telegram) {
     return str;
 }
 
-/**
+/*
  * Type 0x07 - UBADevices - shows us the connected EMS devices
  * e.g. 08 00 07 00 0B 80 00 00 00 00 00 00 00 00 00 00 00
  * Junkers has 15 bytes of data

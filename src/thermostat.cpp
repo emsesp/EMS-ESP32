@@ -676,8 +676,6 @@ void Thermostat::show_values(uuid::console::Shell & shell) {
                 shell.printfln(F("  Building: heavy"));
             }
         }
-
-        shell.println();
     }
 }
 

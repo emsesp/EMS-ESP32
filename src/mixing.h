@@ -50,12 +50,19 @@ class Mixing : public EMSdevice {
     void process_MMPLUSStatusMessage_WWC(std::shared_ptr<const Telegram> telegram);
     void process_MMStatusMessage(std::shared_ptr<const Telegram> telegram);
 
+    enum class Type {
+        NONE,
+        HC, // heating circuit
+        WWC // warm water circuit
+    };
+
   private:
     uint16_t hc_          = EMS_VALUE_USHORT_NOTSET;
     uint16_t flowTemp_    = EMS_VALUE_USHORT_NOTSET;
     uint8_t  pumpMod_     = EMS_VALUE_UINT_NOTSET;
-    uint8_t  valveStatus_ = EMS_VALUE_UINT_NOTSET;
+    uint8_t  status_      = EMS_VALUE_UINT_NOTSET;
     uint8_t  flowSetTemp_ = EMS_VALUE_UINT_NOTSET;
+    Type     type_        = Type::NONE;
 };
 
 } // namespace emsesp

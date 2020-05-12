@@ -339,6 +339,32 @@ void EMSESP::run_test(uuid::console::Shell & shell, const std::string & command)
         return;
     }
 
+    if (command == "mixing") {
+        shell.printfln(F("Mixing Solar"));
+
+        rxservice_.ems_mask(EMSbus::EMS_MASK_BUDERUS);
+
+        std::string version("1.2.3");
+        add_device(0x28, 160, version, EMSdevice::Brand::BUDERUS); // MM100, WWC
+        add_device(0x29, 161, version, EMSdevice::Brand::BUDERUS); // MM200, WWC
+
+        rxservice_.loop();
+
+        // WWC1 on 0x29
+        uint8_t m1[] = {0xA9, 0x00, 0xFF, 0x00, 0x02, 0x32, 0x02, 0x6C, 0x00, 0x3C, 0x00, 0x3C, 0x3C, 0x46, 0x02, 0x03, 0x03, 0x00, 0x3C, 0x57};
+        rxservice_.add(m1, sizeof(m1));
+        rxservice_.loop();
+
+        // WWC2 on 0x28
+        uint8_t m2[] = {0xA8, 0x00, 0xFF, 0x00, 0x02, 0x31, 0x02, 0x35, 0x00, 0x3C, 0x00, 0x3C, 0x3C, 0x46, 0x02, 0x03, 0x03, 0x00, 0x3C, 0x71};
+        rxservice_.add(m2, sizeof(m2));
+        rxservice_.loop();
+
+        shell.loop_all();
+
+        return;
+    }
+
     shell.printfln(F("[Test] Unknown test command"));
 }
 

@@ -18,7 +18,6 @@
 
 #include "solar.h"
 
-// MAKE_PSTR_WORD(solar)
 MAKE_PSTR(kwh, "kWh")
 MAKE_PSTR(wh, "Wh")
 
@@ -69,8 +68,6 @@ void Solar::show_values(uuid::console::Shell & shell) {
     print_value(shell, F("Energy last hour"), F_(wh), Helpers::render_value(buffer, energyLastHour_, 10));
     print_value(shell, F("Energy today"), F_(wh), Helpers::render_value(buffer, energyToday_, 0)); // no division
     print_value(shell, F("Energy total"), F_(kwh), Helpers::render_value(buffer, energyTotal_, 10));
-
-    shell.println();
 }
 
 // publish values via MQTT

@@ -18,8 +18,6 @@
 
 #include "mixing.h"
 
-// MAKE_PSTR_WORD(mixing)
-
 namespace emsesp {
 
 REGISTER_FACTORY(Mixing, EMSdevice::DeviceType::MIXING);
@@ -55,21 +53,40 @@ void Mixing::add_context_menu() {
 void Mixing::show_values(uuid::console::Shell & shell) {
     EMSdevice::show_values(shell); // always call this to show header
 
+    if (type_ == Type::NONE) {
+        return; // don't have any values yet
+    }
+
     char buffer[10]; // used for formatting
 
-    shell.printfln(F("  Circuit #: %d"), hc_);
+    if (type_ == Type::WWC) {
+        shell.printfln(F("  Warm Water Circuit #: %d"), hc_);
+
+    } else {
+        shell.printfln(F("  Heating Circuit #: %d"), hc_);
+    }
     print_value(shell, F("Current flow temperature"), F_(degrees), Helpers::render_value(buffer, flowTemp_, 10));
     print_value(shell, F("Setpoint flow temperature"), F_(degrees), Helpers::render_value(buffer, flowSetTemp_, 1));
     print_value(shell, F("Current pump modulation"), Helpers::render_value(buffer, pumpMod_, 1));
-    print_value(shell, F("Current valve status"), Helpers::render_value(buffer, valveStatus_, 1));
-
-    shell.println();
+    print_value(shell, F("Current valve status"), Helpers::render_value(buffer, status_, 1));
 }
 
 // publish values via MQTT
 // ideally we should group up all the mixing units together into a nested JSON but for now we'll send them individually
 void Mixing::publish_values() {
     DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_SMALL);
+
+    switch (type_) {
+    case Type::HC:
+        doc["type"] = F("hc");
+        break;
+    case Type::WWC:
+        doc["type"] = F("wwc");
+        break;
+    case Type::NONE:
+    default:
+        return;
+    }
 
     if (flowTemp_ != EMS_VALUE_USHORT_NOTSET) {
         doc["flowTemp"] = (float)flowTemp_ / 10;
@@ -79,12 +96,12 @@ void Mixing::publish_values() {
         doc["pumpMod"] = pumpMod_;
     }
 
-    if (valveStatus_ != EMS_VALUE_UINT_NOTSET) {
-        doc["valveStatus_"] = valveStatus_;
+    if (status_ != EMS_VALUE_UINT_NOTSET) {
+        doc["status"] = status_;
     }
 
     if (flowSetTemp_ != EMS_VALUE_UINT_NOTSET) {
-        doc["flowSetTemp_"] = flowSetTemp_;
+        doc["flowSetTemp"] = flowSetTemp_;
     }
 
 #ifdef EMSESP_DEBUG
@@ -107,27 +124,34 @@ bool Mixing::updated_values() {
 void Mixing::console_commands() {
 }
 
-//  0x02D7, 0x02D8 etc...
+//  heating circuits 0x02D7, 0x02D8 etc...
 void Mixing::process_MMPLUSStatusMessage_HC(std::shared_ptr<const Telegram> telegram) {
-    hc_ = 0x02D8 - telegram->type_id;   // determine which circuit this is
-    telegram->read_value(flowTemp_, 3); // isd * 10
+    type_ = Type::HC;
+    hc_   = telegram->type_id - 0x02D7 + 1; // determine which circuit this is
+    telegram->read_value(flowTemp_, 3);     // is * 10
     telegram->read_value(pumpMod_, 5);
-    telegram->read_value(valveStatus_, 2);
+    telegram->read_value(status_, 2); // valve status
 }
 
-// Mixing module warm water loading - 0x0331, 0x0332
+// Mixing module warm water loading/DHW - 0x0331, 0x0332
+// e.g. A9 00 FF 00 02 32 02 6C 00 3C 00 3C 3C 46 02 03 03 00 3C // on 0x28
+//      A8 00 FF 00 02 31 02 35 00 3C 00 3C 3C 46 02 03 03 00 3C // in 0x29
 void Mixing::process_MMPLUSStatusMessage_WWC(std::shared_ptr<const Telegram> telegram) {
-    hc_ = 0x0332 - telegram->type_id;   // determine which circuit this is. There are max 2.
-    telegram->read_value(flowTemp_, 0); // isd * 10
+    type_ = Type::WWC;
+    hc_   = telegram->type_id - 0x0331 + 1; // determine which circuit this is. There are max 2.
+    telegram->read_value(flowTemp_, 0);     // is * 10
     telegram->read_value(pumpMod_, 2);
-    telegram->read_value(valveStatus_, 11);
+    telegram->read_value(status_, 11); // temp status
 }
 
+// Mixing on a MM10 - 0xAB
+// We assume MM10 is on HC2 and WM10 is using HC1 - https://github.com/proddy/EMS-ESP/issues/270
 void Mixing::process_MMStatusMessage(std::shared_ptr<const Telegram> telegram) {
-    hc_ = 1;                            // fixed
-    telegram->read_value(flowTemp_, 1); // isd * 10
+    type_ = Type::HC;
+    hc_   = 1;                          // fixed to circuit 1
+    telegram->read_value(flowTemp_, 1); // is * 10
     telegram->read_value(pumpMod_, 3);
-    telegram->read_value(valveStatus_, 0);
+    telegram->read_value(flowSetTemp_, 0);
 }
 
 } // namespace emsesp
