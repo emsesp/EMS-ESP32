@@ -50,7 +50,7 @@ namespace emsesp {
 		EMSESP_SETTINGS_SIMPLE(std::string, "", mqtt_base, "", (), EMSESP_DEFAULT_MQTT_BASE) \
 		EMSESP_SETTINGS_SIMPLE(uint8_t, "", mqtt_qos, "", (), EMSESP_DEFAULT_MQTT_QOS) \
 		EMSESP_SETTINGS_SIMPLE(bool, "", mqtt_retain, "", (), EMSESP_DEFAULT_MQTT_RETAIN) \
-		EMSESP_SETTINGS_SIMPLE(bool, "", mqtt_nestedjson, "", (), EMSESP_DEFAULT_MQTT_NESTEDJSON) \
+		EMSESP_SETTINGS_SIMPLE(uint8_t, "", mqtt_format, "", (), EMSESP_DEFAULT_MQTT_FORMAT) \
 		EMSESP_SETTINGS_SIMPLE(bool, "", mqtt_heartbeat, "", (), EMSESP_DEFAULT_MQTT_HEARTBEAT) 
 
 #define EMSESP_SETTINGS_SIMPLE EMSESP_SETTINGS_GENERIC

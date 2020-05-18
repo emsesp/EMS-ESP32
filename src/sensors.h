@@ -74,7 +74,7 @@ class Sensors {
     static constexpr size_t SCRATCHPAD_TEMP_LSB = 0;
     static constexpr size_t SCRATCHPAD_CONFIG   = 4;
 
-    // chips
+    // dallas chips
     static constexpr uint8_t TYPE_DS18B20 = 0x28;
     static constexpr uint8_t TYPE_DS18S20 = 0x10;
     static constexpr uint8_t TYPE_DS1822  = 0x22;
@@ -102,7 +102,7 @@ class Sensors {
     std::vector<Device> found_;
     std::vector<Device> devices_;
 
-    bool mqtt_nestedjson_;
+    uint8_t mqtt_format_;
 };
 
 } // namespace emsesp

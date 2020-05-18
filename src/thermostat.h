@@ -104,10 +104,11 @@ class Thermostat : public EMSdevice {
     static uuid::log::Logger logger_;
 
     void console_commands();
+    void init_mqtt();
 
     std::string datetime_; // date and time stamp
 
-    bool mqtt_nested_json_;
+    uint8_t mqtt_format_; // single, nested or ha
 
     // Installation parameters
     uint8_t ibaMainDisplay =

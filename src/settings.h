@@ -51,7 +51,7 @@
 #define EMSESP_DEFAULT_MQTT_PORT 1883
 #define EMSESP_DEFAULT_MQTT_QOS 0
 #define EMSESP_DEFAULT_MQTT_RETAIN false
-#define EMSESP_DEFAULT_MQTT_NESTEDJSON true
+#define EMSESP_DEFAULT_MQTT_FORMAT 2 // nested
 #define EMSESP_DEFAULT_MQTT_HEARTBEAT true
 #define EMSESP_DEFAULT_EMS_READ_ONLY false
 #define EMSESP_DEFAULT_SHOWER_TIMER false
@@ -136,9 +136,6 @@ class Settings {
     bool mqtt_retain() const;
     void mqtt_retain(const bool & mqtt_retain);
 
-    bool mqtt_nestedjson() const;
-    void mqtt_nestedjson(const bool & mqtt_nestedjson);
-
     bool mqtt_heartbeat() const;
     void mqtt_heartbeat(const bool & mqtt_heartbeat);
 
@@ -150,6 +147,10 @@ class Settings {
 
     uint8_t master_thermostat() const;
     void    master_thermostat(const uint8_t & master_thermostat);
+
+    enum MQTT_format : uint8_t { SINGLE = 1, NESTED, HA };
+    uint8_t mqtt_format() const;
+    void    mqtt_format(const uint8_t & mqtt_format);
 
   private:
     static constexpr size_t BUFFER_SIZE = 2048; // max size for the settings file
@@ -194,9 +195,9 @@ class Settings {
     static std::string mqtt_base_;
     static uint8_t     mqtt_qos_;
     static bool        mqtt_retain_;
-    static bool        mqtt_nestedjson_;
     static bool        mqtt_heartbeat_;
-    static uint16_t    mqtt_publish_time_; // frequency of MQTT publish in seconds
+    static uint16_t    mqtt_publish_time_; // seconds
+    static uint8_t     mqtt_format_;
 };
 
 } // namespace emsesp

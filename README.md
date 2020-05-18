@@ -8,24 +8,25 @@ Note: Version 2.0 is not backward compatible with v1.0. The File system structur
 
 ## Major changes since version 1.9.x
 
-### **Design & Coding principles**
+### **Design & coding principles**
 
-- The code can be built and run without an ESP microcontroller, which is useful with testing and simulating handling of telegrams. Make sure you have GNU make and g++ installed and use 'make' to build the image and execute the file `emsesp` (on linux). 
+- The code can be built and run without an ESP microcontroller, which is useful when testing and simulating handling of the different telegrams and devices. Make sure you have GNU make and g++ installed and use 'make' to build the image and execute the file `emsesp` (on linux). 
 - I used C++11 containers where I could (std::string, std::deque, std::list, std::multimap etc).
 - The core is based off the great libraries from @nomis' and I adopted his general design pattens such as making everything as asynchronous as possible so that no one operation should starve another operation of it's time to execute (https://isocpp.org/wiki/faq/ctors#static-init-order).
 - All EMS devices (e.g. boiler, thermostat, solar modules etc) are derived from a factory base class and each class handles its own registering of telegram and mqtt handlers. This makes the EMS device code easier to manage and extend with new telegrams types and features.
 - Built to work with both EMS8266 and ESP32.
+- Extended MQTT to use MQTT discovery on Home Assistant, just for the thermostat
 
 ### **Features**
 
 - A web interface built using React and TypeScript to be secure and cross-browser compatible. Each restful endpoint is protected and issues a JWT which is then sent using Bearer Authentication. Implements a Web captive portal. On first installs EMS-ESP starts an Access Point where system settings can be configured. Note, this is still in a separate repo and pending a merge into this project.
   
-- A new console. Like 1.9.x it works with both Serial and Telnet but a lot more intuitive behaving like a Linux shell and secure. Multiple telnet sessions are supported now but watch out for slow connections and low memory. A password is need to change any settings. You can use TAB to auto-complete commands. Some key commands:
+- A new console. Like 1.9.x it works with both Serial and Telnet but a lot more intuitive behaving like a Linux shell and secure. Multiple telnet sessions are supported now but watch out for slow connections and low memory. A password is need to change any settings. You can use TAB to auto-complete commands, ctrl-L, ctrl-U and the other typical console type shortcuts. Some key commands:
     * `help` lists the commands and keywords
     * some commands take you into a new context, a bit like a sub-menu. e.g. `system`, `mqtt`, `thermostat`. Use `help` to show which commands this context has and `exit` to get back to the root.
     * To change a setting use the `set` command. Typing `set` shows the current settings.
     * `show` shows the data specific to the context you're in.
-    * `su` to switch to Admin which enables more commands such as most of the `set` commands. The default password is "neo". When in Admin mode the command prompt switches from `$` to `#`.
+    * `su` to switch to Admin which enables more commands such as most of the `set` commands. The default password is "neo" which can be changed with `passwd` from the system menu. When in Admin mode the command prompt switches from `$` to `#`.
     * `log` sets the logging. `log off` disables logging. Use `log trace` to see the telegram traffic and `log debug` for very verbose logging. To watch a specific telegram ID or device ID use `log trace [id]`.
 
 - There is no "serial mode" anymore like with version 1.9. When the Wifi cannot connect to the SSID it will automatically enter a "safe" mode where the Serial console is activated, baud 115200. Note Serial is always available on the ESP32 because it has 2 UARTs.
@@ -34,7 +35,7 @@ Note: Version 2.0 is not backward compatible with v1.0. The File system structur
 
 - on a new install you will want to enter `su` and then go to the `system` context. Use `set wifi ...` to set the network up. Then go to the `mqtt` context to set the mqtt up.
 
-# Full Console 
+# Full Console Commands
 
 ```
 common commands available in all contexts:
@@ -43,15 +44,15 @@ common commands available in all contexts:
   log [level] [trace ID]
   su
 
-top level/root
+(top level)
 	refresh
 	show
 	show version
-	ems (is a menu)
-	mqtt (is a menu)
-	system (is a menu)
-	boiler (is a menu)
-	thermostat (is a menu)
+	ems (enters a context)
+	mqtt (enters a context)
+	system (enters a context)
+	boiler (enters a context)
+	thermostat (enters a context)
 
 ems
     scan devices [deep]
@@ -72,7 +73,7 @@ mqtt
 	set enabled <on | off>
 	set heartbeat <on | off>
 	set ip <IP address>
-	set nested_json <on | off>
+	set format <single | nested | ha>
 	set password
 	set publish_time <seconds>
 	set qos <n>
@@ -125,8 +126,8 @@ thermostat
 ```
 TODO figure out why sometimes telnet on ESP32 (and sometimes ESP8266) has slow response times. After a manual reset it seems to fix itself. Perhaps the telnet service needs to start after the wifi is up & running.
 TODO Get the ESP32 UART code working.
+TODO sometimes with tx_mode 0 there are a few CRC errors due to collision when waiting for a BRK signal.
 TODO console auto-complete with 'set' command in the system context is not showing all commands, only the hostname.
-TODO sometimes get an error after a Tx send when first booting up. timeout perhaps?
 ```
 
 ### **Features to add next**
@@ -139,7 +140,6 @@ TODO validate 0xE9 with data from Koen. (https://github.com/proddy/EMS-ESP/issue
 
 ```
 TODO replace vectors of class objects with shared pointers and use emplace_back since it instantiates during construction. It may have a performance gain.
-TODO decide if we really need to store the timestamp of each incoming Rx telegram.
 TODO make more use of comparison operators in the Telegram class e.g. the compare like "friend inline bool operator==(const Telegram & lhs, const Telegram & rhs)"
 TODO exit from serial should be prevented? Because you never can really exit, just close it.
 TODO add real unit tests using platformio's test bed (https://docs.platformio.org/en/latest/plus/pio-remote.html)
@@ -149,10 +149,6 @@ TODO See if it's easier to use timers instead of millis() timers, using https://
 ### **These features to add next**
 
 ```
-TODO merge in the web code
-TODO merge in NTP code
-TODO make ascii colors in the console optional?
-TODO decide what to do with gateways, switches and other bogus EMS devices
-TODO add MQTT subscribe topic to toggle on/off the shower alert and timer. If really needed.
+TODO merge in the web code which has the Captive AP and better wifi reconnect logic. Use IPV6 and NTP from lwip2
 TODO decide if I want to port over the shower one-shot cold water logic. Don't think its used.
 ```

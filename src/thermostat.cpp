@@ -114,21 +114,73 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
     uint8_t  master_thermostat        = settings.master_thermostat();                                 // what the user has defined
     uint8_t  actual_master_thermostat = EMSESP::actual_master_thermostat();                           // what we're actually using
     uint8_t  num_devices              = EMSESP::count_devices(EMSdevice::DeviceType::THERMOSTAT) + 1; // including this thermostat
-    mqtt_nested_json_                 = settings.mqtt_nestedjson();
+    mqtt_format_                      = settings.mqtt_format();                                       // single, nested or ha
 
-    // if we're on auto mode, register this first one we find as we may find multiple
+    // if we're on auto mode, register this thermostat if it has a device id of 0x10 or 0x17
     // or if its the master thermostat we defined
-    if (((num_devices == 1) && (actual_master_thermostat == EMSESP_DEFAULT_MASTER_THERMOSTAT)) || (master_thermostat == device_id)) {
+    // see https://github.com/proddy/EMS-ESP/issues/362#issuecomment-629628161
+    if (((num_devices == 1) && (actual_master_thermostat == EMSESP_DEFAULT_MASTER_THERMOSTAT) && ((device_id == 0x10) || (device_id == 0x17)))
+        || (master_thermostat == device_id)) {
         EMSESP::actual_master_thermostat(device_id);
         DEBUG_LOG(F("Registering new thermostat with device ID 0x%02X (as the master)"), device_id);
-
-        // MQTT callbacks
-        register_mqtt_topic("thermostat_cmd", std::bind(&Thermostat::thermostat_cmd, this, _1));
-        register_mqtt_topic("thermostat_cmd_temp", std::bind(&Thermostat::thermostat_cmd_temp, this, _1));
-        register_mqtt_topic("thermostat_cmd_mode", std::bind(&Thermostat::thermostat_cmd_mode, this, _1));
-
+        init_mqtt();
     } else {
         DEBUG_LOG(F("Registering new thermostat with device ID 0x%02X"), device_id);
+    }
+}
+
+// for the master thermostat initialize the MQTT subscribes
+void Thermostat::init_mqtt() {
+    register_mqtt_topic("thermostat_cmd", std::bind(&Thermostat::thermostat_cmd, this, _1)); // generic commands
+
+    // if the MQTT format type is ha then send the config to HA (via the mqtt discovery service)
+    // for each of the heating circuits
+    if (mqtt_format_ == Settings::MQTT_format::HA) {
+        for (uint8_t hc = 0; hc < monitor_typeids.size(); hc++) {
+            std::string topic(100, '\0'); // e.g homeassistant/climate/hc1/thermostat/config
+            snprintf_P(&topic[0], topic.capacity() + 1, PSTR("homeassistant/climate/hc%d/thermostat/config"), hc + 1);
+
+            // Mqtt::publish(topic.c_str()); // empty payload, this remove any previous config sent to HA
+
+            StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
+            std::string                                     payload(100, '\0');
+            snprintf_P(&payload[0], payload.capacity() + 1, PSTR("thermostat_hc%d"), hc + 1);
+
+            doc["name"]      = payload; // "name": "thermostat_hc1"
+            doc["unique_id"] = payload; // "unique_id": "thermostat_hc1"
+
+            snprintf_P(&payload[0], payload.capacity() + 1, PSTR("homeassistant/climate/hc%d/thermostat"), hc + 1);
+            doc["~"] = payload; // "homeassistant/climate/hc1/thermostat"
+
+            doc["mode_cmd_t"]    = "~/cmd_mode";
+            doc["mode_stat_t"]   = "~/state";
+            doc["mode_stat_tpl"] = "{{value_json.mode}}";
+            doc["temp_cmd_t"]    = "~/cmd_temp";
+            doc["temp_stat_t"]   = "~/state";
+            doc["temp_stat_tpl"] = "{{value_json.seltemp}}";
+            doc["curr_temp_t"]   = "~/state";
+            doc["curr_temp_tpl"] = "{{value_json.currtemp}}";
+            doc["min_temp"]      = "5";
+            doc["max_temp"]      = "40";
+            doc["temp_step"]     = "0.5";
+
+            JsonArray modes = doc.createNestedArray("modes");
+            modes.add("off");
+            modes.add("heat");
+            modes.add("auto");
+
+            Mqtt::publish(topic.c_str(), doc, true); // publish the config payload with retain flag
+
+            // subscribe to the temp and mode commands
+            snprintf_P(&topic[0], topic.capacity() + 1, PSTR("homeassistant/climate/hc%d/thermostat/cmd_temp"), hc + 1);
+            register_mqtt_topic(topic, std::bind(&Thermostat::thermostat_cmd_temp, this, _1));
+            snprintf_P(&topic[0], topic.capacity() + 1, PSTR("homeassistant/climate/hc%d/thermostat/cmd_mode"), hc + 1);
+            register_mqtt_topic(topic, std::bind(&Thermostat::thermostat_cmd_mode, this, _1));
+        }
+    } else {
+        // these will be prefixed with hostname and base
+        register_mqtt_topic("thermostat_cmd_temp", std::bind(&Thermostat::thermostat_cmd_temp, this, _1));
+        register_mqtt_topic("thermostat_cmd_mode", std::bind(&Thermostat::thermostat_cmd_mode, this, _1));
     }
 }
 
@@ -292,8 +344,8 @@ void Thermostat::publish_values() {
     JsonObject                                      rootThermostat = doc.to<JsonObject>();
     JsonObject                                      dataThermostat;
 
-    // optional, add external temp
-    if (flags == EMS_DEVICE_FLAG_RC35) {
+    // optional, add external temp. I don't think anyone actually is interested in this
+    if ((flags == EMS_DEVICE_FLAG_RC35) && (mqtt_format_ == Settings::MQTT_format::SINGLE)) {
         if (dampedoutdoortemp != EMS_VALUE_INT_NOTSET) {
             doc["dampedtemp"] = dampedoutdoortemp;
         }
@@ -312,7 +364,7 @@ void Thermostat::publish_values() {
         }
 
         has_data = true;
-        if (mqtt_nested_json_) {
+        if (mqtt_format_ == Settings::MQTT_format::NESTED) {
             // create nested json for each HC
             char hc_name[10]; // hc{1-4}
             strlcpy(hc_name, "hc", 10);
@@ -371,25 +423,54 @@ void Thermostat::publish_values() {
         }
 
         if (hc->mode != EMS_VALUE_UINT_NOTSET) {
-            dataThermostat["mode"] = mode_tostring(hc->get_mode(flags));
+            uint8_t hc_mode = hc->get_mode(flags);
+            // if we're sending to HA the only valid mode types are heat, auto and off
+            if (mqtt_format_ == Settings::MQTT_format::HA) {
+                if ((hc_mode == HeatingCircuit::Mode::MANUAL) || (hc_mode == HeatingCircuit::Mode::DAY)) {
+                    hc_mode = HeatingCircuit::Mode::HEAT;
+                } else if ((hc_mode == HeatingCircuit::Mode::NIGHT) || (hc_mode == HeatingCircuit::Mode::OFF)) {
+                    hc_mode = HeatingCircuit::Mode::OFF;
+                } else {
+                    hc_mode = HeatingCircuit::Mode::AUTO;
+                }
+            }
+            dataThermostat["mode"] = mode_tostring(hc_mode);
         }
-        if (hc->mode_type != EMS_VALUE_UINT_NOTSET) {
+
+        // special handling of mode type, for the RC35 replace with summer/holiday
+        // https://github.com/proddy/EMS-ESP/issues/373#issuecomment-619810209
+        if ((flags & 0x0F) == EMS_DEVICE_FLAG_RC35) {
+            if (hc->holiday_mode != EMS_VALUE_UINT_NOTSET) {
+                dataThermostat["modetype"] = F("holiday");
+            } else if (hc->summer_mode != EMS_VALUE_UINT_NOTSET) {
+                dataThermostat["modetype"] = F("summer");
+            } else if (hc->mode_type != EMS_VALUE_UINT_NOTSET) {
+                dataThermostat["modetype"] = mode_tostring(hc->get_mode_type(flags));
+            }
+        } else if (hc->mode_type != EMS_VALUE_UINT_NOTSET) {
             dataThermostat["modetype"] = mode_tostring(hc->get_mode_type(flags));
         }
 
-        // if its not nested, send immediately
-        if (!mqtt_nested_json_) {
+
+        // if format is single, send immediately
+        // if its HA send it to the special topic
+        if (mqtt_format_ == Settings::MQTT_format::SINGLE) {
             char topic[30];
             char s[3]; // for formatting strings
             strlcpy(topic, "thermostat_data", 30);
             strlcat(topic, Helpers::itoa(s, hc->hc_num()), 30); // append hc to topic
             Mqtt::publish(topic, doc);
             return;
+        } else if (mqtt_format_ == Settings::MQTT_format::HA) {
+            std::string topic(100, '\0');
+            snprintf_P(&topic[0], topic.capacity() + 1, PSTR("homeassistant/climate/hc%d/thermostat/state"), hc->hc_num());
+            Mqtt::publish(topic.c_str(), doc);
+            return;
         }
     }
 
     // if we're using nested json, send all in one go
-    if (mqtt_nested_json_ && has_data) {
+    if ((mqtt_format_ == Settings::MQTT_format::NESTED) && has_data) {
         Mqtt::publish("thermostat_data", doc);
     }
 }
@@ -408,7 +489,7 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(const ui
 }
 
 // determine which heating circuit the type ID is referring too
-// returns pointer to the HeatingCircuit
+// returns pointer to the HeatingCircuit or nullptr if it can't be found
 std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::shared_ptr<const Telegram> telegram) {
     // look through the Monitor and Set arrays to see if there is a match
     uint8_t hc_num = 0;
@@ -430,9 +511,9 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::sha
         }
     }
 
-    // still didn't recognize it, assume its hc 1
+    // still didn't recognize it, ignore it
     if (hc_num == 0) {
-        hc_num = DEFAULT_HEATING_CIRCUIT;
+        return nullptr;
     }
 
     // if we have the heating circuit already present, returns its object
@@ -446,7 +527,6 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::sha
     // create a new heating circuit object
     // TODO do we need to create a new object if using emplace_back?
     heating_circuits_.emplace_back(new HeatingCircuit(hc_num, monitor_typeids[hc_num - 1], set_typeids[hc_num - 1]));
-
     return heating_circuits_.back();
 }
 
@@ -826,8 +906,9 @@ void Thermostat::process_RC30Set(std::shared_ptr<const Telegram> telegram) {
 
 // type 0x3E (HC1), 0x48 (HC2), 0x52 (HC3), 0x5C (HC4) - data from the RC35 thermostat (0x10) - 16 bytes
 void Thermostat::process_RC35Monitor(std::shared_ptr<const Telegram> telegram) {
-    // exit if...
-    // - the 15th byte (second from last) is 0x00, which I think is flow temp, means HC is not is use
+    // exit if the 15th byte (second from last) is 0x00, which I think is calculated flow setpoint temperature
+    // with weather controlled RC35s this value can be zero and our setpoint temps will be incorrect
+    // see https://github.com/proddy/EMS-ESP/issues/373#issuecomment-627907301
     if (telegram->message_data[14] == 0x00) {
         return;
     }

@@ -83,6 +83,7 @@ MAKE_PSTR_WORD(disconnect)
 MAKE_PSTR_WORD(debug)
 MAKE_PSTR_WORD(restart)
 MAKE_PSTR_WORD(reconnect)
+MAKE_PSTR_WORD(format)
 
 // context menus
 MAKE_PSTR_WORD(mqtt)

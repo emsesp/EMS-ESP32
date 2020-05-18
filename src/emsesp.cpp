@@ -570,7 +570,8 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
 
     // are we waiting for a response from a recent Tx Read or Write?
     if (EMSbus::tx_waiting()) {
-        // if it's a single byte 1 or 4 then its a response from the last write
+        // if it's a single byte 1 or 4 then its maybe a response from the last write action
+        EMSbus::tx_waiting(false); // reset Tx wait state
         if (length == 1) {
             if (first_value == TxService::TX_WRITE_SUCCESS) {
                 DEBUG_LOG(F("Last Tx write successful. Sending read request."));
@@ -581,13 +582,12 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
                 DEBUG_LOG(F("Last Tx write rejected by host"));
                 txservice_.send_poll(); // close the bus
             } else {
-#ifdef EMSESP_DEBUG
-                logger_.err(F("Expecting Tx ACK (1/4) but got 0x%02X. Tx:%s"), first_value, txservice_.last_tx_to_string().c_str());
-#endif
+                // ignore it, it's probably a poll and we can wait for the next one
+                return;
             }
-
         } else {
-            // got a telegram. See if the src/dest matches that from the last one we sent
+            // got a telegram with data in it. See if the src/dest matches that from the last one we sent
+            // and continue to process it
             uint8_t src  = data[0];
             uint8_t dest = data[1];
             if (txservice_.is_last_tx(src, dest)) {
@@ -605,18 +605,21 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
                 }
             }
         }
-        EMSbus::tx_waiting(false); // reset Tx wait state
     }
 
-    // check for poll, if so, send Tx from the queue immediately
-    // if ht3 poll must be ems_bus_id else if Buderus poll must be (ems_bus_id | 0x80)
-    if ((length == 1) && ((first_value ^ 0x80 ^ rxservice_.ems_mask()) == txservice_.ems_bus_id())) {
-        EMSbus::last_bus_activity(millis()); // set the flag indication the EMS bus is active
-        txservice_.send();
+    // check for poll
+    if (length == 1) {
+        // check for poll to us, if so send top message from Tx queue immediately and quit
+        // if ht3 poll must be ems_bus_id else if Buderus poll must be (ems_bus_id | 0x80)
+        if ((first_value ^ 0x80 ^ rxservice_.ems_mask()) == txservice_.ems_bus_id()) {
+            EMSbus::last_bus_activity(millis()); // set the flag indication the EMS bus is active
+            txservice_.send();
+        }
+        return;
+    } else {
+        // add to RxQueue, what ever it is.
+        rxservice_.add(data, length);
     }
-
-    // add to RxQueue
-    rxservice_.add(data, length);
 }
 
 // sends raw data of bytes along the Tx line

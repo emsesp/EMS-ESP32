@@ -28,7 +28,7 @@ uuid::log::Logger Sensors::logger_{F_(logger_name), uuid::log::Facility::DAEMON}
 
 void Sensors::start() {
     // copy over values from MQTT so we don't keep on quering the filesystem
-    mqtt_nestedjson_ = Settings().mqtt_nestedjson();
+    mqtt_format_ = Settings().mqtt_format();
 
 #ifndef EMSESP_STANDALONE
     bus_.begin(SENSOR_GPIO);
@@ -39,34 +39,36 @@ void Sensors::loop() {
 #ifndef EMSESP_STANDALONE
     if (state_ == State::IDLE) {
         if (millis() - last_activity_ >= READ_INTERVAL_MS) {
-            // DEBUG_LOG(F("Read sensor temperature"));
+            // DEBUG_LOG(F("Read sensor temperature")); // uncomment for debug
             if (bus_.reset()) {
                 bus_.skip();
                 bus_.write(CMD_CONVERT_TEMP);
 
                 state_ = State::READING;
             } else {
-                // logger_.err(F("Bus reset failed"));
+                // no sensors found
+                // logger_.err(F("Bus reset failed")); // uncomment for debug
+                devices_.clear(); // remove all know devices incase we have a disconnect
             }
             last_activity_ = millis();
         }
     } else if (state_ == State::READING) {
         if (temperature_convert_complete()) {
-            // DEBUG_LOG(F("Scanning for sensors"));
+            // DEBUG_LOG(F("Scanning for sensors")); // uncomment for debug
             bus_.reset_search();
             found_.clear();
 
             state_         = State::SCANNING;
             last_activity_ = millis();
         } else if (millis() - last_activity_ > READ_TIMEOUT_MS) {
-            // logger_.err(F("Sensor read timeout"));
+            logger_.err(F("Sensor read timeout"));
 
             state_         = State::IDLE;
             last_activity_ = millis();
         }
     } else if (state_ == State::SCANNING) {
         if (millis() - last_activity_ > SCAN_TIMEOUT_MS) {
-            // logger_.err(F("Sensor scan timeout"));
+            logger_.err(F("Sensor scan timeout"));
             state_         = State::IDLE;
             last_activity_ = millis();
         } else {
@@ -84,8 +86,13 @@ void Sensors::loop() {
                         found_.emplace_back(addr);
                         found_.back().temperature_c_ = get_temperature_c(addr);
 
-                        // char result[10];
-                        // DEBUG_LOG(F("Temperature of %s = %s"), found_.back().to_string().c_str(), Helpers::render_value(result, found_.back().temperature_c_, 2));
+                        /*
+                        // comment out for debugging
+                        char result[10];
+                        DEBUG_LOG(F("Temp of %s = %s"),
+                                  found_.back().to_string().c_str(),
+                                  Helpers::render_value(result, found_.back().temperature_c_, 2)); 
+                        */
                         break;
 
                     default:
@@ -99,7 +106,7 @@ void Sensors::loop() {
                 bus_.depower();
                 devices_ = std::move(found_);
                 found_.clear();
-                // DEBUG_LOG(F("Found %zu sensor(s)"), devices_.size());
+                // DEBUG_LOG(F("Found %zu sensor(s). Adding them."), devices_.size()); // uncomment for debug
                 state_         = State::IDLE;
                 last_activity_ = millis();
             }
@@ -220,14 +227,14 @@ void Sensors::publish_values() {
     // if we're not using nested JSON, send each sensor out seperately
     // sensor1, sensor2 etc...
     // e.g. sensor_1 = {"temp":20.2}
-    if (!mqtt_nestedjson_) {
-        StaticJsonDocument<20> doc;
+    if (mqtt_format_ != Settings::MQTT_format::NESTED) {
+        StaticJsonDocument<100> doc;
         for (const auto & device : devices_) {
             char s[5];
             doc["temp"] = Helpers::render_value(s, device.temperature_c_, 2);
             char topic[60];                // sensors{1-n}
-            strlcpy(topic, "sensor_", 50); // create topic
-            strlcat(topic, device.to_string().c_str(), 50);
+            strlcpy(topic, "sensor_", 50); // create topic, e.g. home/ems-esp/sensor_28-EA41-9497-0E03-5F
+            strlcat(topic, device.to_string().c_str(), 60);
             Mqtt::publish(topic, doc);
             doc.clear(); // clear json doc so we can reuse the buffer again
         }

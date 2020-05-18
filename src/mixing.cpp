@@ -145,10 +145,15 @@ void Mixing::process_MMPLUSStatusMessage_WWC(std::shared_ptr<const Telegram> tel
 }
 
 // Mixing on a MM10 - 0xAB
-// We assume MM10 is on HC2 and WM10 is using HC1 - https://github.com/proddy/EMS-ESP/issues/270
+// e.g. Mixing Module -> All, type 0xAB, telegram: 21 00 AB 00 2D 01 BE 64 04 01 00 (CRC=15) #data=7
+// see also https://github.com/proddy/EMS-ESP/issues/386
 void Mixing::process_MMStatusMessage(std::shared_ptr<const Telegram> telegram) {
     type_ = Type::HC;
-    hc_   = 1;                          // fixed to circuit 1
+
+    // the heating circuit is determine by which device_id it is, 0x20 - 0x23
+    // 0x21 is position 2. 0x20 is typically reserved for the WM10 switch module 
+    // see https://github.com/proddy/EMS-ESP/issues/270 and https://github.com/proddy/EMS-ESP/issues/386#issuecomment-629610918
+    hc_   = 0x22 - device_id();
     telegram->read_value(flowTemp_, 1); // is * 10
     telegram->read_value(pumpMod_, 3);
     telegram->read_value(flowSetTemp_, 0);

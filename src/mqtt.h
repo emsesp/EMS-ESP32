@@ -49,10 +49,9 @@ using mqtt_function_p = std::function<void(const char * message)>;
 using namespace std::placeholders; // for `_1`
 
 struct MqttMessage {
-    MqttMessage(uint64_t uptime_ms, uint8_t operation, const std::string & topic, const std::string & payload, bool retain);
+    MqttMessage(uint8_t operation, const std::string & topic, const std::string & payload, bool retain);
     ~MqttMessage() = default;
 
-    const uint64_t    uptime_ms;
     const uint8_t     operation;
     const std::string topic;
     const std::string payload;
@@ -75,6 +74,7 @@ class Mqtt {
     static void publish(const char * topic, const JsonDocument & payload);
     static void publish(const char * topic, const JsonDocument & payload, bool retain);
     static void publish(const char * topic, const bool value);
+    static void publish(const char * topic);
 
     static void show_topic_handlers(uuid::console::Shell & shell, const uint8_t device_id);
 
@@ -139,8 +139,8 @@ class Mqtt {
     void          on_message(char * topic, char * payload, size_t len);
     void          on_connect();
     static char * make_topic(char * result, const std::string & topic);
-    void          publish_queue();
-    void          publish_all_queue();
+    void          process_queue();
+    void          process_all_queue();
     void          send_start_topic();
     static void   reconnect();
     void          init();
@@ -177,6 +177,7 @@ class Mqtt {
     static std::string mqtt_hostname_;
     static std::string mqtt_base_;
     static uint8_t     mqtt_qos_;
+    static uint8_t     mqtt_format_;
     std::string        mqtt_ip_;
     std::string        mqtt_user_;
     std::string        mqtt_password_;

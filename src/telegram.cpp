@@ -189,9 +189,8 @@ void Telegram::read_value8(int16_t & param, const uint8_t index) const {
     param = message_data[pos];
 }
 
-RxService::QueuedRxTelegram::QueuedRxTelegram(uint16_t id, uint32_t timestamp, std::shared_ptr<Telegram> && telegram)
+RxService::QueuedRxTelegram::QueuedRxTelegram(uint16_t id, std::shared_ptr<Telegram> && telegram)
     : id_(id)
-    , timestamp_(timestamp)
     , telegram_(std::move(telegram)) {
 }
 
@@ -238,11 +237,6 @@ void RxService::loop() {
 // data is the whole telegram, assuming last byte holds the CRC
 // for EMS+ the type_id has the value + 256. We look for these type of telegrams with F7, F9 and FF in 3rd byte
 void RxService::add(uint8_t * data, uint8_t length) {
-    // ignore any telegrams which are 1 byte
-    if (length <= 1) {
-        return;
-    }
-
     // validate the CRC
     uint8_t crc = calculate_crc(data, length - 1);
     if (data[length - 1] != crc) {
@@ -313,8 +307,8 @@ void RxService::add(uint8_t * data, uint8_t length) {
     }
 
     // add to queue, with timestamp
-    DEBUG_LOG(F("New Rx [%d] telegram added, length %d"), rx_telegram_id_, message_length);
-    rx_telegrams_.emplace_back(rx_telegram_id_++, millis(), std::move(telegram));
+    DEBUG_LOG(F("New Rx [#%d] telegram added, length %d"), rx_telegram_id_, message_length);
+    rx_telegrams_.emplace_back(rx_telegram_id_++, std::move(telegram));
 }
 
 

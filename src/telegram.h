@@ -187,11 +187,10 @@ class RxService : public EMSbus {
 
     class QueuedRxTelegram {
       public:
-        QueuedRxTelegram(uint16_t id, uint32_t timestamp, std::shared_ptr<Telegram> && telegram);
+        QueuedRxTelegram(uint16_t id, std::shared_ptr<Telegram> && telegram);
         ~QueuedRxTelegram() = default;
 
-        uint16_t                              id_;        // sequential identifier
-        uint32_t                              timestamp_; // time it was received
+        uint16_t                              id_; // sequential identifier
         const std::shared_ptr<const Telegram> telegram_;
     };
 
