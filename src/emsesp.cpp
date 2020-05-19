@@ -173,7 +173,7 @@ void EMSESP::show_emsbus(uuid::console::Shell & shell) {
 // and for each associated EMS device go and request data values
 void EMSESP::show_values(uuid::console::Shell & shell) {
     if (sensor_devices().empty() && emsdevices.empty()) {
-        shell.printfln(F("No information from devices to show"));
+        shell.printfln(F("No data available from devices to show"));
         return;
     }
 

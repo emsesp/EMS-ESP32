@@ -73,16 +73,16 @@ class System {
 #endif
 
     static constexpr uint32_t SYSTEM_CHECK_FREQUENCY = 5000; // check every 5 seconds
-    static constexpr uint32_t LED_WARNING_BLINK      = 1000; // flash
-    static constexpr uint32_t LED_WARNING_BLINK_FAST = 100;  // flash quick
+    static constexpr uint32_t LED_WARNING_BLINK      = 1000; // pulse to show no connection
+    static constexpr uint32_t LED_WARNING_BLINK_FAST = 100;  // flash quickly for boot up sequence or safe-mode
 
 // internal LED
 #if defined(ESP8266)
     static constexpr uint8_t LED_GPIO = 2;
     static constexpr uint8_t LED_ON   = LOW;
 #elif defined(ESP32)
-    static constexpr uint8_t LED_GPIO = 5;
-    static constexpr uint8_t LED_ON   = HIGH;
+    static constexpr uint8_t LED_GPIO = 5; // on Wemos D32
+    static constexpr uint8_t LED_ON   = LOW;
 #else
     static constexpr uint8_t LED_GPIO = 0;
     static constexpr uint8_t LED_ON   = 0;

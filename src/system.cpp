@@ -524,14 +524,19 @@ void System::console_commands() {
 
                                            if (shell.has_flags(CommandFlags::ADMIN | CommandFlags::LOCAL)) {
                                                shell.printfln("Wifi:");
+                                               shell.print(" ");
                                                shell.printfln(F_(wifi_ssid_fmt),
                                                               settings.wifi_ssid().empty() ? uuid::read_flash_string(F_(unset)).c_str()
                                                                                            : settings.wifi_ssid().c_str());
+                                               shell.print(" ");
                                                shell.printfln(F_(wifi_password_fmt), settings.wifi_password().empty() ? F_(unset) : F_(asterisks));
                                                shell.printfln(F("Syslog:"));
                                                auto host = settings.syslog_host();
+                                               shell.print(" ");
                                                shell.printfln(F_(host_fmt), !host.empty() ? host.c_str() : uuid::read_flash_string(F_(unset)).c_str());
+                                               shell.print(" ");
                                                shell.printfln(F_(log_level_fmt), uuid::log::format_level_uppercase(settings.syslog_level()));
+                                               shell.print(" ");
                                                shell.printfln(F_(mark_interval_fmt), settings.syslog_mark_interval());
                                            }
                                        });

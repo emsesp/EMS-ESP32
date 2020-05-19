@@ -16,6 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/* ESP32 UART port by Arwed Richert @ArwedL */
+
 #if defined(ESP32)
 
 #include "uart/emsuart_esp32.h"
@@ -85,7 +87,6 @@ void EMSuart::emsuart_recvTask(void * param) {
  * init UART0 driver
  */
 void EMSuart::start(uint8_t tx_mode) {
-    return; // TODO commented out because it causes crash. @ArwedL could you take a look?
 
     tx_mode_ = tx_mode;
 
@@ -117,15 +118,15 @@ void EMSuart::start(uint8_t tx_mode) {
     // 1 should be enough - also 10 should be fine
     ESP_ERROR_CHECK(uart_driver_install(EMSUART_UART, EMSUART_RXBUFSIZE, 0, 10, &uart_queue, 0));
 
+    // Create a ringbuffer for communication between recvTask and parseTask (as max message size is ~32 bytes) 512 bytes has capacity to hold more than 16 telegrams
+    buf_handle = xRingbufferCreate(512, RINGBUF_TYPE_NOSPLIT);
+
     // start recvTaskQueue stacksize choosen any value 4069 bytes, Priority choosen 2 above normal to be able to fastly react on received signals
     // xTaskCreate parameters taken from https://github.com/espressif/esp-idf/blob/ce2a99dc23533f40369e4ab0d17ffd40f4b0dd72/examples/peripherals/uart/uart_events/main/uart_events_example_main.c
     xTaskCreate(emsuart_recvTask, "EMS_recv", 2048, NULL, 12, NULL);
 
     // create 2 tasks because assumption is that parseTelegram needs some time (even on ESP32) which would block receiving task
     xTaskCreate(emsuart_parseTask, "EMS_parse", 8000, NULL, 2, NULL);
-
-    // Create a ringbuffer for communication between recvTask and parseTask (as max message size is ~32 bytes) 512 bytes has capacity to hold more than 16 telegrams
-    buf_handle = xRingbufferCreate(512, RINGBUF_TYPE_NOSPLIT);
 }
 
 /*
