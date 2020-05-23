@@ -119,8 +119,8 @@ class EMSdevice {
 
     void fetch_values();
 
-    void print_value(uuid::console::Shell & shell, const __FlashStringHelper * name, const __FlashStringHelper * prefix, const char * value);
-    void print_value(uuid::console::Shell & shell, const __FlashStringHelper * name, const char * value);
+    void print_value(uuid::console::Shell & shell, uint8_t padding, const __FlashStringHelper * name, const __FlashStringHelper * prefix, const char * value);
+    void print_value(uuid::console::Shell & shell, uint8_t padding, const __FlashStringHelper * name, const char * value);
 
     enum Brand : uint8_t {
         NO_BRAND, // 0
@@ -195,9 +195,8 @@ class EMSdevice {
 
         uint16_t                    telegram_type_id_;   // it's type_id
         const __FlashStringHelper * telegram_type_name_; // e.g. RC20Message
-        // std::string        telegram_type_name_; // e.g. RC20Message
-        bool               fetch_; // should this type_id be queried automatically?
-        process_function_p process_function_;
+        bool                        fetch_;              // if this type_id be queried automatically
+        process_function_p          process_function_;
     };
     std::vector<TelegramFunction> telegram_functions_; // each EMS device has its own set of registered telegram types
 };

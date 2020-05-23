@@ -46,7 +46,7 @@ class Boiler : public EMSdevice {
   private:
     static uuid::log::Logger logger_;
 
-    void console_commands();
+    void console_commands(Shell & shell, unsigned int context);
 
     uint8_t last_boilerState = 0xFF; // remember last state of heating and warm water on/off
 
@@ -67,23 +67,23 @@ class Boiler : public EMSdevice {
     uint8_t wWComfort_       = EMS_VALUE_UINT_NOTSET; // WW comfort mode
 
     // UBAMonitorFast - 0x18 on EMS1
-    uint8_t  selFlowTemp_    = EMS_VALUE_UINT_NOTSET;   // Selected flow temperature
-    uint16_t curFlowTemp_    = EMS_VALUE_USHORT_NOTSET; // Current flow temperature
-    uint16_t wwStorageTemp1_ = EMS_VALUE_USHORT_NOTSET; // warm water storage temp 1
-    uint16_t wwStorageTemp2_ = EMS_VALUE_USHORT_NOTSET; // warm water storage temp 2
-    uint16_t retTemp_        = EMS_VALUE_USHORT_NOTSET; // Return temperature
-    uint8_t  burnGas_        = EMS_VALUE_BOOL_NOTSET;   // Gas on/off
-    uint8_t  fanWork_        = EMS_VALUE_BOOL_NOTSET;   // Fan on/off
-    uint8_t  ignWork_        = EMS_VALUE_BOOL_NOTSET;   // Ignition on/off
-    uint8_t  heatPmp_        = EMS_VALUE_BOOL_NOTSET;   // Boiler pump on/off
-    uint8_t  wWHeat_         = EMS_VALUE_BOOL_NOTSET;   // 3-way valve on WW
-    uint8_t  wWCirc_         = EMS_VALUE_BOOL_NOTSET;   // Circulation on/off
-    uint8_t  selBurnPow_     = EMS_VALUE_UINT_NOTSET;   // Burner max power %
-    uint8_t  curBurnPow_     = EMS_VALUE_UINT_NOTSET;   // Burner current power %
-    uint16_t flameCurr_      = EMS_VALUE_USHORT_NOTSET; // Flame current in micro amps
-    uint8_t  sysPress_       = EMS_VALUE_UINT_NOTSET;   // System pressure
-    char     serviceCodeChar_[3];                       // 2 character status/service code
-    uint16_t serviceCode_ = EMS_VALUE_USHORT_NOTSET;    // error/service code
+    uint8_t  selFlowTemp_        = EMS_VALUE_UINT_NOTSET;   // Selected flow temperature
+    uint16_t curFlowTemp_        = EMS_VALUE_USHORT_NOTSET; // Current flow temperature
+    uint16_t wwStorageTemp1_     = EMS_VALUE_USHORT_NOTSET; // warm water storage temp 1
+    uint16_t wwStorageTemp2_     = EMS_VALUE_USHORT_NOTSET; // warm water storage temp 2
+    uint16_t retTemp_            = EMS_VALUE_USHORT_NOTSET; // Return temperature
+    uint8_t  burnGas_            = EMS_VALUE_BOOL_NOTSET;   // Gas on/off
+    uint8_t  fanWork_            = EMS_VALUE_BOOL_NOTSET;   // Fan on/off
+    uint8_t  ignWork_            = EMS_VALUE_BOOL_NOTSET;   // Ignition on/off
+    uint8_t  heatPmp_            = EMS_VALUE_BOOL_NOTSET;   // Boiler pump on/off
+    uint8_t  wWHeat_             = EMS_VALUE_BOOL_NOTSET;   // 3-way valve on WW
+    uint8_t  wWCirc_             = EMS_VALUE_BOOL_NOTSET;   // Circulation on/off
+    uint8_t  selBurnPow_         = EMS_VALUE_UINT_NOTSET;   // Burner max power %
+    uint8_t  curBurnPow_         = EMS_VALUE_UINT_NOTSET;   // Burner current power %
+    uint16_t flameCurr_          = EMS_VALUE_USHORT_NOTSET; // Flame current in micro amps
+    uint8_t  sysPress_           = EMS_VALUE_UINT_NOTSET;   // System pressure
+    char     serviceCodeChar_[3] = {'\0'};                  // 2 character status/service code
+    uint16_t serviceCode_        = EMS_VALUE_USHORT_NOTSET; // error/service code
 
     // UBAMonitorSlow - 0x19 on EMS1
     int16_t  extTemp_     = EMS_VALUE_SHORT_NOTSET;  // Outside temperature

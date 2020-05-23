@@ -125,7 +125,13 @@ namespace emsesp {
 using LogLevel    = ::uuid::log::Level;
 using LogFacility = ::uuid::log::Facility;
 
-enum CommandFlags : uint8_t { USER = 0, ADMIN = (1 << 0), LOCAL = (1 << 1) };
+enum CommandFlags : uint8_t {
+
+    USER  = 0,
+    ADMIN = (1 << 0),
+    LOCAL = (1 << 1)
+
+};
 
 enum ShellContext : uint8_t {
 
@@ -146,8 +152,6 @@ class EMSESPShell : virtual public uuid::console::Shell {
 
     static std::shared_ptr<uuid::console::Commands> commands;
     static std::shared_ptr<EMSESPShell>             shell;
-
-    void enter_custom_context(unsigned int context);
 
   protected:
     EMSESPShell();
@@ -190,6 +194,9 @@ class Console {
     void start();
 
     uuid::log::Level log_level();
+
+    static void enter_custom_context(Shell & shell, unsigned int context);
+    static void load_standard_commands(unsigned int context);
 
   private:
     static constexpr unsigned long SERIAL_CONSOLE_BAUD_RATE = 115200;

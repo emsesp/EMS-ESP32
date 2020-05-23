@@ -334,7 +334,7 @@ void System::show_system(uuid::console::Shell & shell) {
 }
 
 // console commands to add
-void System::console_commands() {
+void System::console_commands(Shell & shell, unsigned int context) {
     EMSESPShell::commands->add_command(ShellContext::SYSTEM,
                                        CommandFlags::ADMIN,
                                        flash_string_vector{F_(set), F_(hostname)},
@@ -509,7 +509,6 @@ void System::console_commands() {
                                        flash_string_vector{F_(show)},
                                        [=](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
                                            Network::show_network(shell);
-                                           shell.println();
                                            show_system(shell);
                                            shell.println();
                                        });
@@ -522,7 +521,7 @@ void System::console_commands() {
                                            shell.printfln(F_(hostname_fmt),
                                                           settings.hostname().empty() ? uuid::read_flash_string(F_(unset)).c_str() : settings.hostname().c_str());
 
-                                           if (shell.has_flags(CommandFlags::ADMIN | CommandFlags::LOCAL)) {
+                                           if (shell.has_flags(CommandFlags::ADMIN)) {
                                                shell.printfln("Wifi:");
                                                shell.print(" ");
                                                shell.printfln(F_(wifi_ssid_fmt),
@@ -540,6 +539,9 @@ void System::console_commands() {
                                                shell.printfln(F_(mark_interval_fmt), settings.syslog_mark_interval());
                                            }
                                        });
+
+    // enter the context
+    Console::enter_custom_context(shell, context);
 }
 
 

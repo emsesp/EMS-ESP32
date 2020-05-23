@@ -76,7 +76,6 @@ void Shell::output_logs() {
             auto message = std::move(log_messages_.front());
             log_messages_.pop_front();
 
-
             print(uuid::log::format_timestamp_ms(message.content_->uptime_ms, 3));
             printf(F(" %c %lu: [%S] "), uuid::log::format_level_char(message.content_->level), message.id_, message.content_->name);
 

@@ -346,6 +346,7 @@ void Network::show_network(uuid::console::Shell & shell) {
         shell.printfln(F("WiFi: unknown"));
         break;
     }
+
     shell.println();
 #endif
 }

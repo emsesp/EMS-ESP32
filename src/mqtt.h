@@ -39,6 +39,8 @@
 
 #include <uuid/log.h>
 
+using uuid::console::Shell;
+
 #define EMSESP_MAX_JSON_SIZE_SMALL 200  // for smaller json docs
 #define EMSESP_MAX_JSON_SIZE_MEDIUM 800 // for smaller json docs from ems devices
 #define EMSESP_MAX_JSON_SIZE_LARGE 1500 // for large json docs from ems devices, like boiler or thermostat data
@@ -69,16 +71,16 @@ class Mqtt {
     static void subscribe(const uint8_t device_id, const std::string & topic, mqtt_function_p cb);
     static void subscribe(const std::string & topic, mqtt_function_p cb);
 
-    static void publish(const char * topic, const char * payload);
-    static void publish(const char * topic, const char * payload, bool retain);
-    static void publish(const char * topic, const JsonDocument & payload);
-    static void publish(const char * topic, const JsonDocument & payload, bool retain);
-    static void publish(const char * topic, const bool value);
-    static void publish(const char * topic);
+    static void publish(const std::string & topic, const std::string & payload);
+    static void publish(const std::string & topic, const std::string & payload, bool retain);
+    static void publish(const std::string & topic, const JsonDocument & payload);
+    static void publish(const std::string & topic, const JsonDocument & payload, bool retain);
+    static void publish(const std::string & topic, const bool value);
+    static void publish(const std::string & topic);
 
     static void show_topic_handlers(uuid::console::Shell & shell, const uint8_t device_id);
 
-    static void console_commands();
+    static void console_commands(Shell & shell, unsigned int context);
 
     void incoming(char * topic, char * payload); // for testing
 
@@ -130,8 +132,8 @@ class Mqtt {
 
     static bool mqtt_retain_;
 
-    static void queue_publish_message(const char * topic, const JsonDocument & payload, const bool retain);
-    static void queue_publish_message(const char * topic, const std::string & payload, const bool retain);
+    static void queue_publish_message(const std::string & topic, const JsonDocument & payload, const bool retain);
+    static void queue_publish_message(const std::string & topic, const std::string & payload, const bool retain);
 
     static void queue_subscribe_message(const std::string & topic);
 

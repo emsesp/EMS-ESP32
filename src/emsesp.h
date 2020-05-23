@@ -85,7 +85,7 @@ class EMSESP {
     static void show_devices(uuid::console::Shell & shell);
     static void show_emsbus(uuid::console::Shell & shell);
 
-    static void add_context_menu();
+    static void add_context_menus();
 
     static void incoming_telegram(uint8_t * data, const uint8_t length);
 
@@ -111,7 +111,7 @@ class EMSESP {
         return ems_read_only_;
     }
 
-    static void console_commands();
+    static void console_commands(Shell & shell, unsigned int context);
 
     static void fetch_device_values(const uint8_t device_id);
     static void fetch_device_values();
@@ -135,6 +135,9 @@ class EMSESP {
     static Shower    shower_;
     static RxService rxservice_;
     static TxService txservice_;
+
+    static constexpr uint32_t EMS_FETCH_FREQUENCY = 60000; // check every minute
+    static uint32_t           last_fetch_;
 
     struct Device_record {
         uint8_t                     product_id;

@@ -10,12 +10,12 @@ Note: Version 2.0 is not backward compatible with v1.0. The File system structur
 
 ### **Design & coding principles**
 
-- The code can be built and run without an ESP microcontroller, which is useful when testing and simulating handling of the different telegrams and devices. Make sure you have GNU make and g++ installed and use 'make' to build the image and execute the file `emsesp` (on linux). 
+- The code can be built and run without an ESP microcontroller, which is useful when testing and simulating handling of the different telegrams and devices. Make sure you have GNU make and g++ installed and use 'make' to build the image and execute the file `emsesp` (on linux).
 - I used C++11 containers where I could (std::string, std::deque, std::list, std::multimap etc).
 - The core is based off the great libraries from @nomis' and I adopted his general design pattens such as making everything as asynchronous as possible so that no one operation should starve another operation of it's time to execute (https://isocpp.org/wiki/faq/ctors#static-init-order).
 - All EMS devices (e.g. boiler, thermostat, solar modules etc) are derived from a factory base class and each class handles its own registering of telegram and mqtt handlers. This makes the EMS device code easier to manage and extend with new telegrams types and features.
 - Built to work with both EMS8266 and ESP32.
-- Extended MQTT to use MQTT discovery on Home Assistant, just for the thermostat
+- Extended MQTT to use MQTT discovery on Home Assistant, just for the thermostat for now.
 
 ### **Features**
 
@@ -124,6 +124,7 @@ thermostat
 ### **Known issues, bugs and improvements currently working on**
 
 ```
+TODO when doing show, should we sort the ems devices?
 TODO figure out why sometimes telnet on ESP32 (and sometimes ESP8266) has slow response times. After a manual reset it seems to fix itself. Perhaps the telnet service needs to start after the wifi is up & running.
 TODO Get the ESP32 UART code working.
 TODO sometimes with tx_mode 0 there are a few CRC errors due to collision when waiting for a BRK signal.
