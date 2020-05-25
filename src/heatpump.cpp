@@ -35,7 +35,7 @@ uuid::log::Logger Heatpump::logger_{F_(logger_name), uuid::log::Facility::CONSOL
 
 Heatpump::Heatpump(uint8_t device_type, uint8_t device_id, uint8_t product_id, const std::string & version, const std::string & name, uint8_t flags, uint8_t brand)
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
-    DEBUG_LOG(F("Registering new Heat Pump module with device ID 0x%02X"), device_id);
+    LOG_DEBUG(F("Registering new Heat Pump module with device ID 0x%02X"), device_id);
 
     // telegram handlers
     register_telegram_type(0x047B, F("HP1"), true, std::bind(&Heatpump::process_HPMonitor1, this, _1));

@@ -30,6 +30,23 @@ void Sensors::start() {
     // copy over values from MQTT so we don't keep on quering the filesystem
     mqtt_format_ = Settings().mqtt_format();
 
+    // if we're using HA MQTT Discovery, send out the config
+    // currently we just do this for a single sensor (sensor1)
+    if (mqtt_format_ == Settings::MQTT_format::HA) {
+        // Mqtt::publish(topic); // empty payload, this remove any previous config sent to HA
+
+        StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
+        doc["dev_cla"]      = "temperature";
+        doc["name"]         = "ems-esp-sensor1";
+        doc["uniq_id"]      = "ems-esp-sensor1";
+        doc["~"]            = "homeassistant/sensor/ems-esp/external";
+        doc["stat_t"]       = "~/state";
+        doc["unit_of_meas"] = "°C";
+        doc["val_tpl"]      = "{{value_json.sensor1.temp}}";
+
+        Mqtt::publish("homeassistant/sensor/ems-esp/external/config", doc, true); // publish the config payload with retain flag
+    }
+
 #ifndef EMSESP_STANDALONE
     bus_.begin(SENSOR_GPIO);
 #endif
@@ -39,7 +56,7 @@ void Sensors::loop() {
 #ifndef EMSESP_STANDALONE
     if (state_ == State::IDLE) {
         if (millis() - last_activity_ >= READ_INTERVAL_MS) {
-            // DEBUG_LOG(F("Read sensor temperature")); // uncomment for debug
+            // LOG_DEBUG(F("Read sensor temperature")); // uncomment for debug
             if (bus_.reset()) {
                 bus_.skip();
                 bus_.write(CMD_CONVERT_TEMP);
@@ -47,28 +64,28 @@ void Sensors::loop() {
                 state_ = State::READING;
             } else {
                 // no sensors found
-                // logger_.err(F("Bus reset failed")); // uncomment for debug
+                // LOG_ERROR(F("Bus reset failed")); // uncomment for debug
                 devices_.clear(); // remove all know devices incase we have a disconnect
             }
             last_activity_ = millis();
         }
     } else if (state_ == State::READING) {
         if (temperature_convert_complete()) {
-            // DEBUG_LOG(F("Scanning for sensors")); // uncomment for debug
+            // LOG_DEBUG(F("Scanning for sensors")); // uncomment for debug
             bus_.reset_search();
             found_.clear();
 
             state_         = State::SCANNING;
             last_activity_ = millis();
         } else if (millis() - last_activity_ > READ_TIMEOUT_MS) {
-            logger_.err(F("Sensor read timeout"));
+            LOG_ERROR(F("Sensor read timeout"));
 
             state_         = State::IDLE;
             last_activity_ = millis();
         }
     } else if (state_ == State::SCANNING) {
         if (millis() - last_activity_ > SCAN_TIMEOUT_MS) {
-            logger_.err(F("Sensor scan timeout"));
+            LOG_ERROR(F("Sensor scan timeout"));
             state_         = State::IDLE;
             last_activity_ = millis();
         } else {
@@ -89,24 +106,24 @@ void Sensors::loop() {
                         /*
                         // comment out for debugging
                         char result[10];
-                        DEBUG_LOG(F("Temp of %s = %s"),
+                        LOG_DEBUG(F("Temp of %s = %s"),
                                   found_.back().to_string().c_str(),
                                   Helpers::render_value(result, found_.back().temperature_c_, 2)); 
                         */
                         break;
 
                     default:
-                        logger_.err(F("Unknown sensor %s"), Device(addr).to_string().c_str());
+                        LOG_ERROR(F("Unknown sensor %s"), Device(addr).to_string().c_str());
                         break;
                     }
                 } else {
-                    logger_.err(F("Invalid sensor %s"), Device(addr).to_string().c_str());
+                    LOG_ERROR(F("Invalid sensor %s"), Device(addr).to_string().c_str());
                 }
             } else {
                 bus_.depower();
                 devices_ = std::move(found_);
                 found_.clear();
-                // DEBUG_LOG(F("Found %zu sensor(s). Adding them."), devices_.size()); // uncomment for debug
+                // LOG_DEBUG(F("Found %zu sensor(s). Adding them."), devices_.size()); // uncomment for debug
                 state_         = State::IDLE;
                 last_activity_ = millis();
             }
@@ -129,7 +146,7 @@ bool Sensors::temperature_convert_complete() {
 float Sensors::get_temperature_c(const uint8_t addr[]) {
 #ifndef EMSESP_STANDALONE
     if (!bus_.reset()) {
-        logger_.err(F("Bus reset failed before reading scratchpad from %s"), Device(addr).to_string().c_str());
+        LOG_ERROR(F("Bus reset failed before reading scratchpad from %s"), Device(addr).to_string().c_str());
         return NAN;
     }
 
@@ -140,22 +157,22 @@ float Sensors::get_temperature_c(const uint8_t addr[]) {
     bus_.read_bytes(scratchpad, SCRATCHPAD_LEN);
 
     if (!bus_.reset()) {
-        logger_.err(F("Bus reset failed after reading scratchpad from %s"), Device(addr).to_string().c_str());
+        LOG_ERROR(F("Bus reset failed after reading scratchpad from %s"), Device(addr).to_string().c_str());
         return NAN;
     }
 
     if (bus_.crc8(scratchpad, SCRATCHPAD_LEN - 1) != scratchpad[SCRATCHPAD_LEN - 1]) {
-        logger_.warning(F("Invalid scratchpad CRC: %02X%02X%02X%02X%02X%02X%02X%02X%02X from device %s"),
-                        scratchpad[0],
-                        scratchpad[1],
-                        scratchpad[2],
-                        scratchpad[3],
-                        scratchpad[4],
-                        scratchpad[5],
-                        scratchpad[6],
-                        scratchpad[7],
-                        scratchpad[8],
-                        Device(addr).to_string().c_str());
+        LOG_WARNING(F("Invalid scratchpad CRC: %02X%02X%02X%02X%02X%02X%02X%02X%02X from device %s"),
+                    scratchpad[0],
+                    scratchpad[1],
+                    scratchpad[2],
+                    scratchpad[3],
+                    scratchpad[4],
+                    scratchpad[5],
+                    scratchpad[6],
+                    scratchpad[7],
+                    scratchpad[8],
+                    Device(addr).to_string().c_str());
         return NAN;
     }
 
@@ -227,7 +244,7 @@ void Sensors::publish_values() {
     // if we're not using nested JSON, send each sensor out seperately
     // sensor1, sensor2 etc...
     // e.g. sensor_1 = {"temp":20.2}
-    if (mqtt_format_ != Settings::MQTT_format::NESTED) {
+    if (mqtt_format_ == Settings::MQTT_format::SINGLE) {
         StaticJsonDocument<100> doc;
         for (const auto & device : devices_) {
             char s[5];
@@ -242,13 +259,14 @@ void Sensors::publish_values() {
     }
 
     // group all sensors together - https://github.com/proddy/EMS-ESP/issues/327
-    // https://arduinojson.org/v6/assistant/
+    // This is used for both NESTED and HA modes
     //  sensors = {
     // "sensor1":{"id":"28-EA41-9497-0E03-5F","temp":"23.25"},
     // "sensor2":{"id":"28-EA41-9497-0E03-5F","temp":"23.25"},
     // "sensor3":{"id":"28-EA41-9497-0E03-5F","temp":"23.25"},
     // "sensor4":{"id":"28-EA41-9497-0E03-5F","temp":"23.25"}
     // }
+
     // const size_t        capacity = num_devices * JSON_OBJECT_SIZE(2) + JSON_OBJECT_SIZE(num_devices);
     DynamicJsonDocument doc(100 * num_devices);
 
@@ -263,7 +281,11 @@ void Sensors::publish_values() {
         dataSensor["temp"]    = Helpers::render_value(s, device.temperature_c_, 2);
     }
 
-    Mqtt::publish("sensors", doc);
+    if (mqtt_format_ == Settings::MQTT_format::HA) {
+        Mqtt::publish("homeassistant/sensor/ems-esp/external/state", doc);
+    } else {
+        Mqtt::publish("sensors", doc);
+    }
 }
 
 } // namespace emsesp

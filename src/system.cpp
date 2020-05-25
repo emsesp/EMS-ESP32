@@ -60,7 +60,7 @@ void System::mqtt_commands(const char * message) {
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
     DeserializationError                           error = deserializeJson(doc, message);
     if (error) {
-        DEBUG_LOG(F("MQTT error: payload %s, error %s"), message, error.c_str());
+        LOG_DEBUG(F("MQTT error: payload %s, error %s"), message, error.c_str());
         return;
     }
     const char * command = doc["cmd"];
@@ -91,9 +91,9 @@ void System::restart(bool mode) {
 
     // check for safe mode
     if (mode) {
-        logger_.notice("Restarting system in safe mode...");
+        LOG_NOTICE("Restarting system in safe mode...");
     } else {
-        logger_.notice("Restarting system...");
+        LOG_NOTICE("Restarting system...");
     }
 
     Shell::loop_all();
@@ -140,9 +140,11 @@ void System::start() {
     settings.app_version(EMSESP_APP_VERSION);
     settings.commit();
 
-    logger_.info(F("System booted (EMS-ESP version %s)"), settings.app_version().c_str());
+    LOG_INFO(F("System booted (EMS-ESP version %s)"), settings.app_version().c_str());
 
-    pinMode(LED_GPIO, OUTPUT); // LED pin
+    if (LED_GPIO) {
+        pinMode(LED_GPIO, OUTPUT); // LED pin, 0 is disabled
+    }
 
     // register MQTT system commands
     Mqtt::subscribe("cmd", std::bind(&System::mqtt_commands, this, _1));
@@ -218,19 +220,11 @@ void System::loop() {
     syslog_.loop();
 #endif
 
-    led_monitor(); // check status and report back using the LED
+    if (LED_GPIO) {
+        led_monitor(); // check status and report back using the LED
+    }
 
     system_check(); // check system health
-
-    /*
-#ifdef EMSESP_DEBUG
-    static uint32_t last_debug_ = 0;
-    if (millis() - last_debug_ >= 5000) {
-        last_debug_ = millis();
-        show_mem("loop");
-    }
-#endif
-*/
 }
 
 void System::show_mem(const char * text) {
@@ -239,7 +233,7 @@ void System::show_mem(const char * text) {
 #else
     uint32_t mem = 1000;
 #endif
-    logger_.notice(F("{%s} Free mem: %ld (%d%%)"), text, mem, (100 * mem / heap_start_));
+    LOG_NOTICE(F("{%s} Free mem: %ld (%d%%)"), text, mem, (100 * mem / heap_start_));
 }
 
 // sets rate of led flash
@@ -272,7 +266,9 @@ void System::system_check() {
             // if it was unhealthy but now we're better, make sure the LED is solid again cos we've been healed
             if (!system_healthy_) {
                 system_healthy_ = true;
-                digitalWrite(LED_GPIO, LED_ON); // LED on, for ever
+                if (LED_GPIO) {
+                    digitalWrite(LED_GPIO, LED_ON); // LED on, for ever
+                }
             }
         }
     }

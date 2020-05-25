@@ -45,6 +45,8 @@
 #include "boiler.h"
 #include "shower.h"
 
+#define LOG_TRACE_WATCH_NONE 0     // no watch set
+
 namespace emsesp {
 
 class Shower; // forward declaration for compiler
@@ -79,8 +81,6 @@ class EMSESP {
     static uint8_t actual_master_thermostat();
     static void    actual_master_thermostat(const uint8_t device_id);
 
-    static void trace_watch_id(uint16_t);
-
     static void show_values(uuid::console::Shell & shell);
     static void show_devices(uuid::console::Shell & shell);
     static void show_emsbus(uuid::console::Shell & shell);
@@ -93,8 +93,18 @@ class EMSESP {
         return sensors_.devices();
     }
 
+    static void trace_watch_id(uint16_t id);
+
     static uint16_t trace_watch_id() {
         return trace_watch_id_;
+    }
+
+    static void trace_raw(bool trace_raw) {
+        trace_raw_ = trace_raw;
+    }
+
+    static bool trace_raw() {
+        return trace_raw_;
     }
 
     static bool tap_water_active() {
@@ -151,6 +161,7 @@ class EMSESP {
 
     static uint8_t  actual_master_thermostat_;
     static uint16_t trace_watch_id_;
+    static bool     trace_raw_;
     static bool     tap_water_active_;
     static bool     ems_read_only_;
 };

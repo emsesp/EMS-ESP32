@@ -27,19 +27,15 @@
 #include "freertos/queue.h"
 #include <driver/uart.h>
 
-#define EMS_MAXBUFFERSIZE 34 // max size of the buffer. EMS packets are max 32 bytes, plus extra 2 for BRKs
+#define EMS_MAXBUFFERSIZE 33 // max size of the buffer. EMS packets are max 32 bytes, plus extra 2 for BRKs
 
-#define EMSUART_UART UART_NUM_2 // UART 0 --> Changed to 2 for ESP32 // To do: Adapt
-#define EMSUART_RXPIN 17        // To do: Adapt seems to be IO17 for ESP32 UART2 RX pin
-#define EMSUART_TXPIN 16        // To do: Adapt seems to be IO16 for ESP32 UART2 TX pin
-//#define EMSUART_CONFIG 0x1C // 8N1 (8 bits, no parity, 1 stopbit)
+#define EMSUART_UART UART_NUM_2 // on the ESP32 we're using UART2
+#define EMS_UART UART2          // for intr setting
 #define EMSUART_BAUD 9600 // uart baud rate for the EMS circuit
-#define EMSUART_RXBUFSIZE (2 * UART_FIFO_LEN)
-#define EMSUART_BREAKBITS 11 // 11 bits break signal
 
-#define EMS_TXMODE_DEFAULT 1
-#define EMS_TXMODE_EMSPLUS 2
-#define EMS_TXMODE_HT3 3
+// customize the GPIO pins for RX and TX here
+#define EMSUART_RXPIN 17 // 17 is UART2 RX. Use 23 for D7 on a Wemos D1-32 mini for backwards compatabilty
+#define EMSUART_TXPIN 16 // 16 is UART2 TX. Use 5 for D8 on a Wemos D1-32 mini for backwards compatabilty
 
 namespace emsesp {
 
@@ -56,14 +52,12 @@ class EMSuart {
 
     static void           start(uint8_t tx_mode);
     static void           send_poll(uint8_t data);
+    static void           stop();
+    static void           restart();
     static EMSUART_STATUS transmit(uint8_t * buf, uint8_t len);
-
-    static void stop(){};    // not used with ESP32
-    static void restart(){}; // not used with ESP32
 
   private:
     static void emsuart_recvTask(void * param);
-    static void emsuart_parseTask(void * param);
 };
 
 } // namespace emsesp

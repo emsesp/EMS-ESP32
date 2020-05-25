@@ -26,7 +26,7 @@ uuid::log::Logger Mixing::logger_{F_(logger_name), uuid::log::Facility::CONSOLE}
 
 Mixing::Mixing(uint8_t device_type, uint8_t device_id, uint8_t product_id, const std::string & version, const std::string & name, uint8_t flags, uint8_t brand)
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
-    DEBUG_LOG(F("Registering new Mixing module with device ID 0x%02X"), device_id);
+    LOG_DEBUG(F("Registering new Mixing module with device ID 0x%02X"), device_id);
 
     // telegram handlers 0x20 - 0x27 for HC
     register_telegram_type(0x02D7, F("MMPLUSStatusMessage_HC"), true, std::bind(&Mixing::process_MMPLUSStatusMessage_HC, this, _1));
@@ -105,7 +105,7 @@ void Mixing::publish_values() {
     }
 
 #ifdef EMSESP_DEBUG
-    DEBUG_LOG(F("[DEBUG] Performing a mixing module publish"));
+    LOG_DEBUG(F("[DEBUG] Performing a mixing module publish"));
 #endif
 
     char topic[30];

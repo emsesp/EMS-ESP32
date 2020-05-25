@@ -60,7 +60,7 @@ class System {
 
     static void restart(bool safe_mode);
     static void restart() {
-        restart(false); // no safe mode
+        restart(false); // default, don't boot into safe mode
     }
 
     static void show_mem(const char * text);
@@ -83,8 +83,8 @@ class System {
     static constexpr uint8_t LED_GPIO = 2;
     static constexpr uint8_t LED_ON   = LOW;
 #elif defined(ESP32)
-    static constexpr uint8_t LED_GPIO = 5; // on Wemos D32
-    static constexpr uint8_t LED_ON   = LOW;
+    static constexpr uint8_t LED_GPIO = 5;   // 5 on Lolin D32, 2 on Wemos D1-32 mini. Use 0 for off.
+    static constexpr uint8_t LED_ON   = LOW; // LOW on Lolin D32, HIGH on Wemos D1-32 mini
 #else
     static constexpr uint8_t LED_GPIO = 0;
     static constexpr uint8_t LED_ON   = 0;
@@ -106,6 +106,7 @@ class System {
     static int      reset_counter_;
 
     static EMSuart emsuart_;
+
 #if defined(ESP8266)
     static RTCVars state_;
 #endif

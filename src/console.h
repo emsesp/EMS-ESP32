@@ -41,8 +41,12 @@ using uuid::log::Level;
 
 // clang-format off
 
-#define DEBUG_LOG(...) if (logger_.enabled(Level::DEBUG)) {logger_.debug(__VA_ARGS__);}
-#define TRACE_LOG(...) if (logger_.enabled(Level::TRACE)) {logger_.trace(__VA_ARGS__);}
+#define LOG_DEBUG(...) if (logger_.enabled(Level::DEBUG)) {logger_.debug(__VA_ARGS__);}
+#define LOG_TRACE(...) if (logger_.enabled(Level::TRACE)) {logger_.trace(__VA_ARGS__);}
+#define LOG_INFO(...) logger_.info(__VA_ARGS__)
+#define LOG_NOTICE(...) logger_.notice(__VA_ARGS__)
+#define LOG_WARNING(...) logger_.warning(__VA_ARGS__)
+#define LOG_ERROR(...) logger_.err(__VA_ARGS__)
 
 #define MAKE_PSTR(string_name, string_literal) static const char __pstr__##string_name[] __attribute__((__aligned__(sizeof(int)))) PROGMEM = string_literal;
 #define MAKE_PSTR_WORD(string_name) MAKE_PSTR(string_name, #string_name)
@@ -84,6 +88,7 @@ MAKE_PSTR_WORD(debug)
 MAKE_PSTR_WORD(restart)
 MAKE_PSTR_WORD(reconnect)
 MAKE_PSTR_WORD(format)
+MAKE_PSTR_WORD(raw)
 
 // context menus
 MAKE_PSTR_WORD(mqtt)
@@ -96,6 +101,8 @@ MAKE_PSTR(asterisks, "********")
 MAKE_PSTR(n_mandatory, "<n>")
 MAKE_PSTR(n_optional, "[n]")
 MAKE_PSTR(traceid_optional, "[trace ID]")
+MAKE_PSTR(trace_raw_fmt, "Displaying raw bytes = %s")
+MAKE_PSTR(raw_optional, "[raw]")
 MAKE_PSTR(bool_mandatory, "<on | off>")
 MAKE_PSTR(typeid_mandatory, "<type ID>")
 MAKE_PSTR(deviceid_mandatory, "<device ID>")

@@ -160,7 +160,7 @@ void EMSdevice::show_values(uuid::console::Shell & shell) {
 
 // for each telegram that has the fetch value set (true) do a read request
 void EMSdevice::fetch_values() {
-    DEBUG_LOG(F("Fetching values for device ID 0x%02X"), device_id());
+    LOG_DEBUG(F("Fetching values for device ID 0x%02X"), device_id());
 
     for (const auto & tf : telegram_functions_) {
         if (tf.fetch_) {
@@ -188,7 +188,7 @@ void EMSdevice::show_mqtt_handlers(uuid::console::Shell & shell) {
 }
 
 void EMSdevice::register_mqtt_topic(const std::string & topic, mqtt_function_p f) {
-    DEBUG_LOG(F("Registering MQTT topic %s for device ID %02X"), topic.c_str(), this->device_id_);
+    LOG_DEBUG(F("Registering MQTT topic %s for device ID %02X"), topic.c_str(), this->device_id_);
     Mqtt::subscribe(this->device_id_, topic, f);
 }
 
@@ -230,7 +230,7 @@ std::string EMSdevice::telegram_type_name(std::shared_ptr<const Telegram> telegr
 bool EMSdevice::process_telegram(std::shared_ptr<const Telegram> telegram) {
     for (const auto & tf : telegram_functions_) {
         if (tf.telegram_type_id_ == telegram->type_id) {
-            DEBUG_LOG(F("Processing %s..."), uuid::read_flash_string(tf.telegram_type_name_).c_str());
+            LOG_DEBUG(F("Processing %s..."), uuid::read_flash_string(tf.telegram_type_name_).c_str());
             tf.process_function_(telegram);
             return true;
         }

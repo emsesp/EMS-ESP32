@@ -46,7 +46,7 @@ uuid::log::Logger Boiler::logger_{F_(logger_name), uuid::log::Facility::CONSOLE}
 
 Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const std::string & version, const std::string & name, uint8_t flags, uint8_t brand)
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
-    DEBUG_LOG(F("Registering new Boiler with device ID 0x%02X"), device_id);
+    LOG_DEBUG(F("Registering new Boiler with device ID 0x%02X"), device_id);
 
     // the telegram handlers...
     register_telegram_type(0x18, F("UBAMonitorFast"), true, std::bind(&Boiler::process_UBAMonitorFast, this, _1));
@@ -91,7 +91,7 @@ void Boiler::boiler_cmd(const char * message) {
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
     DeserializationError                           error = deserializeJson(doc, message);
     if (error) {
-        DEBUG_LOG(F("MQTT error: payload %s, error %s"), message, error.c_str());
+        LOG_DEBUG(F("MQTT error: payload %s, error %s"), message, error.c_str());
         return;
     }
     const char * command = doc["cmd"];
@@ -312,7 +312,7 @@ void Boiler::publish_values() {
     }
 
 #ifdef EMSESP_DEBUG
-    DEBUG_LOG(F("[DEBUG] Performing a boiler publish"));
+    LOG_DEBUG(F("[DEBUG] Performing a boiler publish"));
 #endif
 
     // if we have data, publish it
@@ -675,31 +675,31 @@ void Boiler::process_UBAMaintenanceSettings(std::shared_ptr<const Telegram> tele
 
 // Set the warm water temperature 0x33
 void Boiler::set_warmwater_temp(const uint8_t temperature) {
-    logger_.info(F("Setting boiler warm water temperature to %d C"), temperature);
+    LOG_INFO(F("Setting boiler warm water temperature to %d C"), temperature);
     write_command(EMS_TYPE_UBAParameterWW, 2, temperature);
 }
 
 // flow temp
 void Boiler::set_flow_temp(const uint8_t temperature) {
-    logger_.info(F("Setting boiler flow temperature to %d C"), temperature);
+    LOG_INFO(F("Setting boiler flow temperature to %d C"), temperature);
     write_command(EMS_TYPE_UBASetPoints, 0, temperature);
 }
 
 // 1=hot, 2=eco, 3=intelligent
 void Boiler::set_warmwater_mode(const uint8_t comfort) {
     if (comfort == 1) {
-        logger_.info(F("Setting boiler warm water to hot"));
+        LOG_INFO(F("Setting boiler warm water to hot"));
     } else if (comfort == 2) {
-        logger_.info(F("Setting boiler warm water to eco"));
+        LOG_INFO(F("Setting boiler warm water to eco"));
     } else if (comfort == 3) {
-        logger_.info(F("Setting boiler warm water to intelligent"));
+        LOG_INFO(F("Setting boiler warm water to intelligent"));
     }
     write_command(EMS_TYPE_UBAParameterWW, 9, comfort);
 }
 
 // turn on/off warm water
 void Boiler::set_warmwater_activated(const bool activated) {
-    logger_.info(F("Setting boiler warm water %s"), activated ? "on" : "off");
+    LOG_INFO(F("Setting boiler warm water %s"), activated ? "on" : "off");
     uint8_t value;
 
     // https://github.com/proddy/EMS-ESP/issues/268
@@ -715,7 +715,7 @@ void Boiler::set_warmwater_activated(const bool activated) {
 // true = on, false = off
 // Note: Using the type 0x1D to put the boiler into Test mode. This may be shown on the boiler with a flashing 'T'
 void Boiler::set_tapwarmwater_activated(const bool activated) {
-    logger_.info(F("Setting boiler warm tap water %s"), activated ? "on" : "off");
+    LOG_INFO(F("Setting boiler warm tap water %s"), activated ? "on" : "off");
     uint8_t message_data[EMS_MAX_TELEGRAM_MESSAGE_LENGTH];
     for (uint8_t i = 0; i < sizeof(message_data); i++) {
         message_data[i] = 0x00;
@@ -743,14 +743,14 @@ void Boiler::set_tapwarmwater_activated(const bool activated) {
 // true = on, false = off
 // See also https://github.com/proddy/EMS-ESP/issues/341#issuecomment-596245458 for Junkers
 void Boiler::set_warmwater_onetime(const bool activated) {
-    logger_.info(F("Setting boiler warm water OneTime loading %s"), activated ? "on" : "off");
+    LOG_INFO(F("Setting boiler warm water OneTime loading %s"), activated ? "on" : "off");
     write_command(EMS_TYPE_UBAFlags, 0, (activated ? 0x22 : 0x02));
 }
 
 // Activate / De-activate circulation of warm water 0x35
 // true = on, false = off
 void Boiler::set_warmwater_circulation(const bool activated) {
-    logger_.info(F("Setting boiler warm water circulation %s"), activated ? "on" : "off");
+    LOG_INFO(F("Setting boiler warm water circulation %s"), activated ? "on" : "off");
     write_command(EMS_TYPE_UBAFlags, 1, (activated ? 0x22 : 0x02));
 }
 

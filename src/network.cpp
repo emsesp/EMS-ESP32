@@ -36,6 +36,7 @@ void Network::start() {
     WiFi.persistent(false);
     WiFi.disconnect(true);
     WiFi.setAutoReconnect(false);
+    WiFi.mode(WIFI_STA);
 #endif
 
 #if defined(ESP8266)
@@ -71,7 +72,7 @@ void Network::sta_mode_start(WiFiEvent_t event, WiFiEventInfo_t info) {
 
 #if defined(ESP8266)
 void Network::sta_mode_connected(const WiFiEventStationModeConnected & event) {
-    logger_.info(F("Connected to %s (%02X:%02X:%02X:%02X:%02X:%02X) on channel %u"),
+    LOG_INFO(F("Connected to %s (%02X:%02X:%02X:%02X:%02X:%02X) on channel %u"),
                  event.ssid.c_str(),
                  event.bssid[0],
                  event.bssid[1],
@@ -86,7 +87,7 @@ void Network::sta_mode_connected(const WiFiEventStationModeConnected & event) {
 }
 #elif defined(ESP32)
 void Network::sta_mode_connected(WiFiEvent_t event, WiFiEventInfo_t info) {
-    logger_.info(F("Connected to %s (%02X:%02X:%02X:%02X:%02X:%02X) on channel %u"),
+    LOG_INFO(F("Connected to %s (%02X:%02X:%02X:%02X:%02X:%02X) on channel %u"),
                  info.connected.ssid,
                  info.sta_connected.mac[0],
                  info.sta_connected.mac[1],
@@ -107,10 +108,10 @@ void Network::sta_mode_disconnected(const WiFiEventStationModeDisconnected & eve
     if (event.reason == 201) {
         if (++disconnect_count_ == 3) {
             if (System::safe_mode()) {
-                logger_.err(F("Failed to connect to WiFi %s after %d attempts"), event.ssid.c_str(), disconnect_count_ - 1);
+                LOG_ERROR(F("Failed to connect to WiFi %s after %d attempts"), event.ssid.c_str(), disconnect_count_ - 1);
                 disconnect_count_ = 0;
             } else {
-                logger_.err(F("Failed to connect to WiFi. Rebooting into Safe mode"));
+                LOG_ERROR(F("Failed to connect to WiFi. Rebooting into Safe mode"));
                 System::restart(true); // set safe mode and restart
             }
         }
@@ -118,20 +119,20 @@ void Network::sta_mode_disconnected(const WiFiEventStationModeDisconnected & eve
 }
 #elif defined(ESP32)
 void Network::sta_mode_disconnected(WiFiEvent_t event, WiFiEventInfo_t info) {
-    // logger_.err(F("Failed to connect to WiFi %s, reason code %d"), info.disconnected.ssid, info.disconnected.reason);
+    // LOG_ERROR(F("Failed to connect to WiFi %s, reason code %d"), info.disconnected.ssid, info.disconnected.reason);
 }
 #endif
 
 #if defined(ESP8266)
 void Network::sta_mode_got_ip(const WiFiEventStationModeGotIP & event) {
-    logger_.info(F("Obtained IPv4 address %s/%s and gateway %s"),
+    LOG_INFO(F("Obtained IPv4 address %s/%s and gateway %s"),
                  uuid::printable_to_string(event.ip).c_str(),
                  uuid::printable_to_string(event.mask).c_str(),
                  uuid::printable_to_string(event.gw).c_str());
 }
 #elif defined(ESP32)
 void Network::sta_mode_got_ip(WiFiEvent_t event, WiFiEventInfo_t info) {
-    logger_.info(F("Obtained IPv4 address %s/%s and gateway %s"),
+    LOG_INFO(F("Obtained IPv4 address %s/%s and gateway %s"),
                  uuid::printable_to_string(IPAddress(info.got_ip.ip_info.ip.addr)).c_str(),
                  uuid::printable_to_string(IPAddress(info.got_ip.ip_info.netmask.addr)).c_str(),
                  uuid::printable_to_string(IPAddress(info.got_ip.ip_info.gw.addr)).c_str());
@@ -202,21 +203,21 @@ void Network::ota_setup() {
     ota_->setPassword(settings.admin_password().c_str());
 
     ota_->onStart([this]() {
-        DEBUG_LOG(F("OTA starting (send type %d)..."), ota_->getCommand());
+        LOG_DEBUG(F("OTA starting (send type %d)..."), ota_->getCommand());
 
         // turn off stuff to stop interference
         EMSuart::stop(); // UART stop
         in_ota_ = true;  // set flag so all other services stop
     });
 
-    ota_->onEnd([this]() { DEBUG_LOG(F("OTA done, automatically restarting")); });
+    ota_->onEnd([this]() { LOG_DEBUG(F("OTA done, automatically restarting")); });
 
     ota_->onProgress([this](unsigned int progress, unsigned int total) {
         /*
         static unsigned int _progOld;
         unsigned int        _prog = (progress / (total / 100));
         if (_prog != _progOld) {
-            DEBUG_LOG(F("[OTA] Progress: %u%%"), _prog);
+            LOG_DEBUG(F("[OTA] Progress: %u%%"), _prog);
             _progOld = _prog;
         }
         */
@@ -224,23 +225,23 @@ void Network::ota_setup() {
 
     ota_->onError([this](ota_error_t error) {
         if (error == OTA_AUTH_ERROR) {
-            logger_.err(F("[OTA] Auth Failed"));
+            LOG_ERROR(F("[OTA] Auth Failed"));
         } else if (error == OTA_BEGIN_ERROR) {
-            logger_.err(F("[OTA] Begin Failed"));
+            LOG_ERROR(F("[OTA] Begin Failed"));
         } else if (error == OTA_CONNECT_ERROR) {
-            logger_.err(F("[OTA] Connect Failed"));
+            LOG_ERROR(F("[OTA] Connect Failed"));
         } else if (error == OTA_RECEIVE_ERROR) {
-            logger_.err(F("[OTA] Receive Failed"));
+            LOG_ERROR(F("[OTA] Receive Failed"));
         } else if (error == OTA_END_ERROR) {
-            logger_.err(F("[OTA] End Failed"));
+            LOG_ERROR(F("[OTA] End Failed"));
         } else {
-            logger_.err(F("[OTA] Error %d"), error);
+            LOG_ERROR(F("[OTA] Error %d"), error);
         };
     });
 
     // start ota service
     ota_->begin();
-    logger_.info(F("Listening to firmware updates on %s.local:%u"), ota_->getHostname().c_str(), OTA_PORT);
+    LOG_INFO(F("Listening to firmware updates on %s.local:%u"), ota_->getHostname().c_str(), OTA_PORT);
 
 #endif
 }
