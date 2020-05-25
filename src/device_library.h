@@ -24,10 +24,10 @@
  */
 
 // Boilers - 0x08
+{ 72, DeviceType::BOILER, F("GB125/MC10"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {115, DeviceType::BOILER, F("Topline/GB162"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {123, DeviceType::BOILER, F("GBx72/Trendline/Cerapur/Greenstar Si/27i"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {133, DeviceType::BOILER, F("GB125/Logamatic MC110"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
-{115, DeviceType::BOILER, F("Topline/GB162"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {203, DeviceType::BOILER, F("Logamax U122/Cerapur"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {208, DeviceType::BOILER, F("Logamax plus/GB192/Condens GC9000"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 { 64, DeviceType::BOILER, F("BK13,BK15/Smartline/GB1x2"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
@@ -78,7 +78,7 @@
 
 // Gateways - 0x48 / 0x18
 {189, DeviceType::GATEWAY, F("KM200"), DeviceFlags::EMS_DEVICE_FLAG_NONE},  // 0x48
-{ 94, DeviceType::GATEWAY, F("RC"), DeviceFlags::EMS_DEVICE_FLAG_NONE},   // 0x18
+{ 94, DeviceType::GATEWAY, F("RFM"), DeviceFlags::EMS_DEVICE_FLAG_NONE},   // 0x18
 
 // Thermostat - not currently supporting write operations, like the Easy/100 types - 0x18
 {202, DeviceType::THERMOSTAT, F("Logamatic TC100/Moduline Easy"), DeviceFlags::EMS_DEVICE_FLAG_EASY | DeviceFlags::EMS_DEVICE_FLAG_NO_WRITE}, // 0x18, cannot write
@@ -98,7 +98,7 @@
 
 // Thermostat - Sieger - 0x10 / 0x17
 { 76, DeviceType::THERMOSTAT, F("ES73"), DeviceFlags::EMS_DEVICE_FLAG_RC35}, // 0x10
-{113, DeviceType::THERMOSTAT, F("ES72"), DeviceFlags::EMS_DEVICE_FLAG_RC20_2}, // 0x17
+{113, DeviceType::THERMOSTAT, F("ES72/RC20"), DeviceFlags::EMS_DEVICE_FLAG_RC20_2}, // 0x17
 
 // Thermostat - Junkers - 0x10
 {105, DeviceType::THERMOSTAT, F("FW100"), DeviceFlags::EMS_DEVICE_FLAG_JUNKERS},

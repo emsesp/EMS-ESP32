@@ -63,7 +63,12 @@ class Sensors {
     const std::vector<Device> devices() const;
 
   private:
+#if defined(ESP8266)
     static constexpr uint8_t SENSOR_GPIO = 14; // D5
+#elif defined(ESP32)
+//    static constexpr uint8_t SENSOR_GPIO = 14; // same position
+    static constexpr uint8_t SENSOR_GPIO = 18; // for Wemos D1 32
+#endif
 
     enum class State { IDLE, READING, SCANNING };
 
