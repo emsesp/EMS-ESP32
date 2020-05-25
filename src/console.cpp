@@ -21,7 +21,11 @@
 
 namespace emsesp {
 
-static std::shared_ptr<Commands>    commands = std::make_shared<Commands>();
+std::shared_ptr<Commands> EMSESPShell::commands = [] {
+    std::shared_ptr<Commands> commands = std::make_shared<Commands>();
+    return commands;
+}();
+
 static std::shared_ptr<EMSESPShell> shell;
 
 std::vector<bool> EMSESPStreamConsole::ptys_;
@@ -31,11 +35,6 @@ uuid::telnet::TelnetService telnet_([](Stream & stream, const IPAddress & addr, 
     return std::make_shared<EMSESPStreamConsole>(stream, addr, port);
 });
 #endif
-
-std::shared_ptr<Commands> EMSESPShell::commands = [] {
-    std::shared_ptr<Commands> commands = std::make_shared<Commands>();
-    return commands;
-}();
 
 EMSESPShell::EMSESPShell()
     : Shell() {
@@ -125,7 +124,7 @@ void EMSESPShell::add_console_commands() {
                           });
 
     /*
-     * add the submenu contexts...
+     * add all the submenu contexts...
      */
 
     // MQTT
@@ -133,8 +132,7 @@ void EMSESPShell::add_console_commands() {
                           CommandFlags::USER,
                           flash_string_vector{F_(mqtt)},
                           [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
-                              dynamic_cast<EMSESPShell &>(shell).enter_custom_context(ShellContext::MQTT);
-                              Mqtt::console_commands();
+                              Mqtt::console_commands(shell, ShellContext::MQTT);
                           });
 
     // EMS
@@ -142,8 +140,7 @@ void EMSESPShell::add_console_commands() {
                           CommandFlags::USER,
                           flash_string_vector{F_(ems)},
                           [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
-                              dynamic_cast<EMSESPShell &>(shell).enter_custom_context(ShellContext::EMS);
-                              EMSESP::console_commands();
+                              EMSESP::console_commands(shell, ShellContext::EMS);
                           });
 
     // System
@@ -151,15 +148,14 @@ void EMSESPShell::add_console_commands() {
                           CommandFlags::USER,
                           flash_string_vector{F_(system)},
                           [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
-                              dynamic_cast<EMSESPShell &>(shell).enter_custom_context(ShellContext::SYSTEM);
-                              System::console_commands();
+                              System::console_commands(shell, ShellContext::SYSTEM);
                           });
 
     // add all the context menus for the connected devices
-    // this assumes they devices have been detected and registered
-    EMSESP::add_context_menu();
+    // this assumes they devices have been detected and pre-registered
+    EMSESP::add_context_menus();
 
-    enter_custom_context(ShellContext::MAIN); // add su, exit and help
+    Console::load_standard_commands(ShellContext::MAIN);
 
     _console_commands_loaded = true;
 }
@@ -199,17 +195,29 @@ bool EMSESPShell::exit_context() {
     return Shell::exit_context();
 }
 
+// enter a custom context (sub-menu)
+void Console::enter_custom_context(Shell & shell, unsigned int context) {
+    load_standard_commands(context);
+
+    // don't enter context if we're already at the root
+    if (context != ShellContext::MAIN) {
+        shell.enter_context(context);
+    }
+}
+
 // each custom context has the common commands like log, help, exit, su etc
-void EMSESPShell::enter_custom_context(unsigned int context) {
+void Console::load_standard_commands(unsigned int context) {
 #ifdef EMSESP_DEBUG
-    commands->add_command(context,
-                          CommandFlags::ADMIN,
-                          flash_string_vector{F_(test)},
-                          flash_string_vector{F_(name_mandatory)},
-                          [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) { EMSESP::run_test(shell, arguments.front()); });
+    EMSESPShell::commands->add_command(context,
+                                       CommandFlags::ADMIN,
+                                       flash_string_vector{F_(test)},
+                                       flash_string_vector{F_(name_mandatory)},
+                                       [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
+                                           EMSESP::run_test(shell, arguments.front());
+                                       });
 #endif
 
-    commands->add_command(
+    EMSESPShell::commands->add_command(
         context,
         CommandFlags::USER,
         flash_string_vector{F_(log)},
@@ -229,7 +237,7 @@ void EMSESPShell::enter_custom_context(unsigned int context) {
                 uint16_t watch_id = 0; // no watch ID set
                 if ((arguments.size() == 2) && (level == uuid::log::Level::TRACE)) {
                     watch_id = Helpers::hextoint(arguments[1].c_str());
-                    shell.printfln(("Tracing only telegrams that match a device ID/telegram type ID of 0x%02X"), watch_id);
+                    shell.printfln(("Tracing only telegrams that match a device ID or telegram type of 0x%02X"), watch_id);
                 }
                 emsesp::EMSESP::trace_watch_id(watch_id);
             }
@@ -239,68 +247,61 @@ void EMSESPShell::enter_custom_context(unsigned int context) {
             return uuid::log::levels_lowercase();
         });
 
-    commands->add_command(context,
-                          CommandFlags::USER,
-                          flash_string_vector{F_(help)},
-                          [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) { shell.print_all_available_commands(); });
+    EMSESPShell::commands->add_command(context,
+                                       CommandFlags::USER,
+                                       flash_string_vector{F_(help)},
+                                       [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
+                                           shell.print_all_available_commands();
+                                       });
 
-    commands->add_command(context,
-                          CommandFlags::USER,
-                          flash_string_vector{F_(exit)},
-                          [=](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) { shell.exit_context(); });
+    EMSESPShell::commands->add_command(context,
+                                       CommandFlags::USER,
+                                       flash_string_vector{F_(exit)},
+                                       [=](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
+                                           // delete MAIN console stuff first to save memory
+                                           EMSESPShell::commands->remove_context_commands(context); 
+                                           shell.exit_context();
+                                       });
 
-    commands->add_command(context,
-                          CommandFlags::USER,
-                          flash_string_vector{F_(su)},
-                          [=](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
-                              auto become_admin = [](Shell & shell) {
-                                  shell.logger().log(LogLevel::NOTICE,
-                                                     LogFacility::AUTH,
-                                                     F("Admin session opened on console %s"),
-                                                     dynamic_cast<EMSESPShell &>(shell).console_name().c_str());
-                                  shell.add_flags(CommandFlags::ADMIN);
-                              };
+    EMSESPShell::commands->add_command(context,
+                                       CommandFlags::USER,
+                                       flash_string_vector{F_(su)},
+                                       [=](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
+                                           auto become_admin = [](Shell & shell) {
+                                               shell.logger().log(LogLevel::NOTICE, LogFacility::AUTH, F("Admin session opened on console"));
+                                               shell.add_flags(CommandFlags::ADMIN);
+                                           };
 
-                              if (shell.has_flags(CommandFlags::LOCAL)) {
-                                  become_admin(shell);
-                              } else {
-                                  shell.enter_password(F_(password_prompt), [=](Shell & shell, bool completed, const std::string & password) {
-                                      if (completed) {
-                                          uint64_t now = uuid::get_uptime_ms();
+                                           if (shell.has_flags(CommandFlags::LOCAL)) {
+                                               become_admin(shell);
+                                           } else {
+                                               shell.enter_password(F_(password_prompt), [=](Shell & shell, bool completed, const std::string & password) {
+                                                   if (completed) {
+                                                       uint64_t now = uuid::get_uptime_ms();
 
-                                          if (!password.empty() && password == Settings().admin_password()) {
-                                              become_admin(shell);
-                                          } else {
-                                              shell.delay_until(now + INVALID_PASSWORD_DELAY_MS, [](Shell & shell) {
-                                                  shell.logger().log(LogLevel::NOTICE,
-                                                                     LogFacility::AUTH,
-                                                                     F("Invalid admin password on console %s"),
-                                                                     dynamic_cast<EMSESPShell &>(shell).console_name().c_str());
-                                                  shell.println(F("su: incorrect password"));
-                                              });
-                                          }
-                                      }
-                                  });
-                              }
-                          });
+                                                       if (!password.empty() && password == Settings().admin_password()) {
+                                                           become_admin(shell);
+                                                       } else {
+                                                           shell.delay_until(now + INVALID_PASSWORD_DELAY_MS, [](Shell & shell) {
+                                                               shell.logger().log(LogLevel::NOTICE, LogFacility::AUTH, F("Invalid admin password on console"));
+                                                               shell.println(F("su: incorrect password"));
+                                                           });
+                                                       }
+                                                   }
+                                               });
+                                           }
+                                       });
 
 #ifdef EMSESP_DEBUG
-    commands->add_command(context,
-                          CommandFlags::ADMIN,
-                          flash_string_vector{F_(debug)},
-                          [&](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
-                              shell.printfln(F("%s%sEMS-ESP version %s%s"), COLOR_BRIGHT_GREEN, COLOR_BOLD_ON, Settings().app_version().c_str(), COLOR_RESET);
-                              Settings settings;
-                              settings.commit();
-                              settings.show_settings(shell);
-                              shell.println();
-                          });
+    EMSESPShell::commands->add_command(
+        context, CommandFlags::ADMIN, flash_string_vector{F_(debug)}, [&](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
+            shell.printfln(F("%s%sEMS-ESP version %s%s"), COLOR_BRIGHT_GREEN, COLOR_BOLD_ON, Settings().app_version().c_str(), COLOR_RESET);
+            Settings settings;
+            settings.commit();
+            settings.show_settings(shell);
+            shell.println();
+        });
 #endif
-
-    // don't enter context if we're at the root
-    if (context != ShellContext::MAIN) {
-        Shell::enter_context(context);
-    }
 }
 
 // prompt, change per context
@@ -339,8 +340,6 @@ std::string EMSESPShell::prompt_suffix() {
 }
 
 void EMSESPShell::end_of_transmission() {
-    // delete MAIN console stuff
-    commands->remove_context_commands(ShellContext::MAIN);
     invoke_command(uuid::read_flash_string(F_(exit)));
 }
 
@@ -415,7 +414,7 @@ void Console::start() {
 // note, this must be started after the network/wifi for ESP32 otherwise it'll crash
 #ifndef EMSESP_STANDALONE
     telnet_.start();
-    // telnet_.default_write_timeout(1000); // in ms, socket timeout 1 second
+    telnet_.default_write_timeout(1000); // in ms, socket timeout 1 second
 #endif
 }
 
@@ -428,8 +427,6 @@ void Console::loop() {
 #endif
 
     Shell::loop_all();
-
-    // delay(0); // in EMS-ESP 1.9.5 this helped with stability
 }
 
 } // namespace emsesp

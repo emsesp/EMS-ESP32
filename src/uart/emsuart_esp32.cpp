@@ -83,7 +83,7 @@ void EMSuart::start(uint8_t tx_mode) {
     EMS_UART.int_ena.val             = 0;          // diable all intr.
     EMS_UART.int_clr.val             = 0xFFFFFFFF; // clear all intr. flags
     EMS_UART.int_ena.brk_det         = 1;          // activate only break 
-    buf_handle = xRingbufferCreate(512, RINGBUF_TYPE_NOSPLIT);
+    buf_handle = xRingbufferCreate(128, RINGBUF_TYPE_NOSPLIT);
 	ESP_ERROR_CHECK(uart_isr_register(EMSUART_UART,uart_intr_handle, NULL, ESP_INTR_FLAG_IRAM, &uart_handle));
     xTaskCreate(emsuart_recvTask, "emsuart_recvTask", 2048, NULL, 12, NULL);
 }
@@ -91,14 +91,14 @@ void EMSuart::start(uint8_t tx_mode) {
  /*
  * Stop, disables interrupt
  */
-vvoid EMSuart::stop(){
+void EMSuart::stop(){
     EMS_UART.int_ena.val = 0; //diable all intr.
  };
 
  /*
  * Restart Interrupt
  */
-vvoid EMSuart::restart(){
+void EMSuart::restart(){
     EMS_UART.int_clr.val     = 0xFFFFFFFF; // clear all intr. flags
     EMS_UART.int_ena.brk_det = 1;          // activate only break
  };
@@ -120,6 +120,9 @@ void EMSuart::send_poll(uint8_t data) {
  */
 EMSUART_STATUS EMSuart::transmit(uint8_t * buf, uint8_t len) {
     if (len > 0) {
+        if (EMS_UART.status.txfifo_cnt > 0) { // fifo not empty
+            return EMS_TX_WTD_TIMEOUT;
+        }
         EMS_UART.conf0.txd_brk        = 0;  // just to make sure the bit is cleared
         for (uint8_t i = 0; i < len; i++) {
             EMS_UART.fifo.rw_byte = buf[i];
@@ -127,7 +130,7 @@ EMSUART_STATUS EMSuart::transmit(uint8_t * buf, uint8_t len) {
         //uart_tx_chars(EMSUART_UART, (const char *)buf, len);
         EMS_UART.idle_conf.tx_brk_num = 12; // breaklenght 12 bit
         EMS_UART.conf0.txd_brk        = 1;  // sending ends in a break
-   }
+    }
     return EMS_TX_STATUS_OK;
 }
 

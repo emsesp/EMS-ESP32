@@ -59,14 +59,15 @@ uint8_t  EMSESP::actual_master_thermostat_ = EMSESP_DEFAULT_MASTER_THERMOSTAT; /
 uint16_t EMSESP::trace_watch_id_           = 0;                                // for when log is TRACE
 bool     EMSESP::tap_water_active_         = false;                            // for when Boiler states we having running warm water. used in Shower()
 bool     EMSESP::ems_read_only_;
+uint32_t EMSESP::last_fetch_ = 0;
 
 #ifdef EMSESP_DEBUG
 #include "test/test_data.h" // used with the 'test' command, under su/admin
 #endif
 
-// for each associated EMS device go and request data values
+// for each associated EMS device go and request its data values
 void EMSESP::fetch_device_values() {
-    fetch_device_values(0); // fetch all
+    fetch_device_values(0); // 0 = fetch all
 }
 
 // for a specific EMS device go and request data values
@@ -76,7 +77,9 @@ void EMSESP::fetch_device_values(const uint8_t device_id) {
         if (emsdevice) {
             if ((device_id == 0) || emsdevice->is_device_id(device_id)) {
                 emsdevice->fetch_values();
-                return;
+                if (device_id != 0) {
+                    return; // quit, we only want to return the selected device
+                }
             }
         }
     }
@@ -177,6 +180,14 @@ void EMSESP::show_values(uuid::console::Shell & shell) {
         return;
     }
 
+    // show EMS device values
+    for (const auto & emsdevice : emsdevices) {
+        if (emsdevice) {
+            emsdevice->show_values(shell);
+            shell.println();
+        }
+    }
+
     // Dallas sensors (if available)
     char valuestr[8] = {0}; // for formatting temp
     if (!sensor_devices().empty()) {
@@ -185,14 +196,6 @@ void EMSESP::show_values(uuid::console::Shell & shell) {
             shell.printfln(F(" Sensor ID %s: %s°C"), device.to_string().c_str(), Helpers::render_value(valuestr, device.temperature_c_, 2));
         }
         shell.println();
-    }
-
-    // show EMS device values
-    for (const auto & emsdevice : emsdevices) {
-        if (emsdevice) {
-            emsdevice->show_values(shell);
-            shell.println();
-        }
     }
 
     shell.println();
@@ -340,6 +343,7 @@ void EMSESP::process_UBADevices(std::shared_ptr<const Telegram> telegram) {
 }
 
 // process the Version telegram (type 0x02), which is a common type
+// e.g. 09 0B 02 00 PP V1 V2
 void EMSESP::process_version(std::shared_ptr<const Telegram> telegram) {
     // check for valid telegram, just in case
     if (telegram->message_length < 3) {
@@ -447,7 +451,7 @@ bool EMSESP::device_exists(const uint8_t device_id) {
 }
 
 // for each device add its context menu for the console
-void EMSESP::add_context_menu() {
+void EMSESP::add_context_menus() {
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice) {
             emsdevice->add_context_menu();
@@ -531,10 +535,10 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
 
     // if we don't recognize the product ID report it, but don't add it.
     if (!found) {
-        DEBUG_LOG(F("Cannot add device. Unknown device ID 0x%02X, product ID %d. Ignoring it."), device_id, product_id);
+        logger_.notice(F("Unrecognized EMS device with device ID 0x%02X with product ID %d. Please report on GitHub."), device_id, product_id);
         return false; // not found
     } else {
-        DEBUG_LOG(F("Adding new device with device ID 0x%02X, product ID %d"), device_id, product_id);
+        DEBUG_LOG(F("Adding new device with device ID 0x%02X with product ID %d"), device_id, product_id);
         // go and fetch its data, including asking for the version
         send_read_request(EMSdevice::EMS_TYPE_VERSION, device_id);
         fetch_device_values(device_id);
@@ -634,7 +638,7 @@ void EMSESP::set_ems_read_only() {
 }
 
 // console commands to add
-void EMSESP::console_commands() {
+void EMSESP::console_commands(Shell & shell, unsigned int context) {
     EMSESPShell::commands->add_command(ShellContext::EMS,
                                        CommandFlags::USER,
                                        flash_string_vector{F_(show), F_(devices)},
@@ -775,6 +779,9 @@ void EMSESP::console_commands() {
                                            shell.printfln(F_(bus_id_fmt), settings.ems_bus_id());
                                            shell.printfln(F_(read_only_fmt), settings.ems_read_only() ? F_(enabled) : F_(disabled));
                                        });
+
+    // enter the context
+    Console::enter_custom_context(shell, context);
 }
 
 // kick off the party, start all the services
@@ -805,6 +812,13 @@ void EMSESP::loop() {
         rxservice_.loop(); // process what ever is in the rx queue
         shower_.loop();    // check for shower on/off
         sensors_.loop();   // this will also send out via MQTT
+
+        // force a query on the EMS devices to fetch latest data
+        uint32_t currentMillis = millis();
+        if ((currentMillis - last_fetch_ > EMS_FETCH_FREQUENCY)) {
+            last_fetch_ = currentMillis;
+            fetch_device_values();
+        }
     }
 }
 

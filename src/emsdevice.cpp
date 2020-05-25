@@ -138,7 +138,7 @@ std::string EMSdevice::to_string() const {
     }
 
     if (brand_ == Brand::NO_BRAND) {
-        snprintf_P(&str[0], str.capacity() + 1, PSTR("%s (DeviceID:0x%02X ProductID:%d, Version:%s)"), name_.c_str(), device_id_, product_id_, version_.c_str());
+        snprintf_P(&str[0], str.capacity() + 1, PSTR("%s (DeviceID:0x%02X, ProductID:%d, Version:%s)"), name_.c_str(), device_id_, product_id_, version_.c_str());
     } else {
         snprintf_P(&str[0],
                    str.capacity() + 1,
@@ -161,6 +161,7 @@ void EMSdevice::show_values(uuid::console::Shell & shell) {
 // for each telegram that has the fetch value set (true) do a read request
 void EMSdevice::fetch_values() {
     DEBUG_LOG(F("Fetching values for device ID 0x%02X"), device_id());
+
     for (const auto & tf : telegram_functions_) {
         if (tf.fetch_) {
             read_command(tf.telegram_type_id_);
@@ -260,13 +261,21 @@ void EMSdevice::read_command(const uint16_t type_id) {
 }
 
 // prints a value to the console
-void EMSdevice::print_value(uuid::console::Shell & shell, const __FlashStringHelper * name, const __FlashStringHelper * prefix, const char * value) {
-    shell.printfln(PSTR("  %s: %s%s"), uuid::read_flash_string(name).c_str(), value, uuid::read_flash_string(prefix).c_str());
+void EMSdevice::print_value(uuid::console::Shell & shell, uint8_t padding, const __FlashStringHelper * name, const __FlashStringHelper * suffix, const char * value) {
+    uint8_t i = padding;
+    while (i-- > 0) {
+        shell.print(F(" "));
+    }
+    shell.printf(PSTR("%s: %s"), uuid::read_flash_string(name).c_str(), value);
+    if (suffix != nullptr) {
+        shell.print(uuid::read_flash_string(suffix).c_str());
+    }
+    shell.println();
 }
 
-// prints a value to the console - no prefix
-void EMSdevice::print_value(uuid::console::Shell & shell, const __FlashStringHelper * name, const char * value) {
-    shell.printfln(PSTR("  %s: %s"), uuid::read_flash_string(name).c_str(), value);
+// prints a value to the console - with no prefix
+void EMSdevice::print_value(uuid::console::Shell & shell, uint8_t padding, const __FlashStringHelper * name, const char * value) {
+    print_value(shell, padding, name, nullptr, value);
 }
 
 } // namespace emsesp

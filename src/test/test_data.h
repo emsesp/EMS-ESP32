@@ -1,12 +1,12 @@
 // create some fake test data
 // used with the 'test' command, under su/admin
 void EMSESP::run_test(uuid::console::Shell & shell, const std::string & command) {
-    // A fake response - UBADevices(0x07) - only for testing offline
     if (command == "devices") {
         rxservice_.ems_mask(EMSbus::EMS_MASK_BUDERUS); // this is important otherwise nothing will be picked up!
 
         emsdevices.push_back(EMSFactory::add(EMSdevice::DeviceType::BOILER, EMSdevice::EMS_DEVICE_ID_BOILER, 0, "", "My Boiler", 0, 0));
 
+        // A fake response - UBADevices(0x07)
         uint8_t t0[] = {0x08, 0x00, 0x07, 0x00, 0x0B, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x47};
         rxservice_.add(t0, sizeof(t0));
 
@@ -17,6 +17,20 @@ void EMSESP::run_test(uuid::console::Shell & shell, const std::string & command)
         // question: do we need to set the mask?
         std::string version("1.2.3");
         add_device(0x08, 123, version, EMSdevice::Brand::BUDERUS); // Nefit Trendline
+
+        return;
+    }
+
+    if (command == "unknown") {
+        // question: do we need to set the mask?
+        std::string version("1.2.3");
+        add_device(0x09, 89, version, EMSdevice::Brand::BUDERUS);
+        rxservice_.loop();
+
+        // simulate getting version information back from an unknown device
+        uint8_t u1[] = {0x09, 0x0B, 0x02, 0x00, 0x59, 0x01, 0x02, 0x56};
+        rxservice_.add(u1, sizeof(u1));
+        rxservice_.loop();
 
         return;
     }

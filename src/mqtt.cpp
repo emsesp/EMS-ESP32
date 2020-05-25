@@ -40,7 +40,7 @@ MAKE_PSTR(mqtt_enabled_fmt, "MQTT is %s")
 MAKE_PSTR(mqtt_base_fmt, "Base = %s")
 MAKE_PSTR(mqtt_qos_fmt, "QOS = %ld")
 MAKE_PSTR(mqtt_retain_fmt, "Retain Flag = %s")
-MAKE_PSTR(mqtt_format_fmt, "JSON format = %s")
+MAKE_PSTR(mqtt_format_fmt, "Format for JSON = %s")
 MAKE_PSTR(mqtt_heartbeat_fmt, "Heartbeat = %s")
 MAKE_PSTR(mqtt_publish_time_fmt, "Publish time = %d seconds")
 
@@ -52,6 +52,7 @@ namespace emsesp {
 #ifndef EMSESP_STANDALONE
 AsyncMqttClient Mqtt::mqttClient_;
 #endif
+
 std::vector<Mqtt::MQTTFunction>     Mqtt::mqtt_functions_;
 bool                                Mqtt::mqtt_retain_;
 uint8_t                             Mqtt::mqtt_qos_;
@@ -463,17 +464,20 @@ void Mqtt::send_heartbeat() {
 
 // add MQTT message to queue, payload is a JSON doc.
 // NOTE this only prints first 255 chars
-void Mqtt::queue_publish_message(const char * topic, const JsonDocument & payload, const bool retain) {
-    if (strlen(topic) == 0) {
+void Mqtt::queue_publish_message(const std::string & topic, const JsonDocument & payload, const bool retain) {
+    // can't have bogus topics, but empty payloads are ok
+    if (topic.empty()) {
         return;
     }
 
+    /*
     // check for empty JSON doc - we don't like those
     size_t capacity = measureJson(payload);
     if (capacity <= 3) {
-        // DEBUG_LOG(("Empty JSON for topic %s. Skipping"), topic);
+        // DEBUG_LOG(("Empty JSON payload for topic %s. Skipping"), topic);
         return;
     }
+    */
 
     std::string payload_text;
     serializeJson(payload, payload_text);
@@ -491,9 +495,9 @@ void Mqtt::queue_publish_message(const char * topic, const JsonDocument & payloa
 }
 
 // add MQTT message to queue, payload is a string
-void Mqtt::queue_publish_message(const char * topic, const std::string & payload, const bool retain) {
+void Mqtt::queue_publish_message(const std::string & topic, const std::string & payload, const bool retain) {
     // can't have bogus topics, but empty payloads are ok
-    if (strlen(topic) == 0) {
+    if (topic.empty()) {
         return;
     }
 
@@ -525,29 +529,29 @@ void Mqtt::queue_subscribe_message(const std::string & topic) {
 }
 
 // MQTT Publish, using a specific retain flag
-void Mqtt::publish(const char * topic, const char * payload, bool retain) {
+void Mqtt::publish(const std::string & topic, const std::string & payload, bool retain) {
     queue_publish_message(topic, payload, retain);
 }
 
 // Publish using the user's custom retain flag
-void Mqtt::publish(const char * topic, const char * payload) {
+void Mqtt::publish(const std::string & topic, const std::string & payload) {
     publish(topic, payload, mqtt_retain_);
 }
 
-void Mqtt::publish(const char * topic, const JsonDocument & payload) {
+void Mqtt::publish(const std::string & topic, const JsonDocument & payload) {
     publish(topic, payload, mqtt_retain_);
 }
 
-void Mqtt::publish(const char * topic, const JsonDocument & payload, bool retain) {
+void Mqtt::publish(const std::string & topic, const JsonDocument & payload, bool retain) {
     queue_publish_message(topic, payload, retain);
 }
 
-void Mqtt::publish(const char * topic, const bool value) {
+void Mqtt::publish(const std::string & topic, const bool value) {
     queue_publish_message(topic, value ? "1" : "0", mqtt_retain_);
 }
 
 // no payload
-void Mqtt::publish(const char * topic) {
+void Mqtt::publish(const std::string & topic) {
     queue_publish_message(topic, "", mqtt_retain_);
 }
 
@@ -634,10 +638,10 @@ void Mqtt::process_queue() {
     }
 
     mqtt_messages_.pop_front(); // remove the message from the queue
-} // namespace emsesp
+}
 
 // add console commands
-void Mqtt::console_commands() {
+void Mqtt::console_commands(Shell & shell, unsigned int context) {
     EMSESPShell::commands->add_command(
         ShellContext::MQTT,
         CommandFlags::ADMIN,
@@ -853,6 +857,9 @@ void Mqtt::console_commands() {
             shell.printfln(F_(mqtt_publish_time_fmt), settings.mqtt_publish_time());
             shell.println();
         });
-} // namespace emsesp
+
+    // enter the context
+    Console::enter_custom_context(shell, context);
+}
 
 } // namespace emsesp

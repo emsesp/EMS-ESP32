@@ -39,6 +39,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
     register_telegram_type(EMS_TYPE_RCOutdoorTemp, F("RCOutdoorTemp"), false, std::bind(&Thermostat::process_RCOutdoorTemp, this, _1));
     register_telegram_type(EMS_TYPE_RCTime, F("RCTime"), true, std::bind(&Thermostat::process_RCTime, this, _1)); // 0x06
 
+    // RC10
     if (flags == EMSdevice::EMS_DEVICE_FLAG_RC10) {
         monitor_typeids = {0xB1};
         set_typeids     = {0xB0};
@@ -47,6 +48,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
             register_telegram_type(set_typeids[i], F("RC10Set"), true, std::bind(&Thermostat::process_RC10Set, this, _1));
         }
 
+        // RC35
     } else if ((flags == EMSdevice::EMS_DEVICE_FLAG_RC35) || (flags == EMSdevice::EMS_DEVICE_FLAG_RC30_1)) {
         monitor_typeids = {0x3E, 0x48, 0x52, 0x5C};
         set_typeids     = {0x3D, 0x47, 0x51, 0x5B};
@@ -56,6 +58,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
         }
         register_telegram_type(EMS_TYPE_IBASettings, F("IBASettings"), true, std::bind(&Thermostat::process_IBASettings, this, _1));
 
+        // RC20
     } else if (flags == EMSdevice::EMS_DEVICE_FLAG_RC20) {
         monitor_typeids = {0x91};
         set_typeids     = {0xA8};
@@ -64,6 +67,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
             register_telegram_type(set_typeids[i], F("RC20Set"), true, std::bind(&Thermostat::process_RC20Set, this, _1));
         }
 
+        // RC20 newer
     } else if (flags == EMSdevice::EMS_DEVICE_FLAG_RC20_2) {
         monitor_typeids = {0xAE};
         set_typeids     = {0xAD};
@@ -72,6 +76,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
             register_telegram_type(set_typeids[i], F("RC20Set"), true, std::bind(&Thermostat::process_RC20Set_2, this, _1));
         }
 
+        // RC30
     } else if (flags == EMSdevice::EMS_DEVICE_FLAG_RC30) {
         monitor_typeids = {0x41};
         set_typeids     = {0xA7};
@@ -80,11 +85,13 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
             register_telegram_type(set_typeids[i], F("RC30Set"), true, std::bind(&Thermostat::process_RC30Set, this, _1));
         }
 
+        // EASY
     } else if (flags == EMSdevice::EMS_DEVICE_FLAG_EASY) {
         monitor_typeids = {0x0A};
         set_typeids     = {};
         register_telegram_type(monitor_typeids[0], F("EasyMonitor"), true, std::bind(&Thermostat::process_EasyMonitor, this, _1));
 
+        // RC300/RC100
     } else if ((flags == EMSdevice::EMS_DEVICE_FLAG_RC300) || (flags == EMSdevice::EMS_DEVICE_FLAG_RC100)) {
         monitor_typeids = {0x02A5, 0x02A6, 0x02A7, 0x02A8};
         set_typeids     = {0x02B9, 0x02BA, 0x02BB, 0x02BC};
@@ -93,6 +100,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
             register_telegram_type(set_typeids[i], F("RC300Set"), true, std::bind(&Thermostat::process_RC300Set, this, _1));
         }
 
+        // JUNKERS/HT3
     } else if (flags == EMSdevice::EMS_DEVICE_FLAG_JUNKERS) {
         monitor_typeids = {0x6F, 0x70, 0x71, 0x72};
         set_typeids     = {0x65, 0x66, 0x67, 0x68};
@@ -194,8 +202,7 @@ void Thermostat::add_context_menu() {
                                        CommandFlags::USER,
                                        flash_string_vector{F_(thermostat)},
                                        [&](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
-                                           dynamic_cast<EMSESPShell &>(shell).enter_custom_context(ShellContext::THERMOSTAT);
-                                           console_commands();
+                                           Thermostat::console_commands(shell, ShellContext::THERMOSTAT);
                                        });
 }
 
@@ -326,7 +333,7 @@ bool Thermostat::updated_values() {
     }
 
     return false;
-} // namespace emsesp
+}
 
 // publish values via MQTT
 void Thermostat::publish_values() {
@@ -337,7 +344,7 @@ void Thermostat::publish_values() {
 
     DEBUG_LOG(F("Performing a thermostat publish (device ID 0x%02X)"), device_id());
 
-    uint8_t flags    = (this->flags() & 0x0F); // specific thermostat characteristics, strip the option bits
+    uint8_t flags    = (this->flags() & 0x0F); // specific thermostat characteristics, stripping the option bits
     bool    has_data = false;
 
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
@@ -364,6 +371,7 @@ void Thermostat::publish_values() {
         }
 
         has_data = true;
+        // if the MQTT format is 'nested' then create the parent object hc<n>
         if (mqtt_format_ == Settings::MQTT_format::NESTED) {
             // create nested json for each HC
             char hc_name[10]; // hc{1-4}
@@ -533,6 +541,10 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::sha
 // decodes the thermostat mode for the heating circuit based on the thermostat type
 // modes are off, manual, auto, day and night
 uint8_t Thermostat::HeatingCircuit::get_mode(uint8_t flags) const {
+    if (mode == EMS_VALUE_UINT_NOTSET) {
+        return HeatingCircuit::Mode::UNKNOWN;
+    }
+
     flags &= 0x0F; // strip top 4 bits
 
     if (flags == EMSdevice::EMS_DEVICE_FLAG_RC20) {
@@ -565,7 +577,7 @@ uint8_t Thermostat::HeatingCircuit::get_mode(uint8_t flags) const {
         }
     }
 
-    return HeatingCircuit::Mode::OFF;
+    return HeatingCircuit::Mode::UNKNOWN;
 }
 
 // figures out the thermostat day/night mode depending on the thermostat type
@@ -629,9 +641,12 @@ std::string Thermostat::mode_tostring(uint8_t mode) const {
     case HeatingCircuit::Mode::NOFROST:
         return read_flash_string(F("nofrost"));
         break;
-    default:
     case HeatingCircuit::Mode::AUTO:
         return read_flash_string(F("auto"));
+        break;
+    default:
+    case HeatingCircuit::Mode::UNKNOWN:
+        return read_flash_string(F("unknown"));
         break;
     }
 }
@@ -643,22 +658,22 @@ void Thermostat::show_values(uuid::console::Shell & shell) {
     char buffer[10]; // for formatting only
 
     if (datetime_.size()) {
-        shell.printfln(F("Clock: %s"), datetime_.c_str());
+        shell.printfln(F(" Clock: %s"), datetime_.c_str());
         if (ibaClockOffset != EMS_VALUE_UINT_NOTSET) {
-            print_value(shell, F("Offset clock"), Helpers::render_value(buffer, ibaClockOffset, 1)); // offset (in sec) to clock, 0xff = -1 s, 0x02 = 2 s
+            print_value(shell, 1, F("Offset clock"), Helpers::render_value(buffer, ibaClockOffset, 1)); // offset (in sec) to clock, 0xff = -1 s, 0x02 = 2 s
         }
     }
 
     uint8_t flags = (this->flags() & 0x0F); // specific thermostat characteristics, strip the option bits
 
     if (flags == EMS_DEVICE_FLAG_RC35) {
-        print_value(shell, F("Damped Outdoor temperature"), F_(degrees), Helpers::render_value(buffer, dampedoutdoortemp, 1));
-        print_value(shell, F("Tempsensor 1"), F_(degrees), Helpers::render_value(buffer, tempsensor1, 10));
-        print_value(shell, F("Tempsensor 2"), F_(degrees), Helpers::render_value(buffer, tempsensor2, 10));
+        print_value(shell, 1, F("Damped Outdoor temperature"), F_(degrees), Helpers::render_value(buffer, dampedoutdoortemp, 1));
+        print_value(shell, 1, F("Tempsensor 1"), F_(degrees), Helpers::render_value(buffer, tempsensor1, 10));
+        print_value(shell, 1, F("Tempsensor 2"), F_(degrees), Helpers::render_value(buffer, tempsensor2, 10));
     }
 
     for (const auto & hc : heating_circuits_) {
-        shell.printfln(F("Heating Circuit %d:"), hc->hc_num());
+        shell.printfln(F(" Heating Circuit %d:"), hc->hc_num());
 
         // different thermostat types store their temperature values differently
         uint8_t format_setpoint, format_curr;
@@ -677,83 +692,87 @@ void Thermostat::show_values(uuid::console::Shell & shell) {
             break;
         }
 
-        print_value(shell, F("Current room temperature"), F_(degrees), Helpers::render_value(buffer, hc->curr_roomTemp, format_curr));
-        print_value(shell, F("Setpoint room temperature"), F_(degrees), Helpers::render_value(buffer, hc->setpoint_roomTemp, format_setpoint));
-        print_value(shell, F("Mode"), mode_tostring(hc->get_mode(flags)).c_str());
-        print_value(shell, F("Mode Type"), mode_tostring(hc->get_mode_type(flags)).c_str());
+        print_value(shell, 2, F("Current room temperature"), F_(degrees), Helpers::render_value(buffer, hc->curr_roomTemp, format_curr));
+        print_value(shell, 2, F("Setpoint room temperature"), F_(degrees), Helpers::render_value(buffer, hc->setpoint_roomTemp, format_setpoint));
+        if (hc->mode != EMS_VALUE_UINT_NOTSET) {
+            print_value(shell, 2, F("Mode"), mode_tostring(hc->get_mode(flags)).c_str());
+        }
+        if (hc->mode_type != EMS_VALUE_UINT_NOTSET) {
+            print_value(shell, 2, F("Mode Type"), mode_tostring(hc->get_mode_type(flags)).c_str());
+        }
 
         if ((flags == EMS_DEVICE_FLAG_RC35) || (flags == EMS_DEVICE_FLAG_RC30_1)) {
             if (hc->summer_mode) {
-                shell.printfln(F("   Program is set to Summer mode"));
+                shell.printfln(F("    Program is set to Summer mode"));
             } else if (hc->holiday_mode) {
-                shell.printfln(F("   Program is set to Holiday mode"));
+                shell.printfln(F("    Program is set to Holiday mode"));
             }
 
-            print_value(shell, F("Day temperature"), F_(degrees), Helpers::render_value(buffer, hc->daytemp, 2));
-            print_value(shell, F("Night temperature"), F_(degrees), Helpers::render_value(buffer, hc->nighttemp, 2));
-            print_value(shell, F("Vacation temperature"), F_(degrees), Helpers::render_value(buffer, hc->holidaytemp, 2));
+            print_value(shell, 2, F("Day temperature"), F_(degrees), Helpers::render_value(buffer, hc->daytemp, 2));
+            print_value(shell, 2, F("Night temperature"), F_(degrees), Helpers::render_value(buffer, hc->nighttemp, 2));
+            print_value(shell, 2, F("Vacation temperature"), F_(degrees), Helpers::render_value(buffer, hc->holidaytemp, 2));
 
             if (hc->offsettemp < 100) {
-                print_value(shell, F("Offset temperature"), F_(degrees), Helpers::render_value(buffer, hc->offsettemp, 2));
+                print_value(shell, 2, F("Offset temperature"), F_(degrees), Helpers::render_value(buffer, hc->offsettemp, 2));
             }
-            print_value(shell, F("Design temperature"), F_(degrees), Helpers::render_value(buffer, hc->designtemp, 2));
+            print_value(shell, 2, F("Design temperature"), F_(degrees), Helpers::render_value(buffer, hc->designtemp, 2));
         }
 
         // show flow temp if we have it
         if (hc->circuitcalctemp != EMS_VALUE_UINT_NOTSET) {
-            print_value(shell, F("Calculated flow temperature"), F_(degrees), Helpers::render_value(buffer, hc->circuitcalctemp, 1));
+            print_value(shell, 2, F("Calculated flow temperature"), F_(degrees), Helpers::render_value(buffer, hc->circuitcalctemp, 1));
         }
 
         // settings parameters
         if (ibaMainDisplay != EMS_VALUE_UINT_NOTSET) {
             if (ibaMainDisplay == 0) {
-                shell.printfln(F("  Display: internal temperature"));
+                shell.printfln(F("    Display: internal temperature"));
             } else if (ibaMainDisplay == 1) {
-                shell.printfln(F("  Display: internal setpoint"));
+                shell.printfln(F("    Display: internal setpoint"));
             } else if (ibaMainDisplay == 2) {
-                shell.printfln(F("  Display: external temperature"));
+                shell.printfln(F("    Display: external temperature"));
             } else if (ibaMainDisplay == 3) {
-                shell.printfln(F("  Display: burner temperature"));
+                shell.printfln(F("    Display: burner temperature"));
             } else if (ibaMainDisplay == 4) {
-                shell.printfln(F("  Display: WW temperature"));
+                shell.printfln(F("    Display: WW temperature"));
             } else if (ibaMainDisplay == 5) {
-                shell.printfln(F("  Display: functioning mode"));
+                shell.printfln(F("    Display: functioning mode"));
             } else if (ibaMainDisplay == 6) {
-                shell.printfln(F("  Display: time"));
+                shell.printfln(F("    Display: time"));
             } else if (ibaMainDisplay == 7) {
-                shell.printfln(F("  Display: date"));
+                shell.printfln(F("    Display: date"));
             } else if (ibaMainDisplay == 9) {
-                shell.printfln(F("  Display: smoke temperature"));
+                shell.printfln(F("    Display: smoke temperature"));
             }
         }
 
         if (ibaLanguage != EMS_VALUE_UINT_NOTSET) {
             if (ibaLanguage == 0) {
-                shell.printfln(F("  Language: German"));
+                shell.printfln(F("    Language: German"));
             } else if (ibaLanguage == 1) {
-                shell.printfln(F("  Language: Dutch"));
+                shell.printfln(F("    Language: Dutch"));
             } else if (ibaLanguage == 2) {
-                shell.printfln(F("  Language: French"));
+                shell.printfln(F("    Language: French"));
             } else if (ibaLanguage == 3) {
-                shell.printfln(F("  Language: Italian"));
+                shell.printfln(F("    Language: Italian"));
             }
         }
 
         if (ibaCalIntTemperature != EMS_VALUE_INT_NOTSET) {
-            print_value(shell, F("Offset int. temperature"), F_(degrees), Helpers::render_value(buffer, ibaCalIntTemperature, 2));
+            print_value(shell, 2, F("Offset int. temperature"), F_(degrees), Helpers::render_value(buffer, ibaCalIntTemperature, 2));
         }
 
         if (ibaMinExtTemperature != EMS_VALUE_INT_NOTSET) {
-            print_value(shell, F("Min ext. temperature"), F_(degrees), Helpers::render_value(buffer, ibaMinExtTemperature, 10)); // min ext temp for heating curve, in deg.
+            print_value(shell, 2, F("Min ext. temperature"), F_(degrees), Helpers::render_value(buffer, ibaMinExtTemperature, 10)); // min ext temp for heating curve, in deg.
         }
 
         if (ibaBuildingType != EMS_VALUE_UINT_NOTSET) {
             if (ibaBuildingType == 0) {
-                shell.printfln(F("  Building: light"));
+                shell.printfln(F("    Building: light"));
             } else if (ibaBuildingType == 1) {
-                shell.printfln(F("  Building: medium"));
+                shell.printfln(F("    Building: medium"));
             } else if (ibaBuildingType == 2) {
-                shell.printfln(F("  Building: heavy"));
+                shell.printfln(F("    Building: heavy"));
             }
         }
     }
@@ -1238,7 +1257,7 @@ void Thermostat::set_temperature(const float temperature, const uint8_t mode, co
 }
 
 // add console commands
-void Thermostat::console_commands() {
+void Thermostat::console_commands(Shell & shell, unsigned int context) {
     EMSESPShell::commands->add_command(ShellContext::THERMOSTAT,
                                        CommandFlags::ADMIN,
                                        flash_string_vector{F_(set), F_(master)},
@@ -1318,6 +1337,9 @@ void Thermostat::console_commands() {
                                                                                             : Helpers::hextoa(buffer, settings.master_thermostat()));
                                            shell.println();
                                        });
+
+    // enter the context
+    Console::enter_custom_context(shell, context);
 }
 
 } // namespace emsesp

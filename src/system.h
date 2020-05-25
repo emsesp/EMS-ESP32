@@ -43,6 +43,8 @@
 
 #include <uuid/log.h>
 
+using uuid::console::Shell;
+
 namespace emsesp {
 
 class System {
@@ -63,7 +65,7 @@ class System {
 
     static void show_mem(const char * text);
 
-    static void console_commands();
+    static void console_commands(Shell & shell, unsigned int context);
 
   private:
     static uuid::log::Logger logger_;

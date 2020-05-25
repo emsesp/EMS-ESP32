@@ -76,7 +76,7 @@ class Thermostat : public EMSdevice {
             return set_typeid_;
         }
 
-        enum Mode : uint8_t { OFF, MANUAL, AUTO, DAY, NIGHT, HEAT, NOFROST, ECO, HOLIDAY, COMFORT, OFFSET, DESIGN };
+        enum Mode : uint8_t { UNKNOWN, OFF, MANUAL, AUTO, DAY, NIGHT, HEAT, NOFROST, ECO, HOLIDAY, COMFORT, OFFSET, DESIGN };
 
       private:
         uint8_t  hc_num_;
@@ -103,7 +103,7 @@ class Thermostat : public EMSdevice {
   private:
     static uuid::log::Logger logger_;
 
-    void console_commands();
+    void console_commands(Shell & shell, unsigned int context);
     void init_mqtt();
 
     std::string datetime_; // date and time stamp
