@@ -45,7 +45,7 @@
 #include "boiler.h"
 #include "shower.h"
 
-#define LOG_TRACE_WATCH_NONE 0     // no watch set
+#define LOG_TRACE_WATCH_NONE 0 // no watch set
 
 namespace emsesp {
 

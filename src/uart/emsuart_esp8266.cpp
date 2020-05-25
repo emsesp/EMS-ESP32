@@ -29,6 +29,9 @@ EMSuart::EMSRxBuf_t * pEMSRxBuf;
 EMSuart::EMSRxBuf_t * paEMSRxBuf[EMS_MAXBUFFERS];
 uint8_t               emsRxBufIdx = 0;
 
+uint8_t phantomBreak = 0;
+uint8_t tx_mode_     = EMS_TXMODE_DEFAULT;
+
 // Main interrupt handler
 // Important: must not use ICACHE_FLASH_ATTR
 void ICACHE_RAM_ATTR EMSuart::emsuart_rx_intr_handler(void * para) {
@@ -64,6 +67,12 @@ void ICACHE_FLASH_ATTR EMSuart::emsuart_recvTask(os_event_t * events) {
     uint8_t length        = pCurrent->length;                           // number of bytes including the BRK at the end
     pCurrent->length      = 0;
 
+    // LEGACY CODE
+    if (phantomBreak) {
+        phantomBreak = 0;
+        length--; // remove phantom break from Rx buffer
+    }
+
     // it's a poll or status code, single byte and ok to send on, then quit
     if (length == 2) {
         EMSESP::incoming_telegram((uint8_t *)pCurrent->buffer, 1);
@@ -81,6 +90,8 @@ void ICACHE_FLASH_ATTR EMSuart::emsuart_recvTask(os_event_t * events) {
  * init UART0 driver
  */
 void ICACHE_FLASH_ATTR EMSuart::start(uint8_t tx_mode) {
+    tx_mode_ = tx_mode;
+
     // allocate and preset EMS Receive buffers
     for (int i = 0; i < EMS_MAXBUFFERS; i++) {
         EMSRxBuf_t * p = (EMSRxBuf_t *)malloc(sizeof(EMSRxBuf_t));
@@ -139,16 +150,163 @@ void EMSuart::send_poll(uint8_t data) {
  * buf contains the CRC and len is #bytes including the CRC
  */
 EMSUART_STATUS ICACHE_FLASH_ATTR EMSuart::transmit(uint8_t * buf, uint8_t len) {
-    if (len) {
+    if (len == 0) {
+        return EMS_TX_STATUS_OK; // nothing to send
+    }
+
+    // new code from Michael. See https://github.com/proddy/EMS-ESP/issues/380
+    if (tx_mode_ == EMS_TXMODE_NEW) {
         USC0(EMSUART_UART) &= ~(1 << UCBRK); // clear <BRK> bit
         for (uint8_t i = 0; i < len; i++) {
             USF(EMSUART_UART) = buf[i];
         }
         USC0(EMSUART_UART) |= (1 << UCBRK); // send <BRK> at the end
+
+        return EMS_TX_STATUS_OK;
     }
-    return EMS_TX_STATUS_OK;
+
+    // EMS+ https://github.com/proddy/EMS-ESP/issues/23#
+    if (tx_mode_ == EMS_TXMODE_EMSPLUS) { // With extra tx delay for EMS+
+        for (uint8_t i = 0; i < len; i++) {
+            USF(EMSUART_UART) = buf[i];
+            delayMicroseconds(EMSUART_TX_BRK_WAIT); // 2070
+        }
+        tx_brk(); // send <BRK>
+        return EMS_TX_STATUS_OK;
+    }
+
+    // Junkers logic by @philrich
+    if (tx_mode_ == EMS_TXMODE_HT3) {
+        for (uint8_t i = 0; i < len; i++) {
+            USF(EMSUART_UART) = buf[i];
+
+            // just to be safe wait for tx fifo empty (still needed?)
+            while (((USS(EMSUART_UART) >> USTXC) & 0xff))
+                ;
+
+            // wait until bits are sent on wire
+            delayMicroseconds(EMSUART_TX_WAIT_BYTE - EMSUART_TX_LAG + EMSUART_TX_WAIT_GAP); // 1760
+        }
+        tx_brk(); // send <BRK>
+        return EMS_TX_STATUS_OK;
+    }
+
+    /*
+     * Logic for tx_mode of 0 (EMS_TXMODE_DEFAULT)
+     * based on code from https://github.com/proddy/EMS-ESP/issues/103 by @susisstrolch
+     * 
+     * Logic:
+     * we emit the whole telegram, with Rx interrupt disabled, collecting busmaster response in FIFO.
+     * after sending the last char we poll the Rx status until either
+     * - size(Rx FIFO) == size(Tx-Telegram)
+     * - <BRK> is detected
+     * At end of receive we re-enable Rx-INT and send a Tx-BRK in loopback mode.
+     * 
+     * EMS-Bus error handling
+     * 1. Busmaster stops echoing on Tx w/o permission
+     * 2. Busmaster cancel telegram by sending a BRK
+     * 
+     * Case 1. is handled by a watchdog counter which is reset on each
+     * Tx attempt. The timeout should be 20x EMSUART_BIT_TIME plus 
+     * some smart guess for processing time on targeted EMS device.
+     * We set Status to EMS_TX_WTD_TIMEOUT and return
+     * 
+     * Case 2. is handled via a BRK chk during transmission.
+     * We set Status to EMS_TX_BRK_DETECT and return
+     * 
+     */
+
+    EMSUART_STATUS result = EMS_TX_STATUS_OK;
+
+    // disable rx interrupt
+    // clear Rx status register, resetting the Rx FIFO and flush it
+    ETS_UART_INTR_DISABLE();
+    USC0(EMSUART_UART) |= (1 << UCRXRST);
+    emsuart_flush_fifos();
+
+    // send the bytes along the serial line
+    for (uint8_t i = 0; i < len; i++) {
+        uint16_t         wdc    = EMS_TX_TO_COUNT; // 1760
+        volatile uint8_t _usrxc = (USS(EMSUART_UART) >> USRXC) & 0xFF;
+        USF(EMSUART_UART)       = buf[i]; // send each Tx byte
+        // wait for echo from the busmaster
+        while (((USS(EMSUART_UART) >> USRXC) & 0xFF) == _usrxc) {
+            delayMicroseconds(EMSUART_BUSY_WAIT); // burn CPU cycles...
+            if (--wdc == 0) {
+                ETS_UART_INTR_ENABLE();
+                return EMS_TX_WTD_TIMEOUT;
+            }
+            if (USIR(EMSUART_UART) & (1 << UIBD)) {
+                USIC(EMSUART_UART) = (1 << UIBD); // clear BRK detect IRQ
+                ETS_UART_INTR_ENABLE();
+                return EMS_TX_BRK_DETECT;
+            }
+        }
+    }
+
+    // we got the whole telegram in the Rx buffer
+    // on Rx-BRK (bus collision), we simply enable Rx and leave it
+    // otherwise we send the final Tx-BRK in the loopback and re=enable Rx-INT.
+    // worst case, we'll see an additional Rx-BRK...
+    if (result == EMS_TX_STATUS_OK) {
+        // neither bus collision nor timeout - send terminating BRK signal
+        if (!(USIS(EMSUART_UART) & (1 << UIBD))) {
+            // no bus collision - send terminating BRK signal
+            USC0(EMSUART_UART) |= (1 << UCLBE) | (1 << UCBRK); // enable loopback & set <BRK>
+
+            // wait until BRK detected...
+            while (!(USIR(EMSUART_UART) & (1 << UIBD))) {
+                delayMicroseconds(EMSUART_BIT_TIME);
+            }
+
+            USC0(EMSUART_UART) &= ~((1 << UCBRK) | (1 << UCLBE)); // disable loopback & clear <BRK>
+            USIC(EMSUART_UART) = (1 << UIBD);                     // clear BRK detect IRQ
+            phantomBreak       = 1;
+        }
+    }
+
+    ETS_UART_INTR_ENABLE(); // open up the FIFO again to start receiving
+
+    return result; // send the Tx status back
 }
 
+/*
+ * flush everything left over in buffer, this clears both rx and tx FIFOs
+ */
+void ICACHE_FLASH_ATTR EMSuart::emsuart_flush_fifos() {
+    uint32_t tmp = ((1 << UCRXRST) | (1 << UCTXRST)); // bit mask
+    USC0(EMSUART_UART) |= (tmp);                      // set bits
+    USC0(EMSUART_UART) &= ~(tmp);                     // clear bits
+}
+
+/*
+ * Send a BRK signal
+ * Which is a 11-bit set of zero's (11 cycles)
+ */
+void ICACHE_FLASH_ATTR EMSuart::tx_brk() {
+    uint32_t tmp;
+
+    // must make sure Tx FIFO is empty
+    while (((USS(EMSUART_UART) >> USTXC) & 0xFF))
+        ;
+
+    tmp = ((1 << UCRXRST) | (1 << UCTXRST)); // bit mask
+    USC0(EMSUART_UART) |= (tmp);             // set bits
+    USC0(EMSUART_UART) &= ~(tmp);            // clear bits
+
+    // To create a 11-bit <BRK> we set TXD_BRK bit so the break signal will
+    // automatically be sent when the tx fifo is empty
+    tmp = (1 << UCBRK);
+    USC0(EMSUART_UART) |= (tmp); // set bit
+
+    if (tx_mode_ == EMS_TX_WTD_TIMEOUT) { // EMS+ mode
+        delayMicroseconds(EMSUART_TX_BRK_WAIT);
+    } else if (tx_mode_ == EMS_TXMODE_HT3) {                     // junkers mode
+        delayMicroseconds(EMSUART_TX_WAIT_BRK - EMSUART_TX_LAG); // 1144 (11 Bits)
+    }
+
+    USC0(EMSUART_UART) &= ~(tmp); // clear bit
+}
 
 } // namespace emsesp
 

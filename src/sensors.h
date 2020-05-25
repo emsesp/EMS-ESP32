@@ -100,8 +100,8 @@ class Sensors {
     bool  temperature_convert_complete();
     float get_temperature_c(const uint8_t addr[]);
 
-    uint32_t            last_activity_ = millis();
-    uint32_t            last_publish_  = millis();
+    uint32_t            last_activity_ = uuid::get_uptime();
+    uint32_t            last_publish_  = uuid::get_uptime();
     State               state_         = State::IDLE;
     std::vector<Device> found_;
     std::vector<Device> devices_;

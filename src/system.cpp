@@ -246,9 +246,8 @@ void System::set_led_speed(uint32_t speed) {
 void System::system_check() {
     static uint32_t last_system_check_ = 0;
 
-    uint32_t currentMillis = millis();
-    if (!last_system_check_ || ((uint32_t)(currentMillis - last_system_check_) >= SYSTEM_CHECK_FREQUENCY)) {
-        last_system_check_ = currentMillis;
+    if (!last_system_check_ || ((uint32_t)(uuid::get_uptime() - last_system_check_) >= SYSTEM_CHECK_FREQUENCY)) {
+        last_system_check_ = uuid::get_uptime();
 
 #ifndef EMSESP_STANDALONE
         if ((WiFi.status() != WL_CONNECTED) || safe_mode()) {
@@ -262,6 +261,7 @@ void System::system_check() {
         if (!EMSbus::bus_connected()) {
             system_healthy_ = false;
             set_led_speed(LED_WARNING_BLINK); // flash every 1/2 second from now on
+            LOG_ERROR(F("No connection to the EMS bus!"));
         } else {
             // if it was unhealthy but now we're better, make sure the LED is solid again cos we've been healed
             if (!system_healthy_) {
@@ -278,9 +278,8 @@ void System::system_check() {
 void System::led_monitor() {
     static uint32_t led_last_blink_ = 0;
 
-    uint32_t currentMillis = millis();
-    if (!led_last_blink_ || (uint32_t)(currentMillis - led_last_blink_) >= led_flash_speed_) {
-        led_last_blink_ = currentMillis;
+    if (!led_last_blink_ || (uint32_t)(uuid::get_uptime() - led_last_blink_) >= led_flash_speed_) {
+        led_last_blink_ = uuid::get_uptime();
 
         // if bus_not_connected or network not connected, start flashing
         if (!system_healthy_) {

@@ -142,7 +142,7 @@ void Mqtt::setup() {
 #endif
 
     mqtt_connecting_      = false;
-    mqtt_last_connection_ = millis();
+    mqtt_last_connection_ = uuid::get_uptime();
     mqtt_reconnect_delay_ = Mqtt::MQTT_RECONNECT_DELAY_MIN;
 
     LOG_DEBUG(F("Configuring MQTT service..."));
@@ -177,7 +177,7 @@ void Mqtt::init() {
         }
 
         // Reset reconnection delay
-        mqtt_last_connection_ = millis();
+        mqtt_last_connection_ = uuid::get_uptime();
         mqtt_connecting_      = false;
         mqtt_start_           = false; // will force a new start()
     });
@@ -236,7 +236,7 @@ void Mqtt::loop() {
         }
 
         // send out heartbeat
-        uint32_t currentMillis = millis();
+        uint32_t currentMillis = uuid::get_uptime();
         if ((currentMillis - last_heartbeat_ > MQTT_HEARTBEAT_INTERVAL)) {
             last_heartbeat_ = currentMillis;
             send_heartbeat();
@@ -258,7 +258,7 @@ void Mqtt::loop() {
     }
 
     // We need to reconnect. Check when was the last time we tried this
-    if (mqtt_last_connection_ && (millis() - mqtt_last_connection_ < mqtt_reconnect_delay_)) {
+    if (mqtt_last_connection_ && (uuid::get_uptime() - mqtt_last_connection_ < mqtt_reconnect_delay_)) {
         return;
     }
 
@@ -394,7 +394,9 @@ void Mqtt::on_publish(uint16_t packetId) {
     }
 
     if (mqtt_message.packet_id_ == packetId) {
+#ifdef EMSESP_DEBUG
         LOG_DEBUG(F("Acknowledged PID %d. Removing from queue"), packetId);
+#endif
     } else {
         LOG_DEBUG(F("Mismatch, expecting PID %d, got %d"), mqtt_message.packet_id_, packetId);
         mqtt_publish_fails_++; // increment error count
@@ -436,7 +438,7 @@ void Mqtt::send_start_topic() {
 // MQTT onConnect - when a connect is established
 void Mqtt::on_connect() {
     mqtt_reconnect_delay_ = Mqtt::MQTT_RECONNECT_DELAY_MIN;
-    mqtt_last_connection_ = millis();
+    mqtt_last_connection_ = uuid::get_uptime();
     mqtt_connecting_      = false;
     LOG_INFO(F("MQTT connected"));
 }
@@ -600,7 +602,9 @@ void Mqtt::process_queue() {
     // but add the packet_id so we can check it later
     if (mqtt_qos_ != 0) {
         mqtt_messages_.front().packet_id_ = packet_id;
+#ifdef EMSESP_DEBUG
         LOG_DEBUG(F("Setting packetID for ACK to %d"), packet_id);
+#endif
         return;
     }
 

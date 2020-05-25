@@ -333,7 +333,7 @@ void EMSESP::process_UBADevices(std::shared_ptr<const Telegram> telegram) {
                     // if we haven't already detected this device, request it's version details, unless its us (EMS-ESP)
                     // when the version info is received, it will automagically add the device
                     if ((device_id != ems_bus_id) && !(EMSESP::device_exists(device_id))) {
-                        LOG_INFO(F("New EMS device detected with ID 0x%02X. Requesting version information."), device_id);
+                        LOG_DEBUG(F("New EMS device detected with ID 0x%02X. Requesting version information."), device_id);
                         send_read_request(EMSdevice::EMS_TYPE_VERSION, device_id);
                     }
                 }
@@ -619,7 +619,7 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
         // check for poll to us, if so send top message from Tx queue immediately and quit
         // if ht3 poll must be ems_bus_id else if Buderus poll must be (ems_bus_id | 0x80)
         if ((first_value ^ 0x80 ^ rxservice_.ems_mask()) == txservice_.ems_bus_id()) {
-            EMSbus::last_bus_activity(millis()); // set the flag indication the EMS bus is active
+            EMSbus::last_bus_activity(uuid::get_uptime()); // set the flag indication the EMS bus is active
             txservice_.send();
         }
         return;
@@ -695,17 +695,17 @@ void EMSESP::console_commands(Shell & shell, unsigned int context) {
         flash_string_vector{F_(n_mandatory)},
         [](Shell & shell, const std::vector<std::string> & arguments) {
             uint8_t tx_mode = (arguments[0]).at(0) - '0';
-            if ((tx_mode > 0) && (tx_mode <= 3)) {
+            if ((tx_mode > 0) && (tx_mode <= 4)) {
                 Settings settings;
                 settings.ems_tx_mode(tx_mode);
                 settings.commit();
                 shell.printfln(F_(tx_mode_fmt), settings.ems_tx_mode());
             } else {
-                shell.println(F("Must be 1 for EMS generic, 2 for EMS+ or 3 for HT3"));
+                shell.println(F("Must be 1 for EMS generic, 2 for EMS+, 3 for HT3, 4 for experimental"));
             }
         },
         [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments __attribute__((unused))) -> const std::vector<std::string> {
-            return std::vector<std::string>{read_flash_string(F("1")), read_flash_string(F("2")), read_flash_string(F("3"))};
+            return std::vector<std::string>{read_flash_string(F("1")), read_flash_string(F("2")), read_flash_string(F("3")), read_flash_string(F("4"))};
         });
 
     EMSESPShell::commands->add_command(
@@ -808,19 +808,20 @@ void EMSESP::start() {
 
 // loop de loop
 void EMSESP::loop() {
-    // network returns false if an OTA is being carried out.
+    // network returns false if an OTA is being carried out
+    // so we disable all services when an OTA is happening
     if (network_.loop()) {
         console_.loop();   // telnet/serial console
         system_.loop();    // does LED and checks system health, and syslog service
         mqtt_.loop();      // starts mqtt, and sends out anything in the queue
         rxservice_.loop(); // process what ever is in the rx queue
+        txservice_.loop(); // check that the Tx is all ok
         shower_.loop();    // check for shower on/off
         sensors_.loop();   // this will also send out via MQTT
 
-        // force a query on the EMS devices to fetch latest data
-        uint32_t currentMillis = millis();
-        if ((currentMillis - last_fetch_ > EMS_FETCH_FREQUENCY)) {
-            last_fetch_ = currentMillis;
+        // force a query on the EMS devices to fetch latest data at a set interval (1 min)
+        if ((uuid::get_uptime() - last_fetch_ > EMS_FETCH_FREQUENCY)) {
+            last_fetch_ = uuid::get_uptime();
             fetch_device_values();
         }
     }

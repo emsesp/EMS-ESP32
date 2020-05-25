@@ -36,7 +36,8 @@ void Shower::loop() {
         return;
     }
 
-    uint32_t time_now = millis();
+    uint32_t time_now = uuid::get_uptime();
+
     // if already in cold mode, ignore all this logic until we're out of the cold blast
     if (!doing_cold_shot_) {
         // is the hot water running?

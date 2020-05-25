@@ -86,6 +86,9 @@ void loop();
  */
 uint64_t get_uptime_ms();
 
+uint32_t get_uptime(); // added by proddy
+void     set_uptime();
+
 } // namespace uuid
 
 #endif

@@ -200,9 +200,10 @@ void RxService::flush_rx_queue() {
     rx_telegram_id_ = 0;
 }
 
-// start and initialize the Rx incoming buffer. Not currently used.
+// start and initialize the Rx incoming buffer
 void RxService::start() {
     // LOG_DEBUG(F("RxStart"));
+    // function not currently used
 }
 
 // Rx loop, run as many times as you can
@@ -210,11 +211,10 @@ void RxService::start() {
 void RxService::loop() {
 #ifndef EMSESP_STANDALONE
     // give rx some breathing space
-    uint32_t time_now = millis();
-    if ((time_now - last_rx_check_) < RX_LOOP_WAIT) {
+    if ((uuid::get_uptime() - last_rx_check_) < RX_LOOP_WAIT) {
         return;
     }
-    last_rx_check_ = time_now;
+    last_rx_check_ = uuid::get_uptime();
 #endif
 
     while (!rx_telegrams_.empty()) {
@@ -235,6 +235,7 @@ void RxService::loop() {
 
 // add a new rx telegram object
 // data is the whole telegram, assuming last byte holds the CRC
+// length includes the CRC
 // for EMS+ the type_id has the value + 256. We look for these type of telegrams with F7, F9 and FF in 3rd byte
 void RxService::add(uint8_t * data, uint8_t length) {
     // validate the CRC
@@ -263,7 +264,7 @@ void RxService::add(uint8_t * data, uint8_t length) {
     uint8_t dest   = data[1] & 0x7F; // strip MSB, don't care if its read or write for processing
     uint8_t offset = data[3];        // offset is always 4th byte
 
-    uint16_t  type_id; // this could be 2 bytes for ems+
+    uint16_t  type_id = 0; // this could be 2 bytes for ems+
     uint8_t * message_data;
     uint8_t   message_length;
 
@@ -274,15 +275,21 @@ void RxService::add(uint8_t * data, uint8_t length) {
         message_data   = data + 4;   // message block starts at 5th byte
         message_length = length - 5; // remove 4 bytes header plus CRC
     } else {
-        // EMS 2.0
+        // EMS 2.0 / EMS+
         if (data[2] == 0xFF) {
-            type_id      = (data[4] << 8) + data[5] + 256;
-            message_data = data + 6; // message block starts at 7th position
-
+            // check for empty data
+            // special broadcast telegrams on ems+ have no data values, some even don't have a type ID
             if (length <= 7) {
-                message_length = 0; // special broadcast on ems+ have no data values
+                message_data   = data; // bogus pointer, will not be used
+                message_length = 0;
+                if (length <= 5) {
+                    type_id = 0; // has also an empty type_id
+                } else {
+                    type_id = (data[4] << 8) + data[5] + 256;
+                }
             } else {
                 message_length = length - 7; // remove 6 byte header plus CRC
+                message_data   = data + 6;   // message block starts at 7th position
             }
         } else {
             // its F9 or F7
@@ -297,20 +304,28 @@ void RxService::add(uint8_t * data, uint8_t length) {
         }
     }
 
+    // if we don't have a type_id, exit
+    if (type_id == 0) {
+        return;
+    }
+
     // create the telegram
     auto telegram = std::make_shared<Telegram>(Telegram::Operation::RX, src, dest, type_id, offset, message_data, message_length);
 
     // check if queue is full
-    if (rx_telegrams_.size() >= maximum_rx_telegrams_) {
+    if (rx_telegrams_.size() >= MAX_RX_TELEGRAMS) {
         // rx_telegrams_overflow_ = true;
         rx_telegrams_.pop_front();
     }
 
-    // add to queue, with timestamp
+    // add to queue
     LOG_DEBUG(F("New Rx [#%d] telegram, length %d"), rx_telegram_id_, message_length);
     rx_telegrams_.emplace_back(rx_telegram_id_++, std::move(telegram));
 }
 
+//
+// Tx CODE here
+//
 
 TxService::QueuedTxTelegram::QueuedTxTelegram(uint16_t id, std::shared_ptr<Telegram> && telegram)
     : id_(id)
@@ -325,8 +340,6 @@ void TxService::flush_tx_queue() {
 
 // start and initialize Tx
 void TxService::start() {
-    // LOG_DEBUG(F("TxStart()"));
-
     // grab the bus ID
     Settings settings;
     ems_bus_id(settings.ems_bus_id());
@@ -334,6 +347,19 @@ void TxService::start() {
     // send first Tx request to bus master (boiler) for its registered devices
     // this will be added to the queue and sent during the first tx loop()
     read_request(EMSdevice::EMS_TYPE_UBADevices, EMSdevice::EMS_DEVICE_ID_BOILER);
+}
+
+// Tx loop
+// here we check if the Tx is not full and report an error
+void TxService::loop() {
+#ifndef EMSESP_STANDALONE
+    if ((uuid::get_uptime() - last_tx_check_) > TX_LOOP_WAIT) {
+        last_tx_check_ = uuid::get_uptime();
+        if ((tx_telegrams_.size() >= MAX_TX_TELEGRAMS - 1) && (EMSbus::bus_connected())) {
+            LOG_ERROR(F("Tx buffer full. Looks like Tx is not working?"));
+        }
+    }
+#endif
 }
 
 // sends a 1 byte poll which is our own device ID
@@ -352,9 +378,8 @@ void TxService::send() {
 
     // if there's nothing in the queue to send
     // optionally, send back a poll and quit
-    // for now I've disabled the poll
     if (tx_telegrams_.empty()) {
-        // send_poll();
+        // send_poll(); // TODO commented out poll for now. should add back when stable.
         return;
     }
 
@@ -482,7 +507,7 @@ void TxService::add(const uint8_t operation, const uint8_t dest, const uint16_t 
     LOG_DEBUG(F("New Tx [#%d] telegram, length %d"), tx_telegram_id_, message_length);
 
     // if the queue is full, make room but removing the last one
-    if (tx_telegrams_.size() >= maximum_tx_telegrams_) {
+    if (tx_telegrams_.size() >= MAX_TX_TELEGRAMS) {
         tx_telegrams_.pop_front();
     }
 
@@ -508,7 +533,7 @@ void TxService::add(uint8_t * data, const uint8_t length) {
     auto telegram = std::make_shared<Telegram>(Telegram::Operation::TX_RAW, src, dest, type_id, offset, message_data, message_length);
 
     // if the queue is full, make room but removing the last one
-    if (tx_telegrams_.size() >= maximum_tx_telegrams_) {
+    if (tx_telegrams_.size() >= MAX_TX_TELEGRAMS) {
         tx_telegrams_.pop_front();
     }
 

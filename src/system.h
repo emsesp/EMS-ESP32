@@ -74,9 +74,9 @@ class System {
     static uuid::syslog::SyslogService syslog_;
 #endif
 
-    static constexpr uint32_t SYSTEM_CHECK_FREQUENCY = 5000; // check every 5 seconds
-    static constexpr uint32_t LED_WARNING_BLINK      = 1000; // pulse to show no connection
-    static constexpr uint32_t LED_WARNING_BLINK_FAST = 100;  // flash quickly for boot up sequence or safe-mode
+    static constexpr uint32_t SYSTEM_CHECK_FREQUENCY = 10000; // check every 10 seconds
+    static constexpr uint32_t LED_WARNING_BLINK      = 1000;  // pulse to show no connection, 1 sec
+    static constexpr uint32_t LED_WARNING_BLINK_FAST = 100;   // flash quickly for boot up sequence or safe-mode
 
 // internal LED
 #if defined(ESP8266)

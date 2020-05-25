@@ -221,7 +221,7 @@ void Console::load_standard_commands(unsigned int context) {
         context,
         CommandFlags::USER,
         flash_string_vector{F_(log)},
-        flash_string_vector{F_(log_level_optional), F_(traceid_optional), F_(raw_optional)},
+        flash_string_vector{F_(log_level_optional), F_(trace_format_optional), F_(traceid_optional)},
         [](Shell & shell, const std::vector<std::string> & arguments) {
             uint16_t watch_id;
             if (!arguments.empty()) {
@@ -238,16 +238,17 @@ void Console::load_standard_commands(unsigned int context) {
                 if (level == uuid::log::Level::TRACE) {
                     watch_id = LOG_TRACE_WATCH_NONE; // no watch ID set
                     if (arguments.size() > 1) {
-                        watch_id = Helpers::hextoint(arguments[1].c_str()); // get the watch ID
-                    }
+                        // next argument is raw or full
+                        if (arguments[1] == read_flash_string(F_(raw))) {
+                            emsesp::EMSESP::trace_raw(true);
+                        } else if (arguments[1] == read_flash_string(F_(full))) {
+                            emsesp::EMSESP::trace_raw(false);
+                        }
 
-                    emsesp::EMSESP::trace_watch_id(watch_id);
-
-                    // see if we have a "raw"
-                    if ((arguments.size() == 3) && (arguments[2] == read_flash_string(F_(raw)))) {
-                        emsesp::EMSESP::trace_raw(true);
-                    } else {
-                        emsesp::EMSESP::trace_raw(false);
+                        // get the watch_id if its set
+                        if (arguments.size() == 3) {
+                            emsesp::EMSESP::trace_watch_id(Helpers::hextoint(arguments[2].c_str()));
+                        }
                     }
                 }
             }

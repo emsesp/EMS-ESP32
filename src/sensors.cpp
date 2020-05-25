@@ -54,8 +54,10 @@ void Sensors::start() {
 
 void Sensors::loop() {
 #ifndef EMSESP_STANDALONE
+    uint32_t time_now = uuid::get_uptime();
+
     if (state_ == State::IDLE) {
-        if (millis() - last_activity_ >= READ_INTERVAL_MS) {
+        if (time_now - last_activity_ >= READ_INTERVAL_MS) {
             // LOG_DEBUG(F("Read sensor temperature")); // uncomment for debug
             if (bus_.reset()) {
                 bus_.skip();
@@ -67,7 +69,7 @@ void Sensors::loop() {
                 // LOG_ERROR(F("Bus reset failed")); // uncomment for debug
                 devices_.clear(); // remove all know devices incase we have a disconnect
             }
-            last_activity_ = millis();
+            last_activity_ = time_now;
         }
     } else if (state_ == State::READING) {
         if (temperature_convert_complete()) {
@@ -76,18 +78,18 @@ void Sensors::loop() {
             found_.clear();
 
             state_         = State::SCANNING;
-            last_activity_ = millis();
-        } else if (millis() - last_activity_ > READ_TIMEOUT_MS) {
+            last_activity_ = time_now;
+        } else if (time_now - last_activity_ > READ_TIMEOUT_MS) {
             LOG_ERROR(F("Sensor read timeout"));
 
             state_         = State::IDLE;
-            last_activity_ = millis();
+            last_activity_ = time_now;
         }
     } else if (state_ == State::SCANNING) {
-        if (millis() - last_activity_ > SCAN_TIMEOUT_MS) {
+        if (time_now - last_activity_ > SCAN_TIMEOUT_MS) {
             LOG_ERROR(F("Sensor scan timeout"));
             state_         = State::IDLE;
-            last_activity_ = millis();
+            last_activity_ = time_now;
         } else {
             uint8_t addr[ADDR_LEN] = {0};
 
@@ -125,7 +127,7 @@ void Sensors::loop() {
                 found_.clear();
                 // LOG_DEBUG(F("Found %zu sensor(s). Adding them."), devices_.size()); // uncomment for debug
                 state_         = State::IDLE;
-                last_activity_ = millis();
+                last_activity_ = time_now;
             }
         }
     }
