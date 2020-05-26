@@ -569,6 +569,7 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
     // check first for echo
     uint8_t first_value = data[0];
     if (((first_value & 0x7F) == txservice_.ems_bus_id()) && (length > 1)) {
+        DEBUG_LOG(F("Tx echo"));
         return; // it's an echo
     }
 

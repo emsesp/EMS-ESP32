@@ -268,7 +268,7 @@ void RxService::add(uint8_t * data, uint8_t length) {
     uint8_t   message_length;
 
     // work out depending on the type where the data message block starts
-    if (data[2] < 0xF0) {
+    if (data[2] < 0xF0 || length < 6) {
         // EMS 1.0
         type_id        = data[2];
         message_data   = data + 4;   // message block starts at 5th byte
