@@ -425,7 +425,7 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
                 // check to see if we need to force an MQTT publish
                 if (found) {
                     if (emsdevice->updated_values()) {
-                        emsdevice->publish_values();
+                        emsdevice->publish_values(); // publish to MQTT if we explicitly have too
                     }
                 }
                 break;
@@ -434,7 +434,7 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
     }
 
     if (!found) {
-        LOG_DEBUG(F("No telegram type handler found for type ID 0x%02X (src 0x%02X, dest 0x%02X)"), telegram->type_id, telegram->src, telegram->dest);
+        LOG_DEBUG(F("No telegram type handler found for ID 0x%02X (src 0x%02X, dest 0x%02X)"), telegram->type_id, telegram->src, telegram->dest);
     }
 
     return found;
@@ -586,7 +586,7 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
                 txservice_.send_poll();                      // close the bus
                 txservice_.post_send_query();                // send type_id to last destination
             } else if (first_value == TxService::TX_WRITE_FAIL) {
-                LOG_DEBUG(F("Last Tx write rejected by host"));
+                LOG_ERROR(F("Last Tx write rejected by host"));
                 txservice_.send_poll(); // close the bus
             } else {
                 // ignore it, it's probably a poll and we can wait for the next one
@@ -606,9 +606,9 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
                 // So re-send the last Tx and increment retry count
                 uint8_t retries = txservice_.retry_tx(); // returns 0 if exceeded count
                 if (retries) {
-                    LOG_DEBUG(F("Last Tx read failed. Retrying #%d..."), retries);
+                    LOG_ERROR(F("Last Tx read failed. Retrying #%d..."), retries);
                 } else {
-                    LOG_DEBUG(F("Last Tx read failed. Giving up"));
+                    LOG_ERROR(F("Last Tx read failed after %d retries"), txservice_.MAXIMUM_TX_RETRIES);
                 }
             }
         }
