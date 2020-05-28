@@ -447,7 +447,7 @@ void Boiler::check_active() {
     // heating
     // using a quick hack for checking the heating by looking at the Selected Flow Temp, but doesn't work for all boilers apparently
     if (selFlowTemp_ != EMS_VALUE_UINT_NOTSET && burnGas_ != EMS_VALUE_UINT_NOTSET) {
-        heating_active_ = ((selFlowTemp_ >= EMS_BOILER_SELFLOWTEMP_HEATING) && (burnGas_ != EMS_VALUE_BOOL_OFF));
+        heating_active_ = (!tap_water_active_ && ((selFlowTemp_ >= EMS_BOILER_SELFLOWTEMP_HEATING) && (burnGas_ != EMS_VALUE_BOOL_OFF)));
     }
 
     // see if the heating or hot tap water has changed, if so send

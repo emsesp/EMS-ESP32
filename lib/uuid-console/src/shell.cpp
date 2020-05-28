@@ -58,8 +58,8 @@ Shell::~Shell() {
 
 void Shell::start() {
 #ifdef EMSESP_DEBUG
-    // uuid::log::Logger::register_handler(this, uuid::log::Level::DEBUG); // added by proddy
-    uuid::log::Logger::register_handler(this, uuid::log::Level::INFO); // added by proddy
+    uuid::log::Logger::register_handler(this, uuid::log::Level::DEBUG); // added by proddy
+    //uuid::log::Logger::register_handler(this, uuid::log::Level::INFO); // added by proddy
 #else
     uuid::log::Logger::register_handler(this, uuid::log::Level::NOTICE);
 #endif

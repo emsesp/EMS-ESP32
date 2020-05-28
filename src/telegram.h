@@ -287,10 +287,9 @@ class TxService : public EMSbus {
 
     std::string last_tx_to_string() const;
 
-
-  private:
     static constexpr uint8_t MAXIMUM_TX_RETRIES = 3;
 
+  private:
     uint8_t tx_telegram_id_ = 0; // queue counter
 
     static constexpr uint32_t TX_LOOP_WAIT   = 10000; // when to check if Tx is up and running (10 sec)

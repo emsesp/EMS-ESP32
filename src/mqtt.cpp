@@ -394,11 +394,7 @@ void Mqtt::on_publish(uint16_t packetId) {
         return;
     }
 
-    if (mqtt_message.packet_id_ == packetId) {
-#ifdef EMSESP_DEBUG
-        LOG_DEBUG(F("Acknowledged PID %d. Removing from queue"), packetId);
-#endif
-    } else {
+    if (mqtt_message.packet_id_ != packetId) {
         LOG_DEBUG(F("Mismatch, expecting PID %d, got %d"), mqtt_message.packet_id_, packetId);
         mqtt_publish_fails_++; // increment error count
     }
@@ -423,9 +419,7 @@ char * Mqtt::make_topic(char * result, const std::string & topic) {
 }
 
 void Mqtt::start() {
-    publish("status", "online", true); // say we're alive to the Last Will topic, with retain on
     send_start_topic();
-    send_heartbeat(); // send heartbeat if enabled
 }
 
 // send online appended with the version information as JSON
@@ -441,6 +435,11 @@ void Mqtt::on_connect() {
     mqtt_reconnect_delay_ = Mqtt::MQTT_RECONNECT_DELAY_MIN;
     mqtt_last_connection_ = uuid::get_uptime();
     mqtt_connecting_      = false;
+
+    publish("status", "online", true); // say we're alive to the Last Will topic, with retain on
+
+    send_heartbeat(); // send heartbeat if enabled
+
     LOG_INFO(F("MQTT connected"));
 }
 
@@ -603,9 +602,7 @@ void Mqtt::process_queue() {
     // but add the packet_id so we can check it later
     if (mqtt_qos_ != 0) {
         mqtt_messages_.front().packet_id_ = packet_id;
-#ifdef EMSESP_DEBUG
-        LOG_DEBUG(F("Setting packetID for ACK to %d"), packet_id);
-#endif
+        // LOG_DEBUG(F("Setting packetID for ACK to %d"), packet_id);
         return;
     }
 
