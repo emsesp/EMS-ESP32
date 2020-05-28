@@ -26,15 +26,25 @@ uint64_t get_uptime_ms() {
     static uint32_t high_millis = 0;
     static uint32_t low_millis  = 0;
 
-    uint32_t now_millis = ::millis();
-
-    if (now_millis < low_millis) {
+    if (get_uptime() < low_millis) {
         high_millis++;
     }
 
-    low_millis = now_millis;
+    low_millis = get_uptime();
 
     return ((uint64_t)high_millis << 32) | low_millis;
+}
+
+// added by proddy
+
+static uint32_t now_millis; // added by proddy
+
+void set_uptime() {
+    now_millis = ::millis();
+}
+
+uint32_t get_uptime() {
+    return now_millis;
 }
 
 } // namespace uuid

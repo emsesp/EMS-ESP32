@@ -56,7 +56,8 @@ Shower    EMSESP::shower_;    // Shower logic
 
 // static/common variables
 uint8_t  EMSESP::actual_master_thermostat_ = EMSESP_DEFAULT_MASTER_THERMOSTAT; // which thermostat leads when multiple found
-uint16_t EMSESP::trace_watch_id_           = 0;                                // for when log is TRACE
+uint16_t EMSESP::trace_watch_id_           = LOG_TRACE_WATCH_NONE;             // for when log is TRACE. 0 means no trace set
+bool     EMSESP::trace_raw_                = false;                            // not showing raw when in trace logging
 bool     EMSESP::tap_water_active_         = false;                            // for when Boiler states we having running warm water. used in Shower()
 bool     EMSESP::ems_read_only_;
 uint32_t EMSESP::last_fetch_ = 0;
@@ -332,7 +333,7 @@ void EMSESP::process_UBADevices(std::shared_ptr<const Telegram> telegram) {
                     // if we haven't already detected this device, request it's version details, unless its us (EMS-ESP)
                     // when the version info is received, it will automagically add the device
                     if ((device_id != ems_bus_id) && !(EMSESP::device_exists(device_id))) {
-                        logger_.info(F("New EMS device detected with ID 0x%02X. Requesting version information."), device_id);
+                        LOG_DEBUG(F("New EMS device detected with ID 0x%02X. Requesting version information."), device_id);
                         send_read_request(EMSdevice::EMS_TYPE_VERSION, device_id);
                     }
                 }
@@ -391,9 +392,11 @@ void EMSESP::process_version(std::shared_ptr<const Telegram> telegram) {
 // We also check for common telgram types, like the Version(0x02)
 // returns false if there are none found
 bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
-    // print to console if logging is TRACE
-    if ((trace_watch_id_ == 0) || (telegram->src == trace_watch_id_) || (telegram->dest == trace_watch_id_) || (telegram->type_id == trace_watch_id_)) {
-        TRACE_LOG(pretty_telegram(telegram).c_str());
+    if ((logger_.enabled(Level::TRACE)) && !trace_raw()) {
+        if ((trace_watch_id_ == LOG_TRACE_WATCH_NONE) || (telegram->src == trace_watch_id_) || (telegram->dest == trace_watch_id_)
+            || (telegram->type_id == trace_watch_id_)) {
+            LOG_TRACE(pretty_telegram(telegram).c_str());
+        }
     }
 
     // only process broadcast telegrams or ones sent to us on request
@@ -431,7 +434,7 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
     }
 
     if (!found) {
-        DEBUG_LOG(F("No telegram type handler found for type ID 0x%02X (src 0x%02X, dest 0x%02X)"), telegram->type_id, telegram->src, telegram->dest);
+        LOG_DEBUG(F("No telegram type handler found for type ID 0x%02X (src 0x%02X, dest 0x%02X)"), telegram->type_id, telegram->src, telegram->dest);
     }
 
     return found;
@@ -504,7 +507,7 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice) {
             if (emsdevice->is_device_id(device_id)) {
-                DEBUG_LOG(F("Updating details for already existing device with ID 0x%02X"), device_id);
+                LOG_DEBUG(F("Updating details for already existing device with ID 0x%02X"), device_id);
                 emsdevice->product_id(product_id);
                 emsdevice->version(version);
                 emsdevice->brand(brand);
@@ -535,10 +538,10 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
 
     // if we don't recognize the product ID report it, but don't add it.
     if (!found) {
-        logger_.notice(F("Unrecognized EMS device with device ID 0x%02X with product ID %d. Please report on GitHub."), device_id, product_id);
+        LOG_NOTICE(F("Unrecognized EMS device with device ID 0x%02X with product ID %d. Please report on GitHub."), device_id, product_id);
         return false; // not found
     } else {
-        DEBUG_LOG(F("Adding new device with device ID 0x%02X with product ID %d"), device_id, product_id);
+        LOG_DEBUG(F("Adding new device with device ID 0x%02X with product ID %d"), device_id, product_id);
         // go and fetch its data, including asking for the version
         send_read_request(EMSdevice::EMS_TYPE_VERSION, device_id);
         fetch_device_values(device_id);
@@ -569,7 +572,6 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
     // check first for echo
     uint8_t first_value = data[0];
     if (((first_value & 0x7F) == txservice_.ems_bus_id()) && (length > 1)) {
-        DEBUG_LOG(F("Tx echo"));
         return; // it's an echo
     }
 
@@ -579,12 +581,12 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
         EMSbus::tx_waiting(false); // reset Tx wait state
         if (length == 1) {
             if (first_value == TxService::TX_WRITE_SUCCESS) {
-                DEBUG_LOG(F("Last Tx write successful. Sending read request."));
+                LOG_DEBUG(F("Last Tx write successful. Sending read request."));
                 txservice_.increment_telegram_write_count(); // last tx/write was confirmed ok
                 txservice_.send_poll();                      // close the bus
                 txservice_.post_send_query();                // send type_id to last destination
             } else if (first_value == TxService::TX_WRITE_FAIL) {
-                DEBUG_LOG(F("Last Tx write rejected by host"));
+                LOG_DEBUG(F("Last Tx write rejected by host"));
                 txservice_.send_poll(); // close the bus
             } else {
                 // ignore it, it's probably a poll and we can wait for the next one
@@ -596,7 +598,7 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
             uint8_t src  = data[0];
             uint8_t dest = data[1];
             if (txservice_.is_last_tx(src, dest)) {
-                DEBUG_LOG(F("Last Tx read successful"));
+                LOG_DEBUG(F("Last Tx read successful"));
                 txservice_.increment_telegram_read_count();
                 txservice_.send_poll();
             } else {
@@ -604,9 +606,9 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
                 // So re-send the last Tx and increment retry count
                 uint8_t retries = txservice_.retry_tx(); // returns 0 if exceeded count
                 if (retries) {
-                    DEBUG_LOG(F("Last Tx read failed. Retrying #%d..."), retries);
+                    LOG_DEBUG(F("Last Tx read failed. Retrying #%d..."), retries);
                 } else {
-                    DEBUG_LOG(F("Last Tx read failed. Giving up"));
+                    LOG_DEBUG(F("Last Tx read failed. Giving up"));
                 }
             }
         }
@@ -617,7 +619,7 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
         // check for poll to us, if so send top message from Tx queue immediately and quit
         // if ht3 poll must be ems_bus_id else if Buderus poll must be (ems_bus_id | 0x80)
         if ((first_value ^ 0x80 ^ rxservice_.ems_mask()) == txservice_.ems_bus_id()) {
-            EMSbus::last_bus_activity(millis()); // set the flag indication the EMS bus is active
+            EMSbus::last_bus_activity(uuid::get_uptime()); // set the flag indication the EMS bus is active
             txservice_.send();
         }
         return;
@@ -635,7 +637,7 @@ void EMSESP::send_raw_telegram(const char * data) {
 // sets the ems read only flag preventing any Tx from going out
 void EMSESP::set_ems_read_only() {
     ems_read_only_ = Settings().ems_read_only();
-    DEBUG_LOG(F("Setting EMS read-only mode to %s"), ems_read_only_ ? F("on") : F("off"));
+    LOG_DEBUG(F("Setting EMS read-only mode to %s"), ems_read_only_ ? F("on") : F("off"));
 }
 
 // console commands to add
@@ -693,17 +695,17 @@ void EMSESP::console_commands(Shell & shell, unsigned int context) {
         flash_string_vector{F_(n_mandatory)},
         [](Shell & shell, const std::vector<std::string> & arguments) {
             uint8_t tx_mode = (arguments[0]).at(0) - '0';
-            if ((tx_mode > 0) && (tx_mode <= 3)) {
+            if ((tx_mode > 0) && (tx_mode <= 4)) {
                 Settings settings;
                 settings.ems_tx_mode(tx_mode);
                 settings.commit();
                 shell.printfln(F_(tx_mode_fmt), settings.ems_tx_mode());
             } else {
-                shell.println(F("Must be 1 for EMS generic, 2 for EMS+ or 3 for HT3"));
+                shell.println(F("Must be 1 for EMS generic, 2 for EMS+, 3 for HT3, 4 for experimental"));
             }
         },
         [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments __attribute__((unused))) -> const std::vector<std::string> {
-            return std::vector<std::string>{read_flash_string(F("1")), read_flash_string(F("2")), read_flash_string(F("3"))};
+            return std::vector<std::string>{read_flash_string(F("1")), read_flash_string(F("2")), read_flash_string(F("3")), read_flash_string(F("4"))};
         });
 
     EMSESPShell::commands->add_command(
@@ -787,7 +789,7 @@ void EMSESP::console_commands(Shell & shell, unsigned int context) {
 
 // kick off the party, start all the services
 void EMSESP::start() {
-    // Load our libary of known devices
+    // Load our library of known devices
     device_library_ = {
 #include "device_library.h"
     };
@@ -799,25 +801,27 @@ void EMSESP::start() {
     rxservice_.start();
     txservice_.start();
     shower_.start();
+    mqtt_.start();
 
     set_ems_read_only(); // see if we have Tx disabled and set the flag
 }
 
 // loop de loop
 void EMSESP::loop() {
-    // network returns false if an OTA is being carried out.
+    // network returns false if an OTA is being carried out
+    // so we disable all services when an OTA is happening
     if (network_.loop()) {
         console_.loop();   // telnet/serial console
         system_.loop();    // does LED and checks system health, and syslog service
         mqtt_.loop();      // starts mqtt, and sends out anything in the queue
         rxservice_.loop(); // process what ever is in the rx queue
+        txservice_.loop(); // check that the Tx is all ok
         shower_.loop();    // check for shower on/off
         sensors_.loop();   // this will also send out via MQTT
 
-        // force a query on the EMS devices to fetch latest data
-        uint32_t currentMillis = millis();
-        if ((currentMillis - last_fetch_ > EMS_FETCH_FREQUENCY)) {
-            last_fetch_ = currentMillis;
+        // force a query on the EMS devices to fetch latest data at a set interval (1 min)
+        if ((uuid::get_uptime() - last_fetch_ > EMS_FETCH_FREQUENCY)) {
+            last_fetch_ = uuid::get_uptime();
             fetch_device_values();
         }
     }

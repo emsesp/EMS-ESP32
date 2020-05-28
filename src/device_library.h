@@ -37,7 +37,6 @@
 {122, DeviceType::BOILER, F("Proline"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {170, DeviceType::BOILER, F("Logano GB212"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {172, DeviceType::BOILER, F("Enviline/Compress 6000AW"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
-{ 72, DeviceType::BOILER, F("MC10"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 
 // Solar Modules - 0x30
 { 73, DeviceType::SOLAR, F("SM10"), DeviceFlags::EMS_DEVICE_FLAG_SM10},

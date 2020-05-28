@@ -29,7 +29,7 @@ uuid::log::Logger Solar::logger_{F_(logger_name), uuid::log::Facility::CONSOLE};
 
 Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const std::string & version, const std::string & name, uint8_t flags, uint8_t brand)
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
-    DEBUG_LOG(F("Registering new Solar module with device ID 0x%02X"), device_id);
+    LOG_DEBUG(F("Registering new Solar module with device ID 0x%02X"), device_id);
 
     // telegram handlers
     register_telegram_type(0x0097, F("SM10Monitor"), true, std::bind(&Solar::process_SM10Monitor, this, _1));
@@ -108,7 +108,7 @@ void Solar::publish_values() {
     }
 
 #ifdef EMSESP_DEBUG
-    DEBUG_LOG(F("[DEBUG] Performing a solar module publish"));
+    LOG_DEBUG(F("[DEBUG] Performing a solar module publish"));
 #endif
 
     Mqtt::publish("sm_data", doc);

@@ -26,20 +26,25 @@ uuid::log::Logger Mixing::logger_{F_(logger_name), uuid::log::Facility::CONSOLE}
 
 Mixing::Mixing(uint8_t device_type, uint8_t device_id, uint8_t product_id, const std::string & version, const std::string & name, uint8_t flags, uint8_t brand)
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
-    DEBUG_LOG(F("Registering new Mixing module with device ID 0x%02X"), device_id);
+    LOG_DEBUG(F("Registering new Mixing module with device ID 0x%02X"), device_id);
 
-    // telegram handlers 0x20 - 0x27 for HC
-    register_telegram_type(0x02D7, F("MMPLUSStatusMessage_HC"), true, std::bind(&Mixing::process_MMPLUSStatusMessage_HC, this, _1));
-    register_telegram_type(0x02D8, F("MMPLUSStatusMessage_HC"), true, std::bind(&Mixing::process_MMPLUSStatusMessage_HC, this, _1));
-    register_telegram_type(0x02D9, F("MMPLUSStatusMessage_HC"), true, std::bind(&Mixing::process_MMPLUSStatusMessage_HC, this, _1));
-    register_telegram_type(0x02DA, F("MMPLUSStatusMessage_HC"), true, std::bind(&Mixing::process_MMPLUSStatusMessage_HC, this, _1));
-
-    // telegram handlers for warm water/DHW 0x28, 0x29
-    register_telegram_type(0x0331, F("MMPLUSStatusMessage_WWC"), true, std::bind(&Mixing::process_MMPLUSStatusMessage_WWC, this, _1));
-    register_telegram_type(0x0332, F("MMPLUSStatusMessage_WWC"), true, std::bind(&Mixing::process_MMPLUSStatusMessage_WWC, this, _1));
-
+    if (flags == EMSdevice::EMS_DEVICE_FLAG_MMPLUS) {
+        if (device_id < 0x28) {
+            // telegram handlers 0x20 - 0x27 for HC
+            register_telegram_type(device_id -0x20 + 0x02D7, F("MMPLUSStatusMessage_HC"), true, std::bind(&Mixing::process_MMPLUSStatusMessage_HC, this, _1));
+        } else {
+            // telegram handlers for warm water/DHW 0x28, 0x29
+            register_telegram_type(device_id - 0x28 + 0x0331, F("MMPLUSStatusMessage_WWC"), true, std::bind(&Mixing::process_MMPLUSStatusMessage_WWC, this, _1));
+        }
+    }
     // EMS 1.0
-    register_telegram_type(0x00AB, F("MMStatusMessage"), true, std::bind(&Mixing::process_MMStatusMessage, this, _1));
+    if (flags == EMSdevice::EMS_DEVICE_FLAG_MM10) {
+        register_telegram_type(0x00AA, F("MMConfigMessage"), false, nullptr);
+        register_telegram_type(0x00AB, F("MMStatusMessage"), true, std::bind(&Mixing::process_MMStatusMessage, this, _1));
+        register_telegram_type(0x00AC, F("MMSetMessage"), false, nullptr);
+    }
+    Settings settings;
+    mqtt_format_ = settings.mqtt_format(); // single, nested or ha
 
     // MQTT callbacks
     // register_mqtt_topic("cmd", std::bind(&Mixing::cmd, this, _1));
@@ -75,43 +80,64 @@ void Mixing::show_values(uuid::console::Shell & shell) {
 // ideally we should group up all the mixing units together into a nested JSON but for now we'll send them individually
 void Mixing::publish_values() {
     DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_SMALL);
+    JsonObject          rootMixing = doc.to<JsonObject>();
+    JsonObject          dataMixing;
 
-    switch (type_) {
-    case Type::HC:
-        doc["type"] = F("hc");
-        break;
-    case Type::WWC:
-        doc["type"] = F("wwc");
-        break;
-    case Type::NONE:
-    default:
-        return;
+    if (mqtt_format_ == Settings::MQTT_format::SINGLE) {
+        switch (type_) {
+        case Type::HC:
+            rootMixing["type"] = F("hc");
+            break;
+        case Type::WWC:
+            rootMixing["type"] = F("wwc");
+            break;
+        case Type::NONE:
+        default:
+            return;
+        }
+        dataMixing = rootMixing;
+    } else {
+        char hc_name[10]; // hc{1-4}
+        if(type_ == Type::HC) {
+            strlcpy(hc_name, "hc", 10);
+        } else {
+            strlcpy(hc_name, "wwc", 10);
+        }
+        char s[3]; // for formatting strings
+        strlcat(hc_name, Helpers::itoa(s, hc_), 10);
+        dataMixing = rootMixing.createNestedObject(hc_name);
     }
 
     if (flowTemp_ != EMS_VALUE_USHORT_NOTSET) {
-        doc["flowTemp"] = (float)flowTemp_ / 10;
+        dataMixing["flowTemp"] = (float)flowTemp_ / 10;
     }
 
     if (pumpMod_ != EMS_VALUE_UINT_NOTSET) {
-        doc["pumpMod"] = pumpMod_;
+        dataMixing["pumpMod"] = pumpMod_;
     }
 
     if (status_ != EMS_VALUE_UINT_NOTSET) {
-        doc["status"] = status_;
+        dataMixing["status"] = status_;
     }
 
     if (flowSetTemp_ != EMS_VALUE_UINT_NOTSET) {
-        doc["flowSetTemp"] = flowSetTemp_;
+        dataMixing["flowSetTemp"] = flowSetTemp_;
     }
 
 #ifdef EMSESP_DEBUG
-    DEBUG_LOG(F("[DEBUG] Performing a mixing module publish"));
+    LOG_DEBUG(F("[DEBUG] Performing a mixing module publish"));
 #endif
-
+    // if format is single, send immediately and quit
+    if (mqtt_format_ == Settings::MQTT_format::SINGLE) {
+        char topic[30];
+        char s[3]; // for formatting strings
+        strlcpy(topic, "mixing_data", 30);
+        strlcat(topic, Helpers::itoa(s, hc_), 30); // append hc to topic
+        Mqtt::publish(topic, doc);
+        return;
+    }
     char topic[30];
-    char s[3]; // for formatting strings
     strlcpy(topic, "mixing_data", 30);
-    strlcat(topic, Helpers::itoa(s, hc_), 30); // append hc to topic
     Mqtt::publish(topic, doc);
 }
 

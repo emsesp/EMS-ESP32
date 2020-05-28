@@ -265,7 +265,8 @@ std::string Helpers::data_to_hex(const uint8_t * data, const uint8_t length) {
 }
 
 
-// takes a hex string and convert it to a 32bit number (max 8 hex digits)
+// takes a hex string and convert it to an unsigned 32bit number (max 8 hex digits)
+// works with only positive numbers
 uint32_t Helpers::hextoint(const char * hex) {
     uint32_t val = 0;
     while (*hex) {

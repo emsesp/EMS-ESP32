@@ -96,7 +96,7 @@ class EMSbus {
 
     static bool bus_connected() {
 #ifndef EMSESP_STANDALONE
-        if ((millis() - last_bus_activity_) > EMS_BUS_TIMEOUT) {
+        if ((uuid::get_uptime() - last_bus_activity_) > EMS_BUS_TIMEOUT) {
             bus_connected_ = false;
         }
         return bus_connected_;
@@ -202,8 +202,6 @@ class RxService : public EMSbus {
     static constexpr uint32_t RX_LOOP_WAIT   = 800; // delay in processing Rx queue
     uint32_t                  last_rx_check_ = 0;
 
-    size_t maximum_rx_telegrams_ = MAX_RX_TELEGRAMS;
-
     // std::atomic<bool> rx_telegrams_overflow_{false};
     uint8_t rx_telegram_id_ = 0; // queue counter
 
@@ -215,7 +213,7 @@ class RxService : public EMSbus {
 
 class TxService : public EMSbus {
   public:
-    static constexpr size_t MAX_TX_TELEGRAMS = 20;
+    static constexpr size_t MAX_TX_TELEGRAMS = 50;
 
     static constexpr uint8_t TX_WRITE_FAIL    = 4;
     static constexpr uint8_t TX_WRITE_SUCCESS = 1;
@@ -224,6 +222,7 @@ class TxService : public EMSbus {
     ~TxService() = default;
 
     void start();
+    void loop();
     void send();
 
     void add(const uint8_t operation, const uint8_t dest, const uint16_t type_id, const uint8_t offset, uint8_t * message_data, const uint8_t message_length);
@@ -292,8 +291,10 @@ class TxService : public EMSbus {
   private:
     static constexpr uint8_t MAXIMUM_TX_RETRIES = 3;
 
-    size_t  maximum_tx_telegrams_ = MAX_TX_TELEGRAMS;
-    uint8_t tx_telegram_id_       = 0; // queue counter
+    uint8_t tx_telegram_id_ = 0; // queue counter
+
+    static constexpr uint32_t TX_LOOP_WAIT   = 10000; // when to check if Tx is up and running (10 sec)
+    uint32_t                  last_tx_check_ = 0;
 
     std::deque<QueuedTxTelegram> tx_telegrams_;
 

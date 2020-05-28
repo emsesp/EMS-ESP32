@@ -27,14 +27,15 @@
 #include "freertos/queue.h"
 #include <driver/uart.h>
 
-#define EMS_MAXBUFFERSIZE 33                  // max size of the buffer. EMS packets are max 32 bytes, plus BRK
-#define EMSUART_UART UART_NUM_2               // UART 0 --> Changed to 2 for ESP32 // To do: Adapt
-#define EMS_UART UART2                        // for intr setting
-//#define EMSUART_RXPIN 17                    // To do: Adapt seems to be IO17 for ESP32 UART2 RX pin
-//#define EMSUART_TXPIN 16                    // To do: Adapt seems to be IO16 for ESP32 UART2 TX pin
-#define EMSUART_RXPIN 23                      // Wemos D1 ESP32 UART2 RX pin for compatibility
-#define EMSUART_TXPIN 5                       // Wemos D1 ESP32 UART2 TX pin for compatibility
-#define EMSUART_BAUD 9600                     // uart baud rate for the EMS circuit
+#define EMS_MAXBUFFERSIZE 33 // max size of the buffer. EMS packets are max 32 bytes, plus extra 2 for BRKs
+
+#define EMSUART_UART UART_NUM_2 // on the ESP32 we're using UART2
+#define EMS_UART UART2          // for intr setting
+#define EMSUART_BAUD 9600 // uart baud rate for the EMS circuit
+
+// customize the GPIO pins for RX and TX here
+#define EMSUART_RXPIN 23 // 17 is UART2 RX. Use 23 for D7 on a Wemos D1-32 mini for backwards compatabilty
+#define EMSUART_TXPIN 5 // 16 is UART2 TX. Use 5 for D8 on a Wemos D1-32 mini for backwards compatabilty
 
 namespace emsesp {
 

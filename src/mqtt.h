@@ -63,6 +63,7 @@ struct MqttMessage {
 class Mqtt {
   public:
     void loop();
+    void start();
     void send_heartbeat();
 
     enum Operation { PUBLISH, SUBSCRIBE };
@@ -109,32 +110,28 @@ class Mqtt {
     };
     static std::deque<QueuedMqttMessage> mqtt_messages_;
 
-    void start();
-
 #ifndef EMSESP_STANDALONE
     static AsyncMqttClient mqttClient_;
 #endif
 
     void flush_message_queue();
+    void setup();
 
     static constexpr size_t MAX_MQTT_MESSAGES = 50;
     static size_t           maximum_mqtt_messages_;
     static uint16_t         mqtt_message_id_;
+    static bool             mqtt_retain_;
 
     static constexpr uint8_t  MQTT_QUEUE_MAX_SIZE       = 50;
-    static constexpr uint32_t MQTT_PUBLISH_WAIT         = 750; // delay between sending publishes, although it should be asynchronous!
-    static constexpr uint8_t  MQTT_PUBLISH_MAX_RETRY    = 3;   // max retries for giving up on publishing
-    static constexpr uint8_t  MQTT_KEEP_ALIVE           = 60;
+    static constexpr uint32_t MQTT_PUBLISH_WAIT         = 750;    // delay between sending publishes, to account for large payloads
+    static constexpr uint8_t  MQTT_PUBLISH_MAX_RETRY    = 3;      // max retries for giving up on publishing
+    static constexpr uint8_t  MQTT_KEEP_ALIVE           = 60;     // 60 seconds. This could also be less, like 30 seconds
     static constexpr uint32_t MQTT_RECONNECT_DELAY_MIN  = 2000;   // Try to reconnect in 2 seconds upon disconnection
     static constexpr uint32_t MQTT_RECONNECT_DELAY_STEP = 3000;   // Increase the reconnect delay in 3 seconds after each failed attempt
     static constexpr uint32_t MQTT_RECONNECT_DELAY_MAX  = 120000; // Set reconnect time to 2 minutes at most
     static constexpr uint32_t MQTT_HEARTBEAT_INTERVAL   = 60000;  // in milliseconds, how often the MQTT heartbeat is sent (1 min)
 
-    static bool mqtt_retain_;
-
-    static void queue_publish_message(const std::string & topic, const JsonDocument & payload, const bool retain);
     static void queue_publish_message(const std::string & topic, const std::string & payload, const bool retain);
-
     static void queue_subscribe_message(const std::string & topic);
 
     void          on_publish(uint16_t packetId);

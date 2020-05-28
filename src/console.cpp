@@ -221,8 +221,9 @@ void Console::load_standard_commands(unsigned int context) {
         context,
         CommandFlags::USER,
         flash_string_vector{F_(log)},
-        flash_string_vector{F_(log_level_optional), F_(traceid_optional)},
+        flash_string_vector{F_(log_level_optional), F_(trace_format_optional), F_(traceid_optional)},
         [](Shell & shell, const std::vector<std::string> & arguments) {
+            uint16_t watch_id;
             if (!arguments.empty()) {
                 uuid::log::Level level;
 
@@ -233,15 +234,34 @@ void Console::load_standard_commands(unsigned int context) {
                     return;
                 }
 
-                // see if we have extra argument, for trace
-                uint16_t watch_id = 0; // no watch ID set
-                if ((arguments.size() == 2) && (level == uuid::log::Level::TRACE)) {
-                    watch_id = Helpers::hextoint(arguments[1].c_str());
-                    shell.printfln(("Tracing only telegrams that match a device ID or telegram type of 0x%02X"), watch_id);
+                // trace logic
+                if (level == uuid::log::Level::TRACE) {
+                    watch_id = LOG_TRACE_WATCH_NONE; // no watch ID set
+                    if (arguments.size() > 1) {
+                        // next argument is raw or full
+                        if (arguments[1] == read_flash_string(F_(raw))) {
+                            emsesp::EMSESP::trace_raw(true);
+                        } else if (arguments[1] == read_flash_string(F_(full))) {
+                            emsesp::EMSESP::trace_raw(false);
+                        }
+
+                        // get the watch_id if its set
+                        if (arguments.size() == 3) {
+                            emsesp::EMSESP::trace_watch_id(Helpers::hextoint(arguments[2].c_str()));
+                        }
+                    }
                 }
-                emsesp::EMSESP::trace_watch_id(watch_id);
             }
+
+            // print out logging settings
             shell.printfln(F_(log_level_fmt), uuid::log::format_level_uppercase(shell.log_level()));
+            watch_id = emsesp::EMSESP::trace_watch_id();
+            if (watch_id == LOG_TRACE_WATCH_NONE) {
+                shell.printfln(F("Tracing all telegrams"));
+            } else {
+                shell.printfln(F("Tracing only telegrams that match a device ID or telegram type of 0x%02X"), watch_id);
+            }
+            shell.printfln(F_(trace_raw_fmt), emsesp::EMSESP::trace_raw() ? uuid::read_flash_string(F_(on)).c_str() : uuid::read_flash_string(F_(off)).c_str());
         },
         [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments __attribute__((unused))) -> std::vector<std::string> {
             return uuid::log::levels_lowercase();
@@ -259,7 +279,7 @@ void Console::load_standard_commands(unsigned int context) {
                                        flash_string_vector{F_(exit)},
                                        [=](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
                                            // delete MAIN console stuff first to save memory
-                                           EMSESPShell::commands->remove_context_commands(context); 
+                                           EMSESPShell::commands->remove_context_commands(context);
                                            shell.exit_context();
                                        });
 
@@ -384,6 +404,8 @@ EMSESPStreamConsole::~EMSESPStreamConsole() {
 #endif
         ptys_[pty_] = false;
         ptys_.shrink_to_fit();
+
+        EMSESPShell::commands->remove_all_commands();
     }
 }
 
@@ -414,7 +436,7 @@ void Console::start() {
 // note, this must be started after the network/wifi for ESP32 otherwise it'll crash
 #ifndef EMSESP_STANDALONE
     telnet_.start();
-    telnet_.default_write_timeout(1000); // in ms, socket timeout 1 second
+    // telnet_.default_write_timeout(1000); // in ms, socket timeout 1 second
 #endif
 }
 

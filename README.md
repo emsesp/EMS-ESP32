@@ -41,7 +41,7 @@ Note: Version 2.0 is not backward compatible with v1.0. The File system structur
 common commands available in all contexts:
   exit
   help
-  log [level] [trace ID]
+  log [level] [raw] [trace ID]
   su
 
 (top level)
@@ -124,9 +124,9 @@ thermostat
 ### **Known issues, bugs and improvements currently working on**
 
 ```
-TODO when doing show, should we sort the ems devices?
+TODO ESP32 - when saving SPIFFS the UART stop and restart() functions need to flush queue to avoid miss fires
+TODO network issues with ESP8266 - can take a while to get an IP address. DNS issue?
 TODO figure out why sometimes telnet on ESP32 (and sometimes ESP8266) has slow response times. After a manual reset it seems to fix itself. Perhaps the telnet service needs to start after the wifi is up & running.
-TODO Get the ESP32 UART code working.
 TODO sometimes with tx_mode 0 there are a few CRC errors due to collision when waiting for a BRK signal.
 TODO console auto-complete with 'set' command in the system context is not showing all commands, only the hostname.
 ```
@@ -152,4 +152,6 @@ TODO See if it's easier to use timers instead of millis() timers, using https://
 ```
 TODO merge in the web code which has the Captive AP and better wifi reconnect logic. Use IPV6 and NTP from lwip2
 TODO decide if I want to port over the shower one-shot cold water logic. Don't think its used.
+TODO when doing show in telnet, should we sort the ems devices?
+
 ```

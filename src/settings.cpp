@@ -139,10 +139,10 @@ Settings::Settings() {
         if (EMSESP_FS.begin(true)) {
 #endif
 #endif
-            logger_.info(F("Mounted filesystem"));
+            LOG_INFO(F("Mounted filesystem"));
             mounted_ = true;
         } else {
-            logger_.alert(F("Unable to mount filesystem"));
+            LOG_ERROR(F("Unable to mount filesystem"));
             unavailable_ = true;
         }
     }
@@ -154,7 +154,7 @@ Settings::Settings() {
     }
 
     if (!loaded_) {
-        logger_.err(F("Failed to load settings. Using defaults"));
+        LOG_ERROR(F("Failed to load settings. Using defaults"));
         read_settings(ArduinoJson::StaticJsonDocument<0>());
         loaded_ = true;
     }
@@ -169,7 +169,7 @@ void Settings::commit() {
 
         EMSuart::stop(); // temporary suspend UART because is can cause interference on the UART
 
-        logger_.debug(F("Saving settings"));
+        LOG_DEBUG(F("Saving settings"));
         if (write_settings(filename)) {
             if (read_settings(filename, false)) {
                 write_settings(backup_filename);
@@ -190,21 +190,21 @@ bool Settings::read_settings(const std::string & filename, bool load) {
         auto error = ArduinoJson::deserializeMsgPack(doc, file);
 
         if (error) {
-            logger_.err(F("Failed to parse settings file %s: %s"), filename.c_str(), error.c_str());
+            LOG_ERROR(F("Failed to parse settings file %s: %s"), filename.c_str(), error.c_str());
             return false;
         } else {
             if (load) {
-                logger_.info(F("Loading settings from file %s"), filename.c_str());
+                LOG_INFO(F("Loading settings from file %s"), filename.c_str());
                 read_settings(doc);
             }
             return true;
         }
     } else {
-        logger_.err(F("Settings file %s does not exist"), filename.c_str());
+        LOG_ERROR(F("Settings file %s does not exist"), filename.c_str());
         return false;
     }
 #else
-    logger_.info(F("Loading settings from file %s (%d)"), filename.c_str(), load);
+    LOG_INFO(F("Loading settings from file %s (%d)"), filename.c_str(), load);
     return false;
 #endif
 }
@@ -221,17 +221,17 @@ bool Settings::write_settings(const std::string & filename) {
         ArduinoJson::serializeMsgPack(doc, file);
 
         if (file.getWriteError()) {
-            logger_.alert(F("Failed to write settings file %s: %u"), filename.c_str(), file.getWriteError());
+            LOG_ERROR(F("Failed to write settings file %s: %u"), filename.c_str(), file.getWriteError());
             return false;
         } else {
             return true;
         }
     } else {
-        logger_.alert(F("Unable to open settings file %s for writing"), filename.c_str());
+        LOG_ERROR(F("Unable to open settings file %s for writing"), filename.c_str());
         return false;
     }
 #else
-    logger_.debug(F("Write settings file %s"), filename.c_str());
+    LOG_DEBUG(F("Write settings file %s"), filename.c_str());
     return false;
 #endif
 }

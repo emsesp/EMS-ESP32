@@ -36,7 +36,8 @@ void Shower::loop() {
         return;
     }
 
-    uint32_t time_now = millis();
+    uint32_t time_now = uuid::get_uptime();
+
     // if already in cold mode, ignore all this logic until we're out of the cold blast
     if (!doing_cold_shot_) {
         // is the hot water running?
@@ -55,7 +56,7 @@ void Shower::loop() {
                 if (!shower_on_ && (time_now - timer_start_) > SHOWER_MIN_DURATION) {
                     shower_on_ = true;
                     Mqtt::publish("shower_active", (bool)true);
-                    DEBUG_LOG(F("[Shower] hot water still running, starting shower timer"));
+                    LOG_DEBUG(F("[Shower] hot water still running, starting shower timer"));
                 }
                 // check if the shower has been on too long
                 else if ((((time_now - timer_start_) > SHOWER_MAX_DURATION) && !doing_cold_shot_) && shower_alert_) {
@@ -76,7 +77,7 @@ void Shower::loop() {
                     duration_ = (timer_pause_ - timer_start_ - SHOWER_OFFSET_TIME);
                     if (duration_ > SHOWER_MIN_DURATION) {
                         Mqtt::publish("shower_active", (bool)false);
-                        DEBUG_LOG(F("[Shower] finished with duration %d"), duration_);
+                        LOG_DEBUG(F("[Shower] finished with duration %d"), duration_);
                         publish_values();
                     }
                 }
@@ -94,7 +95,7 @@ void Shower::loop() {
 // turn back on the hot water for the shower
 void Shower::shower_alert_stop() {
     if (doing_cold_shot_) {
-        DEBUG_LOG(F("Shower Alert stopped"));
+        LOG_DEBUG(F("Shower Alert stopped"));
         // Boiler::set_tapwarmwater_activated(true);
         doing_cold_shot_ = false;
         // showerColdShotStopTimer.detach(); // disable the timer
@@ -104,7 +105,7 @@ void Shower::shower_alert_stop() {
 // turn off hot water to send a shot of cold
 void Shower::shower_alert_start() {
     if (shower_alert_) {
-        DEBUG_LOG(F("Shower Alert started!"));
+        LOG_DEBUG(F("Shower Alert started!"));
         // Boiler::set_tapwarmwater_activated(false);
         doing_cold_shot_ = true;
         // start the timer for n seconds which will reset the water back to hot

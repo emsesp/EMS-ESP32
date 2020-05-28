@@ -60,7 +60,7 @@ class System {
 
     static void restart(bool safe_mode);
     static void restart() {
-        restart(false); // no safe mode
+        restart(false); // default, don't boot into safe mode
     }
 
     static void show_mem(const char * text);
@@ -74,9 +74,9 @@ class System {
     static uuid::syslog::SyslogService syslog_;
 #endif
 
-    static constexpr uint32_t SYSTEM_CHECK_FREQUENCY = 5000; // check every 5 seconds
-    static constexpr uint32_t LED_WARNING_BLINK      = 1000; // pulse to show no connection
-    static constexpr uint32_t LED_WARNING_BLINK_FAST = 100;  // flash quickly for boot up sequence or safe-mode
+    static constexpr uint32_t SYSTEM_CHECK_FREQUENCY = 10000; // check every 10 seconds
+    static constexpr uint32_t LED_WARNING_BLINK      = 1000;  // pulse to show no connection, 1 sec
+    static constexpr uint32_t LED_WARNING_BLINK_FAST = 100;   // flash quickly for boot up sequence or safe-mode
 
 // internal LED
 #if defined(ESP8266)
@@ -108,6 +108,7 @@ class System {
     static int      reset_counter_;
 
     static EMSuart emsuart_;
+
 #if defined(ESP8266)
     static RTCVars state_;
 #endif

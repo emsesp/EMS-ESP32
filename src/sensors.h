@@ -46,6 +46,7 @@ class Sensors {
 
         uint64_t    id() const;
         std::string to_string() const;
+        std::string to_stringc() const;
 
         float temperature_c_ = NAN;
 
@@ -66,8 +67,7 @@ class Sensors {
 #if defined(ESP8266)
     static constexpr uint8_t SENSOR_GPIO = 14; // D5
 #elif defined(ESP32)
-//    static constexpr uint8_t SENSOR_GPIO = 14; // same position
-    static constexpr uint8_t SENSOR_GPIO = 18; // for Wemos D1 32
+    static constexpr uint8_t SENSOR_GPIO = 18; // Wemos D1-32 for compatibility D5
 #endif
 
     enum class State { IDLE, READING, SCANNING };
@@ -101,8 +101,8 @@ class Sensors {
     bool  temperature_convert_complete();
     float get_temperature_c(const uint8_t addr[]);
 
-    uint32_t            last_activity_ = millis();
-    uint32_t            last_publish_  = millis();
+    uint32_t            last_activity_ = uuid::get_uptime();
+    uint32_t            last_publish_  = uuid::get_uptime();
     State               state_         = State::IDLE;
     std::vector<Device> found_;
     std::vector<Device> devices_;

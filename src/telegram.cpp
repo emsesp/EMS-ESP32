@@ -200,9 +200,10 @@ void RxService::flush_rx_queue() {
     rx_telegram_id_ = 0;
 }
 
-// start and initialize the Rx incoming buffer. Not currently used.
+// start and initialize the Rx incoming buffer
 void RxService::start() {
-    // DEBUG_LOG(F("RxStart"));
+    // LOG_DEBUG(F("RxStart"));
+    // function not currently used
 }
 
 // Rx loop, run as many times as you can
@@ -210,11 +211,10 @@ void RxService::start() {
 void RxService::loop() {
 #ifndef EMSESP_STANDALONE
     // give rx some breathing space
-    uint32_t time_now = millis();
-    if ((time_now - last_rx_check_) < RX_LOOP_WAIT) {
+    if ((uuid::get_uptime() - last_rx_check_) < RX_LOOP_WAIT) {
         return;
     }
-    last_rx_check_ = time_now;
+    last_rx_check_ = uuid::get_uptime();
 #endif
 
     while (!rx_telegrams_.empty()) {
@@ -235,12 +235,13 @@ void RxService::loop() {
 
 // add a new rx telegram object
 // data is the whole telegram, assuming last byte holds the CRC
+// length includes the CRC
 // for EMS+ the type_id has the value + 256. We look for these type of telegrams with F7, F9 and FF in 3rd byte
 void RxService::add(uint8_t * data, uint8_t length) {
     // validate the CRC
     uint8_t crc = calculate_crc(data, length - 1);
     if (data[length - 1] != crc) {
-        TRACE_LOG(F("Rx: %s %s(BAD, CRC %02X != %02X)%s"), Helpers::data_to_hex(data, length).c_str(), COLOR_RED, data[length - 1], crc, COLOR_RESET);
+        LOG_TRACE(F("Rx: %s %s(BAD, CRC %02X != %02X)%s"), Helpers::data_to_hex(data, length).c_str(), COLOR_RED, data[length - 1], crc, COLOR_RESET);
         increment_telegram_error_count();
         return;
     }
@@ -253,9 +254,9 @@ void RxService::add(uint8_t * data, uint8_t length) {
         ems_mask(data[0]);
     }
 
-    // if we're in read only mode, just dump out to console
-    if (EMSESP::ems_read_only()) {
-        TRACE_LOG(F("Rx: %s"), Helpers::data_to_hex(data, length).c_str());
+    // if we're in "trace" and "raw" print out actual telegram
+    if (logger_.enabled(Level::TRACE) && EMSESP::trace_raw()) {
+        LOG_TRACE(F("Rx: %s"), Helpers::data_to_hex(data, length).c_str());
     }
 
     // src, dest and offset are always in fixed positions
@@ -263,7 +264,7 @@ void RxService::add(uint8_t * data, uint8_t length) {
     uint8_t dest   = data[1] & 0x7F; // strip MSB, don't care if its read or write for processing
     uint8_t offset = data[3];        // offset is always 4th byte
 
-    uint16_t  type_id; // this could be 2 bytes for ems+
+    uint16_t  type_id = 0; // this could be 2 bytes for ems+
     uint8_t * message_data;
     uint8_t   message_length;
 
@@ -274,15 +275,21 @@ void RxService::add(uint8_t * data, uint8_t length) {
         message_data   = data + 4;   // message block starts at 5th byte
         message_length = length - 5; // remove 4 bytes header plus CRC
     } else {
-        // EMS 2.0
+        // EMS 2.0 / EMS+
         if (data[2] == 0xFF) {
-            type_id      = (data[4] << 8) + data[5] + 256;
-            message_data = data + 6; // message block starts at 7th position
-
+            // check for empty data
+            // special broadcast telegrams on ems+ have no data values, some even don't have a type ID
             if (length <= 7) {
-                message_length = 0; // special broadcast on ems+ have no data values
+                message_data   = data; // bogus pointer, will not be used
+                message_length = 0;
+                if (length <= 5) {
+                    type_id = 0; // has also an empty type_id
+                } else {
+                    type_id = (data[4] << 8) + data[5] + 256;
+                }
             } else {
                 message_length = length - 7; // remove 6 byte header plus CRC
+                message_data   = data + 6;   // message block starts at 7th position
             }
         } else {
             // its F9 or F7
@@ -297,20 +304,28 @@ void RxService::add(uint8_t * data, uint8_t length) {
         }
     }
 
+    // if we don't have a type_id, exit
+    if (type_id == 0) {
+        return;
+    }
+
     // create the telegram
     auto telegram = std::make_shared<Telegram>(Telegram::Operation::RX, src, dest, type_id, offset, message_data, message_length);
 
     // check if queue is full
-    if (rx_telegrams_.size() >= maximum_rx_telegrams_) {
+    if (rx_telegrams_.size() >= MAX_RX_TELEGRAMS) {
         // rx_telegrams_overflow_ = true;
         rx_telegrams_.pop_front();
     }
 
-    // add to queue, with timestamp
-    DEBUG_LOG(F("New Rx [#%d] telegram added, length %d"), rx_telegram_id_, message_length);
+    // add to queue
+    LOG_DEBUG(F("New Rx [#%d] telegram, length %d"), rx_telegram_id_, message_length);
     rx_telegrams_.emplace_back(rx_telegram_id_++, std::move(telegram));
 }
 
+//
+// Tx CODE here
+//
 
 TxService::QueuedTxTelegram::QueuedTxTelegram(uint16_t id, std::shared_ptr<Telegram> && telegram)
     : id_(id)
@@ -325,8 +340,6 @@ void TxService::flush_tx_queue() {
 
 // start and initialize Tx
 void TxService::start() {
-    // DEBUG_LOG(F("TxStart()"));
-
     // grab the bus ID
     Settings settings;
     ems_bus_id(settings.ems_bus_id());
@@ -334,6 +347,19 @@ void TxService::start() {
     // send first Tx request to bus master (boiler) for its registered devices
     // this will be added to the queue and sent during the first tx loop()
     read_request(EMSdevice::EMS_TYPE_UBADevices, EMSdevice::EMS_DEVICE_ID_BOILER);
+}
+
+// Tx loop
+// here we check if the Tx is not full and report an error
+void TxService::loop() {
+#ifndef EMSESP_STANDALONE
+    if ((uuid::get_uptime() - last_tx_check_) > TX_LOOP_WAIT) {
+        last_tx_check_ = uuid::get_uptime();
+        if ((tx_telegrams_.size() >= MAX_TX_TELEGRAMS - 1) && (EMSbus::bus_connected())) {
+            LOG_ERROR(F("Tx buffer full. Looks like Tx is not working?"));
+        }
+    }
+#endif
 }
 
 // sends a 1 byte poll which is our own device ID
@@ -352,9 +378,8 @@ void TxService::send() {
 
     // if there's nothing in the queue to send
     // optionally, send back a poll and quit
-    // for now I've disabled the poll
     if (tx_telegrams_.empty()) {
-        // send_poll();
+        // send_poll(); // TODO commented out poll for now. should add back when stable.
         return;
     }
 
@@ -431,11 +456,12 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
 
     length++; // add one since we want to now include the CRC
 
-    DEBUG_LOG(F("Sending %s Tx [#%d], telegram: %s"),
+    LOG_DEBUG(F("Sending %s Tx [#%d], telegram: %s"),
               (telegram->operation == Telegram::Operation::TX_WRITE) ? F("write") : F("read"),
               tx_telegram.id_,
               telegram->to_string(telegram_raw, length).c_str());
 
+    // if we're watching an ID, then always show
     if ((logger_.enabled(Level::TRACE))
         && ((telegram->src == EMSESP::trace_watch_id()) || (telegram->dest == EMSESP::trace_watch_id()) || (telegram->type_id == EMSESP::trace_watch_id()))) {
         logger_.trace(F("Sending %s Tx [#%d], telegram: %s"),
@@ -446,9 +472,9 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
 
     // send the telegram to the UART Tx
     EMSUART_STATUS status = EMSuart::transmit(telegram_raw, length);
-
+    LOG_TRACE(F("Tx: %s"), Helpers::data_to_hex(telegram_raw, length).c_str());
     if (status != EMS_TX_STATUS_OK) {
-        logger_.err(F("Failed to transmit Tx via UART. Error: %s"), status == EMS_TX_WTD_TIMEOUT ? F("Timeout") : F("BRK"));
+        LOG_ERROR(F("Failed to transmit Tx via UART. Error: %s"), status == EMS_TX_WTD_TIMEOUT ? F("Timeout") : F("BRK"));
     }
 
     tx_waiting(true); // tx now in a wait state
@@ -465,12 +491,13 @@ void TxService::send_telegram(const uint8_t * data, const uint8_t length) {
     }
     telegram_raw[length] = calculate_crc(telegram_raw, length); // apppend CRC
 
-    DEBUG_LOG(F("Sending Raw telegram: %s (length=%d)"), Helpers::data_to_hex(telegram_raw, length).c_str(), length);
+    LOG_DEBUG(F("Sending Raw telegram: %s (length=%d)"), Helpers::data_to_hex(telegram_raw, length).c_str(), length);
 
     // send the telegram to the UART Tx
     EMSUART_STATUS status = EMSuart::transmit(telegram_raw, length);
+    LOG_TRACE(F("Tx: %s"), Helpers::data_to_hex(telegram_raw, length).c_str());
     if (status != EMS_TX_STATUS_OK) {
-        logger_.err(F("Failed to transmit Tx via UART. Error: %s"), status == EMS_TX_WTD_TIMEOUT ? F("Timeout") : F("BRK"));
+        LOG_ERROR(F("Failed to transmit Tx via UART. Error: %s"), status == EMS_TX_WTD_TIMEOUT ? F("Timeout") : F("BRK"));
     }
 }
 
@@ -478,10 +505,10 @@ void TxService::send_telegram(const uint8_t * data, const uint8_t length) {
 // given some details like the destination, type, offset and message block
 void TxService::add(const uint8_t operation, const uint8_t dest, const uint16_t type_id, const uint8_t offset, uint8_t * message_data, const uint8_t message_length) {
     auto telegram = std::make_shared<Telegram>(operation, ems_bus_id(), dest, type_id, offset, message_data, message_length);
-    DEBUG_LOG(F("New Tx [#%d] telegram added, length %d"), tx_telegram_id_, message_length);
+    LOG_DEBUG(F("New Tx [#%d] telegram, length %d"), tx_telegram_id_, message_length);
 
     // if the queue is full, make room but removing the last one
-    if (tx_telegrams_.size() >= maximum_tx_telegrams_) {
+    if (tx_telegrams_.size() >= MAX_TX_TELEGRAMS) {
         tx_telegrams_.pop_front();
     }
 
@@ -493,7 +520,7 @@ void TxService::add(const uint8_t operation, const uint8_t dest, const uint16_t 
 void TxService::add(uint8_t * data, const uint8_t length) {
     uint8_t message_length = length - 4;
     if (!message_length) {
-        logger_.err(F("Bad Tx telegram, too short (message length is %d)"), message_length);
+        LOG_ERROR(F("Bad Tx telegram, too short (message length is %d)"), message_length);
         return;
     }
 
@@ -507,17 +534,17 @@ void TxService::add(uint8_t * data, const uint8_t length) {
     auto telegram = std::make_shared<Telegram>(Telegram::Operation::TX_RAW, src, dest, type_id, offset, message_data, message_length);
 
     // if the queue is full, make room but removing the last one
-    if (tx_telegrams_.size() >= maximum_tx_telegrams_) {
+    if (tx_telegrams_.size() >= MAX_TX_TELEGRAMS) {
         tx_telegrams_.pop_front();
     }
 
-    DEBUG_LOG(F("New Tx [#%d] telegram added, length %d"), tx_telegram_id_, message_length);
+    LOG_DEBUG(F("New Tx [#%d] telegram, length %d"), tx_telegram_id_, message_length);
     tx_telegrams_.emplace_back(tx_telegram_id_++, std::move(telegram));
 }
 
 // send a Tx telegram to request data from an EMS device
 void TxService::read_request(const uint16_t type_id, const uint8_t dest, const uint8_t offset) {
-    DEBUG_LOG(F("Tx read request to device 0x%02X for type ID 0x%02X"), dest, type_id);
+    LOG_DEBUG(F("Tx read request to device 0x%02X for type ID 0x%02X"), dest, type_id);
 
     uint8_t message_data[1] = {EMS_MAX_TELEGRAM_LENGTH}; // request all data, 32 bytes
     add(Telegram::Operation::TX_READ, dest, type_id, offset, message_data, 1);
@@ -582,7 +609,7 @@ uint8_t TxService::retry_tx() {
 // and incoming Rx dest must be us (our ems_bus_id)
 // for both src and dest we strip the MSB 8th bit
 bool TxService::is_last_tx(const uint8_t src, const uint8_t dest) const {
-    // DEBUG_LOG(F("Comparing %02X=%02X , %02X,%02X"), (telegram_last_[1] & 0x7F), (src & 0x7F), (dest & 0x7F), ems_bus_id());
+    // LOG_DEBUG(F("Comparing %02X=%02X , %02X,%02X"), (telegram_last_[1] & 0x7F), (src & 0x7F), (dest & 0x7F), ems_bus_id());
     return (((telegram_last_[1] & 0x7F) == (src & 0x7F)) && ((dest & 0x7F) == ems_bus_id()));
 }
 
@@ -590,7 +617,7 @@ bool TxService::is_last_tx(const uint8_t src, const uint8_t dest) const {
 void TxService::post_send_query() {
     if (telegram_last_post_send_query_) {
         uint8_t dest = (telegram_last_[1] & 0x7F);
-        DEBUG_LOG(F("Sending post validate read, type ID 0x%02X to dest 0x%02X"), telegram_last_post_send_query_, dest);
+        LOG_DEBUG(F("Sending post validate read, type ID 0x%02X to dest 0x%02X"), telegram_last_post_send_query_, dest);
 
         read_request(telegram_last_post_send_query_, dest, 0); // no offset
     }

@@ -7,8 +7,8 @@ void EMSESP::run_test(uuid::console::Shell & shell, const std::string & command)
         emsdevices.push_back(EMSFactory::add(EMSdevice::DeviceType::BOILER, EMSdevice::EMS_DEVICE_ID_BOILER, 0, "", "My Boiler", 0, 0));
 
         // A fake response - UBADevices(0x07)
-        uint8_t t0[] = {0x08, 0x00, 0x07, 0x00, 0x0B, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x47};
-        rxservice_.add(t0, sizeof(t0));
+        uint8_t t[] = {0x08, 0x00, 0x07, 0x00, 0x0B, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x47};
+        rxservice_.add(t, sizeof(t));
 
         return;
     }
@@ -28,8 +28,8 @@ void EMSESP::run_test(uuid::console::Shell & shell, const std::string & command)
         rxservice_.loop();
 
         // simulate getting version information back from an unknown device
-        uint8_t u1[] = {0x09, 0x0B, 0x02, 0x00, 0x59, 0x01, 0x02, 0x56};
-        rxservice_.add(u1, sizeof(u1));
+        uint8_t t[] = {0x09, 0x0B, 0x02, 0x00, 0x59, 0x01, 0x02, 0x56};
+        rxservice_.add(t, sizeof(t));
         rxservice_.loop();
 
         return;
@@ -63,9 +63,9 @@ void EMSESP::run_test(uuid::console::Shell & shell, const std::string & command)
 
         // SM100Monitor - type 0x0362 EMS+ - for SM100 and SM200
         // B0 0B FF 00 02 62 00 44 02 7A 80 00 80 00 80 00 80 00 80 00 80 00 00 7C 80 00 80 00 80 00 80
-        uint8_t s1[] = {0xB0, 0x0B, 0xFF, 00, 0x02, 0x62, 00, 0x44, 0x02, 0x7A, 0x80, 00, 0x80, 0x00, 0x80, 00,
-                        0x80, 00,   0x80, 00, 0x80, 00,   00, 0x7C, 0x80, 00,   0x80, 00, 0x80, 00,   0x80, 0x89};
-        rxservice_.add(s1, sizeof(s1));
+        uint8_t t[] = {0xB0, 0x0B, 0xFF, 00, 0x02, 0x62, 00, 0x44, 0x02, 0x7A, 0x80, 00, 0x80, 0x00, 0x80, 00,
+                       0x80, 00,   0x80, 00, 0x80, 00,   00, 0x7C, 0x80, 00,   0x80, 00, 0x80, 00,   0x80, 0x89};
+        rxservice_.add(t, sizeof(t));
         rxservice_.loop();
 
         shell.loop_all();
@@ -84,9 +84,9 @@ void EMSESP::run_test(uuid::console::Shell & shell, const std::string & command)
 
         // RCPLUSStatusMessage_HC1(0x01A5)
         // 98 00 FF 00 01 A5 00 CF 21 2E 00 00 2E 24 03 25 03 03 01 03 25 00 C8 00 00 11 01 03
-        uint8_t c1[] = {0x98, 0x00, 0xFF, 0x00, 0x01, 0xA5, 0x00, 0xCF, 0x21, 0x2E, 0x00, 0x00, 0x2E, 0x24, 0x03,
-                        0x25, 0x03, 0x03, 0x01, 0x03, 0x25, 0x00, 0xC8, 0x00, 0x00, 0x11, 0x01, 0x03, 0x13};
-        rxservice_.add(c1, sizeof(c1));
+        uint8_t t[] = {0x98, 0x00, 0xFF, 0x00, 0x01, 0xA5, 0x00, 0xCF, 0x21, 0x2E, 0x00, 0x00, 0x2E, 0x24, 0x03,
+                       0x25, 0x03, 0x03, 0x01, 0x03, 0x25, 0x00, 0xC8, 0x00, 0x00, 0x11, 0x01, 0x03, 0x13};
+        rxservice_.add(t, sizeof(t));
         rxservice_.loop();
 
         shell.loop_all();
@@ -231,7 +231,7 @@ void EMSESP::run_test(uuid::console::Shell & shell, const std::string & command)
 
         // simulate sending a read request
         // uint8_t t16[] = {0x44, 0x45, 0x46, 0x47}; // Me -> Thermostat, (0x91), telegram: 0B 17 91 05 44 45 46 47 (#data=4)
-        //txservice_.add(Telegram::Operation::TX_RAW, 0x17, 0x91, 0x05, t16, sizeof(t16));
+        // txservice_.add(Telegram::Operation::TX_RAW, 0x17, 0x91, 0x05, t16, sizeof(t16));
         send_read_request(0x91, 0x17);
         // txservice_.show_tx_queue();
 
@@ -240,19 +240,19 @@ void EMSESP::run_test(uuid::console::Shell & shell, const std::string & command)
         incoming_telegram(poll, 1);
 
         // incoming Rx
-        uint8_t t17[] = {0x17, 0x08, 0x1A, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3A};
-        incoming_telegram(t17, sizeof(t17));
+        uint8_t t1[] = {0x17, 0x08, 0x1A, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3A};
+        incoming_telegram(t1, sizeof(t1));
         rxservice_.loop();
 
         // Simulate adding a Poll - should send retry
         incoming_telegram(poll, 1);
 
         show_emsbus(shell);
-        uint8_t t18[] = {0x21, 0x22};
-        send_write_request(0x91, 0x17, 0x00, t18, sizeof(t18), 0);
+        uint8_t t2[] = {0x21, 0x22};
+        send_write_request(0x91, 0x17, 0x00, t2, sizeof(t2), 0);
         show_emsbus(shell);
 
-        incoming_telegram(t17, sizeof(t17));
+        incoming_telegram(t1, sizeof(t1));
 
         txservice_.flush_tx_queue();
 
@@ -324,9 +324,17 @@ void EMSESP::run_test(uuid::console::Shell & shell, const std::string & command)
 
     if (command == "rx2") {
         // incoming Rx
-        uint8_t t71[] = {0x1B, 0x5B, 0xFD, 0x2D, 0x9E, 0x3A, 0xB6, 0xE5, 0x02, 0x20, 0x33, 0x30, 0x32, 0x3A, 0x20, 0x5B, 0x73,
-                         0xFF, 0xFF, 0xCB, 0xDF, 0xB7, 0xA7, 0xB5, 0x67, 0x77, 0x77, 0xE4, 0xFF, 0xFD, 0x77, 0xFF, 0xD1};
-        incoming_telegram(t71, sizeof(t71));
+        uint8_t t[] = {0x1B, 0x5B, 0xFD, 0x2D, 0x9E, 0x3A, 0xB6, 0xE5, 0x02, 0x20, 0x33, 0x30, 0x32, 0x3A, 0x20, 0x5B, 0x73,
+                       0xFF, 0xFF, 0xCB, 0xDF, 0xB7, 0xA7, 0xB5, 0x67, 0x77, 0x77, 0xE4, 0xFF, 0xFD, 0x77, 0xFF, 0xD1};
+        incoming_telegram(t, sizeof(t));
+        return;
+    }
+
+    // https://github.com/proddy/EMS-ESP/issues/380#issuecomment-633663007
+    if (command == "rx3") {
+        // incoming Rx
+        uint8_t t[] = {0x21, 0x0B, 0xFF, 0x00, 0xDA};
+        incoming_telegram(t, sizeof(t));
         return;
     }
 
@@ -341,8 +349,8 @@ void EMSESP::run_test(uuid::console::Shell & shell, const std::string & command)
 
     // testing the UART tx command, without a queue
     if (command == "tx2") {
-        uint8_t tx[] = {0x0B, 0x88, 0x18, 0x00, 0x20, 0xD4}; // including CRC
-        EMSuart::transmit(tx, sizeof(tx));
+        uint8_t t[] = {0x0B, 0x88, 0x18, 0x00, 0x20, 0xD4}; // including CRC
+        EMSuart::transmit(t, sizeof(t));
         return;
     }
 
