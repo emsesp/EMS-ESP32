@@ -700,6 +700,9 @@ void EMSESP::console_commands(Shell & shell, unsigned int context) {
                 settings.ems_tx_mode(tx_mode);
                 settings.commit();
                 shell.printfln(F_(tx_mode_fmt), settings.ems_tx_mode());
+                // reset the UART
+                EMSuart::stop();
+                EMSuart::start(tx_mode);
             } else {
                 shell.println(F("Must be 1 for EMS generic, 2 for EMS+, 3 for HT3, 4 for experimental"));
             }

@@ -105,8 +105,6 @@ class System {
     static uint32_t heap_start_;
     static int      reset_counter_;
 
-    static EMSuart emsuart_;
-
 #if defined(ESP8266)
     static RTCVars state_;
 #endif
