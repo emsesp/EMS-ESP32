@@ -87,7 +87,6 @@ void System::mqtt_commands(const char * message) {
 // restart EMS-ESP
 // mode = safe mode. true to enable on next boot
 void System::restart(bool mode) {
-    EMSuart::stop();
 
     // check for safe mode
     if (mode) {

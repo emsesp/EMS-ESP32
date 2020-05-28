@@ -188,6 +188,7 @@ void ICACHE_FLASH_ATTR EMSuart::stop() {
  */
 void ICACHE_FLASH_ATTR EMSuart::restart() {
     ETS_UART_INTR_ENABLE();
+    // emsuart_flush_fifos();
 }
 
 /*

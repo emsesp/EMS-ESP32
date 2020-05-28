@@ -28,18 +28,22 @@ Mixing::Mixing(uint8_t device_type, uint8_t device_id, uint8_t product_id, const
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
     LOG_DEBUG(F("Registering new Mixing module with device ID 0x%02X"), device_id);
 
-    // telegram handlers 0x20 - 0x27 for HC
-    register_telegram_type(0x02D7, F("MMPLUSStatusMessage_HC"), true, std::bind(&Mixing::process_MMPLUSStatusMessage_HC, this, _1));
-    register_telegram_type(0x02D8, F("MMPLUSStatusMessage_HC"), true, std::bind(&Mixing::process_MMPLUSStatusMessage_HC, this, _1));
-    register_telegram_type(0x02D9, F("MMPLUSStatusMessage_HC"), true, std::bind(&Mixing::process_MMPLUSStatusMessage_HC, this, _1));
-    register_telegram_type(0x02DA, F("MMPLUSStatusMessage_HC"), true, std::bind(&Mixing::process_MMPLUSStatusMessage_HC, this, _1));
-
-    // telegram handlers for warm water/DHW 0x28, 0x29
-    register_telegram_type(0x0331, F("MMPLUSStatusMessage_WWC"), true, std::bind(&Mixing::process_MMPLUSStatusMessage_WWC, this, _1));
-    register_telegram_type(0x0332, F("MMPLUSStatusMessage_WWC"), true, std::bind(&Mixing::process_MMPLUSStatusMessage_WWC, this, _1));
+    if (flags == EMSdevice::EMS_DEVICE_FLAG_MMPLUS) {
+        if (device_id < 0x28) {
+            // telegram handlers 0x20 - 0x27 for HC
+            register_telegram_type(device_id - 0x20 + 0x02D7, F("MMPLUSStatusMessage_HC"), true, std::bind(&Mixing::process_MMPLUSStatusMessage_HC, this, _1));
+        } else {
+            // telegram handlers for warm water/DHW 0x28, 0x29
+            register_telegram_type(device_id - 0x28 + 0x0331, F("MMPLUSStatusMessage_WWC"), true, std::bind(&Mixing::process_MMPLUSStatusMessage_WWC, this, _1));
+        }
+    }
 
     // EMS 1.0
-    register_telegram_type(0x00AB, F("MMStatusMessage"), true, std::bind(&Mixing::process_MMStatusMessage, this, _1));
+    if (flags == EMSdevice::EMS_DEVICE_FLAG_MM10) {
+        register_telegram_type(0x00AA, F("MMConfigMessage"), false, nullptr);
+        register_telegram_type(0x00AB, F("MMStatusMessage"), true, std::bind(&Mixing::process_MMStatusMessage, this, _1));
+        register_telegram_type(0x00AC, F("MMSetMessage"), false, nullptr);
+    }
 
     // MQTT callbacks
     // register_mqtt_topic("cmd", std::bind(&Mixing::cmd, this, _1));
@@ -47,6 +51,15 @@ Mixing::Mixing(uint8_t device_type, uint8_t device_id, uint8_t product_id, const
 
 // add context submenu
 void Mixing::add_context_menu() {
+}
+
+// check to see if values have been updated
+bool Mixing::updated_values() {
+    return false;
+}
+
+// add console commands
+void Mixing::console_commands() {
 }
 
 // display all values into the shell console
@@ -61,10 +74,10 @@ void Mixing::show_values(uuid::console::Shell & shell) {
 
     if (type_ == Type::WWC) {
         shell.printfln(F("  Warm Water Circuit #: %d"), hc_);
-
     } else {
         shell.printfln(F("  Heating Circuit #: %d"), hc_);
     }
+
     print_value(shell, 2, F("Current flow temperature"), F_(degrees), Helpers::render_value(buffer, flowTemp_, 10));
     print_value(shell, 2, F("Setpoint flow temperature"), F_(degrees), Helpers::render_value(buffer, flowSetTemp_, 1));
     print_value(shell, 2, F("Current pump modulation"), Helpers::render_value(buffer, pumpMod_, 1));
@@ -78,10 +91,10 @@ void Mixing::publish_values() {
 
     switch (type_) {
     case Type::HC:
-        doc["type"] = F("hc");
+        doc["type"] = "hc";
         break;
     case Type::WWC:
-        doc["type"] = F("wwc");
+        doc["type"] = "wwc";
         break;
     case Type::NONE:
     default:
@@ -115,15 +128,6 @@ void Mixing::publish_values() {
     Mqtt::publish(topic, doc);
 }
 
-// check to see if values have been updated
-bool Mixing::updated_values() {
-    return false;
-}
-
-// add console commands
-void Mixing::console_commands() {
-}
-
 //  heating circuits 0x02D7, 0x02D8 etc...
 void Mixing::process_MMPLUSStatusMessage_HC(std::shared_ptr<const Telegram> telegram) {
     type_ = Type::HC;
@@ -153,7 +157,7 @@ void Mixing::process_MMStatusMessage(std::shared_ptr<const Telegram> telegram) {
     // the heating circuit is determine by which device_id it is, 0x20 - 0x23
     // 0x21 is position 2. 0x20 is typically reserved for the WM10 switch module
     // see https://github.com/proddy/EMS-ESP/issues/270 and https://github.com/proddy/EMS-ESP/issues/386#issuecomment-629610918
-    hc_ = 0x22 - device_id();
+    hc_ = device_id() - 0x20 + 1;
     telegram->read_value(flowTemp_, 1); // is * 10
     telegram->read_value(pumpMod_, 3);
     telegram->read_value(flowSetTemp_, 0);

@@ -169,6 +169,17 @@ void EMSdevice::fetch_values() {
     }
 }
 
+// toggle on/off automatic fetch for a telegram id
+void EMSdevice::toggle_fetch(uint16_t telegram_id, bool toggle) {
+    LOG_DEBUG(F("Toggling fetch for device ID 0x%02X, telegram ID 0x%02X to %d"), device_id(), telegram_id, toggle);
+
+    for (auto & tf : telegram_functions_) {
+        if (tf.telegram_type_id_ == telegram_id) {
+            tf.fetch_ = toggle;
+        }
+    }
+}
+
 // list all the telegram type IDs for this device
 void EMSdevice::show_telegram_handlers(uuid::console::Shell & shell) {
     if (telegram_functions_.size() == 0) {
@@ -227,9 +238,17 @@ std::string EMSdevice::telegram_type_name(std::shared_ptr<const Telegram> telegr
 
 // take a telegram_type_id and call the matching handler
 // return true if match found
-bool EMSdevice::process_telegram(std::shared_ptr<const Telegram> telegram) {
+bool EMSdevice::handle_telegram(std::shared_ptr<const Telegram> telegram) {
     for (const auto & tf : telegram_functions_) {
         if (tf.telegram_type_id_ == telegram->type_id) {
+            // if the data block is empty, assume that this telegram is not recognized by the bus master
+            // so remove it from the automatic fetch list
+            if (telegram->message_length == 0) {
+                LOG_DEBUG(F("This telegram (%s) is not recognized by the EMS bus"), uuid::read_flash_string(tf.telegram_type_name_).c_str());
+                toggle_fetch(tf.telegram_type_id_, false);
+                return false;
+            }
+
             LOG_DEBUG(F("Processing %s..."), uuid::read_flash_string(tf.telegram_type_name_).c_str());
             tf.process_function_(telegram);
             return true;
