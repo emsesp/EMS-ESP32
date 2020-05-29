@@ -49,7 +49,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     LOG_DEBUG(F("Registering new Boiler with device ID 0x%02X"), device_id);
 
     // the telegram handlers...
-    register_telegram_type(0x18, F("UBAMonitorFast"), true, std::bind(&Boiler::process_UBAMonitorFast, this, _1));
+    register_telegram_type(0x18, F("UBAMonitorFast"), false, std::bind(&Boiler::process_UBAMonitorFast, this, _1));
     register_telegram_type(0x19, F("UBAMonitorSlow"), true, std::bind(&Boiler::process_UBAMonitorSlow, this, _1));
     register_telegram_type(0x34, F("UBAMonitorWW"), false, std::bind(&Boiler::process_UBAMonitorWW, this, _1));
     register_telegram_type(0x1C, F("UBAMaintenanceStatus"), false, std::bind(&Boiler::process_UBAMaintenanceStatus, this, _1));
@@ -61,12 +61,12 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     register_telegram_type(0x16, F("UBAParameters"), true, std::bind(&Boiler::process_UBAParameters, this, _1));
     register_telegram_type(0x1A, F("UBASetPoints"), false, std::bind(&Boiler::process_UBASetPoints, this, _1));
     register_telegram_type(0xD1, F("UBAOutdoorTemp"), false, std::bind(&Boiler::process_UBAOutdoorTemp, this, _1));
-    register_telegram_type(0xE4, F("UBAMonitorFastPlus"), true, std::bind(&Boiler::process_UBAMonitorFastPlus, this, _1));
-    register_telegram_type(0xE5, F("UBAMonitorSlowPlus"), true, std::bind(&Boiler::process_UBAMonitorSlowPlus, this, _1));
+    register_telegram_type(0xE4, F("UBAMonitorFastPlus"), false, std::bind(&Boiler::process_UBAMonitorFastPlus, this, _1));
+    register_telegram_type(0xE5, F("UBAMonitorSlowPlus"), false, std::bind(&Boiler::process_UBAMonitorSlowPlus, this, _1));
 
     register_telegram_type(0xE9, F("UBADHWStatus"), false, std::bind(&Boiler::process_UBADHWStatus, this, _1));
-    register_telegram_type(0xE3, F("HeatPumpMonitor1"), true, std::bind(&Boiler::process_HPMonitor1, this, _1));
-    register_telegram_type(0xE5, F("HeatPumpMonitor2"), true, std::bind(&Boiler::process_HPMonitor2, this, _1));
+    register_telegram_type(0xE3, F("HeatPumpMonitor1"), false, std::bind(&Boiler::process_HPMonitor1, this, _1));
+    register_telegram_type(0xE5, F("HeatPumpMonitor2"), false, std::bind(&Boiler::process_HPMonitor2, this, _1));
 
     // MQTT callbacks
     register_mqtt_topic("boiler_cmd", std::bind(&Boiler::boiler_cmd, this, _1));
@@ -190,13 +190,16 @@ void Boiler::publish_values() {
         doc["pumpMod"] = pumpMod_;
     }
     if (wWCircPump_ != EMS_VALUE_BOOL_NOTSET) {
-        doc["wWCircPump"] = wWCircPump_;
+        doc["wWCircPump"] = Helpers::render_value(s, wWCircPump_, EMS_VALUE_BOOL);
     }
     if (wWCircPumpType_ != EMS_VALUE_BOOL_NOTSET) {
-        doc["wWCiPuType"] = wWCircPumpType_;
+        doc["wWCiPuType"] = wWCircPumpType_ ? "valve" : "pump";
     }
     if (wWCircPumpMode_ != EMS_VALUE_UINT_NOTSET) {
         doc["wWCiPuMode"] = wWCircPumpMode_;
+    }
+    if (wWCirc_ != EMS_VALUE_BOOL_NOTSET) {
+        doc["wWCirc"] = Helpers::render_value(s, wWCirc_, EMS_VALUE_BOOL);
     }
     if (extTemp_ != EMS_VALUE_SHORT_NOTSET) {
         doc["outdoorTemp"] = (float)extTemp_ / 10;

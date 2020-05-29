@@ -232,18 +232,7 @@ std::string Sensors::Device::to_string() const {
                (unsigned int)(id_)&0xFF);
     return str;
 }
-std::string Sensors::Device::to_stringc() const {
-    std::string str(20, '\0');
-    snprintf_P(&str[0],
-               str.capacity() + 1,
-               PSTR("%02X%04X%04X%04X%02X"),
-               (unsigned int)(id_ >> 56) & 0xFF,
-               (unsigned int)(id_ >> 40) & 0xFFFF,
-               (unsigned int)(id_ >> 24) & 0xFFFF,
-               (unsigned int)(id_ >> 8) & 0xFFFF,
-               (unsigned int)(id_)&0xFF);
-    return str;
-}
+
 
 // send all dallas sensor values as a JSON package to MQTT
 // assumes there are devices
@@ -287,7 +276,7 @@ void Sensors::publish_values() {
     for (const auto & device : devices_) {
         if (mqtt_format_ == Settings::MQTT_format::MY) {
             char s[5];
-            doc[device.to_stringc()] = Helpers::render_value(s, device.temperature_c_, 2);
+            doc[device.to_string()] = Helpers::render_value(s, device.temperature_c_, 2);
         } else { 
             char sensorID[10]; // sensor{1-n}
             strlcpy(sensorID, "sensor", 10);

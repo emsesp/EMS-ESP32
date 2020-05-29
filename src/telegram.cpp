@@ -364,6 +364,7 @@ void TxService::loop() {
 
 // sends a 1 byte poll which is our own device ID
 void TxService::send_poll() {
+    //OG_TRACE(F("Ack %02X"),ems_bus_id() ^ ems_mask());
     EMSuart::send_poll(ems_bus_id() ^ ems_mask());
 }
 
@@ -472,7 +473,7 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
 
     // send the telegram to the UART Tx
     EMSUART_STATUS status = EMSuart::transmit(telegram_raw, length);
-    LOG_TRACE(F("Tx: %s"), Helpers::data_to_hex(telegram_raw, length).c_str());
+    //LOG_TRACE(F("Tx: %s"), Helpers::data_to_hex(telegram_raw, length).c_str());
     if (status != EMS_TX_STATUS_OK) {
         LOG_ERROR(F("Failed to transmit Tx via UART. Error: %s"), status == EMS_TX_WTD_TIMEOUT ? F("Timeout") : F("BRK"));
     }
@@ -495,7 +496,7 @@ void TxService::send_telegram(const uint8_t * data, const uint8_t length) {
 
     // send the telegram to the UART Tx
     EMSUART_STATUS status = EMSuart::transmit(telegram_raw, length);
-    LOG_TRACE(F("Tx: %s"), Helpers::data_to_hex(telegram_raw, length).c_str());
+    //LOG_TRACE(F("Tx: %s"), Helpers::data_to_hex(telegram_raw, length).c_str());
     if (status != EMS_TX_STATUS_OK) {
         LOG_ERROR(F("Failed to transmit Tx via UART. Error: %s"), status == EMS_TX_WTD_TIMEOUT ? F("Timeout") : F("BRK"));
     }

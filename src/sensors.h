@@ -46,7 +46,6 @@ class Sensors {
 
         uint64_t    id() const;
         std::string to_string() const;
-        std::string to_stringc() const;
 
         float temperature_c_ = NAN;
 

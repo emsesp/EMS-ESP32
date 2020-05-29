@@ -66,20 +66,20 @@ void Mixing::show_values(uuid::console::Shell & shell) {
 
     if (type_ == Type::WWC) {
         shell.printfln(F("  Warm Water Circuit #: %d"), hc_);
-
     } else {
         shell.printfln(F("  Heating Circuit #: %d"), hc_);
     }
-    print_value(shell, 2, F("Current flow temperature"), F_(degrees), Helpers::render_value(buffer, flowTemp_, 10));
-    print_value(shell, 2, F("Setpoint flow temperature"), F_(degrees), Helpers::render_value(buffer, flowSetTemp_, 1));
-    print_value(shell, 2, F("Current pump modulation"), Helpers::render_value(buffer, pumpMod_, 1));
-    print_value(shell, 2, F("Current valve status"), Helpers::render_value(buffer, status_, 1));
+    print_value(shell, 4, F("Current flow temperature"), F_(degrees), Helpers::render_value(buffer, flowTemp_, 10));
+    print_value(shell, 4, F("Setpoint flow temperature"), F_(degrees), Helpers::render_value(buffer, flowSetTemp_, 1));
+    print_value(shell, 4, F("Current pump modulation"), Helpers::render_value(buffer, pumpMod_, 1));
+    print_value(shell, 4, F("Current valve status"), Helpers::render_value(buffer, status_, 1));
 }
 
 // publish values via MQTT
 // ideally we should group up all the mixing units together into a nested JSON but for now we'll send them individually
 void Mixing::publish_values() {
-    DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_SMALL);
+    static DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_MEDIUM);
+//    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
     JsonObject          rootMixing = doc.to<JsonObject>();
     JsonObject          dataMixing;
 

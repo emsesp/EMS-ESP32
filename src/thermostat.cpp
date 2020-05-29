@@ -327,7 +327,8 @@ bool Thermostat::updated_values() {
     static uint16_t current_value_ = 0;
     for (const auto & hc : heating_circuits_) {
         // don't publish if we haven't yet received some data
-        if ((hc->setpoint_roomTemp == EMS_VALUE_SHORT_NOTSET) || (hc->curr_roomTemp == EMS_VALUE_SHORT_NOTSET)) {
+//        if ((hc->setpoint_roomTemp == EMS_VALUE_SHORT_NOTSET) || (hc->curr_roomTemp == EMS_VALUE_SHORT_NOTSET)) {
+        if (hc->setpoint_roomTemp == EMS_VALUE_SHORT_NOTSET) {
             return false;
         }
         new_value += hc->setpoint_roomTemp + hc->curr_roomTemp + hc->mode;
@@ -359,14 +360,17 @@ void Thermostat::publish_values() {
 
     // optional, add external temp. I don't think anyone actually is interested in this
     if ((flags == EMS_DEVICE_FLAG_RC35) && ((mqtt_format_ == Settings::MQTT_format::SINGLE) || (mqtt_format_ == Settings::MQTT_format::MY))) {
+        if (datetime_.size()) {
+            rootThermostat["time"] = datetime_.c_str();
+        }
         if (dampedoutdoortemp != EMS_VALUE_INT_NOTSET) {
             rootThermostat["dampedtemp"] = dampedoutdoortemp;
         }
         if (tempsensor1 != EMS_VALUE_USHORT_NOTSET) {
-            rootThermostat["tempsens1"] = (float)tempsensor1 / 10;
+            rootThermostat["tempsensor1"] = (float)tempsensor1 / 10;
         }
         if (tempsensor2 != EMS_VALUE_USHORT_NOTSET) {
-            rootThermostat["tempsens2"] = (float)tempsensor2 / 10;
+            rootThermostat["tempsensor2"] = (float)tempsensor2 / 10;
         }
     }
 
@@ -666,22 +670,78 @@ void Thermostat::show_values(uuid::console::Shell & shell) {
     char buffer[10]; // for formatting only
 
     if (datetime_.size()) {
-        shell.printfln(F(" Clock: %s"), datetime_.c_str());
+        shell.printfln(F("  Clock: %s"), datetime_.c_str());
         if (ibaClockOffset != EMS_VALUE_UINT_NOTSET) {
-            print_value(shell, 1, F("Offset clock"), Helpers::render_value(buffer, ibaClockOffset, 1)); // offset (in sec) to clock, 0xff = -1 s, 0x02 = 2 s
+            print_value(shell, 2, F("Offset clock"), Helpers::render_value(buffer, ibaClockOffset, 1)); // offset (in sec) to clock, 0xff = -1 s, 0x02 = 2 s
         }
     }
 
     uint8_t flags = (this->flags() & 0x0F); // specific thermostat characteristics, strip the option bits
 
     if (flags == EMS_DEVICE_FLAG_RC35) {
-        print_value(shell, 1, F("Damped Outdoor temperature"), F_(degrees), Helpers::render_value(buffer, dampedoutdoortemp, 1));
-        print_value(shell, 1, F("Tempsensor 1"), F_(degrees), Helpers::render_value(buffer, tempsensor1, 10));
-        print_value(shell, 1, F("Tempsensor 2"), F_(degrees), Helpers::render_value(buffer, tempsensor2, 10));
+        print_value(shell, 2, F("Damped Outdoor temperature"), F_(degrees), Helpers::render_value(buffer, dampedoutdoortemp, 1));
+        print_value(shell, 2, F("Tempsensor 1"), F_(degrees), Helpers::render_value(buffer, tempsensor1, 10));
+        print_value(shell, 2, F("Tempsensor 2"), F_(degrees), Helpers::render_value(buffer, tempsensor2, 10));
+    }
+    if (flags == EMS_DEVICE_FLAG_RC30_1) {
+        // settings parameters
+        if (ibaMainDisplay != EMS_VALUE_UINT_NOTSET) {
+            if (ibaMainDisplay == 0) {
+                shell.printfln(F("  Display: internal temperature"));
+            } else if (ibaMainDisplay == 1) {
+                shell.printfln(F("  Display: internal setpoint"));
+            } else if (ibaMainDisplay == 2) {
+                shell.printfln(F("  Display: external temperature"));
+            } else if (ibaMainDisplay == 3) {
+                shell.printfln(F("  Display: burner temperature"));
+            } else if (ibaMainDisplay == 4) {
+                shell.printfln(F("  Display: WW temperature"));
+            } else if (ibaMainDisplay == 5) {
+                shell.printfln(F("  Display: functioning mode"));
+            } else if (ibaMainDisplay == 6) {
+                shell.printfln(F("  Display: time"));
+            } else if (ibaMainDisplay == 7) {
+                shell.printfln(F("  Display: date"));
+            } else if (ibaMainDisplay == 9) {
+                shell.printfln(F("  Display: smoke temperature"));
+            }
+        }
+
+        if (ibaLanguage != EMS_VALUE_UINT_NOTSET) {
+            if (ibaLanguage == 0) {
+                shell.printfln(F("  Language: German"));
+            } else if (ibaLanguage == 1) {
+                shell.printfln(F("  Language: Dutch"));
+            } else if (ibaLanguage == 2) {
+                shell.printfln(F("  Language: French"));
+            } else if (ibaLanguage == 3) {
+                shell.printfln(F("  Language: Italian"));
+            }
+        }
+    }
+    if (flags == EMS_DEVICE_FLAG_RC35 ||flags == EMS_DEVICE_FLAG_RC30_1) {
+ 
+        if (ibaCalIntTemperature != EMS_VALUE_INT_NOTSET) {
+            print_value(shell, 2, F("Offset int. temperature"), F_(degrees), Helpers::render_value(buffer, ibaCalIntTemperature, 2));
+        }
+
+        if (ibaMinExtTemperature != EMS_VALUE_INT_NOTSET) {
+            print_value(shell, 2, F("Min ext. temperature"), F_(degrees), Helpers::render_value(buffer, ibaMinExtTemperature, 0)); // min ext temp for heating curve, in deg.
+        }
+
+        if (ibaBuildingType != EMS_VALUE_UINT_NOTSET) {
+            if (ibaBuildingType == 0) {
+                shell.printfln(F("  Building: light"));
+            } else if (ibaBuildingType == 1) {
+                shell.printfln(F("  Building: medium"));
+            } else if (ibaBuildingType == 2) {
+                shell.printfln(F("  Building: heavy"));
+            }
+        }
     }
 
     for (const auto & hc : heating_circuits_) {
-        shell.printfln(F(" Heating Circuit %d:"), hc->hc_num());
+        shell.printfln(F("  Heating Circuit %d:"), hc->hc_num());
 
         // different thermostat types store their temperature values differently
         uint8_t format_setpoint, format_curr;
@@ -700,13 +760,13 @@ void Thermostat::show_values(uuid::console::Shell & shell) {
             break;
         }
 
-        print_value(shell, 2, F("Current room temperature"), F_(degrees), Helpers::render_value(buffer, hc->curr_roomTemp, format_curr));
-        print_value(shell, 2, F("Setpoint room temperature"), F_(degrees), Helpers::render_value(buffer, hc->setpoint_roomTemp, format_setpoint));
+        print_value(shell, 4, F("Current room temperature"), F_(degrees), Helpers::render_value(buffer, hc->curr_roomTemp, format_curr));
+        print_value(shell, 4, F("Setpoint room temperature"), F_(degrees), Helpers::render_value(buffer, hc->setpoint_roomTemp, format_setpoint));
         if (hc->mode != EMS_VALUE_UINT_NOTSET) {
-            print_value(shell, 2, F("Mode"), mode_tostring(hc->get_mode(flags)).c_str());
+            print_value(shell, 4, F("Mode"), mode_tostring(hc->get_mode(flags)).c_str());
         }
         if (hc->mode_type != EMS_VALUE_UINT_NOTSET) {
-            print_value(shell, 2, F("Mode Type"), mode_tostring(hc->get_mode_type(flags)).c_str());
+            print_value(shell, 4, F("Mode Type"), mode_tostring(hc->get_mode_type(flags)).c_str());
         }
 
         if ((flags == EMS_DEVICE_FLAG_RC35) || (flags == EMS_DEVICE_FLAG_RC30_1)) {
@@ -716,72 +776,19 @@ void Thermostat::show_values(uuid::console::Shell & shell) {
                 shell.printfln(F("    Program is set to Holiday mode"));
             }
 
-            print_value(shell, 2, F("Day temperature"), F_(degrees), Helpers::render_value(buffer, hc->daytemp, 2));
-            print_value(shell, 2, F("Night temperature"), F_(degrees), Helpers::render_value(buffer, hc->nighttemp, 2));
-            print_value(shell, 2, F("Vacation temperature"), F_(degrees), Helpers::render_value(buffer, hc->holidaytemp, 2));
+            print_value(shell, 4, F("Day temperature"), F_(degrees), Helpers::render_value(buffer, hc->daytemp, 2));
+            print_value(shell, 4, F("Night temperature"), F_(degrees), Helpers::render_value(buffer, hc->nighttemp, 2));
+            print_value(shell, 4, F("Holiday temperature"), F_(degrees), Helpers::render_value(buffer, hc->holidaytemp, 2));
 
             if (hc->offsettemp < 100) {
-                print_value(shell, 2, F("Offset temperature"), F_(degrees), Helpers::render_value(buffer, hc->offsettemp, 2));
+                print_value(shell, 4, F("Offset temperature"), F_(degrees), Helpers::render_value(buffer, hc->offsettemp, 2));
             }
-            print_value(shell, 2, F("Design temperature"), F_(degrees), Helpers::render_value(buffer, hc->designtemp, 2));
+            print_value(shell, 4, F("Design temperature"), F_(degrees), Helpers::render_value(buffer, hc->designtemp, 0));
         }
 
         // show flow temp if we have it
         if (hc->circuitcalctemp != EMS_VALUE_UINT_NOTSET) {
-            print_value(shell, 2, F("Calculated flow temperature"), F_(degrees), Helpers::render_value(buffer, hc->circuitcalctemp, 1));
-        }
-
-        // settings parameters
-        if (ibaMainDisplay != EMS_VALUE_UINT_NOTSET) {
-            if (ibaMainDisplay == 0) {
-                shell.printfln(F("    Display: internal temperature"));
-            } else if (ibaMainDisplay == 1) {
-                shell.printfln(F("    Display: internal setpoint"));
-            } else if (ibaMainDisplay == 2) {
-                shell.printfln(F("    Display: external temperature"));
-            } else if (ibaMainDisplay == 3) {
-                shell.printfln(F("    Display: burner temperature"));
-            } else if (ibaMainDisplay == 4) {
-                shell.printfln(F("    Display: WW temperature"));
-            } else if (ibaMainDisplay == 5) {
-                shell.printfln(F("    Display: functioning mode"));
-            } else if (ibaMainDisplay == 6) {
-                shell.printfln(F("    Display: time"));
-            } else if (ibaMainDisplay == 7) {
-                shell.printfln(F("    Display: date"));
-            } else if (ibaMainDisplay == 9) {
-                shell.printfln(F("    Display: smoke temperature"));
-            }
-        }
-
-        if (ibaLanguage != EMS_VALUE_UINT_NOTSET) {
-            if (ibaLanguage == 0) {
-                shell.printfln(F("    Language: German"));
-            } else if (ibaLanguage == 1) {
-                shell.printfln(F("    Language: Dutch"));
-            } else if (ibaLanguage == 2) {
-                shell.printfln(F("    Language: French"));
-            } else if (ibaLanguage == 3) {
-                shell.printfln(F("    Language: Italian"));
-            }
-        }
-
-        if (ibaCalIntTemperature != EMS_VALUE_INT_NOTSET) {
-            print_value(shell, 2, F("Offset int. temperature"), F_(degrees), Helpers::render_value(buffer, ibaCalIntTemperature, 2));
-        }
-
-        if (ibaMinExtTemperature != EMS_VALUE_INT_NOTSET) {
-            print_value(shell, 2, F("Min ext. temperature"), F_(degrees), Helpers::render_value(buffer, ibaMinExtTemperature, 10)); // min ext temp for heating curve, in deg.
-        }
-
-        if (ibaBuildingType != EMS_VALUE_UINT_NOTSET) {
-            if (ibaBuildingType == 0) {
-                shell.printfln(F("    Building: light"));
-            } else if (ibaBuildingType == 1) {
-                shell.printfln(F("    Building: medium"));
-            } else if (ibaBuildingType == 2) {
-                shell.printfln(F("    Building: heavy"));
-            }
+            print_value(shell, 4, F("Calculated flow temperature"), F_(degrees), Helpers::render_value(buffer, hc->circuitcalctemp, 1));
         }
     }
 }
@@ -859,12 +866,12 @@ void Thermostat::process_EasyMonitor(std::shared_ptr<const Telegram> telegram) {
 // Settings Parameters - 0xA5 - RC30_1
 void Thermostat::process_IBASettings(std::shared_ptr<const Telegram> telegram) {
     uint8_t extTemp = 100; // Min. ext temperature is coded as int8,  0xF6=-10, 0x0 = 0, 0xFF=-1. 100 is out of permissible range
-
+    // 22 - display line on RC35
     telegram->read_value(ibaMainDisplay,
                          0); // display on Thermostat: 0 int. temp, 1 int. setpoint, 2 ext. temp., 3 burner temp., 4 ww temp, 5 functioning mode, 6 time, 7 data, 9 smoke temp
-    telegram->read_value(ibaLanguage, 6);          // language on Thermostat: 0 german, 1 dutch, 2 french, 3 italian
-    telegram->read_value(ibaBuildingType, 2);      // building type: 0 = light, 1 = medium, 2 = heavy
+    telegram->read_value(ibaLanguage, 1);          // language on Thermostat: 0 german, 1 dutch, 2 french, 3 italian
     telegram->read_value(ibaCalIntTemperature, 2); // offset int. temperature sensor, by * 0.1 Kelvin
+    telegram->read_value(ibaBuildingType, 6);      // building type: 0 = light, 1 = medium, 2 = heavy
     telegram->read_value(extTemp, 5);              // min ext temp for heating curve, in deg., 0xF6=-10, 0x0 = 0, 0xFF=-1
     if (extTemp != 100) {
         // code as signed short, to benefit from negative value rendering

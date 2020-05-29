@@ -57,7 +57,8 @@ class EMSuart {
     static EMSUART_STATUS transmit(uint8_t * buf, uint8_t len);
 
   private:
-    static void emsuart_recvTask(void * param);
+    static void           emsuart_recvTask(void * param);
+    static void IRAM_ATTR emsuart_rx_intr_handler(void * para);
 };
 
 } // namespace emsesp
