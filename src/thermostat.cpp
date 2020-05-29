@@ -221,6 +221,47 @@ void Thermostat::thermostat_cmd(const char * message) {
         LOG_DEBUG(F("MQTT error: payload %s, error %s"), message, error.c_str());
         return;
     }
+    for (const auto & hc : heating_circuits_) {
+        char hc_name[6], s[3]; // hc{1-4}
+        strlcpy(hc_name, "hc", 6);
+        uint8_t hc_num = hc->hc_num();
+        strlcat(hc_name, Helpers::itoa(s, hc_num), 6);
+        if (nullptr != doc[hc_name]["mode"]) {
+            std::string mode = doc[hc_name]["mode"]; // first check mode
+            set_mode(mode, hc_num);
+        }
+        if (float f = doc[hc_name]["temp"]) { 
+            set_temperature(f, HeatingCircuit::Mode::AUTO, hc_num);
+        }
+        if (float f = doc[hc_name]["nighttemp"]) {
+            set_temperature(f, HeatingCircuit::Mode::NIGHT, hc_num);
+        }
+        if (float f = doc[hc_name]["daytemp"]) {
+            set_temperature(f, HeatingCircuit::Mode::DAY, hc_num);
+        }
+        if (float f = doc[hc_name]["nofrosttemp"]) {
+            set_temperature(f, HeatingCircuit::Mode::NOFROST, hc_num);
+        }
+        if (float f = doc[hc_name]["summertemp"]) {
+            set_temperature(f, HeatingCircuit::Mode::SUMMER, hc_num);
+        }
+        if (float f = doc[hc_name]["designtemp"]) {
+            set_temperature(f, HeatingCircuit::Mode::DESIGN, hc_num);
+        }
+        if (float f = doc[hc_name]["offsettemp"]) {
+            set_temperature(f, HeatingCircuit::Mode::OFFSET, hc_num);
+        }
+        if (float f = doc[hc_name]["holidaytemp"]) { //
+            set_temperature(f, HeatingCircuit::Mode::HOLIDAY, hc_num);
+        }
+        if (float f = doc[hc_name]["remotetemp"]) {
+            if(f > 100 || f < 0) {
+                hc->remotetemp = EMS_VALUE_SHORT_NOTSET;
+            } else {
+                hc->remotetemp = (uint16_t) (f * 10);
+            }
+        }
+    }
 
     const char * command = doc["cmd"];
     if (command == nullptr) {
@@ -301,6 +342,27 @@ void Thermostat::thermostat_cmd(const char * message) {
         }
         return;
     }
+    if (strcmp(command, "summertemp") == 0) {
+        float f = doc["data"];
+        if (f) {
+            set_temperature(f, HeatingCircuit::Mode::SUMMER, hc_num);
+        }
+        return;
+    }
+    if (strcmp(command, "designtemp") == 0) {
+        float f = doc["data"];
+        if (f) {
+            set_temperature(f, HeatingCircuit::Mode::DESIGN, hc_num);
+        }
+        return;
+    }
+    if (strcmp(command, "offettemp") == 0) {
+        float f = doc["data"];
+        if (f) {
+            set_temperature(f, HeatingCircuit::Mode::OFFSET, hc_num);
+        }
+        return;
+    }
 }
 
 void Thermostat::thermostat_cmd_temp(const char * message) {
@@ -358,8 +420,8 @@ void Thermostat::publish_values() {
     JsonObject                                      rootThermostat = doc.to<JsonObject>();
     JsonObject                                      dataThermostat;
 
-    // optional, add external temp. I don't think anyone actually is interested in this
-    if ((flags == EMS_DEVICE_FLAG_RC35) && ((mqtt_format_ == Settings::MQTT_format::SINGLE) || (mqtt_format_ == Settings::MQTT_format::MY))) {
+    // optional, add external temp. I don't think anyone (except MichaelDvP) actually is interested in this
+    if ((flags == EMS_DEVICE_FLAG_RC35 || flags == EMS_DEVICE_FLAG_RC30_1) && (mqtt_format_ == Settings::MQTT_format::SINGLE || mqtt_format_ == Settings::MQTT_format::MY)) {
         if (datetime_.size()) {
             rootThermostat["time"] = datetime_.c_str();
         }
@@ -367,10 +429,32 @@ void Thermostat::publish_values() {
             rootThermostat["dampedtemp"] = dampedoutdoortemp;
         }
         if (tempsensor1 != EMS_VALUE_USHORT_NOTSET) {
-            rootThermostat["tempsensor1"] = (float)tempsensor1 / 10;
+            rootThermostat["inttemp1"] = (float)tempsensor1 / 10;
         }
         if (tempsensor2 != EMS_VALUE_USHORT_NOTSET) {
-            rootThermostat["tempsensor2"] = (float)tempsensor2 / 10;
+            rootThermostat["inttemp2"] = (float)tempsensor2 / 10;
+        }
+ 
+        if (ibaCalIntTemperature != EMS_VALUE_INT_NOTSET) {
+            rootThermostat["intoffset"] = (float)ibaCalIntTemperature / 2;
+        }
+
+        if (ibaMinExtTemperature != EMS_VALUE_INT_NOTSET) {
+            rootThermostat["minexttemp"] = (float)ibaMinExtTemperature; // min ext temp for heating curve, in deg.
+        }
+
+        if (ibaBuildingType != EMS_VALUE_UINT_NOTSET) {
+            if (ibaBuildingType == 0) {
+                rootThermostat["building"] = "light";
+            } else if (ibaBuildingType == 1) {
+                rootThermostat["building"] = "medium";
+            } else if (ibaBuildingType == 2) {
+                rootThermostat["building"] = "heavy";
+            }
+        }
+        if (mqtt_format_ == Settings::MQTT_format::SINGLE) {
+            Mqtt::publish("thermostat_data", doc);
+            rootThermostat = doc.to<JsonObject>(); // clear object
         }
     }
 
@@ -470,14 +554,14 @@ void Thermostat::publish_values() {
             dataThermostat["modetype"] = mode_tostring(hc->get_mode_type(flags));
         }
 
-        // if format is single, send immediately and quit
+        // if format is single, send immediately and clear object for next hc
         if (mqtt_format_ == Settings::MQTT_format::SINGLE) {
             char topic[30];
             char s[3]; // for formatting strings
             strlcpy(topic, "thermostat_data", 30);
             strlcat(topic, Helpers::itoa(s, hc->hc_num()), 30); // append hc to topic
             Mqtt::publish(topic, doc);
-            return;
+            rootThermostat = doc.to<JsonObject>(); // clear object
         }
     }
 
@@ -652,14 +736,23 @@ std::string Thermostat::mode_tostring(uint8_t mode) const {
     case HeatingCircuit::Mode::HEAT:
         return read_flash_string(F("heat"));
         break;
-//    case HeatingCircuit::Mode::HOLIDAY:
-//        return read_flash_string(F("holiday"));
-//        break;
+    case HeatingCircuit::Mode::HOLIDAY:
+        return read_flash_string(F("holiday"));
+        break;
     case HeatingCircuit::Mode::NOFROST:
         return read_flash_string(F("nofrost"));
         break;
     case HeatingCircuit::Mode::AUTO:
         return read_flash_string(F("auto"));
+        break;
+    case HeatingCircuit::Mode::SUMMER:
+        return read_flash_string(F("summer"));
+        break;
+    case HeatingCircuit::Mode::OFFSET:
+        return read_flash_string(F("offset"));
+        break;
+    case HeatingCircuit::Mode::DESIGN:
+        return read_flash_string(F("design"));
         break;
     default:
     case HeatingCircuit::Mode::UNKNOWN:
@@ -869,19 +962,14 @@ void Thermostat::process_EasyMonitor(std::shared_ptr<const Telegram> telegram) {
 
 // Settings Parameters - 0xA5 - RC30_1
 void Thermostat::process_IBASettings(std::shared_ptr<const Telegram> telegram) {
-    uint8_t extTemp = 100; // Min. ext temperature is coded as int8,  0xF6=-10, 0x0 = 0, 0xFF=-1. 100 is out of permissible range
     // 22 - display line on RC35
     telegram->read_value(ibaMainDisplay,
                          0); // display on Thermostat: 0 int. temp, 1 int. setpoint, 2 ext. temp., 3 burner temp., 4 ww temp, 5 functioning mode, 6 time, 7 data, 9 smoke temp
     telegram->read_value(ibaLanguage, 1);          // language on Thermostat: 0 german, 1 dutch, 2 french, 3 italian
     telegram->read_value(ibaCalIntTemperature, 2); // offset int. temperature sensor, by * 0.1 Kelvin
     telegram->read_value(ibaBuildingType, 6);      // building type: 0 = light, 1 = medium, 2 = heavy
-    telegram->read_value(extTemp, 5);              // min ext temp for heating curve, in deg., 0xF6=-10, 0x0 = 0, 0xFF=-1
-    if (extTemp != 100) {
-        // code as signed short, to benefit from negative value rendering
-        ibaMinExtTemperature = (int16_t)(extTemp > 127) ? (extTemp - 256) : extTemp;
-    }
-    telegram->read_value(ibaClockOffset, 12); // offset (in sec) to clock, 0xff = -1 s, 0x02 = 2 s
+    telegram->read_value(ibaMinExtTemperature, 5); // min ext temp for heating curve, in deg., 0xF6=-10, 0x0 = 0, 0xFF=-1
+    telegram->read_value(ibaClockOffset, 12);      // offset (in sec) to clock, 0xff = -1 s, 0x02 = 2 s
 }
 
 // type 0x6F - FR10/FR50/FR100 Junkers
@@ -945,7 +1033,7 @@ void Thermostat::process_RC30Set(std::shared_ptr<const Telegram> telegram) {
 // type 0x3E (HC1), 0x48 (HC2), 0x52 (HC3), 0x5C (HC4) - data from the RC35 thermostat (0x10) - 16 bytes
 void Thermostat::process_RC35Monitor(std::shared_ptr<const Telegram> telegram) {
     // exit if the 15th byte (second from last) is 0x00, which I think is calculated flow setpoint temperature
-    // with weather controlled RC35s this value can be zero and our setpoint temps will be incorrect
+    // with weather controlled RC35s this value is >=5, otherwise can be zero and our setpoint temps will be incorrect
     // see https://github.com/proddy/EMS-ESP/issues/373#issuecomment-627907301
     if (telegram->message_data[14] == 0x00) {
         return;
@@ -953,7 +1041,7 @@ void Thermostat::process_RC35Monitor(std::shared_ptr<const Telegram> telegram) {
 
     std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
 
-    telegram->read_value8(hc->setpoint_roomTemp, 2); // is * 2, force to single byte
+    telegram->read_value8(hc->setpoint_roomTemp, 2); // is * 2, force to single byte, is 0 in summermode
     telegram->read_value(hc->curr_roomTemp, 3); // is * 10 - or 0x7D00 if thermostat is mounted on boiler
     telegram->read_value(hc->mode_type, 1, 1);
     telegram->read_value(hc->summer_mode, 1, 0);
@@ -975,10 +1063,12 @@ void Thermostat::process_RC35Set(std::shared_ptr<const Telegram> telegram) {
     telegram->read_value(hc->daytemp, 2);     // is * 2
     telegram->read_value(hc->nighttemp, 1);   // is * 2
     telegram->read_value(hc->holidaytemp, 3); // is * 2
-    telegram->read_value(hc->heatingtype, 0); // byte 0 bit floor heating = 3
+    telegram->read_value(hc->heatingtype, 0); // 0- off, 1-radiator, 2-convector, 3-floor
 
-    telegram->read_value(hc->designtemp, 17);
-    telegram->read_value(hc->offsettemp, 6);
+    telegram->read_value(hc->summertemp, 22);  // is * 1
+    telegram->read_value(hc->nofrosttemp, 23); // is * 1
+    telegram->read_value(hc->designtemp, 17);  // is * 1
+    telegram->read_value(hc->offsettemp, 6);   // is * 2
 }
 
 // process_RCTime - type 0x06 - date and time from a thermostat - 14 bytes long
@@ -1206,10 +1296,29 @@ void Thermostat::set_temperature(const float temperature, const uint8_t mode, co
         case HeatingCircuit::Mode::HOLIDAY: // change the holiday temp
             offset = EMS_OFFSET_RC35Set_temp_holiday;
             break;
+        case HeatingCircuit::Mode::OFFSET: // change the offset temp
+            offset = EMS_OFFSET_RC35Set_temp_offset;
+            break;
+        case HeatingCircuit::Mode::DESIGN: 
+            offset = EMS_OFFSET_RC35Set_temp_design;
+            break;
+        case HeatingCircuit::Mode::SUMMER: 
+            offset = EMS_OFFSET_RC35Set_temp_summer;
+            break;
+        case HeatingCircuit::Mode::NOFROST: 
+            offset = EMS_OFFSET_RC35Set_temp_nofrost;
+            break;
         default:
         case HeatingCircuit::Mode::AUTO: // automatic selection, if no type is defined, we use the standard code
             if (model == EMS_DEVICE_FLAG_RC35) {
-                offset = EMS_OFFSET_RC35Set_seltemp; // https://github.com/proddy/EMS-ESP/issues/310
+                uint8_t mode_ = hc->get_mode(flags());
+                if (mode_ == HeatingCircuit::Mode::NIGHT) {
+                    offset = EMS_OFFSET_RC35Set_temp_night;
+                } else if (mode_ == HeatingCircuit::Mode::DAY) {
+                    offset = EMS_OFFSET_RC35Set_temp_day;
+                } else {
+                    offset = EMS_OFFSET_RC35Set_seltemp; // https://github.com/proddy/EMS-ESP/issues/310
+                }
             } else {
                 uint8_t mode_type = hc->get_mode_type(flags());
                 offset            = (mode_type == HeatingCircuit::Mode::NIGHT) ? EMS_OFFSET_RC35Set_temp_night : EMS_OFFSET_RC35Set_temp_day;

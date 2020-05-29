@@ -87,8 +87,7 @@ void Mixing::show_values(uuid::console::Shell & shell) {
 // publish values via MQTT
 // ideally we should group up all the mixing units together into a nested JSON but for now we'll send them individually
 void Mixing::publish_values() {
-    static DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_MEDIUM);
-//    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
+    DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_SMALL);
     JsonObject          rootMixing = doc.to<JsonObject>();
     JsonObject          dataMixing;
 
@@ -141,13 +140,11 @@ void Mixing::publish_values() {
         char topic[30];
         char s[3]; // for formatting strings
         strlcpy(topic, "mixing_data", 30);
-        strlcat(topic, Helpers::itoa(s, hc_), 30); // append hc to topic
+        strlcat(topic, Helpers::itoa(s, device_id() - 0x20 + 1), 30); // append hc to topic
         Mqtt::publish(topic, doc);
         return;
     }
-    char topic[30];
-    strlcpy(topic, "mixing_data", 30);
-    Mqtt::publish(topic, doc);
+    Mqtt::publish("mixing_data", doc);
 }
 
 //  heating circuits 0x02D7, 0x02D8 etc...
