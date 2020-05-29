@@ -73,14 +73,14 @@ void Network::sta_mode_start(WiFiEvent_t event, WiFiEventInfo_t info) {
 #if defined(ESP8266)
 void Network::sta_mode_connected(const WiFiEventStationModeConnected & event) {
     LOG_INFO(F("Connected to %s (%02X:%02X:%02X:%02X:%02X:%02X) on channel %u"),
-                 event.ssid.c_str(),
-                 event.bssid[0],
-                 event.bssid[1],
-                 event.bssid[2],
-                 event.bssid[3],
-                 event.bssid[4],
-                 event.bssid[5],
-                 event.channel);
+             event.ssid.c_str(),
+             event.bssid[0],
+             event.bssid[1],
+             event.bssid[2],
+             event.bssid[3],
+             event.bssid[4],
+             event.bssid[5],
+             event.channel);
 
     // turn off safe mode
     System::save_safe_mode(false);
@@ -88,14 +88,14 @@ void Network::sta_mode_connected(const WiFiEventStationModeConnected & event) {
 #elif defined(ESP32)
 void Network::sta_mode_connected(WiFiEvent_t event, WiFiEventInfo_t info) {
     LOG_INFO(F("Connected to %s (%02X:%02X:%02X:%02X:%02X:%02X) on channel %u"),
-                 info.connected.ssid,
-                 info.sta_connected.mac[0],
-                 info.sta_connected.mac[1],
-                 info.sta_connected.mac[2],
-                 info.sta_connected.mac[3],
-                 info.sta_connected.mac[4],
-                 info.sta_connected.mac[5],
-                 info.connected.channel);
+             info.connected.ssid,
+             info.sta_connected.mac[0],
+             info.sta_connected.mac[1],
+             info.sta_connected.mac[2],
+             info.sta_connected.mac[3],
+             info.sta_connected.mac[4],
+             info.sta_connected.mac[5],
+             info.connected.channel);
 
     // turn off safe mode
     System::save_safe_mode(false);
@@ -126,16 +126,16 @@ void Network::sta_mode_disconnected(WiFiEvent_t event, WiFiEventInfo_t info) {
 #if defined(ESP8266)
 void Network::sta_mode_got_ip(const WiFiEventStationModeGotIP & event) {
     LOG_INFO(F("Obtained IPv4 address %s/%s and gateway %s"),
-                 uuid::printable_to_string(event.ip).c_str(),
-                 uuid::printable_to_string(event.mask).c_str(),
-                 uuid::printable_to_string(event.gw).c_str());
+             uuid::printable_to_string(event.ip).c_str(),
+             uuid::printable_to_string(event.mask).c_str(),
+             uuid::printable_to_string(event.gw).c_str());
 }
 #elif defined(ESP32)
 void Network::sta_mode_got_ip(WiFiEvent_t event, WiFiEventInfo_t info) {
     LOG_INFO(F("Obtained IPv4 address %s/%s and gateway %s"),
-                 uuid::printable_to_string(IPAddress(info.got_ip.ip_info.ip.addr)).c_str(),
-                 uuid::printable_to_string(IPAddress(info.got_ip.ip_info.netmask.addr)).c_str(),
-                 uuid::printable_to_string(IPAddress(info.got_ip.ip_info.gw.addr)).c_str());
+             uuid::printable_to_string(IPAddress(info.got_ip.ip_info.ip.addr)).c_str(),
+             uuid::printable_to_string(IPAddress(info.got_ip.ip_info.netmask.addr)).c_str(),
+             uuid::printable_to_string(IPAddress(info.got_ip.ip_info.gw.addr)).c_str());
 }
 #endif
 
@@ -148,11 +148,16 @@ void Network::connect() {
 
 #ifndef EMSESP_STANDALONE
 
-    // WiFi.mode(WIFI_STA);
-
     if (!settings.hostname().empty()) {
 #if defined(ESP8266)
+        // experiment with fixed IP
+        // IPAddress ip(10, 10, 10, 140);
+        // IPAddress gateway(10, 10, 10, 1);
+        // IPAddress subnet(255, 255, 255, 0);
+        // WiFi.config(ip, gateway, subnet);
+
         WiFi.config(INADDR_ANY, INADDR_ANY, INADDR_ANY);
+
         WiFi.hostname(settings.hostname().c_str());
 #elif defined(ESP32)
         WiFi.config(INADDR_NONE, INADDR_NONE, INADDR_NONE);
@@ -205,9 +210,11 @@ void Network::ota_setup() {
     ota_->onStart([this]() {
         LOG_DEBUG(F("OTA starting (send type %d)..."), ota_->getCommand());
 
-        // turn off stuff to stop interference
+// turn off UART stuff to stop interference on an ESP8266 only
+#if defined(ESP8266)
         EMSuart::stop(); // UART stop
-        in_ota_ = true;  // set flag so all other services stop
+#endif
+        in_ota_ = true; // set flag so all other services stop
     });
 
     ota_->onEnd([this]() { LOG_DEBUG(F("OTA done, automatically restarting")); });

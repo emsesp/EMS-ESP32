@@ -99,7 +99,7 @@ class EMSdevice {
 
     using process_function_p = std::function<void(std::shared_ptr<const Telegram>)>;
     void register_telegram_type(const uint16_t telegram_type_id, const __FlashStringHelper * telegram_type_name, bool fetch, process_function_p cb);
-    bool process_telegram(std::shared_ptr<const Telegram> telegram);
+    bool handle_telegram(std::shared_ptr<const Telegram> telegram);
 
     void write_command(const uint16_t type_id, const uint8_t offset, uint8_t * message_data, const uint8_t message_length, const uint16_t validate_typeid);
     void write_command(const uint16_t type_id, const uint8_t offset, const uint8_t value, const uint16_t validate_typeid);
@@ -118,6 +118,7 @@ class EMSdevice {
     std::string telegram_type_name(std::shared_ptr<const Telegram> telegram);
 
     void fetch_values();
+    void toggle_fetch(uint16_t telegram_id, bool toggle);
 
     void print_value(uuid::console::Shell & shell, uint8_t padding, const __FlashStringHelper * name, const __FlashStringHelper * prefix, const char * value);
     void print_value(uuid::console::Shell & shell, uint8_t padding, const __FlashStringHelper * name, const char * value);

@@ -30,7 +30,7 @@ EMSuart::EMSRxBuf_t * pEMSRxBuf;
 EMSuart::EMSRxBuf_t * paEMSRxBuf[EMS_MAXBUFFERS];
 uint8_t               emsRxBufIdx   = 0;
 uint8_t               phantomBreak  = 0;
-uint8_t               tx_mode_      = EMS_TXMODE_DEFAULT;
+uint8_t               tx_mode_      = 0xFF;
 bool                  drop_first_rx = true;
 
 //
@@ -127,8 +127,12 @@ void ICACHE_FLASH_ATTR EMSuart::emsuart_flush_fifos() {
  * init UART0 driver
  */
 void ICACHE_FLASH_ATTR EMSuart::start(uint8_t tx_mode) {
+    if (tx_mode_ != 0xFF) { // it's a restart no need to configure rx
+        tx_mode_ = tx_mode;
+        restart();
+        return;
+    }
     tx_mode_ = tx_mode;
-
     // allocate and preset EMS Receive buffers
     for (int i = 0; i < EMS_MAXBUFFERS; i++) {
         EMSRxBuf_t * p = (EMSRxBuf_t *)malloc(sizeof(EMSRxBuf_t));
@@ -205,6 +209,7 @@ void ICACHE_FLASH_ATTR EMSuart::restart() {
         drop_first_rx      = true;
     }
     ETS_UART_INTR_ENABLE();
+    // emsuart_flush_fifos();
 }
 
 /*

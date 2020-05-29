@@ -139,8 +139,15 @@ class EMSbus {
         return tx_waiting_;
     }
 
+    static bool tx_active_; // whether Tx is active or not
+
     static void tx_waiting(bool tx_waiting) {
         tx_waiting_ = tx_waiting;
+
+        // if false, then it's been reset which means we have an active Tx
+        if (!tx_waiting) {
+            tx_active_ = true;
+        }
     }
 
     static uint8_t calculate_crc(const uint8_t * data, const uint8_t length);
@@ -150,14 +157,14 @@ class EMSbus {
 
     static uint32_t last_bus_activity_; // timestamp of last time a valid Rx came in
     static bool     bus_connected_;     // start assuming the bus hasn't been connected
-    static uint8_t  ems_mask_;          // unset 0x00 buderus 0x80 junker/ht3
+    static uint8_t  ems_mask_;          // unset 0x00 buderus 0x80 junkers/ht3
     static uint8_t  ems_bus_id_;        // the bus id, which configurable and stored in settings
     static bool     tx_waiting_;        // state of the Tx queue (idle, waiting for ack)
 };
 
 class RxService : public EMSbus {
   public:
-    static constexpr size_t MAX_RX_TELEGRAMS = 10;
+    static constexpr size_t MAX_RX_TELEGRAMS = 20;
 
     RxService()  = default;
     ~RxService() = default;
@@ -213,7 +220,7 @@ class RxService : public EMSbus {
 
 class TxService : public EMSbus {
   public:
-    static constexpr size_t MAX_TX_TELEGRAMS = 30;
+    static constexpr size_t MAX_TX_TELEGRAMS = 40; // size of Tx queue
 
     static constexpr uint8_t TX_WRITE_FAIL    = 4;
     static constexpr uint8_t TX_WRITE_SUCCESS = 1;

@@ -45,8 +45,6 @@ uuid::log::Logger System::logger_{F_(logger_name), uuid::log::Facility::KERN};
 uuid::syslog::SyslogService System::syslog_;
 #endif
 
-EMSuart System::emsuart_;
-
 #if defined(ESP8266)
 RTCVars System::state_;
 #endif
@@ -87,7 +85,6 @@ void System::mqtt_commands(const char * message) {
 // restart EMS-ESP
 // mode = safe mode. true to enable on next boot
 void System::restart(bool mode) {
-    EMSuart::stop();
 
     // check for safe mode
     if (mode) {
@@ -171,7 +168,7 @@ void System::start() {
     if (safe_mode()) {
     } else {
         save_safe_mode(false); // next time boot up in normal mode
-        emsuart_.start(settings.ems_tx_mode());
+        EMSuart::start(settings.ems_tx_mode());
     }
 #endif
 }

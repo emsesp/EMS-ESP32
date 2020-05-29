@@ -58,9 +58,9 @@
 // Switches - 0x11
 { 71, DeviceType::SWITCH, F("WM10"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x11
 
-// Controllers - 0x09 / 0x10
+// Controllers - 0x09 / 0x10 / 0x50
 { 68, DeviceType::CONTROLLER, F("BC10/RFM20"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
-{ 89, DeviceType::CONTROLLER, F("BC"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
+{ 89, DeviceType::CONTROLLER, F("BC10 GB142"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
 {218, DeviceType::CONTROLLER, F("M200/RFM200"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x50
 {190, DeviceType::CONTROLLER, F("BC10"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
 {114, DeviceType::CONTROLLER, F("BC10"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
@@ -79,7 +79,7 @@
 
 // Gateways - 0x48 / 0x18
 {189, DeviceType::GATEWAY, F("KM200"), DeviceFlags::EMS_DEVICE_FLAG_NONE},  // 0x48
-{ 94, DeviceType::GATEWAY, F("RC"), DeviceFlags::EMS_DEVICE_FLAG_NONE},     // 0x18
+{ 94, DeviceType::GATEWAY, F("RFM20 Remote Base for RC20RF"), DeviceFlags::EMS_DEVICE_FLAG_NONE},     // 0x18
 
 // Thermostat - not currently supporting write operations, like the Easy/100 types - 0x18
 {202, DeviceType::THERMOSTAT, F("Logamatic TC100/Moduline Easy"), DeviceFlags::EMS_DEVICE_FLAG_EASY | DeviceFlags::EMS_DEVICE_FLAG_NO_WRITE}, // 0x18, cannot write

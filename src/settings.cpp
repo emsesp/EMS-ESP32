@@ -254,9 +254,9 @@ void Settings::show_settings(uuid::console::Shell & shell) {
 
 // format the FS. Wipes everything.
 void Settings::format(uuid::console::Shell & shell) {
-    EMSuart::stop();
 #ifndef EMSESP_STANDALONE
 #if defined(ESP8266)
+    EMSuart::stop();
     if (EMSESP_FS.begin()) {
 #elif defined(ESP32)
     if (EMSESP_FS.begin(true)) {
@@ -275,7 +275,9 @@ void Settings::format(uuid::console::Shell & shell) {
         auto msg = F("Unable to mount filesystem");
         shell.logger().alert(msg);
     }
+#if defined(ESP8266)
     EMSuart::restart();
+#endif
 #endif
 }
 

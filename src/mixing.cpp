@@ -31,7 +31,7 @@ Mixing::Mixing(uint8_t device_type, uint8_t device_id, uint8_t product_id, const
     if (flags == EMSdevice::EMS_DEVICE_FLAG_MMPLUS) {
         if (device_id < 0x28) {
             // telegram handlers 0x20 - 0x27 for HC
-            register_telegram_type(device_id -0x20 + 0x02D7, F("MMPLUSStatusMessage_HC"), true, std::bind(&Mixing::process_MMPLUSStatusMessage_HC, this, _1));
+            register_telegram_type(device_id - 0x20 + 0x02D7, F("MMPLUSStatusMessage_HC"), true, std::bind(&Mixing::process_MMPLUSStatusMessage_HC, this, _1));
         } else {
             // telegram handlers for warm water/DHW 0x28, 0x29
             register_telegram_type(device_id - 0x28 + 0x0331, F("MMPLUSStatusMessage_WWC"), true, std::bind(&Mixing::process_MMPLUSStatusMessage_WWC, this, _1));
@@ -52,6 +52,15 @@ Mixing::Mixing(uint8_t device_type, uint8_t device_id, uint8_t product_id, const
 
 // add context submenu
 void Mixing::add_context_menu() {
+}
+
+// check to see if values have been updated
+bool Mixing::updated_values() {
+    return false;
+}
+
+// add console commands
+void Mixing::console_commands() {
 }
 
 // display all values into the shell console
@@ -86,10 +95,10 @@ void Mixing::publish_values() {
     if (mqtt_format_ == Settings::MQTT_format::SINGLE) {
         switch (type_) {
         case Type::HC:
-            rootMixing["type"] = F("hc");
+            rootMixing["type"] = "hc";
             break;
         case Type::WWC:
-            rootMixing["type"] = F("wwc");
+            rootMixing["type"] = "wwc";
             break;
         case Type::NONE:
         default:
@@ -139,15 +148,6 @@ void Mixing::publish_values() {
     char topic[30];
     strlcpy(topic, "mixing_data", 30);
     Mqtt::publish(topic, doc);
-}
-
-// check to see if values have been updated
-bool Mixing::updated_values() {
-    return false;
-}
-
-// add console commands
-void Mixing::console_commands() {
 }
 
 //  heating circuits 0x02D7, 0x02D8 etc...

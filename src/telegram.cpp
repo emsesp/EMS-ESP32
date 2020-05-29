@@ -43,6 +43,7 @@ bool     EMSbus::bus_connected_     = false;          // start assuming the bus 
 uint8_t  EMSbus::ems_mask_          = EMS_MASK_UNSET; // unset so its triggered when booting, the its 0x00=buderus, 0x80=junker/ht3
 uint8_t  EMSbus::ems_bus_id_        = EMSESP_DEFAULT_BUS_ID;
 bool     EMSbus::tx_waiting_        = false;
+bool     EMSbus::tx_active_         = false;
 
 uuid::log::Logger EMSbus::logger_{F_(logger_name), uuid::log::Facility::CONSOLE};
 
@@ -278,7 +279,7 @@ void RxService::add(uint8_t * data, uint8_t length) {
         // EMS 2.0 / EMS+
         if (data[2] == 0xFF) {
             // check for empty data
-            // special broadcast telegrams on ems+ have no data values, some even don't have a type ID
+            // special broadcast telegrams on ems+ have no data values, some even don't have a type ID, e.g. "21 0B FF 00"
             if (length <= 7) {
                 message_data   = data; // bogus pointer, will not be used
                 message_length = 0;
@@ -355,8 +356,8 @@ void TxService::loop() {
 #ifndef EMSESP_STANDALONE
     if ((uuid::get_uptime() - last_tx_check_) > TX_LOOP_WAIT) {
         last_tx_check_ = uuid::get_uptime();
-        if ((tx_telegrams_.size() >= MAX_TX_TELEGRAMS - 1) && (EMSbus::bus_connected())) {
-            LOG_ERROR(F("Tx buffer full. Looks like Tx is not working?"));
+        if (!tx_active_ && (EMSbus::bus_connected())) {
+            LOG_ERROR(F("Tx is not active. Please check connection."));
         }
     }
 #endif

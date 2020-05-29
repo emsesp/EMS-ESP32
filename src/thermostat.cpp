@@ -35,7 +35,7 @@ uuid::log::Logger Thermostat::logger_{F_(logger_name), uuid::log::Facility::CONS
 
 Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_id, const std::string & version, const std::string & name, uint8_t flags, uint8_t brand)
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
-    // telegram handlers
+    // common telegram handlers
     register_telegram_type(EMS_TYPE_RCOutdoorTemp, F("RCOutdoorTemp"), false, std::bind(&Thermostat::process_RCOutdoorTemp, this, _1));
     register_telegram_type(EMS_TYPE_RCTime, F("RCTime"), true, std::bind(&Thermostat::process_RCTime, this, _1)); // 0x06
 
@@ -44,8 +44,8 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
         monitor_typeids = {0xB1};
         set_typeids     = {0xB0};
         for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
-            register_telegram_type(monitor_typeids[i], F("RC10Monitor"), true, std::bind(&Thermostat::process_RC10Monitor, this, _1));
-            register_telegram_type(set_typeids[i], F("RC10Set"), true, std::bind(&Thermostat::process_RC10Set, this, _1));
+            register_telegram_type(monitor_typeids[i], F("RC10Monitor"), false, std::bind(&Thermostat::process_RC10Monitor, this, _1));
+            register_telegram_type(set_typeids[i], F("RC10Set"), false, std::bind(&Thermostat::process_RC10Set, this, _1));
         }
 
         // RC35
@@ -53,8 +53,8 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
         monitor_typeids = {0x3E, 0x48, 0x52, 0x5C};
         set_typeids     = {0x3D, 0x47, 0x51, 0x5B};
         for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
-            register_telegram_type(monitor_typeids[i], F("RC35Monitor"), true, std::bind(&Thermostat::process_RC35Monitor, this, _1));
-            register_telegram_type(set_typeids[i], F("RC35Set"), true, std::bind(&Thermostat::process_RC35Set, this, _1));
+            register_telegram_type(monitor_typeids[i], F("RC35Monitor"), false, std::bind(&Thermostat::process_RC35Monitor, this, _1));
+            register_telegram_type(set_typeids[i], F("RC35Set"), false, std::bind(&Thermostat::process_RC35Set, this, _1));
         }
         register_telegram_type(EMS_TYPE_IBASettings, F("IBASettings"), true, std::bind(&Thermostat::process_IBASettings, this, _1));
 
@@ -63,8 +63,8 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
         monitor_typeids = {0x91};
         set_typeids     = {0xA8};
         for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
-            register_telegram_type(monitor_typeids[i], F("RC20Monitor"), true, std::bind(&Thermostat::process_RC20Monitor, this, _1));
-            register_telegram_type(set_typeids[i], F("RC20Set"), true, std::bind(&Thermostat::process_RC20Set, this, _1));
+            register_telegram_type(monitor_typeids[i], F("RC20Monitor"), false, std::bind(&Thermostat::process_RC20Monitor, this, _1));
+            register_telegram_type(set_typeids[i], F("RC20Set"), false, std::bind(&Thermostat::process_RC20Set, this, _1));
         }
 
         // RC20 newer
@@ -72,8 +72,8 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
         monitor_typeids = {0xAE};
         set_typeids     = {0xAD};
         for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
-            register_telegram_type(monitor_typeids[i], F("RC20Monitor"), true, std::bind(&Thermostat::process_RC20Monitor_2, this, _1));
-            register_telegram_type(set_typeids[i], F("RC20Set"), true, std::bind(&Thermostat::process_RC20Set_2, this, _1));
+            register_telegram_type(monitor_typeids[i], F("RC20Monitor"), false, std::bind(&Thermostat::process_RC20Monitor_2, this, _1));
+            register_telegram_type(set_typeids[i], F("RC20Set"), false, std::bind(&Thermostat::process_RC20Set_2, this, _1));
         }
 
         // RC30
@@ -81,23 +81,23 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
         monitor_typeids = {0x41};
         set_typeids     = {0xA7};
         for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
-            register_telegram_type(monitor_typeids[i], F("RC30Monitor"), true, std::bind(&Thermostat::process_RC30Monitor, this, _1));
-            register_telegram_type(set_typeids[i], F("RC30Set"), true, std::bind(&Thermostat::process_RC30Set, this, _1));
+            register_telegram_type(monitor_typeids[i], F("RC30Monitor"), false, std::bind(&Thermostat::process_RC30Monitor, this, _1));
+            register_telegram_type(set_typeids[i], F("RC30Set"), false, std::bind(&Thermostat::process_RC30Set, this, _1));
         }
 
         // EASY
     } else if (flags == EMSdevice::EMS_DEVICE_FLAG_EASY) {
         monitor_typeids = {0x0A};
         set_typeids     = {};
-        register_telegram_type(monitor_typeids[0], F("EasyMonitor"), true, std::bind(&Thermostat::process_EasyMonitor, this, _1));
+        register_telegram_type(monitor_typeids[0], F("EasyMonitor"), false, std::bind(&Thermostat::process_EasyMonitor, this, _1));
 
         // RC300/RC100
     } else if ((flags == EMSdevice::EMS_DEVICE_FLAG_RC300) || (flags == EMSdevice::EMS_DEVICE_FLAG_RC100)) {
         monitor_typeids = {0x02A5, 0x02A6, 0x02A7, 0x02A8};
         set_typeids     = {0x02B9, 0x02BA, 0x02BB, 0x02BC};
         for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
-            register_telegram_type(monitor_typeids[i], F("RC300Monitor"), true, std::bind(&Thermostat::process_RC300Monitor, this, _1));
-            register_telegram_type(set_typeids[i], F("RC300Set"), true, std::bind(&Thermostat::process_RC300Set, this, _1));
+            register_telegram_type(monitor_typeids[i], F("RC300Monitor"), false, std::bind(&Thermostat::process_RC300Monitor, this, _1));
+            register_telegram_type(set_typeids[i], F("RC300Set"), false, std::bind(&Thermostat::process_RC300Set, this, _1));
         }
 
         // JUNKERS/HT3
@@ -105,16 +105,16 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
         monitor_typeids = {0x6F, 0x70, 0x71, 0x72};
         set_typeids     = {0x65, 0x66, 0x67, 0x68};
         for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
-            register_telegram_type(monitor_typeids[i], F("JunkersMonitor"), true, std::bind(&Thermostat::process_JunkersMonitor, this, _1));
-            register_telegram_type(set_typeids[i], F("JunkersSet"), true, std::bind(&Thermostat::process_JunkersSet, this, _1));
+            register_telegram_type(monitor_typeids[i], F("JunkersMonitor"), false, std::bind(&Thermostat::process_JunkersMonitor, this, _1));
+            register_telegram_type(set_typeids[i], F("JunkersSet"), false, std::bind(&Thermostat::process_JunkersSet, this, _1));
         }
 
     } else if (flags == (EMSdevice::EMS_DEVICE_FLAG_JUNKERS | EMSdevice::EMS_DEVICE_FLAG_JUNKERS_2)) {
         monitor_typeids = {0x6F, 0x70, 0x71, 0x72};
         set_typeids     = {0x79, 0x7A, 0x7B, 0x7C};
         for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
-            register_telegram_type(monitor_typeids[i], F("JunkersMonitor"), true, std::bind(&Thermostat::process_JunkersMonitor, this, _1));
-            register_telegram_type(set_typeids[i], F("JunkersSet"), true, std::bind(&Thermostat::process_JunkersSet, this, _1));
+            register_telegram_type(monitor_typeids[i], F("JunkersMonitor"), false, std::bind(&Thermostat::process_JunkersMonitor, this, _1));
+            register_telegram_type(set_typeids[i], F("JunkersSet"), false, std::bind(&Thermostat::process_JunkersSet, this, _1));
         }
     }
 
@@ -510,6 +510,7 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(const ui
 
 // determine which heating circuit the type ID is referring too
 // returns pointer to the HeatingCircuit or nullptr if it can't be found
+// if its a new one, the object will be created and also the fetch flags set
 std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::shared_ptr<const Telegram> telegram) {
     // look through the Monitor and Set arrays to see if there is a match
     uint8_t hc_num = 0;
@@ -545,8 +546,12 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::sha
     }
 
     // create a new heating circuit object
-    // TODO do we need to create a new object if using emplace_back?
     heating_circuits_.emplace_back(new HeatingCircuit(hc_num, monitor_typeids[hc_num - 1], set_typeids[hc_num - 1]));
+
+    // set the flag saying we want its data during the next auto fetch
+    toggle_fetch(monitor_typeids[hc_num - 1], true);
+    toggle_fetch(set_typeids[hc_num - 1], true);
+
     return heating_circuits_.back();
 }
 
@@ -667,16 +672,15 @@ std::string Thermostat::mode_tostring(uint8_t mode) const {
 void Thermostat::show_values(uuid::console::Shell & shell) {
     EMSdevice::show_values(shell); // always call this to show header
 
-    char buffer[10]; // for formatting only
+    char    buffer[10]; // for formatting only
+    uint8_t flags = (this->flags() & 0x0F); // specific thermostat characteristics, strip the option bits
 
     if (datetime_.size()) {
         shell.printfln(F("  Clock: %s"), datetime_.c_str());
-        if (ibaClockOffset != EMS_VALUE_UINT_NOTSET) {
+        if (ibaClockOffset != EMS_VALUE_UINT_NOTSET && flags == EMS_DEVICE_FLAG_RC30_1) {
             print_value(shell, 2, F("Offset clock"), Helpers::render_value(buffer, ibaClockOffset, 1)); // offset (in sec) to clock, 0xff = -1 s, 0x02 = 2 s
         }
     }
-
-    uint8_t flags = (this->flags() & 0x0F); // specific thermostat characteristics, strip the option bits
 
     if (flags == EMS_DEVICE_FLAG_RC35) {
         print_value(shell, 2, F("Damped Outdoor temperature"), F_(degrees), Helpers::render_value(buffer, dampedoutdoortemp, 1));
@@ -719,7 +723,7 @@ void Thermostat::show_values(uuid::console::Shell & shell) {
             }
         }
     }
-    if (flags == EMS_DEVICE_FLAG_RC35 ||flags == EMS_DEVICE_FLAG_RC30_1) {
+    if (flags == EMS_DEVICE_FLAG_RC35 || flags == EMS_DEVICE_FLAG_RC30_1) {
  
         if (ibaCalIntTemperature != EMS_VALUE_INT_NOTSET) {
             print_value(shell, 2, F("Offset int. temperature"), F_(degrees), Helpers::render_value(buffer, ibaCalIntTemperature, 2));

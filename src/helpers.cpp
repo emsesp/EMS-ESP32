@@ -152,7 +152,7 @@ char * Helpers::render_value(char * result, const int16_t value, const uint8_t f
     result[0] = '\0';
 
     // remove errors or invalid values, 0x7D00 and higher
-    if ((value == EMS_VALUE_SHORT_NOTSET) || (value == EMS_VALUE_SHORT_INVALID)) {
+    if ((value == EMS_VALUE_SHORT_NOTSET) || (value == EMS_VALUE_SHORT_INVALID) || (value == EMS_VALUE_USHORT_NOTSET)) {
         strlcpy(result, "?", 10);
         return result;
     }

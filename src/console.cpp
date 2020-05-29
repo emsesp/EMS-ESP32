@@ -431,7 +431,7 @@ void Console::start() {
         shell->log_level(uuid::log::Level::DEBUG); // order is: err, warning, notice, info, trace, debug, all
     }
 
-// always start the telnet service
+// always start the telnet service, except on an ESP8266
 // default idle is 10 minutes, default write timeout is 0 (automatic)
 // note, this must be started after the network/wifi for ESP32 otherwise it'll crash
 #ifndef EMSESP_STANDALONE
