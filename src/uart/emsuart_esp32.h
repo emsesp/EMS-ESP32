@@ -16,6 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+
+/*
+ * ESP32 UART port by @ArwedL and improved by @MichaelDvP. See https://github.com/proddy/EMS-ESP/issues/380
+ */
+
 #ifndef EMSESP_EMSUART_H
 #define EMSESP_EMSUART_H
 
@@ -27,15 +32,15 @@
 #include "freertos/queue.h"
 #include <driver/uart.h>
 
-#define EMS_MAXBUFFERSIZE 33 // max size of the buffer. EMS packets are max 32 bytes, plus extra 2 for BRKs
+#define EMS_MAXBUFFERSIZE 33 // max size of the buffer. EMS packets are max 32 bytes, plus extra for BRK
 
 #define EMSUART_UART UART_NUM_2 // on the ESP32 we're using UART2
 #define EMS_UART UART2          // for intr setting
-#define EMSUART_BAUD 9600 // uart baud rate for the EMS circuit
+#define EMSUART_BAUD 9600       // uart baud rate for the EMS circuit
 
 // customize the GPIO pins for RX and TX here
-#define EMSUART_RXPIN 17 // 17 is UART2 RX. Use 23 for D7 on a Wemos D1-32 mini for backwards compatabilty
-#define EMSUART_TXPIN 16 // 16 is UART2 TX. Use 5 for D8 on a Wemos D1-32 mini for backwards compatabilty
+#define EMSUART_RXPIN 23 // 17 is UART2 RX. Use 23 for D7 on a Wemos D1-32 mini for backwards compatabilty
+#define EMSUART_TXPIN 5  // 16 is UART2 TX. Use 5 for D8 on a Wemos D1-32 mini for backwards compatabilty
 
 namespace emsesp {
 
@@ -57,7 +62,8 @@ class EMSuart {
     static EMSUART_STATUS transmit(uint8_t * buf, uint8_t len);
 
   private:
-    static void emsuart_recvTask(void * param);
+    static void           emsuart_recvTask(void * para);
+    static void IRAM_ATTR emsuart_rx_intr_handler(void * para);
 };
 
 } // namespace emsesp

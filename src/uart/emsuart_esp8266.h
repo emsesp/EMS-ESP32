@@ -36,7 +36,7 @@
 #define EMS_TXMODE_DEFAULT 1
 #define EMS_TXMODE_EMSPLUS 2
 #define EMS_TXMODE_HT3 3
-#define EMS_TXMODE_NEW 4 // for michael
+#define EMS_TXMODE_NEW 4 // for michael's testing
 
 // LEGACY
 #define EMSUART_BIT_TIME 104     // bit time @9600 baud
@@ -47,7 +47,7 @@
 #define EMSUART_TX_LAG 8
 #define EMSUART_BUSY_WAIT (EMSUART_BIT_TIME / 8)
 #define EMS_TX_TO_CHARS (2 + 20)
-#define EMS_TX_TO_COUNT ((EMS_TX_TO_CHARS)*10 * 8)
+#define EMS_TX_TO_COUNT ((EMS_TX_TO_CHARS)*8)
 
 namespace emsesp {
 

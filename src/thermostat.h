@@ -57,9 +57,12 @@ class Thermostat : public EMSdevice {
         uint8_t holidaytemp       = EMS_VALUE_UINT_NOTSET;
         uint8_t heatingtype       = EMS_VALUE_UINT_NOTSET; // type of heating: 1 radiator, 2 convectors, 3 floors, 4 room supply
         uint8_t circuitcalctemp   = EMS_VALUE_UINT_NOTSET;
+        uint8_t summertemp        = EMS_VALUE_UINT_NOTSET;
+        uint8_t nofrosttemp       = EMS_VALUE_UINT_NOTSET;
+        uint8_t designtemp        = EMS_VALUE_UINT_NOTSET; // heatingcurve design temp at MinExtTemp
+        uint8_t offsettemp        = 100;                   // heatingcurve offest temp at roomtemp signed!
+        uint16_t remotetemp       = EMS_VALUE_SHORT_NOTSET; // for simulating a RC20 remote 
 
-        uint8_t designtemp = EMS_VALUE_UINT_NOTSET; // heatingcurve design temp at MinExtTemp
-        uint8_t offsettemp = 100;                   // heatingcurve offest temp at roomtemp signed!
 
         uint8_t hc_num() const {
             return hc_num_;
@@ -76,7 +79,7 @@ class Thermostat : public EMSdevice {
             return set_typeid_;
         }
 
-        enum Mode : uint8_t { UNKNOWN, OFF, MANUAL, AUTO, DAY, NIGHT, HEAT, NOFROST, ECO, HOLIDAY, COMFORT, OFFSET, DESIGN };
+        enum Mode : uint8_t { UNKNOWN, OFF, MANUAL, AUTO, DAY, NIGHT, HEAT, NOFROST, ECO, HOLIDAY, COMFORT, OFFSET, DESIGN, SUMMER };
 
       private:
         uint8_t  hc_num_;
@@ -159,6 +162,10 @@ class Thermostat : public EMSdevice {
     static constexpr uint8_t EMS_OFFSET_RC35Set_heatingtype        = 0;  // e.g. floor heating = 3
     static constexpr uint8_t EMS_OFFSET_RC35Set_circuitcalctemp    = 14; // calculated circuit temperature
     static constexpr uint8_t EMS_OFFSET_RC35Set_seltemp            = 37; // selected temp
+    static constexpr uint8_t EMS_OFFSET_RC35Set_temp_offset        = 6;
+    static constexpr uint8_t EMS_OFFSET_RC35Set_temp_design        = 17;
+    static constexpr uint8_t EMS_OFFSET_RC35Set_temp_summer        = 22;
+    static constexpr uint8_t EMS_OFFSET_RC35Set_temp_nofrost       = 23;
 
     static constexpr uint8_t EMS_OFFSET_EasyStatusMessage_setpoint = 10; // setpoint temp
     static constexpr uint8_t EMS_OFFSET_EasyStatusMessage_curr     = 8;  // current temp

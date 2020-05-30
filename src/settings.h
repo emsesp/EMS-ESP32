@@ -148,7 +148,7 @@ class Settings {
     uint8_t master_thermostat() const;
     void    master_thermostat(const uint8_t & master_thermostat);
 
-    enum MQTT_format : uint8_t { SINGLE = 1, NESTED, HA };
+    enum MQTT_format : uint8_t { SINGLE = 1, NESTED, HA, CUSTOM };
     uint8_t mqtt_format() const;
     void    mqtt_format(const uint8_t & mqtt_format);
 

@@ -66,11 +66,6 @@ uint32_t EMSESP::last_fetch_ = 0;
 #include "test/test_data.h" // used with the 'test' command, under su/admin
 #endif
 
-// for each associated EMS device go and request its data values
-void EMSESP::fetch_device_values() {
-    fetch_device_values(0); // 0 = fetch all
-}
-
 // for a specific EMS device go and request data values
 // or if device_id is 0 it will fetch from all known devices
 void EMSESP::fetch_device_values(const uint8_t device_id) {
@@ -422,7 +417,7 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
         if (emsdevice) {
             if (emsdevice->is_device_id(telegram->src)) {
                 found = emsdevice->handle_telegram(telegram);
-                // check to see if we need to force an MQTT publish
+                // check to see if we need to follow up after the telegram has been processed
                 if (found) {
                     if (emsdevice->updated_values()) {
                         emsdevice->publish_values(); // publish to MQTT if we explicitly have too

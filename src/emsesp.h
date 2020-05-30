@@ -123,8 +123,7 @@ class EMSESP {
 
     static void console_commands(Shell & shell, unsigned int context);
 
-    static void fetch_device_values(const uint8_t device_id);
-    static void fetch_device_values();
+    static void fetch_device_values(const uint8_t device_id = 0);
 
   private:
     EMSESP() = delete;
