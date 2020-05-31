@@ -172,9 +172,9 @@ void Solar::process_SM100Status2(std::shared_ptr<const Telegram> telegram) {
  * e.g. 30 00 FF 00 02 8E 00 00 00 00 00 00 06 C5 00 00 76 35
  */
 void Solar::process_SM100Energy(std::shared_ptr<const Telegram> telegram) {
-    telegram->read_value(energyLastHour_, 0); // last hour / 10 in Wh
-    telegram->read_value(energyToday_, 4);    //  todays in Wh
-    telegram->read_value(energyTotal_, 8);    //  total / 10 in kWh
+    telegram->read_value32(energyLastHour_, 0); // last hour / 10 in Wh
+    telegram->read_value32(energyToday_, 4);    //  todays in Wh
+    telegram->read_value32(energyTotal_, 8);    //  total / 10 in kWh
 }
 
 /*

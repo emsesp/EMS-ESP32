@@ -135,6 +135,16 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
     } else {
         LOG_DEBUG(F("Registering new thermostat with device ID 0x%02X"), device_id);
     }
+
+
+    // for the thermostat, go a query all the heating circuits. This is only done once. The automatic fetch will from now on
+    // only update the active heating circuits
+    for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
+        EMSESP::send_read_request(set_typeids[i], device_id);
+    }
+    for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
+        EMSESP::send_read_request(monitor_typeids[i], device_id);
+    }
 }
 
 // for the master thermostat initialize the MQTT subscribes
@@ -221,6 +231,7 @@ void Thermostat::thermostat_cmd(const char * message) {
         LOG_DEBUG(F("MQTT error: payload %s, error %s"), message, error.c_str());
         return;
     }
+
     for (const auto & hc : heating_circuits_) {
         char hc_name[6], s[3]; // hc{1-4}
         strlcpy(hc_name, "hc", 6);
@@ -230,7 +241,7 @@ void Thermostat::thermostat_cmd(const char * message) {
             std::string mode = doc[hc_name]["mode"]; // first check mode
             set_mode(mode, hc_num);
         }
-        if (float f = doc[hc_name]["temp"]) { 
+        if (float f = doc[hc_name]["temp"]) {
             set_temperature(f, HeatingCircuit::Mode::AUTO, hc_num);
         }
         if (float f = doc[hc_name]["nighttemp"]) {
@@ -255,10 +266,10 @@ void Thermostat::thermostat_cmd(const char * message) {
             set_temperature(f, HeatingCircuit::Mode::HOLIDAY, hc_num);
         }
         if (float f = doc[hc_name]["remotetemp"]) {
-            if(f > 100 || f < 0) {
+            if (f > 100 || f < 0) {
                 hc->remotetemp = EMS_VALUE_SHORT_NOTSET;
             } else {
-                hc->remotetemp = (uint16_t) (f * 10);
+                hc->remotetemp = (uint16_t)(f * 10);
             }
         }
     }
@@ -376,7 +387,7 @@ void Thermostat::thermostat_cmd_mode(const char * message) {
     set_mode(s, DEFAULT_HEATING_CIRCUIT);
 }
 
-// this function is called post and telegram process call
+// this function is called post the telegram handler function has been executed
 // we check if any of the thermostat values have changed and then republish if necessary
 bool Thermostat::updated_values() {
     // only publish on the master thermostat
@@ -420,8 +431,9 @@ void Thermostat::publish_values() {
     JsonObject                                      rootThermostat = doc.to<JsonObject>();
     JsonObject                                      dataThermostat;
 
-    // optional, add external temp. I don't think anyone (except MichaelDvP) actually is interested in this
-    if ((flags == EMS_DEVICE_FLAG_RC35 || flags == EMS_DEVICE_FLAG_RC30_1) && (mqtt_format_ == Settings::MQTT_format::SINGLE || mqtt_format_ == Settings::MQTT_format::MY)) {
+    // add external temp
+    if ((flags == EMS_DEVICE_FLAG_RC35 || flags == EMS_DEVICE_FLAG_RC30_1)
+        && (mqtt_format_ == Settings::MQTT_format::SINGLE || mqtt_format_ == Settings::MQTT_format::CUSTOM)) {
         if (datetime_.size()) {
             rootThermostat["time"] = datetime_.c_str();
         }
@@ -434,15 +446,12 @@ void Thermostat::publish_values() {
         if (tempsensor2 != EMS_VALUE_USHORT_NOTSET) {
             rootThermostat["inttemp2"] = (float)tempsensor2 / 10;
         }
- 
         if (ibaCalIntTemperature != EMS_VALUE_INT_NOTSET) {
             rootThermostat["intoffset"] = (float)ibaCalIntTemperature / 2;
         }
-
         if (ibaMinExtTemperature != EMS_VALUE_INT_NOTSET) {
             rootThermostat["minexttemp"] = (float)ibaMinExtTemperature; // min ext temp for heating curve, in deg.
         }
-
         if (ibaBuildingType != EMS_VALUE_UINT_NOTSET) {
             if (ibaBuildingType == 0) {
                 rootThermostat["building"] = "light";
@@ -495,6 +504,7 @@ void Thermostat::publish_values() {
         if (hc->setpoint_roomTemp != EMS_VALUE_SHORT_NOTSET) {
             dataThermostat["seltemp"] = Helpers::round2((float)hc->setpoint_roomTemp / setpoint_temp_divider);
         }
+
         if (hc->curr_roomTemp != EMS_VALUE_SHORT_NOTSET && hc->curr_roomTemp != EMS_VALUE_USHORT_NOTSET) {
             dataThermostat["currtemp"] = Helpers::round2((float)hc->curr_roomTemp / curr_temp_divider);
         }
@@ -525,7 +535,8 @@ void Thermostat::publish_values() {
             dataThermostat["designtemp"] = hc->designtemp;
         }
 
-        if (hc->mode != EMS_VALUE_UINT_NOTSET) {
+        // when using HA always send the mode otherwise it'll break the component/widget and report an error
+        if ((hc->mode != EMS_VALUE_UINT_NOTSET) || (mqtt_format_ == Settings::MQTT_format::HA)) {
             uint8_t hc_mode = hc->get_mode(flags);
             // if we're sending to HA the only valid mode types are heat, auto and off
             if (mqtt_format_ == Settings::MQTT_format::HA) {
@@ -574,7 +585,7 @@ void Thermostat::publish_values() {
         Mqtt::publish("thermostat_data", doc);
     } else if (mqtt_format_ == Settings::MQTT_format::HA) {
         Mqtt::publish("homeassistant/climate/ems-esp/state", doc);
-    } else if (mqtt_format_ == Settings::MQTT_format::MY) {
+    } else if (mqtt_format_ == Settings::MQTT_format::CUSTOM) {
         Mqtt::publish("thermostat_data", doc);
     }
 }
@@ -1238,7 +1249,6 @@ void Thermostat::set_mode(const uint8_t mode, const uint8_t hc_num) {
     // post validate is the corresponding monitor or set type IDs as they can differ per model
     write_command(set_typeids[hc->hc_num() - 1], offset, set_mode_value, validate_typeid);
 }
-
 
 // Set the temperature of the thermostat
 void Thermostat::set_temperature(const float temperature, const uint8_t mode, const uint8_t hc_num) {

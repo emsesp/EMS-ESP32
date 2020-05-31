@@ -24,10 +24,11 @@ MAKE_PSTR_WORD(qos)
 MAKE_PSTR_WORD(base)
 MAKE_PSTR_WORD(heartbeat)
 MAKE_PSTR_WORD(ip)
+MAKE_PSTR_WORD(port)
 MAKE_PSTR_WORD(nested)
 MAKE_PSTR_WORD(single)
 MAKE_PSTR_WORD(ha)
-MAKE_PSTR_WORD(my)
+MAKE_PSTR_WORD(custom)
 MAKE_PSTR_WORD(publish_time)
 MAKE_PSTR_WORD(publish)
 MAKE_PSTR_WORD(connected)
@@ -647,8 +648,8 @@ void Mqtt::console_commands(Shell & shell, unsigned int context) {
                 value = Settings::MQTT_format::NESTED;
             } else if (arguments[0] == read_flash_string(F_(ha))) {
                 value = Settings::MQTT_format::HA;
-            } else if (arguments[0] == read_flash_string(F_(my))) {
-                value = Settings::MQTT_format::MY;
+            } else if (arguments[0] == read_flash_string(F_(custom))) {
+                value = Settings::MQTT_format::CUSTOM;
             } else {
                 shell.println(F("Must be single, nested or ha"));
                 return;
@@ -658,7 +659,7 @@ void Mqtt::console_commands(Shell & shell, unsigned int context) {
             shell.println(F("Please restart EMS-ESP"));
         },
         [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments __attribute__((unused))) -> const std::vector<std::string> {
-            return std::vector<std::string>{read_flash_string(F_(single)), read_flash_string(F_(nested)), read_flash_string(F_(ha)), read_flash_string(F_(my))};
+            return std::vector<std::string>{read_flash_string(F_(single)), read_flash_string(F_(nested)), read_flash_string(F_(ha)), read_flash_string(F_(custom))};
         });
 
     EMSESPShell::commands->add_command(ShellContext::MQTT,
@@ -721,6 +722,19 @@ void Mqtt::console_commands(Shell & shell, unsigned int context) {
                                            Settings settings;
                                            if (!arguments.empty()) {
                                                settings.mqtt_base(arguments.front());
+                                               settings.commit();
+                                           }
+                                           reconnect();
+                                       });
+    
+    EMSESPShell::commands->add_command(ShellContext::MQTT,
+                                       CommandFlags::ADMIN,
+                                       flash_string_vector{F_(set), F_(port)},
+                                       flash_string_vector{F_(port_mandatory)},
+                                       [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) {
+                                           Settings settings;
+                                           if (!arguments.empty()) {
+                                               settings.mqtt_port(atoi(arguments.front().c_str()));
                                                settings.commit();
                                            }
                                            reconnect();
@@ -823,8 +837,8 @@ void Mqtt::console_commands(Shell & shell, unsigned int context) {
                 shell.printfln(F_(mqtt_format_fmt), F_(nested));
             } else if (settings.mqtt_format() == Settings::MQTT_format::HA) {
                 shell.printfln(F_(mqtt_format_fmt), F_(ha));
-            } else if (settings.mqtt_format() == Settings::MQTT_format::MY) {
-                shell.printfln(F_(mqtt_format_fmt), F_(my));
+            } else if (settings.mqtt_format() == Settings::MQTT_format::CUSTOM) {
+                shell.printfln(F_(mqtt_format_fmt), F_(custom));
             }
             shell.printfln(F_(mqtt_heartbeat_fmt), settings.mqtt_heartbeat() ? F_(enabled) : F_(disabled));
             shell.printfln(F_(mqtt_publish_time_fmt), settings.mqtt_publish_time());

@@ -38,8 +38,8 @@ bool                  drop_next_rx = true;
 // Important: must not use ICACHE_FLASH_ATTR
 //
 void ICACHE_RAM_ATTR EMSuart::emsuart_rx_intr_handler(void * para) {
-    static uint8_t length   = 0;
 //    static bool    rx_idle_ = true;
+    static uint8_t length = 0;
     static uint8_t uart_buffer[EMS_MAXBUFFERSIZE + 2];
 
 /*
@@ -62,7 +62,7 @@ void ICACHE_RAM_ATTR EMSuart::emsuart_rx_intr_handler(void * para) {
 */
     // BREAK detection = End of EMS data block
     if (USIS(EMSUART_UART) & ((1 << UIBD))) {
-        length   = 0;
+        length = 0;
         while ((USS(EMSUART_UART) >> USRXC) & 0xFF) {
             uint8_t rx = USF(EMSUART_UART);
             if (length < EMS_MAXBUFFERSIZE) {
@@ -77,7 +77,7 @@ void ICACHE_RAM_ATTR EMSuart::emsuart_rx_intr_handler(void * para) {
         if (!drop_next_rx) {
             pEMSRxBuf->length = length;
             os_memcpy((void *)pEMSRxBuf->buffer, (void *)&uart_buffer, pEMSRxBuf->length); // copy data into transfer buffer, including the BRK 0x00 at the end
- //       rx_idle_ = true;        // check set the status flag stating BRK has been received and we can start a new package
+            // rx_idle_ = true; // check set the status flag stating BRK has been received and we can start a new package
         }
         drop_next_rx = false;
         ETS_UART_INTR_ENABLE(); // re-enable UART interrupts

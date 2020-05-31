@@ -274,7 +274,7 @@ void Sensors::publish_values() {
 
     uint8_t i = 1;
     for (const auto & device : devices_) {
-        if (mqtt_format_ == Settings::MQTT_format::MY) {
+        if (mqtt_format_ == Settings::MQTT_format::CUSTOM) {
             char s[5];
             doc[device.to_string()] = Helpers::render_value(s, device.temperature_c_, 2);
         } else { 

@@ -63,7 +63,6 @@ class Mixing : public EMSdevice {
     uint8_t  status_      = EMS_VALUE_UINT_NOTSET;
     uint8_t  flowSetTemp_ = EMS_VALUE_UINT_NOTSET;
     Type     type_        = Type::NONE;
-    uint8_t  mqtt_format_; // single, nested or ha
 
 };
 

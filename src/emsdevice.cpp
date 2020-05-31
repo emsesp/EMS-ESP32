@@ -228,8 +228,7 @@ std::string EMSdevice::telegram_type_name(std::shared_ptr<const Telegram> telegr
     }
 
     for (const auto & tf : telegram_functions_) {
-//        if ((tf.telegram_type_id_ & 0x7F) == (telegram->type_id & 0x7F)) {
-        if (tf.telegram_type_id_ == telegram->type_id && (telegram->type_id < 0xF0)) {
+        if (tf.telegram_type_id_ == (telegram->type_id && ((telegram->type_id & 0xF0) != 0xF0))) {
             return uuid::read_flash_string(tf.telegram_type_name_);
         }
     }

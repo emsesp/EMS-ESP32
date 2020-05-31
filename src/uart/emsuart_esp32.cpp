@@ -81,7 +81,7 @@ void EMSuart::start(uint8_t tx_mode) {
         restart();
         return;
     }
-    tx_mode_ =  tx_mode;
+    tx_mode_ = tx_mode;
     uart_config_t uart_config = {
         .baud_rate = EMSUART_BAUD,
         .data_bits = UART_DATA_8_BITS,
@@ -89,18 +89,18 @@ void EMSuart::start(uint8_t tx_mode) {
         .stop_bits = UART_STOP_BITS_1,
         .flow_ctrl = UART_HW_FLOWCTRL_DISABLE,
     };
-    
+
     ESP_ERROR_CHECK(uart_param_config(EMSUART_UART, &uart_config));
     ESP_ERROR_CHECK(uart_set_pin(EMSUART_UART, EMSUART_TXPIN, EMSUART_RXPIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
     EMS_UART.int_ena.val             = 0; // disable all intr.
     EMS_UART.int_clr.val             = 0xFFFFFFFF; // clear all intr. flags
     EMS_UART.idle_conf.tx_brk_num    = 11; // breaklength 11 bit
-    EMS_UART.idle_conf.rx_idle_thrhd = 256;  
+    EMS_UART.idle_conf.rx_idle_thrhd = 256;
     drop_next_rx                     = true;
     buf_handle                       = xRingbufferCreate(128, RINGBUF_TYPE_NOSPLIT);
     ESP_ERROR_CHECK(uart_isr_register(EMSUART_UART, emsuart_rx_intr_handler, NULL, ESP_INTR_FLAG_IRAM, &uart_handle));
     xTaskCreate(emsuart_recvTask, "emsuart_recvTask", 2048, NULL, 12, NULL);
-    EMS_UART.int_ena.brk_det = 1; // activate only break   
+    EMS_UART.int_ena.brk_det = 1; // activate only break
 }
 
 /*
@@ -114,9 +114,9 @@ void EMSuart::stop() {
  * Restart Interrupt
  */
 void EMSuart::restart() {
-    if (EMS_UART.int_raw.brk_det) { 
+    if (EMS_UART.int_raw.brk_det) {
         EMS_UART.int_clr.brk_det = 1; // clear flag
-        drop_next_rx = true; // and drop first frame 
+        drop_next_rx = true; // and drop first frame
     }
     EMS_UART.int_ena.brk_det = 1; // activate only break
 };

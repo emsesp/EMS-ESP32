@@ -48,8 +48,8 @@
 #define EMSESP_DEFAULT_TX_MODE 1
 #define EMSESP_DEFAULT_MQTT_ENABLED true
 #define EMSESP_DEFAULT_MQTT_BASE "home"
-#define EMSESP_DEFAULT_MQTT_PORT 1884
-#define EMSESP_DEFAULT_MQTT_QOS 0
+#define EMSESP_DEFAULT_MQTT_PORT 1883
+#define EMSESP_DEFAULT_MQTT_QOS 1
 #define EMSESP_DEFAULT_MQTT_RETAIN false
 #define EMSESP_DEFAULT_MQTT_FORMAT 2 // 2=nested
 #define EMSESP_DEFAULT_MQTT_HEARTBEAT true
@@ -148,7 +148,7 @@ class Settings {
     uint8_t master_thermostat() const;
     void    master_thermostat(const uint8_t & master_thermostat);
 
-    enum MQTT_format : uint8_t { SINGLE = 1, NESTED, HA, MY };
+    enum MQTT_format : uint8_t { SINGLE = 1, NESTED, HA, CUSTOM };
     uint8_t mqtt_format() const;
     void    mqtt_format(const uint8_t & mqtt_format);
 
