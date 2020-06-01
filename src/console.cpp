@@ -235,7 +235,7 @@ void Console::load_standard_commands(unsigned int context) {
                 }
 
                 // trace logic
-                if (level == uuid::log::Level::TRACE) {
+                if (level == uuid::log::Level::TRACE || level == uuid::log::Level::DEBUG) {
                     watch_id = LOG_TRACE_WATCH_NONE; // no watch ID set
                     if (arguments.size() > 1) {
                         // next argument is raw or full
@@ -243,6 +243,8 @@ void Console::load_standard_commands(unsigned int context) {
                             emsesp::EMSESP::trace_raw(true);
                         } else if (arguments[1] == read_flash_string(F_(full))) {
                             emsesp::EMSESP::trace_raw(false);
+                        } else {
+                            emsesp::EMSESP::trace_watch_id(Helpers::hextoint(arguments[1].c_str()));
                         }
 
                         // get the watch_id if its set

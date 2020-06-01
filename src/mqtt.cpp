@@ -726,7 +726,7 @@ void Mqtt::console_commands(Shell & shell, unsigned int context) {
                                            }
                                            reconnect();
                                        });
-    
+
     EMSESPShell::commands->add_command(ShellContext::MQTT,
                                        CommandFlags::ADMIN,
                                        flash_string_vector{F_(set), F_(port)},

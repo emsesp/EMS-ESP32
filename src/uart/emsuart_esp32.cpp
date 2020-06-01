@@ -63,7 +63,7 @@ void IRAM_ATTR EMSuart::emsuart_rx_intr_handler(void * para) {
             if (length < EMS_MAXBUFFERSIZE) {
                 rxbuf[length++] = rx;
             } else {
-                drop_next_rx = true; // we have a overflow 
+                drop_next_rx = true; // we have a overflow
             }
         }
         if ((!drop_next_rx) && ((length == 2) || (length > 4))) {

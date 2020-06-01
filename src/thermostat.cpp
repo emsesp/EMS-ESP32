@@ -470,8 +470,8 @@ void Thermostat::publish_values() {
     // go through all the heating circuits
     for (const auto & hc : heating_circuits_) {
 //        if ((hc->setpoint_roomTemp == EMS_VALUE_SHORT_NOTSET) || (hc->curr_roomTemp == EMS_VALUE_SHORT_NOTSET)) {
-        if (hc->heatingtype == 0) {
-            break; // skip this HC 
+        if (hc->setpoint_roomTemp == EMS_VALUE_SHORT_NOTSET) {
+            break; // skip this HC
         }
 
         has_data = true;

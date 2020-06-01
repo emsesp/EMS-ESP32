@@ -279,6 +279,8 @@ uint32_t Helpers::hextoint(const char * hex) {
             byte = byte - 'a' + 10;
         else if (byte >= 'A' && byte <= 'F')
             byte = byte - 'A' + 10;
+        else 
+            return 0; // error
         // shift 4 to make space for new digit, and add the 4 bits of the new digit
         val = (val << 4) | (byte & 0xF);
     }

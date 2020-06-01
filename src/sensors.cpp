@@ -277,7 +277,7 @@ void Sensors::publish_values() {
         if (mqtt_format_ == Settings::MQTT_format::CUSTOM) {
             char s[5];
             doc[device.to_string()] = Helpers::render_value(s, device.temperature_c_, 2);
-        } else { 
+        } else {
             char sensorID[10]; // sensor{1-n}
             strlcpy(sensorID, "sensor", 10);
             char s[5];
