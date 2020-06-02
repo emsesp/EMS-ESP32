@@ -222,10 +222,10 @@ void RxService::start() {
 void RxService::loop() {
 #ifndef EMSESP_STANDALONE
     // give rx some breathing space
-    if ((uuid::get_uptime() - last_rx_check_) < RX_LOOP_WAIT) {
-        return;
-    }
-    last_rx_check_ = uuid::get_uptime();
+    //if ((uuid::get_uptime() - last_rx_check_) < RX_LOOP_WAIT) {
+    //    return;
+    //}
+    //last_rx_check_ = uuid::get_uptime();
 #endif
 
     while (!rx_telegrams_.empty()) {
