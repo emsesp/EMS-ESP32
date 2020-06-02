@@ -66,7 +66,11 @@ class Sensors {
 #if defined(ESP8266)
     static constexpr uint8_t SENSOR_GPIO = 14; // D5
 #elif defined(ESP32)
+#ifdef WEMOS_D1_32
     static constexpr uint8_t SENSOR_GPIO = 18; // Wemos D1-32 for compatibility D5
+#else
+    static constexpr uint8_t SENSOR_GPIO = 14;
+#endif
 #endif
 
     enum class State { IDLE, READING, SCANNING };

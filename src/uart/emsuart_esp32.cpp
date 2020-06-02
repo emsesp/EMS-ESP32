@@ -126,7 +126,7 @@ void EMSuart::restart() {
  */
 void EMSuart::send_poll(uint8_t data) {
     EMS_UART.fifo.rw_byte  = data;
-    EMS_UART.conf0.txd_brk = 1;  // <brk> after send
+    EMS_UART.conf0.txd_brk = 1; // <brk> after send
 }
 
 /*
@@ -139,7 +139,7 @@ EMSUART_STATUS EMSuart::transmit(uint8_t * buf, uint8_t len) {
         for (uint8_t i = 0; i < len; i++) {
             EMS_UART.fifo.rw_byte = buf[i];
         }
-        EMS_UART.conf0.txd_brk = 1;  // <brk> after send
+        EMS_UART.conf0.txd_brk = 1; // <brk> after send
     }
     return EMS_TX_STATUS_OK;
 }
