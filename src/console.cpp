@@ -438,7 +438,7 @@ void Console::start() {
 // note, this must be started after the network/wifi for ESP32 otherwise it'll crash
 #ifndef EMSESP_STANDALONE
     telnet_.start();
-    // telnet_.default_write_timeout(1000); // in ms, socket timeout 1 second
+    telnet_.default_write_timeout(1000); // in ms, socket timeout 1 second
 #endif
 }
 
