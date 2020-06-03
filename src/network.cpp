@@ -44,6 +44,12 @@ void Network::start() {
     sta_mode_disconnected_ = WiFi.onStationModeDisconnected(std::bind(&Network::sta_mode_disconnected, this, _1));
     sta_mode_got_ip_       = WiFi.onStationModeGotIP(std::bind(&Network::sta_mode_got_ip, this, _1));
 
+    WiFi.setSleepMode(WIFI_NONE_SLEEP); // added to possibly fix wifi dropouts in arduino core 2.5.0
+    // ref: https://github.com/esp8266/Arduino/issues/6471
+    // ref: https://github.com/esp8266/Arduino/issues/6366
+    // high tx power causing weird behavior, slightly lowering from 20.5 to 20.0 may help stability
+    // WiFi.setOutputPower(20.0); // in DBM
+
     connect();   // connect to WiFi
     ota_setup(); // initialize OTA
 
@@ -164,9 +170,8 @@ void Network::connect() {
 #endif
     }
 
-    if (!settings.wifi_ssid().empty()) {
-        WiFi.begin(settings.wifi_ssid().c_str(), settings.wifi_password().c_str());
-    }
+    LOG_INFO(F("Connecting to wifi ssid %s..."), settings.wifi_ssid().c_str());
+    WiFi.begin(settings.wifi_ssid().c_str(), settings.wifi_password().c_str());
 
 #endif
 }
