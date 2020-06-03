@@ -16,7 +16,4 @@ scripts/stackdmp.txt
 firmware
 *.bin
 emsesp
-doc/github.txt
-doc/test_data.txt
 
-/src/uart/uart_proddy.txt

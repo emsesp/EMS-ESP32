@@ -389,7 +389,7 @@ void Boiler::show_values(uuid::console::Shell & shell) {
     print_value(shell, 2, F("Boiler pump"), Helpers::render_value(buffer, heatPmp_, EMS_VALUE_BOOL));
     print_value(shell, 2, F("Fan"), Helpers::render_value(buffer, fanWork_, EMS_VALUE_BOOL));
     print_value(shell, 2, F("Ignition"), Helpers::render_value(buffer, ignWork_, EMS_VALUE_BOOL));
-    
+
     print_value(shell, 2, F("Burner selected max power"), F_(percent), Helpers::render_value(buffer, selBurnPow_, 1));
     print_value(shell, 2, F("Burner current power"), F_(percent), Helpers::render_value(buffer, curBurnPow_, 1));
     print_value(shell, 2, F("Flame current"), F("uA"), Helpers::render_value(buffer, flameCurr_, 10));
