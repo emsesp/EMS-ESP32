@@ -140,6 +140,7 @@ TODO validate 0xE9 with data from Koen. (https://github.com/proddy/EMS-ESP/issue
 ```
 TODO replace vectors of class objects with shared pointers and use emplace_back since it instantiates during construction. It may have a performance gain.
 TODO make more use of comparison operators in the Telegram class e.g. the compare like "friend inline bool operator==(const Telegram & lhs, const Telegram & rhs)"
+TODO replace read_value with C++ Templates per data type
 TODO exit from serial should be prevented? Because you never can really exit, just close it.
 TODO add real unit tests using platformio's test bed (https://docs.platformio.org/en/latest/plus/pio-remote.html)
 TODO See if it's easier to use timers instead of millis() timers, using https://github.com/esp8266/Arduino/blob/master/libraries/esp8266/examples/BlinkPolledTimeout/BlinkPolledTimeout.ino
