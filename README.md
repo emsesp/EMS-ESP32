@@ -1,6 +1,6 @@
 # EMS-ESP version 2.0 (alpha)
 
-*Warning: this is a snapshot from my EMS-ESP2 development repo and still in early stages of it's development. Not all features have been fully tested. Use at your own risk!*
+*Warning: this is still in early stages of it's development. Not all features have been fully tested. Use at your own risk!*
 
 Note: Version 2.0 is not backward compatible with v1.0. The File system structure is different. When coming from version 1.9.x its best if you first erase the flash on the ESP and upload using USB. `esptool.py erase_flash` will clean the flash and `esptool.py -p COM6 -b 921600 write_flash 0x00000 firmware.bin` is an example of how to upload the firmware over USB.
 
@@ -41,7 +41,7 @@ Note: Version 2.0 is not backward compatible with v1.0. The File system structur
 common commands available in all contexts:
   exit
   help
-  log [level] [raw] [trace ID]
+  log [level] [full|raw] [trace ID]
   su
 
 (top level)
