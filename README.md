@@ -125,8 +125,6 @@ thermostat
 
 ```
 TODO ESP32 - when saving SPIFFS the UART stop and restart() functions need to flush queue to avoid miss fires
-TODO network issues with ESP8266 - can take a while to get an IP address. DNS issue?
-TODO figure out why sometimes telnet on ESP32 (and sometimes ESP8266) has slow response times. After a manual reset it seems to fix itself. Perhaps the telnet service needs to start after the wifi is up & running.
 TODO sometimes with tx_mode 0 there are a few CRC errors due to collision when waiting for a BRK signal.
 TODO console auto-complete with 'set' command in the system context is not showing all commands, only the hostname.
 ```
