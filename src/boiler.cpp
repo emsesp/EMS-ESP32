@@ -335,9 +335,6 @@ void Boiler::show_values(uuid::console::Shell & shell) {
 
     char buffer[10]; // used for formatting
 
-    print_value(shell, 2, F("Selected flow temperature"), F_(degrees), Helpers::render_value(buffer, selFlowTemp_, 1));
-    print_value(shell, 2, F("Warm Water selected temperature"), F_(degrees), Helpers::render_value(buffer, wWSelTemp_, 1));
-
     if (tap_water_active_ != EMS_VALUE_BOOL_NOTSET) {
         print_value(shell, 2, F("Hot tap water"), tap_water_active_ ? "running" : "off");
     }
@@ -347,8 +344,8 @@ void Boiler::show_values(uuid::console::Shell & shell) {
     }
 
     print_value(shell, 2, F("Warm Water activated"), Helpers::render_value(buffer, wWActivated_, EMS_VALUE_BOOL));
+    print_value(shell, 2, F("Warm Water charging type"), wWCircPumpType_ ?  "3-way valve" : "charge pump");
     print_value(shell, 2, F("Warm Water circulation pump available"), Helpers::render_value(buffer, wWCircPump_, EMS_VALUE_BOOL));
-    print_value(shell, 2, F("Warm Water circulation pump type"), wWCircPumpType_ ? "3-way pump" : "charge pump");
     if (wWCircPumpMode_ == 7) {
         print_value(shell, 2, F("Warm Water circulation pump freq"), "continuous");
     } else {
@@ -360,6 +357,7 @@ void Boiler::show_values(uuid::console::Shell & shell) {
         strlcat(s, "x3min", 7);
         print_value(shell, 2, F("Warm Water circulation pump freq"), s);
     }
+    print_value(shell, 2, F("Warm Water circulation active"), Helpers::render_value(buffer, wWCirc_, EMS_VALUE_BOOL));
 
     if (wWComfort_ == 0x00) {
         print_value(shell, 2, F("Warm Water comfort setting"), "Hot");
@@ -369,20 +367,20 @@ void Boiler::show_values(uuid::console::Shell & shell) {
         print_value(shell, 2, F("Warm Water comfort setting"), "Intelligent");
     }
 
-    print_value(shell, 2, F("Warm Water selected temperature"), F_(degrees), Helpers::render_value(buffer, wWSelTemp_, 1));
     print_value(shell, 2, F("Warm Water disinfection temperature"), F_(degrees), Helpers::render_value(buffer, wWDisinfectTemp_, 1));
-    print_value(shell, 2, F("Warm Water circulation active"), F_(degrees), Helpers::render_value(buffer, wWCirc_, EMS_VALUE_BOOL));
+    print_value(shell, 2, F("Warm Water selected temperature"), F_(degrees), Helpers::render_value(buffer, wWSelTemp_, 1));
     print_value(shell, 2, F("Warm Water set temperature"), F_(degrees), Helpers::render_value(buffer, wWSetTmp_, 1));
-    print_value(shell, 2, F("Warm Water current temperature"), F_(degrees), Helpers::render_value(buffer, wWCurTmp_, 10));
-    print_value(shell, 2, F("Warm water temperature (intern)"), F_(degrees), Helpers::render_value(buffer, wwStorageTemp1_, 10));
-    print_value(shell, 2, F("Warm water temperature (extern)"), F_(degrees), Helpers::render_value(buffer, wwStorageTemp2_, 10));
+    print_value(shell, 2, F("Warm Water current temperature (intern)"), F_(degrees), Helpers::render_value(buffer, wWCurTmp_, 10));
+    print_value(shell, 2, F("Warm water storage temperature (intern)"), F_(degrees), Helpers::render_value(buffer, wwStorageTemp1_, 10));
     print_value(shell, 2, F("Warm Water current temperature (extern)"), F_(degrees), Helpers::render_value(buffer, wWCurTmp2_, 10));
+    print_value(shell, 2, F("Warm water storage temperature (extern)"), F_(degrees), Helpers::render_value(buffer, wwStorageTemp2_, 10));
     print_value(shell, 2, F("Warm Water current tap water flow"), F("l/min"), Helpers::render_value(buffer, wWCurFlow_, 10));
     print_value(shell, 2, F("Warm Water # starts"), Helpers::render_value(buffer, wWStarts_, 1));
     if (wWWorkM_ != EMS_VALUE_ULONG_NOTSET) {
         shell.printfln(F("  Warm Water active time: %d days %d hours %d minutes"), wWWorkM_ / 1440, (wWWorkM_ % 1440) / 60, wWWorkM_ % 60);
     }
-    print_value(shell, 2, F("Warm Water 3-way valve"), Helpers::render_value(buffer, wWHeat_, EMS_VALUE_BOOL));
+    print_value(shell, 2, F("Warm Water charging"), Helpers::render_value(buffer, wWHeat_, EMS_VALUE_BOOL));
+    print_value(shell, 2, F("Warm Water disinfecting"), Helpers::render_value(buffer, wWDesinfecting_, EMS_VALUE_BOOL));
     print_value(shell, 2, F("Selected flow temperature"), F_(degrees), Helpers::render_value(buffer, selFlowTemp_, 1));
     print_value(shell, 2, F("Current flow temperature"), F_(degrees), Helpers::render_value(buffer, curFlowTemp_, 10));
     print_value(shell, 2, F("Max boiler temperature"), F_(degrees), Helpers::render_value(buffer, boilTemp_, 10));
@@ -391,8 +389,7 @@ void Boiler::show_values(uuid::console::Shell & shell) {
     print_value(shell, 2, F("Boiler pump"), Helpers::render_value(buffer, heatPmp_, EMS_VALUE_BOOL));
     print_value(shell, 2, F("Fan"), Helpers::render_value(buffer, fanWork_, EMS_VALUE_BOOL));
     print_value(shell, 2, F("Ignition"), Helpers::render_value(buffer, ignWork_, EMS_VALUE_BOOL));
-    print_value(shell, 2, F("Circulation pump"), Helpers::render_value(buffer, wWCirc_, EMS_VALUE_BOOL));
-
+    
     print_value(shell, 2, F("Burner selected max power"), F_(percent), Helpers::render_value(buffer, selBurnPow_, 1));
     print_value(shell, 2, F("Burner current power"), F_(percent), Helpers::render_value(buffer, curBurnPow_, 1));
     print_value(shell, 2, F("Flame current"), F("uA"), Helpers::render_value(buffer, flameCurr_, 10));
