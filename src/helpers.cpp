@@ -152,7 +152,7 @@ char * Helpers::render_value(char * result, const int16_t value, const uint8_t f
     result[0] = '\0';
 
     // remove errors or invalid values, 0x7D00 and higher
-    if ((value == EMS_VALUE_SHORT_NOTSET) || (value == EMS_VALUE_SHORT_INVALID)) {
+    if ((value == EMS_VALUE_SHORT_NOTSET) || (value == EMS_VALUE_SHORT_INVALID) || (value == EMS_VALUE_USHORT_NOTSET)) {
         strlcpy(result, "?", 10);
         return result;
     }
@@ -279,6 +279,8 @@ uint32_t Helpers::hextoint(const char * hex) {
             byte = byte - 'a' + 10;
         else if (byte >= 'A' && byte <= 'F')
             byte = byte - 'A' + 10;
+        else 
+            return 0; // error
         // shift 4 to make space for new digit, and add the 4 bits of the new digit
         val = (val << 4) | (byte & 0xF);
     }

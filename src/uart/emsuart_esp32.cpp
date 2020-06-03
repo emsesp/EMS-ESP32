@@ -29,9 +29,12 @@
 namespace emsesp {
 
 static intr_handle_t   uart_handle;
-static RingbufHandle_t buf_handle    = NULL;
-static bool            drop_first_rx = true;
-static uint8_t         tx_mode_      = 0xFF;
+static RingbufHandle_t buf_handle   = NULL;
+static bool            drop_next_rx = true;
+static uint8_t         tx_mode_     = 0xFF;
+static uint32_t        emsRxTime;
+
+#define EMS_RX_TO_TX_TIMEOUT 20
 
 /*
 * Task to handle the incoming data
@@ -46,7 +49,7 @@ void EMSuart::emsuart_recvTask(void * para) {
             EMSESP::incoming_telegram(telegram, telegramSize);
             vRingbufferReturnItem(buf_handle, (void *)telegram);
         }
-    }
+   }
 }
 /*
  * UART interrupt, on break read the fifo and put the whole telegram to ringbuffer
@@ -57,19 +60,21 @@ void IRAM_ATTR EMSuart::emsuart_rx_intr_handler(void * para) {
 
     if (EMS_UART.int_st.brk_det) {
         EMS_UART.int_clr.brk_det = 1; // clear flag
-        EMS_UART.conf0.txd_brk   = 0; // if it was break from sending, clear bit
-        length                   = 0;
+        length = 0;
         while (EMS_UART.status.rxfifo_cnt) {
-            uint8_t rx = EMS_UART.fifo.rw_byte; // read all bytes into buffer
+            uint8_t rx = EMS_UART.fifo.rw_byte; // read all bytes from fifo
             if (length < EMS_MAXBUFFERSIZE) {
                 rxbuf[length++] = rx;
+            } else {
+                drop_next_rx = true; // we have a overflow
             }
         }
-        if ((!drop_first_rx) && ((length == 2) || ((length > 4)))) {
+        if ((!drop_next_rx) && ((length == 2) || (length > 4))) {
             int baseType = 0;
             xRingbufferSendFromISR(buf_handle, rxbuf, length - 1, &baseType);
+            emsRxTime = millis();
         }
-        drop_first_rx = false;
+        drop_next_rx = false;
     }
 }
 /*
@@ -80,9 +85,7 @@ void EMSuart::start(uint8_t tx_mode) {
         restart();
         return;
     }
-
     tx_mode_ = tx_mode;
-
     uart_config_t uart_config = {
         .baud_rate = EMSUART_BAUD,
         .data_bits = UART_DATA_8_BITS,
@@ -93,17 +96,14 @@ void EMSuart::start(uint8_t tx_mode) {
 
     ESP_ERROR_CHECK(uart_param_config(EMSUART_UART, &uart_config));
     ESP_ERROR_CHECK(uart_set_pin(EMSUART_UART, EMSUART_TXPIN, EMSUART_RXPIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
-    EMS_UART.int_ena.val             = 0;          // disable all intr.
+    EMS_UART.int_ena.val             = 0; // disable all intr.
     EMS_UART.int_clr.val             = 0xFFFFFFFF; // clear all intr. flags
-    EMS_UART.idle_conf.tx_brk_num    = 11;         // breaklength 11 bit
-    EMS_UART.idle_conf.rx_idle_thrhd = 12;
-
-    drop_first_rx = true;
-
-    buf_handle = xRingbufferCreate(128, RINGBUF_TYPE_NOSPLIT);
+    EMS_UART.idle_conf.tx_brk_num    = 11; // breaklength 11 bit
+    EMS_UART.idle_conf.rx_idle_thrhd = 256;
+    drop_next_rx                     = true;
+    buf_handle                       = xRingbufferCreate(128, RINGBUF_TYPE_NOSPLIT);
     ESP_ERROR_CHECK(uart_isr_register(EMSUART_UART, emsuart_rx_intr_handler, NULL, ESP_INTR_FLAG_IRAM, &uart_handle));
     xTaskCreate(emsuart_recvTask, "emsuart_recvTask", 2048, NULL, 12, NULL);
-
     EMS_UART.int_ena.brk_det = 1; // activate only break
 }
 
@@ -119,8 +119,8 @@ void EMSuart::stop() {
  */
 void EMSuart::restart() {
     if (EMS_UART.int_raw.brk_det) {
-        EMS_UART.int_clr.brk_det = 1;    // clear flag
-        drop_first_rx            = true; // and drop first frame
+        EMS_UART.int_clr.brk_det = 1; // clear flag
+        drop_next_rx = true; // and drop first frame
     }
     EMS_UART.int_ena.brk_det = 1; // activate only break
 };
@@ -129,10 +129,8 @@ void EMSuart::restart() {
  * Sends a 1-byte poll, ending with a <BRK>
  */
 void EMSuart::send_poll(uint8_t data) {
-    EMS_UART.conf0.txd_brk = 0; // just to make sure the bit is cleared
     EMS_UART.fifo.rw_byte  = data;
-    //EMS_UART.idle_conf.tx_brk_num = 11; // breaklength 11 bit
-    EMS_UART.conf0.txd_brk = 1; // sending ends in a break
+    EMS_UART.conf0.txd_brk = 1; // <brk> after send
 }
 
 /*
@@ -141,14 +139,14 @@ void EMSuart::send_poll(uint8_t data) {
  * returns code, 1=success
  */
 EMSUART_STATUS EMSuart::transmit(uint8_t * buf, uint8_t len) {
+    if (millis() -emsRxTime > EMS_RX_TO_TX_TIMEOUT) {
+        return EMS_TX_WTD_TIMEOUT;
+    }
     if (len > 0) {
-        EMS_UART.conf0.txd_brk = 0; // just to make sure the bit is cleared
         for (uint8_t i = 0; i < len; i++) {
             EMS_UART.fifo.rw_byte = buf[i];
         }
-        //uart_tx_chars(EMSUART_UART, (const char *)buf, len);
-        //EMS_UART.idle_conf.tx_brk_num = 11; // breaklength 11 bit
-        EMS_UART.conf0.txd_brk = 1; // sending ends in a break
+        EMS_UART.conf0.txd_brk = 1; // <brk> after send
     }
     return EMS_TX_STATUS_OK;
 }

@@ -222,7 +222,6 @@ uint64_t Sensors::Device::id() const {
 
 std::string Sensors::Device::to_string() const {
     std::string str(20, '\0');
-
     snprintf_P(&str[0],
                str.capacity() + 1,
                PSTR("%02X-%04X-%04X-%04X-%02X"),
@@ -233,6 +232,7 @@ std::string Sensors::Device::to_string() const {
                (unsigned int)(id_)&0xFF);
     return str;
 }
+
 
 // send all dallas sensor values as a JSON package to MQTT
 // assumes there are devices
@@ -274,13 +274,18 @@ void Sensors::publish_values() {
 
     uint8_t i = 1;
     for (const auto & device : devices_) {
-        char sensorID[10]; // sensor{1-n}
-        strlcpy(sensorID, "sensor", 10);
-        char s[5];
-        strlcat(sensorID, Helpers::itoa(s, i++), 10);
-        JsonObject dataSensor = doc.createNestedObject(sensorID);
-        dataSensor["id"]      = device.to_string();
-        dataSensor["temp"]    = Helpers::render_value(s, device.temperature_c_, 2);
+        if (mqtt_format_ == Settings::MQTT_format::CUSTOM) {
+            char s[5];
+            doc[device.to_string()] = Helpers::render_value(s, device.temperature_c_, 2);
+        } else {
+            char sensorID[10]; // sensor{1-n}
+            strlcpy(sensorID, "sensor", 10);
+            char s[5];
+            strlcat(sensorID, Helpers::itoa(s, i++), 10);
+            JsonObject dataSensor = doc.createNestedObject(sensorID);
+            dataSensor["id"]      = device.to_string();
+            dataSensor["temp"]    = Helpers::render_value(s, device.temperature_c_, 2);
+        }
     }
 
     if (mqtt_format_ == Settings::MQTT_format::HA) {

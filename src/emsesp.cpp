@@ -189,7 +189,7 @@ void EMSESP::show_values(uuid::console::Shell & shell) {
     if (!sensor_devices().empty()) {
         shell.printfln(F("External temperature sensors:"));
         for (const auto & device : sensor_devices()) {
-            shell.printfln(F(" Sensor ID %s: %s°C"), device.to_string().c_str(), Helpers::render_value(valuestr, device.temperature_c_, 2));
+            shell.printfln(F("  Sensor ID %s: %s°C"), device.to_string().c_str(), Helpers::render_value(valuestr, device.temperature_c_, 2));
         }
         shell.println();
     }
@@ -247,6 +247,7 @@ std::string EMSESP::pretty_telegram(std::shared_ptr<const Telegram> telegram) {
             // get the type name, any match will do
             if (type_name.empty()) {
                 type_name = emsdevice->telegram_type_name(telegram);
+
             }
         }
     }
@@ -362,13 +363,12 @@ void EMSESP::process_version(std::shared_ptr<const Telegram> telegram) {
     uint8_t product_id = telegram->message_data[offset]; // product ID
 
     // get version as XX.XX
-    char        buf[6] = {0};
     std::string version(5, '\0');
     snprintf_P(&version[0],
                version.capacity() + 1,
-               PSTR("%s.%s"),
-               Helpers::smallitoa(buf, telegram->message_data[offset + 1]),
-               Helpers::smallitoa(buf, telegram->message_data[offset + 2]));
+               PSTR("%02d.%02d"),
+               telegram->message_data[offset + 1],
+               telegram->message_data[offset + 2]);
 
     // some devices store the protocol type (HT3, Buderus) in the last byte
     uint8_t brand;
@@ -565,8 +565,10 @@ void EMSESP::send_write_request(const uint16_t type_id,
 // we check if its a complete telegram or just a single byte (which could be a poll or a return status)
 void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
     // check first for echo
+    //LOG_TRACE(F("Rx: %s"), Helpers::data_to_hex(data, length).c_str());
     uint8_t first_value = data[0];
     if (((first_value & 0x7F) == txservice_.ems_bus_id()) && (length > 1)) {
+        rxservice_.add(data, length); // just for logging
         return; // it's an echo
     }
 
@@ -750,7 +752,7 @@ void EMSESP::console_commands(Shell & shell, unsigned int context) {
                                                shell.printfln(F("Performing a deep scan by pinging our device library..."));
                                                std::vector<uint8_t> Device_Ids;
 
-                                               Device_Ids.push_back(0x09); // Controllers - 0x09
+                                               Device_Ids.push_back(0x08); // Boilers - 0x08
                                                Device_Ids.push_back(0x38); // HeatPump - 0x38
                                                Device_Ids.push_back(0x30); // Solar Module - 0x30
                                                Device_Ids.push_back(0x09); // Controllers - 0x09
@@ -758,10 +760,16 @@ void EMSESP::console_commands(Shell & shell, unsigned int context) {
                                                Device_Ids.push_back(0x48); // Gateway - 0x48
                                                Device_Ids.push_back(0x20); // Mixing Devices - 0x20
                                                Device_Ids.push_back(0x21); // Mixing Devices - 0x21
+                                               Device_Ids.push_back(0x22); // Mixing Devices - 0x22
+                                               Device_Ids.push_back(0x23); // Mixing Devices - 0x23
+                                               Device_Ids.push_back(0x28); // Mixing Devices WW- 0x28
+                                               Device_Ids.push_back(0x29); // Mixing Devices WW- 0x29
                                                Device_Ids.push_back(0x10); // Thermostats - 0x10
                                                Device_Ids.push_back(0x17); // Thermostats - 0x17
-                                               Device_Ids.push_back(0x18); // Thermostats - 0x18
-                                               Device_Ids.push_back(0x19); // Thermostats - 0x19
+                                               Device_Ids.push_back(0x18); // Thermostat remote - 0x18
+                                               Device_Ids.push_back(0x19); // Thermostat remote - 0x19
+                                               Device_Ids.push_back(0x1A); // Thermostat remote - 0x1A
+                                               Device_Ids.push_back(0x1B); // Thermostat remote - 0x1B
                                                Device_Ids.push_back(0x11); // Switches - 0x11
 
                                                // send the read command with Version command

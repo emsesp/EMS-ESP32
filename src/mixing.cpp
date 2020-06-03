@@ -37,7 +37,6 @@ Mixing::Mixing(uint8_t device_type, uint8_t device_id, uint8_t product_id, const
             register_telegram_type(device_id - 0x28 + 0x0331, F("MMPLUSStatusMessage_WWC"), true, std::bind(&Mixing::process_MMPLUSStatusMessage_WWC, this, _1));
         }
     }
-
     // EMS 1.0
     if (flags == EMSdevice::EMS_DEVICE_FLAG_MM10) {
         register_telegram_type(0x00AA, F("MMConfigMessage"), false, nullptr);
@@ -77,11 +76,10 @@ void Mixing::show_values(uuid::console::Shell & shell) {
     } else {
         shell.printfln(F("  Heating Circuit #: %d"), hc_);
     }
-
-    print_value(shell, 2, F("Current flow temperature"), F_(degrees), Helpers::render_value(buffer, flowTemp_, 10));
-    print_value(shell, 2, F("Setpoint flow temperature"), F_(degrees), Helpers::render_value(buffer, flowSetTemp_, 1));
-    print_value(shell, 2, F("Current pump modulation"), Helpers::render_value(buffer, pumpMod_, 1));
-    print_value(shell, 2, F("Current valve status"), Helpers::render_value(buffer, status_, 1));
+    print_value(shell, 4, F("Current flow temperature"), F_(degrees), Helpers::render_value(buffer, flowTemp_, 10));
+    print_value(shell, 4, F("Setpoint flow temperature"), F_(degrees), Helpers::render_value(buffer, flowSetTemp_, 1));
+    print_value(shell, 4, F("Current pump modulation"), Helpers::render_value(buffer, pumpMod_, 1));
+    print_value(shell, 4, F("Current valve status"), Helpers::render_value(buffer, status_, 1));
 }
 
 // publish values via MQTT
@@ -120,11 +118,10 @@ void Mixing::publish_values() {
 #ifdef EMSESP_DEBUG
     LOG_DEBUG(F("[DEBUG] Performing a mixing module publish"));
 #endif
-
     char topic[30];
     char s[3]; // for formatting strings
     strlcpy(topic, "mixing_data", 30);
-    strlcat(topic, Helpers::itoa(s, hc_), 30); // append hc to topic
+    strlcat(topic, Helpers::itoa(s, device_id() - 0x20 + 1), 30); // append hc to topic
     Mqtt::publish(topic, doc);
 }
 

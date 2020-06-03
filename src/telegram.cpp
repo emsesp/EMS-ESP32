@@ -104,13 +104,13 @@ std::string Telegram::to_string(const uint8_t * telegram, uint8_t length) const 
 // if offset is 0, it takes the whole telegram. if it's for example 1 it'll show the 2nd data item and
 // everything after it
 // returns -1 if out of bounds
-int8_t Telegram::_getDataPosition(const uint8_t index) const {
-    return ((index - offset) >= message_length) ? -1 : (index - offset);
+int8_t Telegram::_getDataPosition(const uint8_t index, const uint8_t size) const {
+    return ((index - offset + size - 1) >= message_length) ? -1 : (index - offset);
 }
 
 // unsigned byte
 void Telegram::read_value(uint8_t & param, const uint8_t index) const {
-    int8_t pos = _getDataPosition(index);
+    int8_t pos = _getDataPosition(index, sizeof(param));
     if (pos < 0) {
         return;
     }
@@ -119,7 +119,7 @@ void Telegram::read_value(uint8_t & param, const uint8_t index) const {
 
 // signed byte
 void Telegram::read_value(int8_t & param, const uint8_t index) const {
-    int8_t pos = _getDataPosition(index);
+    int8_t pos = _getDataPosition(index, sizeof(param));
     if (pos < 0) {
         return;
     }
@@ -128,7 +128,7 @@ void Telegram::read_value(int8_t & param, const uint8_t index) const {
 
 // unsigned short
 void Telegram::read_value(uint16_t & param, const uint8_t index) const {
-    int8_t pos = _getDataPosition(index);
+    int8_t pos = _getDataPosition(index, sizeof(param));
     if (pos < 0) {
         return;
     }
@@ -145,7 +145,7 @@ void Telegram::read_value(uint16_t & param, const uint8_t index) const {
 
 // signed short
 void Telegram::read_value(int16_t & param, const uint8_t index) const {
-    int8_t pos = _getDataPosition(index);
+    int8_t pos = _getDataPosition(index, sizeof(param));
     if (pos < 0) {
         return;
     }
@@ -160,9 +160,9 @@ void Telegram::read_value(int16_t & param, const uint8_t index) const {
     param = value;
 }
 
-// Long
+// Long 24 bit
 void Telegram::read_value(uint32_t & param, const uint8_t index) const {
-    int8_t pos = _getDataPosition(index);
+    int8_t pos = _getDataPosition(index, 3);
     if (pos < 0) {
         return;
     }
@@ -170,9 +170,19 @@ void Telegram::read_value(uint32_t & param, const uint8_t index) const {
     param = (uint32_t)((message_data[pos] << 16) + (message_data[pos + 1] << 8) + (message_data[pos + 2]));
 }
 
+// Long 32 bit
+void Telegram::read_value32(uint32_t & param, const uint8_t index) const {
+    int8_t pos = _getDataPosition(index, sizeof(param));
+    if (pos < 0) {
+        return;
+    }
+
+    param = (uint32_t)((message_data[pos] << 24) + (message_data[pos] << 16) + (message_data[pos + 1] << 8) + (message_data[pos + 2]));
+}
+
 // bit from an unsigned byte
 void Telegram::read_value(uint8_t & param, const uint8_t index, const uint8_t bit) const {
-    int8_t pos = _getDataPosition(index);
+    int8_t pos = _getDataPosition(index, sizeof(param));
     if (pos < 0) {
         return;
     }
@@ -182,7 +192,7 @@ void Telegram::read_value(uint8_t & param, const uint8_t index, const uint8_t bi
 
 // convert signed short to single 8 byte, for setpoint thermostat temperatures that don't store their temps in 2 bytes
 void Telegram::read_value8(int16_t & param, const uint8_t index) const {
-    int8_t pos = _getDataPosition(index);
+    int8_t pos = _getDataPosition(index, 1);
     if (pos < 0) {
         return;
     }
@@ -212,10 +222,10 @@ void RxService::start() {
 void RxService::loop() {
 #ifndef EMSESP_STANDALONE
     // give rx some breathing space
-    if ((uuid::get_uptime() - last_rx_check_) < RX_LOOP_WAIT) {
-        return;
-    }
-    last_rx_check_ = uuid::get_uptime();
+    //if ((uuid::get_uptime() - last_rx_check_) < RX_LOOP_WAIT) {
+    //    return;
+    //}
+    //last_rx_check_ = uuid::get_uptime();
 #endif
 
     while (!rx_telegrams_.empty()) {
@@ -270,7 +280,7 @@ void RxService::add(uint8_t * data, uint8_t length) {
     uint8_t   message_length;
 
     // work out depending on the type where the data message block starts
-    if (data[2] < 0xF0) {
+    if (data[2] < 0xF0 || length < 6) {
         // EMS 1.0
         type_id        = data[2];
         message_data   = data + 4;   // message block starts at 5th byte
@@ -365,6 +375,7 @@ void TxService::loop() {
 
 // sends a 1 byte poll which is our own device ID
 void TxService::send_poll() {
+    //LOG_TRACE(F("Ack %02X"),ems_bus_id() ^ ems_mask());
     EMSuart::send_poll(ems_bus_id() ^ ems_mask());
 }
 
@@ -473,7 +484,7 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
 
     // send the telegram to the UART Tx
     EMSUART_STATUS status = EMSuart::transmit(telegram_raw, length);
-
+    //LOG_TRACE(F("Tx: %s"), Helpers::data_to_hex(telegram_raw, length).c_str());
     if (status != EMS_TX_STATUS_OK) {
         LOG_ERROR(F("Failed to transmit Tx via UART. Error: %s"), status == EMS_TX_WTD_TIMEOUT ? F("Timeout") : F("BRK"));
     }
@@ -496,6 +507,7 @@ void TxService::send_telegram(const uint8_t * data, const uint8_t length) {
 
     // send the telegram to the UART Tx
     EMSUART_STATUS status = EMSuart::transmit(telegram_raw, length);
+    //LOG_TRACE(F("Tx: %s"), Helpers::data_to_hex(telegram_raw, length).c_str());
     if (status != EMS_TX_STATUS_OK) {
         LOG_ERROR(F("Failed to transmit Tx via UART. Error: %s"), status == EMS_TX_WTD_TIMEOUT ? F("Timeout") : F("BRK"));
     }

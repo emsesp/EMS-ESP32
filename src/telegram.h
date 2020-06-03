@@ -76,6 +76,7 @@ class Telegram {
 
     void read_value(uint16_t & param, const uint8_t index) const;
     void read_value(uint32_t & param, const uint8_t index) const;
+    void read_value32(uint32_t & param, const uint8_t index) const;
     void read_value(uint8_t & param, const uint8_t index, const uint8_t bit) const;
     void read_value(uint8_t & param, const uint8_t index) const;
     void read_value(int16_t & param, const uint8_t index) const;
@@ -83,7 +84,7 @@ class Telegram {
     void read_value(int8_t & param, const uint8_t index) const;
 
   private:
-    int8_t _getDataPosition(const uint8_t index) const;
+    int8_t _getDataPosition(const uint8_t index, const uint8_t size) const;
 };
 
 class EMSbus {

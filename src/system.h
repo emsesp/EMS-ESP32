@@ -83,8 +83,13 @@ class System {
     static constexpr uint8_t LED_GPIO = 2;
     static constexpr uint8_t LED_ON   = LOW;
 #elif defined(ESP32)
-    static constexpr uint8_t LED_GPIO = 5;   // 5 on Lolin D32, 2 on Wemos D1-32 mini. Use 0 for off.
-    static constexpr uint8_t LED_ON   = LOW; // LOW on Lolin D32, HIGH on Wemos D1-32 mini
+#ifdef WEMOS_D1_32
+    static constexpr uint8_t LED_GPIO = 2; // on Wemos D1-32
+    static constexpr uint8_t LED_ON   = HIGH;
+#else
+    static constexpr uint8_t LED_GPIO = 5;
+    static constexpr uint8_t LED_ON   = LOW;
+#endif
 #else
     static constexpr uint8_t LED_GPIO = 0;
     static constexpr uint8_t LED_ON   = 0;
