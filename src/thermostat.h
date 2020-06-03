@@ -46,22 +46,22 @@ class Thermostat : public EMSdevice {
         }
         ~HeatingCircuit() = default;
 
-        int16_t setpoint_roomTemp = EMS_VALUE_SHORT_NOTSET;
-        int16_t curr_roomTemp     = EMS_VALUE_SHORT_NOTSET;
-        uint8_t mode              = EMS_VALUE_UINT_NOTSET;
-        uint8_t mode_type         = EMS_VALUE_UINT_NOTSET;
-        uint8_t summer_mode       = EMS_VALUE_UINT_NOTSET;
-        uint8_t holiday_mode      = EMS_VALUE_UINT_NOTSET;
-        uint8_t daytemp           = EMS_VALUE_UINT_NOTSET;
-        uint8_t nighttemp         = EMS_VALUE_UINT_NOTSET;
-        uint8_t holidaytemp       = EMS_VALUE_UINT_NOTSET;
-        uint8_t heatingtype       = EMS_VALUE_UINT_NOTSET; // type of heating: 1 radiator, 2 convectors, 3 floors, 4 room supply
-        uint8_t circuitcalctemp   = EMS_VALUE_UINT_NOTSET;
-        uint8_t summertemp        = EMS_VALUE_UINT_NOTSET;
-        uint8_t nofrosttemp       = EMS_VALUE_UINT_NOTSET;
-        uint8_t designtemp        = EMS_VALUE_UINT_NOTSET; // heatingcurve design temp at MinExtTemp
-        uint8_t offsettemp        = 100;                   // heatingcurve offest temp at roomtemp signed!
-        uint16_t remotetemp       = EMS_VALUE_SHORT_NOTSET; // for simulating a RC20 remote 
+        int16_t  setpoint_roomTemp = EMS_VALUE_SHORT_NOTSET;
+        int16_t  curr_roomTemp     = EMS_VALUE_SHORT_NOTSET;
+        uint8_t  mode              = EMS_VALUE_UINT_NOTSET;
+        uint8_t  mode_type         = EMS_VALUE_UINT_NOTSET;
+        uint8_t  summer_mode       = EMS_VALUE_UINT_NOTSET;
+        uint8_t  holiday_mode      = EMS_VALUE_UINT_NOTSET;
+        uint8_t  daytemp           = EMS_VALUE_UINT_NOTSET;
+        uint8_t  nighttemp         = EMS_VALUE_UINT_NOTSET;
+        uint8_t  holidaytemp       = EMS_VALUE_UINT_NOTSET;
+        uint8_t  heatingtype       = EMS_VALUE_UINT_NOTSET; // type of heating: 1 radiator, 2 convectors, 3 floors, 4 room supply
+        uint8_t  circuitcalctemp   = EMS_VALUE_UINT_NOTSET;
+        uint8_t  summertemp        = EMS_VALUE_UINT_NOTSET;
+        uint8_t  nofrosttemp       = EMS_VALUE_UINT_NOTSET;
+        uint8_t  designtemp        = EMS_VALUE_UINT_NOTSET;  // heatingcurve design temp at MinExtTemp
+        uint8_t  offsettemp        = 100;                    // heatingcurve offest temp at roomtemp signed!
+        uint16_t remotetemp        = EMS_VALUE_SHORT_NOTSET; // for simulating a RC20 remote
 
 
         uint8_t hc_num() const {

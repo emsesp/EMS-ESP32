@@ -54,7 +54,7 @@ void ICACHE_RAM_ATTR EMSuart::emsuart_rx_intr_handler(void * para) {
                 drop_next_rx = true;
             }
         }
-        USIC(EMSUART_UART) = (1 << UIBD); // INT clear the BREAK detect interrupt
+        USIC(EMSUART_UART) = (1 << UIBD);    // INT clear the BREAK detect interrupt
         USC0(EMSUART_UART) &= ~(1 << UCBRK); // reset tx-brk
         if (!drop_next_rx) {
             pEMSRxBuf->length = length;
@@ -91,7 +91,7 @@ void ICACHE_FLASH_ATTR EMSuart::emsuart_recvTask(os_event_t * events) {
     // ignore double BRK at the end, possibly from the Tx loopback
     // also telegrams with no data value
     // then transmit EMS buffer, excluding the BRK
-    if (length > 4)  {
+    if (length > 4) {
         EMSESP::incoming_telegram((uint8_t *)pCurrent->buffer, length - 1);
     }
 }
@@ -188,7 +188,7 @@ void ICACHE_FLASH_ATTR EMSuart::stop() {
 void ICACHE_FLASH_ATTR EMSuart::restart() {
     if (USIR(EMSUART_UART) & ((1 << UIBD))) {
         USIC(EMSUART_UART) = (1 << UIBD); // INT clear the BREAK detect interrupt
-        drop_next_rx      = true;
+        drop_next_rx       = true;
     }
     ETS_UART_INTR_ENABLE();
 }
@@ -249,7 +249,7 @@ EMSUART_STATUS ICACHE_FLASH_ATTR EMSuart::transmit(uint8_t * buf, uint8_t len) {
     if (len == 0) {
         return EMS_TX_STATUS_OK; // nothing to send
     }
-    if(millis() > (emsRxTime + EMS_RX_TO_TX_TIMEOUT)) { // send allowed within 20 ms
+    if (millis() > (emsRxTime + EMS_RX_TO_TX_TIMEOUT)) { // send allowed within 20 ms
         return EMS_TX_WTD_TIMEOUT;
     }
 

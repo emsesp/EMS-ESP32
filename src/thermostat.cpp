@@ -400,7 +400,7 @@ bool Thermostat::updated_values() {
     static uint16_t current_value_ = 0;
     for (const auto & hc : heating_circuits_) {
         // don't publish if we haven't yet received some data
-//        if ((hc->setpoint_roomTemp == EMS_VALUE_SHORT_NOTSET) || (hc->curr_roomTemp == EMS_VALUE_SHORT_NOTSET)) {
+        //        if ((hc->setpoint_roomTemp == EMS_VALUE_SHORT_NOTSET) || (hc->curr_roomTemp == EMS_VALUE_SHORT_NOTSET)) {
         if (hc->setpoint_roomTemp == EMS_VALUE_SHORT_NOTSET) {
             return false;
         }
@@ -469,7 +469,7 @@ void Thermostat::publish_values() {
 
     // go through all the heating circuits
     for (const auto & hc : heating_circuits_) {
-//        if ((hc->setpoint_roomTemp == EMS_VALUE_SHORT_NOTSET) || (hc->curr_roomTemp == EMS_VALUE_SHORT_NOTSET)) {
+        //        if ((hc->setpoint_roomTemp == EMS_VALUE_SHORT_NOTSET) || (hc->curr_roomTemp == EMS_VALUE_SHORT_NOTSET)) {
         if (hc->setpoint_roomTemp == EMS_VALUE_SHORT_NOTSET) {
             break; // skip this HC
         }
@@ -776,7 +776,7 @@ std::string Thermostat::mode_tostring(uint8_t mode) const {
 void Thermostat::show_values(uuid::console::Shell & shell) {
     EMSdevice::show_values(shell); // always call this to show header
 
-    char    buffer[10]; // for formatting only
+    char    buffer[10];                     // for formatting only
     uint8_t flags = (this->flags() & 0x0F); // specific thermostat characteristics, strip the option bits
 
     if (datetime_.size()) {
@@ -828,7 +828,6 @@ void Thermostat::show_values(uuid::console::Shell & shell) {
         }
     }
     if (flags == EMS_DEVICE_FLAG_RC35 || flags == EMS_DEVICE_FLAG_RC30_1) {
- 
         if (ibaCalIntTemperature != EMS_VALUE_INT_NOTSET) {
             print_value(shell, 2, F("Offset int. temperature"), F_(degrees), Helpers::render_value(buffer, ibaCalIntTemperature, 2));
         }
@@ -1053,7 +1052,7 @@ void Thermostat::process_RC35Monitor(std::shared_ptr<const Telegram> telegram) {
     std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
 
     telegram->read_value8(hc->setpoint_roomTemp, 2); // is * 2, force to single byte, is 0 in summermode
-    telegram->read_value(hc->curr_roomTemp, 3); // is * 10 - or 0x7D00 if thermostat is mounted on boiler
+    telegram->read_value(hc->curr_roomTemp, 3);      // is * 10 - or 0x7D00 if thermostat is mounted on boiler
     telegram->read_value(hc->mode_type, 1, 1);
     telegram->read_value(hc->summer_mode, 1, 0);
     telegram->read_value(hc->holiday_mode, 0, 5);
@@ -1309,13 +1308,13 @@ void Thermostat::set_temperature(const float temperature, const uint8_t mode, co
         case HeatingCircuit::Mode::OFFSET: // change the offset temp
             offset = EMS_OFFSET_RC35Set_temp_offset;
             break;
-        case HeatingCircuit::Mode::DESIGN: 
+        case HeatingCircuit::Mode::DESIGN:
             offset = EMS_OFFSET_RC35Set_temp_design;
             break;
-        case HeatingCircuit::Mode::SUMMER: 
+        case HeatingCircuit::Mode::SUMMER:
             offset = EMS_OFFSET_RC35Set_temp_summer;
             break;
-        case HeatingCircuit::Mode::NOFROST: 
+        case HeatingCircuit::Mode::NOFROST:
             offset = EMS_OFFSET_RC35Set_temp_nofrost;
             break;
         default:

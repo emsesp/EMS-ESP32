@@ -41,7 +41,7 @@
 // customize the GPIO pins for RX and TX here
 #ifdef WEMOS_D1_32
 #define EMSUART_RXPIN 23 // 17 is UART2 RX. Use 23 for D7 on a Wemos D1-32 mini for backwards compatabilty
-#define EMSUART_TXPIN 5 // 16 is UART2 TX. Use 5 for D8 on a Wemos D1-32 mini for backwards compatabilty
+#define EMSUART_TXPIN 5  // 16 is UART2 TX. Use 5 for D8 on a Wemos D1-32 mini for backwards compatabilty
 #else
 #define EMSUART_RXPIN 17 // 17 is UART2 RX. Use 23 for D7 on a Wemos D1-32 mini for backwards compatabilty
 #define EMSUART_TXPIN 16 // 16 is UART2 TX. Use 5 for D8 on a Wemos D1-32 mini for backwards compatabilty
