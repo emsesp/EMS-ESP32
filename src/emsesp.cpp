@@ -830,5 +830,6 @@ void EMSESP::loop() {
         // https://github.com/esp8266/Arduino/blob/e721089e601985e633641ab7323f81a84ea0cd1b/cores/esp8266/core_esp8266_wiring.cpp#L41-L57
         delay(1);
     }
+}
 
 } // namespace emsesp
