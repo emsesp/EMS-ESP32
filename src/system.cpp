@@ -20,7 +20,6 @@
 #include "emsesp.h" // for send_raw_telegram() command
 
 MAKE_PSTR_WORD(syslog)
-MAKE_PSTR_WORD(interval)
 MAKE_PSTR_WORD(mark)
 MAKE_PSTR_WORD(level)
 MAKE_PSTR_WORD(host)
@@ -85,7 +84,6 @@ void System::mqtt_commands(const char * message) {
 // restart EMS-ESP
 // mode = safe mode. true to enable on next boot
 void System::restart(bool mode) {
-
     // check for safe mode
     if (mode) {
         LOG_NOTICE("Restarting system in safe mode...");
