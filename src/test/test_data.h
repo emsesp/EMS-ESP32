@@ -35,6 +35,15 @@ void EMSESP::run_test(uuid::console::Shell & shell, const std::string & command)
         return;
     }
 
+    if (command == "unknown2") {
+        // simulate getting version information back from an unknown device
+        uint8_t t[] = {0x09, 0x0B, 0x02, 0x00, 0x5A, 0x01, 0x02, 0x5A}; // product id is 90
+        rxservice_.add(t, sizeof(t));
+        rxservice_.loop();
+
+        return;
+    }
+
     if (command == "thermostats") {
         shell.printfln(F("Testing adding devices on the EMS bus..."));
 
