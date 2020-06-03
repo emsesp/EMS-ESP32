@@ -247,7 +247,6 @@ std::string EMSESP::pretty_telegram(std::shared_ptr<const Telegram> telegram) {
             // get the type name, any match will do
             if (type_name.empty()) {
                 type_name = emsdevice->telegram_type_name(telegram);
-
             }
         }
     }
@@ -364,11 +363,7 @@ void EMSESP::process_version(std::shared_ptr<const Telegram> telegram) {
 
     // get version as XX.XX
     std::string version(5, '\0');
-    snprintf_P(&version[0],
-               version.capacity() + 1,
-               PSTR("%02d.%02d"),
-               telegram->message_data[offset + 1],
-               telegram->message_data[offset + 2]);
+    snprintf_P(&version[0], version.capacity() + 1, PSTR("%02d.%02d"), telegram->message_data[offset + 1], telegram->message_data[offset + 2]);
 
     // some devices store the protocol type (HT3, Buderus) in the last byte
     uint8_t brand;
@@ -569,7 +564,7 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
     uint8_t first_value = data[0];
     if (((first_value & 0x7F) == txservice_.ems_bus_id()) && (length > 1)) {
         rxservice_.add(data, length); // just for logging
-        return; // it's an echo
+        return;                       // it's an echo
     }
 
     // are we waiting for a response from a recent Tx Read or Write?
@@ -786,7 +781,7 @@ void EMSESP::console_commands(Shell & shell, unsigned int context) {
                                            Settings settings;
                                            shell.printfln(F_(tx_mode_fmt), settings.ems_tx_mode());
                                            shell.printfln(F_(bus_id_fmt), settings.ems_bus_id());
-                                           shell.printfln(F_(read_only_fmt), settings.ems_read_only() ? F_(enabled) : F_(disabled));
+                                           shell.printfln(F_(read_only_fmt), settings.ems_read_only() ? F_(on) : F_(off));
                                        });
 
     // enter the context
@@ -801,8 +796,8 @@ void EMSESP::start() {
     };
 
     system_.start();
-    network_.start();
     console_.start();
+    network_.start();
     sensors_.start();
     rxservice_.start();
     txservice_.start();
@@ -817,20 +812,23 @@ void EMSESP::loop() {
     // network returns false if an OTA is being carried out
     // so we disable all services when an OTA is happening
     if (network_.loop()) {
-        console_.loop();   // telnet/serial console
         system_.loop();    // does LED and checks system health, and syslog service
         mqtt_.loop();      // starts mqtt, and sends out anything in the queue
         rxservice_.loop(); // process what ever is in the rx queue
         txservice_.loop(); // check that the Tx is all ok
         shower_.loop();    // check for shower on/off
         sensors_.loop();   // this will also send out via MQTT
+        console_.loop();   // telnet/serial console
 
         // force a query on the EMS devices to fetch latest data at a set interval (1 min)
         if ((uuid::get_uptime() - last_fetch_ > EMS_FETCH_FREQUENCY)) {
             last_fetch_ = uuid::get_uptime();
             fetch_device_values();
         }
+
+        // helps ease wifi outages
+        // https://github.com/esp8266/Arduino/blob/e721089e601985e633641ab7323f81a84ea0cd1b/cores/esp8266/core_esp8266_wiring.cpp#L41-L57
+        delay(1);
     }
-}
 
 } // namespace emsesp
