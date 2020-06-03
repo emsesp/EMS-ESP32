@@ -69,7 +69,7 @@ class Sensors {
 #ifdef WEMOS_D1_32
     static constexpr uint8_t SENSOR_GPIO = 18; // Wemos D1-32 for compatibility D5
 #else
-    static constexpr uint8_t SENSOR_GPIO = 14;
+    static constexpr uint8_t SENSOR_GPIO = 14; // D5 is LED on wemos lolin D32, so use GPIO14
 #endif
 #endif
 

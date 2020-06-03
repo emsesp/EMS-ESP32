@@ -344,7 +344,7 @@ void Boiler::show_values(uuid::console::Shell & shell) {
     }
 
     print_value(shell, 2, F("Warm Water activated"), Helpers::render_value(buffer, wWActivated_, EMS_VALUE_BOOL));
-    print_value(shell, 2, F("Warm Water charging type"), wWCircPumpType_ ?  "3-way valve" : "charge pump");
+    print_value(shell, 2, F("Warm Water charging type"), wWCircPumpType_ ? "3-way valve" : "charge pump");
     print_value(shell, 2, F("Warm Water circulation pump available"), Helpers::render_value(buffer, wWCircPump_, EMS_VALUE_BOOL));
     if (wWCircPumpMode_ == 7) {
         print_value(shell, 2, F("Warm Water circulation pump freq"), "continuous");

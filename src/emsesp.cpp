@@ -819,7 +819,6 @@ void EMSESP::loop() {
         shower_.loop();    // check for shower on/off
         sensors_.loop();   // this will also send out via MQTT
         console_.loop();   // telnet/serial console
-        delay(ESP_DELAY);  // some time to WiFi and everything else to catch up, calls yield, and also prevent overheating
 
         // force a query on the EMS devices to fetch latest data at a set interval (1 min)
         if ((uuid::get_uptime() - last_fetch_ > EMS_FETCH_FREQUENCY)) {

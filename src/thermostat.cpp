@@ -1456,15 +1456,14 @@ void Thermostat::console_commands(Shell & shell, unsigned int context) {
     EMSESPShell::commands->add_command(ShellContext::THERMOSTAT,
                                        CommandFlags::ADMIN,
                                        flash_string_vector{F_(change), F_(temp)},
-                                       flash_string_vector{F_(degrees_mandatory), F_(hc_optional),F_(mode_optional)},
+                                       flash_string_vector{F_(degrees_mandatory), F_(hc_optional), F_(mode_optional)},
                                        [=](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) {
-                                            uint8_t hc = (arguments.size() >= 2) ? arguments[1].at(0) - '0' : DEFAULT_HEATING_CIRCUIT;
-                                            if ((arguments.size() == 3)) {
-                                                set_temperature(atof(arguments.front().c_str()), arguments.back().c_str(), hc);
-                                            } else {
-                                                set_temperature(atof(arguments.front().c_str()), HeatingCircuit::Mode::AUTO, hc);
-                                            }
-
+                                           uint8_t hc = (arguments.size() >= 2) ? arguments[1].at(0) - '0' : DEFAULT_HEATING_CIRCUIT;
+                                           if ((arguments.size() == 3)) {
+                                               set_temperature(atof(arguments.front().c_str()), arguments.back().c_str(), hc);
+                                           } else {
+                                               set_temperature(atof(arguments.front().c_str()), HeatingCircuit::Mode::AUTO, hc);
+                                           }
                                        });
 
     EMSESPShell::commands->add_command(
@@ -1473,7 +1472,7 @@ void Thermostat::console_commands(Shell & shell, unsigned int context) {
         flash_string_vector{F_(change), F_(mode)},
         flash_string_vector{F_(mode_mandatory), F_(hc_optional)},
         [=](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) {
-            uint8_t hc = (arguments.size() == 2) ?  arguments[1].at(0) - '0' : DEFAULT_HEATING_CIRCUIT;
+            uint8_t hc = (arguments.size() == 2) ? arguments[1].at(0) - '0' : DEFAULT_HEATING_CIRCUIT;
             set_mode(arguments.front(), hc);
         },
         [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments __attribute__((unused))) -> const std::vector<std::string> {
