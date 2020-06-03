@@ -25,6 +25,7 @@ MAKE_PSTR_WORD(mode)
 
 MAKE_PSTR(hc_optional, "[heating circuit]")
 MAKE_PSTR(mode_mandatory, "<mode>")
+MAKE_PSTR(mode_optional, "[mode]")
 MAKE_PSTR(master_thermostat_fmt, "Master Thermostat device ID = %s")
 
 namespace emsesp {
@@ -527,12 +528,15 @@ void Thermostat::publish_values() {
             dataThermostat["circuitcalctemp"] = hc->circuitcalctemp;
         }
 
-        if (hc->offsettemp != 100) {
-            dataThermostat["offsettemp"] = (int8_t)hc->offsettemp / 2;
+        if (hc->offsettemp != EMS_VALUE_INT_NOTSET) {
+            dataThermostat["offsettemp"] = hc->offsettemp / 2;
         }
 
         if (hc->designtemp != EMS_VALUE_UINT_NOTSET) {
             dataThermostat["designtemp"] = hc->designtemp;
+        }
+        if (hc->summertemp != EMS_VALUE_UINT_NOTSET) {
+            dataThermostat["summertemp"] = hc->summertemp;
         }
 
         // when using HA always send the mode otherwise it'll break the component/widget and report an error
@@ -887,10 +891,9 @@ void Thermostat::show_values(uuid::console::Shell & shell) {
             print_value(shell, 4, F("Night temperature"), F_(degrees), Helpers::render_value(buffer, hc->nighttemp, 2));
             print_value(shell, 4, F("Holiday temperature"), F_(degrees), Helpers::render_value(buffer, hc->holidaytemp, 2));
 
-            if (hc->offsettemp < 100) {
-                print_value(shell, 4, F("Offset temperature"), F_(degrees), Helpers::render_value(buffer, hc->offsettemp, 2));
-            }
+            print_value(shell, 4, F("Offset temperature"), F_(degrees), Helpers::render_value(buffer, hc->offsettemp, 2));
             print_value(shell, 4, F("Design temperature"), F_(degrees), Helpers::render_value(buffer, hc->designtemp, 0));
+            print_value(shell, 4, F("Summer temperature"), F_(degrees), Helpers::render_value(buffer, hc->summertemp, 0));
         }
 
         // show flow temp if we have it
@@ -1249,6 +1252,35 @@ void Thermostat::set_mode(const uint8_t mode, const uint8_t hc_num) {
     write_command(set_typeids[hc->hc_num() - 1], offset, set_mode_value, validate_typeid);
 }
 
+// sets the thermostat temp, where mode is a string
+void Thermostat::set_temperature(const float temperature, const std::string & mode, const uint8_t hc_num) {
+    if (mode_tostring(HeatingCircuit::Mode::MANUAL) == mode) {
+        set_temperature(temperature, HeatingCircuit::Mode::MANUAL, hc_num);
+    } else if (mode_tostring(HeatingCircuit::Mode::AUTO) == mode) {
+        set_temperature(temperature, HeatingCircuit::Mode::AUTO, hc_num);
+    } else if (mode_tostring(HeatingCircuit::Mode::DAY) == mode) {
+        set_temperature(temperature, HeatingCircuit::Mode::DAY, hc_num);
+    } else if (mode_tostring(HeatingCircuit::Mode::NIGHT) == mode) {
+        set_temperature(temperature, HeatingCircuit::Mode::NIGHT, hc_num);
+    } else if (mode_tostring(HeatingCircuit::Mode::COMFORT) == mode) {
+        set_temperature(temperature, HeatingCircuit::Mode::COMFORT, hc_num);
+    } else if (mode_tostring(HeatingCircuit::Mode::HEAT) == mode) {
+        set_temperature(temperature, HeatingCircuit::Mode::HEAT, hc_num);
+    } else if (mode_tostring(HeatingCircuit::Mode::NOFROST) == mode) {
+        set_temperature(temperature, HeatingCircuit::Mode::NOFROST, hc_num);
+    } else if (mode_tostring(HeatingCircuit::Mode::SUMMER) == mode) {
+        set_temperature(temperature, HeatingCircuit::Mode::SUMMER, hc_num);
+    } else if (mode_tostring(HeatingCircuit::Mode::HOLIDAY) == mode) {
+        set_temperature(temperature, HeatingCircuit::Mode::HOLIDAY, hc_num);
+    } else if (mode_tostring(HeatingCircuit::Mode::OFFSET) == mode) {
+        set_temperature(temperature, HeatingCircuit::Mode::OFFSET, hc_num);
+    } else if (mode_tostring(HeatingCircuit::Mode::DESIGN) == mode) {
+        set_temperature(temperature, HeatingCircuit::Mode::DESIGN, hc_num);
+    } else {
+        LOG_WARNING(F("Invalid mode %s."), mode.c_str());
+    }
+}
+
 // Set the temperature of the thermostat
 void Thermostat::set_temperature(const float temperature, const uint8_t mode, const uint8_t hc_num) {
     if (can_write()) {
@@ -1424,10 +1456,15 @@ void Thermostat::console_commands(Shell & shell, unsigned int context) {
     EMSESPShell::commands->add_command(ShellContext::THERMOSTAT,
                                        CommandFlags::ADMIN,
                                        flash_string_vector{F_(change), F_(temp)},
-                                       flash_string_vector{F_(degrees_mandatory), F_(hc_optional)},
+                                       flash_string_vector{F_(degrees_mandatory), F_(hc_optional),F_(mode_optional)},
                                        [=](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) {
-                                           uint8_t hc = (arguments.size() == 1) ? DEFAULT_HEATING_CIRCUIT : arguments[1].at(0) - '0';
-                                           set_temperature(atof(arguments.front().c_str()), HeatingCircuit::Mode::AUTO, hc);
+                                            uint8_t hc = (arguments.size() >= 2) ? arguments[1].at(0) - '0' : DEFAULT_HEATING_CIRCUIT;
+                                            if ((arguments.size() == 3)) {
+                                                set_temperature(atof(arguments.front().c_str()), arguments.back().c_str(), hc);
+                                            } else {
+                                                set_temperature(atof(arguments.front().c_str()), HeatingCircuit::Mode::AUTO, hc);
+                                            }
+
                                        });
 
     EMSESPShell::commands->add_command(
@@ -1436,7 +1473,7 @@ void Thermostat::console_commands(Shell & shell, unsigned int context) {
         flash_string_vector{F_(change), F_(mode)},
         flash_string_vector{F_(mode_mandatory), F_(hc_optional)},
         [=](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) {
-            uint8_t hc = (arguments.size() == 1) ? DEFAULT_HEATING_CIRCUIT : arguments[1].at(0) - '0';
+            uint8_t hc = (arguments.size() == 2) ?  arguments[1].at(0) - '0' : DEFAULT_HEATING_CIRCUIT;
             set_mode(arguments.front(), hc);
         },
         [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments __attribute__((unused))) -> const std::vector<std::string> {

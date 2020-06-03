@@ -60,7 +60,7 @@ class Thermostat : public EMSdevice {
         uint8_t  summertemp        = EMS_VALUE_UINT_NOTSET;
         uint8_t  nofrosttemp       = EMS_VALUE_UINT_NOTSET;
         uint8_t  designtemp        = EMS_VALUE_UINT_NOTSET;  // heatingcurve design temp at MinExtTemp
-        uint8_t  offsettemp        = 100;                    // heatingcurve offest temp at roomtemp signed!
+        int8_t   offsettemp        = EMS_VALUE_INT_NOTSET;   // heatingcurve offest temp at roomtemp signed!
         uint16_t remotetemp        = EMS_VALUE_SHORT_NOTSET; // for simulating a RC20 remote
 
 
@@ -236,6 +236,7 @@ class Thermostat : public EMSdevice {
     void set_settings_language(const uint8_t lg);
     void set_mode(const uint8_t mode, const uint8_t hc_num);
     void set_mode(const std::string & mode, const uint8_t hc_num);
+    void set_temperature(const float temperature, const std::string & mode, const uint8_t hc_num);
     void set_temperature(const float temperature, const uint8_t mode, const uint8_t hc_num);
 
     // MQTT functions
