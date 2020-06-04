@@ -669,7 +669,7 @@ void EMSESP::console_commands(Shell & shell, unsigned int context) {
 
     EMSESPShell::commands->add_command(
         ShellContext::EMS,
-        CommandFlags::USER,
+        CommandFlags::ADMIN,
         flash_string_vector{F_(set), F_(bus_id)},
         flash_string_vector{F_(deviceid_mandatory)},
         [](Shell & shell, const std::vector<std::string> & arguments) {
@@ -696,7 +696,7 @@ void EMSESP::console_commands(Shell & shell, unsigned int context) {
 
     EMSESPShell::commands->add_command(
         ShellContext::EMS,
-        CommandFlags::USER,
+        CommandFlags::ADMIN,
         flash_string_vector{F_(set), F_(tx_mode)},
         flash_string_vector{F_(n_mandatory)},
         [](Shell & shell, const std::vector<std::string> & arguments) {
@@ -719,7 +719,7 @@ void EMSESP::console_commands(Shell & shell, unsigned int context) {
 
     EMSESPShell::commands->add_command(
         ShellContext::EMS,
-        CommandFlags::USER,
+        CommandFlags::ADMIN,
         flash_string_vector{F_(set), F_(read_only)},
         flash_string_vector{F_(bool_mandatory)},
         [](Shell & shell, const std::vector<std::string> & arguments) {
