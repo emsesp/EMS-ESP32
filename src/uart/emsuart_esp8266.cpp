@@ -320,12 +320,11 @@ EMSUART_STATUS ICACHE_FLASH_ATTR EMSuart::transmit(uint8_t * buf, uint8_t len) {
      * 
      */
 
-    EMSUART_STATUS result = EMS_TX_STATUS_OK;
-
     // disable rx interrupt
     // clear Rx status register, resetting the Rx FIFO and flush it
     noInterrupts();
-    //ETS_UART_INTR_DISABLE();
+    // ETS_UART_INTR_DISABLE();
+    // USC0(EMSUART_UART) |= (1 << UCRXRST); // reset uart rx fifo
     emsuart_flush_fifos();
 
     // send the bytes along the serial line
@@ -338,13 +337,13 @@ EMSUART_STATUS ICACHE_FLASH_ATTR EMSuart::transmit(uint8_t * buf, uint8_t len) {
             delayMicroseconds(EMSUART_BUSY_WAIT); // burn CPU cycles...
             if (--wdc == 0) {
                 interrupts();
-                //ETS_UART_INTR_ENABLE();
+                // ETS_UART_INTR_ENABLE();
                 return EMS_TX_WTD_TIMEOUT;
             }
             if (USIR(EMSUART_UART) & (1 << UIBD)) {
                 USIC(EMSUART_UART) = (1 << UIBD); // clear BRK detect IRQ
                 interrupts();
-                //ETS_UART_INTR_ENABLE();
+                // ETS_UART_INTR_ENABLE();
                 return EMS_TX_BRK_DETECT;
             }
         }
@@ -354,27 +353,25 @@ EMSUART_STATUS ICACHE_FLASH_ATTR EMSuart::transmit(uint8_t * buf, uint8_t len) {
     // on Rx-BRK (bus collision), we simply enable Rx and leave it
     // otherwise we send the final Tx-BRK in the loopback and re=enable Rx-INT.
     // worst case, we'll see an additional Rx-BRK...
-    if (result == EMS_TX_STATUS_OK) {
-        // neither bus collision nor timeout - send terminating BRK signal
-        if (!(USIS(EMSUART_UART) & (1 << UIBD))) {
-            // no bus collision - send terminating BRK signal
-            USC0(EMSUART_UART) |= (1 << UCLBE) | (1 << UCBRK); // enable loopback & set <BRK>
+    // neither bus collision nor timeout - send terminating BRK signal
+    if (!(USIS(EMSUART_UART) & (1 << UIBD))) {
+        // no bus collision - send terminating BRK signal
+        USC0(EMSUART_UART) |= (1 << UCLBE) | (1 << UCBRK); // enable loopback & set <BRK>
 
-            // wait until BRK detected...
-            while (!(USIR(EMSUART_UART) & (1 << UIBD))) {
-                delayMicroseconds(EMSUART_BIT_TIME);
-            }
-
-            USC0(EMSUART_UART) &= ~((1 << UCBRK) | (1 << UCLBE)); // disable loopback & clear <BRK>
-            USIC(EMSUART_UART) = (1 << UIBD);                     // clear BRK detect IRQ
-            phantomBreak       = 1;
+        // wait until BRK detected...
+        while (!(USIR(EMSUART_UART) & (1 << UIBD))) {
+            delayMicroseconds(EMSUART_BIT_TIME);
         }
+
+        USC0(EMSUART_UART) &= ~((1 << UCBRK) | (1 << UCLBE)); // disable loopback & clear <BRK>
+        USIC(EMSUART_UART) = (1 << UIBD);                     // clear BRK detect IRQ
+        phantomBreak       = 1;
     }
 
     interrupts();
-    //ETS_UART_INTR_ENABLE(); // open up the FIFO again to start receiving
+    // ETS_UART_INTR_ENABLE(); // open up the FIFO again to start receiving
 
-    return result; // send the Tx status back
+    return EMS_TX_STATUS_OK; // send the Tx ok status back
 }
 
 } // namespace emsesp

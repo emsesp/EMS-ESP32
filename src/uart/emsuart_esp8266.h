@@ -47,7 +47,7 @@
 #define EMSUART_TX_LAG 8
 #define EMSUART_BUSY_WAIT (EMSUART_BIT_TIME / 8)
 #define EMS_TX_TO_CHARS (2 + 20)
-#define EMS_TX_TO_COUNT ((EMS_TX_TO_CHARS)*8)
+#define EMS_TX_TO_COUNT ((EMS_TX_TO_CHARS)*8*10)
 
 namespace emsesp {
 
