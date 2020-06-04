@@ -29,6 +29,7 @@
 #include "emsesp.h"
 #include "helpers.h"
 #include "mqtt.h"
+#include "roomcontrol.h"
 
 #include <vector>
 
@@ -61,7 +62,6 @@ class Thermostat : public EMSdevice {
         uint8_t  nofrosttemp       = EMS_VALUE_UINT_NOTSET;
         uint8_t  designtemp        = EMS_VALUE_UINT_NOTSET;  // heatingcurve design temp at MinExtTemp
         int8_t   offsettemp        = EMS_VALUE_INT_NOTSET;   // heatingcurve offest temp at roomtemp signed!
-        uint16_t remotetemp        = EMS_VALUE_SHORT_NOTSET; // for simulating a RC20 remote
 
 
         uint8_t hc_num() const {
@@ -231,9 +231,13 @@ class Thermostat : public EMSdevice {
     void process_EasyMonitor(std::shared_ptr<const Telegram> telegram);
 
     // set functions
+    void set_settings_minexttemp(const int8_t mt);
+    void set_settings_calinttemp(const int8_t ct);
+    void set_settings_clockoffset(const int8_t co);
     void set_settings_display(const uint8_t ds);
     void set_settings_building(const uint8_t bg);
     void set_settings_language(const uint8_t lg);
+    void set_control(const uint8_t ctrl, const uint8_t hc_num);
     void set_mode(const uint8_t mode, const uint8_t hc_num);
     void set_mode(const std::string & mode, const uint8_t hc_num);
     void set_temperature(const float temperature, const std::string & mode, const uint8_t hc_num);
