@@ -369,7 +369,7 @@ void Mqtt::show_topic_handlers(uuid::console::Shell & shell, const uint8_t devic
         return;
     }
 
-    shell.print(F(" These MQTT topics are registered: "));
+    shell.print(F(" Subscribed MQTT topics: "));
     for (const auto & mqtt_function : mqtt_functions_) {
         if (mqtt_function.device_id_ == device_id) {
             shell.printf(F("%s "), mqtt_function.topic_.c_str());
