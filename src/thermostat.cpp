@@ -238,6 +238,7 @@ void Thermostat::thermostat_cmd(const char * message) {
         strlcpy(hc_name, "hc", 6);
         uint8_t hc_num = hc->hc_num();
         strlcat(hc_name, Helpers::itoa(s, hc_num), 6);
+
         if (nullptr != doc[hc_name]["mode"]) {
             std::string mode = doc[hc_name]["mode"]; // first check mode
             set_mode(mode, hc_num);
@@ -268,10 +269,37 @@ void Thermostat::thermostat_cmd(const char * message) {
         }
         if (float f = doc[hc_name]["remotetemp"]) {
             if (f > 100 || f < 0) {
-                hc->remotetemp = EMS_VALUE_SHORT_NOTSET;
+                Roomctrl::set_remotetemp(hc_num - 1, EMS_VALUE_SHORT_NOTSET);
             } else {
-                hc->remotetemp = (uint16_t)(f * 10);
+                Roomctrl::set_remotetemp(hc_num - 1, (int16_t)(f * 10));
             }
+        }
+        if (nullptr != doc[hc_name]["control"]) {
+            uint8_t ctrl = doc[hc_name]["control"];
+            set_control(ctrl, hc_num);
+        }
+        if (float ct = doc["calinttemp"]) {
+            set_settings_calinttemp((int8_t)(ct *10));
+        }
+        if (nullptr != doc["minexttemp"]) {
+            int8_t mt = doc["minexttemp"];
+            set_settings_minexttemp(mt);
+        }
+        if (nullptr != doc["building"]) {
+            uint8_t bd = doc["building"];
+            set_settings_building(bd);
+        }
+        if (nullptr != doc["language"]) {
+            uint8_t lg = doc["language"];
+            set_settings_language(lg);
+        }
+        if (nullptr != doc["display"]) {
+            uint8_t dp = doc["display"];
+            set_settings_display(dp);
+        }
+        if (nullptr != doc["clockoffset"]) {
+            int8_t co = doc["clockoffset"];
+            set_settings_clockoffset(co);
         }
     }
 
@@ -301,7 +329,6 @@ void Thermostat::thermostat_cmd(const char * message) {
         return;
     }
 
-    // set night temp value
     if (strcmp(command, "nighttemp") == 0) {
         float f = doc["data"];
         if (f) {
@@ -310,7 +337,6 @@ void Thermostat::thermostat_cmd(const char * message) {
         }
     }
 
-    // set daytemp value
     if (strcmp(command, "daytemp") == 0) {
         float f = doc["data"];
         if (f) {
@@ -319,7 +345,6 @@ void Thermostat::thermostat_cmd(const char * message) {
         return;
     }
 
-    // set holiday value
     if (strcmp(command, "holidaytemp") == 0) {
         float f = doc["data"];
         if (f) {
@@ -328,7 +353,6 @@ void Thermostat::thermostat_cmd(const char * message) {
         return;
     }
 
-    // set eco value
     if (strcmp(command, "ecotemp") == 0) {
         float f = doc["data"];
         if (f) {
@@ -337,7 +361,6 @@ void Thermostat::thermostat_cmd(const char * message) {
         return;
     }
 
-    // set heat value
     if (strcmp(command, "heattemp") == 0) {
         float f = doc["data"];
         if (f) {
@@ -346,7 +369,6 @@ void Thermostat::thermostat_cmd(const char * message) {
         return;
     }
 
-    // set nofrost value
     if (strcmp(command, "nofrosttemp") == 0) {
         float f = doc["data"];
         if (f) {
@@ -354,6 +376,7 @@ void Thermostat::thermostat_cmd(const char * message) {
         }
         return;
     }
+
     if (strcmp(command, "summertemp") == 0) {
         float f = doc["data"];
         if (f) {
@@ -361,6 +384,7 @@ void Thermostat::thermostat_cmd(const char * message) {
         }
         return;
     }
+
     if (strcmp(command, "designtemp") == 0) {
         float f = doc["data"];
         if (f) {
@@ -368,7 +392,8 @@ void Thermostat::thermostat_cmd(const char * message) {
         }
         return;
     }
-    if (strcmp(command, "offettemp") == 0) {
+
+    if (strcmp(command, "offsettemp") == 0) {
         float f = doc["data"];
         if (f) {
             set_temperature(f, HeatingCircuit::Mode::OFFSET, hc_num);
@@ -1114,22 +1139,68 @@ void Thermostat::process_RCTime(std::shared_ptr<const Telegram> telegram) {
     );
 }
 
+// 0xA5 - Set minimum external temperature
+void Thermostat::set_settings_minexttemp(const int8_t mt) {
+    if (((flags() & 0x0F) == EMS_DEVICE_FLAG_RC30_1) || ((flags() & 0x0F) == EMS_DEVICE_FLAG_RC35)) {
+        LOG_INFO(F("Setting min external temperature to %d"), mt);
+        write_command(EMS_TYPE_IBASettings, 5, mt);
+    }
+}
+
+// 0xA5 - Clock offset
+void Thermostat::set_settings_clockoffset(const int8_t co) {
+    if ((flags() & 0x0F) == EMS_DEVICE_FLAG_RC30_1) {
+        LOG_INFO(F("Setting clock offset to %d"), co);
+        write_command(EMS_TYPE_IBASettings, 12, co);
+    }
+}
+// 0xA5 - Calibrate internal temperature
+void Thermostat::set_settings_calinttemp(const int8_t ct) {
+    if (((flags() & 0x0F) == EMS_DEVICE_FLAG_RC30_1) || ((flags() & 0x0F) == EMS_DEVICE_FLAG_RC35)) {
+        LOG_INFO(F("Calibrating internal temperature to %d.%d"), ct / 10, ct < 0 ? -ct % 10 : ct % 10);
+        write_command(EMS_TYPE_IBASettings, 2, ct);
+    }
+}
+
 // 0xA5 - Set the display settings
 void Thermostat::set_settings_display(const uint8_t ds) {
-    LOG_INFO(F("Setting display to %d"), ds);
-    write_command(EMS_TYPE_IBASettings, 0, ds);
+    if ((flags() & 0x0F) == EMS_DEVICE_FLAG_RC30_1) {
+        LOG_INFO(F("Setting display to %d"), ds);
+        write_command(EMS_TYPE_IBASettings, 0, ds);
+    }
 }
 
 // 0xA5 - Set the building settings
 void Thermostat::set_settings_building(const uint8_t bg) {
-    LOG_INFO(F("Setting building to %d"), bg);
-    write_command(EMS_TYPE_IBASettings, 6, bg);
+    if (((flags() & 0x0F) == EMS_DEVICE_FLAG_RC30_1) || ((flags() & 0x0F) == EMS_DEVICE_FLAG_RC35)) {
+        LOG_INFO(F("Setting building to %d"), bg);
+        write_command(EMS_TYPE_IBASettings, 6, bg);
+    }
 }
 
 // 0xA5 Set the language settings
 void Thermostat::set_settings_language(const uint8_t lg) {
-    LOG_INFO(F("Setting building to %d"), lg);
-    write_command(EMS_TYPE_IBASettings, 1, lg);
+    if ((flags() & 0x0F) == EMS_DEVICE_FLAG_RC30_1) {
+        LOG_INFO(F("Setting building to %d"), lg);
+        write_command(EMS_TYPE_IBASettings, 1, lg);
+    }
+}
+
+// Set the control-mode for hc 0-off, 1-RC20, 2-RC3x
+void Thermostat::set_control(const uint8_t ctrl,const uint8_t hc_num) {
+    std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(hc_num);
+    if (hc == nullptr) {
+        LOG_WARNING(F("set control: Heating Circuit %d not found or activated"), hc_num);
+        return;
+    }
+    if (ctrl > 2) {
+        LOG_WARNING(F("set control: Invalid control mode: %d"), ctrl);
+        return;
+    }
+    if ((flags() & 0x0F) == EMS_DEVICE_FLAG_RC35 || (flags() & 0x0F) == EMS_DEVICE_FLAG_RC30_1) {
+        LOG_INFO(F("Setting Circuit-control for hc%d to %d"), hc_num, ctrl);
+        write_command(set_typeids[hc->hc_num() - 1], 26, ctrl);
+    }
 }
 
 // sets the thermostat working mode, where mode is a string

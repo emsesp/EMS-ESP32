@@ -563,6 +563,8 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
     //LOG_TRACE(F("Rx: %s"), Helpers::data_to_hex(data, length).c_str());
     uint8_t first_value = data[0];
     if (((first_value & 0x7F) == txservice_.ems_bus_id()) && (length > 1)) {
+        // if we ask ourself at roomcontrol for version e.g. 0B 98 02 ...
+        Roomctrl::check((data[1] ^ 0x80 ^ rxservice_.ems_mask()), data, length);
         rxservice_.add(data, length); // just for logging
         return;                       // it's an echo
     }
@@ -620,8 +622,12 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
             EMSbus::last_bus_activity(uuid::get_uptime()); // set the flag indication the EMS bus is active
             txservice_.send();
         }
+        // send remote room temperature if active
+        Roomctrl::send(first_value ^ 0x80 ^ rxservice_.ems_mask());
         return;
     } else {
+        // check if there is a message for the roomcontroller
+        Roomctrl::check((data[1] ^ 0x80 ^ rxservice_.ems_mask()), data, length);
         // add to RxQueue, what ever it is.
         rxservice_.add(data, length);
     }
