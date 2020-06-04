@@ -564,9 +564,11 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
     uint8_t first_value = data[0];
     if (((first_value & 0x7F) == txservice_.ems_bus_id()) && (length > 1)) {
         // if we ask ourself at roomcontrol for version e.g. 0B 98 02 ...
-        Roomctrl::check((data[1] ^ 0x80 ^ rxservice_.ems_mask()), data, length);
-        rxservice_.add(data, length); // just for logging
-        return;                       // it's an echo
+        Roomctrl::check((data[1] ^ 0x80 ^ rxservice_.ems_mask()), data);
+#ifdef EMSESP_DEBUG
+        rxservice_.add(data, length); // just for logging, if compiled with additional debugging
+#endif
+        return; // it's an echo
     }
 
     // are we waiting for a response from a recent Tx Read or Write?
@@ -627,7 +629,7 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
         return;
     } else {
         // check if there is a message for the roomcontroller
-        Roomctrl::check((data[1] ^ 0x80 ^ rxservice_.ems_mask()), data, length);
+        Roomctrl::check((data[1] ^ 0x80 ^ rxservice_.ems_mask()), data);
         // add to RxQueue, what ever it is.
         rxservice_.add(data, length);
     }

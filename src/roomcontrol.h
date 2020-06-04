@@ -16,8 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EMSESP_ROOMCTRL_H
-#define EMSESP_ROOMCTRL_H
+#ifndef EMSESP_ROOMCONTROL_H
+#define EMSESP_ROOMCONTROL_H
 
 #include "emsesp.h"
 #include "telegram.h"
@@ -29,15 +29,16 @@ namespace emsesp {
 class Roomctrl {
   public:
     static void send(uint8_t addr);
-    static void check(uint8_t addr, uint8_t * data, const uint8_t length);
+    static void check(uint8_t addr, uint8_t * data);
     static void set_remotetemp(uint8_t hc, int16_t temp);
 
   private:
-    #define ADDR 0x18
+    static constexpr uint8_t  ADDR          = 0x18;
+    static constexpr uint32_t SEND_INTERVAL = 60000; // 1 minute
+
     static void version(uint8_t addr, uint8_t dst);
     static void unknown(uint8_t addr, uint8_t dst, uint8_t type, uint8_t offset);
     static void temperature(uint8_t addr, uint8_t dst);
-
 };
 
 } // namespace emsesp
