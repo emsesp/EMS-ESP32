@@ -144,7 +144,7 @@ void System::start() {
     // register MQTT system commands
     Mqtt::subscribe("cmd", std::bind(&System::mqtt_commands, this, _1));
 
-// RTC state variables - onky for ESP8266
+// RTC state variables - only for ESP8266
 #if defined(ESP8266)
     state_.registerVar(&reset_counter_); // we send a pointer to each of our variables
     state_.registerVar(&safe_mode_);

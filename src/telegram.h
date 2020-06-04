@@ -270,6 +270,14 @@ class TxService : public EMSbus {
         telegram_read_count_++;
     }
 
+    uint16_t telegram_fail_count() const {
+        return telegram_fail_count_;
+    }
+
+    void increment_telegram_fail_count() {
+        telegram_fail_count_++;
+    }
+
     uint16_t telegram_write_count() const {
         return telegram_write_count_;
     }
@@ -312,6 +320,7 @@ class TxService : public EMSbus {
     const std::shared_ptr<const Telegram> telegram_last;             // copy of last telegram
     uint16_t                              telegram_read_count_  = 0; // # Tx successful reads
     uint16_t                              telegram_write_count_ = 0; // # Tx successful writes
+    uint16_t                              telegram_fail_count_  = 0; // # Tx unsuccessful transmits
 
     uint8_t retry_count_ = 0; // count for # Tx retries
 

@@ -110,22 +110,22 @@ void EMSESP::trace_watch_id(uint16_t trace_watch_id) {
     }
 }
 
-// show the Rx and Tx queues
+// show the EMS bus status plus both Rx and Tx queues
 void EMSESP::show_emsbus(uuid::console::Shell & shell) {
-    // EMS bus specific
+    // EMS bus information
     if (rxservice_.bus_connected()) {
         uint8_t success_rate = 0;
         if (rxservice_.telegram_error_count()) {
             success_rate = ((float)rxservice_.telegram_error_count() / (float)rxservice_.telegram_count()) * 100;
         }
 
-        shell.printfln(F("EMS Bus protocol: %s, #telegrams received: %d, #Read requests sent: %d, #Write requests sent: %d, #CRC errors: %d (%d%%)"),
-                       EMSbus::is_ht3() ? F("HT3") : F("Buderus"),
-                       rxservice_.telegram_count(),
-                       txservice_.telegram_read_count(),
-                       txservice_.telegram_write_count(),
-                       rxservice_.telegram_error_count(),
-                       success_rate);
+        shell.printfln(F("EMS Bus info:"));
+        shell.printfln(F("  Bus protocol: %s"), EMSbus::is_ht3() ? F("HT3") : F("Buderus"));
+        shell.printfln(F("  #telegrams received: %d"), rxservice_.telegram_count());
+        shell.printfln(F("  #read requests sent: %d"), txservice_.telegram_read_count());
+        shell.printfln(F("  #write requests sent: %d"), txservice_.telegram_write_count());
+        shell.printfln(F("  #CRC errors: %d (%d%%)"), rxservice_.telegram_error_count(), success_rate);
+        shell.printfln(F("  #Tx fails: %d"), txservice_.telegram_fail_count());
     } else {
         shell.printfln(F("EMS Bus is disconnected"));
     }
@@ -570,21 +570,21 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
     }
 
     // are we waiting for a response from a recent Tx Read or Write?
+    bool tx_successful = false;
     if (EMSbus::tx_waiting()) {
-        // if it's a single byte 1 or 4 then its maybe a response from the last write action
         EMSbus::tx_waiting(false); // reset Tx wait state
+
+        // if it's a single byte 1 or 4 then its maybe a response from the last write action
         if (length == 1) {
             if (first_value == TxService::TX_WRITE_SUCCESS) {
                 LOG_DEBUG(F("Last Tx write successful. Sending read request."));
                 txservice_.increment_telegram_write_count(); // last tx/write was confirmed ok
                 txservice_.send_poll();                      // close the bus
-                txservice_.post_send_query();                // send type_id to last destination
+                txservice_.post_send_query();                // follow up with any post-read
+                tx_successful = true;
             } else if (first_value == TxService::TX_WRITE_FAIL) {
                 LOG_ERROR(F("Last Tx write rejected by host"));
                 txservice_.send_poll(); // close the bus
-            } else {
-                // ignore it, it's probably a poll and we can wait for the next one
-                return;
             }
         } else {
             // got a telegram with data in it. See if the src/dest matches that from the last one we sent
@@ -594,17 +594,23 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
             if (txservice_.is_last_tx(src, dest)) {
                 LOG_DEBUG(F("Last Tx read successful"));
                 txservice_.increment_telegram_read_count();
-                txservice_.send_poll();
-            } else {
-                // the telegram we got wasn't what we had requested
-                // So re-send the last Tx and increment retry count
-                uint8_t retries = txservice_.retry_tx(); // returns 0 if exceeded count
-                if (retries) {
-                    LOG_ERROR(F("Last Tx read failed. Retrying #%d..."), retries);
-                } else {
-                    LOG_ERROR(F("Last Tx read failed after %d retries"), txservice_.MAXIMUM_TX_RETRIES);
-                }
+                txservice_.send_poll(); // close the bus
+                tx_successful = true;
             }
+        }
+
+        // if Tx wasn't successful, retry
+        if (!tx_successful) {
+            // the telegram we got wasn't what we had requested
+            // So re-send the last Tx and increment retry count
+            uint8_t retries = txservice_.retry_tx(); // returns 0 if exceeded count
+            if (retries) {
+                LOG_ERROR(F("Last Tx operation failed. Retrying #%d..."), retries);
+            } else {
+                LOG_ERROR(F("Last Tx operation failed after %d retries. Ignoring request."), txservice_.MAXIMUM_TX_RETRIES);
+            }
+
+            return;
         }
     }
 
@@ -825,7 +831,6 @@ void EMSESP::loop() {
         shower_.loop();    // check for shower on/off
         sensors_.loop();   // this will also send out via MQTT
         console_.loop();   // telnet/serial console
-        delay(ESP_DELAY);  // some time to WiFi and everything else to catch up, calls yield, and also prevent overheating
 
         // force a query on the EMS devices to fetch latest data at a set interval (1 min)
         if ((uuid::get_uptime() - last_fetch_ > EMS_FETCH_FREQUENCY)) {
@@ -833,7 +838,7 @@ void EMSESP::loop() {
             fetch_device_values();
         }
 
-        // helps ease wifi outages
+        // helps ease wifi dropouts effecting MQTT and Telnet services
         // https://github.com/esp8266/Arduino/blob/e721089e601985e633641ab7323f81a84ea0cd1b/cores/esp8266/core_esp8266_wiring.cpp#L41-L57
         delay(1);
     }

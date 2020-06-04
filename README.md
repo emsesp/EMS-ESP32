@@ -21,19 +21,39 @@ Note: Version 2.0 is not backward compatible with v1.0. The File system structur
 
 - A web interface built using React and TypeScript to be secure and cross-browser compatible. Each restful endpoint is protected and issues a JWT which is then sent using Bearer Authentication. Implements a Web captive portal. On first installs EMS-ESP starts an Access Point where system settings can be configured. Note, this is still in a separate repo and pending a merge into this project.
   
-- A new console. Like 1.9.x it works with both Serial and Telnet but a lot more intuitive behaving like a Linux shell and secure. Multiple telnet sessions are supported now but watch out for slow connections and low memory. A password is need to change any settings. You can use TAB to auto-complete commands, ctrl-L, ctrl-U and the other typical console type shortcuts. Some key commands:
+- A new console. Like in version 1.9 it works with both Serial and Telnet but a lot more intuitive, behaving similar to a Linux-style shell. It supports multiple connections and any commands that effect the behavior of EMS-ESP are secure behind an admin password. You can use TAB to auto-complete commands, ctrl-L, ctrl-U and the other typical console type shortcuts. ctrl-D to exit the current menu. Some other important commands:
     * `help` lists the commands and keywords
-    * some commands take you into a new context, a bit like a sub-menu. e.g. `system`, `mqtt`, `thermostat`. Use `help` to show which commands this context has and `exit` to get back to the root.
+    * some commands take you into a new context, a bit like a sub-menu. e.g. `system`, `mqtt`, `thermostat`. Use `help` to show which commands this context has and `exit` or CTRL-D to get back to the root.
     * To change a setting use the `set` command. Typing `set` shows the current settings.
     * `show` shows the data specific to the context you're in.
     * `su` to switch to Admin which enables more commands such as most of the `set` commands. The default password is "neo" which can be changed with `passwd` from the system menu. When in Admin mode the command prompt switches from `$` to `#`.
-    * `log` sets the logging. `log off` disables logging. Use `log trace` to see the telegram traffic and `log debug` for very verbose logging. To watch a specific telegram ID or device ID use `log trace [id]`.
+    * `log` sets the logging. `log off` disables logging. Use `log trace` to see the telegram traffic and `log debug` for very verbose logging. To watch a specific telegram ID or device ID use `log trace [full|raw| [id]`.
 
-- There is no "serial mode" anymore like with version 1.9. When the Wifi cannot connect to the SSID it will automatically enter a "safe" mode where the Serial console is activated, baud 115200. Note Serial is always available on the ESP32 because it has 2 UARTs.
+- There is no "serial mode" anymore like with version 1.9. When the Wifi cannot connect to the SSID it will automatically enter a "safe" mode where the Serial console is activated, baud 115200. Note Serial is always available on the ESP32 because it has multiple UARTs.
 
 - LED behaves like in 1.9. A solid LED means good connection and EMS data is coming in. A slow pulse means either the WiFi or the EMS bus is not connected. A very fast pulse is when the system is booting up and configuring itself.
 
-- on a new install you will want to enter `su` and then go to the `system` context. Use `set wifi ...` to set the network up. Then go to the `mqtt` context to set the mqtt up.
+### Setting up for the first time:
+
+ - connect the ESP8266/ESP32 via USB and enter via the serial/com port with baud 115200
+ - type `su` and use the default password *neo*
+ - type `system` to go to the system sub-menu (which we call a context)
+ - type `set` to see the current settings
+ - use `set wifi` to change the SSID and password. Remember TAB auto-completes the command
+ - CTRL-D to get back to the root
+ - use `mqtt` to enter the MQTT menu. Same approach using the `set` command to set the MQTT IP and any credentials. CTRL-D to get back to the root.
+ - use `ems` to change to the EMS BUS tx mode if you find Tx is not working.
+ - reboot and next time use the Telnet via WiFi to connect as the serial mode will be disabled.
+
+### Debugging
+ - Turn on logging with either `log all` or `log trace` or `log debug`
+ - Error messages are shown in the color red
+ - type `show` from the main root to see if any data has come in
+ - if not, go to the `ems` context and type `show` which will display some EMS bus stats
+ - use the `refresh` command to fetch new data from the EMS bus
+ - use `scan devices` or `scan devices deep` to locate devices on the EMS bus. If any are unknown please report back to the project so we can update our EMS device library.
+
+
 
 # Full Console Commands
 
@@ -44,7 +64,7 @@ common commands available in all contexts:
   log [level] [full|raw] [trace ID]
   su
 
-(top level)
+(top root level)
 	refresh
 	show
 	show version
@@ -124,15 +144,8 @@ thermostat
 ### **Known issues, bugs and improvements currently working on**
 
 ```
-TODO ESP32 - when saving SPIFFS the UART stop and restart() functions need to flush queue to avoid miss fires
-TODO sometimes with tx_mode 0 there are a few CRC errors due to collision when waiting for a BRK signal.
+TODO Optimized ESP8266 and ESP32 UART code (via Michael)
 TODO console auto-complete with 'set' command in the system context is not showing all commands, only the hostname.
-```
-
-### **Features to add next**
-
-```
-TODO validate 0xE9 with data from Koen. (https://github.com/proddy/EMS-ESP/issues/382)
 ```
 
 ### **To tidy up in code later**
@@ -140,9 +153,10 @@ TODO validate 0xE9 with data from Koen. (https://github.com/proddy/EMS-ESP/issue
 ```
 TODO replace vectors of class objects with shared pointers and use emplace_back since it instantiates during construction. It may have a performance gain.
 TODO make more use of comparison operators in the Telegram class e.g. the compare like "friend inline bool operator==(const Telegram & lhs, const Telegram & rhs)"
+TODO replace read_value with C++ Templates per data type
 TODO exit from serial should be prevented? Because you never can really exit, just close it.
 TODO add real unit tests using platformio's test bed (https://docs.platformio.org/en/latest/plus/pio-remote.html)
-TODO See if it's easier to use timers instead of millis() timers, using https://github.com/esp8266/Arduino/blob/master/libraries/esp8266/examples/BlinkPolledTimeout/BlinkPolledTimeout.ino
+TODO See if it's easier to use timers instead of millis() based timers, using https://github.com/esp8266/Arduino/blob/master/libraries/esp8266/examples/BlinkPolledTimeout/BlinkPolledTimeout.ino
 ```
 
 ### **These features to add next**
@@ -151,5 +165,6 @@ TODO See if it's easier to use timers instead of millis() timers, using https://
 TODO merge in the web code which has the Captive AP and better wifi reconnect logic. Use IPV6 and NTP from lwip2
 TODO decide if I want to port over the shower one-shot cold water logic. Don't think its used.
 TODO when doing show in telnet, should we sort the ems devices?
+TODO validate 0xE9 with data from Koen. (https://github.com/proddy/EMS-ESP/issues/382)
 
 ```

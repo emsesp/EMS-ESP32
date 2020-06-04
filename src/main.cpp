@@ -24,5 +24,4 @@ void setup() {
 
 void loop() {
     emsesp::EMSESP::loop();
-    yield();
 }

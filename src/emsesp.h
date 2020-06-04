@@ -47,7 +47,6 @@
 #include "roomcontrol.h"
 
 #define LOG_TRACE_WATCH_NONE 0 // no watch set
-#define ESP_DELAY 1
 
 namespace emsesp {
 
