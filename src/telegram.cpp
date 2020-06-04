@@ -611,10 +611,13 @@ void TxService::remember_tx(const uint8_t * data, const uint8_t length) {
 // returns retry count, or 0 if all done
 uint8_t TxService::retry_tx() {
     if (++retry_count_ == MAXIMUM_TX_RETRIES) {
-        reset_retry_count(); // give up
-    } else {
-        add(telegram_last_, telegram_last_length_); // add the last Tx telegram to the tx queue, at the top
+        reset_retry_count();             // give up
+        increment_telegram_fail_count(); // another Tx fail
+        return 0;
     }
+
+    add(telegram_last_, telegram_last_length_); // add the last Tx telegram to the tx queue, at the top
+
     return retry_count_;
 }
 

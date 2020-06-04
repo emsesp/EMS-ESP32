@@ -110,22 +110,22 @@ void EMSESP::trace_watch_id(uint16_t trace_watch_id) {
     }
 }
 
-// show the Rx and Tx queues
+// show the EMS bus status plus both Rx and Tx queues
 void EMSESP::show_emsbus(uuid::console::Shell & shell) {
-    // EMS bus specific
+    // EMS bus information
     if (rxservice_.bus_connected()) {
         uint8_t success_rate = 0;
         if (rxservice_.telegram_error_count()) {
             success_rate = ((float)rxservice_.telegram_error_count() / (float)rxservice_.telegram_count()) * 100;
         }
 
-        shell.printfln(F("EMS Bus protocol: %s, #telegrams received: %d, #Read requests sent: %d, #Write requests sent: %d, #CRC errors: %d (%d%%)"),
-                       EMSbus::is_ht3() ? F("HT3") : F("Buderus"),
-                       rxservice_.telegram_count(),
-                       txservice_.telegram_read_count(),
-                       txservice_.telegram_write_count(),
-                       rxservice_.telegram_error_count(),
-                       success_rate);
+        shell.printfln(F("EMS Bus info:"));
+        shell.printfln(F("  Bus protocol: %s"), EMSbus::is_ht3() ? F("HT3") : F("Buderus"));
+        shell.printfln(F("  #telegrams received: %d"), rxservice_.telegram_count());
+        shell.printfln(F("  #read requests sent: %d"), txservice_.telegram_read_count());
+        shell.printfln(F("  #write requests sent: %d"), txservice_.telegram_write_count());
+        shell.printfln(F("  #CRC errors: %d (%d%%)"), rxservice_.telegram_error_count(), success_rate);
+        shell.printfln(F("  #Tx fails: %d"), txservice_.telegram_fail_count());
     } else {
         shell.printfln(F("EMS Bus is disconnected"));
     }
@@ -603,9 +603,9 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
             // So re-send the last Tx and increment retry count
             uint8_t retries = txservice_.retry_tx(); // returns 0 if exceeded count
             if (retries) {
-                LOG_ERROR(F("Last Tx read failed. Retrying #%d..."), retries);
+                LOG_ERROR(F("Last Tx operation failed. Retrying #%d..."), retries);
             } else {
-                LOG_ERROR(F("Last Tx read failed after %d retries. Abandoning Tx operation."), txservice_.MAXIMUM_TX_RETRIES);
+                LOG_ERROR(F("Last Tx operation failed after %d retries. Ignoring request."), txservice_.MAXIMUM_TX_RETRIES);
             }
 
             return;
