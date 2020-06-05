@@ -30,7 +30,7 @@
 #define EMS_MAXBUFFERS 3     // buffers for circular filling to avoid collisions
 #define EMS_MAXBUFFERSIZE 33 // max size of the buffer. EMS packets are max 32 bytes, plus extra 2 for BRKs
 
-#define EMSUART_recvTaskPrio 1      // 0, 1 or 2. 0 being the lowest
+#define EMSUART_recvTaskPrio 2      // 0, 1 or 2. 0 being the lowest
 #define EMSUART_recvTaskQueueLen 10 // number of queued Rx triggers
 
 #define EMS_TXMODE_DEFAULT 1

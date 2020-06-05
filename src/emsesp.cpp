@@ -582,9 +582,11 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
                 txservice_.send_poll();                      // close the bus
                 txservice_.post_send_query();                // follow up with any post-read
                 tx_successful = true;
+                txservice_.reset_retry_count();
             } else if (first_value == TxService::TX_WRITE_FAIL) {
                 LOG_ERROR(F("Last Tx write rejected by host"));
                 txservice_.send_poll(); // close the bus
+                txservice_.reset_retry_count();
             }
         } else {
             // got a telegram with data in it. See if the src/dest matches that from the last one we sent
@@ -595,6 +597,7 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
                 LOG_DEBUG(F("Last Tx read successful"));
                 txservice_.increment_telegram_read_count();
                 txservice_.send_poll(); // close the bus
+                txservice_.reset_retry_count();
                 tx_successful = true;
             }
         }

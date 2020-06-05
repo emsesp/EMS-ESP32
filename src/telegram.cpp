@@ -390,7 +390,7 @@ void TxService::send() {
 
     // if there's nothing in the queue to transmit, send back a poll and quit
     if (tx_telegrams_.empty()) {
-        send_poll();
+        //send_poll();
         return;
     }
 
