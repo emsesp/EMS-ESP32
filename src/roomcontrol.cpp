@@ -18,19 +18,16 @@
 
 #include "roomcontrol.h"
 
-MAKE_PSTR(logger_name, "roomctrl")
-
 namespace emsesp {
 
-uint32_t rc_time_     = 0;
-uint16_t  hc_         = EMS_VALUE_USHORT_NOTSET;
-int16_t remotetemp[4] = {
-    EMS_VALUE_SHORT_NOTSET, EMS_VALUE_SHORT_NOTSET, EMS_VALUE_SHORT_NOTSET, EMS_VALUE_SHORT_NOTSET
-};
+uint32_t rc_time_      = 0;
+uint16_t hc_           = EMS_VALUE_USHORT_NOTSET;
+int16_t  remotetemp[4] = {EMS_VALUE_SHORT_NOTSET, EMS_VALUE_SHORT_NOTSET, EMS_VALUE_SHORT_NOTSET, EMS_VALUE_SHORT_NOTSET};
+
 /**
  * set the temperature,
  */
-void Roomctrl::set_remotetemp(uint8_t hc, int16_t temp){
+void Roomctrl::set_remotetemp(uint8_t hc, int16_t temp) {
     remotetemp[hc] = temp;
 }
 
@@ -47,9 +44,9 @@ void Roomctrl::send(uint8_t addr) {
     if (remotetemp[hc_] == EMS_VALUE_SHORT_NOTSET) {
         return;
     }
-    if (millis() - rc_time_ > 60000) { // send every minute
-        rc_time_ = millis();
-        temperature(addr, 0x00); // send to all
+    if (uuid::get_uptime() - rc_time_ > SEND_INTERVAL) { // send every minute
+        rc_time_ = uuid::get_uptime();                   // use EMS-ESP's millis() to prevent overhead
+        temperature(addr, 0x00);                         // send to all
     } else {
         // acknowledge every poll, otherwise the master shows error A11-822
         EMSuart::send_poll(addr);
@@ -59,16 +56,19 @@ void Roomctrl::send(uint8_t addr) {
 /**
  * check if there is a message for the remote room controller
  */
-void Roomctrl::check(uint8_t addr, uint8_t * data, const uint8_t length) {
+void Roomctrl::check(uint8_t addr, uint8_t * data) {
     uint8_t hc_num = addr - ADDR;
+
     // check address, reply only on addresses 0x18..0x1B
     if (hc_num > 3) {
         return;
     }
+
     // no reply if the temperature is not set
     if (remotetemp[hc_num] == EMS_VALUE_SHORT_NOTSET) {
         return;
     }
+
     // for now we only reply to version and remote temperature
     if (data[2] == 0x02) {
         version(addr, data[0]);
@@ -114,14 +114,14 @@ void Roomctrl::unknown(uint8_t addr, uint8_t dst, uint8_t type, uint8_t offset) 
 void Roomctrl::temperature(uint8_t addr, uint8_t dst) {
     uint8_t data[10];
     uint8_t hc_ = addr - ADDR;
-    data[0] = addr;
-    data[1] = dst;
-    data[2] = 0xAF;
-    data[3] = 0;
-    data[4] = (uint8_t)(remotetemp[hc_] >> 8);
-    data[5] = (uint8_t)(remotetemp[hc_] & 0xFF);
-    data[6] = 0;
-    data[7] = EMSbus::calculate_crc(data, 7); // apppend CRC
+    data[0]     = addr;
+    data[1]     = dst;
+    data[2]     = 0xAF;
+    data[3]     = 0;
+    data[4]     = (uint8_t)(remotetemp[hc_] >> 8);
+    data[5]     = (uint8_t)(remotetemp[hc_] & 0xFF);
+    data[6]     = 0;
+    data[7]     = EMSbus::calculate_crc(data, 7); // apppend CRC
     EMSuart::transmit(data, 8);
 }
 

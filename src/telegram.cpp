@@ -390,7 +390,7 @@ void TxService::send() {
 
     // if there's nothing in the queue to transmit, send back a poll and quit
     if (tx_telegrams_.empty()) {
-        //send_poll();
+        send_poll();
         return;
     }
 
@@ -489,6 +489,8 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
 
     if (status != EMS_TX_STATUS_OK) {
         LOG_ERROR(F("Failed to transmit Tx via UART. Error: %s"), status == EMS_TX_WTD_TIMEOUT ? F("Timeout") : F("BRK"));
+        tx_waiting(false); // nothing send, tx not in wait state
+        return;
     }
 
     tx_waiting(true); // tx now in a wait state

@@ -124,8 +124,8 @@ void EMSESP::show_emsbus(uuid::console::Shell & shell) {
         shell.printfln(F("  #telegrams received: %d"), rxservice_.telegram_count());
         shell.printfln(F("  #read requests sent: %d"), txservice_.telegram_read_count());
         shell.printfln(F("  #write requests sent: %d"), txservice_.telegram_write_count());
-        shell.printfln(F("  #CRC errors: %d (%d%%)"), rxservice_.telegram_error_count(), success_rate);
-        shell.printfln(F("  #Tx fails: %d"), txservice_.telegram_fail_count());
+        shell.printfln(F("  #incomplete telegrams: %d (%d%%)"), rxservice_.telegram_error_count(), success_rate);
+        shell.printfln(F("  #tx fails (after 3 retries): %d"), txservice_.telegram_fail_count());
     } else {
         shell.printfln(F("EMS Bus is disconnected"));
     }
@@ -564,9 +564,11 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
     uint8_t first_value = data[0];
     if (((first_value & 0x7F) == txservice_.ems_bus_id()) && (length > 1)) {
         // if we ask ourself at roomcontrol for version e.g. 0B 98 02 ...
-        Roomctrl::check((data[1] ^ 0x80 ^ rxservice_.ems_mask()), data, length);
-        rxservice_.add(data, length); // just for logging
-        return;                       // it's an echo
+        Roomctrl::check((data[1] ^ 0x80 ^ rxservice_.ems_mask()), data);
+#ifdef EMSESP_DEBUG
+        rxservice_.add(data, length); // just for logging, if compiled with additional debugging
+#endif
+        return; // it's an echo
     }
 
     // are we waiting for a response from a recent Tx Read or Write?
@@ -606,6 +608,9 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
         if (!tx_successful) {
             // the telegram we got wasn't what we had requested
             // So re-send the last Tx and increment retry count
+#ifdef EMSESP_DEBUG
+            LOG_DEBUG(F("send: %s, received: %s"), txservice_.last_tx_to_string().c_str(), Helpers::data_to_hex(data, length).c_str());
+#endif
             uint8_t retries = txservice_.retry_tx(); // returns 0 if exceeded count
             if (retries) {
                 LOG_ERROR(F("Last Tx operation failed. Retrying #%d..."), retries);
@@ -630,7 +635,7 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
         return;
     } else {
         // check if there is a message for the roomcontroller
-        Roomctrl::check((data[1] ^ 0x80 ^ rxservice_.ems_mask()), data, length);
+        Roomctrl::check((data[1] ^ 0x80 ^ rxservice_.ems_mask()), data);
         // add to RxQueue, what ever it is.
         rxservice_.add(data, length);
     }
@@ -670,7 +675,7 @@ void EMSESP::console_commands(Shell & shell, unsigned int context) {
 
     EMSESPShell::commands->add_command(
         ShellContext::EMS,
-        CommandFlags::USER,
+        CommandFlags::ADMIN,
         flash_string_vector{F_(set), F_(bus_id)},
         flash_string_vector{F_(deviceid_mandatory)},
         [](Shell & shell, const std::vector<std::string> & arguments) {
@@ -697,7 +702,7 @@ void EMSESP::console_commands(Shell & shell, unsigned int context) {
 
     EMSESPShell::commands->add_command(
         ShellContext::EMS,
-        CommandFlags::USER,
+        CommandFlags::ADMIN,
         flash_string_vector{F_(set), F_(tx_mode)},
         flash_string_vector{F_(n_mandatory)},
         [](Shell & shell, const std::vector<std::string> & arguments) {
@@ -720,7 +725,7 @@ void EMSESP::console_commands(Shell & shell, unsigned int context) {
 
     EMSESPShell::commands->add_command(
         ShellContext::EMS,
-        CommandFlags::USER,
+        CommandFlags::ADMIN,
         flash_string_vector{F_(set), F_(read_only)},
         flash_string_vector{F_(bool_mandatory)},
         [](Shell & shell, const std::vector<std::string> & arguments) {
@@ -811,8 +816,8 @@ void EMSESP::start() {
     };
 
     system_.start();
-    console_.start();
     network_.start();
+    console_.start();
     sensors_.start();
     rxservice_.start();
     txservice_.start();

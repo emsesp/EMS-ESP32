@@ -32,9 +32,6 @@ static intr_handle_t   uart_handle;
 static RingbufHandle_t buf_handle   = NULL;
 static bool            drop_next_rx = true;
 static uint8_t         tx_mode_     = 0xFF;
-static uint32_t        emsRxTime;
-
-#define EMS_RX_TO_TX_TIMEOUT 20
 
 /*
 * Task to handle the incoming data
@@ -72,7 +69,6 @@ void IRAM_ATTR EMSuart::emsuart_rx_intr_handler(void * para) {
         if ((!drop_next_rx) && ((length == 2) || (length > 4))) {
             int baseType = 0;
             xRingbufferSendFromISR(buf_handle, rxbuf, length - 1, &baseType);
-            emsRxTime = millis();
         }
         drop_next_rx = false;
     }
@@ -139,9 +135,6 @@ void EMSuart::send_poll(uint8_t data) {
  * returns code, 1=success
  */
 EMSUART_STATUS EMSuart::transmit(uint8_t * buf, uint8_t len) {
-    if (millis() - emsRxTime > EMS_RX_TO_TX_TIMEOUT) {
-        return EMS_TX_WTD_TIMEOUT;
-    }
     if (len > 0) {
         for (uint8_t i = 0; i < len; i++) {
             EMS_UART.fifo.rw_byte = buf[i];

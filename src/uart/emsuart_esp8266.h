@@ -22,6 +22,7 @@
 #include <Arduino.h>
 
 #include <user_interface.h>
+#include <uuid/log.h>
 
 #define EMSUART_UART 0      // UART 0
 #define EMSUART_CONFIG 0x1C // 8N1 (8 bits, no stop bits, 1 parity)
@@ -74,9 +75,10 @@ class EMSuart {
     } EMSRxBuf_t;
 
   private:
+    // static constexpr uint32_t     EMS_RX_TO_TX_TIMEOUT = 20;
+    static uuid::log::Logger      logger_;
     static void ICACHE_RAM_ATTR   emsuart_rx_intr_handler(void * para);
     static void ICACHE_FLASH_ATTR emsuart_recvTask(os_event_t * events);
-
     static void ICACHE_FLASH_ATTR emsuart_flush_fifos();
     static void ICACHE_FLASH_ATTR tx_brk();
 };
