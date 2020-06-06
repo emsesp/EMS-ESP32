@@ -63,7 +63,7 @@ bool     EMSESP::ems_read_only_;
 uint32_t EMSESP::last_fetch_ = 0;
 
 #ifdef EMSESP_DEBUG
-#include "test/test_data.h" // used with the 'test' command, under su/admin
+#include "test_data.h" // used with the 'test' command, under su/admin
 #endif
 
 // for a specific EMS device go and request data values
@@ -172,7 +172,7 @@ void EMSESP::show_emsbus(uuid::console::Shell & shell) {
 // and for each associated EMS device go and request data values
 void EMSESP::show_values(uuid::console::Shell & shell) {
     if (sensor_devices().empty() && emsdevices.empty()) {
-        shell.printfln(F("No data available from devices to show"));
+        shell.printfln(F("No data collected from EMS devices. Try 'refresh'."));
         return;
     }
 
@@ -454,15 +454,16 @@ void EMSESP::add_context_menus() {
 
 // for each associated EMS device go and get its system information
 void EMSESP::show_devices(uuid::console::Shell & shell) {
-    /*
+#ifdef EMSESP_DEBUG
     // for debugging ony
     // prints out DeviceType (UNKNOWN = 0, SERVICEKEY, BOILER, THERMOSTAT, MIXING, SOLAR, HEATPUMP, GATEWAY, SWITCH, CONTROLLER, CONNECT)
-    shell.printf(F("Registered EMS device handlers:"));
+    // from emsdevice.h
+    shell.printf(F("(debug) Registered EMS device handlers:"));
     for (const auto & pair : EMSFactory::device_handlers()) {
         shell.printf(F(" %d"), pair.first);
     }
     shell.println();
-    */
+#endif
 
     if (emsdevices.empty()) {
         shell.printfln(F("No EMS devices detected. Try scanning using the 'scan devices' command."));
@@ -514,7 +515,7 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
         }
     }
 
-    // look up the rest of the details using the product_id and create the new device
+    // look up the rest of the details using the product_id and create the new device object
     // then send a request to the device to get the version and any other info we may have
     bool found = false;
     for (const auto & device : device_library_) {
@@ -531,9 +532,8 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
         LOG_NOTICE(F("Unrecognized EMS device with device ID 0x%02X with product ID %d. Please report on GitHub."), device_id, product_id);
         return false; // not found
     } else {
-        LOG_DEBUG(F("Adding new device with device ID 0x%02X with product ID %d"), device_id, product_id);
-        // go and fetch its data, including asking for the version
-        send_read_request(EMSdevice::EMS_TYPE_VERSION, device_id);
+        LOG_DEBUG(F("Adding new device with device ID 0x%02X with product ID %d and version %s"), device_id, product_id, version.c_str());
+        // go and fetch its data,
         fetch_device_values(device_id);
     }
 
@@ -542,7 +542,7 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
 
 // send a read request, passing it into to the Tx Service, with no offset
 void EMSESP::send_read_request(const uint16_t type_id, const uint8_t dest) {
-    txservice_.read_request(type_id, dest, 0); // no offset
+    txservice_.read_request(type_id, dest, 0); // 0 = no offset
 }
 
 // sends write request

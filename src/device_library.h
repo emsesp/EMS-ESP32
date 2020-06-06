@@ -39,50 +39,6 @@
 {208, DeviceType::BOILER, F("Logamax plus/GB192/Condens GC9000"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {234, DeviceType::BOILER, F("Logamax Plus GB122"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 
-// Solar Modules - 0x30
-{ 73, DeviceType::SOLAR, F("SM10"), DeviceFlags::EMS_DEVICE_FLAG_SM10},
-{101, DeviceType::SOLAR, F("ISM1"), DeviceFlags::EMS_DEVICE_FLAG_SM100},
-{162, DeviceType::SOLAR, F("SM50"), DeviceFlags::EMS_DEVICE_FLAG_SM100},
-{163, DeviceType::SOLAR, F("SM100"), DeviceFlags::EMS_DEVICE_FLAG_SM100},
-{164, DeviceType::SOLAR, F("SM200"), DeviceFlags::EMS_DEVICE_FLAG_SM100},
-
-// Mixing Modules - 0x20-0x27 for HC, 0x28-0x29 for WWC
-{ 69, DeviceType::MIXING, F("MM10"), DeviceFlags::EMS_DEVICE_FLAG_MM10},
-{159, DeviceType::MIXING, F("MM50"), DeviceFlags::EMS_DEVICE_FLAG_MMPLUS},
-{160, DeviceType::MIXING, F("MM100"), DeviceFlags::EMS_DEVICE_FLAG_MMPLUS},
-{161, DeviceType::MIXING, F("MM200"), DeviceFlags::EMS_DEVICE_FLAG_MMPLUS},
-
-// Heat Pumps - 0x38
-{200, DeviceType::HEATPUMP, F("HP Module"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
-{252, DeviceType::HEATPUMP, F("HP Module"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
-
-// Switches - 0x11
-{ 71, DeviceType::SWITCH, F("WM10"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
-
-// Controllers - 0x09 / 0x10 / 0x50
-{ 68, DeviceType::CONTROLLER, F("BC10/RFM20"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
-{ 89, DeviceType::CONTROLLER, F("BC10 GB142"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
-{ 95, DeviceType::CONTROLLER, F("HT3"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
-{114, DeviceType::CONTROLLER, F("BC10"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
-{125, DeviceType::CONTROLLER, F("BC25"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
-{152, DeviceType::CONTROLLER, F("Controller"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
-{169, DeviceType::CONTROLLER, F("BC40"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
-{190, DeviceType::CONTROLLER, F("BC10"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
-{207, DeviceType::CONTROLLER, F("Sense II/CS200"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x10
-{209, DeviceType::CONTROLLER, F("ErP"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
-{218, DeviceType::CONTROLLER, F("M200/RFM200"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x50
-{230, DeviceType::CONTROLLER, F("BC Base"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
-{241, DeviceType::CONTROLLER, F("Condens 5000i"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
-
-// Connect devices - 0x02
-{171, DeviceType::CONNECT, F("OpenTherm Converter"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
-{205, DeviceType::CONNECT, F("Moduline Easy Connect"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
-{206, DeviceType::CONNECT, F("Easy Connect"), DeviceFlags::EMS_DEVICE_FLAG_NONE},       
-
-// Gateways - 0x48 / 0x18
-{ 94, DeviceType::GATEWAY, F("RFM20 Remote Base for RC20RF"), DeviceFlags::EMS_DEVICE_FLAG_NONE},     // 0x18
-{189, DeviceType::GATEWAY, F("KM200"), DeviceFlags::EMS_DEVICE_FLAG_NONE},  // 0x48
-
 // Thermostat - not currently supporting write operations, like the Easy/100 types - 0x18
 {202, DeviceType::THERMOSTAT, F("Logamatic TC100/Moduline Easy"), DeviceFlags::EMS_DEVICE_FLAG_EASY | DeviceFlags::EMS_DEVICE_FLAG_NO_WRITE}, // 0x18, cannot write
 {203, DeviceType::THERMOSTAT, F("EasyControl CT200"), DeviceFlags::EMS_DEVICE_FLAG_EASY | DeviceFlags::EMS_DEVICE_FLAG_NO_WRITE}, // 0x18, cannot write
@@ -109,8 +65,53 @@
 {107, DeviceType::THERMOSTAT, F("FR100"), DeviceFlags::EMS_DEVICE_FLAG_JUNKERS | DeviceFlags::EMS_DEVICE_FLAG_JUNKERS_2}, // older model
 {108, DeviceType::THERMOSTAT, F("FR110"), DeviceFlags::EMS_DEVICE_FLAG_JUNKERS | DeviceFlags::EMS_DEVICE_FLAG_JUNKERS_2}, // older model
 {111, DeviceType::THERMOSTAT, F("FR10"), DeviceFlags::EMS_DEVICE_FLAG_JUNKERS},  
-{147, DeviceType::THERMOSTAT, F("FR50"), DeviceFlags::EMS_DEVICE_FLAG_JUNKERS},  
+{147, DeviceType::THERMOSTAT, F("FR50"), DeviceFlags::EMS_DEVICE_FLAG_JUNKERS},
 {191, DeviceType::THERMOSTAT, F("FR120"), DeviceFlags::EMS_DEVICE_FLAG_JUNKERS}, 
-{192, DeviceType::THERMOSTAT, F("FW120"), DeviceFlags::EMS_DEVICE_FLAG_JUNKERS}
+{192, DeviceType::THERMOSTAT, F("FW120"), DeviceFlags::EMS_DEVICE_FLAG_JUNKERS},
+
+// Solar Modules - 0x30
+{ 73, DeviceType::SOLAR, F("SM10"), DeviceFlags::EMS_DEVICE_FLAG_SM10},
+{101, DeviceType::SOLAR, F("ISM1"), DeviceFlags::EMS_DEVICE_FLAG_SM100},
+{162, DeviceType::SOLAR, F("SM50"), DeviceFlags::EMS_DEVICE_FLAG_SM100},
+{163, DeviceType::SOLAR, F("SM100"), DeviceFlags::EMS_DEVICE_FLAG_SM100},
+{164, DeviceType::SOLAR, F("SM200"), DeviceFlags::EMS_DEVICE_FLAG_SM100},
+
+// Mixing Modules - 0x20-0x27 for HC, 0x28-0x29 for WWC
+{ 69, DeviceType::MIXING, F("MM10"), DeviceFlags::EMS_DEVICE_FLAG_MM10},
+{159, DeviceType::MIXING, F("MM50"), DeviceFlags::EMS_DEVICE_FLAG_MMPLUS},
+{160, DeviceType::MIXING, F("MM100"), DeviceFlags::EMS_DEVICE_FLAG_MMPLUS},
+{161, DeviceType::MIXING, F("MM200"), DeviceFlags::EMS_DEVICE_FLAG_MMPLUS},
+
+// Heat Pumps - 0x38
+{200, DeviceType::HEATPUMP, F("HP Module"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
+{252, DeviceType::HEATPUMP, F("HP Module"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
+
+// Controllers - 0x09 / 0x10 / 0x50
+{ 68, DeviceType::CONTROLLER, F("BC10/RFM20"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
+{ 89, DeviceType::CONTROLLER, F("BC10 GB142"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
+{ 95, DeviceType::CONTROLLER, F("HT3"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
+{114, DeviceType::CONTROLLER, F("BC10"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
+{125, DeviceType::CONTROLLER, F("BC25"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
+{152, DeviceType::CONTROLLER, F("Controller"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
+{169, DeviceType::CONTROLLER, F("BC40"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
+{190, DeviceType::CONTROLLER, F("BC10"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
+{207, DeviceType::CONTROLLER, F("Sense II/CS200"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x10
+{209, DeviceType::CONTROLLER, F("ErP"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
+{218, DeviceType::CONTROLLER, F("M200/RFM200"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x50
+{230, DeviceType::CONTROLLER, F("BC Base"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
+{241, DeviceType::CONTROLLER, F("Condens 5000i"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
+
+// Connect devices - 0x02
+{171, DeviceType::CONNECT, F("OpenTherm Converter"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
+{205, DeviceType::CONNECT, F("Moduline Easy Connect"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
+{206, DeviceType::CONNECT, F("Easy Connect"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
+
+// Switches - 0x11
+{ 71, DeviceType::SWITCH, F("WM10"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
+
+// Gateways - 0x48 / 0x18
+{ 94, DeviceType::GATEWAY, F("RFM20 Remote Base for RC20RF"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x18
+{189, DeviceType::GATEWAY, F("KM200"), DeviceFlags::EMS_DEVICE_FLAG_NONE} // 0x48
+
 
 // clang-format on

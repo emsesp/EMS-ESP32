@@ -431,6 +431,10 @@ void Console::start() {
         shell->maximum_log_messages(100); // default is 50
         shell->start();
         shell->log_level(uuid::log::Level::DEBUG); // order is: err, warning, notice, info, trace, debug, all
+
+#if defined(EMSESP_STANDALONE)
+        shell->add_flags(CommandFlags::ADMIN);
+#endif
     }
 
 // always start the telnet service, except on an ESP8266

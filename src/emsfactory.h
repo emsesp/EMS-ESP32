@@ -32,10 +32,9 @@
     auto registry_##derivedClass = ConcreteEMSFactory<derivedClass>(device_type);                                                                              \
     }
 
-
 namespace emsesp {
 
-class EMSdevice; // forward declaration
+class EMSdevice; // forward declaration, for gcc linking
 
 class EMSFactory {
   public:

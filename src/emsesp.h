@@ -42,11 +42,12 @@
 #include "system.h"
 #include "sensors.h"
 #include "console.h"
-#include "boiler.h"
 #include "shower.h"
 #include "roomcontrol.h"
 
-#define LOG_TRACE_WATCH_NONE 0 // no watch set
+#include "devices/boiler.h"
+
+#define LOG_TRACE_WATCH_NONE 0 // no watch id set
 
 namespace emsesp {
 
@@ -62,6 +63,8 @@ class EMSESP {
 #ifdef EMSESP_DEBUG
     static void run_test(uuid::console::Shell & shell, const std::string & command); // only for testing
     static void dummy_mqtt_commands(const char * message);
+    static void rx_telegram(const std::vector<uint8_t> & data);
+    static void uart_telegram(const std::vector<uint8_t> & rx_data);
 #endif
 
     static bool        process_telegram(std::shared_ptr<const Telegram> telegram);

@@ -250,7 +250,7 @@ EMSUART_STATUS ICACHE_FLASH_ATTR EMSuart::transmit(uint8_t * buf, uint8_t len) {
         return EMS_TX_STATUS_OK; // nothing to send
     }
 #ifdef EMSESP_DEBUG
-    LOG_INFO(F("UART Responsetime: %d ms"),uuid::get_uptime() - emsRxTime);
+    LOG_INFO(F("UART Responsetime: %d ms"), uuid::get_uptime() - emsRxTime);
 #endif
     // if ((uuid::get_uptime() - emsRxTime) > EMS_RX_TO_TX_TIMEOUT)) { // send allowed within 20 ms
     //      return EMS_TX_WTD_TIMEOUT;

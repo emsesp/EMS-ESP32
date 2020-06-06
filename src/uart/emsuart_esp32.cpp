@@ -99,7 +99,7 @@ void EMSuart::start(uint8_t tx_mode) {
     drop_next_rx                     = true;
     buf_handle                       = xRingbufferCreate(128, RINGBUF_TYPE_NOSPLIT);
     ESP_ERROR_CHECK(uart_isr_register(EMSUART_UART, emsuart_rx_intr_handler, NULL, ESP_INTR_FLAG_IRAM, &uart_handle));
-    xTaskCreate(emsuart_recvTask, "emsuart_recvTask", 2048, NULL, configMAX_PRIORITIES -1, NULL);
+    xTaskCreate(emsuart_recvTask, "emsuart_recvTask", 2048, NULL, configMAX_PRIORITIES - 1, NULL);
     EMS_UART.int_ena.brk_det = 1; // activate only break
 }
 
