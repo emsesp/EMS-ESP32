@@ -131,7 +131,7 @@ void System::start() {
 
     Settings settings;
 
-    // update the version
+    // update the version to the latest build
     settings.app_version(EMSESP_APP_VERSION);
     settings.commit();
 
@@ -367,6 +367,7 @@ void System::console_commands(Shell & shell, unsigned int context) {
                                            if (!arguments.empty()) {
                                                settings.syslog_host(arguments[0]);
                                                settings.commit();
+                                               shell.println(F("Please restart EMS-ESP"));
                                            }
                                            auto host = settings.syslog_host();
                                            shell.printfln(F_(host_fmt), !host.empty() ? host.c_str() : uuid::read_flash_string(F_(unset)).c_str());
@@ -385,6 +386,7 @@ void System::console_commands(Shell & shell, unsigned int context) {
                 if (uuid::log::parse_level_lowercase(arguments[0], level)) {
                     settings.syslog_level(level);
                     settings.commit();
+                    shell.println(F("Please restart EMS-ESP"));
                 } else {
                     shell.printfln(F_(invalid_log_level));
                     return;
@@ -405,6 +407,7 @@ void System::console_commands(Shell & shell, unsigned int context) {
                                            if (!arguments.empty()) {
                                                settings.syslog_mark_interval(String(arguments[0].c_str()).toInt());
                                                settings.commit();
+                                               shell.println(F("Please restart EMS-ESP"));
                                            }
                                            shell.printfln(F_(mark_interval_fmt), settings.syslog_mark_interval());
                                        });
@@ -504,7 +507,7 @@ void System::console_commands(Shell & shell, unsigned int context) {
                                        });
 
     EMSESPShell::commands->add_command(ShellContext::SYSTEM,
-                                       CommandFlags::ADMIN,
+                                       CommandFlags::USER,
                                        flash_string_vector{F_(set)},
                                        [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
                                            Settings settings;
