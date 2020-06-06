@@ -387,18 +387,24 @@ bool SyslogService::can_transmit() {
 }
 
 bool SyslogService::transmit(const QueuedLogMessage & message) {
+    /*
+    // modifications by Proddy. From https://github.com/proddy/EMS-ESP/issues/395#issuecomment-640053528
     struct tm tm;
 
     tm.tm_year = 0;
     if (message.time_.tv_sec != (time_t)-1) {
         gmtime_r(&message.time_.tv_sec, &tm);
     }
+    */
 
     if (udp_.beginPacket(host_, port_) != 1) {
         last_transmit_ = uuid::get_uptime_ms();
         return false;
     }
+
     udp_.printf_P(PSTR("<%u>1 "), ((unsigned int)message.content_->facility * 8) + std::min(7U, (unsigned int)message.content_->level));
+
+    /*
     if (tm.tm_year != 0) {
         udp_.printf_P(PSTR("%04u-%02u-%02uT%02u:%02u:%02u.%06luZ"),
                       tm.tm_year + 1900,
@@ -411,6 +417,9 @@ bool SyslogService::transmit(const QueuedLogMessage & message) {
     } else {
         udp_.print('-');
     }
+    */
+
+    udp_.print('-');
     udp_.printf_P(PSTR(" %s - - - - \xEF\xBB\xBF"), hostname_.c_str());
     udp_.print(uuid::log::format_timestamp_ms(message.content_->uptime_ms, 3).c_str());
 
