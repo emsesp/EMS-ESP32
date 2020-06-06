@@ -177,10 +177,13 @@ void EMSESP::show_values(uuid::console::Shell & shell) {
     }
 
     // show EMS device values
-    for (const auto & emsdevice : emsdevices) {
-        if (emsdevice) {
-            emsdevice->show_values(shell);
-            shell.println();
+    // do this in the order of factory classes to keep a consistent order when displaying
+    for (const auto & device_class : EMSFactory::device_handlers()) {
+        for (const auto & emsdevice : emsdevices) {
+            if ((emsdevice) && (emsdevice->device_type() == device_class.first)) {
+                emsdevice->show_values(shell);
+                shell.println();
+            }
         }
     }
 
@@ -454,17 +457,6 @@ void EMSESP::add_context_menus() {
 
 // for each associated EMS device go and get its system information
 void EMSESP::show_devices(uuid::console::Shell & shell) {
-#ifdef EMSESP_DEBUG
-    // for debugging ony
-    // prints out DeviceType (UNKNOWN = 0, SERVICEKEY, BOILER, THERMOSTAT, MIXING, SOLAR, HEATPUMP, GATEWAY, SWITCH, CONTROLLER, CONNECT)
-    // from emsdevice.h
-    shell.printf(F("(debug) Registered EMS device handlers:"));
-    for (const auto & pair : EMSFactory::device_handlers()) {
-        shell.printf(F(" %d"), pair.first);
-    }
-    shell.println();
-#endif
-
     if (emsdevices.empty()) {
         shell.printfln(F("No EMS devices detected. Try scanning using the 'scan devices' command."));
         return;
@@ -472,16 +464,22 @@ void EMSESP::show_devices(uuid::console::Shell & shell) {
 
     shell.printfln(F("These EMS devices are currently active:"));
     shell.println();
-    for (const auto & emsdevice : emsdevices) {
-        if (emsdevice) {
-            shell.printf(F("%s: %s"), emsdevice->device_type_name().c_str(), emsdevice->to_string().c_str());
-            if ((emsdevice->device_type() == EMSdevice::DeviceType::THERMOSTAT) && (emsdevice->device_id() == actual_master_thermostat())) {
-                shell.printf(F(" ** master device **"));
+
+    // for all device objects from emsdevice.h (UNKNOWN, SERVICEKEY, BOILER, THERMOSTAT, MIXING, SOLAR, HEATPUMP, GATEWAY, SWITCH, CONTROLLER, CONNECT)
+    // so we keep a consistent order
+    for (const auto & device_class : EMSFactory::device_handlers()) {
+        // shell.printf(F("[factory ID: %d] "), device_class.first);
+        for (const auto & emsdevice : emsdevices) {
+            if ((emsdevice) && (emsdevice->device_type() == device_class.first)) {
+                shell.printf(F("%s: %s"), emsdevice->device_type_name().c_str(), emsdevice->to_string().c_str());
+                if ((emsdevice->device_type() == EMSdevice::DeviceType::THERMOSTAT) && (emsdevice->device_id() == actual_master_thermostat())) {
+                    shell.printf(F(" ** master device **"));
+                }
+                shell.println();
+                emsdevice->show_telegram_handlers(shell);
+                emsdevice->show_mqtt_handlers(shell);
+                shell.println();
             }
-            shell.println();
-            emsdevice->show_telegram_handlers(shell);
-            emsdevice->show_mqtt_handlers(shell);
-            shell.println();
         }
     }
 }
