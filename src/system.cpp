@@ -29,7 +29,7 @@ MAKE_PSTR_WORD(wifi)
 MAKE_PSTR_WORD(ssid)
 
 MAKE_PSTR(host_fmt, "Host = %s")
-MAKE_PSTR(hostname_fmt, "System Hostname = %s")
+MAKE_PSTR(hostname_fmt, "Hostname = %s")
 MAKE_PSTR(mark_interval_fmt, "Mark interval = %lus");
 MAKE_PSTR(wifi_ssid_fmt, "WiFi SSID = %s");
 MAKE_PSTR(wifi_password_fmt, "WiFi Password = %S")
@@ -327,12 +327,25 @@ void System::show_system(uuid::console::Shell & shell) {
 void System::console_commands(Shell & shell, unsigned int context) {
     EMSESPShell::commands->add_command(ShellContext::SYSTEM,
                                        CommandFlags::ADMIN,
-                                       flash_string_vector{F_(set), F_(hostname)},
-                                       flash_string_vector{F_(name_mandatory)},
-                                       [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) {
-                                           Settings settings;
-                                           settings.hostname(arguments.front());
-                                           settings.commit();
+                                       flash_string_vector{F_(restart)},
+                                       [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments __attribute__((unused))) {
+                                           restart();
+                                       });
+
+    EMSESPShell::commands->add_command(ShellContext::SYSTEM,
+                                       CommandFlags::ADMIN,
+                                       flash_string_vector{F_(format)},
+                                       [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
+                                           shell.enter_password(F_(password_prompt), [=](Shell & shell, bool completed, const std::string & password) {
+                                               if (completed) {
+                                                   Settings settings;
+                                                   if ((settings.admin_password().empty()) || (!password.empty() && password == settings.admin_password())) {
+                                                       settings.format(shell);
+                                                   } else {
+                                                       shell.println(F("incorrect password"));
+                                                   }
+                                               }
+                                           });
                                        });
 
     EMSESPShell::commands->add_command(ShellContext::SYSTEM,
@@ -356,6 +369,34 @@ void System::console_commands(Shell & shell, unsigned int context) {
                                                                         });
                                                }
                                            });
+                                       });
+
+    EMSESPShell::commands->add_command(ShellContext::SYSTEM,
+                                       CommandFlags::ADMIN,
+                                       flash_string_vector{F_(wifi), F_(disconnect)},
+                                       [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments __attribute__((unused))) {
+                                           Network::disconnect();
+                                       });
+
+    EMSESPShell::commands->add_command(ShellContext::SYSTEM,
+                                       CommandFlags::ADMIN,
+                                       flash_string_vector{F_(wifi), F_(reconnect)},
+                                       [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments __attribute__((unused))) {
+                                           Network::reconnect();
+                                       });
+
+    EMSESPShell::commands->add_command(ShellContext::SYSTEM,
+                                       CommandFlags::ADMIN,
+                                       flash_string_vector{F_(wifi), F_(scan)},
+                                       [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) { Network::scan(shell); });
+
+    EMSESPShell::commands->add_command(ShellContext::SYSTEM,
+                                       CommandFlags::USER,
+                                       flash_string_vector{F_(show)},
+                                       [=](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
+                                           Network::show_network(shell);
+                                           show_system(shell);
+                                           shell.println();
                                        });
 
     EMSESPShell::commands->add_command(ShellContext::SYSTEM,
@@ -414,25 +455,12 @@ void System::console_commands(Shell & shell, unsigned int context) {
 
     EMSESPShell::commands->add_command(ShellContext::SYSTEM,
                                        CommandFlags::ADMIN,
-                                       flash_string_vector{F_(restart)},
-                                       [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments __attribute__((unused))) {
-                                           restart();
-                                       });
-
-    EMSESPShell::commands->add_command(ShellContext::SYSTEM,
-                                       CommandFlags::ADMIN,
-                                       flash_string_vector{F_(format)},
-                                       [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
-                                           shell.enter_password(F_(password_prompt), [=](Shell & shell, bool completed, const std::string & password) {
-                                               if (completed) {
-                                                   Settings settings;
-                                                   if ((settings.admin_password().empty()) || (!password.empty() && password == settings.admin_password())) {
-                                                       settings.format(shell);
-                                                   } else {
-                                                       shell.println(F("incorrect password"));
-                                                   }
-                                               }
-                                           });
+                                       flash_string_vector{F_(set), F_(wifi), F_(hostname)},
+                                       flash_string_vector{F_(name_mandatory)},
+                                       [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) {
+                                           Settings settings;
+                                           settings.hostname(arguments.front());
+                                           settings.commit();
                                        });
 
     EMSESPShell::commands->add_command(
@@ -452,25 +480,6 @@ void System::console_commands(Shell & shell, unsigned int context) {
             Settings settings;
             return std::vector<std::string>{settings.wifi_ssid()};
         });
-
-    EMSESPShell::commands->add_command(ShellContext::SYSTEM,
-                                       CommandFlags::ADMIN,
-                                       flash_string_vector{F_(wifi), F_(disconnect)},
-                                       [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments __attribute__((unused))) {
-                                           Network::disconnect();
-                                       });
-
-    EMSESPShell::commands->add_command(ShellContext::SYSTEM,
-                                       CommandFlags::ADMIN,
-                                       flash_string_vector{F_(wifi), F_(reconnect)},
-                                       [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments __attribute__((unused))) {
-                                           Network::reconnect();
-                                       });
-
-    EMSESPShell::commands->add_command(ShellContext::SYSTEM,
-                                       CommandFlags::ADMIN,
-                                       flash_string_vector{F_(wifi), F_(scan)},
-                                       [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) { Network::scan(shell); });
 
 
     EMSESPShell::commands->add_command(ShellContext::SYSTEM,
@@ -495,15 +504,6 @@ void System::console_commands(Shell & shell, unsigned int context) {
                                                                         });
                                                }
                                            });
-                                       });
-
-    EMSESPShell::commands->add_command(ShellContext::SYSTEM,
-                                       CommandFlags::USER,
-                                       flash_string_vector{F_(show)},
-                                       [=](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
-                                           Network::show_network(shell);
-                                           show_system(shell);
-                                           shell.println();
                                        });
 
     EMSESPShell::commands->add_command(ShellContext::SYSTEM,
