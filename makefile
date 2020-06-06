@@ -8,18 +8,14 @@ MAKEFLAGS+="j "
 # SOURCES   is a list of directories containing source code
 # INCLUDES  is a list of directories containing header files
 # LIBRARIES is a list of directories containing libraries, this must be the top level containing include and lib
-# DATA      is a list of directories containing data files
-# RESOURCES is a list of directories containing other files
 #----------------------------------------------------------------------
 
 #TARGET    := $(notdir $(CURDIR))
 TARGET    := emsesp
 BUILD     := build
-SOURCES   := src lib_standalone lib/rtcvars lib/uuid-common/src lib/uuid-console/src lib/uuid-log/src
-INCLUDES  := lib_standalone/ArduinoJson/src lib_standalone lib/rtcvars lib/uuid-common/src lib/uuid-console/src lib/uuid-log/src lib/uuid-telnet/src lib/uuid-syslog/src
+SOURCES   := src lib_standalone lib/rtcvars lib/uuid-common/src lib/uuid-console/src lib/uuid-log/src src/devices
+INCLUDES  := lib_standalone/ArduinoJson/src lib_standalone lib/rtcvars lib/uuid-common/src lib/uuid-console/src lib/uuid-log/src lib/uuid-telnet/src lib/uuid-syslog/src src/devices src
 LIBRARIES := 
-RESOURCES :=
-DATA      :=
 
 #----------------------------------------------------------------------
 # Languages Standard
@@ -40,16 +36,14 @@ SYMBOLS    := $(CURDIR)/$(BUILD)/$(TARGET).out
 
 CSOURCES   := $(foreach dir,$(SOURCES),$(wildcard $(dir)/*.c))
 CXXSOURCES := $(foreach dir,$(SOURCES),$(wildcard $(dir)/*.cpp))
-ASMSOURCES := $(foreach dir,$(SOURCES),$(wildcard $(dir)/*.s))
 
-OBJS       := $(patsubst %,$(BUILD)/%.o,$(basename $(CSOURCES)) $(basename $(CXXSOURCES)) $(basename $(ASMSOURCES)))
-DEPS       := $(patsubst %,$(BUILD)/%.d,$(basename $(CSOURCES)) $(basename $(CXXSOURCES)) $(basename $(ASMSOURCES)))
+OBJS       := $(patsubst %,$(BUILD)/%.o,$(basename $(CSOURCES)) $(basename $(CXXSOURCES)) )
+DEPS       := $(patsubst %,$(BUILD)/%.d,$(basename $(CSOURCES)) $(basename $(CXXSOURCES)) ) 
 
 INCLUDE    += $(addprefix -I,$(foreach dir,$(INCLUDES), $(wildcard $(dir))))
 INCLUDE    += $(addprefix -I,$(foreach dir,$(LIBRARIES),$(wildcard $(dir)/include)))
 
 LDLIBS     += $(addprefix -L,$(foreach dir,$(LIBRARIES),$(wildcard $(dir)/lib)))
-LDLIBS     += $(addprefix -L,$(foreach dir,$(LIBRARIES),$(wildcard $(dir)/library)))
 
 #----------------------------------------------------------------------
 # Compiler & Linker
@@ -74,7 +68,7 @@ CFLAGS    += $(CPPFLAGS)
 CFLAGS    += -Wall
 CFLAGS    += -Wextra
 
-CXXFLAGS  += $(CFLAGS)
+CXXFLAGS  += $(CFLAGS) -MMD
 
 #----------------------------------------------------------------------
 # Compiler & Linker Commands
