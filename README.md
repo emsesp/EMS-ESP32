@@ -105,10 +105,10 @@ system
 	passwd
 	restart
 	set
-	set hostname <name>
 	set syslog host [IP address]
 	set syslog level [level]
 	set syslog mark [seconds]
+	set wifi hostname <name>
 	set wifi password
 	set wifi ssid <name>
 	show
@@ -141,11 +141,11 @@ thermostat
   
 ----------
 
-### **Known issues, bugs and improvements currently working on**
+### **Known issues, bugs and improvements currently being worked on**
 
 ```
 TODO Optimized ESP8266 and ESP32 UART code (via Michael)
-TODO console auto-complete with 'set' command in the system context is not showing all commands, only the hostname.
+TODO merge in the web code which has the Captive AP and better wifi reconnect logic. Use IPV6 and NTP from lwip2
 ```
 
 ### **To tidy up in code later**
@@ -159,12 +159,3 @@ TODO add real unit tests using platformio's test bed (https://docs.platformio.or
 TODO See if it's easier to use timers instead of millis() based timers, using https://github.com/esp8266/Arduino/blob/master/libraries/esp8266/examples/BlinkPolledTimeout/BlinkPolledTimeout.ino
 ```
 
-### **These features to add next**
-
-```
-TODO merge in the web code which has the Captive AP and better wifi reconnect logic. Use IPV6 and NTP from lwip2
-TODO decide if I want to port over the shower one-shot cold water logic. Don't think its used.
-TODO when doing show in telnet, should we sort the ems devices?
-TODO validate 0xE9 with data from Koen. (https://github.com/proddy/EMS-ESP/issues/382)
-
-```
