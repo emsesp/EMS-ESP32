@@ -24,8 +24,10 @@
 
 namespace emsesp {
 
-os_event_t recvTaskQueue[EMSUART_recvTaskQueueLen]; // our Rx queue
+MAKE_PSTR(logger_name, "emsuart")
 
+uuid::log::Logger     EMSuart::logger_{F_(logger_name), uuid::log::Facility::CONSOLE};
+os_event_t            recvTaskQueue[EMSUART_recvTaskQueueLen]; // our Rx queue
 EMSuart::EMSRxBuf_t * pEMSRxBuf;
 EMSuart::EMSRxBuf_t * paEMSRxBuf[EMS_MAXBUFFERS];
 uint8_t               emsRxBufIdx  = 0;
@@ -33,8 +35,6 @@ uint8_t               phantomBreak = 0;
 uint8_t               tx_mode_     = 0xFF;
 bool                  drop_next_rx = true;
 uint32_t              emsRxTime;
-
-#define EMS_RX_TO_TX_TIMEOUT 20
 
 //
 // Main interrupt handler
@@ -46,7 +46,7 @@ void ICACHE_RAM_ATTR EMSuart::emsuart_rx_intr_handler(void * para) {
 
     if (USIS(EMSUART_UART) & ((1 << UIBD))) { // BREAK detection = End of EMS data block
         length = 0;
-        while ((USS(EMSUART_UART) >> USRXC) & 0xFF) { // read fifo into buffer
+        while ((USS(EMSUART_UART) >> USRXC) & 0x0FF) { // read fifo into buffer
             uint8_t rx = USF(EMSUART_UART);
             if (length < EMS_MAXBUFFERSIZE) {
                 uart_buffer[length++] = rx;
@@ -59,7 +59,7 @@ void ICACHE_RAM_ATTR EMSuart::emsuart_rx_intr_handler(void * para) {
         if (!drop_next_rx) {
             pEMSRxBuf->length = length;
             os_memcpy((void *)pEMSRxBuf->buffer, (void *)&uart_buffer, pEMSRxBuf->length); // copy data into transfer buffer, including the BRK 0x00 at the end
-            emsRxTime = millis();
+            emsRxTime = uuid::get_uptime();
         }
         drop_next_rx = false;
         system_os_post(EMSUART_recvTaskPrio, 0, 0); // call emsuart_recvTask() at next opportunity
@@ -249,9 +249,12 @@ EMSUART_STATUS ICACHE_FLASH_ATTR EMSuart::transmit(uint8_t * buf, uint8_t len) {
     if (len == 0) {
         return EMS_TX_STATUS_OK; // nothing to send
     }
-    if (millis() > (emsRxTime + EMS_RX_TO_TX_TIMEOUT)) { // send allowed within 20 ms
-        return EMS_TX_WTD_TIMEOUT;
-    }
+#ifdef EMSESP_DEBUG
+    LOG_INFO(F("UART Responsetime: %d ms"),uuid::get_uptime() - emsRxTime);
+#endif
+    // if ((uuid::get_uptime() - emsRxTime) > EMS_RX_TO_TX_TIMEOUT)) { // send allowed within 20 ms
+    //      return EMS_TX_WTD_TIMEOUT;
+    // }
 
     // new code from Michael. See https://github.com/proddy/EMS-ESP/issues/380
     if (tx_mode_ == EMS_TXMODE_NEW) {

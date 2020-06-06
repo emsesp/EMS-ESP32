@@ -22,6 +22,7 @@
 #include <Arduino.h>
 
 #include <user_interface.h>
+#include <uuid/log.h>
 
 #define EMSUART_UART 0      // UART 0
 #define EMSUART_CONFIG 0x1C // 8N1 (8 bits, no stop bits, 1 parity)
@@ -30,7 +31,7 @@
 #define EMS_MAXBUFFERS 3     // buffers for circular filling to avoid collisions
 #define EMS_MAXBUFFERSIZE 33 // max size of the buffer. EMS packets are max 32 bytes, plus extra 2 for BRKs
 
-#define EMSUART_recvTaskPrio 1      // 0, 1 or 2. 0 being the lowest
+#define EMSUART_recvTaskPrio 2      // 0, 1 or 2. 0 being the lowest
 #define EMSUART_recvTaskQueueLen 10 // number of queued Rx triggers
 
 #define EMS_TXMODE_DEFAULT 1
@@ -47,7 +48,7 @@
 #define EMSUART_TX_LAG 8
 #define EMSUART_BUSY_WAIT (EMSUART_BIT_TIME / 8)
 #define EMS_TX_TO_CHARS (2 + 20)
-#define EMS_TX_TO_COUNT ((EMS_TX_TO_CHARS)*8*10)
+#define EMS_TX_TO_COUNT ((EMS_TX_TO_CHARS)*8)
 
 namespace emsesp {
 
@@ -74,9 +75,10 @@ class EMSuart {
     } EMSRxBuf_t;
 
   private:
+    // static constexpr uint32_t     EMS_RX_TO_TX_TIMEOUT = 20;
+    static uuid::log::Logger      logger_;
     static void ICACHE_RAM_ATTR   emsuart_rx_intr_handler(void * para);
     static void ICACHE_FLASH_ATTR emsuart_recvTask(os_event_t * events);
-
     static void ICACHE_FLASH_ATTR emsuart_flush_fifos();
     static void ICACHE_FLASH_ATTR tx_brk();
 };

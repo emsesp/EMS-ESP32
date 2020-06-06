@@ -49,6 +49,8 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     LOG_DEBUG(F("Registering new Boiler with device ID 0x%02X"), device_id);
 
     // the telegram handlers...
+    register_telegram_type(0x10, F("UBAErrorMessage1"), false, nullptr);
+    register_telegram_type(0x11, F("UBAErrorMessage2"), false, nullptr);
     register_telegram_type(0x18, F("UBAMonitorFast"), false, std::bind(&Boiler::process_UBAMonitorFast, this, _1));
     register_telegram_type(0x19, F("UBAMonitorSlow"), true, std::bind(&Boiler::process_UBAMonitorSlow, this, _1));
     register_telegram_type(0x34, F("UBAMonitorWW"), false, std::bind(&Boiler::process_UBAMonitorWW, this, _1));

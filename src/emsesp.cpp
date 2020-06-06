@@ -584,9 +584,11 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
                 txservice_.send_poll();                      // close the bus
                 txservice_.post_send_query();                // follow up with any post-read
                 tx_successful = true;
+                txservice_.reset_retry_count();
             } else if (first_value == TxService::TX_WRITE_FAIL) {
                 LOG_ERROR(F("Last Tx write rejected by host"));
                 txservice_.send_poll(); // close the bus
+                txservice_.reset_retry_count();
             }
         } else {
             // got a telegram with data in it. See if the src/dest matches that from the last one we sent
@@ -597,6 +599,7 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
                 LOG_DEBUG(F("Last Tx read successful"));
                 txservice_.increment_telegram_read_count();
                 txservice_.send_poll(); // close the bus
+                txservice_.reset_retry_count();
                 tx_successful = true;
             }
         }
@@ -605,6 +608,9 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
         if (!tx_successful) {
             // the telegram we got wasn't what we had requested
             // So re-send the last Tx and increment retry count
+#ifdef EMSESP_DEBUG
+            LOG_DEBUG(F("send: %s, received: %s"), txservice_.last_tx_to_string().c_str(), Helpers::data_to_hex(data, length).c_str());
+#endif
             uint8_t retries = txservice_.retry_tx(); // returns 0 if exceeded count
             if (retries) {
                 LOG_ERROR(F("Last Tx operation failed. Retrying #%d..."), retries);
@@ -810,8 +816,8 @@ void EMSESP::start() {
     };
 
     system_.start();
-    console_.start();
     network_.start();
+    console_.start();
     sensors_.start();
     rxservice_.start();
     txservice_.start();
