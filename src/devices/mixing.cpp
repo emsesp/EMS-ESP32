@@ -21,6 +21,7 @@
 namespace emsesp {
 
 REGISTER_FACTORY(Mixing, EMSdevice::DeviceType::MIXING);
+
 MAKE_PSTR(logger_name, "mixing")
 uuid::log::Logger Mixing::logger_{F_(logger_name), uuid::log::Facility::CONSOLE};
 

@@ -31,6 +31,7 @@ MAKE_PSTR(master_thermostat_fmt, "Master Thermostat device ID = %s")
 namespace emsesp {
 
 REGISTER_FACTORY(Thermostat, EMSdevice::DeviceType::THERMOSTAT);
+
 MAKE_PSTR(logger_name, "thermostat")
 uuid::log::Logger Thermostat::logger_{F_(logger_name), uuid::log::Facility::CONSOLE};
 
@@ -279,7 +280,7 @@ void Thermostat::thermostat_cmd(const char * message) {
             set_control(ctrl, hc_num);
         }
         if (float ct = doc["calinttemp"]) {
-            set_settings_calinttemp((int8_t)(ct *10));
+            set_settings_calinttemp((int8_t)(ct * 10));
         }
         if (nullptr != doc["minexttemp"]) {
             int8_t mt = doc["minexttemp"];
@@ -1187,7 +1188,7 @@ void Thermostat::set_settings_language(const uint8_t lg) {
 }
 
 // Set the control-mode for hc 0-off, 1-RC20, 2-RC3x
-void Thermostat::set_control(const uint8_t ctrl,const uint8_t hc_num) {
+void Thermostat::set_control(const uint8_t ctrl, const uint8_t hc_num) {
     std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(hc_num);
     if (hc == nullptr) {
         LOG_WARNING(F("set control: Heating Circuit %d not found or activated"), hc_num);

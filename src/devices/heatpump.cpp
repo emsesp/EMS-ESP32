@@ -30,6 +30,7 @@
 namespace emsesp {
 
 REGISTER_FACTORY(Heatpump, EMSdevice::DeviceType::HEATPUMP);
+
 MAKE_PSTR(logger_name, "heatpump")
 uuid::log::Logger Heatpump::logger_{F_(logger_name), uuid::log::Facility::CONSOLE};
 

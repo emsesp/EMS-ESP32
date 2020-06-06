@@ -23,6 +23,7 @@
 namespace emsesp {
 
 REGISTER_FACTORY(Controller, EMSdevice::DeviceType::CONTROLLER);
+
 MAKE_PSTR(logger_name, "controller")
 uuid::log::Logger Controller::logger_{F_(logger_name), uuid::log::Facility::CONSOLE};
 

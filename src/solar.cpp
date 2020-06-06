@@ -24,6 +24,7 @@ MAKE_PSTR(wh, "Wh")
 namespace emsesp {
 
 REGISTER_FACTORY(Solar, EMSdevice::DeviceType::SOLAR);
+
 MAKE_PSTR(logger_name, "solar")
 uuid::log::Logger Solar::logger_{F_(logger_name), uuid::log::Facility::CONSOLE};
 
