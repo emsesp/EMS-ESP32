@@ -98,7 +98,7 @@ void EMSESPShell::add_console_commands() {
                           CommandFlags::USER,
                           flash_string_vector{F_(refresh)},
                           [&](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
-                              shell.printfln(F("Refreshing console and fetching device data"));
+                              shell.printfln(F("Requesting data from EMS devices"));
                               _console_commands_loaded = false;
                               add_console_commands();
                               EMSESP::fetch_device_values();

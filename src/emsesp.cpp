@@ -168,15 +168,20 @@ void EMSESP::show_emsbus(uuid::console::Shell & shell) {
     shell.println();
 }
 
-// display in the console all system stats
-// and for each associated EMS device go and request data values
+// display in the console all the data we have from ems devices and external sensors
 void EMSESP::show_values(uuid::console::Shell & shell) {
-    if (sensor_devices().empty() && emsdevices.empty()) {
-        shell.printfln(F("No data collected from EMS devices. Try 'refresh'."));
+    show_device_values(shell);
+    show_sensor_values(shell);
+}
+
+// show EMS device values
+void EMSESP::show_device_values(uuid::console::Shell & shell) {
+    if (emsdevices.empty()) {
+        shell.printfln(F("No EMS devices detected yet. Try 'scan devices' from the ems menu."));
+        shell.println();
         return;
     }
 
-    // show EMS device values
     // do this in the order of factory classes to keep a consistent order when displaying
     for (const auto & device_class : EMSFactory::device_handlers()) {
         for (const auto & emsdevice : emsdevices) {
@@ -186,17 +191,20 @@ void EMSESP::show_values(uuid::console::Shell & shell) {
             }
         }
     }
+    shell.println();
+}
 
-    // Dallas sensors (if available)
-    char valuestr[8] = {0}; // for formatting temp
-    if (!sensor_devices().empty()) {
-        shell.printfln(F("External temperature sensors:"));
-        for (const auto & device : sensor_devices()) {
-            shell.printfln(F("  Sensor ID %s: %s°C"), device.to_string().c_str(), Helpers::render_value(valuestr, device.temperature_c_, 2));
-        }
-        shell.println();
+// show Dallas sensors
+void EMSESP::show_sensor_values(uuid::console::Shell & shell) {
+    if (sensor_devices().empty()) {
+        return;
     }
 
+    char valuestr[8] = {0}; // for formatting temp
+    shell.printfln(F("External temperature sensors:"));
+    for (const auto & device : sensor_devices()) {
+        shell.printfln(F("  Sensor ID %s: %s°C"), device.to_string().c_str(), Helpers::render_value(valuestr, device.temperature_c_, 2));
+    }
     shell.println();
 }
 
@@ -669,6 +677,21 @@ void EMSESP::console_commands(Shell & shell, unsigned int context) {
                                        [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
                                            show_devices(shell);
                                            show_emsbus(shell);
+                                       });
+
+    EMSESPShell::commands->add_command(ShellContext::EMS,
+                                       CommandFlags::USER,
+                                       flash_string_vector{F_(show), F_(values)},
+                                       [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
+                                           EMSESP::show_device_values(shell);
+                                       });
+
+    EMSESPShell::commands->add_command(ShellContext::EMS,
+                                       CommandFlags::USER,
+                                       flash_string_vector{F_(refresh)},
+                                       [&](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
+                                           shell.printfln(F("Requesting data from EMS devices"));
+                                           EMSESP::fetch_device_values();
                                        });
 
     EMSESPShell::commands->add_command(
