@@ -24,7 +24,6 @@
 #include <vector>
 #include <queue>
 #include <string>
-#include <memory>
 
 #include <uuid/common.h>
 #include <uuid/console.h>
@@ -132,16 +131,7 @@ class EMSESP {
 
     static void fetch_device_values(const uint8_t device_id = 0);
 
-  private:
-    EMSESP() = delete;
-
-    static uuid::log::Logger logger_;
-
     static bool        add_device(const uint8_t device_id, const uint8_t product_id, std::string & version, const uint8_t brand);
-    static std::string device_tostring(const uint8_t device_id);
-
-    static void process_UBADevices(std::shared_ptr<const Telegram> telegram);
-    static void process_version(std::shared_ptr<const Telegram> telegram);
 
     static Mqtt      mqtt_;
     static System    system_;
@@ -151,6 +141,16 @@ class EMSESP {
     static Shower    shower_;
     static RxService rxservice_;
     static TxService txservice_;
+
+  private:
+    EMSESP() = delete;
+
+    static uuid::log::Logger logger_;
+
+    static std::string device_tostring(const uint8_t device_id);
+
+    static void process_UBADevices(std::shared_ptr<const Telegram> telegram);
+    static void process_version(std::shared_ptr<const Telegram> telegram);
 
     static constexpr uint32_t EMS_FETCH_FREQUENCY = 60000; // check every minute
     static uint32_t           last_fetch_;
