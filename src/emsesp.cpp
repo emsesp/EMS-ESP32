@@ -48,7 +48,7 @@ uuid::log::Logger EMSESP::logger_{FPSTR(__pstr__logger_name), uuid::log::Facilit
 RxService EMSESP::rxservice_; // incoming Telegram Rx handler
 TxService EMSESP::txservice_; // outgoing Telegram Tx handler
 Mqtt      EMSESP::mqtt_;      // mqtt handler
-System    EMSESP::system_;    // core system stuff
+System    EMSESP::system_;    // core system services
 Console   EMSESP::console_;   // telnet and serial console
 Sensors   EMSESP::sensors_;   // Dallas sensors
 Network   EMSESP::network_;   // WiFi
@@ -61,10 +61,6 @@ bool     EMSESP::trace_raw_                = false;                            /
 bool     EMSESP::tap_water_active_         = false;                            // for when Boiler states we having running warm water. used in Shower()
 bool     EMSESP::ems_read_only_;
 uint32_t EMSESP::last_fetch_ = 0;
-
-#ifdef EMSESP_DEBUG
-#include "test_data.h" // used with the 'test' command, under su/admin
-#endif
 
 // for a specific EMS device go and request data values
 // or if device_id is 0 it will fetch from all known devices
@@ -102,7 +98,7 @@ uint8_t EMSESP::actual_master_thermostat() {
 
 // to watch both type IDs and device IDs
 void EMSESP::trace_watch_id(uint16_t trace_watch_id) {
-    // if it's a device ID, which is a single byte, remove the MSB (to support both Buderus and HT3)
+    // if it's a device ID, which is a single byte, remove the MSB so to support both Buderus and HT3 protocols
     if (trace_watch_id <= 0xFF) {
         trace_watch_id_ = (trace_watch_id & 0x7F);
     } else {
@@ -177,7 +173,7 @@ void EMSESP::show_values(uuid::console::Shell & shell) {
 // show EMS device values
 void EMSESP::show_device_values(uuid::console::Shell & shell) {
     if (emsdevices.empty()) {
-        shell.printfln(F("No EMS devices detected yet. Try 'scan devices' from the ems menu."));
+        shell.printfln(F("No EMS devices detected. Try using 'scan devices' from the ems menu."));
         shell.println();
         return;
     }
@@ -466,7 +462,8 @@ void EMSESP::add_context_menus() {
 // for each associated EMS device go and get its system information
 void EMSESP::show_devices(uuid::console::Shell & shell) {
     if (emsdevices.empty()) {
-        shell.printfln(F("No EMS devices detected. Try scanning using the 'scan devices' command."));
+        shell.printfln(F("No EMS devices detected. Try using 'scan devices' from the ems menu."));
+        shell.println();
         return;
     }
 
