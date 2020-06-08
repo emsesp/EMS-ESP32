@@ -610,17 +610,18 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
             }
         }
 
-        // if Tx wasn't successful, retry
+        // if Tx wasn't successful, retry or give up
         if (!tx_successful) {
             // the telegram we got wasn't what we had requested
             // So re-send the last Tx and increment retry count
-#ifdef EMSESP_DEBUG
-            LOG_DEBUG(F("send: %s, received: %s"), txservice_.last_tx_to_string().c_str(), Helpers::data_to_hex(data, length).c_str());
-#endif
             uint8_t retries = txservice_.retry_tx(); // returns 0 if exceeded count
-            if (retries) {
-                LOG_ERROR(F("Last Tx operation failed. Retrying #%d..."), retries);
-            } else {
+#ifdef EMSESP_DEBUG
+            LOG_DEBUG(F("Last Tx operation failed. Retry #%d. Sent: %s, received: %s"),
+                      retries,
+                      txservice_.last_tx_to_string().c_str(),
+                      Helpers::data_to_hex(data, length).c_str());
+#endif
+            if (!retries) {
                 LOG_ERROR(F("Last Tx operation failed after %d retries. Ignoring request."), txservice_.MAXIMUM_TX_RETRIES);
             }
 
