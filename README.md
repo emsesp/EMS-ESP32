@@ -61,7 +61,7 @@ Note: Version 2.0 is not backward compatible with v1.0. The File system structur
 common commands available in all contexts:
   exit
   help
-  log [level] [full|raw] [trace ID]
+  log [level] [pretty | raw] [trace ID]
   su
 
 (top root level)
@@ -81,9 +81,11 @@ ems
 	set bus_id <device ID>
 	set read_only <on | off>
 	set tx_mode <n>
+	refresh
 	show
 	show devices
 	show emsbus
+	show values
 
 mqtt
 	publish
@@ -118,7 +120,7 @@ system
 	wifi scan
 
 boiler
-	change comfort <hot|eco|intelligent>
+	change comfort <hot |eco | intelligent>
 	change flowtemp <degrees>
 	change wwactive <on | off>
 	change wwcirculation <on | off>
