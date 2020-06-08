@@ -265,11 +265,6 @@ void RxService::add(uint8_t * data, uint8_t length) {
         ems_mask(data[0]);
     }
 
-    // if we're in "trace" and "raw" print out actual telegram
-    if (logger_.enabled(Level::TRACE) && EMSESP::trace_raw()) {
-        LOG_TRACE(F("Rx: %s"), Helpers::data_to_hex(data, length).c_str());
-    }
-
     // src, dest and offset are always in fixed positions
     uint8_t src    = data[0] & 0x7F; // strip MSB, don't care if its read or write for processing
     uint8_t dest   = data[1] & 0x7F; // strip MSB, don't care if its read or write for processing
@@ -323,7 +318,7 @@ void RxService::add(uint8_t * data, uint8_t length) {
     // create the telegram
     auto telegram = std::make_shared<Telegram>(Telegram::Operation::RX, src, dest, type_id, offset, message_data, message_length);
 
-    // check if queue is full
+    // check if queue is full, if so remove top item to make space
     if (rx_telegrams_.size() >= MAX_RX_TELEGRAMS) {
         // rx_telegrams_overflow_ = true;
         rx_telegrams_.pop_front();
@@ -332,10 +327,19 @@ void RxService::add(uint8_t * data, uint8_t length) {
     // add to queue
     LOG_DEBUG(F("New Rx [#%d] telegram, length %d"), rx_telegram_id_, message_length);
     rx_telegrams_.emplace_back(rx_telegram_id_++, std::move(telegram));
+
+    // if we're in "trace" and "raw" print out actual telegram as bytes to the console
+    if (logger_.enabled(Level::TRACE) && EMSESP::trace_raw()) {
+        uint16_t trace_watch_id = EMSESP::trace_watch_id();
+        if ((trace_watch_id == LOG_TRACE_WATCH_NONE) || (src == trace_watch_id) || (dest == trace_watch_id) || (type_id == trace_watch_id)) {
+            LOG_TRACE(F("Rx: %s"), Helpers::data_to_hex(data, length).c_str());
+        }
+    }
 }
 
+
 //
-// Tx CODE here
+// Tx CODE starts here...
 //
 
 TxService::QueuedTxTelegram::QueuedTxTelegram(uint16_t id, std::shared_ptr<Telegram> && telegram)
@@ -472,7 +476,7 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
               tx_telegram.id_,
               telegram->to_string(telegram_raw, length).c_str());
 
-    // if we're watching an ID, then always show
+    // if we're watching an ID, then always show the full telegram
     if ((logger_.enabled(Level::TRACE))
         && ((telegram->src == EMSESP::trace_watch_id()) || (telegram->dest == EMSESP::trace_watch_id()) || (telegram->type_id == EMSESP::trace_watch_id()))) {
         logger_.trace(F("Sending %s Tx [#%d], telegram: %s"),
