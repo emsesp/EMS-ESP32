@@ -19,6 +19,8 @@
 #include "system.h"
 #include "emsesp.h" // for send_raw_telegram() command
 
+#include "version.h" // version of EMS-ESP
+
 MAKE_PSTR_WORD(syslog)
 MAKE_PSTR_WORD(mark)
 MAKE_PSTR_WORD(level)
