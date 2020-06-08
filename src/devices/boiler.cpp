@@ -29,7 +29,7 @@ MAKE_PSTR_WORD(eco)
 MAKE_PSTR_WORD(intelligent)
 MAKE_PSTR_WORD(hot)
 
-MAKE_PSTR(comfort_mandatory, "<hot|eco|intelligent>")
+MAKE_PSTR(comfort_mandatory, "<hot | eco | intelligent>")
 
 // shower
 MAKE_PSTR_WORD(shower)
