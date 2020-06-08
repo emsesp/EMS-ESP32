@@ -19,6 +19,10 @@
 #include "console.h"
 #include "emsesp.h"
 
+#ifdef EMSESP_DEBUG
+#include "test/test.h"
+#endif
+
 namespace emsesp {
 
 std::shared_ptr<Commands> EMSESPShell::commands = [] {
@@ -213,7 +217,7 @@ void Console::load_standard_commands(unsigned int context) {
                                        flash_string_vector{F_(test)},
                                        flash_string_vector{F_(name_mandatory)},
                                        [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
-                                           EMSESP::run_test(shell, arguments.front());
+                                           Test::run_test(shell, arguments.front());
                                        });
 #endif
 
@@ -241,7 +245,7 @@ void Console::load_standard_commands(unsigned int context) {
                         // next argument is raw or full
                         if (arguments[1] == read_flash_string(F_(raw))) {
                             emsesp::EMSESP::trace_raw(true);
-                        } else if (arguments[1] == read_flash_string(F_(full))) {
+                        } else if (arguments[1] == read_flash_string(F_(pretty))) {
                             emsesp::EMSESP::trace_raw(false);
                         } else {
                             emsesp::EMSESP::trace_watch_id(Helpers::hextoint(arguments[1].c_str()));
@@ -251,6 +255,10 @@ void Console::load_standard_commands(unsigned int context) {
                         if (arguments.size() == 3) {
                             emsesp::EMSESP::trace_watch_id(Helpers::hextoint(arguments[2].c_str()));
                         }
+                    } else {
+                        // it was "log trace" so reset the watch id and switch back to pretty
+                        emsesp::EMSESP::trace_raw(false);
+                        emsesp::EMSESP::trace_watch_id(LOG_TRACE_WATCH_NONE);
                     }
                 }
             }
@@ -263,7 +271,7 @@ void Console::load_standard_commands(unsigned int context) {
             } else {
                 shell.printfln(F("Tracing only telegrams that match a device ID or telegram type of 0x%02X"), watch_id);
             }
-            shell.printfln(F_(trace_raw_fmt), emsesp::EMSESP::trace_raw() ? uuid::read_flash_string(F_(on)).c_str() : uuid::read_flash_string(F_(off)).c_str());
+            shell.printfln(F_(trace_raw_fmt), emsesp::EMSESP::trace_raw() ? F("as raw bytes") : F("in decoded format"));
         },
         [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments __attribute__((unused))) -> std::vector<std::string> {
             return uuid::log::levels_lowercase();
