@@ -38,7 +38,6 @@
 #include <uuid/console.h>
 
 #include "helpers.h"
-#include "version.h"
 #include "console.h"
 
 // default settings - these can be customized from within the application

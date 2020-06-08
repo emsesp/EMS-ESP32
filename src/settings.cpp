@@ -27,7 +27,7 @@ namespace emsesp {
 
 // clang-format off
 #define EMSESP_SETTINGS_DATA \
-		EMSESP_SETTINGS_SIMPLE(std::string, "", app_version, "", (), EMSESP_APP_VERSION) \
+		EMSESP_SETTINGS_SIMPLE(std::string, "", app_version, "", (), "2.0") \
 		EMSESP_SETTINGS_SIMPLE(std::string, "", admin_password, "", (), EMSESP_DEFAULT_ADMIN_PASSWORD) \
 		EMSESP_SETTINGS_SIMPLE(std::string, "", hostname, "", (), EMSESP_DEFAULT_HOSTNAME) \
 		EMSESP_SETTINGS_SIMPLE(std::string, "", wifi_ssid, "", (), "") \
