@@ -1,10 +1,34 @@
+
+/*
+ * EMS-ESP - https://github.com/proddy/EMS-ESP
+ * Copyright 2019  Paul Derbyshire
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+
+#include "test.h"
+
+namespace emsesp {
+
 // create some fake test data
 // used with the 'test' command, under su/admin
-void EMSESP::run_test(uuid::console::Shell & shell, const std::string & command) {
+void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
     if (command == "devices") {
-        rxservice_.ems_mask(EMSbus::EMS_MASK_BUDERUS); // this is important otherwise nothing will be picked up!
+        EMSESP::rxservice_.ems_mask(EMSbus::EMS_MASK_BUDERUS); // this is important otherwise nothing will be picked up!
 
-        emsdevices.push_back(EMSFactory::add(EMSdevice::DeviceType::BOILER, EMSdevice::EMS_DEVICE_ID_BOILER, 0, "", "My Boiler", 0, 0));
+        //emsdevices.push_back(EMSFactory::add(EMSdevice::DeviceType::BOILER, EMSdevice::EMS_DEVICE_ID_BOILER, 0, "", "My Boiler", 0, 0));
 
         // A fake response - UBADevices(0x07)
         rx_telegram({0x08, 0x00, 0x07, 0x00, 0x0B, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00});
@@ -13,14 +37,14 @@ void EMSESP::run_test(uuid::console::Shell & shell, const std::string & command)
     if (command == "boiler2") {
         // question: do we need to set the mask?
         std::string version("1.2.3");
-        add_device(0x08, 123, version, EMSdevice::Brand::BUDERUS); // Nefit Trendline
+        EMSESP::add_device(0x08, 123, version, EMSdevice::Brand::BUDERUS); // Nefit Trendline
     }
 
     if (command == "unknown") {
         // question: do we need to set the mask?
         std::string version("1.2.3");
-        add_device(0x09, 89, version, EMSdevice::Brand::BUDERUS);
-        rxservice_.loop();
+        EMSESP::add_device(0x09, 89, version, EMSdevice::Brand::BUDERUS);
+        EMSESP::rxservice_.loop();
 
         // simulate getting version information back from an unknown device
         rx_telegram({0x09, 0x0B, 0x02, 0x00, 0x59, 0x01, 0x02});
@@ -41,8 +65,8 @@ void EMSESP::run_test(uuid::console::Shell & shell, const std::string & command)
 
         // add thermostat - Thermostat: RC300/RC310/Moduline 3000/CW400/Sense II (DeviceID:0x10, ProductID:158, Version:03.03) ** master device **
         std::string version("01.03");
-        add_device(0x10, 158, version, EMSdevice::Brand::BUDERUS);
-        rxservice_.loop();
+        EMSESP::add_device(0x10, 158, version, EMSdevice::Brand::BUDERUS);
+        EMSESP::rxservice_.loop();
 
         // simulate incoming telegram
         // Thermostat(0x10) -> 48(0x48), ?(0x26B), data: 6B 08 4F 00 00 00 02 00 00 00 02 00 03 00 03 00 03
@@ -60,18 +84,18 @@ void EMSESP::run_test(uuid::console::Shell & shell, const std::string & command)
         // add_device(0x17, 93, version, EMSdevice::Brand::BUDERUS);
         // add_device(0x17, 254, version, EMSdevice::Brand::BUDERUS); // test unknown product_id
 
-        add_device(0x18, 157, version, EMSdevice::Brand::BOSCH); // Bosch CR100 - https://github.com/proddy/EMS-ESP/issues/355
+        EMSESP::add_device(0x18, 157, version, EMSdevice::Brand::BOSCH); // Bosch CR100 - https://github.com/proddy/EMS-ESP/issues/355
     }
 
     if (command == "solar") {
         shell.printfln(F("Testing Solar"));
 
-        rxservice_.ems_mask(EMSbus::EMS_MASK_BUDERUS);
+        EMSESP::rxservice_.ems_mask(EMSbus::EMS_MASK_BUDERUS);
 
         std::string version("1.2.3");
-        add_device(0x30, 163, version, EMSdevice::Brand::BUDERUS); // SM100
+        EMSESP::add_device(0x30, 163, version, EMSdevice::Brand::BUDERUS); // SM100
 
-        rxservice_.loop();
+        EMSESP::rxservice_.loop();
 
         // SM100Monitor - type 0x0362 EMS+ - for SM100 and SM200
         // B0 0B FF 00 02 62 00 44 02 7A 80 00 80 00 80 00 80 00 80 00 80 00 00 7C 80 00 80 00 80 00 80
@@ -82,11 +106,11 @@ void EMSESP::run_test(uuid::console::Shell & shell, const std::string & command)
     if (command == "cr100") {
         shell.printfln(F("Testing CR100"));
 
-        rxservice_.ems_mask(EMSbus::EMS_MASK_HT3); // switch to junkers
+        EMSESP::rxservice_.ems_mask(EMSbus::EMS_MASK_HT3); // switch to junkers
 
         std::string version("1.2.3");
-        add_device(0x18, 157, version, EMSdevice::Brand::BOSCH); // Bosch CR100 - https://github.com/proddy/EMS-ESP/issues/355
-        rxservice_.loop();
+        EMSESP::add_device(0x18, 157, version, EMSdevice::Brand::BOSCH); // Bosch CR100 - https://github.com/proddy/EMS-ESP/issues/355
+        EMSESP::rxservice_.loop();
 
         // RCPLUSStatusMessage_HC1(0x01A5)
         // 98 00 FF 00 01 A5 00 CF 21 2E 00 00 2E 24 03 25 03 03 01 03 25 00 C8 00 00 11 01 03
@@ -94,10 +118,10 @@ void EMSESP::run_test(uuid::console::Shell & shell, const std::string & command)
                        0x03, 0x25, 0x03, 0x03, 0x01, 0x03, 0x25, 0x00, 0xC8, 0x00, 0x00, 0x11, 0x01, 0x03});
 
         shell.loop_all();
-        rxservice_.loop();
-        txservice_.flush_tx_queue();
+        EMSESP::rxservice_.loop();
+        EMSESP::txservice_.flush_tx_queue();
         shell.loop_all();
-        show_values(shell);
+        EMSESP::show_values(shell);
 
         shell.invoke_command("thermostat");
         shell.loop_all();
@@ -106,10 +130,10 @@ void EMSESP::run_test(uuid::console::Shell & shell, const std::string & command)
         shell.invoke_command("set mode auto");
 
         shell.loop_all();
-        show_emsbus(shell);
+        EMSESP::show_emsbus(shell);
         shell.loop_all();
 
-        txservice_.send(); // send it to UART
+        EMSESP::txservice_.send(); // send it to UART
     }
 
     if (command == "rx") {
@@ -131,7 +155,7 @@ void EMSESP::run_test(uuid::console::Shell & shell, const std::string & command)
 
         // bad CRC - corrupt telegram - CRC should be 0x8E
         uint8_t t5[] = {0x17, 0x0B, 0x91, 0x05, 0x44, 0x45, 0x46, 0x47, 0x99};
-        rxservice_.add(t5, sizeof(t5));
+        EMSESP::rxservice_.add(t5, sizeof(t5));
 
         // simulating a Tx record
         uart_telegram({0x0B, 0x88, 0x07, 0x00, 0x20});
@@ -168,127 +192,127 @@ void EMSESP::run_test(uuid::console::Shell & shell, const std::string & command)
 
     if (command == "send") {
         shell.printfln(F("Sending to Tx..."));
-        show_emsbus(shell);
-        txservice_.send(); // send it to UART
+        EMSESP::show_emsbus(shell);
+        EMSESP::txservice_.send(); // send it to UART
     }
 
     if (command == "tx") {
         shell.printfln(F("Testing Tx..."));
 
-        txservice_.flush_tx_queue();
+        EMSESP::txservice_.flush_tx_queue();
 
         // TX queue example - Me -> Thermostat, (0x91), telegram: 0B 17 91 05 44 45 46 47 (#data=4)
         // uint8_t t11[] = {0x44, 0x45, 0x46, 0x47};
-        // txservice_.add(Telegram::Operation::TX_RAW, 0x17, 0x91, 0x05, t11, sizeof(t11));
+        // EMSESP::txservice_.add(Telegram::Operation::TX_RAW, 0x17, 0x91, 0x05, t11, sizeof(t11));
 
         // TX - raw example test
         // uint8_t t12[] = {0x10, 0x08, 0x63, 0x04, 0x64};
-        // txservice_.add(t12, sizeof(t12));
+        // EMSESP::txservice_.add(t12, sizeof(t12));
 
         // TX - sending raw string
-        // txservice_.send_raw("10 08 63 03 64 65 66");
+        // EMSESP::txservice_.send_raw("10 08 63 03 64 65 66");
 
         // TX - send a read request
-        send_read_request(0x18, 0x08);
+        EMSESP::send_read_request(0x18, 0x08);
 
         // TX - send a write request
         // uint8_t t18[] = {0x52, 0x79};
         // send_write_request(0x91, 0x17, 0x00, t18, sizeof(t18));
 
-        console_.loop();
-        show_emsbus(shell);
-        txservice_.send(); // send it to UART
+        shell.loop_all();
+        EMSESP::show_emsbus(shell);
+        EMSESP::txservice_.send(); // send it to UART
 
-        txservice_.flush_tx_queue();
+        EMSESP::txservice_.flush_tx_queue();
     }
 
     if (command == "poll") {
         shell.printfln(F("Testing Poll..."));
 
         // check if sending works when a poll comes in, with retries
-        txservice_.flush_tx_queue();
+        EMSESP::txservice_.flush_tx_queue();
 
         // simulate sending a read request
         // uint8_t t16[] = {0x44, 0x45, 0x46, 0x47}; // Me -> Thermostat, (0x91), telegram: 0B 17 91 05 44 45 46 47 (#data=4)
-        // txservice_.add(Telegram::Operation::TX_RAW, 0x17, 0x91, 0x05, t16, sizeof(t16));
-        send_read_request(0x91, 0x17);
-        // txservice_.show_tx_queue();
+        // EMSESP::txservice_.add(Telegram::Operation::TX_RAW, 0x17, 0x91, 0x05, t16, sizeof(t16));
+        EMSESP::send_read_request(0x91, 0x17);
+        // EMSESP::txservice_.show_tx_queue();
 
         // Simulate adding a Poll, so read request is sent
         uint8_t poll[1] = {0x8B};
-        incoming_telegram(poll, 1);
+        EMSESP::incoming_telegram(poll, 1);
 
         // incoming Rx
         uart_telegram({0x17, 0x08, 0x1A, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3A});
 
         // Simulate adding a Poll - should send retry
-        incoming_telegram(poll, 1);
+        EMSESP::incoming_telegram(poll, 1);
 
-        show_emsbus(shell);
+        EMSESP::show_emsbus(shell);
         uint8_t t2[] = {0x21, 0x22};
-        send_write_request(0x91, 0x17, 0x00, t2, sizeof(t2), 0);
-        show_emsbus(shell);
+        EMSESP::send_write_request(0x91, 0x17, 0x00, t2, sizeof(t2), 0);
+        EMSESP::show_emsbus(shell);
 
-        txservice_.flush_tx_queue();
+        EMSESP::txservice_.flush_tx_queue();
     }
 
     if (command == "mqtt1") {
         shell.printfln(F("Testing MQTT..."));
 
         // MQTT test
-        txservice_.flush_tx_queue();
-        mqtt_.publish("boiler_cmd", "test me");
-        // mqtt_.show_queue();
+        EMSESP::txservice_.flush_tx_queue();
+        EMSESP::EMSESP::mqtt_.publish("boiler_cmd", "test me");
+        // EMSESP::mqtt_.show_queue();
         // simulate an incoming mqtt msg
         char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
         char payload[100];
 
         strcpy(topic, "boiler_cmd");
         strcpy(payload, "12345");
-        mqtt_.incoming(topic, payload);
-        mqtt_.incoming(payload, payload); // should report error
+        EMSESP::mqtt_.incoming(topic, payload);
+        EMSESP::mqtt_.incoming(payload, payload); // should report error
 
         strcpy(topic, "thermostat_cmd_mode");
         strcpy(payload, "auto");
-        mqtt_.incoming(topic, payload);
+        EMSESP::mqtt_.incoming(topic, payload);
 
         strcpy(topic, "thermostat_cmd_temp");
         strcpy(payload, "20");
-        mqtt_.incoming(topic, payload);
+        EMSESP::mqtt_.incoming(topic, payload);
 
         strcpy(topic, "thermostat_cmd");
         strcpy(payload, "{\"cmd\":\"temp\",\"data\":22.52}");
-        mqtt_.incoming(topic, payload);
+        EMSESP::mqtt_.incoming(topic, payload);
 
         strcpy(topic, "boiler_cmd_wwtemp");
         strcpy(payload, "66");
-        mqtt_.incoming(topic, payload);
+        EMSESP::mqtt_.incoming(topic, payload);
 
         strcpy(topic, "thermostat_cmd");
         strcpy(payload, "{\"cmd\":\"temp\",\"hc\":2,\"data\":22}");
-        mqtt_.incoming(topic, payload);
+        EMSESP::mqtt_.incoming(topic, payload);
 
         strcpy(topic, "home/ems-esp/cmd");
         strcpy(payload, "restart");
-        mqtt_.incoming(topic, payload);
+        EMSESP::mqtt_.incoming(topic, payload);
 
-        // txservice_.show_tx_queue();
+        // EMSESP::txservice_.show_tx_queue();
 
-        publish_all_values();
+        EMSESP::publish_all_values();
     }
 
     if (command == "poll2") {
         shell.printfln(F("Testing Tx Sending last message on queue..."));
 
-        show_emsbus(shell);
+        EMSESP::show_emsbus(shell);
 
         uint8_t poll[1] = {0x8B};
-        incoming_telegram(poll, 1);
+        EMSESP::incoming_telegram(poll, 1);
 
-        rxservice_.loop();
+        EMSESP::rxservice_.loop();
 
-        show_emsbus(shell);
-        txservice_.flush_tx_queue();
+        EMSESP::show_emsbus(shell);
+        EMSESP::txservice_.flush_tx_queue();
     }
 
     if (command == "rx2") {
@@ -304,7 +328,7 @@ void EMSESP::run_test(uuid::console::Shell & shell, const std::string & command)
     }
 
     if (command == "mqtt2") {
-        // Mqtt::subscribe("cmd", std::bind(&EMSESP::dummy_mqtt_commands, this, _1));
+        // Mqtt::subscribe("cmd", std::bind(&EMSESP::dummy_EMSESP::mqtt_commands, this, _1));
         for (uint8_t i = 0; i < 30; i++) {
             Mqtt::subscribe("cmd", dummy_mqtt_commands);
         }
@@ -319,19 +343,19 @@ void EMSESP::run_test(uuid::console::Shell & shell, const std::string & command)
     // send read request with offset
     if (command == "offset") {
         // send_read_request(0x18, 0x08);
-        txservice_.read_request(0x18, 0x08, 27); // no offset
+        EMSESP::txservice_.read_request(0x18, 0x08, 27); // no offset
     }
 
     if (command == "mixing") {
         shell.printfln(F("Mixing Solar"));
 
-        rxservice_.ems_mask(EMSbus::EMS_MASK_BUDERUS);
+        EMSESP::rxservice_.ems_mask(EMSbus::EMS_MASK_BUDERUS);
 
         std::string version("1.2.3");
-        add_device(0x28, 160, version, EMSdevice::Brand::BUDERUS); // MM100, WWC
-        add_device(0x29, 161, version, EMSdevice::Brand::BUDERUS); // MM200, WWC
+        EMSESP::add_device(0x28, 160, version, EMSdevice::Brand::BUDERUS); // MM100, WWC
+        EMSESP::add_device(0x29, 161, version, EMSdevice::Brand::BUDERUS); // MM200, WWC
 
-        rxservice_.loop();
+        EMSESP::rxservice_.loop();
 
         // WWC1 on 0x29
         rx_telegram({0xA9, 0x00, 0xFF, 0x00, 0x02, 0x32, 0x02, 0x6C, 0x00, 0x3C, 0x00, 0x3C, 0x3C, 0x46, 0x02, 0x03, 0x03, 0x00, 0x3C});
@@ -345,29 +369,31 @@ void EMSESP::run_test(uuid::console::Shell & shell, const std::string & command)
 }
 
 // simulates a telegram in the Rx queue, but without the CRC which is added automatically
-void EMSESP::rx_telegram(const std::vector<uint8_t> & rx_data) {
+void Test::rx_telegram(const std::vector<uint8_t> & rx_data) {
     uint8_t len = rx_data.size();
     uint8_t data[50];
     std::copy(rx_data.begin(), rx_data.end(), data);
-    data[len] = rxservice_.calculate_crc(rx_data.data(), len);
-    rxservice_.add(data, len + 1);
-    rxservice_.loop();
+    data[len] = EMSESP::rxservice_.calculate_crc(rx_data.data(), len);
+    EMSESP::rxservice_.add(data, len + 1);
+    EMSESP::rxservice_.loop();
 }
 
 // simulates a telegram straight from UART, but without the CRC which is added automatically
-void EMSESP::uart_telegram(const std::vector<uint8_t> & rx_data) {
+void Test::uart_telegram(const std::vector<uint8_t> & rx_data) {
     uint8_t len = rx_data.size();
     uint8_t data[50];
     std::copy(rx_data.begin(), rx_data.end(), data);
-    data[len] = rxservice_.calculate_crc(rx_data.data(), len);
-    incoming_telegram(data, len + 1);
+    data[len] = EMSESP::rxservice_.calculate_crc(rx_data.data(), len);
+    EMSESP::incoming_telegram(data, len + 1);
 }
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
-void EMSESP::dummy_mqtt_commands(const char * message) {
+void Test::dummy_mqtt_commands(const char * message) {
     //
 }
 
 #pragma GCC diagnostic pop
+
+} // namespace emsesp

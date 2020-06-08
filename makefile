@@ -13,7 +13,7 @@ MAKEFLAGS+="j "
 #TARGET    := $(notdir $(CURDIR))
 TARGET    := emsesp
 BUILD     := build
-SOURCES   := src lib_standalone lib/rtcvars lib/uuid-common/src lib/uuid-console/src lib/uuid-log/src src/devices
+SOURCES   := src lib_standalone lib/rtcvars lib/uuid-common/src lib/uuid-console/src lib/uuid-log/src src/devices src/test
 INCLUDES  := lib_standalone/ArduinoJson/src lib_standalone lib/rtcvars lib/uuid-common/src lib/uuid-console/src lib/uuid-log/src lib/uuid-telnet/src lib/uuid-syslog/src src/devices src
 LIBRARIES := 
 
