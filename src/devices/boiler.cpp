@@ -369,6 +369,9 @@ void Boiler::show_values(uuid::console::Shell & shell) {
         print_value(shell, 2, F("Warm Water comfort setting"), "Intelligent");
     }
 
+    print_value(shell, 2, F("Warm water mix temperature"), F_(degrees), Helpers::render_value(buffer, wwMixTemperature_, 10));
+    print_value(shell, 2, F("Warm water buffer boiler temperature"), F_(degrees), Helpers::render_value(buffer, wwBufferBoilerTemperature_, 10));
+
     print_value(shell, 2, F("Warm Water disinfection temperature"), F_(degrees), Helpers::render_value(buffer, wWDisinfectTemp_, 1));
     print_value(shell, 2, F("Warm Water selected temperature"), F_(degrees), Helpers::render_value(buffer, wWSelTemp_, 1));
     print_value(shell, 2, F("Warm Water set temperature"), F_(degrees), Helpers::render_value(buffer, wWSetTmp_, 1));
@@ -636,6 +639,14 @@ void Boiler::process_UBADHWStatus(std::shared_ptr<const Telegram> telegram) {
     telegram->read_value(wWDisinfectTemp_, 9);
 }
 
+// 0x2A - MC10Status
+// e.g. 88 00 2A 00 00 00 00 00 00 00 00 00 D2 00 00 80 00 00 01 08 80 00 02 47 00
+// see https://github.com/proddy/EMS-ESP/issues/397
+void Boiler::process_MC10Status(std::shared_ptr<const Telegram> telegram) {
+    telegram->read_value(wwMixTemperature_, 14);
+    telegram->read_value(wwBufferBoilerTemperature_, 18);
+}
+
 /*
  * UBAOutdoorTemp - type 0xD1 - external temperature EMS+
  */
@@ -656,11 +667,6 @@ void Boiler::process_UBASetPoints(std::shared_ptr<const Telegram> telegram) {
 // 0x35
 // not yet implemented
 void Boiler::process_UBAFlags(std::shared_ptr<const Telegram> telegram) {
-}
-
-// 0x2A
-// not yet implemented
-void Boiler::process_MC10Status(std::shared_ptr<const Telegram> telegram) {
 }
 
 // 0x1C

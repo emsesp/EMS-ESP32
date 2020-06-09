@@ -66,6 +66,10 @@ class Boiler : public EMSdevice {
     uint8_t wWDisinfectTemp_ = EMS_VALUE_UINT_NOTSET; // Warm Water disinfection temperature to prevent infection
     uint8_t wWComfort_       = EMS_VALUE_UINT_NOTSET; // WW comfort mode
 
+    // MC10Status
+    uint16_t wwMixTemperature_          = EMS_VALUE_USHORT_NOTSET; // mengertemperatuur
+    uint16_t wwBufferBoilerTemperature_ = EMS_VALUE_USHORT_NOTSET; // bufferboilertemperatuur
+
     // UBAMonitorFast - 0x18 on EMS1
     uint8_t  selFlowTemp_        = EMS_VALUE_UINT_NOTSET;   // Selected flow temperature
     uint16_t curFlowTemp_        = EMS_VALUE_USHORT_NOTSET; // Current flow temperature

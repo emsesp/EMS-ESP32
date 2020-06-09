@@ -188,6 +188,9 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         //  Boiler(0x08) -> All(0x00), UBAMonitorWW(0x34), data: 36 01 A5 80 00 21 00 00 01 00 01 3E 8D 03 77 91 00 80 00
         uart_telegram(
             {0x08, 0x00, 0x34, 0x00, 0x36, 0x01, 0xA5, 0x80, 0x00, 0x21, 0x00, 0x00, 0x01, 0x00, 0x01, 0x3E, 0x8D, 0x03, 0x77, 0x91, 0x00, 0x80, 0x00});
+
+        // test 0x2A - DHWStatus3
+        uart_telegram({0x88, 00, 0x2A, 00, 00, 00, 00, 00, 00, 00, 00, 00, 0xD2, 00, 00, 0x80, 00, 00, 01, 0x9D, 0x80, 0x00, 0x02, 0x79, 00});
     }
 
     if (command == "send") {
@@ -347,7 +350,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
     }
 
     if (command == "mixing") {
-        shell.printfln(F("Mixing Solar"));
+        shell.printfln(F("Testing Mixing..."));
 
         EMSESP::rxservice_.ems_mask(EMSbus::EMS_MASK_BUDERUS);
 
