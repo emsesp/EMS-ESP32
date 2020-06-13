@@ -31,7 +31,6 @@ MAKE_PSTR(master_thermostat_fmt, "Master Thermostat device ID = %s")
 namespace emsesp {
 
 REGISTER_FACTORY(Thermostat, EMSdevice::DeviceType::THERMOSTAT);
-
 MAKE_PSTR(logger_name, "thermostat")
 uuid::log::Logger Thermostat::logger_{F_(logger_name), uuid::log::Facility::CONSOLE};
 
@@ -239,7 +238,6 @@ void Thermostat::thermostat_cmd(const char * message) {
         strlcpy(hc_name, "hc", 6);
         uint8_t hc_num = hc->hc_num();
         strlcat(hc_name, Helpers::itoa(s, hc_num), 6);
-
         if (nullptr != doc[hc_name]["mode"]) {
             std::string mode = doc[hc_name]["mode"]; // first check mode
             set_mode(mode, hc_num);
@@ -279,29 +277,29 @@ void Thermostat::thermostat_cmd(const char * message) {
             uint8_t ctrl = doc[hc_name]["control"];
             set_control(ctrl, hc_num);
         }
-        if (float ct = doc["calinttemp"]) {
-            set_settings_calinttemp((int8_t)(ct * 10));
-        }
-        if (nullptr != doc["minexttemp"]) {
-            int8_t mt = doc["minexttemp"];
-            set_settings_minexttemp(mt);
-        }
-        if (nullptr != doc["building"]) {
-            uint8_t bd = doc["building"];
-            set_settings_building(bd);
-        }
-        if (nullptr != doc["language"]) {
-            uint8_t lg = doc["language"];
-            set_settings_language(lg);
-        }
-        if (nullptr != doc["display"]) {
-            uint8_t dp = doc["display"];
-            set_settings_display(dp);
-        }
-        if (nullptr != doc["clockoffset"]) {
-            int8_t co = doc["clockoffset"];
-            set_settings_clockoffset(co);
-        }
+    }
+    if (float ct = doc["calinttemp"]) {
+        set_settings_calinttemp((int8_t)(ct * 10));
+    }
+    if (nullptr != doc["minexttemp"]) {
+        int8_t mt = doc["minexttemp"];
+        set_settings_minexttemp(mt);
+    }
+    if (nullptr != doc["building"]) {
+        uint8_t bd = doc["building"];
+        set_settings_building(bd);
+    }
+    if (nullptr != doc["language"]) {
+        uint8_t lg = doc["language"];
+        set_settings_language(lg);
+    }
+    if (nullptr != doc["display"]) {
+        uint8_t dp = doc["display"];
+        set_settings_display(dp);
+    }
+    if (nullptr != doc["clockoffset"]) {
+        int8_t co = doc["clockoffset"];
+        set_settings_clockoffset(co);
     }
 
     const char * command = doc["cmd"];
@@ -1023,17 +1021,17 @@ void Thermostat::process_JunkersMonitor(std::shared_ptr<const Telegram> telegram
 
 // type 0x02A5 - data from the Nefit RC1010/3000 thermostat (0x18) and RC300/310s on 0x10
 void Thermostat::process_RC300Monitor(std::shared_ptr<const Telegram> telegram) {
+    if (telegram->message_data[2] == 0x00) {
+        return;
+    }
     std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
-
     telegram->read_value(hc->curr_roomTemp, 0); // is * 10
     telegram->read_value(hc->mode_type, 10, 1);
     telegram->read_value(hc->mode, 10, 0); // bit 1, mode (auto=1 or manual=0)
 
     // setpoint is in offset 3 and also 7. We're sticking to 3 for now.
     // also ignore if its 0 - see https://github.com/proddy/EMS-ESP/issues/256#issuecomment-585171426
-    if (telegram->message_data[3] != 0) {
-        telegram->read_value8(hc->setpoint_roomTemp, 3); // is * 2, force as single byte
-    }
+    telegram->read_value8(hc->setpoint_roomTemp, 3); // is * 2, force as single byte
 }
 
 // type 0x02B9 EMS+ for reading from RC300/RC310 thermostat
@@ -1044,11 +1042,12 @@ void Thermostat::process_RC300Set(std::shared_ptr<const Telegram> telegram) {
     // manual is position 10
     // comfort is position 2
     // I think auto is position 8?
-    telegram->read_value8(hc->setpoint_roomTemp, 8);  // single byte conversion, value is * 2 - auto?
-    telegram->read_value8(hc->setpoint_roomTemp, 10); // single byte conversion, value is * 2 - manual
+    // actual setpoint taken from RC300Monitor (Michael 12.06.2020) 
+    // telegram->read_value8(hc->setpoint_roomTemp, 8);  // single byte conversion, value is * 2 - auto?
+    // telegram->read_value8(hc->setpoint_roomTemp, 10); // single byte conversion, value is * 2 - manual
 
     // check why mode is both in the Monitor and Set for the RC300. It'll be read twice!
-    telegram->read_value(hc->mode, 0); // Auto = xFF, Manual = x00 eg. 10 00 FF 08 01 B9 FF
+    // telegram->read_value(hc->mode, 0); // Auto = xFF, Manual = x00 eg. 10 00 FF 08 01 B9 FF
 
     telegram->read_value(hc->daytemp, 2);   // is * 2
     telegram->read_value(hc->nighttemp, 4); // is * 2
@@ -1182,7 +1181,7 @@ void Thermostat::set_settings_building(const uint8_t bg) {
 // 0xA5 Set the language settings
 void Thermostat::set_settings_language(const uint8_t lg) {
     if ((flags() & 0x0F) == EMS_DEVICE_FLAG_RC30_1) {
-        LOG_INFO(F("Setting building to %d"), lg);
+        LOG_INFO(F("Setting language to %d"), lg);
         write_command(EMS_TYPE_IBASettings, 1, lg);
     }
 }
@@ -1199,8 +1198,10 @@ void Thermostat::set_control(const uint8_t ctrl, const uint8_t hc_num) {
         return;
     }
     if ((flags() & 0x0F) == EMS_DEVICE_FLAG_RC35 || (flags() & 0x0F) == EMS_DEVICE_FLAG_RC30_1) {
-        LOG_INFO(F("Setting Circuit-control for hc%d to %d"), hc_num, ctrl);
+        LOG_INFO(F("Setting circuit-control for hc%d to %d"), hc_num, ctrl);
         write_command(set_typeids[hc->hc_num() - 1], 26, ctrl);
+    } else {
+        LOG_INFO(F("Setting circuit-control not possible"));
     }
 }
 

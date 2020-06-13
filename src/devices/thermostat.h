@@ -29,7 +29,6 @@
 #include "emsesp.h"
 #include "helpers.h"
 #include "mqtt.h"
-#include "roomcontrol.h"
 
 #include <vector>
 

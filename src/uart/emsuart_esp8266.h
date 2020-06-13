@@ -15,6 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#if defined(ESP8266)
 
 #ifndef EMSESP_EMSUART_H
 #define EMSESP_EMSUART_H
@@ -81,8 +82,11 @@ class EMSuart {
     static void ICACHE_FLASH_ATTR emsuart_recvTask(os_event_t * events);
     static void ICACHE_FLASH_ATTR emsuart_flush_fifos();
     static void ICACHE_FLASH_ATTR tx_brk();
+    static void ICACHE_RAM_ATTR   emsuart_tx_timer_intr_handler();
+
 };
 
 } // namespace emsesp
 
+#endif
 #endif

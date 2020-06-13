@@ -20,6 +20,7 @@
 /*
  * ESP32 UART port by @ArwedL and improved by @MichaelDvP. See https://github.com/proddy/EMS-ESP/issues/380
  */
+#if defined(ESP32)
 
 #ifndef EMSESP_EMSUART_H
 #define EMSESP_EMSUART_H
@@ -73,4 +74,5 @@ class EMSuart {
 
 } // namespace emsesp
 
+#endif
 #endif

@@ -20,17 +20,14 @@
 #define EMSESP_ROOMCONTROL_H
 
 #include "emsesp.h"
-#include "telegram.h"
-#include "uart/emsuart_esp8266.h"
-#include "uart/emsuart_esp32.h"
 
 namespace emsesp {
 
 class Roomctrl {
   public:
-    static void send(uint8_t addr);
-    static void check(uint8_t addr, uint8_t * data);
-    static void set_remotetemp(uint8_t hc, int16_t temp);
+    static void send(const uint8_t addr);
+    static void check(const uint8_t addr, const uint8_t * data);
+    static void set_remotetemp(const uint8_t hc, const int16_t temp);
 
   private:
     static constexpr uint8_t  ADDR          = 0x18;
@@ -39,6 +36,8 @@ class Roomctrl {
     static void version(uint8_t addr, uint8_t dst);
     static void unknown(uint8_t addr, uint8_t dst, uint8_t type, uint8_t offset);
     static void temperature(uint8_t addr, uint8_t dst);
+    static void nack_write();
+
 };
 
 } // namespace emsesp

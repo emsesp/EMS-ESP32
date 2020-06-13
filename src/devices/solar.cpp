@@ -37,9 +37,9 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
     register_telegram_type(0x0362, F("SM100Monitor"), true, std::bind(&Solar::process_SM100Monitor, this, _1));
     register_telegram_type(0x0364, F("SM100Status"), false, std::bind(&Solar::process_SM100Status, this, _1));
     register_telegram_type(0x036A, F("SM100Status2"), false, std::bind(&Solar::process_SM100Status2, this, _1));
-    register_telegram_type(0x038E, F("SM100Energy"), false, std::bind(&Solar::process_SM100Energy, this, _1));
-    register_telegram_type(0x0003, F("ISM1StatusMessage"), true, std::bind(&Solar::process_ISM1StatusMessage, this, _1));
-    register_telegram_type(0x0001, F("ISM1Set"), false, std::bind(&Solar::process_ISM1Set, this, _1));
+    register_telegram_type(0x038E, F("SM100Energy"), true, std::bind(&Solar::process_SM100Energy, this, _1));
+    register_telegram_type(0x0103, F("ISM1StatusMessage"), true, std::bind(&Solar::process_ISM1StatusMessage, this, _1));
+    register_telegram_type(0x0101, F("ISM1Set"), false, std::bind(&Solar::process_ISM1Set, this, _1));
 
     // MQTT callbacks
     // register_mqtt_topic("cmd", std::bind(&Solar::cmd, this, _1));
@@ -130,10 +130,11 @@ void Solar::process_SM10Monitor(std::shared_ptr<const Telegram> telegram) {
     telegram->read_value(bottomTemp_, 5);     // bottom temp from SM10, is *10
     telegram->read_value(pumpModulation_, 4); // modulation solar pump
     telegram->read_value(pump_, 7, 1);
+    telegram->read_value(pumpWorkMin_, 8);
 }
 
 /*
- * SM100Monitor - type 0x0162 EMS+ - for SM100 and SM200
+ * SM100Monitor - type 0x0262 EMS+ - for SM100 and SM200
  * e.g. B0 0B FF 00 02 62 00 44 02 7A 80 00 80 00 80 00 80 00 80 00 80 00 00 7C 80 00 80 00 80 00 80
  * e.g, 30 00 FF 00 02 62 01 AC
  *      30 00 FF 18 02 62 80 00

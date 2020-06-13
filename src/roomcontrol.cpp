@@ -20,21 +20,23 @@
 
 namespace emsesp {
 
-uint32_t rc_time_      = 0;
-uint16_t hc_           = EMS_VALUE_USHORT_NOTSET;
-int16_t  remotetemp[4] = {EMS_VALUE_SHORT_NOTSET, EMS_VALUE_SHORT_NOTSET, EMS_VALUE_SHORT_NOTSET, EMS_VALUE_SHORT_NOTSET};
+static uint32_t rc_time_      = 0;
+static int16_t  remotetemp[4] = {EMS_VALUE_SHORT_NOTSET, EMS_VALUE_SHORT_NOTSET, EMS_VALUE_SHORT_NOTSET, EMS_VALUE_SHORT_NOTSET};
 
 /**
  * set the temperature,
  */
-void Roomctrl::set_remotetemp(uint8_t hc, int16_t temp) {
+void Roomctrl::set_remotetemp(const uint8_t hc, const int16_t temp) {
+    if (hc > 3) {
+        return;
+    }
     remotetemp[hc] = temp;
 }
 
 /**
  * if remote control is active send the temperature every minute
  */
-void Roomctrl::send(uint8_t addr) {
+void Roomctrl::send(const uint8_t addr) {
     uint8_t hc_ = addr - ADDR;
     // check address, reply only on addresses 0x18..0x1B
     if (hc_ > 3) {
@@ -48,7 +50,7 @@ void Roomctrl::send(uint8_t addr) {
         rc_time_ = uuid::get_uptime();                   // use EMS-ESP's millis() to prevent overhead
         temperature(addr, 0x00);                         // send to all
     } else {
-        // acknowledge every poll, otherwise the master shows error A11-822
+        // acknowledge every poll, otherwise the master shows error A22-816
         EMSuart::send_poll(addr);
     }
 }
@@ -56,19 +58,22 @@ void Roomctrl::send(uint8_t addr) {
 /**
  * check if there is a message for the remote room controller
  */
-void Roomctrl::check(uint8_t addr, uint8_t * data) {
-    uint8_t hc_num = addr - ADDR;
+void Roomctrl::check(const uint8_t addr, const uint8_t * data) {
+    uint8_t hc_ = (addr & 0x7F) - ADDR;
 
     // check address, reply only on addresses 0x18..0x1B
-    if (hc_num > 3) {
+    if (hc_ > 3) {
         return;
     }
-
     // no reply if the temperature is not set
-    if (remotetemp[hc_num] == EMS_VALUE_SHORT_NOTSET) {
+    if (remotetemp[hc_] == EMS_VALUE_SHORT_NOTSET) {
         return;
     }
-
+    // reply to writes with write nack byte   
+    if(addr & 0x80) { // it's a write to us
+        nack_write(); // we don't accept writes.
+        return;
+    }
     // for now we only reply to version and remote temperature
     if (data[2] == 0x02) {
         version(addr, data[0]);
@@ -123,6 +128,14 @@ void Roomctrl::temperature(uint8_t addr, uint8_t dst) {
     data[6]     = 0;
     data[7]     = EMSbus::calculate_crc(data, 7); // apppend CRC
     EMSuart::transmit(data, 8);
+}
+/**
+ * send a nack if someone want to write to us.
+ */
+void Roomctrl::nack_write() {
+    uint8_t data[1];
+    data[0] = TxService::TX_WRITE_FAIL;
+    EMSuart::transmit(data, 1);
 }
 
 } // namespace emsesp

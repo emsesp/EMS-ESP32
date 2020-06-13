@@ -40,9 +40,9 @@ Mixing::Mixing(uint8_t device_type, uint8_t device_id, uint8_t product_id, const
     }
     // EMS 1.0
     if (flags == EMSdevice::EMS_DEVICE_FLAG_MM10) {
-        register_telegram_type(0x00AA, F("MMConfigMessage"), false, nullptr);
+        register_telegram_type(0x00AA, F("MMConfigMessage"), false, std::bind(&Mixing::process_MMConfigMessage, this, _1));
         register_telegram_type(0x00AB, F("MMStatusMessage"), true, std::bind(&Mixing::process_MMStatusMessage, this, _1));
-        register_telegram_type(0x00AC, F("MMSetMessage"), false, nullptr);
+        register_telegram_type(0x00AC, F("MMSetMessage"), false, std::bind(&Mixing::process_MMSetMessage, this, _1));
     }
 
     // MQTT callbacks
@@ -131,8 +131,9 @@ void Mixing::process_MMPLUSStatusMessage_HC(std::shared_ptr<const Telegram> tele
     type_ = Type::HC;
     hc_   = telegram->type_id - 0x02D7 + 1; // determine which circuit this is
     telegram->read_value(flowTemp_, 3);     // is * 10
-    telegram->read_value(pumpMod_, 5);
-    telegram->read_value(status_, 2); // valve status
+    telegram->read_value(flowSetTemp_, 5);
+    telegram->read_value(pumpMod_, 2);
+    telegram->read_value(status_, 1); // valve status
 }
 
 // Mixing module warm water loading/DHW - 0x0331, 0x0332
@@ -159,6 +160,21 @@ void Mixing::process_MMStatusMessage(std::shared_ptr<const Telegram> telegram) {
     telegram->read_value(flowTemp_, 1); // is * 10
     telegram->read_value(pumpMod_, 3);
     telegram->read_value(flowSetTemp_, 0);
+}
+
+// Mixing on a MM10 - 0xAA
+// e.g. Thermostat -> Mixing Module, type 0xAA, telegram: 10 21 AA 00 FF 0C 0A 11 0A 32 xx
+void Mixing::process_MMConfigMessage(std::shared_ptr<const Telegram> telegram) {
+    hc_ = device_id() - 0x20 + 1;
+    // pos 0: active FF = on
+    // pos 1: valve runtime 0C = 120 sec in units of 10 sec
+}
+// Mixing on a MM10 - 0xAC
+// e.g. Thermostat -> Mixing Module, type 0xAC, telegram: 10 21 AC 00 1E 64 01 AB
+void Mixing::process_MMSetMessage(std::shared_ptr<const Telegram> telegram) {
+    hc_ = device_id() - 0x20 + 1;
+    // pos 0: flowtemp setpoint 1E = 30°C
+    // pos 1: position in %
 }
 
 } // namespace emsesp

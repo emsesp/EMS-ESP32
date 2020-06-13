@@ -177,7 +177,7 @@ void Telegram::read_value32(uint32_t & param, const uint8_t index) const {
         return;
     }
 
-    param = (uint32_t)((message_data[pos] << 24) + (message_data[pos] << 16) + (message_data[pos + 1] << 8) + (message_data[pos + 2]));
+    param = (uint32_t)((message_data[pos] << 24) + (message_data[pos + 1] << 16) + (message_data[pos + 2] << 8) + (message_data[pos + 3]));
 }
 
 // bit from an unsigned byte
@@ -294,12 +294,13 @@ void RxService::add(uint8_t * data, uint8_t length) {
                     type_id = (data[4] << 8) + data[5] + 256;
                 }
             } else {
+                type_id        = (data[4] << 8) + data[5] + 256;
                 message_length = length - 7; // remove 6 byte header plus CRC
                 message_data   = data + 6;   // message block starts at 7th position
             }
         } else {
             // its F9 or F7
-            uint8_t shift = (data[4] != 0xFF); // true (1) if 5th byte is not 0xFF, then telegram is 1 byte longer
+            uint8_t shift = (data[4] != 0xFF) ? 1 : 0; // true (1) if 5th byte is not 0xFF, then telegram is 1 byte longer
             type_id       = (data[5 + shift] << 8) + data[6 + shift] + 256;
             message_data  = data + 6 + shift; // there is a special byte after the typeID which we ignore for now
             if (length <= (9 + shift)) {
@@ -611,6 +612,10 @@ void TxService::remember_tx(const uint8_t * data, const uint8_t length) {
         telegram_last_[i] = data[i];
     }
     telegram_last_length_ = length;
+    if (ems_mask() != EMS_MASK_UNSET) {
+        telegram_last_[0] ^= ems_mask();
+    }
+
 }
 
 // add last Tx to tx queue and increment count
@@ -621,8 +626,25 @@ uint8_t TxService::retry_tx() {
         increment_telegram_fail_count(); // another Tx fail
         return 0;
     }
+   // if the queue is full, throw away
+    if (tx_telegrams_.size() >= MAX_TX_TELEGRAMS) {
+        reset_retry_count();             // give up
+        increment_telegram_fail_count(); // another Tx fail
+        return 0;
+    }
 
-    add(telegram_last_, telegram_last_length_); // add the last Tx telegram to the tx queue, at the top
+    uint8_t message_length = telegram_last_length_ - 4;
+
+    // build header
+    uint8_t   src          = telegram_last_[0];
+    uint8_t   dest         = telegram_last_[1];
+    uint8_t   type_id      = telegram_last_[2];
+    uint8_t   offset       = telegram_last_[3];
+    uint8_t * message_data = telegram_last_ + 4;
+
+    auto telegram = std::make_shared<Telegram>(Telegram::Operation::TX_RAW, src, dest, type_id, offset, message_data, message_length);
+
+    tx_telegrams_.emplace_front(tx_telegram_id_++, std::move(telegram));
 
     return retry_count_;
 }

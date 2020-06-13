@@ -49,6 +49,8 @@ class Mixing : public EMSdevice {
     void process_MMPLUSStatusMessage_HC(std::shared_ptr<const Telegram> telegram);
     void process_MMPLUSStatusMessage_WWC(std::shared_ptr<const Telegram> telegram);
     void process_MMStatusMessage(std::shared_ptr<const Telegram> telegram);
+    void process_MMConfigMessage(std::shared_ptr<const Telegram> telegram);
+    void process_MMSetMessage(std::shared_ptr<const Telegram> telegram);
 
     enum class Type {
         NONE,

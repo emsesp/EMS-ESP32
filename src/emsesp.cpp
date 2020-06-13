@@ -562,14 +562,14 @@ void EMSESP::send_write_request(const uint16_t type_id,
 // this is main entry point when data is received on the Rx line, via emsuart library
 // we check if its a complete telegram or just a single byte (which could be a poll or a return status)
 void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
+    // LOG_DEBUG(F("Rx: %s"), Helpers::data_to_hex(data, length).c_str());
     // check first for echo
-    //LOG_TRACE(F("Rx: %s"), Helpers::data_to_hex(data, length).c_str());
     uint8_t first_value = data[0];
     if (((first_value & 0x7F) == txservice_.ems_bus_id()) && (length > 1)) {
-        // if we ask ourself at roomcontrol for version e.g. 0B 98 02 ...
+        // if we ask ourself at roomcontrol for version e.g. 0B 98 02 00 20
         Roomctrl::check((data[1] ^ 0x80 ^ rxservice_.ems_mask()), data);
 #ifdef EMSESP_DEBUG
-        rxservice_.add(data, length); // just for logging, if compiled with additional debugging
+        LOG_DEBUG(F("Echo: %s"), Helpers::data_to_hex(data, length).c_str());
 #endif
         return; // it's an echo
     }
