@@ -15,6 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#if defined(ESP8266)
 
 #ifndef EMSESP_EMSUART_H
 #define EMSESP_EMSUART_H
@@ -40,34 +41,30 @@
 #define EMS_TXMODE_NEW 4 // for michael's testing
 
 // LEGACY
-#define EMSUART_BIT_TIME 104     // bit time @9600 baud
+#define EMSUART_TX_BIT_TIME 104  // bit time @9600 baud
 #define EMSUART_TX_BRK_WAIT 2070 // the BRK from Boiler master is roughly 1.039ms, so accounting for hardware lag using around 2078 (for half-duplex) - 8 (lag)
-#define EMSUART_TX_WAIT_BYTE (EMSUART_BIT_TIME * 10) // Time to send one Byte (8 Bits, 1 Start Bit, 1 Stop Bit)
-#define EMSUART_TX_WAIT_BRK (EMSUART_BIT_TIME * 11)  // Time to send a BRK Signal (11 Bit)
-#define EMSUART_TX_WAIT_GAP (EMSUART_BIT_TIME * 7)   // Gap between to Bytes
-#define EMSUART_TX_LAG 8
-#define EMSUART_BUSY_WAIT (EMSUART_BIT_TIME / 8)
-#define EMS_TX_TO_CHARS (2 + 20)
-#define EMS_TX_TO_COUNT ((EMS_TX_TO_CHARS)*8)
+
+// EMS 1.0
+#define EMSUART_TX_BUSY_WAIT (EMSUART_TX_BIT_TIME / 8) // 13
+
+// HT3/Junkers - Time to send one Byte (8 Bits, 1 Start Bit, 1 Stop Bit). The -8 is for lag compensation.
+#define EMSUART_TX_BRK_WAIT_HT3 (EMSUART_TX_BIT_TIME * 11) - 8 // 1136
 
 namespace emsesp {
 
-typedef enum {
-    EMS_TX_STATUS_OK = 1,
-    EMS_TX_WTD_TIMEOUT, // watchdog timeout during send
-    EMS_TX_BRK_DETECT,  // incoming BRK during Tx
-} EMSUART_STATUS;
+#define EMS_TX_STATUS_ERR 0
+#define EMS_TX_STATUS_OK 1
 
 class EMSuart {
   public:
     EMSuart()  = default;
     ~EMSuart() = default;
 
-    static void ICACHE_FLASH_ATTR           start(uint8_t tx_mode);
-    static void ICACHE_FLASH_ATTR           stop();
-    static void ICACHE_FLASH_ATTR           restart();
-    static void ICACHE_FLASH_ATTR           send_poll(uint8_t data);
-    static EMSUART_STATUS ICACHE_FLASH_ATTR transmit(uint8_t * buf, uint8_t len);
+    static void ICACHE_FLASH_ATTR     start(uint8_t tx_mode);
+    static void ICACHE_FLASH_ATTR     stop();
+    static void ICACHE_FLASH_ATTR     restart();
+    static void ICACHE_FLASH_ATTR     send_poll(uint8_t data);
+    static uint16_t ICACHE_FLASH_ATTR transmit(uint8_t * buf, uint8_t len);
 
     typedef struct {
         uint8_t length;
@@ -81,8 +78,10 @@ class EMSuart {
     static void ICACHE_FLASH_ATTR emsuart_recvTask(os_event_t * events);
     static void ICACHE_FLASH_ATTR emsuart_flush_fifos();
     static void ICACHE_FLASH_ATTR tx_brk();
+    static void ICACHE_RAM_ATTR   emsuart_tx_timer_intr_handler();
 };
 
 } // namespace emsesp
 
+#endif
 #endif
