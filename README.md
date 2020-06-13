@@ -61,7 +61,7 @@ Note: Version 2.0 is not backward compatible with v1.0. The File system structur
 common commands available in all contexts:
   exit
   help
-  log [level] [pretty | raw] [trace ID]
+  log [level]
   su
 
 (top root level)
@@ -86,6 +86,7 @@ ems
 	show devices
 	show emsbus
 	show values
+	watch <on | off | raw> [ID]
 
 mqtt
 	publish
