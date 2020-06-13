@@ -47,8 +47,8 @@ PROGMEM = {reinterpret_cast<const __FlashStringHelper *>(pstr_level_uppercase_of
            reinterpret_cast<const __FlashStringHelper *>(pstr_level_uppercase_warning),
            reinterpret_cast<const __FlashStringHelper *>(pstr_level_uppercase_notice),
            reinterpret_cast<const __FlashStringHelper *>(pstr_level_uppercase_info),
-           reinterpret_cast<const __FlashStringHelper *>(pstr_level_uppercase_trace), // switched by proddy
            reinterpret_cast<const __FlashStringHelper *>(pstr_level_uppercase_debug),
+           reinterpret_cast<const __FlashStringHelper *>(pstr_level_uppercase_trace),
            reinterpret_cast<const __FlashStringHelper *>(pstr_level_uppercase_all)};
 
 const __FlashStringHelper * format_level_uppercase(Level level) {

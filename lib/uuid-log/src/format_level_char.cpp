@@ -23,7 +23,7 @@ namespace uuid {
 namespace log {
 
 char format_level_char(Level level) {
-    constexpr char log_level_chars[(int)Level::ALL - (int)Level::OFF + 1] = {' ', 'P', 'A', 'C', 'E', 'W', 'N', 'I', 'T', 'D', ' '}; // changed by proddy
+    constexpr char log_level_chars[(int)Level::ALL - (int)Level::OFF + 1] = {' ', 'P', 'A', 'C', 'E', 'W', 'N', 'I', 'D', 'T', ' '};
     return log_level_chars[(int)level + 1];
 }
 
