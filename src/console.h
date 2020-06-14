@@ -42,8 +42,8 @@ using uuid::log::Level;
 // clang-format off
 
 #define LOG_DEBUG(...) if (logger_.enabled(Level::DEBUG)) {logger_.debug(__VA_ARGS__);}
-#define LOG_TRACE(...) if (logger_.enabled(Level::TRACE)) {logger_.trace(__VA_ARGS__);}
 #define LOG_INFO(...) logger_.info(__VA_ARGS__)
+#define LOG_TRACE(...) logger_.trace(__VA_ARGS__)
 #define LOG_NOTICE(...) logger_.notice(__VA_ARGS__)
 #define LOG_WARNING(...) logger_.warning(__VA_ARGS__)
 #define LOG_ERROR(...) logger_.err(__VA_ARGS__)
@@ -90,7 +90,7 @@ MAKE_PSTR_WORD(restart)
 MAKE_PSTR_WORD(reconnect)
 MAKE_PSTR_WORD(format)
 MAKE_PSTR_WORD(raw)
-MAKE_PSTR_WORD(pretty)
+MAKE_PSTR_WORD(watch)
 
 // context menus
 MAKE_PSTR_WORD(mqtt)
@@ -102,9 +102,6 @@ MAKE_PSTR(degrees_mandatory, "<degrees>")
 MAKE_PSTR(asterisks, "********")
 MAKE_PSTR(n_mandatory, "<n>")
 MAKE_PSTR(n_optional, "[n]")
-MAKE_PSTR(traceid_optional, "[trace ID]")
-MAKE_PSTR(trace_raw_fmt, "Displaying telegrams %s")
-MAKE_PSTR(trace_format_optional, "[pretty | raw]")
 MAKE_PSTR(bool_mandatory, "<on | off>")
 MAKE_PSTR(typeid_mandatory, "<type ID>")
 MAKE_PSTR(deviceid_mandatory, "<device ID>")

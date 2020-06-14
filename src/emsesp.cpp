@@ -32,6 +32,10 @@ MAKE_PSTR(tx_mode_fmt, "Tx mode = %d")
 MAKE_PSTR(bus_id_fmt, "Bus ID = %02X")
 MAKE_PSTR(read_only_fmt, "Read-only mode is %s")
 
+MAKE_PSTR(watchid_optional, "[ID]")
+MAKE_PSTR(watch_format_mandatory, "<off | on | raw>")
+MAKE_PSTR(invalid_watch, "Invalid watch type")
+
 MAKE_PSTR(logger_name, "emsesp")
 
 namespace emsesp {
@@ -56,8 +60,8 @@ Shower    EMSESP::shower_;    // Shower logic
 
 // static/common variables
 uint8_t  EMSESP::actual_master_thermostat_ = EMSESP_DEFAULT_MASTER_THERMOSTAT; // which thermostat leads when multiple found
-uint16_t EMSESP::trace_watch_id_           = LOG_TRACE_WATCH_NONE;             // for when log is TRACE. 0 means no trace set
-bool     EMSESP::trace_raw_                = false;                            // not showing raw when in trace logging
+uint16_t EMSESP::watch_id_                 = WATCH_NONE;                       // for when log is TRACE. 0 means no trace set
+uint8_t  EMSESP::watch_                    = 0;                                // trace off
 bool     EMSESP::tap_water_active_         = false;                            // for when Boiler states we having running warm water. used in Shower()
 bool     EMSESP::ems_read_only_;
 uint32_t EMSESP::last_fetch_ = 0;
@@ -97,12 +101,12 @@ uint8_t EMSESP::actual_master_thermostat() {
 }
 
 // to watch both type IDs and device IDs
-void EMSESP::trace_watch_id(uint16_t trace_watch_id) {
+void EMSESP::watch_id(uint16_t watch_id) {
     // if it's a device ID, which is a single byte, remove the MSB so to support both Buderus and HT3 protocols
-    if (trace_watch_id <= 0xFF) {
-        trace_watch_id_ = (trace_watch_id & 0x7F);
+    if (watch_id <= 0xFF) {
+        watch_id_ = (watch_id & 0x7F);
     } else {
-        trace_watch_id_ = trace_watch_id;
+        watch_id_ = watch_id;
     }
 }
 
@@ -389,10 +393,9 @@ void EMSESP::process_version(std::shared_ptr<const Telegram> telegram) {
 // We also check for common telgram types, like the Version(0x02)
 // returns false if there are none found
 bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
-    if ((logger_.enabled(Level::TRACE)) && !trace_raw()) {
-        if ((trace_watch_id_ == LOG_TRACE_WATCH_NONE) || (telegram->src == trace_watch_id_) || (telegram->dest == trace_watch_id_)
-            || (telegram->type_id == trace_watch_id_)) {
-            LOG_TRACE(pretty_telegram(telegram).c_str());
+    if (watch() == 1) {
+        if ((watch_id_ == WATCH_NONE) || (telegram->src == watch_id_) || (telegram->dest == watch_id_) || (telegram->type_id == watch_id_)) {
+            LOG_INFO(pretty_telegram(telegram).c_str());
         }
     }
 
@@ -568,9 +571,9 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
     if (((first_value & 0x7F) == txservice_.ems_bus_id()) && (length > 1)) {
         // if we ask ourself at roomcontrol for version e.g. 0B 98 02 00 20
         Roomctrl::check((data[1] ^ 0x80 ^ rxservice_.ems_mask()), data);
-//#ifdef EMSESP_DEBUG
-        LOG_DEBUG(F("Echo: %s"), Helpers::data_to_hex(data, length).c_str());
-//#endif
+#ifdef EMSESP_DEBUG
+        LOG_DEBUG(F("[DEBUG] Echo: %s"), Helpers::data_to_hex(data, length).c_str());
+#endif
         return; // it's an echo
     }
 
@@ -613,7 +616,7 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
             // So re-send the last Tx and increment retry count
             uint8_t retries = txservice_.retry_tx(); // returns 0 if exceeded count
 #ifdef EMSESP_DEBUG
-            LOG_DEBUG(F("Last Tx operation failed. Retry #%d. Sent: %s, received: %s"),
+            LOG_DEBUG(F("[DEBUG] Last Tx operation failed. Retry #%d. Sent: %s, received: %s"),
                       retries,
                       txservice_.last_tx_to_string().c_str(),
                       Helpers::data_to_hex(data, length).c_str());
@@ -725,7 +728,6 @@ void EMSESP::console_commands(Shell & shell, unsigned int context) {
         flash_string_vector{F_(set), F_(tx_mode)},
         flash_string_vector{F_(n_mandatory)},
         [](Shell & shell, const std::vector<std::string> & arguments) {
-            // uint8_t tx_mode = (arguments[0]).at(0) - '0';
             uint8_t tx_mode = std::strtol(arguments[0].c_str(), nullptr, 10);
             if ((tx_mode > 0) && (tx_mode <= 30)) {
                 Settings settings;
@@ -824,6 +826,50 @@ void EMSESP::console_commands(Shell & shell, unsigned int context) {
                                            shell.printfln(F_(read_only_fmt), settings.ems_read_only() ? F_(on) : F_(off));
                                        });
 
+
+
+    EMSESPShell::commands->add_command(ShellContext::EMS,
+                                       CommandFlags::USER,
+                                       flash_string_vector{F_(watch)},
+                                       flash_string_vector{F_(watch_format_mandatory), F_(watchid_optional)},
+                                       [](Shell & shell, const std::vector<std::string> & arguments) {
+                                           // get raw/pretty
+                                           if (arguments[0] == read_flash_string(F_(raw))) {
+                                               emsesp::EMSESP::watch(2); // raw
+                                           } else if (arguments[0] == read_flash_string(F_(on))) {
+                                               emsesp::EMSESP::watch(1); // on
+                                           } else if (arguments[0] == read_flash_string(F_(off))) {
+                                               emsesp::EMSESP::watch(0); // off
+                                           } else {
+                                               shell.printfln(F_(invalid_watch));
+                                               return;
+                                           }
+
+                                           uint16_t watch_id;
+                                           if (arguments.size() == 2) {
+                                               // get the watch_id if its set
+                                               watch_id = Helpers::hextoint(arguments[1].c_str());
+                                           } else {
+                                               watch_id = WATCH_NONE;
+                                           }
+
+                                           emsesp::EMSESP::watch_id(watch_id);
+
+                                           uint8_t watch = emsesp::EMSESP::watch();
+                                           if (watch == 0) {
+                                               shell.printfln(F("Watch is off"));
+                                           } else if (watch == 1) {
+                                               shell.printfln(F("Watching incoming telegrams, displayed in decoded format"));
+                                           } else {
+                                               shell.printfln(F("Watching incoming telegrams, displayed as raw bytes"));
+                                           }
+
+                                           watch_id = emsesp::EMSESP::watch_id();
+                                           if (watch_id != WATCH_NONE) {
+                                               shell.printfln(F("Filtering only telegrams that match a device ID or telegram type of 0x%02X"), watch_id);
+                                           }
+                                       });
+
     // enter the context
     Console::enter_custom_context(shell, context);
 }
@@ -839,7 +885,6 @@ void EMSESP::start() {
     network_.start();
     console_.start();
     sensors_.start();
-    rxservice_.start();
     txservice_.start();
     shower_.start();
     mqtt_.start();

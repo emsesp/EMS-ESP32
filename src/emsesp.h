@@ -46,7 +46,7 @@
 
 #include "devices/boiler.h"
 
-#define LOG_TRACE_WATCH_NONE 0 // no watch id set
+#define WATCH_NONE 0 // no watch id set
 
 namespace emsesp {
 
@@ -99,18 +99,18 @@ class EMSESP {
         return sensors_.devices();
     }
 
-    static void trace_watch_id(uint16_t id);
+    static void watch_id(uint16_t id);
 
-    static uint16_t trace_watch_id() {
-        return trace_watch_id_;
+    static uint16_t watch_id() {
+        return watch_id_;
     }
 
-    static void trace_raw(bool trace_raw) {
-        trace_raw_ = trace_raw;
+    static void watch(uint8_t watch) {
+        watch_ = watch; // 0=off, 1=on, 2=raw
     }
 
-    static bool trace_raw() {
-        return trace_raw_;
+    static uint8_t watch() {
+        return watch_; // 0=off, 1=on, 2=raw
     }
 
     static bool tap_water_active() {
@@ -131,7 +131,7 @@ class EMSESP {
 
     static void fetch_device_values(const uint8_t device_id = 0);
 
-    static bool        add_device(const uint8_t device_id, const uint8_t product_id, std::string & version, const uint8_t brand);
+    static bool add_device(const uint8_t device_id, const uint8_t product_id, std::string & version, const uint8_t brand);
 
     static Mqtt      mqtt_;
     static System    system_;
@@ -166,8 +166,8 @@ class EMSESP {
     static std::vector<Device_record>              device_library_;
 
     static uint8_t  actual_master_thermostat_;
-    static uint16_t trace_watch_id_;
-    static bool     trace_raw_;
+    static uint16_t watch_id_;
+    static uint8_t  watch_;
     static bool     tap_water_active_;
     static bool     ems_read_only_;
 };

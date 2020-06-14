@@ -35,8 +35,8 @@ std::vector<std::string> levels_lowercase() {
             uuid::read_flash_string(format_level_lowercase(Level::WARNING)),
             uuid::read_flash_string(format_level_lowercase(Level::NOTICE)),
             uuid::read_flash_string(format_level_lowercase(Level::INFO)),
-            uuid::read_flash_string(format_level_lowercase(Level::TRACE)), // switched by proddy
             uuid::read_flash_string(format_level_lowercase(Level::DEBUG)),
+            uuid::read_flash_string(format_level_lowercase(Level::TRACE)),
             uuid::read_flash_string(format_level_lowercase(Level::ALL))};
 }
 
