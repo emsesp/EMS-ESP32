@@ -487,13 +487,13 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
     }
 
     // send the telegram to the UART Tx
-    EMSUART_STATUS status = EMSuart::transmit(telegram_raw, length);
+    uint16_t status = EMSuart::transmit(telegram_raw, length);
 #ifdef EMSESP_DEBUG
     LOG_TRACE(F("Tx: %s"), Helpers::data_to_hex(telegram_raw, length).c_str());
 #endif
 
     if (status != EMS_TX_STATUS_OK) {
-        LOG_ERROR(F("Failed to transmit Tx via UART. Error: %s"), status == EMS_TX_WTD_TIMEOUT ? F("Timeout") : F("BRK"));
+        LOG_ERROR(F("Failed to transmit Tx via UART."));
         tx_waiting(false); // nothing send, tx not in wait state
         return;
     }
@@ -515,10 +515,10 @@ void TxService::send_telegram(const uint8_t * data, const uint8_t length) {
     LOG_DEBUG(F("Sending Raw telegram: %s (length=%d)"), Helpers::data_to_hex(telegram_raw, length).c_str(), length);
 
     // send the telegram to the UART Tx
-    EMSUART_STATUS status = EMSuart::transmit(telegram_raw, length);
+    uint16_t status = EMSuart::transmit(telegram_raw, length);
     //LOG_TRACE(F("Tx: %s"), Helpers::data_to_hex(telegram_raw, length).c_str());
     if (status != EMS_TX_STATUS_OK) {
-        LOG_ERROR(F("Failed to transmit Tx via UART. Error: %s"), status == EMS_TX_WTD_TIMEOUT ? F("Timeout") : F("BRK"));
+        LOG_ERROR(F("Failed to transmit Tx via UART"));
     }
 }
 

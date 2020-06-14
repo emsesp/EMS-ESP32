@@ -568,9 +568,9 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
     if (((first_value & 0x7F) == txservice_.ems_bus_id()) && (length > 1)) {
         // if we ask ourself at roomcontrol for version e.g. 0B 98 02 00 20
         Roomctrl::check((data[1] ^ 0x80 ^ rxservice_.ems_mask()), data);
-#ifdef EMSESP_DEBUG
+//#ifdef EMSESP_DEBUG
         LOG_DEBUG(F("Echo: %s"), Helpers::data_to_hex(data, length).c_str());
-#endif
+//#endif
         return; // it's an echo
     }
 
@@ -725,8 +725,9 @@ void EMSESP::console_commands(Shell & shell, unsigned int context) {
         flash_string_vector{F_(set), F_(tx_mode)},
         flash_string_vector{F_(n_mandatory)},
         [](Shell & shell, const std::vector<std::string> & arguments) {
-            uint8_t tx_mode = (arguments[0]).at(0) - '0';
-            if ((tx_mode > 0) && (tx_mode <= 4)) {
+            // uint8_t tx_mode = (arguments[0]).at(0) - '0';
+            uint8_t tx_mode = std::strtol(arguments[0].c_str(), nullptr, 10);
+            if ((tx_mode > 0) && (tx_mode <= 30)) {
                 Settings settings;
                 settings.ems_tx_mode(tx_mode);
                 settings.commit();

@@ -30,8 +30,14 @@ namespace emsesp {
 
 static intr_handle_t   uart_handle;
 static RingbufHandle_t buf_handle   = NULL;
-static bool            drop_next_rx = true;
-static uint8_t         tx_mode_     = 0xFF;
+static hw_timer_t *    timer        = NULL;
+bool                   drop_next_rx = true;
+uint8_t                tx_mode_     = 0xFF;
+//portMUX_TYPE           timerMux     = portMUX_INITIALIZER_UNLOCKED;
+uint8_t                emsTxBuf[EMS_MAXBUFFERSIZE];
+uint8_t                emsTxBufIdx;
+uint8_t                emsTxBufLen;
+uint32_t               emsTxWait;
 
 /*
 * Task to handle the incoming data
@@ -73,11 +79,39 @@ void IRAM_ATTR EMSuart::emsuart_rx_intr_handler(void * para) {
         drop_next_rx = false;
     }
 }
+
+
+void IRAM_ATTR EMSuart::emsuart_tx_timer_intr_handler() {
+    if (emsTxBufIdx > 32) {
+        return;
+    }
+    emsTxBufIdx++;
+    if (emsTxBufIdx < emsTxBufLen) {
+        EMS_UART.fifo.rw_byte = emsTxBuf[emsTxBufIdx];
+        timerAlarmWrite(timer, emsTxWait, false);
+        timerAlarmEnable(timer);
+    } else  if (emsTxBufIdx == emsTxBufLen) {
+        EMS_UART.conf0.txd_brk = 1; // <brk> after send
+    }
+}
+
 /*
  * init UART driver
  */
 void EMSuart::start(uint8_t tx_mode) {
+    if (tx_mode == EMS_TXMODE_DEFAULT) {
+        emsTxWait = EMSUART_BIT_TIME * 11;
+    } else if (tx_mode == EMS_TXMODE_EMSPLUS) {
+        emsTxWait = EMSUART_BIT_TIME * 20;
+    } else if (tx_mode == EMS_TXMODE_HT3) {
+        emsTxWait = EMSUART_BIT_TIME * 17;
+    } else if(tx_mode > 10 ) {
+        emsTxWait = EMSUART_BIT_TIME * tx_mode;
+    } else if(tx_mode > 5 ) {
+        emsTxWait = EMSUART_BIT_TIME * tx_mode * 2;
+    }
     if (tx_mode_ != 0xFF) { // uart already initialized
+        tx_mode_ = tx_mode;
         restart();
         return;
     }
@@ -101,6 +135,11 @@ void EMSuart::start(uint8_t tx_mode) {
     ESP_ERROR_CHECK(uart_isr_register(EMSUART_UART, emsuart_rx_intr_handler, NULL, ESP_INTR_FLAG_IRAM, &uart_handle));
     xTaskCreate(emsuart_recvTask, "emsuart_recvTask", 2048, NULL, configMAX_PRIORITIES - 1, NULL);
     EMS_UART.int_ena.brk_det = 1; // activate only break
+
+    emsTxBufIdx = 0;
+    emsTxBufLen = 0;
+    timer = timerBegin(1, 80, true); // timer prescale to 1 µs, countup
+	timerAttachInterrupt(timer, &emsuart_tx_timer_intr_handler, true); // Timer with edge interrupt
 }
 
 /*
@@ -108,6 +147,7 @@ void EMSuart::start(uint8_t tx_mode) {
  */
 void EMSuart::stop() {
     EMS_UART.int_ena.val = 0; // disable all intr.
+	// timerAlarmDisable(timer);
 };
 
 /*
@@ -119,14 +159,24 @@ void EMSuart::restart() {
         drop_next_rx             = true; // and drop first frame
     }
     EMS_UART.int_ena.brk_det = 1; // activate only break
+    emsTxBufIdx = 0;
+    emsTxBufLen = 0;
 };
 
 /*
  * Sends a 1-byte poll, ending with a <BRK>
  */
 void EMSuart::send_poll(uint8_t data) {
-    EMS_UART.fifo.rw_byte  = data;
-    EMS_UART.conf0.txd_brk = 1; // <brk> after send
+    if (tx_mode_ == EMS_TXMODE_NEW || tx_mode_ == 5) {
+        EMS_UART.fifo.rw_byte  = data;
+        EMS_UART.conf0.txd_brk = 1; // <brk> after send
+    } else {
+        EMS_UART.fifo.rw_byte = data;
+        emsTxBufIdx = 0;
+        emsTxBufLen = 1;
+        timerAlarmWrite(timer, emsTxWait, false);
+        timerAlarmEnable(timer);
+    }
 }
 
 /*
@@ -134,12 +184,24 @@ void EMSuart::send_poll(uint8_t data) {
  * buf contains the CRC and len is #bytes including the CRC
  * returns code, 1=success
  */
-EMSUART_STATUS EMSuart::transmit(uint8_t * buf, uint8_t len) {
-    if (len > 0) {
+uint16_t EMSuart::transmit(uint8_t * buf, uint8_t len) {
+    if (len == 0 || len > 32) {
+        return EMS_TX_STATUS_ERROR;
+    }
+    if (tx_mode_ == EMS_TXMODE_NEW || tx_mode_ == 5) {
         for (uint8_t i = 0; i < len; i++) {
             EMS_UART.fifo.rw_byte = buf[i];
         }
         EMS_UART.conf0.txd_brk = 1; // <brk> after send
+    } else {
+        for (uint8_t i = 0; i < len; i++) {
+            emsTxBuf[i] = buf[i];
+        }
+        EMS_UART.fifo.rw_byte = buf[0];
+        emsTxBufIdx = 0;
+        emsTxBufLen = len;
+        timerAlarmWrite(timer, emsTxWait, false);
+        timerAlarmEnable(timer);
     }
     return EMS_TX_STATUS_OK;
 }
