@@ -58,7 +58,7 @@
 namespace emsesp {
 
 #define EMS_TX_STATUS_OK 1
-#define EMS_TX_STATUS_ERROR 0
+#define EMS_TX_STATUS_ERR 0
 
 class EMSuart {
   public:

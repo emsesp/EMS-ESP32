@@ -23,7 +23,15 @@
 #include <deque>
 #include <memory> // for unique ptrs
 #include <vector>
-// #include <atomic> // for overflow
+
+// UART drivers
+#if defined(ESP8266)
+#include "uart/emsuart_esp8266.h"
+#elif defined(ESP32)
+#include "uart/emsuart_esp32.h"
+#elif defined(EMSESP_STANDALONE)
+#include <emsuart_standalone.h>
+#endif
 
 #include <uuid/log.h>
 
@@ -43,8 +51,8 @@ static constexpr int16_t  EMS_VALUE_SHORT_INVALID  = 0x8000;
 static constexpr uint32_t EMS_VALUE_ULONG_NOTSET   = 0xFFFFFFFF; // for 3-byte and 4-byte longs
 static constexpr uint32_t EMS_VALUE_ULONG_INVALID  = 0x80000000;
 
-static constexpr uint8_t EMS_MAX_TELEGRAM_LENGTH         = 32;                          // max length of a telegram
-static constexpr uint8_t EMS_MAX_TELEGRAM_MESSAGE_LENGTH = EMS_MAX_TELEGRAM_LENGTH - 5; // max length of message block
+static constexpr uint8_t EMS_MAX_TELEGRAM_LENGTH         = 32; // max length of a complete EMS telegram
+static constexpr uint8_t EMS_MAX_TELEGRAM_MESSAGE_LENGTH = 27; // max length of message block, assuming EMS1.0
 
 namespace emsesp {
 
@@ -170,7 +178,6 @@ class RxService : public EMSbus {
     RxService()  = default;
     ~RxService() = default;
 
-    void start();
     void loop();
 
     void add(uint8_t * data, uint8_t length);
@@ -210,7 +217,6 @@ class RxService : public EMSbus {
     static constexpr uint32_t RX_LOOP_WAIT   = 800; // delay in processing Rx queue
     uint32_t                  last_rx_check_ = 0;
 
-    // std::atomic<bool> rx_telegrams_overflow_{false};
     uint8_t rx_telegram_id_ = 0; // queue counter
 
     uint16_t telegram_count_       = 0; // # Rx received
@@ -234,7 +240,7 @@ class TxService : public EMSbus {
     void send();
 
     void add(const uint8_t operation, const uint8_t dest, const uint16_t type_id, const uint8_t offset, uint8_t * message_data, const uint8_t message_length);
-    void add(uint8_t * data, const uint8_t length);
+    void add(uint8_t * data, const uint8_t length, bool front = false);
 
     void read_request(const uint16_t type_id, const uint8_t dest, const uint8_t offset = 0);
 

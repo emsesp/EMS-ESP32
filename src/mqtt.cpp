@@ -340,7 +340,7 @@ void Mqtt::on_message(char * topic, char * payload, size_t len) {
     strlcpy(message, payload, len + 1);
 
 #ifdef EMSESP_DEBUG
-    LOG_DEBUG(F("Received %s => %s (length %d)"), topic, message, len);
+    LOG_DEBUG(F("[DEBUG] Received %s => %s (length %d)"), topic, message, len);
 #endif
 
     // strip out everything until the last /

@@ -42,13 +42,16 @@
 
 // LEGACY
 #define EMSUART_TX_BIT_TIME 104  // bit time @9600 baud
-#define EMSUART_TX_BRK_WAIT 2070 // the BRK from Boiler master is roughly 1.039ms, so accounting for hardware lag using around 2078 (for half-duplex) - 8 (lag)
+#define EMSUART_TX_WAIT_BRK (EMSUART_TX_BIT_TIME * 11) // 1144
 
 // EMS 1.0
 #define EMSUART_TX_BUSY_WAIT (EMSUART_TX_BIT_TIME / 8) // 13
 
-// HT3/Junkers - Time to send one Byte (8 Bits, 1 Start Bit, 1 Stop Bit). The -8 is for lag compensation.
-#define EMSUART_TX_BRK_WAIT_HT3 (EMSUART_TX_BIT_TIME * 11) - 8 // 1136
+// HT3/Junkers - Time to send one Byte (8 Bits, 1 Start Bit, 1 Stop Bit) plus 7 bit delay. The -8 is for lag compensation.
+#define EMSUART_TX_WAIT_HT3 (EMSUART_TX_BIT_TIME * 17) - 8 // 1760
+
+// EMS+ - Time to send one Byte (8 Bits, 1 Start Bit, 1 Stop Bit) and delay of another Bytetime.
+#define EMSUART_TX_WAIT_PLUS 2070
 
 namespace emsesp {
 

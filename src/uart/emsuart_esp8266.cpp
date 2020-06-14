@@ -35,6 +35,7 @@ uint8_t               phantomBreak = 0;
 uint8_t               tx_mode_     = 0xFF;
 bool                  drop_next_rx = true;
 uint32_t              emsRxTime;
+// uint32_t              emsTxTime = 0;
 uint8_t               emsTxBuf[EMS_MAXBUFFERSIZE];
 uint8_t               emsTxBufIdx;
 uint8_t               emsTxBufLen;
@@ -88,7 +89,10 @@ void ICACHE_FLASH_ATTR EMSuart::emsuart_recvTask(os_event_t * events) {
         phantomBreak = 0;
         length--; // remove phantom break from Rx buffer
     }
-
+    // if (emsTxTime > 0) {
+    //     LOG_INFO(F("tx duration: %d ms"), uuid::get_uptime() - emsTxTime);
+    //     emsTxTime = 0;
+    // }
     // it's a poll or status code, single byte and ok to send on, then quit
     if (length == 2) {
         EMSESP::incoming_telegram((uint8_t *)pCurrent->buffer, 1);
@@ -124,7 +128,7 @@ void ICACHE_RAM_ATTR EMSuart::emsuart_tx_timer_intr_handler() {
     } else if (emsTxBufIdx == emsTxBufLen) {
         USC0(EMSUART_UART) |= (1 << UCBRK); // set <BRK>
         if (tx_mode_ > 5 || tx_mode_ < 11) {
-        timer1_write(5 * EMSUART_TX_BIT_TIME * 11);
+            timer1_write(5 * EMSUART_TX_BIT_TIME * 12);
             USIE(EMSUART_UART) &= ~(1 << UIBD); // disable break interrupt
         }
     } else if (USC0(EMSUART_UART) & (1 << UCBRK)) {
@@ -258,10 +262,10 @@ void ICACHE_FLASH_ATTR EMSuart::tx_brk() {
     ETS_UART_INTR_DISABLE();
     USC0(EMSUART_UART) |= (1 << UCBRK); // set bit
 
-    if (tx_mode_ == EMS_TXMODE_EMSPLUS) {           // EMS+ mode
-        delayMicroseconds(EMSUART_TX_BRK_WAIT);     // 2070
-    } else if (tx_mode_ == EMS_TXMODE_HT3) {        // junkers mode
-        delayMicroseconds(EMSUART_TX_BRK_WAIT_HT3); // 1144
+    if (tx_mode_ == EMS_TXMODE_EMSPLUS) {        // EMS+ mode
+        delayMicroseconds(EMSUART_TX_WAIT_PLUS); // 2070
+    } else {                                     // junkers and EMS1.0
+        delayMicroseconds(EMSUART_TX_WAIT_BRK);  // 1144
     }
 
     USC0(EMSUART_UART) &= ~(1 << UCBRK); // clear BRK bit
@@ -283,10 +287,17 @@ void EMSuart::send_poll(uint8_t data) {
     } else if (tx_mode_ >= EMS_TXMODE_NEW) { // hardware controlled modes
         USF(EMSUART_UART) = data;
         USC0(EMSUART_UART) |= (1 << UCBRK); // send <BRK> at the end
-    } else { // software controlled modes
-        // EMS1.0, EMS+ and HT3
+    } else if (tx_mode_ == EMS_TXMODE_HT3) {
         USF(EMSUART_UART) = data;
-        delayMicroseconds(EMSUART_TX_BRK_WAIT);
+        delayMicroseconds(EMSUART_TX_WAIT_HT3);
+        tx_brk(); // send <BRK>
+    } else if (tx_mode_ == EMS_TXMODE_EMSPLUS) {
+        USF(EMSUART_UART) = data;
+        delayMicroseconds(EMSUART_TX_WAIT_PLUS);
+        tx_brk(); // send <BRK>
+    } else { // EMS1.0
+        USF(EMSUART_UART) = data;
+        delayMicroseconds(EMSUART_TX_WAIT_BRK);
         tx_brk(); // send <BRK>
     }
 }
@@ -303,6 +314,7 @@ uint16_t ICACHE_FLASH_ATTR EMSuart::transmit(uint8_t * buf, uint8_t len) {
 #ifdef EMSESP_DEBUG
     // LOG_INFO(F("[DEBUG] UART Response time: %d ms"), uuid::get_uptime() - emsRxTime);
 #endif
+    // emsTxTime = uuid::get_uptime();
     // if ((uuid::get_uptime() - emsRxTime) > EMS_RX_TO_TX_TIMEOUT)) { // send allowed within 20 ms
     //      return EMS_TX_STATUS_ERR;
     // }
@@ -317,6 +329,8 @@ uint16_t ICACHE_FLASH_ATTR EMSuart::transmit(uint8_t * buf, uint8_t len) {
         emsTxBufIdx = 0;
         emsTxBufLen = len;
         USF(EMSUART_UART) = buf[0];
+        // timer1_attachInterrupt(emsuart_tx_timer_intr_handler); // Add ISR Function
+        // timer1_enable(TIM_DIV16, TIM_EDGE, TIM_SINGLE);        // 5 MHz timer
         timer1_write(emsTxWait);
         return EMS_TX_STATUS_OK;
     }
@@ -334,7 +348,7 @@ uint16_t ICACHE_FLASH_ATTR EMSuart::transmit(uint8_t * buf, uint8_t len) {
     if (tx_mode_ == EMS_TXMODE_EMSPLUS) { // With extra tx delay for EMS+
         for (uint8_t i = 0; i < len; i++) {
             USF(EMSUART_UART) = buf[i];
-            delayMicroseconds(EMSUART_TX_BRK_WAIT); // 2070
+            delayMicroseconds(EMSUART_TX_WAIT_PLUS); // 2070
         }
         tx_brk(); // send <BRK>
         return EMS_TX_STATUS_OK;
@@ -350,7 +364,7 @@ uint16_t ICACHE_FLASH_ATTR EMSuart::transmit(uint8_t * buf, uint8_t len) {
                 ;
 
             // wait until bits are sent on wire
-            delayMicroseconds(EMSUART_TX_BRK_WAIT_HT3);
+            delayMicroseconds(EMSUART_TX_WAIT_HT3);
         }
         tx_brk(); // send <BRK>
         return EMS_TX_STATUS_OK;

@@ -71,7 +71,7 @@ namespace uuid {
 namespace log {
 
 /**
- * Severity level of log messages. Proddy switches trace & debug
+ * Severity level of log messages.
  *
  * @since 1.0.0
  */
@@ -84,8 +84,8 @@ enum Level : int8_t {
     WARNING,    /*!< Warning conditions. @since 1.0.0 */
     NOTICE,     /*!< Normal but significant conditions. @since 1.0.0 */
     INFO,       /*!< Informational messages. @since 1.0.0 */
-    TRACE,      /*!< Trace messages. @since 1.0.0 */
     DEBUG,      /*!< Debug-level messages. @since 1.0.0 */
+    TRACE,      /*!< Trace messages. @since 1.0.0 */
     ALL,        /*!< Meta level representing all log messages. @since 1.0.0 */
 };
 

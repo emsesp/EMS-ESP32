@@ -33,8 +33,8 @@ std::vector<Level> levels() {
             Level::WARNING,
             Level::NOTICE,
             Level::INFO,
+            Level::DEBUG,
             Level::TRACE,
-            Level::DEBUG, // switched by proddy
             Level::ALL};
 }
 

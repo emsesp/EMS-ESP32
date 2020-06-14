@@ -225,9 +225,8 @@ void Console::load_standard_commands(unsigned int context) {
         context,
         CommandFlags::USER,
         flash_string_vector{F_(log)},
-        flash_string_vector{F_(log_level_optional), F_(trace_format_optional), F_(traceid_optional)},
+        flash_string_vector{F_(log_level_optional)},
         [](Shell & shell, const std::vector<std::string> & arguments) {
-            uint16_t watch_id;
             if (!arguments.empty()) {
                 uuid::log::Level level;
 
@@ -237,41 +236,10 @@ void Console::load_standard_commands(unsigned int context) {
                     shell.printfln(F_(invalid_log_level));
                     return;
                 }
-
-                // trace logic
-                if (level == uuid::log::Level::TRACE || level == uuid::log::Level::DEBUG) {
-                    watch_id = LOG_TRACE_WATCH_NONE; // no watch ID set
-                    if (arguments.size() > 1) {
-                        // next argument is raw or full
-                        if (arguments[1] == read_flash_string(F_(raw))) {
-                            emsesp::EMSESP::trace_raw(true);
-                        } else if (arguments[1] == read_flash_string(F_(pretty))) {
-                            emsesp::EMSESP::trace_raw(false);
-                        } else {
-                            emsesp::EMSESP::trace_watch_id(Helpers::hextoint(arguments[1].c_str()));
-                        }
-
-                        // get the watch_id if its set
-                        if (arguments.size() == 3) {
-                            emsesp::EMSESP::trace_watch_id(Helpers::hextoint(arguments[2].c_str()));
-                        }
-                    } else {
-                        // it was "log trace" so reset the watch id and switch back to pretty
-                        emsesp::EMSESP::trace_raw(false);
-                        emsesp::EMSESP::trace_watch_id(LOG_TRACE_WATCH_NONE);
-                    }
-                }
             }
 
             // print out logging settings
             shell.printfln(F_(log_level_fmt), uuid::log::format_level_uppercase(shell.log_level()));
-            watch_id = emsesp::EMSESP::trace_watch_id();
-            if (watch_id == LOG_TRACE_WATCH_NONE) {
-                shell.printfln(F("Tracing all telegrams"));
-            } else {
-                shell.printfln(F("Tracing only telegrams that match a device ID or telegram type of 0x%02X"), watch_id);
-            }
-            shell.printfln(F_(trace_raw_fmt), emsesp::EMSESP::trace_raw() ? F("as raw bytes") : F("in decoded format"));
         },
         [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments __attribute__((unused))) -> std::vector<std::string> {
             return uuid::log::levels_lowercase();

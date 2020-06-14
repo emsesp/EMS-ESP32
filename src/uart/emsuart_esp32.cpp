@@ -122,7 +122,12 @@ void EMSuart::start(uint8_t tx_mode) {
         .parity    = UART_PARITY_DISABLE,
         .stop_bits = UART_STOP_BITS_1,
         .flow_ctrl = UART_HW_FLOWCTRL_DISABLE,
-    };
+    }
+    if (tx_mode_ == 5) {
+        EMS_UART.conf0.stop_bit_num = UART_STOP_BITS_1_5;
+    } else {
+        EMS_UART.conf0.stop_bit_num = UART_STOP_BITS_1;
+    }
 
     ESP_ERROR_CHECK(uart_param_config(EMSUART_UART, &uart_config));
     ESP_ERROR_CHECK(uart_set_pin(EMSUART_UART, EMSUART_TXPIN, EMSUART_RXPIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
@@ -161,7 +166,12 @@ void EMSuart::restart() {
     EMS_UART.int_ena.brk_det = 1; // activate only break
     emsTxBufIdx = 0;
     emsTxBufLen = 0;
-};
+    if (tx_mode_ == 5) {
+        EMS_UART.conf0.stop_bit_num = UART_STOP_BITS_1_5;
+    } else {
+        EMS_UART.conf0.stop_bit_num = UART_STOP_BITS_1;
+    }
+}
 
 /*
  * Sends a 1-byte poll, ending with a <BRK>
@@ -186,7 +196,7 @@ void EMSuart::send_poll(uint8_t data) {
  */
 uint16_t EMSuart::transmit(uint8_t * buf, uint8_t len) {
     if (len == 0 || len > 32) {
-        return EMS_TX_STATUS_ERROR;
+        return EMS_TX_STATUS_ERR;
     }
     if (tx_mode_ == EMS_TXMODE_NEW || tx_mode_ == 5) {
         for (uint8_t i = 0; i < len; i++) {
