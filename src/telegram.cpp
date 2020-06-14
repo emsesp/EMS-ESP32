@@ -304,11 +304,11 @@ void RxService::add(uint8_t * data, uint8_t length) {
         return;
     }
 
-    // if we're in "trace" and "raw" print out actual telegram as bytes to the console
+    // if we're watching and "raw" print out actual telegram as bytes to the console
     if (EMSESP::watch() == 2) {
         uint16_t trace_watch_id = EMSESP::watch_id();
         if ((trace_watch_id == WATCH_NONE) || (src == trace_watch_id) || (dest == trace_watch_id) || (type_id == trace_watch_id)) {
-            LOG_INFO(F("Rx: %s"), Helpers::data_to_hex(data, length).c_str());
+            LOG_NOTICE(F("Rx: %s"), Helpers::data_to_hex(data, length).c_str());
         }
     }
 
@@ -471,7 +471,7 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
 #ifdef EMSESP_DEBUG
     // if watching in 'raw' mode
     if (EMSESP::watch() == 2) {
-        LOG_INFO(F("[DEBUG] Tx: %s"), Helpers::data_to_hex(telegram_raw, length).c_str());
+        LOG_NOTICE(F("[DEBUG] Tx: %s"), Helpers::data_to_hex(telegram_raw, length).c_str());
     }
 #endif
 

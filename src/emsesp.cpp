@@ -120,19 +120,20 @@ void EMSESP::show_emsbus(uuid::console::Shell & shell) {
         }
 
         shell.printfln(F("EMS Bus info:"));
+        shell.printfln(F("  Tx mode: %d"), Settings().ems_tx_mode());
         shell.printfln(F("  Bus protocol: %s"), EMSbus::is_ht3() ? F("HT3") : F("Buderus"));
         shell.printfln(F("  #telegrams received: %d"), rxservice_.telegram_count());
         shell.printfln(F("  #read requests sent: %d"), txservice_.telegram_read_count());
         shell.printfln(F("  #write requests sent: %d"), txservice_.telegram_write_count());
-        shell.printfln(F("  #incomplete telegrams: %d (%d%%)"), rxservice_.telegram_error_count(), success_rate);
-        shell.printfln(F("  #tx fails (after 3 retries): %d"), txservice_.telegram_fail_count());
+        shell.printfln(F("  #corrupted telegrams: %d (%d%%)"), rxservice_.telegram_error_count(), success_rate);
+        shell.printfln(F("  #tx fails (after %d retries): %d"), TxService::MAXIMUM_TX_RETRIES, txservice_.telegram_fail_count());
     } else {
-        shell.printfln(F("EMS Bus is disconnected"));
+        shell.printfln(F("EMS Bus is disconnected."));
     }
 
     shell.println();
 
-    // Rx
+    // Rx queue
     auto rx_telegrams = rxservice_.queue();
     if (rx_telegrams.empty()) {
         shell.printfln(F("Rx Queue is empty"));
@@ -145,7 +146,7 @@ void EMSESP::show_emsbus(uuid::console::Shell & shell) {
 
     shell.println();
 
-    // Tx
+    // Tx queue
     auto tx_telegrams = txservice_.queue();
     if (tx_telegrams.empty()) {
         shell.printfln(F("Tx Queue is empty"));
@@ -393,9 +394,11 @@ void EMSESP::process_version(std::shared_ptr<const Telegram> telegram) {
 // We also check for common telgram types, like the Version(0x02)
 // returns false if there are none found
 bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
+
+    // if watching...
     if (watch() == 1) {
         if ((watch_id_ == WATCH_NONE) || (telegram->src == watch_id_) || (telegram->dest == watch_id_) || (telegram->type_id == watch_id_)) {
-            LOG_INFO(pretty_telegram(telegram).c_str());
+            LOG_NOTICE(pretty_telegram(telegram).c_str());
         }
     }
 
@@ -722,28 +725,24 @@ void EMSESP::console_commands(Shell & shell, unsigned int context) {
             };
         });
 
-    EMSESPShell::commands->add_command(
-        ShellContext::EMS,
-        CommandFlags::ADMIN,
-        flash_string_vector{F_(set), F_(tx_mode)},
-        flash_string_vector{F_(n_mandatory)},
-        [](Shell & shell, const std::vector<std::string> & arguments) {
-            uint8_t tx_mode = std::strtol(arguments[0].c_str(), nullptr, 10);
-            if ((tx_mode > 0) && (tx_mode <= 30)) {
-                Settings settings;
-                settings.ems_tx_mode(tx_mode);
-                settings.commit();
-                shell.printfln(F_(tx_mode_fmt), settings.ems_tx_mode());
-                // reset the UART
-                EMSuart::stop();
-                EMSuart::start(tx_mode);
-            } else {
-                shell.println(F("Must be 1 for EMS generic, 2 for EMS+, 3 for HT3, 4 for experimental"));
-            }
-        },
-        [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments __attribute__((unused))) -> const std::vector<std::string> {
-            return std::vector<std::string>{read_flash_string(F("1")), read_flash_string(F("2")), read_flash_string(F("3")), read_flash_string(F("4"))};
-        });
+    EMSESPShell::commands->add_command(ShellContext::EMS,
+                                       CommandFlags::ADMIN,
+                                       flash_string_vector{F_(set), F_(tx_mode)},
+                                       flash_string_vector{F_(n_mandatory)},
+                                       [](Shell & shell, const std::vector<std::string> & arguments) {
+                                           uint8_t tx_mode = std::strtol(arguments[0].c_str(), nullptr, 10);
+                                           if ((tx_mode > 0) && (tx_mode <= 30)) {
+                                               Settings settings;
+                                               settings.ems_tx_mode(tx_mode);
+                                               settings.commit();
+                                               shell.printfln(F_(tx_mode_fmt), settings.ems_tx_mode());
+                                               // reset the UART
+                                               EMSuart::stop();
+                                               EMSuart::start(tx_mode);
+                                           } else {
+                                               shell.println(F("Must be 1 for EMS generic, 2 for EMS+, 3 for HT3, 4 for experimental"));
+                                           }
+                                       });
 
     EMSESPShell::commands->add_command(
         ShellContext::EMS,
@@ -858,7 +857,15 @@ void EMSESP::console_commands(Shell & shell, unsigned int context) {
                                            uint8_t watch = emsesp::EMSESP::watch();
                                            if (watch == 0) {
                                                shell.printfln(F("Watch is off"));
-                                           } else if (watch == 1) {
+                                               return;
+                                           }
+
+                                           // if logging is off, the watch won't show anything, show force it back to INFO
+                                           if (!logger_.enabled(Level::NOTICE)) {
+                                               shell.log_level(Level::NOTICE);
+                                           }
+
+                                           if (watch == 1) {
                                                shell.printfln(F("Watching incoming telegrams, displayed in decoded format"));
                                            } else {
                                                shell.printfln(F("Watching incoming telegrams, displayed as raw bytes"));
