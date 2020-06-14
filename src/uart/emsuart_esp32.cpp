@@ -34,10 +34,10 @@ static hw_timer_t *    timer        = NULL;
 bool                   drop_next_rx = true;
 uint8_t                tx_mode_     = 0xFF;
 //portMUX_TYPE           timerMux     = portMUX_INITIALIZER_UNLOCKED;
-uint8_t                emsTxBuf[EMS_MAXBUFFERSIZE];
-uint8_t                emsTxBufIdx;
-uint8_t                emsTxBufLen;
-uint32_t               emsTxWait;
+uint8_t  emsTxBuf[EMS_MAXBUFFERSIZE];
+uint8_t  emsTxBufIdx;
+uint8_t  emsTxBufLen;
+uint32_t emsTxWait;
 
 /*
 * Task to handle the incoming data
@@ -90,7 +90,7 @@ void IRAM_ATTR EMSuart::emsuart_tx_timer_intr_handler() {
         EMS_UART.fifo.rw_byte = emsTxBuf[emsTxBufIdx];
         timerAlarmWrite(timer, emsTxWait, false);
         timerAlarmEnable(timer);
-    } else  if (emsTxBufIdx == emsTxBufLen) {
+    } else if (emsTxBufIdx == emsTxBufLen) {
         EMS_UART.conf0.txd_brk = 1; // <brk> after send
     }
 }
@@ -105,9 +105,9 @@ void EMSuart::start(uint8_t tx_mode) {
         emsTxWait = EMSUART_BIT_TIME * 20;
     } else if (tx_mode == EMS_TXMODE_HT3) {
         emsTxWait = EMSUART_BIT_TIME * 17;
-    } else if(tx_mode > 10 ) {
+    } else if (tx_mode > 10) {
         emsTxWait = EMSUART_BIT_TIME * tx_mode;
-    } else if(tx_mode > 5 ) {
+    } else if (tx_mode > 5) {
         emsTxWait = EMSUART_BIT_TIME * tx_mode * 2;
     }
     if (tx_mode_ != 0xFF) { // uart already initialized
@@ -138,8 +138,8 @@ void EMSuart::start(uint8_t tx_mode) {
 
     emsTxBufIdx = 0;
     emsTxBufLen = 0;
-    timer = timerBegin(1, 80, true); // timer prescale to 1 µs, countup
-	timerAttachInterrupt(timer, &emsuart_tx_timer_intr_handler, true); // Timer with edge interrupt
+    timer       = timerBegin(1, 80, true);                             // timer prescale to 1 µs, countup
+    timerAttachInterrupt(timer, &emsuart_tx_timer_intr_handler, true); // Timer with edge interrupt
 }
 
 /*
@@ -147,7 +147,7 @@ void EMSuart::start(uint8_t tx_mode) {
  */
 void EMSuart::stop() {
     EMS_UART.int_ena.val = 0; // disable all intr.
-	// timerAlarmDisable(timer);
+                              // timerAlarmDisable(timer);
 };
 
 /*
@@ -159,8 +159,8 @@ void EMSuart::restart() {
         drop_next_rx             = true; // and drop first frame
     }
     EMS_UART.int_ena.brk_det = 1; // activate only break
-    emsTxBufIdx = 0;
-    emsTxBufLen = 0;
+    emsTxBufIdx              = 0;
+    emsTxBufLen              = 0;
 };
 
 /*
@@ -172,8 +172,8 @@ void EMSuart::send_poll(uint8_t data) {
         EMS_UART.conf0.txd_brk = 1; // <brk> after send
     } else {
         EMS_UART.fifo.rw_byte = data;
-        emsTxBufIdx = 0;
-        emsTxBufLen = 1;
+        emsTxBufIdx           = 0;
+        emsTxBufLen           = 1;
         timerAlarmWrite(timer, emsTxWait, false);
         timerAlarmEnable(timer);
     }
@@ -198,8 +198,8 @@ uint16_t EMSuart::transmit(uint8_t * buf, uint8_t len) {
             emsTxBuf[i] = buf[i];
         }
         EMS_UART.fifo.rw_byte = buf[0];
-        emsTxBufIdx = 0;
-        emsTxBufLen = len;
+        emsTxBufIdx           = 0;
+        emsTxBufLen           = len;
         timerAlarmWrite(timer, emsTxWait, false);
         timerAlarmEnable(timer);
     }

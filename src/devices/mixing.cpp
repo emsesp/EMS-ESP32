@@ -162,6 +162,9 @@ void Mixing::process_MMStatusMessage(std::shared_ptr<const Telegram> telegram) {
     telegram->read_value(flowSetTemp_, 0);
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
 // Mixing on a MM10 - 0xAA
 // e.g. Thermostat -> Mixing Module, type 0xAA, telegram: 10 21 AA 00 FF 0C 0A 11 0A 32 xx
 void Mixing::process_MMConfigMessage(std::shared_ptr<const Telegram> telegram) {
@@ -176,5 +179,7 @@ void Mixing::process_MMSetMessage(std::shared_ptr<const Telegram> telegram) {
     // pos 0: flowtemp setpoint 1E = 30°C
     // pos 1: position in %
 }
+
+#pragma GCC diagnostic pop
 
 } // namespace emsesp

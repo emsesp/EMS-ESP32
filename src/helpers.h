@@ -29,7 +29,7 @@ class Helpers {
     static char *      hextoa(char * result, const uint8_t value);
     static std::string data_to_hex(const uint8_t * data, const uint8_t length);
 
-    static char *   render_value(char * result, const float value, const uint8_t format); // format is precision
+    static char *   render_value(char * result, const float value, const uint8_t format); // format is the precision
     static char *   render_value(char * result, const uint8_t value, const uint8_t format);
     static char *   render_value(char * result, const int8_t value, const uint8_t format);
     static char *   render_value(char * result, const uint16_t value, const uint8_t format);

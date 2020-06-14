@@ -816,8 +816,8 @@ void Thermostat::show_values(uuid::console::Shell & shell) {
 
     if (flags == EMS_DEVICE_FLAG_RC35) {
         print_value(shell, 2, F("Damped Outdoor temperature"), F_(degrees), Helpers::render_value(buffer, dampedoutdoortemp, 1));
-        print_value(shell, 2, F("Tempsensor 1"), F_(degrees), Helpers::render_value(buffer, tempsensor1, 10));
-        print_value(shell, 2, F("Tempsensor 2"), F_(degrees), Helpers::render_value(buffer, tempsensor2, 10));
+        print_value(shell, 2, F("Temp sensor 1"), F_(degrees), Helpers::render_value(buffer, tempsensor1, 10));
+        print_value(shell, 2, F("Temp sensor 2"), F_(degrees), Helpers::render_value(buffer, tempsensor2, 10));
     }
     if (flags == EMS_DEVICE_FLAG_RC30_1) {
         // settings parameters
@@ -1042,7 +1042,7 @@ void Thermostat::process_RC300Set(std::shared_ptr<const Telegram> telegram) {
     // manual is position 10
     // comfort is position 2
     // I think auto is position 8?
-    // actual setpoint taken from RC300Monitor (Michael 12.06.2020) 
+    // actual setpoint taken from RC300Monitor (Michael 12.06.2020)
     // telegram->read_value8(hc->setpoint_roomTemp, 8);  // single byte conversion, value is * 2 - auto?
     // telegram->read_value8(hc->setpoint_roomTemp, 10); // single byte conversion, value is * 2 - manual
 

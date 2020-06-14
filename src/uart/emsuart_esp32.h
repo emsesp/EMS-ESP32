@@ -65,17 +65,16 @@ class EMSuart {
     EMSuart()  = default;
     ~EMSuart() = default;
 
-    static void           start(uint8_t tx_mode);
-    static void           send_poll(uint8_t data);
-    static void           stop();
-    static void           restart();
-    static uint16_t       transmit(uint8_t * buf, uint8_t len);
+    static void     start(uint8_t tx_mode);
+    static void     send_poll(uint8_t data);
+    static void     stop();
+    static void     restart();
+    static uint16_t transmit(uint8_t * buf, uint8_t len);
 
   private:
     static void           emsuart_recvTask(void * para);
     static void IRAM_ATTR emsuart_rx_intr_handler(void * para);
     static void IRAM_ATTR emsuart_tx_timer_intr_handler();
-
 };
 
 } // namespace emsesp
