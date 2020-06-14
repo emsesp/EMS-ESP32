@@ -26,7 +26,7 @@
 #include <uuid/log.h>
 
 #define EMSUART_UART 0      // UART 0
-#define EMSUART_CONFIG 0x1C // 8N1 (8 bits, no stop bits, 1 parity)
+#define EMSUART_CONFIG 0x1C // 8N1 (8 bits, no parity, 1 stop bit)
 #define EMSUART_BAUD 9600   // uart baud rate for the EMS circuit
 
 #define EMS_MAXBUFFERS 3     // buffers for circular filling to avoid collisions

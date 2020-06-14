@@ -49,8 +49,9 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     LOG_DEBUG(F("Registering new Boiler with device ID 0x%02X"), device_id);
 
     // the telegram handlers...
-    register_telegram_type(0x10, F("UBAErrorMessage1"), false, nullptr);
-    register_telegram_type(0x11, F("UBAErrorMessage2"), false, nullptr);
+    register_telegram_type(0x10, F("UBAErrorMessage1"), false, std::bind(&Boiler::process_UBAErrorMessage, this, _1));
+    register_telegram_type(0x11, F("UBAErrorMessage2"), false, std::bind(&Boiler::process_UBAErrorMessage, this, _1));
+    register_telegram_type(0x12, F("UBAErrorMessage3"), false, std::bind(&Boiler::process_UBAErrorMessage, this, _1));
     register_telegram_type(0x18, F("UBAMonitorFast"), false, std::bind(&Boiler::process_UBAMonitorFast, this, _1));
     register_telegram_type(0x19, F("UBAMonitorSlow"), true, std::bind(&Boiler::process_UBAMonitorSlow, this, _1));
     register_telegram_type(0x34, F("UBAMonitorWW"), false, std::bind(&Boiler::process_UBAMonitorWW, this, _1));
@@ -677,6 +678,12 @@ void Boiler::process_UBAMaintenanceStatus(std::shared_ptr<const Telegram> telegr
 // 0x15
 // not yet implemented
 void Boiler::process_UBAMaintenanceSettings(std::shared_ptr<const Telegram> telegram) {
+}
+
+// 0x10, 0x11, 0x12 
+// not yet implemented
+void Boiler::process_UBAErrorMessage(std::shared_ptr<const Telegram> telegram) {
+    // data: displaycode(2), errornumner(2), year, month, hour, day, minute, duration(2), src-addr
 }
 
 #pragma GCC diagnostic pop

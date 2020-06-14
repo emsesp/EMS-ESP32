@@ -233,7 +233,7 @@ char * Helpers::render_value(char * result, const uint32_t value, const uint8_t 
         strlcat(result, ltoa(value, s, 10), 20);
     } else {
         strlcat(result, ltoa(value / format, s, 10), 20);
-        strlcat(result, ".", 2);
+        strlcat(result, ".", 20);
         strlcat(result, ltoa(value % format, s, 10), 20);
     }
 

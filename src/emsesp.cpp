@@ -728,8 +728,8 @@ void EMSESP::console_commands(Shell & shell, unsigned int context) {
         flash_string_vector{F_(set), F_(tx_mode)},
         flash_string_vector{F_(n_mandatory)},
         [](Shell & shell, const std::vector<std::string> & arguments) {
-            uint8_t tx_mode = (arguments[0]).at(0) - '0';
-            if ((tx_mode > 0) && (tx_mode <= 4)) {
+            uint8_t tx_mode = std::strtol(arguments[0].c_str(), nullptr, 10);
+            if ((tx_mode > 0) && (tx_mode <= 30)) {
                 Settings settings;
                 settings.ems_tx_mode(tx_mode);
                 settings.commit();

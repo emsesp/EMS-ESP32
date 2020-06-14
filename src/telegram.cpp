@@ -177,7 +177,7 @@ void Telegram::read_value32(uint32_t & param, const uint8_t index) const {
         return;
     }
 
-    param = (uint32_t)((message_data[pos] << 24) + (message_data[pos] << 16) + (message_data[pos + 1] << 8) + (message_data[pos + 2]));
+    param = (uint32_t)((message_data[pos] << 24) + (message_data[pos + 1] << 16) + (message_data[pos + 2] << 8) + (message_data[pos + 3]));
 }
 
 // bit from an unsigned byte
@@ -290,7 +290,7 @@ void RxService::add(uint8_t * data, uint8_t length) {
             }
         } else {
             // its F9 or F7
-            uint8_t shift = (data[4] != 0xFF); // true (1) if 5th byte is not 0xFF, then telegram is 1 byte longer
+            uint8_t shift = (data[4] != 0xFF) ? 1 : 0; // true (1) if 5th byte is not 0xFF, then telegram is 1 byte longer
             type_id       = (data[5 + shift] << 8) + data[6 + shift] + 256;
             message_data += 6 + shift; // there is a special byte after the typeID which we ignore for now
             if (length > (9 + shift)) {
@@ -468,7 +468,6 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
 
     // send the telegram to the UART Tx
     uint16_t status = EMSuart::transmit(telegram_raw, length);
-
 #ifdef EMSESP_DEBUG
     // if watching in 'raw' mode
     if (EMSESP::watch() == 2) {
@@ -614,6 +613,10 @@ void TxService::remember_tx(const uint8_t * data, const uint8_t length) {
         telegram_last_[i] = data[i];
     }
     telegram_last_length_ = length;
+    if (ems_mask() != EMS_MASK_UNSET) {
+        telegram_last_[0] ^= ems_mask();
+    }
+
 }
 
 // add last Tx to tx queue and increment count

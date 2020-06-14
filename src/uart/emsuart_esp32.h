@@ -20,6 +20,7 @@
 /*
  * ESP32 UART port by @ArwedL and improved by @MichaelDvP. See https://github.com/proddy/EMS-ESP/issues/380
  */
+#if defined(ESP32)
 
 #ifndef EMSESP_EMSUART_H
 #define EMSESP_EMSUART_H
@@ -37,6 +38,13 @@
 #define EMSUART_UART UART_NUM_2 // on the ESP32 we're using UART2
 #define EMS_UART UART2          // for intr setting
 #define EMSUART_BAUD 9600       // uart baud rate for the EMS circuit
+#define EMSUART_BIT_TIME 104    // bit time @9600 baud
+
+#define EMS_TXMODE_DEFAULT 1
+#define EMS_TXMODE_EMSPLUS 2
+#define EMS_TXMODE_HT3 3
+#define EMS_TXMODE_NEW 4 // for michael's testing
+
 
 // customize the GPIO pins for RX and TX here
 #ifdef WEMOS_D1_32
@@ -49,11 +57,8 @@
 
 namespace emsesp {
 
-typedef enum {
-    EMS_TX_STATUS_OK = 1,
-    EMS_TX_WTD_TIMEOUT, // watchdog timeout during send
-    EMS_TX_BRK_DETECT,  // incoming BRK during Tx
-} EMSUART_STATUS;
+#define EMS_TX_STATUS_OK 1
+#define EMS_TX_STATUS_ERROR 0
 
 class EMSuart {
   public:
@@ -64,13 +69,16 @@ class EMSuart {
     static void           send_poll(uint8_t data);
     static void           stop();
     static void           restart();
-    static EMSUART_STATUS transmit(uint8_t * buf, uint8_t len);
+    static uint16_t       transmit(uint8_t * buf, uint8_t len);
 
   private:
     static void           emsuart_recvTask(void * para);
     static void IRAM_ATTR emsuart_rx_intr_handler(void * para);
+    static void IRAM_ATTR emsuart_tx_timer_intr_handler();
+
 };
 
 } // namespace emsesp
 
+#endif
 #endif
