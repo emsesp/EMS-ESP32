@@ -23,25 +23,22 @@
 
 namespace emsesp {
 
-typedef enum {
-    EMS_TX_STATUS_OK = 1,
-    EMS_TX_WTD_TIMEOUT, // watchdog timeout during send
-    EMS_TX_BRK_DETECT,  // incoming BRK during Tx
-} EMSUART_STATUS;
+#define EMS_TX_STATUS_ERR 0
+#define EMS_TX_STATUS_OK 1
 
 class EMSuart {
   public:
     EMSuart()  = default;
     ~EMSuart() = default;
 
-    static void           start(uint8_t tx_mode);
-    static void           stop();
-    static void           restart();
-    static void           send_poll(uint8_t data);
-    static EMSUART_STATUS transmit(uint8_t * buf, uint8_t len);
+    static void     start(uint8_t tx_mode);
+    static void     stop();
+    static void     restart();
+    static void     send_poll(uint8_t data);
+    static uint16_t transmit(uint8_t * buf, uint8_t len);
 
   private:
-    static char *  hextoa(char * result, const uint8_t value);
+    static char * hextoa(char * result, const uint8_t value);
 };
 
 } // namespace emsesp

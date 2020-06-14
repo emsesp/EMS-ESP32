@@ -56,7 +56,7 @@ void EMSuart::send_poll(uint8_t data) {
  * buf contains the CRC and len is #bytes including the CRC
  * returns code, 0=success, 1=brk error, 2=watchdog timeout
  */
-EMSUART_STATUS EMSuart::transmit(uint8_t * buf, uint8_t len) {
+uint16_t EMSuart::transmit(uint8_t * buf, uint8_t len) {
     if (len == 0) {
         return EMS_TX_STATUS_OK; // nothing to send
     }
