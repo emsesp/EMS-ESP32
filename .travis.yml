@@ -38,7 +38,7 @@ jobs:
     - stage: Release
 
 before_deploy:
-  - export FIRMWARE_VERSION=$(grep -E '^#define APP_VERSION' ./src/version.h | awk '{print $3}' | sed 's/"//g')
+  - export FIRMWARE_VERSION=$(grep -E '^#define EMSESP_APP_VERSION' ./src/version.h | awk '{print $3}' | sed 's/"//g')
   - git tag -f travis-${TAG}-build
   - git remote add gh
     https://${OWNER}:${GITHUB_TOKEN}@github.com/${TRAVIS_REPO_SLUG}.git
