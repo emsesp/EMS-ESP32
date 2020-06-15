@@ -41,7 +41,7 @@ using uuid::log::Level;
 
 // clang-format off
 
-#define LOG_DEBUG(...) if (logger_.enabled(Level::DEBUG)) {logger_.debug(__VA_ARGS__);}
+#define LOG_DEBUG(...) logger_.debug(__VA_ARGS__)
 #define LOG_INFO(...) logger_.info(__VA_ARGS__)
 #define LOG_TRACE(...) logger_.trace(__VA_ARGS__)
 #define LOG_NOTICE(...) logger_.notice(__VA_ARGS__)

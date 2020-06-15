@@ -65,7 +65,11 @@ void EMSESPShell::display_banner() {
 
     println();
     printfln(F("┌──────────────────────────────────────────┐"));
+#if defined(ESP32)
+    printfln(F("│ %sEMS-ESP version %-10s ESP32%s         │"), COLOR_BOLD_ON, settings.app_version().c_str(), COLOR_BOLD_OFF);
+#else
     printfln(F("│ %sEMS-ESP version %-10s%s               │"), COLOR_BOLD_ON, settings.app_version().c_str(), COLOR_BOLD_OFF);
+#endif
     printfln(F("│ %s%shttps://github.com/proddy/EMS-ESP%s        │"), COLOR_BRIGHT_GREEN, COLOR_UNDERLINE, COLOR_RESET);
     printfln(F("│                                          │"));
 
