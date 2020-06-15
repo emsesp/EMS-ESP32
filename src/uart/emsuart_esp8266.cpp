@@ -320,7 +320,7 @@ uint16_t ICACHE_FLASH_ATTR EMSuart::transmit(uint8_t * buf, uint8_t len) {
     }
 
     // new code from Michael. See https://github.com/proddy/EMS-ESP/issues/380
-    if (tx_mode_ == EMS_TXMODE_NEW) { // tx_mode 4
+    if (tx_mode_ >= EMS_TXMODE_NEW) { // tx_mode 4
         for (uint8_t i = 0; i < len; i++) {
             USF(EMSUART_UART) = buf[i];
         }
