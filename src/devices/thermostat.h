@@ -113,17 +113,20 @@ class Thermostat : public EMSdevice {
     uint8_t mqtt_format_; // single, nested or ha
 
     // Installation parameters
-    uint8_t ibaMainDisplay =
+    uint8_t ibaMainDisplay_ =
         EMS_VALUE_UINT_NOTSET; // display on Thermostat: 0 int. temp, 1 int. setpoint, 2 ext. temp., 3 burner temp., 4 ww temp, 5 functioning mode, 6 time, 7 data, 9 smoke temp
-    uint8_t ibaLanguage          = EMS_VALUE_UINT_NOTSET; // language on Thermostat: 0 german, 1 dutch, 2 french, 3 italian
-    int8_t  ibaCalIntTemperature = EMS_VALUE_INT_NOTSET;  // offset int. temperature sensor, by * 0.1 Kelvin (-5.0 to 5.0K)
-    int8_t  ibaMinExtTemperature = EMS_VALUE_INT_NOTSET;  // min ext temp for heating curve, in deg., 0xF6=-10, 0x0 = 0, 0xFF=-1
-    uint8_t ibaBuildingType      = EMS_VALUE_UINT_NOTSET; // building type: 0 = light, 1 = medium, 2 = heavy
-    uint8_t ibaClockOffset       = EMS_VALUE_UINT_NOTSET; // offset (in sec) to clock, 0xff = -1 s, 0x02 = 2 s
+    uint8_t ibaLanguage_          = EMS_VALUE_UINT_NOTSET; // language on Thermostat: 0 german, 1 dutch, 2 french, 3 italian
+    int8_t  ibaCalIntTemperature_ = EMS_VALUE_INT_NOTSET;  // offset int. temperature sensor, by * 0.1 Kelvin (-5.0 to 5.0K)
+    int8_t  ibaMinExtTemperature_ = EMS_VALUE_INT_NOTSET;  // min ext temp for heating curve, in deg., 0xF6=-10, 0x0 = 0, 0xFF=-1
+    uint8_t ibaBuildingType_      = EMS_VALUE_UINT_NOTSET; // building type: 0 = light, 1 = medium, 2 = heavy
+    uint8_t ibaClockOffset_       = EMS_VALUE_UINT_NOTSET; // offset (in sec) to clock, 0xff = -1 s, 0x02 = 2 s
 
-    int8_t   dampedoutdoortemp = EMS_VALUE_INT_NOTSET;
-    uint16_t tempsensor1       = EMS_VALUE_USHORT_NOTSET;
-    uint16_t tempsensor2       = EMS_VALUE_USHORT_NOTSET;
+    int8_t   dampedoutdoortemp_ = EMS_VALUE_INT_NOTSET;
+    uint16_t tempsensor1_       = EMS_VALUE_USHORT_NOTSET;
+    uint16_t tempsensor2_       = EMS_VALUE_USHORT_NOTSET;
+
+    uint8_t wwSystem_ = EMS_VALUE_UINT_NOTSET;
+    uint8_t wwExtra_  = EMS_VALUE_UINT_NOTSET;
 
     std::vector<std::shared_ptr<HeatingCircuit>> heating_circuits_; // each thermostat can have multiple heating circuits
 
@@ -193,7 +196,6 @@ class Thermostat : public EMSdevice {
     static constexpr uint8_t EMS_OFFSET_JunkersSetMessage2_eco_temp      = 6;
     static constexpr uint8_t EMS_OFFSET_JunkersSetMessage3_heat          = 7;
 
-// static constexpr uint8_t DEFAULT_HEATING_CIRCUIT = 1; // default heating circuit is always 1
 #define DEFAULT_HEATING_CIRCUIT 1
 
     // Installation settings
@@ -228,6 +230,8 @@ class Thermostat : public EMSdevice {
     void process_JunkersSet(std::shared_ptr<const Telegram> telegram);
 
     void process_EasyMonitor(std::shared_ptr<const Telegram> telegram);
+
+    void process_RC300WWmode(std::shared_ptr<const Telegram> telegram);
 
     // set functions
     void set_settings_minexttemp(const int8_t mt);

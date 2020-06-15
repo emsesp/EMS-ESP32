@@ -358,6 +358,8 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         EMSESP::add_device(0x28, 160, version, EMSdevice::Brand::BUDERUS); // MM100, WWC
         EMSESP::add_device(0x29, 161, version, EMSdevice::Brand::BUDERUS); // MM200, WWC
 
+        EMSESP::add_device(0x20, 160, version, EMSdevice::Brand::BOSCH); // MM100
+
         EMSESP::rxservice_.loop();
 
         // WWC1 on 0x29
@@ -365,6 +367,9 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
 
         // WWC2 on 0x28
         rx_telegram({0xA8, 0x00, 0xFF, 0x00, 0x02, 0x31, 0x02, 0x35, 0x00, 0x3C, 0x00, 0x3C, 0x3C, 0x46, 0x02, 0x03, 0x03, 0x00, 0x3C});
+
+        // check for error "[emsesp] No telegram type handler found for ID 0x255 (src 0x20, dest 0x00)"
+        rx_telegram({0xA0, 0x00, 0xFF, 0x00, 0x01, 0x55, 0x00, 0x1A});
     }
 
     // finally dump to console
