@@ -33,7 +33,6 @@ static RingbufHandle_t buf_handle   = NULL;
 static hw_timer_t *    timer        = NULL;
 bool                   drop_next_rx = true;
 uint8_t                tx_mode_     = 0xFF;
-//portMUX_TYPE           timerMux     = portMUX_INITIALIZER_UNLOCKED;
 uint8_t                emsTxBuf[EMS_MAXBUFFERSIZE];
 uint8_t                emsTxBufIdx;
 uint8_t                emsTxBufLen;
@@ -99,13 +98,7 @@ void IRAM_ATTR EMSuart::emsuart_tx_timer_intr_handler() {
  * init UART driver
  */
 void EMSuart::start(uint8_t tx_mode) {
-    if (tx_mode == EMS_TXMODE_DEFAULT) {
-        emsTxWait = EMSUART_BIT_TIME * 11;
-    } else if (tx_mode == EMS_TXMODE_EMSPLUS) {
-        emsTxWait = EMSUART_BIT_TIME * 20;
-    } else if (tx_mode == EMS_TXMODE_HT3) {
-        emsTxWait = EMSUART_BIT_TIME * 17;
-    } else if(tx_mode > 10 ) {
+    if(tx_mode > 10 ) {
         emsTxWait = EMSUART_BIT_TIME * tx_mode;
     } else if(tx_mode > 5 ) {
         emsTxWait = EMSUART_BIT_TIME * tx_mode * 2;
@@ -123,13 +116,10 @@ void EMSuart::start(uint8_t tx_mode) {
         .stop_bits = UART_STOP_BITS_1,
         .flow_ctrl = UART_HW_FLOWCTRL_DISABLE,
     }
+    ESP_ERROR_CHECK(uart_param_config(EMSUART_UART, &uart_config));
     if (tx_mode_ == 5) {
         EMS_UART.conf0.stop_bit_num = UART_STOP_BITS_1_5;
-    } else {
-        EMS_UART.conf0.stop_bit_num = UART_STOP_BITS_1;
     }
-
-    ESP_ERROR_CHECK(uart_param_config(EMSUART_UART, &uart_config));
     ESP_ERROR_CHECK(uart_set_pin(EMSUART_UART, EMSUART_TXPIN, EMSUART_RXPIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
     EMS_UART.int_ena.val             = 0;          // disable all intr.
     EMS_UART.int_clr.val             = 0xFFFFFFFF; // clear all intr. flags
@@ -195,15 +185,10 @@ void EMSuart::send_poll(uint8_t data) {
  * returns code, 1=success
  */
 uint16_t EMSuart::transmit(uint8_t * buf, uint8_t len) {
-    if (len == 0 || len > 32) {
+    if (len == 0 || len >= EMS_MAXBUFFERSIZE) {
         return EMS_TX_STATUS_ERR;
     }
-    if (tx_mode_ == EMS_TXMODE_NEW || tx_mode_ == 5) {
-        for (uint8_t i = 0; i < len; i++) {
-            EMS_UART.fifo.rw_byte = buf[i];
-        }
-        EMS_UART.conf0.txd_brk = 1; // <brk> after send
-    } else {
+    if (tx_mode_ > 5) { // timer controlled modes
         for (uint8_t i = 0; i < len; i++) {
             emsTxBuf[i] = buf[i];
         }
@@ -212,7 +197,44 @@ uint16_t EMSuart::transmit(uint8_t * buf, uint8_t len) {
         emsTxBufLen = len;
         timerAlarmWrite(timer, emsTxWait, false);
         timerAlarmEnable(timer);
+        return EMS_TX_STATUS_OK;
     }
+    if (tx_mode_ >= EMS_TXMODE_NEW) { // hardware controlled modes
+        for (uint8_t i = 0; i < len; i++) {
+            EMS_UART.fifo.rw_byte = buf[i];
+        }
+        EMS_UART.conf0.txd_brk = 1; // <brk> after send
+        return EMS_TX_STATUS_OK;
+    }
+    if (tx_mode_ >= EMS_TXMODE_EMSPLUS) { // EMS+ with long delay
+        for (uint8_t i = 0; i < len; i++) {
+            EMS_UART.fifo.rw_byte = buf[i];
+            delaymicroseconds(EMSUART_TX_WAIT_PLUS);
+        }
+        EMS_UART.conf0.txd_brk = 1; // <brk> after send, cleard by hardware after send
+        return EMS_TX_STATUS_OK;
+    }
+    if (tx_mode_ >= EMS_TXMODE_HT3) { // HT3 with 7 bittimes delay
+        for (uint8_t i = 0; i < len; i++) {
+            EMS_UART.fifo.rw_byte = buf[i];
+            delayMicroseconds(EMSUART_TX_WAIT_HT3);
+        }
+        EMS_UART.conf0.txd_brk = 1; // <brk> after send, cleard by hardware after send
+        return EMS_TX_STATUS_OK;
+    }
+    // mode 1 
+    // flush fifos -- not supported in ESP32 uart #2!
+    // EMS_UART.conf0.rxfifo_rst = 1;
+    // EMS_UART.conf0.txfifo_rst = 1;
+    for (uint8_t i = 0; i < len; i++) {
+        volatile uint8_t _usrxc = EMS_UART.status.rxfifo_cnt;
+        EMS_UART.fifo.rw_byte    = buf[i]; // send each Tx byte
+        // wait for echo
+        while (EMS_UART.status.rxfifo_cnt == _usrxc) {
+            delayMicroseconds(EMSUART_TX_BUSY_WAIT); // burn CPU cycles...
+        }
+    }
+    EMS_UART.conf0.txd_brk = 1; // <brk> after send, cleard by hardware after send
     return EMS_TX_STATUS_OK;
 }
 

@@ -461,25 +461,19 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
 
     length++; // add one since we want to now include the CRC
 
-    LOG_DEBUG(F("Sending %s Tx [#%d], telegram: %s"),
-              (telegram->operation == Telegram::Operation::TX_WRITE) ? F("write") : F("read"),
-              tx_telegram.id_,
-              telegram->to_string(telegram_raw, length).c_str());
-
     // send the telegram to the UART Tx
     uint16_t status = EMSuart::transmit(telegram_raw, length);
-#ifdef EMSESP_DEBUG
-    // if watching in 'raw' mode
-    if (EMSESP::watch() == 2) {
-        LOG_INFO(F("[DEBUG] Tx: %s"), Helpers::data_to_hex(telegram_raw, length).c_str());
-    }
-#endif
 
     if (status == EMS_TX_STATUS_ERR) {
         LOG_ERROR(F("Failed to transmit Tx via UART."));
         increment_telegram_fail_count(); // another Tx fail
         tx_waiting(false);               // nothing send, tx not in wait state
         return;
+//    } else {
+//        LOG_DEBUG(F("Send %s Tx [#%d], telegram: %s"),
+//              (telegram->operation == Telegram::Operation::TX_WRITE) ? F("write") : F("read"),
+//              tx_telegram.id_,
+//              telegram->to_string(telegram_raw, length).c_str());
     }
 
     tx_waiting(true); // tx now in a wait state
@@ -496,17 +490,17 @@ void TxService::send_telegram(const uint8_t * data, const uint8_t length) {
     }
     telegram_raw[length] = calculate_crc(telegram_raw, length); // apppend CRC
 
-    LOG_DEBUG(F("Sending Raw telegram: %s (length=%d)"), Helpers::data_to_hex(telegram_raw, length).c_str(), length);
-
     tx_waiting(false); // no post validation
 
     // send the telegram to the UART Tx
     uint16_t status = EMSuart::transmit(telegram_raw, length);
-    //LOG_DEBUG(F("Tx: %s"), Helpers::data_to_hex(telegram_raw, length).c_str());
+
 
     if (status == EMS_TX_STATUS_ERR) {
         LOG_ERROR(F("Failed to transmit Tx via UART."));
         increment_telegram_fail_count(); // another Tx fail
+//    } else {
+//        LOG_DEBUG(F("Send Raw telegram: %s (length=%d)"), Helpers::data_to_hex(telegram_raw, length).c_str(), length);
     }
 }
 

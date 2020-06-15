@@ -75,8 +75,6 @@ class EMSuart {
     } EMSRxBuf_t;
 
   private:
-    // static constexpr uint32_t     EMS_RX_TO_TX_TIMEOUT = 20;
-    static uuid::log::Logger      logger_;
     static void ICACHE_RAM_ATTR   emsuart_rx_intr_handler(void * para);
     static void ICACHE_FLASH_ATTR emsuart_recvTask(os_event_t * events);
     static void ICACHE_FLASH_ATTR emsuart_flush_fifos();
