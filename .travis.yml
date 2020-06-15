@@ -53,7 +53,7 @@ deploy:
   token: ${GITHUB_TOKEN}
   file_glob: true
   file: "*.bin"
-  name: latest v2 development build
+  name: latest v2 development builds
   release_notes:
     Version $FIRMWARE_VERSION.
     Automatic firmware builds of the current EMS-ESP branch built on $(date +'%F %T %Z') from commit $TRAVIS_COMMIT.
@@ -64,7 +64,7 @@ deploy:
   target_commitish: $TRAVIS_COMMIT
   on:
     tags: false
-    branch: dev
+    branch: v2
 
 notifications:
   email:
