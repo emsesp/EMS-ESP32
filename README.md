@@ -35,14 +35,14 @@ Note: Version 2.0 is not backward compatible with v1.0. The File system structur
 
 ### Uploading the firmware
 
-- If you don't have Python 3.8, install it (https://www.python.org/downloads/)
-#### Using direct to USB:
-- install `esptool` using the command `pip install esptool`
-- connect an ESP8266 to the USB. Figure out which COM port it's on (e.g. windows device manager)
-- `esptool.py -p COM6 -b 921600 write_flash 0x00000 <firmware.bin>`
-#### Using OTA (Over The Air):
-- download `espota` from https://github.com/esp8266/Arduino/blob/master/tools/espota.py
-- `espota.py --debug --progress --port 8266 --auth neo -i <ip address> -f <firmware.bin>`
+- If you don't have Python 3.8:
+  - first install it (https://www.python.org/downloads/)
+  - install `esptool` using the command `pip install esptool`
+  - also for OTA updates later, download `espota` from https://github.com/esp8266/Arduino/blob/master/tools/espota.py
+
+- Grab the firmware binary from https://github.com/proddy/EMS-ESP/releases/tag/travis-v2-build
+- Using direct to USB: `esptool.py -p <COM PORT> -b 921600 write_flash 0x00000 <firmware.bin>`
+- Using OTA (Over The Air): `espota.py --debug --progress --port 8266 --auth neo -i <ip address> -f <firmware.bin>`
 
 ### Setting up for the first time:
 
