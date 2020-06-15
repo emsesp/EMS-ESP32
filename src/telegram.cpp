@@ -466,14 +466,15 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
               tx_telegram.id_,
               telegram->to_string(telegram_raw, length).c_str());
 
-    // send the telegram to the UART Tx
-    uint16_t status = EMSuart::transmit(telegram_raw, length);
 #ifdef EMSESP_DEBUG
     // if watching in 'raw' mode
     if (EMSESP::watch() == 2) {
         LOG_NOTICE(F("[DEBUG] Tx: %s"), Helpers::data_to_hex(telegram_raw, length).c_str());
     }
 #endif
+
+    // send the telegram to the UART Tx
+    uint16_t status = EMSuart::transmit(telegram_raw, length);
 
     if (status == EMS_TX_STATUS_ERR) {
         LOG_ERROR(F("Failed to transmit Tx via UART."));
@@ -616,7 +617,6 @@ void TxService::remember_tx(const uint8_t * data, const uint8_t length) {
     if (ems_mask() != EMS_MASK_UNSET) {
         telegram_last_[0] ^= ems_mask();
     }
-
 }
 
 // add last Tx to tx queue and increment count
