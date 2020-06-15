@@ -37,7 +37,6 @@ class Roomctrl {
     static void unknown(uint8_t addr, uint8_t dst, uint8_t type, uint8_t offset);
     static void temperature(uint8_t addr, uint8_t dst);
     static void nack_write();
-
 };
 
 } // namespace emsesp

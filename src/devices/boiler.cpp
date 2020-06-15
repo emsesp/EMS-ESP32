@@ -679,7 +679,7 @@ void Boiler::process_UBAMaintenanceStatus(std::shared_ptr<const Telegram> telegr
 void Boiler::process_UBAMaintenanceSettings(std::shared_ptr<const Telegram> telegram) {
 }
 
-// 0x10, 0x11, 0x12 
+// 0x10, 0x11, 0x12
 // not yet implemented
 void Boiler::process_UBAErrorMessage(std::shared_ptr<const Telegram> telegram) {
     // data: displaycode(2), errornumner(2), year, month, hour, day, minute, duration(2), src-addr

@@ -173,7 +173,8 @@ void EMSuart::restart() {
  * Sends a 1-byte poll, ending with a <BRK>
  */
 void EMSuart::send_poll(uint8_t data) {
-    if (tx_mode_ > 5 || tx_mode_ < 4) {
+    if (tx_mode_ > 5 || tx_mode_ < 4) { // modes 1, 2, 3 also here
+    // if (tx_mode_ > 5) {
         EMS_UART.fifo.rw_byte = data;
         emsTxBufIdx = 0;
         emsTxBufLen = 1;
@@ -186,13 +187,19 @@ void EMSuart::send_poll(uint8_t data) {
         EMS_UART.fifo.rw_byte  = data;
         delayMicroseconds(EMSUART_TX_WAIT_HT3);
         EMS_UART.conf0.txd_brk = 1; // <brk>
+        // delayMicroseconds(EMSUART_TX_WAIT_BRK);
+        // EMS_UART.conf0.txd_brk = 0;
     } else if (tx_mode_ == EMS_TXMODE_EMSPLUS) {
         EMS_UART.fifo.rw_byte  = data;
         delayMicroseconds(EMSUART_TX_WAIT_PLUS);
         EMS_UART.conf0.txd_brk = 1; // <brk>
+        // delayMicroseconds(EMSUART_TX_WAIT_BRK);
+        // EMS_UART.conf0.txd_brk = 0;
     } else {
-        EMS_UART.fifo.rw_byte  = data;
-        delayMicroseconds(EMSUART_TX_WAIT_BRK);
+        volatile uint8_t _usrxc = EMS_UART.status.rxfifo_cnt;
+        EMS_UART.fifo.rw_byte   = data;
+        while (EMS_UART.status.rxfifo_cnt == _usrxc) {
+        }
         EMS_UART.conf0.txd_brk = 1; // <brk>
     }
 }
@@ -206,7 +213,8 @@ uint16_t EMSuart::transmit(uint8_t * buf, uint8_t len) {
     if (len == 0 || len >= EMS_MAXBUFFERSIZE) {
         return EMS_TX_STATUS_ERR;
     }
-    if (tx_mode_ > 5 || tx_mode_ < 4) { // timer controlled modes
+    if (tx_mode_ > 5 || tx_mode_ < 4) { // timer controlled modes, also modes 1, 2, 3 because delays not working
+    // if (tx_mode_ > 5) { // timer controlled modes
         for (uint8_t i = 0; i < len; i++) {
             emsTxBuf[i] = buf[i];
         }
@@ -230,6 +238,8 @@ uint16_t EMSuart::transmit(uint8_t * buf, uint8_t len) {
             delayMicroseconds(EMSUART_TX_WAIT_PLUS);
         }
         EMS_UART.conf0.txd_brk = 1; // <brk> after send, cleard by hardware after send
+        // delayMicroseconds(EMSUART_TX_WAIT_BRK);
+        // EMS_UART.conf0.txd_brk = 0;
         return EMS_TX_STATUS_OK;
     }
     if (tx_mode_ == EMS_TXMODE_HT3) { // HT3 with 7 bittimes delay
@@ -238,6 +248,8 @@ uint16_t EMSuart::transmit(uint8_t * buf, uint8_t len) {
             delayMicroseconds(EMSUART_TX_WAIT_HT3);
         }
         EMS_UART.conf0.txd_brk = 1; // <brk> after send, cleard by hardware after send
+        // delayMicroseconds(EMSUART_TX_WAIT_BRK);
+        // EMS_UART.conf0.txd_brk = 0;
         return EMS_TX_STATUS_OK;
     }
     // mode 1 
@@ -249,10 +261,12 @@ uint16_t EMSuart::transmit(uint8_t * buf, uint8_t len) {
         EMS_UART.fifo.rw_byte    = buf[i]; // send each Tx byte
         // wait for echo
         while (EMS_UART.status.rxfifo_cnt == _usrxc) {
-            delayMicroseconds(EMSUART_TX_BUSY_WAIT); // burn CPU cycles...
+            // delayMicroseconds(EMSUART_TX_BUSY_WAIT); // burn CPU cycles...
         }
     }
     EMS_UART.conf0.txd_brk = 1; // <brk> after send, cleard by hardware after send
+    // delayMicroseconds(EMSUART_TX_WAIT_BRK);
+    // EMS_UART.conf0.txd_brk = 0;
     return EMS_TX_STATUS_OK;
 }
 

@@ -33,6 +33,17 @@ Note: Version 2.0 is not backward compatible with v1.0. The File system structur
 
 - LED behaves like in 1.9. A solid LED means good connection and EMS data is coming in. A slow pulse means either the WiFi or the EMS bus is not connected. A very fast pulse is when the system is booting up and configuring itself.
 
+### Uploading the firmware
+
+- If you don't have Python 3.8, install it (https://www.python.org/downloads/)
+#### Using direct to USB:
+- install `esptool` using the command `pip install esptool`
+- connect an ESP8266 to the USB. Figure out which COM port it's on (e.g. windows device manager)
+- `esptool.py -p COM6 -b 921600 write_flash 0x00000 <firmware.bin>`
+#### Using OTA (Over The Air):
+- download `espota` from https://github.com/esp8266/Arduino/blob/master/tools/espota.py
+- `espota.py --debug --progress --port 8266 --auth neo -i <ip address> -f <firmware.bin>`
+
 ### Setting up for the first time:
 
  - connect the ESP8266/ESP32 via USB and enter via the serial/com port with baud 115200
@@ -46,16 +57,14 @@ Note: Version 2.0 is not backward compatible with v1.0. The File system structur
  - reboot and next time use the Telnet via WiFi to connect as the serial mode will be disabled.
 
 ### Debugging
- - Turn on logging with either `log all` or `log trace` or `log debug`
+ - Turn on logging with either `log all` or `log debug`
  - Error messages are shown in the color red
  - type `show` from the main root to see if any data has come in
  - if not, go to the `ems` context and type `show` which will display some EMS bus stats
  - use the `refresh` command to fetch new data from the EMS bus
  - use `scan devices` or `scan devices deep` to locate devices on the EMS bus. If any are unknown please report back to the project so we can update our EMS device library.
 
-
-
-# Full Console Commands
+# List of console commands
 
 ```
 common commands available in all contexts:

@@ -72,8 +72,7 @@ void System::mqtt_commands(const char * message) {
     if (doc["send"] != nullptr) {
         const char * data = doc["send"];
         EMSESP::send_raw_telegram(data);
-        LOG_INFO(F("Sending raw: %s"),data);
-
+        LOG_INFO(F("Sending raw: %s"), data);
     }
 
 #if defined(ESP8266)
@@ -87,39 +86,60 @@ void System::mqtt_commands(const char * message) {
     const uint8_t d2_ = 21;
     const uint8_t d3_ = 17;
 #endif
-    if(doc["D0"] != nullptr) {
+
+#ifndef EMSESP_STANDALONE
+
+    if (doc["D0"] != nullptr) {
         const int8_t set = doc["D0"];
         pinMode(d0_, OUTPUT);
-        if (set == 1) digitalWrite(d0_, HIGH);
-        else if (set == 0) digitalWrite(d0_, LOW);
-        LOG_INFO(F("Port D0 set to %d"),set);
+        if (set == 1) {
+            digitalWrite(d0_, HIGH);
+        } else if (set == 0) {
+            digitalWrite(d0_, LOW);
+        }
+        LOG_INFO(F("Port D0 set to %d"), set);
     }
-    if(doc["D1"] != nullptr) {
+
+    if (doc["D1"] != nullptr) {
         const int8_t set = doc["D1"];
         pinMode(d1_, OUTPUT);
-        if (set == 1) digitalWrite(d1_, HIGH);
-        else if (set == 0) digitalWrite(d1_, LOW);
-        LOG_INFO(F("Port D1 set to %d"),set);
+        if (set == 1) {
+            digitalWrite(d1_, HIGH);
+        } else if (set == 0) {
+            digitalWrite(d1_, LOW);
+        }
+        LOG_INFO(F("Port D1 set to %d"), set);
     }
-    if(doc["D2"] != nullptr) {
+
+    if (doc["D2"] != nullptr) {
         const int8_t set = doc["D2"];
         pinMode(d2_, OUTPUT);
-        if (set == 1) digitalWrite(d2_, HIGH);
-        else if (set == 0) digitalWrite(d2_, LOW);
-        LOG_INFO(F("Port D2 set to %d"),set);
+        if (set == 1) {
+            digitalWrite(d2_, HIGH);
+        } else if (set == 0) {
+            digitalWrite(d2_, LOW);
+        }
+        LOG_INFO(F("Port D2 set to %d"), set);
     }
-    if(doc["D3"] != nullptr) {
+
+    if (doc["D3"] != nullptr) {
         const int8_t set = doc["D3"];
         pinMode(d3_, OUTPUT);
-        if (set == 1) digitalWrite(d3_, HIGH);
-        else if (set == 0) digitalWrite(d3_, LOW);
-        LOG_INFO(F("Port D3 set to %d"),set);
+        if (set == 1) {
+            digitalWrite(d3_, HIGH);
+        } else if (set == 0) {
+            digitalWrite(d3_, LOW);
+        }
+        LOG_INFO(F("Port D3 set to %d"), set);
     }
+
+#endif
 
     const char * command = doc["cmd"];
     if (command == nullptr) {
         return;
     }
+
     // send raw command
     if (strcmp(command, "send") == 0) {
         const char * data = doc["data"];
@@ -127,7 +147,7 @@ void System::mqtt_commands(const char * message) {
             return;
         }
         EMSESP::send_raw_telegram(data);
-        LOG_INFO(F("Sending raw: %s"),data);
+        LOG_INFO(F("Sending raw: %s"), data);
         return;
     }
 }

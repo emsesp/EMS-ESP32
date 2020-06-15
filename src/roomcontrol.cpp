@@ -69,9 +69,9 @@ void Roomctrl::check(const uint8_t addr, const uint8_t * data) {
     if (remotetemp[hc_] == EMS_VALUE_SHORT_NOTSET) {
         return;
     }
-    // reply to writes with write nack byte   
-    if(addr & 0x80) { // it's a write to us
-        nack_write(); // we don't accept writes.
+    // reply to writes with write nack byte
+    if (addr & 0x80) { // it's a write to us
+        nack_write();  // we don't accept writes.
         return;
     }
     // for now we only reply to version and remote temperature

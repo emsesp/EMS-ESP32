@@ -272,9 +272,16 @@ void EMSuart::send_poll(uint8_t data) {
         delayMicroseconds(EMSUART_TX_WAIT_PLUS);
         tx_brk(); // send <BRK>
     } else { // EMS1.0
-        USF(EMSUART_UART) = data;
-        delayMicroseconds(EMSUART_TX_WAIT_BRK);
-        tx_brk(); // send <BRK>
+        ETS_UART_INTR_DISABLE();
+        volatile uint8_t _usrxc = (USS(EMSUART_UART) >> USRXC) & 0xFF;
+        USF(EMSUART_UART)       = data;
+        while (((USS(EMSUART_UART) >> USRXC) & 0xFF) == _usrxc) {
+        }
+        USC0(EMSUART_UART) |= (1 << UCBRK); // set <BRK>
+        while (!(USIR(EMSUART_UART) & (1 << UIBD))) {
+        }
+        USC0(EMSUART_UART) &= ~(1 << UCBRK); // clear <BRK>
+        ETS_UART_INTR_ENABLE();
     }
 }
 

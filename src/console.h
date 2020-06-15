@@ -51,7 +51,6 @@ using uuid::log::Level;
 #define MAKE_PSTR(string_name, string_literal) static const char __pstr__##string_name[] __attribute__((__aligned__(sizeof(int)))) PROGMEM = string_literal;
 #define MAKE_PSTR_WORD(string_name) MAKE_PSTR(string_name, #string_name)
 #define F_(string_name) FPSTR(__pstr__##string_name)
-#define NO_ARGUMENTS std::vector<std::string>{}
 
 // clang-format on
 
