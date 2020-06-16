@@ -29,23 +29,26 @@ class Helpers {
     static char *      hextoa(char * result, const uint8_t value);
     static std::string data_to_hex(const uint8_t * data, const uint8_t length);
 
-    static char *   render_value(char * result, const float value, const uint8_t format); // format is the precision
-    static char *   render_value(char * result, const uint8_t value, const uint8_t format);
-    static char *   render_value(char * result, const int8_t value, const uint8_t format);
-    static char *   render_value(char * result, const uint16_t value, const uint8_t format);
-    static char *   render_value(char * result, const uint32_t value, const uint8_t format);
-    static char *   render_value(char * result, const int16_t value, const uint8_t format);
+    static char * render_value(char * result, const float value, const uint8_t format); // format is the precision
+    static char * render_value(char * result, const uint8_t value, const uint8_t format);
+    static char * render_value(char * result, const int8_t value, const uint8_t format);
+    static char * render_value(char * result, const uint16_t value, const uint8_t format);
+    static char * render_value(char * result, const uint32_t value, const uint8_t format);
+    static char * render_value(char * result, const int16_t value, const uint8_t format);
+
     static char *   smallitoa(char * result, const uint8_t value);
     static char *   smallitoa(char * result, const uint16_t value);
     static char *   itoa(char * result, int16_t value, const uint8_t base = 10);
     static uint32_t hextoint(const char * hex);
     static uint16_t atoint(const char * value);
+    static bool     check_abs(const int32_t i);
+    static double   round2(double value);
 
-    static bool check_abs(const int32_t i) {
-        return ((i < 0 ? -i : i) != 0xFFFFFF); // UNSET value is from telegram.h
-    }
-
-    static double round2(double value);
+    static bool hasValue(const uint8_t v, bool isBool = false); // use isBool=true for bool's
+    static bool hasValue(const int8_t v);
+    static bool hasValue(const int16_t v);
+    static bool hasValue(const uint16_t v);
+    static bool hasValue(const uint32_t v);
 };
 
 } // namespace emsesp

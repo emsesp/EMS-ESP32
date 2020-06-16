@@ -68,6 +68,8 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     register_telegram_type(0xE5, F("UBAMonitorSlowPlus"), false, std::bind(&Boiler::process_UBAMonitorSlowPlus, this, _1));
 
     register_telegram_type(0xE9, F("UBADHWStatus"), false, std::bind(&Boiler::process_UBADHWStatus, this, _1));
+
+    // HeatPump specific
     register_telegram_type(0xE3, F("HeatPumpMonitor1"), false, std::bind(&Boiler::process_HPMonitor1, this, _1));
     register_telegram_type(0xE5, F("HeatPumpMonitor2"), false, std::bind(&Boiler::process_HPMonitor2, this, _1));
 
@@ -166,154 +168,157 @@ void Boiler::publish_values() {
 
     char s[10]; // for formatting strings
 
-    if (wWComfort_ == 0x00) {
-        doc["wWComfort"] = "Hot";
-    } else if (wWComfort_ == 0xD8) {
-        doc["wWComfort"] = "Eco";
-    } else if (wWComfort_ == 0xEC) {
-        doc["wWComfort"] = "Intelligent";
+    if (Helpers::hasValue(wWComfort_)) {
+        if (wWComfort_ == 0x00) {
+            doc["wWComfort"] = "Hot";
+        } else if (wWComfort_ == 0xD8) {
+            doc["wWComfort"] = "Eco";
+        } else if (wWComfort_ == 0xEC) {
+            doc["wWComfort"] = "Intelligent";
+        }
     }
 
-    if (wWSelTemp_ != EMS_VALUE_UINT_NOTSET) {
+    if (Helpers::hasValue(wWSelTemp_)) {
         doc["wWSelTemp"] = wWSelTemp_;
     }
-    if (wWDisinfectTemp_ != EMS_VALUE_UINT_NOTSET) {
+    if (Helpers::hasValue(wWDisinfectTemp_)) {
         doc["wWDisinfectionTemp"] = wWDisinfectTemp_;
     }
-    if (selFlowTemp_ != EMS_VALUE_UINT_NOTSET) {
+    if (Helpers::hasValue(selFlowTemp_)) {
         doc["selFlowTemp"] = selFlowTemp_;
     }
-    if (selBurnPow_ != EMS_VALUE_UINT_NOTSET) {
+    if (Helpers::hasValue(selBurnPow_)) {
         doc["selBurnPow"] = selBurnPow_;
     }
-    if (curBurnPow_ != EMS_VALUE_UINT_NOTSET) {
+    if (Helpers::hasValue(curBurnPow_)) {
         doc["curBurnPow"] = curBurnPow_;
     }
-    if (pumpMod_ != EMS_VALUE_UINT_NOTSET) {
+    if (Helpers::hasValue(pumpMod_)) {
         doc["pumpMod"] = pumpMod_;
     }
-    if (wWCircPump_ != EMS_VALUE_BOOL_NOTSET) {
+    if (Helpers::hasValue(wWCircPump_, true)) {
         doc["wWCircPump"] = Helpers::render_value(s, wWCircPump_, EMS_VALUE_BOOL);
     }
-    if (wWCircPumpType_ != EMS_VALUE_BOOL_NOTSET) {
+    if (Helpers::hasValue(wWCircPumpType_)) {
         doc["wWCiPuType"] = wWCircPumpType_ ? "valve" : "pump";
     }
-    if (wWCircPumpMode_ != EMS_VALUE_UINT_NOTSET) {
+    if (Helpers::hasValue(wWCircPumpMode_)) {
         doc["wWCiPuMode"] = wWCircPumpMode_;
     }
-    if (wWCirc_ != EMS_VALUE_BOOL_NOTSET) {
+    if (Helpers::hasValue(wWCirc_)) {
         doc["wWCirc"] = Helpers::render_value(s, wWCirc_, EMS_VALUE_BOOL);
     }
-    if (extTemp_ != EMS_VALUE_SHORT_NOTSET) {
+    if (Helpers::hasValue(extTemp_)) {
         doc["outdoorTemp"] = (float)extTemp_ / 10;
     }
-    if (wWCurTmp_ != EMS_VALUE_USHORT_NOTSET) {
+    if (Helpers::hasValue(wWCurTmp_)) {
         doc["wWCurTmp"] = (float)wWCurTmp_ / 10;
     }
-    if (wWCurFlow_ != EMS_VALUE_UINT_NOTSET) {
+    if (Helpers::hasValue(wWCurFlow_)) {
         doc["wWCurFlow"] = (float)wWCurFlow_ / 10;
     }
-    if (curFlowTemp_ != EMS_VALUE_USHORT_NOTSET) {
+    if (Helpers::hasValue(curFlowTemp_)) {
         doc["curFlowTemp"] = (float)curFlowTemp_ / 10;
     }
-    if (retTemp_ != EMS_VALUE_USHORT_NOTSET) {
+    if (Helpers::hasValue(retTemp_)) {
         doc["retTemp"] = (float)retTemp_ / 10;
     }
-    if (switchTemp_ != EMS_VALUE_USHORT_NOTSET) {
+    if (Helpers::hasValue(switchTemp_)) {
         doc["switchTemp"] = (float)switchTemp_ / 10;
     }
-    if (sysPress_ != EMS_VALUE_UINT_NOTSET) {
+    if (Helpers::hasValue(sysPress_)) {
         doc["sysPress"] = (float)sysPress_ / 10;
     }
-    if (boilTemp_ != EMS_VALUE_USHORT_NOTSET) {
+    if (Helpers::hasValue(boilTemp_)) {
         doc["boilTemp"] = (float)boilTemp_ / 10;
     }
-    if (wwStorageTemp1_ != EMS_VALUE_USHORT_NOTSET) {
+    if (Helpers::hasValue(wwStorageTemp1_)) {
         doc["wwStorageTemp1"] = (float)wwStorageTemp1_ / 10;
     }
-    if (wwStorageTemp2_ != EMS_VALUE_USHORT_NOTSET) {
+    if (Helpers::hasValue(wwStorageTemp2_)) {
         doc["wwStorageTemp2"] = (float)wwStorageTemp2_ / 10;
     }
-    if (exhaustTemp_ != EMS_VALUE_USHORT_NOTSET) {
+    if (Helpers::hasValue(exhaustTemp_)) {
         doc["exhaustTemp"] = (float)exhaustTemp_ / 10;
     }
-    if (wWActivated_ != EMS_VALUE_BOOL_NOTSET) {
+    if (Helpers::hasValue(wWActivated_, true)) {
         doc["wWActivated"] = Helpers::render_value(s, wWActivated_, EMS_VALUE_BOOL);
     }
-    if (wWOneTime_ != EMS_VALUE_BOOL_NOTSET) {
+    if (Helpers::hasValue(wWOneTime_, true)) {
         doc["wWOnetime"] = Helpers::render_value(s, wWOneTime_, EMS_VALUE_BOOL);
     }
-    if (wWDesinfecting_ != EMS_VALUE_BOOL_NOTSET) {
+    if (Helpers::hasValue(wWDesinfecting_, true)) {
         doc["wWDesinfecting"] = Helpers::render_value(s, wWDesinfecting_, EMS_VALUE_BOOL);
     }
-    if (wWReadiness_ != EMS_VALUE_BOOL_NOTSET) {
+    if (Helpers::hasValue(wWReadiness_, true)) {
         doc["wWReady"] = Helpers::render_value(s, wWReadiness_, EMS_VALUE_BOOL);
     }
-    if (wWRecharging_ != EMS_VALUE_BOOL_NOTSET) {
+    if (Helpers::hasValue(wWRecharging_, true)) {
         doc["wWRecharge"] = Helpers::render_value(s, wWRecharging_, EMS_VALUE_BOOL);
     }
-    if (wWTemperatureOK_ != EMS_VALUE_BOOL_NOTSET) {
+    if (Helpers::hasValue(wWTemperatureOK_, true)) {
         doc["wWTempOK"] = Helpers::render_value(s, wWTemperatureOK_, EMS_VALUE_BOOL);
     }
-    if (wWCirc_ != EMS_VALUE_BOOL_NOTSET) {
+    if (Helpers::hasValue(wWCirc_, true)) {
         doc["wWCirc"] = Helpers::render_value(s, wWCirc_, EMS_VALUE_BOOL);
     }
-    if (burnGas_ != EMS_VALUE_BOOL_NOTSET) {
+    if (Helpers::hasValue(burnGas_, true)) {
         doc["burnGas"] = Helpers::render_value(s, burnGas_, EMS_VALUE_BOOL);
     }
-    if (flameCurr_ != EMS_VALUE_USHORT_NOTSET) {
+    if (Helpers::hasValue(flameCurr_)) {
         doc["flameCurr"] = (float)(int16_t)flameCurr_ / 10;
     }
-    if (heatPmp_ != EMS_VALUE_BOOL_NOTSET) {
+    if (Helpers::hasValue(heatPmp_, true)) {
         doc["heatPmp"] = Helpers::render_value(s, heatPmp_, EMS_VALUE_BOOL);
     }
-    if (fanWork_ != EMS_VALUE_BOOL_NOTSET) {
+    if (Helpers::hasValue(fanWork_, true)) {
         doc["fanWork"] = Helpers::render_value(s, fanWork_, EMS_VALUE_BOOL);
     }
-    if (ignWork_ != EMS_VALUE_BOOL_NOTSET) {
+    if (Helpers::hasValue(ignWork_, true)) {
         doc["ignWork"] = Helpers::render_value(s, ignWork_, EMS_VALUE_BOOL);
     }
-    if (wWHeat_ != EMS_VALUE_BOOL_NOTSET) {
+    if (Helpers::hasValue(wWHeat_, true)) {
         doc["wWHeat"] = Helpers::render_value(s, wWHeat_, EMS_VALUE_BOOL);
     }
-    if (heating_temp_ != EMS_VALUE_UINT_NOTSET) {
+    if (Helpers::hasValue(heating_temp_)) {
         doc["heating_temp"] = heating_temp_;
     }
-    if (pump_mod_max_ != EMS_VALUE_UINT_NOTSET) {
+    if (Helpers::hasValue(pump_mod_max_)) {
         doc["pump_mod_max"] = pump_mod_max_;
     }
-    if (pump_mod_min_ != EMS_VALUE_UINT_NOTSET) {
+    if (Helpers::hasValue(pump_mod_min_)) {
         doc["pump_mod_min"] = pump_mod_min_;
     }
-    if (wWStarts_ != EMS_VALUE_ULONG_NOTSET) {
+    if (Helpers::hasValue(wWStarts_)) {
         doc["wWStarts"] = wWStarts_;
     }
-    if (wWWorkM_ != EMS_VALUE_ULONG_NOTSET) {
+    if (Helpers::hasValue(wWWorkM_)) {
         doc["wWWorkM"] = wWWorkM_;
     }
-    if (UBAuptime_ != EMS_VALUE_ULONG_NOTSET) {
+    if (Helpers::hasValue(UBAuptime_)) {
         doc["UBAuptime"] = UBAuptime_;
     }
-    if (burnStarts_ != EMS_VALUE_ULONG_NOTSET) {
+    if (Helpers::hasValue(burnStarts_)) {
         doc["burnStarts"] = burnStarts_;
     }
-    if (burnWorkMin_ != EMS_VALUE_ULONG_NOTSET) {
+    if (Helpers::hasValue(burnWorkMin_)) {
         doc["burnWorkMin"] = burnWorkMin_;
     }
-    if (heatWorkMin_ != EMS_VALUE_ULONG_NOTSET) {
+    if (Helpers::hasValue(heatWorkMin_)) {
         doc["heatWorkMin"] = heatWorkMin_;
     }
 
-    if (serviceCode_ != EMS_VALUE_USHORT_NOTSET) {
+    if (Helpers::hasValue(serviceCode_)) {
         doc["serviceCode"]       = serviceCodeChar_;
         doc["serviceCodeNumber"] = serviceCode_;
     }
 
     // heatpump specific
-    if (hpModulation_ != EMS_VALUE_UINT_NOTSET) {
+    if (Helpers::hasValue(hpModulation_)) {
         doc["pumpmodulation"] = hpModulation_;
     }
-    if (hpSpeed_ != EMS_VALUE_UINT_NOTSET) {
+
+    if (Helpers::hasValue(hpSpeed_)) {
         doc["pumpspeed"] = hpSpeed_;
     }
 
@@ -338,11 +343,11 @@ void Boiler::show_values(uuid::console::Shell & shell) {
 
     char buffer[10]; // used for formatting
 
-    if (tap_water_active_ != EMS_VALUE_BOOL_NOTSET) {
+    if (Helpers::hasValue(tap_water_active_, true)) {
         print_value(shell, 2, F("Hot tap water"), tap_water_active_ ? "running" : "off");
     }
 
-    if (heating_active_ != EMS_VALUE_BOOL_NOTSET) {
+    if (Helpers::hasValue(heating_active_, true)) {
         print_value(shell, 2, F("Central heating"), heating_active_ ? "active" : "off");
     }
 
@@ -382,7 +387,7 @@ void Boiler::show_values(uuid::console::Shell & shell) {
     print_value(shell, 2, F("Warm water storage temperature (extern)"), F_(degrees), Helpers::render_value(buffer, wwStorageTemp2_, 10));
     print_value(shell, 2, F("Warm Water current tap water flow"), F("l/min"), Helpers::render_value(buffer, wWCurFlow_, 10));
     print_value(shell, 2, F("Warm Water # starts"), Helpers::render_value(buffer, wWStarts_, 1));
-    if (wWWorkM_ != EMS_VALUE_ULONG_NOTSET) {
+    if (Helpers::hasValue(wWWorkM_)) {
         shell.printfln(F("  Warm Water active time: %d days %d hours %d minutes"), wWWorkM_ / 1440, (wWWorkM_ % 1440) / 60, wWWorkM_ % 60);
     }
     print_value(shell, 2, F("Warm Water charging"), Helpers::render_value(buffer, wWHeat_, EMS_VALUE_BOOL));
@@ -400,7 +405,7 @@ void Boiler::show_values(uuid::console::Shell & shell) {
     print_value(shell, 2, F("Burner current power"), F_(percent), Helpers::render_value(buffer, curBurnPow_, 1));
     print_value(shell, 2, F("Flame current"), F("uA"), Helpers::render_value(buffer, flameCurr_, 10));
     print_value(shell, 2, F("System pressure"), F("bar"), Helpers::render_value(buffer, sysPress_, 10));
-    if (serviceCode_ != EMS_VALUE_USHORT_NOTSET) {
+    if (Helpers::hasValue(serviceCode_)) {
         shell.printfln(F("  System service code: %s (%d)"), serviceCodeChar_, serviceCode_);
     } else if (serviceCodeChar_[0] != '\0') {
         shell.printfln(F("  System service code: %s"), serviceCodeChar_);
@@ -412,28 +417,28 @@ void Boiler::show_values(uuid::console::Shell & shell) {
     print_value(shell, 2, F("Boiler circuit pump modulation min power"), F_(percent), Helpers::render_value(buffer, pump_mod_min_, 1));
 
     // UBAMonitorSlow
-    if (extTemp_ != EMS_VALUE_SHORT_NOTSET) {
+    if (Helpers::hasValue(extTemp_)) {
         print_value(shell, 2, F("Outside temperature"), F_(degrees), Helpers::render_value(buffer, extTemp_, 10));
     }
 
     print_value(shell, 2, F("Exhaust temperature"), F_(degrees), Helpers::render_value(buffer, exhaustTemp_, 10));
     print_value(shell, 2, F("Pump modulation"), F_(percent), Helpers::render_value(buffer, pumpMod_, 1));
     print_value(shell, 2, F("Burner # starts"), Helpers::render_value(buffer, burnStarts_, 1));
-    if (burnWorkMin_ != EMS_VALUE_ULONG_NOTSET) {
+    if (Helpers::hasValue(burnWorkMin_)) {
         shell.printfln(F("  Total burner operating time: %d days %d hours %d minutes"), burnWorkMin_ / 1440, (burnWorkMin_ % 1440) / 60, burnWorkMin_ % 60);
     }
-    if (heatWorkMin_ != EMS_VALUE_ULONG_NOTSET) {
+    if (Helpers::hasValue(heatWorkMin_)) {
         shell.printfln(F("  Total heat operating time: %d days %d hours %d minutes"), heatWorkMin_ / 1440, (heatWorkMin_ % 1440) / 60, heatWorkMin_ % 60);
     }
-    if (UBAuptime_ != EMS_VALUE_ULONG_NOTSET) {
+    if (Helpers::hasValue(UBAuptime_)) {
         shell.printfln(F("  Total UBA working time: %d days %d hours %d minutes"), UBAuptime_ / 1440, (UBAuptime_ % 1440) / 60, UBAuptime_ % 60);
     }
 
-    if (hpModulation_ != EMS_VALUE_UINT_NOTSET) {
+    if (Helpers::hasValue(hpModulation_)) {
         print_value(shell, 2, F("Heat Pump modulation"), F_(percent), Helpers::render_value(buffer, hpModulation_, 1));
     }
 
-    if (hpSpeed_ != EMS_VALUE_UINT_NOTSET) {
+    if (Helpers::hasValue(hpSpeed_)) {
         print_value(shell, 2, F("Heat Pump speed"), F_(percent), Helpers::render_value(buffer, hpSpeed_, 1));
     }
 }
@@ -445,20 +450,20 @@ void Boiler::show_values(uuid::console::Shell & shell) {
 void Boiler::check_active() {
     // hot tap water, using flow to check instead of the burner power
     // send these values back to the main EMSESP, so other classes (e.g. Shower) can use it
-    if (wWCurFlow_ != EMS_VALUE_UINT_NOTSET && burnGas_ != EMS_VALUE_UINT_NOTSET) {
+    if (Helpers::hasValue(wWCurFlow_) && Helpers::hasValue(burnGas_)) {
         tap_water_active_ = ((wWCurFlow_ != 0) && (burnGas_ != EMS_VALUE_BOOL_OFF));
         EMSESP::tap_water_active(tap_water_active_);
     }
 
     // heating
     // using a quick hack for checking the heating by looking at the Selected Flow Temp, but doesn't work for all boilers apparently
-    if (selFlowTemp_ != EMS_VALUE_UINT_NOTSET && burnGas_ != EMS_VALUE_UINT_NOTSET) {
+    if (Helpers::hasValue(selFlowTemp_) && Helpers::hasValue(burnGas_)) {
         heating_active_ = (!tap_water_active_ && ((selFlowTemp_ >= EMS_BOILER_SELFLOWTEMP_HEATING) && (burnGas_ != EMS_VALUE_BOOL_OFF)));
     }
 
     // see if the heating or hot tap water has changed, if so send
     // last_boilerActive stores heating in bit 1 and tap water in bit 2
-    if ((tap_water_active_ != EMS_VALUE_BOOL_NOTSET) && (heating_active_ != EMS_VALUE_BOOL_NOTSET)) {
+    if (Helpers::hasValue(tap_water_active_, true) && Helpers::hasValue(heating_active_, true)) {
         uint8_t latest_boilerState = (tap_water_active_ << 1) + heating_active_;
         if (latest_boilerState != last_boilerState) {
             last_boilerState = latest_boilerState;

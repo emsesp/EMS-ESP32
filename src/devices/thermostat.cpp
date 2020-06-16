@@ -427,8 +427,7 @@ bool Thermostat::updated_values() {
     static uint16_t current_value_ = 0;
     for (const auto & hc : heating_circuits_) {
         // don't publish if we haven't yet received some data
-        //        if ((hc->setpoint_roomTemp == EMS_VALUE_SHORT_NOTSET) || (hc->curr_roomTemp == EMS_VALUE_SHORT_NOTSET)) {
-        if (hc->setpoint_roomTemp == EMS_VALUE_SHORT_NOTSET) {
+        if (!Helpers::hasValue(hc->setpoint_roomTemp)) {
             return false;
         }
         new_value += hc->setpoint_roomTemp + hc->curr_roomTemp + hc->mode;
@@ -464,22 +463,22 @@ void Thermostat::publish_values() {
         if (datetime_.size()) {
             rootThermostat["time"] = datetime_.c_str();
         }
-        if (dampedoutdoortemp_ != EMS_VALUE_INT_NOTSET) {
+        if (Helpers::hasValue(dampedoutdoortemp_)) {
             rootThermostat["dampedtemp"] = dampedoutdoortemp_;
         }
-        if (tempsensor1_ != EMS_VALUE_USHORT_NOTSET) {
+        if (Helpers::hasValue(tempsensor1_)) {
             rootThermostat["inttemp1"] = (float)tempsensor1_ / 10;
         }
-        if (tempsensor2_ != EMS_VALUE_USHORT_NOTSET) {
+        if (Helpers::hasValue(tempsensor2_)) {
             rootThermostat["inttemp2"] = (float)tempsensor2_ / 10;
         }
-        if (ibaCalIntTemperature_ != EMS_VALUE_INT_NOTSET) {
+        if (Helpers::hasValue(ibaCalIntTemperature_)) {
             rootThermostat["intoffset"] = (float)ibaCalIntTemperature_ / 2;
         }
-        if (ibaMinExtTemperature_ != EMS_VALUE_INT_NOTSET) {
+        if (Helpers::hasValue(ibaMinExtTemperature_)) {
             rootThermostat["minexttemp"] = (float)ibaMinExtTemperature_; // min ext temp for heating curve, in deg.
         }
-        if (ibaBuildingType_ != EMS_VALUE_UINT_NOTSET) {
+        if (Helpers::hasValue(ibaBuildingType_)) {
             if (ibaBuildingType_ == 0) {
                 rootThermostat["building"] = "light";
             } else if (ibaBuildingType_ == 1) {
@@ -496,8 +495,7 @@ void Thermostat::publish_values() {
 
     // go through all the heating circuits
     for (const auto & hc : heating_circuits_) {
-        //        if ((hc->setpoint_roomTemp == EMS_VALUE_SHORT_NOTSET) || (hc->curr_roomTemp == EMS_VALUE_SHORT_NOTSET)) {
-        if (hc->setpoint_roomTemp == EMS_VALUE_SHORT_NOTSET) {
+        if (!Helpers::hasValue(hc->setpoint_roomTemp)) {
             break; // skip this HC
         }
 
@@ -528,45 +526,45 @@ void Thermostat::publish_values() {
             curr_temp_divider     = 10;
         }
 
-        if (hc->setpoint_roomTemp != EMS_VALUE_SHORT_NOTSET) {
+        if (Helpers::hasValue(hc->setpoint_roomTemp)) {
             dataThermostat["seltemp"] = Helpers::round2((float)hc->setpoint_roomTemp / setpoint_temp_divider);
         }
 
-        if (hc->curr_roomTemp != EMS_VALUE_SHORT_NOTSET && hc->curr_roomTemp != EMS_VALUE_USHORT_NOTSET) {
+        if (Helpers::hasValue(hc->curr_roomTemp)) {
             dataThermostat["currtemp"] = Helpers::round2((float)hc->curr_roomTemp / curr_temp_divider);
         }
 
-        if (hc->daytemp != EMS_VALUE_UINT_NOTSET) {
+        if (Helpers::hasValue(hc->daytemp)) {
             dataThermostat["daytemp"] = (float)hc->daytemp / 2;
         }
-        if (hc->nighttemp != EMS_VALUE_UINT_NOTSET) {
+        if (Helpers::hasValue(hc->nighttemp)) {
             dataThermostat["nighttemp"] = (float)hc->nighttemp / 2;
         }
-        if (hc->holidaytemp != EMS_VALUE_UINT_NOTSET) {
+        if (Helpers::hasValue(hc->holidaytemp)) {
             dataThermostat["holidaytemp"] = (float)hc->holidaytemp / 2;
         }
 
-        if (hc->heatingtype != EMS_VALUE_UINT_NOTSET) {
+        if (Helpers::hasValue(hc->heatingtype)) {
             dataThermostat["heatingtype"] = hc->heatingtype;
         }
 
-        if (hc->circuitcalctemp != EMS_VALUE_UINT_NOTSET) {
+        if (Helpers::hasValue(hc->circuitcalctemp)) {
             dataThermostat["circuitcalctemp"] = hc->circuitcalctemp;
         }
 
-        if (hc->offsettemp != EMS_VALUE_INT_NOTSET) {
+        if (Helpers::hasValue(hc->offsettemp)) {
             dataThermostat["offsettemp"] = hc->offsettemp / 2;
         }
 
-        if (hc->designtemp != EMS_VALUE_UINT_NOTSET) {
+        if (Helpers::hasValue(hc->designtemp)) {
             dataThermostat["designtemp"] = hc->designtemp;
         }
-        if (hc->summertemp != EMS_VALUE_UINT_NOTSET) {
+        if (Helpers::hasValue(hc->summertemp)) {
             dataThermostat["summertemp"] = hc->summertemp;
         }
 
         // when using HA always send the mode otherwise it'll break the component/widget and report an error
-        if ((hc->mode != EMS_VALUE_UINT_NOTSET) || (mqtt_format_ == Settings::MQTT_format::HA)) {
+        if ((Helpers::hasValue(hc->mode)) || (mqtt_format_ == Settings::MQTT_format::HA)) {
             uint8_t hc_mode = hc->get_mode(flags);
             // if we're sending to HA the only valid mode types are heat, auto and off
             if (mqtt_format_ == Settings::MQTT_format::HA) {
@@ -588,10 +586,10 @@ void Thermostat::publish_values() {
                 dataThermostat["modetype"] = F("summer");
             } else if (hc->holiday_mode) {
                 dataThermostat["modetype"] = F("holiday");
-            } else if (hc->mode_type != EMS_VALUE_UINT_NOTSET) {
+            } else if (Helpers::hasValue(hc->mode_type)) {
                 dataThermostat["modetype"] = mode_tostring(hc->get_mode_type(flags));
             }
-        } else if (hc->mode_type != EMS_VALUE_UINT_NOTSET) {
+        } else if (Helpers::hasValue(hc->mode_type)) {
             dataThermostat["modetype"] = mode_tostring(hc->get_mode_type(flags));
         }
 
@@ -683,7 +681,7 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::sha
 // decodes the thermostat mode for the heating circuit based on the thermostat type
 // modes are off, manual, auto, day and night
 uint8_t Thermostat::HeatingCircuit::get_mode(uint8_t flags) const {
-    if (mode == EMS_VALUE_UINT_NOTSET) {
+    if (!Helpers::hasValue(mode)) {
         return HeatingCircuit::Mode::UNKNOWN;
     }
 
@@ -811,7 +809,7 @@ void Thermostat::show_values(uuid::console::Shell & shell) {
 
     if (datetime_.size()) {
         shell.printfln(F("  Clock: %s"), datetime_.c_str());
-        if (ibaClockOffset_ != EMS_VALUE_UINT_NOTSET && flags == EMS_DEVICE_FLAG_RC30_1) {
+        if (Helpers::hasValue(ibaClockOffset_) && flags == EMS_DEVICE_FLAG_RC30_1) {
             print_value(shell, 2, F("Offset clock"), Helpers::render_value(buffer, ibaClockOffset_, 1)); // offset (in sec) to clock, 0xff = -1 s, 0x02 = 2 s
         }
     }
@@ -823,7 +821,7 @@ void Thermostat::show_values(uuid::console::Shell & shell) {
     }
     if (flags == EMS_DEVICE_FLAG_RC30_1) {
         // settings parameters
-        if (ibaMainDisplay_ != EMS_VALUE_UINT_NOTSET) {
+        if (Helpers::hasValue(ibaMainDisplay_)) {
             if (ibaMainDisplay_ == 0) {
                 shell.printfln(F("  Display: internal temperature"));
             } else if (ibaMainDisplay_ == 1) {
@@ -845,7 +843,7 @@ void Thermostat::show_values(uuid::console::Shell & shell) {
             }
         }
 
-        if (ibaLanguage_ != EMS_VALUE_UINT_NOTSET) {
+        if (Helpers::hasValue(ibaLanguage_)) {
             if (ibaLanguage_ == 0) {
                 shell.printfln(F("  Language: German"));
             } else if (ibaLanguage_ == 1) {
@@ -858,15 +856,15 @@ void Thermostat::show_values(uuid::console::Shell & shell) {
         }
     }
     if (flags == EMS_DEVICE_FLAG_RC35 || flags == EMS_DEVICE_FLAG_RC30_1) {
-        if (ibaCalIntTemperature_ != EMS_VALUE_INT_NOTSET) {
+        if (Helpers::hasValue(ibaCalIntTemperature_)) {
             print_value(shell, 2, F("Offset int. temperature"), F_(degrees), Helpers::render_value(buffer, ibaCalIntTemperature_, 2));
         }
 
-        if (ibaMinExtTemperature_ != EMS_VALUE_INT_NOTSET) {
+        if (Helpers::hasValue(ibaMinExtTemperature_)) {
             print_value(shell, 2, F("Min ext. temperature"), F_(degrees), Helpers::render_value(buffer, ibaMinExtTemperature_, 0)); // min ext temp for heating curve, in deg.
         }
 
-        if (ibaBuildingType_ != EMS_VALUE_UINT_NOTSET) {
+        if (Helpers::hasValue(ibaBuildingType_)) {
             if (ibaBuildingType_ == 0) {
                 shell.printfln(F("  Building: light"));
             } else if (ibaBuildingType_ == 1) {
@@ -899,10 +897,10 @@ void Thermostat::show_values(uuid::console::Shell & shell) {
 
         print_value(shell, 4, F("Current room temperature"), F_(degrees), Helpers::render_value(buffer, hc->curr_roomTemp, format_curr));
         print_value(shell, 4, F("Setpoint room temperature"), F_(degrees), Helpers::render_value(buffer, hc->setpoint_roomTemp, format_setpoint));
-        if (hc->mode != EMS_VALUE_UINT_NOTSET) {
+        if (Helpers::hasValue(hc->mode)) {
             print_value(shell, 4, F("Mode"), mode_tostring(hc->get_mode(flags)).c_str());
         }
-        if (hc->mode_type != EMS_VALUE_UINT_NOTSET) {
+        if (Helpers::hasValue(hc->mode_type)) {
             print_value(shell, 4, F("Mode Type"), mode_tostring(hc->get_mode_type(flags)).c_str());
         }
 
@@ -923,7 +921,7 @@ void Thermostat::show_values(uuid::console::Shell & shell) {
         }
 
         // show flow temp if we have it
-        if (hc->circuitcalctemp != EMS_VALUE_UINT_NOTSET) {
+        if (Helpers::hasValue(hc->circuitcalctemp)) {
             print_value(shell, 4, F("Calculated flow temperature"), F_(degrees), Helpers::render_value(buffer, hc->circuitcalctemp, 1));
         }
     }

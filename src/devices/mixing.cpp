@@ -100,19 +100,19 @@ void Mixing::publish_values() {
         return;
     }
 
-    if (flowTemp_ != EMS_VALUE_USHORT_NOTSET) {
+    if (Helpers::hasValue(flowTemp_)) {
         doc["flowTemp"] = (float)flowTemp_ / 10;
     }
 
-    if (pumpMod_ != EMS_VALUE_UINT_NOTSET) {
+    if (Helpers::hasValue(pumpMod_)) {
         doc["pumpMod"] = pumpMod_;
     }
 
-    if (status_ != EMS_VALUE_UINT_NOTSET) {
+    if (Helpers::hasValue(status_)) {
         doc["status"] = status_;
     }
 
-    if (flowSetTemp_ != EMS_VALUE_UINT_NOTSET) {
+    if (Helpers::hasValue(flowSetTemp_)) {
         doc["flowSetTemp"] = flowSetTemp_;
     }
 

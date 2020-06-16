@@ -66,7 +66,7 @@ void Solar::show_values(uuid::console::Shell & shell) {
     print_value(shell, 2, F("Valve (VS2) status"), Helpers::render_value(buffer, valveStatus_, EMS_VALUE_BOOL));
     print_value(shell, 2, F("Pump (PS1) active"), Helpers::render_value(buffer, pump_, EMS_VALUE_BOOL));
 
-    if (pumpWorkMin_ != EMS_VALUE_ULONG_NOTSET) {
+    if (Helpers::hasValue(pumpWorkMin_)) {
         shell.printfln(F("  Pump working time: %d days %d hours %d minutes"), pumpWorkMin_ / 1440, (pumpWorkMin_ % 1440) / 60, pumpWorkMin_ % 60);
     }
 
@@ -81,34 +81,34 @@ void Solar::publish_values() {
 
     char s[10]; // for formatting strings
 
-    if (collectorTemp_ != EMS_VALUE_SHORT_NOTSET) {
+    if (Helpers::hasValue(collectorTemp_)) {
         doc["collectortemp"] = (float)collectorTemp_ / 10;
     }
-    if (bottomTemp_ != EMS_VALUE_SHORT_NOTSET) {
+    if (Helpers::hasValue(bottomTemp_)) {
         doc["bottomtemp"] = (float)bottomTemp_ / 10;
     }
-    if (bottomTemp2_ != EMS_VALUE_SHORT_NOTSET) {
+    if (Helpers::hasValue(bottomTemp2_)) {
         doc["bottomtemp2"] = (float)bottomTemp2_ / 10;
     }
-    if (pumpModulation_ != EMS_VALUE_INT_NOTSET) {
+    if (Helpers::hasValue(pumpModulation_)) {
         doc["pumpmodulation"] = pumpModulation_;
     }
-    if (pump_ != EMS_VALUE_BOOL_NOTSET) {
+    if (Helpers::hasValue(pump_, true)) {
         doc["pump"] = Helpers::render_value(s, pump_, EMS_VALUE_BOOL);
     }
-    if (valveStatus_ != EMS_VALUE_BOOL_NOTSET) {
+    if (Helpers::hasValue(valveStatus_, true)) {
         doc["valvestatus"] = Helpers::render_value(s, valveStatus_, EMS_VALUE_BOOL);
     }
-    if (pumpWorkMin_ != EMS_VALUE_ULONG_NOTSET) {
+    if (Helpers::hasValue(pumpWorkMin_)) {
         doc["pumpWorkMin"] = (float)pumpWorkMin_;
     }
-    if (energyLastHour_ != EMS_VALUE_ULONG_NOTSET) {
+    if (Helpers::hasValue(energyLastHour_)) {
         doc["energylasthour"] = (float)energyLastHour_ / 10;
     }
-    if (energyToday_ != EMS_VALUE_ULONG_NOTSET) {
+    if (Helpers::hasValue(energyToday_)) {
         doc["energytoday"] = energyToday_;
     }
-    if (energyTotal_ != EMS_VALUE_ULONG_NOTSET) {
+    if (Helpers::hasValue(energyTotal_)) {
         doc["energytotal"] = (float)energyTotal_ / 10;
     }
 
