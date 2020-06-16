@@ -56,22 +56,20 @@ void Solar::add_context_menu() {
 void Solar::show_values(uuid::console::Shell & shell) {
     EMSdevice::show_values(shell); // always call this to show header
 
-    char buffer[10]; // used for formatting
-
-    print_value(shell, 2, F("Collector temperature (TS1)"), F_(degrees), Helpers::render_value(buffer, collectorTemp_, 10));
-    print_value(shell, 2, F("Bottom temperature (TS2)"), F_(degrees), Helpers::render_value(buffer, bottomTemp_, 10));
-    print_value(shell, 2, F("Bottom temperature (TS5)"), F_(degrees), Helpers::render_value(buffer, bottomTemp2_, 10));
-    print_value(shell, 2, F("Pump modulation"), F_(percent), Helpers::render_value(buffer, pumpModulation_, 1));
-    print_value(shell, 2, F("Valve (VS2) status"), Helpers::render_value(buffer, valveStatus_, EMS_VALUE_BOOL));
-    print_value(shell, 2, F("Pump (PS1) active"), Helpers::render_value(buffer, pump_, EMS_VALUE_BOOL));
+    print_value(shell, 2, F("Collector temperature (TS1)"), collectorTemp_, F_(degrees), 10);
+    print_value(shell, 2, F("Bottom temperature (TS2)"), bottomTemp_, F_(degrees), 10);
+    print_value(shell, 2, F("Bottom temperature (TS5)"), bottomTemp2_, F_(degrees), 10);
+    print_value(shell, 2, F("Pump modulation"), pumpModulation_, F_(percent), 1);
+    print_value(shell, 2, F("Valve (VS2) status"), valveStatus_, nullptr, EMS_VALUE_BOOL);
+    print_value(shell, 2, F("Pump (PS1) active"), pump_, nullptr, EMS_VALUE_BOOL);
 
     if (Helpers::hasValue(pumpWorkMin_)) {
         shell.printfln(F("  Pump working time: %d days %d hours %d minutes"), pumpWorkMin_ / 1440, (pumpWorkMin_ % 1440) / 60, pumpWorkMin_ % 60);
     }
 
-    print_value(shell, 2, F("Energy last hour"), F_(wh), Helpers::render_value(buffer, energyLastHour_, 10));
-    print_value(shell, 2, F("Energy today"), F_(wh), Helpers::render_value(buffer, energyToday_, 0)); // no division
-    print_value(shell, 2, F("Energy total"), F_(kwh), Helpers::render_value(buffer, energyTotal_, 10));
+    print_value(shell, 2, F("Energy last hour"), energyLastHour_, F_(wh), 10);
+    print_value(shell, 2, F("Energy today"), energyToday_, F_(wh), 0);
+    print_value(shell, 2, F("Energy total"), energyTotal_, F_(kwh), 10);
 }
 
 // publish values via MQTT

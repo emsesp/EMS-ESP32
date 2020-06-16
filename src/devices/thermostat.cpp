@@ -804,20 +804,19 @@ std::string Thermostat::mode_tostring(uint8_t mode) const {
 void Thermostat::show_values(uuid::console::Shell & shell) {
     EMSdevice::show_values(shell); // always call this to show header
 
-    char    buffer[10];                     // for formatting only
     uint8_t flags = (this->flags() & 0x0F); // specific thermostat characteristics, strip the option bits
 
     if (datetime_.size()) {
         shell.printfln(F("  Clock: %s"), datetime_.c_str());
         if (Helpers::hasValue(ibaClockOffset_) && flags == EMS_DEVICE_FLAG_RC30_1) {
-            print_value(shell, 2, F("Offset clock"), Helpers::render_value(buffer, ibaClockOffset_, 1)); // offset (in sec) to clock, 0xff = -1 s, 0x02 = 2 s
+            print_value(shell, 2, F("Offset clock"), ibaClockOffset_, nullptr, 1); // offset (in sec) to clock, 0xff = -1 s, 0x02 = 2 s
         }
     }
 
     if (flags == EMS_DEVICE_FLAG_RC35) {
-        print_value(shell, 2, F("Damped Outdoor temperature"), F_(degrees), Helpers::render_value(buffer, dampedoutdoortemp_, 1));
-        print_value(shell, 2, F("Temp sensor 1"), F_(degrees), Helpers::render_value(buffer, tempsensor1_, 10));
-        print_value(shell, 2, F("Temp sensor 2"), F_(degrees), Helpers::render_value(buffer, tempsensor2_, 10));
+        print_value(shell, 2, F("Damped Outdoor temperature"), dampedoutdoortemp_, F_(degrees), 1);
+        print_value(shell, 2, F("Temp sensor 1"), tempsensor1_, F_(degrees), 10);
+        print_value(shell, 2, F("Temp sensor 2"), tempsensor2_, F_(degrees), 10);
     }
     if (flags == EMS_DEVICE_FLAG_RC30_1) {
         // settings parameters
@@ -857,11 +856,11 @@ void Thermostat::show_values(uuid::console::Shell & shell) {
     }
     if (flags == EMS_DEVICE_FLAG_RC35 || flags == EMS_DEVICE_FLAG_RC30_1) {
         if (Helpers::hasValue(ibaCalIntTemperature_)) {
-            print_value(shell, 2, F("Offset int. temperature"), F_(degrees), Helpers::render_value(buffer, ibaCalIntTemperature_, 2));
+            print_value(shell, 2, F("Offset int. temperature"), ibaCalIntTemperature_, F_(degrees), 2);
         }
 
         if (Helpers::hasValue(ibaMinExtTemperature_)) {
-            print_value(shell, 2, F("Min ext. temperature"), F_(degrees), Helpers::render_value(buffer, ibaMinExtTemperature_, 0)); // min ext temp for heating curve, in deg.
+            print_value(shell, 2, F("Min ext. temperature"), ibaMinExtTemperature_, F_(degrees), 0); // min ext temp for heating curve, in deg.
         }
 
         if (Helpers::hasValue(ibaBuildingType_)) {
@@ -895,8 +894,8 @@ void Thermostat::show_values(uuid::console::Shell & shell) {
             break;
         }
 
-        print_value(shell, 4, F("Current room temperature"), F_(degrees), Helpers::render_value(buffer, hc->curr_roomTemp, format_curr));
-        print_value(shell, 4, F("Setpoint room temperature"), F_(degrees), Helpers::render_value(buffer, hc->setpoint_roomTemp, format_setpoint));
+        print_value(shell, 4, F("Current room temperature"), hc->curr_roomTemp, F_(degrees), format_curr);
+        print_value(shell, 4, F("Setpoint room temperature"), hc->setpoint_roomTemp, F_(degrees), format_setpoint);
         if (Helpers::hasValue(hc->mode)) {
             print_value(shell, 4, F("Mode"), mode_tostring(hc->get_mode(flags)).c_str());
         }
@@ -911,18 +910,18 @@ void Thermostat::show_values(uuid::console::Shell & shell) {
                 shell.printfln(F("    Program is set to Holiday mode"));
             }
 
-            print_value(shell, 4, F("Day temperature"), F_(degrees), Helpers::render_value(buffer, hc->daytemp, 2));
-            print_value(shell, 4, F("Night temperature"), F_(degrees), Helpers::render_value(buffer, hc->nighttemp, 2));
-            print_value(shell, 4, F("Holiday temperature"), F_(degrees), Helpers::render_value(buffer, hc->holidaytemp, 2));
+            print_value(shell, 4, F("Day temperature"), hc->daytemp, F_(degrees), 2);
+            print_value(shell, 4, F("Night temperature"), hc->nighttemp, F_(degrees), 2);
+            print_value(shell, 4, F("Holiday temperature"), hc->holidaytemp, F_(degrees), 2);
 
-            print_value(shell, 4, F("Offset temperature"), F_(degrees), Helpers::render_value(buffer, hc->offsettemp, 2));
-            print_value(shell, 4, F("Design temperature"), F_(degrees), Helpers::render_value(buffer, hc->designtemp, 0));
-            print_value(shell, 4, F("Summer temperature"), F_(degrees), Helpers::render_value(buffer, hc->summertemp, 0));
+            print_value(shell, 4, F("Offset temperature"), hc->offsettemp, F_(degrees), 2);
+            print_value(shell, 4, F("Design temperature"), hc->designtemp, F_(degrees), 0);
+            print_value(shell, 4, F("Summer temperature"), hc->summertemp, F_(degrees), 0);
         }
 
         // show flow temp if we have it
         if (Helpers::hasValue(hc->circuitcalctemp)) {
-            print_value(shell, 4, F("Calculated flow temperature"), F_(degrees), Helpers::render_value(buffer, hc->circuitcalctemp, 1));
+            print_value(shell, 4, F("Calculated flow temperature"), hc->circuitcalctemp, F_(degrees), 1);
         }
     }
 }

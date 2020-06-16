@@ -32,8 +32,45 @@ char * Helpers::hextoa(char * result, const uint8_t value) {
     return result;
 }
 
+#ifdef EMSESP_STANDALONE
+char * Helpers::ultostr(char * ptr, uint32_t value, const uint8_t base) {
+    unsigned long t = 0, res = 0;
+    unsigned long tmp   = value;
+    int           count = 0;
+
+    if (NULL == ptr) {
+        return NULL;
+    }
+
+    if (tmp == 0) {
+        count++;
+    }
+
+    while (tmp > 0) {
+        tmp = tmp / base;
+        count++;
+    }
+
+    ptr += count;
+
+    *ptr = '\0';
+
+    do {
+        res = value - base * (t = value / base);
+        if (res < 10) {
+            *--ptr = '0' + res;
+        } else if ((res >= 10) && (res < 16)) {
+            *--ptr = 'A' - 10 + res;
+        }
+    } while ((value = t) != 0);
+
+    return (ptr);
+}
+#endif
+
+
 /*
- * itoa for 2 byte integers
+ * itoa for 2 byte signed (short) integers
  * written by Lukás Chmela, Released under GPLv3. http://www.strudel.org.uk/itoa/ version 0.4
  */
 char * Helpers::itoa(char * result, int16_t value, const uint8_t base) {
@@ -56,12 +93,14 @@ char * Helpers::itoa(char * result, int16_t value, const uint8_t base) {
     if (tmp_value < 0) {
         *ptr++ = '-';
     }
+
     *ptr-- = '\0';
     while (ptr1 < ptr) {
         tmp_char = *ptr;
         *ptr--   = *ptr1;
         *ptr1++  = tmp_char;
     }
+
     return result;
 }
 
@@ -92,7 +131,7 @@ char * Helpers::render_value(char * result, uint8_t value, uint8_t format) {
         if (value == EMS_VALUE_BOOL_OFF) {
             strlcpy(result, "off", 5);
         } else if (value == EMS_VALUE_BOOL_NOTSET) {
-            strlcpy(result, "?", 5);
+            return nullptr;
         } else {
             strlcpy(result, "on", 5); // assume on. could have value 0x01 or 0xFF
         }
@@ -100,8 +139,7 @@ char * Helpers::render_value(char * result, uint8_t value, uint8_t format) {
     }
 
     if (value == EMS_VALUE_UINT_NOTSET) {
-        strlcpy(result, "?", 5);
-        return (result);
+        return nullptr;
     }
 
     char s2[5] = {0};
@@ -153,8 +191,7 @@ char * Helpers::render_value(char * result, const int16_t value, const uint8_t f
 
     // remove errors or invalid values, 0x7D00 and higher
     if ((value == EMS_VALUE_SHORT_NOTSET) || (value == EMS_VALUE_SHORT_INVALID) || (value == EMS_VALUE_USHORT_NOTSET)) {
-        strlcpy(result, "?", 10);
-        return result;
+        return nullptr;
     }
 
     // just print it if mo conversion required
@@ -196,8 +233,7 @@ char * Helpers::render_value(char * result, const uint16_t value, const uint8_t 
     result[0] = '\0';
 
     if ((value == EMS_VALUE_USHORT_NOTSET) || (value == EMS_VALUE_USHORT_INVALID)) {
-        strlcpy(result, "?", 10);
-        return result;
+        return nullptr;
     }
 
     return (render_value(result, (int16_t)value, format)); // use same code, force it to a signed int
@@ -209,8 +245,7 @@ char * Helpers::render_value(char * result, const int8_t value, const uint8_t fo
     result[0] = '\0';
 
     if (value == EMS_VALUE_INT_NOTSET) {
-        strlcpy(result, "?", 10);
-        return result;
+        return nullptr;
     }
 
     return (render_value(result, (int16_t)value, format)); // use same code, force it to a signed int
@@ -222,8 +257,7 @@ char * Helpers::render_value(char * result, const uint32_t value, const uint8_t 
     result[0] = '\0';
 
     if ((value == EMS_VALUE_ULONG_NOTSET) || (value == EMS_VALUE_ULONG_INVALID)) {
-        strlcpy(result, "?", 10);
-        return (result);
+        return nullptr;
     }
 
     char s[20] = {0};
@@ -238,7 +272,13 @@ char * Helpers::render_value(char * result, const uint32_t value, const uint8_t 
     }
 
 #else
-    strncat(result, itoa(s, value / format, 10), 20);
+    if (format <= 1) {
+        strlcat(result, ultostr(s, value, 10), 20);
+    } else {
+        strncat(result, ultostr(s, value / format, 10), 20);
+        strlcat(result, ".", 20);
+        strncat(result, ultostr(s, value % format, 10), 20);
+    }
 #endif
 
     return result;
@@ -263,7 +303,6 @@ std::string Helpers::data_to_hex(const uint8_t * data, const uint8_t length) {
 
     return str;
 }
-
 
 // takes a hex string and convert it to an unsigned 32bit number (max 8 hex digits)
 // works with only positive numbers
@@ -330,6 +369,5 @@ bool Helpers::hasValue(const uint16_t v) {
 bool Helpers::hasValue(const uint32_t v) {
     return (v != EMS_VALUE_ULONG_NOTSET);
 }
-
 
 } // namespace emsesp

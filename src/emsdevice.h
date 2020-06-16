@@ -120,8 +120,30 @@ class EMSdevice {
     void fetch_values();
     void toggle_fetch(uint16_t telegram_id, bool toggle);
 
-    void print_value(uuid::console::Shell & shell, uint8_t padding, const __FlashStringHelper * name, const __FlashStringHelper * prefix, const char * value);
-    void print_value(uuid::console::Shell & shell, uint8_t padding, const __FlashStringHelper * name, const char * value);
+    template <typename Value>
+    static void
+    print_value(uuid::console::Shell & shell, uint8_t padding, const __FlashStringHelper * name, Value & value, const __FlashStringHelper * suffix, const uint8_t p) {
+        char buffer[15];
+        if (Helpers::render_value(buffer, value, p) == nullptr) {
+            return;
+        }
+
+        uint8_t i = padding;
+        while (i-- > 0) {
+            shell.print(F(" "));
+        }
+
+        shell.printf(PSTR("%s: %s"), uuid::read_flash_string(name).c_str(), buffer);
+
+        if (suffix != nullptr) {
+            shell.println(uuid::read_flash_string(suffix).c_str());
+        } else {
+            shell.println();
+        }
+    }
+
+    static void print_value(uuid::console::Shell & shell, uint8_t padding, const __FlashStringHelper * name, const __FlashStringHelper * value);
+    static void print_value(uuid::console::Shell & shell, uint8_t padding, const __FlashStringHelper * name, const char * value);
 
     enum Brand : uint8_t {
         NO_BRAND, // 0
