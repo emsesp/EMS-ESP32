@@ -38,7 +38,6 @@
 #define EMSUART_UART UART_NUM_2 // on the ESP32 we're using UART2
 #define EMS_UART UART2          // for intr setting
 #define EMSUART_BAUD 9600       // uart baud rate for the EMS circuit
-#define EMSUART_BIT_TIME 104    // bit time @9600 baud
 
 #define EMS_TXMODE_DEFAULT 1
 #define EMS_TXMODE_EMSPLUS 2
@@ -51,12 +50,14 @@
 
 // EMS 1.0
 #define EMSUART_TX_BUSY_WAIT (EMSUART_TX_BIT_TIME / 8) // 13
+#define EMSUART_TX_TIMEOUT (22 * EMSUART_TX_BIT_TIME / EMSUART_TX_BUSY_WAIT) // 176
 
 // HT3/Junkers - Time to send one Byte (8 Bits, 1 Start Bit, 1 Stop Bit) plus 7 bit delay. The -8 is for lag compensation.
-#define EMSUART_TX_WAIT_HT3 (EMSUART_TX_BIT_TIME * 17) - 8 // 1760
+// since we use a faster processor the lag is negligible
+#define EMSUART_TX_WAIT_HT3 (EMSUART_TX_BIT_TIME * 17) // 1768
 
 // EMS+ - Time to send one Byte (8 Bits, 1 Start Bit, 1 Stop Bit) and delay of another Bytetime.
-#define EMSUART_TX_WAIT_PLUS 2070
+#define EMSUART_TX_WAIT_PLUS (EMSUART_TX_BIT_TIME * 20) // 2080
 
 
 // customize the GPIO pins for RX and TX here

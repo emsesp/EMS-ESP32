@@ -463,7 +463,7 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
 
 #if defined(ESP8266)
     Settings  settings;
-    if (settings.ems_tx_mode() <= 5) {
+    if (settings.ems_tx_mode() <= 4) {
 #endif
     // This logging causes errors with timer based tx-modes on esp8266!
     LOG_DEBUG(F("Sending %s Tx [#%d], telegram: %s"),

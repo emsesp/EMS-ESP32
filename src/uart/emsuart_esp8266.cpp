@@ -46,8 +46,10 @@ void ICACHE_RAM_ATTR EMSuart::emsuart_rx_intr_handler(void * para) {
 
     if (USIS(EMSUART_UART) & ((1 << UIBD))) { // BREAK detection = End of EMS data block
         USC0(EMSUART_UART) &= ~(1 << UCBRK);  // reset tx-brk
-        // just for testing if break isn't finished yet
-        // while((USS(EMSUART_UART) >> USRXD) == 0); // wait for idle state of pin
+        if (emsTxBufIdx < emsTxBufLen) { // timer tx_mode is interrupted by <brk>
+            emsTxBufIdx = emsTxBufLen;   // stop timer mode
+            drop_next_rx = true;         // we have trash in buffer
+        }
         USIC(EMSUART_UART) = (1 << UIBD); // INT clear the BREAK detect interrupt
         length             = 0;
         while ((USS(EMSUART_UART) >> USRXC) & 0x0FF) { // read fifo into buffer
@@ -94,7 +96,7 @@ void ICACHE_FLASH_ATTR EMSuart::emsuart_flush_fifos() {
 
 // ISR to Fire when Timer is triggered
 void ICACHE_RAM_ATTR EMSuart::emsuart_tx_timer_intr_handler() {
-    if (emsTxBufIdx > 32) {
+    if (emsTxBufIdx > EMS_MAXBUFFERSIZE) {
         return;
     }
     emsTxBufIdx++;
@@ -103,30 +105,15 @@ void ICACHE_RAM_ATTR EMSuart::emsuart_tx_timer_intr_handler() {
         timer1_write(emsTxWait);
     } else if (emsTxBufIdx == emsTxBufLen) {
         USC0(EMSUART_UART) |= (1 << UCBRK); // set <BRK>
-        if (tx_mode_ > 5 || tx_mode_ < 11) {
-            timer1_write(5 * EMSUART_TX_BIT_TIME * 11);
-            USIE(EMSUART_UART) &= ~(1 << UIBD); // disable break interrupt
-        }
-    } else if (USC0(EMSUART_UART) & (1 << UCBRK)) {
-        USC0(EMSUART_UART) &= ~(1 << UCBRK); // clear <BRK>
-        USIE(EMSUART_UART) |= (1 << UIBD); // enable break interrupt
     }
 }
 /*
  * init UART0 driver
  */
 void ICACHE_FLASH_ATTR EMSuart::start(uint8_t tx_mode) {
-    if (tx_mode > 10) {
-        emsTxWait = 5 * EMSUART_TX_BIT_TIME * tx_mode; // bittimes for tx_mode
-    } else if (tx_mode > 5) {
-        emsTxWait = 10 * EMSUART_TX_BIT_TIME * tx_mode; // bittimes for tx_mode
+    if (tx_mode >= 5) {
+        emsTxWait = 5 * EMSUART_TX_BIT_TIME * (tx_mode + 10); // bittimes for tx_mode
     }
-    if (tx_mode == 5) {
-        USC0(EMSUART_UART) = 0x2C; // 8N1,5
-    } else {
-        USC0(EMSUART_UART) = EMSUART_CONFIG; // 8N1
-    }
-
     if (tx_mode_ != 0xFF) { // it's a restart no need to configure uart
         tx_mode_ = tx_mode;
         restart();
@@ -152,6 +139,7 @@ void ICACHE_FLASH_ATTR EMSuart::start(uint8_t tx_mode) {
 
     // set 9600, 8 bits, no parity check, 1 stop bit
     USD(EMSUART_UART)  = (UART_CLK_FREQ / EMSUART_BAUD);
+    USC0(EMSUART_UART) = EMSUART_CONFIG; // 8N1
 
     emsuart_flush_fifos();
 
@@ -165,7 +153,7 @@ void ICACHE_FLASH_ATTR EMSuart::start(uint8_t tx_mode) {
     //         Otherwise, we're only noticed by UCTOT or RxBRK!
     // change: don't care, we do not use these interrupts
     USC1(EMSUART_UART) = 0; // reset config first
-    // USC1(EMSUART_UART) = (0x7F << UCFFT) | (0x04 << UCTOT) | (1 << UCTOE); // enable interupts
+    // USC1(EMSUART_UART) = (0x7F << UCFFT) | (0x01 << UCTOT) | (1 << UCTOE); // enable interupts
 
     // set interrupts for triggers
     USIC(EMSUART_UART) = 0xFFFF; // clear all interupts
@@ -234,14 +222,8 @@ void ICACHE_FLASH_ATTR EMSuart::tx_brk() {
     ETS_UART_INTR_DISABLE();
     USC0(EMSUART_UART) |= (1 << UCBRK); // set bit
 
-    if (tx_mode_ == EMS_TXMODE_EMSPLUS) {        // EMS+ mode
-        delayMicroseconds(EMSUART_TX_WAIT_PLUS); // 2070
-    } else if (tx_mode_ == EMS_TXMODE_HT3) {     // junkers
-        delayMicroseconds(EMSUART_TX_WAIT_BRK);  // 1144
-    } else {                                     // EMS1.0
-        while (!(USIR(EMSUART_UART) & (1 << UIBD))) {
-        }
-    }
+    // also for EMS+ there is no need to wait longer, we are finished and can free the bus. 
+    delayMicroseconds(EMSUART_TX_WAIT_BRK);  // 1144
 
     USC0(EMSUART_UART) &= ~(1 << UCBRK); // clear BRK bit
     ETS_UART_INTR_ENABLE();
@@ -252,15 +234,15 @@ void ICACHE_FLASH_ATTR EMSuart::tx_brk() {
  * It's a bit dirty. there is no special wait logic per tx_mode type, fifo flushes or error checking
  */
 void EMSuart::send_poll(uint8_t data) {
-    // reset tx-brk, just in case it is accidently set
+    // reset tx-brk, just in case it is accidentally set
     USC0(EMSUART_UART) &= ~(1 << UCBRK);
 
-    if (tx_mode_ > 5) { // timer controlled modes
+    if (tx_mode_ >= 5) { // timer controlled modes
         USF(EMSUART_UART) = data;
         emsTxBufIdx       = 0;
         emsTxBufLen       = 1;
         timer1_write(emsTxWait);
-    } else if (tx_mode_ >= EMS_TXMODE_NEW) { // hardware controlled modes
+    } else if (tx_mode_ == EMS_TXMODE_NEW) { // hardware controlled modes
         USF(EMSUART_UART) = data;
         USC0(EMSUART_UART) |= (1 << UCBRK); // brk after sendout
     } else if (tx_mode_ == EMS_TXMODE_HT3) {
@@ -271,7 +253,7 @@ void EMSuart::send_poll(uint8_t data) {
         USF(EMSUART_UART) = data;
         delayMicroseconds(EMSUART_TX_WAIT_PLUS);
         tx_brk(); // send <BRK>
-    } else { // EMS1.0
+    } else { // EMS1.0, same logic as in transmit
         ETS_UART_INTR_DISABLE();
         volatile uint8_t _usrxc = (USS(EMSUART_UART) >> USRXC) & 0xFF;
         USF(EMSUART_UART)       = data;
@@ -299,11 +281,11 @@ uint16_t ICACHE_FLASH_ATTR EMSuart::transmit(uint8_t * buf, uint8_t len) {
         return EMS_TX_STATUS_ERR; // nothing or to much to send
     }
  
-    // reset tx-brk, just in case it is accidently set
+    // reset tx-brk, just in case it is accidentally set
     USC0(EMSUART_UART) &= ~(1 << UCBRK);
 
     // timer controlled modes with extra delay
-    if (tx_mode_ > 5) {
+    if (tx_mode_ >= 5) {
         for (uint8_t i = 0; i < len; i++) {
             emsTxBuf[i] = buf[i];
         }
@@ -314,8 +296,8 @@ uint16_t ICACHE_FLASH_ATTR EMSuart::transmit(uint8_t * buf, uint8_t len) {
         return EMS_TX_STATUS_OK;
     }
 
-    // hardware controlled modes with 1 and 1,5 stopbits
-    if (tx_mode_ >= EMS_TXMODE_NEW) {
+    // new code from Michael. See https://github.com/proddy/EMS-ESP/issues/380
+    if (tx_mode_ == EMS_TXMODE_NEW) { // tx_mode 4
         for (uint8_t i = 0; i < len; i++) {
             USF(EMSUART_UART) = buf[i];
         }

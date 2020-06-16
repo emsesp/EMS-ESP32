@@ -35,6 +35,9 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
     // telegram handlers
     register_telegram_type(0x0097, F("SM10Monitor"), true, std::bind(&Solar::process_SM10Monitor, this, _1));
     register_telegram_type(0x0362, F("SM100Monitor"), true, std::bind(&Solar::process_SM100Monitor, this, _1));
+    register_telegram_type(0x0363, F("SM100Monitor2"), true, std::bind(&Solar::process_SM100Monitor2, this, _1));
+    register_telegram_type(0x0366, F("SM100Config"), true, std::bind(&Solar::process_SM100Config, this, _1));
+
     register_telegram_type(0x0364, F("SM100Status"), false, std::bind(&Solar::process_SM100Status, this, _1));
     register_telegram_type(0x036A, F("SM100Status2"), false, std::bind(&Solar::process_SM100Status2, this, _1));
     register_telegram_type(0x038E, F("SM100Energy"), true, std::bind(&Solar::process_SM100Energy, this, _1));
@@ -134,7 +137,7 @@ void Solar::process_SM10Monitor(std::shared_ptr<const Telegram> telegram) {
 }
 
 /*
- * SM100Monitor - type 0x0262 EMS+ - for SM100 and SM200
+ * SM100Monitor - type 0x0362 EMS+ - for SM100 and SM200
  * e.g. B0 0B FF 00 02 62 00 44 02 7A 80 00 80 00 80 00 80 00 80 00 80 00 00 7C 80 00 80 00 80 00 80
  * e.g, 30 00 FF 00 02 62 01 AC
  *      30 00 FF 18 02 62 80 00
@@ -149,8 +152,27 @@ void Solar::process_SM100Monitor(std::shared_ptr<const Telegram> telegram) {
     telegram->read_value(bottomTemp2_, 16);  // is *10
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
+// SM100Monitor2 - 0x0363
+// e.g. B0 00 FF 00 02 63 80 00 80 00 00 00 80 00 80 00 80 00 00 80 00 5A
+void Solar::process_SM100Monitor2(std::shared_ptr<const Telegram> telegram) {
+    // not implemented yet
+}
+
+#pragma GCC diagnostic pop
+
+// SM100Config - 0x0366
+// e.g. B0 00 FF 00 02 66     01 62 00 13 40 14
+void Solar::process_SM100Config(std::shared_ptr<const Telegram> telegram) {
+    telegram->read_value(availabilityFlag_, 0);
+    telegram->read_value(configFlag_, 1);
+    telegram->read_value(userFlag_, 2);
+}
+
 /*
- * SM100Status - type 0x0264 EMS+ for pump modulation - for SM100 and SM200
+ * SM100Status - type 0x0364 EMS+ for pump modulation - for SM100 and SM200
  * e.g. 30 00 FF 09 02 64 64 = 100%
  *      30 00 FF 09 02 64 1E = 30%
  */
@@ -159,7 +181,7 @@ void Solar::process_SM100Status(std::shared_ptr<const Telegram> telegram) {
 }
 
 /*
- * SM100Status2 - type 0x026A EMS+ for pump on/off at offset 0x0A - for SM100 and SM200
+ * SM100Status2 - type 0x036A EMS+ for pump on/off at offset 0x0A - for SM100 and SM200
  * e.g. B0 00 FF 00 02 6A 03 03 03 03 01 03 03 03 03 03 01 03 
  * byte 4 = VS2 3-way valve for cylinder 2 : test=01, on=04 and off=03
  * byte 10 = PS1 Solar circuit pump for collector array 1: test=01, on=04 and off=03
@@ -170,7 +192,7 @@ void Solar::process_SM100Status2(std::shared_ptr<const Telegram> telegram) {
 }
 
 /*
- * SM100Energy - type 0x028E EMS+ for energy readings
+ * SM100Energy - type 0x038E EMS+ for energy readings
  * e.g. 30 00 FF 00 02 8E 00 00 00 00 00 00 06 C5 00 00 76 35
  */
 void Solar::process_SM100Energy(std::shared_ptr<const Telegram> telegram) {
@@ -180,7 +202,7 @@ void Solar::process_SM100Energy(std::shared_ptr<const Telegram> telegram) {
 }
 
 /*
- * Junkers ISM1 Solar Module - type 0x0003 EMS+ for energy readings
+ * Junkers ISM1 Solar Module - type 0x0103 EMS+ for energy readings
  *  e.g. B0 00 FF 00 00 03 32 00 00 00 00 13 00 D6 00 00 00 FB D0 F0
  */
 void Solar::process_ISM1StatusMessage(std::shared_ptr<const Telegram> telegram) {
@@ -192,7 +214,7 @@ void Solar::process_ISM1StatusMessage(std::shared_ptr<const Telegram> telegram) 
 }
 
 /*
- * Junkers ISM1 Solar Module - type 0x0001 EMS+ for setting values
+ * Junkers ISM1 Solar Module - type 0x0101 EMS+ for setting values
  * e.g. 90 30 FF 06 00 01 50
  */
 void Solar::process_ISM1Set(std::shared_ptr<const Telegram> telegram) {

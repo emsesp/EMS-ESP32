@@ -30,7 +30,7 @@ Mixing::Mixing(uint8_t device_type, uint8_t device_id, uint8_t product_id, const
     LOG_DEBUG(F("Registering new Mixing module with device ID 0x%02X"), device_id);
 
     if (flags == EMSdevice::EMS_DEVICE_FLAG_MMPLUS) {
-        if (device_id < 0x28) {
+        if (device_id <= 0x27) {
             // telegram handlers 0x20 - 0x27 for HC
             register_telegram_type(device_id - 0x20 + 0x02D7, F("MMPLUSStatusMessage_HC"), true, std::bind(&Mixing::process_MMPLUSStatusMessage_HC, this, _1));
         } else {
@@ -126,7 +126,9 @@ void Mixing::publish_values() {
     Mqtt::publish(topic, doc);
 }
 
-//  heating circuits 0x02D7, 0x02D8 etc...
+// heating circuits 0x02D7, 0x02D8 etc...
+// e.g.  A0 00 FF 00 01 D7 00 00 00 80 00 00 00 00 03 C5
+//       A0 0B FF 00 01 D7 00 00 00 80 00 00 00 00 03 80
 void Mixing::process_MMPLUSStatusMessage_HC(std::shared_ptr<const Telegram> telegram) {
     type_ = Type::HC;
     hc_   = telegram->type_id - 0x02D7 + 1; // determine which circuit this is
@@ -172,6 +174,7 @@ void Mixing::process_MMConfigMessage(std::shared_ptr<const Telegram> telegram) {
     // pos 0: active FF = on
     // pos 1: valve runtime 0C = 120 sec in units of 10 sec
 }
+
 // Mixing on a MM10 - 0xAC
 // e.g. Thermostat -> Mixing Module, type 0xAC, telegram: 10 21 AC 00 1E 64 01 AB
 void Mixing::process_MMSetMessage(std::shared_ptr<const Telegram> telegram) {
