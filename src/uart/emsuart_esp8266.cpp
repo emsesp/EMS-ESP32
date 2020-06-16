@@ -275,10 +275,14 @@ void EMSuart::send_poll(uint8_t data) {
         ETS_UART_INTR_DISABLE();
         volatile uint8_t _usrxc = (USS(EMSUART_UART) >> USRXC) & 0xFF;
         USF(EMSUART_UART)       = data;
-        while (((USS(EMSUART_UART) >> USRXC) & 0xFF) == _usrxc) {
+        uint8_t timeoutcnt      = EMSUART_TX_TIMEOUT;
+        while ((((USS(EMSUART_UART) >> USRXC) & 0xFF) == _usrxc) && (--timeoutcnt > 0)) {
+            delayMicroseconds(EMSUART_TX_BUSY_WAIT); // burn CPU cycles...
         }
         USC0(EMSUART_UART) |= (1 << UCBRK); // set <BRK>
-        while (!(USIR(EMSUART_UART) & (1 << UIBD))) {
+        timeoutcnt = EMSUART_TX_TIMEOUT;
+        while (!(USIR(EMSUART_UART) & (1 << UIBD)) && (--timeoutcnt > 0)) {
+            delayMicroseconds(EMSUART_TX_BUSY_WAIT);
         }
         USC0(EMSUART_UART) &= ~(1 << UCBRK); // clear <BRK>
         ETS_UART_INTR_ENABLE();
@@ -376,9 +380,10 @@ uint16_t ICACHE_FLASH_ATTR EMSuart::transmit(uint8_t * buf, uint8_t len) {
     // send the bytes along the serial line
     for (uint8_t i = 0; i < len; i++) {
         volatile uint8_t _usrxc = (USS(EMSUART_UART) >> USRXC) & 0xFF;
+        uint8_t timeoutcnt      = EMSUART_TX_TIMEOUT;
         USF(EMSUART_UART)       = buf[i]; // send each Tx byte
         // wait for echo
-        while (((USS(EMSUART_UART) >> USRXC) & 0xFF) == _usrxc) {
+        while ((((USS(EMSUART_UART) >> USRXC) & 0xFF) == _usrxc) && (--timeoutcnt > 0)) {
             delayMicroseconds(EMSUART_TX_BUSY_WAIT); // burn CPU cycles...
         }
     }
@@ -391,10 +396,10 @@ uint16_t ICACHE_FLASH_ATTR EMSuart::transmit(uint8_t * buf, uint8_t len) {
     if (!(USIS(EMSUART_UART) & (1 << UIBD))) {
         // no bus collision - send terminating BRK signal
         USC0(EMSUART_UART) |= (1 << UCBRK); // set <BRK>
-
+        uint8_t timeoutcnt = EMSUART_TX_TIMEOUT;
         // wait until BRK detected...
-        while (!(USIR(EMSUART_UART) & (1 << UIBD))) {
-            // delayMicroseconds(EMSUART_TX_BIT_TIME);
+        while (!(USIR(EMSUART_UART) & (1 << UIBD)) && (--timeoutcnt > 0)) {
+            delayMicroseconds(EMSUART_TX_BUSY_WAIT);
         }
 
         USC0(EMSUART_UART) &= ~(1 << UCBRK); // clear <BRK>

@@ -461,7 +461,10 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
 
     length++; // add one since we want to now include the CRC
 
-#if defined(ESP32)
+#if defined(ESP8266)
+    Settings  settings;
+    if (settings.ems_tx_mode() <= 5) {
+#endif
     // This logging causes errors with timer based tx-modes on esp8266!
     LOG_DEBUG(F("Sending %s Tx [#%d], telegram: %s"),
               (telegram->operation == Telegram::Operation::TX_WRITE) ? F("write") : F("read"),
@@ -474,6 +477,8 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
         LOG_NOTICE(F("[DEBUG] Tx: %s"), Helpers::data_to_hex(telegram_raw, length).c_str());
     }
 #endif
+#if defined(ESP8266)
+    }
 #endif
     // send the telegram to the UART Tx
     uint16_t status = EMSuart::transmit(telegram_raw, length);
