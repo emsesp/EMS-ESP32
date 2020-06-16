@@ -206,7 +206,11 @@ void System::start() {
     settings.app_version(EMSESP_APP_VERSION);
     settings.commit();
 
+#if defined(ESP32)
+    LOG_INFO(F("System booted (EMS-ESP version %s ESP32)"), settings.app_version().c_str());
+#else
     LOG_INFO(F("System booted (EMS-ESP version %s)"), settings.app_version().c_str());
+#endif
 
     if (LED_GPIO) {
         pinMode(LED_GPIO, OUTPUT); // LED pin, 0 is disabled

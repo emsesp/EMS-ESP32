@@ -568,14 +568,15 @@ void EMSESP::send_write_request(const uint16_t type_id,
 // this is main entry point when data is received on the Rx line, via emsuart library
 // we check if its a complete telegram or just a single byte (which could be a poll or a return status)
 void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
-    // LOG_DEBUG(F("Rx: %s"), Helpers::data_to_hex(data, length).c_str());
+    static uint32_t tx_time_ = 0;
     // check first for echo
     uint8_t first_value = data[0];
     if (((first_value & 0x7F) == txservice_.ems_bus_id()) && (length > 1)) {
         // if we ask ourself at roomcontrol for version e.g. 0B 98 02 00 20
         Roomctrl::check((data[1] ^ 0x80 ^ rxservice_.ems_mask()), data);
 #ifdef EMSESP_DEBUG
-        LOG_DEBUG(F("[DEBUG] Echo: %s"), Helpers::data_to_hex(data, length).c_str());
+        // get_uptime is only updated once per loop, does not give the right time 
+        LOG_DEBUG(F("[DEBUG] Echo after %d ms: %s"), ::millis() - tx_time_, Helpers::data_to_hex(data, length).c_str());
 #endif
         return; // it's an echo
     }
@@ -638,6 +639,7 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
         // if ht3 poll must be ems_bus_id else if Buderus poll must be (ems_bus_id | 0x80)
         if ((first_value ^ 0x80 ^ rxservice_.ems_mask()) == txservice_.ems_bus_id()) {
             EMSbus::last_bus_activity(uuid::get_uptime()); // set the flag indication the EMS bus is active
+            tx_time_ = ::millis(); // get_uptime is only updated once per loop, does not give the right time 
             txservice_.send();
         }
         // send remote room temperature if active
@@ -731,7 +733,7 @@ void EMSESP::console_commands(Shell & shell, unsigned int context) {
                                        flash_string_vector{F_(n_mandatory)},
                                        [](Shell & shell, const std::vector<std::string> & arguments) {
                                            uint8_t tx_mode = std::strtol(arguments[0].c_str(), nullptr, 10);
-                                           if ((tx_mode > 0) && (tx_mode <= 30)) {
+                                           if ((tx_mode > 0) && (tx_mode <= 50)) {
                                                Settings settings;
                                                settings.ems_tx_mode(tx_mode);
                                                settings.commit();

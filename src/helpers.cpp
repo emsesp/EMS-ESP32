@@ -104,7 +104,7 @@ char * Helpers::render_value(char * result, uint8_t value, uint8_t format) {
         return (result);
     }
 
-    static char s2[5] = {0};
+    char s2[5] = {0};
 
     switch (format) {
     case 2:
@@ -226,7 +226,7 @@ char * Helpers::render_value(char * result, const uint32_t value, const uint8_t 
         return (result);
     }
 
-    static char s[20] = {0};
+    char s[20] = {0};
 
 #ifndef EMSESP_STANDALONE
     if (format <= 1) {

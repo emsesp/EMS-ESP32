@@ -42,13 +42,18 @@
 
 // LEGACY
 #define EMSUART_TX_BIT_TIME 104  // bit time @9600 baud
-#define EMSUART_TX_BRK_WAIT 2070 // the BRK from Boiler master is roughly 1.039ms, so accounting for hardware lag using around 2078 (for half-duplex) - 8 (lag)
+#define EMSUART_TX_WAIT_BRK (EMSUART_TX_BIT_TIME * 11) // 1144
 
 // EMS 1.0
 #define EMSUART_TX_BUSY_WAIT (EMSUART_TX_BIT_TIME / 8) // 13
+#define EMSUART_TX_TIMEOUT (22 * EMSUART_TX_BIT_TIME / EMSUART_TX_BUSY_WAIT) // 176
 
-// HT3/Junkers - Time to send one Byte (8 Bits, 1 Start Bit, 1 Stop Bit). The -8 is for lag compensation.
-#define EMSUART_TX_BRK_WAIT_HT3 (EMSUART_TX_BIT_TIME * 11) - 8 // 1136
+// HT3/Junkers - Time to send one Byte (8 Bits, 1 Start Bit, 1 Stop Bit) plus 7 bit delay. The -8 is for lag compensation.
+// since we use a faster processor the lag is negligible
+#define EMSUART_TX_WAIT_HT3 (EMSUART_TX_BIT_TIME * 17) // 1768
+
+// EMS+ - Time to send one Byte (8 Bits, 1 Start Bit, 1 Stop Bit) and delay of another Bytetime.
+#define EMSUART_TX_WAIT_PLUS (EMSUART_TX_BIT_TIME * 20) // 2080
 
 namespace emsesp {
 
@@ -72,8 +77,6 @@ class EMSuart {
     } EMSRxBuf_t;
 
   private:
-    // static constexpr uint32_t     EMS_RX_TO_TX_TIMEOUT = 20;
-    static uuid::log::Logger      logger_;
     static void ICACHE_RAM_ATTR   emsuart_rx_intr_handler(void * para);
     static void ICACHE_FLASH_ATTR emsuart_recvTask(os_event_t * events);
     static void ICACHE_FLASH_ATTR emsuart_flush_fifos();

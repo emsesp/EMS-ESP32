@@ -461,6 +461,11 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
 
     length++; // add one since we want to now include the CRC
 
+#if defined(ESP8266)
+    Settings  settings;
+    if (settings.ems_tx_mode() <= 4) {
+#endif
+    // This logging causes errors with timer based tx-modes on esp8266!
     LOG_DEBUG(F("Sending %s Tx [#%d], telegram: %s"),
               (telegram->operation == Telegram::Operation::TX_WRITE) ? F("write") : F("read"),
               tx_telegram.id_,
@@ -472,7 +477,9 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
         LOG_NOTICE(F("[DEBUG] Tx: %s"), Helpers::data_to_hex(telegram_raw, length).c_str());
     }
 #endif
-
+#if defined(ESP8266)
+    }
+#endif
     // send the telegram to the UART Tx
     uint16_t status = EMSuart::transmit(telegram_raw, length);
 
@@ -497,13 +504,10 @@ void TxService::send_telegram(const uint8_t * data, const uint8_t length) {
     }
     telegram_raw[length] = calculate_crc(telegram_raw, length); // apppend CRC
 
-    LOG_DEBUG(F("Sending Raw telegram: %s (length=%d)"), Helpers::data_to_hex(telegram_raw, length).c_str(), length);
-
     tx_waiting(false); // no post validation
 
     // send the telegram to the UART Tx
     uint16_t status = EMSuart::transmit(telegram_raw, length);
-    //LOG_DEBUG(F("Tx: %s"), Helpers::data_to_hex(telegram_raw, length).c_str());
 
     if (status == EMS_TX_STATUS_ERR) {
         LOG_ERROR(F("Failed to transmit Tx via UART."));
