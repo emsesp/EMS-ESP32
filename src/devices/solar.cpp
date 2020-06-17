@@ -33,16 +33,22 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
     LOG_DEBUG(F("Registering new Solar module with device ID 0x%02X"), device_id);
 
     // telegram handlers
-    register_telegram_type(0x0097, F("SM10Monitor"), true, std::bind(&Solar::process_SM10Monitor, this, _1));
-    register_telegram_type(0x0362, F("SM100Monitor"), true, std::bind(&Solar::process_SM100Monitor, this, _1));
-    register_telegram_type(0x0363, F("SM100Monitor2"), true, std::bind(&Solar::process_SM100Monitor2, this, _1));
-    register_telegram_type(0x0366, F("SM100Config"), true, std::bind(&Solar::process_SM100Config, this, _1));
+    if (flags == EMSdevice::EMS_DEVICE_FLAG_SM10) {
+        register_telegram_type(0x0097, F("SM10Monitor"), true, std::bind(&Solar::process_SM10Monitor, this, _1));
+    }
+    if (flags == EMSdevice::EMS_DEVICE_FLAG_SM100) {
+        register_telegram_type(0x0362, F("SM100Monitor"), true, std::bind(&Solar::process_SM100Monitor, this, _1));
+        register_telegram_type(0x0363, F("SM100Monitor2"), true, std::bind(&Solar::process_SM100Monitor2, this, _1));
+        register_telegram_type(0x0366, F("SM100Config"), true, std::bind(&Solar::process_SM100Config, this, _1));
 
-    register_telegram_type(0x0364, F("SM100Status"), false, std::bind(&Solar::process_SM100Status, this, _1));
-    register_telegram_type(0x036A, F("SM100Status2"), false, std::bind(&Solar::process_SM100Status2, this, _1));
-    register_telegram_type(0x038E, F("SM100Energy"), true, std::bind(&Solar::process_SM100Energy, this, _1));
-    register_telegram_type(0x0103, F("ISM1StatusMessage"), true, std::bind(&Solar::process_ISM1StatusMessage, this, _1));
-    register_telegram_type(0x0101, F("ISM1Set"), false, std::bind(&Solar::process_ISM1Set, this, _1));
+        register_telegram_type(0x0364, F("SM100Status"), false, std::bind(&Solar::process_SM100Status, this, _1));
+        register_telegram_type(0x036A, F("SM100Status2"), false, std::bind(&Solar::process_SM100Status2, this, _1));
+        register_telegram_type(0x038E, F("SM100Energy"), true, std::bind(&Solar::process_SM100Energy, this, _1));
+    }
+    if (flags == EMSdevice::EMS_DEVICE_FLAG_ISM) {
+        register_telegram_type(0x0103, F("ISM1StatusMessage"), true, std::bind(&Solar::process_ISM1StatusMessage, this, _1));
+        register_telegram_type(0x0101, F("ISM1Set"), false, std::bind(&Solar::process_ISM1Set, this, _1));
+    }
 
     // MQTT callbacks
     // register_mqtt_topic("cmd", std::bind(&Solar::cmd, this, _1));
@@ -204,10 +210,10 @@ void Solar::process_SM100Energy(std::shared_ptr<const Telegram> telegram) {
  *  e.g. B0 00 FF 00 00 03 32 00 00 00 00 13 00 D6 00 00 00 FB D0 F0
  */
 void Solar::process_ISM1StatusMessage(std::shared_ptr<const Telegram> telegram) {
-    telegram->read_value(collectorTemp_, 4);  // Collector Temperature
-    telegram->read_value(bottomTemp_, 6);     // Temperature Bottom of Solar Boiler
-    telegram->read_value(energyLastHour_, 2); // Solar Energy produced in last hour - is * 10 and handled in ems-esp.cpp
-    telegram->read_value(pump_, 8, 0);        // Solar pump on (1) or off (0)
+    telegram->read_value(collectorTemp_, 4);    // Collector Temperature
+    telegram->read_value(bottomTemp_, 6);       // Temperature Bottom of Solar Boiler
+    telegram->read_value32(energyLastHour_, 0); // Solar Energy produced in last hour - is * 10 and handled in ems-esp.cpp
+    telegram->read_value(pump_, 8, 0);          // Solar pump on (1) or off (0)
     telegram->read_value(pumpWorkMin_, 10);
 }
 

@@ -279,15 +279,9 @@ void RxService::add(uint8_t * data, uint8_t length) {
     } else {
         // EMS 2.0 / EMS+
         if (data[2] == 0xFF) {
-            // check for empty data
-            // special broadcast telegrams on ems+ have no data values, some even don't have a type ID, e.g. "21 0B FF 00"
-            if (length > 8) {
-                message_length -= 7; // remove 6 byte header plus CRC
-                message_data += 6;   // message block starts at 7th position
-            }
-            if (length > 5) {
-                type_id = (data[4] << 8) + data[5] + 256; // set type_id if there is one
-            }
+            message_length -= 7; // remove 6 byte header plus CRC
+            message_data += 6;   // message block starts at 7th position
+            type_id = (data[4] << 8) + data[5] + 256; // set type_id if there is one
         } else {
             // its F9 or F7
             uint8_t shift = (data[4] != 0xFF) ? 1 : 0; // true (1) if 5th byte is not 0xFF, then telegram is 1 byte longer

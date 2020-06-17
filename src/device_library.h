@@ -71,7 +71,7 @@
 
 // Solar Modules - 0x30
 { 73, DeviceType::SOLAR, F("SM10"), DeviceFlags::EMS_DEVICE_FLAG_SM10},
-{101, DeviceType::SOLAR, F("ISM1"), DeviceFlags::EMS_DEVICE_FLAG_SM100},
+{101, DeviceType::SOLAR, F("ISM1"), DeviceFlags::EMS_DEVICE_FLAG_ISM},
 {162, DeviceType::SOLAR, F("SM50"), DeviceFlags::EMS_DEVICE_FLAG_SM100},
 {163, DeviceType::SOLAR, F("SM100"), DeviceFlags::EMS_DEVICE_FLAG_SM100},
 {164, DeviceType::SOLAR, F("SM200"), DeviceFlags::EMS_DEVICE_FLAG_SM100},

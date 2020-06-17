@@ -181,6 +181,7 @@ class EMSdevice {
     // Solar Module
     static constexpr uint8_t EMS_DEVICE_FLAG_SM10  = 1;
     static constexpr uint8_t EMS_DEVICE_FLAG_SM100 = 2;
+    static constexpr uint8_t EMS_DEVICE_FLAG_ISM   = 3;
 
     // Mixing Module
     static constexpr uint8_t EMS_DEVICE_FLAG_MMPLUS = 1;
