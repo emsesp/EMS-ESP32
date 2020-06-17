@@ -671,11 +671,13 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::sha
     // create a new heating circuit object
     heating_circuits_.emplace_back(new HeatingCircuit(hc_num, monitor_typeids[hc_num - 1], set_typeids[hc_num - 1]));
 
+    std::sort(heating_circuits_.begin(), heating_circuits_.end()); // sort based on hc number
+
     // set the flag saying we want its data during the next auto fetch
     toggle_fetch(monitor_typeids[hc_num - 1], true);
     toggle_fetch(set_typeids[hc_num - 1], true);
 
-    return heating_circuits_.back();
+    return heating_circuits_.back(); // even after sorting, this should still point back to the newly created HC
 }
 
 // decodes the thermostat mode for the heating circuit based on the thermostat type
@@ -874,6 +876,8 @@ void Thermostat::show_values(uuid::console::Shell & shell) {
         }
     }
 
+    // std::sort(heating_circuits_.begin(), heating_circuits_.end()); // sort based on hc number. This has moved to the heating_circuit() function
+
     for (const auto & hc : heating_circuits_) {
         shell.printfln(F("  Heating Circuit %d:"), hc->hc_num());
 
@@ -1020,17 +1024,35 @@ void Thermostat::process_JunkersMonitor(std::shared_ptr<const Telegram> telegram
 
 // type 0x02A5 - data from the Nefit RC1010/3000 thermostat (0x18) and RC300/310s on 0x10
 void Thermostat::process_RC300Monitor(std::shared_ptr<const Telegram> telegram) {
+    // can't remember why this is here?
     if (telegram->message_data[2] == 0x00) {
         return;
     }
+
     std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
-    telegram->read_value(hc->curr_roomTemp, 0); // is * 10
+
+    // if current room temp starts with 0x90 it's usually trouble
+    if (telegram->message_data[0] != 0x90) {
+        telegram->read_value(hc->curr_roomTemp, 0); // is * 10
+    }
+
     telegram->read_value(hc->mode_type, 10, 1);
     telegram->read_value(hc->mode, 10, 0); // bit 1, mode (auto=1 or manual=0)
 
-    // setpoint is in offset 3 and also 7. We're sticking to 3 for now.
-    // also ignore if its 0 - see https://github.com/proddy/EMS-ESP/issues/256#issuecomment-585171426
-    telegram->read_value8(hc->setpoint_roomTemp, 3); // is * 2, force as single byte
+    // if manual, take the current setpoint temp at pos 6
+    // if auto, take the next setpoint temp at pos 7
+    // pos 3 is the current target temp and sometimes can be 0
+    // see https://github.com/proddy/EMS-ESP/issues/256#issuecomment-585171426
+    uint8_t pos;
+    if (hc->mode == 0) { // manual
+        pos = 6;
+    } else if (hc->mode == 1) { // auto
+        pos = 7;
+    } else {
+        pos = 3;
+    }
+
+    telegram->read_value8(hc->setpoint_roomTemp, pos); // is * 2, force as single byte
 }
 
 // type 0x02B9 EMS+ for reading from RC300/RC310 thermostat

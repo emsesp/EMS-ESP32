@@ -62,7 +62,6 @@ class Thermostat : public EMSdevice {
         uint8_t designtemp        = EMS_VALUE_UINT_NOTSET; // heatingcurve design temp at MinExtTemp
         int8_t  offsettemp        = EMS_VALUE_INT_NOTSET;  // heatingcurve offest temp at roomtemp signed!
 
-
         uint8_t hc_num() const {
             return hc_num_;
         }
@@ -80,12 +79,16 @@ class Thermostat : public EMSdevice {
 
         enum Mode : uint8_t { UNKNOWN, OFF, MANUAL, AUTO, DAY, NIGHT, HEAT, NOFROST, ECO, HOLIDAY, COMFORT, OFFSET, DESIGN, SUMMER };
 
+        // for sorting
+        friend inline bool operator<(const std::shared_ptr<HeatingCircuit> & lhs, const std::shared_ptr<HeatingCircuit> & rhs) {
+            return (lhs->hc_num_ < rhs->hc_num_);
+        }
+
       private:
         uint8_t  hc_num_;
         uint16_t monitor_typeid_;
         uint16_t set_typeid_;
     };
-
 
     std::string mode_tostring(uint8_t mode) const;
 
