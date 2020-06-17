@@ -170,8 +170,11 @@ class EMSdevice {
 
     };
 
-    static constexpr uint16_t EMS_DEVICE_ID_BOILER = 0x08; // fixed device_id for Master Boiler
+    // device IDs
+    static constexpr uint16_t EMS_DEVICE_ID_BOILER = 0x08; // fixed device_id for Master Boiler/UBA
+    static constexpr uint16_t EMS_DEVICE_ID_MODEM  = 0x48; // gateways like the KM200
 
+    // type IDs
     static constexpr uint16_t EMS_TYPE_VERSION    = 0x02; // type ID for Version information. Generic across all EMS devices.
     static constexpr uint16_t EMS_TYPE_UBADevices = 0x07; // EMS connected devices
 

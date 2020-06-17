@@ -170,6 +170,51 @@ static constexpr uint32_t EMS_VALUE_ULONG_INVALID  = 0x80000000;
         EMSESP::show_values(shell);
     }
 
+    if (command == "km") {
+        shell.printfln(F("Testing KM200 Gateway"));
+
+        EMSESP::rxservice_.ems_mask(EMSbus::EMS_MASK_BUDERUS);
+
+        std::string version("1.2.3");
+        EMSESP::add_device(0x10, 158, version, EMSdevice::Brand::BUDERUS); // RC300
+        EMSESP::add_device(0x48, 189, version, EMSdevice::Brand::BUDERUS); // KM200
+        EMSESP::rxservice_.loop();
+
+        // see https://github.com/proddy/EMS-ESP/issues/390
+        uart_telegram("90 48 FF 00 01 A6 4C");
+        uart_telegram("90 48 F9 00 FF 01 B0 08 0B 00 00 00 14 00 00 00 19 00 00 00 4B 00 00");
+        uart_telegram("90 48 FF 08 01 A7 6D");
+        uart_telegram("90 48 F9 00 FF 01 9C 08 03 00 00 00 1E 00 00 00 4B 00 00 00 55 00 00");
+        uart_telegram("90 48 F9 00 FF 01 9C 07 03 00 00 00 1E 00 00 00 30 00 00 00 3C 00 00");
+        uart_telegram("90 48 F9 00 FF 01 9D 00 43 00 00 00 01 00 00 00 02 00 03 00 06 00 03 00 02 05");
+        uart_telegram("90 48 F9 00 FF 01 9D 07 03 00 00 00 1E 00 00 00 30 00 00 00 3C 00 00 00 30 C4");
+        uart_telegram("90 48 F9 00 FF 01 9D 08 03 00 00 00 1E 00 00 00 4B 00 00 00 55 00 00 00 4B C8");
+        uart_telegram("90 48 F9 00 FF 01 B1 08 0B 00 00 00 14 00 00 00 19 00 00 00 4B 00 00 00 19 A2");
+        uart_telegram("90 48 FF 07 01 A7 51");
+        uart_telegram("90 48 FF 08 01 A7 6D");
+        uart_telegram("90 48 FF 00 01 A7 4D");
+        uart_telegram("90 48 FF 25 01 A6 D8");
+        uart_telegram("90 48 FF 07 01 A7 51");
+        uart_telegram("90 0B 06 00 14 06 17 08 03 22 00 01 10 FF 00 18"); // time
+        uart_telegram("90 0B FF 00 01 A5 80 00 01 28 17 00 28 2A 05 A0 02 03 03 05 A0 05 A0 00 00 11 01 02 FF FF 00");
+        uart_telegram("90 0B FF 00 01 B9 00 2E 26 26 1B 03 00 FF FF 05 28 01 E1 20 01 0F 05 2A");
+        uart_telegram("90 0B FF 00 01 A6 90 0B FF 00 01 A6 18");
+        uart_telegram("90 0B FF 00 01 B9 00 2E 26 26 1B 03 00 FF FF 05 28 01 E1 20 01 0F 05 2A");
+        uart_telegram("90 0B FF 00 01 A6 90 0B FF 00 01 A6 18");
+        uart_telegram("90 0B FF 00 01 BA 00 2E 2A 26 1E 03 00 FF FF 05 2A 01 E1 20 01 0F 05 2A");
+        uart_telegram("90 0B FF 00 01 A7 90 0B FF 00 01 A7 19");
+        uart_telegram("90 0B FF 00 01 BB 00 2E 2A 26 1E 03 00 FF FF 05 2A 01 E1 20 01 0F 05 2A");
+        uart_telegram("90 0B FF 00 01 A8 90 0B FF 00 01 A8 16");
+        uart_telegram("90 0B FF 00 01 BC 00 2E 2A 26 1E 03 00 FF FF 05 2A 01 E1 20 01 0F 05 2A");
+        uart_telegram("90 0B FF 00 01 A5 80 00 01 28 17 00 28 2A 05 A0 02 03 03 05 A0 05 A0 00 00 11 01 02 FF FF 00");
+
+        // uart_telegram("10 00 FF 00 01 A5 00 D7 21 00 00 00 00 30 01 84 01 01 03 01 84 01 F1 00 00 11 01 00 08 63 00");
+
+        EMSESP::show_emsbus(shell);
+        EMSESP::rxservice_.loop();
+        EMSESP::show_values(shell);
+    }
+
     if (command == "cr100") {
         shell.printfln(F("Testing CR100"));
 
@@ -386,14 +431,12 @@ static constexpr uint32_t EMS_VALUE_ULONG_INVALID  = 0x80000000;
     }
 
     if (command == "rx2") {
-        // incoming Rx
         uart_telegram({0x1B, 0x5B, 0xFD, 0x2D, 0x9E, 0x3A, 0xB6, 0xE5, 0x02, 0x20, 0x33, 0x30, 0x32, 0x3A, 0x20, 0x5B,
                        0x73, 0xFF, 0xFF, 0xCB, 0xDF, 0xB7, 0xA7, 0xB5, 0x67, 0x77, 0x77, 0xE4, 0xFF, 0xFD, 0x77, 0xFF});
     }
 
     // https://github.com/proddy/EMS-ESP/issues/380#issuecomment-633663007
     if (command == "rx3") {
-        // incoming Rx
         uart_telegram({0x21, 0x0B, 0xFF, 0x00});
     }
 
@@ -460,6 +503,44 @@ void Test::uart_telegram(const std::vector<uint8_t> & rx_data) {
     std::copy(rx_data.begin(), rx_data.end(), data);
     data[len] = EMSESP::rxservice_.calculate_crc(rx_data.data(), len);
     EMSESP::incoming_telegram(data, len + 1);
+    EMSESP::rxservice_.loop();
+}
+
+// takes raw string
+void Test::uart_telegram(const char * rx_data) {
+    // since the telegram data is a const, make a copy. add 1 to grab the \0 EOS
+    char telegram[EMS_MAX_TELEGRAM_LENGTH * 3];
+    for (uint8_t i = 0; i < strlen(rx_data); i++) {
+        telegram[i] = rx_data[i];
+    }
+    telegram[strlen(rx_data)] = '\0'; // make sure its terminated
+
+    uint8_t count = 0;
+    char *  p;
+    char    value[10] = {0};
+
+    uint8_t data[EMS_MAX_TELEGRAM_LENGTH];
+
+    // get first value, which should be the src
+    if ((p = strtok(telegram, " ,"))) { // delimiter
+        strlcpy(value, p, 10);
+        data[0] = (uint8_t)strtol(value, 0, 16);
+    }
+
+    // and iterate until end
+    while (p != 0) {
+        if ((p = strtok(nullptr, " ,"))) {
+            strlcpy(value, p, 10);
+            uint8_t val   = (uint8_t)strtol(value, 0, 16);
+            data[++count] = val;
+        }
+    }
+
+    if (count == 0) {
+        return; // nothing to send
+    }
+
+    EMSESP::incoming_telegram(data, count + 1);
 }
 
 #pragma GCC diagnostic push
