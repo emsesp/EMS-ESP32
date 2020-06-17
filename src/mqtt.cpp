@@ -234,7 +234,7 @@ void Mqtt::loop() {
             force_publish_ = false;
             send_heartbeat();             // create a heartbeat payload
             EMSESP::publish_all_values(); // add sensors and mqtt to queue
-            process_all_queue();          // publish everything on queue
+            // process_all_queue();          // publish everything on queue
         }
 
         // send out heartbeat

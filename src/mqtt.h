@@ -123,7 +123,7 @@ class Mqtt {
     static bool             mqtt_retain_;
 
     static constexpr uint8_t  MQTT_QUEUE_MAX_SIZE       = 50;
-    static constexpr uint32_t MQTT_PUBLISH_WAIT         = 750;    // delay between sending publishes, to account for large payloads
+    static constexpr uint32_t MQTT_PUBLISH_WAIT         = 250;    // delay between sending publishes, to account for large payloads
     static constexpr uint8_t  MQTT_PUBLISH_MAX_RETRY    = 3;      // max retries for giving up on publishing
     static constexpr uint8_t  MQTT_KEEP_ALIVE           = 60;     // 60 seconds. This could also be less, like 30 seconds
     static constexpr uint32_t MQTT_RECONNECT_DELAY_MIN  = 2000;   // Try to reconnect in 2 seconds upon disconnection
