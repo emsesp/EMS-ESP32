@@ -351,7 +351,7 @@ void Boiler::show_values(uuid::console::Shell & shell) {
         buffer[1] = '\0';
         strlcpy(s, buffer, 7);
         strlcat(s, "x3min", 7);
-        print_value(shell, 2, F("Warm Water circulation pump freq"), FPSTR(s)); // TODO check
+        print_value(shell, 2, F("Warm Water circulation pump freq"), s);
     }
     print_value(shell, 2, F("Warm Water circulation active"), wWCirc_, nullptr, EMS_VALUE_BOOL);
 
@@ -395,7 +395,7 @@ void Boiler::show_values(uuid::console::Shell & shell) {
     if (Helpers::hasValue(serviceCode_)) {
         shell.printfln(F("  System service code: %s (%d)"), serviceCodeChar_, serviceCode_);
     } else if (serviceCodeChar_[0] != '\0') {
-        print_value(shell, 2, F("System service code"), FPSTR(serviceCodeChar_)); // TODO check
+        print_value(shell, 2, F("System service code"), serviceCodeChar_);
     }
 
     // UBAParameters
