@@ -261,46 +261,34 @@ void RxService::add(uint8_t * data, uint8_t length) {
     }
 
     // src, dest and offset are always in fixed positions
-    uint8_t src    = data[0] & 0x7F; // strip MSB, don't care if its read or write for processing
+    uint8_t src    = data[0] & 0x7F; // strip MSB (HT3 adds it)
     uint8_t dest   = data[1] & 0x7F; // strip MSB, don't care if its read or write for processing
     uint8_t offset = data[3];        // offset is always 4th byte
 
-    // set default values, which will be adjusted depending on the EMS1.0/2.0 logic below
-    uint16_t  type_id        = 0;
-    uint8_t * message_data   = data;
-    uint8_t   message_length = length;
+    uint16_t  type_id;
+    uint8_t * message_data;   // where the message block starts
+    uint8_t   message_length; // length of the message block, excluding CRC
 
-    // work out depending on the type where the data message block starts
-    if (data[2] < 0xF0 || length < 6) {
+    // work out depending on the type, where the data message block starts and the message length
+    if (data[2] < 0xF0) {
         // EMS 1.0
-        type_id = data[2];
-        message_data += 4;   // message block starts at 5th byte
-        message_length -= 5; // remove 4 bytes header plus CRC
+        type_id        = data[2];
+        message_data   = data + 4;
+        message_length = length - 5;
     } else {
         // EMS 2.0 / EMS+
-        if (data[2] == 0xFF) {
-            // check for empty data
-            // special broadcast telegrams on ems+ have no data values, some even don't have a type ID, e.g. "21 0B FF 00"
-            if (length > 8) {
-                message_length -= 7; // remove 6 byte header plus CRC
-                message_data += 6;   // message block starts at 7th position
-            }
-            if (length > 5) {
-                type_id = (data[4] << 8) + data[5] + 256; // set type_id if there is one
-            }
-        } else {
-            // its F9 or F7
-            uint8_t shift = (data[4] != 0xFF) ? 1 : 0; // true (1) if 5th byte is not 0xFF, then telegram is 1 byte longer
-            type_id       = (data[5 + shift] << 8) + data[6 + shift] + 256;
-            message_data += 6 + shift; // there is a special byte after the typeID which we ignore for now
-            if (length > (9 + shift)) {
-                message_length -= (9 + shift);
-            }
+        uint8_t shift = 0; // default when data[2] is 0xFF
+        if (data[2] != 0xFF) {
+            // its F9 or F7, re-calculate shift. If the 5th byte is not 0xFF then telegram is 1 byte longer
+            shift = (data[4] != 0xFF) ? 2 : 1;
         }
+        type_id        = (data[4 + shift] << 8) + data[5 + shift] + 256;
+        message_data   = data + 6 + shift;
+        message_length = length - 6 - shift;
     }
 
-    // if we don't have a type_id, exit
-    if (type_id == 0) {
+    // if we don't have a type_id or empty data block, exit
+    if ((type_id == 0) || (message_length == 0)) {
         return;
     }
 
@@ -462,20 +450,20 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
     length++; // add one since we want to now include the CRC
 
 #if defined(ESP8266)
-    Settings  settings;
+    Settings settings;
     if (settings.ems_tx_mode() <= 4) {
 #endif
-    // This logging causes errors with timer based tx-modes on esp8266!
-    LOG_DEBUG(F("Sending %s Tx [#%d], telegram: %s"),
-              (telegram->operation == Telegram::Operation::TX_WRITE) ? F("write") : F("read"),
-              tx_telegram.id_,
-              telegram->to_string(telegram_raw, length).c_str());
+        // This logging causes errors with timer based tx-modes on esp8266!
+        LOG_DEBUG(F("Sending %s Tx [#%d], telegram: %s"),
+                  (telegram->operation == Telegram::Operation::TX_WRITE) ? F("write") : F("read"),
+                  tx_telegram.id_,
+                  telegram->to_string(telegram_raw, length).c_str());
 
 #ifdef EMSESP_DEBUG
-    // if watching in 'raw' mode
-    if (EMSESP::watch() == 2) {
-        LOG_NOTICE(F("[DEBUG] Tx: %s"), Helpers::data_to_hex(telegram_raw, length).c_str());
-    }
+        // if watching in 'raw' mode
+        if (EMSESP::watch() == 2) {
+            LOG_NOTICE(F("[DEBUG] Tx: %s"), Helpers::data_to_hex(telegram_raw, length).c_str());
+        }
 #endif
 #if defined(ESP8266)
     }
@@ -580,10 +568,11 @@ void TxService::read_request(const uint16_t type_id, const uint8_t dest, const u
 // Send a raw telegram to the bus, telegram is a text string of hex values
 void TxService::send_raw(const char * telegram_data) {
     // since the telegram data is a const, make a copy. add 1 to grab the \0 EOS
-    char telegram[EMS_MAX_TELEGRAM_LENGTH];
-    for (uint8_t i = 0; i < strlen(telegram_data) + 1; i++) {
+    char telegram[EMS_MAX_TELEGRAM_LENGTH * 3];
+    for (uint8_t i = 0; i < strlen(telegram_data); i++) {
         telegram[i] = telegram_data[i];
     }
+    telegram[strlen(telegram_data)] = '\0'; // make sure its terminated
 
     uint8_t count = 0;
     char *  p;
@@ -596,6 +585,7 @@ void TxService::send_raw(const char * telegram_data) {
         strlcpy(value, p, 10);
         data[0] = (uint8_t)strtol(value, 0, 16);
     }
+
     // and iterate until end
     while (p != 0) {
         if ((p = strtok(nullptr, " ,"))) {
