@@ -67,6 +67,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
             register_telegram_type(monitor_typeids[i], F("RC20Monitor"), false, std::bind(&Thermostat::process_RC20Monitor, this, _1));
             register_telegram_type(set_typeids[i], F("RC20Set"), false, std::bind(&Thermostat::process_RC20Set, this, _1));
         }
+        register_telegram_type(0xAF, F("RC20Remote"), false, std::bind(&Thermostat::process_RC20Remote, this, _1));
 
         // RC20 newer
     } else if (flags == EMSdevice::EMS_DEVICE_FLAG_RC20_2) {
@@ -76,6 +77,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
             register_telegram_type(monitor_typeids[i], F("RC20Monitor"), false, std::bind(&Thermostat::process_RC20Monitor_2, this, _1));
             register_telegram_type(set_typeids[i], F("RC20Set"), false, std::bind(&Thermostat::process_RC20Set_2, this, _1));
         }
+        register_telegram_type(0xAF, F("RC20Remote"), false, std::bind(&Thermostat::process_RC20Remote, this, _1));
 
         // RC30
     } else if (flags == EMSdevice::EMS_DEVICE_FLAG_RC30) {
@@ -655,6 +657,11 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::sha
         }
     }
 
+    // not found, search device-id types for remote thermostats
+    if (telegram->src >= 0x18 && telegram->src <= 0x1B) {
+        hc_num = telegram->src - 0x17;
+    }
+
     // still didn't recognize it, ignore it
     if (hc_num == 0) {
         return nullptr;
@@ -952,6 +959,12 @@ void Thermostat::process_RC20Set_2(std::shared_ptr<const Telegram> telegram) {
     std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
 
     telegram->read_value(hc->mode, 3);
+}
+
+// 0xAF - for reading the roomtemperature from the RC20/ES72 thermostat (0x18, 0x19, ..)
+void Thermostat::process_RC20Remote(std::shared_ptr<const Telegram> telegram) {
+    std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
+    telegram->read_value(hc->curr_roomTemp, 0);
 }
 
 // type 0xB1 - data from the RC10 thermostat (0x17)
