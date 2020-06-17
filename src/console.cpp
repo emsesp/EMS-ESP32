@@ -410,7 +410,7 @@ void Console::start() {
         shell = std::make_shared<EMSESPStreamConsole>(serial_console_, true);
         shell->maximum_log_messages(100); // default is 50
         shell->start();
-        shell->log_level(uuid::log::Level::DEBUG); // order is: err, warning, notice, info, trace, debug, all
+        shell->log_level(uuid::log::Level::DEBUG); // order is: err, warning, notice, info, debug, trace, all
 
 #if defined(EMSESP_STANDALONE)
         shell->add_flags(CommandFlags::ADMIN);

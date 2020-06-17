@@ -123,9 +123,7 @@ class Boiler : public EMSdevice {
     uint8_t tap_water_active_ = EMS_VALUE_BOOL_NOTSET; // Hot tap water is on/off
     uint8_t heating_active_   = EMS_VALUE_BOOL_NOTSET; // Central heating is on/off
 
-    // heatpump boilers
-    uint8_t hpModulation_ = EMS_VALUE_UINT_NOTSET; // heatpump modulation in %
-    uint8_t hpSpeed_      = EMS_VALUE_UINT_NOTSET; // speed 0-100 %
+    uint8_t pumpMod2_ = EMS_VALUE_UINT_NOTSET; // heatpump modulation from 0xE3 (heatpumps)
 
     void process_UBAParameterWW(std::shared_ptr<const Telegram> telegram);
     void process_UBAMonitorFast(std::shared_ptr<const Telegram> telegram);
@@ -135,6 +133,8 @@ class Boiler : public EMSdevice {
     void process_UBAMonitorFastPlus(std::shared_ptr<const Telegram> telegram);
     void process_UBAMonitorSlow(std::shared_ptr<const Telegram> telegram);
     void process_UBAMonitorSlowPlus(std::shared_ptr<const Telegram> telegram);
+    void process_UBAMonitorSlowPlus2(std::shared_ptr<const Telegram> telegram);
+
     void process_UBAOutdoorTemp(std::shared_ptr<const Telegram> telegram);
     void process_UBASetPoints(std::shared_ptr<const Telegram> telegram);
     void process_UBAFlags(std::shared_ptr<const Telegram> telegram);
@@ -144,8 +144,6 @@ class Boiler : public EMSdevice {
     void process_UBAErrorMessage(std::shared_ptr<const Telegram> telegram);
 
     void process_UBADHWStatus(std::shared_ptr<const Telegram> telegram);
-    void process_HPMonitor1(std::shared_ptr<const Telegram> telegram);
-    void process_HPMonitor2(std::shared_ptr<const Telegram> telegram);
 
     void check_active();
 

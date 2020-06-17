@@ -63,14 +63,11 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     register_telegram_type(0x16, F("UBAParameters"), true, std::bind(&Boiler::process_UBAParameters, this, _1));
     register_telegram_type(0x1A, F("UBASetPoints"), false, std::bind(&Boiler::process_UBASetPoints, this, _1));
     register_telegram_type(0xD1, F("UBAOutdoorTemp"), false, std::bind(&Boiler::process_UBAOutdoorTemp, this, _1));
+    register_telegram_type(0xE3, F("UBAMonitorSlowPlus"), false, std::bind(&Boiler::process_UBAMonitorSlowPlus2, this, _1));
     register_telegram_type(0xE4, F("UBAMonitorFastPlus"), false, std::bind(&Boiler::process_UBAMonitorFastPlus, this, _1));
     register_telegram_type(0xE5, F("UBAMonitorSlowPlus"), false, std::bind(&Boiler::process_UBAMonitorSlowPlus, this, _1));
 
     register_telegram_type(0xE9, F("UBADHWStatus"), false, std::bind(&Boiler::process_UBADHWStatus, this, _1));
-
-    // HeatPump specific
-    register_telegram_type(0xE3, F("HeatPumpMonitor1"), false, std::bind(&Boiler::process_HPMonitor1, this, _1));
-    register_telegram_type(0xE5, F("HeatPumpMonitor2"), false, std::bind(&Boiler::process_HPMonitor2, this, _1));
 
     // MQTT callbacks
     register_mqtt_topic("boiler_cmd", std::bind(&Boiler::boiler_cmd, this, _1));
@@ -195,6 +192,9 @@ void Boiler::publish_values() {
     if (Helpers::hasValue(pumpMod_)) {
         doc["pumpMod"] = pumpMod_;
     }
+    if (Helpers::hasValue(pumpMod2_)) {
+        doc["pumpMod2"] = pumpMod2_;
+    }
     if (Helpers::hasValue(wWCircPump_, true)) {
         doc["wWCircPump"] = Helpers::render_value(s, wWCircPump_, EMS_VALUE_BOOL);
     }
@@ -312,15 +312,6 @@ void Boiler::publish_values() {
         doc["serviceCodeNumber"] = serviceCode_;
     }
 
-    // heatpump specific
-    if (Helpers::hasValue(hpModulation_)) {
-        doc["pumpmodulation"] = hpModulation_;
-    }
-
-    if (Helpers::hasValue(hpSpeed_)) {
-        doc["pumpspeed"] = hpSpeed_;
-    }
-
 #ifdef EMSESP_DEBUG
     LOG_DEBUG(F("[DEBUG] Performing a boiler publish"));
 #endif
@@ -340,21 +331,19 @@ bool Boiler::updated_values() {
 void Boiler::show_values(uuid::console::Shell & shell) {
     EMSdevice::show_values(shell); // for showing the header
 
-    char buffer[10]; // used for formatting
-
     if (Helpers::hasValue(tap_water_active_, true)) {
-        print_value(shell, 2, F("Hot tap water"), tap_water_active_ ? "running" : "off");
+        print_value(shell, 2, F("Hot tap water"), tap_water_active_ ? F("running") : F("off"));
     }
 
     if (Helpers::hasValue(heating_active_, true)) {
-        print_value(shell, 2, F("Central heating"), heating_active_ ? "active" : "off");
+        print_value(shell, 2, F("Central heating"), heating_active_ ? F("active") : F("off"));
     }
 
-    print_value(shell, 2, F("Warm Water activated"), Helpers::render_value(buffer, wWActivated_, EMS_VALUE_BOOL));
-    print_value(shell, 2, F("Warm Water charging type"), wWCircPumpType_ ? "3-way valve" : "charge pump");
-    print_value(shell, 2, F("Warm Water circulation pump available"), Helpers::render_value(buffer, wWCircPump_, EMS_VALUE_BOOL));
+    print_value(shell, 2, F("Warm Water activated"), wWActivated_, nullptr, EMS_VALUE_BOOL);
+    print_value(shell, 2, F("Warm Water charging type"), wWCircPumpType_ ? F("3-way valve") : F("charge pump"));
+    print_value(shell, 2, F("Warm Water circulation pump available"), wWCircPump_, nullptr, EMS_VALUE_BOOL);
     if (wWCircPumpMode_ == 7) {
-        print_value(shell, 2, F("Warm Water circulation pump freq"), "continuous");
+        print_value(shell, 2, F("Warm Water circulation pump freq"), F("continuous"));
     } else {
         char s[7];
         char buffer[2];
@@ -362,67 +351,67 @@ void Boiler::show_values(uuid::console::Shell & shell) {
         buffer[1] = '\0';
         strlcpy(s, buffer, 7);
         strlcat(s, "x3min", 7);
-        print_value(shell, 2, F("Warm Water circulation pump freq"), s);
+        print_value(shell, 2, F("Warm Water circulation pump freq"), FPSTR(s)); // TODO check
     }
-    print_value(shell, 2, F("Warm Water circulation active"), Helpers::render_value(buffer, wWCirc_, EMS_VALUE_BOOL));
+    print_value(shell, 2, F("Warm Water circulation active"), wWCirc_, nullptr, EMS_VALUE_BOOL);
 
     if (wWComfort_ == 0x00) {
-        print_value(shell, 2, F("Warm Water comfort setting"), "Hot");
+        print_value(shell, 2, F("Warm Water comfort setting"), F("Hot"));
     } else if (wWComfort_ == 0xD8) {
-        print_value(shell, 2, F("Warm Water comfort setting"), "Eco");
+        print_value(shell, 2, F("Warm Water comfort setting"), F("Eco"));
     } else if (wWComfort_ == 0xEC) {
-        print_value(shell, 2, F("Warm Water comfort setting"), "Intelligent");
+        print_value(shell, 2, F("Warm Water comfort setting"), F("Intelligent"));
     }
 
-    print_value(shell, 2, F("Warm water mix temperature"), F_(degrees), Helpers::render_value(buffer, wwMixTemperature_, 10));
-    print_value(shell, 2, F("Warm water buffer boiler temperature"), F_(degrees), Helpers::render_value(buffer, wwBufferBoilerTemperature_, 10));
-
-    print_value(shell, 2, F("Warm Water disinfection temperature"), F_(degrees), Helpers::render_value(buffer, wWDisinfectTemp_, 1));
-    print_value(shell, 2, F("Warm Water selected temperature"), F_(degrees), Helpers::render_value(buffer, wWSelTemp_, 1));
-    print_value(shell, 2, F("Warm Water set temperature"), F_(degrees), Helpers::render_value(buffer, wWSetTmp_, 1));
-    print_value(shell, 2, F("Warm Water current temperature (intern)"), F_(degrees), Helpers::render_value(buffer, wWCurTmp_, 10));
-    print_value(shell, 2, F("Warm water storage temperature (intern)"), F_(degrees), Helpers::render_value(buffer, wwStorageTemp1_, 10));
-    print_value(shell, 2, F("Warm Water current temperature (extern)"), F_(degrees), Helpers::render_value(buffer, wWCurTmp2_, 10));
-    print_value(shell, 2, F("Warm water storage temperature (extern)"), F_(degrees), Helpers::render_value(buffer, wwStorageTemp2_, 10));
-    print_value(shell, 2, F("Warm Water current tap water flow"), F("l/min"), Helpers::render_value(buffer, wWCurFlow_, 10));
-    print_value(shell, 2, F("Warm Water # starts"), Helpers::render_value(buffer, wWStarts_, 1));
+    print_value(shell, 2, F("Warm water mix temperature"), wwMixTemperature_, F_(degrees), 10);
+    print_value(shell, 2, F("Warm water buffer boiler temperature"), wwBufferBoilerTemperature_, F_(degrees), 10);
+    print_value(shell, 2, F("Warm Water disinfection temperature"), wWDisinfectTemp_, F_(degrees), 1);
+    print_value(shell, 2, F("Warm Water selected temperature"), wWSelTemp_, F_(degrees), 1);
+    print_value(shell, 2, F("Warm Water set temperature"), wWSetTmp_, F_(degrees), 1);
+    print_value(shell, 2, F("Warm Water current temperature (intern)"), wWCurTmp_, F_(degrees), 10);
+    print_value(shell, 2, F("Warm water storage temperature (intern)"), wwStorageTemp1_, F_(degrees), 10);
+    print_value(shell, 2, F("Warm Water current temperature (extern)"), wWCurTmp2_, F_(degrees), 10);
+    print_value(shell, 2, F("Warm water storage temperature (extern)"), wwStorageTemp2_, F_(degrees), 10);
+    print_value(shell, 2, F("Warm Water current tap water flow"), wWCurFlow_, F("l/min"), 10);
+    print_value(shell, 2, F("Warm Water # starts"), wWStarts_, nullptr, 1);
     if (Helpers::hasValue(wWWorkM_)) {
         shell.printfln(F("  Warm Water active time: %d days %d hours %d minutes"), wWWorkM_ / 1440, (wWWorkM_ % 1440) / 60, wWWorkM_ % 60);
     }
-    print_value(shell, 2, F("Warm Water charging"), Helpers::render_value(buffer, wWHeat_, EMS_VALUE_BOOL));
-    print_value(shell, 2, F("Warm Water disinfecting"), Helpers::render_value(buffer, wWDesinfecting_, EMS_VALUE_BOOL));
-    print_value(shell, 2, F("Selected flow temperature"), F_(degrees), Helpers::render_value(buffer, selFlowTemp_, 1));
-    print_value(shell, 2, F("Current flow temperature"), F_(degrees), Helpers::render_value(buffer, curFlowTemp_, 10));
-    print_value(shell, 2, F("Max boiler temperature"), F_(degrees), Helpers::render_value(buffer, boilTemp_, 10));
-    print_value(shell, 2, F("Return temperature"), F_(degrees), Helpers::render_value(buffer, retTemp_, 10));
-    print_value(shell, 2, F("Gas"), Helpers::render_value(buffer, burnGas_, EMS_VALUE_BOOL));
-    print_value(shell, 2, F("Boiler pump"), Helpers::render_value(buffer, heatPmp_, EMS_VALUE_BOOL));
-    print_value(shell, 2, F("Fan"), Helpers::render_value(buffer, fanWork_, EMS_VALUE_BOOL));
-    print_value(shell, 2, F("Ignition"), Helpers::render_value(buffer, ignWork_, EMS_VALUE_BOOL));
+    print_value(shell, 2, F("Warm Water charging"), wWHeat_, nullptr, EMS_VALUE_BOOL);
+    print_value(shell, 2, F("Warm Water disinfecting"), wWDesinfecting_, nullptr, EMS_VALUE_BOOL);
+    print_value(shell, 2, F("Selected flow temperature"), selFlowTemp_, F_(degrees), 1);
+    print_value(shell, 2, F("Current flow temperature"), curFlowTemp_, F_(degrees), 10);
+    print_value(shell, 2, F("Max boiler temperature"), boilTemp_, F_(degrees), 10);
+    print_value(shell, 2, F("Return temperature"), retTemp_, F_(degrees), 10);
+    print_value(shell, 2, F("Gas"), burnGas_, nullptr, EMS_VALUE_BOOL);
+    print_value(shell, 2, F("Boiler pump"), heatPmp_, nullptr, EMS_VALUE_BOOL);
+    print_value(shell, 2, F("Fan"), fanWork_, nullptr, EMS_VALUE_BOOL);
+    print_value(shell, 2, F("Ignition"), ignWork_, nullptr, EMS_VALUE_BOOL);
 
-    print_value(shell, 2, F("Burner selected max power"), F_(percent), Helpers::render_value(buffer, selBurnPow_, 1));
-    print_value(shell, 2, F("Burner current power"), F_(percent), Helpers::render_value(buffer, curBurnPow_, 1));
-    print_value(shell, 2, F("Flame current"), F("uA"), Helpers::render_value(buffer, flameCurr_, 10));
-    print_value(shell, 2, F("System pressure"), F("bar"), Helpers::render_value(buffer, sysPress_, 10));
+    print_value(shell, 2, F("Burner selected max power"), selBurnPow_, F_(percent), 1);
+    print_value(shell, 2, F("Burner current power"), curBurnPow_, F_(percent), 1);
+    print_value(shell, 2, F("Flame current"), flameCurr_, F("uA"), 10);
+    print_value(shell, 2, F("System pressure"), sysPress_, F("bar"), 10);
     if (Helpers::hasValue(serviceCode_)) {
         shell.printfln(F("  System service code: %s (%d)"), serviceCodeChar_, serviceCode_);
     } else if (serviceCodeChar_[0] != '\0') {
-        shell.printfln(F("  System service code: %s"), serviceCodeChar_);
+        print_value(shell, 2, F("System service code"), FPSTR(serviceCodeChar_)); // TODO check
     }
 
     // UBAParameters
-    print_value(shell, 2, F("Heating temperature setting on the boiler"), F_(degrees), Helpers::render_value(buffer, heating_temp_, 1));
-    print_value(shell, 2, F("Boiler circuit pump modulation max power"), F_(percent), Helpers::render_value(buffer, pump_mod_max_, 1));
-    print_value(shell, 2, F("Boiler circuit pump modulation min power"), F_(percent), Helpers::render_value(buffer, pump_mod_min_, 1));
+    print_value(shell, 2, F("Heating temperature setting on the boiler"), heating_temp_, F_(degrees), 1);
+    print_value(shell, 2, F("Boiler circuit pump modulation max power"), pump_mod_max_, F_(percent), 1);
+    print_value(shell, 2, F("Boiler circuit pump modulation min power"), pump_mod_min_, F_(percent), 1);
 
     // UBAMonitorSlow
     if (Helpers::hasValue(extTemp_)) {
-        print_value(shell, 2, F("Outside temperature"), F_(degrees), Helpers::render_value(buffer, extTemp_, 10));
+        print_value(shell, 2, F("Outside temperature"), extTemp_, F_(degrees), 10);
     }
 
-    print_value(shell, 2, F("Exhaust temperature"), F_(degrees), Helpers::render_value(buffer, exhaustTemp_, 10));
-    print_value(shell, 2, F("Pump modulation"), F_(percent), Helpers::render_value(buffer, pumpMod_, 1));
-    print_value(shell, 2, F("Burner # starts"), Helpers::render_value(buffer, burnStarts_, 1));
+    print_value(shell, 2, F("Exhaust temperature"), exhaustTemp_, F_(degrees), 10);
+    print_value(shell, 2, F("Pump modulation"), pumpMod_, F_(percent), 1);
+    print_value(shell, 2, F("Pump modulation2"), pumpMod2_, F_(percent), 1);
+    print_value(shell, 2, F("Burner # starts"), burnStarts_, nullptr, 1);
     if (Helpers::hasValue(burnWorkMin_)) {
         shell.printfln(F("  Total burner operating time: %d days %d hours %d minutes"), burnWorkMin_ / 1440, (burnWorkMin_ % 1440) / 60, burnWorkMin_ % 60);
     }
@@ -431,14 +420,6 @@ void Boiler::show_values(uuid::console::Shell & shell) {
     }
     if (Helpers::hasValue(UBAuptime_)) {
         shell.printfln(F("  Total UBA working time: %d days %d hours %d minutes"), UBAuptime_ / 1440, (UBAuptime_ % 1440) / 60, UBAuptime_ % 60);
-    }
-
-    if (Helpers::hasValue(hpModulation_)) {
-        print_value(shell, 2, F("Heat Pump modulation"), F_(percent), Helpers::render_value(buffer, hpModulation_, 1));
-    }
-
-    if (Helpers::hasValue(hpSpeed_)) {
-        print_value(shell, 2, F("Heat Pump speed"), F_(percent), Helpers::render_value(buffer, hpSpeed_, 1));
     }
 }
 
@@ -598,6 +579,13 @@ void Boiler::process_UBAMonitorSlow(std::shared_ptr<const Telegram> telegram) {
 }
 
 /*
+ * UBAMonitorSlowPlus2 - type 0xE3
+ */
+void Boiler::process_UBAMonitorSlowPlus2(std::shared_ptr<const Telegram> telegram) {
+    telegram->read_value(pumpMod2_, 13);
+}
+
+/*
  * UBAMonitorSlowPlus - type 0xE5 - central heating monitor EMS+
  */
 void Boiler::process_UBAMonitorSlowPlus(std::shared_ptr<const Telegram> telegram) {
@@ -608,21 +596,7 @@ void Boiler::process_UBAMonitorSlowPlus(std::shared_ptr<const Telegram> telegram
     telegram->read_value(burnStarts_, 10);
     telegram->read_value(burnWorkMin_, 13);
     telegram->read_value(heatWorkMin_, 19);
-    telegram->read_value(pumpMod_, 25); // or is it switchTemp ?
-}
-
-/*
- * Type 0xE3 - HeatPump Monitor 1
- */
-void Boiler::process_HPMonitor1(std::shared_ptr<const Telegram> telegram) {
-    telegram->read_value(hpModulation_, 13);
-}
-
-/*
- * Type 0xE5 - HeatPump Monitor 2
- */
-void Boiler::process_HPMonitor2(std::shared_ptr<const Telegram> telegram) {
-    telegram->read_value(hpSpeed_, 25);
+    telegram->read_value(pumpMod_, 25);
 }
 
 // 0xE9 - DHW Status

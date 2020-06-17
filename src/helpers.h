@@ -44,6 +44,10 @@ class Helpers {
     static bool     check_abs(const int32_t i);
     static double   round2(double value);
 
+#ifdef EMSESP_STANDALONE
+    static char * ultostr(char * ptr, uint32_t value, const uint8_t base);
+#endif
+
     static bool hasValue(const uint8_t v, bool isBool = false); // use isBool=true for bool's
     static bool hasValue(const int8_t v);
     static bool hasValue(const int16_t v);

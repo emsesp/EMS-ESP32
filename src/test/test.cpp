@@ -25,6 +25,62 @@ namespace emsesp {
 // create some fake test data
 // used with the 'test' command, under su/admin
 void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
+    if (command == "render") {
+        /*
+static constexpr uint8_t EMS_VALUE_BOOL     = 0xFF; // boolean
+static constexpr uint8_t EMS_VALUE_BOOL_OFF = 0x00; // boolean false. True can be 0x01 or 0xFF sometimes.
+
+static constexpr uint8_t  EMS_VALUE_BOOL_NOTSET    = 0xFE;   // random number for booleans, that's not 0, 1 or FF
+static constexpr uint8_t  EMS_VALUE_UINT_NOTSET    = 0xFF;   // for 8-bit unsigned ints/bytes
+static constexpr int8_t   EMS_VALUE_INT_NOTSET     = 0x7F;   // for signed 8-bit ints/bytes
+static constexpr int16_t  EMS_VALUE_SHORT_NOTSET   = 0x8300; // -32000: for 2-byte signed shorts
+static constexpr uint16_t EMS_VALUE_USHORT_NOTSET  = 0x7D00; //  32000: for 2-byte unsigned shorts
+static constexpr uint16_t EMS_VALUE_USHORT_INVALID = 0x8000;
+static constexpr int16_t  EMS_VALUE_SHORT_INVALID  = 0x8000;
+static constexpr uint32_t EMS_VALUE_ULONG_NOTSET   = 0xFFFFFFFF; // for 3-byte and 4-byte longs
+static constexpr uint32_t EMS_VALUE_ULONG_INVALID  = 0x80000000;
+*/
+
+        uint8_t  test1 = 12;
+        int8_t   test2 = -12;
+        uint16_t test3 = 456;
+        int16_t  test4 = -456;
+        uint8_t  test5 = 1; // bool = on
+        uint32_t test6 = 305419896;
+        float    test7 = 89.43;
+
+        uint8_t  test1u = EMS_VALUE_UINT_NOTSET;
+        int8_t   test2u = EMS_VALUE_INT_NOTSET;
+        uint16_t test3u = EMS_VALUE_USHORT_NOTSET;
+        int16_t  test4u = EMS_VALUE_USHORT_NOTSET;
+        uint8_t  test5u = EMS_VALUE_BOOL_NOTSET;
+        uint32_t test6u = EMS_VALUE_ULONG_NOTSET;
+
+        EMSdevice::print_value(shell, 2, F("Selected flow temperature1"), test1, F_(degrees), 1);          // 12
+        EMSdevice::print_value(shell, 2, F("Selected flow temperature2"), test2, F_(degrees), 1);          // -12
+        EMSdevice::print_value(shell, 2, F("Selected flow temperature3"), test3, F_(degrees), 10);         // 45.6
+        EMSdevice::print_value(shell, 2, F("Selected flow temperature4"), test4, F_(degrees), 10);         // -45.6
+        EMSdevice::print_value(shell, 2, F("Selected flow temperature5"), test5, nullptr, EMS_VALUE_BOOL); // on
+        EMSdevice::print_value(shell, 2, F("Selected flow temperature6"), test6, F_(degrees), 1);          //
+        EMSdevice::print_value(shell, 2, F("Selected flow temperature7"), test7, F_(degrees), 2);          // 89.43
+        EMSdevice::print_value(shell, 2, F("Warm Water comfort setting"), F("Intelligent"));
+        char s[100];
+        strcpy(s, "Not very intelligent");
+        EMSdevice::print_value(shell, 2, F("Warm Water comfort setting2"), s);
+
+        shell.println();
+
+        EMSdevice::print_value(shell, 2, F("Selected flow temperature1u"), test1u, F_(degrees), 1);
+        EMSdevice::print_value(shell, 2, F("Selected flow temperature2u"), test2u, F_(degrees), 1);
+        EMSdevice::print_value(shell, 2, F("Selected flow temperature3u"), test3u, F_(degrees), 10);
+        EMSdevice::print_value(shell, 2, F("Selected flow temperature4u"), test4u, F_(degrees), 10);
+        EMSdevice::print_value(shell, 2, F("Selected flow temperature5u"), test5u, F_(degrees), EMS_VALUE_BOOL);
+        EMSdevice::print_value(shell, 2, F("Selected flow temperature6u"), test6u, F_(degrees), 100);
+
+        shell.loop_all();
+        return;
+    }
+
     if (command == "devices") {
         EMSESP::rxservice_.ems_mask(EMSbus::EMS_MASK_BUDERUS); // this is important otherwise nothing will be picked up!
 
@@ -101,6 +157,17 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         // B0 0B FF 00 02 62 00 44 02 7A 80 00 80 00 80 00 80 00 80 00 80 00 00 7C 80 00 80 00 80 00 80
         rx_telegram({0xB0, 0x0B, 0xFF, 00, 0x02, 0x62, 00, 0x44, 0x02, 0x7A, 0x80, 00, 0x80, 0x00, 0x80, 00,
                      0x80, 00,   0x80, 00, 0x80, 00,   00, 0x7C, 0x80, 00,   0x80, 00, 0x80, 00,   0x80});
+        EMSESP::show_values(shell);
+
+        rx_telegram({0xB0, 0x0B, 0xFF, 0x00, 0x02, 0x62, 0x01, 0x44, 0x03, 0x30, 0x80, 00, 0x80, 00, 0x80, 00,
+                     0x80, 00,   0x80, 00,   0x80, 00,   0x80, 00,   0x80, 00,   0x80, 00, 0x80, 00, 0x80, 0x33});
+        EMSESP::show_values(shell);
+
+        rx_telegram({0xB0, 00, 0xFF, 0x18, 02, 0x62, 0x80, 00, 0xB8});
+        EMSESP::show_values(shell);
+
+        EMSESP::send_raw_telegram("B0 00 FF 18 02 62 80 00 B8");
+        EMSESP::show_values(shell);
     }
 
     if (command == "cr100") {
