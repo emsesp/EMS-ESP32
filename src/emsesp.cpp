@@ -287,7 +287,6 @@ std::string EMSESP::pretty_telegram(std::shared_ptr<const Telegram> telegram) {
     if (offset) {
         snprintf_P(&str[0],
                    str.capacity() + 1,
-                   // PSTR("%s(0x%02X) -> %s(0x%02X), %s(0x%02X), data: %s (#data=%d)"),
                    PSTR("%s(0x%02X) -> %s(0x%02X), %s(0x%02X), data: %s @offset %d"),
                    src_name.c_str(),
                    src,
@@ -300,7 +299,6 @@ std::string EMSESP::pretty_telegram(std::shared_ptr<const Telegram> telegram) {
     } else {
         snprintf_P(&str[0],
                    str.capacity() + 1,
-                   // PSTR("%s(0x%02X) -> %s(0x%02X), %s(0x%02X), data: %s (#data=%d)"),
                    PSTR("%s(0x%02X) -> %s(0x%02X), %s(0x%02X), data: %s"),
                    src_name.c_str(),
                    src,
@@ -394,7 +392,6 @@ void EMSESP::process_version(std::shared_ptr<const Telegram> telegram) {
 // We also check for common telgram types, like the Version(0x02)
 // returns false if there are none found
 bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
-
     // if watching...
     if (watch() == 1) {
         if ((watch_id_ == WATCH_NONE) || (telegram->src == watch_id_) || (telegram->dest == watch_id_) || (telegram->type_id == watch_id_)) {
@@ -402,8 +399,8 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
         }
     }
 
-    // only process broadcast telegrams or ones sent to us on request
-    if ((telegram->dest != 0x00) && (telegram->dest != rxservice_.ems_bus_id())) {
+    // only process broadcast telegrams or ones sent to us on request or ones sent to a modem device (like the KM200)
+    if ((telegram->dest != 0x00) && (telegram->dest != rxservice_.ems_bus_id()) && (telegram->dest != EMSdevice::EMS_DEVICE_ID_MODEM)) {
         return false;
     }
 
@@ -575,7 +572,7 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
         // if we ask ourself at roomcontrol for version e.g. 0B 98 02 00 20
         Roomctrl::check((data[1] ^ 0x80 ^ rxservice_.ems_mask()), data);
 #ifdef EMSESP_DEBUG
-        // get_uptime is only updated once per loop, does not give the right time 
+        // get_uptime is only updated once per loop, does not give the right time
         LOG_DEBUG(F("[DEBUG] Echo after %d ms: %s"), ::millis() - tx_time_, Helpers::data_to_hex(data, length).c_str());
 #endif
         return; // it's an echo
@@ -639,7 +636,7 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
         // if ht3 poll must be ems_bus_id else if Buderus poll must be (ems_bus_id | 0x80)
         if ((first_value ^ 0x80 ^ rxservice_.ems_mask()) == txservice_.ems_bus_id()) {
             EMSbus::last_bus_activity(uuid::get_uptime()); // set the flag indication the EMS bus is active
-            tx_time_ = ::millis(); // get_uptime is only updated once per loop, does not give the right time 
+            tx_time_ = ::millis();                         // get_uptime is only updated once per loop, does not give the right time
             txservice_.send();
         }
         // send remote room temperature if active
