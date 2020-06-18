@@ -37,7 +37,7 @@
 #define EMS_TXMODE_DEFAULT 1
 #define EMS_TXMODE_EMSPLUS 2
 #define EMS_TXMODE_HT3 3
-#define EMS_TXMODE_NEW 4 // for michael's testingc
+#define EMS_TXMODE_NEW 4 // for michael's testing
 
 // LEGACY
 #define EMSUART_TX_BIT_TIME 104                        // bit time @9600 baud
