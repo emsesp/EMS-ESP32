@@ -571,6 +571,7 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
     if (((first_value & 0x7F) == txservice_.ems_bus_id()) && (length > 1)) {
         // if we ask ourself at roomcontrol for version e.g. 0B 98 02 00 20
         Roomctrl::check((data[1] ^ 0x80 ^ rxservice_.ems_mask()), data);
+
 #ifdef EMSESP_DEBUG
         // get_uptime is only updated once per loop, does not give the right time
         LOG_DEBUG(F("[DEBUG] Echo after %d ms: %s"), ::millis() - tx_time_, Helpers::data_to_hex(data, length).c_str());
@@ -579,27 +580,27 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
     }
 
     // are we waiting for a response from a recent Tx Read or Write?
-    bool tx_successful = false;
-    if (EMSbus::tx_waiting()) {
-        EMSbus::tx_waiting(false); // reset Tx wait state
+    uint8_t op = EMSbus::tx_waiting();
+    if (op != Telegram::Operation::NONE) {
+        bool tx_successful = false;
+        EMSbus::tx_waiting(Telegram::Operation::NONE); // reset Tx wait state
 
-        // if it's a single byte 1 or 4 then its maybe a response from the last write action
-        if (length == 1) {
+        // if we're waiting on a Write operation, we want a single byte 1 or 4
+        if ((op == Telegram::Operation::TX_WRITE) && (length == 1)) {
             if (first_value == TxService::TX_WRITE_SUCCESS) {
-                LOG_DEBUG(F("Last Tx write successful. Sending read request."));
+                LOG_DEBUG(F("Last Tx write successful"));
                 txservice_.increment_telegram_write_count(); // last tx/write was confirmed ok
                 txservice_.send_poll();                      // close the bus
                 txservice_.post_send_query();                // follow up with any post-read
-                tx_successful = true;
                 txservice_.reset_retry_count();
+                tx_successful = true;
             } else if (first_value == TxService::TX_WRITE_FAIL) {
                 LOG_ERROR(F("Last Tx write rejected by host"));
                 txservice_.send_poll(); // close the bus
                 txservice_.reset_retry_count();
             }
-        } else {
-            // got a telegram with data in it. See if the src/dest matches that from the last one we sent
-            // and continue to process it
+        } else if (op == Telegram::Operation::TX_READ) {
+            // got a telegram with data in it. See if the src/dest matches that from the last one we sent and continue to process it
             uint8_t src  = data[0];
             uint8_t dest = data[1];
             if (txservice_.is_last_tx(src, dest)) {
@@ -613,17 +614,19 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
 
         // if Tx wasn't successful, retry or give up
         if (!tx_successful) {
-            // the telegram we got wasn't what we had requested
-            // So re-send the last Tx and increment retry count
+            // the telegram we got wasn't what we had requested, so re-send the last Tx and increment retry count
             uint8_t retries = txservice_.retry_tx(); // returns 0 if exceeded count
 #ifdef EMSESP_DEBUG
-            LOG_DEBUG(F("[DEBUG] Last Tx operation failed. Retry #%d. Sent: %s, received: %s"),
+            LOG_DEBUG(F("[DEBUG] Last Tx %s operation failed. Retry #%d. Sent: %s, received: %s"),
+                      (op == Telegram::Operation::TX_WRITE) ? F("Write") : F("Read"),
                       retries,
                       txservice_.last_tx_to_string().c_str(),
                       Helpers::data_to_hex(data, length).c_str());
 #endif
             if (!retries) {
-                LOG_ERROR(F("Last Tx operation failed after %d retries. Ignoring request."), txservice_.MAXIMUM_TX_RETRIES);
+                LOG_ERROR(F("Last Tx %s operation failed after %d retries. Ignoring request."),
+                          (op == Telegram::Operation::TX_WRITE) ? F("Write") : F("Read"),
+                          txservice_.MAXIMUM_TX_RETRIES);
             }
 
             return;
