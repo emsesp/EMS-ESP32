@@ -181,6 +181,9 @@ static constexpr uint32_t EMS_VALUE_ULONG_INVALID  = 0x80000000;
         EMSESP::rxservice_.loop();
 
         // see https://github.com/proddy/EMS-ESP/issues/390
+
+        uart_telegram("90 48 FF 04 01 A6 5C");
+
         uart_telegram("90 48 FF 00 01 A6 4C");
         uart_telegram("90 48 F9 00 FF 01 B0 08 0B 00 00 00 14 00 00 00 19 00 00 00 4B 00 00");
         uart_telegram("90 48 FF 08 01 A7 6D");
@@ -207,6 +210,8 @@ static constexpr uint32_t EMS_VALUE_ULONG_INVALID  = 0x80000000;
         uart_telegram("90 0B FF 00 01 A8 90 0B FF 00 01 A8 16");
         uart_telegram("90 0B FF 00 01 BC 00 2E 2A 26 1E 03 00 FF FF 05 2A 01 E1 20 01 0F 05 2A");
         uart_telegram("90 0B FF 00 01 A5 80 00 01 28 17 00 28 2A 05 A0 02 03 03 05 A0 05 A0 00 00 11 01 02 FF FF 00");
+
+        uart_telegram("C8 90 F7 02 01 FF 01 A6 BA");
 
         // uart_telegram("10 00 FF 00 01 A5 00 D7 21 00 00 00 00 30 01 84 01 01 03 01 84 01 F1 00 00 11 01 00 08 63 00");
 
