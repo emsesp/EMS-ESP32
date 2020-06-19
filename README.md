@@ -28,7 +28,6 @@
 
 - For debugging there is an offline mode where the code can be compiled and executed standalone without uploading to an ESP controller. Use `make` (based off GNUMakefile).
 
-
 ## **Uploading the firmware**
 
 - If you're not using PlatformIO, use the command-line and Python. You can download Python from https://www.python.org/downloads/. Make sure you also get:
@@ -141,8 +140,8 @@ thermostat
 
 ### **Things to tidy up in code later**
 
+- Find out why ESP32 uses so much Flash (almost 2x ESP8266)
 - Replace vectors of class objects with shared pointers and use emplace_back since it instantiates during construction. It may have a performance gain.
-- Make more use of comparison operators in the Telegram class e.g. the compare like "friend inline bool operator==(const Telegram & lhs, const Telegram & rhs)"
 - Add real unit tests using platformio's test bed (https://docs.platformio.org/en/latest/plus/pio-remote.html)
 - See if it's easier to use timers instead of millis() based timers, using https://github.com/esp8266/Arduino/blob/master/libraries/esp8266/examples/BlinkPolledTimeout/BlinkPolledTimeout.ino
 
