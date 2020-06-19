@@ -69,11 +69,7 @@ class Telegram {
     const uint16_t type_id;
     const uint8_t  offset;
     const uint8_t  message_length;
-
-    uint8_t message_data[EMS_MAX_TELEGRAM_MESSAGE_LENGTH];
-
-    std::string to_string() const;
-    std::string to_string(const uint8_t * telegram, uint8_t length) const;
+    uint8_t        message_data[EMS_MAX_TELEGRAM_MESSAGE_LENGTH];
 
     enum Operation : uint8_t {
         NONE = 0,
@@ -82,6 +78,9 @@ class Telegram {
         TX_READ,
         TX_WRITE,
     };
+
+    std::string to_string() const;
+    std::string to_string(const uint8_t * telegram, uint8_t length) const;
 
     void read_value(uint16_t & param, const uint8_t index) const;
     void read_value(uint32_t & param, const uint8_t index) const;
@@ -145,8 +144,6 @@ class EMSbus {
         bus_connected_     = true;
     }
 
-
-
     static bool tx_active() {
         return tx_active_;
     }
@@ -173,7 +170,7 @@ class EMSbus {
 
     static uint32_t last_bus_activity_; // timestamp of last time a valid Rx came in
     static bool     bus_connected_;     // start assuming the bus hasn't been connected
-    static uint8_t  ems_mask_;          // unset 0x00 buderus 0x80 junkers/ht3
+    static uint8_t  ems_mask_;          // unset=0xFF, buderus=0x00, junkers/ht3=0x80
     static uint8_t  ems_bus_id_;        // the bus id, which configurable and stored in settings
     static uint8_t  tx_waiting_;        // state of the Tx line (NONE or waiting on a TX_READ or TX_WRITE)
     static bool     tx_active_;         // is true is we have a working Tx connection
@@ -248,7 +245,7 @@ class TxService : public EMSbus {
     void send();
 
     void add(const uint8_t operation, const uint8_t dest, const uint16_t type_id, const uint8_t offset, uint8_t * message_data, const uint8_t message_length);
-    void add(const uint8_t operation, uint8_t * data, const uint8_t length, bool front = false);
+    void add(const uint8_t operation, uint8_t * data, const uint8_t length);
 
     void read_request(const uint16_t type_id, const uint8_t dest, const uint8_t offset = 0);
 
@@ -258,9 +255,7 @@ class TxService : public EMSbus {
 
     void flush_tx_queue();
 
-    void remember_tx(const uint8_t operation, const uint8_t * data, const uint8_t length);
-
-    uint8_t retry_tx();
+    void retry_tx(const uint8_t operation, const uint8_t * data, const uint8_t length);
 
     uint8_t retry_count() const {
         return retry_count_;
@@ -302,20 +297,21 @@ class TxService : public EMSbus {
 
     void post_send_query();
 
+    void print_last_tx();
+
     class QueuedTxTelegram {
       public:
-        QueuedTxTelegram(uint16_t id, std::shared_ptr<Telegram> && telegram);
+        QueuedTxTelegram(uint16_t id, std::shared_ptr<Telegram> && telegram, bool retry);
         ~QueuedTxTelegram() = default;
 
         uint16_t                              id_; // sequential identifier
         const std::shared_ptr<const Telegram> telegram_;
+        bool                                  retry_; // is a retry
     };
 
     const std::deque<QueuedTxTelegram> queue() const {
         return tx_telegrams_;
     }
-
-    std::string last_tx_to_string() const;
 
     static constexpr uint8_t MAXIMUM_TX_RETRIES = 3;
 
@@ -331,13 +327,9 @@ class TxService : public EMSbus {
     uint16_t telegram_write_count_ = 0; // # Tx successful writes
     uint16_t telegram_fail_count_  = 0; // # Tx unsuccessful transmits
 
-    const std::shared_ptr<const Telegram> telegram_last;
-
-    uint8_t  telegram_last_[EMS_MAX_TELEGRAM_LENGTH]; // copy of last telegram
-    uint8_t  telegram_last_length_;                   // and its length
-    uint16_t telegram_last_post_send_query_;          // which type ID to query after a successful send, to read back the values just written
-    uint8_t  telegram_last_op_;                       // TX_WRITE or TX_READ
-    uint8_t  retry_count_ = 0;                        // count for # Tx retries
+    std::shared_ptr<Telegram> telegram_last_;
+    uint16_t                  telegram_last_post_send_query_; // which type ID to query after a successful send, to read back the values just written
+    uint8_t                   retry_count_ = 0;               // count for # Tx retries
 
     void send_telegram(const QueuedTxTelegram & tx_telegram);
     void send_telegram(const uint8_t * data, const uint8_t length);
