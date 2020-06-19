@@ -50,7 +50,7 @@
 
 // EMS 1.0
 #define EMSUART_TX_BUSY_WAIT (EMSUART_TX_BIT_TIME / 8) // 13
-#define EMSUART_TX_TIMEOUT (22 * EMSUART_TX_BIT_TIME / EMSUART_TX_BUSY_WAIT) // 176
+#define EMSUART_TX_TIMEOUT (32 * EMSUART_TX_BIT_TIME / EMSUART_TX_BUSY_WAIT) // 256
 
 // HT3/Junkers - Time to send one Byte (8 Bits, 1 Start Bit, 1 Stop Bit) plus 7 bit delay. The -8 is for lag compensation.
 // since we use a faster processor the lag is negligible

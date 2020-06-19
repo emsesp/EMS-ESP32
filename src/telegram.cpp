@@ -270,7 +270,10 @@ void RxService::add(uint8_t * data, uint8_t length) {
     uint8_t   message_length; // length of the message block, excluding CRC
 
     // work out depending on the type, where the data message block starts and the message length
-    if (data[2] < 0xF0) {
+    // EMS 1 has type_id always in data[2], if it gets a ems+ inquiery it will reply with FF but short length
+    // i.e. sending 0B A1 FF 00 01 D8 20 CRC to a MM10 Mixer (ems1.0), the reply is 21 0B FF 00 CRC
+    // see: https://github.com/proddy/EMS-ESP/issues/380#issuecomment-633663007
+    if (data[2] < 0xF0 || length < 6) {
         // EMS 1.0
         type_id        = data[2];
         message_data   = data + 4;
