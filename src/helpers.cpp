@@ -359,11 +359,11 @@ bool Helpers::hasValue(const int8_t v) {
 }
 
 bool Helpers::hasValue(const int16_t v) {
-    return (v != EMS_VALUE_SHORT_NOTSET);
+    return (v != EMS_VALUE_SHORT_NOTSET && v != EMS_VALUE_USHORT_NOTSET && v != EMS_VALUE_SHORT_INVALID && v != EMS_VALUE_USHORT_INVALID);
 }
 
 bool Helpers::hasValue(const uint16_t v) {
-    return (v != EMS_VALUE_USHORT_NOTSET);
+    return (v != EMS_VALUE_SHORT_NOTSET && v != EMS_VALUE_USHORT_NOTSET && v != EMS_VALUE_SHORT_INVALID && v != EMS_VALUE_USHORT_INVALID);
 }
 
 bool Helpers::hasValue(const uint32_t v) {

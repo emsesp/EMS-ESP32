@@ -60,13 +60,25 @@ void IRAM_ATTR EMSuart::emsuart_rx_intr_handler(void * para) {
     static uint8_t rxbuf[EMS_MAXBUFFERSIZE];
     static uint8_t length;
 
+    if (EMS_UART.int_st.rxfifo_full) {
+        EMS_UART.int_clr.rxfifo_full = 1;
+        emsTxBufIdx++;
+        if (emsTxBufIdx < emsTxBufLen) {
+            EMS_UART.conf1.rxfifo_full_thrhd = emsTxBufId + 1;
+            EMS_UART.fifo.rw_byte            = emsTxBuf[emsTxBufIdx];
+        } else  if (emsTxBufIdx == emsTxBufLen) {
+            EMS_UART.conf0.txd_brk           = 1; // <brk> after send
+            EMS_UART.int_ena.rxfifo_full     = 0;
+            EMS_UART.conf1.rxfifo_full_thrhd = 0x7F;
+        }
+    }
     if (EMS_UART.int_st.brk_det) {
         EMS_UART.int_clr.brk_det = 1; // clear flag
         if (emsTxBufIdx < emsTxBufLen) { // timer tx_mode is interrupted by <brk>
             emsTxBufIdx = emsTxBufLen;   // stop timer mode
             drop_next_rx = true;         // we have trash in buffer
         }
-        length                   = 0;
+        length = 0;
         while (EMS_UART.status.rxfifo_cnt) {
             uint8_t rx = EMS_UART.fifo.rw_byte; // read all bytes from fifo
             if (length < EMS_MAXBUFFERSIZE) {
@@ -169,6 +181,13 @@ void EMSuart::send_poll(uint8_t data) {
         emsTxBufLen           = 1;
         timerAlarmWrite(timer, emsTxWait, false);
         timerAlarmEnable(timer);
+    } else if (tx_mode_ == 5) {
+        EMS_UART.fifo.rw_byte            = data;
+        emsTxBufIdx                      = 0;
+        emsTxBufLen                      = 1;
+        EMS_UART.conf1.rxfifo_full_thrhd = 1;
+        EMS_UART.int_ena.rxfifo_full     = 1;
+        return EMS_TX_STATUS_OK;
     } else if (tx_mode_ == EMS_TXMODE_NEW) {
         EMS_UART.fifo.rw_byte  = data;
         EMS_UART.conf0.txd_brk = 1; // <brk> after send
@@ -214,6 +233,17 @@ uint16_t EMSuart::transmit(uint8_t * buf, uint8_t len) {
         emsTxBufLen           = len;
         timerAlarmWrite(timer, emsTxWait, false);
         timerAlarmEnable(timer);
+        return EMS_TX_STATUS_OK;
+    }
+    if (tx_mode_ == 5) {
+        for (uint8_t i = 0; i < len; i++) {
+            emsTxBuf[i] = buf[i];
+        }
+        EMS_UART.fifo.rw_byte            = buf[0];
+        emsTxBufIdx                      = 0;
+        emsTxBufLen                      = len;
+        EMS_UART.conf1.rxfifo_full_thrhd = 1;
+        EMS_UART.int_ena.rxfifo_full     = 1;
         return EMS_TX_STATUS_OK;
     }
     if (tx_mode_ == EMS_TXMODE_NEW) { // hardware controlled modes

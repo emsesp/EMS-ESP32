@@ -571,10 +571,10 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
     if (((first_value & 0x7F) == txservice_.ems_bus_id()) && (length > 1)) {
         // if we ask ourself at roomcontrol for version e.g. 0B 98 02 00 20
         Roomctrl::check((data[1] ^ 0x80 ^ rxservice_.ems_mask()), data);
-#ifdef EMSESP_DEBUG
+// #ifdef EMSESP_DEBUG
         // get_uptime is only updated once per loop, does not give the right time
         LOG_DEBUG(F("[DEBUG] Echo after %d ms: %s"), ::millis() - tx_time_, Helpers::data_to_hex(data, length).c_str());
-#endif
+// #endif
         return; // it's an echo
     }
 
