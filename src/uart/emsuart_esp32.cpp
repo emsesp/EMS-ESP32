@@ -53,6 +53,7 @@ void EMSuart::emsuart_recvTask(void * para) {
         }
     }
 }
+
 /*
  * UART interrupt, on break read the fifo and put the whole telegram to ringbuffer
  */
@@ -83,7 +84,6 @@ void IRAM_ATTR EMSuart::emsuart_rx_intr_handler(void * para) {
     }
 }
 
-
 void IRAM_ATTR EMSuart::emsuart_tx_timer_intr_handler() {
     if (emsTxBufIdx > EMS_MAXBUFFERSIZE) {
         return;
@@ -104,6 +104,9 @@ void IRAM_ATTR EMSuart::emsuart_tx_timer_intr_handler() {
  * init UART driver
  */
 void EMSuart::start(uint8_t tx_mode) {
+
+    return;
+    
     emsTxWait = EMSUART_TX_BIT_TIME * (tx_mode + 10);
     if (tx_mode_ != 0xFF) { // uart already initialized
         tx_mode_ = tx_mode;

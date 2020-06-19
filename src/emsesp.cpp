@@ -162,7 +162,12 @@ void EMSESP::show_emsbus(uuid::console::Shell & shell) {
             } else if ((it.telegram_->operation) == Telegram::Operation::TX_WRITE) {
                 op = read_flash_string(F("WRITE"));
             }
-            shell.printfln(F(" [%02d] %s %s (offset %d)"), it.id_, op.c_str(), pretty_telegram(it.telegram_).c_str(), it.telegram_->offset);
+            shell.printfln(F(" [%02d%c] %s %s (offset %d)"),
+                           it.id_,
+                           ((it.retry_) ? '*' : ' '),
+                           op.c_str(),
+                           pretty_telegram(it.telegram_).c_str(),
+                           it.telegram_->offset);
         }
     }
 
@@ -559,6 +564,7 @@ void EMSESP::send_write_request(const uint16_t type_id,
                                 const uint8_t  message_length,
                                 const uint16_t validate_typeid) {
     txservice_.add(Telegram::Operation::TX_WRITE, dest, type_id, offset, message_data, message_length);
+
     txservice_.set_post_send_query(validate_typeid); // store which type_id to send Tx read after a write
 }
 
@@ -584,6 +590,7 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
     if (op != Telegram::Operation::NONE) {
         bool tx_successful = false;
         EMSbus::tx_waiting(Telegram::Operation::NONE); // reset Tx wait state
+        // txservice_.print_last_tx();
 
         // if we're waiting on a Write operation, we want a single byte 1 or 4
         if ((op == Telegram::Operation::TX_WRITE) && (length == 1)) {
@@ -612,23 +619,9 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
             }
         }
 
-        // if Tx wasn't successful, retry or give up
+        // if Tx wasn't successful, retry or just give up
         if (!tx_successful) {
-            // the telegram we got wasn't what we had requested, so re-send the last Tx and increment retry count
-            uint8_t retries = txservice_.retry_tx(); // returns 0 if exceeded count
-#ifdef EMSESP_DEBUG
-            LOG_DEBUG(F("[DEBUG] Last Tx %s operation failed. Retry #%d. Sent: %s, received: %s"),
-                      (op == Telegram::Operation::TX_WRITE) ? F("Write") : F("Read"),
-                      retries,
-                      txservice_.last_tx_to_string().c_str(),
-                      Helpers::data_to_hex(data, length).c_str());
-#endif
-            if (!retries) {
-                LOG_ERROR(F("Last Tx %s operation failed after %d retries. Ignoring request."),
-                          (op == Telegram::Operation::TX_WRITE) ? F("Write") : F("Read"),
-                          txservice_.MAXIMUM_TX_RETRIES);
-            }
-
+            txservice_.retry_tx(op, data, length);
             return;
         }
     }
