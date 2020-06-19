@@ -42,7 +42,7 @@ uint32_t EMSbus::last_bus_activity_ = 0;              // timestamp of last time 
 bool     EMSbus::bus_connected_     = false;          // start assuming the bus hasn't been connected
 uint8_t  EMSbus::ems_mask_          = EMS_MASK_UNSET; // unset so its triggered when booting, the its 0x00=buderus, 0x80=junker/ht3
 uint8_t  EMSbus::ems_bus_id_        = EMSESP_DEFAULT_BUS_ID;
-bool     EMSbus::tx_waiting_        = false;
+uint8_t  EMSbus::tx_waiting_        = Telegram::Operation::NONE;
 bool     EMSbus::tx_active_         = false;
 
 uuid::log::Logger EMSbus::logger_{F_(logger_name), uuid::log::Facility::CONSOLE};
@@ -271,7 +271,8 @@ void RxService::add(uint8_t * data, uint8_t length) {
 
     // work out depending on the type, where the data message block starts and the message length
     // EMS 1 has type_id always in data[2], if it gets a ems+ inquiery it will reply with FF but short length
-    // i.e. sending 0b A1 FF 00 01 D8 20 to a MM10 Mixer (ems1.0) he replys with 21 0B FF 00
+    // i.e. sending 0B A1 FF 00 01 D8 20 CRC to a MM10 Mixer (ems1.0), the reply is 21 0B FF 00 CRC
+    // see: https://github.com/proddy/EMS-ESP/issues/380#issuecomment-633663007
     if (data[2] < 0xF0 || length < 6) {
         // EMS 1.0
         type_id        = data[2];
@@ -350,7 +351,7 @@ void TxService::loop() {
 #ifndef EMSESP_STANDALONE
     if ((uuid::get_uptime() - last_tx_check_) > TX_LOOP_WAIT) {
         last_tx_check_ = uuid::get_uptime();
-        if (!tx_active_ && (EMSbus::bus_connected())) {
+        if (!tx_active() && (EMSbus::bus_connected())) {
             LOG_ERROR(F("Tx is not active. Please check connection."));
         }
     }
@@ -445,7 +446,7 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
 
     uint8_t length = message_p;
 
-    remember_tx(telegram_raw, length); // make a copy of it in case we want to re-send it, without the CRC
+    remember_tx(telegram->operation, telegram_raw, length); // make a copy of it in case we want to re-send it, without the CRC
 
     telegram_raw[length] = calculate_crc(telegram_raw, length); // generate and append CRC to the end
 
@@ -475,12 +476,12 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
 
     if (status == EMS_TX_STATUS_ERR) {
         LOG_ERROR(F("Failed to transmit Tx via UART."));
-        increment_telegram_fail_count(); // another Tx fail
-        tx_waiting(false);               // nothing send, tx not in wait state
+        increment_telegram_fail_count();       // another Tx fail
+        tx_waiting(Telegram::Operation::NONE); // nothing send, tx not in wait state
         return;
     }
 
-    tx_waiting(true); // tx now in a wait state
+    tx_waiting(telegram->operation); // tx now in a wait state
 }
 
 // send an array of bytes as a telegram
@@ -494,7 +495,7 @@ void TxService::send_telegram(const uint8_t * data, const uint8_t length) {
     }
     telegram_raw[length] = calculate_crc(telegram_raw, length); // apppend CRC
 
-    tx_waiting(false); // no post validation
+    tx_waiting(Telegram::Operation::NONE); // no post validation needed
 
     // send the telegram to the UART Tx
     uint16_t status = EMSuart::transmit(telegram_raw, length);
@@ -521,11 +522,12 @@ void TxService::add(const uint8_t operation, const uint8_t dest, const uint16_t 
     tx_telegrams_.emplace_back(tx_telegram_id_++, std::move(telegram));
 }
 
-// builds a Tx telegram and adds to queue, using only raw data
+// builds a Tx telegram and adds to queue
+// this is used by the retry() function to put the last failed Tx back into the queue
 // format is EMS 1.0 (src, dest, type_id, offset, data)
 // length is the length of the whole telegram data
 // front = true if adding to the front of queue, e.g. with an Tx retry. Default is false.
-void TxService::add(uint8_t * data, const uint8_t length, bool front) {
+void TxService::add(uint8_t operation, uint8_t * data, const uint8_t length, bool front) {
     if (length < 5) {
         LOG_ERROR(F("Tx telegram too short (telegram length is %d)"), length);
         return;
@@ -540,7 +542,7 @@ void TxService::add(uint8_t * data, const uint8_t length, bool front) {
     uint8_t   offset       = data[3];
     uint8_t * message_data = data + 4;
 
-    auto telegram = std::make_shared<Telegram>(Telegram::Operation::TX_RAW, src, dest, type_id, offset, message_data, message_length);
+    auto telegram = std::make_shared<Telegram>(operation, src, dest, type_id, offset, message_data, message_length); // operation is TX_WRITE or TX_READ
 
     // if the queue is full, make room but removing the last one
     if (tx_telegrams_.size() >= MAX_TX_TELEGRAMS) {
@@ -601,15 +603,18 @@ void TxService::send_raw(const char * telegram_data) {
         return; // nothing to send
     }
 
-    add(data, count + 1); // add to Tx queue
+    add(Telegram::Operation::TX_RAW, data, count + 1); // add to Tx queue
 }
 
 // save the last Tx sent, only the telegram, excluding the CRC
-void TxService::remember_tx(const uint8_t * data, const uint8_t length) {
+void TxService::remember_tx(const uint8_t operation, const uint8_t * data, const uint8_t length) {
     for (uint8_t i = 0; i < length; i++) {
         telegram_last_[i] = data[i];
     }
+
     telegram_last_length_ = length;
+    telegram_last_op_     = operation;
+
     if (ems_mask() != EMS_MASK_UNSET) {
         telegram_last_[0] ^= ems_mask();
     }
@@ -624,7 +629,7 @@ uint8_t TxService::retry_tx() {
         return 0;
     }
 
-    add(telegram_last_, telegram_last_length_, true); // add the last Tx telegram to the front of the tx queue, at the top
+    add(telegram_last_op_, telegram_last_, telegram_last_length_, true); // add the last Tx telegram to the front of the tx queue, at the top
 
     return retry_count_;
 }
