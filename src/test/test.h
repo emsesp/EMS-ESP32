@@ -38,12 +38,12 @@ namespace emsesp {
 
 class Test {
   public:
-
     static void run_test(uuid::console::Shell & shell, const std::string & command); // only for testing
     static void dummy_mqtt_commands(const char * message);
     static void rx_telegram(const std::vector<uint8_t> & data);
     static void uart_telegram(const std::vector<uint8_t> & rx_data);
-    static void uart_telegram(const char *rx_data);
+    static void uart_telegram(const char * rx_data);
+    static void uart_telegram_withCRC(const char * rx_data);
 };
 
 } // namespace emsesp
