@@ -46,7 +46,7 @@
 
 #include "devices/boiler.h"
 
-#define WATCH_NONE 0 // no watch id set
+#define WATCH_ID_NONE 0 // no watch id set
 
 namespace emsesp {
 
@@ -109,8 +109,9 @@ class EMSESP {
         watch_ = watch; // 0=off, 1=on, 2=raw
     }
 
+    enum Watch : uint8_t { WATCH_OFF, WATCH_ON, WATCH_RAW };
     static uint8_t watch() {
-        return watch_; // 0=off, 1=on, 2=raw
+        return watch_;
     }
 
     static bool tap_water_active() {

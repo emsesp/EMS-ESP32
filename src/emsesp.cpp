@@ -60,7 +60,7 @@ Shower    EMSESP::shower_;    // Shower logic
 
 // static/common variables
 uint8_t  EMSESP::actual_master_thermostat_ = EMSESP_DEFAULT_MASTER_THERMOSTAT; // which thermostat leads when multiple found
-uint16_t EMSESP::watch_id_                 = WATCH_NONE;                       // for when log is TRACE. 0 means no trace set
+uint16_t EMSESP::watch_id_                 = WATCH_ID_NONE;                    // for when log is TRACE. 0 means no trace set
 uint8_t  EMSESP::watch_                    = 0;                                // trace off
 bool     EMSESP::tap_water_active_         = false;                            // for when Boiler states we having running warm water. used in Shower()
 bool     EMSESP::ems_read_only_;
@@ -398,8 +398,8 @@ void EMSESP::process_version(std::shared_ptr<const Telegram> telegram) {
 // returns false if there are none found
 bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
     // if watching...
-    if (watch() == 1) {
-        if ((watch_id_ == WATCH_NONE) || (telegram->src == watch_id_) || (telegram->dest == watch_id_) || (telegram->type_id == watch_id_)) {
+    if (watch() == WATCH_ON) {
+        if ((watch_id_ == WATCH_ID_NONE) || (telegram->src == watch_id_) || (telegram->dest == watch_id_) || (telegram->type_id == watch_id_)) {
             LOG_NOTICE(pretty_telegram(telegram).c_str());
         }
     }
@@ -570,6 +570,7 @@ void EMSESP::send_write_request(const uint16_t type_id,
 
 // this is main entry point when data is received on the Rx line, via emsuart library
 // we check if its a complete telegram or just a single byte (which could be a poll or a return status)
+// the CRC check is not done here, only when it's added to the Rx queue with add()
 void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
     static uint32_t tx_time_ = 0;
     // check first for echo
@@ -641,6 +642,7 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
         // check if there is a message for the roomcontroller
         Roomctrl::check((data[1] ^ 0x80 ^ rxservice_.ems_mask()), data);
         // add to RxQueue, what ever it is.
+        // in add() the CRC will be checked
         rxservice_.add(data, length);
     }
 }
@@ -828,11 +830,11 @@ void EMSESP::console_commands(Shell & shell, unsigned int context) {
                                        [](Shell & shell, const std::vector<std::string> & arguments) {
                                            // get raw/pretty
                                            if (arguments[0] == read_flash_string(F_(raw))) {
-                                               emsesp::EMSESP::watch(2); // raw
+                                               emsesp::EMSESP::watch(WATCH_RAW); // raw
                                            } else if (arguments[0] == read_flash_string(F_(on))) {
-                                               emsesp::EMSESP::watch(1); // on
+                                               emsesp::EMSESP::watch(WATCH_ON); // on
                                            } else if (arguments[0] == read_flash_string(F_(off))) {
-                                               emsesp::EMSESP::watch(0); // off
+                                               emsesp::EMSESP::watch(WATCH_OFF); // off
                                            } else {
                                                shell.printfln(F_(invalid_watch));
                                                return;
@@ -843,13 +845,13 @@ void EMSESP::console_commands(Shell & shell, unsigned int context) {
                                                // get the watch_id if its set
                                                watch_id = Helpers::hextoint(arguments[1].c_str());
                                            } else {
-                                               watch_id = WATCH_NONE;
+                                               watch_id = WATCH_ID_NONE;
                                            }
 
                                            emsesp::EMSESP::watch_id(watch_id);
 
                                            uint8_t watch = emsesp::EMSESP::watch();
-                                           if (watch == 0) {
+                                           if (watch == WATCH_OFF) {
                                                shell.printfln(F("Watch is off"));
                                                return;
                                            }
@@ -859,14 +861,14 @@ void EMSESP::console_commands(Shell & shell, unsigned int context) {
                                                shell.log_level(Level::NOTICE);
                                            }
 
-                                           if (watch == 1) {
+                                           if (watch == WATCH_ON) {
                                                shell.printfln(F("Watching incoming telegrams, displayed in decoded format"));
                                            } else {
-                                               shell.printfln(F("Watching incoming telegrams, displayed as raw bytes"));
+                                               shell.printfln(F("Watching incoming telegrams, displayed as raw bytes")); // WATCH_RAW
                                            }
 
                                            watch_id = emsesp::EMSESP::watch_id();
-                                           if (watch_id != WATCH_NONE) {
+                                           if (watch_id != WATCH_ID_NONE) {
                                                shell.printfln(F("Filtering only telegrams that match a device ID or telegram type of 0x%02X"), watch_id);
                                            }
                                        });

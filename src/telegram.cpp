@@ -246,8 +246,8 @@ void RxService::add(uint8_t * data, uint8_t length) {
     // validate the CRC
     uint8_t crc = calculate_crc(data, length - 1);
 
-    if ((data[length - 1] != crc) && (EMSESP::watch() != 0)) {
-        LOG_ERROR(F("Rx: %s %s(BAD, CRC %02X != %02X)%s"), Helpers::data_to_hex(data, length).c_str(), COLOR_RED, data[length - 1], crc, COLOR_RESET);
+    if ((data[length - 1] != crc) && (EMSESP::watch() != EMSESP::Watch::WATCH_OFF)) {
+        LOG_ERROR(F("Rx: %s %s(CRC %02X != %02X)%s"), Helpers::data_to_hex(data, length).c_str(), COLOR_RED, data[length - 1], crc, COLOR_RESET);
         increment_telegram_error_count();
         return;
     }
@@ -296,9 +296,9 @@ void RxService::add(uint8_t * data, uint8_t length) {
     }
 
     // if we're watching and "raw" print out actual telegram as bytes to the console
-    if (EMSESP::watch() == 2) {
+    if (EMSESP::watch() == EMSESP::Watch::WATCH_RAW) {
         uint16_t trace_watch_id = EMSESP::watch_id();
-        if ((trace_watch_id == WATCH_NONE) || (src == trace_watch_id) || (dest == trace_watch_id) || (type_id == trace_watch_id)) {
+        if ((trace_watch_id == WATCH_ID_NONE) || (src == trace_watch_id) || (dest == trace_watch_id) || (type_id == trace_watch_id)) {
             LOG_NOTICE(F("Rx: %s"), Helpers::data_to_hex(data, length).c_str());
         }
     }
@@ -465,7 +465,7 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
 
 #ifdef EMSESP_DEBUG
         // if watching in 'raw' mode
-        if (EMSESP::watch() == 2) {
+        if (EMSESP::watch() == EMSESP::Watch::WATCH_RAW) {
             LOG_NOTICE(F("[DEBUG] Tx: %s"), Helpers::data_to_hex(telegram_raw, length).c_str());
         }
 #endif
@@ -624,25 +624,23 @@ void TxService::send_raw(const char * telegram_data) {
 // add last Tx to tx queue and increment count
 // returns retry count, or 0 if all done
 void TxService::retry_tx(const uint8_t operation, const uint8_t * data, const uint8_t length) {
-    retry_count_++;
 
     // have we reached the limit? if so, reset count and give up
-    if (retry_count_ > MAXIMUM_TX_RETRIES) {
+    if (++retry_count_ > MAXIMUM_TX_RETRIES) {
         reset_retry_count();             // give up
         increment_telegram_fail_count(); // another Tx fail
 
         LOG_ERROR(F("Last Tx %s operation failed after %d retries. Ignoring request."),
                   (operation == Telegram::Operation::TX_WRITE) ? F("Write") : F("Read"),
                   MAXIMUM_TX_RETRIES);
-    } else {
-        LOG_DEBUG(F("[DEBUG] Last Tx %s operation failed. Retry #%d. sent message data: %s, received: %s"),
-                  (operation == Telegram::Operation::TX_WRITE) ? F("Write") : F("Read"),
-                  retry_count_,
-                  telegram_last_->to_string().c_str(),
-                  Helpers::data_to_hex(data, length).c_str());
-
         return;
     }
+
+    LOG_DEBUG(F("[DEBUG] Last Tx %s operation failed. Retry #%d. sent message data: %s, received: %s"),
+              (operation == Telegram::Operation::TX_WRITE) ? F("Write") : F("Read"),
+              retry_count_,
+              telegram_last_->to_string().c_str(),
+              Helpers::data_to_hex(data, length).c_str());
 
     // add to the top of the queue
     if (tx_telegrams_.size() >= MAX_TX_TELEGRAMS) {
