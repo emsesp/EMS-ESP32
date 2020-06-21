@@ -70,6 +70,9 @@ class EMSuart {
     static void ICACHE_FLASH_ATTR     restart();
     static void ICACHE_FLASH_ATTR     send_poll(uint8_t data);
     static uint16_t ICACHE_FLASH_ATTR transmit(uint8_t * buf, uint8_t len);
+    static bool                       sending() {
+      return sending_;
+    }
 
     typedef struct {
         uint8_t length;
@@ -82,6 +85,7 @@ class EMSuart {
     static void ICACHE_FLASH_ATTR emsuart_flush_fifos();
     static void ICACHE_FLASH_ATTR tx_brk();
     static void ICACHE_RAM_ATTR   emsuart_tx_timer_intr_handler();
+    static bool                   sending_;
 };
 
 } // namespace emsesp

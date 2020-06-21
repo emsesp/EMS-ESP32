@@ -434,7 +434,13 @@ void Console::loop() {
     telnet_.loop();
 #endif
 
+#if defined(ESP8266)
+    if (!EMSuart::sending()) {
+        Shell::loop_all();
+    }
+#else
     Shell::loop_all();
+#endif
 }
 
 } // namespace emsesp
