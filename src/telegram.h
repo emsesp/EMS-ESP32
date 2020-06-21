@@ -44,8 +44,8 @@ static constexpr uint8_t EMS_VALUE_BOOL_OFF = 0x00; // boolean false. True can b
 static constexpr uint8_t  EMS_VALUE_BOOL_NOTSET   = 0xFE;       // random number for booleans, that's not 0, 1 or FF
 static constexpr uint8_t  EMS_VALUE_UINT_NOTSET   = 0xFF;       // for 8-bit unsigned ints/bytes
 static constexpr int8_t   EMS_VALUE_INT_NOTSET    = 0x7F;       // for signed 8-bit ints/bytes
-static constexpr int16_t  EMS_VALUE_SHORT_NOTSET  = 0x8300;     // -32000: for 2-byte signed shorts
 static constexpr uint16_t EMS_VALUE_USHORT_NOTSET = 0x7D00;     //  32000: for 2-byte unsigned shorts
+static constexpr int16_t  EMS_VALUE_SHORT_NOTSET  = 0x7D00;     //  32000: for 2-byte signed shorts
 static constexpr uint32_t EMS_VALUE_ULONG_NOTSET  = 0xFFFFFFFF; // for 3-byte and 4-byte longs
 
 static constexpr uint8_t EMS_MAX_TELEGRAM_LENGTH         = 32; // max length of a complete EMS telegram

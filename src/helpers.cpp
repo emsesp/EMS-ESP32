@@ -358,13 +358,12 @@ bool Helpers::hasValue(const int8_t v) {
 }
 
 // for short these are typically 0x8300, 0x7D00 and sometimes 0x8000
-// so we just check for anything > 0x70
 bool Helpers::hasValue(const int16_t v) {
-    return ((v >> 8) < 0x70);
+    return (abs(v) < EMS_VALUE_USHORT_NOTSET);
 }
 
 bool Helpers::hasValue(const uint16_t v) {
-    return ((v >> 8) < 0x70);
+    return (v < EMS_VALUE_USHORT_NOTSET);
 }
 
 bool Helpers::hasValue(const uint32_t v) {

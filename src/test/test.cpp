@@ -34,12 +34,16 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         uint32_t test6 = 305419896;
         float    test7 = 89.43;
 
-        uint8_t  test1u = EMS_VALUE_UINT_NOTSET;
-        int8_t   test2u = EMS_VALUE_INT_NOTSET;
-        uint16_t test3u = EMS_VALUE_USHORT_NOTSET;
-        int16_t  test4u = EMS_VALUE_USHORT_NOTSET;
+        uint8_t test1u = EMS_VALUE_UINT_NOTSET;
+        int8_t  test2u = EMS_VALUE_INT_NOTSET;
+
         uint8_t  test5u = EMS_VALUE_BOOL_NOTSET;
         uint32_t test6u = EMS_VALUE_ULONG_NOTSET;
+
+        uint16_t test3u = EMS_VALUE_USHORT_NOTSET;
+        int16_t  test4u = EMS_VALUE_SHORT_NOTSET;
+
+        // TODO set to 7D00 for both
 
         EMSdevice::print_value(shell, 2, F("Selected flow temperature1"), test1, F_(degrees), 1);          // 12
         EMSdevice::print_value(shell, 2, F("Selected flow temperature2"), test2, F_(degrees), 1);          // -12
@@ -61,6 +65,21 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         EMSdevice::print_value(shell, 2, F("Selected flow temperature4u"), test4u, F_(degrees), 10);
         EMSdevice::print_value(shell, 2, F("Selected flow temperature5u"), test5u, F_(degrees), EMS_VALUE_BOOL);
         EMSdevice::print_value(shell, 2, F("Selected flow temperature6u"), test6u, F_(degrees), 100);
+
+        shell.printfln("int16  unset = %d, [%0X] %0X %0X", test4u, test4u, (test4u >> 8), ((test4u >> 8) & 0xFF));
+        shell.printfln("uint16 unset = %d, [%0X] %0X %0X", test3u, test3u, (test3u >> 8), ((test3u >> 8) & 0xFF));
+
+        test3u = 456;
+        test4u = -456;
+
+        shell.printfln("int16  set   = %d, [%0X] %0X %0X", test4u, test4u, (test4u >> 8), ((test4u >> 8) & 0xFF));
+
+        shell.printfln("uint16 set   = %d, [%0X] %0X %0X", test3u, test3u, (test3u >> 8), ((test3u >> 8) & 0xFF));
+
+        test4u = 0x7D00;
+
+        // test4u = abs(0x7D00);
+        shell.printfln("int16 invalid= %d, [%0X] %0X %0X", test4u, test4u, (test4u >> 8), ((test4u >> 8) & 0xFF));
 
         shell.println();
 
