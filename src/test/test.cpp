@@ -25,21 +25,7 @@ namespace emsesp {
 // create some fake test data
 // used with the 'test' command, under su/admin
 void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
-    if (command == "render") {
-        /*
-static constexpr uint8_t EMS_VALUE_BOOL     = 0xFF; // boolean
-static constexpr uint8_t EMS_VALUE_BOOL_OFF = 0x00; // boolean false. True can be 0x01 or 0xFF sometimes.
-
-static constexpr uint8_t  EMS_VALUE_BOOL_NOTSET    = 0xFE;   // random number for booleans, that's not 0, 1 or FF
-static constexpr uint8_t  EMS_VALUE_UINT_NOTSET    = 0xFF;   // for 8-bit unsigned ints/bytes
-static constexpr int8_t   EMS_VALUE_INT_NOTSET     = 0x7F;   // for signed 8-bit ints/bytes
-static constexpr int16_t  EMS_VALUE_SHORT_NOTSET   = 0x8300; // -32000: for 2-byte signed shorts
-static constexpr uint16_t EMS_VALUE_USHORT_NOTSET  = 0x7D00; //  32000: for 2-byte unsigned shorts
-static constexpr uint16_t EMS_VALUE_USHORT_INVALID = 0x8000;
-static constexpr int16_t  EMS_VALUE_SHORT_INVALID  = 0x8000;
-static constexpr uint32_t EMS_VALUE_ULONG_NOTSET   = 0xFFFFFFFF; // for 3-byte and 4-byte longs
-static constexpr uint32_t EMS_VALUE_ULONG_INVALID  = 0x80000000;
-*/
+    if ((command == "render") || (command == "r")) {
 
         uint8_t  test1 = 12;
         int8_t   test2 = -12;
@@ -77,7 +63,58 @@ static constexpr uint32_t EMS_VALUE_ULONG_INVALID  = 0x80000000;
         EMSdevice::print_value(shell, 2, F("Selected flow temperature5u"), test5u, F_(degrees), EMS_VALUE_BOOL);
         EMSdevice::print_value(shell, 2, F("Selected flow temperature6u"), test6u, F_(degrees), 100);
 
+        shell.println();
+
+        // check read_value to make sure it handles all the data type correctly
+        uint8_t message_data[] = {1, 2, 3, 4, 5, 6, 7, 8, 9}; // message_length is 9
+        auto    telegram       = std::make_shared<Telegram>(Telegram::Operation::RX, 0x10, 0x11, 0x1234, 0, message_data, sizeof(message_data));
+
+        uint8_t uint8b = EMS_VALUE_UINT_NOTSET;
+        telegram->read_value(uint8b, 0);
+        shell.printfln("uint8: expecting %02X, got:%02X", 1, uint8b);
+
+        int8_t int8b = EMS_VALUE_INT_NOTSET;
+        telegram->read_value(int8b, 0);
+        shell.printfln("int8: expecting %02X, got:%02X", 1, int8b);
+
+        uint16_t uint16b = EMS_VALUE_USHORT_NOTSET;
+        telegram->read_value(uint16b, 1);
+        shell.printfln("uint16: expecting %02X, got:%02X", 0x0203, uint16b);
+
+        int16_t int16b = EMS_VALUE_SHORT_NOTSET;
+        telegram->read_value(int16b, 1);
+        shell.printfln("int16: expecting %02X, got:%02X", 0x0203, int16b);
+
+        int16_t int16b8 = EMS_VALUE_SHORT_NOTSET;
+        telegram->read_value(int16b8, 1, 1); // override to 1 byte
+        shell.printfln("int16 1 byte: expecting %02X, got:%02X", 0x02, int16b8);
+
+        uint32_t uint32b = EMS_VALUE_ULONG_NOTSET;
+        telegram->read_value(uint32b, 1, 3);
+        shell.printfln("uint32 3 bytes: expecting %02X, got:%02X", 0x020304, uint32b);
+
+        uint32b = EMS_VALUE_ULONG_NOTSET;
+        telegram->read_value(uint32b, 1);
+        shell.printfln("uint32 4 bytes: expecting %02X, got:%02X", 0x02030405, uint32b);
+
+        // check out of bounds
+        uint16_t uint16 = EMS_VALUE_USHORT_NOTSET;
+        telegram->read_value(uint16, 9);
+        shell.printfln("uint16 out-of-bounds: was:%02X, new:%02X", EMS_VALUE_USHORT_NOTSET, uint16);
+        uint8_t uint8oob = EMS_VALUE_UINT_NOTSET;
+        telegram->read_value(uint8oob, 9);
+        shell.printfln("uint8 out-of-bounds: was:%02X, new:%02X", EMS_VALUE_UINT_NOTSET, uint8oob);
+
+        // check read bit
+        uint8_t uint8bitb = EMS_VALUE_UINT_NOTSET;
+        telegram->read_bit(uint8bitb, 1, 1); // value is 0x02 = 0000 0010
+        shell.printfln("uint8 bit read: expecting 1, got:%d", uint8bitb);
+        uint8bitb = EMS_VALUE_UINT_NOTSET;
+        telegram->read_bit(uint8bitb, 0, 0); // value is 0x01 = 0000 0001
+        shell.printfln("uint8 bit read: expecting 1, got:%d", uint8bitb);
+
         shell.loop_all();
+
         return;
     }
 
@@ -186,14 +223,17 @@ static constexpr uint32_t EMS_VALUE_ULONG_INVALID  = 0x80000000;
 
         uart_telegram_withCRC("90 48 FF 04 01 A6 5C");
         uart_telegram_withCRC("90 48 FF 00 01 A6 4C");
-        uart_telegram_withCRC("90 48 F9 00 FF 01 B0 08 0B 00 00 00 14 00 00 00 19 00 00 00 4B 00 00");
         uart_telegram_withCRC("90 48 FF 08 01 A7 6D");
-        uart_telegram_withCRC("90 48 F9 00 FF 01 9C 08 03 00 00 00 1E 00 00 00 4B 00 00 00 55 00 00");
-        uart_telegram_withCRC("90 48 F9 00 FF 01 9C 07 03 00 00 00 1E 00 00 00 30 00 00 00 3C 00 00");
+
+        uart_telegram("90 48 F9 00 FF 01 B0 08 0B 00 00 00 14 00 00 00 19 00 00 00 4B 00 00");
+        uart_telegram("90 48 F9 00 FF 01 9C 08 03 00 00 00 1E 00 00 00 4B 00 00 00 55 00 00");
+        uart_telegram("90 48 F9 00 FF 01 9C 07 03 00 00 00 1E 00 00 00 30 00 00 00 3C 00 00");
+
         uart_telegram_withCRC("90 48 F9 00 FF 01 9D 00 43 00 00 00 01 00 00 00 02 00 03 00 06 00 03 00 02 05");
         uart_telegram_withCRC("90 48 F9 00 FF 01 9D 07 03 00 00 00 1E 00 00 00 30 00 00 00 3C 00 00 00 30 C4");
         uart_telegram_withCRC("90 48 F9 00 FF 01 9D 08 03 00 00 00 1E 00 00 00 4B 00 00 00 55 00 00 00 4B C8");
         uart_telegram_withCRC("90 48 F9 00 FF 01 B1 08 0B 00 00 00 14 00 00 00 19 00 00 00 4B 00 00 00 19 A2");
+
         uart_telegram_withCRC("90 48 FF 07 01 A7 51");
         uart_telegram_withCRC("90 48 FF 08 01 A7 6D");
         uart_telegram_withCRC("90 48 FF 00 01 A7 4D");
