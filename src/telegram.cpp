@@ -344,11 +344,6 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
 
     length++; // add one since we want to now include the CRC
 
-// logging interferes with the UART so disable this
-#if defined(ESP8266)
-    if (Settings().ems_tx_mode() <= 4) {
-#endif
-        // This logging causes errors with timer based tx-modes on esp8266!
         LOG_DEBUG(F("Sending %s Tx [#%d], telegram: %s"),
                   (telegram->operation == Telegram::Operation::TX_WRITE) ? F("write") : F("read"),
                   tx_telegram.id_,
@@ -359,9 +354,6 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
         if (EMSESP::watch() == EMSESP::Watch::WATCH_RAW) {
             LOG_NOTICE(F("[DEBUG] Tx: %s"), Helpers::data_to_hex(telegram_raw, length).c_str());
         }
-#endif
-#if defined(ESP8266)
-    }
 #endif
 
     // send the telegram to the UART Tx
