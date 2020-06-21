@@ -136,7 +136,7 @@ void Solar::process_SM10Monitor(std::shared_ptr<const Telegram> telegram) {
     telegram->read_value(collectorTemp_, 2);  // collector temp from SM10, is *10
     telegram->read_value(bottomTemp_, 5);     // bottom temp from SM10, is *10
     telegram->read_value(pumpModulation_, 4); // modulation solar pump
-    telegram->read_value(pump_, 7, 1);
+    telegram->read_bitvalue(pump_, 7, 1);
     telegram->read_value(pumpWorkMin_, 8);
 }
 
@@ -191,8 +191,8 @@ void Solar::process_SM100Status(std::shared_ptr<const Telegram> telegram) {
  * byte 10 = PS1 Solar circuit pump for collector array 1: test=01, on=04 and off=03
  */
 void Solar::process_SM100Status2(std::shared_ptr<const Telegram> telegram) {
-    telegram->read_value(valveStatus_, 4, 2); // on if bit 2 set
-    telegram->read_value(pump_, 10, 2);       // on if bit 2 set
+    telegram->read_bitvalue(valveStatus_, 4, 2); // on if bit 2 set
+    telegram->read_bitvalue(pump_, 10, 2);       // on if bit 2 set
 }
 
 /*
@@ -200,9 +200,9 @@ void Solar::process_SM100Status2(std::shared_ptr<const Telegram> telegram) {
  * e.g. 30 00 FF 00 02 8E 00 00 00 00 00 00 06 C5 00 00 76 35
  */
 void Solar::process_SM100Energy(std::shared_ptr<const Telegram> telegram) {
-    telegram->read_value32(energyLastHour_, 0); // last hour / 10 in Wh
-    telegram->read_value32(energyToday_, 4);    //  todays in Wh
-    telegram->read_value32(energyTotal_, 8);    //  total / 10 in kWh
+    telegram->read_value(energyLastHour_, 0); // last hour / 10 in Wh
+    telegram->read_value(energyToday_, 4);    //  todays in Wh
+    telegram->read_value(energyTotal_, 8);    //  total / 10 in kWh
 }
 
 /*
@@ -210,11 +210,11 @@ void Solar::process_SM100Energy(std::shared_ptr<const Telegram> telegram) {
  *  e.g. B0 00 FF 00 00 03 32 00 00 00 00 13 00 D6 00 00 00 FB D0 F0
  */
 void Solar::process_ISM1StatusMessage(std::shared_ptr<const Telegram> telegram) {
-    telegram->read_value(collectorTemp_, 4);    // Collector Temperature
-    telegram->read_value(bottomTemp_, 6);       // Temperature Bottom of Solar Boiler
-    telegram->read_value32(energyLastHour_, 0); // Solar Energy produced in last hour - is * 10 and handled in ems-esp.cpp
-    telegram->read_value(pump_, 8, 0);          // Solar pump on (1) or off (0)
-    telegram->read_value(pumpWorkMin_, 10);
+    telegram->read_value(collectorTemp_, 4);   // Collector Temperature
+    telegram->read_value(bottomTemp_, 6);      // Temperature Bottom of Solar Boiler
+    telegram->read_value(energyLastHour_, 0);  // Solar Energy produced in last hour - is * 10 and handled in ems-esp.cpp
+    telegram->read_bitvalue(pump_, 8, 0);      // Solar pump on (1) or off (0)
+    telegram->read_value(pumpWorkMin_, 10, 3); // force to 3 bytes
 }
 
 /*

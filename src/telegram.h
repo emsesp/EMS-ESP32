@@ -41,15 +41,12 @@
 static constexpr uint8_t EMS_VALUE_BOOL     = 0xFF; // boolean
 static constexpr uint8_t EMS_VALUE_BOOL_OFF = 0x00; // boolean false. True can be 0x01 or 0xFF sometimes.
 
-static constexpr uint8_t  EMS_VALUE_BOOL_NOTSET    = 0xFE;   // random number for booleans, that's not 0, 1 or FF
-static constexpr uint8_t  EMS_VALUE_UINT_NOTSET    = 0xFF;   // for 8-bit unsigned ints/bytes
-static constexpr int8_t   EMS_VALUE_INT_NOTSET     = 0x7F;   // for signed 8-bit ints/bytes
-static constexpr int16_t  EMS_VALUE_SHORT_NOTSET   = 0x8300; // -32000: for 2-byte signed shorts
-static constexpr uint16_t EMS_VALUE_USHORT_NOTSET  = 0x7D00; //  32000: for 2-byte unsigned shorts
-static constexpr uint16_t EMS_VALUE_USHORT_INVALID = 0x8000;
-static constexpr int16_t  EMS_VALUE_SHORT_INVALID  = 0x8000;
-static constexpr uint32_t EMS_VALUE_ULONG_NOTSET   = 0xFFFFFFFF; // for 3-byte and 4-byte longs
-static constexpr uint32_t EMS_VALUE_ULONG_INVALID  = 0x80000000;
+static constexpr uint8_t  EMS_VALUE_BOOL_NOTSET   = 0xFE;       // random number for booleans, that's not 0, 1 or FF
+static constexpr uint8_t  EMS_VALUE_UINT_NOTSET   = 0xFF;       // for 8-bit unsigned ints/bytes
+static constexpr int8_t   EMS_VALUE_INT_NOTSET    = 0x7F;       // for signed 8-bit ints/bytes
+static constexpr int16_t  EMS_VALUE_SHORT_NOTSET  = 0x8300;     // -32000: for 2-byte signed shorts
+static constexpr uint16_t EMS_VALUE_USHORT_NOTSET = 0x7D00;     //  32000: for 2-byte unsigned shorts
+static constexpr uint32_t EMS_VALUE_ULONG_NOTSET  = 0xFFFFFFFF; // for 3-byte and 4-byte longs
 
 static constexpr uint8_t EMS_MAX_TELEGRAM_LENGTH         = 32; // max length of a complete EMS telegram
 static constexpr uint8_t EMS_MAX_TELEGRAM_MESSAGE_LENGTH = 27; // max length of message block, assuming EMS1.0
@@ -82,14 +79,36 @@ class Telegram {
     std::string to_string() const;
     std::string to_string(const uint8_t * telegram, uint8_t length) const;
 
-    void read_value(uint16_t & param, const uint8_t index) const;
-    void read_value(uint32_t & param, const uint8_t index) const;
-    void read_value32(uint32_t & param, const uint8_t index) const;
-    void read_value(uint8_t & param, const uint8_t index, const uint8_t bit) const;
-    void read_value(uint8_t & param, const uint8_t index) const;
-    void read_value(int16_t & param, const uint8_t index) const;
-    void read_value8(int16_t & param, const uint8_t index) const;
-    void read_value(int8_t & param, const uint8_t index) const;
+    // reads a bit value from a given telegram position
+    void read_bitvalue(uint8_t & value, const uint8_t index, const uint8_t bit) const {
+        if ((index - offset) >= message_length) {
+            return; // out of bounds
+        }
+
+        value = (uint8_t)(((message_data[index]) >> (bit)) & 0x01);
+    }
+
+    // read values from a telegram. We always store the value, regardless if its garbage
+    template <typename Value>
+    // assuming negative numbers are stored as 2's-complement
+    // https://medium.com/@LeeJulija/how-integers-are-stored-in-memory-using-twos-complement-5ba04d61a56c
+    // 2-compliment : https://www.rapidtables.com/convert/number/decimal-to-hex.html
+    // https://en.wikipedia.org/wiki/Two%27s_complement
+    // s is to override number of bytes read (e.g. use 3 to simulat a uint24_t)
+    void read_value(Value & value, const uint8_t index, uint8_t s = 0) const {
+        uint8_t size      = (!s) ? sizeof(Value) : s;
+        int8_t  abs_index = ((index - offset + size - 1) >= message_length) ? -1 : (index - offset);
+        if (abs_index < 0) {
+            return; // out of bounds, we don't change the value
+        }
+
+        value = 0;
+        for (uint8_t i = 0; i < size; i++) {
+            // shift
+            value = (value << 8) + message_data[abs_index + i];
+        }
+    }
+
 
   private:
     int8_t _getDataPosition(const uint8_t index, const uint8_t size) const;

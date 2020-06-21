@@ -26,7 +26,6 @@ namespace emsesp {
 // used with the 'test' command, under su/admin
 void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
     if ((command == "render") || (command == "r")) {
-
         uint8_t  test1 = 12;
         int8_t   test2 = -12;
         uint16_t test3 = 456;
@@ -86,7 +85,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         shell.printfln("int16: expecting %02X, got:%02X", 0x0203, int16b);
 
         int16_t int16b8 = EMS_VALUE_SHORT_NOTSET;
-        telegram->read_value(int16b8, 1, 1); // override to 1 byte
+        telegram->read_value(int16b8, 1, 1); // force to 1 byte
         shell.printfln("int16 1 byte: expecting %02X, got:%02X", 0x02, int16b8);
 
         uint32_t uint32b = EMS_VALUE_ULONG_NOTSET;
@@ -107,10 +106,10 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
 
         // check read bit
         uint8_t uint8bitb = EMS_VALUE_UINT_NOTSET;
-        telegram->read_bit(uint8bitb, 1, 1); // value is 0x02 = 0000 0010
+        telegram->read_bitvalue(uint8bitb, 1, 1); // value is 0x02 = 0000 0010
         shell.printfln("uint8 bit read: expecting 1, got:%d", uint8bitb);
         uint8bitb = EMS_VALUE_UINT_NOTSET;
-        telegram->read_bit(uint8bitb, 0, 0); // value is 0x01 = 0000 0001
+        telegram->read_bitvalue(uint8bitb, 0, 0); // value is 0x01 = 0000 0001
         shell.printfln("uint8 bit read: expecting 1, got:%d", uint8bitb);
 
         shell.loop_all();

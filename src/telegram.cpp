@@ -99,107 +99,6 @@ std::string Telegram::to_string(const uint8_t * telegram, uint8_t length) const 
     return Helpers::data_to_hex(telegram, length);
 }
 
-// validate we have data at the offset (index) requested
-// get adjusted index position based on offset
-// if offset is 0, it takes the whole telegram. if it's for example 1 it'll show the 2nd data item and
-// everything after it
-// returns -1 if out of bounds
-int8_t Telegram::_getDataPosition(const uint8_t index, const uint8_t size) const {
-    return ((index - offset + size - 1) >= message_length) ? -1 : (index - offset);
-}
-
-// unsigned byte
-void Telegram::read_value(uint8_t & param, const uint8_t index) const {
-    int8_t pos = _getDataPosition(index, sizeof(param));
-    if (pos < 0) {
-        return;
-    }
-    param = (uint8_t)message_data[pos];
-}
-
-// signed byte
-void Telegram::read_value(int8_t & param, const uint8_t index) const {
-    int8_t pos = _getDataPosition(index, sizeof(param));
-    if (pos < 0) {
-        return;
-    }
-    param = (int8_t)message_data[pos];
-}
-
-// unsigned short
-void Telegram::read_value(uint16_t & param, const uint8_t index) const {
-    int8_t pos = _getDataPosition(index, sizeof(param));
-    if (pos < 0) {
-        return;
-    }
-
-    uint16_t value = (message_data[pos] << 8) + message_data[pos + 1];
-
-    // check for undefined/unset values, 0x8000, 0x8300, 0x7D00
-    if ((value == EMS_VALUE_USHORT_NOTSET) || (value == EMS_VALUE_USHORT_INVALID)) {
-        value = EMS_VALUE_USHORT_NOTSET; // make sure we render this right
-    }
-
-    param = value;
-}
-
-// signed short
-void Telegram::read_value(int16_t & param, const uint8_t index) const {
-    int8_t pos = _getDataPosition(index, sizeof(param));
-    if (pos < 0) {
-        return;
-    }
-
-    int16_t value = (message_data[pos] << 8) + message_data[pos + 1];
-
-    // check for undefined/unset values, 0x8000, 0x8300, 0x7D00
-    if ((value == EMS_VALUE_SHORT_NOTSET) || (value == EMS_VALUE_SHORT_INVALID)) {
-        value = EMS_VALUE_SHORT_NOTSET; // make sure we render this right
-    }
-
-    param = value;
-}
-
-// Long 24 bit
-void Telegram::read_value(uint32_t & param, const uint8_t index) const {
-    int8_t pos = _getDataPosition(index, 3);
-    if (pos < 0) {
-        return;
-    }
-
-    param = (uint32_t)((message_data[pos] << 16) + (message_data[pos + 1] << 8) + (message_data[pos + 2]));
-}
-
-// Long 32 bit
-void Telegram::read_value32(uint32_t & param, const uint8_t index) const {
-    int8_t pos = _getDataPosition(index, sizeof(param));
-    if (pos < 0) {
-        return;
-    }
-
-    param = (uint32_t)((message_data[pos] << 24) + (message_data[pos + 1] << 16) + (message_data[pos + 2] << 8) + (message_data[pos + 3]));
-}
-
-// bit from an unsigned byte
-void Telegram::read_value(uint8_t & param, const uint8_t index, const uint8_t bit) const {
-    int8_t pos = _getDataPosition(index, sizeof(param));
-    if (pos < 0) {
-        return;
-    }
-
-    param = (uint8_t)(((message_data[pos]) >> (bit)) & 0x01);
-}
-
-// convert signed short to single 8 byte, for setpoint thermostat temperatures that don't store their temps in 2 bytes
-void Telegram::read_value8(int16_t & param, const uint8_t index) const {
-    int8_t pos = _getDataPosition(index, 1);
-    if (pos < 0) {
-        return;
-    }
-
-    param = message_data[pos];
-}
-
 RxService::QueuedRxTelegram::QueuedRxTelegram(uint16_t id, std::shared_ptr<Telegram> && telegram)
     : id_(id)
     , telegram_(std::move(telegram)) {
@@ -214,14 +113,6 @@ void RxService::flush_rx_queue() {
 // Rx loop, run as many times as you can
 // processes all telegrams on the queue. Assumes there are valid (i.e. CRC checked)
 void RxService::loop() {
-    /*
-#ifndef EMSESP_STANDALONE
-    give rx some breathing space if ((uuid::get_uptime() - last_rx_check_) < RX_LOOP_WAIT) {
-        return;
-    }
-    last_rx_check_ = uuid::get_uptime();
-#endif
-*/
 
     while (!rx_telegrams_.empty()) {
         auto telegram = rx_telegrams_.front().telegram_;
@@ -270,7 +161,7 @@ void RxService::add(uint8_t * data, uint8_t length) {
     uint8_t   message_length; // length of the message block, excluding CRC
 
     // work out depending on the type, where the data message block starts and the message length
-    // EMS 1 has type_id always in data[2], if it gets a ems+ inquiery it will reply with FF but short length
+    // EMS 1 has type_id always in data[2], if it gets a ems+ inquiry it will reply with FF but short length
     // i.e. sending 0B A1 FF 00 01 D8 20 CRC to a MM10 Mixer (ems1.0), the reply is 21 0B FF 00 CRC
     // see: https://github.com/proddy/EMS-ESP/issues/380#issuecomment-633663007
     if (data[2] < 0xF0 || length < 6) {

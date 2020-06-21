@@ -126,7 +126,7 @@ char * Helpers::smallitoa(char * result, const uint16_t value) {
 char * Helpers::render_value(char * result, uint8_t value, uint8_t format) {
     result[0] = '\0';
 
-    // check if its a boolean
+    // special check if its a boolean
     if (format == EMS_VALUE_BOOL) {
         if (value == EMS_VALUE_BOOL_OFF) {
             strlcpy(result, "off", 5);
@@ -138,7 +138,7 @@ char * Helpers::render_value(char * result, uint8_t value, uint8_t format) {
         return result;
     }
 
-    if (value == EMS_VALUE_UINT_NOTSET) {
+    if (!hasValue(value)) {
         return nullptr;
     }
 
@@ -189,8 +189,7 @@ char * Helpers::render_value(char * result, const float value, const uint8_t for
 char * Helpers::render_value(char * result, const int16_t value, const uint8_t format) {
     result[0] = '\0';
 
-    // remove errors or invalid values, 0x7D00 and higher
-    if ((value == EMS_VALUE_SHORT_NOTSET) || (value == EMS_VALUE_SHORT_INVALID) || (value == EMS_VALUE_USHORT_NOTSET)) {
+    if (!hasValue(value)) {
         return nullptr;
     }
 
@@ -232,7 +231,7 @@ char * Helpers::render_value(char * result, const int16_t value, const uint8_t f
 char * Helpers::render_value(char * result, const uint16_t value, const uint8_t format) {
     result[0] = '\0';
 
-    if ((value == EMS_VALUE_USHORT_NOTSET) || (value == EMS_VALUE_USHORT_INVALID)) {
+    if (!hasValue(value)) {
         return nullptr;
     }
 
@@ -244,7 +243,7 @@ char * Helpers::render_value(char * result, const uint16_t value, const uint8_t 
 char * Helpers::render_value(char * result, const int8_t value, const uint8_t format) {
     result[0] = '\0';
 
-    if (value == EMS_VALUE_INT_NOTSET) {
+    if (!hasValue(value)) {
         return nullptr;
     }
 
@@ -256,7 +255,7 @@ char * Helpers::render_value(char * result, const int8_t value, const uint8_t fo
 char * Helpers::render_value(char * result, const uint32_t value, const uint8_t format) {
     result[0] = '\0';
 
-    if ((value == EMS_VALUE_ULONG_NOTSET) || (value == EMS_VALUE_ULONG_INVALID)) {
+    if (!hasValue(value)) {
         return nullptr;
     }
 
@@ -358,12 +357,14 @@ bool Helpers::hasValue(const int8_t v) {
     return (v != EMS_VALUE_INT_NOTSET);
 }
 
+// for short these are typically 0x8300, 0x7D00 and sometimes 0x8000
+// so we just check for anything > 0x70
 bool Helpers::hasValue(const int16_t v) {
-    return (v != EMS_VALUE_SHORT_NOTSET && v != EMS_VALUE_USHORT_NOTSET && v != EMS_VALUE_SHORT_INVALID && v != EMS_VALUE_USHORT_INVALID);
+    return ((v >> 8) < 0x70);
 }
 
 bool Helpers::hasValue(const uint16_t v) {
-    return (v != EMS_VALUE_SHORT_NOTSET && v != EMS_VALUE_USHORT_NOTSET && v != EMS_VALUE_SHORT_INVALID && v != EMS_VALUE_USHORT_INVALID);
+    return ((v >> 8) < 0x70);
 }
 
 bool Helpers::hasValue(const uint32_t v) {

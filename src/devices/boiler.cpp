@@ -471,12 +471,12 @@ void Boiler::process_UBAMonitorFast(std::shared_ptr<const Telegram> telegram) {
     telegram->read_value(selBurnPow_, 3); // burn power max setting
     telegram->read_value(curBurnPow_, 4);
 
-    telegram->read_value(burnGas_, 7, 0);
-    telegram->read_value(fanWork_, 7, 2);
-    telegram->read_value(ignWork_, 7, 3);
-    telegram->read_value(heatPmp_, 7, 5);
-    telegram->read_value(wWHeat_, 7, 6);
-    telegram->read_value(wWCirc_, 7, 7);
+    telegram->read_bitvalue(burnGas_, 7, 0);
+    telegram->read_bitvalue(fanWork_, 7, 2);
+    telegram->read_bitvalue(ignWork_, 7, 3);
+    telegram->read_bitvalue(heatPmp_, 7, 5);
+    telegram->read_bitvalue(wWHeat_, 7, 6);
+    telegram->read_bitvalue(wWCirc_, 7, 7);
 
     // warm water storage sensors (if present)
     // wwStorageTemp2 is also used by some brands as the boiler temperature - see https://github.com/proddy/EMS-ESP/issues/206
@@ -506,7 +506,7 @@ void Boiler::process_UBAMonitorFast(std::shared_ptr<const Telegram> telegram) {
  * received only after requested (not broadcasted)
  */
 void Boiler::process_UBATotalUptime(std::shared_ptr<const Telegram> telegram) {
-    telegram->read_value(UBAuptime_, 0);
+    telegram->read_value(UBAuptime_, 0, 3); // force to 3 bytes
 }
 
 /*
@@ -527,13 +527,15 @@ void Boiler::process_UBAMonitorWW(std::shared_ptr<const Telegram> telegram) {
     telegram->read_value(wWCurTmp_, 1);
     telegram->read_value(wWCurTmp2_, 3);
     telegram->read_value(wWCurFlow_, 9);
-    telegram->read_value(wWWorkM_, 10);
-    telegram->read_value(wWStarts_, 13);
-    telegram->read_value(wWOneTime_, 5, 1);
-    telegram->read_value(wWDesinfecting_, 5, 2);
-    telegram->read_value(wWReadiness_, 5, 3);
-    telegram->read_value(wWRecharging_, 5, 4);
-    telegram->read_value(wWTemperatureOK_, 5, 5);
+
+    telegram->read_value(wWWorkM_, 10, 3);  // force to 3 bytes
+    telegram->read_value(wWStarts_, 13, 3); // force to 3 bytes
+
+    telegram->read_bitvalue(wWOneTime_, 5, 1);
+    telegram->read_bitvalue(wWDesinfecting_, 5, 2);
+    telegram->read_bitvalue(wWReadiness_, 5, 3);
+    telegram->read_bitvalue(wWRecharging_, 5, 4);
+    telegram->read_bitvalue(wWTemperatureOK_, 5, 5);
 }
 
 /*
@@ -542,8 +544,8 @@ void Boiler::process_UBAMonitorWW(std::shared_ptr<const Telegram> telegram) {
  */
 void Boiler::process_UBAMonitorFastPlus(std::shared_ptr<const Telegram> telegram) {
     telegram->read_value(selFlowTemp_, 6);
-    telegram->read_value(burnGas_, 11, 0);
-    telegram->read_value(wWHeat_, 11, 2);
+    telegram->read_bitvalue(burnGas_, 11, 0);
+    telegram->read_bitvalue(wWHeat_, 11, 2);
     telegram->read_value(curBurnPow_, 10);
     telegram->read_value(selBurnPow_, 9);
     telegram->read_value(curFlowTemp_, 7);
@@ -573,9 +575,9 @@ void Boiler::process_UBAMonitorSlow(std::shared_ptr<const Telegram> telegram) {
     telegram->read_value(exhaustTemp_, 4);
     telegram->read_value(switchTemp_, 25); // only if there is a mixing module present
     telegram->read_value(pumpMod_, 9);
-    telegram->read_value(burnStarts_, 10);
-    telegram->read_value(burnWorkMin_, 13);
-    telegram->read_value(heatWorkMin_, 19);
+    telegram->read_value(burnStarts_, 10, 3);  // force to 3 bytes
+    telegram->read_value(burnWorkMin_, 13, 3); // force to 3 bytes
+    telegram->read_value(heatWorkMin_, 19, 3); // force to 3 bytes
 }
 
 /*
@@ -589,13 +591,13 @@ void Boiler::process_UBAMonitorSlowPlus2(std::shared_ptr<const Telegram> telegra
  * UBAMonitorSlowPlus - type 0xE5 - central heating monitor EMS+
  */
 void Boiler::process_UBAMonitorSlowPlus(std::shared_ptr<const Telegram> telegram) {
-    telegram->read_value(fanWork_, 2, 2);
-    telegram->read_value(ignWork_, 2, 3);
-    telegram->read_value(heatPmp_, 2, 5);
-    telegram->read_value(wWCirc_, 2, 7);
-    telegram->read_value(burnStarts_, 10);
-    telegram->read_value(burnWorkMin_, 13);
-    telegram->read_value(heatWorkMin_, 19);
+    telegram->read_bitvalue(fanWork_, 2, 2);
+    telegram->read_bitvalue(ignWork_, 2, 3);
+    telegram->read_bitvalue(heatPmp_, 2, 5);
+    telegram->read_bitvalue(wWCirc_, 2, 7);
+    telegram->read_value(burnStarts_, 10, 3);  // force to 3 bytes
+    telegram->read_value(burnWorkMin_, 13, 3); // force to 3 bytes
+    telegram->read_value(heatWorkMin_, 19, 3); // force to 3 bytes
     telegram->read_value(pumpMod_, 25);
 }
 
@@ -605,15 +607,18 @@ void Boiler::process_UBADHWStatus(std::shared_ptr<const Telegram> telegram) {
     telegram->read_value(wWSetTmp_, 0);
     telegram->read_value(wWCurTmp_, 1);
     telegram->read_value(wWCurTmp2_, 3);
-    telegram->read_value(wWWorkM_, 17);
-    telegram->read_value(wWStarts_, 14);
-    telegram->read_value(wWOneTime_, 12, 2);
-    telegram->read_value(wWDesinfecting_, 12, 3);
-    telegram->read_value(wWReadiness_, 12, 4);
-    telegram->read_value(wWRecharging_, 13, 4);
-    telegram->read_value(wWTemperatureOK_, 13, 5);
+
+    telegram->read_value(wWWorkM_, 17, 3);  // force to 3 bytes
+    telegram->read_value(wWStarts_, 14, 3); // force to 3 bytes
+
+    telegram->read_bitvalue(wWOneTime_, 12, 2);
+    telegram->read_bitvalue(wWDesinfecting_, 12, 3);
+    telegram->read_bitvalue(wWReadiness_, 12, 4);
+    telegram->read_bitvalue(wWRecharging_, 13, 4);
+    telegram->read_bitvalue(wWTemperatureOK_, 13, 5);
+    telegram->read_bitvalue(wWCircPump_, 13, 2);
+
     telegram->read_value(wWActivated_, 20);
-    telegram->read_value(wWCircPump_, 13, 2);
     telegram->read_value(wWSelTemp_, 10);
     telegram->read_value(wWDisinfectTemp_, 9);
 }
