@@ -74,7 +74,7 @@ void EMSESPShell::display_banner() {
     printfln(F("│                                          │"));
 
     if (System::safe_mode()) {
-        printfln(F("│ %sIN SAFE MODE. EMS BUS IS DISABLED.%s       │"), COLOR_BRIGHT_RED_BACKGROUND, COLOR_RESET);
+        printfln(F("│ %sIN SAFE MODE. EMS BUS IS DISABLED%s       │"), COLOR_BRIGHT_RED_BACKGROUND, COLOR_RESET);
 #ifdef EMSESP_SAFE_MODE
         printfln(F("│ %s!FORCED AT COMPILE TIME!%s                 │"), COLOR_BRIGHT_RED, COLOR_RESET);
 #endif
