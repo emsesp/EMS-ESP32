@@ -206,7 +206,8 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
 
         EMSESP::send_raw_telegram("B0 00 FF 18 02 62 80 00 B8");
 
-        uart_telegram("30 00 FF 0A 02 6A 04"); // SM100 pump on  1
+        uart_telegram("30 00 FF 0A 02 6A 04");                                                 // SM100 pump on  1
+        uart_telegram("30 00 FF 00 02 64 00 00 00 04 00 00 FF 00 00 1E 0B 09 64 00 00 00 00"); // SM100 modulation
 
         EMSESP::rxservice_.loop();
         EMSESP::show_values(shell);
