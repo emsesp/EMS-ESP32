@@ -56,7 +56,7 @@ class Thermostat : public EMSdevice {
         uint8_t nighttemp         = EMS_VALUE_UINT_NOTSET;
         uint8_t holidaytemp       = EMS_VALUE_UINT_NOTSET;
         uint8_t heatingtype       = EMS_VALUE_UINT_NOTSET; // type of heating: 1 radiator, 2 convectors, 3 floors, 4 room supply
-        uint8_t circuitcalctemp   = EMS_VALUE_UINT_NOTSET;
+        uint8_t targetflowtemp    = EMS_VALUE_UINT_NOTSET;
         uint8_t summertemp        = EMS_VALUE_UINT_NOTSET;
         uint8_t nofrosttemp       = EMS_VALUE_UINT_NOTSET;
         uint8_t designtemp        = EMS_VALUE_UINT_NOTSET; // heatingcurve design temp at MinExtTemp
@@ -165,7 +165,7 @@ class Thermostat : public EMSdevice {
     static constexpr uint8_t EMS_OFFSET_RC35Set_temp_night         = 1;  // position of thermostat setpoint temperature for night time
     static constexpr uint8_t EMS_OFFSET_RC35Set_temp_holiday       = 3;  // temp during holiday mode
     static constexpr uint8_t EMS_OFFSET_RC35Set_heatingtype        = 0;  // e.g. floor heating = 3
-    static constexpr uint8_t EMS_OFFSET_RC35Set_circuitcalctemp    = 14; // calculated circuit temperature
+    static constexpr uint8_t EMS_OFFSET_RC35Set_targetflowtemp     = 14; // target flow temperature
     static constexpr uint8_t EMS_OFFSET_RC35Set_seltemp            = 37; // selected temp
     static constexpr uint8_t EMS_OFFSET_RC35Set_temp_offset        = 6;
     static constexpr uint8_t EMS_OFFSET_RC35Set_temp_design        = 17;

@@ -550,8 +550,8 @@ void Thermostat::publish_values() {
             dataThermostat["heatingtype"] = hc->heatingtype;
         }
 
-        if (Helpers::hasValue(hc->circuitcalctemp)) {
-            dataThermostat["circuitcalctemp"] = hc->circuitcalctemp;
+        if (Helpers::hasValue(hc->targetflowtemp)) {
+            dataThermostat["targetflowtemp"] = hc->targetflowtemp;
         }
 
         if (Helpers::hasValue(hc->offsettemp)) {
@@ -940,8 +940,8 @@ void Thermostat::show_values(uuid::console::Shell & shell) {
             print_value(shell, 4, F("Summer temperature"), hc->summertemp, F_(degrees), 0);
         }
         // show flow temp if we have it
-        if (Helpers::hasValue(hc->circuitcalctemp)) {
-            print_value(shell, 4, F("Calculated flow temperature"), hc->circuitcalctemp, F_(degrees), 1);
+        if (Helpers::hasValue(hc->targetflowtemp)) {
+            print_value(shell, 4, F("Target flow temperature"), hc->targetflowtemp, F_(degrees), 1);
         }
     }
 }
@@ -1066,12 +1066,12 @@ void Thermostat::process_RC300Monitor(std::shared_ptr<const Telegram> telegram) 
     // if auto, take the next setpoint temp at pos 7
     // pos 3 is the current target temp and sometimes can be 0
     // see https://github.com/proddy/EMS-ESP/issues/256#issuecomment-585171426
-    // pos 3 actual setpoint (optmized), i.e. changes with temporary change, summer/holiday-modes
+    // pos 3 actual setpoint (optimized), i.e. changes with temporary change, summer/holiday-modes
     // pos 6 actual setpoint according to programmed changes eco/comfort
     // pos 7 next setpoint in the future, time to next setpoint in pos 8/9
     telegram->read_value(hc->setpoint_roomTemp, 3, 1); // is * 2, force as single byte
     telegram->read_bitvalue(hc->summer_mode, 2, 4);
-    telegram->read_value(hc->circuitcalctemp, 4);
+    telegram->read_value(hc->targetflowtemp, 4);
 }
 
 // type 0x02B9 EMS+ for reading from RC300/RC310 thermostat
@@ -1136,7 +1136,7 @@ void Thermostat::process_RC35Monitor(std::shared_ptr<const Telegram> telegram) {
     telegram->read_bitvalue(hc->summer_mode, 1, 0);
     telegram->read_bitvalue(hc->holiday_mode, 0, 5);
 
-    telegram->read_value(hc->circuitcalctemp, 14);
+    telegram->read_value(hc->targetflowtemp, 14);
 }
 
 // type 0x3D (HC1), 0x47 (HC2), 0x51 (HC3), 0x5B (HC4) - Working Mode Heating - for reading the mode from the RC35 thermostat (0x10)
