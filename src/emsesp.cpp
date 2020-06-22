@@ -405,7 +405,8 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
     }
 
     // only process broadcast telegrams or ones sent to us on request or ones sent to a modem device (like the KM200)
-    if ((telegram->dest != 0x00) && (telegram->dest != rxservice_.ems_bus_id()) && (telegram->dest != EMSdevice::EMS_DEVICE_ID_MODEM)) {
+    // if ((telegram->dest != 0x00) && (telegram->dest != rxservice_.ems_bus_id()) && (telegram->dest != EMSdevice::EMS_DEVICE_ID_MODEM)) {
+    if ((telegram->dest != 0x00) && (telegram->dest != rxservice_.ems_bus_id())) {
         return false;
     }
 
@@ -726,18 +727,18 @@ void EMSESP::console_commands(Shell & shell, unsigned int context) {
                                        flash_string_vector{F_(set), F_(tx_mode)},
                                        flash_string_vector{F_(n_mandatory)},
                                        [](Shell & shell, const std::vector<std::string> & arguments) {
-                                           uint8_t tx_mode = std::strtol(arguments[0].c_str(), nullptr, 10);
-                                           if ((tx_mode > 0) && (tx_mode <= 50)) {
-                                               Settings settings;
-                                               settings.ems_tx_mode(tx_mode);
-                                               settings.commit();
-                                               shell.printfln(F_(tx_mode_fmt), settings.ems_tx_mode());
-                                               // reset the UART
-                                               EMSuart::stop();
-                                               EMSuart::start(tx_mode);
-                                           } else {
-                                               shell.println(F("Must be 1 for EMS generic, 2 for EMS+, 3 for HT3, 4 for experimental"));
-                                           }
+                                           uint8_t  tx_mode = std::strtol(arguments[0].c_str(), nullptr, 10);
+                                           Settings settings;
+                                           settings.ems_tx_mode(tx_mode);
+                                           settings.commit();
+                                           shell.printfln(F_(tx_mode_fmt), settings.ems_tx_mode());
+                                           // reset counters
+                                           txservice_.telegram_read_count(0);
+                                           txservice_.telegram_write_count(0);
+                                           txservice_.telegram_fail_count(0);
+                                           // reset the UART
+                                           EMSuart::stop();
+                                           EMSuart::start(tx_mode);
                                        });
 
     EMSESPShell::commands->add_command(

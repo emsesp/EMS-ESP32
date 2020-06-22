@@ -294,6 +294,10 @@ class TxService : public EMSbus {
         return telegram_read_count_;
     }
 
+    void telegram_read_count(uint8_t telegram_read_count) {
+        telegram_read_count_ = telegram_read_count;
+    }
+
     void increment_telegram_read_count() {
         telegram_read_count_++;
     }
@@ -302,12 +306,20 @@ class TxService : public EMSbus {
         return telegram_fail_count_;
     }
 
+    void telegram_fail_count(uint8_t telegram_fail_count) {
+        telegram_fail_count_ = telegram_fail_count;
+    }
+
     void increment_telegram_fail_count() {
         telegram_fail_count_++;
     }
 
     uint16_t telegram_write_count() const {
         return telegram_write_count_;
+    }
+
+    void telegram_write_count(uint8_t telegram_write_count) {
+        telegram_write_count_ = telegram_write_count;
     }
 
     void increment_telegram_write_count() {
