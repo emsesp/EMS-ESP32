@@ -25,7 +25,7 @@ namespace emsesp {
 // create some fake test data
 // used with the 'test' command, under su/admin
 void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
-    if ((command == "render") || (command == "r")) {
+    if (command == "render") {
         uint8_t  test1 = 12;
         int8_t   test2 = -12;
         uint16_t test3 = 456;
@@ -42,8 +42,6 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
 
         uint16_t test3u = EMS_VALUE_USHORT_NOTSET;
         int16_t  test4u = EMS_VALUE_SHORT_NOTSET;
-
-        // TODO set to 7D00 for both
 
         EMSdevice::print_value(shell, 2, F("Selected flow temperature1"), test1, F_(degrees), 1);          // 12
         EMSdevice::print_value(shell, 2, F("Selected flow temperature2"), test2, F_(degrees), 1);          // -12
@@ -65,21 +63,6 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         EMSdevice::print_value(shell, 2, F("Selected flow temperature4u"), test4u, F_(degrees), 10);
         EMSdevice::print_value(shell, 2, F("Selected flow temperature5u"), test5u, F_(degrees), EMS_VALUE_BOOL);
         EMSdevice::print_value(shell, 2, F("Selected flow temperature6u"), test6u, F_(degrees), 100);
-
-        shell.printfln("int16  unset = %d, [%0X] %0X %0X", test4u, test4u, (test4u >> 8), ((test4u >> 8) & 0xFF));
-        shell.printfln("uint16 unset = %d, [%0X] %0X %0X", test3u, test3u, (test3u >> 8), ((test3u >> 8) & 0xFF));
-
-        test3u = 456;
-        test4u = -456;
-
-        shell.printfln("int16  set   = %d, [%0X] %0X %0X", test4u, test4u, (test4u >> 8), ((test4u >> 8) & 0xFF));
-
-        shell.printfln("uint16 set   = %d, [%0X] %0X %0X", test3u, test3u, (test3u >> 8), ((test3u >> 8) & 0xFF));
-
-        test4u = 0x7D00;
-
-        // test4u = abs(0x7D00);
-        shell.printfln("int16 invalid= %d, [%0X] %0X %0X", test4u, test4u, (test4u >> 8), ((test4u >> 8) & 0xFF));
 
         shell.println();
 
@@ -166,7 +149,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         rx_telegram({0x09, 0x0B, 0x02, 0x00, 0x5A, 0x01, 0x02}); // product id is 90 which doesn't exist
     }
 
-    if ((command == "gateway") || (command == "g")) {
+    if (command == "gateway") {
         // add 0x48 KM200, via a version command
         rx_telegram({0x48, 0x0B, 0x02, 0x00, 0xBD, 0x04, 0x06, 00, 00, 00, 00, 00, 00, 00});
 
@@ -239,6 +222,8 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
 
         // see https://github.com/proddy/EMS-ESP/issues/390
 
+        /*
+
         uart_telegram_withCRC("90 48 FF 04 01 A6 5C");
         uart_telegram_withCRC("90 48 FF 00 01 A6 4C");
         uart_telegram_withCRC("90 48 FF 08 01 A7 6D");
@@ -276,6 +261,17 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         uart_telegram_withCRC("C8 90 FF 00 02 01 A6 D0");
 
         // uart_telegram_withCRC("10 00 FF 00 01 A5 00 D7 21 00 00 00 00 30 01 84 01 01 03 01 84 01 F1 00 00 11 01 00 08 63 00");
+
+        */
+
+        uart_telegram_withCRC("C8 90 F7 02 01 FF 01 A6 BA");
+
+        uart_telegram_withCRC("90 48 FF 04 01 A6 5C");
+        uart_telegram_withCRC("90 00 FF 00 01 A5 80 00 01 27 16 00 27 2A 05 A0 02 03 03 05 A0 05 A0 00 00 11 01 02 FF FF 00 9A");
+        uart_telegram_withCRC("90 00 FF 19 01 A5 01 04 00 00 00 00 FF 64 2A 00 3C 01 FF 92");
+        uart_telegram_withCRC("90 0B FF 00 01 A5 80 00 01 26 15 00 26 2A 05 A0 03 03 03 05 A0 05 A0 00 00 11 01 03 FF FF 00 FE");
+        uart_telegram_withCRC("90 00 FF 19 01 A5 01 04 00 00 00 00 FF 64 2A 00 3C 01 FF 92");
+
 
         EMSESP::show_emsbus(shell);
         EMSESP::rxservice_.loop();
