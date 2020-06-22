@@ -188,7 +188,7 @@ void Solar::process_SM100Status(std::shared_ptr<const Telegram> telegram) {
  * SM100Status2 - type 0x036A EMS+ for pump on/off at offset 0x0A - for SM100 and SM200
  * e.g. B0 00 FF 00 02 6A 03 03 03 03 01 03 03 03 03 03 01 03 
  * byte 4 = VS2 3-way valve for cylinder 2 : test=01, on=04 and off=03
- * byte 10 = PS1 Solar circuit pump for collector array 1: test=01, on=04 and off=03
+ * byte 10 = PS1 Solar circuit pump for collector array 1: test=b0001(1), on=b0100(4) and off=b0011(3)
  */
 void Solar::process_SM100Status2(std::shared_ptr<const Telegram> telegram) {
     telegram->read_bitvalue(valveStatus_, 4, 2); // on if bit 2 set

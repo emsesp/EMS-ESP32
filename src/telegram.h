@@ -85,7 +85,7 @@ class Telegram {
             return; // out of bounds
         }
 
-        value = (uint8_t)(((message_data[index]) >> (bit)) & 0x01);
+        value = (uint8_t)(((message_data[index - offset]) >> (bit)) & 0x01);
     }
 
     // read values from a telegram. We always store the value, regardless if its garbage
