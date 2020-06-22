@@ -581,16 +581,12 @@ void Thermostat::publish_values() {
             dataThermostat["mode"] = mode_tostring(hc_mode);
         }
 
-        // special handling of mode type, for the RC35 replace with summer/holiday
+        // special handling of mode type, for the RC35 replace with summer/holiday if set
         // https://github.com/proddy/EMS-ESP/issues/373#issuecomment-619810209
-        if ((flags & 0x0F) == EMS_DEVICE_FLAG_RC35) {
-            if (hc->summer_mode) {
-                dataThermostat["modetype"] = F("summer");
-            } else if (hc->holiday_mode) {
-                dataThermostat["modetype"] = F("holiday");
-            } else if (Helpers::hasValue(hc->mode_type)) {
-                dataThermostat["modetype"] = mode_tostring(hc->get_mode_type(flags));
-            }
+        if (hc->summer_mode) {
+            dataThermostat["modetype"] = F("summer");
+        } else if (hc->holiday_mode) {
+            dataThermostat["modetype"] = F("holiday");
         } else if (Helpers::hasValue(hc->mode_type)) {
             dataThermostat["modetype"] = mode_tostring(hc->get_mode_type(flags));
         }
@@ -638,11 +634,13 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(const ui
 // if its a new one, the object will be created and also the fetch flags set
 std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::shared_ptr<const Telegram> telegram) {
     // look through the Monitor and Set arrays to see if there is a match
-    uint8_t hc_num = 0;
+    uint8_t hc_num  = 0;
+    bool    toggle_ = false;
     // search set message types
     for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
         if (monitor_typeids[i] == telegram->type_id) {
-            hc_num = i + 1;
+            hc_num  = i + 1;
+            toggle_ = true;
             break;
         }
     }
@@ -681,8 +679,8 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::sha
     std::sort(heating_circuits_.begin(), heating_circuits_.end()); // sort based on hc number
 
     // set the flag saying we want its data during the next auto fetch
-    toggle_fetch(monitor_typeids[hc_num - 1], true);
-    toggle_fetch(set_typeids[hc_num - 1], true);
+    toggle_fetch(monitor_typeids[hc_num - 1], toggle_);
+    toggle_fetch(set_typeids[hc_num - 1], toggle_);
 
     return heating_circuits_.back(); // even after sorting, this should still point back to the newly created HC
 }
@@ -886,6 +884,9 @@ void Thermostat::show_values(uuid::console::Shell & shell) {
     // std::sort(heating_circuits_.begin(), heating_circuits_.end()); // sort based on hc number. This has moved to the heating_circuit() function
 
     for (const auto & hc : heating_circuits_) {
+        if (!Helpers::hasValue(hc->setpoint_roomTemp)) {
+            break; // skip this HC
+        }
         shell.printfln(F("  Heating Circuit %d:"), hc->hc_num());
 
         // different thermostat types store their temperature values differently
@@ -914,22 +915,30 @@ void Thermostat::show_values(uuid::console::Shell & shell) {
             print_value(shell, 4, F("Mode Type"), mode_tostring(hc->get_mode_type(flags)).c_str());
         }
 
-        if ((flags == EMS_DEVICE_FLAG_RC35) || (flags == EMS_DEVICE_FLAG_RC30_1)) {
-            if (hc->summer_mode) {
-                shell.printfln(F("    Program is set to Summer mode"));
-            } else if (hc->holiday_mode) {
-                shell.printfln(F("    Program is set to Holiday mode"));
-            }
-
-            print_value(shell, 4, F("Day temperature"), hc->daytemp, F_(degrees), 2);
-            print_value(shell, 4, F("Night temperature"), hc->nighttemp, F_(degrees), 2);
-            print_value(shell, 4, F("Holiday temperature"), hc->holidaytemp, F_(degrees), 2);
-
-            print_value(shell, 4, F("Offset temperature"), hc->offsettemp, F_(degrees), 2);
-            print_value(shell, 4, F("Design temperature"), hc->designtemp, F_(degrees), 0);
-            print_value(shell, 4, F("Summer temperature"), hc->summertemp, F_(degrees), 0);
+        if (hc->summer_mode) {
+            shell.printfln(F("    Program is set to Summer mode"));
+        } else if (hc->holiday_mode) {
+            shell.printfln(F("    Program is set to Holiday mode"));
         }
 
+        if (Helpers::hasValue(hc->daytemp)) {
+            print_value(shell, 4, F("Day temperature"), hc->daytemp, F_(degrees), 2);
+        }
+        if (Helpers::hasValue(hc->nighttemp)) {
+            print_value(shell, 4, F("Night temperature"), hc->nighttemp, F_(degrees), 2);
+        }
+        if (Helpers::hasValue(hc->holidaytemp)) {
+            print_value(shell, 4, F("Holiday temperature"), hc->holidaytemp, F_(degrees), 2);
+        }
+        if (Helpers::hasValue(hc->offsettemp)) {
+            print_value(shell, 4, F("Offset temperature"), hc->offsettemp, F_(degrees), 2);
+        }
+        if (Helpers::hasValue(hc->designtemp)) {
+            print_value(shell, 4, F("Design temperature"), hc->designtemp, F_(degrees), 0);
+        }
+        if (Helpers::hasValue(hc->summertemp)) {
+            print_value(shell, 4, F("Summer temperature"), hc->summertemp, F_(degrees), 0);
+        }
         // show flow temp if we have it
         if (Helpers::hasValue(hc->circuitcalctemp)) {
             print_value(shell, 4, F("Calculated flow temperature"), hc->circuitcalctemp, F_(degrees), 1);
@@ -1038,15 +1047,15 @@ void Thermostat::process_JunkersMonitor(std::shared_ptr<const Telegram> telegram
 
 // type 0x02A5 - data from the Nefit RC1010/3000 thermostat (0x18) and RC300/310s on 0x10
 void Thermostat::process_RC300Monitor(std::shared_ptr<const Telegram> telegram) {
-    // can't remember why this is here?
-    if (telegram->message_data[2] == 0x00) {
+    if (telegram->message_length == 0) {
         return;
     }
 
     std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
 
     // if current room temp starts with 0x90 it's usually trouble
-    if (telegram->message_data[0] != 0x90) {
+    // room temperatur is valid if bit 5 in data[2] is set
+    if (telegram->message_data[2] & 0x40) {
         telegram->read_value(hc->curr_roomTemp, 0); // is * 10
     }
 
@@ -1057,16 +1066,12 @@ void Thermostat::process_RC300Monitor(std::shared_ptr<const Telegram> telegram) 
     // if auto, take the next setpoint temp at pos 7
     // pos 3 is the current target temp and sometimes can be 0
     // see https://github.com/proddy/EMS-ESP/issues/256#issuecomment-585171426
-    uint8_t pos;
-    if (hc->mode == 0) { // manual
-        pos = 6;
-    } else if (hc->mode == 1) { // auto
-        pos = 7;
-    } else {
-        pos = 3;
-    }
-
-    telegram->read_value(hc->setpoint_roomTemp, pos, 1); // is * 2, force as single byte
+    // pos 3 actual setpoint (optmized), i.e. changes with temporary change, summer/holiday-modes
+    // pos 6 actual setpoint according to programmed changes eco/comfort
+    // pos 7 next setpoint in the future, time to next setpoint in pos 8/9
+    telegram->read_value(hc->setpoint_roomTemp, 3, 1); // is * 2, force as single byte
+    telegram->read_bitvalue(hc->summer_mode, 2, 4);
+    telegram->read_value(hc->circuitcalctemp, 4);
 }
 
 // type 0x02B9 EMS+ for reading from RC300/RC310 thermostat
