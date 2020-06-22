@@ -404,8 +404,7 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
         }
     }
 
-    // only process broadcast telegrams or ones sent to us on request or ones sent to a modem device (like the KM200)
-    // if ((telegram->dest != 0x00) && (telegram->dest != rxservice_.ems_bus_id()) && (telegram->dest != EMSdevice::EMS_DEVICE_ID_MODEM)) {
+    // only process broadcast telegrams or ones sent to us on request
     if ((telegram->dest != 0x00) && (telegram->dest != rxservice_.ems_bus_id())) {
         return false;
     }
