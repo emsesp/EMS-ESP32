@@ -675,6 +675,8 @@ void Boiler::process_UBAErrorMessage(std::shared_ptr<const Telegram> telegram) {
 void Boiler::set_warmwater_temp(const uint8_t temperature) {
     LOG_INFO(F("Setting boiler warm water temperature to %d C"), temperature);
     write_command(EMS_TYPE_UBAParameterWW, 2, temperature);
+    // for i9000, see #397
+    write_command(EMS_TYPE_UBAFlags, 3, temperature);
 }
 
 // flow temp
@@ -846,8 +848,7 @@ void Boiler::console_commands(Shell & shell, unsigned int context) {
                 set_warmwater_mode(1);
             } else if (arguments[0] == read_flash_string(F_(eco))) {
                 set_warmwater_mode(2);
-            }
-            if (arguments[0] == read_flash_string(F_(intelligent))) {
+            } else if (arguments[0] == read_flash_string(F_(intelligent))) {
                 set_warmwater_mode(3);
             } else {
                 shell.println(F("Invalid value. Must be hot, eco or intelligent"));
