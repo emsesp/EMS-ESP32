@@ -427,7 +427,7 @@ void TxService::add(uint8_t operation, uint8_t * data, const uint8_t length) {
         // EMS 1.0
         type_id        = data[2];
         message_data   = data + 4;
-        message_length = length - 5;
+        message_length = length - 4;
     } else {
         // EMS 2.0 / EMS+
         uint8_t shift = 0; // default when data[2] is 0xFF
@@ -442,7 +442,18 @@ void TxService::add(uint8_t operation, uint8_t * data, const uint8_t length) {
 
     // if we don't have a type_id or empty data block, exit
     if ((type_id == 0) || (message_length == 0)) {
+#ifdef EMSESP_DEBUG
+        LOG_DEBUG(F("[DEBUG] Tx telegram type %d failed, length %d"), type_id, message_length);
+#endif
         return;
+    }
+
+    if (operation == Telegram::Operation::TX_RAW) {
+        if (dest & 0x80) {
+            operation = Telegram::Operation::TX_READ;
+        } else {
+            operation = Telegram::Operation::TX_WRITE;
+        }
     }
 
     auto telegram = std::make_shared<Telegram>(operation, src, dest, type_id, offset, message_data, message_length); // operation is TX_WRITE or TX_READ

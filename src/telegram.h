@@ -81,11 +81,12 @@ class Telegram {
 
     // reads a bit value from a given telegram position
     void read_bitvalue(uint8_t & value, const uint8_t index, const uint8_t bit) const {
-        if ((index - offset) >= message_length) {
+        uint8_t abs_index = (index - offset); 
+        if(abs_index >= message_length) {
             return; // out of bounds
         }
 
-        value = (uint8_t)(((message_data[index - offset]) >> (bit)) & 0x01);
+        value = (uint8_t)(((message_data[abs_index]) >> (bit)) & 0x01);
     }
 
     // read values from a telegram. We always store the value, regardless if its garbage

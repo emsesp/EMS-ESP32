@@ -181,7 +181,11 @@ void Solar::process_SM100Config(std::shared_ptr<const Telegram> telegram) {
  *      30 00 FF 09 02 64 1E = 30%
  */
 void Solar::process_SM100Status(std::shared_ptr<const Telegram> telegram) {
+    uint8_t pumpmod = pumpModulation_;
     telegram->read_value(pumpModulation_, 9);
+    if (pumpmod == 0 && pumpModulation_ == 100) { // mask out boosts
+        pumpModulation_ = 15; // set to minimum, 
+    }
 }
 
 /*
