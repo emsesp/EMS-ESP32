@@ -1042,9 +1042,12 @@ void Thermostat::process_IBASettings(std::shared_ptr<const Telegram> telegram) {
 
 // type 0x6F - FR10/FR50/FR100 Junkers
 void Thermostat::process_JunkersMonitor(std::shared_ptr<const Telegram> telegram) {
-    if (telegram->message_length <= 1) { 
+    
+    // ignore single byte telegram messages
+    if (telegram->message_length <= 1) {
         return;
     }
+
     std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
 
     telegram->read_value(hc->curr_roomTemp, 4);     // value is * 10

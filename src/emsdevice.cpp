@@ -26,7 +26,7 @@ namespace emsesp {
 
 uuid::log::Logger EMSdevice::logger_{F_(logger_name), uuid::log::Facility::CONSOLE};
 
-std::string EMSdevice::brand() const {
+std::string EMSdevice::brand_to_string() const {
     switch (brand_) {
     case EMSdevice::Brand::BOSCH:
         return read_flash_string(F("Bosch"));
@@ -143,7 +143,7 @@ std::string EMSdevice::to_string() const {
         snprintf_P(&str[0],
                    str.capacity() + 1,
                    PSTR("%s %s (DeviceID:0x%02X ProductID:%d, Version:%s)"),
-                   brand().c_str(),
+                   brand_to_string().c_str(),
                    name_.c_str(),
                    device_id_,
                    product_id_,

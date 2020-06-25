@@ -155,14 +155,14 @@ void Mixing::process_MMPLUSStatusMessage_WWC(std::shared_ptr<const Telegram> tel
 // e.g.  A0 00 FF 00 00 0C 01 00 00 00 00 00 54
 //       A1 00 FF 00 00 0C 02 04 00 01 1D 00 82
 void Mixing::process_IPMStatusMessage(std::shared_ptr<const Telegram> telegram) {
-    type_ = Type::HC;
-    hc_ = device_id() - 0x20 + 1;
+    type_           = Type::HC;
+    hc_             = device_id() - 0x20 + 1;
     uint8_t ismixed = 0;
     telegram->read_value(ismixed, 0); // check if circuit is active, 0-off, 1-unmixed, 2-mixed
     if (ismixed == 0) {
         return;
     }
-    if (ismixed == 2) { // we have a mixed circuit
+    if (ismixed == 2) {                     // we have a mixed circuit
         telegram->read_value(flowTemp_, 3); // is * 10
         telegram->read_value(flowSetTemp_, 5);
         telegram->read_value(status_, 2); // valve status

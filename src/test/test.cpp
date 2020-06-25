@@ -134,14 +134,25 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         EMSESP::add_device(0x08, 123, version, EMSdevice::Brand::BUDERUS); // Nefit Trendline
     }
 
-    if (command == "unknown") {
+    // unknown device -
+    if ((command == "unknown") || (command == "u")) {
         // question: do we need to set the mask?
         std::string version("1.2.3");
-        EMSESP::add_device(0x09, 89, version, EMSdevice::Brand::BUDERUS);
+
+        // add boiler
+        EMSESP::add_device(0x08, 84, version, EMSdevice::Brand::BUDERUS);
+        EMSESP::rxservice_.loop();
+
+        // add Controller - BC10 GB142 - but using the same device_id to see what happens
+        EMSESP::add_device(0x09, 84, version, EMSdevice::Brand::BUDERUS);
         EMSESP::rxservice_.loop();
 
         // simulate getting version information back from an unknown device
-        rx_telegram({0x09, 0x0B, 0x02, 0x00, 0x59, 0x01, 0x02});
+        // note there is no brand (byte 9)
+        rx_telegram({0x09, 0x0B, 0x02, 0x00, 0x59, 0x09, 0x0a});
+
+        shell.loop_all();
+        EMSESP::show_values(shell);
     }
 
     if (command == "unknown2") {
@@ -282,7 +293,6 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         uart_telegram_withCRC("90 0B FF 00 01 A5 80 00 01 26 15 00 26 2A 05 A0 03 03 03 05 A0 05 A0 00 00 11 01 03 FF FF 00 FE");
         uart_telegram_withCRC("90 00 FF 19 01 A5 01 04 00 00 00 00 FF 64 2A 00 3C 01 FF 92");
 
-
         EMSESP::show_emsbus(shell);
         EMSESP::rxservice_.loop();
         EMSESP::show_values(shell);
@@ -395,26 +405,39 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         EMSESP::txservice_.flush_tx_queue();
 
         // TX queue example - Me -> Thermostat, (0x91), telegram: 0B 17 91 05 44 45 46 47 (#data=4)
-        // uint8_t t11[] = {0x44, 0x45, 0x46, 0x47};
-        // EMSESP::txservice_.add(Telegram::Operation::TX_RAW, 0x17, 0x91, 0x05, t11, sizeof(t11));
+        uint8_t t11[] = {0x44, 0x45, 0x46, 0x47};
+        EMSESP::txservice_.add(Telegram::Operation::TX_RAW, 0x17, 0x91, 0x05, t11, sizeof(t11));
 
         // TX - raw example test
-        // uint8_t t12[] = {0x10, 0x08, 0x63, 0x04, 0x64};
-        // EMSESP::txservice_.add(t12, sizeof(t12));
+        uint8_t t12[] = {0x10, 0x08, 0x63, 0x04, 0x64};
+        EMSESP::txservice_.add(Telegram::Operation::TX_RAW, t12, sizeof(t12));
 
         // TX - sending raw string
-        // EMSESP::txservice_.send_raw("10 08 63 03 64 65 66");
+        EMSESP::txservice_.send_raw("10 08 63 03 64 65 66");
 
         // TX - send a read request
         EMSESP::send_read_request(0x18, 0x08);
 
         // TX - send a write request
-        // uint8_t t18[] = {0x52, 0x79};
-        // send_write_request(0x91, 0x17, 0x00, t18, sizeof(t18));
+        uint8_t t18[] = {0x52, 0x79};
+        EMSESP::send_write_request(0x91, 0x17, 0x00, t18, sizeof(t18), 0x00);
+
+        // TX - send EMS+
+        const uint8_t t13[] = {0x90, 0x0B, 0xFF, 00, 01,   0xBA, 00,   0x2E, 0x2A, 0x26, 0x1E, 0x03,
+                               00,   0xFF, 0xFF, 05, 0x2A, 01,   0xE1, 0x20, 0x01, 0x0F, 05,   0x2A};
+        EMSESP::txservice_.add(Telegram::Operation::TX_RAW, t13, sizeof(t13));
+  
+        // EMS+ Junkers read request
+        EMSESP::send_read_request(0x16F, 0x10);
+
+        EMSESP::show_emsbus(shell);
+
+        // process whole Tx queue
+        for (uint8_t i = 0; i < 10; i++) {
+            EMSESP::txservice_.send(); // send it to UART
+        }
 
         shell.loop_all();
-        EMSESP::show_emsbus(shell);
-        EMSESP::txservice_.send(); // send it to UART
 
         EMSESP::txservice_.flush_tx_queue();
     }

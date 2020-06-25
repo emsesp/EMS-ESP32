@@ -340,19 +340,25 @@ void Boiler::show_values(uuid::console::Shell & shell) {
     }
 
     print_value(shell, 2, F("Warm Water activated"), wWActivated_, nullptr, EMS_VALUE_BOOL);
-    print_value(shell, 2, F("Warm Water charging type"), wWCircPumpType_ ? F("3-way valve") : F("charge pump"));
-    print_value(shell, 2, F("Warm Water circulation pump available"), wWCircPump_, nullptr, EMS_VALUE_BOOL);
-    if (wWCircPumpMode_ == 7) {
-        print_value(shell, 2, F("Warm Water circulation pump freq"), F("continuous"));
-    } else {
-        char s[7];
-        char buffer[2];
-        buffer[0] = (wWCircPumpMode_ % 10) + '0';
-        buffer[1] = '\0';
-        strlcpy(s, buffer, 7);
-        strlcat(s, "x3min", 7);
-        print_value(shell, 2, F("Warm Water circulation pump freq"), s);
+    if (Helpers::hasValue(wWCircPumpType_, true)) {
+        print_value(shell, 2, F("Warm Water charging type"), wWCircPumpType_ ? F("3-way valve") : F("charge pump"));
     }
+    print_value(shell, 2, F("Warm Water circulation pump available"), wWCircPump_, nullptr, EMS_VALUE_BOOL);
+
+    if (Helpers::hasValue(wWCircPumpMode_)) {
+        if (wWCircPumpMode_ == 7) {
+            print_value(shell, 2, F("Warm Water circulation pump freq"), F("continuous"));
+        } else {
+            char s[7];
+            char buffer[2];
+            buffer[0] = (wWCircPumpMode_ % 10) + '0';
+            buffer[1] = '\0';
+            strlcpy(s, buffer, 7);
+            strlcat(s, "x3min", 7);
+            print_value(shell, 2, F("Warm Water circulation pump freq"), s);
+        }
+    }
+
     print_value(shell, 2, F("Warm Water circulation active"), wWCirc_, nullptr, EMS_VALUE_BOOL);
 
     if (wWComfort_ == 0x00) {
@@ -697,6 +703,8 @@ void Boiler::set_warmwater_mode(const uint8_t comfort) {
     } else if (comfort == 3) {
         LOG_INFO(F("Setting boiler warm water to intelligent"));
         set = 2;
+    } else {
+        return; // do nothing
     }
     write_command(EMS_TYPE_UBAParameterWW, 9, comfort);
     // some boilers do not have this setting, than it's done by thermostat
