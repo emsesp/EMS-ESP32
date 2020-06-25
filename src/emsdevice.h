@@ -189,6 +189,7 @@ class EMSdevice {
     // Mixing Module
     static constexpr uint8_t EMS_DEVICE_FLAG_MMPLUS = 1;
     static constexpr uint8_t EMS_DEVICE_FLAG_MM10   = 2;
+    static constexpr uint8_t EMS_DEVICE_FLAG_IPM    = 3;
 
     // Thermostats
     static constexpr uint8_t EMS_DEVICE_FLAG_NO_WRITE  = (1 << 7); // last bit

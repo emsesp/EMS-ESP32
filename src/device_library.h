@@ -78,6 +78,7 @@
 
 // Mixing Modules - 0x20-0x27 for HC, 0x28-0x29 for WWC
 { 69, DeviceType::MIXING, F("MM10"), DeviceFlags::EMS_DEVICE_FLAG_MM10},
+{102, DeviceType::MIXING, F("IPM"), DeviceFlags::EMS_DEVICE_FLAG_IPM},
 {159, DeviceType::MIXING, F("MM50"), DeviceFlags::EMS_DEVICE_FLAG_MMPLUS},
 {160, DeviceType::MIXING, F("MM100"), DeviceFlags::EMS_DEVICE_FLAG_MMPLUS},
 {161, DeviceType::MIXING, F("MM200"), DeviceFlags::EMS_DEVICE_FLAG_MMPLUS},

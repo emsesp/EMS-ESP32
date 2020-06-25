@@ -44,6 +44,10 @@ Mixing::Mixing(uint8_t device_type, uint8_t device_id, uint8_t product_id, const
         register_telegram_type(0x00AB, F("MMStatusMessage"), true, std::bind(&Mixing::process_MMStatusMessage, this, _1));
         register_telegram_type(0x00AC, F("MMSetMessage"), false, std::bind(&Mixing::process_MMSetMessage, this, _1));
     }
+    // HT3
+    if (flags == EMSdevice::EMS_DEVICE_FLAG_IPM) {
+        register_telegram_type(0x010C, F("IPMSetMessage"), false, std::bind(&Mixing::process_IPMStatusMessage, this, _1));
+    }
 
     // MQTT callbacks
     // register_mqtt_topic("cmd", std::bind(&Mixing::cmd, this, _1));
@@ -145,6 +149,29 @@ void Mixing::process_MMPLUSStatusMessage_WWC(std::shared_ptr<const Telegram> tel
     telegram->read_value(flowTemp_, 0);     // is * 10
     telegram->read_value(pumpMod_, 2);
     telegram->read_value(status_, 11); // temp status
+}
+
+// Mixing IMP - 0x010C
+// e.g.  A0 00 FF 00 00 0C 01 00 00 00 00 00 54
+//       A1 00 FF 00 00 0C 02 04 00 01 1D 00 82
+void Mixing::process_IPMStatusMessage(std::shared_ptr<const Telegram> telegram) {
+    type_ = Type::HC;
+    hc_ = device_id() - 0x20 + 1;
+    uint8_t ismixed = 0;
+    telegram->read_value(ismixed, 0); // check if circuit is active, 0-off, 1-unmixed, 2-mixed
+    if (ismixed == 0) {
+        return;
+    }
+    if (ismixed == 2) { // we have a mixed circuit
+        telegram->read_value(flowTemp_, 3); // is * 10
+        telegram->read_value(flowSetTemp_, 5);
+        telegram->read_value(status_, 2); // valve status
+    }
+    uint8_t pump = 0xFF;
+    telegram->read_bitvalue(pump, 1, 0); // pump is also in unmixed circuits
+    if (pump != 0xFF) {
+        pumpMod_ = 100 * pump;
+    }
 }
 
 // Mixing on a MM10 - 0xAB
