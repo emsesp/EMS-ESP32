@@ -300,7 +300,8 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
     }
     telegram_raw[1] = dest;
 
-    uint8_t message_p = 0; // this is the position in the telegram where we want to put our message data
+    uint8_t message_p  = 0; // this is the position in the telegram where we want to put our message data
+    uint8_t message_p0 = 0; // this is the position of start of message data
 
     if (telegram->type_id > 0xFF) {
         // it's EMS 2.0/+
@@ -319,6 +320,7 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
             telegram_raw[5] = (telegram->type_id >> 8) - 1; // type, 1st byte, high-byte, subtract 0x100
             telegram_raw[6] = telegram->type_id & 0xFF;     // type, 2nd byte, low-byte
             message_p       = 7;
+            message_p0      = 1; // data[0] is in raw[4]
         }
     } else {
         // EMS 1.0
@@ -332,7 +334,7 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
         return; // too big
     }
 
-    for (uint8_t i = 0; i < telegram->message_length; i++) {
+    for (uint8_t i = message_p0; i < telegram->message_length; i++) {
         telegram_raw[message_p++] = telegram->message_data[i];
     }
 
