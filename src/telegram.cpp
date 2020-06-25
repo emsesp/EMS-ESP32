@@ -61,7 +61,13 @@ uint8_t EMSbus::calculate_crc(const uint8_t * data, const uint8_t length) {
 
 // creates a telegram object
 // stores header in separate member objects and the rest in the message_data block
-Telegram::Telegram(uint8_t operation, uint8_t src, uint8_t dest, uint16_t type_id, uint8_t offset, uint8_t * data, uint8_t message_length)
+Telegram::Telegram(const uint8_t   operation,
+                   const uint8_t   src,
+                   const uint8_t   dest,
+                   const uint16_t  type_id,
+                   const uint8_t   offset,
+                   const uint8_t * data,
+                   const uint8_t   message_length)
     : operation(operation)
     , src(src)
     , dest(dest)
@@ -113,7 +119,6 @@ void RxService::flush_rx_queue() {
 // Rx loop, run as many times as you can
 // processes all telegrams on the queue. Assumes there are valid (i.e. CRC checked)
 void RxService::loop() {
-
     while (!rx_telegrams_.empty()) {
         auto telegram = rx_telegrams_.front().telegram_;
 
@@ -300,7 +305,8 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
     }
     telegram_raw[1] = dest;
 
-    uint8_t message_p = 0; // this is the position in the telegram where we want to put our message data
+    uint8_t message_p = 0;    // this is the position in the telegram where we want to put our message data
+    bool    copy_data = true; // true if we want to copy over the data message block to the end of the telegram header
 
     if (telegram->type_id > 0xFF) {
         // it's EMS 2.0/+
@@ -319,6 +325,7 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
             telegram_raw[5] = (telegram->type_id >> 8) - 1; // type, 1st byte, high-byte, subtract 0x100
             telegram_raw[6] = telegram->type_id & 0xFF;     // type, 2nd byte, low-byte
             message_p       = 7;
+            copy_data       = false; // there are no more data values after the type_id when reading on EMS+
         }
     } else {
         // EMS 1.0
@@ -327,13 +334,15 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
         message_p       = 4;
     }
 
-    // add the data to send to to the end of the header
-    if (telegram->message_length > EMS_MAX_TELEGRAM_MESSAGE_LENGTH) {
-        return; // too big
-    }
+    if (copy_data) {
+        if (telegram->message_length > EMS_MAX_TELEGRAM_MESSAGE_LENGTH) {
+            return; // too big
+        }
 
-    for (uint8_t i = 0; i < telegram->message_length; i++) {
-        telegram_raw[message_p++] = telegram->message_data[i];
+        // add the data to send to to the end of the header
+        for (uint8_t i = 0; i < telegram->message_length; i++) {
+            telegram_raw[message_p++] = telegram->message_data[i];
+        }
     }
 
     uint8_t length = message_p;
@@ -344,16 +353,16 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
 
     length++; // add one since we want to now include the CRC
 
-        LOG_DEBUG(F("Sending %s Tx [#%d], telegram: %s"),
-                  (telegram->operation == Telegram::Operation::TX_WRITE) ? F("write") : F("read"),
-                  tx_telegram.id_,
-                  telegram->to_string(telegram_raw, length).c_str());
+    LOG_DEBUG(F("Sending %s Tx [#%d], telegram: %s"),
+              (telegram->operation == Telegram::Operation::TX_WRITE) ? F("write") : F("read"),
+              tx_telegram.id_,
+              telegram->to_string(telegram_raw, length).c_str());
 
 #ifdef EMSESP_DEBUG
-        // if watching in 'raw' mode
-        if (EMSESP::watch() == EMSESP::Watch::WATCH_RAW) {
-            LOG_NOTICE(F("[DEBUG] Tx: %s"), Helpers::data_to_hex(telegram_raw, length).c_str());
-        }
+    // if watching in 'raw' mode
+    if (EMSESP::watch() == EMSESP::Watch::WATCH_RAW) {
+        LOG_NOTICE(F("[DEBUG] Tx: %s"), Helpers::data_to_hex(telegram_raw, length).c_str());
+    }
 #endif
 
     // send the telegram to the UART Tx
@@ -410,19 +419,19 @@ void TxService::add(const uint8_t operation, const uint8_t dest, const uint16_t 
 // builds a Tx telegram and adds to queue
 // this is used by the retry() function to put the last failed Tx back into the queue
 // format is EMS 1.0 (src, dest, type_id, offset, data)
-// length is the length of the whole telegram data
-void TxService::add(uint8_t operation, uint8_t * data, const uint8_t length) {
+// length is the length of the whole telegram data, excluding the CRC
+void TxService::add(uint8_t operation, const uint8_t * data, const uint8_t length) {
     // build header. src, dest and offset have fixed positions
     uint8_t src    = data[0];
     uint8_t dest   = data[1];
     uint8_t offset = data[3];
 
-    uint16_t  type_id;
-    uint8_t * message_data;   // where the message block starts
-    uint8_t   message_length; // length of the message block, excluding CRC
+    uint16_t        type_id;
+    const uint8_t * message_data;   // where the message block starts
+    uint8_t         message_length; // length of the message block, excluding CRC
 
     // work out depending on the type, where the data message block starts and the message length
-    // same logic as in RxService::add()
+    // same logic as in RxService::add(), but adjusted for no appended CRC
     if (data[2] < 0xF0) {
         // EMS 1.0
         type_id        = data[2];
@@ -518,7 +527,6 @@ void TxService::send_raw(const char * telegram_data) {
 // add last Tx to tx queue and increment count
 // returns retry count, or 0 if all done
 void TxService::retry_tx(const uint8_t operation, const uint8_t * data, const uint8_t length) {
-
     // have we reached the limit? if so, reset count and give up
     if (++retry_count_ > MAXIMUM_TX_RETRIES) {
         reset_retry_count();             // give up

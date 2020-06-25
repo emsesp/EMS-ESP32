@@ -57,7 +57,13 @@ namespace emsesp {
 // from Rx (receiving one) or Tx for preparing one for sending
 class Telegram {
   public:
-    Telegram(uint8_t operation, uint8_t src, uint8_t dest, uint16_t type_id, uint8_t offset, uint8_t * message_data, uint8_t message_length);
+    Telegram(const uint8_t   operation,
+             const uint8_t   src,
+             const uint8_t   dest,
+             const uint16_t  type_id,
+             const uint8_t   offset,
+             const uint8_t * message_data,
+             const uint8_t   message_length);
     ~Telegram() = default;
 
     const uint8_t  operation; // is Operation mode
@@ -81,8 +87,8 @@ class Telegram {
 
     // reads a bit value from a given telegram position
     void read_bitvalue(uint8_t & value, const uint8_t index, const uint8_t bit) const {
-        uint8_t abs_index = (index - offset); 
-        if(abs_index >= message_length) {
+        uint8_t abs_index = (index - offset);
+        if (abs_index >= message_length) {
             return; // out of bounds
         }
 
@@ -265,7 +271,7 @@ class TxService : public EMSbus {
     void send();
 
     void add(const uint8_t operation, const uint8_t dest, const uint16_t type_id, const uint8_t offset, uint8_t * message_data, const uint8_t message_length);
-    void add(const uint8_t operation, uint8_t * data, const uint8_t length);
+    void add(const uint8_t operation, const uint8_t * data, const uint8_t length);
 
     void read_request(const uint16_t type_id, const uint8_t dest, const uint8_t offset = 0);
 
