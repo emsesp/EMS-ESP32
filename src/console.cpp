@@ -56,7 +56,8 @@ void EMSESPShell::stopped() {
 
     // remove all custom contexts
     commands->remove_all_commands();
-    _console_commands_loaded = false; // make sure they got loaded next time a console is opened
+    
+    _console_commands_loaded = false; // make sure they get reloaded next time a console is opened
 }
 
 // show welcome banner
@@ -74,7 +75,7 @@ void EMSESPShell::display_banner() {
     printfln(F("│                                          │"));
 
     if (System::safe_mode()) {
-        printfln(F("│ %sIN SAFE MODE. EMS BUS IS DISABLED%s       │"), COLOR_BRIGHT_RED_BACKGROUND, COLOR_RESET);
+        printfln(F("│ %sIN SAFE MODE. EMS BUS IS DISABLED%s        │"), COLOR_BRIGHT_RED_BACKGROUND, COLOR_RESET);
 #ifdef EMSESP_SAFE_MODE
         printfln(F("│ %s!FORCED AT COMPILE TIME!%s                 │"), COLOR_BRIGHT_RED, COLOR_RESET);
 #endif
@@ -101,7 +102,7 @@ void EMSESPShell::add_console_commands() {
     // just in case, remove everything
     // commands->remove_context_commands(ShellContext::MAIN);
     commands->remove_all_commands();
-
+ 
     commands->add_command(ShellContext::MAIN,
                           CommandFlags::USER,
                           flash_string_vector{F_(refresh)},
