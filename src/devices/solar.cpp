@@ -184,7 +184,7 @@ void Solar::process_SM100Status(std::shared_ptr<const Telegram> telegram) {
     uint8_t pumpmod = pumpModulation_;
     telegram->read_value(pumpModulation_, 9);
     if (pumpmod == 0 && pumpModulation_ == 100) { // mask out boosts
-        pumpModulation_ = 15; // set to minimum, 
+        pumpModulation_ = 15;                     // set to minimum
     }
 }
 
@@ -214,10 +214,10 @@ void Solar::process_SM100Energy(std::shared_ptr<const Telegram> telegram) {
  *  e.g. B0 00 FF 00 00 03 32 00 00 00 00 13 00 D6 00 00 00 FB D0 F0
  */
 void Solar::process_ISM1StatusMessage(std::shared_ptr<const Telegram> telegram) {
-    telegram->read_value(collectorTemp_, 4);   // Collector Temperature
-    telegram->read_value(bottomTemp_, 6);      // Temperature Bottom of Solar Boiler
+    telegram->read_value(collectorTemp_, 4); // Collector Temperature
+    telegram->read_value(bottomTemp_, 6);    // Temperature Bottom of Solar Boiler
     uint16_t Wh = 0xFFFF;
-    telegram->read_value(Wh, 2);  // Solar Energy produced in last hour only ushort, is not * 10
+    telegram->read_value(Wh, 2); // Solar Energy produced in last hour only ushort, is not * 10
     if (Wh != 0xFFFF) {
         energyLastHour_ = Wh * 10; // set to *10
     }

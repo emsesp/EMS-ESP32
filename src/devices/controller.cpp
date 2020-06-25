@@ -27,14 +27,13 @@ REGISTER_FACTORY(Controller, EMSdevice::DeviceType::CONTROLLER);
 MAKE_PSTR(logger_name, "controller")
 uuid::log::Logger Controller::logger_{F_(logger_name), uuid::log::Facility::CONSOLE};
 
-Controller::Controller(uint8_t device_type, uint8_t device_id, uint8_t product_id, const std::string &version, const std::string &name, uint8_t flags, uint8_t brand)
+Controller::Controller(uint8_t device_type, uint8_t device_id, uint8_t product_id, const std::string & version, const std::string & name, uint8_t flags, uint8_t brand)
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
     // telegram handlers
     // register_telegram_type(EMS_TYPE_XX, "XX", false, std::bind(&Controller::process_XX, this, _1));
 
     // MQTT callbacks
     // register_mqtt_topic("cmd", std::bind(&Controller::cmd, this, _1));
-
 }
 
 void Controller::add_context_menu() {
