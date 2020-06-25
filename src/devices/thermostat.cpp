@@ -107,16 +107,16 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
 
         // JUNKERS/HT3
     } else if (flags == EMSdevice::EMS_DEVICE_FLAG_JUNKERS) {
-        monitor_typeids = {0x6F, 0x70, 0x71, 0x72};
-        set_typeids     = {0x65, 0x66, 0x67, 0x68};
+        monitor_typeids = {0x016F, 0x0170, 0x0171, 0x0172};
+        set_typeids     = {0x0165, 0x0166, 0x0167, 0x0168};
         for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
             register_telegram_type(monitor_typeids[i], F("JunkersMonitor"), false, std::bind(&Thermostat::process_JunkersMonitor, this, _1));
             register_telegram_type(set_typeids[i], F("JunkersSet"), false, std::bind(&Thermostat::process_JunkersSet, this, _1));
         }
 
     } else if (flags == (EMSdevice::EMS_DEVICE_FLAG_JUNKERS | EMSdevice::EMS_DEVICE_FLAG_JUNKERS_2)) {
-        monitor_typeids = {0x6F, 0x70, 0x71, 0x72};
-        set_typeids     = {0x79, 0x7A, 0x7B, 0x7C};
+        monitor_typeids = {0x016F, 0x0170, 0x0171, 0x0172};
+        set_typeids     = {0x0179, 0x017A, 0x017B, 0x017C};
         for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
             register_telegram_type(monitor_typeids[i], F("JunkersMonitor"), false, std::bind(&Thermostat::process_JunkersMonitor, this, _1));
             register_telegram_type(set_typeids[i], F("JunkersSet"), false, std::bind(&Thermostat::process_JunkersSet, this, _1));
@@ -312,7 +312,7 @@ void Thermostat::thermostat_cmd(const char * message) {
     }
 
     // get heating circuit if it exists
-    uint8_t hc_num = doc["hc"] | DEFAULT_HEATING_CIRCUIT;
+    uint8_t hc_num = doc["hc"] | AUTO_HEATING_CIRCUIT;
 
     if (strcmp(command, "temp") == 0) {
         float f = doc["data"];
@@ -407,13 +407,13 @@ void Thermostat::thermostat_cmd(const char * message) {
 
 void Thermostat::thermostat_cmd_temp(const char * message) {
     float f = strtof((char *)message, 0);
-    set_temperature(f, HeatingCircuit::Mode::AUTO, DEFAULT_HEATING_CIRCUIT);
+    set_temperature(f, HeatingCircuit::Mode::AUTO, AUTO_HEATING_CIRCUIT);
 }
 
 // message payload holds the text name of the mode e.g. "auto"
 void Thermostat::thermostat_cmd_mode(const char * message) {
     std::string s(message);
-    set_mode(s, DEFAULT_HEATING_CIRCUIT);
+    set_mode(s, AUTO_HEATING_CIRCUIT);
 }
 
 // this function is called post the telegram handler function has been executed
@@ -619,9 +619,15 @@ void Thermostat::publish_values() {
 // returns the heating circuit object based on the hc number
 // of nullptr if it doesn't exist yet
 std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(const uint8_t hc_num) {
-    uint8_t hc = (hc_num) ? hc_num : DEFAULT_HEATING_CIRCUIT;
+    // uint8_t hc = (hc_num) ? hc_num : DEFAULT_HEATING_CIRCUIT;
+    if (hc_num == 0) {
+        // return first existing hc
+        for (const auto & heating_circuit : heating_circuits_) {
+            return heating_circuit;
+        }
+    }
     for (const auto & heating_circuit : heating_circuits_) {
-        if (heating_circuit->hc_num() == hc) {
+        if (heating_circuit->hc_num() == hc_num) {
             return heating_circuit;
         }
     }
@@ -1036,6 +1042,9 @@ void Thermostat::process_IBASettings(std::shared_ptr<const Telegram> telegram) {
 
 // type 0x6F - FR10/FR50/FR100 Junkers
 void Thermostat::process_JunkersMonitor(std::shared_ptr<const Telegram> telegram) {
+    if (telegram->message_length <= 1) { 
+        return;
+    }
     std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
 
     telegram->read_value(hc->curr_roomTemp, 4);     // value is * 10
@@ -1583,7 +1592,7 @@ void Thermostat::console_commands(Shell & shell, unsigned int context) {
                                        flash_string_vector{F_(change), F_(temp)},
                                        flash_string_vector{F_(degrees_mandatory), F_(hc_optional), F_(mode_optional)},
                                        [=](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) {
-                                           uint8_t hc = (arguments.size() >= 2) ? arguments[1].at(0) - '0' : DEFAULT_HEATING_CIRCUIT;
+                                           uint8_t hc = (arguments.size() >= 2) ? arguments[1].at(0) - '0' : AUTO_HEATING_CIRCUIT;
                                            if ((arguments.size() == 3)) {
                                                set_temperature(atof(arguments.front().c_str()), arguments.back().c_str(), hc);
                                            } else {

@@ -199,6 +199,7 @@ class Thermostat : public EMSdevice {
     static constexpr uint8_t EMS_OFFSET_JunkersSetMessage2_eco_temp      = 6;
     static constexpr uint8_t EMS_OFFSET_JunkersSetMessage3_heat          = 7;
 
+#define AUTO_HEATING_CIRCUIT 0
 #define DEFAULT_HEATING_CIRCUIT 1
 
     // Installation settings
