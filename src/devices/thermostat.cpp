@@ -583,9 +583,9 @@ void Thermostat::publish_values() {
 
         // special handling of mode type, for the RC35 replace with summer/holiday if set
         // https://github.com/proddy/EMS-ESP/issues/373#issuecomment-619810209
-        if (hc->summer_mode) {
+        if (Helpers::hasValue(hc->summer_mode)) {
             dataThermostat["modetype"] = F("summer");
-        } else if (hc->holiday_mode) {
+        } else if (Helpers::hasValue(hc->holiday_mode)) {
             dataThermostat["modetype"] = F("holiday");
         } else if (Helpers::hasValue(hc->mode_type)) {
             dataThermostat["modetype"] = mode_tostring(hc->get_mode_type(flags));
@@ -921,9 +921,9 @@ void Thermostat::show_values(uuid::console::Shell & shell) {
             print_value(shell, 4, F("Mode Type"), mode_tostring(hc->get_mode_type(flags)).c_str());
         }
 
-        if (hc->summer_mode) {
+        if (Helpers::hasValue(hc->summer_mode)) {
             shell.printfln(F("    Program is set to Summer mode"));
-        } else if (hc->holiday_mode) {
+        } else if (Helpers::hasValue(hc->holiday_mode)) {
             shell.printfln(F("    Program is set to Holiday mode"));
         }
 
@@ -945,7 +945,6 @@ void Thermostat::show_values(uuid::console::Shell & shell) {
         if (Helpers::hasValue(hc->summertemp)) {
             print_value(shell, 4, F("Summer temperature"), hc->summertemp, F_(degrees), 0);
         }
-        // show flow temp if we have it
         if (Helpers::hasValue(hc->targetflowtemp)) {
             print_value(shell, 4, F("Target flow temperature"), hc->targetflowtemp, F_(degrees), 1);
         }
@@ -1042,7 +1041,6 @@ void Thermostat::process_IBASettings(std::shared_ptr<const Telegram> telegram) {
 
 // type 0x6F - FR10/FR50/FR100 Junkers
 void Thermostat::process_JunkersMonitor(std::shared_ptr<const Telegram> telegram) {
-    
     // ignore single byte telegram messages
     if (telegram->message_length <= 1) {
         return;
@@ -1059,10 +1057,6 @@ void Thermostat::process_JunkersMonitor(std::shared_ptr<const Telegram> telegram
 
 // type 0x02A5 - data from the Nefit RC1010/3000 thermostat (0x18) and RC300/310s on 0x10
 void Thermostat::process_RC300Monitor(std::shared_ptr<const Telegram> telegram) {
-    if (telegram->message_length == 0) {
-        return;
-    }
-
     std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
 
     // if current room temp starts with 0x90 it's usually trouble
