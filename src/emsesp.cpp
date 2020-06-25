@@ -497,10 +497,10 @@ void EMSESP::show_devices(uuid::console::Shell & shell) {
     }
 }
 
-// add the EMS device to our list of devices
+// add a new or update existing EMS device to our list of active EMS devices
 // if its not in our database, we don't add it
 bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::string & version, const uint8_t brand) {
-    // don't add ourselves
+    // don't add ourselves!
     if (device_id == rxservice_.ems_bus_id()) {
         return false;
     }
@@ -509,10 +509,13 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice) {
             if (emsdevice->is_device_id(device_id)) {
-                LOG_DEBUG(F("Updating details for already existing device with ID 0x%02X"), device_id);
+                LOG_DEBUG(F("Updating details to already existing device ID 0x%02X"), device_id);
                 emsdevice->product_id(product_id);
                 emsdevice->version(version);
-                emsdevice->brand(brand);
+                // only set brand if it doesn't already exist
+                if (emsdevice->brand() == EMSdevice::Brand::NO_BRAND) {
+                    emsdevice->brand(brand);
+                }
                 // find the name and flags in our database
                 for (const auto & device : device_library_) {
                     if (device.product_id == product_id) {
@@ -521,28 +524,37 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
                     }
                 }
 
-                return true; // finish
+                return true; // finish up
             }
         }
     }
 
     // look up the rest of the details using the product_id and create the new device object
-    // then send a request to the device to get the version and any other info we may have
-    bool found = false;
-    for (const auto & device : device_library_) {
+    Device_record * device_p = nullptr;
+    for (auto & device : device_library_) {
         if (device.product_id == product_id) {
-            emsdevices.push_back(
-                EMSFactory::add(device.device_type, device_id, device.product_id, version, uuid::read_flash_string(device.name), device.flags, brand));
-            found = true;
-            break;
+            // sometimes boilers share the same product id as controllers
+            // so only add boilers if the device_id is 0x08, which is fixed for EMS
+            if (device.device_type == DeviceType::BOILER) {
+                if (device_id == EMSdevice::EMS_DEVICE_ID_BOILER) {
+                    device_p = &device;
+                    break;
+                }
+            } else {
+                // it's not a boiler, but we have a match
+                device_p = &device;
+                break;
+            }
         }
     }
 
     // if we don't recognize the product ID report it, but don't add it.
-    if (!found) {
+    if (device_p == nullptr) {
         LOG_NOTICE(F("Unrecognized EMS device with device ID 0x%02X with product ID %d. Please report on GitHub."), device_id, product_id);
         return false; // not found
     } else {
+        emsdevices.push_back(
+            EMSFactory::add(device_p->device_type, device_id, device_p->product_id, version, uuid::read_flash_string(device_p->name), device_p->flags, brand));
         LOG_DEBUG(F("Adding new device with device ID 0x%02X with product ID %d and version %s"), device_id, product_id, version.c_str());
         // go and fetch its data,
         fetch_device_values(device_id);
@@ -572,7 +584,9 @@ void EMSESP::send_write_request(const uint16_t type_id,
 // we check if its a complete telegram or just a single byte (which could be a poll or a return status)
 // the CRC check is not done here, only when it's added to the Rx queue with add()
 void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
+#ifdef EMSESP_DEBUG
     static uint32_t tx_time_ = 0;
+#endif
     // check first for echo
     uint8_t first_value = data[0];
     if (((first_value & 0x7F) == txservice_.ems_bus_id()) && (length > 1)) {
@@ -632,7 +646,9 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
         // if ht3 poll must be ems_bus_id else if Buderus poll must be (ems_bus_id | 0x80)
         if ((first_value ^ 0x80 ^ rxservice_.ems_mask()) == txservice_.ems_bus_id()) {
             EMSbus::last_bus_activity(uuid::get_uptime()); // set the flag indication the EMS bus is active
-            tx_time_ = ::millis();                         // get_uptime is only updated once per loop, does not give the right time
+#ifdef EMSESP_DEBUG
+            tx_time_ = ::millis(); // get_uptime is only updated once per loop, does not give the right time
+#endif
             txservice_.send();
         }
         // send remote room temperature if active
