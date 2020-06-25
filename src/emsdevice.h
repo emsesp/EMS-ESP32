@@ -86,11 +86,15 @@ class EMSdevice {
         brand_ = brand;
     }
 
+    inline uint8_t brand() const {
+        return brand_;
+    }
+
     inline void name(const std::string & name) {
         name_ = name;
     }
 
-    std::string    brand() const;
+    std::string    brand_to_string() const;
     static uint8_t decode_brand(uint8_t value);
 
     std::string to_string() const;
@@ -171,8 +175,8 @@ class EMSdevice {
     };
 
     // device IDs
-    static constexpr uint16_t EMS_DEVICE_ID_BOILER = 0x08; // fixed device_id for Master Boiler/UBA
-    static constexpr uint16_t EMS_DEVICE_ID_MODEM  = 0x48; // gateways like the KM200
+    static constexpr uint8_t EMS_DEVICE_ID_BOILER = 0x08; // fixed device_id for Master Boiler/UBA
+    static constexpr uint8_t EMS_DEVICE_ID_MODEM  = 0x48; // gateways like the KM200
 
     // type IDs
     static constexpr uint16_t EMS_TYPE_VERSION    = 0x02; // type ID for Version information. Generic across all EMS devices.
