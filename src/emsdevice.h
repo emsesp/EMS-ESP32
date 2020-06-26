@@ -124,11 +124,22 @@ class EMSdevice {
     void fetch_values();
     void toggle_fetch(uint16_t telegram_id, bool toggle);
 
+    // prints a ems device value to the console, handling the correct rendering of the type
+    // padding is # white space
+    // name is the name of the parameter
+    // suffix is any string to be appended after the value
+    // format:
+    //  for ints its  0=no division, 255=handle as boolean, other divide by the value given and render with a decimal point
+    //  for floats its the precision in number of decimal places from 0 to 8
     template <typename Value>
-    static void
-    print_value(uuid::console::Shell & shell, uint8_t padding, const __FlashStringHelper * name, Value & value, const __FlashStringHelper * suffix, const uint8_t p) {
+    static void print_value(uuid::console::Shell &      shell,
+                            uint8_t                     padding,
+                            const __FlashStringHelper * name,
+                            Value &                     value,
+                            const __FlashStringHelper * suffix,
+                            const uint8_t               format = 0) {
         char buffer[15];
-        if (Helpers::render_value(buffer, value, p) == nullptr) {
+        if (Helpers::render_value(buffer, value, format) == nullptr) {
             return;
         }
 

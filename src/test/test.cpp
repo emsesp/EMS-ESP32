@@ -43,12 +43,12 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         uint16_t test3u = EMS_VALUE_USHORT_NOTSET;
         int16_t  test4u = EMS_VALUE_SHORT_NOTSET;
 
-        EMSdevice::print_value(shell, 2, F("Selected flow temperature1"), test1, F_(degrees), 1);          // 12
-        EMSdevice::print_value(shell, 2, F("Selected flow temperature2"), test2, F_(degrees), 1);          // -12
+        EMSdevice::print_value(shell, 2, F("Selected flow temperature1"), test1, F_(degrees));             // 12
+        EMSdevice::print_value(shell, 2, F("Selected flow temperature2"), test2, F_(degrees));             // -12
         EMSdevice::print_value(shell, 2, F("Selected flow temperature3"), test3, F_(degrees), 10);         // 45.6
         EMSdevice::print_value(shell, 2, F("Selected flow temperature4"), test4, F_(degrees), 10);         // -45.6
         EMSdevice::print_value(shell, 2, F("Selected flow temperature5"), test5, nullptr, EMS_VALUE_BOOL); // on
-        EMSdevice::print_value(shell, 2, F("Selected flow temperature6"), test6, F_(degrees), 1);          //
+        EMSdevice::print_value(shell, 2, F("Selected flow temperature6"), test6, F_(degrees));             //
         EMSdevice::print_value(shell, 2, F("Selected flow temperature7"), test7, F_(degrees), 2);          // 89.43
         EMSdevice::print_value(shell, 2, F("Warm Water comfort setting"), F("Intelligent"));
         char s[100];
@@ -57,8 +57,8 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
 
         shell.println();
 
-        EMSdevice::print_value(shell, 2, F("Selected flow temperature1u"), test1u, F_(degrees), 1);
-        EMSdevice::print_value(shell, 2, F("Selected flow temperature2u"), test2u, F_(degrees), 1);
+        EMSdevice::print_value(shell, 2, F("Selected flow temperature1u"), test1u, F_(degrees));
+        EMSdevice::print_value(shell, 2, F("Selected flow temperature2u"), test2u, F_(degrees));
         EMSdevice::print_value(shell, 2, F("Selected flow temperature3u"), test3u, F_(degrees), 10);
         EMSdevice::print_value(shell, 2, F("Selected flow temperature4u"), test4u, F_(degrees), 10);
         EMSdevice::print_value(shell, 2, F("Selected flow temperature5u"), test5u, F_(degrees), EMS_VALUE_BOOL);
@@ -426,7 +426,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         const uint8_t t13[] = {0x90, 0x0B, 0xFF, 00, 01,   0xBA, 00,   0x2E, 0x2A, 0x26, 0x1E, 0x03,
                                00,   0xFF, 0xFF, 05, 0x2A, 01,   0xE1, 0x20, 0x01, 0x0F, 05,   0x2A};
         EMSESP::txservice_.add(Telegram::Operation::TX_RAW, t13, sizeof(t13));
-  
+
         // EMS+ Junkers read request
         EMSESP::send_read_request(0x16F, 0x10);
 
