@@ -450,10 +450,11 @@ void Mqtt::send_heartbeat() {
         return;
     }
 
-    StaticJsonDocument<90> doc;
+    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
 
     doc["rssid"]            = Network::wifi_quality();
     doc["uptime"]           = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
+    doc["uptime_sec"]       = uuid::get_uptime_sec();
     doc["freemem"]          = System::free_mem();
     doc["mqttpublishfails"] = mqtt_publish_fails_;
 
