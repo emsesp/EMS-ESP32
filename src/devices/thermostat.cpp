@@ -494,6 +494,15 @@ void Thermostat::publish_values() {
                 rootThermostat["building"] = "heavy";
             }
         }
+        if (Helpers::hasValue(wwMode_)) {
+            if (wwMode_ == 0) {
+                rootThermostat["wwmode"] = "off";
+            } else if (wwMode_ == 1) {
+                rootThermostat["wwmode"] = "on";
+            } else if (wwMode_ == 2) {
+                rootThermostat["wwmode"] = "auto";
+            }
+        }
         if (mqtt_format_ == Settings::MQTT_format::SINGLE) {
             Mqtt::publish("thermostat_data", doc);
             rootThermostat = doc.to<JsonObject>(); // clear object
