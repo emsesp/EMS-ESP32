@@ -177,6 +177,9 @@ void Boiler::publish_values() {
     if (Helpers::hasValue(wWSelTemp_)) {
         doc["wWSelTemp"] = wWSelTemp_;
     }
+    if (Helpers::hasValue(wWSetTmp_)) {
+        doc["wWSetTemp"] = wWSetTmp_;
+    }
     if (Helpers::hasValue(wWDisinfectTemp_)) {
         doc["wWDisinfectionTemp"] = wWDisinfectTemp_;
     }
@@ -696,20 +699,21 @@ void Boiler::set_warmwater_mode(const uint8_t comfort) {
     uint8_t set;
     if (comfort == 1) {
         LOG_INFO(F("Setting boiler warm water to hot"));
-        set = 1;
+        set = 0;
     } else if (comfort == 2) {
         LOG_INFO(F("Setting boiler warm water to eco"));
-        set = 0;
+        set = 0xD8;
     } else if (comfort == 3) {
         LOG_INFO(F("Setting boiler warm water to intelligent"));
-        set = 2;
+        set = 0xEC;
     } else {
         return; // do nothing
     }
-    write_command(EMS_TYPE_UBAParameterWW, 9, comfort);
+    write_command(EMS_TYPE_UBAParameterWW, 9, set);
     // some boilers do not have this setting, than it's done by thermostat
     // Test for RC35, but not a good way, we are here in boiler context.
     // EMSESP::send_write_request(0x37, 0x10, 2, &set, 1, 0); // for RC35, maybe work also on RC300
+
 }
 
 // turn on/off warm water

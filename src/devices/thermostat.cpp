@@ -58,6 +58,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
             register_telegram_type(set_typeids[i], F("RC35Set"), false, std::bind(&Thermostat::process_RC35Set, this, _1));
         }
         register_telegram_type(EMS_TYPE_IBASettings, F("IBASettings"), true, std::bind(&Thermostat::process_IBASettings, this, _1));
+        register_telegram_type(EMS_TYPE_wwSettings, F("WWSettings"), true, std::bind(&Thermostat::process_RC35wwSettings, this, _1));
 
         // RC20
     } else if (flags == EMSdevice::EMS_DEVICE_FLAG_RC20) {
@@ -281,6 +282,10 @@ void Thermostat::thermostat_cmd(const char * message) {
             uint8_t ctrl = doc[hc_name]["control"];
             set_control(ctrl, hc_num);
         }
+    }
+    if (nullptr != doc["wwmode"]) {
+        std::string mode = doc["wwmode"];
+        set_ww_mode(mode);
     }
     if (float ct = doc["calinttemp"]) {
         set_settings_calinttemp((int8_t)(ct * 10));
@@ -1039,6 +1044,11 @@ void Thermostat::process_IBASettings(std::shared_ptr<const Telegram> telegram) {
     telegram->read_value(ibaClockOffset_, 12);      // offset (in sec) to clock, 0xff = -1 s, 0x02 = 2 s
 }
 
+// Settings WW 0x37 - RC35
+void Thermostat::process_RC35wwSettings(std::shared_ptr<const Telegram> telegram) {
+    telegram->read_value(wwMode_, 2); // 0 off, 1-on, 2-auto
+}
+
 // type 0x6F - FR10/FR50/FR100 Junkers
 void Thermostat::process_JunkersMonitor(std::shared_ptr<const Telegram> telegram) {
     // ignore single byte telegram messages
@@ -1263,6 +1273,28 @@ void Thermostat::set_control(const uint8_t ctrl, const uint8_t hc_num) {
     }
 }
 
+// Set the WW mode in 0x37, 0-off, 1-on, 2-auto
+void Thermostat::set_ww_mode(const uint8_t mode) {
+    if (mode > 2) {
+        LOG_WARNING(F("set wWMode: Invalid control mode: %d"), mode);
+        return;
+    }
+    if ((flags() & 0x0F) == EMS_DEVICE_FLAG_RC35 || (flags() & 0x0F) == EMS_DEVICE_FLAG_RC30_1) {
+        LOG_INFO(F("Setting wWMode to %d"), mode);
+        write_command(0x37, 2, mode);
+    }
+}
+// sets the thermostat ww working mode, where mode is a string
+void Thermostat::set_ww_mode(const std::string & mode) {
+    if (strcasecmp("off",mode.c_str()) == 0) {
+        set_ww_mode(0);
+    } if (strcasecmp("on",mode.c_str()) == 0) {
+        set_ww_mode(1);
+    } else if (strcasecmp("auto",mode.c_str()) == 0) {
+        set_ww_mode(2);
+    }
+}
+
 // sets the thermostat working mode, where mode is a string
 void Thermostat::set_mode(const std::string & mode, const uint8_t hc_num) {
     if (mode_tostring(HeatingCircuit::Mode::OFF) == mode) {
@@ -1359,7 +1391,11 @@ void Thermostat::set_mode(const uint8_t mode, const uint8_t hc_num) {
         }
         break;
     case EMSdevice::EMS_DEVICE_FLAG_JUNKERS:
-        offset          = EMS_OFFSET_JunkersSetMessage_set_mode;
+        if ((flags() & EMS_DEVICE_FLAG_JUNKERS_2) == EMS_DEVICE_FLAG_JUNKERS_2) {
+            offset = EMS_OFFSET_JunkersSetMessage2_set_mode;
+        } else {
+            offset = EMS_OFFSET_JunkersSetMessage_set_mode;
+        }
         validate_typeid = monitor_typeids[hc_p];
         if (mode == HeatingCircuit::Mode::NOFROST) {
             set_mode_value = 0x01;
@@ -1616,6 +1652,22 @@ void Thermostat::console_commands(Shell & shell, unsigned int context) {
                                             read_flash_string(F("heat")),
                                             read_flash_string(F("holiday")),
                                             read_flash_string(F("nofrost")),
+                                            read_flash_string(F("auto"))
+
+            };
+        });
+
+    EMSESPShell::commands->add_command(
+        ShellContext::THERMOSTAT,
+        CommandFlags::ADMIN,
+        flash_string_vector{F_(change), F_(mode)},
+        flash_string_vector{F_(mode_mandatory)},
+        [=](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) {
+            set_ww_mode(arguments.front());
+        },
+        [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments __attribute__((unused))) -> const std::vector<std::string> {
+            return std::vector<std::string>{read_flash_string(F("off")),
+                                            read_flash_string(F("on")),
                                             read_flash_string(F("auto"))
 
             };
