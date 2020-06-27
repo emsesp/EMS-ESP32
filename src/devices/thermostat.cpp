@@ -1060,7 +1060,7 @@ void Thermostat::process_RC300Monitor(std::shared_ptr<const Telegram> telegram) 
     std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
 
     telegram->read_value(hc->curr_roomTemp, 0); // is * 10
-    
+
     telegram->read_bitvalue(hc->mode_type, 10, 1);
     telegram->read_bitvalue(hc->mode, 10, 0); // bit 1, mode (auto=1 or manual=0)
 
