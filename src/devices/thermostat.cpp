@@ -827,12 +827,12 @@ void Thermostat::show_values(uuid::console::Shell & shell) {
     if (datetime_.size()) {
         shell.printfln(F("  Clock: %s"), datetime_.c_str());
         if (Helpers::hasValue(ibaClockOffset_) && flags == EMS_DEVICE_FLAG_RC30_1) {
-            print_value(shell, 2, F("Offset clock"), ibaClockOffset_, nullptr, 1); // offset (in sec) to clock, 0xff = -1 s, 0x02 = 2 s
+            print_value(shell, 2, F("Offset clock"), ibaClockOffset_, nullptr); // offset (in sec) to clock, 0xff = -1 s, 0x02 = 2 s
         }
     }
 
     if (flags == EMS_DEVICE_FLAG_RC35) {
-        print_value(shell, 2, F("Damped Outdoor temperature"), dampedoutdoortemp_, F_(degrees), 1);
+        print_value(shell, 2, F("Damped Outdoor temperature"), dampedoutdoortemp_, F_(degrees));
         print_value(shell, 2, F("Temp sensor 1"), tempsensor1_, F_(degrees), 10);
         print_value(shell, 2, F("Temp sensor 2"), tempsensor2_, F_(degrees), 10);
     }
@@ -878,7 +878,7 @@ void Thermostat::show_values(uuid::console::Shell & shell) {
         }
 
         if (Helpers::hasValue(ibaMinExtTemperature_)) {
-            print_value(shell, 2, F("Min ext. temperature"), ibaMinExtTemperature_, F_(degrees), 0); // min ext temp for heating curve, in deg.
+            print_value(shell, 2, F("Min ext. temperature"), ibaMinExtTemperature_, F_(degrees)); // min ext temp for heating curve, in deg.
         }
 
         if (Helpers::hasValue(ibaBuildingType_)) {
@@ -945,13 +945,13 @@ void Thermostat::show_values(uuid::console::Shell & shell) {
             print_value(shell, 4, F("Offset temperature"), hc->offsettemp, F_(degrees), 2);
         }
         if (Helpers::hasValue(hc->designtemp)) {
-            print_value(shell, 4, F("Design temperature"), hc->designtemp, F_(degrees), 0);
+            print_value(shell, 4, F("Design temperature"), hc->designtemp, F_(degrees));
         }
         if (Helpers::hasValue(hc->summertemp)) {
-            print_value(shell, 4, F("Summer temperature"), hc->summertemp, F_(degrees), 0);
+            print_value(shell, 4, F("Summer temperature"), hc->summertemp, F_(degrees));
         }
         if (Helpers::hasValue(hc->targetflowtemp)) {
-            print_value(shell, 4, F("Target flow temperature"), hc->targetflowtemp, F_(degrees), 1);
+            print_value(shell, 4, F("Target flow temperature"), hc->targetflowtemp, F_(degrees));
         }
     }
 }
@@ -1069,12 +1069,8 @@ void Thermostat::process_JunkersMonitor(std::shared_ptr<const Telegram> telegram
 void Thermostat::process_RC300Monitor(std::shared_ptr<const Telegram> telegram) {
     std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
 
-    // if current room temp starts with 0x90 it's usually trouble
-    // room temperatur is valid if bit 5 in data[2] is set
-    if (telegram->message_data[2] & 0x40) {
-        telegram->read_value(hc->curr_roomTemp, 0); // is * 10
-    }
-
+    telegram->read_value(hc->curr_roomTemp, 0); // is * 10
+    
     telegram->read_bitvalue(hc->mode_type, 10, 1);
     telegram->read_bitvalue(hc->mode, 10, 0); // bit 1, mode (auto=1 or manual=0)
 

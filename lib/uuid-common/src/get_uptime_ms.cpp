@@ -22,6 +22,22 @@
 
 namespace uuid {
 
+#define UPTIME_OVERFLOW 4294967295 // Uptime overflow value
+
+// returns system uptime in seconds
+uint32_t get_uptime_sec() {
+    static uint32_t last_uptime      = 0;
+    static uint8_t  uptime_overflows = 0;
+
+    if (millis() < last_uptime) {
+        ++uptime_overflows;
+    }
+    last_uptime             = millis();
+    uint32_t uptime_seconds = uptime_overflows * (UPTIME_OVERFLOW / 1000) + (last_uptime / 1000);
+
+    return uptime_seconds;
+}
+
 uint64_t get_uptime_ms() {
     static uint32_t high_millis = 0;
     static uint32_t low_millis  = 0;
@@ -36,8 +52,7 @@ uint64_t get_uptime_ms() {
 }
 
 // added by proddy
-
-static uint32_t now_millis; // added by proddy
+static uint32_t now_millis;
 
 void set_uptime() {
     now_millis = ::millis();

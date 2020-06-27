@@ -65,7 +65,7 @@ void Solar::show_values(uuid::console::Shell & shell) {
     print_value(shell, 2, F("Collector temperature (TS1)"), collectorTemp_, F_(degrees), 10);
     print_value(shell, 2, F("Bottom temperature (TS2)"), bottomTemp_, F_(degrees), 10);
     print_value(shell, 2, F("Bottom temperature (TS5)"), bottomTemp2_, F_(degrees), 10);
-    print_value(shell, 2, F("Pump modulation"), pumpModulation_, F_(percent), 1);
+    print_value(shell, 2, F("Pump modulation"), pumpModulation_, F_(percent));
     print_value(shell, 2, F("Valve (VS2) status"), valveStatus_, nullptr, EMS_VALUE_BOOL);
     print_value(shell, 2, F("Pump (PS1) active"), pump_, nullptr, EMS_VALUE_BOOL);
 
@@ -74,7 +74,7 @@ void Solar::show_values(uuid::console::Shell & shell) {
     }
 
     print_value(shell, 2, F("Energy last hour"), energyLastHour_, F_(wh), 10);
-    print_value(shell, 2, F("Energy today"), energyToday_, F_(wh), 0);
+    print_value(shell, 2, F("Energy today"), energyToday_, F_(wh));
     print_value(shell, 2, F("Energy total"), energyTotal_, F_(kwh), 10);
 }
 

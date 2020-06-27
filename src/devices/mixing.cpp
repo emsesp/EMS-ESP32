@@ -75,14 +75,14 @@ void Mixing::show_values(uuid::console::Shell & shell) {
     }
 
     if (type_ == Type::WWC) {
-        print_value(shell, 2, F("Warm Water Circuit"), hc_, nullptr, 1);
+        print_value(shell, 2, F("Warm Water Circuit"), hc_, nullptr);
     } else {
-        print_value(shell, 2, F("Heating Circuit"), hc_, nullptr, 1);
+        print_value(shell, 2, F("Heating Circuit"), hc_, nullptr);
     }
     print_value(shell, 4, F("Current flow temperature"), flowTemp_, F_(degrees), 10);
-    print_value(shell, 4, F("Setpoint flow temperature"), flowSetTemp_, F_(degrees), 1);
-    print_value(shell, 4, F("Current pump modulation"), pumpMod_, F_(percent), 1);
-    print_value(shell, 4, F("Current valve status"), status_, nullptr, 1);
+    print_value(shell, 4, F("Setpoint flow temperature"), flowSetTemp_, F_(degrees));
+    print_value(shell, 4, F("Current pump modulation"), pumpMod_, F_(percent));
+    print_value(shell, 4, F("Current valve status"), status_, nullptr);
 }
 
 // publish values via MQTT

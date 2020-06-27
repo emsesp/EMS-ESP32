@@ -374,21 +374,21 @@ void Boiler::show_values(uuid::console::Shell & shell) {
 
     print_value(shell, 2, F("Warm water mix temperature"), wwMixTemperature_, F_(degrees), 10);
     print_value(shell, 2, F("Warm water buffer boiler temperature"), wwBufferBoilerTemperature_, F_(degrees), 10);
-    print_value(shell, 2, F("Warm Water disinfection temperature"), wWDisinfectTemp_, F_(degrees), 1);
-    print_value(shell, 2, F("Warm Water selected temperature"), wWSelTemp_, F_(degrees), 1);
-    print_value(shell, 2, F("Warm Water set temperature"), wWSetTmp_, F_(degrees), 1);
+    print_value(shell, 2, F("Warm Water disinfection temperature"), wWDisinfectTemp_, F_(degrees));
+    print_value(shell, 2, F("Warm Water selected temperature"), wWSelTemp_, F_(degrees));
+    print_value(shell, 2, F("Warm Water set temperature"), wWSetTmp_, F_(degrees));
     print_value(shell, 2, F("Warm Water current temperature (intern)"), wWCurTmp_, F_(degrees), 10);
     print_value(shell, 2, F("Warm water storage temperature (intern)"), wwStorageTemp1_, F_(degrees), 10);
     print_value(shell, 2, F("Warm Water current temperature (extern)"), wWCurTmp2_, F_(degrees), 10);
     print_value(shell, 2, F("Warm water storage temperature (extern)"), wwStorageTemp2_, F_(degrees), 10);
     print_value(shell, 2, F("Warm Water current tap water flow"), wWCurFlow_, F("l/min"), 10);
-    print_value(shell, 2, F("Warm Water # starts"), wWStarts_, nullptr, 1);
+    print_value(shell, 2, F("Warm Water # starts"), wWStarts_, nullptr);
     if (Helpers::hasValue(wWWorkM_)) {
         shell.printfln(F("  Warm Water active time: %d days %d hours %d minutes"), wWWorkM_ / 1440, (wWWorkM_ % 1440) / 60, wWWorkM_ % 60);
     }
     print_value(shell, 2, F("Warm Water charging"), wWHeat_, nullptr, EMS_VALUE_BOOL);
     print_value(shell, 2, F("Warm Water disinfecting"), wWDesinfecting_, nullptr, EMS_VALUE_BOOL);
-    print_value(shell, 2, F("Selected flow temperature"), selFlowTemp_, F_(degrees), 1);
+    print_value(shell, 2, F("Selected flow temperature"), selFlowTemp_, F_(degrees));
     print_value(shell, 2, F("Current flow temperature"), curFlowTemp_, F_(degrees), 10);
     print_value(shell, 2, F("Max boiler temperature"), boilTemp_, F_(degrees), 10);
     print_value(shell, 2, F("Return temperature"), retTemp_, F_(degrees), 10);
@@ -397,8 +397,8 @@ void Boiler::show_values(uuid::console::Shell & shell) {
     print_value(shell, 2, F("Fan"), fanWork_, nullptr, EMS_VALUE_BOOL);
     print_value(shell, 2, F("Ignition"), ignWork_, nullptr, EMS_VALUE_BOOL);
 
-    print_value(shell, 2, F("Burner selected max power"), selBurnPow_, F_(percent), 1);
-    print_value(shell, 2, F("Burner current power"), curBurnPow_, F_(percent), 1);
+    print_value(shell, 2, F("Burner selected max power"), selBurnPow_, F_(percent));
+    print_value(shell, 2, F("Burner current power"), curBurnPow_, F_(percent));
     print_value(shell, 2, F("Flame current"), flameCurr_, F("uA"), 10);
     print_value(shell, 2, F("System pressure"), sysPress_, F("bar"), 10);
     if (Helpers::hasValue(serviceCode_)) {
@@ -408,9 +408,9 @@ void Boiler::show_values(uuid::console::Shell & shell) {
     }
 
     // UBAParameters
-    print_value(shell, 2, F("Heating temperature setting on the boiler"), heating_temp_, F_(degrees), 1);
-    print_value(shell, 2, F("Boiler circuit pump modulation max power"), pump_mod_max_, F_(percent), 1);
-    print_value(shell, 2, F("Boiler circuit pump modulation min power"), pump_mod_min_, F_(percent), 1);
+    print_value(shell, 2, F("Heating temperature setting on the boiler"), heating_temp_, F_(degrees));
+    print_value(shell, 2, F("Boiler circuit pump modulation max power"), pump_mod_max_, F_(percent));
+    print_value(shell, 2, F("Boiler circuit pump modulation min power"), pump_mod_min_, F_(percent));
 
     // UBAMonitorSlow
     if (Helpers::hasValue(extTemp_)) {
@@ -418,9 +418,9 @@ void Boiler::show_values(uuid::console::Shell & shell) {
     }
 
     print_value(shell, 2, F("Exhaust temperature"), exhaustTemp_, F_(degrees), 10);
-    print_value(shell, 2, F("Pump modulation"), pumpMod_, F_(percent), 1);
-    print_value(shell, 2, F("Pump modulation2"), pumpMod2_, F_(percent), 1);
-    print_value(shell, 2, F("Burner # starts"), burnStarts_, nullptr, 1);
+    print_value(shell, 2, F("Pump modulation"), pumpMod_, F_(percent));
+    print_value(shell, 2, F("Pump modulation2"), pumpMod2_, F_(percent));
+    print_value(shell, 2, F("Burner # starts"), burnStarts_, nullptr);
     if (Helpers::hasValue(burnWorkMin_)) {
         shell.printfln(F("  Total burner operating time: %d days %d hours %d minutes"), burnWorkMin_ / 1440, (burnWorkMin_ % 1440) / 60, burnWorkMin_ % 60);
     }

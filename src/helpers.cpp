@@ -33,6 +33,7 @@ char * Helpers::hextoa(char * result, const uint8_t value) {
 }
 
 #ifdef EMSESP_STANDALONE
+// special function to work outside of ESP's libraries
 char * Helpers::ultostr(char * ptr, uint32_t value, const uint8_t base) {
     unsigned long t = 0, res = 0;
     unsigned long tmp   = value;
@@ -67,7 +68,6 @@ char * Helpers::ultostr(char * ptr, uint32_t value, const uint8_t base) {
     return (ptr);
 }
 #endif
-
 
 /*
  * itoa for 2 byte signed (short) integers
@@ -122,10 +122,8 @@ char * Helpers::smallitoa(char * result, const uint16_t value) {
 }
 
 // convert unsigned int (single byte) to text value and returns it
-// format: 2=divide by 2, 10=divide by 10, 255=handle as a Boolean
+// format: 255=boolean, 0=no formatting, otherwise divide by format
 char * Helpers::render_value(char * result, uint8_t value, uint8_t format) {
-    result[0] = '\0';
-
     // special check if its a boolean
     if (format == EMS_VALUE_BOOL) {
         if (value == EMS_VALUE_BOOL_OFF) {
@@ -142,31 +140,30 @@ char * Helpers::render_value(char * result, uint8_t value, uint8_t format) {
         return nullptr;
     }
 
-    char s2[5] = {0};
+    if (!format) {
+        itoa(result, value, 10); // format = 0
+        return result;
+    }
 
-    switch (format) {
-    case 2:
+    char s2[5];
+
+    // special case for / 2
+    if (format == 2) {
         strlcpy(result, itoa(s2, value >> 1, 10), 5);
         strlcat(result, ".", 5);
         strlcat(result, ((value & 0x01) ? "5" : "0"), 5);
-        break;
-
-    case 10:
-        strlcpy(result, itoa(s2, value / 10, 10), 5);
-        strlcat(result, ".", 5);
-        strlcat(result, itoa(s2, value % 10, 10), 5);
-        break;
-
-    default:
-        itoa(result, value, 10);
-        break;
+        return result;
     }
+
+    strlcpy(result, itoa(s2, value / format, 10), 5);
+    strlcat(result, ".", 5);
+    strlcat(result, itoa(s2, value % format, 10), 5);
 
     return result;
 }
 
-// convert float to char
-// format is the precision
+// float: convert float to char
+// format is the precision, 0 to 8
 char * Helpers::render_value(char * result, const float value, const uint8_t format) {
     long p[] = {0, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000};
 
@@ -183,23 +180,21 @@ char * Helpers::render_value(char * result, const float value, const uint8_t for
     return ret;
 }
 
-// convert short (two bytes) to text string and returns string
-// decimals: 0 = no division, 10=divide value by 10, 2=divide by 2, 100=divide value by 100
-// negative values are assumed stored as 1-compliment (https://medium.com/@LeeJulija/how-integers-are-stored-in-memory-using-twos-complement-5ba04d61a56c)
+// int16: convert short (two bytes) to text string and returns string
+// format: 0=no division, other divide by the value given and render with a decimal point
 char * Helpers::render_value(char * result, const int16_t value, const uint8_t format) {
-    result[0] = '\0';
-
     if (!hasValue(value)) {
         return nullptr;
     }
 
-    // just print it if mo conversion required
-    if ((format == 0) || (format == 1)) {
+    // just print it if mo conversion required (format = 0)
+    if (!format) {
         itoa(result, value, 10);
         return result;
     }
 
     int16_t new_value = value;
+    result[0]         = '\0';
 
     // check for negative values
     if (new_value < 0) {
@@ -216,7 +211,6 @@ char * Helpers::render_value(char * result, const int16_t value, const uint8_t f
         strlcat(result, itoa(s2, new_value / 2, 10), 10);
         strlcat(result, ".", 10);
         strlcat(result, ((new_value & 0x01) ? "5" : "0"), 10);
-
     } else {
         strlcat(result, itoa(s2, new_value / format, 10), 10);
         strlcat(result, ".", 10);
@@ -226,44 +220,34 @@ char * Helpers::render_value(char * result, const int16_t value, const uint8_t f
     return result;
 }
 
-// convert unsigned short (two bytes) to text string and prints it
-// format: 0 = no division, 10=divide value by 10, 2=divide by 2, 100=divide value by 100
+// uint16: convert unsigned short (two bytes) to text string and prints it
 char * Helpers::render_value(char * result, const uint16_t value, const uint8_t format) {
-    result[0] = '\0';
-
     if (!hasValue(value)) {
         return nullptr;
     }
-
     return (render_value(result, (int16_t)value, format)); // use same code, force it to a signed int
 }
 
-// convert signed byte to text string and prints it
-// format: 0 = no division, 10=divide value by 10, 2=divide by 2, 100=divide value by 100
+// int8: convert signed byte to text string and prints it
 char * Helpers::render_value(char * result, const int8_t value, const uint8_t format) {
-    result[0] = '\0';
-
     if (!hasValue(value)) {
         return nullptr;
     }
-
     return (render_value(result, (int16_t)value, format)); // use same code, force it to a signed int
 }
 
-// render long (4 byte) unsigned values
-// format = 0 for normal, any other value for divide by format
+// uint32: render long (4 byte) unsigned values
 char * Helpers::render_value(char * result, const uint32_t value, const uint8_t format) {
-    result[0] = '\0';
-
     if (!hasValue(value)) {
         return nullptr;
     }
 
-    char s[20] = {0};
+    char s[20];
+    result[0] = '\0';
 
 #ifndef EMSESP_STANDALONE
-    if (format <= 1) {
-        strlcat(result, ltoa(value, s, 10), 20);
+    if (!format) {
+        strlcat(result, ltoa(value, s, 10), 20); // format is 0
     } else {
         strlcat(result, ltoa(value / format, s, 10), 20);
         strlcat(result, ".", 20);
@@ -271,8 +255,8 @@ char * Helpers::render_value(char * result, const uint32_t value, const uint8_t 
     }
 
 #else
-    if (format <= 1) {
-        strlcat(result, ultostr(s, value, 10), 20);
+    if (!format) {
+        strlcat(result, ultostr(s, value, 10), 20); // format is 0
     } else {
         strncat(result, ultostr(s, value / format, 10), 20);
         strlcat(result, ".", 20);

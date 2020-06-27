@@ -249,7 +249,7 @@ void TxService::loop() {
     if ((uuid::get_uptime() - last_tx_check_) > TX_LOOP_WAIT) {
         last_tx_check_ = uuid::get_uptime();
         if (!tx_active() && (EMSbus::bus_connected())) {
-            LOG_ERROR(F("Tx is not active. Please check connection."));
+            LOG_ERROR(F("Tx is not active. Please check settings and the circuit connection."));
         }
     }
 #endif

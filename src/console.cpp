@@ -56,7 +56,7 @@ void EMSESPShell::stopped() {
 
     // remove all custom contexts
     commands->remove_all_commands();
-    
+
     _console_commands_loaded = false; // make sure they get reloaded next time a console is opened
 }
 
@@ -88,6 +88,9 @@ void EMSESPShell::display_banner() {
 
     // load the list of commands
     add_console_commands();
+
+    // turn off watch
+    emsesp::EMSESP::watch_id(WATCH_ID_NONE);
 }
 
 // pre-loads all the console commands into the MAIN context
@@ -102,7 +105,7 @@ void EMSESPShell::add_console_commands() {
     // just in case, remove everything
     // commands->remove_context_commands(ShellContext::MAIN);
     commands->remove_all_commands();
- 
+
     commands->add_command(ShellContext::MAIN,
                           CommandFlags::USER,
                           flash_string_vector{F_(refresh)},
