@@ -95,6 +95,15 @@ void Boiler::boiler_cmd(const char * message) {
         LOG_DEBUG(F("MQTT error: payload %s, error %s"), message, error.c_str());
         return;
     }
+    if (nullptr != doc["flowtemp"]) {
+        uint8_t t = doc["flowtemp"];
+        set_flow_temp(t);
+    }
+    if (nullptr != doc["wwtemp"]) {
+        uint8_t t = doc["wwtemp"];
+        set_warmwater_temp(t);
+    }
+
     const char * command = doc["cmd"];
     if (command == nullptr) {
         return;
@@ -695,25 +704,23 @@ void Boiler::set_flow_temp(const uint8_t temperature) {
 }
 
 // 1=hot, 2=eco, 3=intelligent
+// note some boilers do not have this setting, than it's done by thermostat
+// on a RC35 it's by EMSESP::send_write_request(0x37, 0x10, 2, &set, 1, 0); (set is 1,2,3)
 void Boiler::set_warmwater_mode(const uint8_t comfort) {
     uint8_t set;
     if (comfort == 1) {
-        LOG_INFO(F("Setting boiler warm water to hot"));
-        set = 0;
+        LOG_INFO(F("Setting boiler warm water to Hot"));
+        set = 0x00;
     } else if (comfort == 2) {
-        LOG_INFO(F("Setting boiler warm water to eco"));
+        LOG_INFO(F("Setting boiler warm water to Eco"));
         set = 0xD8;
     } else if (comfort == 3) {
-        LOG_INFO(F("Setting boiler warm water to intelligent"));
+        LOG_INFO(F("Setting boiler warm water to Intelligent"));
         set = 0xEC;
     } else {
         return; // do nothing
     }
     write_command(EMS_TYPE_UBAParameterWW, 9, set);
-    // some boilers do not have this setting, than it's done by thermostat
-    // Test for RC35, but not a good way, we are here in boiler context.
-    // EMSESP::send_write_request(0x37, 0x10, 2, &set, 1, 0); // for RC35, maybe work also on RC300
-
 }
 
 // turn on/off warm water

@@ -249,7 +249,7 @@ bool EMSdevice::handle_telegram(std::shared_ptr<const Telegram> telegram) {
                 return false;
             }
 
-            LOG_DEBUG(F("Processing %s..."), uuid::read_flash_string(tf.telegram_type_name_).c_str());
+            LOG_DEBUG(F("Decoding %s"), uuid::read_flash_string(tf.telegram_type_name_).c_str());
             tf.process_function_(telegram);
             return true;
         }

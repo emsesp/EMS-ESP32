@@ -868,7 +868,7 @@ void EMSESP::console_commands(Shell & shell, unsigned int context) {
 
                                            uint8_t watch = emsesp::EMSESP::watch();
                                            if (watch == WATCH_OFF) {
-                                               shell.printfln(F("Watching telegrams is off"));
+                                               shell.printfln(F("Watch is off"));
                                                return;
                                            }
 

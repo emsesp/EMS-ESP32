@@ -250,7 +250,6 @@ class Thermostat : public EMSdevice {
     void set_settings_building(const uint8_t bg);
     void set_settings_language(const uint8_t lg);
     void set_control(const uint8_t ctrl, const uint8_t hc_num);
-    void set_ww_mode(const uint8_t mode);
     void set_ww_mode(const std::string & mode);
     void set_mode(const uint8_t mode, const uint8_t hc_num);
     void set_mode(const std::string & mode, const uint8_t hc_num);

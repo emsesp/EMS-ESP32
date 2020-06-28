@@ -22,6 +22,7 @@ MAKE_PSTR_WORD(thermostat)
 MAKE_PSTR_WORD(master)
 MAKE_PSTR_WORD(temp)
 MAKE_PSTR_WORD(mode)
+MAKE_PSTR_WORD(wwmode)
 
 MAKE_PSTR(hc_optional, "[heating circuit]")
 MAKE_PSTR(mode_mandatory, "<mode>")
@@ -238,6 +239,7 @@ void Thermostat::thermostat_cmd(const char * message) {
         return;
     }
 
+    // check for nested commands like {"hc2":{"temp":21}}
     for (const auto & hc : heating_circuits_) {
         char hc_name[6], s[3]; // hc{1-4}
         strlcpy(hc_name, "hc", 6);
@@ -295,7 +297,15 @@ void Thermostat::thermostat_cmd(const char * message) {
         set_settings_minexttemp(mt);
     }
     if (nullptr != doc["building"]) {
+        std::string bds = doc["building"];
         uint8_t bd = doc["building"];
+        if (strcmp(bds.c_str(), "light") == 0) {
+            bd = 0;
+        } else if (strcmp(bds.c_str(), "medium") == 0) {
+            bd = 1;
+        } else if (strcmp(bds.c_str(), "heavy") == 0) {
+            bd = 2;
+        }
         set_settings_building(bd);
     }
     if (nullptr != doc["language"]) {
@@ -311,20 +321,62 @@ void Thermostat::thermostat_cmd(const char * message) {
         set_settings_clockoffset(co);
     }
 
+    // get heating circuit if it exists
+    uint8_t hc_num = doc["hc"] | AUTO_HEATING_CIRCUIT;
+
+    // check for unnested commands like {"temp":21} or {"hc":2,"temp":21,"mode":"auto"}
+    if (nullptr != doc["mode"]) {
+        std::string mode = doc["mode"]; // first check mode
+        set_mode(mode, hc_num);
+    }
+    if (float f = doc["temp"]) {
+        set_temperature(f, HeatingCircuit::Mode::AUTO, hc_num);
+    }
+    if (float f = doc["nighttemp"]) {
+        set_temperature(f, HeatingCircuit::Mode::NIGHT, hc_num);
+    }
+    if (float f = doc["daytemp"]) {
+        set_temperature(f, HeatingCircuit::Mode::DAY, hc_num);
+    }
+    if (float f = doc["nofrosttemp"]) {
+        set_temperature(f, HeatingCircuit::Mode::NOFROST, hc_num);
+    }
+    if (float f = doc["summertemp"]) {
+        set_temperature(f, HeatingCircuit::Mode::SUMMER, hc_num);
+    }
+    if (float f = doc["designtemp"]) {
+        set_temperature(f, HeatingCircuit::Mode::DESIGN, hc_num);
+    }
+    if (float f = doc["offsettemp"]) {
+        set_temperature(f, HeatingCircuit::Mode::OFFSET, hc_num);
+    }
+    if (float f = doc["holidaytemp"]) { //
+        set_temperature(f, HeatingCircuit::Mode::HOLIDAY, hc_num);
+    }
+    if (float f = doc["remotetemp"]) {
+        if (f > 100 || f < 0) {
+            Roomctrl::set_remotetemp(hc_num - 1, EMS_VALUE_SHORT_NOTSET);
+        } else {
+            Roomctrl::set_remotetemp(hc_num - 1, (int16_t)(f * 10));
+        }
+    }
+    if (nullptr != doc["control"]) {
+        uint8_t ctrl = doc["control"];
+        set_control(ctrl, hc_num);
+    }
+
+    // check for commands like {"hc":2,"cmd":"temp","data":21}
     const char * command = doc["cmd"];
     if (command == nullptr) {
         return;
     }
 
-    // get heating circuit if it exists
-    uint8_t hc_num = doc["hc"] | AUTO_HEATING_CIRCUIT;
-
     if (strcmp(command, "temp") == 0) {
         float f = doc["data"];
         if (f) {
             set_temperature(f, HeatingCircuit::Mode::AUTO, hc_num);
-            return;
         }
+        return;
     }
 
     // thermostat mode changes
@@ -341,8 +393,8 @@ void Thermostat::thermostat_cmd(const char * message) {
         float f = doc["data"];
         if (f) {
             set_temperature(f, HeatingCircuit::Mode::NIGHT, hc_num);
-            return;
         }
+        return;
     }
 
     if (strcmp(command, "daytemp") == 0) {
@@ -597,9 +649,9 @@ void Thermostat::publish_values() {
 
         // special handling of mode type, for the RC35 replace with summer/holiday if set
         // https://github.com/proddy/EMS-ESP/issues/373#issuecomment-619810209
-        if (Helpers::hasValue(hc->summer_mode)) {
+        if (Helpers::hasValue(hc->summer_mode) && hc->summer_mode) {
             dataThermostat["modetype"] = F("summer");
-        } else if (Helpers::hasValue(hc->holiday_mode)) {
+        } else if (Helpers::hasValue(hc->holiday_mode) && hc->holiday_mode) {
             dataThermostat["modetype"] = F("holiday");
         } else if (Helpers::hasValue(hc->mode_type)) {
             dataThermostat["modetype"] = mode_tostring(hc->get_mode_type(flags));
@@ -839,7 +891,15 @@ void Thermostat::show_values(uuid::console::Shell & shell) {
             print_value(shell, 2, F("Offset clock"), ibaClockOffset_, nullptr); // offset (in sec) to clock, 0xff = -1 s, 0x02 = 2 s
         }
     }
-
+    if (Helpers::hasValue(wwMode_)) {
+        if (wwMode_ == 0) {
+            shell.printfln(F("  Warm Water mode: off"));
+        } else if (wwMode_ == 1) {
+            shell.printfln(F("  Warm Water mode: on"));
+        } else if (wwMode_ == 2) {
+            shell.printfln(F("  Warm Water mode: auto"));
+        }
+    }
     if (flags == EMS_DEVICE_FLAG_RC35) {
         print_value(shell, 2, F("Damped Outdoor temperature"), dampedoutdoortemp_, F_(degrees));
         print_value(shell, 2, F("Temp sensor 1"), tempsensor1_, F_(degrees), 10);
@@ -935,9 +995,9 @@ void Thermostat::show_values(uuid::console::Shell & shell) {
             print_value(shell, 4, F("Mode Type"), mode_tostring(hc->get_mode_type(flags)).c_str());
         }
 
-        if (Helpers::hasValue(hc->summer_mode)) {
-            shell.printfln(F("    Program is set to Summer mode"));
-        } else if (Helpers::hasValue(hc->holiday_mode)) {
+        if (Helpers::hasValue(hc->summer_mode) && hc->summer_mode) {
+                shell.printfln(F("    Program is set to Summer mode"));
+        } else if (Helpers::hasValue(hc->holiday_mode) && hc->holiday_mode) {
             shell.printfln(F("    Program is set to Holiday mode"));
         }
 
@@ -1079,7 +1139,7 @@ void Thermostat::process_RC300Monitor(std::shared_ptr<const Telegram> telegram) 
     std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
 
     telegram->read_value(hc->curr_roomTemp, 0); // is * 10
-    
+
     telegram->read_bitvalue(hc->mode_type, 10, 1);
     telegram->read_bitvalue(hc->mode, 10, 0); // bit 1, mode (auto=1 or manual=0)
 
@@ -1274,29 +1334,23 @@ void Thermostat::set_control(const uint8_t ctrl, const uint8_t hc_num) {
         LOG_INFO(F("Setting circuit-control for hc%d to %d"), hc_num, ctrl);
         write_command(set_typeids[hc->hc_num() - 1], 26, ctrl);
     } else {
-        LOG_INFO(F("Setting circuit-control not possible"));
+        LOG_INFO(F("set circuit-control not supported"));
     }
 }
 
-// Set the WW mode in 0x37, 0-off, 1-on, 2-auto
-void Thermostat::set_ww_mode(const uint8_t mode) {
-    if (mode > 2) {
-        LOG_WARNING(F("set wWMode: Invalid control mode: %d"), mode);
-        return;
-    }
-    if ((flags() & 0x0F) == EMS_DEVICE_FLAG_RC35 || (flags() & 0x0F) == EMS_DEVICE_FLAG_RC30_1) {
-        LOG_INFO(F("Setting wWMode to %d"), mode);
-        write_command(0x37, 2, mode);
-    }
-}
 // sets the thermostat ww working mode, where mode is a string
 void Thermostat::set_ww_mode(const std::string & mode) {
     if (strcasecmp("off",mode.c_str()) == 0) {
-        set_ww_mode(0);
-    } if (strcasecmp("on",mode.c_str()) == 0) {
-        set_ww_mode(1);
+        LOG_INFO(F("Setting thermostat warm water mode to %s"), mode.c_str());
+        write_command(EMS_TYPE_wwSettings, 2, 0);
+    } else if (strcasecmp("on",mode.c_str()) == 0) {
+        LOG_INFO(F("Setting thermostat warm water mode to %s"), mode.c_str());
+        write_command(EMS_TYPE_wwSettings, 2, 1);
     } else if (strcasecmp("auto",mode.c_str()) == 0) {
-        set_ww_mode(2);
+        LOG_INFO(F("Setting thermostat warm water mode to %s"), mode.c_str());
+        write_command(EMS_TYPE_wwSettings, 2, 2);
+    } else {
+        LOG_WARNING(F("set thermostat warm water mode: Invalid mode: %s"), mode.c_str());
     }
 }
 
@@ -1633,6 +1687,8 @@ void Thermostat::console_commands(Shell & shell, unsigned int context) {
                                            uint8_t hc = (arguments.size() >= 2) ? arguments[1].at(0) - '0' : AUTO_HEATING_CIRCUIT;
                                            if ((arguments.size() == 3)) {
                                                set_temperature(atof(arguments.front().c_str()), arguments.back().c_str(), hc);
+                                           } else if (arguments[1].at(0) >= 'A') {
+                                               set_temperature(atof(arguments.front().c_str()), arguments.back().c_str(), AUTO_HEATING_CIRCUIT);
                                            } else {
                                                set_temperature(atof(arguments.front().c_str()), HeatingCircuit::Mode::AUTO, hc);
                                            }
@@ -1665,7 +1721,7 @@ void Thermostat::console_commands(Shell & shell, unsigned int context) {
     EMSESPShell::commands->add_command(
         ShellContext::THERMOSTAT,
         CommandFlags::ADMIN,
-        flash_string_vector{F_(change), F_(mode)},
+        flash_string_vector{F_(change), F_(wwmode)},
         flash_string_vector{F_(mode_mandatory)},
         [=](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) {
             set_ww_mode(arguments.front());
