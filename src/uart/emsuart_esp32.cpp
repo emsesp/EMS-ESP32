@@ -60,7 +60,7 @@ void EMSuart::emsuart_recvTask(void * para) {
 void IRAM_ATTR EMSuart::emsuart_rx_intr_handler(void * para) {
     static uint8_t rxbuf[EMS_MAXBUFFERSIZE];
     static uint8_t length;
-    UART_MUTEX_LOCK();
+
     if (EMS_UART.int_st.rxfifo_full) {
         EMS_UART.int_clr.rxfifo_full = 1;
         emsTxBufIdx++;
@@ -93,7 +93,6 @@ void IRAM_ATTR EMSuart::emsuart_rx_intr_handler(void * para) {
             xRingbufferSendFromISR(buf_handle, rxbuf, length - 1, &baseType);
         }
         drop_next_rx = false;
-        UART_MUTEX_UNLOCK();
     }
 }
 
@@ -102,17 +101,16 @@ void IRAM_ATTR EMSuart::emsuart_tx_timer_intr_handler() {
     if (emsTxBufIdx > EMS_MAXBUFFERSIZE) {
         return;
     }
-    UART_MUTEX_LOCK();
+
     emsTxBufIdx++;
+
     if (emsTxBufIdx < emsTxBufLen) {
         EMS_UART.fifo.rw_byte = emsTxBuf[emsTxBufIdx];
-        timerWrite(timer, 0);
         timerAlarmWrite(timer, emsTxWait, false);
         timerAlarmEnable(timer);
     } else if (emsTxBufIdx == emsTxBufLen) {
         EMS_UART.conf0.txd_brk = 1; // <brk> after send
     }
-    UART_MUTEX_UNLOCK();
 }
 
 /*
@@ -126,7 +124,6 @@ void EMSuart::start(uint8_t tx_mode) {
         return;
     }
     tx_mode_ = tx_mode;
-    UART_MUTEX_LOCK();
 
     uart_config_t uart_config = {
         .baud_rate = EMSUART_BAUD,
@@ -151,24 +148,20 @@ void EMSuart::start(uint8_t tx_mode) {
     emsTxBufLen = 0;
     timer       = timerBegin(1, 80, true);                             // timer prescale to 1 µs, countup
     timerAttachInterrupt(timer, &emsuart_tx_timer_intr_handler, true); // Timer with edge interrupt
-    UART_MUTEX_UNLOCK();
 }
 
 /*
  * Stop, disables interrupt
  */
 void EMSuart::stop() {
-    UART_MUTEX_LOCK();
     EMS_UART.int_ena.val = 0; // disable all intr.
                               // timerAlarmDisable(timer);
-    UART_MUTEX_UNLOCK();
 };
 
 /*
  * Restart Interrupt
  */
 void EMSuart::restart() {
-    UART_MUTEX_LOCK();
     if (EMS_UART.int_raw.brk_det) {
         EMS_UART.int_clr.brk_det = 1;    // clear flag
         drop_next_rx             = true; // and drop first frame
@@ -176,7 +169,6 @@ void EMSuart::restart() {
     EMS_UART.int_ena.brk_det = 1; // activate only break
     emsTxBufIdx              = 0;
     emsTxBufLen              = 0;
-    UART_MUTEX_UNLOCK();
 }
 
 /*
@@ -184,12 +176,10 @@ void EMSuart::restart() {
  */
 void EMSuart::send_poll(uint8_t data) {
     // if (tx_mode_ >= 6 || tx_mode_ < 4) { // modes 1, 2, 3 also here
-    UART_MUTEX_LOCK();
     if (tx_mode_ >= 5) {
         EMS_UART.fifo.rw_byte = data;
         emsTxBufIdx           = 0;
         emsTxBufLen           = 1;
-        timerWrite(timer, 0);
         timerAlarmWrite(timer, emsTxWait, false);
         timerAlarmEnable(timer);
     } else if (tx_mode_ == 5) {
@@ -222,7 +212,6 @@ void EMSuart::send_poll(uint8_t data) {
         }
         EMS_UART.conf0.txd_brk = 1; // <brk>
     }
-    UART_MUTEX_UNLOCK();
 }
 
 /*
@@ -234,7 +223,6 @@ uint16_t EMSuart::transmit(uint8_t * buf, uint8_t len) {
     if (len == 0 || len >= EMS_MAXBUFFERSIZE) {
         return EMS_TX_STATUS_ERR;
     }
-    UART_MUTEX_LOCK();
 
     // if (tx_mode_ >= 6 || tx_mode_ < 4) { // timer controlled modes, also modes 1, 2, 3 because delays not working
     if (tx_mode_ >= 5) { // timer controlled modes
@@ -244,10 +232,8 @@ uint16_t EMSuart::transmit(uint8_t * buf, uint8_t len) {
         EMS_UART.fifo.rw_byte = buf[0];
         emsTxBufIdx           = 0;
         emsTxBufLen           = len;
-        timerWrite(timer, 0);
         timerAlarmWrite(timer, emsTxWait, false);
         timerAlarmEnable(timer);
-        UART_MUTEX_UNLOCK();
         return EMS_TX_STATUS_OK;
     }
 
@@ -260,7 +246,6 @@ uint16_t EMSuart::transmit(uint8_t * buf, uint8_t len) {
         emsTxBufLen                      = len;
         EMS_UART.conf1.rxfifo_full_thrhd = 1;
         EMS_UART.int_ena.rxfifo_full     = 1;
-        UART_MUTEX_UNLOCK();
         return EMS_TX_STATUS_OK;
     }
 
@@ -269,7 +254,6 @@ uint16_t EMSuart::transmit(uint8_t * buf, uint8_t len) {
             EMS_UART.fifo.rw_byte = buf[i];
         }
         EMS_UART.conf0.txd_brk = 1; // <brk> after send
-        UART_MUTEX_UNLOCK();
         return EMS_TX_STATUS_OK;
     }
 
@@ -281,7 +265,6 @@ uint16_t EMSuart::transmit(uint8_t * buf, uint8_t len) {
         EMS_UART.conf0.txd_brk = 1; // <brk> after send, cleard by hardware after send
         // delayMicroseconds(EMSUART_TX_WAIT_BRK);
         // EMS_UART.conf0.txd_brk = 0;
-        UART_MUTEX_UNLOCK();
         return EMS_TX_STATUS_OK;
     }
 
@@ -293,7 +276,6 @@ uint16_t EMSuart::transmit(uint8_t * buf, uint8_t len) {
         EMS_UART.conf0.txd_brk = 1; // <brk> after send, cleard by hardware after send
         // delayMicroseconds(EMSUART_TX_WAIT_BRK);
         // EMS_UART.conf0.txd_brk = 0;
-        UART_MUTEX_UNLOCK();
         return EMS_TX_STATUS_OK;
     }
 
@@ -312,7 +294,6 @@ uint16_t EMSuart::transmit(uint8_t * buf, uint8_t len) {
     EMS_UART.conf0.txd_brk = 1; // <brk> after send, cleard by hardware after send
     // delayMicroseconds(EMSUART_TX_WAIT_BRK);
     // EMS_UART.conf0.txd_brk = 0;
-    UART_MUTEX_UNLOCK();
     return EMS_TX_STATUS_OK;
 }
 
