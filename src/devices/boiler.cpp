@@ -95,6 +95,15 @@ void Boiler::boiler_cmd(const char * message) {
         LOG_DEBUG(F("MQTT error: payload %s, error %s"), message, error.c_str());
         return;
     }
+    if (nullptr != doc["flowtemp"]) {
+        uint8_t t = doc["flowtemp"];
+        set_flow_temp(t);
+    }
+    if (nullptr != doc["wwtemp"]) {
+        uint8_t t = doc["wwtemp"];
+        set_warmwater_temp(t);
+    }
+
     const char * command = doc["cmd"];
     if (command == nullptr) {
         return;
@@ -176,6 +185,9 @@ void Boiler::publish_values() {
 
     if (Helpers::hasValue(wWSelTemp_)) {
         doc["wWSelTemp"] = wWSelTemp_;
+    }
+    if (Helpers::hasValue(wWSetTmp_)) {
+        doc["wWSetTemp"] = wWSetTmp_;
     }
     if (Helpers::hasValue(wWDisinfectTemp_)) {
         doc["wWDisinfectionTemp"] = wWDisinfectTemp_;

@@ -130,6 +130,7 @@ class Thermostat : public EMSdevice {
 
     uint8_t wwSystem_ = EMS_VALUE_UINT_NOTSET;
     uint8_t wwExtra_  = EMS_VALUE_UINT_NOTSET;
+    uint8_t wwMode_   = EMS_VALUE_UINT_NOTSET;
 
     std::vector<std::shared_ptr<HeatingCircuit>> heating_circuits_; // each thermostat can have multiple heating circuits
 
@@ -187,7 +188,7 @@ class Thermostat : public EMSdevice {
     static constexpr uint8_t EMS_OFFSET_RCPLUSSet_temp_setpoint          = 8;  // temp setpoint, when changing of templevel (in auto) value is reset to FF
     static constexpr uint8_t EMS_OFFSET_RCPLUSSet_manual_setpoint        = 10; // manual setpoint
 
-    static constexpr uint8_t EMS_OFFSET_JunkersStatusMessage_daymode     = 0;  // 3 = day, 2 = night
+    static constexpr uint8_t EMS_OFFSET_JunkersStatusMessage_daymode     = 0;  // 3 = day, 2 = night, 1 = nofrost
     static constexpr uint8_t EMS_OFFSET_JunkersStatusMessage_mode        = 1;  // current mode, 1 = manual, 2 = auto
     static constexpr uint8_t EMS_OFFSET_JunkersStatusMessage_setpoint    = 2;  // setpoint temp
     static constexpr uint8_t EMS_OFFSET_JunkersStatusMessage_curr        = 4;  // current temp
@@ -195,6 +196,7 @@ class Thermostat : public EMSdevice {
     static constexpr uint8_t EMS_OFFSET_JunkersSetMessage_night_temp     = 16; // EMS offset to set temperature on thermostat for night mode
     static constexpr uint8_t EMS_OFFSET_JunkersSetMessage_no_frost_temp  = 15; // EMS offset to set temperature on thermostat for no frost mode
     static constexpr uint8_t EMS_OFFSET_JunkersSetMessage_set_mode       = 14; // EMS offset to set mode on thermostat
+    static constexpr uint8_t EMS_OFFSET_JunkersSetMessage2_set_mode      = 4;  // EMS offset to set mode on thermostat
     static constexpr uint8_t EMS_OFFSET_JunkersSetMessage2_no_frost_temp = 5;
     static constexpr uint8_t EMS_OFFSET_JunkersSetMessage2_eco_temp      = 6;
     static constexpr uint8_t EMS_OFFSET_JunkersSetMessage3_heat          = 7;
@@ -204,6 +206,7 @@ class Thermostat : public EMSdevice {
 
     // Installation settings
     static constexpr uint8_t EMS_TYPE_IBASettings = 0xA5; // installation settings
+    static constexpr uint8_t EMS_TYPE_wwSettings  = 0x37; // ww settings
 
     std::shared_ptr<Thermostat::HeatingCircuit> heating_circuit(std::shared_ptr<const Telegram> telegram);
     std::shared_ptr<Thermostat::HeatingCircuit> heating_circuit(const uint8_t hc_num);
@@ -211,6 +214,7 @@ class Thermostat : public EMSdevice {
     void process_RCOutdoorTemp(std::shared_ptr<const Telegram> telegram);
     void process_IBASettings(std::shared_ptr<const Telegram> telegram);
     void process_RCTime(std::shared_ptr<const Telegram> telegram);
+    void process_RC35wwSettings(std::shared_ptr<const Telegram> telegram);
 
     void process_RC35Monitor(std::shared_ptr<const Telegram> telegram);
     void process_RC35Set(std::shared_ptr<const Telegram> telegram);
@@ -246,6 +250,7 @@ class Thermostat : public EMSdevice {
     void set_settings_building(const uint8_t bg);
     void set_settings_language(const uint8_t lg);
     void set_control(const uint8_t ctrl, const uint8_t hc_num);
+    void set_ww_mode(const std::string & mode);
     void set_mode(const uint8_t mode, const uint8_t hc_num);
     void set_mode(const std::string & mode, const uint8_t hc_num);
     void set_temperature(const float temperature, const std::string & mode, const uint8_t hc_num);

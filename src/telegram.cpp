@@ -85,19 +85,38 @@ std::string Telegram::to_string() const {
     if (message_length == 0) {
         return read_flash_string(F("<empty>"));
     }
-
-    std::string str(160, '\0');
-    char        buffer[4];
-    char *      p = &str[0];
-    for (uint8_t i = 0; i < this->message_length; i++) {
-        Helpers::hextoa(buffer, this->message_data[i]);
-        *p++ = buffer[0];
-        *p++ = buffer[1];
-        *p++ = ' '; // space
+    uint8_t data[EMS_MAX_TELEGRAM_LENGTH];
+    uint8_t length = 0;
+    data[0] = this->src ^ RxService::ems_mask();
+    if (this->operation == Telegram::Operation::TX_READ) {
+        data[1] = this->dest | 0x80;
+        data[4] = this->message_data[0];
+        if (this->type_id > 0xFF) {
+            data[2] = 0xFF;
+            data[5] = (this->type_id >> 8) - 1;
+            data[6] = this->type_id & 0xFF;
+            length  = 7;
+        } else {
+            data[2] = this->type_id;
+            length  =  5;
+        }
     }
-    *--p = '\0'; // null terminate just in case, loosing the trailing space
-
-    return str;
+    if (this->operation == Telegram::Operation::TX_WRITE) {
+        data[1] = this->dest;
+        if (this->type_id > 0xFF) {
+            data[2] = 0xFF;
+            data[4] = (this->type_id >> 8) - 1;
+            data[5] = this->type_id & 0xFF;
+            length  = 6;
+        } else {
+            data[2] = this->type_id;
+            length  = 4;
+        }
+        for (uint8_t i = 0; i < this->message_length; i++) {
+            data[length++] = this->message_data[i];
+        }
+    }
+    return Helpers::data_to_hex(data, length);
 }
 
 // returns telegram's full telegram message in hex
@@ -538,7 +557,7 @@ void TxService::retry_tx(const uint8_t operation, const uint8_t * data, const ui
         return;
     }
 
-    LOG_DEBUG(F("[DEBUG] Last Tx %s operation failed. Retry #%d. sent message data: %s, received: %s"),
+    LOG_DEBUG(F("[DEBUG] Last Tx %s operation failed. Retry #%d. sent message: %s, received: %s"),
               (operation == Telegram::Operation::TX_WRITE) ? F("Write") : F("Read"),
               retry_count_,
               telegram_last_->to_string().c_str(),
