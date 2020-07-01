@@ -304,7 +304,7 @@ void Thermostat::thermostat_cmd(const char * message) {
     }
     if (nullptr != doc["building"]) {
         std::string bds = doc["building"];
-        uint8_t bd = doc["building"];
+        uint8_t     bd  = doc["building"];
         if (strcmp(bds.c_str(), "light") == 0) {
             bd = 0;
         } else if (strcmp(bds.c_str(), "medium") == 0) {
@@ -1012,7 +1012,7 @@ void Thermostat::show_values(uuid::console::Shell & shell) {
         }
 
         if (Helpers::hasValue(hc->summer_mode) && hc->summer_mode) {
-                shell.printfln(F("    Program is set to Summer mode"));
+            shell.printfln(F("    Program is set to Summer mode"));
         } else if (Helpers::hasValue(hc->holiday_mode) && hc->holiday_mode) {
             shell.printfln(F("    Program is set to Holiday mode"));
         }
@@ -1146,8 +1146,8 @@ void Thermostat::process_JunkersMonitor(std::shared_ptr<const Telegram> telegram
     telegram->read_value(hc->curr_roomTemp, 4);     // value is * 10
     telegram->read_value(hc->setpoint_roomTemp, 2); // value is * 10
 
-    telegram->read_value(hc->mode_type, 0);         // 1 = nofrost, 2 = eco, 3 = heat
-    telegram->read_value(hc->mode, 1);              // 1 = manual, 2 = auto
+    telegram->read_value(hc->mode_type, 0); // 1 = nofrost, 2 = eco, 3 = heat
+    telegram->read_value(hc->mode, 1);      // 1 = manual, 2 = auto
 }
 
 // type 0x02A5 - data from the Nefit RC1010/3000 thermostat (0x18) and RC300/310s on 0x10
@@ -1356,13 +1356,13 @@ void Thermostat::set_control(const uint8_t ctrl, const uint8_t hc_num) {
 
 // sets the thermostat ww working mode, where mode is a string
 void Thermostat::set_ww_mode(const std::string & mode) {
-    if (strcasecmp("off",mode.c_str()) == 0) {
+    if (strcasecmp("off", mode.c_str()) == 0) {
         LOG_INFO(F("Setting thermostat warm water mode to %s"), mode.c_str());
         write_command(EMS_TYPE_wwSettings, 2, 0);
-    } else if (strcasecmp("on",mode.c_str()) == 0) {
+    } else if (strcasecmp("on", mode.c_str()) == 0) {
         LOG_INFO(F("Setting thermostat warm water mode to %s"), mode.c_str());
         write_command(EMS_TYPE_wwSettings, 2, 1);
-    } else if (strcasecmp("auto",mode.c_str()) == 0) {
+    } else if (strcasecmp("auto", mode.c_str()) == 0) {
         LOG_INFO(F("Setting thermostat warm water mode to %s"), mode.c_str());
         write_command(EMS_TYPE_wwSettings, 2, 2);
     } else {
@@ -1629,7 +1629,8 @@ void Thermostat::set_temperature(const float temperature, const uint8_t mode, co
             default:
             case HeatingCircuit::Mode::AUTO: // automatic selection, if no type is defined, we use the standard code
                 uint8_t mode_type = hc->get_mode_type(flags());
-                offset = (mode_type == HeatingCircuit::Mode::NIGHT || mode_type == HeatingCircuit::Mode::ECO) ? EMS_OFFSET_JunkersSetMessage_night_temp : EMS_OFFSET_JunkersSetMessage_day_temp;
+                offset = (mode_type == HeatingCircuit::Mode::NIGHT || mode_type == HeatingCircuit::Mode::ECO) ? EMS_OFFSET_JunkersSetMessage_night_temp
+                                                                                                              : EMS_OFFSET_JunkersSetMessage_day_temp;
                 break;
             }
 
@@ -1743,13 +1744,9 @@ void Thermostat::console_commands(Shell & shell, unsigned int context) {
         CommandFlags::ADMIN,
         flash_string_vector{F_(change), F_(wwmode)},
         flash_string_vector{F_(mode_mandatory)},
-        [=](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) {
-            set_ww_mode(arguments.front());
-        },
+        [=](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) { set_ww_mode(arguments.front()); },
         [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments __attribute__((unused))) -> const std::vector<std::string> {
-            return std::vector<std::string>{read_flash_string(F("off")),
-                                            read_flash_string(F("on")),
-                                            read_flash_string(F("auto"))
+            return std::vector<std::string>{read_flash_string(F("off")), read_flash_string(F("on")), read_flash_string(F("auto"))
 
             };
         });
