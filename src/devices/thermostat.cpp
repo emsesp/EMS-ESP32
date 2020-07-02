@@ -304,7 +304,7 @@ void Thermostat::thermostat_cmd(const char * message) {
     }
     if (nullptr != doc["building"]) {
         std::string bds = doc["building"];
-        uint8_t bd = doc["building"];
+        uint8_t     bd  = doc["building"];
         if (strcmp(bds.c_str(), "light") == 0) {
             bd = 0;
         } else if (strcmp(bds.c_str(), "medium") == 0) {
@@ -821,21 +821,21 @@ uint8_t Thermostat::HeatingCircuit::get_mode_type(uint8_t flags) const {
     if (flags == EMS_DEVICE_FLAG_JUNKERS) {
         if (mode_type == 3) {
             return HeatingCircuit::Mode::HEAT;
-        } else if (mode == 2) {
+        } else if (mode_type == 2) {
             return HeatingCircuit::Mode::ECO;
-        } else if (mode == 1) {
+        } else if (mode_type == 1) {
             return HeatingCircuit::Mode::NOFROST;
         }
     } else if ((flags == EMS_DEVICE_FLAG_RC35) || (flags == EMS_DEVICE_FLAG_RC30_1)) {
         if (mode_type == 0) {
             return HeatingCircuit::Mode::NIGHT;
-        } else if (mode == 1) {
+        } else if (mode_type == 1) {
             return HeatingCircuit::Mode::DAY;
         }
     } else if (flags == EMS_DEVICE_FLAG_RC300) {
         if (mode_type == 0) {
             return HeatingCircuit::Mode::ECO;
-        } else if (mode == 1) {
+        } else if (mode_type == 1) {
             return HeatingCircuit::Mode::COMFORT;
         }
     } else if (flags == EMS_DEVICE_FLAG_RC100) {
@@ -1012,7 +1012,7 @@ void Thermostat::show_values(uuid::console::Shell & shell) {
         }
 
         if (Helpers::hasValue(hc->summer_mode) && hc->summer_mode) {
-                shell.printfln(F("    Program is set to Summer mode"));
+            shell.printfln(F("    Program is set to Summer mode"));
         } else if (Helpers::hasValue(hc->holiday_mode) && hc->holiday_mode) {
             shell.printfln(F("    Program is set to Holiday mode"));
         }
@@ -1146,8 +1146,8 @@ void Thermostat::process_JunkersMonitor(std::shared_ptr<const Telegram> telegram
     telegram->read_value(hc->curr_roomTemp, 4);     // value is * 10
     telegram->read_value(hc->setpoint_roomTemp, 2); // value is * 10
 
-    telegram->read_value(hc->mode_type, 0);         // 1 = nofrost, 2 = eco, 3 = heat
-    telegram->read_value(hc->mode, 1);              // 1 = manual, 2 = auto
+    telegram->read_value(hc->mode_type, 0); // 1 = nofrost, 2 = eco, 3 = heat
+    telegram->read_value(hc->mode, 1);      // 1 = manual, 2 = auto
 }
 
 // type 0x02A5 - data from the Nefit RC1010/3000 thermostat (0x18) and RC300/310s on 0x10
@@ -1356,13 +1356,13 @@ void Thermostat::set_control(const uint8_t ctrl, const uint8_t hc_num) {
 
 // sets the thermostat ww working mode, where mode is a string
 void Thermostat::set_ww_mode(const std::string & mode) {
-    if (strcasecmp("off",mode.c_str()) == 0) {
+    if (strcasecmp("off", mode.c_str()) == 0) {
         LOG_INFO(F("Setting thermostat warm water mode to %s"), mode.c_str());
         write_command(EMS_TYPE_wwSettings, 2, 0);
-    } else if (strcasecmp("on",mode.c_str()) == 0) {
+    } else if (strcasecmp("on", mode.c_str()) == 0) {
         LOG_INFO(F("Setting thermostat warm water mode to %s"), mode.c_str());
         write_command(EMS_TYPE_wwSettings, 2, 1);
-    } else if (strcasecmp("auto",mode.c_str()) == 0) {
+    } else if (strcasecmp("auto", mode.c_str()) == 0) {
         LOG_INFO(F("Setting thermostat warm water mode to %s"), mode.c_str());
         write_command(EMS_TYPE_wwSettings, 2, 2);
     } else {
@@ -1388,8 +1388,8 @@ void Thermostat::set_mode(const std::string & mode, const uint8_t hc_num) {
         set_mode(HeatingCircuit::Mode::NOFROST, hc_num);
     } else if (mode_tostring(HeatingCircuit::Mode::ECO) == mode) {
         set_mode(HeatingCircuit::Mode::ECO, hc_num);
-    } else if (mode_tostring(HeatingCircuit::Mode::HOLIDAY) == mode) {
-        set_mode(HeatingCircuit::Mode::HOLIDAY, hc_num);
+    // } else if (mode_tostring(HeatingCircuit::Mode::HOLIDAY) == mode) {
+    //    set_mode(HeatingCircuit::Mode::HOLIDAY, hc_num);
     } else if (mode_tostring(HeatingCircuit::Mode::COMFORT) == mode) {
         set_mode(HeatingCircuit::Mode::COMFORT, hc_num);
     } else {
@@ -1413,7 +1413,7 @@ void Thermostat::set_mode(const uint8_t mode, const uint8_t hc_num) {
 
     uint8_t  set_mode_value, offset;
     uint16_t validate_typeid = 0;
-    uint8_t  hc_p            = hc->hc_num();
+    uint8_t  hc_p            = hc->hc_num() - 1;
 
     // set the value to send via EMS depending on the mode type
     switch (mode) {
@@ -1431,7 +1431,7 @@ void Thermostat::set_mode(const uint8_t mode, const uint8_t hc_num) {
 
     default:
     case HeatingCircuit::Mode::AUTO:
-    case HeatingCircuit::Mode::HOLIDAY:
+    // case HeatingCircuit::Mode::HOLIDAY:
     case HeatingCircuit::Mode::ECO:
         set_mode_value = 2;
         break;
@@ -1453,7 +1453,7 @@ void Thermostat::set_mode(const uint8_t mode, const uint8_t hc_num) {
     case EMSdevice::EMS_DEVICE_FLAG_RC35:
     case EMSdevice::EMS_DEVICE_FLAG_RC30_1:
         offset          = EMS_OFFSET_RC35Set_mode;
-        validate_typeid = set_typeids[hc_p];
+        validate_typeid = monitor_typeids[hc_p];
         break;
     case EMSdevice::EMS_DEVICE_FLAG_RC300:
     case EMSdevice::EMS_DEVICE_FLAG_RC100:
@@ -1491,7 +1491,7 @@ void Thermostat::set_mode(const uint8_t mode, const uint8_t hc_num) {
 
     // add the write command to the Tx queue
     // post validate is the corresponding monitor or set type IDs as they can differ per model
-    write_command(set_typeids[hc->hc_num() - 1], offset, set_mode_value, validate_typeid);
+    write_command(set_typeids[hc_p], offset, set_mode_value, validate_typeid);
 }
 
 // sets the thermostat temp, where mode is a string
@@ -1539,6 +1539,7 @@ void Thermostat::set_temperature(const float temperature, const uint8_t mode, co
 
     uint8_t model  = flags() & 0x0F;
     int8_t  offset = -1; // we use -1 to check if there is a value
+    uint8_t factor = 2;  // some temperatures only use 1 
 
     if (model == EMS_DEVICE_FLAG_RC10) {
         offset = EMS_OFFSET_RC10Set_temp;
@@ -1584,12 +1585,15 @@ void Thermostat::set_temperature(const float temperature, const uint8_t mode, co
             break;
         case HeatingCircuit::Mode::DESIGN:
             offset = EMS_OFFSET_RC35Set_temp_design;
+            factor = 1;
             break;
         case HeatingCircuit::Mode::SUMMER:
             offset = EMS_OFFSET_RC35Set_temp_summer;
+            factor = 1;
             break;
         case HeatingCircuit::Mode::NOFROST:
             offset = EMS_OFFSET_RC35Set_temp_nofrost;
+            factor = 1;
             break;
         default:
         case HeatingCircuit::Mode::AUTO: // automatic selection, if no type is defined, we use the standard code
@@ -1629,7 +1633,8 @@ void Thermostat::set_temperature(const float temperature, const uint8_t mode, co
             default:
             case HeatingCircuit::Mode::AUTO: // automatic selection, if no type is defined, we use the standard code
                 uint8_t mode_type = hc->get_mode_type(flags());
-                offset = (mode_type == HeatingCircuit::Mode::NIGHT || mode_type == HeatingCircuit::Mode::ECO) ? EMS_OFFSET_JunkersSetMessage_night_temp : EMS_OFFSET_JunkersSetMessage_day_temp;
+                offset = (mode_type == HeatingCircuit::Mode::NIGHT || mode_type == HeatingCircuit::Mode::ECO) ? EMS_OFFSET_JunkersSetMessage_night_temp
+                                                                                                              : EMS_OFFSET_JunkersSetMessage_day_temp;
                 break;
             }
 
@@ -1661,9 +1666,8 @@ void Thermostat::set_temperature(const float temperature, const uint8_t mode, co
                  mode_tostring(mode).c_str());
 
         // add the write command to the Tx queue
-        // value is *2
         // post validate is the corresponding monitor type_id
-        write_command(set_typeids[hc->hc_num() - 1], offset, (uint8_t)((float)temperature * (float)2), monitor_typeids[hc->hc_num() - 1]);
+        write_command(set_typeids[hc->hc_num() - 1], offset, (uint8_t)((float)temperature * (float)factor), monitor_typeids[hc->hc_num() - 1]);
     }
 }
 
@@ -1720,7 +1724,7 @@ void Thermostat::console_commands(Shell & shell, unsigned int context) {
         flash_string_vector{F_(change), F_(mode)},
         flash_string_vector{F_(mode_mandatory), F_(hc_optional)},
         [=](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) {
-            uint8_t hc = (arguments.size() == 2) ? arguments[1].at(0) - '0' : DEFAULT_HEATING_CIRCUIT;
+            uint8_t hc = (arguments.size() == 2) ? arguments[1].at(0) - '0' : AUTO_HEATING_CIRCUIT;
             set_mode(arguments.front(), hc);
         },
         [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments __attribute__((unused))) -> const std::vector<std::string> {
@@ -1731,7 +1735,7 @@ void Thermostat::console_commands(Shell & shell, unsigned int context) {
                                             read_flash_string(F("eco")),
                                             read_flash_string(F("comfort")),
                                             read_flash_string(F("heat")),
-                                            read_flash_string(F("holiday")),
+                                            // read_flash_string(F("holiday")),
                                             read_flash_string(F("nofrost")),
                                             read_flash_string(F("auto"))
 
@@ -1743,14 +1747,10 @@ void Thermostat::console_commands(Shell & shell, unsigned int context) {
         CommandFlags::ADMIN,
         flash_string_vector{F_(change), F_(wwmode)},
         flash_string_vector{F_(mode_mandatory)},
-        [=](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) {
-            set_ww_mode(arguments.front());
-        },
+        [=](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) { set_ww_mode(arguments.front()); },
         [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments __attribute__((unused))) -> const std::vector<std::string> {
-            return std::vector<std::string>{read_flash_string(F("off")),
-                                            read_flash_string(F("on")),
-                                            read_flash_string(F("auto"))
-
+            return std::vector<std::string>{read_flash_string(F("off")), read_flash_string(F("on")), read_flash_string(F("auto"))
+            
             };
         });
 

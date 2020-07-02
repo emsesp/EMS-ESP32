@@ -585,7 +585,7 @@ void EMSESP::send_write_request(const uint16_t type_id,
 // the CRC check is not done here, only when it's added to the Rx queue with add()
 void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
 #ifdef EMSESP_DEBUG
-    static uint32_t tx_time_ = 0;
+    static uint32_t rx_time_ = 0;
 #endif
     // check first for echo
     uint8_t first_value = data[0];
@@ -593,8 +593,7 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
         // if we ask ourself at roomcontrol for version e.g. 0B 98 02 00 20
         Roomctrl::check((data[1] ^ 0x80 ^ rxservice_.ems_mask()), data);
 #ifdef EMSESP_DEBUG
-        // get_uptime is only updated once per loop, does not give the right time
-        LOG_DEBUG(F("[DEBUG] Echo after %d ms: %s"), ::millis() - tx_time_, Helpers::data_to_hex(data, length).c_str());
+        LOG_TRACE(F("[DEBUG] Echo after %d ms: %s"), ::millis() - rx_time_, Helpers::data_to_hex(data, length).c_str());
 #endif
         return; // it's an echo
     }
@@ -642,19 +641,29 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
 
     // check for poll
     if (length == 1) {
+#ifdef EMSESP_DEBUG
+        char s[4];
+        if(first_value & 0x80) {
+            LOG_TRACE(F("[DEBUG] next Poll %s after %d ms"), Helpers::hextoa(s, first_value), ::millis() - rx_time_);
+            // time measurement starts here, use millis because get_uptime is only updated once per loop
+            rx_time_ = ::millis();
+        } else {
+            LOG_TRACE(F("[DEBUG] Poll ack %s after %d ms"), Helpers::hextoa(s, first_value), ::millis() - rx_time_);
+        }
+#endif
         // check for poll to us, if so send top message from Tx queue immediately and quit
         // if ht3 poll must be ems_bus_id else if Buderus poll must be (ems_bus_id | 0x80)
         if ((first_value ^ 0x80 ^ rxservice_.ems_mask()) == txservice_.ems_bus_id()) {
             EMSbus::last_bus_activity(uuid::get_uptime()); // set the flag indication the EMS bus is active
-#ifdef EMSESP_DEBUG
-            tx_time_ = ::millis(); // get_uptime is only updated once per loop, does not give the right time
-#endif
             txservice_.send();
         }
         // send remote room temperature if active
         Roomctrl::send(first_value ^ 0x80 ^ rxservice_.ems_mask());
         return;
     } else {
+#ifdef EMSESP_DEBUG
+        LOG_TRACE(F("[DEBUG] Reply after %d ms: %s"), ::millis() - rx_time_, Helpers::data_to_hex(data, length).c_str());
+#endif
         // check if there is a message for the roomcontroller
         Roomctrl::check((data[1] ^ 0x80 ^ rxservice_.ems_mask()), data);
         // add to RxQueue, what ever it is.

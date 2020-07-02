@@ -32,6 +32,7 @@
 #include "freertos/ringbuf.h"
 #include "freertos/queue.h"
 #include <driver/uart.h>
+#include <driver/timer.h>
 
 #define EMS_MAXBUFFERSIZE 33 // max size of the buffer. EMS packets are max 32 bytes, plus extra for BRK
 
@@ -79,11 +80,11 @@ class EMSuart {
     EMSuart()  = default;
     ~EMSuart() = default;
 
-    static void     start(uint8_t tx_mode);
-    static void     send_poll(uint8_t data);
+    static void     start(const uint8_t tx_mode);
+    static void     send_poll(const uint8_t data);
     static void     stop();
     static void     restart();
-    static uint16_t transmit(uint8_t * buf, uint8_t len);
+    static uint16_t transmit(const uint8_t * buf, const uint8_t len);
 
   private:
     static void           emsuart_recvTask(void * para);
