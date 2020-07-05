@@ -57,7 +57,7 @@ deploy:
   provider: releases
   edge:
   #  source: wenkokke/dpl
-    branch: main
+    branch: master
   token: ${GITHUB_TOKEN}
   file_glob: true
   # file: "firmware/*.bin"
