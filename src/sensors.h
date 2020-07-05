@@ -89,6 +89,7 @@ class Sensors {
     static constexpr uint8_t TYPE_DS1825  = 0x3B;
 
     static constexpr uint32_t READ_INTERVAL_MS = 5000;  // 5 seconds
+    static constexpr uint32_t CONVERSION_MS    = 1000;  // 1 seconds
     static constexpr uint32_t READ_TIMEOUT_MS  = 2000;  // 2 seconds
     static constexpr uint32_t SCAN_TIMEOUT_MS  = 30000; // 30 seconds
 

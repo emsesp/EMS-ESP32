@@ -88,7 +88,7 @@ class Telegram {
     // reads a bit value from a given telegram position
     void read_bitvalue(uint8_t & value, const uint8_t index, const uint8_t bit) const {
         uint8_t abs_index = (index - offset);
-        if (abs_index >= message_length) {
+        if (abs_index >= message_length - 1) {
             return; // out of bounds
         }
 
@@ -104,7 +104,7 @@ class Telegram {
     // s is to override number of bytes read (e.g. use 3 to simulat a uint24_t)
     void read_value(Value & value, const uint8_t index, uint8_t s = 0) const {
         uint8_t size      = (!s) ? sizeof(Value) : s;
-        int8_t  abs_index = ((index - offset + size - 1) >= message_length) ? -1 : (index - offset);
+        int8_t  abs_index = ((index - offset + size - 1) >= message_length - 1) ? -1 : (index - offset);
         if (abs_index < 0) {
             return; // out of bounds, we don't change the value
         }
@@ -270,8 +270,8 @@ class TxService : public EMSbus {
     void loop();
     void send();
 
-    void add(const uint8_t operation, const uint8_t dest, const uint16_t type_id, const uint8_t offset, uint8_t * message_data, const uint8_t message_length);
-    void add(const uint8_t operation, const uint8_t * data, const uint8_t length);
+    void add(const uint8_t operation, const uint8_t dest, const uint16_t type_id, const uint8_t offset, uint8_t * message_data, const uint8_t message_length, const bool front = false);
+    void add(const uint8_t operation, const uint8_t * data, const uint8_t length, const bool front = false);
 
     void read_request(const uint16_t type_id, const uint8_t dest, const uint8_t offset = 0);
 

@@ -104,6 +104,7 @@ class Thermostat : public EMSdevice {
     // each thermostat has a list of heating controller type IDs for reading and writing
     std::vector<uint16_t> monitor_typeids;
     std::vector<uint16_t> set_typeids;
+    std::vector<uint16_t> timer_typeids;
 
   private:
     static uuid::log::Logger logger_;
@@ -251,6 +252,10 @@ class Thermostat : public EMSdevice {
     void set_settings_language(const uint8_t lg);
     void set_control(const uint8_t ctrl, const uint8_t hc_num);
     void set_ww_mode(const std::string & mode);
+    void set_holiday(const char * hd, const uint8_t hc_num);
+    void set_datetime(const char * dt);
+    void set_pause(const uint8_t hrs, const uint8_t hc_num);
+    void set_party(const uint8_t hrs, const uint8_t hc_num);
     void set_mode(const uint8_t mode, const uint8_t hc_num);
     void set_mode(const std::string & mode, const uint8_t hc_num);
     void set_temperature(const float temperature, const std::string & mode, const uint8_t hc_num);
