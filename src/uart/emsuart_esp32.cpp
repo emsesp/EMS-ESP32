@@ -213,7 +213,8 @@ uint16_t EMSuart::transmit(const uint8_t * buf, const uint8_t len) {
     }
 
     if (tx_mode_ == 5) { // wait before sending
-        vTaskDelay(4 / portTICK_PERIOD_MS);
+        //vTaskDelay(4 / portTICK_PERIOD_MS);
+        delayMicroseconds(4000);
         for (uint8_t i = 0; i < len; i++) {
             EMS_UART.fifo.rw_byte = buf[i];
         }
