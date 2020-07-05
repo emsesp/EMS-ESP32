@@ -270,8 +270,8 @@ class TxService : public EMSbus {
     void loop();
     void send();
 
-    void add(const uint8_t operation, const uint8_t dest, const uint16_t type_id, const uint8_t offset, uint8_t * message_data, const uint8_t message_length);
-    void add(const uint8_t operation, const uint8_t * data, const uint8_t length);
+    void add(const uint8_t operation, const uint8_t dest, const uint16_t type_id, const uint8_t offset, uint8_t * message_data, const uint8_t message_length, const bool front = false);
+    void add(const uint8_t operation, const uint8_t * data, const uint8_t length, const bool front = false);
 
     void read_request(const uint16_t type_id, const uint8_t dest, const uint8_t offset = 0);
 
