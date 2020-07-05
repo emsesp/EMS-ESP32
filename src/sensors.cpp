@@ -73,7 +73,7 @@ void Sensors::loop() {
             last_activity_ = time_now;
         }
     } else if (state_ == State::READING) {
-        if (temperature_convert_complete()) {
+        if (temperature_convert_complete() && (time_now - last_activity_ > CONVERSION_MS)) {
             // LOG_DEBUG(F("Scanning for sensors")); // uncomment for debug
             bus_.reset_search();
             found_.clear();
