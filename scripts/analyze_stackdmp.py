@@ -17,8 +17,10 @@ import os
 # 3fffffb0: feefeffe feefeffe 3ffe8558 40100b01
 # <<<stack<<<
 
-call(['python', 'scripts/decoder.py ', '-s', '-e', os.getcwd()+"/.pio/build/debug/firmware_debug_1_9_1b3.elf", 'scripts/stackdmp.txt'])
+call(['python', 'scripts/decoder.py ', '-s', '-e', os.getcwd()+"/.pio/build/esp12e/firmware.elf", 'scripts/stackdmp.txt'])
 
 # example for linux:
 # % cd EMS-ESP
-# % python scripts/decoder_linux.py -s -e .pio/build/debug/firmware_d1_mini.elf scripts/stackdmp.txt
+# % python scripts/decoder_linux.py -s -e .pio/build/esp12e/firmware.elf scripts/stackdmp.txt
+
+#  python decoder_linux.py -s -e ../.pio/build/esp8266-debug/firmware.elf stackdmp.txt

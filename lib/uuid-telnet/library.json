@@ -1,0 +1,36 @@
+{
+	"name": "uuid-telnet",
+	"description": "Telnet service",
+	"keywords": "communication,telnet",
+	"authors": [
+		{
+			"name": "Simon Arlott",
+			"maintainer": true
+		}
+	],
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/nomis/mcu-uuid-telnet.git"
+	},
+	"version": "0.1.0",
+	"license": "GPL-3.0-or-later",
+	"homepage": "https://mcu-uuid-telnet.readthedocs.io/",
+	"export": {
+		"exclude": [
+			".travis.yml",
+			"test/*"
+		]
+	},
+	"frameworks": [
+		"arduino"
+	],
+	"dependencies": {
+		"uuid-common": "^1.1.0",
+		"uuid-log": "^2.1.1",
+		"uuid-console": "^0.7.0"
+	},
+	"build": {
+		"flags": "-Wall -Wextra",
+		"libLDFMode": "chain+"
+	}
+}

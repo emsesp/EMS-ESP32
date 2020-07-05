@@ -1,23 +1,24 @@
 # vscode
 .vscode
 
+# build
+/build/
+.clang_complete
+.gcc-flags.json
+
 # platformio
 .pio
-lib/readme.txt
-
-# web stuff compiled
-src/websrc/temp
-src/webh/*.gz.h
-
-# NPM directories
-node_modules
+pio_local.ini
 
 # OS specific
 .DS_Store
+*Thumbs.db
 
 # project specfic
-scripts/stackdmp.txt
-firmware
-
-# firmware
+/scripts/stackdmp.txt
 *.bin
+emsesp
+/data/www/
+/lib/framework/WWWData.h
+/interface/build/
+/interface/node_modules/

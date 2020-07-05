@@ -290,7 +290,7 @@ if __name__ == "__main__":
         file = open(args.file, "r")
 
     addr2line = os.path.join(os.path.abspath(os.path.expanduser(args.tool)),
-                             "bin/xtensa-" + PLATFORMS[args.platform] + "-elf-addr2line")
+                             "bin/xtensa-" + PLATFORMS[args.platform] + "-elf-addr2line.exe")
     if not os.path.exists(addr2line):
         print("ERROR: addr2line not found (" + addr2line + ")")
 

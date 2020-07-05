@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0 alpha]
+
+### Changed
+- everything. See README
+
 ## [1.9.5] 30-04-2020
 
 ### Added
@@ -46,7 +51,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.9.4] 15-12-2019
 
-There are breaking changes in this release. Make you sure you adjust the MQTT topics as described in the wiki.
+There are breaking changes in this release. See `publish_time` below and make sure you set this value to 0.
 
 ### Added
 
@@ -182,7 +187,7 @@ There are breaking changes in this release. Make you sure you adjust the MQTT to
 ### Added
 
 - Added back -DCRASH in Debug build target for capturing any ESP8266 stack dumps during crashes
-- Basic Web Interface, for checking stats and setting wifi credentials. See wiki for more details.
+- Web Interface, for checking stats and setting wifi credentials. See wiki for more details.
 - reset firmware option. If the reset button on the ESP is pressed during boot up sequence (the LED is flashing very fast) all settings are erased and goes into AP mode.
 - Added tx_mode back with options 0,1 and 2 until we've fixed option 2 that works for everyone and doesn't reset ESP
 - More solar module data captured, thanks to @Vuego123

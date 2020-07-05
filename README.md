@@ -1,42 +1,113 @@
-![logo](https://emsesp.github.io/docs/_media/logo/EMS-ESP_logo_dark.png)
+# EMS-ESP version 2.0 (beta)
 
-[![version](https://img.shields.io/github/release/proddy/EMS-ESP.svg?label=Latest%20Release)](https://github.com/proddy/EMS-ESP/blob/master/CHANGELOG.md)
-[![release-date](https://img.shields.io/github/release-date/proddy/EMS-ESP.svg?label=Released)](https://github.com/proddy/EMS-ESP/commits/master)
-<br />
-[![license](https://img.shields.io/github/license/proddy/EMS-ESP.svg)](LICENSE)
-[![travis](https://travis-ci.com/proddy/EMS-ESP.svg?branch=dev)](https://travis-ci.com/proddy/EMS-ESP)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/b8880625bdf841d4adb2829732030887)](https://app.codacy.com/app/proddy/EMS-ESP?utm_source=github.com&utm_medium=referral&utm_content=proddy/EMS-ESP&utm_campaign=Badge_Grade_Settings)
-[![downloads](https://img.shields.io/github/downloads/proddy/EMS-ESP/total.svg)](https://github.com/proddy/EMS-ESP/releases)
-<br />
-[![gitter](https://img.shields.io/gitter/room/EMS-ESP/EMS-ESP.svg)](https://gitter.im/EMS-ESP/community)
-<br>
+## **New Features in v2**
 
-EMS-ESP is a open-source system built for the Espressif ESP8266 microcontroller to communicate with **EMS** (Energy Management System) based boilers, thermostats and other modules from manufacturers like Bosch, Buderus, Nefit, Junkers and Sieger.
+- A new web interface using React and TypeScript that's now secure as each URL endpoint is protected by issuing a JWT which is then sent using Bearer Authentication. Using a Captive Portal in AP mode or connecting to a local wifi network.
 
-## Features
+![settings](/media/web_settings.PNG)
+![status](/media/web_status.PNG)
 
-* Supporting more than [50 EMS devices](https://emsesp.github.io/docs/#/Supported-EMS-Devices) (EMS 1, EMS 2.0/Plus and Heatronics 3).
-* A web interface for easy configuration and real-time monitoring of the EMS bus.
-* Telnet for advanced configuration and verbose traffic logging.
-* Configurable MQTT, with templates for Home Assistant and Domoticz.
-* Includes an simple schematic for a test breadboard interface board.
-* Native compatibility with bbqkees' [EMS Gateway](https://bbqkees-electronics.nl/) interface board.
+- A new console. Like in version 1.9 it works with both Serial and Telnet but with a rich set of commands and more intuitive with behavior similar to a Linux-style shell. It supports multiple connections and commands that alter the settings or interact directly with EMS devices are secure behind an admin password. A full list of commands is below, here are the key ones:
+    * `help` lists the commands and keywords
+    * some commands take you into a new context, a bit like a sub-menu. e.g. `system`, `thermostat`. Use `help` to show which commands this context has and `exit` or CTRL-D to get back to the root.
+    * To change a setting use the `set` command. Typing `set` shows the current settings.
+    * `show` shows the data specific to the which context you're in.
+    * `su` to switch to Admin which enables more commands such as most of the `set` commands. The default password is "ems-esp-neo" which can be changed with `passwd` from the system menu. When in Admin mode the command prompt switches from `$` to `#`.
+    * `log` sets the logging level. `log off` disables logging. Use `log debug` for debugging commands and actions.
+    * `watch` will output the incoming Rx telegrams to the console. You can also show these in its 'raw' data format and also watch a particular ID.
+    * CTRL-D to exit, CTRL-U to remove line, TAB to auto-complete 
+  
+- There is no "serial mode" anymore like with version 1.9. When the Wifi cannot connect to the SSID it will automatically enter a "safe" mode where the Serial console is activated automatically (baud 115200). Note Serial is always available on the ESP32 because it has multiple UARTs.
 
-Please reference the [Wiki](https://emsesp.github.io/docs) for further details and instructions on how to build and configure the firmware.
+- The onboard LED behaves like in 1.9. A solid LED means good connection and EMS data is coming in. A slow pulse means either the WiFi or the EMS bus is not connected yet. A very fast pulse is when the system is booting up and configuring itself, which typically takes 5 seconds.
 
----
+- Built to work with both EMS8266 and ESP32
 
-## Say Thanks
-If you like EMS-ESP buy me a :coffee: via [PayPal](https://www.paypal.me/prderbyshire/2).
+- Extended MQTT to use MQTT discovery on Home Assistant.
 
----
+- For debugging there is an offline mode where the code can be compiled and executed standalone without uploading to an ESP controller. Use `make` (based off GNUMakefile).
 
-| ![web menu](https://emsesp.github.io/docs/_media/web/system_status.PNG) | ![web menu](https://emsesp.github.io/docs/_media/web/ems_dashboard.PNG) |
-| - | - |
-![ha](https://emsesp.github.io/docs/_media/home%20assistant/ha.png)
+## **Uploading the firmware**
 
-| ![telnet menu](https://emsesp.github.io/docs/_media/telnet/telnet_menu.jpg) | ![telnet menu](https://emsesp.github.io/docs/_media/telnet/telnet_stats.PNG) |
-| - | - |
+- If you're not using PlatformIO, use the command-line and Python. You can download Python from https://www.python.org/downloads/. Make sure you also get:
+  - `esptool`, install using the command `pip install esptool`
+  - and for OTA updates later, `espota` from https://github.com/esp8266/Arduino/blob/master/tools/espota.py
 
-| ![on boiler](https://emsesp.github.io/docs/_media/ems%20gateway/on-boiler.jpg) | ![kit](https://emsesp.github.io/docs/_media/ems%20gateway/ems-kit-2.jpg) | ![basic circuit](https://emsesp.github.io/docs/_media/ems%20gateway/ems-board-white.jpg) |
-| - | - | - |
+- Grab the latest firmware binary from https://github.com/proddy/EMS-ESP/releases/tag/travis-v2-build
+- Uploading directly via USB.
+  
+  For ESP8266: `esptool.py -p <COM PORT> -b 921600 write_flash 0x00000 <firmware.bin>`
+  
+  For ESP32: `esptool.py --chip esp32 --port "COM6" --baud 921600 --before default_reset --after hard_reset write_flash -z --flash_mode dio --flash_freq 40m --flash_size detect 0x1000 XX\.platformio\packages\framework-arduinoespressif32\tools\sdk\bin\bootloader_dio_40m.bin 0x8000 XX\.pio\build\esp32\partitions.bin 0xe000 XX\.platformio\packages\framework-arduinoespressif32\tools\partitions\boot_app0.bin 0x10000  <firmware.bin>`
+- Uploading over WiFi: `espota.py --debug --progress --port 8266 --auth ems-esp-neo -i <IP address> -f <firmware.bin>`
+
+## **Setting EMS-ESP up for the first time**
+
+ - Connect to the Access Point called ems-esp. Login to the captive portal with admin/admin and set the WiFi credentials and restart the ESP.
+ - When it connects to your network you can use the Web UI to configure the other settings or login using Telnet. See the console commands below for options. The password for `su` is the sames as the JWT secret which you can see from the WebUI.
+
+## **List of console commands**
+
+```
+common commands available in all contexts:
+  exit
+  help
+  log [level]
+  watch <on | off | raw> [ID]
+  su
+
+(from the root)
+	set
+	refresh
+	system (enters a context)
+	boiler (enters a context)
+	thermostat (enters a context)
+	scan devices [deep]
+	send telegram <"XX XX ...">
+	set bus_id <device ID>
+	set tx_mode <n>
+	show
+	show devices
+	show ems
+	show values
+
+system
+	set
+	show
+	show mqtt
+	passwd
+	restart
+	set wifi hostname <name>
+	set wifi password
+	set wifi ssid <name>
+
+boiler
+	comfort <hot |eco | intelligent>
+	flowtemp <degrees>
+	wwactive <on | off>
+	wwcirculation <on | off>
+	wwonetime <on | off>
+	wwtemp <degrees>
+	read <type ID>
+
+thermostat
+	set
+	set master [device ID]
+	mode <mode> [heating circuit]
+	temp <degrees> [heating circuit]
+	read <type ID>
+```
+  
+----------
+
+### **Basic Design Principles**
+
+- The core services like telnet, logging and shell are based off the libraries from @nomis. I also adopted his general design pattens such as making everything as asynchronous as possible so that no one operation should starve another operation of it's time to execute (https://isocpp.org/wiki/faq/ctors#static-init-order).
+- All EMS devices (e.g. boiler, thermostat, solar modules, mixing units etc) are derived from a factory base class and each class handles its own registering of telegram and mqtt handlers. This makes the EMS device code easier to manage and we can extend with new telegrams types and features.
+
+### **Things to tidy up in code later**
+
+- Replace vectors of class objects with shared pointers and use emplace_back since it instantiates during construction. It may have a performance gain.
+- Add real unit tests using platformio's test bed (https://docs.platformio.org/en/latest/plus/pio-remote.html)
+- See if it's easier to use timers instead of millis() based timers, using https://github.com/esp8266/Arduino/blob/master/libraries/esp8266/examples/BlinkPolledTimeout/BlinkPolledTimeout.ino
+
