@@ -73,6 +73,9 @@ void Solar::show_values(uuid::console::Shell & shell) {
         shell.printfln(F("  Pump working time: %d days %d hours %d minutes"), pumpWorkMin_ / 1440, (pumpWorkMin_ % 1440) / 60, pumpWorkMin_ % 60);
     }
 
+    print_value(shell, 2, F("Tank Heated"), tankHeated_, nullptr, EMS_VALUE_BOOL);
+    print_value(shell, 2, F("Collector"), collectorOnOff_, nullptr, EMS_VALUE_BOOL);
+
     print_value(shell, 2, F("Energy last hour"), energyLastHour_, F_(wh), 10);
     print_value(shell, 2, F("Energy today"), energyToday_, F_(wh));
     print_value(shell, 2, F("Energy total"), energyTotal_, F_(kwh), 10);
@@ -87,30 +90,47 @@ void Solar::publish_values() {
     if (Helpers::hasValue(collectorTemp_)) {
         doc["collectortemp"] = (float)collectorTemp_ / 10;
     }
+
     if (Helpers::hasValue(bottomTemp_)) {
         doc["bottomtemp"] = (float)bottomTemp_ / 10;
     }
+
     if (Helpers::hasValue(bottomTemp2_)) {
         doc["bottomtemp2"] = (float)bottomTemp2_ / 10;
     }
+
     if (Helpers::hasValue(pumpModulation_)) {
         doc["pumpmodulation"] = pumpModulation_;
     }
+
     if (Helpers::hasValue(pump_, true)) {
         doc["pump"] = Helpers::render_value(s, pump_, EMS_VALUE_BOOL);
     }
+
     if (Helpers::hasValue(valveStatus_, true)) {
         doc["valvestatus"] = Helpers::render_value(s, valveStatus_, EMS_VALUE_BOOL);
     }
+
     if (Helpers::hasValue(pumpWorkMin_)) {
         doc["pumpWorkMin"] = (float)pumpWorkMin_;
     }
+
+    if (Helpers::hasValue(tankHeated_, true)) {
+        doc["tankHeated"] = Helpers::render_value(s, tankHeated_, EMS_VALUE_BOOL);
+    }
+
+    if (Helpers::hasValue(collectorOnOff_, true)) {
+        doc["collectorOnOff"] = Helpers::render_value(s, collectorOnOff_, EMS_VALUE_BOOL);
+    }
+
     if (Helpers::hasValue(energyLastHour_)) {
         doc["energylasthour"] = (float)energyLastHour_ / 10;
     }
+
     if (Helpers::hasValue(energyToday_)) {
         doc["energytoday"] = energyToday_;
     }
+
     if (Helpers::hasValue(energyTotal_)) {
         doc["energytotal"] = (float)energyTotal_ / 10;
     }
@@ -186,6 +206,9 @@ void Solar::process_SM100Status(std::shared_ptr<const Telegram> telegram) {
     if (pumpmod == 0 && pumpModulation_ == 100) { // mask out boosts
         pumpModulation_ = 15;                     // set to minimum
     }
+
+    telegram->read_bitvalue(tankHeated_, 3, 1); // issue #422
+    telegram->read_bitvalue(collectorOnOff_, 3, 0);
 }
 
 /*
