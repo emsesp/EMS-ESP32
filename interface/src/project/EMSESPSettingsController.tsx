@@ -52,10 +52,10 @@ function EMSESPSettingsControllerForm(props: EMSESPSettingsControllerFormProps) 
                 </Typography>
             </Box>
             <TextValidator
-                validators={['required', 'isNumber', 'minNumber:1', 'maxNumber:255']}
-                errorMessages={['TX mode is required', "Must be a number", "Must be greater than 0", "Max value is 255"]}
+                validators={['required', 'isNumber', 'minNumber:0', 'maxNumber:255']}
+                errorMessages={['TX mode is required', "Must be a number", "Must be 0 or higher", "Max value is 255"]}
                 name="tx_mode"
-                label="Tx mode"
+                label="Tx mode (0=off)"
                 fullWidth
                 variant="outlined"
                 value={data.tx_mode}
