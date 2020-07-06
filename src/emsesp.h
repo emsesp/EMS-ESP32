@@ -37,6 +37,7 @@
 #include "EMSESPStatusService.h"
 #include "EMSESPDevicesService.h"
 #include "EMSESPSettingsService.h"
+#include "EMSESPScanDevicesService.h"
 
 #include "emsdevice.h"
 #include "emsfactory.h"
@@ -136,6 +137,7 @@ class EMSESP {
 
     static std::vector<std::unique_ptr<EMSdevice>> emsdevices;
 
+    // services
     static Mqtt      mqtt_;
     static System    system_;
     static Sensors   sensors_;
@@ -144,10 +146,12 @@ class EMSESP {
     static RxService rxservice_;
     static TxService txservice_;
 
-    static ESP8266React          esp8266React;
-    static EMSESPSettingsService emsespSettingsService;
-    static EMSESPStatusService   emsespStatusService;
-    static EMSESPDevicesService  emsespDevicesService;
+    // web controllers
+    static ESP8266React             esp8266React;
+    static EMSESPSettingsService    emsespSettingsService;
+    static EMSESPStatusService      emsespStatusService;
+    static EMSESPDevicesService     emsespDevicesService;
+    static EMSESPScanDevicesService emsespScanDevicesService;
 
   private:
     EMSESP() = delete;
@@ -169,7 +173,7 @@ class EMSESP {
         uint8_t                     flags;
     };
 
-    static std::vector<Device_record>              device_library_;
+    static std::vector<Device_record> device_library_;
 
     static uint8_t  actual_master_thermostat_;
     static uint16_t watch_id_;

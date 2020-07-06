@@ -9,22 +9,24 @@ import {
   List,
   withWidth,
   WithWidthProps,
-  isWidthDown
+  isWidthDown,
+  Button,
+  DialogTitle, DialogContent, DialogActions, Box, Dialog, Typography
 } from "@material-ui/core";
-
-import { Box, Typography } from '@material-ui/core';
 
 import RefreshIcon from "@material-ui/icons/Refresh";
 
-import { withAuthenticatedContext, AuthenticatedContextProps } from '../authentication';
+import { redirectingAuthorizedFetch, withAuthenticatedContext, AuthenticatedContextProps } from '../authentication';
 
 import {
   RestFormProps,
-  FormActions,
   FormButton,
 } from "../components";
 
 import { EMSESPDevices, Device } from "./types";
+
+import { ENDPOINT_ROOT } from '../api';
+export const SCANDEVICES_ENDPOINT = ENDPOINT_ROOT + "scanDevices";
 
 function compareDevices(a: Device, b: Device) {
   if (a.type < b.type) {
@@ -36,9 +38,19 @@ function compareDevices(a: Device, b: Device) {
   return 0;
 }
 
+interface EMSESPDevicesFormState {
+  confirmScanDevices: boolean;
+  processing: boolean;
+}
+
 type EMSESPDevicesFormProps = RestFormProps<EMSESPDevices> & AuthenticatedContextProps & WithWidthProps;
 
-class EMSESPDevicesForm extends Component<EMSESPDevicesFormProps> {
+class EMSESPDevicesForm extends Component<EMSESPDevicesFormProps, EMSESPDevicesFormState> {
+
+  state: EMSESPDevicesFormState = {
+    confirmScanDevices: false,
+    processing: false
+  }
 
   noData = () => {
     return (this.props.data.devices.length === 0);
@@ -97,25 +109,76 @@ class EMSESPDevicesForm extends Component<EMSESPDevicesFormProps> {
     );
   }
 
+  renderScanDevicesDialog() {
+    return (
+      <Dialog
+        open={this.state.confirmScanDevices}
+        onClose={this.onScanDevicesRejected}
+      >
+        <DialogTitle>Confirm Scan Devices</DialogTitle>
+        <DialogContent dividers>
+          Are you sure you want to scan the EMS bus for all new devices?
+        </DialogContent>
+        <DialogActions>
+          <Button variant="contained" onClick={this.onScanDevicesRejected} color="secondary">
+            Cancel
+          </Button>
+          <Button startIcon={<RefreshIcon />} variant="contained" onClick={this.onScanDevicesConfirmed} disabled={this.state.processing} color="primary" autoFocus>
+            Start Scan
+          </Button>
+        </DialogActions>
+      </Dialog>
+    )
+  }
+
+  onScanDevices = () => {
+    this.setState({ confirmScanDevices: true });
+  }
+
+  onScanDevicesRejected = () => {
+    this.setState({ confirmScanDevices: false });
+  }
+
+  onScanDevicesConfirmed = () => {
+    this.setState({ processing: true });
+    redirectingAuthorizedFetch(SCANDEVICES_ENDPOINT, { method: 'POST' })
+      .then(response => {
+        if (response.status === 200) {
+          this.props.enqueueSnackbar("Device scan is starting...", { variant: 'info' });
+          this.setState({ processing: false, confirmScanDevices: false });
+        } else {
+          throw Error("Invalid status code: " + response.status);
+        }
+      })
+      .catch(error => {
+        this.props.enqueueSnackbar(error.message || "Problem with scan", { variant: 'error' });
+        this.setState({ processing: false, confirmScanDevices: false });
+      });
+  }
+
   render() {
     return (
       <Fragment>
         <List>{this.createListItems()}</List>
-        <FormActions>
-          <FormButton
-            startIcon={<RefreshIcon />}
-            variant="contained"
-            color="secondary"
-            onClick={this.props.loadData}
-          >
-            Refresh
-          </FormButton>
-        </FormActions>
+
+        <Box display="flex" flexWrap="wrap">
+          <Box flexGrow={1} padding={1}>
+            <FormButton startIcon={<RefreshIcon />} variant="contained" color="secondary" onClick={this.props.loadData}>
+              Refresh
+            </FormButton>
+          </Box>
+
+          <Box flexWrap="none" padding={1} whiteSpace="nowrap">
+            <FormButton startIcon={<RefreshIcon />} variant="contained" color="primary" onClick={this.onScanDevices}>
+              Scan Devices
+              </FormButton>
+          </Box>
+        </Box>
+        {this.renderScanDevicesDialog()}
       </Fragment>
     );
   }
+
 }
 
 export default withAuthenticatedContext(withWidth()(EMSESPDevicesForm));
-
-// export default withTheme(EMSESPDevicesForm);

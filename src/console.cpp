@@ -196,7 +196,7 @@ void EMSESPShell::add_console_commands() {
                               if (arguments.size() == 0) {
                                   EMSESP::send_read_request(EMSdevice::EMS_TYPE_UBADevices, EMSdevice::EMS_DEVICE_ID_BOILER);
                               } else {
-                                  shell.printfln(F("Performing a deep scan by pinging our device library..."));
+                                  shell.printfln(F("Performing a deep scan..."));
                                   std::vector<uint8_t> Device_Ids;
 
                                   Device_Ids.push_back(0x08); // Boilers - 0x08
