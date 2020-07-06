@@ -47,20 +47,6 @@ EMSESPShell::EMSESPShell()
 
 void EMSESPShell::started() {
     logger().log(LogLevel::INFO, LogFacility::CONSOLE, F("User session opened on console %s"), console_name().c_str());
-
-    // set console name
-    EMSESP::esp8266React.getWiFiSettingsService()->read([&](WiFiSettings & wifiSettings) { console_hostname_ = wifiSettings.hostname.c_str(); });
-
-    if (console_hostname_.empty()) {
-        console_hostname_.resize(16, '\0');
-
-
-#if defined(ESP8266)
-        snprintf_P(&console_hostname_[0], console_hostname_.capacity() + 1, PSTR("esp8266"));
-#else
-        snprintf_P(&console_hostname_[0], console_hostname_.capacity() + 1, PSTR("esp32"));
-#endif
-    }
 }
 
 void EMSESPShell::stopped() {
@@ -76,6 +62,7 @@ void EMSESPShell::stopped() {
 }
 
 // show welcome banner
+// this is one of the first functions called when the shell is started
 void EMSESPShell::display_banner() {
     println();
     printfln(F("┌──────────────────────────────────────────┐"));
@@ -85,6 +72,18 @@ void EMSESPShell::display_banner() {
     printfln(F("│ type %shelp%s to show available commands     │"), COLOR_UNDERLINE, COLOR_RESET);
     printfln(F("└──────────────────────────────────────────┘"));
     println();
+
+    // set console name
+    EMSESP::esp8266React.getWiFiSettingsService()->read([&](WiFiSettings & wifiSettings) { console_hostname_ = wifiSettings.hostname.c_str(); });
+
+    if (console_hostname_.empty()) {
+        console_hostname_.resize(16, '\0');
+#if defined(ESP8266)
+        snprintf_P(&console_hostname_[0], console_hostname_.capacity() + 1, PSTR("esp8266"));
+#else
+        snprintf_P(&console_hostname_[0], console_hostname_.capacity() + 1, PSTR("esp32"));
+#endif
+    }
 
     // load the list of commands
     add_console_commands();
