@@ -82,6 +82,10 @@ class EMSdevice {
         version_ = version;
     }
 
+    inline std::string version() const {
+        return version_;
+    }
+
     inline void brand(uint8_t brand) {
         brand_ = brand;
     }
@@ -92,6 +96,10 @@ class EMSdevice {
 
     inline void name(const std::string & name) {
         name_ = name;
+    }
+
+    inline std::string name() const {
+        return name_;
     }
 
     std::string    brand_to_string() const;
