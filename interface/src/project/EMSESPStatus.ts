@@ -1,12 +1,13 @@
 import { Theme } from '@material-ui/core';
 import { EMSESPStatus, busConnectionStatus } from './types';
 
-export const isConnected = ({ status }: EMSESPStatus) => status === busConnectionStatus.BUS_STATUS_CONNECTED;
+export const isConnected = ({ status }: EMSESPStatus) => status !== busConnectionStatus.BUS_STATUS_OFFLINE;
 
 export const busStatusHighlight = ({ status }: EMSESPStatus, theme: Theme) => {
+
   switch (status) {
     case busConnectionStatus.BUS_STATUS_TX_ERRORS:
-      return theme.palette.info.main;
+      return theme.palette.warning.main;
     case busConnectionStatus.BUS_STATUS_CONNECTED:
       return theme.palette.success.main;
     case busConnectionStatus.BUS_STATUS_OFFLINE:
@@ -30,6 +31,7 @@ export const busStatus = ({ status }: EMSESPStatus) => {
 }
 
 export const mqttStatusHighlight = ({ mqtt_fails }: EMSESPStatus, theme: Theme) => {
+
   if (mqtt_fails === 0)
     return theme.palette.success.main;
 

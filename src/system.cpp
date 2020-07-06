@@ -231,7 +231,9 @@ void System::start() {
     Mqtt::subscribe("cmd", std::bind(&System::mqtt_commands, this, _1));
 
 #ifndef EMSESP_FORCE_SERIAL
-    EMSuart::start(tx_mode_); // start UART
+    if (tx_mode_) {
+        EMSuart::start(tx_mode_); // start UART, if tx_mode is not 0
+    }
 #endif
 }
 

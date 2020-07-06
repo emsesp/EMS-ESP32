@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 
 import { CssBaseline } from '@material-ui/core';
 import { MuiThemeProvider, createMuiTheme, StylesProvider } from '@material-ui/core/styles';
-import { blueGrey, orange, red, green } from '@material-ui/core/colors';
+import { yellow, orange, red, green } from '@material-ui/core/colors';
 
 const theme = createMuiTheme({
   palette: {
@@ -14,7 +14,7 @@ const theme = createMuiTheme({
       main: '#3d5afe',
     },
     info: {
-      main: blueGrey[900]
+      main: yellow[200]
     },
     warning: {
       main: orange[500]
