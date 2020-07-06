@@ -1,11 +1,6 @@
 - It's slow on ESP8266 - probably due to heap
 - AP not showing correct wifi SSID
-- remove Serial.*s
+- remove Serial.print's 
 - add Boiler web page using web sockets
-- check Chrome Tab errors
-- check if we need to disabled UART during OTA
+- check if we need to disabled UART during OTA on an ESP8266 - need to tie into the service
 - fix Makefile for standalone
-
-handy git commands
-- git pull --tags -f
-- git pull upstream master
