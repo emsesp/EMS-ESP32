@@ -60,7 +60,7 @@ const SingleUpload: FC<SingleUploadProps> = ({ onDrop, onCancel, accept, uploadi
       }
       return "Uploading\u2026";
     }
-    return "Drop file here or click to browse";
+    return "Drop file or click here";
   }
 
   const renderProgress = (progress?: ProgressEvent) => (
