@@ -21,4 +21,7 @@ export interface APSettings {
   provision_mode: APProvisionMode;
   ssid: string;
   password: string;
+  local_ip: string;
+  gateway_ip: string;
+  subnet_mask: string;
 }
