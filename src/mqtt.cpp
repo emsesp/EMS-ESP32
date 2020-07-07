@@ -309,7 +309,7 @@ void Mqtt::queue_subscribe_message(const std::string & topic) {
     }
 
     auto message = std::make_shared<MqttMessage>(Operation::SUBSCRIBE, topic, "", false);
-    LOG_DEBUG(F("Adding a subscription for %s"), topic.c_str());
+    // LOG_DEBUG(F("Adding a subscription for %s"), topic.c_str());
 
     // if the queue is full, make room but removing the last one
     if (mqtt_messages_.size() >= maximum_mqtt_messages_) {

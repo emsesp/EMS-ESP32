@@ -34,7 +34,7 @@ void EMSESPStatusService::onStationModeDisconnected(WiFiEvent_t event, WiFiEvent
 }
 
 void EMSESPStatusService::onStationModeGotIP(WiFiEvent_t event, WiFiEventInfo_t info) {
-    EMSESP::logger().debug(F("WiFi Got IP. IP=%s, hostname=%s"), WiFi.localIP().toString().c_str(), WiFi.getHostname());
+    EMSESP::logger().debug(F("WiFi connected with IP=%s, hostname=%s"), WiFi.localIP().toString().c_str(), WiFi.getHostname());
 }
 #elif defined(ESP8266)
 void EMSESPStatusService::onStationModeConnected(const WiFiEventStationModeConnected & event) {
@@ -46,7 +46,7 @@ void EMSESPStatusService::onStationModeDisconnected(const WiFiEventStationModeDi
 }
 
 void EMSESPStatusService::onStationModeGotIP(const WiFiEventStationModeGotIP & event) {
-    EMSESP::logger().debug(F("WiFi Got IP. IP=%s, hostname=%s"), event.ip.toString().c_str(), WiFi.hostname().c_str());
+    EMSESP::logger().debug(F("WiFi connected with IP=%s, hostname=%s"), event.ip.toString().c_str(), WiFi.hostname().c_str());
 }
 #endif
 
