@@ -7,6 +7,7 @@ export const wifiStatusHighlight = ({ status }: WiFiStatus, theme: Theme) => {
   switch (status) {
     case WiFiConnectionStatus.WIFI_STATUS_IDLE:
     case WiFiConnectionStatus.WIFI_STATUS_DISCONNECTED:
+    case WiFiConnectionStatus.WIFI_STATUS_NO_SHIELD:
       return theme.palette.info.main;
     case WiFiConnectionStatus.WIFI_STATUS_CONNECTED:
       return theme.palette.success.main;
@@ -20,6 +21,8 @@ export const wifiStatusHighlight = ({ status }: WiFiStatus, theme: Theme) => {
 
 export const wifiStatus = ({ status }: WiFiStatus) => {
   switch (status) {
+    case WiFiConnectionStatus.WIFI_STATUS_NO_SHIELD:
+      return "Inactive";
     case WiFiConnectionStatus.WIFI_STATUS_IDLE:
       return "Idle";
     case WiFiConnectionStatus.WIFI_STATUS_NO_SSID_AVAIL:
