@@ -38,7 +38,7 @@ void EMSESPStatusService::onStationModeGotIP(WiFiEvent_t event, WiFiEventInfo_t 
 }
 #elif defined(ESP8266)
 void EMSESPStatusService::onStationModeConnected(const WiFiEventStationModeConnected & event) {
-    EMSESP::logger().debug(F("Wifi connected with SSID %s"), event.ssid);
+    EMSESP::logger().debug(F("Wifi connected with SSID %s"), event.ssid.c_str());
 }
 
 void EMSESPStatusService::onStationModeDisconnected(const WiFiEventStationModeDisconnected & event) {
