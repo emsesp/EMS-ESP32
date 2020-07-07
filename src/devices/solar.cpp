@@ -246,6 +246,9 @@ void Solar::process_ISM1StatusMessage(std::shared_ptr<const Telegram> telegram) 
     }
     telegram->read_bitvalue(pump_, 8, 0);      // Solar pump on (1) or off (0)
     telegram->read_value(pumpWorkMin_, 10, 3); // force to 3 bytes
+
+    telegram->read_bitvalue(tankHeated_, 9, 2); // issue #422
+    telegram->read_bitvalue(collectorOnOff_, 9, 0);
 }
 
 /*
