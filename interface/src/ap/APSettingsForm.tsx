@@ -4,14 +4,19 @@ import { TextValidator, ValidatorForm, SelectValidator } from 'react-material-ui
 import MenuItem from '@material-ui/core/MenuItem';
 import SaveIcon from '@material-ui/icons/Save';
 
-import {PasswordValidator, RestFormProps, FormActions, FormButton} from '../components';
+import { PasswordValidator, RestFormProps, FormActions, FormButton } from '../components';
 
 import { isAPEnabled } from './APModes';
 import { APSettings, APProvisionMode } from './types';
+import { isIP } from '../validators';
 
 type APSettingsFormProps = RestFormProps<APSettings>;
 
 class APSettingsForm extends React.Component<APSettingsFormProps> {
+
+  componentWillMount() {
+    ValidatorForm.addValidationRule('isIP', isIP);
+  }
 
   render() {
     const { data, handleValueChange, saveData, loadData } = this.props;
@@ -51,6 +56,39 @@ class APSettingsForm extends React.Component<APSettingsFormProps> {
               variant="outlined"
               value={data.password}
               onChange={handleValueChange('password')}
+              margin="normal"
+            />
+            <TextValidator
+              validators={['required', 'isIP']}
+              errorMessages={['Local IP is required', 'Must be an IP address']}
+              name="local_ip"
+              label="Local IP"
+              fullWidth
+              variant="outlined"
+              value={data.local_ip}
+              onChange={handleValueChange('local_ip')}
+              margin="normal"
+            />
+            <TextValidator
+              validators={['required', 'isIP']}
+              errorMessages={['Gateway IP is required', 'Must be an IP address']}
+              name="gateway_ip"
+              label="Gateway"
+              fullWidth
+              variant="outlined"
+              value={data.gateway_ip}
+              onChange={handleValueChange('gateway_ip')}
+              margin="normal"
+            />
+            <TextValidator
+              validators={['required', 'isIP']}
+              errorMessages={['Subnet mask is required', 'Must be an IP address']}
+              name="subnet_mask"
+              label="Subnet"
+              fullWidth
+              variant="outlined"
+              value={data.subnet_mask}
+              onChange={handleValueChange('subnet_mask')}
               margin="normal"
             />
           </Fragment>

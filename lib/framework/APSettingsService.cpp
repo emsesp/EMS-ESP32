@@ -45,10 +45,7 @@ void APSettingsService::manageAP() {
 
 void APSettingsService::startAP() {
   // Serial.println(F("Starting software access point"));
-  IPAddress localIP(192, 168, 4, 1);
-  IPAddress gateway(192, 168, 4, 1);
-  IPAddress subnet(255, 255, 255, 0);
-  WiFi.softAPConfig(localIP, gateway, subnet);
+  WiFi.softAPConfig(_state.localIP, _state.gatewayIP, _state.subnetMask);
   WiFi.softAP(_state.ssid.c_str(), _state.password.c_str());
   if (!_dnsServer) {
     IPAddress apIp = WiFi.softAPIP();
