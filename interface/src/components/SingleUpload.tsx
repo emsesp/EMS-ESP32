@@ -5,7 +5,6 @@ import { makeStyles, createStyles } from '@material-ui/styles';
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 import CancelIcon from '@material-ui/icons/Cancel';
 import { Theme, Box, Typography, LinearProgress, Button } from '@material-ui/core';
-import ErrorButton from './ErrorButton';
 
 interface SingleUploadStyleProps extends DropzoneState {
   uploading: boolean;
@@ -84,9 +83,9 @@ const SingleUpload: FC<SingleUploadProps> = ({ onDrop, onCancel, accept, uploadi
             <Box width="100%" p={2}>
               {renderProgress(progress)}
             </Box>
-            <ErrorButton startIcon={<CancelIcon />} variant="contained" color="primary" onClick={onCancel}>
+            <Button startIcon={<CancelIcon />} variant="contained" color="secondary" onClick={onCancel}>
               Cancel
-            </ErrorButton>
+            </Button>
           </Fragment>
         )}
       </Box>

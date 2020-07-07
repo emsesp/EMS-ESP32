@@ -84,11 +84,11 @@ export function restController<D, P extends RestControllerProps<D>>(endpointUrl:
           }
           throw Error("Invalid status code: " + response.status);
         }).then(json => {
-          this.props.enqueueSnackbar("Changes successfully applied.", { variant: 'success' });
+          this.props.enqueueSnackbar("Update successful.", { variant: 'success' });
           this.setState({ data: json, loading: false });
         }).catch(error => {
           const errorMessage = error.message || "Unknown error";
-          this.props.enqueueSnackbar("Problem saving: " + errorMessage, { variant: 'error' });
+          this.props.enqueueSnackbar("Problem updating: " + errorMessage, { variant: 'error' });
           this.setState({ data: undefined, loading: false, errorMessage });
         });
       }

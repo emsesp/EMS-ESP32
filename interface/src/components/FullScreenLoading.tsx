@@ -23,7 +23,7 @@ const FullScreenLoading = () => {
     <div className={classes.fullScreenLoading}>
       <CircularProgress className={classes.progress} size={100} />
       <Typography variant="h4">
-        Loading &hellip;
+        Loading&hellip;
       </Typography>
     </div>
   )

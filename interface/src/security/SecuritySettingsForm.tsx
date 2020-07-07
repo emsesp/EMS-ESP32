@@ -35,7 +35,7 @@ class SecuritySettingsForm extends React.Component<SecuritySettingsFormProps> {
         />
         <Box bgcolor="primary.main" color="primary.contrastText" p={2} mt={2} mb={2}>
           <Typography variant="body1">
-            If you modify the JWT Secret, all users will be logged out.
+            The JWT secret is used to sign authentication tokens. If you modify the JWT Secret, all users will be signed out.
           </Typography>
         </Box>
         <FormActions>

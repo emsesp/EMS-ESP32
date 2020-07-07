@@ -18,7 +18,7 @@
     "lodash": "^4.17.15",
     "mime-types": "^2.1.25",
     "moment": "^2.26.0",
-    "notistack": "^0.9.16",
+    "notistack": "^0.9.17",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-dropzone": "^11.0.1",

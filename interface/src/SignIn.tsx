@@ -11,7 +11,7 @@ import {PasswordValidator} from './components';
 import { PROJECT_NAME, SIGN_IN_ENDPOINT } from './api';
 
 const styles = (theme: Theme) => createStyles({
-  loginPage: {
+  signInPage: {
     display: "flex",
     height: "100vh",
     margin: "auto",
@@ -20,7 +20,7 @@ const styles = (theme: Theme) => createStyles({
     flexDirection: "column",
     maxWidth: theme.breakpoints.values.sm
   },
-  loginPanel: {
+  signInPanel: {
     textAlign: "center",
     padding: theme.spacing(2),
     paddingTop: "200px",
@@ -81,7 +81,7 @@ class SignIn extends Component<SignInProps, SignInState> {
         if (response.status === 200) {
           return response.json();
         } else if (response.status === 401) {
-          throw Error("Invalid login details.");
+          throw Error("Invalid credentials.");
         } else {
           throw Error("Invalid status code: " + response.status);
         }
@@ -100,8 +100,8 @@ class SignIn extends Component<SignInProps, SignInState> {
     const { username, password, processing } = this.state;
     const { classes } = this.props;
     return (
-      <div className={classes.loginPage}>
-        <Paper className={classes.loginPanel}>
+      <div className={classes.signInPage}>
+        <Paper className={classes.signInPanel}>
           <Typography variant="h4">{PROJECT_NAME}</Typography>
           <ValidatorForm onSubmit={this.onSubmit}>
             <TextValidator

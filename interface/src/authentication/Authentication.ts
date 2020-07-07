@@ -5,8 +5,8 @@ import { Features } from '../features/types';
 import { getDefaultRoute } from '../AppRouting';
 
 export const ACCESS_TOKEN = 'access_token';
-export const LOGIN_PATHNAME = 'loginPathname';
-export const LOGIN_SEARCH = 'loginSearch';
+export const SIGN_IN_PATHNAME = 'signInPathname';
+export const SIGN_IN_SEARCH = 'signInSearch';
 
 /**
  * Fallback to sessionStorage if localStorage is absent. WebView may not have local storage enabled.
@@ -17,23 +17,23 @@ export function getStorage() {
 
 export function storeLoginRedirect(location?: H.Location) {
   if (location) {
-    getStorage().setItem(LOGIN_PATHNAME, location.pathname);
-    getStorage().setItem(LOGIN_SEARCH, location.search);
+    getStorage().setItem(SIGN_IN_PATHNAME, location.pathname);
+    getStorage().setItem(SIGN_IN_SEARCH, location.search);
   }
 }
 
 export function clearLoginRedirect() {
-  getStorage().removeItem(LOGIN_PATHNAME);
-  getStorage().removeItem(LOGIN_SEARCH);
+  getStorage().removeItem(SIGN_IN_PATHNAME);
+  getStorage().removeItem(SIGN_IN_SEARCH);
 }
 
 export function fetchLoginRedirect(features: Features): H.LocationDescriptorObject {
-  const loginPathname = getStorage().getItem(LOGIN_PATHNAME);
-  const loginSearch = getStorage().getItem(LOGIN_SEARCH);
+  const signInPathname = getStorage().getItem(SIGN_IN_PATHNAME);
+  const signInSearch = getStorage().getItem(SIGN_IN_SEARCH);
   clearLoginRedirect();
   return {
-    pathname: loginPathname || getDefaultRoute(features),
-    search: (loginPathname && loginSearch) || undefined
+    pathname: signInPathname || getDefaultRoute(features),
+    search: (signInPathname && signInSearch) || undefined
   };
 }
 

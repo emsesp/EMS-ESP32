@@ -27,7 +27,7 @@ export class AuthenticatedRoute extends React.Component<AuthenticatedRouteProps>
         );
       }
       Authentication.storeLoginRedirect(location);
-      enqueueSnackbar("Please log in to continue.", { variant: 'info' });
+      enqueueSnackbar("Please sign in to continue.", { variant: 'info' });
       return (
         <Redirect to='/' />
       );
