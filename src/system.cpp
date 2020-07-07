@@ -381,63 +381,61 @@ void System::show_system(uuid::console::Shell & shell) {
     shell.printfln(F("Free mem:                 %d  %%"), free_mem());
 #endif
 
-    if (shell.has_flags(CommandFlags::ADMIN)) {
-        shell.println();
+    shell.println();
 
 #ifndef EMSESP_STANDALONE
 
-        switch (WiFi.status()) {
-        case WL_IDLE_STATUS:
-            shell.printfln(F("WiFi: idle"));
-            break;
+    switch (WiFi.status()) {
+    case WL_IDLE_STATUS:
+        shell.printfln(F("WiFi: idle"));
+        break;
 
-        case WL_NO_SSID_AVAIL:
-            shell.printfln(F("WiFi: network not found"));
-            break;
+    case WL_NO_SSID_AVAIL:
+        shell.printfln(F("WiFi: network not found"));
+        break;
 
-        case WL_SCAN_COMPLETED:
-            shell.printfln(F("WiFi: network scan complete"));
-            break;
+    case WL_SCAN_COMPLETED:
+        shell.printfln(F("WiFi: network scan complete"));
+        break;
 
-        case WL_CONNECTED: {
-            shell.printfln(F("WiFi: connected"));
-            shell.println();
+    case WL_CONNECTED: {
+        shell.printfln(F("WiFi: connected"));
+        shell.println();
 
-            shell.printfln(F("SSID: %s"), WiFi.SSID().c_str());
-            shell.printfln(F("BSSID: %s"), WiFi.BSSIDstr().c_str());
-            shell.printfln(F("RSSI: %d dBm (%d %%)"), WiFi.RSSI(), wifi_quality());
-            shell.println();
+        shell.printfln(F("SSID: %s"), WiFi.SSID().c_str());
+        shell.printfln(F("BSSID: %s"), WiFi.BSSIDstr().c_str());
+        shell.printfln(F("RSSI: %d dBm (%d %%)"), WiFi.RSSI(), wifi_quality());
+        shell.println();
 
-            shell.printfln(F("MAC address: %s"), WiFi.macAddress().c_str());
+        shell.printfln(F("MAC address: %s"), WiFi.macAddress().c_str());
 #if defined(ESP8266)
-            shell.printfln(F("Hostname: %s"), WiFi.hostname().c_str());
+        shell.printfln(F("Hostname: %s"), WiFi.hostname().c_str());
 #elif defined(ESP32)
-            shell.printfln(F("Hostname: %s"), WiFi.getHostname());
+        shell.printfln(F("Hostname: %s"), WiFi.getHostname());
 #endif
 
-            shell.println();
-            shell.printfln(F("IPv4 address: %s/%s"), uuid::printable_to_string(WiFi.localIP()).c_str(), uuid::printable_to_string(WiFi.subnetMask()).c_str());
-            shell.printfln(F("IPv4 gateway: %s"), uuid::printable_to_string(WiFi.gatewayIP()).c_str());
-            shell.printfln(F("IPv4 nameserver: %s"), uuid::printable_to_string(WiFi.dnsIP()).c_str());
-        } break;
+        shell.println();
+        shell.printfln(F("IPv4 address: %s/%s"), uuid::printable_to_string(WiFi.localIP()).c_str(), uuid::printable_to_string(WiFi.subnetMask()).c_str());
+        shell.printfln(F("IPv4 gateway: %s"), uuid::printable_to_string(WiFi.gatewayIP()).c_str());
+        shell.printfln(F("IPv4 nameserver: %s"), uuid::printable_to_string(WiFi.dnsIP()).c_str());
+    } break;
 
-        case WL_CONNECT_FAILED:
-            shell.printfln(F("WiFi: connection failed"));
-            break;
+    case WL_CONNECT_FAILED:
+        shell.printfln(F("WiFi: connection failed"));
+        break;
 
-        case WL_CONNECTION_LOST:
-            shell.printfln(F("WiFi: connection lost"));
-            break;
+    case WL_CONNECTION_LOST:
+        shell.printfln(F("WiFi: connection lost"));
+        break;
 
-        case WL_DISCONNECTED:
-            shell.printfln(F("WiFi: disconnected"));
-            break;
+    case WL_DISCONNECTED:
+        shell.printfln(F("WiFi: disconnected"));
+        break;
 
-        case WL_NO_SHIELD:
-        default:
-            shell.printfln(F("WiFi: unknown"));
-            break;
-        }
+    case WL_NO_SHIELD:
+    default:
+        shell.printfln(F("WiFi: unknown"));
+        break;
     }
 
 #endif
