@@ -153,6 +153,10 @@ class EMSESP {
     static EMSESPDevicesService     emsespDevicesService;
     static EMSESPScanDevicesService emsespScanDevicesService;
 
+    static uuid::log::Logger logger() {
+        return logger_;
+    }
+
   private:
     EMSESP() = delete;
 
