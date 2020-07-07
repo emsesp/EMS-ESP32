@@ -155,7 +155,7 @@ function EMSESPSettingsControllerForm(props: EMSESPSettingsControllerFormProps) 
                     />
                     <TextValidator
                         validators={['required', 'isNumber', 'minNumber:0', 'maxNumber:65535']}
-                        errorMessages={['Keep alive is required', "Must be a number", "Must be 0 or higher (0=off)", "Max value is 65535"]}
+                        errorMessages={['Syslog Mark is required', "Must be a number", "Must be 0 or higher (0=off)", "Max value is 65535"]}
                         name="syslog_mark_interval"
                         label="Syslog Mark Interval (seconds, 0=off)"
                         fullWidth

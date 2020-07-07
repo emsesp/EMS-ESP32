@@ -27,10 +27,9 @@ void EMSESPDevicesService::emsespDevicesService(AsyncWebServerRequest * request)
             deviceRoot["productid"] = emsdevice->product_id();
             deviceRoot["version"]   = emsdevice->version();
         }
-
-        response->setLength();
-        request->send(response);
     }
+    response->setLength();
+    request->send(response);
 }
 
 } // namespace emsesp

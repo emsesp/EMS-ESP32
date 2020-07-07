@@ -256,6 +256,9 @@ void Mqtt::start(AsyncMqttClient * mqttClient) {
 
 #ifndef EMSESP_STANDALONE
     mqttClient_->setWill(make_topic(will_topic_, "status"), 1, true, "offline"); // with qos 1, retain true
+    mqttClient_->onMessage([this](char * topic, char * payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) {
+        on_message(topic, payload, len);
+    });
 #endif
 }
 

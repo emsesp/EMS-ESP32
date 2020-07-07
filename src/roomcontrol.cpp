@@ -65,18 +65,17 @@ void Roomctrl::check(const uint8_t addr, const uint8_t * data) {
     if (hc_ > 3) {
         return;
     }
-    // no reply if the temperature is not set
-    if (remotetemp[hc_] == EMS_VALUE_SHORT_NOTSET) {
-        return;
-    }
     // reply to writes with write nack byte
     if (addr & 0x80) { // it's a write to us
         nack_write();  // we don't accept writes.
         return;
     }
-    // for now we only reply to version and remote temperature
+    // reads: for now we only reply to version and remote temperature
+    // empty message back if temperature not set or unknown message type
     if (data[2] == 0x02) {
         version(addr, data[0]);
+    } else if (remotetemp[hc_] == EMS_VALUE_SHORT_NOTSET) {
+        unknown(addr, data[0], data[2], data[3]);
     } else if (data[2] == 0xAF && data[3] == 0) {
         temperature(addr, data[0]);
     } else {
