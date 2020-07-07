@@ -56,12 +56,6 @@ void System::mqtt_commands(const char * message) {
         return;
     }
 
-    // restart EMS-ESP
-    if (strcmp(message, "restart") == 0) {
-        LOG_INFO(F("Restart command received"));
-        restart();
-    }
-
     if (doc["send"] != nullptr) {
         const char * data = doc["send"];
         EMSESP::send_raw_telegram(data);
