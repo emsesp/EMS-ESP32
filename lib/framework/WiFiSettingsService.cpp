@@ -64,7 +64,7 @@ void WiFiSettingsService::manageSTA() {
   }
   // Connect or reconnect as required
   if ((WiFi.getMode() & WIFI_STA) == 0) {
-    Serial.println(F("Connecting to WiFi."));
+    // Serial.println(F("Connecting to WiFi."));
     if (_state.staticIPConfig) {
       // configure for static IP
       WiFi.config(_state.localIP, _state.gatewayIP, _state.subnetMask, _state.dnsIP1, _state.dnsIP2);

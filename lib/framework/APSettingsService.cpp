@@ -44,7 +44,7 @@ void APSettingsService::manageAP() {
 }
 
 void APSettingsService::startAP() {
-  Serial.println(F("Starting software access point"));
+  // Serial.println(F("Starting software access point"));
   IPAddress localIP(192, 168, 4, 1);
   IPAddress gateway(192, 168, 4, 1);
   IPAddress subnet(255, 255, 255, 0);
@@ -52,8 +52,8 @@ void APSettingsService::startAP() {
   WiFi.softAP(_state.ssid.c_str(), _state.password.c_str());
   if (!_dnsServer) {
     IPAddress apIp = WiFi.softAPIP();
-    Serial.print(F("Starting captive portal on "));
-    Serial.println(apIp);
+    // Serial.print(F("Starting captive portal on "));
+    // Serial.println(apIp);
     _dnsServer = new DNSServer;
     _dnsServer->start(DNS_PORT, "*", apIp);
   }
@@ -61,12 +61,12 @@ void APSettingsService::startAP() {
 
 void APSettingsService::stopAP() {
   if (_dnsServer) {
-    Serial.println(F("Stopping captive portal"));
+    // Serial.println(F("Stopping captive portal"));
     _dnsServer->stop();
     delete _dnsServer;
     _dnsServer = nullptr;
   }
-  Serial.println(F("Stopping software access point"));
+  // Serial.println(F("Stopping software access point"));
   WiFi.softAPdisconnect(true);
 }
 

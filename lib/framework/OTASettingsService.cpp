@@ -34,10 +34,11 @@ void OTASettingsService::configureArduinoOTA() {
     _arduinoOTA = nullptr;
   }
   if (_state.enabled) {
-    Serial.println(F("Starting OTA Update Service..."));
+    // Serial.println(F("Starting OTA Update Service..."));
     _arduinoOTA = new ArduinoOTAClass;
     _arduinoOTA->setPort(_state.port);
     _arduinoOTA->setPassword(_state.password.c_str());
+    /*
     _arduinoOTA->onStart([]() { Serial.println(F("Starting")); });
     _arduinoOTA->onEnd([]() { Serial.println(F("\r\nEnd")); });
     _arduinoOTA->onProgress([](unsigned int progress, unsigned int total) {
@@ -56,6 +57,7 @@ void OTASettingsService::configureArduinoOTA() {
       else if (error == OTA_END_ERROR)
         Serial.println(F("End Failed"));
     });
+    */
     _arduinoOTA->begin();
   }
 }
