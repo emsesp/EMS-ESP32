@@ -108,6 +108,39 @@ thermostat
 ### **Things to tidy up in code later**
 
 - Replace vectors of class objects with shared pointers and use emplace_back since it instantiates during construction. It may have a performance gain.
-- Add real unit tests using platformio's test bed (https://docs.platformio.org/en/latest/plus/pio-remote.html)
-- See if it's easier to use timers instead of millis() based timers, using https://github.com/esp8266/Arduino/blob/master/libraries/esp8266/examples/BlinkPolledTimeout/BlinkPolledTimeout.ino
+- Add real unit tests using platformio's [pio-remote](https://docs.platformio.org/en/latest/plus/pio-remote.html) test bed.
+- See if it's easier to use timers instead of millis() based timers, using [polledTimeout](https://github.com/esp8266/Arduino/blob/master/libraries/esp8266/examples/BlinkPolledTimeout/BlinkPolledTimeout.ino).
 
+### **Customizing the Web UI**
+
+The Web is based off Rick's awesome [esp8266-react](https://github.com/rjwats/esp8266-react/) framework. These are the files that are modified:
+
+```
+interface/
+  .env (project name and project path to ems-esp)
+  .env.development (CORS URL)
+ 
+interface/public/
+  app/manifest.json (ems-esp name)
+  index.html (ems-esp name)
+  app/icon.png (256x256 PNG)
+  favicon.ico 
+
+interface/src/
+  CustomMuiTheme.tsx (colors for dark mode)
+
+interface/src/project/
+  ProjectRouting.tsx (removed demo, renamed DemoProject to EMSESP)
+  DemoProject.tsx (remove /demo/ and changed title, renamed to EMSESP.tsx)
+  ProjectMenu.tsx (title)
+  DemoInformation.tsx (removed file)
+  types.ts (add variables)
+ ```
+
+ UI customizations:
+
+  icons: https://material-ui.com/components/material-icons/
+
+  colors: https://material-ui.com/customization/color/
+
+  tables: https://material-ui.com/components/tables/#dense-table
