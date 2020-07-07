@@ -144,3 +144,12 @@ interface/src/project/
   colors: https://material-ui.com/customization/color/
 
   tables: https://material-ui.com/components/tables/#dense-table
+
+Files changed in Framework:
+
+SystemStatus.h : added #include <LittleFS.h>
+SystemStatus.cpp : added LittleFS.info(fs_info); 
+Commented out all Serial.print*
+features.ini: -D FT_NTP=0
+customized platformio.ini
+customized factory_settings.ini with ems-esp-neo as password and ems-esp everywhere else
