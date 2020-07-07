@@ -30,3 +30,17 @@ export interface EMSESPStatus {
   uptime: string;
   free_mem: number;
 }
+
+export interface Device {
+  type: string;
+  brand: string;
+  name: string;
+  deviceid: number;
+  productid: number;
+  version: string;
+}
+
+export interface EMSESPDevices {
+  devices: Device[];
+}
+

@@ -12,7 +12,7 @@ import {
   List,
   ListItem,
   ListItemAvatar,
-  ListItemText,
+  ListItemText
 } from "@material-ui/core";
 
 import BuildIcon from "@material-ui/icons/Build";
@@ -81,7 +81,7 @@ class EMSESPStatusForm extends Component<EMSESPStatusFormProps> {
             </HighlightAvatar>
           </ListItemAvatar>
           <ListItemText
-            primary="MQTT Publish failures"
+            primary="MQTT Publish Errors"
             secondary={data.mqtt_fails}
           />
         </ListItem>
@@ -125,7 +125,7 @@ class EMSESPStatusForm extends Component<EMSESPStatusFormProps> {
                 </TableRow>
                 <TableRow>
                   <TableCell component="th" scope="row">
-                    (Tx) Send failures
+                    (Tx) Send Errors
                   </TableCell>
                   <TableCell align="center">{data.tx_errors}</TableCell>
                 </TableRow>

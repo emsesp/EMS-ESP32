@@ -239,16 +239,18 @@ void Solar::process_SM100Energy(std::shared_ptr<const Telegram> telegram) {
 void Solar::process_ISM1StatusMessage(std::shared_ptr<const Telegram> telegram) {
     telegram->read_value(collectorTemp_, 4); // Collector Temperature
     telegram->read_value(bottomTemp_, 6);    // Temperature Bottom of Solar Boiler
+
     uint16_t Wh = 0xFFFF;
     telegram->read_value(Wh, 2); // Solar Energy produced in last hour only ushort, is not * 10
     if (Wh != 0xFFFF) {
         energyLastHour_ = Wh * 10; // set to *10
     }
+
     telegram->read_bitvalue(pump_, 8, 0);      // Solar pump on (1) or off (0)
     telegram->read_value(pumpWorkMin_, 10, 3); // force to 3 bytes
 
-    telegram->read_bitvalue(tankHeated_, 9, 2); // issue #422
-    telegram->read_bitvalue(collectorOnOff_, 9, 0);
+    telegram->read_bitvalue(collectorOnOff_, 9, 0); // collector on/off
+    telegram->read_bitvalue(tankHeated_, 9, 2);     // tank full
 }
 
 /*

@@ -9,6 +9,7 @@ import { AuthenticatedRoute } from '../authentication';
 
 import EMSESPSettingsController from './EMSESPSettingsController';
 import EMSESPStatusController from './EMSESPStatusController';
+import EMSESPDevicesController from './EMSESPDevicesController';
 
 class EMSESP extends Component<RouteComponentProps> {
 
@@ -21,10 +22,12 @@ class EMSESP extends Component<RouteComponentProps> {
       <MenuAppBar sectionTitle="EMS-ESP">
         <Tabs value={this.props.match.url} onChange={this.handleTabChange} variant="fullWidth">
           <Tab value={`/${PROJECT_PATH}/status`} label="EMS-ESP Status" />
+          <Tab value={`/${PROJECT_PATH}/devices`} label="EMS Devices" />
           <Tab value={`/${PROJECT_PATH}/settings`} label="EMS-ESP Settings" />
         </Tabs>
         <Switch>
           <AuthenticatedRoute exact path={`/${PROJECT_PATH}/status`} component={EMSESPStatusController} />
+          <AuthenticatedRoute exact path={`/${PROJECT_PATH}/devices`} component={EMSESPDevicesController} />
           <AuthenticatedRoute exact path={`/${PROJECT_PATH}/settings`} component={EMSESPSettingsController} />
           <Redirect to={`/${PROJECT_PATH}/status`} />
         </Switch>

@@ -1,6 +1,7 @@
 #include "EMSESPStatusService.h"
 #include "emsesp.h"
 #include "mqtt.h"
+#include "version.h"
 
 namespace emsesp {
 

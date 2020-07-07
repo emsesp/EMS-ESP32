@@ -55,7 +55,7 @@ function EMSESPSettingsControllerForm(props: EMSESPSettingsControllerFormProps) 
                 validators={['required', 'isNumber', 'minNumber:0', 'maxNumber:255']}
                 errorMessages={['TX mode is required', "Must be a number", "Must be 0 or higher", "Max value is 255"]}
                 name="tx_mode"
-                label="Tx mode (0=off)"
+                label="Tx Mode (0=off)"
                 fullWidth
                 variant="outlined"
                 value={data.tx_mode}
@@ -71,10 +71,10 @@ function EMSESPSettingsControllerForm(props: EMSESPSettingsControllerFormProps) 
                         value="system_heartbeat"
                     />
                 }
-                label="MQTT heartbeat"
+                label="MQTT Heartbeat"
             />
             <SelectValidator name="mqtt_format"
-                label="MQTT format"
+                label="MQTT Format"
                 value={data.mqtt_format}
                 fullWidth
                 variant="outlined"
@@ -100,7 +100,7 @@ function EMSESPSettingsControllerForm(props: EMSESPSettingsControllerFormProps) 
                 validators={['required', 'isNumber', 'minNumber:1', 'maxNumber:65535']}
                 errorMessages={['Keep alive is required', "Must be a number", "Must be greater than 0", "Max value is 65535"]}
                 name="publish_time"
-                label="MQTT Publish time (seconds)"
+                label="MQTT Publish Time (seconds)"
                 fullWidth
                 variant="outlined"
                 value={data.publish_time}
@@ -129,7 +129,7 @@ function EMSESPSettingsControllerForm(props: EMSESPSettingsControllerFormProps) 
                 label="Shower Alert"
             />
             <SelectValidator name="syslog_level"
-                label="Syslog log level"
+                label="Syslog Log Level"
                 value={data.syslog_level}
                 fullWidth
                 variant="outlined"
@@ -155,9 +155,9 @@ function EMSESPSettingsControllerForm(props: EMSESPSettingsControllerFormProps) 
                     />
                     <TextValidator
                         validators={['required', 'isNumber', 'minNumber:0', 'maxNumber:65535']}
-                        errorMessages={['Mark intervall is required', "Must be a number", "0 means off", "Max value is 65535"]}
+                        errorMessages={['Keep alive is required', "Must be a number", "Must be 0 or higher (0=off)", "Max value is 65535"]}
                         name="syslog_mark_interval"
-                        label="Syslog mark interval (seconds)"
+                        label="Syslog Mark Interval (seconds, 0=off)"
                         fullWidth
                         variant="outlined"
                         value={data.syslog_mark_interval}

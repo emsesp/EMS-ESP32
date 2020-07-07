@@ -38,6 +38,10 @@ EMSESPSettingsService EMSESP::emsespSettingsService = EMSESPSettingsService(&web
 EMSESPStatusService EMSESP::emsespStatusService =
     EMSESPStatusService(&webServer, EMSESP::esp8266React.getSecurityManager(), EMSESP::esp8266React.getMqttClient());
 
+EMSESPDevicesService EMSESP::emsespDevicesService = EMSESPDevicesService(&webServer, EMSESP::esp8266React.getSecurityManager());
+
+EMSESPScanDevicesService EMSESP::emsespScanDevicesService = EMSESPScanDevicesService(&webServer, EMSESP::esp8266React.getSecurityManager());
+
 std::vector<std::unique_ptr<EMSdevice>>    EMSESP::emsdevices;      // array of all the detected EMS devices
 std::vector<emsesp::EMSESP::Device_record> EMSESP::device_library_; // libary of all our known EMS devices so far
 
@@ -60,7 +64,7 @@ bool     EMSESP::tap_water_active_         = false;                            /
 uint32_t EMSESP::last_fetch_               = 0;
 
 // for a specific EMS device go and request data values
-// or if device_id is 0 it will fetch from all known devices
+// or if device_id is 0 it will fetch from all our known and active devices
 void EMSESP::fetch_device_values(const uint8_t device_id) {
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice) {
@@ -103,13 +107,16 @@ void EMSESP::watch_id(uint16_t watch_id) {
     }
 }
 
+// change the tx_mode
+// resets all counters and bumps the UART
 void EMSESP::reset_tx(uint8_t const tx_mode) {
     txservice_.telegram_read_count(0);
     txservice_.telegram_write_count(0);
     txservice_.telegram_fail_count(0);
     if (tx_mode) {
         EMSuart::stop();
-        EMSuart::start(tx_mode); // reset the UART
+        EMSuart::start(tx_mode);
+        EMSESP::fetch_device_values();
     }
 }
 
