@@ -14,13 +14,23 @@ namespace emsesp {
 
 class EMSESPStatusService {
   public:
-    EMSESPStatusService(AsyncWebServer * server, SecurityManager * securityManager, AsyncMqttClient * mqttClient);
+    EMSESPStatusService(AsyncWebServer * server, SecurityManager * securityManager);
 
   private:
-    void              emsespStatusService(AsyncWebServerRequest * request);
-    AsyncMqttClient * _mqttClient;
+    void emsespStatusService(AsyncWebServerRequest * request);
 
-    void init_mqtt();
+#ifdef ESP32
+    static void onStationModeConnected(WiFiEvent_t event, WiFiEventInfo_t info);
+    static void onStationModeDisconnected(WiFiEvent_t event, WiFiEventInfo_t info);
+    static void onStationModeGotIP(WiFiEvent_t event, WiFiEventInfo_t info);
+#elif defined(ESP8266)
+    WiFiEventHandler _onStationModeConnectedHandler;
+    WiFiEventHandler _onStationModeDisconnectedHandler;
+    WiFiEventHandler _onStationModeGotIPHandler;
+    static void      onStationModeConnected(const WiFiEventStationModeConnected & event);
+    static void      onStationModeDisconnected(const WiFiEventStationModeDisconnected & event);
+    static void      onStationModeGotIP(const WiFiEventStationModeGotIP & event);
+#endif
 };
 
 } // namespace emsesp

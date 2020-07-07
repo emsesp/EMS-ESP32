@@ -35,8 +35,7 @@ ESP8266React          EMSESP::esp8266React(&webServer, &LittleFS);
 EMSESPSettingsService EMSESP::emsespSettingsService = EMSESPSettingsService(&webServer, &LittleFS, EMSESP::esp8266React.getSecurityManager());
 #endif
 
-EMSESPStatusService EMSESP::emsespStatusService =
-    EMSESPStatusService(&webServer, EMSESP::esp8266React.getSecurityManager(), EMSESP::esp8266React.getMqttClient());
+EMSESPStatusService EMSESP::emsespStatusService = EMSESPStatusService(&webServer, EMSESP::esp8266React.getSecurityManager());
 
 EMSESPDevicesService EMSESP::emsespDevicesService = EMSESPDevicesService(&webServer, EMSESP::esp8266React.getSecurityManager());
 
