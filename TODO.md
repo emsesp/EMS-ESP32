@@ -1,6 +1,4 @@
-- It's slow on ESP8266 - probably due to heap
-- AP not showing correct wifi SSID
-- remove Serial.print's 
-- add Boiler web page using web sockets
+- Test that AP is showing correct wifi SSID
+- change EMS Devices Web page to use web sockets so data is instant
 - check if we need to disabled UART during OTA on an ESP8266 - need to tie into the service
 - fix Makefile for standalone
