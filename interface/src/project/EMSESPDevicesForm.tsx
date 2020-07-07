@@ -23,7 +23,7 @@ import {
   FormButton,
 } from "../components";
 
-import { EMSESPDevices, Device } from "./types";
+import { EMSESPDevices, Device } from "./EMSESPtypes";
 
 import { ENDPOINT_ROOT } from '../api';
 export const SCANDEVICES_ENDPOINT = ENDPOINT_ROOT + "scanDevices";

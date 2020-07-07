@@ -10,7 +10,7 @@ import { restController, RestControllerProps, RestFormLoader, RestFormProps, For
 
 import { isIP, isHostname, or } from '../validators';
 
-import { EMSESPSettings } from './types';
+import { EMSESPSettings } from './EMSESPtypes';
 
 export const EMSESP_SETTINGS_ENDPOINT = ENDPOINT_ROOT + "emsespSettings";
 

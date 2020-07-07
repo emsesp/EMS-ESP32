@@ -1,5 +1,5 @@
 import { Theme } from '@material-ui/core';
-import { EMSESPStatus, busConnectionStatus } from './types';
+import { EMSESPStatus, busConnectionStatus } from './EMSESPtypes';
 
 export const isConnected = ({ status }: EMSESPStatus) => status !== busConnectionStatus.BUS_STATUS_OFFLINE;
 

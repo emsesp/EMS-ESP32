@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import { restController, RestControllerProps, RestFormLoader, SectionContent } from '../components';
 import { ENDPOINT_ROOT } from '../api';
 import EMSESPStatusForm from './EMSESPStatusForm';
-import { EMSESPStatus } from './types';
+import { EMSESPStatus } from './EMSESPtypes';
 
 export const EMSESP_STATUS_ENDPOINT = ENDPOINT_ROOT + "emsespStatus";
 

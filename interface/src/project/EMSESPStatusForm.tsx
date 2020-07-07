@@ -35,7 +35,7 @@ import {
   mqttStatusHighlight,
 } from "./EMSESPStatus";
 
-import { EMSESPStatus } from "./types";
+import { EMSESPStatus } from "./EMSESPtypes";
 
 type EMSESPStatusFormProps = RestFormProps<EMSESPStatus> & WithTheme;
 
