@@ -205,11 +205,6 @@ void RxService::add(uint8_t * data, uint8_t length) {
         message_length = length - 6 - shift;
     }
 
-    // if we don't have a type_id or empty data block, exit
-    if ((type_id == 0) || (message_length == 0)) {
-        return;
-    }
-
     // if we're watching and "raw" print out actual telegram as bytes to the console
     if (EMSESP::watch() == EMSESP::Watch::WATCH_RAW) {
         uint16_t trace_watch_id = EMSESP::watch_id();
@@ -222,6 +217,11 @@ void RxService::add(uint8_t * data, uint8_t length) {
     LOG_DEBUG(F("[DEBUG] New Rx [#%d] telegram, message length %d"), rx_telegram_id_, message_length);
 #endif
 
+    // if we don't have a type_id or empty data block, exit
+    if ((type_id == 0) || (message_length == 0)) {
+        return;
+    }
+
     // create the telegram
     auto telegram = std::make_shared<Telegram>(Telegram::Operation::RX, src, dest, type_id, offset, message_data, message_length);
 
@@ -232,7 +232,6 @@ void RxService::add(uint8_t * data, uint8_t length) {
 
     rx_telegrams_.emplace_back(rx_telegram_id_++, std::move(telegram)); // add to queue
 }
-
 
 //
 // Tx CODE starts here...
