@@ -152,6 +152,27 @@ void System::restart() {
 #endif
 }
 
+// format fs
+// format the FS. Wipes everything.
+void System::format(uuid::console::Shell & shell) {
+    auto msg = F("Resetting all settings to defaults");
+    shell.logger().warning(msg);
+    shell.flush();
+
+#ifndef EMSESP_STANDALONE
+    EMSuart::stop();
+
+#if defined(ESP8266)
+    LittleFS.format();
+#elif defined(ESP32)
+    SPIFFS.format();
+#endif
+
+    System::restart();
+
+#endif
+}
+
 // return free heap mem as a percentage
 uint8_t System::free_mem() {
 #ifndef EMSESP_STANDALONE
@@ -442,6 +463,23 @@ void System::console_commands(Shell & shell, unsigned int context) {
                                        flash_string_vector{F_(restart)},
                                        [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments __attribute__((unused))) {
                                            restart();
+                                       });
+
+    EMSESPShell::commands->add_command(ShellContext::SYSTEM,
+                                       CommandFlags::ADMIN,
+                                       flash_string_vector{F_(format)},
+                                       [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
+                                           shell.enter_password(F_(password_prompt), [=](Shell & shell, bool completed, const std::string & password) {
+                                               if (completed) {
+                                                   EMSESP::esp8266React.getSecuritySettingsService()->read([&](SecuritySettings & securitySettings) {
+                                                       if (securitySettings.jwtSecret.equals(password.c_str())) {
+                                                           format(shell);
+                                                       } else {
+                                                           shell.println(F("incorrect password"));
+                                                       }
+                                                   });
+                                               }
+                                           });
                                        });
 
     EMSESPShell::commands->add_command(ShellContext::SYSTEM,

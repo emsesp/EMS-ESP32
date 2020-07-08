@@ -43,6 +43,7 @@ class System {
     void loop();
 
     static void    restart();
+    static void    format(uuid::console::Shell & shell);
     static uint8_t free_mem();
     void           syslog_init();
     void           set_heartbeat(bool system_heartbeat);
