@@ -1,4 +1,5 @@
 import React, { Component, Fragment } from "react";
+import { withStyles, Theme, createStyles } from '@material-ui/core/styles';
 
 import {
   Table,
@@ -6,7 +7,7 @@ import {
   TableCell,
   TableHead,
   TableRow,
-  List,
+  TableContainer,
   withWidth,
   WithWidthProps,
   isWidthDown,
@@ -27,6 +28,18 @@ import { EMSESPDevices, Device } from "./EMSESPtypes";
 
 import { ENDPOINT_ROOT } from '../api';
 export const SCANDEVICES_ENDPOINT = ENDPOINT_ROOT + "scanDevices";
+
+const StyledTableCell = withStyles((theme: Theme) =>
+  createStyles({
+    head: {
+      backgroundColor: theme.palette.common.black,
+      color: theme.palette.common.white,
+    },
+    body: {
+      fontSize: 14,
+    },
+  }),
+)(TableCell);
 
 function compareDevices(a: Device, b: Device) {
   if (a.type < b.type) {
@@ -56,24 +69,24 @@ class EMSESPDevicesForm extends Component<EMSESPDevicesFormProps, EMSESPDevicesF
     return (this.props.data.devices.length === 0);
   };
 
-  createListItems() {
+  createTableItems() {
     const { width, data } = this.props;
     return (
-      <Fragment>
+      <TableContainer>
         <Table size="small" padding={isWidthDown('xs', width!) ? "none" : "default"}>
           <TableHead>
             <TableRow>
-              <TableCell>Type</TableCell>
-              <TableCell align="center">Brand</TableCell>
-              <TableCell align="center">Name</TableCell>
-              <TableCell align="center">Device ID</TableCell>
-              <TableCell align="center">Product ID</TableCell>
-              <TableCell align="center">Version</TableCell>
+              <StyledTableCell>Type</StyledTableCell>
+              <StyledTableCell align="center">Brand</StyledTableCell>
+              <StyledTableCell align="center">Model</StyledTableCell>
+              <StyledTableCell align="center">Device ID</StyledTableCell>
+              <StyledTableCell align="center">Product ID</StyledTableCell>
+              <StyledTableCell align="center">Version</StyledTableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {data.devices.sort(compareDevices).map(device => (
-              <TableRow key={device.type}>
+              <TableRow hover key={device.type}>
                 <TableCell component="th" scope="row">
                   {device.type}
                 </TableCell>
@@ -105,7 +118,7 @@ class EMSESPDevicesForm extends Component<EMSESPDevicesFormProps, EMSESPDevicesF
             </Box>
           )
         }
-      </Fragment >
+      </TableContainer>
     );
   }
 
@@ -117,7 +130,7 @@ class EMSESPDevicesForm extends Component<EMSESPDevicesFormProps, EMSESPDevicesF
       >
         <DialogTitle>Confirm Scan Devices</DialogTitle>
         <DialogContent dividers>
-          Are you sure you want to scan the EMS bus for all new devices?
+          Are you sure you want to initiate a scan on the EMS bus for all new devices?
         </DialogContent>
         <DialogActions>
           <Button variant="contained" onClick={this.onScanDevicesRejected} color="secondary">
@@ -159,7 +172,7 @@ class EMSESPDevicesForm extends Component<EMSESPDevicesFormProps, EMSESPDevicesF
   render() {
     return (
       <Fragment>
-        <List>{this.createListItems()}</List>
+        {this.createTableItems()}
 
         <Box display="flex" flexWrap="wrap">
           <Box flexGrow={1} padding={1}>
