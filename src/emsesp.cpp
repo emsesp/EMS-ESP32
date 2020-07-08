@@ -139,7 +139,7 @@ uint8_t EMSESP::bus_status() {
     }
 
     // Tx Failure rate > 5%
-    if (((txservice_.telegram_fail_count() * 100) / total_sent) >= 5) {
+    if (((txservice_.telegram_fail_count() * 100) / total_sent) > 5) {
         return BUS_STATUS_TX_ERRORS;
     }
 

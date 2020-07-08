@@ -73,47 +73,49 @@ class EMSESPDevicesForm extends Component<EMSESPDevicesFormProps, EMSESPDevicesF
     const { width, data } = this.props;
     return (
       <TableContainer>
-        <Table size="small" padding={isWidthDown('xs', width!) ? "none" : "default"}>
-          <TableHead>
-            <TableRow>
-              <StyledTableCell>Type</StyledTableCell>
-              <StyledTableCell align="center">Brand</StyledTableCell>
-              <StyledTableCell align="center">Model</StyledTableCell>
-              <StyledTableCell align="center">Device ID</StyledTableCell>
-              <StyledTableCell align="center">Product ID</StyledTableCell>
-              <StyledTableCell align="center">Version</StyledTableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {data.devices.sort(compareDevices).map(device => (
-              <TableRow hover key={device.type}>
-                <TableCell component="th" scope="row">
-                  {device.type}
-                </TableCell>
-                <TableCell align="center">
-                  {device.brand}
-                </TableCell>
-                <TableCell align="center">
-                  {device.name}
-                </TableCell>
-                <TableCell align="center">
-                  0x{('00' + device.deviceid.toString(16).toUpperCase()).slice(-2)}
-                </TableCell>
-                <TableCell align="center">
-                  {device.productid}
-                </TableCell>
-                <TableCell align="center">
-                  {device.version}
-                </TableCell>
+        {!this.noData() && (
+          <Table size="small" padding={isWidthDown('xs', width!) ? "none" : "default"}>
+            <TableHead>
+              <TableRow>
+                <StyledTableCell>Type</StyledTableCell>
+                <StyledTableCell align="center">Brand</StyledTableCell>
+                <StyledTableCell align="center">Model</StyledTableCell>
+                <StyledTableCell align="center">Device ID</StyledTableCell>
+                <StyledTableCell align="center">Product ID</StyledTableCell>
+                <StyledTableCell align="center">Version</StyledTableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHead>
+            <TableBody>
+              {data.devices.sort(compareDevices).map(device => (
+                <TableRow hover key={device.type}>
+                  <TableCell component="th" scope="row">
+                    {device.type}
+                  </TableCell>
+                  <TableCell align="center">
+                    {device.brand}
+                  </TableCell>
+                  <TableCell align="center">
+                    {device.name}
+                  </TableCell>
+                  <TableCell align="center">
+                    0x{('00' + device.deviceid.toString(16).toUpperCase()).slice(-2)}
+                  </TableCell>
+                  <TableCell align="center">
+                    {device.productid}
+                  </TableCell>
+                  <TableCell align="center">
+                    {device.version}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
         {this.noData() &&
           (
             <Box bgcolor="error.main" color="error.contrastText" p={2} mt={2} mb={2}>
               <Typography variant="body1">
-                No EMS devices found.
+                No EMS devices found. Check connection and for Tx errors. Try forcing a scan.
               </Typography>
             </Box>
           )

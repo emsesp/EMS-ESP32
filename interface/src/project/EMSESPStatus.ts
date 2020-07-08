@@ -22,7 +22,7 @@ export const busStatus = ({ status }: EMSESPStatus) => {
     case busConnectionStatus.BUS_STATUS_CONNECTED:
       return "Connected";
     case busConnectionStatus.BUS_STATUS_TX_ERRORS:
-      return "Tx not stable";
+      return "Tx Errors";
     case busConnectionStatus.BUS_STATUS_OFFLINE:
       return "Disconnected";
     default:
