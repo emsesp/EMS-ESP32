@@ -122,7 +122,7 @@ class MqttSettingsService : public StatefulService<MqttSettings> {
   FSPersistence<MqttSettings> _fsPersistence;
 
   // Pointers to hold retained copies of the mqtt client connection strings.
-  // This is required as AsyncMqttClient holds refrences to the supplied connection strings.
+  // This is required as AsyncMqttClient holds references to the supplied connection strings.
   char* _retainedHost;
   char* _retainedClientId;
   char* _retainedUsername;
