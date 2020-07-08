@@ -129,6 +129,8 @@ interface/public/
 interface/src/
   CustomMuiTheme.tsx (colors for dark mode)
 
+interface/src/wifi/WifiSettingsController.tsx (rename esp8266-react)
+
 interface/src/project/
   ProjectRouting.tsx (removed demo, renamed DemoProject to EMSESP)
   DemoProject.tsx (remove /demo/ and changed title, renamed to EMSESP.tsx)
