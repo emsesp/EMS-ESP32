@@ -21,7 +21,7 @@
 #endif
 
 #ifndef FACTORY_AP_SSID
-#define FACTORY_AP_SSID "ESP8266-React"
+#define FACTORY_AP_SSID "ems-esp"
 #endif
 
 #ifndef FACTORY_AP_PASSWORD
