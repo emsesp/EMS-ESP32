@@ -308,7 +308,7 @@ uint16_t ICACHE_FLASH_ATTR EMSuart::transmit(uint8_t * buf, uint8_t len) {
     USC0(EMSUART_UART) &= ~(1 << UCBRK);
     sending_ = true;
 
-    // all at once after a inititial timer delay
+    // all at once after a initial timer delay
     if (tx_mode_ > 50) {
         for (uint8_t i = 0; i < len; i++) {
             emsTxBuf[i] = buf[i];
@@ -327,7 +327,7 @@ uint16_t ICACHE_FLASH_ATTR EMSuart::transmit(uint8_t * buf, uint8_t len) {
         timer1_write(emsTxWait);
         return EMS_TX_STATUS_OK;
     }
-    // fixed dealy before sending
+    // fixed delay before sending
     if (tx_mode_ == 5) {
         delayMicroseconds(3000);
         for (uint8_t i = 0; i < len; i++) {
