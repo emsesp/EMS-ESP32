@@ -8,6 +8,6 @@ RestartService::RestartService(AsyncWebServer* server, SecurityManager* security
 }
 
 void RestartService::restart(AsyncWebServerRequest* request) {
-  request->onDisconnect([]() { RestartService::restartNow(); });
+  request->onDisconnect(RestartService::restartNow);
   request->send(200);
 }
