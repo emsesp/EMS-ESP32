@@ -750,7 +750,10 @@ void EMSESP::loop() {
         fetch_device_values();
     }
 
+#if defined(ESP32)
     delay(1);
+#endif
+
 }
 
 } // namespace emsesp
