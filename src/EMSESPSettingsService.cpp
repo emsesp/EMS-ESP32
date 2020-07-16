@@ -9,61 +9,35 @@ EMSESPSettingsService::EMSESPSettingsService(AsyncWebServer * server, FS * fs, S
 }
 
 void EMSESPSettings::read(EMSESPSettings & settings, JsonObject & root) {
-    root["tx_mode"]              = settings.tx_mode;
-    root["ems_bus_id"]           = settings.ems_bus_id;
-    root["system_heartbeat"]     = settings.system_heartbeat;
+    root["tx_mode"]    = settings.tx_mode;
+    root["ems_bus_id"] = settings.ems_bus_id;
+
     root["syslog_level"]         = settings.syslog_level;
     root["syslog_mark_interval"] = settings.syslog_mark_interval;
     root["syslog_host"]          = settings.syslog_host;
-    root["master_thermostat"]    = settings.master_thermostat;
-    root["shower_timer"]         = settings.shower_timer;
-    root["shower_alert"]         = settings.shower_alert;
-    root["publish_time"]         = settings.publish_time;
-    root["mqtt_format"]          = settings.mqtt_format;
-    root["mqtt_qos"]             = settings.mqtt_qos;
+
+    root["master_thermostat"] = settings.master_thermostat;
+    root["shower_timer"]      = settings.shower_timer;
+    root["shower_alert"]      = settings.shower_alert;
 }
 
 StateUpdateResult EMSESPSettings::update(JsonObject & root, EMSESPSettings & settings) {
-    EMSESPSettings newSettings       = {};
-    newSettings.tx_mode              = root["tx_mode"] | EMSESP_DEFAULT_TX_MODE;
-    newSettings.ems_bus_id           = root["ems_bus_id"] | EMSESP_DEFAULT_EMS_BUS_ID;
-    newSettings.system_heartbeat     = root["system_heartbeat"] | EMSESP_DEFAULT_SYSTEM_HEARTBEAT;
+    EMSESPSettings newSettings = {};
+    newSettings.tx_mode        = root["tx_mode"] | EMSESP_DEFAULT_TX_MODE;
+    newSettings.ems_bus_id     = root["ems_bus_id"] | EMSESP_DEFAULT_EMS_BUS_ID;
+
     newSettings.syslog_level         = root["syslog_level"] | EMSESP_DEFAULT_SYSLOG_LEVEL;
     newSettings.syslog_mark_interval = root["syslog_mark_interval"] | EMSESP_DEFAULT_SYSLOG_MARK_INTERVAL;
     newSettings.syslog_host          = root["syslog_host"] | EMSESP_DEFAULT_SYSLOG_HOST;
-    newSettings.master_thermostat    = root["master_thermostat"] | EMSESP_DEFAULT_MASTER_THERMOSTAT;
-    newSettings.shower_timer         = root["shower_timer"] | EMSESP_DEFAULT_SHOWER_TIMER;
-    newSettings.shower_alert         = root["shower_alert"] | EMSESP_DEFAULT_SHOWER_ALERT;
-    newSettings.publish_time         = root["publish_time"] | EMSESP_DEFAULT_PUBLISH_TIME;
-    newSettings.mqtt_format          = root["mqtt_format"] | EMSESP_DEFAULT_MQTT_FORMAT;
-    newSettings.mqtt_qos             = root["mqtt_qos"] | EMSESP_DEFAULT_MQTT_QOS;
+
+    newSettings.master_thermostat = root["master_thermostat"] | EMSESP_DEFAULT_MASTER_THERMOSTAT;
+    newSettings.shower_timer      = root["shower_timer"] | EMSESP_DEFAULT_SHOWER_TIMER;
+    newSettings.shower_alert      = root["shower_alert"] | EMSESP_DEFAULT_SHOWER_ALERT;
 
     bool changed = false;
 
-    // changing master thermostat, bus ID, mqtt_format requires a reboot
-    if ((newSettings.master_thermostat != settings.master_thermostat) || (newSettings.ems_bus_id != settings.ems_bus_id)
-        || (newSettings.mqtt_format != settings.mqtt_format)) {
-        changed = true;
-    }
-
-    if (newSettings.system_heartbeat != settings.system_heartbeat) {
-        EMSESP::system_.set_heartbeat(newSettings.system_heartbeat);
-        changed = true;
-    }
-
     if (newSettings.tx_mode != settings.tx_mode) {
         EMSESP::reset_tx(newSettings.tx_mode); // reset counters
-        changed = true;
-    }
-
-    if (newSettings.mqtt_qos != settings.mqtt_qos) {
-        EMSESP::mqtt_.set_qos(newSettings.mqtt_qos);
-        EMSESP::mqtt_.disconnect(); // force a disconnect & reconnect
-        changed = true;
-    }
-
-    if (newSettings.publish_time != settings.publish_time) {
-        EMSESP::mqtt_.set_publish_time(newSettings.publish_time);
         changed = true;
     }
 

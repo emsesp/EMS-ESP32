@@ -61,9 +61,6 @@ void EMSESPStatusService::emsespStatusService(AsyncWebServerRequest * request) {
     root["tx_sent"]     = EMSESP::txservice_.telegram_read_count() + EMSESP::txservice_.telegram_write_count();
     root["crc_errors"]  = EMSESP::rxservice_.telegram_error_count();
     root["tx_errors"]   = EMSESP::txservice_.telegram_fail_count();
-    root["mqtt_fails"]  = Mqtt::publish_fails();
-    root["uptime"]      = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
-    root["free_mem"]    = System::free_mem();
 
     response->setLength();
     request->send(response);

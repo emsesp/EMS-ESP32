@@ -247,11 +247,9 @@ void Mqtt::start(AsyncMqttClient * mqttClient) {
     EMSESP::esp8266React.getWiFiSettingsService()->read([&](WiFiSettings & wifiSettings) { hostname_ = wifiSettings.hostname.c_str(); });
 
     // fetch MQTT settings
-    // EMSESP::esp8266React.getMqttSettingsService()->read([&](MqttSettings & mqttSettings) { mqtt_enabled_ = mqttSettings.enabled; });
-
-    EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) {
-        publish_time_ = settings.publish_time * 1000; // convert to milliseconds
-        mqtt_qos_     = settings.mqtt_qos;
+    EMSESP::esp8266React.getMqttSettingsService()->read([&](MqttSettings & mqttSettings) {
+        publish_time_ = mqttSettings.publish_time * 1000; // convert to milliseconds
+        mqtt_qos_     = mqttSettings.mqtt_qos;
     });
 
 #ifndef EMSESP_STANDALONE

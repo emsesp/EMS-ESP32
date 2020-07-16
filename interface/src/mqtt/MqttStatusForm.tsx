@@ -6,9 +6,10 @@ import { Avatar, Divider, List, ListItem, ListItemAvatar, ListItemText } from '@
 import DeviceHubIcon from '@material-ui/icons/DeviceHub';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import ReportIcon from '@material-ui/icons/Report';
+import SpeakerNotesOffIcon from "@material-ui/icons/SpeakerNotesOff";
 
 import { RestFormProps, FormActions, FormButton, HighlightAvatar } from '../components';
-import { mqttStatusHighlight, mqttStatus, disconnectReason } from './MqttStatus';
+import { mqttStatusHighlight, mqttStatus, mqttStatusHighlight2, disconnectReason } from './MqttStatus';
 import { MqttStatus } from './types';
 
 type MqttStatusFormProps = RestFormProps<MqttStatus> & WithTheme;
@@ -16,7 +17,7 @@ type MqttStatusFormProps = RestFormProps<MqttStatus> & WithTheme;
 class MqttStatusForm extends Component<MqttStatusFormProps> {
 
   renderConnectionStatus() {
-    const { data } = this.props
+    const { data, theme } = this.props
     if (data.connected) {
       return (
         <Fragment>
@@ -27,6 +28,17 @@ class MqttStatusForm extends Component<MqttStatusFormProps> {
             <ListItemText primary="Client ID" secondary={data.client_id} />
           </ListItem>
           <Divider variant="inset" component="li" />
+          <ListItem>
+          <ListItemAvatar>
+            <HighlightAvatar color={mqttStatusHighlight2(data, theme)}>
+              <SpeakerNotesOffIcon />
+            </HighlightAvatar>
+          </ListItemAvatar>
+          <ListItemText
+            primary="MQTT Publish Errors"
+            secondary={data.mqtt_fails}
+          />
+        </ListItem>
         </Fragment>
       );
     }

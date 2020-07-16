@@ -126,10 +126,13 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
         }
     }
 
-    uint8_t master_thermostat;
+    uint8_t master_thermostat = 0;
     EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) {
         master_thermostat = settings.master_thermostat; // what the user has defined
-        mqtt_format_      = settings.mqtt_format;       // single, nested or ha
+    });
+
+    EMSESP::esp8266React.getMqttSettingsService()->read([&](MqttSettings & settings) {
+        mqtt_format_ = settings.mqtt_format; // single, nested or ha
     });
 
     uint8_t actual_master_thermostat = EMSESP::actual_master_thermostat();                           // what we're actually using

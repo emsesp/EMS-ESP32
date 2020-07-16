@@ -29,15 +29,3 @@ export const busStatus = ({ status }: EMSESPStatus) => {
       return "Unknown";
   }
 }
-
-export const mqttStatusHighlight = ({ mqtt_fails }: EMSESPStatus, theme: Theme) => {
-
-  if (mqtt_fails === 0)
-    return theme.palette.success.main;
-
-  if (mqtt_fails < 10)
-    return theme.palette.warning.main;
-
-  return theme.palette.success.main;
-
-}

@@ -13,6 +13,8 @@ import AppsIcon from '@material-ui/icons/Apps';
 import PowerSettingsNewIcon from '@material-ui/icons/PowerSettingsNew';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import SettingsBackupRestoreIcon from '@material-ui/icons/SettingsBackupRestore';
+import BatteryUnknownIcon from "@material-ui/icons/BatteryUnknown";
+import TimerIcon from "@material-ui/icons/Timer";
 
 import { redirectingAuthorizedFetch, AuthenticatedContextProps, withAuthenticatedContext } from '../authentication';
 import { RestFormProps, FormButton, ErrorButton } from '../components';
@@ -53,6 +55,14 @@ class SystemStatusForm extends Component<SystemStatusFormProps, SystemStatusForm
           <ListItemText primary="Device (Platform / SDK)" secondary={data.esp_platform + ' / ' + data.sdk_version} />
         </ListItem>
         <Divider variant="inset" component="li" />
+        <ListItem>
+          <ListItemAvatar>
+            <Avatar>
+              <TimerIcon />
+            </Avatar>
+          </ListItemAvatar>
+          <ListItemText primary="System Uptime" secondary={data.uptime} />
+        </ListItem>
         <ListItem >
           <ListItemAvatar>
             <Avatar>
@@ -84,6 +94,17 @@ class SystemStatusForm extends Component<SystemStatusFormProps, SystemStatusForm
               </ListItem>
             </Fragment>)
         }
+        <ListItem>
+          <ListItemAvatar>
+            <Avatar>
+              <BatteryUnknownIcon />
+            </Avatar>
+          </ListItemAvatar>
+          <ListItemText
+            primary="Free System Memory"
+            secondary={data.free_mem + "%"}
+          />
+        </ListItem>
         <Divider variant="inset" component="li" />
         <ListItem >
           <ListItemAvatar>

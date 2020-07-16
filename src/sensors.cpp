@@ -29,7 +29,7 @@ uuid::log::Logger Sensors::logger_{F_(logger_name), uuid::log::Facility::DAEMON}
 
 void Sensors::start() {
     // copy over values from MQTT so we don't keep on quering the filesystem
-    EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) {
+    EMSESP::esp8266React.getMqttSettingsService()->read([&](MqttSettings & settings) {
         mqtt_format_ = settings.mqtt_format; // single, nested or ha
     });
 

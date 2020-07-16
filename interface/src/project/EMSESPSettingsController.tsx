@@ -1,7 +1,7 @@
 import React, { Component, Fragment } from 'react';
 import { ValidatorForm, TextValidator, SelectValidator } from 'react-material-ui-form-validator';
 
-import { Checkbox, Typography, Box } from '@material-ui/core';
+import { Checkbox, Typography, Box, Link } from '@material-ui/core';
 import SaveIcon from '@material-ui/icons/Save';
 import MenuItem from '@material-ui/core/MenuItem';
 
@@ -46,9 +46,9 @@ function EMSESPSettingsControllerForm(props: EMSESPSettingsControllerFormProps) 
     const { data, saveData, loadData, handleValueChange } = props;
     return (
         <ValidatorForm onSubmit={saveData}>
-            <Box bgcolor="primary.main" color="primary.contrastText" p={2} mt={2} mb={2}>
+            <Box bgcolor="info.main" p={2} mt={2} mb={2}>
                 <Typography variant="body1">
-                    Customize EMS-ESP by editing the default settings here. Refer to the <a href="https://emsesp.github.io/docs/#/">Wiki</a> for assistance.
+                    Customize EMS-ESP by editing the default settings here. Refer to the <Link href="https://emsesp.github.io/docs/#/" color="primary">{'Wiki'}</Link>&nbsp;for descriptions of each setting.
                 </Typography>
             </Box>
             <TextValidator
@@ -61,51 +61,6 @@ function EMSESPSettingsControllerForm(props: EMSESPSettingsControllerFormProps) 
                 value={data.tx_mode}
                 type="number"
                 onChange={handleValueChange('tx_mode')}
-                margin="normal"
-            />
-            <BlockFormControlLabel
-                control={
-                    <Checkbox
-                        checked={data.system_heartbeat}
-                        onChange={handleValueChange('system_heartbeat')}
-                        value="system_heartbeat"
-                    />
-                }
-                label="MQTT Heartbeat"
-            />
-            <SelectValidator name="mqtt_format"
-                label="MQTT Format"
-                value={data.mqtt_format}
-                fullWidth
-                variant="outlined"
-                onChange={handleValueChange('mqtt_format')}
-                margin="normal">
-                <MenuItem value={1}>Single</MenuItem>
-                <MenuItem value={2}>Nested</MenuItem>
-                <MenuItem value={3}>Home Assistant</MenuItem>
-                <MenuItem value={4}>Custom</MenuItem>
-            </SelectValidator>
-            <SelectValidator name="mqtt_qos"
-                label="MQTT QoS"
-                value={data.mqtt_qos}
-                fullWidth
-                variant="outlined"
-                onChange={handleValueChange('mqtt_qos')}
-                margin="normal">
-                <MenuItem value={0}>0</MenuItem>
-                <MenuItem value={1}>1</MenuItem>
-                <MenuItem value={2}>2</MenuItem>
-            </SelectValidator>
-            <TextValidator
-                validators={['required', 'isNumber', 'minNumber:1', 'maxNumber:65535']}
-                errorMessages={['Keep alive is required', "Must be a number", "Must be greater than 0", "Max value is 65535"]}
-                name="publish_time"
-                label="MQTT Publish Time (seconds)"
-                fullWidth
-                variant="outlined"
-                value={data.publish_time}
-                type="number"
-                onChange={handleValueChange('publish_time')}
                 margin="normal"
             />
             <BlockFormControlLabel

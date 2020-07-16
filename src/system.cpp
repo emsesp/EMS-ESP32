@@ -225,10 +225,9 @@ void System::start() {
     }
 
     // fetch settings
-    EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) {
-        tx_mode_          = settings.tx_mode;
-        system_heartbeat_ = settings.system_heartbeat;
-    });
+    EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) { tx_mode_ = settings.tx_mode; });
+
+    EMSESP::esp8266React.getMqttSettingsService()->read([&](MqttSettings & settings) { system_heartbeat_ = settings.system_heartbeat; });
 
     syslog_init();
 
@@ -596,7 +595,9 @@ void System::console_commands(Shell & shell, unsigned int context) {
                     shell.print(" ");
                     shell.printfln(F_(mark_interval_fmt), settings.syslog_mark_interval);
                     shell.println();
-                    shell.printfln(F_(system_heartbeat_fmt), settings.system_heartbeat ? F_(enabled) : F_(disabled));
+                    bool system_heartbeat;
+                    EMSESP::esp8266React.getMqttSettingsService()->read([&](MqttSettings & settings) { system_heartbeat = settings.system_heartbeat; });
+                    shell.printfln(F_(system_heartbeat_fmt), system_heartbeat ? F_(enabled) : F_(disabled));
                 });
             }
         });

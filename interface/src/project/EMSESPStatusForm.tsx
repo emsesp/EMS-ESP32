@@ -7,20 +7,18 @@ import {
   TableCell,
   TableHead,
   TableRow,
-  Avatar,
   Divider,
   List,
   ListItem,
   ListItemAvatar,
-  ListItemText
+  ListItemText,
+  Typography,
+  Box,
+  Link
 } from "@material-ui/core";
 
-import BuildIcon from "@material-ui/icons/Build";
 import RefreshIcon from "@material-ui/icons/Refresh";
 import DeviceHubIcon from "@material-ui/icons/DeviceHub";
-import SpeakerNotesOffIcon from "@material-ui/icons/SpeakerNotesOff";
-import TimerIcon from "@material-ui/icons/Timer";
-import BatteryUnknownIcon from "@material-ui/icons/BatteryUnknown";
 
 import {
   RestFormProps,
@@ -28,11 +26,11 @@ import {
   FormButton,
   HighlightAvatar,
 } from "../components";
+
 import {
   busStatus,
   busStatusHighlight,
-  isConnected,
-  mqttStatusHighlight,
+  isConnected
 } from "./EMSESPStatus";
 
 import { EMSESPStatus } from "./EMSESPtypes";
@@ -44,55 +42,24 @@ class EMSESPStatusForm extends Component<EMSESPStatusFormProps> {
     const { data, theme } = this.props;
     return (
       <Fragment>
-        <ListItem>
-          <ListItemAvatar>
-            <Avatar>
-              <BuildIcon />
-            </Avatar>
-          </ListItemAvatar>
-          <ListItemText primary="Firmware Version" secondary={data.version} />
-        </ListItem>
-        <Divider variant="inset" component="li" />
-        <ListItem>
-          <ListItemAvatar>
-            <Avatar>
-              <TimerIcon />
-            </Avatar>
-          </ListItemAvatar>
-          <ListItemText primary="System Uptime" secondary={data.uptime} />
-        </ListItem>
-        <Divider variant="inset" component="li" />
-        <ListItem>
-          <ListItemAvatar>
-            <Avatar>
-              <BatteryUnknownIcon />
-            </Avatar>
-          </ListItemAvatar>
-          <ListItemText
-            primary="Free System Memory"
-            secondary={data.free_mem + "%"}
-          />
-        </ListItem>
-        <Divider variant="inset" component="li" />
-        <ListItem>
-          <ListItemAvatar>
-            <HighlightAvatar color={mqttStatusHighlight(data, theme)}>
-              <SpeakerNotesOffIcon />
-            </HighlightAvatar>
-          </ListItemAvatar>
-          <ListItemText
-            primary="MQTT Publish Errors"
-            secondary={data.mqtt_fails}
-          />
-        </ListItem>
-        <Divider variant="inset" component="li" />
+        <Box bgcolor="info.main" border={1} p={3} mt={1} mb={0}>
+          <Typography variant="body1">
+            Firmware Version is <b>{data.version}</b>
+            <br /><br />
+            Check for news and updates on the <Link href="https://emsesp.github.io/docs/#/" color="primary">{'Wiki'}</Link>
+            <br/>
+            For live community chat go to <Link href="https://gitter.im/EMS-ESP/community#" color="primary">{'Gitter'}</Link>
+            <br/>
+            To report issues, contribute and give kudos visit <Link href="https://github.com/proddy/EMS-ESP" color="primary">{'github.com/proddy/EMS-ESP'}</Link>
+          </Typography>
+        </Box>
         <ListItem>
           <ListItemAvatar>
             <HighlightAvatar color={busStatusHighlight(data, theme)}>
               <DeviceHubIcon />
             </HighlightAvatar>
           </ListItemAvatar>
-          <ListItemText primary="EMS Bus Status" secondary={busStatus(data)} />
+          <ListItemText primary="EMS Connection Status" secondary={busStatus(data)} />
         </ListItem>
         {isConnected(data) && (
           <Fragment>

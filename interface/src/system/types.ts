@@ -15,6 +15,8 @@ interface ESPSystemStatus {
   flash_chip_speed: number;
   fs_used: number;
   fs_total: number;
+  uptime: string;
+  free_mem: number;
 }
 
 export interface ESP32SystemStatus extends ESPSystemStatus {

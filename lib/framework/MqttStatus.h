@@ -9,6 +9,8 @@
 #include <ESPAsyncTCP.h>
 #endif
 
+#include "../../src/mqtt.h"
+
 #include <MqttSettingsService.h>
 #include <ArduinoJson.h>
 #include <AsyncJson.h>
@@ -19,13 +21,13 @@
 #define MQTT_STATUS_SERVICE_PATH "/rest/mqttStatus"
 
 class MqttStatus {
- public:
-  MqttStatus(AsyncWebServer* server, MqttSettingsService* mqttSettingsService, SecurityManager* securityManager);
+  public:
+    MqttStatus(AsyncWebServer * server, MqttSettingsService * mqttSettingsService, SecurityManager * securityManager);
 
- private:
-  MqttSettingsService* _mqttSettingsService;
+  private:
+    MqttSettingsService * _mqttSettingsService;
 
-  void mqttStatus(AsyncWebServerRequest* request);
+    void mqttStatus(AsyncWebServerRequest * request);
 };
 
-#endif  // end MqttStatus_h
+#endif // end MqttStatus_h

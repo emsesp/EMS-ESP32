@@ -43,3 +43,15 @@ export const disconnectReason = ({ disconnect_reason }: MqttStatus) => {
       return "Unknown"
   }
 }
+
+export const mqttStatusHighlight2 = ({ mqtt_fails }: MqttStatus, theme: Theme) => {
+
+  if (mqtt_fails === 0)
+    return theme.palette.success.main;
+
+  if (mqtt_fails < 10)
+    return theme.palette.warning.main;
+
+  return theme.palette.success.main;
+
+}

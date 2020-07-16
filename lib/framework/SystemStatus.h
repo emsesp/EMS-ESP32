@@ -17,15 +17,18 @@
 #include <ESPAsyncWebServer.h>
 #include <SecurityManager.h>
 
+#include <uuid/log.h>
+#include "../../src/system.h"
+
 #define MAX_ESP_STATUS_SIZE 1024
 #define SYSTEM_STATUS_SERVICE_PATH "/rest/systemStatus"
 
 class SystemStatus {
- public:
-  SystemStatus(AsyncWebServer* server, SecurityManager* securityManager);
+  public:
+    SystemStatus(AsyncWebServer * server, SecurityManager * securityManager);
 
- private:
-  void systemStatus(AsyncWebServerRequest* request);
+  private:
+    void systemStatus(AsyncWebServerRequest * request);
 };
 
-#endif  // end SystemStatus_h
+#endif // end SystemStatus_h
