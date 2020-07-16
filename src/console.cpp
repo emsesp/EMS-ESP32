@@ -349,7 +349,7 @@ void Console::load_standard_commands(unsigned int context) {
                                                        uint64_t now = uuid::get_uptime_ms();
 
                                                        EMSESP::esp8266React.getSecuritySettingsService()->read([&](SecuritySettings & securitySettings) {
-                                                           if (securitySettings.jwtSecret = password.c_str()) {
+                                                           if (securitySettings.jwtSecret.equals(password.c_str())) {
                                                                become_admin(shell);
                                                            } else {
                                                                shell.delay_until(now + INVALID_PASSWORD_DELAY_MS, [](Shell & shell) {
