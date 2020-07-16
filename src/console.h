@@ -37,8 +37,6 @@ using uuid::console::Commands;
 using uuid::console::Shell;
 using uuid::log::Level;
 
-// clang-format off
-
 #define LOG_DEBUG(...) logger_.debug(__VA_ARGS__)
 #define LOG_INFO(...) logger_.info(__VA_ARGS__)
 #define LOG_TRACE(...) logger_.trace(__VA_ARGS__)
@@ -46,10 +44,10 @@ using uuid::log::Level;
 #define LOG_WARNING(...) logger_.warning(__VA_ARGS__)
 #define LOG_ERROR(...) logger_.err(__VA_ARGS__)
 
+// clang-format off
 #define MAKE_PSTR(string_name, string_literal) static const char __pstr__##string_name[] __attribute__((__aligned__(sizeof(int)))) PROGMEM = string_literal;
 #define MAKE_PSTR_WORD(string_name) MAKE_PSTR(string_name, #string_name)
 #define F_(string_name) FPSTR(__pstr__##string_name)
-
 // clang-format on
 
 // common words
