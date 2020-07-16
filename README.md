@@ -1,11 +1,11 @@
-# EMS-ESP version 2.0 (beta)
+# EMS-ESP version 2.0
 
 ## **New Features in v2**
 
 - A new web interface using React and TypeScript that's now secure as each URL endpoint is protected by issuing a JWT which is then sent using Bearer Authentication. Using a Captive Portal in AP mode or connecting to a local wifi network.
 
-![settings](/media/web_settings.PNG)
-![status](/media/web_status.PNG)
+![settings](media/web_settings.PNG)
+![status](media/web_status.PNG)
 
 - A new console. Like in version 1.9 it works with both Serial and Telnet but with a rich set of commands and more intuitive with behavior similar to a Linux-style shell. It supports multiple connections and commands that alter the settings or interact directly with EMS devices are secure behind an admin password. A full list of commands is below, here are the key ones:
     * `help` lists the commands and keywords
@@ -110,48 +110,45 @@ thermostat
 - Replace vectors of class objects with shared pointers and use emplace_back since it instantiates during construction. It may have a performance gain.
 - Add real unit tests using platformio's [pio-remote](https://docs.platformio.org/en/latest/plus/pio-remote.html) test bed.
 - See if it's easier to use timers instead of millis() based timers, using [polledTimeout](https://github.com/esp8266/Arduino/blob/master/libraries/esp8266/examples/BlinkPolledTimeout/BlinkPolledTimeout.ino).
+- Port over to ESP-IDF. The Arduino SDK is showing its limitations
 
 ### **Customizing the Web UI**
 
 The Web is based off Rick's awesome [esp8266-react](https://github.com/rjwats/esp8266-react/) framework. These are the files that are modified:
 
-```
-interface/
-  .env (project name and project path to ems-esp)
-  .env.development (CORS URL)
+**`interface:`**
+  * `.env` (project name and project path to ems-esp)
+  * `.env.development` (CORS URL)
  
-interface/public/
-  app/manifest.json (ems-esp name)
-  index.html (ems-esp name)
-  app/icon.png (256x256 PNG)
-  favicon.ico 
+**`interface/public:`**
+  * `app/manifest.json` (ems-esp name)
+  * `index.html` (ems-esp name)
+  * `app/icon.png` (256x256 PNG)
+  * `favicon.ico` 
 
-interface/src/
-  CustomMuiTheme.tsx (colors for dark mode)
+**`interface/src:`**
+  * `CustomMuiTheme.tsx` (colors for dark mode)
+  * `interface/src/wifi/WifiSettingsController.tsx` (rename esp8266-react)
 
-interface/src/wifi/WifiSettingsController.tsx (rename esp8266-react)
+**`interface/src/project:`**
+  * `ProjectRouting.tsx` (removed demo, renamed DemoProject to EMSESP)
+  * `DemoProject.tsx` (remove /demo/ and changed title, renamed to EMSESP.tsx)
+  * `ProjectMenu.tsx` (title)
+  * `DemoInformation.tsx` (removed file)
+  * `types.ts` (add variables)
 
-interface/src/project/
-  ProjectRouting.tsx (removed demo, renamed DemoProject to EMSESP)
-  DemoProject.tsx (remove /demo/ and changed title, renamed to EMSESP.tsx)
-  ProjectMenu.tsx (title)
-  DemoInformation.tsx (removed file)
-  types.ts (add variables)
- ```
+**`lib/framework`:**
 
- UI customizations:
+* `SystemStatus.h` : added #include <LittleFS.h>
+* `SystemStatus.cpp` : added LittleFS.info(fs_info); 
+* Commented out all `Serial.print`'s
+* `features.ini`: -D FT_NTP=0
+* customized `platformio.ini`
+* customized `factory_settings.ini` with `ems-esp-neo` as password and `ems-esp` everywhere else
 
-  icons: https://material-ui.com/components/material-icons/
 
-  colors: https://material-ui.com/customization/color/
+ Info on UI customizations:
 
-  tables: https://material-ui.com/components/tables/#dense-table
-
-Files changed in Framework:
-
-SystemStatus.h : added #include <LittleFS.h>
-SystemStatus.cpp : added LittleFS.info(fs_info); 
-Commented out all Serial.print*
-features.ini: -D FT_NTP=0
-customized platformio.ini
-customized factory_settings.ini with ems-esp-neo as password and ems-esp everywhere else
+  * icons: https://material-ui.com/components/material-icons/
+  * colors: https://material-ui.com/customization/color/
+  * tables: https://material-ui.com/components/tables/#dense-table
