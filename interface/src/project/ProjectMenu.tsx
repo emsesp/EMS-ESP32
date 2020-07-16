@@ -2,25 +2,28 @@ import React, { Component } from "react";
 import { Link, withRouter, RouteComponentProps } from "react-router-dom";
 
 import { List, ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
+
+import SettingsIcon from '@material-ui/icons/Settings';
 import SettingsRemoteIcon from "@material-ui/icons/SettingsRemote";
 
-import { PROJECT_PATH } from "../api";
+// import { PROJECT_PATH } from "../api";
 
 class ProjectMenu extends Component<RouteComponentProps> {
   render() {
     const path = this.props.match.url;
     return (
       <List>
-        <ListItem
-          to={`/${PROJECT_PATH}/`}
-          selected={path.startsWith(`/${PROJECT_PATH}/`)}
-          button
-          component={Link}
-        >
+        <ListItem to='/ems-esp/' selected={path.startsWith('/ems-esp/')} button component={Link}>
           <ListItemIcon>
             <SettingsRemoteIcon />
           </ListItemIcon>
-          <ListItemText primary="EMS-ESP" />
+          <ListItemText primary="Dashboard" />
+        </ListItem>
+        <ListItem to='/ems-esp/settings' selected={path.startsWith('/ems-esp/settings/')} button component={Link}>
+          <ListItemIcon>
+            <SettingsIcon />
+          </ListItemIcon>
+          <ListItemText primary="Settings" />
         </ListItem>
       </List>
     );
