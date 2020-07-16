@@ -129,6 +129,8 @@ class EMSbus {
     static constexpr uint8_t EMS_MASK_HT3     = 0x80; // EMS bus type Junkers/HT3
     static constexpr uint8_t EMS_MASK_BUDERUS = 0xFF; // EMS bus type Buderus
 
+    static constexpr uint8_t EMS_TX_ERROR_LIMIT = 10; // % limit of failed Tx read/write attempts before showing a warning
+
     static bool bus_connected() {
 #ifndef EMSESP_STANDALONE
         if ((uuid::get_uptime() - last_bus_activity_) > EMS_BUS_TIMEOUT) {
