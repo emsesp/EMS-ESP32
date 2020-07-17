@@ -25,10 +25,10 @@ namespace emsesp {
 uuid::log::Logger Shower::logger_{F_(logger_name), uuid::log::Facility::CONSOLE};
 
 void Shower::start() {
-    Settings settings;
-
-    shower_timer_ = settings.shower_timer();
-    shower_alert_ = settings.shower_alert();
+    EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) {
+        shower_timer_ = settings.shower_timer;
+        shower_alert_ = settings.shower_alert;
+    });
 }
 
 void Shower::loop() {

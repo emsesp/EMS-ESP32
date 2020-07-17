@@ -23,14 +23,12 @@
 #include <ArduinoJson.h>
 
 #include "helpers.h"
-#include "settings.h"
 #include "console.h"
 #include "mqtt.h"
 #include "telegram.h"
 #include "emsesp.h"
 
 #include <uuid/log.h>
-
 
 namespace emsesp {
 

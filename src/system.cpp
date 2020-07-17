@@ -19,22 +19,20 @@
 #include "system.h"
 #include "emsesp.h" // for send_raw_telegram() command
 
-#include "version.h" // version of EMS-ESP
+#include "version.h" // firmware version of EMS-ESP
 
-MAKE_PSTR_WORD(syslog)
-MAKE_PSTR_WORD(mark)
-MAKE_PSTR_WORD(level)
-MAKE_PSTR_WORD(host)
 MAKE_PSTR_WORD(passwd)
 MAKE_PSTR_WORD(hostname)
 MAKE_PSTR_WORD(wifi)
 MAKE_PSTR_WORD(ssid)
+MAKE_PSTR_WORD(heartbeat)
 
 MAKE_PSTR(host_fmt, "Host = %s")
 MAKE_PSTR(hostname_fmt, "Hostname = %s")
 MAKE_PSTR(mark_interval_fmt, "Mark interval = %lus");
 MAKE_PSTR(wifi_ssid_fmt, "WiFi SSID = %s");
 MAKE_PSTR(wifi_password_fmt, "WiFi Password = %S")
+MAKE_PSTR(system_heartbeat_fmt, "Heartbeat = %s")
 
 MAKE_PSTR(logger_name, "system")
 
@@ -46,12 +44,7 @@ uuid::log::Logger System::logger_{F_(logger_name), uuid::log::Facility::KERN};
 uuid::syslog::SyslogService System::syslog_;
 #endif
 
-#if defined(ESP8266)
-RTCVars System::state_;
-#endif
-
 uint32_t System::heap_start_ = 0;
-bool     System::safe_mode_  = false;
 int      System::reset_counter_;
 
 // handle generic system related MQTT commands
@@ -61,12 +54,6 @@ void System::mqtt_commands(const char * message) {
     if (error) {
         LOG_DEBUG(F("MQTT error: payload %s, error %s"), message, error.c_str());
         return;
-    }
-
-    // restart EMS-ESP
-    if (strcmp(message, "restart") == 0) {
-        LOG_INFO(F("Restart command received"));
-        restart();
     }
 
     if (doc["send"] != nullptr) {
@@ -153,22 +140,36 @@ void System::mqtt_commands(const char * message) {
 }
 
 // restart EMS-ESP
-// mode = safe mode. true to enable on next boot
-void System::restart(bool mode) {
-    // check for safe mode
-    if (mode) {
-        LOG_NOTICE("Restarting system in safe mode...");
-    } else {
-        LOG_NOTICE("Restarting system...");
-    }
+void System::restart() {
+    LOG_NOTICE("Restarting system...");
 
     Shell::loop_all();
-    save_safe_mode(mode);
     delay(1000); // wait a second
 #if defined(ESP8266)
     ESP.reset();
 #elif defined(ESP32)
     ESP.restart();
+#endif
+}
+
+// format fs
+// format the FS. Wipes everything.
+void System::format(uuid::console::Shell & shell) {
+    auto msg = F("Resetting all settings to defaults");
+    shell.logger().warning(msg);
+    shell.flush();
+
+#ifndef EMSESP_STANDALONE
+    EMSuart::stop();
+
+#if defined(ESP8266)
+    LittleFS.format();
+#elif defined(ESP32)
+    SPIFFS.format();
+#endif
+
+    System::restart();
+
 #endif
 }
 
@@ -183,6 +184,35 @@ uint8_t System::free_mem() {
     return (100 * free_memory / heap_start_);
 }
 
+void System::syslog_init() {
+    // fetch settings
+    EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) {
+        syslog_level_         = settings.syslog_level;
+        syslog_mark_interval_ = settings.syslog_mark_interval;
+        syslog_host_          = settings.syslog_host;
+    });
+
+#ifndef EMSESP_STANDALONE
+    syslog_.start(); // syslog service
+
+    // configure syslog
+    IPAddress addr;
+
+    if (!addr.fromString(syslog_host_.c_str())) {
+        addr = (uint32_t)0;
+    }
+
+    EMSESP::esp8266React.getWiFiSettingsService()->read([&](WiFiSettings & wifiSettings) { syslog_.hostname(wifiSettings.hostname.c_str()); });
+    syslog_.log_level((uuid::log::Level)syslog_level_);
+    syslog_.mark_interval(syslog_mark_interval_);
+    syslog_.destination(addr);
+#endif
+}
+
+void System::set_heartbeat(bool system_heartbeat) {
+    system_heartbeat_ = system_heartbeat;
+}
+
 // first call. Sets memory and starts up the UART Serial bridge
 void System::start() {
     // set the inital free mem
@@ -194,93 +224,30 @@ void System::start() {
 #endif
     }
 
-#ifndef EMSESP_STANDALONE
-    syslog_.start(); // syslog service
-#endif
+    // fetch settings
+    EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) { tx_mode_ = settings.tx_mode; });
 
-    config_syslog();
+    EMSESP::esp8266React.getMqttSettingsService()->read([&](MqttSettings & settings) { system_heartbeat_ = settings.system_heartbeat; });
 
-    Settings settings;
-
-    // update the version to the latest build
-    settings.app_version(EMSESP_APP_VERSION);
-    settings.commit();
+    syslog_init();
 
 #if defined(ESP32)
-    LOG_INFO(F("System booted (EMS-ESP version %s ESP32)"), settings.app_version().c_str());
+    LOG_INFO(F("System booted (EMS-ESP version %s ESP32)"), EMSESP_APP_VERSION);
 #else
-    LOG_INFO(F("System booted (EMS-ESP version %s)"), settings.app_version().c_str());
+    LOG_INFO(F("System booted (EMS-ESP version %s)"), EMSESP_APP_VERSION);
 #endif
 
     if (LED_GPIO) {
-        pinMode(LED_GPIO, OUTPUT); // LED pin, 0 is disabled
+        pinMode(LED_GPIO, OUTPUT); // LED pin, 0 means disabled
     }
 
     // register MQTT system commands
     Mqtt::subscribe("cmd", std::bind(&System::mqtt_commands, this, _1));
 
-// RTC state variables - only for ESP8266
-#if defined(ESP8266)
-    state_.registerVar(&reset_counter_); // we send a pointer to each of our variables
-    state_.registerVar(&safe_mode_);
-    state_.loadFromRTC();
-#endif
-
-// safe mode is forced at compile time
-#ifdef EMSESP_SAFE_MODE
-    safe_mode_ = true;
-#endif
-
-    // if there is no wifi ssid set (like an inital setup) go into safe mode
-    if (settings.wifi_ssid().empty()) {
-        safe_mode_ = true;
+#ifndef EMSESP_FORCE_SERIAL
+    if (tx_mode_) {
+        EMSuart::start(tx_mode_); // start UART, if tx_mode is not 0
     }
-
-#ifndef EMSESP_STANDALONE
-    // if we're in safe switch is back so next boot it'll be normal. Safe mode is a one-off
-    if (safe_mode()) {
-    } else {
-        save_safe_mode(false); // next time boot up in normal mode
-        EMSuart::start(settings.ems_tx_mode());
-    }
-#endif
-}
-
-// gets/sets the safe mode from RTC
-bool System::safe_mode() {
-    return safe_mode_;
-}
-
-// set safe mode and save it to RTC
-void System::safe_mode(const bool safe_mode) {
-    safe_mode_ = safe_mode;
-}
-
-// set safe mode and save it to RTC
-void System::save_safe_mode(const bool safe_mode) {
-    bool curr_save_mode = safe_mode_; // remember current setting
-    safe_mode_          = safe_mode;
-#if defined(ESP8266)
-    state_.saveToRTC();
-#endif
-    safe_mode_ = curr_save_mode; // restore
-}
-
-// sets up syslog
-void System::config_syslog() {
-#ifndef EMSESP_STANDALONE
-    Settings  settings;
-    IPAddress addr;
-
-    if (!addr.fromString(settings.syslog_host().c_str())) {
-        addr = (uint32_t)0;
-    }
-
-    syslog_.hostname(settings.hostname());
-    syslog_.log_level(settings.syslog_level());
-    syslog_.mark_interval(settings.syslog_mark_interval());
-    syslog_.destination(addr);
-
 #endif
 }
 
@@ -289,21 +256,33 @@ void System::loop() {
 #ifndef EMSESP_STANDALONE
     syslog_.loop();
 #endif
-
-    if (LED_GPIO) {
-        led_monitor(); // check status and report back using the LED
-    }
-
+    led_monitor();  // check status and report back using the LED
     system_check(); // check system health
+
+    // send out heartbeat
+    uint32_t currentMillis = uuid::get_uptime();
+    if (!last_heartbeat_ || (currentMillis - last_heartbeat_ > SYSTEM_HEARTBEAT_INTERVAL)) {
+        last_heartbeat_ = currentMillis;
+        if (system_heartbeat_) {
+            send_heartbeat();
+        }
+    }
 }
 
-void System::show_mem(const char * text) {
-#ifndef EMSESP_STANDALONE
-    uint32_t mem = ESP.getFreeHeap();
-#else
-    uint32_t mem = 1000;
-#endif
-    LOG_NOTICE(F("{%s} Free mem: %ld (%d%%)"), text, mem, (100 * mem / heap_start_));
+// send periodic MQTT message with system information
+void System::send_heartbeat() {
+    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
+
+    int rssid = wifi_quality();
+    if (rssid != -1) {
+        doc["rssid"] = rssid;
+    }
+    doc["uptime"]           = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
+    doc["uptime_sec"]       = uuid::get_uptime_sec();
+    doc["freemem"]          = free_mem();
+    doc["mqttpublishfails"] = Mqtt::publish_fails();
+
+    Mqtt::publish("heartbeat", doc, false); // send to MQTT with retain off
 }
 
 // sets rate of led flash
@@ -320,7 +299,7 @@ void System::system_check() {
         last_system_check_ = uuid::get_uptime();
 
 #ifndef EMSESP_STANDALONE
-        if ((WiFi.status() != WL_CONNECTED) || safe_mode()) {
+        if (WiFi.status() != WL_CONNECTED) {
             set_led_speed(LED_WARNING_BLINK_FAST);
             system_healthy_ = false;
             return;
@@ -331,7 +310,7 @@ void System::system_check() {
         if (!EMSbus::bus_connected()) {
             system_healthy_ = false;
             set_led_speed(LED_WARNING_BLINK); // flash every 1/2 second from now on
-            LOG_ERROR(F("No connection to the EMS bus!"));
+            // LOG_ERROR(F("Error: No connection to the EMS bus"));
         } else {
             // if it was unhealthy but now we're better, make sure the LED is solid again cos we've been healed
             if (!system_healthy_) {
@@ -346,6 +325,10 @@ void System::system_check() {
 
 // flashes the LED
 void System::led_monitor() {
+    if (!LED_GPIO) {
+        return;
+    }
+
     static uint32_t led_last_blink_ = 0;
 
     if (!led_last_blink_ || (uint32_t)(uuid::get_uptime() - led_last_blink_) >= led_flash_speed_) {
@@ -356,6 +339,29 @@ void System::led_monitor() {
             digitalWrite(LED_GPIO, !digitalRead(LED_GPIO));
         }
     }
+}
+
+// Return the quality (Received Signal Strength Indicator) of the WiFi network as a %. Or -1 if disconnected.
+//  High quality: 90% ~= -55dBm
+//  Medium quality: 50% ~= -75dBm
+//  Low quality: 30% ~= -85dBm
+//  Unusable quality: 8% ~= -96dBm
+int8_t System::wifi_quality() {
+#ifndef EMSESP_STANDALONE
+    if (WiFi.status() != WL_CONNECTED) {
+        return -1;
+    }
+    int dBm = WiFi.RSSI();
+#else
+    int8_t dBm = -70;
+#endif
+    if (dBm <= -100) {
+        return 0;
+    }
+    if (dBm >= -50) {
+        return 100;
+    }
+    return 2 * (dBm + 100);
 }
 
 void System::show_system(uuid::console::Shell & shell) {
@@ -381,19 +387,70 @@ void System::show_system(uuid::console::Shell & shell) {
     shell.printfln(F("Maximum free block size:  %lu bytes"), (unsigned long)ESP.getMaxFreeBlockSize());
     shell.printfln(F("Heap fragmentation:       %u%"), ESP.getHeapFragmentation());
     shell.printfln(F("Free continuations stack: %lu bytes"), (unsigned long)ESP.getFreeContStack());
-
-    FSInfo info;
-    if (EMSESP_FS.info(info)) {
-        shell.printfln(F("FS size:   %zu bytes (block size %zu bytes, page size %zu bytes)"), info.totalBytes, info.blockSize, info.pageSize);
-        shell.printfln(F("FS used:   %zu bytes"), info.usedBytes);
-    }
 #elif defined(ESP32)
-
     shell.printfln(F("SDK version:   %s"), ESP.getSdkVersion());
     shell.printfln(F("CPU frequency: %u MHz"), ESP.getCpuFreqMHz());
     shell.printfln(F("Sketch size:   %u bytes (%u bytes free)"), ESP.getSketchSize(), ESP.getFreeSketchSpace());
     shell.printfln(F("Free heap:                %lu bytes"), (unsigned long)ESP.getFreeHeap());
     shell.printfln(F("Free mem:                 %d  %%"), free_mem());
+#endif
+
+    shell.println();
+
+#ifndef EMSESP_STANDALONE
+
+    switch (WiFi.status()) {
+    case WL_IDLE_STATUS:
+        shell.printfln(F("WiFi: idle"));
+        break;
+
+    case WL_NO_SSID_AVAIL:
+        shell.printfln(F("WiFi: network not found"));
+        break;
+
+    case WL_SCAN_COMPLETED:
+        shell.printfln(F("WiFi: network scan complete"));
+        break;
+
+    case WL_CONNECTED: {
+        shell.printfln(F("WiFi: connected"));
+        shell.println();
+
+        shell.printfln(F("SSID: %s"), WiFi.SSID().c_str());
+        shell.printfln(F("BSSID: %s"), WiFi.BSSIDstr().c_str());
+        shell.printfln(F("RSSI: %d dBm (%d %%)"), WiFi.RSSI(), wifi_quality());
+        shell.println();
+
+        shell.printfln(F("MAC address: %s"), WiFi.macAddress().c_str());
+#if defined(ESP8266)
+        shell.printfln(F("Hostname: %s"), WiFi.hostname().c_str());
+#elif defined(ESP32)
+        shell.printfln(F("Hostname: %s"), WiFi.getHostname());
+#endif
+
+        shell.println();
+        shell.printfln(F("IPv4 address: %s/%s"), uuid::printable_to_string(WiFi.localIP()).c_str(), uuid::printable_to_string(WiFi.subnetMask()).c_str());
+        shell.printfln(F("IPv4 gateway: %s"), uuid::printable_to_string(WiFi.gatewayIP()).c_str());
+        shell.printfln(F("IPv4 nameserver: %s"), uuid::printable_to_string(WiFi.dnsIP()).c_str());
+    } break;
+
+    case WL_CONNECT_FAILED:
+        shell.printfln(F("WiFi: connection failed"));
+        break;
+
+    case WL_CONNECTION_LOST:
+        shell.printfln(F("WiFi: connection lost"));
+        break;
+
+    case WL_DISCONNECTED:
+        shell.printfln(F("WiFi: disconnected"));
+        break;
+
+    case WL_NO_SHIELD:
+    default:
+        shell.printfln(F("WiFi: unknown"));
+        break;
+    }
 
 #endif
 }
@@ -413,12 +470,13 @@ void System::console_commands(Shell & shell, unsigned int context) {
                                        [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
                                            shell.enter_password(F_(password_prompt), [=](Shell & shell, bool completed, const std::string & password) {
                                                if (completed) {
-                                                   Settings settings;
-                                                   if ((settings.admin_password().empty()) || (!password.empty() && password == settings.admin_password())) {
-                                                       settings.format(shell);
-                                                   } else {
-                                                       shell.println(F("incorrect password"));
-                                                   }
+                                                   EMSESP::esp8266React.getSecuritySettingsService()->read([&](SecuritySettings & securitySettings) {
+                                                       if (securitySettings.jwtSecret.equals(password.c_str())) {
+                                                           format(shell);
+                                                       } else {
+                                                           shell.println(F("incorrect password"));
+                                                       }
+                                                   });
                                                }
                                            });
                                        });
@@ -433,9 +491,12 @@ void System::console_commands(Shell & shell, unsigned int context) {
                                                                         [password1](Shell & shell, bool completed, const std::string & password2) {
                                                                             if (completed) {
                                                                                 if (password1 == password2) {
-                                                                                    Settings settings;
-                                                                                    settings.admin_password(password2);
-                                                                                    settings.commit();
+                                                                                    EMSESP::esp8266React.getSecuritySettingsService()->update(
+                                                                                        [&](SecuritySettings & securitySettings) {
+                                                                                            securitySettings.jwtSecret = password2.c_str();
+                                                                                            return StateUpdateResult::CHANGED;
+                                                                                        },
+                                                                                        "local");
                                                                                     shell.println(F("Admin password updated"));
                                                                                 } else {
                                                                                     shell.println(F("Passwords do not match"));
@@ -447,85 +508,11 @@ void System::console_commands(Shell & shell, unsigned int context) {
                                        });
 
     EMSESPShell::commands->add_command(ShellContext::SYSTEM,
-                                       CommandFlags::ADMIN,
-                                       flash_string_vector{F_(wifi), F_(disconnect)},
-                                       [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments __attribute__((unused))) {
-                                           Network::disconnect();
-                                       });
-
-    EMSESPShell::commands->add_command(ShellContext::SYSTEM,
-                                       CommandFlags::ADMIN,
-                                       flash_string_vector{F_(wifi), F_(reconnect)},
-                                       [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments __attribute__((unused))) {
-                                           Network::reconnect();
-                                       });
-
-    EMSESPShell::commands->add_command(ShellContext::SYSTEM,
-                                       CommandFlags::ADMIN,
-                                       flash_string_vector{F_(wifi), F_(scan)},
-                                       [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) { Network::scan(shell); });
-
-    EMSESPShell::commands->add_command(ShellContext::SYSTEM,
                                        CommandFlags::USER,
                                        flash_string_vector{F_(show)},
                                        [=](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
-                                           Network::show_network(shell);
-                                           show_system(shell);
+                                           show_system(shell); // has to be static
                                            shell.println();
-                                       });
-
-    EMSESPShell::commands->add_command(ShellContext::SYSTEM,
-                                       CommandFlags::ADMIN,
-                                       flash_string_vector{F_(set), F_(syslog), F_(host)},
-                                       flash_string_vector{F_(ip_address_optional)},
-                                       [](Shell & shell, const std::vector<std::string> & arguments) {
-                                           Settings settings;
-                                           if (!arguments.empty()) {
-                                               settings.syslog_host(arguments[0]);
-                                               settings.commit();
-                                               shell.println(F("Please restart EMS-ESP"));
-                                           }
-                                           auto host = settings.syslog_host();
-                                           shell.printfln(F_(host_fmt), !host.empty() ? host.c_str() : uuid::read_flash_string(F_(unset)).c_str());
-                                       });
-
-    EMSESPShell::commands->add_command(
-        ShellContext::SYSTEM,
-        CommandFlags::ADMIN,
-        flash_string_vector{F_(set), F_(syslog), F_(level)},
-        flash_string_vector{F_(log_level_optional)},
-        [](Shell & shell, const std::vector<std::string> & arguments) {
-            Settings settings;
-            if (!arguments.empty()) {
-                uuid::log::Level level;
-
-                if (uuid::log::parse_level_lowercase(arguments[0], level)) {
-                    settings.syslog_level(level);
-                    settings.commit();
-                    shell.println(F("Please restart EMS-ESP"));
-                } else {
-                    shell.printfln(F_(invalid_log_level));
-                    return;
-                }
-            }
-            shell.printfln(F_(log_level_fmt), uuid::log::format_level_uppercase(settings.syslog_level()));
-        },
-        [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments __attribute__((unused))) -> std::vector<std::string> {
-            return uuid::log::levels_lowercase();
-        });
-
-    EMSESPShell::commands->add_command(ShellContext::SYSTEM,
-                                       CommandFlags::ADMIN,
-                                       flash_string_vector{F_(set), F_(syslog), F_(mark)},
-                                       flash_string_vector{F_(seconds_optional)},
-                                       [](Shell & shell, const std::vector<std::string> & arguments) {
-                                           Settings settings;
-                                           if (!arguments.empty()) {
-                                               settings.syslog_mark_interval(String(arguments[0].c_str()).toInt());
-                                               settings.commit();
-                                               shell.println(F("Please restart EMS-ESP"));
-                                           }
-                                           shell.printfln(F_(mark_interval_fmt), settings.syslog_mark_interval());
                                        });
 
     EMSESPShell::commands->add_command(ShellContext::SYSTEM,
@@ -533,29 +520,27 @@ void System::console_commands(Shell & shell, unsigned int context) {
                                        flash_string_vector{F_(set), F_(wifi), F_(hostname)},
                                        flash_string_vector{F_(name_mandatory)},
                                        [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) {
-                                           Settings settings;
-                                           settings.hostname(arguments.front());
-                                           settings.commit();
+                                           EMSESP::esp8266React.getWiFiSettingsService()->update(
+                                               [&](WiFiSettings & wifiSettings) {
+                                                   wifiSettings.hostname = arguments.front().c_str();
+                                                   return StateUpdateResult::CHANGED;
+                                               },
+                                               "local");
                                        });
 
-    EMSESPShell::commands->add_command(
-        ShellContext::SYSTEM,
-        CommandFlags::ADMIN,
-        flash_string_vector{F_(set), F_(wifi), F_(ssid)},
-        flash_string_vector{F_(name_mandatory)},
-        [](Shell & shell, const std::vector<std::string> & arguments) {
-            Settings settings;
-            settings.wifi_ssid(arguments.front());
-            settings.commit();
-            shell.printfln(F_(wifi_ssid_fmt), settings.wifi_ssid().empty() ? uuid::read_flash_string(F_(unset)).c_str() : settings.wifi_ssid().c_str());
-            shell.println(F("WiFi SSID updated. Please restart"));
-            Network::reconnect();
-        },
-        [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments __attribute__((unused))) -> std::vector<std::string> {
-            Settings settings;
-            return std::vector<std::string>{settings.wifi_ssid()};
-        });
-
+    EMSESPShell::commands->add_command(ShellContext::SYSTEM,
+                                       CommandFlags::ADMIN,
+                                       flash_string_vector{F_(set), F_(wifi), F_(ssid)},
+                                       flash_string_vector{F_(name_mandatory)},
+                                       [](Shell & shell, const std::vector<std::string> & arguments) {
+                                           EMSESP::esp8266React.getWiFiSettingsService()->update(
+                                               [&](WiFiSettings & wifiSettings) {
+                                                   wifiSettings.ssid = arguments.front().c_str();
+                                                   return StateUpdateResult::CHANGED;
+                                               },
+                                               "local");
+                                           shell.println(F("WiFi SSID updated"));
+                                       });
 
     EMSESPShell::commands->add_command(ShellContext::SYSTEM,
                                        CommandFlags::ADMIN,
@@ -567,11 +552,13 @@ void System::console_commands(Shell & shell, unsigned int context) {
                                                                         [password1](Shell & shell, bool completed, const std::string & password2) {
                                                                             if (completed) {
                                                                                 if (password1 == password2) {
-                                                                                    Settings settings;
-                                                                                    settings.wifi_password(password2);
-                                                                                    settings.commit();
-                                                                                    shell.println(F("WiFi password updated. Please restart"));
-                                                                                    Network::reconnect();
+                                                                                    EMSESP::esp8266React.getWiFiSettingsService()->update(
+                                                                                        [&](WiFiSettings & wifiSettings) {
+                                                                                            wifiSettings.password = password2.c_str();
+                                                                                            return StateUpdateResult::CHANGED;
+                                                                                        },
+                                                                                        "local");
+                                                                                    shell.println(F("WiFi password updated"));
                                                                                 } else {
                                                                                     shell.println(F("Passwords do not match"));
                                                                                 }
@@ -581,32 +568,45 @@ void System::console_commands(Shell & shell, unsigned int context) {
                                            });
                                        });
 
+    EMSESPShell::commands->add_command(
+        ShellContext::SYSTEM,
+        CommandFlags::USER,
+        flash_string_vector{F_(set)},
+        [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
+            EMSESP::esp8266React.getWiFiSettingsService()->read([&](WiFiSettings & wifiSettings) {
+                shell.printfln(F_(hostname_fmt), wifiSettings.hostname.isEmpty() ? uuid::read_flash_string(F_(unset)).c_str() : wifiSettings.hostname.c_str());
+            });
+
+            if (shell.has_flags(CommandFlags::ADMIN)) {
+                shell.printfln("Wifi:");
+                EMSESP::esp8266React.getWiFiSettingsService()->read([&](WiFiSettings & wifiSettings) {
+                    shell.print(" ");
+                    shell.printfln(F_(wifi_ssid_fmt), wifiSettings.ssid.isEmpty() ? uuid::read_flash_string(F_(unset)).c_str() : wifiSettings.ssid.c_str());
+                    shell.print(" ");
+                    shell.printfln(F_(wifi_password_fmt), wifiSettings.ssid.isEmpty() ? F_(unset) : F_(asterisks));
+                });
+
+                EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) {
+                    shell.printfln(F("Syslog:"));
+                    shell.print(" ");
+                    shell.printfln(F_(host_fmt), !settings.syslog_host.isEmpty() ? settings.syslog_host.c_str() : uuid::read_flash_string(F_(unset)).c_str());
+                    shell.print(" ");
+                    shell.printfln(F_(log_level_fmt), uuid::log::format_level_uppercase(static_cast<uuid::log::Level>(settings.syslog_level)));
+                    shell.print(" ");
+                    shell.printfln(F_(mark_interval_fmt), settings.syslog_mark_interval);
+                    shell.println();
+                    bool system_heartbeat;
+                    EMSESP::esp8266React.getMqttSettingsService()->read([&](MqttSettings & settings) { system_heartbeat = settings.system_heartbeat; });
+                    shell.printfln(F_(system_heartbeat_fmt), system_heartbeat ? F_(enabled) : F_(disabled));
+                });
+            }
+        });
+
     EMSESPShell::commands->add_command(ShellContext::SYSTEM,
                                        CommandFlags::USER,
-                                       flash_string_vector{F_(set)},
-                                       [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
-                                           Settings settings;
-                                           shell.printfln(F_(hostname_fmt),
-                                                          settings.hostname().empty() ? uuid::read_flash_string(F_(unset)).c_str() : settings.hostname().c_str());
+                                       flash_string_vector{F_(show), F_(mqtt)},
+                                       [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) { Mqtt::show_mqtt(shell); });
 
-                                           if (shell.has_flags(CommandFlags::ADMIN)) {
-                                               shell.printfln("Wifi:");
-                                               shell.print(" ");
-                                               shell.printfln(F_(wifi_ssid_fmt),
-                                                              settings.wifi_ssid().empty() ? uuid::read_flash_string(F_(unset)).c_str()
-                                                                                           : settings.wifi_ssid().c_str());
-                                               shell.print(" ");
-                                               shell.printfln(F_(wifi_password_fmt), settings.wifi_password().empty() ? F_(unset) : F_(asterisks));
-                                               shell.printfln(F("Syslog:"));
-                                               auto host = settings.syslog_host();
-                                               shell.print(" ");
-                                               shell.printfln(F_(host_fmt), !host.empty() ? host.c_str() : uuid::read_flash_string(F_(unset)).c_str());
-                                               shell.print(" ");
-                                               shell.printfln(F_(log_level_fmt), uuid::log::format_level_uppercase(settings.syslog_level()));
-                                               shell.print(" ");
-                                               shell.printfln(F_(mark_interval_fmt), settings.syslog_mark_interval());
-                                           }
-                                       });
 
     // enter the context
     Console::enter_custom_context(shell, context);

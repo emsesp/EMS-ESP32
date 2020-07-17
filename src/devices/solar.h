@@ -26,7 +26,6 @@
 
 #include "emsdevice.h"
 #include "telegram.h"
-#include "emsesp.h"
 #include "helpers.h"
 #include "mqtt.h"
 
@@ -57,6 +56,8 @@ class Solar : public EMSdevice {
     uint32_t energyToday_            = EMS_VALUE_ULONG_NOTSET;
     uint32_t energyTotal_            = EMS_VALUE_ULONG_NOTSET;
     uint32_t pumpWorkMin_            = EMS_VALUE_ULONG_NOTSET; // Total solar pump operating time
+    uint8_t  tankHeated_             = EMS_VALUE_BOOL_NOTSET;
+    uint8_t  collectorOnOff_         = EMS_VALUE_BOOL_NOTSET;
 
     uint8_t availabilityFlag_ = EMS_VALUE_BOOL_NOTSET;
     uint8_t configFlag_       = EMS_VALUE_BOOL_NOTSET;

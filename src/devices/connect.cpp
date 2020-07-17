@@ -18,8 +18,6 @@
 
 #include "connect.h"
 
-// MAKE_PSTR_WORD(connect)
-
 namespace emsesp {
 
 REGISTER_FACTORY(Connect, EMSdevice::DeviceType::CONNECT);
@@ -33,7 +31,7 @@ Connect::Connect(uint8_t device_type, uint8_t device_id, uint8_t product_id, con
     // register_telegram_type(EMS_TYPE_XX, "XX", false, std::bind(&Controller::process_XX, this, _1));
 
     // MQTT callbacks
-    // register_mqtt_topic("cmd", std::bind(&Controller::cmd, this, _1));
+    // register_mqtt_topic("cmd", std::bind(&Connect::cmd, this, _1));
 }
 
 void Connect::add_context_menu() {

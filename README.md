@@ -1,21 +1,26 @@
-# EMS-ESP version 2.0 (alpha)
+# EMS-ESP version 2.0
 
-*Warning: this is still in development and not all features have been fully tested.*
+## **Breaking changes**
 
----
+- MQTT base has been removed. The hostname is only used.
 
 ## **New Features in v2**
 
 - A new web interface using React and TypeScript that's now secure as each URL endpoint is protected by issuing a JWT which is then sent using Bearer Authentication. Using a Captive Portal in AP mode or connecting to a local wifi network.
-  
-- A new console. Like in version 1.9 it works with both Serial and Telnet but with a rich set of commands and more intuitive with behavior similar to a Linux-style shell. It supports multiple connections and commands that alter the settings or interact directly with EMS devices are secure behind an admin password. A full list of commands is below, here are the key ones:
+
+<img src="media/web_settings.PNG" width=70% height=70%>
+<img src="media/web_status.PNG" width=70% height=70%>
+<img src="media/web_devices.PNG" width=70% height=70%>
+<img src="media/web_mqtt.PNG" width=70% height=70%>
+
+- A new console. Like in version 1.9 it works with both Serial and Telnet but with a more intuitive Linux shell like behavior. It supports multiple connections and has basic security to prevent any changes to EMS-ESP. A full list of commands is below, here are the key ones:
     * `help` lists the commands and keywords
-    * some commands take you into a new context, a bit like a sub-menu. e.g. `system`, `mqtt`, `thermostat`. Use `help` to show which commands this context has and `exit` or CTRL-D to get back to the root.
+    * some commands take you into a new context, a bit like a sub-menu. e.g. `system`, `thermostat`. Use `help` to show which commands this context has and `exit` or CTRL-D to get back to the root.
     * To change a setting use the `set` command. Typing `set` shows the current settings.
     * `show` shows the data specific to the which context you're in.
-    * `su` to switch to Admin which enables more commands such as most of the `set` commands. The default password is "neo" which can be changed with `passwd` from the system menu. When in Admin mode the command prompt switches from `$` to `#`.
+    * `su` to switch to Admin which enables more commands such as most of the `set` commands. The default password is "ems-esp-neo" which can be changed with `passwd` from the system menu. When in Admin mode the command prompt switches from `$` to `#`.
     * `log` sets the logging level. `log off` disables logging. Use `log debug` for debugging commands and actions.
-    * `watch` from the ems context, will output the incoming Rx telegrams to the console. You can also show these in its 'raw' data format and also watch a particular ID.
+    * `watch` will output the incoming Rx telegrams to the console. You can also show these in its 'raw' data format and also watch a particular ID.
     * CTRL-D to exit, CTRL-U to remove line, TAB to auto-complete 
   
 - There is no "serial mode" anymore like with version 1.9. When the Wifi cannot connect to the SSID it will automatically enter a "safe" mode where the Serial console is activated automatically (baud 115200). Note Serial is always available on the ESP32 because it has multiple UARTs.
@@ -35,24 +40,17 @@
   - and for OTA updates later, `espota` from https://github.com/esp8266/Arduino/blob/master/tools/espota.py
 
 - Grab the latest firmware binary from https://github.com/proddy/EMS-ESP/releases/tag/travis-v2-build
-- Uploading directly via USB: `esptool.py -p <COM PORT> -b 921600 write_flash 0x00000 <firmware.bin>`
-- Uploading over WiFi: `espota.py --debug --progress --port 8266 --auth neo -i <IP address> -f <firmware.bin>`
+- Uploading directly via USB.
+  
+  For ESP8266: `esptool.py -p <COM PORT> -b 921600 write_flash 0x00000 <firmware.bin>`
+  
+  For ESP32: `esptool.py --chip esp32 --port "COM6" --baud 921600 --before default_reset --after hard_reset write_flash -z --flash_mode dio --flash_freq 40m --flash_size detect 0x1000 XX\.platformio\packages\framework-arduinoespressif32\tools\sdk\bin\bootloader_dio_40m.bin 0x8000 XX\.pio\build\esp32\partitions.bin 0xe000 XX\.platformio\packages\framework-arduinoespressif32\tools\partitions\boot_app0.bin 0x10000  <firmware.bin>`
+- Uploading over WiFi: `espota.py --debug --progress --port 8266 --auth ems-esp-neo -i <IP address> -f <firmware.bin>`
 
 ## **Setting EMS-ESP up for the first time**
 
- - connect the ESP8266/ESP32 via USB. If you're coming from version 1.9 all the settings will be erased. If you want a full clean system do a `esptool.py erase_flash` first
- - enter USB via the serial/com/tty port with baud 115200, with something like putty
- - type `su` and use the default password *neo*
- - type `system` to go to the system sub-menu/context
- - type `help` if you want see the available commands
- - type `set` to see the current settings
- - use `set wifi ssid` to change the SSID and password. Remember TAB auto-completes commands if you're not sure of the next parameter.
- - CTRL-D to get back to the root
- - use `mqtt` to enter the MQTT context. Using the same approach, use `help` and `set` command to set the MQTT IP and any credentials. Then CTRL-D to get back to the root.
- - reboot and next time use the Telnet via WiFi to connect as the serial mode will be disabled. The EMS-ESP should have a solid LED or a slow pulsing LED.
- - Telnet to the IP to get back into the console.
- - If Tx is not working you will see errors show up in red. Use `ems` to change to the EMS context and `set` to see the default values. Try different `tx_mode` settings. 1 is default for EMS 1.0. EMS 2.0 is 2 and HT3/Bosch/Junkers is 3. Then a `refresh` to see if it's working. There is no need to reboot.
- - `show` to show all values.
+ - Connect to the Access Point called ems-esp. Login to the captive portal with admin/admin and set the WiFi credentials and restart the ESP.
+ - When it connects to your network you can use the Web UI to configure the other settings or login using Telnet. See the console commands below for options. The password for `su` is the sames as the JWT secret which you can see from the WebUI.
 
 ## **List of console commands**
 
@@ -61,74 +59,49 @@ common commands available in all contexts:
   exit
   help
   log [level]
+  watch <on | off | raw> [ID]
   su
-  set
-  show
 
-(top root level)
+(from the root)
+	set
 	refresh
-	show version
-	ems (enters a context)
-	mqtt (enters a context)
 	system (enters a context)
 	boiler (enters a context)
 	thermostat (enters a context)
-
-ems
-    scan devices [deep]
+	scan devices [deep]
 	send telegram <"XX XX ...">
 	set bus_id <device ID>
-	set read_only <on | off>
 	set tx_mode <n>
-	refresh
+	show
 	show devices
-	show emsbus
+	show ems
 	show values
-	watch <on | off | raw> [ID]
-
-mqtt
-	publish
-	reconnect
-	set base <name>
-	set enabled <on | off>
-	set heartbeat <on | off>
-	set ip <IP address>
-	set format <single | nested | ha>
-	set password
-	set publish_time <seconds>
-	set qos <n>
-	set username [name]
 
 system
-	format
+	set
+	show
+	show mqtt
 	passwd
 	restart
-	set syslog host [IP address]
-	set syslog level [level]
-	set syslog mark [seconds]
 	set wifi hostname <name>
 	set wifi password
 	set wifi ssid <name>
-	wifi disconnect
-	wifi reconnect
-	wifi scan
 
 boiler
-	change comfort <hot |eco | intelligent>
-	change flowtemp <degrees>
-	change wwactive <on | off>
-	change wwcirculation <on | off>
-	change wwonetime <on | off>
-	change wwtemp <degrees>
+	comfort <hot |eco | intelligent>
+	flowtemp <degrees>
+	wwactive <on | off>
+	wwcirculation <on | off>
+	wwonetime <on | off>
+	wwtemp <degrees>
 	read <type ID>
-	set shower alert <on | off>
-	set shower timer <on | off>
 
 thermostat
-	change mode <mode> [heating circuit]
-	change temp <degrees> [heating circuit]
-	read <type ID>
+	set
 	set master [device ID]
+	mode <mode> [heating circuit]
+	temp <degrees> [heating circuit]
+	read <type ID>
 ```
   
 ----------
@@ -140,8 +113,79 @@ thermostat
 
 ### **Things to tidy up in code later**
 
-- Find out why ESP32 uses so much Flash (almost 2x ESP8266)
 - Replace vectors of class objects with shared pointers and use emplace_back since it instantiates during construction. It may have a performance gain.
-- Add real unit tests using platformio's test bed (https://docs.platformio.org/en/latest/plus/pio-remote.html)
-- See if it's easier to use timers instead of millis() based timers, using https://github.com/esp8266/Arduino/blob/master/libraries/esp8266/examples/BlinkPolledTimeout/BlinkPolledTimeout.ino
+- Add real unit tests using platformio's [pio-remote](https://docs.platformio.org/en/latest/plus/pio-remote.html) test bed.
+- See if it's easier to use timers instead of millis() based timers, using [polledTimeout](https://github.com/esp8266/Arduino/blob/master/libraries/esp8266/examples/BlinkPolledTimeout/BlinkPolledTimeout.ino).
+- Port over to ESP-IDF. The Arduino SDK is showing its limitations
+
+### **Features to add**
+
+- Multi-language. German, Dutch, French
+- Click on a device in the Web UI shows it's details
+- Publish time can be customized per device (solar, mixing etc)
+
+### **Customizing the Web UI**
+
+The Web is based off Rick's awesome [esp8266-react](https://github.com/rjwats/esp8266-react/) framework. These are the files that are modified:
+
+**`interface:`**
+  * `.env` project name and project path to ems-esp
+  * `.env.development` CORS URL
+ 
+**`interface/public:`**
+  * `app/manifest.json` ems-esp name
+  * `index.html` ems-esp name
+  * `app/icon.png` 256x256 PNG
+  * `favicon.ico` replaced
+
+**`interface/src:`**
+  * `CustomMuiTheme.tsx` colors for dark mode
+  * `interface/src/wifi/WifiSettingsController.tsx` rename esp8266-react
+
+**`interface/src/project:`**
+  * `ProjectRouting.tsx` removed demo, added paths to ems-esp/status, ems-esp/settings and *
+  * `DemoProject.tsx` remove /demo/ and changed title, renamed to EMSESP.tsx
+  * `ProjectMenu.tsx` title change, added /ems-esp/settings
+  * `DemoInformation.tsx` removed file
+  * `types.ts` add variables
+  * added all custom files starting with EMSESP*
+
+**`interface/src/mqtt:`**
+  * `types.ts` added mqtt_fails
+  * `MqttStatusForm.tsx` added MQTT Publish Errors
+  * `MqttStatus.ts` added function mqttPublishHighlight
+  * `MqttSettingsForm.tsx` added publish time, qos, format
+
+**`interface/src/authentication:`**
+  * `AuthenticationWrapper.tsx` commented out features.security because we added version
+  * `AuthenticationContext.tsx` added version
+  * `MqttSettingsForm.tsx` added publish time, qos, format
+
+**`interface/src/components:`**
+  * `MenuAppBar.tsx` added version to toolbar
+
+**`interface/src/system:`**
+  * `types.ts` added uptime and free_mem
+  * `SystemStatusForm.tsx` added system uptime, % free mem
+
+**`lib/framework`:**
+  * `SystemStatus.h` added #include <LittleFS.h>, #include <uuid/log.h>, #include "../../src/system.h"
+  * `SystemStatus.cpp` added LittleFS.info(fs_info); root["uptime"], root["free_mem"]
+  * Commented out all `Serial.print`'s in all files
+  * `MqttStatus.h` added #include "../../src/mqtt.h"
+  * `MqttStatus.cpp` added root["mqtt_fails"]
+  * `SecuritySettingsService.cpp` added version to the JWT payload
+  * `SecuritySettingsService.h` #include "../../src/version.h"
+  * `WiFiSettingsService.cpp` added WiFi.setOutputPower(20.0f)
+  * `features.ini`: -D FT_NTP=0
+  * `platformio.ini` using our own version
+  * `factory_settings.ini` modified with `ems-esp-neo` as password and `ems-esp` everywhere else
+
+
+ UI customization links:
+
+  * icons: https://material-ui.com/components/material-icons/
+  * colors: https://material-ui.com/customization/color/
+  * tables: https://material-ui.com/components/tables/#dense-table
+
 

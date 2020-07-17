@@ -1,0 +1,3 @@
+- change EMS Devices Web page to use web sockets to show specific Devices data underneath table
+- check if we need to disabled UART during OTA on an ESP8266 - need to tie into the service
+- fix Makefile for standalone

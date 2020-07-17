@@ -28,9 +28,7 @@
 #include <uuid/log.h>
 
 #include "helpers.h"
-#include "settings.h"
 #include "system.h"
-#include "network.h"
 #include "mqtt.h"
 
 using uuid::flash_string_vector;
@@ -39,8 +37,6 @@ using uuid::console::Commands;
 using uuid::console::Shell;
 using uuid::log::Level;
 
-// clang-format off
-
 #define LOG_DEBUG(...) logger_.debug(__VA_ARGS__)
 #define LOG_INFO(...) logger_.info(__VA_ARGS__)
 #define LOG_TRACE(...) logger_.trace(__VA_ARGS__)
@@ -48,10 +44,10 @@ using uuid::log::Level;
 #define LOG_WARNING(...) logger_.warning(__VA_ARGS__)
 #define LOG_ERROR(...) logger_.err(__VA_ARGS__)
 
+// clang-format off
 #define MAKE_PSTR(string_name, string_literal) static const char __pstr__##string_name[] __attribute__((__aligned__(sizeof(int)))) PROGMEM = string_literal;
 #define MAKE_PSTR_WORD(string_name) MAKE_PSTR(string_name, #string_name)
 #define F_(string_name) FPSTR(__pstr__##string_name)
-
 // clang-format on
 
 // common words
@@ -82,19 +78,25 @@ MAKE_PSTR_WORD(version)
 MAKE_PSTR_WORD(values)
 MAKE_PSTR_WORD(system)
 MAKE_PSTR_WORD(refresh)
-MAKE_PSTR_WORD(change)
-MAKE_PSTR_WORD(disconnect)
-MAKE_PSTR_WORD(debug)
 MAKE_PSTR_WORD(restart)
-MAKE_PSTR_WORD(reconnect)
 MAKE_PSTR_WORD(format)
 MAKE_PSTR_WORD(raw)
 MAKE_PSTR_WORD(watch)
-
-// context menus
 MAKE_PSTR_WORD(mqtt)
+MAKE_PSTR_WORD(send)
+MAKE_PSTR_WORD(telegram)
+MAKE_PSTR_WORD(bus_id)
+MAKE_PSTR_WORD(tx_mode)
 MAKE_PSTR_WORD(ems)
+MAKE_PSTR_WORD(devices)
 
+MAKE_PSTR(deep_optional, "[deep]")
+MAKE_PSTR(tx_mode_fmt, "Tx mode = %d")
+MAKE_PSTR(bus_id_fmt, "Bus ID = %02X")
+MAKE_PSTR(watchid_optional, "[ID]")
+MAKE_PSTR(watch_format_mandatory, "<off | on | raw>")
+MAKE_PSTR(invalid_watch, "Invalid watch type")
+MAKE_PSTR(data_mandatory, "<\"XX XX ...\">")
 MAKE_PSTR(percent, "%")
 MAKE_PSTR(degrees, "°C")
 MAKE_PSTR(degrees_mandatory, "<degrees>")
@@ -106,8 +108,6 @@ MAKE_PSTR(typeid_mandatory, "<type ID>")
 MAKE_PSTR(deviceid_mandatory, "<device ID>")
 MAKE_PSTR(deviceid_optional, "[device ID]")
 MAKE_PSTR(invalid_log_level, "Invalid log level")
-MAKE_PSTR(ip_address_optional, "[IP address]")
-MAKE_PSTR(ip_address_mandatory, "<IP address>")
 MAKE_PSTR(port_mandatory, "<port>")
 MAKE_PSTR(log_level_fmt, "Log level = %s")
 MAKE_PSTR(log_level_optional, "[level]")
@@ -116,8 +116,6 @@ MAKE_PSTR(name_optional, "[name]")
 MAKE_PSTR(new_password_prompt1, "Enter new password: ")
 MAKE_PSTR(new_password_prompt2, "Retype new password: ")
 MAKE_PSTR(password_prompt, "Password: ")
-MAKE_PSTR(seconds_optional, "[seconds]")
-MAKE_PSTR(seconds_mandatory, "<seconds>")
 MAKE_PSTR(unset, "<unset>")
 
 #ifdef LOCAL
@@ -143,10 +141,10 @@ enum ShellContext : uint8_t {
 
     MAIN = 0,
     SYSTEM,
-    EMS,
-    MQTT,
     BOILER,
-    THERMOSTAT
+    THERMOSTAT,
+    SOLAR,
+    MIXING
 
 };
 
@@ -173,8 +171,9 @@ class EMSESPShell : virtual public uuid::console::Shell {
     bool        exit_context() override;
 
   private:
-    void add_console_commands();
-    bool _console_commands_loaded = false; // set to true when the initial commands are loaded
+    void        add_console_commands();
+    bool        console_commands_loaded_ = false; // set to true when the initial commands are loaded
+    std::string console_hostname_;
 };
 
 class EMSESPStreamConsole : public uuid::console::StreamConsole, public EMSESPShell {

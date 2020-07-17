@@ -33,7 +33,7 @@ Switch::Switch(uint8_t device_type, uint8_t device_id, uint8_t product_id, const
     // register_telegram_type(EMS_TYPE_XX, "XX", false, std::bind(&Controller::process_XX, this, _1));
 
     // MQTT callbacks
-    // register_mqtt_topic("cmd", std::bind(&Controller::cmd, this, _1));
+    // register_mqtt_topic("cmd", std::bind(&Switch::cmd, this, _1));
 }
 
 void Switch::add_context_menu() {

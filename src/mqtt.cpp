@@ -18,52 +18,27 @@
 
 #include "mqtt.h"
 #include "emsesp.h"
+#include "version.h"
 
-MAKE_PSTR_WORD(username)
-MAKE_PSTR_WORD(qos)
-MAKE_PSTR_WORD(base)
-MAKE_PSTR_WORD(heartbeat)
-MAKE_PSTR_WORD(ip)
-MAKE_PSTR_WORD(port)
-MAKE_PSTR_WORD(nested)
-MAKE_PSTR_WORD(single)
-MAKE_PSTR_WORD(ha)
-MAKE_PSTR_WORD(custom)
-MAKE_PSTR_WORD(publish_time)
-MAKE_PSTR_WORD(publish)
 MAKE_PSTR_WORD(connected)
 MAKE_PSTR_WORD(disconnected)
-
-MAKE_PSTR(mqtt_ip_fmt, "IP = %s")
-MAKE_PSTR(mqtt_user_fmt, "Username = %s")
-MAKE_PSTR(mqtt_password_fmt, "Password = %S")
-MAKE_PSTR(mqtt_port_fmt, "Port = %d")
-MAKE_PSTR(mqtt_enabled_fmt, "MQTT is %s")
-MAKE_PSTR(mqtt_base_fmt, "Base = %s")
-MAKE_PSTR(mqtt_qos_fmt, "QOS = %ld")
-MAKE_PSTR(mqtt_retain_fmt, "Retain Flag = %s")
-MAKE_PSTR(mqtt_format_fmt, "Format for JSON = %s")
-MAKE_PSTR(mqtt_heartbeat_fmt, "Heartbeat = %s")
-MAKE_PSTR(mqtt_publish_time_fmt, "Publish time = %d seconds")
 
 MAKE_PSTR(logger_name, "mqtt")
 
 namespace emsesp {
 
-// exposing static stuff to compiler/linker
 #ifndef EMSESP_STANDALONE
-AsyncMqttClient Mqtt::mqttClient_;
+AsyncMqttClient * Mqtt::mqttClient_;
 #endif
 
+// static parameters we make global
+std::string Mqtt::hostname_;
+uint8_t     Mqtt::mqtt_qos_;
+uint16_t    Mqtt::publish_time_;
+
 std::vector<Mqtt::MQTTFunction>     Mqtt::mqtt_functions_;
-bool                                Mqtt::mqtt_retain_;
-uint8_t                             Mqtt::mqtt_qos_;
-std::string                         Mqtt::mqtt_hostname_; // copy of hostname
-uint8_t                             Mqtt::mqtt_format_;
-std::string                         Mqtt::mqtt_base_;
 uint16_t                            Mqtt::mqtt_publish_fails_    = 0;
 size_t                              Mqtt::maximum_mqtt_messages_ = Mqtt::MAX_MQTT_MESSAGES;
-bool                                Mqtt::force_publish_         = false;
 uint16_t                            Mqtt::mqtt_message_id_       = 0;
 std::deque<Mqtt::QueuedMqttMessage> Mqtt::mqtt_messages_;
 char                                will_topic_[Mqtt::MQTT_TOPIC_MAX_SIZE]; // because MQTT library keeps only char pointer
@@ -82,116 +57,6 @@ MqttMessage::MqttMessage(uint8_t operation, const std::string & topic, const std
     , topic(topic)
     , payload(payload)
     , retain(retain) {
-}
-
-// empty queue
-void Mqtt::flush_message_queue() {
-    mqtt_messages_.clear();
-    mqtt_message_id_ = 0;
-}
-
-// restart MQTT services
-void Mqtt::reconnect() {
-#ifndef EMSESP_STANDALONE
-    mqttClient_.disconnect();
-#endif
-    LOG_DEBUG(F("Reconnecting..."));
-}
-
-// MQTT setup
-void Mqtt::setup() {
-    // exit if already initialized
-    if (mqtt_start_) {
-        return;
-    }
-    mqtt_start_ = true;
-
-    // get some settings and store them locally. This is also because the asyncmqtt library uses references for char *
-    Settings settings;
-    mqtt_enabled_      = settings.mqtt_enabled();
-    mqtt_hostname_     = settings.hostname();
-    mqtt_base_         = settings.mqtt_base();
-    mqtt_qos_          = settings.mqtt_qos();
-    mqtt_format_       = settings.mqtt_format();
-    mqtt_retain_       = settings.mqtt_retain();
-    mqtt_heartbeat_    = settings.mqtt_heartbeat();
-    mqtt_publish_time_ = settings.mqtt_publish_time() * 1000; // convert to seconds
-    mqtt_ip_           = settings.mqtt_ip();
-    mqtt_user_         = settings.mqtt_user();
-    mqtt_password_     = settings.mqtt_password();
-    mqtt_port_         = settings.mqtt_port();
-
-    // if IP is empty, disable MQTT
-    if (settings.mqtt_ip().empty()) {
-        mqtt_enabled_ = false;
-    }
-
-    init(); // set up call backs. only done once.
-
-#ifdef EMSESP_STANDALONE
-    mqtt_enabled_ = true; // force it on for debugging standalone
-#else
-    mqttClient_.setServer(mqtt_ip_.c_str(), mqtt_port_);
-    mqttClient_.setClientId(mqtt_hostname_.c_str());
-    mqttClient_.setWill(make_topic(will_topic_, "status"), 1, true, "offline"); // qos 1, retain true
-    mqttClient_.setKeepAlive(MQTT_KEEP_ALIVE);
-    mqttClient_.setCleanSession(false);
-
-    // set credentials if we have them
-    if (!mqtt_user_.empty()) {
-        mqttClient_.setCredentials(mqtt_user_.c_str(), mqtt_password_.c_str());
-    }
-#endif
-
-    mqtt_connecting_      = false;
-    mqtt_last_connection_ = uuid::get_uptime();
-    mqtt_reconnect_delay_ = Mqtt::MQTT_RECONNECT_DELAY_MIN;
-
-    LOG_DEBUG(F("Configuring MQTT service..."));
-}
-
-// MQTT init callbacks
-// This should only be executed once
-void Mqtt::init() {
-    if (mqtt_init_) {
-        return;
-    }
-    mqtt_init_ = true;
-
-#ifndef EMSESP_STANDALONE
-    mqttClient_.onConnect([this](bool sessionPresent) { on_connect(); });
-
-    mqttClient_.onDisconnect([this](AsyncMqttClientDisconnectReason reason) {
-        if (reason == AsyncMqttClientDisconnectReason::TCP_DISCONNECTED) {
-            LOG_DEBUG(F("Disconnected from server"));
-        }
-        if (reason == AsyncMqttClientDisconnectReason::MQTT_IDENTIFIER_REJECTED) {
-            LOG_ERROR(F("Server identifier Rejected"));
-        }
-        if (reason == AsyncMqttClientDisconnectReason::MQTT_SERVER_UNAVAILABLE) {
-            LOG_ERROR(F("Server unavailable"));
-        }
-        if (reason == AsyncMqttClientDisconnectReason::MQTT_MALFORMED_CREDENTIALS) {
-            LOG_ERROR(F("Malformed credentials"));
-        }
-        if (reason == AsyncMqttClientDisconnectReason::MQTT_NOT_AUTHORIZED) {
-            LOG_ERROR(F("Not authorized"));
-        }
-
-        // Reset reconnection delay
-        mqtt_last_connection_ = uuid::get_uptime();
-        mqtt_connecting_      = false;
-        mqtt_start_           = false; // will force a new start()
-    });
-
-    // mqttClient.onSubscribe([this](uint16_t packetId, uint8_t qos) { LOG_DEBUG(F("Subscribe ACK for PID %d"), packetId); });
-
-    mqttClient_.onPublish([this](uint16_t packetId) { on_publish(packetId); });
-
-    mqttClient_.onMessage([this](char * topic, char * payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) {
-        on_message(topic, payload, len);
-    });
-#endif
 }
 
 Mqtt::MQTTFunction::MQTTFunction(uint8_t device_id, const std::string && topic, mqtt_function_p mqtt_function)
@@ -219,64 +84,27 @@ void Mqtt::subscribe(const std::string & topic, mqtt_function_p cb) {
 // Checks for connection, establishes a connection if not
 // sends out top item on publish queue
 void Mqtt::loop() {
-    // exit if MQTT is not enabled, there is no WIFI or we're still in the MQTT connection process
+    // exit if MQTT is not enabled or ig there is no WIFI
 #ifndef EMSESP_STANDALONE
-    if (!mqtt_enabled_ || mqtt_connecting_ || (WiFi.status() != WL_CONNECTED)) {
+    if (!connected()) {
 #else
     if (false) {
 #endif
         return;
     }
 
-    // if we're already connected....
-    if (connected()) {
-        if (force_publish_) {
-            force_publish_ = false;
-            send_heartbeat();             // create a heartbeat payload
-            EMSESP::publish_all_values(); // add sensors and mqtt to queue
-            // process_all_queue();          // publish everything on queue
-        }
-
-        // send out heartbeat
-        uint32_t currentMillis = uuid::get_uptime();
-        if ((currentMillis - last_heartbeat_ > MQTT_HEARTBEAT_INTERVAL)) {
-            last_heartbeat_ = currentMillis;
-            send_heartbeat();
-        }
-
-        // create publish messages for each of the EMS device values, adding to queue
-        if (currentMillis - last_publish_ >= mqtt_publish_time_) {
-            last_publish_ = currentMillis;
-            EMSESP::publish_all_values();
-        }
-
-        // publish top item from MQTT queue to stop flooding
-        if ((uint32_t)(currentMillis - last_mqtt_poll_) > MQTT_PUBLISH_WAIT) {
-            last_mqtt_poll_ = currentMillis;
-            process_queue();
-        }
-
-        return;
+    uint32_t currentMillis = uuid::get_uptime();
+    // create publish messages for each of the EMS device values, adding to queue
+    if (publish_time_ && (currentMillis - last_publish_ > publish_time_)) {
+        last_publish_ = currentMillis;
+        EMSESP::publish_all_values();
     }
 
-    // We need to reconnect. Check when was the last time we tried this
-    if (mqtt_last_connection_ && (uuid::get_uptime() - mqtt_last_connection_ < mqtt_reconnect_delay_)) {
-        return;
+    // publish top item from MQTT queue to stop flooding
+    if ((uint32_t)(currentMillis - last_mqtt_poll_) > MQTT_PUBLISH_WAIT) {
+        last_mqtt_poll_ = currentMillis;
+        process_queue();
     }
-
-    mqtt_connecting_ = true; // we're doing a connection now
-
-    // Increase the reconnect delay for next time
-    mqtt_reconnect_delay_ += MQTT_RECONNECT_DELAY_STEP;
-    if (mqtt_reconnect_delay_ > MQTT_RECONNECT_DELAY_MAX) {
-        mqtt_reconnect_delay_ = MQTT_RECONNECT_DELAY_MAX;
-    }
-
-#ifndef EMSESP_STANDALONE
-    setup();
-    LOG_INFO(F("Connecting to the MQTT server..."));
-    mqttClient_.connect(); // Connect to the MQTT broker
-#endif
 }
 
 // print MQTT log and other stuff to console
@@ -379,7 +207,7 @@ void Mqtt::show_topic_handlers(uuid::console::Shell & shell, const uint8_t devic
 }
 
 // called when an MQTT Publish ACK is received
-// its a poor-mans QOS we assume the ACK represents the last Publish sent
+// its a poor man's QOS we assume the ACK represents the last Publish sent
 // check if ACK matches the last Publish we sent, if not report an error. Only if qos is 1 or 2
 // and always remove from queue
 void Mqtt::on_publish(uint16_t packetId) {
@@ -403,62 +231,56 @@ void Mqtt::on_publish(uint16_t packetId) {
     mqtt_messages_.pop_front(); // always remove from queue, regardless if there was a successful ACK
 }
 
-// builds up a topic by prefixing the base and hostname
+// builds up a topic by prefixing the hostname
 char * Mqtt::make_topic(char * result, const std::string & topic) {
-    if (!mqtt_base_.empty()) {
-        strlcpy(result, mqtt_base_.c_str(), MQTT_TOPIC_MAX_SIZE);
-        strlcat(result, "/", MQTT_TOPIC_MAX_SIZE);
-        strlcat(result, mqtt_hostname_.c_str(), MQTT_TOPIC_MAX_SIZE);
-    } else {
-        strlcpy(result, mqtt_hostname_.c_str(), MQTT_TOPIC_MAX_SIZE);
-    }
-
+    strlcpy(result, hostname_.c_str(), MQTT_TOPIC_MAX_SIZE);
     strlcat(result, "/", MQTT_TOPIC_MAX_SIZE);
     strlcat(result, topic.c_str(), MQTT_TOPIC_MAX_SIZE);
 
     return result;
 }
 
-void Mqtt::start() {
-    send_start_topic();
+void Mqtt::start(AsyncMqttClient * mqttClient) {
+    mqttClient_ = mqttClient; // copy over from esp8266-react's MQTT service
+
+    // get the hostname, which we'll use to prefix to all topics
+    EMSESP::esp8266React.getWiFiSettingsService()->read([&](WiFiSettings & wifiSettings) { hostname_ = wifiSettings.hostname.c_str(); });
+
+    // fetch MQTT settings
+    EMSESP::esp8266React.getMqttSettingsService()->read([&](MqttSettings & mqttSettings) {
+        publish_time_ = mqttSettings.publish_time * 1000; // convert to milliseconds
+        mqtt_qos_     = mqttSettings.mqtt_qos;
+    });
+
+#ifndef EMSESP_STANDALONE
+    mqttClient_->onConnect([this](bool sessionPresent) { on_connect(); });
+    mqttClient_->setWill(make_topic(will_topic_, "status"), 1, true, "offline"); // with qos 1, retain true
+    mqttClient_->onMessage([this](char * topic, char * payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) {
+        on_message(topic, payload, len);
+        mqttClient_->onPublish([this](uint16_t packetId) { on_publish(packetId); });
+    });
+#endif
 }
 
-// send online appended with the version information as JSON
-void Mqtt::send_start_topic() {
-    StaticJsonDocument<90> doc;
-    doc["event"]   = "start";
-    doc["version"] = Settings().app_version();
-    publish("info", doc, false); // send with retain off
+void Mqtt::set_publish_time(uint16_t publish_time) {
+    publish_time_ = publish_time * 1000; // convert to milliseconds
+}
+
+void Mqtt::set_qos(uint8_t mqtt_qos) {
+    mqtt_qos_ = mqtt_qos;
 }
 
 // MQTT onConnect - when a connect is established
 void Mqtt::on_connect() {
-    mqtt_reconnect_delay_ = Mqtt::MQTT_RECONNECT_DELAY_MIN;
-    mqtt_last_connection_ = uuid::get_uptime();
-    mqtt_connecting_      = false;
+    // send info topic appended with the version information as JSON
+    StaticJsonDocument<90> doc;
+    doc["event"]   = "start";
+    doc["version"] = EMSESP_APP_VERSION;
+    doc["ip"]      = WiFi.localIP().toString();
+    publish("info", doc, false); // send with retain off
 
     publish("status", "online", true); // say we're alive to the Last Will topic, with retain on
-
-    send_heartbeat(); // send heartbeat if enabled
-
     LOG_INFO(F("MQTT connected"));
-}
-
-// send periodic MQTT message with system information
-void Mqtt::send_heartbeat() {
-    if (!mqtt_heartbeat_) {
-        return;
-    }
-
-    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
-
-    doc["rssid"]            = Network::wifi_quality();
-    doc["uptime"]           = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
-    doc["uptime_sec"]       = uuid::get_uptime_sec();
-    doc["freemem"]          = System::free_mem();
-    doc["mqttpublishfails"] = mqtt_publish_fails_;
-
-    publish("heartbeat", doc, false); // send to MQTT with retain off
 }
 
 // add MQTT message to queue, payload is a string
@@ -485,7 +307,7 @@ void Mqtt::queue_subscribe_message(const std::string & topic) {
     }
 
     auto message = std::make_shared<MqttMessage>(Operation::SUBSCRIBE, topic, "", false);
-    LOG_DEBUG(F("Adding a subscription for %s"), topic.c_str());
+    // LOG_DEBUG(F("Adding a subscription for %s"), topic.c_str());
 
     // if the queue is full, make room but removing the last one
     if (mqtt_messages_.size() >= maximum_mqtt_messages_) {
@@ -493,14 +315,6 @@ void Mqtt::queue_subscribe_message(const std::string & topic) {
     }
 
     mqtt_messages_.emplace_back(mqtt_message_id_++, std::move(message));
-}
-
-// Publish using the user's custom retain flag
-void Mqtt::publish(const std::string & topic, const std::string & payload) {
-    publish(topic, payload, mqtt_retain_);
-}
-void Mqtt::publish(const std::string & topic, const JsonDocument & payload) {
-    publish(topic, payload, mqtt_retain_);
 }
 
 // MQTT Publish, using a specific retain flag
@@ -517,12 +331,12 @@ void Mqtt::publish(const std::string & topic, const JsonDocument & payload, bool
 
 // for booleans, which get converted to string values 1 and 0
 void Mqtt::publish(const std::string & topic, const bool value) {
-    queue_publish_message(topic, value ? "1" : "0", mqtt_retain_);
+    queue_publish_message(topic, value ? "1" : "0", false);
 }
 
 // no payload
 void Mqtt::publish(const std::string & topic) {
-    queue_publish_message(topic, "", mqtt_retain_);
+    queue_publish_message(topic, "", false);
 }
 
 // publish all queued messages to MQTT
@@ -543,10 +357,9 @@ void Mqtt::process_queue() {
     auto mqtt_message = mqtt_messages_.front();
     auto message      = mqtt_message.content_;
 
-    // append the hostname and base to the topic, unless we're doing native HA which has a different format
+    // append the hostname to the topic, unless we're doing native HA which has a different format
+    // if the topic starts with "homeassistant" we leave it untouched, otherwise append host
     char full_topic[MQTT_TOPIC_MAX_SIZE];
-
-    // if the topic starts with "homeassistant" we leave it untouched, otherwise append host and base
     if (strncmp(message->topic.c_str(), "homeassistant/", 13) == 0) {
         strcpy(full_topic, message->topic.c_str());
     } else {
@@ -557,7 +370,7 @@ void Mqtt::process_queue() {
     if (message->operation == Operation::SUBSCRIBE) {
         LOG_DEBUG(F("Subscribing to topic: %s"), full_topic);
 #ifndef EMSESP_STANDALONE
-        uint16_t packet_id = mqttClient_.subscribe(full_topic, mqtt_qos_);
+        uint16_t packet_id = mqttClient_->subscribe(full_topic, mqtt_qos_);
 #else
         uint16_t packet_id = 1;
 #endif
@@ -579,8 +392,7 @@ void Mqtt::process_queue() {
     // else try and publish it
 
 #ifndef EMSESP_STANDALONE
-    // uint16_t packet_id = mqttClient_.publish(full_topic, mqtt_qos_, message->retain, message->payload.c_str());
-    uint16_t packet_id = mqttClient_.publish(full_topic, mqtt_qos_, message->retain, message->payload.c_str(), message->payload.size(), false, mqtt_message.id_);
+    uint16_t packet_id = mqttClient_->publish(full_topic, mqtt_qos_, message->retain, message->payload.c_str(), message->payload.size(), false, mqtt_message.id_);
 #else
     uint16_t packet_id = 1;
 #endif
@@ -609,245 +421,6 @@ void Mqtt::process_queue() {
     }
 
     mqtt_messages_.pop_front(); // remove the message from the queue
-}
-
-// add console commands
-void Mqtt::console_commands(Shell & shell, unsigned int context) {
-    EMSESPShell::commands->add_command(
-        ShellContext::MQTT,
-        CommandFlags::ADMIN,
-        flash_string_vector{F_(set), F_(heartbeat)},
-        flash_string_vector{F_(bool_mandatory)},
-        [](Shell & shell, const std::vector<std::string> & arguments) {
-            Settings settings;
-            if (arguments[0] == read_flash_string(F_(on))) {
-                settings.mqtt_heartbeat(true);
-                settings.commit();
-            } else if (arguments[0] == read_flash_string(F_(off))) {
-                settings.mqtt_heartbeat(false);
-                settings.commit();
-            } else {
-                shell.println(F("Must be on or off"));
-                return;
-            }
-        },
-        [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments __attribute__((unused))) -> const std::vector<std::string> {
-            return std::vector<std::string>{read_flash_string(F_(on)), read_flash_string(F_(off))};
-        });
-
-    EMSESPShell::commands->add_command(
-        ShellContext::MQTT,
-        CommandFlags::ADMIN,
-        flash_string_vector{F_(set), F_(format)},
-        flash_string_vector{F_(name_mandatory)},
-        [](Shell & shell, const std::vector<std::string> & arguments) {
-            Settings settings;
-            uint8_t  value;
-            if (arguments[0] == read_flash_string(F_(single))) {
-                value = Settings::MQTT_format::SINGLE;
-            } else if (arguments[0] == read_flash_string(F_(nested))) {
-                value = Settings::MQTT_format::NESTED;
-            } else if (arguments[0] == read_flash_string(F_(ha))) {
-                value = Settings::MQTT_format::HA;
-            } else if (arguments[0] == read_flash_string(F_(custom))) {
-                value = Settings::MQTT_format::CUSTOM;
-            } else {
-                shell.println(F("Must be single, nested or ha"));
-                return;
-            }
-            settings.mqtt_format(value);
-            settings.commit();
-            shell.println(F("Please restart EMS-ESP"));
-        },
-        [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments __attribute__((unused))) -> const std::vector<std::string> {
-            return std::vector<std::string>{read_flash_string(F_(single)), read_flash_string(F_(nested)), read_flash_string(F_(ha)), read_flash_string(F_(custom))};
-        });
-
-    EMSESPShell::commands->add_command(ShellContext::MQTT,
-                                       CommandFlags::ADMIN,
-                                       flash_string_vector{F_(set), F_(publish_time)},
-                                       flash_string_vector{F_(seconds_mandatory)},
-                                       [](Shell & shell, const std::vector<std::string> & arguments) {
-                                           uint16_t publish_time = Helpers::atoint(arguments.front().c_str());
-                                           Settings settings;
-                                           settings.mqtt_publish_time(publish_time);
-                                           settings.commit();
-                                           shell.printfln(F_(mqtt_publish_time_fmt), settings.mqtt_publish_time());
-                                       });
-
-    EMSESPShell::commands->add_command(
-        ShellContext::MQTT,
-        CommandFlags::ADMIN,
-        flash_string_vector{F_(set), F_(enabled)},
-        flash_string_vector{F_(bool_mandatory)},
-        [](Shell & shell, const std::vector<std::string> & arguments) {
-            Settings settings;
-            if (arguments[0] == read_flash_string(F_(on))) {
-                settings.mqtt_enabled(true);
-                settings.commit();
-                reconnect();
-            } else if (arguments[0] == read_flash_string(F_(off))) {
-                settings.mqtt_enabled(false);
-                settings.commit();
-                reconnect();
-            } else {
-                shell.println(F("Value must be on or off"));
-                return;
-            }
-        },
-        [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments __attribute__((unused))) -> const std::vector<std::string> {
-            return std::vector<std::string>{read_flash_string(F_(on)), read_flash_string(F_(off))};
-        });
-
-    EMSESPShell::commands->add_command(ShellContext::MQTT,
-                                       CommandFlags::ADMIN,
-                                       flash_string_vector{F_(set), F_(ip)},
-                                       flash_string_vector{F_(ip_address_mandatory)},
-                                       [](Shell & shell, const std::vector<std::string> & arguments) {
-                                           Settings settings;
-
-                                           if (!arguments.empty()) {
-                                               settings.mqtt_ip(arguments.front());
-                                               settings.commit();
-                                           }
-                                           auto ip = settings.mqtt_ip();
-                                           shell.printfln(F_(mqtt_ip_fmt), ip.empty() ? uuid::read_flash_string(F_(unset)).c_str() : ip.c_str());
-                                           reconnect();
-                                       });
-
-    EMSESPShell::commands->add_command(ShellContext::MQTT,
-                                       CommandFlags::ADMIN,
-                                       flash_string_vector{F_(set), F_(base)},
-                                       flash_string_vector{F_(name_mandatory)},
-                                       [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) {
-                                           Settings settings;
-                                           if (!arguments.empty()) {
-                                               settings.mqtt_base(arguments.front());
-                                               settings.commit();
-                                           }
-                                           reconnect();
-                                       });
-
-    EMSESPShell::commands->add_command(ShellContext::MQTT,
-                                       CommandFlags::ADMIN,
-                                       flash_string_vector{F_(set), F_(port)},
-                                       flash_string_vector{F_(port_mandatory)},
-                                       [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) {
-                                           Settings settings;
-                                           if (!arguments.empty()) {
-                                               settings.mqtt_port(atoi(arguments.front().c_str()));
-                                               settings.commit();
-                                           }
-                                           reconnect();
-                                       });
-
-    EMSESPShell::commands->add_command(ShellContext::MQTT,
-                                       CommandFlags::ADMIN,
-                                       flash_string_vector{F_(set), F_(qos)},
-                                       flash_string_vector{F_(n_mandatory)},
-                                       [](Shell & shell, const std::vector<std::string> & arguments) {
-                                           uint8_t value = (arguments[0]).at(0) - '0';
-
-                                           if (value <= 2) {
-                                               Settings settings;
-                                               settings.mqtt_qos(value);
-                                               settings.commit();
-                                               reconnect();
-                                           } else {
-                                               shell.printfln(F("Value must be 0, 1 or 2"));
-                                           }
-                                       });
-
-    EMSESPShell::commands->add_command(ShellContext::MQTT,
-                                       CommandFlags::USER,
-                                       flash_string_vector{F_(publish)},
-                                       [=](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
-                                           shell.printfln(F("Publishing all values to MQTT"));
-                                           force_publish_ = true;
-                                       });
-
-    EMSESPShell::commands->add_command(ShellContext::MQTT,
-                                       CommandFlags::ADMIN,
-                                       flash_string_vector{F_(reconnect)},
-                                       [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments __attribute__((unused))) {
-                                           reconnect();
-                                       });
-
-    EMSESPShell::commands->add_command(ShellContext::MQTT,
-                                       CommandFlags::ADMIN,
-                                       flash_string_vector{F_(set), F_(password)},
-                                       [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
-                                           shell.enter_password(F_(new_password_prompt1), [=](Shell & shell, bool completed, const std::string & password1) {
-                                               if (completed) {
-                                                   shell.enter_password(F_(new_password_prompt2),
-                                                                        [password1](Shell & shell, bool completed, const std::string & password2) {
-                                                                            if (completed) {
-                                                                                if (password1 == password2) {
-                                                                                    Settings settings;
-                                                                                    settings.mqtt_password(password2);
-                                                                                    settings.commit();
-                                                                                    shell.println(F("MQTT password updated"));
-                                                                                    reconnect();
-                                                                                } else {
-                                                                                    shell.println(F("Passwords do not match"));
-                                                                                }
-                                                                            }
-                                                                        });
-                                               }
-                                           });
-                                       });
-
-    EMSESPShell::commands->add_command(ShellContext::MQTT,
-                                       CommandFlags::ADMIN,
-                                       flash_string_vector{F_(set), F_(username)},
-                                       flash_string_vector{F_(name_optional)},
-                                       [](Shell & shell, const std::vector<std::string> & arguments) {
-                                           Settings settings;
-                                           if (arguments.empty()) {
-                                               settings.mqtt_user("");
-                                           } else {
-                                               settings.mqtt_user(arguments.front());
-                                           }
-                                           settings.commit();
-                                           shell.printfln(F_(mqtt_user_fmt),
-                                                          settings.mqtt_user().empty() ? uuid::read_flash_string(F_(unset)).c_str()
-                                                                                       : settings.mqtt_user().c_str());
-                                           reconnect();
-                                       });
-
-    EMSESPShell::commands->add_command(ShellContext::MQTT,
-                                       CommandFlags::USER,
-                                       flash_string_vector{F_(show)},
-                                       [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) { show_mqtt(shell); });
-
-
-    EMSESPShell::commands->add_command(
-        ShellContext::MQTT, CommandFlags::USER, flash_string_vector{F_(set)}, [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
-            Settings settings;
-            shell.printfln(F_(mqtt_enabled_fmt), settings.mqtt_enabled() ? F_(enabled) : F_(disabled));
-            shell.printfln(F_(mqtt_ip_fmt), settings.mqtt_ip().empty() ? uuid::read_flash_string(F_(unset)).c_str() : settings.mqtt_ip().c_str());
-            shell.printfln(F_(mqtt_user_fmt), settings.mqtt_user().empty() ? uuid::read_flash_string(F_(unset)).c_str() : settings.mqtt_user().c_str());
-            shell.printfln(F_(mqtt_password_fmt), settings.mqtt_password().empty() ? F_(unset) : F_(asterisks));
-            shell.printfln(F_(mqtt_port_fmt), settings.mqtt_port());
-            shell.printfln(F_(mqtt_base_fmt), settings.mqtt_base().empty() ? uuid::read_flash_string(F_(unset)).c_str() : settings.mqtt_base().c_str());
-            shell.printfln(F_(mqtt_qos_fmt), settings.mqtt_qos());
-            shell.printfln(F_(mqtt_retain_fmt), settings.mqtt_retain() ? F_(enabled) : F_(disabled));
-            if (settings.mqtt_format() == Settings::MQTT_format::SINGLE) {
-                shell.printfln(F_(mqtt_format_fmt), F_(single));
-            } else if (settings.mqtt_format() == Settings::MQTT_format::NESTED) {
-                shell.printfln(F_(mqtt_format_fmt), F_(nested));
-            } else if (settings.mqtt_format() == Settings::MQTT_format::HA) {
-                shell.printfln(F_(mqtt_format_fmt), F_(ha));
-            } else if (settings.mqtt_format() == Settings::MQTT_format::CUSTOM) {
-                shell.printfln(F_(mqtt_format_fmt), F_(custom));
-            }
-            shell.printfln(F_(mqtt_heartbeat_fmt), settings.mqtt_heartbeat() ? F_(enabled) : F_(disabled));
-            shell.printfln(F_(mqtt_publish_time_fmt), settings.mqtt_publish_time());
-            shell.println();
-        });
-
-    // enter the context
-    Console::enter_custom_context(shell, context);
 }
 
 } // namespace emsesp

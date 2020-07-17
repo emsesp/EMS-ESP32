@@ -25,7 +25,6 @@
 #include <vector>
 
 #include "helpers.h"
-#include "settings.h"
 #include "mqtt.h"
 #include "console.h"
 

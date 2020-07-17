@@ -33,11 +33,16 @@
 #include <uuid/telnet.h>
 #endif
 
+#include <ESP8266React.h>
+#include "EMSESPStatusService.h"
+#include "EMSESPDevicesService.h"
+#include "EMSESPSettingsService.h"
+#include "EMSESPScanDevicesService.h"
+
 #include "emsdevice.h"
 #include "emsfactory.h"
 #include "telegram.h"
 #include "mqtt.h"
-#include "settings.h"
 #include "system.h"
 #include "sensors.h"
 #include "console.h"
@@ -84,14 +89,15 @@ class EMSESP {
     static uint8_t actual_master_thermostat();
     static void    actual_master_thermostat(const uint8_t device_id);
 
-    static void show_values(uuid::console::Shell & shell);
     static void show_device_values(uuid::console::Shell & shell);
     static void show_sensor_values(uuid::console::Shell & shell);
 
     static void show_devices(uuid::console::Shell & shell);
-    static void show_emsbus(uuid::console::Shell & shell);
+    static void show_ems(uuid::console::Shell & shell);
 
     static void add_context_menus();
+
+    static void reset_tx(uint8_t const tx_mode);
 
     static void incoming_telegram(uint8_t * data, const uint8_t length);
 
@@ -114,6 +120,9 @@ class EMSESP {
         return watch_;
     }
 
+    enum Bus_status : uint8_t { BUS_STATUS_CONNECTED = 0, BUS_STATUS_TX_ERRORS, BUS_STATUS_OFFLINE };
+    static uint8_t bus_status();
+
     static bool tap_water_active() {
         return tap_water_active_;
     }
@@ -122,26 +131,31 @@ class EMSESP {
         tap_water_active_ = tap_water_active;
     }
 
-    static void set_ems_read_only();
-
-    static bool ems_read_only() {
-        return ems_read_only_;
-    }
-
-    static void console_commands(Shell & shell, unsigned int context);
-
     static void fetch_device_values(const uint8_t device_id = 0);
 
     static bool add_device(const uint8_t device_id, const uint8_t product_id, std::string & version, const uint8_t brand);
 
+    static std::vector<std::unique_ptr<EMSdevice>> emsdevices;
+
+    // services
     static Mqtt      mqtt_;
     static System    system_;
-    static Network   network_;
     static Sensors   sensors_;
     static Console   console_;
     static Shower    shower_;
     static RxService rxservice_;
     static TxService txservice_;
+
+    // web controllers
+    static ESP8266React             esp8266React;
+    static EMSESPSettingsService    emsespSettingsService;
+    static EMSESPStatusService      emsespStatusService;
+    static EMSESPDevicesService     emsespDevicesService;
+    static EMSESPScanDevicesService emsespScanDevicesService;
+
+    static uuid::log::Logger logger() {
+        return logger_;
+    }
 
   private:
     EMSESP() = delete;
@@ -163,14 +177,12 @@ class EMSESP {
         uint8_t                     flags;
     };
 
-    static std::vector<std::unique_ptr<EMSdevice>> emsdevices;
-    static std::vector<Device_record>              device_library_;
+    static std::vector<Device_record> device_library_;
 
     static uint8_t  actual_master_thermostat_;
     static uint16_t watch_id_;
     static uint8_t  watch_;
     static bool     tap_water_active_;
-    static bool     ems_read_only_;
 };
 
 } // namespace emsesp

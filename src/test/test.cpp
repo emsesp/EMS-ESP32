@@ -152,7 +152,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         rx_telegram({0x09, 0x0B, 0x02, 0x00, 0x59, 0x09, 0x0a});
 
         shell.loop_all();
-        EMSESP::show_values(shell);
+        EMSESP::show_device_values(shell);
     }
 
     if (command == "unknown2") {
@@ -206,14 +206,14 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         // B0 0B FF 00 02 62 00 44 02 7A 80 00 80 00 80 00 80 00 80 00 80 00 00 7C 80 00 80 00 80 00 80
         rx_telegram({0xB0, 0x0B, 0xFF, 00, 0x02, 0x62, 00, 0x44, 0x02, 0x7A, 0x80, 00, 0x80, 0x00, 0x80, 00,
                      0x80, 00,   0x80, 00, 0x80, 00,   00, 0x7C, 0x80, 00,   0x80, 00, 0x80, 00,   0x80});
-        EMSESP::show_values(shell);
+        EMSESP::show_device_values(shell);
 
         rx_telegram({0xB0, 0x0B, 0xFF, 0x00, 0x02, 0x62, 0x01, 0x44, 0x03, 0x30, 0x80, 00, 0x80, 00, 0x80, 00,
                      0x80, 00,   0x80, 00,   0x80, 00,   0x80, 00,   0x80, 00,   0x80, 00, 0x80, 00, 0x80, 0x33});
-        EMSESP::show_values(shell);
+        EMSESP::show_device_values(shell);
 
         rx_telegram({0xB0, 00, 0xFF, 0x18, 02, 0x62, 0x80, 00, 0xB8});
-        EMSESP::show_values(shell);
+        EMSESP::show_device_values(shell);
 
         EMSESP::send_raw_telegram("B0 00 FF 18 02 62 80 00 B8");
 
@@ -221,12 +221,12 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         uart_telegram("30 00 FF 00 02 64 00 00 00 04 00 00 FF 00 00 1E 0B 09 64 00 00 00 00"); // SM100 modulation
 
         EMSESP::rxservice_.loop();
-        EMSESP::show_values(shell);
+        EMSESP::show_device_values(shell);
 
         uart_telegram("30 00 FF 0A 02 6A 03"); // SM100 pump off  0
 
         EMSESP::rxservice_.loop();
-        EMSESP::show_values(shell);
+        EMSESP::show_device_values(shell);
     }
 
     if (command == "km") {
@@ -293,9 +293,9 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         uart_telegram_withCRC("90 0B FF 00 01 A5 80 00 01 26 15 00 26 2A 05 A0 03 03 03 05 A0 05 A0 00 00 11 01 03 FF FF 00 FE");
         uart_telegram_withCRC("90 00 FF 19 01 A5 01 04 00 00 00 00 FF 64 2A 00 3C 01 FF 92");
 
-        EMSESP::show_emsbus(shell);
+        EMSESP::show_ems(shell);
         EMSESP::rxservice_.loop();
-        EMSESP::show_values(shell);
+        EMSESP::show_device_values(shell);
     }
 
     if (command == "cr100") {
@@ -321,7 +321,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         EMSESP::rxservice_.loop();
         EMSESP::txservice_.flush_tx_queue();
         shell.loop_all();
-        EMSESP::show_values(shell);
+        EMSESP::show_device_values(shell);
 
         shell.invoke_command("thermostat");
         shell.loop_all();
@@ -330,7 +330,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         shell.invoke_command("set mode auto");
 
         shell.loop_all();
-        EMSESP::show_emsbus(shell);
+        EMSESP::show_ems(shell);
         shell.loop_all();
 
         EMSESP::txservice_.send(); // send it to UART
@@ -395,7 +395,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
 
     if (command == "send") {
         shell.printfln(F("Sending to Tx..."));
-        EMSESP::show_emsbus(shell);
+        EMSESP::show_ems(shell);
         EMSESP::txservice_.send(); // send it to UART
     }
 
@@ -430,7 +430,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         // EMS+ Junkers read request
         EMSESP::send_read_request(0x16F, 0x10);
 
-        EMSESP::show_emsbus(shell);
+        EMSESP::show_ems(shell);
 
         // process whole Tx queue
         for (uint8_t i = 0; i < 10; i++) {
@@ -464,10 +464,10 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         // Simulate adding a Poll - should send retry
         EMSESP::incoming_telegram(poll, 1);
 
-        EMSESP::show_emsbus(shell);
+        EMSESP::show_ems(shell);
         uint8_t t2[] = {0x21, 0x22};
         EMSESP::send_write_request(0x91, 0x17, 0x00, t2, sizeof(t2), 0);
-        EMSESP::show_emsbus(shell);
+        EMSESP::show_ems(shell);
 
         EMSESP::txservice_.flush_tx_queue();
     }
@@ -520,14 +520,14 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
     if (command == "poll2") {
         shell.printfln(F("Testing Tx Sending last message on queue..."));
 
-        EMSESP::show_emsbus(shell);
+        EMSESP::show_ems(shell);
 
         uint8_t poll[1] = {0x8B};
         EMSESP::incoming_telegram(poll, 1);
 
         EMSESP::rxservice_.loop();
 
-        EMSESP::show_emsbus(shell);
+        EMSESP::show_ems(shell);
         EMSESP::txservice_.flush_tx_queue();
     }
 

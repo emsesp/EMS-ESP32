@@ -34,7 +34,7 @@ uint8_t               emsTxBuf[EMS_MAXBUFFERSIZE];
 uint8_t               emsTxBufIdx;
 uint8_t               emsTxBufLen;
 uint32_t              emsTxWait;
-bool                  EMSuart::sending_ = false; 
+bool                  EMSuart::sending_ = false;
 
 //
 // Main interrupt handler
@@ -52,7 +52,7 @@ void ICACHE_RAM_ATTR EMSuart::emsuart_rx_intr_handler(void * para) {
         }
         USIC(EMSUART_UART) = (1 << UIBD);   // INT clear the BREAK detect interrupt
         USIE(EMSUART_UART) &= ~(1 << UIFF); // disable fifo-full irq
-        length             = 0;
+        length = 0;
         while ((USS(EMSUART_UART) >> USRXC) & 0x0FF) { // read fifo into buffer
             uint8_t rx = USF(EMSUART_UART);
             if (length < EMS_MAXBUFFERSIZE) {
@@ -64,7 +64,7 @@ void ICACHE_RAM_ATTR EMSuart::emsuart_rx_intr_handler(void * para) {
         if (!drop_next_rx) {
             pEMSRxBuf->length = length;
             os_memcpy((void *)pEMSRxBuf->buffer, (void *)&uart_buffer, pEMSRxBuf->length); // copy data into transfer buffer, including the BRK 0x00 at the end
-            system_os_post(EMSUART_recvTaskPrio, 0, 0); // call emsuart_recvTask() at next opportunity
+            system_os_post(EMSUART_recvTaskPrio, 0, 0);                                    // call emsuart_recvTask() at next opportunity
         }
         drop_next_rx = false;
         sending_     = false;
@@ -98,9 +98,9 @@ void ICACHE_FLASH_ATTR EMSuart::emsuart_flush_fifos() {
 
 // ISR to Fire when Timer is triggered
 void ICACHE_RAM_ATTR EMSuart::emsuart_tx_timer_intr_handler() {
-    if ( tx_mode_ >  50) {
+    if (tx_mode_ > 50) {
         for (uint8_t i = 0; i < emsTxBufLen; i++) {
-             USF(EMSUART_UART) = emsTxBuf[i];
+            USF(EMSUART_UART) = emsTxBuf[i];
         }
         USC0(EMSUART_UART) |= (1 << UCBRK); // set <BRK>
     } else {
@@ -150,7 +150,7 @@ void ICACHE_FLASH_ATTR EMSuart::start(uint8_t tx_mode) {
     PIN_FUNC_SELECT(PERIPHS_IO_MUX_U0RXD_U, FUNC_U0RXD);
 
     // set 9600, 8 bits, no parity check, 1 stop bit
-    USD(EMSUART_UART)  = (UART_CLK_FREQ / EMSUART_BAUD);
+    USD(EMSUART_UART) = (UART_CLK_FREQ / EMSUART_BAUD);
     if (tx_mode_ == 5) {
         USC0(EMSUART_UART) = 0x2C; // 8N1.5
     } else {
@@ -249,7 +249,7 @@ void ICACHE_FLASH_ATTR EMSuart::tx_brk() {
 void EMSuart::send_poll(uint8_t data) {
     // reset tx-brk, just in case it is accidentally set
     USC0(EMSUART_UART) &= ~(1 << UCBRK);
-    sending_           = true;
+    sending_ = true;
 
     if (tx_mode_ > 50) { // timer controlled modes
         emsTxBuf[0] = data;
@@ -260,7 +260,7 @@ void EMSuart::send_poll(uint8_t data) {
         emsTxBufIdx = 0;
         emsTxBufLen = 1;
         timer1_write(emsTxWait);
-    }else if (tx_mode_ == 5) {
+    } else if (tx_mode_ == 5) {
         delayMicroseconds(3000);
         USF(EMSUART_UART) = data;
         USC0(EMSUART_UART) |= (1 << UCBRK);
@@ -275,7 +275,7 @@ void EMSuart::send_poll(uint8_t data) {
         USF(EMSUART_UART) = data;
         delayMicroseconds(EMSUART_TX_WAIT_PLUS);
         tx_brk(); // send <BRK>
-    } else {      
+    } else {
         // tx_mode 1
         // EMS1.0, same logic as in transmit
         ETS_UART_INTR_DISABLE();
@@ -306,9 +306,9 @@ uint16_t ICACHE_FLASH_ATTR EMSuart::transmit(uint8_t * buf, uint8_t len) {
     }
     // reset tx-brk, just in case it is accidentally set
     USC0(EMSUART_UART) &= ~(1 << UCBRK);
-    sending_           = true;
+    sending_ = true;
 
-    // all at once after a inititial timer delay
+    // all at once after a initial timer delay
     if (tx_mode_ > 50) {
         for (uint8_t i = 0; i < len; i++) {
             emsTxBuf[i] = buf[i];
@@ -327,7 +327,7 @@ uint16_t ICACHE_FLASH_ATTR EMSuart::transmit(uint8_t * buf, uint8_t len) {
         timer1_write(emsTxWait);
         return EMS_TX_STATUS_OK;
     }
-    // fixed dealy before sending
+    // fixed delay before sending
     if (tx_mode_ == 5) {
         delayMicroseconds(3000);
         for (uint8_t i = 0; i < len; i++) {
@@ -428,7 +428,7 @@ uint16_t ICACHE_FLASH_ATTR EMSuart::transmit(uint8_t * buf, uint8_t len) {
         USC0(EMSUART_UART) &= ~(1 << UCBRK); // clear <BRK>
     }
 
-    ETS_UART_INTR_ENABLE(); // open up the FIFO again to start receiving
+    ETS_UART_INTR_ENABLE();  // open up the FIFO again to start receiving
     return EMS_TX_STATUS_OK; // send the Tx ok status back
 }
 

@@ -26,7 +26,6 @@
 
 #include "emsdevice.h"
 #include "telegram.h"
-#include "emsesp.h"
 #include "helpers.h"
 #include "mqtt.h"
 

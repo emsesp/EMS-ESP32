@@ -126,11 +126,17 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
         }
     }
 
-    Settings settings;
-    uint8_t  master_thermostat        = settings.master_thermostat();                                 // what the user has defined
-    uint8_t  actual_master_thermostat = EMSESP::actual_master_thermostat();                           // what we're actually using
-    uint8_t  num_devices              = EMSESP::count_devices(EMSdevice::DeviceType::THERMOSTAT) + 1; // including this thermostat
-    mqtt_format_                      = settings.mqtt_format();                                       // single, nested or ha
+    uint8_t master_thermostat = 0;
+    EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) {
+        master_thermostat = settings.master_thermostat; // what the user has defined
+    });
+
+    EMSESP::esp8266React.getMqttSettingsService()->read([&](MqttSettings & settings) {
+        mqtt_format_ = settings.mqtt_format; // single, nested or ha
+    });
+
+    uint8_t actual_master_thermostat = EMSESP::actual_master_thermostat();                           // what we're actually using
+    uint8_t num_devices              = EMSESP::count_devices(EMSdevice::DeviceType::THERMOSTAT) + 1; // including this thermostat
 
     // if we're on auto mode, register this thermostat if it has a device id of 0x10 or 0x17
     // or if its the master thermostat we defined
@@ -161,7 +167,7 @@ void Thermostat::init_mqtt() {
 
     // if the MQTT format type is ha then send the config to HA (via the mqtt discovery service)
     // for each of the heating circuits
-    if (mqtt_format_ == Settings::MQTT_format::HA) {
+    if (mqtt_format_ == MQTT_format::HA) {
         for (uint8_t hc = 0; hc < monitor_typeids.size(); hc++) {
             StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
 
@@ -304,7 +310,8 @@ void Thermostat::thermostat_cmd(const char * message) {
             std::string holiday = doc[hc_name]["holiday"];
             set_holiday(holiday.c_str(), hc_num);
         }
-   }
+    }
+
     if (nullptr != doc["wwmode"]) {
         std::string mode = doc["wwmode"];
         set_ww_mode(mode);
@@ -502,7 +509,7 @@ void Thermostat::thermostat_cmd(const char * message) {
         }
         return;
     }
-}
+} // namespace emsesp
 
 void Thermostat::thermostat_cmd_temp(const char * message) {
     float f = strtof((char *)message, 0);
@@ -559,8 +566,7 @@ void Thermostat::publish_values() {
     JsonObject                                      dataThermostat;
 
     // add external temp
-    if ((flags == EMS_DEVICE_FLAG_RC35 || flags == EMS_DEVICE_FLAG_RC30_1)
-        && (mqtt_format_ == Settings::MQTT_format::SINGLE || mqtt_format_ == Settings::MQTT_format::CUSTOM)) {
+    if ((flags == EMS_DEVICE_FLAG_RC35 || flags == EMS_DEVICE_FLAG_RC30_1) && (mqtt_format_ == MQTT_format::SINGLE || mqtt_format_ == MQTT_format::CUSTOM)) {
         if (datetime_.size()) {
             rootThermostat["time"] = datetime_.c_str();
         }
@@ -597,7 +603,7 @@ void Thermostat::publish_values() {
                 rootThermostat["wwmode"] = "auto";
             }
         }
-        if (mqtt_format_ == Settings::MQTT_format::SINGLE) {
+        if (mqtt_format_ == MQTT_format::SINGLE) {
             Mqtt::publish("thermostat_data", doc);
             rootThermostat = doc.to<JsonObject>(); // clear object
         }
@@ -611,7 +617,7 @@ void Thermostat::publish_values() {
 
         has_data = true;
         // if the MQTT format is 'nested' or 'ha' then create the parent object hc<n>
-        if (mqtt_format_ != Settings::MQTT_format::SINGLE) {
+        if (mqtt_format_ != MQTT_format::SINGLE) {
             // create nested json for each HC
             char hc_name[10]; // hc{1-4}
             strlcpy(hc_name, "hc", 10);
@@ -674,10 +680,10 @@ void Thermostat::publish_values() {
         }
 
         // when using HA always send the mode otherwise it'll break the component/widget and report an error
-        if ((Helpers::hasValue(hc->mode)) || (mqtt_format_ == Settings::MQTT_format::HA)) {
+        if ((Helpers::hasValue(hc->mode)) || (mqtt_format_ == MQTT_format::HA)) {
             uint8_t hc_mode = hc->get_mode(flags);
             // if we're sending to HA the only valid mode types are heat, auto and off
-            if (mqtt_format_ == Settings::MQTT_format::HA) {
+            if (mqtt_format_ == MQTT_format::HA) {
                 if ((hc_mode == HeatingCircuit::Mode::MANUAL) || (hc_mode == HeatingCircuit::Mode::DAY)) {
                     hc_mode = HeatingCircuit::Mode::HEAT;
                 } else if ((hc_mode == HeatingCircuit::Mode::NIGHT) || (hc_mode == HeatingCircuit::Mode::OFF)) {
@@ -700,7 +706,7 @@ void Thermostat::publish_values() {
         }
 
         // if format is single, send immediately and clear object for next hc
-        if (mqtt_format_ == Settings::MQTT_format::SINGLE) {
+        if (mqtt_format_ == MQTT_format::SINGLE) {
             char topic[30];
             char s[3]; // for formatting strings
             strlcpy(topic, "thermostat_data", 30);
@@ -715,11 +721,11 @@ void Thermostat::publish_values() {
     }
 
     // if we're using nested json, send all in one go
-    if (mqtt_format_ == Settings::MQTT_format::NESTED) {
+    if (mqtt_format_ == MQTT_format::NESTED) {
         Mqtt::publish("thermostat_data", doc);
-    } else if (mqtt_format_ == Settings::MQTT_format::HA) {
+    } else if (mqtt_format_ == MQTT_format::HA) {
         Mqtt::publish("homeassistant/climate/ems-esp/state", doc);
-    } else if (mqtt_format_ == Settings::MQTT_format::CUSTOM) {
+    } else if (mqtt_format_ == MQTT_format::CUSTOM) {
         Mqtt::publish("thermostat_data", doc);
     }
 }
@@ -727,7 +733,6 @@ void Thermostat::publish_values() {
 // returns the heating circuit object based on the hc number
 // of nullptr if it doesn't exist yet
 std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(const uint8_t hc_num) {
-    // uint8_t hc = (hc_num) ? hc_num : DEFAULT_HEATING_CIRCUIT;
     if (hc_num == 0) {
         // return first existing hc
         for (const auto & heating_circuit : heating_circuits_) {
@@ -1454,16 +1459,16 @@ void Thermostat::set_party(const uint8_t hrs, const uint8_t hc_num) {
 
 // set date&time as string hh:mm:ss-dd.mm.yyyy-dw-dst
 // dw - day of week (0..6), dst- summertime (0/1)
- void Thermostat::set_datetime(const char * dt) {
+void Thermostat::set_datetime(const char * dt) {
     uint8_t data[9];
     data[0] = (dt[16] - '0') * 100 + (dt[17] - '0') * 10 + (dt[18] - '0'); // year
-    data[1] = (dt[12] - '0') * 10 + (dt[13] - '0'); // month
-    data[2] = (dt[0] - '0') * 10 + (dt[1] - '0');   // hour
-    data[3] = (dt[9] - '0') * 10 + (dt[10] - '0');  // day
-    data[4] = (dt[3] - '0') * 10 + (dt[4] - '0');   // min
-    data[5] = (dt[6] - '0') * 10 + (dt[7] - '0');   // sec
-    data[6] = (dt[20] - '0');                       // day of week
-    data[7] = (dt[22] - '0');                       // summerime
+    data[1] = (dt[12] - '0') * 10 + (dt[13] - '0');                        // month
+    data[2] = (dt[0] - '0') * 10 + (dt[1] - '0');                          // hour
+    data[3] = (dt[9] - '0') * 10 + (dt[10] - '0');                         // day
+    data[4] = (dt[3] - '0') * 10 + (dt[4] - '0');                          // min
+    data[5] = (dt[6] - '0') * 10 + (dt[7] - '0');                          // sec
+    data[6] = (dt[20] - '0');                                              // day of week
+    data[7] = (dt[22] - '0');                                              // summerime
     if ((flags() & 0x0F) == EMS_DEVICE_FLAG_RC35 || (flags() & 0x0F) == EMS_DEVICE_FLAG_RC30_1) {
         LOG_INFO(F("Setting date and time"));
         write_command(6, 0, data, 8, 0);
@@ -1490,8 +1495,8 @@ void Thermostat::set_mode(const std::string & mode, const uint8_t hc_num) {
         set_mode(HeatingCircuit::Mode::NOFROST, hc_num);
     } else if (mode_tostring(HeatingCircuit::Mode::ECO) == mode) {
         set_mode(HeatingCircuit::Mode::ECO, hc_num);
-    // } else if (mode_tostring(HeatingCircuit::Mode::HOLIDAY) == mode) {
-    //    set_mode(HeatingCircuit::Mode::HOLIDAY, hc_num);
+    } else if (mode_tostring(HeatingCircuit::Mode::HOLIDAY) == mode) {
+        set_mode(HeatingCircuit::Mode::HOLIDAY, hc_num);
     } else if (mode_tostring(HeatingCircuit::Mode::COMFORT) == mode) {
         set_mode(HeatingCircuit::Mode::COMFORT, hc_num);
     } else {
@@ -1509,7 +1514,7 @@ void Thermostat::set_mode(const uint8_t mode, const uint8_t hc_num) {
     // get hc based on number
     std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(hc_num);
     if (hc == nullptr) {
-        LOG_WARNING(F("Set mode: Heating Circuit %d not found or activated"), hc_num);
+        LOG_WARNING(F("set mode: Heating Circuit %d not found or activated"), hc_num);
         return;
     }
 
@@ -1593,7 +1598,7 @@ void Thermostat::set_mode(const uint8_t mode, const uint8_t hc_num) {
 
     // add the write command to the Tx queue
     // post validate is the corresponding monitor or set type IDs as they can differ per model
-    write_command(set_typeids[hc_p], offset, set_mode_value, validate_typeid);
+    write_command(set_typeids[hc->hc_num() - 1], offset, set_mode_value, validate_typeid);
 }
 
 // sets the thermostat temp, where mode is a string
@@ -1641,7 +1646,7 @@ void Thermostat::set_temperature(const float temperature, const uint8_t mode, co
 
     uint8_t  model           = flags() & 0x0F;
     int8_t   offset          = -1; // we use -1 to check if there is a value
-    uint8_t  factor          = 2;  // some temperatures only use 1 
+    uint8_t  factor          = 2;  // some temperatures only use 1
     uint16_t validate_typeid = monitor_typeids[hc->hc_num() - 1];
 
     if (model == EMS_DEVICE_FLAG_RC10) {
@@ -1771,6 +1776,7 @@ void Thermostat::set_temperature(const float temperature, const uint8_t mode, co
                  mode_tostring(mode).c_str());
 
         // add the write command to the Tx queue
+        // value is *2
         // post validate is the corresponding monitor or set type IDs as they can differ per model
         write_command(set_typeids[hc->hc_num() - 1], offset, (uint8_t)((float)temperature * (float)factor), validate_typeid);
     }
@@ -1789,14 +1795,17 @@ void Thermostat::console_commands(Shell & shell, unsigned int context) {
                                            } else {
                                                value = Helpers::hextoint(arguments.front().c_str());
                                            }
-                                           Settings settings;
-                                           settings.master_thermostat(value);
-                                           settings.commit();
-                                           EMSESP::actual_master_thermostat(value); // set the internal value too
-                                           char buffer[5];
-                                           shell.printfln(F_(master_thermostat_fmt),
-                                                          settings.master_thermostat() == 0 ? uuid::read_flash_string(F_(auto)).c_str()
-                                                                                            : Helpers::hextoa(buffer, settings.master_thermostat()));
+
+                                           EMSESP::emsespSettingsService.update(
+                                               [&](EMSESPSettings & settings) {
+                                                   settings.master_thermostat = value;
+                                                   EMSESP::actual_master_thermostat(value); // set the internal value too
+                                                   char buffer[5];
+                                                   shell.printfln(F_(master_thermostat_fmt),
+                                                                  !value ? uuid::read_flash_string(F_(auto)).c_str() : Helpers::hextoa(buffer, value));
+                                                   return StateUpdateResult::CHANGED;
+                                               },
+                                               "local");
                                        });
 
     EMSESPShell::commands->add_command(ShellContext::THERMOSTAT,
@@ -1810,7 +1819,7 @@ void Thermostat::console_commands(Shell & shell, unsigned int context) {
 
     EMSESPShell::commands->add_command(ShellContext::THERMOSTAT,
                                        CommandFlags::ADMIN,
-                                       flash_string_vector{F_(change), F_(temp)},
+                                       flash_string_vector{F_(temp)},
                                        flash_string_vector{F_(degrees_mandatory), F_(hc_optional), F_(mode_optional)},
                                        [=](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) {
                                            uint8_t hc = (arguments.size() >= 2) ? arguments[1].at(0) - '0' : AUTO_HEATING_CIRCUIT;
@@ -1826,7 +1835,7 @@ void Thermostat::console_commands(Shell & shell, unsigned int context) {
     EMSESPShell::commands->add_command(
         ShellContext::THERMOSTAT,
         CommandFlags::ADMIN,
-        flash_string_vector{F_(change), F_(mode)},
+        flash_string_vector{F_(mode)},
         flash_string_vector{F_(mode_mandatory), F_(hc_optional)},
         [=](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) {
             uint8_t hc = (arguments.size() == 2) ? arguments[1].at(0) - '0' : AUTO_HEATING_CIRCUIT;
@@ -1850,12 +1859,11 @@ void Thermostat::console_commands(Shell & shell, unsigned int context) {
     EMSESPShell::commands->add_command(
         ShellContext::THERMOSTAT,
         CommandFlags::ADMIN,
-        flash_string_vector{F_(change), F_(wwmode)},
+        flash_string_vector{F_(wwmode)},
         flash_string_vector{F_(mode_mandatory)},
         [=](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) { set_ww_mode(arguments.front()); },
         [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments __attribute__((unused))) -> const std::vector<std::string> {
-            return std::vector<std::string>{read_flash_string(F("off")), read_flash_string(F("on")), read_flash_string(F("auto"))
-            };
+            return std::vector<std::string>{read_flash_string(F("off")), read_flash_string(F("on")), read_flash_string(F("auto"))};
         });
 
     EMSESPShell::commands->add_command(ShellContext::THERMOSTAT,
@@ -1867,12 +1875,13 @@ void Thermostat::console_commands(Shell & shell, unsigned int context) {
                                        CommandFlags::USER,
                                        flash_string_vector{F_(set)},
                                        [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
-                                           Settings settings;
-                                           char     buffer[4];
-                                           shell.printfln(F_(master_thermostat_fmt),
-                                                          settings.master_thermostat() == 0 ? uuid::read_flash_string(F_(auto)).c_str()
-                                                                                            : Helpers::hextoa(buffer, settings.master_thermostat()));
-                                           shell.println();
+                                           EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) {
+                                               char buffer[4];
+                                               shell.printfln(F_(master_thermostat_fmt),
+                                                              settings.master_thermostat == 0 ? uuid::read_flash_string(F_(auto)).c_str()
+                                                                                              : Helpers::hextoa(buffer, settings.master_thermostat));
+                                               shell.println();
+                                           });
                                        });
 
     // enter the context

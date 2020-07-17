@@ -2,7 +2,9 @@
 .vscode
 
 # build
-build/
+/build/
+.clang_complete
+.gcc-flags.json
 
 # platformio
 .pio
@@ -10,10 +12,13 @@ pio_local.ini
 
 # OS specific
 .DS_Store
+*Thumbs.db
 
 # project specfic
-scripts/stackdmp.txt
-firmware
+/scripts/stackdmp.txt
 *.bin
 emsesp
-
+/data/www/
+/lib/framework/WWWData.h
+/interface/build/
+/interface/node_modules/

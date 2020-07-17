@@ -32,9 +32,7 @@
 #endif
 
 #include "helpers.h"
-#include "settings.h"
 #include "system.h"
-#include "network.h"
 #include "console.h"
 
 #include <uuid/log.h>
@@ -63,36 +61,51 @@ struct MqttMessage {
 class Mqtt {
   public:
     void loop();
-    void start();
-    void send_heartbeat();
+
+    void start(AsyncMqttClient * mqttClient);
+
+    void set_publish_time(uint16_t publish_time);
+    void set_qos(uint8_t mqtt_qos);
 
     enum Operation { PUBLISH, SUBSCRIBE };
+
+    static constexpr uint8_t MQTT_TOPIC_MAX_SIZE = 60; // include host and base etc
 
     // are static to be accessed from EMS devices
     static void subscribe(const uint8_t device_id, const std::string & topic, mqtt_function_p cb);
     static void subscribe(const std::string & topic, mqtt_function_p cb);
 
-    static void publish(const std::string & topic, const std::string & payload);
-    static void publish(const std::string & topic, const std::string & payload, bool retain);
-    static void publish(const std::string & topic, const JsonDocument & payload);
-    static void publish(const std::string & topic, const JsonDocument & payload, bool retain);
+    static void publish(const std::string & topic, const std::string & payload, bool retain = false);
+    static void publish(const std::string & topic, const JsonDocument & payload, bool retain = false);
     static void publish(const std::string & topic, const bool value);
     static void publish(const std::string & topic);
 
     static void show_topic_handlers(uuid::console::Shell & shell, const uint8_t device_id);
 
-    static void console_commands(Shell & shell, unsigned int context);
+    static void show_mqtt(uuid::console::Shell & shell);
+
+    static void on_connect();
+
+    void disconnect() {
+#ifdef EMSESP_STANDALONE
+        return;
+#else
+        mqttClient_->disconnect();
+#endif
+    }
 
     void incoming(char * topic, char * payload); // for testing
-
-    static constexpr uint8_t MQTT_TOPIC_MAX_SIZE = 60; // include host and base etc
 
     static bool connected() {
 #ifdef EMSESP_STANDALONE
         return true;
 #else
-        return mqttClient_.connected();
+        return mqttClient_->connected();
 #endif
+    }
+
+    static uint32_t publish_fails() {
+        return mqtt_publish_fails_;
     }
 
   private:
@@ -111,40 +124,28 @@ class Mqtt {
     static std::deque<QueuedMqttMessage> mqtt_messages_;
 
 #ifndef EMSESP_STANDALONE
-    static AsyncMqttClient mqttClient_;
+    static AsyncMqttClient * mqttClient_;
 #endif
-
-    void flush_message_queue();
-    void setup();
 
     static constexpr size_t MAX_MQTT_MESSAGES = 50;
     static size_t           maximum_mqtt_messages_;
     static uint16_t         mqtt_message_id_;
     static bool             mqtt_retain_;
 
-    static constexpr uint8_t  MQTT_QUEUE_MAX_SIZE       = 50;
-    static constexpr uint32_t MQTT_PUBLISH_WAIT         = 250;    // delay between sending publishes, to account for large payloads
-    static constexpr uint8_t  MQTT_PUBLISH_MAX_RETRY    = 3;      // max retries for giving up on publishing
-    static constexpr uint8_t  MQTT_KEEP_ALIVE           = 60;     // 60 seconds. This could also be less, like 30 seconds
-    static constexpr uint32_t MQTT_RECONNECT_DELAY_MIN  = 2000;   // Try to reconnect in 2 seconds upon disconnection
-    static constexpr uint32_t MQTT_RECONNECT_DELAY_STEP = 3000;   // Increase the reconnect delay in 3 seconds after each failed attempt
-    static constexpr uint32_t MQTT_RECONNECT_DELAY_MAX  = 120000; // Set reconnect time to 2 minutes at most
-    static constexpr uint32_t MQTT_HEARTBEAT_INTERVAL   = 60000;  // in milliseconds, how often the MQTT heartbeat is sent (1 min)
+    static constexpr uint8_t  MQTT_QUEUE_MAX_SIZE    = 50;
+    static constexpr uint32_t MQTT_PUBLISH_WAIT      = 250; // delay between sending publishes, to account for large payloads
+    static constexpr uint8_t  MQTT_PUBLISH_MAX_RETRY = 3;   // max retries for giving up on publishing
 
     static void queue_publish_message(const std::string & topic, const std::string & payload, const bool retain);
     static void queue_subscribe_message(const std::string & topic);
 
     void          on_publish(uint16_t packetId);
     void          on_message(char * topic, char * payload, size_t len);
-    void          on_connect();
     static char * make_topic(char * result, const std::string & topic);
     void          process_queue();
     void          process_all_queue();
-    void          send_start_topic();
-    static void   reconnect();
-    void          init();
 
-    static void show_mqtt(uuid::console::Shell & shell);
+    static uint16_t mqtt_publish_fails_;
 
     class MQTTFunction {
       public:
@@ -157,33 +158,14 @@ class Mqtt {
     };
     static std::vector<MQTTFunction> mqtt_functions_; // list of mqtt callbacks for all devices
 
-    static uint16_t mqtt_publish_fails_;
-
-    uint32_t mqtt_last_connection_ = 0;
-    uint32_t mqtt_reconnect_delay_ = MQTT_RECONNECT_DELAY_MIN;
-    bool     mqtt_init_            = false;
-    bool     mqtt_start_           = false;
-    bool     mqtt_connecting_      = false;
-    uint16_t mqtt_publish_time_;
-
-    uint32_t last_heartbeat_ = 0;
     uint32_t last_mqtt_poll_ = 0;
     uint32_t last_publish_   = 0;
 
-    static bool force_publish_;
-
-    // settings
-    static std::string mqtt_hostname_;
-    static std::string mqtt_base_;
+    // settings, copied over
+    static std::string hostname_;
     static uint8_t     mqtt_qos_;
-    static uint8_t     mqtt_format_;
-    std::string        mqtt_ip_;
-    std::string        mqtt_user_;
-    std::string        mqtt_password_;
-    bool               mqtt_enabled_ = true; // start off assuming we want to connect
-    bool               mqtt_heartbeat_;
-    uint16_t           mqtt_port_;
-};
+    static uint16_t    publish_time_;
+}; // namespace emsesp
 
 } // namespace emsesp
 

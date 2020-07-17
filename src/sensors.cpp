@@ -19,6 +19,7 @@
 // code written by nomis - https://github.com/nomis
 
 #include "sensors.h"
+#include "emsesp.h"
 
 MAKE_PSTR(logger_name, "sensors")
 
@@ -28,11 +29,13 @@ uuid::log::Logger Sensors::logger_{F_(logger_name), uuid::log::Facility::DAEMON}
 
 void Sensors::start() {
     // copy over values from MQTT so we don't keep on quering the filesystem
-    mqtt_format_ = Settings().mqtt_format();
+    EMSESP::esp8266React.getMqttSettingsService()->read([&](MqttSettings & settings) {
+        mqtt_format_ = settings.mqtt_format; // single, nested or ha
+    });
 
     // if we're using HA MQTT Discovery, send out the config
     // currently we just do this for a single sensor (sensor1)
-    if (mqtt_format_ == Settings::MQTT_format::HA) {
+    if (mqtt_format_ == MQTT_format::HA) {
         // Mqtt::publish(topic); // empty payload, this remove any previous config sent to HA
 
         StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
@@ -246,7 +249,7 @@ void Sensors::publish_values() {
     // if we're not using nested JSON, send each sensor out seperately
     // sensor1, sensor2 etc...
     // e.g. sensor_1 = {"temp":20.2}
-    if (mqtt_format_ == Settings::MQTT_format::SINGLE) {
+    if (mqtt_format_ == MQTT_format::SINGLE) {
         StaticJsonDocument<100> doc;
         for (const auto & device : devices_) {
             char s[5];
@@ -274,7 +277,7 @@ void Sensors::publish_values() {
 
     uint8_t i = 1;
     for (const auto & device : devices_) {
-        if (mqtt_format_ == Settings::MQTT_format::CUSTOM) {
+        if (mqtt_format_ == MQTT_format::CUSTOM) {
             char s[5];
             doc[device.to_string()] = Helpers::render_value(s, device.temperature_c_, 2);
         } else {
@@ -288,7 +291,7 @@ void Sensors::publish_values() {
         }
     }
 
-    if (mqtt_format_ == Settings::MQTT_format::HA) {
+    if (mqtt_format_ == MQTT_format::HA) {
         Mqtt::publish("homeassistant/sensor/ems-esp/external/state", doc);
     } else {
         Mqtt::publish("sensors", doc);

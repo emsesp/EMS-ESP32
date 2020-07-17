@@ -18,30 +18,28 @@
 
 #include "emsesp.h"
 
-MAKE_PSTR_WORD(bus_id)
-MAKE_PSTR_WORD(tx_mode)
-MAKE_PSTR_WORD(read_only)
-MAKE_PSTR_WORD(emsbus)
-MAKE_PSTR_WORD(devices)
-MAKE_PSTR_WORD(send)
-MAKE_PSTR_WORD(telegram)
-
-MAKE_PSTR(deep_optional, "[deep]")
-MAKE_PSTR(data_mandatory, "<\"XX XX ...\">")
-MAKE_PSTR(tx_mode_fmt, "Tx mode = %d")
-MAKE_PSTR(bus_id_fmt, "Bus ID = %02X")
-MAKE_PSTR(read_only_fmt, "Read-only mode is %s")
-
-MAKE_PSTR(watchid_optional, "[ID]")
-MAKE_PSTR(watch_format_mandatory, "<off | on | raw>")
-MAKE_PSTR(invalid_watch, "Invalid watch type")
-
 MAKE_PSTR(logger_name, "emsesp")
 
 namespace emsesp {
 
 using DeviceFlags = emsesp::EMSdevice;
 using DeviceType  = emsesp::EMSdevice::DeviceType;
+
+AsyncWebServer webServer(80);
+
+#if defined(ESP32)
+ESP8266React          EMSESP::esp8266React(&webServer, &SPIFFS);
+EMSESPSettingsService EMSESP::emsespSettingsService = EMSESPSettingsService(&webServer, &SPIFFS, EMSESP::esp8266React.getSecurityManager());
+#else
+ESP8266React          EMSESP::esp8266React(&webServer, &LittleFS);
+EMSESPSettingsService EMSESP::emsespSettingsService = EMSESPSettingsService(&webServer, &LittleFS, EMSESP::esp8266React.getSecurityManager());
+#endif
+
+EMSESPStatusService EMSESP::emsespStatusService = EMSESPStatusService(&webServer, EMSESP::esp8266React.getSecurityManager());
+
+EMSESPDevicesService EMSESP::emsespDevicesService = EMSESPDevicesService(&webServer, EMSESP::esp8266React.getSecurityManager());
+
+EMSESPScanDevicesService EMSESP::emsespScanDevicesService = EMSESPScanDevicesService(&webServer, EMSESP::esp8266React.getSecurityManager());
 
 std::vector<std::unique_ptr<EMSdevice>>    EMSESP::emsdevices;      // array of all the detected EMS devices
 std::vector<emsesp::EMSESP::Device_record> EMSESP::device_library_; // libary of all our known EMS devices so far
@@ -55,7 +53,6 @@ Mqtt      EMSESP::mqtt_;      // mqtt handler
 System    EMSESP::system_;    // core system services
 Console   EMSESP::console_;   // telnet and serial console
 Sensors   EMSESP::sensors_;   // Dallas sensors
-Network   EMSESP::network_;   // WiFi
 Shower    EMSESP::shower_;    // Shower logic
 
 // static/common variables
@@ -63,11 +60,10 @@ uint8_t  EMSESP::actual_master_thermostat_ = EMSESP_DEFAULT_MASTER_THERMOSTAT; /
 uint16_t EMSESP::watch_id_                 = WATCH_ID_NONE;                    // for when log is TRACE. 0 means no trace set
 uint8_t  EMSESP::watch_                    = 0;                                // trace off
 bool     EMSESP::tap_water_active_         = false;                            // for when Boiler states we having running warm water. used in Shower()
-bool     EMSESP::ems_read_only_;
-uint32_t EMSESP::last_fetch_ = 0;
+uint32_t EMSESP::last_fetch_               = 0;
 
 // for a specific EMS device go and request data values
-// or if device_id is 0 it will fetch from all known devices
+// or if device_id is 0 it will fetch from all our known and active devices
 void EMSESP::fetch_device_values(const uint8_t device_id) {
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice) {
@@ -110,8 +106,48 @@ void EMSESP::watch_id(uint16_t watch_id) {
     }
 }
 
+// change the tx_mode
+// resets all counters and bumps the UART
+void EMSESP::reset_tx(uint8_t const tx_mode) {
+    txservice_.telegram_read_count(0);
+    txservice_.telegram_write_count(0);
+    txservice_.telegram_fail_count(0);
+    if (tx_mode) {
+        EMSuart::stop();
+        EMSuart::start(tx_mode);
+        EMSESP::fetch_device_values();
+    }
+}
+
+// return status of bus: connected, connected but Tx is broken, disconnected
+uint8_t EMSESP::bus_status() {
+    if (!rxservice_.bus_connected()) {
+        return BUS_STATUS_OFFLINE;
+    }
+
+    // check if we have Tx issues.
+    uint32_t total_sent = txservice_.telegram_read_count() + txservice_.telegram_write_count();
+
+    // nothing sent successfully, also no errors - must be ok
+    if ((total_sent == 0) && (txservice_.telegram_fail_count() == 0)) {
+        return BUS_STATUS_CONNECTED;
+    }
+
+    // nothing sent successfully, but have Tx errors
+    if ((total_sent == 0) && (txservice_.telegram_fail_count() != 0)) {
+        return BUS_STATUS_TX_ERRORS;
+    }
+
+    // Tx Failure rate > 5%
+    if (((txservice_.telegram_fail_count() * 100) / total_sent) > EMSbus::EMS_TX_ERROR_LIMIT) {
+        return BUS_STATUS_TX_ERRORS;
+    }
+
+    return BUS_STATUS_CONNECTED;
+}
+
 // show the EMS bus status plus both Rx and Tx queues
-void EMSESP::show_emsbus(uuid::console::Shell & shell) {
+void EMSESP::show_ems(uuid::console::Shell & shell) {
     // EMS bus information
     if (rxservice_.bus_connected()) {
         uint8_t success_rate = 0;
@@ -120,7 +156,7 @@ void EMSESP::show_emsbus(uuid::console::Shell & shell) {
         }
 
         shell.printfln(F("EMS Bus info:"));
-        shell.printfln(F("  Tx mode: %d"), Settings().ems_tx_mode());
+        EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) { shell.printfln(F("  Tx mode: %d"), settings.tx_mode); });
         shell.printfln(F("  Bus protocol: %s"), EMSbus::is_ht3() ? F("HT3") : F("Buderus"));
         shell.printfln(F("  #telegrams received: %d"), rxservice_.telegram_count());
         shell.printfln(F("  #read requests sent: %d"), txservice_.telegram_read_count());
@@ -172,12 +208,6 @@ void EMSESP::show_emsbus(uuid::console::Shell & shell) {
     }
 
     shell.println();
-}
-
-// display in the console all the data we have from ems devices and external sensors
-void EMSESP::show_values(uuid::console::Shell & shell) {
-    show_device_values(shell);
-    show_sensor_values(shell);
 }
 
 // show EMS device values
@@ -330,8 +360,6 @@ void EMSESP::process_UBADevices(std::shared_ptr<const Telegram> telegram) {
         return;
     }
 
-    uint8_t ems_bus_id = Settings().ems_bus_id();
-
     // for each byte, check the bits and determine the device_id
     for (uint8_t data_byte = 0; data_byte < telegram->message_length; data_byte++) {
         uint8_t next_byte = telegram->message_data[data_byte];
@@ -342,7 +370,7 @@ void EMSESP::process_UBADevices(std::shared_ptr<const Telegram> telegram) {
                     uint8_t device_id = ((data_byte + 1) * 8) + bit;
                     // if we haven't already detected this device, request it's version details, unless its us (EMS-ESP)
                     // when the version info is received, it will automagically add the device
-                    if ((device_id != ems_bus_id) && !(EMSESP::device_exists(device_id))) {
+                    if ((device_id != EMSbus::ems_bus_id()) && !(EMSESP::device_exists(device_id))) {
                         LOG_DEBUG(F("New EMS device detected with ID 0x%02X. Requesting version information."), device_id);
                         send_read_request(EMSdevice::EMS_TYPE_VERSION, device_id);
                     }
@@ -593,7 +621,8 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
         // if we ask ourself at roomcontrol for version e.g. 0B 98 02 00 20
         Roomctrl::check((data[1] ^ 0x80 ^ rxservice_.ems_mask()), data);
 #ifdef EMSESP_DEBUG
-        LOG_TRACE(F("[DEBUG] Echo after %d ms: %s"), ::millis() - rx_time_, Helpers::data_to_hex(data, length).c_str());
+        // get_uptime is only updated once per loop, does not give the right time
+        LOG_DEBUG(F("[DEBUG] Echo after %d ms: %s"), ::millis() - rx_time_, Helpers::data_to_hex(data, length).c_str());
 #endif
         return; // it's an echo
     }
@@ -643,7 +672,7 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
     if (length == 1) {
 #ifdef EMSESP_DEBUG
         char s[4];
-        if(first_value & 0x80) {
+        if (first_value & 0x80) {
             LOG_TRACE(F("[DEBUG] next Poll %s after %d ms"), Helpers::hextoa(s, first_value), ::millis() - rx_time_);
             // time measurement starts here, use millis because get_uptime is only updated once per loop
             rx_time_ = ::millis();
@@ -677,231 +706,6 @@ void EMSESP::send_raw_telegram(const char * data) {
     txservice_.send_raw(data);
 }
 
-// sets the ems read only flag preventing any Tx from going out
-void EMSESP::set_ems_read_only() {
-    ems_read_only_ = Settings().ems_read_only();
-    LOG_DEBUG(F("Setting EMS read-only mode to %s"), ems_read_only_ ? F("on") : F("off"));
-}
-
-// console commands to add
-void EMSESP::console_commands(Shell & shell, unsigned int context) {
-    EMSESPShell::commands->add_command(ShellContext::EMS,
-                                       CommandFlags::USER,
-                                       flash_string_vector{F_(show), F_(devices)},
-                                       [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) { show_devices(shell); });
-
-
-    EMSESPShell::commands->add_command(ShellContext::EMS,
-                                       CommandFlags::USER,
-                                       flash_string_vector{F_(show), F_(emsbus)},
-                                       [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) { show_emsbus(shell); });
-
-    EMSESPShell::commands->add_command(ShellContext::EMS,
-                                       CommandFlags::USER,
-                                       flash_string_vector{F_(show)},
-                                       [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
-                                           show_devices(shell);
-                                           show_emsbus(shell);
-                                       });
-
-    EMSESPShell::commands->add_command(ShellContext::EMS,
-                                       CommandFlags::USER,
-                                       flash_string_vector{F_(show), F_(values)},
-                                       [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
-                                           EMSESP::show_device_values(shell);
-                                       });
-
-    EMSESPShell::commands->add_command(ShellContext::EMS,
-                                       CommandFlags::USER,
-                                       flash_string_vector{F_(refresh)},
-                                       [&](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
-                                           shell.printfln(F("Requesting data from EMS devices"));
-                                           EMSESP::fetch_device_values();
-                                       });
-
-    EMSESPShell::commands->add_command(
-        ShellContext::EMS,
-        CommandFlags::ADMIN,
-        flash_string_vector{F_(set), F_(bus_id)},
-        flash_string_vector{F_(deviceid_mandatory)},
-        [](Shell & shell, const std::vector<std::string> & arguments) {
-            uint8_t device_id = Helpers::hextoint(arguments.front().c_str());
-            if ((device_id == 0x0B) || (device_id == 0x0D) || (device_id == 0x0A) || (device_id == 0x0F) || (device_id == 0x12)) {
-                Settings settings;
-                settings.ems_bus_id(device_id);
-                settings.commit();
-                shell.printfln(F_(bus_id_fmt), settings.ems_bus_id());
-            } else {
-                shell.println(F("Must be 0B, 0D, 0A, 0F or 12"));
-            }
-        },
-        [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments __attribute__((unused))) -> const std::vector<std::string> {
-            return std::vector<std::string>{
-                read_flash_string(F("0B")),
-                read_flash_string(F("0D")),
-                read_flash_string(F("0A")),
-                read_flash_string(F("0F")),
-                read_flash_string(F("12")),
-
-            };
-        });
-
-    EMSESPShell::commands->add_command(ShellContext::EMS,
-                                       CommandFlags::ADMIN,
-                                       flash_string_vector{F_(set), F_(tx_mode)},
-                                       flash_string_vector{F_(n_mandatory)},
-                                       [](Shell & shell, const std::vector<std::string> & arguments) {
-                                           uint8_t  tx_mode = std::strtol(arguments[0].c_str(), nullptr, 10);
-                                           Settings settings;
-                                           settings.ems_tx_mode(tx_mode);
-                                           settings.commit();
-                                           shell.printfln(F_(tx_mode_fmt), settings.ems_tx_mode());
-                                           // reset counters
-                                           txservice_.telegram_read_count(0);
-                                           txservice_.telegram_write_count(0);
-                                           txservice_.telegram_fail_count(0);
-                                           // reset the UART
-                                           EMSuart::stop();
-                                           EMSuart::start(tx_mode);
-                                       });
-
-    EMSESPShell::commands->add_command(
-        ShellContext::EMS,
-        CommandFlags::ADMIN,
-        flash_string_vector{F_(set), F_(read_only)},
-        flash_string_vector{F_(bool_mandatory)},
-        [](Shell & shell, const std::vector<std::string> & arguments) {
-            Settings settings;
-            if (arguments[0] == read_flash_string(F_(on))) {
-                settings.ems_read_only(true);
-                settings.commit();
-                EMSESP::ems_read_only();
-            } else if (arguments[0] == read_flash_string(F_(off))) {
-                settings.ems_read_only(false);
-                settings.commit();
-                EMSESP::ems_read_only();
-            } else {
-                shell.println(F("Must be on or off"));
-                return;
-            }
-        },
-        [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments __attribute__((unused))) -> const std::vector<std::string> {
-            return std::vector<std::string>{read_flash_string(F_(on)), read_flash_string(F_(off))};
-        });
-
-
-    EMSESPShell::commands->add_command(ShellContext::EMS,
-                                       CommandFlags::USER,
-                                       flash_string_vector{F_(send), F_(telegram)},
-                                       flash_string_vector{F_(data_mandatory)},
-                                       [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) {
-                                           EMSESP::send_raw_telegram(arguments.front().c_str());
-                                       });
-
-    EMSESPShell::commands->add_command(ShellContext::EMS,
-                                       CommandFlags::USER,
-                                       flash_string_vector{F_(scan), F_(devices)},
-                                       flash_string_vector{F_(deep_optional)},
-                                       [](Shell & shell, const std::vector<std::string> & arguments) {
-                                           if (arguments.size() == 0) {
-                                               EMSESP::send_read_request(EMSdevice::EMS_TYPE_UBADevices, EMSdevice::EMS_DEVICE_ID_BOILER);
-                                           } else {
-                                               shell.printfln(F("Performing a deep scan by pinging our device library..."));
-                                               std::vector<uint8_t> Device_Ids;
-
-                                               Device_Ids.push_back(0x08); // Boilers - 0x08
-                                               Device_Ids.push_back(0x38); // HeatPump - 0x38
-                                               Device_Ids.push_back(0x30); // Solar Module - 0x30
-                                               Device_Ids.push_back(0x09); // Controllers - 0x09
-                                               Device_Ids.push_back(0x02); // Connect - 0x02
-                                               Device_Ids.push_back(0x48); // Gateway - 0x48
-                                               Device_Ids.push_back(0x20); // Mixing Devices - 0x20
-                                               Device_Ids.push_back(0x21); // Mixing Devices - 0x21
-                                               Device_Ids.push_back(0x22); // Mixing Devices - 0x22
-                                               Device_Ids.push_back(0x23); // Mixing Devices - 0x23
-                                               Device_Ids.push_back(0x28); // Mixing Devices WW- 0x28
-                                               Device_Ids.push_back(0x29); // Mixing Devices WW- 0x29
-                                               Device_Ids.push_back(0x10); // Thermostats - 0x10
-                                               Device_Ids.push_back(0x17); // Thermostats - 0x17
-                                               Device_Ids.push_back(0x18); // Thermostat remote - 0x18
-                                               Device_Ids.push_back(0x19); // Thermostat remote - 0x19
-                                               Device_Ids.push_back(0x1A); // Thermostat remote - 0x1A
-                                               Device_Ids.push_back(0x1B); // Thermostat remote - 0x1B
-                                               Device_Ids.push_back(0x11); // Switches - 0x11
-
-                                               // send the read command with Version command
-                                               for (const uint8_t device_id : Device_Ids) {
-                                                   EMSESP::send_read_request(EMSdevice::EMS_TYPE_VERSION, device_id);
-                                               }
-                                           }
-                                       });
-
-    EMSESPShell::commands->add_command(ShellContext::EMS,
-                                       CommandFlags::USER,
-                                       flash_string_vector{F_(set)},
-                                       [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
-                                           Settings settings;
-                                           shell.printfln(F_(tx_mode_fmt), settings.ems_tx_mode());
-                                           shell.printfln(F_(bus_id_fmt), settings.ems_bus_id());
-                                           shell.printfln(F_(read_only_fmt), settings.ems_read_only() ? F_(on) : F_(off));
-                                       });
-
-
-
-    EMSESPShell::commands->add_command(ShellContext::EMS,
-                                       CommandFlags::USER,
-                                       flash_string_vector{F_(watch)},
-                                       flash_string_vector{F_(watch_format_mandatory), F_(watchid_optional)},
-                                       [](Shell & shell, const std::vector<std::string> & arguments) {
-                                           // get raw/pretty
-                                           if (arguments[0] == read_flash_string(F_(raw))) {
-                                               emsesp::EMSESP::watch(WATCH_RAW); // raw
-                                           } else if (arguments[0] == read_flash_string(F_(on))) {
-                                               emsesp::EMSESP::watch(WATCH_ON); // on
-                                           } else if (arguments[0] == read_flash_string(F_(off))) {
-                                               emsesp::EMSESP::watch(WATCH_OFF); // off
-                                           } else {
-                                               shell.printfln(F_(invalid_watch));
-                                               return;
-                                           }
-
-                                           uint16_t watch_id;
-                                           if (arguments.size() == 2) {
-                                               // get the watch_id if its set
-                                               watch_id = Helpers::hextoint(arguments[1].c_str());
-                                           } else {
-                                               watch_id = WATCH_ID_NONE;
-                                           }
-
-                                           emsesp::EMSESP::watch_id(watch_id);
-
-                                           uint8_t watch = emsesp::EMSESP::watch();
-                                           if (watch == WATCH_OFF) {
-                                               shell.printfln(F("Watching telegrams is off"));
-                                               return;
-                                           }
-
-                                           // if logging is off, the watch won't show anything, show force it back to INFO
-                                           if (!logger_.enabled(Level::NOTICE)) {
-                                               shell.log_level(Level::NOTICE);
-                                           }
-
-                                           if (watch == WATCH_ON) {
-                                               shell.printfln(F("Watching incoming telegrams, displayed in decoded format"));
-                                           } else {
-                                               shell.printfln(F("Watching incoming telegrams, displayed as raw bytes")); // WATCH_RAW
-                                           }
-
-                                           watch_id = emsesp::EMSESP::watch_id();
-                                           if (watch_id != WATCH_ID_NONE) {
-                                               shell.printfln(F("Filtering only telegrams that match a device ID or telegram type of 0x%02X"), watch_id);
-                                           }
-                                       });
-
-    // enter the context
-    Console::enter_custom_context(shell, context);
-}
-
 // kick off the party, start all the services
 void EMSESP::start() {
     // Load our library of known devices
@@ -909,40 +713,47 @@ void EMSESP::start() {
 #include "device_library.h"
     };
 
-    system_.start();
-    network_.start();
-    console_.start();
-    sensors_.start();
-    txservice_.start();
-    shower_.start();
-    mqtt_.start();
+#ifdef ESP32
+    SPIFFS.begin(true);
+#elif defined(ESP8266)
+    LittleFS.begin();
+#endif
 
-    set_ems_read_only(); // see if we have Tx disabled and set the flag
+    esp8266React.begin();                              // starts wifi, ap, ota, security, mqtt services
+    emsespSettingsService.begin();                     // load settings
+    console_.start();                                  // telnet and serial console
+    system_.start();                                   // starts syslog, uart, sets version, initializes LED. Requires pre-loaded settings.
+    mqtt_.start(EMSESP::esp8266React.getMqttClient()); // mqtt init
+    sensors_.start();                                  // dallas external sensors
+    shower_.start();                                   // initialize shower timer and shower alert
+    txservice_.start();                                // sets bus ID, sends out request for EMS devices
+    webServer.begin();                                 // start web server
 }
 
 // loop de loop
 void EMSESP::loop() {
-    // network returns false if an OTA is being carried out
-    // so we disable all services when an OTA is happening
-    if (network_.loop()) {
-        system_.loop();    // does LED and checks system health, and syslog service
-        mqtt_.loop();      // starts mqtt, and sends out anything in the queue
-        rxservice_.loop(); // process what ever is in the rx queue
-        txservice_.loop(); // check that the Tx is all ok
-        shower_.loop();    // check for shower on/off
-        sensors_.loop();   // this will also send out via MQTT
-        console_.loop();   // telnet/serial console
+#ifndef EMSESP_STANDALONE
+    esp8266React.loop();
+#endif
 
-        // force a query on the EMS devices to fetch latest data at a set interval (1 min)
-        if ((uuid::get_uptime() - last_fetch_ > EMS_FETCH_FREQUENCY)) {
-            last_fetch_ = uuid::get_uptime();
-            fetch_device_values();
-        }
+    system_.loop();    // does LED and checks system health, and syslog service
+    mqtt_.loop();      // starts mqtt, and sends out anything in the queue
+    rxservice_.loop(); // process what ever is in the rx queue
+    txservice_.loop(); // check that the Tx is all ok
+    shower_.loop();    // check for shower on/off
+    sensors_.loop();   // this will also send out via MQTT
+    console_.loop();   // telnet/serial console
 
-        // helps ease wifi dropouts effecting MQTT and Telnet services
-        // https://github.com/esp8266/Arduino/blob/e721089e601985e633641ab7323f81a84ea0cd1b/cores/esp8266/core_esp8266_wiring.cpp#L41-L57
-        delay(1);
+    // force a query on the EMS devices to fetch latest data at a set interval (1 min)
+    if ((uuid::get_uptime() - last_fetch_ > EMS_FETCH_FREQUENCY)) {
+        last_fetch_ = uuid::get_uptime();
+        fetch_device_values();
     }
+
+#if defined(ESP32)
+    delay(1);
+#endif
+
 }
 
 } // namespace emsesp

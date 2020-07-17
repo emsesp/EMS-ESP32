@@ -63,7 +63,7 @@ class Thermostat : public EMSdevice {
         int8_t  offsettemp        = EMS_VALUE_INT_NOTSET;  // heatingcurve offest temp at roomtemp signed!
 
         uint8_t hc_num() const {
-            return hc_num_;
+            return hc_num_; // 1..10
         }
 
         uint8_t get_mode(uint8_t flags) const;
@@ -85,7 +85,7 @@ class Thermostat : public EMSdevice {
         }
 
       private:
-        uint8_t  hc_num_;
+        uint8_t  hc_num_; // 1..10
         uint16_t monitor_typeid_;
         uint16_t set_typeid_;
     };

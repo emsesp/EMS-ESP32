@@ -41,7 +41,7 @@ const uint8_t ems_crc_table[] = {0x00, 0x02, 0x04, 0x06, 0x08, 0x0A, 0x0C, 0x0E,
 uint32_t EMSbus::last_bus_activity_ = 0;              // timestamp of last time a valid Rx came in
 bool     EMSbus::bus_connected_     = false;          // start assuming the bus hasn't been connected
 uint8_t  EMSbus::ems_mask_          = EMS_MASK_UNSET; // unset so its triggered when booting, the its 0x00=buderus, 0x80=junker/ht3
-uint8_t  EMSbus::ems_bus_id_        = EMSESP_DEFAULT_BUS_ID;
+uint8_t  EMSbus::ems_bus_id_        = EMSESP_DEFAULT_EMS_BUS_ID;
 uint8_t  EMSbus::tx_waiting_        = Telegram::Operation::NONE;
 bool     EMSbus::tx_active_         = false;
 
@@ -87,7 +87,7 @@ std::string Telegram::to_string() const {
     }
     uint8_t data[EMS_MAX_TELEGRAM_LENGTH];
     uint8_t length = 0;
-    data[0] = this->src ^ RxService::ems_mask();
+    data[0]        = this->src ^ RxService::ems_mask();
     if (this->operation == Telegram::Operation::TX_READ) {
         data[1] = this->dest | 0x80;
         data[4] = this->message_data[0];
@@ -98,7 +98,7 @@ std::string Telegram::to_string() const {
             length  = 7;
         } else {
             data[2] = this->type_id;
-            length  =  5;
+            length  = 5;
         }
     }
     if (this->operation == Telegram::Operation::TX_WRITE) {
@@ -205,11 +205,6 @@ void RxService::add(uint8_t * data, uint8_t length) {
         message_length = length - 6 - shift;
     }
 
-    // if we don't have a type_id or empty data block, exit
-    if ((type_id == 0) || (message_length == 0)) {
-        return;
-    }
-
     // if we're watching and "raw" print out actual telegram as bytes to the console
     if (EMSESP::watch() == EMSESP::Watch::WATCH_RAW) {
         uint16_t trace_watch_id = EMSESP::watch_id();
@@ -222,6 +217,11 @@ void RxService::add(uint8_t * data, uint8_t length) {
     LOG_DEBUG(F("[DEBUG] New Rx [#%d] telegram, message length %d"), rx_telegram_id_, message_length);
 #endif
 
+    // if we don't have a type_id or empty data block, exit
+    if ((type_id == 0) || (message_length == 0)) {
+        return;
+    }
+
     // create the telegram
     auto telegram = std::make_shared<Telegram>(Telegram::Operation::RX, src, dest, type_id, offset, message_data, message_length);
 
@@ -232,7 +232,6 @@ void RxService::add(uint8_t * data, uint8_t length) {
 
     rx_telegrams_.emplace_back(rx_telegram_id_++, std::move(telegram)); // add to queue
 }
-
 
 //
 // Tx CODE starts here...
@@ -253,8 +252,7 @@ void TxService::flush_tx_queue() {
 // start and initialize Tx
 void TxService::start() {
     // grab the bus ID
-    Settings settings;
-    ems_bus_id(settings.ems_bus_id());
+    EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) { ems_bus_id(settings.ems_bus_id); });
 
     // send first Tx request to bus master (boiler) for its registered devices
     // this will be added to the queue and sent during the first tx loop()
@@ -285,7 +283,7 @@ void TxService::send_poll() {
 void TxService::send() {
     // don't process if we don't have a connection to the EMS bus
     // or we're in read-only mode
-    if (!bus_connected() || EMSESP::ems_read_only()) {
+    if (!bus_connected()) {
         return;
     }
 
@@ -421,7 +419,13 @@ void TxService::send_telegram(const uint8_t * data, const uint8_t length) {
 
 // builds a Tx telegram and adds to queue
 // given some details like the destination, type, offset and message block
-void TxService::add(const uint8_t operation, const uint8_t dest, const uint16_t type_id, const uint8_t offset, uint8_t * message_data, const uint8_t message_length, const bool front) {
+void TxService::add(const uint8_t  operation,
+                    const uint8_t  dest,
+                    const uint16_t type_id,
+                    const uint8_t  offset,
+                    uint8_t *      message_data,
+                    const uint8_t  message_length,
+                    const bool     front) {
     auto telegram = std::make_shared<Telegram>(operation, ems_bus_id(), dest, type_id, offset, message_data, message_length);
 #ifdef EMSESP_DEBUG
     LOG_DEBUG(F("[DEBUG] New Tx [#%d] telegram, length %d"), tx_telegram_id_, message_length);

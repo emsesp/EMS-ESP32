@@ -793,7 +793,7 @@ void Boiler::console_commands(Shell & shell, unsigned int context) {
 
     EMSESPShell::commands->add_command(ShellContext::BOILER,
                                        CommandFlags::ADMIN,
-                                       flash_string_vector{F_(change), F_(wwtemp)},
+                                       flash_string_vector{F_(wwtemp)},
                                        flash_string_vector{F_(degrees_mandatory)},
                                        [=](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) {
                                            set_warmwater_temp(Helpers::atoint(arguments.front().c_str()));
@@ -801,7 +801,7 @@ void Boiler::console_commands(Shell & shell, unsigned int context) {
 
     EMSESPShell::commands->add_command(ShellContext::BOILER,
                                        CommandFlags::ADMIN,
-                                       flash_string_vector{F_(change), F_(flowtemp)},
+                                       flash_string_vector{F_(flowtemp)},
                                        flash_string_vector{F_(degrees_mandatory)},
                                        [=](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) {
                                            set_flow_temp(Helpers::atoint(arguments.front().c_str()));
@@ -810,7 +810,7 @@ void Boiler::console_commands(Shell & shell, unsigned int context) {
     EMSESPShell::commands->add_command(
         ShellContext::BOILER,
         CommandFlags::ADMIN,
-        flash_string_vector{F_(change), F_(wwactive)},
+        flash_string_vector{F_(wwactive)},
         flash_string_vector{F_(bool_mandatory)},
         [=](Shell & shell, const std::vector<std::string> & arguments) {
             if (arguments[0] == read_flash_string(F_(on))) {
@@ -829,7 +829,7 @@ void Boiler::console_commands(Shell & shell, unsigned int context) {
     EMSESPShell::commands->add_command(
         ShellContext::BOILER,
         CommandFlags::ADMIN,
-        flash_string_vector{F_(change), F_(wwonetime)},
+        flash_string_vector{F_(wwonetime)},
         flash_string_vector{F_(bool_mandatory)},
         [=](Shell & shell, const std::vector<std::string> & arguments) {
             if (arguments[0] == read_flash_string(F_(on))) {
@@ -848,7 +848,7 @@ void Boiler::console_commands(Shell & shell, unsigned int context) {
     EMSESPShell::commands->add_command(
         ShellContext::BOILER,
         CommandFlags::ADMIN,
-        flash_string_vector{F_(change), F_(wwcirculation)},
+        flash_string_vector{F_(wwcirculation)},
         flash_string_vector{F_(bool_mandatory)},
         [=](Shell & shell, const std::vector<std::string> & arguments) {
             if (arguments[0] == read_flash_string(F_(on))) {
@@ -867,7 +867,7 @@ void Boiler::console_commands(Shell & shell, unsigned int context) {
     EMSESPShell::commands->add_command(
         ShellContext::BOILER,
         CommandFlags::ADMIN,
-        flash_string_vector{F_(change), F_(comfort)},
+        flash_string_vector{F_(comfort)},
         flash_string_vector{F_(comfort_mandatory)},
         [=](Shell & shell, const std::vector<std::string> & arguments) {
             if (arguments[0] == read_flash_string(F_(hot))) {
@@ -888,65 +888,6 @@ void Boiler::console_commands(Shell & shell, unsigned int context) {
                                        CommandFlags::USER,
                                        flash_string_vector{F_(show)},
                                        [&](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) { show_values(shell); });
-
-    EMSESPShell::commands->add_command(
-        ShellContext::BOILER,
-        CommandFlags::ADMIN,
-        flash_string_vector{F_(set), F_(shower), F_(timer)},
-        flash_string_vector{F_(bool_mandatory)},
-        [](Shell & shell, const std::vector<std::string> & arguments) {
-            bool value;
-            if (arguments[0] == read_flash_string(F_(on))) {
-                value = true;
-            } else if (arguments[0] == read_flash_string(F_(off))) {
-                value = false;
-            } else {
-                shell.println(F("Must be on or off"));
-                return;
-            }
-            Settings settings;
-            settings.shower_timer(value);
-            settings.commit();
-            shell.printfln(F_(shower_timer_fmt), settings.shower_timer() ? uuid::read_flash_string(F_(on)).c_str() : uuid::read_flash_string(F_(off)).c_str());
-        },
-        [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments __attribute__((unused))) -> const std::vector<std::string> {
-            return std::vector<std::string>{read_flash_string(F_(on)), read_flash_string(F_(off))};
-        });
-
-    EMSESPShell::commands->add_command(
-        ShellContext::BOILER,
-        CommandFlags::ADMIN,
-        flash_string_vector{F_(set), F_(shower), F_(alert)},
-        flash_string_vector{F_(bool_mandatory)},
-        [](Shell & shell, const std::vector<std::string> & arguments) {
-            bool value;
-            if (arguments[0] == read_flash_string(F_(on))) {
-                value = true;
-            } else if (arguments[0] == read_flash_string(F_(off))) {
-                value = false;
-            } else {
-                shell.println(F("Must be on or off"));
-                return;
-            }
-            Settings settings;
-            settings.shower_alert(value);
-            settings.commit();
-            shell.printfln(F_(shower_timer_fmt), settings.shower_alert() ? uuid::read_flash_string(F_(on)).c_str() : uuid::read_flash_string(F_(off)).c_str());
-        },
-        [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments __attribute__((unused))) -> const std::vector<std::string> {
-            return std::vector<std::string>{read_flash_string(F_(on)), read_flash_string(F_(off))};
-        });
-
-    EMSESPShell::commands->add_command(ShellContext::BOILER,
-                                       CommandFlags::USER,
-                                       flash_string_vector{F_(set)},
-                                       [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
-                                           Settings settings;
-                                           shell.printfln(F_(shower_timer_fmt), settings.shower_timer() ? F_(enabled) : F_(disabled));
-                                           shell.printfln(F_(shower_alert_fmt), settings.shower_alert() ? F_(enabled) : F_(disabled));
-                                           shell.println();
-                                       });
-
 
     // enter the context
     Console::enter_custom_context(shell, context);

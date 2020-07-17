@@ -71,7 +71,7 @@ class EMSuart {
     static void ICACHE_FLASH_ATTR     send_poll(uint8_t data);
     static uint16_t ICACHE_FLASH_ATTR transmit(uint8_t * buf, uint8_t len);
     static bool                       sending() {
-      return sending_;
+        return sending_;
     }
 
     typedef struct {

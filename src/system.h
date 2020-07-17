@@ -23,14 +23,9 @@
 #include <ArduinoJson.h>
 
 #include "helpers.h"
-#include "settings.h"
 #include "console.h"
 #include "mqtt.h"
 #include "telegram.h"
-
-#if defined(ESP8266)
-#include <RTCVars.h>
-#endif
 
 #ifndef EMSESP_STANDALONE
 #include <uuid/syslog.h>
@@ -44,23 +39,15 @@ namespace emsesp {
 
 class System {
   public:
-    static uint8_t free_mem();
-
     void start();
     void loop();
 
-    static bool safe_mode();
-    static void save_safe_mode(const bool safe_mode);
-    static void safe_mode(const bool safe_mode);
-
-    static void restart(bool safe_mode);
-    static void restart() {
-        restart(false); // default, don't boot into safe mode
-    }
-
-    static void show_mem(const char * text);
-
-    static void console_commands(Shell & shell, unsigned int context);
+    static void    restart();
+    static void    format(uuid::console::Shell & shell);
+    static uint8_t free_mem();
+    void           syslog_init();
+    void           set_heartbeat(bool system_heartbeat);
+    static void    console_commands(Shell & shell, unsigned int context);
 
   private:
     static uuid::log::Logger logger_;
@@ -69,11 +56,13 @@ class System {
     static uuid::syslog::SyslogService syslog_;
 #endif
 
-    static constexpr uint32_t SYSTEM_CHECK_FREQUENCY = 10000; // check every 10 seconds
-    static constexpr uint32_t LED_WARNING_BLINK      = 1000;  // pulse to show no connection, 1 sec
-    static constexpr uint32_t LED_WARNING_BLINK_FAST = 100;   // flash quickly for boot up sequence or safe-mode
+    static constexpr uint32_t SYSTEM_CHECK_FREQUENCY    = 10000; // check every 10 seconds
+    static constexpr uint32_t LED_WARNING_BLINK         = 1000;  // pulse to show no connection, 1 sec
+    static constexpr uint32_t LED_WARNING_BLINK_FAST    = 100;   // flash quickly for boot up sequence
+    static constexpr uint32_t SYSTEM_HEARTBEAT_INTERVAL = 60000; // in milliseconds, how often the MQTT heartbeat is sent (1 min)
 
 // internal LED
+#ifndef EMSESP_NO_LED
 #if defined(ESP8266)
     static constexpr uint8_t LED_GPIO = 2;
     static constexpr uint8_t LED_ON   = LOW;
@@ -85,29 +74,33 @@ class System {
     static constexpr uint8_t LED_GPIO = 5;
     static constexpr uint8_t LED_ON   = LOW;
 #endif
+#endif
 #else
-    static constexpr uint8_t LED_GPIO = 0;
+    static constexpr uint8_t LED_GPIO = 0; // no LED
     static constexpr uint8_t LED_ON   = 0;
 #endif
 
     void led_monitor();
     void set_led_speed(uint32_t speed);
     void mqtt_commands(const char * message);
-    void config_syslog();
+    void send_heartbeat();
+    void system_check();
 
-    static void show_system(uuid::console::Shell & shell);
+    static void   show_system(uuid::console::Shell & shell);
+    static int8_t wifi_quality();
 
-    void     system_check();
-    bool     system_healthy_  = false;
-    uint32_t led_flash_speed_ = LED_WARNING_BLINK_FAST; // default boot flashes quickly
-
-    static bool     safe_mode_;
+    bool            system_healthy_  = false;
+    uint32_t        led_flash_speed_ = LED_WARNING_BLINK_FAST; // default boot flashes quickly
     static uint32_t heap_start_;
     static int      reset_counter_;
+    uint32_t        last_heartbeat_ = 0;
 
-#if defined(ESP8266)
-    static RTCVars state_;
-#endif
+    // settings
+    uint8_t  tx_mode_;
+    bool     system_heartbeat_;
+    uint8_t  syslog_level_;
+    uint32_t syslog_mark_interval_;
+    String   syslog_host_;
 };
 
 } // namespace emsesp

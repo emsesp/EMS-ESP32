@@ -63,7 +63,7 @@ void IRAM_ATTR EMSuart::emsuart_rx_intr_handler(void * para) {
 
     if (EMS_UART.int_st.brk_det) {
         EMS_UART.int_clr.brk_det = 1;    // clear flag
-        EMS_UART.conf0.txd_brk = 0;      // disable <brk>
+        EMS_UART.conf0.txd_brk   = 0;    // disable <brk>
         if (emsTxBufIdx < emsTxBufLen) { // timer tx_mode is interrupted by <brk>
             emsTxBufIdx  = emsTxBufLen;  // stop timer mode
             drop_next_rx = true;         // we have trash in buffer
@@ -87,10 +87,10 @@ void IRAM_ATTR EMSuart::emsuart_rx_intr_handler(void * para) {
 
 
 void IRAM_ATTR EMSuart::emsuart_tx_timer_intr_handler() {
-    if(emsTxBufLen == 0) {
+    if (emsTxBufLen == 0) {
         return;
     }
-    if(tx_mode_ > 50) {
+    if (tx_mode_ > 50) {
         for (uint8_t i = 0; i < emsTxBufLen; i++) {
             EMS_UART.fifo.rw_byte = emsTxBuf[i];
         }
@@ -101,7 +101,7 @@ void IRAM_ATTR EMSuart::emsuart_tx_timer_intr_handler() {
             timerAlarmWrite(timer, emsTxWait, false);
             timerAlarmEnable(timer);
         } else if (emsTxBufIdx + 1 == emsTxBufLen) {
-            EMS_UART.fifo.rw_byte = emsTxBuf[emsTxBufIdx];
+            EMS_UART.fifo.rw_byte  = emsTxBuf[emsTxBufIdx];
             EMS_UART.conf0.txd_brk = 1; // <brk> after send
         }
         emsTxBufIdx++;
@@ -137,7 +137,7 @@ void EMSuart::start(const uint8_t tx_mode) {
     uart_isr_register(EMSUART_UART, emsuart_rx_intr_handler, NULL, ESP_INTR_FLAG_IRAM, &uart_handle);
     xTaskCreate(emsuart_recvTask, "emsuart_recvTask", 2048, NULL, configMAX_PRIORITIES - 1, NULL);
 
-    timer = timerBegin(1, 80, true);                                  // timer prescale to 1 µs, countup
+    timer = timerBegin(1, 80, true);                                   // timer prescale to 1 µs, countup
     timerAttachInterrupt(timer, &emsuart_tx_timer_intr_handler, true); // Timer with edge interrupt
     restart();
 }
@@ -173,10 +173,10 @@ void EMSuart::restart() {
         EMS_UART.idle_conf.tx_idle_num = 2;
     } else if (tx_mode_ <= 50) {
         EMS_UART.idle_conf.tx_idle_num = tx_mode_;
-        emsTxWait = EMSUART_TX_BIT_TIME * (tx_mode_ + 10);
+        emsTxWait                      = EMSUART_TX_BIT_TIME * (tx_mode_ + 10);
     } else {
         EMS_UART.idle_conf.tx_idle_num = 2;
-        emsTxWait = EMSUART_TX_BIT_TIME * (tx_mode_ - 50);
+        emsTxWait                      = EMSUART_TX_BIT_TIME * (tx_mode_ - 50);
     }
 }
 
@@ -213,7 +213,8 @@ uint16_t EMSuart::transmit(const uint8_t * buf, const uint8_t len) {
     }
 
     if (tx_mode_ == 5) { // wait before sending
-        vTaskDelay(4 / portTICK_PERIOD_MS);
+        //vTaskDelay(4 / portTICK_PERIOD_MS);
+        delayMicroseconds(4000);
         for (uint8_t i = 0; i < len; i++) {
             EMS_UART.fifo.rw_byte = buf[i];
         }
@@ -233,7 +234,7 @@ uint16_t EMSuart::transmit(const uint8_t * buf, const uint8_t len) {
             EMS_UART.fifo.rw_byte = buf[i];
             delayMicroseconds(EMSUART_TX_WAIT_PLUS);
         }
-        EMS_UART.fifo.rw_byte = buf[len - 1];
+        EMS_UART.fifo.rw_byte  = buf[len - 1];
         EMS_UART.conf0.txd_brk = 1; // <brk> after send, cleard by hardware after send
         return EMS_TX_STATUS_OK;
     }
@@ -243,7 +244,7 @@ uint16_t EMSuart::transmit(const uint8_t * buf, const uint8_t len) {
             EMS_UART.fifo.rw_byte = buf[i];
             delayMicroseconds(EMSUART_TX_WAIT_HT3);
         }
-        EMS_UART.fifo.rw_byte = buf[len - 1];
+        EMS_UART.fifo.rw_byte  = buf[len - 1];
         EMS_UART.conf0.txd_brk = 1; // <brk> after send, cleard by hardware after send
         return EMS_TX_STATUS_OK;
     }
@@ -257,11 +258,11 @@ uint16_t EMSuart::transmit(const uint8_t * buf, const uint8_t len) {
         EMS_UART.fifo.rw_byte   = buf[i]; // send each Tx byte
         uint16_t timeoutcnt     = EMSUART_TX_TIMEOUT;
         while ((EMS_UART.status.rxfifo_cnt == _usrxc) && (--timeoutcnt > 0)) {
-           delayMicroseconds(EMSUART_TX_BUSY_WAIT); // burn CPU cycles...
+            delayMicroseconds(EMSUART_TX_BUSY_WAIT); // burn CPU cycles...
         }
     }
-    EMS_UART.fifo.rw_byte   = buf[len - 1]; // send each Tx byte
-    EMS_UART.conf0.txd_brk = 1; // <brk> after send, cleard by hardware after send
+    EMS_UART.fifo.rw_byte  = buf[len - 1]; // send each Tx byte
+    EMS_UART.conf0.txd_brk = 1;            // <brk> after send, cleard by hardware after send
     return EMS_TX_STATUS_OK;
 }
 
