@@ -6,20 +6,18 @@ import { List, ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
 import SettingsIcon from '@material-ui/icons/Settings';
 import SettingsRemoteIcon from "@material-ui/icons/SettingsRemote";
 
-// import { PROJECT_PATH } from "../api";
-
 class ProjectMenu extends Component<RouteComponentProps> {
   render() {
     const path = this.props.match.url;
     return (
       <List>
-        <ListItem to='/ems-esp/' selected={path.startsWith('/ems-esp/')} button component={Link}>
+        <ListItem to='/ems-esp/status/' selected={path.startsWith('/ems-esp/status/')} button component={Link}>
           <ListItemIcon>
             <SettingsRemoteIcon />
           </ListItemIcon>
           <ListItemText primary="Dashboard" />
         </ListItem>
-        <ListItem to='/ems-esp/settings' selected={path.startsWith('/ems-esp/settings/')} button component={Link}>
+        <ListItem to='/ems-esp/settings/' selected={path.startsWith('/ems-esp/settings/')} button component={Link}>
           <ListItemIcon>
             <SettingsIcon />
           </ListItemIcon>

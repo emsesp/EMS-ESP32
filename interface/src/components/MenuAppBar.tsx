@@ -130,7 +130,7 @@ class MenuAppBar extends React.Component<MenuAppBarProps, MenuAppBarState> {
           </Typography>
 
           <Typography align="right" variant="caption" color="textPrimary">
-            &nbsp;&nbsp;{authenticatedContext.me.version}
+            &nbsp;&nbsp;v{authenticatedContext.me.version}
           </Typography>
 
           <Divider absolute />
@@ -142,6 +142,7 @@ class MenuAppBar extends React.Component<MenuAppBarProps, MenuAppBarState> {
             <Divider />
           </Fragment>
         )}
+        
         <List>
           <ListItem to='/wifi/' selected={path.startsWith('/wifi/')} button component={Link}>
             <ListItemIcon>

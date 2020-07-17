@@ -26,9 +26,9 @@ class EMSESP extends Component<RouteComponentProps> {
           <Tab value={`/${PROJECT_PATH}/help`} label="EMS-ESP Help" />
         </Tabs>
         <Switch>
-          <AuthenticatedRoute exact path={`/${PROJECT_PATH}/help`} component={EMSESPHelp} />
           <AuthenticatedRoute exact path={`/${PROJECT_PATH}/status`} component={EMSESPStatusController} />
           <AuthenticatedRoute exact path={`/${PROJECT_PATH}/devices`} component={EMSESPDevicesController} />
+          <AuthenticatedRoute exact path={`/${PROJECT_PATH}/help`} component={EMSESPHelp} />
           <Redirect to={`/${PROJECT_PATH}/status`} />
         </Switch>
       </MenuAppBar>
