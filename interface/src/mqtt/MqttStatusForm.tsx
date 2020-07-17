@@ -9,7 +9,7 @@ import ReportIcon from '@material-ui/icons/Report';
 import SpeakerNotesOffIcon from "@material-ui/icons/SpeakerNotesOff";
 
 import { RestFormProps, FormActions, FormButton, HighlightAvatar } from '../components';
-import { mqttStatusHighlight, mqttStatus, mqttStatusHighlight2, disconnectReason } from './MqttStatus';
+import { mqttStatusHighlight, mqttStatus, mqttPublishHighlight, disconnectReason } from './MqttStatus';
 import { MqttStatus } from './types';
 
 type MqttStatusFormProps = RestFormProps<MqttStatus> & WithTheme;
@@ -30,7 +30,7 @@ class MqttStatusForm extends Component<MqttStatusFormProps> {
           <Divider variant="inset" component="li" />
           <ListItem>
           <ListItemAvatar>
-            <HighlightAvatar color={mqttStatusHighlight2(data, theme)}>
+            <HighlightAvatar color={mqttPublishHighlight(data, theme)}>
               <SpeakerNotesOffIcon />
             </HighlightAvatar>
           </ListItemAvatar>

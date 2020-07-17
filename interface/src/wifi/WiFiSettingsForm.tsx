@@ -24,15 +24,39 @@ class WiFiSettingsForm extends React.Component<WiFiStatusFormProps> {
   static contextType = WiFiConnectionContext;
   context!: React.ContextType<typeof WiFiConnectionContext>;
 
+  constructor(props: WiFiStatusFormProps, context: WiFiConnectionContext) {
+    super(props);
+
+    const { selectedNetwork } = context;
+    if (selectedNetwork) {
+      const wifiSettings: WiFiSettings = {
+        ssid: selectedNetwork.ssid,
+        password: "",
+        hostname: props.data.hostname,
+        static_ip_config: false,
+      }
+      props.setData(wifiSettings);
+    }
+  }
+
   componentWillMount() {
     ValidatorForm.addValidationRule('isIP', isIP);
     ValidatorForm.addValidationRule('isHostname', isHostname);
     ValidatorForm.addValidationRule('isOptionalIP', optional(isIP));
   }
 
+  deselectNetworkAndLoadData = () => {
+    this.context.deselectNetwork();
+    this.props.loadData();
+  }
+
+  componentWillUnmount() {
+    this.context.deselectNetwork();
+  }
+
   render() {
     const { selectedNetwork, deselectNetwork } = this.context;
-    const { data, handleValueChange, saveData, loadData } = this.props;
+    const { data, handleValueChange, saveData } = this.props;
     return (
       <ValidatorForm onSubmit={saveData} ref="WiFiSettingsForm">
         {
@@ -167,7 +191,7 @@ class WiFiSettingsForm extends React.Component<WiFiStatusFormProps> {
           <FormButton startIcon={<SaveIcon />} variant="contained" color="primary" type="submit">
             Save
           </FormButton>
-          <FormButton variant="contained" color="secondary" onClick={loadData}>
+          <FormButton variant="contained" color="secondary" onClick={this.deselectNetworkAndLoadData}>
             Reset
           </FormButton>
         </FormActions>

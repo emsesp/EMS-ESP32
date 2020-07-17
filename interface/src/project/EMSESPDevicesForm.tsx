@@ -115,7 +115,7 @@ class EMSESPDevicesForm extends Component<EMSESPDevicesFormProps, EMSESPDevicesF
           (
             <Box bgcolor="error.main" color="error.contrastText" p={2} mt={2} mb={2}>
               <Typography variant="body1">
-                No EMS devices found. Check connection and for Tx errors. Try forcing a scan.
+                No EMS devices found. Check the connection and for possible Tx errors and try scanning for new devices.
               </Typography>
             </Box>
           )
@@ -174,8 +174,9 @@ class EMSESPDevicesForm extends Component<EMSESPDevicesFormProps, EMSESPDevicesF
   render() {
     return (
       <Fragment>
+        <br></br>
         {this.createTableItems()}
-
+        <br></br>
         <Box display="flex" flexWrap="wrap">
           <Box flexGrow={1} padding={1}>
             <FormButton startIcon={<RefreshIcon />} variant="contained" color="secondary" onClick={this.props.loadData}>

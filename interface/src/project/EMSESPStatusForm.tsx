@@ -12,9 +12,6 @@ import {
   ListItem,
   ListItemAvatar,
   ListItemText,
-  Typography,
-  Box,
-  Link
 } from "@material-ui/core";
 
 import RefreshIcon from "@material-ui/icons/Refresh";
@@ -42,17 +39,7 @@ class EMSESPStatusForm extends Component<EMSESPStatusFormProps> {
     const { data, theme } = this.props;
     return (
       <Fragment>
-        <Box bgcolor="info.main" border={1} p={3} mt={1} mb={0}>
-          <Typography variant="body1">
-            Firmware Version is <b>{data.version}</b>
-            <br /><br />
-            Check for news and updates on the <Link href="https://emsesp.github.io/docs/#/" color="primary">{'Wiki'}</Link>
-            <br/>
-            For live community chat go to <Link href="https://gitter.im/EMS-ESP/community#" color="primary">{'Gitter'}</Link>
-            <br/>
-            To report issues, contribute and give kudos visit <Link href="https://github.com/proddy/EMS-ESP" color="primary">{'github.com/proddy/EMS-ESP'}</Link>
-          </Typography>
-        </Box>
+
         <ListItem>
           <ListItemAvatar>
             <HighlightAvatar color={busStatusHighlight(data, theme)}>

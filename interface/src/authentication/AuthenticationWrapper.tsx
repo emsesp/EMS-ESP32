@@ -59,10 +59,11 @@ class AuthenticationWrapper extends React.Component<AuthenticationWrapperProps, 
   }
 
   refresh = () => {
-    if (!this.props.features.security) {
-      this.setState({ initialized: true, context: { ...this.state.context, me: { admin: true, username: "admin" } } });
-      return;
-    }
+    // proddy removed
+    // if (!this.props.features.security) {
+    //   this.setState({ initialized: true, context: { ...this.state.context, me: { admin: true, username: "admin" } } });
+    //   return;
+    // }
     const accessToken = getStorage().getItem(ACCESS_TOKEN)
     if (accessToken) {
       authorizedFetch(VERIFY_AUTHORIZATION_ENDPOINT)

@@ -124,11 +124,18 @@ class MenuAppBar extends React.Component<MenuAppBarProps, MenuAppBarState> {
           <Box display="flex">
             <img src="/app/icon.png" className={classes.toolbarImage} alt={PROJECT_NAME} />
           </Box>
+
           <Typography variant="h6" color="textPrimary">
             {PROJECT_NAME}
           </Typography>
+
+          <Typography align="right" variant="caption" color="textPrimary">
+            &nbsp;&nbsp;{authenticatedContext.me.version}
+          </Typography>
+
           <Divider absolute />
         </Toolbar>
+
         {features.project && (
           <Fragment>
             <ProjectMenu />
@@ -149,12 +156,12 @@ class MenuAppBar extends React.Component<MenuAppBarProps, MenuAppBarState> {
             <ListItemText primary="Access Point" />
           </ListItem>
           {features.ntp && (
-          <ListItem to='/ntp/' selected={path.startsWith('/ntp/')} button component={Link}>
-            <ListItemIcon>
-              <AccessTimeIcon />
-            </ListItemIcon>
-            <ListItemText primary="Network Time" />
-          </ListItem>
+            <ListItem to='/ntp/' selected={path.startsWith('/ntp/')} button component={Link}>
+              <ListItemIcon>
+                <AccessTimeIcon />
+              </ListItemIcon>
+              <ListItemText primary="Network Time" />
+            </ListItem>
           )}
           {features.mqtt && (
             <ListItem to='/mqtt/' selected={path.startsWith('/mqtt/')} button component={Link}>

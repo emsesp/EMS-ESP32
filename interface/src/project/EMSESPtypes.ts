@@ -16,7 +16,6 @@ export enum busConnectionStatus {
 }
 
 export interface EMSESPStatus {
-  version: string;
   status: busConnectionStatus;
   rx_received: number;
   tx_sent: number;

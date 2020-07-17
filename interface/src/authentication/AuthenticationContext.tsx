@@ -3,6 +3,7 @@ import * as React from "react";
 export interface Me {
   username: string;
   admin: boolean;
+  version: string; // proddy added
 }
 
 export interface AuthenticationContext {

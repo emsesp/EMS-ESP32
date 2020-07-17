@@ -16,7 +16,7 @@ void MqttStatus::mqttStatus(AsyncWebServerRequest * request) {
     root["client_id"]         = _mqttSettingsService->getClientId();
     root["disconnect_reason"] = (uint8_t)_mqttSettingsService->getDisconnectReason();
 
-    root["mqtt_fails"] = emsesp::Mqtt::publish_fails();
+    root["mqtt_fails"] = emsesp::Mqtt::publish_fails(); // proddy added
 
     response->setLength();
     request->send(response);

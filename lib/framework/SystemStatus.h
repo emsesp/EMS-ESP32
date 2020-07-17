@@ -9,7 +9,7 @@
 #include <ESP8266WiFi.h>
 #include <ESPAsyncTCP.h>
 #include <FS.h>
-#include <LittleFS.h> // TODO added littlefs
+#include <LittleFS.h> // proddy added
 #endif
 
 #include <ArduinoJson.h>
@@ -17,8 +17,8 @@
 #include <ESPAsyncWebServer.h>
 #include <SecurityManager.h>
 
-#include <uuid/log.h>
-#include "../../src/system.h"
+#include <uuid/log.h> // proddy added
+#include "../../src/system.h" // proddy added
 
 #define MAX_ESP_STATUS_SIZE 1024
 #define SYSTEM_STATUS_SERVICE_PATH "/rest/systemStatus"

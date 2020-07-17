@@ -1,13 +1,19 @@
 # EMS-ESP version 2.0
 
+## **Breaking changes**
+
+- MQTT base has been removed. The hostname is only used.
+
 ## **New Features in v2**
 
 - A new web interface using React and TypeScript that's now secure as each URL endpoint is protected by issuing a JWT which is then sent using Bearer Authentication. Using a Captive Portal in AP mode or connecting to a local wifi network.
 
-![settings](media/web_settings.PNG)
-![status](media/web_status.PNG)
+<img src="media/web_settings.PNG" width=70% height=70%>
+<img src="media/web_status.PNG" width=70% height=70%>
+<img src="media/web_devices.PNG" width=70% height=70%>
+<img src="media/web_mqtt.PNG" width=70% height=70%>
 
-- A new console. Like in version 1.9 it works with both Serial and Telnet but with a rich set of commands and more intuitive with behavior similar to a Linux-style shell. It supports multiple connections and commands that alter the settings or interact directly with EMS devices are secure behind an admin password. A full list of commands is below, here are the key ones:
+- A new console. Like in version 1.9 it works with both Serial and Telnet but with a more intuitive Linux shell like behavior. It supports multiple connections and has basic security to prevent any changes to EMS-ESP. A full list of commands is below, here are the key ones:
     * `help` lists the commands and keywords
     * some commands take you into a new context, a bit like a sub-menu. e.g. `system`, `thermostat`. Use `help` to show which commands this context has and `exit` or CTRL-D to get back to the root.
     * To change a setting use the `set` command. Typing `set` shows the current settings.
@@ -112,43 +118,73 @@ thermostat
 - See if it's easier to use timers instead of millis() based timers, using [polledTimeout](https://github.com/esp8266/Arduino/blob/master/libraries/esp8266/examples/BlinkPolledTimeout/BlinkPolledTimeout.ino).
 - Port over to ESP-IDF. The Arduino SDK is showing its limitations
 
+### **Features to add**
+
+- Multi-language. German, Dutch, French
+- Click on a device in the Web UI shows it's details
+- Publish time can be customized per device (solar, mixing etc)
+
 ### **Customizing the Web UI**
 
 The Web is based off Rick's awesome [esp8266-react](https://github.com/rjwats/esp8266-react/) framework. These are the files that are modified:
 
 **`interface:`**
-  * `.env` (project name and project path to ems-esp)
-  * `.env.development` (CORS URL)
+  * `.env` project name and project path to ems-esp
+  * `.env.development` CORS URL
  
 **`interface/public:`**
-  * `app/manifest.json` (ems-esp name)
-  * `index.html` (ems-esp name)
-  * `app/icon.png` (256x256 PNG)
-  * `favicon.ico` 
+  * `app/manifest.json` ems-esp name
+  * `index.html` ems-esp name
+  * `app/icon.png` 256x256 PNG
+  * `favicon.ico` replaced
 
 **`interface/src:`**
-  * `CustomMuiTheme.tsx` (colors for dark mode)
-  * `interface/src/wifi/WifiSettingsController.tsx` (rename esp8266-react)
+  * `CustomMuiTheme.tsx` colors for dark mode
+  * `interface/src/wifi/WifiSettingsController.tsx` rename esp8266-react
 
 **`interface/src/project:`**
-  * `ProjectRouting.tsx` (removed demo, renamed DemoProject to EMSESP)
-  * `DemoProject.tsx` (remove /demo/ and changed title, renamed to EMSESP.tsx)
-  * `ProjectMenu.tsx` (title)
-  * `DemoInformation.tsx` (removed file)
-  * `types.ts` (add variables)
+  * `ProjectRouting.tsx` removed demo, added paths to ems-esp/status, ems-esp/settings and *
+  * `DemoProject.tsx` remove /demo/ and changed title, renamed to EMSESP.tsx
+  * `ProjectMenu.tsx` title change, added /ems-esp/settings
+  * `DemoInformation.tsx` removed file
+  * `types.ts` add variables
+  * added all custom files starting with EMSESP*
+
+**`interface/src/mqtt:`**
+  * `types.ts` added mqtt_fails
+  * `MqttStatusForm.tsx` added MQTT Publish Errors
+  * `MqttStatus.ts` added function mqttPublishHighlight
+  * `MqttSettingsForm.tsx` added publish time, qos, format
+
+**`interface/src/authentication:`**
+  * `AuthenticationWrapper.tsx` commented out features.security because we added version
+  * `AuthenticationContext.tsx` added version
+  * `MqttSettingsForm.tsx` added publish time, qos, format
+
+**`interface/src/components:`**
+  * `MenuAppBar.tsx` added version to toolbar
+
+**`interface/src/system:`**
+  * `types.ts` added uptime and free_mem
+  * `SystemStatusForm.tsx` added system uptime, % free mem
 
 **`lib/framework`:**
+  * `SystemStatus.h` added #include <LittleFS.h>, #include <uuid/log.h>, #include "../../src/system.h"
+  * `SystemStatus.cpp` added LittleFS.info(fs_info); root["uptime"], root["free_mem"]
+  * Commented out all `Serial.print`'s in all files
+  * `MqttStatus.h` added #include "../../src/mqtt.h"
+  * `MqttStatus.cpp` added root["mqtt_fails"]
+  * `SecuritySettingsService.cpp` added version to the JWT payload
+  * `SecuritySettingsService.h` #include "../../src/version.h"  
+  * `features.ini`: -D FT_NTP=0
+  * `platformio.ini` using our own version
+  * `factory_settings.ini` modified with `ems-esp-neo` as password and `ems-esp` everywhere else
 
-* `SystemStatus.h` : added #include <LittleFS.h>
-* `SystemStatus.cpp` : added LittleFS.info(fs_info); 
-* Commented out all `Serial.print`'s
-* `features.ini`: -D FT_NTP=0
-* customized `platformio.ini`
-* customized `factory_settings.ini` with `ems-esp-neo` as password and `ems-esp` everywhere else
 
-
- Info on UI customizations:
+ UI customization links:
 
   * icons: https://material-ui.com/components/material-icons/
   * colors: https://material-ui.com/customization/color/
   * tables: https://material-ui.com/components/tables/#dense-table
+
+

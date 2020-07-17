@@ -54,8 +54,6 @@ void EMSESPStatusService::emsespStatusService(AsyncWebServerRequest * request) {
     AsyncJsonResponse * response = new AsyncJsonResponse(false, MAX_EMSESP_STATUS_SIZE);
     JsonObject          root     = response->getRoot();
 
-    root["version"] = EMSESP_APP_VERSION;
-
     root["status"]      = EMSESP::bus_status(); // 0, 1 or 2
     root["rx_received"] = EMSESP::rxservice_.telegram_count();
     root["tx_sent"]     = EMSESP::txservice_.telegram_read_count() + EMSESP::txservice_.telegram_write_count();
