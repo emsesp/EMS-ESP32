@@ -49,8 +49,8 @@
 
 ## **Setting EMS-ESP up for the first time**
 
- - Connect to the Access Point called ems-esp. Login to the captive portal with admin/admin and set the WiFi credentials and restart the ESP.
- - When it connects to your network you can use the Web UI to configure the other settings or login using Telnet. See the console commands below for options. The password for `su` is the sames as the JWT secret which you can see from the WebUI.
+ - Connect to the Access Point called ems-esp using the WPA password `ems-esp-neo`. When you see the captive portal sign-in with username `admin` and password `admin`. Set the WiFi credentials and restart the ESP.
+ - When it connects to your wifi network you can use either the Web UI to further configure the other settings or using Telnet. If using the Telnet console refer to the full set of commands below. To change any settings you need to be admin which can be accessed via the `su` command. The password here is the same as the JWT secret from the Web UI, default `ems-esp-neo`.
 
 ## **List of console commands**
 
