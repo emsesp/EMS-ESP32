@@ -277,10 +277,12 @@ void System::send_heartbeat() {
     if (rssid != -1) {
         doc["rssid"] = rssid;
     }
+
     doc["uptime"]           = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
     doc["uptime_sec"]       = uuid::get_uptime_sec();
     doc["freemem"]          = free_mem();
     doc["mqttpublishfails"] = Mqtt::publish_fails();
+    doc["txfails"]          = EMSESP::txservice_.telegram_fail_count();
 
     Mqtt::publish("heartbeat", doc, false); // send to MQTT with retain off
 }
