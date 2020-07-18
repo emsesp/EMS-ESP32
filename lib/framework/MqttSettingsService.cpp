@@ -215,6 +215,8 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
         emsesp::EMSESP::mqtt_.set_publish_time(newSettings.publish_time);
     }
 
+    emsesp::EMSESP::mqtt_.reset_publish_fails(); // reset fail counter back to 0
+
     settings = newSettings;
 
     return StateUpdateResult::CHANGED;

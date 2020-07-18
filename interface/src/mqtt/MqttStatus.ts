@@ -52,5 +52,5 @@ export const mqttPublishHighlight = ({ mqtt_fails }: MqttStatus, theme: Theme) =
   if (mqtt_fails < 10)
     return theme.palette.warning.main;
 
-  return theme.palette.success.main;
+  return theme.palette.error.main;
 }
