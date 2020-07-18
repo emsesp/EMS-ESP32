@@ -69,7 +69,7 @@ class Mqtt {
 
     enum Operation { PUBLISH, SUBSCRIBE };
 
-    static constexpr uint8_t MQTT_TOPIC_MAX_SIZE = 60; // include host and base etc
+    static constexpr uint8_t MQTT_TOPIC_MAX_SIZE = 60;
 
     // are static to be accessed from EMS devices
     static void subscribe(const uint8_t device_id, const std::string & topic, mqtt_function_p cb);
@@ -106,6 +106,10 @@ class Mqtt {
 
     static uint32_t publish_fails() {
         return mqtt_publish_fails_;
+    }
+
+    static void reset_publish_fails() {
+        mqtt_publish_fails_ = 0;
     }
 
   private:
@@ -156,6 +160,7 @@ class Mqtt {
         std::string     topic_;
         mqtt_function_p mqtt_function_;
     };
+
     static std::vector<MQTTFunction> mqtt_functions_; // list of mqtt callbacks for all devices
 
     uint32_t last_mqtt_poll_ = 0;
@@ -165,7 +170,7 @@ class Mqtt {
     static std::string hostname_;
     static uint8_t     mqtt_qos_;
     static uint16_t    publish_time_;
-}; // namespace emsesp
+};
 
 } // namespace emsesp
 

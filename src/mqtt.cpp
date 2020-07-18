@@ -280,6 +280,9 @@ void Mqtt::on_connect() {
     publish("info", doc, false); // send with retain off
 
     publish("status", "online", true); // say we're alive to the Last Will topic, with retain on
+
+    reset_publish_fails(); // reset fail count to 0
+
     LOG_INFO(F("MQTT connected"));
 }
 
