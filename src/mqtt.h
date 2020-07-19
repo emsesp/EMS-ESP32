@@ -69,11 +69,11 @@ class Mqtt {
 
     enum Operation { PUBLISH, SUBSCRIBE };
 
-    static constexpr uint8_t MQTT_TOPIC_MAX_SIZE = 60;
+    static constexpr uint8_t MQTT_TOPIC_MAX_SIZE = 100;
 
-    // are static to be accessed from EMS devices
     static void subscribe(const uint8_t device_id, const std::string & topic, mqtt_function_p cb);
     static void subscribe(const std::string & topic, mqtt_function_p cb);
+    static void resubscribe();
 
     static void publish(const std::string & topic, const std::string & payload, bool retain = false);
     static void publish(const std::string & topic, const JsonDocument & payload, bool retain = false);
@@ -81,7 +81,6 @@ class Mqtt {
     static void publish(const std::string & topic);
 
     static void show_topic_handlers(uuid::console::Shell & shell, const uint8_t device_id);
-
     static void show_mqtt(uuid::console::Shell & shell);
 
     static void on_connect();
@@ -161,7 +160,7 @@ class Mqtt {
         mqtt_function_p mqtt_function_;
     };
 
-    static std::vector<MQTTFunction> mqtt_functions_; // list of mqtt callbacks for all devices
+    static std::vector<MQTTFunction> mqtt_functions_; // list of mqtt subscribe callbacks for all devices
 
     uint32_t last_mqtt_poll_ = 0;
     uint32_t last_publish_   = 0;
