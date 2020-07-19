@@ -25,11 +25,11 @@ WiFiSettingsService::WiFiSettingsService(AsyncWebServer* server, FS* fs, Securit
 #elif defined(ESP8266)
 
     // proddy added
-    WiFi.setSleepMode(WIFI_NONE_SLEEP); // added to possibly fix wifi dropouts in arduino core 2.5.0
+    // WiFi.setSleepMode(WIFI_NONE_SLEEP); // added to possibly fix wifi dropouts in arduino core 2.5.0
     // ref: https://github.com/esp8266/Arduino/issues/6471
     // ref: https://github.com/esp8266/Arduino/issues/6366
     // high tx power causing weird behavior, slightly lowering from 20.5 to 20.0 may help stability
-    WiFi.setOutputPower(20.0f); // in DBM
+    // WiFi.setOutputPower(20.0f); // in dBm
 
   _onStationModeDisconnectedHandler = WiFi.onStationModeDisconnected(
       std::bind(&WiFiSettingsService::onStationModeDisconnected, this, std::placeholders::_1));
