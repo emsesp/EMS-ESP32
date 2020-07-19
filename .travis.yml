@@ -28,7 +28,7 @@ branches:
     - /^travis-.*-build$/
 
 script:
-  - ./scripts/build.sh
+  - sh ./scripts/build.sh
 
 stages:
   - name: Release
