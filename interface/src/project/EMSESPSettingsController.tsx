@@ -55,7 +55,7 @@ function EMSESPSettingsControllerForm(props: EMSESPSettingsControllerFormProps) 
                 validators={['required', 'isNumber', 'minNumber:0', 'maxNumber:255']}
                 errorMessages={['TX mode is required', "Must be a number", "Must be 0 or higher", "Max value is 255"]}
                 name="tx_mode"
-                label="Tx Mode (0=off)"
+                label="Tx Mode (0=off, 1=EMS1.0, 2=EMS+, 3=HT3)"
                 fullWidth
                 variant="outlined"
                 value={data.tx_mode}
