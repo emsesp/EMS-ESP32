@@ -271,13 +271,14 @@ void System::loop() {
 
 // send periodic MQTT message with system information
 void System::send_heartbeat() {
-    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
-
+    // don't send heartbeat if WiFi is not connected
     int rssid = wifi_quality();
-    if (rssid != -1) {
-        doc["rssid"] = rssid;
+    if (rssid == -1) {
+        return;
     }
 
+    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
+    doc["rssid"]            = rssid;
     doc["uptime"]           = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
     doc["uptime_sec"]       = uuid::get_uptime_sec();
     doc["freemem"]          = free_mem();
