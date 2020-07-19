@@ -167,16 +167,23 @@ void Thermostat::init_mqtt() {
 
     // if the MQTT format type is ha then send the config to HA (via the mqtt discovery service)
     // for each of the heating circuits
+    // state is /state
+    // config is /config
     if (mqtt_format_ == MQTT_format::HA) {
         for (uint8_t hc = 0; hc < monitor_typeids.size(); hc++) {
             StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
+            uint8_t                                         hc_num = hc + 1;
 
             std::string hc_text(10, '\0');
-            snprintf_P(&hc_text[0], hc_text.capacity() + 1, PSTR("hc%d"), hc + 1);
+            snprintf_P(&hc_text[0], hc_text.capacity() + 1, PSTR("hc%d"), hc_num);
             doc["name"]    = hc_text;
             doc["uniq_id"] = hc_text;
 
-            doc["~"]           = "homeassistant/climate/ems-esp";
+            // topic root is homeassistant/climate/ems-esp/hc<1..n>/
+            std::string root(100, '\0');
+            snprintf_P(&root[0], root.capacity() + 1, PSTR("homeassistant/climate/ems-esp/hc%d"), hc_num);
+            doc["~"] = root;
+
             doc["mode_cmd_t"]  = "~/cmd_mode";
             doc["mode_stat_t"] = "~/state";
             doc["temp_cmd_t"]  = "~/cmd_temp";
@@ -184,15 +191,15 @@ void Thermostat::init_mqtt() {
             doc["curr_temp_t"] = "~/state";
 
             std::string mode_str(30, '\0');
-            snprintf_P(&mode_str[0], 30, PSTR("{{value_json.hc%d.mode}}"), hc + 1);
+            snprintf_P(&mode_str[0], 30, PSTR("{{value_json.hc%d.mode}}"), hc_num);
             doc["mode_stat_tpl"] = mode_str;
 
             std::string seltemp_str(30, '\0');
-            snprintf_P(&seltemp_str[0], 30, PSTR("{{value_json.hc%d.seltemp}}"), hc + 1);
+            snprintf_P(&seltemp_str[0], 30, PSTR("{{value_json.hc%d.seltemp}}"), hc_num);
             doc["temp_stat_tpl"] = seltemp_str;
 
             std::string currtemp_str(30, '\0');
-            snprintf_P(&currtemp_str[0], 30, PSTR("{{value_json.hc%d.currtemp}}"), hc + 1);
+            snprintf_P(&currtemp_str[0], 30, PSTR("{{value_json.hc%d.currtemp}}"), hc_num);
             doc["curr_temp_tpl"] = currtemp_str;
 
             doc["min_temp"]  = "5";
@@ -205,14 +212,14 @@ void Thermostat::init_mqtt() {
             modes.add("auto");
 
             std::string topic(100, '\0'); // e.g homeassistant/climate/hc1/thermostat/config
-            snprintf_P(&topic[0], topic.capacity() + 1, PSTR("homeassistant/climate/ems-esp/hc%d/config"), hc + 1);
+            snprintf_P(&topic[0], topic.capacity() + 1, PSTR("homeassistant/climate/ems-esp/hc%d/config"), hc_num);
             // Mqtt::publish(topic); // empty payload, this remove any previous config sent to HA
             Mqtt::publish(topic, doc, true); // publish the config payload with retain flag
 
             // subscribe to the temp and mode commands
-            snprintf_P(&topic[0], topic.capacity() + 1, PSTR("homeassistant/climate/hc%d/thermostat/cmd_temp"), hc + 1);
+            snprintf_P(&topic[0], topic.capacity() + 1, PSTR("homeassistant/climate/ems-esp/hc%d/cmd_temp"), hc_num);
             register_mqtt_topic(topic, std::bind(&Thermostat::thermostat_cmd_temp, this, _1));
-            snprintf_P(&topic[0], topic.capacity() + 1, PSTR("homeassistant/climate/hc%d/thermostat/cmd_mode"), hc + 1);
+            snprintf_P(&topic[0], topic.capacity() + 1, PSTR("homeassistant/climate/ems-esp/hc%d/cmd_mode"), hc_num);
             register_mqtt_topic(topic, std::bind(&Thermostat::thermostat_cmd_mode, this, _1));
         }
     } else {
@@ -509,7 +516,7 @@ void Thermostat::thermostat_cmd(const char * message) {
         }
         return;
     }
-} // namespace emsesp
+}
 
 void Thermostat::thermostat_cmd_temp(const char * message) {
     float f = strtof((char *)message, 0);
@@ -565,7 +572,7 @@ void Thermostat::publish_values() {
     JsonObject                                      rootThermostat = doc.to<JsonObject>();
     JsonObject                                      dataThermostat;
 
-    // add external temp
+    // add external temp and other stuff specific to the RC30 and RC35
     if ((flags == EMS_DEVICE_FLAG_RC35 || flags == EMS_DEVICE_FLAG_RC30_1) && (mqtt_format_ == MQTT_format::SINGLE || mqtt_format_ == MQTT_format::CUSTOM)) {
         if (datetime_.size()) {
             rootThermostat["time"] = datetime_.c_str();
@@ -603,7 +610,9 @@ void Thermostat::publish_values() {
                 rootThermostat["wwmode"] = "auto";
             }
         }
-        if (mqtt_format_ == MQTT_format::SINGLE) {
+
+        // send this specific data using the thermostat_data topic
+        if ((mqtt_format_ == MQTT_format::SINGLE) || (mqtt_format_ == MQTT_format::HA)) {
             Mqtt::publish("thermostat_data", doc);
             rootThermostat = doc.to<JsonObject>(); // clear object
         }
@@ -618,10 +627,9 @@ void Thermostat::publish_values() {
         has_data = true;
         // if the MQTT format is 'nested' or 'ha' then create the parent object hc<n>
         if (mqtt_format_ != MQTT_format::SINGLE) {
-            // create nested json for each HC
             char hc_name[10]; // hc{1-4}
             strlcpy(hc_name, "hc", 10);
-            char s[3]; // for formatting strings
+            char s[3];
             strlcat(hc_name, Helpers::itoa(s, hc->hc_num()), 10);
             dataThermostat = rootThermostat.createNestedObject(hc_name);
         } else {
@@ -679,7 +687,7 @@ void Thermostat::publish_values() {
             dataThermostat["summertemp"] = hc->summertemp;
         }
 
-        // when using HA always send the mode otherwise it'll break the component/widget and report an error
+        // when using HA always send the mode otherwise it'll may break the component/widget and report an error
         if ((Helpers::hasValue(hc->mode)) || (mqtt_format_ == MQTT_format::HA)) {
             uint8_t hc_mode = hc->get_mode(flags);
             // if we're sending to HA the only valid mode types are heat, auto and off
@@ -706,25 +714,28 @@ void Thermostat::publish_values() {
         }
 
         // if format is single, send immediately and clear object for next hc
+        // the topic will have the hc number appended
         if (mqtt_format_ == MQTT_format::SINGLE) {
             char topic[30];
-            char s[3]; // for formatting strings
+            char s[3];
             strlcpy(topic, "thermostat_data", 30);
             strlcat(topic, Helpers::itoa(s, hc->hc_num()), 30); // append hc to topic
             Mqtt::publish(topic, doc);
             rootThermostat = doc.to<JsonObject>(); // clear object
+        } else if (mqtt_format_ == MQTT_format::HA) {
+            std::string topic(100, '\0');
+            snprintf_P(&topic[0], topic.capacity() + 1, PSTR("homeassistant/climate/ems-esp/hc%d/state"), hc->hc_num());
+            Mqtt::publish(topic, doc);
         }
     }
 
     if (!has_data) {
-        return; // nothing to send
+        return; // nothing to send, quit
     }
 
-    // if we're using nested json, send all in one go
+    // if we're using nested json, send all in one go under one topic called thermostat_data
     if (mqtt_format_ == MQTT_format::NESTED) {
         Mqtt::publish("thermostat_data", doc);
-    } else if (mqtt_format_ == MQTT_format::HA) {
-        Mqtt::publish("homeassistant/climate/ems-esp/state", doc);
     } else if (mqtt_format_ == MQTT_format::CUSTOM) {
         Mqtt::publish("thermostat_data", doc);
     }
