@@ -118,9 +118,6 @@ void Mixing::publish_values() {
         doc["flowSetTemp"] = flowSetTemp_;
     }
 
-#ifdef EMSESP_DEBUG
-    LOG_DEBUG(F("[DEBUG] Performing a mixing module publish"));
-#endif
     char topic[30];
     char s[3]; // for formatting strings
     strlcpy(topic, "mixing_data", 30);

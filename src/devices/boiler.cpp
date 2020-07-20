@@ -324,10 +324,6 @@ void Boiler::publish_values() {
         doc["serviceCodeNumber"] = serviceCode_;
     }
 
-#ifdef EMSESP_DEBUG
-    LOG_DEBUG(F("[DEBUG] Performing a boiler publish"));
-#endif
-
     // if we have data, publish it
     if (!doc.isNull()) {
         Mqtt::publish("boiler_data", doc);
