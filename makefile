@@ -26,7 +26,7 @@ CXX_STANDARD := -std=c++11
 #----------------------------------------------------------------------
 # Defined Symbols
 #----------------------------------------------------------------------
-DEFINES += -DARDUINOJSON_ENABLE_STD_STRING=1 -DEMSESP_DEBUG -DEMSESP_STANDALONE
+DEFINES += -DARDUINOJSON_ENABLE_STD_STRING=1 -DARDUINOJSON_ENABLE_ARDUINO_STRING -DEMSESP_DEBUG -DEMSESP_STANDALONE -DEMSESP_NO_LED
 
 #----------------------------------------------------------------------
 # Sources & Files
@@ -66,6 +66,7 @@ CPPFLAGS  += -Os
 
 CFLAGS    += $(CPPFLAGS)
 CFLAGS    += -Wall
+CFLAGS    += -Wno-unused -Wno-restrict
 CFLAGS    += -Wextra
 
 CXXFLAGS  += $(CFLAGS) -MMD

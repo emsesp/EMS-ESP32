@@ -39,6 +39,7 @@ static int           __output_level[256];
 int main(int argc __attribute__((unused)), char * argv[] __attribute__((unused))) {
     memset(__output_pins, 0, sizeof(__output_pins));
     memset(__output_level, 0, sizeof(__output_level));
+
     setup();
     // loop(); // run once
 

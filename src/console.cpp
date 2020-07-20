@@ -20,7 +20,7 @@
 #include "emsesp.h"
 #include "version.h"
 
-#ifdef EMSESP_DEBUG
+#ifdef EMSESP_STANDALONE
 #include "test/test.h"
 #endif
 
@@ -285,7 +285,7 @@ void Console::enter_custom_context(Shell & shell, unsigned int context) {
 
 // each custom context has the common commands like log, help, exit, su etc
 void Console::load_standard_commands(unsigned int context) {
-#ifdef EMSESP_DEBUG
+#ifdef EMSESP_STANDALONE
     EMSESPShell::commands->add_command(context,
                                        CommandFlags::ADMIN,
                                        flash_string_vector{F_(test)},

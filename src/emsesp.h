@@ -64,7 +64,7 @@ class EMSESP {
 
     static void publish_all_values();
 
-#ifdef EMSESP_DEBUG
+#ifdef EMSESP_STANDALONE
     static void run_test(uuid::console::Shell & shell, const std::string & command); // only for testing
     static void dummy_mqtt_commands(const char * message);
     static void rx_telegram(const std::vector<uint8_t> & data);

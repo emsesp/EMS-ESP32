@@ -30,15 +30,17 @@ AsyncWebServer webServer(80);
 #if defined(ESP32)
 ESP8266React          EMSESP::esp8266React(&webServer, &SPIFFS);
 EMSESPSettingsService EMSESP::emsespSettingsService = EMSESPSettingsService(&webServer, &SPIFFS, EMSESP::esp8266React.getSecurityManager());
-#else
+#elif defined(ESP8266)
 ESP8266React          EMSESP::esp8266React(&webServer, &LittleFS);
 EMSESPSettingsService EMSESP::emsespSettingsService = EMSESPSettingsService(&webServer, &LittleFS, EMSESP::esp8266React.getSecurityManager());
+#elif defined(EMSESP_STANDALONE)
+FS                    dummyFS;
+ESP8266React          EMSESP::esp8266React(&webServer, &dummyFS);
+EMSESPSettingsService EMSESP::emsespSettingsService = EMSESPSettingsService(&webServer, &dummyFS, EMSESP::esp8266React.getSecurityManager());
 #endif
 
-EMSESPStatusService EMSESP::emsespStatusService = EMSESPStatusService(&webServer, EMSESP::esp8266React.getSecurityManager());
-
-EMSESPDevicesService EMSESP::emsespDevicesService = EMSESPDevicesService(&webServer, EMSESP::esp8266React.getSecurityManager());
-
+EMSESPStatusService      EMSESP::emsespStatusService      = EMSESPStatusService(&webServer, EMSESP::esp8266React.getSecurityManager());
+EMSESPDevicesService     EMSESP::emsespDevicesService     = EMSESPDevicesService(&webServer, EMSESP::esp8266React.getSecurityManager());
 EMSESPScanDevicesService EMSESP::emsespScanDevicesService = EMSESPScanDevicesService(&webServer, EMSESP::esp8266React.getSecurityManager());
 
 std::vector<std::unique_ptr<EMSdevice>>    EMSESP::emsdevices;      // array of all the detected EMS devices
@@ -622,7 +624,7 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
         Roomctrl::check((data[1] ^ 0x80 ^ rxservice_.ems_mask()), data);
 #ifdef EMSESP_DEBUG
         // get_uptime is only updated once per loop, does not give the right time
-        LOG_DEBUG(F("[DEBUG] Echo after %d ms: %s"), ::millis() - rx_time_, Helpers::data_to_hex(data, length).c_str());
+        LOG_TRACE(F("[DEBUG] Echo after %d ms: %s"), ::millis() - rx_time_, Helpers::data_to_hex(data, length).c_str());
 #endif
         return; // it's an echo
     }
@@ -720,7 +722,7 @@ void EMSESP::start() {
 #endif
 
     esp8266React.begin();                              // starts wifi, ap, ota, security, mqtt services
-    emsespSettingsService.begin();                     // load settings
+    emsespSettingsService.begin();                     // load EMS-ESP specific settings from LittleFS
     console_.start();                                  // telnet and serial console
     system_.start();                                   // starts syslog, uart, sets version, initializes LED. Requires pre-loaded settings.
     mqtt_.start(EMSESP::esp8266React.getMqttClient()); // mqtt init
@@ -732,17 +734,14 @@ void EMSESP::start() {
 
 // loop de loop
 void EMSESP::loop() {
-#ifndef EMSESP_STANDALONE
-    esp8266React.loop();
-#endif
-
-    system_.loop();    // does LED and checks system health, and syslog service
-    mqtt_.loop();      // starts mqtt, and sends out anything in the queue
-    rxservice_.loop(); // process what ever is in the rx queue
-    txservice_.loop(); // check that the Tx is all ok
-    shower_.loop();    // check for shower on/off
-    sensors_.loop();   // this will also send out via MQTT
-    console_.loop();   // telnet/serial console
+    esp8266React.loop(); // web
+    system_.loop();      // does LED and checks system health, and syslog service
+    mqtt_.loop();        // starts mqtt, and sends out anything in the queue
+    rxservice_.loop();   // process what ever is in the rx queue
+    txservice_.loop();   // check that the Tx is all ok
+    shower_.loop();      // check for shower on/off
+    sensors_.loop();     // this will also send out via MQTT
+    console_.loop();     // telnet/serial console
 
     // force a query on the EMS devices to fetch latest data at a set interval (1 min)
     if ((uuid::get_uptime() - last_fetch_ > EMS_FETCH_FREQUENCY)) {
@@ -753,7 +752,6 @@ void EMSESP::loop() {
 #if defined(ESP32)
     delay(1);
 #endif
-
 }
 
 } // namespace emsesp

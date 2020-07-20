@@ -26,12 +26,15 @@
 #include <string>
 #include <algorithm> // for count_if
 
+#include <iostream>
+
 #define IPAddress std::string
 #define ICACHE_FLASH_ATTR
 #define ICACHE_RAM_ATTR
 #define os_event_t void
 #define byte uint8_t
 #define ltoa itoa
+#define boolean bool
 
 #define LOW 0
 #define HIGH 1
@@ -54,13 +57,10 @@ int  digitalRead(uint8_t pin);
         &__c[0];                                                                                                                                               \
     }))
 
+
 class __FlashStringHelper;
 #define FPSTR(string_literal) (reinterpret_cast<const __FlashStringHelper *>(string_literal))
 #define F(string_literal) (FPSTR(PSTR(string_literal)))
-
-#define strlen_P strlen
-#define strncpy_P strncpy
-#define strcmp_P strcmp
 
 int snprintf_P(char * str, size_t size, const char * format, ...);
 int vsnprintf_P(char * str, size_t size, const char * format, va_list ap);
@@ -136,6 +136,7 @@ class Stream : public Print {
     virtual int peek()      = 0;
 };
 
+/*
 class String {
   public:
     String(const char * data = "")
@@ -150,9 +151,18 @@ class String {
         return data_.c_str();
     }
 
+    bool equals(String comp) {
+        return (data_ == comp.c_str());
+    }
+
+    bool isEmpty() {
+        return data_.empty();
+    }
+
   private:
     std::string data_;
 };
+*/
 
 class NativeConsole : public Stream {
   public:
@@ -215,7 +225,10 @@ void yield(void);
 void setup(void);
 void loop(void);
 
+
 size_t strlcpy(char * __restrict dst, const char * __restrict src, size_t dsize);
 size_t strlcat(char * dst, const char * src, size_t siz);
+
+#include "WString.h"
 
 #endif

@@ -27,9 +27,7 @@ MAKE_PSTR(logger_name, "mqtt")
 
 namespace emsesp {
 
-#ifndef EMSESP_STANDALONE
 AsyncMqttClient * Mqtt::mqttClient_;
-#endif
 
 // static parameters we make global
 std::string Mqtt::hostname_;
@@ -90,10 +88,6 @@ void Mqtt::subscribe(const uint8_t device_id, const std::string & topic, mqtt_fu
 
     if (!exists) {
         mqtt_functions_.emplace_back(device_id, std::move(full_topic), cb); // register a call back function for a specific telegram type
-    } else {
-#ifdef EMSESP_DEBUG
-        LOG_DEBUG(F("[DEBUG] Resubscribing to topic %s"), full_topic);
-#endif
     }
 
     queue_subscribe_message(topic); // add subscription to queue
@@ -120,11 +114,7 @@ void Mqtt::subscribe(const std::string & topic, mqtt_function_p cb) {
 // sends out top item on publish queue
 void Mqtt::loop() {
     // exit if MQTT is not enabled or if there is no WIFI
-#ifndef EMSESP_STANDALONE
     if (!connected()) {
-#else
-    if (false) {
-#endif
         return;
     }
 
@@ -201,10 +191,7 @@ void Mqtt::on_message(char * topic, char * payload, size_t len) {
     // convert payload to a null-terminated char string
     char message[len + 2];
     strlcpy(message, payload, len + 1);
-
-#ifdef EMSESP_DEBUG
     LOG_DEBUG(F("[DEBUG] Received %s => %s (length %d)"), topic, message, len);
-#endif
 
     /*
     // strip out everything until the last /
@@ -296,14 +283,13 @@ void Mqtt::start(AsyncMqttClient * mqttClient) {
         mqtt_qos_     = mqttSettings.mqtt_qos;
     });
 
-#ifndef EMSESP_STANDALONE
+
     mqttClient_->onConnect([this](bool sessionPresent) { on_connect(); });
     mqttClient_->setWill(make_topic(will_topic_, "status"), 1, true, "offline"); // with qos 1, retain true
     mqttClient_->onMessage([this](char * topic, char * payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) {
         on_message(topic, payload, len);
         mqttClient_->onPublish([this](uint16_t packetId) { on_publish(packetId); });
     });
-#endif
 }
 
 void Mqtt::set_publish_time(uint16_t publish_time) {
@@ -320,7 +306,9 @@ void Mqtt::on_connect() {
     StaticJsonDocument<90> doc;
     doc["event"]   = "start";
     doc["version"] = EMSESP_APP_VERSION;
-    doc["ip"]      = WiFi.localIP().toString();
+#ifndef EMSESP_STANDALONE
+    doc["ip"] = WiFi.localIP().toString();
+#endif
     publish("info", doc, false); // send with retain off
 
     publish("status", "online", true); // say we're alive to the Last Will topic, with retain on
@@ -416,11 +404,7 @@ void Mqtt::process_queue() {
     // if we're subscribing...
     if (message->operation == Operation::SUBSCRIBE) {
         LOG_DEBUG(F("Subscribing to topic: %s"), full_topic);
-#ifndef EMSESP_STANDALONE
         uint16_t packet_id = mqttClient_->subscribe(full_topic, mqtt_qos_);
-#else
-        uint16_t packet_id = 1;
-#endif
         if (!packet_id) {
             LOG_DEBUG(F("Error subscribing to %s, error %d"), full_topic, packet_id);
         }
@@ -437,12 +421,7 @@ void Mqtt::process_queue() {
     }
 
     // else try and publish it
-
-#ifndef EMSESP_STANDALONE
     uint16_t packet_id = mqttClient_->publish(full_topic, mqtt_qos_, message->retain, message->payload.c_str(), message->payload.size(), false, mqtt_message.id_);
-#else
-    uint16_t packet_id = 1;
-#endif
     LOG_DEBUG(F("Publishing topic %s (#%02d, attempt #%d, pid %d)"), full_topic, mqtt_message.id_, mqtt_message.retry_count_ + 1, packet_id);
 
     if (packet_id == 0) {

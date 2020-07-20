@@ -16,8 +16,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifdef EMSESP_STANDALONE
-
 #include "emsuart_standalone.h"
 
 #pragma GCC diagnostic push
@@ -88,5 +86,3 @@ char * EMSuart::hextoa(char * result, const uint8_t value) {
 } // namespace emsesp
 
 #pragma GCC diagnostic pop
-
-#endif

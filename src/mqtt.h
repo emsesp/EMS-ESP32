@@ -27,9 +27,7 @@
 #include <deque>
 #include <functional>
 
-#ifndef EMSESP_STANDALONE
 #include <AsyncMqttClient.h>
-#endif
 
 #include "helpers.h"
 #include "system.h"
@@ -86,21 +84,13 @@ class Mqtt {
     static void on_connect();
 
     void disconnect() {
-#ifdef EMSESP_STANDALONE
-        return;
-#else
         mqttClient_->disconnect();
-#endif
     }
 
     void incoming(char * topic, char * payload); // for testing
 
     static bool connected() {
-#ifdef EMSESP_STANDALONE
-        return true;
-#else
         return mqttClient_->connected();
-#endif
     }
 
     static uint32_t publish_fails() {
@@ -126,9 +116,7 @@ class Mqtt {
     };
     static std::deque<QueuedMqttMessage> mqtt_messages_;
 
-#ifndef EMSESP_STANDALONE
     static AsyncMqttClient * mqttClient_;
-#endif
 
     static constexpr size_t MAX_MQTT_MESSAGES = 50;
     static size_t           maximum_mqtt_messages_;

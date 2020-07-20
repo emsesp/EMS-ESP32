@@ -75,7 +75,6 @@ void System::mqtt_commands(const char * message) {
 #endif
 
 #ifndef EMSESP_STANDALONE
-
     if (doc["D0"] != nullptr) {
         const int8_t set = doc["D0"];
         pinMode(d0_, OUTPUT);
@@ -119,7 +118,6 @@ void System::mqtt_commands(const char * message) {
         }
         LOG_INFO(F("Port D3 set to %d"), set);
     }
-
 #endif
 
     const char * command = doc["cmd"];
@@ -155,11 +153,10 @@ void System::restart() {
 // format fs
 // format the FS. Wipes everything.
 void System::format(uuid::console::Shell & shell) {
-    auto msg = F("Resetting all settings to defaults");
+    auto msg = F("Formatting file system. This will also reset all settings to their defaults");
     shell.logger().warning(msg);
     shell.flush();
 
-#ifndef EMSESP_STANDALONE
     EMSuart::stop();
 
 #if defined(ESP8266)
@@ -169,8 +166,6 @@ void System::format(uuid::console::Shell & shell) {
 #endif
 
     System::restart();
-
-#endif
 }
 
 // return free heap mem as a percentage
@@ -226,10 +221,9 @@ void System::start() {
 
     // fetch settings
     EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) { tx_mode_ = settings.tx_mode; });
-
     EMSESP::esp8266React.getMqttSettingsService()->read([&](MqttSettings & settings) { system_heartbeat_ = settings.system_heartbeat; });
 
-    syslog_init();
+    syslog_init(); // init SysLog
 
 #if defined(ESP32)
     LOG_INFO(F("System booted (EMS-ESP version %s ESP32)"), EMSESP_APP_VERSION);

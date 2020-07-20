@@ -135,10 +135,6 @@ void Solar::publish_values() {
         doc["energytotal"] = (float)energyTotal_ / 10;
     }
 
-#ifdef EMSESP_DEBUG
-    LOG_DEBUG(F("[DEBUG] Performing a solar module publish"));
-#endif
-
     Mqtt::publish("sm_data", doc);
 }
 
