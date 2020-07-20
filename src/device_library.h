@@ -73,8 +73,8 @@
 { 73, DeviceType::SOLAR, F("SM10"), DeviceFlags::EMS_DEVICE_FLAG_SM10},
 {101, DeviceType::SOLAR, F("ISM1"), DeviceFlags::EMS_DEVICE_FLAG_ISM},
 {162, DeviceType::SOLAR, F("SM50"), DeviceFlags::EMS_DEVICE_FLAG_SM100},
-{163, DeviceType::SOLAR, F("SM100"), DeviceFlags::EMS_DEVICE_FLAG_SM100},
-{164, DeviceType::SOLAR, F("SM200"), DeviceFlags::EMS_DEVICE_FLAG_SM100},
+{163, DeviceType::SOLAR, F("SM100/MS100"), DeviceFlags::EMS_DEVICE_FLAG_SM100},
+{164, DeviceType::SOLAR, F("SM200/MS200"), DeviceFlags::EMS_DEVICE_FLAG_SM100},
 
 // Mixing Modules - 0x20-0x27 for HC, 0x28-0x29 for WWC
 { 69, DeviceType::MIXING, F("MM10"), DeviceFlags::EMS_DEVICE_FLAG_MM10},
