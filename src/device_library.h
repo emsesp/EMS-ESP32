@@ -24,7 +24,7 @@
  */
 
 // Boilers - 0x08
-{ 64, DeviceType::BOILER, F("BK13,BK15/Smartline/GB1x2"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
+{ 64, DeviceType::BOILER, F("BK13/BK15/Smartline/GB1x2"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 { 72, DeviceType::BOILER, F("GB125/MC10"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 { 84, DeviceType::BOILER, F("Logamax Plus GB022"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 { 95, DeviceType::BOILER, F("Condens 2500/Logamax/Logomatic/Cerapur Top/Greenstar/Generic HT3"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
@@ -36,7 +36,7 @@
 {172, DeviceType::BOILER, F("Enviline/Compress 6000AW"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {195, DeviceType::BOILER, F("Condens 5000i"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {203, DeviceType::BOILER, F("Logamax U122/Cerapur"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
-{208, DeviceType::BOILER, F("Logamax plus/GB192/Condens GC9000"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
+{208, DeviceType::BOILER, F("Logamax Plus/GB192/Condens GC9000"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {234, DeviceType::BOILER, F("Logamax Plus GB122"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 
 // Thermostat - not currently supporting write operations, like the Easy/100 types - 0x18
@@ -112,7 +112,7 @@
 { 71, DeviceType::SWITCH, F("WM10"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 
 // Gateways - 0x48 / 0x18
-{ 94, DeviceType::GATEWAY, F("RFM20 Remote Base for RC20RF"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x18
+{ 94, DeviceType::GATEWAY, F("RFM20 Remote"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x18
 {189, DeviceType::GATEWAY, F("KM200"), DeviceFlags::EMS_DEVICE_FLAG_NONE} // 0x48
 
 
