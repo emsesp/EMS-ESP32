@@ -375,13 +375,6 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
               tx_telegram.id_,
               telegram->to_string(telegram_raw, length).c_str());
 
-#ifdef EMSESP_DEBUG
-    // if watching in 'raw' mode
-    if (EMSESP::watch() == EMSESP::Watch::WATCH_RAW) {
-        LOG_NOTICE(F("[DEBUG] Tx: %s"), Helpers::data_to_hex(telegram_raw, length).c_str());
-    }
-#endif
-
     // send the telegram to the UART Tx
     uint16_t status = EMSuart::transmit(telegram_raw, length);
 
@@ -427,6 +420,7 @@ void TxService::add(const uint8_t  operation,
                     const uint8_t  message_length,
                     const bool     front) {
     auto telegram = std::make_shared<Telegram>(operation, ems_bus_id(), dest, type_id, offset, message_data, message_length);
+
 #ifdef EMSESP_DEBUG
     LOG_DEBUG(F("[DEBUG] New Tx [#%d] telegram, length %d"), tx_telegram_id_, message_length);
 #endif
@@ -502,6 +496,7 @@ void TxService::add(uint8_t operation, const uint8_t * data, const uint8_t lengt
 #ifdef EMSESP_DEBUG
     LOG_DEBUG(F("[DEBUG] New Tx [#%d] telegram, length %d"), tx_telegram_id_, message_length);
 #endif
+
     if (front) {
         tx_telegrams_.emplace_front(tx_telegram_id_++, std::move(telegram), false); // add to back of queue
     } else {
