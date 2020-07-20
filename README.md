@@ -51,6 +51,7 @@
 
  - Connect to the Access Point called ems-esp using the WPA password `ems-esp-neo`. When you see the captive portal sign-in with username `admin` and password `admin`. Set the WiFi credentials and restart the ESP.
  - When it connects to your wifi network you can use either the Web UI to further configure the other settings or using Telnet. If using the Telnet console refer to the full set of commands below. To change any settings you need to be admin which can be accessed via the `su` command. The password here is the same as the JWT secret from the Web UI, default `ems-esp-neo`.
+ - First thing to check is if Tx is working. Use `show ems` and if you have a large number of Tx fails try changing the Tx Mode using `set tx_mode` as admin. Typical values are 1 for EMS1.0, 2 for EMS2.0/EMS+ and 3 for Heatronics.
 
 ## **List of console commands**
 
@@ -123,6 +124,7 @@ thermostat
 - Multi-language. German, Dutch, French
 - Click on a device in the Web UI shows it's details
 - Publish time can be customized per device (solar, mixing etc)
+- add homeassistant mqtt discovery for Boiler as well
 
 ### **Customizing the Web UI**
 
