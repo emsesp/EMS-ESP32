@@ -247,8 +247,7 @@ class RxService : public EMSbus {
     }
 
   private:
-    static constexpr uint32_t RX_LOOP_WAIT   = 800; // delay in processing Rx queue
-    uint32_t                  last_rx_check_ = 0;
+    uint32_t last_rx_check_ = 0;
 
     uint8_t rx_telegram_id_ = 0; // queue counter
 
@@ -260,7 +259,7 @@ class RxService : public EMSbus {
 
 class TxService : public EMSbus {
   public:
-    static constexpr size_t MAX_TX_TELEGRAMS = 40; // size of Tx queue
+    static constexpr size_t MAX_TX_TELEGRAMS = 30; // size of Tx queue
 
     static constexpr uint8_t TX_WRITE_FAIL    = 4;
     static constexpr uint8_t TX_WRITE_SUCCESS = 1;
