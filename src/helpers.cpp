@@ -329,7 +329,7 @@ bool Helpers::check_abs(const int32_t i) {
     return ((i < 0 ? -i : i) != 0xFFFFFF);
 }
 
-// for booleans, use isBool true
+// for booleans, use isBool true (VALUE_BOOL)
 bool Helpers::hasValue(const uint8_t v, bool isBool) {
     if (isBool) {
         return (v != EMS_VALUE_BOOL_NOTSET);

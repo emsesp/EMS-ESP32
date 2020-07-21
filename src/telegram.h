@@ -38,7 +38,8 @@
 #include "helpers.h"
 
 // default values for null values
-static constexpr uint8_t EMS_VALUE_BOOL     = 0xFF; // boolean
+static constexpr uint8_t VALUE_BOOL         = true; // is a boolean
+static constexpr uint8_t EMS_VALUE_BOOL     = 0xFF; // is a boolean
 static constexpr uint8_t EMS_VALUE_BOOL_OFF = 0x00; // boolean false. True can be 0x01 or 0xFF sometimes.
 
 static constexpr uint8_t  EMS_VALUE_BOOL_NOTSET   = 0xFE;       // random number for booleans, that's not 0, 1 or FF
