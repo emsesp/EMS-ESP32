@@ -90,6 +90,7 @@ class EMSuart {
     static void           emsuart_recvTask(void * para);
     static void IRAM_ATTR emsuart_rx_intr_handler(void * para);
     static void IRAM_ATTR emsuart_tx_timer_intr_handler();
+    static void           tx_brk();
 };
 
 } // namespace emsesp
