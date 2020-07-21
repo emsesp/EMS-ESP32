@@ -28,25 +28,23 @@ EMSESPStatusService::EMSESPStatusService(AsyncWebServer * server, SecurityManage
 void EMSESPStatusService::onStationModeConnected(WiFiEvent_t event, WiFiEventInfo_t info) {
     EMSESP::logger().debug(F("Wifi Connected"));
 }
-
 void EMSESPStatusService::onStationModeDisconnected(WiFiEvent_t event, WiFiEventInfo_t info) {
     EMSESP::logger().debug(F("WiFi Disconnected. Reason code=%d"), info.disconnected.reason);
 }
-
 void EMSESPStatusService::onStationModeGotIP(WiFiEvent_t event, WiFiEventInfo_t info) {
     EMSESP::logger().debug(F("WiFi connected with IP=%s, hostname=%s"), WiFi.localIP().toString().c_str(), WiFi.getHostname());
+    EMSESP::system_.send_heartbeat(); // send out heartbeat MQTT as soon as we have a connection
 }
 #elif defined(ESP8266)
 void EMSESPStatusService::onStationModeConnected(const WiFiEventStationModeConnected & event) {
     EMSESP::logger().debug(F("Wifi connected with SSID %s"), event.ssid.c_str());
 }
-
 void EMSESPStatusService::onStationModeDisconnected(const WiFiEventStationModeDisconnected & event) {
     EMSESP::logger().debug(F("WiFi Disconnected. Reason code=%d"), event.reason);
 }
-
 void EMSESPStatusService::onStationModeGotIP(const WiFiEventStationModeGotIP & event) {
     EMSESP::logger().debug(F("WiFi connected with IP=%s, hostname=%s"), event.ip.toString().c_str(), WiFi.hostname().c_str());
+    EMSESP::system_.send_heartbeat(); // send out heartbeat MQTT as soon as we have a connection
 }
 #endif
 
