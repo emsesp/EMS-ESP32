@@ -50,7 +50,7 @@ Mixing::Mixing(uint8_t device_type, uint8_t device_id, uint8_t product_id, const
     }
 
     // MQTT callbacks
-    // register_mqtt_topic("cmd", std::bind(&Mixing::cmd, this, _1));
+    // register_mqtt_topic("topic", std::bind(&Mixing::cmd, this, _1));
 }
 
 // add context submenu

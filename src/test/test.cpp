@@ -542,9 +542,8 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
     }
 
     if (command == "mqtt2") {
-        // Mqtt::subscribe("cmd", std::bind(&EMSESP::dummy_EMSESP::mqtt_commands, this, _1));
         for (uint8_t i = 0; i < 30; i++) {
-            Mqtt::subscribe("cmd", dummy_mqtt_commands);
+            Mqtt::subscribe("topic", dummy_mqtt_commands);
         }
     }
 

@@ -51,7 +51,7 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
     }
 
     // MQTT callbacks
-    // register_mqtt_topic("cmd", std::bind(&Solar::cmd, this, _1));
+    // register_mqtt_topic("topic", std::bind(&Solar::cmd, this, _1));
 }
 
 // context submenu
@@ -103,11 +103,11 @@ void Solar::publish_values() {
         doc["pumpmodulation"] = pumpModulation_;
     }
 
-    if (Helpers::hasValue(pump_, true)) {
+    if (Helpers::hasValue(pump_, VALUE_BOOL)) {
         doc["pump"] = Helpers::render_value(s, pump_, EMS_VALUE_BOOL);
     }
 
-    if (Helpers::hasValue(valveStatus_, true)) {
+    if (Helpers::hasValue(valveStatus_, VALUE_BOOL)) {
         doc["valvestatus"] = Helpers::render_value(s, valveStatus_, EMS_VALUE_BOOL);
     }
 
@@ -115,11 +115,11 @@ void Solar::publish_values() {
         doc["pumpWorkMin"] = (float)pumpWorkMin_;
     }
 
-    if (Helpers::hasValue(tankHeated_, true)) {
+    if (Helpers::hasValue(tankHeated_, VALUE_BOOL)) {
         doc["tankHeated"] = Helpers::render_value(s, tankHeated_, EMS_VALUE_BOOL);
     }
 
-    if (Helpers::hasValue(collectorOnOff_, true)) {
+    if (Helpers::hasValue(collectorOnOff_, VALUE_BOOL)) {
         doc["collectorOnOff"] = Helpers::render_value(s, collectorOnOff_, EMS_VALUE_BOOL);
     }
 

@@ -43,7 +43,7 @@ Heatpump::Heatpump(uint8_t device_type, uint8_t device_id, uint8_t product_id, c
     register_telegram_type(0x042B, F("HP2"), true, std::bind(&Heatpump::process_HPMonitor2, this, _1));
 
     // MQTT callbacks
-    // register_mqtt_topic("cmd", std::bind(&Heatpump::cmd, this, _1));
+    // register_mqtt_topic("topic", std::bind(&Heatpump::cmd, this, _1));
 }
 
 // context submenu
