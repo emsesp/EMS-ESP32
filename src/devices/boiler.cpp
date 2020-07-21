@@ -207,16 +207,16 @@ void Boiler::publish_values() {
     if (Helpers::hasValue(pumpMod2_)) {
         doc["pumpMod2"] = pumpMod2_;
     }
-    if (Helpers::hasValue(wWCircPump_, true)) {
+    if (Helpers::hasValue(wWCircPump_, VALUE_BOOL)) {
         doc["wWCircPump"] = Helpers::render_value(s, wWCircPump_, EMS_VALUE_BOOL);
     }
-    if (Helpers::hasValue(wWCircPumpType_)) {
+    if (Helpers::hasValue(wWCircPumpType_, VALUE_BOOL)) {
         doc["wWCiPuType"] = wWCircPumpType_ ? "valve" : "pump";
     }
     if (Helpers::hasValue(wWCircPumpMode_)) {
         doc["wWCiPuMode"] = wWCircPumpMode_;
     }
-    if (Helpers::hasValue(wWCirc_)) {
+    if (Helpers::hasValue(wWCirc_, VALUE_BOOL)) {
         doc["wWCirc"] = Helpers::render_value(s, wWCirc_, EMS_VALUE_BOOL);
     }
     if (Helpers::hasValue(extTemp_)) {
@@ -252,43 +252,43 @@ void Boiler::publish_values() {
     if (Helpers::hasValue(exhaustTemp_)) {
         doc["exhaustTemp"] = (float)exhaustTemp_ / 10;
     }
-    if (Helpers::hasValue(wWActivated_, true)) {
+    if (Helpers::hasValue(wWActivated_, VALUE_BOOL)) {
         doc["wWActivated"] = Helpers::render_value(s, wWActivated_, EMS_VALUE_BOOL);
     }
-    if (Helpers::hasValue(wWOneTime_, true)) {
+    if (Helpers::hasValue(wWOneTime_, VALUE_BOOL)) {
         doc["wWOnetime"] = Helpers::render_value(s, wWOneTime_, EMS_VALUE_BOOL);
     }
-    if (Helpers::hasValue(wWDesinfecting_, true)) {
+    if (Helpers::hasValue(wWDesinfecting_, VALUE_BOOL)) {
         doc["wWDesinfecting"] = Helpers::render_value(s, wWDesinfecting_, EMS_VALUE_BOOL);
     }
-    if (Helpers::hasValue(wWReadiness_, true)) {
+    if (Helpers::hasValue(wWReadiness_, VALUE_BOOL)) {
         doc["wWReady"] = Helpers::render_value(s, wWReadiness_, EMS_VALUE_BOOL);
     }
-    if (Helpers::hasValue(wWRecharging_, true)) {
+    if (Helpers::hasValue(wWRecharging_, VALUE_BOOL)) {
         doc["wWRecharge"] = Helpers::render_value(s, wWRecharging_, EMS_VALUE_BOOL);
     }
-    if (Helpers::hasValue(wWTemperatureOK_, true)) {
+    if (Helpers::hasValue(wWTemperatureOK_, VALUE_BOOL)) {
         doc["wWTempOK"] = Helpers::render_value(s, wWTemperatureOK_, EMS_VALUE_BOOL);
     }
-    if (Helpers::hasValue(wWCirc_, true)) {
+    if (Helpers::hasValue(wWCirc_, VALUE_BOOL)) {
         doc["wWCirc"] = Helpers::render_value(s, wWCirc_, EMS_VALUE_BOOL);
     }
-    if (Helpers::hasValue(burnGas_, true)) {
+    if (Helpers::hasValue(burnGas_, VALUE_BOOL)) {
         doc["burnGas"] = Helpers::render_value(s, burnGas_, EMS_VALUE_BOOL);
     }
     if (Helpers::hasValue(flameCurr_)) {
         doc["flameCurr"] = (float)(int16_t)flameCurr_ / 10;
     }
-    if (Helpers::hasValue(heatPmp_, true)) {
+    if (Helpers::hasValue(heatPmp_, VALUE_BOOL)) {
         doc["heatPmp"] = Helpers::render_value(s, heatPmp_, EMS_VALUE_BOOL);
     }
-    if (Helpers::hasValue(fanWork_, true)) {
+    if (Helpers::hasValue(fanWork_, VALUE_BOOL)) {
         doc["fanWork"] = Helpers::render_value(s, fanWork_, EMS_VALUE_BOOL);
     }
-    if (Helpers::hasValue(ignWork_, true)) {
+    if (Helpers::hasValue(ignWork_, VALUE_BOOL)) {
         doc["ignWork"] = Helpers::render_value(s, ignWork_, EMS_VALUE_BOOL);
     }
-    if (Helpers::hasValue(wWHeat_, true)) {
+    if (Helpers::hasValue(wWHeat_, VALUE_BOOL)) {
         doc["wWHeat"] = Helpers::render_value(s, wWHeat_, EMS_VALUE_BOOL);
     }
     if (Helpers::hasValue(heating_temp_)) {
@@ -339,16 +339,16 @@ bool Boiler::updated_values() {
 void Boiler::show_values(uuid::console::Shell & shell) {
     EMSdevice::show_values(shell); // for showing the header
 
-    if (Helpers::hasValue(tap_water_active_, true)) {
+    if (Helpers::hasValue(tap_water_active_, VALUE_BOOL)) {
         print_value(shell, 2, F("Hot tap water"), tap_water_active_ ? F("running") : F("off"));
     }
 
-    if (Helpers::hasValue(heating_active_, true)) {
+    if (Helpers::hasValue(heating_active_, VALUE_BOOL)) {
         print_value(shell, 2, F("Central heating"), heating_active_ ? F("active") : F("off"));
     }
 
     print_value(shell, 2, F("Warm Water activated"), wWActivated_, nullptr, EMS_VALUE_BOOL);
-    if (Helpers::hasValue(wWCircPumpType_, true)) {
+    if (Helpers::hasValue(wWCircPumpType_, VALUE_BOOL)) {
         print_value(shell, 2, F("Warm Water charging type"), wWCircPumpType_ ? F("3-way valve") : F("charge pump"));
     }
     print_value(shell, 2, F("Warm Water circulation pump available"), wWCircPump_, nullptr, EMS_VALUE_BOOL);
@@ -457,7 +457,7 @@ void Boiler::check_active() {
 
     // see if the heating or hot tap water has changed, if so send
     // last_boilerActive stores heating in bit 1 and tap water in bit 2
-    if (Helpers::hasValue(tap_water_active_, true) && Helpers::hasValue(heating_active_, true)) {
+    if (Helpers::hasValue(tap_water_active_, VALUE_BOOL) && Helpers::hasValue(heating_active_, VALUE_BOOL)) {
         uint8_t latest_boilerState = (tap_water_active_ << 1) + heating_active_;
         if (latest_boilerState != last_boilerState) {
             last_boilerState = latest_boilerState;
