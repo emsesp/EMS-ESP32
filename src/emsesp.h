@@ -105,17 +105,18 @@ class EMSESP {
         return sensors_.devices();
     }
 
-    static void watch_id(uint16_t id);
-
+    enum Watch : uint8_t { WATCH_OFF, WATCH_ON, WATCH_RAW };
+    static void     watch_id(uint16_t id);
     static uint16_t watch_id() {
         return watch_id_;
     }
 
     static void watch(uint8_t watch) {
         watch_ = watch; // 0=off, 1=on, 2=raw
+        if (watch == WATCH_OFF) {
+            watch_id_ = 0; // reset watch id if watch is disabled
+        }
     }
-
-    enum Watch : uint8_t { WATCH_OFF, WATCH_ON, WATCH_RAW };
     static uint8_t watch() {
         return watch_;
     }
