@@ -42,12 +42,18 @@ class System {
     void start();
     void loop();
 
-    static void    restart();
-    static void    format(uuid::console::Shell & shell);
+    // commands
+    static void restart();
+    static void format(uuid::console::Shell & shell);
+    static void console_commands(Shell & shell, unsigned int context);
+    static void mqtt_commands(const char * message);
+
     static uint8_t free_mem();
     void           syslog_init();
-    void           set_heartbeat(bool system_heartbeat);
-    static void    console_commands(Shell & shell, unsigned int context);
+
+    // heartbeat
+    void set_heartbeat(bool system_heartbeat);
+    void send_heartbeat();
 
   private:
     static uuid::log::Logger logger_;
@@ -82,8 +88,6 @@ class System {
 
     void led_monitor();
     void set_led_speed(uint32_t speed);
-    void mqtt_commands(const char * message);
-    void send_heartbeat();
     void system_check();
 
     static void   show_system(uuid::console::Shell & shell);
