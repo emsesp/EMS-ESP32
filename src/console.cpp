@@ -520,10 +520,13 @@ void Console::start() {
 #endif
 
 #if defined(EMSESP_STANDALONE)
+    // always start in su/admin mode when running tests
     shell->add_flags(CommandFlags::ADMIN);
 #endif
 
-// always start the telnet service, except on an ESP8266
+    emsesp::EMSESP::watch(EMSESP::WATCH_OFF); // turn watch off in case it was still set in the last session
+
+// start the telnet service
 // default idle is 10 minutes, default write timeout is 0 (automatic)
 // note, this must be started after the network/wifi for ESP32 otherwise it'll crash
 #ifndef EMSESP_STANDALONE
