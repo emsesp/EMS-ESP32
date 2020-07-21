@@ -235,9 +235,6 @@ void System::start() {
         pinMode(LED_GPIO, OUTPUT); // LED pin, 0 means disabled
     }
 
-    // register MQTT system commands
-    Mqtt::subscribe("cmd", std::bind(&System::mqtt_commands, this, _1));
-
 #ifndef EMSESP_FORCE_SERIAL
     if (tx_mode_) {
         EMSuart::start(tx_mode_); // start UART, if tx_mode is not 0
@@ -279,7 +276,7 @@ void System::send_heartbeat() {
     doc["mqttpublishfails"] = Mqtt::publish_fails();
     doc["txfails"]          = EMSESP::txservice_.telegram_fail_count();
 
-    Mqtt::publish("heartbeat", doc, false); // send to MQTT with retain off
+    Mqtt::publish("heartbeat", doc, false); // send to MQTT with retain off. This will add to MQTT queue.
 }
 
 // sets rate of led flash
@@ -517,6 +514,8 @@ void System::console_commands(Shell & shell, unsigned int context) {
                                        flash_string_vector{F_(set), F_(wifi), F_(hostname)},
                                        flash_string_vector{F_(name_mandatory)},
                                        [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) {
+                                           shell.println("Note, connection will be reset...");
+                                           Console::loop();
                                            EMSESP::esp8266React.getWiFiSettingsService()->update(
                                                [&](WiFiSettings & wifiSettings) {
                                                    wifiSettings.hostname = arguments.front().c_str();
@@ -530,13 +529,14 @@ void System::console_commands(Shell & shell, unsigned int context) {
                                        flash_string_vector{F_(set), F_(wifi), F_(ssid)},
                                        flash_string_vector{F_(name_mandatory)},
                                        [](Shell & shell, const std::vector<std::string> & arguments) {
+                                           shell.println("Note, connection will be reset...");
+                                           Console::loop();
                                            EMSESP::esp8266React.getWiFiSettingsService()->update(
                                                [&](WiFiSettings & wifiSettings) {
                                                    wifiSettings.ssid = arguments.front().c_str();
                                                    return StateUpdateResult::CHANGED;
                                                },
                                                "local");
-                                           shell.println(F("WiFi SSID updated"));
                                        });
 
     EMSESPShell::commands->add_command(ShellContext::SYSTEM,
