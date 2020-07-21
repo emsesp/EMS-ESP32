@@ -191,8 +191,8 @@ class EMSESPStreamConsole : public uuid::console::StreamConsole, public EMSESPSh
 
 class Console {
   public:
-    void loop();
-    void start();
+    static void loop();
+    void        start();
 
     uuid::log::Level log_level();
 
