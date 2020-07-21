@@ -27,7 +27,6 @@ void SystemStatus::systemStatus(AsyncWebServerRequest * request) {
     root["flash_chip_size"]   = ESP.getFlashChipSize();
     root["flash_chip_speed"]  = ESP.getFlashChipSpeed();
 
-// TODO - Ideally this class will take an *FS and extract the file system information from there.
 // ESP8266 and ESP32 do not have feature parity in FS.h which currently makes that difficult.
 #ifdef ESP32
     root["fs_total"] = SPIFFS.totalBytes();
