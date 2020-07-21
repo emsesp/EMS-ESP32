@@ -229,7 +229,6 @@ void EMSESP::show_device_values(uuid::console::Shell & shell) {
             }
         }
     }
-    shell.println();
 }
 
 // show Dallas sensors
@@ -749,9 +748,8 @@ void EMSESP::loop() {
         fetch_device_values();
     }
 
-#if defined(ESP32)
     delay(1);
-#endif
+
 }
 
 } // namespace emsesp
