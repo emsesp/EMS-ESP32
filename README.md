@@ -178,7 +178,9 @@ The Web is based off Rick's awesome [esp8266-react](https://github.com/rjwats/es
   * `MqttStatus.cpp` added root["mqtt_fails"]
   * `SecuritySettingsService.cpp` added version to the JWT payload
   * `SecuritySettingsService.h` #include "../../src/version.h"
-  * `WiFiSettingsService.cpp` added WiFi.setOutputPower(20.0f)
+  * `WiFiSettingsService.cpp` added WiFi.setOutputPower(20.0f) - removed
+  * `OTASettingsService.h` added #include "../../src/system.h" 
+  * `OTASettingsService.cpp` added call to emsesp::System::upload_status(true)
   * `features.ini`: -D FT_NTP=0
   * `platformio.ini` using our own version
   * `factory_settings.ini` modified with `ems-esp-neo` as password and `ems-esp` everywhere else
