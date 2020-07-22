@@ -212,6 +212,8 @@ class Thermostat : public EMSdevice {
     std::shared_ptr<Thermostat::HeatingCircuit> heating_circuit(std::shared_ptr<const Telegram> telegram);
     std::shared_ptr<Thermostat::HeatingCircuit> heating_circuit(const uint8_t hc_num);
 
+    void register_mqtt_ha_config(uint8_t hc_num);
+
     void process_RCOutdoorTemp(std::shared_ptr<const Telegram> telegram);
     void process_IBASettings(std::shared_ptr<const Telegram> telegram);
     void process_RCTime(std::shared_ptr<const Telegram> telegram);

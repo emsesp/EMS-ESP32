@@ -144,7 +144,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
     if (((num_devices == 1) && (actual_master_thermostat == EMSESP_DEFAULT_MASTER_THERMOSTAT) && ((device_id == 0x10) || (device_id == 0x17)))
         || (master_thermostat == device_id)) {
         EMSESP::actual_master_thermostat(device_id);
-        LOG_DEBUG(F("Registering new thermostat with device ID 0x%02X (as the master)"), device_id);
+        LOG_DEBUG(F("Registering new thermostat with device ID 0x%02X (as master)"), device_id);
         init_mqtt();
     } else {
         LOG_DEBUG(F("Registering new thermostat with device ID 0x%02X"), device_id);
@@ -162,71 +162,11 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
 }
 
 // for the master thermostat initialize the MQTT subscribes
+// these will be prefixed with hostname
 void Thermostat::init_mqtt() {
     register_mqtt_topic("thermostat_cmd", std::bind(&Thermostat::thermostat_cmd, this, _1)); // generic commands
-
-    // if the MQTT format type is ha then send the config to HA (via the mqtt discovery service)
-    // for each of the heating circuits
-    // state is /state
-    // config is /config
-    if (mqtt_format_ == MQTT_format::HA) {
-        for (uint8_t hc = 0; hc < monitor_typeids.size(); hc++) {
-            StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
-            uint8_t                                         hc_num = hc + 1;
-
-            std::string hc_text(10, '\0');
-            snprintf_P(&hc_text[0], hc_text.capacity() + 1, PSTR("hc%d"), hc_num);
-            doc["name"]    = hc_text;
-            doc["uniq_id"] = hc_text;
-
-            // topic root is homeassistant/climate/ems-esp/hc<1..n>/
-            std::string root(100, '\0');
-            snprintf_P(&root[0], root.capacity() + 1, PSTR("homeassistant/climate/ems-esp/hc%d"), hc_num);
-            doc["~"] = root;
-
-            doc["mode_cmd_t"]  = "~/cmd_mode";
-            doc["mode_stat_t"] = "~/state";
-            doc["temp_cmd_t"]  = "~/cmd_temp";
-            doc["temp_stat_t"] = "~/state";
-            doc["curr_temp_t"] = "~/state";
-
-            std::string mode_str(30, '\0');
-            snprintf_P(&mode_str[0], 30, PSTR("{{value_json.hc%d.mode}}"), hc_num);
-            doc["mode_stat_tpl"] = mode_str;
-
-            std::string seltemp_str(30, '\0');
-            snprintf_P(&seltemp_str[0], 30, PSTR("{{value_json.hc%d.seltemp}}"), hc_num);
-            doc["temp_stat_tpl"] = seltemp_str;
-
-            std::string currtemp_str(30, '\0');
-            snprintf_P(&currtemp_str[0], 30, PSTR("{{value_json.hc%d.currtemp}}"), hc_num);
-            doc["curr_temp_tpl"] = currtemp_str;
-
-            doc["min_temp"]  = "5";
-            doc["max_temp"]  = "40";
-            doc["temp_step"] = "0.5";
-
-            JsonArray modes = doc.createNestedArray("modes");
-            modes.add("off");
-            modes.add("heat");
-            modes.add("auto");
-
-            std::string topic(100, '\0'); // e.g homeassistant/climate/hc1/thermostat/config
-            snprintf_P(&topic[0], topic.capacity() + 1, PSTR("homeassistant/climate/ems-esp/hc%d/config"), hc_num);
-            // Mqtt::publish(topic); // empty payload, this remove any previous config sent to HA
-            Mqtt::publish(topic, doc, true); // publish the config payload with retain flag
-
-            // subscribe to the temp and mode commands
-            snprintf_P(&topic[0], topic.capacity() + 1, PSTR("homeassistant/climate/ems-esp/hc%d/cmd_temp"), hc_num);
-            register_mqtt_topic(topic, std::bind(&Thermostat::thermostat_cmd_temp, this, _1));
-            snprintf_P(&topic[0], topic.capacity() + 1, PSTR("homeassistant/climate/ems-esp/hc%d/cmd_mode"), hc_num);
-            register_mqtt_topic(topic, std::bind(&Thermostat::thermostat_cmd_mode, this, _1));
-        }
-    } else {
-        // these will be prefixed with hostname and base
-        register_mqtt_topic("thermostat_cmd_temp", std::bind(&Thermostat::thermostat_cmd_temp, this, _1));
-        register_mqtt_topic("thermostat_cmd_mode", std::bind(&Thermostat::thermostat_cmd_mode, this, _1));
-    }
+    register_mqtt_topic("thermostat_cmd_temp", std::bind(&Thermostat::thermostat_cmd_temp, this, _1));
+    register_mqtt_topic("thermostat_cmd_mode", std::bind(&Thermostat::thermostat_cmd_mode, this, _1));
 }
 
 // only add the menu for the master thermostat
@@ -808,11 +748,72 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::sha
 
     std::sort(heating_circuits_.begin(), heating_circuits_.end()); // sort based on hc number
 
+    // if we're using Home Assistant and HA discovery, register the new config
+    if (mqtt_format_ == MQTT_format::HA) {
+        register_mqtt_ha_config(hc_num);
+    }
+
     // set the flag saying we want its data during the next auto fetch
     toggle_fetch(monitor_typeids[hc_num - 1], toggle_);
     toggle_fetch(set_typeids[hc_num - 1], toggle_);
 
     return heating_circuits_.back(); // even after sorting, this should still point back to the newly created HC
+}
+
+// publish config topic for HA MQTT Discovery
+// homeassistant/climate/ems-esp/hc<num>
+// state is /state
+// config is /config
+void Thermostat::register_mqtt_ha_config(uint8_t hc_num) {
+    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
+
+    std::string hc_text(10, '\0');
+    snprintf_P(&hc_text[0], hc_text.capacity() + 1, PSTR("hc%d"), hc_num);
+    doc["name"]    = hc_text;
+    doc["uniq_id"] = hc_text;
+
+    // topic root is homeassistant/climate/ems-esp/hc<1..n>/
+    std::string root(100, '\0');
+    snprintf_P(&root[0], root.capacity() + 1, PSTR("homeassistant/climate/ems-esp/hc%d"), hc_num);
+    doc["~"] = root;
+
+    doc["mode_cmd_t"]  = "~/cmd_mode";
+    doc["mode_stat_t"] = "~/state";
+    doc["temp_cmd_t"]  = "~/cmd_temp";
+    doc["temp_stat_t"] = "~/state";
+    doc["curr_temp_t"] = "~/state";
+
+    std::string mode_str(30, '\0');
+    snprintf_P(&mode_str[0], 30, PSTR("{{value_json.hc%d.mode}}"), hc_num);
+    doc["mode_stat_tpl"] = mode_str;
+
+    std::string seltemp_str(30, '\0');
+    snprintf_P(&seltemp_str[0], 30, PSTR("{{value_json.hc%d.seltemp}}"), hc_num);
+    doc["temp_stat_tpl"] = seltemp_str;
+
+    std::string currtemp_str(30, '\0');
+    snprintf_P(&currtemp_str[0], 30, PSTR("{{value_json.hc%d.currtemp}}"), hc_num);
+    doc["curr_temp_tpl"] = currtemp_str;
+
+    doc["min_temp"]  = "5";
+    doc["max_temp"]  = "40";
+    doc["temp_step"] = "0.5";
+
+    JsonArray modes = doc.createNestedArray("modes");
+    modes.add("off");
+    modes.add("heat");
+    modes.add("auto");
+
+    std::string topic(100, '\0'); // e.g homeassistant/climate/hc1/thermostat/config
+    snprintf_P(&topic[0], topic.capacity() + 1, PSTR("homeassistant/climate/ems-esp/hc%d/config"), hc_num);
+    // Mqtt::publish(topic); // empty payload, this remove any previous config sent to HA
+    Mqtt::publish(topic, doc, true); // publish the config payload with retain flag
+
+    // subscribe to the temp and mode commands
+    snprintf_P(&topic[0], topic.capacity() + 1, PSTR("homeassistant/climate/ems-esp/hc%d/cmd_temp"), hc_num);
+    register_mqtt_topic(topic, std::bind(&Thermostat::thermostat_cmd_temp, this, _1));
+    snprintf_P(&topic[0], topic.capacity() + 1, PSTR("homeassistant/climate/ems-esp/hc%d/cmd_mode"), hc_num);
+    register_mqtt_topic(topic, std::bind(&Thermostat::thermostat_cmd_mode, this, _1));
 }
 
 // decodes the thermostat mode for the heating circuit based on the thermostat type
@@ -1549,7 +1550,6 @@ void Thermostat::set_mode(const uint8_t mode, const uint8_t hc_num) {
 
     default:
     case HeatingCircuit::Mode::AUTO:
-    // case HeatingCircuit::Mode::HOLIDAY:
     case HeatingCircuit::Mode::ECO:
         set_mode_value = 2;
         break;
@@ -1860,7 +1860,6 @@ void Thermostat::console_commands(Shell & shell, unsigned int context) {
                                             read_flash_string(F("eco")),
                                             read_flash_string(F("comfort")),
                                             read_flash_string(F("heat")),
-                                            // read_flash_string(F("holiday")),
                                             read_flash_string(F("nofrost")),
                                             read_flash_string(F("auto"))
 
