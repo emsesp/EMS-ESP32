@@ -22,6 +22,7 @@
 
 MAKE_PSTR_WORD(connected)
 MAKE_PSTR_WORD(disconnected)
+MAKE_PSTR(system_heartbeat_fmt, "Heartbeat is %s")
 
 MAKE_PSTR(logger_name, "mqtt")
 
@@ -135,6 +136,11 @@ void Mqtt::loop() {
 // print MQTT log and other stuff to console
 void Mqtt::show_mqtt(uuid::console::Shell & shell) {
     shell.printfln(F("MQTT is %s"), connected() ? uuid::read_flash_string(F_(connected)).c_str() : uuid::read_flash_string(F_(disconnected)).c_str());
+
+    bool system_heartbeat;
+    EMSESP::esp8266React.getMqttSettingsService()->read([&](MqttSettings & settings) { system_heartbeat = settings.system_heartbeat; });
+    shell.printfln(F_(system_heartbeat_fmt), system_heartbeat ? F_(enabled) : F_(disabled));
+
     shell.printfln(F("MQTT publish fails: %lu"), mqtt_publish_fails_);
     shell.println();
 

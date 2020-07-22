@@ -28,11 +28,10 @@ MAKE_PSTR_WORD(ssid)
 MAKE_PSTR_WORD(heartbeat)
 
 MAKE_PSTR(host_fmt, "Host = %s")
-MAKE_PSTR(hostname_fmt, "Hostname = %s")
+MAKE_PSTR(hostname_fmt, "WiFi Hostname = %s")
 MAKE_PSTR(mark_interval_fmt, "Mark interval = %lus");
 MAKE_PSTR(wifi_ssid_fmt, "WiFi SSID = %s");
 MAKE_PSTR(wifi_password_fmt, "WiFi Password = %S")
-MAKE_PSTR(system_heartbeat_fmt, "Heartbeat = %s")
 
 MAKE_PSTR(logger_name, "system")
 
@@ -392,7 +391,6 @@ void System::show_system(uuid::console::Shell & shell) {
     shell.println();
 
 #ifndef EMSESP_STANDALONE
-
     switch (WiFi.status()) {
     case WL_IDLE_STATUS:
         shell.printfln(F("WiFi: idle"));
@@ -413,15 +411,12 @@ void System::show_system(uuid::console::Shell & shell) {
         shell.printfln(F("SSID: %s"), WiFi.SSID().c_str());
         shell.printfln(F("BSSID: %s"), WiFi.BSSIDstr().c_str());
         shell.printfln(F("RSSI: %d dBm (%d %%)"), WiFi.RSSI(), wifi_quality());
-        shell.println();
-
         shell.printfln(F("MAC address: %s"), WiFi.macAddress().c_str());
 #if defined(ESP8266)
         shell.printfln(F("Hostname: %s"), WiFi.hostname().c_str());
 #elif defined(ESP32)
         shell.printfln(F("Hostname: %s"), WiFi.getHostname());
 #endif
-
         shell.println();
         shell.printfln(F("IPv4 address: %s/%s"), uuid::printable_to_string(WiFi.localIP()).c_str(), uuid::printable_to_string(WiFi.subnetMask()).c_str());
         shell.printfln(F("IPv4 gateway: %s"), uuid::printable_to_string(WiFi.gatewayIP()).c_str());
@@ -445,6 +440,17 @@ void System::show_system(uuid::console::Shell & shell) {
         shell.printfln(F("WiFi: unknown"));
         break;
     }
+
+    EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) {
+        shell.println();
+        shell.printfln(F("Syslog:"));
+        shell.print(" ");
+        shell.printfln(F_(host_fmt), !settings.syslog_host.isEmpty() ? settings.syslog_host.c_str() : uuid::read_flash_string(F_(unset)).c_str());
+        shell.print(" ");
+        shell.printfln(F_(log_level_fmt), uuid::log::format_level_uppercase(static_cast<uuid::log::Level>(settings.syslog_level)));
+        shell.print(" ");
+        shell.printfln(F_(mark_interval_fmt), settings.syslog_mark_interval);
+    });
 
 #endif
 }
@@ -505,7 +511,7 @@ void System::console_commands(Shell & shell, unsigned int context) {
                                        CommandFlags::USER,
                                        flash_string_vector{F_(show)},
                                        [=](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
-                                           show_system(shell); // has to be static
+                                           show_system(shell);
                                            shell.println();
                                        });
 
@@ -565,39 +571,26 @@ void System::console_commands(Shell & shell, unsigned int context) {
                                            });
                                        });
 
-    EMSESPShell::commands->add_command(
-        ShellContext::SYSTEM,
-        CommandFlags::USER,
-        flash_string_vector{F_(set)},
-        [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
-            EMSESP::esp8266React.getWiFiSettingsService()->read([&](WiFiSettings & wifiSettings) {
-                shell.printfln(F_(hostname_fmt), wifiSettings.hostname.isEmpty() ? uuid::read_flash_string(F_(unset)).c_str() : wifiSettings.hostname.c_str());
-            });
+    EMSESPShell::commands->add_command(ShellContext::SYSTEM,
+                                       CommandFlags::USER,
+                                       flash_string_vector{F_(set)},
+                                       [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
+                                           EMSESP::esp8266React.getWiFiSettingsService()->read([&](WiFiSettings & wifiSettings) {
+                                               shell.print(" ");
+                                               shell.printfln(F_(hostname_fmt),
+                                                              wifiSettings.hostname.isEmpty() ? uuid::read_flash_string(F_(unset)).c_str()
+                                                                                              : wifiSettings.hostname.c_str());
+                                           });
 
-            if (shell.has_flags(CommandFlags::ADMIN)) {
-                shell.printfln("Wifi:");
-                EMSESP::esp8266React.getWiFiSettingsService()->read([&](WiFiSettings & wifiSettings) {
-                    shell.print(" ");
-                    shell.printfln(F_(wifi_ssid_fmt), wifiSettings.ssid.isEmpty() ? uuid::read_flash_string(F_(unset)).c_str() : wifiSettings.ssid.c_str());
-                    shell.print(" ");
-                    shell.printfln(F_(wifi_password_fmt), wifiSettings.ssid.isEmpty() ? F_(unset) : F_(asterisks));
-                });
-
-                EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) {
-                    shell.printfln(F("Syslog:"));
-                    shell.print(" ");
-                    shell.printfln(F_(host_fmt), !settings.syslog_host.isEmpty() ? settings.syslog_host.c_str() : uuid::read_flash_string(F_(unset)).c_str());
-                    shell.print(" ");
-                    shell.printfln(F_(log_level_fmt), uuid::log::format_level_uppercase(static_cast<uuid::log::Level>(settings.syslog_level)));
-                    shell.print(" ");
-                    shell.printfln(F_(mark_interval_fmt), settings.syslog_mark_interval);
-                    shell.println();
-                    bool system_heartbeat;
-                    EMSESP::esp8266React.getMqttSettingsService()->read([&](MqttSettings & settings) { system_heartbeat = settings.system_heartbeat; });
-                    shell.printfln(F_(system_heartbeat_fmt), system_heartbeat ? F_(enabled) : F_(disabled));
-                });
-            }
-        });
+                                           EMSESP::esp8266React.getWiFiSettingsService()->read([&](WiFiSettings & wifiSettings) {
+                                               shell.print(" ");
+                                               shell.printfln(F_(wifi_ssid_fmt),
+                                                              wifiSettings.ssid.isEmpty() ? uuid::read_flash_string(F_(unset)).c_str()
+                                                                                          : wifiSettings.ssid.c_str());
+                                               shell.print(" ");
+                                               shell.printfln(F_(wifi_password_fmt), wifiSettings.ssid.isEmpty() ? F_(unset) : F_(asterisks));
+                                           });
+                                       });
 
     EMSESPShell::commands->add_command(ShellContext::SYSTEM,
                                        CommandFlags::USER,
