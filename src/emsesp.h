@@ -49,8 +49,6 @@
 #include "shower.h"
 #include "roomcontrol.h"
 
-#include "devices/boiler.h"
-
 #define WATCH_ID_NONE 0 // no watch id set
 
 namespace emsesp {
