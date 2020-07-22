@@ -59,8 +59,7 @@ struct MqttMessage {
 class Mqtt {
   public:
     void loop();
-
-    void start(AsyncMqttClient * mqttClient);
+    void start();
 
     void set_publish_time(uint16_t publish_time);
     void set_qos(uint8_t mqtt_qos);

@@ -284,8 +284,9 @@ char * Mqtt::make_topic(char * result, const std::string & topic) {
     return result;
 }
 
-void Mqtt::start(AsyncMqttClient * mqttClient) {
-    mqttClient_ = mqttClient; // copy over from esp8266-react's MQTT service
+void Mqtt::start() {
+
+    mqttClient_ = EMSESP::esp8266React.getMqttClient();
 
     // get the hostname, which we'll use to prefix to all topics
     EMSESP::esp8266React.getWiFiSettingsService()->read([&](WiFiSettings & wifiSettings) { hostname_ = wifiSettings.hostname.c_str(); });
