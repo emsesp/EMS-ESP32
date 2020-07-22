@@ -720,27 +720,37 @@ void EMSESP::start() {
     LittleFS.begin();
 #endif
 
-    esp8266React.begin();                              // starts wifi, ap, ota, security, mqtt services
-    emsespSettingsService.begin();                     // load EMS-ESP specific settings from LittleFS
-    console_.start();                                  // telnet and serial console
-    system_.start();                                   // starts syslog, uart, sets version, initializes LED. Requires pre-loaded settings.
-    mqtt_.start(EMSESP::esp8266React.getMqttClient()); // mqtt init
-    sensors_.start();                                  // dallas external sensors
-    shower_.start();                                   // initialize shower timer and shower alert
-    txservice_.start();                                // sets bus ID, sends out request for EMS devices
-    webServer.begin();                                 // start web server
+    esp8266React.begin();          // loads system settings (wifi, mqtt, etc)
+    emsespSettingsService.begin(); // load EMS-ESP specific settings
+
+    // system_.check_upgrade(); // see if we need to migrate from previous versions
+
+    console_.start();   // telnet and serial console
+    system_.start();    // starts syslog, uart, sets version, initializes LED. Requires pre-loaded settings.
+    mqtt_.start();      // mqtt init
+    shower_.start();    // initialize shower timer and shower alert
+    txservice_.start(); // sets bus ID, sends out request for EMS devices
+    sensors_.start();   // dallas external sensors
+
+    webServer.begin(); // start web server
 }
 
-// loop de loop
+// main loop calling all services
 void EMSESP::loop() {
     esp8266React.loop(); // web
-    system_.loop();      // does LED and checks system health, and syslog service
-    mqtt_.loop();        // starts mqtt, and sends out anything in the queue
-    rxservice_.loop();   // process what ever is in the rx queue
-    txservice_.loop();   // check that the Tx is all ok
-    shower_.loop();      // check for shower on/off
-    sensors_.loop();     // this will also send out via MQTT
-    console_.loop();     // telnet/serial console
+
+    // if we're doing an OTA upload, skip MQTT and EMS
+    if (system_.upload_status()) {
+        return;
+    }
+
+    system_.loop();    // does LED and checks system health, and syslog service
+    mqtt_.loop();      // starts mqtt, and sends out anything in the queue
+    rxservice_.loop(); // process what ever is in the rx queue
+    txservice_.loop(); // check that the Tx is all ok
+    shower_.loop();    // check for shower on/off
+    sensors_.loop();   // this will also send out via MQTT
+    console_.loop();   // telnet/serial console
 
     // force a query on the EMS devices to fetch latest data at a set interval (1 min)
     if ((uuid::get_uptime() - last_fetch_ > EMS_FETCH_FREQUENCY)) {
@@ -749,7 +759,6 @@ void EMSESP::loop() {
     }
 
     delay(1);
-
 }
 
 } // namespace emsesp

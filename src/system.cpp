@@ -43,8 +43,10 @@ uuid::log::Logger System::logger_{F_(logger_name), uuid::log::Facility::KERN};
 uuid::syslog::SyslogService System::syslog_;
 #endif
 
-uint32_t System::heap_start_ = 0;
-int      System::reset_counter_;
+// init statics
+uint32_t System::heap_start_    = 0;
+int      System::reset_counter_ = 0;
+bool     System::upload_status_ = false;
 
 // handle generic system related MQTT commands
 void System::mqtt_commands(const char * message) {
@@ -239,6 +241,19 @@ void System::start() {
         EMSuart::start(tx_mode_); // start UART, if tx_mode is not 0
     }
 #endif
+}
+
+// returns true if OTA is uploading
+bool System::upload_status() {
+    return upload_status_ || Update.isRunning();
+}
+
+void System::upload_status(bool in_progress) {
+    // if we've just started an upload
+    if ((!upload_status_) && (in_progress)) {
+        EMSuart::stop();
+    }
+    upload_status_ = in_progress;
 }
 
 // checks system health and handles LED flashing wizardry
@@ -602,5 +617,134 @@ void System::console_commands(Shell & shell, unsigned int context) {
     Console::enter_custom_context(shell, context);
 }
 
+// upgrade from previous versions of EMS-ESP
+void System::check_upgrade() {
+// check for v1.9. It uses SPIFFS and only on the ESP8266
+#if defined(ESP8266)
+
+    Serial.begin(115200); // TODO remove
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
+    LittleFS.end();
+    SPIFFS.begin();
+
+    // first file
+    File file = SPIFFS.open("/myesp.json", "r");
+    if (!file) {
+        Serial.println(F("Old config doesn't exist."));
+        SPIFFS.end();
+        LittleFS.begin();
+        return;
+    }
+
+    DeserializationError     error;
+    StaticJsonDocument<1024> doc; // for myESP settings
+    error = deserializeJson(doc, file);
+    if (error) {
+        Serial.printf("Error. Failed to deserialize json, error %s", error.c_str());
+        file.close();
+        SPIFFS.end();
+        LittleFS.begin();
+        return;
+    }
+
+    file.close();
+
+    // second file
+    file = SPIFFS.open("/customconfig.json", "r");
+    if (!file) {
+        Serial.println(F("Old custom config file doesn't exist"));
+        SPIFFS.end();
+        LittleFS.begin();
+        return;
+    }
+
+    StaticJsonDocument<1024> doc2; // for custom EMS-ESP settings
+    error = deserializeJson(doc2, file);
+    if (error) {
+        Serial.printf("Error. Failed to deserialize json, error %s", error.c_str());
+        file.close();
+        SPIFFS.end();
+        LittleFS.begin();
+        return;
+    }
+
+    file.close();
+
+    // close SPIFFS and open LittleFS
+    SPIFFS.end();
+    LittleFS.begin();
+
+#pragma GCC diagnostic pop
+
+    Serial.println(F("Migrating settings from EMS-ESP 1.9.x..."));
+
+    // get the json objects
+    JsonObject network         = doc["network"];
+    JsonObject general         = doc["general"];
+    JsonObject mqtt            = doc["mqtt"];
+    JsonObject custom_settings = doc2["settings"]; // from 2nd file
+
+    EMSESP::esp8266React.getWiFiSettingsService()->update(
+        [&](WiFiSettings & wifiSettings) {
+            wifiSettings.hostname = general["hostname"] | FACTORY_WIFI_HOSTNAME;
+            wifiSettings.ssid     = network["ssid"] | FACTORY_WIFI_SSID;
+            wifiSettings.password = network["password"] | FACTORY_WIFI_PASSWORD;
+
+            wifiSettings.staticIPConfig = false;
+            JsonUtils::readIP(network, "staticip", wifiSettings.localIP);
+            JsonUtils::readIP(network, "dnsip", wifiSettings.dnsIP1);
+            JsonUtils::readIP(network, "gatewayip", wifiSettings.gatewayIP);
+            JsonUtils::readIP(network, "nmask", wifiSettings.subnetMask);
+
+            return StateUpdateResult::CHANGED;
+        },
+        "local");
+
+    EMSESP::esp8266React.getMqttSettingsService()->update(
+        [&](MqttSettings & mqttSettings) {
+            mqttSettings.host             = mqtt["ip"] | FACTORY_MQTT_HOST;
+            mqttSettings.mqtt_format      = (mqtt["nestedjson"] ? 2 : 1);
+            mqttSettings.mqtt_qos         = mqtt["qos"] | 0;
+            mqttSettings.username         = mqtt["user"] | "";
+            mqttSettings.password         = mqtt["password"] | "";
+            mqttSettings.port             = mqtt["port"] | FACTORY_MQTT_PORT;
+            mqttSettings.clientId         = FACTORY_MQTT_CLIENT_ID;
+            mqttSettings.enabled          = mqtt["enabled"];
+            mqttSettings.system_heartbeat = mqtt["heartbeat"];
+            mqttSettings.keepAlive        = FACTORY_MQTT_KEEP_ALIVE;
+            mqttSettings.cleanSession     = FACTORY_MQTT_CLEAN_SESSION;
+            mqttSettings.maxTopicLength   = FACTORY_MQTT_MAX_TOPIC_LENGTH;
+
+            return StateUpdateResult::CHANGED;
+        },
+        "local");
+
+    EMSESP::esp8266React.getSecuritySettingsService()->update(
+        [&](SecuritySettings & securitySettings) {
+            securitySettings.jwtSecret = general["password"] | FACTORY_JWT_SECRET;
+
+            return StateUpdateResult::CHANGED;
+        },
+        "local");
+
+    EMSESP::emsespSettingsService.update(
+        [&](EMSESPSettings & settings) {
+            settings.tx_mode              = custom_settings["tx_mode"] | EMSESP_DEFAULT_TX_MODE;
+            settings.shower_alert         = custom_settings["shower_alert"] | EMSESP_DEFAULT_SHOWER_ALERT;
+            settings.shower_timer         = custom_settings["shower_timer"] | EMSESP_DEFAULT_SHOWER_TIMER;
+            settings.master_thermostat    = custom_settings["master_thermostat"] | EMSESP_DEFAULT_MASTER_THERMOSTAT;
+            settings.ems_bus_id           = custom_settings["bus_id"] | EMSESP_DEFAULT_EMS_BUS_ID;
+            settings.syslog_host          = EMSESP_DEFAULT_SYSLOG_HOST;
+            settings.syslog_level         = EMSESP_DEFAULT_SYSLOG_LEVEL;
+            settings.syslog_mark_interval = EMSESP_DEFAULT_SYSLOG_MARK_INTERVAL;
+
+            return StateUpdateResult::CHANGED;
+        },
+        "local");
+#endif
+}
 
 } // namespace emsesp

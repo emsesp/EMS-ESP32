@@ -45,15 +45,21 @@ class System {
     // commands
     static void restart();
     static void format(uuid::console::Shell & shell);
+
     static void console_commands(Shell & shell, unsigned int context);
     static void mqtt_commands(const char * message);
 
     static uint8_t free_mem();
-    void           syslog_init();
+    static void upload_status(bool in_progress);
+    static bool upload_status();
+
+    void syslog_init();
 
     // heartbeat
     void set_heartbeat(bool system_heartbeat);
     void send_heartbeat();
+
+    void check_upgrade();
 
   private:
     static uuid::log::Logger logger_;
@@ -98,6 +104,9 @@ class System {
     static uint32_t heap_start_;
     static int      reset_counter_;
     uint32_t        last_heartbeat_ = 0;
+
+    // OTA
+    static bool upload_status_; // true if we're in the middle of a OTA firmware upload
 
     // settings
     uint8_t  tx_mode_;
