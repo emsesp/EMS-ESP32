@@ -113,7 +113,7 @@
 
 // Gateways - 0x48 / 0x18
 { 94, DeviceType::GATEWAY, F("RFM20 Remote"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x18
-{189, DeviceType::GATEWAY, F("KM200"), DeviceFlags::EMS_DEVICE_FLAG_NONE} // 0x48
+{189, DeviceType::GATEWAY, F("KM200/MB LAN 2"), DeviceFlags::EMS_DEVICE_FLAG_NONE} // 0x48
 
 
 // clang-format on
