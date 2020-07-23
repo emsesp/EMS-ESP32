@@ -144,7 +144,7 @@ sample code bearing this copyright.
 #include "OneWire_direct_gpio.h"
 
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-variable"
 
 void OneWire::begin(uint8_t pin) {
     pinMode(pin, INPUT);
@@ -154,7 +154,6 @@ void OneWire::begin(uint8_t pin) {
     reset_search();
 #endif
 }
-
 
 // Perform the onewire reset function.  We will wait up to 250uS for
 // the bus to come high, if it doesn't then it is broken or shorted
