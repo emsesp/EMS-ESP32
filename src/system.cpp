@@ -373,9 +373,7 @@ int8_t System::wifi_quality() {
 }
 
 void System::show_system(uuid::console::Shell & shell) {
-    shell.print(F("Uptime: "));
-    shell.print(uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3));
-    shell.println();
+    shell.printfln(F("Uptime:        %s"), uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3).c_str());
 
 #if defined(ESP8266)
     shell.printfln(F("Chip ID:       0x%08x"), ESP.getChipId());
@@ -389,7 +387,7 @@ void System::show_system(uuid::console::Shell & shell) {
     shell.printfln(F("Sketch size:   %u bytes (%u bytes free)"), ESP.getSketchSize(), ESP.getFreeSketchSpace());
     shell.printfln(F("Reset reason:  %s"), ESP.getResetReason().c_str());
     shell.printfln(F("Reset info:    %s"), ESP.getResetInfo().c_str());
-
+    shell.println();
     shell.printfln(F("Free heap:                %lu bytes"), (unsigned long)ESP.getFreeHeap());
     shell.printfln(F("Free mem:                 %d  %%"), free_mem());
     shell.printfln(F("Maximum free block size:  %lu bytes"), (unsigned long)ESP.getMaxFreeBlockSize());
@@ -408,21 +406,19 @@ void System::show_system(uuid::console::Shell & shell) {
 #ifndef EMSESP_STANDALONE
     switch (WiFi.status()) {
     case WL_IDLE_STATUS:
-        shell.printfln(F("WiFi: idle"));
+        shell.printfln(F("WiFi: Idle"));
         break;
 
     case WL_NO_SSID_AVAIL:
-        shell.printfln(F("WiFi: network not found"));
+        shell.printfln(F("WiFi: Network not found"));
         break;
 
     case WL_SCAN_COMPLETED:
-        shell.printfln(F("WiFi: network scan complete"));
+        shell.printfln(F("WiFi: Network scan complete"));
         break;
 
     case WL_CONNECTED: {
-        shell.printfln(F("WiFi: connected"));
-        shell.println();
-
+        shell.printfln(F("WiFi: Connected"));
         shell.printfln(F("SSID: %s"), WiFi.SSID().c_str());
         shell.printfln(F("BSSID: %s"), WiFi.BSSIDstr().c_str());
         shell.printfln(F("RSSI: %d dBm (%d %%)"), WiFi.RSSI(), wifi_quality());
@@ -432,27 +428,26 @@ void System::show_system(uuid::console::Shell & shell) {
 #elif defined(ESP32)
         shell.printfln(F("Hostname: %s"), WiFi.getHostname());
 #endif
-        shell.println();
         shell.printfln(F("IPv4 address: %s/%s"), uuid::printable_to_string(WiFi.localIP()).c_str(), uuid::printable_to_string(WiFi.subnetMask()).c_str());
         shell.printfln(F("IPv4 gateway: %s"), uuid::printable_to_string(WiFi.gatewayIP()).c_str());
         shell.printfln(F("IPv4 nameserver: %s"), uuid::printable_to_string(WiFi.dnsIP()).c_str());
     } break;
 
     case WL_CONNECT_FAILED:
-        shell.printfln(F("WiFi: connection failed"));
+        shell.printfln(F("WiFi: Connection failed"));
         break;
 
     case WL_CONNECTION_LOST:
-        shell.printfln(F("WiFi: connection lost"));
+        shell.printfln(F("WiFi: Connection lost"));
         break;
 
     case WL_DISCONNECTED:
-        shell.printfln(F("WiFi: disconnected"));
+        shell.printfln(F("WiFi: Disconnected"));
         break;
 
     case WL_NO_SHIELD:
     default:
-        shell.printfln(F("WiFi: unknown"));
+        shell.printfln(F("WiFi: Unknown"));
         break;
     }
 
@@ -535,8 +530,9 @@ void System::console_commands(Shell & shell, unsigned int context) {
                                        flash_string_vector{F_(set), F_(wifi), F_(hostname)},
                                        flash_string_vector{F_(name_mandatory)},
                                        [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) {
-                                           shell.println("Note, connection will be reset...");
-                                           Console::loop();
+                                           shell.println("The wifi connection will be reset...");
+                                           Shell::loop_all();
+                                           delay(1000); // wait a second
                                            EMSESP::esp8266React.getWiFiSettingsService()->update(
                                                [&](WiFiSettings & wifiSettings) {
                                                    wifiSettings.hostname = arguments.front().c_str();
@@ -550,8 +546,9 @@ void System::console_commands(Shell & shell, unsigned int context) {
                                        flash_string_vector{F_(set), F_(wifi), F_(ssid)},
                                        flash_string_vector{F_(name_mandatory)},
                                        [](Shell & shell, const std::vector<std::string> & arguments) {
-                                           shell.println("Note, connection will be reset...");
-                                           Console::loop();
+                                           shell.println("The wifi connection will be reset...");
+                                           Shell::loop_all();
+                                           delay(1000); // wait a second
                                            EMSESP::esp8266React.getWiFiSettingsService()->update(
                                                [&](WiFiSettings & wifiSettings) {
                                                    wifiSettings.ssid = arguments.front().c_str();
