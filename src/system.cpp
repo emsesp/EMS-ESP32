@@ -226,7 +226,7 @@ void System::start() {
     EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) { tx_mode_ = settings.tx_mode; });
     EMSESP::esp8266React.getMqttSettingsService()->read([&](MqttSettings & settings) { system_heartbeat_ = settings.system_heartbeat; });
     EMSESP::esp8266React.getWiFiSettingsService()->read(
-        [&](WiFiSettings & wifiSettings) { LOG_INFO(F("System %s booted (EMS-ESP version %s)"), wifiSettings.hostname, EMSESP_APP_VERSION); });
+        [&](WiFiSettings & wifiSettings) { LOG_INFO(F("System %s booted (EMS-ESP version %s)"), wifiSettings.hostname.c_str(), EMSESP_APP_VERSION); });
 
     syslog_.log_level((uuid::log::Level)syslog_level_);
     syslog_init(); // init SysLog
@@ -377,7 +377,7 @@ void System::show_users(uuid::console::Shell & shell) {
 
     EMSESP::esp8266React.getSecuritySettingsService()->read([&](SecuritySettings & securitySettings) {
         for (User user : securitySettings.users) {
-            shell.printfln(F(" username: %s password: %s is_admin: %s"), user.username, user.password, user.admin ? "yes" : "no");
+            shell.printfln(F(" username: %s, password: %s, is_admin: %s"), user.username.c_str(), user.password.c_str(), user.admin ? F("yes") : F("no"));
         }
     });
 
