@@ -14,36 +14,28 @@ EMSESPStatusService::EMSESPStatusService(AsyncWebServer * server, SecurityManage
 
 // trigger on wifi connects
 #ifdef ESP32
-    WiFi.onEvent(onStationModeConnected, WiFiEvent_t::SYSTEM_EVENT_STA_CONNECTED);
     WiFi.onEvent(onStationModeDisconnected, WiFiEvent_t::SYSTEM_EVENT_STA_DISCONNECTED);
     WiFi.onEvent(onStationModeGotIP, WiFiEvent_t::SYSTEM_EVENT_STA_GOT_IP);
 #elif defined(ESP8266)
-    _onStationModeConnectedHandler    = WiFi.onStationModeConnected(onStationModeConnected);
     _onStationModeDisconnectedHandler = WiFi.onStationModeDisconnected(onStationModeDisconnected);
     _onStationModeGotIPHandler        = WiFi.onStationModeGotIP(onStationModeGotIP);
 #endif
 }
 
 #ifdef ESP32
-void EMSESPStatusService::onStationModeConnected(WiFiEvent_t event, WiFiEventInfo_t info) {
-    EMSESP::logger().debug(F("Wifi Connected"));
-}
 void EMSESPStatusService::onStationModeDisconnected(WiFiEvent_t event, WiFiEventInfo_t info) {
     EMSESP::logger().debug(F("WiFi Disconnected. Reason code=%d"), info.disconnected.reason);
 }
 void EMSESPStatusService::onStationModeGotIP(WiFiEvent_t event, WiFiEventInfo_t info) {
-    EMSESP::logger().debug(F("WiFi connected with IP=%s, hostname=%s"), WiFi.localIP().toString().c_str(), WiFi.getHostname());
+    EMSESP::logger().debug(F("WiFi Connected with IP=%s, hostname=%s"), WiFi.localIP().toString().c_str(), WiFi.getHostname());
     EMSESP::system_.send_heartbeat(); // send out heartbeat MQTT as soon as we have a connection
 }
 #elif defined(ESP8266)
-void EMSESPStatusService::onStationModeConnected(const WiFiEventStationModeConnected & event) {
-    EMSESP::logger().debug(F("Wifi connected with SSID %s"), event.ssid.c_str());
-}
 void EMSESPStatusService::onStationModeDisconnected(const WiFiEventStationModeDisconnected & event) {
     EMSESP::logger().debug(F("WiFi Disconnected. Reason code=%d"), event.reason);
 }
 void EMSESPStatusService::onStationModeGotIP(const WiFiEventStationModeGotIP & event) {
-    EMSESP::logger().debug(F("WiFi connected with IP=%s, hostname=%s"), event.ip.toString().c_str(), WiFi.hostname().c_str());
+    EMSESP::logger().debug(F("WiFi Connected with IP=%s, hostname=%s"), event.ip.toString().c_str(), WiFi.hostname().c_str());
     EMSESP::system_.send_heartbeat(); // send out heartbeat MQTT as soon as we have a connection
 }
 #endif
