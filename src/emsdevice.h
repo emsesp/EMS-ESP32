@@ -119,7 +119,7 @@ class EMSdevice {
 
     void read_command(const uint16_t type_id);
 
-    void register_mqtt_topic(const std::string & topic, mqtt_function_p f);
+    void register_mqtt_topic(const std::string & topic, mqtt_subfunction_p f);
 
     // virtual functions overrules by derived classes
     virtual void show_values(uuid::console::Shell & shell) = 0;
