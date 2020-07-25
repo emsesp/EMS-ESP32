@@ -17,6 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#if defined(EMSESP_STANADLONE)
 
 #include "test.h"
 
@@ -692,3 +693,5 @@ void Test::dummy_mqtt_commands(const char * message) {
 #pragma GCC diagnostic pop
 
 } // namespace emsesp
+
+#endif
