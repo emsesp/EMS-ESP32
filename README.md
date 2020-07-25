@@ -82,6 +82,7 @@ system
 	set
 	show
 	show mqtt
+  show users
 	passwd
 	restart
 	set wifi hostname <name>

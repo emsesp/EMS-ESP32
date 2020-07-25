@@ -50,8 +50,8 @@ class System {
     static void mqtt_commands(const char * message);
 
     static uint8_t free_mem();
-    static void upload_status(bool in_progress);
-    static bool upload_status();
+    static void    upload_status(bool in_progress);
+    static bool    upload_status();
 
     void syslog_init();
 
@@ -97,6 +97,7 @@ class System {
     void system_check();
 
     static void   show_system(uuid::console::Shell & shell);
+    static void   show_users(uuid::console::Shell & shell);
     static int8_t wifi_quality();
 
     bool            system_healthy_  = false;

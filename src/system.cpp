@@ -26,6 +26,7 @@ MAKE_PSTR_WORD(hostname)
 MAKE_PSTR_WORD(wifi)
 MAKE_PSTR_WORD(ssid)
 MAKE_PSTR_WORD(heartbeat)
+MAKE_PSTR_WORD(users)
 
 MAKE_PSTR(host_fmt, "Host = %s")
 MAKE_PSTR(hostname_fmt, "WiFi Hostname = %s")
@@ -221,16 +222,14 @@ void System::start() {
     }
 
     // fetch settings
+    std::string hostname;
     EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) { tx_mode_ = settings.tx_mode; });
     EMSESP::esp8266React.getMqttSettingsService()->read([&](MqttSettings & settings) { system_heartbeat_ = settings.system_heartbeat; });
+    EMSESP::esp8266React.getWiFiSettingsService()->read(
+        [&](WiFiSettings & wifiSettings) { LOG_INFO(F("System %s booted (EMS-ESP version %s)"), wifiSettings.hostname, EMSESP_APP_VERSION); });
 
+    syslog_.log_level((uuid::log::Level)syslog_level_);
     syslog_init(); // init SysLog
-
-#if defined(ESP32)
-    LOG_INFO(F("System booted (EMS-ESP version %s ESP32)"), EMSESP_APP_VERSION);
-#else
-    LOG_INFO(F("System booted (EMS-ESP version %s)"), EMSESP_APP_VERSION);
-#endif
 
     if (LED_GPIO) {
         pinMode(LED_GPIO, OUTPUT); // LED pin, 0 means disabled
@@ -370,6 +369,19 @@ int8_t System::wifi_quality() {
         return 100;
     }
     return 2 * (dBm + 100);
+}
+
+// print users to console
+void System::show_users(uuid::console::Shell & shell) {
+    shell.printfln(F("Users:"));
+
+    EMSESP::esp8266React.getSecuritySettingsService()->read([&](SecuritySettings & securitySettings) {
+        for (User user : securitySettings.users) {
+            shell.printfln(F(" username: %s password: %s is_admin: %s"), user.username, user.password, user.admin ? "yes" : "no");
+        }
+    });
+
+    shell.println();
 }
 
 void System::show_system(uuid::console::Shell & shell) {
@@ -609,6 +621,11 @@ void System::console_commands(Shell & shell, unsigned int context) {
                                        flash_string_vector{F_(show), F_(mqtt)},
                                        [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) { Mqtt::show_mqtt(shell); });
 
+    EMSESPShell::commands->add_command(ShellContext::SYSTEM,
+                                       CommandFlags::ADMIN,
+                                       flash_string_vector{F_(show), F_(users)},
+                                       [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) { System::show_users(shell); });
+
 
     // enter the context
     Console::enter_custom_context(shell, context);
@@ -618,8 +635,7 @@ void System::console_commands(Shell & shell, unsigned int context) {
 void System::check_upgrade() {
 // check for v1.9. It uses SPIFFS and only on the ESP8266
 #if defined(ESP8266)
-
-    Serial.begin(115200); // TODO remove
+    Serial.begin(115200); // TODO remove, just for debugging
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
