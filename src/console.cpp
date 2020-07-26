@@ -519,12 +519,14 @@ void Console::start() {
     // shell->log_level(uuid::log::Level::DEBUG); // order is: err, warning, notice, info, debug, trace, all
 #endif
 
+#if defined(EMSESP_DEBUG)
+    shell->log_level(uuid::log::Level::DEBUG); // order is: err, warning, notice, info, debug, trace, all
+#endif
+
 #if defined(EMSESP_STANDALONE)
     // always start in su/admin mode when running tests
     shell->add_flags(CommandFlags::ADMIN);
 #endif
-
-    emsesp::EMSESP::watch(EMSESP::WATCH_OFF); // turn watch off in case it was still set in the last session
 
 // start the telnet service
 // default idle is 10 minutes, default write timeout is 0 (automatic)
@@ -533,6 +535,9 @@ void Console::start() {
     telnet_.start();
     telnet_.default_write_timeout(1000); // in ms, socket timeout 1 second
 #endif
+
+    // turn watch off in case it was still set in the last session
+    emsesp::EMSESP::watch(EMSESP::WATCH_OFF);
 }
 
 // handles telnet sync and logging to console
