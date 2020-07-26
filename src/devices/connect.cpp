@@ -34,6 +34,9 @@ Connect::Connect(uint8_t device_type, uint8_t device_id, uint8_t product_id, con
     // register_mqtt_topic("topic", std::bind(&Connect::cmd, this, _1));
 }
 
+void Connect::device_info(JsonArray & root) {
+}
+
 void Connect::add_context_menu() {
 }
 

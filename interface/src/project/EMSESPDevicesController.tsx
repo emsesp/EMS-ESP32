@@ -5,7 +5,7 @@ import { ENDPOINT_ROOT } from '../api';
 import EMSESPDevicesForm from './EMSESPDevicesForm';
 import { EMSESPDevices } from './EMSESPtypes';
 
-export const EMSESP_DEVICES_ENDPOINT = ENDPOINT_ROOT + "emsespDevices";
+export const EMSESP_DEVICES_ENDPOINT = ENDPOINT_ROOT + "allDevices";
 
 type EMSESPDevicesControllerProps = RestControllerProps<EMSESPDevices>;
 

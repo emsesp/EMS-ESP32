@@ -39,9 +39,8 @@ ESP8266React          EMSESP::esp8266React(&webServer, &dummyFS);
 EMSESPSettingsService EMSESP::emsespSettingsService = EMSESPSettingsService(&webServer, &dummyFS, EMSESP::esp8266React.getSecurityManager());
 #endif
 
-EMSESPStatusService      EMSESP::emsespStatusService      = EMSESPStatusService(&webServer, EMSESP::esp8266React.getSecurityManager());
-EMSESPDevicesService     EMSESP::emsespDevicesService     = EMSESPDevicesService(&webServer, EMSESP::esp8266React.getSecurityManager());
-EMSESPScanDevicesService EMSESP::emsespScanDevicesService = EMSESPScanDevicesService(&webServer, EMSESP::esp8266React.getSecurityManager());
+EMSESPStatusService  EMSESP::emsespStatusService  = EMSESPStatusService(&webServer, EMSESP::esp8266React.getSecurityManager());
+EMSESPDevicesService EMSESP::emsespDevicesService = EMSESPDevicesService(&webServer, EMSESP::esp8266React.getSecurityManager());
 
 std::vector<std::unique_ptr<EMSdevice>>    EMSESP::emsdevices;      // array of all the detected EMS devices
 std::vector<emsesp::EMSESP::Device_record> EMSESP::device_library_; // libary of all our known EMS devices so far
@@ -63,6 +62,7 @@ uint16_t EMSESP::watch_id_                 = WATCH_ID_NONE;                    /
 uint8_t  EMSESP::watch_                    = 0;                                // trace off
 bool     EMSESP::tap_water_active_         = false;                            // for when Boiler states we having running warm water. used in Shower()
 uint32_t EMSESP::last_fetch_               = 0;
+uint8_t  EMSESP::unique_id_count_          = 0;
 
 // for a specific EMS device go and request data values
 // or if device_id is 0 it will fetch from all our known and active devices
@@ -474,6 +474,20 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
     return found;
 }
 
+// calls the device handler's function to populate a json doc with device info
+void EMSESP::device_info(const uint8_t unique_id, JsonObject & root) {
+    for (const auto & emsdevice : emsdevices) {
+        if (emsdevice) {
+            if (emsdevice->unique_id() == unique_id) {
+                root["deviceName"] = emsdevice->to_string_short(); // can;t use c_str() because of scope
+                JsonArray data     = root.createNestedArray("deviceData");
+                emsdevice->device_info(data);
+                return;
+            }
+        }
+    }
+}
+
 // return true if we have this device already registered
 bool EMSESP::device_exists(const uint8_t device_id) {
     for (const auto & emsdevice : emsdevices) {
@@ -513,6 +527,9 @@ void EMSESP::show_devices(uuid::console::Shell & shell) {
         // shell.printf(F("[factory ID: %d] "), device_class.first);
         for (const auto & emsdevice : emsdevices) {
             if ((emsdevice) && (emsdevice->device_type() == device_class.first)) {
+#if defined(EMSESP_DEBUG)
+                shell.printf(F("[id=%d] "), emsdevice->unique_id());
+#endif
                 shell.printf(F("%s: %s"), emsdevice->device_type_name().c_str(), emsdevice->to_string().c_str());
                 if ((emsdevice->device_type() == EMSdevice::DeviceType::THERMOSTAT) && (emsdevice->device_id() == actual_master_thermostat())) {
                     shell.printf(F(" ** master device **"));
@@ -584,6 +601,7 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
     } else {
         emsdevices.push_back(
             EMSFactory::add(device_p->device_type, device_id, device_p->product_id, version, uuid::read_flash_string(device_p->name), device_p->flags, brand));
+        emsdevices.back()->unique_id(++unique_id_count_);
         LOG_DEBUG(F("Adding new device with device ID 0x%02X with product ID %d and version %s"), device_id, product_id, version.c_str());
         // go and fetch its data,
         fetch_device_values(device_id);
@@ -745,11 +763,11 @@ void EMSESP::loop() {
     }
 
     system_.loop();    // does LED and checks system health, and syslog service
-    mqtt_.loop();      // starts mqtt, and sends out anything in the queue
     rxservice_.loop(); // process what ever is in the rx queue
     txservice_.loop(); // check that the Tx is all ok
     shower_.loop();    // check for shower on/off
     sensors_.loop();   // this will also send out via MQTT
+    mqtt_.loop();      // sends out anything in the queue via MQTT
     console_.loop();   // telnet/serial console
 
     // force a query on the EMS devices to fetch latest data at a set interval (1 min)

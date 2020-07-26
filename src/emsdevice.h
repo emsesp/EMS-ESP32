@@ -102,12 +102,22 @@ class EMSdevice {
         return name_;
     }
 
+    inline uint8_t unique_id() const {
+        return unique_id_;
+    }
+
+    inline void unique_id(uint8_t unique_id) {
+        unique_id_ = unique_id;
+    }
+
     std::string    brand_to_string() const;
     static uint8_t decode_brand(uint8_t value);
 
     std::string to_string() const;
-    void        show_telegram_handlers(uuid::console::Shell & shell);
-    void        show_mqtt_handlers(uuid::console::Shell & shell);
+    std::string to_string_short() const;
+
+    void show_telegram_handlers(uuid::console::Shell & shell);
+    void show_mqtt_handlers(uuid::console::Shell & shell);
 
     using process_function_p = std::function<void(std::shared_ptr<const Telegram>)>;
     void register_telegram_type(const uint16_t telegram_type_id, const __FlashStringHelper * telegram_type_name, bool fetch, process_function_p cb);
@@ -126,6 +136,7 @@ class EMSdevice {
     virtual void publish_values()                          = 0;
     virtual bool updated_values()                          = 0;
     virtual void add_context_menu()                        = 0;
+    virtual void device_info(JsonArray & root)             = 0;
 
     std::string telegram_type_name(std::shared_ptr<const Telegram> telegram);
 
@@ -163,6 +174,37 @@ class EMSdevice {
         } else {
             shell.println();
         }
+    }
+
+    // takes a value from an ems device and creates a nested json (name, value)
+    // which can be passed to the web UI
+    template <typename Value>
+    static void render_value_json(JsonArray &                 json,
+                                  const std::string &         prefix,
+                                  const __FlashStringHelper * name,
+                                  Value &                     value,
+                                  const __FlashStringHelper * suffix,
+                                  const uint8_t               format = 0) {
+        char buffer[15];
+        if (Helpers::render_value(buffer, value, format) == nullptr) {
+            return;
+        }
+
+        JsonObject dataElement = json.createNestedObject();
+
+        // copy flash into std::strings to ensure arduinojson can reference them without a copy
+
+        if (suffix != nullptr) {
+            std::string text(20, '\0');
+            snprintf_P(&text[0], text.capacity() + 1, PSTR("%s%s"), buffer, uuid::read_flash_string(suffix).c_str());
+            dataElement["value"] = text;
+        } else {
+            dataElement["value"] = buffer;
+        }
+
+        std::string text2(100, '\0');
+        snprintf_P(&text2[0], text2.capacity() + 1, PSTR("%s%s"), prefix.c_str(), uuid::read_flash_string(name).c_str());
+        dataElement["name"] = text2;
     }
 
     static void print_value(uuid::console::Shell & shell, uint8_t padding, const __FlashStringHelper * name, const __FlashStringHelper * value);
@@ -229,6 +271,7 @@ class EMSdevice {
     static constexpr uint8_t EMS_DEVICE_FLAG_JUNKERS_2 = (1 << 6); // 6th bit set if older models
 
   private:
+    uint8_t     unique_id_;
     uint8_t     device_type_ = DeviceType::UNKNOWN;
     uint8_t     device_id_   = 0;
     uint8_t     product_id_  = 0;

@@ -169,6 +169,50 @@ void Thermostat::init_mqtt() {
     register_mqtt_topic("thermostat_cmd_mode", std::bind(&Thermostat::thermostat_cmd_mode, this, _1));
 }
 
+// prepare data for Web UI
+void Thermostat::device_info(JsonArray & root) {
+    JsonObject dataElement;
+
+    uint8_t flags = (this->flags() & 0x0F); // specific thermostat characteristics, strip the option bits
+
+    for (const auto & hc : heating_circuits_) {
+        if (!Helpers::hasValue(hc->setpoint_roomTemp)) {
+            break; // skip this HC
+        }
+
+        // different thermostat types store their temperature values differently
+        uint8_t format_setpoint, format_curr;
+        switch (flags) {
+        case EMS_DEVICE_FLAG_EASY:
+            format_setpoint = 100; // *100
+            format_curr     = 100; // *100
+            break;
+        case EMS_DEVICE_FLAG_JUNKERS:
+            format_setpoint = 10; // *10
+            format_curr     = 10; // *10
+            break;
+        default:                  // RC30, RC35 etc...
+            format_setpoint = 2;  // *2
+            format_curr     = 10; // *10
+            break;
+        }
+  
+        // create prefix with heating circuit number
+        std::string hc_str(5, '\0');
+        snprintf_P(&hc_str[0], hc_str.capacity() + 1, PSTR("hc%d: "), hc->hc_num());
+
+        render_value_json(root, hc_str, F("Current room temperature"), hc->curr_roomTemp, F_(degrees), format_curr);
+        render_value_json(root, hc_str, F("Setpoint room temperature"), hc->setpoint_roomTemp, F_(degrees), format_setpoint);
+        if (Helpers::hasValue(hc->mode)) {
+            dataElement = root.createNestedObject();
+            std::string mode_str(15, '\0');
+            snprintf_P(&mode_str[0], mode_str.capacity() + 1, PSTR("%sMode"), hc_str.c_str());
+            dataElement["name"]  = mode_str;
+            dataElement["value"] = mode_tostring(hc->get_mode(flags));
+        }
+    }
+}
+
 // only add the menu for the master thermostat
 void Thermostat::add_context_menu() {
     if (device_id() != EMSESP::actual_master_thermostat()) {
@@ -1023,8 +1067,6 @@ void Thermostat::show_values(uuid::console::Shell & shell) {
             }
         }
     }
-
-    // std::sort(heating_circuits_.begin(), heating_circuits_.end()); // sort based on hc number. This has moved to the heating_circuit() function
 
     for (const auto & hc : heating_circuits_) {
         if (!Helpers::hasValue(hc->setpoint_roomTemp)) {

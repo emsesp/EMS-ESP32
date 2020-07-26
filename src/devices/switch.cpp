@@ -39,6 +39,9 @@ Switch::Switch(uint8_t device_type, uint8_t device_id, uint8_t product_id, const
 void Switch::add_context_menu() {
 }
 
+void Switch::device_info(JsonArray & root) {
+}
+
 // display all values into the shell console
 void Switch::show_values(uuid::console::Shell & shell) {
     EMSdevice::show_values(shell); // always call this to show header

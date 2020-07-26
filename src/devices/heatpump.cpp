@@ -50,6 +50,9 @@ Heatpump::Heatpump(uint8_t device_type, uint8_t device_id, uint8_t product_id, c
 void Heatpump::add_context_menu() {
 }
 
+void Heatpump::device_info(JsonArray & root) {
+}
+
 // display all values into the shell console
 void Heatpump::show_values(uuid::console::Shell & shell) {
     EMSdevice::show_values(shell); // always call this to show header

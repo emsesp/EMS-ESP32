@@ -57,6 +57,9 @@ Mixing::Mixing(uint8_t device_type, uint8_t device_id, uint8_t product_id, const
 void Mixing::add_context_menu() {
 }
 
+void Mixing::device_info(JsonArray & root) {
+}
+
 // check to see if values have been updated
 bool Mixing::updated_values() {
     return false;

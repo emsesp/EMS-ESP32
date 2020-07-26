@@ -166,6 +166,24 @@ void Boiler::boiler_cmd_wwtemp(const char * message) {
     }
 }
 
+void Boiler::device_info(JsonArray & root) {
+    JsonObject dataElement;
+
+    dataElement          = root.createNestedObject();
+    dataElement["name"]  = F("Hot tap water");
+    dataElement["value"] = tap_water_active_ ? F("running") : F("off");
+
+    dataElement          = root.createNestedObject();
+    dataElement["name"]  = F("Central heating");
+    dataElement["value"] = heating_active_ ? F("active") : F("off");
+
+    render_value_json(root, "", F("Selected flow temperature"), selFlowTemp_, F_(degrees));
+    render_value_json(root, "", F("Current flow temperature"), curFlowTemp_, F_(degrees), 10);
+    render_value_json(root, "", F("Warm Water selected temperature"), wWSelTemp_, F_(degrees));
+    render_value_json(root, "", F("Warm Water set temperature"), wWSetTmp_, F_(degrees));
+    render_value_json(root, "", F("Warm Water current temperature (intern)"), wWCurTmp_, F_(degrees), 10);
+}
+
 // publish values via MQTT
 void Boiler::publish_values() {
     const size_t        capacity = JSON_OBJECT_SIZE(47); // must recalculate if more objects addded https://arduinojson.org/v6/assistant/
