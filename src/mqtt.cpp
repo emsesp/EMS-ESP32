@@ -114,6 +114,7 @@ void Mqtt::loop() {
     }
 
     uint32_t currentMillis = uuid::get_uptime();
+
     // create publish messages for each of the EMS device values, adding to queue
     if (publish_time_ && (currentMillis - last_publish_ > publish_time_)) {
         last_publish_ = currentMillis;
@@ -200,14 +201,6 @@ void Mqtt::on_message(char * topic, char * payload, size_t len) {
     strlcpy(message, payload, len + 1);
     LOG_DEBUG(F("[DEBUG] Received %s => %s (length %d)"), topic, message, len);
 
-    /*
-    // strip out everything until the last /
-    char * topic_magnitude = strrchr(topic, '/');
-    if (topic_magnitude != nullptr) {
-        topic = topic_magnitude + 1;
-    }
-    */
-
     // see if we have this topic in our subscription list, then call its callback handler
     // note: this will pick the first topic that matches, so for multiple devices of the same type it's gonna fail. Not sure if this is going to be an issue?
     for (const auto & mf : mqtt_subfunctions_) {
@@ -264,22 +257,6 @@ void Mqtt::on_publish(uint16_t packetId) {
     mqtt_messages_.pop_front(); // always remove from queue, regardless if there was a successful ACK
 }
 
-// builds up a topic by prefixing the hostname
-// unless it's hardcoded like "homeassistant"
-char * Mqtt::make_topic(char * result, const std::string & topic) {
-    // check for homesassistant
-    if (strncmp(topic.c_str(), "homeassistant/", 13) == 0) {
-        strlcpy(result, topic.c_str(), MQTT_TOPIC_MAX_SIZE);
-        return result;
-    }
-
-    strlcpy(result, hostname_.c_str(), MQTT_TOPIC_MAX_SIZE);
-    strlcat(result, "/", MQTT_TOPIC_MAX_SIZE);
-    strlcat(result, topic.c_str(), MQTT_TOPIC_MAX_SIZE);
-
-    return result;
-}
-
 void Mqtt::start() {
     mqttClient_ = EMSESP::esp8266React.getMqttClient();
 
@@ -293,6 +270,24 @@ void Mqtt::start() {
     });
 
     mqttClient_->onConnect([this](bool sessionPresent) { on_connect(); });
+
+    mqttClient_->onDisconnect([this](AsyncMqttClientDisconnectReason reason) {
+        if (reason == AsyncMqttClientDisconnectReason::TCP_DISCONNECTED) {
+            LOG_INFO(F("MQTT disconnected: TCP"));
+        }
+        if (reason == AsyncMqttClientDisconnectReason::MQTT_IDENTIFIER_REJECTED) {
+            LOG_INFO(F("MQTT disconnected: Identifier Rejected"));
+        }
+        if (reason == AsyncMqttClientDisconnectReason::MQTT_SERVER_UNAVAILABLE) {
+            LOG_INFO(F("MQTT disconnected: Server unavailable"));
+        }
+        if (reason == AsyncMqttClientDisconnectReason::MQTT_MALFORMED_CREDENTIALS) {
+            LOG_INFO(F("MQTT disconnected: Malformed credentials"));
+        }
+        if (reason == AsyncMqttClientDisconnectReason::MQTT_NOT_AUTHORIZED) {
+            LOG_INFO(F("MQTT disconnected: Not authorized"));
+        }
+    });
 
     // create will_topic with the hostname prefixed. It has to be static because asyncmqttclient destroys the reference
     static char will_topic[MQTT_TOPIC_MAX_SIZE];

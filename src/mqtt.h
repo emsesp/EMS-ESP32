@@ -133,7 +133,6 @@ class Mqtt {
 
     void          on_publish(uint16_t packetId);
     void          on_message(char * topic, char * payload, size_t len);
-    static char * make_topic(char * result, const std::string & topic);
     void          process_queue();
     void          process_all_queue();
 
