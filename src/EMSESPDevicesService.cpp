@@ -1,3 +1,21 @@
+/*
+ * EMS-ESP - https://github.com/proddy/EMS-ESP
+ * Copyright 2019  Paul Derbyshire
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "EMSESPDevicesService.h"
 #include "emsesp.h"
 #include "mqtt.h"
@@ -5,9 +23,8 @@
 namespace emsesp {
 
 EMSESPDevicesService::EMSESPDevicesService(AsyncWebServer * server, SecurityManager * securityManager)
-    : _timeHandler(DEVICE_DATA_SERVICE_PATH,
-                   securityManager->wrapCallback(std::bind(&EMSESPDevicesService::device_data, this, _1, _2), AuthenticationPredicates::IS_AUTHENTICATED)) {
-    // body
+    : _device_dataHandler(DEVICE_DATA_SERVICE_PATH,
+                          securityManager->wrapCallback(std::bind(&EMSESPDevicesService::device_data, this, _1, _2), AuthenticationPredicates::IS_AUTHENTICATED)) {
     server->on(EMSESP_DEVICES_SERVICE_PATH,
                HTTP_GET,
                securityManager->wrapRequest(std::bind(&EMSESPDevicesService::all_devices, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
@@ -16,9 +33,9 @@ EMSESPDevicesService::EMSESPDevicesService(AsyncWebServer * server, SecurityMana
                HTTP_GET,
                securityManager->wrapRequest(std::bind(&EMSESPDevicesService::scan_devices, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
 
-    _timeHandler.setMethod(HTTP_POST);
-    _timeHandler.setMaxContentLength(256);
-    server->addHandler(&_timeHandler);
+    _device_dataHandler.setMethod(HTTP_POST);
+    _device_dataHandler.setMaxContentLength(256);
+    server->addHandler(&_device_dataHandler);
 }
 
 void EMSESPDevicesService::scan_devices(AsyncWebServerRequest * request) {
