@@ -114,7 +114,11 @@ void ICACHE_FLASH_ATTR EMSuart::emsuart_flush_fifos() {
  * init UART0 driver
  */
 void ICACHE_FLASH_ATTR EMSuart::start(uint8_t tx_mode) {
-    emsTxWait = 5 * EMSUART_TX_BIT_TIME * (tx_mode + 10); // bittimes wait between bytes
+    if (tx_mode_ > 100) {
+        emsTxWait = 5 * EMSUART_TX_BIT_TIME * (tx_mode - 90);
+    } else {
+        emsTxWait = 5 * EMSUART_TX_BIT_TIME * (tx_mode + 10); // bittimes wait to next bytes
+    }
     if (tx_mode_ != 0xFF) { // it's a restart no need to configure uart
         tx_mode_ = tx_mode;
         restart();
@@ -175,12 +179,12 @@ void ICACHE_FLASH_ATTR EMSuart::start(uint8_t tx_mode) {
     system_uart_swap();
 
     ETS_UART_INTR_ATTACH(emsuart_rx_intr_handler, nullptr);
-    // ETS_UART_INTR_ENABLE();
     drop_next_rx = true;
 
     // for sending with large delay in EMS+ mode we use a timer interrupt
     timer1_attachInterrupt(emsuart_tx_timer_intr_handler); // Add ISR Function
     timer1_enable(TIM_DIV16, TIM_EDGE, TIM_SINGLE);        // 5 MHz timer
+    ETS_UART_INTR_ENABLE();
     USIE(EMSUART_UART) = (1 << UIBD);
 }
 
@@ -190,7 +194,9 @@ void ICACHE_FLASH_ATTR EMSuart::start(uint8_t tx_mode) {
  */
 void ICACHE_FLASH_ATTR EMSuart::stop() {
     USIE(EMSUART_UART) = 0;
-    // timer1_disable();
+    USC0(EMSUART_UART) &= ~(1 << UCBRK); // clear BRK bit
+    timer1_disable();
+    sending_     = false;
 }
 
 /*
@@ -203,7 +209,7 @@ void ICACHE_FLASH_ATTR EMSuart::restart() {
     }
     emsTxBufIdx = 0;
     emsTxBufLen = 0;
-    // timer1_enable(TIM_DIV16, TIM_EDGE, TIM_SINGLE);
+    timer1_enable(TIM_DIV16, TIM_EDGE, TIM_SINGLE);
     USIE(EMSUART_UART) = (1 << UIBD);
 }
 
@@ -282,7 +288,11 @@ uint16_t ICACHE_FLASH_ATTR EMSuart::transmit(uint8_t * buf, uint8_t len) {
         USF(EMSUART_UART) = buf[0]; // send first byte
         emsTxBufIdx = 0;
         emsTxBufLen = len;
-        timer1_write(emsTxWait);
+        if (tx_mode_ > 100) {
+            timer1_write(EMSUART_TX_WAIT_REPLY);
+        } else {
+            timer1_write(emsTxWait);
+        }
         return EMS_TX_STATUS_OK;
     }
 

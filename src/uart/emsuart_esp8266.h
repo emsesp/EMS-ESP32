@@ -41,12 +41,14 @@
 
 // LEGACY
 #define EMSUART_TX_BIT_TIME 104                        // bit time @9600 baud
-#define EMSUART_TX_WAIT_BRK (EMSUART_TX_BIT_TIME * 11) // 1144
+#define EMSUART_TX_WAIT_BRK (EMSUART_TX_BIT_TIME * 10)
+#define EMSUART_TX_WAIT_REPLY 500000                   // delay 100ms after first byte
 
 // EMS 1.0
 #define EMSUART_TX_BUSY_WAIT (EMSUART_TX_BIT_TIME / 8) // 13
 // #define EMSUART_TX_TIMEOUT (22 * EMSUART_TX_BIT_TIME / EMSUART_TX_BUSY_WAIT) // 176
-#define EMSUART_TX_TIMEOUT (32 * 8) // 256 for tx_mode 1 - see https://github.com/proddy/EMS-ESP/issues/398#issuecomment-645886277
+// #define EMSUART_TX_TIMEOUT (32 * 8) // 256 for tx_mode 1 - see https://github.com/proddy/EMS-ESP/issues/398#issuecomment-645886277
+#define EMSUART_TX_TIMEOUT (220 * 8) // 1760 as in v1.9 (180 ms)
 
 // HT3/Junkers - Time to send one Byte (8 Bits, 1 Start Bit, 1 Stop Bit) plus 7 bit delay. The -8 is for lag compensation.
 // since we use a faster processor the lag is negligible
