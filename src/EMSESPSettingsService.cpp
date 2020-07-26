@@ -82,4 +82,8 @@ void EMSESPSettingsService::begin() {
     _fsPersistence.readFromFS();
 }
 
+void EMSESPSettingsService::save() {
+    _fsPersistence.writeToFS();
+}
+
 } // namespace emsesp

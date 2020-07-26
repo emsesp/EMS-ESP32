@@ -62,6 +62,7 @@ class EMSESPSettingsService : public StatefulService<EMSESPSettings> {
     EMSESPSettingsService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager);
 
     void begin();
+    void save();
 
   private:
     HttpEndpoint<EMSESPSettings>  _httpEndpoint;
