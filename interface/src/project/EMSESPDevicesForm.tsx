@@ -123,7 +123,7 @@ class EMSESPDevicesForm extends Component<EMSESPDevicesFormProps, EMSESPDevicesF
           (
             <Box bgcolor="error.main" color="error.contrastText" p={2} mt={2} mb={2}>
               <Typography variant="body1">
-                No EMS devices found. Check the connection and for possible Tx errors and try scanning for new devices.
+                No EMS devices found. Check the connections and for possible Tx errors.
               </Typography>
             </Box>
           )
@@ -205,24 +205,15 @@ class EMSESPDevicesForm extends Component<EMSESPDevicesFormProps, EMSESPDevicesF
     const { width } = this.props;
 
     if (this.noDevices()) {
-      return (
-        <p />
-      )
+      return;
     }
 
-    if (!deviceData) {
-      return (
-        <Typography variant="h6">
-          <p></p>
-          Click on a device to show it's values
-        </Typography>
-      );
+    if (!deviceData) { 
+      return;
     }
 
     if ((deviceData.deviceData || []).length === 0) {
-      return (
-        <p />
-      );
+      return;
     }
 
     return (

@@ -42,8 +42,7 @@ uint32_t EMSbus::last_bus_activity_ = 0;              // timestamp of last time 
 bool     EMSbus::bus_connected_     = false;          // start assuming the bus hasn't been connected
 uint8_t  EMSbus::ems_mask_          = EMS_MASK_UNSET; // unset so its triggered when booting, the its 0x00=buderus, 0x80=junker/ht3
 uint8_t  EMSbus::ems_bus_id_        = EMSESP_DEFAULT_EMS_BUS_ID;
-uint8_t  EMSbus::tx_waiting_        = Telegram::Operation::NONE;
-bool     EMSbus::tx_active_         = false;
+uint8_t  EMSbus::tx_state_          = Telegram::Operation::NONE;
 
 uuid::log::Logger EMSbus::logger_{F_(logger_name), uuid::log::Facility::CONSOLE};
 
@@ -259,19 +258,6 @@ void TxService::start() {
     read_request(EMSdevice::EMS_TYPE_UBADevices, EMSdevice::EMS_DEVICE_ID_BOILER);
 }
 
-// Tx loop
-// here we check if the Tx is not full and report an error
-void TxService::loop() {
-#ifndef EMSESP_STANDALONE
-    if ((uuid::get_uptime() - last_tx_check_) > TX_LOOP_WAIT) {
-        last_tx_check_ = uuid::get_uptime();
-        if (!tx_active() && (EMSbus::bus_connected())) {
-            LOG_ERROR(F("Tx is not active. Please check settings and the circuit connection."));
-        }
-    }
-#endif
-}
-
 // sends a 1 byte poll which is our own device ID
 void TxService::send_poll() {
     //LOG_DEBUG(F("Ack %02X"),ems_bus_id() ^ ems_mask());
@@ -381,11 +367,11 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
     if (status == EMS_TX_STATUS_ERR) {
         LOG_ERROR(F("Failed to transmit Tx via UART."));
         increment_telegram_fail_count();       // another Tx fail
-        tx_waiting(Telegram::Operation::NONE); // nothing send, tx not in wait state
+        tx_state(Telegram::Operation::NONE); // nothing send, tx not in wait state
         return;
     }
 
-    tx_waiting(telegram->operation); // tx now in a wait state
+    tx_state(telegram->operation); // tx now in a wait state
 }
 
 // send an array of bytes as a telegram
@@ -399,7 +385,7 @@ void TxService::send_telegram(const uint8_t * data, const uint8_t length) {
     }
     telegram_raw[length] = calculate_crc(telegram_raw, length); // apppend CRC
 
-    tx_waiting(Telegram::Operation::NONE); // no post validation needed
+    tx_state(Telegram::Operation::NONE); // no post validation needed
 
     // send the telegram to the UART Tx
     uint16_t status = EMSuart::transmit(telegram_raw, length);

@@ -151,7 +151,22 @@ uint8_t EMSESP::bus_status() {
 // show the EMS bus status plus both Rx and Tx queues
 void EMSESP::show_ems(uuid::console::Shell & shell) {
     // EMS bus information
-    if (rxservice_.bus_connected()) {
+    switch (bus_status()) {
+    case BUS_STATUS_OFFLINE:
+        shell.printfln(F("EMS Bus is disconnected."));
+        break;
+    case BUS_STATUS_TX_ERRORS:
+        shell.printfln(F("EMS Bus is connected, but Tx is not stable."));
+        break;
+    case BUS_STATUS_CONNECTED:
+    default:
+        shell.printfln(F("EMS Bus is connected."));
+        break;
+    }
+
+    shell.println();
+
+    if (bus_status() != BUS_STATUS_OFFLINE) {
         uint8_t success_rate = 0;
         if (rxservice_.telegram_error_count()) {
             success_rate = ((float)rxservice_.telegram_error_count() / (float)rxservice_.telegram_count()) * 100;
@@ -165,8 +180,6 @@ void EMSESP::show_ems(uuid::console::Shell & shell) {
         shell.printfln(F("  #write requests sent: %d"), txservice_.telegram_write_count());
         shell.printfln(F("  #corrupted telegrams: %d (%d%%)"), rxservice_.telegram_error_count(), success_rate);
         shell.printfln(F("  #tx fails (after %d retries): %d"), TxService::MAXIMUM_TX_RETRIES, txservice_.telegram_fail_count());
-    } else {
-        shell.printfln(F("EMS Bus is disconnected."));
     }
 
     shell.println();
@@ -647,14 +660,14 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
     }
 
     // are we waiting for a response from a recent Tx Read or Write?
-    uint8_t op = EMSbus::tx_waiting();
-    if (op != Telegram::Operation::NONE) {
+    uint8_t tx_state = EMSbus::tx_state();
+    if (tx_state != Telegram::Operation::NONE) {
         bool tx_successful = false;
-        EMSbus::tx_waiting(Telegram::Operation::NONE); // reset Tx wait state
+        EMSbus::tx_state(Telegram::Operation::NONE); // reset Tx wait state
         // txservice_.print_last_tx();
 
         // if we're waiting on a Write operation, we want a single byte 1 or 4
-        if ((op == Telegram::Operation::TX_WRITE) && (length == 1)) {
+        if ((tx_state == Telegram::Operation::TX_WRITE) && (length == 1)) {
             if (first_value == TxService::TX_WRITE_SUCCESS) {
                 LOG_DEBUG(F("Last Tx write successful"));
                 txservice_.increment_telegram_write_count(); // last tx/write was confirmed ok
@@ -667,7 +680,7 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
                 txservice_.send_poll(); // close the bus
                 txservice_.reset_retry_count();
             }
-        } else if (op == Telegram::Operation::TX_READ) {
+        } else if (tx_state == Telegram::Operation::TX_READ) {
             // got a telegram with data in it. See if the src/dest matches that from the last one we sent and continue to process it
             uint8_t src  = data[0];
             uint8_t dest = data[1];
@@ -682,13 +695,15 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
 
         // if Tx wasn't successful, retry or just give up
         if (!tx_successful) {
-            txservice_.retry_tx(op, data, length);
+            txservice_.retry_tx(tx_state, data, length);
             return;
         }
     }
 
     // check for poll
     if (length == 1) {
+        EMSbus::last_bus_activity(uuid::get_uptime()); // set the flag indication the EMS bus is active
+
 #ifdef EMSESP_DEBUG
         char s[4];
         if (first_value & 0x80) {
@@ -702,7 +717,6 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
         // check for poll to us, if so send top message from Tx queue immediately and quit
         // if ht3 poll must be ems_bus_id else if Buderus poll must be (ems_bus_id | 0x80)
         if ((first_value ^ 0x80 ^ rxservice_.ems_mask()) == txservice_.ems_bus_id()) {
-            EMSbus::last_bus_activity(uuid::get_uptime()); // set the flag indication the EMS bus is active
             txservice_.send();
         }
         // send remote room temperature if active
@@ -764,7 +778,6 @@ void EMSESP::loop() {
 
     system_.loop();    // does LED and checks system health, and syslog service
     rxservice_.loop(); // process what ever is in the rx queue
-    txservice_.loop(); // check that the Tx is all ok
     shower_.loop();    // check for shower on/off
     sensors_.loop();   // this will also send out via MQTT
     mqtt_.loop();      // sends out anything in the queue via MQTT

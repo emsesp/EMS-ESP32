@@ -173,23 +173,11 @@ class EMSbus {
         bus_connected_     = true;
     }
 
-    static bool tx_active() {
-        return tx_active_;
+    static uint8_t tx_state() {
+        return tx_state_;
     }
-    static void tx_active(bool tx_active) {
-        tx_active_ = tx_active;
-    }
-
-    static uint8_t tx_waiting() {
-        return tx_waiting_;
-    }
-    static void tx_waiting(uint8_t tx_waiting) {
-        tx_waiting_ = tx_waiting;
-
-        // if NONE, then it's been reset which means we have an active Tx
-        if ((tx_waiting == Telegram::Operation::NONE) && !(tx_active_)) {
-            tx_active_ = true;
-        }
+    static void tx_state(uint8_t tx_state) {
+        tx_state_ = tx_state;
     }
 
     static uint8_t calculate_crc(const uint8_t * data, const uint8_t length);
@@ -201,8 +189,7 @@ class EMSbus {
     static bool     bus_connected_;     // start assuming the bus hasn't been connected
     static uint8_t  ems_mask_;          // unset=0xFF, buderus=0x00, junkers/ht3=0x80
     static uint8_t  ems_bus_id_;        // the bus id, which configurable and stored in settings
-    static uint8_t  tx_waiting_;        // state of the Tx line (NONE or waiting on a TX_READ or TX_WRITE)
-    static bool     tx_active_;         // is true is we have a working Tx connection
+    static uint8_t  tx_state_;          // state of the Tx line (NONE or waiting on a TX_READ or TX_WRITE)
 };
 
 class RxService : public EMSbus {
@@ -269,7 +256,6 @@ class TxService : public EMSbus {
     ~TxService() = default;
 
     void start();
-    void loop();
     void send();
 
     void add(const uint8_t  operation,
@@ -364,7 +350,6 @@ class TxService : public EMSbus {
   private:
     uint8_t tx_telegram_id_ = 0; // queue counter
 
-    static constexpr uint32_t TX_LOOP_WAIT   = 10000; // when to check if Tx is up and running (10 sec)
     uint32_t                  last_tx_check_ = 0;
 
     std::deque<QueuedTxTelegram> tx_telegrams_;
