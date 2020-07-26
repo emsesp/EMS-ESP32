@@ -142,9 +142,9 @@ void System::mqtt_commands(const char * message) {
 // restart EMS-ESP
 void System::restart() {
     LOG_NOTICE("Restarting system...");
-
     Shell::loop_all();
-    delay(1000); // wait a second
+    EMSESP::esp8266React.getWiFiSettingsService()->callUpdateHandlers("local"); // forces a save
+    delay(1000);                                                                // wait a second
 #if defined(ESP8266)
     ESP.reset();
 #elif defined(ESP32)
@@ -562,7 +562,7 @@ void System::console_commands(Shell & shell, unsigned int context) {
                                                wifiSettings.ssid = arguments.front().c_str();
                                                return StateUpdateResult::CHANGED;
                                            });
-                                           shell.println("You will need to restart to apply the new WiFi changes");
+                                           shell.println("You will need to use the restart command to apply the new WiFi changes");
                                        });
 
     EMSESPShell::commands->add_command(ShellContext::SYSTEM,
