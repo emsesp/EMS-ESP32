@@ -558,15 +558,11 @@ void System::console_commands(Shell & shell, unsigned int context) {
                                        flash_string_vector{F_(set), F_(wifi), F_(ssid)},
                                        flash_string_vector{F_(name_mandatory)},
                                        [](Shell & shell, const std::vector<std::string> & arguments) {
-                                           shell.println("The wifi connection will be reset...");
-                                           Shell::loop_all();
-                                           delay(1000); // wait a second
-                                           EMSESP::esp8266React.getWiFiSettingsService()->update(
-                                               [&](WiFiSettings & wifiSettings) {
-                                                   wifiSettings.ssid = arguments.front().c_str();
-                                                   return StateUpdateResult::CHANGED;
-                                               },
-                                               "local");
+                                           EMSESP::esp8266React.getWiFiSettingsService()->updateWithoutPropagation([&](WiFiSettings & wifiSettings) {
+                                               wifiSettings.ssid = arguments.front().c_str();
+                                               return StateUpdateResult::CHANGED;
+                                           });
+                                           shell.println("You will need to restart to apply the new WiFi changes");
                                        });
 
     EMSESPShell::commands->add_command(ShellContext::SYSTEM,
@@ -579,13 +575,12 @@ void System::console_commands(Shell & shell, unsigned int context) {
                                                                         [password1](Shell & shell, bool completed, const std::string & password2) {
                                                                             if (completed) {
                                                                                 if (password1 == password2) {
-                                                                                    EMSESP::esp8266React.getWiFiSettingsService()->update(
+                                                                                    EMSESP::esp8266React.getWiFiSettingsService()->updateWithoutPropagation(
                                                                                         [&](WiFiSettings & wifiSettings) {
                                                                                             wifiSettings.password = password2.c_str();
                                                                                             return StateUpdateResult::CHANGED;
-                                                                                        },
-                                                                                        "local");
-                                                                                    shell.println(F("WiFi password updated"));
+                                                                                        });
+                                                                                    shell.println("You will need to restart to apply the new WiFi changes");
                                                                                 } else {
                                                                                     shell.println(F("Passwords do not match"));
                                                                                 }
