@@ -81,9 +81,10 @@ Telegram::Telegram(const uint8_t   operation,
 
 // returns telegram's message data bytes in hex
 std::string Telegram::to_string() const {
-    if (message_length == 0) {
+    if (this->message_length == 0) {
         return read_flash_string(F("<empty>"));
     }
+
     uint8_t data[EMS_MAX_TELEGRAM_LENGTH];
     uint8_t length = 0;
     data[0]        = this->src ^ RxService::ems_mask();
@@ -99,8 +100,7 @@ std::string Telegram::to_string() const {
             data[2] = this->type_id;
             length  = 5;
         }
-    }
-    if (this->operation == Telegram::Operation::TX_WRITE) {
+    } else if (this->operation == Telegram::Operation::TX_WRITE) {
         data[1] = this->dest;
         if (this->type_id > 0xFF) {
             data[2] = 0xFF;
@@ -114,7 +114,12 @@ std::string Telegram::to_string() const {
         for (uint8_t i = 0; i < this->message_length; i++) {
             data[length++] = this->message_data[i];
         }
+    } else {
+        for (uint8_t i = 0; i < this->message_length; i++) {
+            data[length++] = this->message_data[i];
+        }
     }
+
     return Helpers::data_to_hex(data, length);
 }
 
@@ -366,7 +371,7 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
 
     if (status == EMS_TX_STATUS_ERR) {
         LOG_ERROR(F("Failed to transmit Tx via UART."));
-        increment_telegram_fail_count();       // another Tx fail
+        increment_telegram_fail_count();     // another Tx fail
         tx_state(Telegram::Operation::NONE); // nothing send, tx not in wait state
         return;
     }
