@@ -98,6 +98,7 @@ class System {
 
     static void   show_system(uuid::console::Shell & shell);
     static void   show_users(uuid::console::Shell & shell);
+    static void   wifi_reconnect();
     static int8_t wifi_quality();
 
     bool            system_healthy_  = false;

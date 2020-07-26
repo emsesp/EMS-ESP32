@@ -24,6 +24,7 @@
 MAKE_PSTR_WORD(passwd)
 MAKE_PSTR_WORD(hostname)
 MAKE_PSTR_WORD(wifi)
+MAKE_PSTR_WORD(reconnect)
 MAKE_PSTR_WORD(ssid)
 MAKE_PSTR_WORD(heartbeat)
 MAKE_PSTR_WORD(users)
@@ -143,8 +144,7 @@ void System::mqtt_commands(const char * message) {
 void System::restart() {
     LOG_NOTICE("Restarting system...");
     Shell::loop_all();
-    EMSESP::esp8266React.getWiFiSettingsService()->callUpdateHandlers("local"); // forces a save
-    delay(1000);                                                                // wait a second
+    delay(1000); // wait a second
 #if defined(ESP8266)
     ESP.reset();
 #elif defined(ESP32)
@@ -152,10 +152,19 @@ void System::restart() {
 #endif
 }
 
+// saves all settings
+void System::wifi_reconnect() {
+    LOG_NOTICE("The wifi will reconnect...");
+    Shell::loop_all();
+    delay(1000);                                                                // wait a second
+    EMSESP::emsespSettingsService.save();                                       // local settings
+    EMSESP::esp8266React.getWiFiSettingsService()->callUpdateHandlers("local"); // in case we've changed ssid or password
+}
+
 // format fs
 // format the FS. Wipes everything.
 void System::format(uuid::console::Shell & shell) {
-    auto msg = F("Formatting file system. This will also reset all settings to their defaults");
+    auto msg = F("Formatting file system. This will reset all settings to their defaults");
     shell.logger().warning(msg);
     shell.flush();
 
@@ -488,6 +497,13 @@ void System::console_commands(Shell & shell, unsigned int context) {
 
     EMSESPShell::commands->add_command(ShellContext::SYSTEM,
                                        CommandFlags::ADMIN,
+                                       flash_string_vector{F_(wifi), F_(reconnect)},
+                                       [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments __attribute__((unused))) {
+                                           wifi_reconnect();
+                                       });
+
+    EMSESPShell::commands->add_command(ShellContext::SYSTEM,
+                                       CommandFlags::ADMIN,
                                        flash_string_vector{F_(format)},
                                        [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
                                            shell.enter_password(F_(password_prompt), [=](Shell & shell, bool completed, const std::string & password) {
@@ -562,33 +578,32 @@ void System::console_commands(Shell & shell, unsigned int context) {
                                                wifiSettings.ssid = arguments.front().c_str();
                                                return StateUpdateResult::CHANGED;
                                            });
-                                           shell.println("You will need to use the restart command to apply the new WiFi changes");
+                                           shell.println("Use `wifi reconnect` to apply the new settings");
                                        });
 
-    EMSESPShell::commands->add_command(ShellContext::SYSTEM,
-                                       CommandFlags::ADMIN,
-                                       flash_string_vector{F_(set), F_(wifi), F_(password)},
-                                       [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
-                                           shell.enter_password(F_(new_password_prompt1), [](Shell & shell, bool completed, const std::string & password1) {
-                                               if (completed) {
-                                                   shell.enter_password(F_(new_password_prompt2),
-                                                                        [password1](Shell & shell, bool completed, const std::string & password2) {
-                                                                            if (completed) {
-                                                                                if (password1 == password2) {
-                                                                                    EMSESP::esp8266React.getWiFiSettingsService()->updateWithoutPropagation(
-                                                                                        [&](WiFiSettings & wifiSettings) {
-                                                                                            wifiSettings.password = password2.c_str();
-                                                                                            return StateUpdateResult::CHANGED;
-                                                                                        });
-                                                                                    shell.println("You will need to restart to apply the new WiFi changes");
-                                                                                } else {
-                                                                                    shell.println(F("Passwords do not match"));
-                                                                                }
-                                                                            }
-                                                                        });
-                                               }
-                                           });
-                                       });
+    EMSESPShell::commands
+        ->add_command(ShellContext::SYSTEM,
+                      CommandFlags::ADMIN,
+                      flash_string_vector{F_(set), F_(wifi), F_(password)},
+                      [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
+                          shell.enter_password(F_(new_password_prompt1), [](Shell & shell, bool completed, const std::string & password1) {
+                              if (completed) {
+                                  shell.enter_password(F_(new_password_prompt2), [password1](Shell & shell, bool completed, const std::string & password2) {
+                                      if (completed) {
+                                          if (password1 == password2) {
+                                              EMSESP::esp8266React.getWiFiSettingsService()->updateWithoutPropagation([&](WiFiSettings & wifiSettings) {
+                                                  wifiSettings.password = password2.c_str();
+                                                  return StateUpdateResult::CHANGED;
+                                              });
+                                              shell.println("Use `wifi reconnect` to apply the new settings");
+                                          } else {
+                                              shell.println(F("Passwords do not match"));
+                                          }
+                                      }
+                                  });
+                              }
+                          });
+                      });
 
     EMSESPShell::commands->add_command(ShellContext::SYSTEM,
                                        CommandFlags::USER,

@@ -88,6 +88,7 @@ system
 	set wifi hostname <name>
 	set wifi password
 	set wifi ssid <name>
+  wifi reconnect
 
 boiler
 	comfort <hot |eco | intelligent>
