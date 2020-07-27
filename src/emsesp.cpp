@@ -111,12 +111,13 @@ void EMSESP::watch_id(uint16_t watch_id) {
 // change the tx_mode
 // resets all counters and bumps the UART
 void EMSESP::reset_tx(uint8_t const tx_mode) {
-    txservice_.telegram_read_count(0);
-    txservice_.telegram_write_count(0);
-    txservice_.telegram_fail_count(0);
-    if (tx_mode) {
-        EMSuart::stop();
-        EMSuart::start(tx_mode);
+    EMSuart::stop();
+
+    txservice_.start();
+
+    EMSuart::start(tx_mode);
+
+    if (tx_mode != 0) {
         EMSESP::fetch_device_values();
     }
 }
@@ -773,6 +774,7 @@ void EMSESP::loop() {
 
     // if we're doing an OTA upload, skip MQTT and EMS
     if (system_.upload_status()) {
+        delay(1); // slow down OTA update to avoid getting killed by task watchdog (task_wdt)
         return;
     }
 
