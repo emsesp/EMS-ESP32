@@ -171,8 +171,6 @@ void Thermostat::init_mqtt() {
 
 // prepare data for Web UI
 void Thermostat::device_info(JsonArray & root) {
-    JsonObject dataElement;
-
     uint8_t flags = (this->flags() & 0x0F); // specific thermostat characteristics, strip the option bits
 
     for (const auto & hc : heating_circuits_) {
@@ -196,7 +194,7 @@ void Thermostat::device_info(JsonArray & root) {
             format_curr     = 10; // *10
             break;
         }
-  
+
         // create prefix with heating circuit number
         std::string hc_str(5, '\0');
         snprintf_P(&hc_str[0], hc_str.capacity() + 1, PSTR("hc%d: "), hc->hc_num());
@@ -204,6 +202,7 @@ void Thermostat::device_info(JsonArray & root) {
         render_value_json(root, hc_str, F("Current room temperature"), hc->curr_roomTemp, F_(degrees), format_curr);
         render_value_json(root, hc_str, F("Setpoint room temperature"), hc->setpoint_roomTemp, F_(degrees), format_setpoint);
         if (Helpers::hasValue(hc->mode)) {
+            JsonObject dataElement;
             dataElement = root.createNestedObject();
             std::string mode_str(15, '\0');
             snprintf_P(&mode_str[0], mode_str.capacity() + 1, PSTR("%sMode"), hc_str.c_str());
