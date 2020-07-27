@@ -58,7 +58,30 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
 void Solar::add_context_menu() {
 }
 
+// print to web
 void Solar::device_info(JsonArray & root) {
+    render_value_json(root, "", F("Collector temperature (TS1)"), collectorTemp_, F_(degrees), 10);
+    render_value_json(root, "", F("Bottom temperature (TS2)"), bottomTemp_, F_(degrees), 10);
+    render_value_json(root, "", F("Bottom temperature (TS5)"), bottomTemp2_, F_(degrees), 10);
+    render_value_json(root, "", F("Pump modulation"), pumpModulation_, F_(percent));
+    render_value_json(root, "", F("Valve (VS2) status"), valveStatus_, nullptr, EMS_VALUE_BOOL);
+    render_value_json(root, "", F("Pump (PS1) active"), pump_, nullptr, EMS_VALUE_BOOL);
+
+    if (Helpers::hasValue(pumpWorkMin_)) {
+        JsonObject dataElement;
+        dataElement         = root.createNestedObject();
+        dataElement["name"] = F("Pump working time");
+        std::string time_str(60, '\0');
+        snprintf_P(&time_str[0], time_str.capacity() + 1, PSTR("%d days %d hours %d minutes"), pumpWorkMin_ / 1440, (pumpWorkMin_ % 1440) / 60, pumpWorkMin_ % 60);
+        dataElement["value"] = time_str;
+    }
+
+    render_value_json(root, "", F("Tank Heated"), tankHeated_, nullptr, EMS_VALUE_BOOL);
+    render_value_json(root, "", F("Collector"), collectorOnOff_, nullptr, EMS_VALUE_BOOL);
+
+    render_value_json(root, "", F("Energy last hour"), energyLastHour_, F_(wh), 10);
+    render_value_json(root, "", F("Energy today"), energyToday_, F_(wh));
+    render_value_json(root, "", F("Energy total"), energyTotal_, F_(kwh), 10);
 }
 
 // display all values into the shell console

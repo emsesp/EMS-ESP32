@@ -57,7 +57,22 @@ Mixing::Mixing(uint8_t device_type, uint8_t device_id, uint8_t product_id, const
 void Mixing::add_context_menu() {
 }
 
+// output json to web UI
 void Mixing::device_info(JsonArray & root) {
+    if (type_ == Type::NONE) {
+        return; // don't have any values yet
+    }
+
+    if (type_ == Type::WWC) {
+        render_value_json(root, "", F("Warm Water Circuit"), hc_, nullptr);
+    } else {
+        render_value_json(root, "", F("Heating Circuit"), hc_, nullptr);
+    }
+    render_value_json(root, "", F("Current flow temperature"), flowTemp_, F_(degrees), 10);
+    render_value_json(root, "", F("Setpoint flow temperature"), flowSetTemp_, F_(degrees));
+    render_value_json(root, "", F("Current pump modulation"), pumpMod_, F_(percent));
+    render_value_json(root, "", F("Current valve status"), status_, nullptr);
+
 }
 
 // check to see if values have been updated
