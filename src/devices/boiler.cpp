@@ -59,7 +59,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     register_telegram_type(0x33, F("UBAParameterWW"), true, std::bind(&Boiler::process_UBAParameterWW, this, _1));
     register_telegram_type(0x14, F("UBATotalUptime"), false, std::bind(&Boiler::process_UBATotalUptime, this, _1));
     register_telegram_type(0x35, F("UBAFlags"), false, std::bind(&Boiler::process_UBAFlags, this, _1));
-    register_telegram_type(0x15, F("UBAMaintenanceSettings"), false, std::bind(&Boiler::process_UBAMaintenanceSettings, this, _1));
+    register_telegram_type(0x15, F("UBAMaintenanceData"), false, std::bind(&Boiler::process_UBAMaintenanceData, this, _1));
     register_telegram_type(0x16, F("UBAParameters"), true, std::bind(&Boiler::process_UBAParameters, this, _1));
     register_telegram_type(0x1A, F("UBASetPoints"), false, std::bind(&Boiler::process_UBASetPoints, this, _1));
     register_telegram_type(0xD1, F("UBAOutdoorTemp"), false, std::bind(&Boiler::process_UBAOutdoorTemp, this, _1));
@@ -688,11 +688,14 @@ void Boiler::process_UBAFlags(std::shared_ptr<const Telegram> telegram) {
 // 0x1C
 // not yet implemented
 void Boiler::process_UBAMaintenanceStatus(std::shared_ptr<const Telegram> telegram) {
+    // first byte: Maintenance due (0 = no, 3 = yes, due to operating hours, 8 = yes, due to date)
 }
 
 // 0x15
 // not yet implemented
-void Boiler::process_UBAMaintenanceSettings(std::shared_ptr<const Telegram> telegram) {
+void Boiler::process_UBAMaintenanceData(std::shared_ptr<const Telegram> telegram) {
+    // first byte: Maintenance messages (0 = none, 1 = by operating hours, 2 = by date)
+    // I see a value of 3 when the boiler is booted, so probably a flag
 }
 
 // 0x10, 0x11, 0x12
