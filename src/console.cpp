@@ -107,7 +107,7 @@ void EMSESPShell::add_console_commands() {
 
     commands->add_command(ShellContext::MAIN,
                           CommandFlags::USER,
-                          flash_string_vector{F_(refresh)},
+                          flash_string_vector{F_(fetch)},
                           [&](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
                               shell.printfln(F("Requesting data from EMS devices"));
                               console_commands_loaded_ = false;
@@ -177,11 +177,10 @@ void EMSESPShell::add_console_commands() {
                           flash_string_vector{F_(n_mandatory)},
                           [](Shell & shell, const std::vector<std::string> & arguments) {
                               uint8_t tx_mode = std::strtol(arguments[0].c_str(), nullptr, 10);
-
+                              // save the tx_mode
                               EMSESP::emsespSettingsService.update(
                                   [&](EMSESPSettings & settings) {
                                       settings.tx_mode = tx_mode;
-                                      shell.printfln(F_(tx_mode_fmt), tx_mode);
                                       return StateUpdateResult::CHANGED;
                                   },
                                   "local");
