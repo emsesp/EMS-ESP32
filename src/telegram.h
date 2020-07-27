@@ -126,22 +126,10 @@ class EMSbus {
   public:
     static uuid::log::Logger logger_;
 
-    static constexpr uint8_t EMS_MASK_UNSET   = 0xFF; // EMS bus type (budrus/junkers) hasn't been detected yet
-    static constexpr uint8_t EMS_MASK_HT3     = 0x80; // EMS bus type Junkers/HT3
-    static constexpr uint8_t EMS_MASK_BUDERUS = 0xFF; // EMS bus type Buderus
-
-    static constexpr uint8_t EMS_TX_ERROR_LIMIT = 10; // % limit of failed Tx read/write attempts before showing a warning
-
-    static bool bus_connected() {
-#ifndef EMSESP_STANDALONE
-        if ((uuid::get_uptime() - last_bus_activity_) > EMS_BUS_TIMEOUT) {
-            bus_connected_ = false;
-        }
-        return bus_connected_;
-#else
-        return true;
-#endif
-    }
+    static constexpr uint8_t EMS_MASK_UNSET     = 0xFF; // EMS bus type (budrus/junkers) hasn't been detected yet
+    static constexpr uint8_t EMS_MASK_HT3       = 0x80; // EMS bus type Junkers/HT3
+    static constexpr uint8_t EMS_MASK_BUDERUS   = 0xFF; // EMS bus type Buderus
+    static constexpr uint8_t EMS_TX_ERROR_LIMIT = 10;   // % limit of failed Tx read/write attempts before showing a warning
 
     static bool is_ht3() {
         return (ems_mask_ == EMS_MASK_HT3);
@@ -159,12 +147,31 @@ class EMSbus {
         ems_mask_ = ems_mask & 0x80; // only keep the MSB (8th bit)
     }
 
+    static uint8_t tx_mode() {
+        return tx_mode_;
+    }
+
+    static void tx_mode(uint8_t tx_mode) {
+        tx_mode_ = tx_mode;
+    }
+
     static uint8_t ems_bus_id() {
         return ems_bus_id_;
     }
 
     static void ems_bus_id(uint8_t ems_bus_id) {
         ems_bus_id_ = ems_bus_id;
+    }
+
+    static bool bus_connected() {
+#ifndef EMSESP_STANDALONE
+        if ((uuid::get_uptime() - last_bus_activity_) > EMS_BUS_TIMEOUT) {
+            bus_connected_ = false;
+        }
+        return bus_connected_;
+#else
+        return true;
+#endif
     }
 
     // sets the flag for EMS bus connected
@@ -189,6 +196,7 @@ class EMSbus {
     static bool     bus_connected_;     // start assuming the bus hasn't been connected
     static uint8_t  ems_mask_;          // unset=0xFF, buderus=0x00, junkers/ht3=0x80
     static uint8_t  ems_bus_id_;        // the bus id, which configurable and stored in settings
+    static uint8_t  tx_mode_;           // local copy of the tx mode
     static uint8_t  tx_state_;          // state of the Tx line (NONE or waiting on a TX_READ or TX_WRITE)
 };
 
@@ -350,7 +358,7 @@ class TxService : public EMSbus {
   private:
     uint8_t tx_telegram_id_ = 0; // queue counter
 
-    uint32_t                  last_tx_check_ = 0;
+    uint32_t last_tx_check_ = 0;
 
     std::deque<QueuedTxTelegram> tx_telegrams_;
 

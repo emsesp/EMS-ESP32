@@ -42,6 +42,7 @@ uint32_t EMSbus::last_bus_activity_ = 0;              // timestamp of last time 
 bool     EMSbus::bus_connected_     = false;          // start assuming the bus hasn't been connected
 uint8_t  EMSbus::ems_mask_          = EMS_MASK_UNSET; // unset so its triggered when booting, the its 0x00=buderus, 0x80=junker/ht3
 uint8_t  EMSbus::ems_bus_id_        = EMSESP_DEFAULT_EMS_BUS_ID;
+uint8_t  EMSbus::tx_mode_           = EMSESP_DEFAULT_TX_MODE;
 uint8_t  EMSbus::tx_state_          = Telegram::Operation::NONE;
 
 uuid::log::Logger EMSbus::logger_{F_(logger_name), uuid::log::Facility::CONSOLE};
@@ -255,8 +256,16 @@ void TxService::flush_tx_queue() {
 
 // start and initialize Tx
 void TxService::start() {
-    // grab the bus ID
-    EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) { ems_bus_id(settings.ems_bus_id); });
+    // grab the bus ID and tx_mode
+    EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) {
+        ems_bus_id(settings.ems_bus_id);
+        tx_mode(settings.tx_mode);
+    });
+
+    // reset counters
+    telegram_read_count(0);
+    telegram_write_count(0);
+    telegram_fail_count(0);
 
     // send first Tx request to bus master (boiler) for its registered devices
     // this will be added to the queue and sent during the first tx loop()
@@ -266,21 +275,29 @@ void TxService::start() {
 // sends a 1 byte poll which is our own device ID
 void TxService::send_poll() {
     //LOG_DEBUG(F("Ack %02X"),ems_bus_id() ^ ems_mask());
-    EMSuart::send_poll(ems_bus_id() ^ ems_mask());
+    if (tx_mode()) {
+        EMSuart::send_poll(ems_bus_id() ^ ems_mask());
+    }
 }
 
 // Process the next telegram on the Tx queue
 // This is sent when we receieve a poll request
 void TxService::send() {
     // don't process if we don't have a connection to the EMS bus
-    // or we're in read-only mode
     if (!bus_connected()) {
         return;
     }
 
     // if there's nothing in the queue to transmit, send back a poll and quit
+    // unless tx_mode is 0
     if (tx_telegrams_.empty()) {
         send_poll();
+        return;
+    }
+
+    // if we're in read-only mode (tx_mode 0) forget the Tx call
+    if (tx_mode() == 0) {
+        tx_telegrams_.pop_front();
         return;
     }
 
