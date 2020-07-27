@@ -2,7 +2,9 @@
 
 ## **Breaking changes**
 
-- MQTT base has been removed. The hostname is only used.
+- MQTT base has been removed. The hostname is only used
+- refresh command renamed to fetch
+- have to 'wifi reconnect' after changing wifi in console
 
 ## **New Features in v2**
 
@@ -65,7 +67,7 @@ common commands available in all contexts:
 
 (from the root)
 	set
-	refresh
+	fetch
 	system (enters a context)
 	boiler (enters a context)
 	thermostat (enters a context)
