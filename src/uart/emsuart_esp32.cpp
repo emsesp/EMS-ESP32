@@ -88,11 +88,11 @@ void IRAM_ATTR EMSuart::emsuart_tx_timer_intr_handler() {
     portENTER_CRITICAL(&mux);
     if (emsTxBufIdx < emsTxBufLen) {
         EMS_UART.fifo.rw_byte = emsTxBuf[emsTxBufIdx];
+        timerAlarmWrite(timer, emsTxWait, true);
     } else if (emsTxBufIdx == emsTxBufLen) {
         EMS_UART.conf0.txd_inv = 1;
         timerAlarmWrite(timer, EMSUART_TX_WAIT_BRK, true);
     } else if (emsTxBufIdx == emsTxBufLen + 1) {
-        // delayMicroseconds(EMSUART_TX_WAIT_BRK);
         EMS_UART.conf0.txd_inv = 0;
         timerAlarmDisable(timer);
     }
@@ -122,28 +122,28 @@ void EMSuart::start(const uint8_t tx_mode) {
     uart_set_pin(EMSUART_UART, EMSUART_TXPIN, EMSUART_RXPIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
     EMS_UART.int_ena.val             = 0;          // disable all intr.
     EMS_UART.int_clr.val             = 0xFFFFFFFF; // clear all intr. flags
-    EMS_UART.idle_conf.tx_brk_num    = 11;         // breaklength 11 bit
+    EMS_UART.idle_conf.tx_brk_num    = 10;         // breaklength 10 bit
     EMS_UART.idle_conf.rx_idle_thrhd = 256;
     drop_next_rx                     = true;
     buf_handle                       = xRingbufferCreate(128, RINGBUF_TYPE_NOSPLIT);
     uart_isr_register(EMSUART_UART, emsuart_rx_intr_handler, NULL, ESP_INTR_FLAG_IRAM, NULL);
     xTaskCreate(emsuart_recvTask, "emsuart_recvTask", 2048, NULL, configMAX_PRIORITIES - 1, NULL);
 
-    timer = timerBegin(1, 80, true);                                   // timer prescale to 1 µs, countup
-    timerAttachInterrupt(timer, &emsuart_tx_timer_intr_handler, true); // Timer with edge interrupt
+    timer = timerBegin(0, 80, true);                                    // timer prescale to 1 us, countup
+    timerAttachInterrupt(timer, &emsuart_tx_timer_intr_handler, false); // Timer with level interrupt
     restart();
 }
 
 /*
- * Stop, disables interrupt
+ * Stop, disable interrupt
  */
 void EMSuart::stop() {
-    EMS_UART.int_ena.val = 0; // disable all intr.
-                              // timerAlarmDisable(timer);
+    EMS_UART.int_ena.val   = 0; // disable all intr.
+    EMS_UART.conf0.txd_inv = 0; // stop break
 };
 
 /*
- * Restart Interrupt
+ * Restart uart and make mode dependent configs.
  */
 void EMSuart::restart() {
     if (EMS_UART.int_raw.brk_det) {      // we received a break in the meantime
@@ -153,7 +153,11 @@ void EMSuart::restart() {
     EMS_UART.int_ena.brk_det = 1; // activate only break
     emsTxBufIdx              = 0;
     emsTxBufLen              = 0;
-    emsTxWait                = EMSUART_TX_BIT_TIME * (tx_mode_ + 10);
+    if (tx_mode_ > 100) {
+       emsTxWait = EMSUART_TX_BIT_TIME * (tx_mode_ - 90);
+    } else {
+       emsTxWait = EMSUART_TX_BIT_TIME * (tx_mode_ + 10);
+    }
     if(tx_mode_ == EMS_TXMODE_NEW) {
         EMS_UART.conf0.txd_brk = 1;
     } else {
@@ -217,7 +221,11 @@ uint16_t EMSuart::transmit(const uint8_t * buf, const uint8_t len) {
         }
         emsTxBufIdx = 0;
         emsTxBufLen = len;
-        timerAlarmWrite(timer, emsTxWait, true); // start with autoreload
+        if (tx_mode_ > 100) {
+            timerAlarmWrite(timer, EMSUART_TX_WAIT_REPLY, true);
+        } else {
+            timerAlarmWrite(timer, emsTxWait, true); // start with autoreload
+        }
         timerAlarmEnable(timer);
         return EMS_TX_STATUS_OK;
     }

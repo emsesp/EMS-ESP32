@@ -47,7 +47,8 @@
 
 // LEGACY
 #define EMSUART_TX_BIT_TIME 104                        // bit time @9600 baud
-#define EMSUART_TX_WAIT_BRK (EMSUART_TX_BIT_TIME * 11) // 1144
+#define EMSUART_TX_WAIT_BRK (EMSUART_TX_BIT_TIME * 10) // 10 bt
+#define EMSUART_TX_WAIT_REPLY 100000                   // delay 100ms after first byte
 
 // EMS 1.0
 #define EMSUART_TX_BUSY_WAIT (EMSUART_TX_BIT_TIME / 8)                       // 13
