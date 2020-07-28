@@ -691,13 +691,6 @@ void Boiler::process_UBAMaintenanceStatus(std::shared_ptr<const Telegram> telegr
     // first byte: Maintenance due (0 = no, 3 = yes, due to operating hours, 8 = yes, due to date)
 }
 
-// 0x15
-// not yet implemented
-void Boiler::process_UBAMaintenanceData(std::shared_ptr<const Telegram> telegram) {
-    // first byte: Maintenance messages (0 = none, 1 = by operating hours, 2 = by date)
-    // I see a value of 3 when the boiler is booted, so probably a flag
-}
-
 // 0x10, 0x11, 0x12
 // not yet implemented
 void Boiler::process_UBAErrorMessage(std::shared_ptr<const Telegram> telegram) {
@@ -705,6 +698,15 @@ void Boiler::process_UBAErrorMessage(std::shared_ptr<const Telegram> telegram) {
 }
 
 #pragma GCC diagnostic pop
+
+// 0x15
+void Boiler::process_UBAMaintenanceData(std::shared_ptr<const Telegram> telegram) {
+    // first byte: Maintenance messages (0 = none, 1 = by operating hours, 2 = by date)
+    // I see a value of 3 in the 1st byte when the boiler is booted, so probably a flag
+    if (telegram->message_data[0] == 3) {
+        LOG_WARNING(F("Boiler has booted."));
+    }
+}
 
 // Set the warm water temperature 0x33
 void Boiler::set_warmwater_temp(const uint8_t temperature) {
