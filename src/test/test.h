@@ -16,6 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#if defined(EMSESP_STANDALONE)
+
 #ifndef EMSESP_TEST_H
 #define EMSESP_TEST_H
 
@@ -49,5 +51,7 @@ class Test {
 };
 
 } // namespace emsesp
+
+#endif
 
 #endif
