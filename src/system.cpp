@@ -251,7 +251,7 @@ void System::start() {
 bool System::upload_status() {
 #if defined(EMSESP_STANDALONE)
     return false;
-#elif
+#else
     return upload_status_ || Update.isRunning();
 #endif
 }
