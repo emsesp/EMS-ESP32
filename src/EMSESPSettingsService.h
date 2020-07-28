@@ -67,6 +67,8 @@ class EMSESPSettingsService : public StatefulService<EMSESPSettings> {
   private:
     HttpEndpoint<EMSESPSettings>  _httpEndpoint;
     FSPersistence<EMSESPSettings> _fsPersistence;
+
+    void onUpdate();
 };
 
 } // namespace emsesp
