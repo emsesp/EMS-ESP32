@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if defined(EMSESP_STANADLONE)
+#if defined(EMSESP_STANDALONE)
 
 #include "test.h"
 

@@ -197,7 +197,6 @@ void System::syslog_init() {
         syslog_mark_interval_ = settings.syslog_mark_interval;
         syslog_host_          = settings.syslog_host;
     });
-    EMSESP::esp8266React.getWiFiSettingsService()->read([&](WiFiSettings & wifiSettings) { syslog_.hostname(wifiSettings.hostname.c_str()); });
 
 #ifndef EMSESP_STANDALONE
     syslog_.start(); // syslog service re-start
@@ -210,6 +209,7 @@ void System::syslog_init() {
     syslog_.log_level((uuid::log::Level)syslog_level_);
     syslog_.mark_interval(syslog_mark_interval_);
     syslog_.destination(addr);
+    EMSESP::esp8266React.getWiFiSettingsService()->read([&](WiFiSettings & wifiSettings) { syslog_.hostname(wifiSettings.hostname.c_str()); });
 #endif
 }
 
@@ -249,7 +249,11 @@ void System::start() {
 
 // returns true if OTA is uploading
 bool System::upload_status() {
+#if defined(EMSESP_STANDALONE)
+    return false;
+#elif
     return upload_status_ || Update.isRunning();
+#endif
 }
 
 void System::upload_status(bool in_progress) {
@@ -380,11 +384,13 @@ int8_t System::wifi_quality() {
 void System::show_users(uuid::console::Shell & shell) {
     shell.printfln(F("Users:"));
 
+#ifndef EMSESP_STANDALONE
     EMSESP::esp8266React.getSecuritySettingsService()->read([&](SecuritySettings & securitySettings) {
         for (User user : securitySettings.users) {
             shell.printfln(F(" username: %s, password: %s, is_admin: %s"), user.username.c_str(), user.password.c_str(), user.admin ? F("yes") : F("no"));
         }
     });
+#endif
 
     shell.println();
 }
