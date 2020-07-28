@@ -96,7 +96,7 @@ class EMSESP {
 
     static void add_context_menus();
 
-    static void reset_tx(uint8_t const tx_mode);
+    static void reset_tx();
 
     static void incoming_telegram(uint8_t * data, const uint8_t length);
 

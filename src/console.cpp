@@ -110,8 +110,6 @@ void EMSESPShell::add_console_commands() {
                           flash_string_vector{F_(fetch)},
                           [&](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
                               shell.printfln(F("Requesting data from EMS devices"));
-                              console_commands_loaded_ = false;
-                              add_console_commands();
                               EMSESP::fetch_device_values();
                           });
 
@@ -184,7 +182,7 @@ void EMSESPShell::add_console_commands() {
                                       return StateUpdateResult::CHANGED;
                                   },
                                   "local");
-                              EMSESP::reset_tx(tx_mode); // reset counters and set tx_mode
+                              EMSESP::reset_tx(); // reset counters and set tx_mode
                           });
 
     commands->add_command(ShellContext::MAIN,
@@ -515,7 +513,6 @@ void Console::start() {
     shell = std::make_shared<EMSESPStreamConsole>(serial_console_, true);
     shell->maximum_log_messages(100); // default is 50
     shell->start();
-    // shell->log_level(uuid::log::Level::DEBUG); // order is: err, warning, notice, info, debug, trace, all
 #endif
 
 #if defined(EMSESP_DEBUG)

@@ -110,13 +110,16 @@ void EMSESP::watch_id(uint16_t watch_id) {
 
 // change the tx_mode
 // resets all counters and bumps the UART
-void EMSESP::reset_tx(uint8_t const tx_mode) {
-    EMSuart::stop();
+void EMSESP::reset_tx() {
+    // get the tx_mode
+    uint8_t tx_mode;
+    EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) { tx_mode = settings.tx_mode; });
 
+    EMSuart::stop();
+    EMSuart::start(tx_mode);
     txservice_.start();
 
-    EMSuart::start(tx_mode);
-
+    // force a fetch for all new values, unless Tx is set to off
     if (tx_mode != 0) {
         EMSESP::fetch_device_values();
     }
