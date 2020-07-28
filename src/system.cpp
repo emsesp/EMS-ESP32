@@ -197,18 +197,16 @@ void System::syslog_init() {
         syslog_mark_interval_ = settings.syslog_mark_interval;
         syslog_host_          = settings.syslog_host;
     });
+    EMSESP::esp8266React.getWiFiSettingsService()->read([&](WiFiSettings & wifiSettings) { syslog_.hostname(wifiSettings.hostname.c_str()); });
 
 #ifndef EMSESP_STANDALONE
-    syslog_.start(); // syslog service
+    syslog_.start(); // syslog service re-start
 
     // configure syslog
     IPAddress addr;
-
     if (!addr.fromString(syslog_host_.c_str())) {
         addr = (uint32_t)0;
     }
-
-    EMSESP::esp8266React.getWiFiSettingsService()->read([&](WiFiSettings & wifiSettings) { syslog_.hostname(wifiSettings.hostname.c_str()); });
     syslog_.log_level((uuid::log::Level)syslog_level_);
     syslog_.mark_interval(syslog_mark_interval_);
     syslog_.destination(addr);
@@ -230,20 +228,20 @@ void System::start() {
 #endif
     }
 
-    // fetch settings
-    std::string hostname;
-    EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) { tx_mode_ = settings.tx_mode; });
+    // fetch system heartbeat
     EMSESP::esp8266React.getMqttSettingsService()->read([&](MqttSettings & settings) { system_heartbeat_ = settings.system_heartbeat; });
+
+    // print boot message
     EMSESP::esp8266React.getWiFiSettingsService()->read(
         [&](WiFiSettings & wifiSettings) { LOG_INFO(F("System %s booted (EMS-ESP version %s)"), wifiSettings.hostname.c_str(), EMSESP_APP_VERSION); });
 
-    syslog_.log_level((uuid::log::Level)syslog_level_);
     syslog_init(); // init SysLog
 
     if (LED_GPIO) {
         pinMode(LED_GPIO, OUTPUT); // LED pin, 0 means disabled
     }
 
+    EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) { tx_mode_ = settings.tx_mode; });
 #ifndef EMSESP_FORCE_SERIAL
     EMSuart::start(tx_mode_); // start UART
 #endif
