@@ -777,7 +777,9 @@ void EMSESP::loop() {
 
     // if we're doing an OTA upload, skip MQTT and EMS
     if (system_.upload_status()) {
+#if defined(ESP32)
         delay(1); // slow down OTA update to avoid getting killed by task watchdog (task_wdt)
+#endif
         return;
     }
 
