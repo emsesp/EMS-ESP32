@@ -712,8 +712,7 @@ void Boiler::process_UBAMaintenanceData(std::shared_ptr<const Telegram> telegram
 void Boiler::set_warmwater_temp(const uint8_t temperature) {
     LOG_INFO(F("Setting boiler warm water temperature to %d C"), temperature);
     write_command(EMS_TYPE_UBAParameterWW, 2, temperature);
-    // for i9000, see #397
-    write_command(EMS_TYPE_UBAFlags, 3, temperature);
+    write_command(EMS_TYPE_UBAFlags, 3, temperature); // for i9000, see #397
 }
 
 // flow temp

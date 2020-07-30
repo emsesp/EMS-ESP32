@@ -135,10 +135,6 @@ class EMSbus {
         return (ems_mask_ == EMS_MASK_HT3);
     }
 
-    static uint8_t protocol() {
-        return ems_mask_;
-    }
-
     static uint8_t ems_mask() {
         return ems_mask_;
     }
