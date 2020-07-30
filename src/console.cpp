@@ -90,6 +90,7 @@ void EMSESPShell::display_banner() {
 
     // turn off watch
     emsesp::EMSESP::watch_id(WATCH_ID_NONE);
+    emsesp::EMSESP::watch(EMSESP::WATCH_OFF);
 }
 
 // pre-loads all the console commands into the MAIN context
