@@ -165,17 +165,18 @@ void RxService::add(uint8_t * data, uint8_t length) {
 
     // validate the CRC
     uint8_t crc = calculate_crc(data, length - 1);
-
-    if ((data[length - 1] != crc) && (EMSESP::watch() != EMSESP::Watch::WATCH_OFF)) {
-        LOG_ERROR(F("Rx: %s %s(CRC %02X != %02X)%s"), Helpers::data_to_hex(data, length).c_str(), COLOR_RED, data[length - 1], crc, COLOR_RESET);
+    if (data[length - 1] != crc) {
         increment_telegram_error_count();
+        if (EMSESP::watch() != EMSESP::Watch::WATCH_OFF) {
+            LOG_ERROR(F("Rx: %s %s(CRC %02X != %02X)%s"), Helpers::data_to_hex(data, length).c_str(), COLOR_RED, data[length - 1], crc, COLOR_RESET);
+        }
         return;
     }
 
     // since it's a valid telegram, work out the ems mask
     // we check the 1st byte, which assumed is the src ID and see if the MSB (8th bit) is set
     // this is used to identify if the protocol should be Junkers/HT3 or Buderus
-    // this only happens once with the first rx telegram is processed
+    // this only happens once with the first valid rx telegram is processed
     if (ems_mask() == EMS_MASK_UNSET) {
         ems_mask(data[0]);
     }
