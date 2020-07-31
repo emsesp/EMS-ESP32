@@ -68,8 +68,8 @@ typedef std::function<bool(AsyncWebServerRequest * request)> ArRequestFilterFunc
 
 class AsyncWebHandler {
   protected:
-    String                  _username;
-    String                  _password;
+    String _username;
+    String _password;
 
   public:
     AsyncWebHandler()
@@ -131,7 +131,6 @@ class AsyncWebServer {
     }
 
     void on(const char * uri, WebRequestMethodComposite method, ArRequestHandlerFunction onRequest){};
-
 };
 
 

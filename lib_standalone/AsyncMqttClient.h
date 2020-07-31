@@ -24,7 +24,6 @@ struct AsyncMqttClientMessageProperties {
     bool    retain;
 };
 
-
 namespace AsyncMqttClientInternals {
 
 typedef std::function<void(bool sessionPresent)>                    OnConnectUserCallback;

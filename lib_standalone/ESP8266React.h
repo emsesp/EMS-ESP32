@@ -95,8 +95,6 @@ class EMSESPSettingsService {
     void begin();
 
   private:
-    // HttpEndpoint<EMSESPSettings>  _httpEndpoint;
-    // FSPersistence<EMSESPSettings> _fsPersistence;
 };
 
 #endif
