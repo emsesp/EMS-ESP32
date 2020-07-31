@@ -22,7 +22,7 @@ class EMSESP extends Component<RouteComponentProps> {
       <MenuAppBar sectionTitle="Dashboard">
         <Tabs value={this.props.match.url} onChange={this.handleTabChange} variant="fullWidth">
           <Tab value={`/${PROJECT_PATH}/status`} label="EMS Status" />
-          <Tab value={`/${PROJECT_PATH}/devices`} label="EMS Devices" />
+          <Tab value={`/${PROJECT_PATH}/devices`} label="Devices & Sensors" />
           <Tab value={`/${PROJECT_PATH}/help`} label="EMS-ESP Help" />
         </Tabs>
         <Switch>

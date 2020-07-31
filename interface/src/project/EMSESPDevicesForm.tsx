@@ -71,14 +71,21 @@ class EMSESPDevicesForm extends Component<EMSESPDevicesFormProps, EMSESPDevicesF
     return (this.props.data.devices.length === 0);
   };
 
+  noSensors = () => {
+    return (this.props.data.sensors.length === 0);
+  };
+
   noDeviceData = () => {
     return (this.state.deviceData?.deviceData.length === 0);
   };
 
-  createTableItems() {
+  createDeviceItems() {
     const { width, data } = this.props;
     return (
       <TableContainer>
+        <Typography variant="h6" color="primary" paragraph>
+          Devices:
+        </Typography>
         {!this.noDevices() && (
           <Table size="small" padding={isWidthDown('xs', width!) ? "none" : "default"}>
             <TableHead>
@@ -124,6 +131,49 @@ class EMSESPDevicesForm extends Component<EMSESPDevicesFormProps, EMSESPDevicesF
             <Box bgcolor="error.main" color="error.contrastText" p={2} mt={2} mb={2}>
               <Typography variant="body1">
                 No EMS devices found. Check the connections and for possible Tx errors.
+              </Typography>
+            </Box>
+          )
+        }
+      </TableContainer>
+    );
+  }
+
+  createSensorItems() {
+    const { data } = this.props;
+    return (
+      <TableContainer>
+        <p></p>
+        <Typography variant="h6" color="primary" paragraph>
+          Sensors:
+        </Typography>
+        {!this.noSensors() && (
+          <Table size="small" padding="default">
+            <TableHead>
+              <TableRow>
+                <StyledTableCell>ID</StyledTableCell>
+                <StyledTableCell align="left">Temperature</StyledTableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {data.sensors.map(sensorData => (
+                <TableRow key={sensorData.id}>
+                  <TableCell component="th" scope="row">
+                    {sensorData.id}
+                  </TableCell>
+                  <TableCell align="left">
+                    {sensorData.temp}&deg;C
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+        {this.noSensors() &&
+          (
+            <Box color="warning.main" p={0} mt={0} mb={0}>
+              <Typography variant="body1">
+                No external temperature sensors detected.
               </Typography>
             </Box>
           )
@@ -208,7 +258,7 @@ class EMSESPDevicesForm extends Component<EMSESPDevicesFormProps, EMSESPDevicesF
       return;
     }
 
-    if (!deviceData) { 
+    if (!deviceData) {
       return;
     }
 
@@ -252,8 +302,9 @@ class EMSESPDevicesForm extends Component<EMSESPDevicesFormProps, EMSESPDevicesF
     return (
       <Fragment>
         <br></br>
-        {this.createTableItems()}
+        {this.createDeviceItems()}
         {this.renderDeviceData()}
+        {this.createSensorItems()}
         <br></br>
         <Box display="flex" flexWrap="wrap">
           <Box flexGrow={1} padding={1}>

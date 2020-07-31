@@ -33,8 +33,14 @@ export interface Device {
   version: string;
 }
 
+export interface Sensor {
+  id: string;
+  temp: number;
+}
+
 export interface EMSESPDevices {
   devices: Device[];
+  sensors: Sensor[];
 }
 
 export interface DeviceData {

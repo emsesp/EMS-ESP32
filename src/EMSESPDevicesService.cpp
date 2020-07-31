@@ -50,14 +50,23 @@ void EMSESPDevicesService::all_devices(AsyncWebServerRequest * request) {
     JsonArray devices = root.createNestedArray("devices");
     for (const auto & emsdevice : EMSESP::emsdevices) {
         if (emsdevice) {
-            JsonObject deviceRoot   = devices.createNestedObject();
-            deviceRoot["id"]        = emsdevice->unique_id();
-            deviceRoot["type"]      = emsdevice->device_type_name();
-            deviceRoot["brand"]     = emsdevice->brand_to_string();
-            deviceRoot["name"]      = emsdevice->name();
-            deviceRoot["deviceid"]  = emsdevice->device_id();
-            deviceRoot["productid"] = emsdevice->product_id();
-            deviceRoot["version"]   = emsdevice->version();
+            JsonObject obj   = devices.createNestedObject();
+            obj["id"]        = emsdevice->unique_id();
+            obj["type"]      = emsdevice->device_type_name();
+            obj["brand"]     = emsdevice->brand_to_string();
+            obj["name"]      = emsdevice->name();
+            obj["deviceid"]  = emsdevice->device_id();
+            obj["productid"] = emsdevice->product_id();
+            obj["version"]   = emsdevice->version();
+        }
+    }
+
+    JsonArray sensors = root.createNestedArray("sensors");
+    if (!EMSESP::sensor_devices().empty()) {
+        for (const auto & sensor : EMSESP::sensor_devices()) {
+            JsonObject obj = sensors.createNestedObject();
+            obj["id"]      = sensor.to_string();
+            obj["temp"]    = sensor.temperature_c;
         }
     }
 

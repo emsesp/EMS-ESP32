@@ -107,7 +107,7 @@ void Sensors::loop() {
                     case TYPE_DS1822:
                     case TYPE_DS1825:
                         found_.emplace_back(addr);
-                        found_.back().temperature_c_ = get_temperature_c(addr);
+                        found_.back().temperature_c = get_temperature_c(addr);
 
                         /*
                         // comment out for debugging
@@ -253,7 +253,7 @@ void Sensors::publish_values() {
         StaticJsonDocument<100> doc;
         for (const auto & device : devices_) {
             char s[5];
-            doc["temp"] = Helpers::render_value(s, device.temperature_c_, 2);
+            doc["temp"] = Helpers::render_value(s, device.temperature_c, 2);
             char topic[60];                // sensors{1-n}
             strlcpy(topic, "sensor_", 50); // create topic, e.g. home/ems-esp/sensor_28-EA41-9497-0E03-5F
             strlcat(topic, device.to_string().c_str(), 60);
@@ -279,7 +279,7 @@ void Sensors::publish_values() {
     for (const auto & device : devices_) {
         if (mqtt_format_ == MQTT_format::CUSTOM) {
             char s[5];
-            doc[device.to_string()] = Helpers::render_value(s, device.temperature_c_, 2);
+            doc[device.to_string()] = Helpers::render_value(s, device.temperature_c, 2);
         } else {
             char sensorID[10]; // sensor{1-n}
             strlcpy(sensorID, "sensor", 10);
@@ -287,7 +287,7 @@ void Sensors::publish_values() {
             strlcat(sensorID, Helpers::itoa(s, i++), 10);
             JsonObject dataSensor = doc.createNestedObject(sensorID);
             dataSensor["id"]      = device.to_string();
-            dataSensor["temp"]    = Helpers::render_value(s, device.temperature_c_, 2);
+            dataSensor["temp"]    = Helpers::render_value(s, device.temperature_c, 2);
         }
     }
 

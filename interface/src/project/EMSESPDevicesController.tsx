@@ -17,7 +17,7 @@ class EMSESPDevicesController extends Component<EMSESPDevicesControllerProps> {
 
     render() {
         return (
-            <SectionContent title="EMS Devices">
+            <SectionContent title="Devices & Sensors">
                 <RestFormLoader
                     {...this.props}
                     render={formProps => <EMSESPDevicesForm {...formProps} />}

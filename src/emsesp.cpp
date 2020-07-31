@@ -248,7 +248,7 @@ void EMSESP::show_device_values(uuid::console::Shell & shell) {
     }
 }
 
-// show Dallas sensors
+// show Dallas temperature sensors
 void EMSESP::show_sensor_values(uuid::console::Shell & shell) {
     if (sensor_devices().empty()) {
         return;
@@ -257,7 +257,7 @@ void EMSESP::show_sensor_values(uuid::console::Shell & shell) {
     char valuestr[8] = {0}; // for formatting temp
     shell.printfln(F("External temperature sensors:"));
     for (const auto & device : sensor_devices()) {
-        shell.printfln(F("  Sensor ID %s: %s°C"), device.to_string().c_str(), Helpers::render_value(valuestr, device.temperature_c_, 2));
+        shell.printfln(F("  ID: %s, Temperature: %s°C"), device.to_string().c_str(), Helpers::render_value(valuestr, device.temperature_c, 2));
     }
     shell.println();
 }
@@ -778,7 +778,7 @@ void EMSESP::loop() {
     // if we're doing an OTA upload, skip MQTT and EMS
     if (system_.upload_status()) {
 #if defined(ESP32)
-        delay(1); // slow down OTA update to avoid getting killed by task watchdog (task_wdt)
+        delay(10); // slow down OTA update to avoid getting killed by task watchdog (task_wdt)
 #endif
         return;
     }
