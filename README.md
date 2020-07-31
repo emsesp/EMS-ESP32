@@ -100,6 +100,9 @@ boiler
 	wwonetime <on | off>
 	wwtemp <degrees>
 	read <type ID>
+  temp <degrees>
+  maxpower <%>
+  minpower <%>
 
 thermostat
 	set

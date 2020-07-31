@@ -28,6 +28,9 @@ MAKE_PSTR_WORD(comfort)
 MAKE_PSTR_WORD(eco)
 MAKE_PSTR_WORD(intelligent)
 MAKE_PSTR_WORD(hot)
+MAKE_PSTR_WORD(maxpower)
+MAKE_PSTR_WORD(minpower)
+MAKE_PSTR_WORD(temp)
 
 MAKE_PSTR(comfort_mandatory, "<hot | eco | intelligent>")
 
@@ -133,6 +136,33 @@ void Boiler::boiler_cmd(const char * message) {
         }
         return;
     }
+
+    // boiler temp setting
+    if (strcmp(command, "temp") == 0) {
+        uint8_t t = doc["data"];
+        if (t) {
+            set_temp(t);
+        }
+        return;
+    }
+
+    // boiler max power setting
+    if (strcmp(command, "maxpower") == 0) {
+        uint8_t p = doc["data"];
+        if (p) {
+            set_max_power(p);
+        }
+        return;
+    }
+
+    // boiler min power setting
+    if (strcmp(command, "minpower") == 0) {
+        uint8_t p = doc["data"];
+        if (p) {
+            set_min_power(p);
+        }
+        return;
+    }
 }
 
 void Boiler::boiler_cmd_wwactivated(const char * message) {
@@ -186,7 +216,7 @@ void Boiler::device_info(JsonArray & root) {
 
 // publish values via MQTT
 void Boiler::publish_values() {
-    const size_t        capacity = JSON_OBJECT_SIZE(47); // must recalculate if more objects addded https://arduinojson.org/v6/assistant/
+    const size_t        capacity = JSON_OBJECT_SIZE(50); // must recalculate if more objects addded https://arduinojson.org/v6/assistant/
     DynamicJsonDocument doc(capacity);
 
     char s[10]; // for formatting strings
@@ -337,6 +367,16 @@ void Boiler::publish_values() {
         doc["heatWorkMin"] = heatWorkMin_;
     }
 
+    if (Helpers::hasValue(temp_)) {
+        doc["heatWorkMin"] = temp_;
+    }
+    if (Helpers::hasValue(maxpower_)) {
+        doc["heatWorkMin"] = maxpower_;
+    }
+    if (Helpers::hasValue(setpointpower_)) {
+        doc["heatWorkMin"] = setpointpower_;
+    }
+
     if (Helpers::hasValue(serviceCode_)) {
         doc["serviceCode"]       = serviceCodeChar_;
         doc["serviceCodeNumber"] = serviceCode_;
@@ -434,6 +474,11 @@ void Boiler::show_values(uuid::console::Shell & shell) {
     print_value(shell, 2, F("Heating temperature setting on the boiler"), heating_temp_, F_(degrees));
     print_value(shell, 2, F("Boiler circuit pump modulation max power"), pump_mod_max_, F_(percent));
     print_value(shell, 2, F("Boiler circuit pump modulation min power"), pump_mod_min_, F_(percent));
+
+    // UBASetPoint - these may differ from the above
+    print_value(shell, 2, F("Boiler temp"), temp_, F_(degrees));
+    print_value(shell, 2, F("Max output power"), maxpower_, F_(percent));
+    print_value(shell, 2, F("Set power"), setpointpower_, F_(percent));
 
     // UBAMonitorSlow
     if (Helpers::hasValue(extTemp_)) {
@@ -670,15 +715,15 @@ void Boiler::process_UBAOutdoorTemp(std::shared_ptr<const Telegram> telegram) {
     telegram->read_value(extTemp_, 0);
 }
 
+// UBASetPoint 0x1A
+void Boiler::process_UBASetPoints(std::shared_ptr<const Telegram> telegram) {
+    telegram->read_value(temp_, 0);           // boiler flow temp
+    telegram->read_value(maxpower_, 1);       // max output power in %
+    telegram->read_value(setpointpower_, 14); // ww pump speed/power?
+}
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-
-// UBASetPoint 0x1A
-// not yet implemented
-void Boiler::process_UBASetPoints(std::shared_ptr<const Telegram> telegram) {
-    // uint8_t setpoint = telegram->message_data[0]; // boiler flow temp
-    // uint8_t ww_power = telegram->message_data[2]; // power in %
-}
 
 // 0x35
 // not yet implemented
@@ -719,6 +764,24 @@ void Boiler::set_warmwater_temp(const uint8_t temperature) {
 void Boiler::set_flow_temp(const uint8_t temperature) {
     LOG_INFO(F("Setting boiler flow temperature to %d C"), temperature);
     write_command(EMS_TYPE_UBASetPoints, 0, temperature);
+}
+
+// set heating temp
+void Boiler::set_temp(const uint8_t temperature) {
+    LOG_INFO(F("Setting boiler temperature to %d C"), temperature);
+    write_command(EMS_TYPE_UBAParameters, 1, temperature);
+}
+
+// set min boiler output
+void Boiler::set_min_power(const uint8_t power) {
+    LOG_INFO(F("Setting boiler min power to "), power);
+    write_command(EMS_TYPE_UBAParameters, 3, power);
+}
+
+// set max temp
+void Boiler::set_max_power(const uint8_t power) {
+    LOG_INFO(F("Setting boiler max power to %d C"), power);
+    write_command(EMS_TYPE_UBAParameters, 2, power);
 }
 
 // 1=hot, 2=eco, 3=intelligent
@@ -823,6 +886,30 @@ void Boiler::console_commands(Shell & shell, unsigned int context) {
                                        flash_string_vector{F_(degrees_mandatory)},
                                        [=](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) {
                                            set_flow_temp(Helpers::atoint(arguments.front().c_str()));
+                                       });
+
+    EMSESPShell::commands->add_command(ShellContext::BOILER,
+                                       CommandFlags::ADMIN,
+                                       flash_string_vector{F_(temp)},
+                                       flash_string_vector{F_(degrees_mandatory)},
+                                       [=](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) {
+                                           set_temp(Helpers::atoint(arguments.front().c_str()));
+                                       });
+
+    EMSESPShell::commands->add_command(ShellContext::BOILER,
+                                       CommandFlags::ADMIN,
+                                       flash_string_vector{F_(maxpower)},
+                                       flash_string_vector{F_(n_mandatory)},
+                                       [=](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) {
+                                           set_max_power(Helpers::atoint(arguments.front().c_str()));
+                                       });
+
+    EMSESPShell::commands->add_command(ShellContext::BOILER,
+                                       CommandFlags::ADMIN,
+                                       flash_string_vector{F_(minpower)},
+                                       flash_string_vector{F_(n_mandatory)},
+                                       [=](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) {
+                                           set_min_power(Helpers::atoint(arguments.front().c_str()));
                                        });
 
     EMSESPShell::commands->add_command(

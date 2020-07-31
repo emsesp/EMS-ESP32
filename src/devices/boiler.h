@@ -55,6 +55,7 @@ class Boiler : public EMSdevice {
     static constexpr uint8_t EMS_TYPE_UBAFunctionTest = 0x1D;
     static constexpr uint8_t EMS_TYPE_UBAFlags        = 0x35;
     static constexpr uint8_t EMS_TYPE_UBASetPoints    = 0x1A;
+    static constexpr uint8_t EMS_TYPE_UBAParameters   = 0x16;
 
     static constexpr uint8_t EMS_BOILER_SELFLOWTEMP_HEATING = 20; // was originally 70, changed to 30 for issue #193, then to 20 with issue #344
 
@@ -121,10 +122,15 @@ class Boiler : public EMSdevice {
     uint8_t pump_mod_max_ = EMS_VALUE_UINT_NOTSET; // Boiler circuit pump modulation max. power %
     uint8_t pump_mod_min_ = EMS_VALUE_UINT_NOTSET; // Boiler circuit pump modulation min. power
 
+    // UBASetPoint
+    uint8_t temp_          = EMS_VALUE_UINT_NOTSET; // boiler flow temp
+    uint8_t maxpower_      = EMS_VALUE_UINT_NOTSET; // max output power in %
+    uint8_t setpointpower_ = EMS_VALUE_UINT_NOTSET; // ww pump speed/power?
+
+    // other internal calculated params
     uint8_t tap_water_active_ = EMS_VALUE_BOOL_NOTSET; // Hot tap water is on/off
     uint8_t heating_active_   = EMS_VALUE_BOOL_NOTSET; // Central heating is on/off
-
-    uint8_t pumpMod2_ = EMS_VALUE_UINT_NOTSET; // heatpump modulation from 0xE3 (heatpumps)
+    uint8_t pumpMod2_         = EMS_VALUE_UINT_NOTSET; // heatpump modulation from 0xE3 (heatpumps)
 
     void process_UBAParameterWW(std::shared_ptr<const Telegram> telegram);
     void process_UBAMonitorFast(std::shared_ptr<const Telegram> telegram);
@@ -155,6 +161,10 @@ class Boiler : public EMSdevice {
     void set_tapwarmwater_activated(const bool activated);
     void set_warmwater_onetime(const bool activated);
     void set_warmwater_circulation(const bool activated);
+    void set_temp(const uint8_t temperature);
+    void set_min_power(const uint8_t power);
+    void set_max_power(const uint8_t power);
+
 
     // mqtt callbacks
     void boiler_cmd(const char * message);
