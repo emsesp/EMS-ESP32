@@ -77,7 +77,7 @@ void Solar::device_info(JsonArray & root) {
     }
 
     render_value_json(root, "", F("Tank Heated"), tankHeated_, nullptr, EMS_VALUE_BOOL);
-    render_value_json(root, "", F("Collector"), collectorOnOff_, nullptr, EMS_VALUE_BOOL);
+    render_value_json(root, "", F("Collector shutdown"), collectorOnOff_, nullptr, EMS_VALUE_BOOL);
 
     render_value_json(root, "", F("Energy last hour"), energyLastHour_, F_(wh), 10);
     render_value_json(root, "", F("Energy today"), energyToday_, F_(wh));
@@ -100,7 +100,7 @@ void Solar::show_values(uuid::console::Shell & shell) {
     }
 
     print_value(shell, 2, F("Tank Heated"), tankHeated_, nullptr, EMS_VALUE_BOOL);
-    print_value(shell, 2, F("Collector"), collectorOnOff_, nullptr, EMS_VALUE_BOOL);
+    print_value(shell, 2, F("Collector shutdown"), collectorOnOff_, nullptr, EMS_VALUE_BOOL);
 
     print_value(shell, 2, F("Energy last hour"), energyLastHour_, F_(wh), 10);
     print_value(shell, 2, F("Energy today"), energyToday_, F_(wh));
@@ -229,8 +229,8 @@ void Solar::process_SM100Status(std::shared_ptr<const Telegram> telegram) {
         pumpModulation_ = 15;                     // set to minimum
     }
 
-    telegram->read_bitvalue(tankHeated_, 3, 1); // issue #422
-    telegram->read_bitvalue(collectorOnOff_, 3, 0);
+    telegram->read_bitvalue(tankHeated_, 3, 1);     // issue #422
+    telegram->read_bitvalue(collectorOnOff_, 3, 0); // collector shutdown
 }
 
 /*
@@ -266,7 +266,7 @@ void Solar::process_ISM1StatusMessage(std::shared_ptr<const Telegram> telegram) 
     if (Wh != 0xFFFF) {
         energyLastHour_ = Wh * 10; // set to *10
     }
-    telegram->read_bitvalue(collectorOnOff_, 9, 0); // collector on/off
+    telegram->read_bitvalue(collectorOnOff_, 9, 0); // collector shutdown on/off
     telegram->read_bitvalue(tankHeated_, 9, 2);     // tank full
 }
 
