@@ -121,11 +121,17 @@ class Boiler : public EMSdevice {
     uint8_t heating_temp_ = EMS_VALUE_UINT_NOTSET; // Heating temperature setting on the boiler
     uint8_t pump_mod_max_ = EMS_VALUE_UINT_NOTSET; // Boiler circuit pump modulation max. power %
     uint8_t pump_mod_min_ = EMS_VALUE_UINT_NOTSET; // Boiler circuit pump modulation min. power
+    uint8_t burnPowermin_ = EMS_VALUE_UINT_NOTSET;
+    uint8_t burnPowermax_ = EMS_VALUE_UINT_NOTSET;
+    int8_t  boilTemp_off_ = EMS_VALUE_INT_NOTSET;
+    int8_t  boilTemp_on_  = EMS_VALUE_UINT_NOTSET;
+    uint8_t burnPeriod_   = EMS_VALUE_UINT_NOTSET;
+    uint8_t pumpDelay_    = EMS_VALUE_UINT_NOTSET;
 
     // UBASetPoint
-    uint8_t temp_          = EMS_VALUE_UINT_NOTSET; // boiler flow temp
-    uint8_t maxpower_      = EMS_VALUE_UINT_NOTSET; // max output power in %
-    uint8_t setpointpower_ = EMS_VALUE_UINT_NOTSET; // ww pump speed/power?
+    uint8_t setFlowTemp_  = EMS_VALUE_UINT_NOTSET; // boiler setpoint temp
+    uint8_t setBurnPow_   = EMS_VALUE_UINT_NOTSET; // max output power in %
+    uint8_t setWWPumpPow_ = EMS_VALUE_UINT_NOTSET; // ww pump speed/power?
 
     // other internal calculated params
     uint8_t tap_water_active_ = EMS_VALUE_BOOL_NOTSET; // Hot tap water is on/off
@@ -161,9 +167,12 @@ class Boiler : public EMSdevice {
     void set_tapwarmwater_activated(const bool activated);
     void set_warmwater_onetime(const bool activated);
     void set_warmwater_circulation(const bool activated);
-    void set_temp(const uint8_t temperature);
     void set_min_power(const uint8_t power);
     void set_max_power(const uint8_t power);
+    void set_hyst_on(const uint8_t temp);
+    void set_hyst_off(const uint8_t temp);
+    void set_burn_period(const uint8_t t);
+    void set_pump_delay(const uint8_t t);
 
 
     // mqtt callbacks

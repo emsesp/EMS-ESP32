@@ -30,7 +30,6 @@ MAKE_PSTR_WORD(intelligent)
 MAKE_PSTR_WORD(hot)
 MAKE_PSTR_WORD(maxpower)
 MAKE_PSTR_WORD(minpower)
-MAKE_PSTR_WORD(temp)
 
 MAKE_PSTR(comfort_mandatory, "<hot | eco | intelligent>")
 
@@ -106,18 +105,50 @@ void Boiler::boiler_cmd(const char * message) {
         uint8_t t = doc["wwtemp"];
         set_warmwater_temp(t);
     }
+    if (nullptr != doc["boilhyston"]) {
+        int8_t t = doc["boilhyston"];
+        set_hyst_on(t);
+    }
+    if (nullptr != doc["boilhystoff"]) {
+        uint8_t t = doc["boilhystoff"];
+        set_hyst_off(t);
+    }
+    if (nullptr != doc["burnperiod"]) {
+        uint8_t t = doc["burnperiod"];
+        set_burn_period(t);
+    }
+    if (nullptr != doc["burnminpower"]) {
+        uint8_t p = doc["burnminpower"];
+        set_min_power(p);
+    }
+    if (nullptr != doc["burnmaxpower"]) {
+        uint8_t p = doc["burnmaxpower"];
+        set_max_power(p);
+    }
+    if (nullptr != doc["pumpdelay"]) {
+        uint8_t t = doc["pumpdelay"];
+        set_pump_delay(t);
+    }
+
+    if (nullptr != doc["comfort"]) {
+        const char * data = doc["comfort"];
+        if (strcmp((char *)data, "hot") == 0) {
+            set_warmwater_mode(1);
+        } else if (strcmp((char *)data, "eco") == 0) {
+            set_warmwater_mode(2);
+        } else if (strcmp((char *)data, "intelligent") == 0) {
+            set_warmwater_mode(3);
+        }
+    }
 
     const char * command = doc["cmd"];
-    if (command == nullptr) {
+    if (command == nullptr || doc["data"] == nullptr) {
         return;
     }
 
     // boiler ww comfort setting
     if (strcmp(command, "comfort") == 0) {
         const char * data = doc["data"];
-        if (data == nullptr) {
-            return;
-        }
         if (strcmp((char *)data, "hot") == 0) {
             set_warmwater_mode(1);
         } else if (strcmp((char *)data, "eco") == 0) {
@@ -131,36 +162,45 @@ void Boiler::boiler_cmd(const char * message) {
     // boiler flowtemp setting
     if (strcmp(command, "flowtemp") == 0) {
         uint8_t t = doc["data"];
-        if (t) {
-            set_flow_temp(t);
-        }
+        set_flow_temp(t);
         return;
     }
-
-    // boiler temp setting
-    if (strcmp(command, "temp") == 0) {
+    if (strcmp(command, "wwtemp") == 0) {
         uint8_t t = doc["data"];
-        if (t) {
-            set_temp(t);
-        }
+        set_warmwater_temp(t);
         return;
     }
-
     // boiler max power setting
-    if (strcmp(command, "maxpower") == 0) {
+    if (strcmp(command, "burnmaxpower") == 0) {
         uint8_t p = doc["data"];
-        if (p) {
-            set_max_power(p);
-        }
+        set_max_power(p);
         return;
     }
 
     // boiler min power setting
-    if (strcmp(command, "minpower") == 0) {
+    if (strcmp(command, "burnminpower") == 0) {
         uint8_t p = doc["data"];
-        if (p) {
-            set_min_power(p);
-        }
+        set_min_power(p);
+        return;
+    }
+    if (strcmp(command, "boilhyston") == 0) {
+        int8_t t = doc["data"];
+        set_hyst_on(t);
+        return;
+    }
+    if (strcmp(command, "boilhystoff") == 0) {
+        uint8_t t = doc["data"];
+        set_hyst_off(t);
+        return;
+    }
+    if (strcmp(command, "burnperiod") == 0) {
+        uint8_t t = doc["data"];
+        set_burn_period(t);
+        return;
+    }
+    if (strcmp(command, "pumpdelay") == 0) {
+        uint8_t t = doc["data"];
+        set_pump_delay(t);
         return;
     }
 }
@@ -216,7 +256,7 @@ void Boiler::device_info(JsonArray & root) {
 
 // publish values via MQTT
 void Boiler::publish_values() {
-    const size_t        capacity = JSON_OBJECT_SIZE(50); // must recalculate if more objects addded https://arduinojson.org/v6/assistant/
+    const size_t        capacity = JSON_OBJECT_SIZE(56); // must recalculate if more objects addded https://arduinojson.org/v6/assistant/
     DynamicJsonDocument doc(capacity);
 
     char s[10]; // for formatting strings
@@ -328,7 +368,7 @@ void Boiler::publish_values() {
         doc["flameCurr"] = (float)(int16_t)flameCurr_ / 10;
     }
     if (Helpers::hasValue(heatPmp_, VALUE_BOOL)) {
-        doc["heatPmp"] = Helpers::render_value(s, heatPmp_, EMS_VALUE_BOOL);
+        doc["heatPump"] = Helpers::render_value(s, heatPmp_, EMS_VALUE_BOOL);
     }
     if (Helpers::hasValue(fanWork_, VALUE_BOOL)) {
         doc["fanWork"] = Helpers::render_value(s, fanWork_, EMS_VALUE_BOOL);
@@ -340,13 +380,37 @@ void Boiler::publish_values() {
         doc["wWHeat"] = Helpers::render_value(s, wWHeat_, EMS_VALUE_BOOL);
     }
     if (Helpers::hasValue(heating_temp_)) {
-        doc["heating_temp"] = heating_temp_;
+        doc["heatingTemp"] = heating_temp_;
     }
     if (Helpers::hasValue(pump_mod_max_)) {
-        doc["pump_mod_max"] = pump_mod_max_;
+        doc["pumpModMax"] = pump_mod_max_;
     }
     if (Helpers::hasValue(pump_mod_min_)) {
-        doc["pump_mod_min"] = pump_mod_min_;
+        doc["pumpModMin"] = pump_mod_min_;
+    }
+    if (Helpers::hasValue(pumpDelay_)) {
+        doc["pumpDelay"] = pumpDelay_;
+    }
+    if (Helpers::hasValue(burnPeriod_)) {
+        doc["burnMinPeriod"] = burnPeriod_;
+    }
+    if (Helpers::hasValue(burnPowermin_)) {
+        doc["burnMinPower"] = burnPowermin_;
+    }
+    if (Helpers::hasValue(burnPowermax_)) {
+        doc["burnMaxPower"] = burnPowermax_;
+    }
+    if (Helpers::hasValue(boilTemp_on_)) {
+        doc["boilHystOn"] = boilTemp_on_;
+    }
+    if (Helpers::hasValue(boilTemp_off_)) {
+        doc["boilHystOff"] = boilTemp_off_;
+    }
+    if (Helpers::hasValue(setFlowTemp_)) {
+        doc["setFlowTemp"] = setFlowTemp_;
+    }
+    if (Helpers::hasValue(setWWPumpPow_)) {
+        doc["wWSetPumpPower"] = setWWPumpPow_;
     }
     if (Helpers::hasValue(wWStarts_)) {
         doc["wWStarts"] = wWStarts_;
@@ -366,17 +430,6 @@ void Boiler::publish_values() {
     if (Helpers::hasValue(heatWorkMin_)) {
         doc["heatWorkMin"] = heatWorkMin_;
     }
-
-    if (Helpers::hasValue(temp_)) {
-        doc["heatWorkMin"] = temp_;
-    }
-    if (Helpers::hasValue(maxpower_)) {
-        doc["heatWorkMin"] = maxpower_;
-    }
-    if (Helpers::hasValue(setpointpower_)) {
-        doc["heatWorkMin"] = setpointpower_;
-    }
-
     if (Helpers::hasValue(serviceCode_)) {
         doc["serviceCode"]       = serviceCodeChar_;
         doc["serviceCodeNumber"] = serviceCode_;
@@ -474,11 +527,17 @@ void Boiler::show_values(uuid::console::Shell & shell) {
     print_value(shell, 2, F("Heating temperature setting on the boiler"), heating_temp_, F_(degrees));
     print_value(shell, 2, F("Boiler circuit pump modulation max power"), pump_mod_max_, F_(percent));
     print_value(shell, 2, F("Boiler circuit pump modulation min power"), pump_mod_min_, F_(percent));
+    print_value(shell, 2, F("Boiler circuit pump delay time"), pumpDelay_, F("min"));
+    print_value(shell, 2, F("Boiler temp hysteresis on"), boilTemp_on_, F_(degrees));
+    print_value(shell, 2, F("Boiler temp hysteresis off"), boilTemp_off_, F_(degrees));
+    print_value(shell, 2, F("Boiler burner min period"), burnPeriod_, F("min"));
+    print_value(shell, 2, F("Boiler burner min power"), burnPowermin_, F_(percent));
+    print_value(shell, 2, F("Boiler burner max power"), burnPowermax_, F_(percent));
 
     // UBASetPoint - these may differ from the above
-    print_value(shell, 2, F("Boiler temp"), temp_, F_(degrees));
-    print_value(shell, 2, F("Max output power"), maxpower_, F_(percent));
-    print_value(shell, 2, F("Set power"), setpointpower_, F_(percent));
+    print_value(shell, 2, F("Set Flow temperature"), setFlowTemp_, F_(degrees));
+    print_value(shell, 2, F("Boiler burner set power"), setBurnPow_, F_(percent));
+    print_value(shell, 2, F("Warm Water pump set power"), setWWPumpPow_, F_(percent));
 
     // UBAMonitorSlow
     if (Helpers::hasValue(extTemp_)) {
@@ -591,6 +650,12 @@ void Boiler::process_UBATotalUptime(std::shared_ptr<const Telegram> telegram) {
  */
 void Boiler::process_UBAParameters(std::shared_ptr<const Telegram> telegram) {
     telegram->read_value(heating_temp_, 1);
+    telegram->read_value(burnPowermax_,2);
+    telegram->read_value(burnPowermin_,3);
+    telegram->read_value(boilTemp_off_,4);
+    telegram->read_value(boilTemp_on_,5);
+    telegram->read_value(burnPeriod_,6);
+    telegram->read_value(pumpDelay_,8);
     telegram->read_value(pump_mod_max_, 9);
     telegram->read_value(pump_mod_min_, 10);
 }
@@ -717,9 +782,9 @@ void Boiler::process_UBAOutdoorTemp(std::shared_ptr<const Telegram> telegram) {
 
 // UBASetPoint 0x1A
 void Boiler::process_UBASetPoints(std::shared_ptr<const Telegram> telegram) {
-    telegram->read_value(temp_, 0);           // boiler flow temp
-    telegram->read_value(maxpower_, 1);       // max output power in %
-    telegram->read_value(setpointpower_, 14); // ww pump speed/power?
+    telegram->read_value(setFlowTemp_, 0);  // boiler set temp from thermostat
+    telegram->read_value(setBurnPow_, 1);   // max output power in %
+    telegram->read_value(setWWPumpPow_, 2); // ww pump speed/power?
 }
 
 #pragma GCC diagnostic push
@@ -766,12 +831,6 @@ void Boiler::set_flow_temp(const uint8_t temperature) {
     write_command(EMS_TYPE_UBASetPoints, 0, temperature);
 }
 
-// set heating temp
-void Boiler::set_temp(const uint8_t temperature) {
-    LOG_INFO(F("Setting boiler temperature to %d C"), temperature);
-    write_command(EMS_TYPE_UBAParameters, 1, temperature);
-}
-
 // set min boiler output
 void Boiler::set_min_power(const uint8_t power) {
     LOG_INFO(F("Setting boiler min power to "), power);
@@ -782,6 +841,30 @@ void Boiler::set_min_power(const uint8_t power) {
 void Boiler::set_max_power(const uint8_t power) {
     LOG_INFO(F("Setting boiler max power to %d C"), power);
     write_command(EMS_TYPE_UBAParameters, 2, power);
+}
+
+// set oiler on hysteresis
+void Boiler::set_hyst_on(const uint8_t temp) {
+    LOG_INFO(F("Setting boiler hysteresis on to %d C"), temp);
+    write_command(EMS_TYPE_UBAParameters, 5, temp);
+}
+
+// set boiler off hysteresis
+void Boiler::set_hyst_off(const uint8_t temp) {
+    LOG_INFO(F("Setting boiler hysteresis off to %d C"), temp);
+    write_command(EMS_TYPE_UBAParameters, 4, temp);
+}
+
+// set min burner period
+void Boiler::set_burn_period(const uint8_t t) {
+    LOG_INFO(F("Setting burner min. period to %d min"), t);
+    write_command(EMS_TYPE_UBAParameters, 6, t);
+}
+
+// set pump delay
+void Boiler::set_pump_delay(const uint8_t t) {
+    LOG_INFO(F("Setting boiler pump delay to %d min"), t);
+    write_command(EMS_TYPE_UBAParameters, 8, t);
 }
 
 // 1=hot, 2=eco, 3=intelligent
@@ -886,14 +969,6 @@ void Boiler::console_commands(Shell & shell, unsigned int context) {
                                        flash_string_vector{F_(degrees_mandatory)},
                                        [=](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) {
                                            set_flow_temp(Helpers::atoint(arguments.front().c_str()));
-                                       });
-
-    EMSESPShell::commands->add_command(ShellContext::BOILER,
-                                       CommandFlags::ADMIN,
-                                       flash_string_vector{F_(temp)},
-                                       flash_string_vector{F_(degrees_mandatory)},
-                                       [=](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) {
-                                           set_temp(Helpers::atoint(arguments.front().c_str()));
                                        });
 
     EMSESPShell::commands->add_command(ShellContext::BOILER,
