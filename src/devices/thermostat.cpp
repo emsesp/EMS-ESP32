@@ -207,7 +207,17 @@ void Thermostat::device_info(JsonArray & root) {
             std::string mode_str(15, '\0');
             snprintf_P(&mode_str[0], mode_str.capacity() + 1, PSTR("%sMode"), hc_str.c_str());
             dataElement["name"]  = mode_str;
-            dataElement["value"] = mode_tostring(hc->get_mode(flags));
+            std::string modetype_str(20, '\0');
+            if (Helpers::hasValue(hc->summer_mode) && hc->summer_mode) {
+                snprintf_P(&modetype_str[0], modetype_str.capacity() + 1, PSTR("%s - summer"), mode_tostring(hc->get_mode(flags)).c_str());
+            } else if (Helpers::hasValue(hc->holiday_mode) && hc->holiday_mode) {
+                snprintf_P(&modetype_str[0], modetype_str.capacity() + 1, PSTR("%s - holiday"), mode_tostring(hc->get_mode(flags)).c_str());
+            } else if (Helpers::hasValue(hc->mode_type)) {
+                snprintf_P(&modetype_str[0], modetype_str.capacity() + 1, PSTR("%s - %s"), mode_tostring(hc->get_mode(flags)).c_str(), mode_tostring(hc->get_mode_type(flags)).c_str());
+            } else {
+                snprintf_P(&modetype_str[0], modetype_str.capacity() + 1, mode_tostring(hc->get_mode(flags)).c_str());
+            }
+            dataElement["value"] = modetype_str;
         }
     }
 }
@@ -301,7 +311,7 @@ void Thermostat::thermostat_cmd(const char * message) {
             set_holiday(holiday.c_str(), hc_num);
         }
     }
-
+    // commands without heatingcircuit
     if (nullptr != doc["wwmode"]) {
         std::string mode = doc["wwmode"];
         set_ww_mode(mode);
@@ -406,10 +416,10 @@ void Thermostat::thermostat_cmd(const char * message) {
 
     // check for commands like {"hc":2,"cmd":"temp","data":21}
     const char * command = doc["cmd"];
-    if (command == nullptr) {
+    if (command == nullptr || doc["data"] == nullptr) {
         return;
     }
-
+    // ok, we have command and data
     if (strcmp(command, "temp") == 0) {
         float f = doc["data"];
         if (f) {
@@ -595,7 +605,8 @@ void Thermostat::publish_values() {
         }
 
         // send this specific data using the thermostat_data topic
-        if ((mqtt_format_ == MQTT_format::SINGLE) || (mqtt_format_ == MQTT_format::HA)) {
+        // if ((mqtt_format_ == MQTT_format::SINGLE) || (mqtt_format_ == MQTT_format::HA)) {
+        if (mqtt_format_ != MQTT_format::NESTED) {
             Mqtt::publish("thermostat_data", doc);
             rootThermostat = doc.to<JsonObject>(); // clear object
         }
@@ -609,7 +620,8 @@ void Thermostat::publish_values() {
 
         has_data = true;
         // if the MQTT format is 'nested' or 'ha' then create the parent object hc<n>
-        if (mqtt_format_ != MQTT_format::SINGLE) {
+        // if (mqtt_format_ != MQTT_format::SINGLE) {
+        if ((mqtt_format_ == MQTT_format::NESTED) || (mqtt_format_ == MQTT_format::HA)) {
             char hc_name[10]; // hc{1-4}
             strlcpy(hc_name, "hc", 10);
             char s[3];
@@ -698,7 +710,8 @@ void Thermostat::publish_values() {
 
         // if format is single, send immediately and clear object for next hc
         // the topic will have the hc number appended
-        if (mqtt_format_ == MQTT_format::SINGLE) {
+        // if (mqtt_format_ == MQTT_format::SINGLE) {
+        if ((mqtt_format_ == MQTT_format::SINGLE) || (mqtt_format_ == MQTT_format::CUSTOM)) {
             char topic[30];
             char s[3];
             strlcpy(topic, "thermostat_data", 30);
@@ -717,9 +730,8 @@ void Thermostat::publish_values() {
     }
 
     // if we're using nested json, send all in one go under one topic called thermostat_data
+    // if ((mqtt_format_ == MQTT_format::NESTED) || (mqtt_format_ == MQTT_format::CUSTOM)) {
     if (mqtt_format_ == MQTT_format::NESTED) {
-        Mqtt::publish("thermostat_data", doc);
-    } else if (mqtt_format_ == MQTT_format::CUSTOM) {
         Mqtt::publish("thermostat_data", doc);
     }
 }
@@ -1030,7 +1042,7 @@ void Thermostat::show_values(uuid::console::Shell & shell) {
                 shell.printfln(F("  Display: time"));
             } else if (ibaMainDisplay_ == 7) {
                 shell.printfln(F("  Display: date"));
-            } else if (ibaMainDisplay_ == 9) {
+            } else if (ibaMainDisplay_ == 8) {
                 shell.printfln(F("  Display: smoke temperature"));
             }
         }
@@ -1209,7 +1221,7 @@ void Thermostat::process_EasyMonitor(std::shared_ptr<const Telegram> telegram) {
 void Thermostat::process_IBASettings(std::shared_ptr<const Telegram> telegram) {
     // 22 - display line on RC35
     telegram->read_value(ibaMainDisplay_,
-                         0); // display on Thermostat: 0 int. temp, 1 int. setpoint, 2 ext. temp., 3 burner temp., 4 ww temp, 5 functioning mode, 6 time, 7 data, 9 smoke temp
+                         0); // display on Thermostat: 0 int. temp, 1 int. setpoint, 2 ext. temp., 3 burner temp., 4 ww temp, 5 functioning mode, 6 time, 7 data, 8 smoke temp
     telegram->read_value(ibaLanguage_, 1);          // language on Thermostat: 0 german, 1 dutch, 2 french, 3 italian
     telegram->read_value(ibaCalIntTemperature_, 2); // offset int. temperature sensor, by * 0.1 Kelvin
     telegram->read_value(ibaBuildingType_, 6);      // building type: 0 = light, 1 = medium, 2 = heavy
@@ -1351,11 +1363,16 @@ void Thermostat::process_RCTime(std::shared_ptr<const Telegram> telegram) {
     if (flags() == EMS_DEVICE_FLAG_EASY) {
         return; // not supported
     }
-
+    if (telegram->message_length < 7) {
+        return;
+    }
+    if (telegram->message_data[7] & 0x0C) { // date and time not valid
+        set_datetime("NTP"); // set from NTP
+        return;
+    }
     if (datetime_.empty()) {
         datetime_.resize(25, '\0');
     }
-
     // render time to HH:MM:SS DD/MM/YYYY
     // had to create separate buffers because of how printf works
     char buf1[6];
@@ -1510,18 +1527,38 @@ void Thermostat::set_party(const uint8_t hrs, const uint8_t hc_num) {
     }
 }
 
-// set date&time as string hh:mm:ss-dd.mm.yyyy-dw-dst
+// set date&time as string hh:mm:ss-dd.mm.yyyy-dw-dst or "NTP" for setting to internet-time
 // dw - day of week (0..6), dst- summertime (0/1)
 void Thermostat::set_datetime(const char * dt) {
     uint8_t data[9];
-    data[0] = (dt[16] - '0') * 100 + (dt[17] - '0') * 10 + (dt[18] - '0'); // year
-    data[1] = (dt[12] - '0') * 10 + (dt[13] - '0');                        // month
-    data[2] = (dt[0] - '0') * 10 + (dt[1] - '0');                          // hour
-    data[3] = (dt[9] - '0') * 10 + (dt[10] - '0');                         // day
-    data[4] = (dt[3] - '0') * 10 + (dt[4] - '0');                          // min
-    data[5] = (dt[6] - '0') * 10 + (dt[7] - '0');                          // sec
-    data[6] = (dt[20] - '0');                                              // day of week
-    data[7] = (dt[22] - '0');                                              // summerime
+    if (strcmp(dt,"NTP") == 0) {
+        time_t  now = time(nullptr);
+        tm *    tm_ = localtime(&now);
+        if (tm_->tm_year < 110) { // no NTP time
+            LOG_WARNING(F("No NTP time. Cannot set RCtime"));
+            return;
+        }
+        data[0] = tm_->tm_year - 100; // Bosch counts from 2000
+        data[1] = tm_->tm_mon;
+        data[2] = tm_->tm_hour;
+        data[3] = tm_->tm_mday;
+        data[4] = tm_->tm_min;
+        data[5] = tm_->tm_sec;
+        data[6] = (tm_->tm_wday + 6) % 7; // Bosch counts from Mo, time from Su
+        data[7] = tm_->tm_isdst + 2;      // set DST and flag for ext. clock
+        char time_string[25];
+        strftime(time_string, 25, "%FT%T%z", tm_);
+        LOG_INFO(F("Date and time: %s"), time_string);
+    } else {
+        data[0] = (dt[16] - '0') * 100 + (dt[17] - '0') * 10 + (dt[18] - '0'); // year
+        data[1] = (dt[12] - '0') * 10 + (dt[13] - '0');                        // month
+        data[2] = (dt[0] - '0') * 10 + (dt[1] - '0');                          // hour
+        data[3] = (dt[9] - '0') * 10 + (dt[10] - '0');                         // day
+        data[4] = (dt[3] - '0') * 10 + (dt[4] - '0');                          // min
+        data[5] = (dt[6] - '0') * 10 + (dt[7] - '0');                          // sec
+        data[6] = (dt[20] - '0');                                              // day of week
+        data[7] = (dt[22] - '0') + 2;                                          // DST and flag
+    }
     if ((flags() & 0x0F) == EMS_DEVICE_FLAG_RC35 || (flags() & 0x0F) == EMS_DEVICE_FLAG_RC30_1) {
         LOG_INFO(F("Setting date and time"));
         write_command(6, 0, data, 8, 0);
