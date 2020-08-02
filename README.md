@@ -100,7 +100,6 @@ boiler
 	wwonetime <on | off>
 	wwtemp <degrees>
 	read <type ID>
-  temp <degrees>
   maxpower <%>
   minpower <%>
 
@@ -113,6 +112,61 @@ thermostat
 ```
   
 ----------
+### **mqtt commands**
+
+commands can be written as `{"cmd": ,"data": }` or direct.
+To set thermostat commands depending on heatingcircuits add `"hc": ` or nest the command. Without `"hc":` the first ative heatingcircuit is set.
+These commands are equivalent:
+`{"hc":2,"cmd":"daytemp","data":21}` or `{"hc":2,"daytemp":21}`or `{"hc2"{"daytemp":21}}`
+In direct commands it's possible to combine commands, i.e. `{"hc1":{"daytemp":21,"nighttemp":17},"hc2":{"daytemp":20}}`
+```
+*boiler_cmd*
+  comfort <hot, eco, intelligent>
+  flowtemp <degrees>
+  wwtemp <degrees>
+  boilhyston <degrees> (negative value)
+  boilhystoff <degrees> (positive value)
+  burnperiod <minutes>
+  burnminpower <%>
+  burnmaxpower <%>
+  pumpdelay <minutes>
+
+*thermostat_cmd*
+--- without hc ---
+  wwmode <off | on | auto>
+  calinttemp <degrees>
+  minexttemp <degrees>
+  building <light | medium | heavy>
+  language <n> (0=de, 1=nl, 2=fr, 3=it) only RC30
+  display <n>  (0=int temp, 1= int set, 2=ext. temp, 3=burner, 4=ww, 5=mode, 6=time, 7=date, 8=smoke) only RC30
+  clockoffset <seconds>    (only RC30)
+--- with hc ---
+  mode <auto | night | day | nofrost | heat | eco>
+  temp <degrees>
+  nighttemp <degrees>
+  daytemp <degrees>
+  nofrosttemp <degrees>
+  ecotemp <degrees>
+  heattemp <degrees>
+  summertemp <degrees>
+  designtemp <degrees>
+  offsettemp <degrees>
+  holidaytemp <degrees>
+  remotetemp <degrees>
+  control <0 | 1 | 2>
+  pause <hours>
+  party <hours>
+  holiday <dd.mm.yyyy-dd.mm.yyyy>
+  date <NTP | hh:mm:ss-dd.mm.yyyy-dw-dst>
+
+*cmd*
+  send <"0B XX XX ..">
+  D0 <0 | 1>
+  D1 <0 | 1>
+  D2 <0 | 1>
+  D3 <0 | 1>
+
+```
 
 ### **Basic Design Principles**
 

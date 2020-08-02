@@ -46,20 +46,25 @@
 #define EMS_TXMODE_NEW 4 // for michael's testing
 
 // LEGACY
-#define EMSUART_TX_BIT_TIME 104                        // bit time @9600 baud
-#define EMSUART_TX_WAIT_BRK (EMSUART_TX_BIT_TIME * 10) // 10 bt
-#define EMSUART_TX_WAIT_REPLY 100000                   // delay 100ms after first byte
+#define EMSUART_TX_BIT_TIME 104                             // bit time @9600 baud
+
+// Timer controlled modes
+#define EMSUART_TX_BRK_TIMER (EMSUART_TX_BIT_TIME * 10 + 28) // 10.25 bit times
+#define EMSUART_TX_WAIT_REPLY 100000                         // delay 100ms after first byte
 
 // EMS 1.0
 #define EMSUART_TX_BUSY_WAIT (EMSUART_TX_BIT_TIME / 8)                       // 13
-#define EMSUART_TX_TIMEOUT (32 * EMSUART_TX_BIT_TIME / EMSUART_TX_BUSY_WAIT) // 256
+#define EMSUART_TX_TIMEOUT (20 * EMSUART_TX_BIT_TIME / EMSUART_TX_BUSY_WAIT)
+#define EMSUART_TX_BRK_EMS (EMSUART_TX_BIT_TIME * 10)
 
 // HT3/Junkers - Time to send one Byte (8 Bits, 1 Start Bit, 1 Stop Bit) plus 7 bit delay. The -8 is for lag compensation.
 // since we use a faster processor the lag is negligible
 #define EMSUART_TX_WAIT_HT3 (EMSUART_TX_BIT_TIME * 17) // 1768
+#define EMSUART_TX_BRK_HT3 (EMSUART_TX_BIT_TIME * 11)
 
 // EMS+ - Time to send one Byte (8 Bits, 1 Start Bit, 1 Stop Bit) and delay of another Bytetime.
 #define EMSUART_TX_WAIT_PLUS (EMSUART_TX_BIT_TIME * 20) // 2080
+#define EMSUART_TX_BRK_PLUS (EMSUART_TX_BIT_TIME * 11)
 
 
 // customize the GPIO pins for RX and TX here
@@ -91,7 +96,6 @@ class EMSuart {
     static void           emsuart_recvTask(void * para);
     static void IRAM_ATTR emsuart_rx_intr_handler(void * para);
     static void IRAM_ATTR emsuart_tx_timer_intr_handler();
-    static void           tx_brk();
 };
 
 } // namespace emsesp

@@ -23,6 +23,12 @@
 
 MAKE_PSTR(logger_name, "sensors")
 
+#ifdef ESP32
+#define YIELD
+#else
+#define YIELD yield()
+#endif
+
 namespace emsesp {
 
 uuid::log::Logger Sensors::logger_{F_(logger_name), uuid::log::Facility::DAEMON};
@@ -63,7 +69,7 @@ void Sensors::loop() {
         if (time_now - last_activity_ >= READ_INTERVAL_MS) {
             // LOG_DEBUG(F("Read sensor temperature")); // uncomment for debug
             if (bus_.reset()) {
-                yield();
+                YIELD;
                 bus_.skip();
                 bus_.write(CMD_CONVERT_TEMP);
 
@@ -155,17 +161,17 @@ float Sensors::get_temperature_c(const uint8_t addr[]) {
         LOG_ERROR(F("Bus reset failed before reading scratchpad from %s"), Device(addr).to_string().c_str());
         return NAN;
     }
-    yield();
+    YIELD;
     uint8_t scratchpad[SCRATCHPAD_LEN] = {0};
     bus_.select(addr);
     bus_.write(CMD_READ_SCRATCHPAD);
     bus_.read_bytes(scratchpad, SCRATCHPAD_LEN);
-    yield();
+    YIELD;
     if (!bus_.reset()) {
         LOG_ERROR(F("Bus reset failed after reading scratchpad from %s"), Device(addr).to_string().c_str());
         return NAN;
     }
-    yield();
+    YIELD;
     if (bus_.crc8(scratchpad, SCRATCHPAD_LEN - 1) != scratchpad[SCRATCHPAD_LEN - 1]) {
         LOG_WARNING(F("Invalid scratchpad CRC: %02X%02X%02X%02X%02X%02X%02X%02X%02X from device %s"),
                     scratchpad[0],
@@ -202,7 +208,8 @@ float Sensors::get_temperature_c(const uint8_t addr[]) {
         break;
     }
 
-    return (float)raw_value / 16;
+    uint32_t raw = (raw_value *625) / 100; // round to 0.01
+    return (float)raw / 100;
 #else
     return NAN;
 #endif

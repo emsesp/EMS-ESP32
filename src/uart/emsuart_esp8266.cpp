@@ -95,10 +95,10 @@ void ICACHE_RAM_ATTR EMSuart::emsuart_tx_timer_intr_handler() {
         timer1_write(emsTxWait);
     } else if (emsTxBufIdx == emsTxBufLen) {
         USC0(EMSUART_UART) |= (1 << UCBRK); // set <BRK>
-        timer1_write(EMSUART_TX_WAIT_BRK * 5);
+        timer1_write(EMSUART_TX_BRK_TIMER);
     } else {
         USC0(EMSUART_UART) &= ~(1 << UCBRK); // reset <BRK>
-        sending_     = false;
+        sending_           = false;
     }
 }
 
@@ -114,11 +114,6 @@ void ICACHE_FLASH_ATTR EMSuart::emsuart_flush_fifos() {
  * init UART0 driver
  */
 void ICACHE_FLASH_ATTR EMSuart::start(uint8_t tx_mode) {
-    if (tx_mode_ > 100) {
-        emsTxWait = 5 * EMSUART_TX_BIT_TIME * (tx_mode - 90);
-    } else {
-        emsTxWait = 5 * EMSUART_TX_BIT_TIME * (tx_mode + 10); // bittimes wait to next bytes
-    }
     if (tx_mode_ != 0xFF) { // it's a restart no need to configure uart
         tx_mode_ = tx_mode;
         restart();
@@ -133,7 +128,6 @@ void ICACHE_FLASH_ATTR EMSuart::start(uint8_t tx_mode) {
     }
     pEMSRxBuf = paEMSRxBuf[0]; // reset EMS Rx Buffer
 
-    ETS_UART_INTR_DISABLE();
     ETS_UART_INTR_ATTACH(nullptr, nullptr);
 
     // pin settings
@@ -153,21 +147,13 @@ void ICACHE_FLASH_ATTR EMSuart::start(uint8_t tx_mode) {
     // UCFFT = RX FIFO Full Threshold (7 bit) = want this to be 31 for 32 bytes of buffer (default was 127)
     // see https://www.espressif.com/sites/default/files/documentation/esp8266-technical_reference_en.pdf
     //
-    // change: we set UCFFT to 1 to get an immediate indicator about incoming traffic.
-    //         Otherwise, we're only noticed by UCTOT or RxBRK!
     // change: don't care, we do not use these interrupts
-    USC1(EMSUART_UART) = 0; // reset config first
+    USC1(EMSUART_UART) = 0; // reset config
     // USC1(EMSUART_UART) = (0x7F << UCFFT) | (0x01 << UCTOT) | (1 << UCTOE); // enable interupts
 
     // set interrupts for triggers
     USIC(EMSUART_UART) = 0xFFFF; // clear all interupts
     USIE(EMSUART_UART) = 0;      // disable all interrupts
-
-    // enable rx break, fifo full and timeout.
-    // but not frame error UIFR (because they are too frequent) or overflow UIOF because our buffer is only max 32 bytes
-    // change: we don't care about Rx Timeout - it may lead to wrong readouts
-    // change:we don't care about Fifo full and read only on break-detect
-    USIE(EMSUART_UART) = (1 << UIBD) | (0 << UIFF) | (0 << UITO);
 
     // set up interrupt callbacks for Rx
     system_os_task(emsuart_recvTask, EMSUART_recvTaskPrio, recvTaskQueue, EMSUART_recvTaskQueueLen);
@@ -182,10 +168,9 @@ void ICACHE_FLASH_ATTR EMSuart::start(uint8_t tx_mode) {
     drop_next_rx = true;
 
     // for sending with large delay in EMS+ mode we use a timer interrupt
-    timer1_attachInterrupt(emsuart_tx_timer_intr_handler); // Add ISR Function
-    timer1_enable(TIM_DIV16, TIM_EDGE, TIM_SINGLE);        // 5 MHz timer
-    ETS_UART_INTR_ENABLE();
-    USIE(EMSUART_UART) = (1 << UIBD);
+    timer1_attachInterrupt(emsuart_tx_timer_intr_handler);
+
+    restart();
 }
 
 /*
@@ -204,67 +189,25 @@ void ICACHE_FLASH_ATTR EMSuart::stop() {
  */
 void ICACHE_FLASH_ATTR EMSuart::restart() {
     if (USIR(EMSUART_UART) & ((1 << UIBD))) {
-        USIC(EMSUART_UART) = (1 << UIBD); // INT clear the BREAK detect interrupt
+        USIC(EMSUART_UART) = (1 << UIBD); // INT clear the <brk> detect interrupt
         drop_next_rx       = true;
+    }
+    if (tx_mode_ > 100) {
+        emsTxWait = 5 * EMSUART_TX_BIT_TIME * (tx_mode_ - 90);
+    } else {
+        emsTxWait = 5 * EMSUART_TX_BIT_TIME * (tx_mode_ + 10); // bittimes wait to next bytes
     }
     emsTxBufIdx = 0;
     emsTxBufLen = 0;
     timer1_enable(TIM_DIV16, TIM_EDGE, TIM_SINGLE);
-    USIE(EMSUART_UART) = (1 << UIBD);
-}
-
-/*
- * Send a BRK signal
- * Which is a 11-bit set of zero's (11 cycles)
- */
-void ICACHE_FLASH_ATTR EMSuart::tx_brk() {
-    // make sure Tx FIFO is empty
-    while (((USS(EMSUART_UART) >> USTXC) & 0xFF)) {
-    }
-    USC0(EMSUART_UART) |= (1 << UCBRK); // set bit
-    // also for EMS+ there is no need to wait longer, we are finished and can free the bus.
-    delayMicroseconds(EMSUART_TX_WAIT_BRK); // 1144
-    USC0(EMSUART_UART) &= ~(1 << UCBRK); // clear BRK bit
+    USIE(EMSUART_UART) = (1 << UIBD); // enable <brk> interrupt
 }
 
 /*
  * Sends a 1-byte poll, ending with a <BRK>
- * It's a bit dirty. there is no special wait logic per tx_mode type, fifo flushes or error checking
  */
-void EMSuart::send_poll(uint8_t data) {
-    // reset tx-brk, just in case it is accidentally set
-    USC0(EMSUART_UART) &= ~(1 << UCBRK);
-    sending_ = true;
-
-    if (tx_mode_ >= 5) { // timer controlled modes
-        emsTxBuf[0] = data;
-        emsTxBufIdx = 0;
-        emsTxBufLen = 1;
-        timer1_write(emsTxWait);
-    } else if (tx_mode_ == EMS_TXMODE_NEW) { // hardware controlled modes
-        USF(EMSUART_UART) = data;
-        USC0(EMSUART_UART) |= (1 << UCBRK);
-    } else if (tx_mode_ == EMS_TXMODE_HT3) {
-        USF(EMSUART_UART) = data;
-        delayMicroseconds(EMSUART_TX_WAIT_HT3);
-        tx_brk(); // send <BRK>
-        sending_     = false;
-    } else if (tx_mode_ == EMS_TXMODE_EMSPLUS) {
-        USF(EMSUART_UART) = data;
-        delayMicroseconds(EMSUART_TX_WAIT_PLUS);
-        tx_brk(); // send <BRK>
-        sending_     = false;
-    } else {
-        // tx_mode 1
-        volatile uint8_t _usrxc = (USS(EMSUART_UART) >> USRXC) & 0xFF;
-        USF(EMSUART_UART)       = data;
-        uint16_t timeoutcnt     = EMSUART_TX_TIMEOUT;
-        while ((((USS(EMSUART_UART) >> USRXC) & 0xFF) == _usrxc) && (--timeoutcnt > 0)) {
-            delayMicroseconds(EMSUART_TX_BUSY_WAIT); // burn CPU cycles...
-        }
-        tx_brk(); // send <BRK>
-        sending_     = false;
-    }
+void ICACHE_FLASH_ATTR EMSuart::send_poll(uint8_t data) {
+    transmit(&data, 1);
 }
 
 /*
@@ -276,20 +219,18 @@ uint16_t ICACHE_FLASH_ATTR EMSuart::transmit(uint8_t * buf, uint8_t len) {
     if (len == 0 || len >= EMS_MAXBUFFERSIZE) {
         return EMS_TX_STATUS_ERR; // nothing or to much to send
     }
-    // reset tx-brk, just in case it is accidentally set
-    USC0(EMSUART_UART) &= ~(1 << UCBRK);
-    sending_ = true;
 
     // timer controlled modes with extra delay
     if (tx_mode_ >= 5) {
+        sending_ = true;
         for (uint8_t i = 0; i < len; i++) {
             emsTxBuf[i] = buf[i];
         }
         USF(EMSUART_UART) = buf[0]; // send first byte
         emsTxBufIdx = 0;
         emsTxBufLen = len;
-        if (tx_mode_ > 100) {
-            timer1_write(EMSUART_TX_WAIT_REPLY);
+        if (tx_mode_ > 100 && len > 1) {
+            timer1_write(EMSUART_TX_WAIT_REPLY); // large delay after first byte
         } else {
             timer1_write(emsTxWait);
         }
@@ -301,7 +242,7 @@ uint16_t ICACHE_FLASH_ATTR EMSuart::transmit(uint8_t * buf, uint8_t len) {
         for (uint8_t i = 0; i < len; i++) {
             USF(EMSUART_UART) = buf[i];
         }
-        USC0(EMSUART_UART) |= (1 << UCBRK); // send <BRK> at the end
+        USC0(EMSUART_UART) |= (1 << UCBRK); // send <BRK> at the end, clear by interrupt
         return EMS_TX_STATUS_OK;
     }
 
@@ -311,8 +252,9 @@ uint16_t ICACHE_FLASH_ATTR EMSuart::transmit(uint8_t * buf, uint8_t len) {
             USF(EMSUART_UART) = buf[i];
             delayMicroseconds(EMSUART_TX_WAIT_PLUS); // 2070
         }
-        tx_brk(); // send <BRK>
-        sending_     = false;
+        USC0(EMSUART_UART) |= (1 << UCBRK); // set break
+        delayMicroseconds(EMSUART_TX_BRK_PLUS);
+        USC0(EMSUART_UART) &= ~(1 << UCBRK);
         return EMS_TX_STATUS_OK;
     }
 
@@ -326,8 +268,9 @@ uint16_t ICACHE_FLASH_ATTR EMSuart::transmit(uint8_t * buf, uint8_t len) {
             // wait until bits are sent on wire
             delayMicroseconds(EMSUART_TX_WAIT_HT3);
         }
-        tx_brk(); // send <BRK>
-        sending_     = false;
+        USC0(EMSUART_UART) |= (1 << UCBRK); // set break bit
+        delayMicroseconds(EMSUART_TX_BRK_HT3);
+        USC0(EMSUART_UART) &= ~(1 << UCBRK);
         return EMS_TX_STATUS_OK;
     }
 
@@ -356,9 +299,7 @@ uint16_t ICACHE_FLASH_ATTR EMSuart::transmit(uint8_t * buf, uint8_t len) {
      * 
      */
 
-    // disable rx interrupt
     // clear Rx status register, resetting the Rx FIFO and flush it
-    // ETS_UART_INTR_DISABLE();
     emsuart_flush_fifos();
 
     // send the bytes along the serial line
@@ -371,18 +312,9 @@ uint16_t ICACHE_FLASH_ATTR EMSuart::transmit(uint8_t * buf, uint8_t len) {
             delayMicroseconds(EMSUART_TX_BUSY_WAIT); // burn CPU cycles...
         }
     }
-
-    // we got the whole telegram in the Rx buffer
-    // on Rx-BRK (bus collision), we simply enable Rx and leave it
-    // otherwise we send the final Tx-BRK 
-    // worst case, we'll see an additional Rx-BRK...
-    // neither bus collision nor timeout - send terminating BRK signal
-    if (!(USIS(EMSUART_UART) & (1 << UIBD))) {
-        // no bus collision - send terminating BRK signal
-        tx_brk();
-    }
-    // ETS_UART_INTR_ENABLE();  // open up the FIFO again to start receiving
-    sending_     = false;
+    USC0(EMSUART_UART) |= (1 << UCBRK); // snd break
+    delayMicroseconds(EMSUART_TX_BRK_EMS);
+    USC0(EMSUART_UART) &= ~(1 << UCBRK);
     return EMS_TX_STATUS_OK; // send the Tx ok status back
 }
 
