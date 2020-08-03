@@ -141,8 +141,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
     // if we're on auto mode, register this thermostat if it has a device id of 0x10 or 0x17
     // or if its the master thermostat we defined
     // see https://github.com/proddy/EMS-ESP/issues/362#issuecomment-629628161
-    if (((num_devices == 1) && (actual_master_thermostat == EMSESP_DEFAULT_MASTER_THERMOSTAT) && ((device_id == 0x10) || (device_id == 0x17)))
-        || (master_thermostat == device_id)) {
+    if (((num_devices == 1) && (actual_master_thermostat == EMSESP_DEFAULT_MASTER_THERMOSTAT)) || (master_thermostat == device_id)) {
         EMSESP::actual_master_thermostat(device_id);
         LOG_DEBUG(F("Registering new thermostat with device ID 0x%02X (as master)"), device_id);
         init_mqtt();
@@ -427,8 +426,6 @@ void Thermostat::thermostat_cmd(const char * message) {
         }
         return;
     }
-
-    // thermostat mode changes
     if (strcmp(command, "mode") == 0) {
         std::string mode = doc["data"];
         if (mode.empty()) {
@@ -437,7 +434,6 @@ void Thermostat::thermostat_cmd(const char * message) {
         set_mode(mode, hc_num);
         return;
     }
-
     if (strcmp(command, "nighttemp") == 0) {
         float f = doc["data"];
         if (f) {
@@ -445,7 +441,6 @@ void Thermostat::thermostat_cmd(const char * message) {
         }
         return;
     }
-
     if (strcmp(command, "daytemp") == 0) {
         float f = doc["data"];
         if (f) {
@@ -453,7 +448,6 @@ void Thermostat::thermostat_cmd(const char * message) {
         }
         return;
     }
-
     if (strcmp(command, "holidaytemp") == 0) {
         float f = doc["data"];
         if (f) {
@@ -461,7 +455,6 @@ void Thermostat::thermostat_cmd(const char * message) {
         }
         return;
     }
-
     if (strcmp(command, "ecotemp") == 0) {
         float f = doc["data"];
         if (f) {
@@ -469,7 +462,6 @@ void Thermostat::thermostat_cmd(const char * message) {
         }
         return;
     }
-
     if (strcmp(command, "heattemp") == 0) {
         float f = doc["data"];
         if (f) {
@@ -477,7 +469,6 @@ void Thermostat::thermostat_cmd(const char * message) {
         }
         return;
     }
-
     if (strcmp(command, "nofrosttemp") == 0) {
         float f = doc["data"];
         if (f) {
@@ -485,7 +476,6 @@ void Thermostat::thermostat_cmd(const char * message) {
         }
         return;
     }
-
     if (strcmp(command, "summertemp") == 0) {
         float f = doc["data"];
         if (f) {
@@ -493,7 +483,6 @@ void Thermostat::thermostat_cmd(const char * message) {
         }
         return;
     }
-
     if (strcmp(command, "designtemp") == 0) {
         float f = doc["data"];
         if (f) {
@@ -501,12 +490,45 @@ void Thermostat::thermostat_cmd(const char * message) {
         }
         return;
     }
-
     if (strcmp(command, "offsettemp") == 0) {
         float f = doc["data"];
         if (f) {
             set_temperature(f, HeatingCircuit::Mode::OFFSET, hc_num);
         }
+        return;
+    }
+    if (strcmp(command, "remotetemp") == 0) {
+        float f = doc["data"];
+        if (f > 100 || f < 0) {
+            Roomctrl::set_remotetemp(hc_num - 1, EMS_VALUE_SHORT_NOTSET);
+        } else {
+            Roomctrl::set_remotetemp(hc_num - 1, (int16_t)(f * 10));
+        }
+        return;
+    }
+    if (strcmp(command, "control") == 0) {
+        uint8_t ctrl = doc["data"];
+        set_control(ctrl, hc_num);
+        return;
+    }
+    if (strcmp(command, "pause") == 0) {
+        uint8_t p = doc["data"];
+        set_pause(p, hc_num);
+        return;
+    }
+    if (strcmp(command, "party") == 0) {
+        uint8_t p = doc["data"];
+        set_party(p, hc_num);
+        return;
+    }
+    if (strcmp(command, "holiday") == 0) {
+        std::string holiday = doc["data"];
+        set_holiday(holiday.c_str(), hc_num);
+        return;
+    }
+    if (strcmp(command, "date") == 0) {
+        std::string date = doc["data"];
+        set_datetime(date.c_str());
         return;
     }
 }
