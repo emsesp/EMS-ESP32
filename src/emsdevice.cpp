@@ -339,11 +339,19 @@ void EMSdevice::print_value(uuid::console::Shell & shell, uint8_t padding, const
 
 // given a context, automatically add the commands taken them from the MQTT registry for "<device_type>_cmd" topics
 void EMSdevice::add_context_commands(unsigned int context) {
+    // if we're adding commands for a thermostat or mixing, then include an additional optional paramter called heating circuit
+    flash_string_vector params;
+    if ((context == ShellContext::THERMOSTAT) || (context == ShellContext::MIXING)) {
+        params = flash_string_vector{F_(cmd_optional), F_(data_optional), F_(hc_optional)};
+    } else {
+        params = flash_string_vector{F_(cmd_optional), F_(data_optional)};
+    }
+
     EMSESPShell::commands->add_command(
         context,
         CommandFlags::ADMIN,
         flash_string_vector{F_(call)},
-        flash_string_vector{F_(cmd_optional), F_(data_optional), F_(id_optional)},
+        params,
         [&](Shell & shell, const std::vector<std::string> & arguments) {
             uint8_t device_type_ = device_type();
             if (arguments.empty()) {

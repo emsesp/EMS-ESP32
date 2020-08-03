@@ -160,7 +160,7 @@ class Boiler : public EMSdevice {
 
     void check_active();
 
-    // commands
+    // commands - none of these use the additional id parameter
     void set_warmwater_mode(const char * value, const int8_t id);
     void set_warmwater_activated(const char * value, const int8_t id);
     void set_tapwarmwater_activated(const char * value, const int8_t id);
