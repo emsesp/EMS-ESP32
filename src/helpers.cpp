@@ -17,7 +17,6 @@
  */
 
 #include "helpers.h"
-#include "telegram.h" // for EMS_VALUE_* settings
 
 namespace emsesp {
 
@@ -329,9 +328,9 @@ bool Helpers::check_abs(const int32_t i) {
     return ((i < 0 ? -i : i) != 0xFFFFFF);
 }
 
-// for booleans, use isBool true (VALUE_BOOL)
-bool Helpers::hasValue(const uint8_t v, bool isBool) {
-    if (isBool) {
+// for booleans, use isBool true (EMS_VALUE_BOOL)
+bool Helpers::hasValue(const uint8_t v, const uint8_t isBool) {
+    if (isBool == EMS_VALUE_BOOL) {
         return (v != EMS_VALUE_BOOL_NOTSET);
     }
     return (v != EMS_VALUE_UINT_NOTSET);
@@ -352,6 +351,63 @@ bool Helpers::hasValue(const uint16_t v) {
 
 bool Helpers::hasValue(const uint32_t v) {
     return (v != EMS_VALUE_ULONG_NOTSET);
+}
+
+// checks if we can convert a char string to an int value
+bool Helpers::value2number(const char * v, int value) {
+    if ((v == nullptr) || (strlen(v) == 0)) {
+        value = 0;
+        return false;
+    }
+    value = atoi((char *)v);
+    return true;
+}
+
+// checks if we can convert a char string to a float value
+bool Helpers::value2float(const char * v, float value) {
+    if ((v == nullptr) || (strlen(v) == 0)) {
+        value = 0;
+        return false;
+    }
+    value = atof((char *)v);
+    return true;
+}
+
+// https://stackoverflow.com/questions/313970/how-to-convert-stdstring-to-lower-case
+std::string Helpers::toLower(std::string const & s) {
+    std::string lc = s;
+    std::transform(lc.begin(), lc.end(), lc.begin(), [](unsigned char c) { return std::tolower(c); });
+    return lc;
+}
+
+// checks if we can convert a chat string to an int value
+bool Helpers::value2string(const char * v, std::string & value) {
+    if ((v == nullptr) || (strlen(v) == 0)) {
+        value = {};
+        return false;
+    }
+    value = toLower(v);
+    return true;
+}
+
+// checks to see if a string (usually a command or payload cmd) looks like a boolean
+// on, off, true, false, 1, 0
+bool Helpers::value2bool(const char * v, uint8_t value) {
+    if ((v == nullptr) || (strlen(v) == 0)) {
+        return false;
+    }
+
+    if ((strncmp(v, "on", 2) == 0) || (strncmp(v, "1", 1) == 0) || (strncmp(v, "true", 4) == 0)) {
+        value = true;
+        return true;
+    }
+
+    if ((strncmp(v, "off", 3) == 0) || (strncmp(v, "0", 1) == 0) || (strncmp(v, "false", 5) == 0)) {
+        value = false;
+        return true;
+    }
+
+    return false;
 }
 
 } // namespace emsesp

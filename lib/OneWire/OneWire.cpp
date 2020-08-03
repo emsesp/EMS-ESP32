@@ -202,7 +202,7 @@ uint8_t OneWire::reset(void) {
 #ifdef ARDUINO_ARCH_ESP32
 void IRAM_ATTR OneWire::write_bit(uint8_t v) {
 #else
-void OneWire::write_bit(uint8_t v) {
+void    OneWire::write_bit(uint8_t v) {
 #endif
     IO_REG_TYPE mask           IO_REG_MASK_ATTR = bitmask;
     volatile IO_REG_TYPE * reg IO_REG_BASE_ATTR = baseReg;

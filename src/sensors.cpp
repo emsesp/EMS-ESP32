@@ -16,12 +16,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// code written by nomis - https://github.com/nomis
+// code originally written by nomis - https://github.com/nomis
 
 #include "sensors.h"
 #include "emsesp.h"
-
-MAKE_PSTR(logger_name, "sensors")
 
 #ifdef ESP32
 #define YIELD
@@ -31,7 +29,7 @@ MAKE_PSTR(logger_name, "sensors")
 
 namespace emsesp {
 
-uuid::log::Logger Sensors::logger_{F_(logger_name), uuid::log::Facility::DAEMON};
+uuid::log::Logger Sensors::logger_{F_(sensors), uuid::log::Facility::DAEMON};
 
 void Sensors::start() {
     // copy over values from MQTT so we don't keep on quering the filesystem
@@ -206,7 +204,7 @@ float Sensors::get_temperature_c(const uint8_t addr[]) {
         break;
     }
 
-    uint32_t raw = (raw_value *625) / 100; // round to 0.01
+    uint32_t raw = (raw_value * 625) / 100; // round to 0.01
     return (float)raw / 100;
 #else
     return NAN;

@@ -91,6 +91,12 @@ void EMSESPShell::display_banner() {
     // turn off watch
     emsesp::EMSESP::watch_id(WATCH_ID_NONE);
     emsesp::EMSESP::watch(EMSESP::WATCH_OFF);
+
+#if defined(EMSESP_STANDALONE)
+#ifdef RUN_TEST
+    invoke_command("test"); // "test default"
+#endif
+#endif
 }
 
 // pre-loads all the console commands into the MAIN context
@@ -285,11 +291,15 @@ void Console::enter_custom_context(Shell & shell, unsigned int context) {
 void Console::load_standard_commands(unsigned int context) {
 #ifdef EMSESP_STANDALONE
     EMSESPShell::commands->add_command(context,
-                                       CommandFlags::ADMIN,
+                                       CommandFlags::USER,
                                        flash_string_vector{F_(test)},
-                                       flash_string_vector{F_(name_mandatory)},
+                                       flash_string_vector{F_(name_optional)},
                                        [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
-                                           Test::run_test(shell, arguments.front());
+                                           if (arguments.size() == 0) {
+                                               Test::run_test(shell, "default");
+                                           } else {
+                                               Test::run_test(shell, arguments.front());
+                                           }
                                        });
 #endif
 

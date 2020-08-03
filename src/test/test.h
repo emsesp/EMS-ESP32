@@ -36,8 +36,6 @@
 #include "mqtt.h"
 #include "emsesp.h"
 
-MAKE_PSTR_WORD(test)
-
 namespace emsesp {
 
 class Test {

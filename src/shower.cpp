@@ -18,11 +18,9 @@
 
 #include "shower.h"
 
-MAKE_PSTR(logger_name, "shower")
-
 namespace emsesp {
 
-uuid::log::Logger Shower::logger_{F_(logger_name), uuid::log::Facility::CONSOLE};
+uuid::log::Logger Shower::logger_{F_(shower), uuid::log::Facility::CONSOLE};
 
 void Shower::start() {
     EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) {

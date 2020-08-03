@@ -18,19 +18,15 @@
 
 #include "solar.h"
 
-MAKE_PSTR(kwh, "kWh")
-MAKE_PSTR(wh, "Wh")
-
 namespace emsesp {
 
 REGISTER_FACTORY(Solar, EMSdevice::DeviceType::SOLAR);
 
-MAKE_PSTR(logger_name, "solar")
-uuid::log::Logger Solar::logger_{F_(logger_name), uuid::log::Facility::CONSOLE};
+uuid::log::Logger Solar::logger_{F_(solar), uuid::log::Facility::CONSOLE};
 
 Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const std::string & version, const std::string & name, uint8_t flags, uint8_t brand)
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
-    LOG_DEBUG(F("Registering new Solar module with device ID 0x%02X"), device_id);
+    LOG_DEBUG(F("Adding new Solar module with device ID 0x%02X"), device_id);
 
     // telegram handlers
     if (flags == EMSdevice::EMS_DEVICE_FLAG_SM10) {
@@ -49,9 +45,6 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
         register_telegram_type(0x0103, F("ISM1StatusMessage"), true, std::bind(&Solar::process_ISM1StatusMessage, this, _1));
         register_telegram_type(0x0101, F("ISM1Set"), false, std::bind(&Solar::process_ISM1Set, this, _1));
     }
-
-    // MQTT callbacks
-    // register_mqtt_topic("topic", std::bind(&Solar::cmd, this, _1));
 }
 
 // context submenu
@@ -105,6 +98,8 @@ void Solar::show_values(uuid::console::Shell & shell) {
     print_value(shell, 2, F("Energy last hour"), energyLastHour_, F_(wh), 10);
     print_value(shell, 2, F("Energy today"), energyToday_, F_(wh));
     print_value(shell, 2, F("Energy total"), energyTotal_, F_(kwh), 10);
+
+    shell.println();
 }
 
 // publish values via MQTT
@@ -129,11 +124,11 @@ void Solar::publish_values() {
         doc["pumpmodulation"] = pumpModulation_;
     }
 
-    if (Helpers::hasValue(pump_, VALUE_BOOL)) {
+    if (Helpers::hasValue(pump_, EMS_VALUE_BOOL)) {
         doc["pump"] = Helpers::render_value(s, pump_, EMS_VALUE_BOOL);
     }
 
-    if (Helpers::hasValue(valveStatus_, VALUE_BOOL)) {
+    if (Helpers::hasValue(valveStatus_, EMS_VALUE_BOOL)) {
         doc["valvestatus"] = Helpers::render_value(s, valveStatus_, EMS_VALUE_BOOL);
     }
 
@@ -141,11 +136,11 @@ void Solar::publish_values() {
         doc["pumpWorkMin"] = (float)pumpWorkMin_;
     }
 
-    if (Helpers::hasValue(tankHeated_, VALUE_BOOL)) {
+    if (Helpers::hasValue(tankHeated_, EMS_VALUE_BOOL)) {
         doc["tankHeated"] = Helpers::render_value(s, tankHeated_, EMS_VALUE_BOOL);
     }
 
-    if (Helpers::hasValue(collectorOnOff_, VALUE_BOOL)) {
+    if (Helpers::hasValue(collectorOnOff_, EMS_VALUE_BOOL)) {
         doc["collectorOnOff"] = Helpers::render_value(s, collectorOnOff_, EMS_VALUE_BOOL);
     }
 

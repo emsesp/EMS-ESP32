@@ -17,6 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+
 #if defined(EMSESP_STANDALONE)
 
 #include "test.h"
@@ -26,6 +27,14 @@ namespace emsesp {
 // create some fake test data
 // used with the 'test' command, under su/admin
 void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
+    if (command == "default") {
+        run_test(shell, "mqtt"); // add the default test case here
+    }
+
+    if (command.empty()) {
+        run_test(shell, "default");
+    }
+
     if (command == "render") {
         uint8_t  test1 = 12;
         int8_t   test2 = -12;
@@ -129,7 +138,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         rx_telegram({0x08, 0x00, 0x07, 0x00, 0x0B, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00});
     }
 
-    if (command == "boiler2") {
+    if (command == "boiler") {
         // question: do we need to set the mask?
         std::string version("1.2.3");
         EMSESP::add_device(0x08, 123, version, EMSdevice::Brand::BUDERUS); // Nefit Trendline
@@ -180,7 +189,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
     }
 
     if (command == "thermostat") {
-        shell.printfln(F("Testing adding devices on the EMS bus..."));
+        shell.printfln(F("Testing adding a thermostat to the EMS bus..."));
 
         // create some fake devices
         std::string version("1.2.3");
@@ -245,7 +254,6 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         // see https://github.com/proddy/EMS-ESP/issues/390
 
         /*
-
         uart_telegram_withCRC("90 48 FF 04 01 A6 5C");
         uart_telegram_withCRC("90 48 FF 00 01 A6 4C");
         uart_telegram_withCRC("90 48 FF 08 01 A7 6D");
@@ -283,7 +291,6 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         uart_telegram_withCRC("C8 90 FF 00 02 01 A6 D0");
 
         // uart_telegram_withCRC("10 00 FF 00 01 A5 00 D7 21 00 00 00 00 30 01 84 01 01 03 01 84 01 F1 00 00 11 01 00 08 63 00");
-
         */
 
         uart_telegram_withCRC("C8 90 F7 02 01 FF 01 A6 BA");
@@ -473,49 +480,115 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         EMSESP::txservice_.flush_tx_queue();
     }
 
-    if (command == "mqtt1") {
+    if (command == "mqtt") {
         shell.printfln(F("Testing MQTT..."));
 
-        // MQTT test
-        EMSESP::txservice_.flush_tx_queue();
-        EMSESP::EMSESP::mqtt_.publish("boiler_cmd", "test me");
-        // EMSESP::mqtt_.show_queue();
-        // simulate an incoming mqtt msg
+        // simulate an on connect
+        Mqtt::on_connect();
+
+        // add a boiler
+        // question: do we need to set the mask?
+        std::string version("1.2.3");
+        EMSESP::add_device(0x08, 123, version, EMSdevice::Brand::BUDERUS); // Nefit Trendline
+
+        // add a thermostat
+        EMSESP::add_device(0x18, 157, version, EMSdevice::Brand::BOSCH); // Bosch CR100 - https://github.com/proddy/EMS-ESP/issues/355
+        EMSESP::rxservice_.loop();
+
+        // RCPLUSStatusMessage_HC1(0x01A5)
+        uart_telegram({0x98, 0x00, 0xFF, 0x00, 0x01, 0xA5, 0x00, 0xCF, 0x21, 0x2E, 0x00, 0x00, 0x2E, 0x24,
+                       0x03, 0x25, 0x03, 0x03, 0x01, 0x03, 0x25, 0x00, 0xC8, 0x00, 0x00, 0x11, 0x01, 0x03});
+        uart_telegram("98 00 FF 00 01 A5 00 CF 21 2E 00 00 2E 24 03 25 03 03 01 03 25 00 C8 00 00 11 01 03");            // without CRC
+        uart_telegram_withCRC("98 00 FF 00 01 A5 00 CF 21 2E 00 00 2E 24 03 25 03 03 01 03 25 00 C8 00 00 11 01 03 13"); // with CRC
+
+        EMSESP::rxservice_.loop();
+        shell.loop_all();
+
         char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
         char payload[100];
 
-        strcpy(topic, "boiler_cmd");
+        // test publish and adding to queue
+        EMSESP::txservice_.flush_tx_queue();
+        EMSESP::EMSESP::mqtt_.publish("boiler_cmd", "test me");
+        Mqtt::show_mqtt(shell);
+
+        strcpy(topic, "ems-esp/boiler_cmd");
         strcpy(payload, "12345");
-        EMSESP::mqtt_.incoming(topic, payload);
-        EMSESP::mqtt_.incoming(payload, payload); // should report error
+        EMSESP::mqtt_.incoming(topic, payload);   // invalid format
+        EMSESP::mqtt_.incoming(payload, payload); // no matching topic
 
-        strcpy(topic, "thermostat_cmd_mode");
-        strcpy(payload, "auto");
+        strcpy(topic, "ems-esp/boiler_cmd");
+        strcpy(payload, "{\"cmd\":\"garbage\",\"data\":22.52}");
+        EMSESP::mqtt_.incoming(topic, payload); // should report error
+
+        strcpy(topic, "ems-esp/boiler_cmd");
+        strcpy(payload, "{\"cmd\":\"comfort\",\"data\":\"eco\"}");
         EMSESP::mqtt_.incoming(topic, payload);
 
-        strcpy(topic, "thermostat_cmd_temp");
-        strcpy(payload, "20");
+        strcpy(topic, "ems-esp/boiler_cmd");
+        strcpy(payload, "{\"cmd\":\"wwactivated\",\"data\":\"1\"}");
         EMSESP::mqtt_.incoming(topic, payload);
 
-        strcpy(topic, "thermostat_cmd");
+        strcpy(topic, "ems-esp/boiler_cmd");
+        strcpy(payload, "{\"cmd\":\"wwactivated\",\"data\":1}");
+        EMSESP::mqtt_.incoming(topic, payload);
+
+        strcpy(topic, "ems-esp/boiler_cmd");
+        strcpy(payload, "{\"cmd\":\"flowtemp\",\"data\":55}");
+        EMSESP::mqtt_.incoming(topic, payload);
+
+        strcpy(topic, "ems-esp/system");
+        strcpy(payload, "{\"cmd\":\"send\",\"data\":\"01 02 03 04 05\"}");
+        EMSESP::mqtt_.incoming(topic, payload);
+
+        strcpy(topic, "ems-esp/system");
+        strcpy(payload, "{\"cmd\":\"gpio\",\"id\":1,\"data\":\"1\"}");
+        EMSESP::mqtt_.incoming(topic, payload);
+
+        strcpy(topic, "ems-esp/thermostat_cmd");
+        strcpy(payload, "{\"cmd\":\"wwmode\",\"data\":\"auto\"}");
+        EMSESP::mqtt_.incoming(topic, payload);
+
+        strcpy(topic, "ems-esp/thermostat_cmd");
+        strcpy(payload, "{\"cmd\":\"control\",\"data\":\"1\"}");
+        EMSESP::mqtt_.incoming(topic, payload);
+
+        strcpy(topic, "ems-esp/thermostat_cmd");
+        strcpy(payload, "{\"cmd\":\"control\",\"data\":1}");
+        EMSESP::mqtt_.incoming(topic, payload);
+
+        strcpy(topic, "ems-esp/thermostat_cmd");
+        strcpy(payload, "{\"cmd\":\"mode\",\"data\":\"auto\",\"id\":2}"); // with id
+        EMSESP::mqtt_.incoming(topic, payload);
+
+        strcpy(topic, "ems-esp/thermostat_cmd");
+        strcpy(payload, "{\"cmd\":\"mode\",\"data\":\"auto\",\"hc\":2}"); // with hc
+        EMSESP::mqtt_.incoming(topic, payload);
+
+        strcpy(topic, "ems-esp/thermostat_cmd");
         strcpy(payload, "{\"cmd\":\"temp\",\"data\":22.52}");
         EMSESP::mqtt_.incoming(topic, payload);
 
-        strcpy(topic, "boiler_cmd_wwtemp");
-        strcpy(payload, "66");
+        strcpy(topic, "ems-esp/thermostat_cmd");
+        strcpy(payload, "{\"cmd\":\"temp\",\"data\":22.52}");
         EMSESP::mqtt_.incoming(topic, payload);
 
-        strcpy(topic, "thermostat_cmd");
-        strcpy(payload, "{\"cmd\":\"temp\",\"hc\":2,\"data\":22}");
-        EMSESP::mqtt_.incoming(topic, payload);
-
-        strcpy(topic, "home/ems-esp/cmd");
-        strcpy(payload, "restart");
+        strcpy(topic, "ems-esp/thermostat_cmd");
+        strcpy(payload, "{\"cmd\":\"temp\",\"id\":2,\"data\":22}");
         EMSESP::mqtt_.incoming(topic, payload);
 
         // EMSESP::txservice_.show_tx_queue();
+        // EMSESP::publish_all_values();
 
-        EMSESP::publish_all_values();
+        EMSESP::add_context_menus(); // need to add this as it happens later in the code
+        shell.invoke_command("su");
+        shell.invoke_command("thermostat");
+        shell.invoke_command("help");
+        shell.invoke_command("call");
+        shell.invoke_command("call wwmode");
+        shell.invoke_command("call mode auto 2");
+
+        shell.loop_all();
     }
 
     if (command == "poll2") {
@@ -540,12 +613,6 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
     // https://github.com/proddy/EMS-ESP/issues/380#issuecomment-633663007
     if (command == "rx3") {
         uart_telegram({0x21, 0x0B, 0xFF, 0x00});
-    }
-
-    if (command == "mqtt2") {
-        for (uint8_t i = 0; i < 30; i++) {
-            Mqtt::subscribe("topic", dummy_mqtt_commands);
-        }
     }
 
     // testing the UART tx command, without a queue
@@ -686,9 +753,6 @@ void Test::uart_telegram(const char * rx_data) {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
-void Test::dummy_mqtt_commands(const char * message) {
-    //
-}
 
 #pragma GCC diagnostic pop
 

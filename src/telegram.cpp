@@ -19,8 +19,6 @@
 #include "telegram.h"
 #include "emsesp.h"
 
-MAKE_PSTR(logger_name, "telegram")
-
 namespace emsesp {
 
 // CRC lookup table with poly 12 for faster checking
@@ -45,7 +43,7 @@ uint8_t  EMSbus::ems_bus_id_        = EMSESP_DEFAULT_EMS_BUS_ID;
 uint8_t  EMSbus::tx_mode_           = EMSESP_DEFAULT_TX_MODE;
 uint8_t  EMSbus::tx_state_          = Telegram::Operation::NONE;
 
-uuid::log::Logger EMSbus::logger_{F_(logger_name), uuid::log::Facility::CONSOLE};
+uuid::log::Logger EMSbus::logger_{F_(telegram), uuid::log::Facility::CONSOLE};
 
 // Calculates CRC checksum using lookup table for speed
 // length excludes the last byte (which mainly is the CRC)
@@ -572,11 +570,13 @@ void TxService::retry_tx(const uint8_t operation, const uint8_t * data, const ui
         return;
     }
 
+#ifdef EMSESP_DENUG
     LOG_DEBUG(F("[DEBUG] Last Tx %s operation failed. Retry #%d. sent message: %s, received: %s"),
               (operation == Telegram::Operation::TX_WRITE) ? F("Write") : F("Read"),
               retry_count_,
               telegram_last_->to_string().c_str(),
               Helpers::data_to_hex(data, length).c_str());
+#endif
 
     // add to the top of the queue
     if (tx_telegrams_.size() >= MAX_TX_TELEGRAMS) {

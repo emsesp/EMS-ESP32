@@ -66,59 +66,49 @@ common commands available in all contexts:
   su
 
 (from the root)
-	set
-	fetch
-	system (enters a context)
-	boiler (enters a context)
-	thermostat (enters a context)
-	scan devices [deep]
-	send telegram <"XX XX ...">
-	set bus_id <device ID>
-	set tx_mode <n>
-	show
-	show devices
-	show ems
-	show values
+  set
+  fetch
+  system (enters a context)
+  boiler (enters a context)
+  thermostat (enters a context)
+  scan devices [deep]
+  send telegram <"XX XX ...">
+  set bus_id <device ID>
+  set tx_mode <n>
+  show
+  show devices
+  show ems
+  show values
 
 system
-	set
-	show
-	show mqtt
+  set
+  show
+  show mqtt
   show users
-	passwd
-	restart
-	set wifi hostname <name>
-	set wifi password
-	set wifi ssid <name>
+  passwd
+  restart
+  set wifi hostname <name>
+  set wifi password
+  set wifi ssid <name>
   wifi reconnect
 
 boiler
-	comfort <hot |eco | intelligent>
-	flowtemp <degrees>
-	wwactive <on | off>
-	wwcirculation <on | off>
-	wwonetime <on | off>
-	wwtemp <degrees>
-	read <type ID>
-  maxpower <%>
-  minpower <%>
+  read <type ID>
+  call [cmd] [n] (cmd's: comfort wwactivated wwtapactivated wwonetime wwcirculation flowtemp wwtemp burnmaxpower burnminpower boilhyston boilhystoff burnperiod pumpdelay)
 
 thermostat
-	set
-	set master [device ID]
-	mode <mode> [heating circuit]
-	temp <degrees> [heating circuit]
-	read <type ID>
+  set
+  set master [device ID]
+  read <type ID>
+  call [cmd] [n] (cmd's: wwmode control mode holiday pause party datetime minexttemp clockoffset calinttemp display building language remotetemp temp nighttemp daytemp nofrosttemp ecotemp heattemp summertemp designtemp offsettemp holidaytemp)
+
 ```
   
 ----------
 ### **mqtt commands**
 
-commands can be written as `{"cmd": ,"data": }` or direct.
-To set thermostat commands depending on heatingcircuits add `"hc": ` or nest the command. Without `"hc":` the first ative heatingcircuit is set.
-These commands are equivalent:
-`{"hc":2,"cmd":"daytemp","data":21}` or `{"hc":2,"daytemp":21}`or `{"hc2"{"daytemp":21}}`
-In direct commands it's possible to combine commands, i.e. `{"hc1":{"daytemp":21,"nighttemp":17},"hc2":{"daytemp":20}}`
+commands must be written as `{"cmd":<cmd> ,"data":<data>, "id":<n> }`. The `id` can be replaced with `hc` for some devices.
+
 ```
 *boiler_cmd*
   comfort <hot, eco, intelligent>
@@ -161,10 +151,7 @@ In direct commands it's possible to combine commands, i.e. `{"hc1":{"daytemp":21
 
 *cmd*
   send <"0B XX XX ..">
-  D0 <0 | 1>
-  D1 <0 | 1>
-  D2 <0 | 1>
-  D3 <0 | 1>
+  gpio <0 | 1> <0-3> (for D0-D3)
 
 ```
 
@@ -179,13 +166,6 @@ In direct commands it's possible to combine commands, i.e. `{"hc1":{"daytemp":21
 - Add real unit tests using platformio's [pio-remote](https://docs.platformio.org/en/latest/plus/pio-remote.html) test bed.
 - See if it's easier to use timers instead of millis() based timers, using [polledTimeout](https://github.com/esp8266/Arduino/blob/master/libraries/esp8266/examples/BlinkPolledTimeout/BlinkPolledTimeout.ino).
 - Port over to ESP-IDF. The Arduino SDK is showing its limitations
-
-### **Features to add**
-
-- Multi-language. German, Dutch, French
-- Click on a device in the Web UI shows it's details
-- Publish time can be customized per device (solar, mixing etc)
-- add homeassistant mqtt discovery for Boiler as well
 
 ### **Customizing the Web UI**
 

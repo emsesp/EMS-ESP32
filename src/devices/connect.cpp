@@ -22,16 +22,10 @@ namespace emsesp {
 
 REGISTER_FACTORY(Connect, EMSdevice::DeviceType::CONNECT);
 
-MAKE_PSTR(logger_name, "connect")
-uuid::log::Logger Connect::logger_{F_(logger_name), uuid::log::Facility::CONSOLE};
+uuid::log::Logger Connect::logger_{F_(connect), uuid::log::Facility::CONSOLE};
 
 Connect::Connect(uint8_t device_type, uint8_t device_id, uint8_t product_id, const std::string & version, const std::string & name, uint8_t flags, uint8_t brand)
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
-    // telegram handlers
-    // register_telegram_type(EMS_TYPE_XX, "XX", false, std::bind(&Controller::process_XX, this, _1));
-
-    // MQTT callbacks
-    // register_mqtt_topic("topic", std::bind(&Connect::cmd, this, _1));
 }
 
 void Connect::device_info(JsonArray & root) {
@@ -42,7 +36,7 @@ void Connect::add_context_menu() {
 
 // display all values into the shell console
 void Connect::show_values(uuid::console::Shell & shell) {
-    EMSdevice::show_values(shell); // always call this to show header
+    // EMSdevice::show_values(shell); // always call this to show header
 }
 
 // publish values via MQTT

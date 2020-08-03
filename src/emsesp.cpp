@@ -18,8 +18,6 @@
 
 #include "emsesp.h"
 
-MAKE_PSTR(logger_name, "emsesp")
-
 namespace emsesp {
 
 using DeviceFlags = emsesp::EMSdevice;
@@ -45,7 +43,7 @@ EMSESPDevicesService EMSESP::emsespDevicesService = EMSESPDevicesService(&webSer
 std::vector<std::unique_ptr<EMSdevice>>    EMSESP::emsdevices;      // array of all the detected EMS devices
 std::vector<emsesp::EMSESP::Device_record> EMSESP::device_library_; // libary of all our known EMS devices so far
 
-uuid::log::Logger EMSESP::logger_{FPSTR(__pstr__logger_name), uuid::log::Facility::KERN};
+uuid::log::Logger EMSESP::logger_{F_(emsesp), uuid::log::Facility::KERN};
 
 // The services
 RxService EMSESP::rxservice_; // incoming Telegram Rx handler
@@ -242,7 +240,6 @@ void EMSESP::show_device_values(uuid::console::Shell & shell) {
         for (const auto & emsdevice : emsdevices) {
             if ((emsdevice) && (emsdevice->device_type() == device_class.first)) {
                 emsdevice->show_values(shell);
-                shell.println();
             }
         }
     }
@@ -758,17 +755,14 @@ void EMSESP::start() {
 
     esp8266React.begin();          // loads system settings (wifi, mqtt, etc)
     emsespSettingsService.begin(); // load EMS-ESP specific settings
-
     // system_.check_upgrade(); // see if we need to migrate from previous versions
-
+    mqtt_.start();      // mqtt init
     console_.start();   // telnet and serial console
     system_.start();    // starts syslog, uart, sets version, initializes LED. Requires pre-loaded settings.
-    mqtt_.start();      // mqtt init
     shower_.start();    // initialize shower timer and shower alert
     txservice_.start(); // sets bus ID, sends out request for EMS devices
     sensors_.start();   // dallas external sensors
-
-    webServer.begin(); // start web server
+    webServer.begin();  // start web server
 }
 
 // main loop calling all services
@@ -777,9 +771,11 @@ void EMSESP::loop() {
 
     // if we're doing an OTA upload, skip MQTT and EMS
     if (system_.upload_status()) {
+        /*
 #if defined(ESP32)
         delay(10); // slow down OTA update to avoid getting killed by task watchdog (task_wdt)
 #endif
+*/
         return;
     }
 
@@ -796,7 +792,9 @@ void EMSESP::loop() {
         fetch_device_values();
     }
 
+#if defined(ESP8266)
     delay(1);
+#endif
 }
 
 } // namespace emsesp

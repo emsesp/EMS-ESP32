@@ -47,11 +47,22 @@ class EMSdevice {
 
     virtual ~EMSdevice() = default; // destructor of base class must always be virtual because it's a polymorphic class
 
+    /*
+    // https://github.com/proddy/EMS-ESP/issues/434#issuecomment-667840531
+    inline uint8_t device_id(uint8_t hc = 0) const {
+        if (((device_id_ & 0x7F) >= 0x18) && ((device_id_ & 0x7F) <= 0x1B)) {
+            return ((device_id_ & 0x80) + 0x18 + hc);
+        }
+        return device_id_;
+    }
+    */
+
     inline uint8_t device_id() const {
         return device_id_;
     }
 
-    std::string device_type_name() const;
+    std::string        device_type_name() const;
+    static std::string device_type_topic_name(const uint8_t device_type);
 
     inline uint8_t product_id() const {
         return product_id_;
@@ -129,7 +140,10 @@ class EMSdevice {
 
     void read_command(const uint16_t type_id);
 
+    void add_context_commands(unsigned int context);
+
     void register_mqtt_topic(const std::string & topic, mqtt_subfunction_p f);
+    void register_mqtt_cmd(const __FlashStringHelper * cmd, mqtt_cmdfunction_p f);
 
     // virtual functions overrules by derived classes
     virtual void show_values(uuid::console::Shell & shell) = 0;
@@ -222,7 +236,7 @@ class EMSdevice {
 
     enum DeviceType : uint8_t {
         UNKNOWN = 0,
-        SERVICEKEY,
+        SERVICEKEY, // us
         BOILER,
         THERMOSTAT,
         MIXING,

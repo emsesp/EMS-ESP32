@@ -220,55 +220,61 @@ class Thermostat : public EMSdevice {
     void process_IBASettings(std::shared_ptr<const Telegram> telegram);
     void process_RCTime(std::shared_ptr<const Telegram> telegram);
     void process_RC35wwSettings(std::shared_ptr<const Telegram> telegram);
-
     void process_RC35Monitor(std::shared_ptr<const Telegram> telegram);
     void process_RC35Set(std::shared_ptr<const Telegram> telegram);
-
     void process_RC30Monitor(std::shared_ptr<const Telegram> telegram);
     void process_RC30Set(std::shared_ptr<const Telegram> telegram);
-
     void process_RC20Monitor(std::shared_ptr<const Telegram> telegram);
     void process_RC20Set(std::shared_ptr<const Telegram> telegram);
     void process_RC20Remote(std::shared_ptr<const Telegram> telegram);
-
     void process_RC20Monitor_2(std::shared_ptr<const Telegram> telegram);
     void process_RC20Set_2(std::shared_ptr<const Telegram> telegram);
-
     void process_RC10Monitor(std::shared_ptr<const Telegram> telegram);
     void process_RC10Set(std::shared_ptr<const Telegram> telegram);
-
     void process_RC300Monitor(std::shared_ptr<const Telegram> telegram);
     void process_RC300Set(std::shared_ptr<const Telegram> telegram);
-
     void process_JunkersMonitor(std::shared_ptr<const Telegram> telegram);
     void process_JunkersSet(std::shared_ptr<const Telegram> telegram);
-
     void process_EasyMonitor(std::shared_ptr<const Telegram> telegram);
-
     void process_RC300WWmode(std::shared_ptr<const Telegram> telegram);
 
-    // set functions
-    void set_settings_minexttemp(const int8_t mt);
-    void set_settings_calinttemp(const int8_t ct);
-    void set_settings_clockoffset(const int8_t co);
-    void set_settings_display(const uint8_t ds);
-    void set_settings_building(const uint8_t bg);
-    void set_settings_language(const uint8_t lg);
-    void set_control(const uint8_t ctrl, const uint8_t hc_num);
-    void set_ww_mode(const std::string & mode);
-    void set_holiday(const char * hd, const uint8_t hc_num);
-    void set_datetime(const char * dt);
-    void set_pause(const uint8_t hrs, const uint8_t hc_num);
-    void set_party(const uint8_t hrs, const uint8_t hc_num);
-    void set_mode(const uint8_t mode, const uint8_t hc_num);
-    void set_mode(const std::string & mode, const uint8_t hc_num);
+    // internal helper functions
+    void set_mode_n(const uint8_t mode, const uint8_t hc_num);
+    void set_temperature_value(const char * value, const uint8_t hc, const uint8_t mode);
     void set_temperature(const float temperature, const std::string & mode, const uint8_t hc_num);
     void set_temperature(const float temperature, const uint8_t mode, const uint8_t hc_num);
 
-    // MQTT functions
-    void thermostat_cmd(const char * message);
+    // for HA specifically. MQTT functions.
     void thermostat_cmd_temp(const char * message);
     void thermostat_cmd_mode(const char * message);
+
+    // set functions - these use the id/hc
+    void set_mode(const char * value, const int8_t id);
+    void set_control(const char * value, const int8_t id);
+    void set_holiday(const char * value, const int8_t id);
+    void set_pause(const char * value, const int8_t id);
+    void set_party(const char * value, const int8_t id);
+    void set_temp(const char * value, const int8_t id);
+    void set_nighttemp(const char * value, const int8_t id);
+    void set_daytemp(const char * value, const int8_t id);
+    void set_nofrosttemp(const char * value, const int8_t id);
+    void set_ecotemp(const char * value, const int8_t id);
+    void set_heattemp(const char * value, const int8_t id);
+    void set_summertemp(const char * value, const int8_t id);
+    void set_designtemp(const char * value, const int8_t id);
+    void set_offsettemp(const char * value, const int8_t id);
+    void set_holidaytemp(const char * value, const int8_t id);
+    void set_remotetemp(const char * value, const int8_t id);
+
+    // set functions - these don't use the id/hc
+    void set_wwmode(const char * value, const int8_t id);
+    void set_datetime(const char * value, const int8_t id);
+    void set_settings_minexttemp(const char * value, const int8_t id);
+    void set_settings_clockoffset(const char * value, const int8_t id);
+    void set_settings_calinttemp(const char * value, const int8_t id);
+    void set_settings_display(const char * value, const int8_t id);
+    void set_settings_building(const char * value, const int8_t id);
+    void set_settings_language(const char * value, const int8_t id);
 };
 
 } // namespace emsesp

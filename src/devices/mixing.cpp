@@ -22,12 +22,11 @@ namespace emsesp {
 
 REGISTER_FACTORY(Mixing, EMSdevice::DeviceType::MIXING);
 
-MAKE_PSTR(logger_name, "mixing")
-uuid::log::Logger Mixing::logger_{F_(logger_name), uuid::log::Facility::CONSOLE};
+uuid::log::Logger Mixing::logger_{F_(mixing), uuid::log::Facility::CONSOLE};
 
 Mixing::Mixing(uint8_t device_type, uint8_t device_id, uint8_t product_id, const std::string & version, const std::string & name, uint8_t flags, uint8_t brand)
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
-    LOG_DEBUG(F("Registering new Mixing module with device ID 0x%02X"), device_id);
+    LOG_DEBUG(F("Adding new Mixing module with device ID 0x%02X"), device_id);
 
     if (flags == EMSdevice::EMS_DEVICE_FLAG_MMPLUS) {
         if (device_id <= 0x27) {
@@ -48,9 +47,6 @@ Mixing::Mixing(uint8_t device_type, uint8_t device_id, uint8_t product_id, const
     if (flags == EMSdevice::EMS_DEVICE_FLAG_IPM) {
         register_telegram_type(0x010C, F("IPMSetMessage"), false, std::bind(&Mixing::process_IPMStatusMessage, this, _1));
     }
-
-    // MQTT callbacks
-    // register_mqtt_topic("topic", std::bind(&Mixing::cmd, this, _1));
 }
 
 // add context submenu
@@ -72,7 +68,6 @@ void Mixing::device_info(JsonArray & root) {
     render_value_json(root, "", F("Setpoint flow temperature"), flowSetTemp_, F_(degrees));
     render_value_json(root, "", F("Current pump modulation"), pumpMod_, F_(percent));
     render_value_json(root, "", F("Current valve status"), status_, nullptr);
-
 }
 
 // check to see if values have been updated
@@ -101,6 +96,8 @@ void Mixing::show_values(uuid::console::Shell & shell) {
     print_value(shell, 4, F("Setpoint flow temperature"), flowSetTemp_, F_(degrees));
     print_value(shell, 4, F("Current pump modulation"), pumpMod_, F_(percent));
     print_value(shell, 4, F("Current valve status"), status_, nullptr);
+
+    shell.println();
 }
 
 // publish values via MQTT

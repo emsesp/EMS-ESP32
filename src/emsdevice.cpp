@@ -20,11 +20,9 @@
 #include "emsesp.h"
 #include "mqtt.h" // for the mqtt_function_p
 
-MAKE_PSTR(logger_name, "emsdevice")
-
 namespace emsesp {
 
-uuid::log::Logger EMSdevice::logger_{F_(logger_name), uuid::log::Facility::CONSOLE};
+uuid::log::Logger EMSdevice::logger_{F_(emsesp), uuid::log::Facility::CONSOLE};
 
 std::string EMSdevice::brand_to_string() const {
     switch (brand_) {
@@ -53,6 +51,35 @@ std::string EMSdevice::brand_to_string() const {
     }
 
     return std::string{};
+}
+
+// returns the name of the MQTT topic to use for a specific device
+std::string EMSdevice::device_type_topic_name(const uint8_t device_type) {
+    switch (device_type) {
+    case DeviceType::BOILER:
+        return read_flash_string(F("boiler"));
+        break;
+
+    case DeviceType::THERMOSTAT:
+        return read_flash_string(F("thermostat"));
+        break;
+
+    case DeviceType::HEATPUMP:
+        return read_flash_string(F("heatpump"));
+        break;
+
+    case DeviceType::SOLAR:
+        return read_flash_string(F("solar"));
+        break;
+
+    case DeviceType::MIXING:
+        return read_flash_string(F("mixing"));
+        break;
+
+    default:
+        return std::string{};
+        break;
+    }
 }
 
 std::string EMSdevice::device_type_name() const {
@@ -206,12 +233,17 @@ void EMSdevice::show_telegram_handlers(uuid::console::Shell & shell) {
 
 // list all the mqtt handlers for this device
 void EMSdevice::show_mqtt_handlers(uuid::console::Shell & shell) {
-    Mqtt::show_topic_handlers(shell, this->device_id_);
+    Mqtt::show_topic_handlers(shell, this->device_type_);
 }
 
 void EMSdevice::register_mqtt_topic(const std::string & topic, mqtt_subfunction_p f) {
-    LOG_DEBUG(F("Registering MQTT topic %s for device ID %02X"), topic.c_str(), this->device_id_);
-    Mqtt::subscribe(this->device_id_, topic, f);
+    LOG_DEBUG(F("Registering MQTT topic %s for device ID %02X and type %s"), topic.c_str(), this->device_id_, this->device_type_name().c_str());
+    Mqtt::subscribe(this->device_type_, topic, f);
+}
+
+void EMSdevice::register_mqtt_cmd(const __FlashStringHelper * cmd, mqtt_cmdfunction_p f) {
+    LOG_DEBUG(F("Registering MQTT cmd %s for device type %s"), uuid::read_flash_string(cmd).c_str(), this->device_type_name().c_str());
+    Mqtt::add_command(this->device_type_, cmd, f);
 }
 
 EMSdevice::TelegramFunction::TelegramFunction(uint16_t                    telegram_type_id,
@@ -239,7 +271,7 @@ std::string EMSdevice::telegram_type_name(std::shared_ptr<const Telegram> telegr
     }
 
     for (const auto & tf : telegram_functions_) {
-        if ((tf.telegram_type_id_ == telegram->type_id) && ((telegram->type_id & 0x0F0) != 0xF0)) {
+        if ((tf.telegram_type_id_ == telegram->type_id) && ((telegram->type_id & 0xF0) != 0xF0)) {
             return uuid::read_flash_string(tf.telegram_type_name_);
         }
     }
@@ -295,6 +327,7 @@ void EMSdevice::print_value(uuid::console::Shell & shell, uint8_t padding, const
     print_value(shell, padding, name, uuid::read_flash_string(value).c_str());
 }
 
+// print string value, value is not in flash
 void EMSdevice::print_value(uuid::console::Shell & shell, uint8_t padding, const __FlashStringHelper * name, const char * value) {
     uint8_t i = padding;
     while (i-- > 0) {
@@ -303,5 +336,53 @@ void EMSdevice::print_value(uuid::console::Shell & shell, uint8_t padding, const
 
     shell.printfln(PSTR("%s: %s"), uuid::read_flash_string(name).c_str(), value);
 }
+
+// given a context, automatically add the commands taken them from the MQTT registry for "<device_type>_cmd" topics
+void EMSdevice::add_context_commands(unsigned int context) {
+    EMSESPShell::commands->add_command(
+        context,
+        CommandFlags::ADMIN,
+        flash_string_vector{F_(call)},
+        flash_string_vector{F_(cmd_optional), F_(data_optional), F_(id_optional)},
+        [&](Shell & shell, const std::vector<std::string> & arguments) {
+            uint8_t device_type_ = device_type();
+            if (arguments.empty()) {
+                // list options
+                shell.print("Available commands:");
+                for (const auto & cf : Mqtt::commands()) {
+                    if (cf.device_type_ == device_type_) {
+                        shell.printf(" %s", uuid::read_flash_string(cf.cmd_).c_str());
+                    }
+                }
+                shell.println();
+                return;
+            }
+
+            const char * cmd = arguments[0].c_str();
+            if (arguments.size() == 1) {
+                // no value specified
+                Mqtt::call_command(device_type_, cmd, nullptr, -1);
+            } else if (arguments.size() == 2) {
+                // has a value but no id
+                Mqtt::call_command(device_type_, cmd, arguments.back().c_str(), -1);
+            } else {
+                // use value, which could be an id or hc
+                Mqtt::call_command(device_type_, cmd, arguments[1].c_str(), atoi(arguments[2].c_str()));
+            }
+        },
+        [&](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) -> std::vector<std::string> {
+            if (arguments.size() > 0) {
+                return {};
+            }
+            std::vector<std::string> commands;
+            for (const auto & cf : Mqtt::commands()) {
+                if (cf.device_type_ == device_type()) {
+                    commands.emplace_back(uuid::read_flash_string(cf.cmd_));
+                }
+            }
+            return commands;
+        });
+}
+
 
 } // namespace emsesp

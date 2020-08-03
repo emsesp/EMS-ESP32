@@ -21,25 +21,9 @@
 
 #include "version.h" // firmware version of EMS-ESP
 
-MAKE_PSTR_WORD(passwd)
-MAKE_PSTR_WORD(hostname)
-MAKE_PSTR_WORD(wifi)
-MAKE_PSTR_WORD(reconnect)
-MAKE_PSTR_WORD(ssid)
-MAKE_PSTR_WORD(heartbeat)
-MAKE_PSTR_WORD(users)
-
-MAKE_PSTR(host_fmt, "Host = %s")
-MAKE_PSTR(hostname_fmt, "WiFi Hostname = %s")
-MAKE_PSTR(mark_interval_fmt, "Mark interval = %lus");
-MAKE_PSTR(wifi_ssid_fmt, "WiFi SSID = %s");
-MAKE_PSTR(wifi_password_fmt, "WiFi Password = %S")
-
-MAKE_PSTR(logger_name, "system")
-
 namespace emsesp {
 
-uuid::log::Logger System::logger_{F_(logger_name), uuid::log::Facility::KERN};
+uuid::log::Logger System::logger_{F_(system), uuid::log::Facility::KERN};
 
 #ifndef EMSESP_STANDALONE
 uuid::syslog::SyslogService System::syslog_;
@@ -50,94 +34,28 @@ uint32_t System::heap_start_    = 0;
 int      System::reset_counter_ = 0;
 bool     System::upload_status_ = false;
 
-// handle generic system related MQTT commands
-void System::mqtt_commands(const char * message) {
-    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
-    DeserializationError                           error = deserializeJson(doc, message);
-    if (error) {
-        LOG_DEBUG(F("MQTT error: payload %s, error %s"), message, error.c_str());
-        return;
-    }
-
-    if (doc["send"] != nullptr) {
-        const char * data = doc["send"];
-        EMSESP::send_raw_telegram(data);
-        LOG_INFO(F("Sending raw: %s"), data);
-    }
-
+// send on/off to a gpio pin
+// value: true = HIGH, false = LOW
+void System::mqtt_command_gpio(const char * value, const int8_t id) {
 #if defined(ESP8266)
-    const uint8_t d0_ = 16;
-    const uint8_t d1_ = 5;
-    const uint8_t d2_ = 4;
-    const uint8_t d3_ = 0;
+    const uint8_t pins[] = {16, 5, 4, 0};
 #elif defined(ESP32)
-    const uint8_t d0_ = 26;
-    const uint8_t d1_ = 22;
-    const uint8_t d2_ = 21;
-    const uint8_t d3_ = 17;
+    const uint8_t pins[] = {26, 22, 21, 17};
+#else
+    const uint8_t pins[] = {0, 1, 2, 3};
 #endif
-
-#ifndef EMSESP_STANDALONE
-    if (doc["D0"] != nullptr) {
-        const int8_t set = doc["D0"];
-        pinMode(d0_, OUTPUT);
-        if (set == 1) {
-            digitalWrite(d0_, HIGH);
-        } else if (set == 0) {
-            digitalWrite(d0_, LOW);
-        }
-        LOG_INFO(F("Port D0 set to %d"), set);
+    bool v = false;
+    if (Helpers::value2bool(value, v)) {
+        uint8_t gpio = pins[id]; // D0 - D3
+        pinMode(gpio, OUTPUT);
+        digitalWrite(gpio, v);
+        LOG_INFO(F("Port D%d set to %s"), id, v ? "HIGH" : "LOW");
     }
+}
 
-    if (doc["D1"] != nullptr) {
-        const int8_t set = doc["D1"];
-        pinMode(d1_, OUTPUT);
-        if (set == 1) {
-            digitalWrite(d1_, HIGH);
-        } else if (set == 0) {
-            digitalWrite(d1_, LOW);
-        }
-        LOG_INFO(F("Port D1 set to %d"), set);
-    }
-
-    if (doc["D2"] != nullptr) {
-        const int8_t set = doc["D2"];
-        pinMode(d2_, OUTPUT);
-        if (set == 1) {
-            digitalWrite(d2_, HIGH);
-        } else if (set == 0) {
-            digitalWrite(d2_, LOW);
-        }
-        LOG_INFO(F("Port D2 set to %d"), set);
-    }
-
-    if (doc["D3"] != nullptr) {
-        const int8_t set = doc["D3"];
-        pinMode(d3_, OUTPUT);
-        if (set == 1) {
-            digitalWrite(d3_, HIGH);
-        } else if (set == 0) {
-            digitalWrite(d3_, LOW);
-        }
-        LOG_INFO(F("Port D3 set to %d"), set);
-    }
-#endif
-
-    const char * command = doc["cmd"];
-    if (command == nullptr) {
-        return;
-    }
-
-    // send raw command
-    if (strcmp(command, "send") == 0) {
-        const char * data = doc["data"];
-        if (data == nullptr) {
-            return;
-        }
-        EMSESP::send_raw_telegram(data);
-        LOG_INFO(F("Sending raw: %s"), data);
-        return;
-    }
+// send raw
+void System::mqtt_command_send(const char * value, const int8_t id) {
+    EMSESP::send_raw_telegram(value); // ignore id
 }
 
 // restart EMS-ESP
@@ -646,9 +564,10 @@ void System::console_commands(Shell & shell, unsigned int context) {
 
 // upgrade from previous versions of EMS-ESP
 void System::check_upgrade() {
+    /*
 // check for v1.9. It uses SPIFFS and only on the ESP8266
 #if defined(ESP8266)
-    Serial.begin(115200); // TODO remove, just for debugging
+    Serial.begin(115200);
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
@@ -771,6 +690,7 @@ void System::check_upgrade() {
         },
         "local");
 #endif
+*/
 }
 
 } // namespace emsesp

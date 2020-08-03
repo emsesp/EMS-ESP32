@@ -23,7 +23,6 @@ class MsgPackDeserializer {
                       TStringStorage stringStorage)
       : _pool(&pool), _reader(reader), _stringStorage(stringStorage) {}
 
-  // TODO: add support for filter
   DeserializationError parse(VariantData &variant, AllowAllFilter,
                              NestingLimit nestingLimit) {
     return parse(variant, nestingLimit);
@@ -40,7 +39,6 @@ class MsgPackDeserializer {
     }
 
     if ((code & 0xe0) == 0xe0) {
-      // TODO: add setNegativeInteger()
       variant.setSignedInteger(static_cast<int8_t>(code));
       return DeserializationError::Ok;
     }
