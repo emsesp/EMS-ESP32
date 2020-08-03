@@ -72,7 +72,6 @@ void Sensors::loop() {
                 YIELD;
                 bus_.skip();
                 bus_.write(CMD_CONVERT_TEMP);
-
                 state_ = State::READING;
             } else {
                 // no sensors found
@@ -86,20 +85,15 @@ void Sensors::loop() {
             // LOG_DEBUG(F("Scanning for sensors")); // uncomment for debug
             bus_.reset_search();
             found_.clear();
-
-            state_         = State::SCANNING;
-            last_activity_ = time_now;
+            state_ = State::SCANNING;
         } else if (time_now - last_activity_ > READ_TIMEOUT_MS) {
             LOG_ERROR(F("Sensor read timeout"));
-
-            state_         = State::IDLE;
-            last_activity_ = time_now;
+            state_ = State::IDLE;
         }
     } else if (state_ == State::SCANNING) {
         if (time_now - last_activity_ > SCAN_TIMEOUT_MS) {
             LOG_ERROR(F("Sensor scan timeout"));
-            state_         = State::IDLE;
-            last_activity_ = time_now;
+            state_ = State::IDLE;
         } else {
             uint8_t addr[ADDR_LEN] = {0};
 
@@ -133,11 +127,15 @@ void Sensors::loop() {
                 }
             } else {
                 bus_.depower();
-                devices_ = std::move(found_);
+                if ((found_.size() >= devices_.size()) || (retrycnt_ > 5)) {
+                    devices_  = std::move(found_);
+                    retrycnt_ = 0;
+                } else {
+                    retrycnt_++;
+                }
                 found_.clear();
                 // LOG_DEBUG(F("Found %zu sensor(s). Adding them."), devices_.size()); // uncomment for debug
-                state_         = State::IDLE;
-                last_activity_ = time_now;
+                state_ = State::IDLE;
             }
         }
     }

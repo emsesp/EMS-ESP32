@@ -78,7 +78,11 @@ class OneWire {
     // Perform a 1-Wire reset cycle. Returns 1 if a device responds
     // with a presence pulse.  Returns 0 if there is no device or the
     // bus is shorted or otherwise held low for more than 250uS
+#ifdef ARDUINO_ARCH_ESP32
+    uint8_t IRAM_ATTR reset(void);
+#else
     uint8_t reset(void);
+#endif
 
     // Issue a 1-Wire rom select command, you do the reset first.
     void select(const uint8_t rom[8]);
@@ -101,11 +105,18 @@ class OneWire {
 
     // Write a bit. The bus is always left powered at the end, see
     // note in write() about that.
-    void write_bit(uint8_t v);
+ #ifdef ARDUINO_ARCH_ESP32
+   void IRAM_ATTR write_bit(uint8_t v);
+ #else
+   void write_bit(uint8_t v);
+#endif
 
     // Read a bit.
+#ifdef ARDUINO_ARCH_ESP32
+    uint8_t IRAM_ATTR read_bit(void);
+#else
     uint8_t read_bit(void);
-
+#endif
     // Stop forcing power onto the bus. You only need to do this if
     // you used the 'power' flag to write() or used a write_bit() call
     // and aren't about to do another read or write. You would rather
