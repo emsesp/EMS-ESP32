@@ -666,7 +666,7 @@ void Boiler::process_UBAMaintenanceData(std::shared_ptr<const Telegram> telegram
 
 // Set the warm water temperature 0x33
 void Boiler::set_warmwater_temp(const char * value, const int8_t id) {
-    uint8_t v = 0;
+    int v = 0;
     if (!Helpers::value2number(value, v)) {
         return;
     }
@@ -678,7 +678,7 @@ void Boiler::set_warmwater_temp(const char * value, const int8_t id) {
 
 // flow temp
 void Boiler::set_flow_temp(const char * value, const int8_t id) {
-    uint8_t v = 0;
+    int v = 0;
     if (!Helpers::value2number(value, v)) {
         return;
     }
@@ -689,7 +689,7 @@ void Boiler::set_flow_temp(const char * value, const int8_t id) {
 
 // set min boiler output
 void Boiler::set_min_power(const char * value, const int8_t id) {
-    uint8_t v = 0;
+    int v = 0;
     if (!Helpers::value2number(value, v)) {
         return;
     }
@@ -699,7 +699,7 @@ void Boiler::set_min_power(const char * value, const int8_t id) {
 
 // set max temp
 void Boiler::set_max_power(const char * value, const int8_t id) {
-    uint8_t v = 0;
+    int v = 0;
     if (!Helpers::value2number(value, v)) {
         return;
     }
@@ -710,7 +710,7 @@ void Boiler::set_max_power(const char * value, const int8_t id) {
 
 // set oiler on hysteresis
 void Boiler::set_hyst_on(const char * value, const int8_t id) {
-    uint8_t v = 0;
+    int v = 0;
     if (!Helpers::value2number(value, v)) {
         return;
     }
@@ -721,7 +721,7 @@ void Boiler::set_hyst_on(const char * value, const int8_t id) {
 
 // set boiler off hysteresis
 void Boiler::set_hyst_off(const char * value, const int8_t id) {
-    uint8_t v = 0;
+    int v = 0;
     if (!Helpers::value2number(value, v)) {
         return;
     }
@@ -732,7 +732,7 @@ void Boiler::set_hyst_off(const char * value, const int8_t id) {
 
 // set min burner period
 void Boiler::set_burn_period(const char * value, const int8_t id) {
-    uint8_t v = 0;
+    int v = 0;
     if (!Helpers::value2number(value, v)) {
         return;
     }
@@ -743,7 +743,7 @@ void Boiler::set_burn_period(const char * value, const int8_t id) {
 
 // set pump delay
 void Boiler::set_pump_delay(const char * value, const int8_t id) {
-    uint8_t v = 0;
+    int v = 0;
     if (!Helpers::value2number(value, v)) {
         return;
     }

@@ -42,7 +42,7 @@ void System::mqtt_command_gpio(const char * value, const int8_t id) {
 #elif defined(ESP32)
     const uint8_t pins[] = {26, 22, 21, 17};
 #else
-    const uint8_t pins[] = {0, 1, 2, 3};
+    const uint8_t pins[] = {11, 12, 13, 14};
 #endif
     bool v = false;
     if (Helpers::value2bool(value, v)) {
@@ -557,6 +557,20 @@ void System::console_commands(Shell & shell, unsigned int context) {
                                        flash_string_vector{F_(show), F_(users)},
                                        [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) { System::show_users(shell); });
 
+    EMSESPShell::commands->add_command(ShellContext::SYSTEM,
+                                       CommandFlags::ADMIN,
+                                       flash_string_vector{F_(gpio)},
+                                       flash_string_vector{F_(pin_mandatory), F_(data_optional)},
+                                       [](Shell & shell, const std::vector<std::string> & arguments) {
+                                           if (arguments.size() == 1) {
+                                               shell.printfln(F("use on/off, 1/0 or true/false"));
+                                               return;
+                                           }
+                                           int pin = 0;
+                                           if (Helpers::value2number(arguments[0].c_str(), pin)) {
+                                               System::mqtt_command_gpio(arguments[1].c_str(), pin);
+                                           }
+                                       });
 
     // enter the context
     Console::enter_custom_context(shell, context);

@@ -58,9 +58,9 @@ class Helpers {
 
     static std::string toLower(std::string const & s);
 
-    static bool value2number(const char * v, int value);
-    static bool value2float(const char * v, float value);
-    static bool value2bool(const char * v, uint8_t value);
+    static bool value2number(const char * v, int & value);
+    static bool value2float(const char * v, float & value);
+    static bool value2bool(const char * v, bool & value);
     static bool value2string(const char * v, std::string & value);
 };
 

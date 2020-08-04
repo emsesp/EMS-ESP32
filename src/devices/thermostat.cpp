@@ -1154,7 +1154,7 @@ void Thermostat::console_commands(Shell & shell, unsigned int context) {
 
 // 0xA5 - Set minimum external temperature
 void Thermostat::set_settings_minexttemp(const char * value, const int8_t id) {
-    int8_t mt = 0;
+    int mt = 0;
     if (!Helpers::value2number(value, mt)) {
         return;
     }
@@ -1166,7 +1166,7 @@ void Thermostat::set_settings_minexttemp(const char * value, const int8_t id) {
 
 // 0xA5 - Clock offset
 void Thermostat::set_settings_clockoffset(const char * value, const int8_t id) {
-    int8_t co = 0;
+    int co = 0;
     if (!Helpers::value2number(value, co)) {
         return;
     }
@@ -1178,7 +1178,7 @@ void Thermostat::set_settings_clockoffset(const char * value, const int8_t id) {
 
 // 0xA5 - Calibrate internal temperature
 void Thermostat::set_settings_calinttemp(const char * value, const int8_t id) {
-    int8_t ct = 0;
+    int ct = 0;
     if (!Helpers::value2number(value, ct)) {
         return;
     }
@@ -1192,7 +1192,7 @@ void Thermostat::set_settings_calinttemp(const char * value, const int8_t id) {
 
 // 0xA5 - Set the display settings
 void Thermostat::set_settings_display(const char * value, const int8_t id) {
-    uint8_t ds = 0;
+    int ds = 0;
     if (!Helpers::value2number(value, ds)) {
         return;
     }
@@ -1243,7 +1243,7 @@ void Thermostat::set_settings_building(const char * value, const int8_t id) {
 
 // 0xA5 Set the language settings
 void Thermostat::set_settings_language(const char * value, const int8_t id) {
-    uint8_t lg = 0;
+    int lg = 0;
     if (!Helpers::value2number(value, lg)) {
         return;
     }
@@ -1255,7 +1255,7 @@ void Thermostat::set_settings_language(const char * value, const int8_t id) {
 
 // Set the control-mode for hc 0-off, 1-RC20, 2-RC3x
 void Thermostat::set_control(const char * value, const int8_t id) {
-    uint8_t ctrl = 0;
+    int ctrl = 0;
     if (!Helpers::value2number(value, ctrl)) {
         return;
     }
@@ -1335,7 +1335,7 @@ void Thermostat::set_holiday(const char * value, const int8_t id) {
 
 // set pause in hours
 void Thermostat::set_pause(const char * value, const int8_t id) {
-    uint8_t hrs = 0;
+    int hrs = 0;
     if (!Helpers::value2number(value, hrs)) {
         return;
     }
@@ -1356,7 +1356,7 @@ void Thermostat::set_pause(const char * value, const int8_t id) {
 
 // set partymode in hours
 void Thermostat::set_party(const char * value, const int8_t id) {
-    uint8_t hrs = 0;
+    int hrs = 0;
     if (!Helpers::value2number(value, hrs)) {
         return;
     }
@@ -1747,7 +1747,7 @@ void Thermostat::thermostat_cmd_mode(const char * message) {
 }
 
 void Thermostat::set_temperature_value(const char * value, const uint8_t id, const uint8_t mode) {
-    float f = 0;
+    float   f      = 0;
     uint8_t hc_num = (id == -1) ? DEFAULT_HEATING_CIRCUIT : id;
     if (Helpers::value2float(value, f)) {
         set_temperature(f, mode, hc_num);

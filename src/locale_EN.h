@@ -62,6 +62,9 @@ MAKE_PSTR_WORD(heartbeat)
 MAKE_PSTR_WORD(users)
 MAKE_PSTR_WORD(master)
 MAKE_PSTR_WORD(test)
+MAKE_PSTR_WORD(gpio)
+
+// for commands
 MAKE_PSTR_WORD(call)
 
 // devices
@@ -81,7 +84,7 @@ MAKE_PSTR_WORD(sensors)
 MAKE_PSTR(kwh, "kWh")
 MAKE_PSTR(wh, "Wh")
 MAKE_PSTR(hc_optional, "[heating circuit]")
-MAKE_PSTR(master_thermostat_fmt, "Master Thermostat device ID = %s")
+MAKE_PSTR(master_thermostat_fmt, "Master Thermostat Device ID = %s")
 MAKE_PSTR(host_fmt, "Host = %s")
 MAKE_PSTR(hostname_fmt, "WiFi Hostname = %s")
 MAKE_PSTR(mark_interval_fmt, "Mark interval = %lus");
@@ -101,6 +104,7 @@ MAKE_PSTR(degrees, "°C")
 MAKE_PSTR(asterisks, "********")
 MAKE_PSTR(n_mandatory, "<n>")
 MAKE_PSTR(n_optional, "[n]")
+MAKE_PSTR(pin_mandatory, "<pin>")
 MAKE_PSTR(data_optional, "[data]")
 MAKE_PSTR(typeid_mandatory, "<type ID>")
 MAKE_PSTR(deviceid_mandatory, "<device ID>")

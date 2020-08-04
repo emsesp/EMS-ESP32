@@ -28,7 +28,7 @@ namespace emsesp {
 // used with the 'test' command, under su/admin
 void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
     if (command == "default") {
-        run_test(shell, "mqtt"); // add the default test case here
+        run_test(shell, "gpio"); // add the default test case here
     }
 
     if (command.empty()) {
@@ -478,6 +478,19 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         EMSESP::show_ems(shell);
 
         EMSESP::txservice_.flush_tx_queue();
+    }
+
+    if (command == "gpio") {
+        shell.printfln(F("Testing gpio..."));
+
+        EMSESP::add_context_menus(); // need to add this as it happens later in the code
+        shell.invoke_command("su");
+        shell.invoke_command("system");
+        shell.invoke_command("help");
+        shell.invoke_command("gpio");
+        shell.invoke_command("gpio 1 true");
+
+        shell.loop_all();
     }
 
     if (command == "mqtt") {

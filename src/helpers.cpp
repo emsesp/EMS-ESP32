@@ -354,7 +354,7 @@ bool Helpers::hasValue(const uint32_t v) {
 }
 
 // checks if we can convert a char string to an int value
-bool Helpers::value2number(const char * v, int value) {
+bool Helpers::value2number(const char * v, int & value) {
     if ((v == nullptr) || (strlen(v) == 0)) {
         value = 0;
         return false;
@@ -364,7 +364,7 @@ bool Helpers::value2number(const char * v, int value) {
 }
 
 // checks if we can convert a char string to a float value
-bool Helpers::value2float(const char * v, float value) {
+bool Helpers::value2float(const char * v, float & value) {
     if ((v == nullptr) || (strlen(v) == 0)) {
         value = 0;
         return false;
@@ -392,22 +392,24 @@ bool Helpers::value2string(const char * v, std::string & value) {
 
 // checks to see if a string (usually a command or payload cmd) looks like a boolean
 // on, off, true, false, 1, 0
-bool Helpers::value2bool(const char * v, uint8_t value) {
+bool Helpers::value2bool(const char * v, bool & value) {
     if ((v == nullptr) || (strlen(v) == 0)) {
         return false;
     }
 
-    if ((strncmp(v, "on", 2) == 0) || (strncmp(v, "1", 1) == 0) || (strncmp(v, "true", 4) == 0)) {
+    std::string bool_str = toLower(v); // convert to lower case
+
+    if ((bool_str == "on") || (bool_str == "1") or (bool_str == "true")) {
         value = true;
-        return true;
+        return true; // is a bool
     }
 
-    if ((strncmp(v, "off", 3) == 0) || (strncmp(v, "0", 1) == 0) || (strncmp(v, "false", 5) == 0)) {
+    if ((bool_str == "off") || (bool_str == "0") or (bool_str == "false")) {
         value = false;
-        return true;
+        return true;  // is a bool
     }
 
-    return false;
+    return false; // not a bool
 }
 
 } // namespace emsesp

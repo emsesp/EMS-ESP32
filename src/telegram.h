@@ -112,8 +112,7 @@ class Telegram {
 
         value = 0;
         for (uint8_t i = 0; i < size; i++) {
-            // shift
-            value = (value << 8) + message_data[abs_index + i];
+            value = (value << 8) + message_data[abs_index + i]; // shift
         }
     }
 
