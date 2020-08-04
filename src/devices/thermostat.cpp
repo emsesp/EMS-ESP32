@@ -1746,9 +1746,9 @@ void Thermostat::thermostat_cmd_mode(const char * message) {
     set_mode(message, AUTO_HEATING_CIRCUIT);
 }
 
-void Thermostat::set_temperature_value(const char * value, const uint8_t id, const uint8_t mode) {
+void Thermostat::set_temperature_value(const char * value, const int8_t id, const uint8_t mode) {
     float   f      = 0;
-    uint8_t hc_num = (id == -1) ? DEFAULT_HEATING_CIRCUIT : id;
+    uint8_t hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
     if (Helpers::value2float(value, f)) {
         set_temperature(f, mode, hc_num);
     }
