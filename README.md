@@ -91,6 +91,7 @@ system
   set wifi password
   set wifi ssid <name>
   wifi reconnect
+  gpio <pin> [data]
 
 boiler
   read <type ID>
