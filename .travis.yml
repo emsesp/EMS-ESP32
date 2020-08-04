@@ -64,7 +64,7 @@ deploy:
   target_commitish: $TRAVIS_COMMIT
   on:
     tags: false
-    branch: v2
+    branch: v2_cmd
 
 notifications:
   email:
