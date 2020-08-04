@@ -78,13 +78,17 @@ void Boiler::add_context_menu() {
 void Boiler::device_info(JsonArray & root) {
     JsonObject dataElement;
 
-    dataElement          = root.createNestedObject();
-    dataElement["name"]  = F("Hot tap water");
-    dataElement["value"] = tap_water_active_ ? F("running") : F("off");
+    if (Helpers::hasValue(tap_water_active_, EMS_VALUE_BOOL)) {
+        dataElement          = root.createNestedObject();
+        dataElement["name"]  = F("Hot tap water");
+        dataElement["value"] = tap_water_active_ ? F("running") : F("off");
+    }
 
-    dataElement          = root.createNestedObject();
-    dataElement["name"]  = F("Central heating");
-    dataElement["value"] = heating_active_ ? F("active") : F("off");
+    if (Helpers::hasValue(heating_active_, EMS_VALUE_BOOL)) {
+        dataElement          = root.createNestedObject();
+        dataElement["name"]  = F("Central heating");
+        dataElement["value"] = heating_active_ ? F("active") : F("off");
+    }
 
     render_value_json(root, "", F("Selected flow temperature"), selFlowTemp_, F_(degrees));
     render_value_json(root, "", F("Current flow temperature"), curFlowTemp_, F_(degrees), 10);
