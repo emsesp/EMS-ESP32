@@ -28,7 +28,7 @@ namespace emsesp {
 // used with the 'test' command, under su/admin
 void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
     if (command == "default") {
-        run_test(shell, "gpio"); // add the default test case here
+        run_test(shell, "mqtt"); // add the default test case here
     }
 
     if (command.empty()) {
@@ -523,7 +523,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         // test publish and adding to queue
         EMSESP::txservice_.flush_tx_queue();
         EMSESP::EMSESP::mqtt_.publish("boiler_cmd", "test me");
-        Mqtt::show_mqtt(shell);
+        Mqtt::show_mqtt(shell); // show queue
 
         strcpy(topic, "ems-esp/boiler_cmd");
         strcpy(payload, "12345");
@@ -600,6 +600,9 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         shell.invoke_command("call");
         shell.invoke_command("call wwmode");
         shell.invoke_command("call mode auto 2");
+
+        Mqtt::resubscribe();
+        Mqtt::show_mqtt(shell); // show queue
 
         shell.loop_all();
     }

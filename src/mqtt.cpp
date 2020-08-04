@@ -94,7 +94,7 @@ void Mqtt::add_command(const uint8_t device_type, const __FlashStringHelper * cm
     // unless its a system MQTT command
     std::string cmd_topic(40, '\0');
     if (device_type == EMSdevice::DeviceType::SERVICEKEY) {
-        cmd_topic = "system"; // hard-coded system
+        cmd_topic = MQTT_SYSTEM_CMD; // hard-coded system
     } else {
         snprintf_P(&cmd_topic[0], 40, PSTR("%s_cmd"), EMSdevice::device_type_topic_name(device_type).c_str());
     }
@@ -127,7 +127,7 @@ void Mqtt::resubscribe() {
     }
 
     for (const auto & mqtt_subfunction : mqtt_subfunctions_) {
-        queue_message(Operation::SUBSCRIBE, mqtt_subfunction.topic_, "", false, true); // no payload, no topic prefixing
+        queue_subscribe_message(mqtt_subfunction.topic_);
     }
 }
 
@@ -235,9 +235,9 @@ void Mqtt::incoming(char * topic, char * payload) {
 bool Mqtt::call_command(const uint8_t device_type, const char * cmd, const char * value, const int8_t id) {
 #ifdef EMSESP_DEBUG
     if (id == -1) {
-        LOG_DEBUG(F("calling command %s, value %s, id is default"), cmd, value);
+        LOG_DEBUG(F("[DEBUG] Calling command %s, value %s, id is default"), cmd, value);
     } else {
-        LOG_DEBUG(F("calling command %s, value %s, id is %d"), cmd, value, id);
+        LOG_DEBUG(F("[DEBUG] Calling command %s, value %s, id is %d"), cmd, value, id);
     }
 #endif
 
@@ -430,7 +430,7 @@ void Mqtt::on_connect() {
     resubscribe(); // in case this is a reconnect, re-subscribe again to all MQTT topics
 
     // add the system MQTT subscriptions, only if its a fresh start with no previous subscriptions
-    // these commands respond to the topic "system" and take a payload like {cmd:"", data:"", id:""}
+    // these commands respond to the topic "system_cmd" and take a payload like {cmd:"", data:"", id:""}
     if (mqtt_subfunctions_.empty()) {
         add_command(EMSdevice::DeviceType::SERVICEKEY, F("gpio"), System::mqtt_command_gpio);
         add_command(EMSdevice::DeviceType::SERVICEKEY, F("send"), System::mqtt_command_send);
@@ -442,15 +442,14 @@ void Mqtt::on_connect() {
 // add sub or pub task to the queue.
 // a fully-qualified topic is created by prefixing the hostname, unless it's HA
 // returns a pointer to the message created
-std::shared_ptr<const MqttMessage>
-Mqtt::queue_message(const uint8_t operation, const std::string & topic, const std::string & payload, const bool retain, bool no_prefix) {
+std::shared_ptr<const MqttMessage> Mqtt::queue_message(const uint8_t operation, const std::string & topic, const std::string & payload, const bool retain) {
     if (topic.empty()) {
         return nullptr;
     }
 
     // take the topic and prefix the hostname, unless its for HA
     std::shared_ptr<MqttMessage> message;
-    if ((strncmp(topic.c_str(), "homeassistant/", 13) == 0) || no_prefix) {
+    if ((strncmp(topic.c_str(), "homeassistant/", 13) == 0)) {
         // leave topic as it is
         message = std::make_shared<MqttMessage>(operation, topic, payload, retain);
     } else {
