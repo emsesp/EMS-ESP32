@@ -103,7 +103,7 @@ void Mixing::show_values(uuid::console::Shell & shell) {
 // publish values via MQTT
 // ideally we should group up all the mixing units together into a nested JSON but for now we'll send them individually
 void Mixing::publish_values() {
-    DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_SMALL);
+    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
 
     switch (type_) {
     case Type::HC:

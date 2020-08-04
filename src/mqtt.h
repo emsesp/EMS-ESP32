@@ -37,9 +37,9 @@
 
 using uuid::console::Shell;
 
-#define EMSESP_MAX_JSON_SIZE_SMALL 200  // for smaller json docs
-#define EMSESP_MAX_JSON_SIZE_MEDIUM 800 // for smaller json docs from ems devices
-#define EMSESP_MAX_JSON_SIZE_LARGE 1500 // for large json docs from ems devices, like boiler or thermostat data
+#define EMSESP_MAX_JSON_SIZE_SMALL 200  // for smaller json docs when using StaticJsonDocument
+#define EMSESP_MAX_JSON_SIZE_MEDIUM 800 // for smaller json docs from ems devices, when using StaticJsonDocument
+#define EMSESP_MAX_JSON_SIZE_LARGE 1500 // for large json docs from ems devices, like boiler or thermostat data. Using DynamicJsonDocument
 
 namespace emsesp {
 
