@@ -91,7 +91,7 @@ system
   set wifi password
   set wifi ssid <name>
   wifi reconnect
-  gpio <pin> [data]
+  pin <gpio> [data]
 
 boiler
   read <type ID>
@@ -150,9 +150,9 @@ commands must be written as `{"cmd":<cmd> ,"data":<data>, "id":<n> }`. The `id` 
   holiday <dd.mm.yyyy-dd.mm.yyyy>
   date <NTP | hh:mm:ss-dd.mm.yyyy-dw-dst>
 
-*cmd*
+*system_cmd*
   send <"0B XX XX ..">
-  gpio <0 | 1> <0-3> (for D0-D3)
+  pin <gpio> <on|off|1|0|true|false>
 
 ```
 

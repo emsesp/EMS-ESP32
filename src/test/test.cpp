@@ -480,15 +480,15 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         EMSESP::txservice_.flush_tx_queue();
     }
 
-    if (command == "gpio") {
-        shell.printfln(F("Testing gpio..."));
+    if (command == "pin") {
+        shell.printfln(F("Testing pin..."));
 
         EMSESP::add_context_menus(); // need to add this as it happens later in the code
         shell.invoke_command("su");
         shell.invoke_command("system");
         shell.invoke_command("help");
-        shell.invoke_command("gpio");
-        shell.invoke_command("gpio 1 true");
+        shell.invoke_command("pin");
+        shell.invoke_command("pin 1 true");
 
         shell.loop_all();
     }
@@ -550,12 +550,12 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         strcpy(payload, "{\"cmd\":\"flowtemp\",\"data\":55}");
         EMSESP::mqtt_.incoming(topic, payload);
 
-        strcpy(topic, "ems-esp/system");
+        strcpy(topic, "ems-esp/system_cmd");
         strcpy(payload, "{\"cmd\":\"send\",\"data\":\"01 02 03 04 05\"}");
         EMSESP::mqtt_.incoming(topic, payload);
 
-        strcpy(topic, "ems-esp/system");
-        strcpy(payload, "{\"cmd\":\"gpio\",\"id\":1,\"data\":\"1\"}");
+        strcpy(topic, "ems-esp/system_cmd");
+        strcpy(payload, "{\"cmd\":\"pin\",\"id\":12,\"data\":\"1\"}");
         EMSESP::mqtt_.incoming(topic, payload);
 
         strcpy(topic, "ems-esp/thermostat_cmd");

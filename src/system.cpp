@@ -36,20 +36,12 @@ bool     System::upload_status_ = false;
 
 // send on/off to a gpio pin
 // value: true = HIGH, false = LOW
-void System::mqtt_command_gpio(const char * value, const int8_t id) {
-#if defined(ESP8266)
-    const uint8_t pins[] = {16, 5, 4, 0};
-#elif defined(ESP32)
-    const uint8_t pins[] = {26, 22, 21, 17};
-#else
-    const uint8_t pins[] = {11, 12, 13, 14};
-#endif
+void System::mqtt_command_pin(const char * value, const int8_t id) {
     bool v = false;
     if (Helpers::value2bool(value, v)) {
-        uint8_t gpio = pins[id]; // D0 - D3
-        pinMode(gpio, OUTPUT);
-        digitalWrite(gpio, v);
-        LOG_INFO(F("Port D%d set to %s"), id, v ? "HIGH" : "LOW");
+        pinMode(id, OUTPUT);
+        digitalWrite(id, v);
+        LOG_INFO(F("GPIO %d set to %s"), id, v ? "HIGH" : "LOW");
     }
 }
 
@@ -559,8 +551,8 @@ void System::console_commands(Shell & shell, unsigned int context) {
 
     EMSESPShell::commands->add_command(ShellContext::SYSTEM,
                                        CommandFlags::ADMIN,
-                                       flash_string_vector{F_(gpio)},
-                                       flash_string_vector{F_(pin_mandatory), F_(data_optional)},
+                                       flash_string_vector{F_(pin)},
+                                       flash_string_vector{F_(gpio_mandatory), F_(data_optional)},
                                        [](Shell & shell, const std::vector<std::string> & arguments) {
                                            if (arguments.size() == 1) {
                                                shell.printfln(F("use on/off, 1/0 or true/false"));
@@ -568,7 +560,7 @@ void System::console_commands(Shell & shell, unsigned int context) {
                                            }
                                            int pin = 0;
                                            if (Helpers::value2number(arguments[0].c_str(), pin)) {
-                                               System::mqtt_command_gpio(arguments[1].c_str(), pin);
+                                               System::mqtt_command_pin(arguments[1].c_str(), pin);
                                            }
                                        });
 

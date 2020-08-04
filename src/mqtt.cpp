@@ -432,7 +432,7 @@ void Mqtt::on_connect() {
     // add the system MQTT subscriptions, only if its a fresh start with no previous subscriptions
     // these commands respond to the topic "system_cmd" and take a payload like {cmd:"", data:"", id:""}
     if (mqtt_subfunctions_.empty()) {
-        add_command(EMSdevice::DeviceType::SERVICEKEY, F("gpio"), System::mqtt_command_gpio);
+        add_command(EMSdevice::DeviceType::SERVICEKEY, F("pin"), System::mqtt_command_pin);
         add_command(EMSdevice::DeviceType::SERVICEKEY, F("send"), System::mqtt_command_send);
     }
 

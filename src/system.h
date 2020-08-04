@@ -50,7 +50,7 @@ class System {
 
     static void console_commands(Shell & shell, unsigned int context);
 
-    static void mqtt_command_gpio(const char * value, const int8_t id);
+    static void mqtt_command_pin(const char * value, const int8_t id);
     static void mqtt_command_send(const char * value, const int8_t id);
 
     static uint8_t free_mem();
