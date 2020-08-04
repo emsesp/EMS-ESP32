@@ -3,15 +3,10 @@
 #define ASYNC_JSON_H_
 #include <ArduinoJson.h>
 #include <ESPAsyncWebServer.h>
-// #include <Print.h>
 
 #define DYNAMIC_JSON_DOCUMENT_SIZE 1024
 
 constexpr const char * JSON_MIMETYPE = "application/json";
-
-/*
- * Json Response
- * */
 
 class ChunkPrint : public Print {
   private:
@@ -45,9 +40,8 @@ class ChunkPrint : public Print {
     }
 };
 
-class AsyncJsonResponse  {
+class AsyncJsonResponse {
   protected:
-
     DynamicJsonDocument _jsonBuffer;
 
     JsonVariant _root;
@@ -71,7 +65,7 @@ class AsyncJsonResponse  {
         return _isValid;
     }
     size_t setLength() {
-return 0;
+        return 0;
     }
 
     size_t getSize() {
@@ -79,9 +73,6 @@ return 0;
     }
 
     size_t _fillBuffer(uint8_t * data, size_t len) {
-        // ChunkPrint dest(data, 0, len);
-
-        // serializeJson(_root, dest);
         return len;
     }
 };

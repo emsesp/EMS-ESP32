@@ -24,10 +24,11 @@ import {
   FormButton,
 } from "../components";
 
-import { EMSESPDevices, Device } from "./EMSESPtypes";
+import { EMSESPDevices, EMSESPDeviceData, Device } from "./EMSESPtypes";
 
 import { ENDPOINT_ROOT } from '../api';
 export const SCANDEVICES_ENDPOINT = ENDPOINT_ROOT + "scanDevices";
+export const DEVICE_DATA_ENDPOINT = ENDPOINT_ROOT + "deviceData";
 
 const StyledTableCell = withStyles((theme: Theme) =>
   createStyles({
@@ -54,6 +55,7 @@ function compareDevices(a: Device, b: Device) {
 interface EMSESPDevicesFormState {
   confirmScanDevices: boolean;
   processing: boolean;
+  deviceData?: EMSESPDeviceData;
 }
 
 type EMSESPDevicesFormProps = RestFormProps<EMSESPDevices> & AuthenticatedContextProps & WithWidthProps;
@@ -65,15 +67,26 @@ class EMSESPDevicesForm extends Component<EMSESPDevicesFormProps, EMSESPDevicesF
     processing: false
   }
 
-  noData = () => {
+  noDevices = () => {
     return (this.props.data.devices.length === 0);
   };
 
-  createTableItems() {
+  noSensors = () => {
+    return (this.props.data.sensors.length === 0);
+  };
+
+  noDeviceData = () => {
+    return (this.state.deviceData?.deviceData.length === 0);
+  };
+
+  createDeviceItems() {
     const { width, data } = this.props;
     return (
       <TableContainer>
-        {!this.noData() && (
+        <Typography variant="h6" color="primary" paragraph>
+          Devices:
+        </Typography>
+        {!this.noDevices() && (
           <Table size="small" padding={isWidthDown('xs', width!) ? "none" : "default"}>
             <TableHead>
               <TableRow>
@@ -87,7 +100,9 @@ class EMSESPDevicesForm extends Component<EMSESPDevicesFormProps, EMSESPDevicesF
             </TableHead>
             <TableBody>
               {data.devices.sort(compareDevices).map(device => (
-                <TableRow hover key={device.type}>
+                <TableRow hover key={device.id}
+                  onClick={() => this.handleRowClick(device.id)}
+                >
                   <TableCell component="th" scope="row">
                     {device.type}
                   </TableCell>
@@ -111,11 +126,54 @@ class EMSESPDevicesForm extends Component<EMSESPDevicesFormProps, EMSESPDevicesF
             </TableBody>
           </Table>
         )}
-        {this.noData() &&
+        {this.noDevices() &&
           (
             <Box bgcolor="error.main" color="error.contrastText" p={2} mt={2} mb={2}>
               <Typography variant="body1">
-                No EMS devices found. Check the connection and for possible Tx errors and try scanning for new devices.
+                No EMS devices found. Check the connections and for possible Tx errors.
+              </Typography>
+            </Box>
+          )
+        }
+      </TableContainer>
+    );
+  }
+
+  createSensorItems() {
+    const { data } = this.props;
+    return (
+      <TableContainer>
+        <p></p>
+        <Typography variant="h6" color="primary" paragraph>
+          Sensors:
+        </Typography>
+        {!this.noSensors() && (
+          <Table size="small" padding="default">
+            <TableHead>
+              <TableRow>
+                <StyledTableCell>ID</StyledTableCell>
+                <StyledTableCell align="left">Temperature</StyledTableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {data.sensors.map(sensorData => (
+                <TableRow key={sensorData.id}>
+                  <TableCell component="th" scope="row">
+                    {sensorData.id}
+                  </TableCell>
+                  <TableCell align="left">
+                    {sensorData.temp}&deg;C
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+        {this.noSensors() &&
+          (
+            <Box color="warning.main" p={0} mt={0} mb={0}>
+              <Typography variant="body1">
+                No external temperature sensors detected.
               </Typography>
             </Box>
           )
@@ -156,26 +214,97 @@ class EMSESPDevicesForm extends Component<EMSESPDevicesFormProps, EMSESPDevicesF
 
   onScanDevicesConfirmed = () => {
     this.setState({ processing: true });
-    redirectingAuthorizedFetch(SCANDEVICES_ENDPOINT, { method: 'POST' })
-      .then(response => {
-        if (response.status === 200) {
-          this.props.enqueueSnackbar("Device scan is starting...", { variant: 'info' });
-          this.setState({ processing: false, confirmScanDevices: false });
-        } else {
-          throw Error("Invalid status code: " + response.status);
-        }
-      })
+    redirectingAuthorizedFetch(SCANDEVICES_ENDPOINT).then(response => {
+      if (response.status === 200) {
+        this.props.enqueueSnackbar("Device scan is starting...", { variant: 'info' });
+        this.setState({ processing: false, confirmScanDevices: false });
+      } else {
+        throw Error("Invalid status code: " + response.status);
+      }
+    })
       .catch(error => {
         this.props.enqueueSnackbar(error.message || "Problem with scan", { variant: 'error' });
         this.setState({ processing: false, confirmScanDevices: false });
       });
   }
 
+  handleRowClick = (id: any) => {
+    this.setState({ deviceData: undefined });
+    redirectingAuthorizedFetch(DEVICE_DATA_ENDPOINT, {
+      method: 'POST',
+      body: JSON.stringify({ id: id }),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }).then(response => {
+      if (response.status === 200) {
+        return response.json();
+        // this.setState({ errorMessage: undefined }, this.props.loadData);
+      }
+      throw Error("Unexpected response code: " + response.status);
+    }).then(json => {
+      this.setState({ deviceData: json });
+    }).catch(error => {
+      this.props.enqueueSnackbar(error.message || "Problem getting device data", { variant: 'error' });
+      this.setState({ deviceData: undefined });
+    });
+  }
+
+  renderDeviceData() {
+    const { deviceData } = this.state;
+    const { width } = this.props;
+
+    if (this.noDevices()) {
+      return;
+    }
+
+    if (!deviceData) {
+      return;
+    }
+
+    if ((deviceData.deviceData || []).length === 0) {
+      return;
+    }
+
+    return (
+      <Fragment>
+        <p></p>
+        <Box bgcolor="info.main" p={2} mt={1} mb={1}>
+          <Typography variant="body1">
+            {deviceData.deviceName}
+          </Typography>
+        </Box>
+
+        <TableContainer>
+          <Table size="small" padding={isWidthDown('xs', width!) ? "none" : "default"}>
+            <TableHead>
+            </TableHead>
+            <TableBody>
+              {deviceData.deviceData.map(deviceData => (
+                <TableRow key={deviceData.name}>
+                  <TableCell component="th" scope="row">
+                    {deviceData.name}
+                  </TableCell>
+                  <TableCell align="left">
+                    {deviceData.value}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Fragment>
+    );
+
+  }
+
   render() {
     return (
       <Fragment>
         <br></br>
-        {this.createTableItems()}
+        {this.createDeviceItems()}
+        {this.renderDeviceData()}
+        {this.createSensorItems()}
         <br></br>
         <Box display="flex" flexWrap="wrap">
           <Box flexGrow={1} padding={1}>

@@ -136,34 +136,6 @@ class Stream : public Print {
     virtual int peek()      = 0;
 };
 
-/*
-class String {
-  public:
-    String(const char * data = "")
-        : data_(data) {
-    }
-
-    long toInt() const {
-        return std::stol(data_);
-    }
-
-    const char * c_str() const {
-        return data_.c_str();
-    }
-
-    bool equals(String comp) {
-        return (data_ == comp.c_str());
-    }
-
-    bool isEmpty() {
-        return data_.empty();
-    }
-
-  private:
-    std::string data_;
-};
-*/
-
 class NativeConsole : public Stream {
   public:
     void begin(unsigned long baud __attribute__((unused))) {
@@ -224,10 +196,6 @@ void yield(void);
 
 void setup(void);
 void loop(void);
-
-
-size_t strlcpy(char * __restrict dst, const char * __restrict src, size_t dsize);
-size_t strlcat(char * dst, const char * src, size_t siz);
 
 #include "WString.h"
 

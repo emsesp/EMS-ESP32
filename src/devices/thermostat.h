@@ -31,6 +31,7 @@
 #include "mqtt.h"
 
 #include <vector>
+#include <time.h>
 
 namespace emsesp {
 
@@ -94,6 +95,7 @@ class Thermostat : public EMSdevice {
 
     virtual void show_values(uuid::console::Shell & shell);
     virtual void publish_values();
+    virtual void device_info(JsonArray & root);
     virtual bool updated_values();
     virtual void add_context_menu();
 

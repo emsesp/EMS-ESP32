@@ -39,9 +39,8 @@ ESP8266React          EMSESP::esp8266React(&webServer, &dummyFS);
 EMSESPSettingsService EMSESP::emsespSettingsService = EMSESPSettingsService(&webServer, &dummyFS, EMSESP::esp8266React.getSecurityManager());
 #endif
 
-EMSESPStatusService      EMSESP::emsespStatusService      = EMSESPStatusService(&webServer, EMSESP::esp8266React.getSecurityManager());
-EMSESPDevicesService     EMSESP::emsespDevicesService     = EMSESPDevicesService(&webServer, EMSESP::esp8266React.getSecurityManager());
-EMSESPScanDevicesService EMSESP::emsespScanDevicesService = EMSESPScanDevicesService(&webServer, EMSESP::esp8266React.getSecurityManager());
+EMSESPStatusService  EMSESP::emsespStatusService  = EMSESPStatusService(&webServer, EMSESP::esp8266React.getSecurityManager());
+EMSESPDevicesService EMSESP::emsespDevicesService = EMSESPDevicesService(&webServer, EMSESP::esp8266React.getSecurityManager());
 
 std::vector<std::unique_ptr<EMSdevice>>    EMSESP::emsdevices;      // array of all the detected EMS devices
 std::vector<emsesp::EMSESP::Device_record> EMSESP::device_library_; // libary of all our known EMS devices so far
@@ -63,6 +62,7 @@ uint16_t EMSESP::watch_id_                 = WATCH_ID_NONE;                    /
 uint8_t  EMSESP::watch_                    = 0;                                // trace off
 bool     EMSESP::tap_water_active_         = false;                            // for when Boiler states we having running warm water. used in Shower()
 uint32_t EMSESP::last_fetch_               = 0;
+uint8_t  EMSESP::unique_id_count_          = 0;
 
 // for a specific EMS device go and request data values
 // or if device_id is 0 it will fetch from all our known and active devices
@@ -110,13 +110,17 @@ void EMSESP::watch_id(uint16_t watch_id) {
 
 // change the tx_mode
 // resets all counters and bumps the UART
-void EMSESP::reset_tx(uint8_t const tx_mode) {
-    txservice_.telegram_read_count(0);
-    txservice_.telegram_write_count(0);
-    txservice_.telegram_fail_count(0);
-    if (tx_mode) {
-        EMSuart::stop();
-        EMSuart::start(tx_mode);
+void EMSESP::reset_tx() {
+    // get the tx_mode
+    uint8_t tx_mode;
+    EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) { tx_mode = settings.tx_mode; });
+
+    EMSuart::stop();
+    EMSuart::start(tx_mode);
+    txservice_.start();
+
+    // force a fetch for all new values, unless Tx is set to off
+    if (tx_mode != 0) {
         EMSESP::fetch_device_values();
     }
 }
@@ -151,7 +155,22 @@ uint8_t EMSESP::bus_status() {
 // show the EMS bus status plus both Rx and Tx queues
 void EMSESP::show_ems(uuid::console::Shell & shell) {
     // EMS bus information
-    if (rxservice_.bus_connected()) {
+    switch (bus_status()) {
+    case BUS_STATUS_OFFLINE:
+        shell.printfln(F("EMS Bus is disconnected."));
+        break;
+    case BUS_STATUS_TX_ERRORS:
+        shell.printfln(F("EMS Bus is connected, but Tx is not stable."));
+        break;
+    case BUS_STATUS_CONNECTED:
+    default:
+        shell.printfln(F("EMS Bus is connected."));
+        break;
+    }
+
+    shell.println();
+
+    if (bus_status() != BUS_STATUS_OFFLINE) {
         uint8_t success_rate = 0;
         if (rxservice_.telegram_error_count()) {
             success_rate = ((float)rxservice_.telegram_error_count() / (float)rxservice_.telegram_count()) * 100;
@@ -165,8 +184,6 @@ void EMSESP::show_ems(uuid::console::Shell & shell) {
         shell.printfln(F("  #write requests sent: %d"), txservice_.telegram_write_count());
         shell.printfln(F("  #corrupted telegrams: %d (%d%%)"), rxservice_.telegram_error_count(), success_rate);
         shell.printfln(F("  #tx fails (after %d retries): %d"), TxService::MAXIMUM_TX_RETRIES, txservice_.telegram_fail_count());
-    } else {
-        shell.printfln(F("EMS Bus is disconnected."));
     }
 
     shell.println();
@@ -231,7 +248,7 @@ void EMSESP::show_device_values(uuid::console::Shell & shell) {
     }
 }
 
-// show Dallas sensors
+// show Dallas temperature sensors
 void EMSESP::show_sensor_values(uuid::console::Shell & shell) {
     if (sensor_devices().empty()) {
         return;
@@ -240,7 +257,7 @@ void EMSESP::show_sensor_values(uuid::console::Shell & shell) {
     char valuestr[8] = {0}; // for formatting temp
     shell.printfln(F("External temperature sensors:"));
     for (const auto & device : sensor_devices()) {
-        shell.printfln(F("  Sensor ID %s: %s°C"), device.to_string().c_str(), Helpers::render_value(valuestr, device.temperature_c_, 2));
+        shell.printfln(F("  ID: %s, Temperature: %s°C"), device.to_string().c_str(), Helpers::render_value(valuestr, device.temperature_c, 2));
     }
     shell.println();
 }
@@ -474,6 +491,20 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
     return found;
 }
 
+// calls the device handler's function to populate a json doc with device info
+void EMSESP::device_info(const uint8_t unique_id, JsonObject & root) {
+    for (const auto & emsdevice : emsdevices) {
+        if (emsdevice) {
+            if (emsdevice->unique_id() == unique_id) {
+                root["deviceName"] = emsdevice->to_string_short(); // can;t use c_str() because of scope
+                JsonArray data     = root.createNestedArray("deviceData");
+                emsdevice->device_info(data);
+                return;
+            }
+        }
+    }
+}
+
 // return true if we have this device already registered
 bool EMSESP::device_exists(const uint8_t device_id) {
     for (const auto & emsdevice : emsdevices) {
@@ -513,6 +544,9 @@ void EMSESP::show_devices(uuid::console::Shell & shell) {
         // shell.printf(F("[factory ID: %d] "), device_class.first);
         for (const auto & emsdevice : emsdevices) {
             if ((emsdevice) && (emsdevice->device_type() == device_class.first)) {
+#if defined(EMSESP_DEBUG)
+                shell.printf(F("[id=%d] "), emsdevice->unique_id());
+#endif
                 shell.printf(F("%s: %s"), emsdevice->device_type_name().c_str(), emsdevice->to_string().c_str());
                 if ((emsdevice->device_type() == EMSdevice::DeviceType::THERMOSTAT) && (emsdevice->device_id() == actual_master_thermostat())) {
                     shell.printf(F(" ** master device **"));
@@ -584,6 +618,7 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
     } else {
         emsdevices.push_back(
             EMSFactory::add(device_p->device_type, device_id, device_p->product_id, version, uuid::read_flash_string(device_p->name), device_p->flags, brand));
+        emsdevices.back()->unique_id(++unique_id_count_);
         LOG_DEBUG(F("Adding new device with device ID 0x%02X with product ID %d and version %s"), device_id, product_id, version.c_str());
         // go and fetch its data,
         fetch_device_values(device_id);
@@ -629,14 +664,14 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
     }
 
     // are we waiting for a response from a recent Tx Read or Write?
-    uint8_t op = EMSbus::tx_waiting();
-    if (op != Telegram::Operation::NONE) {
+    uint8_t tx_state = EMSbus::tx_state();
+    if (tx_state != Telegram::Operation::NONE) {
         bool tx_successful = false;
-        EMSbus::tx_waiting(Telegram::Operation::NONE); // reset Tx wait state
+        EMSbus::tx_state(Telegram::Operation::NONE); // reset Tx wait state
         // txservice_.print_last_tx();
 
         // if we're waiting on a Write operation, we want a single byte 1 or 4
-        if ((op == Telegram::Operation::TX_WRITE) && (length == 1)) {
+        if ((tx_state == Telegram::Operation::TX_WRITE) && (length == 1)) {
             if (first_value == TxService::TX_WRITE_SUCCESS) {
                 LOG_DEBUG(F("Last Tx write successful"));
                 txservice_.increment_telegram_write_count(); // last tx/write was confirmed ok
@@ -649,7 +684,7 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
                 txservice_.send_poll(); // close the bus
                 txservice_.reset_retry_count();
             }
-        } else if (op == Telegram::Operation::TX_READ) {
+        } else if (tx_state == Telegram::Operation::TX_READ) {
             // got a telegram with data in it. See if the src/dest matches that from the last one we sent and continue to process it
             uint8_t src  = data[0];
             uint8_t dest = data[1];
@@ -664,13 +699,15 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
 
         // if Tx wasn't successful, retry or just give up
         if (!tx_successful) {
-            txservice_.retry_tx(op, data, length);
+            txservice_.retry_tx(tx_state, data, length);
             return;
         }
     }
 
     // check for poll
     if (length == 1) {
+        EMSbus::last_bus_activity(uuid::get_uptime()); // set the flag indication the EMS bus is active
+
 #ifdef EMSESP_DEBUG
         char s[4];
         if (first_value & 0x80) {
@@ -684,7 +721,6 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
         // check for poll to us, if so send top message from Tx queue immediately and quit
         // if ht3 poll must be ems_bus_id else if Buderus poll must be (ems_bus_id | 0x80)
         if ((first_value ^ 0x80 ^ rxservice_.ems_mask()) == txservice_.ems_bus_id()) {
-            EMSbus::last_bus_activity(uuid::get_uptime()); // set the flag indication the EMS bus is active
             txservice_.send();
         }
         // send remote room temperature if active
@@ -741,15 +777,17 @@ void EMSESP::loop() {
 
     // if we're doing an OTA upload, skip MQTT and EMS
     if (system_.upload_status()) {
+#if defined(ESP32)
+        delay(10); // slow down OTA update to avoid getting killed by task watchdog (task_wdt)
+#endif
         return;
     }
 
     system_.loop();    // does LED and checks system health, and syslog service
-    mqtt_.loop();      // starts mqtt, and sends out anything in the queue
     rxservice_.loop(); // process what ever is in the rx queue
-    txservice_.loop(); // check that the Tx is all ok
     shower_.loop();    // check for shower on/off
     sensors_.loop();   // this will also send out via MQTT
+    mqtt_.loop();      // sends out anything in the queue via MQTT
     console_.loop();   // telnet/serial console
 
     // force a query on the EMS devices to fetch latest data at a set interval (1 min)

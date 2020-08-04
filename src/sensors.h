@@ -46,7 +46,7 @@ class Sensors {
         uint64_t    id() const;
         std::string to_string() const;
 
-        float temperature_c_ = NAN;
+        float temperature_c = NAN;
 
       private:
         const uint64_t id_;
@@ -90,7 +90,7 @@ class Sensors {
     static constexpr uint32_t READ_INTERVAL_MS = 5000;  // 5 seconds
     static constexpr uint32_t CONVERSION_MS    = 1000;  // 1 seconds
     static constexpr uint32_t READ_TIMEOUT_MS  = 2000;  // 2 seconds
-    static constexpr uint32_t SCAN_TIMEOUT_MS  = 30000; // 30 seconds
+    static constexpr uint32_t SCAN_TIMEOUT_MS  = 3000;  // 3 seconds
 
     static constexpr uint8_t CMD_CONVERT_TEMP    = 0x44;
     static constexpr uint8_t CMD_READ_SCRATCHPAD = 0xBE;
@@ -111,6 +111,8 @@ class Sensors {
     std::vector<Device> devices_;
 
     uint8_t mqtt_format_;
+    uint8_t retrycnt_ = 0;
+
 };
 
 } // namespace emsesp

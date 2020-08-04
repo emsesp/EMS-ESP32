@@ -89,6 +89,7 @@ class ConcreteEMSFactory : EMSFactory {
     ConcreteEMSFactory(const uint8_t device_type) {
         EMSFactory::registerFactory(device_type, this);
     }
+
     auto construct(uint8_t device_type, uint8_t device_id, uint8_t product_id, std::string version, std::string name, uint8_t flags, uint8_t brand) const
         -> EMSdevice * {
         return new DerivedClass(device_type, device_id, product_id, version, name, flags, brand);

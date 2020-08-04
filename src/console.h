@@ -73,7 +73,7 @@ MAKE_PSTR_WORD(read)
 MAKE_PSTR_WORD(version)
 MAKE_PSTR_WORD(values)
 MAKE_PSTR_WORD(system)
-MAKE_PSTR_WORD(refresh)
+MAKE_PSTR_WORD(fetch)
 MAKE_PSTR_WORD(restart)
 MAKE_PSTR_WORD(format)
 MAKE_PSTR_WORD(raw)
@@ -191,8 +191,8 @@ class EMSESPStreamConsole : public uuid::console::StreamConsole, public EMSESPSh
 
 class Console {
   public:
-    static void loop();
-    void        start();
+    void loop();
+    void start();
 
     uuid::log::Level log_level();
 

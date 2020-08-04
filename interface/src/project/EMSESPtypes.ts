@@ -24,6 +24,7 @@ export interface EMSESPStatus {
 }
 
 export interface Device {
+  id: number;
   type: string;
   brand: string;
   name: string;
@@ -32,7 +33,23 @@ export interface Device {
   version: string;
 }
 
+export interface Sensor {
+  id: string;
+  temp: number;
+}
+
 export interface EMSESPDevices {
   devices: Device[];
+  sensors: Sensor[];
+}
+
+export interface DeviceData {
+  name: string;
+  value: string;
+}
+
+export interface EMSESPDeviceData {
+  deviceName: string;
+  deviceData: DeviceData[];
 }
 

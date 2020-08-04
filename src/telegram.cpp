@@ -42,8 +42,8 @@ uint32_t EMSbus::last_bus_activity_ = 0;              // timestamp of last time 
 bool     EMSbus::bus_connected_     = false;          // start assuming the bus hasn't been connected
 uint8_t  EMSbus::ems_mask_          = EMS_MASK_UNSET; // unset so its triggered when booting, the its 0x00=buderus, 0x80=junker/ht3
 uint8_t  EMSbus::ems_bus_id_        = EMSESP_DEFAULT_EMS_BUS_ID;
-uint8_t  EMSbus::tx_waiting_        = Telegram::Operation::NONE;
-bool     EMSbus::tx_active_         = false;
+uint8_t  EMSbus::tx_mode_           = EMSESP_DEFAULT_TX_MODE;
+uint8_t  EMSbus::tx_state_          = Telegram::Operation::NONE;
 
 uuid::log::Logger EMSbus::logger_{F_(logger_name), uuid::log::Facility::CONSOLE};
 
@@ -82,9 +82,10 @@ Telegram::Telegram(const uint8_t   operation,
 
 // returns telegram's message data bytes in hex
 std::string Telegram::to_string() const {
-    if (message_length == 0) {
+    if (this->message_length == 0) {
         return read_flash_string(F("<empty>"));
     }
+
     uint8_t data[EMS_MAX_TELEGRAM_LENGTH];
     uint8_t length = 0;
     data[0]        = this->src ^ RxService::ems_mask();
@@ -100,8 +101,7 @@ std::string Telegram::to_string() const {
             data[2] = this->type_id;
             length  = 5;
         }
-    }
-    if (this->operation == Telegram::Operation::TX_WRITE) {
+    } else if (this->operation == Telegram::Operation::TX_WRITE) {
         data[1] = this->dest;
         if (this->type_id > 0xFF) {
             data[2] = 0xFF;
@@ -115,7 +115,12 @@ std::string Telegram::to_string() const {
         for (uint8_t i = 0; i < this->message_length; i++) {
             data[length++] = this->message_data[i];
         }
+    } else {
+        for (uint8_t i = 0; i < this->message_length; i++) {
+            data[length++] = this->message_data[i];
+        }
     }
+
     return Helpers::data_to_hex(data, length);
 }
 
@@ -160,17 +165,18 @@ void RxService::add(uint8_t * data, uint8_t length) {
 
     // validate the CRC
     uint8_t crc = calculate_crc(data, length - 1);
-
-    if ((data[length - 1] != crc) && (EMSESP::watch() != EMSESP::Watch::WATCH_OFF)) {
-        LOG_ERROR(F("Rx: %s %s(CRC %02X != %02X)%s"), Helpers::data_to_hex(data, length).c_str(), COLOR_RED, data[length - 1], crc, COLOR_RESET);
+    if (data[length - 1] != crc) {
         increment_telegram_error_count();
+        if (EMSESP::watch() != EMSESP::Watch::WATCH_OFF) {
+            LOG_ERROR(F("Rx: %s %s(CRC %02X != %02X)%s"), Helpers::data_to_hex(data, length).c_str(), COLOR_RED, data[length - 1], crc, COLOR_RESET);
+        }
         return;
     }
 
     // since it's a valid telegram, work out the ems mask
     // we check the 1st byte, which assumed is the src ID and see if the MSB (8th bit) is set
     // this is used to identify if the protocol should be Junkers/HT3 or Buderus
-    // this only happens once with the first rx telegram is processed
+    // this only happens once with the first valid rx telegram is processed
     if (ems_mask() == EMS_MASK_UNSET) {
         ems_mask(data[0]);
     }
@@ -251,45 +257,48 @@ void TxService::flush_tx_queue() {
 
 // start and initialize Tx
 void TxService::start() {
-    // grab the bus ID
-    EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) { ems_bus_id(settings.ems_bus_id); });
+    // grab the bus ID and tx_mode
+    EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) {
+        ems_bus_id(settings.ems_bus_id);
+        tx_mode(settings.tx_mode);
+    });
+
+    // reset counters
+    telegram_read_count(0);
+    telegram_write_count(0);
+    telegram_fail_count(0);
 
     // send first Tx request to bus master (boiler) for its registered devices
     // this will be added to the queue and sent during the first tx loop()
     read_request(EMSdevice::EMS_TYPE_UBADevices, EMSdevice::EMS_DEVICE_ID_BOILER);
 }
 
-// Tx loop
-// here we check if the Tx is not full and report an error
-void TxService::loop() {
-#ifndef EMSESP_STANDALONE
-    if ((uuid::get_uptime() - last_tx_check_) > TX_LOOP_WAIT) {
-        last_tx_check_ = uuid::get_uptime();
-        if (!tx_active() && (EMSbus::bus_connected())) {
-            LOG_ERROR(F("Tx is not active. Please check settings and the circuit connection."));
-        }
-    }
-#endif
-}
-
 // sends a 1 byte poll which is our own device ID
 void TxService::send_poll() {
     //LOG_DEBUG(F("Ack %02X"),ems_bus_id() ^ ems_mask());
-    EMSuart::send_poll(ems_bus_id() ^ ems_mask());
+    if (tx_mode()) {
+        EMSuart::send_poll(ems_bus_id() ^ ems_mask());
+    }
 }
 
 // Process the next telegram on the Tx queue
 // This is sent when we receieve a poll request
 void TxService::send() {
     // don't process if we don't have a connection to the EMS bus
-    // or we're in read-only mode
     if (!bus_connected()) {
         return;
     }
 
     // if there's nothing in the queue to transmit, send back a poll and quit
+    // unless tx_mode is 0
     if (tx_telegrams_.empty()) {
         send_poll();
+        return;
+    }
+
+    // if we're in read-only mode (tx_mode 0) forget the Tx call
+    if (tx_mode() == 0) {
+        tx_telegrams_.pop_front();
         return;
     }
 
@@ -380,12 +389,12 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
 
     if (status == EMS_TX_STATUS_ERR) {
         LOG_ERROR(F("Failed to transmit Tx via UART."));
-        increment_telegram_fail_count();       // another Tx fail
-        tx_waiting(Telegram::Operation::NONE); // nothing send, tx not in wait state
+        increment_telegram_fail_count();     // another Tx fail
+        tx_state(Telegram::Operation::NONE); // nothing send, tx not in wait state
         return;
     }
 
-    tx_waiting(telegram->operation); // tx now in a wait state
+    tx_state(telegram->operation); // tx now in a wait state
 }
 
 // send an array of bytes as a telegram
@@ -399,7 +408,7 @@ void TxService::send_telegram(const uint8_t * data, const uint8_t length) {
     }
     telegram_raw[length] = calculate_crc(telegram_raw, length); // apppend CRC
 
-    tx_waiting(Telegram::Operation::NONE); // no post validation needed
+    tx_state(Telegram::Operation::NONE); // no post validation needed
 
     // send the telegram to the UART Tx
     uint16_t status = EMSuart::transmit(telegram_raw, length);

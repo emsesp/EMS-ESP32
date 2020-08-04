@@ -23,6 +23,12 @@
 
 MAKE_PSTR(logger_name, "sensors")
 
+#ifdef ESP32
+#define YIELD
+#else
+#define YIELD yield()
+#endif
+
 namespace emsesp {
 
 uuid::log::Logger Sensors::logger_{F_(logger_name), uuid::log::Facility::DAEMON};
@@ -63,10 +69,9 @@ void Sensors::loop() {
         if (time_now - last_activity_ >= READ_INTERVAL_MS) {
             // LOG_DEBUG(F("Read sensor temperature")); // uncomment for debug
             if (bus_.reset()) {
-                yield();
+                YIELD;
                 bus_.skip();
                 bus_.write(CMD_CONVERT_TEMP);
-
                 state_ = State::READING;
             } else {
                 // no sensors found
@@ -80,20 +85,15 @@ void Sensors::loop() {
             // LOG_DEBUG(F("Scanning for sensors")); // uncomment for debug
             bus_.reset_search();
             found_.clear();
-
-            state_         = State::SCANNING;
-            last_activity_ = time_now;
+            state_ = State::SCANNING;
         } else if (time_now - last_activity_ > READ_TIMEOUT_MS) {
             LOG_ERROR(F("Sensor read timeout"));
-
-            state_         = State::IDLE;
-            last_activity_ = time_now;
+            state_ = State::IDLE;
         }
     } else if (state_ == State::SCANNING) {
         if (time_now - last_activity_ > SCAN_TIMEOUT_MS) {
             LOG_ERROR(F("Sensor scan timeout"));
-            state_         = State::IDLE;
-            last_activity_ = time_now;
+            state_ = State::IDLE;
         } else {
             uint8_t addr[ADDR_LEN] = {0};
 
@@ -107,7 +107,7 @@ void Sensors::loop() {
                     case TYPE_DS1822:
                     case TYPE_DS1825:
                         found_.emplace_back(addr);
-                        found_.back().temperature_c_ = get_temperature_c(addr);
+                        found_.back().temperature_c = get_temperature_c(addr);
 
                         /*
                         // comment out for debugging
@@ -127,11 +127,15 @@ void Sensors::loop() {
                 }
             } else {
                 bus_.depower();
-                devices_ = std::move(found_);
+                if ((found_.size() >= devices_.size()) || (retrycnt_ > 5)) {
+                    devices_  = std::move(found_);
+                    retrycnt_ = 0;
+                } else {
+                    retrycnt_++;
+                }
                 found_.clear();
                 // LOG_DEBUG(F("Found %zu sensor(s). Adding them."), devices_.size()); // uncomment for debug
-                state_         = State::IDLE;
-                last_activity_ = time_now;
+                state_ = State::IDLE;
             }
         }
     }
@@ -155,17 +159,17 @@ float Sensors::get_temperature_c(const uint8_t addr[]) {
         LOG_ERROR(F("Bus reset failed before reading scratchpad from %s"), Device(addr).to_string().c_str());
         return NAN;
     }
-    yield();
+    YIELD;
     uint8_t scratchpad[SCRATCHPAD_LEN] = {0};
     bus_.select(addr);
     bus_.write(CMD_READ_SCRATCHPAD);
     bus_.read_bytes(scratchpad, SCRATCHPAD_LEN);
-    yield();
+    YIELD;
     if (!bus_.reset()) {
         LOG_ERROR(F("Bus reset failed after reading scratchpad from %s"), Device(addr).to_string().c_str());
         return NAN;
     }
-    yield();
+    YIELD;
     if (bus_.crc8(scratchpad, SCRATCHPAD_LEN - 1) != scratchpad[SCRATCHPAD_LEN - 1]) {
         LOG_WARNING(F("Invalid scratchpad CRC: %02X%02X%02X%02X%02X%02X%02X%02X%02X from device %s"),
                     scratchpad[0],
@@ -202,7 +206,8 @@ float Sensors::get_temperature_c(const uint8_t addr[]) {
         break;
     }
 
-    return (float)raw_value / 16;
+    uint32_t raw = (raw_value *625) / 100; // round to 0.01
+    return (float)raw / 100;
 #else
     return NAN;
 #endif
@@ -253,7 +258,7 @@ void Sensors::publish_values() {
         StaticJsonDocument<100> doc;
         for (const auto & device : devices_) {
             char s[5];
-            doc["temp"] = Helpers::render_value(s, device.temperature_c_, 2);
+            doc["temp"] = Helpers::render_value(s, device.temperature_c, 2);
             char topic[60];                // sensors{1-n}
             strlcpy(topic, "sensor_", 50); // create topic, e.g. home/ems-esp/sensor_28-EA41-9497-0E03-5F
             strlcat(topic, device.to_string().c_str(), 60);
@@ -279,7 +284,7 @@ void Sensors::publish_values() {
     for (const auto & device : devices_) {
         if (mqtt_format_ == MQTT_format::CUSTOM) {
             char s[5];
-            doc[device.to_string()] = Helpers::render_value(s, device.temperature_c_, 2);
+            doc[device.to_string()] = Helpers::render_value(s, device.temperature_c, 2);
         } else {
             char sensorID[10]; // sensor{1-n}
             strlcpy(sensorID, "sensor", 10);
@@ -287,7 +292,7 @@ void Sensors::publish_values() {
             strlcat(sensorID, Helpers::itoa(s, i++), 10);
             JsonObject dataSensor = doc.createNestedObject(sensorID);
             dataSensor["id"]      = device.to_string();
-            dataSensor["temp"]    = Helpers::render_value(s, device.temperature_c_, 2);
+            dataSensor["temp"]    = Helpers::render_value(s, device.temperature_c, 2);
         }
     }
 

@@ -37,6 +37,7 @@ class Solar : public EMSdevice {
 
     virtual void show_values(uuid::console::Shell & shell);
     virtual void publish_values();
+    virtual void device_info(JsonArray & root);
     virtual bool updated_values();
     virtual void add_context_menu();
 
@@ -57,7 +58,7 @@ class Solar : public EMSdevice {
     uint32_t energyTotal_            = EMS_VALUE_ULONG_NOTSET;
     uint32_t pumpWorkMin_            = EMS_VALUE_ULONG_NOTSET; // Total solar pump operating time
     uint8_t  tankHeated_             = EMS_VALUE_BOOL_NOTSET;
-    uint8_t  collectorOnOff_         = EMS_VALUE_BOOL_NOTSET;
+    uint8_t  collectorOnOff_         = EMS_VALUE_BOOL_NOTSET; // Collector shutdown on/off
 
     uint8_t availabilityFlag_ = EMS_VALUE_BOOL_NOTSET;
     uint8_t configFlag_       = EMS_VALUE_BOOL_NOTSET;

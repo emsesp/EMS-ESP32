@@ -1,3 +1,21 @@
+/*
+ * EMS-ESP - https://github.com/proddy/EMS-ESP
+ * Copyright 2019  Paul Derbyshire
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #ifndef EMSESPSettingsConfig_h
 #define EMSESPSettingsConfig_h
 
@@ -7,7 +25,7 @@
 #define EMSESP_SETTINGS_FILE "/config/emsespSettings.json"
 #define EMSESP_SETTINGS_SERVICE_PATH "/rest/emsespSettings"
 
-#define EMSESP_DEFAULT_TX_MODE 1 // EMS1.0
+#define EMSESP_DEFAULT_TX_MODE 1       // EMS1.0
 #define EMSESP_DEFAULT_EMS_BUS_ID 0x0B // service key
 
 #define EMSESP_DEFAULT_SYSLOG_LEVEL -1 // OFF
@@ -44,10 +62,13 @@ class EMSESPSettingsService : public StatefulService<EMSESPSettings> {
     EMSESPSettingsService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager);
 
     void begin();
+    void save();
 
   private:
     HttpEndpoint<EMSESPSettings>  _httpEndpoint;
     FSPersistence<EMSESPSettings> _fsPersistence;
+
+    void onUpdate();
 };
 
 } // namespace emsesp

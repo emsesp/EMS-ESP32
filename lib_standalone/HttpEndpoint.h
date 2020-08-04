@@ -22,12 +22,6 @@ class HttpGetEndpoint {
                   AuthenticationPredicate authenticationPredicate = AuthenticationPredicates::IS_ADMIN,
                   size_t bufferSize = DEFAULT_BUFFER_SIZE) :
       _stateReader(stateReader), _statefulService(statefulService), _bufferSize(bufferSize) {
-        /*
-    server->on(servicePath.c_str(),
-               HTTP_GET,
-               securityManager->wrapRequest(std::bind(&HttpGetEndpoint::fetchSettings, this, std::placeholders::_1),
-                                            authenticationPredicate));
-                                            */
   }
 
   HttpGetEndpoint(JsonStateReader<T> stateReader,
@@ -36,9 +30,6 @@ class HttpGetEndpoint {
                   const String& servicePath,
                   size_t bufferSize = DEFAULT_BUFFER_SIZE) :
       _stateReader(stateReader), _statefulService(statefulService), _bufferSize(bufferSize) {
-        /*
-    server->on(servicePath.c_str(), HTTP_GET, std::bind(&HttpGetEndpoint::fetchSettings, this, std::placeholders::_1));
-    */
   }
 
  protected:
@@ -47,12 +38,6 @@ class HttpGetEndpoint {
   size_t _bufferSize;
 
   void fetchSettings(AsyncWebServerRequest* request) {
-    // AsyncJsonResponse* response = new AsyncJsonResponse(false, _bufferSize);
-    // JsonObject jsonObject = response->getRoot().to<JsonObject>();
-    // _statefulService->read(jsonObject, _stateReader);
-
-    // response->setLength();
-    // request->send(response);
   }
 };
 
@@ -70,17 +55,7 @@ class HttpPostEndpoint {
       _stateReader(stateReader),
       _stateUpdater(stateUpdater),
       _statefulService(statefulService),
-      /*
-      _updateHandler(
-          servicePath,
-          securityManager->wrapCallback(
-              std::bind(&HttpPostEndpoint::updateSettings, this, std::placeholders::_1, std::placeholders::_2),
-              authenticationPredicate),
-          bufferSize),
-          */
       _bufferSize(bufferSize) {
-    //_updateHandler.setMethod(HTTP_POST);
-    // server->addHandler(&_updateHandler);
   }
 
   HttpPostEndpoint(JsonStateReader<T> stateReader,
@@ -92,42 +67,26 @@ class HttpPostEndpoint {
       _stateReader(stateReader),
       _stateUpdater(stateUpdater),
       _statefulService(statefulService),
-      /*
-      _updateHandler(servicePath,
-                     std::bind(&HttpPostEndpoint::updateSettings, this, std::placeholders::_1, std::placeholders::_2),
-                     bufferSize),
-                     */
       _bufferSize(bufferSize) {
-    // _updateHandler.setMethod(HTTP_POST);
-    // server->addHandler(&_updateHandler);
   }
 
  protected:
   JsonStateReader<T> _stateReader;
   JsonStateUpdater<T> _stateUpdater;
   StatefulService<T>* _statefulService;
-  //AsyncCallbackJsonWebHandler _updateHandler;
   size_t _bufferSize;
 
   void updateSettings(AsyncWebServerRequest* request, JsonVariant& json) {
     if (!json.is<JsonObject>()) {
-      // request->send(400);
       return;
     }
     JsonObject jsonObject = json.as<JsonObject>();
     StateUpdateResult outcome = _statefulService->updateWithoutPropagation(jsonObject, _stateUpdater);
     if (outcome == StateUpdateResult::ERROR) {
-      // request->send(400);
       return;
     }
     if (outcome == StateUpdateResult::CHANGED) {
-      // request->onDisconnect([this]() { _statefulService->callUpdateHandlers(HTTP_ENDPOINT_ORIGIN_ID); });
     }
-    // AsyncJsonResponse* response = new AsyncJsonResponse(false, _bufferSize);
-    // jsonObject = response->getRoot().to<JsonObject>();
-    // _statefulService->read(jsonObject, _stateReader);
-    // response->setLength();
-    // request->send(response);
   }
 };
 

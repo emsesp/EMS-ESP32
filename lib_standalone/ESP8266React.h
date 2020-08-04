@@ -4,32 +4,31 @@
 #include <Arduino.h>
 #include <ArduinoJson.h>
 #include <AsyncJson.h>
-#include <SecurityManager.h>
+#include <AsyncMqttClient.h>
 #include <ESPAsyncWebServer.h>
 #include <FS.h>
-#include <AsyncMqttClient.h>
+#include <SecurityManager.h>
+#include <SecuritySettingsService.h>
 #include <StatefulService.h>
 
 class DummySettings {
   public:
-    uint8_t  tx_mode;
-    uint8_t  ems_bus_id;
-    bool     system_heartbeat;
-    int8_t   syslog_level; // uuid::log::Level
-    uint32_t syslog_mark_interval;
-    String   syslog_host;
-    uint8_t  master_thermostat;
-    bool     shower_timer;
-    bool     shower_alert;
-
-    uint16_t publish_time; // seconds
-    uint8_t  mqtt_format;  // 1=single, 2=nested, 3=ha, 4=custom
-    uint8_t  mqtt_qos;
-
-    String   hostname;
-    String   jwtSecret;
-    String   ssid;
-    String   password;
+    uint8_t  tx_mode              = 1;
+    uint8_t  ems_bus_id           = 0x0B;
+    bool     system_heartbeat     = false;
+    int8_t   syslog_level         = 1; // uuid::log::Level
+    uint32_t syslog_mark_interval = 0;
+    String   syslog_host          = "192.168.1.4";
+    uint8_t  master_thermostat    = 0;
+    bool     shower_timer         = false;
+    bool     shower_alert         = false;
+    uint16_t publish_time         = 10; // seconds
+    uint8_t  mqtt_format          = 1;  // 1=single, 2=nested, 3=ha, 4=custom
+    uint8_t  mqtt_qos             = 0;
+    String   hostname             = "ems-esp";
+    String   jwtSecret            = "ems-esp";
+    String   ssid                 = "ems-esp";
+    String   password             = "ems-esp";
 
     static void read(DummySettings & settings, JsonObject & root){};
     static void read(DummySettings & settings){};
@@ -56,13 +55,14 @@ class DummySettingsService : public StatefulService<DummySettings> {
 class ESP8266React {
   public:
     ESP8266React(AsyncWebServer * server, FS * fs)
-        : _settings(server, fs, nullptr){};
+        : _settings(server, fs, nullptr)
+        , _securitySettingsService(server, fs){};
 
     void begin(){};
     void loop(){};
 
     SecurityManager * getSecurityManager() {
-        return nullptr;
+        return &_securitySettingsService;
     }
 
     AsyncMqttClient * getMqttClient() {
@@ -82,8 +82,10 @@ class ESP8266React {
     }
 
   private:
-    DummySettingsService _settings;
-    AsyncMqttClient *    _mqttClient;
+    DummySettingsService    _settings;
+    SecuritySettingsService _securitySettingsService;
+
+    AsyncMqttClient * _mqttClient;
 };
 
 class EMSESPSettingsService {
@@ -93,8 +95,6 @@ class EMSESPSettingsService {
     void begin();
 
   private:
-    // HttpEndpoint<EMSESPSettings>  _httpEndpoint;
-    // FSPersistence<EMSESPSettings> _fsPersistence;
 };
 
 #endif

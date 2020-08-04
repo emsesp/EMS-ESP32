@@ -58,6 +58,32 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
 void Solar::add_context_menu() {
 }
 
+// print to web
+void Solar::device_info(JsonArray & root) {
+    render_value_json(root, "", F("Collector temperature (TS1)"), collectorTemp_, F_(degrees), 10);
+    render_value_json(root, "", F("Bottom temperature (TS2)"), bottomTemp_, F_(degrees), 10);
+    render_value_json(root, "", F("Bottom temperature (TS5)"), bottomTemp2_, F_(degrees), 10);
+    render_value_json(root, "", F("Pump modulation"), pumpModulation_, F_(percent));
+    render_value_json(root, "", F("Valve (VS2) status"), valveStatus_, nullptr, EMS_VALUE_BOOL);
+    render_value_json(root, "", F("Pump (PS1) active"), pump_, nullptr, EMS_VALUE_BOOL);
+
+    if (Helpers::hasValue(pumpWorkMin_)) {
+        JsonObject dataElement;
+        dataElement         = root.createNestedObject();
+        dataElement["name"] = F("Pump working time");
+        std::string time_str(60, '\0');
+        snprintf_P(&time_str[0], time_str.capacity() + 1, PSTR("%d days %d hours %d minutes"), pumpWorkMin_ / 1440, (pumpWorkMin_ % 1440) / 60, pumpWorkMin_ % 60);
+        dataElement["value"] = time_str;
+    }
+
+    render_value_json(root, "", F("Tank Heated"), tankHeated_, nullptr, EMS_VALUE_BOOL);
+    render_value_json(root, "", F("Collector shutdown"), collectorOnOff_, nullptr, EMS_VALUE_BOOL);
+
+    render_value_json(root, "", F("Energy last hour"), energyLastHour_, F_(wh), 10);
+    render_value_json(root, "", F("Energy today"), energyToday_, F_(wh));
+    render_value_json(root, "", F("Energy total"), energyTotal_, F_(kwh), 10);
+}
+
 // display all values into the shell console
 void Solar::show_values(uuid::console::Shell & shell) {
     EMSdevice::show_values(shell); // always call this to show header
@@ -74,7 +100,7 @@ void Solar::show_values(uuid::console::Shell & shell) {
     }
 
     print_value(shell, 2, F("Tank Heated"), tankHeated_, nullptr, EMS_VALUE_BOOL);
-    print_value(shell, 2, F("Collector"), collectorOnOff_, nullptr, EMS_VALUE_BOOL);
+    print_value(shell, 2, F("Collector shutdown"), collectorOnOff_, nullptr, EMS_VALUE_BOOL);
 
     print_value(shell, 2, F("Energy last hour"), energyLastHour_, F_(wh), 10);
     print_value(shell, 2, F("Energy today"), energyToday_, F_(wh));
@@ -203,8 +229,8 @@ void Solar::process_SM100Status(std::shared_ptr<const Telegram> telegram) {
         pumpModulation_ = 15;                     // set to minimum
     }
 
-    telegram->read_bitvalue(tankHeated_, 3, 1); // issue #422
-    telegram->read_bitvalue(collectorOnOff_, 3, 0);
+    telegram->read_bitvalue(tankHeated_, 3, 1);     // issue #422
+    telegram->read_bitvalue(collectorOnOff_, 3, 0); // collector shutdown
 }
 
 /*
@@ -240,11 +266,14 @@ void Solar::process_ISM1StatusMessage(std::shared_ptr<const Telegram> telegram) 
     if (Wh != 0xFFFF) {
         energyLastHour_ = Wh * 10; // set to *10
     }
-    telegram->read_bitvalue(collectorOnOff_, 9, 0); // collector on/off
+    telegram->read_bitvalue(pump_, 8, 0);           // Solar pump on (1) or off (0)
+    telegram->read_value(pumpWorkMin_, 10, 3);      // force to 3 bytes
+    telegram->read_bitvalue(collectorOnOff_, 9, 0); // collector shutdown on/off
     telegram->read_bitvalue(tankHeated_, 9, 2);     // tank full
 }
 
 /*
+ * Junkers ISM1 Solar Module - type 0x0101 EMS+ for setting values
  * e.g. 90 30 FF 06 00 01 50
  */
 void Solar::process_ISM1Set(std::shared_ptr<const Telegram> telegram) {

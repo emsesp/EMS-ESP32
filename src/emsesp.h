@@ -37,7 +37,6 @@
 #include "EMSESPStatusService.h"
 #include "EMSESPDevicesService.h"
 #include "EMSESPSettingsService.h"
-#include "EMSESPScanDevicesService.h"
 
 #include "emsdevice.h"
 #include "emsfactory.h"
@@ -82,6 +81,8 @@ class EMSESP {
     static void send_raw_telegram(const char * data);
     static bool device_exists(const uint8_t device_id);
 
+    static void device_info(const uint8_t unique_id, JsonObject & root);
+
     static uint8_t count_devices(const uint8_t device_type);
 
     static uint8_t actual_master_thermostat();
@@ -95,7 +96,7 @@ class EMSESP {
 
     static void add_context_menus();
 
-    static void reset_tx(uint8_t const tx_mode);
+    static void reset_tx();
 
     static void incoming_telegram(uint8_t * data, const uint8_t length);
 
@@ -146,11 +147,10 @@ class EMSESP {
     static TxService txservice_;
 
     // web controllers
-    static ESP8266React             esp8266React;
-    static EMSESPSettingsService    emsespSettingsService;
-    static EMSESPStatusService      emsespStatusService;
-    static EMSESPDevicesService     emsespDevicesService;
-    static EMSESPScanDevicesService emsespScanDevicesService;
+    static ESP8266React          esp8266React;
+    static EMSESPSettingsService emsespSettingsService;
+    static EMSESPStatusService   emsespStatusService;
+    static EMSESPDevicesService  emsespDevicesService;
 
     static uuid::log::Logger logger() {
         return logger_;
@@ -182,6 +182,8 @@ class EMSESP {
     static uint16_t watch_id_;
     static uint8_t  watch_;
     static bool     tap_water_active_;
+
+    static uint8_t unique_id_count_;
 };
 
 } // namespace emsesp

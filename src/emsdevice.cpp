@@ -127,7 +127,7 @@ uint8_t EMSdevice::decode_brand(uint8_t value) {
     }
 }
 
-// print human friendly description of the EMS device
+// returns string of a human friendly description of the EMS device
 std::string EMSdevice::to_string() const {
     std::string str(160, '\0');
 
@@ -150,6 +150,17 @@ std::string EMSdevice::to_string() const {
                    version_.c_str());
     }
 
+    return str;
+}
+
+// returns out brand + device name
+std::string EMSdevice::to_string_short() const {
+    std::string str(160, '\0');
+    if (brand_ == Brand::NO_BRAND) {
+        snprintf_P(&str[0], str.capacity() + 1, PSTR("%s: %s"), device_type_name().c_str(), name_.c_str());
+    } else {
+        snprintf_P(&str[0], str.capacity() + 1, PSTR("%s: %s %s"), device_type_name().c_str(), brand_to_string().c_str(), name_.c_str());
+    }
     return str;
 }
 
@@ -198,7 +209,7 @@ void EMSdevice::show_mqtt_handlers(uuid::console::Shell & shell) {
     Mqtt::show_topic_handlers(shell, this->device_id_);
 }
 
-void EMSdevice::register_mqtt_topic(const std::string & topic, mqtt_function_p f) {
+void EMSdevice::register_mqtt_topic(const std::string & topic, mqtt_subfunction_p f) {
     LOG_DEBUG(F("Registering MQTT topic %s for device ID %02X"), topic.c_str(), this->device_id_);
     Mqtt::subscribe(this->device_id_, topic, f);
 }

@@ -90,6 +90,7 @@ void EMSESPShell::display_banner() {
 
     // turn off watch
     emsesp::EMSESP::watch_id(WATCH_ID_NONE);
+    emsesp::EMSESP::watch(EMSESP::WATCH_OFF);
 }
 
 // pre-loads all the console commands into the MAIN context
@@ -107,11 +108,9 @@ void EMSESPShell::add_console_commands() {
 
     commands->add_command(ShellContext::MAIN,
                           CommandFlags::USER,
-                          flash_string_vector{F_(refresh)},
+                          flash_string_vector{F_(fetch)},
                           [&](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
                               shell.printfln(F("Requesting data from EMS devices"));
-                              console_commands_loaded_ = false;
-                              add_console_commands();
                               EMSESP::fetch_device_values();
                           });
 
@@ -177,15 +176,14 @@ void EMSESPShell::add_console_commands() {
                           flash_string_vector{F_(n_mandatory)},
                           [](Shell & shell, const std::vector<std::string> & arguments) {
                               uint8_t tx_mode = std::strtol(arguments[0].c_str(), nullptr, 10);
-
+                              // save the tx_mode
                               EMSESP::emsespSettingsService.update(
                                   [&](EMSESPSettings & settings) {
                                       settings.tx_mode = tx_mode;
-                                      shell.printfln(F_(tx_mode_fmt), tx_mode);
                                       return StateUpdateResult::CHANGED;
                                   },
                                   "local");
-                              EMSESP::reset_tx(tx_mode); // reset counters and set tx_mode
+                              EMSESP::reset_tx(); // reset counters and set tx_mode
                           });
 
     commands->add_command(ShellContext::MAIN,
@@ -516,6 +514,9 @@ void Console::start() {
     shell = std::make_shared<EMSESPStreamConsole>(serial_console_, true);
     shell->maximum_log_messages(100); // default is 50
     shell->start();
+#endif
+
+#if defined(EMSESP_DEBUG)
     shell->log_level(uuid::log::Level::DEBUG); // order is: err, warning, notice, info, debug, trace, all
 #endif
 
@@ -524,8 +525,6 @@ void Console::start() {
     shell->add_flags(CommandFlags::ADMIN);
 #endif
 
-    emsesp::EMSESP::watch(EMSESP::WATCH_OFF); // turn watch off in case it was still set in the last session
-
 // start the telnet service
 // default idle is 10 minutes, default write timeout is 0 (automatic)
 // note, this must be started after the network/wifi for ESP32 otherwise it'll crash
@@ -533,6 +532,9 @@ void Console::start() {
     telnet_.start();
     telnet_.default_write_timeout(1000); // in ms, socket timeout 1 second
 #endif
+
+    // turn watch off in case it was still set in the last session
+    emsesp::EMSESP::watch(EMSESP::WATCH_OFF);
 }
 
 // handles telnet sync and logging to console
