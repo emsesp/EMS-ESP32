@@ -39,12 +39,13 @@
 
 - If you're not using PlatformIO, use the command-line and Python. You can download Python from https://www.python.org/downloads/. Make sure you also get:
   - `esptool`, install using the command `pip install esptool`
-  - and for OTA updates later, `espota` from https://github.com/esp8266/Arduino/blob/master/tools/espota.py
+  - and for OTA updates later, `espota` from https://github.com/esp8266/Arduino/blob/master/tools/espota.py using `python espota.py --debug --progress --port 8266 --auth ems-esp-neo -i ems-esp.local -f <firmware.bin>` 
 
 - Grab the latest firmware binary from https://github.com/proddy/EMS-ESP/releases/tag/travis-v2-build
 - Uploading directly via USB.
   
   For ESP8266: `esptool.py -p <COM PORT> -b 921600 write_flash 0x00000 <firmware.bin>`
+  note: if this fails try a lower speed like `115200` instead of `921600`.
   
   For ESP32: `esptool.py --chip esp32 --port "COM6" --baud 921600 --before default_reset --after hard_reset write_flash -z --flash_mode dio --flash_freq 40m --flash_size detect 0x1000 XX\.platformio\packages\framework-arduinoespressif32\tools\sdk\bin\bootloader_dio_40m.bin 0x8000 XX\.pio\build\esp32\partitions.bin 0xe000 XX\.platformio\packages\framework-arduinoespressif32\tools\partitions\boot_app0.bin 0x10000  <firmware.bin>`
 - Uploading over WiFi: `espota.py --debug --progress --port 8266 --auth ems-esp-neo -i <IP address> -f <firmware.bin>`

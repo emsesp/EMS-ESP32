@@ -54,11 +54,13 @@ void Solar::add_context_menu() {
 // print to web
 void Solar::device_info(JsonArray & root) {
     render_value_json(root, "", F("Collector temperature (TS1)"), collectorTemp_, F_(degrees), 10);
-    render_value_json(root, "", F("Bottom temperature (TS2)"), bottomTemp_, F_(degrees), 10);
-    render_value_json(root, "", F("Bottom temperature (TS5)"), bottomTemp2_, F_(degrees), 10);
-    render_value_json(root, "", F("Pump modulation"), pumpModulation_, F_(percent));
+    render_value_json(root, "", F("Tank bottom temperature (TS2)"), tankBottomTemp_, F_(degrees), 10);
+    render_value_json(root, "", F("Tank bottom temperature (TS5)"), tankBottomTemp2_, F_(degrees), 10);
+    render_value_json(root, "", F("Heat exchanger temperature (TS6)"), heatExchangerTemp_, F_(degrees), 10);
+    render_value_json(root, "", F("Solar pump modulation (PS1)"), solarPumpModulation_, F_(percent));
+    render_value_json(root, "", F("Cylinder pump modulation (PS5)"), cylinderPumpModulation_, F_(percent));
     render_value_json(root, "", F("Valve (VS2) status"), valveStatus_, nullptr, EMS_VALUE_BOOL);
-    render_value_json(root, "", F("Pump (PS1) active"), pump_, nullptr, EMS_VALUE_BOOL);
+    render_value_json(root, "", F("Solar Pump (PS1) active"), solarPump_, nullptr, EMS_VALUE_BOOL);
 
     if (Helpers::hasValue(pumpWorkMin_)) {
         JsonObject dataElement;
@@ -70,7 +72,7 @@ void Solar::device_info(JsonArray & root) {
     }
 
     render_value_json(root, "", F("Tank Heated"), tankHeated_, nullptr, EMS_VALUE_BOOL);
-    render_value_json(root, "", F("Collector shutdown"), collectorOnOff_, nullptr, EMS_VALUE_BOOL);
+    render_value_json(root, "", F("Collector shutdown"), collectorShutdown_, nullptr, EMS_VALUE_BOOL);
 
     render_value_json(root, "", F("Energy last hour"), energyLastHour_, F_(wh), 10);
     render_value_json(root, "", F("Energy today"), energyToday_, F_(wh));
@@ -82,24 +84,24 @@ void Solar::show_values(uuid::console::Shell & shell) {
     EMSdevice::show_values(shell); // always call this to show header
 
     print_value(shell, 2, F("Collector temperature (TS1)"), collectorTemp_, F_(degrees), 10);
-    print_value(shell, 2, F("Bottom temperature (TS2)"), bottomTemp_, F_(degrees), 10);
-    print_value(shell, 2, F("Bottom temperature (TS5)"), bottomTemp2_, F_(degrees), 10);
-    print_value(shell, 2, F("Pump modulation"), pumpModulation_, F_(percent));
+    print_value(shell, 2, F("Bottom temperature (TS2)"), tankBottomTemp_, F_(degrees), 10);
+    print_value(shell, 2, F("Bottom temperature (TS5)"), tankBottomTemp2_, F_(degrees), 10);
+    print_value(shell, 2, F("Heat exchanger temperature (TS6)"), heatExchangerTemp_, F_(degrees), 10);
+    print_value(shell, 2, F("Solar pump modulation (PS1)"), solarPumpModulation_, F_(percent));
+    print_value(shell, 2, F("Cylinder pump modulation (PS5)"), cylinderPumpModulation_, F_(percent));
     print_value(shell, 2, F("Valve (VS2) status"), valveStatus_, nullptr, EMS_VALUE_BOOL);
-    print_value(shell, 2, F("Pump (PS1) active"), pump_, nullptr, EMS_VALUE_BOOL);
+    print_value(shell, 2, F("Solar Pump (PS1) active"), solarPump_, nullptr, EMS_VALUE_BOOL);
 
     if (Helpers::hasValue(pumpWorkMin_)) {
         shell.printfln(F("  Pump working time: %d days %d hours %d minutes"), pumpWorkMin_ / 1440, (pumpWorkMin_ % 1440) / 60, pumpWorkMin_ % 60);
     }
 
     print_value(shell, 2, F("Tank Heated"), tankHeated_, nullptr, EMS_VALUE_BOOL);
-    print_value(shell, 2, F("Collector shutdown"), collectorOnOff_, nullptr, EMS_VALUE_BOOL);
+    print_value(shell, 2, F("Collector shutdown"), collectorShutdown_, nullptr, EMS_VALUE_BOOL);
 
     print_value(shell, 2, F("Energy last hour"), energyLastHour_, F_(wh), 10);
     print_value(shell, 2, F("Energy today"), energyToday_, F_(wh));
     print_value(shell, 2, F("Energy total"), energyTotal_, F_(kwh), 10);
-
-    shell.println();
 }
 
 // publish values via MQTT
@@ -109,27 +111,35 @@ void Solar::publish_values() {
     char s[10]; // for formatting strings
 
     if (Helpers::hasValue(collectorTemp_)) {
-        doc["collectortemp"] = (float)collectorTemp_ / 10;
+        doc["collectorTemp"] = (float)collectorTemp_ / 10;
     }
 
-    if (Helpers::hasValue(bottomTemp_)) {
-        doc["bottomtemp"] = (float)bottomTemp_ / 10;
+    if (Helpers::hasValue(tankBottomTemp_)) {
+        doc["tankBottomTemp"] = (float)tankBottomTemp_ / 10;
     }
 
-    if (Helpers::hasValue(bottomTemp2_)) {
-        doc["bottomtemp2"] = (float)bottomTemp2_ / 10;
+    if (Helpers::hasValue(tankBottomTemp2_)) {
+        doc["tankBottomTemp2"] = (float)tankBottomTemp2_ / 10;
     }
 
-    if (Helpers::hasValue(pumpModulation_)) {
-        doc["pumpmodulation"] = pumpModulation_;
+    if (Helpers::hasValue(heatExchangerTemp_)) {
+        doc["heatExchangerTemp"] = (float)heatExchangerTemp_ / 10;
     }
 
-    if (Helpers::hasValue(pump_, EMS_VALUE_BOOL)) {
-        doc["pump"] = Helpers::render_value(s, pump_, EMS_VALUE_BOOL);
+    if (Helpers::hasValue(solarPumpModulation_)) {
+        doc["solarPumpModulation"] = solarPumpModulation_;
+    }
+
+    if (Helpers::hasValue(cylinderPumpModulation_)) {
+        doc["cylinderPumpModulation"] = cylinderPumpModulation_;
+    }
+
+    if (Helpers::hasValue(solarPump_, EMS_VALUE_BOOL)) {
+        doc["solarPump"] = Helpers::render_value(s, solarPump_, EMS_VALUE_BOOL);
     }
 
     if (Helpers::hasValue(valveStatus_, EMS_VALUE_BOOL)) {
-        doc["valvestatus"] = Helpers::render_value(s, valveStatus_, EMS_VALUE_BOOL);
+        doc["valveStatus"] = Helpers::render_value(s, valveStatus_, EMS_VALUE_BOOL);
     }
 
     if (Helpers::hasValue(pumpWorkMin_)) {
@@ -140,20 +150,20 @@ void Solar::publish_values() {
         doc["tankHeated"] = Helpers::render_value(s, tankHeated_, EMS_VALUE_BOOL);
     }
 
-    if (Helpers::hasValue(collectorOnOff_, EMS_VALUE_BOOL)) {
-        doc["collectorOnOff"] = Helpers::render_value(s, collectorOnOff_, EMS_VALUE_BOOL);
+    if (Helpers::hasValue(collectorShutdown_, EMS_VALUE_BOOL)) {
+        doc["collectorShutdown"] = Helpers::render_value(s, collectorShutdown_, EMS_VALUE_BOOL);
     }
 
     if (Helpers::hasValue(energyLastHour_)) {
-        doc["energylasthour"] = (float)energyLastHour_ / 10;
+        doc["energyLastHour"] = (float)energyLastHour_ / 10;
     }
 
     if (Helpers::hasValue(energyToday_)) {
-        doc["energytoday"] = energyToday_;
+        doc["energyToday"] = energyToday_;
     }
 
     if (Helpers::hasValue(energyTotal_)) {
-        doc["energytotal"] = (float)energyTotal_ / 10;
+        doc["energyTotal"] = (float)energyTotal_ / 10;
     }
 
     Mqtt::publish("sm_data", doc);
@@ -170,27 +180,29 @@ void Solar::console_commands() {
 
 // SM10Monitor - type 0x97
 void Solar::process_SM10Monitor(std::shared_ptr<const Telegram> telegram) {
-    telegram->read_value(collectorTemp_, 2);  // collector temp from SM10, is *10
-    telegram->read_value(bottomTemp_, 5);     // bottom temp from SM10, is *10
-    telegram->read_value(pumpModulation_, 4); // modulation solar pump
-    telegram->read_bitvalue(pump_, 7, 1);
+    telegram->read_value(collectorTemp_, 2);       // collector temp from SM10, is *10
+    telegram->read_value(tankBottomTemp_, 5);      // bottom temp from SM10, is *10
+    telegram->read_value(solarPumpModulation_, 4); // modulation solar pump
+    telegram->read_bitvalue(solarPump_, 7, 1);
     telegram->read_value(pumpWorkMin_, 8);
 }
 
 /*
- * SM100Monitor - type 0x0362 EMS+ - for SM100 and SM200
- * e.g. B0 0B FF 00 02 62 00 44 02 7A 80 00 80 00 80 00 80 00 80 00 80 00 00 7C 80 00 80 00 80 00 80
+ * SM100Monitor - type 0x0362 EMS+ - for MS/SM100 and MS/SM200
+ * e.g. B0 0B FF 00 02 62 00 77 01 D4 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 00 F9 80 00 80 9E - for heat exchanger temp
  * e.g, 30 00 FF 00 02 62 01 AC
  *      30 00 FF 18 02 62 80 00
  *      30 00 FF 00 02 62 01 A1 - for bottom temps
  * bytes 0+1 = TS1 Temperature sensor for collector
- * bytes 2+3 = TS2 Temperature sensor bottom cylinder 1
- * bytes 16+17 = TS5 Temperature sensor bottom cylinder 2
+ * bytes 2+3 = TS2 Temperature sensor 1 cylinder, bottom
+ * bytes 16+17 = TS5 Temperature sensor 2 cylinder, bottom, or swimming pool
+ * bytes 20+21 = TS6 Temperature sensor external heat exchanger
  */
 void Solar::process_SM100Monitor(std::shared_ptr<const Telegram> telegram) {
-    telegram->read_value(collectorTemp_, 0); // is *10
-    telegram->read_value(bottomTemp_, 2);    // is *10
-    telegram->read_value(bottomTemp2_, 16);  // is *10
+    telegram->read_value(collectorTemp_, 0);      // is *10 - TS1: Temperature sensor for collector array 1
+    telegram->read_value(tankBottomTemp_, 2);     // is *10 - TS2: Temperature sensor 1 cylinder, bottom
+    telegram->read_value(tankBottomTemp2_, 16);   // is *10 - TS5: Temperature sensor 2 cylinder, bottom, or swimming pool
+    telegram->read_value(heatExchangerTemp_, 20); // is *10 - TS6: Heat exchanger temperature sensor
 }
 
 #pragma GCC diagnostic push
@@ -213,19 +225,28 @@ void Solar::process_SM100Config(std::shared_ptr<const Telegram> telegram) {
 }
 
 /*
- * SM100Status - type 0x0364 EMS+ for pump modulation - for SM100 and SM200
- * e.g. 30 00 FF 09 02 64 64 = 100%
- *      30 00 FF 09 02 64 1E = 30%
+ * SM100Status - type 0x0364 EMS+ for pump modulations - for MS/SM100 and MS/SM200
+ *  PS1: Solar circuit pump for collector array 1
+ *  PS5: Cylinder primary pump when using an external heat exchanger
+ *  e.g. 30 00 FF 09 02 64 64 = 100%
+ *       30 00 FF 09 02 64 1E = 30%
  */
 void Solar::process_SM100Status(std::shared_ptr<const Telegram> telegram) {
-    uint8_t pumpmod = pumpModulation_;
-    telegram->read_value(pumpModulation_, 9);
-    if (pumpmod == 0 && pumpModulation_ == 100) { // mask out boosts
-        pumpModulation_ = 15;                     // set to minimum
+    uint8_t solarpumpmod    = solarPumpModulation_;
+    uint8_t cylinderpumpmod = cylinderPumpModulation_;
+    telegram->read_value(cylinderPumpModulation_, 8);
+    telegram->read_value(solarPumpModulation_, 9);
+
+    if (solarpumpmod == 0 && solarPumpModulation_ == 100) { // mask out boosts
+        solarPumpModulation_ = 15;                          // set to minimum
     }
 
-    telegram->read_bitvalue(tankHeated_, 3, 1);     // issue #422
-    telegram->read_bitvalue(collectorOnOff_, 3, 0); // collector shutdown
+    if (cylinderpumpmod == 0 && cylinderPumpModulation_ == 100) { // mask out boosts
+        cylinderPumpModulation_ = 15;                             // set to minimum
+    }
+
+    telegram->read_bitvalue(tankHeated_, 3, 1);        // issue #422
+    telegram->read_bitvalue(collectorShutdown_, 3, 0); // collector shutdown
 }
 
 /*
@@ -236,7 +257,7 @@ void Solar::process_SM100Status(std::shared_ptr<const Telegram> telegram) {
  */
 void Solar::process_SM100Status2(std::shared_ptr<const Telegram> telegram) {
     telegram->read_bitvalue(valveStatus_, 4, 2); // on if bit 2 set
-    telegram->read_bitvalue(pump_, 10, 2);       // on if bit 2 set
+    telegram->read_bitvalue(solarPump_, 10, 2);  // on if bit 2 set
 }
 
 /*
@@ -245,8 +266,8 @@ void Solar::process_SM100Status2(std::shared_ptr<const Telegram> telegram) {
  */
 void Solar::process_SM100Energy(std::shared_ptr<const Telegram> telegram) {
     telegram->read_value(energyLastHour_, 0); // last hour / 10 in Wh
-    telegram->read_value(energyToday_, 4);    //  todays in Wh
-    telegram->read_value(energyTotal_, 8);    //  total / 10 in kWh
+    telegram->read_value(energyToday_, 4);    // todays in Wh
+    telegram->read_value(energyTotal_, 8);    // total / 10 in kWh
 }
 
 /*
@@ -254,17 +275,17 @@ void Solar::process_SM100Energy(std::shared_ptr<const Telegram> telegram) {
  *  e.g. B0 00 FF 00 00 03 32 00 00 00 00 13 00 D6 00 00 00 FB D0 F0
  */
 void Solar::process_ISM1StatusMessage(std::shared_ptr<const Telegram> telegram) {
-    telegram->read_value(collectorTemp_, 4); // Collector Temperature
-    telegram->read_value(bottomTemp_, 6);    // Temperature Bottom of Solar Boiler
+    telegram->read_value(collectorTemp_, 4);  // Collector Temperature
+    telegram->read_value(tankBottomTemp_, 6); // Temperature Bottom of Solar Boiler
     uint16_t Wh = 0xFFFF;
     telegram->read_value(Wh, 2); // Solar Energy produced in last hour only ushort, is not * 10
     if (Wh != 0xFFFF) {
         energyLastHour_ = Wh * 10; // set to *10
     }
-    telegram->read_bitvalue(pump_, 8, 0);           // Solar pump on (1) or off (0)
-    telegram->read_value(pumpWorkMin_, 10, 3);      // force to 3 bytes
-    telegram->read_bitvalue(collectorOnOff_, 9, 0); // collector shutdown on/off
-    telegram->read_bitvalue(tankHeated_, 9, 2);     // tank full
+    telegram->read_bitvalue(solarPump_, 8, 0);         // PS1 Solar pump on (1) or off (0)
+    telegram->read_value(pumpWorkMin_, 10, 3);         // force to 3 bytes
+    telegram->read_bitvalue(collectorShutdown_, 9, 0); // collector shutdown on/off
+    telegram->read_bitvalue(tankHeated_, 9, 2);        // tank full
 }
 
 /*
