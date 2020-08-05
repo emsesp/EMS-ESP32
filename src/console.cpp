@@ -526,8 +526,10 @@ void Console::start() {
     shell->start();
 #endif
 
+#ifndef ESP8266
 #if defined(EMSESP_DEBUG)
     shell->log_level(uuid::log::Level::DEBUG); // order is: err, warning, notice, info, debug, trace, all
+#endif
 #endif
 
 #if defined(EMSESP_STANDALONE)
