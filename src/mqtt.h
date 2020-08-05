@@ -49,7 +49,7 @@ using mqtt_cmdfunction_p = std::function<void(const char * data, const int8_t id
 using namespace std::placeholders; // for `_1`
 
 struct MqttMessage {
-    MqttMessage(const uint8_t operation, const std::string & topic, const std::string & payload, bool retain);
+    MqttMessage(const uint8_t operation, const std::string & topic, const std::string && payload, bool retain);
     ~MqttMessage() = default;
 
     const uint8_t     operation;

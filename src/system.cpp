@@ -190,6 +190,18 @@ void System::loop() {
             send_heartbeat();
         }
     }
+
+#if defined(ESP8266)
+#if defined(EMSESP_DEBUG)
+    static uint32_t last_memcheck_ = 0;
+    if (currentMillis - last_memcheck_ > 8000) {
+        last_memcheck_ = currentMillis;
+        LOG_INFO(F("Free heap: %d%% (%lu), frag:%u%%"), free_mem(), (unsigned long)ESP.getFreeHeap(), ESP.getHeapFragmentation());
+    }
+#elif defined(ESP32)
+
+#endif
+#endif
 }
 
 // send periodic MQTT message with system information
@@ -322,9 +334,9 @@ void System::show_system(uuid::console::Shell & shell) {
     shell.printfln(F("Reset info:    %s"), ESP.getResetInfo().c_str());
     shell.println();
     shell.printfln(F("Free heap:                %lu bytes"), (unsigned long)ESP.getFreeHeap());
-    shell.printfln(F("Free mem:                 %d  %%"), free_mem());
+    shell.printfln(F("Free mem:                 %d %%"), free_mem());
     shell.printfln(F("Maximum free block size:  %lu bytes"), (unsigned long)ESP.getMaxFreeBlockSize());
-    shell.printfln(F("Heap fragmentation:       %u%"), ESP.getHeapFragmentation());
+    shell.printfln(F("Heap fragmentation:       %u %%"), ESP.getHeapFragmentation());
     shell.printfln(F("Free continuations stack: %lu bytes"), (unsigned long)ESP.getFreeContStack());
 #elif defined(ESP32)
     shell.printfln(F("SDK version:   %s"), ESP.getSdkVersion());

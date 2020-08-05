@@ -206,7 +206,7 @@ void EMSESP::show_ems(uuid::console::Shell & shell) {
     } else {
         shell.printfln(F("Tx Queue (%ld telegram%s):"), tx_telegrams.size(), tx_telegrams.size() == 1 ? "" : "s");
 
-        std::string op;
+        std::string op(10, '\0');
         for (const auto & it : tx_telegrams) {
             if ((it.telegram_->operation) == Telegram::Operation::TX_RAW) {
                 op = read_flash_string(F("RAW  "));
@@ -295,9 +295,9 @@ std::string EMSESP::pretty_telegram(std::shared_ptr<const Telegram> telegram) {
     uint8_t offset = telegram->offset;
 
     // find name for src and dest by looking up known devices
-    std::string src_name;
-    std::string dest_name;
-    std::string type_name;
+    std::string src_name(20, '\0');
+    std::string dest_name(20, '\0');
+    std::string type_name(20, '\0');
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice) {
             // get src & dest
@@ -541,9 +541,6 @@ void EMSESP::show_devices(uuid::console::Shell & shell) {
         // shell.printf(F("[factory ID: %d] "), device_class.first);
         for (const auto & emsdevice : emsdevices) {
             if ((emsdevice) && (emsdevice->device_type() == device_class.first)) {
-#if defined(EMSESP_DEBUG)
-                shell.printf(F("[id=%d] "), emsdevice->unique_id());
-#endif
                 shell.printf(F("%s: %s"), emsdevice->device_type_name().c_str(), emsdevice->to_string().c_str());
                 if ((emsdevice->device_type() == EMSdevice::DeviceType::THERMOSTAT) && (emsdevice->device_id() == actual_master_thermostat())) {
                     shell.printf(F(" ** master device **"));
@@ -613,12 +610,11 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
         LOG_NOTICE(F("Unrecognized EMS device with device ID 0x%02X with product ID %d. Please report on GitHub."), device_id, product_id);
         return false; // not found
     } else {
-        emsdevices.push_back(
-            EMSFactory::add(device_p->device_type, device_id, device_p->product_id, version, uuid::read_flash_string(device_p->name), device_p->flags, brand));
+        std::string name = uuid::read_flash_string(device_p->name);
+        emsdevices.push_back(EMSFactory::add(device_p->device_type, device_id, device_p->product_id, version, name, device_p->flags, brand));
         emsdevices.back()->unique_id(++unique_id_count_);
         LOG_DEBUG(F("Adding new device with device ID 0x%02X with product ID %d and version %s"), device_id, product_id, version.c_str());
-        // go and fetch its data,
-        fetch_device_values(device_id);
+        fetch_device_values(device_id); // go and fetch its data,
     }
 
     return true;

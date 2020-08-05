@@ -47,10 +47,10 @@ Mqtt::QueuedMqttMessage::QueuedMqttMessage(uint16_t id, std::shared_ptr<MqttMess
     packet_id_   = 0;
 }
 
-MqttMessage::MqttMessage(const uint8_t operation, const std::string & topic, const std::string & payload, bool retain)
+MqttMessage::MqttMessage(const uint8_t operation, const std::string & topic, const std::string && payload, bool retain)
     : operation(operation)
     , topic(topic)
-    , payload(payload)
+    , payload(std::move(payload))
     , retain(retain) {
 }
 
@@ -84,19 +84,19 @@ void Mqtt::subscribe(const uint8_t device_type, const std::string & topic, mqtt_
 
     // register in our libary with the callback function.
     // We store both the original topic and the fully-qualified
-    mqtt_subfunctions_.emplace_back(device_type, std::move(topic), std::move(message->topic), cb);
+    mqtt_subfunctions_.emplace_back(device_type, std::move(topic), std::move(message->topic), std::move(cb));
 }
 
 // adds a command and callback function for a specific device
 void Mqtt::add_command(const uint8_t device_type, const __FlashStringHelper * cmd, mqtt_cmdfunction_p cb) {
     // subscribe to the command topic if it doesn't exist yet
     // create the cmd topic for a device like "<device_type>_cmd" e.g. "boiler_cmd"
-    // unless its a system MQTT command
+    // unless its a system MQTT command, then its system_cmd
     std::string cmd_topic(40, '\0');
     if (device_type == EMSdevice::DeviceType::SERVICEKEY) {
         cmd_topic = MQTT_SYSTEM_CMD; // hard-coded system
     } else {
-        snprintf_P(&cmd_topic[0], 40, PSTR("%s_cmd"), EMSdevice::device_type_topic_name(device_type).c_str());
+        snprintf_P(&cmd_topic[0], 41, PSTR("%s_cmd"), EMSdevice::device_type_topic_name(device_type).c_str());
     }
 
     bool exists = false;
@@ -112,7 +112,7 @@ void Mqtt::add_command(const uint8_t device_type, const __FlashStringHelper * cm
     }
 
     // add the function to our list
-    mqtt_cmdfunctions_.emplace_back(device_type, cmd, cb);
+    mqtt_cmdfunctions_.emplace_back(device_type, std::move(cmd), std::move(cb));
 }
 
 // subscribe to an MQTT topic, and store the associated callback function. For generic functions not tied to a specific device
@@ -451,11 +451,12 @@ std::shared_ptr<const MqttMessage> Mqtt::queue_message(const uint8_t operation, 
     std::shared_ptr<MqttMessage> message;
     if ((strncmp(topic.c_str(), "homeassistant/", 13) == 0)) {
         // leave topic as it is
-        message = std::make_shared<MqttMessage>(operation, topic, payload, retain);
+        message = std::make_shared<MqttMessage>(operation, topic, std::move(payload), retain);
     } else {
         // prefix the hostname
-        std::string full_topic = Mqtt::hostname_ + "/" + topic;
-        message                = std::make_shared<MqttMessage>(operation, full_topic, payload, retain);
+        std::string full_topic(20, '\0');
+        snprintf_P(&full_topic[0], full_topic.capacity() + 1, PSTR("%s/%s"), Mqtt::hostname_.c_str(), topic.c_str());
+        message = std::make_shared<MqttMessage>(operation, full_topic, std::move(payload), retain);
     }
 
     // if the queue is full, make room but removing the last one

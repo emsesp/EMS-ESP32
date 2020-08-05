@@ -1183,7 +1183,7 @@ void Thermostat::set_settings_calinttemp(const char * value, const int8_t id) {
         return;
     }
 
-    // TODO: Michael - does this value need to be multiple by 10?
+    // does this value need to be multiple by 10?
     if (((flags() & 0x0F) == EMS_DEVICE_FLAG_RC30_1) || ((flags() & 0x0F) == EMS_DEVICE_FLAG_RC35)) {
         LOG_INFO(F("Calibrating internal temperature to %d.%d"), ct / 10, ct < 0 ? -ct % 10 : ct % 10);
         write_command(EMS_TYPE_IBASettings, 2, ct);
@@ -1219,7 +1219,7 @@ void Thermostat::set_remotetemp(const char * value, const int8_t id) {
 
 // 0xA5 - Set the building settings
 void Thermostat::set_settings_building(const char * value, const int8_t id) {
-    std::string bd;
+    std::string bd(20, '\0');
     if (!Helpers::value2string(value, bd)) {
         return;
     }
@@ -1283,7 +1283,7 @@ void Thermostat::set_control(const char * value, const int8_t id) {
 
 // sets the thermostat ww working mode, where mode is a string
 void Thermostat::set_wwmode(const char * value, const int8_t id) {
-    std::string v;
+    std::string v(10, '\0');
     if (!Helpers::value2string(value, v)) {
         return;
     }
@@ -1307,7 +1307,7 @@ void Thermostat::set_wwmode(const char * value, const int8_t id) {
 
 // set the holiday as string dd.mm.yyyy-dd.mm.yyyy
 void Thermostat::set_holiday(const char * value, const int8_t id) {
-    std::string hd;
+    std::string hd(30, '\0');
     if (!Helpers::value2string(value, hd)) {
         return;
     }
@@ -1379,7 +1379,7 @@ void Thermostat::set_party(const char * value, const int8_t id) {
 // dw - day of week (0..6), dst- summertime (0/1)
 // id is ignored
 void Thermostat::set_datetime(const char * value, const int8_t id) {
-    std::string dt;
+    std::string dt(30, '\0');
     if (!Helpers::value2string(value, dt)) {
         return;
     }
@@ -1424,7 +1424,7 @@ void Thermostat::set_datetime(const char * value, const int8_t id) {
 // sets the thermostat working mode, where mode is a string
 // converts string mode to HeatingCircuit::Mode
 void Thermostat::set_mode(const char * value, const int8_t id) {
-    std::string mode;
+    std::string mode(10, '\0');
     if (!Helpers::value2string(value, mode)) {
         return;
     }
