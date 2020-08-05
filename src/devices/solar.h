@@ -46,10 +46,6 @@ class Solar : public EMSdevice {
 
     void console_commands();
 
-    int16_t  bottomTemp_             = EMS_VALUE_SHORT_NOTSET; // bottom temp (TS2)
-    int16_t  bottomTemp2_            = EMS_VALUE_SHORT_NOTSET; // bottom temp cylinder 2 (TS5)
-    uint8_t  pumpModulation_         = EMS_VALUE_UINT_NOTSET;  // modulation solar pump
-    uint8_t  pump_                   = EMS_VALUE_BOOL_NOTSET;  // pump active
     int16_t  collectorTemp_          = EMS_VALUE_SHORT_NOTSET; // TS1: Temperature sensor for collector array 1
     int16_t  tankBottomTemp_         = EMS_VALUE_SHORT_NOTSET; // TS2: Temperature sensor 1 cylinder, bottom (solar thermal system)
     int16_t  tankBottomTemp2_        = EMS_VALUE_SHORT_NOTSET; // TS5: Temperature sensor 2 cylinder, bottom, or swimming pool (solar thermal system)
