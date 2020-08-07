@@ -194,12 +194,18 @@ void System::loop() {
 #if defined(ESP8266)
 #if defined(EMSESP_DEBUG)
     static uint32_t last_memcheck_ = 0;
-    if (currentMillis - last_memcheck_ > 8000) {
+    if (currentMillis - last_memcheck_ > 5000) { // 5 seconds
         last_memcheck_ = currentMillis;
-        LOG_INFO(F("Free heap: %d%% (%lu), frag:%u%%"), free_mem(), (unsigned long)ESP.getFreeHeap(), ESP.getHeapFragmentation());
+        show_mem("core");
     }
-#elif defined(ESP32)
+#endif
+#endif
+}
 
+void System::show_mem(const char * note) {
+#if defined(ESP8266)
+#if defined(EMSESP_DEBUG)
+    LOG_INFO(F("(%s) Free heap: %d%% (%lu), frag:%u%%"), note, free_mem(), (unsigned long)ESP.getFreeHeap(), ESP.getHeapFragmentation());
 #endif
 #endif
 }
@@ -320,6 +326,7 @@ void System::show_users(uuid::console::Shell & shell) {
 void System::show_system(uuid::console::Shell & shell) {
     shell.printfln(F("Uptime:        %s"), uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3).c_str());
 
+#ifndef EMSESP_STANDALONE
 #if defined(ESP8266)
     shell.printfln(F("Chip ID:       0x%08x"), ESP.getChipId());
     shell.printfln(F("SDK version:   %s"), ESP.getSdkVersion());
@@ -329,10 +336,8 @@ void System::show_system(uuid::console::Shell & shell) {
     shell.printfln(F("Boot mode:     %u"), ESP.getBootMode());
     shell.printfln(F("CPU frequency: %u MHz"), ESP.getCpuFreqMHz());
     shell.printfln(F("Flash chip:    0x%08X (%u bytes)"), ESP.getFlashChipId(), ESP.getFlashChipRealSize());
-    shell.printfln(F("Sketch size:   %u bytes (%u bytes free)"), ESP.getSketchSize(), ESP.getFreeSketchSpace());
     shell.printfln(F("Reset reason:  %s"), ESP.getResetReason().c_str());
     shell.printfln(F("Reset info:    %s"), ESP.getResetInfo().c_str());
-    shell.println();
     shell.printfln(F("Free heap:                %lu bytes"), (unsigned long)ESP.getFreeHeap());
     shell.printfln(F("Free mem:                 %d %%"), free_mem());
     shell.printfln(F("Maximum free block size:  %lu bytes"), (unsigned long)ESP.getMaxFreeBlockSize());
@@ -341,14 +346,12 @@ void System::show_system(uuid::console::Shell & shell) {
 #elif defined(ESP32)
     shell.printfln(F("SDK version:   %s"), ESP.getSdkVersion());
     shell.printfln(F("CPU frequency: %u MHz"), ESP.getCpuFreqMHz());
+#endif
     shell.printfln(F("Sketch size:   %u bytes (%u bytes free)"), ESP.getSketchSize(), ESP.getFreeSketchSpace());
     shell.printfln(F("Free heap:                %lu bytes"), (unsigned long)ESP.getFreeHeap());
     shell.printfln(F("Free mem:                 %d  %%"), free_mem());
-#endif
-
     shell.println();
 
-#ifndef EMSESP_STANDALONE
     switch (WiFi.status()) {
     case WL_IDLE_STATUS:
         shell.printfln(F("WiFi: Idle"));
@@ -368,6 +371,7 @@ void System::show_system(uuid::console::Shell & shell) {
         shell.printfln(F("BSSID: %s"), WiFi.BSSIDstr().c_str());
         shell.printfln(F("RSSI: %d dBm (%d %%)"), WiFi.RSSI(), wifi_quality());
         shell.printfln(F("MAC address: %s"), WiFi.macAddress().c_str());
+
 #if defined(ESP8266)
         shell.printfln(F("Hostname: %s"), WiFi.hostname().c_str());
 #elif defined(ESP32)

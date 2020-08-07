@@ -63,6 +63,8 @@ class System {
     void set_heartbeat(bool system_heartbeat);
     void send_heartbeat();
 
+    static void show_mem(const char * note);
+
     void check_upgrade();
 
   private:
@@ -72,7 +74,7 @@ class System {
     static uuid::syslog::SyslogService syslog_;
 #endif
 
-    static constexpr uint32_t SYSTEM_CHECK_FREQUENCY    = 10000; // check every 10 seconds
+    static constexpr uint32_t SYSTEM_CHECK_FREQUENCY    = 5000;  // check every 5 seconds
     static constexpr uint32_t LED_WARNING_BLINK         = 1000;  // pulse to show no connection, 1 sec
     static constexpr uint32_t LED_WARNING_BLINK_FAST    = 100;   // flash quickly for boot up sequence
     static constexpr uint32_t SYSTEM_HEARTBEAT_INTERVAL = 60000; // in milliseconds, how often the MQTT heartbeat is sent (1 min)
