@@ -215,12 +215,11 @@ void EMSESP::show_ems(uuid::console::Shell & shell) {
             } else if ((it.telegram_->operation) == Telegram::Operation::TX_WRITE) {
                 op = read_flash_string(F("WRITE"));
             }
-            shell.printfln(F(" [%02d%c] %s %s (offset %d)"),
+            shell.printfln(F(" [%02d%c] %s %s"),
                            it.id_,
                            ((it.retry_) ? '*' : ' '),
                            op.c_str(),
-                           pretty_telegram(it.telegram_).c_str(),
-                           it.telegram_->offset);
+                           pretty_telegram(it.telegram_).c_str());
         }
     }
 
@@ -288,7 +287,7 @@ std::string EMSESP::device_tostring(const uint8_t device_id) {
 }
 
 // created a pretty print telegram as a text string
-// e.g. Boiler(0x08) -> Me(0x0B), Version(0x02), data: 7B 06 01 00 00 00 00 00 00 04 (#data=10)
+// e.g. Boiler(0x08) -> Me(0x0B), Version(0x02), data: 7B 06 01 00 00 00 00 00 00 04 (offset 1)
 std::string EMSESP::pretty_telegram(std::shared_ptr<const Telegram> telegram) {
     uint8_t src    = telegram->src & 0x7F;
     uint8_t dest   = telegram->dest & 0x7F;
@@ -337,14 +336,14 @@ std::string EMSESP::pretty_telegram(std::shared_ptr<const Telegram> telegram) {
     if (offset) {
         snprintf_P(&str[0],
                    str.capacity() + 1,
-                   PSTR("%s(0x%02X) -> %s(0x%02X), %s(0x%02X), data: %s @offset %d"),
+                   PSTR("%s(0x%02X) -> %s(0x%02X), %s(0x%02X), data: %s (offset %d)"),
                    src_name.c_str(),
                    src,
                    dest_name.c_str(),
                    dest,
                    type_name.c_str(),
                    telegram->type_id,
-                   telegram->to_string().c_str(),
+                   telegram->to_string_message().c_str(),
                    offset);
     } else {
         snprintf_P(&str[0],
@@ -356,7 +355,7 @@ std::string EMSESP::pretty_telegram(std::shared_ptr<const Telegram> telegram) {
                    dest,
                    type_name.c_str(),
                    telegram->type_id,
-                   telegram->to_string().c_str());
+                   telegram->to_string_message().c_str());
     }
 
     return str;
@@ -566,7 +565,7 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice) {
             if (emsdevice->is_device_id(device_id)) {
-                LOG_DEBUG(F("Updating details to already existing device ID 0x%02X"), device_id);
+                LOG_DEBUG(F("Updating details on already existing device ID 0x%02X"), device_id);
                 emsdevice->product_id(product_id);
                 emsdevice->version(version);
                 // only set brand if it doesn't already exist

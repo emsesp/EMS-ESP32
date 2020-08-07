@@ -83,8 +83,8 @@ class Telegram {
         TX_WRITE,
     };
 
+    std::string to_string_message() const;
     std::string to_string() const;
-    std::string to_string(const uint8_t * telegram, uint8_t length) const;
 
     // reads a bit value from a given telegram position
     void read_bitvalue(uint8_t & value, const uint8_t index, const uint8_t bit) const {

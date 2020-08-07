@@ -78,12 +78,8 @@ Telegram::Telegram(const uint8_t   operation,
     }
 }
 
-// returns telegram's message data bytes in hex
+// returns telegram as data bytes in hex (excluding CRC)
 std::string Telegram::to_string() const {
-    if (this->message_length == 0) {
-        return read_flash_string(F("<empty>"));
-    }
-
     uint8_t data[EMS_MAX_TELEGRAM_LENGTH];
     uint8_t length = 0;
     data[0]        = this->src ^ RxService::ems_mask();
@@ -122,9 +118,13 @@ std::string Telegram::to_string() const {
     return Helpers::data_to_hex(data, length);
 }
 
-// returns telegram's full telegram message in hex
-std::string Telegram::to_string(const uint8_t * telegram, uint8_t length) const {
-    return Helpers::data_to_hex(telegram, length);
+// returns telegram's message body only, in hex
+std::string Telegram::to_string_message() const {
+    if (this->message_length == 0) {
+        return read_flash_string(F("<empty>"));
+    }
+
+    return Helpers::data_to_hex(this->message_data, this->message_length);
 }
 
 RxService::QueuedRxTelegram::QueuedRxTelegram(uint16_t id, std::shared_ptr<Telegram> && telegram)
@@ -380,7 +380,7 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
     LOG_DEBUG(F("Sending %s Tx [#%d], telegram: %s"),
               (telegram->operation == Telegram::Operation::TX_WRITE) ? F("write") : F("read"),
               tx_telegram.id_,
-              telegram->to_string(telegram_raw, length).c_str());
+              Helpers::data_to_hex(telegram_raw, length).c_str());
 
     // send the telegram to the UART Tx
     uint16_t status = EMSuart::transmit(telegram_raw, length);
