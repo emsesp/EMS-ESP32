@@ -454,7 +454,7 @@ std::shared_ptr<const MqttMessage> Mqtt::queue_message(const uint8_t operation, 
         message = std::make_shared<MqttMessage>(operation, topic, std::move(payload), retain);
     } else {
         // prefix the hostname
-        std::string full_topic(20, '\0');
+        std::string full_topic(50, '\0');
         snprintf_P(&full_topic[0], full_topic.capacity() + 1, PSTR("%s/%s"), Mqtt::hostname_.c_str(), topic.c_str());
         message = std::make_shared<MqttMessage>(operation, full_topic, std::move(payload), retain);
     }
