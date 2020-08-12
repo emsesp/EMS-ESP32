@@ -91,7 +91,7 @@ class Thermostat : public EMSdevice {
         uint16_t set_typeid_;
     };
 
-    std::string mode_tostring(uint8_t mode) const;
+    static std::string mode_tostring(uint8_t mode);
 
     virtual void show_values(uuid::console::Shell & shell);
     virtual void publish_values();
@@ -99,20 +99,16 @@ class Thermostat : public EMSdevice {
     virtual bool updated_values();
     virtual void add_context_menu();
 
-    bool can_write() const {
-        return ((flags() & EMSdevice::EMS_DEVICE_FLAG_NO_WRITE) == EMSdevice::EMS_DEVICE_FLAG_NO_WRITE);
-    }
+  private:
+    static uuid::log::Logger logger_;
+
+    void console_commands(Shell & shell, unsigned int context);
+    void add_commands();
 
     // each thermostat has a list of heating controller type IDs for reading and writing
     std::vector<uint16_t> monitor_typeids;
     std::vector<uint16_t> set_typeids;
     std::vector<uint16_t> timer_typeids;
-
-  private:
-    static uuid::log::Logger logger_;
-
-    void console_commands(Shell & shell, unsigned int context);
-    void init_mqtt();
 
     std::string datetime_; // date and time stamp
 
@@ -210,6 +206,7 @@ class Thermostat : public EMSdevice {
     // Installation settings
     static constexpr uint8_t EMS_TYPE_IBASettings = 0xA5; // installation settings
     static constexpr uint8_t EMS_TYPE_wwSettings  = 0x37; // ww settings
+    static constexpr uint8_t EMS_TYPE_time        = 0x06; // time
 
     std::shared_ptr<Thermostat::HeatingCircuit> heating_circuit(std::shared_ptr<const Telegram> telegram);
     std::shared_ptr<Thermostat::HeatingCircuit> heating_circuit(const uint8_t hc_num);
@@ -240,6 +237,7 @@ class Thermostat : public EMSdevice {
 
     // internal helper functions
     void set_mode_n(const uint8_t mode, const uint8_t hc_num);
+
     void set_temperature_value(const char * value, const int8_t id, const uint8_t mode);
     void set_temperature(const float temperature, const std::string & mode, const uint8_t hc_num);
     void set_temperature(const float temperature, const uint8_t mode, const uint8_t hc_num);
@@ -254,6 +252,7 @@ class Thermostat : public EMSdevice {
     void set_holiday(const char * value, const int8_t id);
     void set_pause(const char * value, const int8_t id);
     void set_party(const char * value, const int8_t id);
+
     void set_temp(const char * value, const int8_t id);
     void set_nighttemp(const char * value, const int8_t id);
     void set_daytemp(const char * value, const int8_t id);
@@ -264,17 +263,18 @@ class Thermostat : public EMSdevice {
     void set_designtemp(const char * value, const int8_t id);
     void set_offsettemp(const char * value, const int8_t id);
     void set_holidaytemp(const char * value, const int8_t id);
+
     void set_remotetemp(const char * value, const int8_t id);
 
-    // set functions - these don't use the id/hc
+    // set functions - these don't use the id/hc, the parameters are ignored
     void set_wwmode(const char * value, const int8_t id);
     void set_datetime(const char * value, const int8_t id);
-    void set_settings_minexttemp(const char * value, const int8_t id);
-    void set_settings_clockoffset(const char * value, const int8_t id);
-    void set_settings_calinttemp(const char * value, const int8_t id);
-    void set_settings_display(const char * value, const int8_t id);
-    void set_settings_building(const char * value, const int8_t id);
-    void set_settings_language(const char * value, const int8_t id);
+    void set_minexttemp(const char * value, const int8_t id);
+    void set_clockoffset(const char * value, const int8_t id);
+    void set_calinttemp(const char * value, const int8_t id);
+    void set_display(const char * value, const int8_t id);
+    void set_building(const char * value, const int8_t id);
+    void set_language(const char * value, const int8_t id);
 };
 
 } // namespace emsesp
