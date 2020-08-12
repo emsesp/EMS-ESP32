@@ -24,6 +24,8 @@ namespace emsesp {
 
 uuid::log::Logger EMSdevice::logger_{F_(emsesp), uuid::log::Facility::CONSOLE};
 
+std::vector<EMSdevice::TelegramFunction> EMSdevice::telegram_functions_;
+
 std::string EMSdevice::brand_to_string() const {
     switch (brand_) {
     case EMSdevice::Brand::BOSCH:
@@ -198,7 +200,7 @@ void EMSdevice::show_values(uuid::console::Shell & shell) {
 
 // for each telegram that has the fetch value set (true) do a read request
 void EMSdevice::fetch_values() {
-    LOG_DEBUG(F("Fetching values for device ID 0x%02X"), device_id());
+    LOG_DEBUG(F("Fetching values for device ID 0x%02X"), get_device_id());
 
     for (const auto & tf : telegram_functions_) {
         if (tf.fetch_) {
@@ -209,7 +211,7 @@ void EMSdevice::fetch_values() {
 
 // toggle on/off automatic fetch for a telegram id
 void EMSdevice::toggle_fetch(uint16_t telegram_id, bool toggle) {
-    LOG_DEBUG(F("Toggling fetch for device ID 0x%02X, telegram ID 0x%02X to %d"), device_id(), telegram_id, toggle);
+    LOG_DEBUG(F("Toggling fetch for device ID 0x%02X, telegram ID 0x%02X to %d"), get_device_id(), telegram_id, toggle);
 
     for (auto & tf : telegram_functions_) {
         if (tf.telegram_type_id_ == telegram_id) {
@@ -243,22 +245,12 @@ void EMSdevice::register_mqtt_topic(const std::string & topic, mqtt_subfunction_
 
 void EMSdevice::register_mqtt_cmd(const __FlashStringHelper * cmd, mqtt_cmdfunction_p f) {
     LOG_DEBUG(F("Registering MQTT cmd %s for device type %s"), uuid::read_flash_string(cmd).c_str(), this->device_type_name().c_str());
-    Mqtt::add_command(this->device_type_, cmd, f);
-}
-
-EMSdevice::TelegramFunction::TelegramFunction(uint16_t                    telegram_type_id,
-                                              const __FlashStringHelper * telegram_type_name,
-                                              bool                        fetch,
-                                              process_function_p          process_function)
-    : telegram_type_id_(telegram_type_id)
-    , telegram_type_name_(telegram_type_name)
-    , fetch_(fetch)
-    , process_function_(process_function) {
+    Mqtt::add_command(this->device_type_, this->device_id_, cmd, f);
 }
 
 // register a call back function for a specific telegram type
 void EMSdevice::register_telegram_type(const uint16_t telegram_type_id, const __FlashStringHelper * telegram_type_name, bool fetch, process_function_p f) {
-    telegram_functions_.emplace_back(telegram_type_id, std::move(telegram_type_name), fetch, std::move(f));
+    telegram_functions_.emplace_back(telegram_type_id, telegram_type_name, fetch, f);
 }
 
 // return the name of the telegram type
@@ -302,24 +294,22 @@ bool EMSdevice::handle_telegram(std::shared_ptr<const Telegram> telegram) {
 
 // send Tx write with a data block
 void EMSdevice::write_command(const uint16_t type_id, const uint8_t offset, uint8_t * message_data, const uint8_t message_length, const uint16_t validate_typeid) {
-    EMSESP::send_write_request(type_id, device_id(), offset, message_data, message_length, validate_typeid);
+    EMSESP::send_write_request(type_id, this->get_device_id(), offset, message_data, message_length, validate_typeid);
 }
 
 // send Tx write with a single value
 void EMSdevice::write_command(const uint16_t type_id, const uint8_t offset, const uint8_t value, const uint16_t validate_typeid) {
-    uint8_t message_data[1];
-    message_data[0] = value;
-    EMSESP::send_write_request(type_id, device_id(), offset, message_data, 1, validate_typeid);
+    EMSESP::send_write_request(type_id, this->get_device_id(), offset, value, validate_typeid);
 }
 
 // send Tx write with a single value, with no post validation
 void EMSdevice::write_command(const uint16_t type_id, const uint8_t offset, const uint8_t value) {
-    write_command(type_id, offset, value, 0);
+    EMSESP::send_write_request(type_id, this->get_device_id(), offset, value, 0);
 }
 
 // send Tx read command to the device
 void EMSdevice::read_command(const uint16_t type_id) {
-    EMSESP::send_read_request(type_id, device_id());
+    EMSESP::send_read_request(type_id, get_device_id());
 }
 
 // prints a string value to the console

@@ -28,6 +28,7 @@ AsyncMqttClient * Mqtt::mqttClient_;
 std::string Mqtt::hostname_;
 uint8_t     Mqtt::mqtt_qos_;
 uint16_t    Mqtt::publish_time_;
+uint8_t     Mqtt::bus_id_;
 
 std::vector<Mqtt::MQTTSubFunction> Mqtt::mqtt_subfunctions_;
 std::vector<Mqtt::MQTTCmdFunction> Mqtt::mqtt_cmdfunctions_;
@@ -35,37 +36,10 @@ std::vector<Mqtt::MQTTCmdFunction> Mqtt::mqtt_cmdfunctions_;
 uint16_t                            Mqtt::mqtt_publish_fails_    = 0;
 size_t                              Mqtt::maximum_mqtt_messages_ = Mqtt::MAX_MQTT_MESSAGES;
 uint16_t                            Mqtt::mqtt_message_id_       = 0;
-std::deque<Mqtt::QueuedMqttMessage> Mqtt::mqtt_messages_;
+std::list<Mqtt::QueuedMqttMessage> Mqtt::mqtt_messages_;
 char                                will_topic_[Mqtt::MQTT_TOPIC_MAX_SIZE]; // because MQTT library keeps only char pointer
 
 uuid::log::Logger Mqtt::logger_{F_(mqtt), uuid::log::Facility::DAEMON};
-
-Mqtt::QueuedMqttMessage::QueuedMqttMessage(uint16_t id, std::shared_ptr<MqttMessage> && content)
-    : id_(id)
-    , content_(std::move(content)) {
-    retry_count_ = 0;
-    packet_id_   = 0;
-}
-
-MqttMessage::MqttMessage(const uint8_t operation, const std::string & topic, const std::string && payload, bool retain)
-    : operation(operation)
-    , topic(topic)
-    , payload(std::move(payload))
-    , retain(retain) {
-}
-
-Mqtt::MQTTSubFunction::MQTTSubFunction(const uint8_t device_type, const std::string && topic, const std::string && full_topic, mqtt_subfunction_p mqtt_subfunction)
-    : device_type_(device_type)
-    , topic_(topic)
-    , full_topic_(full_topic)
-    , mqtt_subfunction_(mqtt_subfunction) {
-}
-
-Mqtt::MQTTCmdFunction::MQTTCmdFunction(const uint8_t device_type, const __FlashStringHelper * cmd, mqtt_cmdfunction_p mqtt_cmdfunction)
-    : device_type_(device_type)
-    , cmd_(cmd)
-    , mqtt_cmdfunction_(mqtt_cmdfunction) {
-}
 
 // subscribe to an MQTT topic, and store the associated callback function
 // only if it already hasn't been added
@@ -88,10 +62,11 @@ void Mqtt::subscribe(const uint8_t device_type, const std::string & topic, mqtt_
 }
 
 // adds a command and callback function for a specific device
-void Mqtt::add_command(const uint8_t device_type, const __FlashStringHelper * cmd, mqtt_cmdfunction_p cb) {
+void Mqtt::add_command(const uint8_t device_type, const uint8_t device_id, const __FlashStringHelper * cmd, mqtt_cmdfunction_p cb) {
     // subscribe to the command topic if it doesn't exist yet
     // create the cmd topic for a device like "<device_type>_cmd" e.g. "boiler_cmd"
     // unless its a system MQTT command, then its system_cmd
+
     std::string cmd_topic(40, '\0');
     if (device_type == EMSdevice::DeviceType::SERVICEKEY) {
         cmd_topic = MQTT_SYSTEM_CMD; // hard-coded system
@@ -111,8 +86,7 @@ void Mqtt::add_command(const uint8_t device_type, const __FlashStringHelper * cm
         Mqtt::subscribe(device_type, cmd_topic, nullptr); // use an empty function handler to signal this is a command function
     }
 
-    // add the function to our list
-    mqtt_cmdfunctions_.emplace_back(device_type, std::move(cmd), std::move(cb));
+    mqtt_cmdfunctions_.emplace_back(device_type, device_id, cmd, cb);
 }
 
 // subscribe to an MQTT topic, and store the associated callback function. For generic functions not tied to a specific device
@@ -366,6 +340,8 @@ void Mqtt::start() {
         mqtt_qos_     = mqttSettings.mqtt_qos;
     });
 
+    EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) { bus_id_ = settings.ems_bus_id; });
+
     mqttClient_->onConnect([this](bool sessionPresent) { on_connect(); });
 
     mqttClient_->onDisconnect([this](AsyncMqttClientDisconnectReason reason) {
@@ -402,6 +378,10 @@ void Mqtt::start() {
         // publish
         on_publish(packetId);
     });
+
+    // create space for command buffer, to avoid heap memory fragmentation
+    mqtt_cmdfunctions_.reserve(40); // current count with boiler+thermostat is 37
+    mqtt_subfunctions_.reserve(10);
 }
 
 void Mqtt::set_publish_time(uint16_t publish_time) {
@@ -432,8 +412,8 @@ void Mqtt::on_connect() {
     // add the system MQTT subscriptions, only if its a fresh start with no previous subscriptions
     // these commands respond to the topic "system_cmd" and take a payload like {cmd:"", data:"", id:""}
     if (mqtt_subfunctions_.empty()) {
-        add_command(EMSdevice::DeviceType::SERVICEKEY, F("pin"), System::mqtt_command_pin);
-        add_command(EMSdevice::DeviceType::SERVICEKEY, F("send"), System::mqtt_command_send);
+        add_command(EMSdevice::DeviceType::SERVICEKEY, bus_id_, F("pin"), System::mqtt_command_pin);
+        add_command(EMSdevice::DeviceType::SERVICEKEY, bus_id_, F("send"), System::mqtt_command_send);
     }
 
     LOG_INFO(F("MQTT connected"));

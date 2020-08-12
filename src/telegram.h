@@ -20,9 +20,7 @@
 #define EMSESP_TELEGRAM_H
 
 #include <string>
-#include <deque>
-#include <memory> // for unique ptrs
-#include <vector>
+#include <list>
 
 // UART drivers
 #if defined(ESP8266)
@@ -197,7 +195,7 @@ class EMSbus {
 
 class RxService : public EMSbus {
   public:
-    static constexpr size_t MAX_RX_TELEGRAMS = 20;
+    static constexpr size_t MAX_RX_TELEGRAMS = 10;
 
     RxService()  = default;
     ~RxService() = default;
@@ -226,31 +224,32 @@ class RxService : public EMSbus {
 
     class QueuedRxTelegram {
       public:
-        QueuedRxTelegram(uint16_t id, std::shared_ptr<Telegram> && telegram);
-        ~QueuedRxTelegram() = default;
-
-        uint16_t                              id_; // sequential identifier
+        const uint16_t                        id_;
         const std::shared_ptr<const Telegram> telegram_;
+
+        ~QueuedRxTelegram() = default;
+        QueuedRxTelegram(uint16_t id, std::shared_ptr<Telegram> && telegram)
+            : id_(id)
+            , telegram_(std::move(telegram)) {
+        }
     };
 
-    const std::deque<QueuedRxTelegram> queue() const {
+    const std::list<QueuedRxTelegram> queue() const {
         return rx_telegrams_;
     }
 
   private:
-    uint32_t last_rx_check_ = 0;
-
-    uint8_t rx_telegram_id_ = 0; // queue counter
-
+    uint32_t last_rx_check_        = 0;
+    uint8_t  rx_telegram_id_       = 0; // queue counter
     uint16_t telegram_count_       = 0; // # Rx received
     uint16_t telegram_error_count_ = 0; // # Rx CRC errors
 
-    std::deque<QueuedRxTelegram> rx_telegrams_;
+    std::list<QueuedRxTelegram> rx_telegrams_;
 };
 
 class TxService : public EMSbus {
   public:
-    static constexpr size_t MAX_TX_TELEGRAMS = 30; // size of Tx queue
+    static constexpr size_t MAX_TX_TELEGRAMS = 20; // size of Tx queue
 
     static constexpr uint8_t TX_WRITE_FAIL    = 4;
     static constexpr uint8_t TX_WRITE_SUCCESS = 1;
@@ -336,26 +335,29 @@ class TxService : public EMSbus {
 
     class QueuedTxTelegram {
       public:
-        QueuedTxTelegram(uint16_t id, std::shared_ptr<Telegram> && telegram, bool retry);
-        ~QueuedTxTelegram() = default;
-
-        uint16_t                              id_; // sequential identifier
+        const uint16_t                        id_;
         const std::shared_ptr<const Telegram> telegram_;
-        bool                                  retry_; // is a retry
+        const bool                            retry_; // is a retry
+
+        ~QueuedTxTelegram() = default;
+        QueuedTxTelegram(uint16_t id, std::shared_ptr<Telegram> && telegram, bool retry)
+            : id_(id)
+            , telegram_(std::move(telegram))
+            , retry_(retry) {
+        }
     };
 
-    const std::deque<QueuedTxTelegram> queue() const {
+    const std::list<QueuedTxTelegram> queue() const {
         return tx_telegrams_;
     }
 
     static constexpr uint8_t MAXIMUM_TX_RETRIES = 3;
 
   private:
-    uint8_t tx_telegram_id_ = 0; // queue counter
+    uint8_t  tx_telegram_id_ = 0; // queue counter
+    uint32_t last_tx_check_  = 0;
 
-    uint32_t last_tx_check_ = 0;
-
-    std::deque<QueuedTxTelegram> tx_telegrams_;
+    std::list<QueuedTxTelegram> tx_telegrams_;
 
     uint16_t telegram_read_count_  = 0; // # Tx successful reads
     uint16_t telegram_write_count_ = 0; // # Tx successful writes

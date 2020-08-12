@@ -24,7 +24,7 @@
 
 #include <string>
 #include <vector>
-#include <deque>
+#include <list>
 #include <functional>
 
 #include <AsyncMqttClient.h>
@@ -46,16 +46,20 @@ namespace emsesp {
 using mqtt_subfunction_p = std::function<void(const char * message)>;
 using mqtt_cmdfunction_p = std::function<void(const char * data, const int8_t id)>;
 
-using namespace std::placeholders; // for `_1`
-
 struct MqttMessage {
-    MqttMessage(const uint8_t operation, const std::string & topic, const std::string && payload, bool retain);
     ~MqttMessage() = default;
 
     const uint8_t     operation;
     const std::string topic;
     const std::string payload;
     const bool        retain;
+
+    MqttMessage(const uint8_t operation, const std::string & topic, const std::string && payload, bool retain)
+        : operation(operation)
+        , topic(topic)
+        , payload(std::move(payload))
+        , retain(retain) {
+    }
 };
 
 class Mqtt {
@@ -74,7 +78,7 @@ class Mqtt {
     static void subscribe(const std::string & topic, mqtt_subfunction_p cb);
     static void resubscribe();
 
-    static void add_command(const uint8_t device_type, const __FlashStringHelper * cmd, mqtt_cmdfunction_p cb);
+    static void add_command(const uint8_t device_type, const uint8_t device_id, const __FlashStringHelper * cmd, mqtt_cmdfunction_p cb);
 
     static void publish(const std::string & topic, const std::string & payload, bool retain = false);
     static void publish(const std::string & topic, const JsonDocument & payload, bool retain = false);
@@ -106,16 +110,18 @@ class Mqtt {
         mqtt_publish_fails_ = 0;
     }
 
-    static std::string hostname_;
-
-    class MQTTCmdFunction {
-      public:
-        MQTTCmdFunction(const uint8_t device_type, const __FlashStringHelper * cmd, mqtt_cmdfunction_p mqtt_cmdfunction);
-        ~MQTTCmdFunction() = default;
-
-        const uint8_t               device_type_;
+    struct MQTTCmdFunction {
+        uint8_t                     device_type_;
+        uint8_t                     device_id_;
         const __FlashStringHelper * cmd_;
         mqtt_cmdfunction_p          mqtt_cmdfunction_;
+
+        MQTTCmdFunction(uint8_t device_type, uint8_t device_id, const __FlashStringHelper * cmd, mqtt_cmdfunction_p mqtt_cmdfunction)
+            : device_type_(device_type)
+            , device_id_(device_id)
+            , cmd_(cmd)
+            , mqtt_cmdfunction_(mqtt_cmdfunction) {
+        }
     };
 
     static std::vector<MQTTCmdFunction> commands() {
@@ -127,15 +133,20 @@ class Mqtt {
 
     class QueuedMqttMessage {
       public:
-        QueuedMqttMessage(uint16_t id, std::shared_ptr<MqttMessage> && content);
-        ~QueuedMqttMessage() = default;
-
         const uint16_t                           id_;
         const std::shared_ptr<const MqttMessage> content_;
         uint8_t                                  retry_count_;
         uint16_t                                 packet_id_;
+
+        ~QueuedMqttMessage() = default;
+        QueuedMqttMessage(uint16_t id, std::shared_ptr<MqttMessage> && content)
+            : id_(id)
+            , content_(std::move(content)) {
+            retry_count_ = 0;
+            packet_id_   = 0;
+        }
     };
-    static std::deque<QueuedMqttMessage> mqtt_messages_;
+    static std::list<QueuedMqttMessage> mqtt_messages_;
 
     static AsyncMqttClient * mqttClient_;
 
@@ -143,7 +154,7 @@ class Mqtt {
     static uint16_t mqtt_message_id_;
     static bool     mqtt_retain_;
 
-    static constexpr size_t   MAX_MQTT_MESSAGES      = 30;  // size of queue
+    static constexpr size_t   MAX_MQTT_MESSAGES      = 20;  // size of queue
     static constexpr uint32_t MQTT_PUBLISH_WAIT      = 200; // delay between sending publishes, to account for large payloads
     static constexpr uint8_t  MQTT_PUBLISH_MAX_RETRY = 3;   // max retries for giving up on publishing
 
@@ -159,15 +170,18 @@ class Mqtt {
     static uint16_t mqtt_publish_fails_;
 
     // function handlers for MQTT subscriptions
-    class MQTTSubFunction {
-      public:
-        MQTTSubFunction(const uint8_t device_type, const std::string && topic, const std::string && full_topic, mqtt_subfunction_p mqtt_subfunction);
-        ~MQTTSubFunction() = default;
-
-        const uint8_t      device_type_; // which device type, from DeviceType::
+    struct MQTTSubFunction {
+        uint8_t            device_type_; // which device type, from DeviceType::
         const std::string  topic_;
         const std::string  full_topic_;       // the fully qualified topic name, usually with the hostname prefixed
         mqtt_subfunction_p mqtt_subfunction_; // can be empty
+
+        MQTTSubFunction(uint8_t device_type, const std::string && topic, const std::string && full_topic, mqtt_subfunction_p mqtt_subfunction)
+            : device_type_(device_type)
+            , topic_(topic)
+            , full_topic_(full_topic)
+            , mqtt_subfunction_(mqtt_subfunction) {
+        }
     };
 
     static std::vector<MQTTSubFunction> mqtt_subfunctions_; // list of mqtt subscribe callbacks for all devices
@@ -177,8 +191,10 @@ class Mqtt {
     uint32_t last_publish_   = 0;
 
     // settings, copied over
-    static uint8_t  mqtt_qos_;
-    static uint16_t publish_time_;
+    static std::string hostname_;
+    static uint8_t     mqtt_qos_;
+    static uint16_t    publish_time_;
+    static uint8_t     bus_id_;
 };
 
 } // namespace emsesp

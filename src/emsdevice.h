@@ -30,10 +30,10 @@
 
 namespace emsesp {
 
-using namespace std::placeholders; // for `_1`
-
 class EMSdevice {
   public:
+    static constexpr uint8_t EMS_DEVICES_MAX_TELEGRAMS = 20;
+
     // device_type defines which derived class to use, e.g. BOILER, THERMOSTAT etc..
     EMSdevice(uint8_t device_type, uint8_t device_id, uint8_t product_id, const std::string & version, const std::string & name, uint8_t flags, uint8_t brand)
         : device_type_(device_type)
@@ -47,17 +47,7 @@ class EMSdevice {
 
     virtual ~EMSdevice() = default; // destructor of base class must always be virtual because it's a polymorphic class
 
-    /*
-    // https://github.com/proddy/EMS-ESP/issues/434#issuecomment-667840531
-    inline uint8_t device_id(uint8_t hc = 0) const {
-        if (((device_id_ & 0x7F) >= 0x18) && ((device_id_ & 0x7F) <= 0x1B)) {
-            return ((device_id_ & 0x80) + 0x18 + hc);
-        }
-        return device_id_;
-    }
-    */
-
-    inline uint8_t device_id() const {
+    inline uint8_t get_device_id() const {
         return device_id_;
     }
 
@@ -156,6 +146,10 @@ class EMSdevice {
 
     void fetch_values();
     void toggle_fetch(uint16_t telegram_id, bool toggle);
+
+    static void reserve_mem(size_t n) {
+        telegram_functions_.reserve(n);
+    }
 
     // prints a ems device value to the console, handling the correct rendering of the type
     // padding is # white space
@@ -296,17 +290,21 @@ class EMSdevice {
 
     static uuid::log::Logger logger_;
 
-    class TelegramFunction {
-      public:
-        TelegramFunction(uint16_t telegram_type_id, const __FlashStringHelper * telegram_type_name, bool fetch, process_function_p process_function);
-        ~TelegramFunction() = default;
-
+    struct TelegramFunction {
         uint16_t                    telegram_type_id_;   // it's type_id
         const __FlashStringHelper * telegram_type_name_; // e.g. RC20Message
         bool                        fetch_;              // if this type_id be queried automatically
-        process_function_p          process_function_;
+
+        process_function_p process_function_;
+
+        TelegramFunction(uint16_t telegram_type_id, const __FlashStringHelper * telegram_type_name, bool fetch, process_function_p process_function)
+            : telegram_type_id_(telegram_type_id)
+            , telegram_type_name_(telegram_type_name)
+            , fetch_(fetch)
+            , process_function_(process_function) {
+        }
     };
-    std::vector<TelegramFunction> telegram_functions_; // each EMS device has its own set of registered telegram types
+    static std::vector<TelegramFunction> telegram_functions_; // each EMS device has its own set of registered telegram types
 };
 
 } // namespace emsesp

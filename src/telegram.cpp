@@ -127,11 +127,6 @@ std::string Telegram::to_string_message() const {
     return Helpers::data_to_hex(this->message_data, this->message_length);
 }
 
-RxService::QueuedRxTelegram::QueuedRxTelegram(uint16_t id, std::shared_ptr<Telegram> && telegram)
-    : id_(id)
-    , telegram_(std::move(telegram)) {
-}
-
 // empty queue, don't process them
 void RxService::flush_rx_queue() {
     rx_telegrams_.clear();
@@ -143,12 +138,9 @@ void RxService::flush_rx_queue() {
 void RxService::loop() {
     while (!rx_telegrams_.empty()) {
         auto telegram = rx_telegrams_.front().telegram_;
-
         (void)EMSESP::process_telegram(telegram); // further process the telegram
-
-        increment_telegram_count(); // increase count
-
-        rx_telegrams_.pop_front(); // remove it from the queue
+        increment_telegram_count();               // increase count
+        rx_telegrams_.pop_front();                // remove it from the queue
     }
 }
 
@@ -221,10 +213,14 @@ void RxService::add(uint8_t * data, uint8_t length) {
     LOG_DEBUG(F("[DEBUG] New Rx [#%d] telegram, message length %d"), rx_telegram_id_, message_length);
 #endif
 
-    // if we don't have a type_id or empty data block, exit
-    if ((type_id == 0) || (message_length == 0)) {
+    // if we don't have a type_id exit,
+    // do not exit on empty message, it is checked for toggle fetch
+    if (type_id == 0) {
         return;
     }
+
+    // if we receive a hc2.. telegram from 0x19.. match it to master_thermostat if master is 0x18
+    src = EMSESP::check_master_device(src, type_id, true);
 
     // create the telegram
     auto telegram = std::make_shared<Telegram>(Telegram::Operation::RX, src, dest, type_id, offset, message_data, message_length);
@@ -240,12 +236,6 @@ void RxService::add(uint8_t * data, uint8_t length) {
 //
 // Tx CODE starts here...
 //
-
-TxService::QueuedTxTelegram::QueuedTxTelegram(uint16_t id, std::shared_ptr<Telegram> && telegram, bool retry)
-    : id_(id)
-    , telegram_(std::move(telegram))
-    , retry_(retry) {
-}
 
 // empty queue, don't process
 void TxService::flush_tx_queue() {
@@ -295,16 +285,12 @@ void TxService::send() {
     }
 
     // if we're in read-only mode (tx_mode 0) forget the Tx call
-    if (tx_mode() == 0) {
-        tx_telegrams_.pop_front();
-        return;
+    if (tx_mode() != 0) {
+        send_telegram(tx_telegrams_.front());
     }
 
-    // send next telegram in the queue (which is actually a list!)
-    send_telegram(tx_telegrams_.front());
 
-    // remove the telegram from the queue
-    tx_telegrams_.pop_front();
+    tx_telegrams_.pop_front(); // remove the telegram from the queue
 }
 
 // process a Tx telegram
@@ -324,6 +310,10 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
     // dest - for READ the MSB must be set
     // fix the READ or WRITE depending on the operation
     uint8_t dest = telegram->dest;
+
+    // check if we have to manipulate the id for thermostats > 0x18
+    dest = EMSESP::check_master_device(dest, telegram->type_id, false);
+
     if (telegram->operation == Telegram::Operation::TX_READ) {
         dest |= 0x80; // read has 8th bit set for the destination
     }
@@ -570,7 +560,7 @@ void TxService::retry_tx(const uint8_t operation, const uint8_t * data, const ui
         return;
     }
 
-#ifdef EMSESP_DENUG
+#ifdef EMSESP_DEBUG
     LOG_DEBUG(F("[DEBUG] Last Tx %s operation failed. Retry #%d. sent message: %s, received: %s"),
               (operation == Telegram::Operation::TX_WRITE) ? F("Write") : F("Read"),
               retry_count_,

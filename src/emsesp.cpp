@@ -20,9 +20,6 @@
 
 namespace emsesp {
 
-using DeviceFlags = emsesp::EMSdevice;
-using DeviceType  = emsesp::EMSdevice::DeviceType;
-
 AsyncWebServer webServer(80);
 
 #if defined(ESP32)
@@ -40,6 +37,8 @@ EMSESPSettingsService EMSESP::emsespSettingsService = EMSESPSettingsService(&web
 EMSESPStatusService  EMSESP::emsespStatusService  = EMSESPStatusService(&webServer, EMSESP::esp8266React.getSecurityManager());
 EMSESPDevicesService EMSESP::emsespDevicesService = EMSESPDevicesService(&webServer, EMSESP::esp8266React.getSecurityManager());
 
+using DeviceFlags = emsesp::EMSdevice;
+using DeviceType  = emsesp::EMSdevice::DeviceType;
 std::vector<std::unique_ptr<EMSdevice>>    EMSESP::emsdevices;      // array of all the detected EMS devices
 std::vector<emsesp::EMSESP::Device_record> EMSESP::device_library_; // libary of all our known EMS devices so far
 
@@ -77,6 +76,11 @@ void EMSESP::fetch_device_values(const uint8_t device_id) {
     }
 }
 
+// clears list of recognized devices
+void EMSESP::clear_all_devices() {
+    emsdevices.clear(); // or use empty to release memory too
+}
+
 // return number of devices of a known type
 uint8_t EMSESP::count_devices(const uint8_t device_type) {
     uint8_t count = 0;
@@ -86,6 +90,33 @@ uint8_t EMSESP::count_devices(const uint8_t device_type) {
         }
     }
     return count;
+}
+
+// scans for new devices
+void EMSESP::scan_devices() {
+    EMSESP::clear_all_devices();
+    EMSESP::send_read_request(EMSdevice::EMS_TYPE_UBADevices, EMSdevice::EMS_DEVICE_ID_BOILER);
+}
+
+/**
+* if thermostat master is 0x18 it handles only ww and hc1, hc2..hc4 handled by devices 0x19..0x1B
+* we send to right device and match all reads to 0x18
+*/
+uint8_t EMSESP::check_master_device(const uint8_t device_id, const uint16_t type_id, const bool read) {
+    uint16_t mon_id[4] = {0x02A5, 0x02A6, 0x02A7, 0x02A8};
+    uint16_t set_id[4] = {0x02B9, 0x02BA, 0x02BB, 0x02BC};
+    if (actual_master_thermostat_ == 0x18) {
+        for (uint8_t i = 0; i < 4; i++) {
+            if (type_id == mon_id[i] || type_id == set_id[i]) {
+                if (read) {
+                    return 0x18;
+                } else {
+                    return 0x18 + i;
+                }
+            }
+        }
+    }
+    return device_id;
 }
 
 void EMSESP::actual_master_thermostat(const uint8_t device_id) {
@@ -215,11 +246,7 @@ void EMSESP::show_ems(uuid::console::Shell & shell) {
             } else if ((it.telegram_->operation) == Telegram::Operation::TX_WRITE) {
                 op = read_flash_string(F("WRITE"));
             }
-            shell.printfln(F(" [%02d%c] %s %s"),
-                           it.id_,
-                           ((it.retry_) ? '*' : ' '),
-                           op.c_str(),
-                           pretty_telegram(it.telegram_).c_str());
+            shell.printfln(F(" [%02d%c] %s %s"), it.id_, ((it.retry_) ? '*' : ' '), op.c_str(), pretty_telegram(it.telegram_).c_str());
         }
     }
 
@@ -541,7 +568,7 @@ void EMSESP::show_devices(uuid::console::Shell & shell) {
         for (const auto & emsdevice : emsdevices) {
             if ((emsdevice) && (emsdevice->device_type() == device_class.first)) {
                 shell.printf(F("%s: %s"), emsdevice->device_type_name().c_str(), emsdevice->to_string().c_str());
-                if ((emsdevice->device_type() == EMSdevice::DeviceType::THERMOSTAT) && (emsdevice->device_id() == actual_master_thermostat())) {
+                if ((emsdevice->device_type() == EMSdevice::DeviceType::THERMOSTAT) && (emsdevice->get_device_id() == actual_master_thermostat())) {
                     shell.printf(F(" ** master device **"));
                 }
                 shell.println();
@@ -560,6 +587,7 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
     if (device_id == rxservice_.ems_bus_id()) {
         return false;
     }
+
 
     // first check to see if we already have it, if so update the record
     for (const auto & emsdevice : emsdevices) {
@@ -584,6 +612,7 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
             }
         }
     }
+
 
     // look up the rest of the details using the product_id and create the new device object
     Device_record * device_p = nullptr;
@@ -634,6 +663,17 @@ void EMSESP::send_write_request(const uint16_t type_id,
     txservice_.add(Telegram::Operation::TX_WRITE, dest, type_id, offset, message_data, message_length);
 
     txservice_.set_post_send_query(validate_typeid); // store which type_id to send Tx read after a write
+}
+
+void EMSESP::send_write_request(const uint16_t type_id, const uint8_t dest, const uint8_t offset, const uint8_t value) {
+    send_write_request(type_id, dest, offset, value, 0);
+}
+
+// send Tx write with a single value
+void EMSESP::send_write_request(const uint16_t type_id, const uint8_t dest, const uint8_t offset, const uint8_t value, const uint16_t validate_typeid) {
+    uint8_t message_data[1];
+    message_data[0] = value;
+    EMSESP::send_write_request(type_id, dest, offset, message_data, 1, validate_typeid);
 }
 
 // this is main entry point when data is received on the Rx line, via emsuart library
@@ -735,9 +775,11 @@ void EMSESP::send_raw_telegram(const char * data) {
     txservice_.send_raw(data);
 }
 
-// kick off the party, start all the services
+// start all the core services
+// the services must be loaded in the correct order
 void EMSESP::start() {
-    // Load our library of known devices
+    // Load our library of known devices. Names are stored in Flash mem.
+    device_library_.reserve(100);
     device_library_ = {
 #include "device_library.h"
     };
@@ -758,6 +800,12 @@ void EMSESP::start() {
     txservice_.start(); // sets bus ID, sends out request for EMS devices
     sensors_.start();   // dallas external sensors
     webServer.begin();  // start web server
+
+    // reserve some space for the telegram registries, to avoid memory fragmentation
+    EMSdevice::reserve_mem(EMSdevice::EMS_DEVICES_MAX_TELEGRAMS); // space for 20 telegram handlers
+    emsdevices.reserve(5);                                        // reserve space for initially 5 devices
+
+    LOG_INFO("EMS Device library loaded with %d records", device_library_.size());
 }
 
 // main loop calling all services

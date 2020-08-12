@@ -30,20 +30,22 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
 
     // telegram handlers
     if (flags == EMSdevice::EMS_DEVICE_FLAG_SM10) {
-        register_telegram_type(0x0097, F("SM10Monitor"), true, std::bind(&Solar::process_SM10Monitor, this, _1));
+        register_telegram_type(0x0097, F("SM10Monitor"), true, [&](std::shared_ptr<const Telegram> t) { process_SM10Monitor(t); });
     }
-    if (flags == EMSdevice::EMS_DEVICE_FLAG_SM100) {
-        register_telegram_type(0x0362, F("SM100Monitor"), true, std::bind(&Solar::process_SM100Monitor, this, _1));
-        register_telegram_type(0x0363, F("SM100Monitor2"), true, std::bind(&Solar::process_SM100Monitor2, this, _1));
-        register_telegram_type(0x0366, F("SM100Config"), true, std::bind(&Solar::process_SM100Config, this, _1));
 
-        register_telegram_type(0x0364, F("SM100Status"), false, std::bind(&Solar::process_SM100Status, this, _1));
-        register_telegram_type(0x036A, F("SM100Status2"), false, std::bind(&Solar::process_SM100Status2, this, _1));
-        register_telegram_type(0x038E, F("SM100Energy"), true, std::bind(&Solar::process_SM100Energy, this, _1));
+    if (flags == EMSdevice::EMS_DEVICE_FLAG_SM100) {
+        register_telegram_type(0x0362, F("SM100Monitor"), true, [&](std::shared_ptr<const Telegram> t) { process_SM100Monitor(t); });
+        register_telegram_type(0x0363, F("SM100Monitor2"), true, [&](std::shared_ptr<const Telegram> t) { process_SM100Monitor2(t); });
+        register_telegram_type(0x0366, F("SM100Config"), true, [&](std::shared_ptr<const Telegram> t) { process_SM100Config(t); });
+
+        register_telegram_type(0x0364, F("SM100Status"), false, [&](std::shared_ptr<const Telegram> t) { process_SM100Status(t); });
+        register_telegram_type(0x036A, F("SM100Status2"), false, [&](std::shared_ptr<const Telegram> t) { process_SM100Status2(t); });
+        register_telegram_type(0x038E, F("SM100Energy"), true, [&](std::shared_ptr<const Telegram> t) { process_SM100Energy(t); });
     }
+
     if (flags == EMSdevice::EMS_DEVICE_FLAG_ISM) {
-        register_telegram_type(0x0103, F("ISM1StatusMessage"), true, std::bind(&Solar::process_ISM1StatusMessage, this, _1));
-        register_telegram_type(0x0101, F("ISM1Set"), false, std::bind(&Solar::process_ISM1Set, this, _1));
+        register_telegram_type(0x0103, F("ISM1StatusMessage"), true, [&](std::shared_ptr<const Telegram> t) { process_ISM1StatusMessage(t); });
+        register_telegram_type(0x0101, F("ISM1Set"), false, [&](std::shared_ptr<const Telegram> t) { process_ISM1Set(t); });
     }
 }
 
@@ -106,7 +108,7 @@ void Solar::show_values(uuid::console::Shell & shell) {
 
 // publish values via MQTT
 void Solar::publish_values() {
-    DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_MEDIUM);
+    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
 
     char s[10]; // for formatting strings
 

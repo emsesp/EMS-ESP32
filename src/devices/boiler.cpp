@@ -29,39 +29,39 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     LOG_DEBUG(F("Adding new Boiler with device ID 0x%02X"), device_id);
 
     // the telegram handlers...
-    register_telegram_type(0x10, F("UBAErrorMessage1"), false, std::bind(&Boiler::process_UBAErrorMessage, this, _1));
-    register_telegram_type(0x11, F("UBAErrorMessage2"), false, std::bind(&Boiler::process_UBAErrorMessage, this, _1));
-    register_telegram_type(0x18, F("UBAMonitorFast"), false, std::bind(&Boiler::process_UBAMonitorFast, this, _1));
-    register_telegram_type(0x19, F("UBAMonitorSlow"), true, std::bind(&Boiler::process_UBAMonitorSlow, this, _1));
-    register_telegram_type(0x34, F("UBAMonitorWW"), false, std::bind(&Boiler::process_UBAMonitorWW, this, _1));
-    register_telegram_type(0x1C, F("UBAMaintenanceStatus"), false, std::bind(&Boiler::process_UBAMaintenanceStatus, this, _1));
-    register_telegram_type(0x2A, F("MC10Status"), false, std::bind(&Boiler::process_MC10Status, this, _1));
-    register_telegram_type(0x33, F("UBAParameterWW"), true, std::bind(&Boiler::process_UBAParameterWW, this, _1));
-    register_telegram_type(0x14, F("UBATotalUptime"), false, std::bind(&Boiler::process_UBATotalUptime, this, _1));
-    register_telegram_type(0x35, F("UBAFlags"), false, std::bind(&Boiler::process_UBAFlags, this, _1));
-    register_telegram_type(0x15, F("UBAMaintenanceData"), false, std::bind(&Boiler::process_UBAMaintenanceData, this, _1));
-    register_telegram_type(0x16, F("UBAParameters"), true, std::bind(&Boiler::process_UBAParameters, this, _1));
-    register_telegram_type(0x1A, F("UBASetPoints"), false, std::bind(&Boiler::process_UBASetPoints, this, _1));
-    register_telegram_type(0xD1, F("UBAOutdoorTemp"), false, std::bind(&Boiler::process_UBAOutdoorTemp, this, _1));
-    register_telegram_type(0xE3, F("UBAMonitorSlowPlus"), false, std::bind(&Boiler::process_UBAMonitorSlowPlus2, this, _1));
-    register_telegram_type(0xE4, F("UBAMonitorFastPlus"), false, std::bind(&Boiler::process_UBAMonitorFastPlus, this, _1));
-    register_telegram_type(0xE5, F("UBAMonitorSlowPlus"), false, std::bind(&Boiler::process_UBAMonitorSlowPlus, this, _1));
-    register_telegram_type(0xE9, F("UBADHWStatus"), false, std::bind(&Boiler::process_UBADHWStatus, this, _1));
+    register_telegram_type(0x10, F("UBAErrorMessage1"), false, [&](std::shared_ptr<const Telegram> t) { process_UBAErrorMessage(t); });
+    register_telegram_type(0x11, F("UBAErrorMessage2"), false, [&](std::shared_ptr<const Telegram> t) { process_UBAErrorMessage(t); });
+    register_telegram_type(0x18, F("UBAMonitorFast"), false, [&](std::shared_ptr<const Telegram> t) { process_UBAMonitorFast(t); });
+    register_telegram_type(0x19, F("UBAMonitorSlow"), true, [&](std::shared_ptr<const Telegram> t) { process_UBAMonitorSlow(t); });
+    register_telegram_type(0x34, F("UBAMonitorWW"), false, [&](std::shared_ptr<const Telegram> t) { process_UBAMonitorWW(t); });
+    register_telegram_type(0x1C, F("UBAMaintenanceStatus"), false, [&](std::shared_ptr<const Telegram> t) { process_UBAMaintenanceStatus(t); });
+    register_telegram_type(0x2A, F("MC10Status"), false, [&](std::shared_ptr<const Telegram> t) { process_MC10Status(t); });
+    register_telegram_type(0x33, F("UBAParameterWW"), true, [&](std::shared_ptr<const Telegram> t) { process_UBAParameterWW(t); });
+    register_telegram_type(0x14, F("UBATotalUptime"), false, [&](std::shared_ptr<const Telegram> t) { process_UBATotalUptime(t); });
+    register_telegram_type(0x35, F("UBAFlags"), false, [&](std::shared_ptr<const Telegram> t) { process_UBAFlags(t); });
+    register_telegram_type(0x15, F("UBAMaintenanceData"), false, [&](std::shared_ptr<const Telegram> t) { process_UBAMaintenanceData(t); });
+    register_telegram_type(0x16, F("UBAParameters"), true, [&](std::shared_ptr<const Telegram> t) { process_UBAParameters(t); });
+    register_telegram_type(0x1A, F("UBASetPoints"), false, [&](std::shared_ptr<const Telegram> t) { process_UBASetPoints(t); });
+    register_telegram_type(0xD1, F("UBAOutdoorTemp"), false, [&](std::shared_ptr<const Telegram> t) { process_UBAOutdoorTemp(t); });
+    register_telegram_type(0xE3, F("UBAMonitorSlowPlus"), false, [&](std::shared_ptr<const Telegram> t) { process_UBAMonitorSlowPlus2(t); });
+    register_telegram_type(0xE4, F("UBAMonitorFastPlus"), false, [&](std::shared_ptr<const Telegram> t) { process_UBAMonitorFastPlus(t); });
+    register_telegram_type(0xE5, F("UBAMonitorSlowPlus"), false, [&](std::shared_ptr<const Telegram> t) { process_UBAMonitorSlowPlus(t); });
+    register_telegram_type(0xE9, F("UBADHWStatus"), false, [&](std::shared_ptr<const Telegram> t) { process_UBADHWStatus(t); });
 
     // MQTT commands for boiler_cmd topic
-    register_mqtt_cmd(F("comfort"), std::bind(&Boiler::set_warmwater_mode, this, _1, _2));
-    register_mqtt_cmd(F("wwactivated"), std::bind(&Boiler::set_warmwater_activated, this, _1, _2));
-    register_mqtt_cmd(F("wwtapactivated"), std::bind(&Boiler::set_tapwarmwater_activated, this, _1, _2));
-    register_mqtt_cmd(F("wwonetime"), std::bind(&Boiler::set_warmwater_onetime, this, _1, _2));
-    register_mqtt_cmd(F("wwcirculation"), std::bind(&Boiler::set_warmwater_circulation, this, _1, _2));
-    register_mqtt_cmd(F("flowtemp"), std::bind(&Boiler::set_flow_temp, this, _1, _2));
-    register_mqtt_cmd(F("wwtemp"), std::bind(&Boiler::set_warmwater_temp, this, _1, _2));
-    register_mqtt_cmd(F("burnmaxpower"), std::bind(&Boiler::set_max_power, this, _1, _2));
-    register_mqtt_cmd(F("burnminpower"), std::bind(&Boiler::set_min_power, this, _1, _2));
-    register_mqtt_cmd(F("boilhyston"), std::bind(&Boiler::set_hyst_on, this, _1, _2));
-    register_mqtt_cmd(F("boilhystoff"), std::bind(&Boiler::set_hyst_off, this, _1, _2));
-    register_mqtt_cmd(F("burnperiod"), std::bind(&Boiler::set_burn_period, this, _1, _2));
-    register_mqtt_cmd(F("pumpdelay"), std::bind(&Boiler::set_pump_delay, this, _1, _2));
+    register_mqtt_cmd(F("comfort"), [&](const char * value, const int8_t id) { set_warmwater_mode(value, id); });
+    register_mqtt_cmd(F("wwactivated"), [&](const char * value, const int8_t id) { set_warmwater_activated(value, id); });
+    register_mqtt_cmd(F("wwtapactivated"), [&](const char * value, const int8_t id) { set_tapwarmwater_activated(value, id); });
+    register_mqtt_cmd(F("wwonetime"), [&](const char * value, const int8_t id) { set_warmwater_onetime(value, id); });
+    register_mqtt_cmd(F("wwcirculation"), [&](const char * value, const int8_t id) { set_warmwater_circulation(value, id); });
+    register_mqtt_cmd(F("flowtemp"), [&](const char * value, const int8_t id) { set_flow_temp(value, id); });
+    register_mqtt_cmd(F("wwtemp"), [&](const char * value, const int8_t id) { set_warmwater_temp(value, id); });
+    register_mqtt_cmd(F("burnmaxpower"), [&](const char * value, const int8_t id) { set_max_power(value, id); });
+    register_mqtt_cmd(F("burnminpower"), [&](const char * value, const int8_t id) { set_min_power(value, id); });
+    register_mqtt_cmd(F("boilhyston"), [&](const char * value, const int8_t id) { set_hyst_on(value, id); });
+    register_mqtt_cmd(F("boilhystoff"), [&](const char * value, const int8_t id) { set_hyst_off(value, id); });
+    register_mqtt_cmd(F("burnperiod"), [&](const char * value, const int8_t id) { set_burn_period(value, id); });
+    register_mqtt_cmd(F("pumpdelay"), [&](const char * value, const int8_t id) { set_pump_delay(value, id); });
 }
 
 // add submenu context
@@ -99,8 +99,9 @@ void Boiler::device_info(JsonArray & root) {
 
 // publish values via MQTT
 void Boiler::publish_values() {
-    const size_t        capacity = JSON_OBJECT_SIZE(56); // must recalculate if more objects addded https://arduinojson.org/v6/assistant/
-    DynamicJsonDocument doc(capacity);
+    // const size_t        capacity = JSON_OBJECT_SIZE(56); // must recalculate if more objects addded https://arduinojson.org/v6/assistant/
+    // DynamicJsonDocument doc(capacity);
+    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_LARGE> doc;
 
     char s[10]; // for formatting strings
 
@@ -862,7 +863,7 @@ void Boiler::console_commands(Shell & shell, unsigned int context) {
                                        flash_string_vector{F_(typeid_mandatory)},
                                        [=](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) {
                                            uint16_t type_id = Helpers::hextoint(arguments.front().c_str());
-                                           EMSESP::send_read_request(type_id, device_id());
+                                           EMSESP::send_read_request(type_id, get_device_id());
                                        });
 
     EMSESPShell::commands->add_command(ShellContext::BOILER,
