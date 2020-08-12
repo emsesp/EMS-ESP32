@@ -22,6 +22,8 @@
 
 namespace emsesp {
 
+using namespace std::placeholders; // for `_1` etc
+
 EMSESPDevicesService::EMSESPDevicesService(AsyncWebServer * server, SecurityManager * securityManager)
     : _device_dataHandler(DEVICE_DATA_SERVICE_PATH,
                           securityManager->wrapCallback(std::bind(&EMSESPDevicesService::device_data, this, _1, _2), AuthenticationPredicates::IS_AUTHENTICATED)) {
@@ -39,7 +41,7 @@ EMSESPDevicesService::EMSESPDevicesService(AsyncWebServer * server, SecurityMana
 }
 
 void EMSESPDevicesService::scan_devices(AsyncWebServerRequest * request) {
-    EMSESP::send_read_request(EMSdevice::EMS_TYPE_UBADevices, EMSdevice::EMS_DEVICE_ID_BOILER);
+    EMSESP::scan_devices();
     request->send(200);
 }
 
@@ -55,7 +57,7 @@ void EMSESPDevicesService::all_devices(AsyncWebServerRequest * request) {
             obj["type"]      = emsdevice->device_type_name();
             obj["brand"]     = emsdevice->brand_to_string();
             obj["name"]      = emsdevice->name();
-            obj["deviceid"]  = emsdevice->device_id();
+            obj["deviceid"]  = emsdevice->get_device_id();
             obj["productid"] = emsdevice->product_id();
             obj["version"]   = emsdevice->version();
         }
