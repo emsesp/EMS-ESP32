@@ -193,14 +193,15 @@ void EMSESPShell::add_console_commands() {
                           });
 
     commands->add_command(ShellContext::MAIN,
-                          CommandFlags::USER,
+                          CommandFlags::ADMIN,
                           flash_string_vector{F_(scan), F_(devices)},
                           flash_string_vector{F_(deep_optional)},
                           [](Shell & shell, const std::vector<std::string> & arguments) {
                               if (arguments.size() == 0) {
-                                  EMSESP::send_read_request(EMSdevice::EMS_TYPE_UBADevices, EMSdevice::EMS_DEVICE_ID_BOILER);
+                                  EMSESP::scan_devices();
                               } else {
                                   shell.printfln(F("Performing a deep scan..."));
+                                  EMSESP::clear_all_devices();
                                   std::vector<uint8_t> Device_Ids;
 
                                   Device_Ids.push_back(0x08); // Boilers - 0x08
@@ -372,7 +373,7 @@ void Console::load_standard_commands(unsigned int context) {
                                        });
 
     EMSESPShell::commands->add_command(context,
-                                       CommandFlags::USER,
+                                       CommandFlags::ADMIN,
                                        flash_string_vector{F_(send), F_(telegram)},
                                        flash_string_vector{F_(data_mandatory)},
                                        [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) {
