@@ -26,6 +26,8 @@ uuid::log::Logger Boiler::logger_{F_(boiler), uuid::log::Facility::CONSOLE};
 
 Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const std::string & version, const std::string & name, uint8_t flags, uint8_t brand)
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
+    this->reserve_mem(20); // reserve some space for the telegram registries, to avoid memory fragmentation
+
     LOG_DEBUG(F("Adding new Boiler with device ID 0x%02X"), device_id);
 
     // the telegram handlers...

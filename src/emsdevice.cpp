@@ -24,8 +24,6 @@ namespace emsesp {
 
 uuid::log::Logger EMSdevice::logger_{F_(emsesp), uuid::log::Facility::CONSOLE};
 
-std::vector<EMSdevice::TelegramFunction> EMSdevice::telegram_functions_;
-
 std::string EMSdevice::brand_to_string() const {
     switch (brand_) {
     case EMSdevice::Brand::BOSCH:
@@ -248,7 +246,6 @@ void EMSdevice::register_mqtt_topic(const std::string & topic, mqtt_subfunction_
 }
 
 void EMSdevice::register_mqtt_cmd(const __FlashStringHelper * cmd, mqtt_cmdfunction_p f) {
-    LOG_DEBUG(F("Registering MQTT cmd %s for device type %s"), uuid::read_flash_string(cmd).c_str(), this->device_type_name().c_str());
     Mqtt::add_command(this->device_type_, this->device_id_, cmd, f);
 }
 

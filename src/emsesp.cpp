@@ -573,7 +573,7 @@ void EMSESP::show_devices(uuid::console::Shell & shell) {
                 }
                 shell.println();
                 emsdevice->show_telegram_handlers(shell);
-                emsdevice->show_mqtt_handlers(shell);
+                // emsdevice->show_mqtt_handlers(shell);
                 shell.println();
             }
         }
@@ -793,19 +793,21 @@ void EMSESP::start() {
     esp8266React.begin();          // loads system settings (wifi, mqtt, etc)
     emsespSettingsService.begin(); // load EMS-ESP specific settings
     // system_.check_upgrade(); // see if we need to migrate from previous versions
-    mqtt_.start();      // mqtt init
     console_.start();   // telnet and serial console
+    mqtt_.start();      // mqtt init
     system_.start();    // starts syslog, uart, sets version, initializes LED. Requires pre-loaded settings.
     shower_.start();    // initialize shower timer and shower alert
     txservice_.start(); // sets bus ID, sends out request for EMS devices
     sensors_.start();   // dallas external sensors
     webServer.begin();  // start web server
 
-    // reserve some space for the telegram registries, to avoid memory fragmentation
-    EMSdevice::reserve_mem(EMSdevice::EMS_DEVICES_MAX_TELEGRAMS); // space for 20 telegram handlers
-    emsdevices.reserve(5);                                        // reserve space for initially 5 devices
+    emsdevices.reserve(5); // reserve space for initially 5 devices to avoid mem
 
     LOG_INFO("EMS Device library loaded with %d records", device_library_.size());
+
+#if defined(EMSESP_STANDALONE)
+    mqtt_.on_connect(); // simulate an MQTT connection
+#endif
 }
 
 // main loop calling all services
