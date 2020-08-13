@@ -90,7 +90,7 @@ MAKE_PSTR(hostname_fmt, "WiFi Hostname = %s")
 MAKE_PSTR(mark_interval_fmt, "Mark interval = %lus");
 MAKE_PSTR(wifi_ssid_fmt, "WiFi SSID = %s");
 MAKE_PSTR(wifi_password_fmt, "WiFi Password = %S")
-MAKE_PSTR(system_heartbeat_fmt, "Heartbeat is %s")
+MAKE_PSTR(system_heartbeat_fmt, "MQTT Heartbeat is %s")
 MAKE_PSTR(cmd_optional, "[cmd]")
 MAKE_PSTR(deep_optional, "[deep]")
 MAKE_PSTR(tx_mode_fmt, "Tx mode = %d")
