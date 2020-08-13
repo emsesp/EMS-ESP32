@@ -33,11 +33,11 @@ uint8_t     Mqtt::bus_id_;
 std::vector<Mqtt::MQTTSubFunction> Mqtt::mqtt_subfunctions_;
 std::vector<Mqtt::MQTTCmdFunction> Mqtt::mqtt_cmdfunctions_;
 
-uint16_t                            Mqtt::mqtt_publish_fails_    = 0;
-size_t                              Mqtt::maximum_mqtt_messages_ = Mqtt::MAX_MQTT_MESSAGES;
-uint16_t                            Mqtt::mqtt_message_id_       = 0;
+uint16_t                           Mqtt::mqtt_publish_fails_    = 0;
+size_t                             Mqtt::maximum_mqtt_messages_ = Mqtt::MAX_MQTT_MESSAGES;
+uint16_t                           Mqtt::mqtt_message_id_       = 0;
 std::list<Mqtt::QueuedMqttMessage> Mqtt::mqtt_messages_;
-char                                will_topic_[Mqtt::MQTT_TOPIC_MAX_SIZE]; // because MQTT library keeps only char pointer
+char                               will_topic_[Mqtt::MQTT_TOPIC_MAX_SIZE]; // because MQTT library keeps only char pointer
 
 uuid::log::Logger Mqtt::logger_{F_(mqtt), uuid::log::Facility::DAEMON};
 
@@ -64,15 +64,7 @@ void Mqtt::subscribe(const uint8_t device_type, const std::string & topic, mqtt_
 // adds a command and callback function for a specific device
 void Mqtt::add_command(const uint8_t device_type, const uint8_t device_id, const __FlashStringHelper * cmd, mqtt_cmdfunction_p cb) {
     // subscribe to the command topic if it doesn't exist yet
-    // create the cmd topic for a device like "<device_type>_cmd" e.g. "boiler_cmd"
-    // unless its a system MQTT command, then its system_cmd
-
-    std::string cmd_topic(40, '\0');
-    if (device_type == EMSdevice::DeviceType::SERVICEKEY) {
-        cmd_topic = MQTT_SYSTEM_CMD; // hard-coded system
-    } else {
-        snprintf_P(&cmd_topic[0], 41, PSTR("%s_cmd"), EMSdevice::device_type_topic_name(device_type).c_str());
-    }
+    std::string cmd_topic = EMSdevice::device_type_topic_name(device_type); // cmd topic for a device like "<device_type>_cmd" e.g. "boiler_cmd"
 
     bool exists = false;
     if (!mqtt_subfunctions_.empty()) {
@@ -143,20 +135,14 @@ void Mqtt::show_mqtt(uuid::console::Shell & shell) {
     // show subscriptions
     shell.printfln(F("MQTT subscriptions:"));
     for (const auto & mqtt_subfunction : mqtt_subfunctions_) {
-        shell.printfln(F(" %s"), mqtt_subfunction.full_topic_.c_str());
-    }
-    shell.println();
-
-    // show command handlers
-    shell.printfln(F("MQTT commands:"));
-    for (const auto & mqtt_cmdfunction : mqtt_cmdfunctions_) {
-        if (mqtt_cmdfunction.device_type_ == EMSdevice::DeviceType::SERVICEKEY) {
-            shell.printfln(F(" on topic: system, cmd: %s"), uuid::read_flash_string(mqtt_cmdfunction.cmd_).c_str()); // hardcoded topic is system
-        } else {
-            shell.printfln(F(" on topic: %s_cmd, cmd: %s"),
-                           EMSdevice::device_type_topic_name(mqtt_cmdfunction.device_type_).c_str(),
-                           uuid::read_flash_string(mqtt_cmdfunction.cmd_).c_str());
+        shell.printf(F(" topic: %s, [cmd]:"), mqtt_subfunction.full_topic_.c_str());
+        // show the commands associated with this subscription
+        for (const auto & mqtt_cmdfunction : mqtt_cmdfunctions_) {
+            if (EMSdevice::device_type_topic_name(mqtt_cmdfunction.device_type_) == mqtt_subfunction.topic_) {
+                shell.printf(F(" %s"), uuid::read_flash_string(mqtt_cmdfunction.cmd_).c_str());
+            }
         }
+        shell.println();
     }
     shell.println();
 
@@ -197,7 +183,7 @@ void Mqtt::show_mqtt(uuid::console::Shell & shell) {
         }
     }
     shell.println();
-}
+} // namespace emsesp
 
 // simulate receiving a MQTT message, used only for testing
 void Mqtt::incoming(char * topic, char * payload) {
@@ -378,6 +364,11 @@ void Mqtt::start() {
         // publish
         on_publish(packetId);
     });
+
+#if defined(EMSESP_STANDALONE)
+    // simulate an MQTT connection
+    on_connect();
+#endif
 
     // create space for command buffer, to avoid heap memory fragmentation
     mqtt_cmdfunctions_.reserve(40); // current count with boiler+thermostat is 37
