@@ -537,9 +537,6 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
     if (command == "mqtt") {
         shell.printfln(F("Testing MQTT..."));
 
-        // simulate an on connect
-        Mqtt::on_connect();
-
         // add a boiler
         // question: do we need to set the mask?
         std::string version("1.2.3");
