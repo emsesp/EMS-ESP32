@@ -123,6 +123,9 @@ class EMSESP {
     static uint8_t watch() {
         return watch_;
     }
+    static void set_read_id(uint16_t id) {
+        read_id_ = id;
+    }
 
     enum Bus_status : uint8_t { BUS_STATUS_CONNECTED = 0, BUS_STATUS_TX_ERRORS, BUS_STATUS_OFFLINE };
     static uint8_t bus_status();
@@ -187,6 +190,7 @@ class EMSESP {
     static uint8_t  actual_master_thermostat_;
     static uint16_t watch_id_;
     static uint8_t  watch_;
+    static uint16_t read_id_;
     static bool     tap_water_active_;
 
     static uint8_t unique_id_count_;

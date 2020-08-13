@@ -554,12 +554,12 @@ void System::console_commands(Shell & shell, unsigned int context) {
                                                shell.printfln(F_(wifi_password_fmt), wifiSettings.ssid.isEmpty() ? F_(unset) : F_(asterisks));
                                            });
                                        });
-
+/*
     EMSESPShell::commands->add_command(ShellContext::SYSTEM,
                                        CommandFlags::USER,
                                        flash_string_vector{F_(show), F_(mqtt)},
                                        [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) { Mqtt::show_mqtt(shell); });
-
+*/
     EMSESPShell::commands->add_command(ShellContext::SYSTEM,
                                        CommandFlags::ADMIN,
                                        flash_string_vector{F_(show), F_(users)},

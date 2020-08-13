@@ -57,6 +57,7 @@ Shower    EMSESP::shower_;    // Shower logic
 uint8_t  EMSESP::actual_master_thermostat_ = EMSESP_DEFAULT_MASTER_THERMOSTAT; // which thermostat leads when multiple found
 uint16_t EMSESP::watch_id_                 = WATCH_ID_NONE;                    // for when log is TRACE. 0 means no trace set
 uint8_t  EMSESP::watch_                    = 0;                                // trace off
+uint16_t EMSESP::read_id_                  = WATCH_ID_NONE;
 bool     EMSESP::tap_water_active_         = false;                            // for when Boiler states we having running warm water. used in Shower()
 uint32_t EMSESP::last_fetch_               = 0;
 uint8_t  EMSESP::unique_id_count_          = 0;
@@ -467,7 +468,10 @@ void EMSESP::process_version(std::shared_ptr<const Telegram> telegram) {
 // returns false if there are none found
 bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
     // if watching...
-    if (watch() == WATCH_ON) {
+    if (telegram->type_id == read_id_) {
+        LOG_NOTICE(pretty_telegram(telegram).c_str());
+        read_id_ = WATCH_ID_NONE;
+    } else if (watch() == WATCH_ON) {
         if ((watch_id_ == WATCH_ID_NONE) || (telegram->src == watch_id_) || (telegram->dest == watch_id_) || (telegram->type_id == watch_id_)) {
             LOG_NOTICE(pretty_telegram(telegram).c_str());
         }
