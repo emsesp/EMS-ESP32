@@ -171,8 +171,8 @@ class Mqtt {
 
     // function handlers for MQTT subscriptions
     struct MQTTSubFunction {
-        uint8_t            device_type_; // which device type, from DeviceType::
-        const std::string  topic_;
+        uint8_t            device_type_;      // which device type, from DeviceType::
+        const std::string  topic_;            // short topic name
         const std::string  full_topic_;       // the fully qualified topic name, usually with the hostname prefixed
         mqtt_subfunction_p mqtt_subfunction_; // can be empty
 

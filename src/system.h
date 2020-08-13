@@ -35,8 +35,6 @@
 
 using uuid::console::Shell;
 
-#define MQTT_SYSTEM_CMD "system_cmd"
-
 namespace emsesp {
 
 class System {

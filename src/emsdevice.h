@@ -147,7 +147,7 @@ class EMSdevice {
     void fetch_values();
     void toggle_fetch(uint16_t telegram_id, bool toggle);
 
-    static void reserve_mem(size_t n) {
+    void reserve_mem(size_t n) {
         telegram_functions_.reserve(n);
     }
 
@@ -229,8 +229,7 @@ class EMSdevice {
     };
 
     enum DeviceType : uint8_t {
-        UNKNOWN = 0,
-        SERVICEKEY, // us
+        SERVICEKEY = 0, // this is us
         BOILER,
         THERMOSTAT,
         MIXING,
@@ -280,11 +279,11 @@ class EMSdevice {
 
   private:
     uint8_t     unique_id_;
-    uint8_t     device_type_ = DeviceType::UNKNOWN;
+    uint8_t     device_type_ = DeviceType::SERVICEKEY;
     uint8_t     device_id_   = 0;
     uint8_t     product_id_  = 0;
     std::string version_;
-    std::string name_; // the long name of the EMS model
+    std::string name_; // the long name for the EMS model
     uint8_t     flags_ = 0;
     uint8_t     brand_ = Brand::NO_BRAND;
 
@@ -304,7 +303,7 @@ class EMSdevice {
             , process_function_(process_function) {
         }
     };
-    static std::vector<TelegramFunction> telegram_functions_; // each EMS device has its own set of registered telegram types
+    std::vector<TelegramFunction> telegram_functions_; // each EMS device has its own set of registered telegram types
 };
 
 } // namespace emsesp
