@@ -1,16 +1,11 @@
 # EMS-ESP version 2.0
 
-## **Breaking changes**
-
-- MQTT base has been removed. The hostname is only used as prefixed to the topic, e.g. `ems-esp/status`
-- `refresh` command in the console has been renamed to `fetch`
-
 ## **New Features in v2**
 
 - Supports both ESP8266 and ESP32
 - New MQTT option to support Home Assistant MQTT Discovery (https://www.home-assistant.io/docs/mqtt/discovery/)
 - A new web interface using React and TypeScript that's now secure as each URL endpoint is protected by issuing a JWT which is then sent using Bearer Authentication.
-- The Access Point mode presents the user with a Captive Portal
+- In the Access Point mode there is a web Captive Portal
 
 <img src="media/web_settings.PNG" width=70% height=70%>
 <img src="media/web_status.PNG" width=70% height=70%>
@@ -50,15 +45,16 @@
 
 ## **Setting EMS-ESP up for the first time**
 
- - Connect to the Access Point called ems-esp using the WPA password `ems-esp-neo`. When you see the captive portal sign-in with username `admin` and password `admin`. Set the WiFi credentials and restart the ESP.
- - When it connects to your wifi network you can use either the Web UI to further configure the other settings or using Telnet. If using the Telnet console refer to the full set of commands below. To change any settings you need to be admin which can be accessed via the `su` command. The password here is the same as the JWT secret from the Web UI, default `ems-esp-neo`.
- - First thing to check is if Tx is working. Use `show ems` and if you have a large number of Tx fails try changing the Tx Mode using `set tx_mode` as admin. Typical values are 1 for EMS1.0, 2 for EMS2.0/EMS+ and 3 for Heatronics.
+ - Connect to the Access Point called ems-esp using the WPA password `ems-esp-neo`. When you see the captive portal sign-in with username `admin` and password `admin`. Set the WiFi credentials and go back to http://ems-esp
+ - First thing to check is if Tx is working and that you have a connect to the EMS bus. If it's showing an error try changing the Tx Mode from the settings page. Then check the Status (no need to restart EMS-ESP).
 
-## **List of console commands**
+## **The Console**
 
- (* = available in su/Admin mode)
+Connecting to the console will give you more insight into the EMS bus traffic, MQTT queues and the actual device information. The console is reachable via Telnet (port 22) or via the Serial port if using an USB (on baud 115200). To change any settings in the console you must be admin (use `su` with the default password `ems-esp-neo`). On an ESP8266 the Serial port is disabled by default unless it's unable to connect to the WiFi.
 
-  The `call` command is to execute a command. The command names (`[cmd]`) are the same as the MQTT command listed in the next section.
+The `call` command is to execute a command. The command names (`[cmd]`) are the same as the MQTT command listed in the next section.
+
+(* = available in su/Admin mode)
 
 ```
 common commands available in all contexts:
@@ -69,11 +65,11 @@ common commands available in all contexts:
   su
 
 (from the root)
-  set
-  fetch
   system (enters a context)
   boiler (enters a context)
   thermostat (enters a context)
+  set
+  fetch
   scan devices [deep] *
   send telegram <"XX XX ..."> *
   set bus_id <device ID> *
@@ -82,12 +78,12 @@ common commands available in all contexts:
   show devices
   show ems
   show values
+  show mqtt
 
 system
   set
   show
   format *
-  show mqtt
   show users *
   passwd *
   restart *
@@ -110,9 +106,13 @@ thermostat
 ```
   
 ----------
-### **MQTT commands**
+## **MQTT commands**
 
-commands must be written as `{"cmd":<cmd> ,"data":<data>, "id":<n>}`. The `id` can be replaced with `hc` for some devices. `cmd` and `data` must be enclose in quotes as a string.
+Breaking change: The MQTT base has been removed in version 2. The hostname is only used as prefixed to the topic, e.g. `ems-esp/status`.
+
+All commands must be written as `{"cmd":<cmd> ,"data":<data>, "id":<n>}`. 
+
+The `id` can be replaced with `hc` for some devices. `cmd` and `data` must be enclose in quotes as a string.
 
 ```
 *boiler_cmd*
@@ -160,13 +160,13 @@ commands must be written as `{"cmd":<cmd> ,"data":<data>, "id":<n>}`. The `id` c
 
 ```
 
-### **Basic Design Principles**
+## **Basic Design Principles**
 
 - The core services like telnet, logging and shell are based off the libraries from @nomis. I also adopted his general design pattens such as making everything as asynchronous as possible so that no one operation should starve another operation of it's time to execute (https://isocpp.org/wiki/faq/ctors#static-init-order).
 - All EMS devices (e.g. boiler, thermostat, solar modules, mixing units etc) are derived from a factory base class and each class handles its own registering of telegram and mqtt handlers. This makes the EMS device code easier to manage and we can extend with new telegrams types and features.
 - For debugging there is an offline mode where the code can be compiled and executed standalone without uploading to an ESP controller. Use `make` (based off GNUMakefile).
 
-### **Customizing the Web UI**
+## **Customizing the Web UI**
 
 The Web is based off Rick's awesome [esp8266-react](https://github.com/rjwats/esp8266-react/) framework. These are the files that are modified:
 
