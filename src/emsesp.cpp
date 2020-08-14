@@ -212,7 +212,7 @@ void EMSESP::show_ems(uuid::console::Shell & shell) {
         shell.printfln(F("  #telegrams received: %d"), rxservice_.telegram_count());
         shell.printfln(F("  #read requests sent: %d"), txservice_.telegram_read_count());
         shell.printfln(F("  #write requests sent: %d"), txservice_.telegram_write_count());
-        shell.printfln(F("  #corrupted telegrams: %d (%d%%)"), rxservice_.telegram_error_count(), success_rate);
+        shell.printfln(F("  #incomplete telegrams: %d (%d%%)"), rxservice_.telegram_error_count(), success_rate);
         shell.printfln(F("  #tx fails (after %d retries): %d"), TxService::MAXIMUM_TX_RETRIES, txservice_.telegram_fail_count());
     }
 

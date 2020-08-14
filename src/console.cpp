@@ -333,7 +333,7 @@ void Console::load_standard_commands(unsigned int context) {
                 }
                 shell.println();
             }
-            shell.printfln(F_(log_level_fmt), uuid::log::format_level_uppercase(shell.log_level()));
+            shell.printfln(F_(log_level_fmt), uuid::log::format_level_lowercase(shell.log_level()));
         },
         [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments __attribute__((unused))) -> std::vector<std::string> {
             return uuid::log::levels_lowercase();

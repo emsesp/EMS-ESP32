@@ -406,7 +406,7 @@ void System::show_system(uuid::console::Shell & shell) {
         shell.print(" ");
         shell.printfln(F_(host_fmt), !settings.syslog_host.isEmpty() ? settings.syslog_host.c_str() : uuid::read_flash_string(F_(unset)).c_str());
         shell.print(" ");
-        shell.printfln(F_(log_level_fmt), uuid::log::format_level_uppercase(static_cast<uuid::log::Level>(settings.syslog_level)));
+        shell.printfln(F_(log_level_fmt), uuid::log::format_level_lowercase(static_cast<uuid::log::Level>(settings.syslog_level)));
         shell.print(" ");
         shell.printfln(F_(mark_interval_fmt), settings.syslog_mark_interval);
     });
