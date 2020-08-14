@@ -154,6 +154,8 @@ void RxService::add(uint8_t * data, uint8_t length) {
     }
 
     // validate the CRC
+    // if it fails then increment the number of corrupt/incomplete telegrams and only report to console/syslog
+    // if watch is running
     uint8_t crc = calculate_crc(data, length - 1);
     if (data[length - 1] != crc) {
         increment_telegram_error_count();
