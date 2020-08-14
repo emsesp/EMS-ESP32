@@ -146,6 +146,11 @@ void EMSESPShell::add_console_commands() {
                           flash_string_vector{F_(show), F_(values)},
                           [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) { EMSESP::show_device_values(shell); });
 
+    commands->add_command(ShellContext::MAIN,
+                          CommandFlags::USER,
+                          flash_string_vector{F_(show), F_(mqtt)},
+                          [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) { Mqtt::show_mqtt(shell); });
+
     commands->add_command(
         ShellContext::MAIN,
         CommandFlags::ADMIN,
@@ -186,10 +191,10 @@ void EMSESPShell::add_console_commands() {
                               EMSESP::emsespSettingsService.update(
                                   [&](EMSESPSettings & settings) {
                                       settings.tx_mode = tx_mode;
+                                      shell.printfln(F_(tx_mode_fmt), settings.tx_mode);
                                       return StateUpdateResult::CHANGED;
                                   },
                                   "local");
-                              EMSESP::reset_tx(); // reset counters and set tx_mode
                           });
 
     commands->add_command(ShellContext::MAIN,
@@ -318,6 +323,8 @@ void Console::load_standard_commands(unsigned int context) {
                     shell.printfln(F_(invalid_log_level));
                     return;
                 }
+            } else {
+                shell.printfln(F_(log_level_list));
             }
             shell.printfln(F_(log_level_fmt), uuid::log::format_level_uppercase(shell.log_level()));
         },

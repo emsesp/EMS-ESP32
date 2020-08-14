@@ -1132,6 +1132,7 @@ void Thermostat::console_commands(Shell & shell, unsigned int context) {
                                        flash_string_vector{F_(typeid_mandatory)},
                                        [=](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) {
                                            uint16_t type_id = Helpers::hextoint(arguments.front().c_str());
+                                           EMSESP::set_read_id(type_id);
                                            EMSESP::send_read_request(type_id, this->get_device_id());
                                        });
 
