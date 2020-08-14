@@ -94,7 +94,7 @@ void EMSESPShell::display_banner() {
 
 #if defined(EMSESP_STANDALONE)
 #ifdef RUN_TEST
-    invoke_command("test"); // "test default"
+    invoke_command("test"); // same as "test default"
 #endif
 #endif
 }
@@ -324,7 +324,14 @@ void Console::load_standard_commands(unsigned int context) {
                     return;
                 }
             } else {
-                shell.printfln(F_(log_level_list));
+                shell.print(F("levels: "));
+                std::vector<std::string> v = uuid::log::levels_lowercase();
+                size_t                   i = v.size();
+                while (i--) {
+                    shell.printf(v[i].c_str());
+                    shell.print(' ');
+                }
+                shell.println();
             }
             shell.printfln(F_(log_level_fmt), uuid::log::format_level_uppercase(shell.log_level()));
         },
