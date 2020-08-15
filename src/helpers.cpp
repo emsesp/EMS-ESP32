@@ -186,7 +186,7 @@ char * Helpers::render_value(char * result, const int16_t value, const uint8_t f
         return nullptr;
     }
 
-    // just print it if mo conversion required (format = 0)
+    // just print it if no conversion required (format = 0)
     if (!format) {
         itoa(result, value, 10);
         return result;
@@ -406,7 +406,7 @@ bool Helpers::value2bool(const char * v, bool & value) {
 
     if ((bool_str == "off") || (bool_str == "0") or (bool_str == "false")) {
         value = false;
-        return true;  // is a bool
+        return true; // is a bool
     }
 
     return false; // not a bool

@@ -92,11 +92,6 @@ void EMSESPShell::display_banner() {
     emsesp::EMSESP::watch_id(WATCH_ID_NONE);
     emsesp::EMSESP::watch(EMSESP::WATCH_OFF);
 
-#if defined(EMSESP_STANDALONE)
-#ifdef RUN_TEST
-    invoke_command("test"); // same as "test default"
-#endif
-#endif
 }
 
 // pre-loads all the console commands into the MAIN context

@@ -96,7 +96,9 @@ class Mqtt {
         mqttClient_->disconnect();
     }
 
-    void incoming(char * topic, char * payload); // for testing
+#if defined(EMSESP_DEBUG)
+    void incoming(const char * topic, const char * payload); // for testing only
+#endif
 
     static bool connected() {
         return mqttClient_->connected();
@@ -163,7 +165,7 @@ class Mqtt {
     static std::shared_ptr<const MqttMessage> queue_subscribe_message(const std::string & topic);
 
     void on_publish(uint16_t packetId);
-    void on_message(char * topic, char * payload, size_t len);
+    void on_message(const char * topic, const char * payload, size_t len);
     void process_queue();
     void process_all_queue();
 

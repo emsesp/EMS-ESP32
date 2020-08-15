@@ -28,7 +28,7 @@ namespace emsesp {
 // used with the 'test' command, under su/admin
 void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
     if (command == "default") {
-        run_test(shell, "general"); // add the default test case here
+        run_test(shell, "mqtt"); // add the default test case here
     }
 
     if (command.empty()) {
@@ -553,78 +553,40 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
 
         shell.loop_all();
 
-        char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
-        char payload[100];
+        char boiler_topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
+        char thermostat_topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
+        char system_topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
 
         // test publish and adding to queue
         EMSESP::txservice_.flush_tx_queue();
         EMSESP::EMSESP::mqtt_.publish("boiler_cmd", "test me");
         Mqtt::show_mqtt(shell); // show queue
 
-        strcpy(topic, "ems-esp/boiler_cmd");
-        strcpy(payload, "12345");
-        EMSESP::mqtt_.incoming(topic, payload);   // invalid format
-        EMSESP::mqtt_.incoming(payload, payload); // no matching topic
+        strcpy(boiler_topic, "ems-esp/boiler_cmd");
+        strcpy(thermostat_topic, "ems-esp/thermostat_cmd");
+        strcpy(system_topic, "ems-esp/saystem_cmd");
 
-        strcpy(topic, "ems-esp/boiler_cmd");
-        strcpy(payload, "{\"cmd\":\"garbage\",\"data\":22.52}");
-        EMSESP::mqtt_.incoming(topic, payload); // should report error
+        EMSESP::mqtt_.incoming(boiler_topic, "12345");                                // invalid format
+        EMSESP::mqtt_.incoming("bad_topic", "12345");                                 // no matching topic
+        EMSESP::mqtt_.incoming(boiler_topic, "{\"cmd\":\"garbage\",\"data\":22.52}"); // should report error
+        EMSESP::mqtt_.incoming(boiler_topic, "{\"cmd\":\"comfort\",\"data\":\"eco\"}");
+        EMSESP::mqtt_.incoming(boiler_topic, "{\"cmd\":\"wwactivated\",\"data\":\"1\"}");
+        EMSESP::mqtt_.incoming(boiler_topic, "{\"cmd\":\"wwactivated\",\"data\":1}");
+        EMSESP::mqtt_.incoming(boiler_topic, "{\"cmd\":\"flowtemp\",\"data\":55}");
 
-        strcpy(topic, "ems-esp/boiler_cmd");
-        strcpy(payload, "{\"cmd\":\"comfort\",\"data\":\"eco\"}");
-        EMSESP::mqtt_.incoming(topic, payload);
+        EMSESP::mqtt_.incoming(system_topic, "{\"cmd\":\"send\",\"data\":\"01 02 03 04 05\"}");
+        EMSESP::mqtt_.incoming(system_topic, "{\"cmd\":\"pin\",\"id\":12,\"data\":\"1\"}");
 
-        strcpy(topic, "ems-esp/boiler_cmd");
-        strcpy(payload, "{\"cmd\":\"wwactivated\",\"data\":\"1\"}");
-        EMSESP::mqtt_.incoming(topic, payload);
-
-        strcpy(topic, "ems-esp/boiler_cmd");
-        strcpy(payload, "{\"cmd\":\"wwactivated\",\"data\":1}");
-        EMSESP::mqtt_.incoming(topic, payload);
-
-        strcpy(topic, "ems-esp/boiler_cmd");
-        strcpy(payload, "{\"cmd\":\"flowtemp\",\"data\":55}");
-        EMSESP::mqtt_.incoming(topic, payload);
-
-        strcpy(topic, "ems-esp/system_cmd");
-        strcpy(payload, "{\"cmd\":\"send\",\"data\":\"01 02 03 04 05\"}");
-        EMSESP::mqtt_.incoming(topic, payload);
-
-        strcpy(topic, "ems-esp/system_cmd");
-        strcpy(payload, "{\"cmd\":\"pin\",\"id\":12,\"data\":\"1\"}");
-        EMSESP::mqtt_.incoming(topic, payload);
-
-        strcpy(topic, "ems-esp/thermostat_cmd");
-        strcpy(payload, "{\"cmd\":\"wwmode\",\"data\":\"auto\"}");
-        EMSESP::mqtt_.incoming(topic, payload);
-
-        strcpy(topic, "ems-esp/thermostat_cmd");
-        strcpy(payload, "{\"cmd\":\"control\",\"data\":\"1\"}");
-        EMSESP::mqtt_.incoming(topic, payload);
-
-        strcpy(topic, "ems-esp/thermostat_cmd");
-        strcpy(payload, "{\"cmd\":\"control\",\"data\":1}");
-        EMSESP::mqtt_.incoming(topic, payload);
-
-        strcpy(topic, "ems-esp/thermostat_cmd");
-        strcpy(payload, "{\"cmd\":\"mode\",\"data\":\"auto\",\"id\":2}"); // with id
-        EMSESP::mqtt_.incoming(topic, payload);
-
-        strcpy(topic, "ems-esp/thermostat_cmd");
-        strcpy(payload, "{\"cmd\":\"mode\",\"data\":\"auto\",\"hc\":2}"); // with hc
-        EMSESP::mqtt_.incoming(topic, payload);
-
-        strcpy(topic, "ems-esp/thermostat_cmd");
-        strcpy(payload, "{\"cmd\":\"temp\",\"data\":22.52}");
-        EMSESP::mqtt_.incoming(topic, payload);
-
-        strcpy(topic, "ems-esp/thermostat_cmd");
-        strcpy(payload, "{\"cmd\":\"temp\",\"data\":22.52}");
-        EMSESP::mqtt_.incoming(topic, payload);
-
-        strcpy(topic, "ems-esp/thermostat_cmd");
-        strcpy(payload, "{\"cmd\":\"temp\",\"id\":2,\"data\":22}");
-        EMSESP::mqtt_.incoming(topic, payload);
+        EMSESP::mqtt_.incoming(thermostat_topic, "{\"cmd\":\"wwmode\",\"data\":\"auto\"}");
+        EMSESP::mqtt_.incoming(thermostat_topic, "{\"cmd\":\"control\",\"data\":\"1\"}");
+        EMSESP::mqtt_.incoming(thermostat_topic, "{\"cmd\":\"control\",\"data\":1}");
+        EMSESP::mqtt_.incoming(thermostat_topic, "{\"cmd\":\"mode\",\"data\":\"auto\",\"id\":2}");
+        EMSESP::mqtt_.incoming(thermostat_topic, "{\"cmd\":\"mode\",\"data\":\"auto\",\"hc\":2}");     // hc as number
+        EMSESP::mqtt_.incoming(thermostat_topic, "{\"cmd\":\"mode\",\"data\":\"auto\",\"hc\":\"2\"}"); // hc as string
+        EMSESP::mqtt_.incoming(thermostat_topic, "{\"cmd\":\"temp\",\"data\":22.56}");
+        EMSESP::mqtt_.incoming(thermostat_topic, "{\"cmd\":\"temp\",\"data\":22}");
+        EMSESP::mqtt_.incoming(thermostat_topic, "{\"cmd\":\"temp\",\"data\":\"22.56\"}");
+        EMSESP::mqtt_.incoming(thermostat_topic, "{\"cmd\":\"temp\",\"id\":2,\"data\":22}");
 
         // EMSESP::txservice_.show_tx_queue();
         // EMSESP::publish_all_values();
@@ -636,6 +598,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         shell.invoke_command("call");
         shell.invoke_command("call wwmode");
         shell.invoke_command("call mode auto 2");
+        shell.invoke_command("call temp 22.56");
 
         Mqtt::resubscribe();
         Mqtt::show_mqtt(shell); // show queue

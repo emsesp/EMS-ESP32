@@ -112,7 +112,7 @@ Breaking change: The MQTT base has been removed in version 2. The hostname is on
 
 All commands must be written as `{"cmd":<cmd> ,"data":<data>, "id":<n>}`. 
 
-The `id` can be replaced with `hc` for some devices. `cmd` and `data` must be enclose in quotes as a string.
+The `id` can be replaced with `hc` for some devices and represented as a string or a number. `cmd` is a string, `data` can be a string or number.
 
 ```
 *boiler_cmd*

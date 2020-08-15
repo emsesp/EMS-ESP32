@@ -192,10 +192,12 @@ void Mqtt::show_mqtt(uuid::console::Shell & shell) {
     shell.println();
 } // namespace emsesp
 
+#if defined(EMSESP_DEBUG)
 // simulate receiving a MQTT message, used only for testing
-void Mqtt::incoming(char * topic, char * payload) {
+void Mqtt::incoming(const char * topic, const char * payload) {
     on_message(topic, payload, strlen(payload));
 }
+#endif
 
 // calls a command, context is the device_type
 // id may be used to represent a heating circuit for example
@@ -223,7 +225,7 @@ bool Mqtt::call_command(const uint8_t device_type, const char * cmd, const char 
 }
 
 // received an MQTT message that we subscribed too
-void Mqtt::on_message(char * topic, char * payload, size_t len) {
+void Mqtt::on_message(const char * topic, const char * payload, size_t len) {
     if (len == 0) {
         return;
     }
@@ -257,7 +259,7 @@ void Mqtt::on_message(char * topic, char * payload, size_t len) {
                     return;
                 }
 
-                // check for hc and id
+                // check for hc and id, and convert to int
                 int8_t n = -1; // no value
                 if (doc.containsKey("hc")) {
                     n = doc["hc"];
@@ -265,9 +267,20 @@ void Mqtt::on_message(char * topic, char * payload, size_t len) {
                     n = doc["id"];
                 }
 
-                if (!call_command(mf.device_type_, command, doc["data"], n)) {
-                    // if we got here we didn't find a matching command
-                    LOG_ERROR(F("MQTT error: no matching cmd: %s"), command);
+                bool        cmd_known = false;
+                JsonVariant data      = doc["data"];
+                if (data.is<char *>()) {
+                    cmd_known = call_command(mf.device_type_, command, data.as<char *>(), n);
+                } else if (data.is<int>()) {
+                    char data_str[10];
+                    cmd_known = call_command(mf.device_type_, command, Helpers::itoa(data_str, (int16_t)data.as<int>()), n);
+                } else if (data.is<float>()) {
+                    char data_str[10];
+                    cmd_known = call_command(mf.device_type_, command, Helpers::render_value(data_str, (float)data.as<float>(), 2), n);
+                }
+
+                if (!cmd_known) {
+                    LOG_ERROR(F("MQTT: no matching cmd or invalid data: %s"), command);
                 }
 
                 return;
