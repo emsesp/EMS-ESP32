@@ -140,6 +140,7 @@ void EMSESP::watch_id(uint16_t watch_id) {
 
 // change the tx_mode
 // resets all counters and bumps the UART
+// this is called when the tx_mode is persisted in the FS either via Web UI or the console
 void EMSESP::reset_tx() {
     // get the tx_mode
     uint8_t tx_mode;
