@@ -225,6 +225,7 @@ void System::send_heartbeat() {
     doc["freemem"]          = free_mem();
     doc["mqttpublishfails"] = Mqtt::publish_fails();
     doc["txfails"]          = EMSESP::txservice_.telegram_fail_count();
+    doc["rxfails"]          = EMSESP::rxservice_.telegram_error_count();
 
     Mqtt::publish("heartbeat", doc, false); // send to MQTT with retain off. This will add to MQTT queue.
 }
