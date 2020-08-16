@@ -51,10 +51,11 @@ StateUpdateResult EMSESPSettings::update(JsonObject & root, EMSESPSettings & set
     return StateUpdateResult::CHANGED;
 }
 
-// this is called after the settings have been persisted to the filesystem
+// this is called after any of the settings have been persisted to the filesystem
+// either via the Web UI or via the Console
 void EMSESPSettingsService::onUpdate() {
     EMSESP::shower_.start();
-    EMSESP::system_.syslog_init();
+    // EMSESP::system_.syslog_init(); // changing SysLog will require a restart
     EMSESP::reset_tx();
 }
 
