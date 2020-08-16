@@ -194,7 +194,7 @@ void System::loop() {
 #if defined(ESP8266)
 #if defined(EMSESP_DEBUG)
     static uint32_t last_memcheck_ = 0;
-    if (currentMillis - last_memcheck_ > 5000) { // 5 seconds
+    if (currentMillis - last_memcheck_ > 10000) { // 10 seconds
         last_memcheck_ = currentMillis;
         show_mem("core");
     }
