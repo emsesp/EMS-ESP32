@@ -160,7 +160,7 @@ void RxService::add(uint8_t * data, uint8_t length) {
     if (data[length - 1] != crc) {
         increment_telegram_error_count();
         if (EMSESP::watch() != EMSESP::Watch::WATCH_OFF) {
-            LOG_ERROR(F("Rx: %s %s(CRC %02X != %02X)%s"), Helpers::data_to_hex(data, length).c_str(), COLOR_RED, data[length - 1], crc, COLOR_RESET);
+            LOG_ERROR(F("Rx: %s (CRC %02X != %02X)"), Helpers::data_to_hex(data, length).c_str(), data[length - 1], crc);
         }
         return;
     }
