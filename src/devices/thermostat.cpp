@@ -26,12 +26,13 @@ uuid::log::Logger Thermostat::logger_{F_(thermostat), uuid::log::Facility::CONSO
 
 Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_id, const std::string & version, const std::string & name, uint8_t flags, uint8_t brand)
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
-    this->reserve_mem(25); // reserve some space for the telegram registries, to avoid memory fragmentation
+    if (EMSESP::actual_master_thermostat() == 0) {
+        this->reserve_mem(25); // reserve some space for the telegram registries, to avoid memory fragmentation
 
-    // common telegram handlers
-    register_telegram_type(EMS_TYPE_RCOutdoorTemp, F("RCOutdoorTemp"), false, [&](std::shared_ptr<const Telegram> t) { process_RCOutdoorTemp(t); });
-    register_telegram_type(EMS_TYPE_RCTime, F("RCTime"), false, [&](std::shared_ptr<const Telegram> t) { process_RCTime(t); });
-
+        // common telegram handlers
+        register_telegram_type(EMS_TYPE_RCOutdoorTemp, F("RCOutdoorTemp"), false, [&](std::shared_ptr<const Telegram> t) { process_RCOutdoorTemp(t); });
+        register_telegram_type(EMS_TYPE_RCTime, F("RCTime"), false, [&](std::shared_ptr<const Telegram> t) { process_RCTime(t); });
+    }
     // RC10
     if (flags == EMSdevice::EMS_DEVICE_FLAG_RC10) {
         monitor_typeids = {0xB1};
@@ -57,22 +58,26 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
     } else if (flags == EMSdevice::EMS_DEVICE_FLAG_RC20) {
         monitor_typeids = {0x91};
         set_typeids     = {0xA8};
-        for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
-            register_telegram_type(monitor_typeids[i], F("RC20Monitor"), false, [&](std::shared_ptr<const Telegram> t) { process_RC20Monitor(t); });
-            register_telegram_type(set_typeids[i], F("RC20Set"), false, [&](std::shared_ptr<const Telegram> t) { process_RC20Set(t); });
+        if (EMSESP::actual_master_thermostat() == 0) {
+            for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
+                register_telegram_type(monitor_typeids[i], F("RC20Monitor"), false, [&](std::shared_ptr<const Telegram> t) { process_RC20Monitor(t); });
+                register_telegram_type(set_typeids[i], F("RC20Set"), false, [&](std::shared_ptr<const Telegram> t) { process_RC20Set(t); });
+            }
+        } else {
+            register_telegram_type(0xAF, F("RC20Remote"), false, [&](std::shared_ptr<const Telegram> t) { process_RC20Remote(t); });
         }
-        register_telegram_type(0xAF, F("RC20Remote"), false, [&](std::shared_ptr<const Telegram> t) { process_RC20Remote(t); });
-
         // RC20 newer
     } else if (flags == EMSdevice::EMS_DEVICE_FLAG_RC20_2) {
         monitor_typeids = {0xAE};
         set_typeids     = {0xAD};
-        for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
-            register_telegram_type(monitor_typeids[i], F("RC20Monitor"), false, [&](std::shared_ptr<const Telegram> t) { process_RC20Monitor_2(t); });
-            register_telegram_type(set_typeids[i], F("RC20Set"), false, [&](std::shared_ptr<const Telegram> t) { process_RC20Set_2(t); });
+        if (EMSESP::actual_master_thermostat() == 0) {
+            for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
+                register_telegram_type(monitor_typeids[i], F("RC20Monitor"), false, [&](std::shared_ptr<const Telegram> t) { process_RC20Monitor_2(t); });
+                register_telegram_type(set_typeids[i], F("RC20Set"), false, [&](std::shared_ptr<const Telegram> t) { process_RC20Set_2(t); });
+            }
+        } else {
+            register_telegram_type(0xAF, F("RC20Remote"), false, [&](std::shared_ptr<const Telegram> t) { process_RC20Remote(t); });
         }
-        register_telegram_type(0xAF, F("RC20Remote"), false, [&](std::shared_ptr<const Telegram> t) { process_RC20Remote(t); });
-
         // RC30
     } else if (flags == EMSdevice::EMS_DEVICE_FLAG_RC30) {
         monitor_typeids = {0x41};
@@ -113,7 +118,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
         set_typeids     = {0x0179, 0x017A, 0x017B, 0x017C};
         for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
             register_telegram_type(monitor_typeids[i], F("JunkersMonitor"), false, [&](std::shared_ptr<const Telegram> t) { process_JunkersMonitor(t); });
-            register_telegram_type(set_typeids[i], F("JunkersSet"), false, [&](std::shared_ptr<const Telegram> t) { process_JunkersSet(t); });
+            register_telegram_type(set_typeids[i], F("JunkersSet"), false, [&](std::shared_ptr<const Telegram> t) { process_JunkersSet2(t); });
         }
     }
 
@@ -358,13 +363,25 @@ void Thermostat::publish_values() {
         }
 
         if (Helpers::hasValue(hc->daytemp)) {
-            dataThermostat["daytemp"] = (float)hc->daytemp / 2;
+            if (flags == EMSdevice::EMS_DEVICE_FLAG_JUNKERS) {
+                dataThermostat["heattemp"] = (float)hc->daytemp / 2;
+            } else {
+                dataThermostat["daytemp"] = (float)hc->daytemp / 2;
+            }
         }
         if (Helpers::hasValue(hc->nighttemp)) {
-            dataThermostat["nighttemp"] = (float)hc->nighttemp / 2;
+            if (flags == EMSdevice::EMS_DEVICE_FLAG_JUNKERS) {
+                dataThermostat["ecotemp"] = (float)hc->nighttemp / 2;
+            } else {
+                dataThermostat["nighttemp"] = (float)hc->nighttemp / 2;
+            }
         }
         if (Helpers::hasValue(hc->holidaytemp)) {
             dataThermostat["holidaytemp"] = (float)hc->holidaytemp / 2;
+        }
+
+        if (Helpers::hasValue(hc->nofrosttemp)) {
+            dataThermostat["nofrosttemp"] = (float)hc->nofrosttemp / 2;
         }
 
         if (Helpers::hasValue(hc->heatingtype)) {
@@ -825,10 +842,21 @@ void Thermostat::show_values(uuid::console::Shell & shell) {
         }
 
         if (Helpers::hasValue(hc->daytemp)) {
-            print_value(shell, 4, F("Day temperature"), hc->daytemp, F_(degrees), 2);
+            if (flags == EMSdevice::EMS_DEVICE_FLAG_JUNKERS) {
+                print_value(shell, 4, F("Heat temperature"), hc->daytemp, F_(degrees), 2);
+            } else {
+                print_value(shell, 4, F("Day temperature"), hc->daytemp, F_(degrees), 2);
+            }
         }
         if (Helpers::hasValue(hc->nighttemp)) {
-            print_value(shell, 4, F("Night temperature"), hc->nighttemp, F_(degrees), 2);
+            if (flags == EMSdevice::EMS_DEVICE_FLAG_JUNKERS) {
+                print_value(shell, 4, F("Eco temperature"), hc->nighttemp, F_(degrees), 2);
+            } else {
+                print_value(shell, 4, F("Night temperature"), hc->nighttemp, F_(degrees), 2);
+            }
+        }
+        if (Helpers::hasValue(hc->nofrosttemp)) {
+            print_value(shell, 4, F("Nofrost temperature"), hc->nofrosttemp, F_(degrees), 2);
         }
         if (Helpers::hasValue(hc->holidaytemp)) {
             print_value(shell, 4, F("Holiday temperature"), hc->holidaytemp, F_(degrees), 2);
@@ -895,13 +923,22 @@ void Thermostat::process_RC10Monitor(std::shared_ptr<const Telegram> telegram) {
 void Thermostat::process_RC10Set(std::shared_ptr<const Telegram> telegram) {
     // mode not implemented yet
 }
-
-// not sure about this one yet
-// data comes in but i don't think we need to process it as its covered in the Monitor type_id?
-void Thermostat::process_JunkersSet(std::shared_ptr<const Telegram> telegram) {
-}
-
 #pragma GCC diagnostic pop
+
+// type 0x0165, ff
+void Thermostat::process_JunkersSet(std::shared_ptr<const Telegram> telegram) {
+    std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
+    telegram->read_value(hc->daytemp, 17);   // is * 2
+    telegram->read_value(hc->nighttemp, 16); // is * 2
+    telegram->read_value(hc->nofrosttemp, 15); // is * 2
+}
+// type 0x0179, ff
+void Thermostat::process_JunkersSet2(std::shared_ptr<const Telegram> telegram) {
+    std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
+    telegram->read_value(hc->daytemp, 7);   // is * 2
+    telegram->read_value(hc->nighttemp, 6); // is * 2
+    telegram->read_value(hc->nofrosttemp, 5); // is * 2
+}
 
 // type 0xA3 - for external temp settings from the the RC* thermostats (e.g. RC35)
 void Thermostat::process_RCOutdoorTemp(std::shared_ptr<const Telegram> telegram) {
@@ -1778,21 +1815,19 @@ void Thermostat::add_commands() {
         register_mqtt_cmd(F("nighttemp"), [&](const char * value, const int8_t id) { set_nighttemp(value, id); });
         register_mqtt_cmd(F("daytemp"), [&](const char * value, const int8_t id) { set_daytemp(value, id); });
         break;
-    case EMS_DEVICE_FLAG_RC35:
-    case EMS_DEVICE_FLAG_RC30_1:
+    case EMS_DEVICE_FLAG_RC30_1: // only RC30_1
+        register_mqtt_cmd(F("clockoffset"), [&](const char * value, const int8_t id) { set_clockoffset(value, id); });
+        register_mqtt_cmd(F("language"), [&](const char * value, const int8_t id) { set_language(value, id); });
+        register_mqtt_cmd(F("display"), [&](const char * value, const int8_t id) { set_display(value, id); });
+    case EMS_DEVICE_FLAG_RC35: // RC30 and RC35
         register_mqtt_cmd(F("nighttemp"), [&](const char * value, const int8_t id) { set_nighttemp(value, id); });
         register_mqtt_cmd(F("daytemp"), [&](const char * value, const int8_t id) { set_daytemp(value, id); });
         register_mqtt_cmd(F("nofrosttemp"), [&](const char * value, const int8_t id) { set_nofrosttemp(value, id); });
-        register_mqtt_cmd(F("ecotemp"), [&](const char * value, const int8_t id) { set_ecotemp(value, id); });
-        register_mqtt_cmd(F("heattemp"), [&](const char * value, const int8_t id) { set_heattemp(value, id); });
         register_mqtt_cmd(F("remotetemp"), [&](const char * value, const int8_t id) { set_remotetemp(value, id); });
         register_mqtt_cmd(F("datetime"), [&](const char * value, const int8_t id) { set_datetime(value, id); });
         register_mqtt_cmd(F("minexttemp"), [&](const char * value, const int8_t id) { set_minexttemp(value, id); });
-        register_mqtt_cmd(F("clockoffset"), [&](const char * value, const int8_t id) { set_clockoffset(value, id); });
         register_mqtt_cmd(F("calinttemp"), [&](const char * value, const int8_t id) { set_calinttemp(value, id); });
-        register_mqtt_cmd(F("display"), [&](const char * value, const int8_t id) { set_display(value, id); });
         register_mqtt_cmd(F("building"), [&](const char * value, const int8_t id) { set_building(value, id); });
-        register_mqtt_cmd(F("language"), [&](const char * value, const int8_t id) { set_language(value, id); });
         register_mqtt_cmd(F("control"), [&](const char * value, const int8_t id) { set_control(value, id); });
         register_mqtt_cmd(F("pause"), [&](const char * value, const int8_t id) { set_pause(value, id); });
         register_mqtt_cmd(F("party"), [&](const char * value, const int8_t id) { set_party(value, id); });
@@ -1804,23 +1839,11 @@ void Thermostat::add_commands() {
         break;
     case EMS_DEVICE_FLAG_JUNKERS:
         register_mqtt_cmd(F("nofrosttemp"), [&](const char * value, const int8_t id) { set_nofrosttemp(value, id); });
+        register_mqtt_cmd(F("ecotemp"), [&](const char * value, const int8_t id) { set_ecotemp(value, id); });
+        register_mqtt_cmd(F("heattemp"), [&](const char * value, const int8_t id) { set_heattemp(value, id); });
         break;
     default:
         break;
-    }
-
-    // Jumkers specific
-    if (model == EMS_DEVICE_FLAG_JUNKERS) {
-        bool old_junkers = ((this->flags() & EMS_DEVICE_FLAG_JUNKERS_2) == EMS_DEVICE_FLAG_JUNKERS_2);
-        if (!old_junkers) {
-            // FW...
-            register_mqtt_cmd(F("nighttemp"), [&](const char * value, const int8_t id) { set_nighttemp(value, id); });
-            register_mqtt_cmd(F("daytemp"), [&](const char * value, const int8_t id) { set_daytemp(value, id); });
-        } else {
-            // FR100
-            register_mqtt_cmd(F("ecotemp"), [&](const char * value, const int8_t id) { set_ecotemp(value, id); });
-            register_mqtt_cmd(F("heattemp"), [&](const char * value, const int8_t id) { set_heattemp(value, id); });
-        }
     }
 }
 
