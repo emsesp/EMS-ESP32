@@ -91,7 +91,6 @@ void EMSESPShell::display_banner() {
     // turn off watch
     emsesp::EMSESP::watch_id(WATCH_ID_NONE);
     emsesp::EMSESP::watch(EMSESP::WATCH_OFF);
-
 }
 
 // pre-loads all the console commands into the MAIN context
@@ -392,29 +391,32 @@ void Console::load_standard_commands(unsigned int context) {
     EMSESPShell::commands->add_command(context,
                                        CommandFlags::USER,
                                        flash_string_vector{F_(watch)},
-                                       flash_string_vector{F_(watch_format_mandatory), F_(watchid_optional)},
+                                       flash_string_vector{F_(watch_format_optional), F_(watchid_optional)},
                                        [](Shell & shell, const std::vector<std::string> & arguments) {
-                                           // get raw/pretty
-                                           if (arguments[0] == read_flash_string(F_(raw))) {
-                                               emsesp::EMSESP::watch(EMSESP::WATCH_RAW); // raw
-                                           } else if (arguments[0] == read_flash_string(F_(on))) {
-                                               emsesp::EMSESP::watch(EMSESP::WATCH_ON); // on
-                                           } else if (arguments[0] == read_flash_string(F_(off))) {
-                                               emsesp::EMSESP::watch(EMSESP::WATCH_OFF); // off
-                                           } else {
-                                               shell.printfln(F_(invalid_watch));
-                                               return;
-                                           }
-
                                            uint16_t watch_id;
-                                           if (arguments.size() == 2) {
-                                               // get the watch_id if its set
-                                               watch_id = Helpers::hextoint(arguments[1].c_str());
-                                           } else {
-                                               watch_id = WATCH_ID_NONE;
-                                           }
 
-                                           emsesp::EMSESP::watch_id(watch_id);
+                                           if (!arguments.empty()) {
+                                               // get raw/pretty
+                                               if (arguments[0] == read_flash_string(F_(raw))) {
+                                                   emsesp::EMSESP::watch(EMSESP::WATCH_RAW); // raw
+                                               } else if (arguments[0] == read_flash_string(F_(on))) {
+                                                   emsesp::EMSESP::watch(EMSESP::WATCH_ON); // on
+                                               } else if (arguments[0] == read_flash_string(F_(off))) {
+                                                   emsesp::EMSESP::watch(EMSESP::WATCH_OFF); // off
+                                               } else {
+                                                   shell.printfln(F_(invalid_watch));
+                                                   return;
+                                               }
+
+                                               if (arguments.size() == 2) {
+                                                   // get the watch_id if its set
+                                                   watch_id = Helpers::hextoint(arguments[1].c_str());
+                                               } else {
+                                                   watch_id = WATCH_ID_NONE;
+                                               }
+
+                                               emsesp::EMSESP::watch_id(watch_id);
+                                           }
 
                                            uint8_t watch = emsesp::EMSESP::watch();
                                            if (watch == EMSESP::WATCH_OFF) {
