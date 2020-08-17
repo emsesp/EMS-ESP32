@@ -255,7 +255,7 @@ void Sensors::publish_values() {
     if (mqtt_format_ == MQTT_format::SINGLE) {
         StaticJsonDocument<100> doc;
         for (const auto & device : devices_) {
-            char s[5];
+            char s[7]; // sensorrange -55.00 to 125.00
             doc["temp"] = Helpers::render_value(s, device.temperature_c, 2);
             char topic[60];                // sensors{1-n}
             strlcpy(topic, "sensor_", 50); // create topic, e.g. home/ems-esp/sensor_28-EA41-9497-0E03-5F
@@ -281,12 +281,12 @@ void Sensors::publish_values() {
     uint8_t i = 1;
     for (const auto & device : devices_) {
         if (mqtt_format_ == MQTT_format::CUSTOM) {
-            char s[5];
+            char s[7];
             doc[device.to_string()] = Helpers::render_value(s, device.temperature_c, 2);
         } else {
             char sensorID[10]; // sensor{1-n}
             strlcpy(sensorID, "sensor", 10);
-            char s[5];
+            char s[7];
             strlcat(sensorID, Helpers::itoa(s, i++), 10);
             JsonObject dataSensor = doc.createNestedObject(sensorID);
             dataSensor["id"]      = device.to_string();
