@@ -151,11 +151,9 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
 
         // add boiler
         EMSESP::add_device(0x08, 84, version, EMSdevice::Brand::BUDERUS);
-        EMSESP::rxservice_.loop();
 
         // add Controller - BC10 GB142 - but using the same device_id to see what happens
         EMSESP::add_device(0x09, 84, version, EMSdevice::Brand::BUDERUS);
-        EMSESP::rxservice_.loop();
 
         // simulate getting version information back from an unknown device
         // note there is no brand (byte 9)
@@ -181,7 +179,6 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         // add thermostat - Thermostat: RC300/RC310/Moduline 3000/CW400/Sense II (DeviceID:0x10, ProductID:158, Version:03.03) ** master device **
         std::string version("01.03");
         EMSESP::add_device(0x10, 158, version, EMSdevice::Brand::BUDERUS);
-        EMSESP::rxservice_.loop();
 
         // simulate incoming telegram
         // Thermostat(0x10) -> 48(0x48), ?(0x26B), data: 6B 08 4F 00 00 00 02 00 00 00 02 00 03 00 03 00 03
@@ -249,8 +246,6 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
 
         std::string version("1.2.3");
         EMSESP::add_device(0x30, 163, version, EMSdevice::Brand::BUDERUS); // SM100
-
-        EMSESP::rxservice_.loop();
 
         // SM100Monitor - type 0x0362 EMS+ - for SM100 and SM200
         // B0 0B FF 00 02 62 00 44 02 7A 80 00 80 00 80 00 80 00 80 00 80 00 00 7C 80 00 80 00 80 00 80
@@ -351,7 +346,6 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
 
         std::string version("1.2.3");
         EMSESP::add_device(0x18, 157, version, EMSdevice::Brand::BOSCH); // Bosch CR100 - https://github.com/proddy/EMS-ESP/issues/355
-        EMSESP::rxservice_.loop();
 
         // RCPLUSStatusMessage_HC1(0x01A5)
         // 98 00 FF 00 01 A5 00 CF 21 2E 00 00 2E 24 03 25 03 03 01 03 25 00 C8 00 00 11 01 03 (no CRC)
@@ -614,8 +608,6 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         uint8_t poll[1] = {0x8B};
         EMSESP::incoming_telegram(poll, 1);
 
-        EMSESP::rxservice_.loop();
-
         EMSESP::show_ems(shell);
         EMSESP::txservice_.flush_tx_queue();
     }
@@ -653,8 +645,6 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
 
         EMSESP::add_device(0x20, 160, version, EMSdevice::Brand::BOSCH); // MM100
 
-        EMSESP::rxservice_.loop();
-
         // WWC1 on 0x29
         rx_telegram({0xA9, 0x00, 0xFF, 0x00, 0x02, 0x32, 0x02, 0x6C, 0x00, 0x3C, 0x00, 0x3C, 0x3C, 0x46, 0x02, 0x03, 0x03, 0x00, 0x3C});
 
@@ -680,7 +670,6 @@ void Test::rx_telegram(const std::vector<uint8_t> & rx_data) {
     }
     data[i] = EMSESP::rxservice_.calculate_crc(data, i);
     EMSESP::rxservice_.add(data, len + 1);
-    EMSESP::rxservice_.loop();
 }
 
 // simulates a telegram straight from UART, but without the CRC which is added automatically
@@ -694,7 +683,6 @@ void Test::uart_telegram(const std::vector<uint8_t> & rx_data) {
     }
     data[i] = EMSESP::rxservice_.calculate_crc(data, i);
     EMSESP::incoming_telegram(data, i + 1);
-    EMSESP::rxservice_.loop();
 }
 
 // takes raw string, assuming it contains the CRC. This is what is output from 'watch raw'
