@@ -136,15 +136,11 @@ void RxService::add(uint8_t * data, uint8_t length) {
         return;
     }
 
-    // validate the CRC
-    // if it fails then increment the number of corrupt/incomplete telegrams and only report to console/syslog
-    // if watch is running
+    // validate the CRC. if it fails then increment the number of corrupt/incomplete telegrams and only report to console/syslog
     uint8_t crc = calculate_crc(data, length - 1);
     if (data[length - 1] != crc) {
         increment_telegram_error_count();
-        if (EMSESP::watch() != EMSESP::Watch::WATCH_OFF) {
-            LOG_ERROR(F("Rx: %s (CRC %02X != %02X)"), Helpers::data_to_hex(data, length).c_str(), data[length - 1], crc);
-        }
+        LOG_ERROR(F("Rx: %s (CRC %02X != %02X)"), Helpers::data_to_hex(data, length).c_str(), data[length - 1], crc);
         return;
     }
 
@@ -195,7 +191,7 @@ void RxService::add(uint8_t * data, uint8_t length) {
     }
 
 #ifdef EMSESP_DEBUG
-    LOG_DEBUG(F("[DEBUG] New Rx [#%d] telegram, message length %d"), rx_telegram_id_, message_length);
+    LOG_DEBUG(F("[DEBUG] New Rx telegram, message length %d"), message_length);
 #endif
 
     // if we don't have a type_id exit,
