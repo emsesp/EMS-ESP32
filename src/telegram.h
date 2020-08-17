@@ -195,64 +195,39 @@ class EMSbus {
 
 class RxService : public EMSbus {
   public:
-    static constexpr size_t MAX_RX_TELEGRAMS = 10;
-
     RxService()  = default;
     ~RxService() = default;
 
-    void loop();
-
     void add(uint8_t * data, uint8_t length);
-
-    void flush_rx_queue();
 
     uint16_t telegram_count() const {
         return telegram_count_;
-    }
-
-    uint16_t telegram_error_count() const {
-        return telegram_error_count_;
     }
 
     void increment_telegram_count() {
         telegram_count_++;
     }
 
+    uint16_t telegram_error_count() const {
+        return telegram_error_count_;
+    }
+
     void increment_telegram_error_count() {
         telegram_error_count_++;
     }
 
-    class QueuedRxTelegram {
-      public:
-        const uint16_t                        id_;
-        const std::shared_ptr<const Telegram> telegram_;
-
-        ~QueuedRxTelegram() = default;
-        QueuedRxTelegram(uint16_t id, std::shared_ptr<Telegram> && telegram)
-            : id_(id)
-            , telegram_(std::move(telegram)) {
-        }
-    };
-
-    const std::list<QueuedRxTelegram> queue() const {
-        return rx_telegrams_;
-    }
-
   private:
-    uint32_t last_rx_check_        = 0;
-    uint8_t  rx_telegram_id_       = 0; // queue counter
-    uint16_t telegram_count_       = 0; // # Rx received
-    uint16_t telegram_error_count_ = 0; // # Rx CRC errors
-
-    std::list<QueuedRxTelegram> rx_telegrams_;
+    uint16_t                        telegram_count_       = 0; // # Rx received
+    uint16_t                        telegram_error_count_ = 0; // # Rx CRC errors
+    std::shared_ptr<const Telegram> rx_telegram;               // the incoming Rx telegram
 };
 
 class TxService : public EMSbus {
   public:
     static constexpr size_t MAX_TX_TELEGRAMS = 20; // size of Tx queue
 
-    static constexpr uint8_t TX_WRITE_FAIL    = 4;
-    static constexpr uint8_t TX_WRITE_SUCCESS = 1;
+    static constexpr uint8_t TX_WRITE_FAIL    = 4; // EMS return code for fail
+    static constexpr uint8_t TX_WRITE_SUCCESS = 1; // EMS return code for success
 
     TxService()  = default;
     ~TxService() = default;
@@ -358,10 +333,7 @@ class TxService : public EMSbus {
 #endif
 
   private:
-    uint8_t  tx_telegram_id_ = 0; // queue counter
-    uint32_t last_tx_check_  = 0;
-
-    std::list<QueuedTxTelegram> tx_telegrams_;
+    std::list<QueuedTxTelegram> tx_telegrams_; // the Tx queue
 
     uint16_t telegram_read_count_  = 0; // # Tx successful reads
     uint16_t telegram_write_count_ = 0; // # Tx successful writes
@@ -369,7 +341,9 @@ class TxService : public EMSbus {
 
     std::shared_ptr<Telegram> telegram_last_;
     uint16_t                  telegram_last_post_send_query_; // which type ID to query after a successful send, to read back the values just written
-    uint8_t                   retry_count_ = 0;               // count for # Tx retries
+    uint8_t                   retry_count_    = 0;            // count for # Tx retries
+
+    uint8_t                   tx_telegram_id_ = 0;            // queue counter
 
     void send_telegram(const QueuedTxTelegram & tx_telegram);
     void send_telegram(const uint8_t * data, const uint8_t length);

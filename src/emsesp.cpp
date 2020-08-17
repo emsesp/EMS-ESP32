@@ -58,7 +58,7 @@ uint8_t  EMSESP::actual_master_thermostat_ = EMSESP_DEFAULT_MASTER_THERMOSTAT; /
 uint16_t EMSESP::watch_id_                 = WATCH_ID_NONE;                    // for when log is TRACE. 0 means no trace set
 uint8_t  EMSESP::watch_                    = 0;                                // trace off
 uint16_t EMSESP::read_id_                  = WATCH_ID_NONE;
-bool     EMSESP::tap_water_active_         = false;                            // for when Boiler states we having running warm water. used in Shower()
+bool     EMSESP::tap_water_active_         = false; // for when Boiler states we having running warm water. used in Shower()
 uint32_t EMSESP::last_fetch_               = 0;
 uint8_t  EMSESP::unique_id_count_          = 0;
 
@@ -215,19 +215,6 @@ void EMSESP::show_ems(uuid::console::Shell & shell) {
         shell.printfln(F("  #write requests sent: %d"), txservice_.telegram_write_count());
         shell.printfln(F("  #incomplete telegrams: %d (%d%%)"), rxservice_.telegram_error_count(), success_rate);
         shell.printfln(F("  #tx fails (after %d retries): %d"), TxService::MAXIMUM_TX_RETRIES, txservice_.telegram_fail_count());
-    }
-
-    shell.println();
-
-    // Rx queue
-    auto rx_telegrams = rxservice_.queue();
-    if (rx_telegrams.empty()) {
-        shell.printfln(F("Rx Queue is empty"));
-    } else {
-        shell.printfln(F("Rx Queue (%ld telegram%s):"), rx_telegrams.size(), rx_telegrams.size() == 1 ? "" : "s");
-        for (const auto & it : rx_telegrams) {
-            shell.printfln(F(" [%02d] %s"), it.id_, pretty_telegram(it.telegram_).c_str());
-        }
     }
 
     shell.println();
@@ -829,12 +816,11 @@ void EMSESP::loop() {
         return;
     }
 
-    system_.loop();    // does LED and checks system health, and syslog service
-    rxservice_.loop(); // process what ever is in the rx queue
-    shower_.loop();    // check for shower on/off
-    sensors_.loop();   // this will also send out via MQTT
-    mqtt_.loop();      // sends out anything in the queue via MQTT
-    console_.loop();   // telnet/serial console
+    system_.loop();  // does LED and checks system health, and syslog service
+    shower_.loop();  // check for shower on/off
+    sensors_.loop(); // this will also send out via MQTT
+    mqtt_.loop();    // sends out anything in the queue via MQTT
+    console_.loop(); // telnet/serial console
 
     // force a query on the EMS devices to fetch latest data at a set interval (1 min)
     if ((uuid::get_uptime() - last_fetch_ > EMS_FETCH_FREQUENCY)) {

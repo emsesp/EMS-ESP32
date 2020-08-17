@@ -127,23 +127,6 @@ std::string Telegram::to_string_message() const {
     return Helpers::data_to_hex(this->message_data, this->message_length);
 }
 
-// empty queue, don't process them
-void RxService::flush_rx_queue() {
-    rx_telegrams_.clear();
-    rx_telegram_id_ = 0;
-}
-
-// Rx loop, run as many times as you can
-// processes all telegrams on the queue. Assumes there are valid (i.e. CRC checked)
-void RxService::loop() {
-    while (!rx_telegrams_.empty()) {
-        auto telegram = rx_telegrams_.front().telegram_;
-        (void)EMSESP::process_telegram(telegram); // further process the telegram
-        increment_telegram_count();               // increase count
-        rx_telegrams_.pop_front();                // remove it from the queue
-    }
-}
-
 // add a new rx telegram object
 // data is the whole telegram, assuming last byte holds the CRC
 // length includes the CRC
@@ -225,14 +208,11 @@ void RxService::add(uint8_t * data, uint8_t length) {
     src = EMSESP::check_master_device(src, type_id, true);
 
     // create the telegram
-    auto telegram = std::make_shared<Telegram>(Telegram::Operation::RX, src, dest, type_id, offset, message_data, message_length);
+    rx_telegram = std::make_shared<Telegram>(Telegram::Operation::RX, src, dest, type_id, offset, message_data, message_length);
 
-    // check if queue is full, if so remove top item to make space
-    if (rx_telegrams_.size() >= MAX_RX_TELEGRAMS) {
-        rx_telegrams_.pop_front();
-    }
-
-    rx_telegrams_.emplace_back(rx_telegram_id_++, std::move(telegram)); // add to queue
+    // process it immediately
+    EMSESP::process_telegram(rx_telegram); // further process the telegram
+    increment_telegram_count();            // increase count
 }
 
 //
@@ -280,7 +260,6 @@ void TxService::send() {
     }
 
     // if there's nothing in the queue to transmit, send back a poll and quit
-    // unless tx_mode is 0
     if (tx_telegrams_.empty()) {
         send_poll();
         return;
