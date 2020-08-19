@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// code written by nomis - https://github.com/nomis
+// code originally written by nomis - https://github.com/nomis
 
 #ifndef EMSESP_SENSORS_H
 #define EMSESP_SENSORS_H
@@ -87,10 +87,10 @@ class Sensors {
     static constexpr uint8_t TYPE_DS1822  = 0x22;
     static constexpr uint8_t TYPE_DS1825  = 0x3B;
 
-    static constexpr uint32_t READ_INTERVAL_MS = 5000;  // 5 seconds
-    static constexpr uint32_t CONVERSION_MS    = 1000;  // 1 seconds
-    static constexpr uint32_t READ_TIMEOUT_MS  = 2000;  // 2 seconds
-    static constexpr uint32_t SCAN_TIMEOUT_MS  = 3000;  // 3 seconds
+    static constexpr uint32_t READ_INTERVAL_MS = 5000; // 5 seconds
+    static constexpr uint32_t CONVERSION_MS    = 1000; // 1 seconds
+    static constexpr uint32_t READ_TIMEOUT_MS  = 2000; // 2 seconds
+    static constexpr uint32_t SCAN_TIMEOUT_MS  = 3000; // 3 seconds
 
     static constexpr uint8_t CMD_CONVERT_TEMP    = 0x44;
     static constexpr uint8_t CMD_READ_SCRATCHPAD = 0xBE;
@@ -112,7 +112,6 @@ class Sensors {
 
     uint8_t mqtt_format_;
     uint8_t retrycnt_ = 0;
-
 };
 
 } // namespace emsesp

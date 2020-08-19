@@ -21,25 +21,9 @@
 
 #include "version.h" // firmware version of EMS-ESP
 
-MAKE_PSTR_WORD(passwd)
-MAKE_PSTR_WORD(hostname)
-MAKE_PSTR_WORD(wifi)
-MAKE_PSTR_WORD(reconnect)
-MAKE_PSTR_WORD(ssid)
-MAKE_PSTR_WORD(heartbeat)
-MAKE_PSTR_WORD(users)
-
-MAKE_PSTR(host_fmt, "Host = %s")
-MAKE_PSTR(hostname_fmt, "WiFi Hostname = %s")
-MAKE_PSTR(mark_interval_fmt, "Mark interval = %lus");
-MAKE_PSTR(wifi_ssid_fmt, "WiFi SSID = %s");
-MAKE_PSTR(wifi_password_fmt, "WiFi Password = %S")
-
-MAKE_PSTR(logger_name, "system")
-
 namespace emsesp {
 
-uuid::log::Logger System::logger_{F_(logger_name), uuid::log::Facility::KERN};
+uuid::log::Logger System::logger_{F_(system), uuid::log::Facility::KERN};
 
 #ifndef EMSESP_STANDALONE
 uuid::syslog::SyslogService System::syslog_;
@@ -50,94 +34,20 @@ uint32_t System::heap_start_    = 0;
 int      System::reset_counter_ = 0;
 bool     System::upload_status_ = false;
 
-// handle generic system related MQTT commands
-void System::mqtt_commands(const char * message) {
-    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
-    DeserializationError                           error = deserializeJson(doc, message);
-    if (error) {
-        LOG_DEBUG(F("MQTT error: payload %s, error %s"), message, error.c_str());
-        return;
+// send on/off to a gpio pin
+// value: true = HIGH, false = LOW
+void System::mqtt_command_pin(const char * value, const int8_t id) {
+    bool v = false;
+    if (Helpers::value2bool(value, v)) {
+        pinMode(id, OUTPUT);
+        digitalWrite(id, v);
+        LOG_INFO(F("GPIO %d set to %s"), id, v ? "HIGH" : "LOW");
     }
+}
 
-    if (doc["send"] != nullptr) {
-        const char * data = doc["send"];
-        EMSESP::send_raw_telegram(data);
-        LOG_INFO(F("Sending raw: %s"), data);
-    }
-
-#if defined(ESP8266)
-    const uint8_t d0_ = 16;
-    const uint8_t d1_ = 5;
-    const uint8_t d2_ = 4;
-    const uint8_t d3_ = 0;
-#elif defined(ESP32)
-    const uint8_t d0_ = 26;
-    const uint8_t d1_ = 22;
-    const uint8_t d2_ = 21;
-    const uint8_t d3_ = 17;
-#endif
-
-#ifndef EMSESP_STANDALONE
-    if (doc["D0"] != nullptr) {
-        const int8_t set = doc["D0"];
-        pinMode(d0_, OUTPUT);
-        if (set == 1) {
-            digitalWrite(d0_, HIGH);
-        } else if (set == 0) {
-            digitalWrite(d0_, LOW);
-        }
-        LOG_INFO(F("Port D0 set to %d"), set);
-    }
-
-    if (doc["D1"] != nullptr) {
-        const int8_t set = doc["D1"];
-        pinMode(d1_, OUTPUT);
-        if (set == 1) {
-            digitalWrite(d1_, HIGH);
-        } else if (set == 0) {
-            digitalWrite(d1_, LOW);
-        }
-        LOG_INFO(F("Port D1 set to %d"), set);
-    }
-
-    if (doc["D2"] != nullptr) {
-        const int8_t set = doc["D2"];
-        pinMode(d2_, OUTPUT);
-        if (set == 1) {
-            digitalWrite(d2_, HIGH);
-        } else if (set == 0) {
-            digitalWrite(d2_, LOW);
-        }
-        LOG_INFO(F("Port D2 set to %d"), set);
-    }
-
-    if (doc["D3"] != nullptr) {
-        const int8_t set = doc["D3"];
-        pinMode(d3_, OUTPUT);
-        if (set == 1) {
-            digitalWrite(d3_, HIGH);
-        } else if (set == 0) {
-            digitalWrite(d3_, LOW);
-        }
-        LOG_INFO(F("Port D3 set to %d"), set);
-    }
-#endif
-
-    const char * command = doc["cmd"];
-    if (command == nullptr) {
-        return;
-    }
-
-    // send raw command
-    if (strcmp(command, "send") == 0) {
-        const char * data = doc["data"];
-        if (data == nullptr) {
-            return;
-        }
-        EMSESP::send_raw_telegram(data);
-        LOG_INFO(F("Sending raw: %s"), data);
-        return;
-    }
+// send raw
+void System::mqtt_command_send(const char * value, const int8_t id) {
+    EMSESP::send_raw_telegram(value); // ignore id
 }
 
 // restart EMS-ESP
@@ -280,6 +190,24 @@ void System::loop() {
             send_heartbeat();
         }
     }
+
+#if defined(ESP8266)
+#if defined(EMSESP_DEBUG)
+    static uint32_t last_memcheck_ = 0;
+    if (currentMillis - last_memcheck_ > 10000) { // 10 seconds
+        last_memcheck_ = currentMillis;
+        show_mem("core");
+    }
+#endif
+#endif
+}
+
+void System::show_mem(const char * note) {
+#if defined(ESP8266)
+#if defined(EMSESP_DEBUG)
+    LOG_INFO(F("(%s) Free heap: %d%% (%lu), frag:%u%%"), note, free_mem(), (unsigned long)ESP.getFreeHeap(), ESP.getHeapFragmentation());
+#endif
+#endif
 }
 
 // send periodic MQTT message with system information
@@ -297,6 +225,7 @@ void System::send_heartbeat() {
     doc["freemem"]          = free_mem();
     doc["mqttpublishfails"] = Mqtt::publish_fails();
     doc["txfails"]          = EMSESP::txservice_.telegram_fail_count();
+    doc["rxfails"]          = EMSESP::rxservice_.telegram_error_count();
 
     Mqtt::publish("heartbeat", doc, false); // send to MQTT with retain off. This will add to MQTT queue.
 }
@@ -398,6 +327,7 @@ void System::show_users(uuid::console::Shell & shell) {
 void System::show_system(uuid::console::Shell & shell) {
     shell.printfln(F("Uptime:        %s"), uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3).c_str());
 
+#ifndef EMSESP_STANDALONE
 #if defined(ESP8266)
     shell.printfln(F("Chip ID:       0x%08x"), ESP.getChipId());
     shell.printfln(F("SDK version:   %s"), ESP.getSdkVersion());
@@ -407,26 +337,22 @@ void System::show_system(uuid::console::Shell & shell) {
     shell.printfln(F("Boot mode:     %u"), ESP.getBootMode());
     shell.printfln(F("CPU frequency: %u MHz"), ESP.getCpuFreqMHz());
     shell.printfln(F("Flash chip:    0x%08X (%u bytes)"), ESP.getFlashChipId(), ESP.getFlashChipRealSize());
-    shell.printfln(F("Sketch size:   %u bytes (%u bytes free)"), ESP.getSketchSize(), ESP.getFreeSketchSpace());
     shell.printfln(F("Reset reason:  %s"), ESP.getResetReason().c_str());
     shell.printfln(F("Reset info:    %s"), ESP.getResetInfo().c_str());
-    shell.println();
     shell.printfln(F("Free heap:                %lu bytes"), (unsigned long)ESP.getFreeHeap());
-    shell.printfln(F("Free mem:                 %d  %%"), free_mem());
+    shell.printfln(F("Free mem:                 %d %%"), free_mem());
     shell.printfln(F("Maximum free block size:  %lu bytes"), (unsigned long)ESP.getMaxFreeBlockSize());
-    shell.printfln(F("Heap fragmentation:       %u%"), ESP.getHeapFragmentation());
+    shell.printfln(F("Heap fragmentation:       %u %%"), ESP.getHeapFragmentation());
     shell.printfln(F("Free continuations stack: %lu bytes"), (unsigned long)ESP.getFreeContStack());
 #elif defined(ESP32)
     shell.printfln(F("SDK version:   %s"), ESP.getSdkVersion());
     shell.printfln(F("CPU frequency: %u MHz"), ESP.getCpuFreqMHz());
+#endif
     shell.printfln(F("Sketch size:   %u bytes (%u bytes free)"), ESP.getSketchSize(), ESP.getFreeSketchSpace());
     shell.printfln(F("Free heap:                %lu bytes"), (unsigned long)ESP.getFreeHeap());
     shell.printfln(F("Free mem:                 %d  %%"), free_mem());
-#endif
-
     shell.println();
 
-#ifndef EMSESP_STANDALONE
     switch (WiFi.status()) {
     case WL_IDLE_STATUS:
         shell.printfln(F("WiFi: Idle"));
@@ -446,6 +372,7 @@ void System::show_system(uuid::console::Shell & shell) {
         shell.printfln(F("BSSID: %s"), WiFi.BSSIDstr().c_str());
         shell.printfln(F("RSSI: %d dBm (%d %%)"), WiFi.RSSI(), wifi_quality());
         shell.printfln(F("MAC address: %s"), WiFi.macAddress().c_str());
+
 #if defined(ESP8266)
         shell.printfln(F("Hostname: %s"), WiFi.hostname().c_str());
 #elif defined(ESP32)
@@ -480,7 +407,7 @@ void System::show_system(uuid::console::Shell & shell) {
         shell.print(" ");
         shell.printfln(F_(host_fmt), !settings.syslog_host.isEmpty() ? settings.syslog_host.c_str() : uuid::read_flash_string(F_(unset)).c_str());
         shell.print(" ");
-        shell.printfln(F_(log_level_fmt), uuid::log::format_level_uppercase(static_cast<uuid::log::Level>(settings.syslog_level)));
+        shell.printfln(F_(log_level_fmt), uuid::log::format_level_lowercase(static_cast<uuid::log::Level>(settings.syslog_level)));
         shell.print(" ");
         shell.printfln(F_(mark_interval_fmt), settings.syslog_mark_interval);
     });
@@ -628,17 +555,31 @@ void System::console_commands(Shell & shell, unsigned int context) {
                                                shell.printfln(F_(wifi_password_fmt), wifiSettings.ssid.isEmpty() ? F_(unset) : F_(asterisks));
                                            });
                                        });
-
+/*
     EMSESPShell::commands->add_command(ShellContext::SYSTEM,
                                        CommandFlags::USER,
                                        flash_string_vector{F_(show), F_(mqtt)},
                                        [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) { Mqtt::show_mqtt(shell); });
-
+*/
     EMSESPShell::commands->add_command(ShellContext::SYSTEM,
                                        CommandFlags::ADMIN,
                                        flash_string_vector{F_(show), F_(users)},
                                        [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) { System::show_users(shell); });
 
+    EMSESPShell::commands->add_command(ShellContext::SYSTEM,
+                                       CommandFlags::ADMIN,
+                                       flash_string_vector{F_(pin)},
+                                       flash_string_vector{F_(gpio_mandatory), F_(data_optional)},
+                                       [](Shell & shell, const std::vector<std::string> & arguments) {
+                                           if (arguments.size() == 1) {
+                                               shell.printfln(F("use on/off, 1/0 or true/false"));
+                                               return;
+                                           }
+                                           int pin = 0;
+                                           if (Helpers::value2number(arguments[0].c_str(), pin)) {
+                                               System::mqtt_command_pin(arguments[1].c_str(), pin);
+                                           }
+                                       });
 
     // enter the context
     Console::enter_custom_context(shell, context);
@@ -646,9 +587,10 @@ void System::console_commands(Shell & shell, unsigned int context) {
 
 // upgrade from previous versions of EMS-ESP
 void System::check_upgrade() {
+    /*
 // check for v1.9. It uses SPIFFS and only on the ESP8266
 #if defined(ESP8266)
-    Serial.begin(115200); // TODO remove, just for debugging
+    Serial.begin(115200);
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
@@ -771,6 +713,7 @@ void System::check_upgrade() {
         },
         "local");
 #endif
+*/
 }
 
 } // namespace emsesp

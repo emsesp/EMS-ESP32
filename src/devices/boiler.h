@@ -124,7 +124,7 @@ class Boiler : public EMSdevice {
     uint8_t burnPowermin_ = EMS_VALUE_UINT_NOTSET;
     uint8_t burnPowermax_ = EMS_VALUE_UINT_NOTSET;
     int8_t  boilTemp_off_ = EMS_VALUE_INT_NOTSET;
-    int8_t  boilTemp_on_  = EMS_VALUE_UINT_NOTSET;
+    int8_t  boilTemp_on_  = EMS_VALUE_INT_NOTSET;
     uint8_t burnPeriod_   = EMS_VALUE_UINT_NOTSET;
     uint8_t pumpDelay_    = EMS_VALUE_UINT_NOTSET;
 
@@ -160,27 +160,20 @@ class Boiler : public EMSdevice {
 
     void check_active();
 
-    void set_warmwater_temp(const uint8_t temperature);
-    void set_flow_temp(const uint8_t temperature);
-    void set_warmwater_mode(const uint8_t comfort);
-    void set_warmwater_activated(const bool activated);
-    void set_tapwarmwater_activated(const bool activated);
-    void set_warmwater_onetime(const bool activated);
-    void set_warmwater_circulation(const bool activated);
-    void set_min_power(const uint8_t power);
-    void set_max_power(const uint8_t power);
-    void set_hyst_on(const uint8_t temp);
-    void set_hyst_off(const uint8_t temp);
-    void set_burn_period(const uint8_t t);
-    void set_pump_delay(const uint8_t t);
-
-
-    // mqtt callbacks
-    void boiler_cmd(const char * message);
-    void boiler_cmd_wwactivated(const char * message);
-    void boiler_cmd_wwonetime(const char * message);
-    void boiler_cmd_wwcirculation(const char * message);
-    void boiler_cmd_wwtemp(const char * message);
+    // commands - none of these use the additional id parameter
+    void set_warmwater_mode(const char * value, const int8_t id);
+    void set_warmwater_activated(const char * value, const int8_t id);
+    void set_tapwarmwater_activated(const char * value, const int8_t id);
+    void set_warmwater_onetime(const char * value, const int8_t id);
+    void set_warmwater_circulation(const char * value, const int8_t id);
+    void set_warmwater_temp(const char * value, const int8_t id);
+    void set_flow_temp(const char * value, const int8_t id);
+    void set_min_power(const char * value, const int8_t id);
+    void set_max_power(const char * value, const int8_t id);
+    void set_hyst_on(const char * value, const int8_t id);
+    void set_hyst_off(const char * value, const int8_t id);
+    void set_burn_period(const char * value, const int8_t id);
+    void set_pump_delay(const char * value, const int8_t id);
 };
 
 } // namespace emsesp

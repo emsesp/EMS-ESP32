@@ -18,65 +18,52 @@
 
 #include "boiler.h"
 
-MAKE_PSTR_WORD(boiler)
-MAKE_PSTR_WORD(wwtemp)
-MAKE_PSTR_WORD(flowtemp)
-MAKE_PSTR_WORD(wwactive)
-MAKE_PSTR_WORD(wwonetime)
-MAKE_PSTR_WORD(wwcirculation)
-MAKE_PSTR_WORD(comfort)
-MAKE_PSTR_WORD(eco)
-MAKE_PSTR_WORD(intelligent)
-MAKE_PSTR_WORD(hot)
-MAKE_PSTR_WORD(maxpower)
-MAKE_PSTR_WORD(minpower)
-
-MAKE_PSTR(comfort_mandatory, "<hot | eco | intelligent>")
-
-// shower
-MAKE_PSTR_WORD(shower)
-MAKE_PSTR_WORD(timer)
-MAKE_PSTR_WORD(alert)
-MAKE_PSTR(shower_timer_fmt, "Shower Timer is %s")
-MAKE_PSTR(shower_alert_fmt, "Shower Alert is %s")
-
 namespace emsesp {
 
 REGISTER_FACTORY(Boiler, EMSdevice::DeviceType::BOILER)
-MAKE_PSTR(logger_name, "boiler")
-uuid::log::Logger Boiler::logger_{F_(logger_name), uuid::log::Facility::CONSOLE};
+
+uuid::log::Logger Boiler::logger_{F_(boiler), uuid::log::Facility::CONSOLE};
 
 Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const std::string & version, const std::string & name, uint8_t flags, uint8_t brand)
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
-    LOG_DEBUG(F("Registering new Boiler with device ID 0x%02X"), device_id);
+    this->reserve_mem(20); // reserve some space for the telegram registries, to avoid memory fragmentation
+
+    LOG_DEBUG(F("Adding new Boiler with device ID 0x%02X"), device_id);
 
     // the telegram handlers...
-    register_telegram_type(0x10, F("UBAErrorMessage1"), false, std::bind(&Boiler::process_UBAErrorMessage, this, _1));
-    register_telegram_type(0x11, F("UBAErrorMessage2"), false, std::bind(&Boiler::process_UBAErrorMessage, this, _1));
-    register_telegram_type(0x18, F("UBAMonitorFast"), false, std::bind(&Boiler::process_UBAMonitorFast, this, _1));
-    register_telegram_type(0x19, F("UBAMonitorSlow"), true, std::bind(&Boiler::process_UBAMonitorSlow, this, _1));
-    register_telegram_type(0x34, F("UBAMonitorWW"), false, std::bind(&Boiler::process_UBAMonitorWW, this, _1));
-    register_telegram_type(0x1C, F("UBAMaintenanceStatus"), false, std::bind(&Boiler::process_UBAMaintenanceStatus, this, _1));
-    register_telegram_type(0x2A, F("MC10Status"), false, std::bind(&Boiler::process_MC10Status, this, _1));
-    register_telegram_type(0x33, F("UBAParameterWW"), true, std::bind(&Boiler::process_UBAParameterWW, this, _1));
-    register_telegram_type(0x14, F("UBATotalUptime"), false, std::bind(&Boiler::process_UBATotalUptime, this, _1));
-    register_telegram_type(0x35, F("UBAFlags"), false, std::bind(&Boiler::process_UBAFlags, this, _1));
-    register_telegram_type(0x15, F("UBAMaintenanceData"), false, std::bind(&Boiler::process_UBAMaintenanceData, this, _1));
-    register_telegram_type(0x16, F("UBAParameters"), true, std::bind(&Boiler::process_UBAParameters, this, _1));
-    register_telegram_type(0x1A, F("UBASetPoints"), false, std::bind(&Boiler::process_UBASetPoints, this, _1));
-    register_telegram_type(0xD1, F("UBAOutdoorTemp"), false, std::bind(&Boiler::process_UBAOutdoorTemp, this, _1));
-    register_telegram_type(0xE3, F("UBAMonitorSlowPlus"), false, std::bind(&Boiler::process_UBAMonitorSlowPlus2, this, _1));
-    register_telegram_type(0xE4, F("UBAMonitorFastPlus"), false, std::bind(&Boiler::process_UBAMonitorFastPlus, this, _1));
-    register_telegram_type(0xE5, F("UBAMonitorSlowPlus"), false, std::bind(&Boiler::process_UBAMonitorSlowPlus, this, _1));
+    register_telegram_type(0x10, F("UBAErrorMessage1"), false, [&](std::shared_ptr<const Telegram> t) { process_UBAErrorMessage(t); });
+    register_telegram_type(0x11, F("UBAErrorMessage2"), false, [&](std::shared_ptr<const Telegram> t) { process_UBAErrorMessage(t); });
+    register_telegram_type(0x18, F("UBAMonitorFast"), false, [&](std::shared_ptr<const Telegram> t) { process_UBAMonitorFast(t); });
+    register_telegram_type(0x19, F("UBAMonitorSlow"), true, [&](std::shared_ptr<const Telegram> t) { process_UBAMonitorSlow(t); });
+    register_telegram_type(0x34, F("UBAMonitorWW"), false, [&](std::shared_ptr<const Telegram> t) { process_UBAMonitorWW(t); });
+    register_telegram_type(0x1C, F("UBAMaintenanceStatus"), false, [&](std::shared_ptr<const Telegram> t) { process_UBAMaintenanceStatus(t); });
+    register_telegram_type(0x2A, F("MC10Status"), false, [&](std::shared_ptr<const Telegram> t) { process_MC10Status(t); });
+    register_telegram_type(0x33, F("UBAParameterWW"), true, [&](std::shared_ptr<const Telegram> t) { process_UBAParameterWW(t); });
+    register_telegram_type(0x14, F("UBATotalUptime"), false, [&](std::shared_ptr<const Telegram> t) { process_UBATotalUptime(t); });
+    register_telegram_type(0x35, F("UBAFlags"), false, [&](std::shared_ptr<const Telegram> t) { process_UBAFlags(t); });
+    register_telegram_type(0x15, F("UBAMaintenanceData"), false, [&](std::shared_ptr<const Telegram> t) { process_UBAMaintenanceData(t); });
+    register_telegram_type(0x16, F("UBAParameters"), true, [&](std::shared_ptr<const Telegram> t) { process_UBAParameters(t); });
+    register_telegram_type(0x1A, F("UBASetPoints"), false, [&](std::shared_ptr<const Telegram> t) { process_UBASetPoints(t); });
+    register_telegram_type(0xD1, F("UBAOutdoorTemp"), false, [&](std::shared_ptr<const Telegram> t) { process_UBAOutdoorTemp(t); });
+    register_telegram_type(0xE3, F("UBAMonitorSlowPlus"), false, [&](std::shared_ptr<const Telegram> t) { process_UBAMonitorSlowPlus2(t); });
+    register_telegram_type(0xE4, F("UBAMonitorFastPlus"), false, [&](std::shared_ptr<const Telegram> t) { process_UBAMonitorFastPlus(t); });
+    register_telegram_type(0xE5, F("UBAMonitorSlowPlus"), false, [&](std::shared_ptr<const Telegram> t) { process_UBAMonitorSlowPlus(t); });
+    register_telegram_type(0xE9, F("UBADHWStatus"), false, [&](std::shared_ptr<const Telegram> t) { process_UBADHWStatus(t); });
 
-    register_telegram_type(0xE9, F("UBADHWStatus"), false, std::bind(&Boiler::process_UBADHWStatus, this, _1));
-
-    // MQTT callbacks
-    register_mqtt_topic("boiler_cmd", std::bind(&Boiler::boiler_cmd, this, _1));
-    register_mqtt_topic("boiler_cmd_wwactivated", std::bind(&Boiler::boiler_cmd_wwactivated, this, _1));
-    register_mqtt_topic("boiler_cmd_wwonetime", std::bind(&Boiler::boiler_cmd_wwonetime, this, _1));
-    register_mqtt_topic("boiler_cmd_wwcirculation", std::bind(&Boiler::boiler_cmd_wwcirculation, this, _1));
-    register_mqtt_topic("boiler_cmd_wwtemp", std::bind(&Boiler::boiler_cmd_wwtemp, this, _1));
+    // MQTT commands for boiler_cmd topic
+    register_mqtt_cmd(F("comfort"), [&](const char * value, const int8_t id) { set_warmwater_mode(value, id); });
+    register_mqtt_cmd(F("wwactivated"), [&](const char * value, const int8_t id) { set_warmwater_activated(value, id); });
+    register_mqtt_cmd(F("wwtapactivated"), [&](const char * value, const int8_t id) { set_tapwarmwater_activated(value, id); });
+    register_mqtt_cmd(F("wwonetime"), [&](const char * value, const int8_t id) { set_warmwater_onetime(value, id); });
+    register_mqtt_cmd(F("wwcirculation"), [&](const char * value, const int8_t id) { set_warmwater_circulation(value, id); });
+    register_mqtt_cmd(F("flowtemp"), [&](const char * value, const int8_t id) { set_flow_temp(value, id); });
+    register_mqtt_cmd(F("wwtemp"), [&](const char * value, const int8_t id) { set_warmwater_temp(value, id); });
+    register_mqtt_cmd(F("burnmaxpower"), [&](const char * value, const int8_t id) { set_max_power(value, id); });
+    register_mqtt_cmd(F("burnminpower"), [&](const char * value, const int8_t id) { set_min_power(value, id); });
+    register_mqtt_cmd(F("boilhyston"), [&](const char * value, const int8_t id) { set_hyst_on(value, id); });
+    register_mqtt_cmd(F("boilhystoff"), [&](const char * value, const int8_t id) { set_hyst_off(value, id); });
+    register_mqtt_cmd(F("burnperiod"), [&](const char * value, const int8_t id) { set_burn_period(value, id); });
+    register_mqtt_cmd(F("pumpdelay"), [&](const char * value, const int8_t id) { set_pump_delay(value, id); });
 }
 
 // add submenu context
@@ -86,166 +73,24 @@ void Boiler::add_context_menu() {
                                        flash_string_vector{F_(boiler)},
                                        [&](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
                                            Boiler::console_commands(shell, ShellContext::BOILER);
+                                           add_context_commands(ShellContext::BOILER);
                                        });
-}
-
-// boiler_cmd topic
-void Boiler::boiler_cmd(const char * message) {
-    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
-    DeserializationError                           error = deserializeJson(doc, message);
-    if (error) {
-        LOG_DEBUG(F("MQTT error: payload %s, error %s"), message, error.c_str());
-        return;
-    }
-    if (nullptr != doc["flowtemp"]) {
-        uint8_t t = doc["flowtemp"];
-        set_flow_temp(t);
-    }
-    if (nullptr != doc["wwtemp"]) {
-        uint8_t t = doc["wwtemp"];
-        set_warmwater_temp(t);
-    }
-    if (nullptr != doc["boilhyston"]) {
-        int8_t t = doc["boilhyston"];
-        set_hyst_on(t);
-    }
-    if (nullptr != doc["boilhystoff"]) {
-        uint8_t t = doc["boilhystoff"];
-        set_hyst_off(t);
-    }
-    if (nullptr != doc["burnperiod"]) {
-        uint8_t t = doc["burnperiod"];
-        set_burn_period(t);
-    }
-    if (nullptr != doc["burnminpower"]) {
-        uint8_t p = doc["burnminpower"];
-        set_min_power(p);
-    }
-    if (nullptr != doc["burnmaxpower"]) {
-        uint8_t p = doc["burnmaxpower"];
-        set_max_power(p);
-    }
-    if (nullptr != doc["pumpdelay"]) {
-        uint8_t t = doc["pumpdelay"];
-        set_pump_delay(t);
-    }
-
-    if (nullptr != doc["comfort"]) {
-        const char * data = doc["comfort"];
-        if (strcmp((char *)data, "hot") == 0) {
-            set_warmwater_mode(1);
-        } else if (strcmp((char *)data, "eco") == 0) {
-            set_warmwater_mode(2);
-        } else if (strcmp((char *)data, "intelligent") == 0) {
-            set_warmwater_mode(3);
-        }
-    }
-
-    const char * command = doc["cmd"];
-    if (command == nullptr || doc["data"] == nullptr) {
-        return;
-    }
-
-    // boiler ww comfort setting
-    if (strcmp(command, "comfort") == 0) {
-        const char * data = doc["data"];
-        if (strcmp((char *)data, "hot") == 0) {
-            set_warmwater_mode(1);
-        } else if (strcmp((char *)data, "eco") == 0) {
-            set_warmwater_mode(2);
-        } else if (strcmp((char *)data, "intelligent") == 0) {
-            set_warmwater_mode(3);
-        }
-        return;
-    }
-
-    // boiler flowtemp setting
-    if (strcmp(command, "flowtemp") == 0) {
-        uint8_t t = doc["data"];
-        set_flow_temp(t);
-        return;
-    }
-    if (strcmp(command, "wwtemp") == 0) {
-        uint8_t t = doc["data"];
-        set_warmwater_temp(t);
-        return;
-    }
-    // boiler max power setting
-    if (strcmp(command, "burnmaxpower") == 0) {
-        uint8_t p = doc["data"];
-        set_max_power(p);
-        return;
-    }
-
-    // boiler min power setting
-    if (strcmp(command, "burnminpower") == 0) {
-        uint8_t p = doc["data"];
-        set_min_power(p);
-        return;
-    }
-    if (strcmp(command, "boilhyston") == 0) {
-        int8_t t = doc["data"];
-        set_hyst_on(t);
-        return;
-    }
-    if (strcmp(command, "boilhystoff") == 0) {
-        uint8_t t = doc["data"];
-        set_hyst_off(t);
-        return;
-    }
-    if (strcmp(command, "burnperiod") == 0) {
-        uint8_t t = doc["data"];
-        set_burn_period(t);
-        return;
-    }
-    if (strcmp(command, "pumpdelay") == 0) {
-        uint8_t t = doc["data"];
-        set_pump_delay(t);
-        return;
-    }
-}
-
-void Boiler::boiler_cmd_wwactivated(const char * message) {
-    if ((message[0] == '1' || strcmp(message, "on") == 0) || (strcmp(message, "auto") == 0)) {
-        set_warmwater_activated(true);
-    } else if (message[0] == '0' || strcmp(message, "off") == 0) {
-        set_warmwater_activated(false);
-    }
-}
-
-void Boiler::boiler_cmd_wwonetime(const char * message) {
-    if (message[0] == '1' || strcmp(message, "on") == 0) {
-        set_warmwater_onetime(true);
-    } else if (message[0] == '0' || strcmp(message, "off") == 0) {
-        set_warmwater_onetime(false);
-    }
-}
-
-void Boiler::boiler_cmd_wwcirculation(const char * message) {
-    if (message[0] == '1' || strcmp(message, "on") == 0) {
-        set_warmwater_circulation(true);
-    } else if (message[0] == '0' || strcmp(message, "off") == 0) {
-        set_warmwater_circulation(false);
-    }
-}
-
-void Boiler::boiler_cmd_wwtemp(const char * message) {
-    uint8_t t = atoi((char *)message);
-    if (t) {
-        set_warmwater_temp(t);
-    }
 }
 
 void Boiler::device_info(JsonArray & root) {
     JsonObject dataElement;
 
-    dataElement          = root.createNestedObject();
-    dataElement["name"]  = F("Hot tap water");
-    dataElement["value"] = tap_water_active_ ? F("running") : F("off");
+    if (Helpers::hasValue(tap_water_active_, EMS_VALUE_BOOL)) {
+        dataElement          = root.createNestedObject();
+        dataElement["name"]  = F("Hot tap water");
+        dataElement["value"] = tap_water_active_ ? F("running") : F("off");
+    }
 
-    dataElement          = root.createNestedObject();
-    dataElement["name"]  = F("Central heating");
-    dataElement["value"] = heating_active_ ? F("active") : F("off");
+    if (Helpers::hasValue(heating_active_, EMS_VALUE_BOOL)) {
+        dataElement          = root.createNestedObject();
+        dataElement["name"]  = F("Central heating");
+        dataElement["value"] = heating_active_ ? F("active") : F("off");
+    }
 
     render_value_json(root, "", F("Selected flow temperature"), selFlowTemp_, F_(degrees));
     render_value_json(root, "", F("Current flow temperature"), curFlowTemp_, F_(degrees), 10);
@@ -256,8 +101,9 @@ void Boiler::device_info(JsonArray & root) {
 
 // publish values via MQTT
 void Boiler::publish_values() {
-    const size_t        capacity = JSON_OBJECT_SIZE(56); // must recalculate if more objects addded https://arduinojson.org/v6/assistant/
-    DynamicJsonDocument doc(capacity);
+    // const size_t        capacity = JSON_OBJECT_SIZE(56); // must recalculate if more objects addded https://arduinojson.org/v6/assistant/
+    // DynamicJsonDocument doc(capacity);
+    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_LARGE> doc;
 
     char s[10]; // for formatting strings
 
@@ -295,16 +141,16 @@ void Boiler::publish_values() {
     if (Helpers::hasValue(pumpMod2_)) {
         doc["pumpMod2"] = pumpMod2_;
     }
-    if (Helpers::hasValue(wWCircPump_, VALUE_BOOL)) {
+    if (Helpers::hasValue(wWCircPump_, EMS_VALUE_BOOL)) {
         doc["wWCircPump"] = Helpers::render_value(s, wWCircPump_, EMS_VALUE_BOOL);
     }
-    if (Helpers::hasValue(wWCircPumpType_, VALUE_BOOL)) {
+    if (Helpers::hasValue(wWCircPumpType_, EMS_VALUE_BOOL)) {
         doc["wWCiPuType"] = wWCircPumpType_ ? "valve" : "pump";
     }
     if (Helpers::hasValue(wWCircPumpMode_)) {
         doc["wWCiPuMode"] = wWCircPumpMode_;
     }
-    if (Helpers::hasValue(wWCirc_, VALUE_BOOL)) {
+    if (Helpers::hasValue(wWCirc_, EMS_VALUE_BOOL)) {
         doc["wWCirc"] = Helpers::render_value(s, wWCirc_, EMS_VALUE_BOOL);
     }
     if (Helpers::hasValue(extTemp_)) {
@@ -340,43 +186,43 @@ void Boiler::publish_values() {
     if (Helpers::hasValue(exhaustTemp_)) {
         doc["exhaustTemp"] = (float)exhaustTemp_ / 10;
     }
-    if (Helpers::hasValue(wWActivated_, VALUE_BOOL)) {
+    if (Helpers::hasValue(wWActivated_, EMS_VALUE_BOOL)) {
         doc["wWActivated"] = Helpers::render_value(s, wWActivated_, EMS_VALUE_BOOL);
     }
-    if (Helpers::hasValue(wWOneTime_, VALUE_BOOL)) {
+    if (Helpers::hasValue(wWOneTime_, EMS_VALUE_BOOL)) {
         doc["wWOnetime"] = Helpers::render_value(s, wWOneTime_, EMS_VALUE_BOOL);
     }
-    if (Helpers::hasValue(wWDesinfecting_, VALUE_BOOL)) {
+    if (Helpers::hasValue(wWDesinfecting_, EMS_VALUE_BOOL)) {
         doc["wWDesinfecting"] = Helpers::render_value(s, wWDesinfecting_, EMS_VALUE_BOOL);
     }
-    if (Helpers::hasValue(wWReadiness_, VALUE_BOOL)) {
+    if (Helpers::hasValue(wWReadiness_, EMS_VALUE_BOOL)) {
         doc["wWReady"] = Helpers::render_value(s, wWReadiness_, EMS_VALUE_BOOL);
     }
-    if (Helpers::hasValue(wWRecharging_, VALUE_BOOL)) {
+    if (Helpers::hasValue(wWRecharging_, EMS_VALUE_BOOL)) {
         doc["wWRecharge"] = Helpers::render_value(s, wWRecharging_, EMS_VALUE_BOOL);
     }
-    if (Helpers::hasValue(wWTemperatureOK_, VALUE_BOOL)) {
+    if (Helpers::hasValue(wWTemperatureOK_, EMS_VALUE_BOOL)) {
         doc["wWTempOK"] = Helpers::render_value(s, wWTemperatureOK_, EMS_VALUE_BOOL);
     }
-    if (Helpers::hasValue(wWCirc_, VALUE_BOOL)) {
+    if (Helpers::hasValue(wWCirc_, EMS_VALUE_BOOL)) {
         doc["wWCirc"] = Helpers::render_value(s, wWCirc_, EMS_VALUE_BOOL);
     }
-    if (Helpers::hasValue(burnGas_, VALUE_BOOL)) {
+    if (Helpers::hasValue(burnGas_, EMS_VALUE_BOOL)) {
         doc["burnGas"] = Helpers::render_value(s, burnGas_, EMS_VALUE_BOOL);
     }
     if (Helpers::hasValue(flameCurr_)) {
         doc["flameCurr"] = (float)(int16_t)flameCurr_ / 10;
     }
-    if (Helpers::hasValue(heatPmp_, VALUE_BOOL)) {
+    if (Helpers::hasValue(heatPmp_, EMS_VALUE_BOOL)) {
         doc["heatPump"] = Helpers::render_value(s, heatPmp_, EMS_VALUE_BOOL);
     }
-    if (Helpers::hasValue(fanWork_, VALUE_BOOL)) {
+    if (Helpers::hasValue(fanWork_, EMS_VALUE_BOOL)) {
         doc["fanWork"] = Helpers::render_value(s, fanWork_, EMS_VALUE_BOOL);
     }
-    if (Helpers::hasValue(ignWork_, VALUE_BOOL)) {
+    if (Helpers::hasValue(ignWork_, EMS_VALUE_BOOL)) {
         doc["ignWork"] = Helpers::render_value(s, ignWork_, EMS_VALUE_BOOL);
     }
-    if (Helpers::hasValue(wWHeat_, VALUE_BOOL)) {
+    if (Helpers::hasValue(wWHeat_, EMS_VALUE_BOOL)) {
         doc["wWHeat"] = Helpers::render_value(s, wWHeat_, EMS_VALUE_BOOL);
     }
     if (Helpers::hasValue(heating_temp_)) {
@@ -450,16 +296,16 @@ bool Boiler::updated_values() {
 void Boiler::show_values(uuid::console::Shell & shell) {
     EMSdevice::show_values(shell); // for showing the header
 
-    if (Helpers::hasValue(tap_water_active_, VALUE_BOOL)) {
+    if (Helpers::hasValue(tap_water_active_, EMS_VALUE_BOOL)) {
         print_value(shell, 2, F("Hot tap water"), tap_water_active_ ? F("running") : F("off"));
     }
 
-    if (Helpers::hasValue(heating_active_, VALUE_BOOL)) {
+    if (Helpers::hasValue(heating_active_, EMS_VALUE_BOOL)) {
         print_value(shell, 2, F("Central heating"), heating_active_ ? F("active") : F("off"));
     }
 
     print_value(shell, 2, F("Warm Water activated"), wWActivated_, nullptr, EMS_VALUE_BOOL);
-    if (Helpers::hasValue(wWCircPumpType_, VALUE_BOOL)) {
+    if (Helpers::hasValue(wWCircPumpType_, EMS_VALUE_BOOL)) {
         print_value(shell, 2, F("Warm Water charging type"), wWCircPumpType_ ? F("3-way valve") : F("charge pump"));
     }
     print_value(shell, 2, F("Warm Water circulation pump available"), wWCircPump_, nullptr, EMS_VALUE_BOOL);
@@ -557,6 +403,8 @@ void Boiler::show_values(uuid::console::Shell & shell) {
     if (Helpers::hasValue(UBAuptime_)) {
         shell.printfln(F("  Total UBA working time: %d days %d hours %d minutes"), UBAuptime_ / 1440, (UBAuptime_ % 1440) / 60, UBAuptime_ % 60);
     }
+
+    shell.println();
 }
 
 /*
@@ -579,7 +427,7 @@ void Boiler::check_active() {
 
     // see if the heating or hot tap water has changed, if so send
     // last_boilerActive stores heating in bit 1 and tap water in bit 2
-    if (Helpers::hasValue(tap_water_active_, VALUE_BOOL) && Helpers::hasValue(heating_active_, VALUE_BOOL)) {
+    if (Helpers::hasValue(tap_water_active_, EMS_VALUE_BOOL) && Helpers::hasValue(heating_active_, EMS_VALUE_BOOL)) {
         uint8_t latest_boilerState = (tap_water_active_ << 1) + heating_active_;
         if (latest_boilerState != last_boilerState) {
             last_boilerState = latest_boilerState;
@@ -650,12 +498,12 @@ void Boiler::process_UBATotalUptime(std::shared_ptr<const Telegram> telegram) {
  */
 void Boiler::process_UBAParameters(std::shared_ptr<const Telegram> telegram) {
     telegram->read_value(heating_temp_, 1);
-    telegram->read_value(burnPowermax_,2);
-    telegram->read_value(burnPowermin_,3);
-    telegram->read_value(boilTemp_off_,4);
-    telegram->read_value(boilTemp_on_,5);
-    telegram->read_value(burnPeriod_,6);
-    telegram->read_value(pumpDelay_,8);
+    telegram->read_value(burnPowermax_, 2);
+    telegram->read_value(burnPowermin_, 3);
+    telegram->read_value(boilTemp_off_, 4);
+    telegram->read_value(boilTemp_on_, 5);
+    telegram->read_value(burnPeriod_, 6);
+    telegram->read_value(pumpDelay_, 8);
     telegram->read_value(pump_mod_max_, 9);
     telegram->read_value(pump_mod_min_, 10);
 }
@@ -804,7 +652,7 @@ void Boiler::process_UBAMaintenanceStatus(std::shared_ptr<const Telegram> telegr
 // 0x10, 0x11, 0x12
 // not yet implemented
 void Boiler::process_UBAErrorMessage(std::shared_ptr<const Telegram> telegram) {
-    // data: displaycode(2), errornumner(2), year, month, hour, day, minute, duration(2), src-addr
+    // data: displaycode(2), errornumber(2), year, month, hour, day, minute, duration(2), src-addr
 }
 
 #pragma GCC diagnostic pop
@@ -818,67 +666,113 @@ void Boiler::process_UBAMaintenanceData(std::shared_ptr<const Telegram> telegram
     }
 }
 
+/*
+ * Commands
+ */
+
+
 // Set the warm water temperature 0x33
-void Boiler::set_warmwater_temp(const uint8_t temperature) {
-    LOG_INFO(F("Setting boiler warm water temperature to %d C"), temperature);
-    write_command(EMS_TYPE_UBAParameterWW, 2, temperature);
-    write_command(EMS_TYPE_UBAFlags, 3, temperature); // for i9000, see #397
+void Boiler::set_warmwater_temp(const char * value, const int8_t id) {
+    int v = 0;
+    if (!Helpers::value2number(value, v)) {
+        return;
+    }
+
+    LOG_INFO(F("Setting boiler warm water temperature to %d C"), v);
+    write_command(EMS_TYPE_UBAParameterWW, 2, v);
+    write_command(EMS_TYPE_UBAFlags, 3, v); // for i9000, see #397
 }
 
 // flow temp
-void Boiler::set_flow_temp(const uint8_t temperature) {
-    LOG_INFO(F("Setting boiler flow temperature to %d C"), temperature);
-    write_command(EMS_TYPE_UBASetPoints, 0, temperature);
+void Boiler::set_flow_temp(const char * value, const int8_t id) {
+    int v = 0;
+    if (!Helpers::value2number(value, v)) {
+        return;
+    }
+
+    LOG_INFO(F("Setting boiler flow temperature to %d C"), v);
+    write_command(EMS_TYPE_UBASetPoints, 0, v);
 }
 
 // set min boiler output
-void Boiler::set_min_power(const uint8_t power) {
-    LOG_INFO(F("Setting boiler min power to "), power);
-    write_command(EMS_TYPE_UBAParameters, 3, power);
+void Boiler::set_min_power(const char * value, const int8_t id) {
+    int v = 0;
+    if (!Helpers::value2number(value, v)) {
+        return;
+    }
+    LOG_INFO(F("Setting boiler min power to "), v);
+    write_command(EMS_TYPE_UBAParameters, 3, v);
 }
 
 // set max temp
-void Boiler::set_max_power(const uint8_t power) {
-    LOG_INFO(F("Setting boiler max power to %d C"), power);
-    write_command(EMS_TYPE_UBAParameters, 2, power);
+void Boiler::set_max_power(const char * value, const int8_t id) {
+    int v = 0;
+    if (!Helpers::value2number(value, v)) {
+        return;
+    }
+
+    LOG_INFO(F("Setting boiler max power to %d C"), v);
+    write_command(EMS_TYPE_UBAParameters, 2, v);
 }
 
 // set oiler on hysteresis
-void Boiler::set_hyst_on(const uint8_t temp) {
-    LOG_INFO(F("Setting boiler hysteresis on to %d C"), temp);
-    write_command(EMS_TYPE_UBAParameters, 5, temp);
+void Boiler::set_hyst_on(const char * value, const int8_t id) {
+    int v = 0;
+    if (!Helpers::value2number(value, v)) {
+        return;
+    }
+
+    LOG_INFO(F("Setting boiler hysteresis on to %d C"), v);
+    write_command(EMS_TYPE_UBAParameters, 5, v);
 }
 
 // set boiler off hysteresis
-void Boiler::set_hyst_off(const uint8_t temp) {
-    LOG_INFO(F("Setting boiler hysteresis off to %d C"), temp);
-    write_command(EMS_TYPE_UBAParameters, 4, temp);
+void Boiler::set_hyst_off(const char * value, const int8_t id) {
+    int v = 0;
+    if (!Helpers::value2number(value, v)) {
+        return;
+    }
+
+    LOG_INFO(F("Setting boiler hysteresis off to %d C"), v);
+    write_command(EMS_TYPE_UBAParameters, 4, v);
 }
 
 // set min burner period
-void Boiler::set_burn_period(const uint8_t t) {
-    LOG_INFO(F("Setting burner min. period to %d min"), t);
-    write_command(EMS_TYPE_UBAParameters, 6, t);
+void Boiler::set_burn_period(const char * value, const int8_t id) {
+    int v = 0;
+    if (!Helpers::value2number(value, v)) {
+        return;
+    }
+
+    LOG_INFO(F("Setting burner min. period to %d min"), v);
+    write_command(EMS_TYPE_UBAParameters, 6, v);
 }
 
 // set pump delay
-void Boiler::set_pump_delay(const uint8_t t) {
-    LOG_INFO(F("Setting boiler pump delay to %d min"), t);
-    write_command(EMS_TYPE_UBAParameters, 8, t);
+void Boiler::set_pump_delay(const char * value, const int8_t id) {
+    int v = 0;
+    if (!Helpers::value2number(value, v)) {
+        return;
+    }
+
+    LOG_INFO(F("Setting boiler pump delay to %d min"), v);
+    write_command(EMS_TYPE_UBAParameters, 8, v);
 }
 
-// 1=hot, 2=eco, 3=intelligent
 // note some boilers do not have this setting, than it's done by thermostat
-// on a RC35 it's by EMSESP::send_write_request(0x37, 0x10, 2, &set, 1, 0); (set is 1,2,3)
-void Boiler::set_warmwater_mode(const uint8_t comfort) {
+// on a RC35 it's by EMSESP::send_write_request(0x37, 0x10, 2, &set, 1, 0); (set is 1,2,3) 1=hot, 2=eco, 3=intelligent
+void Boiler::set_warmwater_mode(const char * value, const int8_t id) {
+    if (value == nullptr) {
+        return;
+    }
     uint8_t set;
-    if (comfort == 1) {
+    if (strcmp(value, "hot") == 0) {
         LOG_INFO(F("Setting boiler warm water to Hot"));
         set = 0x00;
-    } else if (comfort == 2) {
+    } else if (strcmp(value, "eco") == 0) {
         LOG_INFO(F("Setting boiler warm water to Eco"));
         set = 0xD8;
-    } else if (comfort == 3) {
+    } else if (strcmp(value, "intelligent") == 0) {
         LOG_INFO(F("Setting boiler warm water to Intelligent"));
         set = 0xEC;
     } else {
@@ -888,24 +782,33 @@ void Boiler::set_warmwater_mode(const uint8_t comfort) {
 }
 
 // turn on/off warm water
-void Boiler::set_warmwater_activated(const bool activated) {
-    LOG_INFO(F("Setting boiler warm water %s"), activated ? "on" : "off");
-    uint8_t value;
+void Boiler::set_warmwater_activated(const char * value, const int8_t id) {
+    bool v = false;
+    if (!Helpers::value2bool(value, v)) {
+        return;
+    }
+
+    LOG_INFO(F("Setting boiler warm water %s"), v ? "on" : "off");
 
     // https://github.com/proddy/EMS-ESP/issues/268
+    uint8_t n;
     if (EMSbus::is_ht3()) {
-        value = (activated ? 0x08 : 0x00); // 0x08 is on, 0x00 is off
+        n = (v ? 0x08 : 0x00); // 0x08 is on, 0x00 is off
     } else {
-        value = (activated ? 0xFF : 0x00); // 0xFF is on, 0x00 is off
+        n = (v ? 0xFF : 0x00); // 0xFF is on, 0x00 is off
     }
-    write_command(EMS_TYPE_UBAParameterWW, 1, value);
+    write_command(EMS_TYPE_UBAParameterWW, 1, n);
 }
 
 // Activate / De-activate the Warm Tap Water
-// true = on, false = off
 // Note: Using the type 0x1D to put the boiler into Test mode. This may be shown on the boiler with a flashing 'T'
-void Boiler::set_tapwarmwater_activated(const bool activated) {
-    LOG_INFO(F("Setting boiler warm tap water %s"), activated ? "on" : "off");
+void Boiler::set_tapwarmwater_activated(const char * value, const int8_t id) {
+    bool v = false;
+    if (!Helpers::value2bool(value, v)) {
+        return;
+    }
+
+    LOG_INFO(F("Setting tap warm tap water %s"), v ? "on" : "off");
     uint8_t message_data[EMS_MAX_TELEGRAM_MESSAGE_LENGTH];
     for (uint8_t i = 0; i < sizeof(message_data); i++) {
         message_data[i] = 0x00;
@@ -914,7 +817,7 @@ void Boiler::set_tapwarmwater_activated(const bool activated) {
     // we use the special test mode 0x1D for this. Setting the first data to 5A puts the system into test mode and
     // a setting of 0x00 puts it back into normal operating mode
     // when in test mode we're able to mess around with the 3-way valve settings
-    if (!activated) {
+    if (!v) {
         // on
         message_data[0] = 0x5A; // test mode on
         message_data[1] = 0x00; // burner output 0%
@@ -932,16 +835,26 @@ void Boiler::set_tapwarmwater_activated(const bool activated) {
 // Activate / De-activate One Time warm water 0x35
 // true = on, false = off
 // See also https://github.com/proddy/EMS-ESP/issues/341#issuecomment-596245458 for Junkers
-void Boiler::set_warmwater_onetime(const bool activated) {
-    LOG_INFO(F("Setting boiler warm water OneTime loading %s"), activated ? "on" : "off");
-    write_command(EMS_TYPE_UBAFlags, 0, (activated ? 0x22 : 0x02));
+void Boiler::set_warmwater_onetime(const char * value, const int8_t id) {
+    bool v = false;
+    if (!Helpers::value2bool(value, v)) {
+        return;
+    }
+
+    LOG_INFO(F("Setting boiler warm water OneTime loading %s"), v ? "on" : "off");
+    write_command(EMS_TYPE_UBAFlags, 0, (v ? 0x22 : 0x02));
 }
 
 // Activate / De-activate circulation of warm water 0x35
 // true = on, false = off
-void Boiler::set_warmwater_circulation(const bool activated) {
-    LOG_INFO(F("Setting boiler warm water circulation %s"), activated ? "on" : "off");
-    write_command(EMS_TYPE_UBAFlags, 1, (activated ? 0x22 : 0x02));
+void Boiler::set_warmwater_circulation(const char * value, const int8_t id) {
+    bool v = false;
+    if (!Helpers::value2bool(value, v)) {
+        return;
+    }
+
+    LOG_INFO(F("Setting boiler warm water circulation %s"), v ? "on" : "off");
+    write_command(EMS_TYPE_UBAFlags, 1, (v ? 0x22 : 0x02));
 }
 
 // add console commands
@@ -952,117 +865,9 @@ void Boiler::console_commands(Shell & shell, unsigned int context) {
                                        flash_string_vector{F_(typeid_mandatory)},
                                        [=](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) {
                                            uint16_t type_id = Helpers::hextoint(arguments.front().c_str());
-                                           EMSESP::send_read_request(type_id, device_id());
+                                           EMSESP::set_read_id(type_id);
+                                           EMSESP::send_read_request(type_id, get_device_id());
                                        });
-
-    EMSESPShell::commands->add_command(ShellContext::BOILER,
-                                       CommandFlags::ADMIN,
-                                       flash_string_vector{F_(wwtemp)},
-                                       flash_string_vector{F_(degrees_mandatory)},
-                                       [=](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) {
-                                           set_warmwater_temp(Helpers::atoint(arguments.front().c_str()));
-                                       });
-
-    EMSESPShell::commands->add_command(ShellContext::BOILER,
-                                       CommandFlags::ADMIN,
-                                       flash_string_vector{F_(flowtemp)},
-                                       flash_string_vector{F_(degrees_mandatory)},
-                                       [=](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) {
-                                           set_flow_temp(Helpers::atoint(arguments.front().c_str()));
-                                       });
-
-    EMSESPShell::commands->add_command(ShellContext::BOILER,
-                                       CommandFlags::ADMIN,
-                                       flash_string_vector{F_(maxpower)},
-                                       flash_string_vector{F_(n_mandatory)},
-                                       [=](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) {
-                                           set_max_power(Helpers::atoint(arguments.front().c_str()));
-                                       });
-
-    EMSESPShell::commands->add_command(ShellContext::BOILER,
-                                       CommandFlags::ADMIN,
-                                       flash_string_vector{F_(minpower)},
-                                       flash_string_vector{F_(n_mandatory)},
-                                       [=](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) {
-                                           set_min_power(Helpers::atoint(arguments.front().c_str()));
-                                       });
-
-    EMSESPShell::commands->add_command(
-        ShellContext::BOILER,
-        CommandFlags::ADMIN,
-        flash_string_vector{F_(wwactive)},
-        flash_string_vector{F_(bool_mandatory)},
-        [=](Shell & shell, const std::vector<std::string> & arguments) {
-            if (arguments[0] == read_flash_string(F_(on))) {
-                set_warmwater_activated(true);
-            } else if (arguments[0] == read_flash_string(F_(off))) {
-                set_warmwater_activated(false);
-            } else {
-                shell.println(F("Must be on or off"));
-                return;
-            }
-        },
-        [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments __attribute__((unused))) -> const std::vector<std::string> {
-            return std::vector<std::string>{read_flash_string(F_(on)), read_flash_string(F_(off))};
-        });
-
-    EMSESPShell::commands->add_command(
-        ShellContext::BOILER,
-        CommandFlags::ADMIN,
-        flash_string_vector{F_(wwonetime)},
-        flash_string_vector{F_(bool_mandatory)},
-        [=](Shell & shell, const std::vector<std::string> & arguments) {
-            if (arguments[0] == read_flash_string(F_(on))) {
-                set_warmwater_onetime(true);
-            } else if (arguments[0] == read_flash_string(F_(off))) {
-                set_warmwater_onetime(false);
-            } else {
-                shell.println(F("Must be on or off"));
-                return;
-            }
-        },
-        [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments __attribute__((unused))) -> const std::vector<std::string> {
-            return std::vector<std::string>{read_flash_string(F_(on)), read_flash_string(F_(off))};
-        });
-
-    EMSESPShell::commands->add_command(
-        ShellContext::BOILER,
-        CommandFlags::ADMIN,
-        flash_string_vector{F_(wwcirculation)},
-        flash_string_vector{F_(bool_mandatory)},
-        [=](Shell & shell, const std::vector<std::string> & arguments) {
-            if (arguments[0] == read_flash_string(F_(on))) {
-                set_warmwater_circulation(true);
-            } else if (arguments[0] == read_flash_string(F_(off))) {
-                set_warmwater_circulation(false);
-            } else {
-                shell.println(F("Must be on or off"));
-                return;
-            }
-        },
-        [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments __attribute__((unused))) -> const std::vector<std::string> {
-            return std::vector<std::string>{read_flash_string(F_(on)), read_flash_string(F_(off))};
-        });
-
-    EMSESPShell::commands->add_command(
-        ShellContext::BOILER,
-        CommandFlags::ADMIN,
-        flash_string_vector{F_(comfort)},
-        flash_string_vector{F_(comfort_mandatory)},
-        [=](Shell & shell, const std::vector<std::string> & arguments) {
-            if (arguments[0] == read_flash_string(F_(hot))) {
-                set_warmwater_mode(1);
-            } else if (arguments[0] == read_flash_string(F_(eco))) {
-                set_warmwater_mode(2);
-            } else if (arguments[0] == read_flash_string(F_(intelligent))) {
-                set_warmwater_mode(3);
-            } else {
-                shell.println(F("Invalid value. Must be hot, eco or intelligent"));
-            }
-        },
-        [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments __attribute__((unused))) -> const std::vector<std::string> {
-            return std::vector<std::string>{read_flash_string(F_(hot)), read_flash_string(F_(eco)), read_flash_string(F_(intelligent))};
-        });
 
     EMSESPShell::commands->add_command(ShellContext::BOILER,
                                        CommandFlags::USER,

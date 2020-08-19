@@ -16,12 +16,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// code written by nomis - https://github.com/nomis
+// code originally written by nomis - https://github.com/nomis
 
 #include "sensors.h"
 #include "emsesp.h"
-
-MAKE_PSTR(logger_name, "sensors")
 
 #ifdef ESP32
 #define YIELD
@@ -31,7 +29,7 @@ MAKE_PSTR(logger_name, "sensors")
 
 namespace emsesp {
 
-uuid::log::Logger Sensors::logger_{F_(logger_name), uuid::log::Facility::DAEMON};
+uuid::log::Logger Sensors::logger_{F_(sensors), uuid::log::Facility::DAEMON};
 
 void Sensors::start() {
     // copy over values from MQTT so we don't keep on quering the filesystem
@@ -206,7 +204,7 @@ float Sensors::get_temperature_c(const uint8_t addr[]) {
         break;
     }
 
-    uint32_t raw = (raw_value *625) / 100; // round to 0.01
+    uint32_t raw = (raw_value * 625) / 100; // round to 0.01
     return (float)raw / 100;
 #else
     return NAN;
@@ -257,7 +255,7 @@ void Sensors::publish_values() {
     if (mqtt_format_ == MQTT_format::SINGLE) {
         StaticJsonDocument<100> doc;
         for (const auto & device : devices_) {
-            char s[5];
+            char s[7]; // sensorrange -55.00 to 125.00
             doc["temp"] = Helpers::render_value(s, device.temperature_c, 2);
             char topic[60];                // sensors{1-n}
             strlcpy(topic, "sensor_", 50); // create topic, e.g. home/ems-esp/sensor_28-EA41-9497-0E03-5F
@@ -283,12 +281,12 @@ void Sensors::publish_values() {
     uint8_t i = 1;
     for (const auto & device : devices_) {
         if (mqtt_format_ == MQTT_format::CUSTOM) {
-            char s[5];
+            char s[7];
             doc[device.to_string()] = Helpers::render_value(s, device.temperature_c, 2);
         } else {
             char sensorID[10]; // sensor{1-n}
             strlcpy(sensorID, "sensor", 10);
-            char s[5];
+            char s[7];
             strlcat(sensorID, Helpers::itoa(s, i++), 10);
             JsonObject dataSensor = doc.createNestedObject(sensorID);
             dataSensor["id"]      = device.to_string();

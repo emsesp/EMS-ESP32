@@ -54,7 +54,7 @@ void NTPSettingsService::onStationModeDisconnected(const WiFiEventStationModeDis
 
 void NTPSettingsService::configureNTP() {
   if (WiFi.isConnected() && _state.enabled) {
-    Serial.println(F("Starting NTP..."));
+    // Serial.println(F("Starting NTP..."));
 #ifdef ESP32
     configTzTime(_state.tzFormat.c_str(), _state.server.c_str());
 #elif defined(ESP8266)

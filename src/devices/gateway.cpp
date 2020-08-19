@@ -18,22 +18,14 @@
 
 #include "gateway.h"
 
-// MAKE_PSTR_WORD(gateway)
-
 namespace emsesp {
 
 REGISTER_FACTORY(Gateway, EMSdevice::DeviceType::GATEWAY);
 
-MAKE_PSTR(logger_name, "gateway")
-uuid::log::Logger Gateway::logger_{F_(logger_name), uuid::log::Facility::CONSOLE};
+uuid::log::Logger Gateway::logger_{F_(gateway), uuid::log::Facility::CONSOLE};
 
 Gateway::Gateway(uint8_t device_type, uint8_t device_id, uint8_t product_id, const std::string & version, const std::string & name, uint8_t flags, uint8_t brand)
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
-    // telegram handlers
-    // register_telegram_type(EMS_TYPE_XX, "XX", false, std::bind(&Controller::process_XX, this, _1));
-
-    // MQTT callbacks
-    // register_mqtt_topic("topic", std::bind(&Gateway::cmd, this, _1));
 }
 
 void Gateway::add_context_menu() {

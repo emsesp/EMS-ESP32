@@ -18,22 +18,14 @@
 
 #include "switch.h"
 
-// MAKE_PSTR_WORD(switch)
-
 namespace emsesp {
 
 REGISTER_FACTORY(Switch, EMSdevice::DeviceType::SWITCH);
 
-MAKE_PSTR(logger_name, "switch")
-uuid::log::Logger Switch::logger_{F_(logger_name), uuid::log::Facility::CONSOLE};
+uuid::log::Logger Switch::logger_{F_(switch), uuid::log::Facility::CONSOLE};
 
 Switch::Switch(uint8_t device_type, uint8_t device_id, uint8_t product_id, const std::string & version, const std::string & name, uint8_t flags, uint8_t brand)
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
-    // telegram handlers
-    // register_telegram_type(EMS_TYPE_XX, "XX", false, std::bind(&Controller::process_XX, this, _1));
-
-    // MQTT callbacks
-    // register_mqtt_topic("topic", std::bind(&Switch::cmd, this, _1));
 }
 
 void Switch::add_context_menu() {
@@ -44,7 +36,7 @@ void Switch::device_info(JsonArray & root) {
 
 // display all values into the shell console
 void Switch::show_values(uuid::console::Shell & shell) {
-    EMSdevice::show_values(shell); // always call this to show header
+    // EMSdevice::show_values(shell); // always call this to show header
 }
 
 // publish values via MQTT

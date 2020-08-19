@@ -1,39 +1,32 @@
 # EMS-ESP version 2.0
 
-## **Breaking changes**
-
-- MQTT base has been removed. The hostname is only used
-- refresh command renamed to fetch
-- have to 'wifi reconnect' after changing wifi in console
-
 ## **New Features in v2**
 
-- A new web interface using React and TypeScript that's now secure as each URL endpoint is protected by issuing a JWT which is then sent using Bearer Authentication. Using a Captive Portal in AP mode or connecting to a local wifi network.
+- Supports both ESP8266 and ESP32
+- New MQTT option to support Home Assistant MQTT Discovery (https://www.home-assistant.io/docs/mqtt/discovery/)
+- A new web interface using React and TypeScript that's now secure as each URL endpoint is protected by issuing a JWT which is then sent using Bearer Authentication.
+- In the Access Point mode there is a web Captive Portal
 
 <img src="media/web_settings.PNG" width=70% height=70%>
 <img src="media/web_status.PNG" width=70% height=70%>
 <img src="media/web_devices.PNG" width=70% height=70%>
 <img src="media/web_mqtt.PNG" width=70% height=70%>
 
-- A new console. Like in version 1.9 it works with both Serial and Telnet but with a more intuitive Linux shell like behavior. It supports multiple connections and has basic security to prevent any changes to EMS-ESP. A full list of commands is below, here are the key ones:
-    * `help` lists the commands and keywords
-    * some commands take you into a new context, a bit like a sub-menu. e.g. `system`, `thermostat`. Use `help` to show which commands this context has and `exit` or CTRL-D to get back to the root.
-    * To change a setting use the `set` command. Typing `set` shows the current settings.
-    * `show` shows the data specific to the which context you're in.
-    * `su` to switch to Admin which enables more commands such as most of the `set` commands. The default password is "ems-esp-neo" which can be changed with `passwd` from the system menu. When in Admin mode the command prompt switches from `$` to `#`.
-    * `log` sets the logging level. `log off` disables logging. Use `log debug` for debugging commands and actions.
-    * `watch` will output the incoming Rx telegrams to the console. You can also show these in its 'raw' data format and also watch a particular ID.
-    * CTRL-D to exit, CTRL-U to remove line, TAB to auto-complete 
+- A new console. As in version 1.9 it works with both Serial and Telnet but now with a more intuitive Linux shell like behavior. It supports multiple connections and has basic security to prevent any changes to EMS-ESP. A full list of commands is below, here are the key ones:
+    * `help` lists the commands and keywords. This works in each context.
+    * `exit` will exit the console or exit the current context. CTRL-D does the same.
+    * `CTRL-U` for Undo
+    * `TAB` for auto-complete
+    * Some specific commands are behind contexts. Think of this as a sub-menu. e.g. `system`, `thermostat`. The path will always show you which context you are in. `$` is the root.
+    * `su` will switch to super-user or Admin. The default password is "ems-esp-neo" and can be changed with `passwd` from the system menu or via the Web UI (called secret password). When in Admin mode the command prompt switches from `$` to `#`.
+    * Some settings can be changed in the console. The `set` command will list them.
+    * `show` shows the data specific to the which context you're in. From the root it will show you all the EMS device information and any external temperature sensors. From a context it will be more specific to that context, e.g. `show mqtt` from `system` will list MQTT subscriptions and show the status and queue. 
+    * `log` sets the logging level. `log off` disables logging. Use `log debug` for debugging commands and actions. This will be reset next time the console is opened.
+    * `watch` will output the incoming Rx telegrams directly to the console. You can also put on a watch on a specific EMS device ID or telegram ID. Also choose to output as verbose text or raw data bytes.  these in its 'raw' data format and also watch a particular ID.
   
-- There is no "serial mode" anymore like with version 1.9. When the Wifi cannot connect to the SSID it will automatically enter a "safe" mode where the Serial console is activated automatically (baud 115200). Note Serial is always available on the ESP32 because it has multiple UARTs.
+- There is no "serial mode" anymore like with version 1.9. When the Wifi cannot connect to the SSID it will automatically enter a "safe" mode where the Serial console is automatically activated (note Serial is always available on the ESP32 because it has multiple UARTs). The EMS-ESP will blink fast when in Serial mode. Connect via a USB with baud 115200 to see the serial console. Note in this mode the EMS will be disconnect so there will be no incoming traffic. Use only for debugging or changing settings.
 
 - The onboard LED behaves like in 1.9. A solid LED means good connection and EMS data is coming in. A slow pulse means either the WiFi or the EMS bus is not connected yet. A very fast pulse is when the system is booting up and configuring itself, which typically takes 5 seconds.
-
-- Built to work with both EMS8266 and ESP32
-
-- Extended MQTT to use MQTT discovery on Home Assistant.
-
-- For debugging there is an offline mode where the code can be compiled and executed standalone without uploading to an ESP controller. Use `make` (based off GNUMakefile).
 
 ## **Uploading the firmware**
 
@@ -44,18 +37,24 @@
 - Grab the latest firmware binary from https://github.com/proddy/EMS-ESP/releases/tag/travis-v2-build
 - Uploading directly via USB.
   
-  For ESP8266: `esptool.py -p <COM PORT> -b 115200 write_flash 0x00000 <firmware.bin>`
+  For ESP8266: `esptool.py -p <COM PORT> -b 921600 write_flash 0x00000 <firmware.bin>`
+  note: if this fails try a lower speed like `115200` instead of `921600`.
   
   For ESP32: `esptool.py --chip esp32 --port "COM6" --baud 921600 --before default_reset --after hard_reset write_flash -z --flash_mode dio --flash_freq 40m --flash_size detect 0x1000 XX\.platformio\packages\framework-arduinoespressif32\tools\sdk\bin\bootloader_dio_40m.bin 0x8000 XX\.pio\build\esp32\partitions.bin 0xe000 XX\.platformio\packages\framework-arduinoespressif32\tools\partitions\boot_app0.bin 0x10000  <firmware.bin>`
 - Uploading over WiFi: `espota.py --debug --progress --port 8266 --auth ems-esp-neo -i <IP address> -f <firmware.bin>`
 
 ## **Setting EMS-ESP up for the first time**
 
- - Connect to the Access Point called ems-esp using the WPA password `ems-esp-neo`. When you see the captive portal sign-in with username `admin` and password `admin`. Set the WiFi credentials and restart the ESP.
- - When it connects to your wifi network you can use either the Web UI to further configure the other settings or using Telnet. If using the Telnet console refer to the full set of commands below. To change any settings you need to be admin which can be accessed via the `su` command. The password here is the same as the JWT secret from the Web UI, default `ems-esp-neo`.
- - First thing to check is if Tx is working. Use `show ems` and if you have a large number of Tx fails try changing the Tx Mode using `set tx_mode` as admin. Typical values are 1 for EMS1.0, 2 for EMS2.0/EMS+ and 3 for Heatronics.
+ - Connect to the Access Point called ems-esp using the WPA password `ems-esp-neo`. When you see the captive portal sign-in with username `admin` and password `admin`. Set the WiFi credentials and go back to http://ems-esp
+ - First thing to check is if Tx is working and that you have a connect to the EMS bus. If it's showing an error try changing the Tx Mode from the settings page. Then check the Status (no need to restart EMS-ESP).
 
-## **List of console commands**
+## **The Console**
+
+Connecting to the console will give you more insight into the EMS bus traffic, MQTT queues and the actual device information. The console is reachable via Telnet (port 22) or via the Serial port if using an USB (on baud 115200). To change any settings in the console you must be admin (use `su` with the default password `ems-esp-neo`). On an ESP8266 the Serial port is disabled by default unless it's unable to connect to the WiFi.
+
+The `call` command is to execute a command. The command names (`[cmd]`) are the same as the MQTT command listed in the next section.
+
+(* = available in su/Admin mode)
 
 ```
 common commands available in all contexts:
@@ -66,59 +65,55 @@ common commands available in all contexts:
   su
 
 (from the root)
-	set
-	fetch
-	system (enters a context)
-	boiler (enters a context)
-	thermostat (enters a context)
-	scan devices [deep]
-	send telegram <"XX XX ...">
-	set bus_id <device ID>
-	set tx_mode <n>
-	show
-	show devices
-	show ems
-	show values
+  system (enters a context)
+  boiler (enters a context)
+  thermostat (enters a context)
+  set
+  fetch
+  scan devices [deep] *
+  send telegram <"XX XX ..."> *
+  set bus_id <device ID> *
+  set tx_mode <n> *
+  show
+  show devices
+  show ems
+  show values
+  show mqtt
 
 system
-	set
-	show
-	show mqtt
-  show users
-	passwd
-	restart
-	set wifi hostname <name>
-	set wifi password
-	set wifi ssid <name>
-  wifi reconnect
+  set
+  show
+  format *
+  show users *
+  passwd *
+  restart *
+  set wifi hostname <name> *
+  set wifi password *
+  set wifi ssid <name> *
+  wifi reconnect *
+  pin <gpio> [data] *
 
 boiler
-	comfort <hot |eco | intelligent>
-	flowtemp <degrees>
-	wwactive <on | off>
-	wwcirculation <on | off>
-	wwonetime <on | off>
-	wwtemp <degrees>
-	read <type ID>
-  maxpower <%>
-  minpower <%>
+  read <type ID> *
+  call [cmd] [data] *
 
 thermostat
-	set
-	set master [device ID]
-	mode <mode> [heating circuit]
-	temp <degrees> [heating circuit]
-	read <type ID>
+  set
+  set master [device ID] *
+  read <type ID> *
+  call [cmd] [data] [heating circuit] *
+
 ```
   
 ----------
-### **mqtt commands**
+## **MQTT commands**
 
-commands can be written as `{"cmd": ,"data": }` or direct.
-To set thermostat commands depending on heatingcircuits add `"hc": ` or nest the command. Without `"hc":` the first ative heatingcircuit is set.
-These commands are equivalent:
-`{"hc":2,"cmd":"daytemp","data":21}` or `{"hc":2,"daytemp":21}`or `{"hc2"{"daytemp":21}}`
-In direct commands it's possible to combine commands, i.e. `{"hc1":{"daytemp":21,"nighttemp":17},"hc2":{"daytemp":20}}`
+Breaking change: The MQTT base has been removed in version 2. The hostname is only used as prefixed to the topic, e.g. `ems-esp/status`.
+
+All commands must be written as `{"cmd":<cmd> ,"data":<data>, "id":<n>}`. 
+
+The `id` can be replaced with `hc` for some devices and represented as a string or a number. `cmd` is a string, `data` can be a string or number.
+
 ```
 *boiler_cmd*
   comfort <hot, eco, intelligent>
@@ -159,35 +154,19 @@ In direct commands it's possible to combine commands, i.e. `{"hc1":{"daytemp":21
   holiday <dd.mm.yyyy-dd.mm.yyyy>
   date <NTP | hh:mm:ss-dd.mm.yyyy-dw-dst>
 
-*cmd*
+*system_cmd*
   send <"0B XX XX ..">
-  D0 <0 | 1>
-  D1 <0 | 1>
-  D2 <0 | 1>
-  D3 <0 | 1>
+  pin <gpio> <on|off|1|0|true|false>
 
 ```
 
-### **Basic Design Principles**
+## **Basic Design Principles**
 
 - The core services like telnet, logging and shell are based off the libraries from @nomis. I also adopted his general design pattens such as making everything as asynchronous as possible so that no one operation should starve another operation of it's time to execute (https://isocpp.org/wiki/faq/ctors#static-init-order).
 - All EMS devices (e.g. boiler, thermostat, solar modules, mixing units etc) are derived from a factory base class and each class handles its own registering of telegram and mqtt handlers. This makes the EMS device code easier to manage and we can extend with new telegrams types and features.
+- For debugging there is an offline mode where the code can be compiled and executed standalone without uploading to an ESP controller. Use `make` (based off GNUMakefile).
 
-### **Things to tidy up in code later**
-
-- Replace vectors of class objects with shared pointers and use emplace_back since it instantiates during construction. It may have a performance gain.
-- Add real unit tests using platformio's [pio-remote](https://docs.platformio.org/en/latest/plus/pio-remote.html) test bed.
-- See if it's easier to use timers instead of millis() based timers, using [polledTimeout](https://github.com/esp8266/Arduino/blob/master/libraries/esp8266/examples/BlinkPolledTimeout/BlinkPolledTimeout.ino).
-- Port over to ESP-IDF. The Arduino SDK is showing its limitations
-
-### **Features to add**
-
-- Multi-language. German, Dutch, French
-- Click on a device in the Web UI shows it's details
-- Publish time can be customized per device (solar, mixing etc)
-- add homeassistant mqtt discovery for Boiler as well
-
-### **Customizing the Web UI**
+## **Customizing the Web UI**
 
 The Web is based off Rick's awesome [esp8266-react](https://github.com/rjwats/esp8266-react/) framework. These are the files that are modified:
 
@@ -247,10 +226,5 @@ The Web is based off Rick's awesome [esp8266-react](https://github.com/rjwats/es
   * `factory_settings.ini` modified with `ems-esp-neo` as password and `ems-esp` everywhere else
 
 
- UI customization links:
-
-  * icons: https://material-ui.com/components/material-icons/
-  * colors: https://material-ui.com/customization/color/
-  * tables: https://material-ui.com/components/tables/#dense-table
 
 

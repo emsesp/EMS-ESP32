@@ -22,6 +22,8 @@
 #include <Arduino.h>
 #include <uuid/common.h>
 
+#include "telegram.h" // for EMS_VALUE_* settings
+
 namespace emsesp {
 
 class Helpers {
@@ -48,11 +50,18 @@ class Helpers {
     static char * ultostr(char * ptr, uint32_t value, const uint8_t base);
 #endif
 
-    static bool hasValue(const uint8_t v, bool isBool = false); // use isBool=true for bool's
+    static bool hasValue(const uint8_t v, const uint8_t isBool = 0);
     static bool hasValue(const int8_t v);
     static bool hasValue(const int16_t v);
     static bool hasValue(const uint16_t v);
     static bool hasValue(const uint32_t v);
+
+    static std::string toLower(std::string const & s);
+
+    static bool value2number(const char * v, int & value);
+    static bool value2float(const char * v, float & value);
+    static bool value2bool(const char * v, bool & value);
+    static bool value2string(const char * v, std::string & value);
 };
 
 } // namespace emsesp

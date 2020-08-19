@@ -20,12 +20,6 @@
 #include "emsesp.h"
 #include "version.h"
 
-MAKE_PSTR_WORD(connected)
-MAKE_PSTR_WORD(disconnected)
-MAKE_PSTR(system_heartbeat_fmt, "Heartbeat is %s")
-
-MAKE_PSTR(logger_name, "mqtt")
-
 namespace emsesp {
 
 AsyncMqttClient * Mqtt::mqttClient_;
@@ -34,58 +28,59 @@ AsyncMqttClient * Mqtt::mqttClient_;
 std::string Mqtt::hostname_;
 uint8_t     Mqtt::mqtt_qos_;
 uint16_t    Mqtt::publish_time_;
+uint8_t     Mqtt::bus_id_;
 
-std::vector<Mqtt::MQTTSubFunction>  Mqtt::mqtt_subfunctions_;
-uint16_t                            Mqtt::mqtt_publish_fails_    = 0;
-size_t                              Mqtt::maximum_mqtt_messages_ = Mqtt::MAX_MQTT_MESSAGES;
-uint16_t                            Mqtt::mqtt_message_id_       = 0;
-std::deque<Mqtt::QueuedMqttMessage> Mqtt::mqtt_messages_;
-char                                will_topic_[Mqtt::MQTT_TOPIC_MAX_SIZE]; // because MQTT library keeps only char pointer
+std::vector<Mqtt::MQTTSubFunction> Mqtt::mqtt_subfunctions_;
+std::vector<Mqtt::MQTTCmdFunction> Mqtt::mqtt_cmdfunctions_;
 
-uuid::log::Logger Mqtt::logger_{F_(logger_name), uuid::log::Facility::DAEMON};
+uint16_t                           Mqtt::mqtt_publish_fails_    = 0;
+size_t                             Mqtt::maximum_mqtt_messages_ = Mqtt::MAX_MQTT_MESSAGES;
+uint16_t                           Mqtt::mqtt_message_id_       = 0;
+std::list<Mqtt::QueuedMqttMessage> Mqtt::mqtt_messages_;
+char                               will_topic_[Mqtt::MQTT_TOPIC_MAX_SIZE]; // because MQTT library keeps only char pointer
 
-Mqtt::QueuedMqttMessage::QueuedMqttMessage(uint16_t id, std::shared_ptr<MqttMessage> && content)
-    : id_(id)
-    , content_(std::move(content)) {
-    retry_count_ = 0;
-    packet_id_   = 0;
-}
-
-MqttMessage::MqttMessage(const uint8_t operation, const std::string & topic, const std::string & payload, bool retain)
-    : operation(operation)
-    , topic(topic)
-    , payload(payload)
-    , retain(retain) {
-}
-
-Mqtt::MQTTSubFunction::MQTTSubFunction(const uint8_t device_id, const std::string && topic, mqtt_subfunction_p mqtt_subfunction)
-    : device_id_(device_id)
-    , topic_(topic)
-    , mqtt_subfunction_(mqtt_subfunction) {
-}
+uuid::log::Logger Mqtt::logger_{F_(mqtt), uuid::log::Facility::DAEMON};
 
 // subscribe to an MQTT topic, and store the associated callback function
-void Mqtt::subscribe(const uint8_t device_id, const std::string & topic, mqtt_subfunction_p cb) {
-    auto message = queue_subscribe_message(topic); // add subscription to queue. The hostname will automatically be appended
-
-    if (message == nullptr) {
-        return;
-    }
-
-    // the message will contain the full topic, with the hostname prefixed
+// only if it already hasn't been added
+void Mqtt::subscribe(const uint8_t device_type, const std::string & topic, mqtt_subfunction_p cb) {
     // check if we already have the topic subscribed, if so don't add it again
-    bool exists = false;
     if (!mqtt_subfunctions_.empty()) {
         for (const auto & mqtt_subfunction : mqtt_subfunctions_) {
-            if ((mqtt_subfunction.device_id_ == device_id) && (strcmp(mqtt_subfunction.topic_.c_str(), message->topic.c_str()) == 0)) {
-                exists = true;
+            if ((mqtt_subfunction.device_type_ == device_type) && (strcmp(mqtt_subfunction.topic_.c_str(), topic.c_str()) == 0)) {
+                return; // it exists, exit
             }
         }
     }
 
-    if (!exists) {
-        mqtt_subfunctions_.emplace_back(device_id, std::move(message->topic), cb); // register a call back function for a specific telegram type
+    // add to MQTT queue as a subscribe operation
+    auto message = queue_subscribe_message(topic);
+
+    // register in our libary with the callback function.
+    // We store both the original topic and the fully-qualified
+    mqtt_subfunctions_.emplace_back(device_type, std::move(topic), std::move(message->topic), std::move(cb));
+}
+
+// adds a command and callback function for a specific device
+void Mqtt::add_command(const uint8_t device_type, const uint8_t device_id, const __FlashStringHelper * cmd, mqtt_cmdfunction_p cb) {
+    // subscribe to the command topic if it doesn't exist yet
+    std::string cmd_topic = EMSdevice::device_type_topic_name(device_type); // cmd topic for a device like "<device_type>_cmd" e.g. "boiler_cmd"
+
+    bool exists = false;
+    if (!mqtt_subfunctions_.empty()) {
+        for (const auto & mqtt_subfunction : mqtt_subfunctions_) {
+            if ((mqtt_subfunction.device_type_ == device_type) && (strcmp(mqtt_subfunction.topic_.c_str(), cmd_topic.c_str()) == 0)) {
+                exists = true;
+            }
+        }
     }
+    if (!exists) {
+        Mqtt::subscribe(device_type, cmd_topic, nullptr); // use an empty function handler to signal this is a command function
+    }
+
+    LOG_DEBUG(F("Registering MQTT cmd %s with topic %s"), uuid::read_flash_string(cmd).c_str(), EMSdevice::device_type_topic_name(device_type).c_str());
+
+    mqtt_cmdfunctions_.emplace_back(device_type, device_id, cmd, cb);
 }
 
 // subscribe to an MQTT topic, and store the associated callback function. For generic functions not tied to a specific device
@@ -100,7 +95,7 @@ void Mqtt::resubscribe() {
     }
 
     for (const auto & mqtt_subfunction : mqtt_subfunctions_) {
-        queue_message(Operation::SUBSCRIBE, mqtt_subfunction.topic_, "", false, true); // no payload, no topic prefixing
+        queue_subscribe_message(mqtt_subfunction.topic_);
     }
 }
 
@@ -142,7 +137,19 @@ void Mqtt::show_mqtt(uuid::console::Shell & shell) {
     // show subscriptions
     shell.printfln(F("MQTT subscriptions:"));
     for (const auto & mqtt_subfunction : mqtt_subfunctions_) {
-        shell.printfln(F(" %s"), mqtt_subfunction.topic_.c_str());
+        // don't show commands if its homeassistant
+        if ((strncmp(mqtt_subfunction.full_topic_.c_str(), "homeassistant/", 13) == 0)) {
+            shell.printf(F(" topic: %s"), mqtt_subfunction.full_topic_.c_str());
+        } else {
+            // show the commands associated with this subscription
+            shell.printf(F(" topic: %s, [cmd]:"), mqtt_subfunction.full_topic_.c_str());
+            for (const auto & mqtt_cmdfunction : mqtt_cmdfunctions_) {
+                if (EMSdevice::device_type_topic_name(mqtt_cmdfunction.device_type_) == mqtt_subfunction.topic_) {
+                    shell.printf(F(" %s"), uuid::read_flash_string(mqtt_cmdfunction.cmd_).c_str());
+                }
+            }
+        }
+        shell.println();
     }
     shell.println();
 
@@ -183,15 +190,42 @@ void Mqtt::show_mqtt(uuid::console::Shell & shell) {
         }
     }
     shell.println();
-}
+} // namespace emsesp
 
+#if defined(EMSESP_DEBUG)
 // simulate receiving a MQTT message, used only for testing
-void Mqtt::incoming(char * topic, char * payload) {
+void Mqtt::incoming(const char * topic, const char * payload) {
     on_message(topic, payload, strlen(payload));
+}
+#endif
+
+// calls a command, context is the device_type
+// id may be used to represent a heating circuit for example
+bool Mqtt::call_command(const uint8_t device_type, const char * cmd, const char * value, const int8_t id) {
+#ifdef EMSESP_DEBUG
+    if (id == -1) {
+        LOG_DEBUG(F("[DEBUG] Calling command %s, value %s, id is default"), cmd, value);
+    } else {
+        LOG_DEBUG(F("[DEBUG] Calling command %s, value %s, id is %d"), cmd, value, id);
+    }
+#endif
+
+    if (!mqtt_cmdfunctions_.empty()) {
+        for (const auto & cf : mqtt_cmdfunctions_) {
+            if (cf.device_type_ == device_type) {
+                const char * cf_cmd = uuid::read_flash_string(cf.cmd_).c_str();
+                if (strcmp(cf_cmd, cmd) == 0) {
+                    (cf.mqtt_cmdfunction_)(value, id); // call function, data needs to be a string and can be null
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
 }
 
 // received an MQTT message that we subscribed too
-void Mqtt::on_message(char * topic, char * payload, size_t len) {
+void Mqtt::on_message(const char * topic, const char * payload, size_t len) {
     if (len == 0) {
         return;
     }
@@ -199,33 +233,76 @@ void Mqtt::on_message(char * topic, char * payload, size_t len) {
     // convert payload to a null-terminated char string
     char message[len + 2];
     strlcpy(message, payload, len + 1);
+
+#ifdef EMSESP_DEBUG
     LOG_DEBUG(F("[DEBUG] Received %s => %s (length %d)"), topic, message, len);
+#endif
 
     // see if we have this topic in our subscription list, then call its callback handler
-    // note: this will pick the first topic that matches, so for multiple devices of the same type it's gonna fail. Not sure if this is going to be an issue?
     for (const auto & mf : mqtt_subfunctions_) {
-        if (strcmp(topic, mf.topic_.c_str()) == 0) {
-            (mf.mqtt_subfunction_)(message);
-            return;
+        if (strcmp(topic, mf.full_topic_.c_str()) == 0) {
+            if (mf.mqtt_subfunction_) {
+                (mf.mqtt_subfunction_)(message); // matching function, call it
+                return;
+            } else {
+                // empty function. It's a command then. Find the command from the json and call it directly.
+                StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
+                DeserializationError                           error = deserializeJson(doc, message);
+                if (error) {
+                    LOG_ERROR(F("MQTT error: payload %s, error %s"), message, error.c_str());
+                    return;
+                }
+
+                const char * command = doc["cmd"];
+                if (command == nullptr) {
+                    LOG_ERROR(F("MQTT error: invalid payload cmd format. message=%s"), message);
+                    return;
+                }
+
+                // check for hc and id, and convert to int
+                int8_t n = -1; // no value
+                if (doc.containsKey("hc")) {
+                    n = doc["hc"];
+                } else if (doc.containsKey("id")) {
+                    n = doc["id"];
+                }
+
+                bool        cmd_known = false;
+                JsonVariant data      = doc["data"];
+                if (data.is<char *>()) {
+                    cmd_known = call_command(mf.device_type_, command, data.as<char *>(), n);
+                } else if (data.is<int>()) {
+                    char data_str[10];
+                    cmd_known = call_command(mf.device_type_, command, Helpers::itoa(data_str, (int16_t)data.as<int>()), n);
+                } else if (data.is<float>()) {
+                    char data_str[10];
+                    cmd_known = call_command(mf.device_type_, command, Helpers::render_value(data_str, (float)data.as<float>(), 2), n);
+                }
+
+                if (!cmd_known) {
+                    LOG_ERROR(F("MQTT: no matching cmd or invalid data: %s"), command);
+                }
+
+                return;
+            }
         }
     }
-
     // if we got here we didn't find a topic match
-    LOG_DEBUG(F("No responding handler found for topic %s"), topic);
+    LOG_ERROR(F("No MQTT handler found for topic %s and payload %s"), topic, message);
 }
 
-// print all the topics related to a specific device_id
-void Mqtt::show_topic_handlers(uuid::console::Shell & shell, const uint8_t device_id) {
+// print all the topics related to a specific device type
+void Mqtt::show_topic_handlers(uuid::console::Shell & shell, const uint8_t device_type) {
     if (std::count_if(mqtt_subfunctions_.cbegin(),
                       mqtt_subfunctions_.cend(),
-                      [=](MQTTSubFunction const & mqtt_subfunction) { return device_id == mqtt_subfunction.device_id_; })
+                      [=](MQTTSubFunction const & mqtt_subfunction) { return device_type == mqtt_subfunction.device_type_; })
         == 0) {
         return;
     }
 
     shell.print(F(" Subscribed MQTT topics: "));
     for (const auto & mqtt_subfunction : mqtt_subfunctions_) {
-        if (mqtt_subfunction.device_id_ == device_id) {
+        if (mqtt_subfunction.device_type_ == device_type) {
             shell.printf(F("%s "), mqtt_subfunction.topic_.c_str());
         }
     }
@@ -269,6 +346,8 @@ void Mqtt::start() {
         mqtt_qos_     = mqttSettings.mqtt_qos;
     });
 
+    EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) { bus_id_ = settings.ems_bus_id; });
+
     mqttClient_->onConnect([this](bool sessionPresent) { on_connect(); });
 
     mqttClient_->onDisconnect([this](AsyncMqttClientDisconnectReason reason) {
@@ -297,9 +376,18 @@ void Mqtt::start() {
     mqttClient_->setWill(will_topic, 1, true, "offline"); // with qos 1, retain true
 
     mqttClient_->onMessage([this](char * topic, char * payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) {
+        // receiving mqtt
         on_message(topic, payload, len);
-        mqttClient_->onPublish([this](uint16_t packetId) { on_publish(packetId); });
     });
+
+    mqttClient_->onPublish([this](uint16_t packetId) {
+        // publish
+        on_publish(packetId);
+    });
+
+    // create space for command buffer, to avoid heap memory fragmentation
+    mqtt_cmdfunctions_.reserve(40); // current count with boiler+thermostat is 37
+    mqtt_subfunctions_.reserve(10);
 }
 
 void Mqtt::set_publish_time(uint16_t publish_time) {
@@ -327,31 +415,31 @@ void Mqtt::on_connect() {
 
     resubscribe(); // in case this is a reconnect, re-subscribe again to all MQTT topics
 
-    // add the system MQTT subscriptions, only if its a fresh start with no previous subscriptions
-    if (mqtt_subfunctions_.empty()) {
-        Mqtt::subscribe("cmd", System::mqtt_commands);
-    }
+    // these commands respond to the topic "system_cmd" and take a payload like {cmd:"", data:"", id:""}
+    add_command(EMSdevice::DeviceType::SERVICEKEY, bus_id_, F("pin"), System::mqtt_command_pin);
+    add_command(EMSdevice::DeviceType::SERVICEKEY, bus_id_, F("send"), System::mqtt_command_send);
 
     LOG_INFO(F("MQTT connected"));
 }
 
-// add sub or pub task to the queue. When the message is created, the topic will have
-// automatically the hostname prefixed.
-std::shared_ptr<const MqttMessage>
-Mqtt::queue_message(const uint8_t operation, const std::string & topic, const std::string & payload, const bool retain, bool no_prefix) {
+// add sub or pub task to the queue.
+// a fully-qualified topic is created by prefixing the hostname, unless it's HA
+// returns a pointer to the message created
+std::shared_ptr<const MqttMessage> Mqtt::queue_message(const uint8_t operation, const std::string & topic, const std::string & payload, const bool retain) {
     if (topic.empty()) {
         return nullptr;
     }
 
     // take the topic and prefix the hostname, unless its for HA
     std::shared_ptr<MqttMessage> message;
-    if ((strncmp(topic.c_str(), "homeassistant/", 13) == 0) || no_prefix) {
+    if ((strncmp(topic.c_str(), "homeassistant/", 13) == 0)) {
         // leave topic as it is
-        message = std::make_shared<MqttMessage>(operation, topic, payload, retain);
+        message = std::make_shared<MqttMessage>(operation, topic, std::move(payload), retain);
     } else {
         // prefix the hostname
-        std::string full_topic = Mqtt::hostname_ + "/" + topic;
-        message                = std::make_shared<MqttMessage>(operation, full_topic, payload, retain);
+        std::string full_topic(50, '\0');
+        snprintf_P(&full_topic[0], full_topic.capacity() + 1, PSTR("%s/%s"), Mqtt::hostname_.c_str(), topic.c_str());
+        message = std::make_shared<MqttMessage>(operation, full_topic, std::move(payload), retain);
     }
 
     // if the queue is full, make room but removing the last one

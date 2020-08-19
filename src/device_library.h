@@ -31,6 +31,7 @@
 {115, DeviceType::BOILER, F("Topline/GB162"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {122, DeviceType::BOILER, F("Proline"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {123, DeviceType::BOILER, F("GBx72/Trendline/Cerapur/Greenstar Si/27i"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
+{131, DeviceType::BOILER, F("GB212"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {133, DeviceType::BOILER, F("GB125/Logamatic MC110"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {170, DeviceType::BOILER, F("Logano GB212"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {172, DeviceType::BOILER, F("Enviline/Compress 6000AW"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
@@ -39,11 +40,28 @@
 {208, DeviceType::BOILER, F("Logamax Plus/GB192/Condens GC9000"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {234, DeviceType::BOILER, F("Logamax Plus GB122"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 
+// Controllers - 0x09 / 0x10 / 0x50
+{ 68, DeviceType::CONTROLLER, F("BC10/RFM20"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
+{ 89, DeviceType::CONTROLLER, F("BC10 GB142"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
+{ 95, DeviceType::CONTROLLER, F("HT3"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
+{114, DeviceType::CONTROLLER, F("BC10"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
+{125, DeviceType::CONTROLLER, F("BC25"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
+{152, DeviceType::CONTROLLER, F("Controller"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
+{169, DeviceType::CONTROLLER, F("BC40"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
+{190, DeviceType::CONTROLLER, F("BC10"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
+{194, DeviceType::CONTROLLER, F("BC10"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
+{207, DeviceType::CONTROLLER, F("Sense II/CS200"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x10
+{209, DeviceType::CONTROLLER, F("ErP"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
+{218, DeviceType::CONTROLLER, F("M200/RFM200"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x50
+{224, DeviceType::CONTROLLER, F("9000i"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
+{230, DeviceType::CONTROLLER, F("BC Base"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
+{241, DeviceType::CONTROLLER, F("Condens 5000i"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
+
 // Thermostat - not currently supporting write operations, like the Easy/100 types - 0x18
 {202, DeviceType::THERMOSTAT, F("Logamatic TC100/Moduline Easy"), DeviceFlags::EMS_DEVICE_FLAG_EASY | DeviceFlags::EMS_DEVICE_FLAG_NO_WRITE}, // 0x18, cannot write
 {203, DeviceType::THERMOSTAT, F("EasyControl CT200"), DeviceFlags::EMS_DEVICE_FLAG_EASY | DeviceFlags::EMS_DEVICE_FLAG_NO_WRITE}, // 0x18, cannot write
 
-// Thermostat - Common for Buderus/Nefit/Bosch specific - 0x17 / 0x10 / 0x18
+// Thermostat - Buderus/Nefit/Bosch specific - 0x17 / 0x10 / 0x18 / 0x19
 { 67, DeviceType::THERMOSTAT, F("RC30"), DeviceFlags::EMS_DEVICE_FLAG_RC30_1},// 0x10 - based on RC35
 { 77, DeviceType::THERMOSTAT, F("RC20/Moduline 300"), DeviceFlags::EMS_DEVICE_FLAG_RC20},// 0x17
 { 78, DeviceType::THERMOSTAT, F("Moduline 400"), DeviceFlags::EMS_DEVICE_FLAG_RC30}, // 0x10
@@ -51,6 +69,7 @@
 { 80, DeviceType::THERMOSTAT, F("Moduline 200"), DeviceFlags::EMS_DEVICE_FLAG_RC10}, // 0x17
 { 86, DeviceType::THERMOSTAT, F("RC35"), DeviceFlags::EMS_DEVICE_FLAG_RC35}, // 0x10
 { 93, DeviceType::THERMOSTAT, F("RC20RF"), DeviceFlags::EMS_DEVICE_FLAG_RC20}, // 0x19
+{ 94, DeviceType::THERMOSTAT, F("RFM20 Remote"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x18
 {157, DeviceType::THERMOSTAT, F("RC200/CW100"), DeviceFlags::EMS_DEVICE_FLAG_RC100}, // 0x18
 {158, DeviceType::THERMOSTAT, F("RC300/RC310/Moduline 3000/CW400/Sense II"), DeviceFlags::EMS_DEVICE_FLAG_RC300}, // 0x10
 {165, DeviceType::THERMOSTAT, F("RC100/Moduline 1000/1010"), DeviceFlags::EMS_DEVICE_FLAG_RC100}, // 0x18, 0x38
@@ -87,22 +106,6 @@
 {200, DeviceType::HEATPUMP, F("HP Module"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {252, DeviceType::HEATPUMP, F("HP Module"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 
-// Controllers - 0x09 / 0x10 / 0x50
-{ 68, DeviceType::CONTROLLER, F("BC10/RFM20"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
-{ 89, DeviceType::CONTROLLER, F("BC10 GB142"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
-{ 95, DeviceType::CONTROLLER, F("HT3"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
-{114, DeviceType::CONTROLLER, F("BC10"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
-{125, DeviceType::CONTROLLER, F("BC25"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
-{152, DeviceType::CONTROLLER, F("Controller"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
-{169, DeviceType::CONTROLLER, F("BC40"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
-{190, DeviceType::CONTROLLER, F("BC10"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
-{207, DeviceType::CONTROLLER, F("Sense II/CS200"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x10
-{209, DeviceType::CONTROLLER, F("ErP"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
-{218, DeviceType::CONTROLLER, F("M200/RFM200"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x50
-{224, DeviceType::CONTROLLER, F("9000i"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
-{230, DeviceType::CONTROLLER, F("BC Base"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
-{241, DeviceType::CONTROLLER, F("Condens 5000i"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
-
 // Connect devices - 0x02
 {171, DeviceType::CONNECT, F("OpenTherm Converter"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {205, DeviceType::CONNECT, F("Moduline Easy Connect"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
@@ -111,9 +114,7 @@
 // Switches - 0x11
 { 71, DeviceType::SWITCH, F("WM10"), DeviceFlags::EMS_DEVICE_FLAG_NONE},
 
-// Gateways - 0x48 / 0x18
-{ 94, DeviceType::GATEWAY, F("RFM20 Remote"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x18
-{189, DeviceType::GATEWAY, F("KM200/MB LAN 2"), DeviceFlags::EMS_DEVICE_FLAG_NONE} // 0x48
-
+// Gateways - 0x48
+{189, DeviceType::GATEWAY, F("KM200/MB LAN 2"), DeviceFlags::EMS_DEVICE_FLAG_NONE}
 
 // clang-format on

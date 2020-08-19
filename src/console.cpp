@@ -20,7 +20,7 @@
 #include "emsesp.h"
 #include "version.h"
 
-#ifdef EMSESP_STANDALONE
+#if defined(EMSESP_DEBUG)
 #include "test/test.h"
 #endif
 
@@ -140,6 +140,11 @@ void EMSESPShell::add_console_commands() {
                           flash_string_vector{F_(show), F_(values)},
                           [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) { EMSESP::show_device_values(shell); });
 
+    commands->add_command(ShellContext::MAIN,
+                          CommandFlags::USER,
+                          flash_string_vector{F_(show), F_(mqtt)},
+                          [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) { Mqtt::show_mqtt(shell); });
+
     commands->add_command(
         ShellContext::MAIN,
         CommandFlags::ADMIN,
@@ -180,21 +185,22 @@ void EMSESPShell::add_console_commands() {
                               EMSESP::emsespSettingsService.update(
                                   [&](EMSESPSettings & settings) {
                                       settings.tx_mode = tx_mode;
+                                      shell.printfln(F_(tx_mode_fmt), settings.tx_mode);
                                       return StateUpdateResult::CHANGED;
                                   },
                                   "local");
-                              EMSESP::reset_tx(); // reset counters and set tx_mode
                           });
 
     commands->add_command(ShellContext::MAIN,
-                          CommandFlags::USER,
+                          CommandFlags::ADMIN,
                           flash_string_vector{F_(scan), F_(devices)},
                           flash_string_vector{F_(deep_optional)},
                           [](Shell & shell, const std::vector<std::string> & arguments) {
                               if (arguments.size() == 0) {
-                                  EMSESP::send_read_request(EMSdevice::EMS_TYPE_UBADevices, EMSdevice::EMS_DEVICE_ID_BOILER);
+                                  EMSESP::scan_devices();
                               } else {
                                   shell.printfln(F("Performing a deep scan..."));
+                                  EMSESP::clear_all_devices();
                                   std::vector<uint8_t> Device_Ids;
 
                                   Device_Ids.push_back(0x08); // Boilers - 0x08
@@ -283,13 +289,17 @@ void Console::enter_custom_context(Shell & shell, unsigned int context) {
 
 // each custom context has the common commands like log, help, exit, su etc
 void Console::load_standard_commands(unsigned int context) {
-#ifdef EMSESP_STANDALONE
+#if defined(EMSESP_DEBUG)
     EMSESPShell::commands->add_command(context,
-                                       CommandFlags::ADMIN,
+                                       CommandFlags::USER,
                                        flash_string_vector{F_(test)},
-                                       flash_string_vector{F_(name_mandatory)},
+                                       flash_string_vector{F_(name_optional)},
                                        [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
-                                           Test::run_test(shell, arguments.front());
+                                           if (arguments.size() == 0) {
+                                               Test::run_test(shell, "default");
+                                           } else {
+                                               Test::run_test(shell, arguments.front());
+                                           }
                                        });
 #endif
 
@@ -307,8 +317,17 @@ void Console::load_standard_commands(unsigned int context) {
                     shell.printfln(F_(invalid_log_level));
                     return;
                 }
+            } else {
+                shell.print(F("levels: "));
+                std::vector<std::string> v = uuid::log::levels_lowercase();
+                size_t                   i = v.size();
+                while (i--) {
+                    shell.printf(v[i].c_str());
+                    shell.print(' ');
+                }
+                shell.println();
             }
-            shell.printfln(F_(log_level_fmt), uuid::log::format_level_uppercase(shell.log_level()));
+            shell.printfln(F_(log_level_fmt), uuid::log::format_level_lowercase(shell.log_level()));
         },
         [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments __attribute__((unused))) -> std::vector<std::string> {
             return uuid::log::levels_lowercase();
@@ -362,7 +381,7 @@ void Console::load_standard_commands(unsigned int context) {
                                        });
 
     EMSESPShell::commands->add_command(context,
-                                       CommandFlags::USER,
+                                       CommandFlags::ADMIN,
                                        flash_string_vector{F_(send), F_(telegram)},
                                        flash_string_vector{F_(data_mandatory)},
                                        [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) {
@@ -372,29 +391,32 @@ void Console::load_standard_commands(unsigned int context) {
     EMSESPShell::commands->add_command(context,
                                        CommandFlags::USER,
                                        flash_string_vector{F_(watch)},
-                                       flash_string_vector{F_(watch_format_mandatory), F_(watchid_optional)},
+                                       flash_string_vector{F_(watch_format_optional), F_(watchid_optional)},
                                        [](Shell & shell, const std::vector<std::string> & arguments) {
-                                           // get raw/pretty
-                                           if (arguments[0] == read_flash_string(F_(raw))) {
-                                               emsesp::EMSESP::watch(EMSESP::WATCH_RAW); // raw
-                                           } else if (arguments[0] == read_flash_string(F_(on))) {
-                                               emsesp::EMSESP::watch(EMSESP::WATCH_ON); // on
-                                           } else if (arguments[0] == read_flash_string(F_(off))) {
-                                               emsesp::EMSESP::watch(EMSESP::WATCH_OFF); // off
-                                           } else {
-                                               shell.printfln(F_(invalid_watch));
-                                               return;
-                                           }
-
                                            uint16_t watch_id;
-                                           if (arguments.size() == 2) {
-                                               // get the watch_id if its set
-                                               watch_id = Helpers::hextoint(arguments[1].c_str());
-                                           } else {
-                                               watch_id = WATCH_ID_NONE;
-                                           }
 
-                                           emsesp::EMSESP::watch_id(watch_id);
+                                           if (!arguments.empty()) {
+                                               // get raw/pretty
+                                               if (arguments[0] == read_flash_string(F_(raw))) {
+                                                   emsesp::EMSESP::watch(EMSESP::WATCH_RAW); // raw
+                                               } else if (arguments[0] == read_flash_string(F_(on))) {
+                                                   emsesp::EMSESP::watch(EMSESP::WATCH_ON); // on
+                                               } else if (arguments[0] == read_flash_string(F_(off))) {
+                                                   emsesp::EMSESP::watch(EMSESP::WATCH_OFF); // off
+                                               } else {
+                                                   shell.printfln(F_(invalid_watch));
+                                                   return;
+                                               }
+
+                                               if (arguments.size() == 2) {
+                                                   // get the watch_id if its set
+                                                   watch_id = Helpers::hextoint(arguments[1].c_str());
+                                               } else {
+                                                   watch_id = WATCH_ID_NONE;
+                                               }
+
+                                               emsesp::EMSESP::watch_id(watch_id);
+                                           }
 
                                            uint8_t watch = emsesp::EMSESP::watch();
                                            if (watch == EMSESP::WATCH_OFF) {
@@ -516,8 +538,10 @@ void Console::start() {
     shell->start();
 #endif
 
+#ifndef ESP8266
 #if defined(EMSESP_DEBUG)
     shell->log_level(uuid::log::Level::DEBUG); // order is: err, warning, notice, info, debug, trace, all
+#endif
 #endif
 
 #if defined(EMSESP_STANDALONE)

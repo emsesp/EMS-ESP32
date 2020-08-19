@@ -17,7 +17,6 @@
  */
 
 #include "helpers.h"
-#include "telegram.h" // for EMS_VALUE_* settings
 
 namespace emsesp {
 
@@ -187,7 +186,7 @@ char * Helpers::render_value(char * result, const int16_t value, const uint8_t f
         return nullptr;
     }
 
-    // just print it if mo conversion required (format = 0)
+    // just print it if no conversion required (format = 0)
     if (!format) {
         itoa(result, value, 10);
         return result;
@@ -329,9 +328,9 @@ bool Helpers::check_abs(const int32_t i) {
     return ((i < 0 ? -i : i) != 0xFFFFFF);
 }
 
-// for booleans, use isBool true (VALUE_BOOL)
-bool Helpers::hasValue(const uint8_t v, bool isBool) {
-    if (isBool) {
+// for booleans, use isBool true (EMS_VALUE_BOOL)
+bool Helpers::hasValue(const uint8_t v, const uint8_t isBool) {
+    if (isBool == EMS_VALUE_BOOL) {
         return (v != EMS_VALUE_BOOL_NOTSET);
     }
     return (v != EMS_VALUE_UINT_NOTSET);
@@ -352,6 +351,65 @@ bool Helpers::hasValue(const uint16_t v) {
 
 bool Helpers::hasValue(const uint32_t v) {
     return (v != EMS_VALUE_ULONG_NOTSET);
+}
+
+// checks if we can convert a char string to an int value
+bool Helpers::value2number(const char * v, int & value) {
+    if ((v == nullptr) || (strlen(v) == 0)) {
+        value = 0;
+        return false;
+    }
+    value = atoi((char *)v);
+    return true;
+}
+
+// checks if we can convert a char string to a float value
+bool Helpers::value2float(const char * v, float & value) {
+    if ((v == nullptr) || (strlen(v) == 0)) {
+        value = 0;
+        return false;
+    }
+    value = atof((char *)v);
+    return true;
+}
+
+// https://stackoverflow.com/questions/313970/how-to-convert-stdstring-to-lower-case
+std::string Helpers::toLower(std::string const & s) {
+    std::string lc = s;
+    std::transform(lc.begin(), lc.end(), lc.begin(), [](unsigned char c) { return std::tolower(c); });
+    return lc;
+}
+
+// checks if we can convert a chat string to an int value
+bool Helpers::value2string(const char * v, std::string & value) {
+    if ((v == nullptr) || (strlen(v) == 0)) {
+        value = {};
+        return false;
+    }
+    value = toLower(v);
+    return true;
+}
+
+// checks to see if a string (usually a command or payload cmd) looks like a boolean
+// on, off, true, false, 1, 0
+bool Helpers::value2bool(const char * v, bool & value) {
+    if ((v == nullptr) || (strlen(v) == 0)) {
+        return false;
+    }
+
+    std::string bool_str = toLower(v); // convert to lower case
+
+    if ((bool_str == "on") || (bool_str == "1") or (bool_str == "true")) {
+        value = true;
+        return true; // is a bool
+    }
+
+    if ((bool_str == "off") || (bool_str == "0") or (bool_str == "false")) {
+        value = false;
+        return true; // is a bool
+    }
+
+    return false; // not a bool
 }
 
 } // namespace emsesp

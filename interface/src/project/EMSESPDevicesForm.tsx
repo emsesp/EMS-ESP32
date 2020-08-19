@@ -173,7 +173,7 @@ class EMSESPDevicesForm extends Component<EMSESPDevicesFormProps, EMSESPDevicesF
           (
             <Box color="warning.main" p={0} mt={0} mb={0}>
               <Typography variant="body1">
-                No external temperature sensors detected.
+                <i>No external temperature sensors detected.</i>
               </Typography>
             </Box>
           )

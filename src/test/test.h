@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if defined(EMSESP_STANDALONE)
+#if defined(EMSESP_DEBUG)
 
 #ifndef EMSESP_TEST_H
 #define EMSESP_TEST_H
@@ -35,8 +35,6 @@
 #include "telegram.h"
 #include "mqtt.h"
 #include "emsesp.h"
-
-MAKE_PSTR_WORD(test)
 
 namespace emsesp {
 

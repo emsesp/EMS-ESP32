@@ -18,40 +18,35 @@
 
 #include "solar.h"
 
-MAKE_PSTR(kwh, "kWh")
-MAKE_PSTR(wh, "Wh")
-
 namespace emsesp {
 
 REGISTER_FACTORY(Solar, EMSdevice::DeviceType::SOLAR);
 
-MAKE_PSTR(logger_name, "solar")
-uuid::log::Logger Solar::logger_{F_(logger_name), uuid::log::Facility::CONSOLE};
+uuid::log::Logger Solar::logger_{F_(solar), uuid::log::Facility::CONSOLE};
 
 Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const std::string & version, const std::string & name, uint8_t flags, uint8_t brand)
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
-    LOG_DEBUG(F("Registering new Solar module with device ID 0x%02X"), device_id);
+    LOG_DEBUG(F("Adding new Solar module with device ID 0x%02X"), device_id);
 
     // telegram handlers
     if (flags == EMSdevice::EMS_DEVICE_FLAG_SM10) {
-        register_telegram_type(0x0097, F("SM10Monitor"), true, std::bind(&Solar::process_SM10Monitor, this, _1));
+        register_telegram_type(0x0097, F("SM10Monitor"), true, [&](std::shared_ptr<const Telegram> t) { process_SM10Monitor(t); });
     }
+
     if (flags == EMSdevice::EMS_DEVICE_FLAG_SM100) {
-        register_telegram_type(0x0362, F("SM100Monitor"), true, std::bind(&Solar::process_SM100Monitor, this, _1));
-        register_telegram_type(0x0363, F("SM100Monitor2"), true, std::bind(&Solar::process_SM100Monitor2, this, _1));
-        register_telegram_type(0x0366, F("SM100Config"), true, std::bind(&Solar::process_SM100Config, this, _1));
+        register_telegram_type(0x0362, F("SM100Monitor"), true, [&](std::shared_ptr<const Telegram> t) { process_SM100Monitor(t); });
+        register_telegram_type(0x0363, F("SM100Monitor2"), true, [&](std::shared_ptr<const Telegram> t) { process_SM100Monitor2(t); });
+        register_telegram_type(0x0366, F("SM100Config"), true, [&](std::shared_ptr<const Telegram> t) { process_SM100Config(t); });
 
-        register_telegram_type(0x0364, F("SM100Status"), false, std::bind(&Solar::process_SM100Status, this, _1));
-        register_telegram_type(0x036A, F("SM100Status2"), false, std::bind(&Solar::process_SM100Status2, this, _1));
-        register_telegram_type(0x038E, F("SM100Energy"), true, std::bind(&Solar::process_SM100Energy, this, _1));
+        register_telegram_type(0x0364, F("SM100Status"), false, [&](std::shared_ptr<const Telegram> t) { process_SM100Status(t); });
+        register_telegram_type(0x036A, F("SM100Status2"), false, [&](std::shared_ptr<const Telegram> t) { process_SM100Status2(t); });
+        register_telegram_type(0x038E, F("SM100Energy"), true, [&](std::shared_ptr<const Telegram> t) { process_SM100Energy(t); });
     }
+
     if (flags == EMSdevice::EMS_DEVICE_FLAG_ISM) {
-        register_telegram_type(0x0103, F("ISM1StatusMessage"), true, std::bind(&Solar::process_ISM1StatusMessage, this, _1));
-        register_telegram_type(0x0101, F("ISM1Set"), false, std::bind(&Solar::process_ISM1Set, this, _1));
+        register_telegram_type(0x0103, F("ISM1StatusMessage"), true, [&](std::shared_ptr<const Telegram> t) { process_ISM1StatusMessage(t); });
+        register_telegram_type(0x0101, F("ISM1Set"), false, [&](std::shared_ptr<const Telegram> t) { process_ISM1Set(t); });
     }
-
-    // MQTT callbacks
-    // register_mqtt_topic("topic", std::bind(&Solar::cmd, this, _1));
 }
 
 // context submenu
@@ -113,7 +108,7 @@ void Solar::show_values(uuid::console::Shell & shell) {
 
 // publish values via MQTT
 void Solar::publish_values() {
-    DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_MEDIUM);
+    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
 
     char s[10]; // for formatting strings
 
@@ -141,11 +136,11 @@ void Solar::publish_values() {
         doc["cylinderPumpModulation"] = cylinderPumpModulation_;
     }
 
-    if (Helpers::hasValue(solarPump_, VALUE_BOOL)) {
+    if (Helpers::hasValue(solarPump_, EMS_VALUE_BOOL)) {
         doc["solarPump"] = Helpers::render_value(s, solarPump_, EMS_VALUE_BOOL);
     }
 
-    if (Helpers::hasValue(valveStatus_, VALUE_BOOL)) {
+    if (Helpers::hasValue(valveStatus_, EMS_VALUE_BOOL)) {
         doc["valveStatus"] = Helpers::render_value(s, valveStatus_, EMS_VALUE_BOOL);
     }
 
@@ -153,11 +148,11 @@ void Solar::publish_values() {
         doc["pumpWorkMin"] = (float)pumpWorkMin_;
     }
 
-    if (Helpers::hasValue(tankHeated_, VALUE_BOOL)) {
+    if (Helpers::hasValue(tankHeated_, EMS_VALUE_BOOL)) {
         doc["tankHeated"] = Helpers::render_value(s, tankHeated_, EMS_VALUE_BOOL);
     }
 
-    if (Helpers::hasValue(collectorShutdown_, VALUE_BOOL)) {
+    if (Helpers::hasValue(collectorShutdown_, EMS_VALUE_BOOL)) {
         doc["collectorShutdown"] = Helpers::render_value(s, collectorShutdown_, EMS_VALUE_BOOL);
     }
 
@@ -187,8 +182,8 @@ void Solar::console_commands() {
 
 // SM10Monitor - type 0x97
 void Solar::process_SM10Monitor(std::shared_ptr<const Telegram> telegram) {
-    telegram->read_value(collectorTemp_, 2);  // collector temp from SM10, is *10
-    telegram->read_value(tankBottomTemp_, 5);     // bottom temp from SM10, is *10
+    telegram->read_value(collectorTemp_, 2);       // collector temp from SM10, is *10
+    telegram->read_value(tankBottomTemp_, 5);      // bottom temp from SM10, is *10
     telegram->read_value(solarPumpModulation_, 4); // modulation solar pump
     telegram->read_bitvalue(solarPump_, 7, 1);
     telegram->read_value(pumpWorkMin_, 8);
@@ -196,7 +191,6 @@ void Solar::process_SM10Monitor(std::shared_ptr<const Telegram> telegram) {
 
 /*
  * SM100Monitor - type 0x0362 EMS+ - for MS/SM100 and MS/SM200
- * e.g. B0 0B FF 00 02 62 00 44 02 7A 80 00 80 00 80 00 80 00 80 00 80 00 00 7C 80 00 80 00 80 00 80
  * e.g. B0 0B FF 00 02 62 00 77 01 D4 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 00 F9 80 00 80 9E - for heat exchanger temp
  * e.g, 30 00 FF 00 02 62 01 AC
  *      30 00 FF 18 02 62 80 00
@@ -237,21 +231,21 @@ void Solar::process_SM100Config(std::shared_ptr<const Telegram> telegram) {
  - PS1: Solar circuit pump for collector array 1
  - PS5: Cylinder primary pump when using an external heat exchanger
  * e.g. 30 00 FF 09 02 64 64 = 100%
- *      30 00 FF 09 02 64 1E = 30%
  */
 void Solar::process_SM100Status(std::shared_ptr<const Telegram> telegram) {
-    uint8_t solarpumpmod = solarPumpModulation_;
+    uint8_t solarpumpmod    = solarPumpModulation_;
     uint8_t cylinderpumpmod = cylinderPumpModulation_;
     telegram->read_value(cylinderPumpModulation_, 8);
     telegram->read_value(solarPumpModulation_, 9);
+
     if (solarpumpmod == 0 && solarPumpModulation_ == 100) { // mask out boosts
         solarPumpModulation_ = 15;                          // set to minimum
     }
+
     if (cylinderpumpmod == 0 && cylinderPumpModulation_ == 100) { // mask out boosts
         cylinderPumpModulation_ = 15;                             // set to minimum
     }
-
-    telegram->read_bitvalue(tankHeated_, 3, 1);     // issue #422
+    telegram->read_bitvalue(tankHeated_, 3, 1);        // issue #422
     telegram->read_bitvalue(collectorShutdown_, 3, 0); // collector shutdown
 }
 
@@ -281,22 +275,23 @@ void Solar::process_SM100Energy(std::shared_ptr<const Telegram> telegram) {
  *  e.g. B0 00 FF 00 00 03 32 00 00 00 00 13 00 D6 00 00 00 FB D0 F0
  */
 void Solar::process_ISM1StatusMessage(std::shared_ptr<const Telegram> telegram) {
-    telegram->read_value(collectorTemp_, 4);     // Collector Temperature
-    telegram->read_value(tankBottomTemp_, 6);    // Temperature Bottom of Solar Boiler
+    telegram->read_value(collectorTemp_, 4);  // Collector Temperature
+    telegram->read_value(tankBottomTemp_, 6); // Temperature Bottom of Solar Boiler
     uint16_t Wh = 0xFFFF;
     telegram->read_value(Wh, 2); // Solar Energy produced in last hour only ushort, is not * 10
+
     if (Wh != 0xFFFF) {
         energyLastHour_ = Wh * 10; // set to *10
     }
-    telegram->read_bitvalue(solarPump_, 8, 0);           // PS1 Solar pump on (1) or off (0)
-    telegram->read_value(pumpWorkMin_, 10, 3);           // force to 3 bytes
-    telegram->read_bitvalue(collectorShutdown_, 9, 0);   // collector shutdown on/off
-    telegram->read_bitvalue(tankHeated_, 9, 2);          // tank full
+
+    telegram->read_bitvalue(solarPump_, 8, 0);         // PS1 Solar pump on (1) or off (0)
+    telegram->read_value(pumpWorkMin_, 10, 3);         // force to 3 bytes
+    telegram->read_bitvalue(collectorShutdown_, 9, 0); // collector shutdown on/off
+    telegram->read_bitvalue(tankHeated_, 9, 2);        // tank full
 }
 
 /*
  * Junkers ISM1 Solar Module - type 0x0101 EMS+ for setting values
- * e.g. 90 30 FF 06 00 01 50
  */
 void Solar::process_ISM1Set(std::shared_ptr<const Telegram> telegram) {
     telegram->read_value(setpoint_maxBottomTemp_, 6);

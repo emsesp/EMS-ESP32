@@ -30,10 +30,10 @@
 
 namespace emsesp {
 
-using namespace std::placeholders; // for `_1`
-
 class EMSdevice {
   public:
+    static constexpr uint8_t EMS_DEVICES_MAX_TELEGRAMS = 20;
+
     // device_type defines which derived class to use, e.g. BOILER, THERMOSTAT etc..
     EMSdevice(uint8_t device_type, uint8_t device_id, uint8_t product_id, const std::string & version, const std::string & name, uint8_t flags, uint8_t brand)
         : device_type_(device_type)
@@ -47,11 +47,12 @@ class EMSdevice {
 
     virtual ~EMSdevice() = default; // destructor of base class must always be virtual because it's a polymorphic class
 
-    inline uint8_t device_id() const {
+    inline uint8_t get_device_id() const {
         return device_id_;
     }
 
-    std::string device_type_name() const;
+    std::string        device_type_name() const;
+    static std::string device_type_topic_name(const uint8_t device_type);
 
     inline uint8_t product_id() const {
         return product_id_;
@@ -129,7 +130,10 @@ class EMSdevice {
 
     void read_command(const uint16_t type_id);
 
+    void add_context_commands(unsigned int context);
+
     void register_mqtt_topic(const std::string & topic, mqtt_subfunction_p f);
+    void register_mqtt_cmd(const __FlashStringHelper * cmd, mqtt_cmdfunction_p f);
 
     // virtual functions overrules by derived classes
     virtual void show_values(uuid::console::Shell & shell) = 0;
@@ -142,6 +146,10 @@ class EMSdevice {
 
     void fetch_values();
     void toggle_fetch(uint16_t telegram_id, bool toggle);
+
+    void reserve_mem(size_t n) {
+        telegram_functions_.reserve(n);
+    }
 
     // prints a ems device value to the console, handling the correct rendering of the type
     // padding is # white space
@@ -221,8 +229,7 @@ class EMSdevice {
     };
 
     enum DeviceType : uint8_t {
-        UNKNOWN = 0,
-        SERVICEKEY,
+        SERVICEKEY = 0, // this is us
         BOILER,
         THERMOSTAT,
         MIXING,
@@ -272,25 +279,29 @@ class EMSdevice {
 
   private:
     uint8_t     unique_id_;
-    uint8_t     device_type_ = DeviceType::UNKNOWN;
+    uint8_t     device_type_ = DeviceType::SERVICEKEY;
     uint8_t     device_id_   = 0;
     uint8_t     product_id_  = 0;
     std::string version_;
-    std::string name_; // the long name of the EMS model
+    std::string name_; // the long name for the EMS model
     uint8_t     flags_ = 0;
     uint8_t     brand_ = Brand::NO_BRAND;
 
     static uuid::log::Logger logger_;
 
-    class TelegramFunction {
-      public:
-        TelegramFunction(uint16_t telegram_type_id, const __FlashStringHelper * telegram_type_name, bool fetch, process_function_p process_function);
-        ~TelegramFunction() = default;
-
+    struct TelegramFunction {
         uint16_t                    telegram_type_id_;   // it's type_id
         const __FlashStringHelper * telegram_type_name_; // e.g. RC20Message
         bool                        fetch_;              // if this type_id be queried automatically
-        process_function_p          process_function_;
+
+        process_function_p process_function_;
+
+        TelegramFunction(uint16_t telegram_type_id, const __FlashStringHelper * telegram_type_name, bool fetch, process_function_p process_function)
+            : telegram_type_id_(telegram_type_id)
+            , telegram_type_name_(telegram_type_name)
+            , fetch_(fetch)
+            , process_function_(process_function) {
+        }
     };
     std::vector<TelegramFunction> telegram_functions_; // each EMS device has its own set of registered telegram types
 };

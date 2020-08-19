@@ -24,16 +24,13 @@
 #include <ESPAsyncWebServer.h>
 #include <SecurityManager.h>
 
-// #define MAX_EMSESP_STATUS_SIZE 1024
-#define MAX_EMSESP_DEVICE_SIZE 1280
+#define MAX_EMSESP_DEVICE_SIZE 1536
 
 #define EMSESP_DEVICES_SERVICE_PATH "/rest/allDevices"
 #define SCAN_DEVICES_SERVICE_PATH "/rest/scanDevices"
 #define DEVICE_DATA_SERVICE_PATH "/rest/deviceData"
 
 namespace emsesp {
-
-using namespace std::placeholders; // for `_1`
 
 class EMSESPDevicesService {
   public:

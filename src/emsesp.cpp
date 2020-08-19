@@ -18,12 +18,7 @@
 
 #include "emsesp.h"
 
-MAKE_PSTR(logger_name, "emsesp")
-
 namespace emsesp {
-
-using DeviceFlags = emsesp::EMSdevice;
-using DeviceType  = emsesp::EMSdevice::DeviceType;
 
 AsyncWebServer webServer(80);
 
@@ -42,10 +37,12 @@ EMSESPSettingsService EMSESP::emsespSettingsService = EMSESPSettingsService(&web
 EMSESPStatusService  EMSESP::emsespStatusService  = EMSESPStatusService(&webServer, EMSESP::esp8266React.getSecurityManager());
 EMSESPDevicesService EMSESP::emsespDevicesService = EMSESPDevicesService(&webServer, EMSESP::esp8266React.getSecurityManager());
 
+using DeviceFlags = emsesp::EMSdevice;
+using DeviceType  = emsesp::EMSdevice::DeviceType;
 std::vector<std::unique_ptr<EMSdevice>>    EMSESP::emsdevices;      // array of all the detected EMS devices
 std::vector<emsesp::EMSESP::Device_record> EMSESP::device_library_; // libary of all our known EMS devices so far
 
-uuid::log::Logger EMSESP::logger_{FPSTR(__pstr__logger_name), uuid::log::Facility::KERN};
+uuid::log::Logger EMSESP::logger_{F_(emsesp), uuid::log::Facility::KERN};
 
 // The services
 RxService EMSESP::rxservice_; // incoming Telegram Rx handler
@@ -60,7 +57,8 @@ Shower    EMSESP::shower_;    // Shower logic
 uint8_t  EMSESP::actual_master_thermostat_ = EMSESP_DEFAULT_MASTER_THERMOSTAT; // which thermostat leads when multiple found
 uint16_t EMSESP::watch_id_                 = WATCH_ID_NONE;                    // for when log is TRACE. 0 means no trace set
 uint8_t  EMSESP::watch_                    = 0;                                // trace off
-bool     EMSESP::tap_water_active_         = false;                            // for when Boiler states we having running warm water. used in Shower()
+uint16_t EMSESP::read_id_                  = WATCH_ID_NONE;
+bool     EMSESP::tap_water_active_         = false; // for when Boiler states we having running warm water. used in Shower()
 uint32_t EMSESP::last_fetch_               = 0;
 uint8_t  EMSESP::unique_id_count_          = 0;
 
@@ -79,6 +77,11 @@ void EMSESP::fetch_device_values(const uint8_t device_id) {
     }
 }
 
+// clears list of recognized devices
+void EMSESP::clear_all_devices() {
+    emsdevices.clear(); // or use empty to release memory too
+}
+
 // return number of devices of a known type
 uint8_t EMSESP::count_devices(const uint8_t device_type) {
     uint8_t count = 0;
@@ -88,6 +91,33 @@ uint8_t EMSESP::count_devices(const uint8_t device_type) {
         }
     }
     return count;
+}
+
+// scans for new devices
+void EMSESP::scan_devices() {
+    EMSESP::clear_all_devices();
+    EMSESP::send_read_request(EMSdevice::EMS_TYPE_UBADevices, EMSdevice::EMS_DEVICE_ID_BOILER);
+}
+
+/**
+* if thermostat master is 0x18 it handles only ww and hc1, hc2..hc4 handled by devices 0x19..0x1B
+* we send to right device and match all reads to 0x18
+*/
+uint8_t EMSESP::check_master_device(const uint8_t device_id, const uint16_t type_id, const bool read) {
+    uint16_t mon_id[4] = {0x02A5, 0x02A6, 0x02A7, 0x02A8};
+    uint16_t set_id[4] = {0x02B9, 0x02BA, 0x02BB, 0x02BC};
+    if (actual_master_thermostat_ == 0x18) {
+        for (uint8_t i = 0; i < 4; i++) {
+            if (type_id == mon_id[i] || type_id == set_id[i]) {
+                if (read) {
+                    return 0x18;
+                } else {
+                    return 0x18 + i;
+                }
+            }
+        }
+    }
+    return device_id;
 }
 
 void EMSESP::actual_master_thermostat(const uint8_t device_id) {
@@ -110,6 +140,7 @@ void EMSESP::watch_id(uint16_t watch_id) {
 
 // change the tx_mode
 // resets all counters and bumps the UART
+// this is called when the tx_mode is persisted in the FS either via Web UI or the console
 void EMSESP::reset_tx() {
     // get the tx_mode
     uint8_t tx_mode;
@@ -182,21 +213,8 @@ void EMSESP::show_ems(uuid::console::Shell & shell) {
         shell.printfln(F("  #telegrams received: %d"), rxservice_.telegram_count());
         shell.printfln(F("  #read requests sent: %d"), txservice_.telegram_read_count());
         shell.printfln(F("  #write requests sent: %d"), txservice_.telegram_write_count());
-        shell.printfln(F("  #corrupted telegrams: %d (%d%%)"), rxservice_.telegram_error_count(), success_rate);
+        shell.printfln(F("  #incomplete telegrams: %d (%d%%)"), rxservice_.telegram_error_count(), success_rate);
         shell.printfln(F("  #tx fails (after %d retries): %d"), TxService::MAXIMUM_TX_RETRIES, txservice_.telegram_fail_count());
-    }
-
-    shell.println();
-
-    // Rx queue
-    auto rx_telegrams = rxservice_.queue();
-    if (rx_telegrams.empty()) {
-        shell.printfln(F("Rx Queue is empty"));
-    } else {
-        shell.printfln(F("Rx Queue (%ld telegram%s):"), rx_telegrams.size(), rx_telegrams.size() == 1 ? "" : "s");
-        for (const auto & it : rx_telegrams) {
-            shell.printfln(F(" [%02d] %s"), it.id_, pretty_telegram(it.telegram_).c_str());
-        }
     }
 
     shell.println();
@@ -208,7 +226,7 @@ void EMSESP::show_ems(uuid::console::Shell & shell) {
     } else {
         shell.printfln(F("Tx Queue (%ld telegram%s):"), tx_telegrams.size(), tx_telegrams.size() == 1 ? "" : "s");
 
-        std::string op;
+        std::string op(10, '\0');
         for (const auto & it : tx_telegrams) {
             if ((it.telegram_->operation) == Telegram::Operation::TX_RAW) {
                 op = read_flash_string(F("RAW  "));
@@ -217,12 +235,7 @@ void EMSESP::show_ems(uuid::console::Shell & shell) {
             } else if ((it.telegram_->operation) == Telegram::Operation::TX_WRITE) {
                 op = read_flash_string(F("WRITE"));
             }
-            shell.printfln(F(" [%02d%c] %s %s (offset %d)"),
-                           it.id_,
-                           ((it.retry_) ? '*' : ' '),
-                           op.c_str(),
-                           pretty_telegram(it.telegram_).c_str(),
-                           it.telegram_->offset);
+            shell.printfln(F(" [%02d%c] %s %s"), it.id_, ((it.retry_) ? '*' : ' '), op.c_str(), pretty_telegram(it.telegram_).c_str());
         }
     }
 
@@ -242,7 +255,6 @@ void EMSESP::show_device_values(uuid::console::Shell & shell) {
         for (const auto & emsdevice : emsdevices) {
             if ((emsdevice) && (emsdevice->device_type() == device_class.first)) {
                 emsdevice->show_values(shell);
-                shell.println();
             }
         }
     }
@@ -291,16 +303,16 @@ std::string EMSESP::device_tostring(const uint8_t device_id) {
 }
 
 // created a pretty print telegram as a text string
-// e.g. Boiler(0x08) -> Me(0x0B), Version(0x02), data: 7B 06 01 00 00 00 00 00 00 04 (#data=10)
+// e.g. Boiler(0x08) -> Me(0x0B), Version(0x02), data: 7B 06 01 00 00 00 00 00 00 04 (offset 1)
 std::string EMSESP::pretty_telegram(std::shared_ptr<const Telegram> telegram) {
     uint8_t src    = telegram->src & 0x7F;
     uint8_t dest   = telegram->dest & 0x7F;
     uint8_t offset = telegram->offset;
 
     // find name for src and dest by looking up known devices
-    std::string src_name;
-    std::string dest_name;
-    std::string type_name;
+    std::string src_name(20, '\0');
+    std::string dest_name(20, '\0');
+    std::string type_name(20, '\0');
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice) {
             // get src & dest
@@ -340,14 +352,14 @@ std::string EMSESP::pretty_telegram(std::shared_ptr<const Telegram> telegram) {
     if (offset) {
         snprintf_P(&str[0],
                    str.capacity() + 1,
-                   PSTR("%s(0x%02X) -> %s(0x%02X), %s(0x%02X), data: %s @offset %d"),
+                   PSTR("%s(0x%02X) -> %s(0x%02X), %s(0x%02X), data: %s (offset %d)"),
                    src_name.c_str(),
                    src,
                    dest_name.c_str(),
                    dest,
                    type_name.c_str(),
                    telegram->type_id,
-                   telegram->to_string().c_str(),
+                   telegram->to_string_message().c_str(),
                    offset);
     } else {
         snprintf_P(&str[0],
@@ -359,7 +371,7 @@ std::string EMSESP::pretty_telegram(std::shared_ptr<const Telegram> telegram) {
                    dest,
                    type_name.c_str(),
                    telegram->type_id,
-                   telegram->to_string().c_str());
+                   telegram->to_string_message().c_str());
     }
 
     return str;
@@ -444,7 +456,10 @@ void EMSESP::process_version(std::shared_ptr<const Telegram> telegram) {
 // returns false if there are none found
 bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
     // if watching...
-    if (watch() == WATCH_ON) {
+    if (telegram->type_id == read_id_) {
+        LOG_NOTICE(pretty_telegram(telegram).c_str());
+        read_id_ = WATCH_ID_NONE;
+    } else if (watch() == WATCH_ON) {
         if ((watch_id_ == WATCH_ID_NONE) || (telegram->src == watch_id_) || (telegram->dest == watch_id_) || (telegram->type_id == watch_id_)) {
             LOG_NOTICE(pretty_telegram(telegram).c_str());
         }
@@ -544,16 +559,13 @@ void EMSESP::show_devices(uuid::console::Shell & shell) {
         // shell.printf(F("[factory ID: %d] "), device_class.first);
         for (const auto & emsdevice : emsdevices) {
             if ((emsdevice) && (emsdevice->device_type() == device_class.first)) {
-#if defined(EMSESP_DEBUG)
-                shell.printf(F("[id=%d] "), emsdevice->unique_id());
-#endif
                 shell.printf(F("%s: %s"), emsdevice->device_type_name().c_str(), emsdevice->to_string().c_str());
-                if ((emsdevice->device_type() == EMSdevice::DeviceType::THERMOSTAT) && (emsdevice->device_id() == actual_master_thermostat())) {
+                if ((emsdevice->device_type() == EMSdevice::DeviceType::THERMOSTAT) && (emsdevice->get_device_id() == actual_master_thermostat())) {
                     shell.printf(F(" ** master device **"));
                 }
                 shell.println();
                 emsdevice->show_telegram_handlers(shell);
-                emsdevice->show_mqtt_handlers(shell);
+                // emsdevice->show_mqtt_handlers(shell);
                 shell.println();
             }
         }
@@ -568,11 +580,12 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
         return false;
     }
 
+
     // first check to see if we already have it, if so update the record
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice) {
             if (emsdevice->is_device_id(device_id)) {
-                LOG_DEBUG(F("Updating details to already existing device ID 0x%02X"), device_id);
+                LOG_DEBUG(F("Updating details on already existing device ID 0x%02X"), device_id);
                 emsdevice->product_id(product_id);
                 emsdevice->version(version);
                 // only set brand if it doesn't already exist
@@ -591,6 +604,7 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
             }
         }
     }
+
 
     // look up the rest of the details using the product_id and create the new device object
     Device_record * device_p = nullptr;
@@ -616,12 +630,11 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
         LOG_NOTICE(F("Unrecognized EMS device with device ID 0x%02X with product ID %d. Please report on GitHub."), device_id, product_id);
         return false; // not found
     } else {
-        emsdevices.push_back(
-            EMSFactory::add(device_p->device_type, device_id, device_p->product_id, version, uuid::read_flash_string(device_p->name), device_p->flags, brand));
+        std::string name = uuid::read_flash_string(device_p->name);
+        emsdevices.push_back(EMSFactory::add(device_p->device_type, device_id, device_p->product_id, version, name, device_p->flags, brand));
         emsdevices.back()->unique_id(++unique_id_count_);
         LOG_DEBUG(F("Adding new device with device ID 0x%02X with product ID %d and version %s"), device_id, product_id, version.c_str());
-        // go and fetch its data,
-        fetch_device_values(device_id);
+        fetch_device_values(device_id); // go and fetch its data,
     }
 
     return true;
@@ -642,6 +655,17 @@ void EMSESP::send_write_request(const uint16_t type_id,
     txservice_.add(Telegram::Operation::TX_WRITE, dest, type_id, offset, message_data, message_length);
 
     txservice_.set_post_send_query(validate_typeid); // store which type_id to send Tx read after a write
+}
+
+void EMSESP::send_write_request(const uint16_t type_id, const uint8_t dest, const uint8_t offset, const uint8_t value) {
+    send_write_request(type_id, dest, offset, value, 0);
+}
+
+// send Tx write with a single value
+void EMSESP::send_write_request(const uint16_t type_id, const uint8_t dest, const uint8_t offset, const uint8_t value, const uint16_t validate_typeid) {
+    uint8_t message_data[1];
+    message_data[0] = value;
+    EMSESP::send_write_request(type_id, dest, offset, message_data, 1, validate_typeid);
 }
 
 // this is main entry point when data is received on the Rx line, via emsuart library
@@ -743,9 +767,11 @@ void EMSESP::send_raw_telegram(const char * data) {
     txservice_.send_raw(data);
 }
 
-// kick off the party, start all the services
+// start all the core services
+// the services must be loaded in the correct order
 void EMSESP::start() {
-    // Load our library of known devices
+    // Load our library of known devices. Names are stored in Flash mem.
+    device_library_.reserve(100);
     device_library_ = {
 #include "device_library.h"
     };
@@ -758,17 +784,22 @@ void EMSESP::start() {
 
     esp8266React.begin();          // loads system settings (wifi, mqtt, etc)
     emsespSettingsService.begin(); // load EMS-ESP specific settings
-
     // system_.check_upgrade(); // see if we need to migrate from previous versions
-
     console_.start();   // telnet and serial console
-    system_.start();    // starts syslog, uart, sets version, initializes LED. Requires pre-loaded settings.
     mqtt_.start();      // mqtt init
+    system_.start();    // starts syslog, uart, sets version, initializes LED. Requires pre-loaded settings.
     shower_.start();    // initialize shower timer and shower alert
     txservice_.start(); // sets bus ID, sends out request for EMS devices
     sensors_.start();   // dallas external sensors
+    webServer.begin();  // start web server
 
-    webServer.begin(); // start web server
+    emsdevices.reserve(5); // reserve space for initially 5 devices to avoid mem
+
+    LOG_INFO("EMS Device library loaded with %d records", device_library_.size());
+
+#if defined(EMSESP_STANDALONE)
+    mqtt_.on_connect(); // simulate an MQTT connection
+#endif
 }
 
 // main loop calling all services
@@ -777,18 +808,19 @@ void EMSESP::loop() {
 
     // if we're doing an OTA upload, skip MQTT and EMS
     if (system_.upload_status()) {
+        /*
 #if defined(ESP32)
         delay(10); // slow down OTA update to avoid getting killed by task watchdog (task_wdt)
 #endif
+*/
         return;
     }
 
-    system_.loop();    // does LED and checks system health, and syslog service
-    rxservice_.loop(); // process what ever is in the rx queue
-    shower_.loop();    // check for shower on/off
-    sensors_.loop();   // this will also send out via MQTT
-    mqtt_.loop();      // sends out anything in the queue via MQTT
-    console_.loop();   // telnet/serial console
+    system_.loop();  // does LED and checks system health, and syslog service
+    shower_.loop();  // check for shower on/off
+    sensors_.loop(); // this will also send out via MQTT
+    mqtt_.loop();    // sends out anything in the queue via MQTT
+    console_.loop(); // telnet/serial console
 
     // force a query on the EMS devices to fetch latest data at a set interval (1 min)
     if ((uuid::get_uptime() - last_fetch_ > EMS_FETCH_FREQUENCY)) {
@@ -796,7 +828,9 @@ void EMSESP::loop() {
         fetch_device_values();
     }
 
+#if defined(ESP8266)
     delay(1);
+#endif
 }
 
 } // namespace emsesp

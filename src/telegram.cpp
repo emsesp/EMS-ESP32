@@ -19,8 +19,6 @@
 #include "telegram.h"
 #include "emsesp.h"
 
-MAKE_PSTR(logger_name, "telegram")
-
 namespace emsesp {
 
 // CRC lookup table with poly 12 for faster checking
@@ -45,7 +43,7 @@ uint8_t  EMSbus::ems_bus_id_        = EMSESP_DEFAULT_EMS_BUS_ID;
 uint8_t  EMSbus::tx_mode_           = EMSESP_DEFAULT_TX_MODE;
 uint8_t  EMSbus::tx_state_          = Telegram::Operation::NONE;
 
-uuid::log::Logger EMSbus::logger_{F_(logger_name), uuid::log::Facility::CONSOLE};
+uuid::log::Logger EMSbus::logger_{F_(telegram), uuid::log::Facility::CONSOLE};
 
 // Calculates CRC checksum using lookup table for speed
 // length excludes the last byte (which mainly is the CRC)
@@ -80,12 +78,8 @@ Telegram::Telegram(const uint8_t   operation,
     }
 }
 
-// returns telegram's message data bytes in hex
+// returns telegram as data bytes in hex (excluding CRC)
 std::string Telegram::to_string() const {
-    if (this->message_length == 0) {
-        return read_flash_string(F("<empty>"));
-    }
-
     uint8_t data[EMS_MAX_TELEGRAM_LENGTH];
     uint8_t length = 0;
     data[0]        = this->src ^ RxService::ems_mask();
@@ -124,34 +118,13 @@ std::string Telegram::to_string() const {
     return Helpers::data_to_hex(data, length);
 }
 
-// returns telegram's full telegram message in hex
-std::string Telegram::to_string(const uint8_t * telegram, uint8_t length) const {
-    return Helpers::data_to_hex(telegram, length);
-}
-
-RxService::QueuedRxTelegram::QueuedRxTelegram(uint16_t id, std::shared_ptr<Telegram> && telegram)
-    : id_(id)
-    , telegram_(std::move(telegram)) {
-}
-
-// empty queue, don't process them
-void RxService::flush_rx_queue() {
-    rx_telegrams_.clear();
-    rx_telegram_id_ = 0;
-}
-
-// Rx loop, run as many times as you can
-// processes all telegrams on the queue. Assumes there are valid (i.e. CRC checked)
-void RxService::loop() {
-    while (!rx_telegrams_.empty()) {
-        auto telegram = rx_telegrams_.front().telegram_;
-
-        (void)EMSESP::process_telegram(telegram); // further process the telegram
-
-        increment_telegram_count(); // increase count
-
-        rx_telegrams_.pop_front(); // remove it from the queue
+// returns telegram's message body only, in hex
+std::string Telegram::to_string_message() const {
+    if (this->message_length == 0) {
+        return read_flash_string(F("<empty>"));
     }
+
+    return Helpers::data_to_hex(this->message_data, this->message_length);
 }
 
 // add a new rx telegram object
@@ -163,13 +136,11 @@ void RxService::add(uint8_t * data, uint8_t length) {
         return;
     }
 
-    // validate the CRC
+    // validate the CRC. if it fails then increment the number of corrupt/incomplete telegrams and only report to console/syslog
     uint8_t crc = calculate_crc(data, length - 1);
     if (data[length - 1] != crc) {
         increment_telegram_error_count();
-        if (EMSESP::watch() != EMSESP::Watch::WATCH_OFF) {
-            LOG_ERROR(F("Rx: %s %s(CRC %02X != %02X)%s"), Helpers::data_to_hex(data, length).c_str(), COLOR_RED, data[length - 1], crc, COLOR_RESET);
-        }
+        LOG_ERROR(F("Rx: %s (CRC %02X != %02X)"), Helpers::data_to_hex(data, length).c_str(), data[length - 1], crc);
         return;
     }
 
@@ -220,34 +191,29 @@ void RxService::add(uint8_t * data, uint8_t length) {
     }
 
 #ifdef EMSESP_DEBUG
-    LOG_DEBUG(F("[DEBUG] New Rx [#%d] telegram, message length %d"), rx_telegram_id_, message_length);
+    LOG_DEBUG(F("[DEBUG] New Rx telegram, message length %d"), message_length);
 #endif
 
-    // if we don't have a type_id or empty data block, exit
-    if ((type_id == 0) || (message_length == 0)) {
+    // if we don't have a type_id exit,
+    // do not exit on empty message, it is checked for toggle fetch
+    if (type_id == 0) {
         return;
     }
 
+    // if we receive a hc2.. telegram from 0x19.. match it to master_thermostat if master is 0x18
+    src = EMSESP::check_master_device(src, type_id, true);
+
     // create the telegram
-    auto telegram = std::make_shared<Telegram>(Telegram::Operation::RX, src, dest, type_id, offset, message_data, message_length);
+    rx_telegram = std::make_shared<Telegram>(Telegram::Operation::RX, src, dest, type_id, offset, message_data, message_length);
 
-    // check if queue is full, if so remove top item to make space
-    if (rx_telegrams_.size() >= MAX_RX_TELEGRAMS) {
-        rx_telegrams_.pop_front();
-    }
-
-    rx_telegrams_.emplace_back(rx_telegram_id_++, std::move(telegram)); // add to queue
+    // process it immediately
+    EMSESP::process_telegram(rx_telegram); // further process the telegram
+    increment_telegram_count();            // increase count
 }
 
 //
 // Tx CODE starts here...
 //
-
-TxService::QueuedTxTelegram::QueuedTxTelegram(uint16_t id, std::shared_ptr<Telegram> && telegram, bool retry)
-    : id_(id)
-    , telegram_(std::move(telegram))
-    , retry_(retry) {
-}
 
 // empty queue, don't process
 void TxService::flush_tx_queue() {
@@ -290,23 +256,18 @@ void TxService::send() {
     }
 
     // if there's nothing in the queue to transmit, send back a poll and quit
-    // unless tx_mode is 0
     if (tx_telegrams_.empty()) {
         send_poll();
         return;
     }
 
     // if we're in read-only mode (tx_mode 0) forget the Tx call
-    if (tx_mode() == 0) {
-        tx_telegrams_.pop_front();
-        return;
+    if (tx_mode() != 0) {
+        send_telegram(tx_telegrams_.front());
     }
 
-    // send next telegram in the queue (which is actually a list!)
-    send_telegram(tx_telegrams_.front());
 
-    // remove the telegram from the queue
-    tx_telegrams_.pop_front();
+    tx_telegrams_.pop_front(); // remove the telegram from the queue
 }
 
 // process a Tx telegram
@@ -326,6 +287,10 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
     // dest - for READ the MSB must be set
     // fix the READ or WRITE depending on the operation
     uint8_t dest = telegram->dest;
+
+    // check if we have to manipulate the id for thermostats > 0x18
+    dest = EMSESP::check_master_device(dest, telegram->type_id, false);
+
     if (telegram->operation == Telegram::Operation::TX_READ) {
         dest |= 0x80; // read has 8th bit set for the destination
     }
@@ -382,7 +347,7 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
     LOG_DEBUG(F("Sending %s Tx [#%d], telegram: %s"),
               (telegram->operation == Telegram::Operation::TX_WRITE) ? F("write") : F("read"),
               tx_telegram.id_,
-              telegram->to_string(telegram_raw, length).c_str());
+              Helpers::data_to_hex(telegram_raw, length).c_str());
 
     // send the telegram to the UART Tx
     uint16_t status = EMSuart::transmit(telegram_raw, length);
@@ -572,11 +537,13 @@ void TxService::retry_tx(const uint8_t operation, const uint8_t * data, const ui
         return;
     }
 
+#ifdef EMSESP_DEBUG
     LOG_DEBUG(F("[DEBUG] Last Tx %s operation failed. Retry #%d. sent message: %s, received: %s"),
               (operation == Telegram::Operation::TX_WRITE) ? F("Write") : F("Read"),
               retry_count_,
               telegram_last_->to_string().c_str(),
               Helpers::data_to_hex(data, length).c_str());
+#endif
 
     // add to the top of the queue
     if (tx_telegrams_.size() >= MAX_TX_TELEGRAMS) {

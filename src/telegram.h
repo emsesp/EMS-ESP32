@@ -20,9 +20,7 @@
 #define EMSESP_TELEGRAM_H
 
 #include <string>
-#include <deque>
-#include <memory> // for unique ptrs
-#include <vector>
+#include <list>
 
 // UART drivers
 #if defined(ESP8266)
@@ -38,9 +36,9 @@
 #include "helpers.h"
 
 // default values for null values
-static constexpr uint8_t VALUE_BOOL         = true; // is a boolean
-static constexpr uint8_t EMS_VALUE_BOOL     = 0xFF; // is a boolean
-static constexpr uint8_t EMS_VALUE_BOOL_OFF = 0x00; // boolean false. True can be 0x01 or 0xFF sometimes.
+static constexpr uint8_t EMS_VALUE_BOOL     = 0xFF; // used to mark that something is a boolean
+static constexpr uint8_t EMS_VALUE_BOOL_OFF = 0x00; // boolean false
+static constexpr uint8_t EMS_VALUE_BOOL_ON  = 0x01; // boolean true. True can be 0x01 or 0xFF sometimes
 
 static constexpr uint8_t  EMS_VALUE_BOOL_NOTSET   = 0xFE;       // random number for booleans, that's not 0, 1 or FF
 static constexpr uint8_t  EMS_VALUE_UINT_NOTSET   = 0xFF;       // for 8-bit unsigned ints/bytes
@@ -83,8 +81,8 @@ class Telegram {
         TX_WRITE,
     };
 
+    std::string to_string_message() const;
     std::string to_string() const;
-    std::string to_string(const uint8_t * telegram, uint8_t length) const;
 
     // reads a bit value from a given telegram position
     void read_bitvalue(uint8_t & value, const uint8_t index, const uint8_t bit) const {
@@ -112,8 +110,7 @@ class Telegram {
 
         value = 0;
         for (uint8_t i = 0; i < size; i++) {
-            // shift
-            value = (value << 8) + message_data[abs_index + i];
+            value = (value << 8) + message_data[abs_index + i]; // shift
         }
     }
 
@@ -198,63 +195,39 @@ class EMSbus {
 
 class RxService : public EMSbus {
   public:
-    static constexpr size_t MAX_RX_TELEGRAMS = 20;
-
     RxService()  = default;
     ~RxService() = default;
 
-    void loop();
-
     void add(uint8_t * data, uint8_t length);
-
-    void flush_rx_queue();
 
     uint16_t telegram_count() const {
         return telegram_count_;
-    }
-
-    uint16_t telegram_error_count() const {
-        return telegram_error_count_;
     }
 
     void increment_telegram_count() {
         telegram_count_++;
     }
 
+    uint16_t telegram_error_count() const {
+        return telegram_error_count_;
+    }
+
     void increment_telegram_error_count() {
         telegram_error_count_++;
     }
 
-    class QueuedRxTelegram {
-      public:
-        QueuedRxTelegram(uint16_t id, std::shared_ptr<Telegram> && telegram);
-        ~QueuedRxTelegram() = default;
-
-        uint16_t                              id_; // sequential identifier
-        const std::shared_ptr<const Telegram> telegram_;
-    };
-
-    const std::deque<QueuedRxTelegram> queue() const {
-        return rx_telegrams_;
-    }
-
   private:
-    uint32_t last_rx_check_ = 0;
-
-    uint8_t rx_telegram_id_ = 0; // queue counter
-
-    uint16_t telegram_count_       = 0; // # Rx received
-    uint16_t telegram_error_count_ = 0; // # Rx CRC errors
-
-    std::deque<QueuedRxTelegram> rx_telegrams_;
+    uint16_t                        telegram_count_       = 0; // # Rx received
+    uint16_t                        telegram_error_count_ = 0; // # Rx CRC errors
+    std::shared_ptr<const Telegram> rx_telegram;               // the incoming Rx telegram
 };
 
 class TxService : public EMSbus {
   public:
-    static constexpr size_t MAX_TX_TELEGRAMS = 30; // size of Tx queue
+    static constexpr size_t MAX_TX_TELEGRAMS = 20; // size of Tx queue
 
-    static constexpr uint8_t TX_WRITE_FAIL    = 4;
-    static constexpr uint8_t TX_WRITE_SUCCESS = 1;
+    static constexpr uint8_t TX_WRITE_FAIL    = 4; // EMS return code for fail
+    static constexpr uint8_t TX_WRITE_SUCCESS = 1; // EMS return code for success
 
     TxService()  = default;
     ~TxService() = default;
@@ -337,26 +310,30 @@ class TxService : public EMSbus {
 
     class QueuedTxTelegram {
       public:
-        QueuedTxTelegram(uint16_t id, std::shared_ptr<Telegram> && telegram, bool retry);
-        ~QueuedTxTelegram() = default;
-
-        uint16_t                              id_; // sequential identifier
+        const uint16_t                        id_;
         const std::shared_ptr<const Telegram> telegram_;
-        bool                                  retry_; // is a retry
+        const bool                            retry_; // is a retry
+
+        ~QueuedTxTelegram() = default;
+        QueuedTxTelegram(uint16_t id, std::shared_ptr<Telegram> && telegram, bool retry)
+            : id_(id)
+            , telegram_(std::move(telegram))
+            , retry_(retry) {
+        }
     };
 
-    const std::deque<QueuedTxTelegram> queue() const {
+    const std::list<QueuedTxTelegram> queue() const {
         return tx_telegrams_;
     }
 
+#if defined(EMSESP_DEBUG)
+    static constexpr uint8_t MAXIMUM_TX_RETRIES = 0; // when compiled with EMSESP_DEBUG don't retry
+#else
     static constexpr uint8_t MAXIMUM_TX_RETRIES = 3;
+#endif
 
   private:
-    uint8_t tx_telegram_id_ = 0; // queue counter
-
-    uint32_t last_tx_check_ = 0;
-
-    std::deque<QueuedTxTelegram> tx_telegrams_;
+    std::list<QueuedTxTelegram> tx_telegrams_; // the Tx queue
 
     uint16_t telegram_read_count_  = 0; // # Tx successful reads
     uint16_t telegram_write_count_ = 0; // # Tx successful writes
@@ -364,7 +341,9 @@ class TxService : public EMSbus {
 
     std::shared_ptr<Telegram> telegram_last_;
     uint16_t                  telegram_last_post_send_query_; // which type ID to query after a successful send, to read back the values just written
-    uint8_t                   retry_count_ = 0;               // count for # Tx retries
+    uint8_t                   retry_count_    = 0;            // count for # Tx retries
+
+    uint8_t                   tx_telegram_id_ = 0;            // queue counter
 
     void send_telegram(const QueuedTxTelegram & tx_telegram);
     void send_telegram(const uint8_t * data, const uint8_t length);

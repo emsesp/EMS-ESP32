@@ -105,10 +105,10 @@ class OneWire {
 
     // Write a bit. The bus is always left powered at the end, see
     // note in write() about that.
- #ifdef ARDUINO_ARCH_ESP32
-   void IRAM_ATTR write_bit(uint8_t v);
- #else
-   void write_bit(uint8_t v);
+#ifdef ARDUINO_ARCH_ESP32
+    void IRAM_ATTR write_bit(uint8_t v);
+#else
+    void    write_bit(uint8_t v);
 #endif
 
     // Read a bit.
