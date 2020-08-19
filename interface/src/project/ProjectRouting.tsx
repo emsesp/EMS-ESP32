@@ -20,7 +20,7 @@ class ProjectRouting extends Component {
           * The "to" property must match one of the routes above for this to work correctly.
           */
         }
-        <Redirect to={`/ems-esp/status/`} />
+        <Redirect to={`/ems-esp/status`} />
       </Switch>
     )
   }
