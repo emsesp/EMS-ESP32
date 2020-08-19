@@ -808,11 +808,6 @@ void EMSESP::loop() {
 
     // if we're doing an OTA upload, skip MQTT and EMS
     if (system_.upload_status()) {
-        /*
-#if defined(ESP32)
-        delay(10); // slow down OTA update to avoid getting killed by task watchdog (task_wdt)
-#endif
-*/
         return;
     }
 
@@ -828,9 +823,7 @@ void EMSESP::loop() {
         fetch_device_values();
     }
 
-#if defined(ESP8266)
-    delay(1);
-#endif
+    delay(1); // helps telnet catch up
 }
 
 } // namespace emsesp
