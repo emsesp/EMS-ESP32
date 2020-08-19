@@ -16,13 +16,13 @@ class ProjectMenu extends Component<ProjectProps> {
     const path = this.props.match.url;
     return (
       <List>
-        <ListItem to='/ems-esp/status/' selected={path.startsWith('/ems-esp/status/')} button component={Link}>
+        <ListItem to='/ems-esp/' selected={path.startsWith('/ems-esp/status') || path.startsWith('/ems-esp/devices') || path.startsWith('/ems-esp/help')} button component={Link}>
           <ListItemIcon>
             <SettingsRemoteIcon />
           </ListItemIcon>
           <ListItemText primary="Dashboard" />
         </ListItem>
-        <ListItem to='/ems-esp/settings/' selected={path.startsWith('/ems-esp/settings/')} button component={Link} disabled={!authenticatedContext.me.admin}>
+        <ListItem to='/ems-esp/settings' selected={path.startsWith('/ems-esp/settings')} button component={Link} disabled={!authenticatedContext.me.admin}>
           <ListItemIcon>
             <SettingsIcon />
           </ListItemIcon>
