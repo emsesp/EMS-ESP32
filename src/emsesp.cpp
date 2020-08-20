@@ -811,11 +811,12 @@ void EMSESP::loop() {
         return;
     }
 
-    system_.loop();  // does LED and checks system health, and syslog service
-    shower_.loop();  // check for shower on/off
-    sensors_.loop(); // this will also send out via MQTT
-    mqtt_.loop();    // sends out anything in the queue via MQTT
-    console_.loop(); // telnet/serial console
+    system_.loop();    // does LED and checks system health, and syslog service
+    shower_.loop();    // check for shower on/off
+    sensors_.loop();   // this will also send out via MQTT
+    mqtt_.loop();      // sends out anything in the queue via MQTT
+    console_.loop();   // telnet/serial console
+    rxservice_.loop(); // process any incoming Rx telegrams
 
     // force a query on the EMS devices to fetch latest data at a set interval (1 min)
     if ((uuid::get_uptime() - last_fetch_ > EMS_FETCH_FREQUENCY)) {

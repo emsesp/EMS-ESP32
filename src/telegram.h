@@ -52,8 +52,6 @@ static constexpr uint8_t EMS_MAX_TELEGRAM_MESSAGE_LENGTH = 27; // max length of 
 
 namespace emsesp {
 
-// creates a telegram
-// from Rx (receiving one) or Tx for preparing one for sending
 class Telegram {
   public:
     Telegram(const uint8_t   operation,
@@ -197,6 +195,8 @@ class RxService : public EMSbus {
   public:
     RxService()  = default;
     ~RxService() = default;
+
+    void loop();
 
     void add(uint8_t * data, uint8_t length);
 

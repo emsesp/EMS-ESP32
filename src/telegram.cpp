@@ -127,6 +127,15 @@ std::string Telegram::to_string_message() const {
     return Helpers::data_to_hex(this->message_data, this->message_length);
 }
 
+// checks if we have an Rx telegram that needs processing
+void RxService::loop() {
+    if (rx_telegram) {
+        EMSESP::process_telegram(rx_telegram);
+        rx_telegram = nullptr;      // telegram has been processed, reset
+        increment_telegram_count(); // increase rx count
+    }
+}
+
 // add a new rx telegram object
 // data is the whole telegram, assuming last byte holds the CRC
 // length includes the CRC
@@ -205,10 +214,6 @@ void RxService::add(uint8_t * data, uint8_t length) {
 
     // create the telegram
     rx_telegram = std::make_shared<Telegram>(Telegram::Operation::RX, src, dest, type_id, offset, message_data, message_length);
-
-    // process it immediately
-    EMSESP::process_telegram(rx_telegram); // further process the telegram
-    increment_telegram_count();            // increase count
 }
 
 //
