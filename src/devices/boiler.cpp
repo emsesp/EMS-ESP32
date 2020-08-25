@@ -97,6 +97,7 @@ void Boiler::device_info(JsonArray & root) {
     render_value_json(root, "", F("Warm Water selected temperature"), wWSelTemp_, F_(degrees));
     render_value_json(root, "", F("Warm Water set temperature"), wWSetTmp_, F_(degrees));
     render_value_json(root, "", F("Warm Water current temperature (intern)"), wWCurTmp_, F_(degrees), 10);
+    render_value_json(root, "", F("Warm Water current temperature (extern)"), wWCurTmp2_, F_(degrees), 10);
 }
 
 // publish values via MQTT
@@ -158,6 +159,9 @@ void Boiler::publish_values() {
     }
     if (Helpers::hasValue(wWCurTmp_)) {
         doc["wWCurTmp"] = (float)wWCurTmp_ / 10;
+    }
+    if (Helpers::hasValue(wWCurTmp2_)) {
+        doc["wWCurTmp2"] = (float)wWCurTmp2_ / 10;
     }
     if (Helpers::hasValue(wWCurFlow_)) {
         doc["wWCurFlow"] = (float)wWCurFlow_ / 10;
