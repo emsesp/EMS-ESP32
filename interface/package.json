@@ -26,9 +26,9 @@
     "react-material-ui-form-validator": "^2.0.10",
     "react-router": "^5.1.2",
     "react-router-dom": "^5.1.2",
-    "react-scripts": "3.4.1",
+    "react-scripts": "3.4.3",
     "sockette": "^2.0.6",
-    "typescript": "^3.9.5",
+    "typescript": "^4.0.2",
     "zlib": "^1.0.5"
   },
   "scripts": {

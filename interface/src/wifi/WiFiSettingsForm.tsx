@@ -191,9 +191,6 @@ class WiFiSettingsForm extends React.Component<WiFiStatusFormProps> {
           <FormButton startIcon={<SaveIcon />} variant="contained" color="primary" type="submit">
             Save
           </FormButton>
-          <FormButton variant="contained" color="secondary" onClick={this.deselectNetworkAndLoadData}>
-            Reset
-          </FormButton>
         </FormActions>
       </ValidatorForm>
     );

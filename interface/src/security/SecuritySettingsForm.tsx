@@ -19,7 +19,7 @@ class SecuritySettingsForm extends React.Component<SecuritySettingsFormProps> {
   }
 
   render() {
-    const { data, handleValueChange, loadData } = this.props;
+    const { data, handleValueChange } = this.props;
     return (
       <ValidatorForm onSubmit={this.onSubmit}>
         <PasswordValidator
@@ -41,9 +41,6 @@ class SecuritySettingsForm extends React.Component<SecuritySettingsFormProps> {
         <FormActions>
           <FormButton startIcon={<SaveIcon />} variant="contained" color="primary" type="submit">
             Save
-          </FormButton>
-          <FormButton variant="contained" color="secondary" onClick={loadData}>
-            Reset
           </FormButton>
         </FormActions>
       </ValidatorForm>

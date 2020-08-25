@@ -47,7 +47,7 @@ export default function RestFormLoader<D>(props: RestFormLoaderProps<D>) {
           {errorMessage}
         </Typography>
         <Button variant="contained" color="secondary" className={classes.button} onClick={loadData}>
-          Reset
+          Retry
         </Button>
       </div>
     );

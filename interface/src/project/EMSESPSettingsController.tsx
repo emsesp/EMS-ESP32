@@ -43,7 +43,7 @@ export default restController(EMSESP_SETTINGS_ENDPOINT, EMSESPSettingsController
 type EMSESPSettingsControllerFormProps = RestFormProps<EMSESPSettings>;
 
 function EMSESPSettingsControllerForm(props: EMSESPSettingsControllerFormProps) {
-    const { data, saveData, loadData, handleValueChange } = props;
+    const { data, saveData, handleValueChange } = props;
     return (
         <ValidatorForm onSubmit={saveData}>
             <Box bgcolor="info.main" p={2} mt={2} mb={2}>
@@ -138,10 +138,7 @@ function EMSESPSettingsControllerForm(props: EMSESPSettingsControllerFormProps) 
             <FormActions>
                 <FormButton startIcon={<SaveIcon />} variant="contained" color="primary" type="submit">
                     Save
-        </FormButton>
-                <FormButton variant="contained" color="secondary" onClick={loadData}>
-                    Reset
-        </FormButton>
+                </FormButton>
             </FormActions>
         </ValidatorForm>
     );

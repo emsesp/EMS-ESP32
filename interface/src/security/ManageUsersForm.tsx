@@ -106,7 +106,7 @@ class ManageUsersForm extends React.Component<ManageUsersFormProps, ManageUsersF
   }
 
   render() {
-    const { width, data, loadData } = this.props;
+    const { width, data } = this.props;
     const { user, creating } = this.state;
     return (
       <Fragment>
@@ -165,9 +165,6 @@ class ManageUsersForm extends React.Component<ManageUsersFormProps, ManageUsersF
           <FormActions>
             <FormButton startIcon={<SaveIcon />} variant="contained" color="primary" type="submit" disabled={this.noAdminConfigured()}>
               Save
-            </FormButton>
-            <FormButton variant="contained" color="secondary" onClick={loadData}>
-              Reset
             </FormButton>
           </FormActions>
         </ValidatorForm>
