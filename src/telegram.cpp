@@ -227,6 +227,7 @@ void TxService::flush_tx_queue() {
 }
 
 // start and initialize Tx
+// send out request to EMS bus for all devices
 void TxService::start() {
     // grab the bus ID and tx_mode
     EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) {
