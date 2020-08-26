@@ -173,7 +173,7 @@ class EMSESPDevicesForm extends Component<EMSESPDevicesFormProps, EMSESPDevicesF
           (
             <Box color="warning.main" p={0} mt={0} mb={0}>
               <Typography variant="body1">
-                <i>No external temperature sensors detected.</i>
+                <i>No connected Dallas temperature sensors detected</i>
               </Typography>
             </Box>
           )
@@ -312,7 +312,6 @@ class EMSESPDevicesForm extends Component<EMSESPDevicesFormProps, EMSESPDevicesF
               Refresh
             </FormButton>
           </Box>
-
           <Box flexWrap="none" padding={1} whiteSpace="nowrap">
             <FormButton startIcon={<RefreshIcon />} variant="contained" color="primary" onClick={this.onScanDevices}>
               Scan Devices
