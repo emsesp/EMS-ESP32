@@ -27,14 +27,13 @@
 
 #define EMSESP_DEFAULT_TX_MODE 1       // EMS1.0
 #define EMSESP_DEFAULT_EMS_BUS_ID 0x0B // service key
-
 #define EMSESP_DEFAULT_SYSLOG_LEVEL -1 // OFF
 #define EMSESP_DEFAULT_SYSLOG_MARK_INTERVAL 0
 #define EMSESP_DEFAULT_SYSLOG_HOST ""
-
 #define EMSESP_DEFAULT_MASTER_THERMOSTAT 0 // not set
 #define EMSESP_DEFAULT_SHOWER_TIMER false
 #define EMSESP_DEFAULT_SHOWER_ALERT false
+#define EMSESP_DEFAULT_HIDE_LED false
 
 namespace emsesp {
 
@@ -42,13 +41,12 @@ enum MQTT_format : uint8_t { SINGLE = 1, NESTED, HA, CUSTOM };
 
 class EMSESPSettings {
   public:
-    uint8_t tx_mode;
-    uint8_t ems_bus_id;
-    uint8_t master_thermostat;
-    bool    shower_timer;
-    bool    shower_alert;
-
-    // syslog
+    uint8_t  tx_mode;
+    uint8_t  ems_bus_id;
+    uint8_t  master_thermostat;
+    bool     shower_timer;
+    bool     shower_alert;
+    bool     hide_led;
     int8_t   syslog_level; // uuid::log::Level
     uint32_t syslog_mark_interval;
     String   syslog_host;

@@ -63,6 +63,8 @@ class System {
 
     static void show_mem(const char * note);
 
+    static void set_led();
+
     void check_upgrade();
 
   private:
@@ -115,11 +117,11 @@ class System {
     static bool upload_status_; // true if we're in the middle of a OTA firmware upload
 
     // settings
-    uint8_t  tx_mode_;
-    bool     system_heartbeat_;
-    uint8_t  syslog_level_;
-    uint32_t syslog_mark_interval_;
-    String   syslog_host_;
+    bool        system_heartbeat_;
+    static bool hide_led_;
+    uint8_t     syslog_level_;
+    uint32_t    syslog_mark_interval_;
+    String      syslog_host_;
 };
 
 } // namespace emsesp

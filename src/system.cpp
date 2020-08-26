@@ -33,6 +33,7 @@ uuid::syslog::SyslogService System::syslog_;
 uint32_t System::heap_start_    = 0;
 int      System::reset_counter_ = 0;
 bool     System::upload_status_ = false;
+bool     System::hide_led_      = false;
 
 // send on/off to a gpio pin
 // value: true = HIGH, false = LOW
@@ -145,16 +146,20 @@ void System::start() {
     EMSESP::esp8266React.getWiFiSettingsService()->read(
         [&](WiFiSettings & wifiSettings) { LOG_INFO(F("System %s booted (EMS-ESP version %s)"), wifiSettings.hostname.c_str(), EMSESP_APP_VERSION); });
 
-    syslog_init(); // init SysLog
+    syslog_init();     // init SysLog
+    set_led();         // init LED
+    EMSESP::init_tx(); // start UART
+}
 
-    if (LED_GPIO) {
-        pinMode(LED_GPIO, OUTPUT); // LED pin, 0 means disabled
-    }
-
-    EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) { tx_mode_ = settings.tx_mode; });
-#ifndef EMSESP_FORCE_SERIAL
-    EMSuart::start(tx_mode_); // start UART
-#endif
+// set the LED to on or off when in normal operating mode
+void System::set_led() {
+    EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) {
+        hide_led_ = settings.hide_led;
+        if (LED_GPIO) {
+            pinMode(LED_GPIO, OUTPUT);                            // LED_GPIO 0 means disabled
+            digitalWrite(LED_GPIO, hide_led_ ? !LED_ON : LED_ON); // LED on, for ever
+        }
+    });
 }
 
 // returns true if OTA is uploading
@@ -261,7 +266,7 @@ void System::system_check() {
             if (!system_healthy_) {
                 system_healthy_ = true;
                 if (LED_GPIO) {
-                    digitalWrite(LED_GPIO, LED_ON); // LED on, for ever
+                    digitalWrite(LED_GPIO, hide_led_ ? !LED_ON : LED_ON); // LED on, for ever
                 }
             }
         }
@@ -555,7 +560,7 @@ void System::console_commands(Shell & shell, unsigned int context) {
                                                shell.printfln(F_(wifi_password_fmt), wifiSettings.ssid.isEmpty() ? F_(unset) : F_(asterisks));
                                            });
                                        });
-/*
+    /*
     EMSESPShell::commands->add_command(ShellContext::SYSTEM,
                                        CommandFlags::USER,
                                        flash_string_vector{F_(show), F_(mqtt)},

@@ -36,6 +36,7 @@ void EMSESPSettings::read(EMSESPSettings & settings, JsonObject & root) {
     root["master_thermostat"]    = settings.master_thermostat;
     root["shower_timer"]         = settings.shower_timer;
     root["shower_alert"]         = settings.shower_alert;
+    root["hide_led"]             = settings.hide_led;
 }
 
 StateUpdateResult EMSESPSettings::update(JsonObject & root, EMSESPSettings & settings) {
@@ -47,6 +48,7 @@ StateUpdateResult EMSESPSettings::update(JsonObject & root, EMSESPSettings & set
     settings.master_thermostat    = root["master_thermostat"] | EMSESP_DEFAULT_MASTER_THERMOSTAT;
     settings.shower_timer         = root["shower_timer"] | EMSESP_DEFAULT_SHOWER_TIMER;
     settings.shower_alert         = root["shower_alert"] | EMSESP_DEFAULT_SHOWER_ALERT;
+    settings.hide_led             = root["hide_led"] | EMSESP_DEFAULT_HIDE_LED;
 
     return StateUpdateResult::CHANGED;
 }
@@ -56,7 +58,8 @@ StateUpdateResult EMSESPSettings::update(JsonObject & root, EMSESPSettings & set
 void EMSESPSettingsService::onUpdate() {
     EMSESP::shower_.start();
     // EMSESP::system_.syslog_init(); // changing SysLog will require a restart
-    EMSESP::reset_tx();
+    EMSESP::init_tx();
+    System::set_led();
 }
 
 void EMSESPSettingsService::begin() {

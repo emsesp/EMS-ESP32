@@ -79,6 +79,16 @@ function EMSESPSettingsControllerForm(props: EMSESPSettingsControllerFormProps) 
             <BlockFormControlLabel
                 control={
                     <Checkbox
+                        checked={data.hide_led}
+                        onChange={handleValueChange('hide_led')}
+                        value="hide_led"
+                    />
+                }
+                label="Hide LED"
+            />
+            <BlockFormControlLabel
+                control={
+                    <Checkbox
                         checked={data.shower_timer}
                         onChange={handleValueChange('shower_timer')}
                         value="shower_timer"
