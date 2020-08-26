@@ -7,6 +7,7 @@ export interface EMSESPSettings {
   master_thermostat: number;
   shower_timer: boolean;
   shower_alert: boolean;
+  hide_led: boolean;
 }
 
 export enum busConnectionStatus {
