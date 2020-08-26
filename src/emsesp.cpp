@@ -141,14 +141,17 @@ void EMSESP::watch_id(uint16_t watch_id) {
 // change the tx_mode
 // resets all counters and bumps the UART
 // this is called when the tx_mode is persisted in the FS either via Web UI or the console
-void EMSESP::reset_tx() {
+void EMSESP::init_tx() {
     // get the tx_mode
     uint8_t tx_mode;
     EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) { tx_mode = settings.tx_mode; });
 
+#ifndef EMSESP_FORCE_SERIAL
     EMSuart::stop();
     EMSuart::start(tx_mode);
-    txservice_.start();
+#endif
+
+    txservice_.start(); // sends out request to EMS bus for all devices
 
     // force a fetch for all new values, unless Tx is set to off
     if (tx_mode != 0) {
@@ -785,13 +788,12 @@ void EMSESP::start() {
     esp8266React.begin();          // loads system settings (wifi, mqtt, etc)
     emsespSettingsService.begin(); // load EMS-ESP specific settings
     // system_.check_upgrade(); // see if we need to migrate from previous versions
-    console_.start();   // telnet and serial console
-    mqtt_.start();      // mqtt init
-    system_.start();    // starts syslog, uart, sets version, initializes LED. Requires pre-loaded settings.
-    shower_.start();    // initialize shower timer and shower alert
-    txservice_.start(); // sets bus ID, sends out request for EMS devices
-    sensors_.start();   // dallas external sensors
-    webServer.begin();  // start web server
+    console_.start();  // telnet and serial console
+    mqtt_.start();     // mqtt init
+    system_.start();   // starts syslog, uart, sets version, initializes LED. Requires pre-loaded settings.
+    shower_.start();   // initialize shower timer and shower alert
+    sensors_.start();  // dallas external sensors
+    webServer.begin(); // start web server
 
     emsdevices.reserve(5); // reserve space for initially 5 devices to avoid mem
 
