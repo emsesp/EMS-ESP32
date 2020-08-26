@@ -1,17 +1,22 @@
 import React, { Component, Fragment } from "react";
 
-import { WithTheme, withTheme } from "@material-ui/core/styles";
+import { WithTheme, withTheme, withStyles, Theme, createStyles } from "@material-ui/core/styles";
 import {
+  TableContainer,
   Table,
+  Box,
+  Typography,
   TableBody,
   TableCell,
   TableHead,
   TableRow,
-  Divider,
   List,
   ListItem,
   ListItemAvatar,
   ListItemText,
+  withWidth,
+  WithWidthProps,
+  isWidthDown
 } from "@material-ui/core";
 
 import RefreshIcon from "@material-ui/icons/Refresh";
@@ -32,14 +37,30 @@ import {
 
 import { EMSESPStatus } from "./EMSESPtypes";
 
-type EMSESPStatusFormProps = RestFormProps<EMSESPStatus> & WithTheme;
+type EMSESPStatusFormProps = RestFormProps<EMSESPStatus> & WithTheme & WithWidthProps;
+
+const StyledTableCell = withStyles((theme: Theme) =>
+  createStyles({
+    head: {
+      backgroundColor: theme.palette.common.black,
+      color: theme.palette.common.white,
+    },
+    body: {
+      fontSize: 14,
+    },
+  }),
+)(TableCell);
 
 class EMSESPStatusForm extends Component<EMSESPStatusFormProps> {
+
+  rxErrors = () => {
+    return this.props.data.crc_errors !== 0;
+  }
+
   createListItems() {
-    const { data, theme } = this.props;
+    const { data, theme, width } = this.props;
     return (
       <Fragment>
-
         <ListItem>
           <ListItemAvatar>
             <HighlightAvatar color={busStatusHighlight(data, theme)}>
@@ -49,46 +70,52 @@ class EMSESPStatusForm extends Component<EMSESPStatusFormProps> {
           <ListItemText primary="EMS Connection Status" secondary={busStatus(data)} />
         </ListItem>
         {isConnected(data) && (
-          <Fragment>
-            <Table size="small" padding="default">
+          <TableContainer>
+            <Table size="small" padding={isWidthDown('xs', width!) ? "none" : "default"}>
               <TableHead>
                 <TableRow>
-                  <TableCell>Statistic</TableCell>
-                  <TableCell align="center"># Telegrams</TableCell>
-                  <TableCell />
+                  <StyledTableCell>Statistic</StyledTableCell>
+                  <StyledTableCell align="center"># Telegrams</StyledTableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 <TableRow>
-                  <TableCell component="th" scope="row">
+                  <TableCell>
                     (Rx) Received telegrams
                   </TableCell>
                   <TableCell align="center">{data.rx_received}</TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell component="th" scope="row">
+                  <TableCell >
                     (Rx) Incomplete telegrams
                   </TableCell>
                   <TableCell align="center">{data.crc_errors}</TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell component="th" scope="row">
+                  <TableCell >
                     (Tx) Successfully sent telegrams
                   </TableCell>
                   <TableCell align="center">{data.tx_sent}</TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell component="th" scope="row">
+                  <TableCell >
                     (Tx) Send Errors
                   </TableCell>
                   <TableCell align="center">{data.tx_errors}</TableCell>
                 </TableRow>
               </TableBody>
             </Table>
-          </Fragment>
+            <Fragment>
+              {this.rxErrors() && (
+                <Box bgcolor="warning.main" p={1} mt={0} mb={0}>
+                  <Typography variant="caption" color="textPrimary">
+                    <i>Note: Having a small number of incomplete Rx telegrams is normal and often caused by noise on the EMS line.</i>
+                  </Typography>
+                </Box>
+              )}
+            </Fragment>
+          </TableContainer>
         )}
-        <Divider variant="inset" component="li" />
-        <ListItem></ListItem>
       </Fragment>
     );
   }
@@ -99,11 +126,7 @@ class EMSESPStatusForm extends Component<EMSESPStatusFormProps> {
         <List>{this.createListItems()}</List>
         <FormActions>
           <FormButton
-            startIcon={<RefreshIcon />}
-            variant="contained"
-            color="secondary"
-            onClick={this.props.loadData}
-          >
+            startIcon={<RefreshIcon />} variant="contained" color="secondary" onClick={this.props.loadData}>
             Refresh
           </FormButton>
         </FormActions>
@@ -112,4 +135,4 @@ class EMSESPStatusForm extends Component<EMSESPStatusFormProps> {
   }
 }
 
-export default withTheme(EMSESPStatusForm);
+export default withTheme(withWidth()(EMSESPStatusForm));
