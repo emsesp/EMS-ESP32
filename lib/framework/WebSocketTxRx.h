@@ -3,6 +3,7 @@
 
 #include <StatefulService.h>
 #include <ESPAsyncWebServer.h>
+#include <SecurityManager.h>
 
 #define WEB_SOCKET_CLIENT_ID_MSG_SIZE 128
 
