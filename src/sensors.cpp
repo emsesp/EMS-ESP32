@@ -31,32 +31,26 @@ namespace emsesp {
 
 uuid::log::Logger Sensors::logger_{F_(sensors), uuid::log::Facility::DAEMON};
 
+// start the 1-wire
 void Sensors::start() {
+    reload();
+
+#ifndef EMSESP_STANDALONE
+    bus_.begin(SENSOR_GPIO);
+#endif
+}
+
+// load the MQTT settings
+void Sensors::reload() {
     // copy over values from MQTT so we don't keep on quering the filesystem
     EMSESP::esp8266React.getMqttSettingsService()->read([&](MqttSettings & settings) {
         mqtt_format_ = settings.mqtt_format; // single, nested or ha
     });
 
-    // if we're using HA MQTT Discovery, send out the config
-    // currently we just do this for a single sensor (sensor1)
     if (mqtt_format_ == MQTT_format::HA) {
-        // Mqtt::publish(topic); // empty payload, this remove any previous config sent to HA
-
-        StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
-        doc["dev_cla"]      = "temperature";
-        doc["name"]         = "ems-esp-sensor1";
-        doc["uniq_id"]      = "ems-esp-sensor1";
-        doc["~"]            = "homeassistant/sensor/ems-esp/external";
-        doc["stat_t"]       = "~/state";
-        doc["unit_of_meas"] = "°C";
-        doc["val_tpl"]      = "{{value_json.sensor1.temp}}";
-
-        Mqtt::publish("homeassistant/sensor/ems-esp/external/config", doc, true); // publish the config payload with retain flag
+        for (uint8_t i = 0; i < MAX_SENSORS; registered_ha_[i++] = false)
+            ;
     }
-
-#ifndef EMSESP_STANDALONE
-    bus_.begin(SENSOR_GPIO);
-#endif
 }
 
 void Sensors::loop() {
@@ -74,7 +68,7 @@ void Sensors::loop() {
             } else {
                 // no sensors found
                 // LOG_ERROR(F("Bus reset failed")); // uncomment for debug
-                devices_.clear(); // remove all know devices incase we have a disconnect
+                devices_.clear(); // remove all know devices in case we have a disconnect
             }
             last_activity_ = time_now;
         }
@@ -266,39 +260,72 @@ void Sensors::publish_values() {
         return;
     }
 
-    // group all sensors together - https://github.com/proddy/EMS-ESP/issues/327
-    // This is used for both NESTED and HA modes
-    //  sensors = {
-    // "sensor1":{"id":"28-EA41-9497-0E03-5F","temp":"23.25"},
-    // "sensor2":{"id":"28-EA41-9497-0E03-5F","temp":"23.25"},
-    // "sensor3":{"id":"28-EA41-9497-0E03-5F","temp":"23.25"},
-    // "sensor4":{"id":"28-EA41-9497-0E03-5F","temp":"23.25"}
-    // }
-
     // const size_t        capacity = num_devices * JSON_OBJECT_SIZE(2) + JSON_OBJECT_SIZE(num_devices);
     DynamicJsonDocument doc(100 * num_devices);
-
-    uint8_t i = 1;
+    uint8_t             i = 1; // sensor count
     for (const auto & device : devices_) {
+        char s[7];
+
         if (mqtt_format_ == MQTT_format::CUSTOM) {
-            char s[7];
             doc[device.to_string()] = Helpers::render_value(s, device.temperature_c, 2);
-        } else {
+        } else if (mqtt_format_ == MQTT_format::SINGLE) {
+            doc["id"]   = device.to_string();
+            doc["temp"] = Helpers::render_value(s, device.temperature_c, 2);
+            std::string topic(100, '\0');
+            snprintf_P(&topic[0], 50, PSTR("sensor%d"), i);
+            Mqtt::publish(topic, doc);
+        } else if ((mqtt_format_ == MQTT_format::NESTED) || (mqtt_format_ == MQTT_format::HA)) {
+            // e.g. {"sensor1":{"id":"28-EA41-9497-0E03-5F","temp":"23.30"},"sensor2":{"id":"28-233D-9497-0C03-8B","temp":"24.0"}}
             char sensorID[10]; // sensor{1-n}
             strlcpy(sensorID, "sensor", 10);
-            char s[7];
-            strlcat(sensorID, Helpers::itoa(s, i++), 10);
+            strlcat(sensorID, Helpers::itoa(s, i), 10);
             JsonObject dataSensor = doc.createNestedObject(sensorID);
             dataSensor["id"]      = device.to_string();
             dataSensor["temp"]    = Helpers::render_value(s, device.temperature_c, 2);
         }
+
+        // special for HA
+        if (mqtt_format_ == MQTT_format::HA) {
+            std::string topic(100, '\0');
+
+            // create the config if this hasn't already been done
+            /* e.g.
+            {
+            "dev_cla": "temperature",
+            "stat_t": "homeassistant/sensor/ems-esp/state",
+            "unit_of_meas": "°C",
+            "val_tpl": "{{value_json.sensor2.temp}}",
+            "name": "ems-esp-sensor2",
+            "uniq_id": "ems-esp-sensor2"
+            }
+            */
+            if (!(registered_ha_[i])) {
+                StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> config;
+                config["dev_cla"]      = "temperature";
+                config["stat_t"]       = "homeassistant/sensor/ems-esp/state";
+                config["unit_of_meas"] = "°C";
+
+                std::string str(50, '\0');
+                snprintf_P(&str[0], 50, PSTR("{{value_json.sensor%d.temp}}"), i);
+                config["val_tpl"] = str;
+
+                snprintf_P(&str[0], 50, PSTR("ems-esp-sensor%d"), i);
+                config["name"]    = str;
+                config["uniq_id"] = str;
+
+                snprintf_P(&topic[0], 50, PSTR("homeassistant/sensor/ems-esp/sensor%d/config"), i);
+                Mqtt::publish(topic, config, false); // publish the config payload with no retain flag
+
+                registered_ha_[i] = true;
+            }
+        }
+        i++; // increment sensor count
     }
 
-    if (mqtt_format_ == MQTT_format::HA) {
-        Mqtt::publish("homeassistant/sensor/ems-esp/external/state", doc);
-    } else {
+    if ((mqtt_format_ == MQTT_format::NESTED) || (mqtt_format_ == MQTT_format::CUSTOM)) {
         Mqtt::publish("sensors", doc);
+    } else if (mqtt_format_ == MQTT_format::HA) {
+        Mqtt::publish("homeassistant/sensor/ems-esp/state", doc);
     }
 }
-
 } // namespace emsesp

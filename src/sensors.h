@@ -50,6 +50,7 @@ class Sensors {
 
       private:
         const uint64_t id_;
+        bool           registered_ = false;
     };
 
     Sensors()  = default;
@@ -58,6 +59,7 @@ class Sensors {
     void start();
     void loop();
     void publish_values();
+    void reload();
 
     const std::vector<Device> devices() const;
 
@@ -71,6 +73,8 @@ class Sensors {
     static constexpr uint8_t SENSOR_GPIO = 14; // D5 is LED on wemos lolin D32, so use GPIO14
 #endif
 #endif
+
+    static constexpr uint8_t MAX_SENSORS = 20;
 
     enum class State { IDLE, READING, SCANNING };
 
@@ -109,6 +113,8 @@ class Sensors {
     State               state_         = State::IDLE;
     std::vector<Device> found_;
     std::vector<Device> devices_;
+
+    bool registered_ha_[MAX_SENSORS];
 
     uint8_t mqtt_format_;
     uint8_t retrycnt_ = 0;
