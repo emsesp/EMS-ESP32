@@ -4,8 +4,9 @@
 namespace emsesp {
 class EMSESP {
   public:
-    static System system_;
-    static Mqtt   mqtt_;
+    static System  system_;
+    static Mqtt    mqtt_;
+    static Sensors sensors_;
 };
 } // namespace emsesp
 
@@ -112,6 +113,9 @@ void MqttSettingsService::onMqttDisconnect(AsyncMqttClientDisconnectReason reaso
 void MqttSettingsService::onConfigUpdated() {
     _reconfigureMqtt = true;
     _disconnectedAt  = 0;
+
+    // added by proddy
+    // reload EMS-ESP MQTT settings
 }
 
 #ifdef ESP32
@@ -164,6 +168,8 @@ void MqttSettingsService::configureMqtt() {
         _mqttClient.setMaxTopicLength(_state.maxTopicLength);
         _mqttClient.connect();
     }
+
+    emsesp::EMSESP::sensors_.reload();
 }
 
 void MqttSettings::read(MqttSettings & settings, JsonObject & root) {
@@ -208,7 +214,6 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
 
     if (newSettings.mqtt_qos != settings.mqtt_qos) {
         emsesp::EMSESP::mqtt_.set_qos(newSettings.mqtt_qos);
-        emsesp::EMSESP::mqtt_.disconnect(); // force a disconnect & reconnect
     }
 
     if (newSettings.publish_time != settings.publish_time) {
