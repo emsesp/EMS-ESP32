@@ -717,6 +717,8 @@ bool System::check_upgrade() {
 
     Serial.end();
     return true;
+#else
+    return false;
 #endif
 }
 
