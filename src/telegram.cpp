@@ -129,10 +129,11 @@ std::string Telegram::to_string_message() const {
 
 // checks if we have an Rx telegram that needs processing
 void RxService::loop() {
-    if (rx_telegram) {
-        EMSESP::process_telegram(rx_telegram);
-        rx_telegram = nullptr;      // telegram has been processed, reset
-        increment_telegram_count(); // increase rx count
+    while (!rx_telegrams_.empty()) {
+        auto telegram = rx_telegrams_.front().telegram_;
+        (void)EMSESP::process_telegram(telegram); // further process the telegram
+        increment_telegram_count();               // increase rx count
+        rx_telegrams_.pop_front();                // remove it from the queue
     }
 }
 
@@ -212,8 +213,16 @@ void RxService::add(uint8_t * data, uint8_t length) {
     // if we receive a hc2.. telegram from 0x19.. match it to master_thermostat if master is 0x18
     src = EMSESP::check_master_device(src, type_id, true);
 
-    // create the telegram
-    rx_telegram = std::make_shared<Telegram>(Telegram::Operation::RX, src, dest, type_id, offset, message_data, message_length);
+        // create the telegram
+    auto telegram = std::make_shared<Telegram>(Telegram::Operation::RX, src, dest, type_id, offset, message_data, message_length);
+
+    // check if queue is full, if so remove top item to make space
+    if (rx_telegrams_.size() >= MAX_RX_TELEGRAMS) {
+        rx_telegrams_.pop_front();
+    }
+
+    rx_telegrams_.emplace_back(rx_telegram_id_++, std::move(telegram)); // add to queue
+
 }
 
 //

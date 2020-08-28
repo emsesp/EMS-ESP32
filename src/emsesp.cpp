@@ -222,6 +222,19 @@ void EMSESP::show_ems(uuid::console::Shell & shell) {
 
     shell.println();
 
+    // Rx queue
+    auto rx_telegrams = rxservice_.queue();
+    if (rx_telegrams.empty()) {
+        shell.printfln(F("Rx Queue is empty"));
+    } else {
+        shell.printfln(F("Rx Queue (%ld telegram%s):"), rx_telegrams.size(), rx_telegrams.size() == 1 ? "" : "s");
+        for (const auto & it : rx_telegrams) {
+            shell.printfln(F(" [%02d] %s"), it.id_, pretty_telegram(it.telegram_).c_str());
+        }
+    }
+
+    shell.println();
+
     // Tx queue
     auto tx_telegrams = txservice_.queue();
     if (tx_telegrams.empty()) {
@@ -270,7 +283,7 @@ void EMSESP::show_sensor_values(uuid::console::Shell & shell) {
     }
 
     char valuestr[8] = {0}; // for formatting temp
-    shell.printfln(F("External temperature sensors:"));
+    shell.printfln(F("Dallas temperature sensors:"));
     for (const auto & device : sensor_devices()) {
         shell.printfln(F("  ID: %s, Temperature: %s°C"), device.to_string().c_str(), Helpers::render_value(valuestr, device.temperature_c, 2));
     }
@@ -774,7 +787,7 @@ void EMSESP::send_raw_telegram(const char * data) {
 // the services must be loaded in the correct order
 void EMSESP::start() {
     // Load our library of known devices. Names are stored in Flash mem.
-    device_library_.reserve(100);
+    device_library_.reserve(80);
     device_library_ = {
 #include "device_library.h"
     };
