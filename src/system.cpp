@@ -590,74 +590,71 @@ void System::console_commands(Shell & shell, unsigned int context) {
     Console::enter_custom_context(shell, context);
 }
 
-// upgrade from previous versions of EMS-ESP
-void System::check_upgrade() {
-    /*
-// check for v1.9. It uses SPIFFS and only on the ESP8266
+// upgrade from previous versions of EMS-ESP, based on SPIFFS on an ESP8266
+// returns true if an upgrade was done
+bool System::check_upgrade() {
 #if defined(ESP8266)
-    Serial.begin(115200);
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 
-    LittleFS.end();
-    SPIFFS.begin();
-
-    // first file
-    File file = SPIFFS.open("/myesp.json", "r");
-    if (!file) {
-        Serial.println(F("Old config doesn't exist."));
-        SPIFFS.end();
-        LittleFS.begin();
-        return;
+    SPIFFSConfig cfg;
+    cfg.setAutoFormat(false); // prevent formatting when opening SPIFFS filesystem
+    SPIFFS.setConfig(cfg);
+    if (!SPIFFS.begin()) {
+        return false; // is not SPIFFS
     }
 
+    Serial.begin(115200);
+
+    // open the two files
+    File file1 = SPIFFS.open("/myesp.json", "r");
+    File file2 = SPIFFS.open("/customconfig.json", "r");
+    if (!file1 || !file2) {
+        Serial.println(F("Unable to read the config files"));
+        file1.close();
+        file2.close();
+        SPIFFS.end();
+        return false; // can't open files
+    }
+
+    // read the content of the files
     DeserializationError     error;
-    StaticJsonDocument<1024> doc; // for myESP settings
-    error = deserializeJson(doc, file);
-    if (error) {
-        Serial.printf("Error. Failed to deserialize json, error %s", error.c_str());
-        file.close();
-        SPIFFS.end();
-        LittleFS.begin();
-        return;
-    }
-
-    file.close();
-
-    // second file
-    file = SPIFFS.open("/customconfig.json", "r");
-    if (!file) {
-        Serial.println(F("Old custom config file doesn't exist"));
-        SPIFFS.end();
-        LittleFS.begin();
-        return;
-    }
-
+    StaticJsonDocument<1024> doc1; // for myESP settings
     StaticJsonDocument<1024> doc2; // for custom EMS-ESP settings
-    error = deserializeJson(doc2, file);
+    bool                     failed = false;
+
+    error = deserializeJson(doc1, file1);
     if (error) {
-        Serial.printf("Error. Failed to deserialize json, error %s", error.c_str());
-        file.close();
-        SPIFFS.end();
-        LittleFS.begin();
-        return;
+        Serial.printf("Error. Failed to deserialize json, doc1, error %s", error.c_str());
+        failed = true;
+    }
+    error = deserializeJson(doc2, file2);
+    if (error) {
+        Serial.printf("Error. Failed to deserialize json, doc2, error %s", error.c_str());
+        failed = true;
     }
 
-    file.close();
-
-    // close SPIFFS and open LittleFS
+    file1.close();
+    file2.close();
     SPIFFS.end();
-    LittleFS.begin();
+
+    if (failed) {
+        return false; // parse error
+    }
 
 #pragma GCC diagnostic pop
+
+    LittleFS.begin();
+    EMSESP::esp8266React.begin();          // loads system settings (wifi, mqtt, etc)
+    EMSESP::emsespSettingsService.begin(); // load EMS-ESP specific settings
 
     Serial.println(F("Migrating settings from EMS-ESP 1.9.x..."));
 
     // get the json objects
-    JsonObject network         = doc["network"];
-    JsonObject general         = doc["general"];
-    JsonObject mqtt            = doc["mqtt"];
+    JsonObject network         = doc1["network"];
+    JsonObject general         = doc1["general"];
+    JsonObject mqtt            = doc1["mqtt"];
     JsonObject custom_settings = doc2["settings"]; // from 2nd file
 
     EMSESP::esp8266React.getWiFiSettingsService()->update(
@@ -717,8 +714,10 @@ void System::check_upgrade() {
             return StateUpdateResult::CHANGED;
         },
         "local");
+
+    Serial.end();
+    return true;
 #endif
-*/
 }
 
 } // namespace emsesp

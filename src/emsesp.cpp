@@ -786,21 +786,24 @@ void EMSESP::send_raw_telegram(const char * data) {
 // start all the core services
 // the services must be loaded in the correct order
 void EMSESP::start() {
+    // see if we need to migrate from previous versions
+    if (!system_.check_upgrade()) {
+#ifdef ESP32
+        SPIFFS.begin(true);
+#elif defined(ESP8266)
+        LittleFS.begin();
+#endif
+
+        esp8266React.begin();          // loads system settings (wifi, mqtt, etc)
+        emsespSettingsService.begin(); // load EMS-ESP specific settings
+    }
+
     // Load our library of known devices. Names are stored in Flash mem.
     device_library_.reserve(80);
     device_library_ = {
 #include "device_library.h"
     };
 
-#ifdef ESP32
-    SPIFFS.begin(true);
-#elif defined(ESP8266)
-    LittleFS.begin();
-#endif
-
-    esp8266React.begin();          // loads system settings (wifi, mqtt, etc)
-    emsespSettingsService.begin(); // load EMS-ESP specific settings
-    // system_.check_upgrade(); // see if we need to migrate from previous versions
     console_.start();  // telnet and serial console
     mqtt_.start();     // mqtt init
     system_.start();   // starts syslog, uart, sets version, initializes LED. Requires pre-loaded settings.

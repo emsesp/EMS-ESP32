@@ -54,18 +54,12 @@ class System {
     static uint8_t free_mem();
     static void    upload_status(bool in_progress);
     static bool    upload_status();
-
-    void syslog_init();
-
-    // heartbeat
-    void set_heartbeat(bool system_heartbeat);
-    void send_heartbeat();
-
-    static void show_mem(const char * note);
-
-    static void set_led();
-
-    void check_upgrade();
+    void           syslog_init();
+    void           set_heartbeat(bool system_heartbeat);
+    void           send_heartbeat();
+    static void    show_mem(const char * note);
+    static void    set_led();
+    bool           check_upgrade();
 
   private:
     static uuid::log::Logger logger_;
