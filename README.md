@@ -1,11 +1,27 @@
-# EMS-ESP version 2.0
+# ![logo](media/EMS-ESP_logo_dark.png)
+
+[![version](https://img.shields.io/github/release/proddy/EMS-ESP.svg?label=Latest%20Release)](https://github.com/proddy/EMS-ESP/blob/master/CHANGELOG.md)
+[![release-date](https://img.shields.io/github/release-date/proddy/EMS-ESP.svg?label=Released)](https://github.com/proddy/EMS-ESP/commits/master)
+<br />
+[![license](https://img.shields.io/github/license/proddy/EMS-ESP.svg)](LICENSE)
+[![travis](https://travis-ci.com/proddy/EMS-ESP.svg?branch=dev)](https://travis-ci.com/proddy/EMS-ESP)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/b8880625bdf841d4adb2829732030887)](https://app.codacy.com/app/proddy/EMS-ESP?utm_source=github.com&utm_medium=referral&utm_content=proddy/EMS-ESP&utm_campaign=Badge_Grade_Settings)
+[![downloads](https://img.shields.io/github/downloads/proddy/EMS-ESP/total.svg)](https://github.com/proddy/EMS-ESP/releases)
+<br />
+[![gitter](https://img.shields.io/gitter/room/EMS-ESP/EMS-ESP.svg)](https://gitter.im/EMS-ESP/community)
+<br>
+
+EMS-ESP is a open-source system built for the Espressif ESP8266 microcontroller to communicate with **EMS** (Energy Management System) based boilers, thermostats and other modules from manufacturers like Bosch, Buderus, Nefit, Junkers and Sieger.
 
 ## **New Features in v2**
 
 - Supports both ESP8266 and ESP32
 - New MQTT option to support Home Assistant MQTT Discovery (https://www.home-assistant.io/docs/mqtt/discovery/)
-- A new web interface using React and TypeScript that's now secure as each URL endpoint is protected by issuing a JWT which is then sent using Bearer Authentication.
-- In the Access Point mode there is a web Captive Portal
+- Tighter security in Web and Console
+- New secure web interface (based on React/TypeScript)
+- Can be run on WiFi on as a Stand alone Access Point
+- Easier first-time configuration via a web Captive Portal
+- Supporting over 70 EMS devices
 
 <img src="media/web_settings.PNG" width=70% height=70%>
 <img src="media/web_status.PNG" width=70% height=70%>
@@ -24,9 +40,14 @@
     * `log` sets the logging level. `log off` disables logging. Use `log debug` for debugging commands and actions. This will be reset next time the console is opened.
     * `watch` will output the incoming Rx telegrams directly to the console. You can also put on a watch on a specific EMS device ID or telegram ID. Also choose to output as verbose text or raw data bytes.  these in its 'raw' data format and also watch a particular ID.
   
-- There is no "serial mode" anymore like with version 1.9. When the Wifi cannot connect to the SSID it will automatically enter a "safe" mode where the Serial console is automatically activated (note Serial is always available on the ESP32 because it has multiple UARTs). The EMS-ESP will blink fast when in Serial mode. Connect via a USB with baud 115200 to see the serial console. Note in this mode the EMS will be disconnect so there will be no incoming traffic. Use only for debugging or changing settings.
+## **Migrating from version 1.9**
 
-- The onboard LED behaves like in 1.9. A solid LED means good connection and EMS data is coming in. A slow pulse means either the WiFi or the EMS bus is not connected yet. A very fast pulse is when the system is booting up and configuring itself, which typically takes 5 seconds.
+EMS-ESP will attempt to automatically migrate the 1.9 settings. 
+
+Note there are some noticeable different to be aware of in version 2:
+  - MQTT base has been removed
+  - There is no "serial mode" anymore like with version 1.9. When the Wifi cannot connect to the SSID it will automatically enter a "safe" mode where the Serial console is automatically activated (note Serial is always available on the ESP32 because it has multiple UARTs). The EMS-ESP will blink fast when in Serial mode. Connect via a USB with baud 115200 to see the serial console. Note in this mode the EMS will be disconnect so there will be no incoming traffic. Use only for debugging or changing settings.
+
 
 ## **Uploading the firmware**
 
@@ -45,10 +66,15 @@
 
 ## **Setting EMS-ESP up for the first time**
 
+ - After powering up the ESP, watch the onboard LED. A solid light means good connection and EMS data is coming in. A slow pulse means either the WiFi or the EMS bus is not connected yet. A very fast pulse is when the system is booting up and configuring itself, which typically takes 5 seconds.
+  
  - Connect to the Access Point called ems-esp using the WPA password `ems-esp-neo`. When you see the captive portal sign-in with username `admin` and password `admin`. Set the WiFi credentials and go back to http://ems-esp
+
  - First thing to check is if Tx is working and that you have a connect to the EMS bus. If it's showing an error try changing the Tx Mode from the settings page. Then check the Status (no need to restart EMS-ESP).
 
-## **The Console**
+ - If Rx incomplete telegrams are reported in the Web UI, don't panic. Some telegrams can be missed and this is usually due to noise on line.
+
+## **Using the  Console**
 
 Connecting to the console will give you more insight into the EMS bus traffic, MQTT queues and the actual device information. The console is reachable via Telnet (port 22) or via the Serial port if using an USB (on baud 115200). To change any settings in the console you must be admin (use `su` with the default password `ems-esp-neo`). On an ESP8266 the Serial port is disabled by default unless it's unable to connect to the WiFi.
 
@@ -159,72 +185,3 @@ The `id` can be replaced with `hc` for some devices and represented as a string 
   pin <gpio> <on|off|1|0|true|false>
 
 ```
-
-## **Basic Design Principles**
-
-- The core services like telnet, logging and shell are based off the libraries from @nomis. I also adopted his general design pattens such as making everything as asynchronous as possible so that no one operation should starve another operation of it's time to execute (https://isocpp.org/wiki/faq/ctors#static-init-order).
-- All EMS devices (e.g. boiler, thermostat, solar modules, mixing units etc) are derived from a factory base class and each class handles its own registering of telegram and mqtt handlers. This makes the EMS device code easier to manage and we can extend with new telegrams types and features.
-- For debugging there is an offline mode where the code can be compiled and executed standalone without uploading to an ESP controller. Use `make` (based off GNUMakefile).
-
-## **Customizing the Web UI**
-
-The Web is based off Rick's awesome [esp8266-react](https://github.com/rjwats/esp8266-react/) framework. These are the files that are modified:
-
-**`interface:`**
-  * `.env` project name and project path to ems-esp
-  * `.env.development` CORS URL
- 
-**`interface/public:`**
-  * `app/manifest.json` ems-esp name
-  * `index.html` ems-esp name
-  * `app/icon.png` 256x256 PNG
-  * `favicon.ico` replaced
-
-**`interface/src:`**
-  * `CustomMuiTheme.tsx` colors for dark mode
-  * `interface/src/wifi/WifiSettingsController.tsx` rename esp8266-react
-
-**`interface/src/project:`**
-  * `ProjectRouting.tsx` removed demo, added paths to ems-esp/status, ems-esp/settings and *
-  * `DemoProject.tsx` remove /demo/ and changed title, renamed to EMSESP.tsx
-  * `ProjectMenu.tsx` title change, added /ems-esp/settings
-  * `DemoInformation.tsx` removed file
-  * `types.ts` add variables
-  * added all custom files starting with EMSESP*
-
-**`interface/src/mqtt:`**
-  * `types.ts` added mqtt_fails
-  * `MqttStatusForm.tsx` added MQTT Publish Errors
-  * `MqttStatus.ts` added function mqttPublishHighlight
-  * `MqttSettingsForm.tsx` added publish time, qos, format
-
-**`interface/src/authentication:`**
-  * `AuthenticationWrapper.tsx` commented out features.security because we added version
-  * `AuthenticationContext.tsx` added version
-  * `MqttSettingsForm.tsx` added publish time, qos, format
-
-**`interface/src/components:`**
-  * `MenuAppBar.tsx` added version to toolbar
-
-**`interface/src/system:`**
-  * `types.ts` added uptime and free_mem
-  * `SystemStatusForm.tsx` added system uptime, % free mem
-
-**`lib/framework`:**
-  * `SystemStatus.h` added #include <LittleFS.h>, #include <uuid/log.h>, #include "../../src/system.h"
-  * `SystemStatus.cpp` added LittleFS.info(fs_info); root["uptime"], root["free_mem"]
-  * Commented out all `Serial.print`'s in all files
-  * `MqttStatus.h` added #include "../../src/mqtt.h"
-  * `MqttStatus.cpp` added root["mqtt_fails"]
-  * `SecuritySettingsService.cpp` added version to the JWT payload
-  * `SecuritySettingsService.h` #include "../../src/version.h"
-  * `WiFiSettingsService.cpp` added WiFi.setOutputPower(20.0f), moved setHostname
-  * `OTASettingsService.h` added #include "../../src/system.h" 
-  * `OTASettingsService.cpp` added call to emsesp::System::upload_status(true)
-  * `features.ini`: -D FT_NTP=0
-  * `platformio.ini` using our own version
-  * `factory_settings.ini` modified with `ems-esp-neo` as password and `ems-esp` everywhere else
-
-
-
-
