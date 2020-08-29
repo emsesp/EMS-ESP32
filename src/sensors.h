@@ -64,16 +64,6 @@ class Sensors {
     const std::vector<Device> devices() const;
 
   private:
-#if defined(ESP8266)
-    static constexpr uint8_t SENSOR_GPIO = 14; // D5
-#elif defined(ESP32)
-#ifdef WEMOS_D1_32
-    static constexpr uint8_t SENSOR_GPIO = 18; // Wemos D1-32 for compatibility D5
-#else
-    static constexpr uint8_t SENSOR_GPIO = 14; // D5 is LED on wemos lolin D32, so use GPIO14
-#endif
-#endif
-
     static constexpr uint8_t MAX_SENSORS = 20;
 
     enum class State { IDLE, READING, SCANNING };
@@ -117,7 +107,8 @@ class Sensors {
     bool registered_ha_[MAX_SENSORS];
 
     uint8_t mqtt_format_;
-    uint8_t retrycnt_ = 0;
+    uint8_t retrycnt_    = 0;
+    uint8_t dallas_gpio_ = 0;
 };
 
 } // namespace emsesp

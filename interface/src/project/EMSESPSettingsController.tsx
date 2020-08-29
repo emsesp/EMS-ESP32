@@ -76,6 +76,54 @@ function EMSESPSettingsControllerForm(props: EMSESPSettingsControllerFormProps) 
                 <MenuItem value={0x0F}>Time Module (0x0F)</MenuItem>
                 <MenuItem value={0x12}>Alarm Module (0x12)</MenuItem>
             </SelectValidator>
+            <TextValidator
+                validators={['required', 'isNumber', 'minNumber:0', 'maxNumber:40']}
+                errorMessages={['Rx GPIO is required', "Must be a number", "Must be 0 or higher", "Max value is 255"]}
+                name="rx_gpio"
+                label="Rx GPIO pin"
+                fullWidth
+                variant="outlined"
+                value={data.rx_gpio}
+                type="number"
+                onChange={handleValueChange('rx_gpio')}
+                margin="normal"
+            />
+            <TextValidator
+                validators={['required', 'isNumber', 'minNumber:0', 'maxNumber:40']}
+                errorMessages={['Tx GPIO is required', "Must be a number", "Must be 0 or higher", "Max value is 255"]}
+                name="tx_gpio"
+                label="Tx GPIO pin"
+                fullWidth
+                variant="outlined"
+                value={data.tx_gpio}
+                type="number"
+                onChange={handleValueChange('tx_gpio')}
+                margin="normal"
+            />
+            <TextValidator
+                validators={['required', 'isNumber', 'minNumber:0', 'maxNumber:40']}
+                errorMessages={['LED GPIO is required', "Must be a number", "Must be 0 or higher", "Max value is 255"]}
+                name="led_gpio"
+                label="LED GPIO pin (0=none)"
+                fullWidth
+                variant="outlined"
+                value={data.led_gpio}
+                type="number"
+                onChange={handleValueChange('led_gpio')}
+                margin="normal"
+            />
+            <TextValidator
+                validators={['required', 'isNumber', 'minNumber:0', 'maxNumber:40']}
+                errorMessages={['Dallas GPIO is required', "Must be a number", "Must be 0 or higher", "Max value is 255"]}
+                name="dallas_gpio"
+                label="Dallas GPIO pin (0=none)"
+                fullWidth
+                variant="outlined"
+                value={data.dallas_gpio}
+                type="number"
+                onChange={handleValueChange('dallas_gpio')}
+                margin="normal"
+            />
             <BlockFormControlLabel
                 control={
                     <Checkbox

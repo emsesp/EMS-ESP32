@@ -66,16 +66,6 @@
 #define EMSUART_TX_WAIT_PLUS (EMSUART_TX_BIT_TIME * 20) // 2080
 #define EMSUART_TX_BRK_PLUS (EMSUART_TX_BIT_TIME * 11)
 
-
-// customize the GPIO pins for RX and TX here
-#ifdef WEMOS_D1_32
-#define EMSUART_RXPIN 23 // 17 is UART2 RX. Use 23 for D7 on a Wemos D1-32 mini for backwards compatabilty
-#define EMSUART_TXPIN 5  // 16 is UART2 TX. Use 5 for D8 on a Wemos D1-32 mini for backwards compatabilty
-#else
-#define EMSUART_RXPIN 17 // 17 is UART2 RX. Use 23 for D7 on a Wemos D1-32 mini for backwards compatabilty
-#define EMSUART_TXPIN 16 // 16 is UART2 TX. Use 5 for D8 on a Wemos D1-32 mini for backwards compatabilty
-#endif
-
 namespace emsesp {
 
 #define EMS_TX_STATUS_OK 1
@@ -86,7 +76,7 @@ class EMSuart {
     EMSuart()  = default;
     ~EMSuart() = default;
 
-    static void     start(const uint8_t tx_mode);
+    static void     start(const uint8_t tx_mode, const uint8_t rx_gpio, const uint8_t tx_gpio);
     static void     send_poll(const uint8_t data);
     static void     stop();
     static void     restart();

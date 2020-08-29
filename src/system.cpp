@@ -34,6 +34,7 @@ uint32_t System::heap_start_    = 0;
 int      System::reset_counter_ = 0;
 bool     System::upload_status_ = false;
 bool     System::hide_led_      = false;
+uint8_t  System::led_gpio_      = 0;
 
 // send on/off to a gpio pin
 // value: true = HIGH, false = LOW
@@ -155,9 +156,10 @@ void System::start() {
 void System::set_led() {
     EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) {
         hide_led_ = settings.hide_led;
-        if (LED_GPIO) {
-            pinMode(LED_GPIO, OUTPUT);                            // LED_GPIO 0 means disabled
-            digitalWrite(LED_GPIO, hide_led_ ? !LED_ON : LED_ON); // LED on, for ever
+        led_gpio_ = settings.led_gpio;
+        if (led_gpio_) {
+            pinMode(led_gpio_, OUTPUT);                            // 0 means disabled
+            digitalWrite(led_gpio_, hide_led_ ? !LED_ON : LED_ON); // LED on, for ever
         }
     });
 }
@@ -265,8 +267,8 @@ void System::system_check() {
             // if it was unhealthy but now we're better, make sure the LED is solid again cos we've been healed
             if (!system_healthy_) {
                 system_healthy_ = true;
-                if (LED_GPIO) {
-                    digitalWrite(LED_GPIO, hide_led_ ? !LED_ON : LED_ON); // LED on, for ever
+                if (led_gpio_) {
+                    digitalWrite(led_gpio_, hide_led_ ? !LED_ON : LED_ON); // LED on, for ever
                 }
             }
         }
@@ -275,7 +277,7 @@ void System::system_check() {
 
 // flashes the LED
 void System::led_monitor() {
-    if (!LED_GPIO) {
+    if (!led_gpio_) {
         return;
     }
 
@@ -286,7 +288,7 @@ void System::led_monitor() {
 
         // if bus_not_connected or network not connected, start flashing
         if (!system_healthy_) {
-            digitalWrite(LED_GPIO, !digitalRead(LED_GPIO));
+            digitalWrite(led_gpio_, !digitalRead(led_gpio_));
         }
     }
 }

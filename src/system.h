@@ -76,20 +76,16 @@ class System {
 // internal LED
 #ifndef EMSESP_NO_LED
 #if defined(ESP8266)
-    static constexpr uint8_t LED_GPIO = 2;
-    static constexpr uint8_t LED_ON   = LOW;
+    static constexpr uint8_t LED_ON = LOW;
 #elif defined(ESP32)
 #ifdef WEMOS_D1_32
-    static constexpr uint8_t LED_GPIO = 2; // on Wemos D1-32
-    static constexpr uint8_t LED_ON   = HIGH;
+    static constexpr uint8_t LED_ON = HIGH;
 #else
-    static constexpr uint8_t LED_GPIO = 5;
-    static constexpr uint8_t LED_ON   = LOW;
+    static constexpr uint8_t LED_ON = LOW;
 #endif
 #endif
 #else
-    static constexpr uint8_t LED_GPIO = 0; // no LED
-    static constexpr uint8_t LED_ON   = 0;
+    static constexpr uint8_t LED_ON = 0;
 #endif
 
     void led_monitor();
@@ -106,16 +102,15 @@ class System {
     static uint32_t heap_start_;
     static int      reset_counter_;
     uint32_t        last_heartbeat_ = 0;
-
-    // OTA
-    static bool upload_status_; // true if we're in the middle of a OTA firmware upload
+    static bool     upload_status_; // true if we're in the middle of a OTA firmware upload
 
     // settings
-    bool        system_heartbeat_;
-    static bool hide_led_;
-    uint8_t     syslog_level_;
-    uint32_t    syslog_mark_interval_;
-    String      syslog_host_;
+    bool           system_heartbeat_;
+    static bool    hide_led_;
+    uint8_t        syslog_level_;
+    uint32_t       syslog_mark_interval_;
+    String         syslog_host_;
+    static uint8_t led_gpio_;
 };
 
 } // namespace emsesp

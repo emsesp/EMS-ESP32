@@ -37,6 +37,10 @@ void EMSESPSettings::read(EMSESPSettings & settings, JsonObject & root) {
     root["shower_timer"]         = settings.shower_timer;
     root["shower_alert"]         = settings.shower_alert;
     root["hide_led"]             = settings.hide_led;
+    root["rx_gpio"]              = settings.rx_gpio;
+    root["tx_gpio"]              = settings.tx_gpio;
+    root["dallas_gpio"]          = settings.dallas_gpio;
+    root["led_gpio"]             = settings.led_gpio;
 }
 
 StateUpdateResult EMSESPSettings::update(JsonObject & root, EMSESPSettings & settings) {
@@ -49,6 +53,10 @@ StateUpdateResult EMSESPSettings::update(JsonObject & root, EMSESPSettings & set
     settings.shower_timer         = root["shower_timer"] | EMSESP_DEFAULT_SHOWER_TIMER;
     settings.shower_alert         = root["shower_alert"] | EMSESP_DEFAULT_SHOWER_ALERT;
     settings.hide_led             = root["hide_led"] | EMSESP_DEFAULT_HIDE_LED;
+    settings.rx_gpio              = root["rx_gpio"] | EMSESP_DEFAULT_RX_GPIO;
+    settings.tx_gpio              = root["tx_gpio"] | EMSESP_DEFAULT_TX_GPIO;
+    settings.dallas_gpio          = root["dallas_gpio"] | EMSESP_DEFAULT_DALLAS_GPIO;
+    settings.led_gpio             = root["led_gpio"] | EMSESP_DEFAULT_LED_GPIO;
 
     return StateUpdateResult::CHANGED;
 }

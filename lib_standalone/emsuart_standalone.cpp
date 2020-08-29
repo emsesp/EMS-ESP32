@@ -26,7 +26,7 @@ namespace emsesp {
 /*
  * init UART0 driver
  */
-void EMSuart::start(uint8_t tx_mode) {
+void EMSuart::start(uint8_t tx_mode, uint8_t rx_gpio, uint8_t tx_gpio) {
 }
 
 /*

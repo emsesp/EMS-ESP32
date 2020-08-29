@@ -36,7 +36,9 @@ void Sensors::start() {
     reload();
 
 #ifndef EMSESP_STANDALONE
-    bus_.begin(SENSOR_GPIO);
+    if (dallas_gpio_) {
+        bus_.begin(dallas_gpio_);
+    }
 #endif
 }
 
@@ -46,6 +48,8 @@ void Sensors::reload() {
     EMSESP::esp8266React.getMqttSettingsService()->read([&](MqttSettings & settings) {
         mqtt_format_ = settings.mqtt_format; // single, nested or ha
     });
+
+    EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) { dallas_gpio_ = settings.dallas_gpio; });
 
     if (mqtt_format_ == MQTT_format::HA) {
         for (uint8_t i = 0; i < MAX_SENSORS; registered_ha_[i++] = false)

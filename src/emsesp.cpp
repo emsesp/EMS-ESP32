@@ -142,14 +142,15 @@ void EMSESP::watch_id(uint16_t watch_id) {
 // resets all counters and bumps the UART
 // this is called when the tx_mode is persisted in the FS either via Web UI or the console
 void EMSESP::init_tx() {
-    // get the tx_mode
     uint8_t tx_mode;
-    EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) { tx_mode = settings.tx_mode; });
+    EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) {
+        tx_mode = settings.tx_mode;
 
 #ifndef EMSESP_FORCE_SERIAL
-    EMSuart::stop();
-    EMSuart::start(tx_mode);
+        EMSuart::stop();
+        EMSuart::start(tx_mode, settings.rx_gpio, settings.tx_gpio);
 #endif
+    });
 
     txservice_.start(); // sends out request to EMS bus for all devices
 

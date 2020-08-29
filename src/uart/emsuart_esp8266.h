@@ -71,7 +71,7 @@ class EMSuart {
     EMSuart()  = default;
     ~EMSuart() = default;
 
-    static void ICACHE_FLASH_ATTR     start(uint8_t tx_mode);
+    static void ICACHE_FLASH_ATTR     start(const uint8_t tx_mode, const uint8_t rx_gpio, const uint8_t tx_gpio);
     static void ICACHE_FLASH_ATTR     stop();
     static void ICACHE_FLASH_ATTR     restart();
     static void ICACHE_FLASH_ATTR     send_poll(uint8_t data);

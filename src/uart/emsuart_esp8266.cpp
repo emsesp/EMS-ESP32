@@ -47,11 +47,11 @@ void ICACHE_RAM_ATTR EMSuart::emsuart_rx_intr_handler(void * para) {
     if (USIS(EMSUART_UART) & ((1 << UIBD))) { // BREAK detection = End of EMS data block
         USC0(EMSUART_UART) &= ~(1 << UCBRK);  // reset tx-brk
         if (emsTxBufIdx < emsTxBufLen) {      // irq tx_mode is interrupted by <brk>
-            emsTxBufIdx  = emsTxBufLen + 1;   // stop tx
+            emsTxBufIdx = emsTxBufLen + 1;    // stop tx
             // drop_next_rx = true;              // we have trash in buffer
         }
-        USIC(EMSUART_UART) = (1 << UIBD);   // INT clear the BREAK detect interrupt
-        length = 0;
+        USIC(EMSUART_UART) = (1 << UIBD); // INT clear the BREAK detect interrupt
+        length             = 0;
         while ((USS(EMSUART_UART) >> USRXC) & 0x0FF) { // read fifo into buffer
             uint8_t rx = USF(EMSUART_UART);
             if (length < EMS_MAXBUFFERSIZE) {
@@ -98,7 +98,7 @@ void ICACHE_RAM_ATTR EMSuart::emsuart_tx_timer_intr_handler() {
         timer1_write(EMSUART_TX_BRK_TIMER);
     } else {
         USC0(EMSUART_UART) &= ~(1 << UCBRK); // reset <BRK>
-        sending_           = false;
+        sending_ = false;
     }
 }
 
@@ -113,7 +113,7 @@ void ICACHE_FLASH_ATTR EMSuart::emsuart_flush_fifos() {
 /*
  * init UART0 driver
  */
-void ICACHE_FLASH_ATTR EMSuart::start(uint8_t tx_mode) {
+void ICACHE_FLASH_ATTR EMSuart::start(const uint8_t tx_mode, const uint8_t rx_gpio, const uint8_t tx_gpio) {
     if (tx_mode_ != 0xFF) { // it's a restart no need to configure uart
         tx_mode_ = tx_mode;
         restart();
@@ -137,7 +137,7 @@ void ICACHE_FLASH_ATTR EMSuart::start(uint8_t tx_mode) {
     PIN_FUNC_SELECT(PERIPHS_IO_MUX_U0RXD_U, FUNC_U0RXD);
 
     // set 9600, 8 bits, no parity check, 1 stop bit
-    USD(EMSUART_UART) = (UART_CLK_FREQ / EMSUART_BAUD);
+    USD(EMSUART_UART)  = (UART_CLK_FREQ / EMSUART_BAUD);
     USC0(EMSUART_UART) = EMSUART_CONFIG; // 8N1
     emsuart_flush_fifos();
 
@@ -161,8 +161,11 @@ void ICACHE_FLASH_ATTR EMSuart::start(uint8_t tx_mode) {
     // disable esp debug which will go to Tx and mess up the line - see https://github.com/espruino/Espruino/issues/655
     system_set_os_print(0);
 
-    // swap Rx and Tx pins to use GPIO13 (D7) and GPIO15 (D8) respectively
-    system_uart_swap();
+    if (tx_gpio == 1 && rx_gpio == 3) {
+        system_uart_de_swap();
+    } else if (tx_gpio == 15 && rx_gpio == 13) {
+        system_uart_swap(); // swap Rx and Tx pins to use GPIO13 (D7) and GPIO15 (D8) respectively
+    }
 
     ETS_UART_INTR_ATTACH(emsuart_rx_intr_handler, nullptr);
     drop_next_rx = true;
@@ -181,7 +184,7 @@ void ICACHE_FLASH_ATTR EMSuart::stop() {
     USIE(EMSUART_UART) = 0;
     USC0(EMSUART_UART) &= ~(1 << UCBRK); // clear BRK bit
     timer1_disable();
-    sending_     = false;
+    sending_ = false;
 }
 
 /*
@@ -227,8 +230,8 @@ uint16_t ICACHE_FLASH_ATTR EMSuart::transmit(uint8_t * buf, uint8_t len) {
             emsTxBuf[i] = buf[i];
         }
         USF(EMSUART_UART) = buf[0]; // send first byte
-        emsTxBufIdx = 0;
-        emsTxBufLen = len;
+        emsTxBufIdx       = 0;
+        emsTxBufLen       = len;
         if (tx_mode_ > 100 && len > 1) {
             timer1_write(EMSUART_TX_WAIT_REPLY); // large delay after first byte
         } else {

@@ -35,6 +35,25 @@
 #define EMSESP_DEFAULT_SHOWER_ALERT false
 #define EMSESP_DEFAULT_HIDE_LED false
 
+// Default GPIO PIN definitions
+#if defined(ESP8266)
+#define EMSESP_DEFAULT_RX_GPIO 13     // UART0, swapped
+#define EMSESP_DEFAULT_TX_GPIO 15     // UART0, swapped
+#define EMSESP_DEFAULT_DALLAS_GPIO 14 // D5
+#define EMSESP_DEFAULT_LED_GPIO 2     // onboard LED
+#elif defined(ESP32)
+#define EMSESP_DEFAULT_RX_GPIO 23     // D7 on Wemos D1-32, OR 17 for UART2 on Lolin D32
+#define EMSESP_DEFAULT_TX_GPIO 5      // D8 on Wemos D1-32, OR 16 for UART2 on Lolin D32
+#define EMSESP_DEFAULT_DALLAS_GPIO 18 // 18 on Wemos D1-32, 14 on LOLIN D32
+#define EMSESP_DEFAULT_LED_GPIO 2     // 2 on Wemos D1-32, 5 on LOLIN D32
+#else
+// for standalone
+#define EMSESP_DEFAULT_RX_GPIO 0
+#define EMSESP_DEFAULT_TX_GPIO 0
+#define EMSESP_DEFAULT_DALLAS_GPIO 0
+#define EMSESP_DEFAULT_LED_GPIO 0
+#endif
+
 namespace emsesp {
 
 enum MQTT_format : uint8_t { SINGLE = 1, NESTED, HA, CUSTOM };
@@ -50,6 +69,10 @@ class EMSESPSettings {
     int8_t   syslog_level; // uuid::log::Level
     uint32_t syslog_mark_interval;
     String   syslog_host;
+    uint8_t  rx_gpio;
+    uint8_t  tx_gpio;
+    uint8_t  dallas_gpio;
+    uint8_t  led_gpio;
 
     static void              read(EMSESPSettings & settings, JsonObject & root);
     static StateUpdateResult update(JsonObject & root, EMSESPSettings & settings);

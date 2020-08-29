@@ -61,7 +61,7 @@ void IRAM_ATTR EMSuart::emsuart_rx_intr_handler(void * para) {
     static uint8_t length;
     portENTER_CRITICAL(&mux);
     if (EMS_UART.int_st.brk_det) {
-        EMS_UART.int_clr.brk_det = 1;    // clear flag
+        EMS_UART.int_clr.brk_det = 1; // clear flag
         length                   = 0;
         while (EMS_UART.status.rxfifo_cnt) {
             uint8_t rx = EMS_UART.fifo.rw_byte; // read all bytes from fifo
@@ -79,7 +79,6 @@ void IRAM_ATTR EMSuart::emsuart_rx_intr_handler(void * para) {
     }
     portEXIT_CRITICAL(&mux);
 }
-
 
 void IRAM_ATTR EMSuart::emsuart_tx_timer_intr_handler() {
     if (emsTxBufLen == 0) {
@@ -106,7 +105,7 @@ void IRAM_ATTR EMSuart::emsuart_tx_timer_intr_handler() {
 /*
  * init UART driver
  */
-void EMSuart::start(const uint8_t tx_mode) {
+void EMSuart::start(const uint8_t tx_mode, const uint8_t rx_gpio, const uint8_t tx_gpio) {
     if (tx_mode_ != 0xFF) { // uart already initialized
         tx_mode_ = tx_mode;
         restart();
@@ -121,8 +120,9 @@ void EMSuart::start(const uint8_t tx_mode) {
         .stop_bits = UART_STOP_BITS_1,
         .flow_ctrl = UART_HW_FLOWCTRL_DISABLE,
     };
+
     uart_param_config(EMSUART_UART, &uart_config);
-    uart_set_pin(EMSUART_UART, EMSUART_TXPIN, EMSUART_RXPIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
+    uart_set_pin(EMSUART_UART, tx_gpio, rx_gpio, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
     EMS_UART.int_ena.val             = 0;          // disable all intr.
     EMS_UART.int_clr.val             = 0xFFFFFFFF; // clear all intr. flags
     EMS_UART.idle_conf.tx_brk_num    = 10;         // breaklength 10 bit
@@ -132,7 +132,7 @@ void EMSuart::start(const uint8_t tx_mode) {
     uart_isr_register(EMSUART_UART, emsuart_rx_intr_handler, NULL, ESP_INTR_FLAG_IRAM, NULL);
     xTaskCreate(emsuart_recvTask, "emsuart_recvTask", 2048, NULL, configMAX_PRIORITIES - 1, NULL);
 
-    timer = timerBegin(0, 80, true);                                    // timer prescale to 1 us, countup
+    timer = timerBegin(0, 80, true);                                   // timer prescale to 1 us, countup
     timerAttachInterrupt(timer, &emsuart_tx_timer_intr_handler, true); // Timer with edge interrupt
     restart();
 }
@@ -160,11 +160,11 @@ void EMSuart::restart() {
     emsTxBufIdx              = 0;
     emsTxBufLen              = 0;
     if (tx_mode_ > 100) {
-       emsTxWait = EMSUART_TX_BIT_TIME * (tx_mode_ - 90);
+        emsTxWait = EMSUART_TX_BIT_TIME * (tx_mode_ - 90);
     } else {
-       emsTxWait = EMSUART_TX_BIT_TIME * (tx_mode_ + 10);
+        emsTxWait = EMSUART_TX_BIT_TIME * (tx_mode_ + 10);
     }
-    if(tx_mode_ == EMS_TXMODE_NEW) {
+    if (tx_mode_ == EMS_TXMODE_NEW) {
         EMS_UART.conf0.txd_brk = 1;
     } else {
         EMS_UART.conf0.txd_brk = 0;
