@@ -10,11 +10,10 @@ cache:
 
 env:
   global:
-    #   - BUILDER_TOTAL_THREADS=4
     - BUILDER_TOTAL_THREADS=1
     - OWNER=${TRAVIS_REPO_SLUG%/*}
-    - DEV=${OWNER/proddy/dev}
-    - BRANCH=${TRAVIS_BRANCH/dev/}
+    - DEV=${OWNER/proddy/v2}
+    - BRANCH=${TRAVIS_BRANCH/v2/}
     - TAG=${DEV}${BRANCH:+_}${BRANCH}
 
 install:
@@ -30,22 +29,16 @@ branches:
 
 script:
   - ./scripts/build.sh
-# - ./scripts/build.sh -p
 
 stages:
   - name: Release
-#   if: type IN (cron, api)
 
 jobs:
   include:
     - stage: Release
-#     env: BUILDER_THREAD=0
-#   - env: BUILDER_THREAD=1
-#   - env: BUILDER_THREAD=2
-#   - env: BUILDER_THREAD=3
 
 before_deploy:
-  - export FIRMWARE_VERSION=$(grep -E '^#define APP_VERSION' ./src/version.h | awk '{print $3}' | sed 's/"//g')
+  - export FIRMWARE_VERSION=$(grep -E '^#define EMSESP_APP_VERSION' ./src/version.h | awk '{print $3}' | sed 's/"//g')
   - git tag -f travis-${TAG}-build
   - git remote add gh
     https://${OWNER}:${GITHUB_TOKEN}@github.com/${TRAVIS_REPO_SLUG}.git
@@ -56,13 +49,11 @@ before_deploy:
 deploy:
   provider: releases
   edge:
-  #  source: wenkokke/dpl
     branch: master
   token: ${GITHUB_TOKEN}
   file_glob: true
-  # file: "firmware/*.bin"
   file: "*.bin"
-  name: latest development build
+  name: latest v2 development builds
   release_notes:
     Version $FIRMWARE_VERSION.
     Automatic firmware builds of the current EMS-ESP branch built on $(date +'%F %T %Z') from commit $TRAVIS_COMMIT.
@@ -73,16 +64,9 @@ deploy:
   target_commitish: $TRAVIS_COMMIT
   on:
     tags: false
-    branch: dev
+    branch: v2
 
 notifications:
   email:
     on_success: change
     on_failure: change
-
-  webhooks:
-    urls:
-      - https://webhooks.gitter.im/e/57e15f7798656d888194
-    on_success: always
-    on_failure: never
-    on_start: never

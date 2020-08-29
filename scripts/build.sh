@@ -55,24 +55,6 @@ set_default_environments() {
     environments=$available
 }
 
-build_webui() {
-    cd ./tools/webfilesbuilder
-
-    # Build system uses gulpscript.js to build web interface
-    if [ ! -e node_modules/gulp/bin/gulp.js ]; then
-        echo "--------------------------------------------------------------"
-        echo "Installing dependencies..."
-        npm ci
-    fi
-
-    # Recreate web interface - "node ./tools/webfilesbuilder/node_modules/gulp/bin/gulp.js --cwd ./tools/webfilesbuilder"
-    echo "--------------------------------------------------------------"
-    echo "Building web interface..."
-    node node_modules/gulp/bin/gulp.js || exit
-
-    cd ../..
-}
-
 build_environments() {
     echo "--------------------------------------------------------------"
     echo "Building firmware images..."
@@ -95,7 +77,7 @@ build_environments() {
 
 destination=firmware
 version_file=./src/version.h
-version=$(grep -E '^#define APP_VERSION' $version_file | awk '{print $3}' | sed 's/"//g')
+version=$(grep -E '^#define EMSESP_APP_VERSION' $version_file | awk '{print $3}' | sed 's/"//g')
 
 if ${TRAVIS:-false}; then
     git_revision=${TRAVIS_COMMIT::7}
@@ -183,5 +165,5 @@ echo "* TRAVIS_TAG = $TRAVIS_TAG"
 echo "* TRAVIS_BRANCH = $TRAVIS_BRANCH"
 echo "* TRAVIS_BUILD_STAGE_NAME = $TRAVIS_BUILD_STAGE_NAME"
 
-build_webui
 build_environments
+
