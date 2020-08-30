@@ -928,15 +928,15 @@ void Thermostat::process_RC10Set(std::shared_ptr<const Telegram> telegram) {
 // type 0x0165, ff
 void Thermostat::process_JunkersSet(std::shared_ptr<const Telegram> telegram) {
     std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
-    telegram->read_value(hc->daytemp, 17);   // is * 2
-    telegram->read_value(hc->nighttemp, 16); // is * 2
+    telegram->read_value(hc->daytemp, 17);     // is * 2
+    telegram->read_value(hc->nighttemp, 16);   // is * 2
     telegram->read_value(hc->nofrosttemp, 15); // is * 2
 }
 // type 0x0179, ff
 void Thermostat::process_JunkersSet2(std::shared_ptr<const Telegram> telegram) {
     std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
-    telegram->read_value(hc->daytemp, 7);   // is * 2
-    telegram->read_value(hc->nighttemp, 6); // is * 2
+    telegram->read_value(hc->daytemp, 7);     // is * 2
+    telegram->read_value(hc->nighttemp, 6);   // is * 2
     telegram->read_value(hc->nofrosttemp, 5); // is * 2
 }
 
@@ -1143,14 +1143,9 @@ void Thermostat::console_commands(Shell & shell, unsigned int context) {
     EMSESPShell::commands->add_command(ShellContext::THERMOSTAT,
                                        CommandFlags::ADMIN,
                                        flash_string_vector{F_(set), F_(master)},
-                                       flash_string_vector{F_(deviceid_optional)},
+                                       flash_string_vector{F_(deviceid_mandatory)},
                                        [](Shell & shell, const std::vector<std::string> & arguments) {
-                                           uint8_t value;
-                                           if (arguments.empty()) {
-                                               value = EMSESP_DEFAULT_MASTER_THERMOSTAT;
-                                           } else {
-                                               value = Helpers::hextoint(arguments.front().c_str());
-                                           }
+                                           uint8_t value = Helpers::hextoint(arguments.front().c_str());
 
                                            EMSESP::emsespSettingsService.update(
                                                [&](EMSESPSettings & settings) {
