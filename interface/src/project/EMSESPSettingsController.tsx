@@ -102,18 +102,6 @@ function EMSESPSettingsControllerForm(props: EMSESPSettingsControllerFormProps) 
             />
             <TextValidator
                 validators={['required', 'isNumber', 'minNumber:0', 'maxNumber:40']}
-                errorMessages={['LED GPIO is required', "Must be a number", "Must be 0 or higher", "Max value is 255"]}
-                name="led_gpio"
-                label="LED GPIO pin (0=none)"
-                fullWidth
-                variant="outlined"
-                value={data.led_gpio}
-                type="number"
-                onChange={handleValueChange('led_gpio')}
-                margin="normal"
-            />
-            <TextValidator
-                validators={['required', 'isNumber', 'minNumber:0', 'maxNumber:40']}
                 errorMessages={['Dallas GPIO is required', "Must be a number", "Must be 0 or higher", "Max value is 255"]}
                 name="dallas_gpio"
                 label="Dallas GPIO pin (0=none)"
@@ -124,6 +112,18 @@ function EMSESPSettingsControllerForm(props: EMSESPSettingsControllerFormProps) 
                 onChange={handleValueChange('dallas_gpio')}
                 margin="normal"
             />
+            <TextValidator
+                validators={['required', 'isNumber', 'minNumber:0', 'maxNumber:40']}
+                errorMessages={['LED GPIO is required', "Must be a number", "Must be 0 or higher", "Max value is 255"]}
+                name="led_gpio"
+                label="LED GPIO pin (0=none)"
+                fullWidth
+                variant="outlined"
+                value={data.led_gpio}
+                type="number"
+                onChange={handleValueChange('led_gpio')}
+                margin="normal"
+            />
             <BlockFormControlLabel
                 control={
                     <Checkbox
@@ -132,7 +132,7 @@ function EMSESPSettingsControllerForm(props: EMSESPSettingsControllerFormProps) 
                         value="hide_led"
                     />
                 }
-                label="Hide LED"
+                label="Invert/Hide LED"
             />
             <BlockFormControlLabel
                 control={

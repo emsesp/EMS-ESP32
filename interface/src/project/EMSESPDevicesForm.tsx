@@ -152,7 +152,7 @@ class EMSESPDevicesForm extends Component<EMSESPDevicesFormProps, EMSESPDevicesF
             <TableHead>
               <TableRow>
                 <StyledTableCell>ID</StyledTableCell>
-                <StyledTableCell align="left">Temperature</StyledTableCell>
+                <StyledTableCell align="right">Temperature</StyledTableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -161,8 +161,8 @@ class EMSESPDevicesForm extends Component<EMSESPDevicesFormProps, EMSESPDevicesF
                   <TableCell component="th" scope="row">
                     {sensorData.id}
                   </TableCell>
-                  <TableCell align="left">
-                    {sensorData.temp}&deg;C
+                  <TableCell align="right">
+                    {sensorData.temp.toFixed(1)}&deg;C
                   </TableCell>
                 </TableRow>
               ))}
@@ -285,7 +285,7 @@ class EMSESPDevicesForm extends Component<EMSESPDevicesFormProps, EMSESPDevicesF
                   <TableCell component="th" scope="row">
                     {deviceData.name}
                   </TableCell>
-                  <TableCell align="left">
+                  <TableCell align="right">
                     {deviceData.value}
                   </TableCell>
                 </TableRow>

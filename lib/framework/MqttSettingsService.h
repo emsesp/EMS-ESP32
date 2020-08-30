@@ -6,12 +6,13 @@
 #include <FSPersistence.h>
 #include <AsyncMqttClient.h>
 #include <ESPUtils.h>
+#include <uuid/common.h>
 
 #include "../../src/system.h"
 #include "../../src/mqtt.h"
 #include "../../src/sensors.h"
 
-#define MQTT_RECONNECTION_DELAY 5000
+#define MQTT_RECONNECTION_DELAY 1000
 
 #define MQTT_SETTINGS_FILE "/config/mqttSettings.json"
 #define MQTT_SETTINGS_SERVICE_PATH "/rest/mqttSettings"
