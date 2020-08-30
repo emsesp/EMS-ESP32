@@ -51,17 +51,24 @@ Note there are some noticeable different to be aware of in version 2:
 
 ## **Uploading the firmware**
 
-- If you're not using PlatformIO, use the command-line and Python. You can download Python from https://www.python.org/downloads/. Make sure you also get:
-  - `esptool`, install using the command `pip install esptool`
-  - and for OTA updates later, `espota` from https://github.com/esp8266/Arduino/blob/master/tools/espota.py using `python espota.py --debug --progress --port 8266 --auth ems-esp-neo -i ems-esp.local -f <firmware.bin>` 
+### *Using PlatformIO*:
+- create a new file called `pio_local.ini` and add
+```yaml
+upload_protocol = esptool
+upload_port = <COM>
+```
+replacing <COM> with the port for example on Windows `COM4`, or Linux/OSX `/dev/cu.wchusbserial1410`
+- execute the command `pio run -t upload`
 
-- Grab the latest firmware binary from https://github.com/proddy/EMS-ESP/releases/tag/travis-v2-build
-- Uploading directly via USB.
-  
-  For ESP8266: `esptool.py -p <COM PORT> -b 921600 write_flash 0x00000 <firmware.bin>`
-  note: if this fails try a lower speed like `115200` instead of `921600`.
-  
-  For ESP32: `esptool.py --chip esp32 --port "COM6" --baud 921600 --before default_reset --after hard_reset write_flash -z --flash_mode dio --flash_freq 40m --flash_size detect 0x1000 XX\.platformio\packages\framework-arduinoespressif32\tools\sdk\bin\bootloader_dio_40m.bin 0x8000 XX\.pio\build\esp32\partitions.bin 0xe000 XX\.platformio\packages\framework-arduinoespressif32\tools\partitions\boot_app0.bin 0x10000  <firmware.bin>`
+### *Not using PlatformIO*:
+
+Here we'll use the command-line. You'll need:
+
+- `esptool`, install [Python]( https://www.python.org/downloads/) and then do `pip install esptool`. If `pip` doesn't work, use `pip3`.
+- `espota` from https://github.com/esp8266/Arduino/blob/master/tools/espota.py
+
+- The latest firmware binary from https://github.com/proddy/EMS-ESP/releases
+- Uploading directly via USB with the ESP8266: `esptool.py -p <COM PORT> -b 921600 write_flash 0x00000 <firmware.bin>`  
 - Uploading over WiFi: `espota.py --debug --progress --port 8266 --auth ems-esp-neo -i <IP address> -f <firmware.bin>`
 
 ## **Setting EMS-ESP up for the first time**
@@ -72,7 +79,7 @@ Note there are some noticeable different to be aware of in version 2:
 
  - First thing to check is if Tx is working and that you have a connect to the EMS bus. If it's showing an error try changing the Tx Mode from the settings page. Then check the Status (no need to restart EMS-ESP).
 
- - If Rx incomplete telegrams are reported in the Web UI, don't panic. Some telegrams can be missed and this is usually due to noise on line.
+ - If Rx incomplete telegrams are reported in the Web UI, don't panic. Some telegrams can be missed and this is usually caused by noise interference on the line.
 
 ## **Using the  Console**
 
