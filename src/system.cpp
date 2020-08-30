@@ -717,7 +717,9 @@ bool System::check_upgrade() {
         },
         "local");
 
+    Serial.println(F("Restarting..."));
     Serial.end();
+    restart(); // force a restart, nice and tidy
     return true;
 #else
     return false;
