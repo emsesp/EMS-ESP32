@@ -26,18 +26,20 @@ uuid::log::Logger Thermostat::logger_{F_(thermostat), uuid::log::Facility::CONSO
 
 Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_id, const std::string & version, const std::string & name, uint8_t flags, uint8_t brand)
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
-
-    uint8_t actual_master_thermostat = EMSESP::actual_master_thermostat();                           // what we're actually using
+    uint8_t actual_master_thermostat = EMSESP::actual_master_thermostat(); // what we're actually using
     uint8_t master_thermostat        = EMSESP_DEFAULT_MASTER_THERMOSTAT;
     EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) {
         master_thermostat = settings.master_thermostat; // what the user has defined
     });
+
+    uint8_t model = this->model();
+
     // if we're on auto mode, register this thermostat if it has a device id of 0x10, 0x17 or 0x18
     // or if its the master thermostat we defined
     // see https://github.com/proddy/EMS-ESP/issues/362#issuecomment-629628161
-    if ((master_thermostat == device_id) || ((master_thermostat == EMSESP_DEFAULT_MASTER_THERMOSTAT) && (device_id < 0x19) &&
-         ((actual_master_thermostat == EMSESP_DEFAULT_MASTER_THERMOSTAT) || (device_id < actual_master_thermostat)))) {
-
+    if ((master_thermostat == device_id)
+        || ((master_thermostat == EMSESP_DEFAULT_MASTER_THERMOSTAT) && (device_id < 0x19)
+            && ((actual_master_thermostat == EMSESP_DEFAULT_MASTER_THERMOSTAT) || (device_id < actual_master_thermostat)))) {
         EMSESP::actual_master_thermostat(device_id);
         actual_master_thermostat = device_id;
         this->reserve_mem(25); // reserve some space for the telegram registries, to avoid memory fragmentation
@@ -47,7 +49,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
         register_telegram_type(EMS_TYPE_RCTime, F("RCTime"), false, [&](std::shared_ptr<const Telegram> t) { process_RCTime(t); });
     }
     // RC10
-    if (flags == EMSdevice::EMS_DEVICE_FLAG_RC10) {
+    if (model == EMSdevice::EMS_DEVICE_FLAG_RC10) {
         monitor_typeids = {0xB1};
         set_typeids     = {0xB0};
         for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
@@ -56,7 +58,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
         }
 
         // RC35
-    } else if ((flags == EMSdevice::EMS_DEVICE_FLAG_RC35) || (flags == EMSdevice::EMS_DEVICE_FLAG_RC30_1)) {
+    } else if ((model == EMSdevice::EMS_DEVICE_FLAG_RC35) || (model == EMSdevice::EMS_DEVICE_FLAG_RC30_1)) {
         monitor_typeids = {0x3E, 0x48, 0x52, 0x5C};
         set_typeids     = {0x3D, 0x47, 0x51, 0x5B};
         timer_typeids   = {0x3F, 0x49, 0x53, 0x5D};
@@ -68,7 +70,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
         register_telegram_type(EMS_TYPE_wwSettings, F("WWSettings"), true, [&](std::shared_ptr<const Telegram> t) { process_RC35wwSettings(t); });
 
         // RC20
-    } else if (flags == EMSdevice::EMS_DEVICE_FLAG_RC20) {
+    } else if (model == EMSdevice::EMS_DEVICE_FLAG_RC20) {
         monitor_typeids = {0x91};
         set_typeids     = {0xA8};
         if (actual_master_thermostat == device_id) {
@@ -80,7 +82,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
             register_telegram_type(0xAF, F("RC20Remote"), false, [&](std::shared_ptr<const Telegram> t) { process_RC20Remote(t); });
         }
         // RC20 newer
-    } else if (flags == EMSdevice::EMS_DEVICE_FLAG_RC20_2) {
+    } else if (model == EMSdevice::EMS_DEVICE_FLAG_RC20_2) {
         monitor_typeids = {0xAE};
         set_typeids     = {0xAD};
         if (actual_master_thermostat == device_id) {
@@ -92,7 +94,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
             register_telegram_type(0xAF, F("RC20Remote"), false, [&](std::shared_ptr<const Telegram> t) { process_RC20Remote(t); });
         }
         // RC30
-    } else if (flags == EMSdevice::EMS_DEVICE_FLAG_RC30) {
+    } else if (model == EMSdevice::EMS_DEVICE_FLAG_RC30) {
         monitor_typeids = {0x41};
         set_typeids     = {0xA7};
         for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
@@ -101,13 +103,13 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
         }
 
         // EASY
-    } else if (flags == EMSdevice::EMS_DEVICE_FLAG_EASY) {
+    } else if (model == EMSdevice::EMS_DEVICE_FLAG_EASY) {
         monitor_typeids = {0x0A};
         set_typeids     = {};
         register_telegram_type(monitor_typeids[0], F("EasyMonitor"), false, [&](std::shared_ptr<const Telegram> t) { process_EasyMonitor(t); });
 
         // RC300/RC100
-    } else if ((flags == EMSdevice::EMS_DEVICE_FLAG_RC300) || (flags == EMSdevice::EMS_DEVICE_FLAG_RC100)) {
+    } else if ((model == EMSdevice::EMS_DEVICE_FLAG_RC300) || (model == EMSdevice::EMS_DEVICE_FLAG_RC100)) {
         monitor_typeids = {0x02A5, 0x02A6, 0x02A7, 0x02A8};
         set_typeids     = {0x02B9, 0x02BA, 0x02BB, 0x02BC};
         for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
@@ -118,7 +120,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
         register_telegram_type(0x31E, F("RC300WWmode"), false, [&](std::shared_ptr<const Telegram> t) { process_RC300WWmode(t); });
 
         // JUNKERS/HT3
-    } else if (flags == EMSdevice::EMS_DEVICE_FLAG_JUNKERS) {
+    } else if (model == EMSdevice::EMS_DEVICE_FLAG_JUNKERS) {
         monitor_typeids = {0x016F, 0x0170, 0x0171, 0x0172};
         set_typeids     = {0x0165, 0x0166, 0x0167, 0x0168};
         for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
@@ -126,7 +128,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
             register_telegram_type(set_typeids[i], F("JunkersSet"), false, [&](std::shared_ptr<const Telegram> t) { process_JunkersSet(t); });
         }
 
-    } else if (flags == (EMSdevice::EMS_DEVICE_FLAG_JUNKERS | EMSdevice::EMS_DEVICE_FLAG_JUNKERS_2)) {
+    } else if (model == (EMSdevice::EMS_DEVICE_FLAG_JUNKERS | EMSdevice::EMS_DEVICE_FLAG_JUNKERS_2)) {
         monitor_typeids = {0x016F, 0x0170, 0x0171, 0x0172};
         set_typeids     = {0x0179, 0x017A, 0x017B, 0x017C};
         for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
@@ -139,7 +141,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
         mqtt_format_ = settings.mqtt_format; // single, nested or ha
     });
 
-    if (actual_master_thermostat != device_id) { 
+    if (actual_master_thermostat != device_id) {
         LOG_DEBUG(F("Adding new thermostat with device ID 0x%02X"), device_id);
         return; // don't fetch data if more than 1 thermostat
     }
@@ -162,7 +164,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
 
 // prepare data for Web UI
 void Thermostat::device_info(JsonArray & root) {
-    uint8_t flags = (this->flags() & 0x0F); // specific thermostat characteristics, strip the option bits
+    uint8_t flags = this->model();
 
     for (const auto & hc : heating_circuits_) {
         if (!Helpers::hasValue(hc->setpoint_roomTemp)) {
@@ -267,7 +269,7 @@ void Thermostat::publish_values() {
         return;
     }
 
-    uint8_t flags    = (this->flags() & 0x0F); // specific thermostat characteristics, stripping the option bits
+    uint8_t flags    = this->model();
     bool    has_data = false;
 
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
@@ -275,7 +277,7 @@ void Thermostat::publish_values() {
     JsonObject                                      dataThermostat;
 
     // add external temp and other stuff specific to the RC30 and RC35
-//    if ((flags == EMS_DEVICE_FLAG_RC35 || flags == EMS_DEVICE_FLAG_RC30_1) && (mqtt_format_ == MQTT_format::SINGLE || mqtt_format_ == MQTT_format::CUSTOM)) {
+    //    if ((flags == EMS_DEVICE_FLAG_RC35 || flags == EMS_DEVICE_FLAG_RC30_1) && (mqtt_format_ == MQTT_format::SINGLE || mqtt_format_ == MQTT_format::CUSTOM)) {
     if (flags == EMS_DEVICE_FLAG_RC35 || flags == EMS_DEVICE_FLAG_RC30_1) {
         if (datetime_.size()) {
             rootThermostat["time"] = datetime_.c_str();
@@ -580,7 +582,7 @@ void Thermostat::register_mqtt_ha_config(uint8_t hc_num) {
     doc["temp_step"] = "0.5";
 
     JsonArray modes = doc.createNestedArray("modes");
-    uint8_t   flags = (this->flags() & 0x0F);
+    uint8_t   flags = this->model();
     if (flags == EMSdevice::EMS_DEVICE_FLAG_RC20_2) {
         modes.add("night");
         modes.add("day");
@@ -741,7 +743,7 @@ std::string Thermostat::mode_tostring(uint8_t mode) {
 void Thermostat::show_values(uuid::console::Shell & shell) {
     EMSdevice::show_values(shell); // always call this to show header
 
-    uint8_t flags = (this->flags() & 0x0F); // specific thermostat characteristics, strip the option bits
+    uint8_t flags = this->model();
 
     if (datetime_.size()) {
         shell.printfln(F("  Clock: %s"), datetime_.c_str());
@@ -1513,7 +1515,7 @@ void Thermostat::set_mode_n(const uint8_t mode, const uint8_t hc_num) {
         break;
     }
 
-    switch (this->flags() & 0x0F) {
+    switch (this->model()) {
     case EMSdevice::EMS_DEVICE_FLAG_RC20:
         offset          = EMS_OFFSET_RC20Set_mode;
         validate_typeid = set_typeids[hc_p];
@@ -1610,7 +1612,7 @@ void Thermostat::set_temperature(const float temperature, const uint8_t mode, co
         return;
     }
 
-    uint8_t  model           = this->flags() & 0x0F;
+    uint8_t  model           = this->model();
     int8_t   offset          = -1; // we use -1 to check if there is a value
     uint8_t  factor          = 2;  // some temperatures only use 1
     uint16_t validate_typeid = monitor_typeids[hc->hc_num() - 1];
@@ -1819,7 +1821,7 @@ void Thermostat::add_commands() {
     register_mqtt_cmd(F("temp"), [&](const char * value, const int8_t id) { set_temp(value, id); });
     register_mqtt_cmd(F("mode"), [&](const char * value, const int8_t id) { set_mode(value, id); });
 
-    uint8_t model = this->flags() & 0x0F;
+    uint8_t model = this->model();
     switch (model) {
     case EMS_DEVICE_FLAG_RC20_2:
         register_mqtt_cmd(F("nighttemp"), [&](const char * value, const int8_t id) { set_nighttemp(value, id); });

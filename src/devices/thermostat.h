@@ -105,6 +105,11 @@ class Thermostat : public EMSdevice {
     void console_commands(Shell & shell, unsigned int context);
     void add_commands();
 
+    // specific thermostat characteristics, stripping the option bits at pos 6 and 7
+    inline uint8_t model() const {
+        return (this->flags() & 0x0F);
+    }
+
     // each thermostat has a list of heating controller type IDs for reading and writing
     std::vector<uint16_t> monitor_typeids;
     std::vector<uint16_t> set_typeids;

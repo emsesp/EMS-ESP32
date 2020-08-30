@@ -239,6 +239,31 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         shell.loop_all();
     }
 
+        if (command == "tc100") {
+        shell.printfln(F("Testing adding a TC100 thermostat to the EMS bus..."));
+
+        // add_device(0x10, 165, version, EMSdevice::Brand::BUDERUS);
+        // add_device(0x17, 125, version, EMSdevice::Brand::BUDERUS); // test unknown class test
+        // add_device(0x17, 93, version, EMSdevice::Brand::BUDERUS);
+        // add_device(0x17, 254, version, EMSdevice::Brand::BUDERUS); // test unknown product_id
+
+        // EMSESP::add_device(0x18, 157, version, EMSdevice::Brand::BOSCH); // Bosch CR100 - https://github.com/proddy/EMS-ESP/issues/355
+
+        std::string version("02.21");
+
+        // add a boiler
+        // EMSESP::add_device(0x08, 123, version, EMSdevice::Brand::BUDERUS); // Nefit Trendline
+
+        // add a thermostat
+        EMSESP::add_device(0x18, 202, version, EMSdevice::Brand::BOSCH); // Bosch TC100 - https://github.com/proddy/EMS-ESP/issues/474
+
+        // RCPLUSStatusMessage_HC1(0x01A5)
+        // uart_telegram({0x98, 0x00, 0xFF, 0x00, 0x01, 0xA5, 0x00, 0xCF, 0x21, 0x2E, 0x00, 0x00, 0x2E, 0x24,
+                    //    0x03, 0x25, 0x03, 0x03, 0x01, 0x03, 0x25, 0x00, 0xC8, 0x00, 0x00, 0x11, 0x01, 0x03});
+
+        shell.loop_all();
+    }
+
     if (command == "solar") {
         shell.printfln(F("Testing Solar"));
 
