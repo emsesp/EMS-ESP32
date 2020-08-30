@@ -62,7 +62,7 @@ void MqttSettingsService::begin() {
 }
 
 void MqttSettingsService::loop() {
-    if (_reconfigureMqtt || (_disconnectedAt && (unsigned long)(millis() - _disconnectedAt) >= MQTT_RECONNECTION_DELAY)) {
+    if (_reconfigureMqtt || (_disconnectedAt && (unsigned long)(uuid::get_uptime() - _disconnectedAt) >= MQTT_RECONNECTION_DELAY)) {
         // reconfigure MQTT client
         configureMqtt();
 
@@ -107,7 +107,7 @@ void MqttSettingsService::onMqttDisconnect(AsyncMqttClientDisconnectReason reaso
     // Serial.print(F("Disconnected from MQTT reason: "));
     // Serial.println((uint8_t)reason);
     _disconnectReason = reason;
-    _disconnectedAt   = millis();
+    _disconnectedAt   = uuid::get_uptime();
 }
 
 void MqttSettingsService::onConfigUpdated() {

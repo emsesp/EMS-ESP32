@@ -33,7 +33,7 @@ void NTPStatus::ntpStatus(AsyncWebServerRequest* request) {
   root["server"] = sntp_getservername(0);
 
   // device uptime in seconds
-  root["uptime"] = millis() / 1000;
+  root["uptime"] = uuid::get_uptime() / 1000;
 
   response->setLength();
   request->send(response);

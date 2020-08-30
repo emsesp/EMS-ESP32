@@ -26,7 +26,20 @@ uuid::log::Logger Thermostat::logger_{F_(thermostat), uuid::log::Facility::CONSO
 
 Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_id, const std::string & version, const std::string & name, uint8_t flags, uint8_t brand)
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
-    if (EMSESP::actual_master_thermostat() == 0) {
+
+    uint8_t actual_master_thermostat = EMSESP::actual_master_thermostat();                           // what we're actually using
+    uint8_t master_thermostat        = EMSESP_DEFAULT_MASTER_THERMOSTAT;
+    EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) {
+        master_thermostat = settings.master_thermostat; // what the user has defined
+    });
+    // if we're on auto mode, register this thermostat if it has a device id of 0x10, 0x17 or 0x18
+    // or if its the master thermostat we defined
+    // see https://github.com/proddy/EMS-ESP/issues/362#issuecomment-629628161
+    if ((master_thermostat == device_id) || ((master_thermostat == EMSESP_DEFAULT_MASTER_THERMOSTAT) && (device_id < 0x19) &&
+         ((actual_master_thermostat == EMSESP_DEFAULT_MASTER_THERMOSTAT) || (device_id < actual_master_thermostat)))) {
+
+        EMSESP::actual_master_thermostat(device_id);
+        actual_master_thermostat = device_id;
         this->reserve_mem(25); // reserve some space for the telegram registries, to avoid memory fragmentation
 
         // common telegram handlers
@@ -58,7 +71,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
     } else if (flags == EMSdevice::EMS_DEVICE_FLAG_RC20) {
         monitor_typeids = {0x91};
         set_typeids     = {0xA8};
-        if (EMSESP::actual_master_thermostat() == 0) {
+        if (actual_master_thermostat == device_id) {
             for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
                 register_telegram_type(monitor_typeids[i], F("RC20Monitor"), false, [&](std::shared_ptr<const Telegram> t) { process_RC20Monitor(t); });
                 register_telegram_type(set_typeids[i], F("RC20Set"), false, [&](std::shared_ptr<const Telegram> t) { process_RC20Set(t); });
@@ -70,7 +83,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
     } else if (flags == EMSdevice::EMS_DEVICE_FLAG_RC20_2) {
         monitor_typeids = {0xAE};
         set_typeids     = {0xAD};
-        if (EMSESP::actual_master_thermostat() == 0) {
+        if (actual_master_thermostat == device_id) {
             for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
                 register_telegram_type(monitor_typeids[i], F("RC20Monitor"), false, [&](std::shared_ptr<const Telegram> t) { process_RC20Monitor_2(t); });
                 register_telegram_type(set_typeids[i], F("RC20Set"), false, [&](std::shared_ptr<const Telegram> t) { process_RC20Set_2(t); });
@@ -122,29 +135,16 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
         }
     }
 
-    uint8_t master_thermostat = 0;
-    EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) {
-        master_thermostat = settings.master_thermostat; // what the user has defined
-    });
-
     EMSESP::esp8266React.getMqttSettingsService()->read([&](MqttSettings & settings) {
         mqtt_format_ = settings.mqtt_format; // single, nested or ha
     });
 
-    uint8_t actual_master_thermostat = EMSESP::actual_master_thermostat();                           // what we're actually using
-    uint8_t num_devices              = EMSESP::count_devices(EMSdevice::DeviceType::THERMOSTAT) + 1; // including this thermostat
-
-    // if we're on auto mode, register this thermostat if it has a device id of 0x10, 0x17 or 0x18
-    // or if its the master thermostat we defined
-    // see https://github.com/proddy/EMS-ESP/issues/362#issuecomment-629628161
-    if (((num_devices == 1) && (actual_master_thermostat == EMSESP_DEFAULT_MASTER_THERMOSTAT)) || (master_thermostat == device_id)) {
-        EMSESP::actual_master_thermostat(device_id);
-        LOG_DEBUG(F("Adding new thermostat with device ID 0x%02X (as master)"), device_id);
-        add_commands();
-    } else {
+    if (actual_master_thermostat != device_id) { 
         LOG_DEBUG(F("Adding new thermostat with device ID 0x%02X"), device_id);
         return; // don't fetch data if more than 1 thermostat
     }
+    LOG_DEBUG(F("Adding new thermostat with device ID 0x%02X (as master)"), device_id);
+    add_commands();
 
     // reserve some memory for the heating circuits (max 4 to start with)
     heating_circuits_.reserve(4);
@@ -275,7 +275,8 @@ void Thermostat::publish_values() {
     JsonObject                                      dataThermostat;
 
     // add external temp and other stuff specific to the RC30 and RC35
-    if ((flags == EMS_DEVICE_FLAG_RC35 || flags == EMS_DEVICE_FLAG_RC30_1) && (mqtt_format_ == MQTT_format::SINGLE || mqtt_format_ == MQTT_format::CUSTOM)) {
+//    if ((flags == EMS_DEVICE_FLAG_RC35 || flags == EMS_DEVICE_FLAG_RC30_1) && (mqtt_format_ == MQTT_format::SINGLE || mqtt_format_ == MQTT_format::CUSTOM)) {
+    if (flags == EMS_DEVICE_FLAG_RC35 || flags == EMS_DEVICE_FLAG_RC30_1) {
         if (datetime_.size()) {
             rootThermostat["time"] = datetime_.c_str();
         }
@@ -579,9 +580,24 @@ void Thermostat::register_mqtt_ha_config(uint8_t hc_num) {
     doc["temp_step"] = "0.5";
 
     JsonArray modes = doc.createNestedArray("modes");
-    modes.add("off");
-    modes.add("heat");
-    modes.add("auto");
+    uint8_t   flags = (this->flags() & 0x0F);
+    if (flags == EMSdevice::EMS_DEVICE_FLAG_RC20_2) {
+        modes.add("night");
+        modes.add("day");
+    } else if ((flags == EMSdevice::EMS_DEVICE_FLAG_RC300) || (flags == EMSdevice::EMS_DEVICE_FLAG_RC100)) {
+        modes.add("eco");
+        modes.add("comfort");
+        modes.add("auto");
+    } else if (flags == EMSdevice::EMS_DEVICE_FLAG_JUNKERS) {
+        modes.add("nofrost");
+        modes.add("eco");
+        modes.add("heat");
+        modes.add("auto");
+    } else { // default for all other thermostats
+        modes.add("night");
+        modes.add("day");
+        modes.add("auto");
+    }
 
     std::string topic(100, '\0'); // e.g homeassistant/climate/hc1/thermostat/config
     snprintf_P(&topic[0], topic.capacity() + 1, PSTR("homeassistant/climate/ems-esp/hc%d/config"), hc_num);
@@ -1146,7 +1162,6 @@ void Thermostat::console_commands(Shell & shell, unsigned int context) {
                                        flash_string_vector{F_(deviceid_mandatory)},
                                        [](Shell & shell, const std::vector<std::string> & arguments) {
                                            uint8_t value = Helpers::hextoint(arguments.front().c_str());
-
                                            EMSESP::emsespSettingsService.update(
                                                [&](EMSESPSettings & settings) {
                                                    settings.master_thermostat = value;

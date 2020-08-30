@@ -183,27 +183,27 @@ float Sensors::get_temperature_c(const uint8_t addr[]) {
 
     int16_t raw_value = ((int16_t)scratchpad[SCRATCHPAD_TEMP_MSB] << 8) | scratchpad[SCRATCHPAD_TEMP_LSB];
 
-    // Adjust based on device resolution
-    int resolution = 9 + ((scratchpad[SCRATCHPAD_CONFIG] >> 5) & 0x3);
-    switch (resolution) {
-    case 9:
-        raw_value &= ~0x1;
-        break;
-
-    case 10:
-        raw_value &= ~0x3;
-        break;
-
-    case 11:
-        raw_value &= ~0x7;
-        break;
-
-    case 12:
-        break;
+    if (addr[0] == TYPE_DS18S20) {
+        raw_value = (raw_value << 3) + 12 - scratchpad[SCRATCHPAD_CNT_REM];
+    } else {
+        // Adjust based on device resolution
+        int resolution = 9 + ((scratchpad[SCRATCHPAD_CONFIG] >> 5) & 0x3);
+        switch (resolution) {
+        case 9:
+            raw_value &= ~0x7;
+            break;
+        case 10:
+            raw_value &= ~0x3;
+            break;
+        case 11:
+            raw_value &= ~0x1;
+            break;
+        case 12:
+            break;
+        }
     }
-
-    uint32_t raw = (raw_value * 625) / 100; // round to 0.01
-    return (float)raw / 100;
+    uint32_t raw = (raw_value * 625 + 500) / 1000; // round to 0.1
+    return (float)raw / 10;
 #else
     return NAN;
 #endif
@@ -254,7 +254,7 @@ void Sensors::publish_values() {
         StaticJsonDocument<100> doc;
         for (const auto & device : devices_) {
             char s[7]; // sensorrange -55.00 to 125.00
-            doc["temp"] = Helpers::render_value(s, device.temperature_c, 2);
+            doc["temp"] = Helpers::render_value(s, device.temperature_c, 1);
             char topic[60];                // sensors{1-n}
             strlcpy(topic, "sensor_", 50); // create topic, e.g. home/ems-esp/sensor_28-EA41-9497-0E03-5F
             strlcat(topic, device.to_string().c_str(), 60);
@@ -264,20 +264,13 @@ void Sensors::publish_values() {
         return;
     }
 
-    // const size_t        capacity = num_devices * JSON_OBJECT_SIZE(2) + JSON_OBJECT_SIZE(num_devices);
     DynamicJsonDocument doc(100 * num_devices);
     uint8_t             i = 1; // sensor count
     for (const auto & device : devices_) {
         char s[7];
 
         if (mqtt_format_ == MQTT_format::CUSTOM) {
-            doc[device.to_string()] = Helpers::render_value(s, device.temperature_c, 2);
-        } else if (mqtt_format_ == MQTT_format::SINGLE) {
-            doc["id"]   = device.to_string();
-            doc["temp"] = Helpers::render_value(s, device.temperature_c, 2);
-            std::string topic(100, '\0');
-            snprintf_P(&topic[0], 50, PSTR("sensor%d"), i);
-            Mqtt::publish(topic, doc);
+            doc[device.to_string()] = Helpers::render_value(s, device.temperature_c, 1);
         } else if ((mqtt_format_ == MQTT_format::NESTED) || (mqtt_format_ == MQTT_format::HA)) {
             // e.g. {"sensor1":{"id":"28-EA41-9497-0E03-5F","temp":"23.30"},"sensor2":{"id":"28-233D-9497-0C03-8B","temp":"24.0"}}
             char sensorID[10]; // sensor{1-n}
@@ -285,7 +278,7 @@ void Sensors::publish_values() {
             strlcat(sensorID, Helpers::itoa(s, i), 10);
             JsonObject dataSensor = doc.createNestedObject(sensorID);
             dataSensor["id"]      = device.to_string();
-            dataSensor["temp"]    = Helpers::render_value(s, device.temperature_c, 2);
+            dataSensor["temp"]    = Helpers::render_value(s, device.temperature_c, 1);
         }
 
         // special for HA
