@@ -55,8 +55,9 @@ Note there are some noticeable different to be aware of in version 2:
   - `esptool`, install using the command `pip install esptool`
   - and for OTA updates later, `espota` from https://github.com/esp8266/Arduino/blob/master/tools/espota.py using `python espota.py --debug --progress --port 8266 --auth ems-esp-neo -i ems-esp.local -f <firmware.bin>` 
 
-- Grab the latest firmware binary from https://github.com/proddy/EMS-ESP/releases/tag/travis-v2-build
-- Uploading directly via USB.
+- Grab the latest firmware binary from https://github.com/proddy/EMS-ESP/releases
+
+- Uploading directly via USB...
   
   For ESP8266: `esptool.py -p <COM PORT> -b 921600 write_flash 0x00000 <firmware.bin>`
   note: if this fails try a lower speed like `115200` instead of `921600`.
