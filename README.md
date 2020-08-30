@@ -37,30 +37,40 @@ EMS-ESP is a open-source system built for the Espressif ESP8266 microcontroller 
 EMS-ESP will attempt to automatically migrate the 1.9 settings. 
 
 Note there are some noticeable differences to be aware of in version 2:
-  - MQTT base has been removed. All MQTT topics are prefixed now with only the hostname.
+  - MQTT base has been removed. All MQTT topics are prefixed now with only the hostname, for example `ems-esp/status`.
   - There is no "serial mode" anymore like with version 1.9. When the Wifi cannot connect to the SSID it will automatically enter a "safe" mode where the Serial console is automatically activated (note Serial is always available on the ESP32 because it has multiple UARTs). The EMS-ESP will blink fast when in Serial mode. Connect via a USB with baud 115200 to see the serial console. Note in this mode the EMS will be disconnect so there will be no incoming traffic. Use only for debugging or changing settings.
 
-## **Uploading the firmware**
+## **Building the firmware with PlatformIO**
 
-### *Using PlatformIO*:
-- create a new file called `pio_local.ini` and add these two lines
+1. Install [PlatformIO](https://platformio.org/install) and [NodeJS](https://nodejs.org/en/).
+2. Decide how you want to upload the firmware, via USB or OTA (Over The Air). OTA requires that a verison of EMS-ESP is already running. Then create a new file called `pio_local.ini` and add these two lines for USB:
 ```yaml
 upload_protocol = esptool
 upload_port = <COM>
 ```
-replacing `<COM>` with the port, for example on Windows `COM4` or Linux/OSX `/dev/cu.wchusbserial1410`
-- execute the command `pio run -t upload`
+or this for OTA:
+```yaml
+upload_protocol = espota
+upload_flags = 
+   --port=8266
+   --auth=ems-esp-neo
+upload_port = ems-esp.local
+```
+3. type `pio run -t upload` to build and upload the firmware
 
-### *Not using PlatformIO*:
+## **Uploading the firmware**
 
-Here we'll use the command-line. You'll need:
+Here we'll use the command-line. You'll need these 2 tools:
 
-- `esptool`, install [Python]( https://www.python.org/downloads/) and then do `pip install esptool`. If `pip` doesn't work, use `pip3`.
-- `espota` from https://github.com/esp8266/Arduino/blob/master/tools/espota.py
+- `esptool.py` install [Python]( https://www.python.org/downloads/) and then do `pip install esptool`. If `pip` doesn't work, use `pip3`.
+- `espota.py` from https://github.com/esp8266/Arduino/blob/master/tools/espota.py
 
-- The latest firmware binary from https://github.com/proddy/EMS-ESP/releases
-- Uploading directly via USB with the ESP8266: `esptool.py -p <COM PORT> -b 921600 write_flash 0x00000 <firmware.bin>`  
-- Uploading over WiFi: `espota.py --debug --progress --port 8266 --auth ems-esp-neo -i <IP address> -f <firmware.bin>`
+Note both these tools are also in the repo under the `scripts` directory.
+
+Then:
+
+1. Fetch the latest firmware binary from https://github.com/proddy/EMS-ESP/releases
+2. Upload. Via the USB with the ESP8266: `esptool.py -p <COM PORT> -b 921600 write_flash 0x00000 <firmware.bin>`  and for OTA  `espota.py --debug --progress --port 8266 --auth ems-esp-neo -i <IP address> -f <firmware.bin>`
 
 ## **Setting EMS-ESP up for the first time**
 
