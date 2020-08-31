@@ -11,16 +11,22 @@
 [![gitter](https://img.shields.io/gitter/room/EMS-ESP/EMS-ESP.svg)](https://gitter.im/EMS-ESP/community)
 <br>
 
-EMS-ESP is a open-source system built for the Espressif ESP8266 microcontroller to communicate with **EMS** (Energy Management System) based boilers, thermostats and other modules from manufacturers like Bosch, Buderus, Nefit, Junkers and Sieger.
+EMS-ESP is a open-source firmware for the Espressif ESP8266 microcontroller that can communicate with **EMS** (Energy Management System) based boilers, thermostats and other modules from manufacturers like Bosch, Buderus, Nefit, Junkers, Worcester and Sieger.
+
+EMS-ESP is the software. It still requires a hardware circuit that can convert the EMS data into Serial data. These can be purchased via https://bbqkees-electronics.nl/.
+
+<img src="media/gateway-integration.jpg" width=40%>
+
+---
 
 ## **New Features in version 2**
 
-- Supports both ESP8266 and ESP32
-- New secure web interface (based on React/TypeScript)
-- New Console (via Serial or Telnet)
-- Secure interfaces in both Web UI and the Console
+- Supporting both ESP8266 and ESP32 microcontrollers
+- A new multi-user Web interface (based on React/TypeScript)
+- A new Console, accessible via Serial and Telnet
+- Tighter security in both Web and Console. Admin privileges required to access core settings and commands.
 - Support for Home Assistant MQTT Discovery (https://www.home-assistant.io/docs/mqtt/discovery/)
-- Can be run standalone (as an Access Point) or on a WiFi network
+- Can be run standalone as an indpendent Access Point or join an existing WiFi network
 - Easier first-time configuration via a web Captive Portal
 - Supporting over 70 EMS devices (boilers, thermostats, solar modules, mixing modules, heat pumps, gateways)
   
@@ -37,18 +43,19 @@ EMS-ESP is a open-source system built for the Espressif ESP8266 microcontroller 
 EMS-ESP will attempt to automatically migrate the 1.9 settings. 
 
 Note there are some noticeable differences to be aware of in version 2:
-  - MQTT base has been removed. All MQTT topics are prefixed now with only the hostname, for example `ems-esp/status`.
-  - There is no "serial mode" anymore like with version 1.9. When the Wifi cannot connect to the SSID it will automatically enter a "safe" mode where the Serial console is automatically activated (note Serial is always available on the ESP32 because it has multiple UARTs). The EMS-ESP will blink fast when in Serial mode. Connect via a USB with baud 115200 to see the serial console. Note in this mode the EMS will be disconnect so there will be no incoming traffic. Use only for debugging or changing settings.
+  - MQTT base has been removed. All MQTT topics are prefixed with only the hostname, for example `ems-esp/status` as opposed to `home/ems-esp/status`.
+  - There is no "serial mode" anymore like with version 1.9. When the Wifi cannot connect to the SSID it will automatically enter a "safe" mode where the Serial console is activated (note Serial is always available on the ESP32 because it has multiple UARTs). The EMS-ESP's LED will blink fast when in Serial mode. When this happens connect via a USB using baud 115200.
 
 ## **Building the firmware with PlatformIO**
 
 1. Install [PlatformIO](https://platformio.org/install) and [NodeJS](https://nodejs.org/en/).
-2. Decide how you want to upload the firmware, via USB or OTA (Over The Air). OTA requires that a verison of EMS-ESP is already running. Then create a new file called `pio_local.ini` and add these two lines for USB:
+2. Decide how you want to upload the firmware, via USB or OTA (Over The Air). OTA requires that a verison of EMS-ESP is already running.
+3. Create a new file called `pio_local.ini` and add these two lines for USB:
 ```yaml
 upload_protocol = esptool
 upload_port = <COM>
 ```
-or this for OTA:
+or these 2 for OTA:
 ```yaml
 upload_protocol = espota
 upload_flags = 
@@ -60,47 +67,50 @@ upload_port = ems-esp.local
 
 ## **Uploading the firmware**
 
-Here we'll use the command-line. You'll need these 2 tools:
+Here we'll use the command-line. You'll need [Python]( https://www.python.org/downloads/) (version 3) installed and these 2 scripts:
 
-- `esptool.py` install [Python]( https://www.python.org/downloads/) and then do `pip install esptool`. If `pip` doesn't work, use `pip3`.
-- `espota.py` from https://github.com/esp8266/Arduino/blob/master/tools/espota.py
+- `esptool.py`. Install using `pip install esptool`.
+- `espota.py` downloaded from https://github.com/esp8266/Arduino/blob/master/tools/espota.py
 
-Note both these tools are also in the repo under the `scripts` directory.
+Both these tools are also in the repo in the `scripts` directory.
 
-Then:
+Next step is to fetch the latest firmware binary from https://github.com/proddy/EMS-ESP/releases, and if you're using USB with an ESP8266:
 
-1. Fetch the latest firmware binary from https://github.com/proddy/EMS-ESP/releases
-2. Upload. Via the USB with the ESP8266: `esptool.py -p <COM PORT> -b 921600 write_flash 0x00000 <firmware.bin>`  and for OTA  `espota.py --debug --progress --port 8266 --auth ems-esp-neo -i <IP address> -f <firmware.bin>`
+  `esptool.py -p <COM PORT> -b 921600 write_flash 0x00000 <firmware.bin>` 
+  
+and for OTA:
+  
+  `espota.py --debug --progress --port 8266 --auth ems-esp-neo -i <IP address> -f <firmware.bin>`
 
 ## **Setting EMS-ESP up for the first time**
 
- - After powering up the ESP, watch the onboard LED. A solid light means good connection and EMS data is coming in. A slow pulse means either the WiFi or the EMS bus is not connected yet. A very fast pulse is when the system is booting up and configuring itself, which typically takes 5 seconds.
+ - After powering up the ESP, watch the onboard blue LED. A solid light means good connection and EMS data is coming in. A slow pulse means either the WiFi or the EMS bus is not connected yet. A very fast pulse is when the system is booting up and configuring itself which typically takes 5 seconds.
   
- - Connect to the Access Point called ems-esp using the WPA password `ems-esp-neo`. When you see the captive portal sign-in with username `admin` and password `admin`. Set the WiFi credentials and go back to http://ems-esp
+ - Connect to the Access Point called `ems-esp` using the WPA password `ems-esp-neo`. When you see the captive portal sign-in with username `admin` and password `admin`. Set the WiFi credentials and go back to http://ems-esp. Remember to change the passwords!
 
- - First thing to check is if Tx is working and that you have a connect to the EMS bus. If it's showing an error try changing the Tx Mode from the settings page. Then check the Status (no need to restart EMS-ESP).
+ - First thing to check is if Tx is working and that you have a connection to the EMS bus. If Tx fails are shown in the Web interface try changing the Tx Mode from the settings page. There is no need to re-start the EMS-ESP.
 
- - If Rx incomplete telegrams are reported in the Web UI, don't panic. Some telegrams can be missed and this is usually caused by noise interference on the line.
+ - If Rx incomplete telegrams are reported in the Web interface, don't panic. Some telegrams can be missed and this is usually caused by noise interference on the line.
 
 ## **Using the Console**
 
-Connecting to the console will give you more insight into the EMS bus traffic, MQTT queues and the actual device information.
+Connecting to the console will give you more insight into the EMS bus traffic, MQTT queues and the full device information.
 
-The console is reachable via Telnet (port 22) or via the Serial port if using an USB (on baud 115200). To change any settings in the console you must be admin (use `su` with the default password `ems-esp-neo`). On an ESP8266 the Serial port is disabled by default unless it's unable to connect to the WiFi.
+The console is reachable via Telnet (port 22) or via the Serial port if using an USB (on baud 115200). To change any settings in the console you must be admin (use `su` with the default password `ems-esp-neo`).
   
-A full list of commands is below. Here are the key ones:
+Some of the most commong commands are:
   * `help` lists the commands and keywords. This works in each context.
   * `exit` will exit the console or exit the current context. `CTRL-D` does the same.
   * `CTRL-U` for Undo
   * `<TAB>` for auto-complete
   * Some specific commands are behind contexts. Think of this as a sub-menu. e.g. `system`, `thermostat`. The path will always show you which context you are in. `$` is the root.
-  * `su` will switch to super-user or Admin. The default password is `ems-esp-neo` and can be changed with `passwd` from the system menu or via the Web UI (called secret password). When in Admin mode the command prompt switches from `$` to `#`.
+  * `su` will switch to the Admin super-user. The default password is `ems-esp-neo` and can be changed with `passwd` from the system menu or via the Web interface (called secret password). When in Admin mode the command prompt switches from `$` to `#`.
   * Some settings can be changed in the console. The `set` command will list them.
-  * `show` shows the data specific to the which context you're in. From the root it will show you all the EMS device information and any external temperature sensors. From a context it will be more specific to that context, e.g. `show mqtt` from `system` will list MQTT subscriptions and show the status and queue. 
+  * `show` shows the data specific to the which context you're in. From the root it will show you all the EMS device information and any external temperature sensors. 
   * `log` sets the logging level. `log off` disables logging. Use `log debug` for debugging commands and actions. This will be reset next time the console is opened.
-  * `watch` will output the incoming Rx telegrams directly to the console. You can also put on a watch on a specific EMS device ID or telegram ID. Also choose to output as verbose text or raw data bytes.  these in its 'raw' data format and also watch a particular ID.
+  * `watch` will output the incoming Rx telegrams directly to the console. You can also put on a watch on a specific EMS device ID or telegram ID. Also choose to output as verbose text as raw data bytes.
 
-The `call` command is to execute a command. The command names (`[cmd]`) are the same as the MQTT command listed in the MQTT section.
+The `call` command is to execute a command. The command names (`[cmd]`) are the same as the MQTT commands listed in the MQTT section.
 
 ```
 (* = available in su/Admin mode)
