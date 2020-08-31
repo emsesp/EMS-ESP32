@@ -1595,7 +1595,7 @@ class ESP32FirmwareImage(BaseFirmwareImage):
                 load_file.seek(start)
                 calc_digest = hashlib.sha256()
                 calc_digest.update(load_file.read(end - start))
-                self.calc_digest = calc_digest.digest()  # TODO: decide what to do here?
+                self.calc_digest = calc_digest.digest()  # decide what to do here?
 
             self.verify()
 
@@ -1608,7 +1608,7 @@ class ESP32FirmwareImage(BaseFirmwareImage):
         return "%s.bin" % (os.path.splitext(input_file)[0])
 
     def warn_if_unusual_segment(self, offset, size, is_irom_segment):
-        pass  # TODO: add warnings for ESP32 segment offset/size combinations that are wrong
+        pass  # add warnings for ESP32 segment offset/size combinations that are wrong
 
     def save(self, filename):
         total_segments = 0
@@ -2799,7 +2799,7 @@ class SpiConnectionAction(argparse.Action):
             if any([v for v in values if v > 33 or v < 0]):
                 raise argparse.ArgumentError(self, 'Pin numbers must be in the range 0-33.')
             # encode the pin numbers as a 32-bit integer with packed 6-bit values, the same way ESP32 ROM takes them
-            # TODO: make this less ESP32 ROM specific somehow...
+            # todo: make this less ESP32 ROM specific somehow...
             clk,q,d,hd,cs = values
             value = (hd << 24) | (cs << 18) | (d << 12) | (q << 6) | clk
         else:

@@ -317,7 +317,6 @@ void Thermostat::publish_values() {
         }
 
         // send this specific data using the thermostat_data topic
-        // if ((mqtt_format_ == MQTT_format::SINGLE) || (mqtt_format_ == MQTT_format::HA)) {
         if (mqtt_format_ != MQTT_format::NESTED) {
             Mqtt::publish("thermostat_data", doc);
             rootThermostat = doc.to<JsonObject>(); // clear object

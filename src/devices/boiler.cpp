@@ -719,7 +719,7 @@ void Boiler::set_max_power(const char * value, const int8_t id) {
     write_command(EMS_TYPE_UBAParameters, 2, v);
 }
 
-// set oiler on hysteresis
+// set boiler on hysteresis
 void Boiler::set_hyst_on(const char * value, const int8_t id) {
     int v = 0;
     if (!Helpers::value2number(value, v)) {
