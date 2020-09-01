@@ -617,6 +617,7 @@ bool System::check_upgrade() {
         file1.close();
         file2.close();
         SPIFFS.end();
+        Serial.end();
         return false; // can't open files
     }
 
@@ -628,18 +629,19 @@ bool System::check_upgrade() {
 
     error = deserializeJson(doc1, file1);
     if (error) {
-        Serial.printf("Error. Failed to deserialize json, doc1, error %s", error.c_str());
+        Serial.printf(PSTR("Error. Failed to deserialize json, doc1, error %s"), error.c_str());
         failed = true;
     }
     error = deserializeJson(doc2, file2);
     if (error) {
-        Serial.printf("Error. Failed to deserialize json, doc2, error %s", error.c_str());
+        Serial.printf(PSTR("Error. Failed to deserialize json, doc2, error %s"), error.c_str());
         failed = true;
     }
 
     file1.close();
     file2.close();
     SPIFFS.end();
+    Serial.end();
 
     if (failed) {
         return false; // parse error
@@ -675,10 +677,11 @@ bool System::check_upgrade() {
         },
         "local");
 
+    // ignoring publish_time
     EMSESP::esp8266React.getMqttSettingsService()->update(
         [&](MqttSettings & mqttSettings) {
             mqttSettings.host             = mqtt["ip"] | FACTORY_MQTT_HOST;
-            mqttSettings.mqtt_format      = (mqtt["nestedjson"] ? 2 : 1);
+            mqttSettings.mqtt_format      = (mqtt["nestedjson"] ? MQTT_format::NESTED : MQTT_format::SINGLE);
             mqttSettings.mqtt_qos         = mqtt["qos"] | 0;
             mqttSettings.username         = mqtt["user"] | "";
             mqttSettings.password         = mqtt["password"] | "";
@@ -718,7 +721,8 @@ bool System::check_upgrade() {
         "local");
 
     Serial.println(F("Restarting..."));
-    Serial.end();
+    Serial.flush();
+    delay(2000);
     restart(); // force a restart, nice and tidy
     return true;
 #else
