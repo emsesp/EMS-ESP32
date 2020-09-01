@@ -239,7 +239,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         shell.loop_all();
     }
 
-        if (command == "tc100") {
+    if (command == "tc100") {
         shell.printfln(F("Testing adding a TC100 thermostat to the EMS bus..."));
 
         // add_device(0x10, 165, version, EMSdevice::Brand::BUDERUS);
@@ -259,7 +259,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
 
         // RCPLUSStatusMessage_HC1(0x01A5)
         // uart_telegram({0x98, 0x00, 0xFF, 0x00, 0x01, 0xA5, 0x00, 0xCF, 0x21, 0x2E, 0x00, 0x00, 0x2E, 0x24,
-                    //    0x03, 0x25, 0x03, 0x03, 0x01, 0x03, 0x25, 0x00, 0xC8, 0x00, 0x00, 0x11, 0x01, 0x03});
+        //    0x03, 0x25, 0x03, 0x03, 0x01, 0x03, 0x25, 0x00, 0xC8, 0x00, 0x00, 0x11, 0x01, 0x03});
 
         shell.loop_all();
     }
@@ -271,6 +271,39 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
 
         std::string version("1.2.3");
         EMSESP::add_device(0x30, 163, version, EMSdevice::Brand::BUDERUS); // SM100
+
+        // SM100Monitor - type 0x0362 EMS+ - for SM100 and SM200
+        // B0 0B FF 00 02 62 00 44 02 7A 80 00 80 00 80 00 80 00 80 00 80 00 00 7C 80 00 80 00 80 00 80
+        rx_telegram({0xB0, 0x0B, 0xFF, 00, 0x02, 0x62, 00, 0x44, 0x02, 0x7A, 0x80, 00, 0x80, 0x00, 0x80, 00,
+                     0x80, 00,   0x80, 00, 0x80, 00,   00, 0x7C, 0x80, 00,   0x80, 00, 0x80, 00,   0x80});
+        EMSESP::show_device_values(shell);
+
+        rx_telegram({0xB0, 0x0B, 0xFF, 0x00, 0x02, 0x62, 0x01, 0x44, 0x03, 0x30, 0x80, 00, 0x80, 00, 0x80, 00,
+                     0x80, 00,   0x80, 00,   0x80, 00,   0x80, 00,   0x80, 00,   0x80, 00, 0x80, 00, 0x80, 0x33});
+        EMSESP::show_device_values(shell);
+
+        rx_telegram({0xB0, 00, 0xFF, 0x18, 02, 0x62, 0x80, 00, 0xB8});
+        EMSESP::show_device_values(shell);
+
+        EMSESP::send_raw_telegram("B0 00 FF 18 02 62 80 00 B8");
+
+        uart_telegram("30 00 FF 0A 02 6A 04");                                                 // SM100 pump on  1
+        uart_telegram("30 00 FF 00 02 64 00 00 00 04 00 00 FF 00 00 1E 0B 09 64 00 00 00 00"); // SM100 modulation
+
+        EMSESP::show_device_values(shell);
+
+        uart_telegram("30 00 FF 0A 02 6A 03"); // SM100 pump off  0
+
+        EMSESP::show_device_values(shell);
+    }
+
+    if (command == "solar200") {
+        shell.printfln(F("Testing Solar SM200"));
+
+        EMSESP::rxservice_.ems_mask(EMSbus::EMS_MASK_BUDERUS);
+
+        std::string version("1.2.3");
+        EMSESP::add_device(0x30, 164, version, EMSdevice::Brand::BUDERUS); // SM200
 
         // SM100Monitor - type 0x0362 EMS+ - for SM100 and SM200
         // B0 0B FF 00 02 62 00 44 02 7A 80 00 80 00 80 00 80 00 80 00 80 00 00 7C 80 00 80 00 80 00 80
