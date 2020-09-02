@@ -48,8 +48,11 @@ class Boiler : public EMSdevice {
     static uuid::log::Logger logger_;
 
     void console_commands(Shell & shell, unsigned int context);
+    void register_mqtt_ha_config();
+    void check_active();
 
     uint8_t last_boilerState = 0xFF; // remember last state of heating and warm water on/off
+    uint8_t mqtt_format_;            // single, nested or ha
 
     static constexpr uint8_t EMS_TYPE_UBAParameterWW  = 0x33;
     static constexpr uint8_t EMS_TYPE_UBAFunctionTest = 0x1D;
@@ -147,7 +150,6 @@ class Boiler : public EMSdevice {
     void process_UBAMonitorSlow(std::shared_ptr<const Telegram> telegram);
     void process_UBAMonitorSlowPlus(std::shared_ptr<const Telegram> telegram);
     void process_UBAMonitorSlowPlus2(std::shared_ptr<const Telegram> telegram);
-
     void process_UBAOutdoorTemp(std::shared_ptr<const Telegram> telegram);
     void process_UBASetPoints(std::shared_ptr<const Telegram> telegram);
     void process_UBAFlags(std::shared_ptr<const Telegram> telegram);
@@ -155,10 +157,7 @@ class Boiler : public EMSdevice {
     void process_UBAMaintenanceStatus(std::shared_ptr<const Telegram> telegram);
     void process_UBAMaintenanceData(std::shared_ptr<const Telegram> telegram);
     void process_UBAErrorMessage(std::shared_ptr<const Telegram> telegram);
-
     void process_UBADHWStatus(std::shared_ptr<const Telegram> telegram);
-
-    void check_active();
 
     // commands - none of these use the additional id parameter
     void set_warmwater_mode(const char * value, const int8_t id);

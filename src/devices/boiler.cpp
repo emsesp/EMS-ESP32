@@ -64,6 +64,14 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     register_mqtt_cmd(F("boilhystoff"), [&](const char * value, const int8_t id) { set_hyst_off(value, id); });
     register_mqtt_cmd(F("burnperiod"), [&](const char * value, const int8_t id) { set_burn_period(value, id); });
     register_mqtt_cmd(F("pumpdelay"), [&](const char * value, const int8_t id) { set_pump_delay(value, id); });
+
+    EMSESP::esp8266React.getMqttSettingsService()->read([&](MqttSettings & settings) {
+        mqtt_format_ = settings.mqtt_format; // single, nested or ha
+
+        if (mqtt_format_ == MQTT_format::HA) {
+            register_mqtt_ha_config();
+        }
+    });
 }
 
 // add submenu context
@@ -75,6 +83,23 @@ void Boiler::add_context_menu() {
                                            Boiler::console_commands(shell, ShellContext::BOILER);
                                            add_context_commands(ShellContext::BOILER);
                                        });
+}
+
+// create the config topic for Home Assistant MQTT Discovery
+// homeassistant/sensor/ems-esp/boiler
+// state is /state
+// config is /config
+void Boiler::register_mqtt_ha_config() {
+    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
+
+    /*
+ * not finished yet - see https://github.com/proddy/EMS-ESP/issues/288
+    doc["name"]    = "boiler";
+    doc["uniq_id"] = "boiler";
+
+    // Mqtt::publish(topic); // empty payload, this remove any previous config sent to HA
+    Mqtt::publish("homeassistant/sensor/ems-esp/boiler/config", doc, true); // publish the config payload with retain flag
+    */
 }
 
 void Boiler::device_info(JsonArray & root) {
