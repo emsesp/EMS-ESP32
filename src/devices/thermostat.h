@@ -70,6 +70,15 @@ class Thermostat : public EMSdevice {
             return ha_registered_;
         }
 
+        void ha_registered(bool b) {
+            ha_registered_ = b;
+        }
+
+        // determines if the heating circuit is actually present and has data
+        bool is_active() {
+            return Helpers::hasValue(setpoint_roomTemp);
+        }
+
         uint8_t get_mode(uint8_t flags) const;
         uint8_t get_mode_type(uint8_t flags) const;
 
@@ -275,7 +284,7 @@ class Thermostat : public EMSdevice {
     void set_display(const char * value, const int8_t id);
     void set_building(const char * value, const int8_t id);
     void set_language(const char * value, const int8_t id);
-};
+}; // namespace emsesp
 
 } // namespace emsesp
 

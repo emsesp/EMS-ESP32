@@ -269,8 +269,7 @@ void Thermostat::publish_values() {
         return;
     }
 
-    uint8_t flags    = this->model();
-    bool    has_data = false;
+    uint8_t flags = this->model();
 
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
     JsonObject                                      rootThermostat = doc.to<JsonObject>();
@@ -324,132 +323,133 @@ void Thermostat::publish_values() {
     }
 
     // go through all the heating circuits
+    bool has_data = false;
     for (const auto & hc : heating_circuits_) {
-        if (!Helpers::hasValue(hc->setpoint_roomTemp)) {
-            break; // skip this HC
-        }
+        if (hc->is_active()) {
+            has_data = true;
 
-        has_data = true;
-        // if the MQTT format is 'nested' or 'ha' then create the parent object hc<n>
-        // if (mqtt_format_ != MQTT_format::SINGLE) {
-        if ((mqtt_format_ == MQTT_format::NESTED) || (mqtt_format_ == MQTT_format::HA)) {
-            char hc_name[10]; // hc{1-4}
-            strlcpy(hc_name, "hc", 10);
-            char s[3];
-            strlcat(hc_name, Helpers::itoa(s, hc->hc_num()), 10);
-            dataThermostat = rootThermostat.createNestedObject(hc_name);
-        } else {
-            dataThermostat = rootThermostat;
-        }
-
-        // different logic on how temperature values are stored, depending on model
-        uint8_t setpoint_temp_divider;
-        uint8_t curr_temp_divider;
-        if (flags == EMS_DEVICE_FLAG_EASY) {
-            setpoint_temp_divider = 100;
-            curr_temp_divider     = 100;
-        } else if (flags == EMS_DEVICE_FLAG_JUNKERS) {
-            setpoint_temp_divider = 10;
-            curr_temp_divider     = 10;
-        } else {
-            setpoint_temp_divider = 2;
-            curr_temp_divider     = 10;
-        }
-
-        if (Helpers::hasValue(hc->setpoint_roomTemp)) {
-            dataThermostat["seltemp"] = Helpers::round2((float)hc->setpoint_roomTemp / setpoint_temp_divider);
-        }
-
-        if (Helpers::hasValue(hc->curr_roomTemp)) {
-            dataThermostat["currtemp"] = Helpers::round2((float)hc->curr_roomTemp / curr_temp_divider);
-        }
-
-        if (Helpers::hasValue(hc->daytemp)) {
-            if (flags == EMSdevice::EMS_DEVICE_FLAG_JUNKERS) {
-                dataThermostat["heattemp"] = (float)hc->daytemp / 2;
+            // if the MQTT format is 'nested' or 'ha' then create the parent object hc<n>
+            // if (mqtt_format_ != MQTT_format::SINGLE) {
+            if ((mqtt_format_ == MQTT_format::NESTED) || (mqtt_format_ == MQTT_format::HA)) {
+                char hc_name[10]; // hc{1-4}
+                strlcpy(hc_name, "hc", 10);
+                char s[3];
+                strlcat(hc_name, Helpers::itoa(s, hc->hc_num()), 10);
+                dataThermostat = rootThermostat.createNestedObject(hc_name);
             } else {
-                dataThermostat["daytemp"] = (float)hc->daytemp / 2;
+                dataThermostat = rootThermostat;
             }
-        }
-        if (Helpers::hasValue(hc->nighttemp)) {
-            if (flags == EMSdevice::EMS_DEVICE_FLAG_JUNKERS) {
-                dataThermostat["ecotemp"] = (float)hc->nighttemp / 2;
+
+            // different logic on how temperature values are stored, depending on model
+            uint8_t setpoint_temp_divider;
+            uint8_t curr_temp_divider;
+            if (flags == EMS_DEVICE_FLAG_EASY) {
+                setpoint_temp_divider = 100;
+                curr_temp_divider     = 100;
+            } else if (flags == EMS_DEVICE_FLAG_JUNKERS) {
+                setpoint_temp_divider = 10;
+                curr_temp_divider     = 10;
             } else {
-                dataThermostat["nighttemp"] = (float)hc->nighttemp / 2;
+                setpoint_temp_divider = 2;
+                curr_temp_divider     = 10;
             }
-        }
-        if (Helpers::hasValue(hc->holidaytemp)) {
-            dataThermostat["holidaytemp"] = (float)hc->holidaytemp / 2;
-        }
 
-        if (Helpers::hasValue(hc->nofrosttemp)) {
-            dataThermostat["nofrosttemp"] = (float)hc->nofrosttemp / 2;
-        }
+            if (Helpers::hasValue(hc->setpoint_roomTemp)) {
+                dataThermostat["seltemp"] = Helpers::round2((float)hc->setpoint_roomTemp / setpoint_temp_divider);
+            }
 
-        if (Helpers::hasValue(hc->heatingtype)) {
-            dataThermostat["heatingtype"] = hc->heatingtype;
-        }
+            if (Helpers::hasValue(hc->curr_roomTemp)) {
+                dataThermostat["currtemp"] = Helpers::round2((float)hc->curr_roomTemp / curr_temp_divider);
+            }
 
-        if (Helpers::hasValue(hc->targetflowtemp)) {
-            dataThermostat["targetflowtemp"] = hc->targetflowtemp;
-        }
-
-        if (Helpers::hasValue(hc->offsettemp)) {
-            dataThermostat["offsettemp"] = hc->offsettemp / 2;
-        }
-
-        if (Helpers::hasValue(hc->designtemp)) {
-            dataThermostat["designtemp"] = hc->designtemp;
-        }
-        if (Helpers::hasValue(hc->summertemp)) {
-            dataThermostat["summertemp"] = hc->summertemp;
-        }
-
-        // when using HA always send the mode otherwise it'll may break the component/widget and report an error
-        if ((Helpers::hasValue(hc->mode)) || (mqtt_format_ == MQTT_format::HA)) {
-            uint8_t hc_mode = hc->get_mode(flags);
-            // if we're sending to HA the only valid mode types are heat, auto and off
-            if (mqtt_format_ == MQTT_format::HA) {
-                if ((hc_mode == HeatingCircuit::Mode::MANUAL) || (hc_mode == HeatingCircuit::Mode::DAY)) {
-                    hc_mode = HeatingCircuit::Mode::HEAT;
-                } else if ((hc_mode == HeatingCircuit::Mode::NIGHT) || (hc_mode == HeatingCircuit::Mode::OFF)) {
-                    hc_mode = HeatingCircuit::Mode::OFF;
+            if (Helpers::hasValue(hc->daytemp)) {
+                if (flags == EMSdevice::EMS_DEVICE_FLAG_JUNKERS) {
+                    dataThermostat["heattemp"] = (float)hc->daytemp / 2;
                 } else {
-                    hc_mode = HeatingCircuit::Mode::AUTO;
+                    dataThermostat["daytemp"] = (float)hc->daytemp / 2;
                 }
             }
-            dataThermostat["mode"] = mode_tostring(hc_mode);
-        }
-
-        // special handling of mode type, for the RC35 replace with summer/holiday if set
-        // https://github.com/proddy/EMS-ESP/issues/373#issuecomment-619810209
-        if (Helpers::hasValue(hc->summer_mode) && hc->summer_mode) {
-            dataThermostat["modetype"] = F("summer");
-        } else if (Helpers::hasValue(hc->holiday_mode) && hc->holiday_mode) {
-            dataThermostat["modetype"] = F("holiday");
-        } else if (Helpers::hasValue(hc->mode_type)) {
-            dataThermostat["modetype"] = mode_tostring(hc->get_mode_type(flags));
-        }
-
-        // if format is single, send immediately and clear object for next hc
-        // the topic will have the hc number appended
-        // if (mqtt_format_ == MQTT_format::SINGLE) {
-        if ((mqtt_format_ == MQTT_format::SINGLE) || (mqtt_format_ == MQTT_format::CUSTOM)) {
-            char topic[30];
-            char s[3];
-            strlcpy(topic, "thermostat_data", 30);
-            strlcat(topic, Helpers::itoa(s, hc->hc_num()), 30); // append hc to topic
-            Mqtt::publish(topic, doc);
-            rootThermostat = doc.to<JsonObject>(); // clear object
-        } else if (mqtt_format_ == MQTT_format::HA) {
-            // see if we have already registered this with HA MQTT Discovery, if not send the config
-            if (!hc->ha_registered()) {
-                register_mqtt_ha_config(hc->hc_num());
+            if (Helpers::hasValue(hc->nighttemp)) {
+                if (flags == EMSdevice::EMS_DEVICE_FLAG_JUNKERS) {
+                    dataThermostat["ecotemp"] = (float)hc->nighttemp / 2;
+                } else {
+                    dataThermostat["nighttemp"] = (float)hc->nighttemp / 2;
+                }
             }
-            // send the thermostat topic and payload data
-            std::string topic(100, '\0');
-            snprintf_P(&topic[0], topic.capacity() + 1, PSTR("homeassistant/climate/ems-esp/hc%d/state"), hc->hc_num());
-            Mqtt::publish(topic, doc);
+            if (Helpers::hasValue(hc->holidaytemp)) {
+                dataThermostat["holidaytemp"] = (float)hc->holidaytemp / 2;
+            }
+
+            if (Helpers::hasValue(hc->nofrosttemp)) {
+                dataThermostat["nofrosttemp"] = (float)hc->nofrosttemp / 2;
+            }
+
+            if (Helpers::hasValue(hc->heatingtype)) {
+                dataThermostat["heatingtype"] = hc->heatingtype;
+            }
+
+            if (Helpers::hasValue(hc->targetflowtemp)) {
+                dataThermostat["targetflowtemp"] = hc->targetflowtemp;
+            }
+
+            if (Helpers::hasValue(hc->offsettemp)) {
+                dataThermostat["offsettemp"] = hc->offsettemp / 2;
+            }
+
+            if (Helpers::hasValue(hc->designtemp)) {
+                dataThermostat["designtemp"] = hc->designtemp;
+            }
+            if (Helpers::hasValue(hc->summertemp)) {
+                dataThermostat["summertemp"] = hc->summertemp;
+            }
+
+            // when using HA always send the mode otherwise it'll may break the component/widget and report an error
+            if ((Helpers::hasValue(hc->mode)) || (mqtt_format_ == MQTT_format::HA)) {
+                uint8_t hc_mode = hc->get_mode(flags);
+                // if we're sending to HA the only valid mode types are heat, auto and off
+                if (mqtt_format_ == MQTT_format::HA) {
+                    if ((hc_mode == HeatingCircuit::Mode::MANUAL) || (hc_mode == HeatingCircuit::Mode::DAY)) {
+                        hc_mode = HeatingCircuit::Mode::HEAT;
+                    } else if ((hc_mode == HeatingCircuit::Mode::NIGHT) || (hc_mode == HeatingCircuit::Mode::OFF)) {
+                        hc_mode = HeatingCircuit::Mode::OFF;
+                    } else {
+                        hc_mode = HeatingCircuit::Mode::AUTO;
+                    }
+                }
+                dataThermostat["mode"] = mode_tostring(hc_mode);
+            }
+
+            // special handling of mode type, for the RC35 replace with summer/holiday if set
+            // https://github.com/proddy/EMS-ESP/issues/373#issuecomment-619810209
+            if (Helpers::hasValue(hc->summer_mode) && hc->summer_mode) {
+                dataThermostat["modetype"] = F("summer");
+            } else if (Helpers::hasValue(hc->holiday_mode) && hc->holiday_mode) {
+                dataThermostat["modetype"] = F("holiday");
+            } else if (Helpers::hasValue(hc->mode_type)) {
+                dataThermostat["modetype"] = mode_tostring(hc->get_mode_type(flags));
+            }
+
+            // if format is single, send immediately and clear object for next hc
+            // the topic will have the hc number appended
+            // if (mqtt_format_ == MQTT_format::SINGLE) {
+            if ((mqtt_format_ == MQTT_format::SINGLE) || (mqtt_format_ == MQTT_format::CUSTOM)) {
+                char topic[30];
+                char s[3];
+                strlcpy(topic, "thermostat_data", 30);
+                strlcat(topic, Helpers::itoa(s, hc->hc_num()), 30); // append hc to topic
+                Mqtt::publish(topic, doc);
+                rootThermostat = doc.to<JsonObject>(); // clear object
+            } else if (mqtt_format_ == MQTT_format::HA) {
+                // see if we have already registered this with HA MQTT Discovery, if not send the config
+                if (!hc->ha_registered()) {
+                    register_mqtt_ha_config(hc->hc_num());
+                    hc->ha_registered(true);
+                }
+                // send the thermostat topic and payload data
+                std::string topic(100, '\0');
+                snprintf_P(&topic[0], topic.capacity() + 1, PSTR("homeassistant/climate/ems-esp/hc%d/state"), hc->hc_num());
+                Mqtt::publish(topic, doc);
+            }
         }
     }
 
@@ -458,7 +458,6 @@ void Thermostat::publish_values() {
     }
 
     // if we're using nested json, send all in one go under one topic called thermostat_data
-    // if ((mqtt_format_ == MQTT_format::NESTED) || (mqtt_format_ == MQTT_format::CUSTOM)) {
     if (mqtt_format_ == MQTT_format::NESTED) {
         Mqtt::publish("thermostat_data", doc);
     }
@@ -824,9 +823,10 @@ void Thermostat::show_values(uuid::console::Shell & shell) {
     }
 
     for (const auto & hc : heating_circuits_) {
-        if (!Helpers::hasValue(hc->setpoint_roomTemp)) {
+        if (!hc->is_active()) {
             break; // skip this HC
         }
+
         shell.printfln(F("  Heating Circuit %d:"), hc->hc_num());
 
         // different thermostat types store their temperature values differently
