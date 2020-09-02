@@ -40,10 +40,8 @@ class Thermostat : public EMSdevice {
     Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_id, const std::string & version, const std::string & name, uint8_t flags, uint8_t brand);
     class HeatingCircuit {
       public:
-        HeatingCircuit(const uint8_t hc_num, const uint16_t monitor_typeid, const uint16_t set_typeid)
-            : hc_num_(hc_num)
-            , monitor_typeid_(monitor_typeid)
-            , set_typeid_(set_typeid) {
+        HeatingCircuit(const uint8_t hc_num)
+            : hc_num_(hc_num) {
         }
         ~HeatingCircuit() = default;
 
@@ -60,35 +58,25 @@ class Thermostat : public EMSdevice {
         uint8_t targetflowtemp    = EMS_VALUE_UINT_NOTSET;
         uint8_t summertemp        = EMS_VALUE_UINT_NOTSET;
         uint8_t nofrosttemp       = EMS_VALUE_UINT_NOTSET;
-        uint8_t designtemp        = EMS_VALUE_UINT_NOTSET; // heatingcurve design temp at MinExtTemp
-        int8_t  offsettemp        = EMS_VALUE_INT_NOTSET;  // heatingcurve offest temp at roomtemp signed!
+        uint8_t designtemp        = EMS_VALUE_UINT_NOTSET; // heating curve design temp at MinExtTemp
+        int8_t  offsettemp        = EMS_VALUE_INT_NOTSET;  // heating curve offest temp at roomtemp signed!
 
         uint8_t hc_num() const {
-            return hc_num_; // 1..10
+            return hc_num_;
         }
 
         uint8_t get_mode(uint8_t flags) const;
         uint8_t get_mode_type(uint8_t flags) const;
 
-        uint16_t monitor_typeid() const {
-            return monitor_typeid_;
-        }
-
-        uint16_t set_typeid() const {
-            return set_typeid_;
-        }
-
         enum Mode : uint8_t { UNKNOWN, OFF, MANUAL, AUTO, DAY, NIGHT, HEAT, NOFROST, ECO, HOLIDAY, COMFORT, OFFSET, DESIGN, SUMMER };
 
-        // for sorting
+        // for sorting based on hc number
         friend inline bool operator<(const std::shared_ptr<HeatingCircuit> & lhs, const std::shared_ptr<HeatingCircuit> & rhs) {
             return (lhs->hc_num_ < rhs->hc_num_);
         }
 
       private:
-        uint8_t  hc_num_; // 1..10
-        uint16_t monitor_typeid_;
-        uint16_t set_typeid_;
+        uint8_t hc_num_; // 1..10
     };
 
     static std::string mode_tostring(uint8_t mode);

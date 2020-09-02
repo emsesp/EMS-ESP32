@@ -106,7 +106,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
     } else if (model == EMSdevice::EMS_DEVICE_FLAG_EASY) {
         monitor_typeids = {0x0A};
         set_typeids     = {};
-        register_telegram_type(monitor_typeids[0], F("EasyMonitor"), false, [&](std::shared_ptr<const Telegram> t) { process_EasyMonitor(t); });
+        register_telegram_type(monitor_typeids[0], F("EasyMonitor"), true, [&](std::shared_ptr<const Telegram> t) { process_EasyMonitor(t); });
 
         // RC300/RC100
     } else if ((model == EMSdevice::EMS_DEVICE_FLAG_RC300) || (model == EMSdevice::EMS_DEVICE_FLAG_RC100)) {
@@ -524,7 +524,7 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::sha
     }
 
     // create a new heating circuit object
-    auto new_hc = std::make_shared<Thermostat::HeatingCircuit>(hc_num, monitor_typeids[hc_num - 1], set_typeids[hc_num - 1]);
+    auto new_hc = std::make_shared<Thermostat::HeatingCircuit>(hc_num);
     heating_circuits_.push_back(new_hc);
 
     std::sort(heating_circuits_.begin(), heating_circuits_.end()); // sort based on hc number
@@ -536,7 +536,10 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::sha
 
     // set the flag saying we want its data during the next auto fetch
     toggle_fetch(monitor_typeids[hc_num - 1], toggle_);
-    toggle_fetch(set_typeids[hc_num - 1], toggle_);
+
+    if (set_typeids.size()) {
+        toggle_fetch(set_typeids[hc_num - 1], toggle_);
+    }
 
     return heating_circuits_.back(); // even after sorting, this should still point back to the newly created HC
 }
@@ -1568,7 +1571,6 @@ void Thermostat::set_mode_n(const uint8_t mode, const uint8_t hc_num) {
 
     // add the write command to the Tx queue
     // post validate is the corresponding monitor or set type IDs as they can differ per model
-    // write_command(set_typeids[hc->hc_num() - 1], offset, set_mode_value, validate_typeid);
     write_command(set_typeids[hc->hc_num() - 1], offset, set_mode_value, validate_typeid);
 }
 

@@ -123,10 +123,6 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         uint8bitb = EMS_VALUE_UINT_NOTSET;
         telegram->read_bitvalue(uint8bitb, 0, 0); // value is 0x01 = 0000 0001
         shell.printfln("uint8 bit read: expecting 1, got:%d", uint8bitb);
-
-        shell.loop_all();
-
-        return;
     }
 
     if (command == "devices") {
@@ -159,7 +155,6 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         // note there is no brand (byte 9)
         rx_telegram({0x09, 0x0B, 0x02, 0x00, 0x59, 0x09, 0x0a});
 
-        shell.loop_all();
         EMSESP::show_device_values(shell);
     }
 
@@ -210,8 +205,6 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         shell.invoke_command("show");
         // shell.invoke_command("system");
         // shell.invoke_command("show mqtt");
-
-        // shell.loop_all();
     }
 
     if (command == "thermostat") {
@@ -235,19 +228,10 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         // RCPLUSStatusMessage_HC1(0x01A5)
         uart_telegram({0x98, 0x00, 0xFF, 0x00, 0x01, 0xA5, 0x00, 0xCF, 0x21, 0x2E, 0x00, 0x00, 0x2E, 0x24,
                        0x03, 0x25, 0x03, 0x03, 0x01, 0x03, 0x25, 0x00, 0xC8, 0x00, 0x00, 0x11, 0x01, 0x03});
-
-        shell.loop_all();
     }
 
     if (command == "tc100") {
         shell.printfln(F("Testing adding a TC100 thermostat to the EMS bus..."));
-
-        // add_device(0x10, 165, version, EMSdevice::Brand::BUDERUS);
-        // add_device(0x17, 125, version, EMSdevice::Brand::BUDERUS); // test unknown class test
-        // add_device(0x17, 93, version, EMSdevice::Brand::BUDERUS);
-        // add_device(0x17, 254, version, EMSdevice::Brand::BUDERUS); // test unknown product_id
-
-        // EMSESP::add_device(0x18, 157, version, EMSdevice::Brand::BOSCH); // Bosch CR100 - https://github.com/proddy/EMS-ESP/issues/355
 
         std::string version("02.21");
 
@@ -257,11 +241,9 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         // add a thermostat
         EMSESP::add_device(0x18, 202, version, EMSdevice::Brand::BOSCH); // Bosch TC100 - https://github.com/proddy/EMS-ESP/issues/474
 
-        // RCPLUSStatusMessage_HC1(0x01A5)
-        // uart_telegram({0x98, 0x00, 0xFF, 0x00, 0x01, 0xA5, 0x00, 0xCF, 0x21, 0x2E, 0x00, 0x00, 0x2E, 0x24,
-        //    0x03, 0x25, 0x03, 0x03, 0x01, 0x03, 0x25, 0x00, 0xC8, 0x00, 0x00, 0x11, 0x01, 0x03});
-
-        shell.loop_all();
+        // 0x0A
+        uart_telegram({0x98, 0x0B, 0x0A, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00});
     }
 
     if (command == "solar") {
@@ -582,8 +564,6 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         shell.invoke_command("help");
         shell.invoke_command("pin");
         shell.invoke_command("pin 1 true");
-
-        shell.loop_all();
     }
 
     if (command == "mqtt") {
@@ -654,8 +634,6 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
 
         Mqtt::resubscribe();
         Mqtt::show_mqtt(shell); // show queue
-
-        shell.loop_all();
     }
 
     if (command == "poll2") {
