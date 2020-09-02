@@ -41,7 +41,8 @@ class Thermostat : public EMSdevice {
     class HeatingCircuit {
       public:
         HeatingCircuit(const uint8_t hc_num)
-            : hc_num_(hc_num) {
+            : hc_num_(hc_num)
+            , ha_registered_(false) {
         }
         ~HeatingCircuit() = default;
 
@@ -65,6 +66,10 @@ class Thermostat : public EMSdevice {
             return hc_num_;
         }
 
+        bool ha_registered() const {
+            return ha_registered_;
+        }
+
         uint8_t get_mode(uint8_t flags) const;
         uint8_t get_mode_type(uint8_t flags) const;
 
@@ -76,7 +81,8 @@ class Thermostat : public EMSdevice {
         }
 
       private:
-        uint8_t hc_num_; // 1..10
+        uint8_t hc_num_;        // heating circuit number 1..10
+        bool    ha_registered_; // whether it has been registered for HA MQTT Discovery
     };
 
     static std::string mode_tostring(uint8_t mode);
@@ -109,7 +115,7 @@ class Thermostat : public EMSdevice {
 
     // Installation parameters
     uint8_t ibaMainDisplay_ =
-        EMS_VALUE_UINT_NOTSET; // display on Thermostat: 0 int. temp, 1 int. setpoint, 2 ext. temp., 3 burner temp., 4 ww temp, 5 functioning mode, 6 time, 7 data, 9 smoke temp
+        EMS_VALUE_UINT_NOTSET; // display on Thermostat: 0 int temp, 1 int setpoint, 2 ext temp, 3 burner temp, 4 ww temp, 5 functioning mode, 6 time, 7 data, 9 smoke temp
     uint8_t ibaLanguage_          = EMS_VALUE_UINT_NOTSET; // language on Thermostat: 0 german, 1 dutch, 2 french, 3 italian
     int8_t  ibaCalIntTemperature_ = EMS_VALUE_INT_NOTSET;  // offset int. temperature sensor, by * 0.1 Kelvin (-5.0 to 5.0K)
     int8_t  ibaMinExtTemperature_ = EMS_VALUE_INT_NOTSET;  // min ext temp for heating curve, in deg., 0xF6=-10, 0x0 = 0, 0xFF=-1

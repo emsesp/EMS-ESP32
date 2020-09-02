@@ -442,6 +442,11 @@ void Thermostat::publish_values() {
             Mqtt::publish(topic, doc);
             rootThermostat = doc.to<JsonObject>(); // clear object
         } else if (mqtt_format_ == MQTT_format::HA) {
+            // see if we have already registered this with HA MQTT Discovery, if not send the config
+            if (!hc->ha_registered()) {
+                register_mqtt_ha_config(hc->hc_num());
+            }
+            // send the thermostat topic and payload data
             std::string topic(100, '\0');
             snprintf_P(&topic[0], topic.capacity() + 1, PSTR("homeassistant/climate/ems-esp/hc%d/state"), hc->hc_num());
             Mqtt::publish(topic, doc);
@@ -528,11 +533,6 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::sha
     heating_circuits_.push_back(new_hc);
 
     std::sort(heating_circuits_.begin(), heating_circuits_.end()); // sort based on hc number
-
-    // if we're using Home Assistant and HA discovery, register the new config
-    if (mqtt_format_ == MQTT_format::HA) {
-        register_mqtt_ha_config(hc_num);
-    }
 
     // set the flag saying we want its data during the next auto fetch
     toggle_fetch(monitor_typeids[hc_num - 1], toggle_);
