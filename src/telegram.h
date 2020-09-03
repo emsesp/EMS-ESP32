@@ -101,7 +101,7 @@ class Telegram {
     // s is to override number of bytes read (e.g. use 3 to simulat a uint24_t)
     void read_value(Value & value, const uint8_t index, uint8_t s = 0) const {
         uint8_t size      = (!s) ? sizeof(Value) : s;
-        int8_t  abs_index = ((index - offset + size - 1) >= message_length - 1) ? -1 : (index - offset);
+        int8_t  abs_index = ((index - offset + size - 1) >= message_length) ? -1 : (index - offset);
         if (abs_index < 0) {
             return; // out of bounds, we don't change the value
         }

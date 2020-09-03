@@ -138,6 +138,9 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         // question: do we need to set the mask?
         std::string version("1.2.3");
         EMSESP::add_device(0x08, 123, version, EMSdevice::Brand::BUDERUS); // Nefit Trendline
+
+        // UBAuptime
+        uart_telegram({0x08, 0x0B, 0x14, 00, 0x3C, 0x1F, 0xAC, 0x70});
     }
 
     // unknown device -
