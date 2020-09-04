@@ -771,11 +771,9 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
 #ifdef EMSESP_DEBUG
         LOG_TRACE(F("[DEBUG] Reply after %d ms: %s"), ::millis() - rx_time_, Helpers::data_to_hex(data, length).c_str());
 #endif
-        // check if there is a message for the roomcontroller
-        Roomctrl::check((data[1] ^ 0x80 ^ rxservice_.ems_mask()), data);
-        // add to RxQueue, what ever it is.
-        // in add() the CRC will be checked
-        rxservice_.add(data, length);
+        Roomctrl::check((data[1] ^ 0x80 ^ rxservice_.ems_mask()), data); // check if there is a message for the roomcontroller
+
+        rxservice_.add(data, length); // add to RxQueue
     }
 }
 
