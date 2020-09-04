@@ -1629,12 +1629,17 @@ void Thermostat::set_temperature(const float temperature, const uint8_t mode, co
 
     } else if ((model == EMS_DEVICE_FLAG_RC300) || (model == EMS_DEVICE_FLAG_RC100)) {
         validate_typeid = set_typeids[hc->hc_num() - 1];
-        if (mode == HeatingCircuit::Mode::AUTO) {
-            offset = 0x08; // auto offset
-        } else if (mode == HeatingCircuit::Mode::MANUAL) {
+        switch (mode) {
+        case HeatingCircuit::Mode::MANUAL:
             offset = 0x0A; // manual offset
-        } else if (mode == HeatingCircuit::Mode::COMFORT) {
+            break;
+        case HeatingCircuit::Mode::COMFORT:
             offset = 0x02; // comfort offset
+            break;
+        default:
+        case HeatingCircuit::Mode::AUTO:
+            offset = 0x08; // auto offset
+            break;
         }
 
     } else if (model == EMS_DEVICE_FLAG_RC20_2) {
@@ -1644,6 +1649,11 @@ void Thermostat::set_temperature(const float temperature, const uint8_t mode, co
             break;
         case HeatingCircuit::Mode::DAY: // change the day temp
             offset = EMS_OFFSET_RC20_2_Set_temp_day;
+            break;
+        default:
+        case HeatingCircuit::Mode::AUTO: // automatic selection, if no type is defined, we use the standard code
+            uint8_t mode_type = hc->get_mode_type(this->flags());
+            offset            = (mode_type == HeatingCircuit::Mode::NIGHT) ? EMS_OFFSET_RC20_2_Set_temp_night : EMS_OFFSET_RC20_2_Set_temp_day;
             break;
         }
 
@@ -1712,8 +1722,13 @@ void Thermostat::set_temperature(const float temperature, const uint8_t mode, co
             default:
             case HeatingCircuit::Mode::AUTO: // automatic selection, if no type is defined, we use the standard code
                 uint8_t mode_type = hc->get_mode_type(this->flags());
-                offset = (mode_type == HeatingCircuit::Mode::NIGHT || mode_type == HeatingCircuit::Mode::ECO) ? EMS_OFFSET_JunkersSetMessage_night_temp
-                                                                                                              : EMS_OFFSET_JunkersSetMessage_day_temp;
+                if (mode_type == HeatingCircuit::Mode::NIGHT || mode_type == HeatingCircuit::Mode::ECO) {
+                    offset = EMS_OFFSET_JunkersSetMessage_night_temp;
+                } else if (mode_type == HeatingCircuit::Mode::DAY || mode_type == HeatingCircuit::Mode::HEAT) {
+                    offset = EMS_OFFSET_JunkersSetMessage_day_temp;
+                } else {
+                    offset = EMS_OFFSET_JunkersSetMessage_no_frost_temp;
+                }
                 break;
             }
 
@@ -1727,10 +1742,20 @@ void Thermostat::set_temperature(const float temperature, const uint8_t mode, co
             case HeatingCircuit::Mode::NIGHT:
                 offset = EMS_OFFSET_JunkersSetMessage2_eco_temp;
                 break;
-            default:
             case HeatingCircuit::Mode::HEAT:
             case HeatingCircuit::Mode::DAY:
-                offset = EMS_OFFSET_JunkersSetMessage3_heat;
+                offset = EMS_OFFSET_JunkersSetMessage2_heat_temp;
+                break;
+            default:
+            case HeatingCircuit::Mode::AUTO: // automatic selection, if no type is defined, we use the standard code
+                uint8_t mode_type = hc->get_mode_type(this->flags());
+                if (mode_type == HeatingCircuit::Mode::NIGHT || mode_type == HeatingCircuit::Mode::ECO) {
+                    offset = EMS_OFFSET_JunkersSetMessage2_eco_temp;
+                } else if (mode_type == HeatingCircuit::Mode::DAY || mode_type == HeatingCircuit::Mode::HEAT) {
+                    offset = EMS_OFFSET_JunkersSetMessage2_heat_temp;
+                } else {
+                    offset = EMS_OFFSET_JunkersSetMessage2_no_frost_temp;
+                }
                 break;
             }
         }
