@@ -92,26 +92,26 @@ class Telegram {
         value = (uint8_t)(((message_data[abs_index]) >> (bit)) & 0x01);
     }
 
-    // read values from a telegram. We always store the value, regardless if its garbage
+    // read a value from a telegram. We always store the value, regardless if its garbage
     template <typename Value>
     // assuming negative numbers are stored as 2's-complement
     // https://medium.com/@LeeJulija/how-integers-are-stored-in-memory-using-twos-complement-5ba04d61a56c
     // 2-compliment : https://www.rapidtables.com/convert/number/decimal-to-hex.html
     // https://en.wikipedia.org/wiki/Two%27s_complement
-    // s is to override number of bytes read (e.g. use 3 to simulat a uint24_t)
+    // s is to override number of bytes read (e.g. use 3 to simulate a uint24_t)
     void read_value(Value & value, const uint8_t index, uint8_t s = 0) const {
-        uint8_t size      = (!s) ? sizeof(Value) : s;
-        int8_t  abs_index = ((index - offset + size - 1) >= message_length) ? -1 : (index - offset);
-        if (abs_index < 0) {
-            return; // out of bounds, we don't change the value
+        uint8_t num_bytes = (!s) ? sizeof(Value) : s;
+
+        // check for out of bounds, if so don't modify the value
+        if ((index - this->offset + num_bytes - 1) >= this->message_length) {
+            return;
         }
 
         value = 0;
-        for (uint8_t i = 0; i < size; i++) {
-            value = (value << 8) + message_data[abs_index + i]; // shift
+        for (uint8_t i = 0; i < num_bytes; i++) {
+            value = (value << 8) + message_data[index - this->offset + i]; // shift by byte
         }
     }
-
 
   private:
     int8_t _getDataPosition(const uint8_t index, const uint8_t size) const;
