@@ -467,7 +467,7 @@ void Thermostat::publish_values() {
 // of nullptr if it doesn't exist yet
 std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(const uint8_t hc_num) {
     // if hc_num is 0 then return the first existing hc in the list
-    if (hc_num == 0) {
+    if (hc_num == AUTO_HEATING_CIRCUIT) {
         for (const auto & heating_circuit : heating_circuits_) {
             return heating_circuit;
         }
@@ -1488,7 +1488,7 @@ void Thermostat::set_mode_n(const uint8_t mode, const uint8_t hc_num) {
     // get hc based on number
     std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(hc_num);
     if (hc == nullptr) {
-        LOG_WARNING(F("set mode: Heating Circuit %d not found or activated"), hc_num);
+        LOG_WARNING(F("Set mode: Heating Circuit %d not found or activated"), hc_num);
         return;
     }
 
