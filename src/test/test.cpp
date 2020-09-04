@@ -28,7 +28,7 @@ namespace emsesp {
 // used with the 'test' command, under su/admin
 void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
     if (command == "default") {
-        run_test(shell, "thermostat"); // add the default test case here
+        run_test(shell, "mqtt"); // add the default test case here
     }
 
     if (command.empty()) {
@@ -587,7 +587,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         // add a thermostat
         EMSESP::add_device(0x18, 157, version, EMSdevice::Brand::BOSCH); // Bosch CR100 - https://github.com/proddy/EMS-ESP/issues/355
 
-        // RCPLUSStatusMessage_HC1(0x01A5)
+        // RCPLUSStatusMessage_HC1(0x01A5) - HC1
         uart_telegram({0x98, 0x00, 0xFF, 0x00, 0x01, 0xA5, 0x00, 0xCF, 0x21, 0x2E, 0x00, 0x00, 0x2E, 0x24,
                        0x03, 0x25, 0x03, 0x03, 0x01, 0x03, 0x25, 0x00, 0xC8, 0x00, 0x00, 0x11, 0x01, 0x03});
         uart_telegram("98 00 FF 00 01 A5 00 CF 21 2E 00 00 2E 24 03 25 03 03 01 03 25 00 C8 00 00 11 01 03");            // without CRC
@@ -702,7 +702,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
     }
 
     // finally dump to console
-    shell.loop_all();
+    EMSESP::loop();
 }
 
 // simulates a telegram in the Rx queue, but without the CRC which is added automatically
@@ -729,6 +729,7 @@ void Test::uart_telegram(const std::vector<uint8_t> & rx_data) {
     }
     data[i] = EMSESP::rxservice_.calculate_crc(data, i);
     EMSESP::incoming_telegram(data, i + 1);
+    EMSESP::rxservice_.loop();
 }
 
 // takes raw string, assuming it contains the CRC. This is what is output from 'watch raw'
@@ -766,6 +767,7 @@ void Test::uart_telegram_withCRC(const char * rx_data) {
     }
 
     EMSESP::incoming_telegram(data, count + 1);
+    EMSESP::rxservice_.loop();
 }
 
 // takes raw string, adds CRC to end
@@ -805,6 +807,7 @@ void Test::uart_telegram(const char * rx_data) {
     data[count + 1] = EMSESP::rxservice_.calculate_crc(data, count + 1); // add CRC
 
     EMSESP::incoming_telegram(data, count + 2);
+    EMSESP::rxservice_.loop();
 }
 
 #pragma GCC diagnostic push
