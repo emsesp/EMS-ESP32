@@ -1217,7 +1217,7 @@ void Thermostat::set_minexttemp(const char * value, const int8_t id) {
         return;
     }
     LOG_INFO(F("Setting min external temperature to %d"), mt);
-    write_command(EMS_TYPE_IBASettings, 5, mt);
+    write_command(EMS_TYPE_IBASettings, 5, mt, EMS_TYPE_IBASettings);
 }
 
 // 0xA5 - Clock offset
@@ -1227,7 +1227,7 @@ void Thermostat::set_clockoffset(const char * value, const int8_t id) {
         return;
     }
     LOG_INFO(F("Setting clock offset to %d"), co);
-    write_command(EMS_TYPE_IBASettings, 12, co);
+    write_command(EMS_TYPE_IBASettings, 12, co, EMS_TYPE_IBASettings);
 }
 
 // 0xA5 - Calibrate internal temperature
@@ -1238,7 +1238,7 @@ void Thermostat::set_calinttemp(const char * value, const int8_t id) {
     }
     // does this value need to be multiple by 10?
     LOG_INFO(F("Calibrating internal temperature to %d.%d"), ct / 10, ct < 0 ? -ct % 10 : ct % 10);
-    write_command(EMS_TYPE_IBASettings, 2, ct);
+    write_command(EMS_TYPE_IBASettings, 2, ct, EMS_TYPE_IBASettings);
 }
 
 // 0xA5 - Set the display settings
@@ -1248,7 +1248,7 @@ void Thermostat::set_display(const char * value, const int8_t id) {
         return;
     }
     LOG_INFO(F("Setting display to %d"), ds);
-    write_command(EMS_TYPE_IBASettings, 0, ds);
+    write_command(EMS_TYPE_IBASettings, 0, ds, EMS_TYPE_IBASettings);
 }
 
 void Thermostat::set_remotetemp(const char * value, const int8_t id) {
@@ -1285,7 +1285,7 @@ void Thermostat::set_building(const char * value, const int8_t id) {
     }
 
     LOG_INFO(F("Setting building to %d"), bg);
-    write_command(EMS_TYPE_wwSettings, 6, bg);
+    write_command(EMS_TYPE_IBASettings, 6, bg, EMS_TYPE_IBASettings);
 }
 
 // 0xA5 Set the language settings
@@ -1295,7 +1295,7 @@ void Thermostat::set_language(const char * value, const int8_t id) {
         return;
     }
     LOG_INFO(F("Setting language to %d"), lg);
-    write_command(EMS_TYPE_wwSettings, 1, lg);
+    write_command(EMS_TYPE_IBASettings, 1, lg, EMS_TYPE_IBASettings);
 }
 
 // Set the control-mode for hc 0-off, 1-RC20, 2-RC3x
@@ -1340,7 +1340,7 @@ void Thermostat::set_wwmode(const char * value, const int8_t id) {
 
     if (set != 0xFF) {
         LOG_INFO(F("Setting thermostat warm water mode to %s"), v.c_str());
-        write_command(EMS_TYPE_wwSettings, 2, set);
+        write_command(EMS_TYPE_wwSettings, 2, set, EMS_TYPE_wwSettings);
     } else {
         LOG_WARNING(F("Set thermostat warm water mode: Invalid mode: %s"), v.c_str());
     }
@@ -1444,7 +1444,7 @@ void Thermostat::set_datetime(const char * value, const int8_t id) {
         data[7] = (dt[22] - '0') + 2;                                          // DST and flag
     }
     LOG_INFO(F("Setting date and time"));
-    write_command(EMS_TYPE_time, 0, data, 8, 0);
+    write_command(EMS_TYPE_time, 0, data, 8, EMS_TYPE_time);
 }
 
 // sets the thermostat working mode, where mode is a string
@@ -1488,7 +1488,7 @@ void Thermostat::set_mode_n(const uint8_t mode, const uint8_t hc_num) {
     // get hc based on number
     std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(hc_num);
     if (hc == nullptr) {
-        LOG_WARNING(F("Set mode: Heating Circuit %d not found or activated"), hc_num);
+        LOG_WARNING(F("set mode: Heating Circuit %d not found or activated"), hc_num);
         return;
     }
 

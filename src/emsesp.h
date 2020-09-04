@@ -191,6 +191,7 @@ class EMSESP {
     static uint16_t watch_id_;
     static uint8_t  watch_;
     static uint16_t read_id_;
+    static uint16_t publish_id_;
     static bool     tap_water_active_;
 
     static uint8_t unique_id_count_;
