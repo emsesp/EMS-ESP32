@@ -67,14 +67,17 @@ void Mixing::device_info(JsonArray & root) {
 
     if (type_ == Type::WWC) {
         render_value_json(root, "", F("Warm Water Circuit"), hc_, nullptr);
+        render_value_json(root, "", F("Current warm water temperature"), flowTemp_, F_(degrees), 10);
+        render_value_json(root, "", F("Current pump status"), pumpMod_, nullptr);
+        render_value_json(root, "", F("Current temperature status"), status_, nullptr);
     } else {
         render_value_json(root, "", F("Heating Circuit"), hc_, nullptr);
+        render_value_json(root, "", F("Current flow temperature"), flowTemp_, F_(degrees), 10);
+        render_value_json(root, "", F("Setpoint flow temperature"), flowSetTemp_, F_(degrees));
+        render_value_json(root, "", F("Current pump modulation"), pumpMod_, F_(percent));
+        render_value_json(root, "", F("Current valve status"), status_, nullptr);
     }
 
-    render_value_json(root, "", F("Current flow temperature"), flowTemp_, F_(degrees), 10);
-    render_value_json(root, "", F("Setpoint flow temperature"), flowSetTemp_, F_(degrees));
-    render_value_json(root, "", F("Current pump modulation"), pumpMod_, F_(percent));
-    render_value_json(root, "", F("Current valve status"), status_, nullptr);
 }
 
 // check to see if values have been updated
@@ -96,14 +99,17 @@ void Mixing::show_values(uuid::console::Shell & shell) {
 
     if (type_ == Type::WWC) {
         print_value(shell, 2, F("Warm Water Circuit"), hc_, nullptr);
+        print_value(shell, 4, F("Current warm water temperature"), flowTemp_, F_(degrees), 10);
+        print_value(shell, 4, F("Current pump status"), pumpMod_, nullptr);
+        print_value(shell, 4, F("Current temperature status"), status_, nullptr);
     } else {
         print_value(shell, 2, F("Heating Circuit"), hc_, nullptr);
+        print_value(shell, 4, F("Current flow temperature"), flowTemp_, F_(degrees), 10);
+        print_value(shell, 4, F("Setpoint flow temperature"), flowSetTemp_, F_(degrees));
+        print_value(shell, 4, F("Current pump modulation"), pumpMod_, F_(percent));
+        print_value(shell, 4, F("Current valve status"), status_, nullptr);
     }
 
-    print_value(shell, 4, F("Current flow temperature"), flowTemp_, F_(degrees), 10);
-    print_value(shell, 4, F("Setpoint flow temperature"), flowSetTemp_, F_(degrees));
-    print_value(shell, 4, F("Current pump modulation"), pumpMod_, F_(percent));
-    print_value(shell, 4, F("Current valve status"), status_, nullptr);
 
     shell.println();
 }
@@ -116,29 +122,34 @@ void Mixing::publish_values() {
     switch (type_) {
     case Type::HC:
         doc["type"] = "hc";
+        if (Helpers::hasValue(flowTemp_)) {
+            doc["flowTemp"] = (float)flowTemp_ / 10;
+        }
+        if (Helpers::hasValue(pumpMod_)) {
+            doc["pumpMod"] = pumpMod_;
+        }
+        if (Helpers::hasValue(status_)) {
+            doc["status"] = status_;
+        }
+        if (Helpers::hasValue(flowSetTemp_)) {
+            doc["flowSetTemp"] = flowSetTemp_;
+        }
         break;
     case Type::WWC:
         doc["type"] = "wwc";
+        if (Helpers::hasValue(flowTemp_)) {
+            doc["wwTemp"] = (float)flowTemp_ / 10;
+        }
+        if (Helpers::hasValue(pumpMod_)) {
+            doc["pumpStatus"] = pumpMod_;
+        }
+        if (Helpers::hasValue(status_)) {
+            doc["tempStatus"] = status_;
+        }
         break;
     case Type::NONE:
     default:
         return;
-    }
-
-    if (Helpers::hasValue(flowTemp_)) {
-        doc["flowTemp"] = (float)flowTemp_ / 10;
-    }
-
-    if (Helpers::hasValue(pumpMod_)) {
-        doc["pumpMod"] = pumpMod_;
-    }
-
-    if (Helpers::hasValue(status_)) {
-        doc["status"] = status_;
-    }
-
-    if (Helpers::hasValue(flowSetTemp_)) {
-        doc["flowSetTemp"] = flowSetTemp_;
     }
 
     char topic[30];
