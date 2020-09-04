@@ -111,7 +111,7 @@ class Boiler : public EMSdevice {
     uint32_t wWStarts_        = EMS_VALUE_ULONG_NOTSET;  // Warm Water # starts
     uint32_t wWWorkM_         = EMS_VALUE_ULONG_NOTSET;  // Warm Water # minutes
     uint8_t  wWOneTime_       = EMS_VALUE_BOOL_NOTSET;   // Warm Water one time function on/off
-    uint8_t  wWDesinfecting_  = EMS_VALUE_BOOL_NOTSET;   // Warm Water disinfection on/off
+    uint8_t  wWDisinfecting_  = EMS_VALUE_BOOL_NOTSET;   // Warm Water disinfection on/off
     uint8_t  wWReadiness_     = EMS_VALUE_BOOL_NOTSET;   // Warm Water readiness on/off
     uint8_t  wWRecharging_    = EMS_VALUE_BOOL_NOTSET;   // Warm Water recharge on/off
     uint8_t  wWTemperatureOK_ = EMS_VALUE_BOOL_NOTSET;   // Warm Water temperature ok on/off

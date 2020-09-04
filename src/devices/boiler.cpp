@@ -221,8 +221,8 @@ void Boiler::publish_values() {
     if (Helpers::hasValue(wWOneTime_, EMS_VALUE_BOOL)) {
         doc["wWOnetime"] = Helpers::render_value(s, wWOneTime_, EMS_VALUE_BOOL);
     }
-    if (Helpers::hasValue(wWDesinfecting_, EMS_VALUE_BOOL)) {
-        doc["wWDesinfecting"] = Helpers::render_value(s, wWDesinfecting_, EMS_VALUE_BOOL);
+    if (Helpers::hasValue(wWDisinfecting_, EMS_VALUE_BOOL)) {
+        doc["wWDisinfecting"] = Helpers::render_value(s, wWDisinfecting_, EMS_VALUE_BOOL);
     }
     if (Helpers::hasValue(wWReadiness_, EMS_VALUE_BOOL)) {
         doc["wWReady"] = Helpers::render_value(s, wWReadiness_, EMS_VALUE_BOOL);
@@ -378,7 +378,7 @@ void Boiler::show_values(uuid::console::Shell & shell) {
         shell.printfln(F("  Warm Water active time: %d days %d hours %d minutes"), wWWorkM_ / 1440, (wWWorkM_ % 1440) / 60, wWWorkM_ % 60);
     }
     print_value(shell, 2, F("Warm Water charging"), wWHeat_, nullptr, EMS_VALUE_BOOL);
-    print_value(shell, 2, F("Warm Water disinfecting"), wWDesinfecting_, nullptr, EMS_VALUE_BOOL);
+    print_value(shell, 2, F("Warm Water disinfecting"), wWDisinfecting_, nullptr, EMS_VALUE_BOOL);
     print_value(shell, 2, F("Selected flow temperature"), selFlowTemp_, F_(degrees));
     print_value(shell, 2, F("Current flow temperature"), curFlowTemp_, F_(degrees), 10);
     print_value(shell, 2, F("Max boiler temperature"), boilTemp_, F_(degrees), 10);
@@ -551,7 +551,7 @@ void Boiler::process_UBAMonitorWW(std::shared_ptr<const Telegram> telegram) {
     telegram->read_value(wWStarts_, 13, 3); // force to 3 bytes
 
     telegram->read_bitvalue(wWOneTime_, 5, 1);
-    telegram->read_bitvalue(wWDesinfecting_, 5, 2);
+    telegram->read_bitvalue(wWDisinfecting_, 5, 2);
     telegram->read_bitvalue(wWReadiness_, 5, 3);
     telegram->read_bitvalue(wWRecharging_, 5, 4);
     telegram->read_bitvalue(wWTemperatureOK_, 5, 5);
@@ -631,7 +631,7 @@ void Boiler::process_UBADHWStatus(std::shared_ptr<const Telegram> telegram) {
     telegram->read_value(wWStarts_, 14, 3); // force to 3 bytes
 
     telegram->read_bitvalue(wWOneTime_, 12, 2);
-    telegram->read_bitvalue(wWDesinfecting_, 12, 3);
+    telegram->read_bitvalue(wWDisinfecting_, 12, 3);
     telegram->read_bitvalue(wWReadiness_, 12, 4);
     telegram->read_bitvalue(wWRecharging_, 13, 4);
     telegram->read_bitvalue(wWTemperatureOK_, 13, 5);
