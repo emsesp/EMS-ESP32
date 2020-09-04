@@ -50,11 +50,11 @@ class Helpers {
     static char * ultostr(char * ptr, uint32_t value, const uint8_t base);
 #endif
 
-    static bool hasValue(const uint8_t v, const uint8_t isBool = 0);
-    static bool hasValue(const int8_t v);
-    static bool hasValue(const int16_t v);
-    static bool hasValue(const uint16_t v);
-    static bool hasValue(const uint32_t v);
+    static bool hasValue(const uint8_t &v, const uint8_t isBool = 0);
+    static bool hasValue(const int8_t &v);
+    static bool hasValue(const int16_t &v);
+    static bool hasValue(const uint16_t &v);
+    static bool hasValue(const uint32_t &v);
 
     static std::string toLower(std::string const & s);
 
