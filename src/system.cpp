@@ -594,8 +594,22 @@ void System::console_commands(Shell & shell, unsigned int context) {
 
 // upgrade from previous versions of EMS-ESP, based on SPIFFS on an ESP8266
 // returns true if an upgrade was done
+// the logic is bit abnormal (loading both filesystems and testing) but this was the only way I could get it to work reliably
 bool System::check_upgrade() {
 #if defined(ESP8266)
+
+    LittleFSConfig l_cfg;
+    l_cfg.setAutoFormat(false);
+    LittleFS.setConfig(l_cfg); // do not auto format if it can't find LittleFS
+    if (LittleFS.begin()) {
+#if defined(EMSESP_DEBUG)
+        Serial.begin(115200);
+        Serial.println(F("FS is Littlefs"));
+        Serial.flush();
+        Serial.end();
+#endif
+        return false;
+    }
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
@@ -604,126 +618,169 @@ bool System::check_upgrade() {
     cfg.setAutoFormat(false); // prevent formatting when opening SPIFFS filesystem
     SPIFFS.setConfig(cfg);
     if (!SPIFFS.begin()) {
-        return false; // is not SPIFFS
+#if defined(EMSESP_DEBUG)
+        Serial.begin(115200);
+        Serial.println(F("No old SPIFFS found!"));
+        Serial.flush();
+        Serial.end();
+#endif
+        return false;
     }
 
     Serial.begin(115200);
 
-    // open the two files
-    File file1 = SPIFFS.open("/myesp.json", "r");
-    File file2 = SPIFFS.open("/customconfig.json", "r");
-    if (!file1 || !file2) {
-        Serial.println(F("Unable to read the config files"));
-        file1.close();
-        file2.close();
-        SPIFFS.end();
-        Serial.end();
-        return false; // can't open files
-    }
-
-    // read the content of the files
-    DeserializationError     error;
-    StaticJsonDocument<1024> doc1; // for myESP settings
-    StaticJsonDocument<1024> doc2; // for custom EMS-ESP settings
     bool                     failed = false;
+    File                     file;
+    JsonObject               network, general, mqtt, custom_settings;
+    StaticJsonDocument<1024> doc;
 
-    error = deserializeJson(doc1, file1);
-    if (error) {
-        Serial.printf(PSTR("Error. Failed to deserialize json, doc1, error %s"), error.c_str());
+    // open the system settings:
+    // {
+    // "command":"configfile",
+    // "network":{"ssid":"xxxx","password":"yyyy","wmode":1,"staticip":null,"gatewayip":null,"nmask":null,"dnsip":null},
+    // "general":{"password":"admin","serial":false,"hostname":"ems-esp","log_events":false,"log_ip":null,"version":"1.9.5"},
+    // "mqtt":{"enabled":false,"heartbeat":false,"ip":null,"user":null,"port":1883,"qos":0,"keepalive":60,"retain":false,"password":null,"base":null,"nestedjson":false},
+    // "ntp":{"server":"pool.ntp.org","interval":720,"enabled":false,"timezone":2}
+    // }
+    file = SPIFFS.open("/myesp.json", "r");
+    if (!file) {
+        Serial.println(F("Unable to read the system config file"));
         failed = true;
-    }
-    error = deserializeJson(doc2, file2);
-    if (error) {
-        Serial.printf(PSTR("Error. Failed to deserialize json, doc2, error %s"), error.c_str());
-        failed = true;
-    }
+    } else {
+        DeserializationError error = deserializeJson(doc, file);
+        if (error) {
+            Serial.printf(PSTR("Error. Failed to deserialize system json, error %s\n"), error.c_str());
+            failed = true;
+        } else {
+            Serial.println(F("Migrating settings from EMS-ESP v1.9..."));
+#if defined(EMSESP_DEBUG)
+            serializeJson(doc, Serial);
+            Serial.println();
+#endif
+            network = doc["network"];
+            general = doc["general"];
+            mqtt    = doc["mqtt"];
 
-    file1.close();
-    file2.close();
-    SPIFFS.end();
-    Serial.end();
+            // start up LittleFS. If it doesn't exist it will format it
+            l_cfg.setAutoFormat(true);
+            LittleFS.setConfig(l_cfg);
+            LittleFS.begin();
+            EMSESP::esp8266React.begin();
+            EMSESP::emsespSettingsService.begin();
+
+            EMSESP::esp8266React.getWiFiSettingsService()->update(
+                [&](WiFiSettings & wifiSettings) {
+                    wifiSettings.hostname = general["hostname"] | FACTORY_WIFI_HOSTNAME;
+                    wifiSettings.ssid     = network["ssid"] | FACTORY_WIFI_SSID;
+                    wifiSettings.password = network["password"] | FACTORY_WIFI_PASSWORD;
+
+                    wifiSettings.staticIPConfig = false;
+                    JsonUtils::readIP(network, "staticip", wifiSettings.localIP);
+                    JsonUtils::readIP(network, "dnsip", wifiSettings.dnsIP1);
+                    JsonUtils::readIP(network, "gatewayip", wifiSettings.gatewayIP);
+                    JsonUtils::readIP(network, "nmask", wifiSettings.subnetMask);
+
+                    return StateUpdateResult::CHANGED;
+                },
+                "local");
+
+            EMSESP::esp8266React.getSecuritySettingsService()->update(
+                [&](SecuritySettings & securitySettings) {
+                    securitySettings.jwtSecret = general["password"] | FACTORY_JWT_SECRET;
+
+                    return StateUpdateResult::CHANGED;
+                },
+                "local");
+
+            EMSESP::esp8266React.getMqttSettingsService()->update(
+                [&](MqttSettings & mqttSettings) {
+                    mqttSettings.host             = mqtt["ip"] | FACTORY_MQTT_HOST;
+                    mqttSettings.mqtt_format      = (mqtt["nestedjson"] ? MQTT_format::NESTED : MQTT_format::SINGLE);
+                    mqttSettings.mqtt_qos         = mqtt["qos"] | 0;
+                    mqttSettings.username         = mqtt["user"] | "";
+                    mqttSettings.password         = mqtt["password"] | "";
+                    mqttSettings.port             = mqtt["port"] | FACTORY_MQTT_PORT;
+                    mqttSettings.clientId         = FACTORY_MQTT_CLIENT_ID;
+                    mqttSettings.enabled          = mqtt["enabled"];
+                    mqttSettings.system_heartbeat = mqtt["heartbeat"];
+                    mqttSettings.keepAlive        = FACTORY_MQTT_KEEP_ALIVE;
+                    mqttSettings.cleanSession     = FACTORY_MQTT_CLEAN_SESSION;
+                    mqttSettings.maxTopicLength   = FACTORY_MQTT_MAX_TOPIC_LENGTH;
+
+                    return StateUpdateResult::CHANGED;
+                },
+                "local");
+        }
+    }
+    file.close();
 
     if (failed) {
-        return false; // parse error
+#if defined(EMSESP_DEBUG)
+        Serial.println(F("Failed to read system config. Quitting."));
+#endif
+        SPIFFS.end();
+        Serial.end();
+        return false;
+    }
+
+    // open the custom settings file next:
+    // {
+    // "command":"custom_configfile",
+    // "settings":{"led":true,"led_gpio":2,"dallas_gpio":14,"dallas_parasite":false,"listen_mode":false,"shower_timer":false,"shower_alert":false,"publish_time":0,"tx_mode":1,"bus_id":11,"master_thermostat":0,"known_devices":""}
+    // }
+    doc.clear();
+    failed = false;
+    file   = SPIFFS.open("/customconfig.json", "r");
+    if (!file) {
+        Serial.println(F("Unable to read custom config file"));
+        failed = true;
+    } else {
+        DeserializationError error = deserializeJson(doc, file);
+        if (error) {
+            Serial.printf(PSTR("Error. Failed to deserialize custom json, error %s\n"), error.c_str());
+            failed = true;
+        } else {
+#if defined(EMSESP_DEBUG)
+            serializeJson(doc, Serial);
+            Serial.println();
+#endif
+            custom_settings = doc["settings"];
+            EMSESP::emsespSettingsService.update(
+                [&](EMSESPSettings & settings) {
+                    settings.tx_mode              = custom_settings["tx_mode"] | EMSESP_DEFAULT_TX_MODE;
+                    settings.shower_alert         = custom_settings["shower_alert"] | EMSESP_DEFAULT_SHOWER_ALERT;
+                    settings.shower_timer         = custom_settings["shower_timer"] | EMSESP_DEFAULT_SHOWER_TIMER;
+                    settings.master_thermostat    = custom_settings["master_thermostat"] | EMSESP_DEFAULT_MASTER_THERMOSTAT;
+                    settings.ems_bus_id           = custom_settings["bus_id"] | EMSESP_DEFAULT_EMS_BUS_ID;
+                    settings.syslog_host          = EMSESP_DEFAULT_SYSLOG_HOST;
+                    settings.syslog_level         = EMSESP_DEFAULT_SYSLOG_LEVEL;
+                    settings.syslog_mark_interval = EMSESP_DEFAULT_SYSLOG_MARK_INTERVAL;
+
+                    return StateUpdateResult::CHANGED;
+                },
+                "local");
+        }
+    }
+    file.close();
+
+    SPIFFS.end();
+
+    if (failed) {
+#if defined(EMSESP_DEBUG)
+        Serial.println(F("Failed to read custom config. Quitting."));
+#endif
+        Serial.end();
+        return false;
     }
 
 #pragma GCC diagnostic pop
 
-    LittleFS.begin();
-    EMSESP::esp8266React.begin();          // loads system settings (wifi, mqtt, etc)
-    EMSESP::emsespSettingsService.begin(); // load EMS-ESP specific settings
-
-    Serial.println(F("Migrating settings from EMS-ESP 1.9.x..."));
-
-    // get the json objects
-    JsonObject network         = doc1["network"];
-    JsonObject general         = doc1["general"];
-    JsonObject mqtt            = doc1["mqtt"];
-    JsonObject custom_settings = doc2["settings"]; // from 2nd file
-
-    EMSESP::esp8266React.getWiFiSettingsService()->update(
-        [&](WiFiSettings & wifiSettings) {
-            wifiSettings.hostname = general["hostname"] | FACTORY_WIFI_HOSTNAME;
-            wifiSettings.ssid     = network["ssid"] | FACTORY_WIFI_SSID;
-            wifiSettings.password = network["password"] | FACTORY_WIFI_PASSWORD;
-
-            wifiSettings.staticIPConfig = false;
-            JsonUtils::readIP(network, "staticip", wifiSettings.localIP);
-            JsonUtils::readIP(network, "dnsip", wifiSettings.dnsIP1);
-            JsonUtils::readIP(network, "gatewayip", wifiSettings.gatewayIP);
-            JsonUtils::readIP(network, "nmask", wifiSettings.subnetMask);
-
-            return StateUpdateResult::CHANGED;
-        },
-        "local");
-
-    // ignoring publish_time
-    EMSESP::esp8266React.getMqttSettingsService()->update(
-        [&](MqttSettings & mqttSettings) {
-            mqttSettings.host             = mqtt["ip"] | FACTORY_MQTT_HOST;
-            mqttSettings.mqtt_format      = (mqtt["nestedjson"] ? MQTT_format::NESTED : MQTT_format::SINGLE);
-            mqttSettings.mqtt_qos         = mqtt["qos"] | 0;
-            mqttSettings.username         = mqtt["user"] | "";
-            mqttSettings.password         = mqtt["password"] | "";
-            mqttSettings.port             = mqtt["port"] | FACTORY_MQTT_PORT;
-            mqttSettings.clientId         = FACTORY_MQTT_CLIENT_ID;
-            mqttSettings.enabled          = mqtt["enabled"];
-            mqttSettings.system_heartbeat = mqtt["heartbeat"];
-            mqttSettings.keepAlive        = FACTORY_MQTT_KEEP_ALIVE;
-            mqttSettings.cleanSession     = FACTORY_MQTT_CLEAN_SESSION;
-            mqttSettings.maxTopicLength   = FACTORY_MQTT_MAX_TOPIC_LENGTH;
-
-            return StateUpdateResult::CHANGED;
-        },
-        "local");
-
-    EMSESP::esp8266React.getSecuritySettingsService()->update(
-        [&](SecuritySettings & securitySettings) {
-            securitySettings.jwtSecret = general["password"] | FACTORY_JWT_SECRET;
-
-            return StateUpdateResult::CHANGED;
-        },
-        "local");
-
-    EMSESP::emsespSettingsService.update(
-        [&](EMSESPSettings & settings) {
-            settings.tx_mode              = custom_settings["tx_mode"] | EMSESP_DEFAULT_TX_MODE;
-            settings.shower_alert         = custom_settings["shower_alert"] | EMSESP_DEFAULT_SHOWER_ALERT;
-            settings.shower_timer         = custom_settings["shower_timer"] | EMSESP_DEFAULT_SHOWER_TIMER;
-            settings.master_thermostat    = custom_settings["master_thermostat"] | EMSESP_DEFAULT_MASTER_THERMOSTAT;
-            settings.ems_bus_id           = custom_settings["bus_id"] | EMSESP_DEFAULT_EMS_BUS_ID;
-            settings.syslog_host          = EMSESP_DEFAULT_SYSLOG_HOST;
-            settings.syslog_level         = EMSESP_DEFAULT_SYSLOG_LEVEL;
-            settings.syslog_mark_interval = EMSESP_DEFAULT_SYSLOG_MARK_INTERVAL;
-
-            return StateUpdateResult::CHANGED;
-        },
-        "local");
-
     Serial.println(F("Restarting..."));
     Serial.flush();
-    delay(2000);
-    restart(); // force a restart, nice and tidy
+    delay(1000);
+    Serial.end();
+    delay(1000);
+    restart();
     return true;
 #else
     return false;
