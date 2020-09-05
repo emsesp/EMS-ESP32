@@ -8,7 +8,7 @@
 #elif defined(ESP8266)
 #include <ESP8266WiFi.h>
 #include <ESPAsyncTCP.h>
-#include <FS.h>
+// #include <FS.h>
 #include <LittleFS.h> // proddy added
 #endif
 
