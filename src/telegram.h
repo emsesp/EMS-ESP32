@@ -288,6 +288,10 @@ class TxService : public EMSbus {
         telegram_last_post_send_query_ = type_id;
     }
 
+    uint16_t get_post_send_query() {
+        return telegram_last_post_send_query_;
+    }
+
     uint32_t telegram_read_count() const {
         return telegram_read_count_;
     }

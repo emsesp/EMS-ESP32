@@ -708,8 +708,8 @@ void Boiler::set_warmwater_temp(const char * value, const int8_t id) {
     }
 
     LOG_INFO(F("Setting boiler warm water temperature to %d C"), v);
-    write_command(EMS_TYPE_UBAParameterWW, 2, v);
-    write_command(EMS_TYPE_UBAFlags, 3, v); // for i9000, see #397
+    write_command(EMS_TYPE_UBAParameterWW, 2, v, EMS_TYPE_UBAParameterWW);
+    write_command(EMS_TYPE_UBAFlags, 3, v, EMS_TYPE_UBAParameterWW); // for i9000, see #397
 }
 
 // flow temp
@@ -720,7 +720,7 @@ void Boiler::set_flow_temp(const char * value, const int8_t id) {
     }
 
     LOG_INFO(F("Setting boiler flow temperature to %d C"), v);
-    write_command(EMS_TYPE_UBASetPoints, 0, v);
+    write_command(EMS_TYPE_UBASetPoints, 0, v, EMS_TYPE_UBASetPoints);
 }
 
 // set min boiler output
@@ -730,7 +730,7 @@ void Boiler::set_min_power(const char * value, const int8_t id) {
         return;
     }
     LOG_INFO(F("Setting boiler min power to "), v);
-    write_command(EMS_TYPE_UBAParameters, 3, v);
+    write_command(EMS_TYPE_UBAParameters, 3, v, EMS_TYPE_UBAParameters);
 }
 
 // set max temp
@@ -741,7 +741,7 @@ void Boiler::set_max_power(const char * value, const int8_t id) {
     }
 
     LOG_INFO(F("Setting boiler max power to %d C"), v);
-    write_command(EMS_TYPE_UBAParameters, 2, v);
+    write_command(EMS_TYPE_UBAParameters, 2, v, EMS_TYPE_UBAParameters);
 }
 
 // set boiler on hysteresis
@@ -752,7 +752,7 @@ void Boiler::set_hyst_on(const char * value, const int8_t id) {
     }
 
     LOG_INFO(F("Setting boiler hysteresis on to %d C"), v);
-    write_command(EMS_TYPE_UBAParameters, 5, v);
+    write_command(EMS_TYPE_UBAParameters, 5, v, EMS_TYPE_UBAParameters);
 }
 
 // set boiler off hysteresis
@@ -763,7 +763,7 @@ void Boiler::set_hyst_off(const char * value, const int8_t id) {
     }
 
     LOG_INFO(F("Setting boiler hysteresis off to %d C"), v);
-    write_command(EMS_TYPE_UBAParameters, 4, v);
+    write_command(EMS_TYPE_UBAParameters, 4, v, EMS_TYPE_UBAParameters);
 }
 
 // set min burner period
@@ -774,7 +774,7 @@ void Boiler::set_burn_period(const char * value, const int8_t id) {
     }
 
     LOG_INFO(F("Setting burner min. period to %d min"), v);
-    write_command(EMS_TYPE_UBAParameters, 6, v);
+    write_command(EMS_TYPE_UBAParameters, 6, v, EMS_TYPE_UBAParameters);
 }
 
 // set pump delay
@@ -785,7 +785,7 @@ void Boiler::set_pump_delay(const char * value, const int8_t id) {
     }
 
     LOG_INFO(F("Setting boiler pump delay to %d min"), v);
-    write_command(EMS_TYPE_UBAParameters, 8, v);
+    write_command(EMS_TYPE_UBAParameters, 8, v, EMS_TYPE_UBAParameters);
 }
 
 // note some boilers do not have this setting, than it's done by thermostat
@@ -807,7 +807,7 @@ void Boiler::set_warmwater_mode(const char * value, const int8_t id) {
     } else {
         return; // do nothing
     }
-    write_command(EMS_TYPE_UBAParameterWW, 9, set);
+    write_command(EMS_TYPE_UBAParameterWW, 9, set, EMS_TYPE_UBAParameterWW);
 }
 
 // turn on/off warm water
@@ -826,7 +826,7 @@ void Boiler::set_warmwater_activated(const char * value, const int8_t id) {
     } else {
         n = (v ? 0xFF : 0x00); // 0xFF is on, 0x00 is off
     }
-    write_command(EMS_TYPE_UBAParameterWW, 1, n);
+    write_command(EMS_TYPE_UBAParameterWW, 1, n, EMS_TYPE_UBAParameterWW);
 }
 
 // Activate / De-activate the Warm Tap Water
@@ -871,7 +871,7 @@ void Boiler::set_warmwater_onetime(const char * value, const int8_t id) {
     }
 
     LOG_INFO(F("Setting boiler warm water OneTime loading %s"), v ? "on" : "off");
-    write_command(EMS_TYPE_UBAFlags, 0, (v ? 0x22 : 0x02));
+    write_command(EMS_TYPE_UBAFlags, 0, (v ? 0x22 : 0x02), 0x18);
 }
 
 // Activate / De-activate circulation of warm water 0x35
@@ -883,7 +883,7 @@ void Boiler::set_warmwater_circulation(const char * value, const int8_t id) {
     }
 
     LOG_INFO(F("Setting boiler warm water circulation %s"), v ? "on" : "off");
-    write_command(EMS_TYPE_UBAFlags, 1, (v ? 0x22 : 0x02));
+    write_command(EMS_TYPE_UBAFlags, 1, (v ? 0x22 : 0x02), 0x18);
 }
 
 // add console commands

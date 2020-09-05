@@ -58,6 +58,7 @@ uint8_t  EMSESP::actual_master_thermostat_ = EMSESP_DEFAULT_MASTER_THERMOSTAT; /
 uint16_t EMSESP::watch_id_                 = WATCH_ID_NONE;                    // for when log is TRACE. 0 means no trace set
 uint8_t  EMSESP::watch_                    = 0;                                // trace off
 uint16_t EMSESP::read_id_                  = WATCH_ID_NONE;
+uint16_t EMSESP::publish_id_               = 0;
 bool     EMSESP::tap_water_active_         = false; // for when Boiler states we having running warm water. used in Shower()
 uint32_t EMSESP::last_fetch_               = 0;
 uint8_t  EMSESP::unique_id_count_          = 0;
@@ -507,7 +508,10 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
                 found = emsdevice->handle_telegram(telegram);
                 // check to see if we need to follow up after the telegram has been processed
                 if (found) {
-                    if (emsdevice->updated_values()) {
+                    if (emsdevice->updated_values() || telegram->type_id == publish_id_) {
+                        if (telegram->type_id == publish_id_) {
+                            publish_id_ = 0;
+                        }
                         emsdevice->publish_values(); // publish to MQTT if we explicitly have too
                     }
                 }
@@ -717,6 +721,7 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
                 LOG_DEBUG(F("Last Tx write successful"));
                 txservice_.increment_telegram_write_count(); // last tx/write was confirmed ok
                 txservice_.send_poll();                      // close the bus
+                publish_id_ = txservice_.get_post_send_query();
                 txservice_.post_send_query();                // follow up with any post-read
                 txservice_.reset_retry_count();
                 tx_successful = true;
