@@ -121,6 +121,7 @@ class Thermostat : public EMSdevice {
     std::string datetime_; // date and time stamp
 
     uint8_t mqtt_format_; // single, nested or ha
+    bool    changed_ = false;
 
     // Installation parameters
     uint8_t ibaMainDisplay_ =

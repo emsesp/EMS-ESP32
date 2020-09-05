@@ -124,6 +124,15 @@ void Sensors::loop() {
             } else {
                 bus_.depower();
                 if ((found_.size() >= devices_.size()) || (retrycnt_ > 5)) {
+                    if (found_.size() == devices_.size()) {
+                        for (uint8_t i = 0; i < devices_.size(); i++) {
+                            if (found_[i].temperature_c != devices_[i].temperature_c) {
+                                changed_ = true;
+                            }
+                        }
+                    } else {
+                        changed_ = true;
+                    }
                     devices_  = std::move(found_);
                     retrycnt_ = 0;
                 } else {
@@ -237,6 +246,14 @@ std::string Sensors::Device::to_string() const {
     return str;
 }
 
+// check to see if values have been updated
+bool Sensors::updated_values() {
+    if (changed_) {
+        changed_ = false;
+        return true;
+    }
+    return false;
+}
 
 // send all dallas sensor values as a JSON package to MQTT
 // assumes there are devices
@@ -270,9 +287,10 @@ void Sensors::publish_values() {
         char s[7];
 
         if (mqtt_format_ == MQTT_format::CUSTOM) {
+            // e.g. sensors = {28-EA41-9497-0E03-5F":23.30,"28-233D-9497-0C03-8B":24.0}
             doc[device.to_string()] = Helpers::render_value(s, device.temperature_c, 1);
         } else if ((mqtt_format_ == MQTT_format::NESTED) || (mqtt_format_ == MQTT_format::HA)) {
-            // e.g. {"sensor1":{"id":"28-EA41-9497-0E03-5F","temp":"23.30"},"sensor2":{"id":"28-233D-9497-0C03-8B","temp":"24.0"}}
+            // e.g. sensors = {"sensor1":{"id":"28-EA41-9497-0E03-5F","temp":"23.30"},"sensor2":{"id":"28-233D-9497-0C03-8B","temp":"24.0"}}
             char sensorID[10]; // sensor{1-n}
             strlcpy(sensorID, "sensor", 10);
             strlcat(sensorID, Helpers::itoa(s, i), 10);
