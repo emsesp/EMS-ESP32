@@ -213,7 +213,7 @@ void RxService::add(uint8_t * data, uint8_t length) {
     // if we receive a hc2.. telegram from 0x19.. match it to master_thermostat if master is 0x18
     src = EMSESP::check_master_device(src, type_id, true);
 
-        // create the telegram
+    // create the telegram
     auto telegram = std::make_shared<Telegram>(Telegram::Operation::RX, src, dest, type_id, offset, message_data, message_length);
 
     // check if queue is full, if so remove top item to make space
@@ -223,7 +223,6 @@ void RxService::add(uint8_t * data, uint8_t length) {
     }
 
     rx_telegrams_.emplace_back(rx_telegram_id_++, std::move(telegram)); // add to queue
-
 }
 
 //
@@ -579,21 +578,20 @@ bool TxService::is_last_tx(const uint8_t src, const uint8_t dest) const {
 }
 
 // sends a type_id read request to fetch values after a successful Tx write operation
-void TxService::post_send_query() {
-    if (telegram_last_post_send_query_) {
-        uint8_t dest            = (telegram_last_->dest & 0x7F);
-        uint8_t message_data[1] = {EMS_MAX_TELEGRAM_LENGTH}; // request all data, 32 bytes
-        add(Telegram::Operation::TX_READ, dest, telegram_last_post_send_query_, 0, message_data, 1, true);
-        // read_request(telegram_last_post_send_query_, dest, 0); // no offset
-        LOG_DEBUG(F("Sending post validate read, type ID 0x%02X to dest 0x%02X"), telegram_last_post_send_query_, dest);
-    }
-}
+// unless the post_send_query has a type_id of 0
+uint16_t TxService::post_send_query() {
+    uint16_t post_typeid = this->get_post_send_query();
 
-// print out the last Tx that was sent
-void TxService::print_last_tx() {
-    LOG_DEBUG(F("Last Tx %s operation: %s"),
-              (telegram_last_->operation == Telegram::Operation::TX_WRITE) ? F("Write") : F("Read"),
-              telegram_last_->to_string().c_str());
+    if (post_typeid) {
+        uint8_t dest            = (this->telegram_last_->dest & 0x7F);
+        uint8_t message_data[1] = {EMS_MAX_TELEGRAM_LENGTH}; // request all data, 32 bytes
+        this->add(Telegram::Operation::TX_READ, dest, post_typeid, 0, message_data, 1, true);
+        // read_request(telegram_last_post_send_query_, dest, 0); // no offset
+        LOG_DEBUG(F("Sending post validate read, type ID 0x%02X to dest 0x%02X"), post_typeid, dest);
+        set_post_send_query(0); // reset
+    }
+
+    return post_typeid;
 }
 
 } // namespace emsesp

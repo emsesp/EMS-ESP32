@@ -713,7 +713,6 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
     if (tx_state != Telegram::Operation::NONE) {
         bool tx_successful = false;
         EMSbus::tx_state(Telegram::Operation::NONE); // reset Tx wait state
-        // txservice_.print_last_tx();
 
         // if we're waiting on a Write operation, we want a single byte 1 or 4
         if ((tx_state == Telegram::Operation::TX_WRITE) && (length == 1)) {
@@ -721,8 +720,7 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
                 LOG_DEBUG(F("Last Tx write successful"));
                 txservice_.increment_telegram_write_count(); // last tx/write was confirmed ok
                 txservice_.send_poll();                      // close the bus
-                publish_id_ = txservice_.get_post_send_query();
-                txservice_.post_send_query();                // follow up with any post-read
+                publish_id_ = txservice_.post_send_query();  // follow up with any post-read if set
                 txservice_.reset_retry_count();
                 tx_successful = true;
             } else if (first_value == TxService::TX_WRITE_FAIL) {
