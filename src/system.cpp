@@ -245,7 +245,7 @@ void System::measure_analog() {
     static uint32_t measure_last_ = 0;
     static uint32_t sum_          = 0;
 
-    if (!measure_last_ || (uint32_t)(uuid::get_uptime() - measure_last_) >= 1100) {
+    if (!measure_last_ || (uint32_t)(uuid::get_uptime() - measure_last_) >= SYSTEM_MEASURE_ANALOG_INTERVAL) {
         measure_last_ = uuid::get_uptime();
 #if defined(ESP8266)
         uint16_t a = analogRead(A0);
@@ -255,8 +255,8 @@ void System::measure_analog() {
         if (!analog_) { // init first time
             analog_ = a;
             sum_    = a * 256;
-        } else {  // simple moving average filter
-            sum_    = sum_ * 255 / 256 + a; 
+        } else { // simple moving average filter
+            sum_    = sum_ * 255 / 256 + a;
             analog_ = sum_ / 256;
         }
     }

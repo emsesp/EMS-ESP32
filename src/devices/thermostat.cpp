@@ -973,8 +973,9 @@ void Thermostat::process_EasyMonitor(std::shared_ptr<const Telegram> telegram) {
 // Settings Parameters - 0xA5 - RC30_1
 void Thermostat::process_IBASettings(std::shared_ptr<const Telegram> telegram) {
     // 22 - display line on RC35
-    changed_ |= telegram->read_value(ibaMainDisplay_,
-                         0); // display on Thermostat: 0 int. temp, 1 int. setpoint, 2 ext. temp., 3 burner temp., 4 ww temp, 5 functioning mode, 6 time, 7 data, 8 smoke temp
+    changed_ |=
+        telegram->read_value(ibaMainDisplay_,
+                             0); // display on Thermostat: 0 int. temp, 1 int. setpoint, 2 ext. temp., 3 burner temp., 4 ww temp, 5 functioning mode, 6 time, 7 data, 8 smoke temp
     changed_ |= telegram->read_value(ibaLanguage_, 1);          // language on Thermostat: 0 german, 1 dutch, 2 french, 3 italian
     changed_ |= telegram->read_value(ibaCalIntTemperature_, 2); // offset int. temperature sensor, by * 0.1 Kelvin
     changed_ |= telegram->read_value(ibaBuildingType_, 6);      // building type: 0 = light, 1 = medium, 2 = heavy

@@ -305,10 +305,8 @@ void EMSESP::publish_device_values(uint8_t device_type) {
 void EMSESP::publish_other_values() {
     if (Mqtt::connected()) {
         for (const auto & emsdevice : emsdevices) {
-            if (emsdevice && (emsdevice->device_type() != EMSdevice::DeviceType::BOILER)
-                          && (emsdevice->device_type() != EMSdevice::DeviceType::THERMOSTAT)
-                          && (emsdevice->device_type() != EMSdevice::DeviceType::SOLAR)
-                          && (emsdevice->device_type() != EMSdevice::DeviceType::MIXING)) {
+            if (emsdevice && (emsdevice->device_type() != EMSdevice::DeviceType::BOILER) && (emsdevice->device_type() != EMSdevice::DeviceType::THERMOSTAT)
+                && (emsdevice->device_type() != EMSdevice::DeviceType::SOLAR) && (emsdevice->device_type() != EMSdevice::DeviceType::MIXING)) {
                 emsdevice->publish_values();
             }
         }

@@ -89,7 +89,7 @@ class Telegram {
             return false; // out of bounds
         }
         uint8_t val = value;
-        value = (uint8_t)(((this->message_data[abs_index]) >> (bit)) & 0x01);
+        value       = (uint8_t)(((this->message_data[abs_index]) >> (bit)) & 0x01);
         if (val != value) {
             return true;
         }
@@ -110,7 +110,7 @@ class Telegram {
             return false;
         }
         auto val = value;
-        value = 0;
+        value    = 0;
         for (uint8_t i = 0; i < num_bytes; i++) {
             value = (value << 8) + this->message_data[index - this->offset + i]; // shift by byte
         }

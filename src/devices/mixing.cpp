@@ -77,7 +77,6 @@ void Mixing::device_info(JsonArray & root) {
         render_value_json(root, "", F("Current pump modulation"), pumpMod_, F_(percent));
         render_value_json(root, "", F("Current valve status"), status_, nullptr);
     }
-
 }
 
 // check to see if values have been updated
@@ -168,8 +167,8 @@ void Mixing::publish_values() {
 //       A0 0B FF 00 01 D7 00 00 00 80 00 00 00 00 03 80
 void Mixing::process_MMPLUSStatusMessage_HC(std::shared_ptr<const Telegram> telegram) {
     type_ = Type::HC;
-    hc_   = telegram->type_id - 0x02D7 + 1; // determine which circuit this is
-    changed_ |= telegram->read_value(flowTemp_, 3);     // is * 10
+    hc_   = telegram->type_id - 0x02D7 + 1;         // determine which circuit this is
+    changed_ |= telegram->read_value(flowTemp_, 3); // is * 10
     changed_ |= telegram->read_value(flowSetTemp_, 5);
     changed_ |= telegram->read_value(pumpMod_, 2);
     changed_ |= telegram->read_value(status_, 1); // valve status
@@ -180,8 +179,8 @@ void Mixing::process_MMPLUSStatusMessage_HC(std::shared_ptr<const Telegram> tele
 //      A8 00 FF 00 02 31 02 35 00 3C 00 3C 3C 46 02 03 03 00 3C // in 0x29
 void Mixing::process_MMPLUSStatusMessage_WWC(std::shared_ptr<const Telegram> telegram) {
     type_ = Type::WWC;
-    hc_   = telegram->type_id - 0x0331 + 1; // determine which circuit this is. There are max 2.
-    changed_ |= telegram->read_value(flowTemp_, 0);     // is * 10
+    hc_   = telegram->type_id - 0x0331 + 1;         // determine which circuit this is. There are max 2.
+    changed_ |= telegram->read_value(flowTemp_, 0); // is * 10
     changed_ |= telegram->read_value(pumpMod_, 2);
     changed_ |= telegram->read_value(status_, 11); // temp status
 }
@@ -197,7 +196,7 @@ void Mixing::process_IPMStatusMessage(std::shared_ptr<const Telegram> telegram) 
     if (ismixed == 0) {
         return;
     }
-    if (ismixed == 2) {                     // we have a mixed circuit
+    if (ismixed == 2) {                                 // we have a mixed circuit
         changed_ |= telegram->read_value(flowTemp_, 3); // is * 10
         changed_ |= telegram->read_value(flowSetTemp_, 5);
         changed_ |= telegram->read_value(status_, 2); // valve status
