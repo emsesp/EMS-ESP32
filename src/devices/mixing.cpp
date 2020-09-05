@@ -82,6 +82,10 @@ void Mixing::device_info(JsonArray & root) {
 
 // check to see if values have been updated
 bool Mixing::updated_values() {
+    if (changed_) {
+        changed_ = false;
+        return true;
+    }
     return false;
 }
 
@@ -165,10 +169,10 @@ void Mixing::publish_values() {
 void Mixing::process_MMPLUSStatusMessage_HC(std::shared_ptr<const Telegram> telegram) {
     type_ = Type::HC;
     hc_   = telegram->type_id - 0x02D7 + 1; // determine which circuit this is
-    telegram->read_value(flowTemp_, 3);     // is * 10
-    telegram->read_value(flowSetTemp_, 5);
-    telegram->read_value(pumpMod_, 2);
-    telegram->read_value(status_, 1); // valve status
+    changed_ |= telegram->read_value(flowTemp_, 3);     // is * 10
+    changed_ |= telegram->read_value(flowSetTemp_, 5);
+    changed_ |= telegram->read_value(pumpMod_, 2);
+    changed_ |= telegram->read_value(status_, 1); // valve status
 }
 
 // Mixing module warm water loading/DHW - 0x0331, 0x0332
@@ -177,9 +181,9 @@ void Mixing::process_MMPLUSStatusMessage_HC(std::shared_ptr<const Telegram> tele
 void Mixing::process_MMPLUSStatusMessage_WWC(std::shared_ptr<const Telegram> telegram) {
     type_ = Type::WWC;
     hc_   = telegram->type_id - 0x0331 + 1; // determine which circuit this is. There are max 2.
-    telegram->read_value(flowTemp_, 0);     // is * 10
-    telegram->read_value(pumpMod_, 2);
-    telegram->read_value(status_, 11); // temp status
+    changed_ |= telegram->read_value(flowTemp_, 0);     // is * 10
+    changed_ |= telegram->read_value(pumpMod_, 2);
+    changed_ |= telegram->read_value(status_, 11); // temp status
 }
 
 // Mixing IMP - 0x010C
@@ -189,17 +193,17 @@ void Mixing::process_IPMStatusMessage(std::shared_ptr<const Telegram> telegram) 
     type_           = Type::HC;
     hc_             = get_device_id() - 0x20 + 1;
     uint8_t ismixed = 0;
-    telegram->read_value(ismixed, 0); // check if circuit is active, 0-off, 1-unmixed, 2-mixed
+    changed_ |= telegram->read_value(ismixed, 0); // check if circuit is active, 0-off, 1-unmixed, 2-mixed
     if (ismixed == 0) {
         return;
     }
     if (ismixed == 2) {                     // we have a mixed circuit
-        telegram->read_value(flowTemp_, 3); // is * 10
-        telegram->read_value(flowSetTemp_, 5);
-        telegram->read_value(status_, 2); // valve status
+        changed_ |= telegram->read_value(flowTemp_, 3); // is * 10
+        changed_ |= telegram->read_value(flowSetTemp_, 5);
+        changed_ |= telegram->read_value(status_, 2); // valve status
     }
     uint8_t pump = 0xFF;
-    telegram->read_bitvalue(pump, 1, 0); // pump is also in unmixed circuits
+    changed_ |= telegram->read_bitvalue(pump, 1, 0); // pump is also in unmixed circuits
     if (pump != 0xFF) {
         pumpMod_ = 100 * pump;
     }
@@ -215,9 +219,9 @@ void Mixing::process_MMStatusMessage(std::shared_ptr<const Telegram> telegram) {
     // 0x21 is position 2. 0x20 is typically reserved for the WM10 switch module
     // see https://github.com/proddy/EMS-ESP/issues/270 and https://github.com/proddy/EMS-ESP/issues/386#issuecomment-629610918
     hc_ = get_device_id() - 0x20 + 1;
-    telegram->read_value(flowTemp_, 1); // is * 10
-    telegram->read_value(pumpMod_, 3);
-    telegram->read_value(flowSetTemp_, 0);
+    changed_ |= telegram->read_value(flowTemp_, 1); // is * 10
+    changed_ |= telegram->read_value(pumpMod_, 3);
+    changed_ |= telegram->read_value(flowSetTemp_, 0);
 }
 
 #pragma GCC diagnostic push

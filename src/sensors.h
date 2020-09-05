@@ -60,6 +60,7 @@ class Sensors {
     void loop();
     void publish_values();
     void reload();
+    bool updated_values();
 
     const std::vector<Device> devices() const;
 
@@ -110,6 +111,7 @@ class Sensors {
     uint8_t mqtt_format_;
     uint8_t retrycnt_    = 0;
     uint8_t dallas_gpio_ = 0;
+    bool    changed_     = false;
 };
 
 } // namespace emsesp

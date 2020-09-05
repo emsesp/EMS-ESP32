@@ -86,7 +86,12 @@ class MqttSettings {
     uint16_t maxTopicLength;
 
     // proddy EMS-ESP specific
-    uint16_t publish_time; // seconds
+    uint16_t publish_time_boiler;
+    uint16_t publish_time_thermostat;
+    uint16_t publish_time_solar;
+    uint16_t publish_time_mixing;
+    uint16_t publish_time_other;
+    uint16_t publish_time_sensor;
     uint8_t  mqtt_format;  // 1=single, 2=nested, 3=ha, 4=custom
     uint8_t  mqtt_qos;
     bool     system_heartbeat;

@@ -59,7 +59,9 @@ class EMSESP {
     static void start();
     static void loop();
 
-    static void publish_all_values();
+    static void publish_device_values(uint8_t device_type);
+    static void publish_other_values();
+    static void publish_sensor_values(const bool force = false);
 
 #ifdef EMSESP_STANDALONE
     static void run_test(uuid::console::Shell & shell, const std::string & command); // only for testing

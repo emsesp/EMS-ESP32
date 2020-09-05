@@ -27,7 +27,12 @@ export interface MqttSettings {
   keep_alive: number;
   clean_session: boolean;
   max_topic_length: number;
-  publish_time: number;
+  publish_time_boiler: number;
+  publish_time_thermostat: number;
+  publish_time_solar: number;
+  publish_time_mixing: number;
+  publish_time_other: number;
+  publish_time_sensor: number;
   mqtt_format: number;
   mqtt_qos: number;
   system_heartbeat: boolean;

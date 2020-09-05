@@ -74,23 +74,12 @@ class System {
     static constexpr uint32_t SYSTEM_HEARTBEAT_INTERVAL = 60000; // in milliseconds, how often the MQTT heartbeat is sent (1 min)
 
 // internal LED
-#ifndef EMSESP_NO_LED
-#if defined(ESP8266)
     static constexpr uint8_t LED_ON = LOW;
-#elif defined(ESP32)
-#ifdef WEMOS_D1_32
-    static constexpr uint8_t LED_ON = HIGH;
-#else
-    static constexpr uint8_t LED_ON = LOW;
-#endif
-#endif
-#else
-    static constexpr uint8_t LED_ON = 0;
-#endif
 
     void led_monitor();
     void set_led_speed(uint32_t speed);
     void system_check();
+    void measure_analog();
 
     static void   show_system(uuid::console::Shell & shell);
     static void   show_users(uuid::console::Shell & shell);
@@ -103,6 +92,7 @@ class System {
     static int      reset_counter_;
     uint32_t        last_heartbeat_ = 0;
     static bool     upload_status_; // true if we're in the middle of a OTA firmware upload
+    static uint16_t analog_;
 
     // settings
     bool           system_heartbeat_;

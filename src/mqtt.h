@@ -67,8 +67,14 @@ class Mqtt {
     void loop();
     void start();
 
-    void set_publish_time(uint16_t publish_time);
+    void set_publish_time_boiler(uint16_t publish_time);
+    void set_publish_time_thermostat(uint16_t publish_time);
+    void set_publish_time_solar(uint16_t publish_time);
+    void set_publish_time_mixing(uint16_t publish_time);
+    void set_publish_time_other(uint16_t publish_time);
+    void set_publish_time_sensor(uint16_t publish_time);
     void set_qos(uint8_t mqtt_qos);
+    bool get_publish_onchange(uint8_t device_type);
 
     enum Operation { PUBLISH, SUBSCRIBE };
 
@@ -167,7 +173,6 @@ class Mqtt {
     void on_publish(uint16_t packetId);
     void on_message(const char * topic, const char * payload, size_t len);
     void process_queue();
-    void process_all_queue();
 
     static uint16_t mqtt_publish_fails_;
 
@@ -189,14 +194,25 @@ class Mqtt {
     static std::vector<MQTTSubFunction> mqtt_subfunctions_; // list of mqtt subscribe callbacks for all devices
     static std::vector<MQTTCmdFunction> mqtt_cmdfunctions_; // list of commands
 
-    uint32_t last_mqtt_poll_ = 0;
-    uint32_t last_publish_   = 0;
+    uint32_t last_mqtt_poll_          = 0;
+    uint32_t last_publish_boiler_     = 0;
+    uint32_t last_publish_thermostat_ = 0;
+    uint32_t last_publish_solar_      = 0;
+    uint32_t last_publish_mixing_     = 0;
+    uint32_t last_publish_other_      = 0;
+    uint32_t last_publish_sensor_     = 0;
 
     // settings, copied over
     static std::string hostname_;
     static uint8_t     mqtt_qos_;
-    static uint16_t    publish_time_;
+    static uint32_t    publish_time_;
     static uint8_t     bus_id_;
+    static uint32_t    publish_time_boiler_;
+    static uint32_t    publish_time_thermostat_;
+    static uint32_t    publish_time_solar_;
+    static uint32_t    publish_time_mixing_;
+    static uint32_t    publish_time_other_;
+    static uint32_t    publish_time_sensor_;
 };
 
 } // namespace emsesp

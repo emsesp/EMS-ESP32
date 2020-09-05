@@ -46,7 +46,7 @@ std::string EMSdevice::brand_to_string() const {
         break;
     case EMSdevice::Brand::NO_BRAND:
     default:
-        return read_flash_string(F(""));
+        return read_flash_string(F("---"));
         break;
     }
 

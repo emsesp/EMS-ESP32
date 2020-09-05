@@ -83,13 +83,17 @@ class Telegram {
     std::string to_string() const;
 
     // reads a bit value from a given telegram position
-    void read_bitvalue(uint8_t & value, const uint8_t index, const uint8_t bit) const {
-        uint8_t abs_index = (index - offset);
-        if (abs_index >= message_length - 1) {
-            return; // out of bounds
+    bool read_bitvalue(uint8_t & value, const uint8_t index, const uint8_t bit) const {
+        uint8_t abs_index = (index - this->offset);
+        if (abs_index >= this->message_length) {
+            return false; // out of bounds
         }
-
-        value = (uint8_t)(((message_data[abs_index]) >> (bit)) & 0x01);
+        uint8_t val = value;
+        value = (uint8_t)(((this->message_data[abs_index]) >> (bit)) & 0x01);
+        if (val != value) {
+            return true;
+        }
+        return false;
     }
 
     // read a value from a telegram. We always store the value, regardless if its garbage
@@ -99,18 +103,21 @@ class Telegram {
     // 2-compliment : https://www.rapidtables.com/convert/number/decimal-to-hex.html
     // https://en.wikipedia.org/wiki/Two%27s_complement
     // s is to override number of bytes read (e.g. use 3 to simulate a uint24_t)
-    void read_value(Value & value, const uint8_t index, uint8_t s = 0) const {
+    bool read_value(Value & value, const uint8_t index, uint8_t s = 0) const {
         uint8_t num_bytes = (!s) ? sizeof(Value) : s;
-
         // check for out of bounds, if so don't modify the value
-        if ((index - this->offset + num_bytes - 1) >= this->message_length) {
-            return;
+        if ((index < this->offset) || ((index - this->offset + num_bytes - 1) >= this->message_length)) {
+            return false;
         }
-
+        auto val = value;
         value = 0;
         for (uint8_t i = 0; i < num_bytes; i++) {
-            value = (value << 8) + message_data[index - this->offset + i]; // shift by byte
+            value = (value << 8) + this->message_data[index - this->offset + i]; // shift by byte
         }
+        if (val != value) {
+            return true;
+        }
+        return false;
     }
 
   private:

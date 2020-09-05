@@ -65,6 +65,7 @@ class Solar : public EMSdevice {
     uint8_t availabilityFlag_ = EMS_VALUE_BOOL_NOTSET;
     uint8_t configFlag_       = EMS_VALUE_BOOL_NOTSET;
     uint8_t userFlag_         = EMS_VALUE_BOOL_NOTSET;
+    bool    changed_          = false;
 
     void process_SM10Monitor(std::shared_ptr<const Telegram> telegram);
     void process_SM100Monitor(std::shared_ptr<const Telegram> telegram);

@@ -35,6 +35,7 @@ int      System::reset_counter_ = 0;
 bool     System::upload_status_ = false;
 bool     System::hide_led_      = false;
 uint8_t  System::led_gpio_      = 0;
+uint16_t System::analog_        = 0;
 
 // send on/off to a gpio pin
 // value: true = HIGH, false = LOW
@@ -188,6 +189,7 @@ void System::loop() {
 #endif
     led_monitor();  // check status and report back using the LED
     system_check(); // check system health
+    measure_analog();
 
     // send out heartbeat
     uint32_t currentMillis = uuid::get_uptime();
@@ -233,8 +235,31 @@ void System::send_heartbeat() {
     doc["mqttpublishfails"] = Mqtt::publish_fails();
     doc["txfails"]          = EMSESP::txservice_.telegram_fail_count();
     doc["rxfails"]          = EMSESP::rxservice_.telegram_error_count();
+    doc["adc"]              = analog_; //analogRead(A0);
 
     Mqtt::publish("heartbeat", doc, false); // send to MQTT with retain off. This will add to MQTT queue.
+}
+
+// measure and moving average adc
+void System::measure_analog() {
+    static uint32_t measure_last_ = 0;
+    static uint32_t sum_          = 0;
+
+    if (!measure_last_ || (uint32_t)(uuid::get_uptime() - measure_last_) >= 1100) {
+        measure_last_ = uuid::get_uptime();
+#if defined(ESP8266)
+        uint16_t a = analogRead(A0);
+#elif defined(ESP32)
+        uint16_t a = analogRead(36);
+#endif
+        if (!analog_) { // init first time
+            analog_ = a;
+            sum_    = a * 256;
+        } else {  // simple moving average filter
+            sum_    = sum_ * 255 / 256 + a; 
+            analog_ = sum_ / 256;
+        }
+    }
 }
 
 // sets rate of led flash
