@@ -530,6 +530,7 @@ std::string EMSESPStreamConsole::console_name() {
 }
 
 // Start up telnet and logging
+// Log order is off, err, warning, notice, info, debug, trace, all
 void Console::start() {
 // if we've detected a boot into safe mode on ESP8266, start the Serial console too
 // Serial is always on with the ESP32 as it has 2 UARTs
@@ -544,9 +545,14 @@ void Console::start() {
 
 #ifndef ESP8266
 #if defined(EMSESP_DEBUG)
-    shell->log_level(uuid::log::Level::DEBUG); // order is: err, warning, notice, info, debug, trace, all
+    shell->log_level(uuid::log::Level::DEBUG);
 #endif
 #endif
+
+#if defined(EMSESP_FORCE_SERIAL)
+    shell->log_level(uuid::log::Level::DEBUG);
+#endif
+
 
 #if defined(EMSESP_STANDALONE)
     // always start in su/admin mode when running tests
