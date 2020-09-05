@@ -26,7 +26,7 @@ EMS-ESP is the software. It still requires a hardware circuit that can convert t
 - A new Console, accessible via Serial and Telnet
 - Tighter security in both Web and Console. Admin privileges required to access core settings and commands.
 - Support for Home Assistant MQTT Discovery (https://www.home-assistant.io/docs/mqtt/discovery/)
-- Can be run standalone as an indpendent Access Point or join an existing WiFi network
+- Can be run standalone as an independent Access Point or join an existing WiFi network
 - Easier first-time configuration via a web Captive Portal
 - Supporting over 70 EMS devices (boilers, thermostats, solar modules, mixing modules, heat pumps, gateways)
   
@@ -46,10 +46,12 @@ Note there are some noticeable differences to be aware of in version 2:
   - MQTT base has been removed. All MQTT topics are prefixed with only the hostname, for example `ems-esp/status` as opposed to `home/ems-esp/status`.
   - There is no "serial mode" anymore like with version 1.9. When the Wifi cannot connect to the SSID it will automatically enter a "safe" mode where the Serial console is activated (note Serial is always available on the ESP32 because it has multiple UARTs). The EMS-ESP's LED will blink fast when in Serial mode. When this happens connect via a USB using baud 115200.
 
+If you run into issues try first erasing the ESP8266 with `esptool.py erase_flash` and uploading the new firmware manually. BBQKees has a good write-up at https://bbqkees-electronics.nl/wiki/gateway/firmware-update-to-v2.html.
+
 ## **Building the firmware with PlatformIO**
 
 1. Install [PlatformIO](https://platformio.org/install) and [NodeJS](https://nodejs.org/en/).
-2. Decide how you want to upload the firmware, via USB or OTA (Over The Air). OTA requires that a verison of EMS-ESP is already running.
+2. Decide how you want to upload the firmware, via USB or OTA (Over The Air). OTA requires that a version of EMS-ESP is already running.
 3. Create a new file called `pio_local.ini` and add these two lines for USB:
 ```yaml
 upload_protocol = esptool
@@ -98,7 +100,7 @@ Connecting to the console will give you more insight into the EMS bus traffic, M
 
 The console is reachable via Telnet (port 22) or via the Serial port if using an USB (on baud 115200). To change any settings in the console you must be admin (use `su` with the default password `ems-esp-neo`).
   
-Some of the most commong commands are:
+Some of the most common commands are:
   * `help` lists the commands and keywords. This works in each context.
   * `exit` will exit the console or exit the current context. `CTRL-D` does the same.
   * `CTRL-U` for Undo
