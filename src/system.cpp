@@ -243,7 +243,6 @@ void System::send_heartbeat() {
 // measure and moving average adc
 void System::measure_analog() {
     static uint32_t measure_last_ = 0;
-    static uint32_t sum_          = 0;
 
     if (!measure_last_ || (uint32_t)(uuid::get_uptime() - measure_last_) >= SYSTEM_MEASURE_ANALOG_INTERVAL) {
         measure_last_ = uuid::get_uptime();
@@ -252,6 +251,8 @@ void System::measure_analog() {
 #elif defined(ESP32)
         uint16_t a = analogRead(36);
 #endif
+        static uint32_t sum_ = 0;
+
         if (!analog_) { // init first time
             analog_ = a;
             sum_    = a * 256;
