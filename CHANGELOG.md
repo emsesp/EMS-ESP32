@@ -5,10 +5,45 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.0.0 beta]
+## [2.0.1] 
+
+### Added
+- Able to set individual MQTT publish intervals per device
+- Immediately send out Rx read request after a successful write, and publish via MQTT
+- Added clearer steps in documentation on how to erase & upload
+
+### Fixed
+- Sometimes the automatic upgrade from 1.9 to 2.0 bricked the ESP8266
+- Thermostat `set master` wasn't preserved after restart
+- Correctly detect Thermostat heating circuits in Home Assistant
+- Logamatic TC100 reading of thermostat data (and other Easy devices)
+- Rendering 3-byte parameters like the UBA uptime
+- MM100/200 MQTT data would be mixed up between heating circuit and ww circuit
+- External Dallas sensor support for DS18S20
 
 ### Changed
-- A lot! See `README.md`
+- Web user-interface improvements
+- Spelling of disinfection in MQTT
+- Many small minor code improvements and optimizations
+- External dallas temperature sensors rounded to a single decimal point
+
+### Removed
+- NO_LED build option
+
+
+## [2.0.0] 29-08-2020
+
+First version of v2 with
+- Supporting both ESP8266 and ESP32 modules from Espressif
+- A new multi-user Web interface (based on React/TypeScript)
+- A new Console, accessible via Serial and Telnet
+- Tighter security in both Web and Console. Admin privileges required to access core settings and commands.
+- Support for Home Assistant MQTT Discovery (https://www.home-assistant.io/docs/mqtt/discovery/)
+- Can be run standalone as an independent Access Point or join an existing WiFi network
+- Easier first-time configuration via a web Captive Portal
+- Supporting over 70 EMS devices (boilers, thermostats, solar modules, mixing modules, heat pumps, gateways)
+
+See README.me for more details.
 
 ## [1.9.5] 30-04-2020
 
@@ -38,7 +73,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - improved MQTT publishing to stop network flooding. `publish_time` of -1 is no publish, 0 is automatic otherwise its a time interval
-- External sensors (like Dallas DS18*) are sent as a nested MQTT topic including their unqiue identifier
+- External sensors (like Dallas DS18*) are sent as a nested MQTT topic including their unique identifier
 - `mqttlog` console command renamed to `mqttqueue` to only show the current publish queue
 - `status` payload on start-up shows the IP and Version of EMS-ESP
 - `thermostat mode` takes a string like manual,auto,heat,day,night,eco,comfort,holiday,nofrost
@@ -160,7 +195,7 @@ There are breaking changes in this release. See `publish_time` below and make su
 - Fixes to the default HA climate component .yaml file to support latest Home Assistance ('heat' added)
 - Update documentation in Wiki on MQTT and troubleshooting
 - Slowed down firmware upload via the Web to prevent users rebooting too early
-- Change way WiFi is intialized to prevent dual AP and Client
+- Change way WiFi is initialized to prevent dual AP and Client
   
 ### Removed
 
@@ -210,7 +245,7 @@ There are breaking changes in this release. See `publish_time` below and make su
 - Stopped automatic refresh of web page, which causes crashes/memory loss after a short time
 - Support HA 0.96 climate component changes
 - -DDEFAULT_NO_SERIAL changed to -DFORCE_SERIAL
-- some code cleanups, removing NULLS and moving some things fron heap to stack to prevent memory fragmentation
+- some code cleanups, removing NULLS and moving some things frond heap to stack to prevent memory fragmentation
 
 ## [1.8.0] 2019-06-15
 
@@ -455,7 +490,7 @@ There are breaking changes in this release. See `publish_time` below and make su
 
 - Settings are saved and loaded from the ESP8266's file system (SPIFFS). Can be set using the 'set' command
 - Improved support when in Access Point mode (192.168.4.1)
-- pre-built firmwares are back
+- pre-built firmware's are back
 
 ## [1.2.4] 2019-01-04
 
@@ -487,7 +522,7 @@ There are breaking changes in this release. See `publish_time` below and make su
 
 - Only process broadcast messages if the offset (byte 4) is 0. (https://github.com/proddy/EMS-ESP/issues/23)
 - Improved checking for duplicate sent Tx telegrams by comparing CRCs
-- Removed distiquishing between noise on the line and corrupt telegrams (https://github.com/proddy/EMS-ESP/issues/24)
+- Removed distinguishing between noise on the line and corrupt telegrams (https://github.com/proddy/EMS-ESP/issues/24)
 
 ## [1.2.0] 2019-01-01
 
