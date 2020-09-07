@@ -102,7 +102,7 @@ void Boiler::register_mqtt_ha_config() {
     */
 }
 
-void Boiler::device_info(JsonArray & root) {
+void Boiler::device_info_web(JsonArray & root) {
     JsonObject dataElement;
 
     if (Helpers::hasValue(tap_water_active_, EMS_VALUE_BOOL)) {
@@ -123,6 +123,9 @@ void Boiler::device_info(JsonArray & root) {
     render_value_json(root, "", F("Warm Water set temperature"), wWSetTmp_, F_(degrees));
     render_value_json(root, "", F("Warm Water current temperature (intern)"), wWCurTmp_, F_(degrees), 10);
     render_value_json(root, "", F("Warm Water current temperature (extern)"), wWCurTmp2_, F_(degrees), 10);
+
+    render_value_json(root, "", F("Pump modulation"), pumpMod_, F_(percent));
+    render_value_json(root, "", F("Heat Pump modulation"), pumpMod2_, F_(percent));
 }
 
 // publish values via MQTT
@@ -425,7 +428,7 @@ void Boiler::show_values(uuid::console::Shell & shell) {
 
     print_value(shell, 2, F("Exhaust temperature"), exhaustTemp_, F_(degrees), 10);
     print_value(shell, 2, F("Pump modulation"), pumpMod_, F_(percent));
-    print_value(shell, 2, F("Pump modulation2"), pumpMod2_, F_(percent));
+    print_value(shell, 2, F("Heat Pump modulation"), pumpMod2_, F_(percent));
     print_value(shell, 2, F("Burner # starts"), burnStarts_, nullptr);
     if (Helpers::hasValue(burnWorkMin_)) {
         shell.printfln(F("  Total burner operating time: %d days %d hours %d minutes"), burnWorkMin_ / 1440, (burnWorkMin_ % 1440) / 60, burnWorkMin_ % 60);
@@ -607,7 +610,7 @@ void Boiler::process_UBAMonitorSlow(std::shared_ptr<const Telegram> telegram) {
  * UBAMonitorSlowPlus2 - type 0xE3
  */
 void Boiler::process_UBAMonitorSlowPlus2(std::shared_ptr<const Telegram> telegram) {
-    changed_ |= telegram->read_value(pumpMod2_, 13);
+    changed_ |= telegram->read_value(pumpMod2_, 13); // Heat Pump Modulation
 }
 
 /*
