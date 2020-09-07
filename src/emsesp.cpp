@@ -541,13 +541,14 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
 }
 
 // calls the device handler's function to populate a json doc with device info
-void EMSESP::device_info(const uint8_t unique_id, JsonObject & root) {
+// to be used in the Web UI
+void EMSESP::device_info_web(const uint8_t unique_id, JsonObject & root) {
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice) {
             if (emsdevice->unique_id() == unique_id) {
                 root["deviceName"] = emsdevice->to_string_short(); // can;t use c_str() because of scope
                 JsonArray data     = root.createNestedArray("deviceData");
-                emsdevice->device_info(data);
+                emsdevice->device_info_web(data);
                 return;
             }
         }

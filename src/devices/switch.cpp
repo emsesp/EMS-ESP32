@@ -31,7 +31,7 @@ Switch::Switch(uint8_t device_type, uint8_t device_id, uint8_t product_id, const
 void Switch::add_context_menu() {
 }
 
-void Switch::device_info(JsonArray & root) {
+void Switch::device_info_web(JsonArray & root) {
 }
 
 // display all values into the shell console

@@ -31,7 +31,7 @@ Controller::Controller(uint8_t device_type, uint8_t device_id, uint8_t product_i
 void Controller::add_context_menu() {
 }
 
-void Controller::device_info(JsonArray & root) {
+void Controller::device_info_web(JsonArray & root) {
 }
 
 // display all values into the shell console

@@ -60,7 +60,7 @@ void Mixing::add_context_menu() {
 }
 
 // output json to web UI
-void Mixing::device_info(JsonArray & root) {
+void Mixing::device_info_web(JsonArray & root) {
     if (type_ == Type::NONE) {
         return; // don't have any values yet
     }

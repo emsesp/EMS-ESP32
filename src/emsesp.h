@@ -86,7 +86,7 @@ class EMSESP {
     static void send_raw_telegram(const char * data);
     static bool device_exists(const uint8_t device_id);
 
-    static void device_info(const uint8_t unique_id, JsonObject & root);
+    static void device_info_web(const uint8_t unique_id, JsonObject & root);
 
     static uint8_t count_devices(const uint8_t device_type);
 

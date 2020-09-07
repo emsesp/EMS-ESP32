@@ -163,7 +163,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
 }
 
 // prepare data for Web UI
-void Thermostat::device_info(JsonArray & root) {
+void Thermostat::device_info_web(JsonArray & root) {
     uint8_t flags = this->model();
 
     for (const auto & hc : heating_circuits_) {

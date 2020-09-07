@@ -54,7 +54,7 @@ void Solar::add_context_menu() {
 }
 
 // print to web
-void Solar::device_info(JsonArray & root) {
+void Solar::device_info_web(JsonArray & root) {
     render_value_json(root, "", F("Collector temperature (TS1)"), collectorTemp_, F_(degrees), 10);
     render_value_json(root, "", F("Tank bottom temperature (TS2)"), tankBottomTemp_, F_(degrees), 10);
     render_value_json(root, "", F("Tank bottom temperature (TS5)"), tankBottomTemp2_, F_(degrees), 10);
