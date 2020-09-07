@@ -93,12 +93,14 @@ void Boiler::register_mqtt_ha_config() {
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
 
     /*
- * not finished yet - see https://github.com/proddy/EMS-ESP/issues/288
+     * not finished yet - see https://github.com/proddy/EMS-ESP/issues/288
+    
     doc["name"]    = "boiler";
     doc["uniq_id"] = "boiler";
 
     // Mqtt::publish(topic); // empty payload, this remove any previous config sent to HA
     Mqtt::publish("homeassistant/sensor/ems-esp/boiler/config", doc, true); // publish the config payload with retain flag
+    
     */
 }
 
@@ -131,7 +133,6 @@ void Boiler::device_info_web(JsonArray & root) {
     render_value_json(root, "", F("Warm Water set temperature"), wWSetTmp_, F_(degrees));
     render_value_json(root, "", F("Warm Water current temperature (intern)"), wWCurTmp_, F_(degrees), 10);
     render_value_json(root, "", F("Warm Water current temperature (extern)"), wWCurTmp2_, F_(degrees), 10);
-
     render_value_json(root, "", F("Pump modulation"), pumpMod_, F_(percent));
     render_value_json(root, "", F("Heat Pump modulation"), pumpMod2_, F_(percent));
 }
@@ -522,7 +523,7 @@ void Boiler::process_UBAMonitorFast(std::shared_ptr<const Telegram> telegram) {
     if ((telegram->message_length > 18) && (telegram->offset == 0)) {
         changed_ |= telegram->read_value(serviceCodeChar_[0], 18);
         changed_ |= telegram->read_value(serviceCodeChar_[1], 19);
-        serviceCodeChar_[2] = '\0';                             // null terminate string
+        serviceCodeChar_[2] = '\0'; // null terminate string
     }
 
     // at this point do a quick check to see if the hot water or heating is active
