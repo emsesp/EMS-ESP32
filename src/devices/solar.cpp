@@ -145,7 +145,7 @@ void Solar::publish_values() {
     }
 
     if (Helpers::hasValue(pumpWorkMin_)) {
-        doc["pumpWorkMin"] = (float)pumpWorkMin_;
+        doc["pumpWorkMin"] = pumpWorkMin_;
     }
 
     if (Helpers::hasValue(tankHeated_, EMS_VALUE_BOOL)) {
