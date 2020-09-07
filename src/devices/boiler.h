@@ -54,7 +54,6 @@ class Boiler : public EMSdevice {
     uint8_t last_boilerState = 0xFF; // remember last state of heating and warm water on/off
     uint8_t mqtt_format_;            // single, nested or ha
     bool    changed_ = false;
-    ;
 
     static constexpr uint8_t EMS_TYPE_UBAParameterWW  = 0x33;
     static constexpr uint8_t EMS_TYPE_UBAFunctionTest = 0x1D;

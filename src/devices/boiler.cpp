@@ -105,6 +105,14 @@ void Boiler::register_mqtt_ha_config() {
 void Boiler::device_info_web(JsonArray & root) {
     JsonObject dataElement;
 
+    if (serviceCodeChar_[0] && Helpers::hasValue(serviceCode_)) {
+        dataElement         = root.createNestedObject();
+        dataElement["name"] = F("Service Code");
+        char s[12];
+        snprintf_P(s, 12, PSTR("%s (%d)"), serviceCodeChar_, serviceCode_);
+        dataElement["value"] = s;
+    }
+
     if (Helpers::hasValue(tap_water_active_, EMS_VALUE_BOOL)) {
         dataElement          = root.createNestedObject();
         dataElement["name"]  = F("Hot tap water");
@@ -512,8 +520,8 @@ void Boiler::process_UBAMonitorFast(std::shared_ptr<const Telegram> telegram) {
 
     // read the service code / installation status as appears on the display
     if ((telegram->message_length > 18) && (telegram->offset == 0)) {
-        serviceCodeChar_[0] = char(telegram->message_data[18]); // ascii character 1
-        serviceCodeChar_[1] = char(telegram->message_data[19]); // ascii character 2
+        changed_ |= telegram->read_value(serviceCodeChar_[0], 18);
+        changed_ |= telegram->read_value(serviceCodeChar_[1], 19);
         serviceCodeChar_[2] = '\0';                             // null terminate string
     }
 
@@ -579,8 +587,8 @@ void Boiler::process_UBAMonitorFastPlus(std::shared_ptr<const Telegram> telegram
 
     // read the service code / installation status as appears on the display
     if ((telegram->message_length > 4) && (telegram->offset == 0)) {
-        serviceCodeChar_[0] = char(telegram->message_data[4]); // ascii character 1
-        serviceCodeChar_[1] = char(telegram->message_data[5]); // ascii character 2
+        changed_ |= telegram->read_value(serviceCodeChar_[0], 4);
+        changed_ |= telegram->read_value(serviceCodeChar_[1], 5);
         serviceCodeChar_[2] = '\0';
     }
 
