@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Able to set individual MQTT publish intervals per device
 - Immediately send out Rx read request after a successful write, and publish via MQTT
 - Added clearer steps in documentation on how to erase & upload
+- Show Boiler's pump modulation in Web
 
 ### Fixed
 - Sometimes the automatic upgrade from 1.9 to 2.0 bricked the ESP8266
@@ -29,7 +30,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 - NO_LED build option
-
 
 ## [2.0.0] 29-08-2020
 
