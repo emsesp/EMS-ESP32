@@ -584,8 +584,10 @@ uint16_t TxService::post_send_query() {
 
     if (post_typeid) {
         uint8_t dest            = (this->telegram_last_->dest & 0x7F);
+        // when set a value with large offset before and validate on same type, we have to add offset 0, 26, 52, ...
+        uint8_t offset          = (this->telegram_last_->type_id == post_typeid) ? ((this->telegram_last_->offset / 26) * 26) : 0;
         uint8_t message_data[1] = {EMS_MAX_TELEGRAM_LENGTH}; // request all data, 32 bytes
-        this->add(Telegram::Operation::TX_READ, dest, post_typeid, 0, message_data, 1, true);
+        this->add(Telegram::Operation::TX_READ, dest, post_typeid, offset, message_data, 1, true);
         // read_request(telegram_last_post_send_query_, dest, 0); // no offset
         LOG_DEBUG(F("Sending post validate read, type ID 0x%02X to dest 0x%02X"), post_typeid, dest);
         set_post_send_query(0); // reset
