@@ -195,7 +195,7 @@ void RxService::add(uint8_t * data, uint8_t length) {
     // if we're watching and "raw" print out actual telegram as bytes to the console
     if (EMSESP::watch() == EMSESP::Watch::WATCH_RAW) {
         uint16_t trace_watch_id = EMSESP::watch_id();
-        if ((trace_watch_id == WATCH_ID_NONE) || (src == trace_watch_id) || (dest == trace_watch_id) || (type_id == trace_watch_id)) {
+        if ((trace_watch_id == WATCH_ID_NONE)  || (type_id == trace_watch_id) || ((trace_watch_id < 0x80) && ((src == trace_watch_id) || (dest == trace_watch_id)))) {
             LOG_NOTICE(F("Rx: %s"), Helpers::data_to_hex(data, length).c_str());
         }
     }
