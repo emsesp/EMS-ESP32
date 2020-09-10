@@ -73,7 +73,7 @@ Telegram::Telegram(const uint8_t   operation,
     , offset(offset)
     , message_length(message_length) {
     // copy complete telegram data over, preventing buffer overflow
-    for (uint8_t i = 0; ((i < message_length) && (i != EMS_MAX_TELEGRAM_MESSAGE_LENGTH - 1)); i++) {
+    for (uint8_t i = 0; ((i < message_length) && (i < EMS_MAX_TELEGRAM_MESSAGE_LENGTH)); i++) {
         message_data[i] = data[i];
     }
 }
@@ -189,7 +189,7 @@ void RxService::add(uint8_t * data, uint8_t length) {
         }
         type_id        = (data[4 + shift] << 8) + data[5 + shift] + 256;
         message_data   = data + 6 + shift;
-        message_length = length - 6 - shift;
+        message_length = length - 7 - shift;
     }
 
     // if we're watching and "raw" print out actual telegram as bytes to the console
