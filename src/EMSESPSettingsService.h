@@ -34,6 +34,7 @@
 #define EMSESP_DEFAULT_SHOWER_TIMER false
 #define EMSESP_DEFAULT_SHOWER_ALERT false
 #define EMSESP_DEFAULT_HIDE_LED false
+#define EMSESP_DEFAULT_DALLAS_PARASITE false
 
 // Default GPIO PIN definitions
 #if defined(ESP8266)
@@ -65,14 +66,15 @@ class EMSESPSettings {
     uint8_t  master_thermostat;
     bool     shower_timer;
     bool     shower_alert;
-    bool     hide_led;
     int8_t   syslog_level; // uuid::log::Level
     uint32_t syslog_mark_interval;
     String   syslog_host;
     uint8_t  rx_gpio;
     uint8_t  tx_gpio;
     uint8_t  dallas_gpio;
+    bool     dallas_parasite;
     uint8_t  led_gpio;
+    bool     hide_led;
 
     static void              read(EMSESPSettings & settings, JsonObject & root);
     static StateUpdateResult update(JsonObject & root, EMSESPSettings & settings);

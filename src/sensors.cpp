@@ -49,7 +49,7 @@ void Sensors::reload() {
         mqtt_format_ = settings.mqtt_format; // single, nested or ha
     });
 
-    EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) { dallas_gpio_ = settings.dallas_gpio; });
+    EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) { dallas_gpio_ = settings.dallas_gpio; parasite_ = settings.dallas_parasite; });
 
     if (mqtt_format_ == MQTT_format::HA) {
         for (uint8_t i = 0; i < MAX_SENSORS; registered_ha_[i++] = false)
@@ -67,7 +67,7 @@ void Sensors::loop() {
             if (bus_.reset()) {
                 YIELD;
                 bus_.skip();
-                bus_.write(CMD_CONVERT_TEMP);
+                bus_.write(CMD_CONVERT_TEMP, parasite_ ? 1 : 0);
                 state_ = State::READING;
             } else {
                 // no sensors found
@@ -149,9 +149,12 @@ void Sensors::loop() {
 
 bool Sensors::temperature_convert_complete() {
 #ifndef EMSESP_STANDALONE
+    if (parasite_) {
+        return true; // don't care, use the minimum time in loop
+    }
     return bus_.read_bit() == 1;
 #else
-    return 1;
+    return true;
 #endif
 }
 

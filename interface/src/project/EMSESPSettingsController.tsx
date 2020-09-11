@@ -51,6 +51,10 @@ function EMSESPSettingsControllerForm(props: EMSESPSettingsControllerFormProps) 
                     Customize EMS-ESP by editing the default settings here. Refer to the <Link href="https://emsesp.github.io/docs/#/" color="primary">{'Wiki'}</Link>&nbsp;for descriptions of each setting.
                 </Typography>
             </Box>
+            <br></br>
+            <Typography variant="h6" color="primary" >
+                EMS Bus Settings
+            </Typography>
             <TextValidator
                 validators={['required', 'isNumber', 'minNumber:0', 'maxNumber:255']}
                 errorMessages={['TX mode is required', "Must be a number", "Must be 0 or higher", "Max value is 255"]}
@@ -100,6 +104,10 @@ function EMSESPSettingsControllerForm(props: EMSESPSettingsControllerFormProps) 
                 onChange={handleValueChange('tx_gpio')}
                 margin="normal"
             />
+            <br></br>
+            <Typography variant="h6" color="primary" >
+                Dallas Sensor Settings
+            </Typography>
             <TextValidator
                 validators={['required', 'isNumber', 'minNumber:0', 'maxNumber:40']}
                 errorMessages={['Dallas GPIO is required', "Must be a number", "Must be 0 or higher", "Max value is 255"]}
@@ -112,7 +120,21 @@ function EMSESPSettingsControllerForm(props: EMSESPSettingsControllerFormProps) 
                 onChange={handleValueChange('dallas_gpio')}
                 margin="normal"
             />
-            <TextValidator
+            <BlockFormControlLabel
+                control={
+                    <Checkbox
+                        checked={data.dallas_parasite}
+                        onChange={handleValueChange('dallas_parasite')}
+                        value="dallas_parasite"
+                    />
+                }
+                label="Dallas Parasite Mode"
+            />
+            <br></br>
+            <Typography variant="h6" color="primary" >
+                LED Settings
+            </Typography>
+           <TextValidator
                 validators={['required', 'isNumber', 'minNumber:0', 'maxNumber:40']}
                 errorMessages={['LED GPIO is required', "Must be a number", "Must be 0 or higher", "Max value is 255"]}
                 name="led_gpio"
@@ -134,6 +156,10 @@ function EMSESPSettingsControllerForm(props: EMSESPSettingsControllerFormProps) 
                 }
                 label="Invert/Hide LED"
             />
+            <br></br>
+            <Typography variant="h6" color="primary" >
+                Shower Settings
+            </Typography>
             <BlockFormControlLabel
                 control={
                     <Checkbox
@@ -154,6 +180,10 @@ function EMSESPSettingsControllerForm(props: EMSESPSettingsControllerFormProps) 
                 }
                 label="Shower Alert"
             />
+            <br></br>
+            <Typography variant="h6" color="primary" >
+                Syslog Settings
+            </Typography>
             <SelectValidator name="syslog_level"
                 label="Syslog Log Level"
                 value={data.syslog_level}

@@ -781,6 +781,9 @@ bool System::check_upgrade() {
                     settings.syslog_host          = EMSESP_DEFAULT_SYSLOG_HOST;
                     settings.syslog_level         = EMSESP_DEFAULT_SYSLOG_LEVEL;
                     settings.syslog_mark_interval = EMSESP_DEFAULT_SYSLOG_MARK_INTERVAL;
+                    settings.dallas_gpio          = custom_settings["dallas_gpio"] | EMSESP_DEFAULT_DALLAS_GPIO;
+                    settings.dallas_parasite      = custom_settings["dallas_parasite"] | EMSESP_DEFAULT_DALLAS_PARASITE;
+                    settings.led_gpio             = custom_settings["led_gpio"] | EMSESP_DEFAULT_LED_GPIO;
 
                     return StateUpdateResult::CHANGED;
                 },
