@@ -121,7 +121,7 @@ void Mixing::show_values(uuid::console::Shell & shell) {
 // ideally we should group up all the mixing units together into a nested JSON but for now we'll send them individually
 void Mixing::publish_values() {
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
-    char s[5]; // for formatting strings
+    char                                           s[5]; // for formatting strings
 
     switch (type_) {
     case Type::HC:

@@ -70,7 +70,7 @@ void EMSESPSettingsService::onUpdate() {
     // EMSESP::system_.syslog_init(); // changing SysLog will require a restart
     EMSESP::init_tx();
     System::set_led();
-    Sensors sensors_;   // Dallas sensors
+    Sensors sensors_; // Dallas sensors
     sensors_.start();
 }
 

@@ -8,10 +8,10 @@ export interface EMSESPSettings {
   shower_timer: boolean;
   shower_alert: boolean;
   rx_gpio: number;
-  tx_gpio : number;
-  dallas_gpio : number;
+  tx_gpio: number;
+  dallas_gpio: number;
   dallas_parasite: boolean;
-  led_gpio : number;
+  led_gpio: number;
   hide_led: boolean;
 }
 

@@ -1630,7 +1630,7 @@ void Thermostat::set_temperature(const float temperature, const uint8_t mode, co
             break;
         default:
         case HeatingCircuit::Mode::AUTO:
-            offset          = 0x08; // auto offset
+            offset          = 0x08;                              // auto offset
             validate_typeid = monitor_typeids[hc->hc_num() - 1]; // get setpoint roomtemp back
             break;
         }
@@ -1678,7 +1678,7 @@ void Thermostat::set_temperature(const float temperature, const uint8_t mode, co
             factor = 1;
             break;
         default:
-        case HeatingCircuit::Mode::AUTO: // automatic selection, if no type is defined, we use the standard code
+        case HeatingCircuit::Mode::AUTO:                         // automatic selection, if no type is defined, we use the standard code
             validate_typeid = monitor_typeids[hc->hc_num() - 1]; //get setpoint roomtemp back
             if (model == EMS_DEVICE_FLAG_RC35) {
                 uint8_t mode_ = hc->get_mode(this->flags());

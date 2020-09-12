@@ -49,7 +49,10 @@ void Sensors::reload() {
         mqtt_format_ = settings.mqtt_format; // single, nested or ha
     });
 
-    EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) { dallas_gpio_ = settings.dallas_gpio; parasite_ = settings.dallas_parasite; });
+    EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) {
+        dallas_gpio_ = settings.dallas_gpio;
+        parasite_    = settings.dallas_parasite;
+    });
 
     if (mqtt_format_ == MQTT_format::HA) {
         for (uint8_t i = 0; i < MAX_SENSORS; registered_ha_[i++] = false)

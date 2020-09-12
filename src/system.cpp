@@ -250,6 +250,8 @@ void System::measure_analog() {
         uint16_t a = analogRead(A0);
 #elif defined(ESP32)
         uint16_t a = analogRead(36);
+#else
+        uint16_t a = 0; // standalone
 #endif
         static uint32_t sum_ = 0;
 

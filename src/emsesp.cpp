@@ -486,8 +486,8 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
         LOG_NOTICE(pretty_telegram(telegram).c_str());
         read_id_ = WATCH_ID_NONE;
     } else if (watch() == WATCH_ON) {
-        if ((watch_id_ == WATCH_ID_NONE)  || (telegram->type_id == watch_id_) ||
-           ((watch_id_ < 0x80) && ((telegram->src == watch_id_) || (telegram->dest == watch_id_)))) {
+        if ((watch_id_ == WATCH_ID_NONE) || (telegram->type_id == watch_id_)
+            || ((watch_id_ < 0x80) && ((telegram->src == watch_id_) || (telegram->dest == watch_id_)))) {
             LOG_NOTICE(pretty_telegram(telegram).c_str());
         }
     }

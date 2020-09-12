@@ -134,7 +134,7 @@ function EMSESPSettingsControllerForm(props: EMSESPSettingsControllerFormProps) 
             <Typography variant="h6" color="primary" >
                 LED Settings
             </Typography>
-           <TextValidator
+            <TextValidator
                 validators={['required', 'isNumber', 'minNumber:0', 'maxNumber:40']}
                 errorMessages={['LED GPIO is required', "Must be a number", "Must be 0 or higher", "Max value is 255"]}
                 name="led_gpio"

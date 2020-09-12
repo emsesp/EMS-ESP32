@@ -195,7 +195,8 @@ void RxService::add(uint8_t * data, uint8_t length) {
     // if we're watching and "raw" print out actual telegram as bytes to the console
     if (EMSESP::watch() == EMSESP::Watch::WATCH_RAW) {
         uint16_t trace_watch_id = EMSESP::watch_id();
-        if ((trace_watch_id == WATCH_ID_NONE)  || (type_id == trace_watch_id) || ((trace_watch_id < 0x80) && ((src == trace_watch_id) || (dest == trace_watch_id)))) {
+        if ((trace_watch_id == WATCH_ID_NONE) || (type_id == trace_watch_id)
+            || ((trace_watch_id < 0x80) && ((src == trace_watch_id) || (dest == trace_watch_id)))) {
             LOG_NOTICE(F("Rx: %s"), Helpers::data_to_hex(data, length).c_str());
         }
     }
@@ -583,7 +584,7 @@ uint16_t TxService::post_send_query() {
     uint16_t post_typeid = this->get_post_send_query();
 
     if (post_typeid) {
-        uint8_t dest            = (this->telegram_last_->dest & 0x7F);
+        uint8_t dest = (this->telegram_last_->dest & 0x7F);
         // when set a value with large offset before and validate on same type, we have to add offset 0, 26, 52, ...
         uint8_t offset          = (this->telegram_last_->type_id == post_typeid) ? ((this->telegram_last_->offset / 26) * 26) : 0;
         uint8_t message_data[1] = {EMS_MAX_TELEGRAM_LENGTH}; // request all data, 32 bytes
