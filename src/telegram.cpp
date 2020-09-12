@@ -320,7 +320,7 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
         telegram_raw[2] = 0xFF; // fixed value indicating an extended message
         telegram_raw[3] = telegram->offset;
 
-        // EMS+ has different format for read and write. See https://github.com/proddy/EMS-ESP/wiki/RC3xx-Thermostats
+        // EMS+ has different format for read and write
         if (telegram->operation == Telegram::Operation::TX_WRITE) {
             // WRITE
             telegram_raw[4] = (telegram->type_id >> 8) - 1; // type, 1st byte, high-byte, subtract 0x100
