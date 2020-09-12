@@ -1,6 +1,6 @@
 # ![logo](media/EMS-ESP_logo_dark.png)
 
-EMS-ESP is an open-source firmware for the Espressif ESP8266 and ESP32 microcontroller that communicates with **EMS** (Energy Management System) based equipment from manufacturers like Bosch, Buderus, Nefit, Junkers, Worcester and Sieger.
+**EMS-ESP** is an open-source firmware for the Espressif ESP8266 and ESP32 microcontroller that communicates with **EMS** (Energy Management System) based equipment from manufacturers like Bosch, Buderus, Nefit, Junkers, Worcester and Sieger.
 
 [![version](https://img.shields.io/github/release/proddy/EMS-ESP.svg?label=Latest%20Release)](https://github.com/proddy/EMS-ESP/blob/master/CHANGELOG.md)
 [![release-date](https://img.shields.io/github/release-date/proddy/EMS-ESP.svg?label=Released)](https://github.com/proddy/EMS-ESP/commits/master)
@@ -44,17 +44,24 @@ Note, EMS-ESP requires a small hardware circuit that can convert the EMS bus dat
 | <img src="media/web_devices.PNG"> | <img src="media/web_mqtt.PNG"> |
 <img src="media/console.PNG" width=100% height=100%>
   
-## **Migrating from previous versions**
+## **Migrating from versions 1.9**
 
 EMS-ESP will attempt to automatically migrate the 1.9 settings. 
 
 Note there are some noticeable differences to be aware of in version 2:
-  - MQTT base has been removed. All MQTT topics are prefixed with only the hostname, for example `ems-esp/status` as opposed to `home/ems-esp/status`.
+### MQTT:
+   - MQTT base has been removed. All MQTT topics are prefixed with only the hostname, for example `ems-esp/status` as opposed to `home/ems-esp/status`.
+   - `heatPmp` renamed to `heatPump`
+   - `ServiceCodeNumber` renamed to `serviceCodeNumber`
+   - Firmware version has been moved to the `start` topic
+   - `desinfection` renamed to `disinfection`
+
+### General:
   - There is no "serial mode" anymore like with version 1.9. When the Wifi cannot connect to the SSID it will automatically enter a "safe" mode where the Serial console is activated (note Serial is always available on the ESP32 because it has multiple UARTs). The EMS-ESP's LED will blink fast when in Serial mode. When this happens connect via a USB using baud 115200.
 
 If you run into issues try first erasing the ESP8266 with `esptool.py erase_flash` and uploading the new firmware manually. BBQKees has a good write-up at https://bbqkees-electronics.nl/wiki/gateway/firmware-update-to-v2.html.
 
-## **Building the firmware with PlatformIO**
+## **Building the firmware using PlatformIO**
 
 1. Install [PlatformIO](https://platformio.org/install) and [NodeJS](https://nodejs.org/en/).
 2. Decide how you want to upload the firmware, via USB or OTA (Over The Air). OTA requires that a version of EMS-ESP is already running.
@@ -90,7 +97,7 @@ and for OTA:
   
   `espota.py --debug --progress --port 8266 --auth ems-esp-neo -i <IP address> -f <firmware.bin>`
 
-## **Setting EMS-ESP up for the first time**
+## **Configuring EMS-ESP for the first time**
 
  - After powering up the ESP, watch the onboard blue LED. A solid light means good connection and EMS data is coming in. A slow pulse means either the WiFi or the EMS bus is not connected yet. A very fast pulse is when the system is booting up and configuring itself which typically takes 5 seconds.
   
@@ -118,116 +125,11 @@ Some of the most common commands are:
   * `log` sets the logging level. `log off` disables logging. Use `log debug` for debugging commands and actions. This will be reset next time the console is opened.
   * `watch` will output the incoming Rx telegrams directly to the console. You can also put on a watch on a specific EMS device ID or telegram ID. Also choose to output as verbose text as raw data bytes.
 
-The `call` command is to execute a command. The command names (`[cmd]`) are the same as the MQTT commands listed in the MQTT section.
+The `call` command is to execute a command. The command names (`[cmd]`) are the same as the MQTT commands used in MQTT.
 
-```
-(* = available in su/Admin mode)
+For further details refer to the [Wiki](https://bbqkees-electronics.nl/wiki/).
 
-common commands available in all contexts:
-  exit
-  help
-  log [level]
-  watch <on | off | raw> [ID]
-  su
-
-(from the root)
-  system (enters a context)
-  boiler (enters a context)
-  thermostat (enters a context)
-  set
-  fetch
-  scan devices [deep] *
-  send telegram <"XX XX ..."> *
-  set bus_id <device ID> *
-  set tx_mode <n> *
-  show
-  show devices
-  show ems
-  show values
-  show mqtt
-
-system
-  set
-  show
-  format *
-  show users *
-  passwd *
-  restart *
-  set wifi hostname <name> *
-  set wifi password *
-  set wifi ssid <name> *
-  wifi reconnect *
-  pin <gpio> [data] *
-
-boiler
-  read <type ID> *
-  call [cmd] [data] *
-
-thermostat
-  set
-  set master [device ID] *
-  read <type ID> *
-  call [cmd] [data] [heating circuit] *
-
-```
-  
-## **MQTT commands**
-
-All commands must be written as `{"cmd":<cmd> ,"data":<data>, "id":<n>}`. 
-
-The `id` can be replaced with `hc` for some devices that use heating circuits, and represented either as a string or a number. `cmd` is a string, `data` can be a string or number.
-
-topic = *boiler_cmd*
-```
-  comfort <hot, eco, intelligent>
-  flowtemp <degrees>
-  wwtemp <degrees>
-  boilhyston <degrees> (negative value)
-  boilhystoff <degrees> (positive value)
-  burnperiod <minutes>
-  burnminpower <%>
-  burnmaxpower <%>
-  pumpdelay <minutes>
-```
-
-topic = *thermostat_cmd*
-```
---- without hc ---
-  wwmode <off | on | auto>
-  calinttemp <degrees>
-  minexttemp <degrees>
-  building <light | medium | heavy>
-  language <n> (0=de, 1=nl, 2=fr, 3=it) only RC30
-  display <n>  (0=int temp, 1= int set, 2=ext. temp, 3=burner, 4=ww, 5=mode, 6=time, 7=date, 8=smoke) only RC30
-  clockoffset <seconds>  (only RC30)
-
---- with hc ---
-  mode <auto | night | day | nofrost | heat | eco>
-  temp <degrees>
-  nighttemp <degrees>
-  daytemp <degrees>
-  nofrosttemp <degrees>
-  ecotemp <degrees>
-  heattemp <degrees>
-  summertemp <degrees>
-  designtemp <degrees>
-  offsettemp <degrees>
-  holidaytemp <degrees>
-  remotetemp <degrees>
-  control <0 | 1 | 2>
-  pause <hours>
-  party <hours>
-  holiday <dd.mm.yyyy-dd.mm.yyyy>
-  date <NTP | hh:mm:ss-dd.mm.yyyy-dw-dst>
-```
-
-topic = *system_cmd*
-```
-  send <"0B XX XX ..">
-  pin <gpio> <on|off|1|0|true|false>
-```
-
-## Support Information
+## **Support Information**
 
 For a list of the EMS devices currently supported see BBQKees's [EMS device compatibility list](https://bbqkees-electronics.nl/ems-device-compatibility/).
 
@@ -235,7 +137,7 @@ If you're looking for support on **EMS-ESP** there are some options available:
 
 ### Documentation
 
-* [Documentation Site](https://emsesp.github.io/docs): For information on how to build and upload the firmware
+* [Documentation Site](https://bbqkees-electronics.nl/wiki/): For information on how to build and upload the firmware maintained by @BBQKees
 * [FAQ and Troubleshooting](https://bbqkees-electronics.nl/wiki/gateway/troubleshooting.html): For information on common problems and solutions
 
 ### Support's Community
@@ -249,14 +151,14 @@ If you're looking for support on **EMS-ESP** there are some options available:
 * [Feature Request](https://github.com/proddy/EMS-ESP/issues/new?template=feature_request.md): For requesting features/functions
 * [Troubleshooting](https://github.com/proddy/EMS-ESP/issues/new?template=questions---troubleshooting.md): As a last resort, you can open new *Troubleshooting & Question* issue on GitHub if the solution could not be found using the other channels. Just remember: the more info you provide the more chances you'll have to get an accurate answer
 
-## Contribute
+## **Contribute**
 
 You can contribute to EMS-ESP by
 - providing Pull Requests (Features, Fixes, suggestions)
 - testing new released features and report issues on your EMS equipment
-- contributing missing [documentation](https://emsesp.github.io/docs) for features and devices
+- contributing missing [documentation](https://bbqkees-electronics.nl/wiki/) for features and devices
 
-## Credits
+## **Credits**
 
 A shout out to the people helping EMS-ESP get to where it is today
 - @MichaelDvP for all his amazing contributions and patience. The core UART code is his.
@@ -264,6 +166,6 @@ A shout out to the people helping EMS-ESP get to where it is today
 - @susisstrolch for writing a first working version of the EMS bridge circuit which I used to design EMS-ESP version 0.1
 - Plus many more providing suggestions, PRs and Donations. Thanks!
 
-## License
+## **License**
 
 This program is licensed under GPL-3.0
