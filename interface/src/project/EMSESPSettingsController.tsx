@@ -48,7 +48,7 @@ function EMSESPSettingsControllerForm(props: EMSESPSettingsControllerFormProps) 
         <ValidatorForm onSubmit={saveData}>
             <Box bgcolor="info.main" p={2} mt={2} mb={2}>
                 <Typography variant="body1">
-                    Customize EMS-ESP by editing the default settings here. Refer to the <Link href="https://emsesp.github.io/docs/#/" color="primary">{'Wiki'}</Link>&nbsp;for descriptions of each setting.
+                    Customize EMS-ESP by modifying the default settings here.
                 </Typography>
             </Box>
             <br></br>
