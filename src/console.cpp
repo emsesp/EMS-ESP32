@@ -244,6 +244,17 @@ void EMSESPShell::add_console_commands() {
                               });
                           });
 
+    commands->add_command(ShellContext::MAIN,
+                          CommandFlags::ADMIN,
+                          flash_string_vector{F_(read)},
+                          flash_string_vector{F_(deviceid_mandatory) ,F_(typeid_mandatory)},
+                          [=](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) {
+                              uint8_t  device_id = Helpers::hextoint(arguments.front().c_str());
+                              uint16_t type_id   = Helpers::hextoint(arguments.back().c_str());
+                              EMSESP::set_read_id(type_id);
+                              EMSESP::send_read_request(type_id, device_id);
+                          });
+
     /*
      * add all the submenu contexts...
      */
@@ -397,7 +408,7 @@ void Console::load_standard_commands(unsigned int context) {
                                        flash_string_vector{F_(watch)},
                                        flash_string_vector{F_(watch_format_optional), F_(watchid_optional)},
                                        [](Shell & shell, const std::vector<std::string> & arguments) {
-                                           uint16_t watch_id;
+                                           uint16_t watch_id = WATCH_ID_NONE;
 
                                            if (!arguments.empty()) {
                                                // get raw/pretty
@@ -407,16 +418,16 @@ void Console::load_standard_commands(unsigned int context) {
                                                    emsesp::EMSESP::watch(EMSESP::WATCH_ON); // on
                                                } else if (arguments[0] == read_flash_string(F_(off))) {
                                                    emsesp::EMSESP::watch(EMSESP::WATCH_OFF); // off
-                                               } else {
+                                               } else if (emsesp::EMSESP::watch() == EMSESP::WATCH_OFF) {
                                                    shell.printfln(F_(invalid_watch));
                                                    return;
+                                               } else {
+                                                   watch_id = Helpers::hextoint(arguments[0].c_str());
                                                }
 
                                                if (arguments.size() == 2) {
                                                    // get the watch_id if its set
                                                    watch_id = Helpers::hextoint(arguments[1].c_str());
-                                               } else {
-                                                   watch_id = WATCH_ID_NONE;
                                                }
 
                                                emsesp::EMSESP::watch_id(watch_id);
@@ -440,7 +451,9 @@ void Console::load_standard_commands(unsigned int context) {
                                            }
 
                                            watch_id = emsesp::EMSESP::watch_id();
-                                           if (watch_id != WATCH_ID_NONE) {
+                                           if (watch_id > 0x80) {
+                                               shell.printfln(F("Filtering only telegrams that match a telegram type of 0x%02X"), watch_id);
+                                           } else if (watch_id != WATCH_ID_NONE) {
                                                shell.printfln(F("Filtering only telegrams that match a device ID or telegram type of 0x%02X"), watch_id);
                                            }
                                        });

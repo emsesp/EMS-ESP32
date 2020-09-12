@@ -95,7 +95,7 @@ std::string Telegram::to_string() const {
             data[2] = this->type_id;
             length  = 5;
         }
-    } else if (this->operation == Telegram::Operation::TX_WRITE) {
+    } else {
         data[1] = this->dest;
         if (this->type_id > 0xFF) {
             data[2] = 0xFF;
@@ -106,10 +106,6 @@ std::string Telegram::to_string() const {
             data[2] = this->type_id;
             length  = 4;
         }
-        for (uint8_t i = 0; i < this->message_length; i++) {
-            data[length++] = this->message_data[i];
-        }
-    } else {
         for (uint8_t i = 0; i < this->message_length; i++) {
             data[length++] = this->message_data[i];
         }
@@ -473,7 +469,9 @@ void TxService::add(uint8_t operation, const uint8_t * data, const uint8_t lengt
             operation = Telegram::Operation::TX_READ;
         } else {
             operation = Telegram::Operation::TX_WRITE;
+            set_post_send_query(type_id);
         }
+        EMSESP::set_read_id(type_id);
     }
 
     auto telegram = std::make_shared<Telegram>(operation, src, dest, type_id, offset, message_data, message_length); // operation is TX_WRITE or TX_READ
@@ -536,7 +534,7 @@ void TxService::send_raw(const char * telegram_data) {
         return; // nothing to send
     }
 
-    add(Telegram::Operation::TX_RAW, data, count + 1); // add to Tx queue
+    add(Telegram::Operation::TX_RAW, data, count + 1, true); // add to front of Tx queue
 }
 
 // add last Tx to tx queue and increment count

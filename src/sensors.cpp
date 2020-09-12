@@ -67,7 +67,7 @@ void Sensors::loop() {
     if (state_ == State::IDLE) {
         if (time_now - last_activity_ >= READ_INTERVAL_MS) {
             // LOG_DEBUG(F("Read sensor temperature")); // uncomment for debug
-            if (bus_.reset()) {
+            if (bus_.reset() || parasite_) {
                 YIELD;
                 bus_.skip();
                 bus_.write(CMD_CONVERT_TEMP, parasite_ ? 1 : 0);
@@ -97,8 +97,9 @@ void Sensors::loop() {
             uint8_t addr[ADDR_LEN] = {0};
 
             if (bus_.search(addr)) {
-                bus_.depower();
-
+                if (!parasite_) {
+                    bus_.depower();
+                }
                 if (bus_.crc8(addr, ADDR_LEN - 1) == addr[ADDR_LEN - 1]) {
                     switch (addr[0]) {
                     case TYPE_DS18B20:
@@ -125,7 +126,9 @@ void Sensors::loop() {
                     LOG_ERROR(F("Invalid sensor %s"), Device(addr).to_string().c_str());
                 }
             } else {
-                bus_.depower();
+                if (!parasite_) {
+                    bus_.depower();
+                }
                 if ((found_.size() >= devices_.size()) || (retrycnt_ > 5)) {
                     if (found_.size() == devices_.size()) {
                         for (uint8_t i = 0; i < devices_.size(); i++) {

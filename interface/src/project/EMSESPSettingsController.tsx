@@ -184,6 +184,17 @@ function EMSESPSettingsControllerForm(props: EMSESPSettingsControllerFormProps) 
             <Typography variant="h6" color="primary" >
                 Syslog Settings
             </Typography>
+            <TextValidator
+                validators={['isIPOrHostname']}
+                errorMessages={["Not a valid IP address or hostname"]}
+                name="syslog_host"
+                label="Syslog IP/Host"
+                fullWidth
+                variant="outlined"
+                value={data.syslog_host}
+                onChange={handleValueChange('syslog_host')}
+                margin="normal"
+            />
             <SelectValidator name="syslog_level"
                 label="Syslog Log Level"
                 value={data.syslog_level}
@@ -196,33 +207,18 @@ function EMSESPSettingsControllerForm(props: EMSESPSettingsControllerFormProps) 
                 <MenuItem value={6}>INFO</MenuItem>
                 <MenuItem value={7}>DEBUG</MenuItem>
             </SelectValidator>
-            {data.syslog_level !== -1 &&
-                <Fragment>
-                    <TextValidator
-                        validators={['isIPOrHostname']}
-                        errorMessages={["Not a valid IP address or hostname"]}
-                        name="syslog_host"
-                        label="Syslog IP/Host"
-                        fullWidth
-                        variant="outlined"
-                        value={data.syslog_host}
-                        onChange={handleValueChange('syslog_host')}
-                        margin="normal"
-                    />
-                    <TextValidator
-                        validators={['required', 'isNumber', 'minNumber:0', 'maxNumber:65535']}
-                        errorMessages={['Syslog Mark is required', "Must be a number", "Must be 0 or higher (0=off)", "Max value is 65535"]}
-                        name="syslog_mark_interval"
-                        label="Syslog Mark Interval (seconds, 0=off)"
-                        fullWidth
-                        variant="outlined"
-                        value={data.syslog_mark_interval}
-                        type="number"
-                        onChange={handleValueChange('syslog_mark_interval')}
-                        margin="normal"
-                    />
-                </Fragment>
-            }
+            <TextValidator
+                validators={['required', 'isNumber', 'minNumber:0', 'maxNumber:65535']}
+                errorMessages={['Syslog Mark is required', "Must be a number", "Must be 0 or higher (0=off)", "Max value is 65535"]}
+                name="syslog_mark_interval"
+                label="Syslog Mark Interval (seconds, 0=off)"
+                fullWidth
+                variant="outlined"
+                value={data.syslog_mark_interval}
+                type="number"
+                onChange={handleValueChange('syslog_mark_interval')}
+                margin="normal"
+            />
             <FormActions>
                 <FormButton startIcon={<SaveIcon />} variant="contained" color="primary" type="submit">
                     Save
