@@ -67,5 +67,15 @@ The Web is based off Rick's awesome [esp8266-react](https://github.com/rjwats/es
   * `factory_settings.ini` modified with `ems-esp-neo` as password and `ems-esp` everywhere else
 
 
+## To develop and test the Web UI
+- uncomment the `-D ENABLE_CORS` in `platformio.ini`
+```sh
+cd interface
+npm start
+```
 
+## To test the core, standalone with an ESP
 
+```sh
+make run
+```
