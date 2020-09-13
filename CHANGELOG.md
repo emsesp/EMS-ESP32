@@ -9,9 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Able to set individual MQTT publish intervals per device
+- Option to automatically MQTT publish when device data is updated
 - Immediately send out Rx read request after a successful write, and publish via MQTT
 - Added clearer steps in documentation on how to erase & upload
 - Show Boiler's pump modulation in Web
+- Support parasite Dallas temperature sensors
+- Improvements to `watch` command, including publishing the telegram to MQTT
+- Support for analog measurements on a GPIO (fixed)
+- New `read <device ID> <type ID>` command in console
 
 ### Fixed
 - Sometimes the automatic upgrade from 1.9 to 2.0 bricked the ESP8266
@@ -23,10 +28,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - External Dallas sensor support for DS18S20
 
 ### Changed
-- Web user-interface improvements
-- Spelling of disinfection in MQTT
+- Web user-interface improvements, table alignment and number formatting
+- Spelling of disinfection in MQTT payload
 - Many small minor code improvements and optimizations
 - External dallas temperature sensors rounded to a single decimal point
+- Syslog hostname always shown in Web
 
 ### Removed
 - NO_LED build option
