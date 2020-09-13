@@ -1,4 +1,4 @@
-## **MQTT commands**
+# **MQTT commands**
 
 All commands must be written as `{"cmd":<cmd> ,"data":<data>, "id":<n>}`. 
 
