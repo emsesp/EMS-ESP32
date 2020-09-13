@@ -1,6 +1,5 @@
 # Notes on customizing the code
 
-
 ## **Basic Design Principles**
 
 - The core services like telnet, logging and shell are based off the libraries from @nomis. I also adopted his general design pattens such as making everything as asynchronous as possible so that no one operation should starve another operation of it's time to execute (https://isocpp.org/wiki/faq/ctors#static-init-order).
