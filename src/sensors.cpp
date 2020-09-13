@@ -49,7 +49,10 @@ void Sensors::reload() {
         mqtt_format_ = settings.mqtt_format; // single, nested or ha
     });
 
-    EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) { dallas_gpio_ = settings.dallas_gpio; });
+    EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) {
+        dallas_gpio_ = settings.dallas_gpio;
+        parasite_    = settings.dallas_parasite;
+    });
 
     if (mqtt_format_ == MQTT_format::HA) {
         for (uint8_t i = 0; i < MAX_SENSORS; registered_ha_[i++] = false)
@@ -64,10 +67,10 @@ void Sensors::loop() {
     if (state_ == State::IDLE) {
         if (time_now - last_activity_ >= READ_INTERVAL_MS) {
             // LOG_DEBUG(F("Read sensor temperature")); // uncomment for debug
-            if (bus_.reset()) {
+            if (bus_.reset() || parasite_) {
                 YIELD;
                 bus_.skip();
-                bus_.write(CMD_CONVERT_TEMP);
+                bus_.write(CMD_CONVERT_TEMP, parasite_ ? 1 : 0);
                 state_ = State::READING;
             } else {
                 // no sensors found
@@ -94,8 +97,9 @@ void Sensors::loop() {
             uint8_t addr[ADDR_LEN] = {0};
 
             if (bus_.search(addr)) {
-                bus_.depower();
-
+                if (!parasite_) {
+                    bus_.depower();
+                }
                 if (bus_.crc8(addr, ADDR_LEN - 1) == addr[ADDR_LEN - 1]) {
                     switch (addr[0]) {
                     case TYPE_DS18B20:
@@ -122,8 +126,19 @@ void Sensors::loop() {
                     LOG_ERROR(F("Invalid sensor %s"), Device(addr).to_string().c_str());
                 }
             } else {
-                bus_.depower();
+                if (!parasite_) {
+                    bus_.depower();
+                }
                 if ((found_.size() >= devices_.size()) || (retrycnt_ > 5)) {
+                    if (found_.size() == devices_.size()) {
+                        for (uint8_t i = 0; i < devices_.size(); i++) {
+                            if (found_[i].temperature_c != devices_[i].temperature_c) {
+                                changed_ = true;
+                            }
+                        }
+                    } else {
+                        changed_ = true;
+                    }
                     devices_  = std::move(found_);
                     retrycnt_ = 0;
                 } else {
@@ -140,9 +155,12 @@ void Sensors::loop() {
 
 bool Sensors::temperature_convert_complete() {
 #ifndef EMSESP_STANDALONE
+    if (parasite_) {
+        return true; // don't care, use the minimum time in loop
+    }
     return bus_.read_bit() == 1;
 #else
-    return 1;
+    return true;
 #endif
 }
 
@@ -183,27 +201,27 @@ float Sensors::get_temperature_c(const uint8_t addr[]) {
 
     int16_t raw_value = ((int16_t)scratchpad[SCRATCHPAD_TEMP_MSB] << 8) | scratchpad[SCRATCHPAD_TEMP_LSB];
 
-    // Adjust based on device resolution
-    int resolution = 9 + ((scratchpad[SCRATCHPAD_CONFIG] >> 5) & 0x3);
-    switch (resolution) {
-    case 9:
-        raw_value &= ~0x1;
-        break;
-
-    case 10:
-        raw_value &= ~0x3;
-        break;
-
-    case 11:
-        raw_value &= ~0x7;
-        break;
-
-    case 12:
-        break;
+    if (addr[0] == TYPE_DS18S20) {
+        raw_value = (raw_value << 3) + 12 - scratchpad[SCRATCHPAD_CNT_REM];
+    } else {
+        // Adjust based on device resolution
+        int resolution = 9 + ((scratchpad[SCRATCHPAD_CONFIG] >> 5) & 0x3);
+        switch (resolution) {
+        case 9:
+            raw_value &= ~0x7;
+            break;
+        case 10:
+            raw_value &= ~0x3;
+            break;
+        case 11:
+            raw_value &= ~0x1;
+            break;
+        case 12:
+            break;
+        }
     }
-
-    uint32_t raw = (raw_value * 625) / 100; // round to 0.01
-    return (float)raw / 100;
+    uint32_t raw = (raw_value * 625 + 500) / 1000; // round to 0.1
+    return (float)raw / 10;
 #else
     return NAN;
 #endif
@@ -237,6 +255,14 @@ std::string Sensors::Device::to_string() const {
     return str;
 }
 
+// check to see if values have been updated
+bool Sensors::updated_values() {
+    if (changed_) {
+        changed_ = false;
+        return true;
+    }
+    return false;
+}
 
 // send all dallas sensor values as a JSON package to MQTT
 // assumes there are devices
@@ -254,7 +280,7 @@ void Sensors::publish_values() {
         StaticJsonDocument<100> doc;
         for (const auto & device : devices_) {
             char s[7]; // sensorrange -55.00 to 125.00
-            doc["temp"] = Helpers::render_value(s, device.temperature_c, 2);
+            doc["temp"] = Helpers::render_value(s, device.temperature_c, 1);
             char topic[60];                // sensors{1-n}
             strlcpy(topic, "sensor_", 50); // create topic, e.g. home/ems-esp/sensor_28-EA41-9497-0E03-5F
             strlcat(topic, device.to_string().c_str(), 60);
@@ -264,28 +290,22 @@ void Sensors::publish_values() {
         return;
     }
 
-    // const size_t        capacity = num_devices * JSON_OBJECT_SIZE(2) + JSON_OBJECT_SIZE(num_devices);
     DynamicJsonDocument doc(100 * num_devices);
     uint8_t             i = 1; // sensor count
     for (const auto & device : devices_) {
         char s[7];
 
         if (mqtt_format_ == MQTT_format::CUSTOM) {
-            doc[device.to_string()] = Helpers::render_value(s, device.temperature_c, 2);
-        } else if (mqtt_format_ == MQTT_format::SINGLE) {
-            doc["id"]   = device.to_string();
-            doc["temp"] = Helpers::render_value(s, device.temperature_c, 2);
-            std::string topic(100, '\0');
-            snprintf_P(&topic[0], 50, PSTR("sensor%d"), i);
-            Mqtt::publish(topic, doc);
+            // e.g. sensors = {28-EA41-9497-0E03-5F":23.30,"28-233D-9497-0C03-8B":24.0}
+            doc[device.to_string()] = Helpers::render_value(s, device.temperature_c, 1);
         } else if ((mqtt_format_ == MQTT_format::NESTED) || (mqtt_format_ == MQTT_format::HA)) {
-            // e.g. {"sensor1":{"id":"28-EA41-9497-0E03-5F","temp":"23.30"},"sensor2":{"id":"28-233D-9497-0C03-8B","temp":"24.0"}}
+            // e.g. sensors = {"sensor1":{"id":"28-EA41-9497-0E03-5F","temp":"23.30"},"sensor2":{"id":"28-233D-9497-0C03-8B","temp":"24.0"}}
             char sensorID[10]; // sensor{1-n}
             strlcpy(sensorID, "sensor", 10);
             strlcat(sensorID, Helpers::itoa(s, i), 10);
             JsonObject dataSensor = doc.createNestedObject(sensorID);
             dataSensor["id"]      = device.to_string();
-            dataSensor["temp"]    = Helpers::render_value(s, device.temperature_c, 2);
+            dataSensor["temp"]    = Helpers::render_value(s, device.temperature_c, 1);
         }
 
         // special for HA
@@ -327,9 +347,9 @@ void Sensors::publish_values() {
     }
 
     if ((mqtt_format_ == MQTT_format::NESTED) || (mqtt_format_ == MQTT_format::CUSTOM)) {
-        Mqtt::publish("sensors", doc);
+        Mqtt::publish(F("sensors"), doc);
     } else if (mqtt_format_ == MQTT_format::HA) {
-        Mqtt::publish("homeassistant/sensor/ems-esp/state", doc);
+        Mqtt::publish(F("homeassistant/sensor/ems-esp/state"), doc);
     }
 }
 } // namespace emsesp

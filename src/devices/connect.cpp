@@ -28,7 +28,7 @@ Connect::Connect(uint8_t device_type, uint8_t device_id, uint8_t product_id, con
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
 }
 
-void Connect::device_info(JsonArray & root) {
+void Connect::device_info_web(JsonArray & root) {
 }
 
 void Connect::add_context_menu() {

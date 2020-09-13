@@ -37,7 +37,7 @@ Heatpump::Heatpump(uint8_t device_type, uint8_t device_id, uint8_t product_id, c
 void Heatpump::add_context_menu() {
 }
 
-void Heatpump::device_info(JsonArray & root) {
+void Heatpump::device_info_web(JsonArray & root) {
 }
 
 // display all values into the shell console

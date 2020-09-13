@@ -39,7 +39,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     register_telegram_type(0x1C, F("UBAMaintenanceStatus"), false, [&](std::shared_ptr<const Telegram> t) { process_UBAMaintenanceStatus(t); });
     register_telegram_type(0x2A, F("MC10Status"), false, [&](std::shared_ptr<const Telegram> t) { process_MC10Status(t); });
     register_telegram_type(0x33, F("UBAParameterWW"), true, [&](std::shared_ptr<const Telegram> t) { process_UBAParameterWW(t); });
-    register_telegram_type(0x14, F("UBATotalUptime"), false, [&](std::shared_ptr<const Telegram> t) { process_UBATotalUptime(t); });
+    register_telegram_type(0x14, F("UBATotalUptime"), true, [&](std::shared_ptr<const Telegram> t) { process_UBATotalUptime(t); });
     register_telegram_type(0x35, F("UBAFlags"), false, [&](std::shared_ptr<const Telegram> t) { process_UBAFlags(t); });
     register_telegram_type(0x15, F("UBAMaintenanceData"), false, [&](std::shared_ptr<const Telegram> t) { process_UBAMaintenanceData(t); });
     register_telegram_type(0x16, F("UBAParameters"), true, [&](std::shared_ptr<const Telegram> t) { process_UBAParameters(t); });
@@ -64,6 +64,14 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     register_mqtt_cmd(F("boilhystoff"), [&](const char * value, const int8_t id) { set_hyst_off(value, id); });
     register_mqtt_cmd(F("burnperiod"), [&](const char * value, const int8_t id) { set_burn_period(value, id); });
     register_mqtt_cmd(F("pumpdelay"), [&](const char * value, const int8_t id) { set_pump_delay(value, id); });
+
+    EMSESP::esp8266React.getMqttSettingsService()->read([&](MqttSettings & settings) {
+        mqtt_format_ = settings.mqtt_format; // single, nested or ha
+
+        if (mqtt_format_ == MQTT_format::HA) {
+            register_mqtt_ha_config();
+        }
+    });
 }
 
 // add submenu context
@@ -77,8 +85,35 @@ void Boiler::add_context_menu() {
                                        });
 }
 
-void Boiler::device_info(JsonArray & root) {
+// create the config topic for Home Assistant MQTT Discovery
+// homeassistant/sensor/ems-esp/boiler
+// state is /state
+// config is /config
+void Boiler::register_mqtt_ha_config() {
+    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
+
+    /*
+     * not finished yet - see https://github.com/proddy/EMS-ESP/issues/288
+    
+    doc["name"]    = "boiler";
+    doc["uniq_id"] = "boiler";
+
+    // Mqtt::publish(topic); // empty payload, this remove any previous config sent to HA
+    Mqtt::publish("homeassistant/sensor/ems-esp/boiler/config", doc, true); // publish the config payload with retain flag
+    
+    */
+}
+
+void Boiler::device_info_web(JsonArray & root) {
     JsonObject dataElement;
+
+    if (serviceCodeChar_[0] && Helpers::hasValue(serviceCode_)) {
+        dataElement         = root.createNestedObject();
+        dataElement["name"] = F("Service Code");
+        char s[12];
+        snprintf_P(s, 12, PSTR("%s (%d)"), serviceCodeChar_, serviceCode_);
+        dataElement["value"] = s;
+    }
 
     if (Helpers::hasValue(tap_water_active_, EMS_VALUE_BOOL)) {
         dataElement          = root.createNestedObject();
@@ -98,6 +133,8 @@ void Boiler::device_info(JsonArray & root) {
     render_value_json(root, "", F("Warm Water set temperature"), wWSetTmp_, F_(degrees));
     render_value_json(root, "", F("Warm Water current temperature (intern)"), wWCurTmp_, F_(degrees), 10);
     render_value_json(root, "", F("Warm Water current temperature (extern)"), wWCurTmp2_, F_(degrees), 10);
+    render_value_json(root, "", F("Pump modulation"), pumpMod_, F_(percent));
+    render_value_json(root, "", F("Heat Pump modulation"), pumpMod2_, F_(percent));
 }
 
 // publish values via MQTT
@@ -196,8 +233,8 @@ void Boiler::publish_values() {
     if (Helpers::hasValue(wWOneTime_, EMS_VALUE_BOOL)) {
         doc["wWOnetime"] = Helpers::render_value(s, wWOneTime_, EMS_VALUE_BOOL);
     }
-    if (Helpers::hasValue(wWDesinfecting_, EMS_VALUE_BOOL)) {
-        doc["wWDesinfecting"] = Helpers::render_value(s, wWDesinfecting_, EMS_VALUE_BOOL);
+    if (Helpers::hasValue(wWDisinfecting_, EMS_VALUE_BOOL)) {
+        doc["wWDisinfecting"] = Helpers::render_value(s, wWDisinfecting_, EMS_VALUE_BOOL);
     }
     if (Helpers::hasValue(wWReadiness_, EMS_VALUE_BOOL)) {
         doc["wWReady"] = Helpers::render_value(s, wWReadiness_, EMS_VALUE_BOOL);
@@ -287,12 +324,16 @@ void Boiler::publish_values() {
 
     // if we have data, publish it
     if (!doc.isNull()) {
-        Mqtt::publish("boiler_data", doc);
+        Mqtt::publish(F("boiler_data"), doc);
     }
 }
 
 // called after a process command is called, to check values and see if we need to force an MQTT publish
 bool Boiler::updated_values() {
+    if (changed_) {
+        changed_ = false;
+        return true;
+    }
     return false;
 }
 
@@ -353,7 +394,7 @@ void Boiler::show_values(uuid::console::Shell & shell) {
         shell.printfln(F("  Warm Water active time: %d days %d hours %d minutes"), wWWorkM_ / 1440, (wWWorkM_ % 1440) / 60, wWWorkM_ % 60);
     }
     print_value(shell, 2, F("Warm Water charging"), wWHeat_, nullptr, EMS_VALUE_BOOL);
-    print_value(shell, 2, F("Warm Water disinfecting"), wWDesinfecting_, nullptr, EMS_VALUE_BOOL);
+    print_value(shell, 2, F("Warm Water disinfecting"), wWDisinfecting_, nullptr, EMS_VALUE_BOOL);
     print_value(shell, 2, F("Selected flow temperature"), selFlowTemp_, F_(degrees));
     print_value(shell, 2, F("Current flow temperature"), curFlowTemp_, F_(degrees), 10);
     print_value(shell, 2, F("Max boiler temperature"), boilTemp_, F_(degrees), 10);
@@ -396,7 +437,7 @@ void Boiler::show_values(uuid::console::Shell & shell) {
 
     print_value(shell, 2, F("Exhaust temperature"), exhaustTemp_, F_(degrees), 10);
     print_value(shell, 2, F("Pump modulation"), pumpMod_, F_(percent));
-    print_value(shell, 2, F("Pump modulation2"), pumpMod2_, F_(percent));
+    print_value(shell, 2, F("Heat Pump modulation"), pumpMod2_, F_(percent));
     print_value(shell, 2, F("Burner # starts"), burnStarts_, nullptr);
     if (Helpers::hasValue(burnWorkMin_)) {
         shell.printfln(F("  Total burner operating time: %d days %d hours %d minutes"), burnWorkMin_ / 1440, (burnWorkMin_ % 1440) / 60, burnWorkMin_ % 60);
@@ -435,54 +476,54 @@ void Boiler::check_active() {
         uint8_t latest_boilerState = (tap_water_active_ << 1) + heating_active_;
         if (latest_boilerState != last_boilerState) {
             last_boilerState = latest_boilerState;
-            Mqtt::publish("tapwater_active", tap_water_active_);
-            Mqtt::publish("heating_active", heating_active_);
+            Mqtt::publish(F("tapwater_active"), tap_water_active_);
+            Mqtt::publish(F("heating_active"), heating_active_);
         }
     }
 }
 
 // 0x33
 void Boiler::process_UBAParameterWW(std::shared_ptr<const Telegram> telegram) {
-    telegram->read_value(wWActivated_, 1);     // 0xFF means on
-    telegram->read_value(wWCircPump_, 6);      // 0xFF means on
-    telegram->read_value(wWCircPumpMode_, 7);  // 1=1x3min... 6=6x3min, 7=continuous
-    telegram->read_value(wWCircPumpType_, 10); // 0 = charge pump, 0xff = 3-way valve
-    telegram->read_value(wWSelTemp_, 2);
-    telegram->read_value(wWDisinfectTemp_, 8);
-    telegram->read_value(wWComfort_, 9);
+    changed_ |= telegram->read_value(wWActivated_, 1);     // 0xFF means on
+    changed_ |= telegram->read_value(wWCircPump_, 6);      // 0xFF means on
+    changed_ |= telegram->read_value(wWCircPumpMode_, 7);  // 1=1x3min... 6=6x3min, 7=continuous
+    changed_ |= telegram->read_value(wWCircPumpType_, 10); // 0 = charge pump, 0xff = 3-way valve
+    changed_ |= telegram->read_value(wWSelTemp_, 2);
+    changed_ |= telegram->read_value(wWDisinfectTemp_, 8);
+    changed_ |= telegram->read_value(wWComfort_, 9);
 }
 
 // 0x18
 void Boiler::process_UBAMonitorFast(std::shared_ptr<const Telegram> telegram) {
-    telegram->read_value(selFlowTemp_, 0);
-    telegram->read_value(curFlowTemp_, 1);
-    telegram->read_value(selBurnPow_, 3); // burn power max setting
-    telegram->read_value(curBurnPow_, 4);
+    changed_ |= telegram->read_value(selFlowTemp_, 0);
+    changed_ |= telegram->read_value(curFlowTemp_, 1);
+    changed_ |= telegram->read_value(selBurnPow_, 3); // burn power max setting
+    changed_ |= telegram->read_value(curBurnPow_, 4);
 
-    telegram->read_bitvalue(burnGas_, 7, 0);
-    telegram->read_bitvalue(fanWork_, 7, 2);
-    telegram->read_bitvalue(ignWork_, 7, 3);
-    telegram->read_bitvalue(heatPmp_, 7, 5);
-    telegram->read_bitvalue(wWHeat_, 7, 6);
-    telegram->read_bitvalue(wWCirc_, 7, 7);
+    changed_ |= telegram->read_bitvalue(burnGas_, 7, 0);
+    changed_ |= telegram->read_bitvalue(fanWork_, 7, 2);
+    changed_ |= telegram->read_bitvalue(ignWork_, 7, 3);
+    changed_ |= telegram->read_bitvalue(heatPmp_, 7, 5);
+    changed_ |= telegram->read_bitvalue(wWHeat_, 7, 6);
+    changed_ |= telegram->read_bitvalue(wWCirc_, 7, 7);
 
     // warm water storage sensors (if present)
     // wwStorageTemp2 is also used by some brands as the boiler temperature - see https://github.com/proddy/EMS-ESP/issues/206
-    telegram->read_value(wwStorageTemp1_, 9);  // 0x8300 if not available
-    telegram->read_value(wwStorageTemp2_, 11); // 0x8000 if not available - this is boiler temp
+    changed_ |= telegram->read_value(wwStorageTemp1_, 9);  // 0x8300 if not available
+    changed_ |= telegram->read_value(wwStorageTemp2_, 11); // 0x8000 if not available - this is boiler temp
 
-    telegram->read_value(retTemp_, 13);
-    telegram->read_value(flameCurr_, 15);
-    telegram->read_value(serviceCode_, 20);
+    changed_ |= telegram->read_value(retTemp_, 13);
+    changed_ |= telegram->read_value(flameCurr_, 15);
+    changed_ |= telegram->read_value(serviceCode_, 20);
 
     // system pressure. FF means missing
-    telegram->read_value(sysPress_, 17); // is *10
+    changed_ |= telegram->read_value(sysPress_, 17); // is *10
 
     // read the service code / installation status as appears on the display
     if ((telegram->message_length > 18) && (telegram->offset == 0)) {
-        serviceCodeChar_[0] = char(telegram->message_data[18]); // ascii character 1
-        serviceCodeChar_[1] = char(telegram->message_data[19]); // ascii character 2
-        serviceCodeChar_[2] = '\0';                             // null terminate string
+        changed_ |= telegram->read_value(serviceCodeChar_[0], 18);
+        changed_ |= telegram->read_value(serviceCodeChar_[1], 19);
+        serviceCodeChar_[2] = '\0'; // null terminate string
     }
 
     // at this point do a quick check to see if the hot water or heating is active
@@ -494,22 +535,22 @@ void Boiler::process_UBAMonitorFast(std::shared_ptr<const Telegram> telegram) {
  * received only after requested (not broadcasted)
  */
 void Boiler::process_UBATotalUptime(std::shared_ptr<const Telegram> telegram) {
-    telegram->read_value(UBAuptime_, 0, 3); // force to 3 bytes
+    changed_ |= telegram->read_value(UBAuptime_, 0, 3); // force to 3 bytes
 }
 
 /*
  * UBAParameters - type 0x16
  */
 void Boiler::process_UBAParameters(std::shared_ptr<const Telegram> telegram) {
-    telegram->read_value(heating_temp_, 1);
-    telegram->read_value(burnPowermax_, 2);
-    telegram->read_value(burnPowermin_, 3);
-    telegram->read_value(boilTemp_off_, 4);
-    telegram->read_value(boilTemp_on_, 5);
-    telegram->read_value(burnPeriod_, 6);
-    telegram->read_value(pumpDelay_, 8);
-    telegram->read_value(pump_mod_max_, 9);
-    telegram->read_value(pump_mod_min_, 10);
+    changed_ |= telegram->read_value(heating_temp_, 1);
+    changed_ |= telegram->read_value(burnPowermax_, 2);
+    changed_ |= telegram->read_value(burnPowermin_, 3);
+    changed_ |= telegram->read_value(boilTemp_off_, 4);
+    changed_ |= telegram->read_value(boilTemp_on_, 5);
+    changed_ |= telegram->read_value(burnPeriod_, 6);
+    changed_ |= telegram->read_value(pumpDelay_, 8);
+    changed_ |= telegram->read_value(pump_mod_max_, 9);
+    changed_ |= telegram->read_value(pump_mod_min_, 10);
 }
 
 /*
@@ -517,19 +558,19 @@ void Boiler::process_UBAParameters(std::shared_ptr<const Telegram> telegram) {
  * received every 10 seconds
  */
 void Boiler::process_UBAMonitorWW(std::shared_ptr<const Telegram> telegram) {
-    telegram->read_value(wWSetTmp_, 0);
-    telegram->read_value(wWCurTmp_, 1);
-    telegram->read_value(wWCurTmp2_, 3);
-    telegram->read_value(wWCurFlow_, 9);
+    changed_ |= telegram->read_value(wWSetTmp_, 0);
+    changed_ |= telegram->read_value(wWCurTmp_, 1);
+    changed_ |= telegram->read_value(wWCurTmp2_, 3);
+    changed_ |= telegram->read_value(wWCurFlow_, 9);
 
-    telegram->read_value(wWWorkM_, 10, 3);  // force to 3 bytes
-    telegram->read_value(wWStarts_, 13, 3); // force to 3 bytes
+    changed_ |= telegram->read_value(wWWorkM_, 10, 3);  // force to 3 bytes
+    changed_ |= telegram->read_value(wWStarts_, 13, 3); // force to 3 bytes
 
-    telegram->read_bitvalue(wWOneTime_, 5, 1);
-    telegram->read_bitvalue(wWDesinfecting_, 5, 2);
-    telegram->read_bitvalue(wWReadiness_, 5, 3);
-    telegram->read_bitvalue(wWRecharging_, 5, 4);
-    telegram->read_bitvalue(wWTemperatureOK_, 5, 5);
+    changed_ |= telegram->read_bitvalue(wWOneTime_, 5, 1);
+    changed_ |= telegram->read_bitvalue(wWDisinfecting_, 5, 2);
+    changed_ |= telegram->read_bitvalue(wWReadiness_, 5, 3);
+    changed_ |= telegram->read_bitvalue(wWRecharging_, 5, 4);
+    changed_ |= telegram->read_bitvalue(wWTemperatureOK_, 5, 5);
 }
 
 /*
@@ -537,18 +578,18 @@ void Boiler::process_UBAMonitorWW(std::shared_ptr<const Telegram> telegram) {
  * Still to figure out are: serviceCode, retTemp, sysPress
  */
 void Boiler::process_UBAMonitorFastPlus(std::shared_ptr<const Telegram> telegram) {
-    telegram->read_value(selFlowTemp_, 6);
-    telegram->read_bitvalue(burnGas_, 11, 0);
-    telegram->read_bitvalue(wWHeat_, 11, 2);
-    telegram->read_value(curBurnPow_, 10);
-    telegram->read_value(selBurnPow_, 9);
-    telegram->read_value(curFlowTemp_, 7);
-    telegram->read_value(flameCurr_, 19);
+    changed_ |= telegram->read_value(selFlowTemp_, 6);
+    changed_ |= telegram->read_bitvalue(burnGas_, 11, 0);
+    changed_ |= telegram->read_bitvalue(wWHeat_, 11, 2);
+    changed_ |= telegram->read_value(curBurnPow_, 10);
+    changed_ |= telegram->read_value(selBurnPow_, 9);
+    changed_ |= telegram->read_value(curFlowTemp_, 7);
+    changed_ |= telegram->read_value(flameCurr_, 19);
 
     // read the service code / installation status as appears on the display
     if ((telegram->message_length > 4) && (telegram->offset == 0)) {
-        serviceCodeChar_[0] = char(telegram->message_data[4]); // ascii character 1
-        serviceCodeChar_[1] = char(telegram->message_data[5]); // ascii character 2
+        changed_ |= telegram->read_value(serviceCodeChar_[0], 4);
+        changed_ |= telegram->read_value(serviceCodeChar_[1], 5);
         serviceCodeChar_[2] = '\0';
     }
 
@@ -564,79 +605,79 @@ void Boiler::process_UBAMonitorFastPlus(std::shared_ptr<const Telegram> telegram
  *                  00 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 17 19 20 21 22 23 24
  */
 void Boiler::process_UBAMonitorSlow(std::shared_ptr<const Telegram> telegram) {
-    telegram->read_value(extTemp_, 0);
-    telegram->read_value(boilTemp_, 2);
-    telegram->read_value(exhaustTemp_, 4);
-    telegram->read_value(switchTemp_, 25); // only if there is a mixing module present
-    telegram->read_value(pumpMod_, 9);
-    telegram->read_value(burnStarts_, 10, 3);  // force to 3 bytes
-    telegram->read_value(burnWorkMin_, 13, 3); // force to 3 bytes
-    telegram->read_value(heatWorkMin_, 19, 3); // force to 3 bytes
+    changed_ |= telegram->read_value(extTemp_, 0);
+    changed_ |= telegram->read_value(boilTemp_, 2);
+    changed_ |= telegram->read_value(exhaustTemp_, 4);
+    changed_ |= telegram->read_value(switchTemp_, 25); // only if there is a mixing module present
+    changed_ |= telegram->read_value(pumpMod_, 9);
+    changed_ |= telegram->read_value(burnStarts_, 10, 3);  // force to 3 bytes
+    changed_ |= telegram->read_value(burnWorkMin_, 13, 3); // force to 3 bytes
+    changed_ |= telegram->read_value(heatWorkMin_, 19, 3); // force to 3 bytes
 }
 
 /*
  * UBAMonitorSlowPlus2 - type 0xE3
  */
 void Boiler::process_UBAMonitorSlowPlus2(std::shared_ptr<const Telegram> telegram) {
-    telegram->read_value(pumpMod2_, 13);
+    changed_ |= telegram->read_value(pumpMod2_, 13); // Heat Pump Modulation
 }
 
 /*
  * UBAMonitorSlowPlus - type 0xE5 - central heating monitor EMS+
  */
 void Boiler::process_UBAMonitorSlowPlus(std::shared_ptr<const Telegram> telegram) {
-    telegram->read_bitvalue(fanWork_, 2, 2);
-    telegram->read_bitvalue(ignWork_, 2, 3);
-    telegram->read_bitvalue(heatPmp_, 2, 5);
-    telegram->read_bitvalue(wWCirc_, 2, 7);
-    telegram->read_value(burnStarts_, 10, 3);  // force to 3 bytes
-    telegram->read_value(burnWorkMin_, 13, 3); // force to 3 bytes
-    telegram->read_value(heatWorkMin_, 19, 3); // force to 3 bytes
-    telegram->read_value(pumpMod_, 25);
+    changed_ |= telegram->read_bitvalue(fanWork_, 2, 2);
+    changed_ |= telegram->read_bitvalue(ignWork_, 2, 3);
+    changed_ |= telegram->read_bitvalue(heatPmp_, 2, 5);
+    changed_ |= telegram->read_bitvalue(wWCirc_, 2, 7);
+    changed_ |= telegram->read_value(burnStarts_, 10, 3);  // force to 3 bytes
+    changed_ |= telegram->read_value(burnWorkMin_, 13, 3); // force to 3 bytes
+    changed_ |= telegram->read_value(heatWorkMin_, 19, 3); // force to 3 bytes
+    changed_ |= telegram->read_value(pumpMod_, 25);
 }
 
 // 0xE9 - DHW Status
 // e.g. 08 00 E9 00 37 01 F6 01 ED 00 00 00 00 41 3C 00 00 00 00 00 00 00 00 00 00 00 00 37 00 00 00 (CRC=77) #data=27
 void Boiler::process_UBADHWStatus(std::shared_ptr<const Telegram> telegram) {
-    telegram->read_value(wWSetTmp_, 0);
-    telegram->read_value(wWCurTmp_, 1);
-    telegram->read_value(wWCurTmp2_, 3);
+    changed_ |= telegram->read_value(wWSetTmp_, 0);
+    changed_ |= telegram->read_value(wWCurTmp_, 1);
+    changed_ |= telegram->read_value(wWCurTmp2_, 3);
 
-    telegram->read_value(wWWorkM_, 17, 3);  // force to 3 bytes
-    telegram->read_value(wWStarts_, 14, 3); // force to 3 bytes
+    changed_ |= telegram->read_value(wWWorkM_, 17, 3);  // force to 3 bytes
+    changed_ |= telegram->read_value(wWStarts_, 14, 3); // force to 3 bytes
 
-    telegram->read_bitvalue(wWOneTime_, 12, 2);
-    telegram->read_bitvalue(wWDesinfecting_, 12, 3);
-    telegram->read_bitvalue(wWReadiness_, 12, 4);
-    telegram->read_bitvalue(wWRecharging_, 13, 4);
-    telegram->read_bitvalue(wWTemperatureOK_, 13, 5);
-    telegram->read_bitvalue(wWCircPump_, 13, 2);
+    changed_ |= telegram->read_bitvalue(wWOneTime_, 12, 2);
+    changed_ |= telegram->read_bitvalue(wWDisinfecting_, 12, 3);
+    changed_ |= telegram->read_bitvalue(wWReadiness_, 12, 4);
+    changed_ |= telegram->read_bitvalue(wWRecharging_, 13, 4);
+    changed_ |= telegram->read_bitvalue(wWTemperatureOK_, 13, 5);
+    changed_ |= telegram->read_bitvalue(wWCircPump_, 13, 2);
 
-    telegram->read_value(wWActivated_, 20);
-    telegram->read_value(wWSelTemp_, 10);
-    telegram->read_value(wWDisinfectTemp_, 9);
+    changed_ |= telegram->read_value(wWActivated_, 20);
+    changed_ |= telegram->read_value(wWSelTemp_, 10);
+    changed_ |= telegram->read_value(wWDisinfectTemp_, 9);
 }
 
 // 0x2A - MC10Status
 // e.g. 88 00 2A 00 00 00 00 00 00 00 00 00 D2 00 00 80 00 00 01 08 80 00 02 47 00
 // see https://github.com/proddy/EMS-ESP/issues/397
 void Boiler::process_MC10Status(std::shared_ptr<const Telegram> telegram) {
-    telegram->read_value(wwMixTemperature_, 14);
-    telegram->read_value(wwBufferBoilerTemperature_, 18);
+    changed_ |= telegram->read_value(wwMixTemperature_, 14);
+    changed_ |= telegram->read_value(wwBufferBoilerTemperature_, 18);
 }
 
 /*
  * UBAOutdoorTemp - type 0xD1 - external temperature EMS+
  */
 void Boiler::process_UBAOutdoorTemp(std::shared_ptr<const Telegram> telegram) {
-    telegram->read_value(extTemp_, 0);
+    changed_ |= telegram->read_value(extTemp_, 0);
 }
 
 // UBASetPoint 0x1A
 void Boiler::process_UBASetPoints(std::shared_ptr<const Telegram> telegram) {
-    telegram->read_value(setFlowTemp_, 0);  // boiler set temp from thermostat
-    telegram->read_value(setBurnPow_, 1);   // max output power in %
-    telegram->read_value(setWWPumpPow_, 2); // ww pump speed/power?
+    changed_ |= telegram->read_value(setFlowTemp_, 0);  // boiler set temp from thermostat
+    changed_ |= telegram->read_value(setBurnPow_, 1);   // max output power in %
+    changed_ |= telegram->read_value(setWWPumpPow_, 2); // ww pump speed/power?
 }
 
 #pragma GCC diagnostic push
@@ -683,8 +724,8 @@ void Boiler::set_warmwater_temp(const char * value, const int8_t id) {
     }
 
     LOG_INFO(F("Setting boiler warm water temperature to %d C"), v);
-    write_command(EMS_TYPE_UBAParameterWW, 2, v);
-    write_command(EMS_TYPE_UBAFlags, 3, v); // for i9000, see #397
+    write_command(EMS_TYPE_UBAParameterWW, 2, v, EMS_TYPE_UBAParameterWW);
+    write_command(EMS_TYPE_UBAFlags, 3, v, EMS_TYPE_UBAParameterWW); // for i9000, see #397
 }
 
 // flow temp
@@ -695,7 +736,7 @@ void Boiler::set_flow_temp(const char * value, const int8_t id) {
     }
 
     LOG_INFO(F("Setting boiler flow temperature to %d C"), v);
-    write_command(EMS_TYPE_UBASetPoints, 0, v);
+    write_command(EMS_TYPE_UBASetPoints, 0, v, EMS_TYPE_UBASetPoints);
 }
 
 // set min boiler output
@@ -705,7 +746,7 @@ void Boiler::set_min_power(const char * value, const int8_t id) {
         return;
     }
     LOG_INFO(F("Setting boiler min power to "), v);
-    write_command(EMS_TYPE_UBAParameters, 3, v);
+    write_command(EMS_TYPE_UBAParameters, 3, v, EMS_TYPE_UBAParameters);
 }
 
 // set max temp
@@ -716,10 +757,10 @@ void Boiler::set_max_power(const char * value, const int8_t id) {
     }
 
     LOG_INFO(F("Setting boiler max power to %d C"), v);
-    write_command(EMS_TYPE_UBAParameters, 2, v);
+    write_command(EMS_TYPE_UBAParameters, 2, v, EMS_TYPE_UBAParameters);
 }
 
-// set oiler on hysteresis
+// set boiler on hysteresis
 void Boiler::set_hyst_on(const char * value, const int8_t id) {
     int v = 0;
     if (!Helpers::value2number(value, v)) {
@@ -727,7 +768,7 @@ void Boiler::set_hyst_on(const char * value, const int8_t id) {
     }
 
     LOG_INFO(F("Setting boiler hysteresis on to %d C"), v);
-    write_command(EMS_TYPE_UBAParameters, 5, v);
+    write_command(EMS_TYPE_UBAParameters, 5, v, EMS_TYPE_UBAParameters);
 }
 
 // set boiler off hysteresis
@@ -738,7 +779,7 @@ void Boiler::set_hyst_off(const char * value, const int8_t id) {
     }
 
     LOG_INFO(F("Setting boiler hysteresis off to %d C"), v);
-    write_command(EMS_TYPE_UBAParameters, 4, v);
+    write_command(EMS_TYPE_UBAParameters, 4, v, EMS_TYPE_UBAParameters);
 }
 
 // set min burner period
@@ -749,7 +790,7 @@ void Boiler::set_burn_period(const char * value, const int8_t id) {
     }
 
     LOG_INFO(F("Setting burner min. period to %d min"), v);
-    write_command(EMS_TYPE_UBAParameters, 6, v);
+    write_command(EMS_TYPE_UBAParameters, 6, v, EMS_TYPE_UBAParameters);
 }
 
 // set pump delay
@@ -760,7 +801,7 @@ void Boiler::set_pump_delay(const char * value, const int8_t id) {
     }
 
     LOG_INFO(F("Setting boiler pump delay to %d min"), v);
-    write_command(EMS_TYPE_UBAParameters, 8, v);
+    write_command(EMS_TYPE_UBAParameters, 8, v, EMS_TYPE_UBAParameters);
 }
 
 // note some boilers do not have this setting, than it's done by thermostat
@@ -782,7 +823,7 @@ void Boiler::set_warmwater_mode(const char * value, const int8_t id) {
     } else {
         return; // do nothing
     }
-    write_command(EMS_TYPE_UBAParameterWW, 9, set);
+    write_command(EMS_TYPE_UBAParameterWW, 9, set, EMS_TYPE_UBAParameterWW);
 }
 
 // turn on/off warm water
@@ -801,7 +842,7 @@ void Boiler::set_warmwater_activated(const char * value, const int8_t id) {
     } else {
         n = (v ? 0xFF : 0x00); // 0xFF is on, 0x00 is off
     }
-    write_command(EMS_TYPE_UBAParameterWW, 1, n);
+    write_command(EMS_TYPE_UBAParameterWW, 1, n, EMS_TYPE_UBAParameterWW);
 }
 
 // Activate / De-activate the Warm Tap Water
@@ -846,7 +887,7 @@ void Boiler::set_warmwater_onetime(const char * value, const int8_t id) {
     }
 
     LOG_INFO(F("Setting boiler warm water OneTime loading %s"), v ? "on" : "off");
-    write_command(EMS_TYPE_UBAFlags, 0, (v ? 0x22 : 0x02));
+    write_command(EMS_TYPE_UBAFlags, 0, (v ? 0x22 : 0x02), 0x18);
 }
 
 // Activate / De-activate circulation of warm water 0x35
@@ -858,7 +899,7 @@ void Boiler::set_warmwater_circulation(const char * value, const int8_t id) {
     }
 
     LOG_INFO(F("Setting boiler warm water circulation %s"), v ? "on" : "off");
-    write_command(EMS_TYPE_UBAFlags, 1, (v ? 0x22 : 0x02));
+    write_command(EMS_TYPE_UBAFlags, 1, (v ? 0x22 : 0x02), 0x18);
 }
 
 // add console commands

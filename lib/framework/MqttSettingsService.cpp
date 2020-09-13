@@ -62,7 +62,7 @@ void MqttSettingsService::begin() {
 }
 
 void MqttSettingsService::loop() {
-    if (_reconfigureMqtt || (_disconnectedAt && (unsigned long)(millis() - _disconnectedAt) >= MQTT_RECONNECTION_DELAY)) {
+    if (_reconfigureMqtt || (_disconnectedAt && (unsigned long)(uuid::get_uptime() - _disconnectedAt) >= MQTT_RECONNECTION_DELAY)) {
         // reconfigure MQTT client
         configureMqtt();
 
@@ -107,7 +107,7 @@ void MqttSettingsService::onMqttDisconnect(AsyncMqttClientDisconnectReason reaso
     // Serial.print(F("Disconnected from MQTT reason: "));
     // Serial.println((uint8_t)reason);
     _disconnectReason = reason;
-    _disconnectedAt   = millis();
+    _disconnectedAt   = uuid::get_uptime();
 }
 
 void MqttSettingsService::onConfigUpdated() {
@@ -184,10 +184,15 @@ void MqttSettings::read(MqttSettings & settings, JsonObject & root) {
     root["max_topic_length"] = settings.maxTopicLength;
 
     // added by proddy for EMS-ESP
-    root["system_heartbeat"] = settings.system_heartbeat;
-    root["publish_time"]     = settings.publish_time;
-    root["mqtt_format"]      = settings.mqtt_format;
-    root["mqtt_qos"]         = settings.mqtt_qos;
+    root["system_heartbeat"]        = settings.system_heartbeat;
+    root["publish_time_boiler"]     = settings.publish_time_boiler;
+    root["publish_time_thermostat"] = settings.publish_time_thermostat;
+    root["publish_time_solar"]      = settings.publish_time_solar;
+    root["publish_time_mixing"]     = settings.publish_time_mixing;
+    root["publish_time_other"]      = settings.publish_time_other;
+    root["publish_time_sensor"]     = settings.publish_time_sensor;
+    root["mqtt_format"]             = settings.mqtt_format;
+    root["mqtt_qos"]                = settings.mqtt_qos;
 }
 
 StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & settings) {
@@ -203,10 +208,15 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
     newSettings.cleanSession   = root["clean_session"] | FACTORY_MQTT_CLEAN_SESSION;
     newSettings.maxTopicLength = root["max_topic_length"] | FACTORY_MQTT_MAX_TOPIC_LENGTH;
 
-    newSettings.system_heartbeat = root["system_heartbeat"] | EMSESP_DEFAULT_SYSTEM_HEARTBEAT;
-    newSettings.publish_time     = root["publish_time"] | EMSESP_DEFAULT_PUBLISH_TIME;
-    newSettings.mqtt_format      = root["mqtt_format"] | EMSESP_DEFAULT_MQTT_FORMAT;
-    newSettings.mqtt_qos         = root["mqtt_qos"] | EMSESP_DEFAULT_MQTT_QOS;
+    newSettings.system_heartbeat        = root["system_heartbeat"] | EMSESP_DEFAULT_SYSTEM_HEARTBEAT;
+    newSettings.publish_time_boiler     = root["publish_time_boiler"] | EMSESP_DEFAULT_PUBLISH_TIME;
+    newSettings.publish_time_thermostat = root["publish_time_thermostat"] | EMSESP_DEFAULT_PUBLISH_TIME;
+    newSettings.publish_time_solar      = root["publish_time_solar"] | EMSESP_DEFAULT_PUBLISH_TIME;
+    newSettings.publish_time_mixing     = root["publish_time_mixing"] | EMSESP_DEFAULT_PUBLISH_TIME;
+    newSettings.publish_time_other      = root["publish_time_other"] | EMSESP_DEFAULT_PUBLISH_TIME;
+    newSettings.publish_time_sensor     = root["publish_time_sensor"] | EMSESP_DEFAULT_PUBLISH_TIME;
+    newSettings.mqtt_format             = root["mqtt_format"] | EMSESP_DEFAULT_MQTT_FORMAT;
+    newSettings.mqtt_qos                = root["mqtt_qos"] | EMSESP_DEFAULT_MQTT_QOS;
 
     if (newSettings.system_heartbeat != settings.system_heartbeat) {
         emsesp::EMSESP::system_.set_heartbeat(newSettings.system_heartbeat);
@@ -216,8 +226,23 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
         emsesp::EMSESP::mqtt_.set_qos(newSettings.mqtt_qos);
     }
 
-    if (newSettings.publish_time != settings.publish_time) {
-        emsesp::EMSESP::mqtt_.set_publish_time(newSettings.publish_time);
+    if (newSettings.publish_time_boiler != settings.publish_time_boiler) {
+        emsesp::EMSESP::mqtt_.set_publish_time_boiler(newSettings.publish_time_boiler);
+    }
+    if (newSettings.publish_time_thermostat != settings.publish_time_thermostat) {
+        emsesp::EMSESP::mqtt_.set_publish_time_thermostat(newSettings.publish_time_thermostat);
+    }
+    if (newSettings.publish_time_solar != settings.publish_time_solar) {
+        emsesp::EMSESP::mqtt_.set_publish_time_solar(newSettings.publish_time_solar);
+    }
+    if (newSettings.publish_time_mixing != settings.publish_time_mixing) {
+        emsesp::EMSESP::mqtt_.set_publish_time_mixing(newSettings.publish_time_mixing);
+    }
+    if (newSettings.publish_time_other != settings.publish_time_other) {
+        emsesp::EMSESP::mqtt_.set_publish_time_other(newSettings.publish_time_other);
+    }
+    if (newSettings.publish_time_sensor != settings.publish_time_sensor) {
+        emsesp::EMSESP::mqtt_.set_publish_time_sensor(newSettings.publish_time_sensor);
     }
 
     emsesp::EMSESP::mqtt_.reset_publish_fails(); // reset fail counter back to 0

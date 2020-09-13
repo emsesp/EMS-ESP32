@@ -60,6 +60,7 @@ class Sensors {
     void loop();
     void publish_values();
     void reload();
+    bool updated_values();
 
     const std::vector<Device> devices() const;
 
@@ -74,12 +75,13 @@ class Sensors {
     static constexpr size_t SCRATCHPAD_TEMP_MSB = 1;
     static constexpr size_t SCRATCHPAD_TEMP_LSB = 0;
     static constexpr size_t SCRATCHPAD_CONFIG   = 4;
+    static constexpr size_t SCRATCHPAD_CNT_REM  = 6;
 
     // dallas chips
     static constexpr uint8_t TYPE_DS18B20 = 0x28;
     static constexpr uint8_t TYPE_DS18S20 = 0x10;
     static constexpr uint8_t TYPE_DS1822  = 0x22;
-    static constexpr uint8_t TYPE_DS1825  = 0x3B;
+    static constexpr uint8_t TYPE_DS1825  = 0x3B; // also DS1826
 
     static constexpr uint32_t READ_INTERVAL_MS = 5000; // 5 seconds
     static constexpr uint32_t CONVERSION_MS    = 1000; // 1 seconds
@@ -109,6 +111,8 @@ class Sensors {
     uint8_t mqtt_format_;
     uint8_t retrycnt_    = 0;
     uint8_t dallas_gpio_ = 0;
+    bool    parasite_    = false;
+    bool    changed_     = false;
 };
 
 } // namespace emsesp

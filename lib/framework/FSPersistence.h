@@ -31,6 +31,12 @@ class FSPersistence {
             DeserializationError error        = deserializeJson(jsonDocument, settingsFile);
             if (error == DeserializationError::Ok && jsonDocument.is<JsonObject>()) {
                 JsonObject jsonObject = jsonDocument.as<JsonObject>();
+
+                // debug added by Proddy
+                // Serial.printf("Read File: %s: ", _filePath);
+                // serializeJson(jsonDocument, Serial);
+                // Serial.println();
+
                 _statefulService->updateWithoutPropagation(jsonObject, _stateUpdater);
                 settingsFile.close();
                 return;
@@ -57,9 +63,12 @@ class FSPersistence {
             return false;
         }
 
-        // Serial.printf("Write File: %s: ", _filePath);
-        // serializeJson(jsonDocument, Serial);
-        // Serial.println();
+// debug added by Proddy
+#if defined(EMSESP_DEBUG)
+        Serial.printf("Write File: %s: ", _filePath);
+        serializeJson(jsonDocument, Serial);
+        Serial.println();
+#endif
 
         // serialize the data to the file
         serializeJson(jsonDocument, settingsFile);

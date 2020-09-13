@@ -37,7 +37,7 @@ class Mixing : public EMSdevice {
 
     virtual void show_values(uuid::console::Shell & shell);
     virtual void publish_values();
-    virtual void device_info(JsonArray & root);
+    virtual void device_info_web(JsonArray & root);
     virtual bool updated_values();
     virtual void add_context_menu();
 
@@ -62,10 +62,11 @@ class Mixing : public EMSdevice {
   private:
     uint16_t hc_          = EMS_VALUE_USHORT_NOTSET;
     uint16_t flowTemp_    = EMS_VALUE_USHORT_NOTSET;
-    uint8_t  pumpMod_     = EMS_VALUE_UINT_NOTSET;
-    uint8_t  status_      = EMS_VALUE_UINT_NOTSET;
+    uint8_t  pump_        = EMS_VALUE_UINT_NOTSET;
+    int8_t   status_      = EMS_VALUE_UINT_NOTSET;
     uint8_t  flowSetTemp_ = EMS_VALUE_UINT_NOTSET;
     Type     type_        = Type::NONE;
+    bool     changed_     = false;
 };
 
 } // namespace emsesp

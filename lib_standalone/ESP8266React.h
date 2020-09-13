@@ -24,12 +24,18 @@ class DummySettings {
     bool     shower_alert         = false;
     bool     hide_led             = false;
     uint16_t publish_time         = 10; // seconds
-    uint8_t  mqtt_format          = 1;  // 1=single, 2=nested, 3=ha, 4=custom
+    uint8_t  mqtt_format          = 3;  // 1=single, 2=nested, 3=ha, 4=custom
     uint8_t  mqtt_qos             = 0;
     String   hostname             = "ems-esp";
     String   jwtSecret            = "ems-esp";
     String   ssid                 = "ems-esp";
     String   password             = "ems-esp";
+    uint16_t publish_time_boiler;
+    uint16_t publish_time_thermostat;
+    uint16_t publish_time_solar;
+    uint16_t publish_time_mixing;
+    uint16_t publish_time_other;
+    uint16_t publish_time_sensor;
 
     static void read(DummySettings & settings, JsonObject & root){};
     static void read(DummySettings & settings){};

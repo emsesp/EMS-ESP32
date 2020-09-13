@@ -140,7 +140,7 @@ class EMSdevice {
     virtual void publish_values()                          = 0;
     virtual bool updated_values()                          = 0;
     virtual void add_context_menu()                        = 0;
-    virtual void device_info(JsonArray & root)             = 0;
+    virtual void device_info_web(JsonArray & root)             = 0;
 
     std::string telegram_type_name(std::shared_ptr<const Telegram> telegram);
 

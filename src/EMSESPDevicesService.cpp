@@ -81,7 +81,7 @@ void EMSESPDevicesService::device_data(AsyncWebServerRequest * request, JsonVari
         AsyncJsonResponse * response = new AsyncJsonResponse(false, MAX_EMSESP_DEVICE_SIZE);
 #ifndef EMSESP_STANDALONE
         uint8_t id = json["id"]; // get id from selected table row
-        EMSESP::device_info(id, (JsonObject &)response->getRoot());
+        EMSESP::device_info_web(id, (JsonObject &)response->getRoot());
 #endif
         response->setLength();
         request->send(response);

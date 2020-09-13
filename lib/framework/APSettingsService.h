@@ -7,6 +7,8 @@
 
 #include <DNSServer.h>
 #include <IPAddress.h>
+#include <uuid/common.h>
+
 
 #define MANAGE_NETWORK_DELAY 10000
 

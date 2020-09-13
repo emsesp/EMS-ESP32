@@ -46,21 +46,25 @@ void ICACHE_RAM_ATTR EMSuart::emsuart_rx_intr_handler(void * para) {
 
     if (USIS(EMSUART_UART) & ((1 << UIBD))) { // BREAK detection = End of EMS data block
         USC0(EMSUART_UART) &= ~(1 << UCBRK);  // reset tx-brk
-        if (emsTxBufIdx < emsTxBufLen) {      // irq tx_mode is interrupted by <brk>
-            emsTxBufIdx = emsTxBufLen + 1;    // stop tx
-            // drop_next_rx = true;              // we have trash in buffer
+        if (sending_) {                       // irq tx_mode is interrupted by <brk>, should never happen
+            drop_next_rx = true;              // we have trash in buffer
         }
         USIC(EMSUART_UART) = (1 << UIBD); // INT clear the BREAK detect interrupt
         length             = 0;
         while ((USS(EMSUART_UART) >> USRXC) & 0x0FF) { // read fifo into buffer
             uint8_t rx = USF(EMSUART_UART);
             if (length < EMS_MAXBUFFERSIZE) {
-                uart_buffer[length++] = rx;
+                if (length || rx) { // skip a leading zero
+                    uart_buffer[length++] = rx;
+                }
             } else {
                 drop_next_rx = true;
             }
         }
         if (!drop_next_rx) {
+            if (uart_buffer[length - 1]) { // check if last byte is break
+                length++;
+            }
             pEMSRxBuf->length = length;
             os_memcpy((void *)pEMSRxBuf->buffer, (void *)&uart_buffer, pEMSRxBuf->length); // copy data into transfer buffer, including the BRK 0x00 at the end
             system_os_post(EMSUART_recvTaskPrio, 0, 0);                                    // call emsuart_recvTask() at next opportunity
@@ -89,6 +93,9 @@ void ICACHE_FLASH_ATTR EMSuart::emsuart_recvTask(os_event_t * events) {
 
 // ISR to Fire when Timer is triggered
 void ICACHE_RAM_ATTR EMSuart::emsuart_tx_timer_intr_handler() {
+    if (!sending_) {
+        return;
+    }
     emsTxBufIdx++;
     if (emsTxBufIdx < emsTxBufLen) {
         USF(EMSUART_UART) = emsTxBuf[emsTxBufIdx];

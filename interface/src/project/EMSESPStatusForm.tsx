@@ -37,6 +37,10 @@ import {
 
 import { EMSESPStatus } from "./EMSESPtypes";
 
+function formatNumber(num: number) {
+   return new Intl.NumberFormat().format(num);
+}
+
 type EMSESPStatusFormProps = RestFormProps<EMSESPStatus> & WithTheme & WithWidthProps;
 
 const StyledTableCell = withStyles((theme: Theme) =>
@@ -75,7 +79,7 @@ class EMSESPStatusForm extends Component<EMSESPStatusFormProps> {
               <TableHead>
                 <TableRow>
                   <StyledTableCell>Statistic</StyledTableCell>
-                  <StyledTableCell align="center"># Telegrams</StyledTableCell>
+                  <StyledTableCell align="right"># Telegrams</StyledTableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -83,25 +87,25 @@ class EMSESPStatusForm extends Component<EMSESPStatusFormProps> {
                   <TableCell>
                     (Rx) Received telegrams
                   </TableCell>
-                  <TableCell align="center">{data.rx_received}</TableCell>
+                  <TableCell align="right">{formatNumber(data.rx_received)}</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell >
                     (Rx) Incomplete telegrams
                   </TableCell>
-                  <TableCell align="center">{data.crc_errors}</TableCell>
+                  <TableCell align="right">{formatNumber(data.crc_errors)}</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell >
                     (Tx) Successfully sent telegrams
                   </TableCell>
-                  <TableCell align="center">{data.tx_sent}</TableCell>
+                  <TableCell align="right">{formatNumber(data.tx_sent)}</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell >
                     (Tx) Send Errors
                   </TableCell>
-                  <TableCell align="center">{data.tx_errors}</TableCell>
+                  <TableCell align="right">{formatNumber(data.tx_errors)}</TableCell>
                 </TableRow>
               </TableBody>
             </Table>

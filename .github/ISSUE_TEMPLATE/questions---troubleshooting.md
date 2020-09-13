@@ -10,8 +10,7 @@ assignees: ''
 *Before creating a new issue please check that you have:*
 
 * *searched the existing [issues](https://github.com/proddy/EMS-ESP/issues) (both open and closed)*
-* *searched the [wiki help pages](https://github.com/proddy/EMS-ESP/wiki/Troubleshooting)*
-
+* *searched the [wiki help pages](https://bbqkees-electronics.nl/wiki/gateway/troubleshooting.html)*
 
 *Completing this template will help developers and contributors help you. Try to be as specific and extensive as possible. If the information provided is not enough the issue will likely be closed.*
 

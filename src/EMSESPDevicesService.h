@@ -24,7 +24,7 @@
 #include <ESPAsyncWebServer.h>
 #include <SecurityManager.h>
 
-#define MAX_EMSESP_DEVICE_SIZE 1536
+#define MAX_EMSESP_DEVICE_SIZE 1700
 
 #define EMSESP_DEVICES_SERVICE_PATH "/rest/allDevices"
 #define SCAN_DEVICES_SERVICE_PATH "/rest/scanDevices"

@@ -73,7 +73,7 @@ Telegram::Telegram(const uint8_t   operation,
     , offset(offset)
     , message_length(message_length) {
     // copy complete telegram data over, preventing buffer overflow
-    for (uint8_t i = 0; ((i < message_length) && (i != EMS_MAX_TELEGRAM_MESSAGE_LENGTH - 1)); i++) {
+    for (uint8_t i = 0; ((i < message_length) && (i < EMS_MAX_TELEGRAM_MESSAGE_LENGTH)); i++) {
         message_data[i] = data[i];
     }
 }
@@ -95,7 +95,7 @@ std::string Telegram::to_string() const {
             data[2] = this->type_id;
             length  = 5;
         }
-    } else if (this->operation == Telegram::Operation::TX_WRITE) {
+    } else {
         data[1] = this->dest;
         if (this->type_id > 0xFF) {
             data[2] = 0xFF;
@@ -106,10 +106,6 @@ std::string Telegram::to_string() const {
             data[2] = this->type_id;
             length  = 4;
         }
-        for (uint8_t i = 0; i < this->message_length; i++) {
-            data[length++] = this->message_data[i];
-        }
-    } else {
         for (uint8_t i = 0; i < this->message_length; i++) {
             data[length++] = this->message_data[i];
         }
@@ -189,13 +185,14 @@ void RxService::add(uint8_t * data, uint8_t length) {
         }
         type_id        = (data[4 + shift] << 8) + data[5 + shift] + 256;
         message_data   = data + 6 + shift;
-        message_length = length - 6 - shift;
+        message_length = length - 7 - shift;
     }
 
     // if we're watching and "raw" print out actual telegram as bytes to the console
     if (EMSESP::watch() == EMSESP::Watch::WATCH_RAW) {
         uint16_t trace_watch_id = EMSESP::watch_id();
-        if ((trace_watch_id == WATCH_ID_NONE) || (src == trace_watch_id) || (dest == trace_watch_id) || (type_id == trace_watch_id)) {
+        if ((trace_watch_id == WATCH_ID_NONE) || (type_id == trace_watch_id)
+            || ((trace_watch_id < 0x80) && ((src == trace_watch_id) || (dest == trace_watch_id)))) {
             LOG_NOTICE(F("Rx: %s"), Helpers::data_to_hex(data, length).c_str());
         }
     }
@@ -213,16 +210,16 @@ void RxService::add(uint8_t * data, uint8_t length) {
     // if we receive a hc2.. telegram from 0x19.. match it to master_thermostat if master is 0x18
     src = EMSESP::check_master_device(src, type_id, true);
 
-        // create the telegram
+    // create the telegram
     auto telegram = std::make_shared<Telegram>(Telegram::Operation::RX, src, dest, type_id, offset, message_data, message_length);
 
     // check if queue is full, if so remove top item to make space
     if (rx_telegrams_.size() >= MAX_RX_TELEGRAMS) {
         rx_telegrams_.pop_front();
+        increment_telegram_error_count();
     }
 
     rx_telegrams_.emplace_back(rx_telegram_id_++, std::move(telegram)); // add to queue
-
 }
 
 //
@@ -319,7 +316,7 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
         telegram_raw[2] = 0xFF; // fixed value indicating an extended message
         telegram_raw[3] = telegram->offset;
 
-        // EMS+ has different format for read and write. See https://github.com/proddy/EMS-ESP/wiki/RC3xx-Thermostats
+        // EMS+ has different format for read and write
         if (telegram->operation == Telegram::Operation::TX_WRITE) {
             // WRITE
             telegram_raw[4] = (telegram->type_id >> 8) - 1; // type, 1st byte, high-byte, subtract 0x100
@@ -472,7 +469,9 @@ void TxService::add(uint8_t operation, const uint8_t * data, const uint8_t lengt
             operation = Telegram::Operation::TX_READ;
         } else {
             operation = Telegram::Operation::TX_WRITE;
+            set_post_send_query(type_id);
         }
+        EMSESP::set_read_id(type_id);
     }
 
     auto telegram = std::make_shared<Telegram>(operation, src, dest, type_id, offset, message_data, message_length); // operation is TX_WRITE or TX_READ
@@ -535,7 +534,7 @@ void TxService::send_raw(const char * telegram_data) {
         return; // nothing to send
     }
 
-    add(Telegram::Operation::TX_RAW, data, count + 1); // add to Tx queue
+    add(Telegram::Operation::TX_RAW, data, count + 1, true); // add to front of Tx queue
 }
 
 // add last Tx to tx queue and increment count
@@ -578,21 +577,22 @@ bool TxService::is_last_tx(const uint8_t src, const uint8_t dest) const {
 }
 
 // sends a type_id read request to fetch values after a successful Tx write operation
-void TxService::post_send_query() {
-    if (telegram_last_post_send_query_) {
-        uint8_t dest            = (telegram_last_->dest & 0x7F);
-        uint8_t message_data[1] = {EMS_MAX_TELEGRAM_LENGTH}; // request all data, 32 bytes
-        add(Telegram::Operation::TX_READ, dest, telegram_last_post_send_query_, 0, message_data, 1, true);
-        // read_request(telegram_last_post_send_query_, dest, 0); // no offset
-        LOG_DEBUG(F("Sending post validate read, type ID 0x%02X to dest 0x%02X"), telegram_last_post_send_query_, dest);
-    }
-}
+// unless the post_send_query has a type_id of 0
+uint16_t TxService::post_send_query() {
+    uint16_t post_typeid = this->get_post_send_query();
 
-// print out the last Tx that was sent
-void TxService::print_last_tx() {
-    LOG_DEBUG(F("Last Tx %s operation: %s"),
-              (telegram_last_->operation == Telegram::Operation::TX_WRITE) ? F("Write") : F("Read"),
-              telegram_last_->to_string().c_str());
+    if (post_typeid) {
+        uint8_t dest = (this->telegram_last_->dest & 0x7F);
+        // when set a value with large offset before and validate on same type, we have to add offset 0, 26, 52, ...
+        uint8_t offset          = (this->telegram_last_->type_id == post_typeid) ? ((this->telegram_last_->offset / 26) * 26) : 0;
+        uint8_t message_data[1] = {EMS_MAX_TELEGRAM_LENGTH}; // request all data, 32 bytes
+        this->add(Telegram::Operation::TX_READ, dest, post_typeid, offset, message_data, 1, true);
+        // read_request(telegram_last_post_send_query_, dest, 0); // no offset
+        LOG_DEBUG(F("Sending post validate read, type ID 0x%02X to dest 0x%02X"), post_typeid, dest);
+        set_post_send_query(0); // reset
+    }
+
+    return post_typeid;
 }
 
 } // namespace emsesp

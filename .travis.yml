@@ -12,8 +12,8 @@ env:
   global:
     - BUILDER_TOTAL_THREADS=1
     - OWNER=${TRAVIS_REPO_SLUG%/*}
-    - DEV=${OWNER/proddy/v2}
-    - BRANCH=${TRAVIS_BRANCH/v2/}
+    - DEV=${OWNER/proddy/dev}
+    - BRANCH=${TRAVIS_BRANCH/dev/}
     - TAG=${DEV}${BRANCH:+_}${BRANCH}
 
 install:
@@ -53,7 +53,7 @@ deploy:
   token: ${GITHUB_TOKEN}
   file_glob: true
   file: "*.bin"
-  name: latest v2 development build
+  name: latest development build
   release_notes:
     Version $FIRMWARE_VERSION.
     Automatic firmware build of the current EMS-ESP branch built on $(date +'%F %T %Z') from commit $TRAVIS_COMMIT.

@@ -329,27 +329,27 @@ bool Helpers::check_abs(const int32_t i) {
 }
 
 // for booleans, use isBool true (EMS_VALUE_BOOL)
-bool Helpers::hasValue(const uint8_t v, const uint8_t isBool) {
+bool Helpers::hasValue(const uint8_t &v, const uint8_t isBool) {
     if (isBool == EMS_VALUE_BOOL) {
         return (v != EMS_VALUE_BOOL_NOTSET);
     }
     return (v != EMS_VALUE_UINT_NOTSET);
 }
 
-bool Helpers::hasValue(const int8_t v) {
+bool Helpers::hasValue(const int8_t &v) {
     return (v != EMS_VALUE_INT_NOTSET);
 }
 
 // for short these are typically 0x8300, 0x7D00 and sometimes 0x8000
-bool Helpers::hasValue(const int16_t v) {
+bool Helpers::hasValue(const int16_t &v) {
     return (abs(v) < EMS_VALUE_USHORT_NOTSET);
 }
 
-bool Helpers::hasValue(const uint16_t v) {
+bool Helpers::hasValue(const uint16_t &v) {
     return (v < EMS_VALUE_USHORT_NOTSET);
 }
 
-bool Helpers::hasValue(const uint32_t v) {
+bool Helpers::hasValue(const uint32_t &v) {
     return (v != EMS_VALUE_ULONG_NOTSET);
 }
 

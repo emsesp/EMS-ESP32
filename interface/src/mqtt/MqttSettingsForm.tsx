@@ -150,15 +150,75 @@ class MqttSettingsForm extends React.Component<MqttSettingsFormProps> {
           <MenuItem value={2}>2</MenuItem>
         </SelectValidator>
         <TextValidator
-          validators={['required', 'isNumber', 'minNumber:1', 'maxNumber:65535']}
-          errorMessages={['Publish time is required', "Must be a number", "Must be greater than 0", "Max value is 65535"]}
-          name="publish_time"
-          label="MQTT Publish Time (seconds)"
+          validators={['required', 'isNumber', 'minNumber:0', 'maxNumber:65535']}
+          errorMessages={['Publish time is required', "Must be a number", "Must be 0 or greater", "Max value is 65535"]}
+          name="publish_time_boiler"
+          label="MQTT Boiler Publish Period (seconds, 0=on change)"
           fullWidth
           variant="outlined"
-          value={data.publish_time}
+          value={data.publish_time_boiler}
           type="number"
-          onChange={handleValueChange('publish_time')}
+          onChange={handleValueChange('publish_time_boiler')}
+          margin="normal"
+        />
+        <TextValidator
+          validators={['required', 'isNumber', 'minNumber:0', 'maxNumber:65535']}
+          errorMessages={['Publish time is required', "Must be a number", "Must be 0 or greater", "Max value is 65535"]}
+          name="publish_time_thermostat"
+          label="MQTT Thermostat Publish Period (seconds, 0=on change)"
+          fullWidth
+          variant="outlined"
+          value={data.publish_time_thermostat}
+          type="number"
+          onChange={handleValueChange('publish_time_thermostat')}
+          margin="normal"
+        />
+        <TextValidator
+          validators={['required', 'isNumber', 'minNumber:0', 'maxNumber:65535']}
+          errorMessages={['Publish time is required', "Must be a number", "Must be 0 or greater", "Max value is 65535"]}
+          name="publish_time_solar"
+          label="MQTT Solar Publish Period (seconds, 0=on change)"
+          fullWidth
+          variant="outlined"
+          value={data.publish_time_solar}
+          type="number"
+          onChange={handleValueChange('publish_time_solar')}
+          margin="normal"
+        />
+        <TextValidator
+          validators={['required', 'isNumber', 'minNumber:0', 'maxNumber:65535']}
+          errorMessages={['Publish time is required', "Must be a number", "Must be 0 or greater", "Max value is 65535"]}
+          name="publish_time_mixing"
+          label="MQTT Mixer Publish Period (seconds, 0=on change)"
+          fullWidth
+          variant="outlined"
+          value={data.publish_time_mixing}
+          type="number"
+          onChange={handleValueChange('publish_time_mixing')}
+          margin="normal"
+        />
+        <TextValidator
+          validators={['required', 'isNumber', 'minNumber:0', 'maxNumber:65535']}
+          errorMessages={['Publish time is required', "Must be a number", "Must be 0 or greater", "Max value is 65535"]}
+          name="publish_time_other"
+          label="MQTT other Modules Publish Period (seconds, 0=on change)"
+          fullWidth
+          variant="outlined"
+          value={data.publish_time_other}
+          type="number"
+          onChange={handleValueChange('publish_time_other')}
+          margin="normal"
+        />
+        <TextValidator
+          validators={['required', 'isNumber', 'minNumber:0', 'maxNumber:65535']}
+          errorMessages={['Publish time is required', "Must be a number", "Must be 0 or greater", "Max value is 65535"]}
+          name="publish_time_sensor"
+          label="MQTT Sensors Publish Period (seconds, 0=on change)"
+          fullWidth
+          variant="outlined"
+          value={data.publish_time_sensor}
+          type="number"
+          onChange={handleValueChange('publish_time_sensor')}
           margin="normal"
         />
         <FormActions>

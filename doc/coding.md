@@ -1,6 +1,5 @@
 # Notes on customizing the code
 
-
 ## **Basic Design Principles**
 
 - The core services like telnet, logging and shell are based off the libraries from @nomis. I also adopted his general design pattens such as making everything as asynchronous as possible so that no one operation should starve another operation of it's time to execute (https://isocpp.org/wiki/faq/ctors#static-init-order).
@@ -67,5 +66,15 @@ The Web is based off Rick's awesome [esp8266-react](https://github.com/rjwats/es
   * `factory_settings.ini` modified with `ems-esp-neo` as password and `ems-esp` everywhere else
 
 
+## To develop and test the Web UI
+- uncomment the `-D ENABLE_CORS` in `platformio.ini`
+```sh
+cd interface
+npm start
+```
 
+## To test the core, standalone with an ESP
 
+```sh
+make run
+```

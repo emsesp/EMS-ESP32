@@ -31,7 +31,7 @@ Gateway::Gateway(uint8_t device_type, uint8_t device_id, uint8_t product_id, con
 void Gateway::add_context_menu() {
 }
 
-void Gateway::device_info(JsonArray & root) {
+void Gateway::device_info_web(JsonArray & root) {
 }
 
 // display all values into the shell console

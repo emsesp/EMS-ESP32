@@ -10,14 +10,14 @@ class EMSESPHelp extends Component {
 
                 <Box bgcolor="info.main" border={1} p={3} mt={1} mb={0}>
                     <Typography variant="body1">
-                        EMS-ESP is an open-source firmware to communicate with heating devices that support the EMS protocol, such as equipment from Bosch, Junkers, Nefit, Buderus and Worcester.
+                        EMS-ESP is an open-source firmware for the Espressif ESP8266 and ESP32 microcontroller that communicates with EMS (Energy Management System) based equipment from manufacturers like Bosch, Buderus, Nefit, Junkers, Worcester and Sieger.
             <p></p>
             Please consider supporting this project via the GitHub page <Link href="https://github.com/proddy/EMS-ESP" color="primary">{'http://github.com/proddy/EMS-ESP'}</Link>.
                     </Typography>
                 </Box>
                 <br></br>
                 <Typography variant="body1" paragraph>
-                    Check for news and updates on the <Link href="https://emsesp.github.io/docs/#/" color="primary">{'Wiki'}</Link>.
+                    Check for news and updates on the <Link href="https://bbqkees-electronics.nl/wiki/" color="primary">{'Wiki'}</Link>.
                 </Typography>
                 <Typography variant="body1" paragraph>
                     For live community chat go to <Link href="https://gitter.im/EMS-ESP/community#" color="primary">{'Gitter'}</Link>.

@@ -7,11 +7,12 @@ export interface EMSESPSettings {
   master_thermostat: number;
   shower_timer: boolean;
   shower_alert: boolean;
-  hide_led: boolean;
   rx_gpio: number;
-  tx_gpio : number;
-  dallas_gpio : number;
-  led_gpio : number;
+  tx_gpio: number;
+  dallas_gpio: number;
+  dallas_parasite: boolean;
+  led_gpio: number;
+  hide_led: boolean;
 }
 
 export enum busConnectionStatus {
