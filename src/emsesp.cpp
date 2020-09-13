@@ -316,15 +316,18 @@ void EMSESP::publish_sensor_values(const bool force) {
     }
 }
 
+// MQTT publish a telegram as raw data
 void EMSESP::publish_response(std::shared_ptr<const Telegram> telegram) {
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
+
     char buffer[100];
     doc["src"]    = Helpers::hextoa(buffer, telegram->src);
     doc["dest"]   = Helpers::hextoa(buffer, telegram->dest);
     doc["type"]   = Helpers::hextoa(buffer, telegram->type_id);
     doc["offset"] = Helpers::hextoa(buffer, telegram->offset);
     strcpy(buffer, Helpers::data_to_hex(telegram->message_data, telegram->message_length).c_str());
-    doc["data"]   = buffer;
+    doc["data"] = buffer;
+
     if (telegram->message_length <= 4) {
         uint32_t value = 0;
         for (uint8_t i = 0; i < telegram->message_length; i++) {
@@ -332,7 +335,8 @@ void EMSESP::publish_response(std::shared_ptr<const Telegram> telegram) {
         }
         doc["value"] = value;
     }
-    Mqtt::publish("response", doc);
+
+    Mqtt::publish(F("response"), doc);
 }
 
 // search for recognized device_ids : Me, All, otherwise print hex value

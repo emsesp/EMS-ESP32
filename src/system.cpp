@@ -237,7 +237,7 @@ void System::send_heartbeat() {
     doc["rxfails"]          = EMSESP::rxservice_.telegram_error_count();
     doc["adc"]              = analog_; //analogRead(A0);
 
-    Mqtt::publish("heartbeat", doc, false); // send to MQTT with retain off. This will add to MQTT queue.
+    Mqtt::publish(F("heartbeat"), doc, false); // send to MQTT with retain off. This will add to MQTT queue.
 }
 
 // measure and moving average adc

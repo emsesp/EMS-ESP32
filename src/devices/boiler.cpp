@@ -324,7 +324,7 @@ void Boiler::publish_values() {
 
     // if we have data, publish it
     if (!doc.isNull()) {
-        Mqtt::publish("boiler_data", doc);
+        Mqtt::publish(F("boiler_data"), doc);
     }
 }
 
@@ -476,8 +476,8 @@ void Boiler::check_active() {
         uint8_t latest_boilerState = (tap_water_active_ << 1) + heating_active_;
         if (latest_boilerState != last_boilerState) {
             last_boilerState = latest_boilerState;
-            Mqtt::publish("tapwater_active", tap_water_active_);
-            Mqtt::publish("heating_active", heating_active_);
+            Mqtt::publish(F("tapwater_active"), tap_water_active_);
+            Mqtt::publish(F("heating_active"), heating_active_);
         }
     }
 }

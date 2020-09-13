@@ -88,7 +88,10 @@ class Mqtt {
 
     static void publish(const std::string & topic, const std::string & payload, bool retain = false);
     static void publish(const std::string & topic, const JsonDocument & payload, bool retain = false);
+    static void publish(const __FlashStringHelper * topic, const JsonDocument & payload, bool retain = false);
+    static void publish(const __FlashStringHelper * topic, const std::string & payload, bool retain = false);
     static void publish(const std::string & topic, const bool value);
+    static void publish(const __FlashStringHelper * topi, const bool value);
     static void publish(const std::string & topic);
 
     static void show_topic_handlers(uuid::console::Shell & shell, const uint8_t device_type);

@@ -170,7 +170,7 @@ void Solar::publish_values() {
 
     // if we have data, publish it
     if (!doc.isNull()) {
-        Mqtt::publish("sm_data", doc);
+        Mqtt::publish(F("sm_data"), doc);
     }
 }
 

@@ -347,9 +347,9 @@ void Sensors::publish_values() {
     }
 
     if ((mqtt_format_ == MQTT_format::NESTED) || (mqtt_format_ == MQTT_format::CUSTOM)) {
-        Mqtt::publish("sensors", doc);
+        Mqtt::publish(F("sensors"), doc);
     } else if (mqtt_format_ == MQTT_format::HA) {
-        Mqtt::publish("homeassistant/sensor/ems-esp/state", doc);
+        Mqtt::publish(F("homeassistant/sensor/ems-esp/state"), doc);
     }
 }
 } // namespace emsesp

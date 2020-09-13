@@ -53,7 +53,7 @@ void Shower::loop() {
                 // first check to see if hot water has been on long enough to be recognized as a Shower/Bath
                 if (!shower_on_ && (time_now - timer_start_) > SHOWER_MIN_DURATION) {
                     shower_on_ = true;
-                    Mqtt::publish("shower_active", (bool)true);
+                    Mqtt::publish(F("shower_active"), (bool)true);
                     LOG_DEBUG(F("[Shower] hot water still running, starting shower timer"));
                 }
                 // check if the shower has been on too long
@@ -74,7 +74,7 @@ void Shower::loop() {
                 if ((timer_pause_ - timer_start_) > SHOWER_OFFSET_TIME) {
                     duration_ = (timer_pause_ - timer_start_ - SHOWER_OFFSET_TIME);
                     if (duration_ > SHOWER_MIN_DURATION) {
-                        Mqtt::publish("shower_active", (bool)false);
+                        Mqtt::publish(F("shower_active"), (bool)false);
                         LOG_DEBUG(F("[Shower] finished with duration %d"), duration_);
                         publish_values();
                     }
@@ -129,7 +129,7 @@ void Shower::publish_values() {
         doc["duration"] = s;
     }
 
-    Mqtt::publish("shower_data", doc);
+    Mqtt::publish(F("shower_data"), doc);
 }
 
 } // namespace emsesp

@@ -479,9 +479,9 @@ void Mqtt::on_connect() {
 #ifndef EMSESP_STANDALONE
     doc["ip"] = WiFi.localIP().toString();
 #endif
-    publish("info", doc, false); // send with retain off
+    publish(F("info"), doc, false); // send with retain off
 
-    publish("status", "online", true); // say we're alive to the Last Will topic, with retain on
+    publish(F("status"), "online", true); // say we're alive to the Last Will topic, with retain on
 
     reset_publish_fails(); // reset fail count to 0
 
@@ -538,6 +538,15 @@ void Mqtt::publish(const std::string & topic, const std::string & payload, bool 
     queue_publish_message(topic, payload, retain);
 }
 
+// MQTT Publish, using a specific retain flag, topic is a flash string
+void Mqtt::publish(const __FlashStringHelper * topic, const std::string & payload, bool retain) {
+    queue_publish_message(uuid::read_flash_string(topic), payload, retain);
+}
+
+void Mqtt::publish(const __FlashStringHelper * topic, const JsonDocument & payload, bool retain) {
+    publish(uuid::read_flash_string(topic), payload, retain);
+}
+
 void Mqtt::publish(const std::string & topic, const JsonDocument & payload, bool retain) {
     std::string payload_text;
     serializeJson(payload, payload_text); // convert json to string
@@ -547,6 +556,9 @@ void Mqtt::publish(const std::string & topic, const JsonDocument & payload, bool
 // for booleans, which get converted to string values 1 and 0
 void Mqtt::publish(const std::string & topic, const bool value) {
     queue_publish_message(topic, value ? "1" : "0", false);
+}
+void Mqtt::publish(const __FlashStringHelper * topic, const bool value) {
+    queue_publish_message(uuid::read_flash_string(topic), value ? "1" : "0", false);
 }
 
 // no payload

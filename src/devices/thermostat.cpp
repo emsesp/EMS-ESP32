@@ -304,7 +304,7 @@ void Thermostat::publish_values() {
 
         // send this specific data using the thermostat_data topic
         if (mqtt_format_ != MQTT_format::NESTED) {
-            Mqtt::publish("thermostat_data", doc);
+            Mqtt::publish(F("thermostat_data"), doc);
             rootThermostat = doc.to<JsonObject>(); // clear object
         }
     }
@@ -446,7 +446,7 @@ void Thermostat::publish_values() {
 
     // if we're using nested json, send all in one go under one topic called thermostat_data
     if (mqtt_format_ == MQTT_format::NESTED) {
-        Mqtt::publish("thermostat_data", doc);
+        Mqtt::publish(F("thermostat_data"), doc);
     }
 }
 
