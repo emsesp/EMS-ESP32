@@ -222,6 +222,17 @@ void EMSdevice::toggle_fetch(uint16_t telegram_id, bool toggle) {
     }
 }
 
+// get status of automatic fetch for a telegram id
+bool EMSdevice::get_toggle_fetch(uint16_t telegram_id) {
+    for (auto & tf : telegram_functions_) {
+        if (tf.telegram_type_id_ == telegram_id) {
+            return tf.fetch_ ;
+        }
+    }
+    return false;
+}
+
+
 // list all the telegram type IDs for this device
 void EMSdevice::show_telegram_handlers(uuid::console::Shell & shell) {
     if (telegram_functions_.size() == 0) {

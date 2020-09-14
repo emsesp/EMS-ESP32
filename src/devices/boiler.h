@@ -55,11 +55,13 @@ class Boiler : public EMSdevice {
     uint8_t mqtt_format_;            // single, nested or ha
     bool    changed_ = false;
 
-    static constexpr uint8_t EMS_TYPE_UBAParameterWW  = 0x33;
-    static constexpr uint8_t EMS_TYPE_UBAFunctionTest = 0x1D;
-    static constexpr uint8_t EMS_TYPE_UBAFlags        = 0x35;
-    static constexpr uint8_t EMS_TYPE_UBASetPoints    = 0x1A;
-    static constexpr uint8_t EMS_TYPE_UBAParameters   = 0x16;
+    static constexpr uint8_t EMS_TYPE_UBAParameterWW     = 0x33;
+    static constexpr uint8_t EMS_TYPE_UBAFunctionTest    = 0x1D;
+    static constexpr uint8_t EMS_TYPE_UBAFlags           = 0x35;
+    static constexpr uint8_t EMS_TYPE_UBASetPoints       = 0x1A;
+    static constexpr uint8_t EMS_TYPE_UBAParameters      = 0x16;
+    static constexpr uint8_t EMS_TYPE_UBAParametersPlus  = 0xE6;
+    static constexpr uint8_t EMS_TYPE_UBAParameterWWPlus = 0xEA;
 
     static constexpr uint8_t EMS_BOILER_SELFLOWTEMP_HEATING = 20; // was originally 70, changed to 30 for issue #193, then to 20 with issue #344
 
@@ -122,15 +124,16 @@ class Boiler : public EMSdevice {
     uint32_t UBAuptime_ = EMS_VALUE_ULONG_NOTSET; // Total UBA working hours
 
     // UBAParameters
-    uint8_t heating_temp_ = EMS_VALUE_UINT_NOTSET; // Heating temperature setting on the boiler
-    uint8_t pump_mod_max_ = EMS_VALUE_UINT_NOTSET; // Boiler circuit pump modulation max. power %
-    uint8_t pump_mod_min_ = EMS_VALUE_UINT_NOTSET; // Boiler circuit pump modulation min. power
-    uint8_t burnPowermin_ = EMS_VALUE_UINT_NOTSET;
-    uint8_t burnPowermax_ = EMS_VALUE_UINT_NOTSET;
-    int8_t  boilTemp_off_ = EMS_VALUE_INT_NOTSET;
-    int8_t  boilTemp_on_  = EMS_VALUE_INT_NOTSET;
-    uint8_t burnPeriod_   = EMS_VALUE_UINT_NOTSET;
-    uint8_t pumpDelay_    = EMS_VALUE_UINT_NOTSET;
+    uint8_t heating_activated_ = EMS_VALUE_BOOL_NOTSET; // Heating activated on the boiler
+    uint8_t heating_temp_      = EMS_VALUE_UINT_NOTSET; // Heating temperature setting on the boiler
+    uint8_t pump_mod_max_      = EMS_VALUE_UINT_NOTSET; // Boiler circuit pump modulation max. power %
+    uint8_t pump_mod_min_      = EMS_VALUE_UINT_NOTSET; // Boiler circuit pump modulation min. power
+    uint8_t burnPowermin_      = EMS_VALUE_UINT_NOTSET;
+    uint8_t burnPowermax_      = EMS_VALUE_UINT_NOTSET;
+    int8_t  boilTemp_off_      = EMS_VALUE_INT_NOTSET;
+    int8_t  boilTemp_on_       = EMS_VALUE_INT_NOTSET;
+    uint8_t burnPeriod_        = EMS_VALUE_UINT_NOTSET;
+    uint8_t pumpDelay_         = EMS_VALUE_UINT_NOTSET;
 
     // UBASetPoint
     uint8_t setFlowTemp_  = EMS_VALUE_UINT_NOTSET; // boiler setpoint temp
@@ -151,6 +154,8 @@ class Boiler : public EMSdevice {
     void process_UBAMonitorSlow(std::shared_ptr<const Telegram> telegram);
     void process_UBAMonitorSlowPlus(std::shared_ptr<const Telegram> telegram);
     void process_UBAMonitorSlowPlus2(std::shared_ptr<const Telegram> telegram);
+    void process_UBAParametersPlus(std::shared_ptr<const Telegram> telegram);
+    void process_UBAParameterWWPlus(std::shared_ptr<const Telegram> telegram);
     void process_UBAOutdoorTemp(std::shared_ptr<const Telegram> telegram);
     void process_UBASetPoints(std::shared_ptr<const Telegram> telegram);
     void process_UBAFlags(std::shared_ptr<const Telegram> telegram);
@@ -168,6 +173,8 @@ class Boiler : public EMSdevice {
     void set_warmwater_circulation(const char * value, const int8_t id);
     void set_warmwater_temp(const char * value, const int8_t id);
     void set_flow_temp(const char * value, const int8_t id);
+    void set_heating_activated(const char * value, const int8_t id);
+    void set_heating_temp(const char * value, const int8_t id);
     void set_min_power(const char * value, const int8_t id);
     void set_max_power(const char * value, const int8_t id);
     void set_hyst_on(const char * value, const int8_t id);

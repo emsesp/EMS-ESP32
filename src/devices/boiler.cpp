@@ -48,7 +48,9 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     register_telegram_type(0xE3, F("UBAMonitorSlowPlus"), false, [&](std::shared_ptr<const Telegram> t) { process_UBAMonitorSlowPlus2(t); });
     register_telegram_type(0xE4, F("UBAMonitorFastPlus"), false, [&](std::shared_ptr<const Telegram> t) { process_UBAMonitorFastPlus(t); });
     register_telegram_type(0xE5, F("UBAMonitorSlowPlus"), false, [&](std::shared_ptr<const Telegram> t) { process_UBAMonitorSlowPlus(t); });
+    register_telegram_type(0xE6, F("UBAParametersPlus"), true, [&](std::shared_ptr<const Telegram> t) { process_UBAParametersPlus(t); });
     register_telegram_type(0xE9, F("UBADHWStatus"), false, [&](std::shared_ptr<const Telegram> t) { process_UBADHWStatus(t); });
+    register_telegram_type(0xEA, F("UBAParameterWWPlus"), true, [&](std::shared_ptr<const Telegram> t) { process_UBAParameterWWPlus(t); });
 
     // MQTT commands for boiler_cmd topic
     register_mqtt_cmd(F("comfort"), [&](const char * value, const int8_t id) { set_warmwater_mode(value, id); });
@@ -58,6 +60,8 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     register_mqtt_cmd(F("wwcirculation"), [&](const char * value, const int8_t id) { set_warmwater_circulation(value, id); });
     register_mqtt_cmd(F("flowtemp"), [&](const char * value, const int8_t id) { set_flow_temp(value, id); });
     register_mqtt_cmd(F("wwtemp"), [&](const char * value, const int8_t id) { set_warmwater_temp(value, id); });
+    register_mqtt_cmd(F("heatingactivated"), [&](const char * value, const int8_t id) { set_heating_activated(value, id); });
+    register_mqtt_cmd(F("heatingtemp"), [&](const char * value, const int8_t id) { set_heating_temp(value, id); });
     register_mqtt_cmd(F("burnmaxpower"), [&](const char * value, const int8_t id) { set_max_power(value, id); });
     register_mqtt_cmd(F("burnminpower"), [&](const char * value, const int8_t id) { set_min_power(value, id); });
     register_mqtt_cmd(F("boilhyston"), [&](const char * value, const int8_t id) { set_hyst_on(value, id); });
@@ -266,6 +270,9 @@ void Boiler::publish_values() {
     if (Helpers::hasValue(wWHeat_, EMS_VALUE_BOOL)) {
         doc["wWHeat"] = Helpers::render_value(s, wWHeat_, EMS_VALUE_BOOL);
     }
+    if (Helpers::hasValue(heating_activated_, EMS_VALUE_BOOL)) {
+        doc["heatingActivated"] = Helpers::render_value(s, heating_activated_, EMS_VALUE_BOOL);
+    }
     if (Helpers::hasValue(heating_temp_)) {
         doc["heatingTemp"] = heating_temp_;
     }
@@ -415,6 +422,7 @@ void Boiler::show_values(uuid::console::Shell & shell) {
     }
 
     // UBAParameters
+    print_value(shell, 2, F("Heating activated"), heating_activated_, nullptr, EMS_VALUE_BOOL);
     print_value(shell, 2, F("Heating temperature setting on the boiler"), heating_temp_, F_(degrees));
     print_value(shell, 2, F("Boiler circuit pump modulation max power"), pump_mod_max_, F_(percent));
     print_value(shell, 2, F("Boiler circuit pump modulation min power"), pump_mod_min_, F_(percent));
@@ -542,6 +550,7 @@ void Boiler::process_UBATotalUptime(std::shared_ptr<const Telegram> telegram) {
  * UBAParameters - type 0x16
  */
 void Boiler::process_UBAParameters(std::shared_ptr<const Telegram> telegram) {
+    changed_ |= telegram->read_value(heating_activated_, 0);
     changed_ |= telegram->read_value(heating_temp_, 1);
     changed_ |= telegram->read_value(burnPowermax_, 2);
     changed_ |= telegram->read_value(burnPowermin_, 3);
@@ -636,6 +645,28 @@ void Boiler::process_UBAMonitorSlowPlus(std::shared_ptr<const Telegram> telegram
     changed_ |= telegram->read_value(pumpMod_, 25);
 }
 
+/*
+ * UBAParametersPlus - type 0xe6
+ */
+void Boiler::process_UBAParametersPlus(std::shared_ptr<const Telegram> telegram) {
+    changed_ |= telegram->read_value(heating_activated_, 0);
+    changed_ |= telegram->read_value(heating_temp_, 1);
+    changed_ |= telegram->read_value(burnPowermax_, 6);
+    changed_ |= telegram->read_value(burnPowermin_, 7);
+    changed_ |= telegram->read_value(boilTemp_off_, 8);
+    changed_ |= telegram->read_value(boilTemp_on_, 9);
+    changed_ |= telegram->read_value(burnPeriod_, 10);
+}
+
+// 0xEA
+void Boiler::process_UBAParameterWWPlus(std::shared_ptr<const Telegram> telegram) {
+    changed_ |= telegram->read_value(wWActivated_, 5);      // 0x01 means on
+    changed_ |= telegram->read_value(wWCircPump_, 10);      // 0x01 means yes
+    changed_ |= telegram->read_value(wWCircPumpMode_, 11);  // 1=1x3min... 6=6x3min, 7=continuous
+    // changed_ |= telegram->read_value(wWDisinfectTemp_, 12); // also in E9
+    // changed_ |= telegram->read_value(wWSelTemp_, 6);
+}
+
 // 0xE9 - DHW Status
 // e.g. 08 00 E9 00 37 01 F6 01 ED 00 00 00 00 41 3C 00 00 00 00 00 00 00 00 00 00 00 00 37 00 00 00 (CRC=77) #data=27
 void Boiler::process_UBADHWStatus(std::shared_ptr<const Telegram> telegram) {
@@ -724,8 +755,12 @@ void Boiler::set_warmwater_temp(const char * value, const int8_t id) {
     }
 
     LOG_INFO(F("Setting boiler warm water temperature to %d C"), v);
-    write_command(EMS_TYPE_UBAParameterWW, 2, v, EMS_TYPE_UBAParameterWW);
-    write_command(EMS_TYPE_UBAFlags, 3, v, EMS_TYPE_UBAParameterWW); // for i9000, see #397
+    if (get_toggle_fetch(EMS_TYPE_UBAParametersPlus)) {
+        write_command(EMS_TYPE_UBAParameterWWPlus, 6, v, EMS_TYPE_UBAParameterWWPlus);
+    } else {
+        write_command(EMS_TYPE_UBAParameterWW, 2, v, EMS_TYPE_UBAParameterWW);
+        write_command(EMS_TYPE_UBAFlags, 3, v, EMS_TYPE_UBAParameterWW); // for i9000, see #397
+    }
 }
 
 // flow temp
@@ -740,13 +775,45 @@ void Boiler::set_flow_temp(const char * value, const int8_t id) {
 }
 
 // set min boiler output
+void Boiler::set_heating_activated(const char * value, const int8_t id) {
+    bool v = false;
+    if (!Helpers::value2bool (value, v)) {
+        return;
+    }
+    LOG_INFO(F("Setting boiler heating "), v ? "on" : "off");
+    if (get_toggle_fetch(EMS_TYPE_UBAParametersPlus)) {
+        write_command(EMS_TYPE_UBAParametersPlus, 0, v ? 0x01 : 0, EMS_TYPE_UBAParametersPlus);
+    } else {
+        write_command(EMS_TYPE_UBAParameters, 0, v ? 0xFF : 0, EMS_TYPE_UBAParameters);
+    }
+}
+
+// set heating maximum temperature
+void Boiler::set_heating_temp(const char * value, const int8_t id) {
+    int v = 0;
+    if (!Helpers::value2number(value, v)) {
+        return;
+    }
+    LOG_INFO(F("Setting boiler heating temperature to "), v);
+    if (get_toggle_fetch(EMS_TYPE_UBAParametersPlus)) {
+        write_command(EMS_TYPE_UBAParametersPlus, 1, v, EMS_TYPE_UBAParametersPlus);
+    } else {
+        write_command(EMS_TYPE_UBAParameters, 1, v, EMS_TYPE_UBAParameters);
+    }
+}
+
+// set min boiler output
 void Boiler::set_min_power(const char * value, const int8_t id) {
     int v = 0;
     if (!Helpers::value2number(value, v)) {
         return;
     }
     LOG_INFO(F("Setting boiler min power to "), v);
-    write_command(EMS_TYPE_UBAParameters, 3, v, EMS_TYPE_UBAParameters);
+    if (get_toggle_fetch(EMS_TYPE_UBAParametersPlus)) {
+        write_command(EMS_TYPE_UBAParametersPlus, 7, v, EMS_TYPE_UBAParametersPlus);
+    } else {
+        write_command(EMS_TYPE_UBAParameters, 3, v, EMS_TYPE_UBAParameters);
+    }
 }
 
 // set max temp
@@ -757,7 +824,11 @@ void Boiler::set_max_power(const char * value, const int8_t id) {
     }
 
     LOG_INFO(F("Setting boiler max power to %d C"), v);
-    write_command(EMS_TYPE_UBAParameters, 2, v, EMS_TYPE_UBAParameters);
+    if (get_toggle_fetch(EMS_TYPE_UBAParametersPlus)) {
+        write_command(EMS_TYPE_UBAParametersPlus, 6, v, EMS_TYPE_UBAParametersPlus);
+    } else {
+        write_command(EMS_TYPE_UBAParameters, 2, v, EMS_TYPE_UBAParameters);
+    }
 }
 
 // set boiler on hysteresis
@@ -768,7 +839,11 @@ void Boiler::set_hyst_on(const char * value, const int8_t id) {
     }
 
     LOG_INFO(F("Setting boiler hysteresis on to %d C"), v);
-    write_command(EMS_TYPE_UBAParameters, 5, v, EMS_TYPE_UBAParameters);
+    if (get_toggle_fetch(EMS_TYPE_UBAParametersPlus)) {
+        write_command(EMS_TYPE_UBAParametersPlus, 9, v, EMS_TYPE_UBAParametersPlus);
+    } else {
+        write_command(EMS_TYPE_UBAParameters, 5, v, EMS_TYPE_UBAParameters);
+    }
 }
 
 // set boiler off hysteresis
@@ -779,7 +854,11 @@ void Boiler::set_hyst_off(const char * value, const int8_t id) {
     }
 
     LOG_INFO(F("Setting boiler hysteresis off to %d C"), v);
-    write_command(EMS_TYPE_UBAParameters, 4, v, EMS_TYPE_UBAParameters);
+    if (get_toggle_fetch(EMS_TYPE_UBAParametersPlus)) {
+        write_command(EMS_TYPE_UBAParametersPlus, 8, v, EMS_TYPE_UBAParametersPlus);
+    } else {
+        write_command(EMS_TYPE_UBAParameters, 4, v, EMS_TYPE_UBAParameters);
+    }
 }
 
 // set min burner period
@@ -790,7 +869,11 @@ void Boiler::set_burn_period(const char * value, const int8_t id) {
     }
 
     LOG_INFO(F("Setting burner min. period to %d min"), v);
-    write_command(EMS_TYPE_UBAParameters, 6, v, EMS_TYPE_UBAParameters);
+    if (get_toggle_fetch(EMS_TYPE_UBAParametersPlus)) {
+        write_command(EMS_TYPE_UBAParametersPlus, 10, v, EMS_TYPE_UBAParametersPlus);
+    } else {
+        write_command(EMS_TYPE_UBAParameters, 6, v, EMS_TYPE_UBAParameters);
+    }
 }
 
 // set pump delay
@@ -842,7 +925,11 @@ void Boiler::set_warmwater_activated(const char * value, const int8_t id) {
     } else {
         n = (v ? 0xFF : 0x00); // 0xFF is on, 0x00 is off
     }
-    write_command(EMS_TYPE_UBAParameterWW, 1, n, EMS_TYPE_UBAParameterWW);
+    if (get_toggle_fetch(EMS_TYPE_UBAParameterWWPlus)) {
+        write_command(EMS_TYPE_UBAParameterWWPlus, 1, v ? 1 : 0, EMS_TYPE_UBAParameterWWPlus);
+    } else {
+        write_command(EMS_TYPE_UBAParameterWW, 1, n, EMS_TYPE_UBAParameterWW);
+    }
 }
 
 // Activate / De-activate the Warm Tap Water

@@ -146,6 +146,7 @@ class EMSdevice {
 
     void fetch_values();
     void toggle_fetch(uint16_t telegram_id, bool toggle);
+    bool get_toggle_fetch(uint16_t telegram_id);
 
     void reserve_mem(size_t n) {
         telegram_functions_.reserve(n);
