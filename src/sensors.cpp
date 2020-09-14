@@ -106,8 +106,12 @@ void Sensors::loop() {
                     case TYPE_DS18S20:
                     case TYPE_DS1822:
                     case TYPE_DS1825:
-                        found_.emplace_back(addr);
-                        found_.back().temperature_c = get_temperature_c(addr);
+                        float f;
+                        f = get_temperature_c(addr);
+                        if ((f != NAN) && (f >= -55) && (f <= 125)) {
+                            found_.emplace_back(addr);
+                            found_.back().temperature_c = f;
+                        }
 
                         /*
                         // comment out for debugging
@@ -220,7 +224,7 @@ float Sensors::get_temperature_c(const uint8_t addr[]) {
             break;
         }
     }
-    uint32_t raw = (raw_value * 625 + 500) / 1000; // round to 0.1
+    uint32_t raw = ((uint32_t)raw_value * 625 + 500) / 1000; // round to 0.1
     return (float)raw / 10;
 #else
     return NAN;

@@ -8,7 +8,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import { ENDPOINT_ROOT } from '../api';
 import { restController, RestControllerProps, RestFormLoader, RestFormProps, FormActions, FormButton, BlockFormControlLabel, SectionContent } from '../components';
 
-import { isIP, isHostname, or } from '../validators';
+import { isIP, isHostname, or, optional } from '../validators';
 
 import { EMSESPSettings } from './EMSESPtypes';
 
@@ -19,7 +19,7 @@ type EMSESPSettingsControllerProps = RestControllerProps<EMSESPSettings>;
 class EMSESPSettingsController extends Component<EMSESPSettingsControllerProps> {
 
     componentDidMount() {
-        ValidatorForm.addValidationRule('isIPOrHostname', or(isIP, isHostname));
+        ValidatorForm.addValidationRule('isIPOrHostname', optional(or(isIP, isHostname)));
         this.props.loadData();
     }
 

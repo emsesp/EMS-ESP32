@@ -633,7 +633,6 @@ bool System::check_upgrade() {
 #if defined(EMSESP_DEBUG)
         Serial.begin(115200);
         Serial.println(F("FS is Littlefs"));
-        Serial.flush();
         Serial.end();
 #endif
         return false;
@@ -649,9 +648,11 @@ bool System::check_upgrade() {
 #if defined(EMSESP_DEBUG)
         Serial.begin(115200);
         Serial.println(F("No old SPIFFS found!"));
-        Serial.flush();
         Serial.end();
 #endif
+        // if there is neither SPIFFS or LittleFS we can assume the ESP8266 has been erased
+        l_cfg.setAutoFormat(true); // reset to normal behaviour
+        LittleFS.setConfig(l_cfg);
         return false;
     }
 
