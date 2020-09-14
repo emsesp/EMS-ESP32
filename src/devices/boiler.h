@@ -119,6 +119,7 @@ class Boiler : public EMSdevice {
     uint8_t  wWRecharging_    = EMS_VALUE_BOOL_NOTSET;   // Warm Water recharge on/off
     uint8_t  wWTemperatureOK_ = EMS_VALUE_BOOL_NOTSET;   // Warm Water temperature ok on/off
     uint8_t  wWCurFlow_       = EMS_VALUE_UINT_NOTSET;   // Warm Water current flow temp in l/min
+    uint8_t  wWType_          = EMS_VALUE_UINT_NOTSET;   // 0-off, 1-flow, 2-flowbuffer, 3-buffer, 4-layered buffer
 
     // UBATotalUptime
     uint32_t UBAuptime_ = EMS_VALUE_ULONG_NOTSET; // Total UBA working hours

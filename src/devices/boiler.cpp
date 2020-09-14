@@ -360,6 +360,17 @@ void Boiler::show_values(uuid::console::Shell & shell) {
     if (Helpers::hasValue(wWCircPumpType_, EMS_VALUE_BOOL)) {
         print_value(shell, 2, F("Warm Water charging type"), wWCircPumpType_ ? F("3-way valve") : F("charge pump"));
     }
+    if (wWType_ == 0) {
+        print_value(shell, 2, F("Warm Water type"), F("off"));
+    } else if (wWType_ == 1) {
+        print_value(shell, 2, F("Warm Water type"), F("flow"));
+    } else if (wWType_ == 2) {
+        print_value(shell, 2, F("Warm Water type"), F("buffered flow"));
+    } else if (wWType_ == 3) {
+        print_value(shell, 2, F("Warm Water type"), F("buffer"));
+    } else if (wWType_ == 4) {
+        print_value(shell, 2, F("Warm Water type"), F("layered buffer"));
+    }
     print_value(shell, 2, F("Warm Water circulation pump available"), wWCircPump_, nullptr, EMS_VALUE_BOOL);
 
     if (Helpers::hasValue(wWCircPumpMode_)) {
@@ -400,6 +411,7 @@ void Boiler::show_values(uuid::console::Shell & shell) {
     if (Helpers::hasValue(wWWorkM_)) {
         shell.printfln(F("  Warm Water active time: %d days %d hours %d minutes"), wWWorkM_ / 1440, (wWWorkM_ % 1440) / 60, wWWorkM_ % 60);
     }
+    print_value(shell, 2, F("Warm Water one time charging"), wWOneTime_, nullptr, EMS_VALUE_BOOL);
     print_value(shell, 2, F("Warm Water charging"), wWHeat_, nullptr, EMS_VALUE_BOOL);
     print_value(shell, 2, F("Warm Water disinfecting"), wWDisinfecting_, nullptr, EMS_VALUE_BOOL);
     print_value(shell, 2, F("Selected flow temperature"), selFlowTemp_, F_(degrees));
@@ -467,14 +479,14 @@ void Boiler::show_values(uuid::console::Shell & shell) {
 void Boiler::check_active() {
     // hot tap water, using flow to check instead of the burner power
     // send these values back to the main EMSESP, so other classes (e.g. Shower) can use it
-    if (Helpers::hasValue(wWCurFlow_) && Helpers::hasValue(burnGas_)) {
+    if (Helpers::hasValue(wWCurFlow_) && Helpers::hasValue(burnGas_) && (wWType_ > 0) && (wWType_ < 3)) {
         tap_water_active_ = ((wWCurFlow_ != 0) && (burnGas_ != EMS_VALUE_BOOL_OFF));
         EMSESP::tap_water_active(tap_water_active_);
     }
 
     // heating
     // using a quick hack for checking the heating by looking at the Selected Flow Temp, but doesn't work for all boilers apparently
-    if (Helpers::hasValue(selFlowTemp_) && Helpers::hasValue(burnGas_)) {
+    if (Helpers::hasValue(tap_water_active_, EMS_VALUE_BOOL) && Helpers::hasValue(selFlowTemp_) && Helpers::hasValue(burnGas_)) {
         heating_active_ = (!tap_water_active_ && ((selFlowTemp_ >= EMS_BOILER_SELFLOWTEMP_HEATING) && (burnGas_ != EMS_VALUE_BOOL_OFF)));
     }
 
@@ -571,6 +583,7 @@ void Boiler::process_UBAMonitorWW(std::shared_ptr<const Telegram> telegram) {
     changed_ |= telegram->read_value(wWCurTmp_, 1);
     changed_ |= telegram->read_value(wWCurTmp2_, 3);
     changed_ |= telegram->read_value(wWCurFlow_, 9);
+    changed_ |= telegram->read_value(wWType_, 8);
 
     changed_ |= telegram->read_value(wWWorkM_, 10, 3);  // force to 3 bytes
     changed_ |= telegram->read_value(wWStarts_, 13, 3); // force to 3 bytes
@@ -663,8 +676,9 @@ void Boiler::process_UBAParameterWWPlus(std::shared_ptr<const Telegram> telegram
     changed_ |= telegram->read_value(wWActivated_, 5);      // 0x01 means on
     changed_ |= telegram->read_value(wWCircPump_, 10);      // 0x01 means yes
     changed_ |= telegram->read_value(wWCircPumpMode_, 11);  // 1=1x3min... 6=6x3min, 7=continuous
-    // changed_ |= telegram->read_value(wWDisinfectTemp_, 12); // also in E9
-    // changed_ |= telegram->read_value(wWSelTemp_, 6);
+    // changed_ |= telegram->read_value(wWDisinfectTemp_, 12); // settings, status in E9
+    // changed_ |= telegram->read_value(wWSelTemp_, 6);        // settings, status in E9
+
 }
 
 // 0xE9 - DHW Status
@@ -684,7 +698,7 @@ void Boiler::process_UBADHWStatus(std::shared_ptr<const Telegram> telegram) {
     changed_ |= telegram->read_bitvalue(wWTemperatureOK_, 13, 5);
     changed_ |= telegram->read_bitvalue(wWCircPump_, 13, 2);
 
-    changed_ |= telegram->read_value(wWActivated_, 20);
+    // changed_ |= telegram->read_value(wWActivated_, 20); // Activated is in 0xEA, this is something other 0/100%
     changed_ |= telegram->read_value(wWSelTemp_, 10);
     changed_ |= telegram->read_value(wWDisinfectTemp_, 9);
 }
@@ -883,14 +897,19 @@ void Boiler::set_pump_delay(const char * value, const int8_t id) {
         return;
     }
 
-    LOG_INFO(F("Setting boiler pump delay to %d min"), v);
-    write_command(EMS_TYPE_UBAParameters, 8, v, EMS_TYPE_UBAParameters);
+    if (get_toggle_fetch(EMS_TYPE_UBAParameters)) {
+        LOG_INFO(F("Setting boiler pump delay to %d min"), v);
+        write_command(EMS_TYPE_UBAParameters, 8, v, EMS_TYPE_UBAParameters);
+    }
 }
 
 // note some boilers do not have this setting, than it's done by thermostat
 // on a RC35 it's by EMSESP::send_write_request(0x37, 0x10, 2, &set, 1, 0); (set is 1,2,3) 1=hot, 2=eco, 3=intelligent
 void Boiler::set_warmwater_mode(const char * value, const int8_t id) {
     if (value == nullptr) {
+        return;
+    }
+    if (!get_toggle_fetch(EMS_TYPE_UBAParameterWW)) {
         return;
     }
     uint8_t set;
@@ -974,7 +993,11 @@ void Boiler::set_warmwater_onetime(const char * value, const int8_t id) {
     }
 
     LOG_INFO(F("Setting boiler warm water OneTime loading %s"), v ? "on" : "off");
-    write_command(EMS_TYPE_UBAFlags, 0, (v ? 0x22 : 0x02), 0x18);
+    if (get_toggle_fetch(EMS_TYPE_UBAParameterWWPlus)) {
+        write_command(EMS_TYPE_UBAFlags, 0, (v ? 0x22 : 0x02), 0xE9); // not sure if this is in flags
+    } else {
+        write_command(EMS_TYPE_UBAFlags, 0, (v ? 0x22 : 0x02), 0x34);
+    }
 }
 
 // Activate / De-activate circulation of warm water 0x35
@@ -986,7 +1009,11 @@ void Boiler::set_warmwater_circulation(const char * value, const int8_t id) {
     }
 
     LOG_INFO(F("Setting boiler warm water circulation %s"), v ? "on" : "off");
-    write_command(EMS_TYPE_UBAFlags, 1, (v ? 0x22 : 0x02), 0x18);
+    if (get_toggle_fetch(EMS_TYPE_UBAParameterWWPlus)) {
+        write_command(EMS_TYPE_UBAFlags, 1, (v ? 0x22 : 0x02), 0xE9); // not sure if this is in flags
+    } else {
+        write_command(EMS_TYPE_UBAFlags, 1, (v ? 0x22 : 0x02), 0x34);
+    }
 }
 
 // add console commands
