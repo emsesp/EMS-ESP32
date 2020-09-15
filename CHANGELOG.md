@@ -10,12 +10,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - add boiler heatingactivated, automatic select parameter telegrams for write
 - add boiler wWType
+- support for uploading compressed firmware binaries
+- add wWType to MQTT publish
 
 ### Fixed
 - fix wwontime readback
 
 ### Changed
-- 
+- renamed wWCircPumpType to wWChargeType
 
 ### Removed
 -
