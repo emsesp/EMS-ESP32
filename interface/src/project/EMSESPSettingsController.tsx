@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { ValidatorForm, TextValidator, SelectValidator } from 'react-material-ui-form-validator';
 
-import { Checkbox, Typography, Box } from '@material-ui/core';
+import { Checkbox, Typography, Box, Link } from '@material-ui/core';
 import SaveIcon from '@material-ui/icons/Save';
 import MenuItem from '@material-ui/core/MenuItem';
 
@@ -48,7 +48,7 @@ function EMSESPSettingsControllerForm(props: EMSESPSettingsControllerFormProps) 
         <ValidatorForm onSubmit={saveData}>
             <Box bgcolor="info.main" p={2} mt={2} mb={2}>
                 <Typography variant="body1">
-                    Customize EMS-ESP by modifying the default settings here.
+                    Customize EMS-ESP by modifying the default settings here. Refer to the <Link href="https://emsesp.github.io/docs/#/Configure-firmware" color="primary">{'Wiki'}</Link>&nbsp;for descriptions of each setting.
                 </Typography>
             </Box>
             <br></br>
@@ -59,7 +59,7 @@ function EMSESPSettingsControllerForm(props: EMSESPSettingsControllerFormProps) 
                 validators={['required', 'isNumber', 'minNumber:0', 'maxNumber:255']}
                 errorMessages={['TX mode is required', "Must be a number", "Must be 0 or higher", "Max value is 255"]}
                 name="tx_mode"
-                label="Tx Mode (0=off, 1=EMS1.0, 2=EMS+, 3=HT3)"
+                label="Tx Mode (0=off)"
                 fullWidth
                 variant="outlined"
                 value={data.tx_mode}
@@ -188,7 +188,7 @@ function EMSESPSettingsControllerForm(props: EMSESPSettingsControllerFormProps) 
                 validators={['isIPOrHostname']}
                 errorMessages={["Not a valid IP address or hostname"]}
                 name="syslog_host"
-                label="Syslog IP/Host"
+                label="Syslog IP/Host (optional)"
                 fullWidth
                 variant="outlined"
                 value={data.syslog_host}
