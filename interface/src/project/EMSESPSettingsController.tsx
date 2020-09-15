@@ -1,7 +1,7 @@
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import { ValidatorForm, TextValidator, SelectValidator } from 'react-material-ui-form-validator';
 
-import { Checkbox, Typography, Box, Link } from '@material-ui/core';
+import { Checkbox, Typography, Box } from '@material-ui/core';
 import SaveIcon from '@material-ui/icons/Save';
 import MenuItem from '@material-ui/core/MenuItem';
 
