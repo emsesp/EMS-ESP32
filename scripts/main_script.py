@@ -25,7 +25,7 @@ def clr(color, text):
 
 def remove_float_support():
     flags = " ".join(env['LINKFLAGS'])
-    print(clr(Color.BLUE, "LINKFLAGS = %ss" % flags))
+    # print(clr(Color.BLUE, "LINKFLAGS = %ss" % flags))
     flags = flags.replace("-u _printf_float", "")
     flags = flags.replace("-u _scanf_float", "")
     newflags = flags.split()
