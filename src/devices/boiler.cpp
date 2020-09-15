@@ -514,10 +514,10 @@ void Boiler::check_active() {
 
 // 0x33
 void Boiler::process_UBAParameterWW(std::shared_ptr<const Telegram> telegram) {
-    changed_ |= telegram->read_value(wWActivated_, 1);     // 0xFF means on
-    changed_ |= telegram->read_value(wWCircPump_, 6);      // 0xFF means on
-    changed_ |= telegram->read_value(wWCircPumpMode_, 7);  // 1=1x3min... 6=6x3min, 7=continuous
-    changed_ |= telegram->read_value(wWChargeType_, 10);   // 0 = charge pump, 0xff = 3-way valve
+    changed_ |= telegram->read_value(wWActivated_, 1);    // 0xFF means on
+    changed_ |= telegram->read_value(wWCircPump_, 6);     // 0xFF means on
+    changed_ |= telegram->read_value(wWCircPumpMode_, 7); // 1=1x3min... 6=6x3min, 7=continuous
+    changed_ |= telegram->read_value(wWChargeType_, 10);  // 0 = charge pump, 0xff = 3-way valve
     changed_ |= telegram->read_value(wWSelTemp_, 2);
     changed_ |= telegram->read_value(wWDisinfectTemp_, 8);
     changed_ |= telegram->read_value(wWComfort_, 9);
@@ -683,12 +683,11 @@ void Boiler::process_UBAParametersPlus(std::shared_ptr<const Telegram> telegram)
 
 // 0xEA
 void Boiler::process_UBAParameterWWPlus(std::shared_ptr<const Telegram> telegram) {
-    changed_ |= telegram->read_value(wWActivated_, 5);      // 0x01 means on
-    changed_ |= telegram->read_value(wWCircPump_, 10);      // 0x01 means yes
-    changed_ |= telegram->read_value(wWCircPumpMode_, 11);  // 1=1x3min... 6=6x3min, 7=continuous
+    changed_ |= telegram->read_value(wWActivated_, 5);     // 0x01 means on
+    changed_ |= telegram->read_value(wWCircPump_, 10);     // 0x01 means yes
+    changed_ |= telegram->read_value(wWCircPumpMode_, 11); // 1=1x3min... 6=6x3min, 7=continuous
     // changed_ |= telegram->read_value(wWDisinfectTemp_, 12); // settings, status in E9
     // changed_ |= telegram->read_value(wWSelTemp_, 6);        // settings, status in E9
-
 }
 
 // 0xE9 - DHW Status
@@ -801,7 +800,7 @@ void Boiler::set_flow_temp(const char * value, const int8_t id) {
 // set min boiler output
 void Boiler::set_heating_activated(const char * value, const int8_t id) {
     bool v = false;
-    if (!Helpers::value2bool (value, v)) {
+    if (!Helpers::value2bool(value, v)) {
         return;
     }
     LOG_INFO(F("Setting boiler heating "), v ? "on" : "off");
