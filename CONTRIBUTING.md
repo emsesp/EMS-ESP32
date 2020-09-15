@@ -1,6 +1,5 @@
 <img src="/media/EMS-ESP_logo_dark.png" alt="Logo" align="right" height="76"/>
 
-
 # Contributing
 
 **Any contribution helps EMS-ESP get better for the entire community!**
@@ -9,7 +8,7 @@ Everybody is welcome and invited to contribute to the EMS-ESP Project by:
 
 - providing Pull Requests (Features, Fixes, suggestions)
 - testing new released features and report issues on your EMS equipment
-- contributing missing [documentation](https://emsesp.github.io/docs) for features and devices
+- contributing to missing [documentation](https://emsesp.github.io/docs)
 
 This document describes rules that are in effect for this repository, meant for handling issues by contributors in the issue tracker and PRs.
 
@@ -50,15 +49,16 @@ The process is straight-forward.
  - Create a Pull Request against the [**dev**](https://github.com/proddy/EMS-ESP/tree/dev) branch of EMS-ESP.
 
 1. All pull requests must be done against the dev branch.
-2. Only relevant files should be touched (Also beware if your editor has auto-formatting feature enabled).
-3. Only one feature/fix should be added per PR.
-4. PRs that don't compile (fail in CI Tests) or cause coding errors will not be merged. Please fix the issue. Same goes for PRs that are raised against older commit in dev - you might need to rebase and resolve conflicts.
-5. All pull requests should undergo peer review by at least one contributor other than the creator, excepts for the owner.
-6. All pull requests should consider updates to the documentation.
-7. Pull requests that address an outstanding issue, particularly an issue deemed to be severe, should be given priority.
-8. If a PR is accepted, then it should undergo review and updated based on the feedback provided, then merged.
-9.  By submitting a PR, it is needed to use the provided PR template and check all boxes, performing the required tasks and accepting the CLA.
-10. Pull requests that don't meet the above will be denied and closed.
+2. Make sure code is formatting per the `.clang-format`
+3. Only relevant files should be touched (Also beware if your editor has auto-formatting feature enabled).
+4. Only one feature/fix should be added per PR.
+5. PRs that don't compile (fail in CI Tests) or cause coding errors will not be merged. Please fix the issue. Same goes for PRs that are raised against older commit in dev - you might need to rebase and resolve conflicts.
+6. All pull requests should undergo peer review by at least one contributor other than the creator, excepts for the owner.
+7. All pull requests should consider updates to the documentation.
+8. Pull requests that address an outstanding issue, particularly an issue deemed to be severe, should be given priority.
+9. If a PR is accepted, then it should undergo review and updated based on the feedback provided, then merged.
+10. By submitting a PR, it is needed to use the provided PR template and check all boxes, performing the required tasks and accepting the CLA.
+11. Pull requests that don't meet the above will be denied and closed.
 
 --------------------------------------
 
@@ -90,8 +90,6 @@ By making a contribution to this project, I certify that:
 This Contributor License Agreement (CLA) was adopted on April 1st, 2019.
 
 The text of this license is available under the [Creative Commons Attribution-ShareAlike 3.0 Unported License](http://creativecommons.org/licenses/by-sa/3.0/).  It is based on the Linux [Developer Certificate Of Origin](http://elinux.org/Developer_Certificate_Of_Origin), but is modified to explicitly use the GPL-3.0 license and not mention sign-off (due to GitHub.com keeps an historial, with your user name, of PRs' commits and all editions on PR's comments).
-
-To accept the CLA it is required to put a x between [ ] on `[ ] I accept the CLA` in the PR template when submitting it. The [ ] is an opt-in box, so you have to manually accept it.
 
 **Why a CLA ?**
 
