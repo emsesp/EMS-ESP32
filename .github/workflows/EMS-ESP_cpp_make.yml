@@ -1,0 +1,20 @@
+name: EMS-ESP C/C++ make
+
+on:
+  push:
+    # branches: [ dev ]
+  pull_request:
+    # branches: [ dev ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: make clean
+      run: make clean
+    - name: make
+      run: make
+      

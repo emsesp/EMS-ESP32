@@ -17,6 +17,7 @@ pio_local.ini
 # project specfic
 /scripts/stackdmp.txt
 emsesp
+firmware
 /data/www/
 /lib/framework/WWWData.h
 /interface/build/
