@@ -53,7 +53,7 @@ function EMSESPSettingsControllerForm(props: EMSESPSettingsControllerFormProps) 
             </Box>
             <br></br>
             <Typography variant="h6" color="primary" >
-                EMS Bus Settings
+                EMS Bus
             </Typography>
             <TextValidator
                 validators={['required', 'isNumber', 'minNumber:0', 'maxNumber:255']}
@@ -106,7 +106,7 @@ function EMSESPSettingsControllerForm(props: EMSESPSettingsControllerFormProps) 
             />
             <br></br>
             <Typography variant="h6" color="primary" >
-                Dallas Sensor Settings
+                Dallas Sensor
             </Typography>
             <TextValidator
                 validators={['required', 'isNumber', 'minNumber:0', 'maxNumber:40']}
@@ -132,7 +132,7 @@ function EMSESPSettingsControllerForm(props: EMSESPSettingsControllerFormProps) 
             />
             <br></br>
             <Typography variant="h6" color="primary" >
-                LED Settings
+                LED
             </Typography>
             <TextValidator
                 validators={['required', 'isNumber', 'minNumber:0', 'maxNumber:40']}
@@ -158,7 +158,7 @@ function EMSESPSettingsControllerForm(props: EMSESPSettingsControllerFormProps) 
             />
             <br></br>
             <Typography variant="h6" color="primary" >
-                Shower Settings
+                Shower
             </Typography>
             <BlockFormControlLabel
                 control={
@@ -182,7 +182,7 @@ function EMSESPSettingsControllerForm(props: EMSESPSettingsControllerFormProps) 
             />
             <br></br>
             <Typography variant="h6" color="primary" >
-                Syslog Settings
+                Syslog
             </Typography>
             <TextValidator
                 validators={['isIPOrHostname']}
