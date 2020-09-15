@@ -1,7 +1,7 @@
 import React from 'react';
 import { TextValidator, ValidatorForm, SelectValidator } from 'react-material-ui-form-validator';
 
-import { Checkbox, TextField } from '@material-ui/core';
+import { Checkbox, TextField, Typography } from '@material-ui/core';
 import SaveIcon from '@material-ui/icons/Save';
 import MenuItem from '@material-ui/core/MenuItem';
 
@@ -149,6 +149,9 @@ class MqttSettingsForm extends React.Component<MqttSettingsFormProps> {
           <MenuItem value={1}>1</MenuItem>
           <MenuItem value={2}>2</MenuItem>
         </SelectValidator>
+        <Typography variant="h6" color="primary" >
+          Publish Intervals
+        </Typography>
         <TextValidator
           validators={['required', 'isNumber', 'minNumber:0', 'maxNumber:65535']}
           errorMessages={['Publish time is required', "Must be a number", "Must be 0 or greater", "Max value is 65535"]}
