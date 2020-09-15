@@ -127,7 +127,7 @@ Some of the most common commands are:
 
 The `call` command is to execute a command. The command names (`[cmd]`) are the same as the MQTT commands used in MQTT.
 
-For further details refer to the [Wiki](https://bbqkees-electronics.nl/wiki/).
+For further details please refer to the [Wiki](https://emsesp.github.io/docs) and [BBQKees's gateway Wiki](https://bbqkees-electronics.nl/wiki/).
 
 ## **Support Information**
 
@@ -137,7 +137,7 @@ If you're looking for support on **EMS-ESP** there are some options available:
 
 ### Documentation
 
-* [Documentation Site](https://bbqkees-electronics.nl/wiki/): For information on how to build and upload the firmware maintained by @BBQKees
+* [Documentation Site](https://emsesp.github.io/docs): For information on how to build and upload the firmware
 * [FAQ and Troubleshooting](https://bbqkees-electronics.nl/wiki/gateway/troubleshooting.html): For information on common problems and solutions
 
 ### Support's Community
@@ -156,7 +156,7 @@ If you're looking for support on **EMS-ESP** there are some options available:
 You can contribute to EMS-ESP by
 - providing Pull Requests (Features, Fixes, suggestions)
 - testing new released features and report issues on your EMS equipment
-- contributing missing [documentation](https://bbqkees-electronics.nl/wiki/) for features and devices
+- contributing to missing [documentation](https://emsesp.github.io/docs)
 
 ## **Credits**
 
