@@ -183,11 +183,22 @@ void Boiler::publish_values() {
     if (Helpers::hasValue(pumpMod2_)) {
         doc["pumpMod2"] = pumpMod2_;
     }
+    if (wWType_ == 0) { // no output if not set
+        doc["wWType"] = F("off");
+    } else if (wWType_ == 1) {
+        doc["wWType"] = F("flow");
+    } else if (wWType_ == 2) {
+        doc["wWType"] = F("buffered flow");
+    } else if (wWType_ == 3) {
+        doc["wWType"] = F("buffer");
+    } else if (wWType_ == 4) {
+        doc["wWType"] = F("layered buffer");
+    }
+    if (Helpers::hasValue(wWChargeType_, EMS_VALUE_BOOL)) {
+        doc["wWChargeType"] = wWChargeType_ ? "valve" : "pump";
+    }
     if (Helpers::hasValue(wWCircPump_, EMS_VALUE_BOOL)) {
         doc["wWCircPump"] = Helpers::render_value(s, wWCircPump_, EMS_VALUE_BOOL);
-    }
-    if (Helpers::hasValue(wWCircPumpType_, EMS_VALUE_BOOL)) {
-        doc["wWCiPuType"] = wWCircPumpType_ ? "valve" : "pump";
     }
     if (Helpers::hasValue(wWCircPumpMode_)) {
         doc["wWCiPuMode"] = wWCircPumpMode_;
@@ -357,9 +368,6 @@ void Boiler::show_values(uuid::console::Shell & shell) {
     }
 
     print_value(shell, 2, F("Warm Water activated"), wWActivated_, nullptr, EMS_VALUE_BOOL);
-    if (Helpers::hasValue(wWCircPumpType_, EMS_VALUE_BOOL)) {
-        print_value(shell, 2, F("Warm Water charging type"), wWCircPumpType_ ? F("3-way valve") : F("charge pump"));
-    }
     if (wWType_ == 0) {
         print_value(shell, 2, F("Warm Water type"), F("off"));
     } else if (wWType_ == 1) {
@@ -371,8 +379,11 @@ void Boiler::show_values(uuid::console::Shell & shell) {
     } else if (wWType_ == 4) {
         print_value(shell, 2, F("Warm Water type"), F("layered buffer"));
     }
-    print_value(shell, 2, F("Warm Water circulation pump available"), wWCircPump_, nullptr, EMS_VALUE_BOOL);
+    if (Helpers::hasValue(wWChargeType_, EMS_VALUE_BOOL)) {
+        print_value(shell, 2, F("Warm Water charging type"), wWChargeType_ ? F("3-way valve") : F("charge pump"));
+    }
 
+    print_value(shell, 2, F("Warm Water circulation pump available"), wWCircPump_, nullptr, EMS_VALUE_BOOL);
     if (Helpers::hasValue(wWCircPumpMode_)) {
         if (wWCircPumpMode_ == 7) {
             print_value(shell, 2, F("Warm Water circulation pump freq"), F("continuous"));
@@ -386,7 +397,6 @@ void Boiler::show_values(uuid::console::Shell & shell) {
             print_value(shell, 2, F("Warm Water circulation pump freq"), s);
         }
     }
-
     print_value(shell, 2, F("Warm Water circulation active"), wWCirc_, nullptr, EMS_VALUE_BOOL);
 
     if (wWComfort_ == 0x00) {
@@ -507,7 +517,7 @@ void Boiler::process_UBAParameterWW(std::shared_ptr<const Telegram> telegram) {
     changed_ |= telegram->read_value(wWActivated_, 1);     // 0xFF means on
     changed_ |= telegram->read_value(wWCircPump_, 6);      // 0xFF means on
     changed_ |= telegram->read_value(wWCircPumpMode_, 7);  // 1=1x3min... 6=6x3min, 7=continuous
-    changed_ |= telegram->read_value(wWCircPumpType_, 10); // 0 = charge pump, 0xff = 3-way valve
+    changed_ |= telegram->read_value(wWChargeType_, 10);   // 0 = charge pump, 0xff = 3-way valve
     changed_ |= telegram->read_value(wWSelTemp_, 2);
     changed_ |= telegram->read_value(wWDisinfectTemp_, 8);
     changed_ |= telegram->read_value(wWComfort_, 9);

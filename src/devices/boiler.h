@@ -70,7 +70,7 @@ class Boiler : public EMSdevice {
     uint8_t wWSelTemp_       = EMS_VALUE_UINT_NOTSET; // Warm Water selected temperature
     uint8_t wWCircPump_      = EMS_VALUE_BOOL_NOTSET; // Warm Water circulation pump available
     uint8_t wWCircPumpMode_  = EMS_VALUE_UINT_NOTSET; // Warm Water circulation pump mode
-    uint8_t wWCircPumpType_  = EMS_VALUE_BOOL_NOTSET; // Warm Water circulation pump type
+    uint8_t wWChargeType_    = EMS_VALUE_BOOL_NOTSET; // Warm Water charge type (pump or 3-way-valve)
     uint8_t wWDisinfectTemp_ = EMS_VALUE_UINT_NOTSET; // Warm Water disinfection temperature to prevent infection
     uint8_t wWComfort_       = EMS_VALUE_UINT_NOTSET; // WW comfort mode
 
