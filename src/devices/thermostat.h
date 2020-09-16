@@ -61,6 +61,7 @@ class Thermostat : public EMSdevice {
         uint8_t nofrosttemp       = EMS_VALUE_UINT_NOTSET;
         uint8_t designtemp        = EMS_VALUE_UINT_NOTSET; // heating curve design temp at MinExtTemp
         int8_t  offsettemp        = EMS_VALUE_INT_NOTSET;  // heating curve offest temp at roomtemp signed!
+        uint8_t manualtemp        = EMS_VALUE_UINT_NOTSET;
 
         uint8_t hc_num() const {
             return hc_num_;
@@ -265,6 +266,7 @@ class Thermostat : public EMSdevice {
     void set_temp(const char * value, const int8_t id);
     void set_nighttemp(const char * value, const int8_t id);
     void set_daytemp(const char * value, const int8_t id);
+    void set_comforttemp(const char * value, const int8_t id);
     void set_nofrosttemp(const char * value, const int8_t id);
     void set_ecotemp(const char * value, const int8_t id);
     void set_heattemp(const char * value, const int8_t id);
@@ -272,6 +274,7 @@ class Thermostat : public EMSdevice {
     void set_designtemp(const char * value, const int8_t id);
     void set_offsettemp(const char * value, const int8_t id);
     void set_holidaytemp(const char * value, const int8_t id);
+    void set_manualtemp(const char * value, const int8_t id);
 
     void set_remotetemp(const char * value, const int8_t id);
 

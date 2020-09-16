@@ -352,17 +352,25 @@ void Thermostat::publish_values() {
             if (Helpers::hasValue(hc->daytemp)) {
                 if (flags == EMSdevice::EMS_DEVICE_FLAG_JUNKERS) {
                     dataThermostat["heattemp"] = (float)hc->daytemp / 2;
+                } else if (flags == EMSdevice::EMS_DEVICE_FLAG_RC300 || flags == EMSdevice::EMS_DEVICE_FLAG_RC100) {
+                    dataThermostat["comforttemp"] = (float)hc->daytemp / 2;
                 } else {
                     dataThermostat["daytemp"] = (float)hc->daytemp / 2;
                 }
             }
+
             if (Helpers::hasValue(hc->nighttemp)) {
-                if (flags == EMSdevice::EMS_DEVICE_FLAG_JUNKERS) {
+                if (flags == EMSdevice::EMS_DEVICE_FLAG_JUNKERS || flags == EMSdevice::EMS_DEVICE_FLAG_RC300 || flags == EMSdevice::EMS_DEVICE_FLAG_RC100) {
                     dataThermostat["ecotemp"] = (float)hc->nighttemp / 2;
                 } else {
                     dataThermostat["nighttemp"] = (float)hc->nighttemp / 2;
                 }
             }
+
+            if (Helpers::hasValue(hc->manualtemp)) {
+                dataThermostat["manualtemp"] = (float)hc->manualtemp / 2;
+            }
+
             if (Helpers::hasValue(hc->holidaytemp)) {
                 dataThermostat["holidaytemp"] = (float)hc->holidaytemp / 2;
             }
@@ -851,16 +859,21 @@ void Thermostat::show_values(uuid::console::Shell & shell) {
         if (Helpers::hasValue(hc->daytemp)) {
             if (flags == EMSdevice::EMS_DEVICE_FLAG_JUNKERS) {
                 print_value(shell, 4, F("Heat temperature"), hc->daytemp, F_(degrees), 2);
+            } else if (flags == EMSdevice::EMS_DEVICE_FLAG_RC300 || flags == EMSdevice::EMS_DEVICE_FLAG_RC100) {
+                print_value(shell, 4, F("Comfort temperature"), hc->daytemp, F_(degrees), 2);
             } else {
                 print_value(shell, 4, F("Day temperature"), hc->daytemp, F_(degrees), 2);
             }
         }
         if (Helpers::hasValue(hc->nighttemp)) {
-            if (flags == EMSdevice::EMS_DEVICE_FLAG_JUNKERS) {
+            if (flags == EMSdevice::EMS_DEVICE_FLAG_JUNKERS || flags == EMSdevice::EMS_DEVICE_FLAG_RC300 || flags == EMSdevice::EMS_DEVICE_FLAG_RC100) {
                 print_value(shell, 4, F("Eco temperature"), hc->nighttemp, F_(degrees), 2);
             } else {
                 print_value(shell, 4, F("Night temperature"), hc->nighttemp, F_(degrees), 2);
             }
+        }
+        if (Helpers::hasValue(hc->manualtemp)) {
+            print_value(shell, 4, F("Manual temperature"), hc->manualtemp, F_(degrees), 2);
         }
         if (Helpers::hasValue(hc->nofrosttemp)) {
             print_value(shell, 4, F("Nofrost temperature"), hc->nofrosttemp, F_(degrees), 2);
@@ -1031,17 +1044,18 @@ void Thermostat::process_RC300Set(std::shared_ptr<const Telegram> telegram) {
 
     // NOTE when setting the room temp we pick from two values, hopefully one is correct!
     // manual is position 10
-    // comfort is position 2
-    // I think auto is position 8?
+    // comfort is position 2, there are 3 levels in pos 3, 2, 1
+    // eco is position 4
+    // auto is position 8, temporary until next switch
     // actual setpoint taken from RC300Monitor (Michael 12.06.2020)
     // changed_ |= telegram->read_value(hc->setpoint_roomTemp, 8, 1);  // single byte conversion, value is * 2 - auto?
     // changed_ |= telegram->read_value(hc->setpoint_roomTemp, 10, 1); // single byte conversion, value is * 2 - manual
 
     // check why mode is both in the Monitor and Set for the RC300. It'll be read twice!
     // changed_ |= telegram->read_value(hc->mode, 0); // Auto = xFF, Manual = x00 eg. 10 00 FF 08 01 B9 FF
-
-    changed_ |= telegram->read_value(hc->daytemp, 2);   // is * 2
-    changed_ |= telegram->read_value(hc->nighttemp, 4); // is * 2
+    changed_ |= telegram->read_value(hc->daytemp, 2);     // is * 2
+    changed_ |= telegram->read_value(hc->nighttemp, 4);   // is * 2
+    changed_ |= telegram->read_value(hc->manualtemp, 10); // is * 2
 }
 
 // types 0x31D and 0x31E
@@ -1580,6 +1594,8 @@ void Thermostat::set_temperature(const float temperature, const std::string & mo
         set_temperature(temperature, HeatingCircuit::Mode::COMFORT, hc_num);
     } else if (mode_tostring(HeatingCircuit::Mode::HEAT) == mode) {
         set_temperature(temperature, HeatingCircuit::Mode::HEAT, hc_num);
+    } else if (mode_tostring(HeatingCircuit::Mode::ECO) == mode) {
+        set_temperature(temperature, HeatingCircuit::Mode::ECO, hc_num);
     } else if (mode_tostring(HeatingCircuit::Mode::NOFROST) == mode) {
         set_temperature(temperature, HeatingCircuit::Mode::NOFROST, hc_num);
     } else if (mode_tostring(HeatingCircuit::Mode::SUMMER) == mode) {
@@ -1626,11 +1642,19 @@ void Thermostat::set_temperature(const float temperature, const uint8_t mode, co
             offset = 0x0A; // manual offset
             break;
         case HeatingCircuit::Mode::COMFORT:
-            offset = 0x02; // comfort offset
+            offset = 0x02; // comfort offset level 2
+            break;
+        case HeatingCircuit::Mode::ECO:
+            offset = 0x04; // eco offset
             break;
         default:
         case HeatingCircuit::Mode::AUTO:
-            offset          = 0x08;                              // auto offset
+            uint8_t mode_ = hc->get_mode(this->flags());
+            if (mode_ == HeatingCircuit::Mode::MANUAL) {
+                offset = 0x0A; // manual offset
+            } else {
+                offset = 0x08; // auto offset
+            }
             validate_typeid = monitor_typeids[hc->hc_num() - 1]; // get setpoint roomtemp back
             break;
         }
@@ -1801,6 +1825,10 @@ void Thermostat::set_daytemp(const char * value, const int8_t id) {
     set_temperature_value(value, id, HeatingCircuit::Mode::DAY);
 }
 
+void Thermostat::set_comforttemp(const char * value, const int8_t id) {
+    set_temperature_value(value, id, HeatingCircuit::Mode::COMFORT);
+}
+
 void Thermostat::set_nofrosttemp(const char * value, const int8_t id) {
     set_temperature_value(value, id, HeatingCircuit::Mode::NOFROST);
 }
@@ -1829,6 +1857,10 @@ void Thermostat::set_holidaytemp(const char * value, const int8_t id) {
     set_temperature_value(value, id, HeatingCircuit::Mode::HOLIDAY);
 }
 
+void Thermostat::set_manualtemp(const char * value, const int8_t id) {
+    set_temperature_value(value, id, HeatingCircuit::Mode::MANUAL);
+}
+
 // commands for MQTT and Console
 void Thermostat::add_commands() {
     // if this thermostat doesn't support write, don't add the commands
@@ -1843,6 +1875,12 @@ void Thermostat::add_commands() {
 
     uint8_t model = this->model();
     switch (model) {
+    case EMS_DEVICE_FLAG_RC100:
+    case EMS_DEVICE_FLAG_RC300:
+        register_mqtt_cmd(F("manualtemp"), [&](const char * value, const int8_t id) { set_manualtemp(value, id); });
+        register_mqtt_cmd(F("ecotemp"), [&](const char * value, const int8_t id) { set_ecotemp(value, id); });
+        register_mqtt_cmd(F("comforttemp"), [&](const char * value, const int8_t id) { set_comforttemp(value, id); });
+        break;
     case EMS_DEVICE_FLAG_RC20_2:
         register_mqtt_cmd(F("nighttemp"), [&](const char * value, const int8_t id) { set_nighttemp(value, id); });
         register_mqtt_cmd(F("daytemp"), [&](const char * value, const int8_t id) { set_daytemp(value, id); });
