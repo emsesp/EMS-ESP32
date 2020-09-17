@@ -63,8 +63,8 @@ static String generateClientId() {
 #define EMSESP_DEFAULT_SYSTEM_HEARTBEAT true
 #define EMSESP_DEFAULT_MQTT_FORMAT 2 // nested
 #define EMSESP_DEFAULT_MQTT_QOS 0
+#define EMSESP_DEFAULT_MQTT_RETAIN false
 #define EMSESP_DEFAULT_PUBLISH_TIME 10
-
 
 class MqttSettings {
   public:
@@ -92,9 +92,10 @@ class MqttSettings {
     uint16_t publish_time_mixing;
     uint16_t publish_time_other;
     uint16_t publish_time_sensor;
-    uint8_t  mqtt_format;  // 1=single, 2=nested, 3=ha, 4=custom
+    uint8_t  mqtt_format; // 1=single, 2=nested, 3=ha, 4=custom
     uint8_t  mqtt_qos;
     bool     system_heartbeat;
+    bool     mqtt_retain;
 
     static void              read(MqttSettings & settings, JsonObject & root);
     static StateUpdateResult update(JsonObject & root, MqttSettings & settings);

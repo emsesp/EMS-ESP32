@@ -149,6 +149,16 @@ class MqttSettingsForm extends React.Component<MqttSettingsFormProps> {
           <MenuItem value={1}>1</MenuItem>
           <MenuItem value={2}>2</MenuItem>
         </SelectValidator>
+        <BlockFormControlLabel
+          control={
+            <Checkbox
+              checked={data.mqtt_retain}
+              onChange={handleValueChange('mqtt_retain')}
+              value="mqtt_retain"
+            />
+          }
+          label="Retain Flag"
+        />
         <Typography variant="h6" color="primary" >
           Publish Intervals
         </Typography>

@@ -35,5 +35,6 @@ export interface MqttSettings {
   publish_time_sensor: number;
   mqtt_format: number;
   mqtt_qos: number;
+  mqtt_retain: boolean;
   system_heartbeat: boolean;
 }

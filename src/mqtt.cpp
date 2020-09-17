@@ -27,6 +27,7 @@ AsyncMqttClient * Mqtt::mqttClient_;
 // static parameters we make global
 std::string Mqtt::hostname_;
 uint8_t     Mqtt::mqtt_qos_;
+bool        Mqtt::mqtt_retain_;
 uint8_t     Mqtt::bus_id_;
 uint32_t    Mqtt::publish_time_boiler_;
 uint32_t    Mqtt::publish_time_thermostat_;
@@ -373,6 +374,7 @@ void Mqtt::start() {
         publish_time_other_      = mqttSettings.publish_time_other * 1000;
         publish_time_sensor_     = mqttSettings.publish_time_sensor * 1000;
         mqtt_qos_                = mqttSettings.mqtt_qos;
+        mqtt_retain_             = mqttSettings.mqtt_retain;
     });
 
     EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) { bus_id_ = settings.ems_bus_id; });
@@ -470,6 +472,10 @@ void Mqtt::set_qos(uint8_t mqtt_qos) {
     mqtt_qos_ = mqtt_qos;
 }
 
+void Mqtt::set_retain(bool mqtt_retain) {
+    mqtt_retain_ = mqtt_retain;
+}
+
 // MQTT onConnect - when a connect is established
 void Mqtt::on_connect() {
     // send info topic appended with the version information as JSON
@@ -479,9 +485,9 @@ void Mqtt::on_connect() {
 #ifndef EMSESP_STANDALONE
     doc["ip"] = WiFi.localIP().toString();
 #endif
-    publish(F("info"), doc, false); // send with retain off
+    publish(F("info"), doc);
 
-    publish(F("status"), "online", true); // say we're alive to the Last Will topic, with retain on
+    publish_retain(F("status"), "online", true); // say we're alive to the Last Will topic, with retain on
 
     reset_publish_fails(); // reset fail count to 0
 
@@ -533,30 +539,46 @@ std::shared_ptr<const MqttMessage> Mqtt::queue_subscribe_message(const std::stri
     return queue_message(Operation::SUBSCRIBE, topic, "", false); // no payload
 }
 
-// MQTT Publish, using a specific retain flag
-void Mqtt::publish(const std::string & topic, const std::string & payload, bool retain) {
-    queue_publish_message(topic, payload, retain);
+// MQTT Publish, using a user's retain flag
+void Mqtt::publish(const std::string & topic, const std::string & payload) {
+    queue_publish_message(topic, payload, mqtt_retain_);
 }
 
 // MQTT Publish, using a specific retain flag, topic is a flash string
-void Mqtt::publish(const __FlashStringHelper * topic, const std::string & payload, bool retain) {
+void Mqtt::publish(const __FlashStringHelper * topic, const std::string & payload) {
+    queue_publish_message(uuid::read_flash_string(topic), payload, mqtt_retain_);
+}
+
+void Mqtt::publish(const __FlashStringHelper * topic, const JsonDocument & payload) {
+    publish(uuid::read_flash_string(topic), payload);
+}
+
+// MQTT Publish, using a specific retain flag, topic is a flash string, forcing retain flag
+void Mqtt::publish_retain(const __FlashStringHelper * topic, const std::string & payload, bool retain) {
     queue_publish_message(uuid::read_flash_string(topic), payload, retain);
 }
 
-void Mqtt::publish(const __FlashStringHelper * topic, const JsonDocument & payload, bool retain) {
-    publish(uuid::read_flash_string(topic), payload, retain);
-}
-
-void Mqtt::publish(const std::string & topic, const JsonDocument & payload, bool retain) {
+void Mqtt::publish_retain(const std::string & topic, const JsonDocument & payload, bool retain) {
     std::string payload_text;
     serializeJson(payload, payload_text); // convert json to string
     queue_publish_message(topic, payload_text, retain);
+}
+
+void Mqtt::publish_retain(const __FlashStringHelper * topic, const JsonDocument & payload, bool retain) {
+    publish_retain(uuid::read_flash_string(topic), payload, retain);
+}
+
+void Mqtt::publish(const std::string & topic, const JsonDocument & payload) {
+    std::string payload_text;
+    serializeJson(payload, payload_text); // convert json to string
+    queue_publish_message(topic, payload_text, mqtt_retain_);
 }
 
 // for booleans, which get converted to string values 1 and 0
 void Mqtt::publish(const std::string & topic, const bool value) {
     queue_publish_message(topic, value ? "1" : "0", false);
 }
+
 void Mqtt::publish(const __FlashStringHelper * topic, const bool value) {
     queue_publish_message(uuid::read_flash_string(topic), value ? "1" : "0", false);
 }

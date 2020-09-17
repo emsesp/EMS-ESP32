@@ -342,7 +342,7 @@ void Sensors::publish_values() {
                 config["uniq_id"] = str;
 
                 snprintf_P(&topic[0], 50, PSTR("homeassistant/sensor/ems-esp/sensor%d/config"), i);
-                Mqtt::publish(topic, config, false); // publish the config payload with no retain flag
+                Mqtt::publish_retain(topic, config, false); // publish the config payload with no retain flag
 
                 registered_ha_[i] = true;
             }

@@ -193,6 +193,7 @@ void MqttSettings::read(MqttSettings & settings, JsonObject & root) {
     root["publish_time_sensor"]     = settings.publish_time_sensor;
     root["mqtt_format"]             = settings.mqtt_format;
     root["mqtt_qos"]                = settings.mqtt_qos;
+    root["mqtt_retain"]             = settings.mqtt_retain;
 }
 
 StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & settings) {
@@ -217,6 +218,7 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
     newSettings.publish_time_sensor     = root["publish_time_sensor"] | EMSESP_DEFAULT_PUBLISH_TIME;
     newSettings.mqtt_format             = root["mqtt_format"] | EMSESP_DEFAULT_MQTT_FORMAT;
     newSettings.mqtt_qos                = root["mqtt_qos"] | EMSESP_DEFAULT_MQTT_QOS;
+    newSettings.mqtt_retain             = root["mqtt_retain"] | EMSESP_DEFAULT_MQTT_RETAIN;
 
     if (newSettings.system_heartbeat != settings.system_heartbeat) {
         emsesp::EMSESP::system_.set_heartbeat(newSettings.system_heartbeat);
@@ -224,6 +226,10 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
 
     if (newSettings.mqtt_qos != settings.mqtt_qos) {
         emsesp::EMSESP::mqtt_.set_qos(newSettings.mqtt_qos);
+    }
+
+    if (newSettings.mqtt_retain != settings.mqtt_retain) {
+        emsesp::EMSESP::mqtt_.set_retain(newSettings.mqtt_retain);
     }
 
     if (newSettings.publish_time_boiler != settings.publish_time_boiler) {

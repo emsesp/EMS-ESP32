@@ -74,6 +74,7 @@ class Mqtt {
     void set_publish_time_other(uint16_t publish_time);
     void set_publish_time_sensor(uint16_t publish_time);
     void set_qos(uint8_t mqtt_qos);
+    void set_retain(bool mqtt_retain);
     bool get_publish_onchange(uint8_t device_type);
 
     enum Operation { PUBLISH, SUBSCRIBE };
@@ -86,13 +87,17 @@ class Mqtt {
 
     static void add_command(const uint8_t device_type, const uint8_t device_id, const __FlashStringHelper * cmd, mqtt_cmdfunction_p cb);
 
-    static void publish(const std::string & topic, const std::string & payload, bool retain = false);
-    static void publish(const std::string & topic, const JsonDocument & payload, bool retain = false);
-    static void publish(const __FlashStringHelper * topic, const JsonDocument & payload, bool retain = false);
-    static void publish(const __FlashStringHelper * topic, const std::string & payload, bool retain = false);
+    static void publish(const std::string & topic, const std::string & payload);
+    static void publish(const std::string & topic, const JsonDocument & payload);
+    static void publish(const __FlashStringHelper * topic, const JsonDocument & payload);
+    static void publish(const __FlashStringHelper * topic, const std::string & payload);
     static void publish(const std::string & topic, const bool value);
     static void publish(const __FlashStringHelper * topi, const bool value);
     static void publish(const std::string & topic);
+
+    static void publish_retain(const std::string & topic, const JsonDocument & payload, bool retain);
+    static void publish_retain(const __FlashStringHelper * topic, const std::string & payload, bool retain);
+    static void publish_retain(const __FlashStringHelper * topic, const JsonDocument & payload, bool retain);
 
     static void show_topic_handlers(uuid::console::Shell & shell, const uint8_t device_type);
     static void show_mqtt(uuid::console::Shell & shell);
@@ -163,7 +168,6 @@ class Mqtt {
 
     static size_t   maximum_mqtt_messages_;
     static uint16_t mqtt_message_id_;
-    static bool     mqtt_retain_;
 
     static constexpr size_t   MAX_MQTT_MESSAGES      = 20;  // size of queue
     static constexpr uint32_t MQTT_PUBLISH_WAIT      = 200; // delay between sending publishes, to account for large payloads
@@ -208,6 +212,7 @@ class Mqtt {
     // settings, copied over
     static std::string hostname_;
     static uint8_t     mqtt_qos_;
+    static bool        mqtt_retain_;
     static uint32_t    publish_time_;
     static uint8_t     bus_id_;
     static uint32_t    publish_time_boiler_;

@@ -12,12 +12,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - add boiler wWType
 - support for uploading compressed firmware binaries
 - add wWType to MQTT publish
+- option to set the MQTT retain flag
 
 ### Fixed
 - fix wwontime readback
+- fixed support for RC300 via MQTT commands (#505)
 
 ### Changed
 - renamed wWCircPumpType to wWChargeType
+- Installation doc moved to wiki
 
 ### Removed
 -

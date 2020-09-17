@@ -237,7 +237,7 @@ void System::send_heartbeat() {
     doc["rxfails"]          = EMSESP::rxservice_.telegram_error_count();
     doc["adc"]              = analog_; //analogRead(A0);
 
-    Mqtt::publish(F("heartbeat"), doc, false); // send to MQTT with retain off. This will add to MQTT queue.
+    Mqtt::publish_retain(F("heartbeat"), doc, false); // send to MQTT with retain off. This will add to MQTT queue.
 }
 
 // measure and moving average adc
@@ -726,6 +726,7 @@ bool System::check_upgrade() {
                     mqttSettings.host             = mqtt["ip"] | FACTORY_MQTT_HOST;
                     mqttSettings.mqtt_format      = (mqtt["nestedjson"] ? MQTT_format::NESTED : MQTT_format::SINGLE);
                     mqttSettings.mqtt_qos         = mqtt["qos"] | 0;
+                    mqttSettings.mqtt_retain      = mqtt["retain"];
                     mqttSettings.username         = mqtt["user"] | "";
                     mqttSettings.password         = mqtt["password"] | "";
                     mqttSettings.port             = mqtt["port"] | FACTORY_MQTT_PORT;
