@@ -158,7 +158,7 @@ void Mixing::publish_values() {
 
     char topic[30];
     strlcpy(topic, "mixing_data", 30);
-    strlcat(topic, Helpers::itoa(s, get_device_id() - 0x20 + 1), 30); // append hc to topic
+    strlcat(topic, Helpers::itoa(s, device_id() - 0x20 + 1), 30); // append hc to topic
     Mqtt::publish(topic, doc);
 }
 
@@ -190,7 +190,7 @@ void Mixing::process_MMPLUSStatusMessage_WWC(std::shared_ptr<const Telegram> tel
 //       A1 00 FF 00 00 0C 02 04 00 01 1D 00 82
 void Mixing::process_IPMStatusMessage(std::shared_ptr<const Telegram> telegram) {
     type_           = Type::HC;
-    hc_             = get_device_id() - 0x20 + 1;
+    hc_             = device_id() - 0x20 + 1;
     uint8_t ismixed = 0;
     changed_ |= telegram->read_value(ismixed, 0); // check if circuit is active, 0-off, 1-unmixed, 2-mixed
     if (ismixed == 0) {
@@ -213,7 +213,7 @@ void Mixing::process_MMStatusMessage(std::shared_ptr<const Telegram> telegram) {
     // the heating circuit is determine by which device_id it is, 0x20 - 0x23
     // 0x21 is position 2. 0x20 is typically reserved for the WM10 switch module
     // see https://github.com/proddy/EMS-ESP/issues/270 and https://github.com/proddy/EMS-ESP/issues/386#issuecomment-629610918
-    hc_ = get_device_id() - 0x20 + 1;
+    hc_ = device_id() - 0x20 + 1;
     changed_ |= telegram->read_value(flowTemp_, 1); // is * 10
     changed_ |= telegram->read_value(pump_, 3);
     changed_ |= telegram->read_value(flowSetTemp_, 0);
@@ -226,7 +226,7 @@ void Mixing::process_MMStatusMessage(std::shared_ptr<const Telegram> telegram) {
 // Mixing on a MM10 - 0xAA
 // e.g. Thermostat -> Mixing Module, type 0xAA, telegram: 10 21 AA 00 FF 0C 0A 11 0A 32 xx
 void Mixing::process_MMConfigMessage(std::shared_ptr<const Telegram> telegram) {
-    hc_ = get_device_id() - 0x20 + 1;
+    hc_ = device_id() - 0x20 + 1;
     // pos 0: active FF = on
     // pos 1: valve runtime 0C = 120 sec in units of 10 sec
 }
@@ -234,7 +234,7 @@ void Mixing::process_MMConfigMessage(std::shared_ptr<const Telegram> telegram) {
 // Mixing on a MM10 - 0xAC
 // e.g. Thermostat -> Mixing Module, type 0xAC, telegram: 10 21 AC 00 1E 64 01 AB
 void Mixing::process_MMSetMessage(std::shared_ptr<const Telegram> telegram) {
-    hc_ = get_device_id() - 0x20 + 1;
+    hc_ = device_id() - 0x20 + 1;
     // pos 0: flowtemp setpoint 1E = 30°C
     // pos 1: position in %
 }

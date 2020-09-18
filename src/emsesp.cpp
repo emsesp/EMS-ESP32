@@ -36,6 +36,7 @@ EMSESPSettingsService EMSESP::emsespSettingsService = EMSESPSettingsService(&web
 
 EMSESPStatusService  EMSESP::emsespStatusService  = EMSESPStatusService(&webServer, EMSESP::esp8266React.getSecurityManager());
 EMSESPDevicesService EMSESP::emsespDevicesService = EMSESPDevicesService(&webServer, EMSESP::esp8266React.getSecurityManager());
+EMSESPAPIService     EMSESP::emsespAPIService     = EMSESPAPIService(&webServer);
 
 using DeviceFlags = emsesp::EMSdevice;
 using DeviceType  = emsesp::EMSdevice::DeviceType;
@@ -615,7 +616,7 @@ void EMSESP::show_devices(uuid::console::Shell & shell) {
         for (const auto & emsdevice : emsdevices) {
             if ((emsdevice) && (emsdevice->device_type() == device_class.first)) {
                 shell.printf(F("%s: %s"), emsdevice->device_type_name().c_str(), emsdevice->to_string().c_str());
-                if ((emsdevice->device_type() == EMSdevice::DeviceType::THERMOSTAT) && (emsdevice->get_device_id() == actual_master_thermostat())) {
+                if ((emsdevice->device_type() == EMSdevice::DeviceType::THERMOSTAT) && (emsdevice->device_id() == actual_master_thermostat())) {
                     shell.printf(F(" ** master device **"));
                 }
                 shell.println();
@@ -727,7 +728,7 @@ void EMSESP::send_write_request(const uint16_t type_id, const uint8_t dest, cons
 // we check if its a complete telegram or just a single byte (which could be a poll or a return status)
 // the CRC check is not done here, only when it's added to the Rx queue with add()
 void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
-#ifdef EMSESP_DEBUG
+#ifdef EMSESP_UART_DEBUG
     static uint32_t rx_time_ = 0;
 #endif
     // check first for echo
@@ -735,9 +736,9 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
     if (((first_value & 0x7F) == txservice_.ems_bus_id()) && (length > 1)) {
         // if we ask ourself at roomcontrol for version e.g. 0B 98 02 00 20
         Roomctrl::check((data[1] ^ 0x80 ^ rxservice_.ems_mask()), data);
-#ifdef EMSESP_DEBUG
+#ifdef EMSESP_UART_DEBUG
         // get_uptime is only updated once per loop, does not give the right time
-        LOG_TRACE(F("[DEBUG] Echo after %d ms: %s"), ::millis() - rx_time_, Helpers::data_to_hex(data, length).c_str());
+        LOG_TRACE(F("[UART_DEBUG] Echo after %d ms: %s"), ::millis() - rx_time_, Helpers::data_to_hex(data, length).c_str());
 #endif
         return; // it's an echo
     }
@@ -786,14 +787,14 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
     if (length == 1) {
         EMSbus::last_bus_activity(uuid::get_uptime()); // set the flag indication the EMS bus is active
 
-#ifdef EMSESP_DEBUG
+#ifdef EMSESP_UART_DEBUG
         char s[4];
         if (first_value & 0x80) {
-            LOG_TRACE(F("[DEBUG] next Poll %s after %d ms"), Helpers::hextoa(s, first_value), ::millis() - rx_time_);
+            LOG_TRACE(F("[UART_DEBUG] next Poll %s after %d ms"), Helpers::hextoa(s, first_value), ::millis() - rx_time_);
             // time measurement starts here, use millis because get_uptime is only updated once per loop
             rx_time_ = ::millis();
         } else {
-            LOG_TRACE(F("[DEBUG] Poll ack %s after %d ms"), Helpers::hextoa(s, first_value), ::millis() - rx_time_);
+            LOG_TRACE(F("[UART_DEBUG] Poll ack %s after %d ms"), Helpers::hextoa(s, first_value), ::millis() - rx_time_);
         }
 #endif
         // check for poll to us, if so send top message from Tx queue immediately and quit
@@ -805,8 +806,8 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
         Roomctrl::send(first_value ^ 0x80 ^ rxservice_.ems_mask());
         return;
     } else {
-#ifdef EMSESP_DEBUG
-        LOG_TRACE(F("[DEBUG] Reply after %d ms: %s"), ::millis() - rx_time_, Helpers::data_to_hex(data, length).c_str());
+#ifdef EMSESP_UART_DEBUG
+        LOG_TRACE(F("[UART_DEBUG] Reply after %d ms: %s"), ::millis() - rx_time_, Helpers::data_to_hex(data, length).c_str());
 #endif
         Roomctrl::check((data[1] ^ 0x80 ^ rxservice_.ems_mask()), data); // check if there is a message for the roomcontroller
 

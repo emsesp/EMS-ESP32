@@ -167,21 +167,21 @@ class Boiler : public EMSdevice {
     void process_UBADHWStatus(std::shared_ptr<const Telegram> telegram);
 
     // commands - none of these use the additional id parameter
-    void set_warmwater_mode(const char * value, const int8_t id);
-    void set_warmwater_activated(const char * value, const int8_t id);
-    void set_tapwarmwater_activated(const char * value, const int8_t id);
-    void set_warmwater_onetime(const char * value, const int8_t id);
-    void set_warmwater_circulation(const char * value, const int8_t id);
-    void set_warmwater_temp(const char * value, const int8_t id);
-    void set_flow_temp(const char * value, const int8_t id);
-    void set_heating_activated(const char * value, const int8_t id);
-    void set_heating_temp(const char * value, const int8_t id);
-    void set_min_power(const char * value, const int8_t id);
-    void set_max_power(const char * value, const int8_t id);
-    void set_hyst_on(const char * value, const int8_t id);
-    void set_hyst_off(const char * value, const int8_t id);
-    void set_burn_period(const char * value, const int8_t id);
-    void set_pump_delay(const char * value, const int8_t id);
+    bool set_warmwater_mode(const char * value, const int8_t id);
+    bool set_warmwater_activated(const char * value, const int8_t id);
+    bool set_tapwarmwater_activated(const char * value, const int8_t id);
+    bool set_warmwater_onetime(const char * value, const int8_t id);
+    bool set_warmwater_circulation(const char * value, const int8_t id);
+    bool set_warmwater_temp(const char * value, const int8_t id);
+    bool set_flow_temp(const char * value, const int8_t id);
+    bool set_heating_activated(const char * value, const int8_t id);
+    bool set_heating_temp(const char * value, const int8_t id);
+    bool set_min_power(const char * value, const int8_t id);
+    bool set_max_power(const char * value, const int8_t id);
+    bool set_hyst_on(const char * value, const int8_t id);
+    bool set_hyst_off(const char * value, const int8_t id);
+    bool set_burn_period(const char * value, const int8_t id);
+    bool set_pump_delay(const char * value, const int8_t id);
 };
 
 } // namespace emsesp

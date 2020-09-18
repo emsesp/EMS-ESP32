@@ -12,6 +12,39 @@ class AsyncWebServerRequest;
 class AsyncWebServerResponse;
 class AsyncJsonResponse;
 
+class AsyncWebParameter {
+  private:
+    String _name;
+    String _value;
+    size_t _size;
+    bool   _isForm;
+    bool   _isFile;
+
+  public:
+    AsyncWebParameter(const String & name, const String & value, bool form = false, bool file = false, size_t size = 0)
+        : _name(name)
+        , _value(value)
+        , _size(size)
+        , _isForm(form)
+        , _isFile(file) {
+    }
+    const String & name() const {
+        return _name;
+    }
+    const String & value() const {
+        return _value;
+    }
+    size_t size() const {
+        return _size;
+    }
+    bool isPost() const {
+        return _isForm;
+    }
+    bool isFile() const {
+        return _isFile;
+    }
+};
+
 typedef enum {
     HTTP_GET     = 0b00000001,
     HTTP_POST    = 0b00000010,
@@ -54,9 +87,41 @@ class AsyncWebServerRequest {
     void send(AsyncWebServerResponse * response){};
     void send(AsyncJsonResponse * response){};
     void send(int code, const String & contentType = String(), const String & content = String()){};
+    void send(int code, const String & contentType, const __FlashStringHelper *){};
+
+    bool hasParam(const String & name, bool post, bool file) const {
+        return false;
+    }
+
+    bool hasParam(const char * name, bool post, bool file) const {
+        return false;
+    }
+
+    bool hasParam(const __FlashStringHelper * data) const {
+        return false;
+    }
+
+    bool hasParam(const __FlashStringHelper * data, bool post, bool file) const {
+        return false;
+    }
+
+    AsyncWebParameter * getParam(const String & name, bool post, bool file) const {
+        return nullptr;
+    }
+
+    AsyncWebParameter * getParam(const __FlashStringHelper * data, bool post, bool file) const {
+        return nullptr;
+    }
+
+    AsyncWebParameter * getParam(const __FlashStringHelper * data) const {
+        return nullptr;
+    }
+
+    AsyncWebParameter * getParam(size_t num) const {
+        return nullptr;
+    }
 
     AsyncWebServerResponse * beginResponse(int code, const String & contentType = String(), const String & content = String()) {
-        // AsyncWebServerResponse *a = new AsyncWebServerResponse()
         return nullptr;
     }
 

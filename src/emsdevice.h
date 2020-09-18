@@ -47,12 +47,13 @@ class EMSdevice {
 
     virtual ~EMSdevice() = default; // destructor of base class must always be virtual because it's a polymorphic class
 
-    inline uint8_t get_device_id() const {
+    inline uint8_t device_id() const {
         return device_id_;
     }
 
     std::string        device_type_name() const;
-    static std::string device_type_topic_name(const uint8_t device_type);
+    static std::string device_type_2_device_name(const uint8_t device_type);
+    static uint8_t     device_name_2_device_type(const char * topic);
 
     inline uint8_t product_id() const {
         return product_id_;
@@ -127,20 +128,17 @@ class EMSdevice {
     void write_command(const uint16_t type_id, const uint8_t offset, uint8_t * message_data, const uint8_t message_length, const uint16_t validate_typeid);
     void write_command(const uint16_t type_id, const uint8_t offset, const uint8_t value, const uint16_t validate_typeid);
     void write_command(const uint16_t type_id, const uint8_t offset, const uint8_t value);
-
     void read_command(const uint16_t type_id);
 
-    void add_context_commands(unsigned int context);
-
     void register_mqtt_topic(const std::string & topic, mqtt_subfunction_p f);
-    void register_mqtt_cmd(const __FlashStringHelper * cmd, mqtt_cmdfunction_p f);
+    void register_mqtt_cmd(const __FlashStringHelper * cmd, cmdfunction_p f);
 
     // virtual functions overrules by derived classes
     virtual void show_values(uuid::console::Shell & shell) = 0;
     virtual void publish_values()                          = 0;
     virtual bool updated_values()                          = 0;
     virtual void add_context_menu()                        = 0;
-    virtual void device_info_web(JsonArray & root)             = 0;
+    virtual void device_info_web(JsonArray & root)         = 0;
 
     std::string telegram_type_name(std::shared_ptr<const Telegram> telegram);
 
@@ -230,7 +228,7 @@ class EMSdevice {
     };
 
     enum DeviceType : uint8_t {
-        SERVICEKEY = 0, // this is us
+        SERVICEKEY = 0, // this is us (EMS-ESP)
         BOILER,
         THERMOSTAT,
         MIXING,
@@ -239,8 +237,8 @@ class EMSdevice {
         GATEWAY,
         SWITCH,
         CONTROLLER,
-        CONNECT
-
+        CONNECT,
+        UNKNOWN
     };
 
     // device IDs

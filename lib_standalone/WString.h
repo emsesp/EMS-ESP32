@@ -33,14 +33,13 @@ class String {
         return lhs;
     }
 
-    ///
     bool isEmpty() {
         return _str.empty();
     }
 
-    // long toInt() const {
-    //     return std::stol(_str);
-    // }
+    long toInt() const {
+        return std::stol(_str);
+    }
 
     bool equals(const char * s) {
         return _str == s;

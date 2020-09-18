@@ -31,6 +31,12 @@ class DummySettings {
     String   jwtSecret            = "ems-esp";
     String   ssid                 = "ems-esp";
     String   password             = "ems-esp";
+    String   localIP;
+    String   gatewayIP;
+    String   subnetMask;
+    String   staticIPConfig;
+    String   dnsIP1;
+    String   dnsIP2;
     uint16_t publish_time_boiler;
     uint16_t publish_time_thermostat;
     uint16_t publish_time_solar;
@@ -103,6 +109,13 @@ class EMSESPSettingsService {
     void begin();
 
   private:
+};
+
+class JsonUtils {
+  public:
+    static void writeIP(JsonObject & root, const String & key, const String & ip) {
+        root[key] = ip;
+    }
 };
 
 #endif

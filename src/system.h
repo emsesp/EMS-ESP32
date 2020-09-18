@@ -47,19 +47,20 @@ class System {
     static void format(uuid::console::Shell & shell);
 
     static void console_commands(Shell & shell, unsigned int context);
-
-    static void mqtt_command_pin(const char * value, const int8_t id);
-    static void mqtt_command_send(const char * value, const int8_t id);
+    static bool command_pin(const char * value, const int8_t id);
+    static bool command_send(const char * value, const int8_t id);
 
     static uint8_t free_mem();
     static void    upload_status(bool in_progress);
     static bool    upload_status();
-    void           syslog_init();
-    void           set_heartbeat(bool system_heartbeat);
-    void           send_heartbeat();
     static void    show_mem(const char * note);
     static void    set_led();
-    bool           check_upgrade();
+    static String  export_settings();
+
+    bool check_upgrade();
+    void syslog_init();
+    void set_heartbeat(bool system_heartbeat);
+    void send_heartbeat();
 
   private:
     static uuid::log::Logger logger_;

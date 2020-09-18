@@ -149,6 +149,12 @@ void EMSESPShell::add_console_commands() {
                           flash_string_vector{F_(show), F_(mqtt)},
                           [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) { Mqtt::show_mqtt(shell); });
 
+
+    commands->add_command(ShellContext::MAIN,
+                          CommandFlags::USER,
+                          flash_string_vector{F_(show), F_(commands)},
+                          [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) { Command::show_all_commands(shell); });
+
     commands->add_command(
         ShellContext::MAIN,
         CommandFlags::ADMIN,
@@ -457,6 +463,11 @@ void Console::load_standard_commands(unsigned int context) {
                                                shell.printfln(F("Filtering only telegrams that match a device ID or telegram type of 0x%02X"), watch_id);
                                            }
                                        });
+
+
+    // load the commands (console & mqtt topics) for this specific context
+    Command::add_context_commands(context);
+
 }
 
 // prompt, change per context

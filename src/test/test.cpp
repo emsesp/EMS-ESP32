@@ -601,12 +601,12 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
 
         // test publish and adding to queue
         EMSESP::txservice_.flush_tx_queue();
-        EMSESP::EMSESP::mqtt_.publish("boiler_cmd", "test me");
+        EMSESP::EMSESP::mqtt_.publish("boiler", "test me");
         Mqtt::show_mqtt(shell); // show queue
 
-        strcpy(boiler_topic, "ems-esp/boiler_cmd");
-        strcpy(thermostat_topic, "ems-esp/thermostat_cmd");
-        strcpy(system_topic, "ems-esp/saystem_cmd");
+        strcpy(boiler_topic, "ems-esp/boiler");
+        strcpy(thermostat_topic, "ems-esp/thermostat");
+        strcpy(system_topic, "ems-esp/saystem");
 
         EMSESP::mqtt_.incoming(boiler_topic, "12345");                                // invalid format
         EMSESP::mqtt_.incoming("bad_topic", "12345");                                 // no matching topic

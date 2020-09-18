@@ -39,18 +39,22 @@ uint16_t System::analog_        = 0;
 
 // send on/off to a gpio pin
 // value: true = HIGH, false = LOW
-void System::mqtt_command_pin(const char * value, const int8_t id) {
+bool System::command_pin(const char * value, const int8_t id) {
     bool v = false;
     if (Helpers::value2bool(value, v)) {
         pinMode(id, OUTPUT);
         digitalWrite(id, v);
         LOG_INFO(F("GPIO %d set to %s"), id, v ? "HIGH" : "LOW");
+        return true;
     }
+
+    return false;
 }
 
 // send raw
-void System::mqtt_command_send(const char * value, const int8_t id) {
+bool System::command_send(const char * value, const int8_t id) {
     EMSESP::send_raw_telegram(value); // ignore id
+    return true;
 }
 
 // restart EMS-ESP
@@ -590,31 +594,11 @@ void System::console_commands(Shell & shell, unsigned int context) {
                                                shell.printfln(F_(wifi_password_fmt), wifiSettings.ssid.isEmpty() ? F_(unset) : F_(asterisks));
                                            });
                                        });
-    /*
-    EMSESPShell::commands->add_command(ShellContext::SYSTEM,
-                                       CommandFlags::USER,
-                                       flash_string_vector{F_(show), F_(mqtt)},
-                                       [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) { Mqtt::show_mqtt(shell); });
-*/
+
     EMSESPShell::commands->add_command(ShellContext::SYSTEM,
                                        CommandFlags::ADMIN,
                                        flash_string_vector{F_(show), F_(users)},
                                        [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) { System::show_users(shell); });
-
-    EMSESPShell::commands->add_command(ShellContext::SYSTEM,
-                                       CommandFlags::ADMIN,
-                                       flash_string_vector{F_(pin)},
-                                       flash_string_vector{F_(gpio_mandatory), F_(data_optional)},
-                                       [](Shell & shell, const std::vector<std::string> & arguments) {
-                                           if (arguments.size() == 1) {
-                                               shell.printfln(F("use on/off, 1/0 or true/false"));
-                                               return;
-                                           }
-                                           int pin = 0;
-                                           if (Helpers::value2number(arguments[0].c_str(), pin)) {
-                                               System::mqtt_command_pin(arguments[1].c_str(), pin);
-                                           }
-                                       });
 
     // enter the context
     Console::enter_custom_context(shell, context);
@@ -818,6 +802,83 @@ bool System::check_upgrade() {
 #else
     return false;
 #endif
+}
+
+// export all settings to JSON text
+// http://ems-esp/api?device=system&cmd=info
+String System::export_settings() {
+    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_LARGE> doc;
+
+#ifndef EMSESP_STANDALONE
+    JsonObject root = doc.to<JsonObject>();
+
+    EMSESP::esp8266React.getWiFiSettingsService()->read([&](WiFiSettings & settings) {
+        JsonObject node = root.createNestedObject("WIFI");
+        node["ssid"]    = settings.ssid;
+        // node["password"]         = settings.password;
+        node["hostname"]         = settings.hostname;
+        node["static_ip_config"] = settings.staticIPConfig;
+        JsonUtils::writeIP(node, "local_ip", settings.localIP);
+        JsonUtils::writeIP(node, "gateway_ip", settings.gatewayIP);
+        JsonUtils::writeIP(node, "subnet_mask", settings.subnetMask);
+        JsonUtils::writeIP(node, "dns_ip_1", settings.dnsIP1);
+        JsonUtils::writeIP(node, "dns_ip_2", settings.dnsIP2);
+    });
+
+    EMSESP::esp8266React.getAPSettingsService()->read([&](APSettings & settings) {
+        JsonObject node        = root.createNestedObject("AP");
+        node["provision_mode"] = settings.provisionMode;
+        node["ssid"]           = settings.ssid;
+        // node["password"]       = settings.password;
+        node["local_ip"]    = settings.localIP.toString();
+        node["gateway_ip"]  = settings.gatewayIP.toString();
+        node["subnet_mask"] = settings.subnetMask.toString();
+    });
+
+    EMSESP::esp8266React.getMqttSettingsService()->read([&](MqttSettings & settings) {
+        JsonObject node  = root.createNestedObject("MQTT");
+        node["enabled"]  = settings.enabled;
+        node["host"]     = settings.host;
+        node["port"]     = settings.port;
+        node["username"] = settings.username;
+        // node["password"]                = settings.password;
+        node["client_id"]               = settings.clientId;
+        node["keep_alive"]              = settings.keepAlive;
+        node["clean_session"]           = settings.cleanSession;
+        node["max_topic_length"]        = settings.maxTopicLength;
+        node["system_heartbeat"]        = settings.system_heartbeat;
+        node["publish_time_boiler"]     = settings.publish_time_boiler;
+        node["publish_time_thermostat"] = settings.publish_time_thermostat;
+        node["publish_time_solar"]      = settings.publish_time_solar;
+        node["publish_time_mixing"]     = settings.publish_time_mixing;
+        node["publish_time_other"]      = settings.publish_time_other;
+        node["publish_time_sensor"]     = settings.publish_time_sensor;
+        node["mqtt_format"]             = settings.mqtt_format;
+        node["mqtt_qos"]                = settings.mqtt_qos;
+        node["mqtt_retain"]             = settings.mqtt_retain;
+    });
+
+    EMSESP::esp8266React.getNTPSettingsService()->read([&](NTPSettings & settings) {
+        JsonObject node   = root.createNestedObject("NTP");
+        node["enabled"]   = settings.enabled;
+        node["server"]    = settings.server;
+        node["tz_label"]  = settings.tzLabel;
+        node["tz_format"] = settings.tzFormat;
+    });
+
+    EMSESP::esp8266React.getOTASettingsService()->read([&](OTASettings & settings) {
+        JsonObject node = root.createNestedObject("OTA");
+        node["enabled"] = settings.enabled;
+        node["port"]    = settings.port;
+        // node["password"] = settings.password;
+    });
+
+#endif
+
+    String buffer;
+    serializeJsonPretty(doc, buffer);
+
+    return buffer;
 }
 
 } // namespace emsesp

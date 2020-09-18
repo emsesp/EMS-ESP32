@@ -18,7 +18,6 @@
 
 #include "EMSESPDevicesService.h"
 #include "emsesp.h"
-#include "mqtt.h"
 
 namespace emsesp {
 
@@ -57,7 +56,7 @@ void EMSESPDevicesService::all_devices(AsyncWebServerRequest * request) {
             obj["type"]      = emsdevice->device_type_name();
             obj["brand"]     = emsdevice->brand_to_string();
             obj["name"]      = emsdevice->name();
-            obj["deviceid"]  = emsdevice->get_device_id();
+            obj["deviceid"]  = emsdevice->device_id();
             obj["productid"] = emsdevice->product_id();
             obj["version"]   = emsdevice->version();
         }

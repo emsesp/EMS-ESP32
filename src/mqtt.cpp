@@ -37,7 +37,6 @@ uint32_t    Mqtt::publish_time_other_;
 uint32_t    Mqtt::publish_time_sensor_;
 
 std::vector<Mqtt::MQTTSubFunction> Mqtt::mqtt_subfunctions_;
-std::vector<Mqtt::MQTTCmdFunction> Mqtt::mqtt_cmdfunctions_;
 
 uint16_t                           Mqtt::mqtt_publish_fails_    = 0;
 size_t                             Mqtt::maximum_mqtt_messages_ = Mqtt::MAX_MQTT_MESSAGES;
@@ -67,10 +66,9 @@ void Mqtt::subscribe(const uint8_t device_type, const std::string & topic, mqtt_
     mqtt_subfunctions_.emplace_back(device_type, std::move(topic), std::move(message->topic), std::move(cb));
 }
 
-// adds a command and callback function for a specific device
-void Mqtt::add_command(const uint8_t device_type, const uint8_t device_id, const __FlashStringHelper * cmd, mqtt_cmdfunction_p cb) {
-    // subscribe to the command topic if it doesn't exist yet
-    std::string cmd_topic = EMSdevice::device_type_topic_name(device_type); // cmd topic for a device like "<device_type>_cmd" e.g. "boiler_cmd"
+// subscribe to the command topic if it doesn't exist yet
+void Mqtt::register_command(const uint8_t device_type, const uint8_t device_id, const __FlashStringHelper * cmd, cmdfunction_p cb) {
+    std::string cmd_topic = EMSdevice::device_type_2_device_name(device_type);
 
     bool exists = false;
     if (!mqtt_subfunctions_.empty()) {
@@ -84,9 +82,7 @@ void Mqtt::add_command(const uint8_t device_type, const uint8_t device_id, const
         Mqtt::subscribe(device_type, cmd_topic, nullptr); // use an empty function handler to signal this is a command function
     }
 
-    LOG_DEBUG(F("Registering MQTT cmd %s with topic %s"), uuid::read_flash_string(cmd).c_str(), EMSdevice::device_type_topic_name(device_type).c_str());
-
-    mqtt_cmdfunctions_.emplace_back(device_type, device_id, cmd, cb);
+    LOG_DEBUG(F("Registering MQTT cmd %s with topic %s"), uuid::read_flash_string(cmd).c_str(), EMSdevice::device_type_2_device_name(device_type).c_str());
 }
 
 // subscribe to an MQTT topic, and store the associated callback function. For generic functions not tied to a specific device
@@ -156,25 +152,13 @@ void Mqtt::show_mqtt(uuid::console::Shell & shell) {
     EMSESP::esp8266React.getMqttSettingsService()->read([&](MqttSettings & settings) { system_heartbeat = settings.system_heartbeat; });
     shell.printfln(F_(system_heartbeat_fmt), system_heartbeat ? F_(enabled) : F_(disabled));
 
-    shell.printfln(F("MQTT publish fails: %lu"), mqtt_publish_fails_);
+    shell.printfln(F("MQTT publish fails count: %lu"), mqtt_publish_fails_);
     shell.println();
 
     // show subscriptions
-    shell.printfln(F("MQTT subscriptions:"));
+    shell.printfln(F("MQTT topic subscriptions:"));
     for (const auto & mqtt_subfunction : mqtt_subfunctions_) {
-        // don't show commands if its homeassistant
-        if ((strncmp(mqtt_subfunction.full_topic_.c_str(), "homeassistant/", 13) == 0)) {
-            shell.printf(F(" topic: %s"), mqtt_subfunction.full_topic_.c_str());
-        } else {
-            // show the commands associated with this subscription
-            shell.printf(F(" topic: %s, [cmd]:"), mqtt_subfunction.full_topic_.c_str());
-            for (const auto & mqtt_cmdfunction : mqtt_cmdfunctions_) {
-                if (EMSdevice::device_type_topic_name(mqtt_cmdfunction.device_type_) == mqtt_subfunction.topic_) {
-                    shell.printf(F(" %s"), uuid::read_flash_string(mqtt_cmdfunction.cmd_).c_str());
-                }
-            }
-        }
-        shell.println();
+        shell.printfln(F(" %s"), mqtt_subfunction.full_topic_.c_str());
     }
     shell.println();
 
@@ -224,31 +208,6 @@ void Mqtt::incoming(const char * topic, const char * payload) {
 }
 #endif
 
-// calls a command, context is the device_type
-// id may be used to represent a heating circuit for example
-bool Mqtt::call_command(const uint8_t device_type, const char * cmd, const char * value, const int8_t id) {
-#ifdef EMSESP_DEBUG
-    if (id == -1) {
-        LOG_DEBUG(F("[DEBUG] Calling command %s, value %s, id is default"), cmd, value);
-    } else {
-        LOG_DEBUG(F("[DEBUG] Calling command %s, value %s, id is %d"), cmd, value, id);
-    }
-#endif
-
-    if (!mqtt_cmdfunctions_.empty()) {
-        for (const auto & cf : mqtt_cmdfunctions_) {
-            if (cf.device_type_ == device_type) {
-                const char * cf_cmd = uuid::read_flash_string(cf.cmd_).c_str();
-                if (strcmp(cf_cmd, cmd) == 0) {
-                    (cf.mqtt_cmdfunction_)(value, id); // call function, data needs to be a string and can be null
-                    return true;
-                }
-            }
-        }
-    }
-    return false;
-}
-
 // received an MQTT message that we subscribed too
 void Mqtt::on_message(const char * topic, const char * payload, size_t len) {
     if (len == 0) {
@@ -295,13 +254,13 @@ void Mqtt::on_message(const char * topic, const char * payload, size_t len) {
                 bool        cmd_known = false;
                 JsonVariant data      = doc["data"];
                 if (data.is<char *>()) {
-                    cmd_known = call_command(mf.device_type_, command, data.as<char *>(), n);
+                    cmd_known = Command::call_command(mf.device_type_, command, data.as<char *>(), n);
                 } else if (data.is<int>()) {
                     char data_str[10];
-                    cmd_known = call_command(mf.device_type_, command, Helpers::itoa(data_str, (int16_t)data.as<int>()), n);
+                    cmd_known = Command::call_command(mf.device_type_, command, Helpers::itoa(data_str, (int16_t)data.as<int>()), n);
                 } else if (data.is<float>()) {
                     char data_str[10];
-                    cmd_known = call_command(mf.device_type_, command, Helpers::render_value(data_str, (float)data.as<float>(), 2), n);
+                    cmd_known = Command::call_command(mf.device_type_, command, Helpers::render_value(data_str, (float)data.as<float>(), 2), n);
                 }
 
                 if (!cmd_known) {
@@ -417,7 +376,6 @@ void Mqtt::start() {
     });
 
     // create space for command buffer, to avoid heap memory fragmentation
-    mqtt_cmdfunctions_.reserve(40); // current count with boiler+thermostat is 37
     mqtt_subfunctions_.reserve(10);
 }
 
@@ -493,9 +451,9 @@ void Mqtt::on_connect() {
 
     resubscribe(); // in case this is a reconnect, re-subscribe again to all MQTT topics
 
-    // these commands respond to the topic "system_cmd" and take a payload like {cmd:"", data:"", id:""}
-    add_command(EMSdevice::DeviceType::SERVICEKEY, bus_id_, F("pin"), System::mqtt_command_pin);
-    add_command(EMSdevice::DeviceType::SERVICEKEY, bus_id_, F("send"), System::mqtt_command_send);
+    // these commands respond to the topic "system" and take a payload like {cmd:"", data:"", id:""}
+    Command::add_command(EMSdevice::DeviceType::SERVICEKEY, bus_id_, F("pin"), System::command_pin);
+    Command::add_command(EMSdevice::DeviceType::SERVICEKEY, bus_id_, F("send"), System::command_send);
 
     LOG_INFO(F("MQTT connected"));
 }

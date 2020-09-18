@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - support for uploading compressed firmware binaries
 - add wWType to MQTT publish
 - option to set the MQTT retain flag
+- HTTP REST API, e.g. http://ems-esp/api?device=boiler&cmd=wwtemp&data=20&id=1
+- `show commands` command
 
 ### Fixed
 - fix wwontime readback
@@ -21,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - renamed wWCircPumpType to wWChargeType
 - Installation doc moved to wiki
+- Removed the _cmd from the MQTT topic names
 
 ### Removed
 -

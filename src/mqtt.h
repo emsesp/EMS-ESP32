@@ -32,6 +32,7 @@
 #include "helpers.h"
 #include "system.h"
 #include "console.h"
+#include "command.h"
 
 #include <uuid/log.h>
 
@@ -44,7 +45,7 @@ using uuid::console::Shell;
 namespace emsesp {
 
 using mqtt_subfunction_p = std::function<void(const char * message)>;
-using mqtt_cmdfunction_p = std::function<void(const char * data, const int8_t id)>;
+using cmdfunction_p = std::function<bool(const char * data, const int8_t id)>;
 
 struct MqttMessage {
     ~MqttMessage() = default;
@@ -85,7 +86,7 @@ class Mqtt {
     static void subscribe(const std::string & topic, mqtt_subfunction_p cb);
     static void resubscribe();
 
-    static void add_command(const uint8_t device_type, const uint8_t device_id, const __FlashStringHelper * cmd, mqtt_cmdfunction_p cb);
+    static void register_command(const uint8_t device_type, const uint8_t device_id, const __FlashStringHelper * cmd, cmdfunction_p cb);
 
     static void publish(const std::string & topic, const std::string & payload);
     static void publish(const std::string & topic, const JsonDocument & payload);
@@ -103,8 +104,6 @@ class Mqtt {
     static void show_mqtt(uuid::console::Shell & shell);
 
     static void on_connect();
-
-    static bool call_command(const uint8_t device_type, const char * cmd, const char * value, const int8_t id);
 
     void disconnect() {
         mqttClient_->disconnect();
@@ -124,24 +123,6 @@ class Mqtt {
 
     static void reset_publish_fails() {
         mqtt_publish_fails_ = 0;
-    }
-
-    struct MQTTCmdFunction {
-        uint8_t                     device_type_;
-        uint8_t                     device_id_;
-        const __FlashStringHelper * cmd_;
-        mqtt_cmdfunction_p          mqtt_cmdfunction_;
-
-        MQTTCmdFunction(uint8_t device_type, uint8_t device_id, const __FlashStringHelper * cmd, mqtt_cmdfunction_p mqtt_cmdfunction)
-            : device_type_(device_type)
-            , device_id_(device_id)
-            , cmd_(cmd)
-            , mqtt_cmdfunction_(mqtt_cmdfunction) {
-        }
-    };
-
-    static std::vector<MQTTCmdFunction> commands() {
-        return mqtt_cmdfunctions_;
     }
 
   private:
@@ -199,7 +180,6 @@ class Mqtt {
     };
 
     static std::vector<MQTTSubFunction> mqtt_subfunctions_; // list of mqtt subscribe callbacks for all devices
-    static std::vector<MQTTCmdFunction> mqtt_cmdfunctions_; // list of commands
 
     uint32_t last_mqtt_poll_          = 0;
     uint32_t last_publish_boiler_     = 0;

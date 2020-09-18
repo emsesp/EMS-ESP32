@@ -37,6 +37,7 @@
 #include "EMSESPStatusService.h"
 #include "EMSESPDevicesService.h"
 #include "EMSESPSettingsService.h"
+#include "EMSESPAPIService.h"
 
 #include "emsdevice.h"
 #include "emsfactory.h"
@@ -47,6 +48,7 @@
 #include "console.h"
 #include "shower.h"
 #include "roomcontrol.h"
+#include "command.h"
 
 #define WATCH_ID_NONE 0 // no watch id set
 
@@ -162,6 +164,7 @@ class EMSESP {
     static EMSESPSettingsService emsespSettingsService;
     static EMSESPStatusService   emsespStatusService;
     static EMSESPDevicesService  emsespDevicesService;
+    static EMSESPAPIService      emsespAPIService;
 
     static uuid::log::Logger logger() {
         return logger_;

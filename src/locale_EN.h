@@ -61,11 +61,20 @@ MAKE_PSTR_WORD(ssid)
 MAKE_PSTR_WORD(heartbeat)
 MAKE_PSTR_WORD(users)
 MAKE_PSTR_WORD(master)
-MAKE_PSTR_WORD(test)
 MAKE_PSTR_WORD(pin)
+
+#if defined(EMSESP_DEBUG)
+MAKE_PSTR_WORD(test)
+#endif
 
 // for commands
 MAKE_PSTR_WORD(call)
+MAKE_PSTR_WORD(cmd)
+MAKE_PSTR_WORD(id)
+MAKE_PSTR_WORD(device)
+MAKE_PSTR_WORD(data)
+MAKE_PSTR_WORD(command)
+MAKE_PSTR_WORD(commands)
 
 // devices
 MAKE_PSTR_WORD(boiler)
@@ -104,7 +113,6 @@ MAKE_PSTR(degrees, "°C")
 MAKE_PSTR(asterisks, "********")
 MAKE_PSTR(n_mandatory, "<n>")
 MAKE_PSTR(n_optional, "[n]")
-MAKE_PSTR(gpio_mandatory, "<gpio>")
 MAKE_PSTR(data_optional, "[data]")
 MAKE_PSTR(typeid_mandatory, "<type ID>")
 MAKE_PSTR(deviceid_mandatory, "<device ID>")
