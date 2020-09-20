@@ -1,4 +1,4 @@
-name: EMS-ESP C/C++ make
+name: EMS-ESP C++ make
 
 on:
   push:
