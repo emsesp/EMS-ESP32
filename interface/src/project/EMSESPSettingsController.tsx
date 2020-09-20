@@ -48,7 +48,7 @@ function EMSESPSettingsControllerForm(props: EMSESPSettingsControllerFormProps) 
         <ValidatorForm onSubmit={saveData}>
             <Box bgcolor="info.main" p={2} mt={2} mb={2}>
                 <Typography variant="body1">
-                    Customize EMS-ESP by modifying the default settings here. Refer to the <Link href="https://emsesp.github.io/docs/#/Configure-firmware" color="primary">{'Wiki'}</Link>&nbsp;for descriptions of each setting.
+                    Customize EMS-ESP by modifying the default settings here. Refer to the <Link href="https://emsesp.github.io/docs/#/Configure-firmware?id=settings" color="primary">{'Documentation'}</Link>&nbsp;for descriptions of each setting.
                 </Typography>
             </Box>
             <br></br>
@@ -179,6 +179,20 @@ function EMSESPSettingsControllerForm(props: EMSESPSettingsControllerFormProps) 
                     />
                 }
                 label="Shower Alert"
+            />
+            <br></br>
+            <Typography variant="h6" color="primary" >
+                API
+            </Typography>
+            <BlockFormControlLabel
+                control={
+                    <Checkbox
+                        checked={data.api_enabled}
+                        onChange={handleValueChange('api_enabled')}
+                        value="api_enabled"
+                    />
+                }
+                label="Enable WEB API (for write commands)"
             />
             <br></br>
             <Typography variant="h6" color="primary" >

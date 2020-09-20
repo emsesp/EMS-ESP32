@@ -25,6 +25,7 @@
 #include <uuid/log.h>
 
 #include "emsdevice.h"
+#include "emsesp.h"
 #include "telegram.h"
 #include "helpers.h"
 #include "mqtt.h"
@@ -44,7 +45,9 @@ class Solar : public EMSdevice {
   private:
     static uuid::log::Logger logger_;
 
-    void console_commands();
+    void console_commands(Shell & shell, unsigned int context);
+    bool export_values(JsonObject & doc);
+    bool command_info(const char * value, const int8_t id, JsonObject & output);
 
     int16_t  collectorTemp_          = EMS_VALUE_SHORT_NOTSET; // TS1: Temperature sensor for collector array 1
     int16_t  tankBottomTemp_         = EMS_VALUE_SHORT_NOTSET; // TS2: Temperature sensor 1 cylinder, bottom (solar thermal system)
@@ -65,7 +68,8 @@ class Solar : public EMSdevice {
     uint8_t availabilityFlag_ = EMS_VALUE_BOOL_NOTSET;
     uint8_t configFlag_       = EMS_VALUE_BOOL_NOTSET;
     uint8_t userFlag_         = EMS_VALUE_BOOL_NOTSET;
-    bool    changed_          = false;
+
+    bool changed_ = false;
 
     void process_SM10Monitor(std::shared_ptr<const Telegram> telegram);
     void process_SM100Monitor(std::shared_ptr<const Telegram> telegram);

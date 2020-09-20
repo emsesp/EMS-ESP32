@@ -34,21 +34,22 @@ using uuid::console::Shell;
 
 namespace emsesp {
 
-using cmdfunction_p = std::function<bool(const char * data, const int8_t id)>;
+using cmdfunction_p      = std::function<bool(const char * data, const int8_t id)>;
+using cmdfunction_json_p = std::function<bool(const char * data, const int8_t id, JsonObject & output)>;
 
 class Command {
   public:
     struct CmdFunction {
         uint8_t                     device_type_; // DeviceType::
-        uint8_t                     device_id_;
         const __FlashStringHelper * cmd_;
         cmdfunction_p               cmdfunction_;
+        cmdfunction_json_p          cmdfunction_json_;
 
-        CmdFunction(uint8_t device_type, uint8_t device_id, const __FlashStringHelper * cmd, cmdfunction_p cmdfunction)
+        CmdFunction(const uint8_t device_type, const __FlashStringHelper * cmd, cmdfunction_p cmdfunction, cmdfunction_json_p cmdfunction_json)
             : device_type_(device_type)
-            , device_id_(device_id)
             , cmd_(cmd)
-            , cmdfunction_(cmdfunction) {
+            , cmdfunction_(cmdfunction)
+            , cmdfunction_json_(cmdfunction_json) {
         }
     };
 
@@ -56,10 +57,11 @@ class Command {
         return cmdfunctions_;
     }
 
-    static bool call_command(const uint8_t device_type, const char * cmd, const char * value, const int8_t id);
-    static void add_command(const uint8_t device_type, const uint8_t device_id, const __FlashStringHelper * cmd, cmdfunction_p cb);
-    static void show_all_commands(uuid::console::Shell & shell);
-    static void show_commands(uuid::console::Shell & shell);
+    static bool call(const uint8_t device_type, const char * cmd, const char * value, const int8_t id, JsonObject & output);
+    static void add(const uint8_t device_type, const uint8_t device_id, const __FlashStringHelper * cmd, cmdfunction_p cb);
+    static void add_with_json(const uint8_t device_type, const __FlashStringHelper * cmd, cmdfunction_json_p cb);
+    static void show_all(uuid::console::Shell & shell);
+    static void show(uuid::console::Shell & shell);
     static void add_context_commands(unsigned int context);
     static bool find(const uint8_t device_type, const char * cmd);
 
@@ -68,7 +70,7 @@ class Command {
   private:
     static uuid::log::Logger logger_;
 
-    static void    show_commands(uuid::console::Shell & shell, uint8_t device_type);
+    static void    show(uuid::console::Shell & shell, uint8_t device_type);
     static uint8_t context_2_device_type(unsigned int context);
 };
 

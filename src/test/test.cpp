@@ -28,7 +28,7 @@ namespace emsesp {
 // used with the 'test' command, under su/admin
 void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
     if (command == "default") {
-        run_test(shell, "mqtt"); // add the default test case here
+        run_test(shell, "cmd"); // add the default test case here
     }
 
     if (command.empty()) {
@@ -565,6 +565,45 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         EMSESP::txservice_.flush_tx_queue();
     }
 
+    if (command == "cmd") {
+        shell.printfln(F("Testing Commands..."));
+
+        // change MQTT format
+        EMSESP::esp8266React.getMqttSettingsService()->updateWithoutPropagation([&](MqttSettings & mqttSettings) {
+            mqttSettings.mqtt_format = MQTT_format::SINGLE;
+            // mqttSettings.mqtt_format = MQTT_format::NESTED;
+            // mqttSettings.mqtt_format = MQTT_format::HA;
+            return StateUpdateResult::CHANGED;
+        });
+
+        EMSESP::add_context_menus(); // need to add this as it happens later in the code
+        shell.invoke_command("su");
+        shell.invoke_command("system");
+        shell.invoke_command("call");
+        shell.invoke_command("call info");
+        shell.invoke_command("exit");
+
+        char system_topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
+        strcpy(system_topic, "ems-esp/system");
+        EMSESP::mqtt_.incoming(system_topic, "{\"cmd\":\"info\"}"); // this should fail
+
+        // add a thermostat with 3 HCs
+        std::string version("1.2.3");
+        EMSESP::add_device(0x10, 192, version, EMSdevice::Brand::JUNKERS); // FW120
+        uart_telegram({0x90, 0x00, 0xFF, 0x00, 0x00, 0x6F, 0x00, 0xCF, 0x21, 0x2E, 0x20, 0x00, 0x2E, 0x24,
+                       0x03, 0x25, 0x03, 0x03, 0x01, 0x03, 0x25, 0x00, 0xC8, 0x00, 0x00, 0x11, 0x01, 0x03}); // HC1
+        uart_telegram({0x90, 0x00, 0xFF, 0x00, 0x00, 0x70, 0x00, 0xCF, 0x22, 0x2F, 0x10, 0x00, 0x2E, 0x24,
+                       0x03, 0x25, 0x03, 0x03, 0x01, 0x03, 0x25, 0x00, 0xC8, 0x00, 0x00, 0x11, 0x01, 0x03}); // HC2
+        uart_telegram({0x90, 0x00, 0xFF, 0x00, 0x00, 0x71, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00});       // HC3
+        EMSESP::add_context_menus();                                                                         // need to add this as it happens later in the code
+        shell.invoke_command("thermostat");
+        shell.invoke_command("show");
+        shell.invoke_command("call");
+        shell.invoke_command("call info");
+        shell.invoke_command("exit");
+        shell.invoke_command("show mqtt");
+    }
+
     if (command == "pin") {
         shell.printfln(F("Testing pin..."));
 
@@ -578,6 +617,11 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
 
     if (command == "mqtt") {
         shell.printfln(F("Testing MQTT..."));
+
+        // EMSESP::esp8266React.getMqttSettingsService()->updateWithoutPropagation([&](MqttSettings & mqttSettings) {
+        //     mqttSettings.mqtt_format = MQTT_format::SINGLE;
+        //     return StateUpdateResult::CHANGED;
+        // });
 
         // add a boiler
         // question: do we need to set the mask?
@@ -700,6 +744,8 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
 
         // check for error "[emsesp] No telegram type handler found for ID 0x255 (src 0x20, dest 0x00)"
         rx_telegram({0xA0, 0x00, 0xFF, 0x00, 0x01, 0x55, 0x00, 0x1A});
+
+        EMSESP::add_context_menus(); // need to add this as it happens later in the code
     }
 
     // finally dump to console

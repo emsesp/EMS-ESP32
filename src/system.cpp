@@ -152,8 +152,16 @@ void System::start() {
     EMSESP::esp8266React.getWiFiSettingsService()->read(
         [&](WiFiSettings & wifiSettings) { LOG_INFO(F("System %s booted (EMS-ESP version %s)"), wifiSettings.hostname.c_str(), EMSESP_APP_VERSION); });
 
-    syslog_init();     // init SysLog
-    set_led();         // init LED
+    syslog_init(); // init SysLog
+    set_led();     // init LED
+
+    // these commands respond to the topic "system" and take a payload like {cmd:"", data:"", id:""}
+    EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) {
+        Command::add(EMSdevice::DeviceType::SERVICEKEY, settings.ems_bus_id, F("pin"), System::command_pin);
+        Command::add(EMSdevice::DeviceType::SERVICEKEY, settings.ems_bus_id, F("send"), System::command_send);
+        Command::add_with_json(EMSdevice::DeviceType::SERVICEKEY, F("info"), System::command_info);
+    });
+
     EMSESP::init_tx(); // start UART
 }
 
@@ -241,7 +249,7 @@ void System::send_heartbeat() {
     doc["rxfails"]          = EMSESP::rxservice_.telegram_error_count();
     doc["adc"]              = analog_; //analogRead(A0);
 
-    Mqtt::publish_retain(F("heartbeat"), doc, false); // send to MQTT with retain off. This will add to MQTT queue.
+    Mqtt::publish_retain(F("heartbeat"), doc.as<JsonObject>(), false); // send to MQTT with retain off. This will add to MQTT queue.
 }
 
 // measure and moving average adc
@@ -806,14 +814,14 @@ bool System::check_upgrade() {
 
 // export all settings to JSON text
 // http://ems-esp/api?device=system&cmd=info
-String System::export_settings() {
-    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_LARGE> doc;
-
-#ifndef EMSESP_STANDALONE
-    JsonObject root = doc.to<JsonObject>();
+// value and id are ignored
+bool System::command_info(const char * value, const int8_t id, JsonObject & output) {
+#ifdef EMSESP_STANDALONE
+    output["test"] = "testing";
+#else
 
     EMSESP::esp8266React.getWiFiSettingsService()->read([&](WiFiSettings & settings) {
-        JsonObject node = root.createNestedObject("WIFI");
+        JsonObject node = output.createNestedObject("WIFI");
         node["ssid"]    = settings.ssid;
         // node["password"]         = settings.password;
         node["hostname"]         = settings.hostname;
@@ -826,7 +834,7 @@ String System::export_settings() {
     });
 
     EMSESP::esp8266React.getAPSettingsService()->read([&](APSettings & settings) {
-        JsonObject node        = root.createNestedObject("AP");
+        JsonObject node        = output.createNestedObject("AP");
         node["provision_mode"] = settings.provisionMode;
         node["ssid"]           = settings.ssid;
         // node["password"]       = settings.password;
@@ -836,7 +844,7 @@ String System::export_settings() {
     });
 
     EMSESP::esp8266React.getMqttSettingsService()->read([&](MqttSettings & settings) {
-        JsonObject node  = root.createNestedObject("MQTT");
+        JsonObject node  = output.createNestedObject("MQTT");
         node["enabled"]  = settings.enabled;
         node["host"]     = settings.host;
         node["port"]     = settings.port;
@@ -859,7 +867,7 @@ String System::export_settings() {
     });
 
     EMSESP::esp8266React.getNTPSettingsService()->read([&](NTPSettings & settings) {
-        JsonObject node   = root.createNestedObject("NTP");
+        JsonObject node   = output.createNestedObject("NTP");
         node["enabled"]   = settings.enabled;
         node["server"]    = settings.server;
         node["tz_label"]  = settings.tzLabel;
@@ -867,18 +875,33 @@ String System::export_settings() {
     });
 
     EMSESP::esp8266React.getOTASettingsService()->read([&](OTASettings & settings) {
-        JsonObject node = root.createNestedObject("OTA");
+        JsonObject node = output.createNestedObject("OTA");
         node["enabled"] = settings.enabled;
         node["port"]    = settings.port;
         // node["password"] = settings.password;
     });
 
+    EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) {
+        JsonObject node              = output.createNestedObject("Settings");
+        node["tx_mode"]              = settings.tx_mode;
+        node["ems_bus_id"]           = settings.ems_bus_id;
+        node["syslog_level"]         = settings.syslog_level;
+        node["syslog_mark_interval"] = settings.syslog_mark_interval;
+        node["syslog_host"]          = settings.syslog_host;
+        node["master_thermostat"]    = settings.master_thermostat;
+        node["shower_timer"]         = settings.shower_timer;
+        node["shower_alert"]         = settings.shower_alert;
+        node["rx_gpio"]              = settings.rx_gpio;
+        node["tx_gpio"]              = settings.tx_gpio;
+        node["dallas_gpio"]          = settings.dallas_gpio;
+        node["dallas_parasite"]      = settings.dallas_parasite;
+        node["led_gpio"]             = settings.led_gpio;
+        node["hide_led"]             = settings.hide_led;
+    });
+
 #endif
-
-    String buffer;
-    serializeJsonPretty(doc, buffer);
-
-    return buffer;
+    return true;
 }
+
 
 } // namespace emsesp

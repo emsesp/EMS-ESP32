@@ -50,6 +50,7 @@ class Boiler : public EMSdevice {
     void console_commands(Shell & shell, unsigned int context);
     void register_mqtt_ha_config();
     void check_active();
+    bool export_values(JsonObject & doc);
 
     uint8_t last_boilerState = 0xFF; // remember last state of heating and warm water on/off
     uint8_t mqtt_format_;            // single, nested or ha
@@ -76,7 +77,7 @@ class Boiler : public EMSdevice {
 
     // MC10Status
     uint16_t wwMixTemperature_          = EMS_VALUE_USHORT_NOTSET; // mengertemperatuur
-    uint16_t wwBufferBoilerTemperature_ = EMS_VALUE_USHORT_NOTSET; // bufferboilertemperatuur
+    uint16_t wwBufferBoilerTemperature_ = EMS_VALUE_USHORT_NOTSET; // bufferboilertemperature
 
     // UBAMonitorFast - 0x18 on EMS1
     uint8_t  selFlowTemp_        = EMS_VALUE_UINT_NOTSET;   // Selected flow temperature
@@ -145,6 +146,8 @@ class Boiler : public EMSdevice {
     uint8_t tap_water_active_ = EMS_VALUE_BOOL_NOTSET; // Hot tap water is on/off
     uint8_t heating_active_   = EMS_VALUE_BOOL_NOTSET; // Central heating is on/off
     uint8_t pumpMod2_         = EMS_VALUE_UINT_NOTSET; // heatpump modulation from 0xE3 (heatpumps)
+
+    bool command_info(const char * value, const int8_t id, JsonObject & output);
 
     void process_UBAParameterWW(std::shared_ptr<const Telegram> telegram);
     void process_UBAMonitorFast(std::shared_ptr<const Telegram> telegram);

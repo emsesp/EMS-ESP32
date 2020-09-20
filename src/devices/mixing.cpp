@@ -53,10 +53,24 @@ Mixing::Mixing(uint8_t device_type, uint8_t device_id, uint8_t product_id, const
     if (flags == EMSdevice::EMS_DEVICE_FLAG_IPM) {
         register_telegram_type(0x010C, F("IPMSetMessage"), false, [&](std::shared_ptr<const Telegram> t) { process_IPMStatusMessage(t); });
     }
+
+    // API call
+    Command::add_with_json(this->device_type(), F("info"), [&](const char * value, const int8_t id, JsonObject & object) {
+        return command_info(value, id, object);
+    });
 }
 
 // add context submenu
 void Mixing::add_context_menu() {
+    // TODO support for multiple mixing units from a single menu, similar to set master with thermostat
+    /*
+    EMSESPShell::commands->add_command(ShellContext::MAIN,
+                                       CommandFlags::USER,
+                                       flash_string_vector{F_(mixing)},
+                                       [&](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
+                                           Mixing::console_commands(shell, ShellContext::MIXING);
+                                       });
+                                       */
 }
 
 // output json to web UI
@@ -89,7 +103,24 @@ bool Mixing::updated_values() {
 }
 
 // add console commands
-void Mixing::console_commands() {
+void Mixing::console_commands(Shell & shell, unsigned int context) {
+    EMSESPShell::commands->add_command(ShellContext::MIXING,
+                                       CommandFlags::ADMIN,
+                                       flash_string_vector{F_(read)},
+                                       flash_string_vector{F_(typeid_mandatory)},
+                                       [=](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) {
+                                           uint16_t type_id = Helpers::hextoint(arguments.front().c_str());
+                                           EMSESP::set_read_id(type_id);
+                                           EMSESP::send_read_request(type_id, device_id());
+                                       });
+
+    EMSESPShell::commands->add_command(ShellContext::MIXING,
+                                       CommandFlags::USER,
+                                       flash_string_vector{F_(show)},
+                                       [&](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) { show_values(shell); });
+
+    // enter the context
+    Console::enter_custom_context(shell, context);
 }
 
 // display all values into the shell console
@@ -117,49 +148,66 @@ void Mixing::show_values(uuid::console::Shell & shell) {
     shell.println();
 }
 
+bool Mixing::command_info(const char * value, const int8_t id, JsonObject & output) {
+    return (export_values(output));
+}
+
 // publish values via MQTT
 // ideally we should group up all the mixing units together into a nested JSON but for now we'll send them individually
 void Mixing::publish_values() {
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
-    char                                           s[5]; // for formatting strings
+    JsonObject                                     output = doc.to<JsonObject>();
+    if (export_values(output)) {
+        char topic[30];
+        char s[5];
+        strlcpy(topic, "mixing_data", 30);
+        strlcat(topic, Helpers::itoa(s, device_id() - 0x20 + 1), 30); // append hc to topic
+        Mqtt::publish(topic, doc.as<JsonObject>());
+    }
+}
+
+// creates JSON doc from values
+// returns false if empty
+bool Mixing::export_values(JsonObject & output) {
+    char s[5]; // for formatting strings
 
     switch (type_) {
     case Type::HC:
-        doc["type"] = "hc";
+        output["type"] = "hc";
         if (Helpers::hasValue(flowTemp_)) {
-            doc["flowTemp"] = (float)flowTemp_ / 10;
+            output["flowTemp"] = (float)flowTemp_ / 10;
         }
         if (Helpers::hasValue(flowSetTemp_)) {
-            doc["flowSetTemp"] = flowSetTemp_;
+            output["flowSetTemp"] = flowSetTemp_;
         }
         if (Helpers::hasValue(pump_)) {
-            doc["pumpStatus"] = Helpers::render_value(s, pump_, EMS_VALUE_BOOL);
+            output["pumpStatus"] = Helpers::render_value(s, pump_, EMS_VALUE_BOOL);
         }
         if (Helpers::hasValue(status_)) {
-            doc["valveStatus"] = status_;
+            output["valveStatus"] = status_;
         }
         break;
+
     case Type::WWC:
-        doc["type"] = "wwc";
+        output["type"] = "wwc";
         if (Helpers::hasValue(flowTemp_)) {
-            doc["wwTemp"] = (float)flowTemp_ / 10;
+            output["wwTemp"] = (float)flowTemp_ / 10;
         }
         if (Helpers::hasValue(pump_)) {
-            doc["pumpStatus"] = pump_;
+            output["pumpStatus"] = pump_;
         }
         if (Helpers::hasValue(status_)) {
-            doc["tempStatus"] = status_;
+            output["tempStatus"] = status_;
         }
         break;
+
     case Type::NONE:
     default:
-        return;
+        return false;
+        break;
     }
 
-    char topic[30];
-    strlcpy(topic, "mixing_data", 30);
-    strlcat(topic, Helpers::itoa(s, device_id() - 0x20 + 1), 30); // append hc to topic
-    Mqtt::publish(topic, doc);
+    return output.size();
 }
 
 // heating circuits 0x02D7, 0x02D8 etc...

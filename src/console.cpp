@@ -153,7 +153,7 @@ void EMSESPShell::add_console_commands() {
     commands->add_command(ShellContext::MAIN,
                           CommandFlags::USER,
                           flash_string_vector{F_(show), F_(commands)},
-                          [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) { Command::show_all_commands(shell); });
+                          [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) { Command::show_all(shell); });
 
     commands->add_command(
         ShellContext::MAIN,
@@ -466,8 +466,10 @@ void Console::load_standard_commands(unsigned int context) {
 
 
     // load the commands (console & mqtt topics) for this specific context
-    Command::add_context_commands(context);
-
+    // unless it's main (the root)
+    if (context != ShellContext::MAIN) {
+        Command::add_context_commands(context);
+    }
 }
 
 // prompt, change per context
@@ -484,6 +486,9 @@ std::string EMSESPShell::context_text() {
 
     case ShellContext::THERMOSTAT:
         return std::string{"/thermostat"};
+
+    case ShellContext::SENSOR:
+        return std::string{"/sensor"};
 
     default:
         return std::string{};
@@ -576,7 +581,6 @@ void Console::start() {
 #if defined(EMSESP_FORCE_SERIAL)
     shell->log_level(uuid::log::Level::DEBUG);
 #endif
-
 
 #if defined(EMSESP_STANDALONE)
     // always start in su/admin mode when running tests

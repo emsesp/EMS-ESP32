@@ -25,6 +25,7 @@
 #include <uuid/log.h>
 
 #include "emsdevice.h"
+#include "emsesp.h"
 #include "telegram.h"
 #include "helpers.h"
 #include "mqtt.h"
@@ -44,7 +45,9 @@ class Mixing : public EMSdevice {
   private:
     static uuid::log::Logger logger_;
 
-    void console_commands();
+    void console_commands(Shell & shell, unsigned int context);
+    bool export_values(JsonObject & doc);
+    bool command_info(const char * value, const int8_t id, JsonObject & output);
 
     void process_MMPLUSStatusMessage_HC(std::shared_ptr<const Telegram> telegram);
     void process_MMPLUSStatusMessage_WWC(std::shared_ptr<const Telegram> telegram);
@@ -66,7 +69,8 @@ class Mixing : public EMSdevice {
     int8_t   status_      = EMS_VALUE_UINT_NOTSET;
     uint8_t  flowSetTemp_ = EMS_VALUE_UINT_NOTSET;
     Type     type_        = Type::NONE;
-    bool     changed_     = false;
+
+    bool changed_ = false;
 };
 
 } // namespace emsesp

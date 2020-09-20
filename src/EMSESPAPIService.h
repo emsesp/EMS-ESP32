@@ -33,7 +33,6 @@ class EMSESPAPIService {
 
   private:
     void emsespAPIService(AsyncWebServerRequest * request);
-
 };
 
 } // namespace emsesp

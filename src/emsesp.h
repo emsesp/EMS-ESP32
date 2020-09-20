@@ -44,7 +44,7 @@
 #include "telegram.h"
 #include "mqtt.h"
 #include "system.h"
-#include "sensors.h"
+#include "sensor.h"
 #include "console.h"
 #include "shower.h"
 #include "roomcontrol.h"
@@ -108,8 +108,8 @@ class EMSESP {
 
     static void incoming_telegram(uint8_t * data, const uint8_t length);
 
-    static const std::vector<Sensors::Device> sensor_devices() {
-        return sensors_.devices();
+    static const std::vector<Sensor::Device> sensor_devices() {
+        return sensor_.devices();
     }
 
     enum Watch : uint8_t { WATCH_OFF, WATCH_ON, WATCH_RAW };
@@ -153,7 +153,7 @@ class EMSESP {
     // services
     static Mqtt      mqtt_;
     static System    system_;
-    static Sensors   sensors_;
+    static Sensor    sensor_;
     static Console   console_;
     static Shower    shower_;
     static RxService rxservice_;

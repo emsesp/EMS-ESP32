@@ -10,7 +10,7 @@
 
 #include "../../src/system.h"
 #include "../../src/mqtt.h"
-#include "../../src/sensors.h"
+#include "../../src/sensor.h"
 
 #define MQTT_RECONNECTION_DELAY 1000
 

@@ -108,6 +108,7 @@ class Thermostat : public EMSdevice {
 
     void console_commands(Shell & shell, unsigned int context);
     void add_commands();
+    bool export_values(uint8_t mqtt_format, JsonObject & doc);
 
     // specific thermostat characteristics, stripping the option bits at pos 6 and 7
     inline uint8_t model() const {
@@ -221,6 +222,7 @@ class Thermostat : public EMSdevice {
     std::shared_ptr<Thermostat::HeatingCircuit> heating_circuit(const uint8_t hc_num);
 
     void register_mqtt_ha_config(uint8_t hc_num);
+    bool command_info(const char * value, const int8_t id, JsonObject & output);
 
     void process_RCOutdoorTemp(std::shared_ptr<const Telegram> telegram);
     void process_IBASettings(std::shared_ptr<const Telegram> telegram);

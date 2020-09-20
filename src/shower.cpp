@@ -129,7 +129,7 @@ void Shower::publish_values() {
         doc["duration"] = s;
     }
 
-    Mqtt::publish(F("shower_data"), doc);
+    Mqtt::publish(F("shower_data"), doc.as<JsonObject>());
 }
 
 } // namespace emsesp

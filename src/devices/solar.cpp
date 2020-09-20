@@ -47,10 +47,28 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
         register_telegram_type(0x0103, F("ISM1StatusMessage"), true, [&](std::shared_ptr<const Telegram> t) { process_ISM1StatusMessage(t); });
         register_telegram_type(0x0101, F("ISM1Set"), false, [&](std::shared_ptr<const Telegram> t) { process_ISM1Set(t); });
     }
+
+    // API call
+    Command::add_with_json(this->device_type(), F("info"), [&](const char * value, const int8_t id, JsonObject & object) {
+        return command_info(value, id, object);
+    });
+}
+
+bool Solar::command_info(const char * value, const int8_t id, JsonObject & output) {
+    return (export_values(output));
 }
 
 // context submenu
 void Solar::add_context_menu() {
+    // TODO support for multiple solar units from a single menu, similar to set master with thermostat
+    /*
+    EMSESPShell::commands->add_command(ShellContext::MAIN,
+                                       CommandFlags::USER,
+                                       flash_string_vector{F_(solar)},
+                                       [&](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
+                                           Solar::console_commands(shell, ShellContext::SOLAR);
+                                       });
+                                       */
 }
 
 // print to web
@@ -109,69 +127,74 @@ void Solar::show_values(uuid::console::Shell & shell) {
 // publish values via MQTT
 void Solar::publish_values() {
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
+    JsonObject                                      output = doc.to<JsonObject>();
+    if (export_values(output)) {
+        Mqtt::publish(F("sm_data"), doc.as<JsonObject>());
+    }
+}
 
+// creates JSON doc from values
+// returns false if empty
+bool Solar::export_values(JsonObject & output) {
     char s[10]; // for formatting strings
 
     if (Helpers::hasValue(collectorTemp_)) {
-        doc["collectorTemp"] = (float)collectorTemp_ / 10;
+        output["collectorTemp"] = (float)collectorTemp_ / 10;
     }
 
     if (Helpers::hasValue(tankBottomTemp_)) {
-        doc["tankBottomTemp"] = (float)tankBottomTemp_ / 10;
+        output["tankBottomTemp"] = (float)tankBottomTemp_ / 10;
     }
 
     if (Helpers::hasValue(tankBottomTemp2_)) {
-        doc["tankBottomTemp2"] = (float)tankBottomTemp2_ / 10;
+        output["tankBottomTemp2"] = (float)tankBottomTemp2_ / 10;
     }
 
     if (Helpers::hasValue(heatExchangerTemp_)) {
-        doc["heatExchangerTemp"] = (float)heatExchangerTemp_ / 10;
+        output["heatExchangerTemp"] = (float)heatExchangerTemp_ / 10;
     }
 
     if (Helpers::hasValue(solarPumpModulation_)) {
-        doc["solarPumpModulation"] = solarPumpModulation_;
+        output["solarPumpModulation"] = solarPumpModulation_;
     }
 
     if (Helpers::hasValue(cylinderPumpModulation_)) {
-        doc["cylinderPumpModulation"] = cylinderPumpModulation_;
+        output["cylinderPumpModulation"] = cylinderPumpModulation_;
     }
 
     if (Helpers::hasValue(solarPump_, EMS_VALUE_BOOL)) {
-        doc["solarPump"] = Helpers::render_value(s, solarPump_, EMS_VALUE_BOOL);
+        output["solarPump"] = Helpers::render_value(s, solarPump_, EMS_VALUE_BOOL);
     }
 
     if (Helpers::hasValue(valveStatus_, EMS_VALUE_BOOL)) {
-        doc["valveStatus"] = Helpers::render_value(s, valveStatus_, EMS_VALUE_BOOL);
+        output["valveStatus"] = Helpers::render_value(s, valveStatus_, EMS_VALUE_BOOL);
     }
 
     if (Helpers::hasValue(pumpWorkMin_)) {
-        doc["pumpWorkMin"] = pumpWorkMin_;
+        output["pumpWorkMin"] = pumpWorkMin_;
     }
 
     if (Helpers::hasValue(tankHeated_, EMS_VALUE_BOOL)) {
-        doc["tankHeated"] = Helpers::render_value(s, tankHeated_, EMS_VALUE_BOOL);
+        output["tankHeated"] = Helpers::render_value(s, tankHeated_, EMS_VALUE_BOOL);
     }
 
     if (Helpers::hasValue(collectorShutdown_, EMS_VALUE_BOOL)) {
-        doc["collectorShutdown"] = Helpers::render_value(s, collectorShutdown_, EMS_VALUE_BOOL);
+        output["collectorShutdown"] = Helpers::render_value(s, collectorShutdown_, EMS_VALUE_BOOL);
     }
 
     if (Helpers::hasValue(energyLastHour_)) {
-        doc["energyLastHour"] = (float)energyLastHour_ / 10;
+        output["energyLastHour"] = (float)energyLastHour_ / 10;
     }
 
     if (Helpers::hasValue(energyToday_)) {
-        doc["energyToday"] = energyToday_;
+        output["energyToday"] = energyToday_;
     }
 
     if (Helpers::hasValue(energyTotal_)) {
-        doc["energyTotal"] = (float)energyTotal_ / 10;
+        output["energyTotal"] = (float)energyTotal_ / 10;
     }
 
-    // if we have data, publish it
-    if (!doc.isNull()) {
-        Mqtt::publish(F("sm_data"), doc);
-    }
+    return output.size();
 }
 
 // check to see if values have been updated
@@ -184,7 +207,24 @@ bool Solar::updated_values() {
 }
 
 // add console commands
-void Solar::console_commands() {
+void Solar::console_commands(Shell & shell, unsigned int context) {
+    EMSESPShell::commands->add_command(ShellContext::SOLAR,
+                                       CommandFlags::ADMIN,
+                                       flash_string_vector{F_(read)},
+                                       flash_string_vector{F_(typeid_mandatory)},
+                                       [=](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) {
+                                           uint16_t type_id = Helpers::hextoint(arguments.front().c_str());
+                                           EMSESP::set_read_id(type_id);
+                                           EMSESP::send_read_request(type_id, device_id());
+                                       });
+
+    EMSESPShell::commands->add_command(ShellContext::SOLAR,
+                                       CommandFlags::USER,
+                                       flash_string_vector{F_(show)},
+                                       [&](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) { show_values(shell); });
+
+    // enter the context
+    Console::enter_custom_context(shell, context);
 }
 
 // SM10Monitor - type 0x97

@@ -30,9 +30,13 @@ EMSESPAPIService::EMSESPAPIService(AsyncWebServer * server) {
 
 // http://ems-esp/api?device=boiler&cmd=wwtemp&data=20&id=1
 void EMSESPAPIService::emsespAPIService(AsyncWebServerRequest * request) {
+    // see if the API is enabled
+    bool api_enabled;
+    EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) { api_enabled = settings.api_enabled; });
+
     // must have device and cmd parameters
     if ((!request->hasParam(F_(device))) || (!request->hasParam(F_(cmd)))) {
-        request->send(400, "text/plain", F("invalid syntax"));
+        request->send(400, "text/plain", F("Invalid syntax"));
         return;
     }
 
@@ -40,26 +44,16 @@ void EMSESPAPIService::emsespAPIService(AsyncWebServerRequest * request) {
     String  device      = request->getParam(F_(device))->value();
     uint8_t device_type = EMSdevice::device_name_2_device_type(device.c_str());
     if (device_type == emsesp::EMSdevice::DeviceType::UNKNOWN) {
-        request->send(400, "text/plain", F("invalid device"));
+        request->send(400, "text/plain", F("Invalid device"));
         return;
     }
 
     // get cmd, we know we have one
     String cmd = request->getParam(F_(cmd))->value();
 
-    // first test for special service commands
-    // e.g. http://ems-esp/api?device=system&cmd=info
-    if (device.equals("system")) {
-        if (cmd.equals("info")) {
-            request->send(200, "text/plain", System::export_settings());
-            EMSESP::logger().info(F("Sent settings json to web UI"));
-            return;
-        }
-    }
-
     // look up command in our list
     if (!Command::find(device_type, cmd.c_str())) {
-        request->send(400, "text/plain", F("invalid cmd"));
+        request->send(400, "text/plain", F("Invalid cmd"));
         return;
     }
 
@@ -73,31 +67,54 @@ void EMSESPAPIService::emsespAPIService(AsyncWebServerRequest * request) {
         id = request->getParam(F_(id))->value();
     }
 
+    DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_LARGE);
+    JsonObject          output = doc.to<JsonObject>();
+    bool                ok     = false;
+
     // execute the command
-    bool ok = false;
     if (data.isEmpty()) {
-        ok = Command::call_command(device_type, cmd.c_str(), nullptr, -1); // command only
-    } else if (id.isEmpty()) {
-        ok = Command::call_command(device_type, cmd.c_str(), data.c_str(), -1); // only ID
+        ok = Command::call(device_type, cmd.c_str(), nullptr, -1, output); // command only
     } else {
-        ok = Command::call_command(device_type, cmd.c_str(), data.c_str(), id.toInt()); // has cmd, data and id
+        if (api_enabled) {
+            // we only allow commands with parameters if the API is enabled
+            if (id.isEmpty()) {
+                ok = Command::call(device_type, cmd.c_str(), data.c_str(), -1, output); // only ID
+            } else {
+                ok = Command::call(device_type, cmd.c_str(), data.c_str(), id.toInt(), output); // has cmd, data and id
+            }
+        } else {
+            request->send(401, "text/plain", F("Unauthorized"));
+            return;
+        }
     }
 
 // debug
 #if defined(EMSESP_DEBUG)
-    std::string output(200, '\0');
-    snprintf_P(&output[0],
-               output.capacity() + 1,
+    std::string debug(200, '\0');
+    snprintf_P(&debug[0],
+               debug.capacity() + 1,
                PSTR("API: device=%s cmd=%s data=%s id=%s [%s]"),
                device.c_str(),
                cmd.c_str(),
                data.c_str(),
                id.c_str(),
-               ok ? F("OK") : F("Failed"));
-    EMSESP::logger().info(output.c_str());
+               ok ? F("OK") : F("Invalid"));
+    EMSESP::logger().info(debug.c_str());
+    if (output.size()) {
+        char buffer2[EMSESP_MAX_JSON_SIZE_LARGE];
+        serializeJson(doc, buffer2);
+        EMSESP::logger().info("output (max 255 chars): %s", buffer2);
+    }
 #endif
 
-    request->send(200, "text/plain", ok ? F("OK") : F("Failed"));
+    // if we have returned data in JSON format, send this to the WEB
+    if (output.size()) {
+        char buffer[EMSESP_MAX_JSON_SIZE_LARGE];
+        serializeJson(doc, buffer);
+        request->send(200, "text/plain", buffer);
+    } else {
+        request->send(200, "text/plain", ok ? F("OK") : F("Invalid"));
+    }
 }
 
 } // namespace emsesp

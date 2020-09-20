@@ -69,6 +69,12 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     register_mqtt_cmd(F("burnperiod"), [&](const char * value, const int8_t id) { return set_burn_period(value, id); });
     register_mqtt_cmd(F("pumpdelay"), [&](const char * value, const int8_t id) { return set_pump_delay(value, id); });
 
+    // API call
+    // Command::add_with_json(this->device_type(), F("info"), Boiler::command_info);
+    Command::add_with_json(this->device_type(), F("info"), [&](const char * value, const int8_t id, JsonObject & object) {
+        return command_info(value, id, object);
+    });
+
     EMSESP::esp8266React.getMqttSettingsService()->read([&](MqttSettings & settings) {
         mqtt_format_ = settings.mqtt_format; // single, nested or ha
 
@@ -140,208 +146,217 @@ void Boiler::device_info_web(JsonArray & root) {
     render_value_json(root, "", F("Heat Pump modulation"), pumpMod2_, F_(percent));
 }
 
+bool Boiler::command_info(const char * value, const int8_t id, JsonObject & output) {
+    return (export_values(output));
+}
+
+// creates JSON doc from values
+// returns false if empty
+bool Boiler::export_values(JsonObject & output) {
+    char s[10]; // for formatting strings
+
+    if (Helpers::hasValue(wWComfort_)) {
+        if (wWComfort_ == 0x00) {
+            output["wWComfort"] = "Hot";
+        } else if (wWComfort_ == 0xD8) {
+            output["wWComfort"] = "Eco";
+        } else if (wWComfort_ == 0xEC) {
+            output["wWComfort"] = "Intelligent";
+        }
+    }
+
+    if (Helpers::hasValue(wWSelTemp_)) {
+        output["wWSelTemp"] = wWSelTemp_;
+    }
+    if (Helpers::hasValue(wWSetTmp_)) {
+        output["wWSetTemp"] = wWSetTmp_;
+    }
+    if (Helpers::hasValue(wWDisinfectTemp_)) {
+        output["wWDisinfectionTemp"] = wWDisinfectTemp_;
+    }
+    if (Helpers::hasValue(selFlowTemp_)) {
+        output["selFlowTemp"] = selFlowTemp_;
+    }
+    if (Helpers::hasValue(selBurnPow_)) {
+        output["selBurnPow"] = selBurnPow_;
+    }
+    if (Helpers::hasValue(curBurnPow_)) {
+        output["curBurnPow"] = curBurnPow_;
+    }
+    if (Helpers::hasValue(pumpMod_)) {
+        output["pumpMod"] = pumpMod_;
+    }
+    if (Helpers::hasValue(pumpMod2_)) {
+        output["pumpMod2"] = pumpMod2_;
+    }
+    if (wWType_ == 0) { // no output if not set
+        output["wWType"] = F("off");
+    } else if (wWType_ == 1) {
+        output["wWType"] = F("flow");
+    } else if (wWType_ == 2) {
+        output["wWType"] = F("buffered flow");
+    } else if (wWType_ == 3) {
+        output["wWType"] = F("buffer");
+    } else if (wWType_ == 4) {
+        output["wWType"] = F("layered buffer");
+    }
+    if (Helpers::hasValue(wWChargeType_, EMS_VALUE_BOOL)) {
+        output["wWChargeType"] = wWChargeType_ ? "valve" : "pump";
+    }
+    if (Helpers::hasValue(wWCircPump_, EMS_VALUE_BOOL)) {
+        output["wWCircPump"] = Helpers::render_value(s, wWCircPump_, EMS_VALUE_BOOL);
+    }
+    if (Helpers::hasValue(wWCircPumpMode_)) {
+        output["wWCiPuMode"] = wWCircPumpMode_;
+    }
+    if (Helpers::hasValue(wWCirc_, EMS_VALUE_BOOL)) {
+        output["wWCirc"] = Helpers::render_value(s, wWCirc_, EMS_VALUE_BOOL);
+    }
+    if (Helpers::hasValue(extTemp_)) {
+        output["outdoorTemp"] = (float)extTemp_ / 10;
+    }
+    if (Helpers::hasValue(wWCurTmp_)) {
+        output["wWCurTmp"] = (float)wWCurTmp_ / 10;
+    }
+    if (Helpers::hasValue(wWCurTmp2_)) {
+        output["wWCurTmp2"] = (float)wWCurTmp2_ / 10;
+    }
+    if (Helpers::hasValue(wWCurFlow_)) {
+        output["wWCurFlow"] = (float)wWCurFlow_ / 10;
+    }
+    if (Helpers::hasValue(curFlowTemp_)) {
+        output["curFlowTemp"] = (float)curFlowTemp_ / 10;
+    }
+    if (Helpers::hasValue(retTemp_)) {
+        output["retTemp"] = (float)retTemp_ / 10;
+    }
+    if (Helpers::hasValue(switchTemp_)) {
+        output["switchTemp"] = (float)switchTemp_ / 10;
+    }
+    if (Helpers::hasValue(sysPress_)) {
+        output["sysPress"] = (float)sysPress_ / 10;
+    }
+    if (Helpers::hasValue(boilTemp_)) {
+        output["boilTemp"] = (float)boilTemp_ / 10;
+    }
+    if (Helpers::hasValue(wwStorageTemp1_)) {
+        output["wwStorageTemp1"] = (float)wwStorageTemp1_ / 10;
+    }
+    if (Helpers::hasValue(wwStorageTemp2_)) {
+        output["wwStorageTemp2"] = (float)wwStorageTemp2_ / 10;
+    }
+    if (Helpers::hasValue(exhaustTemp_)) {
+        output["exhaustTemp"] = (float)exhaustTemp_ / 10;
+    }
+    if (Helpers::hasValue(wWActivated_, EMS_VALUE_BOOL)) {
+        output["wWActivated"] = Helpers::render_value(s, wWActivated_, EMS_VALUE_BOOL);
+    }
+    if (Helpers::hasValue(wWOneTime_, EMS_VALUE_BOOL)) {
+        output["wWOnetime"] = Helpers::render_value(s, wWOneTime_, EMS_VALUE_BOOL);
+    }
+    if (Helpers::hasValue(wWDisinfecting_, EMS_VALUE_BOOL)) {
+        output["wWDisinfecting"] = Helpers::render_value(s, wWDisinfecting_, EMS_VALUE_BOOL);
+    }
+    if (Helpers::hasValue(wWReadiness_, EMS_VALUE_BOOL)) {
+        output["wWReady"] = Helpers::render_value(s, wWReadiness_, EMS_VALUE_BOOL);
+    }
+    if (Helpers::hasValue(wWRecharging_, EMS_VALUE_BOOL)) {
+        output["wWRecharge"] = Helpers::render_value(s, wWRecharging_, EMS_VALUE_BOOL);
+    }
+    if (Helpers::hasValue(wWTemperatureOK_, EMS_VALUE_BOOL)) {
+        output["wWTempOK"] = Helpers::render_value(s, wWTemperatureOK_, EMS_VALUE_BOOL);
+    }
+    if (Helpers::hasValue(wWCirc_, EMS_VALUE_BOOL)) {
+        output["wWCirc"] = Helpers::render_value(s, wWCirc_, EMS_VALUE_BOOL);
+    }
+    if (Helpers::hasValue(burnGas_, EMS_VALUE_BOOL)) {
+        output["burnGas"] = Helpers::render_value(s, burnGas_, EMS_VALUE_BOOL);
+    }
+    if (Helpers::hasValue(flameCurr_)) {
+        output["flameCurr"] = (float)(int16_t)flameCurr_ / 10;
+    }
+    if (Helpers::hasValue(heatPmp_, EMS_VALUE_BOOL)) {
+        output["heatPump"] = Helpers::render_value(s, heatPmp_, EMS_VALUE_BOOL);
+    }
+    if (Helpers::hasValue(fanWork_, EMS_VALUE_BOOL)) {
+        output["fanWork"] = Helpers::render_value(s, fanWork_, EMS_VALUE_BOOL);
+    }
+    if (Helpers::hasValue(ignWork_, EMS_VALUE_BOOL)) {
+        output["ignWork"] = Helpers::render_value(s, ignWork_, EMS_VALUE_BOOL);
+    }
+    if (Helpers::hasValue(wWHeat_, EMS_VALUE_BOOL)) {
+        output["wWHeat"] = Helpers::render_value(s, wWHeat_, EMS_VALUE_BOOL);
+    }
+    if (Helpers::hasValue(heating_activated_, EMS_VALUE_BOOL)) {
+        output["heatingActivated"] = Helpers::render_value(s, heating_activated_, EMS_VALUE_BOOL);
+    }
+    if (Helpers::hasValue(heating_temp_)) {
+        output["heatingTemp"] = heating_temp_;
+    }
+    if (Helpers::hasValue(pump_mod_max_)) {
+        output["pumpModMax"] = pump_mod_max_;
+    }
+    if (Helpers::hasValue(pump_mod_min_)) {
+        output["pumpModMin"] = pump_mod_min_;
+    }
+    if (Helpers::hasValue(pumpDelay_)) {
+        output["pumpDelay"] = pumpDelay_;
+    }
+    if (Helpers::hasValue(burnPeriod_)) {
+        output["burnMinPeriod"] = burnPeriod_;
+    }
+    if (Helpers::hasValue(burnPowermin_)) {
+        output["burnMinPower"] = burnPowermin_;
+    }
+    if (Helpers::hasValue(burnPowermax_)) {
+        output["burnMaxPower"] = burnPowermax_;
+    }
+    if (Helpers::hasValue(boilTemp_on_)) {
+        output["boilHystOn"] = boilTemp_on_;
+    }
+    if (Helpers::hasValue(boilTemp_off_)) {
+        output["boilHystOff"] = boilTemp_off_;
+    }
+    if (Helpers::hasValue(setFlowTemp_)) {
+        output["setFlowTemp"] = setFlowTemp_;
+    }
+    if (Helpers::hasValue(setWWPumpPow_)) {
+        output["wWSetPumpPower"] = setWWPumpPow_;
+    }
+    if (Helpers::hasValue(wWStarts_)) {
+        output["wWStarts"] = wWStarts_;
+    }
+    if (Helpers::hasValue(wWWorkM_)) {
+        output["wWWorkM"] = wWWorkM_;
+    }
+    if (Helpers::hasValue(UBAuptime_)) {
+        output["UBAuptime"] = UBAuptime_;
+    }
+    if (Helpers::hasValue(burnStarts_)) {
+        output["burnStarts"] = burnStarts_;
+    }
+    if (Helpers::hasValue(burnWorkMin_)) {
+        output["burnWorkMin"] = burnWorkMin_;
+    }
+    if (Helpers::hasValue(heatWorkMin_)) {
+        output["heatWorkMin"] = heatWorkMin_;
+    }
+    if (Helpers::hasValue(serviceCode_)) {
+        output["serviceCode"]       = serviceCodeChar_;
+        output["serviceCodeNumber"] = serviceCode_;
+    }
+
+    return (output.size());
+}
+
 // publish values via MQTT
 void Boiler::publish_values() {
     // const size_t        capacity = JSON_OBJECT_SIZE(56); // must recalculate if more objects addded https://arduinojson.org/v6/assistant/
     // DynamicJsonDocument doc(capacity);
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_LARGE> doc;
-
-    char s[10]; // for formatting strings
-
-    if (Helpers::hasValue(wWComfort_)) {
-        if (wWComfort_ == 0x00) {
-            doc["wWComfort"] = "Hot";
-        } else if (wWComfort_ == 0xD8) {
-            doc["wWComfort"] = "Eco";
-        } else if (wWComfort_ == 0xEC) {
-            doc["wWComfort"] = "Intelligent";
-        }
-    }
-
-    if (Helpers::hasValue(wWSelTemp_)) {
-        doc["wWSelTemp"] = wWSelTemp_;
-    }
-    if (Helpers::hasValue(wWSetTmp_)) {
-        doc["wWSetTemp"] = wWSetTmp_;
-    }
-    if (Helpers::hasValue(wWDisinfectTemp_)) {
-        doc["wWDisinfectionTemp"] = wWDisinfectTemp_;
-    }
-    if (Helpers::hasValue(selFlowTemp_)) {
-        doc["selFlowTemp"] = selFlowTemp_;
-    }
-    if (Helpers::hasValue(selBurnPow_)) {
-        doc["selBurnPow"] = selBurnPow_;
-    }
-    if (Helpers::hasValue(curBurnPow_)) {
-        doc["curBurnPow"] = curBurnPow_;
-    }
-    if (Helpers::hasValue(pumpMod_)) {
-        doc["pumpMod"] = pumpMod_;
-    }
-    if (Helpers::hasValue(pumpMod2_)) {
-        doc["pumpMod2"] = pumpMod2_;
-    }
-    if (wWType_ == 0) { // no output if not set
-        doc["wWType"] = F("off");
-    } else if (wWType_ == 1) {
-        doc["wWType"] = F("flow");
-    } else if (wWType_ == 2) {
-        doc["wWType"] = F("buffered flow");
-    } else if (wWType_ == 3) {
-        doc["wWType"] = F("buffer");
-    } else if (wWType_ == 4) {
-        doc["wWType"] = F("layered buffer");
-    }
-    if (Helpers::hasValue(wWChargeType_, EMS_VALUE_BOOL)) {
-        doc["wWChargeType"] = wWChargeType_ ? "valve" : "pump";
-    }
-    if (Helpers::hasValue(wWCircPump_, EMS_VALUE_BOOL)) {
-        doc["wWCircPump"] = Helpers::render_value(s, wWCircPump_, EMS_VALUE_BOOL);
-    }
-    if (Helpers::hasValue(wWCircPumpMode_)) {
-        doc["wWCiPuMode"] = wWCircPumpMode_;
-    }
-    if (Helpers::hasValue(wWCirc_, EMS_VALUE_BOOL)) {
-        doc["wWCirc"] = Helpers::render_value(s, wWCirc_, EMS_VALUE_BOOL);
-    }
-    if (Helpers::hasValue(extTemp_)) {
-        doc["outdoorTemp"] = (float)extTemp_ / 10;
-    }
-    if (Helpers::hasValue(wWCurTmp_)) {
-        doc["wWCurTmp"] = (float)wWCurTmp_ / 10;
-    }
-    if (Helpers::hasValue(wWCurTmp2_)) {
-        doc["wWCurTmp2"] = (float)wWCurTmp2_ / 10;
-    }
-    if (Helpers::hasValue(wWCurFlow_)) {
-        doc["wWCurFlow"] = (float)wWCurFlow_ / 10;
-    }
-    if (Helpers::hasValue(curFlowTemp_)) {
-        doc["curFlowTemp"] = (float)curFlowTemp_ / 10;
-    }
-    if (Helpers::hasValue(retTemp_)) {
-        doc["retTemp"] = (float)retTemp_ / 10;
-    }
-    if (Helpers::hasValue(switchTemp_)) {
-        doc["switchTemp"] = (float)switchTemp_ / 10;
-    }
-    if (Helpers::hasValue(sysPress_)) {
-        doc["sysPress"] = (float)sysPress_ / 10;
-    }
-    if (Helpers::hasValue(boilTemp_)) {
-        doc["boilTemp"] = (float)boilTemp_ / 10;
-    }
-    if (Helpers::hasValue(wwStorageTemp1_)) {
-        doc["wwStorageTemp1"] = (float)wwStorageTemp1_ / 10;
-    }
-    if (Helpers::hasValue(wwStorageTemp2_)) {
-        doc["wwStorageTemp2"] = (float)wwStorageTemp2_ / 10;
-    }
-    if (Helpers::hasValue(exhaustTemp_)) {
-        doc["exhaustTemp"] = (float)exhaustTemp_ / 10;
-    }
-    if (Helpers::hasValue(wWActivated_, EMS_VALUE_BOOL)) {
-        doc["wWActivated"] = Helpers::render_value(s, wWActivated_, EMS_VALUE_BOOL);
-    }
-    if (Helpers::hasValue(wWOneTime_, EMS_VALUE_BOOL)) {
-        doc["wWOnetime"] = Helpers::render_value(s, wWOneTime_, EMS_VALUE_BOOL);
-    }
-    if (Helpers::hasValue(wWDisinfecting_, EMS_VALUE_BOOL)) {
-        doc["wWDisinfecting"] = Helpers::render_value(s, wWDisinfecting_, EMS_VALUE_BOOL);
-    }
-    if (Helpers::hasValue(wWReadiness_, EMS_VALUE_BOOL)) {
-        doc["wWReady"] = Helpers::render_value(s, wWReadiness_, EMS_VALUE_BOOL);
-    }
-    if (Helpers::hasValue(wWRecharging_, EMS_VALUE_BOOL)) {
-        doc["wWRecharge"] = Helpers::render_value(s, wWRecharging_, EMS_VALUE_BOOL);
-    }
-    if (Helpers::hasValue(wWTemperatureOK_, EMS_VALUE_BOOL)) {
-        doc["wWTempOK"] = Helpers::render_value(s, wWTemperatureOK_, EMS_VALUE_BOOL);
-    }
-    if (Helpers::hasValue(wWCirc_, EMS_VALUE_BOOL)) {
-        doc["wWCirc"] = Helpers::render_value(s, wWCirc_, EMS_VALUE_BOOL);
-    }
-    if (Helpers::hasValue(burnGas_, EMS_VALUE_BOOL)) {
-        doc["burnGas"] = Helpers::render_value(s, burnGas_, EMS_VALUE_BOOL);
-    }
-    if (Helpers::hasValue(flameCurr_)) {
-        doc["flameCurr"] = (float)(int16_t)flameCurr_ / 10;
-    }
-    if (Helpers::hasValue(heatPmp_, EMS_VALUE_BOOL)) {
-        doc["heatPump"] = Helpers::render_value(s, heatPmp_, EMS_VALUE_BOOL);
-    }
-    if (Helpers::hasValue(fanWork_, EMS_VALUE_BOOL)) {
-        doc["fanWork"] = Helpers::render_value(s, fanWork_, EMS_VALUE_BOOL);
-    }
-    if (Helpers::hasValue(ignWork_, EMS_VALUE_BOOL)) {
-        doc["ignWork"] = Helpers::render_value(s, ignWork_, EMS_VALUE_BOOL);
-    }
-    if (Helpers::hasValue(wWHeat_, EMS_VALUE_BOOL)) {
-        doc["wWHeat"] = Helpers::render_value(s, wWHeat_, EMS_VALUE_BOOL);
-    }
-    if (Helpers::hasValue(heating_activated_, EMS_VALUE_BOOL)) {
-        doc["heatingActivated"] = Helpers::render_value(s, heating_activated_, EMS_VALUE_BOOL);
-    }
-    if (Helpers::hasValue(heating_temp_)) {
-        doc["heatingTemp"] = heating_temp_;
-    }
-    if (Helpers::hasValue(pump_mod_max_)) {
-        doc["pumpModMax"] = pump_mod_max_;
-    }
-    if (Helpers::hasValue(pump_mod_min_)) {
-        doc["pumpModMin"] = pump_mod_min_;
-    }
-    if (Helpers::hasValue(pumpDelay_)) {
-        doc["pumpDelay"] = pumpDelay_;
-    }
-    if (Helpers::hasValue(burnPeriod_)) {
-        doc["burnMinPeriod"] = burnPeriod_;
-    }
-    if (Helpers::hasValue(burnPowermin_)) {
-        doc["burnMinPower"] = burnPowermin_;
-    }
-    if (Helpers::hasValue(burnPowermax_)) {
-        doc["burnMaxPower"] = burnPowermax_;
-    }
-    if (Helpers::hasValue(boilTemp_on_)) {
-        doc["boilHystOn"] = boilTemp_on_;
-    }
-    if (Helpers::hasValue(boilTemp_off_)) {
-        doc["boilHystOff"] = boilTemp_off_;
-    }
-    if (Helpers::hasValue(setFlowTemp_)) {
-        doc["setFlowTemp"] = setFlowTemp_;
-    }
-    if (Helpers::hasValue(setWWPumpPow_)) {
-        doc["wWSetPumpPower"] = setWWPumpPow_;
-    }
-    if (Helpers::hasValue(wWStarts_)) {
-        doc["wWStarts"] = wWStarts_;
-    }
-    if (Helpers::hasValue(wWWorkM_)) {
-        doc["wWWorkM"] = wWWorkM_;
-    }
-    if (Helpers::hasValue(UBAuptime_)) {
-        doc["UBAuptime"] = UBAuptime_;
-    }
-    if (Helpers::hasValue(burnStarts_)) {
-        doc["burnStarts"] = burnStarts_;
-    }
-    if (Helpers::hasValue(burnWorkMin_)) {
-        doc["burnWorkMin"] = burnWorkMin_;
-    }
-    if (Helpers::hasValue(heatWorkMin_)) {
-        doc["heatWorkMin"] = heatWorkMin_;
-    }
-    if (Helpers::hasValue(serviceCode_)) {
-        doc["serviceCode"]       = serviceCodeChar_;
-        doc["serviceCodeNumber"] = serviceCode_;
-    }
-
-    // if we have data, publish it
-    if (!doc.isNull()) {
-        Mqtt::publish(F("boiler_data"), doc);
+    JsonObject                                     output = doc.to<JsonObject>();
+    if (export_values(output)) {
+        Mqtt::publish(F("boiler_data"), doc.as<JsonObject>());
     }
 }
 
@@ -801,6 +816,7 @@ bool Boiler::set_heating_activated(const char * value, const int8_t id) {
     if (!Helpers::value2bool(value, v)) {
         return false;
     }
+
     LOG_INFO(F("Setting boiler heating "), v ? "on" : "off");
     if (get_toggle_fetch(EMS_TYPE_UBAParametersPlus)) {
         write_command(EMS_TYPE_UBAParametersPlus, 0, v ? 0x01 : 0, EMS_TYPE_UBAParametersPlus);

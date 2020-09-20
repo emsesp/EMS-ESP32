@@ -23,6 +23,7 @@ class DummySettings {
     bool     shower_timer         = false;
     bool     shower_alert         = false;
     bool     hide_led             = false;
+    bool     api_enabled          = true;
     uint16_t publish_time         = 10; // seconds
     uint8_t  mqtt_format          = 3;  // 1=single, 2=nested, 3=ha, 4=custom
     uint8_t  mqtt_qos             = 0;

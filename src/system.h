@@ -50,12 +50,13 @@ class System {
     static bool command_pin(const char * value, const int8_t id);
     static bool command_send(const char * value, const int8_t id);
 
+    static bool command_info(const char * value, const int8_t id, JsonObject & output);
+
     static uint8_t free_mem();
     static void    upload_status(bool in_progress);
     static bool    upload_status();
     static void    show_mem(const char * note);
     static void    set_led();
-    static String  export_settings();
 
     bool check_upgrade();
     void syslog_init();

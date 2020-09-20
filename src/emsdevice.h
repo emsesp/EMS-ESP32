@@ -229,6 +229,7 @@ class EMSdevice {
 
     enum DeviceType : uint8_t {
         SERVICEKEY = 0, // this is us (EMS-ESP)
+        SENSOR,         // for internal dallas sensors
         BOILER,
         THERMOSTAT,
         MIXING,

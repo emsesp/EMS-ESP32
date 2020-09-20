@@ -111,6 +111,10 @@ uint8_t EMSdevice::device_name_2_device_type(const char * topic) {
         return DeviceType::MIXING;
     }
 
+    if (strcmp(topic, "sensor") == 0) {
+        return DeviceType::SENSOR;
+    }
+
     return DeviceType::UNKNOWN;
 }
 
@@ -286,7 +290,7 @@ void EMSdevice::register_mqtt_topic(const std::string & topic, mqtt_subfunction_
 
 // add command to library
 void EMSdevice::register_mqtt_cmd(const __FlashStringHelper * cmd, cmdfunction_p f) {
-    Command::add_command(this->device_type_, this->device_id_, cmd, f);
+    Command::add(this->device_type_, this->device_id_, cmd, f);
 }
 
 // register a call back function for a specific telegram type

@@ -51,7 +51,7 @@ TxService EMSESP::txservice_; // outgoing Telegram Tx handler
 Mqtt      EMSESP::mqtt_;      // mqtt handler
 System    EMSESP::system_;    // core system services
 Console   EMSESP::console_;   // telnet and serial console
-Sensors   EMSESP::sensors_;   // Dallas sensors
+Sensor    EMSESP::sensor_;    // Dallas sensors
 Shower    EMSESP::shower_;    // Shower logic
 
 // static/common variables
@@ -311,8 +311,8 @@ void EMSESP::publish_other_values() {
 
 void EMSESP::publish_sensor_values(const bool force) {
     if (Mqtt::connected()) {
-        if (sensors_.updated_values() || force) {
-            sensors_.publish_values();
+        if (sensor_.updated_values() || force) {
+            sensor_.publish_values();
         }
     }
 }
@@ -337,7 +337,7 @@ void EMSESP::publish_response(std::shared_ptr<const Telegram> telegram) {
         doc["value"] = value;
     }
 
-    Mqtt::publish(F("response"), doc);
+    Mqtt::publish(F("response"), doc.as<JsonObject>());
 }
 
 // search for recognized device_ids : Me, All, otherwise print hex value
@@ -845,7 +845,7 @@ void EMSESP::start() {
     mqtt_.start();     // mqtt init
     system_.start();   // starts syslog, uart, sets version, initializes LED. Requires pre-loaded settings.
     shower_.start();   // initialize shower timer and shower alert
-    sensors_.start();  // dallas external sensors
+    sensor_.start();   // dallas external sensors
     webServer.begin(); // start web server
 
     emsdevices.reserve(5); // reserve space for initially 5 devices to avoid mem
@@ -868,7 +868,7 @@ void EMSESP::loop() {
 
     system_.loop();    // does LED and checks system health, and syslog service
     shower_.loop();    // check for shower on/off
-    sensors_.loop();   // this will also send out via MQTT
+    sensor_.loop();    // this will also send out via MQTT
     mqtt_.loop();      // sends out anything in the queue via MQTT
     console_.loop();   // telnet/serial console
     rxservice_.loop(); // process any incoming Rx telegrams

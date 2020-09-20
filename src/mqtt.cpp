@@ -28,7 +28,6 @@ AsyncMqttClient * Mqtt::mqttClient_;
 std::string Mqtt::hostname_;
 uint8_t     Mqtt::mqtt_qos_;
 bool        Mqtt::mqtt_retain_;
-uint8_t     Mqtt::bus_id_;
 uint32_t    Mqtt::publish_time_boiler_;
 uint32_t    Mqtt::publish_time_thermostat_;
 uint32_t    Mqtt::publish_time_solar_;
@@ -148,9 +147,10 @@ void Mqtt::loop() {
 void Mqtt::show_mqtt(uuid::console::Shell & shell) {
     shell.printfln(F("MQTT is %s"), connected() ? uuid::read_flash_string(F_(connected)).c_str() : uuid::read_flash_string(F_(disconnected)).c_str());
 
-    bool system_heartbeat;
-    EMSESP::esp8266React.getMqttSettingsService()->read([&](MqttSettings & settings) { system_heartbeat = settings.system_heartbeat; });
-    shell.printfln(F_(system_heartbeat_fmt), system_heartbeat ? F_(enabled) : F_(disabled));
+    EMSESP::esp8266React.getMqttSettingsService()->read([&](MqttSettings & settings) {
+        shell.printfln(F_(mqtt_heartbeat_fmt), settings.system_heartbeat ? F_(enabled) : F_(disabled));
+        shell.printfln(F_(mqtt_format_fmt), settings.mqtt_format);
+    });
 
     shell.printfln(F("MQTT publish fails count: %lu"), mqtt_publish_fails_);
     shell.println();
@@ -253,14 +253,19 @@ void Mqtt::on_message(const char * topic, const char * payload, size_t len) {
 
                 bool        cmd_known = false;
                 JsonVariant data      = doc["data"];
+
+                JsonObject output; // empty object
+
                 if (data.is<char *>()) {
-                    cmd_known = Command::call_command(mf.device_type_, command, data.as<char *>(), n);
+                    cmd_known = Command::call(mf.device_type_, command, data.as<char *>(), n, output);
                 } else if (data.is<int>()) {
                     char data_str[10];
-                    cmd_known = Command::call_command(mf.device_type_, command, Helpers::itoa(data_str, (int16_t)data.as<int>()), n);
+                    cmd_known = Command::call(mf.device_type_, command, Helpers::itoa(data_str, (int16_t)data.as<int>()), n, output);
                 } else if (data.is<float>()) {
                     char data_str[10];
-                    cmd_known = Command::call_command(mf.device_type_, command, Helpers::render_value(data_str, (float)data.as<float>(), 2), n);
+                    cmd_known = Command::call(mf.device_type_, command, Helpers::render_value(data_str, (float)data.as<float>(), 2), n, output);
+                } else if (data.isNull()) {
+                    cmd_known = Command::call(mf.device_type_, command, "", n, output);
                 }
 
                 if (!cmd_known) {
@@ -335,8 +340,6 @@ void Mqtt::start() {
         mqtt_qos_                = mqttSettings.mqtt_qos;
         mqtt_retain_             = mqttSettings.mqtt_retain;
     });
-
-    EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) { bus_id_ = settings.ems_bus_id; });
 
     mqttClient_->onConnect([this](bool sessionPresent) { on_connect(); });
 
@@ -443,17 +446,13 @@ void Mqtt::on_connect() {
 #ifndef EMSESP_STANDALONE
     doc["ip"] = WiFi.localIP().toString();
 #endif
-    publish(F("info"), doc);
+    publish(F("info"), doc.as<JsonObject>());
 
     publish_retain(F("status"), "online", true); // say we're alive to the Last Will topic, with retain on
 
     reset_publish_fails(); // reset fail count to 0
 
     resubscribe(); // in case this is a reconnect, re-subscribe again to all MQTT topics
-
-    // these commands respond to the topic "system" and take a payload like {cmd:"", data:"", id:""}
-    Command::add_command(EMSdevice::DeviceType::SERVICEKEY, bus_id_, F("pin"), System::command_pin);
-    Command::add_command(EMSdevice::DeviceType::SERVICEKEY, bus_id_, F("send"), System::command_send);
 
     LOG_INFO(F("MQTT connected"));
 }
@@ -470,12 +469,14 @@ std::shared_ptr<const MqttMessage> Mqtt::queue_message(const uint8_t operation, 
     std::shared_ptr<MqttMessage> message;
     if ((strncmp(topic.c_str(), "homeassistant/", 13) == 0)) {
         // leave topic as it is
-        message = std::make_shared<MqttMessage>(operation, topic, std::move(payload), retain);
+        // message = std::make_shared<MqttMessage>(operation, topic, std::move(payload), retain);
+        message = std::make_shared<MqttMessage>(operation, topic, payload, retain);
+
     } else {
         // prefix the hostname
         std::string full_topic(50, '\0');
         snprintf_P(&full_topic[0], full_topic.capacity() + 1, PSTR("%s/%s"), Mqtt::hostname_.c_str(), topic.c_str());
-        message = std::make_shared<MqttMessage>(operation, full_topic, std::move(payload), retain);
+        message = std::make_shared<MqttMessage>(operation, full_topic, payload, retain);
     }
 
     // if the queue is full, make room but removing the last one
@@ -507,7 +508,7 @@ void Mqtt::publish(const __FlashStringHelper * topic, const std::string & payloa
     queue_publish_message(uuid::read_flash_string(topic), payload, mqtt_retain_);
 }
 
-void Mqtt::publish(const __FlashStringHelper * topic, const JsonDocument & payload) {
+void Mqtt::publish(const __FlashStringHelper * topic, const JsonObject & payload) {
     publish(uuid::read_flash_string(topic), payload);
 }
 
@@ -516,17 +517,17 @@ void Mqtt::publish_retain(const __FlashStringHelper * topic, const std::string &
     queue_publish_message(uuid::read_flash_string(topic), payload, retain);
 }
 
-void Mqtt::publish_retain(const std::string & topic, const JsonDocument & payload, bool retain) {
+void Mqtt::publish_retain(const std::string & topic, const JsonObject & payload, bool retain) {
     std::string payload_text;
     serializeJson(payload, payload_text); // convert json to string
     queue_publish_message(topic, payload_text, retain);
 }
 
-void Mqtt::publish_retain(const __FlashStringHelper * topic, const JsonDocument & payload, bool retain) {
+void Mqtt::publish_retain(const __FlashStringHelper * topic, const JsonObject & payload, bool retain) {
     publish_retain(uuid::read_flash_string(topic), payload, retain);
 }
 
-void Mqtt::publish(const std::string & topic, const JsonDocument & payload) {
+void Mqtt::publish(const std::string & topic, const JsonObject & payload) {
     std::string payload_text;
     serializeJson(payload, payload_text); // convert json to string
     queue_publish_message(topic, payload_text, mqtt_retain_);

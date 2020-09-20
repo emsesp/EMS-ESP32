@@ -45,7 +45,7 @@ using uuid::console::Shell;
 namespace emsesp {
 
 using mqtt_subfunction_p = std::function<void(const char * message)>;
-using cmdfunction_p = std::function<bool(const char * data, const int8_t id)>;
+using cmdfunction_p      = std::function<bool(const char * data, const int8_t id)>;
 
 struct MqttMessage {
     ~MqttMessage() = default;
@@ -55,7 +55,8 @@ struct MqttMessage {
     const std::string payload;
     const bool        retain;
 
-    MqttMessage(const uint8_t operation, const std::string & topic, const std::string && payload, bool retain)
+    //     MqttMessage(const uint8_t operation, const std::string & topic, const std::string && payload, bool retain)
+    MqttMessage(const uint8_t operation, const std::string & topic, const std::string & payload, bool retain)
         : operation(operation)
         , topic(topic)
         , payload(payload)
@@ -89,16 +90,16 @@ class Mqtt {
     static void register_command(const uint8_t device_type, const uint8_t device_id, const __FlashStringHelper * cmd, cmdfunction_p cb);
 
     static void publish(const std::string & topic, const std::string & payload);
-    static void publish(const std::string & topic, const JsonDocument & payload);
-    static void publish(const __FlashStringHelper * topic, const JsonDocument & payload);
+    static void publish(const std::string & topic, const JsonObject & payload);
+    static void publish(const __FlashStringHelper * topic, const JsonObject & payload);
     static void publish(const __FlashStringHelper * topic, const std::string & payload);
     static void publish(const std::string & topic, const bool value);
     static void publish(const __FlashStringHelper * topi, const bool value);
     static void publish(const std::string & topic);
 
-    static void publish_retain(const std::string & topic, const JsonDocument & payload, bool retain);
+    static void publish_retain(const std::string & topic, const JsonObject & payload, bool retain);
     static void publish_retain(const __FlashStringHelper * topic, const std::string & payload, bool retain);
-    static void publish_retain(const __FlashStringHelper * topic, const JsonDocument & payload, bool retain);
+    static void publish_retain(const __FlashStringHelper * topic, const JsonObject & payload, bool retain);
 
     static void show_topic_handlers(uuid::console::Shell & shell, const uint8_t device_type);
     static void show_mqtt(uuid::console::Shell & shell);
@@ -194,7 +195,6 @@ class Mqtt {
     static uint8_t     mqtt_qos_;
     static bool        mqtt_retain_;
     static uint32_t    publish_time_;
-    static uint8_t     bus_id_;
     static uint32_t    publish_time_boiler_;
     static uint32_t    publish_time_thermostat_;
     static uint32_t    publish_time_solar_;

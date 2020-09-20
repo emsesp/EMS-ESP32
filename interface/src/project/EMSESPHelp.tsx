@@ -17,7 +17,7 @@ class EMSESPHelp extends Component {
                 </Box>
                 <br></br>
                 <Typography variant="body1" paragraph>
-                    Check for news and updates on the <Link href="https://emsesp.github.io/docs" color="primary">{'Wiki'}</Link>.
+                    Check for news and updates on the <Link href="https://emsesp.github.io/docs" color="primary">{'Documentation site'}</Link>.
                 </Typography>
                 <Typography variant="body1" paragraph>
                     For live community chat go to <Link href="https://gitter.im/EMS-ESP/community#" color="primary">{'Gitter'}</Link>.
