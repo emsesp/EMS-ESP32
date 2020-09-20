@@ -442,7 +442,8 @@ bool Thermostat::export_values(uint8_t mqtt_format, JsonObject & rootThermostat)
                 char s[3];
                 strlcpy(topic, "thermostat_data", 30);
                 strlcat(topic, Helpers::itoa(s, hc->hc_num()), 30); // append hc to topic
-                rootThermostat.clear();                             // clear object
+                Mqtt::publish(topic, rootThermostat);
+                rootThermostat.clear(); // clear object
             } else if (mqtt_format == MQTT_format::HA) {
                 // see if we have already registered this with HA MQTT Discovery, if not send the config
                 if (!hc->ha_registered()) {

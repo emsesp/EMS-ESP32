@@ -279,7 +279,7 @@ bool Sensor::command_info(const char * value, const int8_t id, JsonObject & outp
 
 // creates JSON doc from values
 // returns false if empty
-// e.g. sensors = {"sensor1":{"id":"28-EA41-9497-0E03-5F","temp":"23.30"},"sensor2":{"id":"28-233D-9497-0C03-8B","temp":"24.0"}}
+// e.g. sensor_data = {"sensor1":{"id":"28-EA41-9497-0E03-5F","temp":"23.30"},"sensor2":{"id":"28-233D-9497-0C03-8B","temp":"24.0"}}
 bool Sensor::export_values(JsonObject & output) {
     if (devices_.size() == 0) {
         return false;
@@ -287,9 +287,9 @@ bool Sensor::export_values(JsonObject & output) {
     uint8_t i = 1; // sensor count
     for (const auto & device : devices_) {
         char s[7];
-        char sensorID[10]; // sensor{1-n}
-        strlcpy(sensorID, "sensor", 10);
-        strlcat(sensorID, Helpers::itoa(s, i), 10);
+        char sensorID[20]; // sensor{1-n}
+        strlcpy(sensorID, "sensor_data", 20);
+        strlcat(sensorID, Helpers::itoa(s, i), 20);
         JsonObject dataSensor = output.createNestedObject(sensorID);
         dataSensor["id"]      = device.to_string();
         dataSensor["temp"]    = Helpers::render_value(s, device.temperature_c, 1);
@@ -308,16 +308,15 @@ void Sensor::publish_values() {
         return;
     }
 
-    // if we're not using nested JSON, send each sensor out seperately
-    // sensor1, sensor2 etc...
-    // e.g. sensor_1 = {"temp":20.2}
+    // if we're not using nested JSON, send each sensor out seperately as sensor1, sensor2 etc...
+    // e.g. sensor_data1 = {"temp":20.2}
     if (mqtt_format_ == MQTT_format::SINGLE) {
         StaticJsonDocument<100> doc;
         for (const auto & device : devices_) {
             char s[7]; // sensorrange -55.00 to 125.00
             doc["temp"] = Helpers::render_value(s, device.temperature_c, 1);
-            char topic[60];                // sensors{1-n}
-            strlcpy(topic, "sensor_", 50); // create topic, e.g. home/ems-esp/sensor_28-EA41-9497-0E03-5F
+            char topic[60];                    // sensors{1-n}
+            strlcpy(topic, "sensor_data", 50); // create topic, e.g. home/ems-esp/sensor_28-EA41-9497-0E03-5F
             strlcat(topic, device.to_string().c_str(), 60);
             Mqtt::publish(topic, doc.as<JsonObject>());
             doc.clear(); // clear json doc so we can reuse the buffer again
@@ -331,13 +330,13 @@ void Sensor::publish_values() {
         char s[7];
 
         if (mqtt_format_ == MQTT_format::CUSTOM) {
-            // e.g. sensors = {28-EA41-9497-0E03-5F":23.30,"28-233D-9497-0C03-8B":24.0}
+            // e.g. sensor_data = {28-EA41-9497-0E03-5F":23.30,"28-233D-9497-0C03-8B":24.0}
             doc[device.to_string()] = Helpers::render_value(s, device.temperature_c, 1);
         } else if ((mqtt_format_ == MQTT_format::NESTED) || (mqtt_format_ == MQTT_format::HA)) {
-            // e.g. sensors = {"sensor1":{"id":"28-EA41-9497-0E03-5F","temp":"23.30"},"sensor2":{"id":"28-233D-9497-0C03-8B","temp":"24.0"}}
-            char sensorID[10]; // sensor{1-n}
-            strlcpy(sensorID, "sensor", 10);
-            strlcat(sensorID, Helpers::itoa(s, i), 10);
+            // e.g. sensor_data = {"sensor1":{"id":"28-EA41-9497-0E03-5F","temp":"23.30"},"sensor2":{"id":"28-233D-9497-0C03-8B","temp":"24.0"}}
+            char sensorID[20]; // sensor{1-n}
+            strlcpy(sensorID, "sensor_data", 20);
+            strlcat(sensorID, Helpers::itoa(s, i), 20);
             JsonObject dataSensor = doc.createNestedObject(sensorID);
             dataSensor["id"]      = device.to_string();
             dataSensor["temp"]    = Helpers::render_value(s, device.temperature_c, 1);
@@ -346,7 +345,6 @@ void Sensor::publish_values() {
         // special for HA
         if (mqtt_format_ == MQTT_format::HA) {
             std::string topic(100, '\0');
-
             // create the config if this hasn't already been done
             /* e.g.
             {
@@ -382,7 +380,7 @@ void Sensor::publish_values() {
     }
 
     if ((mqtt_format_ == MQTT_format::NESTED) || (mqtt_format_ == MQTT_format::CUSTOM)) {
-        Mqtt::publish(F("sensors"), doc.as<JsonObject>());
+        Mqtt::publish(F("sensor_data"), doc.as<JsonObject>());
     } else if (mqtt_format_ == MQTT_format::HA) {
         Mqtt::publish(F("homeassistant/sensor/ems-esp/state"), doc.as<JsonObject>());
     }

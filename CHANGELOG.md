@@ -24,10 +24,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - renamed wWCircPumpType to wWChargeType
 - Installation and Configuration notes moved to the official EMS-ESP documentation site
 - Removed the _cmd from the MQTT topic names
+- MQTT sensors topic renamed to sensor_data
 
 ### Removed
 -
-
 
 ## [2.0.1] September 13 2020
 
