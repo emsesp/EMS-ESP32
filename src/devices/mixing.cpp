@@ -169,8 +169,6 @@ void Mixing::publish_values() {
 // creates JSON doc from values
 // returns false if empty
 bool Mixing::export_values(JsonObject & output) {
-    char s[5]; // for formatting strings
-
     switch (type_) {
     case Type::HC:
         output["type"] = "hc";
@@ -181,6 +179,7 @@ bool Mixing::export_values(JsonObject & output) {
             output["flowSetTemp"] = flowSetTemp_;
         }
         if (Helpers::hasValue(pump_)) {
+            char s[5]; // for formatting strings
             output["pumpStatus"] = Helpers::render_value(s, pump_, EMS_VALUE_BOOL);
         }
         if (Helpers::hasValue(status_)) {
