@@ -21,6 +21,6 @@ If you like **EMS-ESP**, please give it a star, or fork it and contribute!
 
 # Installation
 
-Development builds can be found in https://github.com/proddy/EMS-ESP/tree/firmware/firmware. Follow the instructions in the [Wiki](https://emsesp.github.io/docs) on how to install.
+Development builds can be found in https://github.com/proddy/EMS-ESP/tree/firmware/firmware. Follow the instructions in the [Documentation](https://emsesp.github.io/docs) on how to install.
 
 See [CHANGELOG.md](https://github.com/proddy/blob/development/tasmota/CHANGELOG.md) for changes since the last release.

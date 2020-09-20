@@ -45,7 +45,7 @@ Note, EMS-ESP requires a small hardware circuit that can convert the EMS bus dat
   
 ## **Installing**
 
-Refer to the [Wiki](https://emsesp.github.io/docs) articles to install the firmware.
+Refer to the [Official documentation](https://emsesp.github.io/docs) to install the firmware and configure it.
 
 * [Uploading a pre-built binary](https://emsesp.github.io/docs/#/Uploading-firmware)
 * [Building the firmware and flashing manually](https://emsesp.github.io/docs/#/Building-firmware)
@@ -56,8 +56,8 @@ If you're looking for support on **EMS-ESP** there are some options available:
 
 ### Documentation
 
-* [Documentation Site](https://emsesp.github.io/docs): For information on how to build and upload the firmware
-* [FAQ and Troubleshooting](https://emsesp.github.io/docs/#/Troubleshooting): For information on common problems and solutions. See also [BBQKees's site](https://bbqkees-electronics.nl/wiki/gateway/troubleshooting.html)
+* [Official Documentation](https://emsesp.github.io/docs): For information on how to build and upload the firmware
+* [FAQ and Troubleshooting](https://emsesp.github.io/docs/#/Troubleshooting): For information on common problems and solutions. See also [BBQKees's wiki](https://bbqkees-electronics.nl/wiki/gateway/troubleshooting.html)
 
 ### Support's Community
 

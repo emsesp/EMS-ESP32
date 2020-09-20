@@ -28,7 +28,7 @@ This document describes rules that are in effect for this repository, meant for 
 2.	An issue that needs to be closed, either due to not complying with this policy, or for other reasons, should be closed by a contributor.
 3.	Issues that are accepted should be marked with appropriate labels.
 4.	Issues that could impact functionality for many users should be considered severe.
-5.	Issues caused by the SDK or chip should not be marked severe, as there usually isn’t much to be done. Common sense should be applied when deciding. Such issues should be documented in the Wiki, for reference by users.
+5.	Issues caused by the SDK or chip should not be marked severe, as there usually isn’t much to be done. Common sense should be applied when deciding. Such issues should be documented in the documentation, for reference by users.
 6.	Issues with feature requests should be discussed for viability/desirability.
 7.	Feature requests or changes that are meant to address a very specific/limited use case, especially if at the expense of increased code complexity, may be denied, or may be required to be redesigned, generalized, or simplified.
 8.	Feature requests that are not accompanied by a PR:
