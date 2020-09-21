@@ -288,7 +288,7 @@ bool Sensor::export_values(JsonObject & output) {
     for (const auto & device : devices_) {
         char s[7];
         char sensorID[20]; // sensor{1-n}
-        strlcpy(sensorID, "sensor_data", 20);
+        strlcpy(sensorID, "sensor", 20);
         strlcat(sensorID, Helpers::itoa(s, i), 20);
         JsonObject dataSensor = output.createNestedObject(sensorID);
         dataSensor["id"]      = device.to_string();
@@ -308,16 +308,15 @@ void Sensor::publish_values() {
         return;
     }
 
-    // if we're not using nested JSON, send each sensor out seperately as sensor1, sensor2 etc...
-    // e.g. sensor_data1 = {"temp":20.2}
+    // single mode as e.g. ems-esp/sensor_28-EA41-9497-0E03-5F = {"temp":20.2}
     if (mqtt_format_ == MQTT_format::SINGLE) {
         StaticJsonDocument<100> doc;
         for (const auto & device : devices_) {
-            char s[7]; // sensorrange -55.00 to 125.00
-            doc["temp"] = Helpers::render_value(s, device.temperature_c, 1);
-            char topic[60];                    // sensors{1-n}
-            strlcpy(topic, "sensor_data", 50); // create topic, e.g. home/ems-esp/sensor_28-EA41-9497-0E03-5F
+            char topic[60];
+            strlcpy(topic, "sensor_", 50);
             strlcat(topic, device.to_string().c_str(), 60);
+            char s[7]; // to support -55.00 to 125.00
+            doc["temp"] = Helpers::render_value(s, device.temperature_c, 1);
             Mqtt::publish(topic, doc.as<JsonObject>());
             doc.clear(); // clear json doc so we can reuse the buffer again
         }
@@ -335,7 +334,7 @@ void Sensor::publish_values() {
         } else if ((mqtt_format_ == MQTT_format::NESTED) || (mqtt_format_ == MQTT_format::HA)) {
             // e.g. sensor_data = {"sensor1":{"id":"28-EA41-9497-0E03-5F","temp":"23.30"},"sensor2":{"id":"28-233D-9497-0C03-8B","temp":"24.0"}}
             char sensorID[20]; // sensor{1-n}
-            strlcpy(sensorID, "sensor_data", 20);
+            strlcpy(sensorID, "sensor", 20);
             strlcat(sensorID, Helpers::itoa(s, i), 20);
             JsonObject dataSensor = doc.createNestedObject(sensorID);
             dataSensor["id"]      = device.to_string();
