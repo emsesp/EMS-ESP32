@@ -94,16 +94,6 @@ class MqttSettingsForm extends React.Component<MqttSettingsFormProps> {
           onChange={handleValueChange('keep_alive')}
           margin="normal"
         />
-        <BlockFormControlLabel
-          control={
-            <Checkbox
-              checked={data.clean_session}
-              onChange={handleValueChange('clean_session')}
-              value="clean_session"
-            />
-          }
-          label="Clean Session?"
-        />
         <TextValidator
           validators={['required', 'isNumber', 'minNumber:1', 'maxNumber:65535']}
           errorMessages={['Max topic length is required', "Must be a number", "Must be greater than 0", "Max value is 65535"]}
@@ -115,16 +105,6 @@ class MqttSettingsForm extends React.Component<MqttSettingsFormProps> {
           type="number"
           onChange={handleValueChange('max_topic_length')}
           margin="normal"
-        />
-        <BlockFormControlLabel
-          control={
-            <Checkbox
-              checked={data.system_heartbeat}
-              onChange={handleValueChange('system_heartbeat')}
-              value="system_heartbeat"
-            />
-          }
-          label="Heartbeat"
         />
         <SelectValidator name="mqtt_format"
           label="Format"
@@ -152,6 +132,16 @@ class MqttSettingsForm extends React.Component<MqttSettingsFormProps> {
         <BlockFormControlLabel
           control={
             <Checkbox
+              checked={data.clean_session}
+              onChange={handleValueChange('clean_session')}
+              value="clean_session"
+            />
+          }
+          label="Clean Session?"
+        />
+        <BlockFormControlLabel
+          control={
+            <Checkbox
               checked={data.mqtt_retain}
               onChange={handleValueChange('mqtt_retain')}
               value="mqtt_retain"
@@ -159,6 +149,17 @@ class MqttSettingsForm extends React.Component<MqttSettingsFormProps> {
           }
           label="Retain Flag"
         />
+        <BlockFormControlLabel
+          control={
+            <Checkbox
+              checked={data.system_heartbeat}
+              onChange={handleValueChange('system_heartbeat')}
+              value="system_heartbeat"
+            />
+          }
+          label="Heartbeat"
+        />
+        <br></br>
         <Typography variant="h6" color="primary" >
           Publish Intervals
         </Typography>
