@@ -276,7 +276,7 @@ void EMSESP::show_device_values(uuid::console::Shell & shell) {
 
 // show Dallas temperature sensors
 void EMSESP::show_sensor_values(uuid::console::Shell & shell) {
-    if (sensor_devices().empty()) {
+    if (!have_sensors()) {
         return;
     }
 
@@ -286,6 +286,17 @@ void EMSESP::show_sensor_values(uuid::console::Shell & shell) {
         shell.printfln(F("  ID: %s, Temperature: %s°C"), device.to_string().c_str(), Helpers::render_value(valuestr, device.temperature_c, 1));
     }
     shell.println();
+}
+
+// MQTT publish everything, immediately
+void EMSESP::publish_all() {
+    publish_device_values(EMSdevice::DeviceType::BOILER);
+    publish_device_values(EMSdevice::DeviceType::THERMOSTAT);
+    publish_device_values(EMSdevice::DeviceType::SOLAR);
+    publish_device_values(EMSdevice::DeviceType::MIXING);
+    publish_other_values();
+    publish_sensor_values(true);
+    system_.send_heartbeat();
 }
 
 void EMSESP::publish_device_values(uint8_t device_type) {
@@ -432,7 +443,9 @@ std::string EMSESP::pretty_telegram(std::shared_ptr<const Telegram> telegram) {
  * e.g. 08 00 07 00 0B 80 00 00 00 00 00 00 00 00 00 00 00
  * Junkers has 15 bytes of data
  * each byte is a bitmask for which devices are active
- * byte 1 = range 0x08 - 0x0F, byte 2=0x10 - 0x17 etc...
+ * byte 1 = 0x08 - 0x0F, byte 2 = 0x10 - 0x17, etc...
+ * e.g. in example above 1st byte = x0B = b1011 so we have device ids 0x08, 0x09, 0x011
+ * and 2nd byte = x80 = b1000 b0000 = device id 0x17
  */
 void EMSESP::process_UBADevices(std::shared_ptr<const Telegram> telegram) {
     // exit it length is incorrect (must be 13 or 15 bytes long)
@@ -589,15 +602,6 @@ bool EMSESP::device_exists(const uint8_t device_id) {
     return false; // not found
 }
 
-// for each device add its context menu for the console
-void EMSESP::add_context_menus() {
-    for (const auto & emsdevice : emsdevices) {
-        if (emsdevice) {
-            emsdevice->add_context_menu();
-        }
-    }
-}
-
 // for each associated EMS device go and get its system information
 void EMSESP::show_devices(uuid::console::Shell & shell) {
     if (emsdevices.empty()) {
@@ -609,7 +613,7 @@ void EMSESP::show_devices(uuid::console::Shell & shell) {
     shell.printfln(F("These EMS devices are currently active:"));
     shell.println();
 
-    // for all device objects from emsdevice.h (UNKNOWN, SERVICEKEY, BOILER, THERMOSTAT, MIXING, SOLAR, HEATPUMP, GATEWAY, SWITCH, CONTROLLER, CONNECT)
+    // for all device objects from emsdevice.h (UNKNOWN, SYSTEM, BOILER, THERMOSTAT, MIXING, SOLAR, HEATPUMP, GATEWAY, SWITCH, CONTROLLER, CONNECT)
     // so we keep a consistent order
     for (const auto & device_class : EMSFactory::device_handlers()) {
         // shell.printf(F("[factory ID: %d] "), device_class.first);

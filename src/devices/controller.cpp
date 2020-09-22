@@ -28,9 +28,6 @@ Controller::Controller(uint8_t device_type, uint8_t device_id, uint8_t product_i
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
 }
 
-void Controller::add_context_menu() {
-}
-
 void Controller::device_info_web(JsonArray & root) {
 }
 
@@ -46,10 +43,6 @@ void Controller::publish_values() {
 // check to see if values have been updated
 bool Controller::updated_values() {
     return false;
-}
-
-// add console commands
-void Controller::console_commands() {
 }
 
 } // namespace emsesp

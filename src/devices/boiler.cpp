@@ -84,16 +84,6 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     });
 }
 
-// add submenu context
-void Boiler::add_context_menu() {
-    EMSESPShell::commands->add_command(ShellContext::MAIN,
-                                       CommandFlags::USER,
-                                       flash_string_vector{F_(boiler)},
-                                       [&](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
-                                           Boiler::console_commands(shell, ShellContext::BOILER);
-                                       });
-}
-
 // create the config topic for Home Assistant MQTT Discovery
 // homeassistant/sensor/ems-esp/boiler
 // state is /state
@@ -1068,27 +1058,6 @@ bool Boiler::set_warmwater_circulation(const char * value, const int8_t id) {
     }
 
     return true;
-}
-
-// add console commands
-void Boiler::console_commands(Shell & shell, unsigned int context) {
-    EMSESPShell::commands->add_command(ShellContext::BOILER,
-                                       CommandFlags::ADMIN,
-                                       flash_string_vector{F_(read)},
-                                       flash_string_vector{F_(typeid_mandatory)},
-                                       [=](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) {
-                                           uint16_t type_id = Helpers::hextoint(arguments.front().c_str());
-                                           EMSESP::set_read_id(type_id);
-                                           EMSESP::send_read_request(type_id, device_id());
-                                       });
-
-    EMSESPShell::commands->add_command(ShellContext::BOILER,
-                                       CommandFlags::USER,
-                                       flash_string_vector{F_(show)},
-                                       [&](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) { show_values(shell); });
-
-    // enter the context
-    Console::enter_custom_context(shell, context);
 }
 
 } // namespace emsesp

@@ -64,6 +64,7 @@ class EMSESP {
     static void publish_device_values(uint8_t device_type);
     static void publish_other_values();
     static void publish_sensor_values(const bool force = false);
+    static void publish_all();
 
 #ifdef EMSESP_STANDALONE
     static void run_test(uuid::console::Shell & shell, const std::string & command); // only for testing
@@ -102,14 +103,16 @@ class EMSESP {
     static void show_devices(uuid::console::Shell & shell);
     static void show_ems(uuid::console::Shell & shell);
 
-    static void add_context_menus();
-
     static void init_tx();
 
     static void incoming_telegram(uint8_t * data, const uint8_t length);
 
     static const std::vector<Sensor::Device> sensor_devices() {
         return sensor_.devices();
+    }
+
+    static bool have_sensors() {
+        return (!(sensor_.devices().empty()));
     }
 
     enum Watch : uint8_t { WATCH_OFF, WATCH_ON, WATCH_RAW };

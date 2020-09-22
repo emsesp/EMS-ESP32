@@ -61,17 +61,15 @@ class Command {
     static void add(const uint8_t device_type, const uint8_t device_id, const __FlashStringHelper * cmd, cmdfunction_p cb);
     static void add_with_json(const uint8_t device_type, const __FlashStringHelper * cmd, cmdfunction_json_p cb);
     static void show_all(uuid::console::Shell & shell);
-    static void show(uuid::console::Shell & shell);
-    static void add_context_commands(unsigned int context);
-    static bool find(const uint8_t device_type, const char * cmd);
+    static bool find_command(const uint8_t device_type, const char * cmd);
+    static void show(uuid::console::Shell & shell, uint8_t device_type);
+    static void show_devices(uuid::console::Shell & shell);
+    static bool device_has_commands(const uint8_t device_type);
 
     static std::vector<CmdFunction> cmdfunctions_; // list of commands
 
   private:
     static uuid::log::Logger logger_;
-
-    static void    show(uuid::console::Shell & shell, uint8_t device_type);
-    static uint8_t context_2_device_type(unsigned int context);
 };
 
 } // namespace emsesp

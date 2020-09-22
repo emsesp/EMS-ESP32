@@ -119,6 +119,15 @@ void EMSESPShell::add_console_commands() {
                           });
 
     commands->add_command(ShellContext::MAIN,
+                          CommandFlags::ADMIN,
+                          flash_string_vector{F_(publish)},
+                          [&](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
+                              shell.printfln(F("Publishing all data to MQTT"));
+                              EMSESP::publish_all();
+                          });
+
+
+    commands->add_command(ShellContext::MAIN,
                           CommandFlags::USER,
                           flash_string_vector{F_(show)},
                           [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
@@ -247,6 +256,10 @@ void EMSESPShell::add_console_commands() {
                               EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) {
                                   shell.printfln(F_(tx_mode_fmt), settings.tx_mode);
                                   shell.printfln(F_(bus_id_fmt), settings.ems_bus_id);
+                                  char buffer[4];
+                                  shell.printfln(F_(master_thermostat_fmt),
+                                                 settings.master_thermostat == 0 ? uuid::read_flash_string(F_(auto)).c_str()
+                                                                                 : Helpers::hextoa(buffer, settings.master_thermostat));
                               });
                           });
 
@@ -261,6 +274,163 @@ void EMSESPShell::add_console_commands() {
                               EMSESP::send_read_request(type_id, device_id);
                           });
 
+    commands->add_command(ShellContext::MAIN,
+                          CommandFlags::ADMIN,
+                          flash_string_vector{F_(set), F_(master), F_(thermostat)},
+                          flash_string_vector{F_(deviceid_mandatory)},
+                          [](Shell & shell, const std::vector<std::string> & arguments) {
+                              uint8_t value = Helpers::hextoint(arguments.front().c_str());
+                              EMSESP::emsespSettingsService.update(
+                                  [&](EMSESPSettings & settings) {
+                                      settings.master_thermostat = value;
+                                      EMSESP::actual_master_thermostat(value); // set the internal value too
+                                      char buffer[5];
+                                      shell.printfln(F_(master_thermostat_fmt),
+                                                     !value ? uuid::read_flash_string(F_(auto)).c_str() : Helpers::hextoa(buffer, value));
+                                      return StateUpdateResult::CHANGED;
+                                  },
+                                  "local");
+                          });
+
+    commands->add_command(ShellContext::MAIN,
+                          CommandFlags::ADMIN,
+                          flash_string_vector{F_(send), F_(telegram)},
+                          flash_string_vector{F_(data_mandatory)},
+                          [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) {
+                              EMSESP::send_raw_telegram(arguments.front().c_str());
+                          });
+
+    commands->add_command(ShellContext::MAIN,
+                          CommandFlags::USER,
+                          flash_string_vector{F_(watch)},
+                          flash_string_vector{F_(watch_format_optional), F_(watchid_optional)},
+                          [](Shell & shell, const std::vector<std::string> & arguments) {
+                              uint16_t watch_id = WATCH_ID_NONE;
+
+                              if (!arguments.empty()) {
+                                  // get raw/pretty
+                                  if (arguments[0] == read_flash_string(F_(raw))) {
+                                      emsesp::EMSESP::watch(EMSESP::WATCH_RAW); // raw
+                                  } else if (arguments[0] == read_flash_string(F_(on))) {
+                                      emsesp::EMSESP::watch(EMSESP::WATCH_ON); // on
+                                  } else if (arguments[0] == read_flash_string(F_(off))) {
+                                      emsesp::EMSESP::watch(EMSESP::WATCH_OFF); // off
+                                  } else if (emsesp::EMSESP::watch() == EMSESP::WATCH_OFF) {
+                                      shell.printfln(F_(invalid_watch));
+                                      return;
+                                  } else {
+                                      watch_id = Helpers::hextoint(arguments[0].c_str());
+                                  }
+
+                                  if (arguments.size() == 2) {
+                                      // get the watch_id if its set
+                                      watch_id = Helpers::hextoint(arguments[1].c_str());
+                                  }
+
+                                  emsesp::EMSESP::watch_id(watch_id);
+                              }
+
+                              uint8_t watch = emsesp::EMSESP::watch();
+                              if (watch == EMSESP::WATCH_OFF) {
+                                  shell.printfln(F("Watching telegrams is off"));
+                                  return;
+                              }
+
+                              // if logging is off, the watch won't show anything, show force it back to NOTICE
+                              if (!shell.logger().enabled(Level::NOTICE)) {
+                                  shell.log_level(Level::NOTICE);
+                              }
+
+                              if (watch == EMSESP::WATCH_ON) {
+                                  shell.printfln(F("Watching incoming telegrams, displayed in decoded format"));
+                              } else {
+                                  shell.printfln(F("Watching incoming telegrams, displayed as raw bytes")); // WATCH_RAW
+                              }
+
+                              watch_id = emsesp::EMSESP::watch_id();
+                              if (watch_id > 0x80) {
+                                  shell.printfln(F("Filtering only telegrams that match a telegram type of 0x%02X"), watch_id);
+                              } else if (watch_id != WATCH_ID_NONE) {
+                                  shell.printfln(F("Filtering only telegrams that match a device ID or telegram type of 0x%02X"), watch_id);
+                              }
+                          });
+
+    commands->add_command(
+        ShellContext::MAIN,
+        CommandFlags::ADMIN,
+        flash_string_vector{F_(call)},
+        flash_string_vector{F_(device_type_optional), F_(cmd_optional), F_(data_optional), F_(n_optional)},
+        [&](Shell & shell, const std::vector<std::string> & arguments) {
+            if (arguments.empty()) {
+                Command::show_all(shell); // list options
+                return;
+            }
+
+            // validate the device_type
+            uint8_t device_type = EMSdevice::device_name_2_device_type(arguments[0].c_str());
+            if (!Command::device_has_commands(device_type)) {
+                shell.print(F("Invalid device. Available devices are: "));
+                Command::show_devices(shell);
+                return;
+            }
+
+            // validate the command
+            const char * cmd = arguments[1].c_str();
+            if (!Command::find_command(device_type, cmd)) {
+                shell.print(F("Unknown command. Available commands are: "));
+                Command::show(shell, device_type);
+                return;
+            }
+
+            DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_LARGE);
+            JsonObject          output = doc.to<JsonObject>();
+
+            bool ok = false;
+            if (arguments.size() == 2) {
+                // no value specified, just the cmd
+                ok = Command::call(device_type, cmd, nullptr, -1, output);
+            } else if (arguments.size() == 3) {
+                // has a value but no id
+                ok = Command::call(device_type, cmd, arguments.back().c_str(), -1, output);
+            } else {
+                // use value, which could be an id or hc
+                ok = Command::call(device_type, cmd, arguments[2].c_str(), atoi(arguments[3].c_str()), output);
+            }
+
+            if (ok) {
+                shell.print(F("output: "));
+                serializeJson(doc, shell);
+                shell.println();
+                shell.println();
+            }
+        },
+        [&](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) -> std::vector<std::string> {
+            if (arguments.size() == 0) {
+                std::vector<std::string> devices_list;
+                devices_list.emplace_back(EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::SYSTEM));
+                devices_list.emplace_back(EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::SENSOR));
+                for (const auto & device_class : EMSFactory::device_handlers()) {
+                    if (Command::device_has_commands(device_class.first)) {
+                        devices_list.emplace_back(EMSdevice::device_type_2_device_name(device_class.first));
+                    }
+                }
+                return devices_list;
+            } else if (arguments.size() == 1) {
+                std::vector<std::string> command_list;
+                uint8_t                  device_type = EMSdevice::device_name_2_device_type(arguments[0].c_str());
+                if (!Command::device_has_commands(device_type)) {
+                    for (const auto & cf : Command::commands()) {
+                        if (cf.device_type_ == device_type) {
+                            command_list.emplace_back(uuid::read_flash_string(cf.cmd_));
+                        }
+                    }
+                    return command_list;
+                }
+            }
+
+            return {};
+        });
+
     /*
      * add all the submenu contexts...
      */
@@ -272,10 +442,6 @@ void EMSESPShell::add_console_commands() {
                           [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
                               System::console_commands(shell, ShellContext::SYSTEM);
                           });
-
-    // add all the context menus for the connected devices
-    // this assumes they devices have been detected and pre-registered
-    EMSESP::add_context_menus();
 
     Console::load_standard_commands(ShellContext::MAIN);
 
@@ -400,76 +566,6 @@ void Console::load_standard_commands(unsigned int context) {
                                                });
                                            }
                                        });
-
-    EMSESPShell::commands->add_command(context,
-                                       CommandFlags::ADMIN,
-                                       flash_string_vector{F_(send), F_(telegram)},
-                                       flash_string_vector{F_(data_mandatory)},
-                                       [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) {
-                                           EMSESP::send_raw_telegram(arguments.front().c_str());
-                                       });
-
-    EMSESPShell::commands->add_command(context,
-                                       CommandFlags::USER,
-                                       flash_string_vector{F_(watch)},
-                                       flash_string_vector{F_(watch_format_optional), F_(watchid_optional)},
-                                       [](Shell & shell, const std::vector<std::string> & arguments) {
-                                           uint16_t watch_id = WATCH_ID_NONE;
-
-                                           if (!arguments.empty()) {
-                                               // get raw/pretty
-                                               if (arguments[0] == read_flash_string(F_(raw))) {
-                                                   emsesp::EMSESP::watch(EMSESP::WATCH_RAW); // raw
-                                               } else if (arguments[0] == read_flash_string(F_(on))) {
-                                                   emsesp::EMSESP::watch(EMSESP::WATCH_ON); // on
-                                               } else if (arguments[0] == read_flash_string(F_(off))) {
-                                                   emsesp::EMSESP::watch(EMSESP::WATCH_OFF); // off
-                                               } else if (emsesp::EMSESP::watch() == EMSESP::WATCH_OFF) {
-                                                   shell.printfln(F_(invalid_watch));
-                                                   return;
-                                               } else {
-                                                   watch_id = Helpers::hextoint(arguments[0].c_str());
-                                               }
-
-                                               if (arguments.size() == 2) {
-                                                   // get the watch_id if its set
-                                                   watch_id = Helpers::hextoint(arguments[1].c_str());
-                                               }
-
-                                               emsesp::EMSESP::watch_id(watch_id);
-                                           }
-
-                                           uint8_t watch = emsesp::EMSESP::watch();
-                                           if (watch == EMSESP::WATCH_OFF) {
-                                               shell.printfln(F("Watching telegrams is off"));
-                                               return;
-                                           }
-
-                                           // if logging is off, the watch won't show anything, show force it back to NOTICE
-                                           if (!shell.logger().enabled(Level::NOTICE)) {
-                                               shell.log_level(Level::NOTICE);
-                                           }
-
-                                           if (watch == EMSESP::WATCH_ON) {
-                                               shell.printfln(F("Watching incoming telegrams, displayed in decoded format"));
-                                           } else {
-                                               shell.printfln(F("Watching incoming telegrams, displayed as raw bytes")); // WATCH_RAW
-                                           }
-
-                                           watch_id = emsesp::EMSESP::watch_id();
-                                           if (watch_id > 0x80) {
-                                               shell.printfln(F("Filtering only telegrams that match a telegram type of 0x%02X"), watch_id);
-                                           } else if (watch_id != WATCH_ID_NONE) {
-                                               shell.printfln(F("Filtering only telegrams that match a device ID or telegram type of 0x%02X"), watch_id);
-                                           }
-                                       });
-
-
-    // load the commands (console & mqtt topics) for this specific context
-    // unless it's main (the root)
-    if (context != ShellContext::MAIN) {
-        Command::add_context_commands(context);
-    }
 }
 
 // prompt, change per context
@@ -478,17 +574,8 @@ std::string EMSESPShell::context_text() {
     case ShellContext::MAIN:
         return std::string{'/'};
 
-    case ShellContext::BOILER:
-        return std::string{"/boiler"};
-
     case ShellContext::SYSTEM:
         return std::string{"/system"};
-
-    case ShellContext::THERMOSTAT:
-        return std::string{"/thermostat"};
-
-    case ShellContext::SENSOR:
-        return std::string{"/sensor"};
 
     default:
         return std::string{};

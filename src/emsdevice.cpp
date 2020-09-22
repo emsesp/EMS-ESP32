@@ -55,7 +55,7 @@ std::string EMSdevice::brand_to_string() const {
 // returns the name of the MQTT topic to use for a specific device
 std::string EMSdevice::device_type_2_device_name(const uint8_t device_type) {
     switch (device_type) {
-    case DeviceType::SERVICEKEY:
+    case DeviceType::SYSTEM:
         return read_flash_string(F("system"));
         break;
 
@@ -79,6 +79,18 @@ std::string EMSdevice::device_type_2_device_name(const uint8_t device_type) {
         return read_flash_string(F("mixing"));
         break;
 
+    case DeviceType::SENSOR:
+        return read_flash_string(F("sensor"));
+        break;
+
+    case DeviceType::CONTROLLER:
+        return read_flash_string(F("controller"));
+        break;
+
+    case DeviceType::SWITCH:
+        return read_flash_string(F("switch"));
+        break;
+
     default:
         return std::string{};
         break;
@@ -96,7 +108,7 @@ uint8_t EMSdevice::device_name_2_device_type(const char * topic) {
     }
 
     if (strcmp(topic, "system") == 0) {
-        return DeviceType::SERVICEKEY;
+        return DeviceType::SYSTEM;
     }
 
     if (strcmp(topic, "heatpump") == 0) {

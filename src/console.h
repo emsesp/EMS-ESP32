@@ -76,11 +76,6 @@ enum ShellContext : uint8_t {
 
     MAIN = 0,
     SYSTEM,
-    BOILER,
-    THERMOSTAT,
-    SOLAR,
-    MIXING,
-    SENSOR
 
 };
 

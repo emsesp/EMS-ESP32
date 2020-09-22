@@ -40,12 +40,10 @@ class Solar : public EMSdevice {
     virtual void publish_values();
     virtual void device_info_web(JsonArray & root);
     virtual bool updated_values();
-    virtual void add_context_menu();
 
   private:
     static uuid::log::Logger logger_;
 
-    void console_commands(Shell & shell, unsigned int context);
     bool export_values(JsonObject & doc);
     bool command_info(const char * value, const int8_t id, JsonObject & output);
 

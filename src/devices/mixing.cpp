@@ -60,19 +60,6 @@ Mixing::Mixing(uint8_t device_type, uint8_t device_id, uint8_t product_id, const
     });
 }
 
-// add context submenu
-void Mixing::add_context_menu() {
-    // TODO support for multiple mixing units from a single menu, similar to set master with thermostat
-    /*
-    EMSESPShell::commands->add_command(ShellContext::MAIN,
-                                       CommandFlags::USER,
-                                       flash_string_vector{F_(mixing)},
-                                       [&](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
-                                           Mixing::console_commands(shell, ShellContext::MIXING);
-                                       });
-                                       */
-}
-
 // output json to web UI
 void Mixing::device_info_web(JsonArray & root) {
     if (type_ == Type::NONE) {
@@ -100,27 +87,6 @@ bool Mixing::updated_values() {
         return true;
     }
     return false;
-}
-
-// add console commands
-void Mixing::console_commands(Shell & shell, unsigned int context) {
-    EMSESPShell::commands->add_command(ShellContext::MIXING,
-                                       CommandFlags::ADMIN,
-                                       flash_string_vector{F_(read)},
-                                       flash_string_vector{F_(typeid_mandatory)},
-                                       [=](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) {
-                                           uint16_t type_id = Helpers::hextoint(arguments.front().c_str());
-                                           EMSESP::set_read_id(type_id);
-                                           EMSESP::send_read_request(type_id, device_id());
-                                       });
-
-    EMSESPShell::commands->add_command(ShellContext::MIXING,
-                                       CommandFlags::USER,
-                                       flash_string_vector{F_(show)},
-                                       [&](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) { show_values(shell); });
-
-    // enter the context
-    Console::enter_custom_context(shell, context);
 }
 
 // display all values into the shell console

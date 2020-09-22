@@ -62,8 +62,6 @@ class Shower {
     static constexpr uint32_t SHOWER_COLDSHOT_DURATION = 10;     // in seconds. 10 seconds for cold water before turning back hot water
     static constexpr uint32_t SHOWER_MAX_DURATION      = 420000; // in ms. 7 minutes, before trigger a shot of cold water
 
-    void console_commands();
-
     void publish_values();
     void shower_alert_start();
     void shower_alert_stop();

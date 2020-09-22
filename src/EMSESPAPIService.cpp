@@ -52,7 +52,7 @@ void EMSESPAPIService::emsespAPIService(AsyncWebServerRequest * request) {
     String cmd = request->getParam(F_(cmd))->value();
 
     // look up command in our list
-    if (!Command::find(device_type, cmd.c_str())) {
+    if (!Command::find_command(device_type, cmd.c_str())) {
         request->send(400, "text/plain", F("Invalid cmd"));
         return;
     }

@@ -100,9 +100,7 @@ void Mqtt::resubscribe() {
     }
 }
 
-// Main MQTT loop
-// Checks for connection, establishes a connection if not
-// sends out top item on publish queue
+// Main MQTT loop - sends out top item on publish queue
 void Mqtt::loop() {
     // exit if MQTT is not enabled or if there is no WIFI
     if (!connected()) {
@@ -116,26 +114,32 @@ void Mqtt::loop() {
         last_publish_boiler_ = currentMillis;
         EMSESP::publish_device_values(EMSdevice::DeviceType::BOILER);
     }
+
     if (publish_time_thermostat_ && (currentMillis - last_publish_thermostat_ > publish_time_thermostat_)) {
         last_publish_thermostat_ = currentMillis;
         EMSESP::publish_device_values(EMSdevice::DeviceType::THERMOSTAT);
     }
+
     if (publish_time_solar_ && (currentMillis - last_publish_solar_ > publish_time_solar_)) {
         last_publish_solar_ = currentMillis;
         EMSESP::publish_device_values(EMSdevice::DeviceType::SOLAR);
     }
+
     if (publish_time_mixing_ && (currentMillis - last_publish_mixing_ > publish_time_mixing_)) {
         last_publish_mixing_ = currentMillis;
         EMSESP::publish_device_values(EMSdevice::DeviceType::MIXING);
     }
+
     if (publish_time_other_ && (currentMillis - last_publish_other_ > publish_time_other_)) {
         last_publish_other_ = currentMillis;
         EMSESP::publish_other_values();
     }
+
     if (currentMillis - last_publish_sensor_ > publish_time_sensor_) {
         last_publish_sensor_ = currentMillis;
         EMSESP::publish_sensor_values(publish_time_sensor_ != 0);
     }
+
     // publish top item from MQTT queue to stop flooding
     if ((uint32_t)(currentMillis - last_mqtt_poll_) > MQTT_PUBLISH_WAIT) {
         last_mqtt_poll_ = currentMillis;
@@ -316,7 +320,7 @@ void Mqtt::on_publish(uint16_t packetId) {
     }
 
     if (mqtt_message.packet_id_ != packetId) {
-        LOG_DEBUG(F("Mismatch, expecting PID %d, got %d"), mqtt_message.packet_id_, packetId);
+        LOG_ERROR(F("Mismatch, expecting PID %d, got %d"), mqtt_message.packet_id_, packetId);
         mqtt_publish_fails_++; // increment error count
     }
 
@@ -470,13 +474,14 @@ std::shared_ptr<const MqttMessage> Mqtt::queue_message(const uint8_t operation, 
     if ((strncmp(topic.c_str(), "homeassistant/", 13) == 0)) {
         // leave topic as it is
         // message = std::make_shared<MqttMessage>(operation, topic, std::move(payload), retain);
-        message = std::make_shared<MqttMessage>(operation, topic, payload, retain);
+        message = std::make_shared<MqttMessage>(operation, topic, std::move(payload), retain);
 
     } else {
         // prefix the hostname
         std::string full_topic(50, '\0');
         snprintf_P(&full_topic[0], full_topic.capacity() + 1, PSTR("%s/%s"), Mqtt::hostname_.c_str(), topic.c_str());
-        message = std::make_shared<MqttMessage>(operation, full_topic, payload, retain);
+        //                message = std::make_shared<MqttMessage>(operation, full_topic, std::move(payload), retain);
+        message = std::make_shared<MqttMessage>(operation, full_topic, std::move(payload), retain);
     }
 
     // if the queue is full, make room but removing the last one

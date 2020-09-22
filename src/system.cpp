@@ -157,9 +157,9 @@ void System::start() {
 
     // these commands respond to the topic "system" and take a payload like {cmd:"", data:"", id:""}
     EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) {
-        Command::add(EMSdevice::DeviceType::SERVICEKEY, settings.ems_bus_id, F("pin"), System::command_pin);
-        Command::add(EMSdevice::DeviceType::SERVICEKEY, settings.ems_bus_id, F("send"), System::command_send);
-        Command::add_with_json(EMSdevice::DeviceType::SERVICEKEY, F("info"), System::command_info);
+        Command::add(EMSdevice::DeviceType::SYSTEM, settings.ems_bus_id, F("pin"), System::command_pin);
+        Command::add(EMSdevice::DeviceType::SYSTEM, settings.ems_bus_id, F("send"), System::command_send);
+        Command::add_with_json(EMSdevice::DeviceType::SYSTEM, F("info"), System::command_info);
     });
 
     EMSESP::init_tx(); // start UART
@@ -523,7 +523,7 @@ void System::console_commands(Shell & shell, unsigned int context) {
 
     EMSESPShell::commands->add_command(ShellContext::SYSTEM,
                                        CommandFlags::USER,
-                                       flash_string_vector{F_(show)},
+                                       flash_string_vector{F_(show), F_(system)},
                                        [=](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
                                            show_system(shell);
                                            shell.println();

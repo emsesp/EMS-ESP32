@@ -55,8 +55,8 @@ struct MqttMessage {
     const std::string payload;
     const bool        retain;
 
-    //     MqttMessage(const uint8_t operation, const std::string & topic, const std::string && payload, bool retain)
-    MqttMessage(const uint8_t operation, const std::string & topic, const std::string & payload, bool retain)
+    // MqttMessage(const uint8_t operation, const std::string & topic, const std::string & payload, bool retain)
+    MqttMessage(const uint8_t operation, const std::string & topic, const std::string && payload, bool retain)
         : operation(operation)
         , topic(topic)
         , payload(payload)

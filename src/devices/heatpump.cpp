@@ -33,10 +33,6 @@ Heatpump::Heatpump(uint8_t device_type, uint8_t device_id, uint8_t product_id, c
     register_telegram_type(0x042B, F("HP2"), true, [&](std::shared_ptr<const Telegram> t) { process_HPMonitor2(t); });
 }
 
-// context submenu
-void Heatpump::add_context_menu() {
-}
-
 void Heatpump::device_info_web(JsonArray & root) {
 }
 
@@ -52,10 +48,6 @@ void Heatpump::publish_values() {
 // check to see if values have been updated
 bool Heatpump::updated_values() {
     return false;
-}
-
-// add console commands
-void Heatpump::console_commands() {
 }
 
 #pragma GCC diagnostic push

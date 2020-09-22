@@ -28,9 +28,6 @@ Gateway::Gateway(uint8_t device_type, uint8_t device_id, uint8_t product_id, con
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
 }
 
-void Gateway::add_context_menu() {
-}
-
 void Gateway::device_info_web(JsonArray & root) {
 }
 
@@ -46,10 +43,6 @@ void Gateway::publish_values() {
 // check to see if values have been updated
 bool Gateway::updated_values() {
     return false;
-}
-
-// add console commands
-void Gateway::console_commands() {
 }
 
 } // namespace emsesp

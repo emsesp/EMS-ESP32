@@ -137,7 +137,6 @@ class EMSdevice {
     virtual void show_values(uuid::console::Shell & shell) = 0;
     virtual void publish_values()                          = 0;
     virtual bool updated_values()                          = 0;
-    virtual void add_context_menu()                        = 0;
     virtual void device_info_web(JsonArray & root)         = 0;
 
     std::string telegram_type_name(std::shared_ptr<const Telegram> telegram);
@@ -228,8 +227,8 @@ class EMSdevice {
     };
 
     enum DeviceType : uint8_t {
-        SERVICEKEY = 0, // this is us (EMS-ESP)
-        SENSOR,         // for internal dallas sensors
+        SYSTEM = 0, // this is us (EMS-ESP)
+        SENSOR,     // for internal dallas sensors
         BOILER,
         THERMOSTAT,
         MIXING,
@@ -279,7 +278,7 @@ class EMSdevice {
 
   private:
     uint8_t     unique_id_;
-    uint8_t     device_type_ = DeviceType::SERVICEKEY;
+    uint8_t     device_type_ = DeviceType::SYSTEM;
     uint8_t     device_id_   = 0;
     uint8_t     product_id_  = 0;
     std::string version_;

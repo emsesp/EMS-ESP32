@@ -28,9 +28,6 @@ Switch::Switch(uint8_t device_type, uint8_t device_id, uint8_t product_id, const
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
 }
 
-void Switch::add_context_menu() {
-}
-
 void Switch::device_info_web(JsonArray & root) {
 }
 
@@ -46,10 +43,6 @@ void Switch::publish_values() {
 // check to see if values have been updated
 bool Switch::updated_values() {
     return false;
-}
-
-// add console commands
-void Switch::console_commands() {
 }
 
 } // namespace emsesp

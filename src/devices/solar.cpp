@@ -58,19 +58,6 @@ bool Solar::command_info(const char * value, const int8_t id, JsonObject & outpu
     return (export_values(output));
 }
 
-// context submenu
-void Solar::add_context_menu() {
-    // TODO support for multiple solar units from a single menu, similar to set master with thermostat
-    /*
-    EMSESPShell::commands->add_command(ShellContext::MAIN,
-                                       CommandFlags::USER,
-                                       flash_string_vector{F_(solar)},
-                                       [&](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
-                                           Solar::console_commands(shell, ShellContext::SOLAR);
-                                       });
-                                       */
-}
-
 // print to web
 void Solar::device_info_web(JsonArray & root) {
     render_value_json(root, "", F("Collector temperature (TS1)"), collectorTemp_, F_(degrees), 10);
@@ -204,27 +191,6 @@ bool Solar::updated_values() {
         return true;
     }
     return false;
-}
-
-// add console commands
-void Solar::console_commands(Shell & shell, unsigned int context) {
-    EMSESPShell::commands->add_command(ShellContext::SOLAR,
-                                       CommandFlags::ADMIN,
-                                       flash_string_vector{F_(read)},
-                                       flash_string_vector{F_(typeid_mandatory)},
-                                       [=](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) {
-                                           uint16_t type_id = Helpers::hextoint(arguments.front().c_str());
-                                           EMSESP::set_read_id(type_id);
-                                           EMSESP::send_read_request(type_id, device_id());
-                                       });
-
-    EMSESPShell::commands->add_command(ShellContext::SOLAR,
-                                       CommandFlags::USER,
-                                       flash_string_vector{F_(show)},
-                                       [&](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) { show_values(shell); });
-
-    // enter the context
-    Console::enter_custom_context(shell, context);
 }
 
 // SM10Monitor - type 0x97

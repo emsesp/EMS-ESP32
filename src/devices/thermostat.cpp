@@ -219,21 +219,6 @@ void Thermostat::device_info_web(JsonArray & root) {
     }
 }
 
-// context menu "thermostat"
-void Thermostat::add_context_menu() {
-    // only add it once, to prevent conflicts when there are multiple thermostats
-    if (this->device_id() != EMSESP::actual_master_thermostat()) {
-        return;
-    }
-
-    EMSESPShell::commands->add_command(ShellContext::MAIN,
-                                       CommandFlags::USER,
-                                       flash_string_vector{F_(thermostat)},
-                                       [&](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
-                                           Thermostat::console_commands(shell, ShellContext::THERMOSTAT);
-                                       });
-}
-
 // this function is called post the telegram handler function has been executed
 // we check if any of the thermostat values have changed and then republish if necessary
 bool Thermostat::updated_values() {
@@ -1165,58 +1150,6 @@ void Thermostat::process_RCTime(std::shared_ptr<const Telegram> telegram) {
     if (timeold != datetime_) {
         changed_ = true;
     }
-}
-
-// add console commands
-void Thermostat::console_commands(Shell & shell, unsigned int context) {
-    EMSESPShell::commands->add_command(ShellContext::THERMOSTAT,
-                                       CommandFlags::ADMIN,
-                                       flash_string_vector{F_(set), F_(master)},
-                                       flash_string_vector{F_(deviceid_mandatory)},
-                                       [](Shell & shell, const std::vector<std::string> & arguments) {
-                                           uint8_t value = Helpers::hextoint(arguments.front().c_str());
-                                           EMSESP::emsespSettingsService.update(
-                                               [&](EMSESPSettings & settings) {
-                                                   settings.master_thermostat = value;
-                                                   EMSESP::actual_master_thermostat(value); // set the internal value too
-                                                   char buffer[5];
-                                                   shell.printfln(F_(master_thermostat_fmt),
-                                                                  !value ? uuid::read_flash_string(F_(auto)).c_str() : Helpers::hextoa(buffer, value));
-                                                   return StateUpdateResult::CHANGED;
-                                               },
-                                               "local");
-                                       });
-
-    EMSESPShell::commands->add_command(ShellContext::THERMOSTAT,
-                                       CommandFlags::ADMIN,
-                                       flash_string_vector{F_(read)},
-                                       flash_string_vector{F_(typeid_mandatory)},
-                                       [=](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) {
-                                           uint16_t type_id = Helpers::hextoint(arguments.front().c_str());
-                                           EMSESP::set_read_id(type_id);
-                                           EMSESP::send_read_request(type_id, this->device_id());
-                                       });
-
-    EMSESPShell::commands->add_command(ShellContext::THERMOSTAT,
-                                       CommandFlags::USER,
-                                       flash_string_vector{F_(show)},
-                                       [&](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) { show_values(shell); });
-
-    EMSESPShell::commands->add_command(ShellContext::THERMOSTAT,
-                                       CommandFlags::USER,
-                                       flash_string_vector{F_(set)},
-                                       [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
-                                           EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) {
-                                               char buffer[4];
-                                               shell.printfln(F_(master_thermostat_fmt),
-                                                              settings.master_thermostat == 0 ? uuid::read_flash_string(F_(auto)).c_str()
-                                                                                              : Helpers::hextoa(buffer, settings.master_thermostat));
-                                               shell.println();
-                                           });
-                                       });
-
-    // enter the context
-    Console::enter_custom_context(shell, context);
 }
 
 // 0xA5 - Set minimum external temperature

@@ -101,12 +101,10 @@ class Thermostat : public EMSdevice {
     virtual void publish_values();
     virtual void device_info_web(JsonArray & root);
     virtual bool updated_values();
-    virtual void add_context_menu();
 
   private:
     static uuid::log::Logger logger_;
 
-    void console_commands(Shell & shell, unsigned int context);
     void add_commands();
     bool export_values(uint8_t mqtt_format, JsonObject & doc);
 

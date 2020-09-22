@@ -42,12 +42,10 @@ class Boiler : public EMSdevice {
     virtual void publish_values();
     virtual void device_info_web(JsonArray & root);
     virtual bool updated_values();
-    virtual void add_context_menu();
 
   private:
     static uuid::log::Logger logger_;
 
-    void console_commands(Shell & shell, unsigned int context);
     void register_mqtt_ha_config();
     void check_active();
     bool export_values(JsonObject & doc);

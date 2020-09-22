@@ -206,8 +206,6 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
                        0x03, 0x25, 0x03, 0x03, 0x01, 0x03, 0x25, 0x00, 0xC8, 0x00, 0x00, 0x11, 0x01, 0x03});
 
         shell.invoke_command("show");
-        // shell.invoke_command("system");
-        // shell.invoke_command("show mqtt");
     }
 
     if (command == "thermostat") {
@@ -409,11 +407,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         shell.loop_all();
         EMSESP::show_device_values(shell);
 
-        shell.invoke_command("thermostat");
-        shell.loop_all();
-
-        // shell.invoke_command("set temp 20");
-        shell.invoke_command("set mode auto");
+        shell.invoke_command("call thermostat mode auto");
 
         shell.loop_all();
         EMSESP::show_ems(shell);
@@ -576,12 +570,9 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
             return StateUpdateResult::CHANGED;
         });
 
-        EMSESP::add_context_menus(); // need to add this as it happens later in the code
         shell.invoke_command("su");
-        shell.invoke_command("system");
         shell.invoke_command("call");
-        shell.invoke_command("call info");
-        shell.invoke_command("exit");
+        shell.invoke_command("call system info");
 
         char system_topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
         strcpy(system_topic, "ems-esp/system");
@@ -595,24 +586,14 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         uart_telegram({0x90, 0x00, 0xFF, 0x00, 0x00, 0x70, 0x00, 0xCF, 0x22, 0x2F, 0x10, 0x00, 0x2E, 0x24,
                        0x03, 0x25, 0x03, 0x03, 0x01, 0x03, 0x25, 0x00, 0xC8, 0x00, 0x00, 0x11, 0x01, 0x03}); // HC2
         uart_telegram({0x90, 0x00, 0xFF, 0x00, 0x00, 0x71, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00});       // HC3
-        EMSESP::add_context_menus();                                                                         // need to add this as it happens later in the code
-        shell.invoke_command("thermostat");
-        shell.invoke_command("show");
-        shell.invoke_command("call");
-        shell.invoke_command("call info");
-        shell.invoke_command("exit");
-        shell.invoke_command("show mqtt");
     }
 
     if (command == "pin") {
         shell.printfln(F("Testing pin..."));
 
-        EMSESP::add_context_menus(); // need to add this as it happens later in the code
         shell.invoke_command("su");
-        shell.invoke_command("system");
-        shell.invoke_command("help");
-        shell.invoke_command("pin");
-        shell.invoke_command("pin 1 true");
+        shell.invoke_command("call system pin");
+        shell.invoke_command("call system pin 1 true");
     }
 
     if (command == "mqtt") {
@@ -678,14 +659,12 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         // EMSESP::txservice_.show_tx_queue();
         // EMSESP::publish_all_values();
 
-        EMSESP::add_context_menus(); // need to add this as it happens later in the code
         shell.invoke_command("su");
-        shell.invoke_command("thermostat");
         shell.invoke_command("help");
         shell.invoke_command("call");
-        shell.invoke_command("call wwmode");
-        shell.invoke_command("call mode auto 2");
-        shell.invoke_command("call temp 22.56");
+        shell.invoke_command("call thermostat wwmode");
+        shell.invoke_command("call thermostat mode auto 2");
+        shell.invoke_command("call thermostat temp 22.56");
 
         Mqtt::resubscribe();
         Mqtt::show_mqtt(shell); // show queue
@@ -745,7 +724,6 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         // check for error "[emsesp] No telegram type handler found for ID 0x255 (src 0x20, dest 0x00)"
         rx_telegram({0xA0, 0x00, 0xFF, 0x00, 0x01, 0x55, 0x00, 0x1A});
 
-        EMSESP::add_context_menus(); // need to add this as it happens later in the code
     }
 
     // finally dump to console

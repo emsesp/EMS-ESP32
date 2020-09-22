@@ -31,9 +31,6 @@ Connect::Connect(uint8_t device_type, uint8_t device_id, uint8_t product_id, con
 void Connect::device_info_web(JsonArray & root) {
 }
 
-void Connect::add_context_menu() {
-}
-
 // display all values into the shell console
 void Connect::show_values(uuid::console::Shell & shell) {
     // EMSdevice::show_values(shell); // always call this to show header
@@ -46,10 +43,6 @@ void Connect::publish_values() {
 // check to see if values have been updated
 bool Connect::updated_values() {
     return false;
-}
-
-// add console commands
-void Connect::console_commands() {
 }
 
 } // namespace emsesp

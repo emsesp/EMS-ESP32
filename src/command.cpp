@@ -77,7 +77,7 @@ void Command::add_with_json(const uint8_t device_type, const __FlashStringHelper
 }
 
 // see if a command exists for that device type
-bool Command::find(const uint8_t device_type, const char * cmd) {
+bool Command::find_command(const uint8_t device_type, const char * cmd) {
     for (const auto & cf : cmdfunctions_) {
         if (strcmp(cmd, uuid::read_flash_string(cf.cmd_).c_str()) == 0) {
             return true;
@@ -88,6 +88,10 @@ bool Command::find(const uint8_t device_type, const char * cmd) {
 
 // output list of all commands to console for a specific DeviceType
 void Command::show(uuid::console::Shell & shell, uint8_t device_type) {
+    if (commands().empty()) {
+        shell.println(F("No commands"));
+    }
+
     for (const auto & cf : Command::commands()) {
         if (cf.device_type_ == device_type) {
             shell.printf("%s ", uuid::read_flash_string(cf.cmd_).c_str());
@@ -96,128 +100,71 @@ void Command::show(uuid::console::Shell & shell, uint8_t device_type) {
     shell.println();
 }
 
-// determines the device_type from the shell context we're in
-uint8_t Command::context_2_device_type(unsigned int context) {
-    // if (context == ShellContext::MAIN) {
-    //     return EMSdevice::DeviceType::SERVICEKEY;
-    // }
-    if (context == ShellContext::BOILER) {
-        return EMSdevice::DeviceType::BOILER;
-    }
-    if (context == ShellContext::MIXING) {
-        return EMSdevice::DeviceType::MIXING;
-    }
-    if (context == ShellContext::SOLAR) {
-        return EMSdevice::DeviceType::SOLAR;
-    }
-    if (context == ShellContext::SYSTEM) {
-        return EMSdevice::DeviceType::SERVICEKEY;
-    }
-    if (context == ShellContext::THERMOSTAT) {
-        return EMSdevice::DeviceType::THERMOSTAT;
-    }
-    if (context == ShellContext::SENSOR) {
-        return EMSdevice::DeviceType::SENSOR;
+// see if a device_type is active and has associated commands
+bool Command::device_has_commands(const uint8_t device_type) {
+    if (device_type == EMSdevice::DeviceType::UNKNOWN) {
+        return false;
     }
 
-    return EMSdevice::DeviceType::UNKNOWN; // unknown type
+    if (device_type == EMSdevice::DeviceType::SYSTEM) {
+        return true; // we always have System
+    }
+
+    if (device_type == EMSdevice::DeviceType::SENSOR) {
+        return true; // we always have Sensor, but should check if there are actual sensors attached!
+    }
+
+    for (const auto & emsdevice : EMSESP::emsdevices) {
+        if ((emsdevice) && (emsdevice->device_type() == device_type)) {
+            // device found, now see if it has any commands
+            for (const auto & cf : Command::commands()) {
+                if (cf.device_type_ == device_type) {
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
 }
 
-// show command per current context
-void Command::show(uuid::console::Shell & shell) {
-    show(shell, context_2_device_type(shell.context()));
+void Command::show_devices(uuid::console::Shell & shell) {
+    shell.printf("%s ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::SYSTEM).c_str());
+
+    if (EMSESP::have_sensors()) {
+        shell.printf("%s ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::SENSOR).c_str());
+    }
+
+    for (const auto & device_class : EMSFactory::device_handlers()) {
+        for (const auto & emsdevice : EMSESP::emsdevices) {
+            if ((emsdevice) && (emsdevice->device_type() == device_class.first)) {
+                shell.printf("%s ", EMSdevice::device_type_2_device_name(device_class.first).c_str());
+            }
+        }
+    }
+    shell.println();
 }
 
 // output list of all commands to console
 void Command::show_all(uuid::console::Shell & shell) {
+    shell.println(F("Available commands per device: "));
+
     // show system first
-    shell.printf("%s: ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::SERVICEKEY).c_str());
-    show(shell, EMSdevice::DeviceType::SERVICEKEY);
+    shell.printf(" %s: ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::SYSTEM).c_str());
+    show(shell, EMSdevice::DeviceType::SYSTEM);
+
+    // show sensor
+    if (EMSESP::have_sensors()) {
+        shell.printf(" %s: ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::SENSOR).c_str());
+        show(shell, EMSdevice::DeviceType::SENSOR);
+    }
 
     // do this in the order of factory classes to keep a consistent order when displaying
     for (const auto & device_class : EMSFactory::device_handlers()) {
-        for (const auto & emsdevice : EMSESP::emsdevices) {
-            if ((emsdevice) && (emsdevice->device_type() == device_class.first)) {
-                shell.printf("%s: ", EMSdevice::device_type_2_device_name(device_class.first).c_str());
-                show(shell, device_class.first);
-            }
+        if (Command::device_has_commands(device_class.first)) {
+            shell.printf(" %s: ", EMSdevice::device_type_2_device_name(device_class.first).c_str());
+            show(shell, device_class.first);
         }
     }
-}
-
-// Add the console 'call' command to the given context
-void Command::add_context_commands(unsigned int context) {
-    // if we're adding commands for a thermostat or mixing, then include an additional optional paramter called heating circuit
-    flash_string_vector params;
-    if ((context == ShellContext::THERMOSTAT) || (context == ShellContext::MIXING)) {
-        params = flash_string_vector{F_(cmd_optional), F_(data_optional), F_(hc_optional)};
-    } else if ((context == ShellContext::MAIN) || (context == ShellContext::SYSTEM)) {
-        params = flash_string_vector{F_(cmd_optional), F_(data_optional), F_(n_optional)};
-    } else {
-        params = flash_string_vector{F_(cmd_optional), F_(data_optional)};
-    }
-
-    EMSESPShell::commands->add_command(
-        context,
-        CommandFlags::ADMIN,
-        flash_string_vector{F_(call)},
-        params,
-        [&](Shell & shell, const std::vector<std::string> & arguments) {
-            if (arguments.empty()) {
-                // list options
-                shell.print("Available commands: ");
-                show(shell);
-                shell.println();
-                return;
-            }
-
-            // determine the device_type from the shell context
-            uint8_t device_type = context_2_device_type(shell.context());
-
-            // validate the command
-            const char * cmd = arguments[0].c_str();
-            if (!find(device_type, cmd)) {
-                shell.print(F("Unknown command. Available commands are: "));
-                show(shell);
-                shell.println();
-                return;
-            }
-
-            DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_LARGE);
-            JsonObject          output = doc.to<JsonObject>();
-
-            bool ok = false;
-            if (arguments.size() == 1) {
-                // no value specified, just the cmd
-                ok = Command::call(device_type, cmd, nullptr, -1, output);
-            } else if (arguments.size() == 2) {
-                // has a value but no id
-                ok = Command::call(device_type, cmd, arguments.back().c_str(), -1, output);
-            } else {
-                // use value, which could be an id or hc
-                ok = Command::call(device_type, cmd, arguments[1].c_str(), atoi(arguments[2].c_str()), output);
-            }
-
-            if (ok) {
-                shell.print(F("output: "));
-                serializeJson(doc, shell);
-                shell.println();
-                shell.println();
-            }
-        },
-        [&](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) -> std::vector<std::string> {
-            if (arguments.size() > 0) {
-                return {};
-            }
-            std::vector<std::string> commands;
-            uint8_t                  device_type = context_2_device_type(shell.context());
-            for (const auto & cf : Command::commands()) {
-                if (cf.device_type_ == device_type) {
-                    commands.emplace_back(uuid::read_flash_string(cf.cmd_));
-                }
-            }
-            return commands;
-        });
 }
 
 } // namespace emsesp
