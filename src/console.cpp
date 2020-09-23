@@ -418,7 +418,7 @@ void EMSESPShell::add_console_commands() {
             } else if (arguments.size() == 1) {
                 std::vector<std::string> command_list;
                 uint8_t                  device_type = EMSdevice::device_name_2_device_type(arguments[0].c_str());
-                if (!Command::device_has_commands(device_type)) {
+                if (Command::device_has_commands(device_type)) {
                     for (const auto & cf : Command::commands()) {
                         if (cf.device_type_ == device_type) {
                             command_list.emplace_back(uuid::read_flash_string(cf.cmd_));
