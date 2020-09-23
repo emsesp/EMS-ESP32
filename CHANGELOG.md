@@ -5,29 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.0.2] 
+## [2.1] 
 
 ### Added
-- add boiler heatingactivated, automatic select parameter telegrams for write
-- add boiler wWType
-- support for uploading compressed firmware binaries
-- add wWType to MQTT publish
-- option to set the MQTT retain flag
-- HTTP REST API, e.g. http://ems-esp/api?device=boiler&cmd=wwtemp&data=20&id=1. See https://emsesp.github.io/docs/#/API
+- boiler heatingactivated, automatic select parameter telegrams for write
+- boiler wWType parameter, in Console and MQTT
+- support for uploading compressed firmware binaries in web UI
+- setting to manually override the MQTT retain flag
+- New API via HTTP REST API. See https://emsesp.github.io/docs/#/API
 - `show commands` command
 
 ### Fixed
 - fix wwontime readback
 - fixed support for RC300 via MQTT commands (#505)
+- Some minor optimizations to memory handling in the MQTT service
 
 ### Changed
 - renamed wWCircPumpType to wWChargeType
 - Installation and Configuration notes moved to the official EMS-ESP documentation site
 - Removed the _cmd from the MQTT topic names
 - MQTT sensors topic renamed to sensor_data
+- `call` commands can be done from the Console root for all devices
 
 ### Removed
--
+- Console contexts for thermostat and boiler
 
 ## [2.0.1] September 13 2020
 
