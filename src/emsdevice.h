@@ -156,6 +156,7 @@ class EMSdevice {
     // format:
     //  for ints its  0=no division, 255=handle as boolean, other divide by the value given and render with a decimal point
     //  for floats its the precision in number of decimal places from 0 to 8
+    //  for bools its EMS_VALUE_BOOL (0xFF)
     template <typename Value>
     static void print_value(uuid::console::Shell &      shell,
                             uint8_t                     padding,

@@ -14,6 +14,8 @@ import { EMSESPSettings } from './EMSESPtypes';
 
 export const EMSESP_SETTINGS_ENDPOINT = ENDPOINT_ROOT + "emsespSettings";
 
+export const WebAPISystemInfo = window.location.origin + "/api?device=system&cmd=info";
+
 type EMSESPSettingsControllerProps = RestControllerProps<EMSESPSettings>;
 
 class EMSESPSettingsController extends Component<EMSESPSettingsControllerProps> {
@@ -49,6 +51,7 @@ function EMSESPSettingsControllerForm(props: EMSESPSettingsControllerFormProps) 
             <Box bgcolor="info.main" p={2} mt={2} mb={2}>
                 <Typography variant="body1">
                     Customize EMS-ESP by modifying the default settings here. Refer to the <Link href="https://emsesp.github.io/docs/#/Configure-firmware?id=settings" color="primary">{'Documentation'}</Link>&nbsp;for descriptions of each setting.
+                    <p>You can also <Link target="_blank" href={WebAPISystemInfo} color="primary">{'export'}</Link>&nbsp; all the system settings to make a backup.</p>
                 </Typography>
             </Box>
             <br></br>
@@ -194,6 +197,17 @@ function EMSESPSettingsControllerForm(props: EMSESPSettingsControllerFormProps) 
                 }
                 label="Enable WEB API (for write commands)"
             />
+            <SelectValidator name="bool_format"
+                label="Boolean Format"
+                value={data.bool_format}
+                fullWidth
+                variant="outlined"
+                onChange={handleValueChange('bool_format')}
+                margin="normal">
+                <MenuItem value={1}>on/off</MenuItem>
+                <MenuItem value={2}>true/false</MenuItem>
+                <MenuItem value={3}>1/0</MenuItem>
+            </SelectValidator>
             <br></br>
             <Typography variant="h6" color="primary" >
                 Syslog

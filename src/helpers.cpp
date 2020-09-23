@@ -20,6 +20,8 @@
 
 namespace emsesp {
 
+uint8_t Helpers::bool_format_ = 1; // on/off
+
 // like itoa but for hex, and quicker
 char * Helpers::hextoa(char * result, const uint8_t value) {
     char *  p    = result;
@@ -120,17 +122,28 @@ char * Helpers::smallitoa(char * result, const uint16_t value) {
     return result;
 }
 
+// work out how to display booleans
+void Helpers::render_boolean(char * result, bool value) {
+    if (bool_format() == 1) {
+        strlcpy(result, value ? "on" : "off", 5);
+    } else if (bool_format() == 2) {
+        strlcpy(result, value ? "true" : "false", 7);
+    } else {
+        strlcpy(result, value ? "1" : "0", 2);
+    }
+}
+
 // convert unsigned int (single byte) to text value and returns it
-// format: 255=boolean, 0=no formatting, otherwise divide by format
+// format: 255(0xFF)=boolean, 0=no formatting, otherwise divide by format
 char * Helpers::render_value(char * result, uint8_t value, uint8_t format) {
     // special check if its a boolean
     if (format == EMS_VALUE_BOOL) {
         if (value == EMS_VALUE_BOOL_OFF) {
-            strlcpy(result, "off", 5);
+            render_boolean(result, false);
         } else if (value == EMS_VALUE_BOOL_NOTSET) {
             return nullptr;
         } else {
-            strlcpy(result, "on", 5); // assume on. could have value 0x01 or 0xFF
+            render_boolean(result, true); // assume on. could have value 0x01 or 0xFF
         }
         return result;
     }
@@ -169,9 +182,11 @@ char * Helpers::render_value(char * result, const float value, const uint8_t for
     char * ret   = result;
     long   whole = (long)value;
     Helpers::itoa(result, whole, 10);
+
     while (*result != '\0') {
         result++;
     }
+
     *result++    = '.';
     long decimal = abs((long)((value - whole) * p[format]));
     itoa(result, decimal, 10);
@@ -329,27 +344,27 @@ bool Helpers::check_abs(const int32_t i) {
 }
 
 // for booleans, use isBool true (EMS_VALUE_BOOL)
-bool Helpers::hasValue(const uint8_t &v, const uint8_t isBool) {
+bool Helpers::hasValue(const uint8_t & v, const uint8_t isBool) {
     if (isBool == EMS_VALUE_BOOL) {
         return (v != EMS_VALUE_BOOL_NOTSET);
     }
     return (v != EMS_VALUE_UINT_NOTSET);
 }
 
-bool Helpers::hasValue(const int8_t &v) {
+bool Helpers::hasValue(const int8_t & v) {
     return (v != EMS_VALUE_INT_NOTSET);
 }
 
 // for short these are typically 0x8300, 0x7D00 and sometimes 0x8000
-bool Helpers::hasValue(const int16_t &v) {
+bool Helpers::hasValue(const int16_t & v) {
     return (abs(v) < EMS_VALUE_USHORT_NOTSET);
 }
 
-bool Helpers::hasValue(const uint16_t &v) {
+bool Helpers::hasValue(const uint16_t & v) {
     return (v < EMS_VALUE_USHORT_NOTSET);
 }
 
-bool Helpers::hasValue(const uint32_t &v) {
+bool Helpers::hasValue(const uint32_t & v) {
     return (v != EMS_VALUE_ULONG_NOTSET);
 }
 

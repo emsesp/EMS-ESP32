@@ -57,6 +57,7 @@ class System {
     static bool    upload_status();
     static void    show_mem(const char * note);
     static void    set_led();
+    static void    init();
 
     bool check_upgrade();
     void syslog_init();

@@ -14,6 +14,7 @@ export interface EMSESPSettings {
   led_gpio: number;
   hide_led: boolean;
   api_enabled: boolean;
+  bool_format: number;
 }
 
 export enum busConnectionStatus {

@@ -38,6 +38,8 @@ class Helpers {
     static char * render_value(char * result, const uint32_t value, const uint8_t format);
     static char * render_value(char * result, const int16_t value, const uint8_t format);
 
+    static void render_boolean(char * result, bool value);
+
     static char *   smallitoa(char * result, const uint8_t value);
     static char *   smallitoa(char * result, const uint16_t value);
     static char *   itoa(char * result, int16_t value, const uint8_t base = 10);
@@ -46,15 +48,23 @@ class Helpers {
     static bool     check_abs(const int32_t i);
     static double   round2(double value);
 
+    static void bool_format(uint8_t bool_format) {
+        bool_format_ = bool_format;
+    }
+
+    static uint8_t bool_format() {
+        return bool_format_;
+    }
+
 #ifdef EMSESP_STANDALONE
     static char * ultostr(char * ptr, uint32_t value, const uint8_t base);
 #endif
 
-    static bool hasValue(const uint8_t &v, const uint8_t isBool = 0);
-    static bool hasValue(const int8_t &v);
-    static bool hasValue(const int16_t &v);
-    static bool hasValue(const uint16_t &v);
-    static bool hasValue(const uint32_t &v);
+    static bool hasValue(const uint8_t & v, const uint8_t isBool = 0);
+    static bool hasValue(const int8_t & v);
+    static bool hasValue(const int16_t & v);
+    static bool hasValue(const uint16_t & v);
+    static bool hasValue(const uint32_t & v);
 
     static std::string toLower(std::string const & s);
 
@@ -62,6 +72,9 @@ class Helpers {
     static bool value2float(const char * v, float & value);
     static bool value2bool(const char * v, bool & value);
     static bool value2string(const char * v, std::string & value);
+
+  private:
+    static uint8_t bool_format_;
 };
 
 } // namespace emsesp

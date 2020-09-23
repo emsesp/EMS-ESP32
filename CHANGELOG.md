@@ -8,12 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.1] 
 
 ### Added
-- boiler heatingactivated, automatic select parameter telegrams for write
-- boiler wWType parameter, in Console and MQTT
+- boiler `heatingactivated`, automatic select parameter telegrams for write
+- boiler `wWType` parameter, in Console and MQTT
 - support for uploading compressed firmware binaries in web UI
 - setting to manually override the MQTT retain flag
-- New API via HTTP REST API. See https://emsesp.github.io/docs/#/API
+- New API via HTTP REST API to read and set values. See https://emsesp.github.io/docs/#/API
 - `show commands` command
+- exporting of system settings using the `system info` command in Web and Console. Added link into the Web's Settings page.
+- setting to change how booleans are rendered in MQTT (on/off, true/false, 1/0)
 
 ### Fixed
 - fix wwontime readback

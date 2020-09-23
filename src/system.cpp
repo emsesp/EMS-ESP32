@@ -152,15 +152,24 @@ void System::start() {
     EMSESP::esp8266React.getWiFiSettingsService()->read(
         [&](WiFiSettings & wifiSettings) { LOG_INFO(F("System %s booted (EMS-ESP version %s)"), wifiSettings.hostname.c_str(), EMSESP_APP_VERSION); });
 
-    syslog_init(); // init SysLog
-    set_led();     // init LED
-
     // these commands respond to the topic "system" and take a payload like {cmd:"", data:"", id:""}
     EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) {
         Command::add(EMSdevice::DeviceType::SYSTEM, settings.ems_bus_id, F("pin"), System::command_pin);
         Command::add(EMSdevice::DeviceType::SYSTEM, settings.ems_bus_id, F("send"), System::command_send);
         Command::add_with_json(EMSdevice::DeviceType::SYSTEM, F("info"), System::command_info);
     });
+
+    syslog_init(); // init SysLog
+
+    init();
+}
+
+// init stuff. This is called when settings are changed in the web
+void System::init() {
+    set_led(); // init LED
+
+    // set the boolean format used for rendering booleans
+    EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) { Helpers::bool_format(settings.bool_format); });
 
     EMSESP::init_tx(); // start UART
 }
@@ -897,6 +906,8 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
         node["dallas_parasite"]      = settings.dallas_parasite;
         node["led_gpio"]             = settings.led_gpio;
         node["hide_led"]             = settings.hide_led;
+        node["api_enabled"]          = settings.api_enabled;
+        node["bool_format"]          = settings.bool_format;
     });
 
 #endif
