@@ -44,9 +44,8 @@ bool Command::call(const uint8_t device_type, const char * cmd, const char * val
     if (!cmdfunctions_.empty()) {
         for (const auto & cf : cmdfunctions_) {
             if (cf.device_type_ == device_type) {
-                const char * cf_cmd = uuid::read_flash_string(cf.cmd_).c_str();
                 // find a matching command and call it
-                if (strcmp(cf_cmd, cmd) == 0) {
+                if (uuid::read_flash_string(cf.cmd_) == cmd) {
                     if (cf.cmdfunction_json_) {
                         // check if json object is empty, if so quit
                         if (output.isNull()) {

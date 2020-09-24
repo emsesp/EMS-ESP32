@@ -39,7 +39,9 @@
 #define LOW 0
 #define HIGH 1
 
+#ifndef NAN
 #define NAN 0
+#endif
 
 #define INPUT 0
 #define OUTPUT 1
