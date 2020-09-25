@@ -830,11 +830,12 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
 #else
 
     EMSESP::esp8266React.getWiFiSettingsService()->read([&](WiFiSettings & settings) {
+        char       s[7];
         JsonObject node = output.createNestedObject("WIFI");
         node["ssid"]    = settings.ssid;
         // node["password"]         = settings.password;
         node["hostname"]         = settings.hostname;
-        node["static_ip_config"] = settings.staticIPConfig;
+        node["static_ip_config"] = Helpers::render_boolean(s, settings.staticIPConfig);
         JsonUtils::writeIP(node, "local_ip", settings.localIP);
         JsonUtils::writeIP(node, "gateway_ip", settings.gatewayIP);
         JsonUtils::writeIP(node, "subnet_mask", settings.subnetMask);
@@ -853,17 +854,18 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
     });
 
     EMSESP::esp8266React.getMqttSettingsService()->read([&](MqttSettings & settings) {
+        char       s[7];
         JsonObject node  = output.createNestedObject("MQTT");
-        node["enabled"]  = settings.enabled;
+        node["enabled"]  = Helpers::render_boolean(s, settings.enabled);
         node["host"]     = settings.host;
         node["port"]     = settings.port;
         node["username"] = settings.username;
         // node["password"]                = settings.password;
         node["client_id"]               = settings.clientId;
         node["keep_alive"]              = settings.keepAlive;
-        node["clean_session"]           = settings.cleanSession;
+        node["clean_session"]           = Helpers::render_boolean(s, settings.cleanSession);
         node["max_topic_length"]        = settings.maxTopicLength;
-        node["system_heartbeat"]        = settings.system_heartbeat;
+        node["system_heartbeat"]        = Helpers::render_boolean(s, settings.system_heartbeat);
         node["publish_time_boiler"]     = settings.publish_time_boiler;
         node["publish_time_thermostat"] = settings.publish_time_thermostat;
         node["publish_time_solar"]      = settings.publish_time_solar;
@@ -872,25 +874,28 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
         node["publish_time_sensor"]     = settings.publish_time_sensor;
         node["mqtt_format"]             = settings.mqtt_format;
         node["mqtt_qos"]                = settings.mqtt_qos;
-        node["mqtt_retain"]             = settings.mqtt_retain;
+        node["mqtt_retain"]             = Helpers::render_boolean(s, settings.mqtt_retain);
     });
 
     EMSESP::esp8266React.getNTPSettingsService()->read([&](NTPSettings & settings) {
+        char       s[7];
         JsonObject node   = output.createNestedObject("NTP");
-        node["enabled"]   = settings.enabled;
+        node["enabled"]   = Helpers::render_boolean(s, settings.enabled);
         node["server"]    = settings.server;
         node["tz_label"]  = settings.tzLabel;
         node["tz_format"] = settings.tzFormat;
     });
 
     EMSESP::esp8266React.getOTASettingsService()->read([&](OTASettings & settings) {
+        char       s[7];
         JsonObject node = output.createNestedObject("OTA");
-        node["enabled"] = settings.enabled;
+        node["enabled"] = Helpers::render_boolean(s, settings.enabled);
         node["port"]    = settings.port;
         // node["password"] = settings.password;
     });
 
     EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) {
+        char       s[7];
         JsonObject node              = output.createNestedObject("Settings");
         node["tx_mode"]              = settings.tx_mode;
         node["ems_bus_id"]           = settings.ems_bus_id;
@@ -898,15 +903,15 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
         node["syslog_mark_interval"] = settings.syslog_mark_interval;
         node["syslog_host"]          = settings.syslog_host;
         node["master_thermostat"]    = settings.master_thermostat;
-        node["shower_timer"]         = settings.shower_timer;
-        node["shower_alert"]         = settings.shower_alert;
+        node["shower_timer"]         = Helpers::render_boolean(s, settings.shower_timer);
+        node["shower_alert"]         = Helpers::render_boolean(s, settings.shower_alert);
         node["rx_gpio"]              = settings.rx_gpio;
         node["tx_gpio"]              = settings.tx_gpio;
         node["dallas_gpio"]          = settings.dallas_gpio;
-        node["dallas_parasite"]      = settings.dallas_parasite;
+        node["dallas_parasite"]      = Helpers::render_boolean(s, settings.dallas_parasite);
         node["led_gpio"]             = settings.led_gpio;
-        node["hide_led"]             = settings.hide_led;
-        node["api_enabled"]          = settings.api_enabled;
+        node["hide_led"]             = Helpers::render_boolean(s, settings.hide_led);
+        node["api_enabled"]          = Helpers::render_boolean(s, settings.api_enabled);
         node["bool_format"]          = settings.bool_format;
     });
 

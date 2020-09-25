@@ -123,7 +123,7 @@ char * Helpers::smallitoa(char * result, const uint16_t value) {
 }
 
 // work out how to display booleans
-void Helpers::render_boolean(char * result, bool value) {
+char * Helpers::render_boolean(char * result, bool value) {
     if (bool_format() == 1) {
         strlcpy(result, value ? "on" : "off", 5);
     } else if (bool_format() == 2) {
@@ -131,6 +131,7 @@ void Helpers::render_boolean(char * result, bool value) {
     } else {
         strlcpy(result, value ? "1" : "0", 2);
     }
+    return result;
 }
 
 // convert unsigned int (single byte) to text value and returns it
