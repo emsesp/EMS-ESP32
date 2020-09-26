@@ -397,10 +397,8 @@ void EMSESPShell::add_console_commands() {
                 ok = Command::call(device_type, cmd, arguments[2].c_str(), atoi(arguments[3].c_str()), output);
             }
 
-            if (ok) {
-                shell.print(F("output: "));
+            if (ok && output.size()) {
                 serializeJson(doc, shell);
-                shell.println();
                 shell.println();
             }
         },
