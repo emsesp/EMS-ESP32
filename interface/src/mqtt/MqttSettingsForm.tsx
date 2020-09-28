@@ -30,7 +30,7 @@ class MqttSettingsForm extends React.Component<MqttSettingsFormProps> {
               value="enabled"
             />
           }
-          label="Enable MQTT?"
+          label="Enable MQTT"
         />
         <TextValidator
           validators={['required', 'isIPOrHostname']}
@@ -137,7 +137,7 @@ class MqttSettingsForm extends React.Component<MqttSettingsFormProps> {
               value="clean_session"
             />
           }
-          label="Clean Session?"
+          label="Clean Session"
         />
         <BlockFormControlLabel
           control={
@@ -148,16 +148,6 @@ class MqttSettingsForm extends React.Component<MqttSettingsFormProps> {
             />
           }
           label="Retain Flag"
-        />
-        <BlockFormControlLabel
-          control={
-            <Checkbox
-              checked={data.system_heartbeat}
-              onChange={handleValueChange('system_heartbeat')}
-              value="system_heartbeat"
-            />
-          }
-          label="Heartbeat"
         />
         <br></br>
         <Typography variant="h6" color="primary" >

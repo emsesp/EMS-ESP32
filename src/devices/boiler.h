@@ -47,12 +47,13 @@ class Boiler : public EMSdevice {
     static uuid::log::Logger logger_;
 
     void register_mqtt_ha_config();
+    void register_mqtt_ha_binary_sensor(const __FlashStringHelper * name, const char * entity);
+    void register_mqtt_ha_sensor(const __FlashStringHelper * name, const char * entity, const char * uom, const char * icon);
     void check_active();
     bool export_values(JsonObject & doc);
 
     uint8_t last_boilerState = 0xFF; // remember last state of heating and warm water on/off
-    uint8_t mqtt_format_;            // single, nested or ha
-    bool    changed_ = false;
+    bool    changed_         = false;
 
     static constexpr uint8_t EMS_TYPE_UBAParameterWW     = 0x33;
     static constexpr uint8_t EMS_TYPE_UBAFunctionTest    = 0x1D;
@@ -95,6 +96,7 @@ class Boiler : public EMSdevice {
     uint8_t  sysPress_           = EMS_VALUE_UINT_NOTSET;   // System pressure
     char     serviceCodeChar_[3] = {'\0'};                  // 2 character status/service code
     uint16_t serviceCode_        = EMS_VALUE_USHORT_NOTSET; // error/service code
+    uint8_t  boilerState_        = EMS_VALUE_BOOL_NOTSET;   // State flag, used on HT3
 
     // UBAMonitorSlow - 0x19 on EMS1
     int16_t  extTemp_     = EMS_VALUE_SHORT_NOTSET;  // Outside temperature
@@ -141,8 +143,8 @@ class Boiler : public EMSdevice {
     uint8_t setWWPumpPow_ = EMS_VALUE_UINT_NOTSET; // ww pump speed/power?
 
     // other internal calculated params
-    uint8_t tap_water_active_ = EMS_VALUE_BOOL_NOTSET; // Hot tap water is on/off
-    uint8_t heating_active_   = EMS_VALUE_BOOL_NOTSET; // Central heating is on/off
+    bool    tap_water_active_ = false;                 // Hot tap water is on/off
+    bool    heating_active_   = false;                 // Central heating is on/off
     uint8_t pumpMod2_         = EMS_VALUE_UINT_NOTSET; // heatpump modulation from 0xE3 (heatpumps)
 
     bool command_info(const char * value, const int8_t id, JsonObject & output);

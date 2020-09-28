@@ -130,10 +130,6 @@ void System::syslog_init() {
 #endif
 }
 
-void System::set_heartbeat(bool system_heartbeat) {
-    system_heartbeat_ = system_heartbeat;
-}
-
 // first call. Sets memory and starts up the UART Serial bridge
 void System::start() {
     // set the inital free mem
@@ -144,9 +140,6 @@ void System::start() {
         heap_start_ = 2000;
 #endif
     }
-
-    // fetch system heartbeat
-    EMSESP::esp8266React.getMqttSettingsService()->read([&](MqttSettings & settings) { system_heartbeat_ = settings.system_heartbeat; });
 
     // print boot message
     EMSESP::esp8266React.getWiFiSettingsService()->read(
@@ -216,9 +209,7 @@ void System::loop() {
     uint32_t currentMillis = uuid::get_uptime();
     if (!last_heartbeat_ || (currentMillis - last_heartbeat_ > SYSTEM_HEARTBEAT_INTERVAL)) {
         last_heartbeat_ = currentMillis;
-        if (system_heartbeat_) {
             send_heartbeat();
-        }
     }
 
 #if defined(ESP8266)
@@ -249,6 +240,16 @@ void System::send_heartbeat() {
     }
 
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
+
+    uint8_t ems_status = EMSESP::bus_status();
+    if (ems_status == EMSESP::BUS_STATUS_TX_ERRORS) {
+        doc["status"] = "txerror";
+    } else if (ems_status == EMSESP::BUS_STATUS_CONNECTED) {
+        doc["status"] = "connected";
+    } else {
+        doc["status"] = "disconnected";
+    }
+
     doc["rssid"]            = rssid;
     doc["uptime"]           = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
     doc["uptime_sec"]       = uuid::get_uptime_sec();
@@ -725,7 +726,7 @@ bool System::check_upgrade() {
             EMSESP::esp8266React.getMqttSettingsService()->update(
                 [&](MqttSettings & mqttSettings) {
                     mqttSettings.host             = mqtt["ip"] | FACTORY_MQTT_HOST;
-                    mqttSettings.mqtt_format      = (mqtt["nestedjson"] ? MQTT_format::NESTED : MQTT_format::SINGLE);
+                    mqttSettings.mqtt_format      = (mqtt["nestedjson"] ? Mqtt::Format::NESTED : Mqtt::Format::SINGLE);
                     mqttSettings.mqtt_qos         = mqtt["qos"] | 0;
                     mqttSettings.mqtt_retain      = mqtt["retain"];
                     mqttSettings.username         = mqtt["user"] | "";
@@ -733,7 +734,6 @@ bool System::check_upgrade() {
                     mqttSettings.port             = mqtt["port"] | FACTORY_MQTT_PORT;
                     mqttSettings.clientId         = FACTORY_MQTT_CLIENT_ID;
                     mqttSettings.enabled          = mqtt["enabled"];
-                    mqttSettings.system_heartbeat = mqtt["heartbeat"];
                     mqttSettings.keepAlive        = FACTORY_MQTT_KEEP_ALIVE;
                     mqttSettings.cleanSession     = FACTORY_MQTT_CLEAN_SESSION;
                     mqttSettings.maxTopicLength   = FACTORY_MQTT_MAX_TOPIC_LENGTH;
@@ -865,7 +865,6 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
         node["keep_alive"]              = settings.keepAlive;
         node["clean_session"]           = Helpers::render_boolean(s, settings.cleanSession);
         node["max_topic_length"]        = settings.maxTopicLength;
-        node["system_heartbeat"]        = Helpers::render_boolean(s, settings.system_heartbeat);
         node["publish_time_boiler"]     = settings.publish_time_boiler;
         node["publish_time_thermostat"] = settings.publish_time_thermostat;
         node["publish_time_solar"]      = settings.publish_time_solar;

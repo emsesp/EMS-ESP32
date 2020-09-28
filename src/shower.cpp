@@ -27,6 +27,10 @@ void Shower::start() {
         shower_timer_ = settings.shower_timer;
         shower_alert_ = settings.shower_alert;
     });
+
+    if (Mqtt::mqtt_format() == Mqtt::Format::HA) {
+        Mqtt::register_mqtt_ha_binary_sensor(F("Shower Active"), "shower_active");
+    }
 }
 
 void Shower::loop() {
@@ -115,11 +119,11 @@ void Shower::shower_alert_start() {
 // returns true if added to MQTT queue went ok
 void Shower::publish_values() {
     StaticJsonDocument<90> doc;
-    doc["shower_timer"] = shower_timer_ ? "1" : "0";
-    doc["shower_alert"] = shower_alert_ ? "1" : "0";
+    char                   s[50];
+    doc["shower_timer"] = Helpers::render_boolean(s, shower_timer_);
+    doc["shower_alert"] = Helpers::render_boolean(s, shower_alert_);
 
     // only publish shower duration if there is a value
-    char s[50];
     if (duration_ > SHOWER_MIN_DURATION) {
         char buffer[16] = {0};
         strlcpy(s, Helpers::itoa(buffer, (uint8_t)((duration_ / (1000 * 60)) % 60), 10), 50);

@@ -46,6 +46,7 @@ class Solar : public EMSdevice {
 
     bool export_values(JsonObject & doc);
     bool command_info(const char * value, const int8_t id, JsonObject & output);
+    void register_mqtt_ha_config();
 
     int16_t  collectorTemp_          = EMS_VALUE_SHORT_NOTSET; // TS1: Temperature sensor for collector array 1
     int16_t  tankBottomTemp_         = EMS_VALUE_SHORT_NOTSET; // TS2: Temperature sensor 1 cylinder, bottom (solar thermal system)
@@ -67,7 +68,8 @@ class Solar : public EMSdevice {
     uint8_t configFlag_       = EMS_VALUE_BOOL_NOTSET;
     uint8_t userFlag_         = EMS_VALUE_BOOL_NOTSET;
 
-    bool changed_ = false;
+    bool changed_    = false;
+    bool ha_created_ = false; // for HA MQTT Discovery
 
     void process_SM10Monitor(std::shared_ptr<const Telegram> telegram);
     void process_SM100Monitor(std::shared_ptr<const Telegram> telegram);

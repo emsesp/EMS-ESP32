@@ -296,7 +296,6 @@ void EMSdevice::show_mqtt_handlers(uuid::console::Shell & shell) {
 }
 
 void EMSdevice::register_mqtt_topic(const std::string & topic, mqtt_subfunction_p f) {
-    LOG_DEBUG(F("Registering MQTT topic %s for device ID %02X and type %s"), topic.c_str(), this->device_id_, this->device_type_name().c_str());
     Mqtt::subscribe(this->device_type_, topic, f);
 }
 

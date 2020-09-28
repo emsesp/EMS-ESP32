@@ -20,7 +20,7 @@
 
 namespace emsesp {
 
-uint8_t Helpers::bool_format_ = 1; // on/off
+uint8_t Helpers::bool_format_ = BOOL_FORMAT_ONOFF; // on/off
 
 // like itoa but for hex, and quicker
 char * Helpers::hextoa(char * result, const uint8_t value) {
@@ -124,9 +124,9 @@ char * Helpers::smallitoa(char * result, const uint16_t value) {
 
 // work out how to display booleans
 char * Helpers::render_boolean(char * result, bool value) {
-    if (bool_format() == 1) {
+    if (bool_format() == BOOL_FORMAT_ONOFF) {
         strlcpy(result, value ? "on" : "off", 5);
-    } else if (bool_format() == 2) {
+    } else if (bool_format() == BOOL_FORMAT_TRUEFALSE) {
         strlcpy(result, value ? "true" : "false", 7);
     } else {
         strlcpy(result, value ? "1" : "0", 2);

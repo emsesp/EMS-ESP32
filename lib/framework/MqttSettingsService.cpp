@@ -184,7 +184,6 @@ void MqttSettings::read(MqttSettings & settings, JsonObject & root) {
     root["max_topic_length"] = settings.maxTopicLength;
 
     // added by proddy for EMS-ESP
-    root["system_heartbeat"]        = settings.system_heartbeat;
     root["publish_time_boiler"]     = settings.publish_time_boiler;
     root["publish_time_thermostat"] = settings.publish_time_thermostat;
     root["publish_time_solar"]      = settings.publish_time_solar;
@@ -209,7 +208,6 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
     newSettings.cleanSession   = root["clean_session"] | FACTORY_MQTT_CLEAN_SESSION;
     newSettings.maxTopicLength = root["max_topic_length"] | FACTORY_MQTT_MAX_TOPIC_LENGTH;
 
-    newSettings.system_heartbeat        = root["system_heartbeat"] | EMSESP_DEFAULT_SYSTEM_HEARTBEAT;
     newSettings.publish_time_boiler     = root["publish_time_boiler"] | EMSESP_DEFAULT_PUBLISH_TIME;
     newSettings.publish_time_thermostat = root["publish_time_thermostat"] | EMSESP_DEFAULT_PUBLISH_TIME;
     newSettings.publish_time_solar      = root["publish_time_solar"] | EMSESP_DEFAULT_PUBLISH_TIME;
@@ -219,10 +217,6 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
     newSettings.mqtt_format             = root["mqtt_format"] | EMSESP_DEFAULT_MQTT_FORMAT;
     newSettings.mqtt_qos                = root["mqtt_qos"] | EMSESP_DEFAULT_MQTT_QOS;
     newSettings.mqtt_retain             = root["mqtt_retain"] | EMSESP_DEFAULT_MQTT_RETAIN;
-
-    if (newSettings.system_heartbeat != settings.system_heartbeat) {
-        emsesp::EMSESP::system_.set_heartbeat(newSettings.system_heartbeat);
-    }
 
     if (newSettings.mqtt_qos != settings.mqtt_qos) {
         emsesp::EMSESP::mqtt_.set_qos(newSettings.mqtt_qos);

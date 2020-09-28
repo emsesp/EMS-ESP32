@@ -137,10 +137,6 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
         }
     }
 
-    EMSESP::esp8266React.getMqttSettingsService()->read([&](MqttSettings & settings) {
-        mqtt_format_ = settings.mqtt_format; // single, nested or ha
-    });
-
     if (actual_master_thermostat != device_id) {
         LOG_DEBUG(F("Adding new thermostat with device ID 0x%02X"), device_id);
         return; // don't fetch data if more than 1 thermostat
@@ -236,7 +232,7 @@ bool Thermostat::updated_values() {
 // info API command
 // returns the same MQTT publish payload in Nested format
 bool Thermostat::command_info(const char * value, const int8_t id, JsonObject & output) {
-    return (export_values(MQTT_format::NESTED, output));
+    return (export_values(Mqtt::Format::NESTED, output));
 }
 
 // publish values via MQTT
@@ -247,9 +243,11 @@ void Thermostat::publish_values() {
 
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
     JsonObject                                      output = doc.to<JsonObject>();
-    export_values(mqtt_format_, output);
 
-    if (mqtt_format_ == MQTT_format::NESTED) {
+    export_values(Mqtt::mqtt_format(), output);
+
+    // if we're in SINGLE mode the MQTT would have been published on the export_values() function for each hc
+    if (Mqtt::mqtt_format() != Mqtt::Format::SINGLE) {
         Mqtt::publish(F("thermostat_data"), output);
     }
 }
@@ -300,7 +298,7 @@ bool Thermostat::export_values(uint8_t mqtt_format, JsonObject & rootThermostat)
         }
 
         // send this specific data using the thermostat_data topic
-        if (mqtt_format != MQTT_format::NESTED) {
+        if (mqtt_format != Mqtt::Format::NESTED) {
             Mqtt::publish(F("thermostat_data"), rootThermostat);
             rootThermostat.clear(); // clear object
         }
@@ -313,7 +311,7 @@ bool Thermostat::export_values(uint8_t mqtt_format, JsonObject & rootThermostat)
             has_data = true;
 
             // if the MQTT format is 'nested' or 'ha' then create the parent object hc<n>
-            if ((mqtt_format == MQTT_format::NESTED) || (mqtt_format == MQTT_format::HA)) {
+            if ((mqtt_format == Mqtt::Format::NESTED) || (mqtt_format == Mqtt::Format::HA)) {
                 char hc_name[10]; // hc{1-4}
                 strlcpy(hc_name, "hc", 10);
                 char s[3];
@@ -395,10 +393,10 @@ bool Thermostat::export_values(uint8_t mqtt_format, JsonObject & rootThermostat)
             }
 
             // mode - always force showing this when in HA so not to break HA's climate component
-            if ((Helpers::hasValue(hc->mode)) || (mqtt_format == MQTT_format::HA)) {
+            if ((Helpers::hasValue(hc->mode)) || (mqtt_format == Mqtt::Format::HA)) {
                 uint8_t hc_mode = hc->get_mode(flags);
                 // if we're sending to HA the only valid mode types are heat, auto and off
-                if (mqtt_format == MQTT_format::HA) {
+                if (mqtt_format == Mqtt::Format::HA) {
                     if ((hc_mode == HeatingCircuit::Mode::MANUAL) || (hc_mode == HeatingCircuit::Mode::DAY)) {
                         hc_mode = HeatingCircuit::Mode::HEAT;
                     } else if ((hc_mode == HeatingCircuit::Mode::NIGHT) || (hc_mode == HeatingCircuit::Mode::OFF)) {
@@ -422,23 +420,17 @@ bool Thermostat::export_values(uint8_t mqtt_format, JsonObject & rootThermostat)
 
             // if format is single, send immediately and clear object for next hc
             // the topic will have the hc number appended
-            if ((mqtt_format == MQTT_format::SINGLE) || (mqtt_format == MQTT_format::CUSTOM)) {
+            if ((mqtt_format == Mqtt::Format::SINGLE) || (mqtt_format == Mqtt::Format::CUSTOM)) {
                 char topic[30];
                 char s[3];
                 strlcpy(topic, "thermostat_data", 30);
                 strlcat(topic, Helpers::itoa(s, hc->hc_num()), 30); // append hc to topic
                 Mqtt::publish(topic, rootThermostat);
                 rootThermostat.clear(); // clear object
-            } else if (mqtt_format == MQTT_format::HA) {
+            } else if ((mqtt_format == Mqtt::Format::HA) && (!hc->ha_registered())) {
                 // see if we have already registered this with HA MQTT Discovery, if not send the config
-                if (!hc->ha_registered()) {
-                    register_mqtt_ha_config(hc->hc_num());
-                    hc->ha_registered(true);
-                }
-                // send the thermostat topic and payload data
-                std::string topic(100, '\0');
-                snprintf_P(&topic[0], topic.capacity() + 1, PSTR("homeassistant/climate/ems-esp/hc%d/state"), hc->hc_num());
-                Mqtt::publish(topic, rootThermostat);
+                register_mqtt_ha_config(hc->hc_num());
+                hc->ha_registered(true);
             }
         }
     }
@@ -527,27 +519,24 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::sha
 }
 
 // publish config topic for HA MQTT Discovery
-// homeassistant/climate/ems-esp/hc<num>
-// state is /state
-// config is /config
+// homeassistant/climate/ems-esp/thermostat_hc1/config
 void Thermostat::register_mqtt_ha_config(uint8_t hc_num) {
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
 
-    std::string hc_text(10, '\0');
-    snprintf_P(&hc_text[0], hc_text.capacity() + 1, PSTR("hc%d"), hc_num);
-    doc["name"]    = hc_text;
-    doc["uniq_id"] = hc_text;
+    std::string str1(40, '\0');
+    snprintf_P(&str1[0], str1.capacity() + 1, PSTR("Thermostat hc%d"), hc_num);
+    doc["name"] = str1;
 
-    // topic root is homeassistant/climate/ems-esp/hc<1..n>/
-    std::string root(100, '\0');
-    snprintf_P(&root[0], root.capacity() + 1, PSTR("homeassistant/climate/ems-esp/hc%d"), hc_num);
-    doc["~"] = root;
+    std::string str2(40, '\0');
+    snprintf_P(&str2[0], str2.capacity() + 1, PSTR("thermostat_hc%d"), hc_num);
+    doc["uniq_id"] = str2;
 
-    doc["mode_cmd_t"]  = "~/cmd_mode";
-    doc["mode_stat_t"] = "~/state";
-    doc["temp_cmd_t"]  = "~/cmd_temp";
-    doc["temp_stat_t"] = "~/state";
-    doc["curr_temp_t"] = "~/state";
+    doc["~"]           = F("ems-esp");
+    doc["mode_cmd_t"]  = F("~/thermostat");
+    doc["temp_cmd_t"]  = F("~/thermostat");
+    doc["mode_stat_t"] = F("~/thermostat_data");
+    doc["temp_stat_t"] = F("~/thermostat_data");
+    doc["curr_temp_t"] = F("~/thermostat_data");
 
     std::string mode_str(30, '\0');
     snprintf_P(&mode_str[0], 30, PSTR("{{value_json.hc%d.mode}}"), hc_num);
@@ -561,40 +550,60 @@ void Thermostat::register_mqtt_ha_config(uint8_t hc_num) {
     snprintf_P(&currtemp_str[0], 30, PSTR("{{value_json.hc%d.currtemp}}"), hc_num);
     doc["curr_temp_tpl"] = currtemp_str;
 
-    doc["min_temp"]  = "5";
-    doc["max_temp"]  = "40";
-    doc["temp_step"] = "0.5";
+    doc["min_temp"]  = F("5");
+    doc["max_temp"]  = F("40");
+    doc["temp_step"] = F("0.5");
 
-    JsonArray modes = doc.createNestedArray("modes");
+    JsonArray modes = doc.createNestedArray(F("modes"));
     uint8_t   flags = this->model();
     if (flags == EMSdevice::EMS_DEVICE_FLAG_RC20_2) {
-        modes.add("night");
-        modes.add("day");
+        modes.add(F("night"));
+        modes.add(F("day"));
     } else if ((flags == EMSdevice::EMS_DEVICE_FLAG_RC300) || (flags == EMSdevice::EMS_DEVICE_FLAG_RC100)) {
-        modes.add("eco");
-        modes.add("comfort");
-        modes.add("auto");
+        modes.add(F("eco"));
+        modes.add(F("comfort"));
+        modes.add(F("auto"));
     } else if (flags == EMSdevice::EMS_DEVICE_FLAG_JUNKERS) {
-        modes.add("nofrost");
-        modes.add("eco");
-        modes.add("heat");
-        modes.add("auto");
+        modes.add(F("nofrost"));
+        modes.add(F("eco"));
+        modes.add(F("heat"));
+        modes.add(F("auto"));
     } else { // default for all other thermostats
-        modes.add("night");
-        modes.add("day");
-        modes.add("auto");
+        modes.add(F("night"));
+        modes.add(F("day"));
+        modes.add(F("auto"));
     }
 
+    JsonObject dev = doc.createNestedObject(F("dev"));
+    JsonArray  ids = dev.createNestedArray(F("ids"));
+    ids.add(F("ems-esp"));
+
     std::string topic(100, '\0'); // e.g homeassistant/climate/hc1/thermostat/config
-    snprintf_P(&topic[0], topic.capacity() + 1, PSTR("homeassistant/climate/ems-esp/hc%d/config"), hc_num);
+    snprintf_P(&topic[0], topic.capacity() + 1, PSTR("homeassistant/climate/ems-esp/thermostat_hc%d/config"), hc_num);
     // Mqtt::publish(topic); // empty payload, this remove any previous config sent to HA
     Mqtt::publish_retain(topic, doc.as<JsonObject>(), true); // publish the config payload with retain flag
 
-    // subscribe to the temp and mode commands
-    snprintf_P(&topic[0], topic.capacity() + 1, PSTR("homeassistant/climate/ems-esp/hc%d/cmd_temp"), hc_num);
-    register_mqtt_topic(topic, [&](const char * m) { thermostat_cmd_temp(m); });
-    snprintf_P(&topic[0], topic.capacity() + 1, PSTR("homeassistant/climate/ems-esp/hc%d/cmd_mode"), hc_num);
-    register_mqtt_topic(topic, [&](const char * m) { thermostat_cmd_mode(m); });
+    // enable the thermostat topic to take both mode strings and floats
+    register_mqtt_topic("thermostat", [&](const char * m) { return thermostat_ha_cmd(m); });
+}
+
+// for HA specifically when receiving over MQTT in the thermostat topic
+// it could be either a 'mode' or a float value
+// return true if it parses the message correctly
+bool Thermostat::thermostat_ha_cmd(const char * message) {
+    // check if it's json. We know the message isn't empty
+    if (message[0] == '{') {
+        return false;
+    }
+
+    // check for mode first
+    if (!set_mode(message, AUTO_HEATING_CIRCUIT)) {
+        // handle as a numerical temperature value
+        float f = strtof((char *)message, 0);
+        set_temperature(f, HeatingCircuit::Mode::AUTO, AUTO_HEATING_CIRCUIT);
+    }
+
+    return true;
 }
 
 // decodes the thermostat mode for the heating circuit based on the thermostat type
@@ -1463,7 +1472,6 @@ bool Thermostat::set_mode(const char * value, const int8_t id) {
         return set_mode_n(HeatingCircuit::Mode::COMFORT, hc_num);
     }
 
-    LOG_WARNING(F("Invalid mode %s. Cannot set"), mode.c_str());
     return false;
 }
 
@@ -1789,18 +1797,6 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
     return false;
 }
 
-// for HA specifically when receiving over MQTT
-bool Thermostat::thermostat_cmd_temp(const char * message) {
-    float f = strtof((char *)message, 0);
-    return set_temperature(f, HeatingCircuit::Mode::AUTO, AUTO_HEATING_CIRCUIT);
-}
-
-// for HA specifically when receiving over MQTT
-// message payload holds the text name of the mode e.g. "auto"
-bool Thermostat::thermostat_cmd_mode(const char * message) {
-    return set_mode(message, AUTO_HEATING_CIRCUIT);
-}
-
 bool Thermostat::set_temperature_value(const char * value, const int8_t id, const uint8_t mode) {
     float   f      = 0;
     uint8_t hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
@@ -1874,7 +1870,13 @@ void Thermostat::add_commands() {
     // common to all thermostats
     register_mqtt_cmd(F("wwmode"), [&](const char * value, const int8_t id) { return set_wwmode(value, id); });
     register_mqtt_cmd(F("temp"), [&](const char * value, const int8_t id) { return set_temp(value, id); });
-    register_mqtt_cmd(F("mode"), [&](const char * value, const int8_t id) { return set_mode(value, id); });
+    register_mqtt_cmd(F("mode"), [=](const char * value, const int8_t id) {
+        if (!set_mode(value, id)) {
+            LOG_WARNING(F("Invalid mode %s. Cannot set"), value);
+            return false;
+        }
+        return true;
+    });
 
     uint8_t model = this->model();
     switch (model) {

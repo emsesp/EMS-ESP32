@@ -116,8 +116,33 @@ void Solar::publish_values() {
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
     JsonObject                                      output = doc.to<JsonObject>();
     if (export_values(output)) {
-        Mqtt::publish(F("sm_data"), doc.as<JsonObject>());
+        Mqtt::publish(F("solar_data"), doc.as<JsonObject>());
     }
+
+    // if we're using Home Assistant and haven't created the MQTT Discovery topics, do it now
+    if ((Mqtt::mqtt_format() == Mqtt::Format::HA) && (!ha_created_)) {
+        register_mqtt_ha_config();
+    }
+}
+
+// publish config topic for HA MQTT Discovery
+void Solar::register_mqtt_ha_config() {
+    Mqtt::register_mqtt_ha_sensor(F("Collector temperature (TS1)"), this->device_type(), "collectorTemp", "°C", "");
+    Mqtt::register_mqtt_ha_sensor(F("Bottom temperature (TS2)"), this->device_type(), "tankBottomTemp", "°C", "");
+    Mqtt::register_mqtt_ha_sensor(F("Bottom temperature (TS5)"), this->device_type(), "tankBottomTemp2", "°C", "");
+    Mqtt::register_mqtt_ha_sensor(F("Heat exchanger temperature (TS6)"), this->device_type(), "heatExchangerTemp", "°C", "");
+    Mqtt::register_mqtt_ha_sensor(F("Solar pump modulation (PS1)"), this->device_type(), "solarPumpModulation", "%", "");
+    Mqtt::register_mqtt_ha_sensor(F("Cylinder pump modulation (PS5)"), this->device_type(), "cylinderPumpModulation", "%", "");
+    Mqtt::register_mqtt_ha_sensor(F("Pump working time"), this->device_type(), "pumpWorkMin", "", "");
+    Mqtt::register_mqtt_ha_sensor(F("Energy last hour"), this->device_type(), "energyLastHour", "", "");
+    Mqtt::register_mqtt_ha_sensor(F("Energy today"), this->device_type(), "energyToday", "", "");
+    Mqtt::register_mqtt_ha_sensor(F("Energy total"), this->device_type(), "energyTotal", "", "");
+    Mqtt::register_mqtt_ha_sensor(F("Solar Pump (PS1) active"), this->device_type(), "solarPump", "", "");
+    Mqtt::register_mqtt_ha_sensor(F("Valve (VS2) status"), this->device_type(), "valveStatus", "", "");
+    Mqtt::register_mqtt_ha_sensor(F("Tank Heated"), this->device_type(), "tankHeated", "", "");
+    Mqtt::register_mqtt_ha_sensor(F("Collector shutdown"), this->device_type(), "collectorShutdown", "", "");
+
+    ha_created_ = true;
 }
 
 // creates JSON doc from values

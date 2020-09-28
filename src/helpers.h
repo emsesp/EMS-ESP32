@@ -24,6 +24,9 @@
 
 #include "telegram.h" // for EMS_VALUE_* settings
 
+#define BOOL_FORMAT_ONOFF 1
+#define BOOL_FORMAT_TRUEFALSE 2
+
 namespace emsesp {
 
 class Helpers {

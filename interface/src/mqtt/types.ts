@@ -36,5 +36,4 @@ export interface MqttSettings {
   mqtt_format: number;
   mqtt_qos: number;
   mqtt_retain: boolean;
-  system_heartbeat: boolean;
 }

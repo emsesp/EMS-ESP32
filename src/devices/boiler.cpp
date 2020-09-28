@@ -75,34 +75,30 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
         return command_info(value, id, object);
     });
 
-    EMSESP::esp8266React.getMqttSettingsService()->read([&](MqttSettings & settings) {
-        mqtt_format_ = settings.mqtt_format; // single, nested or ha
-
-        if (mqtt_format_ == MQTT_format::HA) {
-            register_mqtt_ha_config();
-        }
-    });
+    if (Mqtt::mqtt_format() == Mqtt::Format::HA) {
+        register_mqtt_ha_config();
+    }
 }
 
-// create the config topic for Home Assistant MQTT Discovery
-// homeassistant/sensor/ems-esp/boiler
-// state is /state
-// config is /config
+// create the config topics for Home Assistant MQTT Discovery
+// for each of the main elements
 void Boiler::register_mqtt_ha_config() {
-    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
+    Mqtt::register_mqtt_ha_binary_sensor(F("Boiler DHW"), "tapwater_active");
+    Mqtt::register_mqtt_ha_binary_sensor(F("Boiler Heating"), "heating_active");
 
-    /*
-     * not finished yet - see https://github.com/proddy/EMS-ESP/issues/288
-    
-    doc["name"]    = "boiler";
-    doc["uniq_id"] = "boiler";
-
-    // Mqtt::publish(topic); // empty payload, this remove any previous config sent to HA
-    Mqtt::publish("homeassistant/sensor/ems-esp/boiler/config", doc, true); // publish the config payload with retain flag
-    
-    */
+    Mqtt::register_mqtt_ha_sensor(F("Service Code"), this->device_type(), "serviceCode", "", "");
+    Mqtt::register_mqtt_ha_sensor(F("Service Code number"), this->device_type(), "serviceCodeNumber", "", "");
+    Mqtt::register_mqtt_ha_sensor(F("Boiler WW Selected Temp"), this->device_type(), "wWSelTemp", "°C", "mdi:coolant-temperature");
+    Mqtt::register_mqtt_ha_sensor(F("Selected flow temperature"), this->device_type(), "selFlowTemp", "°C", "mdi:coolant-temperature");
+    Mqtt::register_mqtt_ha_sensor(F("Current flow temperature"), this->device_type(), "curFlowTemp", "°C", "mdi:coolant-temperature");
+    Mqtt::register_mqtt_ha_sensor(F("Warm Water set temperature"), this->device_type(), "wWSetTemp", "°C", "mdi:coolant-temperature");
+    Mqtt::register_mqtt_ha_sensor(F("Warm Water current temperature (intern)"), this->device_type(), "wWCurTmp", "°C", "mdi:coolant-temperature");
+    Mqtt::register_mqtt_ha_sensor(F("Warm Water current temperature (extern)"), this->device_type(), "wWCurTmp2", "°C", "mdi:coolant-temperature");
+    Mqtt::register_mqtt_ha_sensor(F("Pump modulation"), this->device_type(), "pumpMod", "%", "mdi:sine-wave");
+    Mqtt::register_mqtt_ha_sensor(F("Heat Pump modulation"), this->device_type(), "pumpMod2", "%", "mdi:sine-wave");
 }
 
+// send stuff to the Web UI
 void Boiler::device_info_web(JsonArray & root) {
     JsonObject dataElement;
 
@@ -341,13 +337,14 @@ bool Boiler::export_values(JsonObject & output) {
 
 // publish values via MQTT
 void Boiler::publish_values() {
-    // const size_t        capacity = JSON_OBJECT_SIZE(56); // must recalculate if more objects addded https://arduinojson.org/v6/assistant/
-    // DynamicJsonDocument doc(capacity);
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_LARGE> doc;
     JsonObject                                     output = doc.to<JsonObject>();
     if (export_values(output)) {
         Mqtt::publish(F("boiler_data"), doc.as<JsonObject>());
     }
+
+    // send out heating and tapwater status - even if there is no change (force = true)
+    check_active();
 }
 
 // called after a process command is called, to check values and see if we need to force an MQTT publish
@@ -491,6 +488,19 @@ void Boiler::show_values(uuid::console::Shell & shell) {
  * If a value has changed, post it immediately to MQTT so we get real time data
  */
 void Boiler::check_active() {
+    if ((boilerState_ & 0x09) != (last_boilerState & 0x09)) {
+        char s[5];
+        Mqtt::publish(F("heating_active"), Helpers::render_boolean(s, ((boilerState_ & 0x09) == 0x09)));
+    }
+    if ((boilerState_ & 0x0A) != (last_boilerState & 0x0A)) {
+        char s[5];
+        Mqtt::publish(F("tapwater_active"), Helpers::render_boolean(s, ((boilerState_ & 0x0A) == 0x0A)));
+        EMSESP::tap_water_active((boilerState_ & 0x0A) == 0x0A);
+    }
+    last_boilerState = boilerState_;
+
+    /*
+
     // hot tap water, using flow to check instead of the burner power
     // send these values back to the main EMSESP, so other classes (e.g. Shower) can use it
     if (Helpers::hasValue(wWCurFlow_) && Helpers::hasValue(burnGas_) && (wWType_ > 0) && (wWType_ < 3)) {
@@ -500,20 +510,21 @@ void Boiler::check_active() {
 
     // heating
     // using a quick hack for checking the heating by looking at the Selected Flow Temp, but doesn't work for all boilers apparently
-    if (Helpers::hasValue(tap_water_active_, EMS_VALUE_BOOL) && Helpers::hasValue(selFlowTemp_) && Helpers::hasValue(burnGas_)) {
+    if (Helpers::hasValue(selFlowTemp_) && Helpers::hasValue(burnGas_)) {
         heating_active_ = (!tap_water_active_ && ((selFlowTemp_ >= EMS_BOILER_SELFLOWTEMP_HEATING) && (burnGas_ != EMS_VALUE_BOOL_OFF)));
     }
 
     // see if the heating or hot tap water has changed, if so send
     // last_boilerActive stores heating in bit 1 and tap water in bit 2
-    if (Helpers::hasValue(tap_water_active_, EMS_VALUE_BOOL) && Helpers::hasValue(heating_active_, EMS_VALUE_BOOL)) {
-        uint8_t latest_boilerState = (tap_water_active_ << 1) + heating_active_;
-        if (latest_boilerState != last_boilerState) {
-            last_boilerState = latest_boilerState;
-            Mqtt::publish(F("tapwater_active"), tap_water_active_);
-            Mqtt::publish(F("heating_active"), heating_active_);
-        }
+    uint8_t latest_boilerState = (tap_water_active_ << 1) + heating_active_;
+    if (latest_boilerState != last_boilerState) {
+        last_boilerState = latest_boilerState;
+        static char s[10];
+        Mqtt::publish(F("tapwater_active"), Helpers::render_boolean(s, tap_water_active_));
+        static char s2[10];
+        Mqtt::publish(F("heating_active"), Helpers::render_boolean(s2, heating_active_));
     }
+    */
 }
 
 // 0x33
@@ -533,6 +544,7 @@ void Boiler::process_UBAMonitorFast(std::shared_ptr<const Telegram> telegram) {
     changed_ |= telegram->read_value(curFlowTemp_, 1);
     changed_ |= telegram->read_value(selBurnPow_, 3); // burn power max setting
     changed_ |= telegram->read_value(curBurnPow_, 4);
+    changed_ |= telegram->read_value(boilerState_, 5);
 
     changed_ |= telegram->read_bitvalue(burnGas_, 7, 0);
     changed_ |= telegram->read_bitvalue(fanWork_, 7, 2);

@@ -120,7 +120,6 @@ class Thermostat : public EMSdevice {
 
     std::string datetime_; // date and time stamp
 
-    uint8_t mqtt_format_; // single, nested or ha
     bool    changed_ = false;
 
     // Installation parameters
@@ -220,6 +219,8 @@ class Thermostat : public EMSdevice {
     std::shared_ptr<Thermostat::HeatingCircuit> heating_circuit(const uint8_t hc_num);
 
     void register_mqtt_ha_config(uint8_t hc_num);
+    bool thermostat_ha_cmd(const char * message);
+
     bool command_info(const char * value, const int8_t id, JsonObject & output);
 
     void process_RCOutdoorTemp(std::shared_ptr<const Telegram> telegram);
@@ -251,10 +252,6 @@ class Thermostat : public EMSdevice {
     bool set_temperature_value(const char * value, const int8_t id, const uint8_t mode);
     bool set_temperature(const float temperature, const std::string & mode, const uint8_t hc_num);
     bool set_temperature(const float temperature, const uint8_t mode, const uint8_t hc_num);
-
-    // for HA specifically. MQTT functions.
-    bool thermostat_cmd_temp(const char * message);
-    bool thermostat_cmd_mode(const char * message);
 
     // set functions - these use the id/hc
     bool set_mode(const char * value, const int8_t id);

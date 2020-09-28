@@ -59,8 +59,6 @@
 
 namespace emsesp {
 
-enum MQTT_format : uint8_t { SINGLE = 1, NESTED, HA, CUSTOM };
-
 class EMSESPSettings {
   public:
     uint8_t  tx_mode;

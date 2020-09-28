@@ -157,7 +157,7 @@ void EMSESP::init_tx() {
     }
 }
 
-// return status of bus: connected, connected but Tx is broken, disconnected
+// return status of bus: connected (0), connected but Tx is broken (1), disconnected (2)
 uint8_t EMSESP::bus_status() {
     if (!rxservice_.bus_connected()) {
         return BUS_STATUS_OFFLINE;

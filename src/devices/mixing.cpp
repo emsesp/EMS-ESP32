@@ -62,16 +62,17 @@ Mixing::Mixing(uint8_t device_type, uint8_t device_id, uint8_t product_id, const
 
 // output json to web UI
 void Mixing::device_info_web(JsonArray & root) {
-    if (type_ == Type::NONE) {
+    if (type() == Type::NONE) {
         return; // don't have any values yet
     }
 
-    if (type_ == Type::WWC) {
+    if (type() == Type::WWC) {
         render_value_json(root, "", F("Warm Water Circuit"), hc_, nullptr);
         render_value_json(root, "", F("Current warm water temperature"), flowTemp_, F_(degrees), 10);
-        render_value_json(root, "", F("Current pump status"), pump_, nullptr);
+        render_value_json(root, "", F("Current pump status"), pump_, nullptr, EMS_VALUE_BOOL);
         render_value_json(root, "", F("Current temperature status"), status_, nullptr);
     } else {
+        // HC
         render_value_json(root, "", F("Heating Circuit"), hc_, nullptr);
         render_value_json(root, "", F("Current flow temperature"), flowTemp_, F_(degrees), 10);
         render_value_json(root, "", F("Setpoint flow temperature"), flowSetTemp_, F_(degrees));
@@ -93,14 +94,14 @@ bool Mixing::updated_values() {
 void Mixing::show_values(uuid::console::Shell & shell) {
     EMSdevice::show_values(shell); // always call this to show header
 
-    if (type_ == Type::NONE) {
+    if (type() == Type::NONE) {
         return; // don't have any values yet
     }
 
-    if (type_ == Type::WWC) {
+    if (type() == Type::WWC) {
         print_value(shell, 2, F("Warm Water Circuit"), hc_, nullptr);
         print_value(shell, 4, F("Current warm water temperature"), flowTemp_, F_(degrees), 10);
-        print_value(shell, 4, F("Current pump status"), pump_, nullptr);
+        print_value(shell, 4, F("Current pump status"), pump_, nullptr, EMS_VALUE_BOOL);
         print_value(shell, 4, F("Current temperature status"), status_, nullptr);
     } else {
         print_value(shell, 2, F("Heating Circuit"), hc_, nullptr);
@@ -109,7 +110,6 @@ void Mixing::show_values(uuid::console::Shell & shell) {
         print_value(shell, 4, F("Current pump status"), pump_, nullptr, EMS_VALUE_BOOL);
         print_value(shell, 4, F("Current valve status"), status_, F_(percent));
     }
-
 
     shell.println();
 }
@@ -129,13 +129,34 @@ void Mixing::publish_values() {
         strlcpy(topic, "mixing_data", 30);
         strlcat(topic, Helpers::itoa(s, device_id() - 0x20 + 1), 30); // append hc to topic
         Mqtt::publish(topic, doc.as<JsonObject>());
+
+        // if we're using Home Assistant and haven't created the MQTT Discovery topics, do it now
+        if ((Mqtt::mqtt_format() == Mqtt::Format::HA) && (!ha_created_)) {
+            register_mqtt_ha_config();
+        }
     }
+}
+
+// publish config topic for HA MQTT Discovery
+void Mixing::register_mqtt_ha_config() {
+    if (this->type() == Type::HC) {
+        Mqtt::register_mqtt_ha_sensor(F("Current flow temperature"), this->device_type(), "flowTemp", "°C", "");
+        Mqtt::register_mqtt_ha_sensor(F("Setpoint flow temperature"), this->device_type(), "flowSetTemp", "°C", "");
+        Mqtt::register_mqtt_ha_sensor(F("Current pump status"), this->device_type(), "pumpStatus", "", "");
+        Mqtt::register_mqtt_ha_sensor(F("Current valve status"), this->device_type(), "valveStatus", "", "");
+    } else {
+        // WWC
+        Mqtt::register_mqtt_ha_sensor(F("Current flow temperature"), this->device_type(), "wwTemp", "°C", "");
+        Mqtt::register_mqtt_ha_sensor(F("Current pump status"), this->device_type(), "pumpStatus", "", "");
+        Mqtt::register_mqtt_ha_sensor(F("Current temperature status"), this->device_type(), "tempStatus", "", "");
+    }
+    ha_created_ = true;
 }
 
 // creates JSON doc from values
 // returns false if empty
 bool Mixing::export_values(JsonObject & output) {
-    switch (type_) {
+    switch (this->type()) {
     case Type::HC:
         output["type"] = "hc";
         if (Helpers::hasValue(flowTemp_)) {
@@ -159,7 +180,8 @@ bool Mixing::export_values(JsonObject & output) {
             output["wwTemp"] = (float)flowTemp_ / 10;
         }
         if (Helpers::hasValue(pump_)) {
-            output["pumpStatus"] = pump_;
+            char s[5]; // for formatting strings
+            output["pumpStatus"] = Helpers::render_value(s, pump_, EMS_VALUE_BOOL);
         }
         if (Helpers::hasValue(status_)) {
             output["tempStatus"] = status_;
@@ -179,11 +201,11 @@ bool Mixing::export_values(JsonObject & output) {
 // e.g.  A0 00 FF 00 01 D7 00 00 00 80 00 00 00 00 03 C5
 //       A0 0B FF 00 01 D7 00 00 00 80 00 00 00 00 03 80
 void Mixing::process_MMPLUSStatusMessage_HC(std::shared_ptr<const Telegram> telegram) {
-    type_ = Type::HC;
-    hc_   = telegram->type_id - 0x02D7 + 1;         // determine which circuit this is
+    type(Type::HC);
+    hc_ = telegram->type_id - 0x02D7 + 1;           // determine which circuit this is
     changed_ |= telegram->read_value(flowTemp_, 3); // is * 10
     changed_ |= telegram->read_value(flowSetTemp_, 5);
-    changed_ |= telegram->read_value(pump_, 0);
+    changed_ |= telegram->read_bitvalue(pump_, 2, 0);
     changed_ |= telegram->read_value(status_, 2); // valve status
 }
 
@@ -191,10 +213,10 @@ void Mixing::process_MMPLUSStatusMessage_HC(std::shared_ptr<const Telegram> tele
 // e.g. A9 00 FF 00 02 32 02 6C 00 3C 00 3C 3C 46 02 03 03 00 3C // on 0x28
 //      A8 00 FF 00 02 31 02 35 00 3C 00 3C 3C 46 02 03 03 00 3C // in 0x29
 void Mixing::process_MMPLUSStatusMessage_WWC(std::shared_ptr<const Telegram> telegram) {
-    type_ = Type::WWC;
-    hc_   = telegram->type_id - 0x0331 + 1;         // determine which circuit this is. There are max 2.
+    type(Type::WWC);
+    hc_ = telegram->type_id - 0x0331 + 1;           // determine which circuit this is. There are max 2.
     changed_ |= telegram->read_value(flowTemp_, 0); // is * 10
-    changed_ |= telegram->read_value(pump_, 2);
+    changed_ |= telegram->read_bitvalue(pump_, 2, 0);
     changed_ |= telegram->read_value(status_, 11); // temp status
 }
 
@@ -202,18 +224,20 @@ void Mixing::process_MMPLUSStatusMessage_WWC(std::shared_ptr<const Telegram> tel
 // e.g.  A0 00 FF 00 00 0C 01 00 00 00 00 00 54
 //       A1 00 FF 00 00 0C 02 04 00 01 1D 00 82
 void Mixing::process_IPMStatusMessage(std::shared_ptr<const Telegram> telegram) {
-    type_           = Type::HC;
+    type(Type::HC);
     hc_             = device_id() - 0x20 + 1;
     uint8_t ismixed = 0;
     changed_ |= telegram->read_value(ismixed, 0); // check if circuit is active, 0-off, 1-unmixed, 2-mixed
     if (ismixed == 0) {
         return;
     }
+
     if (ismixed == 2) {                                 // we have a mixed circuit
         changed_ |= telegram->read_value(flowTemp_, 3); // is * 10
         changed_ |= telegram->read_value(flowSetTemp_, 5);
         changed_ |= telegram->read_value(status_, 2); // valve status
     }
+
     changed_ |= telegram->read_bitvalue(pump_, 1, 0); // pump is also in unmixed circuits
 }
 
@@ -221,14 +245,14 @@ void Mixing::process_IPMStatusMessage(std::shared_ptr<const Telegram> telegram) 
 // e.g. Mixing Module -> All, type 0xAB, telegram: 21 00 AB 00 2D 01 BE 64 04 01 00 (CRC=15) #data=7
 // see also https://github.com/proddy/EMS-ESP/issues/386
 void Mixing::process_MMStatusMessage(std::shared_ptr<const Telegram> telegram) {
-    type_ = Type::HC;
+    type(Type::HC);
 
     // the heating circuit is determine by which device_id it is, 0x20 - 0x23
     // 0x21 is position 2. 0x20 is typically reserved for the WM10 switch module
     // see https://github.com/proddy/EMS-ESP/issues/270 and https://github.com/proddy/EMS-ESP/issues/386#issuecomment-629610918
     hc_ = device_id() - 0x20 + 1;
     changed_ |= telegram->read_value(flowTemp_, 1); // is * 10
-    changed_ |= telegram->read_value(pump_, 3);
+    changed_ |= telegram->read_bitvalue(pump_, 3, 0);
     changed_ |= telegram->read_value(flowSetTemp_, 0);
     changed_ |= telegram->read_value(status_, 4); // valve status -100 to 100
 }

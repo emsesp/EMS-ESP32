@@ -61,7 +61,6 @@ class System {
 
     bool check_upgrade();
     void syslog_init();
-    void set_heartbeat(bool system_heartbeat);
     void send_heartbeat();
 
   private:
@@ -99,7 +98,6 @@ class System {
     static uint16_t analog_;
 
     // settings
-    bool           system_heartbeat_;
     static bool    hide_led_;
     uint8_t        syslog_level_;
     uint32_t       syslog_mark_interval_;

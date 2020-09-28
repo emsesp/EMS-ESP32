@@ -28,7 +28,7 @@ namespace emsesp {
 // used with the 'test' command, under su/admin
 void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
     if (command == "default") {
-        run_test(shell, "cmd"); // add the default test case here
+        run_test(shell, "mqtt"); // add the default test case here
     }
 
     if (command.empty()) {
@@ -143,6 +143,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         uart_telegram({0x08, 0x0B, 0x14, 00, 0x3C, 0x1F, 0xAC, 0x70});
     }
 
+    // check for boiler and controller on same product_id
     if (command == "double") {
         // question: do we need to set the mask?
         std::string version("1.2.3");
@@ -572,22 +573,6 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
     if (command == "cmd") {
         shell.printfln(F("Testing Commands..."));
 
-        // change MQTT format
-        EMSESP::esp8266React.getMqttSettingsService()->updateWithoutPropagation([&](MqttSettings & mqttSettings) {
-            mqttSettings.mqtt_format = MQTT_format::SINGLE;
-            // mqttSettings.mqtt_format = MQTT_format::NESTED;
-            // mqttSettings.mqtt_format = MQTT_format::HA;
-            return StateUpdateResult::CHANGED;
-        });
-
-        shell.invoke_command("su");
-        shell.invoke_command("call");
-        shell.invoke_command("call system info");
-
-        char system_topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
-        strcpy(system_topic, "ems-esp/system");
-        EMSESP::mqtt_.incoming(system_topic, "{\"cmd\":\"info\"}"); // this should fail
-
         // add a thermostat with 3 HCs
         std::string version("1.2.3");
         EMSESP::add_device(0x10, 192, version, EMSdevice::Brand::JUNKERS); // FW120
@@ -596,6 +581,19 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         uart_telegram({0x90, 0x00, 0xFF, 0x00, 0x00, 0x70, 0x00, 0xCF, 0x22, 0x2F, 0x10, 0x00, 0x2E, 0x24,
                        0x03, 0x25, 0x03, 0x03, 0x01, 0x03, 0x25, 0x00, 0xC8, 0x00, 0x00, 0x11, 0x01, 0x03}); // HC2
         uart_telegram({0x90, 0x00, 0xFF, 0x00, 0x00, 0x71, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00});       // HC3
+
+        shell.invoke_command("help");
+        shell.invoke_command("su");
+        shell.invoke_command("call");
+        shell.invoke_command("call system info");
+
+        char system_topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
+        strcpy(system_topic, "ems-esp/system");
+        EMSESP::mqtt_.incoming(system_topic, "{\"cmd\":\"info\"}"); // this should fail
+
+        shell.invoke_command("call thermostat wwmode");      // should do nothing
+        shell.invoke_command("call thermostat mode auto 2"); // should error, no hc2
+        shell.invoke_command("call thermostat temp 22.56");
     }
 
     if (command == "pin") {
@@ -609,10 +607,13 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
     if (command == "mqtt") {
         shell.printfln(F("Testing MQTT..."));
 
-        // EMSESP::esp8266React.getMqttSettingsService()->updateWithoutPropagation([&](MqttSettings & mqttSettings) {
-        //     mqttSettings.mqtt_format = MQTT_format::SINGLE;
-        //     return StateUpdateResult::CHANGED;
-        // });
+        // change MQTT format
+        EMSESP::esp8266React.getMqttSettingsService()->updateWithoutPropagation([&](MqttSettings & mqttSettings) {
+            // mqttSettings.mqtt_format = Mqtt::Format::SINGLE;
+            // mqttSettings.mqtt_format = Mqtt::Format::NESTED;
+            mqttSettings.mqtt_format = Mqtt::Format::HA;
+            return StateUpdateResult::CHANGED;
+        });
 
         // add a boiler
         // question: do we need to set the mask?
@@ -636,45 +637,47 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
 
         // test publish and adding to queue
         EMSESP::txservice_.flush_tx_queue();
+
         EMSESP::EMSESP::mqtt_.publish("boiler", "test me");
         Mqtt::show_mqtt(shell); // show queue
 
         strcpy(boiler_topic, "ems-esp/boiler");
         strcpy(thermostat_topic, "ems-esp/thermostat");
-        strcpy(system_topic, "ems-esp/saystem");
+        strcpy(system_topic, "ems-esp/system");
+
+        EMSESP::mqtt_.incoming(boiler_topic, ""); // test if ignore empty payloads                         // invalid format
 
         EMSESP::mqtt_.incoming(boiler_topic, "12345");                                // invalid format
         EMSESP::mqtt_.incoming("bad_topic", "12345");                                 // no matching topic
         EMSESP::mqtt_.incoming(boiler_topic, "{\"cmd\":\"garbage\",\"data\":22.52}"); // should report error
+
         EMSESP::mqtt_.incoming(boiler_topic, "{\"cmd\":\"comfort\",\"data\":\"eco\"}");
-        EMSESP::mqtt_.incoming(boiler_topic, "{\"cmd\":\"wwactivated\",\"data\":\"1\"}");
-        EMSESP::mqtt_.incoming(boiler_topic, "{\"cmd\":\"wwactivated\",\"data\":1}");
+        EMSESP::mqtt_.incoming(boiler_topic, "{\"cmd\":\"wwactivated\",\"data\":\"1\"}"); // with quotes
+        EMSESP::mqtt_.incoming(boiler_topic, "{\"cmd\":\"wwactivated\",\"data\":1}");     // without quotes
         EMSESP::mqtt_.incoming(boiler_topic, "{\"cmd\":\"flowtemp\",\"data\":55}");
 
         EMSESP::mqtt_.incoming(system_topic, "{\"cmd\":\"send\",\"data\":\"01 02 03 04 05\"}");
         EMSESP::mqtt_.incoming(system_topic, "{\"cmd\":\"pin\",\"id\":12,\"data\":\"1\"}");
 
         EMSESP::mqtt_.incoming(thermostat_topic, "{\"cmd\":\"wwmode\",\"data\":\"auto\"}");
-        EMSESP::mqtt_.incoming(thermostat_topic, "{\"cmd\":\"control\",\"data\":\"1\"}");
-        EMSESP::mqtt_.incoming(thermostat_topic, "{\"cmd\":\"control\",\"data\":1}");
+        EMSESP::mqtt_.incoming(thermostat_topic, "{\"cmd\":\"control\",\"data\":\"1\"}"); // RC35 only, should error
+        EMSESP::mqtt_.incoming(thermostat_topic, "{\"cmd\":\"mode\",\"data\":\"poep\",\"id\":2}"); // invalid mode
         EMSESP::mqtt_.incoming(thermostat_topic, "{\"cmd\":\"mode\",\"data\":\"auto\",\"id\":2}");
         EMSESP::mqtt_.incoming(thermostat_topic, "{\"cmd\":\"mode\",\"data\":\"auto\",\"hc\":2}");     // hc as number
         EMSESP::mqtt_.incoming(thermostat_topic, "{\"cmd\":\"temp\",\"data\":19.5,\"hc\":1}");         // data as number
-        EMSESP::mqtt_.incoming(thermostat_topic, "{\"cmd\":\"mode\",\"data\":\"auto\",\"hc\":\"2\"}"); // hc as string
+        EMSESP::mqtt_.incoming(thermostat_topic, "{\"cmd\":\"mode\",\"data\":\"auto\",\"hc\":\"2\"}"); // hc as string. should error as no hc2
         EMSESP::mqtt_.incoming(thermostat_topic, "{\"cmd\":\"temp\",\"data\":22.56}");
         EMSESP::mqtt_.incoming(thermostat_topic, "{\"cmd\":\"temp\",\"data\":22}");
         EMSESP::mqtt_.incoming(thermostat_topic, "{\"cmd\":\"temp\",\"data\":\"22.56\"}");
         EMSESP::mqtt_.incoming(thermostat_topic, "{\"cmd\":\"temp\",\"id\":2,\"data\":22}");
 
+        // test single commands
+        EMSESP::mqtt_.incoming(thermostat_topic, "auto");
+        EMSESP::mqtt_.incoming(thermostat_topic, "heat");
+        EMSESP::mqtt_.incoming(thermostat_topic, "28.8");
+
         // EMSESP::txservice_.show_tx_queue();
         // EMSESP::publish_all_values();
-
-        shell.invoke_command("su");
-        shell.invoke_command("help");
-        shell.invoke_command("call");
-        shell.invoke_command("call thermostat wwmode");
-        shell.invoke_command("call thermostat mode auto 2");
-        shell.invoke_command("call thermostat temp 22.56");
 
         Mqtt::resubscribe();
         Mqtt::show_mqtt(shell); // show queue
