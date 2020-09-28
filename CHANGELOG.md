@@ -16,11 +16,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `show commands` command
 - exporting of system settings using the `system info` command in Web and Console. Added link into the Web's Settings page.
 - setting to change how booleans are rendered in MQTT (on/off, true/false, 1/0)
+- Added all remaining devices to Home Assistant's MQTT Discovery. No more yaml files!
 
 ### Fixed
 - fix wwontime readback
 - fixed support for RC300 via MQTT commands (#505)
 - Some minor optimizations to memory handling in the MQTT service
+- Prevent MQTT from publishing empty json payloads
+- Accurate detection of warm water and heating (#515)
 
 ### Changed
 - renamed wWCircPumpType to wWChargeType
@@ -31,6 +34,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 - Console contexts for thermostat and boiler
+- Removed option to enable/disable the MQTT Heartbeat. It's always on.
+- renamed MQTT topic for Solar Module from `sm_data` to `solar_data`
 
 ## [2.0.1] September 13 2020
 
