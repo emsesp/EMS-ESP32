@@ -39,7 +39,7 @@ class NTPSettingsForm extends React.Component<NTPSettingsFormProps> {
               value="enabled"
             />
           }
-          label="Enable NTP?"
+          label="Enable NTP"
         />
         <TextValidator
           validators={['required', 'isIPOrHostname']}

@@ -5,7 +5,7 @@ import { Checkbox } from '@material-ui/core';
 import SaveIcon from '@material-ui/icons/Save';
 
 import { RestFormProps, BlockFormControlLabel, PasswordValidator, FormButton, FormActions } from '../components';
-import {isIP,isHostname,or}  from '../validators';
+import { isIP, isHostname, or } from '../validators';
 
 import { OTASettings } from './types';
 
@@ -28,7 +28,7 @@ class OTASettingsForm extends React.Component<OTASettingsFormProps> {
               onChange={handleValueChange("enabled")}
             />
           }
-          label="Enable OTA Updates?"
+          label="Enable OTA Updates"
         />
         <TextValidator
           validators={['required', 'isNumber', 'minNumber:1025', 'maxNumber:65535']}

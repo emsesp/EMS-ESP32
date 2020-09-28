@@ -125,7 +125,7 @@ class WiFiSettingsForm extends React.Component<WiFiStatusFormProps> {
               onChange={handleValueChange("static_ip_config")}
             />
           }
-          label="Static IP Config?"
+          label="Static IP Config"
         />
         {
           data.static_ip_config &&
