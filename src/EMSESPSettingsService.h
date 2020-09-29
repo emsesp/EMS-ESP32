@@ -37,6 +37,7 @@
 #define EMSESP_DEFAULT_DALLAS_PARASITE false
 #define EMSESP_DEFAULT_API_ENABLED true
 #define EMSESP_DEFAULT_BOOL_FORMAT 1 // on/off
+#define EMSESP_DEFAULT_ANALOG_ENABLED false
 
 // Default GPIO PIN definitions
 #if defined(ESP8266)
@@ -77,6 +78,7 @@ class EMSESPSettings {
     bool     hide_led;
     bool     api_enabled;
     uint8_t  bool_format;
+    bool     analog_enabled;
 
     static void              read(EMSESPSettings & settings, JsonObject & root);
     static StateUpdateResult update(JsonObject & root, EMSESPSettings & settings);

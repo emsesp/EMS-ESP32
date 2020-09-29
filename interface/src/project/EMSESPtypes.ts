@@ -15,6 +15,7 @@ export interface EMSESPSettings {
   hide_led: boolean;
   api_enabled: boolean;
   bool_format: number;
+  analog_enabled: boolean;
 }
 
 export enum busConnectionStatus {

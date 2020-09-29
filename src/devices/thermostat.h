@@ -62,6 +62,7 @@ class Thermostat : public EMSdevice {
         uint8_t designtemp        = EMS_VALUE_UINT_NOTSET; // heating curve design temp at MinExtTemp
         int8_t  offsettemp        = EMS_VALUE_INT_NOTSET;  // heating curve offest temp at roomtemp signed!
         uint8_t manualtemp        = EMS_VALUE_UINT_NOTSET;
+        uint8_t summer_setmode    = EMS_VALUE_UINT_NOTSET;
 
         uint8_t hc_num() const {
             return hc_num_;
@@ -117,6 +118,7 @@ class Thermostat : public EMSdevice {
     std::vector<uint16_t> monitor_typeids;
     std::vector<uint16_t> set_typeids;
     std::vector<uint16_t> timer_typeids;
+    std::vector<uint16_t> summer_typeids;
 
     std::string datetime_; // date and time stamp
 
@@ -135,9 +137,10 @@ class Thermostat : public EMSdevice {
     uint16_t tempsensor1_       = EMS_VALUE_USHORT_NOTSET;
     uint16_t tempsensor2_       = EMS_VALUE_USHORT_NOTSET;
 
-    uint8_t wwSystem_ = EMS_VALUE_UINT_NOTSET;
-    uint8_t wwExtra_  = EMS_VALUE_UINT_NOTSET;
-    uint8_t wwMode_   = EMS_VALUE_UINT_NOTSET;
+    uint8_t wwSystem_   = EMS_VALUE_UINT_NOTSET;
+    uint8_t wwExtra_    = EMS_VALUE_UINT_NOTSET;
+    uint8_t wwMode_     = EMS_VALUE_UINT_NOTSET;
+    uint8_t wwCircMode_ = EMS_VALUE_UINT_NOTSET;
 
     std::vector<std::shared_ptr<HeatingCircuit>> heating_circuits_; // each thermostat can have multiple heating circuits
 
@@ -240,11 +243,12 @@ class Thermostat : public EMSdevice {
     void process_RC10Set(std::shared_ptr<const Telegram> telegram);
     void process_RC300Monitor(std::shared_ptr<const Telegram> telegram);
     void process_RC300Set(std::shared_ptr<const Telegram> telegram);
+    void process_RC300Summer(std::shared_ptr<const Telegram> telegram);
+    void process_RC300WWmode(std::shared_ptr<const Telegram> telegram);
     void process_JunkersMonitor(std::shared_ptr<const Telegram> telegram);
     void process_JunkersSet(std::shared_ptr<const Telegram> telegram);
     void process_JunkersSet2(std::shared_ptr<const Telegram> telegram);
     void process_EasyMonitor(std::shared_ptr<const Telegram> telegram);
-    void process_RC300WWmode(std::shared_ptr<const Telegram> telegram);
 
     // internal helper functions
     bool set_mode_n(const uint8_t mode, const uint8_t hc_num);
@@ -259,6 +263,7 @@ class Thermostat : public EMSdevice {
     bool set_holiday(const char * value, const int8_t id);
     bool set_pause(const char * value, const int8_t id);
     bool set_party(const char * value, const int8_t id);
+    bool set_summermode(const char * value, const int8_t id);
 
     bool set_temp(const char * value, const int8_t id);
     bool set_nighttemp(const char * value, const int8_t id);
@@ -276,6 +281,7 @@ class Thermostat : public EMSdevice {
 
     // set functions - these don't use the id/hc, the parameters are ignored
     bool set_wwmode(const char * value, const int8_t id);
+    bool set_wwcircmode(const char * value, const int8_t id);
     bool set_datetime(const char * value, const int8_t id);
     bool set_minexttemp(const char * value, const int8_t id);
     bool set_clockoffset(const char * value, const int8_t id);

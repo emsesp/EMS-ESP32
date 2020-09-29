@@ -192,7 +192,7 @@ class EMSdevice {
                                   Value &                     value,
                                   const __FlashStringHelper * suffix,
                                   const uint8_t               format = 0) {
-        
+
         // create the value as a string using the render_value function
         char buffer[15];
         if (Helpers::render_value(buffer, value, format) == nullptr) {

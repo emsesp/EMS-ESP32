@@ -116,11 +116,12 @@ class Boiler : public EMSdevice {
     uint32_t wWWorkM_         = EMS_VALUE_ULONG_NOTSET;  // Warm Water # minutes
     uint8_t  wWOneTime_       = EMS_VALUE_BOOL_NOTSET;   // Warm Water one time function on/off
     uint8_t  wWDisinfecting_  = EMS_VALUE_BOOL_NOTSET;   // Warm Water disinfection on/off
-    uint8_t  wWReadiness_     = EMS_VALUE_BOOL_NOTSET;   // Warm Water readiness on/off
+    uint8_t  wWCharging_      = EMS_VALUE_BOOL_NOTSET;   // Warm Water charging on/off
     uint8_t  wWRecharging_    = EMS_VALUE_BOOL_NOTSET;   // Warm Water recharge on/off
     uint8_t  wWTemperatureOK_ = EMS_VALUE_BOOL_NOTSET;   // Warm Water temperature ok on/off
     uint8_t  wWCurFlow_       = EMS_VALUE_UINT_NOTSET;   // Warm Water current flow temp in l/min
     uint8_t  wWType_          = EMS_VALUE_UINT_NOTSET;   // 0-off, 1-flow, 2-flowbuffer, 3-buffer, 4-layered buffer
+    uint8_t  wWActive_        = EMS_VALUE_BOOL_NOTSET;
 
     // UBATotalUptime
     uint32_t UBAuptime_ = EMS_VALUE_ULONG_NOTSET; // Total UBA working hours
@@ -175,6 +176,8 @@ class Boiler : public EMSdevice {
     bool set_tapwarmwater_activated(const char * value, const int8_t id);
     bool set_warmwater_onetime(const char * value, const int8_t id);
     bool set_warmwater_circulation(const char * value, const int8_t id);
+    bool set_warmwater_circulation_pump(const char * value, const int8_t id);
+    bool set_warmwater_circulation_mode(const char * value, const int8_t id);
     bool set_warmwater_temp(const char * value, const int8_t id);
     bool set_flow_temp(const char * value, const int8_t id);
     bool set_heating_activated(const char * value, const int8_t id);

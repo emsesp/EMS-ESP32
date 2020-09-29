@@ -74,7 +74,7 @@ class System {
     static constexpr uint32_t LED_WARNING_BLINK              = 1000;  // pulse to show no connection, 1 sec
     static constexpr uint32_t LED_WARNING_BLINK_FAST         = 100;   // flash quickly for boot up sequence
     static constexpr uint32_t SYSTEM_HEARTBEAT_INTERVAL      = 60000; // in milliseconds, how often the MQTT heartbeat is sent (1 min)
-    static constexpr uint32_t SYSTEM_MEASURE_ANALOG_INTERVAL = 1100;
+    static constexpr uint32_t SYSTEM_MEASURE_ANALOG_INTERVAL = 500;
 
     // internal LED
     static constexpr uint8_t LED_ON = LOW;
@@ -103,6 +103,7 @@ class System {
     uint32_t       syslog_mark_interval_;
     String         syslog_host_;
     static uint8_t led_gpio_;
+    static bool    analog_enabled_;
 };
 
 } // namespace emsesp
