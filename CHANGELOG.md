@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - exporting of system settings using the `system info` command in Web and Console. Added link into the Web's Settings page.
 - setting to change how booleans are rendered in MQTT (on/off, true/false, 1/0)
 - Added all remaining devices to Home Assistant's MQTT Discovery. No more yaml files!
+- enable ADC setting, add boiler circulation commands, add thermostat RC300 summermodes
+
 
 ### Fixed
 - fix wwontime readback
