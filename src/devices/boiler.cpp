@@ -96,32 +96,17 @@ void Boiler::register_mqtt_ha_config() {
     Mqtt::register_mqtt_ha_sensor(F("Warm Water current temperature (extern)"), this->device_type(), "wWCurTmp2", "°C", "mdi:coolant-temperature");
     Mqtt::register_mqtt_ha_sensor(F("Pump modulation"), this->device_type(), "pumpMod", "%", "mdi:sine-wave");
     Mqtt::register_mqtt_ha_sensor(F("Heat Pump modulation"), this->device_type(), "pumpMod2", "%", "mdi:sine-wave");
+    Mqtt::register_mqtt_ha_sensor(F("System Pressure"), this->device_type(), "sysPress", "bar", "");
 }
 
 // send stuff to the Web UI
 void Boiler::device_info_web(JsonArray & root) {
     JsonObject dataElement;
 
-    if (serviceCodeChar_[0] && Helpers::hasValue(serviceCode_)) {
-        dataElement         = root.createNestedObject();
-        dataElement["name"] = F("Service Code");
-        char s[12];
-        snprintf_P(s, 12, PSTR("%s (%d)"), serviceCodeChar_, serviceCode_);
-        dataElement["value"] = s;
-    }
-
-    if (Helpers::hasValue(tap_water_active_, EMS_VALUE_BOOL)) {
-        dataElement          = root.createNestedObject();
-        dataElement["name"]  = F("Hot tap water");
-        dataElement["value"] = tap_water_active_ ? F("running") : F("off");
-    }
-
-    if (Helpers::hasValue(heating_active_, EMS_VALUE_BOOL)) {
-        dataElement          = root.createNestedObject();
-        dataElement["name"]  = F("Central heating");
-        dataElement["value"] = heating_active_ ? F("active") : F("off");
-    }
-
+    render_value_json(root, "", F("Service code"), serviceCodeChar_, nullptr);
+    render_value_json(root, "", F("Service code number"), serviceCode_, nullptr);
+    render_value_json(root, "", F("Hot tap water"), tap_water_active_, nullptr, EMS_VALUE_BOOL);
+    render_value_json(root, "", F("Central Heating"), heating_active_, nullptr, EMS_VALUE_BOOL);
     render_value_json(root, "", F("Selected flow temperature"), selFlowTemp_, F_(degrees));
     render_value_json(root, "", F("Current flow temperature"), curFlowTemp_, F_(degrees), 10);
     render_value_json(root, "", F("Warm Water selected temperature"), wWSelTemp_, F_(degrees));
@@ -130,6 +115,7 @@ void Boiler::device_info_web(JsonArray & root) {
     render_value_json(root, "", F("Warm Water current temperature (extern)"), wWCurTmp2_, F_(degrees), 10);
     render_value_json(root, "", F("Pump modulation"), pumpMod_, F_(percent));
     render_value_json(root, "", F("Heat Pump modulation"), pumpMod2_, F_(percent));
+    render_value_json(root, "", F("System pressure"), sysPress_, F_(bar), 10);
 }
 
 bool Boiler::command_info(const char * value, const int8_t id, JsonObject & output) {
@@ -140,6 +126,14 @@ bool Boiler::command_info(const char * value, const int8_t id, JsonObject & outp
 // returns false if empty
 bool Boiler::export_values(JsonObject & output) {
     char s[10]; // for formatting strings
+
+    if (Helpers::hasValue(heating_active_, EMS_VALUE_BOOL)) {
+        output["heating_active"] = Helpers::render_value(s, heating_active_, EMS_VALUE_BOOL);
+    }
+
+    if (Helpers::hasValue(tap_water_active_, EMS_VALUE_BOOL)) {
+        output["tap_water_active"] = Helpers::render_value(s, tap_water_active_, EMS_VALUE_BOOL);
+    }
 
     if (Helpers::hasValue(wWComfort_)) {
         if (wWComfort_ == 0x00) {
@@ -360,13 +354,8 @@ bool Boiler::updated_values() {
 void Boiler::show_values(uuid::console::Shell & shell) {
     EMSdevice::show_values(shell); // for showing the header
 
-    if (Helpers::hasValue(tap_water_active_, EMS_VALUE_BOOL)) {
-        print_value(shell, 2, F("Hot tap water"), tap_water_active_ ? F("running") : F("off"));
-    }
-
-    if (Helpers::hasValue(heating_active_, EMS_VALUE_BOOL)) {
-        print_value(shell, 2, F("Central heating"), heating_active_ ? F("active") : F("off"));
-    }
+    print_value(shell, 2, F("Hot tap water"), tap_water_active_, nullptr, EMS_VALUE_BOOL);
+    print_value(shell, 2, F("Central heating"), heating_active_, nullptr, EMS_VALUE_BOOL);
 
     print_value(shell, 2, F("Warm Water activated"), wWActivated_, nullptr, EMS_VALUE_BOOL);
     if (wWType_ == 0) {
@@ -380,11 +369,13 @@ void Boiler::show_values(uuid::console::Shell & shell) {
     } else if (wWType_ == 4) {
         print_value(shell, 2, F("Warm Water type"), F("layered buffer"));
     }
+
     if (Helpers::hasValue(wWChargeType_, EMS_VALUE_BOOL)) {
         print_value(shell, 2, F("Warm Water charging type"), wWChargeType_ ? F("3-way valve") : F("charge pump"));
     }
 
     print_value(shell, 2, F("Warm Water circulation pump available"), wWCircPump_, nullptr, EMS_VALUE_BOOL);
+
     if (Helpers::hasValue(wWCircPumpMode_)) {
         if (wWCircPumpMode_ == 7) {
             print_value(shell, 2, F("Warm Water circulation pump freq"), F("continuous"));
@@ -436,8 +427,8 @@ void Boiler::show_values(uuid::console::Shell & shell) {
 
     print_value(shell, 2, F("Burner selected max power"), selBurnPow_, F_(percent));
     print_value(shell, 2, F("Burner current power"), curBurnPow_, F_(percent));
-    print_value(shell, 2, F("Flame current"), flameCurr_, F("uA"), 10);
-    print_value(shell, 2, F("System pressure"), sysPress_, F("bar"), 10);
+    print_value(shell, 2, F("Flame current"), flameCurr_, F_(uA), 10);
+    print_value(shell, 2, F("System pressure"), sysPress_, F_(bar), 10);
     if (Helpers::hasValue(serviceCode_)) {
         shell.printfln(F("  System service code: %s (%d)"), serviceCodeChar_, serviceCode_);
     } else if (serviceCodeChar_[0] != '\0') {
@@ -449,10 +440,10 @@ void Boiler::show_values(uuid::console::Shell & shell) {
     print_value(shell, 2, F("Heating temperature setting on the boiler"), heating_temp_, F_(degrees));
     print_value(shell, 2, F("Boiler circuit pump modulation max power"), pump_mod_max_, F_(percent));
     print_value(shell, 2, F("Boiler circuit pump modulation min power"), pump_mod_min_, F_(percent));
-    print_value(shell, 2, F("Boiler circuit pump delay time"), pumpDelay_, F("min"));
+    print_value(shell, 2, F("Boiler circuit pump delay time"), pumpDelay_, F_(min));
     print_value(shell, 2, F("Boiler temp hysteresis on"), boilTemp_on_, F_(degrees));
     print_value(shell, 2, F("Boiler temp hysteresis off"), boilTemp_off_, F_(degrees));
-    print_value(shell, 2, F("Boiler burner min period"), burnPeriod_, F("min"));
+    print_value(shell, 2, F("Boiler burner min period"), burnPeriod_, F_(min));
     print_value(shell, 2, F("Boiler burner min power"), burnPowermin_, F_(percent));
     print_value(shell, 2, F("Boiler burner max power"), burnPowermax_, F_(percent));
 
@@ -490,13 +481,19 @@ void Boiler::show_values(uuid::console::Shell & shell) {
 void Boiler::check_active() {
     if ((boilerState_ & 0x09) != (last_boilerState & 0x09)) {
         char s[5];
-        Mqtt::publish(F("heating_active"), Helpers::render_boolean(s, ((boilerState_ & 0x09) == 0x09)));
+        bool b = ((boilerState_ & 0x09) == 0x09);
+        Mqtt::publish(F("heating_active"), Helpers::render_boolean(s, b));
+        heating_active_ = b ? EMS_VALUE_BOOL_ON : EMS_VALUE_BOOL_OFF;
     }
+
     if ((boilerState_ & 0x0A) != (last_boilerState & 0x0A)) {
         char s[5];
-        Mqtt::publish(F("tapwater_active"), Helpers::render_boolean(s, ((boilerState_ & 0x0A) == 0x0A)));
-        EMSESP::tap_water_active((boilerState_ & 0x0A) == 0x0A);
+        bool b = ((boilerState_ & 0x0A) == 0x0A);
+        Mqtt::publish(F("tapwater_active"), Helpers::render_boolean(s, b));
+        tap_water_active_ = b ? EMS_VALUE_BOOL_ON : EMS_VALUE_BOOL_OFF;
+        EMSESP::tap_water_active(b); // let EMS-ESP know, used in the Shower class
     }
+
     last_boilerState = boilerState_;
 
     /*

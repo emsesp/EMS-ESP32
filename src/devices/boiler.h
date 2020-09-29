@@ -143,8 +143,8 @@ class Boiler : public EMSdevice {
     uint8_t setWWPumpPow_ = EMS_VALUE_UINT_NOTSET; // ww pump speed/power?
 
     // other internal calculated params
-    bool    tap_water_active_ = false;                 // Hot tap water is on/off
-    bool    heating_active_   = false;                 // Central heating is on/off
+    uint8_t tap_water_active_ = EMS_VALUE_BOOL_NOTSET; // Hot tap water is on/off
+    uint8_t heating_active_   = EMS_VALUE_BOOL_NOTSET; // Central heating is on/off
     uint8_t pumpMod2_         = EMS_VALUE_UINT_NOTSET; // heatpump modulation from 0xE3 (heatpumps)
 
     bool command_info(const char * value, const int8_t id, JsonObject & output);
