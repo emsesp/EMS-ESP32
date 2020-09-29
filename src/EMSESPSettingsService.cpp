@@ -44,6 +44,7 @@ void EMSESPSettings::read(EMSESPSettings & settings, JsonObject & root) {
     root["hide_led"]             = settings.hide_led;
     root["api_enabled"]          = settings.api_enabled;
     root["bool_format"]          = settings.bool_format;
+    root["analog_enabled"]       = settings.analog_enabled;
 }
 
 StateUpdateResult EMSESPSettings::update(JsonObject & root, EMSESPSettings & settings) {
@@ -63,6 +64,7 @@ StateUpdateResult EMSESPSettings::update(JsonObject & root, EMSESPSettings & set
     settings.hide_led             = root["hide_led"] | EMSESP_DEFAULT_HIDE_LED;
     settings.api_enabled          = root["api_enabled"] | EMSESP_DEFAULT_API_ENABLED;
     settings.bool_format          = root["bool_format"] | EMSESP_DEFAULT_BOOL_FORMAT;
+    settings.analog_enabled       = root["analog_enabled"] | EMSESP_DEFAULT_ANALOG_ENABLED;
 
     return StateUpdateResult::CHANGED;
 }

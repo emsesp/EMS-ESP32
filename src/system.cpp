@@ -30,12 +30,13 @@ uuid::syslog::SyslogService System::syslog_;
 #endif
 
 // init statics
-uint32_t System::heap_start_    = 0;
-int      System::reset_counter_ = 0;
-bool     System::upload_status_ = false;
-bool     System::hide_led_      = false;
-uint8_t  System::led_gpio_      = 0;
-uint16_t System::analog_        = 0;
+uint32_t System::heap_start_     = 0;
+int      System::reset_counter_  = 0;
+bool     System::upload_status_  = false;
+bool     System::hide_led_       = false;
+uint8_t  System::led_gpio_       = 0;
+uint16_t System::analog_         = 0;
+bool     System::analog_enabled_ = false;
 
 // send on/off to a gpio pin
 // value: true = HIGH, false = LOW
@@ -162,7 +163,10 @@ void System::init() {
     set_led(); // init LED
 
     // set the boolean format used for rendering booleans
-    EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) { Helpers::bool_format(settings.bool_format); });
+    EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) {
+        Helpers::bool_format(settings.bool_format);
+        analog_enabled_ = settings.analog_enabled;
+    });
 
     EMSESP::init_tx(); // start UART
 }
@@ -203,7 +207,9 @@ void System::loop() {
 #endif
     led_monitor();  // check status and report back using the LED
     system_check(); // check system health
-    measure_analog();
+    if (analog_enabled_) {
+        measure_analog();
+    }
 
     // send out heartbeat
     uint32_t currentMillis = uuid::get_uptime();
@@ -257,7 +263,9 @@ void System::send_heartbeat() {
     doc["mqttpublishfails"] = Mqtt::publish_fails();
     doc["txfails"]          = EMSESP::txservice_.telegram_fail_count();
     doc["rxfails"]          = EMSESP::rxservice_.telegram_error_count();
-    doc["adc"]              = analog_; //analogRead(A0);
+    if (analog_enabled_) {
+        doc["adc"] = analog_;
+    }
 
     Mqtt::publish_retain(F("heartbeat"), doc.as<JsonObject>(), false); // send to MQTT with retain off. This will add to MQTT queue.
 }
@@ -279,10 +287,10 @@ void System::measure_analog() {
 
         if (!analog_) { // init first time
             analog_ = a;
-            sum_    = a * 256;
+            sum_    = a * 512;
         } else { // simple moving average filter
-            sum_    = sum_ * 255 / 256 + a;
-            analog_ = sum_ / 256;
+            sum_    = (sum_ * 511) / 512 + a;
+            analog_ = sum_ / 512;
         }
     }
 }
@@ -789,6 +797,7 @@ bool System::check_upgrade() {
                     settings.dallas_gpio          = custom_settings["dallas_gpio"] | EMSESP_DEFAULT_DALLAS_GPIO;
                     settings.dallas_parasite      = custom_settings["dallas_parasite"] | EMSESP_DEFAULT_DALLAS_PARASITE;
                     settings.led_gpio             = custom_settings["led_gpio"] | EMSESP_DEFAULT_LED_GPIO;
+                    settings.analog_enabled       = EMSESP_DEFAULT_ANALOG_ENABLED;
 
                     return StateUpdateResult::CHANGED;
                 },
@@ -912,6 +921,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
         node["hide_led"]             = Helpers::render_boolean(s, settings.hide_led);
         node["api_enabled"]          = Helpers::render_boolean(s, settings.api_enabled);
         node["bool_format"]          = settings.bool_format;
+        node["analog_enabled"]       = settings.analog_enabled;
     });
 
 #endif

@@ -247,6 +247,21 @@ function EMSESPSettingsControllerForm(props: EMSESPSettingsControllerFormProps) 
                 onChange={handleValueChange('syslog_mark_interval')}
                 margin="normal"
             />
+            <br></br>
+            <Typography variant="h6" color="primary" >
+                Analog input
+            </Typography>
+            <BlockFormControlLabel
+                control={
+                    <Checkbox
+                        checked={data.analog_enabled}
+                        onChange={handleValueChange('analog_enabled')}
+                        value="analog_enabled"
+                    />
+                }
+                label="Enable ADC"
+            />
+            <br></br>
             <FormActions>
                 <FormButton startIcon={<SaveIcon />} variant="contained" color="primary" type="submit">
                     Save
