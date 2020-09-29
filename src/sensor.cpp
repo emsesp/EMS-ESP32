@@ -364,7 +364,7 @@ void Sensor::publish_values() {
                 ids.add("ems-esp");
 
                 snprintf_P(&topic[0], 60, PSTR("homeassistant/sensor/ems-esp/dallas_sensor%d/config"), i);
-                Mqtt::publish_retain(topic, config.as<JsonObject>(), false); // publish the config payload with no retain flag
+                Mqtt::publish_retain(topic, config.as<JsonObject>(), true); // publish the config payload with retain flag
 
                 registered_ha_[i] = true;
             }
