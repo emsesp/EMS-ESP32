@@ -575,7 +575,7 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
 }
 
 // calls the device handler's function to populate a json doc with device info
-// to be used in the Web UI
+// to be used in the Web UI. The unique_id is the unique record ID from the Web table to identify which device to load
 void EMSESP::device_info_web(const uint8_t unique_id, JsonObject & root) {
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice) {
