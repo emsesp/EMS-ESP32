@@ -134,6 +134,12 @@ char * Helpers::render_boolean(char * result, bool value) {
     return result;
 }
 
+// render for native char strings
+char * Helpers::render_value(char * result, const char * value, uint8_t format) {
+    strcpy(result, value);
+    return result;
+}
+
 // convert unsigned int (single byte) to text value and returns it
 // format: 255(0xFF)=boolean, 0=no formatting, otherwise divide by format
 char * Helpers::render_value(char * result, uint8_t value, uint8_t format) {

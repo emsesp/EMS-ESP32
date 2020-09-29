@@ -40,7 +40,8 @@ class Helpers {
     static char * render_value(char * result, const uint16_t value, const uint8_t format);
     static char * render_value(char * result, const uint32_t value, const uint8_t format);
     static char * render_value(char * result, const int16_t value, const uint8_t format);
-
+    static char * render_value(char * result, const char * value, uint8_t format);
+    
     static char * render_boolean(char * result, bool value);
 
     static char *   smallitoa(char * result, const uint8_t value);
