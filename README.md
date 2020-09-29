@@ -41,7 +41,7 @@ Note, EMS-ESP requires a small hardware circuit that can convert the EMS bus dat
 | --- | --- |
 | <img src="media/web_settings.PNG"> | <img src="media/web_status.PNG"> |
 | <img src="media/web_devices.PNG"> | <img src="media/web_mqtt.PNG"> |
-<img src="media/console.PNG" width=100% height=100%>
+<img src="media/console.PNG" width=80% height=80%>
   
 ## **Installing**
 
