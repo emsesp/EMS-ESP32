@@ -192,6 +192,8 @@ class EMSdevice {
                                   Value &                     value,
                                   const __FlashStringHelper * suffix,
                                   const uint8_t               format = 0) {
+        
+        // create the value as a string using the render_value function
         char buffer[15];
         if (Helpers::render_value(buffer, value, format) == nullptr) {
             return;
@@ -199,8 +201,7 @@ class EMSdevice {
 
         JsonObject dataElement = json.createNestedObject();
 
-        // copy flash into std::strings to ensure arduinojson can reference them without a copy
-
+        // append suffix to end
         if (suffix != nullptr) {
             std::string text(20, '\0');
             snprintf_P(&text[0], text.capacity() + 1, PSTR("%s%s"), buffer, uuid::read_flash_string(suffix).c_str());
@@ -209,6 +210,7 @@ class EMSdevice {
             dataElement["value"] = buffer;
         }
 
+        // add prefix to name
         std::string text2(100, '\0');
         snprintf_P(&text2[0], text2.capacity() + 1, PSTR("%s%s"), prefix.c_str(), uuid::read_flash_string(name).c_str());
         dataElement["name"] = text2;
