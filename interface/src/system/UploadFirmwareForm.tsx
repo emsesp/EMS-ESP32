@@ -25,7 +25,7 @@ class UploadFirmwareForm extends React.Component<UploadFirmwareFormProps> {
         <Box py={2}>
           Upload a new firmware file (.bin or .bin.gz) below to replace the existing firmware.
         </Box>
-        <SingleUpload accept=".bin,.gz" onDrop={this.handleDrop} uploading={uploading} progress={progress} onCancel={onCancel} />
+        <SingleUpload accept="application/octet-stream" onDrop={this.handleDrop} uploading={uploading} progress={progress} onCancel={onCancel} />
       </Fragment>
     );
   }
