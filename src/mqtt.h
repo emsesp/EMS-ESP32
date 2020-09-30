@@ -104,7 +104,7 @@ class Mqtt {
     static void publish_retain(const __FlashStringHelper * topic, const std::string & payload, bool retain);
     static void publish_retain(const __FlashStringHelper * topic, const JsonObject & payload, bool retain);
 
-    static void register_mqtt_ha_binary_sensor(const __FlashStringHelper * name, const char * entity);
+    static void register_mqtt_ha_binary_sensor(const __FlashStringHelper * name, const uint8_t device_type, const char * entity);
     static void register_mqtt_ha_sensor(const __FlashStringHelper * name, const uint8_t device_type, const char * entity, const char * uom, const char * icon);
 
     static void show_topic_handlers(uuid::console::Shell & shell, const uint8_t device_type);
@@ -162,7 +162,7 @@ class Mqtt {
     static size_t   maximum_mqtt_messages_;
     static uint16_t mqtt_message_id_;
 
-    static constexpr size_t   MAX_MQTT_MESSAGES      = 30;  // size of queue
+    static constexpr size_t   MAX_MQTT_MESSAGES      = 70;  // size of queue
     static constexpr uint32_t MQTT_PUBLISH_WAIT      = 200; // delay between sending publishes, to account for large payloads
     static constexpr uint8_t  MQTT_PUBLISH_MAX_RETRY = 3;   // max retries for giving up on publishing
 

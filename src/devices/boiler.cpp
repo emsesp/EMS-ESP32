@@ -85,8 +85,24 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
 // create the config topics for Home Assistant MQTT Discovery
 // for each of the main elements
 void Boiler::register_mqtt_ha_config() {
-    Mqtt::register_mqtt_ha_binary_sensor(F("Boiler DHW"), "tapwater_active");
-    Mqtt::register_mqtt_ha_binary_sensor(F("Boiler Heating"), "heating_active");
+    // Create the Master device
+    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
+    doc["name"]    = F("EMS-ESP");
+    doc["uniq_id"] = F("boiler");
+    doc["ic"]      = F("mdi:home-thermometer-outline");
+    doc["stat_t"]  = F("ems-esp/boiler_data");
+    doc["val_tpl"] = F("{{value_json.serviceCode}}");
+    JsonObject dev = doc.createNestedObject("dev");
+    dev["name"]    = F("EMS-ESP Boiler");
+    dev["sw"]      = EMSESP_APP_VERSION;
+    dev["mf"]      = this->brand_to_string();
+    dev["mdl"]     = this->name();
+    JsonArray ids  = dev.createNestedArray("ids");
+    ids.add("ems-esp-boiler");
+    Mqtt::publish_retain(F("homeassistant/sensor/ems-esp/boiler/config"), doc.as<JsonObject>(), true); // publish the config payload with retain flag
+
+    Mqtt::register_mqtt_ha_binary_sensor(F("Boiler DHW"), this->device_type(), "tapwater_active");
+    Mqtt::register_mqtt_ha_binary_sensor(F("Boiler Heating"), this->device_type(), "heating_active");
 
     Mqtt::register_mqtt_ha_sensor(F("Service Code"), this->device_type(), "serviceCode", "", "");
     Mqtt::register_mqtt_ha_sensor(F("Service Code number"), this->device_type(), "serviceCodeNumber", "", "");

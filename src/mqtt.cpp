@@ -474,7 +474,7 @@ void Mqtt::on_connect() {
     LOG_INFO(F("MQTT connected"));
 }
 
-// Home Assistant Discovery
+// Home Assistant Discovery - the main master Device
 // homeassistant/sensor/ems-esp/status/config
 void Mqtt::ha_status() {
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
@@ -681,7 +681,7 @@ void Mqtt::process_queue() {
 }
 
 // HA config for a binary_sensor
-void Mqtt::register_mqtt_ha_binary_sensor(const __FlashStringHelper * name, const char * entity) {
+void Mqtt::register_mqtt_ha_binary_sensor(const __FlashStringHelper * name, const uint8_t device_type, const char * entity) {
     if (mqtt_format() != Format::HA) {
         return;
     }
@@ -708,9 +708,11 @@ void Mqtt::register_mqtt_ha_binary_sensor(const __FlashStringHelper * name, cons
         }
     });
 
-    JsonObject dev = doc.createNestedObject(F("dev"));
-    JsonArray  ids = dev.createNestedArray(F("ids"));
-    ids.add(F("ems-esp"));
+    JsonObject  dev = doc.createNestedObject(F("dev"));
+    JsonArray   ids = dev.createNestedArray(F("ids"));
+    std::string ha_device(40, '\0');
+    snprintf_P(&ha_device[0], ha_device.capacity() + 1, PSTR("ems-esp-%s"), EMSdevice::device_type_2_device_name(device_type).c_str());
+    ids.add(ha_device);
 
     std::string topic(100, '\0');
     snprintf_P(&topic[0], topic.capacity() + 1, PSTR("homeassistant/binary_sensor/ems-esp/%s/config"), entity);
@@ -718,7 +720,7 @@ void Mqtt::register_mqtt_ha_binary_sensor(const __FlashStringHelper * name, cons
     Mqtt::publish_retain(topic, doc.as<JsonObject>(), true); // publish the config payload with retain flag
 }
 
-// HA config for a normal sensor
+// HA config for a normal 'sensor' type
 void Mqtt::register_mqtt_ha_sensor(const __FlashStringHelper * name, const uint8_t device_type, const char * entity, const char * uom, const char * icon) {
     if (mqtt_format() != Format::HA) {
         return;
@@ -746,9 +748,11 @@ void Mqtt::register_mqtt_ha_sensor(const __FlashStringHelper * name, const uint8
         doc["ic"] = icon;
     }
 
-    JsonObject dev = doc.createNestedObject(F("dev"));
-    JsonArray  ids = dev.createNestedArray(F("ids"));
-    ids.add(F("ems-esp"));
+    JsonObject  dev = doc.createNestedObject(F("dev"));
+    JsonArray   ids = dev.createNestedArray(F("ids"));
+    std::string ha_device(40, '\0');
+    snprintf_P(&ha_device[0], ha_device.capacity() + 1, PSTR("ems-esp-%s"), EMSdevice::device_type_2_device_name(device_type).c_str());
+    ids.add(ha_device);
 
     std::string topic(100, '\0');
     snprintf_P(&topic[0], topic.capacity() + 1, PSTR("homeassistant/sensor/ems-esp/%s/config"), entity);

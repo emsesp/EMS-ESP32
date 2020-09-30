@@ -29,7 +29,7 @@ void Shower::start() {
     });
 
     if (Mqtt::mqtt_format() == Mqtt::Format::HA) {
-        Mqtt::register_mqtt_ha_binary_sensor(F("Shower Active"), "shower_active");
+        Mqtt::register_mqtt_ha_binary_sensor(F("Shower Active"), EMSdevice::DeviceType::BOILER, "shower_active");
     }
 }
 

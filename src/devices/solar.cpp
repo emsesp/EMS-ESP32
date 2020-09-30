@@ -127,6 +127,22 @@ void Solar::publish_values() {
 
 // publish config topic for HA MQTT Discovery
 void Solar::register_mqtt_ha_config() {
+    // Create the Master device
+    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
+    doc["name"]    = F("EMS-ESP");
+    doc["uniq_id"] = F("solar");
+    doc["ic"]      = F("mdi:home-thermometer-outline");
+    doc["stat_t"]  = F("ems-esp/solar_data");
+    doc["val_tpl"] = F("{{value_json.solarPump}}");
+    JsonObject dev = doc.createNestedObject("dev");
+    dev["name"]    = F("EMS-ESP Solar");
+    dev["sw"]      = EMSESP_APP_VERSION;
+    dev["mf"]      = this->brand_to_string();
+    dev["mdl"]     = this->name();
+    JsonArray ids  = dev.createNestedArray("ids");
+    ids.add("ems-esp-solar");
+    Mqtt::publish_retain(F("homeassistant/sensor/ems-esp/solar/config"), doc.as<JsonObject>(), true); // publish the config payload with retain flag
+
     Mqtt::register_mqtt_ha_sensor(F("Collector temperature (TS1)"), this->device_type(), "collectorTemp", "°C", "");
     Mqtt::register_mqtt_ha_sensor(F("Bottom temperature (TS2)"), this->device_type(), "tankBottomTemp", "°C", "");
     Mqtt::register_mqtt_ha_sensor(F("Bottom temperature (TS5)"), this->device_type(), "tankBottomTemp2", "°C", "");

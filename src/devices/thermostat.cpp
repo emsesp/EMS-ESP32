@@ -412,7 +412,7 @@ bool Thermostat::export_values(uint8_t mqtt_format, JsonObject & rootThermostat)
                     dataThermostat["summermode"] = "auto";
                 } else {
                     char s[7];
-                    rootThermostat["summermode"] = Helpers::render_boolean(s, (hc->summer_setmode  == 0));
+                    rootThermostat["summermode"] = Helpers::render_boolean(s, (hc->summer_setmode == 0));
                 }
             }
 
@@ -599,10 +599,14 @@ void Thermostat::register_mqtt_ha_config(uint8_t hc_num) {
     }
 
     JsonObject dev = doc.createNestedObject(F("dev"));
-    JsonArray  ids = dev.createNestedArray(F("ids"));
-    ids.add(F("ems-esp"));
+    dev["name"]    = F("EMS-ESP Thermostat");
+    dev["sw"]      = EMSESP_APP_VERSION;
+    dev["mf"]      = this->brand_to_string();
+    dev["mdl"]     = this->name();
+    JsonArray ids  = dev.createNestedArray(F("ids"));
+    ids.add(F("ems-esp-thermostat"));
 
-    std::string topic(100, '\0'); // e.g homeassistant/climate/hc1/thermostat/config
+    std::string topic(100, '\0');
     snprintf_P(&topic[0], topic.capacity() + 1, PSTR("homeassistant/climate/ems-esp/thermostat_hc%d/config"), hc_num);
     // Mqtt::publish(topic); // empty payload, this remove any previous config sent to HA
     Mqtt::publish_retain(topic, doc.as<JsonObject>(), true); // publish the config payload with retain flag
@@ -926,7 +930,7 @@ void Thermostat::show_values(uuid::console::Shell & shell) {
                 print_value(shell, 4, F("Summer mode"), F("auto"));
             } else {
                 char s[7];
-                print_value(shell, 4, F("Summer mode"), Helpers::render_boolean(s, (hc->summer_setmode  == 0)));
+                print_value(shell, 4, F("Summer mode"), Helpers::render_boolean(s, (hc->summer_setmode == 0)));
             }
         }
         if (Helpers::hasValue(hc->targetflowtemp)) {
@@ -1646,21 +1650,21 @@ bool Thermostat::set_mode_n(const uint8_t mode, const uint8_t hc_num) {
 }
 
 bool Thermostat::set_summermode(const char * value, const int8_t id) {
-    uint8_t hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
-    std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(hc_num);
-    std::string v(10, '\0');
+    uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
+    std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
+    std::string                                 v(10, '\0');
     if (!Helpers::value2string(value, v)) {
         return false;
     }
 
     uint8_t set = 0xFF; // some dummy value
-    if (v == "on" || v == "1"  || v == "true") {
+    if (v == "on" || v == "1" || v == "true") {
         LOG_INFO(F("Setting summer mode to always on for heating circuit %d"), hc->hc_num());
         set = 0;
     } else if (v == "auto" || v == "2") {
         LOG_INFO(F("Setting summer mode to auto for heating circuit %d"), hc->hc_num());
         set = 1;
-    } else if (v == "off" || v == "0"  || v == "false") {
+    } else if (v == "off" || v == "0" || v == "false") {
         LOG_INFO(F("Setting summer mode to always off for heating circuit %d"), hc->hc_num());
         set = 2;
     } else {

@@ -139,6 +139,22 @@ void Mixing::publish_values() {
 
 // publish config topic for HA MQTT Discovery
 void Mixing::register_mqtt_ha_config() {
+    // Create the Master device
+    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
+    doc["name"]    = F("EMS-ESP");
+    doc["uniq_id"] = F("mixing");
+    doc["ic"]      = F("mdi:home-thermometer-outline");
+    doc["stat_t"]  = F("ems-esp/mixing_data");
+    doc["val_tpl"] = F("{{value_json.pumpStatus}}");
+    JsonObject dev = doc.createNestedObject("dev");
+    dev["name"]    = F("EMS-ESP Mixing");
+    dev["sw"]      = EMSESP_APP_VERSION;
+    dev["mf"]      = this->brand_to_string();
+    dev["mdl"]     = this->name();
+    JsonArray ids  = dev.createNestedArray("ids");
+    ids.add("ems-esp-mixing");
+    Mqtt::publish_retain(F("homeassistant/sensor/ems-esp/mixing/config"), doc.as<JsonObject>(), true); // publish the config payload with retain flag
+
     if (this->type() == Type::HC) {
         Mqtt::register_mqtt_ha_sensor(F("Current flow temperature"), this->device_type(), "flowTemp", "°C", "");
         Mqtt::register_mqtt_ha_sensor(F("Setpoint flow temperature"), this->device_type(), "flowSetTemp", "°C", "");
