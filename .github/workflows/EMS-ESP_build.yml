@@ -70,7 +70,6 @@ jobs:
     - name: Move firmware files in sub-folders
       run: |
         mkdir -p ./firmware
-        mkdir -p ./firmware/tasmota32/ESP32_needed_files/
         [ ! -f ./mv_firmware/*.bin ] || mv ./mv_firmware/EMS-ESP*.* ./firmware/
         [ ! -f ./FIRMWARE.md ] || mv -f ./FIRMWARE.md ./README.md        
     - name: Commit files  # transfer the new binaries back into the repository

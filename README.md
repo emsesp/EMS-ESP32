@@ -29,26 +29,33 @@ Note, EMS-ESP requires a small hardware circuit that can convert the EMS bus dat
 
 - Support for both ESP8266 and ESP32 modules
 - A multi-user secure Web interface (based on React/TypeScript and Material-UI)
-- A Console, accessible via Serial and Telnet
-- Native support for Home Assistant [MQTT Discovery](https://www.home-assistant.io/docs/mqtt/discovery/) (in development)
+- A Console, accessible via Serial and Telnet for controlling and monitoring traffic
+- Native support for Home Assistant [MQTT Discovery](https://www.home-assistant.io/docs/mqtt/discovery/)
 - Can be run standalone as an independent Access Point or join an existing WiFi network
 - Easy first-time configuration via a web Captive Portal
-- Supporting over [70 EMS](https://emsesp.github.io/docs/#/Supported-EMS-Devices) devices (boilers, thermostats, solar modules, mixing modules, heat pumps, gateways)
+- Supporting over [70 EMS devices](https://emsesp.github.io/docs/#/Supported-EMS-Devices)  (boilers, thermostats, solar modules, mixing modules, heat pumps, gateways)
   
 ## **Screenshots**
+
+### The WebUI:
 
 | | |
 | --- | --- |
 | <img src="media/web_settings.PNG"> | <img src="media/web_status.PNG"> |
 | <img src="media/web_devices.PNG"> | <img src="media/web_mqtt.PNG"> |
+
+### The Console:
 <img src="media/console.PNG" width=80% height=80%>
+
+### Home Assistant integration:
+<img src="media/ha_lovelace.PNG" width=80% height=80%>
   
 ## **Installing**
 
-Refer to the [Official documentation](https://emsesp.github.io/docs) to install the firmware and configure it.
+Refer to the [official documentation](https://emsesp.github.io/docs) to how to install the firmware and configure it. This is being constantly updated as new features and information are added.
 
-* [Uploading a pre-built binary](https://emsesp.github.io/docs/#/Uploading-firmware)
-* [Building the firmware and flashing manually](https://emsesp.github.io/docs/#/Building-firmware)
+* [Uploading a pre-built firmware build](https://emsesp.github.io/docs/#/Uploading-firmware)
+* [Building the firmware from source code and flashing manually](https://emsesp.github.io/docs/#/Building-firmware)
 
 ## **Support Information**
 
@@ -56,7 +63,7 @@ If you're looking for support on **EMS-ESP** there are some options available:
 
 ### Documentation
 
-* [Official Documentation](https://emsesp.github.io/docs): For information on how to build and upload the firmware
+* [Official EMS-ESP Documentation](https://emsesp.github.io/docs): For information on how to build and upload the firmware
 * [FAQ and Troubleshooting](https://emsesp.github.io/docs/#/Troubleshooting): For information on common problems and solutions. See also [BBQKees's wiki](https://bbqkees-electronics.nl/wiki/gateway/troubleshooting.html)
 
 ### Support's Community
@@ -73,17 +80,17 @@ If you're looking for support on **EMS-ESP** there are some options available:
 ## **Contributing**
 
 You can contribute to EMS-ESP by
-- providing Pull Requests (Features, Fixes, suggestions)
-- testing new released features and report issues on your EMS equipment
-- contributing to missing [documentation](https://emsesp.github.io/docs)
+- providing Pull Requests (Features, Fixes, suggestions).
+- testing new released features and report issues on your EMS equipment.
+- contributing to missing [documentation](https://emsesp.github.io/docs).
 
 ## **Credits**
 
-A shout out to the people helping EMS-ESP get to where it is today
-- @MichaelDvP for all his amazing contributions and patience. The core UART code is his.
-- @BBQKees for his endless testing and building the awesome circuits
-- @susisstrolch for writing a first working version of the EMS bridge circuit which I used to design EMS-ESP version 0.1
-- Plus many more providing suggestions, PRs and Donations. Thanks!
+A shout out to the people helping EMS-ESP get to where it is today...
+- @MichaelDvP for all his amazing contributions and patience. Specifically the improved uart library, thermostat and mixing logic.
+- @BBQKees for his endless testing and building the awesome circuit boards
+- @susisstrolch for writing a first working version of the EMS bridge circuit which I used to design EMS-ESP version 0.1 back in August 2017
+- Plus many more providing suggestions, PRs and the odd donation. Thanks!
 
 ## **License**
 

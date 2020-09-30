@@ -19,8 +19,9 @@ If you like **EMS-ESP**, please give it a star, or fork it and contribute!
 [![GitHub forks](https://img.shields.io/github/forks/proddy/EMS-ESP.svg?style=social&label=Fork)](https://github.com/proddy/EMS-ESP/network)
 [![donate](https://img.shields.io/badge/donate-PayPal-blue.svg)](https://www.paypal.com/paypalme/prderbyshire/2)
 
-# Installation
+# Firmware Installation
 
-Development builds can be found in https://github.com/proddy/EMS-ESP/tree/firmware/firmware. Follow the instructions in the [Documentation](https://emsesp.github.io/docs) on how to install.
+Here you will find the latest development builds, under the [firmware](https://github.com/proddy/EMS-ESP/tree/firmware/firmware) folder. Follow the instructions in the [documentation](https://emsesp.github.io/docs) on how to install these binaries.
 
-See [CHANGELOG.md](https://github.com/proddy/blob/development/tasmota/CHANGELOG.md) for changes since the last release.
+See also the [CHANGELOG](https://github.com/proddy/EMS-ESP/blob/dev/CHANGELOG.md) for any breaking changes between releases.
+
