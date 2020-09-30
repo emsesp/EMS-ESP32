@@ -158,6 +158,10 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
     for (uint8_t i = 0; i < set_typeids.size(); i++) {
         EMSESP::send_read_request(set_typeids[i], device_id);
     }
+
+    for (uint8_t i = 0; i < summer_typeids.size(); i++) {
+        EMSESP::send_read_request(summer_typeids[i], device_id);
+    }
 }
 
 // prepare data for Web UI
@@ -1742,6 +1746,7 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
             offset          = 0x06;
             set_typeid      = summer_typeids[hc->hc_num() - 1];
             validate_typeid = set_typeid;
+            factor          = 1;
             break;
         case HeatingCircuit::Mode::MANUAL:
             offset = 0x0A; // manual offset
