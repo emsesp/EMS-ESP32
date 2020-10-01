@@ -249,7 +249,7 @@ function EMSESPSettingsControllerForm(props: EMSESPSettingsControllerFormProps) 
             />
             <br></br>
             <Typography variant="h6" color="primary" >
-                Analog input
+                Analog Input
             </Typography>
             <BlockFormControlLabel
                 control={
