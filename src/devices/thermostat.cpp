@@ -508,6 +508,26 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::sha
         }
     }
 
+    // not found, search summer message types
+    if (hc_num == 0) {
+        for (uint8_t i = 0; i < summer_typeids.size(); i++) {
+            if (summer_typeids[i] == telegram->type_id) {
+                hc_num = i + 1;
+                break;
+            }
+        }
+    }
+
+    // not found, search timer message types
+    if (hc_num == 0) {
+        for (uint8_t i = 0; i < timer_typeids.size(); i++) {
+            if (timer_typeids[i] == telegram->type_id) {
+                hc_num = i + 1;
+                break;
+            }
+        }
+    }
+
     // not found, search device-id types for remote thermostats
     if (telegram->src >= 0x18 && telegram->src <= 0x1B) {
         hc_num = telegram->src - 0x17;
@@ -1561,7 +1581,7 @@ bool Thermostat::set_mode_n(const uint8_t mode, const uint8_t hc_num) {
     // get hc based on number
     std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(hc_num);
     if (hc == nullptr) {
-        LOG_WARNING(F("set mode: Heating Circuit %d not found or activated"), hc_num);
+        LOG_WARNING(F("Set mode: Heating Circuit %d not found or activated"), hc_num);
         return false;
     }
 
@@ -1652,8 +1672,13 @@ bool Thermostat::set_mode_n(const uint8_t mode, const uint8_t hc_num) {
 bool Thermostat::set_summermode(const char * value, const int8_t id) {
     uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
     std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
-    std::string                                 v(10, '\0');
+    if (hc == nullptr) {
+        LOG_WARNING(F("Setting summer mode: Heating Circuit %d not found or activated"), hc_num);
+        return false;
+    }
+    std::string v(10, '\0');
     if (!Helpers::value2string(value, v)) {
+        LOG_WARNING(F("Setting summer mode: Invalid value"));
         return false;
     }
 
@@ -1668,6 +1693,7 @@ bool Thermostat::set_summermode(const char * value, const int8_t id) {
         LOG_INFO(F("Setting summer mode to always off for heating circuit %d"), hc->hc_num());
         set = 2;
     } else {
+        LOG_WARNING(F("Setting summer mode: Invalid value %s"), v.c_str());
         return false;
     }
     write_command(summer_typeids[hc->hc_num() - 1], 7, set, summer_typeids[hc->hc_num() - 1]);
