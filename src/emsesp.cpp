@@ -640,7 +640,6 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
         return false;
     }
 
-
     // first check to see if we already have it, if so update the record
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice) {
@@ -665,7 +664,6 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
         }
     }
 
-
     // look up the rest of the details using the product_id and create the new device object
     Device_record * device_p = nullptr;
     for (auto & device : device_library_) {
@@ -687,13 +685,13 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
 
     // if we don't recognize the product ID report it, but don't add it.
     if (device_p == nullptr) {
-        LOG_NOTICE(F("Unrecognized EMS device with device ID 0x%02X with product ID %d. Please report on GitHub."), device_id, product_id);
+        LOG_NOTICE(F("Unrecognized EMS device (device ID 0x%02X, product ID %d). Please report on GitHub."), device_id, product_id);
         return false; // not found
     } else {
         std::string name = uuid::read_flash_string(device_p->name);
         emsdevices.push_back(EMSFactory::add(device_p->device_type, device_id, device_p->product_id, version, name, device_p->flags, brand));
         emsdevices.back()->unique_id(++unique_id_count_);
-        LOG_DEBUG(F("Adding new device with device ID 0x%02X with product ID %d and version %s"), device_id, product_id, version.c_str());
+        LOG_DEBUG(F("Adding new device %s (device ID 0x%02X, product ID %d, version %s)"), name.c_str(), device_id, product_id, version.c_str());
         fetch_device_values(device_id); // go and fetch its data,
     }
 
