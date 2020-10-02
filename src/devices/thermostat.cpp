@@ -412,7 +412,7 @@ bool Thermostat::export_values(uint8_t mqtt_format, JsonObject & rootThermostat)
                     dataThermostat["summermode"] = "auto";
                 } else {
                     char s[7];
-                    rootThermostat["summermode"] = Helpers::render_boolean(s, (hc->summer_setmode == 0));
+                    dataThermostat["summermode"] = Helpers::render_boolean(s, (hc->summer_setmode == 0));
                 }
             }
 
