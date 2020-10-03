@@ -398,7 +398,7 @@ void EMSESPShell::add_console_commands() {
             }
 
             if (ok && output.size()) {
-                serializeJson(doc, shell);
+                serializeJsonPretty(doc, shell);
                 shell.println();
             }
         },
