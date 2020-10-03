@@ -107,7 +107,8 @@ class Thermostat : public EMSdevice {
     static uuid::log::Logger logger_;
 
     void add_commands();
-    bool export_values(uint8_t mqtt_format, JsonObject & doc);
+    bool export_values_main(JsonObject & doc);
+    bool export_values_hc(uint8_t mqtt_format, JsonObject & doc);
 
     // specific thermostat characteristics, stripping the option bits at pos 6 and 7
     inline uint8_t model() const {
@@ -122,7 +123,7 @@ class Thermostat : public EMSdevice {
 
     std::string datetime_; // date and time stamp
 
-    bool    changed_ = false;
+    bool changed_ = false;
 
     // Installation parameters
     uint8_t ibaMainDisplay_ =

@@ -81,7 +81,7 @@ class Mqtt {
 
     enum Operation { PUBLISH, SUBSCRIBE };
 
-    enum Format : uint8_t { SINGLE = 1, NESTED, HA, CUSTOM };
+    enum Format : uint8_t { NONE = 0, SINGLE, NESTED, HA };
 
     static constexpr uint8_t MQTT_TOPIC_MAX_SIZE = 100;
 
@@ -96,8 +96,8 @@ class Mqtt {
     static void publish(const std::string & topic, const JsonObject & payload);
     static void publish(const __FlashStringHelper * topic, const JsonObject & payload);
     static void publish(const __FlashStringHelper * topic, const std::string & payload);
-    static void publish(const std::string & topic, const bool value);
-    static void publish(const __FlashStringHelper * topi, const bool value);
+    static void publish(const std::string & topic, bool value);
+    static void publish(const __FlashStringHelper * topic, bool value);
     static void publish(const std::string & topic);
 
     static void publish_retain(const std::string & topic, const JsonObject & payload, bool retain);
@@ -105,7 +105,12 @@ class Mqtt {
     static void publish_retain(const __FlashStringHelper * topic, const JsonObject & payload, bool retain);
 
     static void register_mqtt_ha_binary_sensor(const __FlashStringHelper * name, const uint8_t device_type, const char * entity);
-    static void register_mqtt_ha_sensor(const __FlashStringHelper * name, const uint8_t device_type, const char * entity, const char * uom, const char * icon);
+    static void register_mqtt_ha_sensor(const char *                prefix,
+                                        const __FlashStringHelper * name,
+                                        const uint8_t               device_type,
+                                        const char *                entity,
+                                        const __FlashStringHelper * uom,
+                                        const __FlashStringHelper * icon);
 
     static void show_topic_handlers(uuid::console::Shell & shell, const uint8_t device_type);
     static void show_mqtt(uuid::console::Shell & shell);
@@ -122,7 +127,15 @@ class Mqtt {
 #endif
 
     static bool connected() {
+#if defined(EMSESP_STANDALONE)
+        return true;
+#else
         return mqttClient_->connected();
+#endif
+    }
+
+    static bool enabled() {
+        return mqtt_enabled_;
     }
 
     static uint32_t publish_fails() {
@@ -163,11 +176,11 @@ class Mqtt {
     static uint16_t mqtt_message_id_;
 
     static constexpr size_t   MAX_MQTT_MESSAGES      = 70;  // size of queue
-    static constexpr uint32_t MQTT_PUBLISH_WAIT      = 200; // delay between sending publishes, to account for large payloads
+    static constexpr uint32_t MQTT_PUBLISH_WAIT      = 100; // delay between sending publishes, to account for large payloads
     static constexpr uint8_t  MQTT_PUBLISH_MAX_RETRY = 3;   // max retries for giving up on publishing
 
-    static std::shared_ptr<const MqttMessage> queue_message(const uint8_t operation, const std::string & topic, const std::string & payload, const bool retain);
-    static std::shared_ptr<const MqttMessage> queue_publish_message(const std::string & topic, const std::string & payload, const bool retain);
+    static std::shared_ptr<const MqttMessage> queue_message(const uint8_t operation, const std::string & topic, const std::string & payload, bool retain);
+    static std::shared_ptr<const MqttMessage> queue_publish_message(const std::string & topic, const std::string & payload, bool retain);
     static std::shared_ptr<const MqttMessage> queue_subscribe_message(const std::string & topic);
 
     void on_publish(uint16_t packetId);
@@ -213,6 +226,7 @@ class Mqtt {
     static uint32_t    publish_time_other_;
     static uint32_t    publish_time_sensor_;
     static uint8_t     mqtt_format_;
+    static bool        mqtt_enabled_;
 };
 
 } // namespace emsesp

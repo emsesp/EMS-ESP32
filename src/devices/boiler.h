@@ -47,10 +47,10 @@ class Boiler : public EMSdevice {
     static uuid::log::Logger logger_;
 
     void register_mqtt_ha_config();
-    void register_mqtt_ha_binary_sensor(const __FlashStringHelper * name, const char * entity);
-    void register_mqtt_ha_sensor(const __FlashStringHelper * name, const char * entity, const char * uom, const char * icon);
     void check_active();
     bool export_values(JsonObject & doc);
+
+    void print_value2(uuid::console::Shell & shell, const char * param, const __FlashStringHelper * name, const __FlashStringHelper * suffix, JsonObject & json);
 
     uint8_t last_boilerState = 0xFF; // remember last state of heating and warm water on/off
     bool    changed_         = false;

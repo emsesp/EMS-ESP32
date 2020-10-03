@@ -98,17 +98,24 @@ void Mixing::show_values(uuid::console::Shell & shell) {
         return; // don't have any values yet
     }
 
+    // fetch the values into a JSON document
+    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
+    JsonObject                                      output = doc.to<JsonObject>();
+    if (!export_values(output)) {
+        return; // empty
+    }
+
     if (type() == Type::WWC) {
-        print_value(shell, 2, F("Warm Water Circuit"), hc_, nullptr);
-        print_value(shell, 4, F("Current warm water temperature"), flowTemp_, F_(degrees), 10);
-        print_value(shell, 4, F("Current pump status"), pump_, nullptr, EMS_VALUE_BOOL);
-        print_value(shell, 4, F("Current temperature status"), status_, nullptr);
+        shell.println(F_(ww_hc));
+        print_value_json(shell, F("wwTemp"), F_(wwTemp), F_(degrees), output);
+        print_value_json(shell, F("pumpStatus"), F_(pumpStatus), nullptr, output);
+        print_value_json(shell, F("tempStatus"), F_(tempStatus), nullptr, output);
     } else {
-        print_value(shell, 2, F("Heating Circuit"), hc_, nullptr);
-        print_value(shell, 4, F("Current flow temperature"), flowTemp_, F_(degrees), 10);
-        print_value(shell, 4, F("Setpoint flow temperature"), flowSetTemp_, F_(degrees));
-        print_value(shell, 4, F("Current pump status"), pump_, nullptr, EMS_VALUE_BOOL);
-        print_value(shell, 4, F("Current valve status"), status_, F_(percent));
+        shell.println(F_(hc));
+        print_value_json(shell, F("flowTemp"), F_(flowTemp), F_(degrees), output);
+        print_value_json(shell, F("flowSetTemp"), F_(flowSetTemp), F_(degrees), output);
+        print_value_json(shell, F("pumpStatus"), F_(pumpStatus), nullptr, output);
+        print_value_json(shell, F("valveStatus"), F_(valveStatus), F_(percent), output);
     }
 
     shell.println();
@@ -119,7 +126,7 @@ bool Mixing::command_info(const char * value, const int8_t id, JsonObject & outp
 }
 
 // publish values via MQTT
-// ideally we should group up all the mixing units together into a nested JSON but for now we'll send them individually
+// topic is mixing_data<id>
 void Mixing::publish_values() {
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
     JsonObject                                     output = doc.to<JsonObject>();
@@ -127,24 +134,28 @@ void Mixing::publish_values() {
         char topic[30];
         char s[5];
         strlcpy(topic, "mixing_data", 30);
-        strlcat(topic, Helpers::itoa(s, device_id() - 0x20 + 1), 30); // append hc to topic
+        strlcat(topic, Helpers::itoa(s, device_id() - 0x20 + 1), 30); // append device_id to topic
         Mqtt::publish(topic, doc.as<JsonObject>());
 
         // if we're using Home Assistant and haven't created the MQTT Discovery topics, do it now
         if ((Mqtt::mqtt_format() == Mqtt::Format::HA) && (!ha_created_)) {
-            register_mqtt_ha_config();
+            register_mqtt_ha_config(topic);
         }
     }
 }
 
 // publish config topic for HA MQTT Discovery
-void Mixing::register_mqtt_ha_config() {
+void Mixing::register_mqtt_ha_config(const char * topic) {
     // Create the Master device
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
     doc["name"]    = F("EMS-ESP");
     doc["uniq_id"] = F("mixing");
     doc["ic"]      = F("mdi:home-thermometer-outline");
-    doc["stat_t"]  = F("ems-esp/mixing_data");
+
+    std::string stat_t(50, '\0');
+    snprintf_P(&stat_t[0], stat_t.capacity() + 1, PSTR("%s/%s"), System::hostname().c_str(), topic);
+    doc["stat_t"] = stat_t;
+
     doc["val_tpl"] = F("{{value_json.pumpStatus}}");
     JsonObject dev = doc.createNestedObject("dev");
     dev["name"]    = F("EMS-ESP Mixing");
@@ -156,15 +167,15 @@ void Mixing::register_mqtt_ha_config() {
     Mqtt::publish_retain(F("homeassistant/sensor/ems-esp/mixing/config"), doc.as<JsonObject>(), true); // publish the config payload with retain flag
 
     if (this->type() == Type::HC) {
-        Mqtt::register_mqtt_ha_sensor(F("Current flow temperature"), this->device_type(), "flowTemp", "°C", "");
-        Mqtt::register_mqtt_ha_sensor(F("Setpoint flow temperature"), this->device_type(), "flowSetTemp", "°C", "");
-        Mqtt::register_mqtt_ha_sensor(F("Current pump status"), this->device_type(), "pumpStatus", "", "");
-        Mqtt::register_mqtt_ha_sensor(F("Current valve status"), this->device_type(), "valveStatus", "", "");
+        Mqtt::register_mqtt_ha_sensor(nullptr, F_(flowTemp), this->device_type(), "flowTemp", F_(degrees), nullptr);
+        Mqtt::register_mqtt_ha_sensor(nullptr, F_(flowSetTemp), this->device_type(), "flowSetTemp", F_(degrees), nullptr);
+        Mqtt::register_mqtt_ha_sensor(nullptr, F_(pumpStatus), this->device_type(), "pumpStatus", nullptr, nullptr);
+        Mqtt::register_mqtt_ha_sensor(nullptr, F_(valveStatus), this->device_type(), "valveStatus", nullptr, nullptr);
     } else {
         // WWC
-        Mqtt::register_mqtt_ha_sensor(F("Current flow temperature"), this->device_type(), "wwTemp", "°C", "");
-        Mqtt::register_mqtt_ha_sensor(F("Current pump status"), this->device_type(), "pumpStatus", "", "");
-        Mqtt::register_mqtt_ha_sensor(F("Current temperature status"), this->device_type(), "tempStatus", "", "");
+        Mqtt::register_mqtt_ha_sensor(nullptr, F_(wwTemp), this->device_type(), "wwTemp", F_(degrees), nullptr);
+        Mqtt::register_mqtt_ha_sensor(nullptr, F_(pumpStatus), this->device_type(), "pumpStatus", nullptr, nullptr);
+        Mqtt::register_mqtt_ha_sensor(nullptr, F_(tempStatus), this->device_type(), "tempStatus", nullptr, nullptr);
     }
     ha_created_ = true;
 }
