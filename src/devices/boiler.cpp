@@ -800,6 +800,7 @@ void Boiler::process_UBAMaintenanceData(std::shared_ptr<const Telegram> telegram
 bool Boiler::set_warmwater_temp(const char * value, const int8_t id) {
     int v = 0;
     if (!Helpers::value2number(value, v)) {
+        LOG_WARNING(F("Set boiler warm water temperature: Invalid value"));
         return false;
     }
 
@@ -807,8 +808,8 @@ bool Boiler::set_warmwater_temp(const char * value, const int8_t id) {
     if (get_toggle_fetch(EMS_TYPE_UBAParametersPlus)) {
         write_command(EMS_TYPE_UBAParameterWWPlus, 6, v, EMS_TYPE_UBAParameterWWPlus);
     } else {
-        write_command(EMS_TYPE_UBAParameterWW, 2, v, EMS_TYPE_UBAParameterWW);
-        write_command(EMS_TYPE_UBAFlags, 3, v, EMS_TYPE_UBAParameterWW); // for i9000, see #397
+        write_command(EMS_TYPE_UBAParameterWW, 2, v, EMS_TYPE_UBAParameterWW); // read seltemp back
+        write_command(EMS_TYPE_UBAFlags, 3, v, 0x34); // for i9000, see #397, read setTemp
     }
 
     return true;
@@ -818,6 +819,7 @@ bool Boiler::set_warmwater_temp(const char * value, const int8_t id) {
 bool Boiler::set_flow_temp(const char * value, const int8_t id) {
     int v = 0;
     if (!Helpers::value2number(value, v)) {
+        LOG_WARNING(F("Set boiler flow temperature: Invalid value"));
         return false;
     }
 
@@ -831,6 +833,7 @@ bool Boiler::set_flow_temp(const char * value, const int8_t id) {
 bool Boiler::set_heating_activated(const char * value, const int8_t id) {
     bool v = false;
     if (!Helpers::value2bool(value, v)) {
+        LOG_WARNING(F("Set boiler heating: Invalid value"));
         return false;
     }
 
@@ -848,6 +851,7 @@ bool Boiler::set_heating_activated(const char * value, const int8_t id) {
 bool Boiler::set_heating_temp(const char * value, const int8_t id) {
     int v = 0;
     if (!Helpers::value2number(value, v)) {
+        LOG_WARNING(F("Set boiler heating temperature: Invalid value"));
         return false;
     }
 
@@ -865,6 +869,7 @@ bool Boiler::set_heating_temp(const char * value, const int8_t id) {
 bool Boiler::set_min_power(const char * value, const int8_t id) {
     int v = 0;
     if (!Helpers::value2number(value, v)) {
+        LOG_WARNING(F("Set boiler min power: Invalid value"));
         return false;
     }
 
@@ -882,6 +887,7 @@ bool Boiler::set_min_power(const char * value, const int8_t id) {
 bool Boiler::set_max_power(const char * value, const int8_t id) {
     int v = 0;
     if (!Helpers::value2number(value, v)) {
+        LOG_WARNING(F("Set boiler max power: Invalid value"));
         return false;
     }
 
@@ -899,6 +905,7 @@ bool Boiler::set_max_power(const char * value, const int8_t id) {
 bool Boiler::set_hyst_on(const char * value, const int8_t id) {
     int v = 0;
     if (!Helpers::value2number(value, v)) {
+        LOG_WARNING(F("Set boiler hysteresis: Invalid value"));
         return false;
     }
 
@@ -916,6 +923,7 @@ bool Boiler::set_hyst_on(const char * value, const int8_t id) {
 bool Boiler::set_hyst_off(const char * value, const int8_t id) {
     int v = 0;
     if (!Helpers::value2number(value, v)) {
+        LOG_WARNING(F("Set boiler hysteresis: Invalid value"));
         return false;
     }
 
@@ -933,6 +941,7 @@ bool Boiler::set_hyst_off(const char * value, const int8_t id) {
 bool Boiler::set_burn_period(const char * value, const int8_t id) {
     int v = 0;
     if (!Helpers::value2number(value, v)) {
+        LOG_WARNING(F("Set burner min. period: Invalid value"));
         return false;
     }
 
@@ -950,21 +959,25 @@ bool Boiler::set_burn_period(const char * value, const int8_t id) {
 bool Boiler::set_pump_delay(const char * value, const int8_t id) {
     int v = 0;
     if (!Helpers::value2number(value, v)) {
+        LOG_WARNING(F("Set boiler pump delay: Invalid value"));
         return false;
     }
 
     if (get_toggle_fetch(EMS_TYPE_UBAParameters)) {
         LOG_INFO(F("Setting boiler pump delay to %d min"), v);
         write_command(EMS_TYPE_UBAParameters, 8, v, EMS_TYPE_UBAParameters);
+        return true;
     }
 
-    return true;
+    return false;
 }
 
 // note some boilers do not have this setting, than it's done by thermostat
 // on a RC35 it's by EMSESP::send_write_request(0x37, 0x10, 2, &set, 1, 0); (set is 1,2,3) 1=hot, 2=eco, 3=intelligent
 bool Boiler::set_warmwater_mode(const char * value, const int8_t id) {
-    if (value == nullptr) {
+    uint8_t set;
+    if (!Helpers::value2enum(value, set, {"hot","eco","intelligent"})) {
+        LOG_WARNING(F("Set boiler warm water mode: Invalid value"));
         return false;
     }
 
@@ -972,14 +985,12 @@ bool Boiler::set_warmwater_mode(const char * value, const int8_t id) {
         return false;
     }
 
-    uint8_t set;
-    if (strcmp(value, "hot") == 0) {
+    if (set == 0) {
         LOG_INFO(F("Setting boiler warm water to Hot"));
-        set = 0x00;
-    } else if (strcmp(value, "eco") == 0) {
+    } else if (set == 1) {
         LOG_INFO(F("Setting boiler warm water to Eco"));
         set = 0xD8;
-    } else if (strcmp(value, "intelligent") == 0) {
+    } else if (set == 2) {
         LOG_INFO(F("Setting boiler warm water to Intelligent"));
         set = 0xEC;
     } else {
@@ -994,10 +1005,11 @@ bool Boiler::set_warmwater_mode(const char * value, const int8_t id) {
 bool Boiler::set_warmwater_activated(const char * value, const int8_t id) {
     bool v = false;
     if (!Helpers::value2bool(value, v)) {
+        LOG_WARNING(F("Set boiler warm water active: Invalid value"));
         return false;
     }
 
-    LOG_INFO(F("Setting boiler warm water %s"), v ? "on" : "off");
+    LOG_INFO(F("Setting boiler warm water active %s"), v ? "on" : "off");
 
     // https://github.com/proddy/EMS-ESP/issues/268
     uint8_t n;
@@ -1021,10 +1033,11 @@ bool Boiler::set_warmwater_activated(const char * value, const int8_t id) {
 bool Boiler::set_tapwarmwater_activated(const char * value, const int8_t id) {
     bool v = false;
     if (!Helpers::value2bool(value, v)) {
+        LOG_WARNING(F("Set warm tap water: Invalid value"));
         return false;
     }
 
-    LOG_INFO(F("Setting tap warm tap water %s"), v ? "on" : "off");
+    LOG_INFO(F("Setting warm tap water %s"), v ? "on" : "off");
     uint8_t message_data[EMS_MAX_TELEGRAM_MESSAGE_LENGTH];
     for (uint8_t i = 0; i < sizeof(message_data); i++) {
         message_data[i] = 0x00;
@@ -1055,10 +1068,11 @@ bool Boiler::set_tapwarmwater_activated(const char * value, const int8_t id) {
 bool Boiler::set_warmwater_onetime(const char * value, const int8_t id) {
     bool v = false;
     if (!Helpers::value2bool(value, v)) {
+        LOG_WARNING(F("Set warm water OneTime loading: Invalid value"));
         return false;
     }
 
-    LOG_INFO(F("Setting boiler warm water OneTime loading %s"), v ? "on" : "off");
+    LOG_INFO(F("Setting warm water OneTime loading %s"), v ? "on" : "off");
     if (get_toggle_fetch(EMS_TYPE_UBAParameterWWPlus)) {
         write_command(EMS_TYPE_UBAFlags, 0, (v ? 0x22 : 0x02), 0xE9); // not sure if this is in flags
     } else {
@@ -1073,10 +1087,11 @@ bool Boiler::set_warmwater_onetime(const char * value, const int8_t id) {
 bool Boiler::set_warmwater_circulation(const char * value, const int8_t id) {
     bool v = false;
     if (!Helpers::value2bool(value, v)) {
+        LOG_WARNING(F("Set warm water circulation: Invalid value"));
         return false;
     }
 
-    LOG_INFO(F("Setting boiler warm water circulation %s"), v ? "on" : "off");
+    LOG_INFO(F("Setting warm water circulation %s"), v ? "on" : "off");
     if (get_toggle_fetch(EMS_TYPE_UBAParameterWWPlus)) {
         write_command(EMS_TYPE_UBAFlags, 1, (v ? 0x22 : 0x02), 0xE9); // not sure if this is in flags
     } else {
@@ -1090,10 +1105,11 @@ bool Boiler::set_warmwater_circulation(const char * value, const int8_t id) {
 bool Boiler::set_warmwater_circulation_pump(const char * value, const int8_t id) {
     bool v = false;
     if (!Helpers::value2bool(value, v)) {
+        LOG_WARNING(F("Set warm water circulation pump: Invalid value"));
         return false;
     }
 
-    LOG_INFO(F("Setting boiler warm water circulation %s"), v ? "on" : "off");
+    LOG_INFO(F("Setting warm water circulation pump %s"), v ? "on" : "off");
 
     if (get_toggle_fetch(EMS_TYPE_UBAParameterWWPlus)) {
         write_command(EMS_TYPE_UBAParameterWWPlus, 10, v ? 0x01 : 0x00, EMS_TYPE_UBAParameterWWPlus);
@@ -1109,14 +1125,17 @@ bool Boiler::set_warmwater_circulation_pump(const char * value, const int8_t id)
 bool Boiler::set_warmwater_circulation_mode(const char * value, const int8_t id) {
     int v = 0;
     if (!Helpers::value2number(value, v)) {
+        LOG_WARNING(F("Set warm water circulation mode: Invalid value"));
         return false;
     }
 
     if (get_toggle_fetch(EMS_TYPE_UBAParameterWW)) {
         if (v < 7) {
-            LOG_INFO(F("Setting circulation mode %dx3min"), v);
+            LOG_INFO(F("Setting warm water circulation mode %dx3min"), v);
+        } else if (v == 7) {
+            LOG_INFO(F("Setting warm water circulation mode continous"));
         } else {
-            LOG_INFO(F("Setting circulation mode continous"));
+            return false;
         }
         write_command(EMS_TYPE_UBAParameterWW, 6, v, EMS_TYPE_UBAParameterWW);
     }

@@ -134,6 +134,24 @@ char * Helpers::render_boolean(char * result, bool value) {
     return result;
 }
 
+// depending on format render a number or a string
+char * Helpers::render_enum(char * result, const std::vector<std::string> value, const int8_t no) {
+    if (bool_format() == BOOL_FORMAT_ONOFF) {
+        strcpy(result, value[no].c_str());
+    } else if (bool_format() == BOOL_FORMAT_TRUEFALSE) {
+        if (no == 0 && value[0] == "off") {
+            strlcpy(result, "false", 7);
+        } else if (no == 1 && value[1] == "on") {
+            strlcpy(result, "true", 6);
+        } else {
+            strcpy(result, value[no].c_str());
+        }
+    } else {
+        itoa(result, no);
+    }
+    return result;
+}
+
 // render for native char strings
 char * Helpers::render_value(char * result, const char * value, uint8_t format) {
     strcpy(result, value);
@@ -402,7 +420,7 @@ std::string Helpers::toLower(std::string const & s) {
     return lc;
 }
 
-// checks if we can convert a chat string to an int value
+// checks if we can convert a char string to a lowercase string
 bool Helpers::value2string(const char * v, std::string & value) {
     if ((v == nullptr) || (strlen(v) == 0)) {
         value = {};
@@ -433,5 +451,20 @@ bool Helpers::value2bool(const char * v, bool & value) {
 
     return false; // not a bool
 }
+
+// checks to see if a string is member of a vector and return the index, also allow true/false for on/off
+bool Helpers::value2enum(const char * v, uint8_t & value, const std::vector<std::string> strs) {
+    if ((v == nullptr) || (strlen(v) == 0)) {
+        return false;
+    }
+    std::string str = toLower(v);
+    for (value = 0; value < strs.size(); value++) {
+        if ((strs[value] == "off" && str == "false") || (strs[value] == "on" && str == "true") || (str == strs[value]) || (v[0] == '0' + value)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 
 } // namespace emsesp
