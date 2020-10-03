@@ -30,13 +30,14 @@ uuid::syslog::SyslogService System::syslog_;
 #endif
 
 // init statics
-uint32_t System::heap_start_     = 0;
-int      System::reset_counter_  = 0;
-bool     System::upload_status_  = false;
-bool     System::hide_led_       = false;
-uint8_t  System::led_gpio_       = 0;
-uint16_t System::analog_         = 0;
-bool     System::analog_enabled_ = false;
+uint32_t    System::heap_start_     = 0;
+int         System::reset_counter_  = 0;
+bool        System::upload_status_  = false;
+bool        System::hide_led_       = false;
+uint8_t     System::led_gpio_       = 0;
+uint16_t    System::analog_         = 0;
+bool        System::analog_enabled_ = false;
+std::string System::hostname_;
 
 // send on/off to a gpio pin
 // value: true = HIGH, false = LOW
@@ -168,6 +169,8 @@ void System::init() {
         analog_enabled_ = settings.analog_enabled;
     });
 
+    EMSESP::esp8266React.getWiFiSettingsService()->read([&](WiFiSettings & settings) { hostname(settings.hostname.c_str()); });
+
     EMSESP::init_tx(); // start UART
 }
 
@@ -215,7 +218,7 @@ void System::loop() {
     uint32_t currentMillis = uuid::get_uptime();
     if (!last_heartbeat_ || (currentMillis - last_heartbeat_ > SYSTEM_HEARTBEAT_INTERVAL)) {
         last_heartbeat_ = currentMillis;
-            send_heartbeat();
+        send_heartbeat();
     }
 
 #if defined(ESP8266)
@@ -266,6 +269,9 @@ void System::send_heartbeat() {
     if (analog_enabled_) {
         doc["adc"] = analog_;
     }
+#if defined(ESP8266)
+    doc["fragmentation"] = ESP.getHeapFragmentation();
+#endif
 
     Mqtt::publish_retain(F("heartbeat"), doc.as<JsonObject>(), false); // send to MQTT with retain off. This will add to MQTT queue.
 }
@@ -404,11 +410,6 @@ void System::show_system(uuid::console::Shell & shell) {
     shell.printfln(F("Flash chip:    0x%08X (%u bytes)"), ESP.getFlashChipId(), ESP.getFlashChipRealSize());
     shell.printfln(F("Reset reason:  %s"), ESP.getResetReason().c_str());
     shell.printfln(F("Reset info:    %s"), ESP.getResetInfo().c_str());
-    shell.printfln(F("Free heap:                %lu bytes"), (unsigned long)ESP.getFreeHeap());
-    shell.printfln(F("Free mem:                 %d %%"), free_mem());
-    shell.printfln(F("Maximum free block size:  %lu bytes"), (unsigned long)ESP.getMaxFreeBlockSize());
-    shell.printfln(F("Heap fragmentation:       %u %%"), ESP.getHeapFragmentation());
-    shell.printfln(F("Free continuations stack: %lu bytes"), (unsigned long)ESP.getFreeContStack());
 #elif defined(ESP32)
     shell.printfln(F("SDK version:   %s"), ESP.getSdkVersion());
     shell.printfln(F("CPU frequency: %u MHz"), ESP.getCpuFreqMHz());
@@ -416,6 +417,11 @@ void System::show_system(uuid::console::Shell & shell) {
     shell.printfln(F("Sketch size:   %u bytes (%u bytes free)"), ESP.getSketchSize(), ESP.getFreeSketchSpace());
     shell.printfln(F("Free heap:                %lu bytes"), (unsigned long)ESP.getFreeHeap());
     shell.printfln(F("Free mem:                 %d  %%"), free_mem());
+#if defined(ESP8266)
+    shell.printfln(F("Heap fragmentation:       %u %%"), ESP.getHeapFragmentation());
+    shell.printfln(F("Maximum free block size:  %lu bytes"), (unsigned long)ESP.getMaxFreeBlockSize());
+    shell.printfln(F("Free continuations stack: %lu bytes"), (unsigned long)ESP.getFreeContStack());
+#endif
     shell.println();
 
     switch (WiFi.status()) {
@@ -541,7 +547,7 @@ void System::console_commands(Shell & shell, unsigned int context) {
 
     EMSESPShell::commands->add_command(ShellContext::SYSTEM,
                                        CommandFlags::USER,
-                                       flash_string_vector{F_(show), F_(system)},
+                                       flash_string_vector{F_(show)},
                                        [=](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
                                            show_system(shell);
                                            shell.println();
@@ -635,7 +641,6 @@ void System::console_commands(Shell & shell, unsigned int context) {
 // the logic is bit abnormal (loading both filesystems and testing) but this was the only way I could get it to work reliably
 bool System::check_upgrade() {
 #if defined(ESP8266)
-
     LittleFSConfig l_cfg;
     l_cfg.setAutoFormat(false);
     LittleFS.setConfig(l_cfg); // do not auto format if it can't find LittleFS
@@ -733,18 +738,18 @@ bool System::check_upgrade() {
 
             EMSESP::esp8266React.getMqttSettingsService()->update(
                 [&](MqttSettings & mqttSettings) {
-                    mqttSettings.host             = mqtt["ip"] | FACTORY_MQTT_HOST;
-                    mqttSettings.mqtt_format      = (mqtt["nestedjson"] ? Mqtt::Format::NESTED : Mqtt::Format::SINGLE);
-                    mqttSettings.mqtt_qos         = mqtt["qos"] | 0;
-                    mqttSettings.mqtt_retain      = mqtt["retain"];
-                    mqttSettings.username         = mqtt["user"] | "";
-                    mqttSettings.password         = mqtt["password"] | "";
-                    mqttSettings.port             = mqtt["port"] | FACTORY_MQTT_PORT;
-                    mqttSettings.clientId         = FACTORY_MQTT_CLIENT_ID;
-                    mqttSettings.enabled          = mqtt["enabled"];
-                    mqttSettings.keepAlive        = FACTORY_MQTT_KEEP_ALIVE;
-                    mqttSettings.cleanSession     = FACTORY_MQTT_CLEAN_SESSION;
-                    mqttSettings.maxTopicLength   = FACTORY_MQTT_MAX_TOPIC_LENGTH;
+                    mqttSettings.host           = mqtt["ip"] | FACTORY_MQTT_HOST;
+                    mqttSettings.mqtt_format    = (mqtt["nestedjson"] ? Mqtt::Format::NESTED : Mqtt::Format::SINGLE);
+                    mqttSettings.mqtt_qos       = mqtt["qos"] | 0;
+                    mqttSettings.mqtt_retain    = mqtt["retain"];
+                    mqttSettings.username       = mqtt["user"] | "";
+                    mqttSettings.password       = mqtt["password"] | "";
+                    mqttSettings.port           = mqtt["port"] | FACTORY_MQTT_PORT;
+                    mqttSettings.clientId       = FACTORY_MQTT_CLIENT_ID;
+                    mqttSettings.enabled        = mqtt["enabled"];
+                    mqttSettings.keepAlive      = FACTORY_MQTT_KEEP_ALIVE;
+                    mqttSettings.cleanSession   = FACTORY_MQTT_CLEAN_SESSION;
+                    mqttSettings.maxTopicLength = FACTORY_MQTT_MAX_TOPIC_LENGTH;
 
                     return StateUpdateResult::CHANGED;
                 },
@@ -837,7 +842,6 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
 #ifdef EMSESP_STANDALONE
     output["test"] = "testing";
 #else
-
     EMSESP::esp8266React.getWiFiSettingsService()->read([&](WiFiSettings & settings) {
         char       s[7];
         JsonObject node = output.createNestedObject("WIFI");

@@ -63,6 +63,14 @@ class System {
     void syslog_init();
     void send_heartbeat();
 
+    static std::string hostname() {
+        return hostname_;
+    }
+
+    static void hostname(std::string hostname) {
+        hostname_ = hostname;
+    }
+
   private:
     static uuid::log::Logger logger_;
 
@@ -89,13 +97,14 @@ class System {
     static void   wifi_reconnect();
     static int8_t wifi_quality();
 
-    bool            system_healthy_  = false;
-    uint32_t        led_flash_speed_ = LED_WARNING_BLINK_FAST; // default boot flashes quickly
-    static uint32_t heap_start_;
-    static int      reset_counter_;
-    uint32_t        last_heartbeat_ = 0;
-    static bool     upload_status_; // true if we're in the middle of a OTA firmware upload
-    static uint16_t analog_;
+    bool               system_healthy_  = false;
+    uint32_t           led_flash_speed_ = LED_WARNING_BLINK_FAST; // default boot flashes quickly
+    static uint32_t    heap_start_;
+    static int         reset_counter_;
+    uint32_t           last_heartbeat_ = 0;
+    static bool        upload_status_; // true if we're in the middle of a OTA firmware upload
+    static uint16_t    analog_;
+    static std::string hostname_;
 
     // settings
     static bool    hide_led_;
