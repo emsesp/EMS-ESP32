@@ -138,10 +138,12 @@ class Thermostat : public EMSdevice {
     uint16_t tempsensor1_       = EMS_VALUE_USHORT_NOTSET;
     uint16_t tempsensor2_       = EMS_VALUE_USHORT_NOTSET;
 
-    uint8_t wwSystem_   = EMS_VALUE_UINT_NOTSET;
-    uint8_t wwExtra_    = EMS_VALUE_UINT_NOTSET;
+    uint8_t wwExtra1_   = EMS_VALUE_UINT_NOTSET; // wwExtra active for wwSystem 1
+    uint8_t wwExtra2_   = EMS_VALUE_UINT_NOTSET;
     uint8_t wwMode_     = EMS_VALUE_UINT_NOTSET;
     uint8_t wwCircMode_ = EMS_VALUE_UINT_NOTSET;
+    uint8_t wwTemp_     = EMS_VALUE_UINT_NOTSET;
+    uint8_t wwTempLow_  = EMS_VALUE_UINT_NOTSET;
 
     std::vector<std::shared_ptr<HeatingCircuit>> heating_circuits_; // each thermostat can have multiple heating circuits
 
@@ -246,6 +248,8 @@ class Thermostat : public EMSdevice {
     void process_RC300Set(std::shared_ptr<const Telegram> telegram);
     void process_RC300Summer(std::shared_ptr<const Telegram> telegram);
     void process_RC300WWmode(std::shared_ptr<const Telegram> telegram);
+    void process_RC300WWmode2(std::shared_ptr<const Telegram> telegram);
+    void process_RC300WWtemp(std::shared_ptr<const Telegram> telegram);
     void process_JunkersMonitor(std::shared_ptr<const Telegram> telegram);
     void process_JunkersSet(std::shared_ptr<const Telegram> telegram);
     void process_JunkersSet2(std::shared_ptr<const Telegram> telegram);
@@ -282,6 +286,8 @@ class Thermostat : public EMSdevice {
 
     // set functions - these don't use the id/hc, the parameters are ignored
     bool set_wwmode(const char * value, const int8_t id);
+    bool set_wwtemp(const char * value, const int8_t id);
+    bool set_wwtemplow(const char * value, const int8_t id);
     bool set_wwcircmode(const char * value, const int8_t id);
     bool set_datetime(const char * value, const int8_t id);
     bool set_minexttemp(const char * value, const int8_t id);

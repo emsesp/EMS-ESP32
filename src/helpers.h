@@ -43,6 +43,7 @@ class Helpers {
     static char * render_value(char * result, const char * value, uint8_t format);
 
     static char * render_boolean(char * result, bool value);
+    static char * render_enum(char * result, const std::vector<std::string> value, const int8_t no);
 
     static char *   smallitoa(char * result, const uint8_t value);
     static char *   smallitoa(char * result, const uint16_t value);
@@ -76,6 +77,9 @@ class Helpers {
     static bool value2float(const char * v, float & value);
     static bool value2bool(const char * v, bool & value);
     static bool value2string(const char * v, std::string & value);
+
+    static bool value2enum(const char * v, uint8_t & value, const std::vector<std::string> strs);
+
 
   private:
     static uint8_t bool_format_;
