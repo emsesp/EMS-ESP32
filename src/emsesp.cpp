@@ -290,46 +290,46 @@ void EMSESP::show_sensor_values(uuid::console::Shell & shell) {
 
 // MQTT publish everything, immediately
 void EMSESP::publish_all() {
-    publish_device_values(EMSdevice::DeviceType::BOILER);
-    publish_device_values(EMSdevice::DeviceType::THERMOSTAT);
-    publish_device_values(EMSdevice::DeviceType::SOLAR);
-    publish_device_values(EMSdevice::DeviceType::MIXING);
-    publish_other_values();
-    publish_sensor_values(true);
-    system_.send_heartbeat();
+    if (Mqtt::connected()) {
+        publish_device_values(EMSdevice::DeviceType::BOILER);
+        publish_device_values(EMSdevice::DeviceType::THERMOSTAT);
+        publish_device_values(EMSdevice::DeviceType::SOLAR);
+        publish_device_values(EMSdevice::DeviceType::MIXING);
+        publish_other_values();
+        publish_sensor_values(true);
+        system_.send_heartbeat();
+    }
 }
 
 void EMSESP::publish_device_values(uint8_t device_type) {
-    if (Mqtt::connected()) {
-        for (const auto & emsdevice : emsdevices) {
-            if (emsdevice && (emsdevice->device_type() == device_type)) {
-                emsdevice->publish_values();
-            }
+    for (const auto & emsdevice : emsdevices) {
+        if (emsdevice && (emsdevice->device_type() == device_type)) {
+            emsdevice->publish_values();
         }
     }
 }
 
 void EMSESP::publish_other_values() {
-    if (Mqtt::connected()) {
-        for (const auto & emsdevice : emsdevices) {
-            if (emsdevice && (emsdevice->device_type() != EMSdevice::DeviceType::BOILER) && (emsdevice->device_type() != EMSdevice::DeviceType::THERMOSTAT)
-                && (emsdevice->device_type() != EMSdevice::DeviceType::SOLAR) && (emsdevice->device_type() != EMSdevice::DeviceType::MIXING)) {
-                emsdevice->publish_values();
-            }
+    for (const auto & emsdevice : emsdevices) {
+        if (emsdevice && (emsdevice->device_type() != EMSdevice::DeviceType::BOILER) && (emsdevice->device_type() != EMSdevice::DeviceType::THERMOSTAT)
+            && (emsdevice->device_type() != EMSdevice::DeviceType::SOLAR) && (emsdevice->device_type() != EMSdevice::DeviceType::MIXING)) {
+            emsdevice->publish_values();
         }
     }
 }
 
 void EMSESP::publish_sensor_values(const bool force) {
-    if (Mqtt::connected()) {
-        if (sensor_.updated_values() || force) {
-            sensor_.publish_values();
-        }
+    if (sensor_.updated_values() || force) {
+        sensor_.publish_values();
     }
 }
 
 // MQTT publish a telegram as raw data
 void EMSESP::publish_response(std::shared_ptr<const Telegram> telegram) {
+    if (!Mqtt::connected()) {
+        return;
+    }
+
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
 
     char buffer[100];
@@ -553,8 +553,8 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
         if (emsdevice) {
             if (emsdevice->is_device_id(telegram->src)) {
                 found = emsdevice->handle_telegram(telegram);
-                // check to see if we need to follow up after the telegram has been processed
-                if (found) {
+                // if we correctly processes the telegram follow up with sending it via MQTT if needed
+                if (found && Mqtt::connected()) {
                     if ((mqtt_.get_publish_onchange(emsdevice->device_type()) && emsdevice->updated_values()) || telegram->type_id == publish_id_) {
                         if (telegram->type_id == publish_id_) {
                             publish_id_ = 0;
