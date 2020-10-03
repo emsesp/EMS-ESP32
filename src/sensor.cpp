@@ -325,10 +325,7 @@ void Sensor::publish_values() {
     for (const auto & device : devices_) {
         char s[7];
 
-        if (mqtt_format_ == Mqtt::Format::CUSTOM) {
-            // e.g. sensor_data = {28-EA41-9497-0E03-5F":23.30,"28-233D-9497-0C03-8B":24.0}
-            doc[device.to_string()] = Helpers::render_value(s, device.temperature_c, 1);
-        } else if ((mqtt_format_ == Mqtt::Format::NESTED) || (mqtt_format_ == Mqtt::Format::HA)) {
+        if ((mqtt_format_ == Mqtt::Format::NESTED) || (mqtt_format_ == Mqtt::Format::HA)) {
             // e.g. sensor_data = {"sensor1":{"id":"28-EA41-9497-0E03-5F","temp":"23.30"},"sensor2":{"id":"28-233D-9497-0C03-8B","temp":"24.0"}}
             char sensorID[20]; // sensor{1-n}
             strlcpy(sensorID, "sensor", 20);

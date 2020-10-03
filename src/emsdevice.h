@@ -149,6 +149,12 @@ class EMSdevice {
         telegram_functions_.reserve(n);
     }
 
+    static void print_value_json(uuid::console::Shell &      shell,
+                                 const __FlashStringHelper * key,
+                                 const __FlashStringHelper * name,
+                                 const __FlashStringHelper * suffix,
+                                 JsonObject &                json);
+
     // prints a ems device value to the console, handling the correct rendering of the type
     // padding is # white space
     // name is the name of the parameter
@@ -192,7 +198,6 @@ class EMSdevice {
                                   Value &                     value,
                                   const __FlashStringHelper * suffix,
                                   const uint8_t               format = 0) {
-
         // create the value as a string using the render_value function
         char buffer[15];
         if (Helpers::render_value(buffer, value, format) == nullptr) {

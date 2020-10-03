@@ -28,7 +28,7 @@ namespace emsesp {
 // used with the 'test' command, under su/admin
 void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
     if (command == "default") {
-        run_test(shell, "web"); // add the default test case here
+        run_test(shell, "thermostat"); // add the default test case here
     }
 
     if (command.empty()) {
@@ -280,6 +280,8 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
 
         // HC3
         uart_telegram({0x90, 0x00, 0xFF, 0x00, 0x00, 0x71, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00});
+
+        shell.invoke_command("show");
     }
 
     if (command == "tc100") {
@@ -310,24 +312,19 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         // B0 0B FF 00 02 62 00 44 02 7A 80 00 80 00 80 00 80 00 80 00 80 00 00 7C 80 00 80 00 80 00 80
         rx_telegram({0xB0, 0x0B, 0xFF, 00, 0x02, 0x62, 00, 0x44, 0x02, 0x7A, 0x80, 00, 0x80, 0x00, 0x80, 00,
                      0x80, 00,   0x80, 00, 0x80, 00,   00, 0x7C, 0x80, 00,   0x80, 00, 0x80, 00,   0x80});
-        EMSESP::show_device_values(shell);
 
         rx_telegram({0xB0, 0x0B, 0xFF, 0x00, 0x02, 0x62, 0x01, 0x44, 0x03, 0x30, 0x80, 00, 0x80, 00, 0x80, 00,
                      0x80, 00,   0x80, 00,   0x80, 00,   0x80, 00,   0x80, 00,   0x80, 00, 0x80, 00, 0x80, 0x33});
-        EMSESP::show_device_values(shell);
 
         rx_telegram({0xB0, 00, 0xFF, 0x18, 02, 0x62, 0x80, 00, 0xB8});
-        EMSESP::show_device_values(shell);
 
         EMSESP::send_raw_telegram("B0 00 FF 18 02 62 80 00 B8");
 
         uart_telegram("30 00 FF 0A 02 6A 04");                                                 // SM100 pump on  1
         uart_telegram("30 00 FF 00 02 64 00 00 00 04 00 00 FF 00 00 1E 0B 09 64 00 00 00 00"); // SM100 modulation
-
         EMSESP::show_device_values(shell);
 
         uart_telegram("30 00 FF 0A 02 6A 03"); // SM100 pump off  0
-
         EMSESP::show_device_values(shell);
     }
 
@@ -758,17 +755,18 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         std::string version("1.2.3");
         EMSESP::add_device(0x28, 160, version, EMSdevice::Brand::BUDERUS); // MM100, WWC
         EMSESP::add_device(0x29, 161, version, EMSdevice::Brand::BUDERUS); // MM200, WWC
-
-        EMSESP::add_device(0x20, 160, version, EMSdevice::Brand::BOSCH); // MM100
+        EMSESP::add_device(0x20, 160, version, EMSdevice::Brand::BOSCH);   // MM100
 
         // WWC1 on 0x29
-        rx_telegram({0xA9, 0x00, 0xFF, 0x00, 0x02, 0x32, 0x02, 0x6C, 0x00, 0x3C, 0x00, 0x3C, 0x3C, 0x46, 0x02, 0x03, 0x03, 0x00, 0x3C});
+        uart_telegram({0xA9, 0x00, 0xFF, 0x00, 0x02, 0x32, 0x02, 0x6C, 0x00, 0x3C, 0x00, 0x3C, 0x3C, 0x46, 0x02, 0x03, 0x03, 0x00, 0x3C});
 
         // WWC2 on 0x28
-        rx_telegram({0xA8, 0x00, 0xFF, 0x00, 0x02, 0x31, 0x02, 0x35, 0x00, 0x3C, 0x00, 0x3C, 0x3C, 0x46, 0x02, 0x03, 0x03, 0x00, 0x3C});
+        uart_telegram({0xA8, 0x00, 0xFF, 0x00, 0x02, 0x31, 0x02, 0x35, 0x00, 0x3C, 0x00, 0x3C, 0x3C, 0x46, 0x02, 0x03, 0x03, 0x00, 0x3C});
 
-        // check for error "[emsesp] No telegram type handler found for ID 0x255 (src 0x20, dest 0x00)"
-        rx_telegram({0xA0, 0x00, 0xFF, 0x00, 0x01, 0x55, 0x00, 0x1A});
+        // check for error "No telegram type handler found for ID 0x255 (src 0x20)"
+        uart_telegram({0xA0, 0x00, 0xFF, 0x00, 0x01, 0x55, 0x00, 0x1A});
+
+        shell.invoke_command("show");
     }
 
     // finally dump to console
