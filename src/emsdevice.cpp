@@ -383,4 +383,36 @@ void EMSdevice::print_value(uuid::console::Shell & shell, uint8_t padding, const
     shell.printfln(PSTR("%s: %s"), uuid::read_flash_string(name).c_str(), value);
 }
 
+// print value to shell from the json doc
+void EMSdevice::print_value_json(uuid::console::Shell &      shell,
+                                 const __FlashStringHelper * key,
+                                 const __FlashStringHelper * name,
+                                 const __FlashStringHelper * suffix,
+                                 JsonObject &                json) {
+    JsonVariant data = json[uuid::read_flash_string(key)];
+    if (data == nullptr) {
+        return; // doesn't exist
+    }
+
+    shell.printf(PSTR("  %s: "), uuid::read_flash_string(name).c_str());
+
+    if (data.is<char *>()) {
+        shell.printf(PSTR("%s"), data.as<char *>());
+    } else if (data.is<int>()) {
+        shell.printf(PSTR("%d"), data.as<int>());
+    } else if (data.is<float>()) {
+        char data_str[10];
+        shell.printf(PSTR("%s"), Helpers::render_value(data_str, (float)data.as<float>(), 1));
+    } else if (data.is<bool>()) {
+        char data_str[10];
+        shell.printf(PSTR("%s"), Helpers::render_boolean(data_str, data.as<bool>()));
+    }
+
+    if (suffix != nullptr) {
+        shell.print(uuid::read_flash_string(suffix).c_str());
+    }
+
+    shell.println();
+}
+
 } // namespace emsesp
