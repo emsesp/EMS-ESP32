@@ -687,8 +687,6 @@ void Mqtt::process_queue() {
 // HA config for a binary_sensor
 void Mqtt::register_mqtt_ha_binary_sensor(const __FlashStringHelper * name, const uint8_t device_type, const char * entity) {
 
-    return; // TODO remove
-
     if (mqtt_format() != Format::HA) {
         return;
     }
