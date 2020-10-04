@@ -359,7 +359,7 @@ void EMSESPShell::add_console_commands() {
         ShellContext::MAIN,
         CommandFlags::ADMIN,
         flash_string_vector{F_(call)},
-        flash_string_vector{F_(device_type_optional), F_(cmd_optional), F_(data_optional), F_(n_optional)},
+        flash_string_vector{F_(device_type_optional), F_(cmd_optional), F_(data_optional), F_(id_optional)},
         [&](Shell & shell, const std::vector<std::string> & arguments) {
             if (arguments.empty()) {
                 Command::show_all(shell); // list options

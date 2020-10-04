@@ -242,7 +242,10 @@ bool Thermostat::updated_values() {
 // info API command
 // returns the same MQTT publish payload in Nested format
 bool Thermostat::command_info(const char * value, const int8_t id, JsonObject & output) {
-    return (export_values_hc(Mqtt::Format::NESTED, output));
+    bool has_value = false;
+    has_value |= export_values_main(output);
+    has_value |= export_values_hc(Mqtt::Format::NESTED, output);
+    return has_value;
 }
 
 // display all thermostat values into the shell console
@@ -252,6 +255,7 @@ void Thermostat::show_values(uuid::console::Shell & shell) {
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc_main;
     JsonObject                                     output_main = doc_main.to<JsonObject>();
     if (export_values_main(output_main)) {
+        print_value_json(shell, F("time"), F_(time), nullptr, output_main);
         print_value_json(shell, F("display"), F_(display), nullptr, output_main);
         print_value_json(shell, F("language"), F_(language), nullptr, output_main);
         print_value_json(shell, F("offsetclock"), F_(offsetclock), nullptr, output_main);
@@ -295,13 +299,13 @@ void Thermostat::show_values(uuid::console::Shell & shell) {
                 print_value_json(shell, F("offsettemp"), F_(offsettemp), F_(degrees), output);
                 print_value_json(shell, F("designtemp"), F_(designtemp), F_(degrees), output);
                 print_value_json(shell, F("summertemp"), F_(summertemp), F_(degrees), output);
+                print_value_json(shell, F("summermode"), F_(summermode), F_(degrees), output);
                 print_value_json(shell, F("mode"), F_(mode), nullptr, output);
                 print_value_json(shell, F("modetype"), F_(modetype), nullptr, output);
-
-                shell.println();
             }
         }
     }
+    shell.println();
 }
 
 // publish values via MQTT
@@ -309,7 +313,21 @@ void Thermostat::publish_values() {
     if (EMSESP::actual_master_thermostat() != this->device_id()) {
         return;
     }
+    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
+    JsonObject                                      output   = doc.to<JsonObject>();
+    bool                                            has_data = false;
 
+    has_data |= export_values_main(output);
+    if (Mqtt::mqtt_format() == Mqtt::Format::SINGLE && has_data) {
+        Mqtt::publish(F("thermostat_data"), output);
+        output.clear();
+    }
+    has_data |= export_values_hc(Mqtt::mqtt_format(), output);
+    // if we're in SINGLE mode the MQTT would have been published on the export_values() function for each hc
+    if (Mqtt::mqtt_format() != Mqtt::Format::SINGLE && has_data) {
+        Mqtt::publish(F("thermostat_data"), output);
+    }
+    /*
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc_main;
     JsonObject                                     output_main = doc_main.to<JsonObject>();
     if (export_values_main(output_main)) {
@@ -324,53 +342,58 @@ void Thermostat::publish_values() {
             Mqtt::publish(F("thermostat_data"), output_hc);
         }
     }
+    */
 }
 
 bool Thermostat::export_values_main(JsonObject & rootThermostat) {
+    uint8_t model = this->model();
+
     // Clock time
     if (datetime_.size()) {
         rootThermostat["time"] = datetime_.c_str();
     }
 
-    // Display
-    if (Helpers::hasValue(ibaMainDisplay_)) {
-        if (ibaMainDisplay_ == 0) {
-            rootThermostat["display"] = F("internal temperature");
-        } else if (ibaMainDisplay_ == 1) {
-            rootThermostat["display"] = F("internal setpoint");
-        } else if (ibaMainDisplay_ == 2) {
-            rootThermostat["display"] = F("external temperature");
-        } else if (ibaMainDisplay_ == 3) {
-            rootThermostat["display"] = F("burner temperature");
-        } else if (ibaMainDisplay_ == 4) {
-            rootThermostat["display"] = F("WW temperature");
-        } else if (ibaMainDisplay_ == 5) {
-            rootThermostat["display"] = F("functioning mode");
-        } else if (ibaMainDisplay_ == 6) {
-            rootThermostat["display"] = F("time");
-        } else if (ibaMainDisplay_ == 7) {
-            rootThermostat["display"] = F("date");
-        } else if (ibaMainDisplay_ == 8) {
-            rootThermostat["display"] = F("smoke temperature");
+    if (model  == EMSdevice::EMS_DEVICE_FLAG_RC30_1) {
+       // Display
+        if (Helpers::hasValue(ibaMainDisplay_)) {
+            if (ibaMainDisplay_ == 0) {
+                rootThermostat["display"] = F("internal temperature");
+            } else if (ibaMainDisplay_ == 1) {
+                rootThermostat["display"] = F("internal setpoint");
+            } else if (ibaMainDisplay_ == 2) {
+                rootThermostat["display"] = F("external temperature");
+            } else if (ibaMainDisplay_ == 3) {
+                rootThermostat["display"] = F("burner temperature");
+            } else if (ibaMainDisplay_ == 4) {
+                rootThermostat["display"] = F("WW temperature");
+            } else if (ibaMainDisplay_ == 5) {
+                rootThermostat["display"] = F("functioning mode");
+            } else if (ibaMainDisplay_ == 6) {
+                rootThermostat["display"] = F("time");
+            } else if (ibaMainDisplay_ == 7) {
+                rootThermostat["display"] = F("date");
+            } else if (ibaMainDisplay_ == 8) {
+                rootThermostat["display"] = F("smoke temperature");
+            }
         }
-    }
 
-    // Language
-    if (Helpers::hasValue(ibaLanguage_)) {
-        if (ibaLanguage_ == 0) {
-            rootThermostat["language"] = F("German");
-        } else if (ibaLanguage_ == 1) {
-            rootThermostat["language"] = F("Dutch");
-        } else if (ibaLanguage_ == 2) {
-            rootThermostat["language"] = F("French");
-        } else if (ibaLanguage_ == 3) {
-            rootThermostat["language"] = F("Italian");
+        // Language
+        if (Helpers::hasValue(ibaLanguage_)) {
+            if (ibaLanguage_ == 0) {
+                rootThermostat["language"] = F("German");
+            } else if (ibaLanguage_ == 1) {
+                rootThermostat["language"] = F("Dutch");
+            } else if (ibaLanguage_ == 2) {
+                rootThermostat["language"] = F("French");
+            } else if (ibaLanguage_ == 3) {
+                rootThermostat["language"] = F("Italian");
+            }
         }
-    }
 
-    // Offset clock
-    if (Helpers::hasValue(ibaClockOffset_)) {
-        rootThermostat["offsetclock"] = ibaClockOffset_; // offset (in sec) to clock, 0xff=-1s, 0x02=2s
+        // Offset clock
+        if (Helpers::hasValue(ibaClockOffset_)) {
+            rootThermostat["offsetclock"] = ibaClockOffset_; // offset (in sec) to clock, 0xff=-1s, 0x02=2s
+        }
     }
 
     // Damped outdoor temperature
@@ -406,8 +429,7 @@ bool Thermostat::export_values_main(JsonObject & rootThermostat) {
 
     // Warm water mode
     if (Helpers::hasValue(wwMode_)) {
-        uint8_t model = this->model();
-        char    s[10];
+        char s[10];
         if (model == EMS_DEVICE_FLAG_RC300 || model == EMS_DEVICE_FLAG_RC100) {
             rootThermostat["wwmode"] = Helpers::render_enum(s, {"off", "low", "high", "auto", "own_prog"}, wwMode_);
         } else {
@@ -779,6 +801,10 @@ void Thermostat::register_mqtt_ha_config(uint8_t hc_num) {
         Mqtt::register_mqtt_ha_sensor(hc_name, F_(summertemp), this->device_type(), "summertemp", F_(degrees), F_(icontemperature));
         break;
     case EMS_DEVICE_FLAG_RC20_2:
+        Mqtt::register_mqtt_ha_sensor(hc_name, F_(daytemp), this->device_type(), "daytemp", F_(degrees), F_(icontemperature));
+        Mqtt::register_mqtt_ha_sensor(hc_name, F_(nighttemp), this->device_type(), "nighttemp", F_(degrees), F_(icontemperature));
+        break;
+    case EMS_DEVICE_FLAG_RC30_1:
     case EMS_DEVICE_FLAG_RC35:
         Mqtt::register_mqtt_ha_sensor(hc_name, F_(modetype), this->device_type(), "modetype", nullptr, nullptr);
         Mqtt::register_mqtt_ha_sensor(hc_name, F_(nighttemp), this->device_type(), "nighttemp", F_(degrees), F_(icontemperature));
