@@ -152,8 +152,8 @@ void Mixing::register_mqtt_ha_config(const char * topic) {
     doc["uniq_id"] = F("mixing");
     doc["ic"]      = F("mdi:home-thermometer-outline");
 
-    std::string stat_t(50, '\0');
-    snprintf_P(&stat_t[0], stat_t.capacity() + 1, PSTR("%s/%s"), System::hostname().c_str(), topic);
+    char stat_t[50];
+    snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/%s"), System::hostname().c_str(), topic);
     doc["stat_t"] = stat_t;
 
     doc["val_tpl"] = F("{{value_json.pumpStatus}}");

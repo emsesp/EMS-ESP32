@@ -193,8 +193,8 @@ void Thermostat::device_info_web(JsonArray & root) {
         }
 
         // create prefix with heating circuit number
-        std::string hc_str(5, '\0');
-        snprintf_P(&hc_str[0], hc_str.capacity() + 1, PSTR("hc%d: "), hc->hc_num());
+        char hc_str[5];
+        snprintf_P(hc_str, sizeof(hc_str), PSTR("hc%d: "), hc->hc_num());
 
         render_value_json(root, hc_str, F_(currtemp), hc->curr_roomTemp, F_(degrees), format_curr);
         render_value_json(root, hc_str, F_(seltemp), hc->setpoint_roomTemp, F_(degrees), format_setpoint);
@@ -202,23 +202,23 @@ void Thermostat::device_info_web(JsonArray & root) {
             JsonObject dataElement;
             dataElement = root.createNestedObject();
 
-            std::string mode_str(15, '\0');
-            snprintf_P(&mode_str[0], mode_str.capacity() + 1, PSTR("%sMode"), hc_str.c_str());
+            char mode_str[15];
+            snprintf_P(mode_str, sizeof(mode_str), PSTR("%sMode"), hc_str);
             dataElement["name"] = mode_str;
 
-            std::string modetype_str(20, '\0');
+            char modetype_str[20];
             if (Helpers::hasValue(hc->summer_mode) && hc->summer_mode) {
-                snprintf_P(&modetype_str[0], modetype_str.capacity() + 1, PSTR("%s - summer"), mode_tostring(hc->get_mode(flags)).c_str());
+                snprintf_P(modetype_str, sizeof(modetype_str), PSTR("%s - summer"), mode_tostring(hc->get_mode(flags)).c_str());
             } else if (Helpers::hasValue(hc->holiday_mode) && hc->holiday_mode) {
-                snprintf_P(&modetype_str[0], modetype_str.capacity() + 1, PSTR("%s - holiday"), mode_tostring(hc->get_mode(flags)).c_str());
+                snprintf_P(modetype_str, sizeof(modetype_str), PSTR("%s - holiday"), mode_tostring(hc->get_mode(flags)).c_str());
             } else if (Helpers::hasValue(hc->mode_type)) {
-                snprintf_P(&modetype_str[0],
-                           modetype_str.capacity() + 1,
+                snprintf_P(modetype_str,
+                           sizeof(modetype_str),
                            PSTR("%s - %s"),
                            mode_tostring(hc->get_mode(flags)).c_str(),
                            mode_tostring(hc->get_mode_type(flags)).c_str());
             } else {
-                snprintf_P(&modetype_str[0], modetype_str.capacity() + 1, mode_tostring(hc->get_mode(flags)).c_str());
+                snprintf_P(modetype_str, sizeof(modetype_str), mode_tostring(hc->get_mode(flags)).c_str());
             }
             dataElement["value"] = modetype_str;
         }
@@ -353,8 +353,8 @@ bool Thermostat::export_values_main(JsonObject & rootThermostat) {
         rootThermostat["time"] = datetime_.c_str();
     }
 
-    if (model  == EMSdevice::EMS_DEVICE_FLAG_RC30_1) {
-       // Display
+    if (model == EMSdevice::EMS_DEVICE_FLAG_RC30_1) {
+        // Display
         if (Helpers::hasValue(ibaMainDisplay_)) {
             if (ibaMainDisplay_ == 0) {
                 rootThermostat["display"] = F("internal temperature");
@@ -716,12 +716,12 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::sha
 void Thermostat::register_mqtt_ha_config(uint8_t hc_num) {
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
 
-    std::string str1(40, '\0');
-    snprintf_P(&str1[0], str1.capacity() + 1, PSTR("Thermostat hc%d"), hc_num);
+    char str1[40];
+    snprintf_P(str1, sizeof(str1), PSTR("Thermostat hc%d"), hc_num);
     doc["name"] = str1;
 
-    std::string str2(40, '\0');
-    snprintf_P(&str2[0], str2.capacity() + 1, PSTR("thermostat_hc%d"), hc_num);
+    char str2[40];
+    snprintf_P(str2, sizeof(str2), PSTR("thermostat_hc%d"), hc_num);
     doc["uniq_id"] = str2;
 
     doc["~"]           = F("ems-esp");
@@ -731,16 +731,16 @@ void Thermostat::register_mqtt_ha_config(uint8_t hc_num) {
     doc["temp_stat_t"] = F("~/thermostat_data");
     doc["curr_temp_t"] = F("~/thermostat_data");
 
-    std::string mode_str(30, '\0');
-    snprintf_P(&mode_str[0], 30, PSTR("{{value_json.hc%d.mode}}"), hc_num);
+    char mode_str[30];
+    snprintf_P(mode_str, sizeof(mode_str), PSTR("{{value_json.hc%d.mode}}"), hc_num);
     doc["mode_stat_tpl"] = mode_str;
 
-    std::string seltemp_str(30, '\0');
-    snprintf_P(&seltemp_str[0], 30, PSTR("{{value_json.hc%d.seltemp}}"), hc_num);
+    char seltemp_str[30];
+    snprintf_P(seltemp_str, sizeof(seltemp_str), PSTR("{{value_json.hc%d.seltemp}}"), hc_num);
     doc["temp_stat_tpl"] = seltemp_str;
 
-    std::string currtemp_str(30, '\0');
-    snprintf_P(&currtemp_str[0], 30, PSTR("{{value_json.hc%d.currtemp}}"), hc_num);
+    char currtemp_str[30];
+    snprintf_P(currtemp_str, sizeof(currtemp_str), PSTR("{{value_json.hc%d.currtemp}}"), hc_num);
     doc["curr_temp_tpl"] = currtemp_str;
 
     doc["min_temp"]  = F("5");

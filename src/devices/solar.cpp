@@ -60,30 +60,28 @@ bool Solar::command_info(const char * value, const int8_t id, JsonObject & outpu
 
 // print to web
 void Solar::device_info_web(JsonArray & root) {
-    render_value_json(root, "", F("Collector temperature (TS1)"), collectorTemp_, F_(degrees), 10);
-    render_value_json(root, "", F("Tank bottom temperature (TS2)"), tankBottomTemp_, F_(degrees), 10);
-    render_value_json(root, "", F("Tank bottom temperature (TS5)"), tankBottomTemp2_, F_(degrees), 10);
-    render_value_json(root, "", F("Heat exchanger temperature (TS6)"), heatExchangerTemp_, F_(degrees), 10);
-    render_value_json(root, "", F("Solar pump modulation (PS1)"), solarPumpModulation_, F_(percent));
-    render_value_json(root, "", F("Cylinder pump modulation (PS5)"), cylinderPumpModulation_, F_(percent));
-    render_value_json(root, "", F("Valve (VS2) status"), valveStatus_, nullptr, EMS_VALUE_BOOL);
-    render_value_json(root, "", F("Solar Pump (PS1) active"), solarPump_, nullptr, EMS_VALUE_BOOL);
+    render_value_json(root, "", F_(collectorTemp), collectorTemp_, F_(degrees), 10);
+    render_value_json(root, "", F_(tankBottomTemp), tankBottomTemp_, F_(degrees), 10);
+    render_value_json(root, "", F_(tankBottomTemp2), tankBottomTemp2_, F_(degrees), 10);
+    render_value_json(root, "", F_(heatExchangerTemp), heatExchangerTemp_, F_(degrees), 10);
+    render_value_json(root, "", F_(solarPumpModulation), solarPumpModulation_, F_(percent));
+    render_value_json(root, "", F_(cylinderPumpModulation), cylinderPumpModulation_, F_(percent));
+    render_value_json(root, "", F_(valveStatus), valveStatus_, nullptr, EMS_VALUE_BOOL);
+    render_value_json(root, "", F_(solarPump), solarPump_, nullptr, EMS_VALUE_BOOL);
+    render_value_json(root, "", F_(tankHeated), tankHeated_, nullptr, EMS_VALUE_BOOL);
+    render_value_json(root, "", F_(collectorShutdown), collectorShutdown_, nullptr, EMS_VALUE_BOOL);
+    render_value_json(root, "", F_(energyLastHour), energyLastHour_, F_(wh), 10);
+    render_value_json(root, "", F_(energyToday), energyToday_, F_(wh));
+    render_value_json(root, "", F_(energyTotal), energyTotal_, F_(kwh), 10);
 
     if (Helpers::hasValue(pumpWorkMin_)) {
         JsonObject dataElement;
         dataElement         = root.createNestedObject();
-        dataElement["name"] = F("Pump working time");
-        std::string time_str(60, '\0');
-        snprintf_P(&time_str[0], time_str.capacity() + 1, PSTR("%d days %d hours %d minutes"), pumpWorkMin_ / 1440, (pumpWorkMin_ % 1440) / 60, pumpWorkMin_ % 60);
+        dataElement["name"] = F_(pumpWorkMin);
+        char time_str[60];
+        snprintf_P(time_str, sizeof(time_str), PSTR("%d days %d hours %d minutes"), pumpWorkMin_ / 1440, (pumpWorkMin_ % 1440) / 60, pumpWorkMin_ % 60);
         dataElement["value"] = time_str;
     }
-
-    render_value_json(root, "", F("Tank Heated"), tankHeated_, nullptr, EMS_VALUE_BOOL);
-    render_value_json(root, "", F("Collector shutdown"), collectorShutdown_, nullptr, EMS_VALUE_BOOL);
-
-    render_value_json(root, "", F("Energy last hour"), energyLastHour_, F_(wh), 10);
-    render_value_json(root, "", F("Energy today"), energyToday_, F_(wh));
-    render_value_json(root, "", F("Energy total"), energyTotal_, F_(kwh), 10);
 }
 
 // display all values into the shell console
@@ -112,7 +110,11 @@ void Solar::show_values(uuid::console::Shell & shell) {
     print_value_json(shell, F("energyTotal"), F_(energyTotal), F_(kwh), output);
 
     if (Helpers::hasValue(pumpWorkMin_)) {
-        shell.printfln(F("  Pump working time: %d days %d hours %d minutes"), pumpWorkMin_ / 1440, (pumpWorkMin_ % 1440) / 60, pumpWorkMin_ % 60);
+        shell.printfln(F("  %s: %d days %d hours %d minutes"),
+                       uuid::read_flash_string(F_(pumpWorkMin)).c_str(),
+                       pumpWorkMin_ / 1440,
+                       (pumpWorkMin_ % 1440) / 60,
+                       pumpWorkMin_ % 60);
     }
 }
 
@@ -134,13 +136,13 @@ void Solar::publish_values() {
 void Solar::register_mqtt_ha_config() {
     // Create the Master device
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
-    doc["name"]    = F("EMS-ESP");
-    doc["uniq_id"] = F("solar");
-    doc["ic"]      = F("mdi:home-thermometer-outline");
-    doc["stat_t"]  = F("ems-esp/solar_data");
-    doc["val_tpl"] = F("{{value_json.solarPump}}");
+    doc["name"]    = "EMS-ESP";
+    doc["uniq_id"] = "solar";
+    doc["ic"]      = "mdi:home-thermometer-outline";
+    doc["stat_t"]  = "ems-esp/solar_data";
+    doc["val_tpl"] = "{{value_json.solarPump}}";
     JsonObject dev = doc.createNestedObject("dev");
-    dev["name"]    = F("EMS-ESP Solar");
+    dev["name"]    = "EMS-ESP Solar";
     dev["sw"]      = EMSESP_APP_VERSION;
     dev["mf"]      = this->brand_to_string();
     dev["mdl"]     = this->name();

@@ -521,7 +521,6 @@ std::shared_ptr<const MqttMessage> Mqtt::queue_message(const uint8_t operation, 
         snprintf_P(&full_topic[0], full_topic.capacity() + 1, PSTR("%s/%s"), hostname_.c_str(), topic.c_str());
         message = std::make_shared<MqttMessage>(operation, full_topic, std::move(payload), retain);
     }
-    // TODO use && and resize() to fix mem defrag issues
 
     // if the queue is full, make room but removing the last one
     if (mqtt_messages_.size() >= maximum_mqtt_messages_) {
@@ -687,17 +686,20 @@ void Mqtt::process_queue() {
 
 // HA config for a binary_sensor
 void Mqtt::register_mqtt_ha_binary_sensor(const __FlashStringHelper * name, const uint8_t device_type, const char * entity) {
+
+    return; // TODO remove
+
     if (mqtt_format() != Format::HA) {
         return;
     }
 
-    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
+    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
 
     doc["name"]    = name;
     doc["uniq_id"] = entity;
 
-    std::string state_t(50, '\0');
-    snprintf_P(&state_t[0], state_t.capacity() + 1, PSTR("%s/%s"), hostname_.c_str(), entity);
+    char state_t[50];
+    snprintf_P(state_t, sizeof(state_t), PSTR("%s/%s"), hostname_.c_str(), entity);
     doc["stat_t"] = state_t;
 
     EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) {
@@ -715,8 +717,8 @@ void Mqtt::register_mqtt_ha_binary_sensor(const __FlashStringHelper * name, cons
 
     JsonObject  dev = doc.createNestedObject(F("dev"));
     JsonArray   ids = dev.createNestedArray(F("ids"));
-    std::string ha_device(40, '\0');
-    snprintf_P(&ha_device[0], ha_device.capacity() + 1, PSTR("ems-esp-%s"), EMSdevice::device_type_2_device_name(device_type).c_str());
+    char ha_device[40];
+    snprintf_P(ha_device, sizeof(ha_device), PSTR("ems-esp-%s"), EMSdevice::device_type_2_device_name(device_type).c_str());
     ids.add(ha_device);
 
     std::string topic(100, '\0');
@@ -737,14 +739,14 @@ void Mqtt::register_mqtt_ha_sensor(const char *                prefix,
         return;
     }
 
-    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
+    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
 
     std::string device_name = EMSdevice::device_type_2_device_name(device_type);
 
     char new_entity[20];
     // add prefix to entity if its specified
     if (prefix != nullptr) {
-        snprintf_P(&new_entity[0], 20, PSTR("%s.%s"), prefix, entity);
+        snprintf_P(new_entity, sizeof(new_entity), PSTR("%s.%s"), prefix, entity);
     } else {
         strcpy(new_entity, entity);
     }
@@ -761,12 +763,12 @@ void Mqtt::register_mqtt_ha_sensor(const char *                prefix,
         doc["unit_of_meas"] = uom;
     }
 
-    std::string state_t(50, '\0');
-    snprintf_P(&state_t[0], state_t.capacity() + 1, PSTR("%s/%s_data"), hostname_.c_str(), device_name.c_str());
+    char state_t[50];
+    snprintf_P(state_t, sizeof(state_t), PSTR("%s/%s_data"), hostname_.c_str(), device_name.c_str());
     doc["stat_t"] = state_t;
 
-    std::string tpl(50, '\0');
-    snprintf_P(&tpl[0], tpl.capacity() + 1, PSTR("{{value_json.%s}}"), new_entity);
+    char tpl[50];
+    snprintf_P(tpl, sizeof(tpl), PSTR("{{value_json.%s}}"), new_entity);
     doc["val_tpl"] = tpl;
 
     if (icon != nullptr) {
@@ -775,8 +777,8 @@ void Mqtt::register_mqtt_ha_sensor(const char *                prefix,
 
     JsonObject  dev = doc.createNestedObject(F("dev"));
     JsonArray   ids = dev.createNestedArray(F("ids"));
-    std::string ha_device(40, '\0');
-    snprintf_P(&ha_device[0], ha_device.capacity() + 1, PSTR("ems-esp-%s"), device_name.c_str());
+    char ha_device[40];
+    snprintf_P(ha_device, sizeof(ha_device), PSTR("ems-esp-%s"), device_name.c_str());
     ids.add(ha_device);
 
     std::string topic(100, '\0');

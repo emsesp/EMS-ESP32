@@ -208,16 +208,16 @@ class EMSdevice {
 
         // append suffix to end
         if (suffix != nullptr) {
-            std::string text(20, '\0');
-            snprintf_P(&text[0], text.capacity() + 1, PSTR("%s%s"), buffer, uuid::read_flash_string(suffix).c_str());
+            char text[20];
+            snprintf_P(text, sizeof(text), PSTR("%s%s"), buffer, uuid::read_flash_string(suffix).c_str());
             dataElement["value"] = text;
         } else {
             dataElement["value"] = buffer;
         }
 
         // add prefix to name
-        std::string text2(100, '\0');
-        snprintf_P(&text2[0], text2.capacity() + 1, PSTR("%s%s"), prefix.c_str(), uuid::read_flash_string(name).c_str());
+        char text2[100];
+        snprintf_P(text2, sizeof(text2), PSTR("%s%s"), prefix.c_str(), uuid::read_flash_string(name).c_str());
         dataElement["name"] = text2;
     }
 

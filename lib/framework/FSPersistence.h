@@ -30,6 +30,7 @@ class FSPersistence {
             DynamicJsonDocument  jsonDocument = DynamicJsonDocument(_bufferSize);
             DeserializationError error        = deserializeJson(jsonDocument, settingsFile);
             if (error == DeserializationError::Ok && jsonDocument.is<JsonObject>()) {
+                jsonDocument.shrinkToFit(); // added by proddy
                 JsonObject jsonObject = jsonDocument.as<JsonObject>();
 
                 // debug added by Proddy

@@ -248,6 +248,12 @@ void System::send_heartbeat() {
         return;
     }
 
+    uint32_t free_memory = free_mem();
+
+#if defined(ESP8266)
+    uint8_t frag_memory = ESP.getHeapFragmentation();
+#endif
+
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
 
     uint8_t ems_status = EMSESP::bus_status();
@@ -262,16 +268,16 @@ void System::send_heartbeat() {
     doc["rssid"]            = rssid;
     doc["uptime"]           = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
     doc["uptime_sec"]       = uuid::get_uptime_sec();
-    doc["freemem"]          = free_mem();
     doc["mqttpublishfails"] = Mqtt::publish_fails();
     doc["txfails"]          = EMSESP::txservice_.telegram_fail_count();
     doc["rxfails"]          = EMSESP::rxservice_.telegram_error_count();
+    doc["freemem"]          = free_memory;
+#if defined(ESP8266)
+    doc["fragmentation"] = frag_memory;
+#endif
     if (analog_enabled_) {
         doc["adc"] = analog_;
     }
-#if defined(ESP8266)
-    doc["fragmentation"] = ESP.getHeapFragmentation();
-#endif
 
     Mqtt::publish_retain(F("heartbeat"), doc.as<JsonObject>(), false); // send to MQTT with retain off. This will add to MQTT queue.
 }
