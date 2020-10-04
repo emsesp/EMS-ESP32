@@ -325,7 +325,10 @@ void Sensor::publish_values() {
     for (const auto & device : devices_) {
         char s[7];
 
-        if ((mqtt_format_ == Mqtt::Format::NESTED) || (mqtt_format_ == Mqtt::Format::HA)) {
+        if (mqtt_format_ == Mqtt::Format::CUSTOM) {
+            // e.g. sensor_data = {28-EA41-9497-0E03-5F":23.30,"28-233D-9497-0C03-8B":24.0}
+            doc[device.to_string()] = Helpers::render_value(s, device.temperature_c, 1);
+        } else if ((mqtt_format_ == Mqtt::Format::NESTED) || (mqtt_format_ == Mqtt::Format::HA)) {
             // e.g. sensor_data = {"sensor1":{"id":"28-EA41-9497-0E03-5F","temp":"23.30"},"sensor2":{"id":"28-233D-9497-0C03-8B","temp":"24.0"}}
             char sensorID[20]; // sensor{1-n}
             strlcpy(sensorID, "sensor", 20);
@@ -337,7 +340,6 @@ void Sensor::publish_values() {
 
         // special for HA
         if (mqtt_format_ == Mqtt::Format::HA) {
-            std::string topic(100, '\0');
             // create the config if this hasn't already been done
             // to e.g. homeassistant/sensor/ems-esp/dallas_sensor1/config
             if (!(registered_ha_[i])) {
@@ -346,21 +348,22 @@ void Sensor::publish_values() {
                 config["stat_t"]       = F("ems-esp/sensor_data");
                 config["unit_of_meas"] = F("°C");
 
-                std::string str(50, '\0');
-                snprintf_P(&str[0], 50, PSTR("{{value_json.sensor%d.temp}}"), i);
+                char str[50];
+                snprintf_P(str, sizeof(str), PSTR("{{value_json.sensor%d.temp}}"), i);
                 config["val_tpl"] = str;
 
-                snprintf_P(&str[0], 50, PSTR("Dallas sensor%d"), i);
+                snprintf_P(str, sizeof(str), PSTR("Dallas sensor%d"), i);
                 config["name"] = str;
 
-                snprintf_P(&str[0], 50, PSTR("dalas_sensor%d"), i);
+                snprintf_P(str, sizeof(str), PSTR("dalas_sensor%d"), i);
                 config["uniq_id"] = str;
 
                 JsonObject dev = config.createNestedObject("dev");
                 JsonArray  ids = dev.createNestedArray("ids");
                 ids.add("ems-esp");
 
-                snprintf_P(&topic[0], 60, PSTR("homeassistant/sensor/ems-esp/dallas_sensor%d/config"), i);
+                std::string topic(100, '\0');
+                snprintf_P(&topic[0], 100, PSTR("homeassistant/sensor/ems-esp/dallas_sensor%d/config"), i);
                 Mqtt::publish_retain(topic, config.as<JsonObject>(), true); // publish the config payload with retain flag
 
                 registered_ha_[i] = true;
