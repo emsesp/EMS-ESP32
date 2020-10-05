@@ -777,7 +777,6 @@ void Thermostat::register_mqtt_ha_config(uint8_t hc_num) {
 
     std::string topic(100, '\0');
     snprintf_P(&topic[0], topic.capacity() + 1, PSTR("homeassistant/climate/ems-esp/thermostat_hc%d/config"), hc_num);
-    // Mqtt::publish(topic); // empty payload, this remove any previous config sent to HA
     Mqtt::publish_retain(topic, doc.as<JsonObject>(), true); // publish the config payload with retain flag
 
     // enable the thermostat topic to take both mode strings and floats
