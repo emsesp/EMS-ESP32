@@ -748,15 +748,20 @@ void Thermostat::register_mqtt_ha_config(uint8_t hc_num) {
     doc["temp_step"] = F("0.5");
 
     JsonArray modes = doc.createNestedArray(F("modes"));
-    uint8_t   flags = this->model();
-    if (flags == EMSdevice::EMS_DEVICE_FLAG_RC20_2) {
+    modes.add(F("auto"));
+    modes.add(F("heat"));
+    modes.add(F("off"));
+
+/*
+    uint8_t model = this->model();
+    if (model == EMSdevice::EMS_DEVICE_FLAG_RC20_2) {
         modes.add(F("night"));
         modes.add(F("day"));
-    } else if ((flags == EMSdevice::EMS_DEVICE_FLAG_RC300) || (flags == EMSdevice::EMS_DEVICE_FLAG_RC100)) {
+    } else if ((model == EMSdevice::EMS_DEVICE_FLAG_RC300) || (model == EMSdevice::EMS_DEVICE_FLAG_RC100)) {
         modes.add(F("eco"));
         modes.add(F("comfort"));
         modes.add(F("auto"));
-    } else if (flags == EMSdevice::EMS_DEVICE_FLAG_JUNKERS) {
+    } else if (model == EMSdevice::EMS_DEVICE_FLAG_JUNKERS) {
         modes.add(F("nofrost"));
         modes.add(F("eco"));
         modes.add(F("heat"));
@@ -766,6 +771,7 @@ void Thermostat::register_mqtt_ha_config(uint8_t hc_num) {
         modes.add(F("day"));
         modes.add(F("auto"));
     }
+    */
 
     JsonObject dev = doc.createNestedObject(F("dev"));
     dev["name"]    = F("EMS-ESP Thermostat");
