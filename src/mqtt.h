@@ -48,20 +48,18 @@ using mqtt_subfunction_p = std::function<bool(const char * message)>;
 using cmdfunction_p      = std::function<bool(const char * data, const int8_t id)>;
 
 struct MqttMessage {
-    ~MqttMessage() = default;
-
     const uint8_t     operation;
     const std::string topic;
     const std::string payload;
     const bool        retain;
 
-    // MqttMessage(const uint8_t operation, const std::string & topic, const std::string & payload, bool retain)
-    MqttMessage(const uint8_t operation, const std::string & topic, const std::string && payload, bool retain)
+    MqttMessage(const uint8_t operation, const std::string & topic, const std::string & payload, bool retain)
         : operation(operation)
         , topic(topic)
         , payload(payload)
         , retain(retain) {
     }
+    ~MqttMessage() = default;
 };
 
 class Mqtt {
@@ -89,17 +87,12 @@ class Mqtt {
     static void subscribe(const std::string & topic, mqtt_subfunction_p cb);
     static void resubscribe();
 
-    static void register_command(const uint8_t device_type, const uint8_t device_id, const __FlashStringHelper * cmd, cmdfunction_p cb);
-
     static void publish(const std::string & topic, const std::string & payload);
     static void publish(const __FlashStringHelper * topic, const char * payload);
     static void publish(const std::string & topic, const JsonObject & payload);
     static void publish(const __FlashStringHelper * topic, const JsonObject & payload);
     static void publish(const __FlashStringHelper * topic, const std::string & payload);
-    static void publish(const std::string & topic, bool value);
-    static void publish(const __FlashStringHelper * topic, bool value);
     static void publish(const std::string & topic);
-
     static void publish_retain(const std::string & topic, const JsonObject & payload, bool retain);
     static void publish_retain(const __FlashStringHelper * topic, const std::string & payload, bool retain);
     static void publish_retain(const __FlashStringHelper * topic, const JsonObject & payload, bool retain);
@@ -111,6 +104,7 @@ class Mqtt {
                                         const char *                entity,
                                         const __FlashStringHelper * uom,
                                         const __FlashStringHelper * icon);
+    static void register_command(const uint8_t device_type, const uint8_t device_id, const __FlashStringHelper * cmd, cmdfunction_p cb);
 
     static void show_topic_handlers(uuid::console::Shell & shell, const uint8_t device_type);
     static void show_mqtt(uuid::console::Shell & shell);

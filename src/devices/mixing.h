@@ -77,8 +77,8 @@ class Mixing : public EMSdevice {
     uint8_t  flowSetTemp_ = EMS_VALUE_UINT_NOTSET;
     Type     type_        = Type::NONE;
 
-    bool changed_    = false;
-    bool ha_created_ = false; // for HA MQTT Discovery
+    bool changed_        = false;
+    bool mqtt_ha_config_ = false; // for HA MQTT Discovery
 };
 
 } // namespace emsesp

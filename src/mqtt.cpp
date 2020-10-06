@@ -514,12 +514,12 @@ std::shared_ptr<const MqttMessage> Mqtt::queue_message(const uint8_t operation, 
     std::shared_ptr<MqttMessage> message;
     if ((strncmp(topic.c_str(), "homeassistant/", 13) == 0)) {
         // leave topic as it is
-        message = std::make_shared<MqttMessage>(operation, topic, std::move(payload), retain);
+        message = std::make_shared<MqttMessage>(operation, topic, payload, retain);
     } else {
         // prefix the hostname
         std::string full_topic(100, '\0');
         snprintf_P(&full_topic[0], full_topic.capacity() + 1, PSTR("%s/%s"), hostname_.c_str(), topic.c_str());
-        message = std::make_shared<MqttMessage>(operation, full_topic, std::move(payload), retain);
+        message = std::make_shared<MqttMessage>(operation, full_topic, payload, retain);
     }
 
     // if the queue is full, make room but removing the last one
@@ -565,20 +565,7 @@ void Mqtt::publish(const __FlashStringHelper * topic, const JsonObject & payload
 
 // publish json doc, only if its not empty
 void Mqtt::publish(const std::string & topic, const JsonObject & payload) {
-    if (enabled() && payload.size()) {
-        std::string payload_text;
-        serializeJson(payload, payload_text); // convert json to string
-        queue_publish_message(topic, payload_text, mqtt_retain_);
-    }
-}
-
-// for booleans, which get converted to string values 1 and 0
-void Mqtt::publish(const std::string & topic, bool value) {
-    queue_publish_message(topic, value ? "1" : "0", false);
-}
-
-void Mqtt::publish(const __FlashStringHelper * topic, bool value) {
-    queue_publish_message(uuid::read_flash_string(topic), value ? "1" : "0", false);
+    publish_retain(topic, payload, mqtt_retain_);
 }
 
 // no payload
@@ -593,6 +580,13 @@ void Mqtt::publish_retain(const __FlashStringHelper * topic, const std::string &
 
 // publish json doc, only if its not empty, using the retain flag
 void Mqtt::publish_retain(const std::string & topic, const JsonObject & payload, bool retain) {
+    /*
+    // for HA, empty payload will remove the previous config
+    if (retain == true) {
+        publish(topic);
+    }
+    */
+
     if (enabled() && payload.size()) {
         std::string payload_text;
         serializeJson(payload, payload_text); // convert json to string
@@ -677,7 +671,9 @@ void Mqtt::process_queue() {
     // but add the packet_id so we can check it later
     if (mqtt_qos_ != 0) {
         mqtt_messages_.front().packet_id_ = packet_id;
-        // LOG_DEBUG(F("Setting packetID for ACK to %d"), packet_id);
+#if defined(EMSESP_DEBUG)
+        LOG_DEBUG(F("Setting packetID for ACK to %d"), packet_id);
+#endif
         return;
     }
 
@@ -686,12 +682,11 @@ void Mqtt::process_queue() {
 
 // HA config for a binary_sensor
 void Mqtt::register_mqtt_ha_binary_sensor(const __FlashStringHelper * name, const uint8_t device_type, const char * entity) {
-
     if (mqtt_format() != Format::HA) {
         return;
     }
 
-    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
+    DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_MEDIUM);
 
     doc["name"]    = name;
     doc["uniq_id"] = entity;
@@ -713,16 +708,27 @@ void Mqtt::register_mqtt_ha_binary_sensor(const __FlashStringHelper * name, cons
         }
     });
 
-    JsonObject  dev = doc.createNestedObject(F("dev"));
-    JsonArray   ids = dev.createNestedArray(F("ids"));
-    char ha_device[40];
+    JsonObject dev = doc.createNestedObject(F("dev"));
+    JsonArray  ids = dev.createNestedArray(F("ids"));
+    char       ha_device[40];
     snprintf_P(ha_device, sizeof(ha_device), PSTR("ems-esp-%s"), EMSdevice::device_type_2_device_name(device_type).c_str());
     ids.add(ha_device);
 
-    std::string topic(100, '\0');
-    snprintf_P(&topic[0], topic.capacity() + 1, PSTR("homeassistant/binary_sensor/ems-esp/%s/config"), entity);
+    char topic[MQTT_TOPIC_MAX_SIZE];
+    snprintf_P(topic, sizeof(topic), PSTR("homeassistant/binary_sensor/ems-esp/%s/config"), entity);
 
-    Mqtt::publish_retain(topic, doc.as<JsonObject>(), true); // publish the config payload with retain flag
+    // convert json to string and publish immediately with retain forced to true
+    doc.shrinkToFit();
+    std::string payload_text;
+    serializeJson(doc, payload_text); // convert json to string
+    uint16_t packet_id = mqttClient_->publish(topic, 0, true, payload_text.c_str(), payload_text.size());
+    if (packet_id == 0) {
+        LOG_ERROR(F("Failed to publish topic %s"), topic);
+    } else {
+        LOG_DEBUG(F("Publishing topic %s"), topic);
+    }
+
+    delay(MQTT_PUBLISH_WAIT);
 }
 
 // HA config for a normal 'sensor' type
@@ -737,52 +743,64 @@ void Mqtt::register_mqtt_ha_sensor(const char *                prefix,
         return;
     }
 
-    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
-
-    std::string device_name = EMSdevice::device_type_2_device_name(device_type);
-
-    char new_entity[20];
-    // add prefix to entity if its specified
+    // create entity by prefixing any given prefix
+    char new_entity[50];
     if (prefix != nullptr) {
         snprintf_P(new_entity, sizeof(new_entity), PSTR("%s.%s"), prefix, entity);
     } else {
         strcpy(new_entity, entity);
     }
 
-    doc["name"] = name;
+    std::string device_name = EMSdevice::device_type_2_device_name(device_type);
 
     // build unique identifier, replacing all . with _ as not to break HA
     std::string uniq(50, '\0');
     snprintf_P(&uniq[0], uniq.capacity() + 1, PSTR("%s_%s"), device_name.c_str(), new_entity);
     std::replace(uniq.begin(), uniq.end(), '.', '_');
-    doc["uniq_id"] = uniq;
 
+    // topic
+    char topic[MQTT_TOPIC_MAX_SIZE];
+    snprintf_P(topic, sizeof(topic), PSTR("homeassistant/sensor/ems-esp/%s/config"), uniq.c_str());
+
+    // state topic
+    char state_t[50];
+    snprintf_P(state_t, sizeof(state_t), PSTR("%s/%s_data"), hostname_.c_str(), device_name.c_str());
+
+    // state template
+    char tpl[50];
+    snprintf_P(tpl, sizeof(tpl), PSTR("{{value_json.%s}}"), new_entity);
+
+    // ha device
+    char ha_device[40];
+    snprintf_P(ha_device, sizeof(ha_device), PSTR("ems-esp-%s"), device_name.c_str());
+
+    DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_MEDIUM);
+    doc["name"]    = name;
+    doc["uniq_id"] = uniq;
     if (uom != nullptr) {
         doc["unit_of_meas"] = uom;
     }
-
-    char state_t[50];
-    snprintf_P(state_t, sizeof(state_t), PSTR("%s/%s_data"), hostname_.c_str(), device_name.c_str());
-    doc["stat_t"] = state_t;
-
-    char tpl[50];
-    snprintf_P(tpl, sizeof(tpl), PSTR("{{value_json.%s}}"), new_entity);
+    doc["stat_t"]  = state_t;
     doc["val_tpl"] = tpl;
-
     if (icon != nullptr) {
         doc["ic"] = icon;
     }
-
-    JsonObject  dev = doc.createNestedObject(F("dev"));
-    JsonArray   ids = dev.createNestedArray(F("ids"));
-    char ha_device[40];
-    snprintf_P(ha_device, sizeof(ha_device), PSTR("ems-esp-%s"), device_name.c_str());
+    JsonObject dev = doc.createNestedObject(F("dev"));
+    JsonArray  ids = dev.createNestedArray(F("ids"));
     ids.add(ha_device);
 
-    std::string topic(100, '\0');
-    snprintf_P(&topic[0], topic.capacity() + 1, PSTR("homeassistant/sensor/ems-esp/%s/config"), uniq.c_str());
+    // convert json to string and publish immediately with retain forced to true
+    doc.shrinkToFit();
+    std::string payload_text;
+    serializeJson(doc, payload_text); // convert json to string
+    uint16_t packet_id = mqttClient_->publish(topic, 0, true, payload_text.c_str(), payload_text.size());
+    if (packet_id == 0) {
+        LOG_ERROR(F("Failed to publish topic %s"), topic);
+    } else {
+        LOG_DEBUG(F("Publishing topic %s"), topic);
+    }
 
-    Mqtt::publish_retain(topic, doc.as<JsonObject>(), true); // publish the config payload with retain flag
+    delay(MQTT_PUBLISH_WAIT);
 }
 
 } // namespace emsesp

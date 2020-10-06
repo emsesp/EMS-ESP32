@@ -127,8 +127,9 @@ void Solar::publish_values() {
     }
 
     // if we're using Home Assistant and haven't created the MQTT Discovery topics, do it now
-    if ((Mqtt::mqtt_format() == Mqtt::Format::HA) && (!ha_created_)) {
+    if ((Mqtt::mqtt_format() == Mqtt::Format::HA) && (!mqtt_ha_config_)) {
         register_mqtt_ha_config();
+        mqtt_ha_config_ = true;
     }
 }
 
@@ -164,8 +165,6 @@ void Solar::register_mqtt_ha_config() {
     Mqtt::register_mqtt_ha_sensor(nullptr, F_(valveStatus), this->device_type(), "valveStatus", nullptr, nullptr);
     Mqtt::register_mqtt_ha_sensor(nullptr, F_(tankHeated), this->device_type(), "tankHeated", nullptr, nullptr);
     Mqtt::register_mqtt_ha_sensor(nullptr, F_(collectorShutdown), this->device_type(), "collectorShutdown", nullptr, nullptr);
-
-    ha_created_ = true;
 }
 
 // creates JSON doc from values
