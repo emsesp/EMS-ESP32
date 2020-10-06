@@ -28,7 +28,7 @@ namespace emsesp {
 // used with the 'test' command, under su/admin
 void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
     if (command == "default") {
-        run_test(shell, "fr120"); // add the default test case here
+        run_test(shell, "thermostat"); // add the default test case here
     }
 
     if (command.empty()) {
@@ -252,7 +252,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         shell.invoke_command("show");
     }
 
-        if (command == "fr120") {
+    if (command == "fr120") {
         shell.printfln(F("Testing adding a thermostat FR120..."));
 
         // add_device(0x10, 165, version, EMSdevice::Brand::BUDERUS);
@@ -307,6 +307,10 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         uart_telegram({0x90, 0x00, 0xFF, 0x00, 0x00, 0x71, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00});
 
         shell.invoke_command("show");
+
+        EMSESP::mqtt_.incoming("ems-esp/thermostat_hc1", "heat");
+        EMSESP::mqtt_.incoming("ems-esp/thermostat_hc2", "28.8");
+        EMSESP::mqtt_.incoming("ems-esp/thermostat", "{\"cmd\":\"temp\",\"id\":2,\"data\":22}");
     }
 
     if (command == "tc100") {

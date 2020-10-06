@@ -722,11 +722,15 @@ void Mqtt::register_mqtt_ha_binary_sensor(const __FlashStringHelper * name, cons
     std::string payload_text;
     serializeJson(doc, payload_text); // convert json to string
     uint16_t packet_id = mqttClient_->publish(topic, 0, true, payload_text.c_str(), payload_text.size());
+#if defined(EMSESP_STANDALONE)
+    LOG_DEBUG(F("Publishing topic %s"), topic);
+#else
     if (packet_id == 0) {
         LOG_ERROR(F("Failed to publish topic %s"), topic);
     } else {
         LOG_DEBUG(F("Publishing topic %s"), topic);
     }
+#endif
 
     delay(MQTT_PUBLISH_WAIT);
 }
@@ -794,11 +798,15 @@ void Mqtt::register_mqtt_ha_sensor(const char *                prefix,
     std::string payload_text;
     serializeJson(doc, payload_text); // convert json to string
     uint16_t packet_id = mqttClient_->publish(topic, 0, true, payload_text.c_str(), payload_text.size());
+#if defined(EMSESP_STANDALONE)
+    LOG_DEBUG(F("Publishing topic %s"), topic);
+#else
     if (packet_id == 0) {
         LOG_ERROR(F("Failed to publish topic %s"), topic);
     } else {
         LOG_DEBUG(F("Publishing topic %s"), topic);
     }
+#endif
 
     delay(MQTT_PUBLISH_WAIT);
 }

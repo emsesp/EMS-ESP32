@@ -317,32 +317,21 @@ void Thermostat::publish_values() {
     JsonObject                                      output   = doc.to<JsonObject>();
     bool                                            has_data = false;
 
+    // if MQTT is in single mode send out the main data to the thermostat_data topic
     has_data |= export_values_main(output);
     if (Mqtt::mqtt_format() == Mqtt::Format::SINGLE && has_data) {
         Mqtt::publish(F("thermostat_data"), output);
         output.clear();
     }
+
+    // get the thermostat data.
+    // if we're in Single mode this function will also have published each of the heating circuits
     has_data |= export_values_hc(Mqtt::mqtt_format(), output);
-    // if we're in SINGLE mode the MQTT would have been published on the export_values() function for each hc
+
+    // if we're in HA or CUSTOM, send out the complete topic with all the data
     if (Mqtt::mqtt_format() != Mqtt::Format::SINGLE && has_data) {
         Mqtt::publish(F("thermostat_data"), output);
     }
-    /*
-    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc_main;
-    JsonObject                                     output_main = doc_main.to<JsonObject>();
-    if (export_values_main(output_main)) {
-        Mqtt::publish(F("thermostat_system_data"), output_main);
-    }
-
-    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc_hc;
-    JsonObject                                      output_hc = doc_hc.to<JsonObject>();
-    if (export_values_hc(Mqtt::mqtt_format(), output_hc)) {
-        // if we're in SINGLE mode the MQTT would have been published on the export_values() function for each hc
-        if (Mqtt::mqtt_format() != Mqtt::Format::SINGLE) {
-            Mqtt::publish(F("thermostat_data"), output_hc);
-        }
-    }
-    */
 }
 
 bool Thermostat::export_values_main(JsonObject & rootThermostat) {
@@ -724,9 +713,13 @@ void Thermostat::register_mqtt_ha_config(uint8_t hc_num) {
     snprintf_P(str2, sizeof(str2), PSTR("thermostat_hc%d"), hc_num);
     doc["uniq_id"] = str2;
 
+    char str3[40];
+    snprintf_P(str3, sizeof(str3), PSTR("~/%s"), str2);
+
+    doc["uniq_id"]     = str2;
     doc["~"]           = F("ems-esp");
-    doc["mode_cmd_t"]  = F("~/thermostat");
-    doc["temp_cmd_t"]  = F("~/thermostat");
+    doc["mode_cmd_t"]  = str3;
+    doc["temp_cmd_t"]  = str3;
     doc["mode_stat_t"] = F("~/thermostat_data");
     doc["temp_stat_t"] = F("~/thermostat_data");
     doc["curr_temp_t"] = F("~/thermostat_data");
@@ -752,7 +745,7 @@ void Thermostat::register_mqtt_ha_config(uint8_t hc_num) {
     modes.add(F("heat"));
     modes.add(F("off"));
 
-/*
+    /*
     uint8_t model = this->model();
     if (model == EMSdevice::EMS_DEVICE_FLAG_RC20_2) {
         modes.add(F("night"));
@@ -786,7 +779,10 @@ void Thermostat::register_mqtt_ha_config(uint8_t hc_num) {
     Mqtt::publish_retain(topic, doc.as<JsonObject>(), true); // publish the config payload with retain flag
 
     // enable the thermostat topic to take both mode strings and floats
-    register_mqtt_topic("thermostat", [&](const char * m) { return thermostat_ha_cmd(m); });
+    // for each of the heating circuits
+    std::string topic2(100, '\0');
+    snprintf_P(&topic2[0], topic2.capacity() + 1, PSTR("thermostat_hc%d"), hc_num);
+    register_mqtt_topic(topic2, [=](const char * m) { return thermostat_ha_cmd(m, hc_num); });
 
     char hc_name[10]; // hc{1-4}
     strlcpy(hc_name, "hc", 10);
@@ -835,17 +831,17 @@ void Thermostat::register_mqtt_ha_config(uint8_t hc_num) {
 // for HA specifically when receiving over MQTT in the thermostat topic
 // it could be either a 'mode' or a float value
 // return true if it parses the message correctly
-bool Thermostat::thermostat_ha_cmd(const char * message) {
+bool Thermostat::thermostat_ha_cmd(const char * message, uint8_t hc_num) {
     // check if it's json. We know the message isn't empty
     if (message[0] == '{') {
         return false;
     }
 
     // check for mode first
-    if (!set_mode(message, AUTO_HEATING_CIRCUIT)) {
+    if (!set_mode(message, hc_num)) {
         // handle as a numerical temperature value
         float f = strtof((char *)message, 0);
-        set_temperature(f, HeatingCircuit::Mode::AUTO, AUTO_HEATING_CIRCUIT);
+        set_temperature(f, HeatingCircuit::Mode::AUTO, hc_num);
     }
 
     return true;
@@ -1567,6 +1563,11 @@ bool Thermostat::set_datetime(const char * value, const int8_t id) {
 // sets the thermostat working mode, where mode is a string
 // converts string mode to HeatingCircuit::Mode
 bool Thermostat::set_mode(const char * value, const int8_t id) {
+    // quit if its numerical, as it could be mistaken as a temperature value
+    if (value[0] <= 'A') {
+        return false;
+    }
+
     std::string mode(10, '\0');
     if (!Helpers::value2string(value, mode)) {
         LOG_WARNING(F("Set mode: Invalid mode"));
