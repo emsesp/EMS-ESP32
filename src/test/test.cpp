@@ -28,7 +28,7 @@ namespace emsesp {
 // used with the 'test' command, under su/admin
 void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
     if (command == "default") {
-        run_test(shell, "thermostat"); // add the default test case here
+        run_test(shell, "web"); // add the default test case here
     }
 
     if (command.empty()) {
@@ -219,10 +219,13 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         uart_telegram({0x98, 0x00, 0xFF, 0x00, 0x01, 0xA5, 0x00, 0xCF, 0x21, 0x2E, 0x00, 0x00, 0x2E, 0x24,
                        0x03, 0x25, 0x03, 0x03, 0x01, 0x03, 0x25, 0x00, 0xC8, 0x00, 0x00, 0x11, 0x01, 0x03});
 
+        // time
+        uart_telegram({0x98, 0x00, 0x06, 0x00, 0x00, 0x03, 0x04, 0x0C, 0x02, 0x33, 0x06, 00, 00, 00, 00, 00, 00});
+
         shell.invoke_command("show");
         StaticJsonDocument<2000> doc;
         JsonObject               root = doc.to<JsonObject>();
-        EMSESP::device_info_web(1, root);
+        EMSESP::device_info_web(2, root); // show thermostat. use 1 for boiler
         serializeJsonPretty(doc, shell);
         shell.println();
     }

@@ -151,11 +151,19 @@ class EMSdevice {
 
     static void print_value_json(uuid::console::Shell &      shell,
                                  const __FlashStringHelper * key,
+                                 const __FlashStringHelper * prefix,
                                  const __FlashStringHelper * name,
                                  const __FlashStringHelper * suffix,
                                  JsonObject &                json);
 
-    // prints a ems device value to the console, handling the correct rendering of the type
+    static void print_value_json(JsonArray &                 root,
+                                 const __FlashStringHelper * key,
+                                 const __FlashStringHelper * prefix,
+                                 const __FlashStringHelper * name,
+                                 const __FlashStringHelper * suffix,
+                                 JsonObject &                json);
+
+    // prints an EMS device value to the console, handling the correct rendering of the type
     // padding is # white space
     // name is the name of the parameter
     // suffix is any string to be appended after the value
@@ -183,42 +191,11 @@ class EMSdevice {
         shell.printf(PSTR("%s: %s"), uuid::read_flash_string(name).c_str(), buffer);
 
         if (suffix != nullptr) {
+            shell.print(' ');
             shell.println(uuid::read_flash_string(suffix).c_str());
         } else {
             shell.println();
         }
-    }
-
-    // takes a value from an ems device and creates a nested json (name, value)
-    // which can be passed to the web UI
-    template <typename Value>
-    static void render_value_json(JsonArray &                 json,
-                                  const std::string &         prefix,
-                                  const __FlashStringHelper * name,
-                                  Value &                     value,
-                                  const __FlashStringHelper * suffix,
-                                  const uint8_t               format = 0) {
-        // create the value as a string using the render_value function
-        char buffer[15];
-        if (Helpers::render_value(buffer, value, format) == nullptr) {
-            return;
-        }
-
-        JsonObject dataElement = json.createNestedObject();
-
-        // append suffix to end
-        if (suffix != nullptr) {
-            char text[20];
-            snprintf_P(text, sizeof(text), PSTR("%s%s"), buffer, uuid::read_flash_string(suffix).c_str());
-            dataElement["value"] = text;
-        } else {
-            dataElement["value"] = buffer;
-        }
-
-        // add prefix to name
-        char text2[100];
-        snprintf_P(text2, sizeof(text2), PSTR("%s%s"), prefix.c_str(), uuid::read_flash_string(name).c_str());
-        dataElement["name"] = text2;
     }
 
     static void print_value(uuid::console::Shell & shell, uint8_t padding, const __FlashStringHelper * name, const __FlashStringHelper * value);
@@ -282,7 +259,7 @@ class EMSdevice {
     static constexpr uint8_t EMS_DEVICE_FLAG_RC300     = 8;
     static constexpr uint8_t EMS_DEVICE_FLAG_RC100     = 9;
     static constexpr uint8_t EMS_DEVICE_FLAG_JUNKERS   = 10;
-    static constexpr uint8_t EMS_DEVICE_FLAG_JUNKERS_2 = (1 << 6); // 6th bit set if older models
+    static constexpr uint8_t EMS_DEVICE_FLAG_JUNKERS_2 = (1 << 6); // 6th bit set if older models, like FR120, FR100
 
   private:
     uint8_t     unique_id_;

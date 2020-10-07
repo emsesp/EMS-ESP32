@@ -168,59 +168,56 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
 
 // prepare data for Web UI
 void Thermostat::device_info_web(JsonArray & root) {
-    uint8_t flags = this->model();
+    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc_main;
+    JsonObject                                     output_main = doc_main.to<JsonObject>();
+    if (export_values_main(output_main)) {
+        print_value_json(root, F("time"), nullptr, F_(time), nullptr, output_main);
+        print_value_json(root, F("display"), nullptr, F_(display), nullptr, output_main);
+        print_value_json(root, F("language"), nullptr, F_(language), nullptr, output_main);
+        print_value_json(root, F("offsetclock"), nullptr, F_(offsetclock), nullptr, output_main);
+        print_value_json(root, F("dampedtemp"), nullptr, F_(dampedtemp), F_(degrees), output_main);
+        print_value_json(root, F("inttemp1"), nullptr, F_(inttemp1), F_(degrees), output_main);
+        print_value_json(root, F("inttemp2"), nullptr, F_(inttemp2), F_(degrees), output_main);
+        print_value_json(root, F("intoffset"), nullptr, F_(intoffset), nullptr, output_main);
+        print_value_json(root, F("minexttemp"), nullptr, F_(minexttemp), F_(degrees), output_main);
+        print_value_json(root, F("building"), nullptr, F_(building), nullptr, output_main);
+        print_value_json(root, F("wwmode"), nullptr, F_(wwmode), nullptr, output_main);
+        print_value_json(root, F("wwcircmode"), nullptr, F_(wwcircmode), nullptr, output_main);
+    }
 
-    for (const auto & hc : heating_circuits_) {
-        if (!Helpers::hasValue(hc->setpoint_roomTemp)) {
-            break; // skip this HC
-        }
+    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc_hc;
+    JsonObject                                      output_hc = doc_hc.to<JsonObject>();
+    if (export_values_hc(Mqtt::Format::NESTED, output_hc)) {
+        // display for each active heating circuit
+        for (const auto & hc : heating_circuits_) {
+            if (hc->is_active()) {
+                char prefix_str[10];
+                snprintf_P(prefix_str, sizeof(prefix_str), PSTR("(hc %d) "), hc->hc_num());
 
-        // different thermostat types store their temperature values differently
-        uint8_t format_setpoint, format_curr;
-        switch (flags) {
-        case EMS_DEVICE_FLAG_EASY:
-            format_setpoint = 100; // *100
-            format_curr     = 100; // *100
-            break;
-        case EMS_DEVICE_FLAG_JUNKERS:
-            format_setpoint = 10; // *10
-            format_curr     = 10; // *10
-            break;
-        default:                  // RC30, RC35 etc...
-            format_setpoint = 2;  // *2
-            format_curr     = 10; // *10
-            break;
-        }
+                char hc_name[10]; // hc{1-4}
+                strlcpy(hc_name, "hc", 10);
+                char s[3];
+                strlcat(hc_name, Helpers::itoa(s, hc->hc_num()), 10);
+                JsonObject output = output_hc[hc_name];
 
-        // create prefix with heating circuit number
-        char hc_str[5];
-        snprintf_P(hc_str, sizeof(hc_str), PSTR("hc%d: "), hc->hc_num());
-
-        render_value_json(root, hc_str, F_(currtemp), hc->curr_roomTemp, F_(degrees), format_curr);
-        render_value_json(root, hc_str, F_(seltemp), hc->setpoint_roomTemp, F_(degrees), format_setpoint);
-        if (Helpers::hasValue(hc->mode)) {
-            JsonObject dataElement;
-            dataElement = root.createNestedObject();
-
-            char mode_str[15];
-            snprintf_P(mode_str, sizeof(mode_str), PSTR("%sMode"), hc_str);
-            dataElement["name"] = mode_str;
-
-            char modetype_str[20];
-            if (Helpers::hasValue(hc->summer_mode) && hc->summer_mode) {
-                snprintf_P(modetype_str, sizeof(modetype_str), PSTR("%s - summer"), mode_tostring(hc->get_mode(flags)).c_str());
-            } else if (Helpers::hasValue(hc->holiday_mode) && hc->holiday_mode) {
-                snprintf_P(modetype_str, sizeof(modetype_str), PSTR("%s - holiday"), mode_tostring(hc->get_mode(flags)).c_str());
-            } else if (Helpers::hasValue(hc->mode_type)) {
-                snprintf_P(modetype_str,
-                           sizeof(modetype_str),
-                           PSTR("%s - %s"),
-                           mode_tostring(hc->get_mode(flags)).c_str(),
-                           mode_tostring(hc->get_mode_type(flags)).c_str());
-            } else {
-                snprintf_P(modetype_str, sizeof(modetype_str), mode_tostring(hc->get_mode(flags)).c_str());
+                print_value_json(root, F("seltemp"), FPSTR(prefix_str), F_(seltemp), F_(degrees), output);
+                print_value_json(root, F("currtemp"), FPSTR(prefix_str), F_(currtemp), F_(degrees), output);
+                print_value_json(root, F("heattemp"), FPSTR(prefix_str), F_(heattemp), F_(degrees), output);
+                print_value_json(root, F("comforttemp"), FPSTR(prefix_str), F_(comforttemp), F_(degrees), output);
+                print_value_json(root, F("daytemp"), FPSTR(prefix_str), F_(daytemp), F_(degrees), output);
+                print_value_json(root, F("ecotemp"), FPSTR(prefix_str), F_(ecotemp), F_(degrees), output);
+                print_value_json(root, F("nighttemp"), FPSTR(prefix_str), F_(nighttemp), F_(degrees), output);
+                print_value_json(root, F("manualtemp"), FPSTR(prefix_str), F_(manualtemp), F_(degrees), output);
+                print_value_json(root, F("holidaytemp"), FPSTR(prefix_str), F_(holidaytemp), F_(degrees), output);
+                print_value_json(root, F("nofrosttemp"), FPSTR(prefix_str), F_(nofrosttemp), F_(degrees), output);
+                print_value_json(root, F("targetflowtemp"), FPSTR(prefix_str), F_(targetflowtemp), F_(degrees), output);
+                print_value_json(root, F("offsettemp"), FPSTR(prefix_str), F_(offsettemp), F_(degrees), output);
+                print_value_json(root, F("designtemp"), FPSTR(prefix_str), F_(designtemp), F_(degrees), output);
+                print_value_json(root, F("summertemp"), FPSTR(prefix_str), F_(summertemp), F_(degrees), output);
+                print_value_json(root, F("summermode"), FPSTR(prefix_str), F_(summermode), F_(degrees), output);
+                print_value_json(root, F("mode"), FPSTR(prefix_str), F_(mode), nullptr, output);
+                print_value_json(root, F("modetype"), FPSTR(prefix_str), F_(modetype), nullptr, output);
             }
-            dataElement["value"] = modetype_str;
         }
     }
 }
@@ -255,18 +252,18 @@ void Thermostat::show_values(uuid::console::Shell & shell) {
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc_main;
     JsonObject                                     output_main = doc_main.to<JsonObject>();
     if (export_values_main(output_main)) {
-        print_value_json(shell, F("time"), F_(time), nullptr, output_main);
-        print_value_json(shell, F("display"), F_(display), nullptr, output_main);
-        print_value_json(shell, F("language"), F_(language), nullptr, output_main);
-        print_value_json(shell, F("offsetclock"), F_(offsetclock), nullptr, output_main);
-        print_value_json(shell, F("dampedtemp"), F_(dampedtemp), F_(degrees), output_main);
-        print_value_json(shell, F("inttemp1"), F_(inttemp1), F_(degrees), output_main);
-        print_value_json(shell, F("inttemp2"), F_(inttemp2), F_(degrees), output_main);
-        print_value_json(shell, F("intoffset"), F_(intoffset), nullptr, output_main);
-        print_value_json(shell, F("minexttemp"), F_(minexttemp), F_(degrees), output_main);
-        print_value_json(shell, F("building"), F_(building), nullptr, output_main);
-        print_value_json(shell, F("wwmode"), F_(wwmode), nullptr, output_main);
-        print_value_json(shell, F("wwcircmode"), F_(wwcircmode), nullptr, output_main);
+        print_value_json(shell, F("time"), nullptr, F_(time), nullptr, output_main);
+        print_value_json(shell, F("display"), nullptr, F_(display), nullptr, output_main);
+        print_value_json(shell, F("language"), nullptr, F_(language), nullptr, output_main);
+        print_value_json(shell, F("offsetclock"), nullptr, F_(offsetclock), nullptr, output_main);
+        print_value_json(shell, F("dampedtemp"), nullptr, F_(dampedtemp), F_(degrees), output_main);
+        print_value_json(shell, F("inttemp1"), nullptr, F_(inttemp1), F_(degrees), output_main);
+        print_value_json(shell, F("inttemp2"), nullptr, F_(inttemp2), F_(degrees), output_main);
+        print_value_json(shell, F("intoffset"), nullptr, F_(intoffset), nullptr, output_main);
+        print_value_json(shell, F("minexttemp"), nullptr, F_(minexttemp), F_(degrees), output_main);
+        print_value_json(shell, F("building"), nullptr, F_(building), nullptr, output_main);
+        print_value_json(shell, F("wwmode"), nullptr, F_(wwmode), nullptr, output_main);
+        print_value_json(shell, F("wwcircmode"), nullptr, F_(wwcircmode), nullptr, output_main);
     }
 
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc_hc;
@@ -277,7 +274,7 @@ void Thermostat::show_values(uuid::console::Shell & shell) {
         // display for each active heating circuit
         for (const auto & hc : heating_circuits_) {
             if (hc->is_active()) {
-                shell.printfln("Heating Circuit %d:", hc->hc_num());
+                shell.printfln("  Heating Circuit %d:", hc->hc_num());
 
                 char hc_name[10]; // hc{1-4}
                 strlcpy(hc_name, "hc", 10);
@@ -285,23 +282,23 @@ void Thermostat::show_values(uuid::console::Shell & shell) {
                 strlcat(hc_name, Helpers::itoa(s, hc->hc_num()), 10);
                 JsonObject output = output_hc[hc_name];
 
-                print_value_json(shell, F("seltemp"), F_(seltemp), F_(degrees), output);
-                print_value_json(shell, F("currtemp"), F_(currtemp), F_(degrees), output);
-                print_value_json(shell, F("heattemp"), F_(heattemp), F_(degrees), output);
-                print_value_json(shell, F("comforttemp"), F_(comforttemp), F_(degrees), output);
-                print_value_json(shell, F("daytemp"), F_(daytemp), F_(degrees), output);
-                print_value_json(shell, F("ecotemp"), F_(ecotemp), F_(degrees), output);
-                print_value_json(shell, F("nighttemp"), F_(nighttemp), F_(degrees), output);
-                print_value_json(shell, F("manualtemp"), F_(manualtemp), F_(degrees), output);
-                print_value_json(shell, F("holidaytemp"), F_(holidaytemp), F_(degrees), output);
-                print_value_json(shell, F("nofrosttemp"), F_(nofrosttemp), F_(degrees), output);
-                print_value_json(shell, F("targetflowtemp"), F_(targetflowtemp), F_(degrees), output);
-                print_value_json(shell, F("offsettemp"), F_(offsettemp), F_(degrees), output);
-                print_value_json(shell, F("designtemp"), F_(designtemp), F_(degrees), output);
-                print_value_json(shell, F("summertemp"), F_(summertemp), F_(degrees), output);
-                print_value_json(shell, F("summermode"), F_(summermode), F_(degrees), output);
-                print_value_json(shell, F("mode"), F_(mode), nullptr, output);
-                print_value_json(shell, F("modetype"), F_(modetype), nullptr, output);
+                print_value_json(shell, F("seltemp"), F("  "), F_(seltemp), F_(degrees), output);
+                print_value_json(shell, F("currtemp"), F("  "), F_(currtemp), F_(degrees), output);
+                print_value_json(shell, F("heattemp"), F("  "), F_(heattemp), F_(degrees), output);
+                print_value_json(shell, F("comforttemp"), F("  "), F_(comforttemp), F_(degrees), output);
+                print_value_json(shell, F("daytemp"), F("  "), F_(daytemp), F_(degrees), output);
+                print_value_json(shell, F("ecotemp"), F("  "), F_(ecotemp), F_(degrees), output);
+                print_value_json(shell, F("nighttemp"), F("  "), F_(nighttemp), F_(degrees), output);
+                print_value_json(shell, F("manualtemp"), F("  "), F_(manualtemp), F_(degrees), output);
+                print_value_json(shell, F("holidaytemp"), F("  "), F_(holidaytemp), F_(degrees), output);
+                print_value_json(shell, F("nofrosttemp"), F("  "), F_(nofrosttemp), F_(degrees), output);
+                print_value_json(shell, F("targetflowtemp"), F("  "), F_(targetflowtemp), F_(degrees), output);
+                print_value_json(shell, F("offsettemp"), F("  "), F_(offsettemp), F_(degrees), output);
+                print_value_json(shell, F("designtemp"), F("  "), F_(designtemp), F_(degrees), output);
+                print_value_json(shell, F("summertemp"), F("  "), F_(summertemp), F_(degrees), output);
+                print_value_json(shell, F("summermode"), F("  "), F_(summermode), F_(degrees), output);
+                print_value_json(shell, F("mode"), F("  "), F_(mode), nullptr, output);
+                print_value_json(shell, F("modetype"), F("  "), F_(modetype), nullptr, output);
             }
         }
     }

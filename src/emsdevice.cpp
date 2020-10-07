@@ -386,6 +386,7 @@ void EMSdevice::print_value(uuid::console::Shell & shell, uint8_t padding, const
 // print value to shell from the json doc
 void EMSdevice::print_value_json(uuid::console::Shell &      shell,
                                  const __FlashStringHelper * key,
+                                 const __FlashStringHelper * prefix,
                                  const __FlashStringHelper * name,
                                  const __FlashStringHelper * suffix,
                                  JsonObject &                json) {
@@ -394,7 +395,11 @@ void EMSdevice::print_value_json(uuid::console::Shell &      shell,
         return; // doesn't exist
     }
 
-    shell.printf(PSTR("  %s: "), uuid::read_flash_string(name).c_str());
+    if (prefix != nullptr) {
+        shell.printf(PSTR("  %s%s: "), uuid::read_flash_string(prefix).c_str(), uuid::read_flash_string(name).c_str());
+    } else {
+        shell.printf(PSTR("  %s: "), uuid::read_flash_string(name).c_str());
+    }
 
     if (data.is<char *>()) {
         shell.printf(PSTR("%s"), data.as<char *>());
@@ -409,10 +414,58 @@ void EMSdevice::print_value_json(uuid::console::Shell &      shell,
     }
 
     if (suffix != nullptr) {
+        shell.print(' ');
         shell.print(uuid::read_flash_string(suffix).c_str());
     }
 
     shell.println();
+}
+
+// print value to shell from the json doc into a name/value pair
+void EMSdevice::print_value_json(JsonArray &                 root,
+                                 const __FlashStringHelper * key,
+                                 const __FlashStringHelper * prefix,
+                                 const __FlashStringHelper * name,
+                                 const __FlashStringHelper * suffix,
+                                 JsonObject &                json) {
+    JsonVariant data = json[uuid::read_flash_string(key)];
+    if (data == nullptr) {
+        return; // doesn't exist
+    }
+
+    JsonObject dataElement = root.createNestedObject();
+    // add prefix to name
+    if (prefix != nullptr) {
+        char name_text[100];
+        snprintf_P(name_text, sizeof(name_text), PSTR("%s%s"), uuid::read_flash_string(prefix).c_str(), uuid::read_flash_string(name).c_str());
+        dataElement["n"] = name_text;
+    } else {
+        dataElement["n"] = name;
+    }
+
+    // convert to string and add the suffix, this is to save space when sending to the web as json
+    // which is why we use n and v instead of name and value
+    std::string suffix_string(10, '\0');
+    if (suffix == nullptr) {
+        suffix_string = "";
+    } else {
+        suffix_string = " " + uuid::read_flash_string(suffix);
+    }
+
+    char data_string[20];
+    if (data.is<char *>()) {
+        snprintf_P(data_string, sizeof(data_string), PSTR("%s%s"), data.as<char *>(), suffix_string.c_str());
+    } else if (data.is<int>()) {
+        snprintf_P(data_string, sizeof(data_string), PSTR("%d%s"), data.as<int>(), suffix_string.c_str());
+    } else if (data.is<float>()) {
+        char s[10];
+        snprintf_P(data_string, sizeof(data_string), PSTR("%s%s"), Helpers::render_value(s, (float)data.as<float>(), 1), suffix_string.c_str());
+    } else if (data.is<bool>()) {
+        char s[10];
+        snprintf_P(data_string, sizeof(data_string), PSTR("%s%s"), Helpers::render_boolean(s, data.as<bool>()), suffix_string.c_str());
+    }
+
+    dataElement["v"] = data_string;
 }
 
 } // namespace emsesp

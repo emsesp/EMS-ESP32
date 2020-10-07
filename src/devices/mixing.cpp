@@ -66,18 +66,25 @@ void Mixing::device_info_web(JsonArray & root) {
         return; // don't have any values yet
     }
 
+    // fetch the values into a JSON document
+    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
+    JsonObject                                      output = doc.to<JsonObject>();
+    if (!export_values(output)) {
+        return; // empty
+    }
+
+    char prefix_str[10];
     if (type() == Type::WWC) {
-        render_value_json(root, "", F("Warm Water Circuit"), hc_, nullptr);
-        render_value_json(root, "", F("Current warm water temperature"), flowTemp_, F_(degrees), 10);
-        render_value_json(root, "", F("Current pump status"), pump_, nullptr, EMS_VALUE_BOOL);
-        render_value_json(root, "", F("Current temperature status"), status_, nullptr);
+        snprintf_P(prefix_str, sizeof(prefix_str), PSTR("(wwc %d) "), hc_);
+        print_value_json(root, F("wwTemp"), FPSTR(prefix_str), F_(wwTemp), F_(degrees), output);
+        print_value_json(root, F("pumpStatus"), FPSTR(prefix_str), F_(pumpStatus), nullptr, output);
+        print_value_json(root, F("tempStatus"), FPSTR(prefix_str), F_(tempStatus), nullptr, output);
     } else {
-        // HC
-        render_value_json(root, "", F("Heating Circuit"), hc_, nullptr);
-        render_value_json(root, "", F("Current flow temperature"), flowTemp_, F_(degrees), 10);
-        render_value_json(root, "", F("Setpoint flow temperature"), flowSetTemp_, F_(degrees));
-        render_value_json(root, "", F("Current pump status"), pump_, nullptr, EMS_VALUE_BOOL);
-        render_value_json(root, "", F("Current valve status"), status_, F_(percent));
+        snprintf_P(prefix_str, sizeof(prefix_str), PSTR("(hc %d) "), hc_);
+        print_value_json(root, F("flowTemp"), FPSTR(prefix_str), F_(flowTemp), F_(degrees), output);
+        print_value_json(root, F("flowSetTemp"), FPSTR(prefix_str), F_(flowSetTemp), F_(degrees), output);
+        print_value_json(root, F("pumpStatus"), FPSTR(prefix_str), F_(pumpStatus), nullptr, output);
+        print_value_json(root, F("valveStatus"), FPSTR(prefix_str), F_(valveStatus), F_(percent), output);
     }
 }
 
@@ -107,15 +114,15 @@ void Mixing::show_values(uuid::console::Shell & shell) {
 
     if (type() == Type::WWC) {
         shell.println(F_(ww_hc));
-        print_value_json(shell, F("wwTemp"), F_(wwTemp), F_(degrees), output);
-        print_value_json(shell, F("pumpStatus"), F_(pumpStatus), nullptr, output);
-        print_value_json(shell, F("tempStatus"), F_(tempStatus), nullptr, output);
+        print_value_json(shell, F("wwTemp"), nullptr, F_(wwTemp), F_(degrees), output);
+        print_value_json(shell, F("pumpStatus"), nullptr, F_(pumpStatus), nullptr, output);
+        print_value_json(shell, F("tempStatus"), nullptr, F_(tempStatus), nullptr, output);
     } else {
         shell.println(F_(hc));
-        print_value_json(shell, F("flowTemp"), F_(flowTemp), F_(degrees), output);
-        print_value_json(shell, F("flowSetTemp"), F_(flowSetTemp), F_(degrees), output);
-        print_value_json(shell, F("pumpStatus"), F_(pumpStatus), nullptr, output);
-        print_value_json(shell, F("valveStatus"), F_(valveStatus), F_(percent), output);
+        print_value_json(shell, F("flowTemp"), nullptr, F_(flowTemp), F_(degrees), output);
+        print_value_json(shell, F("flowSetTemp"), nullptr, F_(flowSetTemp), F_(degrees), output);
+        print_value_json(shell, F("pumpStatus"), nullptr, F_(pumpStatus), nullptr, output);
+        print_value_json(shell, F("valveStatus"), nullptr, F_(valveStatus), F_(percent), output);
     }
 
     shell.println();
@@ -192,9 +199,9 @@ bool Mixing::export_values(JsonObject & output) {
         if (Helpers::hasValue(flowSetTemp_)) {
             output["flowSetTemp"] = flowSetTemp_;
         }
-        if (Helpers::hasValue(pump_)) {
+        if (Helpers::hasValue(pumpStatus_)) {
             char s[5]; // for formatting strings
-            output["pumpStatus"] = Helpers::render_value(s, pump_, EMS_VALUE_BOOL);
+            output["pumpStatus"] = Helpers::render_value(s, pumpStatus_, EMS_VALUE_BOOL);
         }
         if (Helpers::hasValue(status_)) {
             output["valveStatus"] = status_;
@@ -206,9 +213,9 @@ bool Mixing::export_values(JsonObject & output) {
         if (Helpers::hasValue(flowTemp_)) {
             output["wwTemp"] = (float)flowTemp_ / 10;
         }
-        if (Helpers::hasValue(pump_)) {
+        if (Helpers::hasValue(pumpStatus_)) {
             char s[5]; // for formatting strings
-            output["pumpStatus"] = Helpers::render_value(s, pump_, EMS_VALUE_BOOL);
+            output["pumpStatus"] = Helpers::render_value(s, pumpStatus_, EMS_VALUE_BOOL);
         }
         if (Helpers::hasValue(status_)) {
             output["tempStatus"] = status_;
@@ -232,7 +239,7 @@ void Mixing::process_MMPLUSStatusMessage_HC(std::shared_ptr<const Telegram> tele
     hc_ = telegram->type_id - 0x02D7 + 1;           // determine which circuit this is
     changed_ |= telegram->read_value(flowTemp_, 3); // is * 10
     changed_ |= telegram->read_value(flowSetTemp_, 5);
-    changed_ |= telegram->read_bitvalue(pump_, 2, 0);
+    changed_ |= telegram->read_bitvalue(pumpStatus_, 2, 0);
     changed_ |= telegram->read_value(status_, 2); // valve status
 }
 
@@ -243,7 +250,7 @@ void Mixing::process_MMPLUSStatusMessage_WWC(std::shared_ptr<const Telegram> tel
     type(Type::WWC);
     hc_ = telegram->type_id - 0x0331 + 1;           // determine which circuit this is. There are max 2.
     changed_ |= telegram->read_value(flowTemp_, 0); // is * 10
-    changed_ |= telegram->read_bitvalue(pump_, 2, 0);
+    changed_ |= telegram->read_bitvalue(pumpStatus_, 2, 0);
     changed_ |= telegram->read_value(status_, 11); // temp status
 }
 
@@ -265,7 +272,7 @@ void Mixing::process_IPMStatusMessage(std::shared_ptr<const Telegram> telegram) 
         changed_ |= telegram->read_value(status_, 2); // valve status
     }
 
-    changed_ |= telegram->read_bitvalue(pump_, 1, 0); // pump is also in unmixed circuits
+    changed_ |= telegram->read_bitvalue(pumpStatus_, 1, 0); // pump is also in unmixed circuits
 }
 
 // Mixing on a MM10 - 0xAB
@@ -279,7 +286,7 @@ void Mixing::process_MMStatusMessage(std::shared_ptr<const Telegram> telegram) {
     // see https://github.com/proddy/EMS-ESP/issues/270 and https://github.com/proddy/EMS-ESP/issues/386#issuecomment-629610918
     hc_ = device_id() - 0x20 + 1;
     changed_ |= telegram->read_value(flowTemp_, 1); // is * 10
-    changed_ |= telegram->read_bitvalue(pump_, 3, 0);
+    changed_ |= telegram->read_bitvalue(pumpStatus_, 3, 0);
     changed_ |= telegram->read_value(flowSetTemp_, 0);
     changed_ |= telegram->read_value(status_, 4); // valve status -100 to 100
 }

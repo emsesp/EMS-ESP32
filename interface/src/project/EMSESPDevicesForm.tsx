@@ -165,7 +165,7 @@ class EMSESPDevicesForm extends Component<EMSESPDevicesFormProps, EMSESPDevicesF
                     {sensorData.id}
                   </TableCell>
                   <TableCell align="right">
-                    {sensorData.temp.toFixed(1)}&deg;C
+                    {sensorData.temp.toFixed(1)}&nbsp;&deg;C
                   </TableCell>
                 </TableRow>
               ))}
@@ -284,12 +284,12 @@ class EMSESPDevicesForm extends Component<EMSESPDevicesFormProps, EMSESPDevicesF
             </TableHead>
             <TableBody>
               {deviceData.deviceData.map(deviceData => (
-                <TableRow key={deviceData.name}>
+                <TableRow key={deviceData.n}>
                   <TableCell component="th" scope="row">
-                    {deviceData.name}
+                    {deviceData.n}
                   </TableCell>
                   <TableCell align="right">
-                    {deviceData.value}
+                    {deviceData.v}
                   </TableCell>
                 </TableRow>
               ))}
