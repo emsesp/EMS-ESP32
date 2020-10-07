@@ -18,7 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - setting to change how booleans are rendered in MQTT (on/off, true/false, 1/0)
 - Added all remaining devices to Home Assistant's MQTT Discovery. No more yaml files!
 - enable ADC setting, add boiler circulation commands, add thermostat RC300 summermodes
-
+- Added all device info to web UI for Thermostat and Boiler
+- Added all device values to Home Assistant MQTT Discovery under separate devices and entities
+- Show Rx and Tx quality in Console and Web UI
 
 ### Fixed
 - fix wwontime readback
@@ -26,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Some minor optimizations to memory handling in the MQTT service
 - Prevent MQTT from publishing empty json payloads
 - Accurate detection of warm water and heating (#515)
+- Fix writing to the Junkers FR120 thermostat
 
 ### Changed
 - renamed wWCircPumpType to wWChargeType
@@ -33,11 +36,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed the _cmd from the MQTT topic names
 - MQTT sensors topic renamed to sensor_data
 - `call` commands can be done from the Console root for all devices
+- renamed MQTT topic for Solar Module from `sm_data` to `solar_data`
+- Updated EMS-ESP official documentation (https://emsesp.github.io/docs/#/)
 
 ### Removed
 - Console contexts for thermostat and boiler
 - Removed option to enable/disable the MQTT Heartbeat. It's always on.
-- renamed MQTT topic for Solar Module from `sm_data` to `solar_data`
+
 
 ## [2.0.1] September 13 2020
 
