@@ -4,8 +4,6 @@ import { WithTheme, withTheme, withStyles, Theme, createStyles } from "@material
 import {
   TableContainer,
   Table,
-  Box,
-  Typography,
   TableBody,
   TableCell,
   TableHead,
@@ -38,7 +36,7 @@ import {
 import { EMSESPStatus } from "./EMSESPtypes";
 
 function formatNumber(num: number) {
-   return new Intl.NumberFormat().format(num);
+  return new Intl.NumberFormat().format(num);
 }
 
 type EMSESPStatusFormProps = RestFormProps<EMSESPStatus> & WithTheme & WithWidthProps;
@@ -56,10 +54,6 @@ const StyledTableCell = withStyles((theme: Theme) =>
 )(TableCell);
 
 class EMSESPStatusForm extends Component<EMSESPStatusFormProps> {
-
-  rxErrors = () => {
-    return this.props.data.crc_errors !== 0;
-  }
 
   createListItems() {
     const { data, theme, width } = this.props;
@@ -91,33 +85,24 @@ class EMSESPStatusForm extends Component<EMSESPStatusFormProps> {
                 </TableRow>
                 <TableRow>
                   <TableCell >
-                    (Rx) Incomplete telegrams
+                    (Rx) Quality
                   </TableCell>
-                  <TableCell align="right">{formatNumber(data.crc_errors)}</TableCell>
+                  <TableCell align="right">{formatNumber(data.rx_quality)}%</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell >
-                    (Tx) Successfully sent telegrams
+                    (Tx) Sent telegrams
                   </TableCell>
                   <TableCell align="right">{formatNumber(data.tx_sent)}</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell >
-                    (Tx) Send Errors
+                    (Tx) Quality
                   </TableCell>
-                  <TableCell align="right">{formatNumber(data.tx_errors)}</TableCell>
+                  <TableCell align="right">{formatNumber(data.tx_quality)}%</TableCell>
                 </TableRow>
               </TableBody>
             </Table>
-            <Fragment>
-              {this.rxErrors() && (
-                <Box bgcolor="warning.main" p={1} mt={0} mb={0}>
-                  <Typography variant="caption" color="textPrimary">
-                    <i>Note: Having a small number of incomplete Rx telegrams is normal and often caused by noise on the EMS line.</i>
-                  </Typography>
-                </Box>
-              )}
-            </Fragment>
           </TableContainer>
         )}
       </Fragment>

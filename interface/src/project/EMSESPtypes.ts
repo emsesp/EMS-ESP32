@@ -28,8 +28,8 @@ export interface EMSESPStatus {
   status: busConnectionStatus;
   rx_received: number;
   tx_sent: number;
-  crc_errors: number;
-  tx_errors: number;
+  rx_quality: number;
+  tx_quality: number;
 }
 
 export interface Device {
@@ -53,8 +53,8 @@ export interface EMSESPDevices {
 }
 
 export interface DeviceData {
-  name: string;
-  value: string;
+  n: string;
+  v: string;
 }
 
 export interface EMSESPDeviceData {

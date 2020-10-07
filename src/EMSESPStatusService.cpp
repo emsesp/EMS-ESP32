@@ -63,8 +63,8 @@ void EMSESPStatusService::emsespStatusService(AsyncWebServerRequest * request) {
     root["status"]      = EMSESP::bus_status(); // 0, 1 or 2
     root["rx_received"] = EMSESP::rxservice_.telegram_count();
     root["tx_sent"]     = EMSESP::txservice_.telegram_read_count() + EMSESP::txservice_.telegram_write_count();
-    root["crc_errors"]  = EMSESP::rxservice_.telegram_error_count();
-    root["tx_errors"]   = EMSESP::txservice_.telegram_fail_count();
+    root["rx_quality"]  = EMSESP::rxservice_.quality();
+    root["tx_quality"]  = EMSESP::txservice_.quality();
 
     response->setLength();
     request->send(response);
