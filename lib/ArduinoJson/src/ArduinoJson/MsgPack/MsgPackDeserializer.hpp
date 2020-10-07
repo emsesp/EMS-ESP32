@@ -23,7 +23,6 @@ class MsgPackDeserializer {
         _stringStorage(stringStorage),
         _error(DeserializationError::Ok) {}
 
-  // TODO: add support for filter
   DeserializationError parse(VariantData &variant, AllowAllFilter,
                              NestingLimit nestingLimit) {
     parseVariant(variant, nestingLimit);
