@@ -223,6 +223,13 @@ class RxService : public EMSbus {
         telegram_error_count_++;
     }
 
+    uint8_t quality() const {
+        if (telegram_error_count_ == 0) {
+            return 100; // all good, 100%
+        }
+        return (100 - (((float)telegram_error_count_ / telegram_count_ * 100)));
+    }
+
     class QueuedRxTelegram {
       public:
         const uint16_t                        id_;
@@ -310,6 +317,13 @@ class TxService : public EMSbus {
         telegram_fail_count_ = telegram_fail_count;
     }
 
+    uint8_t quality() const {
+        if (telegram_fail_count_ == 0) {
+            return 100; // all good, 100%
+        }
+        return (100 - (((float)telegram_fail_count_ / telegram_read_count_ * 100)));
+    }
+
     void increment_telegram_fail_count() {
         telegram_fail_count_++;
     }
@@ -365,7 +379,7 @@ class TxService : public EMSbus {
 
     void send_telegram(const QueuedTxTelegram & tx_telegram);
     void send_telegram(const uint8_t * data, const uint8_t length);
-};
+}; // namespace emsesp
 
 } // namespace emsesp
 
