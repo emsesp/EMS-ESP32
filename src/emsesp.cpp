@@ -203,19 +203,16 @@ void EMSESP::show_ems(uuid::console::Shell & shell) {
     shell.println();
 
     if (bus_status() != BUS_STATUS_OFFLINE) {
-        uint8_t success_rate = 0;
-        if (rxservice_.telegram_error_count()) {
-            success_rate = ((float)rxservice_.telegram_error_count() / (float)rxservice_.telegram_count()) * 100;
-        }
-
         shell.printfln(F("EMS Bus info:"));
         EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) { shell.printfln(F("  Tx mode: %d"), settings.tx_mode); });
         shell.printfln(F("  Bus protocol: %s"), EMSbus::is_ht3() ? F("HT3") : F("Buderus"));
         shell.printfln(F("  #telegrams received: %d"), rxservice_.telegram_count());
         shell.printfln(F("  #read requests sent: %d"), txservice_.telegram_read_count());
         shell.printfln(F("  #write requests sent: %d"), txservice_.telegram_write_count());
-        shell.printfln(F("  #incomplete telegrams: %d (%d%%)"), rxservice_.telegram_error_count(), success_rate);
+        shell.printfln(F("  #incomplete telegrams: %d"), rxservice_.telegram_error_count());
         shell.printfln(F("  #tx fails (after %d retries): %d"), TxService::MAXIMUM_TX_RETRIES, txservice_.telegram_fail_count());
+        shell.printfln(F("  Rx quality: %d%%"), rxservice_.quality());
+        shell.printfln(F("  Tx quality: %d%%"), txservice_.quality());
     }
 
     shell.println();
