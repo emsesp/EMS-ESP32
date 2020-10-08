@@ -126,18 +126,21 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
         // JUNKERS/HT3
     } else if (model == EMSdevice::EMS_DEVICE_FLAG_JUNKERS) {
         monitor_typeids = {0x016F, 0x0170, 0x0171, 0x0172};
-        set_typeids     = {0x0165, 0x0166, 0x0167, 0x0168};
         for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
             register_telegram_type(monitor_typeids[i], F("JunkersMonitor"), false, [&](std::shared_ptr<const Telegram> t) { process_JunkersMonitor(t); });
-            register_telegram_type(set_typeids[i], F("JunkersSet"), false, [&](std::shared_ptr<const Telegram> t) { process_JunkersSet(t); });
         }
-        // JUNKERS/HT3 older models
-    } else if (model == (EMSdevice::EMS_DEVICE_FLAG_JUNKERS | EMSdevice::EMS_DEVICE_FLAG_JUNKERS_2)) {
-        monitor_typeids = {0x016F, 0x0170, 0x0171, 0x0172};
-        set_typeids     = {0x0179, 0x017A, 0x017B, 0x017C};
-        for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
-            register_telegram_type(monitor_typeids[i], F("JunkersMonitor"), false, [&](std::shared_ptr<const Telegram> t) { process_JunkersMonitor(t); });
-            register_telegram_type(set_typeids[i], F("JunkersSet"), false, [&](std::shared_ptr<const Telegram> t) { process_JunkersSet2(t); });
+
+        if (this->has_flags(EMS_DEVICE_FLAG_JUNKERS_2)) {
+            // FR120, FR100
+            set_typeids = {0x0179, 0x017A, 0x017B, 0x017C};
+            for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
+                register_telegram_type(set_typeids[i], F("JunkersSet"), false, [&](std::shared_ptr<const Telegram> t) { process_JunkersSet(t); });
+            }
+        } else {
+            set_typeids = {0x0165, 0x0166, 0x0167, 0x0168};
+            for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
+                register_telegram_type(set_typeids[i], F("JunkersSet"), false, [&](std::shared_ptr<const Telegram> t) { process_JunkersSet2(t); });
+            }
         }
     }
 
@@ -164,7 +167,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
     for (uint8_t i = 0; i < summer_typeids.size(); i++) {
         EMSESP::send_read_request(summer_typeids[i], device_id);
     }
-}
+} // namespace emsesp
 
 // prepare data for Web UI
 void Thermostat::device_info_web(JsonArray & root) {
