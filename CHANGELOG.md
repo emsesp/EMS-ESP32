@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added all device info to web UI for Thermostat and Boiler
 - Added all device values to Home Assistant MQTT Discovery under separate devices and entities
 - Show Rx and Tx quality in Console and Web UI
+- Added button and tooltip to EMS Devices in Web
 - wwtemp and wwtemplow to MQTT, Console and Web
 
 ### Fixed
@@ -40,6 +41,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `call` commands can be done from the Console root for all devices
 - renamed MQTT topic for Solar Module from `sm_data` to `solar_data`
 - Updated EMS-ESP official documentation (https://emsesp.github.io/docs/#/)
+- JWT Secret renamed to Super User Password
+- EMS Devices in Web UI shows button and tooltip to remind users they can click on a device
 
 ### Removed
 - Console contexts for thermostat and boiler
