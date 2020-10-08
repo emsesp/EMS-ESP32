@@ -40,7 +40,7 @@ bool Command::call(const uint8_t device_type, const char * cmd, const char * val
         LOG_DEBUG(F("[DEBUG] Calling command %s, value %s, id is %d in %s"), cmd, value, id, dname.c_str());
     }
 #endif
-
+    bool ok = false;
     if (!cmdfunctions_.empty()) {
         for (const auto & cf : cmdfunctions_) {
             if (cf.device_type_ == device_type) {
@@ -50,16 +50,17 @@ bool Command::call(const uint8_t device_type, const char * cmd, const char * val
                         // check if json object is empty, if so quit
                         if (output.isNull()) {
                             LOG_WARNING(F("Ignore call for command %s in %s because no json"), cmd, EMSdevice::device_type_2_device_name(device_type).c_str());
+                            return false;
                         }
-                        return ((cf.cmdfunction_json_)(value, id, output));
+                        ok |= ((cf.cmdfunction_json_)(value, id, output));
                     } else {
-                        return ((cf.cmdfunction_)(value, id));
+                        ok |= ((cf.cmdfunction_)(value, id));
                     }
                 }
             }
         }
     }
-    return false; // command not found
+    return ok;
 }
 
 // add a command to the list, which does not return json

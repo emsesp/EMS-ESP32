@@ -116,7 +116,6 @@ class MqttSettingsForm extends React.Component<MqttSettingsFormProps> {
           <MenuItem value={1}>Single</MenuItem>
           <MenuItem value={2}>Nested</MenuItem>
           <MenuItem value={3}>Home Assistant</MenuItem>
-          <MenuItem value={4}>Custom</MenuItem>
         </SelectValidator>
         <SelectValidator name="mqtt_qos"
           label="QoS"

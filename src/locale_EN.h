@@ -214,11 +214,11 @@ MAKE_PSTR(tankHeated, "Tank Heated")
 MAKE_PSTR(collectorShutdown, "Collector shutdown")
 
 // mixing
-MAKE_PSTR(ww_hc, "Warm Water Circuit")
+MAKE_PSTR(ww_hc, "  Warm Water Circuit %d:")
 MAKE_PSTR(wwTemp, "Current warm water temperature")
 MAKE_PSTR(pumpStatus, "Current pump status")
 MAKE_PSTR(tempStatus, "Current temperature status")
-MAKE_PSTR(hc, "Heating Circuit")
+MAKE_PSTR(hc, "  Heating Circuit %d:")
 MAKE_PSTR(flowTemp, "Current flow temperature")
 MAKE_PSTR(flowSetTemp, "Setpoint flow temperature")
 
@@ -234,6 +234,8 @@ MAKE_PSTR(intoffset, "Offset int. temperature")
 MAKE_PSTR(minexttemp, "Min ext. temperature")
 MAKE_PSTR(building, "Building")
 MAKE_PSTR(wwmode, "Warm water mode")
+MAKE_PSTR(wwtemp, "Warm water high temperature")
+MAKE_PSTR(wwtemplow, "Warm water low temperature")
 MAKE_PSTR(wwcircmode, "Warm Water circulation mode")
 
 // thermostat - per heating circuit

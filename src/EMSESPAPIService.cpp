@@ -67,21 +67,21 @@ void EMSESPAPIService::emsespAPIService(AsyncWebServerRequest * request) {
         id = request->getParam(F_(id))->value();
     }
 
+    if (id.isEmpty()) {
+        id = "-1";
+    }
+
     DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_LARGE);
     JsonObject          output = doc.to<JsonObject>();
     bool                ok     = false;
 
     // execute the command
     if (data.isEmpty()) {
-        ok = Command::call(device_type, cmd.c_str(), nullptr, -1, output); // command only
+        ok = Command::call(device_type, cmd.c_str(), nullptr, id.toInt(), output); // command only
     } else {
         if (api_enabled) {
             // we only allow commands with parameters if the API is enabled
-            if (id.isEmpty()) {
-                ok = Command::call(device_type, cmd.c_str(), data.c_str(), -1, output); // only ID
-            } else {
-                ok = Command::call(device_type, cmd.c_str(), data.c_str(), id.toInt(), output); // has cmd, data and id
-            }
+            ok = Command::call(device_type, cmd.c_str(), data.c_str(), id.toInt(), output); // has cmd, data and id
         } else {
             request->send(401, "text/plain", F("Unauthorized"));
             return;

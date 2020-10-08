@@ -79,7 +79,7 @@ class Mqtt {
 
     enum Operation { PUBLISH, SUBSCRIBE };
 
-    enum Format : uint8_t { NONE = 0, SINGLE, NESTED, HA, CUSTOM };
+    enum Format : uint8_t { NONE = 0, SINGLE, NESTED, HA };
 
     static constexpr uint8_t MQTT_TOPIC_MAX_SIZE = 100;
 
