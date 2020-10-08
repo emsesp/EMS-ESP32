@@ -28,7 +28,7 @@ namespace emsesp {
 // used with the 'test' command, under su/admin
 void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
     if (command == "default") {
-        run_test(shell, "fr120"); // add the default test case here
+        run_test(shell, "mixing"); // add the default test case here
     }
 
     if (command.empty()) {
@@ -782,6 +782,14 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
 
     if (command == "mixing") {
         shell.printfln(F("Testing Mixing..."));
+
+        // change MQTT format
+        EMSESP::esp8266React.getMqttSettingsService()->updateWithoutPropagation([&](MqttSettings & mqttSettings) {
+            // mqttSettings.mqtt_format = Mqtt::Format::SINGLE;
+            // mqttSettings.mqtt_format = Mqtt::Format::NESTED;
+            mqttSettings.mqtt_format = Mqtt::Format::HA;
+            return StateUpdateResult::CHANGED;
+        });
 
         EMSESP::rxservice_.ems_mask(EMSbus::EMS_MASK_BUDERUS);
 
