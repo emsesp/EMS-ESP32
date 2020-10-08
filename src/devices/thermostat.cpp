@@ -182,6 +182,8 @@ void Thermostat::device_info_web(JsonArray & root) {
         print_value_json(root, F("minexttemp"), nullptr, F_(minexttemp), F_(degrees), output_main);
         print_value_json(root, F("building"), nullptr, F_(building), nullptr, output_main);
         print_value_json(root, F("wwmode"), nullptr, F_(wwmode), nullptr, output_main);
+        print_value_json(root, F("wwtemp"), nullptr, F_(wwtemp), nullptr, output_main);
+        print_value_json(root, F("wwtemplow"), nullptr, F_(wwtemplow), nullptr, output_main);
         print_value_json(root, F("wwcircmode"), nullptr, F_(wwcircmode), nullptr, output_main);
     }
 
@@ -192,13 +194,10 @@ void Thermostat::device_info_web(JsonArray & root) {
         for (const auto & hc : heating_circuits_) {
             if (hc->is_active()) {
                 char prefix_str[10];
-                snprintf_P(prefix_str, sizeof(prefix_str), PSTR("(hc %d) "), hc->hc_num());
+                snprintf_P(prefix_str, sizeof(prefix_str), PSTR("hc%d"), hc->hc_num());
+                JsonObject output = output_hc[prefix_str];
 
-                char hc_name[10]; // hc{1-4}
-                strlcpy(hc_name, "hc", 10);
-                char s[3];
-                strlcat(hc_name, Helpers::itoa(s, hc->hc_num()), 10);
-                JsonObject output = output_hc[hc_name];
+                snprintf_P(prefix_str, sizeof(prefix_str), PSTR("(hc %d) "), hc->hc_num());
 
                 print_value_json(root, F("seltemp"), FPSTR(prefix_str), F_(seltemp), F_(degrees), output);
                 print_value_json(root, F("currtemp"), FPSTR(prefix_str), F_(currtemp), F_(degrees), output);
@@ -263,6 +262,8 @@ void Thermostat::show_values(uuid::console::Shell & shell) {
         print_value_json(shell, F("minexttemp"), nullptr, F_(minexttemp), F_(degrees), output_main);
         print_value_json(shell, F("building"), nullptr, F_(building), nullptr, output_main);
         print_value_json(shell, F("wwmode"), nullptr, F_(wwmode), nullptr, output_main);
+        print_value_json(shell, F("wwtemp"), nullptr, F_(wwtemp), nullptr, output_main);
+        print_value_json(shell, F("wwtemplow"), nullptr, F_(wwtemplow), nullptr, output_main);
         print_value_json(shell, F("wwcircmode"), nullptr, F_(wwcircmode), nullptr, output_main);
     }
 
@@ -274,12 +275,10 @@ void Thermostat::show_values(uuid::console::Shell & shell) {
         // display for each active heating circuit
         for (const auto & hc : heating_circuits_) {
             if (hc->is_active()) {
-                shell.printfln("  Heating Circuit %d:", hc->hc_num());
+                shell.printfln(F_(hc), hc->hc_num());
 
                 char hc_name[10]; // hc{1-4}
-                strlcpy(hc_name, "hc", 10);
-                char s[3];
-                strlcat(hc_name, Helpers::itoa(s, hc->hc_num()), 10);
+                snprintf_P(hc_name, sizeof(hc_name), PSTR("hc%d"), hc->hc_num());
                 JsonObject output = output_hc[hc_name];
 
                 print_value_json(shell, F("seltemp"), F("  "), F_(seltemp), F_(degrees), output);
@@ -423,6 +422,16 @@ bool Thermostat::export_values_main(JsonObject & rootThermostat) {
         }
     }
 
+    // Warm water temp
+    if (Helpers::hasValue(wwTemp_)) {
+        rootThermostat["wwtemp"] = wwTemp_;
+    }
+
+    // Warm water low temp
+    if (Helpers::hasValue(wwTempLow_)) {
+        rootThermostat["wwtemplow"] = wwTempLow_;
+    }
+
     // Warm Water circulation mode
     if (Helpers::hasValue(wwCircMode_)) {
         char s[7];
@@ -546,7 +555,7 @@ bool Thermostat::export_values_hc(uint8_t mqtt_format, JsonObject & rootThermost
             // Summer mode
             if (Helpers::hasValue(hc->summer_setmode)) {
                 char s[7];
-                dataThermostat["summermode"] = Helpers::render_enum(s, {"off", "auto", "on"}, hc->summer_setmode);
+                dataThermostat["summermode"] = Helpers::render_enum(s, {"summer", "auto", "winter"}, hc->summer_setmode);
             }
 
             // mode - always force showing this when in HA so not to break HA's climate component
@@ -1710,7 +1719,7 @@ bool Thermostat::set_summermode(const char * value, const int8_t id) {
         return false;
     }
     uint8_t set = 0xFF;
-    if (!Helpers::value2enum(value, set, {"off", "auto", "on"})) {
+    if (!Helpers::value2enum(value, set, {"summer", "auto", "winter"})) {
         LOG_WARNING(F("Setting summer mode: Invalid mode"));
         return false;
     }

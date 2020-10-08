@@ -69,22 +69,22 @@ void Mixing::device_info_web(JsonArray & root) {
     // fetch the values into a JSON document
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
     JsonObject                                      output = doc.to<JsonObject>();
-    if (!export_values(output)) {
+    if (!export_values(Mqtt::Format::SINGLE, output)) {
         return; // empty
     }
 
     char prefix_str[10];
-    if (type() == Type::WWC) {
-        snprintf_P(prefix_str, sizeof(prefix_str), PSTR("(wwc %d) "), hc_);
-        print_value_json(root, F("wwTemp"), FPSTR(prefix_str), F_(wwTemp), F_(degrees), output);
-        print_value_json(root, F("pumpStatus"), FPSTR(prefix_str), F_(pumpStatus), nullptr, output);
-        print_value_json(root, F("tempStatus"), FPSTR(prefix_str), F_(tempStatus), nullptr, output);
-    } else {
+    if (type() == Type::HC) {
         snprintf_P(prefix_str, sizeof(prefix_str), PSTR("(hc %d) "), hc_);
         print_value_json(root, F("flowTemp"), FPSTR(prefix_str), F_(flowTemp), F_(degrees), output);
         print_value_json(root, F("flowSetTemp"), FPSTR(prefix_str), F_(flowSetTemp), F_(degrees), output);
         print_value_json(root, F("pumpStatus"), FPSTR(prefix_str), F_(pumpStatus), nullptr, output);
         print_value_json(root, F("valveStatus"), FPSTR(prefix_str), F_(valveStatus), F_(percent), output);
+    } else {
+        snprintf_P(prefix_str, sizeof(prefix_str), PSTR("(wwc %d) "), hc_);
+        print_value_json(root, F("wwTemp"), FPSTR(prefix_str), F_(wwTemp), F_(degrees), output);
+        print_value_json(root, F("pumpStatus"), FPSTR(prefix_str), F_(pumpStatus), nullptr, output);
+        print_value_json(root, F("tempStatus"), FPSTR(prefix_str), F_(tempStatus), nullptr, output);
     }
 }
 
@@ -108,28 +108,32 @@ void Mixing::show_values(uuid::console::Shell & shell) {
     // fetch the values into a JSON document
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
     JsonObject                                      output = doc.to<JsonObject>();
-    if (!export_values(output)) {
+    if (!export_values(Mqtt::Format::SINGLE, output)) {
         return; // empty
     }
 
-    if (type() == Type::WWC) {
-        shell.println(F_(ww_hc));
-        print_value_json(shell, F("wwTemp"), nullptr, F_(wwTemp), F_(degrees), output);
-        print_value_json(shell, F("pumpStatus"), nullptr, F_(pumpStatus), nullptr, output);
-        print_value_json(shell, F("tempStatus"), nullptr, F_(tempStatus), nullptr, output);
+    if (type() == Type::HC) {
+        shell.printfln(F_(hc), hc_);
+        print_value_json(shell, F("flowTemp"), F("  "), F_(flowTemp), F_(degrees), output);
+        print_value_json(shell, F("flowSetTemp"), F("  "), F_(flowSetTemp), F_(degrees), output);
+        print_value_json(shell, F("pumpStatus"), F("  "), F_(pumpStatus), nullptr, output);
+        print_value_json(shell, F("valveStatus"), F("  "), F_(valveStatus), F_(percent), output);
     } else {
-        shell.println(F_(hc));
-        print_value_json(shell, F("flowTemp"), nullptr, F_(flowTemp), F_(degrees), output);
-        print_value_json(shell, F("flowSetTemp"), nullptr, F_(flowSetTemp), F_(degrees), output);
-        print_value_json(shell, F("pumpStatus"), nullptr, F_(pumpStatus), nullptr, output);
-        print_value_json(shell, F("valveStatus"), nullptr, F_(valveStatus), F_(percent), output);
+        shell.printfln(F_(ww_hc), hc_);
+        print_value_json(shell, F("wwTemp"), F("  "), F_(wwTemp), F_(degrees), output);
+        print_value_json(shell, F("pumpStatus"), F("  "), F_(pumpStatus), nullptr, output);
+        print_value_json(shell, F("tempStatus"), F("  "), F_(tempStatus), nullptr, output);
     }
 
     shell.println();
 }
 
+// export all valuet to info command
 bool Mixing::command_info(const char * value, const int8_t id, JsonObject & output) {
-    return (export_values(output));
+    if (id != (device_id() - 0x20 + 1) && id > 0) { // defaults to first hc if no id
+        return false;
+    }
+    return (export_values(Mqtt::Format::NESTED, output));
 }
 
 // publish values via MQTT
@@ -137,7 +141,7 @@ bool Mixing::command_info(const char * value, const int8_t id, JsonObject & outp
 void Mixing::publish_values() {
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
     JsonObject                                     output = doc.to<JsonObject>();
-    if (export_values(output)) {
+    if (export_values(Mqtt::mqtt_format(), output)) {
         char topic[30];
         char s[5];
         strlcpy(topic, "mixing_data", 30);
@@ -189,43 +193,49 @@ void Mixing::register_mqtt_ha_config(const char * topic) {
 
 // creates JSON doc from values
 // returns false if empty
-bool Mixing::export_values(JsonObject & output) {
-    switch (this->type()) {
-    case Type::HC:
-        output["type"] = "hc";
+bool Mixing::export_values(uint8_t mqtt_format, JsonObject & output) {
+    JsonObject output_hc;
+    char       hc_name[10]; // hc{1-4}
+
+    if (this->type() == Type::HC) {
+        snprintf_P(hc_name, sizeof(hc_name), PSTR("hc%d"), hc_);
+        if ((mqtt_format == Mqtt::Format::NESTED)) {
+            output_hc = output.createNestedObject(hc_name);
+        } else {
+            output_hc = output;
+            output["type"] = "hc";
+        }
         if (Helpers::hasValue(flowTemp_)) {
-            output["flowTemp"] = (float)flowTemp_ / 10;
+            output_hc["flowTemp"] = (float)flowTemp_ / 10;
         }
         if (Helpers::hasValue(flowSetTemp_)) {
-            output["flowSetTemp"] = flowSetTemp_;
+            output_hc["flowSetTemp"] = flowSetTemp_;
         }
         if (Helpers::hasValue(pumpStatus_)) {
             char s[5]; // for formatting strings
-            output["pumpStatus"] = Helpers::render_value(s, pumpStatus_, EMS_VALUE_BOOL);
+            output_hc["pumpStatus"] = Helpers::render_value(s, pumpStatus_, EMS_VALUE_BOOL);
         }
         if (Helpers::hasValue(status_)) {
-            output["valveStatus"] = status_;
+            output_hc["valveStatus"] = status_;
         }
-        break;
-
-    case Type::WWC:
-        output["type"] = "wwc";
+    } else {
+        snprintf_P(hc_name, sizeof(hc_name), PSTR("wwc%d"), hc_);
+        if ((mqtt_format == Mqtt::Format::NESTED)) {
+            output_hc = output.createNestedObject(hc_name);
+        } else {
+            output_hc = output;
+            output["type"] = "wwc";
+        }
         if (Helpers::hasValue(flowTemp_)) {
-            output["wwTemp"] = (float)flowTemp_ / 10;
+            output_hc["wwTemp"] = (float)flowTemp_ / 10;
         }
         if (Helpers::hasValue(pumpStatus_)) {
             char s[5]; // for formatting strings
-            output["pumpStatus"] = Helpers::render_value(s, pumpStatus_, EMS_VALUE_BOOL);
+            output_hc["pumpStatus"] = Helpers::render_value(s, pumpStatus_, EMS_VALUE_BOOL);
         }
         if (Helpers::hasValue(status_)) {
-            output["tempStatus"] = status_;
+            output_hc["tempStatus"] = status_;
         }
-        break;
-
-    case Type::NONE:
-    default:
-        return false;
-        break;
     }
 
     return output.size();
@@ -285,8 +295,8 @@ void Mixing::process_MMStatusMessage(std::shared_ptr<const Telegram> telegram) {
     // 0x21 is position 2. 0x20 is typically reserved for the WM10 switch module
     // see https://github.com/proddy/EMS-ESP/issues/270 and https://github.com/proddy/EMS-ESP/issues/386#issuecomment-629610918
     hc_ = device_id() - 0x20 + 1;
-    changed_ |= telegram->read_value(flowTemp_, 1); // is * 10
-    changed_ |= telegram->read_bitvalue(pumpStatus_, 3, 0);
+    changed_ |= telegram->read_value(flowTemp_, 1);         // is * 10
+    changed_ |= telegram->read_bitvalue(pumpStatus_, 3, 2); // is 0 or 0x64 (100%), check only bit 2
     changed_ |= telegram->read_value(flowSetTemp_, 0);
     changed_ |= telegram->read_value(status_, 4); // valve status -100 to 100
 }
