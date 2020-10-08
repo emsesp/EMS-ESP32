@@ -131,7 +131,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
             register_telegram_type(monitor_typeids[i], F("JunkersMonitor"), false, [&](std::shared_ptr<const Telegram> t) { process_JunkersMonitor(t); });
             register_telegram_type(set_typeids[i], F("JunkersSet"), false, [&](std::shared_ptr<const Telegram> t) { process_JunkersSet(t); });
         }
-
+        // JUNKERS/HT3 older models
     } else if (model == (EMSdevice::EMS_DEVICE_FLAG_JUNKERS | EMSdevice::EMS_DEVICE_FLAG_JUNKERS_2)) {
         monitor_typeids = {0x016F, 0x0170, 0x0171, 0x0172};
         set_typeids     = {0x0179, 0x017A, 0x017B, 0x017C};
@@ -1671,7 +1671,7 @@ bool Thermostat::set_mode_n(const uint8_t mode, const uint8_t hc_num) {
         }
         break;
     case EMSdevice::EMS_DEVICE_FLAG_JUNKERS:
-        if ((this->flags() & EMS_DEVICE_FLAG_JUNKERS_2) == EMS_DEVICE_FLAG_JUNKERS_2) {
+        if (this->has_flags(EMS_DEVICE_FLAG_JUNKERS_2)) {
             offset = EMS_OFFSET_JunkersSetMessage2_set_mode;
         } else {
             offset = EMS_OFFSET_JunkersSetMessage_set_mode;
@@ -1882,7 +1882,7 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
     } else if (model == EMS_DEVICE_FLAG_JUNKERS) {
         // figure out if we have older or new thermostats, Heating Circuits on 0x65 or 0x79
         // see https://github.com/proddy/EMS-ESP/issues/335#issuecomment-593324716)
-        bool old_junkers = ((this->flags() & EMS_DEVICE_FLAG_JUNKERS_2) == EMS_DEVICE_FLAG_JUNKERS_2);
+        bool old_junkers = (this->has_flags(EMS_DEVICE_FLAG_JUNKERS_2));
         if (!old_junkers) {
             switch (mode) {
             case HeatingCircuit::Mode::NOFROST:

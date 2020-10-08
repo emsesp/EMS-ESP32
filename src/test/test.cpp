@@ -28,7 +28,7 @@ namespace emsesp {
 // used with the 'test' command, under su/admin
 void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
     if (command == "default") {
-        run_test(shell, "web"); // add the default test case here
+        run_test(shell, "fr120"); // add the default test case here
     }
 
     if (command.empty()) {
@@ -278,6 +278,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
                        0x03, 0x25, 0x03, 0x03, 0x01, 0x03, 0x25, 0x00, 0xC8, 0x00, 0x00, 0x11, 0x01, 0x03});
 
         shell.invoke_command("show");
+        shell.invoke_command("show devices");
     }
 
     if (command == "thermostat") {

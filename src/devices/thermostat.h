@@ -110,9 +110,9 @@ class Thermostat : public EMSdevice {
     bool export_values_main(JsonObject & doc);
     bool export_values_hc(uint8_t mqtt_format, JsonObject & doc);
 
-    // specific thermostat characteristics, stripping the option bits at pos 6 and 7
+    // specific thermostat characteristics, stripping the write option at bit 7
     inline uint8_t model() const {
-        return (this->flags() & 0x0F);
+        return (this->flags() & 0x7F);
     }
 
     // each thermostat has a list of heating controller type IDs for reading and writing

@@ -652,7 +652,7 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
                 for (const auto & device : device_library_) {
                     if (device.product_id == product_id) {
                         emsdevice->name(uuid::read_flash_string(device.name));
-                        emsdevice->flags(device.flags);
+                        emsdevice->add_flags(device.flags);
                     }
                 }
 
