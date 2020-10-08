@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added all device info to web UI for Thermostat and Boiler
 - Added all device values to Home Assistant MQTT Discovery under separate devices and entities
 - Show Rx and Tx quality in Console and Web UI
+- wwtemp and wwtemplow to MQTT, Console and Web
 
 ### Fixed
 - fix wwontime readback
@@ -29,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Prevent MQTT from publishing empty json payloads
 - Accurate detection of warm water and heating (#515)
 - Fix writing to the Junkers FR120 thermostat
+- support for changing summermode
 
 ### Changed
 - renamed wWCircPumpType to wWChargeType
