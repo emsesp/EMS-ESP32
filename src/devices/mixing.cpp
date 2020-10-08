@@ -199,10 +199,10 @@ bool Mixing::export_values(uint8_t mqtt_format, JsonObject & output) {
 
     if (this->type() == Type::HC) {
         snprintf_P(hc_name, sizeof(hc_name), PSTR("hc%d"), hc_);
-        if ((mqtt_format == Mqtt::Format::NESTED)) {
+        if (mqtt_format == Mqtt::Format::NESTED) {
             output_hc = output.createNestedObject(hc_name);
         } else {
-            output_hc = output;
+            output_hc      = output;
             output["type"] = "hc";
         }
         if (Helpers::hasValue(flowTemp_)) {
@@ -220,10 +220,10 @@ bool Mixing::export_values(uint8_t mqtt_format, JsonObject & output) {
         }
     } else {
         snprintf_P(hc_name, sizeof(hc_name), PSTR("wwc%d"), hc_);
-        if ((mqtt_format == Mqtt::Format::NESTED)) {
+        if (mqtt_format == Mqtt::Format::NESTED) {
             output_hc = output.createNestedObject(hc_name);
         } else {
-            output_hc = output;
+            output_hc      = output;
             output["type"] = "wwc";
         }
         if (Helpers::hasValue(flowTemp_)) {
