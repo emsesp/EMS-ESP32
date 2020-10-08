@@ -1,12 +1,11 @@
 import React, { Component, Fragment } from "react";
 
-import { WithTheme, withTheme, withStyles, Theme, createStyles } from "@material-ui/core/styles";
+import { WithTheme, withTheme } from "@material-ui/core/styles";
 import {
   TableContainer,
   Table,
   TableBody,
   TableCell,
-  TableHead,
   TableRow,
   List,
   ListItem,
@@ -14,7 +13,7 @@ import {
   ListItemText,
   withWidth,
   WithWidthProps,
-  isWidthDown
+  isWidthDown,
 } from "@material-ui/core";
 
 import RefreshIcon from "@material-ui/icons/Refresh";
@@ -30,7 +29,7 @@ import {
 import {
   busStatus,
   busStatusHighlight,
-  isConnected
+  isConnected,
 } from "./EMSESPStatus";
 
 import { EMSESPStatus } from "./EMSESPtypes";
@@ -40,18 +39,6 @@ function formatNumber(num: number) {
 }
 
 type EMSESPStatusFormProps = RestFormProps<EMSESPStatus> & WithTheme & WithWidthProps;
-
-const StyledTableCell = withStyles((theme: Theme) =>
-  createStyles({
-    head: {
-      backgroundColor: theme.palette.common.black,
-      color: theme.palette.common.white,
-    },
-    body: {
-      fontSize: 14,
-    },
-  }),
-)(TableCell);
 
 class EMSESPStatusForm extends Component<EMSESPStatusFormProps> {
 
@@ -65,41 +52,39 @@ class EMSESPStatusForm extends Component<EMSESPStatusFormProps> {
               <DeviceHubIcon />
             </HighlightAvatar>
           </ListItemAvatar>
-          <ListItemText primary="EMS Connection Status" secondary={busStatus(data)} />
+          <ListItemText primary="Connection Status" secondary={busStatus(data)} />
         </ListItem>
         {isConnected(data) && (
           <TableContainer>
             <Table size="small" padding={isWidthDown('xs', width!) ? "none" : "default"}>
-              <TableHead>
-                <TableRow>
-                  <StyledTableCell>Statistic</StyledTableCell>
-                  <StyledTableCell align="right"># Telegrams</StyledTableCell>
-                </TableRow>
-              </TableHead>
               <TableBody>
                 <TableRow>
                   <TableCell>
-                    (Rx) Received telegrams
+                    Received Telegrams
                   </TableCell>
-                  <TableCell align="right">{formatNumber(data.rx_received)}</TableCell>
+                  <TableCell align="right">{formatNumber(data.rx_received)}
+                  </TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell >
-                    (Rx) Quality
+                    Rx Quality
                   </TableCell>
-                  <TableCell align="right">{formatNumber(data.rx_quality)}%</TableCell>
+                  <TableCell align="right">{data.rx_quality}&nbsp;%
+                  </TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell >
-                    (Tx) Sent telegrams
+                    Sent Telegrams
+                  </TableCell >
+                  <TableCell align="right">{formatNumber(data.tx_sent)}
                   </TableCell>
-                  <TableCell align="right">{formatNumber(data.tx_sent)}</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell >
-                    (Tx) Quality
+                    Tx Quality
                   </TableCell>
-                  <TableCell align="right">{formatNumber(data.tx_quality)}%</TableCell>
+                  <TableCell align="right">{data.tx_quality}&nbsp;%
+                  </TableCell>
                 </TableRow>
               </TableBody>
             </Table>

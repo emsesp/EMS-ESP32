@@ -29,3 +29,12 @@ export const busStatus = ({ status }: EMSESPStatus) => {
       return "Unknown";
   }
 }
+
+export const qualityHighlight = ( value: number, theme: Theme) => {
+  if (value >= 95) {
+    return theme.palette.success.main;
+  }
+
+  return theme.palette.error.main;
+}
+

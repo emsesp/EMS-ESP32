@@ -2,20 +2,14 @@ import React, { Component, Fragment } from "react";
 import { withStyles, Theme, createStyles } from '@material-ui/core/styles';
 
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  TableContainer,
-  withWidth,
-  WithWidthProps,
-  isWidthDown,
-  Button,
+  Table, TableBody, TableCell, TableHead, TableRow, TableContainer,
+  withWidth, WithWidthProps, isWidthDown,
+  Button, Tooltip,
   DialogTitle, DialogContent, DialogActions, Box, Dialog, Typography
 } from "@material-ui/core";
 
 import RefreshIcon from "@material-ui/icons/Refresh";
+import ListIcon from '@material-ui/icons/List';
 
 import { redirectingAuthorizedFetch, withAuthenticatedContext, AuthenticatedContextProps } from '../authentication';
 
@@ -58,6 +52,17 @@ interface EMSESPDevicesFormState {
   deviceData?: EMSESPDeviceData;
 }
 
+const LightTooltip = withStyles((theme: Theme) => ({
+  tooltip: {
+    // backgroundColor: theme.palette.common.black,
+    backgroundColor: theme.palette.primary.dark,
+    color: theme.palette.common.white,
+    boxShadow: theme.shadows[1],
+    borderRadius: "18px",
+    fontSize: 11
+  },
+}))(Tooltip);
+
 type EMSESPDevicesFormProps = RestFormProps<EMSESPDevices> & AuthenticatedContextProps & WithWidthProps;
 
 class EMSESPDevicesForm extends Component<EMSESPDevicesFormProps, EMSESPDevicesFormState> {
@@ -76,8 +81,9 @@ class EMSESPDevicesForm extends Component<EMSESPDevicesFormProps, EMSESPDevicesF
   };
 
   noDeviceData = () => {
-    return (this.state.deviceData?.deviceData.length === 0);
+    return ((this.state.deviceData?.deviceData || []).length === 0);
   };
+
 
   createDeviceItems() {
     const { width, data } = this.props;
@@ -86,9 +92,7 @@ class EMSESPDevicesForm extends Component<EMSESPDevicesFormProps, EMSESPDevicesF
         <Typography variant="h6" color="primary" >
           Devices
         </Typography>
-        <Typography variant="caption" color="initial" paragraph>
-          <i>(click to show details)</i>
-        </Typography>
+        <p></p>
         {!this.noDevices() && (
           <Table size="small" padding={isWidthDown('xs', width!) ? "none" : "default"}>
             <TableHead>
@@ -99,15 +103,18 @@ class EMSESPDevicesForm extends Component<EMSESPDevicesFormProps, EMSESPDevicesF
                 <StyledTableCell align="center">Device ID</StyledTableCell>
                 <StyledTableCell align="center">Product ID</StyledTableCell>
                 <StyledTableCell align="center">Version</StyledTableCell>
+                <StyledTableCell></StyledTableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {data.devices.sort(compareDevices).map(device => (
-                <TableRow hover key={device.id}
-                  onClick={() => this.handleRowClick(device.id)}
-                >
+                <TableRow hover key={device.id} onClick={() => this.handleRowClick(device.id)}>
                   <TableCell component="th" scope="row">
-                    {device.type}
+                    <LightTooltip title="Show values..." placement="right">
+                      <Button startIcon={<ListIcon />} size="small" variant="outlined" color="primary">
+                        {device.type}
+                      </Button>
+                    </LightTooltip >
                   </TableCell>
                   <TableCell align="center">
                     {device.brand}
@@ -123,6 +130,9 @@ class EMSESPDevicesForm extends Component<EMSESPDevicesFormProps, EMSESPDevicesF
                   </TableCell>
                   <TableCell align="center">
                     {device.version}
+                  </TableCell>
+                  <TableCell>
+
                   </TableCell>
                 </TableRow>
               ))}
@@ -176,7 +186,7 @@ class EMSESPDevicesForm extends Component<EMSESPDevicesFormProps, EMSESPDevicesF
           (
             <Box color="warning.main" p={0} mt={0} mb={0}>
               <Typography variant="body1">
-                <i>No connected Dallas temperature sensors detected</i>
+                <i>There are no external temperature sensors connected</i>
               </Typography>
             </Box>
           )
@@ -265,10 +275,6 @@ class EMSESPDevicesForm extends Component<EMSESPDevicesFormProps, EMSESPDevicesF
       return;
     }
 
-    if ((deviceData.deviceData || []).length === 0) {
-      return;
-    }
-
     return (
       <Fragment>
         <p></p>
@@ -277,25 +283,35 @@ class EMSESPDevicesForm extends Component<EMSESPDevicesFormProps, EMSESPDevicesF
             {deviceData.deviceName}
           </Typography>
         </Box>
-
-        <TableContainer>
-          <Table size="small" padding={isWidthDown('xs', width!) ? "none" : "default"}>
-            <TableHead>
-            </TableHead>
-            <TableBody>
-              {deviceData.deviceData.map(deviceData => (
-                <TableRow key={deviceData.n}>
-                  <TableCell component="th" scope="row">
-                    {deviceData.n}
-                  </TableCell>
-                  <TableCell align="right">
-                    {deviceData.v}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+        {!this.noDeviceData() && (
+          <TableContainer>
+            <Table size="small" padding={isWidthDown('xs', width!) ? "none" : "default"}>
+              <TableHead>
+              </TableHead>
+              <TableBody>
+                {deviceData.deviceData.map(deviceData => (
+                  <TableRow key={deviceData.n}>
+                    <TableCell component="th" scope="row">
+                      {deviceData.n}
+                    </TableCell>
+                    <TableCell align="right">
+                      {deviceData.v}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )}
+        {this.noDeviceData() &&
+          (
+            <Box color="warning.main" p={0} mt={0} mb={0}>
+              <Typography variant="body1">
+                <i>No data available for this device</i>
+              </Typography>
+            </Box>
+          )
+        }
       </Fragment>
     );
 

@@ -24,9 +24,9 @@ class SecuritySettingsForm extends React.Component<SecuritySettingsFormProps> {
       <ValidatorForm onSubmit={this.onSubmit}>
         <PasswordValidator
           validators={['required', 'matchRegexp:^.{1,64}$']}
-          errorMessages={['JWT Secret Required', 'JWT Secret must be 64 characters or less']}
+          errorMessages={['Password Required', 'Password must be 64 characters or less']}
           name="jwt_secret"
-          label="JWT Secret"
+          label="Super User Password"
           fullWidth
           variant="outlined"
           value={data.jwt_secret}
@@ -35,7 +35,7 @@ class SecuritySettingsForm extends React.Component<SecuritySettingsFormProps> {
         />
         <Box bgcolor="primary.main" color="primary.contrastText" p={2} mt={2} mb={2}>
           <Typography variant="body1">
-            The JWT secret is used to sign authentication tokens. If you modify the JWT Secret, all users will be signed out.
+            The Super User password is used to sign authentication tokens and also the Console's `su` password. If you modify this all users will be signed out.
           </Typography>
         </Box>
         <FormActions>

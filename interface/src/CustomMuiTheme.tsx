@@ -25,7 +25,7 @@ const theme = createMuiTheme({
     success: {
       main: green[500]
     }
-  },
+  }
 });
 
 export default class CustomMuiTheme extends Component {
