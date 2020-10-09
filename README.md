@@ -27,32 +27,34 @@ Note, EMS-ESP requires a small hardware circuit that can convert the EMS bus dat
 
 ## **Features**
 
-- Support for both ESP8266 and ESP32 modules
-- A multi-user secure Web interface (based on React/TypeScript and Material-UI)
-- A Console, accessible via Serial and Telnet for controlling and monitoring traffic
-- Native support for Home Assistant [MQTT Discovery](https://www.home-assistant.io/docs/mqtt/discovery/)
-- Can be run standalone as an independent Access Point or join an existing WiFi network
+- Compatible with both ESP8266 and ESP32
+- A multi-user secure web interface to change settings and monitor the data
+- A console, accessible via Serial and Telnet for more monitoring
+- Native support for Home Assistan via [MQTT Discovery](https://www.home-assistant.io/docs/mqtt/discovery/)
+- Can run standalone as an independent WiFi Access Point or join an existing WiFi network
 - Easy first-time configuration via a web Captive Portal
-- Supporting over [70 EMS devices](https://emsesp.github.io/docs/#/Supported-EMS-Devices)  (boilers, thermostats, solar modules, mixing modules, heat pumps, gateways)
+- Support for more than [72 EMS devices](https://emsesp.github.io/docs/#/Supported-EMS-Devices) (boilers, thermostats, solar modules, mixing modules, heat pumps, gateways)
   
 ## **Screenshots**
 
-### The WebUI:
+### Web interface:
 
 | | |
 | --- | --- |
 | <img src="media/web_settings.PNG"> | <img src="media/web_status.PNG"> |
 | <img src="media/web_devices.PNG"> | <img src="media/web_mqtt.PNG"> |
 
-### The Console:
+### Telnet Console:
 <img src="media/console.PNG" width=80% height=80%>
 
-### Home Assistant integration:
+### In Home Assistant:
 <img src="media/ha_lovelace.PNG" width=80% height=80%>
   
 ## **Installing**
 
-Refer to the [official documentation](https://emsesp.github.io/docs) to how to install the firmware and configure it. This is being constantly updated as new features and information are added.
+Refer to the [documentation](https://emsesp.github.io/docs) to how to install the firmware and configure it. The documentation is being constantly updated as new features and settings are added.
+
+You can choose to use an pre-built firmware image or compile the code yourself:
 
 * [Uploading a pre-built firmware build](https://emsesp.github.io/docs/#/Uploading-firmware)
 * [Building the firmware from source code and flashing manually](https://emsesp.github.io/docs/#/Building-firmware)
@@ -82,15 +84,15 @@ If you're looking for support on **EMS-ESP** there are some options available:
 You can contribute to EMS-ESP by
 - providing Pull Requests (Features, Fixes, suggestions).
 - testing new released features and report issues on your EMS equipment.
-- contributing to missing [documentation](https://emsesp.github.io/docs).
+- contributing to missing [Documentation](https://emsesp.github.io/docs).
 
 ## **Credits**
 
 A shout out to the people helping EMS-ESP get to where it is today...
-- @MichaelDvP for all his amazing contributions and patience. Specifically the improved uart library, thermostat and mixing logic.
-- @BBQKees for his endless testing and building the awesome circuit boards
-- @susisstrolch for writing a first working version of the EMS bridge circuit which I used to design EMS-ESP version 0.1 back in August 2017
-- Plus many more providing suggestions, PRs and the odd donation. Thanks!
+- **@MichaelDvP** for all his amazing contributions and patience. Specifically the improved uart library, thermostat and mixing logic.
+- **@BBQKees** for his endless testing and building the awesome circuit boards
+- **@susisstrolch** for writing a first working version of the EMS bridge circuit which I used to design EMS-ESP version 0.1 back in August 2017
+- Plus everyone else providing suggestions, PRs and the odd donation that keep us motivated. Thanks!
 
 ## **License**
 
