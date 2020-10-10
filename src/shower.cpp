@@ -28,10 +28,7 @@ void Shower::start() {
         shower_alert_ = settings.shower_alert;
     });
 
-    if (shower_timer_ || shower_alert_) {
-        char s[7];
-        Mqtt::publish(F("shower_active"), Helpers::render_boolean(s, false));
-    }
+    send_mqtt_stat(false); // send first MQTT publish
 }
 
 void Shower::loop() {
@@ -95,7 +92,12 @@ void Shower::loop() {
     }
 }
 
+// send status of shower to MQTT
 void Shower::send_mqtt_stat(bool state) {
+    if (!shower_timer_ && !shower_alert_) {
+        return;
+    }
+
     // if we're in HA mode make sure we've first sent out the HA MQTT Discovery config topic
     if ((Mqtt::mqtt_format() == Mqtt::Format::HA) && (!ha_config_)) {
         Mqtt::register_mqtt_ha_binary_sensor(F("Shower Active"), EMSdevice::DeviceType::BOILER, "shower_active");
