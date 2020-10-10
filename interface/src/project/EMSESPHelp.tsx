@@ -1,6 +1,10 @@
 import React, { Component } from 'react';
-import { Typography, Box, Link } from '@material-ui/core';
+import { Typography, Box, List, ListItem, ListItemText, Link, ListItemAvatar } from '@material-ui/core';
 import { SectionContent } from '../components';
+
+import CommentIcon from "@material-ui/icons/CommentTwoTone";
+import MenuBookIcon from "@material-ui/icons/MenuBookTwoTone";
+import GitHubIcon from "@material-ui/icons/GitHub";
 
 class EMSESPHelp extends Component {
 
@@ -8,23 +12,44 @@ class EMSESPHelp extends Component {
         return (
             <SectionContent title='EMS-ESP Help' titleGutter>
 
+                <List>
+
+                    <ListItem>
+                        <ListItemAvatar>
+                            <MenuBookIcon />
+                        </ListItemAvatar>
+                        <ListItemText>
+                            For the latest news and updates go to the <Link href="https://emsesp.github.io/docs" color="primary">{'documentation'}&nbsp;website</Link>.
+                    </ListItemText>
+                    </ListItem>
+
+                    <ListItem>
+                        <ListItemAvatar>
+                            <CommentIcon />
+                        </ListItemAvatar>
+                        <ListItemText>
+                            For live community chat visit our <Link href="https://gitter.im/EMS-ESP/community#" color="primary">{'Gitter'}&nbsp;channel</Link>.
+                    </ListItemText>
+                    </ListItem>
+
+                    <ListItem>
+                        <ListItemAvatar>
+                            <GitHubIcon />
+                        </ListItemAvatar>
+                        <ListItemText>
+                            To report an issue or feature request go to <Link href="https://github.com/proddy/EMS-ESP/issues/new/choose" color="primary">{'click here'}</Link>.
+                    </ListItemText>
+                    </ListItem>
+
+                </List>
+
                 <Box bgcolor="info.main" border={1} p={3} mt={1} mb={0}>
-                    <Typography variant="body1">
-                        EMS-ESP is an open-source firmware for the Espressif ESP8266 and ESP32 microcontroller that communicates with EMS (Energy Management System) based equipment from manufacturers like Bosch, Buderus, Nefit, Junkers, Worcester and Sieger.
-            <p></p>
-            Please consider supporting this project via the GitHub page <Link href="https://github.com/proddy/EMS-ESP" color="primary">{'http://github.com/proddy/EMS-ESP'}</Link>.
+                    <Typography variant="h6">
+                        EMS-ESP is free and open-source.
+                        <br></br>Please consider supporting this project by giving it a star on our <Link href="https://github.com/proddy/EMS-ESP" color="primary">{'GitHub page'}</Link>.
                     </Typography>
                 </Box>
                 <br></br>
-                <Typography variant="body1" paragraph>
-                    Check for news and updates on the <Link href="https://emsesp.github.io/docs" color="primary">{'Documentation site'}</Link>.
-                </Typography>
-                <Typography variant="body1" paragraph>
-                    For live community chat go to <Link href="https://gitter.im/EMS-ESP/community#" color="primary">{'Gitter'}</Link>.
-                </Typography>
-                <Typography variant="body1" paragraph>
-                    To report an issue or feature request go to <Link href="https://github.com/proddy/EMS-ESP/issues/new/choose" color="primary">{'the github project page'}</Link>.
-                </Typography>
 
             </SectionContent>
         )
