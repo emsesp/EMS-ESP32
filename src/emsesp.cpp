@@ -211,8 +211,8 @@ void EMSESP::show_ems(uuid::console::Shell & shell) {
         shell.printfln(F("  #write requests sent: %d"), txservice_.telegram_write_count());
         shell.printfln(F("  #incomplete telegrams: %d"), rxservice_.telegram_error_count());
         shell.printfln(F("  #tx fails (after %d retries): %d"), TxService::MAXIMUM_TX_RETRIES, txservice_.telegram_fail_count());
-        shell.printfln(F("  Rx quality: %d%%"), rxservice_.quality());
-        shell.printfln(F("  Tx quality: %d%%"), txservice_.quality());
+        shell.printfln(F("  Rx line quality: %d%%"), rxservice_.quality());
+        shell.printfln(F("  Tx line quality: %d%%"), txservice_.quality());
     }
 
     shell.println();
