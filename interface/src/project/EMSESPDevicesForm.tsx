@@ -73,7 +73,7 @@ type EMSESPDevicesFormProps = RestFormProps<EMSESPDevices> &
 class EMSESPDevicesForm extends Component<
   EMSESPDevicesFormProps,
   EMSESPDevicesFormState
-> {
+  > {
   state: EMSESPDevicesFormState = {
     confirmScanDevices: false,
     processing: false,
@@ -123,7 +123,7 @@ class EMSESPDevicesForm extends Component<
                   onClick={() => this.handleRowClick(device.id)}
                 >
                   <TableCell component="th" scope="row">
-                    <Tooltip title="show values..." arrow placement="right-end">
+                    <Tooltip title="click for details..." arrow placement="right-end">
                       <Button
                         startIcon={<ListIcon />}
                         size="small"
@@ -138,8 +138,8 @@ class EMSESPDevicesForm extends Component<
                   <TableCell align="center">
                     0x
                     {("00" + device.deviceid.toString(16).toUpperCase()).slice(
-                      -2
-                    )}
+                    -2
+                  )}
                   </TableCell>
                   <TableCell align="center">{device.productid}</TableCell>
                   <TableCell align="center">{device.version}</TableCell>
