@@ -52,7 +52,7 @@ class Boiler : public EMSdevice {
 
     void print_value2(uuid::console::Shell & shell, const char * param, const __FlashStringHelper * name, const __FlashStringHelper * suffix, JsonObject & json);
 
-    uint8_t last_boilerState = 0xFF; // remember last state of heating and warm water on/off
+    uint8_t last_boilerState = EMS_VALUE_UINT_NOTSET; // remember last state of heating and warm water on/off
     bool    changed_         = false;
     bool    mqtt_ha_config_  = false; // HA MQTT Discovery
 
@@ -97,7 +97,7 @@ class Boiler : public EMSdevice {
     uint8_t  sysPress_          = EMS_VALUE_UINT_NOTSET;   // System pressure
     char     serviceCode_[3]    = {'\0'};                  // 2 character status/service code
     uint16_t serviceCodeNumber_ = EMS_VALUE_USHORT_NOTSET; // error/service code
-    uint8_t  boilerState_       = EMS_VALUE_BOOL_NOTSET;   // State flag, used on HT3
+    uint8_t  boilerState_       = EMS_VALUE_UINT_NOTSET;   // Boiler state flag
 
     // UBAMonitorSlow - 0x19 on EMS1
     int16_t  outdoorTemp_ = EMS_VALUE_SHORT_NOTSET;  // Outside temperature

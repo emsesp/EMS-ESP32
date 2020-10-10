@@ -97,8 +97,8 @@ void Boiler::register_mqtt_ha_config() {
     ids.add("ems-esp-boiler");
     Mqtt::publish_retain(F("homeassistant/sensor/ems-esp/boiler/config"), doc.as<JsonObject>(), true); // publish the config payload with retain flag
 
-    Mqtt::register_mqtt_ha_binary_sensor(F_(tapwaterActive), this->device_type(), "tapwaterActive");
-    Mqtt::register_mqtt_ha_binary_sensor(F_(heatingActive), this->device_type(), "heatingActive");
+    Mqtt::register_mqtt_ha_binary_sensor(F_(tapwaterActive), this->device_type(), "tapwater_active");
+    Mqtt::register_mqtt_ha_binary_sensor(F_(heatingActive), this->device_type(), "heating_active");
 
     Mqtt::register_mqtt_ha_sensor(nullptr, F_(serviceCodeNumber), this->device_type(), "serviceCodeNumber", nullptr, nullptr);
     Mqtt::register_mqtt_ha_sensor(nullptr, F_(wWSelTemp), this->device_type(), "wWSelTemp", F_(degrees), F_(icontemperature));
@@ -604,7 +604,7 @@ void Boiler::publish_values() {
         Mqtt::publish(F("boiler_data"), doc.as<JsonObject>());
     }
 
-    // send out heating and tapwater status - even if there is no change (force = true)
+    // send out heating and tapwater status
     check_active();
 }
 
@@ -711,14 +711,14 @@ void Boiler::show_values(uuid::console::Shell & shell) {
  * If a value has changed, post it immediately to MQTT so we get real time data
  */
 void Boiler::check_active() {
-    if ((boilerState_ & 0x09) != (last_boilerState & 0x09)) {
+    if ((boilerState_ == EMS_VALUE_UINT_NOTSET) || ((boilerState_ & 0x09) != (last_boilerState & 0x09))) {
         char s[7];
         bool b = ((boilerState_ & 0x09) == 0x09);
         Mqtt::publish(F("heating_active"), Helpers::render_boolean(s, b));
         heatingActive_ = b ? EMS_VALUE_BOOL_ON : EMS_VALUE_BOOL_OFF;
     }
 
-    if ((boilerState_ & 0x0A) != (last_boilerState & 0x0A)) {
+    if ((boilerState_ == EMS_VALUE_UINT_NOTSET) || ((boilerState_ & 0x0A) != (last_boilerState & 0x0A))) {
         char s[7];
         bool b = ((boilerState_ & 0x0A) == 0x0A);
         Mqtt::publish(F("tapwater_active"), Helpers::render_boolean(s, b));
