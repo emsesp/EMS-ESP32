@@ -266,12 +266,17 @@ void EMSESPShell::add_console_commands() {
     commands->add_command(ShellContext::MAIN,
                           CommandFlags::ADMIN,
                           flash_string_vector{F_(read)},
-                          flash_string_vector{F_(deviceid_mandatory), F_(typeid_mandatory)},
+                          flash_string_vector{F_(deviceid_mandatory), F_(typeid_mandatory), F_(offset_optional)},
                           [=](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) {
                               uint8_t  device_id = Helpers::hextoint(arguments.front().c_str());
-                              uint16_t type_id   = Helpers::hextoint(arguments.back().c_str());
+                              uint16_t type_id   = Helpers::hextoint(arguments[1].c_str());
                               EMSESP::set_read_id(type_id);
-                              EMSESP::send_read_request(type_id, device_id);
+                              if (arguments.size() == 3) {
+                              uint16_t offset   = Helpers::hextoint(arguments.back().c_str());
+                                EMSESP::send_read_request(type_id, device_id, offset);
+                              } else {
+                                EMSESP::send_read_request(type_id, device_id);
+                              }
                           });
 
     commands->add_command(ShellContext::MAIN,

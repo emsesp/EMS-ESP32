@@ -37,7 +37,7 @@ void Switch::show_values(uuid::console::Shell & shell) {
 }
 
 // publish values via MQTT
-void Switch::publish_values() {
+void Switch::publish_values(JsonObject & data) {
 }
 
 // check to see if values have been updated

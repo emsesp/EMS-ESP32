@@ -594,7 +594,7 @@ bool Boiler::export_values(JsonObject & output) {
 }
 
 // publish values via MQTT
-void Boiler::publish_values() {
+void Boiler::publish_values(JsonObject & data) {
     // must make sure this doesn't exist 1000. Currently (2.1.0) its 950b.
     // otheerwise use DynamicJsonDocument with max size and use .shrinkToFit()
     StaticJsonDocument<1024> doc;

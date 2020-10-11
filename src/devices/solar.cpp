@@ -125,7 +125,7 @@ void Solar::show_values(uuid::console::Shell & shell) {
 }
 
 // publish values via MQTT
-void Solar::publish_values() {
+void Solar::publish_values(JsonObject & data) {
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
     JsonObject                                      output = doc.to<JsonObject>();
     if (export_values(output)) {
