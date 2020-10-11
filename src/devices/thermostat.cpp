@@ -722,13 +722,13 @@ void Thermostat::register_mqtt_ha_config(uint8_t hc_num) {
     snprintf_P(str2, sizeof(str2), PSTR("thermostat_hc%d"), hc_num);
     doc["uniq_id"] = str2;
 
+    doc["~"] = System::hostname(); // ems-esp
+
     char str3[40];
     snprintf_P(str3, sizeof(str3), PSTR("~/%s"), str2);
+    doc["mode_cmd_t"] = str3;
+    doc["temp_cmd_t"] = str3;
 
-    doc["uniq_id"]     = str2;
-    doc["~"]           = F("ems-esp");
-    doc["mode_cmd_t"]  = str3;
-    doc["temp_cmd_t"]  = str3;
     doc["mode_stat_t"] = F("~/thermostat_data");
     doc["temp_stat_t"] = F("~/thermostat_data");
     doc["curr_temp_t"] = F("~/thermostat_data");

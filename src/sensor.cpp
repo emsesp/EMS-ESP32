@@ -341,8 +341,12 @@ void Sensor::publish_values() {
             // to e.g. homeassistant/sensor/ems-esp/dallas_sensor1/config
             if (!(registered_ha_[i])) {
                 StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> config;
-                config["dev_cla"]      = F("temperature");
-                config["stat_t"]       = F("ems-esp/sensor_data");
+                config["dev_cla"] = F("temperature");
+
+                char stat_t[50];
+                snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/sensor_data"), System::hostname().c_str());
+                config["stat_t"] = stat_t;
+
                 config["unit_of_meas"] = F("°C");
 
                 char str[50];

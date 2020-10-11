@@ -83,7 +83,7 @@ void Solar::device_info_web(JsonArray & root) {
 
     if (Helpers::hasValue(pumpWorkMin_)) {
         JsonObject dataElement = root.createNestedObject();
-        dataElement["n"]    = F_(pumpWorkMin);
+        dataElement["n"]       = F_(pumpWorkMin);
         char time_str[60];
         snprintf_P(time_str, sizeof(time_str), PSTR("%d days %d hours %d minutes"), pumpWorkMin_ / 1440, (pumpWorkMin_ % 1440) / 60, pumpWorkMin_ % 60);
         dataElement["v"] = time_str;
@@ -143,13 +143,17 @@ void Solar::publish_values() {
 void Solar::register_mqtt_ha_config() {
     // Create the Master device
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
-    doc["name"]    = "EMS-ESP";
-    doc["uniq_id"] = "solar";
-    doc["ic"]      = "mdi:home-thermometer-outline";
-    doc["stat_t"]  = "ems-esp/solar_data";
-    doc["val_tpl"] = "{{value_json.solarPump}}";
+    doc["name"]    = F("EMS-ESP");
+    doc["uniq_id"] = F("solar");
+    doc["ic"]      = F("mdi:home-thermometer-outline");
+
+    char stat_t[50];
+    snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/solar_data"), System::hostname().c_str());
+    doc["stat_t"] = stat_t;
+
+    doc["val_tpl"] = F("{{value_json.solarPump}}");
     JsonObject dev = doc.createNestedObject("dev");
-    dev["name"]    = "EMS-ESP Solar";
+    dev["name"]    = F("EMS-ESP Solar");
     dev["sw"]      = EMSESP_APP_VERSION;
     dev["mf"]      = this->brand_to_string();
     dev["mdl"]     = this->name();

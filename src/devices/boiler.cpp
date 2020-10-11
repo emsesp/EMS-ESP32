@@ -86,7 +86,11 @@ void Boiler::register_mqtt_ha_config() {
     doc["name"]    = F("Service Code");
     doc["uniq_id"] = F("boiler");
     doc["ic"]      = F("mdi:home-thermometer-outline");
-    doc["stat_t"]  = F("ems-esp/boiler_data");
+
+    char stat_t[50];
+    snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/boiler_data"), System::hostname().c_str());
+    doc["stat_t"] = stat_t;
+
     doc["val_tpl"] = F("{{value_json.serviceCode}}");
     JsonObject dev = doc.createNestedObject("dev");
     dev["name"]    = F("EMS-ESP Boiler");

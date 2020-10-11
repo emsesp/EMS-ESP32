@@ -483,11 +483,13 @@ void Mqtt::on_connect() {
 // all the values from the heartbeat payload will be added as attributes to the entity state
 void Mqtt::ha_status() {
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
+
     doc["name"]        = F("EMS-ESP status");
     doc["uniq_id"]     = F("status");
-    doc["avty_t"]      = F("ems-esp/status");
-    doc["json_attr_t"] = F("ems-esp/heartbeat");
-    doc["stat_t"]      = F("ems-esp/heartbeat");
+    doc["~"]           = System::hostname(); // ems-esp
+    doc["avty_t"]      = F("~/status");
+    doc["json_attr_t"] = F("~/heartbeat");
+    doc["stat_t"]      = F("~/heartbeat");
     doc["val_tpl"]     = F("{{value_json['status']}}");
     doc["ic"]          = F("mdi:home-thermometer-outline");
 
@@ -767,8 +769,8 @@ void Mqtt::register_mqtt_ha_sensor(const char *                prefix,
     snprintf_P(topic, sizeof(topic), PSTR("homeassistant/sensor/ems-esp/%s/config"), uniq.c_str());
 
     // state topic
-    char state_t[50];
-    snprintf_P(state_t, sizeof(state_t), PSTR("%s/%s_data"), hostname_.c_str(), device_name.c_str());
+    char stat_t[50];
+    snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/%s_data"), hostname_.c_str(), device_name.c_str());
 
     // state template
     char tpl[50];
@@ -784,7 +786,7 @@ void Mqtt::register_mqtt_ha_sensor(const char *                prefix,
     if (uom != nullptr) {
         doc["unit_of_meas"] = uom;
     }
-    doc["stat_t"]  = state_t;
+    doc["stat_t"]  = stat_t;
     doc["val_tpl"] = tpl;
     if (icon != nullptr) {
         doc["ic"] = icon;
