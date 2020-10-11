@@ -334,7 +334,7 @@ bool EMSdevice::handle_telegram(std::shared_ptr<const Telegram> telegram) {
         if (tf.telegram_type_id_ == telegram->type_id) {
             // if the data block is empty, assume that this telegram is not recognized by the bus master
             // so remove it from the automatic fetch list
-            if (telegram->message_length == 0) {
+            if (telegram->message_length == 0 && telegram->offset == 0) {
                 LOG_DEBUG(F("This telegram (%s) is not recognized by the EMS bus"), uuid::read_flash_string(tf.telegram_type_name_).c_str());
                 toggle_fetch(tf.telegram_type_id_, false);
                 return false;
