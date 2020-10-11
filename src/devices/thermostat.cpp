@@ -1243,11 +1243,11 @@ void Thermostat::process_RC35Set(std::shared_ptr<const Telegram> telegram) {
     changed_ |= telegram->read_value(hc->summertemp, 22);  // is * 1
     changed_ |= telegram->read_value(hc->nofrosttemp, 23); // is * 1
     if (hc->heatingtype == 3) {
-        changed_ |= telegram->read_value(hc->designtemp, 36);  // is * 1
+        changed_ |= telegram->read_value(hc->designtemp, 36); // is * 1
     } else {
-        changed_ |= telegram->read_value(hc->designtemp, 17);  // is * 1
+        changed_ |= telegram->read_value(hc->designtemp, 17); // is * 1
     }
-    changed_ |= telegram->read_value(hc->offsettemp, 6);   // is * 2
+    changed_ |= telegram->read_value(hc->offsettemp, 6);    // is * 2
     changed_ |= telegram->read_value(hc->roominfluence, 4); // is * 1
 }
 

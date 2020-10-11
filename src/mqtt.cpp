@@ -772,9 +772,9 @@ void Mqtt::register_mqtt_ha_sensor(const char *                prefix,
     char stat_t[50];
     snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/%s_data"), hostname_.c_str(), device_name.c_str());
 
-    // state template
-    char tpl[50];
-    snprintf_P(tpl, sizeof(tpl), PSTR("{{value_json.%s}}"), new_entity);
+    // value template
+    char val_tpl[50];
+    snprintf_P(val_tpl, sizeof(val_tpl), PSTR("{{value_json.%s}}"), new_entity);
 
     // ha device
     char ha_device[40];
@@ -787,7 +787,7 @@ void Mqtt::register_mqtt_ha_sensor(const char *                prefix,
         doc["unit_of_meas"] = uom;
     }
     doc["stat_t"]  = stat_t;
-    doc["val_tpl"] = tpl;
+    doc["val_tpl"] = val_tpl;
     if (icon != nullptr) {
         doc["ic"] = icon;
     }

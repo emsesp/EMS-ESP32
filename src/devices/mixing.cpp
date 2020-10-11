@@ -162,7 +162,6 @@ void Mixing::publish_values(JsonObject & data) {
 
 // publish config topic for HA MQTT Discovery
 void Mixing::register_mqtt_ha_config(const char * topic) {
-    // Create the Master device
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
     doc["name"]    = F("EMS-ESP");
     doc["uniq_id"] = F("mixing");
@@ -172,7 +171,7 @@ void Mixing::register_mqtt_ha_config(const char * topic) {
     snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/%s"), System::hostname().c_str(), topic);
     doc["stat_t"] = stat_t;
 
-    doc["val_tpl"] = F("{{value_json.pumpStatus}}");
+    doc["val_tpl"] = F("{{value_json.type}}"); // HA needs a single value. We take the type which is wwc or hc
     JsonObject dev = doc.createNestedObject("dev");
     dev["name"]    = F("EMS-ESP Mixing");
     dev["sw"]      = EMSESP_APP_VERSION;
@@ -215,7 +214,7 @@ bool Mixing::export_values(uint8_t mqtt_format, JsonObject & output) {
             output_hc = output.createNestedObject(hc_name);
         } else {
             output_hc      = output;
-            output["type"] = "hc";
+            output["type"] = F("hc");
         }
         if (Helpers::hasValue(flowTemp_)) {
             output_hc["flowTemp"] = (float)flowTemp_ / 10;
@@ -224,7 +223,7 @@ bool Mixing::export_values(uint8_t mqtt_format, JsonObject & output) {
             output_hc["flowSetTemp"] = flowSetTemp_;
         }
         if (Helpers::hasValue(pumpStatus_)) {
-            char s[5]; // for formatting strings
+            char s[5];
             output_hc["pumpStatus"] = Helpers::render_value(s, pumpStatus_, EMS_VALUE_BOOL);
         }
         if (Helpers::hasValue(status_)) {
@@ -236,13 +235,13 @@ bool Mixing::export_values(uint8_t mqtt_format, JsonObject & output) {
             output_hc = output.createNestedObject(hc_name);
         } else {
             output_hc      = output;
-            output["type"] = "wwc";
+            output["type"] = F("wwc");
         }
         if (Helpers::hasValue(flowTemp_)) {
             output_hc["wwTemp"] = (float)flowTemp_ / 10;
         }
         if (Helpers::hasValue(pumpStatus_)) {
-            char s[5]; // for formatting strings
+            char s[5];
             output_hc["pumpStatus"] = Helpers::render_value(s, pumpStatus_, EMS_VALUE_BOOL);
         }
         if (Helpers::hasValue(status_)) {

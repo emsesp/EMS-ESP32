@@ -109,7 +109,6 @@ void Boiler::register_mqtt_ha_config() {
     Mqtt::register_mqtt_ha_sensor(nullptr, F_(wWSetTemp), this->device_type(), "wWSetTemp", F_(degrees), F_(icontemperature));
     Mqtt::register_mqtt_ha_sensor(nullptr, F_(wWDisinfectionTemp), this->device_type(), "wWDisinfectionTemp", F_(degrees), F_(icontemperature));
     Mqtt::register_mqtt_ha_sensor(nullptr, F_(selFlowTemp), this->device_type(), "selFlowTemp", F_(degrees), F_(icontemperature));
-
     Mqtt::register_mqtt_ha_sensor(nullptr, F_(selBurnPow), this->device_type(), "selBurnPow", F_(percent), nullptr);
     Mqtt::register_mqtt_ha_sensor(nullptr, F_(curBurnPow), this->device_type(), "curBurnPow", F_(percent), F_(iconpercent));
     Mqtt::register_mqtt_ha_sensor(nullptr, F_(pumpMod), this->device_type(), "pumpMod", F_(percent), F_(iconpercent));
@@ -119,7 +118,6 @@ void Boiler::register_mqtt_ha_config() {
     Mqtt::register_mqtt_ha_sensor(nullptr, F_(wWCircPump), this->device_type(), "wWCircPump", nullptr, nullptr);
     Mqtt::register_mqtt_ha_sensor(nullptr, F_(wWCircPumpMode), this->device_type(), "wWCircPumpMode", nullptr, nullptr);
     Mqtt::register_mqtt_ha_sensor(nullptr, F_(wWCirc), this->device_type(), "wWCirc", nullptr, nullptr);
-
     Mqtt::register_mqtt_ha_sensor(nullptr, F_(outdoorTemp), this->device_type(), "outdoorTemp", F_(degrees), F_(icontemperature));
     Mqtt::register_mqtt_ha_sensor(nullptr, F_(wWCurTemp), this->device_type(), "wWCurTemp", F_(degrees), F_(icontemperature));
     Mqtt::register_mqtt_ha_sensor(nullptr, F_(wWCurTemp2), this->device_type(), "wWCurTemp2", F_(degrees), F_(icontemperature));
@@ -129,26 +127,22 @@ void Boiler::register_mqtt_ha_config() {
     Mqtt::register_mqtt_ha_sensor(nullptr, F_(switchTemp), this->device_type(), "switchTemp", F_(degrees), F_(icontemperature));
     Mqtt::register_mqtt_ha_sensor(nullptr, F_(sysPress), this->device_type(), "sysPress", F_(bar), nullptr);
     Mqtt::register_mqtt_ha_sensor(nullptr, F_(boilTemp), this->device_type(), "boilTemp", F_(degrees), nullptr);
-
     Mqtt::register_mqtt_ha_sensor(nullptr, F_(burnGas), this->device_type(), "burnGas", nullptr, nullptr);
     Mqtt::register_mqtt_ha_sensor(nullptr, F_(flameCurr), this->device_type(), "flameCurr", F_(uA), nullptr);
     Mqtt::register_mqtt_ha_sensor(nullptr, F_(heatPump), this->device_type(), "heatPump", nullptr, nullptr);
     Mqtt::register_mqtt_ha_sensor(nullptr, F_(fanWork), this->device_type(), "fanWork", nullptr, nullptr);
     Mqtt::register_mqtt_ha_sensor(nullptr, F_(ignWork), this->device_type(), "ignWork", nullptr, nullptr);
     Mqtt::register_mqtt_ha_sensor(nullptr, F_(wWHeat), this->device_type(), "wWHeat", nullptr, nullptr);
-
     Mqtt::register_mqtt_ha_sensor(nullptr, F_(wwStorageTemp1), this->device_type(), "wwStorageTemp1", F_(degrees), F_(icontemperature));
     Mqtt::register_mqtt_ha_sensor(nullptr, F_(wwStorageTemp2), this->device_type(), "wwStorageTemp2", F_(degrees), F_(icontemperature));
     Mqtt::register_mqtt_ha_sensor(nullptr, F_(exhaustTemp), this->device_type(), "exhaustTemp", F_(degrees), F_(icontemperature));
     Mqtt::register_mqtt_ha_sensor(nullptr, F_(wWActivated), this->device_type(), "wWActivated", nullptr, nullptr);
     Mqtt::register_mqtt_ha_sensor(nullptr, F_(wWOneTime), this->device_type(), "wWOneTime", nullptr, nullptr);
-
     Mqtt::register_mqtt_ha_sensor(nullptr, F_(wWDisinfecting), this->device_type(), "wWDisinfecting", nullptr, nullptr);
     Mqtt::register_mqtt_ha_sensor(nullptr, F_(wWCharging), this->device_type(), "wWCharging", nullptr, nullptr);
     Mqtt::register_mqtt_ha_sensor(nullptr, F_(wWRecharging), this->device_type(), "wWRecharging", nullptr, nullptr);
     Mqtt::register_mqtt_ha_sensor(nullptr, F_(wWTempOK), this->device_type(), "wWTempOK", nullptr, nullptr);
     Mqtt::register_mqtt_ha_sensor(nullptr, F_(wWActive), this->device_type(), "wWActive", nullptr, nullptr);
-
     Mqtt::register_mqtt_ha_sensor(nullptr, F_(heatingActivated), this->device_type(), "heatingActivated", nullptr, nullptr);
     Mqtt::register_mqtt_ha_sensor(nullptr, F_(heatingTemp), this->device_type(), "heatingTemp", F_(degrees), F_(icontemperature));
     Mqtt::register_mqtt_ha_sensor(nullptr, F_(pumpModMax), this->device_type(), "pumpModMax", F_(percent), F_(iconpercent));
@@ -595,10 +589,11 @@ bool Boiler::export_values(JsonObject & output) {
 
 // publish values via MQTT
 void Boiler::publish_values(JsonObject & data) {
-    // must make sure this doesn't exist 1000. Currently (2.1.0) its 950b.
-    // otheerwise use DynamicJsonDocument with max size and use .shrinkToFit()
+    // Warning: must make sure the json size doesn't exceed 1024 bytes (it's currently 950b with 2.1.0b6)
+    // otherwise use should switch to using DynamicJsonDocument with max size followed by a shrinkToFit()
     StaticJsonDocument<1024> doc;
-    JsonObject               output = doc.to<JsonObject>();
+
+    JsonObject output = doc.to<JsonObject>();
     if (export_values(output)) {
         // see if we need to send out HA MQTT Discovery topics
         if ((Mqtt::mqtt_format() == Mqtt::Format::HA) && (!mqtt_ha_config_)) {
