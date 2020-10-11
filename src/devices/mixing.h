@@ -45,7 +45,7 @@ class Mixing : public EMSdevice {
     static uuid::log::Logger logger_;
 
     bool export_values(uint8_t mqtt_format, JsonObject & doc);
-    void register_mqtt_ha_config(const char * topic);
+    void register_mqtt_ha_config();
     bool command_info(const char * value, const int8_t id, JsonObject & output);
 
     void process_MMPLUSStatusMessage_HC(std::shared_ptr<const Telegram> telegram);

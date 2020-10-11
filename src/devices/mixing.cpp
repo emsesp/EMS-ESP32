@@ -153,7 +153,7 @@ void Mixing::publish_values(JsonObject & data) {
         if (export_values(Mqtt::mqtt_format(), data)) {
             // if we're using Home Assistant and haven't created the MQTT Discovery topics, do it now
             if ((Mqtt::mqtt_format() == Mqtt::Format::HA) && (!mqtt_ha_config_)) {
-                register_mqtt_ha_config("mixing_data");
+                register_mqtt_ha_config();
                 mqtt_ha_config_ = true;
             }
         }
@@ -161,14 +161,22 @@ void Mixing::publish_values(JsonObject & data) {
 }
 
 // publish config topic for HA MQTT Discovery
-void Mixing::register_mqtt_ha_config(const char * topic) {
+void Mixing::register_mqtt_ha_config() {
+    // Create the Master device
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
-    doc["name"]    = F("EMS-ESP");
-    doc["uniq_id"] = F("mixing");
+
+    char str1[20];
+    snprintf_P(str1, sizeof(str1), PSTR("Mixing %d"), device_id() - 0x20 + 1);
+    doc["name"]    = str1;
+
+    char str2[20];
+    snprintf_P(str2, sizeof(str2), PSTR("mixing %d"), device_id() - 0x20 + 1);
+    doc["uniq_id"] = str2;
+
     doc["ic"]      = F("mdi:home-thermometer-outline");
 
     char stat_t[50];
-    snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/%s"), System::hostname().c_str(), topic);
+    snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/mixing_data"), System::hostname().c_str());
     doc["stat_t"] = stat_t;
 
     doc["val_tpl"] = F("{{value_json.type}}"); // HA needs a single value. We take the type which is wwc or hc
@@ -179,23 +187,23 @@ void Mixing::register_mqtt_ha_config(const char * topic) {
     dev["mdl"]     = this->name();
     JsonArray ids  = dev.createNestedArray("ids");
     ids.add("ems-esp-mixing");
-    Mqtt::publish_retain(F("homeassistant/sensor/ems-esp/mixing/config"), doc.as<JsonObject>(), true); // publish the config payload with retain flag
 
+    std::string topic(100, '\0');
     if (this->type() == Type::HC) {
+        snprintf_P(&topic[0], topic.capacity() + 1, PSTR("homeassistant/climate/ems-esp/mixing_hc%d/config"), hc_);
+        Mqtt::publish_retain(topic, doc.as<JsonObject>(), true); // publish the config payload with retain flag
         char hc_name[10];
-        char s[5];
-        strlcpy(hc_name, "hc", 10);
-        strlcat(hc_name, Helpers::itoa(s, device_id() - 0x20 + 1), 10); // append device_id to topic
+        snprintf_P(hc_name, sizeof(hc_name), PSTR("hc%d"), hc_);
         Mqtt::register_mqtt_ha_sensor(hc_name, F_(flowTemp), this->device_type(), "flowTemp", F_(degrees), F_(icontemperature));
         Mqtt::register_mqtt_ha_sensor(hc_name, F_(flowSetTemp), this->device_type(), "flowSetTemp", F_(degrees), F_(icontemperature));
         Mqtt::register_mqtt_ha_sensor(hc_name, F_(pumpStatus), this->device_type(), "pumpStatus", nullptr, nullptr);
         Mqtt::register_mqtt_ha_sensor(hc_name, F_(valveStatus), this->device_type(), "valveStatus", nullptr, nullptr);
     } else {
         // WWC
+        snprintf_P(&topic[0], topic.capacity() + 1, PSTR("homeassistant/climate/ems-esp/mixing_wwc%d/config"), hc_);
+        Mqtt::publish_retain(topic, doc.as<JsonObject>(), true); // publish the config payload with retain flag
         char wwc_name[10];
-        char s[5];
-        strlcpy(wwc_name, "wwc", 10);
-        strlcat(wwc_name, Helpers::itoa(s, device_id() - 0x20 + 1), 10); // append device_id to topic
+        snprintf_P(wwc_name, sizeof(wwc_name), PSTR("wwc%d"), hc_);
         Mqtt::register_mqtt_ha_sensor(wwc_name, F_(wwTemp), this->device_type(), "wwTemp", F_(degrees), F_(icontemperature));
         Mqtt::register_mqtt_ha_sensor(wwc_name, F_(pumpStatus), this->device_type(), "pumpStatus", nullptr, nullptr);
         Mqtt::register_mqtt_ha_sensor(wwc_name, F_(tempStatus), this->device_type(), "tempStatus", nullptr, nullptr);
