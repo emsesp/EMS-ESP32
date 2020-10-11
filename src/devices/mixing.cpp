@@ -138,20 +138,24 @@ bool Mixing::command_info(const char * value, const int8_t id, JsonObject & outp
 
 // publish values via MQTT
 // topic is mixing_data<id>
-void Mixing::publish_values() {
-    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
-    JsonObject                                     output = doc.to<JsonObject>();
-    if (export_values(Mqtt::mqtt_format(), output)) {
-        char topic[30];
-        char s[5];
-        strlcpy(topic, "mixing_data", 30);
-        strlcat(topic, Helpers::itoa(s, device_id() - 0x20 + 1), 30); // append device_id to topic
-        Mqtt::publish(topic, doc.as<JsonObject>());
-
-        // if we're using Home Assistant and haven't created the MQTT Discovery topics, do it now
-        if ((Mqtt::mqtt_format() == Mqtt::Format::HA) && (!mqtt_ha_config_)) {
-            register_mqtt_ha_config(topic);
-            mqtt_ha_config_ = true;
+void Mixing::publish_values(JsonObject & data) {
+    if (Mqtt::mqtt_format() == Mqtt::Format::SINGLE) {
+        StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
+        JsonObject                                     output = doc.to<JsonObject>();
+        if (export_values(Mqtt::mqtt_format(), output)) {
+            char topic[30];
+            char s[5];
+            strlcpy(topic, "mixing_data", 30);
+            strlcat(topic, Helpers::itoa(s, device_id() - 0x20 + 1), 30); // append device_id to topic
+            Mqtt::publish(topic, doc.as<JsonObject>());
+        }
+    } else {
+        if (export_values(Mqtt::mqtt_format(), data)) {
+            // if we're using Home Assistant and haven't created the MQTT Discovery topics, do it now
+            if ((Mqtt::mqtt_format() == Mqtt::Format::HA) && (!mqtt_ha_config_)) {
+                register_mqtt_ha_config("mixing_data");
+                mqtt_ha_config_ = true;
+            }
         }
     }
 }
@@ -179,15 +183,23 @@ void Mixing::register_mqtt_ha_config(const char * topic) {
     Mqtt::publish_retain(F("homeassistant/sensor/ems-esp/mixing/config"), doc.as<JsonObject>(), true); // publish the config payload with retain flag
 
     if (this->type() == Type::HC) {
-        Mqtt::register_mqtt_ha_sensor(nullptr, F_(flowTemp), this->device_type(), "flowTemp", F_(degrees), nullptr);
-        Mqtt::register_mqtt_ha_sensor(nullptr, F_(flowSetTemp), this->device_type(), "flowSetTemp", F_(degrees), nullptr);
-        Mqtt::register_mqtt_ha_sensor(nullptr, F_(pumpStatus), this->device_type(), "pumpStatus", nullptr, nullptr);
-        Mqtt::register_mqtt_ha_sensor(nullptr, F_(valveStatus), this->device_type(), "valveStatus", nullptr, nullptr);
+        char hc_name[10];
+        char s[5];
+        strlcpy(hc_name, "hc", 10);
+        strlcat(hc_name, Helpers::itoa(s, device_id() - 0x20 + 1), 10); // append device_id to topic
+        Mqtt::register_mqtt_ha_sensor(hc_name, F_(flowTemp), this->device_type(), "flowTemp", F_(degrees), F_(icontemperature));
+        Mqtt::register_mqtt_ha_sensor(hc_name, F_(flowSetTemp), this->device_type(), "flowSetTemp", F_(degrees), F_(icontemperature));
+        Mqtt::register_mqtt_ha_sensor(hc_name, F_(pumpStatus), this->device_type(), "pumpStatus", nullptr, nullptr);
+        Mqtt::register_mqtt_ha_sensor(hc_name, F_(valveStatus), this->device_type(), "valveStatus", nullptr, nullptr);
     } else {
         // WWC
-        Mqtt::register_mqtt_ha_sensor(nullptr, F_(wwTemp), this->device_type(), "wwTemp", F_(degrees), nullptr);
-        Mqtt::register_mqtt_ha_sensor(nullptr, F_(pumpStatus), this->device_type(), "pumpStatus", nullptr, nullptr);
-        Mqtt::register_mqtt_ha_sensor(nullptr, F_(tempStatus), this->device_type(), "tempStatus", nullptr, nullptr);
+        char wwc_name[10];
+        char s[5];
+        strlcpy(wwc_name, "wwc", 10);
+        strlcat(wwc_name, Helpers::itoa(s, device_id() - 0x20 + 1), 10); // append device_id to topic
+        Mqtt::register_mqtt_ha_sensor(wwc_name, F_(wwTemp), this->device_type(), "wwTemp", F_(degrees), F_(icontemperature));
+        Mqtt::register_mqtt_ha_sensor(wwc_name, F_(pumpStatus), this->device_type(), "pumpStatus", nullptr, nullptr);
+        Mqtt::register_mqtt_ha_sensor(wwc_name, F_(tempStatus), this->device_type(), "tempStatus", nullptr, nullptr);
     }
 }
 
@@ -199,7 +211,7 @@ bool Mixing::export_values(uint8_t mqtt_format, JsonObject & output) {
 
     if (this->type() == Type::HC) {
         snprintf_P(hc_name, sizeof(hc_name), PSTR("hc%d"), hc_);
-        if (mqtt_format == Mqtt::Format::NESTED) {
+        if (mqtt_format == Mqtt::Format::NESTED || mqtt_format == Mqtt::Format::HA) {
             output_hc = output.createNestedObject(hc_name);
         } else {
             output_hc      = output;

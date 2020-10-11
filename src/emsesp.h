@@ -77,6 +77,7 @@ class EMSESP {
     static std::string pretty_telegram(std::shared_ptr<const Telegram> telegram);
 
     static void send_read_request(const uint16_t type_id, const uint8_t dest);
+    static void send_read_request(const uint16_t type_id, const uint8_t dest, const uint8_t offset);
     static void send_write_request(const uint16_t type_id,
                                    const uint8_t  dest,
                                    const uint8_t  offset,

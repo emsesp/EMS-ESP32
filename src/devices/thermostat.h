@@ -63,6 +63,7 @@ class Thermostat : public EMSdevice {
         int8_t  offsettemp        = EMS_VALUE_INT_NOTSET;  // heating curve offest temp at roomtemp signed!
         uint8_t manualtemp        = EMS_VALUE_UINT_NOTSET;
         uint8_t summer_setmode    = EMS_VALUE_UINT_NOTSET;
+        uint8_t roominfluence     = EMS_VALUE_UINT_NOTSET;
 
         uint8_t hc_num() const {
             return hc_num_;
@@ -99,7 +100,7 @@ class Thermostat : public EMSdevice {
     static std::string mode_tostring(uint8_t mode);
 
     virtual void show_values(uuid::console::Shell & shell);
-    virtual void publish_values();
+    virtual void publish_values(JsonObject & data);
     virtual void device_info_web(JsonArray & root);
     virtual bool updated_values();
 
@@ -183,6 +184,7 @@ class Thermostat : public EMSdevice {
     static constexpr uint8_t EMS_OFFSET_RC35Set_seltemp            = 37; // selected temp
     static constexpr uint8_t EMS_OFFSET_RC35Set_temp_offset        = 6;
     static constexpr uint8_t EMS_OFFSET_RC35Set_temp_design        = 17;
+    static constexpr uint8_t EMS_OFFSET_RC35Set_temp_design_floor  = 36;
     static constexpr uint8_t EMS_OFFSET_RC35Set_temp_summer        = 22;
     static constexpr uint8_t EMS_OFFSET_RC35Set_temp_nofrost       = 23;
 
@@ -283,6 +285,7 @@ class Thermostat : public EMSdevice {
     bool set_holidaytemp(const char * value, const int8_t id);
     bool set_manualtemp(const char * value, const int8_t id);
     bool set_remotetemp(const char * value, const int8_t id);
+    bool set_roominfluence(const char * value, const int8_t id);
 
     // set functions - these don't use the id/hc, the parameters are ignored
     bool set_wwmode(const char * value, const int8_t id);

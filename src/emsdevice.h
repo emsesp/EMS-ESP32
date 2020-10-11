@@ -140,7 +140,7 @@ class EMSdevice {
 
     // virtual functions overrules by derived classes
     virtual void show_values(uuid::console::Shell & shell) = 0;
-    virtual void publish_values()                          = 0;
+    virtual void publish_values(JsonObject & data)         = 0;
     virtual bool updated_values()                          = 0;
     virtual void device_info_web(JsonArray & root)         = 0;
 
