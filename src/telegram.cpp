@@ -567,6 +567,12 @@ void TxService::retry_tx(const uint8_t operation, const uint8_t * data, const ui
     tx_telegrams_.emplace_front(tx_telegram_id_++, std::move(telegram_last_), true);
 }
 
+void TxService::read_next_tx() {
+    // add to the top of the queue
+    uint8_t message_data[1] = {EMS_MAX_TELEGRAM_LENGTH}; // request all data, 32 bytes
+    add(Telegram::Operation::TX_READ, telegram_last_->dest, telegram_last_->type_id, telegram_last_->offset + 25, message_data, 1, true);
+}
+
 // checks if a telegram is sent to us matches the last Tx request
 // incoming Rx src must match the last Tx dest
 // and incoming Rx dest must be us (our ems_bus_id)

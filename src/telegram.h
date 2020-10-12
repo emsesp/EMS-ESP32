@@ -284,6 +284,7 @@ class TxService : public EMSbus {
     void     retry_tx(const uint8_t operation, const uint8_t * data, const uint8_t length);
     bool     is_last_tx(const uint8_t src, const uint8_t dest) const;
     uint16_t post_send_query();
+    void     read_next_tx();
 
     uint8_t retry_count() const {
         return retry_count_;

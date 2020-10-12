@@ -162,7 +162,6 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
 
     for (uint8_t i = 0; i < set_typeids.size(); i++) {
         EMSESP::send_read_request(set_typeids[i], device_id);
-        EMSESP::send_read_request(set_typeids[i], device_id, 0x1B);
     }
 
     for (uint8_t i = 0; i < summer_typeids.size(); i++) {
