@@ -34,13 +34,18 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
     }
 
     if (flags == EMSdevice::EMS_DEVICE_FLAG_SM100) {
-        register_telegram_type(0x0362, F("SM100Monitor"), true, [&](std::shared_ptr<const Telegram> t) { process_SM100Monitor(t); });
-        register_telegram_type(0x0363, F("SM100Monitor2"), true, [&](std::shared_ptr<const Telegram> t) { process_SM100Monitor2(t); });
-        register_telegram_type(0x0366, F("SM100Config"), true, [&](std::shared_ptr<const Telegram> t) { process_SM100Config(t); });
-
-        register_telegram_type(0x0364, F("SM100Status"), false, [&](std::shared_ptr<const Telegram> t) { process_SM100Status(t); });
-        register_telegram_type(0x036A, F("SM100Status2"), false, [&](std::shared_ptr<const Telegram> t) { process_SM100Status2(t); });
-        register_telegram_type(0x038E, F("SM100Energy"), true, [&](std::shared_ptr<const Telegram> t) { process_SM100Energy(t); });
+        if (device_id == 0x2A) {
+            register_telegram_type(0x07D6, F("SM100wwTemperatur"), false, [&](std::shared_ptr<const Telegram> t) { process_SM100wwTemperature(t); });
+            register_telegram_type(0x07AA, F("SM100wwStatus"), false, [&](std::shared_ptr<const Telegram> t) { process_SM100wwStatus(t); });
+            register_telegram_type(0x07AB, F("SM100wwCommand"), false, [&](std::shared_ptr<const Telegram> t) { process_SM100wwCommand(t); });
+        } else {
+            register_telegram_type(0x0362, F("SM100Monitor"), true, [&](std::shared_ptr<const Telegram> t) { process_SM100Monitor(t); });
+            register_telegram_type(0x0363, F("SM100Monitor2"), true, [&](std::shared_ptr<const Telegram> t) { process_SM100Monitor2(t); });
+            register_telegram_type(0x0366, F("SM100Config"), true, [&](std::shared_ptr<const Telegram> t) { process_SM100Config(t); });
+            register_telegram_type(0x0364, F("SM100Status"), false, [&](std::shared_ptr<const Telegram> t) { process_SM100Status(t); });
+            register_telegram_type(0x036A, F("SM100Status2"), false, [&](std::shared_ptr<const Telegram> t) { process_SM100Status2(t); });
+            register_telegram_type(0x038E, F("SM100Energy"), true, [&](std::shared_ptr<const Telegram> t) { process_SM100Energy(t); });
+        }
     }
 
     if (flags == EMSdevice::EMS_DEVICE_FLAG_ISM) {
@@ -129,13 +134,16 @@ void Solar::publish_values(JsonObject & data) {
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
     JsonObject                                      output = doc.to<JsonObject>();
     if (export_values(output)) {
-        Mqtt::publish(F("solar_data"), doc.as<JsonObject>());
-    }
-
-    // if we're using Home Assistant and haven't created the MQTT Discovery topics, do it now
-    if ((Mqtt::mqtt_format() == Mqtt::Format::HA) && (!mqtt_ha_config_)) {
-        register_mqtt_ha_config();
-        mqtt_ha_config_ = true;
+        if (device_id() == 0x2A) {
+            Mqtt::publish(F("ww_data"), doc.as<JsonObject>());
+        } else {
+            Mqtt::publish(F("solar_data"), doc.as<JsonObject>());
+            // if we're using Home Assistant and haven't created the MQTT Discovery topics, do it now
+            if ((Mqtt::mqtt_format() == Mqtt::Format::HA) && (!mqtt_ha_config_)) {
+                register_mqtt_ha_config();
+                mqtt_ha_config_ = true;
+            }
+        }
     }
 }
 
@@ -285,6 +293,27 @@ void Solar::process_SM100Monitor(std::shared_ptr<const Telegram> telegram) {
 void Solar::process_SM100Monitor2(std::shared_ptr<const Telegram> telegram) {
     // not implemented yet
 }
+
+// SM100wwTemperatur - 0x07D6
+// Solar Module(0x2A) -> (0x00), (0x7D6), data: 01 C1 00 00 02 5B 01 AF 01 AD 80 00 01 90
+void Solar::process_SM100wwTemperature(std::shared_ptr<const Telegram> telegram) {
+    // changed_ |= telegram->read_value(wwTemp_1_, 0);
+    // changed_ |= telegram->read_value(wwTemp_3_, 4);
+    // changed_ |= telegram->read_value(wwTemp_4_, 6);
+    // changed_ |= telegram->read_value(wwTemp_5_, 8);
+    // changed_ |= telegram->read_value(wwTemp_7_, 12);
+}
+// SM100wwStatus - 0x07AA
+// Solar Module(0x2A) -> (0x00), (0x7AA), data: 64 00 04 00 03 00 28 01 0F
+void Solar::process_SM100wwStatus(std::shared_ptr<const Telegram> telegram) {
+    // changed_ |= telegram->read_value(wwPump_, 0);
+}
+// SM100wwCommand - 0x07AB
+// Thermostat(0x10) -> Solar Module(0x2A), (0x7AB), data: 01 00 01
+void Solar::process_SM100wwCommand(std::shared_ptr<const Telegram> telegram) {
+    // not implemented yet
+}
+
 
 #pragma GCC diagnostic pop
 

@@ -224,6 +224,7 @@ MAKE_PSTR(flowSetTemp, "Setpoint flow temperature")
 
 // thermostat
 MAKE_PSTR(time, "Time")
+MAKE_PSTR(error, "Error code")
 MAKE_PSTR(display, "Display")
 MAKE_PSTR(language, "Language")
 MAKE_PSTR(offsetclock, "Offset clock")

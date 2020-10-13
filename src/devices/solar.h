@@ -81,6 +81,10 @@ class Solar : public EMSdevice {
     void process_SM100Status2(std::shared_ptr<const Telegram> telegram);
     void process_SM100Energy(std::shared_ptr<const Telegram> telegram);
 
+    void process_SM100wwTemperature(std::shared_ptr<const Telegram> telegram);
+    void process_SM100wwStatus(std::shared_ptr<const Telegram> telegram);
+    void process_SM100wwCommand(std::shared_ptr<const Telegram> telegram);
+
     void process_ISM1StatusMessage(std::shared_ptr<const Telegram> telegram);
     void process_ISM1Set(std::shared_ptr<const Telegram> telegram);
 };

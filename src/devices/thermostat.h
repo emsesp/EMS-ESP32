@@ -110,6 +110,12 @@ class Thermostat : public EMSdevice {
     void add_commands();
     bool export_values_main(JsonObject & doc);
     bool export_values_hc(uint8_t mqtt_format, JsonObject & doc);
+    bool ha_registered() const {
+        return ha_registered_;
+    }
+    void ha_registered(bool b) {
+        ha_registered_ = b;
+    }
 
     // specific thermostat characteristics, stripping the last 4 bits
     inline uint8_t model() const {
@@ -122,9 +128,11 @@ class Thermostat : public EMSdevice {
     std::vector<uint16_t> timer_typeids;
     std::vector<uint16_t> summer_typeids;
 
-    std::string datetime_; // date and time stamp
+    std::string datetime_;  // date and time stamp
+    std::string errorCode_; // code as string i.e. "A22(816)"
 
-    bool changed_ = false;
+    bool changed_       = false;
+    bool ha_registered_ = false;
 
     // Installation parameters
     uint8_t ibaMainDisplay_ =
@@ -135,6 +143,7 @@ class Thermostat : public EMSdevice {
     uint8_t ibaBuildingType_      = EMS_VALUE_UINT_NOTSET; // building type: 0 = light, 1 = medium, 2 = heavy
     uint8_t ibaClockOffset_       = EMS_VALUE_UINT_NOTSET; // offset (in sec) to clock, 0xff = -1 s, 0x02 = 2 s
 
+    uint16_t errorNumber_       = EMS_VALUE_USHORT_NOTSET;
     int8_t   dampedoutdoortemp_ = EMS_VALUE_INT_NOTSET;
     uint16_t tempsensor1_       = EMS_VALUE_USHORT_NOTSET;
     uint16_t tempsensor2_       = EMS_VALUE_USHORT_NOTSET;
@@ -226,6 +235,7 @@ class Thermostat : public EMSdevice {
     std::shared_ptr<Thermostat::HeatingCircuit> heating_circuit(std::shared_ptr<const Telegram> telegram);
     std::shared_ptr<Thermostat::HeatingCircuit> heating_circuit(const uint8_t hc_num);
 
+    void register_mqtt_ha_config();
     void register_mqtt_ha_config(uint8_t hc_num);
     bool thermostat_ha_cmd(const char * message, uint8_t hc_num);
 
@@ -234,6 +244,7 @@ class Thermostat : public EMSdevice {
     void process_RCOutdoorTemp(std::shared_ptr<const Telegram> telegram);
     void process_IBASettings(std::shared_ptr<const Telegram> telegram);
     void process_RCTime(std::shared_ptr<const Telegram> telegram);
+    void process_RCError(std::shared_ptr<const Telegram> telegram);
     void process_RC35wwSettings(std::shared_ptr<const Telegram> telegram);
     void process_RC35Monitor(std::shared_ptr<const Telegram> telegram);
     void process_RC35Set(std::shared_ptr<const Telegram> telegram);

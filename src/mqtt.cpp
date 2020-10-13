@@ -696,7 +696,7 @@ void Mqtt::register_mqtt_ha_binary_sensor(const __FlashStringHelper * name, cons
     char state_t[50];
     snprintf_P(state_t, sizeof(state_t), PSTR("%s/%s"), hostname_.c_str(), entity);
     doc["stat_t"] = state_t;
-
+    /*
     EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) {
         if (settings.bool_format == BOOL_FORMAT_ONOFF) {
             doc[F("payload_on")]  = F("on");
@@ -709,7 +709,7 @@ void Mqtt::register_mqtt_ha_binary_sensor(const __FlashStringHelper * name, cons
             doc[F("payload_off")] = "0";
         }
     });
-
+    */
     JsonObject dev = doc.createNestedObject(F("dev"));
     JsonArray  ids = dev.createNestedArray(F("ids"));
     char       ha_device[40];

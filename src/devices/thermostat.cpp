@@ -47,6 +47,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
         // common telegram handlers
         register_telegram_type(EMS_TYPE_RCOutdoorTemp, F("RCOutdoorTemp"), false, [&](std::shared_ptr<const Telegram> t) { process_RCOutdoorTemp(t); });
         register_telegram_type(EMS_TYPE_RCTime, F("RCTime"), false, [&](std::shared_ptr<const Telegram> t) { process_RCTime(t); });
+        register_telegram_type(0xA2, F("RCError"), false, [&](std::shared_ptr<const Telegram> t) { process_RCError(t); });
     }
     // RC10
     if (model == EMSdevice::EMS_DEVICE_FLAG_RC10) {
@@ -175,6 +176,7 @@ void Thermostat::device_info_web(JsonArray & root) {
     JsonObject                                     output_main = doc_main.to<JsonObject>();
     if (export_values_main(output_main)) {
         print_value_json(root, F("time"), nullptr, F_(time), nullptr, output_main);
+        print_value_json(root, F("errorcode"), nullptr, F_(error), nullptr, output_main);
         print_value_json(root, F("display"), nullptr, F_(display), nullptr, output_main);
         print_value_json(root, F("language"), nullptr, F_(language), nullptr, output_main);
         print_value_json(root, F("offsetclock"), nullptr, F_(offsetclock), nullptr, output_main);
@@ -256,6 +258,7 @@ void Thermostat::show_values(uuid::console::Shell & shell) {
     JsonObject                                     output_main = doc_main.to<JsonObject>();
     if (export_values_main(output_main)) {
         print_value_json(shell, F("time"), nullptr, F_(time), nullptr, output_main);
+        print_value_json(shell, F("errorcode"), nullptr, F_(error), nullptr, output_main);
         print_value_json(shell, F("display"), nullptr, F_(display), nullptr, output_main);
         print_value_json(shell, F("language"), nullptr, F_(language), nullptr, output_main);
         print_value_json(shell, F("offsetclock"), nullptr, F_(offsetclock), nullptr, output_main);
@@ -341,6 +344,10 @@ bool Thermostat::export_values_main(JsonObject & rootThermostat) {
     // Clock time
     if (datetime_.size()) {
         rootThermostat["time"] = datetime_.c_str();
+    }
+
+    if (Helpers::hasValue(errorNumber_)) {
+        rootThermostat["errorcode"] = errorCode_.c_str();
     }
 
     if (model == EMSdevice::EMS_DEVICE_FLAG_RC30_1) {
@@ -441,6 +448,12 @@ bool Thermostat::export_values_main(JsonObject & rootThermostat) {
     if (Helpers::hasValue(wwCircMode_)) {
         char s[7];
         rootThermostat["wwcircmode"] = Helpers::render_enum(s, {"off", "on", "auto"}, wwCircMode_);
+    }
+
+    if ((Mqtt::mqtt_format() == Mqtt::Format::HA) && (!ha_registered())) {
+        // see if we have already registered this with HA MQTT Discovery, if not send the config
+        register_mqtt_ha_config();
+        ha_registered(true);
     }
 
     return (rootThermostat.size());
@@ -718,6 +731,43 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::sha
     }
 
     return heating_circuits_.back(); // even after sorting, this should still point back to the newly created HC
+}
+
+// publish config topic for HA MQTT Discovery
+// homeassistant/climate/ems-esp/thermostat_/config
+void Thermostat::register_mqtt_ha_config() {
+    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
+    doc["name"]    = F("Thermostat");
+    doc["uniq_id"] = F("thermostat");
+    doc["ic"]      = F("mdi:home-thermometer-outline");
+
+    char stat_t[50];
+    snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/thermostat_data"), System::hostname().c_str());
+    doc["stat_t"] = stat_t;
+
+    doc["val_tpl"] = F("{{value_json.time}}");
+    JsonObject dev = doc.createNestedObject("dev");
+    dev["name"]    = F("EMS-ESP Thermostat");
+    dev["sw"]      = EMSESP_APP_VERSION;
+    dev["mf"]      = this->brand_to_string();
+    dev["mdl"]     = this->name();
+    JsonArray ids  = dev.createNestedArray("ids");
+    ids.add("ems-esp-thermostat");
+    Mqtt::publish_retain(F("homeassistant/sensor/ems-esp/thermostat/config"), doc.as<JsonObject>(), true); // publish the config payload with retain flag
+
+    Mqtt::register_mqtt_ha_sensor(nullptr, F_(time), this->device_type(), "time", nullptr, nullptr);
+    Mqtt::register_mqtt_ha_sensor(nullptr, F_(error), this->device_type(), "errorcode", nullptr, nullptr);
+
+    uint8_t model = this->model();
+    if (model == EMS_DEVICE_FLAG_RC35 || model == EMS_DEVICE_FLAG_RC35) {
+        Mqtt::register_mqtt_ha_sensor(nullptr, F_(dampedtemp), this->device_type(), "dampedtemp", F_(degrees), F_(icontemperature));
+        Mqtt::register_mqtt_ha_sensor(nullptr, F_(building), this->device_type(), "building", nullptr, nullptr);
+        Mqtt::register_mqtt_ha_sensor(nullptr, F_(minexttemp), this->device_type(), "minexttemp", F_(degrees), F_(icontemperature));
+        Mqtt::register_mqtt_ha_sensor(nullptr, F_(wwmode), this->device_type(), "wwmode", nullptr, nullptr);
+        Mqtt::register_mqtt_ha_sensor(nullptr, F_(wwtemp), this->device_type(), "wwtemp", F_(degrees), F_(icontemperature));
+        Mqtt::register_mqtt_ha_sensor(nullptr, F_(wwtemplow), this->device_type(), "wwtemplow", F_(degrees), F_(icontemperature));
+        Mqtt::register_mqtt_ha_sensor(nullptr, F_(wwcircmode), this->device_type(), "wwcircmode", nullptr, nullptr);
+    }
 }
 
 // publish config topic for HA MQTT Discovery
@@ -1290,6 +1340,28 @@ void Thermostat::process_RCTime(std::shared_ptr<const Telegram> telegram) {
     }
 }
 
+// process_RCError - type 0xA2 - error maeesage - 14 bytes long
+// 10 00 A2 00 41 32 32 03 30 00 02 00 00 00 00 00 00 02 CRC
+//              A  2  2  816
+void Thermostat::process_RCError(std::shared_ptr<const Telegram> telegram) {
+    if (errorCode_.empty()) {
+        errorCode_.resize(10, '\0');
+    }
+    char buf[4];
+    buf[0] = telegram->message_data[0];
+    buf[1] = telegram->message_data[1];
+    buf[2] = telegram->message_data[2];
+    buf[3] = 0;
+    changed_ |= telegram->read_value(errorNumber_, 3);
+
+    snprintf_P(&errorCode_[0],
+               errorCode_.capacity() + 1,
+               PSTR("%s(%d)"),
+               buf,
+               errorNumber_
+    );
+}
+
 // 0xA5 - Set minimum external temperature
 bool Thermostat::set_minexttemp(const char * value, const int8_t id) {
     int mt = 0;
@@ -1353,12 +1425,16 @@ bool Thermostat::set_remotetemp(const char * value, const int8_t id) {
         return false;
     }
 
-    uint8_t hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
+    uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
+    std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
+    if (hc == nullptr) {
+        return false;
+    }
 
     if (f > 100 || f < 0) {
-        Roomctrl::set_remotetemp(hc_num - 1, EMS_VALUE_SHORT_NOTSET);
+        Roomctrl::set_remotetemp(hc->hc_num() - 1, EMS_VALUE_SHORT_NOTSET);
     } else {
-        Roomctrl::set_remotetemp(hc_num - 1, (int16_t)(f * 10));
+        Roomctrl::set_remotetemp(hc->hc_num() - 1, (int16_t)(f * 10));
     }
 
     return true;
