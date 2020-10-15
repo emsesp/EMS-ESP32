@@ -239,7 +239,7 @@ bool Mixing::export_values(uint8_t mqtt_format, JsonObject & output) {
         }
     } else {
         snprintf_P(hc_name, sizeof(hc_name), PSTR("wwc%d"), hc_);
-        if (mqtt_format == Mqtt::Format::NESTED) {
+        if (mqtt_format == Mqtt::Format::NESTED || mqtt_format == Mqtt::Format::HA) {
             output_hc = output.createNestedObject(hc_name);
         } else {
             output_hc      = output;
