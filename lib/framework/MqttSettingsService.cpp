@@ -222,6 +222,10 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
         emsesp::EMSESP::mqtt_.set_qos(newSettings.mqtt_qos);
     }
 
+    if (newSettings.mqtt_format != settings.mqtt_format) {
+        emsesp::EMSESP::mqtt_.set_format(newSettings.mqtt_format);
+    }
+
     if (newSettings.mqtt_retain != settings.mqtt_retain) {
         emsesp::EMSESP::mqtt_.set_retain(newSettings.mqtt_retain);
     }

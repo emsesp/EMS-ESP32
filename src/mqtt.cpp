@@ -454,6 +454,10 @@ void Mqtt::set_retain(bool mqtt_retain) {
     mqtt_retain_ = mqtt_retain;
 }
 
+void Mqtt::set_format(uint8_t mqtt_format) {
+    mqtt_format_ = mqtt_format;
+}
+
 // MQTT onConnect - when a connect is established
 void Mqtt::on_connect() {
     // send info topic appended with the version information as JSON

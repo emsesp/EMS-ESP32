@@ -75,6 +75,7 @@ class Mqtt {
     void set_publish_time_sensor(uint16_t publish_time);
     void set_qos(uint8_t mqtt_qos);
     void set_retain(bool mqtt_retain);
+    void set_format(uint8_t mqtt_format);
     bool get_publish_onchange(uint8_t device_type);
 
     enum Operation { PUBLISH, SUBSCRIBE };
