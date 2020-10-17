@@ -403,6 +403,7 @@ void EMSESPShell::add_console_commands() {
             }
 
             if (ok && output.size()) {
+                doc.shrinkToFit();
                 serializeJsonPretty(doc, shell);
                 shell.println();
             }
