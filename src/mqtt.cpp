@@ -640,7 +640,7 @@ void Mqtt::process_queue() {
         LOG_DEBUG(F("Subscribing to topic: %s"), message->topic.c_str());
         uint16_t packet_id = mqttClient_->subscribe(message->topic.c_str(), mqtt_qos_);
         if (!packet_id) {
-            LOG_DEBUG(F("Error subscribing to %s, error %d"), message->topic.c_str(), packet_id);
+            LOG_DEBUG(F("Error subscribing to %s"), message->topic.c_str());
         }
 
         mqtt_messages_.pop_front(); // remove the message from the queue
@@ -714,8 +714,8 @@ void Mqtt::register_mqtt_ha_binary_sensor(const __FlashStringHelper * name, cons
         }
     });
 
-    JsonObject dev = doc.createNestedObject(F("dev"));
-    JsonArray  ids = dev.createNestedArray(F("ids"));
+    JsonObject dev = doc.createNestedObject("dev");
+    JsonArray  ids = dev.createNestedArray("ids");
     char       ha_device[40];
     snprintf_P(ha_device, sizeof(ha_device), PSTR("ems-esp-%s"), EMSdevice::device_type_2_device_name(device_type).c_str());
     ids.add(ha_device);
@@ -795,8 +795,8 @@ void Mqtt::register_mqtt_ha_sensor(const char *                prefix,
     if (icon != nullptr) {
         doc["ic"] = icon;
     }
-    JsonObject dev = doc.createNestedObject(F("dev"));
-    JsonArray  ids = dev.createNestedArray(F("ids"));
+    JsonObject dev = doc.createNestedObject("dev");
+    JsonArray  ids = dev.createNestedArray("ids");
     ids.add(ha_device);
 
     // convert json to string and publish immediately with retain forced to true
@@ -804,17 +804,17 @@ void Mqtt::register_mqtt_ha_sensor(const char *                prefix,
     std::string payload_text;
     serializeJson(doc, payload_text); // convert json to string
     uint16_t packet_id = mqttClient_->publish(topic, 0, true, payload_text.c_str(), payload_text.size());
-#if defined(EMSESP_STANDALONE)
-    LOG_DEBUG(F("Publishing topic %s"), topic);
-#else
     if (packet_id == 0) {
         LOG_ERROR(F("Failed to publish topic %s"), topic);
     } else {
+#if defined(EMSESP_STANDALONE)
+        LOG_DEBUG(F("Publishing topic=%s, payload=%s"), topic, payload_text.c_str());
+#else
         LOG_DEBUG(F("Publishing topic %s"), topic);
-    }
 #endif
+    }
 
-    delay(MQTT_PUBLISH_WAIT);
+    delay(MQTT_PUBLISH_WAIT); // don't flood asynctcp
 }
 
 } // namespace emsesp
