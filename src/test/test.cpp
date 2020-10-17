@@ -28,7 +28,7 @@ namespace emsesp {
 // used with the 'test' command, under su/admin
 void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
     if (command == "default") {
-        run_test(shell, "mixing"); // add the default test case here
+        run_test(shell, "unknown"); // add the default test case here
     }
 
     if (command.empty()) {
@@ -172,7 +172,8 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         // note there is no brand (byte 9)
         rx_telegram({0x09, 0x0B, 0x02, 0x00, 0x59, 0x09, 0x0a});
 
-        EMSESP::show_device_values(shell);
+        shell.invoke_command("show devices");
+        shell.invoke_command("call system report");
     }
 
     if (command == "unknown2") {
@@ -808,6 +809,8 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         uart_telegram({0xA0, 0x00, 0xFF, 0x00, 0x01, 0x55, 0x00, 0x1A});
 
         shell.invoke_command("show");
+        shell.invoke_command("call");
+        shell.invoke_command("call system report");
     }
 
     // finally dump to console

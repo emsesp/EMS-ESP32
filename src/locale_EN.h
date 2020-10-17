@@ -90,10 +90,13 @@ MAKE_PSTR_WORD(gateway)
 MAKE_PSTR_WORD(controller)
 MAKE_PSTR_WORD(connect)
 MAKE_PSTR_WORD(heatpump)
+MAKE_PSTR_WORD(generic)
 
 // dallas sensors
 MAKE_PSTR_WORD(sensor)
 
+MAKE_PSTR(1space, " ")
+MAKE_PSTR(2spaces, "  ")
 MAKE_PSTR(kwh, "kWh")
 MAKE_PSTR(wh, "Wh")
 MAKE_PSTR(master_thermostat_fmt, "Master Thermostat Device ID = %s")
