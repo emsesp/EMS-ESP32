@@ -152,6 +152,7 @@ void System::start() {
         Command::add(EMSdevice::DeviceType::SYSTEM, settings.ems_bus_id, F("pin"), System::command_pin);
         Command::add(EMSdevice::DeviceType::SYSTEM, settings.ems_bus_id, F("send"), System::command_send);
         Command::add_with_json(EMSdevice::DeviceType::SYSTEM, F("info"), System::command_info);
+        Command::add_with_json(EMSdevice::DeviceType::SYSTEM, F("report"), System::command_report);
     });
 
     syslog_init(); // init SysLog
@@ -243,8 +244,8 @@ void System::show_mem(const char * note) {
 // send periodic MQTT message with system information
 void System::send_heartbeat() {
     // don't send heartbeat if WiFi is not connected
-    int rssid = wifi_quality();
-    if (rssid == -1) {
+    int rssi = wifi_quality();
+    if (rssi == -1) {
         return;
     }
 
@@ -265,7 +266,7 @@ void System::send_heartbeat() {
         doc["status"] = "disconnected";
     }
 
-    doc["rssid"]            = rssid;
+    doc["rssi"]             = rssi;
     doc["uptime"]           = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
     doc["uptime_sec"]       = uuid::get_uptime_sec();
     doc["mqttpublishfails"] = Mqtt::publish_fails();
@@ -481,11 +482,11 @@ void System::show_system(uuid::console::Shell & shell) {
     EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) {
         shell.println();
         shell.printfln(F("Syslog:"));
-        shell.print(" ");
+        shell.print(F_(1space));
         shell.printfln(F_(host_fmt), !settings.syslog_host.isEmpty() ? settings.syslog_host.c_str() : uuid::read_flash_string(F_(unset)).c_str());
-        shell.print(" ");
+        shell.print(F_(1space));
         shell.printfln(F_(log_level_fmt), uuid::log::format_level_lowercase(static_cast<uuid::log::Level>(settings.syslog_level)));
-        shell.print(" ");
+        shell.print(F_(1space));
         shell.printfln(F_(mark_interval_fmt), settings.syslog_mark_interval);
     });
 
@@ -617,18 +618,18 @@ void System::console_commands(Shell & shell, unsigned int context) {
                                        flash_string_vector{F_(set)},
                                        [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
                                            EMSESP::esp8266React.getWiFiSettingsService()->read([&](WiFiSettings & wifiSettings) {
-                                               shell.print(" ");
+                                               shell.print(F_(1space));
                                                shell.printfln(F_(hostname_fmt),
                                                               wifiSettings.hostname.isEmpty() ? uuid::read_flash_string(F_(unset)).c_str()
                                                                                               : wifiSettings.hostname.c_str());
                                            });
 
                                            EMSESP::esp8266React.getWiFiSettingsService()->read([&](WiFiSettings & wifiSettings) {
-                                               shell.print(" ");
+                                               shell.print(F_(1space));
                                                shell.printfln(F_(wifi_ssid_fmt),
                                                               wifiSettings.ssid.isEmpty() ? uuid::read_flash_string(F_(unset)).c_str()
                                                                                           : wifiSettings.ssid.c_str());
-                                               shell.print(" ");
+                                               shell.print(F_(1space));
                                                shell.printfln(F_(wifi_password_fmt), wifiSettings.ssid.isEmpty() ? F_(unset) : F_(asterisks));
                                            });
                                        });
@@ -846,7 +847,7 @@ bool System::check_upgrade() {
 // value and id are ignored
 bool System::command_info(const char * value, const int8_t id, JsonObject & output) {
 #ifdef EMSESP_STANDALONE
-    output["test"] = "testing";
+    output["test"] = "testing info command";
 #else
     EMSESP::esp8266React.getWiFiSettingsService()->read([&](WiFiSettings & settings) {
         char       s[7];
@@ -938,5 +939,94 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
     return true;
 }
 
+// export debug information
+// http://ems-esp/api?device=system&cmd=report
+bool System::command_report(const char * value, const int8_t id, JsonObject & output) {
+    JsonObject node;
+
+    node = output.createNestedObject("System");
+
+    node["version"] = EMSESP_APP_VERSION;
+    node["uptime"]  = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
+    node["freemem"] = free_mem();
+#if defined(ESP8266)
+    node["fragmem"] = ESP.getHeapFragmentation();
+#endif
+
+    node = output.createNestedObject("Settings");
+
+    EMSESP::esp8266React.getMqttSettingsService()->read([&](MqttSettings & settings) {
+        node["publish_time_boiler"]     = settings.publish_time_boiler;
+        node["publish_time_thermostat"] = settings.publish_time_thermostat;
+        node["publish_time_solar"]      = settings.publish_time_solar;
+        node["publish_time_mixing"]     = settings.publish_time_mixing;
+        node["publish_time_other"]      = settings.publish_time_other;
+        node["publish_time_sensor"]     = settings.publish_time_sensor;
+        node["mqtt_format"]             = settings.mqtt_format;
+        node["mqtt_qos"]                = settings.mqtt_qos;
+        char s[7];
+        node["mqtt_retain"] = Helpers::render_boolean(s, settings.mqtt_retain);
+    });
+
+    EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) {
+        char s[7];
+        node["tx_mode"]           = settings.tx_mode;
+        node["ems_bus_id"]        = settings.ems_bus_id;
+        node["master_thermostat"] = settings.master_thermostat;
+        node["rx_gpio"]           = settings.rx_gpio;
+        node["tx_gpio"]           = settings.tx_gpio;
+        node["dallas_gpio"]       = settings.dallas_gpio;
+        node["dallas_parasite"]   = Helpers::render_boolean(s, settings.dallas_parasite);
+        node["led_gpio"]          = settings.led_gpio;
+        node["hide_led"]          = Helpers::render_boolean(s, settings.hide_led);
+        node["api_enabled"]       = Helpers::render_boolean(s, settings.api_enabled);
+        node["bool_format"]       = settings.bool_format;
+        node["analog_enabled"]    = settings.analog_enabled;
+    });
+
+    node = output.createNestedObject("Status");
+
+    switch (EMSESP::bus_status()) {
+    case EMSESP::BUS_STATUS_OFFLINE:
+        node["bus"] = (F("disconnected"));
+        break;
+    case EMSESP::BUS_STATUS_TX_ERRORS:
+        node["bus"] = (F("connected, instable tx"));
+        break;
+    case EMSESP::BUS_STATUS_CONNECTED:
+    default:
+        node["bus"] = (F("connected"));
+        break;
+    }
+
+    if (EMSESP::bus_status() != EMSESP::BUS_STATUS_OFFLINE) {
+        node["bus protocol"]          = EMSbus::is_ht3() ? F("HT3") : F("Buderus");
+        node["#telegrams received"]   = EMSESP::rxservice_.telegram_count();
+        node["#read requests sent"]   = EMSESP::txservice_.telegram_read_count();
+        node["#write requests sent"]  = EMSESP::txservice_.telegram_write_count();
+        node["#incomplete telegrams"] = EMSESP::rxservice_.telegram_error_count();
+        node["#tx fails"]             = TxService::MAXIMUM_TX_RETRIES, EMSESP::txservice_.telegram_fail_count();
+        node["rx line quality"]       = EMSESP::rxservice_.quality();
+        node["tx line quality"]       = EMSESP::txservice_.quality();
+        node["#MQTT publish fails"]   = Mqtt::publish_fails();
+        node["#dallas sensors"]       = EMSESP::sensor_devices().size();
+    }
+
+    JsonArray devices2 = output.createNestedArray("Devices");
+
+    for (const auto & device_class : EMSFactory::device_handlers()) {
+        for (const auto & emsdevice : EMSESP::emsdevices) {
+            if ((emsdevice) && (emsdevice->device_type() == device_class.first)) {
+                JsonObject obj = devices2.createNestedObject();
+                obj["type"]    = emsdevice->device_type_name();
+                obj["name"]    = emsdevice->to_string();
+                char result[200];
+                obj["handlers"] = emsdevice->show_telegram_handlers(result);
+            }
+        }
+    }
+
+    return true;
+}
 
 } // namespace emsesp

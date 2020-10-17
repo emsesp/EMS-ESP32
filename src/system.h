@@ -47,10 +47,11 @@ class System {
     static void format(uuid::console::Shell & shell);
 
     static void console_commands(Shell & shell, unsigned int context);
+
     static bool command_pin(const char * value, const int8_t id);
     static bool command_send(const char * value, const int8_t id);
-
     static bool command_info(const char * value, const int8_t id, JsonObject & output);
+    static bool command_report(const char * value, const int8_t id, JsonObject & output);
 
     static uint8_t free_mem();
     static void    upload_status(bool in_progress);

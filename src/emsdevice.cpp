@@ -290,6 +290,29 @@ void EMSdevice::show_telegram_handlers(uuid::console::Shell & shell) {
     shell.println();
 }
 
+// list all the telegram type IDs for this device, outputting to a string (max size 200)
+char * EMSdevice::show_telegram_handlers(char * result) {
+    strlcpy(result, "", 200);
+
+    if (telegram_functions_.size() == 0) {
+        return result;
+    }
+
+    char    str[10];
+    uint8_t i    = 0;
+    size_t  size = telegram_functions_.size();
+    for (const auto & tf : telegram_functions_) {
+        snprintf_P(str, sizeof(str), PSTR("0x%02X"), tf.telegram_type_id_);
+        strlcat(result, str, 200);
+        if (++i < size) {
+            strlcat(result, " ", 200);
+        }
+    }
+
+    return result;
+}
+
+
 // list all the mqtt handlers for this device
 void EMSdevice::show_mqtt_handlers(uuid::console::Shell & shell) {
     Mqtt::show_topic_handlers(shell, this->device_type_);
@@ -377,7 +400,7 @@ void EMSdevice::print_value(uuid::console::Shell & shell, uint8_t padding, const
 void EMSdevice::print_value(uuid::console::Shell & shell, uint8_t padding, const __FlashStringHelper * name, const char * value) {
     uint8_t i = padding;
     while (i-- > 0) {
-        shell.print(F(" "));
+        shell.print(F_(1space));
     }
 
     shell.printfln(PSTR("%s: %s"), uuid::read_flash_string(name).c_str(), value);

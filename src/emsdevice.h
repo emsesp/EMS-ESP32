@@ -123,8 +123,9 @@ class EMSdevice {
     std::string to_string() const;
     std::string to_string_short() const;
 
-    void show_telegram_handlers(uuid::console::Shell & shell);
-    void show_mqtt_handlers(uuid::console::Shell & shell);
+    void   show_telegram_handlers(uuid::console::Shell & shell);
+    char * show_telegram_handlers(char * result);
+    void   show_mqtt_handlers(uuid::console::Shell & shell);
 
     using process_function_p = std::function<void(std::shared_ptr<const Telegram>)>;
     void register_telegram_type(const uint16_t telegram_type_id, const __FlashStringHelper * telegram_type_name, bool fetch, process_function_p cb);
@@ -190,13 +191,13 @@ class EMSdevice {
 
         uint8_t i = padding;
         while (i-- > 0) {
-            shell.print(F(" "));
+            shell.print(F_(1space));
         }
 
         shell.printf(PSTR("%s: %s"), uuid::read_flash_string(name).c_str(), buffer);
 
         if (suffix != nullptr) {
-            shell.print(' ');
+            shell.print(F_(1space));
             shell.println(uuid::read_flash_string(suffix).c_str());
         } else {
             shell.println();
@@ -207,13 +208,13 @@ class EMSdevice {
     static void print_value(uuid::console::Shell & shell, uint8_t padding, const __FlashStringHelper * name, const char * value);
 
     enum Brand : uint8_t {
-        NO_BRAND, // 0
-        BOSCH,    // 1
-        JUNKERS,  // 2
-        BUDERUS,  // 3
-        NEFIT,    // 4
-        SIEGER,   // 5
-        WORCESTER // 11
+        NO_BRAND = 0, // 0
+        BOSCH,        // 1
+        JUNKERS,      // 2
+        BUDERUS,      // 3
+        NEFIT,        // 4
+        SIEGER,       // 5
+        WORCESTER     // 11
     };
 
     enum DeviceType : uint8_t {
@@ -228,6 +229,7 @@ class EMSdevice {
         SWITCH,
         CONTROLLER,
         CONNECT,
+        GENERIC,
         UNKNOWN
     };
 
