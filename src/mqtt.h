@@ -38,9 +38,9 @@
 
 using uuid::console::Shell;
 
-#define EMSESP_MAX_JSON_SIZE_SMALL 200  // for smaller json docs when using StaticJsonDocument
-#define EMSESP_MAX_JSON_SIZE_MEDIUM 800 // for smaller json docs from ems devices, when using StaticJsonDocument
-#define EMSESP_MAX_JSON_SIZE_LARGE 1500 // for large json docs from ems devices, like boiler or thermostat data. Using DynamicJsonDocument
+#define EMSESP_MAX_JSON_SIZE_SMALL 256  // for smaller json docs when using StaticJsonDocument
+#define EMSESP_MAX_JSON_SIZE_MEDIUM 768 // for smaller json docs from ems devices, when using StaticJsonDocument
+#define EMSESP_MAX_JSON_SIZE_LARGE 2048 // for large json docs from ems devices, like boiler or thermostat data. Using DynamicJsonDocument
 
 namespace emsesp {
 
@@ -82,7 +82,7 @@ class Mqtt {
 
     enum Format : uint8_t { NONE = 0, SINGLE, NESTED, HA };
 
-    static constexpr uint8_t MQTT_TOPIC_MAX_SIZE = 100;
+    static constexpr uint8_t MQTT_TOPIC_MAX_SIZE = 128; // note this should really match the user setting in mqttSettings.maxTopicLength
 
     static void subscribe(const uint8_t device_type, const std::string & topic, mqtt_subfunction_p cb);
     static void subscribe(const std::string & topic, mqtt_subfunction_p cb);
