@@ -23,6 +23,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Show Rx and Tx quality in Console and Web UI
 - Added button and tooltip to EMS Devices in Web
 - wwtemp and wwtemplow to MQTT, Console and Web
+- summer, winter modes for the CW400 thermostat
+- new command under system called `report`. http://ems-esp/api?device=system&cmd=report to generate a report log for troubleshooting
 
 ### Fixed
 - fix wwontime readback
