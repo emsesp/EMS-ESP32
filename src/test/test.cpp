@@ -17,7 +17,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 #if defined(EMSESP_DEBUG)
 
 #include "test.h"
@@ -28,7 +27,7 @@ namespace emsesp {
 // used with the 'test' command, under su/admin
 void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
     if (command == "default") {
-        run_test(shell, "unknown"); // add the default test case here
+        run_test(shell, "mixing"); // add the default test case here
     }
 
     if (command.empty()) {
