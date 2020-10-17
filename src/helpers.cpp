@@ -23,8 +23,13 @@ namespace emsesp {
 uint8_t Helpers::bool_format_ = BOOL_FORMAT_ONOFF; // on/off
 
 // like itoa but for hex, and quicker
-char * Helpers::hextoa(char * result, const uint8_t value) {
-    char *  p    = result;
+// only for single byte hex values
+char * Helpers::hextoa(char * result, const uint8_t value, bool prefix) {
+    char * p = result;
+    if (prefix) {
+        *p++ = '0';
+        *p++ = 'x';
+    }
     uint8_t nib1 = (value >> 4) & 0x0F;
     uint8_t nib2 = (value >> 0) & 0x0F;
     *p++         = nib1 < 0xA ? '0' + nib1 : 'A' + nib1 - 0xA;

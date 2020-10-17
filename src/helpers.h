@@ -31,7 +31,7 @@ namespace emsesp {
 
 class Helpers {
   public:
-    static char *      hextoa(char * result, const uint8_t value);
+    static char *      hextoa(char * result, const uint8_t value, bool prefix = false);
     static std::string data_to_hex(const uint8_t * data, const uint8_t length);
 
     static char * render_value(char * result, const float value, const uint8_t format); // format is the precision
