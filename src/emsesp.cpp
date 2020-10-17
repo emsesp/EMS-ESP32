@@ -698,7 +698,6 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
     // if we don't recognize the product ID report it and add as a generic device
     if (device_p == nullptr) {
         LOG_NOTICE(F("Unrecognized EMS device (device ID 0x%02X, product ID %d). Please report on GitHub."), device_id, product_id);
-        // TODO here
         std::string name("unknown");
         emsdevices.push_back(
             EMSFactory::add(DeviceType::GENERIC, device_id, product_id, version, name, DeviceFlags::EMS_DEVICE_FLAG_NONE, EMSdevice::Brand::NO_BRAND));
