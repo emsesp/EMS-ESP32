@@ -319,7 +319,7 @@ bool Boiler::export_values(JsonObject & output) {
 
     // Warm Water charging type
     if (Helpers::hasValue(wWChargeType_, EMS_VALUE_BOOL)) {
-        output["wWChargeType"] = wWChargeType_ ? "3-way valve" : "charge pump";
+        output["wWChargeType"] = wWChargeType_ ? F("3way valve") : F("charge pump");
     }
 
     // Warm Water circulation pump available bool
@@ -714,7 +714,8 @@ void Boiler::check_active() {
         char s[7];
         bool b = ((boilerState_ & 0x09) == 0x09);
         Mqtt::publish(F("heating_active"), Helpers::render_boolean(s, b));
-        heatingActive_ = b ? EMS_VALUE_BOOL_ON : EMS_VALUE_BOOL_OFF;
+        heatingActive_   = b ? EMS_VALUE_BOOL_ON : EMS_VALUE_BOOL_OFF;
+        last_boilerState = boilerState_;
     }
 
     if ((boilerState_ == EMS_VALUE_UINT_NOTSET) || ((boilerState_ & 0x0A) != (last_boilerState & 0x0A))) {
@@ -723,9 +724,8 @@ void Boiler::check_active() {
         Mqtt::publish(F("tapwater_active"), Helpers::render_boolean(s, b));
         tapwaterActive_ = b ? EMS_VALUE_BOOL_ON : EMS_VALUE_BOOL_OFF;
         EMSESP::tap_water_active(b); // let EMS-ESP know, used in the Shower class
+        last_boilerState = boilerState_;
     }
-
-    last_boilerState = boilerState_;
 
     /*
     // hot tap water, using flow to check instead of the burner power
@@ -1334,7 +1334,7 @@ bool Boiler::set_warmwater_circulation_pump(const char * value, const int8_t id)
     return true;
 }
 
-// Set the mode of circulation, 1x3min, ... 6x3min, continous
+// Set the mode of circulation, 1x3min, ... 6x3min, continuos
 // true = on, false = off
 bool Boiler::set_warmwater_circulation_mode(const char * value, const int8_t id) {
     int v = 0;
@@ -1347,7 +1347,7 @@ bool Boiler::set_warmwater_circulation_mode(const char * value, const int8_t id)
         if (v < 7) {
             LOG_INFO(F("Setting warm water circulation mode %dx3min"), v);
         } else if (v == 7) {
-            LOG_INFO(F("Setting warm water circulation mode continous"));
+            LOG_INFO(F("Setting warm water circulation mode continuos"));
         } else {
             return false;
         }
