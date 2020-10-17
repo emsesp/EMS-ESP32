@@ -101,6 +101,7 @@ void Command::show(uuid::console::Shell & shell, uint8_t device_type) {
 }
 
 // see if a device_type is active and has associated commands
+// returns false if the device has no commands
 bool Command::device_has_commands(const uint8_t device_type) {
     if (device_type == EMSdevice::DeviceType::UNKNOWN) {
         return false;
@@ -124,6 +125,7 @@ bool Command::device_has_commands(const uint8_t device_type) {
             }
         }
     }
+
     return false;
 }
 
