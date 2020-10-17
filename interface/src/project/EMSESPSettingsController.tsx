@@ -14,8 +14,6 @@ import { EMSESPSettings } from './EMSESPtypes';
 
 export const EMSESP_SETTINGS_ENDPOINT = ENDPOINT_ROOT + "emsespSettings";
 
-export const WebAPISystemInfo = window.location.origin + "/api?device=system&cmd=info";
-
 type EMSESPSettingsControllerProps = RestControllerProps<EMSESPSettings>;
 
 class EMSESPSettingsController extends Component<EMSESPSettingsControllerProps> {
@@ -50,8 +48,7 @@ function EMSESPSettingsControllerForm(props: EMSESPSettingsControllerFormProps) 
         <ValidatorForm onSubmit={saveData}>
             <Box bgcolor="info.main" p={2} mt={2} mb={2}>
                 <Typography variant="body1">
-                    Change the default settings for EMS-ESP. For help refer to the <Link target="_blank" href="https://emsesp.github.io/docs/#/Configure-firmware?id=settings" color="primary">{'documentation'}</Link>.
-                    <p>You can also <Link target="_blank" href={WebAPISystemInfo} color="primary">{'export'}</Link>&nbsp; the complete system settings to keep an offline backup.</p>
+                    Change the default settings on this page. For help refer to the <Link target="_blank" href="https://emsesp.github.io/docs/#/Configure-firmware?id=settings" color="primary">{'documentation'}</Link>.
                 </Typography>
             </Box>
             <br></br>

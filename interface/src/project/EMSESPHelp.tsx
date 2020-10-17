@@ -5,6 +5,12 @@ import { SectionContent } from '../components';
 import CommentIcon from "@material-ui/icons/CommentTwoTone";
 import MenuBookIcon from "@material-ui/icons/MenuBookTwoTone";
 import GitHubIcon from "@material-ui/icons/GitHub";
+import StarIcon from "@material-ui/icons/Star";
+import ImportExportIcon from "@material-ui/icons/ImportExport";
+import BugReportIcon from "@material-ui/icons/BugReportTwoTone";
+
+export const WebAPISystemInfo = window.location.origin + "/api?device=system&cmd=info";
+export const WebAPISystemReport = window.location.origin + "/api?device=system&cmd=report";
 
 class EMSESPHelp extends Component {
 
@@ -19,8 +25,8 @@ class EMSESPHelp extends Component {
                             <MenuBookIcon />
                         </ListItemAvatar>
                         <ListItemText>
-                            For the latest news and updates go to the <Link href="https://emsesp.github.io/docs" color="primary">{'documentation'}&nbsp;website</Link>.
-                    </ListItemText>
+                            For the latest news and updates go to the <Link href="https://emsesp.github.io/docs" color="primary">{'documentation'}&nbsp;website</Link>
+                        </ListItemText>
                     </ListItem>
 
                     <ListItem>
@@ -28,8 +34,8 @@ class EMSESPHelp extends Component {
                             <CommentIcon />
                         </ListItemAvatar>
                         <ListItemText>
-                            For live community chat visit our <Link href="https://gitter.im/EMS-ESP/community#" color="primary">{'Gitter'}&nbsp;channel</Link>.
-                    </ListItemText>
+                            For live community chat visit our <Link href="https://gitter.im/EMS-ESP/community#" color="primary">{'Gitter'}&nbsp;channel</Link>
+                        </ListItemText>
                     </ListItem>
 
                     <ListItem>
@@ -37,8 +43,27 @@ class EMSESPHelp extends Component {
                             <GitHubIcon />
                         </ListItemAvatar>
                         <ListItemText>
-                            To report an issue or feature request go to <Link href="https://github.com/proddy/EMS-ESP/issues/new/choose" color="primary">{'click here'}</Link>.
-                    </ListItemText>
+                            To report an issue or feature request go to <Link href="https://github.com/proddy/EMS-ESP/issues/new/choose" color="primary">{'click here'}</Link>
+                        </ListItemText>
+                    </ListItem>
+
+                    <ListItem>
+                        <ListItemAvatar>
+                            <ImportExportIcon />
+                        </ListItemAvatar>
+                        <ListItemText>
+                            To export your system settings <Link target="_blank" href={WebAPISystemInfo} color="primary">{'click here'}</Link>
+                        </ListItemText>
+                    </ListItem>
+
+
+                    <ListItem>
+                        <ListItemAvatar>
+                            <BugReportIcon />
+                        </ListItemAvatar>
+                        <ListItemText>
+                            To create a report of the current EMS-ESP status (for troubleshooting) <Link target="_blank" href={WebAPISystemReport} color="primary">{'click here'}</Link>
+                        </ListItemText>
                     </ListItem>
 
                 </List>
@@ -46,7 +71,7 @@ class EMSESPHelp extends Component {
                 <Box bgcolor="info.main" border={1} p={3} mt={1} mb={0}>
                     <Typography variant="h6">
                         EMS-ESP is free and open-source.
-                        <br></br>Please consider supporting this project by giving it a star on our <Link href="https://github.com/proddy/EMS-ESP" color="primary">{'GitHub page'}</Link>.
+                        <br></br>Please consider supporting this project by giving it a <StarIcon style={{ color: '#fdff3a' }} /> on our <Link href="https://github.com/proddy/EMS-ESP" color="primary">{'GitHub page'}</Link>.
                     </Typography>
                 </Box>
                 <br></br>
