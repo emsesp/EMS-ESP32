@@ -309,7 +309,7 @@ class Handler {
  */
 class Logger {
   public:
-    /**
+/**
 	 * This is the maximum length of any log message.
 	 *
 	 * Determines the size of the buffer used for format string
@@ -317,7 +317,11 @@ class Logger {
 	 *
 	 * @since 1.0.0
 	 */
+#if defined(EMSESP_STANDALONE)
+    static constexpr size_t MAX_LOG_LENGTH = 500;
+#else
     static constexpr size_t MAX_LOG_LENGTH = 255;
+#endif
 
     /**
 	 * Create a new logger with the given name and logging facility.

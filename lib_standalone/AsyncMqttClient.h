@@ -77,13 +77,13 @@ class AsyncMqttClient {
     void disconnect(bool force = false) {
     }
     uint16_t subscribe(const char * topic, uint8_t qos) {
-        return 0;
+        return 1;
     }
     uint16_t unsubscribe(const char * topic) {
-        return 0;
+        return 1;
     }
     uint16_t publish(const char * topic, uint8_t qos, bool retain, const char * payload = nullptr, size_t length = 0, bool dup = false, uint16_t message_id = 0) {
-        return 0;
+        return 1;
     }
 
     const char * getClientId() {
