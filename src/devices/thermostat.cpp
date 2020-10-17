@@ -288,24 +288,24 @@ void Thermostat::show_values(uuid::console::Shell & shell) {
                 snprintf_P(hc_name, sizeof(hc_name), PSTR("hc%d"), hc->hc_num());
                 JsonObject output = output_hc[hc_name];
 
-                print_value_json(shell, F("seltemp"), F("  "), F_(seltemp), F_(degrees), output);
-                print_value_json(shell, F("currtemp"), F("  "), F_(currtemp), F_(degrees), output);
-                print_value_json(shell, F("heattemp"), F("  "), F_(heattemp), F_(degrees), output);
-                print_value_json(shell, F("comforttemp"), F("  "), F_(comforttemp), F_(degrees), output);
-                print_value_json(shell, F("daytemp"), F("  "), F_(daytemp), F_(degrees), output);
-                print_value_json(shell, F("ecotemp"), F("  "), F_(ecotemp), F_(degrees), output);
-                print_value_json(shell, F("nighttemp"), F("  "), F_(nighttemp), F_(degrees), output);
-                print_value_json(shell, F("manualtemp"), F("  "), F_(manualtemp), F_(degrees), output);
-                print_value_json(shell, F("holidaytemp"), F("  "), F_(holidaytemp), F_(degrees), output);
-                print_value_json(shell, F("nofrosttemp"), F("  "), F_(nofrosttemp), F_(degrees), output);
-                print_value_json(shell, F("targetflowtemp"), F("  "), F_(targetflowtemp), F_(degrees), output);
-                print_value_json(shell, F("offsettemp"), F("  "), F_(offsettemp), F_(degrees), output);
-                print_value_json(shell, F("designtemp"), F("  "), F_(designtemp), F_(degrees), output);
-                print_value_json(shell, F("roominfluence"), F("  "), F_(roominfluence), F_(degrees), output);
-                print_value_json(shell, F("summertemp"), F("  "), F_(summertemp), F_(degrees), output);
-                print_value_json(shell, F("summermode"), F("  "), F_(summermode), F_(degrees), output);
-                print_value_json(shell, F("mode"), F("  "), F_(mode), nullptr, output);
-                print_value_json(shell, F("modetype"), F("  "), F_(modetype), nullptr, output);
+                print_value_json(shell, F("seltemp"), F_(2spaces), F_(seltemp), F_(degrees), output);
+                print_value_json(shell, F("currtemp"), F_(2spaces), F_(currtemp), F_(degrees), output);
+                print_value_json(shell, F("heattemp"), F_(2spaces), F_(heattemp), F_(degrees), output);
+                print_value_json(shell, F("comforttemp"), F_(2spaces), F_(comforttemp), F_(degrees), output);
+                print_value_json(shell, F("daytemp"), F_(2spaces), F_(daytemp), F_(degrees), output);
+                print_value_json(shell, F("ecotemp"), F_(2spaces), F_(ecotemp), F_(degrees), output);
+                print_value_json(shell, F("nighttemp"), F_(2spaces), F_(nighttemp), F_(degrees), output);
+                print_value_json(shell, F("manualtemp"), F_(2spaces), F_(manualtemp), F_(degrees), output);
+                print_value_json(shell, F("holidaytemp"), F_(2spaces), F_(holidaytemp), F_(degrees), output);
+                print_value_json(shell, F("nofrosttemp"), F_(2spaces), F_(nofrosttemp), F_(degrees), output);
+                print_value_json(shell, F("targetflowtemp"), F_(2spaces), F_(targetflowtemp), F_(degrees), output);
+                print_value_json(shell, F("offsettemp"), F_(2spaces), F_(offsettemp), F_(degrees), output);
+                print_value_json(shell, F("designtemp"), F_(2spaces), F_(designtemp), F_(degrees), output);
+                print_value_json(shell, F("roominfluence"), F_(2spaces), F_(roominfluence), F_(degrees), output);
+                print_value_json(shell, F("summertemp"), F_(2spaces), F_(summertemp), F_(degrees), output);
+                print_value_json(shell, F("summermode"), F_(2spaces), F_(summermode), F_(degrees), output);
+                print_value_json(shell, F("mode"), F_(2spaces), F_(mode), nullptr, output);
+                print_value_json(shell, F("modetype"), F_(2spaces), F_(modetype), nullptr, output);
             }
         }
     }
@@ -343,11 +343,11 @@ bool Thermostat::export_values_main(JsonObject & rootThermostat) {
 
     // Clock time
     if (datetime_.size()) {
-        rootThermostat["time"] = datetime_.c_str();
+        rootThermostat["time"] = datetime_;
     }
 
     if (Helpers::hasValue(errorNumber_)) {
-        rootThermostat["errorcode"] = errorCode_.c_str();
+        rootThermostat["errorcode"] = errorCode_;
     }
 
     if (model == EMSdevice::EMS_DEVICE_FLAG_RC30_1) {
@@ -759,7 +759,14 @@ void Thermostat::register_mqtt_ha_config() {
     Mqtt::register_mqtt_ha_sensor(nullptr, F_(error), this->device_type(), "errorcode", nullptr, nullptr);
 
     uint8_t model = this->model();
+
+    if (model == EMS_DEVICE_FLAG_RC30_1) {
+        Mqtt::register_mqtt_ha_sensor(nullptr, F_(display), this->device_type(), "display", nullptr, nullptr);
+        Mqtt::register_mqtt_ha_sensor(nullptr, F_(language), this->device_type(), "language", nullptr, nullptr);
+    }
+
     if (model == EMS_DEVICE_FLAG_RC35 || model == EMS_DEVICE_FLAG_RC35) {
+        // excluding inttemp1, inttemp2, intoffset, minexttemp
         Mqtt::register_mqtt_ha_sensor(nullptr, F_(dampedtemp), this->device_type(), "dampedtemp", F_(degrees), F_(icontemperature));
         Mqtt::register_mqtt_ha_sensor(nullptr, F_(building), this->device_type(), "building", nullptr, nullptr);
         Mqtt::register_mqtt_ha_sensor(nullptr, F_(minexttemp), this->device_type(), "minexttemp", F_(degrees), F_(icontemperature));
@@ -771,7 +778,7 @@ void Thermostat::register_mqtt_ha_config() {
 }
 
 // publish config topic for HA MQTT Discovery
-// homeassistant/climate/ems-esp/thermostat_hc1/config
+// e.g. homeassistant/climate/ems-esp/thermostat_hc1/config
 void Thermostat::register_mqtt_ha_config(uint8_t hc_num) {
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
 
@@ -807,9 +814,10 @@ void Thermostat::register_mqtt_ha_config(uint8_t hc_num) {
     doc["curr_temp_tpl"] = currtemp_str;
 
     doc["min_temp"]  = F("5");
-    doc["max_temp"]  = F("40");
+    doc["max_temp"]  = F("30");
     doc["temp_step"] = F("0.5");
 
+    // the HA climate component only responds to auto, heat and off
     JsonArray modes = doc.createNestedArray(F("modes"));
     modes.add(F("auto"));
     modes.add(F("heat"));
@@ -836,12 +844,12 @@ void Thermostat::register_mqtt_ha_config(uint8_t hc_num) {
     }
     */
 
-    JsonObject dev = doc.createNestedObject(F("dev"));
+    JsonObject dev = doc.createNestedObject("dev");
     dev["name"]    = F("EMS-ESP Thermostat");
     dev["sw"]      = EMSESP_APP_VERSION;
     dev["mf"]      = this->brand_to_string();
     dev["mdl"]     = this->name();
-    JsonArray ids  = dev.createNestedArray(F("ids"));
+    JsonArray ids  = dev.createNestedArray("ids");
     ids.add(F("ems-esp-thermostat"));
 
     std::string topic(100, '\0');
@@ -1328,12 +1336,12 @@ void Thermostat::process_RCTime(std::shared_ptr<const Telegram> telegram) {
     snprintf_P(&datetime_[0],
                datetime_.capacity() + 1,
                PSTR("%s:%s:%s %s/%s/%s"),
-               Helpers::smallitoa(buf1, telegram->message_data[2]),      // hour
-               Helpers::smallitoa(buf2, telegram->message_data[4]),      // minute
-               Helpers::smallitoa(buf3, telegram->message_data[5]),      // second
-               Helpers::smallitoa(buf4, telegram->message_data[3]),      // day
-               Helpers::smallitoa(buf5, telegram->message_data[1]),      // month
-               Helpers::itoa(buf6, telegram->message_data[0] + 2000, 10) // year
+               Helpers::smallitoa(buf1, telegram->message_data[2]),  // hour
+               Helpers::smallitoa(buf2, telegram->message_data[4]),  // minute
+               Helpers::smallitoa(buf3, telegram->message_data[5]),  // second
+               Helpers::smallitoa(buf4, telegram->message_data[3]),  // day
+               Helpers::smallitoa(buf5, telegram->message_data[1]),  // month
+               Helpers::itoa(buf6, telegram->message_data[0] + 2000) // year
     );
     if (timeold != datetime_) {
         changed_ = true;
@@ -1354,12 +1362,7 @@ void Thermostat::process_RCError(std::shared_ptr<const Telegram> telegram) {
     buf[3] = 0;
     changed_ |= telegram->read_value(errorNumber_, 3);
 
-    snprintf_P(&errorCode_[0],
-               errorCode_.capacity() + 1,
-               PSTR("%s(%d)"),
-               buf,
-               errorNumber_
-    );
+    snprintf_P(&errorCode_[0], errorCode_.capacity() + 1, PSTR("%s(%d)"), buf, errorNumber_);
 }
 
 // 0xA5 - Set minimum external temperature

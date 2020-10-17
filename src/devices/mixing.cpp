@@ -114,21 +114,21 @@ void Mixing::show_values(uuid::console::Shell & shell) {
 
     if (type() == Type::HC) {
         shell.printfln(F_(hc), hc_);
-        print_value_json(shell, F("flowTemp"), F("  "), F_(flowTemp), F_(degrees), output);
-        print_value_json(shell, F("flowSetTemp"), F("  "), F_(flowSetTemp), F_(degrees), output);
-        print_value_json(shell, F("pumpStatus"), F("  "), F_(pumpStatus), nullptr, output);
-        print_value_json(shell, F("valveStatus"), F("  "), F_(valveStatus), F_(percent), output);
+        print_value_json(shell, F("flowTemp"), F_(2spaces), F_(flowTemp), F_(degrees), output);
+        print_value_json(shell, F("flowSetTemp"), F_(2spaces), F_(flowSetTemp), F_(degrees), output);
+        print_value_json(shell, F("pumpStatus"), F_(2spaces), F_(pumpStatus), nullptr, output);
+        print_value_json(shell, F("valveStatus"), F_(2spaces), F_(valveStatus), F_(percent), output);
     } else {
         shell.printfln(F_(ww_hc), hc_);
-        print_value_json(shell, F("wwTemp"), F("  "), F_(wwTemp), F_(degrees), output);
-        print_value_json(shell, F("pumpStatus"), F("  "), F_(pumpStatus), nullptr, output);
-        print_value_json(shell, F("tempStatus"), F("  "), F_(tempStatus), nullptr, output);
+        print_value_json(shell, F("wwTemp"), F_(2spaces), F_(wwTemp), F_(degrees), output);
+        print_value_json(shell, F("pumpStatus"), F_(2spaces), F_(pumpStatus), nullptr, output);
+        print_value_json(shell, F("tempStatus"), F_(2spaces), F_(tempStatus), nullptr, output);
     }
 
     shell.println();
 }
 
-// export all valuet to info command
+// export all values to info command
 bool Mixing::command_info(const char * value, const int8_t id, JsonObject & output) {
     if (id != (device_id() - 0x20 + 1) && id > 0) { // defaults to first hc if no id
         return false;
@@ -167,13 +167,13 @@ void Mixing::register_mqtt_ha_config() {
 
     char str1[20];
     snprintf_P(str1, sizeof(str1), PSTR("Mixing %d"), device_id() - 0x20 + 1);
-    doc["name"]    = str1;
+    doc["name"] = str1;
 
     char str2[20];
     snprintf_P(str2, sizeof(str2), PSTR("mixing %d"), device_id() - 0x20 + 1);
     doc["uniq_id"] = str2;
 
-    doc["ic"]      = F("mdi:home-thermometer-outline");
+    doc["ic"] = F("mdi:home-thermometer-outline");
 
     char stat_t[50];
     snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/mixing_data"), System::hostname().c_str());
