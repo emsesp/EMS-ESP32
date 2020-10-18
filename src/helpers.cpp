@@ -171,7 +171,7 @@ char * Helpers::render_value(char * result, uint8_t value, uint8_t format) {
         if (value == EMS_VALUE_BOOL_OFF) {
             render_boolean(result, false);
         } else if (value == EMS_VALUE_BOOL_NOTSET) {
-            return nullptr;
+            result[0] = '\0';
         } else {
             render_boolean(result, true); // assume on. could have value 0x01 or 0xFF
         }
@@ -179,7 +179,8 @@ char * Helpers::render_value(char * result, uint8_t value, uint8_t format) {
     }
 
     if (!hasValue(value)) {
-        return nullptr;
+        result[0] = '\0';
+        return result;
     }
 
     if (!format) {
@@ -209,9 +210,14 @@ char * Helpers::render_value(char * result, uint8_t value, uint8_t format) {
 char * Helpers::render_value(char * result, const float value, const uint8_t format) {
     long p[] = {0, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000};
 
+    result[0] = '\0';
+    if (value == NAN || format > 8) {
+        return result;
+    }
+
     char * ret   = result;
     long   whole = (long)value;
-    Helpers::itoa(result, whole, 10);
+    ltoa(whole, result, 10);
 
     while (*result != '\0') {
         result++;
@@ -219,7 +225,7 @@ char * Helpers::render_value(char * result, const float value, const uint8_t for
 
     *result++    = '.';
     long decimal = abs((long)((value - whole) * p[format]));
-    itoa(result, decimal, 10);
+    ltoa(decimal, result, 10);
 
     return ret;
 }
@@ -227,8 +233,9 @@ char * Helpers::render_value(char * result, const float value, const uint8_t for
 // int16: convert short (two bytes) to text string and returns string
 // format: 0=no division, other divide by the value given and render with a decimal point
 char * Helpers::render_value(char * result, const int16_t value, const uint8_t format) {
+    result[0] = '\0';
     if (!hasValue(value)) {
-        return nullptr;
+        return result;
     }
 
     // just print it if no conversion required (format = 0)
@@ -238,7 +245,6 @@ char * Helpers::render_value(char * result, const int16_t value, const uint8_t f
     }
 
     int16_t new_value = value;
-    result[0]         = '\0';
 
     // check for negative values
     if (new_value < 0) {
@@ -267,7 +273,8 @@ char * Helpers::render_value(char * result, const int16_t value, const uint8_t f
 // uint16: convert unsigned short (two bytes) to text string and prints it
 char * Helpers::render_value(char * result, const uint16_t value, const uint8_t format) {
     if (!hasValue(value)) {
-        return nullptr;
+        result[0] = '\0';
+        return result;
     }
     return (render_value(result, (int16_t)value, format)); // use same code, force it to a signed int
 }
@@ -275,7 +282,8 @@ char * Helpers::render_value(char * result, const uint16_t value, const uint8_t 
 // int8: convert signed byte to text string and prints it
 char * Helpers::render_value(char * result, const int8_t value, const uint8_t format) {
     if (!hasValue(value)) {
-        return nullptr;
+        result[0] = '\0';
+        return result;
     }
     return (render_value(result, (int16_t)value, format)); // use same code, force it to a signed int
 }
@@ -283,7 +291,8 @@ char * Helpers::render_value(char * result, const int8_t value, const uint8_t fo
 // uint32: render long (4 byte) unsigned values
 char * Helpers::render_value(char * result, const uint32_t value, const uint8_t format) {
     if (!hasValue(value)) {
-        return nullptr;
+        result[0] = '\0';
+        return result;
     }
 
     char s[20];

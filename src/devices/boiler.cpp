@@ -256,11 +256,11 @@ bool Boiler::export_values(JsonObject & output) {
     // Warm Water comfort setting
     if (Helpers::hasValue(wWComfort_)) {
         if (wWComfort_ == 0x00) {
-            output["wWComfort"] = "Hot";
+            output["wWComfort"] = F("Hot");
         } else if (wWComfort_ == 0xD8) {
-            output["wWComfort"] = "Eco";
+            output["wWComfort"] = F("Eco");
         } else if (wWComfort_ == 0xEC) {
-            output["wWComfort"] = "Intelligent";
+            output["wWComfort"] = F("Intelligent");
         }
     }
 

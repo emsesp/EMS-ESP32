@@ -179,18 +179,22 @@ class EMSESPDevicesForm extends Component<
           <Table size="small" padding="default">
             <TableHead>
               <TableRow>
-                <StyledTableCell>ID</StyledTableCell>
+                <StyledTableCell>Sensor no.</StyledTableCell>
+                <StyledTableCell align="center">ID</StyledTableCell>
                 <StyledTableCell align="right">Temperature</StyledTableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {data.sensors.map((sensorData) => (
-                <TableRow key={sensorData.id}>
+                <TableRow key={sensorData.no}>
                   <TableCell component="th" scope="row">
+                    Sensor&nbsp;{sensorData.no}
+                  </TableCell>
+                  <TableCell align="center">
                     {sensorData.id}
                   </TableCell>
                   <TableCell align="right">
-                    {sensorData.temp.toFixed(1)}&nbsp;&deg;C
+                    {sensorData.temp}&nbsp;&deg;C
                   </TableCell>
                 </TableRow>
               ))}
