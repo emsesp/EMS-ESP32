@@ -111,7 +111,7 @@ void EMSESPAPIService::emsespAPIService(AsyncWebServerRequest * request) {
     if (output.size()) {
         doc.shrinkToFit();
         char buffer[EMSESP_MAX_JSON_SIZE_LARGE];
-        serializeJson(doc, buffer);
+        serializeJsonPretty(doc, buffer);
         request->send(200, "text/plain", buffer);
     } else {
         request->send(200, "text/plain", ok ? F("OK") : F("Invalid"));
