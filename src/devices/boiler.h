@@ -52,7 +52,6 @@ class Boiler : public EMSdevice {
 
     void print_value2(uuid::console::Shell & shell, const char * param, const __FlashStringHelper * name, const __FlashStringHelper * suffix, JsonObject & json);
 
-    uint8_t last_boilerState = EMS_VALUE_UINT_NOTSET; // remember last state of heating and warm water on/off
     bool    changed_         = false;
     bool    mqtt_ha_config_  = false; // HA MQTT Discovery
 
