@@ -23,13 +23,9 @@ namespace emsesp {
 uint8_t Helpers::bool_format_ = BOOL_FORMAT_ONOFF; // on/off
 
 // like itoa but for hex, and quicker
-// only for single byte hex values
-char * Helpers::hextoa(char * result, const uint8_t value, bool prefix) {
-    char * p = result;
-    if (prefix) {
-        *p++ = '0';
-        *p++ = 'x';
-    }
+// note: only for single byte hex values
+char * Helpers::hextoa(char * result, const uint8_t value) {
+    char *  p    = result;
     uint8_t nib1 = (value >> 4) & 0x0F;
     uint8_t nib2 = (value >> 0) & 0x0F;
     *p++         = nib1 < 0xA ? '0' + nib1 : 'A' + nib1 - 0xA;
@@ -79,7 +75,7 @@ char * Helpers::ultostr(char * ptr, uint32_t value, const uint8_t base) {
  * itoa for 2 byte signed (short) integers
  * written by Lukás Chmela, Released under GPLv3. http://www.strudel.org.uk/itoa/ version 0.4
  */
-char * Helpers::itoa(char * result, int16_t value, const uint8_t base) {
+char * Helpers::itoa(char * result, int32_t value, const uint8_t base) {
     // check that the base if valid
     if (base < 2 || base > 36) {
         *result = '\0';
@@ -171,7 +167,7 @@ char * Helpers::render_value(char * result, uint8_t value, uint8_t format) {
         if (value == EMS_VALUE_BOOL_OFF) {
             render_boolean(result, false);
         } else if (value == EMS_VALUE_BOOL_NOTSET) {
-            result[0] = '\0';
+            return nullptr;
         } else {
             render_boolean(result, true); // assume on. could have value 0x01 or 0xFF
         }
@@ -179,8 +175,7 @@ char * Helpers::render_value(char * result, uint8_t value, uint8_t format) {
     }
 
     if (!hasValue(value)) {
-        result[0] = '\0';
-        return result;
+        return nullptr;
     }
 
     if (!format) {
@@ -188,7 +183,7 @@ char * Helpers::render_value(char * result, uint8_t value, uint8_t format) {
         return result;
     }
 
-    char s2[5];
+    char s2[10];
 
     // special case for / 2
     if (format == 2) {
@@ -208,24 +203,23 @@ char * Helpers::render_value(char * result, uint8_t value, uint8_t format) {
 // float: convert float to char
 // format is the precision, 0 to 8
 char * Helpers::render_value(char * result, const float value, const uint8_t format) {
-    long p[] = {0, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000};
-
-    result[0] = '\0';
-    if (value == NAN || format > 8) {
-        return result;
+    if (format > 8) {
+        return nullptr;
     }
 
-    char * ret   = result;
-    long   whole = (long)value;
-    ltoa(whole, result, 10);
+    uint32_t p[] = {0, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000};
+
+    char *  ret   = result;
+    int32_t whole = (int32_t)value;
+    itoa(result, whole, 10);
 
     while (*result != '\0') {
         result++;
     }
 
-    *result++    = '.';
-    long decimal = abs((long)((value - whole) * p[format]));
-    ltoa(decimal, result, 10);
+    *result++       = '.';
+    int32_t decimal = abs((int32_t)((value - whole) * p[format]));
+    itoa(result, decimal, 10);
 
     return ret;
 }
@@ -233,9 +227,8 @@ char * Helpers::render_value(char * result, const float value, const uint8_t for
 // int16: convert short (two bytes) to text string and returns string
 // format: 0=no division, other divide by the value given and render with a decimal point
 char * Helpers::render_value(char * result, const int16_t value, const uint8_t format) {
-    result[0] = '\0';
     if (!hasValue(value)) {
-        return result;
+        return nullptr;
     }
 
     // just print it if no conversion required (format = 0)
@@ -245,6 +238,7 @@ char * Helpers::render_value(char * result, const int16_t value, const uint8_t f
     }
 
     int16_t new_value = value;
+    result[0]         = '\0';
 
     // check for negative values
     if (new_value < 0) {
@@ -273,8 +267,7 @@ char * Helpers::render_value(char * result, const int16_t value, const uint8_t f
 // uint16: convert unsigned short (two bytes) to text string and prints it
 char * Helpers::render_value(char * result, const uint16_t value, const uint8_t format) {
     if (!hasValue(value)) {
-        result[0] = '\0';
-        return result;
+        return nullptr;
     }
     return (render_value(result, (int16_t)value, format)); // use same code, force it to a signed int
 }
@@ -282,8 +275,7 @@ char * Helpers::render_value(char * result, const uint16_t value, const uint8_t 
 // int8: convert signed byte to text string and prints it
 char * Helpers::render_value(char * result, const int8_t value, const uint8_t format) {
     if (!hasValue(value)) {
-        result[0] = '\0';
-        return result;
+        return nullptr;
     }
     return (render_value(result, (int16_t)value, format)); // use same code, force it to a signed int
 }
@@ -291,8 +283,7 @@ char * Helpers::render_value(char * result, const int8_t value, const uint8_t fo
 // uint32: render long (4 byte) unsigned values
 char * Helpers::render_value(char * result, const uint32_t value, const uint8_t format) {
     if (!hasValue(value)) {
-        result[0] = '\0';
-        return result;
+        return nullptr;
     }
 
     char s[20];
@@ -479,6 +470,5 @@ bool Helpers::value2enum(const char * v, uint8_t & value, const std::vector<std:
     }
     return false;
 }
-
 
 } // namespace emsesp

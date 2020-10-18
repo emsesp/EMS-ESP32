@@ -111,7 +111,7 @@ void Sensor::loop() {
                             bool found = false;
                             for (auto & device : devices_) {
                                 if (device.id() == get_id(addr)) {
-                                    changed_             |= (t != device.temperature_c);
+                                    changed_ |= (t != device.temperature_c);
                                     device.temperature_c = t;
                                     device.read          = true;
                                     found                = true;
@@ -144,7 +144,7 @@ void Sensor::loop() {
                     for (auto & device : devices_) {
                         if (!device.read) {
                             device.temperature_c = EMS_VALUE_SHORT_NOTSET;
-                            changed_ = true;
+                            changed_             = true;
                         }
                         device.read = false;
                     }
@@ -184,16 +184,19 @@ int16_t Sensor::get_temperature_c(const uint8_t addr[]) {
         return EMS_VALUE_SHORT_NOTSET;
     }
     YIELD;
+
     uint8_t scratchpad[SCRATCHPAD_LEN] = {0};
     bus_.select(addr);
     bus_.write(CMD_READ_SCRATCHPAD);
     bus_.read_bytes(scratchpad, SCRATCHPAD_LEN);
     YIELD;
+
     if (!bus_.reset()) {
         LOG_ERROR(F("Bus reset failed after reading scratchpad from %s"), Device(addr).to_string().c_str());
         return EMS_VALUE_SHORT_NOTSET;
     }
     YIELD;
+
     if (bus_.crc8(scratchpad, SCRATCHPAD_LEN - 1) != scratchpad[SCRATCHPAD_LEN - 1]) {
         LOG_WARNING(F("Invalid scratchpad CRC: %02X%02X%02X%02X%02X%02X%02X%02X%02X from device %s"),
                     scratchpad[0],
@@ -251,7 +254,7 @@ Sensor::Device::Device(const uint8_t addr[])
 
 uint64_t Sensor::get_id(const uint8_t addr[]) {
     return (((uint64_t)addr[0] << 48) | ((uint64_t)addr[1] << 40) | ((uint64_t)addr[2] << 32) | ((uint64_t)addr[3] << 24) | ((uint64_t)addr[4] << 16)
-           | ((uint64_t)addr[5] << 8) | ((uint64_t)addr[6]));
+            | ((uint64_t)addr[5] << 8) | ((uint64_t)addr[6]));
 }
 
 uint64_t Sensor::Device::id() const {
@@ -266,7 +269,7 @@ std::string Sensor::Device::to_string() const {
                (unsigned int)(id_ >> 48) & 0xFF,
                (unsigned int)(id_ >> 32) & 0xFFFF,
                (unsigned int)(id_ >> 16) & 0xFFFF,
-               (unsigned int)(id_) & 0xFFFF);
+               (unsigned int)(id_)&0xFFFF);
     return str;
 }
 
@@ -328,27 +331,31 @@ void Sensor::publish_values() {
         return;
     }
     */
+
     DynamicJsonDocument doc(100 * num_devices);
-    uint8_t             i = 1; // sensor count
+    uint8_t             sensor_no = 1; // sensor count
     for (const auto & device : devices_) {
-        char s[7];         // for rendering temperature
         char sensorID[10]; // sensor{1-n}
-        snprintf_P(sensorID, 10, PSTR("sensor%d"), i);
+        snprintf_P(sensorID, 10, PSTR("sensor%d"), sensor_no);
         if (mqtt_format_ == Mqtt::Format::SINGLE) {
             // e.g. sensor_data = {"sensor1":23.3,"sensor2":24.0}
-            doc[sensorID] = Helpers::render_value(s, device.temperature_c, 10);
+            // doc[sensorID] = Helpers::render_value(s, device.temperature_c, 10);
+            doc[sensorID] = (float)(device.temperature_c) / 10;
         } else if (mqtt_format_ == Mqtt::Format::NESTED) {
             // e.g. sensor_data = {"sensor1":{"id":"28-EA41-9497-0E03","temp":"23.3"},"sensor2":{"id":"28-233D-9497-0C03","temp":"24.0"}}
             JsonObject dataSensor = doc.createNestedObject(sensorID);
             dataSensor["id"]      = device.to_string();
-            dataSensor["temp"]    = Helpers::render_value(s, device.temperature_c, 10);
+            // dataSensor["temp"]    = Helpers::render_value(s, device.temperature_c, 10);
+            dataSensor["temp"] = (float)(device.temperature_c) / 10;
         } else if (mqtt_format_ == Mqtt::Format::HA) {
             // e.g. sensor_data = {"28-EA41-9497-0E03":23.3,"28-233D-9497-0C03":24.0}
-            doc[device.to_string()] = Helpers::render_value(s, device.temperature_c, 10);
-
+            // doc[device.to_string()] = Helpers::render_value(s, device.temperature_c, 10);
+            JsonObject dataSensor = doc.createNestedObject(sensorID);
+            dataSensor["id"]      = device.to_string();
+            dataSensor["temp"]    = (float)(device.temperature_c) / 10;
             // create the config if this hasn't already been done
-            // to e.g. homeassistant/sensor/ems-esp/dallas_sensor1/config
-            if (!(registered_ha_[i])) {
+            // to e.g. homeassistant/sensor/ems-esp/dallas_28-233D-9497-0C03/config
+            if (!(registered_ha_[sensor_no - 1])) {
                 StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> config;
                 config["dev_cla"] = F("temperature");
 
@@ -359,11 +366,11 @@ void Sensor::publish_values() {
                 config["unit_of_meas"] = F("°C");
 
                 char str[50];
-                snprintf_P(str, sizeof(str), PSTR("{{value_json.%s}}"), device.to_string().c_str());
+                snprintf_P(str, sizeof(str), PSTR("{{value_json.sensor%d.temp}}"), sensor_no);
                 config["val_tpl"] = str;
 
                 // name as sensor number not the long unique ID
-                snprintf_P(str, sizeof(str), PSTR("Dallas Sensor %d"), i);
+                snprintf_P(str, sizeof(str), PSTR("Dallas Sensor %d"), sensor_no);
                 config["name"] = str;
 
                 snprintf_P(str, sizeof(str), PSTR("dallas_%s"), device.to_string().c_str());
@@ -377,10 +384,10 @@ void Sensor::publish_values() {
                 snprintf_P(&topic[0], 100, PSTR("homeassistant/sensor/ems-esp/dallas_%s/config"), device.to_string().c_str());
                 Mqtt::publish_retain(topic, config.as<JsonObject>(), true); // publish the config payload with retain flag
 
-                registered_ha_[i] = true;
+                registered_ha_[sensor_no - 1] = true;
             }
         }
-        i++; // increment sensor count
+        sensor_no++; // increment sensor count
     }
 
     Mqtt::publish(F("sensor_data"), doc.as<JsonObject>());

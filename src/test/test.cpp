@@ -27,7 +27,7 @@ namespace emsesp {
 // used with the 'test' command, under su/admin
 void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
     if (command == "default") {
-        run_test(shell, "mixing"); // add the default test case here
+        run_test(shell, "render"); // add the default test case here
     }
 
     if (command.empty()) {
@@ -122,6 +122,11 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         uint8bitb = EMS_VALUE_UINT_NOTSET;
         telegram->read_bitvalue(uint8bitb, 0, 0); // value is 0x01 = 0000 0001
         shell.printfln("uint8 bit read: expecting 1, got:%d", uint8bitb);
+
+        float test_float = 20.56;
+        char  result[100];
+        Helpers::render_value(result, test_float, 2);
+        shell.printfln("Float test from %f to %s", test_float, result);
     }
 
     if (command == "devices") {

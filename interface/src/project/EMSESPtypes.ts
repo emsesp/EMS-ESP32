@@ -45,7 +45,7 @@ export interface Device {
 export interface Sensor {
   no: number;
   id: string;
-  temp: string;
+  temp: number;
 }
 
 export interface EMSESPDevices {
