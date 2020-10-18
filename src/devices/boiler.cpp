@@ -708,23 +708,29 @@ void Boiler::show_values(uuid::console::Shell & shell) {
 /*
  * Check if hot tap water or heating is active
  * If a value has changed, post it immediately to MQTT so we get real time data
+ * Values will always be posted first time as heatingActive_ and tapwaterActive_ will have values EMS_VALUE_BOOL_NOTSET
  */
 void Boiler::check_active() {
-    if ((boilerState_ == EMS_VALUE_UINT_NOTSET) || ((boilerState_ & 0x09) != (last_boilerState & 0x09))) {
+    bool    b;
+    uint8_t val;
+
+    // check if heating is active, bits 2 and 4 must be set
+    b   = ((boilerState_ & 0x09) == 0x09);
+    val = b ? EMS_VALUE_BOOL_ON : EMS_VALUE_BOOL_OFF;
+    if (heatingActive_ != val) {
+        heatingActive_ = val;
         char s[7];
-        bool b = ((boilerState_ & 0x09) == 0x09);
         Mqtt::publish(F("heating_active"), Helpers::render_boolean(s, b));
-        heatingActive_   = b ? EMS_VALUE_BOOL_ON : EMS_VALUE_BOOL_OFF;
-        last_boilerState = boilerState_;
     }
 
-    if ((boilerState_ == EMS_VALUE_UINT_NOTSET) || ((boilerState_ & 0x0A) != (last_boilerState & 0x0A))) {
+    // check if tap water is active, bits 1 and 4 must be set
+    b   = ((boilerState_ & 0x0A) == 0x0A);
+    val = b ? EMS_VALUE_BOOL_ON : EMS_VALUE_BOOL_OFF;
+    if (tapwaterActive_ != val) {
+        tapwaterActive_ = val;
         char s[7];
-        bool b = ((boilerState_ & 0x0A) == 0x0A);
         Mqtt::publish(F("tapwater_active"), Helpers::render_boolean(s, b));
-        tapwaterActive_ = b ? EMS_VALUE_BOOL_ON : EMS_VALUE_BOOL_OFF;
         EMSESP::tap_water_active(b); // let EMS-ESP know, used in the Shower class
-        last_boilerState = boilerState_;
     }
 
     /*
