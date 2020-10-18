@@ -319,7 +319,7 @@ bool Boiler::export_values(JsonObject & output) {
 
     // Warm Water charging type
     if (Helpers::hasValue(wWChargeType_, EMS_VALUE_BOOL)) {
-        output["wWChargeType"] = wWChargeType_ ? F("3way valve") : F("charge pump");
+        output["wWChargeType"] = wWChargeType_ ? F("3-way valve") : F("charge pump");
     }
 
     // Warm Water circulation pump available bool
