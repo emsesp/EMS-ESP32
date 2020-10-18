@@ -300,15 +300,18 @@ void EMSESP::publish_all() {
     }
 }
 
+// create json doc for the devices values and add to MQTT publish queue
+// special case for Mixing units, since we want to bundle all devices together into one payload
 void EMSESP::publish_device_values(uint8_t device_type) {
     if (device_type == EMSdevice::DeviceType::MIXING && Mqtt::mqtt_format() != Mqtt::Format::SINGLE) {
-        StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
-        JsonObject                                      output = doc.to<JsonObject>();
+        DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_LARGE);
+        JsonObject          output = doc.to<JsonObject>();
         for (const auto & emsdevice : emsdevices) {
             if (emsdevice && (emsdevice->device_type() == device_type)) {
                 emsdevice->publish_values(output);
             }
         }
+        doc.shrinkToFit();
         Mqtt::publish("mixing_data", doc.as<JsonObject>());
         return;
     }
