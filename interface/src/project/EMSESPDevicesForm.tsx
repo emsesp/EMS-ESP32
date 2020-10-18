@@ -179,7 +179,7 @@ class EMSESPDevicesForm extends Component<
           <Table size="small" padding="default">
             <TableHead>
               <TableRow>
-                <StyledTableCell>Sensor no.</StyledTableCell>
+                <StyledTableCell>Sensor #</StyledTableCell>
                 <StyledTableCell align="center">ID</StyledTableCell>
                 <StyledTableCell align="right">Temperature</StyledTableCell>
               </TableRow>
