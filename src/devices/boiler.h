@@ -50,10 +50,8 @@ class Boiler : public EMSdevice {
     void check_active();
     bool export_values(JsonObject & doc);
 
-    void print_value2(uuid::console::Shell & shell, const char * param, const __FlashStringHelper * name, const __FlashStringHelper * suffix, JsonObject & json);
-
-    bool    changed_         = false;
-    bool    mqtt_ha_config_  = false; // HA MQTT Discovery
+    bool changed_        = false;
+    bool mqtt_ha_config_ = false; // HA MQTT Discovery
 
     static constexpr uint8_t EMS_TYPE_UBAParameterWW     = 0x33;
     static constexpr uint8_t EMS_TYPE_UBAFunctionTest    = 0x1D;
