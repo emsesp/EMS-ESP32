@@ -70,6 +70,7 @@
 { 79, DeviceType::THERMOSTAT, F("RC10/Moduline 100"), DeviceFlags::EMS_DEVICE_FLAG_RC10},// 0x17
 { 80, DeviceType::THERMOSTAT, F("Moduline 200"), DeviceFlags::EMS_DEVICE_FLAG_RC10}, // 0x17
 { 86, DeviceType::THERMOSTAT, F("RC35"), DeviceFlags::EMS_DEVICE_FLAG_RC35}, // 0x10
+{ 90, DeviceType::THERMOSTAT, F("RC10/Moduline 100"), DeviceFlags::EMS_DEVICE_FLAG_RC20_2}, // 0x17
 { 93, DeviceType::THERMOSTAT, F("RC20RF"), DeviceFlags::EMS_DEVICE_FLAG_RC20}, // 0x19
 { 94, DeviceType::THERMOSTAT, F("RFM20 Remote"), DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x18
 {157, DeviceType::THERMOSTAT, F("RC200/CW100"), DeviceFlags::EMS_DEVICE_FLAG_RC100}, // 0x18
