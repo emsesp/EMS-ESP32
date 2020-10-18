@@ -279,8 +279,10 @@ void EMSESP::show_sensor_values(uuid::console::Shell & shell) {
 
     char valuestr[8] = {0}; // for formatting temp
     shell.printfln(F("Dallas temperature sensors:"));
+    uint8_t i = 1;
     for (const auto & device : sensor_devices()) {
-        shell.printfln(F("  ID: %s, Temperature: %s°C"), device.to_string().c_str(), Helpers::render_value(valuestr, device.temperature_c, 1));
+        shell.printfln(F("  Sensor %d, ID: %s, Temperature: %s °C"), i, device.to_string().c_str(), Helpers::render_value(valuestr, device.temperature_c, 10));
+        i++;
     }
     shell.println();
 }

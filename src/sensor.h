@@ -46,11 +46,11 @@ class Sensor {
         uint64_t    id() const;
         std::string to_string() const;
 
-        float temperature_c = NAN;
+        int16_t temperature_c = EMS_VALUE_SHORT_NOTSET;
+        bool    read          = false;
 
       private:
         const uint64_t id_;
-        bool           registered_ = false;
     };
 
     Sensor()  = default;
@@ -100,18 +100,19 @@ class Sensor {
     OneWire bus_;
 #endif
 
-    bool  temperature_convert_complete();
-    float get_temperature_c(const uint8_t addr[]);
+    bool     temperature_convert_complete();
+    int16_t  get_temperature_c(const uint8_t addr[]);
+    uint64_t get_id(const uint8_t addr[]);
 
     uint32_t            last_activity_ = uuid::get_uptime();
     uint32_t            last_publish_  = uuid::get_uptime();
     State               state_         = State::IDLE;
-    std::vector<Device> found_;
     std::vector<Device> devices_;
 
     bool registered_ha_[MAX_SENSORS];
 
-    uint8_t retrycnt_    = 0;
+    int8_t  scancnt_     = -3;
+    uint8_t firstscan_   = 0;
     uint8_t dallas_gpio_ = 0;
     bool    parasite_    = false;
     bool    changed_     = false;
