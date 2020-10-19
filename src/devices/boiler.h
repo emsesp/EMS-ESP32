@@ -48,7 +48,8 @@ class Boiler : public EMSdevice {
 
     void register_mqtt_ha_config();
     void check_active();
-    bool export_values(JsonObject & doc);
+    bool export_values_main(JsonObject & doc);
+    bool export_values_ww(JsonObject & doc);
 
     bool changed_        = false;
     bool mqtt_ha_config_ = false; // HA MQTT Discovery
@@ -73,8 +74,8 @@ class Boiler : public EMSdevice {
     uint8_t wWComfort_          = EMS_VALUE_UINT_NOTSET; // WW comfort mode
 
     // MC10Status
-    uint16_t wwMixTemperature_          = EMS_VALUE_USHORT_NOTSET; // mengertemperatuur
-    uint16_t wwBufferBoilerTemperature_ = EMS_VALUE_USHORT_NOTSET; // bufferboilertemperature
+    uint16_t wwMixTemperature_    = EMS_VALUE_USHORT_NOTSET; // mengertemperatuur
+    uint16_t wwBufferTemperature_ = EMS_VALUE_USHORT_NOTSET; // buffertemperature
 
     // UBAMonitorFast - 0x18 on EMS1
     uint8_t  selFlowTemp_       = EMS_VALUE_UINT_NOTSET;   // Selected flow temperature
