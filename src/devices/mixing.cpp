@@ -194,19 +194,19 @@ void Mixing::register_mqtt_ha_config() {
         Mqtt::publish_retain(topic, doc.as<JsonObject>(), true); // publish the config payload with retain flag
         char hc_name[10];
         snprintf_P(hc_name, sizeof(hc_name), PSTR("hc%d"), hc_);
-        Mqtt::register_mqtt_ha_sensor(hc_name, F_(flowTemp), this->device_type(), "flowTemp", F_(degrees), F_(icontemperature));
-        Mqtt::register_mqtt_ha_sensor(hc_name, F_(flowSetTemp), this->device_type(), "flowSetTemp", F_(degrees), F_(icontemperature));
-        Mqtt::register_mqtt_ha_sensor(hc_name, F_(pumpStatus), this->device_type(), "pumpStatus", nullptr, nullptr);
-        Mqtt::register_mqtt_ha_sensor(hc_name, F_(valveStatus), this->device_type(), "valveStatus", nullptr, nullptr);
+        Mqtt::register_mqtt_ha_sensor(hc_name, nullptr, F_(flowTemp), this->device_type(), "flowTemp", F_(degrees), F_(icontemperature));
+        Mqtt::register_mqtt_ha_sensor(hc_name, nullptr, F_(flowSetTemp), this->device_type(), "flowSetTemp", F_(degrees), F_(icontemperature));
+        Mqtt::register_mqtt_ha_sensor(hc_name, nullptr, F_(pumpStatus), this->device_type(), "pumpStatus", nullptr, nullptr);
+        Mqtt::register_mqtt_ha_sensor(hc_name, nullptr, F_(valveStatus), this->device_type(), "valveStatus", nullptr, nullptr);
     } else {
         // WWC
         snprintf_P(&topic[0], topic.capacity() + 1, PSTR("homeassistant/climate/ems-esp/mixing_wwc%d/config"), hc_);
         Mqtt::publish_retain(topic, doc.as<JsonObject>(), true); // publish the config payload with retain flag
         char wwc_name[10];
         snprintf_P(wwc_name, sizeof(wwc_name), PSTR("wwc%d"), hc_);
-        Mqtt::register_mqtt_ha_sensor(wwc_name, F_(wwTemp), this->device_type(), "wwTemp", F_(degrees), F_(icontemperature));
-        Mqtt::register_mqtt_ha_sensor(wwc_name, F_(pumpStatus), this->device_type(), "pumpStatus", nullptr, nullptr);
-        Mqtt::register_mqtt_ha_sensor(wwc_name, F_(tempStatus), this->device_type(), "tempStatus", nullptr, nullptr);
+        Mqtt::register_mqtt_ha_sensor(wwc_name, nullptr, F_(wwTemp), this->device_type(), "wwTemp", F_(degrees), F_(icontemperature));
+        Mqtt::register_mqtt_ha_sensor(wwc_name, nullptr, F_(pumpStatus), this->device_type(), "pumpStatus", nullptr, nullptr);
+        Mqtt::register_mqtt_ha_sensor(wwc_name, nullptr, F_(tempStatus), this->device_type(), "tempStatus", nullptr, nullptr);
     }
 }
 

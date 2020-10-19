@@ -100,6 +100,7 @@ class Mqtt {
 
     static void register_mqtt_ha_binary_sensor(const __FlashStringHelper * name, const uint8_t device_type, const char * entity);
     static void register_mqtt_ha_sensor(const char *                prefix,
+                                        const __FlashStringHelper * suffix,
                                         const __FlashStringHelper * name,
                                         const uint8_t               device_type,
                                         const char *                entity,
@@ -143,6 +144,10 @@ class Mqtt {
 
     static uint8_t mqtt_format() {
         return mqtt_format_;
+    }
+
+    static AsyncMqttClient * client() {
+        return mqttClient_;
     }
 
   private:
