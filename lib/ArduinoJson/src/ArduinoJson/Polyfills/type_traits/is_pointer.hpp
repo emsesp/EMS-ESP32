@@ -4,18 +4,13 @@
 
 #pragma once
 
-#include <ArduinoJson/Namespace.hpp>
-
-#include <stddef.h>  // size_t
+#include "integral_constant.hpp"
 
 namespace ARDUINOJSON_NAMESPACE {
 
 template <typename T>
-struct is_array : false_type {};
+struct is_pointer : false_type {};
 
 template <typename T>
-struct is_array<T[]> : true_type {};
-
-template <typename T, size_t N>
-struct is_array<T[N]> : true_type {};
+struct is_pointer<T*> : true_type {};
 }  // namespace ARDUINOJSON_NAMESPACE

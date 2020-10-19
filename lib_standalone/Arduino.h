@@ -59,7 +59,6 @@ int  digitalRead(uint8_t pin);
         &__c[0];                                                                                                                                               \
     }))
 
-
 class __FlashStringHelper;
 #define FPSTR(string_literal) (reinterpret_cast<const __FlashStringHelper *>(string_literal))
 #define F(string_literal) (FPSTR(PSTR(string_literal)))
@@ -67,7 +66,13 @@ class __FlashStringHelper;
 int snprintf_P(char * str, size_t size, const char * format, ...);
 int vsnprintf_P(char * str, size_t size, const char * format, va_list ap);
 
-#define pgm_read_byte(addr) (*reinterpret_cast<const char *>(addr))
+// #define pgm_read_byte(addr) (*reinterpret_cast<const char *>(addr))
+// #define pgm_read_ptr(p) (reinterpret_cast<const void *>(p))
+#define pgm_read_byte(addr) (*(const unsigned char *)(addr))
+#define pgm_read_word(addr) (*(const unsigned short *)(addr))
+#define pgm_read_dword(addr) (*(const unsigned long *)(addr))
+#define pgm_read_float(addr) (*(const float *)(addr))
+#define pgm_read_ptr(addr) (*(const void **)(addr))
 
 class Print;
 

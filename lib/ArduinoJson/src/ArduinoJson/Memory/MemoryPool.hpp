@@ -5,12 +5,13 @@
 #pragma once
 
 #include <ArduinoJson/Memory/Alignment.hpp>
-#include <ArduinoJson/Memory/StringSlot.hpp>
 #include <ArduinoJson/Polyfills/assert.hpp>
 #include <ArduinoJson/Polyfills/mpl/max.hpp>
 #include <ArduinoJson/Variant/VariantSlot.hpp>
 
 #include <string.h>  // memmove
+
+#define JSON_STRING_SIZE(SIZE) (SIZE + 1)
 
 namespace ARDUINOJSON_NAMESPACE {
 
@@ -28,7 +29,8 @@ class MemoryPool {
       : _begin(buf),
         _left(buf),
         _right(buf ? buf + capa : 0),
-        _end(buf ? buf + capa : 0) {
+        _end(buf ? buf + capa : 0),
+        _overflowed(false) {
     ARDUINOJSON_ASSERT(isAligned(_begin));
     ARDUINOJSON_ASSERT(isAligned(_right));
     ARDUINOJSON_ASSERT(isAligned(_end));
@@ -45,6 +47,10 @@ class MemoryPool {
 
   size_t size() const {
     return size_t(_left - _begin + _end - _right);
+  }
+
+  bool overflowed() const {
+    return _overflowed;
   }
 
   VariantSlot* allocVariant() {
@@ -90,9 +96,14 @@ class MemoryPool {
     return str;
   }
 
+  void markAsOverflowed() {
+    _overflowed = true;
+  }
+
   void clear() {
     _left = _begin;
     _right = _end;
+    _overflowed = false;
   }
 
   bool canAlloc(size_t bytes) const {
@@ -143,10 +154,6 @@ class MemoryPool {
   }
 
  private:
-  StringSlot* allocStringSlot() {
-    return allocRight<StringSlot>();
-  }
-
   void checkInvariants() {
     ARDUINOJSON_ASSERT(_begin <= _left);
     ARDUINOJSON_ASSERT(_left <= _right);
@@ -174,8 +181,10 @@ class MemoryPool {
 #endif
 
   char* allocString(size_t n) {
-    if (!canAlloc(n))
+    if (!canAlloc(n)) {
+      _overflowed = true;
       return 0;
+    }
     char* s = _left;
     _left += n;
     checkInvariants();
@@ -188,13 +197,16 @@ class MemoryPool {
   }
 
   void* allocRight(size_t bytes) {
-    if (!canAlloc(bytes))
+    if (!canAlloc(bytes)) {
+      _overflowed = true;
       return 0;
+    }
     _right -= bytes;
     return _right;
   }
 
   char *_begin, *_left, *_right, *_end;
+  bool _overflowed;
 };
 
 }  // namespace ARDUINOJSON_NAMESPACE

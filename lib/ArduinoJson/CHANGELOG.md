@@ -1,6 +1,19 @@
 ArduinoJson: change log
 =======================
 
+v6.17.0 (2020-10-19)
+-------
+
+* Added a build failure when nullptr is defined as a macro (issue #1355)
+* Added `JsonDocument::overflowed()` which tells if the memory pool was too small (issue #1358)
+* Added `DeserializationError::EmptyInput` which tells if the input was empty
+* Added `DeserializationError::f_str()` which returns a `const __FlashStringHelper*` (issue #846)
+* Added `operator|(JsonVariantConst, JsonVariantConst)`
+* Added filtering for MessagePack (issue #1298, PR #1394 by Luca Passarella)
+* Moved float convertion tables to PROGMEM
+* Fixed `JsonVariant::set((char*)0)` which returned false instead of true (issue #1368)
+* Fixed error `No such file or directory #include <WString.h>` (issue #1381)
+
 v6.16.1 (2020-08-04)
 -------
 
@@ -12,6 +25,7 @@ v6.16.0 (2020-08-01)
 * Added comparisons (`>`, `>=`, `==`, `!=`, `<`, and `<=`) between `JsonVariant`s
 * Added string deduplication (issue #1303)
 * Added `JsonString::operator!=`
+* Added wildcard key (`*`) for filters (issue #1309)
 * Set `ARDUINOJSON_DECODE_UNICODE` to `1` by default
 * Fixed `copyArray()` not working with `String`, `ElementProxy`, and `MemberProxy`
 * Fixed error `getOrAddElement is not a member of ElementProxy` (issue #1311)
