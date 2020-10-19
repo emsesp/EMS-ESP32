@@ -266,15 +266,15 @@ void System::send_heartbeat() {
         doc["status"] = "disconnected";
     }
 
-    doc["rssi"]             = rssi;
-    doc["uptime"]           = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
-    doc["uptime_sec"]       = uuid::get_uptime_sec();
-    doc["mqttpublishfails"] = Mqtt::publish_fails();
-    doc["txfails"]          = EMSESP::txservice_.telegram_fail_count();
-    doc["rxfails"]          = EMSESP::rxservice_.telegram_error_count();
-    doc["freemem"]          = free_memory;
+    doc["rssi"]       = rssi;
+    doc["uptime"]     = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
+    doc["uptime_sec"] = uuid::get_uptime_sec();
+    doc["mqttfails"]  = Mqtt::publish_fails();
+    doc["txfails"]    = EMSESP::txservice_.telegram_fail_count();
+    doc["rxfails"]    = EMSESP::rxservice_.telegram_error_count();
+    doc["freemem"]    = free_memory;
 #if defined(ESP8266)
-    doc["fragmentation"] = frag_memory;
+    doc["fragmem"] = frag_memory;
 #endif
     if (analog_enabled_) {
         doc["adc"] = analog_;
