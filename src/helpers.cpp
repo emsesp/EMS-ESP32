@@ -136,7 +136,10 @@ char * Helpers::render_boolean(char * result, bool value) {
 }
 
 // depending on format render a number or a string
-char * Helpers::render_enum(char * result, const std::vector<std::string> value, const int8_t no) {
+char * Helpers::render_enum(char * result, const std::vector<std::string> & value, const uint8_t no) {
+    if (no >= value.size()) {
+        return nullptr; // out of bounds
+    }
     if (bool_format() == BOOL_FORMAT_ONOFF) {
         strcpy(result, value[no].c_str());
     } else if (bool_format() == BOOL_FORMAT_TRUEFALSE) {
@@ -211,6 +214,7 @@ char * Helpers::render_value(char * result, const float value, const uint8_t for
 
     char *  ret   = result;
     int32_t whole = (int32_t)value;
+
     itoa(result, whole, 10);
 
     while (*result != '\0') {
@@ -458,7 +462,7 @@ bool Helpers::value2bool(const char * v, bool & value) {
 }
 
 // checks to see if a string is member of a vector and return the index, also allow true/false for on/off
-bool Helpers::value2enum(const char * v, uint8_t & value, const std::vector<std::string> strs) {
+bool Helpers::value2enum(const char * v, uint8_t & value, const std::vector<std::string> & strs) {
     if ((v == nullptr) || (strlen(v) == 0)) {
         return false;
     }
