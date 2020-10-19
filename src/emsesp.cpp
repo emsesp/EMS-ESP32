@@ -315,6 +315,7 @@ void EMSESP::publish_device_values(uint8_t device_type) {
         Mqtt::publish("mixing_data", doc.as<JsonObject>());
         return;
     }
+
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice && (emsdevice->device_type() == device_type)) {
             JsonObject dummy;
