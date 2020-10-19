@@ -13,38 +13,38 @@
 
 class DummySettings {
   public:
-    uint8_t  tx_mode              = 1;
-    uint8_t  ems_bus_id           = 0x0B;
-    int8_t   syslog_level         = 1; // uuid::log::Level
-    uint32_t syslog_mark_interval = 0;
-    String   syslog_host          = "192.168.1.4";
-    uint8_t  master_thermostat    = 0;
-    bool     shower_timer         = false;
-    bool     shower_alert         = false;
-    bool     hide_led             = false;
-    bool     api_enabled          = true;
-    uint16_t publish_time         = 10; // seconds
-    uint8_t  mqtt_format          = 3;  // 1=single, 2=nested, 3=ha, 4=custom
-    uint8_t  mqtt_qos             = 0;
-    bool     mqtt_retain          = false;
-    bool     enabled              = true; // MQTT
-    String   hostname             = "ems-esp";
-    String   jwtSecret            = "ems-esp";
-    String   ssid                 = "ems-esp";
-    String   password             = "ems-esp";
-    String   localIP;
-    String   gatewayIP;
-    String   subnetMask;
-    String   staticIPConfig;
-    String   dnsIP1;
-    String   dnsIP2;
-    uint16_t publish_time_boiler;
-    uint16_t publish_time_thermostat;
-    uint16_t publish_time_solar;
-    uint16_t publish_time_mixing;
-    uint16_t publish_time_other;
-    uint16_t publish_time_sensor;
-    uint8_t  bool_format;
+    uint8_t  tx_mode                 = 1;
+    uint8_t  ems_bus_id              = 0x0B;
+    int8_t   syslog_level            = 1; // uuid::log::Level
+    uint32_t syslog_mark_interval    = 0;
+    String   syslog_host             = "192.168.1.4";
+    uint8_t  master_thermostat       = 0;
+    bool     shower_timer            = false;
+    bool     shower_alert            = false;
+    bool     hide_led                = false;
+    bool     api_enabled             = true;
+    uint16_t publish_time            = 10; // seconds
+    uint8_t  mqtt_format             = 3;  // 1=single, 2=nested, 3=ha, 4=custom
+    uint8_t  mqtt_qos                = 0;
+    bool     mqtt_retain             = false;
+    bool     enabled                 = true; // MQTT
+    String   hostname                = "ems-esp";
+    String   jwtSecret               = "ems-esp";
+    String   ssid                    = "ems-esp";
+    String   password                = "ems-esp";
+    String   localIP                 = "";
+    String   gatewayIP               = "";
+    String   subnetMask              = "";
+    String   staticIPConfig          = "";
+    String   dnsIP1                  = "";
+    String   dnsIP2                  = "";
+    uint16_t publish_time_boiler     = 10;
+    uint16_t publish_time_thermostat = 10;
+    uint16_t publish_time_solar      = 10;
+    uint16_t publish_time_mixing     = 10;
+    uint16_t publish_time_other      = 10;
+    uint16_t publish_time_sensor     = 10;
+    uint8_t  bool_format             = 1; // on off
 
     static void read(DummySettings & settings, JsonObject & root){};
     static void read(DummySettings & settings){};
