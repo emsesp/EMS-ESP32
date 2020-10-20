@@ -34,6 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Accurate detection of warm water and heating (#515)
 - Fix writing to the Junkers FR120 thermostat
 - support for changing summermode
+- added missing `heatingtype` to thermostat data
 
 ### Changed
 - renamed wWCircPumpType to wWChargeType
@@ -45,11 +46,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated EMS-ESP official documentation (https://emsesp.github.io/docs/#/)
 - JWT Secret renamed to Super User Password
 - EMS Devices in Web UI shows button and tooltip to remind users they can click on a device
+- MQTT boiler_data payload split into two topics `boiler_data_main` and `boiler_data_ww`
 
 ### Removed
 - Console contexts for thermostat and boiler
 - Removed option to enable/disable the MQTT Heartbeat. It's always on.
-
 
 ## [2.0.1] September 13 2020
 

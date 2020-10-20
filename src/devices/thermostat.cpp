@@ -215,6 +215,7 @@ void Thermostat::device_info_web(JsonArray & root) {
                 print_value_json(root, F("manualtemp"), FPSTR(prefix_str), F_(manualtemp), F_(degrees), output);
                 print_value_json(root, F("holidaytemp"), FPSTR(prefix_str), F_(holidaytemp), F_(degrees), output);
                 print_value_json(root, F("nofrosttemp"), FPSTR(prefix_str), F_(nofrosttemp), F_(degrees), output);
+                print_value_json(root, F("heatingtype"), FPSTR(prefix_str), F_(heatingtype), nullptr, output);
                 print_value_json(root, F("targetflowtemp"), FPSTR(prefix_str), F_(targetflowtemp), F_(degrees), output);
                 print_value_json(root, F("offsettemp"), FPSTR(prefix_str), F_(offsettemp), F_(degrees), output);
                 print_value_json(root, F("designtemp"), FPSTR(prefix_str), F_(designtemp), F_(degrees), output);
