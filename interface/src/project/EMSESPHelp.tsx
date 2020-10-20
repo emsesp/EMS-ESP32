@@ -25,7 +25,7 @@ class EMSESPHelp extends Component {
                             <MenuBookIcon />
                         </ListItemAvatar>
                         <ListItemText>
-                            For the latest news and updates go to the <Link href="https://emsesp.github.io/docs" color="primary">{'documentation'}&nbsp;website</Link>
+                            For the latest news and updates go to the <Link href="https://emsesp.github.io/docs" color="primary">{'official documentation'}&nbsp;website</Link>
                         </ListItemText>
                     </ListItem>
 
