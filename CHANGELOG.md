@@ -16,7 +16,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `show commands` command
 - exporting of system settings using the `system info` command in Web and Console. Added link into the Web's Settings page.
 - setting to change how booleans are rendered in MQTT (on/off, true/false, 1/0)
-- Added all remaining devices to Home Assistant's MQTT Discovery. No more yaml files!
 - enable ADC setting, add boiler circulation commands, add thermostat RC300 summermodes
 - Added all device info to web UI for Thermostat and Boiler
 - Added all device values to Home Assistant MQTT Discovery under separate devices and entities
@@ -26,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - summer, winter modes for the CW400 thermostat
 - new command under system called `report`. http://ems-esp/api?device=system&cmd=report to generate a report log for troubleshooting
 - thermostat error codes
+- Console command `pulbish ha` to also force the creation of the Home Assistant MQTT Discovery topics
 
 ### Fixed
 - fix wwontime readback
