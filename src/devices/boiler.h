@@ -39,14 +39,14 @@ class Boiler : public EMSdevice {
     Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const std::string & version, const std::string & name, uint8_t flags, uint8_t brand);
 
     virtual void show_values(uuid::console::Shell & shell);
-    virtual void publish_values(JsonObject & data);
+    virtual void publish_values(JsonObject & data, bool force);
     virtual void device_info_web(JsonArray & root);
     virtual bool updated_values();
 
   private:
     static uuid::log::Logger logger_;
 
-    bool register_mqtt_ha_config();
+    void register_mqtt_ha_config(bool force);
     void check_active();
     bool export_values_main(JsonObject & doc);
     bool export_values_ww(JsonObject & doc);

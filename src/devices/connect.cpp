@@ -37,7 +37,7 @@ void Connect::show_values(uuid::console::Shell & shell) {
 }
 
 // publish values via MQTT
-void Connect::publish_values(JsonObject & data) {
+void Connect::publish_values(JsonObject & data, bool force) {
 }
 
 // check to see if values have been updated

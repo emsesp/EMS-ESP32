@@ -315,10 +315,11 @@ void Thermostat::show_values(uuid::console::Shell & shell) {
 }
 
 // publish values via MQTT
-void Thermostat::publish_values(JsonObject & data) {
+void Thermostat::publish_values(JsonObject & data, bool force) {
     if (EMSESP::actual_master_thermostat() != this->device_id()) {
         return;
     }
+
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
     JsonObject                                      output   = doc.to<JsonObject>();
     bool                                            has_data = false;
@@ -336,6 +337,10 @@ void Thermostat::publish_values(JsonObject & data) {
 
     // if we're in HA or CUSTOM, send out the complete topic with all the data
     if (Mqtt::mqtt_format() != Mqtt::Format::SINGLE && has_data) {
+        // see if we have already registered this with HA MQTT Discovery, if not send the config
+        if (Mqtt::mqtt_format() == Mqtt::Format::HA) {
+            ha_config(force);
+        }
         Mqtt::publish(F("thermostat_data"), output);
     }
 }
@@ -450,13 +455,6 @@ bool Thermostat::export_values_main(JsonObject & rootThermostat) {
     if (Helpers::hasValue(wwCircMode_)) {
         char s[7];
         rootThermostat["wwcircmode"] = Helpers::render_enum(s, {"off", "on", "auto"}, wwCircMode_);
-    }
-
-    if ((Mqtt::mqtt_format() == Mqtt::Format::HA) && (!ha_registered())) {
-        // see if we have already registered this with HA MQTT Discovery, if not send the config
-        if (register_mqtt_ha_config()) {
-            ha_registered(true);
-        }
     }
 
     return (rootThermostat.size());
@@ -625,16 +623,31 @@ bool Thermostat::export_values_hc(uint8_t mqtt_format, JsonObject & rootThermost
                 strlcat(topic, Helpers::itoa(s, hc->hc_num()), 30); // append hc to topic
                 Mqtt::publish(topic, rootThermostat);
                 rootThermostat.clear(); // clear object
-            } else if ((mqtt_format == Mqtt::Format::HA) && (!hc->ha_registered())) {
-                // see if we have already registered this with HA MQTT Discovery, if not send the config
-                if (register_mqtt_ha_config(hc->hc_num())) {
-                    hc->ha_registered(true);
-                }
             }
         }
     }
 
     return (has_data);
+}
+
+// set up HA MQTT Discovery
+void Thermostat::ha_config(bool force) {
+    if (!Mqtt::connected()) {
+        return;
+    }
+
+    if (force || !ha_registered()) {
+        register_mqtt_ha_config();
+        ha_registered(true);
+    }
+
+    // check to see which heating circuits need publishing
+    for (const auto & hc : heating_circuits_) {
+        if (force || (hc->is_active() && !hc->ha_registered())) {
+            register_mqtt_ha_config(hc->hc_num());
+            hc->ha_registered(true);
+        }
+    }
 }
 
 // returns the heating circuit object based on the hc number
@@ -739,11 +752,7 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::sha
 
 // publish config topic for HA MQTT Discovery
 // homeassistant/climate/ems-esp/thermostat/config
-bool Thermostat::register_mqtt_ha_config() {
-    if (!Mqtt::connected()) {
-        return false;
-    }
-
+void Thermostat::register_mqtt_ha_config() {
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
     doc["uniq_id"] = F("thermostat");
     doc["ic"]      = F("mdi:home-thermometer-outline");
@@ -783,17 +792,11 @@ bool Thermostat::register_mqtt_ha_config() {
         Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(wwtemplow), this->device_type(), "wwtemplow", F_(degrees), F_(icontemperature));
         Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(wwcircmode), this->device_type(), "wwcircmode", nullptr, nullptr);
     }
-
-    return true;
 }
 
 // publish config topic for HA MQTT Discovery
 // e.g. homeassistant/climate/ems-esp/thermostat_hc1/config
-bool Thermostat::register_mqtt_ha_config(uint8_t hc_num) {
-    if (!Mqtt::connected()) {
-        return false;
-    }
-
+void Thermostat::register_mqtt_ha_config(uint8_t hc_num) {
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
 
     char str1[40];
@@ -919,8 +922,6 @@ bool Thermostat::register_mqtt_ha_config(uint8_t hc_num) {
     default:
         break;
     }
-
-    return true;
 }
 
 // for HA specifically when receiving over MQTT in the thermostat topic

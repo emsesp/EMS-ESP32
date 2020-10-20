@@ -100,7 +100,7 @@ class Thermostat : public EMSdevice {
     static std::string mode_tostring(uint8_t mode);
 
     virtual void show_values(uuid::console::Shell & shell);
-    virtual void publish_values(JsonObject & data);
+    virtual void publish_values(JsonObject & data, bool force);
     virtual void device_info_web(JsonArray & root);
     virtual bool updated_values();
 
@@ -237,8 +237,9 @@ class Thermostat : public EMSdevice {
     std::shared_ptr<Thermostat::HeatingCircuit> heating_circuit(std::shared_ptr<const Telegram> telegram);
     std::shared_ptr<Thermostat::HeatingCircuit> heating_circuit(const uint8_t hc_num);
 
-    bool register_mqtt_ha_config();
-    bool register_mqtt_ha_config(uint8_t hc_num);
+    void register_mqtt_ha_config();
+    void register_mqtt_ha_config(uint8_t hc_num);
+    void ha_config(bool force = false);
     bool thermostat_ha_cmd(const char * message, uint8_t hc_num);
 
     bool command_info(const char * value, const int8_t id, JsonObject & output);

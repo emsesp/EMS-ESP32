@@ -130,7 +130,12 @@ void Solar::show_values(uuid::console::Shell & shell) {
 }
 
 // publish values via MQTT
-void Solar::publish_values(JsonObject & data) {
+void Solar::publish_values(JsonObject & data, bool force) {
+    // handle HA first
+    if (Mqtt::mqtt_format() == Mqtt::Format::HA) {
+        register_mqtt_ha_config(force);
+    }
+
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
     JsonObject                                      output = doc.to<JsonObject>();
     if (export_values(output)) {
@@ -138,17 +143,20 @@ void Solar::publish_values(JsonObject & data) {
             Mqtt::publish(F("ww_data"), doc.as<JsonObject>());
         } else {
             Mqtt::publish(F("solar_data"), doc.as<JsonObject>());
-            // if we're using Home Assistant and haven't created the MQTT Discovery topics, do it now
-            if ((Mqtt::mqtt_format() == Mqtt::Format::HA) && (!mqtt_ha_config_)) {
-                register_mqtt_ha_config();
-                mqtt_ha_config_ = true;
-            }
         }
     }
 }
 
 // publish config topic for HA MQTT Discovery
-void Solar::register_mqtt_ha_config() {
+void Solar::register_mqtt_ha_config(bool force) {
+    if ((mqtt_ha_config_ && !force)) {
+        return;
+    }
+
+    if (!Mqtt::connected()) {
+        return;
+    }
+
     // Create the Master device
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
     doc["name"]    = F("EMS-ESP");
@@ -183,6 +191,9 @@ void Solar::register_mqtt_ha_config() {
     Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(valveStatus), this->device_type(), "valveStatus", nullptr, nullptr);
     Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(tankHeated), this->device_type(), "tankHeated", nullptr, nullptr);
     Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(collectorShutdown), this->device_type(), "collectorShutdown", nullptr, nullptr);
+
+    mqtt_ha_config_ = true; // done
+
 }
 
 // creates JSON doc from values

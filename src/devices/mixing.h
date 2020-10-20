@@ -37,7 +37,7 @@ class Mixing : public EMSdevice {
     Mixing(uint8_t device_type, uint8_t device_id, uint8_t product_id, const std::string & version, const std::string & name, uint8_t flags, uint8_t brand);
 
     virtual void show_values(uuid::console::Shell & shell);
-    virtual void publish_values(JsonObject & data);
+    virtual void publish_values(JsonObject & data, bool force);
     virtual void device_info_web(JsonArray & root);
     virtual bool updated_values();
 
@@ -45,7 +45,7 @@ class Mixing : public EMSdevice {
     static uuid::log::Logger logger_;
 
     bool export_values(uint8_t mqtt_format, JsonObject & doc);
-    void register_mqtt_ha_config();
+    void register_mqtt_ha_config(bool force);
     bool command_info(const char * value, const int8_t id, JsonObject & output);
 
     void process_MMPLUSStatusMessage_HC(std::shared_ptr<const Telegram> telegram);

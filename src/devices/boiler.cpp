@@ -80,9 +80,13 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
 
 // create the config topics for Home Assistant MQTT Discovery
 // for each of the main elements
-bool Boiler::register_mqtt_ha_config() {
+void Boiler::register_mqtt_ha_config(bool force) {
+    if ((mqtt_ha_config_ && !force)) {
+        return;
+    }
+
     if (!Mqtt::connected()) {
-        return false;
+        return;
     }
 
     // Create the Master device
@@ -169,7 +173,7 @@ bool Boiler::register_mqtt_ha_config() {
     Mqtt::register_mqtt_ha_sensor(nullptr, F_(mqtt_suffix_ww), F_(wWStarts), this->device_type(), "wWStarts", nullptr, nullptr);
     Mqtt::register_mqtt_ha_sensor(nullptr, F_(mqtt_suffix_ww), F_(wWWorkM), this->device_type(), "wWWorkM", nullptr, nullptr);
 
-    return true;
+    mqtt_ha_config_ = true; // done
 }
 
 // send stuff to the Web UI
@@ -611,10 +615,10 @@ bool Boiler::export_values_main(JsonObject & output) {
 }
 
 // publish values via MQTT
-void Boiler::publish_values(JsonObject & data) {
+void Boiler::publish_values(JsonObject & data, bool force) {
     // handle HA first
-    if ((Mqtt::mqtt_format() == Mqtt::Format::HA) && (!mqtt_ha_config_)) {
-        mqtt_ha_config_ = register_mqtt_ha_config();
+    if (Mqtt::mqtt_format() == Mqtt::Format::HA) {
+        register_mqtt_ha_config(force);
     }
 
     DynamicJsonDocument doc_main(EMSESP_MAX_JSON_SIZE_LARGE);

@@ -138,7 +138,12 @@ bool Mixing::command_info(const char * value, const int8_t id, JsonObject & outp
 
 // publish values via MQTT
 // topic is mixing_data<id>
-void Mixing::publish_values(JsonObject & data) {
+void Mixing::publish_values(JsonObject & data, bool force) {
+    // handle HA first
+    if (Mqtt::mqtt_format() == Mqtt::Format::HA) {
+        register_mqtt_ha_config(force);
+    }
+
     if (Mqtt::mqtt_format() == Mqtt::Format::SINGLE) {
         StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
         JsonObject                                     output = doc.to<JsonObject>();
@@ -150,18 +155,21 @@ void Mixing::publish_values(JsonObject & data) {
             Mqtt::publish(topic, doc.as<JsonObject>());
         }
     } else {
-        if (export_values(Mqtt::mqtt_format(), data)) {
-            // if we're using Home Assistant and haven't created the MQTT Discovery topics, do it now
-            if ((Mqtt::mqtt_format() == Mqtt::Format::HA) && (!mqtt_ha_config_)) {
-                register_mqtt_ha_config();
-                mqtt_ha_config_ = true;
-            }
-        }
+        // format is HA or Nested. This is bundled together and sent in emsesp.cpp
+        (void)export_values(Mqtt::mqtt_format(), data);
     }
 }
 
 // publish config topic for HA MQTT Discovery
-void Mixing::register_mqtt_ha_config() {
+void Mixing::register_mqtt_ha_config(bool force) {
+    if ((mqtt_ha_config_ && !force)) {
+        return;
+    }
+
+    if (!Mqtt::connected()) {
+        return;
+    }
+
     // Create the Master device
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
 
@@ -208,6 +216,8 @@ void Mixing::register_mqtt_ha_config() {
         Mqtt::register_mqtt_ha_sensor(wwc_name, nullptr, F_(pumpStatus), this->device_type(), "pumpStatus", nullptr, nullptr);
         Mqtt::register_mqtt_ha_sensor(wwc_name, nullptr, F_(tempStatus), this->device_type(), "tempStatus", nullptr, nullptr);
     }
+
+    mqtt_ha_config_ = true; // done
 }
 
 // creates JSON doc from values

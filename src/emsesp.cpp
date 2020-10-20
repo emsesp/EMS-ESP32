@@ -288,12 +288,12 @@ void EMSESP::show_sensor_values(uuid::console::Shell & shell) {
 }
 
 // MQTT publish everything, immediately
-void EMSESP::publish_all() {
+void EMSESP::publish_all(bool force) {
     if (Mqtt::connected()) {
-        publish_device_values(EMSdevice::DeviceType::BOILER);
-        publish_device_values(EMSdevice::DeviceType::THERMOSTAT);
-        publish_device_values(EMSdevice::DeviceType::SOLAR);
-        publish_device_values(EMSdevice::DeviceType::MIXING);
+        publish_device_values(EMSdevice::DeviceType::BOILER, force);
+        publish_device_values(EMSdevice::DeviceType::THERMOSTAT, force);
+        publish_device_values(EMSdevice::DeviceType::SOLAR, force);
+        publish_device_values(EMSdevice::DeviceType::MIXING, force);
         publish_other_values();
         publish_sensor_values(true);
         system_.send_heartbeat();
@@ -302,13 +302,13 @@ void EMSESP::publish_all() {
 
 // create json doc for the devices values and add to MQTT publish queue
 // special case for Mixing units, since we want to bundle all devices together into one payload
-void EMSESP::publish_device_values(uint8_t device_type) {
+void EMSESP::publish_device_values(uint8_t device_type, bool force) {
     if (device_type == EMSdevice::DeviceType::MIXING && Mqtt::mqtt_format() != Mqtt::Format::SINGLE) {
         DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_LARGE);
         JsonObject          output = doc.to<JsonObject>();
         for (const auto & emsdevice : emsdevices) {
             if (emsdevice && (emsdevice->device_type() == device_type)) {
-                emsdevice->publish_values(output);
+                emsdevice->publish_values(output, force);
             }
         }
         doc.shrinkToFit();
@@ -319,7 +319,7 @@ void EMSESP::publish_device_values(uint8_t device_type) {
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice && (emsdevice->device_type() == device_type)) {
             JsonObject dummy;
-            emsdevice->publish_values(dummy);
+            emsdevice->publish_values(dummy, force);
         }
     }
 }

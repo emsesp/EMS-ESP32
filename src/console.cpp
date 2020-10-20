@@ -121,11 +121,16 @@ void EMSESPShell::add_console_commands() {
     commands->add_command(ShellContext::MAIN,
                           CommandFlags::ADMIN,
                           flash_string_vector{F_(publish)},
-                          [&](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
-                              shell.printfln(F("Publishing all data to MQTT"));
-                              EMSESP::publish_all();
+                          flash_string_vector{F_(ha_optional)},
+                          [&](Shell & shell, const std::vector<std::string> & arguments) {
+                              if (arguments.empty()) {
+                                  EMSESP::publish_all();
+                                  shell.printfln(F("Published all data to MQTT"));
+                              } else {
+                                  EMSESP::publish_all(true);
+                                  shell.printfln(F("Published all data to MQTT, including HA configs"));
+                              }
                           });
-
 
     commands->add_command(ShellContext::MAIN,
                           CommandFlags::USER,

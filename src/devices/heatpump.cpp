@@ -42,7 +42,7 @@ void Heatpump::show_values(uuid::console::Shell & shell) {
 }
 
 // publish values via MQTT
-void Heatpump::publish_values(JsonObject & data) {
+void Heatpump::publish_values(JsonObject & data, bool force) {
 }
 
 // check to see if values have been updated
