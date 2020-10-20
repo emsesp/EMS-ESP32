@@ -110,9 +110,11 @@ class Thermostat : public EMSdevice {
     void add_commands();
     bool export_values_main(JsonObject & doc);
     bool export_values_hc(uint8_t mqtt_format, JsonObject & doc);
+
     bool ha_registered() const {
         return ha_registered_;
     }
+
     void ha_registered(bool b) {
         ha_registered_ = b;
     }
@@ -235,8 +237,8 @@ class Thermostat : public EMSdevice {
     std::shared_ptr<Thermostat::HeatingCircuit> heating_circuit(std::shared_ptr<const Telegram> telegram);
     std::shared_ptr<Thermostat::HeatingCircuit> heating_circuit(const uint8_t hc_num);
 
-    void register_mqtt_ha_config();
-    void register_mqtt_ha_config(uint8_t hc_num);
+    bool register_mqtt_ha_config();
+    bool register_mqtt_ha_config(uint8_t hc_num);
     bool thermostat_ha_cmd(const char * message, uint8_t hc_num);
 
     bool command_info(const char * value, const int8_t id, JsonObject & output);

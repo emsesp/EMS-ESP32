@@ -46,7 +46,7 @@ class Boiler : public EMSdevice {
   private:
     static uuid::log::Logger logger_;
 
-    void register_mqtt_ha_config();
+    bool register_mqtt_ha_config();
     void check_active();
     bool export_values_main(JsonObject & doc);
     bool export_values_ww(JsonObject & doc);
