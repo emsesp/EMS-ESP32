@@ -99,6 +99,7 @@ MAKE_PSTR(1space, " ")
 MAKE_PSTR(2spaces, "  ")
 MAKE_PSTR(kwh, "kWh")
 MAKE_PSTR(wh, "Wh")
+MAKE_PSTR(EMSESP, "EMS-ESP")
 MAKE_PSTR(master_thermostat_fmt, "Master Thermostat Device ID = %s")
 MAKE_PSTR(host_fmt, "Host = %s")
 MAKE_PSTR(hostname_fmt, "WiFi Hostname = %s")
@@ -260,6 +261,10 @@ MAKE_PSTR(roominfluence, "Room influence")
 MAKE_PSTR(mode, "Mode")
 MAKE_PSTR(modetype, "Mode type")
 
+// heat pump
+MAKE_PSTR(airHumidity, "Relative air humidity")
+MAKE_PSTR(dewTemperature, "Dew point temperature")
+
 // HA icons
 MAKE_PSTR(icontemperature, "mdi:coolant-temperature")
 MAKE_PSTR(iconpercent, "mdi:sine-wave")
@@ -272,6 +277,8 @@ MAKE_PSTR(iconimport, "mdi:home-import-outline")
 MAKE_PSTR(iconcruise, "mdi:car-cruise-control")
 MAKE_PSTR(iconvalve, "mdi:valve")
 MAKE_PSTR(iconpower, "mdi:power-cycle")
+MAKE_PSTR(iconthermostat, "mdi:home-thermometer-outline")
+MAKE_PSTR(iconheatpump, "mdi:water-pump")
 
 // MQTT topic suffix
 MAKE_PSTR(mqtt_suffix_main, "_main")

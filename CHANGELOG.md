@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - new command under system called `report`. http://ems-esp/api?device=system&cmd=report to generate a report log for troubleshooting
 - thermostat error codes
 - Console command `pulbish ha` to also force the creation of the Home Assistant MQTT Discovery topics
+- Heatpump values
 
 ### Fixed
 - fix wwontime readback

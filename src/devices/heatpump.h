@@ -25,6 +25,7 @@
 #include <uuid/log.h>
 
 #include "emsdevice.h"
+#include "emsesp.h"
 #include "telegram.h"
 #include "helpers.h"
 #include "mqtt.h"
@@ -42,6 +43,16 @@ class Heatpump : public EMSdevice {
 
   private:
     static uuid::log::Logger logger_;
+
+    bool export_values(JsonObject & doc);
+    bool command_info(const char * value, const int8_t id, JsonObject & output);
+    void register_mqtt_ha_config(bool force);
+
+    uint8_t airHumidity_    = EMS_VALUE_UINT_NOTSET;
+    uint8_t dewTemperature_ = EMS_VALUE_UINT_NOTSET;
+
+    bool changed_        = false;
+    bool mqtt_ha_config_ = false; // for HA MQTT Discovery
 
     void process_HPMonitor1(std::shared_ptr<const Telegram> telegram);
     void process_HPMonitor2(std::shared_ptr<const Telegram> telegram);

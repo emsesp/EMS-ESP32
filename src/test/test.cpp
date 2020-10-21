@@ -27,7 +27,7 @@ namespace emsesp {
 // used with the 'test' command, under su/admin
 void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
     if (command == "default") {
-        run_test(shell, "general"); // add the default test case here
+        run_test(shell, "heatpump"); // add the default test case here
     }
 
     if (command.empty()) {
@@ -365,6 +365,27 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         EMSESP::show_device_values(shell);
 
         uart_telegram("30 00 FF 0A 02 6A 03"); // SM100 pump off  0
+        EMSESP::show_device_values(shell);
+    }
+
+    if (command == "heatpump") {
+        shell.printfln(F("Testing Heat Pump"));
+
+        EMSESP::rxservice_.ems_mask(EMSbus::EMS_MASK_BUDERUS);
+
+        std::string version("1.2.3");
+
+        // add heatpump
+        EMSESP::add_device(0x38, 200, version, EMSdevice::Brand::BUDERUS); // Enviline module
+
+        // add a thermostat
+        EMSESP::add_device(0x10, 192, version, EMSdevice::Brand::JUNKERS); // FW120
+        uart_telegram({0x90, 0x00, 0xFF, 0x00, 0x00, 0x6F, 0x00, 0xCF, 0x21, 0x2E, 0x20, 0x00, 0x2E, 0x24,
+                       0x03, 0x25, 0x03, 0x03, 0x01, 0x03, 0x25, 0x00, 0xC8, 0x00, 0x00, 0x11, 0x01, 0x03}); // HC1
+
+        uart_telegram("38 0B FF 00 03 7B 0C 34 00 74");
+        shell.invoke_command("call");
+        shell.invoke_command("call heatpump info");
         EMSESP::show_device_values(shell);
     }
 
