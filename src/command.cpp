@@ -73,13 +73,16 @@ void Command::add(const uint8_t device_type, const uint8_t device_id, const __Fl
 
 // add a command to the list, which does return json object as output
 void Command::add_with_json(const uint8_t device_type, const __FlashStringHelper * cmd, cmdfunction_json_p cb) {
-    cmdfunctions_.emplace_back(device_type, cmd, nullptr, cb);
+    // if the command already exists for that device type don't add it
+    if (!find_command(device_type, uuid::read_flash_string(cmd).c_str())) {
+        cmdfunctions_.emplace_back(device_type, cmd, nullptr, cb);
+    }
 }
 
 // see if a command exists for that device type
 bool Command::find_command(const uint8_t device_type, const char * cmd) {
     for (const auto & cf : cmdfunctions_) {
-        if (strcmp(cmd, uuid::read_flash_string(cf.cmd_).c_str()) == 0) {
+        if ((strcmp(cmd, uuid::read_flash_string(cf.cmd_).c_str()) == 0) && (cf.device_type_ == device_type)) {
             return true;
         }
     }
@@ -140,6 +143,7 @@ void Command::show_devices(uuid::console::Shell & shell) {
         for (const auto & emsdevice : EMSESP::emsdevices) {
             if ((emsdevice) && (emsdevice->device_type() == device_class.first)) {
                 shell.printf("%s ", EMSdevice::device_type_2_device_name(device_class.first).c_str());
+                break; // we only want to show one (not multiple of the same device types)
             }
         }
     }
