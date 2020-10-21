@@ -237,7 +237,7 @@ void EMSESP::show_ems(uuid::console::Shell & shell) {
     } else {
         shell.printfln(F("Tx Queue (%ld telegram%s):"), tx_telegrams.size(), tx_telegrams.size() == 1 ? "" : "s");
 
-        std::string op(10, '\0');
+        std::string op;
         for (const auto & it : tx_telegrams) {
             if ((it.telegram_->operation) == Telegram::Operation::TX_RAW) {
                 op = read_flash_string(F("RAW  "));
@@ -387,9 +387,9 @@ std::string EMSESP::pretty_telegram(std::shared_ptr<const Telegram> telegram) {
     uint8_t offset = telegram->offset;
 
     // find name for src and dest by looking up known devices
-    std::string src_name(20, '\0');
-    std::string dest_name(20, '\0');
-    std::string type_name(20, '\0');
+    std::string src_name;
+    std::string dest_name;
+    std::string type_name;
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice) {
             // get src & dest
@@ -425,7 +425,6 @@ std::string EMSESP::pretty_telegram(std::shared_ptr<const Telegram> telegram) {
     }
 
     std::string str(200, '\0');
-
     if (offset) {
         snprintf_P(&str[0],
                    str.capacity() + 1,
