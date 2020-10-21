@@ -159,9 +159,9 @@ void Solar::register_mqtt_ha_config(bool force) {
 
     // Create the Master device
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
-    doc["name"]    = F("EMS-ESP");
-    doc["uniq_id"] = F("solar");
-    doc["ic"]      = F("mdi:home-thermometer-outline");
+    doc["name"]    = F_(EMSESP);
+    doc["uniq_id"] = F_(solar);
+    doc["ic"]      = F_(iconthermostat);
 
     char stat_t[50];
     snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/solar_data"), System::hostname().c_str());
@@ -193,7 +193,6 @@ void Solar::register_mqtt_ha_config(bool force) {
     Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(collectorShutdown), this->device_type(), "collectorShutdown", nullptr, nullptr);
 
     mqtt_ha_config_ = true; // done
-
 }
 
 // creates JSON doc from values
