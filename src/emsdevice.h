@@ -278,8 +278,6 @@ class EMSdevice {
     uint8_t     flags_ = 0;
     uint8_t     brand_ = Brand::NO_BRAND;
 
-    static uuid::log::Logger logger_;
-
     struct TelegramFunction {
         uint16_t                    telegram_type_id_;   // it's type_id
         const __FlashStringHelper * telegram_type_name_; // e.g. RC20Message

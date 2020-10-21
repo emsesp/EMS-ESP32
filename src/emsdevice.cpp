@@ -21,8 +21,6 @@
 
 namespace emsesp {
 
-uuid::log::Logger EMSdevice::logger_{F_(emsesp), uuid::log::Facility::CONSOLE};
-
 std::string EMSdevice::brand_to_string() const {
     switch (brand_) {
     case EMSdevice::Brand::BOSCH:
@@ -246,7 +244,7 @@ void EMSdevice::show_values(uuid::console::Shell & shell) {
 
 // for each telegram that has the fetch value set (true) do a read request
 void EMSdevice::fetch_values() {
-    LOG_DEBUG(F("Fetching values for device ID 0x%02X"), device_id());
+    EMSESP::logger().debug(F("Fetching values for device ID 0x%02X"), device_id());
 
     for (const auto & tf : telegram_functions_) {
         if (tf.fetch_) {
@@ -257,7 +255,7 @@ void EMSdevice::fetch_values() {
 
 // toggle on/off automatic fetch for a telegram id
 void EMSdevice::toggle_fetch(uint16_t telegram_id, bool toggle) {
-    LOG_DEBUG(F("Toggling fetch for device ID 0x%02X, telegram ID 0x%02X to %d"), device_id(), telegram_id, toggle);
+    EMSESP::logger().debug(F("Toggling fetch for device ID 0x%02X, telegram ID 0x%02X to %d"), device_id(), telegram_id, toggle);
 
     for (auto & tf : telegram_functions_) {
         if (tf.telegram_type_id_ == telegram_id) {
@@ -358,12 +356,12 @@ bool EMSdevice::handle_telegram(std::shared_ptr<const Telegram> telegram) {
             // if the data block is empty, assume that this telegram is not recognized by the bus master
             // so remove it from the automatic fetch list
             if (telegram->message_length == 0 && telegram->offset == 0) {
-                LOG_DEBUG(F("This telegram (%s) is not recognized by the EMS bus"), uuid::read_flash_string(tf.telegram_type_name_).c_str());
+                EMSESP::logger().debug(F("This telegram (%s) is not recognized by the EMS bus"), uuid::read_flash_string(tf.telegram_type_name_).c_str());
                 toggle_fetch(tf.telegram_type_id_, false);
                 return false;
             }
 
-            LOG_DEBUG(F("Received %s"), uuid::read_flash_string(tf.telegram_type_name_).c_str());
+            EMSESP::logger().debug(F("Received %s"), uuid::read_flash_string(tf.telegram_type_name_).c_str());
             tf.process_function_(telegram);
             return true;
         }
