@@ -18,8 +18,8 @@
 
 // code originally written by nomis - https://github.com/nomis
 
-#ifndef EMSESP_SENSOR_H
-#define EMSESP_SENSOR_H
+#ifndef EMSESP_DALLASSENSOR_H
+#define EMSESP_DALLASSENSOR_H
 
 #include <string>
 #include <vector>
@@ -36,12 +36,12 @@
 
 namespace emsesp {
 
-class Sensor {
+class DallasSensor {
   public:
-    class Device {
+    class Sensor {
       public:
-        Device(const uint8_t addr[]);
-        ~Device() = default;
+        Sensor(const uint8_t addr[]);
+        ~Sensor() = default;
 
         uint64_t    id() const;
         std::string to_string() const;
@@ -53,8 +53,8 @@ class Sensor {
         const uint64_t id_;
     };
 
-    Sensor()  = default;
-    ~Sensor() = default;
+    DallasSensor()  = default;
+    ~DallasSensor() = default;
 
     void start();
     void loop();
@@ -62,10 +62,7 @@ class Sensor {
     void reload();
     bool updated_values();
 
-    bool command_info(const char * value, const int8_t id, JsonObject & output);
-    bool export_values(JsonObject & doc);
-
-    const std::vector<Device> devices() const;
+    const std::vector<Sensor> sensors() const;
 
   private:
     static constexpr uint8_t MAX_SENSORS = 20;
@@ -104,10 +101,13 @@ class Sensor {
     int16_t  get_temperature_c(const uint8_t addr[]);
     uint64_t get_id(const uint8_t addr[]);
 
+    bool command_info(const char * value, const int8_t id, JsonObject & output);
+    bool export_values(JsonObject & doc);
+
     uint32_t            last_activity_ = uuid::get_uptime();
     uint32_t            last_publish_  = uuid::get_uptime();
     State               state_         = State::IDLE;
-    std::vector<Device> devices_;
+    std::vector<Sensor> sensors_;
 
     bool registered_ha_[MAX_SENSORS];
 

@@ -16,36 +16,32 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EMSESPStatusService_h
-#define EMSESPStatusService_h
+#ifndef WebDevicesService_h
+#define WebDevicesService_h
 
 #include <ArduinoJson.h>
 #include <AsyncJson.h>
 #include <ESPAsyncWebServer.h>
 #include <SecurityManager.h>
-#include <AsyncMqttClient.h>
 
-#define MAX_EMSESP_STATUS_SIZE 1024
-#define EMSESP_STATUS_SERVICE_PATH "/rest/emsespStatus"
+#define MAX_EMSESP_DEVICE_SIZE 4096
+
+#define EMSESP_DEVICES_SERVICE_PATH "/rest/allDevices"
+#define SCAN_DEVICES_SERVICE_PATH "/rest/scanDevices"
+#define DEVICE_DATA_SERVICE_PATH "/rest/deviceData"
 
 namespace emsesp {
 
-class EMSESPStatusService {
+class WebDevicesService {
   public:
-    EMSESPStatusService(AsyncWebServer * server, SecurityManager * securityManager);
+    WebDevicesService(AsyncWebServer * server, SecurityManager * securityManager);
 
   private:
-    void emsespStatusService(AsyncWebServerRequest * request);
+    void all_devices(AsyncWebServerRequest * request);
+    void scan_devices(AsyncWebServerRequest * request);
+    void device_data(AsyncWebServerRequest * request, JsonVariant & json);
 
-#ifdef ESP32
-    static void onStationModeDisconnected(WiFiEvent_t event, WiFiEventInfo_t info);
-    static void onStationModeGotIP(WiFiEvent_t event, WiFiEventInfo_t info);
-#elif defined(ESP8266)
-    WiFiEventHandler _onStationModeDisconnectedHandler;
-    WiFiEventHandler _onStationModeGotIPHandler;
-    static void      onStationModeDisconnected(const WiFiEventStationModeDisconnected & event);
-    static void      onStationModeGotIP(const WiFiEventStationModeGotIP & event);
-#endif
+    AsyncCallbackJsonWebHandler _device_dataHandler;
 };
 
 } // namespace emsesp

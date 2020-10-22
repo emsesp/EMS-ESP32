@@ -16,23 +16,36 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EMSESPAPIService_h
-#define EMSESPAPIService_h
+#ifndef WebStatusService_h
+#define WebStatusService_h
 
 #include <ArduinoJson.h>
 #include <AsyncJson.h>
 #include <ESPAsyncWebServer.h>
+#include <SecurityManager.h>
+#include <AsyncMqttClient.h>
 
-#define EMSESP_API_SERVICE_PATH "/api"
+#define MAX_EMSESP_STATUS_SIZE 1024
+#define EMSESP_STATUS_SERVICE_PATH "/rest/emsespStatus"
 
 namespace emsesp {
 
-class EMSESPAPIService {
+class WebStatusService {
   public:
-    EMSESPAPIService(AsyncWebServer * server);
+    WebStatusService(AsyncWebServer * server, SecurityManager * securityManager);
 
   private:
-    void emsespAPIService(AsyncWebServerRequest * request);
+    void webStatusService(AsyncWebServerRequest * request);
+
+#ifdef ESP32
+    static void onStationModeDisconnected(WiFiEvent_t event, WiFiEventInfo_t info);
+    static void onStationModeGotIP(WiFiEvent_t event, WiFiEventInfo_t info);
+#elif defined(ESP8266)
+    WiFiEventHandler _onStationModeDisconnectedHandler;
+    WiFiEventHandler _onStationModeGotIPHandler;
+    static void      onStationModeDisconnected(const WiFiEventStationModeDisconnected & event);
+    static void      onStationModeGotIP(const WiFiEventStationModeGotIP & event);
+#endif
 };
 
 } // namespace emsesp

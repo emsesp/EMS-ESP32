@@ -16,32 +16,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EMSESPDevicesService_h
-#define EMSESPDevicesService_h
+#ifndef WebAPIService_h
+#define WebAPIService_h
 
 #include <ArduinoJson.h>
 #include <AsyncJson.h>
 #include <ESPAsyncWebServer.h>
-#include <SecurityManager.h>
 
-#define MAX_EMSESP_DEVICE_SIZE 4096
-
-#define EMSESP_DEVICES_SERVICE_PATH "/rest/allDevices"
-#define SCAN_DEVICES_SERVICE_PATH "/rest/scanDevices"
-#define DEVICE_DATA_SERVICE_PATH "/rest/deviceData"
+#define EMSESP_API_SERVICE_PATH "/api"
 
 namespace emsesp {
 
-class EMSESPDevicesService {
+class WebAPIService {
   public:
-    EMSESPDevicesService(AsyncWebServer * server, SecurityManager * securityManager);
+    WebAPIService(AsyncWebServer * server);
 
   private:
-    void all_devices(AsyncWebServerRequest * request);
-    void scan_devices(AsyncWebServerRequest * request);
-    void device_data(AsyncWebServerRequest * request, JsonVariant & json);
-
-    AsyncCallbackJsonWebHandler _device_dataHandler;
+    void webAPIService(AsyncWebServerRequest * request);
 };
 
 } // namespace emsesp

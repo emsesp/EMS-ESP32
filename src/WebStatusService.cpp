@@ -16,16 +16,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "EMSESPStatusService.h"
+#include "WebStatusService.h"
 #include "emsesp.h"
 
 namespace emsesp {
 
-EMSESPStatusService::EMSESPStatusService(AsyncWebServer * server, SecurityManager * securityManager) {
+WebStatusService::WebStatusService(AsyncWebServer * server, SecurityManager * securityManager) {
     // rest endpoint for web page
     server->on(EMSESP_STATUS_SERVICE_PATH,
                HTTP_GET,
-               securityManager->wrapRequest(std::bind(&EMSESPStatusService::emsespStatusService, this, std::placeholders::_1),
+               securityManager->wrapRequest(std::bind(&WebStatusService::webStatusService, this, std::placeholders::_1),
                                             AuthenticationPredicates::IS_AUTHENTICATED));
 
 // trigger on wifi connects/disconnects
@@ -39,24 +39,24 @@ EMSESPStatusService::EMSESPStatusService(AsyncWebServer * server, SecurityManage
 }
 
 #ifdef ESP32
-void EMSESPStatusService::onStationModeDisconnected(WiFiEvent_t event, WiFiEventInfo_t info) {
+void WebStatusService::onStationModeDisconnected(WiFiEvent_t event, WiFiEventInfo_t info) {
     EMSESP::logger().debug(F("WiFi Disconnected. Reason code=%d"), info.disconnected.reason);
 }
-void EMSESPStatusService::onStationModeGotIP(WiFiEvent_t event, WiFiEventInfo_t info) {
+void WebStatusService::onStationModeGotIP(WiFiEvent_t event, WiFiEventInfo_t info) {
     EMSESP::logger().debug(F("WiFi Connected with IP=%s, hostname=%s"), WiFi.localIP().toString().c_str(), WiFi.getHostname());
     EMSESP::system_.send_heartbeat(); // send out heartbeat MQTT as soon as we have a connection
 }
 #elif defined(ESP8266)
-void EMSESPStatusService::onStationModeDisconnected(const WiFiEventStationModeDisconnected & event) {
+void WebStatusService::onStationModeDisconnected(const WiFiEventStationModeDisconnected & event) {
     EMSESP::logger().debug(F("WiFi Disconnected. Reason code=%d"), event.reason);
 }
-void EMSESPStatusService::onStationModeGotIP(const WiFiEventStationModeGotIP & event) {
+void WebStatusService::onStationModeGotIP(const WiFiEventStationModeGotIP & event) {
     EMSESP::logger().debug(F("WiFi Connected with IP=%s, hostname=%s"), event.ip.toString().c_str(), WiFi.hostname().c_str());
     EMSESP::system_.send_heartbeat(); // send out heartbeat MQTT as soon as we have a connection
 }
 #endif
 
-void EMSESPStatusService::emsespStatusService(AsyncWebServerRequest * request) {
+void WebStatusService::webStatusService(AsyncWebServerRequest * request) {
     AsyncJsonResponse * response = new AsyncJsonResponse(false, MAX_EMSESP_STATUS_SIZE);
     JsonObject          root     = response->getRoot();
 

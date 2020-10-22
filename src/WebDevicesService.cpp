@@ -16,35 +16,35 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "EMSESPDevicesService.h"
+#include "WebDevicesService.h"
 #include "emsesp.h"
 
 namespace emsesp {
 
 using namespace std::placeholders; // for `_1` etc
 
-EMSESPDevicesService::EMSESPDevicesService(AsyncWebServer * server, SecurityManager * securityManager)
+WebDevicesService::WebDevicesService(AsyncWebServer * server, SecurityManager * securityManager)
     : _device_dataHandler(DEVICE_DATA_SERVICE_PATH,
-                          securityManager->wrapCallback(std::bind(&EMSESPDevicesService::device_data, this, _1, _2), AuthenticationPredicates::IS_AUTHENTICATED)) {
+                          securityManager->wrapCallback(std::bind(&WebDevicesService::device_data, this, _1, _2), AuthenticationPredicates::IS_AUTHENTICATED)) {
     server->on(EMSESP_DEVICES_SERVICE_PATH,
                HTTP_GET,
-               securityManager->wrapRequest(std::bind(&EMSESPDevicesService::all_devices, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
+               securityManager->wrapRequest(std::bind(&WebDevicesService::all_devices, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
 
     server->on(SCAN_DEVICES_SERVICE_PATH,
                HTTP_GET,
-               securityManager->wrapRequest(std::bind(&EMSESPDevicesService::scan_devices, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
+               securityManager->wrapRequest(std::bind(&WebDevicesService::scan_devices, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
 
     _device_dataHandler.setMethod(HTTP_POST);
     _device_dataHandler.setMaxContentLength(256);
     server->addHandler(&_device_dataHandler);
 }
 
-void EMSESPDevicesService::scan_devices(AsyncWebServerRequest * request) {
+void WebDevicesService::scan_devices(AsyncWebServerRequest * request) {
     EMSESP::scan_devices();
     request->send(200);
 }
 
-void EMSESPDevicesService::all_devices(AsyncWebServerRequest * request) {
+void WebDevicesService::all_devices(AsyncWebServerRequest * request) {
     AsyncJsonResponse * response = new AsyncJsonResponse(false, MAX_EMSESP_DEVICE_SIZE);
     JsonObject          root     = response->getRoot();
 
@@ -63,7 +63,7 @@ void EMSESPDevicesService::all_devices(AsyncWebServerRequest * request) {
     }
 
     JsonArray sensors = root.createNestedArray("sensors");
-    if (!EMSESP::sensor_devices().empty()) {
+    if (EMSESP::have_sensors()) {
         uint8_t i = 1;
         char    s[8];
         for (const auto & sensor : EMSESP::sensor_devices()) {
@@ -78,7 +78,7 @@ void EMSESPDevicesService::all_devices(AsyncWebServerRequest * request) {
     request->send(response);
 }
 
-void EMSESPDevicesService::device_data(AsyncWebServerRequest * request, JsonVariant & json) {
+void WebDevicesService::device_data(AsyncWebServerRequest * request, JsonVariant & json) {
     if (json.is<JsonObject>()) {
         AsyncJsonResponse * response = new AsyncJsonResponse(false, MAX_EMSESP_DEVICE_SIZE);
 #ifndef EMSESP_STANDALONE

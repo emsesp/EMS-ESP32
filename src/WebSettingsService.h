@@ -16,8 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EMSESPSettingsConfig_h
-#define EMSESPSettingsConfig_h
+#ifndef WebSettingsConfig_h
+#define WebSettingsConfig_h
 
 #include <HttpEndpoint.h>
 #include <FSPersistence.h>
@@ -60,7 +60,7 @@
 
 namespace emsesp {
 
-class EMSESPSettings {
+class WebSettings {
   public:
     uint8_t  tx_mode;
     uint8_t  ems_bus_id;
@@ -80,20 +80,20 @@ class EMSESPSettings {
     uint8_t  bool_format;
     bool     analog_enabled;
 
-    static void              read(EMSESPSettings & settings, JsonObject & root);
-    static StateUpdateResult update(JsonObject & root, EMSESPSettings & settings);
+    static void              read(WebSettings & settings, JsonObject & root);
+    static StateUpdateResult update(JsonObject & root, WebSettings & settings);
 };
 
-class EMSESPSettingsService : public StatefulService<EMSESPSettings> {
+class WebSettingsService : public StatefulService<WebSettings> {
   public:
-    EMSESPSettingsService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager);
+    WebSettingsService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager);
 
     void begin();
     void save();
 
   private:
-    HttpEndpoint<EMSESPSettings>  _httpEndpoint;
-    FSPersistence<EMSESPSettings> _fsPersistence;
+    HttpEndpoint<WebSettings>  _httpEndpoint;
+    FSPersistence<WebSettings> _fsPersistence;
 
     void onUpdate();
 };

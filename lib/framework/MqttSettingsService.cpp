@@ -4,9 +4,9 @@
 namespace emsesp {
 class EMSESP {
   public:
-    static System system_;
-    static Mqtt   mqtt_;
-    static Sensor sensor_;
+    static System       system_;
+    static Mqtt         mqtt_;
+    static DallasSensor dallassensor_;
 };
 } // namespace emsesp
 
@@ -169,7 +169,7 @@ void MqttSettingsService::configureMqtt() {
         _mqttClient.connect();
     }
 
-    emsesp::EMSESP::sensor_.reload();
+    emsesp::EMSESP::dallassensor_.reload();
 }
 
 void MqttSettings::read(MqttSettings & settings, JsonObject & root) {

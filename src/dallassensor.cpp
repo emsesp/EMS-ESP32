@@ -18,7 +18,7 @@
 
 // code originally written by nomis - https://github.com/nomis
 
-#include "sensor.h"
+#include "dallassensor.h"
 #include "emsesp.h"
 
 #ifdef ESP32
@@ -29,10 +29,10 @@
 
 namespace emsesp {
 
-uuid::log::Logger Sensor::logger_{F_(sensor), uuid::log::Facility::DAEMON};
+uuid::log::Logger DallasSensor::logger_{F_(sensor), uuid::log::Facility::DAEMON};
 
 // start the 1-wire
-void Sensor::start() {
+void DallasSensor::start() {
     reload();
 
 #ifndef EMSESP_STANDALONE
@@ -48,8 +48,8 @@ void Sensor::start() {
 }
 
 // load the MQTT settings
-void Sensor::reload() {
-    EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) {
+void DallasSensor::reload() {
+    EMSESP::webSettingsService.read([&](WebSettings & settings) {
         dallas_gpio_ = settings.dallas_gpio;
         parasite_    = settings.dallas_parasite;
     });
@@ -60,7 +60,7 @@ void Sensor::reload() {
     }
 }
 
-void Sensor::loop() {
+void DallasSensor::loop() {
 #ifndef EMSESP_STANDALONE
     uint32_t time_now = uuid::get_uptime();
 
@@ -109,31 +109,31 @@ void Sensor::loop() {
                         if ((t >= -550) && (t <= 1250)) {
                             // check if we have this sensor already
                             bool found = false;
-                            for (auto & device : devices_) {
-                                if (device.id() == get_id(addr)) {
-                                    changed_ |= (t != device.temperature_c);
-                                    device.temperature_c = t;
-                                    device.read          = true;
+                            for (auto & sensor : sensors_) {
+                                if (sensor.id() == get_id(addr)) {
+                                    changed_ |= (t != sensor.temperature_c);
+                                    sensor.temperature_c = t;
+                                    sensor.read          = true;
                                     found                = true;
                                     break;
                                 }
                             }
                             // add new sensor
-                            if (!found && (devices_.size() < (MAX_SENSORS - 1))) {
-                                devices_.emplace_back(addr);
-                                devices_.back().temperature_c = t;
-                                devices_.back().read          = true;
+                            if (!found && (sensors_.size() < (MAX_SENSORS - 1))) {
+                                sensors_.emplace_back(addr);
+                                sensors_.back().temperature_c = t;
+                                sensors_.back().read          = true;
                                 changed_                      = true;
                             }
                         }
                         break;
 
                     default:
-                        LOG_ERROR(F("Unknown sensor %s"), Device(addr).to_string().c_str());
+                        LOG_ERROR(F("Unknown sensor %s"), Sensor(addr).to_string().c_str());
                         break;
                     }
                 } else {
-                    LOG_ERROR(F("Invalid sensor %s"), Device(addr).to_string().c_str());
+                    LOG_ERROR(F("Invalid sensor %s"), Sensor(addr).to_string().c_str());
                 }
             } else {
                 if (!parasite_) {
@@ -141,21 +141,21 @@ void Sensor::loop() {
                 }
                 // check for missing sensors after some samples
                 if (++scancnt_ > 5) {
-                    for (auto & device : devices_) {
-                        if (!device.read) {
-                            device.temperature_c = EMS_VALUE_SHORT_NOTSET;
+                    for (auto & sensor : sensors_) {
+                        if (!sensor.read) {
+                            sensor.temperature_c = EMS_VALUE_SHORT_NOTSET;
                             changed_             = true;
                         }
-                        device.read = false;
+                        sensor.read = false;
                     }
                     scancnt_ = 0;
                 } else if (scancnt_ == -2) { // startup
-                    firstscan_ = devices_.size();
-                } else if ((scancnt_ <= 0) && (firstscan_ != devices_.size())) { // check 2 times for no change of sensorno.
+                    firstscan_ = sensors_.size();
+                } else if ((scancnt_ <= 0) && (firstscan_ != sensors_.size())) { // check 2 times for no change of sensor #
                     scancnt_ = -3;
-                    devices_.clear(); // restart scaning and clear to get correct numbering
+                    sensors_.clear(); // restart scaning and clear to get correct numbering
                 }
-                // LOG_DEBUG(F("Found %zu sensor(s). Adding them."), devices_.size()); // uncomment for debug
+                // LOG_DEBUG(F("Found %zu sensor(s). Adding them."), sensors_.size()); // uncomment for debug
                 state_ = State::IDLE;
             }
         }
@@ -163,7 +163,7 @@ void Sensor::loop() {
 #endif
 }
 
-bool Sensor::temperature_convert_complete() {
+bool DallasSensor::temperature_convert_complete() {
 #ifndef EMSESP_STANDALONE
     if (parasite_) {
         return true; // don't care, use the minimum time in loop
@@ -177,10 +177,10 @@ bool Sensor::temperature_convert_complete() {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
-int16_t Sensor::get_temperature_c(const uint8_t addr[]) {
+int16_t DallasSensor::get_temperature_c(const uint8_t addr[]) {
 #ifndef EMSESP_STANDALONE
     if (!bus_.reset()) {
-        LOG_ERROR(F("Bus reset failed before reading scratchpad from %s"), Device(addr).to_string().c_str());
+        LOG_ERROR(F("Bus reset failed before reading scratchpad from %s"), Sensor(addr).to_string().c_str());
         return EMS_VALUE_SHORT_NOTSET;
     }
     YIELD;
@@ -192,13 +192,13 @@ int16_t Sensor::get_temperature_c(const uint8_t addr[]) {
     YIELD;
 
     if (!bus_.reset()) {
-        LOG_ERROR(F("Bus reset failed after reading scratchpad from %s"), Device(addr).to_string().c_str());
+        LOG_ERROR(F("Bus reset failed after reading scratchpad from %s"), Sensor(addr).to_string().c_str());
         return EMS_VALUE_SHORT_NOTSET;
     }
     YIELD;
 
     if (bus_.crc8(scratchpad, SCRATCHPAD_LEN - 1) != scratchpad[SCRATCHPAD_LEN - 1]) {
-        LOG_WARNING(F("Invalid scratchpad CRC: %02X%02X%02X%02X%02X%02X%02X%02X%02X from device %s"),
+        LOG_WARNING(F("Invalid scratchpad CRC: %02X%02X%02X%02X%02X%02X%02X%02X%02X from sensor %s"),
                     scratchpad[0],
                     scratchpad[1],
                     scratchpad[2],
@@ -208,7 +208,7 @@ int16_t Sensor::get_temperature_c(const uint8_t addr[]) {
                     scratchpad[6],
                     scratchpad[7],
                     scratchpad[8],
-                    Device(addr).to_string().c_str());
+                    Sensor(addr).to_string().c_str());
         return EMS_VALUE_SHORT_NOTSET;
     }
 
@@ -217,7 +217,7 @@ int16_t Sensor::get_temperature_c(const uint8_t addr[]) {
     if (addr[0] == TYPE_DS18S20) {
         raw_value = (raw_value << 3) + 12 - scratchpad[SCRATCHPAD_CNT_REM];
     } else {
-        // Adjust based on device resolution
+        // Adjust based on sensor resolution
         int resolution = 9 + ((scratchpad[SCRATCHPAD_CONFIG] >> 5) & 0x3);
         switch (resolution) {
         case 9:
@@ -242,26 +242,26 @@ int16_t Sensor::get_temperature_c(const uint8_t addr[]) {
 
 #pragma GCC diagnostic pop
 
-const std::vector<Sensor::Device> Sensor::devices() const {
-    return devices_;
+const std::vector<DallasSensor::Sensor> DallasSensor::sensors() const {
+    return sensors_;
 }
 
 // skip crc from id.
-Sensor::Device::Device(const uint8_t addr[])
+DallasSensor::Sensor::Sensor(const uint8_t addr[])
     : id_(((uint64_t)addr[0] << 48) | ((uint64_t)addr[1] << 40) | ((uint64_t)addr[2] << 32) | ((uint64_t)addr[3] << 24) | ((uint64_t)addr[4] << 16)
           | ((uint64_t)addr[5] << 8) | ((uint64_t)addr[6])) {
 }
 
-uint64_t Sensor::get_id(const uint8_t addr[]) {
+uint64_t DallasSensor::get_id(const uint8_t addr[]) {
     return (((uint64_t)addr[0] << 48) | ((uint64_t)addr[1] << 40) | ((uint64_t)addr[2] << 32) | ((uint64_t)addr[3] << 24) | ((uint64_t)addr[4] << 16)
             | ((uint64_t)addr[5] << 8) | ((uint64_t)addr[6]));
 }
 
-uint64_t Sensor::Device::id() const {
+uint64_t DallasSensor::Sensor::id() const {
     return id_;
 }
 
-std::string Sensor::Device::to_string() const {
+std::string DallasSensor::Sensor::to_string() const {
     std::string str(20, '\0');
     snprintf_P(&str[0],
                str.capacity() + 1,
@@ -274,7 +274,7 @@ std::string Sensor::Device::to_string() const {
 }
 
 // check to see if values have been updated
-bool Sensor::updated_values() {
+bool DallasSensor::updated_values() {
     if (changed_) {
         changed_ = false;
         return true;
@@ -282,25 +282,26 @@ bool Sensor::updated_values() {
     return false;
 }
 
-bool Sensor::command_info(const char * value, const int8_t id, JsonObject & output) {
+bool DallasSensor::command_info(const char * value, const int8_t id, JsonObject & output) {
     return (export_values(output));
 }
 
 // creates JSON doc from values
 // returns false if empty
-// e.g. sensor_data = {"sensor1":{"id":"28-EA41-9497-0E03-5F","temp":"23.30"},"sensor2":{"id":"28-233D-9497-0C03-8B","temp":"24.0"}}
-bool Sensor::export_values(JsonObject & output) {
-    if (devices_.size() == 0) {
+// e.g. sensor_data = {"sensor1":{"id":"28-EA41-9497-0E03-5F","temp":23.30},"sensor2":{"id":"28-233D-9497-0C03-8B","temp":24.0}}
+bool DallasSensor::export_values(JsonObject & output) {
+    if (sensors_.size() == 0) {
         return false;
     }
+
     uint8_t i = 1; // sensor count
-    for (const auto & device : devices_) {
+    for (const auto & sensor : sensors_) {
         char sensorID[10]; // sensor{1-n}
         snprintf_P(sensorID, 10, PSTR("sensor%d"), i++);
         JsonObject dataSensor = output.createNestedObject(sensorID);
-        dataSensor["id"]      = device.to_string();
-        if (Helpers::hasValue(device.temperature_c)) {
-            dataSensor["temp"] = (float)(device.temperature_c) / 10;
+        dataSensor["id"]      = sensor.to_string();
+        if (Helpers::hasValue(sensor.temperature_c)) {
+            dataSensor["temp"] = (float)(sensor.temperature_c) / 10;
         }
     }
 
@@ -308,41 +309,37 @@ bool Sensor::export_values(JsonObject & output) {
 }
 
 // send all dallas sensor values as a JSON package to MQTT
-// assumes there are devices
-void Sensor::publish_values() {
-    uint8_t num_devices = devices_.size();
+void DallasSensor::publish_values() {
+    uint8_t num_sensors = sensors_.size();
 
-    if (num_devices == 0) {
+    if (num_sensors == 0) {
         return;
     }
 
-    DynamicJsonDocument doc(100 * num_devices);
-    uint8_t             sensor_no    = 1; // sensor count
+    DynamicJsonDocument doc(100 * num_sensors);
+    uint8_t             sensor_no    = 1;
     uint8_t             mqtt_format_ = Mqtt::mqtt_format();
-    for (const auto & device : devices_) {
+
+    for (const auto & sensor : sensors_) {
         char sensorID[10]; // sensor{1-n}
         snprintf_P(sensorID, 10, PSTR("sensor%d"), sensor_no);
         if (mqtt_format_ == Mqtt::Format::SINGLE) {
             // e.g. sensor_data = {"sensor1":23.3,"sensor2":24.0}
-            if (Helpers::hasValue(device.temperature_c)) {
-                doc[sensorID] = (float)(device.temperature_c) / 10;
+            if (Helpers::hasValue(sensor.temperature_c)) {
+                doc[sensorID] = (float)(sensor.temperature_c) / 10;
             }
-        } else if (mqtt_format_ == Mqtt::Format::NESTED) {
-            // e.g. sensor_data = {"sensor1":{"id":"28-EA41-9497-0E03","temp":"23.3"},"sensor2":{"id":"28-233D-9497-0C03","temp":"24.0"}}
+        } else {
+            // e.g. sensor_data = {"sensor1":{"id":"28-EA41-9497-0E03","temp":23.3},"sensor2":{"id":"28-233D-9497-0C03","temp":24.0}}
             JsonObject dataSensor = doc.createNestedObject(sensorID);
-            dataSensor["id"]      = device.to_string();
-            if (Helpers::hasValue(device.temperature_c)) {
-                dataSensor["temp"] = (float)(device.temperature_c) / 10;
+            dataSensor["id"]      = sensor.to_string();
+            if (Helpers::hasValue(sensor.temperature_c)) {
+                dataSensor["temp"] = (float)(sensor.temperature_c) / 10;
             }
-        } else if (mqtt_format_ == Mqtt::Format::HA) {
-            // e.g. sensor_data = {"sensor1":{"id":"28-EA41-9497-0E03","temp":"23.3"},"sensor2":{"id":"28-233D-9497-0C03","temp":"24.0"}}
-            JsonObject dataSensor = doc.createNestedObject(sensorID);
-            dataSensor["id"]      = device.to_string();
-            if (Helpers::hasValue(device.temperature_c)) {
-                dataSensor["temp"]    = (float)(device.temperature_c) / 10;
-            }
-            // create the config if this hasn't already been done
-            // to e.g. homeassistant/sensor/ems-esp/dallas_28-233D-9497-0C03/config
+        }
+
+        // create the HA MQTT config
+        // to e.g. homeassistant/sensor/ems-esp/dallas_28-233D-9497-0C03/config
+        if (mqtt_format_ == Mqtt::Format::HA) {
             if (!(registered_ha_[sensor_no - 1])) {
                 StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> config;
                 config["dev_cla"] = F("temperature");
@@ -361,7 +358,7 @@ void Sensor::publish_values() {
                 snprintf_P(str, sizeof(str), PSTR("Dallas Sensor %d"), sensor_no);
                 config["name"] = str;
 
-                snprintf_P(str, sizeof(str), PSTR("dallas_%s"), device.to_string().c_str());
+                snprintf_P(str, sizeof(str), PSTR("dallas_%s"), sensor.to_string().c_str());
                 config["uniq_id"] = str;
 
                 JsonObject dev = config.createNestedObject("dev");
@@ -369,7 +366,7 @@ void Sensor::publish_values() {
                 ids.add("ems-esp");
 
                 std::string topic(100, '\0');
-                snprintf_P(&topic[0], 100, PSTR("homeassistant/sensor/ems-esp/dallas_%s/config"), device.to_string().c_str());
+                snprintf_P(&topic[0], 100, PSTR("homeassistant/sensor/ems-esp/dallas_%s/config"), sensor.to_string().c_str());
                 Mqtt::publish_retain(topic, config.as<JsonObject>(), true); // publish the config payload with retain flag
 
                 registered_ha_[sensor_no - 1] = true;
@@ -378,6 +375,7 @@ void Sensor::publish_values() {
         sensor_no++; // increment sensor count
     }
 
+    doc.shrinkToFit();
     Mqtt::publish(F("sensor_data"), doc.as<JsonObject>());
 }
 

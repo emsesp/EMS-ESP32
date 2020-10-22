@@ -34,17 +34,17 @@
 #endif
 
 #include <ESP8266React.h>
-#include "EMSESPStatusService.h"
-#include "EMSESPDevicesService.h"
-#include "EMSESPSettingsService.h"
-#include "EMSESPAPIService.h"
+#include "WebStatusService.h"
+#include "WebDevicesService.h"
+#include "WebSettingsService.h"
+#include "WebAPIService.h"
 
 #include "emsdevice.h"
 #include "emsfactory.h"
 #include "telegram.h"
 #include "mqtt.h"
 #include "system.h"
-#include "sensor.h"
+#include "dallassensor.h"
 #include "console.h"
 #include "shower.h"
 #include "roomcontrol.h"
@@ -108,12 +108,12 @@ class EMSESP {
 
     static void incoming_telegram(uint8_t * data, const uint8_t length);
 
-    static const std::vector<Sensor::Device> sensor_devices() {
-        return sensor_.devices();
+    static const std::vector<DallasSensor::Sensor> sensor_devices() {
+        return dallassensor_.sensors();
     }
 
     static bool have_sensors() {
-        return (!(sensor_.devices().empty()));
+        return (!(dallassensor_.sensors().empty()));
     }
 
     enum Watch : uint8_t { WATCH_OFF, WATCH_ON, WATCH_RAW };
@@ -155,20 +155,20 @@ class EMSESP {
     static std::vector<std::unique_ptr<EMSdevice>> emsdevices;
 
     // services
-    static Mqtt      mqtt_;
-    static System    system_;
-    static Sensor    sensor_;
-    static Console   console_;
-    static Shower    shower_;
-    static RxService rxservice_;
-    static TxService txservice_;
+    static Mqtt         mqtt_;
+    static System       system_;
+    static DallasSensor dallassensor_;
+    static Console      console_;
+    static Shower       shower_;
+    static RxService    rxservice_;
+    static TxService    txservice_;
 
     // web controllers
-    static ESP8266React          esp8266React;
-    static EMSESPSettingsService emsespSettingsService;
-    static EMSESPStatusService   emsespStatusService;
-    static EMSESPDevicesService  emsespDevicesService;
-    static EMSESPAPIService      emsespAPIService;
+    static ESP8266React       esp8266React;
+    static WebSettingsService webSettingsService;
+    static WebStatusService   webStatusService;
+    static WebDevicesService  webDevicesService;
+    static WebAPIService      webAPIService;
 
     static uuid::log::Logger logger() {
         return logger_;
@@ -203,8 +203,7 @@ class EMSESP {
     static uint16_t read_id_;
     static uint16_t publish_id_;
     static bool     tap_water_active_;
-
-    static uint8_t unique_id_count_;
+    static uint8_t  unique_id_count_;
 };
 
 } // namespace emsesp

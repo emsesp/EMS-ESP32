@@ -706,7 +706,7 @@ void Mqtt::register_mqtt_ha_binary_sensor(const __FlashStringHelper * name, cons
     snprintf_P(state_t, sizeof(state_t), PSTR("%s/%s"), hostname_.c_str(), entity);
     doc["stat_t"] = state_t;
 
-    EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) {
+    EMSESP::webSettingsService.read([&](WebSettings & settings) {
         if (settings.bool_format == BOOL_FORMAT_ONOFF) {
             doc[F("payload_on")]  = F("on");
             doc[F("payload_off")] = F("off");

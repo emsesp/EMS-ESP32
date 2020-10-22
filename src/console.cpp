@@ -177,8 +177,8 @@ void EMSESPShell::add_console_commands() {
         [](Shell & shell, const std::vector<std::string> & arguments) {
             uint8_t device_id = Helpers::hextoint(arguments.front().c_str());
             if ((device_id == 0x0B) || (device_id == 0x0D) || (device_id == 0x0A) || (device_id == 0x0F) || (device_id == 0x12)) {
-                EMSESP::emsespSettingsService.update(
-                    [&](EMSESPSettings & settings) {
+                EMSESP::webSettingsService.update(
+                    [&](WebSettings & settings) {
                         settings.ems_bus_id = device_id;
                         shell.printfln(F_(bus_id_fmt), settings.ems_bus_id);
                         return StateUpdateResult::CHANGED;
@@ -206,8 +206,8 @@ void EMSESPShell::add_console_commands() {
                           [](Shell & shell, const std::vector<std::string> & arguments) {
                               uint8_t tx_mode = std::strtol(arguments[0].c_str(), nullptr, 10);
                               // save the tx_mode
-                              EMSESP::emsespSettingsService.update(
-                                  [&](EMSESPSettings & settings) {
+                              EMSESP::webSettingsService.update(
+                                  [&](WebSettings & settings) {
                                       settings.tx_mode = tx_mode;
                                       shell.printfln(F_(tx_mode_fmt), settings.tx_mode);
                                       return StateUpdateResult::CHANGED;
@@ -258,7 +258,7 @@ void EMSESPShell::add_console_commands() {
                           CommandFlags::USER,
                           flash_string_vector{F_(set)},
                           [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
-                              EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) {
+                              EMSESP::webSettingsService.read([&](WebSettings & settings) {
                                   shell.printfln(F_(tx_mode_fmt), settings.tx_mode);
                                   shell.printfln(F_(bus_id_fmt), settings.ems_bus_id);
                                   char buffer[4];
@@ -290,8 +290,8 @@ void EMSESPShell::add_console_commands() {
                           flash_string_vector{F_(deviceid_mandatory)},
                           [](Shell & shell, const std::vector<std::string> & arguments) {
                               uint8_t value = Helpers::hextoint(arguments.front().c_str());
-                              EMSESP::emsespSettingsService.update(
-                                  [&](EMSESPSettings & settings) {
+                              EMSESP::webSettingsService.update(
+                                  [&](WebSettings & settings) {
                                       settings.master_thermostat = value;
                                       EMSESP::actual_master_thermostat(value); // set the internal value too
                                       char buffer[5];

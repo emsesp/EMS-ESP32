@@ -16,18 +16,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "EMSESPSettingsService.h"
+#include "WebSettingsService.h"
 #include "emsesp.h"
 
 namespace emsesp {
 
-EMSESPSettingsService::EMSESPSettingsService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager)
-    : _httpEndpoint(EMSESPSettings::read, EMSESPSettings::update, this, server, EMSESP_SETTINGS_SERVICE_PATH, securityManager)
-    , _fsPersistence(EMSESPSettings::read, EMSESPSettings::update, this, fs, EMSESP_SETTINGS_FILE) {
+WebSettingsService::WebSettingsService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager)
+    : _httpEndpoint(WebSettings::read, WebSettings::update, this, server, EMSESP_SETTINGS_SERVICE_PATH, securityManager)
+    , _fsPersistence(WebSettings::read, WebSettings::update, this, fs, EMSESP_SETTINGS_FILE) {
     addUpdateHandler([&](const String & originId) { onUpdate(); }, false);
 }
 
-void EMSESPSettings::read(EMSESPSettings & settings, JsonObject & root) {
+void WebSettings::read(WebSettings & settings, JsonObject & root) {
     root["tx_mode"]              = settings.tx_mode;
     root["ems_bus_id"]           = settings.ems_bus_id;
     root["syslog_level"]         = settings.syslog_level;
@@ -47,7 +47,7 @@ void EMSESPSettings::read(EMSESPSettings & settings, JsonObject & root) {
     root["analog_enabled"]       = settings.analog_enabled;
 }
 
-StateUpdateResult EMSESPSettings::update(JsonObject & root, EMSESPSettings & settings) {
+StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings) {
     settings.tx_mode              = root["tx_mode"] | EMSESP_DEFAULT_TX_MODE;
     settings.ems_bus_id           = root["ems_bus_id"] | EMSESP_DEFAULT_EMS_BUS_ID;
     settings.syslog_level         = root["syslog_level"] | EMSESP_DEFAULT_SYSLOG_LEVEL;
@@ -71,19 +71,17 @@ StateUpdateResult EMSESPSettings::update(JsonObject & root, EMSESPSettings & set
 
 // this is called after any of the settings have been persisted to the filesystem
 // either via the Web UI or via the Console
-void EMSESPSettingsService::onUpdate() {
+void WebSettingsService::onUpdate() {
     EMSESP::shower_.start();
-    Sensor sensor_; // Dallas sensors
-    sensor_.start();
-
+    EMSESP::dallassensor_.start();
     System::init();
 }
 
-void EMSESPSettingsService::begin() {
+void WebSettingsService::begin() {
     _fsPersistence.readFromFS();
 }
 
-void EMSESPSettingsService::save() {
+void WebSettingsService::save() {
     _fsPersistence.writeToFS();
 }
 

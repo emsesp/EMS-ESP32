@@ -23,7 +23,7 @@ namespace emsesp {
 uuid::log::Logger Shower::logger_{F_(shower), uuid::log::Facility::CONSOLE};
 
 void Shower::start() {
-    EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) {
+    EMSESP::webSettingsService.read([&](WebSettings & settings) {
         shower_timer_ = settings.shower_timer;
         shower_alert_ = settings.shower_alert;
     });

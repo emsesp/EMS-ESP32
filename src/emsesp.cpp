@@ -23,20 +23,20 @@ namespace emsesp {
 AsyncWebServer webServer(80);
 
 #if defined(ESP32)
-ESP8266React          EMSESP::esp8266React(&webServer, &SPIFFS);
-EMSESPSettingsService EMSESP::emsespSettingsService = EMSESPSettingsService(&webServer, &SPIFFS, EMSESP::esp8266React.getSecurityManager());
+ESP8266React       EMSESP::esp8266React(&webServer, &SPIFFS);
+WebSettingsService EMSESP::webSettingsService = WebSettingsService(&webServer, &SPIFFS, EMSESP::esp8266React.getSecurityManager());
 #elif defined(ESP8266)
-ESP8266React          EMSESP::esp8266React(&webServer, &LittleFS);
-EMSESPSettingsService EMSESP::emsespSettingsService = EMSESPSettingsService(&webServer, &LittleFS, EMSESP::esp8266React.getSecurityManager());
+ESP8266React       EMSESP::esp8266React(&webServer, &LittleFS);
+WebSettingsService EMSESP::webSettingsService = WebSettingsService(&webServer, &LittleFS, EMSESP::esp8266React.getSecurityManager());
 #elif defined(EMSESP_STANDALONE)
-FS                    dummyFS;
-ESP8266React          EMSESP::esp8266React(&webServer, &dummyFS);
-EMSESPSettingsService EMSESP::emsespSettingsService = EMSESPSettingsService(&webServer, &dummyFS, EMSESP::esp8266React.getSecurityManager());
+FS                 dummyFS;
+ESP8266React       EMSESP::esp8266React(&webServer, &dummyFS);
+WebSettingsService EMSESP::webSettingsService = WebSettingsService(&webServer, &dummyFS, EMSESP::esp8266React.getSecurityManager());
 #endif
 
-EMSESPStatusService  EMSESP::emsespStatusService  = EMSESPStatusService(&webServer, EMSESP::esp8266React.getSecurityManager());
-EMSESPDevicesService EMSESP::emsespDevicesService = EMSESPDevicesService(&webServer, EMSESP::esp8266React.getSecurityManager());
-EMSESPAPIService     EMSESP::emsespAPIService     = EMSESPAPIService(&webServer);
+WebStatusService  EMSESP::webStatusService  = WebStatusService(&webServer, EMSESP::esp8266React.getSecurityManager());
+WebDevicesService EMSESP::webDevicesService = WebDevicesService(&webServer, EMSESP::esp8266React.getSecurityManager());
+WebAPIService     EMSESP::webAPIService     = WebAPIService(&webServer);
 
 using DeviceFlags = emsesp::EMSdevice;
 using DeviceType  = emsesp::EMSdevice::DeviceType;
@@ -46,13 +46,13 @@ std::vector<emsesp::EMSESP::Device_record> EMSESP::device_library_; // libary of
 uuid::log::Logger EMSESP::logger_{F_(emsesp), uuid::log::Facility::KERN};
 
 // The services
-RxService EMSESP::rxservice_; // incoming Telegram Rx handler
-TxService EMSESP::txservice_; // outgoing Telegram Tx handler
-Mqtt      EMSESP::mqtt_;      // mqtt handler
-System    EMSESP::system_;    // core system services
-Console   EMSESP::console_;   // telnet and serial console
-Sensor    EMSESP::sensor_;    // Dallas sensors
-Shower    EMSESP::shower_;    // Shower logic
+RxService    EMSESP::rxservice_;    // incoming Telegram Rx handler
+TxService    EMSESP::txservice_;    // outgoing Telegram Tx handler
+Mqtt         EMSESP::mqtt_;         // mqtt handler
+System       EMSESP::system_;       // core system services
+Console      EMSESP::console_;      // telnet and serial console
+DallasSensor EMSESP::dallassensor_; // Dallas sensors
+Shower       EMSESP::shower_;       // Shower logic
 
 // static/common variables
 uint8_t  EMSESP::actual_master_thermostat_ = EMSESP_DEFAULT_MASTER_THERMOSTAT; // which thermostat leads when multiple found
@@ -140,7 +140,7 @@ void EMSESP::watch_id(uint16_t watch_id) {
 // this is called when the tx_mode is persisted in the FS either via Web UI or the console
 void EMSESP::init_tx() {
     uint8_t tx_mode;
-    EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) {
+    EMSESP::webSettingsService.read([&](WebSettings & settings) {
         tx_mode = settings.tx_mode;
 
 #ifndef EMSESP_FORCE_SERIAL
@@ -204,7 +204,7 @@ void EMSESP::show_ems(uuid::console::Shell & shell) {
 
     if (bus_status() != BUS_STATUS_OFFLINE) {
         shell.printfln(F("EMS Bus info:"));
-        EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) { shell.printfln(F("  Tx mode: %d"), settings.tx_mode); });
+        EMSESP::webSettingsService.read([&](WebSettings & settings) { shell.printfln(F("  Tx mode: %d"), settings.tx_mode); });
         shell.printfln(F("  Bus protocol: %s"), EMSbus::is_ht3() ? F("HT3") : F("Buderus"));
         shell.printfln(F("  #telegrams received: %d"), rxservice_.telegram_count());
         shell.printfln(F("  #read requests sent: %d"), txservice_.telegram_read_count());
@@ -335,8 +335,8 @@ void EMSESP::publish_other_values() {
 }
 
 void EMSESP::publish_sensor_values(const bool force) {
-    if (sensor_.updated_values() || force) {
-        sensor_.publish_values();
+    if (dallassensor_.updated_values() || force) {
+        dallassensor_.publish_values();
     }
 }
 
@@ -862,8 +862,8 @@ void EMSESP::start() {
         LittleFS.begin();
 #endif
 
-        esp8266React.begin();          // loads system settings (wifi, mqtt, etc)
-        emsespSettingsService.begin(); // load EMS-ESP specific settings
+        esp8266React.begin();       // loads system settings (wifi, mqtt, etc)
+        webSettingsService.begin(); // load EMS-ESP specific settings
     }
 
     // Load our library of known devices. Names are stored in Flash mem.
@@ -872,12 +872,12 @@ void EMSESP::start() {
 #include "device_library.h"
     };
 
-    console_.start();  // telnet and serial console
-    mqtt_.start();     // mqtt init
-    system_.start();   // starts syslog, uart, sets version, initializes LED. Requires pre-loaded settings.
-    shower_.start();   // initialize shower timer and shower alert
-    sensor_.start();   // dallas external sensors
-    webServer.begin(); // start web server
+    console_.start();      // telnet and serial console
+    mqtt_.start();         // mqtt init
+    system_.start();       // starts syslog, uart, sets version, initializes LED. Requires pre-loaded settings.
+    shower_.start();       // initialize shower timer and shower alert
+    dallassensor_.start(); // dallas external sensors
+    webServer.begin();     // start web server
 
     emsdevices.reserve(5); // reserve space for initially 5 devices to avoid mem
 
@@ -897,12 +897,12 @@ void EMSESP::loop() {
         return;
     }
 
-    system_.loop();    // does LED and checks system health, and syslog service
-    shower_.loop();    // check for shower on/off
-    sensor_.loop();    // this will also send out via MQTT
-    mqtt_.loop();      // sends out anything in the queue via MQTT
-    console_.loop();   // telnet/serial console
-    rxservice_.loop(); // process any incoming Rx telegrams
+    system_.loop();       // does LED and checks system health, and syslog service
+    shower_.loop();       // check for shower on/off
+    dallassensor_.loop(); // this will also send out via MQTT
+    mqtt_.loop();         // sends out anything in the queue via MQTT
+    console_.loop();      // telnet/serial console
+    rxservice_.loop();    // process any incoming Rx telegrams
 
     // force a query on the EMS devices to fetch latest data at a set interval (1 min)
     if ((uuid::get_uptime() - last_fetch_ > EMS_FETCH_FREQUENCY)) {

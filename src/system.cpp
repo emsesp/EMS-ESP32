@@ -76,7 +76,7 @@ void System::wifi_reconnect() {
     LOG_NOTICE("The wifi will reconnect...");
     Shell::loop_all();
     delay(1000);                                                                // wait a second
-    EMSESP::emsespSettingsService.save();                                       // local settings
+    EMSESP::webSettingsService.save();                                          // local settings
     EMSESP::esp8266React.getWiFiSettingsService()->callUpdateHandlers("local"); // in case we've changed ssid or password
 }
 
@@ -111,7 +111,7 @@ uint8_t System::free_mem() {
 
 void System::syslog_init() {
     // fetch settings
-    EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) {
+    EMSESP::webSettingsService.read([&](WebSettings & settings) {
         syslog_level_         = settings.syslog_level;
         syslog_mark_interval_ = settings.syslog_mark_interval;
         syslog_host_          = settings.syslog_host;
@@ -148,7 +148,7 @@ void System::start() {
         [&](WiFiSettings & wifiSettings) { LOG_INFO(F("System %s booted (EMS-ESP version %s)"), wifiSettings.hostname.c_str(), EMSESP_APP_VERSION); });
 
     // these commands respond to the topic "system" and take a payload like {cmd:"", data:"", id:""}
-    EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) {
+    EMSESP::webSettingsService.read([&](WebSettings & settings) {
         Command::add(EMSdevice::DeviceType::SYSTEM, settings.ems_bus_id, F("pin"), System::command_pin);
         Command::add(EMSdevice::DeviceType::SYSTEM, settings.ems_bus_id, F("send"), System::command_send);
         Command::add_with_json(EMSdevice::DeviceType::SYSTEM, F("info"), System::command_info);
@@ -165,7 +165,7 @@ void System::init() {
     set_led(); // init LED
 
     // set the boolean format used for rendering booleans
-    EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) {
+    EMSESP::webSettingsService.read([&](WebSettings & settings) {
         Helpers::bool_format(settings.bool_format);
         analog_enabled_ = settings.analog_enabled;
     });
@@ -177,7 +177,7 @@ void System::init() {
 
 // set the LED to on or off when in normal operating mode
 void System::set_led() {
-    EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) {
+    EMSESP::webSettingsService.read([&](WebSettings & settings) {
         hide_led_ = settings.hide_led;
         led_gpio_ = settings.led_gpio;
         if (led_gpio_) {
@@ -479,7 +479,7 @@ void System::show_system(uuid::console::Shell & shell) {
         break;
     }
 
-    EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) {
+    EMSESP::webSettingsService.read([&](WebSettings & settings) {
         shell.println();
         shell.printfln(F("Syslog:"));
         shell.print(F_(1space));
@@ -717,7 +717,7 @@ bool System::check_upgrade() {
             LittleFS.setConfig(l_cfg);
             LittleFS.begin();
             EMSESP::esp8266React.begin();
-            EMSESP::emsespSettingsService.begin();
+            EMSESP::webSettingsService.begin();
 
             EMSESP::esp8266React.getWiFiSettingsService()->update(
                 [&](WiFiSettings & wifiSettings) {
@@ -796,8 +796,8 @@ bool System::check_upgrade() {
             Serial.println();
 #endif
             custom_settings = doc["settings"];
-            EMSESP::emsespSettingsService.update(
-                [&](EMSESPSettings & settings) {
+            EMSESP::webSettingsService.update(
+                [&](WebSettings & settings) {
                     settings.tx_mode              = custom_settings["tx_mode"] | EMSESP_DEFAULT_TX_MODE;
                     settings.shower_alert         = custom_settings["shower_alert"] | EMSESP_DEFAULT_SHOWER_ALERT;
                     settings.shower_timer         = custom_settings["shower_timer"] | EMSESP_DEFAULT_SHOWER_TIMER;
@@ -913,7 +913,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
         // node["password"] = settings.password;
     });
 
-    EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) {
+    EMSESP::webSettingsService.read([&](WebSettings & settings) {
         char       s[7];
         JsonObject node              = output.createNestedObject("Settings");
         node["tx_mode"]              = settings.tx_mode;
@@ -968,7 +968,7 @@ bool System::command_report(const char * value, const int8_t id, JsonObject & ou
         node["mqtt_retain"] = Helpers::render_boolean(s, settings.mqtt_retain);
     });
 
-    EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) {
+    EMSESP::webSettingsService.read([&](WebSettings & settings) {
         char s[7];
         node["tx_mode"]           = settings.tx_mode;
         node["ems_bus_id"]        = settings.ems_bus_id;

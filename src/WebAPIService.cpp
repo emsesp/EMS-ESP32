@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "EMSESPAPIService.h"
+#include "WebAPIService.h"
 #include "emsesp.h"
 #include "command.h"
 #include "emsdevice.h"
@@ -24,15 +24,15 @@
 
 namespace emsesp {
 
-EMSESPAPIService::EMSESPAPIService(AsyncWebServer * server) {
-    server->on(EMSESP_API_SERVICE_PATH, HTTP_GET, std::bind(&EMSESPAPIService::emsespAPIService, this, std::placeholders::_1));
+WebAPIService::WebAPIService(AsyncWebServer * server) {
+    server->on(EMSESP_API_SERVICE_PATH, HTTP_GET, std::bind(&WebAPIService::webAPIService, this, std::placeholders::_1));
 }
 
 // http://ems-esp/api?device=boiler&cmd=wwtemp&data=20&id=1
-void EMSESPAPIService::emsespAPIService(AsyncWebServerRequest * request) {
+void WebAPIService::webAPIService(AsyncWebServerRequest * request) {
     // see if the API is enabled
     bool api_enabled;
-    EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) { api_enabled = settings.api_enabled; });
+    EMSESP::webSettingsService.read([&](WebSettings & settings) { api_enabled = settings.api_enabled; });
 
     // must have device and cmd parameters
     if ((!request->hasParam(F_(device))) || (!request->hasParam(F_(cmd)))) {

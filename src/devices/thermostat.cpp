@@ -28,7 +28,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
     uint8_t actual_master_thermostat = EMSESP::actual_master_thermostat(); // what we're actually using
     uint8_t master_thermostat        = EMSESP_DEFAULT_MASTER_THERMOSTAT;
-    EMSESP::emsespSettingsService.read([&](EMSESPSettings & settings) {
+    EMSESP::webSettingsService.read([&](WebSettings & settings) {
         master_thermostat = settings.master_thermostat; // what the user has defined
     });
 
