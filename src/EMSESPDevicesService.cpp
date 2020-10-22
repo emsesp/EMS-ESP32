@@ -65,11 +65,12 @@ void EMSESPDevicesService::all_devices(AsyncWebServerRequest * request) {
     JsonArray sensors = root.createNestedArray("sensors");
     if (!EMSESP::sensor_devices().empty()) {
         uint8_t i = 1;
+        char    s[8];
         for (const auto & sensor : EMSESP::sensor_devices()) {
             JsonObject obj = sensors.createNestedObject();
             obj["no"]      = i++;
             obj["id"]      = sensor.to_string();
-            obj["temp"]    = (float)(sensor.temperature_c) / 10;
+            obj["temp"]    = Helpers::render_value(s, sensor.temperature_c, 10);
         }
     }
 

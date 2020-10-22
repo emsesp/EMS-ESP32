@@ -295,13 +295,13 @@ bool Sensor::export_values(JsonObject & output) {
     }
     uint8_t i = 1; // sensor count
     for (const auto & device : devices_) {
-        char s[7];
         char sensorID[10]; // sensor{1-n}
-        snprintf_P(sensorID, 10, PSTR("sensor%d"), i);
+        snprintf_P(sensorID, 10, PSTR("sensor%d"), i++);
         JsonObject dataSensor = output.createNestedObject(sensorID);
         dataSensor["id"]      = device.to_string();
-        dataSensor["temp"]    = Helpers::render_value(s, device.temperature_c, 10);
-        i++;
+        if (Helpers::hasValue(device.temperature_c)) {
+            dataSensor["temp"] = (float)(device.temperature_c) / 10;
+        }
     }
 
     return true;
@@ -316,43 +316,31 @@ void Sensor::publish_values() {
         return;
     }
 
-    uint8_t mqtt_format_ = Mqtt::mqtt_format();
-    /*
-    // single mode as one topic per sensor e.g. ems-esp/sensor_data1 = 20.2
-    if (mqtt_format_ == Mqtt::Format::SINGLE) {
-        uint8_t i = 1;
-        for (const auto & device : devices_) {
-            char topic[20];
-            snprintf_P(topic, 20, PSTR("sensor_data%d"), i);
-            char s[7]; // to support -55.00 to 125.00
-            Mqtt::publish(topic, Helpers::render_value(s, device.temperature_c, 10));
-            i++;
-        }
-        return;
-    }
-    */
-
     DynamicJsonDocument doc(100 * num_devices);
-    uint8_t             sensor_no = 1; // sensor count
+    uint8_t             sensor_no    = 1; // sensor count
+    uint8_t             mqtt_format_ = Mqtt::mqtt_format();
     for (const auto & device : devices_) {
         char sensorID[10]; // sensor{1-n}
         snprintf_P(sensorID, 10, PSTR("sensor%d"), sensor_no);
         if (mqtt_format_ == Mqtt::Format::SINGLE) {
             // e.g. sensor_data = {"sensor1":23.3,"sensor2":24.0}
-            // doc[sensorID] = Helpers::render_value(s, device.temperature_c, 10);
-            doc[sensorID] = (float)(device.temperature_c) / 10;
+            if (Helpers::hasValue(device.temperature_c)) {
+                doc[sensorID] = (float)(device.temperature_c) / 10;
+            }
         } else if (mqtt_format_ == Mqtt::Format::NESTED) {
             // e.g. sensor_data = {"sensor1":{"id":"28-EA41-9497-0E03","temp":"23.3"},"sensor2":{"id":"28-233D-9497-0C03","temp":"24.0"}}
             JsonObject dataSensor = doc.createNestedObject(sensorID);
             dataSensor["id"]      = device.to_string();
-            // dataSensor["temp"]    = Helpers::render_value(s, device.temperature_c, 10);
-            dataSensor["temp"] = (float)(device.temperature_c) / 10;
+            if (Helpers::hasValue(device.temperature_c)) {
+                dataSensor["temp"] = (float)(device.temperature_c) / 10;
+            }
         } else if (mqtt_format_ == Mqtt::Format::HA) {
-            // e.g. sensor_data = {"28-EA41-9497-0E03":23.3,"28-233D-9497-0C03":24.0}
-            // doc[device.to_string()] = Helpers::render_value(s, device.temperature_c, 10);
+            // e.g. sensor_data = {"sensor1":{"id":"28-EA41-9497-0E03","temp":"23.3"},"sensor2":{"id":"28-233D-9497-0C03","temp":"24.0"}}
             JsonObject dataSensor = doc.createNestedObject(sensorID);
             dataSensor["id"]      = device.to_string();
-            dataSensor["temp"]    = (float)(device.temperature_c) / 10;
+            if (Helpers::hasValue(device.temperature_c)) {
+                dataSensor["temp"]    = (float)(device.temperature_c) / 10;
+            }
             // create the config if this hasn't already been done
             // to e.g. homeassistant/sensor/ems-esp/dallas_28-233D-9497-0C03/config
             if (!(registered_ha_[sensor_no - 1])) {
