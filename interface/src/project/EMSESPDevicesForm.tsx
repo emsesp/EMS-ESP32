@@ -70,6 +70,13 @@ type EMSESPDevicesFormProps = RestFormProps<EMSESPDevices> &
   AuthenticatedContextProps &
   WithWidthProps;
 
+function formatTemp(t: string) {
+  if (t == null) {
+    return "(not available)";
+  }
+  return t + " °C";
+}
+
 class EMSESPDevicesForm extends Component<
   EMSESPDevicesFormProps,
   EMSESPDevicesFormState
@@ -194,7 +201,7 @@ class EMSESPDevicesForm extends Component<
                     {sensorData.id}
                   </TableCell>
                   <TableCell align="right">
-                    {sensorData.temp}&nbsp;&deg;C
+                    {formatTemp(sensorData.temp)}
                   </TableCell>
                 </TableRow>
               ))}
