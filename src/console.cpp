@@ -385,6 +385,12 @@ void EMSESPShell::add_console_commands() {
             }
 
             // validate the command
+            if (arguments.size() < 2) {
+                shell.print(F("Available commands are: "));
+                Command::show(shell, device_type);
+                return;
+            }
+
             const char * cmd = arguments[1].c_str();
             if (!Command::find_command(device_type, cmd)) {
                 shell.print(F("Unknown command. Available commands are: "));
@@ -393,21 +399,21 @@ void EMSESPShell::add_console_commands() {
             }
 
             DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_LARGE);
-            JsonObject          output = doc.to<JsonObject>();
+            JsonObject          json = doc.to<JsonObject>();
 
             bool ok = false;
             if (arguments.size() == 2) {
                 // no value specified, just the cmd
-                ok = Command::call(device_type, cmd, nullptr, -1, output);
+                ok = Command::call(device_type, cmd, nullptr, -1, json);
             } else if (arguments.size() == 3) {
                 // has a value but no id
-                ok = Command::call(device_type, cmd, arguments.back().c_str(), -1, output);
+                ok = Command::call(device_type, cmd, arguments.back().c_str(), -1, json);
             } else {
                 // use value, which could be an id or hc
-                ok = Command::call(device_type, cmd, arguments[2].c_str(), atoi(arguments[3].c_str()), output);
+                ok = Command::call(device_type, cmd, arguments[2].c_str(), atoi(arguments[3].c_str()), json);
             }
 
-            if (ok && output.size()) {
+            if (ok && json.size()) {
                 doc.shrinkToFit();
                 serializeJsonPretty(doc, shell);
                 shell.println();
@@ -417,7 +423,7 @@ void EMSESPShell::add_console_commands() {
             if (arguments.size() == 0) {
                 std::vector<std::string> devices_list;
                 devices_list.emplace_back(EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::SYSTEM));
-                devices_list.emplace_back(EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::SENSOR));
+                devices_list.emplace_back(EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::DALLASSENSOR));
                 for (const auto & device_class : EMSFactory::device_handlers()) {
                     if (Command::device_has_commands(device_class.first)) {
                         devices_list.emplace_back(EMSdevice::device_type_2_device_name(device_class.first));
