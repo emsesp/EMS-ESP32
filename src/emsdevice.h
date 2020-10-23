@@ -141,7 +141,8 @@ class EMSdevice {
 
     // virtual functions overrules by derived classes
     virtual void show_values(uuid::console::Shell & shell)             = 0;
-    virtual void publish_values(JsonObject & data, bool force = false) = 0;
+    virtual void publish_values(JsonObject & json, bool force = false) = 0;
+    virtual bool export_values(JsonObject & json)                      = 0;
     virtual bool updated_values()                                      = 0;
     virtual void device_info_web(JsonArray & root)                     = 0;
 
@@ -218,8 +219,8 @@ class EMSdevice {
     };
 
     enum DeviceType : uint8_t {
-        SYSTEM = 0, // this is us (EMS-ESP)
-        SENSOR,     // for internal dallas sensors
+        SYSTEM = 0,   // this is us (EMS-ESP)
+        DALLASSENSOR, // for internal dallas sensors
         BOILER,
         THERMOSTAT,
         MIXING,

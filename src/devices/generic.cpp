@@ -37,7 +37,12 @@ void Generic::show_values(uuid::console::Shell & shell) {
 }
 
 // publish values via MQTT
-void Generic::publish_values(JsonObject & data, bool force) {
+void Generic::publish_values(JsonObject & json, bool force) {
+}
+
+// export values to JSON
+bool Generic::export_values(JsonObject & json) {
+    return true;
 }
 
 // check to see if values have been updated

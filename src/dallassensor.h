@@ -101,7 +101,7 @@ class DallasSensor {
     int16_t  get_temperature_c(const uint8_t addr[]);
     uint64_t get_id(const uint8_t addr[]);
 
-    bool command_info(const char * value, const int8_t id, JsonObject & output);
+    bool command_info(const char * value, const int8_t id, JsonObject & json);
     bool export_values(JsonObject & doc);
 
     uint32_t            last_activity_ = uuid::get_uptime();

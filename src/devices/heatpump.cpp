@@ -31,41 +31,32 @@ Heatpump::Heatpump(uint8_t device_type, uint8_t device_id, uint8_t product_id, c
     // telegram handlers
     register_telegram_type(0x042B, F("HP1"), true, [&](std::shared_ptr<const Telegram> t) { process_HPMonitor1(t); });
     register_telegram_type(0x047B, F("HP2"), true, [&](std::shared_ptr<const Telegram> t) { process_HPMonitor2(t); });
-
-    // API call
-    Command::add_with_json(this->device_type(), F("info"), [&](const char * value, const int8_t id, JsonObject & object) {
-        return command_info(value, id, object);
-    });
-}
-
-bool Heatpump::command_info(const char * value, const int8_t id, JsonObject & output) {
-    return (export_values(output));
 }
 
 // creates JSON doc from values
 // returns false if empty
-bool Heatpump::export_values(JsonObject & output) {
+bool Heatpump::export_values(JsonObject & json) {
     if (Helpers::hasValue(airHumidity_)) {
-        output["airHumidity"] = (float)airHumidity_ / 2;
+        json["airHumidity"] = (float)airHumidity_ / 2;
     }
 
     if (Helpers::hasValue(dewTemperature_)) {
-        output["dewTemperature"] = dewTemperature_;
+        json["dewTemperature"] = dewTemperature_;
     }
 
-    return output.size();
+    return json.size();
 }
 
 void Heatpump::device_info_web(JsonArray & root) {
     // fetch the values into a JSON document
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
-    JsonObject                                      output = doc.to<JsonObject>();
-    if (!export_values(output)) {
+    JsonObject                                      json = doc.to<JsonObject>();
+    if (!export_values(json)) {
         return; // empty
     }
 
-    print_value_json(root, F("airHumidity"), nullptr, F_(airHumidity), F_(percent), output);
-    print_value_json(root, F("dewTemperature"), nullptr, F_(dewTemperature), F_(degrees), output);
+    print_value_json(root, F("airHumidity"), nullptr, F_(airHumidity), F_(percent), json);
+    print_value_json(root, F("dewTemperature"), nullptr, F_(dewTemperature), F_(degrees), json);
 }
 
 // display all values into the shell console
@@ -74,25 +65,25 @@ void Heatpump::show_values(uuid::console::Shell & shell) {
 
     // fetch the values into a JSON document
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
-    JsonObject                                      output = doc.to<JsonObject>();
-    if (!export_values(output)) {
+    JsonObject                                      json = doc.to<JsonObject>();
+    if (!export_values(json)) {
         return; // empty
     }
 
-    print_value_json(shell, F("airHumidity"), nullptr, F_(airHumidity), F_(percent), output);
-    print_value_json(shell, F("dewTemperature"), nullptr, F_(dewTemperature), F_(degrees), output);
+    print_value_json(shell, F("airHumidity"), nullptr, F_(airHumidity), F_(percent), json);
+    print_value_json(shell, F("dewTemperature"), nullptr, F_(dewTemperature), F_(degrees), json);
 }
 
 // publish values via MQTT
-void Heatpump::publish_values(JsonObject & data, bool force) {
+void Heatpump::publish_values(JsonObject & json, bool force) {
     // handle HA first
     if (Mqtt::mqtt_format() == Mqtt::Format::HA) {
         register_mqtt_ha_config(force);
     }
 
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
-    JsonObject                                      output = doc.to<JsonObject>();
-    if (export_values(output)) {
+    JsonObject                                      json_data = doc.to<JsonObject>();
+    if (export_values(json_data)) {
         Mqtt::publish(F("heatpump_data"), doc.as<JsonObject>());
     }
 }

@@ -54,39 +54,39 @@ std::string EMSdevice::brand_to_string() const {
 std::string EMSdevice::device_type_2_device_name(const uint8_t device_type) {
     switch (device_type) {
     case DeviceType::SYSTEM:
-        return read_flash_string(F("system"));
+        return read_flash_string(F_(system));
         break;
 
     case DeviceType::BOILER:
-        return read_flash_string(F("boiler"));
+        return read_flash_string(F_(boiler));
         break;
 
     case DeviceType::THERMOSTAT:
-        return read_flash_string(F("thermostat"));
+        return read_flash_string(F_(thermostat));
         break;
 
     case DeviceType::HEATPUMP:
-        return read_flash_string(F("heatpump"));
+        return read_flash_string(F_(heatpump));
         break;
 
     case DeviceType::SOLAR:
-        return read_flash_string(F("solar"));
+        return read_flash_string(F_(solar));
         break;
 
     case DeviceType::MIXING:
-        return read_flash_string(F("mixing"));
+        return read_flash_string(F_(mixing));
         break;
 
-    case DeviceType::SENSOR:
-        return read_flash_string(F("sensor"));
+    case DeviceType::DALLASSENSOR:
+        return read_flash_string(F_(dallassensor));
         break;
 
     case DeviceType::CONTROLLER:
-        return read_flash_string(F("controller"));
+        return read_flash_string(F_(controller));
         break;
 
     case DeviceType::SWITCH:
-        return read_flash_string(F("switch"));
+        return read_flash_string(F_(switch));
         break;
 
     default:
@@ -97,32 +97,32 @@ std::string EMSdevice::device_type_2_device_name(const uint8_t device_type) {
 
 // returns device_type from a string
 uint8_t EMSdevice::device_name_2_device_type(const char * topic) {
-    if (strcmp(topic, "boiler") == 0) {
+    if (!strcmp_P(topic, reinterpret_cast<PGM_P>(F_(boiler)))) {
         return DeviceType::BOILER;
     }
 
-    if (strcmp(topic, "thermostat") == 0) {
+    if (!strcmp_P(topic, reinterpret_cast<PGM_P>(F_(thermostat)))) {
         return DeviceType::THERMOSTAT;
     }
 
-    if (strcmp(topic, "system") == 0) {
+    if (!strcmp_P(topic, reinterpret_cast<PGM_P>(F_(system)))) {
         return DeviceType::SYSTEM;
     }
 
-    if (strcmp(topic, "heatpump") == 0) {
+    if (!strcmp_P(topic, reinterpret_cast<PGM_P>(F_(heatpump)))) {
         return DeviceType::HEATPUMP;
     }
 
-    if (strcmp(topic, "solar") == 0) {
+    if (!strcmp_P(topic, reinterpret_cast<PGM_P>(F_(solar)))) {
         return DeviceType::SOLAR;
     }
 
-    if (strcmp(topic, "mixing") == 0) {
+    if (!strcmp_P(topic, reinterpret_cast<PGM_P>(F_(mixing)))) {
         return DeviceType::MIXING;
     }
 
-    if (strcmp(topic, "sensor") == 0) {
-        return DeviceType::SENSOR;
+    if (!strcmp_P(topic, reinterpret_cast<PGM_P>(F_(dallassensor)))) {
+        return DeviceType::DALLASSENSOR;
     }
 
     return DeviceType::UNKNOWN;

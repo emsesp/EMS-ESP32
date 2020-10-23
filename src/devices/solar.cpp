@@ -52,39 +52,30 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
         register_telegram_type(0x0103, F("ISM1StatusMessage"), true, [&](std::shared_ptr<const Telegram> t) { process_ISM1StatusMessage(t); });
         register_telegram_type(0x0101, F("ISM1Set"), false, [&](std::shared_ptr<const Telegram> t) { process_ISM1Set(t); });
     }
-
-    // API call
-    Command::add_with_json(this->device_type(), F("info"), [&](const char * value, const int8_t id, JsonObject & object) {
-        return command_info(value, id, object);
-    });
-}
-
-bool Solar::command_info(const char * value, const int8_t id, JsonObject & output) {
-    return (export_values(output));
 }
 
 // print to web
 void Solar::device_info_web(JsonArray & root) {
     // fetch the values into a JSON document
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
-    JsonObject                                      output = doc.to<JsonObject>();
-    if (!export_values(output)) {
+    JsonObject                                      json = doc.to<JsonObject>();
+    if (!export_values(json)) {
         return; // empty
     }
 
-    print_value_json(root, F("collectorTemp"), nullptr, F_(collectorTemp), F_(degrees), output);
-    print_value_json(root, F("tankBottomTemp"), nullptr, F_(tankBottomTemp), F_(degrees), output);
-    print_value_json(root, F("tankBottomTemp2"), nullptr, F_(tankBottomTemp2), F_(degrees), output);
-    print_value_json(root, F("heatExchangerTemp"), nullptr, F_(heatExchangerTemp), F_(degrees), output);
-    print_value_json(root, F("solarPumpModulation"), nullptr, F_(solarPumpModulation), F_(percent), output);
-    print_value_json(root, F("cylinderPumpModulation"), nullptr, F_(cylinderPumpModulation), F_(percent), output);
-    print_value_json(root, F("valveStatus"), nullptr, F_(valveStatus), nullptr, output);
-    print_value_json(root, F("solarPump"), nullptr, F_(solarPump), nullptr, output);
-    print_value_json(root, F("tankHeated"), nullptr, F_(tankHeated), nullptr, output);
-    print_value_json(root, F("collectorShutdown"), nullptr, F_(collectorShutdown), nullptr, output);
-    print_value_json(root, F("energyLastHour"), nullptr, F_(energyLastHour), F_(wh), output);
-    print_value_json(root, F("energyToday"), nullptr, F_(energyToday), F_(wh), output);
-    print_value_json(root, F("energyTotal"), nullptr, F_(energyTotal), F_(kwh), output);
+    print_value_json(root, F("collectorTemp"), nullptr, F_(collectorTemp), F_(degrees), json);
+    print_value_json(root, F("tankBottomTemp"), nullptr, F_(tankBottomTemp), F_(degrees), json);
+    print_value_json(root, F("tankBottomTemp2"), nullptr, F_(tankBottomTemp2), F_(degrees), json);
+    print_value_json(root, F("heatExchangerTemp"), nullptr, F_(heatExchangerTemp), F_(degrees), json);
+    print_value_json(root, F("solarPumpModulation"), nullptr, F_(solarPumpModulation), F_(percent), json);
+    print_value_json(root, F("cylinderPumpModulation"), nullptr, F_(cylinderPumpModulation), F_(percent), json);
+    print_value_json(root, F("valveStatus"), nullptr, F_(valveStatus), nullptr, json);
+    print_value_json(root, F("solarPump"), nullptr, F_(solarPump), nullptr, json);
+    print_value_json(root, F("tankHeated"), nullptr, F_(tankHeated), nullptr, json);
+    print_value_json(root, F("collectorShutdown"), nullptr, F_(collectorShutdown), nullptr, json);
+    print_value_json(root, F("energyLastHour"), nullptr, F_(energyLastHour), F_(wh), json);
+    print_value_json(root, F("energyToday"), nullptr, F_(energyToday), F_(wh), json);
+    print_value_json(root, F("energyTotal"), nullptr, F_(energyTotal), F_(kwh), json);
 
     if (Helpers::hasValue(pumpWorkMin_)) {
         JsonObject dataElement = root.createNestedObject();
@@ -101,24 +92,24 @@ void Solar::show_values(uuid::console::Shell & shell) {
 
     // fetch the values into a JSON document
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
-    JsonObject                                      output = doc.to<JsonObject>();
-    if (!export_values(output)) {
+    JsonObject                                      json = doc.to<JsonObject>();
+    if (!export_values(json)) {
         return; // empty
     }
 
-    print_value_json(shell, F("collectorTemp"), nullptr, F_(collectorTemp), F_(degrees), output);
-    print_value_json(shell, F("tankBottomTemp"), nullptr, F_(tankBottomTemp), F_(degrees), output);
-    print_value_json(shell, F("tankBottomTemp2"), nullptr, F_(tankBottomTemp2), F_(degrees), output);
-    print_value_json(shell, F("heatExchangerTemp"), nullptr, F_(heatExchangerTemp), F_(degrees), output);
-    print_value_json(shell, F("solarPumpModulation"), nullptr, F_(solarPumpModulation), F_(percent), output);
-    print_value_json(shell, F("cylinderPumpModulation"), nullptr, F_(cylinderPumpModulation), F_(percent), output);
-    print_value_json(shell, F("valveStatus"), nullptr, F_(valveStatus), nullptr, output);
-    print_value_json(shell, F("solarPump"), nullptr, F_(solarPump), nullptr, output);
-    print_value_json(shell, F("tankHeated"), nullptr, F_(tankHeated), nullptr, output);
-    print_value_json(shell, F("collectorShutdown"), nullptr, F_(collectorShutdown), nullptr, output);
-    print_value_json(shell, F("energyLastHour"), nullptr, F_(energyLastHour), F_(wh), output);
-    print_value_json(shell, F("energyToday"), nullptr, F_(energyToday), F_(wh), output);
-    print_value_json(shell, F("energyTotal"), nullptr, F_(energyTotal), F_(kwh), output);
+    print_value_json(shell, F("collectorTemp"), nullptr, F_(collectorTemp), F_(degrees), json);
+    print_value_json(shell, F("tankBottomTemp"), nullptr, F_(tankBottomTemp), F_(degrees), json);
+    print_value_json(shell, F("tankBottomTemp2"), nullptr, F_(tankBottomTemp2), F_(degrees), json);
+    print_value_json(shell, F("heatExchangerTemp"), nullptr, F_(heatExchangerTemp), F_(degrees), json);
+    print_value_json(shell, F("solarPumpModulation"), nullptr, F_(solarPumpModulation), F_(percent), json);
+    print_value_json(shell, F("cylinderPumpModulation"), nullptr, F_(cylinderPumpModulation), F_(percent), json);
+    print_value_json(shell, F("valveStatus"), nullptr, F_(valveStatus), nullptr, json);
+    print_value_json(shell, F("solarPump"), nullptr, F_(solarPump), nullptr, json);
+    print_value_json(shell, F("tankHeated"), nullptr, F_(tankHeated), nullptr, json);
+    print_value_json(shell, F("collectorShutdown"), nullptr, F_(collectorShutdown), nullptr, json);
+    print_value_json(shell, F("energyLastHour"), nullptr, F_(energyLastHour), F_(wh), json);
+    print_value_json(shell, F("energyToday"), nullptr, F_(energyToday), F_(wh), json);
+    print_value_json(shell, F("energyTotal"), nullptr, F_(energyTotal), F_(kwh), json);
 
     if (Helpers::hasValue(pumpWorkMin_)) {
         shell.printfln(F("  %s: %d days %d hours %d minutes"),
@@ -130,15 +121,15 @@ void Solar::show_values(uuid::console::Shell & shell) {
 }
 
 // publish values via MQTT
-void Solar::publish_values(JsonObject & data, bool force) {
+void Solar::publish_values(JsonObject & json, bool force) {
     // handle HA first
     if (Mqtt::mqtt_format() == Mqtt::Format::HA) {
         register_mqtt_ha_config(force);
     }
 
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
-    JsonObject                                      output = doc.to<JsonObject>();
-    if (export_values(output)) {
+    JsonObject                                      json_payload = doc.to<JsonObject>();
+    if (export_values(json_payload)) {
         if (device_id() == 0x2A) {
             Mqtt::publish(F("ww_data"), doc.as<JsonObject>());
         } else {
@@ -197,66 +188,66 @@ void Solar::register_mqtt_ha_config(bool force) {
 
 // creates JSON doc from values
 // returns false if empty
-bool Solar::export_values(JsonObject & output) {
+bool Solar::export_values(JsonObject & json) {
     char s[10]; // for formatting strings
 
     if (Helpers::hasValue(collectorTemp_)) {
-        output["collectorTemp"] = (float)collectorTemp_ / 10;
+        json["collectorTemp"] = (float)collectorTemp_ / 10;
     }
 
     if (Helpers::hasValue(tankBottomTemp_)) {
-        output["tankBottomTemp"] = (float)tankBottomTemp_ / 10;
+        json["tankBottomTemp"] = (float)tankBottomTemp_ / 10;
     }
 
     if (Helpers::hasValue(tankBottomTemp2_)) {
-        output["tankBottomTemp2"] = (float)tankBottomTemp2_ / 10;
+        json["tankBottomTemp2"] = (float)tankBottomTemp2_ / 10;
     }
 
     if (Helpers::hasValue(heatExchangerTemp_)) {
-        output["heatExchangerTemp"] = (float)heatExchangerTemp_ / 10;
+        json["heatExchangerTemp"] = (float)heatExchangerTemp_ / 10;
     }
 
     if (Helpers::hasValue(solarPumpModulation_)) {
-        output["solarPumpModulation"] = solarPumpModulation_;
+        json["solarPumpModulation"] = solarPumpModulation_;
     }
 
     if (Helpers::hasValue(cylinderPumpModulation_)) {
-        output["cylinderPumpModulation"] = cylinderPumpModulation_;
+        json["cylinderPumpModulation"] = cylinderPumpModulation_;
     }
 
     if (Helpers::hasValue(solarPump_, EMS_VALUE_BOOL)) {
-        output["solarPump"] = Helpers::render_value(s, solarPump_, EMS_VALUE_BOOL);
+        json["solarPump"] = Helpers::render_value(s, solarPump_, EMS_VALUE_BOOL);
     }
 
     if (Helpers::hasValue(valveStatus_, EMS_VALUE_BOOL)) {
-        output["valveStatus"] = Helpers::render_value(s, valveStatus_, EMS_VALUE_BOOL);
+        json["valveStatus"] = Helpers::render_value(s, valveStatus_, EMS_VALUE_BOOL);
     }
 
     if (Helpers::hasValue(pumpWorkMin_)) {
-        output["pumpWorkMin"] = pumpWorkMin_;
+        json["pumpWorkMin"] = pumpWorkMin_;
     }
 
     if (Helpers::hasValue(tankHeated_, EMS_VALUE_BOOL)) {
-        output["tankHeated"] = Helpers::render_value(s, tankHeated_, EMS_VALUE_BOOL);
+        json["tankHeated"] = Helpers::render_value(s, tankHeated_, EMS_VALUE_BOOL);
     }
 
     if (Helpers::hasValue(collectorShutdown_, EMS_VALUE_BOOL)) {
-        output["collectorShutdown"] = Helpers::render_value(s, collectorShutdown_, EMS_VALUE_BOOL);
+        json["collectorShutdown"] = Helpers::render_value(s, collectorShutdown_, EMS_VALUE_BOOL);
     }
 
     if (Helpers::hasValue(energyLastHour_)) {
-        output["energyLastHour"] = (float)energyLastHour_ / 10;
+        json["energyLastHour"] = (float)energyLastHour_ / 10;
     }
 
     if (Helpers::hasValue(energyToday_)) {
-        output["energyToday"] = energyToday_;
+        json["energyToday"] = energyToday_;
     }
 
     if (Helpers::hasValue(energyTotal_)) {
-        output["energyTotal"] = (float)energyTotal_ / 10;
+        json["energyTotal"] = (float)energyTotal_ / 10;
     }
 
-    return output.size();
+    return json.size();
 }
 
 // check to see if values have been updated

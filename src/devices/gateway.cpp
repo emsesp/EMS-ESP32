@@ -37,7 +37,12 @@ void Gateway::show_values(uuid::console::Shell & shell) {
 }
 
 // publish values via MQTT
-void Gateway::publish_values(JsonObject & data, bool force) {
+void Gateway::publish_values(JsonObject & json, bool force) {
+}
+
+// export values to JSON
+bool Gateway::export_values(JsonObject & json) {
+    return true;
 }
 
 // check to see if values have been updated

@@ -72,16 +72,16 @@ void WebAPIService::webAPIService(AsyncWebServerRequest * request) {
     }
 
     DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_LARGE);
-    JsonObject          output = doc.to<JsonObject>();
-    bool                ok     = false;
+    JsonObject          json = doc.to<JsonObject>();
+    bool                ok   = false;
 
     // execute the command
     if (data.isEmpty()) {
-        ok = Command::call(device_type, cmd.c_str(), nullptr, id.toInt(), output); // command only
+        ok = Command::call(device_type, cmd.c_str(), nullptr, id.toInt(), json); // command only
     } else {
         if (api_enabled) {
             // we only allow commands with parameters if the API is enabled
-            ok = Command::call(device_type, cmd.c_str(), data.c_str(), id.toInt(), output); // has cmd, data and id
+            ok = Command::call(device_type, cmd.c_str(), data.c_str(), id.toInt(), json); // has cmd, data and id
         } else {
             request->send(401, "text/plain", F("Unauthorized"));
             return;
@@ -100,15 +100,15 @@ void WebAPIService::webAPIService(AsyncWebServerRequest * request) {
                id.c_str(),
                ok ? F("OK") : F("Invalid"));
     EMSESP::logger().info(debug.c_str());
-    if (output.size()) {
+    if (json.size()) {
         char buffer2[EMSESP_MAX_JSON_SIZE_LARGE];
         serializeJson(doc, buffer2);
-        EMSESP::logger().info("output (max 255 chars): %s", buffer2);
+        EMSESP::logger().info("json (max 255 chars): %s", buffer2);
     }
 #endif
 
     // if we have returned data in JSON format, send this to the WEB
-    if (output.size()) {
+    if (json.size()) {
         doc.shrinkToFit();
         char buffer[EMSESP_MAX_JSON_SIZE_LARGE];
         serializeJsonPretty(doc, buffer);

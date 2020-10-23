@@ -26,7 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - new command under system called `report`. http://ems-esp/api?device=system&cmd=report to generate a report log for troubleshooting
 - thermostat error codes
 - Console command `pulbish ha` to also force the creation of the Home Assistant MQTT Discovery topics
-- Heatpump values
+- Heatpump values (dew temperature and relative air humidity)
 
 ### Fixed
 - fix wwontime readback
@@ -49,6 +49,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - JWT Secret renamed to Super User Password
 - EMS Devices in Web UI shows button and tooltip to remind users they can click on a device
 - MQTT boiler_data payload split into two topics `boiler_data_main` and `boiler_data_ww`
+- "sensor" renamed to "dallassensor" as a command. MQTT topic not affected.
 
 ### Removed
 - Console contexts for thermostat and boiler

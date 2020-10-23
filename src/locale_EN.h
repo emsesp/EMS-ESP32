@@ -79,6 +79,8 @@ MAKE_PSTR_WORD(device)
 MAKE_PSTR_WORD(data)
 MAKE_PSTR_WORD(command)
 MAKE_PSTR_WORD(commands)
+MAKE_PSTR_WORD(info)
+MAKE_PSTR_WORD(report)
 
 // devices
 MAKE_PSTR_WORD(boiler)
@@ -91,9 +93,7 @@ MAKE_PSTR_WORD(controller)
 MAKE_PSTR_WORD(connect)
 MAKE_PSTR_WORD(heatpump)
 MAKE_PSTR_WORD(generic)
-
-// dallas sensors
-MAKE_PSTR_WORD(sensor)
+MAKE_PSTR_WORD(dallassensor)
 
 MAKE_PSTR(1space, " ")
 MAKE_PSTR(2spaces, "  ")

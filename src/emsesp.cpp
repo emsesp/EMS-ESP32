@@ -305,14 +305,14 @@ void EMSESP::publish_all(bool force) {
 void EMSESP::publish_device_values(uint8_t device_type, bool force) {
     if (device_type == EMSdevice::DeviceType::MIXING && Mqtt::mqtt_format() != Mqtt::Format::SINGLE) {
         DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_LARGE);
-        JsonObject          output = doc.to<JsonObject>();
+        JsonObject          json = doc.to<JsonObject>();
         for (const auto & emsdevice : emsdevices) {
             if (emsdevice && (emsdevice->device_type() == device_type)) {
-                emsdevice->publish_values(output, force);
+                emsdevice->publish_values(json, force);
             }
         }
         doc.shrinkToFit();
-        Mqtt::publish("mixing_data", doc.as<JsonObject>());
+        Mqtt::publish(F("mixing_data"), doc.as<JsonObject>());
         return;
     }
 
@@ -713,9 +713,52 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
     emsdevices.push_back(EMSFactory::add(device_p->device_type, device_id, device_p->product_id, version, name, device_p->flags, brand));
     emsdevices.back()->unique_id(++unique_id_count_);
     LOG_DEBUG(F("Adding new device %s (device ID 0x%02X, product ID %d, version %s)"), name.c_str(), device_id, product_id, version.c_str());
-    fetch_device_values(device_id); // go and fetch its data,
+    fetch_device_values(device_id); // go and fetch its data
+
+    switch (device_p->device_type) {
+    case EMSdevice::DeviceType::BOILER:
+        Command::add_with_json(device_p->device_type, F_(info), [&](const char * value, const int8_t id, JsonObject & json) {
+            return command_info(EMSdevice::DeviceType::BOILER, json);
+        });
+        break;
+    case EMSdevice::DeviceType::MIXING:
+        Command::add_with_json(device_p->device_type, F_(info), [&](const char * value, const int8_t id, JsonObject & json) {
+            return command_info(EMSdevice::DeviceType::MIXING, json);
+        });
+        break;
+    case EMSdevice::DeviceType::SOLAR:
+        Command::add_with_json(device_p->device_type, F_(info), [&](const char * value, const int8_t id, JsonObject & json) {
+            return command_info(EMSdevice::DeviceType::SOLAR, json);
+        });
+        break;
+    case EMSdevice::DeviceType::THERMOSTAT:
+        Command::add_with_json(device_p->device_type, F_(info), [&](const char * value, const int8_t id, JsonObject & json) {
+            return command_info(EMSdevice::DeviceType::THERMOSTAT, json);
+        });
+        break;
+    case EMSdevice::DeviceType::HEATPUMP:
+        Command::add_with_json(device_p->device_type, F_(info), [&](const char * value, const int8_t id, JsonObject & json) {
+            return command_info(EMSdevice::DeviceType::HEATPUMP, json);
+        });
+        break;
+    default:
+        break;
+    }
 
     return true;
+}
+
+// export all values to info command
+// value and id are ignored
+bool EMSESP::command_info(uint8_t device_type, JsonObject & json) {
+    bool ok = false;
+    for (const auto & emsdevice : emsdevices) {
+        if (emsdevice && (emsdevice->device_type() == device_type)) {
+            ok |= emsdevice->export_values(json);
+        }
+    }
+
+    return ok;
 }
 
 // send a read request, passing it into to the Tx Service, with offset

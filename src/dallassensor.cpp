@@ -29,7 +29,7 @@
 
 namespace emsesp {
 
-uuid::log::Logger DallasSensor::logger_{F_(sensor), uuid::log::Facility::DAEMON};
+uuid::log::Logger DallasSensor::logger_{F_(dallassensor), uuid::log::Facility::DAEMON};
 
 // start the 1-wire
 void DallasSensor::start() {
@@ -42,8 +42,8 @@ void DallasSensor::start() {
 #endif
 
     // API call
-    Command::add_with_json(EMSdevice::DeviceType::SENSOR, F("info"), [&](const char * value, const int8_t id, JsonObject & object) {
-        return command_info(value, id, object);
+    Command::add_with_json(EMSdevice::DeviceType::DALLASSENSOR, F_(info), [&](const char * value, const int8_t id, JsonObject & json) {
+        return command_info(value, id, json);
     });
 }
 
@@ -282,14 +282,14 @@ bool DallasSensor::updated_values() {
     return false;
 }
 
-bool DallasSensor::command_info(const char * value, const int8_t id, JsonObject & output) {
-    return (export_values(output));
+bool DallasSensor::command_info(const char * value, const int8_t id, JsonObject & json) {
+    return (export_values(json));
 }
 
 // creates JSON doc from values
 // returns false if empty
 // e.g. sensor_data = {"sensor1":{"id":"28-EA41-9497-0E03-5F","temp":23.30},"sensor2":{"id":"28-233D-9497-0C03-8B","temp":24.0}}
-bool DallasSensor::export_values(JsonObject & output) {
+bool DallasSensor::export_values(JsonObject & json) {
     if (sensors_.size() == 0) {
         return false;
     }
@@ -298,7 +298,7 @@ bool DallasSensor::export_values(JsonObject & output) {
     for (const auto & sensor : sensors_) {
         char sensorID[10]; // sensor{1-n}
         snprintf_P(sensorID, 10, PSTR("sensor%d"), i++);
-        JsonObject dataSensor = output.createNestedObject(sensorID);
+        JsonObject dataSensor = json.createNestedObject(sensorID);
         dataSensor["id"]      = sensor.to_string();
         if (Helpers::hasValue(sensor.temperature_c)) {
             dataSensor["temp"] = (float)(sensor.temperature_c) / 10;

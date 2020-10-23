@@ -269,18 +269,18 @@ void Mqtt::on_message(const char * topic, const char * payload, size_t len) {
             bool        cmd_known = false;
             JsonVariant data      = doc["data"];
 
-            JsonObject output; // empty object
+            JsonObject json; // empty object
 
             if (data.is<char *>()) {
-                cmd_known = Command::call(mf.device_type_, command, data.as<char *>(), n, output);
+                cmd_known = Command::call(mf.device_type_, command, data.as<char *>(), n, json);
             } else if (data.is<int>()) {
                 char data_str[10];
-                cmd_known = Command::call(mf.device_type_, command, Helpers::itoa(data_str, (int16_t)data.as<int>()), n, output);
+                cmd_known = Command::call(mf.device_type_, command, Helpers::itoa(data_str, (int16_t)data.as<int>()), n, json);
             } else if (data.is<float>()) {
                 char data_str[10];
-                cmd_known = Command::call(mf.device_type_, command, Helpers::render_value(data_str, (float)data.as<float>(), 2), n, output);
+                cmd_known = Command::call(mf.device_type_, command, Helpers::render_value(data_str, (float)data.as<float>(), 2), n, json);
             } else if (data.isNull()) {
-                cmd_known = Command::call(mf.device_type_, command, "", n, output);
+                cmd_known = Command::call(mf.device_type_, command, "", n, json);
             }
 
             if (!cmd_known) {
@@ -467,7 +467,7 @@ void Mqtt::on_connect() {
 #ifndef EMSESP_STANDALONE
     doc["ip"] = WiFi.localIP().toString();
 #endif
-    publish(F("info"), doc.as<JsonObject>());
+    publish(F_(info), doc.as<JsonObject>());
 
     publish_retain(F("status"), "online", true); // say we're alive to the Last Will topic, with retain on
 

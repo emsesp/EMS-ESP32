@@ -29,7 +29,7 @@ std::vector<Command::CmdFunction> Command::cmdfunctions_;
 // calls a command, context is the device_type
 // id may be used to represent a heating circuit for example
 // returns false if error or not found
-bool Command::call(const uint8_t device_type, const char * cmd, const char * value, const int8_t id, JsonObject & output) {
+bool Command::call(const uint8_t device_type, const char * cmd, const char * value, const int8_t id, JsonObject & json) {
 #ifdef EMSESP_DEBUG
     std::string dname = EMSdevice::device_type_2_device_name(device_type);
     if (value == nullptr) {
@@ -48,11 +48,11 @@ bool Command::call(const uint8_t device_type, const char * cmd, const char * val
                 if (uuid::read_flash_string(cf.cmd_) == cmd) {
                     if (cf.cmdfunction_json_) {
                         // check if json object is empty, if so quit
-                        if (output.isNull()) {
+                        if (json.isNull()) {
                             LOG_WARNING(F("Ignore call for command %s in %s because no json"), cmd, EMSdevice::device_type_2_device_name(device_type).c_str());
                             return false;
                         }
-                        ok |= ((cf.cmdfunction_json_)(value, id, output));
+                        ok |= ((cf.cmdfunction_json_)(value, id, json));
                     } else {
                         ok |= ((cf.cmdfunction_)(value, id));
                     }
@@ -81,11 +81,16 @@ void Command::add_with_json(const uint8_t device_type, const __FlashStringHelper
 
 // see if a command exists for that device type
 bool Command::find_command(const uint8_t device_type, const char * cmd) {
+    if ((cmd == nullptr) || (strlen(cmd) == 0)) {
+        return false;
+    }
+
     for (const auto & cf : cmdfunctions_) {
-        if ((strcmp(cmd, uuid::read_flash_string(cf.cmd_).c_str()) == 0) && (cf.device_type_ == device_type)) {
+        if (!strcmp_P(cmd, reinterpret_cast<PGM_P>(cf.cmd_)) && (cf.device_type_ == device_type)) {
             return true;
         }
     }
+
     return false; // not found
 }
 
@@ -114,7 +119,7 @@ bool Command::device_has_commands(const uint8_t device_type) {
         return true; // we always have System
     }
 
-    if (device_type == EMSdevice::DeviceType::SENSOR) {
+    if (device_type == EMSdevice::DeviceType::DALLASSENSOR) {
         return true; // we always have Sensor, but should check if there are actual sensors attached!
     }
 
@@ -136,7 +141,7 @@ void Command::show_devices(uuid::console::Shell & shell) {
     shell.printf("%s ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::SYSTEM).c_str());
 
     if (EMSESP::have_sensors()) {
-        shell.printf("%s ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::SENSOR).c_str());
+        shell.printf("%s ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::DALLASSENSOR).c_str());
     }
 
     for (const auto & device_class : EMSFactory::device_handlers()) {
@@ -160,8 +165,8 @@ void Command::show_all(uuid::console::Shell & shell) {
 
     // show sensor
     if (EMSESP::have_sensors()) {
-        shell.printf(" %s: ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::SENSOR).c_str());
-        show(shell, EMSdevice::DeviceType::SENSOR);
+        shell.printf(" %s: ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::DALLASSENSOR).c_str());
+        show(shell, EMSdevice::DeviceType::DALLASSENSOR);
     }
 
     // do this in the order of factory classes to keep a consistent order when displaying

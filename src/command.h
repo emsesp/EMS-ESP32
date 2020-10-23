@@ -35,7 +35,7 @@ using uuid::console::Shell;
 namespace emsesp {
 
 using cmdfunction_p      = std::function<bool(const char * data, const int8_t id)>;
-using cmdfunction_json_p = std::function<bool(const char * data, const int8_t id, JsonObject & output)>;
+using cmdfunction_json_p = std::function<bool(const char * data, const int8_t id, JsonObject & json)>;
 
 class Command {
   public:
@@ -57,7 +57,7 @@ class Command {
         return cmdfunctions_;
     }
 
-    static bool call(const uint8_t device_type, const char * cmd, const char * value, const int8_t id, JsonObject & output);
+    static bool call(const uint8_t device_type, const char * cmd, const char * value, const int8_t id, JsonObject & json);
     static void add(const uint8_t device_type, const uint8_t device_id, const __FlashStringHelper * cmd, cmdfunction_p cb);
     static void add_with_json(const uint8_t device_type, const __FlashStringHelper * cmd, cmdfunction_json_p cb);
     static void show_all(uuid::console::Shell & shell);

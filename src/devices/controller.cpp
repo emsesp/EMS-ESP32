@@ -37,7 +37,12 @@ void Controller::show_values(uuid::console::Shell & shell) {
 }
 
 // publish values via MQTT
-void Controller::publish_values(JsonObject & data, bool force) {
+void Controller::publish_values(JsonObject & json, bool force) {
+}
+
+// export values to JSON
+bool Controller::export_values(JsonObject & json) {
+    return true;
 }
 
 // check to see if values have been updated

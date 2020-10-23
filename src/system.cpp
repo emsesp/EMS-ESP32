@@ -149,10 +149,10 @@ void System::start() {
 
     // these commands respond to the topic "system" and take a payload like {cmd:"", data:"", id:""}
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
-        Command::add(EMSdevice::DeviceType::SYSTEM, settings.ems_bus_id, F("pin"), System::command_pin);
-        Command::add(EMSdevice::DeviceType::SYSTEM, settings.ems_bus_id, F("send"), System::command_send);
-        Command::add_with_json(EMSdevice::DeviceType::SYSTEM, F("info"), System::command_info);
-        Command::add_with_json(EMSdevice::DeviceType::SYSTEM, F("report"), System::command_report);
+        Command::add(EMSdevice::DeviceType::SYSTEM, settings.ems_bus_id, F_(pin), System::command_pin);
+        Command::add(EMSdevice::DeviceType::SYSTEM, settings.ems_bus_id, F_(send), System::command_send);
+        Command::add_with_json(EMSdevice::DeviceType::SYSTEM, F_(info), System::command_info);
+        Command::add_with_json(EMSdevice::DeviceType::SYSTEM, F_(report), System::command_report);
     });
 
     syslog_init(); // init SysLog
@@ -845,13 +845,13 @@ bool System::check_upgrade() {
 // export all settings to JSON text
 // http://ems-esp/api?device=system&cmd=info
 // value and id are ignored
-bool System::command_info(const char * value, const int8_t id, JsonObject & output) {
+bool System::command_info(const char * value, const int8_t id, JsonObject & json) {
 #ifdef EMSESP_STANDALONE
-    output["test"] = "testing info command";
+    json["test"] = "testing info command";
 #else
     EMSESP::esp8266React.getWiFiSettingsService()->read([&](WiFiSettings & settings) {
         char       s[7];
-        JsonObject node = output.createNestedObject("WIFI");
+        JsonObject node = json.createNestedObject("WIFI");
         node["ssid"]    = settings.ssid;
         // node["password"]         = settings.password;
         node["hostname"]         = settings.hostname;
@@ -864,7 +864,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
     });
 
     EMSESP::esp8266React.getAPSettingsService()->read([&](APSettings & settings) {
-        JsonObject node        = output.createNestedObject("AP");
+        JsonObject node        = json.createNestedObject("AP");
         node["provision_mode"] = settings.provisionMode;
         node["ssid"]           = settings.ssid;
         // node["password"]       = settings.password;
@@ -875,7 +875,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
 
     EMSESP::esp8266React.getMqttSettingsService()->read([&](MqttSettings & settings) {
         char       s[7];
-        JsonObject node  = output.createNestedObject("MQTT");
+        JsonObject node  = json.createNestedObject("MQTT");
         node["enabled"]  = Helpers::render_boolean(s, settings.enabled);
         node["host"]     = settings.host;
         node["port"]     = settings.port;
@@ -898,7 +898,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
 
     EMSESP::esp8266React.getNTPSettingsService()->read([&](NTPSettings & settings) {
         char       s[7];
-        JsonObject node   = output.createNestedObject("NTP");
+        JsonObject node   = json.createNestedObject("NTP");
         node["enabled"]   = Helpers::render_boolean(s, settings.enabled);
         node["server"]    = settings.server;
         node["tz_label"]  = settings.tzLabel;
@@ -907,7 +907,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
 
     EMSESP::esp8266React.getOTASettingsService()->read([&](OTASettings & settings) {
         char       s[7];
-        JsonObject node = output.createNestedObject("OTA");
+        JsonObject node = json.createNestedObject("OTA");
         node["enabled"] = Helpers::render_boolean(s, settings.enabled);
         node["port"]    = settings.port;
         // node["password"] = settings.password;
@@ -915,7 +915,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
 
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
         char       s[7];
-        JsonObject node              = output.createNestedObject("Settings");
+        JsonObject node              = json.createNestedObject("Settings");
         node["tx_mode"]              = settings.tx_mode;
         node["ems_bus_id"]           = settings.ems_bus_id;
         node["syslog_level"]         = settings.syslog_level;
@@ -941,10 +941,10 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
 
 // export debug information
 // http://ems-esp/api?device=system&cmd=report
-bool System::command_report(const char * value, const int8_t id, JsonObject & output) {
+bool System::command_report(const char * value, const int8_t id, JsonObject & json) {
     JsonObject node;
 
-    node = output.createNestedObject("System");
+    node = json.createNestedObject("System");
 
     node["version"] = EMSESP_APP_VERSION;
     node["uptime"]  = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
@@ -953,7 +953,7 @@ bool System::command_report(const char * value, const int8_t id, JsonObject & ou
     node["fragmem"] = ESP.getHeapFragmentation();
 #endif
 
-    node = output.createNestedObject("Settings");
+    node = json.createNestedObject("Settings");
 
     EMSESP::esp8266React.getMqttSettingsService()->read([&](MqttSettings & settings) {
         node["publish_time_boiler"]     = settings.publish_time_boiler;
@@ -984,7 +984,7 @@ bool System::command_report(const char * value, const int8_t id, JsonObject & ou
         node["analog_enabled"]    = settings.analog_enabled;
     });
 
-    node = output.createNestedObject("Status");
+    node = json.createNestedObject("Status");
 
     switch (EMSESP::bus_status()) {
     case EMSESP::BUS_STATUS_OFFLINE:
@@ -1012,7 +1012,7 @@ bool System::command_report(const char * value, const int8_t id, JsonObject & ou
         node["#dallas sensors"]       = EMSESP::sensor_devices().size();
     }
 
-    JsonArray devices2 = output.createNestedArray("Devices");
+    JsonArray devices2 = json.createNestedArray("Devices");
 
     for (const auto & device_class : EMSFactory::device_handlers()) {
         for (const auto & emsdevice : EMSESP::emsdevices) {

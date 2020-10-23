@@ -70,12 +70,6 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     register_mqtt_cmd(F("boilhystoff"), [&](const char * value, const int8_t id) { return set_hyst_off(value, id); });
     register_mqtt_cmd(F("burnperiod"), [&](const char * value, const int8_t id) { return set_burn_period(value, id); });
     register_mqtt_cmd(F("pumpdelay"), [&](const char * value, const int8_t id) { return set_pump_delay(value, id); });
-
-    // API call
-    // Command::add_with_json(this->device_type(), F("info"), Boiler::command_info);
-    Command::add_with_json(this->device_type(), F("info"), [&](const char * value, const int8_t id, JsonObject & object) {
-        return command_info(value, id, object);
-    });
 }
 
 // create the config topics for Home Assistant MQTT Discovery
@@ -180,142 +174,142 @@ void Boiler::register_mqtt_ha_config(bool force) {
 void Boiler::device_info_web(JsonArray & root) {
     // fetch the values into a JSON document
     DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_LARGE);
-    JsonObject          output = doc.to<JsonObject>();
-    if (!export_values_main(output)) {
+    JsonObject          json = doc.to<JsonObject>();
+    if (!export_values_main(json)) {
         return; // empty
     }
-    export_values_ww(output); // append ww values
+    export_values_ww(json); // append ww values
 
-    print_value_json(root, F("heatingActive"), nullptr, F_(heatingActive), nullptr, output);
-    print_value_json(root, F("tapwaterActive"), nullptr, F_(tapwaterActive), nullptr, output);
-    print_value_json(root, F("serviceCode"), nullptr, F_(serviceCode), nullptr, output);
-    print_value_json(root, F("serviceCodeNumber"), nullptr, F_(serviceCodeNumber), nullptr, output);
-    print_value_json(root, F("selFlowTemp"), nullptr, F_(selFlowTemp), F_(degrees), output);
-    print_value_json(root, F("selBurnPow"), nullptr, F_(selBurnPow), F_(percent), output);
-    print_value_json(root, F("curBurnPow"), nullptr, F_(curBurnPow), F_(percent), output);
-    print_value_json(root, F("pumpMod"), nullptr, F_(pumpMod), F_(percent), output);
-    print_value_json(root, F("pumpMod2"), nullptr, F_(pumpMod2), F_(percent), output);
-    print_value_json(root, F("outdoorTemp"), nullptr, F_(outdoorTemp), F_(degrees), output);
-    print_value_json(root, F("curFlowTemp"), nullptr, F_(curFlowTemp), F_(degrees), output);
-    print_value_json(root, F("retTemp"), nullptr, F_(retTemp), F_(degrees), output);
-    print_value_json(root, F("switchTemp"), nullptr, F_(switchTemp), F_(degrees), output);
-    print_value_json(root, F("sysPress"), nullptr, F_(sysPress), nullptr, output);
-    print_value_json(root, F("boilTemp"), nullptr, F_(boilTemp), F_(degrees), output);
-    print_value_json(root, F("burnGas"), nullptr, F_(burnGas), nullptr, output);
-    print_value_json(root, F("flameCurr"), nullptr, F_(flameCurr), F_(uA), output);
-    print_value_json(root, F("heatPump"), nullptr, F_(heatPump), nullptr, output);
-    print_value_json(root, F("fanWork"), nullptr, F_(fanWork), nullptr, output);
-    print_value_json(root, F("ignWork"), nullptr, F_(ignWork), nullptr, output);
-    print_value_json(root, F("heatingActivated"), nullptr, F_(heatingActivated), nullptr, output);
-    print_value_json(root, F("heatingTemp"), nullptr, F_(heatingTemp), F_(degrees), output);
-    print_value_json(root, F("pumpModMax"), nullptr, F_(pumpModMax), F_(percent), output);
-    print_value_json(root, F("pumpModMin"), nullptr, F_(pumpModMin), F_(percent), output);
-    print_value_json(root, F("pumpDelay"), nullptr, F_(pumpDelay), F_(min), output);
-    print_value_json(root, F("burnMinPeriod"), nullptr, F_(burnMinPeriod), F_(min), output);
-    print_value_json(root, F("burnMinPower"), nullptr, F_(burnMinPower), F_(percent), output);
-    print_value_json(root, F("burnMaxPower"), nullptr, F_(burnMaxPower), F_(percent), output);
-    print_value_json(root, F("boilHystOn"), nullptr, F_(boilHystOn), F_(degrees), output);
-    print_value_json(root, F("boilHystOff"), nullptr, F_(boilHystOff), F_(degrees), output);
-    print_value_json(root, F("setFlowTemp"), nullptr, F_(setFlowTemp), F_(degrees), output);
-    print_value_json(root, F("setBurnPow"), nullptr, F_(setBurnPow), F_(percent), output);
-    print_value_json(root, F("burnStarts"), nullptr, F_(burnStarts), nullptr, output);
+    print_value_json(root, F("heatingActive"), nullptr, F_(heatingActive), nullptr, json);
+    print_value_json(root, F("tapwaterActive"), nullptr, F_(tapwaterActive), nullptr, json);
+    print_value_json(root, F("serviceCode"), nullptr, F_(serviceCode), nullptr, json);
+    print_value_json(root, F("serviceCodeNumber"), nullptr, F_(serviceCodeNumber), nullptr, json);
+    print_value_json(root, F("selFlowTemp"), nullptr, F_(selFlowTemp), F_(degrees), json);
+    print_value_json(root, F("selBurnPow"), nullptr, F_(selBurnPow), F_(percent), json);
+    print_value_json(root, F("curBurnPow"), nullptr, F_(curBurnPow), F_(percent), json);
+    print_value_json(root, F("pumpMod"), nullptr, F_(pumpMod), F_(percent), json);
+    print_value_json(root, F("pumpMod2"), nullptr, F_(pumpMod2), F_(percent), json);
+    print_value_json(root, F("outdoorTemp"), nullptr, F_(outdoorTemp), F_(degrees), json);
+    print_value_json(root, F("curFlowTemp"), nullptr, F_(curFlowTemp), F_(degrees), json);
+    print_value_json(root, F("retTemp"), nullptr, F_(retTemp), F_(degrees), json);
+    print_value_json(root, F("switchTemp"), nullptr, F_(switchTemp), F_(degrees), json);
+    print_value_json(root, F("sysPress"), nullptr, F_(sysPress), nullptr, json);
+    print_value_json(root, F("boilTemp"), nullptr, F_(boilTemp), F_(degrees), json);
+    print_value_json(root, F("burnGas"), nullptr, F_(burnGas), nullptr, json);
+    print_value_json(root, F("flameCurr"), nullptr, F_(flameCurr), F_(uA), json);
+    print_value_json(root, F("heatPump"), nullptr, F_(heatPump), nullptr, json);
+    print_value_json(root, F("fanWork"), nullptr, F_(fanWork), nullptr, json);
+    print_value_json(root, F("ignWork"), nullptr, F_(ignWork), nullptr, json);
+    print_value_json(root, F("heatingActivated"), nullptr, F_(heatingActivated), nullptr, json);
+    print_value_json(root, F("heatingTemp"), nullptr, F_(heatingTemp), F_(degrees), json);
+    print_value_json(root, F("pumpModMax"), nullptr, F_(pumpModMax), F_(percent), json);
+    print_value_json(root, F("pumpModMin"), nullptr, F_(pumpModMin), F_(percent), json);
+    print_value_json(root, F("pumpDelay"), nullptr, F_(pumpDelay), F_(min), json);
+    print_value_json(root, F("burnMinPeriod"), nullptr, F_(burnMinPeriod), F_(min), json);
+    print_value_json(root, F("burnMinPower"), nullptr, F_(burnMinPower), F_(percent), json);
+    print_value_json(root, F("burnMaxPower"), nullptr, F_(burnMaxPower), F_(percent), json);
+    print_value_json(root, F("boilHystOn"), nullptr, F_(boilHystOn), F_(degrees), json);
+    print_value_json(root, F("boilHystOff"), nullptr, F_(boilHystOff), F_(degrees), json);
+    print_value_json(root, F("setFlowTemp"), nullptr, F_(setFlowTemp), F_(degrees), json);
+    print_value_json(root, F("setBurnPow"), nullptr, F_(setBurnPow), F_(percent), json);
+    print_value_json(root, F("burnStarts"), nullptr, F_(burnStarts), nullptr, json);
 
     // ww
-    print_value_json(root, F("wWSelTemp"), nullptr, F_(wWSelTemp), F_(degrees), output);
-    print_value_json(root, F("wWSetTemp"), nullptr, F_(wWSetTemp), F_(degrees), output);
-    print_value_json(root, F("wWDisinfectionTemp"), nullptr, F_(wWDisinfectionTemp), F_(degrees), output);
-    print_value_json(root, F("wWType"), nullptr, F_(wWType), nullptr, output);
-    print_value_json(root, F("wWChargeType"), nullptr, F_(wWChargeType), nullptr, output);
-    print_value_json(root, F("wWCircPump"), nullptr, F_(wWCircPump), nullptr, output);
-    print_value_json(root, F("wWCircPumpMode"), nullptr, F_(wWCircPumpMode), nullptr, output);
-    print_value_json(root, F("wWCirc"), nullptr, F_(wWCirc), nullptr, output);
-    print_value_json(root, F("wWCurTemp"), nullptr, F_(wWCurTemp), F_(degrees), output);
-    print_value_json(root, F("wWCurTemp2"), nullptr, F_(wWCurTemp2), F_(degrees), output);
-    print_value_json(root, F("wWCurFlow"), nullptr, F_(wWCurFlow), F("l/min"), output);
-    print_value_json(root, F("wwStorageTemp1"), nullptr, F_(wwStorageTemp1), F_(degrees), output);
-    print_value_json(root, F("wwStorageTemp2"), nullptr, F_(wwStorageTemp2), F_(degrees), output);
-    print_value_json(root, F("exhaustTemp"), nullptr, F_(exhaustTemp), F_(degrees), output);
-    print_value_json(root, F("wWActivated"), nullptr, F_(wWActivated), nullptr, output);
-    print_value_json(root, F("wWOneTime"), nullptr, F_(wWOneTime), nullptr, output);
-    print_value_json(root, F("wWDisinfecting"), nullptr, F_(wWDisinfecting), nullptr, output);
-    print_value_json(root, F("wWCharging"), nullptr, F_(wWCharging), nullptr, output);
-    print_value_json(root, F("wWRecharging"), nullptr, F_(wWRecharging), nullptr, output);
-    print_value_json(root, F("wWTempOK"), nullptr, F_(wWTempOK), nullptr, output);
-    print_value_json(root, F("wWActive"), nullptr, F_(wWActive), nullptr, output);
-    print_value_json(root, F("wWHeat"), nullptr, F_(wWHeat), nullptr, output);
-    print_value_json(root, F("wWSetPumpPower"), nullptr, F_(wWSetPumpPower), F_(percent), output);
-    print_value_json(root, F("wwMixTemperature"), nullptr, F_(wwMixTemperature), F_(degrees), output);
-    print_value_json(root, F("wwBufferTemperature"), nullptr, F_(wwBufferTemperature), F_(degrees), output);
-    print_value_json(root, F("wWStarts"), nullptr, F_(wWStarts), nullptr, output);
-    print_value_json(root, F("wWWorkM"), nullptr, F_(wWWorkM), nullptr, output);
+    print_value_json(root, F("wWSelTemp"), nullptr, F_(wWSelTemp), F_(degrees), json);
+    print_value_json(root, F("wWSetTemp"), nullptr, F_(wWSetTemp), F_(degrees), json);
+    print_value_json(root, F("wWDisinfectionTemp"), nullptr, F_(wWDisinfectionTemp), F_(degrees), json);
+    print_value_json(root, F("wWType"), nullptr, F_(wWType), nullptr, json);
+    print_value_json(root, F("wWChargeType"), nullptr, F_(wWChargeType), nullptr, json);
+    print_value_json(root, F("wWCircPump"), nullptr, F_(wWCircPump), nullptr, json);
+    print_value_json(root, F("wWCircPumpMode"), nullptr, F_(wWCircPumpMode), nullptr, json);
+    print_value_json(root, F("wWCirc"), nullptr, F_(wWCirc), nullptr, json);
+    print_value_json(root, F("wWCurTemp"), nullptr, F_(wWCurTemp), F_(degrees), json);
+    print_value_json(root, F("wWCurTemp2"), nullptr, F_(wWCurTemp2), F_(degrees), json);
+    print_value_json(root, F("wWCurFlow"), nullptr, F_(wWCurFlow), F("l/min"), json);
+    print_value_json(root, F("wwStorageTemp1"), nullptr, F_(wwStorageTemp1), F_(degrees), json);
+    print_value_json(root, F("wwStorageTemp2"), nullptr, F_(wwStorageTemp2), F_(degrees), json);
+    print_value_json(root, F("exhaustTemp"), nullptr, F_(exhaustTemp), F_(degrees), json);
+    print_value_json(root, F("wWActivated"), nullptr, F_(wWActivated), nullptr, json);
+    print_value_json(root, F("wWOneTime"), nullptr, F_(wWOneTime), nullptr, json);
+    print_value_json(root, F("wWDisinfecting"), nullptr, F_(wWDisinfecting), nullptr, json);
+    print_value_json(root, F("wWCharging"), nullptr, F_(wWCharging), nullptr, json);
+    print_value_json(root, F("wWRecharging"), nullptr, F_(wWRecharging), nullptr, json);
+    print_value_json(root, F("wWTempOK"), nullptr, F_(wWTempOK), nullptr, json);
+    print_value_json(root, F("wWActive"), nullptr, F_(wWActive), nullptr, json);
+    print_value_json(root, F("wWHeat"), nullptr, F_(wWHeat), nullptr, json);
+    print_value_json(root, F("wWSetPumpPower"), nullptr, F_(wWSetPumpPower), F_(percent), json);
+    print_value_json(root, F("wwMixTemperature"), nullptr, F_(wwMixTemperature), F_(degrees), json);
+    print_value_json(root, F("wwBufferTemperature"), nullptr, F_(wwBufferTemperature), F_(degrees), json);
+    print_value_json(root, F("wWStarts"), nullptr, F_(wWStarts), nullptr, json);
+    print_value_json(root, F("wWWorkM"), nullptr, F_(wWWorkM), nullptr, json);
 }
 
-bool Boiler::command_info(const char * value, const int8_t id, JsonObject & output) {
-    if (!export_values_main(output)) {
+bool Boiler::export_values(JsonObject & json) {
+    if (!export_values_main(json)) {
         return false;
     }
-    export_values_ww(output); // append ww values
+    export_values_ww(json); // append ww values
     return true;
 }
 
 // creates JSON doc from values
 // returns false if empty
-bool Boiler::export_values_ww(JsonObject & output) {
+bool Boiler::export_values_ww(JsonObject & json) {
     char s[10]; // for formatting strings
 
     // Warm Water comfort setting
     if (Helpers::hasValue(wWComfort_)) {
         if (wWComfort_ == 0x00) {
-            output["wWComfort"] = F("Hot");
+            json["wWComfort"] = F("Hot");
         } else if (wWComfort_ == 0xD8) {
-            output["wWComfort"] = F("Eco");
+            json["wWComfort"] = F("Eco");
         } else if (wWComfort_ == 0xEC) {
-            output["wWComfort"] = F("Intelligent");
+            json["wWComfort"] = F("Intelligent");
         }
     }
 
     // Warm Water selected temperature
     if (Helpers::hasValue(wWSelTemp_)) {
-        output["wWSelTemp"] = wWSelTemp_;
+        json["wWSelTemp"] = wWSelTemp_;
     }
 
     // Warm Water set temperature
     if (Helpers::hasValue(wWSetTemp_)) {
-        output["wWSetTemp"] = wWSetTemp_;
+        json["wWSetTemp"] = wWSetTemp_;
     }
 
     // Warm Water disinfection temperature
     if (Helpers::hasValue(wWDisinfectionTemp_)) {
-        output["wWDisinfectionTemp"] = wWDisinfectionTemp_;
+        json["wWDisinfectionTemp"] = wWDisinfectionTemp_;
     }
 
     // Warm Water type
-    if (wWType_ == 0) { // no output if not set
-        output["wWType"] = F("off");
+    if (wWType_ == 0) { // no json if not set
+        json["wWType"] = F("off");
     } else if (wWType_ == 1) {
-        output["wWType"] = F("flow");
+        json["wWType"] = F("flow");
     } else if (wWType_ == 2) {
-        output["wWType"] = F("buffered flow");
+        json["wWType"] = F("buffered flow");
     } else if (wWType_ == 3) {
-        output["wWType"] = F("buffer");
+        json["wWType"] = F("buffer");
     } else if (wWType_ == 4) {
-        output["wWType"] = F("layered buffer");
+        json["wWType"] = F("layered buffer");
     }
 
     // Warm Water charging type
     if (Helpers::hasValue(wWChargeType_, EMS_VALUE_BOOL)) {
-        output["wWChargeType"] = wWChargeType_ ? F("3-way valve") : F("charge pump");
+        json["wWChargeType"] = wWChargeType_ ? F("3-way valve") : F("charge pump");
     }
 
     // Warm Water circulation pump available bool
     if (Helpers::hasValue(wWCircPump_, EMS_VALUE_BOOL)) {
-        output["wWCircPump"] = Helpers::render_value(s, wWCircPump_, EMS_VALUE_BOOL);
+        json["wWCircPump"] = Helpers::render_value(s, wWCircPump_, EMS_VALUE_BOOL);
     }
 
     // Warm Water circulation pump freq
     if (Helpers::hasValue(wWCircPumpMode_)) {
         if (wWCircPumpMode_ == 7) {
-            output["wWCircPumpMode"] = F("continuous");
+            json["wWCircPumpMode"] = F("continuous");
         } else {
             char s[7];
             char buffer[2];
@@ -323,313 +317,313 @@ bool Boiler::export_values_ww(JsonObject & output) {
             buffer[1] = '\0';
             strlcpy(s, buffer, 7);
             strlcat(s, "x3min", 7);
-            output["wWCircPumpMode"] = s;
+            json["wWCircPumpMode"] = s;
         }
     }
 
     // Warm Water circulation active bool
     if (Helpers::hasValue(wWCirc_, EMS_VALUE_BOOL)) {
-        output["wWCirc"] = Helpers::render_value(s, wWCirc_, EMS_VALUE_BOOL);
+        json["wWCirc"] = Helpers::render_value(s, wWCirc_, EMS_VALUE_BOOL);
     }
 
     // Warm Water current temperature (intern)
     if (Helpers::hasValue(wWCurTemp_)) {
-        output["wWCurTemp"] = (float)wWCurTemp_ / 10;
+        json["wWCurTemp"] = (float)wWCurTemp_ / 10;
     }
 
     // Warm Water current temperature (extern)
     if (Helpers::hasValue(wWCurTemp2_)) {
-        output["wWCurTemp2"] = (float)wWCurTemp2_ / 10;
+        json["wWCurTemp2"] = (float)wWCurTemp2_ / 10;
     }
 
     // Warm Water current tap water flow l/min
     if (Helpers::hasValue(wWCurFlow_)) {
-        output["wWCurFlow"] = (float)wWCurFlow_ / 10;
+        json["wWCurFlow"] = (float)wWCurFlow_ / 10;
     }
 
     // Warm water storage temperature (intern)
     if (Helpers::hasValue(wwStorageTemp1_)) {
-        output["wwStorageTemp1"] = (float)wwStorageTemp1_ / 10;
+        json["wwStorageTemp1"] = (float)wwStorageTemp1_ / 10;
     }
 
     // Warm water storage temperature (extern)
     if (Helpers::hasValue(wwStorageTemp2_)) {
-        output["wwStorageTemp2"] = (float)wwStorageTemp2_ / 10;
+        json["wwStorageTemp2"] = (float)wwStorageTemp2_ / 10;
     }
 
     // Warm Water activated bool
     if (Helpers::hasValue(wWActivated_, EMS_VALUE_BOOL)) {
-        output["wWActivated"] = Helpers::render_value(s, wWActivated_, EMS_VALUE_BOOL);
+        json["wWActivated"] = Helpers::render_value(s, wWActivated_, EMS_VALUE_BOOL);
     }
 
     // Warm Water one time charging bool
     if (Helpers::hasValue(wWOneTime_, EMS_VALUE_BOOL)) {
-        output["wWOneTime"] = Helpers::render_value(s, wWOneTime_, EMS_VALUE_BOOL);
+        json["wWOneTime"] = Helpers::render_value(s, wWOneTime_, EMS_VALUE_BOOL);
     }
 
     // Warm Water disinfecting bool
     if (Helpers::hasValue(wWDisinfecting_, EMS_VALUE_BOOL)) {
-        output["wWDisinfecting"] = Helpers::render_value(s, wWDisinfecting_, EMS_VALUE_BOOL);
+        json["wWDisinfecting"] = Helpers::render_value(s, wWDisinfecting_, EMS_VALUE_BOOL);
     }
 
     // Warm water charging bool
     if (Helpers::hasValue(wWCharging_, EMS_VALUE_BOOL)) {
-        output["wWCharging"] = Helpers::render_value(s, wWCharging_, EMS_VALUE_BOOL);
+        json["wWCharging"] = Helpers::render_value(s, wWCharging_, EMS_VALUE_BOOL);
     }
 
     // Warm water recharge bool
     if (Helpers::hasValue(wWRecharging_, EMS_VALUE_BOOL)) {
-        output["wWRecharging"] = Helpers::render_value(s, wWRecharging_, EMS_VALUE_BOOL);
+        json["wWRecharging"] = Helpers::render_value(s, wWRecharging_, EMS_VALUE_BOOL);
     }
 
     // Warm water temperature ok bool
     if (Helpers::hasValue(wWTempOK_, EMS_VALUE_BOOL)) {
-        output["wWTempOK"] = Helpers::render_value(s, wWTempOK_, EMS_VALUE_BOOL);
+        json["wWTempOK"] = Helpers::render_value(s, wWTempOK_, EMS_VALUE_BOOL);
     }
 
     // Warm water active bool
     if (Helpers::hasValue(wWActive_, EMS_VALUE_BOOL)) {
-        output["wWActive"] = Helpers::render_value(s, wWActive_, EMS_VALUE_BOOL);
+        json["wWActive"] = Helpers::render_value(s, wWActive_, EMS_VALUE_BOOL);
     }
 
     // Warm Water charging bool
     if (Helpers::hasValue(wWHeat_, EMS_VALUE_BOOL)) {
-        output["wWHeat"] = Helpers::render_value(s, wWHeat_, EMS_VALUE_BOOL);
+        json["wWHeat"] = Helpers::render_value(s, wWHeat_, EMS_VALUE_BOOL);
     }
 
     // Warm Water pump set power %
     if (Helpers::hasValue(wWSetPumpPower_)) {
-        output["wWSetPumpPower"] = wWSetPumpPower_;
+        json["wWSetPumpPower"] = wWSetPumpPower_;
     }
 
     // Warm water mix temperature
     if (Helpers::hasValue(wwMixTemperature_)) {
-        output["wwMixTemperature"] = wwMixTemperature_;
+        json["wwMixTemperature"] = wwMixTemperature_;
     }
 
     // Warm water buffer boiler temperature
     if (Helpers::hasValue(wwBufferTemperature_)) {
-        output["wwBufferTemperature"] = wwBufferTemperature_;
+        json["wwBufferTemperature"] = wwBufferTemperature_;
     }
 
     // Warm Water # starts
     if (Helpers::hasValue(wWStarts_)) {
-        output["wWStarts"] = wWStarts_;
+        json["wWStarts"] = wWStarts_;
     }
 
     // Warm Water active time
     if (Helpers::hasValue(wWWorkM_)) {
-        output["wWWorkM"] = wWWorkM_;
+        json["wWWorkM"] = wWWorkM_;
     }
 
-    return (output.size());
+    return (json.size());
 }
 
 // creates JSON doc from values
 // returns false if empty
-bool Boiler::export_values_main(JsonObject & output) {
+bool Boiler::export_values_main(JsonObject & json) {
     char s[10]; // for formatting strings
 
     // Hot tap water bool
     if (Helpers::hasValue(heatingActive_, EMS_VALUE_BOOL)) {
-        output["heatingActive"] = Helpers::render_value(s, heatingActive_, EMS_VALUE_BOOL);
+        json["heatingActive"] = Helpers::render_value(s, heatingActive_, EMS_VALUE_BOOL);
     }
 
     // Central heating bool
     if (Helpers::hasValue(tapwaterActive_, EMS_VALUE_BOOL)) {
-        output["tapwaterActive"] = Helpers::render_value(s, tapwaterActive_, EMS_VALUE_BOOL);
+        json["tapwaterActive"] = Helpers::render_value(s, tapwaterActive_, EMS_VALUE_BOOL);
     }
 
     // Selected flow temperature deg
     if (Helpers::hasValue(selFlowTemp_)) {
-        output["selFlowTemp"] = selFlowTemp_;
+        json["selFlowTemp"] = selFlowTemp_;
     }
 
     // Burner selected max power %
     if (Helpers::hasValue(selBurnPow_)) {
-        output["selBurnPow"] = selBurnPow_;
+        json["selBurnPow"] = selBurnPow_;
     }
 
     // Burner current power %
     if (Helpers::hasValue(curBurnPow_)) {
-        output["curBurnPow"] = curBurnPow_;
+        json["curBurnPow"] = curBurnPow_;
     }
 
     // Pump modulation %
     if (Helpers::hasValue(pumpMod_)) {
-        output["pumpMod"] = pumpMod_;
+        json["pumpMod"] = pumpMod_;
     }
 
     // Heat Pump modulation %
     if (Helpers::hasValue(pumpMod2_)) {
-        output["pumpMod2"] = pumpMod2_;
+        json["pumpMod2"] = pumpMod2_;
     }
 
     // Outside temperature
     if (Helpers::hasValue(outdoorTemp_)) {
-        output["outdoorTemp"] = (float)outdoorTemp_ / 10;
+        json["outdoorTemp"] = (float)outdoorTemp_ / 10;
     }
 
     // Current flow temperature
     if (Helpers::hasValue(curFlowTemp_)) {
-        output["curFlowTemp"] = (float)curFlowTemp_ / 10;
+        json["curFlowTemp"] = (float)curFlowTemp_ / 10;
     }
 
     // Return temperature
     if (Helpers::hasValue(retTemp_)) {
-        output["retTemp"] = (float)retTemp_ / 10;
+        json["retTemp"] = (float)retTemp_ / 10;
     }
 
     // Mixing switch temperature
     if (Helpers::hasValue(switchTemp_)) {
-        output["switchTemp"] = (float)switchTemp_ / 10;
+        json["switchTemp"] = (float)switchTemp_ / 10;
     }
 
     // System pressure
     if (Helpers::hasValue(sysPress_)) {
-        output["sysPress"] = (float)sysPress_ / 10;
+        json["sysPress"] = (float)sysPress_ / 10;
     }
 
     // Max boiler temperature
     if (Helpers::hasValue(boilTemp_)) {
-        output["boilTemp"] = (float)boilTemp_ / 10;
+        json["boilTemp"] = (float)boilTemp_ / 10;
     }
 
     // Exhaust temperature
     if (Helpers::hasValue(exhaustTemp_)) {
-        output["exhaustTemp"] = (float)exhaustTemp_ / 10;
+        json["exhaustTemp"] = (float)exhaustTemp_ / 10;
     }
 
     // Gas bool
     if (Helpers::hasValue(burnGas_, EMS_VALUE_BOOL)) {
-        output["burnGas"] = Helpers::render_value(s, burnGas_, EMS_VALUE_BOOL);
+        json["burnGas"] = Helpers::render_value(s, burnGas_, EMS_VALUE_BOOL);
     }
 
     // Flame current uA
     if (Helpers::hasValue(flameCurr_)) {
-        output["flameCurr"] = (float)(int16_t)flameCurr_ / 10;
+        json["flameCurr"] = (float)(int16_t)flameCurr_ / 10;
     }
 
     // Boiler pump bool
     if (Helpers::hasValue(heatPump_, EMS_VALUE_BOOL)) {
-        output["heatPump"] = Helpers::render_value(s, heatPump_, EMS_VALUE_BOOL);
+        json["heatPump"] = Helpers::render_value(s, heatPump_, EMS_VALUE_BOOL);
     }
 
     // Fan bool
     if (Helpers::hasValue(fanWork_, EMS_VALUE_BOOL)) {
-        output["fanWork"] = Helpers::render_value(s, fanWork_, EMS_VALUE_BOOL);
+        json["fanWork"] = Helpers::render_value(s, fanWork_, EMS_VALUE_BOOL);
     }
 
     // Ignition bool
     if (Helpers::hasValue(ignWork_, EMS_VALUE_BOOL)) {
-        output["ignWork"] = Helpers::render_value(s, ignWork_, EMS_VALUE_BOOL);
+        json["ignWork"] = Helpers::render_value(s, ignWork_, EMS_VALUE_BOOL);
     }
 
     // heating activated bool
     if (Helpers::hasValue(heatingActivated_, EMS_VALUE_BOOL)) {
-        output["heatingActivated"] = Helpers::render_value(s, heatingActivated_, EMS_VALUE_BOOL);
+        json["heatingActivated"] = Helpers::render_value(s, heatingActivated_, EMS_VALUE_BOOL);
     }
 
     // Heating temperature setting on the boiler
     if (Helpers::hasValue(heatingTemp_)) {
-        output["heatingTemp"] = heatingTemp_;
+        json["heatingTemp"] = heatingTemp_;
     }
 
     // Boiler circuit pump modulation max power %
     if (Helpers::hasValue(pumpModMax_)) {
-        output["pumpModMax"] = pumpModMax_;
+        json["pumpModMax"] = pumpModMax_;
     }
 
     // Boiler circuit pump modulation min power %
     if (Helpers::hasValue(pumpModMin_)) {
-        output["pumpModMin"] = pumpModMin_;
+        json["pumpModMin"] = pumpModMin_;
     }
 
     // Boiler circuit pump delay time min
     if (Helpers::hasValue(pumpDelay_)) {
-        output["pumpDelay"] = pumpDelay_;
+        json["pumpDelay"] = pumpDelay_;
     }
 
     // Boiler burner min period min
     if (Helpers::hasValue(burnMinPeriod_)) {
-        output["burnMinPeriod"] = burnMinPeriod_;
+        json["burnMinPeriod"] = burnMinPeriod_;
     }
 
     // Boiler burner min power %
     if (Helpers::hasValue(burnMinPower_)) {
-        output["burnMinPower"] = burnMinPower_;
+        json["burnMinPower"] = burnMinPower_;
     }
 
     // Boiler burner max power %
     if (Helpers::hasValue(burnMaxPower_)) {
-        output["burnMaxPower"] = burnMaxPower_;
+        json["burnMaxPower"] = burnMaxPower_;
     }
 
     // Boiler temp hysteresis on degrees
     if (Helpers::hasValue(boilHystOn_)) {
-        output["boilHystOn"] = boilHystOn_;
+        json["boilHystOn"] = boilHystOn_;
     }
 
     // Boiler temp hysteresis off degrees
     if (Helpers::hasValue(boilHystOff_)) {
-        output["boilHystOff"] = boilHystOff_;
+        json["boilHystOff"] = boilHystOff_;
     }
 
     // Set Flow temperature
     if (Helpers::hasValue(setFlowTemp_)) {
-        output["setFlowTemp"] = setFlowTemp_;
+        json["setFlowTemp"] = setFlowTemp_;
     }
 
     // Total UBA working time
     if (Helpers::hasValue(UBAuptime_)) {
-        output["UBAuptime"] = UBAuptime_;
+        json["UBAuptime"] = UBAuptime_;
     }
 
     if (Helpers::hasValue(setBurnPow_)) {
-        output["setBurnPow"] = setBurnPow_;
+        json["setBurnPow"] = setBurnPow_;
     }
 
     // Burner # starts
     if (Helpers::hasValue(burnStarts_)) {
-        output["burnStarts"] = burnStarts_;
+        json["burnStarts"] = burnStarts_;
     }
 
     // Total burner operating time
     if (Helpers::hasValue(burnWorkMin_)) {
-        output["burnWorkMin"] = burnWorkMin_;
+        json["burnWorkMin"] = burnWorkMin_;
     }
 
     // Total heat operating time
     if (Helpers::hasValue(heatWorkMin_)) {
-        output["heatWorkMin"] = heatWorkMin_;
+        json["heatWorkMin"] = heatWorkMin_;
     }
 
     // Service Code
     // Service Code Number
     if (Helpers::hasValue(serviceCodeNumber_)) {
-        output["serviceCode"]       = serviceCode_;
-        output["serviceCodeNumber"] = serviceCodeNumber_;
+        json["serviceCode"]       = serviceCode_;
+        json["serviceCodeNumber"] = serviceCodeNumber_;
     }
 
-    return (output.size());
+    return (json.size());
 }
 
 // publish values via MQTT
-void Boiler::publish_values(JsonObject & data, bool force) {
+void Boiler::publish_values(JsonObject & json, bool force) {
     // handle HA first
     if (Mqtt::mqtt_format() == Mqtt::Format::HA) {
         register_mqtt_ha_config(force);
     }
 
     DynamicJsonDocument doc_main(EMSESP_MAX_JSON_SIZE_LARGE);
-    JsonObject          output_main = doc_main.to<JsonObject>();
-    if (export_values_main(output_main)) {
+    JsonObject          json_main = doc_main.to<JsonObject>();
+    if (export_values_main(json_main)) {
         Mqtt::publish(F("boiler_data_main"), doc_main.as<JsonObject>());
     }
 
     DynamicJsonDocument doc_ww(EMSESP_MAX_JSON_SIZE_LARGE);
-    JsonObject          output_ww = doc_ww.to<JsonObject>();
-    if (export_values_ww(output_ww)) {
+    JsonObject          json_ww = doc_ww.to<JsonObject>();
+    if (export_values_ww(json_ww)) {
         Mqtt::publish(F("boiler_data_ww"), doc_ww.as<JsonObject>());
     }
 
@@ -652,73 +646,73 @@ void Boiler::show_values(uuid::console::Shell & shell) {
 
     // fetch the values into a JSON document
     DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_LARGE);
-    JsonObject          output = doc.to<JsonObject>();
-    if (!export_values_main(output)) {
+    JsonObject          json = doc.to<JsonObject>();
+    if (!export_values_main(json)) {
         return; // empty
     }
-    export_values_ww(output); // append ww values
+    export_values_ww(json); // append ww values
     doc.shrinkToFit();
 
-    print_value_json(shell, F("heatingActive"), nullptr, F_(heatingActive), nullptr, output);
-    print_value_json(shell, F("tapwaterActive"), nullptr, F_(tapwaterActive), nullptr, output);
-    print_value_json(shell, F("serviceCode"), nullptr, F_(serviceCode), nullptr, output);
-    print_value_json(shell, F("serviceCodeNumber"), nullptr, F_(serviceCodeNumber), nullptr, output);
-    print_value_json(shell, F("wWSelTemp"), nullptr, F_(wWSelTemp), F_(degrees), output);
-    print_value_json(shell, F("wWSetTemp"), nullptr, F_(wWSetTemp), F_(degrees), output);
-    print_value_json(shell, F("wWDisinfectionTemp"), nullptr, F_(wWDisinfectionTemp), F_(degrees), output);
-    print_value_json(shell, F("selFlowTemp"), nullptr, F_(selFlowTemp), F_(degrees), output);
-    print_value_json(shell, F("selBurnPow"), nullptr, F_(selBurnPow), F_(percent), output);
-    print_value_json(shell, F("curBurnPow"), nullptr, F_(curBurnPow), F_(percent), output);
-    print_value_json(shell, F("pumpMod"), nullptr, F_(pumpMod), F_(percent), output);
-    print_value_json(shell, F("pumpMod2"), nullptr, F_(pumpMod2), F_(percent), output);
-    print_value_json(shell, F("wWType"), nullptr, F_(wWType), nullptr, output);
-    print_value_json(shell, F("wWChargeType"), nullptr, F_(wWChargeType), nullptr, output);
-    print_value_json(shell, F("wWCircPump"), nullptr, F_(wWCircPump), nullptr, output);
-    print_value_json(shell, F("wWCircPumpMode"), nullptr, F_(wWCircPumpMode), nullptr, output);
-    print_value_json(shell, F("wWCirc"), nullptr, F_(wWCirc), nullptr, output);
-    print_value_json(shell, F("outdoorTemp"), nullptr, F_(outdoorTemp), F_(degrees), output);
-    print_value_json(shell, F("wWCurTemp"), nullptr, F_(wWCurTemp), F_(degrees), output);
-    print_value_json(shell, F("wWCurTemp2"), nullptr, F_(wWCurTemp2), F_(degrees), output);
-    print_value_json(shell, F("wWCurFlow"), nullptr, F_(wWCurFlow), F("l/min"), output);
-    print_value_json(shell, F("curFlowTemp"), nullptr, F_(curFlowTemp), F_(degrees), output);
-    print_value_json(shell, F("retTemp"), nullptr, F_(retTemp), F_(degrees), output);
-    print_value_json(shell, F("switchTemp"), nullptr, F_(switchTemp), F_(degrees), output);
-    print_value_json(shell, F("sysPress"), nullptr, F_(sysPress), nullptr, output);
-    print_value_json(shell, F("boilTemp"), nullptr, F_(boilTemp), F_(degrees), output);
-    print_value_json(shell, F("wwStorageTemp1"), nullptr, F_(wwStorageTemp1), F_(degrees), output);
-    print_value_json(shell, F("wwStorageTemp2"), nullptr, F_(wwStorageTemp2), F_(degrees), output);
-    print_value_json(shell, F("exhaustTemp"), nullptr, F_(exhaustTemp), F_(degrees), output);
-    print_value_json(shell, F("wWActivated"), nullptr, F_(wWActivated), nullptr, output);
-    print_value_json(shell, F("wWOneTime"), nullptr, F_(wWOneTime), nullptr, output);
-    print_value_json(shell, F("wWDisinfecting"), nullptr, F_(wWDisinfecting), nullptr, output);
-    print_value_json(shell, F("wWCharging"), nullptr, F_(wWCharging), nullptr, output);
-    print_value_json(shell, F("wWRecharging"), nullptr, F_(wWRecharging), nullptr, output);
-    print_value_json(shell, F("wWTempOK"), nullptr, F_(wWTempOK), nullptr, output);
-    print_value_json(shell, F("wWActive"), nullptr, F_(wWActive), nullptr, output);
-    print_value_json(shell, F("burnGas"), nullptr, F_(burnGas), nullptr, output);
-    print_value_json(shell, F("flameCurr"), nullptr, F_(flameCurr), F_(uA), output);
-    print_value_json(shell, F("heatPump"), nullptr, F_(heatPump), nullptr, output);
-    print_value_json(shell, F("fanWork"), nullptr, F_(fanWork), nullptr, output);
-    print_value_json(shell, F("ignWork"), nullptr, F_(ignWork), nullptr, output);
-    print_value_json(shell, F("wWHeat"), nullptr, F_(wWHeat), nullptr, output);
-    print_value_json(shell, F("heatingActivated"), nullptr, F_(heatingActivated), nullptr, output);
-    print_value_json(shell, F("heatingTemp"), nullptr, F_(heatingTemp), F_(degrees), output);
-    print_value_json(shell, F("pumpModMax"), nullptr, F_(pumpModMax), F_(percent), output);
-    print_value_json(shell, F("pumpModMin"), nullptr, F_(pumpModMin), F_(percent), output);
-    print_value_json(shell, F("pumpDelay"), nullptr, F_(pumpDelay), F_(min), output);
-    print_value_json(shell, F("burnMinPeriod"), nullptr, F_(burnMinPeriod), F_(min), output);
-    print_value_json(shell, F("burnMinPower"), nullptr, F_(burnMinPower), F_(percent), output);
-    print_value_json(shell, F("burnMaxPower"), nullptr, F_(burnMaxPower), F_(percent), output);
-    print_value_json(shell, F("boilHystOn"), nullptr, F_(boilHystOn), F_(degrees), output);
-    print_value_json(shell, F("boilHystOff"), nullptr, F_(boilHystOff), F_(degrees), output);
-    print_value_json(shell, F("setFlowTemp"), nullptr, F_(setFlowTemp), F_(degrees), output);
-    print_value_json(shell, F("wWSetPumpPower"), nullptr, F_(wWSetPumpPower), F_(percent), output);
-    print_value_json(shell, F("wwMixTemperature"), nullptr, F_(wwMixTemperature), F_(degrees), output);
-    print_value_json(shell, F("wwBufferTemperature"), nullptr, F_(wwBufferTemperature), F_(degrees), output);
-    print_value_json(shell, F("wWStarts"), nullptr, F_(wWStarts), nullptr, output);
-    print_value_json(shell, F("wWWorkM"), nullptr, F_(wWWorkM), nullptr, output);
-    print_value_json(shell, F("setBurnPow"), nullptr, F_(setBurnPow), F_(percent), output);
-    print_value_json(shell, F("burnStarts"), nullptr, F_(burnStarts), nullptr, output);
+    print_value_json(shell, F("heatingActive"), nullptr, F_(heatingActive), nullptr, json);
+    print_value_json(shell, F("tapwaterActive"), nullptr, F_(tapwaterActive), nullptr, json);
+    print_value_json(shell, F("serviceCode"), nullptr, F_(serviceCode), nullptr, json);
+    print_value_json(shell, F("serviceCodeNumber"), nullptr, F_(serviceCodeNumber), nullptr, json);
+    print_value_json(shell, F("wWSelTemp"), nullptr, F_(wWSelTemp), F_(degrees), json);
+    print_value_json(shell, F("wWSetTemp"), nullptr, F_(wWSetTemp), F_(degrees), json);
+    print_value_json(shell, F("wWDisinfectionTemp"), nullptr, F_(wWDisinfectionTemp), F_(degrees), json);
+    print_value_json(shell, F("selFlowTemp"), nullptr, F_(selFlowTemp), F_(degrees), json);
+    print_value_json(shell, F("selBurnPow"), nullptr, F_(selBurnPow), F_(percent), json);
+    print_value_json(shell, F("curBurnPow"), nullptr, F_(curBurnPow), F_(percent), json);
+    print_value_json(shell, F("pumpMod"), nullptr, F_(pumpMod), F_(percent), json);
+    print_value_json(shell, F("pumpMod2"), nullptr, F_(pumpMod2), F_(percent), json);
+    print_value_json(shell, F("wWType"), nullptr, F_(wWType), nullptr, json);
+    print_value_json(shell, F("wWChargeType"), nullptr, F_(wWChargeType), nullptr, json);
+    print_value_json(shell, F("wWCircPump"), nullptr, F_(wWCircPump), nullptr, json);
+    print_value_json(shell, F("wWCircPumpMode"), nullptr, F_(wWCircPumpMode), nullptr, json);
+    print_value_json(shell, F("wWCirc"), nullptr, F_(wWCirc), nullptr, json);
+    print_value_json(shell, F("outdoorTemp"), nullptr, F_(outdoorTemp), F_(degrees), json);
+    print_value_json(shell, F("wWCurTemp"), nullptr, F_(wWCurTemp), F_(degrees), json);
+    print_value_json(shell, F("wWCurTemp2"), nullptr, F_(wWCurTemp2), F_(degrees), json);
+    print_value_json(shell, F("wWCurFlow"), nullptr, F_(wWCurFlow), F("l/min"), json);
+    print_value_json(shell, F("curFlowTemp"), nullptr, F_(curFlowTemp), F_(degrees), json);
+    print_value_json(shell, F("retTemp"), nullptr, F_(retTemp), F_(degrees), json);
+    print_value_json(shell, F("switchTemp"), nullptr, F_(switchTemp), F_(degrees), json);
+    print_value_json(shell, F("sysPress"), nullptr, F_(sysPress), nullptr, json);
+    print_value_json(shell, F("boilTemp"), nullptr, F_(boilTemp), F_(degrees), json);
+    print_value_json(shell, F("wwStorageTemp1"), nullptr, F_(wwStorageTemp1), F_(degrees), json);
+    print_value_json(shell, F("wwStorageTemp2"), nullptr, F_(wwStorageTemp2), F_(degrees), json);
+    print_value_json(shell, F("exhaustTemp"), nullptr, F_(exhaustTemp), F_(degrees), json);
+    print_value_json(shell, F("wWActivated"), nullptr, F_(wWActivated), nullptr, json);
+    print_value_json(shell, F("wWOneTime"), nullptr, F_(wWOneTime), nullptr, json);
+    print_value_json(shell, F("wWDisinfecting"), nullptr, F_(wWDisinfecting), nullptr, json);
+    print_value_json(shell, F("wWCharging"), nullptr, F_(wWCharging), nullptr, json);
+    print_value_json(shell, F("wWRecharging"), nullptr, F_(wWRecharging), nullptr, json);
+    print_value_json(shell, F("wWTempOK"), nullptr, F_(wWTempOK), nullptr, json);
+    print_value_json(shell, F("wWActive"), nullptr, F_(wWActive), nullptr, json);
+    print_value_json(shell, F("burnGas"), nullptr, F_(burnGas), nullptr, json);
+    print_value_json(shell, F("flameCurr"), nullptr, F_(flameCurr), F_(uA), json);
+    print_value_json(shell, F("heatPump"), nullptr, F_(heatPump), nullptr, json);
+    print_value_json(shell, F("fanWork"), nullptr, F_(fanWork), nullptr, json);
+    print_value_json(shell, F("ignWork"), nullptr, F_(ignWork), nullptr, json);
+    print_value_json(shell, F("wWHeat"), nullptr, F_(wWHeat), nullptr, json);
+    print_value_json(shell, F("heatingActivated"), nullptr, F_(heatingActivated), nullptr, json);
+    print_value_json(shell, F("heatingTemp"), nullptr, F_(heatingTemp), F_(degrees), json);
+    print_value_json(shell, F("pumpModMax"), nullptr, F_(pumpModMax), F_(percent), json);
+    print_value_json(shell, F("pumpModMin"), nullptr, F_(pumpModMin), F_(percent), json);
+    print_value_json(shell, F("pumpDelay"), nullptr, F_(pumpDelay), F_(min), json);
+    print_value_json(shell, F("burnMinPeriod"), nullptr, F_(burnMinPeriod), F_(min), json);
+    print_value_json(shell, F("burnMinPower"), nullptr, F_(burnMinPower), F_(percent), json);
+    print_value_json(shell, F("burnMaxPower"), nullptr, F_(burnMaxPower), F_(percent), json);
+    print_value_json(shell, F("boilHystOn"), nullptr, F_(boilHystOn), F_(degrees), json);
+    print_value_json(shell, F("boilHystOff"), nullptr, F_(boilHystOff), F_(degrees), json);
+    print_value_json(shell, F("setFlowTemp"), nullptr, F_(setFlowTemp), F_(degrees), json);
+    print_value_json(shell, F("wWSetPumpPower"), nullptr, F_(wWSetPumpPower), F_(percent), json);
+    print_value_json(shell, F("wwMixTemperature"), nullptr, F_(wwMixTemperature), F_(degrees), json);
+    print_value_json(shell, F("wwBufferTemperature"), nullptr, F_(wwBufferTemperature), F_(degrees), json);
+    print_value_json(shell, F("wWStarts"), nullptr, F_(wWStarts), nullptr, json);
+    print_value_json(shell, F("wWWorkM"), nullptr, F_(wWWorkM), nullptr, json);
+    print_value_json(shell, F("setBurnPow"), nullptr, F_(setBurnPow), F_(percent), json);
+    print_value_json(shell, F("burnStarts"), nullptr, F_(burnStarts), nullptr, json);
 
     if (Helpers::hasValue(wWWorkM_)) {
         shell.printfln(F("  Warm Water active time: %d days %d hours %d minutes"), wWWorkM_ / 1440, (wWWorkM_ % 1440) / 60, wWWorkM_ % 60);
@@ -1013,7 +1007,7 @@ void Boiler::process_UBAOutdoorTemp(std::shared_ptr<const Telegram> telegram) {
 // UBASetPoint 0x1A
 void Boiler::process_UBASetPoints(std::shared_ptr<const Telegram> telegram) {
     changed_ |= telegram->read_value(setFlowTemp_, 0);    // boiler set temp from thermostat
-    changed_ |= telegram->read_value(setBurnPow_, 1);     // max output power in %
+    changed_ |= telegram->read_value(setBurnPow_, 1);     // max json power in %
     changed_ |= telegram->read_value(wWSetPumpPower_, 2); // ww pump speed/power?
 }
 

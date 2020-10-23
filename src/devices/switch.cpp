@@ -22,7 +22,9 @@ namespace emsesp {
 
 REGISTER_FACTORY(Switch, EMSdevice::DeviceType::SWITCH);
 
-uuid::log::Logger Switch::logger_{F_(switch), uuid::log::Facility::CONSOLE};
+uuid::log::Logger Switch::logger_ {
+    F_(switch), uuid::log::Facility::CONSOLE
+};
 
 Switch::Switch(uint8_t device_type, uint8_t device_id, uint8_t product_id, const std::string & version, const std::string & name, uint8_t flags, uint8_t brand)
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
@@ -37,7 +39,12 @@ void Switch::show_values(uuid::console::Shell & shell) {
 }
 
 // publish values via MQTT
-void Switch::publish_values(JsonObject & data, bool force) {
+void Switch::publish_values(JsonObject & json, bool force) {
+}
+
+// export values to JSON
+bool Switch::export_values(JsonObject & json) {
+    return true;
 }
 
 // check to see if values have been updated

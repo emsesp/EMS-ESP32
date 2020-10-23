@@ -39,7 +39,8 @@ class Boiler : public EMSdevice {
     Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const std::string & version, const std::string & name, uint8_t flags, uint8_t brand);
 
     virtual void show_values(uuid::console::Shell & shell);
-    virtual void publish_values(JsonObject & data, bool force);
+    virtual void publish_values(JsonObject & json, bool force);
+    virtual bool export_values(JsonObject & json);
     virtual void device_info_web(JsonArray & root);
     virtual bool updated_values();
 
@@ -146,8 +147,6 @@ class Boiler : public EMSdevice {
     uint8_t tapwaterActive_ = EMS_VALUE_BOOL_NOTSET; // Hot tap water is on/off
     uint8_t heatingActive_  = EMS_VALUE_BOOL_NOTSET; // Central heating is on/off
     uint8_t pumpMod2_       = EMS_VALUE_UINT_NOTSET; // heatpump modulation from 0xE3 (heatpumps)
-
-    bool command_info(const char * value, const int8_t id, JsonObject & output);
 
     void process_UBAParameterWW(std::shared_ptr<const Telegram> telegram);
     void process_UBAMonitorFast(std::shared_ptr<const Telegram> telegram);
