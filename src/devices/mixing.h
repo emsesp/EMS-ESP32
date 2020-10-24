@@ -73,7 +73,7 @@ class Mixing : public EMSdevice {
     uint16_t hc_          = EMS_VALUE_USHORT_NOTSET;
     uint16_t flowTemp_    = EMS_VALUE_USHORT_NOTSET;
     uint8_t  pumpStatus_  = EMS_VALUE_UINT_NOTSET;
-    uint8_t  status_      = EMS_VALUE_UINT_NOTSET;
+    int8_t   status_      = EMS_VALUE_INT_NOTSET;
     uint8_t  flowSetTemp_ = EMS_VALUE_UINT_NOTSET;
 
     Type type_ = Type::NONE;
