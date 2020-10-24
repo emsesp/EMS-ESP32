@@ -324,9 +324,9 @@ void DallasSensor::publish_values() {
         char sensorID[10]; // sensor{1-n}
         snprintf_P(sensorID, 10, PSTR("sensor%d"), sensor_no);
         if (mqtt_format_ == Mqtt::Format::SINGLE) {
-            // e.g. sensor_data = {"sensor1":23.3,"sensor2":24.0}
+            // e.g. sensor_data = {"28-EA41-9497-0E03":23.3,"28-233D-9497-0C03":24.0}
             if (Helpers::hasValue(sensor.temperature_c)) {
-                doc[sensorID] = (float)(sensor.temperature_c) / 10;
+                doc[sensor.to_string()] = (float)(sensor.temperature_c) / 10;
             }
         } else {
             // e.g. sensor_data = {"sensor1":{"id":"28-EA41-9497-0E03","temp":23.3},"sensor2":{"id":"28-233D-9497-0C03","temp":24.0}}
