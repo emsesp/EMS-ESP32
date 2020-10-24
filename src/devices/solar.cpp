@@ -265,7 +265,7 @@ void Solar::process_SM10Monitor(std::shared_ptr<const Telegram> telegram) {
     changed_ |= telegram->read_value(tankBottomTemp_, 5);      // bottom temp from SM10, is *10
     changed_ |= telegram->read_value(solarPumpModulation_, 4); // modulation solar pump
     changed_ |= telegram->read_bitvalue(solarPump_, 7, 1);
-    changed_ |= telegram->read_value(pumpWorkMin_, 8);
+    changed_ |= telegram->read_value(pumpWorkMin_, 8, 3);
 }
 
 /*
