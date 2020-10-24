@@ -124,9 +124,9 @@ class MqttSettingsForm extends React.Component<MqttSettingsFormProps> {
           variant="outlined"
           onChange={handleValueChange('mqtt_qos')}
           margin="normal">
-          <MenuItem value={0}>0</MenuItem>
-          <MenuItem value={1}>1</MenuItem>
-          <MenuItem value={2}>2</MenuItem>
+          <MenuItem value={0}>0 - At most once</MenuItem>
+          <MenuItem value={1}>1 - At least once</MenuItem>
+          <MenuItem value={2}>2 - Exactly once</MenuItem>
         </SelectValidator>
         <BlockFormControlLabel
           control={
@@ -191,13 +191,13 @@ class MqttSettingsForm extends React.Component<MqttSettingsFormProps> {
         <TextValidator
           validators={['required', 'isNumber', 'minNumber:0', 'maxNumber:65535']}
           errorMessages={['Publish time is required', "Must be a number", "Must be 0 or greater", "Max value is 65535"]}
-          name="publish_time_mixing"
+          name="publish_time_mixer"
           label="Mixer Publish Interval (seconds, 0=on change)"
           fullWidth
           variant="outlined"
-          value={data.publish_time_mixing}
+          value={data.publish_time_mixer}
           type="number"
-          onChange={handleValueChange('publish_time_mixing')}
+          onChange={handleValueChange('publish_time_mixer')}
           margin="normal"
         />
         <TextValidator

@@ -88,7 +88,7 @@ class MqttSettings {
     uint16_t publish_time_boiler;
     uint16_t publish_time_thermostat;
     uint16_t publish_time_solar;
-    uint16_t publish_time_mixing;
+    uint16_t publish_time_mixer;
     uint16_t publish_time_other;
     uint16_t publish_time_sensor;
     uint8_t  mqtt_format; // 1=single, 2=nested, 3=ha, 4=custom

@@ -70,7 +70,7 @@ class Mqtt {
     void set_publish_time_boiler(uint16_t publish_time);
     void set_publish_time_thermostat(uint16_t publish_time);
     void set_publish_time_solar(uint16_t publish_time);
-    void set_publish_time_mixing(uint16_t publish_time);
+    void set_publish_time_mixer(uint16_t publish_time);
     void set_publish_time_other(uint16_t publish_time);
     void set_publish_time_sensor(uint16_t publish_time);
     void set_qos(uint8_t mqtt_qos);
@@ -210,7 +210,7 @@ class Mqtt {
     uint32_t last_publish_boiler_     = 0;
     uint32_t last_publish_thermostat_ = 0;
     uint32_t last_publish_solar_      = 0;
-    uint32_t last_publish_mixing_     = 0;
+    uint32_t last_publish_mixer_      = 0;
     uint32_t last_publish_other_      = 0;
     uint32_t last_publish_sensor_     = 0;
 
@@ -222,7 +222,7 @@ class Mqtt {
     static uint32_t    publish_time_boiler_;
     static uint32_t    publish_time_thermostat_;
     static uint32_t    publish_time_solar_;
-    static uint32_t    publish_time_mixing_;
+    static uint32_t    publish_time_mixer_;
     static uint32_t    publish_time_other_;
     static uint32_t    publish_time_sensor_;
     static uint8_t     mqtt_format_;

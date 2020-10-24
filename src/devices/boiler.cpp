@@ -107,37 +107,37 @@ void Boiler::register_mqtt_ha_config(bool force) {
     Mqtt::register_mqtt_ha_binary_sensor(F_(heatingActive), this->device_type(), "heating_active");
 
     // main
-    Mqtt::register_mqtt_ha_sensor(nullptr, F_(mqtt_suffix_main), F_(serviceCodeNumber), this->device_type(), "serviceCodeNumber", nullptr, F_(iconpower));
-    Mqtt::register_mqtt_ha_sensor(nullptr, F_(mqtt_suffix_main), F_(selFlowTemp), this->device_type(), "selFlowTemp", F_(degrees), F_(iconcruise));
-    Mqtt::register_mqtt_ha_sensor(nullptr, F_(mqtt_suffix_main), F_(selBurnPow), this->device_type(), "selBurnPow", F_(percent), F_(iconpercent));
-    Mqtt::register_mqtt_ha_sensor(nullptr, F_(mqtt_suffix_main), F_(curBurnPow), this->device_type(), "curBurnPow", F_(percent), F_(iconfire));
-    Mqtt::register_mqtt_ha_sensor(nullptr, F_(mqtt_suffix_main), F_(pumpMod), this->device_type(), "pumpMod", F_(percent), F_(iconpercent));
-    Mqtt::register_mqtt_ha_sensor(nullptr, F_(mqtt_suffix_main), F_(pumpMod2), this->device_type(), "pumpMod2", F_(percent), F_(iconpercent));
-    Mqtt::register_mqtt_ha_sensor(nullptr, F_(mqtt_suffix_main), F_(outdoorTemp), this->device_type(), "outdoorTemp", F_(degrees), F_(iconexport));
-    Mqtt::register_mqtt_ha_sensor(nullptr, F_(mqtt_suffix_main), F_(curFlowTemp), this->device_type(), "curFlowTemp", F_(degrees), F_(icontemperature));
-    Mqtt::register_mqtt_ha_sensor(nullptr, F_(mqtt_suffix_main), F_(retTemp), this->device_type(), "retTemp", F_(degrees), F_(icontemperature));
-    Mqtt::register_mqtt_ha_sensor(nullptr, F_(mqtt_suffix_main), F_(switchTemp), this->device_type(), "switchTemp", F_(degrees), F_(icontemperature));
-    Mqtt::register_mqtt_ha_sensor(nullptr, F_(mqtt_suffix_main), F_(sysPress), this->device_type(), "sysPress", F_(bar), nullptr);
-    Mqtt::register_mqtt_ha_sensor(nullptr, F_(mqtt_suffix_main), F_(boilTemp), this->device_type(), "boilTemp", F_(degrees), nullptr);
-    Mqtt::register_mqtt_ha_sensor(nullptr, F_(mqtt_suffix_main), F_(burnGas), this->device_type(), "burnGas", nullptr, F_(iconfire));
-    Mqtt::register_mqtt_ha_sensor(nullptr, F_(mqtt_suffix_main), F_(flameCurr), this->device_type(), "flameCurr", F_(uA), F_(iconflash));
-    Mqtt::register_mqtt_ha_sensor(nullptr, F_(mqtt_suffix_main), F_(heatPump), this->device_type(), "heatPump", nullptr, F_(iconwaterpump));
-    Mqtt::register_mqtt_ha_sensor(nullptr, F_(mqtt_suffix_main), F_(fanWork), this->device_type(), "fanWork", nullptr, F_(iconfan));
-    Mqtt::register_mqtt_ha_sensor(nullptr, F_(mqtt_suffix_main), F_(ignWork), this->device_type(), "ignWork", nullptr, F_(iconflash));
-    Mqtt::register_mqtt_ha_sensor(nullptr, F_(mqtt_suffix_main), F_(exhaustTemp), this->device_type(), "exhaustTemp", F_(degrees), F_(icontemperature));
-    Mqtt::register_mqtt_ha_sensor(nullptr, F_(mqtt_suffix_main), F_(heatingActivated), this->device_type(), "heatingActivated", nullptr, nullptr);
-    Mqtt::register_mqtt_ha_sensor(nullptr, F_(mqtt_suffix_main), F_(heatingTemp), this->device_type(), "heatingTemp", F_(degrees), F_(icontemperature));
-    Mqtt::register_mqtt_ha_sensor(nullptr, F_(mqtt_suffix_main), F_(pumpModMax), this->device_type(), "pumpModMax", F_(percent), F_(iconpercent));
-    Mqtt::register_mqtt_ha_sensor(nullptr, F_(mqtt_suffix_main), F_(pumpModMin), this->device_type(), "pumpModMin", F_(percent), F_(iconpercent));
-    Mqtt::register_mqtt_ha_sensor(nullptr, F_(mqtt_suffix_main), F_(pumpDelay), this->device_type(), "pumpDelay", F_(min), nullptr);
-    Mqtt::register_mqtt_ha_sensor(nullptr, F_(mqtt_suffix_main), F_(burnMinPeriod), this->device_type(), "burnMinPeriod", F_(min), nullptr);
-    Mqtt::register_mqtt_ha_sensor(nullptr, F_(mqtt_suffix_main), F_(burnMinPower), this->device_type(), "burnMinPower", F_(percent), F_(iconpercent));
-    Mqtt::register_mqtt_ha_sensor(nullptr, F_(mqtt_suffix_main), F_(burnMaxPower), this->device_type(), "burnMaxPower", F_(percent), F_(iconpercent));
-    Mqtt::register_mqtt_ha_sensor(nullptr, F_(mqtt_suffix_main), F_(boilHystOn), this->device_type(), "boilHystOn", F_(degrees), F_(icontemperature));
-    Mqtt::register_mqtt_ha_sensor(nullptr, F_(mqtt_suffix_main), F_(boilHystOff), this->device_type(), "boilHystOff", F_(degrees), F_(icontemperature));
-    Mqtt::register_mqtt_ha_sensor(nullptr, F_(mqtt_suffix_main), F_(setFlowTemp), this->device_type(), "setFlowTemp", F_(degrees), F_(icontemperature));
-    Mqtt::register_mqtt_ha_sensor(nullptr, F_(mqtt_suffix_main), F_(setBurnPow), this->device_type(), "setBurnPow", F_(percent), F_(iconpercent));
-    Mqtt::register_mqtt_ha_sensor(nullptr, F_(mqtt_suffix_main), F_(burnStarts), this->device_type(), "burnStarts", nullptr, nullptr);
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(serviceCodeNumber), this->device_type(), "serviceCodeNumber", nullptr, F_(iconpower));
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(selFlowTemp), this->device_type(), "selFlowTemp", F_(degrees), F_(iconcruise));
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(selBurnPow), this->device_type(), "selBurnPow", F_(percent), F_(iconpercent));
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(curBurnPow), this->device_type(), "curBurnPow", F_(percent), F_(iconfire));
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(pumpMod), this->device_type(), "pumpMod", F_(percent), F_(iconpercent));
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(pumpMod2), this->device_type(), "pumpMod2", F_(percent), F_(iconpercent));
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(outdoorTemp), this->device_type(), "outdoorTemp", F_(degrees), F_(iconexport));
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(curFlowTemp), this->device_type(), "curFlowTemp", F_(degrees), F_(icontemperature));
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(retTemp), this->device_type(), "retTemp", F_(degrees), F_(icontemperature));
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(switchTemp), this->device_type(), "switchTemp", F_(degrees), F_(icontemperature));
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(sysPress), this->device_type(), "sysPress", F_(bar), nullptr);
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(boilTemp), this->device_type(), "boilTemp", F_(degrees), nullptr);
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(burnGas), this->device_type(), "burnGas", nullptr, F_(iconfire));
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(flameCurr), this->device_type(), "flameCurr", F_(uA), F_(iconflash));
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(heatPump), this->device_type(), "heatPump", nullptr, F_(iconwaterpump));
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(fanWork), this->device_type(), "fanWork", nullptr, F_(iconfan));
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(ignWork), this->device_type(), "ignWork", nullptr, F_(iconflash));
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(exhaustTemp), this->device_type(), "exhaustTemp", F_(degrees), F_(icontemperature));
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(heatingActivated), this->device_type(), "heatingActivated", nullptr, nullptr);
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(heatingTemp), this->device_type(), "heatingTemp", F_(degrees), F_(icontemperature));
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(pumpModMax), this->device_type(), "pumpModMax", F_(percent), F_(iconpercent));
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(pumpModMin), this->device_type(), "pumpModMin", F_(percent), F_(iconpercent));
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(pumpDelay), this->device_type(), "pumpDelay", F_(min), nullptr);
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(burnMinPeriod), this->device_type(), "burnMinPeriod", F_(min), nullptr);
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(burnMinPower), this->device_type(), "burnMinPower", F_(percent), F_(iconpercent));
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(burnMaxPower), this->device_type(), "burnMaxPower", F_(percent), F_(iconpercent));
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(boilHystOn), this->device_type(), "boilHystOn", F_(degrees), F_(icontemperature));
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(boilHystOff), this->device_type(), "boilHystOff", F_(degrees), F_(icontemperature));
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(setFlowTemp), this->device_type(), "setFlowTemp", F_(degrees), F_(icontemperature));
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(setBurnPow), this->device_type(), "setBurnPow", F_(percent), F_(iconpercent));
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(burnStarts), this->device_type(), "burnStarts", nullptr, nullptr);
 
     // ww
     Mqtt::register_mqtt_ha_sensor(nullptr, F_(mqtt_suffix_ww), F_(wWSelTemp), this->device_type(), "wWSelTemp", F_(degrees), F_(iconcruise));
@@ -618,7 +618,7 @@ void Boiler::publish_values(JsonObject & json, bool force) {
     DynamicJsonDocument doc_main(EMSESP_MAX_JSON_SIZE_LARGE);
     JsonObject          json_main = doc_main.to<JsonObject>();
     if (export_values_main(json_main)) {
-        Mqtt::publish(F("boiler_data_main"), doc_main.as<JsonObject>());
+        Mqtt::publish(F("boiler_data"), doc_main.as<JsonObject>());
     }
 
     DynamicJsonDocument doc_ww(EMSESP_MAX_JSON_SIZE_LARGE);
@@ -759,31 +759,6 @@ void Boiler::check_active() {
         EMSESP::tap_water_active(b); // let EMS-ESP know, used in the Shower class
     }
 
-    /*
-    // hot tap water, using flow to check instead of the burner power
-    // send these values back to the main EMSESP, so other classes (e.g. Shower) can use it
-    if (Helpers::hasValue(wWCurFlow_) && Helpers::hasValue(burnGas_) && (wWType_ > 0) && (wWType_ < 3)) {
-        tap_water_active_ = ((wWCurFlow_ != 0) && (burnGas_ != EMS_VALUE_BOOL_OFF));
-        EMSESP::tap_water_active(tap_water_active_);
-    }
-
-    // heating
-    // using a quick hack for checking the heating by looking at the Selected Flow Temp, but doesn't work for all boilers apparently
-    if (Helpers::hasValue(selFlowTemp_) && Helpers::hasValue(burnGas_)) {
-        heating_active_ = (!tap_water_active_ && ((selFlowTemp_ >= EMS_BOILER_SELFLOWTEMP_HEATING) && (burnGas_ != EMS_VALUE_BOOL_OFF)));
-    }
-
-    // see if the heating or hot tap water has changed, if so send
-    // last_boilerActive stores heating in bit 1 and tap water in bit 2
-    uint8_t latest_boilerState = (tap_water_active_ << 1) + heating_active_;
-    if (latest_boilerState != last_boilerState) {
-        last_boilerState = latest_boilerState;
-        static char s[10];
-        Mqtt::publish(F("tapwater_active"), Helpers::render_boolean(s, tap_water_active_));
-        static char s2[10];
-        Mqtt::publish(F("heating_active"), Helpers::render_boolean(s2, heating_active_));
-    }
-    */
 }
 
 // 0x33

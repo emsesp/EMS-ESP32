@@ -223,7 +223,7 @@ class EMSdevice {
         DALLASSENSOR, // for internal dallas sensors
         BOILER,
         THERMOSTAT,
-        MIXING,
+        MIXER,
         SOLAR,
         HEATPUMP,
         GATEWAY,
@@ -250,7 +250,7 @@ class EMSdevice {
     static constexpr uint8_t EMS_DEVICE_FLAG_SM100 = 2;
     static constexpr uint8_t EMS_DEVICE_FLAG_ISM   = 3;
 
-    // Mixing Module
+    // Mixer Module
     static constexpr uint8_t EMS_DEVICE_FLAG_MMPLUS = 1;
     static constexpr uint8_t EMS_DEVICE_FLAG_MM10   = 2;
     static constexpr uint8_t EMS_DEVICE_FLAG_IPM    = 3;

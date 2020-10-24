@@ -808,8 +808,8 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         EMSESP::txservice_.read_request(0x18, 0x08, 27); // no offset
     }
 
-    if (command == "mixing") {
-        shell.printfln(F("Testing Mixing..."));
+    if (command == "mixer") {
+        shell.printfln(F("Testing Mixer..."));
 
         // change MQTT format
         EMSESP::esp8266React.getMqttSettingsService()->updateWithoutPropagation([&](MqttSettings & mqttSettings) {

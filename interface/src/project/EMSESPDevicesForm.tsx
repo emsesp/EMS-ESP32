@@ -103,7 +103,7 @@ class EMSESPDevicesForm extends Component<
     return (
       <TableContainer>
         <Typography variant="h6" color="primary">
-          Devices
+          EMS Devices
         </Typography>
         <p></p>
         {!this.noDevices() && (
@@ -180,7 +180,7 @@ class EMSESPDevicesForm extends Component<
       <TableContainer>
         <p></p>
         <Typography variant="h6" color="primary" paragraph>
-          Sensors
+          Dallas Sensors
         </Typography>
         {!this.noSensors() && (
           <Table size="small" padding="default">

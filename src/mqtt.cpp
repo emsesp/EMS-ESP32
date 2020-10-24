@@ -31,7 +31,7 @@ bool        Mqtt::mqtt_retain_;
 uint32_t    Mqtt::publish_time_boiler_;
 uint32_t    Mqtt::publish_time_thermostat_;
 uint32_t    Mqtt::publish_time_solar_;
-uint32_t    Mqtt::publish_time_mixing_;
+uint32_t    Mqtt::publish_time_mixer_;
 uint32_t    Mqtt::publish_time_other_;
 uint32_t    Mqtt::publish_time_sensor_;
 uint8_t     Mqtt::mqtt_format_;
@@ -138,9 +138,9 @@ void Mqtt::loop() {
         EMSESP::publish_device_values(EMSdevice::DeviceType::SOLAR);
     }
 
-    if (publish_time_mixing_ && (currentMillis - last_publish_mixing_ > publish_time_mixing_)) {
-        last_publish_mixing_ = currentMillis;
-        EMSESP::publish_device_values(EMSdevice::DeviceType::MIXING);
+    if (publish_time_mixer_ && (currentMillis - last_publish_mixer_ > publish_time_mixer_)) {
+        last_publish_mixer_ = currentMillis;
+        EMSESP::publish_device_values(EMSdevice::DeviceType::MIXER);
     }
 
     if (publish_time_other_ && (currentMillis - last_publish_other_ > publish_time_other_)) {
@@ -349,7 +349,7 @@ void Mqtt::start() {
         publish_time_boiler_     = mqttSettings.publish_time_boiler * 1000; // convert to milliseconds
         publish_time_thermostat_ = mqttSettings.publish_time_thermostat * 1000;
         publish_time_solar_      = mqttSettings.publish_time_solar * 1000;
-        publish_time_mixing_     = mqttSettings.publish_time_mixing * 1000;
+        publish_time_mixer_      = mqttSettings.publish_time_mixer * 1000;
         publish_time_other_      = mqttSettings.publish_time_other * 1000;
         publish_time_sensor_     = mqttSettings.publish_time_sensor * 1000;
         mqtt_qos_                = mqttSettings.mqtt_qos;
@@ -411,8 +411,8 @@ void Mqtt::set_publish_time_solar(uint16_t publish_time) {
     publish_time_solar_ = publish_time * 1000; // convert to milliseconds
 }
 
-void Mqtt::set_publish_time_mixing(uint16_t publish_time) {
-    publish_time_mixing_ = publish_time * 1000; // convert to milliseconds
+void Mqtt::set_publish_time_mixer(uint16_t publish_time) {
+    publish_time_mixer_ = publish_time * 1000; // convert to milliseconds
 }
 
 void Mqtt::set_publish_time_other(uint16_t publish_time) {
@@ -436,8 +436,8 @@ bool Mqtt::get_publish_onchange(uint8_t device_type) {
         if (!publish_time_solar_) {
             return true;
         }
-    } else if (device_type == EMSdevice::DeviceType::MIXING) {
-        if (!publish_time_mixing_) {
+    } else if (device_type == EMSdevice::DeviceType::MIXER) {
+        if (!publish_time_mixer_) {
             return true;
         }
     } else if (!publish_time_other_) {

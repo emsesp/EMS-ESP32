@@ -73,8 +73,8 @@ std::string EMSdevice::device_type_2_device_name(const uint8_t device_type) {
         return read_flash_string(F_(solar));
         break;
 
-    case DeviceType::MIXING:
-        return read_flash_string(F_(mixing));
+    case DeviceType::MIXER:
+        return read_flash_string(F_(mixer));
         break;
 
     case DeviceType::DALLASSENSOR:
@@ -117,11 +117,11 @@ uint8_t EMSdevice::device_name_2_device_type(const char * topic) {
         return DeviceType::SOLAR;
     }
 
-    if (!strcmp_P(topic, reinterpret_cast<PGM_P>(F_(mixing)))) {
-        return DeviceType::MIXING;
+    if (!strcmp_P(topic, reinterpret_cast<PGM_P>(F_(mixer)))) {
+        return DeviceType::MIXER;
     }
 
-    if (!strcmp_P(topic, reinterpret_cast<PGM_P>(F_(dallassensor)))) {
+    if (!strcmp_P(topic, reinterpret_cast<PGM_P>(F_(sensor)))) {
         return DeviceType::DALLASSENSOR;
     }
 
@@ -143,27 +143,27 @@ std::string EMSdevice::device_type_name() const {
         break;
 
     case DeviceType::SOLAR:
-        return read_flash_string(F("Solar Module"));
+        return read_flash_string(F("Solar"));
         break;
 
     case DeviceType::CONNECT:
-        return read_flash_string(F("Connect Module"));
+        return read_flash_string(F("Connect"));
         break;
 
     case DeviceType::CONTROLLER:
         return read_flash_string(F("Controller"));
         break;
 
-    case DeviceType::MIXING:
-        return read_flash_string(F("Mixing Module"));
+    case DeviceType::MIXER:
+        return read_flash_string(F("Mixer"));
         break;
 
     case DeviceType::SWITCH:
-        return read_flash_string(F("Switching Module"));
+        return read_flash_string(F("Switch"));
         break;
 
     case DeviceType::GATEWAY:
-        return read_flash_string(F("Gateway Module"));
+        return read_flash_string(F("Gateway"));
         break;
 
     default:
