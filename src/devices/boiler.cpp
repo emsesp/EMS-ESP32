@@ -138,6 +138,9 @@ void Boiler::register_mqtt_ha_config(bool force) {
     Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(setFlowTemp), this->device_type(), "setFlowTemp", F_(degrees), F_(icontemperature));
     Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(setBurnPow), this->device_type(), "setBurnPow", F_(percent), F_(iconpercent));
     Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(burnStarts), this->device_type(), "burnStarts", nullptr, nullptr);
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(burnWorkMin), this->device_type(), "burnWorkMin", F_(min), nullptr);
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(heatWorkMin), this->device_type(), "heatWorkMin", F_(min), nullptr);
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(UBAuptime), this->device_type(), "UBAuptime", F_(min), nullptr);
 
     // ww
     Mqtt::register_mqtt_ha_sensor(nullptr, F_(mqtt_suffix_ww), F_(wWSelTemp), this->device_type(), "wWSelTemp", F_(degrees), F_(iconcruise));
@@ -165,7 +168,7 @@ void Boiler::register_mqtt_ha_config(bool force) {
     Mqtt::register_mqtt_ha_sensor(nullptr, F_(mqtt_suffix_ww), F_(wwMixTemperature), this->device_type(), "wwMixTemperature", F_(degrees), F_(icontemperature));
     Mqtt::register_mqtt_ha_sensor(nullptr, F_(mqtt_suffix_ww), F_(wwBufferTemperature), this->device_type(), "wwBufferTemperature", F_(degrees), F_(icontemperature));
     Mqtt::register_mqtt_ha_sensor(nullptr, F_(mqtt_suffix_ww), F_(wWStarts), this->device_type(), "wWStarts", nullptr, nullptr);
-    Mqtt::register_mqtt_ha_sensor(nullptr, F_(mqtt_suffix_ww), F_(wWWorkM), this->device_type(), "wWWorkM", nullptr, nullptr);
+    Mqtt::register_mqtt_ha_sensor(nullptr, F_(mqtt_suffix_ww), F_(wWWorkM), this->device_type(), "wWWorkM", F_(min), nullptr);
 
     mqtt_ha_config_ = true; // done
 }
@@ -213,6 +216,9 @@ void Boiler::device_info_web(JsonArray & root) {
     print_value_json(root, F("setFlowTemp"), nullptr, F_(setFlowTemp), F_(degrees), json);
     print_value_json(root, F("setBurnPow"), nullptr, F_(setBurnPow), F_(percent), json);
     print_value_json(root, F("burnStarts"), nullptr, F_(burnStarts), nullptr, json);
+    print_value_json(root, F("burnWorkMin"), nullptr, F_(burnWorkMin), F_(min), json);
+    print_value_json(root, F("heatWorkMin"), nullptr, F_(heatWorkMin), F_(min), json);
+    print_value_json(root, F("UBAuptime"), nullptr, F_(UBAuptime), F_(min), json);
 
     // ww
     print_value_json(root, F("wWSelTemp"), nullptr, F_(wWSelTemp), F_(degrees), json);
@@ -241,7 +247,7 @@ void Boiler::device_info_web(JsonArray & root) {
     print_value_json(root, F("wwMixTemperature"), nullptr, F_(wwMixTemperature), F_(degrees), json);
     print_value_json(root, F("wwBufferTemperature"), nullptr, F_(wwBufferTemperature), F_(degrees), json);
     print_value_json(root, F("wWStarts"), nullptr, F_(wWStarts), nullptr, json);
-    print_value_json(root, F("wWWorkM"), nullptr, F_(wWWorkM), nullptr, json);
+    print_value_json(root, F("wWWorkM"), nullptr, F_(wWWorkM), F_(min), json);
 }
 
 bool Boiler::export_values(JsonObject & json) {

@@ -27,7 +27,7 @@ namespace emsesp {
 // used with the 'test' command, under su/admin
 void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
     if (command == "default") {
-        run_test(shell, "general"); // add the default test case here
+        run_test(shell, "mixer"); // add the default test case here
     }
 
     if (command.empty()) {

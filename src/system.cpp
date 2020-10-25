@@ -932,7 +932,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & json
         node["hide_led"]             = Helpers::render_boolean(s, settings.hide_led);
         node["api_enabled"]          = Helpers::render_boolean(s, settings.api_enabled);
         node["bool_format"]          = settings.bool_format;
-        node["analog_enabled"]       = settings.analog_enabled;
+        node["analog_enabled"]       = Helpers::render_boolean(s, settings.analog_enabled);
     });
 
 #endif
@@ -956,6 +956,8 @@ bool System::command_report(const char * value, const int8_t id, JsonObject & js
     node = json.createNestedObject("Settings");
 
     EMSESP::esp8266React.getMqttSettingsService()->read([&](MqttSettings & settings) {
+        char s[7];
+        node["enabled"]                 = Helpers::render_boolean(s, settings.enabled);
         node["publish_time_boiler"]     = settings.publish_time_boiler;
         node["publish_time_thermostat"] = settings.publish_time_thermostat;
         node["publish_time_solar"]      = settings.publish_time_solar;
@@ -964,8 +966,7 @@ bool System::command_report(const char * value, const int8_t id, JsonObject & js
         node["publish_time_sensor"]     = settings.publish_time_sensor;
         node["mqtt_format"]             = settings.mqtt_format;
         node["mqtt_qos"]                = settings.mqtt_qos;
-        char s[7];
-        node["mqtt_retain"] = Helpers::render_boolean(s, settings.mqtt_retain);
+        node["mqtt_retain"]             = Helpers::render_boolean(s, settings.mqtt_retain);
     });
 
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
@@ -981,7 +982,7 @@ bool System::command_report(const char * value, const int8_t id, JsonObject & js
         node["hide_led"]          = Helpers::render_boolean(s, settings.hide_led);
         node["api_enabled"]       = Helpers::render_boolean(s, settings.api_enabled);
         node["bool_format"]       = settings.bool_format;
-        node["analog_enabled"]    = settings.analog_enabled;
+        node["analog_enabled"]    = Helpers::render_boolean(s, settings.analog_enabled);
     });
 
     node = json.createNestedObject("Status");

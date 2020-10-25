@@ -200,6 +200,7 @@ MAKE_PSTR(setBurnPow, "Burner set power")
 MAKE_PSTR(burnStarts, "Burner starts")
 MAKE_PSTR(burnWorkMin, "Burner active time")
 MAKE_PSTR(heatWorkMin, "Heating active time")
+MAKE_PSTR(UBAuptime, "Boiler total uptime")
 
 // solar
 MAKE_PSTR(collectorTemp, "Collector temperature (TS1)")
