@@ -615,7 +615,7 @@ bool Thermostat::export_values_hc(uint8_t mqtt_format, JsonObject & rootThermost
             // the topic will have the hc number appended
             if (mqtt_format == Mqtt::Format::SINGLE) {
                 char topic[30];
-                snprintf_P(topic, 30, PSTR("thermostat_data_hc%d"),hc->hc_num());
+                snprintf_P(topic, 30, PSTR("thermostat_data_hc%d"), hc->hc_num());
                 Mqtt::publish(topic, rootThermostat);
                 rootThermostat.clear(); // clear object
             }
