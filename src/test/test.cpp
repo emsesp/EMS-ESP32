@@ -27,7 +27,7 @@ namespace emsesp {
 // used with the 'test' command, under su/admin
 void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
     if (command == "default") {
-        run_test(shell, "mixing"); // add the default test case here
+        run_test(shell, "mixer"); // add the default test case here
     }
 
     if (command.empty()) {
@@ -837,10 +837,10 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
 
         shell.invoke_command("show");
         shell.invoke_command("call");
-        shell.invoke_command("call mixing info");
+        shell.invoke_command("call mixer info");
         shell.invoke_command("publish");
         shell.invoke_command("show mqtt");
-        shell.invoke_command("call mixing");
+        shell.invoke_command("call mixer");
     }
 
     // finally dump to console
