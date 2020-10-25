@@ -146,7 +146,7 @@ void Command::show_devices(uuid::console::Shell & shell) {
 
     for (const auto & device_class : EMSFactory::device_handlers()) {
         for (const auto & emsdevice : EMSESP::emsdevices) {
-            if ((emsdevice) && (emsdevice->device_type() == device_class.first)) {
+            if ((emsdevice) && (emsdevice->device_type() == device_class.first) && (device_has_commands(device_class.first))) {
                 shell.printf("%s ", EMSdevice::device_type_2_device_name(device_class.first).c_str());
                 break; // we only want to show one (not multiple of the same device types)
             }
