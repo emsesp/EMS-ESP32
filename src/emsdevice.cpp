@@ -73,6 +73,10 @@ std::string EMSdevice::device_type_2_device_name(const uint8_t device_type) {
         return read_flash_string(F_(solar));
         break;
 
+    case DeviceType::CONNECT:
+        return read_flash_string(F_(connect));
+        break;
+
     case DeviceType::MIXER:
         return read_flash_string(F_(mixer));
         break;
@@ -89,8 +93,12 @@ std::string EMSdevice::device_type_2_device_name(const uint8_t device_type) {
         return read_flash_string(F_(switch));
         break;
 
+    case DeviceType::GATEWAY:
+        return read_flash_string(F_(gateway));
+        break;
+
     default:
-        return std::string{};
+        return read_flash_string(F_(unknown));
         break;
     }
 }
@@ -121,55 +129,18 @@ uint8_t EMSdevice::device_name_2_device_type(const char * topic) {
         return DeviceType::MIXER;
     }
 
-    if (!strcmp_P(topic, reinterpret_cast<PGM_P>(F_(sensor)))) {
+    if (!strcmp_P(topic, reinterpret_cast<PGM_P>(F_(dallassensor)))) {
         return DeviceType::DALLASSENSOR;
     }
 
     return DeviceType::UNKNOWN;
 }
 
+// return name of the device type, capitalized
 std::string EMSdevice::device_type_name() const {
-    switch (device_type_) {
-    case DeviceType::BOILER:
-        return read_flash_string(F("Boiler"));
-        break;
-
-    case DeviceType::THERMOSTAT:
-        return read_flash_string(F("Thermostat"));
-        break;
-
-    case DeviceType::HEATPUMP:
-        return read_flash_string(F("Heat Pump"));
-        break;
-
-    case DeviceType::SOLAR:
-        return read_flash_string(F("Solar"));
-        break;
-
-    case DeviceType::CONNECT:
-        return read_flash_string(F("Connect"));
-        break;
-
-    case DeviceType::CONTROLLER:
-        return read_flash_string(F("Controller"));
-        break;
-
-    case DeviceType::MIXER:
-        return read_flash_string(F("Mixer"));
-        break;
-
-    case DeviceType::SWITCH:
-        return read_flash_string(F("Switch"));
-        break;
-
-    case DeviceType::GATEWAY:
-        return read_flash_string(F("Gateway"));
-        break;
-
-    default:
-        return read_flash_string(F("Unknown"));
-        break;
-    }
+    std::string s = device_type_2_device_name(device_type_);
+    s[0] = toupper(s[0]);
+    return s;
 }
 
 // 0=unknown, 1=bosch, 2=junkers, 3=buderus, 4=nefit, 5=sieger, 11=worcester

@@ -288,7 +288,7 @@ bool DallasSensor::command_info(const char * value, const int8_t id, JsonObject 
 
 // creates JSON doc from values
 // returns false if empty
-// e.g. sensor_data = {"sensor1":{"id":"28-EA41-9497-0E03-5F","temp":23.30},"sensor2":{"id":"28-233D-9497-0C03-8B","temp":24.0}}
+// e.g. dallassensor_data = {"sensor1":{"id":"28-EA41-9497-0E03-5F","temp":23.30},"sensor2":{"id":"28-233D-9497-0C03-8B","temp":24.0}}
 bool DallasSensor::export_values(JsonObject & json) {
     if (sensors_.size() == 0) {
         return false;
@@ -324,12 +324,12 @@ void DallasSensor::publish_values() {
         char sensorID[10]; // sensor{1-n}
         snprintf_P(sensorID, 10, PSTR("sensor%d"), sensor_no);
         if (mqtt_format_ == Mqtt::Format::SINGLE) {
-            // e.g. sensor_data = {"28-EA41-9497-0E03":23.3,"28-233D-9497-0C03":24.0}
+            // e.g. dallassensor_data = {"28-EA41-9497-0E03":23.3,"28-233D-9497-0C03":24.0}
             if (Helpers::hasValue(sensor.temperature_c)) {
                 doc[sensor.to_string()] = (float)(sensor.temperature_c) / 10;
             }
         } else {
-            // e.g. sensor_data = {"sensor1":{"id":"28-EA41-9497-0E03","temp":23.3},"sensor2":{"id":"28-233D-9497-0C03","temp":24.0}}
+            // e.g. dallassensor_data = {"sensor1":{"id":"28-EA41-9497-0E03","temp":23.3},"sensor2":{"id":"28-233D-9497-0C03","temp":24.0}}
             JsonObject dataSensor = doc.createNestedObject(sensorID);
             dataSensor["id"]      = sensor.to_string();
             if (Helpers::hasValue(sensor.temperature_c)) {
@@ -345,7 +345,7 @@ void DallasSensor::publish_values() {
                 config["dev_cla"] = F("temperature");
 
                 char stat_t[50];
-                snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/sensor_data"), System::hostname().c_str());
+                snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/dallassensor_data"), System::hostname().c_str());
                 config["stat_t"] = stat_t;
 
                 config["unit_of_meas"] = F("°C");
@@ -376,7 +376,7 @@ void DallasSensor::publish_values() {
     }
 
     doc.shrinkToFit();
-    Mqtt::publish(F("sensor_data"), doc.as<JsonObject>());
+    Mqtt::publish(F("dallassensor_data"), doc.as<JsonObject>());
 }
 
 } // namespace emsesp

@@ -57,7 +57,7 @@ unsigned long millis() {
 }
 
 void delay(unsigned long millis) {
-    __millis += millis;
+    // __millis += millis;
 }
 
 void yield(void) {

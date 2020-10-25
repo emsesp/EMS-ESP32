@@ -542,7 +542,7 @@ void System::console_commands(Shell & shell, unsigned int context) {
                                                                                             return StateUpdateResult::CHANGED;
                                                                                         },
                                                                                         "local");
-                                                                                    shell.println(F("Admin password updated"));
+                                                                                    shell.println(F("su password updated"));
                                                                                 } else {
                                                                                     shell.println(F("Passwords do not match"));
                                                                                 }
@@ -847,7 +847,7 @@ bool System::check_upgrade() {
 // value and id are ignored
 bool System::command_info(const char * value, const int8_t id, JsonObject & json) {
 #ifdef EMSESP_STANDALONE
-    json["test"] = "testing info command";
+    json["test"] = "testing system info command";
 #else
     EMSESP::esp8266React.getWiFiSettingsService()->read([&](WiFiSettings & settings) {
         char       s[7];

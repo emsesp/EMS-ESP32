@@ -80,7 +80,7 @@ function formatTemp(t: string) {
 class EMSESPDevicesForm extends Component<
   EMSESPDevicesFormProps,
   EMSESPDevicesFormState
-  > {
+> {
   state: EMSESPDevicesFormState = {
     confirmScanDevices: false,
     processing: false,
@@ -130,7 +130,11 @@ class EMSESPDevicesForm extends Component<
                   onClick={() => this.handleRowClick(device.id)}
                 >
                   <TableCell component="th" scope="row">
-                    <Tooltip title="click for details..." arrow placement="right-end">
+                    <Tooltip
+                      title="click for details..."
+                      arrow
+                      placement="right-end"
+                    >
                       <Button
                         startIcon={<ListIcon />}
                         size="small"
@@ -145,8 +149,8 @@ class EMSESPDevicesForm extends Component<
                   <TableCell align="center">
                     0x
                     {("00" + device.deviceid.toString(16).toUpperCase()).slice(
-                    -2
-                  )}
+                      -2
+                    )}
                   </TableCell>
                   <TableCell align="center">{device.productid}</TableCell>
                   <TableCell align="center">{device.version}</TableCell>
@@ -195,11 +199,9 @@ class EMSESPDevicesForm extends Component<
               {data.sensors.map((sensorData) => (
                 <TableRow key={sensorData.no}>
                   <TableCell component="th" scope="row">
-                    Sensor&nbsp;{sensorData.no}
+                    {sensorData.no}
                   </TableCell>
-                  <TableCell align="center">
-                    {sensorData.id}
-                  </TableCell>
+                  <TableCell align="center">{sensorData.id}</TableCell>
                   <TableCell align="right">
                     {formatTemp(sensorData.temp)}
                   </TableCell>

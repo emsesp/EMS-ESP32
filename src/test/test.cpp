@@ -820,8 +820,11 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         });
 
         EMSESP::rxservice_.ems_mask(EMSbus::EMS_MASK_BUDERUS);
-
         std::string version("1.2.3");
+
+        // add controller
+        EMSESP::add_device(0x09, 114, version, EMSdevice::Brand::BUDERUS);
+
         EMSESP::add_device(0x28, 160, version, EMSdevice::Brand::BUDERUS); // MM100, WWC
         EMSESP::add_device(0x29, 161, version, EMSdevice::Brand::BUDERUS); // MM200, WWC
         EMSESP::add_device(0x20, 160, version, EMSdevice::Brand::BOSCH);   // MM100

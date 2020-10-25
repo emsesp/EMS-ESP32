@@ -94,7 +94,7 @@ MAKE_PSTR_WORD(connect)
 MAKE_PSTR_WORD(heatpump)
 MAKE_PSTR_WORD(generic)
 MAKE_PSTR_WORD(dallassensor)
-MAKE_PSTR_WORD(sensor)
+MAKE_PSTR_WORD(unknown)
 
 MAKE_PSTR(1space, " ")
 MAKE_PSTR(2spaces, "  ")
@@ -269,7 +269,7 @@ MAKE_PSTR(modetype, "Mode type")
 MAKE_PSTR(airHumidity, "Relative air humidity")
 MAKE_PSTR(dewTemperature, "Dew point temperature")
 
-// HA icons
+// Home Assistant icons
 MAKE_PSTR(icontemperature, "mdi:coolant-temperature")
 MAKE_PSTR(iconpercent, "mdi:sine-wave")
 MAKE_PSTR(iconfire, "mdi:fire")
@@ -285,5 +285,4 @@ MAKE_PSTR(iconthermostat, "mdi:home-thermometer-outline")
 MAKE_PSTR(iconheatpump, "mdi:water-pump")
 
 // MQTT topic suffix
-// MAKE_PSTR(mqtt_suffix_main, "_main")
 MAKE_PSTR(mqtt_suffix_ww, "_ww")

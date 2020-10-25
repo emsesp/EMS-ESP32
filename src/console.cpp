@@ -51,7 +51,7 @@ void EMSESPShell::started() {
 
 void EMSESPShell::stopped() {
     if (has_flags(CommandFlags::ADMIN)) {
-        logger().log(LogLevel::INFO, LogFacility::AUTH, F("Admin session closed on console %s"), console_name().c_str());
+        logger().log(LogLevel::INFO, LogFacility::AUTH, F("su session closed on console %s"), console_name().c_str());
     }
     logger().log(LogLevel::INFO, LogFacility::CONSOLE, F("User session closed on console %s"), console_name().c_str());
 
@@ -570,7 +570,7 @@ void Console::load_standard_commands(unsigned int context) {
                                        flash_string_vector{F_(su)},
                                        [=](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
                                            auto become_admin = [](Shell & shell) {
-                                               shell.logger().log(LogLevel::NOTICE, LogFacility::AUTH, F("Admin session opened on console"));
+                                               shell.logger().log(LogLevel::NOTICE, LogFacility::AUTH, F("su session opened on console"));
                                                shell.add_flags(CommandFlags::ADMIN);
                                            };
 
@@ -586,7 +586,7 @@ void Console::load_standard_commands(unsigned int context) {
                                                                become_admin(shell);
                                                            } else {
                                                                shell.delay_until(now + INVALID_PASSWORD_DELAY_MS, [](Shell & shell) {
-                                                                   shell.logger().log(LogLevel::NOTICE, LogFacility::AUTH, F("Invalid admin password on console"));
+                                                                   shell.logger().log(LogLevel::NOTICE, LogFacility::AUTH, F("Invalid su password on console"));
                                                                    shell.println(F("su: incorrect password"));
                                                                });
                                                            }
