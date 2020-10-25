@@ -41,15 +41,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - renamed wWCircPumpType to wWChargeType
 - Installation and Configuration notes moved to the official EMS-ESP documentation site
-- Removed the _cmd from the MQTT topic names
-- MQTT sensors topic renamed to sensor_data
 - `call` commands can be done from the Console root for all devices
-- renamed MQTT topic for Solar Module from `sm_data` to `solar_data`
 - Updated EMS-ESP official documentation (https://emsesp.github.io/docs/#/)
 - JWT Secret renamed to Super User Password
 - EMS Devices in Web UI shows button and tooltip to remind users they can click on a device
-- MQTT boiler_data payload split into two topics `boiler_data_main` and `boiler_data_ww`
-- "sensor" renamed to "dallassensor" as a command. MQTT topic not affected.
+- MQTT topic name changes (see doc)
+- Mixing renamed to Mixer
 
 ### Removed
 - Console contexts for thermostat and boiler
