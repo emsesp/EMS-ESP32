@@ -41,7 +41,7 @@ class DummySettings {
     uint16_t publish_time_boiler     = 10;
     uint16_t publish_time_thermostat = 10;
     uint16_t publish_time_solar      = 10;
-    uint16_t publish_time_mixing     = 10;
+    uint16_t publish_time_mixer      = 10;
     uint16_t publish_time_other      = 10;
     uint16_t publish_time_sensor     = 10;
     uint8_t  bool_format             = 1; // on off
