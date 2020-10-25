@@ -233,12 +233,12 @@ void EMSESPShell::add_console_commands() {
                                   Device_Ids.push_back(0x09); // Controllers - 0x09
                                   Device_Ids.push_back(0x02); // Connect - 0x02
                                   Device_Ids.push_back(0x48); // Gateway - 0x48
-                                  Device_Ids.push_back(0x20); // Mixing Devices - 0x20
-                                  Device_Ids.push_back(0x21); // Mixing Devices - 0x21
-                                  Device_Ids.push_back(0x22); // Mixing Devices - 0x22
-                                  Device_Ids.push_back(0x23); // Mixing Devices - 0x23
-                                  Device_Ids.push_back(0x28); // Mixing Devices WW- 0x28
-                                  Device_Ids.push_back(0x29); // Mixing Devices WW- 0x29
+                                  Device_Ids.push_back(0x20); // Mixer Devices - 0x20
+                                  Device_Ids.push_back(0x21); // Mixer Devices - 0x21
+                                  Device_Ids.push_back(0x22); // Mixer Devices - 0x22
+                                  Device_Ids.push_back(0x23); // Mixer Devices - 0x23
+                                  Device_Ids.push_back(0x28); // Mixer Devices WW- 0x28
+                                  Device_Ids.push_back(0x29); // Mixer Devices WW- 0x29
                                   Device_Ids.push_back(0x10); // Thermostats - 0x10
                                   Device_Ids.push_back(0x17); // Thermostats - 0x17
                                   Device_Ids.push_back(0x18); // Thermostat remote - 0x18

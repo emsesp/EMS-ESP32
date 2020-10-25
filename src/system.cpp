@@ -888,7 +888,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & json
         node["publish_time_boiler"]     = settings.publish_time_boiler;
         node["publish_time_thermostat"] = settings.publish_time_thermostat;
         node["publish_time_solar"]      = settings.publish_time_solar;
-        node["publish_time_mixing"]     = settings.publish_time_mixing;
+        node["publish_time_mixer"]      = settings.publish_time_mixer;
         node["publish_time_other"]      = settings.publish_time_other;
         node["publish_time_sensor"]     = settings.publish_time_sensor;
         node["mqtt_format"]             = settings.mqtt_format;
@@ -959,7 +959,7 @@ bool System::command_report(const char * value, const int8_t id, JsonObject & js
         node["publish_time_boiler"]     = settings.publish_time_boiler;
         node["publish_time_thermostat"] = settings.publish_time_thermostat;
         node["publish_time_solar"]      = settings.publish_time_solar;
-        node["publish_time_mixing"]     = settings.publish_time_mixing;
+        node["publish_time_mixer"]      = settings.publish_time_mixer;
         node["publish_time_other"]      = settings.publish_time_other;
         node["publish_time_sensor"]     = settings.publish_time_sensor;
         node["mqtt_format"]             = settings.mqtt_format;

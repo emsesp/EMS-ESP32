@@ -187,7 +187,7 @@ void MqttSettings::read(MqttSettings & settings, JsonObject & root) {
     root["publish_time_boiler"]     = settings.publish_time_boiler;
     root["publish_time_thermostat"] = settings.publish_time_thermostat;
     root["publish_time_solar"]      = settings.publish_time_solar;
-    root["publish_time_mixing"]     = settings.publish_time_mixing;
+    root["publish_time_mixer"]      = settings.publish_time_mixer;
     root["publish_time_other"]      = settings.publish_time_other;
     root["publish_time_sensor"]     = settings.publish_time_sensor;
     root["mqtt_format"]             = settings.mqtt_format;
@@ -211,7 +211,7 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
     newSettings.publish_time_boiler     = root["publish_time_boiler"] | EMSESP_DEFAULT_PUBLISH_TIME;
     newSettings.publish_time_thermostat = root["publish_time_thermostat"] | EMSESP_DEFAULT_PUBLISH_TIME;
     newSettings.publish_time_solar      = root["publish_time_solar"] | EMSESP_DEFAULT_PUBLISH_TIME;
-    newSettings.publish_time_mixing     = root["publish_time_mixing"] | EMSESP_DEFAULT_PUBLISH_TIME;
+    newSettings.publish_time_mixer      = root["publish_time_mixer"] | EMSESP_DEFAULT_PUBLISH_TIME;
     newSettings.publish_time_other      = root["publish_time_other"] | EMSESP_DEFAULT_PUBLISH_TIME;
     newSettings.publish_time_sensor     = root["publish_time_sensor"] | EMSESP_DEFAULT_PUBLISH_TIME;
     newSettings.mqtt_format             = root["mqtt_format"] | EMSESP_DEFAULT_MQTT_FORMAT;
@@ -239,8 +239,8 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
     if (newSettings.publish_time_solar != settings.publish_time_solar) {
         emsesp::EMSESP::mqtt_.set_publish_time_solar(newSettings.publish_time_solar);
     }
-    if (newSettings.publish_time_mixing != settings.publish_time_mixing) {
-        emsesp::EMSESP::mqtt_.set_publish_time_mixing(newSettings.publish_time_mixing);
+    if (newSettings.publish_time_mixer != settings.publish_time_mixer) {
+        emsesp::EMSESP::mqtt_.set_publish_time_mixer(newSettings.publish_time_mixer);
     }
     if (newSettings.publish_time_other != settings.publish_time_other) {
         emsesp::EMSESP::mqtt_.set_publish_time_other(newSettings.publish_time_other);

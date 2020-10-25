@@ -16,8 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EMSESP_MIXING_H
-#define EMSESP_MIXING_H
+#ifndef EMSESP_MIXER_H
+#define EMSESP_MIXER_H
 
 #include <Arduino.h>
 #include <ArduinoJson.h>
@@ -32,9 +32,9 @@
 
 namespace emsesp {
 
-class Mixing : public EMSdevice {
+class Mixer : public EMSdevice {
   public:
-    Mixing(uint8_t device_type, uint8_t device_id, uint8_t product_id, const std::string & version, const std::string & name, uint8_t flags, uint8_t brand);
+    Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const std::string & version, const std::string & name, uint8_t flags, uint8_t brand);
 
     virtual void show_values(uuid::console::Shell & shell);
     virtual void publish_values(JsonObject & json, bool force);

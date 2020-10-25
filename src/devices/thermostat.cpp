@@ -471,14 +471,14 @@ bool Thermostat::export_values_hc(uint8_t mqtt_format, JsonObject & rootThermost
             has_data = true;
 
             // if the MQTT format is 'nested' or 'ha' then create the parent object hc<n>
-            if ((mqtt_format == Mqtt::Format::NESTED) || (mqtt_format == Mqtt::Format::HA)) {
+            if (mqtt_format == Mqtt::Format::SINGLE) {
+                dataThermostat = rootThermostat;
+            } else {
                 char hc_name[10]; // hc{1-4}
                 strlcpy(hc_name, "hc", 10);
                 char s[3];
                 strlcat(hc_name, Helpers::itoa(s, hc->hc_num()), 10);
                 dataThermostat = rootThermostat.createNestedObject(hc_name);
-            } else {
-                dataThermostat = rootThermostat;
             }
 
             // different logic on how temperature values are stored, depending on model
@@ -615,9 +615,7 @@ bool Thermostat::export_values_hc(uint8_t mqtt_format, JsonObject & rootThermost
             // the topic will have the hc number appended
             if (mqtt_format == Mqtt::Format::SINGLE) {
                 char topic[30];
-                char s[3];
-                strlcpy(topic, "thermostat_data", 30);
-                strlcat(topic, Helpers::itoa(s, hc->hc_num()), 30); // append hc to topic
+                snprintf_P(topic, 30, PSTR("thermostat_data_hc%d"),hc->hc_num());
                 Mqtt::publish(topic, rootThermostat);
                 rootThermostat.clear(); // clear object
             }

@@ -277,12 +277,11 @@ void EMSESP::show_sensor_values(uuid::console::Shell & shell) {
         return;
     }
 
-    char valuestr[8] = {0}; // for formatting temp
     shell.printfln(F("Dallas temperature sensors:"));
     uint8_t i = 1;
+    char    s[7];
     for (const auto & device : sensor_devices()) {
-        shell.printfln(F("  Sensor %d, ID: %s, Temperature: %s °C"), i, device.to_string().c_str(), Helpers::render_value(valuestr, device.temperature_c, 10));
-        i++;
+        shell.printfln(F("  Sensor %d, ID: %s, Temperature: %s °C"), i++, device.to_string().c_str(), Helpers::render_value(s, device.temperature_c, 10));
     }
     shell.println();
 }
@@ -293,7 +292,7 @@ void EMSESP::publish_all(bool force) {
         publish_device_values(EMSdevice::DeviceType::BOILER, force);
         publish_device_values(EMSdevice::DeviceType::THERMOSTAT, force);
         publish_device_values(EMSdevice::DeviceType::SOLAR, force);
-        publish_device_values(EMSdevice::DeviceType::MIXING, force);
+        publish_device_values(EMSdevice::DeviceType::MIXER, force);
         publish_other_values();
         publish_sensor_values(true);
         system_.send_heartbeat();
@@ -301,9 +300,9 @@ void EMSESP::publish_all(bool force) {
 }
 
 // create json doc for the devices values and add to MQTT publish queue
-// special case for Mixing units, since we want to bundle all devices together into one payload
+// special case for Mixer units, since we want to bundle all devices together into one payload
 void EMSESP::publish_device_values(uint8_t device_type, bool force) {
-    if (device_type == EMSdevice::DeviceType::MIXING && Mqtt::mqtt_format() != Mqtt::Format::SINGLE) {
+    if (device_type == EMSdevice::DeviceType::MIXER && Mqtt::mqtt_format() != Mqtt::Format::SINGLE) {
         DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_LARGE);
         JsonObject          json = doc.to<JsonObject>();
         for (const auto & emsdevice : emsdevices) {
@@ -312,7 +311,7 @@ void EMSESP::publish_device_values(uint8_t device_type, bool force) {
             }
         }
         doc.shrinkToFit();
-        Mqtt::publish(F("mixing_data"), doc.as<JsonObject>());
+        Mqtt::publish("mixer_data", doc.as<JsonObject>());
         return;
     }
 
@@ -327,7 +326,7 @@ void EMSESP::publish_device_values(uint8_t device_type, bool force) {
 void EMSESP::publish_other_values() {
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice && (emsdevice->device_type() != EMSdevice::DeviceType::BOILER) && (emsdevice->device_type() != EMSdevice::DeviceType::THERMOSTAT)
-            && (emsdevice->device_type() != EMSdevice::DeviceType::SOLAR) && (emsdevice->device_type() != EMSdevice::DeviceType::MIXING)) {
+            && (emsdevice->device_type() != EMSdevice::DeviceType::SOLAR) && (emsdevice->device_type() != EMSdevice::DeviceType::MIXER)) {
             JsonObject dummy;
             emsdevice->publish_values(dummy);
         }
@@ -480,7 +479,7 @@ void EMSESP::process_UBADevices(std::shared_ptr<const Telegram> telegram) {
                     // when the version info is received, it will automagically add the device
                     // always skip modem device 0x0D, it does not reply to version request
                     // see https://github.com/proddy/EMS-ESP/issues/460#issuecomment-709553012
-                    if ((device_id != EMSbus::ems_bus_id()) && !(EMSESP::device_exists(device_id)) && (device_id != 0x0D)) {
+                    if ((device_id != EMSbus::ems_bus_id()) && !(EMSESP::device_exists(device_id)) && (device_id != 0x0D) && (device_id != 0x0C)) {
                         LOG_DEBUG(F("New EMS device detected with ID 0x%02X. Requesting version information."), device_id);
                         send_read_request(EMSdevice::EMS_TYPE_VERSION, device_id);
                     }
@@ -630,7 +629,7 @@ void EMSESP::show_devices(uuid::console::Shell & shell) {
     shell.printfln(F("These EMS devices are currently active:"));
     shell.println();
 
-    // for all device objects from emsdevice.h (UNKNOWN, SYSTEM, BOILER, THERMOSTAT, MIXING, SOLAR, HEATPUMP, GATEWAY, SWITCH, CONTROLLER, CONNECT)
+    // for all device objects from emsdevice.h (UNKNOWN, SYSTEM, BOILER, THERMOSTAT, MIXER, SOLAR, HEATPUMP, GATEWAY, SWITCH, CONTROLLER, CONNECT)
     // so we keep a consistent order
     for (const auto & device_class : EMSFactory::device_handlers()) {
         // shell.printf(F("[factory ID: %d] "), device_class.first);
@@ -721,9 +720,9 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
             return command_info(EMSdevice::DeviceType::BOILER, json);
         });
         break;
-    case EMSdevice::DeviceType::MIXING:
+    case EMSdevice::DeviceType::MIXER:
         Command::add_with_json(device_p->device_type, F_(info), [&](const char * value, const int8_t id, JsonObject & json) {
-            return command_info(EMSdevice::DeviceType::MIXING, json);
+            return command_info(EMSdevice::DeviceType::MIXER, json);
         });
         break;
     case EMSdevice::DeviceType::SOLAR:
