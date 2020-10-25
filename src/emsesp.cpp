@@ -714,35 +714,14 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
     LOG_DEBUG(F("Adding new device %s (device ID 0x%02X, product ID %d, version %s)"), name.c_str(), device_id, product_id, version.c_str());
     fetch_device_values(device_id); // go and fetch its data
 
-    switch (device_p->device_type) {
-    case EMSdevice::DeviceType::BOILER:
-        Command::add_with_json(device_p->device_type, F_(info), [&](const char * value, const int8_t id, JsonObject & json) {
-            return command_info(EMSdevice::DeviceType::BOILER, json);
-        });
-        break;
-    case EMSdevice::DeviceType::MIXER:
-        Command::add_with_json(device_p->device_type, F_(info), [&](const char * value, const int8_t id, JsonObject & json) {
-            return command_info(EMSdevice::DeviceType::MIXER, json);
-        });
-        break;
-    case EMSdevice::DeviceType::SOLAR:
-        Command::add_with_json(device_p->device_type, F_(info), [&](const char * value, const int8_t id, JsonObject & json) {
-            return command_info(EMSdevice::DeviceType::SOLAR, json);
-        });
-        break;
-    case EMSdevice::DeviceType::THERMOSTAT:
-        Command::add_with_json(device_p->device_type, F_(info), [&](const char * value, const int8_t id, JsonObject & json) {
-            return command_info(EMSdevice::DeviceType::THERMOSTAT, json);
-        });
-        break;
-    case EMSdevice::DeviceType::HEATPUMP:
-        Command::add_with_json(device_p->device_type, F_(info), [&](const char * value, const int8_t id, JsonObject & json) {
-            return command_info(EMSdevice::DeviceType::HEATPUMP, json);
-        });
-        break;
-    default:
-        break;
+    // add info command, but not for all devices
+    uint8_t device_type = device_p->device_type;
+    if ((device_type == DeviceType::CONNECT) || (device_type == DeviceType::CONTROLLER) || (device_type == DeviceType::GATEWAY)) {
+        return true;
     }
+    Command::add_with_json(device_type, F_(info), [device_type](const char * value, const int8_t id, JsonObject & json) {
+        return command_info(device_type, json);
+    });
 
     return true;
 }
