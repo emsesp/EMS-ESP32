@@ -137,9 +137,9 @@ void Mixer::publish_values(JsonObject & json, bool force) {
         if (export_values_format(Mqtt::mqtt_format(), json)) {
             char topic[30];
             if (type() == Type::HC) {
-                snprintf_P(topic, 30, PSTR("mixer_data_hc%d"),hc_);
+                snprintf_P(topic, 30, PSTR("mixer_data_hc%d"), hc_);
             } else {
-                snprintf_P(topic, 30, PSTR("mixer_data_wwc%d"),hc_);
+                snprintf_P(topic, 30, PSTR("mixer_data_wwc%d"), hc_);
             }
             Mqtt::publish(topic, doc.as<JsonObject>());
         }
