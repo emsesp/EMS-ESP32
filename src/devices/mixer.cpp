@@ -124,7 +124,7 @@ void Mixer::show_values(uuid::console::Shell & shell) {
 }
 
 // publish values via MQTT
-// topic is mixing_data<id>
+// topic is mixer_data<id>
 void Mixer::publish_values(JsonObject & json, bool force) {
     // handle HA first
     if (Mqtt::mqtt_format() == Mqtt::Format::HA) {
@@ -223,7 +223,7 @@ bool Mixer::export_values(JsonObject & json) {
 // creates JSON doc from values
 // returns false if empty
 bool Mixer::export_values_format(uint8_t mqtt_format, JsonObject & json) {
-    // check if there is data for the mixing unit
+    // check if there is data for the mixer unit
     if (!Helpers::hasValue(status_)) {
         return 0;
     }

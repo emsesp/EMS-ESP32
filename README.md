@@ -30,14 +30,14 @@ Note, EMS-ESP requires a small hardware circuit that can convert the EMS bus dat
 - Compatible with both ESP8266 and ESP32
 - A multi-user secure web interface to change settings and monitor the data
 - A console, accessible via Serial and Telnet for more monitoring
-- Native support for Home Assistan via [MQTT Discovery](https://www.home-assistant.io/docs/mqtt/discovery/)
+- Native support for Home Assistant via [MQTT Discovery](https://www.home-assistant.io/docs/mqtt/discovery/)
 - Can run standalone as an independent WiFi Access Point or join an existing WiFi network
 - Easy first-time configuration via a web Captive Portal
-- Support for more than [72 EMS devices](https://emsesp.github.io/docs/#/Supported-EMS-Devices) (boilers, thermostats, solar modules, mixing modules, heat pumps, gateways)
+- Support for more than [70 EMS devices](https://emsesp.github.io/docs/#/Supported-EMS-Devices) (boilers, thermostats, solar modules, mixer modules, heat pumps, gateways)
   
 ## **Screenshots**
 
-### Web interface:
+### Web Interface:
 
 | | |
 | --- | --- |
@@ -68,12 +68,12 @@ If you're looking for support on **EMS-ESP** there are some options available:
 * [Official EMS-ESP Documentation](https://emsesp.github.io/docs): For information on how to build and upload the firmware
 * [FAQ and Troubleshooting](https://emsesp.github.io/docs/#/Troubleshooting): For information on common problems and solutions. See also [BBQKees's wiki](https://bbqkees-electronics.nl/wiki/gateway/troubleshooting.html)
 
-### Support's Community
+### Support Community
 
 * [EMS-ESP Support Chat](https://gitter.im/EMS-ESP/community#): For support, troubleshooting and general questions. You have better chances to get fast answers from members of the community
 * [Search in Issues](https://github.com/proddy/EMS-ESP/issues): You might find an answer to your question by searching current or closed issues
 
-### Developers' Community
+### Developer's Community
 
 * [Bug Report](https://github.com/proddy/EMS-ESP/issues/new?template=bug_report.md): For reporting Bugs
 * [Feature Request](https://github.com/proddy/EMS-ESP/issues/new?template=feature_request.md): For requesting features/functions
@@ -89,10 +89,10 @@ You can contribute to EMS-ESP by
 ## **Credits**
 
 A shout out to the people helping EMS-ESP get to where it is today...
-- **@MichaelDvP** for all his amazing contributions and patience. Specifically the improved uart library, thermostat and mixing logic.
+- **@MichaelDvP** for all his amazing contributions and patience. Specifically the improved uart library, thermostat and mixer logic.
 - **@BBQKees** for his endless testing and building the awesome circuit boards
 - **@susisstrolch** for writing a first working version of the EMS bridge circuit which I used to design EMS-ESP version 0.1 back in August 2017
-- Plus everyone else providing suggestions, PRs and the odd donation that keep us motivated. Thanks!
+- plus everyone else providing suggestions, PRs and the odd donation that keep us motivated. Thanks!
 
 ## **License**
 

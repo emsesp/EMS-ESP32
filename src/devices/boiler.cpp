@@ -898,7 +898,7 @@ void Boiler::process_UBAMonitorSlow(std::shared_ptr<const Telegram> telegram) {
     changed_ |= telegram->read_value(outdoorTemp_, 0);
     changed_ |= telegram->read_value(boilTemp_, 2);
     changed_ |= telegram->read_value(exhaustTemp_, 4);
-    changed_ |= telegram->read_value(switchTemp_, 25); // only if there is a mixing module present
+    changed_ |= telegram->read_value(switchTemp_, 25); // only if there is a mixer module present
     changed_ |= telegram->read_value(pumpMod_, 9);
     changed_ |= telegram->read_value(burnStarts_, 10, 3);  // force to 3 bytes
     changed_ |= telegram->read_value(burnWorkMin_, 13, 3); // force to 3 bytes

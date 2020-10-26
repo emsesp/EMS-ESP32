@@ -25,8 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - summer, winter modes for the CW400 thermostat
 - new command under system called `report`. http://ems-esp/api?device=system&cmd=report to generate a report log for troubleshooting
 - thermostat error codes
-- Console command `pulbish ha` to also force the creation of the Home Assistant MQTT Discovery topics
-- Heatpump values (dew temperature and relative air humidity)
+- Console command `publish ha` to also force the creation of the Home Assistant MQTT Discovery topics
+- Heat pump values (dew temperature and relative air humidity)
 
 ### Fixed
 - fix wwontime readback
@@ -94,7 +94,7 @@ First version of v2 with
 - Support for Home Assistant MQTT Discovery (https://www.home-assistant.io/docs/mqtt/discovery/)
 - Can be run standalone as an independent Access Point or join an existing WiFi network
 - Easier first-time configuration via a web Captive Portal
-- Supporting over 70 EMS devices (boilers, thermostats, solar modules, mixing modules, heat pumps, gateways)
+- Supporting over 70 EMS devices (boilers, thermostats, solar modules, mixer modules, heat pumps, gateways)
 
 See README.me for more details.
 
