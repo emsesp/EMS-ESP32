@@ -220,6 +220,7 @@ void Thermostat::device_info_web(JsonArray & root) {
                 print_value_json(root, F("offsettemp"), FPSTR(prefix_str), F_(offsettemp), F_(degrees), json);
                 print_value_json(root, F("designtemp"), FPSTR(prefix_str), F_(designtemp), F_(degrees), json);
                 print_value_json(root, F("roominfluence"), FPSTR(prefix_str), F_(roominfluence), F_(degrees), json);
+                print_value_json(root, F("flowtempoffset"), FPSTR(prefix_str), F_(flowtempoffset), F_(degrees), json);
                 print_value_json(root, F("summertemp"), FPSTR(prefix_str), F_(summertemp), F_(degrees), json);
                 print_value_json(root, F("summermode"), FPSTR(prefix_str), F_(summermode), F_(degrees), json);
                 print_value_json(root, F("mode"), FPSTR(prefix_str), F_(mode), nullptr, json);
@@ -301,6 +302,7 @@ void Thermostat::show_values(uuid::console::Shell & shell) {
                 print_value_json(shell, F("offsettemp"), F_(2spaces), F_(offsettemp), F_(degrees), json);
                 print_value_json(shell, F("designtemp"), F_(2spaces), F_(designtemp), F_(degrees), json);
                 print_value_json(shell, F("roominfluence"), F_(2spaces), F_(roominfluence), F_(degrees), json);
+                print_value_json(shell, F("flowtempoffset"), F_(2spaces), F_(flowtempoffset), F_(degrees), json);
                 print_value_json(shell, F("summertemp"), F_(2spaces), F_(summertemp), F_(degrees), json);
                 print_value_json(shell, F("summermode"), F_(2spaces), F_(summermode), F_(degrees), json);
                 print_value_json(shell, F("mode"), F_(2spaces), F_(mode), nullptr, json);
@@ -475,9 +477,7 @@ bool Thermostat::export_values_hc(uint8_t mqtt_format, JsonObject & rootThermost
                 dataThermostat = rootThermostat;
             } else {
                 char hc_name[10]; // hc{1-4}
-                strlcpy(hc_name, "hc", 10);
-                char s[3];
-                strlcat(hc_name, Helpers::itoa(s, hc->hc_num()), 10);
+                snprintf_P(hc_name, 10, PSTR("hc%d"), hc->hc_num());
                 dataThermostat = rootThermostat.createNestedObject(hc_name);
             }
 
@@ -570,6 +570,11 @@ bool Thermostat::export_values_hc(uint8_t mqtt_format, JsonObject & rootThermost
             // Room influence
             if (Helpers::hasValue(hc->roominfluence)) {
                 dataThermostat["roominfluence"] = hc->roominfluence;
+            }
+
+            // Flow temperature offset
+            if (Helpers::hasValue(hc->flowtempoffset)) {
+                dataThermostat["flowtempoffset"] = hc->flowtempoffset;
             }
 
             // Summer temperature
@@ -1243,6 +1248,8 @@ void Thermostat::process_RC300WWtemp(std::shared_ptr<const Telegram> telegram) {
 
 // type 02F5
 void Thermostat::process_RC300WWmode(std::shared_ptr<const Telegram> telegram) {
+    // circulation pump see: https://github.com/Th3M3/buderus_ems-wiki/blob/master/Einstellungen%20der%20Bedieneinheit%20RC310.md
+    // changed_ |= telegram->read_value(wwCircMode_, 1); // 0=off, FF=on
     changed_ |= telegram->read_value(wwMode_, 2); // 0=off, 1=low, 2=high, 3=auto, 4=own prog
 }
 
@@ -1304,21 +1311,22 @@ void Thermostat::process_RC35Set(std::shared_ptr<const Telegram> telegram) {
 
     std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
 
-    changed_ |= telegram->read_value(hc->mode, 7);        // night, day, auto
-    changed_ |= telegram->read_value(hc->daytemp, 2);     // is * 2
-    changed_ |= telegram->read_value(hc->nighttemp, 1);   // is * 2
-    changed_ |= telegram->read_value(hc->holidaytemp, 3); // is * 2
-    changed_ |= telegram->read_value(hc->heatingtype, 0); // 0- off, 1-radiator, 2-convector, 3-floor
+    changed_ |= telegram->read_value(hc->heatingtype, 0);   // 0- off, 1-radiator, 2-convector, 3-floor
+    changed_ |= telegram->read_value(hc->nighttemp, 1);     // is * 2
+    changed_ |= telegram->read_value(hc->daytemp, 2);       // is * 2
+    changed_ |= telegram->read_value(hc->holidaytemp, 3);   // is * 2
+    changed_ |= telegram->read_value(hc->roominfluence, 4); // is * 1
+    changed_ |= telegram->read_value(hc->offsettemp, 6);    // is * 2
+    changed_ |= telegram->read_value(hc->mode, 7);          // night, day, auto
 
-    changed_ |= telegram->read_value(hc->summertemp, 22);  // is * 1
-    changed_ |= telegram->read_value(hc->nofrosttemp, 23); // is * 1
+    changed_ |= telegram->read_value(hc->summertemp, 22);     // is * 1
+    changed_ |= telegram->read_value(hc->nofrosttemp, 23);    // is * 1
+    changed_ |= telegram->read_value(hc->flowtempoffset, 24); // is * 1, only in mixed circuits
     if (hc->heatingtype == 3) {
         changed_ |= telegram->read_value(hc->designtemp, 36); // is * 1
     } else {
         changed_ |= telegram->read_value(hc->designtemp, 17); // is * 1
     }
-    changed_ |= telegram->read_value(hc->offsettemp, 6);    // is * 2
-    changed_ |= telegram->read_value(hc->roominfluence, 4); // is * 1
 }
 
 // process_RCTime - type 0x06 - date and time from a thermostat - 14 bytes long
@@ -1986,6 +1994,10 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
         case HeatingCircuit::Mode::OFFSET: // change the offset temp
             offset = EMS_OFFSET_RC35Set_temp_offset;
             break;
+        case HeatingCircuit::Mode::FLOWOFFSET: // change the offset of flowtemp
+            offset = EMS_OFFSET_RC35Set_temp_flowoffset;
+            factor = 1;
+            break;
         case HeatingCircuit::Mode::DESIGN:
             if (hc->heatingtype == 3) {
                 offset = EMS_OFFSET_RC35Set_temp_design_floor;
@@ -2157,6 +2169,10 @@ bool Thermostat::set_manualtemp(const char * value, const int8_t id) {
     return set_temperature_value(value, id, HeatingCircuit::Mode::MANUAL);
 }
 
+bool Thermostat::set_flowtempoffset(const char * value, const int8_t id) {
+    return set_temperature_value(value, id, HeatingCircuit::Mode::FLOWOFFSET);
+}
+
 // API commands for MQTT and Console
 void Thermostat::add_commands() {
     // if this thermostat doesn't support write, don't add the commands
@@ -2209,6 +2225,7 @@ void Thermostat::add_commands() {
         register_mqtt_cmd(F("wwmode"), [&](const char * value, const int8_t id) { return set_wwmode(value, id); });
         register_mqtt_cmd(F("wwcircmode"), [&](const char * value, const int8_t id) { return set_wwcircmode(value, id); });
         register_mqtt_cmd(F("roominfluence"), [&](const char * value, const int8_t id) { return set_roominfluence(value, id); });
+        register_mqtt_cmd(F("flowtempoffset"), [&](const char * value, const int8_t id) { return set_flowtempoffset(value, id); });
         break;
     case EMS_DEVICE_FLAG_JUNKERS:
         register_mqtt_cmd(F("nofrosttemp"), [&](const char * value, const int8_t id) { return set_nofrosttemp(value, id); });

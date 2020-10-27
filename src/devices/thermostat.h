@@ -64,6 +64,7 @@ class Thermostat : public EMSdevice {
         uint8_t manualtemp        = EMS_VALUE_UINT_NOTSET;
         uint8_t summer_setmode    = EMS_VALUE_UINT_NOTSET;
         uint8_t roominfluence     = EMS_VALUE_UINT_NOTSET;
+        uint8_t flowtempoffset    = EMS_VALUE_UINT_NOTSET;
 
         uint8_t hc_num() const {
             return hc_num_;
@@ -85,7 +86,7 @@ class Thermostat : public EMSdevice {
         uint8_t get_mode(uint8_t flags) const;
         uint8_t get_mode_type(uint8_t flags) const;
 
-        enum Mode : uint8_t { UNKNOWN, OFF, MANUAL, AUTO, DAY, NIGHT, HEAT, NOFROST, ECO, HOLIDAY, COMFORT, OFFSET, DESIGN, SUMMER };
+        enum Mode : uint8_t { UNKNOWN, OFF, MANUAL, AUTO, DAY, NIGHT, HEAT, NOFROST, ECO, HOLIDAY, COMFORT, OFFSET, DESIGN, SUMMER, FLOWOFFSET };
 
         // for sorting based on hc number
         friend inline bool operator<(const std::shared_ptr<HeatingCircuit> & lhs, const std::shared_ptr<HeatingCircuit> & rhs) {
@@ -195,6 +196,7 @@ class Thermostat : public EMSdevice {
     static constexpr uint8_t EMS_OFFSET_RC35Set_targetflowtemp     = 14; // target flow temperature
     static constexpr uint8_t EMS_OFFSET_RC35Set_seltemp            = 37; // selected temp
     static constexpr uint8_t EMS_OFFSET_RC35Set_temp_offset        = 6;
+    static constexpr uint8_t EMS_OFFSET_RC35Set_temp_flowoffset    = 24;
     static constexpr uint8_t EMS_OFFSET_RC35Set_temp_design        = 17;
     static constexpr uint8_t EMS_OFFSET_RC35Set_temp_design_floor  = 36;
     static constexpr uint8_t EMS_OFFSET_RC35Set_temp_summer        = 22;
@@ -299,6 +301,7 @@ class Thermostat : public EMSdevice {
     bool set_manualtemp(const char * value, const int8_t id);
     bool set_remotetemp(const char * value, const int8_t id);
     bool set_roominfluence(const char * value, const int8_t id);
+    bool set_flowtempoffset(const char * value, const int8_t id);
 
     // set functions - these don't use the id/hc, the parameters are ignored
     bool set_wwmode(const char * value, const int8_t id);
