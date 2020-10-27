@@ -59,6 +59,7 @@ uint8_t  EMSESP::actual_master_thermostat_ = EMSESP_DEFAULT_MASTER_THERMOSTAT; /
 uint16_t EMSESP::watch_id_                 = WATCH_ID_NONE;                    // for when log is TRACE. 0 means no trace set
 uint8_t  EMSESP::watch_                    = 0;                                // trace off
 uint16_t EMSESP::read_id_                  = WATCH_ID_NONE;
+bool     EMSESP::read_next_                = false;
 uint16_t EMSESP::publish_id_               = 0;
 bool     EMSESP::tap_water_active_         = false; // for when Boiler states we having running warm water. used in Shower()
 uint32_t EMSESP::last_fetch_               = 0;
@@ -81,7 +82,8 @@ void EMSESP::fetch_device_values(const uint8_t device_id) {
 
 // clears list of recognized devices
 void EMSESP::clear_all_devices() {
-    emsdevices.clear(); // or use empty to release memory too
+    // emsdevices.clear(); // or use empty to release memory too
+    emsdevices.empty();
 }
 
 // return number of devices of a known type
@@ -538,7 +540,10 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
     if (telegram->type_id == read_id_) {
         LOG_NOTICE(pretty_telegram(telegram).c_str());
         publish_response(telegram);
-        read_id_ = WATCH_ID_NONE;
+        if (!read_next_) {
+            read_id_ = WATCH_ID_NONE;
+        }
+        read_next_ = false;
     } else if (watch() == WATCH_ON) {
         if ((watch_id_ == WATCH_ID_NONE) || (telegram->type_id == watch_id_)
             || ((watch_id_ < 0x80) && ((telegram->src == watch_id_) || (telegram->dest == watch_id_)))) {
@@ -824,6 +829,7 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
                 // if telegram is longer read next part with offset + 25 for ems+
                 if (length == 32) {
                     txservice_.read_next_tx();
+                    read_next_ = true;
                 }
             }
         }
