@@ -391,6 +391,7 @@ std::string EMSESP::pretty_telegram(std::shared_ptr<const Telegram> telegram) {
     std::string src_name;
     std::string dest_name;
     std::string type_name;
+    std::string direction;
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice) {
             // get src & dest
@@ -425,13 +426,20 @@ std::string EMSESP::pretty_telegram(std::shared_ptr<const Telegram> telegram) {
         type_name = read_flash_string(F("?"));
     }
 
+    if (telegram->dest & 0x80) {
+        direction = read_flash_string(F("<-"));
+    } else {
+        direction = read_flash_string(F("->"));
+    }
+
     std::string str(200, '\0');
     if (offset) {
         snprintf_P(&str[0],
                    str.capacity() + 1,
-                   PSTR("%s(0x%02X) -> %s(0x%02X), %s(0x%02X), data: %s (offset %d)"),
+                   PSTR("%s(0x%02X) %s %s(0x%02X), %s(0x%02X), data: %s (offset %d)"),
                    src_name.c_str(),
                    src,
+                   direction.c_str(),
                    dest_name.c_str(),
                    dest,
                    type_name.c_str(),
@@ -441,9 +449,10 @@ std::string EMSESP::pretty_telegram(std::shared_ptr<const Telegram> telegram) {
     } else {
         snprintf_P(&str[0],
                    str.capacity() + 1,
-                   PSTR("%s(0x%02X) -> %s(0x%02X), %s(0x%02X), data: %s"),
+                   PSTR("%s(0x%02X) %s %s(0x%02X), %s(0x%02X), data: %s"),
                    src_name.c_str(),
                    src,
+                   direction.c_str(),
                    dest_name.c_str(),
                    dest,
                    type_name.c_str(),
