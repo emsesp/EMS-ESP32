@@ -176,12 +176,36 @@ void RxService::add(uint8_t * data, uint8_t length) {
         type_id        = data[2];
         message_data   = data + 4;
         message_length = length - 5;
+    } else if (data[1] & 0x80) {
+        // EMS 2.0 read request
+        uint8_t shift = 0; // default when data[2] is 0xFF
+        if (data[2] != 0xFF) {
+            // its F9 or F7, re-calculate shift. If the 6th byte is 0xFF then telegram is 1 byte longer
+            // if not, we dont know how to handle it
+            // maybe a 24 bit type-id? Example: 90 B0 F7 00 02 02 00 00 96
+            if (data[5] == 0xFF) {
+                shift = 1;
+            } else {
+                LOG_DEBUG(F("unhandled rx: %s"), Helpers::data_to_hex(data, length).c_str());
+                return;
+            }
+        }
+        type_id        = (data[5 + shift] << 8) + data[6 + shift] + 256;
+        message_data   = data + 4; // only data is the requested length
+        message_length = 1;
     } else {
         // EMS 2.0 / EMS+
         uint8_t shift = 0; // default when data[2] is 0xFF
         if (data[2] != 0xFF) {
-            // its F9 or F7, re-calculate shift. If the 5th byte is not 0xFF then telegram is 1 byte longer
-            shift = (data[4] != 0xFF) ? 2 : 1;
+            // its F9 or F7, re-calculate shift. If the 5th byte is 0xFF then telegram is 1 byte longer
+            // if not, we dont know how to handle it
+            // maybe a 24 bit type-id? Example: B0 10 F7 00 02 00 00 1F 00 8F
+            if (data[4] == 0xFF) {
+                shift = 1;
+            } else {
+                LOG_DEBUG(F("unhandled rx: %s"), Helpers::data_to_hex(data, length).c_str());
+                return;
+            }
         }
         type_id        = (data[4 + shift] << 8) + data[5 + shift] + 256;
         message_data   = data + 6 + shift;
