@@ -61,10 +61,12 @@ void Shell::start() {
     uuid::log::Logger::register_handler(this, uuid::log::Level::DEBUG); // added by proddy
     //uuid::log::Logger::register_handler(this, uuid::log::Level::INFO); // added by proddy
 #else
-    uuid::log::Logger::register_handler(this, uuid::log::Level::NOTICE);
+    uuid::log::Logger::register_handler(this, uuid::log::Level::INFO);
 #endif
 
     line_buffer_.reserve(maximum_command_line_length_);
+    oldline_.reserve(maximum_command_line_length_);
+    oldline_.clear();
     display_banner();
     display_prompt();
     shells_.insert(shared_from_this());
@@ -175,6 +177,9 @@ void Shell::loop_normal() {
     case '\x0A':
         // Line feed (^J)
         if (previous_ != '\x0D') {
+            if (!line_buffer_.empty()) {
+                oldline_ = line_buffer_;
+            }
             process_command();
         }
         break;
@@ -187,6 +192,9 @@ void Shell::loop_normal() {
         break;
 
     case '\x0D':
+        if (!line_buffer_.empty()) {
+            oldline_ = line_buffer_;
+        }
         // Carriage return (^M)
         process_command();
         break;
@@ -210,6 +218,20 @@ void Shell::loop_normal() {
             if (line_buffer_.length() < maximum_command_line_length_) {
                 line_buffer_.push_back(c);
                 write((uint8_t)c);
+            }
+            // cursor up, get last command
+            if ((c == 'A') && (previous_ == '[')) {
+                erase_current_line();
+                prompt_displayed_ = false;
+                line_buffer_ = oldline_;
+                display_prompt();
+            }
+            // cursor back, forw or down: Delete line
+            if (((c == 'B') || (c == 'C') || (c == 'D')) && (previous_ == '[')) {
+                erase_current_line();
+                prompt_displayed_ = false;
+                line_buffer_.clear();
+                display_prompt();
             }
         }
         break;
