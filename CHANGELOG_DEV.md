@@ -20,7 +20,7 @@
 - thermostat error codes
 - Console command `publish ha` to also force the creation of the Home Assistant MQTT Discovery topics
 - Heat pump values (dew temperature and relative air humidity)
-- Console up key to repeat last command 
+- Console up key to repeat last command
 
 ### Fixed
 - fix wwontime readback
