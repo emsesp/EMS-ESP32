@@ -61,7 +61,7 @@ void Shell::start() {
     uuid::log::Logger::register_handler(this, uuid::log::Level::DEBUG); // added by proddy
     //uuid::log::Logger::register_handler(this, uuid::log::Level::INFO); // added by proddy
 #else
-    uuid::log::Logger::register_handler(this, uuid::log::Level::INFO);
+    uuid::log::Logger::register_handler(this, uuid::log::Level::NOTICE);
 #endif
 
     line_buffer_.reserve(maximum_command_line_length_);
