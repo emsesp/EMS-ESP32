@@ -31,6 +31,7 @@
 - Fix writing to the Junkers FR120 thermostat
 - support for changing summermode
 - added missing `heatingtype` to thermostat data
+- handle incomming ems+ read requests, ignore F7 telegrams with 3byte-id
 
 ### Changed
 - renamed wWCircPumpType to wWChargeType
