@@ -40,7 +40,7 @@ AsyncMqttClient::AsyncMqttClient()
     _client.onPoll([](void * obj, AsyncClient * c) { (static_cast<AsyncMqttClient *>(obj))->_onPoll(c); }, this);
 
 #ifdef ESP32
-    sprintf(_generatedClientId, "esp32%06x", ESP.getEfuseMac());
+    sprintf(_generatedClientId, "esp32%06x", (int)ESP.getEfuseMac());
     _xSemaphore = xSemaphoreCreateMutex();
 #elif defined(ESP8266)
     sprintf(_generatedClientId, "esp8266%06x", ESP.getChipId());
@@ -931,7 +931,7 @@ uint16_t AsyncMqttClient::unsubscribe(const char * topic) {
 
 uint16_t AsyncMqttClient::publish(const char * topic, uint8_t qos, bool retain, const char * payload, size_t length, bool dup, uint16_t message_id) {
     if (!_connected)
-        return 0; 
+        return 0;
 
     char fixedHeader[5];
     fixedHeader[0] = AsyncMqttClientInternals::PacketType.PUBLISH;
