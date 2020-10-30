@@ -3,7 +3,9 @@ name: Standalone Build
 on:
   push:
     branches: [ dev ]
-
+    paths:
+    - 'src/**'
+    
 jobs:
   build:
 
