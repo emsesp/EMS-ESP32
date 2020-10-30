@@ -1,4 +1,4 @@
-# Dev Change Log
+# Changelog
 
 ### Added
 - boiler `heatingactivated`, automatic select parameter telegrams for write
@@ -21,6 +21,7 @@
 - Console command `publish ha` to also force the creation of the Home Assistant MQTT Discovery topics
 - Heat pump values (dew temperature and relative air humidity)
 - Console up key to repeat last command
+- added RC300 floordrying, error, building, damped temperature 
 
 ### Fixed
 - fix wwontime readback
