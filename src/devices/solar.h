@@ -46,6 +46,10 @@ class Solar : public EMSdevice {
     static uuid::log::Logger logger_;
     void                     register_mqtt_ha_config(bool force);
 
+    uint32_t tank1MaxTempMinimum_    = EMS_VALUE_ULONG_NOTSET; // Min value for max tank temp
+    uint32_t tank1MaxTempDefault_    = EMS_VALUE_ULONG_NOTSET; // Default value for max tank temp
+    uint32_t tank1MaxTempMaximum_    = EMS_VALUE_ULONG_NOTSET; // Max value for max tank temp
+    uint32_t tank1MaxTempCurrent_    = EMS_VALUE_ULONG_NOTSET; // Current value for max tank temp
     int16_t  collectorTemp_          = EMS_VALUE_SHORT_NOTSET; // TS1: Temperature sensor for collector array 1
     int16_t  tankBottomTemp_         = EMS_VALUE_SHORT_NOTSET; // TS2: Temperature sensor 1 cylinder, bottom (solar thermal system)
     int16_t  tankBottomTemp2_        = EMS_VALUE_SHORT_NOTSET; // TS5: Temperature sensor 2 cylinder, bottom, or swimming pool (solar thermal system)
@@ -70,6 +74,7 @@ class Solar : public EMSdevice {
     bool mqtt_ha_config_ = false; // for HA MQTT Discovery
 
     void process_SM10Monitor(std::shared_ptr<const Telegram> telegram);
+    void process_SM100Tank1MaxTemp(std::shared_ptr<const Telegram> telegram);
     void process_SM100Monitor(std::shared_ptr<const Telegram> telegram);
     void process_SM100Monitor2(std::shared_ptr<const Telegram> telegram);
 
