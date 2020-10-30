@@ -226,8 +226,34 @@ void Shell::loop_normal() {
                 line_buffer_ = oldline_;
                 display_prompt();
             }
-            // cursor back, forw or down: Delete line
-            if (((c == 'B') || (c == 'C') || (c == 'D')) && (previous_ == '[')) {
+            // cursor back, delete cursor chars and move on char to rest
+            if ((c == 'D') && (previous_ == '[')) {
+                line_buffer_.pop_back();
+                line_buffer_.pop_back();
+                if (line_buffer_.length() > 0) {
+                    uint8_t ch = line_buffer_.back();
+                    line_rest_.push_back(ch);
+                    line_buffer_.pop_back();
+                }
+                erase_current_line();
+                prompt_displayed_ = false;
+                display_prompt();
+            }
+            // cursor forward, delete cursor chars and add one from rest.
+            if ((c == 'C') && (previous_ == '[')) {
+                line_buffer_.pop_back();
+                line_buffer_.pop_back();
+                if (line_rest_.length() > 0) {
+                    uint8_t ch = line_rest_.back();
+                    line_buffer_.push_back(ch);
+                    line_rest_.pop_back();
+                }
+                erase_current_line();
+                prompt_displayed_ = false;
+                display_prompt();
+            }
+            // cursor down(B): Delete line
+            if ((c == 'B') && (previous_ == '[')) {
                 erase_current_line();
                 prompt_displayed_ = false;
                 line_buffer_.clear();
