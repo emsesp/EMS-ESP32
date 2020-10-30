@@ -1,0 +1,22 @@
+name: Standalone Build
+
+on:
+  push:
+    branches: [ dev ]
+    paths:
+    - 'src/**'
+    
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: make clean
+        run: make clean
+      
+      - name: make
+        run: make
+      

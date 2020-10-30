@@ -1,0 +1,56 @@
+name: Release Main
+
+on:
+  workflow_dispatch:
+    branches: [ main ]
+
+jobs:
+        
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Version
+        id: fetch_version
+        run: |
+             version=`grep -E '^#define EMSESP_APP_VERSION' ./src/version.h | awk '{print $3}' | sed 's/"//g'`
+             echo "::set-output name=s::$version"
+
+      - name: Setup Python
+        uses: actions/setup-python@v1
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -U platformio
+          platformio upgrade
+          platformio update
+
+      - name: Build web
+        run: |
+          cd interface
+          npm install
+          npm run build
+
+      - name: Build images
+        run: |
+          platformio run -e esp8266
+          platformio run -e esp32
+          
+      - name: Changelog
+        run: cat RELEASENOTES.md CHANGELOG_LATEST.md > BODY.txt 
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          body_path: BODY.txt
+          name: EMS-ESP v${{steps.fetch_version.outputs.s}}
+          tag_name: v${{steps.fetch_version.outputs.s}}
+          prerelease: false
+          files: |
+            ./build/firmware/*.*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  

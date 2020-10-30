@@ -5,7 +5,7 @@
 [![version](https://img.shields.io/github/release/proddy/EMS-ESP.svg?label=Latest%20Release)](https://github.com/proddy/EMS-ESP/blob/main/CHANGELOG.md)
 [![release-date](https://img.shields.io/github/release-date/proddy/EMS-ESP.svg?label=Released)](https://github.com/proddy/EMS-ESP/commits/master)
 [![license](https://img.shields.io/github/license/proddy/EMS-ESP.svg)](LICENSE)
-[![travis](https://travis-ci.com/proddy/EMS-ESP.svg?branch=dev)](https://travis-ci.com/proddy/EMS-ESP)
+![Build Firmware](https://github.com/proddy/EMS-ESP/workflows/Build%20Firmware/badge.svg?branch=dev)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/b8880625bdf841d4adb2829732030887)](https://app.codacy.com/app/proddy/EMS-ESP?utm_source=github.com&utm_medium=referral&utm_content=proddy/EMS-ESP&utm_campaign=Badge_Grade_Settings)
 [![downloads](https://img.shields.io/github/downloads/proddy/EMS-ESP/total.svg)](https://github.com/proddy/EMS-ESP/releases)
 [![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/proddy/EMS-ESP.svg)](http://isitmaintained.com/project/proddy/EMS-ESP "Average time to resolve an issue")
@@ -89,7 +89,7 @@ You can contribute to EMS-ESP by
 ## **Credits**
 
 A shout out to the people helping EMS-ESP get to where it is today...
-- **@MichaelDvP** for all his amazing contributions and patience. Specifically the improved uart library, thermostat and mixer logic.
+- **@MichaelDvP** for all his amazing contributions and patience. Specifically for the improved uart library, thermostat and mixer logic.
 - **@BBQKees** for his endless testing and building the awesome circuit boards
 - **@susisstrolch** for writing a first working version of the EMS bridge circuit which I used to design EMS-ESP version 0.1 back in August 2017
 - plus everyone else providing suggestions, PRs and the odd donation that keep us motivated. Thanks!

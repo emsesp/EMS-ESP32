@@ -147,10 +147,13 @@ class Thermostat : public EMSdevice {
     uint8_t ibaBuildingType_      = EMS_VALUE_UINT_NOTSET; // building type: 0 = light, 1 = medium, 2 = heavy
     uint8_t ibaClockOffset_       = EMS_VALUE_UINT_NOTSET; // offset (in sec) to clock, 0xff = -1 s, 0x02 = 2 s
 
-    uint16_t errorNumber_       = EMS_VALUE_USHORT_NOTSET;
-    int8_t   dampedoutdoortemp_ = EMS_VALUE_INT_NOTSET;
-    uint16_t tempsensor1_       = EMS_VALUE_USHORT_NOTSET;
-    uint16_t tempsensor2_       = EMS_VALUE_USHORT_NOTSET;
+    uint16_t errorNumber_        = EMS_VALUE_USHORT_NOTSET;
+    int8_t   dampedoutdoortemp_  = EMS_VALUE_INT_NOTSET;
+    uint16_t tempsensor1_        = EMS_VALUE_USHORT_NOTSET;
+    uint16_t tempsensor2_        = EMS_VALUE_USHORT_NOTSET;
+    int16_t  dampedoutdoortemp2_ = EMS_VALUE_SHORT_NOTSET;
+    uint8_t  floordrystatus_     = EMS_VALUE_UINT_NOTSET;
+    uint8_t  floordrytemp_       = EMS_VALUE_UINT_NOTSET;
 
     uint8_t wwExtra1_   = EMS_VALUE_UINT_NOTSET; // wwExtra active for wwSystem 1
     uint8_t wwExtra2_   = EMS_VALUE_UINT_NOTSET;
@@ -267,6 +270,10 @@ class Thermostat : public EMSdevice {
     void process_RC300WWmode(std::shared_ptr<const Telegram> telegram);
     void process_RC300WWmode2(std::shared_ptr<const Telegram> telegram);
     void process_RC300WWtemp(std::shared_ptr<const Telegram> telegram);
+    void process_RC300OutdoorTemp(std::shared_ptr<const Telegram> telegram);
+    void process_RC300Settings(std::shared_ptr<const Telegram> telegram);
+    void process_RC300Error(std::shared_ptr<const Telegram> telegram);
+    void process_RC300Floordry(std::shared_ptr<const Telegram> telegram);
     void process_JunkersMonitor(std::shared_ptr<const Telegram> telegram);
     void process_JunkersSet(std::shared_ptr<const Telegram> telegram);
     void process_JunkersSet2(std::shared_ptr<const Telegram> telegram);

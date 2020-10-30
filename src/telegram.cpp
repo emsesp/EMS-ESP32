@@ -171,21 +171,22 @@ void RxService::add(uint8_t * data, uint8_t length) {
     // EMS 1 has type_id always in data[2], if it gets a ems+ inquiry it will reply with FF but short length
     // i.e. sending 0B A1 FF 00 01 D8 20 CRC to a MM10 Mixer (ems1.0), the reply is 21 0B FF 00 CRC
     // see: https://github.com/proddy/EMS-ESP/issues/380#issuecomment-633663007
-    if (data[2] < 0xF0 || length < 6) {
+    if (data[2] != 0xFF || length < 6) {
         // EMS 1.0
+        // also handle F7, F9 as EMS 1.0, see https://github.com/proddy/EMS-ESP/issues/109#issuecomment-492781044
         type_id        = data[2];
         message_data   = data + 4;
         message_length = length - 5;
+    } else if (data[1] & 0x80) {
+        // EMS 2.0 read request
+        type_id        = (data[5] << 8) + data[6] + 256;
+        message_data   = data + 4; // only data is the requested length
+        message_length = 1;
     } else {
         // EMS 2.0 / EMS+
-        uint8_t shift = 0; // default when data[2] is 0xFF
-        if (data[2] != 0xFF) {
-            // its F9 or F7, re-calculate shift. If the 5th byte is not 0xFF then telegram is 1 byte longer
-            shift = (data[4] != 0xFF) ? 2 : 1;
-        }
-        type_id        = (data[4 + shift] << 8) + data[5 + shift] + 256;
-        message_data   = data + 6 + shift;
-        message_length = length - 7 - shift;
+        type_id        = (data[4] << 8) + data[5] + 256;
+        message_data   = data + 6;
+        message_length = length - 7;
     }
 
     // if we're watching and "raw" print out actual telegram as bytes to the console
@@ -439,21 +440,20 @@ void TxService::add(uint8_t operation, const uint8_t * data, const uint8_t lengt
 
     // work out depending on the type, where the data message block starts and the message length
     // same logic as in RxService::add(), but adjusted for no appended CRC
-    if (data[2] < 0xF0) {
+    if (data[2] != 0xFF) {
         // EMS 1.0
         type_id        = data[2];
         message_data   = data + 4;
         message_length = length - 4;
+    } else if (data[1] & 0x80) {
+        type_id        = (data[5] << 8) + data[6] + 256;
+        message_data   = data + 4;
+        message_length = 1;
     } else {
         // EMS 2.0 / EMS+
-        uint8_t shift = 0; // default when data[2] is 0xFF
-        if (data[2] != 0xFF) {
-            // its F9 or F7, re-calculate shift. If the 5th byte is not 0xFF then telegram is 1 byte longer
-            shift = (data[4] != 0xFF) ? 2 : 1;
-        }
-        type_id        = (data[4 + shift] << 8) + data[5 + shift] + 256;
-        message_data   = data + 6 + shift;
-        message_length = length - 6 - shift;
+        type_id        = (data[4] << 8) + data[5] + 256;
+        message_data   = data + 6;
+        message_length = length - 6;
     }
 
     // if we don't have a type_id or empty data block, exit
