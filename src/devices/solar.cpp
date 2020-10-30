@@ -17,6 +17,7 @@
  */
 
 #include "solar.h"
+#include "emsesp.h"
 
 namespace emsesp {
 
@@ -41,6 +42,12 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
         register_telegram_type(0x0364, F("SM100Status"), false, [&](std::shared_ptr<const Telegram> t) { process_SM100Status(t); });
         register_telegram_type(0x036A, F("SM100Status2"), false, [&](std::shared_ptr<const Telegram> t) { process_SM100Status2(t); });
         register_telegram_type(0x038E, F("SM100Energy"), true, [&](std::shared_ptr<const Telegram> t) { process_SM100Energy(t); });
+		register_telegram_type(0x035A, F("SM100Tank1MaxTemp"), false, [&](std::shared_ptr<const Telegram> t) { process_SM100Tank1MaxTemp(t); });
+//		EMSESP::send_read_request(0x035A, device_id);
+        // This is a hack right now, need to update TXService to support sending F9 packets
+        uint8_t msg[]="8B B0 F9 00 11 FF 02 5A 03 00";
+        msg[sizeof(msg)-2] = EMSESP::rxservice_.calculate_crc(msg, sizeof(msg)-2);
+        EMSESP::send_raw_telegram((const char*)msg);
     }
 
     if (flags == EMSdevice::EMS_DEVICE_FLAG_ISM) {
@@ -51,6 +58,13 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
 
 // context submenu
 void Solar::add_context_menu() {
+    EMSESPShell::commands->add_command(ShellContext::MAIN,
+                                       CommandFlags::USER,
+                                       flash_string_vector{F_(solar)},
+                                       [&](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
+                                           Solar::console_commands(shell, ShellContext::SOLAR);
+//                                           add_context_commands(ShellContext::SOLAR);
+                                       });
 }
 
 // print to web
@@ -58,6 +72,7 @@ void Solar::device_info_web(JsonArray & root) {
     render_value_json(root, "", F("Collector temperature (TS1)"), collectorTemp_, F_(degrees), 10);
     render_value_json(root, "", F("Tank bottom temperature (TS2)"), tankBottomTemp_, F_(degrees), 10);
     render_value_json(root, "", F("Tank bottom temperature (TS5)"), tankBottomTemp2_, F_(degrees), 10);
+    render_value_json(root, "", F("Tank maximum temperature"), tank1MaxTempCurrent_, F_(degrees), 0);
     render_value_json(root, "", F("Heat exchanger temperature (TS6)"), heatExchangerTemp_, F_(degrees), 10);
     render_value_json(root, "", F("Solar pump modulation (PS1)"), solarPumpModulation_, F_(percent));
     render_value_json(root, "", F("Cylinder pump modulation (PS5)"), cylinderPumpModulation_, F_(percent));
@@ -88,6 +103,7 @@ void Solar::show_values(uuid::console::Shell & shell) {
     print_value(shell, 2, F("Collector temperature (TS1)"), collectorTemp_, F_(degrees), 10);
     print_value(shell, 2, F("Bottom temperature (TS2)"), tankBottomTemp_, F_(degrees), 10);
     print_value(shell, 2, F("Bottom temperature (TS5)"), tankBottomTemp2_, F_(degrees), 10);
+    print_value(shell, 2, F("Tank Maximum temperature"), tank1MaxTempCurrent_, F_(degrees), 0);
     print_value(shell, 2, F("Heat exchanger temperature (TS6)"), heatExchangerTemp_, F_(degrees), 10);
     print_value(shell, 2, F("Solar pump modulation (PS1)"), solarPumpModulation_, F_(percent));
     print_value(shell, 2, F("Cylinder pump modulation (PS5)"), cylinderPumpModulation_, F_(percent));
@@ -124,6 +140,10 @@ void Solar::publish_values() {
         doc["tankBottomTemp2"] = (float)tankBottomTemp2_ / 10;
     }
 
+    if (Helpers::hasValue(tank1MaxTempCurrent_)) {
+        doc["tankMaximumTemp"] = tank1MaxTempCurrent_;
+    }
+    
     if (Helpers::hasValue(heatExchangerTemp_)) {
         doc["heatExchangerTemp"] = (float)heatExchangerTemp_ / 10;
     }
@@ -184,7 +204,19 @@ bool Solar::updated_values() {
 }
 
 // add console commands
-void Solar::console_commands() {
+void Solar::console_commands(Shell & shell, unsigned int context) {
+    EMSESPShell::commands->add_command(ShellContext::SOLAR,
+                                       CommandFlags::USER,
+                                       flash_string_vector{F_(read)},
+                                       [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments __attribute__((unused)))
+                                       {
+                                           uint8_t msg[]="8B B0 F9 00 11 FF 02 5A 03 00";
+                                           msg[sizeof(msg)-2] = EMSESP::rxservice_.calculate_crc(msg, sizeof(msg)-2);
+                                           EMSESP::send_raw_telegram((const char*)msg);
+                                       });
+    
+    // enter the context
+    Console::enter_custom_context(shell, context);
 }
 
 // SM10Monitor - type 0x97
@@ -194,6 +226,29 @@ void Solar::process_SM10Monitor(std::shared_ptr<const Telegram> telegram) {
     changed_ |= telegram->read_value(solarPumpModulation_, 4); // modulation solar pump
     changed_ |= telegram->read_bitvalue(solarPump_, 7, 1);
     changed_ |= telegram->read_value(pumpWorkMin_, 8);
+}
+
+/*
+ * process_SM100Tank1MaxTemp - type 0x035A EMS+ - for MS/SM100 and MS/SM200
+ * e.g. B0 10 F9 00 FF 02 5A 03 17 00 00 00 14 00 00 00 3C 00 00 00 5A 00 00 00 59 29 - requested with 90 B0 F9 00 11 FF 02 5A 03 AF
+ * bytes 0-1 = packet format designator
+ * bytes 2..5 = minimum value
+ * bytes 6..9 = default value
+ * bytes 10..13 = maximum value
+ * bytes 14..17 = current value
+ * e.g, FD 3F - requested with 90 B0 F7 00 FF FF 02 5A B0
+ */
+void Solar::process_SM100Tank1MaxTemp(std::shared_ptr<const Telegram> telegram) {
+    int16_t designator;
+    telegram->read_value(designator, 0);
+    LOG_DEBUG(F("SM100Tank1MaxTemp designator 0x%02X"), designator);
+    if(designator==0x0317)  // The telegram has the right form
+    {
+        changed_ |= telegram->read_value(tank1MaxTempMinimum_, 2);
+        changed_ |= telegram->read_value(tank1MaxTempDefault_, 6);
+        changed_ |= telegram->read_value(tank1MaxTempMaximum_, 10);
+        changed_ |= telegram->read_value(tank1MaxTempCurrent_, 14);
+    }
 }
 
 /*
