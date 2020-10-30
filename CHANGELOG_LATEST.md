@@ -33,6 +33,7 @@
 - support for changing summermode
 - added missing `heatingtype` to thermostat data
 - handle incomming ems+ read requests, ignore F7 telegrams with 3byte-id
+- fix month for setting clock from NTP
 
 ### Changed
 - renamed wWCircPumpType to wWChargeType
