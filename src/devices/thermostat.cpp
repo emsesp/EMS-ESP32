@@ -1745,7 +1745,7 @@ bool Thermostat::set_datetime(const char * value, const int8_t id) {
         }
 
         data[0] = tm_->tm_year - 100; // Bosch counts from 2000
-        data[1] = tm_->tm_mon;
+        data[1] = tm_->tm_mon + 1;
         data[2] = tm_->tm_hour;
         data[3] = tm_->tm_mday;
         data[4] = tm_->tm_min;
