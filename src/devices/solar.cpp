@@ -17,7 +17,6 @@
  */
 
 #include "solar.h"
-#include "emsesp.h"
 
 namespace emsesp {
 
@@ -47,11 +46,15 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
             register_telegram_type(0x036A, F("SM100Status2"), false, [&](std::shared_ptr<const Telegram> t) { process_SM100Status2(t); });
             register_telegram_type(0x038E, F("SM100Energy"), true, [&](std::shared_ptr<const Telegram> t) { process_SM100Energy(t); });
             register_telegram_type(0x035A, F("SM100Tank1MaxTemp"), false, [&](std::shared_ptr<const Telegram> t) { process_SM100Tank1MaxTemp(t); });
-//		    EMSESP::send_read_request(0x035A, device_id);
-            // This is a hack right now, need to update TXService to support sending F9 packets
-            uint8_t msg[]="8B B0 F9 00 11 FF 02 5A 03 00";
-            msg[sizeof(msg)-2] = EMSESP::rxservice_.calculate_crc(msg, sizeof(msg)-2);
-            EMSESP::send_raw_telegram((const char*)msg);
+        }
+//		EMSESP::send_read_request(0x035A, device_id);
+        // This is a hack right now, need to update TXService to support sending F9 packets
+        //uint8_t msg[]="8B B0 F9 00 11 FF 02 5A 03 00";
+        //msg[sizeof(msg)-2] = EMSESP::rxservice_.calculate_crc(msg, sizeof(msg)-2);
+        //EMSESP::send_raw_telegram((const char*)msg);
+        
+        uint8_t msg[]={0x11, 0xFF, 0x02, 0x5A, 0x03};
+        EMSdevice::write_command(EMS_TYPE_RegRead, 0x00, msg, sizeof(msg), EMS_TYPE_RegRead);
     }
 
     if (flags == EMSdevice::EMS_DEVICE_FLAG_ISM) {
@@ -72,7 +75,7 @@ void Solar::device_info_web(JsonArray & root) {
     print_value_json(root, F("collectorTemp"), nullptr, F_(collectorTemp), F_(degrees), json);
     print_value_json(root, F("tankBottomTemp"), nullptr, F_(tankBottomTemp), F_(degrees), json);
     print_value_json(root, F("tankBottomTemp2"), nullptr, F_(tankBottomTemp2), F_(degrees), json);
-    print_value_json(root, F("tank1MaxTemp"), nullptr, F_(tank1MaxTempCurrent_*10), F_(degrees), json);
+    print_value_json(root, F("tank1MaxTemp"), nullptr, F_(tank1MaxTempCurrent), F_(degrees), json);
     print_value_json(root, F("heatExchangerTemp"), nullptr, F_(heatExchangerTemp), F_(degrees), json);
     print_value_json(root, F("solarPumpModulation"), nullptr, F_(solarPumpModulation), F_(percent), json);
     print_value_json(root, F("cylinderPumpModulation"), nullptr, F_(cylinderPumpModulation), F_(percent), json);
@@ -107,7 +110,7 @@ void Solar::show_values(uuid::console::Shell & shell) {
     print_value_json(shell, F("collectorTemp"), nullptr, F_(collectorTemp), F_(degrees), json);
     print_value_json(shell, F("tankBottomTemp"), nullptr, F_(tankBottomTemp), F_(degrees), json);
     print_value_json(shell, F("tankBottomTemp2"), nullptr, F_(tankBottomTemp2), F_(degrees), json);
-    print_value_json(shell, F("tank1MaxTemp"), nullptr, F_(tank1MaxTempCurrent_*10), F_(degrees), json);
+    print_value_json(shell, F("tank1MaxTemp"), nullptr, F_(tank1MaxTempCurrent), F_(degrees), json);
     print_value_json(shell, F("heatExchangerTemp"), nullptr, F_(heatExchangerTemp), F_(degrees), json);
     print_value_json(shell, F("solarPumpModulation"), nullptr, F_(solarPumpModulation), F_(percent), json);
     print_value_json(shell, F("cylinderPumpModulation"), nullptr, F_(cylinderPumpModulation), F_(percent), json);
@@ -179,6 +182,7 @@ void Solar::register_mqtt_ha_config(bool force) {
     Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(collectorTemp), this->device_type(), "collectorTemp", F_(degrees), nullptr);
     Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(tankBottomTemp), this->device_type(), "tankBottomTemp", F_(degrees), nullptr);
     Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(tankBottomTemp2), this->device_type(), "tankBottomTemp2", F_(degrees), nullptr);
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(tank1MaxTempCurrent), this->device_type(), "tank1MaxTemp", F_(degrees), nullptr);
     Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(heatExchangerTemp), this->device_type(), "heatExchangerTemp", F_(degrees), nullptr);
     Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(solarPumpModulation), this->device_type(), "solarPumpModulation", F_(percent), nullptr);
     Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(cylinderPumpModulation), this->device_type(), "cylinderPumpModulation", F_(percent), nullptr);
@@ -212,7 +216,7 @@ bool Solar::export_values(JsonObject & json) {
     }
 
     if (Helpers::hasValue(tank1MaxTempCurrent_)) {
-        doc["tankMaximumTemp"] = tank1MaxTempCurrent_;
+        json["tankMaximumTemp"] = tank1MaxTempCurrent_;
     }
     
     if (Helpers::hasValue(heatExchangerTemp_)) {
