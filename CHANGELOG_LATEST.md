@@ -20,7 +20,7 @@
 - thermostat error codes
 - Console command `publish ha` to also force the creation of the Home Assistant MQTT Discovery topics
 - Heat pump values (dew temperature and relative air humidity)
-- Console up key to repeat last command, left/right for simple editing
+- Console up key to repeat last command
 - added RC300 floordrying, building, damped temperature 
 
 ### Fixed
