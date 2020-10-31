@@ -226,28 +226,22 @@ void Shell::loop_normal() {
                 line_buffer_ = oldline_;
                 display_prompt();
             }
-            // cursor back, delete cursor chars and move on char to rest
+            // cursor back, delete cursor chars
             if ((c == 'D') && (previous_ == '[')) {
                 line_buffer_.pop_back();
                 line_buffer_.pop_back();
-                if (line_buffer_.length() > 0) {
-                    uint8_t ch = line_buffer_.back();
-                    line_rest_.push_back(ch);
-                    line_buffer_.pop_back();
-                }
+                // alternative work as backspace
+                // if (line_buffer_.length() > 0) {
+                //     line_buffer_.pop_back();
+                // }
                 erase_current_line();
                 prompt_displayed_ = false;
                 display_prompt();
             }
-            // cursor forward, delete cursor chars and add one from rest.
+            // cursor forward, only delete cursor chars
             if ((c == 'C') && (previous_ == '[')) {
                 line_buffer_.pop_back();
                 line_buffer_.pop_back();
-                if (line_rest_.length() > 0) {
-                    uint8_t ch = line_rest_.back();
-                    line_buffer_.push_back(ch);
-                    line_rest_.pop_back();
-                }
                 erase_current_line();
                 prompt_displayed_ = false;
                 display_prompt();

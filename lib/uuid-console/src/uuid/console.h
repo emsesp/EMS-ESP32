@@ -906,7 +906,6 @@ class Shell : public std::enable_shared_from_this<Shell>, public uuid::log::Hand
     size_t                      maximum_command_line_length_ = MAX_COMMAND_LINE_LENGTH; /*!< Maximum command line length in bytes. @since 0.6.0 */
     unsigned char               previous_  = 0; /*!< Previous character that was entered on the command line. Used to detect CRLF line endings. @since 0.1.0 */
     std::string                 oldline_;       /*!< old Command line buffer.*/
-    std::string                 line_rest_;     /*!< rest of Command line buffer if goinig back with cursor.*/
     Mode                        mode_      = Mode::NORMAL; /*!< Current execution mode. @since 0.1.0 */
     std::unique_ptr<ModeData>   mode_data_ = nullptr;      /*!< Data associated with the current execution mode. @since 0.1.0 */
     bool                        stopped_   = false;        /*!< Indicates that the shell has been stopped. @since 0.1.0 */
