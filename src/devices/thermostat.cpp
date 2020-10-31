@@ -1305,13 +1305,13 @@ void Thermostat::process_RC300OutdoorTemp(std::shared_ptr<const Telegram> telegr
 
 // 0x240 RC300 parameter
 void Thermostat::process_RC300Settings(std::shared_ptr<const Telegram> telegram) {
-    changed_ |= telegram->read_value(ibaBuildingType_ , 9); // 1=light, 2=medium, 3=heavy
+    changed_ |= telegram->read_value(ibaBuildingType_, 9); // 1=light, 2=medium, 3=heavy
 }
 
 // 0x267 RC300 floordrying
 void Thermostat::process_RC300Floordry(std::shared_ptr<const Telegram> telegram) {
-    changed_ |= telegram->read_value(floordrystatus_ , 0);
-    changed_ |= telegram->read_value(floordrytemp_ , 1);
+    changed_ |= telegram->read_value(floordrystatus_, 0);
+    changed_ |= telegram->read_value(floordrytemp_, 1);
 }
 
 // type 0x41 - data from the RC30 thermostat(0x10) - 14 bytes long

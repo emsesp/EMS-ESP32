@@ -139,7 +139,7 @@ uint8_t EMSdevice::device_name_2_device_type(const char * topic) {
 // return name of the device type, capitalized
 std::string EMSdevice::device_type_name() const {
     std::string s = device_type_2_device_name(device_type_);
-    s[0] = toupper(s[0]);
+    s[0]          = toupper(s[0]);
     return s;
 }
 
