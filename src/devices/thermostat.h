@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/proddy/EMS-ESP
- * Copyright 2019  Paul Derbyshire
+ * Copyright 2020  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -272,7 +272,6 @@ class Thermostat : public EMSdevice {
     void process_RC300WWtemp(std::shared_ptr<const Telegram> telegram);
     void process_RC300OutdoorTemp(std::shared_ptr<const Telegram> telegram);
     void process_RC300Settings(std::shared_ptr<const Telegram> telegram);
-    void process_RC300Error(std::shared_ptr<const Telegram> telegram);
     void process_RC300Floordry(std::shared_ptr<const Telegram> telegram);
     void process_JunkersMonitor(std::shared_ptr<const Telegram> telegram);
     void process_JunkersSet(std::shared_ptr<const Telegram> telegram);

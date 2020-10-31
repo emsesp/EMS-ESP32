@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/proddy/EMS-ESP
- * Copyright 2019  Paul Derbyshire
+ * Copyright 2020  Paul Derbyshire
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
 
     if (flags == EMSdevice::EMS_DEVICE_FLAG_SM100) {
         if (device_id == 0x2A) {
-            register_telegram_type(0x07D6, F("SM100wwTemperatur"), false, [&](std::shared_ptr<const Telegram> t) { process_SM100wwTemperature(t); });
+            register_telegram_type(0x07D6, F("SM100wwTemperature"), false, [&](std::shared_ptr<const Telegram> t) { process_SM100wwTemperature(t); });
             register_telegram_type(0x07AA, F("SM100wwStatus"), false, [&](std::shared_ptr<const Telegram> t) { process_SM100wwStatus(t); });
             register_telegram_type(0x07AB, F("SM100wwCommand"), false, [&](std::shared_ptr<const Telegram> t) { process_SM100wwCommand(t); });
         } else {

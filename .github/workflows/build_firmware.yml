@@ -61,7 +61,7 @@ jobs:
         # if: startsWith(github.ref, 'refs/tags/')
         with:
           body_path: BODY.txt
-          name: Development Build version ${{steps.fetch_version.outputs.s}}
+          name: Development Build v${{steps.fetch_version.outputs.s}}
           tag_name: dev
           prerelease: true
           files: |

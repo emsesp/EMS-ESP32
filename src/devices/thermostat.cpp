@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/proddy/EMS-ESP
- * Copyright 2019  Paul Derbyshire
+ * Copyright 2020  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -126,7 +126,6 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
         register_telegram_type(0x23A, F("RC300OutdoorTemp"), true, [&](std::shared_ptr<const Telegram> t) { process_RC300OutdoorTemp(t); });
         register_telegram_type(0x267, F("RC300Floordry"), false, [&](std::shared_ptr<const Telegram> t) { process_RC300Floordry(t); });
         register_telegram_type(0x240, F("RC300Settings"), true, [&](std::shared_ptr<const Telegram> t) { process_RC300Settings(t); });
-        register_telegram_type(0xBF, F("RC300Error"), false, [&](std::shared_ptr<const Telegram> t) { process_RC300Error(t); });
 
         // JUNKERS/HT3
     } else if (model == EMSdevice::EMS_DEVICE_FLAG_JUNKERS) {
@@ -1306,30 +1305,15 @@ void Thermostat::process_RC300OutdoorTemp(std::shared_ptr<const Telegram> telegr
 
 // 0x240 RC300 parameter
 void Thermostat::process_RC300Settings(std::shared_ptr<const Telegram> telegram) {
-    changed_ |= telegram->read_value(ibaBuildingType_ , 9); // 1=light, 2=medium, 3=heavy
+    changed_ |= telegram->read_value(ibaBuildingType_, 9); // 1=light, 2=medium, 3=heavy
 }
 
 // 0x267 RC300 floordrying
 void Thermostat::process_RC300Floordry(std::shared_ptr<const Telegram> telegram) {
-    changed_ |= telegram->read_value(floordrystatus_ , 0);
-    changed_ |= telegram->read_value(floordrytemp_ , 1);
+    changed_ |= telegram->read_value(floordrystatus_, 0);
+    changed_ |= telegram->read_value(floordrytemp_, 1);
 }
 
-// 0xBF RC300 Errormessage
-void Thermostat::process_RC300Error(std::shared_ptr<const Telegram> telegram) {
-    if (errorCode_.empty()) {
-        errorCode_.resize(10, '\0');
-    }
-    char buf[4];
-    buf[0] = telegram->message_data[5];
-    buf[1] = telegram->message_data[6];
-    buf[2] = telegram->message_data[7];
-    buf[3] = 0;
-    changed_ |= telegram->read_value(errorNumber_, 8);
-
-    snprintf_P(&errorCode_[0], errorCode_.capacity() + 1, PSTR("%s(%d)"), buf, errorNumber_);
-
-}
 // type 0x41 - data from the RC30 thermostat(0x10) - 14 bytes long
 void Thermostat::process_RC30Monitor(std::shared_ptr<const Telegram> telegram) {
     std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);

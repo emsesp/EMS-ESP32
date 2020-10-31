@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/proddy/EMS-ESP
- * Copyright 2019  Paul Derbyshire
+ * Copyright 2020  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -764,7 +764,6 @@ void Boiler::check_active() {
         Mqtt::publish(F("tapwater_active"), Helpers::render_boolean(s, b));
         EMSESP::tap_water_active(b); // let EMS-ESP know, used in the Shower class
     }
-
 }
 
 // 0x33

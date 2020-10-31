@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/proddy/EMS-ESP
- * Copyright 2019  Paul Derbyshire
+ * Copyright 2020  Paul Derbyshire
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

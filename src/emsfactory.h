@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/proddy/EMS-ESP
- * Copyright 2019  Paul Derbyshire
+ * Copyright 2020  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,12 +55,12 @@ class EMSFactory {
     }
 
     // Construct derived class returning an unique ptr
-    static auto add(const uint8_t device_type, uint8_t device_id, uint8_t product_id, std::string &version, std::string &name, uint8_t flags, uint8_t brand)
+    static auto add(const uint8_t device_type, uint8_t device_id, uint8_t product_id, std::string & version, std::string & name, uint8_t flags, uint8_t brand)
         -> std::unique_ptr<EMSdevice> {
         return std::unique_ptr<EMSdevice>(EMSFactory::makeRaw(device_type, device_id, product_id, version, name, flags, brand));
     }
 
-    virtual auto construct(uint8_t device_type, uint8_t device_id, uint8_t product_id, std::string &version, std::string &name, uint8_t flags, uint8_t brand) const
+    virtual auto construct(uint8_t device_type, uint8_t device_id, uint8_t product_id, std::string & version, std::string & name, uint8_t flags, uint8_t brand) const
         -> EMSdevice * = 0;
 
   private:
@@ -72,7 +72,7 @@ class EMSFactory {
 
     // Construct derived class returning a raw pointer
     // find which EMS device it is and use that class
-    static auto makeRaw(const uint8_t device_type, uint8_t device_id, uint8_t product_id, std::string &version, std::string &name, uint8_t flags, uint8_t brand)
+    static auto makeRaw(const uint8_t device_type, uint8_t device_id, uint8_t product_id, std::string & version, std::string & name, uint8_t flags, uint8_t brand)
         -> EMSdevice * {
         auto it = EMSFactory::getRegister().find(device_type);
         if (it != EMSFactory::getRegister().end()) {
@@ -90,7 +90,7 @@ class ConcreteEMSFactory : EMSFactory {
         EMSFactory::registerFactory(device_type, this);
     }
 
-    auto construct(uint8_t device_type, uint8_t device_id, uint8_t product_id, std::string &version, std::string &name, uint8_t flags, uint8_t brand) const
+    auto construct(uint8_t device_type, uint8_t device_id, uint8_t product_id, std::string & version, std::string & name, uint8_t flags, uint8_t brand) const
         -> EMSdevice * {
         return new DerivedClass(device_type, device_id, product_id, version, name, flags, brand);
     }
