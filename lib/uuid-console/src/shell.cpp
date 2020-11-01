@@ -133,6 +133,14 @@ void Shell::loop_one() {
     }
 }
 
+void Shell::set_command_str(const __FlashStringHelper * str) {
+    line_buffer_ = read_flash_string(str);
+    erase_current_line();
+    prompt_displayed_ = false;
+    display_prompt();
+    process_command();
+}
+
 void Shell::loop_normal() {
     const int input = read_one_char();
 
@@ -246,20 +254,17 @@ void Shell::loop_normal() {
                     cursor_ = line_buffer_.length();
                 } else if (esc_ == 11) {
                     // F1 and F10
-                    line_buffer_ = "help";
-                    process_command();
+                    set_command_str(F("help"));
                 } else if (esc_ == 12) {
                     // F2
-                    line_buffer_ = "show";
-                    process_command();
+                    set_command_str(F("show"));
                 } else if (esc_ == 20) {
                     // F9
-                    line_buffer_ = "send telegram \"0B \"";
+                    line_buffer_ = read_flash_string(F("send telegram \"0B \""));
                     cursor_ = 1;
                 } else if (esc_ == 21) {
                     // F10
-                    line_buffer_ = "call system report";
-                    process_command();
+                    set_command_str(F("call system report"));
                 }
                 esc_ = 0;
             } else {
