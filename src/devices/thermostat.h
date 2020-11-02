@@ -133,7 +133,7 @@ class Thermostat : public EMSdevice {
     std::vector<uint16_t> summer_typeids;
 
     std::string datetime_;  // date and time stamp
-    std::string errorCode_; // code as string i.e. "A22(816)"
+    std::string errorCode_; // code from 0xA2 as string i.e. "A22(816)"
 
     bool changed_       = false;
     bool ha_registered_ = false;
