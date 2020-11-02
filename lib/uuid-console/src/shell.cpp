@@ -213,7 +213,7 @@ void Shell::loop_normal() {
 
     default:
         if (esc_) {
-            if (c == '[') {
+            if ((c == '[') || (c == 'O')) {
                 // start of sequence
             } else if (c >= '0' && (c <= '9')) {
                 // numbers
@@ -240,6 +240,22 @@ void Shell::loop_normal() {
                     cursor_++;
                 }
                 esc_ = 0;
+            } else if (c == 'H') {
+                // Home
+                cursor_ = line_buffer_.length();
+                esc_ = 0;
+            } else if (c == 'F') {
+                // End
+                cursor_ = 0;
+                esc_ = 0;
+            } else if (c == 'P') {
+                // F1
+                set_command_str(F("help"));
+                esc_ = 0;
+            } else if (c == 'Q') {
+                // F2
+                set_command_str(F("show"));
+                esc_ = 0;
             } else if (c == '~') {
                 // function keys with number
                 if ((esc_ == 3)  && cursor_) {
@@ -262,8 +278,8 @@ void Shell::loop_normal() {
                     // F9
                     line_buffer_ = read_flash_string(F("send telegram \"0B \""));
                     cursor_ = 1;
-                } else if (esc_ == 21) {
-                    // F10
+                } else if (esc_ == 15) {
+                    // F5
                     set_command_str(F("call system report"));
                 }
                 esc_ = 0;

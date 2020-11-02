@@ -26,6 +26,7 @@
 
 #define BOOL_FORMAT_ONOFF 1
 #define BOOL_FORMAT_TRUEFALSE 2
+#define BOOL_FORMAT_NUMBERS 3
 
 namespace emsesp {
 

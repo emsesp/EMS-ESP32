@@ -140,18 +140,14 @@ char * Helpers::render_enum(char * result, const std::vector<const __FlashString
     if (no >= value.size()) {
         return nullptr; // out of bounds
     }
-    std::string str = uuid::read_flash_string(value[no]);
-    if (bool_format() == BOOL_FORMAT_ONOFF) {
-        strcpy(result, str.c_str());
-    } else if (bool_format() == BOOL_FORMAT_TRUEFALSE) {
+    strcpy(result, uuid::read_flash_string(value[no]).c_str());
+    if (bool_format() == BOOL_FORMAT_TRUEFALSE) {
         if (no == 0 && uuid::read_flash_string(value[0]) == "off") {
             strlcpy(result, "false", 7);
         } else if (no == 1 && uuid::read_flash_string(value[1]) == "on") {
             strlcpy(result, "true", 6);
-        } else {
-            strcpy(result, str.c_str());
         }
-    } else {
+    } else if (bool_format() == BOOL_FORMAT_NUMBERS) {
         itoa(result, no);
     }
     return result;
