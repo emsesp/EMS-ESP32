@@ -829,7 +829,7 @@ void Mqtt::register_mqtt_ha_sensor(const char *                prefix,
         LOG_ERROR(F("Failed to publish topic %s"), topic);
     } else {
 #if defined(EMSESP_STANDALONE)
-        LOG_DEBUG(F("Publishing topic=%s, payload=%s"), topic, payload_text.c_str());
+        LOG_DEBUG(F("Publishing topic=%s, payload=%s"), topic, payload_text);
 #else
         LOG_DEBUG(F("Publishing topic %s"), topic);
 #endif
