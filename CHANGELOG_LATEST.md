@@ -6,7 +6,8 @@
 ### Fixed
 
 ### Changed
+- optimized MQTT for HA to reduce mem fragmentation issues
 
 ### Removed
-
+- old scripts
 
