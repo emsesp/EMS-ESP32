@@ -213,82 +213,70 @@ void Shell::loop_normal() {
 
     default:
         if (esc_) {
-            if ((c == '[') || (c == 'O')) {
-                // start of sequence
-            } else if (c >= '0' && (c <= '9')) {
-                // numbers
-                esc_ = (esc_ & 0x7F) * 10 + c - '0';
-            } else if (c == 'A') {
-                // cursor up
+            if (c == 'A') { // cursor up
                 line_buffer_ = line_old_;
                 cursor_      = 0;
-                esc_         = 0;
-            } else if (c == 'B') {
-                // cursor down
+            } else if (c == 'B') { // cursor down
                 line_buffer_.clear();
                 cursor_ = 0;
-                esc_    = 0;
-            } else if (c == 'C') {
-                // cursor  right
+            } else if (c == 'C') { // cursor  right
                 if (cursor_)  {
                     cursor_--;
                 }
-                esc_ = 0;
-            } else if (c == 'D') {
-                // cursor left
+            } else if (c == 'D') { // cursor left
                  if (cursor_ < line_buffer_.length()) {
                     cursor_++;
                 }
-                esc_ = 0;
-            } else if (c == 'H') {
-                // Home
+            } else if (c == 'H') { // Home
                 cursor_ = line_buffer_.length();
-                esc_ = 0;
-            } else if (c == 'F') {
-                // End
+            } else if (c == 'F') { // End
                 cursor_ = 0;
-                esc_ = 0;
-            } else if (c == 'P') {
-                // F1
-                set_command_str(F("help"));
-                esc_ = 0;
-            } else if (c == 'Q') {
-                // F2
-                set_command_str(F("show"));
-                esc_ = 0;
-            } else if (c == '~') {
-                // function keys with number
-                if ((esc_ == 3)  && cursor_) {
-                    // del
+            } else if (c >= 'P' && c <= 'Z') { // F1 - F11, Linux, VT100
+                // set esc-number like ESCn~
+                esc_ = 11 + c - 'P';
+            }
+            if (c == '~' || (c >= 'P' && c <= 'Z')) { // function keys with number ESCn~
+                if ((esc_ == 3)  && cursor_) { // del
                     cursor_--;
                     line_buffer_.erase(line_buffer_.length() - cursor_ - 1, 1);
-                } else if (esc_ == 4) {
-                    // end
+                } else if (esc_ == 4) { // end
                     cursor_ = 0;
-                } else if (esc_ == 1) {
-                    // pos1
+                } else if (esc_ == 1) { // pos1
                     cursor_ = line_buffer_.length();
-                } else if (esc_ == 11) {
-                    // F1 and F10
+                } else if (esc_ == 11) { // F1
                     set_command_str(F("help"));
-                } else if (esc_ == 12) {
-                    // F2
+                } else if (esc_ == 12) { // F2
                     set_command_str(F("show"));
-                } else if (esc_ == 20) {
-                    // F9
+                } else if (esc_ == 13) { // F3
+                    set_command_str(F("log notice"));
+                } else if (esc_ == 14) { // F4
+                    set_command_str(F("log info"));
+                } else if (esc_ == 15) { // F5
+                    set_command_str(F("log debug"));
+                } else if (esc_ == 17) { // F6
+                    set_command_str(F("watch off"));
+                } else if (esc_ == 18) { // F7
+                    set_command_str(F("watch on"));
+                } else if (esc_ == 19) { // F8
+                    set_command_str(F("watch raw"));
+                } else if (esc_ == 20) { // F9
+                    set_command_str(F("call system info"));
+                } else if (esc_ == 21) { // F10
+                    set_command_str(F("call system report"));
+                } else if (esc_ == 23) { // F11
                     line_buffer_ = read_flash_string(F("send telegram \"0B \""));
                     cursor_ = 1;
-                } else if (esc_ == 15) {
-                    // F5
-                    set_command_str(F("call system report"));
+                } else if (esc_ == 24) { // F12
+                    set_command_str(F("log debug; watch raw"));
                 }
                 esc_ = 0;
-            } else {
-                // all other chars end sequence
+            } else if (c >= '0' && (c <= '9')) { // numbers
+                esc_ = (esc_ & 0x7F) * 10 + c - '0';
+            } else if ((c != '[') && (c != 'O')) { // all other chars except start of sequence
                 esc_ = 0;
             }
+        // process normal ascii text
         } else if (c >= '\x20' && c <= '\x7E') {
-            // ASCII text
             if (line_buffer_.length() < maximum_command_line_length_) {
                 line_buffer_.insert(line_buffer_.length() - cursor_, 1, c);
             }
@@ -506,31 +494,41 @@ void Shell::maximum_command_line_length(size_t length) {
 }
 
 void Shell::process_command() {
-    CommandLine command_line{line_buffer_};
-
-    println();
-    prompt_displayed_ = false;
-
-    if (!command_line->empty()) {
-        if (commands_) {
-            auto execution = commands_->execute_command(*this, std::move(command_line));
-
-            if (execution.error != nullptr) {
-                println(execution.error);
-            }
+    if (line_buffer_.empty()) {
+        return;
+    }
+    line_old_ = line_buffer_;
+    while (!line_buffer_.empty()) {
+        size_t      pos = line_buffer_.find(';');
+        std::string line1;
+        if (pos <  line_buffer_.length()) {
+            line1 = line_buffer_.substr(0, pos);
+            line_buffer_.erase(0, pos + 1);
         } else {
-            println(F("No commands configured"));
+            line1 = line_buffer_;
+            line_buffer_.clear();
+            cursor_ = 0;
         }
-        line_old_ = line_buffer_;
-    }
+        CommandLine command_line{line1};
 
-    cursor_ = 0;
-    line_buffer_.clear();
+        println();
+        prompt_displayed_ = false;
 
-    if (running()) {
-        display_prompt();
+        if (!command_line->empty()) {
+            if (commands_) {
+                auto execution = commands_->execute_command(*this, std::move(command_line));
+                if (execution.error != nullptr) {
+                    println(execution.error);
+                }
+            } else {
+                println(F("No commands configured"));
+            }
+        }
+        ::yield();
     }
-    ::yield();
+    // if (running()) {
+    //     display_prompt();
+    // }
 }
 
 void Shell::process_completion() {
@@ -538,11 +536,9 @@ void Shell::process_completion() {
 
     if (!command_line->empty() && commands_) {
         auto completion = commands_->complete_command(*this, command_line);
-        bool redisplay  = false;
 
         if (!completion.help.empty()) {
             println();
-            redisplay = true;
 
             for (auto & help : completion.help) {
                 std::string help_line = help.to_string(maximum_command_line_length_);
@@ -552,17 +548,7 @@ void Shell::process_completion() {
         }
 
         if (!completion.replacement->empty()) {
-            if (!redisplay) {
-                erase_current_line();
-                prompt_displayed_ = false;
-                redisplay         = true;
-            }
-
             line_buffer_ = completion.replacement.to_string(maximum_command_line_length_);
-        }
-
-        if (redisplay) {
-            display_prompt();
         }
     }
 
@@ -587,15 +573,10 @@ void Shell::process_password(bool completed) {
 }
 
 void Shell::invoke_command(const std::string & line) {
-    if (!line_buffer_.empty()) {
-        println();
-        prompt_displayed_ = false;
-    }
-    if (!prompt_displayed_) {
-        display_prompt();
-    }
+    erase_current_line();
+    prompt_displayed_ = false;
     line_buffer_ = line;
-    print(line_buffer_);
+    display_prompt();
     process_command();
 }
 
