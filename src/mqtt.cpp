@@ -486,7 +486,7 @@ void Mqtt::on_connect() {
 // homeassistant/sensor/ems-esp/status/config
 // all the values from the heartbeat payload will be added as attributes to the entity state
 void Mqtt::ha_status() {
-    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
+    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
 
     doc["name"]        = F("EMS-ESP status");
     doc["uniq_id"]     = F("status");
@@ -697,7 +697,9 @@ void Mqtt::register_mqtt_ha_binary_sensor(const __FlashStringHelper * name, cons
         return;
     }
 
-    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
+    return; // TODO
+
+    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
 
     doc["name"]    = name;
     doc["uniq_id"] = entity;
@@ -729,9 +731,9 @@ void Mqtt::register_mqtt_ha_binary_sensor(const __FlashStringHelper * name, cons
     snprintf_P(topic, sizeof(topic), PSTR("homeassistant/binary_sensor/ems-esp/%s/config"), entity);
 
     // convert json to string and publish immediately with retain forced to true
-    std::string payload_text;
+    char payload_text[300];
     serializeJson(doc, payload_text); // convert json to string
-    uint16_t packet_id = mqttClient_->publish(topic, 0, true, payload_text.c_str(), payload_text.size());
+    uint16_t packet_id = mqttClient_->publish(topic, 0, true, payload_text);
 #if defined(EMSESP_STANDALONE)
     LOG_DEBUG(F("Publishing topic %s"), topic);
 #else
@@ -802,7 +804,7 @@ void Mqtt::register_mqtt_ha_sensor(const char *                prefix,
     }
     new_name[0] = toupper(new_name[0]); // capitalize first letter
 
-    DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_MEDIUM);
+    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
     doc["name"]    = new_name;
     doc["uniq_id"] = uniq;
     if (uom != nullptr) {
@@ -818,21 +820,22 @@ void Mqtt::register_mqtt_ha_sensor(const char *                prefix,
     ids.add(ha_device);
 
     // convert json to string and publish immediately with retain forced to true
-    doc.shrinkToFit();
-    std::string payload_text;
+    // std::string payload_text;
+    char payload_text[300];
     serializeJson(doc, payload_text); // convert json to string
-    uint16_t packet_id = mqttClient_->publish(topic, 0, true, payload_text.c_str(), payload_text.size());
+
+    uint16_t packet_id = mqttClient_->publish(topic, 0, true, payload_text);
     if (!packet_id) {
         LOG_ERROR(F("Failed to publish topic %s"), topic);
     } else {
 #if defined(EMSESP_STANDALONE)
-        LOG_DEBUG(F("Publishing topic=%s, payload=%s"), topic, payload_text.c_str());
+        LOG_DEBUG(F("Publishing topic=%s, payload=%s"), topic, payload_text);
 #else
         LOG_DEBUG(F("Publishing topic %s"), topic);
 #endif
     }
 
-    delay(MQTT_PUBLISH_WAIT); // don't flood asynctcp
+    // delay(MQTT_PUBLISH_WAIT); // don't flood asynctcp
 }
 
 } // namespace emsesp

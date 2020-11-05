@@ -892,6 +892,7 @@ class Shell : public std::enable_shared_from_this<Shell>, public uuid::log::Hand
 	 * @since 0.1.0
 	 */
     size_t vprintf(const __FlashStringHelper * format, va_list ap);
+    void set_command_str(const __FlashStringHelper * str);
 
     static const uuid::log::Logger          logger_; /*!< uuid::log::Logger instance for shells. @since 0.1.0 */
     static std::set<std::shared_ptr<Shell>> shells_; /*!< Registered running shells to be executed. @since 0.1.0 */
@@ -903,9 +904,11 @@ class Shell : public std::enable_shared_from_this<Shell>, public uuid::log::Hand
     std::list<QueuedLogMessage> log_messages_;       /*!< Queued log messages, in the order they were received. @since 0.1.0 */
     size_t                      maximum_log_messages_ = MAX_LOG_MESSAGES; /*!< Maximum command line length in bytes. @since 0.6.0 */
     std::string                 line_buffer_; /*!< Command line buffer. Limited to maximum_command_line_length() bytes. @since 0.1.0 */
+    std::string                 line_old_;    /*!< old Command line buffer.*/
     size_t                      maximum_command_line_length_ = MAX_COMMAND_LINE_LENGTH; /*!< Maximum command line length in bytes. @since 0.6.0 */
     unsigned char               previous_  = 0; /*!< Previous character that was entered on the command line. Used to detect CRLF line endings. @since 0.1.0 */
-    std::string                 oldline_;       /*!< old Command line buffer.*/
+    uint8_t                     cursor_    = 0; /*!< cursor position from end of line */
+    uint8_t                     esc_       = 0; /*!< esc sequence running */
     Mode                        mode_      = Mode::NORMAL; /*!< Current execution mode. @since 0.1.0 */
     std::unique_ptr<ModeData>   mode_data_ = nullptr;      /*!< Data associated with the current execution mode. @since 0.1.0 */
     bool                        stopped_   = false;        /*!< Indicates that the shell has been stopped. @since 0.1.0 */

@@ -65,8 +65,8 @@ void Shell::start() {
 #endif
 
     line_buffer_.reserve(maximum_command_line_length_);
-    oldline_.reserve(maximum_command_line_length_);
-    oldline_.clear();
+    line_old_.reserve(maximum_command_line_length_);
+    line_old_.clear();
     display_banner();
     display_prompt();
     shells_.insert(shared_from_this());
@@ -133,6 +133,14 @@ void Shell::loop_one() {
     }
 }
 
+void Shell::set_command_str(const __FlashStringHelper * str) {
+    line_buffer_ = read_flash_string(str);
+    erase_current_line();
+    prompt_displayed_ = false;
+    display_prompt();
+    process_command();
+}
+
 void Shell::loop_normal() {
     const int input = read_one_char();
 
@@ -148,8 +156,7 @@ void Shell::loop_normal() {
         // Interrupt (^C)
         line_buffer_.clear();
         println();
-        prompt_displayed_ = false;
-        display_prompt();
+        cursor_ = 0;
         break;
 
     case '\x04':
@@ -160,51 +167,38 @@ void Shell::loop_normal() {
         break;
 
     case '\x08':
-    case '\x7F':
         // Backspace (^H)
-        // Delete (^?)
-        if (!line_buffer_.empty()) {
-            erase_characters(1);
-            line_buffer_.pop_back();
+    case '\x7F':
+        // Del/Backspace (^?)
+        if (line_buffer_.length() > cursor_) {
+            line_buffer_.erase(line_buffer_.length() - cursor_ - 1, 1);
         }
         break;
 
     case '\x09':
         // Tab (^I)
         process_completion();
+        cursor_ = 0;
         break;
 
     case '\x0A':
         // Line feed (^J)
         if (previous_ != '\x0D') {
-            if (!line_buffer_.empty()) {
-                oldline_ = line_buffer_;
-            }
             process_command();
         }
         break;
 
-    case '\x0C':
-        // New page (^L)
-        erase_current_line();
-        prompt_displayed_ = false;
-        display_prompt();
-        break;
-
     case '\x0D':
-        if (!line_buffer_.empty()) {
-            oldline_ = line_buffer_;
-        }
         // Carriage return (^M)
         process_command();
         break;
 
+    case '\x0C':
+        // New page (^L)
     case '\x15':
         // Delete line (^U)
-        erase_current_line();
-        prompt_displayed_ = false;
         line_buffer_.clear();
-        display_prompt();
+        cursor_ = 0;
         break;
 
     case '\x17':
@@ -212,49 +206,102 @@ void Shell::loop_normal() {
         delete_buffer_word(true);
         break;
 
+    case '\033':
+        // esc
+        esc_ = 0x80;
+        break;
+
     default:
-        if (c >= '\x20' && c <= '\x7E') {
+        if (esc_) {
+            if ((c == '[') || (c == 'O')) {
+                // start of sequence
+            } else if (c >= '0' && (c <= '9')) {
+                // numbers
+                esc_ = (esc_ & 0x7F) * 10 + c - '0';
+            } else if (c == 'A') {
+                // cursor up
+                line_buffer_ = line_old_;
+                cursor_      = 0;
+                esc_         = 0;
+            } else if (c == 'B') {
+                // cursor down
+                line_buffer_.clear();
+                cursor_ = 0;
+                esc_    = 0;
+            } else if (c == 'C') {
+                // cursor  right
+                if (cursor_)  {
+                    cursor_--;
+                }
+                esc_ = 0;
+            } else if (c == 'D') {
+                // cursor left
+                 if (cursor_ < line_buffer_.length()) {
+                    cursor_++;
+                }
+                esc_ = 0;
+            } else if (c == 'H') {
+                // Home
+                cursor_ = line_buffer_.length();
+                esc_ = 0;
+            } else if (c == 'F') {
+                // End
+                cursor_ = 0;
+                esc_ = 0;
+            } else if (c == 'P') {
+                // F1
+                set_command_str(F("help"));
+                esc_ = 0;
+            } else if (c == 'Q') {
+                // F2
+                set_command_str(F("show"));
+                esc_ = 0;
+            } else if (c == '~') {
+                // function keys with number
+                if ((esc_ == 3)  && cursor_) {
+                    // del
+                    cursor_--;
+                    line_buffer_.erase(line_buffer_.length() - cursor_ - 1, 1);
+                } else if (esc_ == 4) {
+                    // end
+                    cursor_ = 0;
+                } else if (esc_ == 1) {
+                    // pos1
+                    cursor_ = line_buffer_.length();
+                } else if (esc_ == 11) {
+                    // F1 and F10
+                    set_command_str(F("help"));
+                } else if (esc_ == 12) {
+                    // F2
+                    set_command_str(F("show"));
+                } else if (esc_ == 20) {
+                    // F9
+                    line_buffer_ = read_flash_string(F("send telegram \"0B \""));
+                    cursor_ = 1;
+                } else if (esc_ == 15) {
+                    // F5
+                    set_command_str(F("call system report"));
+                }
+                esc_ = 0;
+            } else {
+                // all other chars end sequence
+                esc_ = 0;
+            }
+        } else if (c >= '\x20' && c <= '\x7E') {
             // ASCII text
             if (line_buffer_.length() < maximum_command_line_length_) {
-                line_buffer_.push_back(c);
-                write((uint8_t)c);
-            }
-            // cursor up, get last command
-            if ((c == 'A') && (previous_ == '[')) {
-                erase_current_line();
-                prompt_displayed_ = false;
-                line_buffer_ = oldline_;
-                display_prompt();
-            }
-            // cursor back, delete cursor chars
-            if ((c == 'D') && (previous_ == '[')) {
-                line_buffer_.pop_back();
-                line_buffer_.pop_back();
-                // alternative work as backspace
-                // if (line_buffer_.length() > 0) {
-                //     line_buffer_.pop_back();
-                // }
-                erase_current_line();
-                prompt_displayed_ = false;
-                display_prompt();
-            }
-            // cursor forward, only delete cursor chars
-            if ((c == 'C') && (previous_ == '[')) {
-                line_buffer_.pop_back();
-                line_buffer_.pop_back();
-                erase_current_line();
-                prompt_displayed_ = false;
-                display_prompt();
-            }
-            // cursor down(B): Delete line
-            if ((c == 'B') && (previous_ == '[')) {
-                erase_current_line();
-                prompt_displayed_ = false;
-                line_buffer_.clear();
-                display_prompt();
+                line_buffer_.insert(line_buffer_.length() - cursor_, 1, c);
             }
         }
         break;
+    }
+
+    // common for all, display the complete line
+    erase_current_line();
+    prompt_displayed_ = false;
+    display_prompt();
+    if (cursor_) {
+        printf(F("\033[%dD"), cursor_);
     }
 
     previous_ = c;
@@ -428,16 +475,24 @@ void Shell::delete_buffer_word(bool display) {
 
     if (pos == std::string::npos) {
         line_buffer_.clear();
-        if (display) {
-            erase_current_line();
-            prompt_displayed_ = false;
-            display_prompt();
-        }
+        cursor_ = 0;
     } else {
         if (display) {
-            erase_characters(line_buffer_.length() - pos);
+            size_t pos1 = 0;
+            pos = 0;
+            while (pos1 <  line_buffer_.length() - cursor_) {
+                pos  = pos1;
+                pos1 = line_buffer_.find(' ', pos + 1);
+            }
+            line_buffer_.erase(pos, pos1 - pos);
+            if (line_buffer_.find(' ') == 0) {
+                line_buffer_.erase(0, 1);
+            }
+            cursor_ = line_buffer_.length() - pos;
+        } else {
+            line_buffer_.resize(pos);
+            cursor_ = 0;
         }
-        line_buffer_.resize(pos);
     }
 }
 
@@ -453,7 +508,6 @@ void Shell::maximum_command_line_length(size_t length) {
 void Shell::process_command() {
     CommandLine command_line{line_buffer_};
 
-    line_buffer_.clear();
     println();
     prompt_displayed_ = false;
 
@@ -467,7 +521,11 @@ void Shell::process_command() {
         } else {
             println(F("No commands configured"));
         }
+        line_old_ = line_buffer_;
     }
+
+    cursor_ = 0;
+    line_buffer_.clear();
 
     if (running()) {
         display_prompt();

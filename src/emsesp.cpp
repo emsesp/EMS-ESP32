@@ -917,7 +917,7 @@ void EMSESP::start() {
 
     emsdevices.reserve(5); // reserve space for initially 5 devices to avoid mem
 
-    LOG_INFO("EMS Device library loaded with %d records", device_library_.size());
+    LOG_INFO(F("EMS Device library loaded with %d records"), device_library_.size());
 
 #if defined(EMSESP_STANDALONE)
     mqtt_.on_connect(); // simulate an MQTT connection

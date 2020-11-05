@@ -1202,7 +1202,7 @@ bool Boiler::set_pump_delay(const char * value, const int8_t id) {
 // on a RC35 it's by EMSESP::send_write_request(0x37, 0x10, 2, &set, 1, 0); (set is 1,2,3) 1=hot, 2=eco, 3=intelligent
 bool Boiler::set_warmwater_mode(const char * value, const int8_t id) {
     uint8_t set;
-    if (!Helpers::value2enum(value, set, {"hot", "eco", "intelligent"})) {
+    if (!Helpers::value2enum(value, set, {F("hot"), F("eco"), F("intelligent")})) {
         LOG_WARNING(F("Set boiler warm water mode: Invalid value"));
         return false;
     }

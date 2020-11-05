@@ -124,9 +124,9 @@ class MqttSettingsForm extends React.Component<MqttSettingsFormProps> {
           variant="outlined"
           onChange={handleValueChange('mqtt_qos')}
           margin="normal">
-          <MenuItem value={0}>0 - At most once</MenuItem>
-          <MenuItem value={1}>1 - At least once</MenuItem>
-          <MenuItem value={2}>2 - Exactly once</MenuItem>
+          <MenuItem value={0}>0</MenuItem>
+          <MenuItem value={1}>1</MenuItem>
+          <MenuItem value={2}>2</MenuItem>
         </SelectValidator>
         <BlockFormControlLabel
           control={
