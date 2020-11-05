@@ -224,7 +224,7 @@ bool Mixer::export_values(JsonObject & json) {
 // returns false if empty
 bool Mixer::export_values_format(uint8_t mqtt_format, JsonObject & json) {
     // check if there is data for the mixer unit
-    if (!Helpers::hasValue(status_)) {
+    if (this->type() == Type::NONE) {
         return 0;
     }
 
@@ -249,7 +249,7 @@ bool Mixer::export_values_format(uint8_t mqtt_format, JsonObject & json) {
             json_hc["flowSetTemp"] = flowSetTemp_;
         }
         if (Helpers::hasValue(pumpStatus_)) {
-            char s[5];
+            char s[7];
             json_hc["pumpStatus"] = Helpers::render_value(s, pumpStatus_, EMS_VALUE_BOOL);
         }
         if (Helpers::hasValue(status_)) {
@@ -274,7 +274,7 @@ bool Mixer::export_values_format(uint8_t mqtt_format, JsonObject & json) {
         json_hc["wwTemp"] = (float)flowTemp_ / 10;
     }
     if (Helpers::hasValue(pumpStatus_)) {
-        char s[5];
+        char s[7];
         json_hc["pumpStatus"] = Helpers::render_value(s, pumpStatus_, EMS_VALUE_BOOL);
     }
     if (Helpers::hasValue(status_)) {
@@ -316,7 +316,7 @@ void Mixer::process_IPMStatusMessage(std::shared_ptr<const Telegram> telegram) {
 
     // check if circuit is active, 0-off, 1-unmixed, 2-mixed
     uint8_t ismixed = 0;
-    changed_ |= telegram->read_value(ismixed, 0);
+    telegram->read_value(ismixed, 0);
     if (ismixed == 0) {
         return;
     }
