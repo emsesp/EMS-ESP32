@@ -1,9 +1,0 @@
-Copy the nefit directory + its content to your ../domoticz/plugin directory
-You can now select ""Nefit EMS-ESP with Proddy firmware" as new hardware in Domoticz
-Don't forget to tick "accept new hardware devices" or click "allow for 5 minutes" in Settings first
-Enter your MQTT server address and click "add"
-
-The plugin will create 3 new devices:
-- room temperature (as measured in the thermostat) under "temperature"
-- system pressure under "utility"
-- a device to set the thermostat (change temperature setting) under "utility"
