@@ -58,7 +58,7 @@ class Thermostat : public EMSdevice {
         uint8_t heatingtype       = EMS_VALUE_UINT_NOTSET; // type of heating: 1 radiator, 2 convectors, 3 floors, 4 room supply
         uint8_t targetflowtemp    = EMS_VALUE_UINT_NOTSET;
         uint8_t summertemp        = EMS_VALUE_UINT_NOTSET;
-        uint8_t nofrosttemp       = EMS_VALUE_UINT_NOTSET;
+        int8_t  nofrosttemp       = EMS_VALUE_INT_NOTSET;  // signed -20°C to +10°C
         uint8_t designtemp        = EMS_VALUE_UINT_NOTSET; // heating curve design temp at MinExtTemp
         int8_t  offsettemp        = EMS_VALUE_INT_NOTSET;  // heating curve offest temp at roomtemp signed!
         uint8_t manualtemp        = EMS_VALUE_UINT_NOTSET;
