@@ -77,6 +77,7 @@ void Solar::device_info_web(JsonArray & root) {
     print_value_json(root, F("energyLastHour"), nullptr, F_(energyLastHour), F_(wh), json);
     print_value_json(root, F("energyToday"), nullptr, F_(energyToday), F_(wh), json);
     print_value_json(root, F("energyTotal"), nullptr, F_(energyTotal), F_(kwh), json);
+    print_value_json(root, F("pumpWorkMin"), nullptr, F_(pumpWorkMin), F_(min), json);
 
     if (Helpers::hasValue(pumpWorkMin_)) {
         JsonObject dataElement = root.createNestedObject();
@@ -111,6 +112,7 @@ void Solar::show_values(uuid::console::Shell & shell) {
     print_value_json(shell, F("energyLastHour"), nullptr, F_(energyLastHour), F_(wh), json);
     print_value_json(shell, F("energyToday"), nullptr, F_(energyToday), F_(wh), json);
     print_value_json(shell, F("energyTotal"), nullptr, F_(energyTotal), F_(kwh), json);
+    print_value_json(shell, F("pumpWorkMin"), nullptr, F_(pumpWorkMin), F_(min), json);
 
     if (Helpers::hasValue(pumpWorkMin_)) {
         shell.printfln(F("  %s: %d days %d hours %d minutes"),
@@ -175,7 +177,7 @@ void Solar::register_mqtt_ha_config(bool force) {
     Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(heatExchangerTemp), this->device_type(), "heatExchangerTemp", F_(degrees), nullptr);
     Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(solarPumpModulation), this->device_type(), "solarPumpModulation", F_(percent), nullptr);
     Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(cylinderPumpModulation), this->device_type(), "cylinderPumpModulation", F_(percent), nullptr);
-    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(pumpWorkMin), this->device_type(), "pumpWorkMin", nullptr, nullptr);
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(pumpWorkMin), this->device_type(), "pumpWorkMin", F_(min), nullptr);
     Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(energyLastHour), this->device_type(), "energyLastHour", F_(wh), nullptr);
     Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(energyToday), this->device_type(), "energyToday", F_(wh), nullptr);
     Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(energyTotal), this->device_type(), "energyTotal", F_(kwh), nullptr);
