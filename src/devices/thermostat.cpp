@@ -114,7 +114,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
         monitor_typeids = {0x02A5, 0x02A6, 0x02A7, 0x02A8};
         set_typeids     = {0x02B9, 0x02BA, 0x02BB, 0x02BC};
         summer_typeids  = {0x02AF, 0x02B0, 0x02B1, 0x02B2};
-        curve_typeids  =  {0x029B, 0x029C, 0x029D, 0x029E};
+        curve_typeids   = {0x029B, 0x029C, 0x029D, 0x029E};
         for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
             register_telegram_type(monitor_typeids[i], F("RC300Monitor"), false, [&](std::shared_ptr<const Telegram> t) { process_RC300Monitor(t); });
             register_telegram_type(set_typeids[i], F("RC300Set"), false, [&](std::shared_ptr<const Telegram> t) { process_RC300Set(t); });
@@ -176,7 +176,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
     for (uint8_t i = 0; i < curve_typeids.size(); i++) {
         EMSESP::send_read_request(curve_typeids[i], device_id);
     }
-} // namespace emsesp
+}
 
 // prepare data for Web UI
 void Thermostat::device_info_web(JsonArray & root) {
@@ -1316,7 +1316,6 @@ void Thermostat::process_RC300Curve(std::shared_ptr<const Telegram> telegram) {
     } else {
         changed_ |= telegram->read_value(hc->maxflowtemp, 7);
     }
-
 }
 
 // types 0x31B (and 0x31C?)
@@ -2042,7 +2041,7 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
             offset = 0x04; // eco offset
             break;
         case HeatingCircuit::Mode::OFFSET:
-            offset = 2;
+            offset          = 2;
             set_typeid      = summer_typeids[hc->hc_num() - 1];
             validate_typeid = set_typeid;
             break;
@@ -2066,19 +2065,19 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
             }
             factor = 1;
             break;
-         case HeatingCircuit::Mode::NOFROST:
+        case HeatingCircuit::Mode::NOFROST:
             set_typeid      = curve_typeids[hc->hc_num() - 1];
             validate_typeid = set_typeid;
-            offset = 6;
-            factor = 1;
+            offset          = 6;
+            factor          = 1;
             break;
         case HeatingCircuit::Mode::ROOMINFLUENCE:
             set_typeid      = summer_typeids[hc->hc_num() - 1];
             validate_typeid = set_typeid;
-            offset = 0;
-            factor = 1;
+            offset          = 0;
+            factor          = 1;
             break;
-       default:
+        default:
         case HeatingCircuit::Mode::AUTO:
             uint8_t mode_ = hc->get_mode(this->flags());
             if (mode_ == HeatingCircuit::Mode::MANUAL) {
@@ -2386,6 +2385,5 @@ void Thermostat::add_commands() {
         break;
     }
 }
-
 
 } // namespace emsesp
