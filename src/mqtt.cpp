@@ -211,14 +211,12 @@ void Mqtt::show_mqtt(uuid::console::Shell & shell) {
         }
     }
     shell.println();
-} // namespace emsesp
+}
 
-#if defined(EMSESP_DEBUG)
 // simulate receiving a MQTT message, used only for testing
 void Mqtt::incoming(const char * topic, const char * payload) {
     on_message(topic, payload, strlen(payload));
 }
-#endif
 
 // received an MQTT message that we subscribed too
 void Mqtt::on_message(const char * topic, const char * payload, size_t len) {
@@ -697,8 +695,6 @@ void Mqtt::register_mqtt_ha_binary_sensor(const __FlashStringHelper * name, cons
         return;
     }
 
-    return; // TODO
-
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
 
     doc["name"]    = name;
@@ -768,11 +764,12 @@ void Mqtt::register_mqtt_ha_sensor(const char *                prefix,
         strcpy(new_entity, entity);
     }
 
-    std::string device_name = EMSdevice::device_type_2_device_name(device_type);
+    char device_name[50];
+    strcpy(device_name, EMSdevice::device_type_2_device_name(device_type).c_str());
 
     // build unique identifier, replacing all . with _ as not to break HA
     std::string uniq(50, '\0');
-    snprintf_P(&uniq[0], uniq.capacity() + 1, PSTR("%s_%s"), device_name.c_str(), new_entity);
+    snprintf_P(&uniq[0], uniq.capacity() + 1, PSTR("%s_%s"), device_name, new_entity);
     std::replace(uniq.begin(), uniq.end(), '.', '_');
 
     // topic
@@ -782,9 +779,9 @@ void Mqtt::register_mqtt_ha_sensor(const char *                prefix,
     // state topic
     char stat_t[MQTT_TOPIC_MAX_SIZE];
     if (suffix != nullptr) {
-        snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/%s_data%s"), hostname_.c_str(), device_name.c_str(), uuid::read_flash_string(suffix).c_str());
+        snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/%s_data%s"), hostname_.c_str(), device_name, uuid::read_flash_string(suffix).c_str());
     } else {
-        snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/%s_data"), hostname_.c_str(), device_name.c_str());
+        snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/%s_data"), hostname_.c_str(), device_name);
     }
 
     // value template
@@ -793,20 +790,23 @@ void Mqtt::register_mqtt_ha_sensor(const char *                prefix,
 
     // ha device
     char ha_device[40];
-    snprintf_P(ha_device, sizeof(ha_device), PSTR("ems-esp-%s"), device_name.c_str());
+    snprintf_P(ha_device, sizeof(ha_device), PSTR("ems-esp-%s"), device_name);
 
     // name
     char new_name[50];
     if (prefix != nullptr) {
-        snprintf_P(new_name, sizeof(new_name), PSTR("%s %s %s"), device_name.c_str(), prefix, uuid::read_flash_string(name).c_str());
+        snprintf_P(new_name, sizeof(new_name), PSTR("%s %s %s"), device_name, prefix, uuid::read_flash_string(name).c_str());
     } else {
-        snprintf_P(new_name, sizeof(new_name), PSTR("%s %s"), device_name.c_str(), uuid::read_flash_string(name).c_str());
+        snprintf_P(new_name, sizeof(new_name), PSTR("%s %s"), device_name, uuid::read_flash_string(name).c_str());
     }
     new_name[0] = toupper(new_name[0]); // capitalize first letter
 
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
+
+    // DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_SMALL);
+
     doc["name"]    = new_name;
-    doc["uniq_id"] = uniq;
+    doc["uniq_id"] = uniq.c_str();
     if (uom != nullptr) {
         doc["unit_of_meas"] = uom;
     }
@@ -823,6 +823,9 @@ void Mqtt::register_mqtt_ha_sensor(const char *                prefix,
     // std::string payload_text;
     char payload_text[300];
     serializeJson(doc, payload_text); // convert json to string
+    // queue_publish_message(topic, payload_text, true);
+
+    // publish_retain(topic, doc.as<JsonObject>(), true);
 
     uint16_t packet_id = mqttClient_->publish(topic, 0, true, payload_text);
     if (!packet_id) {
@@ -835,7 +838,7 @@ void Mqtt::register_mqtt_ha_sensor(const char *                prefix,
 #endif
     }
 
-    // delay(MQTT_PUBLISH_WAIT); // don't flood asynctcp
+    delay(MQTT_PUBLISH_WAIT); // don't flood asynctcp
 }
 
 } // namespace emsesp
