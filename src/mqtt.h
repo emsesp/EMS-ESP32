@@ -118,9 +118,7 @@ class Mqtt {
         mqttClient_->disconnect();
     }
 
-#if defined(EMSESP_DEBUG)
     void incoming(const char * topic, const char * payload); // for testing only
-#endif
 
     static bool connected() {
 #if defined(EMSESP_STANDALONE)
