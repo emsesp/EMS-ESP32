@@ -65,6 +65,7 @@ class Thermostat : public EMSdevice {
         uint8_t summer_setmode    = EMS_VALUE_UINT_NOTSET;
         uint8_t roominfluence     = EMS_VALUE_UINT_NOTSET;
         uint8_t flowtempoffset    = EMS_VALUE_UINT_NOTSET;
+        uint8_t maxflowtemp       = EMS_VALUE_UINT_NOTSET;
 
         uint8_t hc_num() const {
             return hc_num_;
@@ -86,7 +87,7 @@ class Thermostat : public EMSdevice {
         uint8_t get_mode(uint8_t flags) const;
         uint8_t get_mode_type(uint8_t flags) const;
 
-        enum Mode : uint8_t { UNKNOWN, OFF, MANUAL, AUTO, DAY, NIGHT, HEAT, NOFROST, ECO, HOLIDAY, COMFORT, OFFSET, DESIGN, SUMMER, FLOWOFFSET };
+        enum Mode : uint8_t { UNKNOWN, OFF, MANUAL, AUTO, DAY, NIGHT, HEAT, NOFROST, ECO, HOLIDAY, COMFORT, OFFSET, DESIGN, SUMMER, FLOWOFFSET, MAXFLOW, ROOMINFLUENCE };
 
         // for sorting based on hc number
         friend inline bool operator<(const std::shared_ptr<HeatingCircuit> & lhs, const std::shared_ptr<HeatingCircuit> & rhs) {
@@ -131,6 +132,7 @@ class Thermostat : public EMSdevice {
     std::vector<uint16_t> set_typeids;
     std::vector<uint16_t> timer_typeids;
     std::vector<uint16_t> summer_typeids;
+    std::vector<uint16_t> curve_typeids;
 
     std::string datetime_;  // date and time stamp
     std::string errorCode_; // code from 0xA2 as string i.e. "A22(816)"
@@ -273,6 +275,7 @@ class Thermostat : public EMSdevice {
     void process_RC300OutdoorTemp(std::shared_ptr<const Telegram> telegram);
     void process_RC300Settings(std::shared_ptr<const Telegram> telegram);
     void process_RC300Floordry(std::shared_ptr<const Telegram> telegram);
+    void process_RC300Curve(std::shared_ptr<const Telegram> telegram);
     void process_JunkersMonitor(std::shared_ptr<const Telegram> telegram);
     void process_JunkersSet(std::shared_ptr<const Telegram> telegram);
     void process_JunkersSet2(std::shared_ptr<const Telegram> telegram);
@@ -308,6 +311,7 @@ class Thermostat : public EMSdevice {
     bool set_remotetemp(const char * value, const int8_t id);
     bool set_roominfluence(const char * value, const int8_t id);
     bool set_flowtempoffset(const char * value, const int8_t id);
+    bool set_maxflowtemp(const char * value, const int8_t id);
 
     // set functions - these don't use the id/hc, the parameters are ignored
     bool set_wwmode(const char * value, const int8_t id);
