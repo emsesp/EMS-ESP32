@@ -283,8 +283,7 @@ class EMSdevice {
         uint16_t                    telegram_type_id_;   // it's type_id
         const __FlashStringHelper * telegram_type_name_; // e.g. RC20Message
         bool                        fetch_;              // if this type_id be queried automatically
-
-        process_function_p process_function_;
+        process_function_p          process_function_;
 
         TelegramFunction(uint16_t telegram_type_id, const __FlashStringHelper * telegram_type_name, bool fetch, process_function_p process_function)
             : telegram_type_id_(telegram_type_id)
