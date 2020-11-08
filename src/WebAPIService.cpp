@@ -98,7 +98,7 @@ void WebAPIService::webAPIService(AsyncWebServerRequest * request) {
                cmd.c_str(),
                data.c_str(),
                id.c_str(),
-               ok ? F("OK") : F("Invalid"));
+               ok ? PSTR("OK") : PSTR("Invalid"));
     EMSESP::logger().info(debug.c_str());
     if (json.size()) {
         char buffer2[EMSESP_MAX_JSON_SIZE_LARGE];
