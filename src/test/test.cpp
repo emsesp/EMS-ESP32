@@ -26,8 +26,11 @@ namespace emsesp {
 // create some fake test data
 // used with the 'test' command, under su/admin
 void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
+    // switch to su
+    shell.add_flags(CommandFlags::ADMIN);
+
     if (command == "default") {
-        run_test(shell, "mixer"); // add the default test case here
+        run_test(shell, "general"); // add the default test case here
     }
 
     if (command.empty()) {
@@ -239,6 +242,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         shell.printfln(F("Testing adding a boiler & thermostat..."));
 
         std::string version("1.2.3");
+
         EMSESP::add_device(0x08, 123, version, EMSdevice::Brand::BUDERUS); // Nefit Trendline
         EMSESP::add_device(0x18, 157, version, EMSdevice::Brand::BOSCH);   // Bosch CR100 - https://github.com/proddy/EMS-ESP/issues/355
 
