@@ -109,6 +109,7 @@ class System {
 
     // settings
     static bool    hide_led_;
+    static bool    syslog_enabled_;
     uint8_t        syslog_level_;
     uint32_t       syslog_mark_interval_;
     String         syslog_host_;

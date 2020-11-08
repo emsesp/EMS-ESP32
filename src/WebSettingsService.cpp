@@ -30,6 +30,7 @@ WebSettingsService::WebSettingsService(AsyncWebServer * server, FS * fs, Securit
 void WebSettings::read(WebSettings & settings, JsonObject & root) {
     root["tx_mode"]              = settings.tx_mode;
     root["ems_bus_id"]           = settings.ems_bus_id;
+    root["syslog_enabled"]       = settings.syslog_enabled;
     root["syslog_level"]         = settings.syslog_level;
     root["syslog_mark_interval"] = settings.syslog_mark_interval;
     root["syslog_host"]          = settings.syslog_host;
@@ -50,6 +51,7 @@ void WebSettings::read(WebSettings & settings, JsonObject & root) {
 StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings) {
     settings.tx_mode              = root["tx_mode"] | EMSESP_DEFAULT_TX_MODE;
     settings.ems_bus_id           = root["ems_bus_id"] | EMSESP_DEFAULT_EMS_BUS_ID;
+    settings.syslog_enabled       = root["syslog_enabled"] | EMSESP_DEFAULT_SYSLOG_ENABLED;
     settings.syslog_level         = root["syslog_level"] | EMSESP_DEFAULT_SYSLOG_LEVEL;
     settings.syslog_mark_interval = root["syslog_mark_interval"] | EMSESP_DEFAULT_SYSLOG_MARK_INTERVAL;
     settings.syslog_host          = root["syslog_host"] | EMSESP_DEFAULT_SYSLOG_HOST;

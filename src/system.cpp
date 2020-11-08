@@ -37,6 +37,7 @@ bool        System::hide_led_       = false;
 uint8_t     System::led_gpio_       = 0;
 uint16_t    System::analog_         = 0;
 bool        System::analog_enabled_ = false;
+bool        System::syslog_enabled_ = false;
 std::string System::hostname_;
 
 // send on/off to a gpio pin
@@ -112,6 +113,7 @@ uint8_t System::free_mem() {
 void System::syslog_init() {
     // fetch settings
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
+        syslog_enabled_       = settings.syslog_enabled;
         syslog_level_         = settings.syslog_level;
         syslog_mark_interval_ = settings.syslog_mark_interval;
         syslog_host_          = settings.syslog_host;
@@ -153,9 +155,11 @@ void System::start() {
         Command::add(EMSdevice::DeviceType::SYSTEM, settings.ems_bus_id, F_(send), System::command_send);
         Command::add_with_json(EMSdevice::DeviceType::SYSTEM, F_(info), System::command_info);
         Command::add_with_json(EMSdevice::DeviceType::SYSTEM, F_(report), System::command_report);
+        if (settings.syslog_enabled) {
+            syslog_init(); // init SysLog
+        }
     });
 
-    syslog_init(); // init SysLog
 
     init();
 }
@@ -168,6 +172,7 @@ void System::init() {
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
         Helpers::bool_format(settings.bool_format);
         analog_enabled_ = settings.analog_enabled;
+        syslog_enabled_ = settings.syslog_enabled;
     });
 
     EMSESP::esp8266React.getWiFiSettingsService()->read([&](WiFiSettings & settings) { hostname(settings.hostname.c_str()); });
@@ -207,8 +212,11 @@ void System::upload_status(bool in_progress) {
 // checks system health and handles LED flashing wizardry
 void System::loop() {
 #ifndef EMSESP_STANDALONE
-    syslog_.loop();
+    if (syslog_enabled_) {
+        syslog_.loop();
+    }
 #endif
+
     led_monitor();  // check status and report back using the LED
     system_check(); // check system health
     if (analog_enabled_) {
@@ -481,13 +489,18 @@ void System::show_system(uuid::console::Shell & shell) {
 
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
         shell.println();
-        shell.printfln(F("Syslog:"));
-        shell.print(F_(1space));
-        shell.printfln(F_(host_fmt), !settings.syslog_host.isEmpty() ? settings.syslog_host.c_str() : uuid::read_flash_string(F_(unset)).c_str());
-        shell.print(F_(1space));
-        shell.printfln(F_(log_level_fmt), uuid::log::format_level_lowercase(static_cast<uuid::log::Level>(settings.syslog_level)));
-        shell.print(F_(1space));
-        shell.printfln(F_(mark_interval_fmt), settings.syslog_mark_interval);
+
+        if (!settings.syslog_enabled) {
+            shell.printfln(F("Syslog: disabled"));
+        } else {
+            shell.printfln(F("Syslog:"));
+            shell.print(F_(1space));
+            shell.printfln(F_(host_fmt), !settings.syslog_host.isEmpty() ? settings.syslog_host.c_str() : uuid::read_flash_string(F_(unset)).c_str());
+            shell.print(F_(1space));
+            shell.printfln(F_(log_level_fmt), uuid::log::format_level_lowercase(static_cast<uuid::log::Level>(settings.syslog_level)));
+            shell.print(F_(1space));
+            shell.printfln(F_(mark_interval_fmt), settings.syslog_mark_interval);
+        }
     });
 
 #endif
@@ -803,6 +816,7 @@ bool System::check_upgrade() {
                     settings.shower_timer         = custom_settings["shower_timer"] | EMSESP_DEFAULT_SHOWER_TIMER;
                     settings.master_thermostat    = custom_settings["master_thermostat"] | EMSESP_DEFAULT_MASTER_THERMOSTAT;
                     settings.ems_bus_id           = custom_settings["bus_id"] | EMSESP_DEFAULT_EMS_BUS_ID;
+                    settings.syslog_enabled       = false;
                     settings.syslog_host          = EMSESP_DEFAULT_SYSLOG_HOST;
                     settings.syslog_level         = EMSESP_DEFAULT_SYSLOG_LEVEL;
                     settings.syslog_mark_interval = EMSESP_DEFAULT_SYSLOG_MARK_INTERVAL;
@@ -918,6 +932,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & json
         JsonObject node              = json.createNestedObject("Settings");
         node["tx_mode"]              = settings.tx_mode;
         node["ems_bus_id"]           = settings.ems_bus_id;
+        node["syslog_enabled"]       = settings.syslog_enabled;
         node["syslog_level"]         = settings.syslog_level;
         node["syslog_mark_interval"] = settings.syslog_mark_interval;
         node["syslog_host"]          = settings.syslog_host;

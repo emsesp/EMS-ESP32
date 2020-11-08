@@ -15,7 +15,8 @@ class DummySettings {
   public:
     uint8_t  tx_mode                 = 1;
     uint8_t  ems_bus_id              = 0x0B;
-    int8_t   syslog_level            = 1; // uuid::log::Level
+    bool     syslog_enabled          = false;
+    int8_t   syslog_level            = 3; // uuid::log::Level
     uint32_t syslog_mark_interval    = 0;
     String   syslog_host             = "192.168.1.4";
     uint8_t  master_thermostat       = 0;

@@ -27,7 +27,8 @@
 
 #define EMSESP_DEFAULT_TX_MODE 1       // EMS1.0
 #define EMSESP_DEFAULT_EMS_BUS_ID 0x0B // service key
-#define EMSESP_DEFAULT_SYSLOG_LEVEL -1 // OFF
+#define EMSESP_DEFAULT_SYSLOG_ENABLED false
+#define EMSESP_DEFAULT_SYSLOG_LEVEL 3 // ERR
 #define EMSESP_DEFAULT_SYSLOG_MARK_INTERVAL 0
 #define EMSESP_DEFAULT_SYSLOG_HOST ""
 #define EMSESP_DEFAULT_MASTER_THERMOSTAT 0 // not set
@@ -67,6 +68,7 @@ class WebSettings {
     uint8_t  master_thermostat;
     bool     shower_timer;
     bool     shower_alert;
+    bool     syslog_enabled;
     int8_t   syslog_level; // uuid::log::Level
     uint32_t syslog_mark_interval;
     String   syslog_host;
