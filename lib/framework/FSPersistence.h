@@ -33,10 +33,12 @@ class FSPersistence {
                 jsonDocument.shrinkToFit(); // added by proddy
                 JsonObject jsonObject = jsonDocument.as<JsonObject>();
 
-                // debug added by Proddy
-                // Serial.printf("Read File: %s: ", _filePath);
-                // serializeJson(jsonDocument, Serial);
-                // Serial.println();
+// debug added by Proddy
+#if defined(EMSESP_FORCE_SERIAL)
+                Serial.printf("Read File: %s: ", _filePath);
+                serializeJson(jsonDocument, Serial);
+                Serial.println();
+#endif
 
                 _statefulService->updateWithoutPropagation(jsonObject, _stateUpdater);
                 settingsFile.close();
@@ -64,12 +66,10 @@ class FSPersistence {
             return false;
         }
 
-// debug added by Proddy
-#if defined(EMSESP_DEBUG)
-        Serial.printf("Write File: %s: ", _filePath);
-        serializeJson(jsonDocument, Serial);
-        Serial.println();
-#endif
+        // debug added by Proddy
+        // Serial.printf("Write File: %s: ", _filePath);
+        // serializeJson(jsonDocument, Serial);
+        // Serial.println();
 
         // serialize the data to the file
         serializeJson(jsonDocument, settingsFile);
