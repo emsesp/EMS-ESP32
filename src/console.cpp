@@ -20,9 +20,7 @@
 #include "emsesp.h"
 #include "version.h"
 
-#if defined(EMSESP_DEBUG)
 #include "test/test.h"
-#endif
 
 namespace emsesp {
 
@@ -494,28 +492,20 @@ void Console::load_standard_commands(unsigned int context) {
 #if defined(EMSESP_DEBUG)
     EMSESPShell::commands->add_command(context,
                                        CommandFlags::USER,
-                                       flash_string_vector{F_(test)},
+                                       flash_string_vector{F("test")},
                                        flash_string_vector{F_(name_optional)},
-                                       [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
+                                       [](Shell & shell, const std::vector<std::string> & arguments) {
                                            if (arguments.size() == 0) {
                                                Test::run_test(shell, "default");
                                            } else {
                                                Test::run_test(shell, arguments.front());
                                            }
                                        });
-#endif
-
-#if defined(EMSESP_STANDALONE)
     EMSESPShell::commands->add_command(context,
                                        CommandFlags::USER,
                                        flash_string_vector{F("t")},
-                                       flash_string_vector{F_(name_optional)},
                                        [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
-                                           if (arguments.size() == 0) {
-                                               Test::run_test(shell, "default");
-                                           } else {
-                                               Test::run_test(shell, arguments.front());
-                                           }
+                                           Test::run_test(shell, "default");
                                        });
 #endif
 
