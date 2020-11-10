@@ -65,6 +65,7 @@ class Thermostat : public EMSdevice {
         uint8_t summer_setmode    = EMS_VALUE_UINT_NOTSET;
         uint8_t roominfluence     = EMS_VALUE_UINT_NOTSET;
         uint8_t flowtempoffset    = EMS_VALUE_UINT_NOTSET;
+        uint8_t minflowtemp       = EMS_VALUE_UINT_NOTSET;
         uint8_t maxflowtemp       = EMS_VALUE_UINT_NOTSET;
 
         uint8_t hc_num() const {
@@ -87,7 +88,7 @@ class Thermostat : public EMSdevice {
         uint8_t get_mode(uint8_t flags) const;
         uint8_t get_mode_type(uint8_t flags) const;
 
-        enum Mode : uint8_t { UNKNOWN, OFF, MANUAL, AUTO, DAY, NIGHT, HEAT, NOFROST, ECO, HOLIDAY, COMFORT, OFFSET, DESIGN, SUMMER, FLOWOFFSET, MAXFLOW, ROOMINFLUENCE };
+        enum Mode : uint8_t { UNKNOWN, OFF, MANUAL, AUTO, DAY, NIGHT, HEAT, NOFROST, ECO, HOLIDAY, COMFORT, OFFSET, DESIGN, SUMMER, FLOWOFFSET, MINFLOW, MAXFLOW, ROOMINFLUENCE };
 
         // for sorting based on hc number
         friend inline bool operator<(const std::shared_ptr<HeatingCircuit> & lhs, const std::shared_ptr<HeatingCircuit> & rhs) {
@@ -311,12 +312,14 @@ class Thermostat : public EMSdevice {
     bool set_remotetemp(const char * value, const int8_t id);
     bool set_roominfluence(const char * value, const int8_t id);
     bool set_flowtempoffset(const char * value, const int8_t id);
+    bool set_minflowtemp(const char * value, const int8_t id);
     bool set_maxflowtemp(const char * value, const int8_t id);
 
     // set functions - these don't use the id/hc, the parameters are ignored
     bool set_wwmode(const char * value, const int8_t id);
     bool set_wwtemp(const char * value, const int8_t id);
     bool set_wwtemplow(const char * value, const int8_t id);
+    bool set_wwonetime(const char * value, const int8_t id);
     bool set_wwcircmode(const char * value, const int8_t id);
     bool set_datetime(const char * value, const int8_t id);
     bool set_minexttemp(const char * value, const int8_t id);

@@ -199,6 +199,7 @@ void Thermostat::device_info_web(JsonArray & root) {
         print_value_json(root, F("wwmode"), nullptr, F_(wwmode), nullptr, json_main);
         print_value_json(root, F("wwtemp"), nullptr, F_(wwtemp), nullptr, json_main);
         print_value_json(root, F("wwtemplow"), nullptr, F_(wwtemplow), nullptr, json_main);
+        print_value_json(root, F("wwextra1"), nullptr, F_(wwextra1), nullptr, json_main);
         print_value_json(root, F("wwcircmode"), nullptr, F_(wwcircmode), nullptr, json_main);
     }
 
@@ -231,6 +232,7 @@ void Thermostat::device_info_web(JsonArray & root) {
                 print_value_json(root, F("designtemp"), FPSTR(prefix_str), F_(designtemp), F_(degrees), json);
                 print_value_json(root, F("roominfluence"), FPSTR(prefix_str), F_(roominfluence), F_(degrees), json);
                 print_value_json(root, F("flowtempoffset"), FPSTR(prefix_str), F_(flowtempoffset), F_(degrees), json);
+                print_value_json(root, F("minflowtemp"), F_(2spaces), F_(minflowtemp), F_(degrees), json);
                 print_value_json(root, F("maxflowtemp"), F_(2spaces), F_(maxflowtemp), F_(degrees), json);
                 print_value_json(root, F("summertemp"), FPSTR(prefix_str), F_(summertemp), F_(degrees), json);
                 print_value_json(root, F("summermode"), FPSTR(prefix_str), F_(summermode), F_(degrees), json);
@@ -284,6 +286,7 @@ void Thermostat::show_values(uuid::console::Shell & shell) {
         print_value_json(shell, F("wwmode"), nullptr, F_(wwmode), nullptr, json_main);
         print_value_json(shell, F("wwtemp"), nullptr, F_(wwtemp), nullptr, json_main);
         print_value_json(shell, F("wwtemplow"), nullptr, F_(wwtemplow), nullptr, json_main);
+        print_value_json(shell, F("wwextra1"), nullptr, F_(wwextra1), nullptr, json_main);
         print_value_json(shell, F("wwcircmode"), nullptr, F_(wwcircmode), nullptr, json_main);
     }
 
@@ -316,6 +319,7 @@ void Thermostat::show_values(uuid::console::Shell & shell) {
                 print_value_json(shell, F("designtemp"), F_(2spaces), F_(designtemp), F_(degrees), json);
                 print_value_json(shell, F("roominfluence"), F_(2spaces), F_(roominfluence), F_(degrees), json);
                 print_value_json(shell, F("flowtempoffset"), F_(2spaces), F_(flowtempoffset), F_(degrees), json);
+                print_value_json(shell, F("minflowtemp"), F_(2spaces), F_(minflowtemp), F_(degrees), json);
                 print_value_json(shell, F("maxflowtemp"), F_(2spaces), F_(maxflowtemp), F_(degrees), json);
                 print_value_json(shell, F("summertemp"), F_(2spaces), F_(summertemp), F_(degrees), json);
                 print_value_json(shell, F("summermode"), F_(2spaces), F_(summermode), F_(degrees), json);
@@ -480,6 +484,16 @@ bool Thermostat::export_values_main(JsonObject & rootThermostat) {
         rootThermostat["wwtemplow"] = wwTempLow_;
     }
 
+    // Warm water extra1
+    if (Helpers::hasValue(wwExtra1_)) {
+        rootThermostat["wwextra1"] = wwExtra1_;
+    }
+
+    // Warm water extra2
+    if (Helpers::hasValue(wwExtra2_)) {
+        rootThermostat["wwextra2"] = wwExtra2_;
+    }
+
     // Warm Water circulation mode
     if (Helpers::hasValue(wwCircMode_)) {
         char s[7];
@@ -607,7 +621,12 @@ bool Thermostat::export_values_hc(uint8_t mqtt_format, JsonObject & rootThermost
                 dataThermostat["flowtempoffset"] = hc->flowtempoffset;
             }
 
-            // Flow temperature offset
+            // Min Flow temperature offset
+            if (Helpers::hasValue(hc->minflowtemp)) {
+                dataThermostat["minflowtemp"] = hc->minflowtemp;
+            }
+
+            // Max Flow temperature offset
             if (Helpers::hasValue(hc->maxflowtemp)) {
                 dataThermostat["maxflowtemp"] = hc->maxflowtemp;
             }
@@ -944,6 +963,7 @@ void Thermostat::register_mqtt_ha_config(uint8_t hc_num) {
         Mqtt::register_mqtt_ha_sensor(hc_name, nullptr, F_(summertemp), this->device_type(), "summertemp", F_(degrees), F_(icontemperature));
         Mqtt::register_mqtt_ha_sensor(hc_name, nullptr, F_(designtemp), this->device_type(), "designtemp", F_(degrees), F_(icontemperature));
         Mqtt::register_mqtt_ha_sensor(hc_name, nullptr, F_(offsettemp), this->device_type(), "offsettemp", F_(degrees), F_(icontemperature));
+        Mqtt::register_mqtt_ha_sensor(hc_name, nullptr, F_(minflowtemp), this->device_type(), "minflowtemp", F_(degrees), F_(icontemperature));
         Mqtt::register_mqtt_ha_sensor(hc_name, nullptr, F_(maxflowtemp), this->device_type(), "maxflowtemp", F_(degrees), F_(icontemperature));
         Mqtt::register_mqtt_ha_sensor(hc_name, nullptr, F_(roominfluence), this->device_type(), "roominfluence", F_(degrees), F_(icontemperature));
         Mqtt::register_mqtt_ha_sensor(hc_name, nullptr, F_(nofrosttemp), this->device_type(), "nofrosttemp", F_(degrees), F_(icontemperature));
@@ -964,6 +984,7 @@ void Thermostat::register_mqtt_ha_config(uint8_t hc_num) {
         Mqtt::register_mqtt_ha_sensor(hc_name, nullptr, F_(summertemp), this->device_type(), "summertemp", F_(degrees), F_(icontemperature));
         Mqtt::register_mqtt_ha_sensor(hc_name, nullptr, F_(nofrosttemp), this->device_type(), "nofrosttemp", F_(degrees), F_(icontemperature));
         Mqtt::register_mqtt_ha_sensor(hc_name, nullptr, F_(roominfluence), this->device_type(), "roominfluence", F_(degrees), F_(icontemperature));
+        Mqtt::register_mqtt_ha_sensor(hc_name, nullptr, F_(minflowtemp), this->device_type(), "minflowtemp", F_(degrees), F_(icontemperature));
         Mqtt::register_mqtt_ha_sensor(hc_name, nullptr, F_(maxflowtemp), this->device_type(), "maxflowtemp", F_(degrees), F_(icontemperature));
         break;
     case EMS_DEVICE_FLAG_JUNKERS:
@@ -1114,6 +1135,9 @@ std::string Thermostat::mode_tostring(uint8_t mode) {
         break;
     case HeatingCircuit::Mode::DESIGN:
         return read_flash_string(F("design"));
+        break;
+    case HeatingCircuit::Mode::MINFLOW:
+        return read_flash_string(F("minflow"));
         break;
     case HeatingCircuit::Mode::MAXFLOW:
         return read_flash_string(F("maxflow"));
@@ -1304,6 +1328,7 @@ void Thermostat::process_RC300Summer(std::shared_ptr<const Telegram> telegram) {
     } else {
         changed_ |= telegram->read_value(hc->designtemp, 5);
     }
+    changed_ |= telegram->read_value(hc->minflowtemp, 8);
 }
 
 // types 0x29B ff
@@ -1417,10 +1442,13 @@ void Thermostat::process_RC35Set(std::shared_ptr<const Telegram> telegram) {
     changed_ |= telegram->read_value(hc->summertemp, 22);     // is * 1
     changed_ |= telegram->read_value(hc->nofrosttemp, 23);    // is * 1
     changed_ |= telegram->read_value(hc->flowtempoffset, 24); // is * 1, only in mixed circuits
+    changed_ |= telegram->read_value(hc->minflowtemp, 16);
     if (hc->heatingtype == 3) {
         changed_ |= telegram->read_value(hc->designtemp, 36); // is * 1
+        changed_ |= telegram->read_value(hc->maxflowtemp, 35); // is * 1
     } else {
         changed_ |= telegram->read_value(hc->designtemp, 17); // is * 1
+        changed_ |= telegram->read_value(hc->maxflowtemp, 15); // is * 1
     }
 }
 
@@ -1653,6 +1681,24 @@ bool Thermostat::set_wwtemplow(const char * value, const int8_t id) {
     }
     LOG_INFO(F("Setting warm water low temperature to %d"), t);
     write_command(0x031B, 1, t, 0x031B);
+    return true;
+}
+
+// Set ww onetime RC300, ems+
+bool Thermostat::set_wwonetime(const char * value, const int8_t id) {
+    bool b = false;
+    if (!Helpers::value2bool(value, b)) {
+        LOG_WARNING(F("Set warm water onetime: Invalid value"));
+        return false;
+    }
+    char s[7];
+    LOG_INFO(F("Setting warm water onetime to %s"), Helpers::render_boolean(s, b));
+    if (b) {
+        write_command(0x031D, 0, 1);
+        write_command(0x031D, 2, 2, 0x031D);
+    } else {
+        write_command(0x031D, 0, 0, 0x031D);
+    }
     return true;
 }
 
@@ -1986,11 +2032,14 @@ bool Thermostat::set_temperature(const float temperature, const std::string & mo
     if (mode_tostring(HeatingCircuit::Mode::DESIGN) == mode) {
         return set_temperature(temperature, HeatingCircuit::Mode::DESIGN, hc_num);
     }
+    if (mode_tostring(HeatingCircuit::Mode::MINFLOW) == mode) {
+        return set_temperature(temperature, HeatingCircuit::Mode::MINFLOW, hc_num);
+    }
     if (mode_tostring(HeatingCircuit::Mode::MAXFLOW) == mode) {
-        return set_temperature(temperature, HeatingCircuit::Mode::DESIGN, hc_num);
+        return set_temperature(temperature, HeatingCircuit::Mode::MAXFLOW, hc_num);
     }
     if (mode_tostring(HeatingCircuit::Mode::ROOMINFLUENCE) == mode) {
-        return set_temperature(temperature, HeatingCircuit::Mode::DESIGN, hc_num);
+        return set_temperature(temperature, HeatingCircuit::Mode::ROOMINFLUENCE, hc_num);
     }
 
     LOG_WARNING(F("Set temperature: Invalid mode"));
@@ -2053,6 +2102,12 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
             } else {
                 offset = 4;
             }
+            factor = 1;
+            break;
+        case HeatingCircuit::Mode::MINFLOW:
+            set_typeid      = summer_typeids[hc->hc_num() - 1];
+            validate_typeid = set_typeid;
+            offset = 8;
             factor = 1;
             break;
         case HeatingCircuit::Mode::MAXFLOW:
@@ -2143,8 +2198,16 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
             offset = 4;
             factor = 1;
             break;
+        case HeatingCircuit::Mode::MINFLOW:
+            offset = 16;
+            factor = 1;
+            break;
         case HeatingCircuit::Mode::MAXFLOW:
-            offset = 15;
+            if (hc->heatingtype == 3) {
+                offset = 35;
+            } else {
+                offset = 15;
+            }
             factor = 1;
             break;
         default:
@@ -2310,6 +2373,10 @@ bool Thermostat::set_maxflowtemp(const char * value, const int8_t id) {
     return set_temperature_value(value, id, HeatingCircuit::Mode::MAXFLOW);
 }
 
+bool Thermostat::set_minflowtemp(const char * value, const int8_t id) {
+    return set_temperature_value(value, id, HeatingCircuit::Mode::MINFLOW);
+}
+
 bool Thermostat::set_roominfluence(const char * value, const int8_t id) {
     return set_temperature_value(value, id, HeatingCircuit::Mode::ROOMINFLUENCE);
 }
@@ -2338,10 +2405,12 @@ void Thermostat::add_commands() {
         register_mqtt_cmd(F("wwmode"), [&](const char * value, const int8_t id) { return set_wwmode(value, id); });
         register_mqtt_cmd(F("wwtemp"), [&](const char * value, const int8_t id) { return set_wwtemp(value, id); });
         register_mqtt_cmd(F("wwtemplow"), [&](const char * value, const int8_t id) { return set_wwtemplow(value, id); });
+        register_mqtt_cmd(F("wwonetime"), [&](const char * value, const int8_t id) { return set_wwonetime(value, id); });
         register_mqtt_cmd(F("building"), [&](const char * value, const int8_t id) { return set_building(value, id); });
         register_mqtt_cmd(F("nofrosttemp"), [&](const char * value, const int8_t id) { return set_nofrosttemp(value, id); });
         register_mqtt_cmd(F("designtemp"), [&](const char * value, const int8_t id) { return set_designtemp(value, id); });
         register_mqtt_cmd(F("offsettemp"), [&](const char * value, const int8_t id) { return set_offsettemp(value, id); });
+        register_mqtt_cmd(F("minflowtemp"), [&](const char * value, const int8_t id) { return set_minflowtemp(value, id); });
         register_mqtt_cmd(F("maxflowtemp"), [&](const char * value, const int8_t id) { return set_maxflowtemp(value, id); });
         register_mqtt_cmd(F("minexttemp"), [&](const char * value, const int8_t id) { return set_minexttemp(value, id); });
         register_mqtt_cmd(F("roominfluence"), [&](const char * value, const int8_t id) { return set_roominfluence(value, id); });
@@ -2374,6 +2443,7 @@ void Thermostat::add_commands() {
         register_mqtt_cmd(F("wwcircmode"), [&](const char * value, const int8_t id) { return set_wwcircmode(value, id); });
         register_mqtt_cmd(F("roominfluence"), [&](const char * value, const int8_t id) { return set_roominfluence(value, id); });
         register_mqtt_cmd(F("flowtempoffset"), [&](const char * value, const int8_t id) { return set_flowtempoffset(value, id); });
+        register_mqtt_cmd(F("minflowtemp"), [&](const char * value, const int8_t id) { return set_minflowtemp(value, id); });
         register_mqtt_cmd(F("maxflowtemp"), [&](const char * value, const int8_t id) { return set_maxflowtemp(value, id); });
         break;
     case EMS_DEVICE_FLAG_JUNKERS:
