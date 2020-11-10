@@ -39,6 +39,11 @@ uint16_t    System::analog_         = 0;
 bool        System::analog_enabled_ = false;
 bool        System::syslog_enabled_ = false;
 std::string System::hostname_;
+int8_t      System::syslog_level_         = -1;
+uint32_t    System::syslog_mark_interval_ = 0;
+String      System::syslog_host_;
+
+
 
 // send on/off to a gpio pin
 // value: true = HIGH, false = LOW
@@ -120,6 +125,13 @@ void System::syslog_init() {
     });
 
 #ifndef EMSESP_STANDALONE
+    if (!syslog_enabled_) {
+        syslog_.log_level((uuid::log::Level)-1);
+        syslog_.mark_interval(0);
+        syslog_.destination(0);
+        return;
+    }
+
     syslog_.start(); // syslog service re-start
 
     // configure syslog
@@ -155,9 +167,6 @@ void System::start() {
         Command::add(EMSdevice::DeviceType::SYSTEM, settings.ems_bus_id, F_(send), System::command_send);
         Command::add_with_json(EMSdevice::DeviceType::SYSTEM, F_(info), System::command_info);
         Command::add_with_json(EMSdevice::DeviceType::SYSTEM, F_(report), System::command_report);
-        if (settings.syslog_enabled) {
-            syslog_init(); // init SysLog
-        }
     });
 
 
@@ -172,8 +181,8 @@ void System::init() {
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
         Helpers::bool_format(settings.bool_format);
         analog_enabled_ = settings.analog_enabled;
-        syslog_enabled_ = settings.syslog_enabled;
     });
+    syslog_init(); // init SysLog
 
     EMSESP::esp8266React.getWiFiSettingsService()->read([&](WiFiSettings & settings) { hostname(settings.hostname.c_str()); });
 
