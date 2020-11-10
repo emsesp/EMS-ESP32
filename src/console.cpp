@@ -300,6 +300,7 @@ void EMSESPShell::add_console_commands() {
                                   "local");
                           });
 
+#ifndef EMSESP_STANDALONE
     commands->add_command(ShellContext::MAIN,
                           CommandFlags::USER,
                           flash_string_vector{F_(set), F_(timeout)},
@@ -309,6 +310,7 @@ void EMSESPShell::add_console_commands() {
                               telnet_.initial_idle_timeout(value * 60);
                               shell.printfln(F("Telnet timout is %d minutes"), value);
                           });
+#endif
 
     commands->add_command(ShellContext::MAIN,
                           CommandFlags::ADMIN,

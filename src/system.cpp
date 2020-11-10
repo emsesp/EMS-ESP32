@@ -128,7 +128,7 @@ void System::syslog_init() {
     if (!syslog_enabled_) {
         syslog_.log_level((uuid::log::Level)-1);
         syslog_.mark_interval(0);
-        syslog_.destination(0);
+        syslog_.destination((IPAddress)0);
         return;
     }
 

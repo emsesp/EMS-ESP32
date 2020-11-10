@@ -1693,12 +1693,7 @@ bool Thermostat::set_wwonetime(const char * value, const int8_t id) {
     }
     char s[7];
     LOG_INFO(F("Setting warm water onetime to %s"), Helpers::render_boolean(s, b));
-    if (b) {
-        write_command(0x031D, 0, 1);
-        write_command(0x031D, 2, 2, 0x031D);
-    } else {
-        write_command(0x031D, 0, 0, 0x031D);
-    }
+    write_command(0x02F5, 11, b ? 0xFF : 0x00, 0x031D);
     return true;
 }
 
