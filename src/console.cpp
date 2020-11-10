@@ -301,6 +301,16 @@ void EMSESPShell::add_console_commands() {
                           });
 
     commands->add_command(ShellContext::MAIN,
+                          CommandFlags::USER,
+                          flash_string_vector{F_(set), F_(timeout)},
+                          flash_string_vector{F_(n_mandatory)},
+                          [](Shell & shell, const std::vector<std::string> & arguments) {
+                              uint16_t value = Helpers::atoint(arguments.front().c_str());
+                              telnet_.initial_idle_timeout(value * 60);
+                              shell.printfln(F("Telnet timout is %d minutes"), value);
+                          });
+
+    commands->add_command(ShellContext::MAIN,
                           CommandFlags::ADMIN,
                           flash_string_vector{F_(send), F_(telegram)},
                           flash_string_vector{F_(data_mandatory)},
