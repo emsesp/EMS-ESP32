@@ -10,6 +10,7 @@
 
 ### Changed
 - optimized MQTT for HA to reduce mem fragmentation issues
+- change syslog settings without reboot
 
 ### Removed
 - old scripts
