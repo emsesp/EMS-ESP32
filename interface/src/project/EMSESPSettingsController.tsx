@@ -237,7 +237,9 @@ function EMSESPSettingsControllerForm(props: EMSESPSettingsControllerFormProps) 
                 variant="outlined"
                 onChange={handleValueChange('syslog_level')}
                 margin="normal">
+                <MenuItem value={-1}>OFF</MenuItem>
                 <MenuItem value={3}>ERR</MenuItem>
+                <MenuItem value={5}>NOTICE</MenuItem>
                 <MenuItem value={6}>INFO</MenuItem>
                 <MenuItem value={7}>DEBUG</MenuItem>
             </SelectValidator>
@@ -245,7 +247,7 @@ function EMSESPSettingsControllerForm(props: EMSESPSettingsControllerFormProps) 
                 validators={['required', 'isNumber', 'minNumber:0', 'maxNumber:65535']}
                 errorMessages={['Syslog Mark is required', "Must be a number", "Must be 0 or higher", "Max value is 10"]}
                 name="syslog_mark_interval"
-                label="Syslog Mark Interval (seconds)"
+                label="Syslog Mark Interval (seconds, 0=off)"
                 fullWidth
                 variant="outlined"
                 value={data.syslog_mark_interval}

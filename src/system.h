@@ -59,9 +59,9 @@ class System {
     static void    show_mem(const char * note);
     static void    set_led();
     static void    init();
+    static void    syslog_init();
 
     bool check_upgrade();
-    void syslog_init();
     void send_heartbeat();
 
     static std::string hostname() {
@@ -108,13 +108,13 @@ class System {
     static std::string hostname_;
 
     // settings
-    static bool    hide_led_;
-    static bool    syslog_enabled_;
-    uint8_t        syslog_level_;
-    uint32_t       syslog_mark_interval_;
-    String         syslog_host_;
-    static uint8_t led_gpio_;
-    static bool    analog_enabled_;
+    static bool     hide_led_;
+    static bool     syslog_enabled_;
+    static int8_t   syslog_level_;
+    static uint32_t syslog_mark_interval_;
+    static String   syslog_host_;
+    static uint8_t  led_gpio_;
+    static bool     analog_enabled_;
 };
 
 } // namespace emsesp

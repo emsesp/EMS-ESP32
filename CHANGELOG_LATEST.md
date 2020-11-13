@@ -1,7 +1,7 @@
 # Changelog
 
 ### Added
-- function keys in editor: cursor, del, pos1, end. F1=help, F2=show, F10=report
+- function keys in editor: cursor, del, home, end. F1=help, F2=show, and other shortcuts
 - add sm100 pump working time and energy units
 - heating curve parameters for RC300
 
@@ -10,6 +10,7 @@
 
 ### Changed
 - optimized MQTT for HA to reduce mem fragmentation issues
+- change syslog settings without reboot
 
 ### Removed
 - old scripts
