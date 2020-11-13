@@ -63,6 +63,7 @@ bool     EMSESP::read_next_                = false;
 uint16_t EMSESP::publish_id_               = 0;
 bool     EMSESP::tap_water_active_         = false; // for when Boiler states we having running warm water. used in Shower()
 uint32_t EMSESP::last_fetch_               = 0;
+uint8_t  EMSESP::publish_all_idx_          = 0;
 
 // for a specific EMS device go and request data values
 // or if device_id is 0 it will fetch from all our known and active devices
@@ -289,14 +290,58 @@ void EMSESP::show_sensor_values(uuid::console::Shell & shell) {
 
 // MQTT publish everything, immediately
 void EMSESP::publish_all(bool force) {
+    if (force) {
+        publish_all_idx_ = 1;
+        return;
+    }
     if (Mqtt::connected()) {
-        publish_device_values(EMSdevice::DeviceType::BOILER, force);
-        publish_device_values(EMSdevice::DeviceType::THERMOSTAT, force);
-        publish_device_values(EMSdevice::DeviceType::SOLAR, force);
-        publish_device_values(EMSdevice::DeviceType::MIXER, force);
+        publish_device_values(EMSdevice::DeviceType::BOILER, false);
+        publish_device_values(EMSdevice::DeviceType::THERMOSTAT, false);
+        publish_device_values(EMSdevice::DeviceType::SOLAR, false);
+        publish_device_values(EMSdevice::DeviceType::MIXER, false);
         publish_other_values();
-        publish_sensor_values(true);
+        publish_sensor_values(true, false);
         system_.send_heartbeat();
+    }
+}
+
+// on command "publish HA" loop and wait between devices for publishing all sensors
+void EMSESP::publish_all_loop() {
+    static uint32_t last = 0;
+    if (!Mqtt::connected() || !publish_all_idx_) {
+        return;
+    }
+    // every HA-sensor takes 20 ms, wait ~2 sec to finish (boiler have ~70 sensors)
+    if ((uuid::get_uptime() - last < 2000)) {
+        return;
+    }
+    last = uuid::get_uptime();
+    switch (publish_all_idx_++) {
+    case 1:
+        publish_device_values(EMSdevice::DeviceType::BOILER, true);
+        break;
+    case 2:
+        publish_device_values(EMSdevice::DeviceType::THERMOSTAT, true);
+        break;
+    case 3:
+        publish_device_values(EMSdevice::DeviceType::SOLAR, true);
+        break;
+    case 4:
+        publish_device_values(EMSdevice::DeviceType::MIXER, true);
+        break;
+    case 5:
+        publish_other_values();
+        break;
+    case 6:
+        publish_sensor_values(true, true);
+        break;
+    case 7:
+        system_.send_heartbeat();
+        break;
+    default:
+        // all finished
+        publish_all_idx_ = 0;
+        last             = 0;
     }
 }
 
@@ -304,14 +349,15 @@ void EMSESP::publish_all(bool force) {
 // special case for Mixer units, since we want to bundle all devices together into one payload
 void EMSESP::publish_device_values(uint8_t device_type, bool force) {
     if (device_type == EMSdevice::DeviceType::MIXER && Mqtt::mqtt_format() != Mqtt::Format::SINGLE) {
-        DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_LARGE);
-        JsonObject          json = doc.to<JsonObject>();
+        // DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_LARGE);
+        StaticJsonDocument<EMSESP_MAX_JSON_SIZE_LARGE> doc;
+        JsonObject                                     json = doc.to<JsonObject>();
         for (const auto & emsdevice : emsdevices) {
             if (emsdevice && (emsdevice->device_type() == device_type)) {
                 emsdevice->publish_values(json, force);
             }
         }
-        doc.shrinkToFit();
+        // doc.shrinkToFit();
         Mqtt::publish("mixer_data", doc.as<JsonObject>());
         return;
     }
@@ -334,9 +380,9 @@ void EMSESP::publish_other_values() {
     }
 }
 
-void EMSESP::publish_sensor_values(const bool force) {
-    if (dallassensor_.updated_values() || force) {
-        dallassensor_.publish_values();
+void EMSESP::publish_sensor_values(const bool time, const bool force) {
+    if (dallassensor_.updated_values() || time || force) {
+        dallassensor_.publish_values(force);
     }
 }
 
@@ -937,6 +983,7 @@ void EMSESP::loop() {
     system_.loop();       // does LED and checks system health, and syslog service
     shower_.loop();       // check for shower on/off
     dallassensor_.loop(); // this will also send out via MQTT
+    publish_all_loop();
     mqtt_.loop();         // sends out anything in the queue via MQTT
     console_.loop();      // telnet/serial console
     rxservice_.loop();    // process any incoming Rx telegrams

@@ -40,7 +40,7 @@ bool        Mqtt::mqtt_enabled_;
 std::vector<Mqtt::MQTTSubFunction> Mqtt::mqtt_subfunctions_;
 
 uint16_t                           Mqtt::mqtt_publish_fails_    = 0;
-size_t                             Mqtt::maximum_mqtt_messages_ = Mqtt::MAX_MQTT_MESSAGES;
+// size_t                             Mqtt::maximum_mqtt_messages_ = Mqtt::MAX_MQTT_MESSAGES;
 uint16_t                           Mqtt::mqtt_message_id_       = 0;
 std::list<Mqtt::QueuedMqttMessage> Mqtt::mqtt_messages_;
 char                               will_topic_[Mqtt::MQTT_TOPIC_MAX_SIZE]; // because MQTT library keeps only char pointer
@@ -527,7 +527,7 @@ std::shared_ptr<const MqttMessage> Mqtt::queue_message(const uint8_t operation, 
     }
 
     // if the queue is full, make room but removing the last one
-    if (mqtt_messages_.size() >= maximum_mqtt_messages_) {
+    if (mqtt_messages_.size() >= MAX_MQTT_MESSAGES) {
         mqtt_messages_.pop_front();
     }
     mqtt_messages_.emplace_back(mqtt_message_id_++, std::move(message));
@@ -695,7 +695,8 @@ void Mqtt::register_mqtt_ha_binary_sensor(const __FlashStringHelper * name, cons
         return;
     }
 
-    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
+    DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_SMALL);
+    // StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
 
     doc["name"]    = name;
     doc["uniq_id"] = entity;
@@ -723,11 +724,13 @@ void Mqtt::register_mqtt_ha_binary_sensor(const __FlashStringHelper * name, cons
     snprintf_P(ha_device, sizeof(ha_device), PSTR("ems-esp-%s"), EMSdevice::device_type_2_device_name(device_type).c_str());
     ids.add(ha_device);
 
+    doc.shrinkToFit();
+
     char topic[MQTT_TOPIC_MAX_SIZE];
     snprintf_P(topic, sizeof(topic), PSTR("homeassistant/binary_sensor/ems-esp/%s/config"), entity);
 
     // convert json to string and publish immediately with retain forced to true
-    char payload_text[300];
+    char payload_text[256];
     serializeJson(doc, payload_text); // convert json to string
     uint16_t packet_id = mqttClient_->publish(topic, 0, true, payload_text);
 #if defined(EMSESP_STANDALONE)
@@ -740,7 +743,9 @@ void Mqtt::register_mqtt_ha_binary_sensor(const __FlashStringHelper * name, cons
     }
 #endif
 
-    delay(MQTT_PUBLISH_WAIT);
+    // delay(MQTT_PUBLISH_WAIT);
+    delay(50);
+
 }
 
 // HA config for a normal 'sensor' type
@@ -761,11 +766,11 @@ void Mqtt::register_mqtt_ha_sensor(const char *                prefix,
     if (prefix != nullptr) {
         snprintf_P(new_entity, sizeof(new_entity), PSTR("%s.%s"), prefix, entity);
     } else {
-        strcpy(new_entity, entity);
+        strncpy(new_entity, entity, sizeof(new_entity));
     }
 
     char device_name[50];
-    strcpy(device_name, EMSdevice::device_type_2_device_name(device_type).c_str());
+    strncpy(device_name, EMSdevice::device_type_2_device_name(device_type).c_str(), sizeof(device_name));
 
     // build unique identifier, replacing all . with _ as not to break HA
     std::string uniq(50, '\0');
@@ -801,9 +806,8 @@ void Mqtt::register_mqtt_ha_sensor(const char *                prefix,
     }
     new_name[0] = toupper(new_name[0]); // capitalize first letter
 
-    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
-
-    // DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_SMALL);
+    DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_SMALL);
+    // StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
 
     doc["name"]    = new_name;
     doc["uniq_id"] = uniq.c_str();
@@ -819,13 +823,10 @@ void Mqtt::register_mqtt_ha_sensor(const char *                prefix,
     JsonArray  ids = dev.createNestedArray("ids");
     ids.add(ha_device);
 
+    doc.shrinkToFit();
     // convert json to string and publish immediately with retain forced to true
-    // std::string payload_text;
-    char payload_text[300];
+    char payload_text[256];
     serializeJson(doc, payload_text); // convert json to string
-    // queue_publish_message(topic, payload_text, true);
-
-    // publish_retain(topic, doc.as<JsonObject>(), true);
 
     uint16_t packet_id = mqttClient_->publish(topic, 0, true, payload_text);
     if (!packet_id) {
@@ -838,7 +839,8 @@ void Mqtt::register_mqtt_ha_sensor(const char *                prefix,
 #endif
     }
 
-    delay(MQTT_PUBLISH_WAIT); // don't flood asynctcp
-}
+    // delay(MQTT_PUBLISH_WAIT); // don't flood asynctcp
+    delay(50); // enough time to send the short message out
 
+}
 } // namespace emsesp

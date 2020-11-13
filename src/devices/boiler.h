@@ -47,13 +47,15 @@ class Boiler : public EMSdevice {
   private:
     static uuid::log::Logger logger_;
 
-    void register_mqtt_ha_config(bool force);
+    void register_mqtt_ha_config();
+    void register_mqtt_ha_config_ww();
     void check_active();
     bool export_values_main(JsonObject & doc);
     bool export_values_ww(JsonObject & doc);
 
-    bool changed_        = false;
-    bool mqtt_ha_config_ = false; // HA MQTT Discovery
+    bool changed_           = false;
+    bool mqtt_ha_config_    = false; // HA MQTT Discovery
+    bool mqtt_ha_config_ww_ = false; // HA MQTT Discovery
 
     static constexpr uint8_t EMS_TYPE_UBAParameterWW     = 0x33;
     static constexpr uint8_t EMS_TYPE_UBAFunctionTest    = 0x1D;

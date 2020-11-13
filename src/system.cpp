@@ -65,6 +65,12 @@ bool System::command_send(const char * value, const int8_t id) {
     return true;
 }
 
+// publish
+bool System::command_publish(const char * value, const int8_t id) {
+    EMSESP::publish_all(); // ignore value and id
+    return true;
+}
+
 // restart EMS-ESP
 void System::restart() {
     LOG_NOTICE(F("Restarting system..."));
@@ -165,6 +171,7 @@ void System::start() {
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
         Command::add(EMSdevice::DeviceType::SYSTEM, settings.ems_bus_id, F_(pin), System::command_pin);
         Command::add(EMSdevice::DeviceType::SYSTEM, settings.ems_bus_id, F_(send), System::command_send);
+        Command::add(EMSdevice::DeviceType::SYSTEM, settings.ems_bus_id, F_(publish), System::command_publish);
         Command::add_with_json(EMSdevice::DeviceType::SYSTEM, F_(info), System::command_info);
         Command::add_with_json(EMSdevice::DeviceType::SYSTEM, F_(report), System::command_report);
     });

@@ -74,17 +74,13 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
 
 // create the config topics for Home Assistant MQTT Discovery
 // for each of the main elements
-void Boiler::register_mqtt_ha_config(bool force) {
-    if ((mqtt_ha_config_ && !force)) {
-        return;
-    }
-
+void Boiler::register_mqtt_ha_config() {
     if (!Mqtt::connected()) {
         return;
     }
 
     // Create the Master device
-    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
+    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
     doc["name"]    = F("Service Code");
     doc["uniq_id"] = F("boiler");
     doc["ic"]      = F("mdi:home-thermometer-outline");
@@ -141,8 +137,17 @@ void Boiler::register_mqtt_ha_config(bool force) {
     Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(burnWorkMin), this->device_type(), "burnWorkMin", F_(min), nullptr);
     Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(heatWorkMin), this->device_type(), "heatWorkMin", F_(min), nullptr);
     Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(UBAuptime), this->device_type(), "UBAuptime", F_(min), nullptr);
+    mqtt_ha_config_ = true; // done
+}
 
-    // ww
+// create the config topics for Home Assistant MQTT Discovery
+// for each of the ww elements
+void Boiler::register_mqtt_ha_config_ww() {
+
+    if (!Mqtt::connected()) {
+        return;
+    }
+   // ww
     Mqtt::register_mqtt_ha_sensor(nullptr, F_(mqtt_suffix_ww), F_(wWSelTemp), this->device_type(), "wWSelTemp", F_(degrees), F_(iconcruise));
     Mqtt::register_mqtt_ha_sensor(nullptr, F_(mqtt_suffix_ww), F_(wWSetTemp), this->device_type(), "wWSetTemp", F_(degrees), F_(icontemperature));
     Mqtt::register_mqtt_ha_sensor(nullptr, F_(mqtt_suffix_ww), F_(wWDisinfectionTemp), this->device_type(), "wWDisinfectionTemp", F_(degrees), F_(icontemperature));
@@ -170,14 +175,15 @@ void Boiler::register_mqtt_ha_config(bool force) {
     Mqtt::register_mqtt_ha_sensor(nullptr, F_(mqtt_suffix_ww), F_(wWStarts), this->device_type(), "wWStarts", nullptr, nullptr);
     Mqtt::register_mqtt_ha_sensor(nullptr, F_(mqtt_suffix_ww), F_(wWWorkM), this->device_type(), "wWWorkM", F_(min), nullptr);
 
-    mqtt_ha_config_ = true; // done
+    mqtt_ha_config_ww_ = true; // done
 }
 
 // send stuff to the Web UI
 void Boiler::device_info_web(JsonArray & root) {
     // fetch the values into a JSON document
-    DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_LARGE);
-    JsonObject          json = doc.to<JsonObject>();
+    // DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_LARGE);
+    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_LARGE> doc;
+    JsonObject                                     json = doc.to<JsonObject>();
     if (!export_values_main(json)) {
         return; // empty
     }
@@ -618,19 +624,29 @@ bool Boiler::export_values_main(JsonObject & json) {
 void Boiler::publish_values(JsonObject & json, bool force) {
     // handle HA first
     if (Mqtt::mqtt_format() == Mqtt::Format::HA) {
-        register_mqtt_ha_config(force);
+        if (force) {
+            mqtt_ha_config_    = false;
+            mqtt_ha_config_ww_ = false;
+        }
+        // register ww in next cycle if both unregistered
+        if (!mqtt_ha_config_) {
+            register_mqtt_ha_config();
+            return;
+        } else if (!mqtt_ha_config_ww_) {
+            register_mqtt_ha_config_ww();
+            return;
+        }
     }
 
-    DynamicJsonDocument doc_main(EMSESP_MAX_JSON_SIZE_LARGE);
-    JsonObject          json_main = doc_main.to<JsonObject>();
-    if (export_values_main(json_main)) {
-        Mqtt::publish(F("boiler_data"), doc_main.as<JsonObject>());
+    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_LARGE> doc;
+    JsonObject                                     json_data = doc.to<JsonObject>();
+    if (export_values_main(json_data)) {
+        Mqtt::publish(F("boiler_data"), json_data);
     }
+    json_data.clear();
 
-    DynamicJsonDocument doc_ww(EMSESP_MAX_JSON_SIZE_LARGE);
-    JsonObject          json_ww = doc_ww.to<JsonObject>();
-    if (export_values_ww(json_ww)) {
-        Mqtt::publish(F("boiler_data_ww"), doc_ww.as<JsonObject>());
+    if (export_values_ww(json_data)) {
+        Mqtt::publish(F("boiler_data_ww"), json_data);
     }
 
     // send out heating and tapwater status
@@ -651,13 +667,14 @@ void Boiler::show_values(uuid::console::Shell & shell) {
     EMSdevice::show_values(shell); // for showing the header
 
     // fetch the values into a JSON document
-    DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_LARGE);
-    JsonObject          json = doc.to<JsonObject>();
+    // DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_LARGE);
+    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_LARGE> doc;
+    JsonObject                                     json = doc.to<JsonObject>();
     if (!export_values_main(json)) {
         return; // empty
     }
     export_values_ww(json); // append ww values
-    doc.shrinkToFit();
+    // doc.shrinkToFit();
 
     print_value_json(shell, F("heatingActive"), nullptr, F_(heatingActive), nullptr, json);
     print_value_json(shell, F("tapwaterActive"), nullptr, F_(tapwaterActive), nullptr, json);
