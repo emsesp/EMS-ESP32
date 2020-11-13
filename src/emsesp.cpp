@@ -63,7 +63,6 @@ bool     EMSESP::read_next_                = false;
 uint16_t EMSESP::publish_id_               = 0;
 bool     EMSESP::tap_water_active_         = false; // for when Boiler states we having running warm water. used in Shower()
 uint32_t EMSESP::last_fetch_               = 0;
-uint8_t  EMSESP::unique_id_count_          = 0;
 uint8_t  EMSESP::publish_all_idx_          = 0;
 
 // for a specific EMS device go and request data values
@@ -768,17 +767,19 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
         return false; // not found
     }
 
-    std::string name = uuid::read_flash_string(device_p->name);
-    emsdevices.push_back(EMSFactory::add(device_p->device_type, device_id, device_p->product_id, version, name, device_p->flags, brand));
-    emsdevices.back()->unique_id(++unique_id_count_);
+    auto name        = uuid::read_flash_string(device_p->name);
+    auto device_type = device_p->device_type;
+    auto flags       = device_p->flags;
     LOG_DEBUG(F("Adding new device %s (device ID 0x%02X, product ID %d, version %s)"), name.c_str(), device_id, product_id, version.c_str());
+    emsdevices.push_back(EMSFactory::add(device_type, device_id, product_id, version, name, flags, brand));
+
     fetch_device_values(device_id); // go and fetch its data
 
     // add info command, but not for all devices
-    uint8_t device_type = device_p->device_type;
     if ((device_type == DeviceType::CONNECT) || (device_type == DeviceType::CONTROLLER) || (device_type == DeviceType::GATEWAY)) {
         return true;
     }
+
     Command::add_with_json(device_type, F_(info), [device_type](const char * value, const int8_t id, JsonObject & json) {
         return command_info(device_type, json);
     });

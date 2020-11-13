@@ -43,6 +43,7 @@ class EMSdevice {
         , name_(name)
         , flags_(flags)
         , brand_(brand) {
+        unique_id_++;
     }
 
     virtual ~EMSdevice() = default; // destructor of base class must always be virtual because it's a polymorphic class
@@ -270,7 +271,7 @@ class EMSdevice {
     static constexpr uint8_t EMS_DEVICE_FLAG_JUNKERS_2 = (1 << 6); // 6th bit set if older models, like FR120, FR100
 
   private:
-    uint8_t     unique_id_;
+    uint8_t     unique_id_   = 0;
     uint8_t     device_type_ = DeviceType::SYSTEM;
     uint8_t     device_id_   = 0;
     uint8_t     product_id_  = 0;
