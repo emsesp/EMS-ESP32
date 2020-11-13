@@ -206,7 +206,6 @@ class EMSESP {
     static bool     read_next_;
     static uint16_t publish_id_;
     static bool     tap_water_active_;
-    static uint8_t  unique_id_count_;
 };
 
 } // namespace emsesp
