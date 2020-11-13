@@ -28,7 +28,9 @@ void Shower::start() {
         shower_alert_ = settings.shower_alert;
     });
 
-    send_mqtt_stat(false); // send first MQTT publish
+    if (Mqtt::enabled()) {
+        send_mqtt_stat(false); // send first MQTT publish
+    }
 }
 
 void Shower::loop() {
