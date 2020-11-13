@@ -45,7 +45,7 @@ class Heatpump : public EMSdevice {
   private:
     static uuid::log::Logger logger_;
 
-    void register_mqtt_ha_config(bool force);
+    void register_mqtt_ha_config();
 
     uint8_t airHumidity_    = EMS_VALUE_UINT_NOTSET;
     uint8_t dewTemperature_ = EMS_VALUE_UINT_NOTSET;

@@ -180,7 +180,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
 
 // prepare data for Web UI
 void Thermostat::device_info_web(JsonArray & root) {
-    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc_main;
+    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc_main;
     JsonObject                                     json_main = doc_main.to<JsonObject>();
     if (export_values_main(json_main)) {
         print_value_json(root, F("time"), nullptr, F_(time), nullptr, json_main);
@@ -336,10 +336,16 @@ void Thermostat::publish_values(JsonObject & json, bool force) {
     if (EMSESP::actual_master_thermostat() != this->device_id()) {
         return;
     }
+    // see if we have already registered this with HA MQTT Discovery, if not send the config
+    if (Mqtt::mqtt_format() == Mqtt::Format::HA) {
+        if (!ha_config(force)) {
+            return;
+        }
+    }
 
-    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
-    JsonObject                                      json_data = doc.to<JsonObject>();
-    bool                                            has_data  = false;
+    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_LARGE> doc;
+    JsonObject                                     json_data = doc.to<JsonObject>();
+    bool                                           has_data  = false;
 
     // if MQTT is in single mode send out the main data to the thermostat_data topic
     has_data |= export_values_main(json_data);
@@ -354,10 +360,6 @@ void Thermostat::publish_values(JsonObject & json, bool force) {
 
     // if we're in HA or CUSTOM, send out the complete topic with all the data
     if (Mqtt::mqtt_format() != Mqtt::Format::SINGLE && has_data) {
-        // see if we have already registered this with HA MQTT Discovery, if not send the config
-        if (Mqtt::mqtt_format() == Mqtt::Format::HA) {
-            ha_config(force);
-        }
         Mqtt::publish(F("thermostat_data"), json_data);
     }
 }
@@ -685,23 +687,32 @@ bool Thermostat::export_values_hc(uint8_t mqtt_format, JsonObject & rootThermost
 }
 
 // set up HA MQTT Discovery
-void Thermostat::ha_config(bool force) {
+bool Thermostat::ha_config(bool force) {
     if (!Mqtt::connected()) {
-        return;
+        return false;
+    }
+    if (force) {
+        for (const auto & hc : heating_circuits_) {
+            hc->ha_registered(false);
+        }
+        ha_registered(false);
     }
 
-    if (force || !ha_registered()) {
+    if (!ha_registered()) {
         register_mqtt_ha_config();
         ha_registered(true);
+        return false;
     }
 
     // check to see which heating circuits need publishing
     for (const auto & hc : heating_circuits_) {
-        if (force || (hc->is_active() && !hc->ha_registered())) {
+        if (hc->is_active() && !hc->ha_registered()) {
             register_mqtt_ha_config(hc->hc_num());
             hc->ha_registered(true);
+            return false;
         }
     }
+    return true;
 }
 
 // returns the heating circuit object based on the hc number
@@ -809,7 +820,7 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::sha
 // publish config topic for HA MQTT Discovery
 // homeassistant/climate/ems-esp/thermostat/config
 void Thermostat::register_mqtt_ha_config() {
-    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
+    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
     doc["uniq_id"] = F("thermostat");
     doc["ic"]      = F("mdi:home-thermometer-outline");
 
@@ -865,13 +876,13 @@ void Thermostat::register_mqtt_ha_config() {
 void Thermostat::register_mqtt_ha_config(uint8_t hc_num) {
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
 
-    char str1[40];
+    char str1[20];
     snprintf_P(str1, sizeof(str1), PSTR("Thermostat hc%d"), hc_num);
 
-    char str2[40];
+    char str2[20];
     snprintf_P(str2, sizeof(str2), PSTR("thermostat_hc%d"), hc_num);
 
-    char str3[40];
+    char str3[25];
     snprintf_P(str3, sizeof(str3), PSTR("~/%s"), str2);
     doc["mode_cmd_t"]  = str3;
     doc["temp_cmd_t"]  = str3;

@@ -44,7 +44,7 @@ class Solar : public EMSdevice {
 
   private:
     static uuid::log::Logger logger_;
-    void                     register_mqtt_ha_config(bool force);
+    void                     register_mqtt_ha_config();
 
     int16_t  collectorTemp_          = EMS_VALUE_SHORT_NOTSET; // TS1: Temperature sensor for collector array 1
     int16_t  tankBottomTemp_         = EMS_VALUE_SHORT_NOTSET; // TS2: Temperature sensor 1 cylinder, bottom (solar thermal system)

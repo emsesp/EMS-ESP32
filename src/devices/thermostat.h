@@ -248,7 +248,7 @@ class Thermostat : public EMSdevice {
 
     void register_mqtt_ha_config();
     void register_mqtt_ha_config(uint8_t hc_num);
-    void ha_config(bool force = false);
+    bool ha_config(bool force = false);
     bool thermostat_ha_cmd(const char * message, uint8_t hc_num);
 
     void process_RCOutdoorTemp(std::shared_ptr<const Telegram> telegram);
