@@ -820,11 +820,9 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         uart_telegram({0xA0, 0x00, 0xFF, 0x00, 0x01, 0x55, 0x00, 0x1A});
 
         shell.invoke_command("show");
-        shell.invoke_command("call");
         shell.invoke_command("call mixer info");
-        shell.invoke_command("publish");
+        shell.invoke_command("call system publish");
         shell.invoke_command("show mqtt");
-        shell.invoke_command("call mixer");
     }
 }
 
