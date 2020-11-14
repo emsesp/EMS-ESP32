@@ -78,12 +78,12 @@ bool System::command_publish(const char * value, const int8_t id) {
     if (Helpers::value2string(value, ha)) {
         if (ha == "ha") {
             EMSESP::publish_all(true); // includes HA
-            LOG_INFO(F("Published all data to MQTT, including HA configs"));
+            LOG_INFO(F("Publishing all data to MQTT, including HA configs"));
             return true;
         }
     }
     EMSESP::publish_all(); // ignore value and id
-    LOG_INFO(F("Published all data to MQTT"));
+    LOG_INFO(F("Publishing all data to MQTT"));
     return true;
 }
 

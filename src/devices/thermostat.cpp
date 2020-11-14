@@ -181,7 +181,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
 // prepare data for Web UI
 void Thermostat::device_info_web(JsonArray & root) {
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc_main;
-    JsonObject                                     json_main = doc_main.to<JsonObject>();
+    JsonObject                                      json_main = doc_main.to<JsonObject>();
     if (export_values_main(json_main)) {
         print_value_json(root, F("time"), nullptr, F_(time), nullptr, json_main);
         print_value_json(root, F("errorcode"), nullptr, F_(error), nullptr, json_main);
@@ -817,7 +817,7 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::sha
     return heating_circuits_.back(); // even after sorting, this should still point back to the newly created HC
 }
 
-// publish config topic for HA MQTT Discovery
+// publish config topic for HA MQTT Discovery for main thermostat values
 // homeassistant/climate/ems-esp/thermostat/config
 void Thermostat::register_mqtt_ha_config() {
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
@@ -871,7 +871,7 @@ void Thermostat::register_mqtt_ha_config() {
     }
 }
 
-// publish config topic for HA MQTT Discovery
+// publish config topic for HA MQTT Discovery for each of the heating circuit
 // e.g. homeassistant/climate/ems-esp/thermostat_hc1/config
 void Thermostat::register_mqtt_ha_config(uint8_t hc_num) {
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
@@ -954,7 +954,7 @@ void Thermostat::register_mqtt_ha_config(uint8_t hc_num) {
     // for each of the heating circuits
     std::string topic2(100, '\0');
     snprintf_P(&topic2[0], topic2.capacity() + 1, PSTR("thermostat_hc%d"), hc_num);
-    register_mqtt_topic(topic2, [=](const char * m) { return thermostat_ha_cmd(m, hc_num); });
+    register_mqtt_topic(topic2, [&](const char * m) { return thermostat_ha_cmd(m, hc_num); });
 
     char hc_name[10]; // hc{1-4}
     strlcpy(hc_name, "hc", 10);
@@ -962,6 +962,9 @@ void Thermostat::register_mqtt_ha_config(uint8_t hc_num) {
     strlcat(hc_name, Helpers::itoa(s, hc_num), 10);
 
     Mqtt::register_mqtt_ha_sensor(hc_name, nullptr, F_(mode), this->device_type(), "mode", nullptr, nullptr);
+
+    Mqtt::register_mqtt_ha_sensor(hc_name, nullptr, F_(seltemp), this->device_type(), "seltemp", F_(degrees), F_(icontemperature));
+    Mqtt::register_mqtt_ha_sensor(hc_name, nullptr, F_(currtemp), this->device_type(), "currtemp", F_(degrees), F_(icontemperature));
 
     uint8_t model = this->model();
     switch (model) {
@@ -1455,10 +1458,10 @@ void Thermostat::process_RC35Set(std::shared_ptr<const Telegram> telegram) {
     changed_ |= telegram->read_value(hc->flowtempoffset, 24); // is * 1, only in mixed circuits
     changed_ |= telegram->read_value(hc->minflowtemp, 16);
     if (hc->heatingtype == 3) {
-        changed_ |= telegram->read_value(hc->designtemp, 36); // is * 1
+        changed_ |= telegram->read_value(hc->designtemp, 36);  // is * 1
         changed_ |= telegram->read_value(hc->maxflowtemp, 35); // is * 1
     } else {
-        changed_ |= telegram->read_value(hc->designtemp, 17); // is * 1
+        changed_ |= telegram->read_value(hc->designtemp, 17);  // is * 1
         changed_ |= telegram->read_value(hc->maxflowtemp, 15); // is * 1
     }
 }
@@ -2113,8 +2116,8 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
         case HeatingCircuit::Mode::MINFLOW:
             set_typeid      = summer_typeids[hc->hc_num() - 1];
             validate_typeid = set_typeid;
-            offset = 8;
-            factor = 1;
+            offset          = 8;
+            factor          = 1;
             break;
         case HeatingCircuit::Mode::MAXFLOW:
             set_typeid      = curve_typeids[hc->hc_num() - 1];
