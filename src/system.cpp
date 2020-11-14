@@ -698,7 +698,7 @@ bool System::check_upgrade() {
     l_cfg.setAutoFormat(false);
     LittleFS.setConfig(l_cfg); // do not auto format if it can't find LittleFS
     if (LittleFS.begin()) {
-#if defined(EMSESP_DEBUG)
+#if defined(EMSESP_FORCE_SERIAL)
         Serial.begin(115200);
         Serial.println(F("FS is Littlefs"));
         Serial.end();
@@ -713,7 +713,7 @@ bool System::check_upgrade() {
     cfg.setAutoFormat(false); // prevent formatting when opening SPIFFS filesystem
     SPIFFS.setConfig(cfg);
     if (!SPIFFS.begin()) {
-#if defined(EMSESP_DEBUG)
+#if defined(EMSESP_FORCE_SERIAL)
         Serial.begin(115200);
         Serial.println(F("No old SPIFFS found!"));
         Serial.end();
@@ -812,9 +812,7 @@ bool System::check_upgrade() {
     file.close();
 
     if (failed) {
-#if defined(EMSESP_DEBUG)
         Serial.println(F("Failed to read system config. Quitting."));
-#endif
         SPIFFS.end();
         Serial.end();
         return false;
@@ -837,10 +835,6 @@ bool System::check_upgrade() {
             Serial.printf(PSTR("Error. Failed to deserialize custom json, error %s\n"), error.c_str());
             failed = true;
         } else {
-#if defined(EMSESP_DEBUG)
-            serializeJson(doc, Serial);
-            Serial.println();
-#endif
             custom_settings = doc["settings"];
             EMSESP::webSettingsService.update(
                 [&](WebSettings & settings) {
@@ -868,9 +862,7 @@ bool System::check_upgrade() {
     SPIFFS.end();
 
     if (failed) {
-#if defined(EMSESP_DEBUG)
         Serial.println(F("Failed to read custom config. Quitting."));
-#endif
         Serial.end();
         return false;
     }
