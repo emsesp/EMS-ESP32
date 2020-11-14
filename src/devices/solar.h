@@ -46,10 +46,6 @@ class Solar : public EMSdevice {
     static uuid::log::Logger logger_;
     void                     register_mqtt_ha_config(bool force);
 
-    uint32_t tank1MaxTempMinimum_    = EMS_VALUE_ULONG_NOTSET; // Min value for max tank temp
-    uint32_t tank1MaxTempDefault_    = EMS_VALUE_ULONG_NOTSET; // Default value for max tank temp
-    uint32_t tank1MaxTempMaximum_    = EMS_VALUE_ULONG_NOTSET; // Max value for max tank temp
-    uint32_t tank1MaxTempCurrent_    = EMS_VALUE_ULONG_NOTSET; // Current value for max tank temp
     int16_t  collectorTemp_          = EMS_VALUE_SHORT_NOTSET; // TS1: Temperature sensor for collector array 1
     int16_t  tankBottomTemp_         = EMS_VALUE_SHORT_NOTSET; // TS2: Temperature sensor 1 cylinder, bottom (solar thermal system)
     int16_t  tankBottomTemp2_        = EMS_VALUE_SHORT_NOTSET; // TS5: Temperature sensor 2 cylinder, bottom, or swimming pool (solar thermal system)
@@ -70,11 +66,37 @@ class Solar : public EMSdevice {
     uint8_t configFlag_       = EMS_VALUE_BOOL_NOTSET;
     uint8_t userFlag_         = EMS_VALUE_BOOL_NOTSET;
 
+    // telegram 0x0358
+    uint8_t heatTransferSystem_     = EMS_VALUE_UINT_NOTSET; // Umladesystem, 00=no
+    uint8_t externalTank_           = EMS_VALUE_UINT_NOTSET; // Heat exchanger, 00=no
+    uint8_t thermalDisinfect_       = EMS_VALUE_UINT_NOTSET; // Daily heatup for disinfection, 00=no
+    uint8_t heatMetering_           = EMS_VALUE_UINT_NOTSET; // Wärmemengenzählung, 00=no
+    uint8_t solarIsEnabled_         = EMS_VALUE_UINT_NOTSET; // System enable, 00=no
+    
+    // telegram 0x035A
+    uint8_t collectorTempMax_       = EMS_VALUE_UINT_NOTSET; // maximum allowable temperature for collector
+    uint8_t tank1MaxTempCurrent_    = EMS_VALUE_UINT_NOTSET; // Current value for max tank temp
+    uint8_t collectorTempMin_       = EMS_VALUE_UINT_NOTSET; // minimum allowable temperature for collector
+    uint8_t solarPumpMode_          = EMS_VALUE_UINT_NOTSET; // 00=off, 01=PWM, 02=10V
+    uint8_t solarPumpMinRPM_        = EMS_VALUE_UINT_NOTSET; // minimum RPM setting, *5 %
+    uint8_t solarPumpTurnoffDiff_   = EMS_VALUE_UINT_NOTSET; // solar pump turnoff collector/tank diff
+    uint8_t solarPumpTurnonDiff_    = EMS_VALUE_UINT_NOTSET; // solar pump turnon collector/tank diff
+    uint8_t solarPumpKick_          = EMS_VALUE_UINT_NOTSET; // pump kick for vacuum collector, 00=off
+    uint8_t plainWaterMode_         = EMS_VALUE_UINT_NOTSET; // system does not use antifreeze, 00=off
+    uint8_t doubleMatchFlow_        = EMS_VALUE_UINT_NOTSET; // double Match Flow, 00=off
+    
+    // telegram 0x380
+    uint8_t climateZone_            = EMS_VALUE_UINT_NOTSET; // climate zone identifier
+    uint16_t collector1Area_        = EMS_VALUE_USHORT_NOTSET;// Area of collector field 1
+    uint8_t collector1Type_         = EMS_VALUE_UINT_NOTSET; // Type of collector field 1, 01=flat, 02=vacuum
+    
     bool changed_        = false;
     bool mqtt_ha_config_ = false; // for HA MQTT Discovery
 
     void process_SM10Monitor(std::shared_ptr<const Telegram> telegram);
-    void process_SM100Tank1MaxTemp(std::shared_ptr<const Telegram> telegram);
+    void process_SM100SystemConfig(std::shared_ptr<const Telegram> telegram);
+    void process_SM100SolarCircuitConfig(std::shared_ptr<const Telegram> telegram);
+    void process_SM100ParamCfg(std::shared_ptr<const Telegram> telegram);
     void process_SM100Monitor(std::shared_ptr<const Telegram> telegram);
     void process_SM100Monitor2(std::shared_ptr<const Telegram> telegram);
 
@@ -82,6 +104,7 @@ class Solar : public EMSdevice {
 
     void process_SM100Status(std::shared_ptr<const Telegram> telegram);
     void process_SM100Status2(std::shared_ptr<const Telegram> telegram);
+    void process_SM100CollectorConfig(std::shared_ptr<const Telegram> telegram);
     void process_SM100Energy(std::shared_ptr<const Telegram> telegram);
 
     void process_SM100wwTemperature(std::shared_ptr<const Telegram> telegram);
@@ -90,6 +113,9 @@ class Solar : public EMSdevice {
 
     void process_ISM1StatusMessage(std::shared_ptr<const Telegram> telegram);
     void process_ISM1Set(std::shared_ptr<const Telegram> telegram);
+    
+    
+    bool set_SM100Tank1MaxTemp(const char * value, const int8_t id);
 };
 
 } // namespace emsesp

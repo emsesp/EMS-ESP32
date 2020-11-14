@@ -39,22 +39,19 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
             register_telegram_type(0x07AA, F("SM100wwStatus"), false, [&](std::shared_ptr<const Telegram> t) { process_SM100wwStatus(t); });
             register_telegram_type(0x07AB, F("SM100wwCommand"), false, [&](std::shared_ptr<const Telegram> t) { process_SM100wwCommand(t); });
         } else {
+            register_telegram_type(EMS_TYPE_ParamCfg, F("ParamCfg"), false, [&](std::shared_ptr<const Telegram> t) { process_SM100ParamCfg(t); });
+            register_telegram_type(0x0358, F("SM100SystemConfig"), true, [&](std::shared_ptr<const Telegram> t) { process_SM100SystemConfig(t); });
+            register_telegram_type(0x035A, F("SM100SolarCircuitConfig"), true, [&](std::shared_ptr<const Telegram> t) { process_SM100SolarCircuitConfig(t); });
             register_telegram_type(0x0362, F("SM100Monitor"), true, [&](std::shared_ptr<const Telegram> t) { process_SM100Monitor(t); });
             register_telegram_type(0x0363, F("SM100Monitor2"), true, [&](std::shared_ptr<const Telegram> t) { process_SM100Monitor2(t); });
             register_telegram_type(0x0366, F("SM100Config"), true, [&](std::shared_ptr<const Telegram> t) { process_SM100Config(t); });
             register_telegram_type(0x0364, F("SM100Status"), false, [&](std::shared_ptr<const Telegram> t) { process_SM100Status(t); });
             register_telegram_type(0x036A, F("SM100Status2"), false, [&](std::shared_ptr<const Telegram> t) { process_SM100Status2(t); });
+            register_telegram_type(0x0380, F("SM100CollectorConfig"), true, [&](std::shared_ptr<const Telegram> t) { process_SM100CollectorConfig(t); });
             register_telegram_type(0x038E, F("SM100Energy"), true, [&](std::shared_ptr<const Telegram> t) { process_SM100Energy(t); });
-            register_telegram_type(0x035A, F("SM100Tank1MaxTemp"), false, [&](std::shared_ptr<const Telegram> t) { process_SM100Tank1MaxTemp(t); });
+
+            register_mqtt_cmd(F("SM100Tank1MaxTemp"), [&](const char * value, const int8_t id) { return set_SM100Tank1MaxTemp(value, id); });
         }
-//		EMSESP::send_read_request(0x035A, device_id);
-        // This is a hack right now, need to update TXService to support sending F9 packets
-        //uint8_t msg[]="8B B0 F9 00 11 FF 02 5A 03 00";
-        //msg[sizeof(msg)-2] = EMSESP::rxservice_.calculate_crc(msg, sizeof(msg)-2);
-        //EMSESP::send_raw_telegram((const char*)msg);
-        
-        uint8_t msg[]={0x11, 0xFF, 0x02, 0x5A, 0x03};
-        EMSdevice::write_command(EMS_TYPE_RegRead, 0x00, msg, sizeof(msg), EMS_TYPE_RegRead);
     }
 
     if (flags == EMSdevice::EMS_DEVICE_FLAG_ISM) {
@@ -75,7 +72,7 @@ void Solar::device_info_web(JsonArray & root) {
     print_value_json(root, F("collectorTemp"), nullptr, F_(collectorTemp), F_(degrees), json);
     print_value_json(root, F("tankBottomTemp"), nullptr, F_(tankBottomTemp), F_(degrees), json);
     print_value_json(root, F("tankBottomTemp2"), nullptr, F_(tankBottomTemp2), F_(degrees), json);
-    print_value_json(root, F("tank1MaxTemp"), nullptr, F_(tank1MaxTempCurrent), F_(degrees), json);
+    print_value_json(root, F("tank1MaxTempCurrent"), nullptr, F_(tank1MaxTempCurrent), F_(degrees), json);
     print_value_json(root, F("heatExchangerTemp"), nullptr, F_(heatExchangerTemp), F_(degrees), json);
     print_value_json(root, F("solarPumpModulation"), nullptr, F_(solarPumpModulation), F_(percent), json);
     print_value_json(root, F("cylinderPumpModulation"), nullptr, F_(cylinderPumpModulation), F_(percent), json);
@@ -110,7 +107,7 @@ void Solar::show_values(uuid::console::Shell & shell) {
     print_value_json(shell, F("collectorTemp"), nullptr, F_(collectorTemp), F_(degrees), json);
     print_value_json(shell, F("tankBottomTemp"), nullptr, F_(tankBottomTemp), F_(degrees), json);
     print_value_json(shell, F("tankBottomTemp2"), nullptr, F_(tankBottomTemp2), F_(degrees), json);
-    print_value_json(shell, F("tank1MaxTemp"), nullptr, F_(tank1MaxTempCurrent), F_(degrees), json);
+    print_value_json(shell, F("tank1MaxTempCurrent"), nullptr, F_(tank1MaxTempCurrent), F_(degrees), json);
     print_value_json(shell, F("heatExchangerTemp"), nullptr, F_(heatExchangerTemp), F_(degrees), json);
     print_value_json(shell, F("solarPumpModulation"), nullptr, F_(solarPumpModulation), F_(percent), json);
     print_value_json(shell, F("cylinderPumpModulation"), nullptr, F_(cylinderPumpModulation), F_(percent), json);
@@ -182,7 +179,7 @@ void Solar::register_mqtt_ha_config(bool force) {
     Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(collectorTemp), this->device_type(), "collectorTemp", F_(degrees), nullptr);
     Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(tankBottomTemp), this->device_type(), "tankBottomTemp", F_(degrees), nullptr);
     Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(tankBottomTemp2), this->device_type(), "tankBottomTemp2", F_(degrees), nullptr);
-    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(tank1MaxTempCurrent), this->device_type(), "tank1MaxTemp", F_(degrees), nullptr);
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(tank1MaxTempCurrent), this->device_type(), "tank1MaxTempCurrent", F_(degrees), nullptr);
     Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(heatExchangerTemp), this->device_type(), "heatExchangerTemp", F_(degrees), nullptr);
     Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(solarPumpModulation), this->device_type(), "solarPumpModulation", F_(percent), nullptr);
     Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(cylinderPumpModulation), this->device_type(), "cylinderPumpModulation", F_(percent), nullptr);
@@ -216,7 +213,7 @@ bool Solar::export_values(JsonObject & json) {
     }
 
     if (Helpers::hasValue(tank1MaxTempCurrent_)) {
-        json["tankMaximumTemp"] = tank1MaxTempCurrent_;
+        json["tank1MaxTempCurrent"] = tank1MaxTempCurrent_;
     }
     
     if (Helpers::hasValue(heatExchangerTemp_)) {
@@ -285,28 +282,62 @@ void Solar::process_SM10Monitor(std::shared_ptr<const Telegram> telegram) {
 }
 
 /*
- * process_SM100Tank1MaxTemp - type 0x035A EMS+ - for MS/SM100 and MS/SM200
- * e.g. B0 10 F9 00 FF 02 5A 03 17 00 00 00 14 00 00 00 3C 00 00 00 5A 00 00 00 59 29 - requested with 90 B0 F9 00 11 FF 02 5A 03 AF
- * bytes 0-1 = packet format designator
- * bytes 2..5 = minimum value
- * bytes 6..9 = default value
- * bytes 10..13 = maximum value
- * bytes 14..17 = current value
- * e.g, FD 3F - requested with 90 B0 F7 00 FF FF 02 5A B0
+ * process_SM100SystemConfig - type 0x0358 EMS+ - for MS/SM100 and MS/SM200
  */
-void Solar::process_SM100Tank1MaxTemp(std::shared_ptr<const Telegram> telegram) {
-    int16_t designator;
-    telegram->read_value(designator, 0);
-    LOG_DEBUG(F("SM100Tank1MaxTemp designator 0x%02X"), designator);
-    if(designator==0x0317)  // The telegram has the right form
-    {
-        changed_ |= telegram->read_value(tank1MaxTempMinimum_, 2);
-        changed_ |= telegram->read_value(tank1MaxTempDefault_, 6);
-        changed_ |= telegram->read_value(tank1MaxTempMaximum_, 10);
-        changed_ |= telegram->read_value(tank1MaxTempCurrent_, 14);
-    }
+void Solar::process_SM100SystemConfig(std::shared_ptr<const Telegram> telegram) {
+    changed_ |= telegram->read_value(heatTransferSystem_  , 5, 1);
+    changed_ |= telegram->read_value(externalTank_        , 9, 1);
+    changed_ |= telegram->read_value(thermalDisinfect_    , 10, 1);
+    changed_ |= telegram->read_value(heatMetering_        , 14, 1);
+    changed_ |= telegram->read_value(solarIsEnabled_      , 19, 1);
 }
 
+/*
+ * process_SM100SolarCircuitConfig - type 0x035A EMS+ - for MS/SM100 and MS/SM200
+ */
+void Solar::process_SM100SolarCircuitConfig(std::shared_ptr<const Telegram> telegram) {
+    changed_ |= telegram->read_value(collectorTempMax_    , 0, 1);
+    changed_ |= telegram->read_value(tank1MaxTempCurrent_ , 3, 1);
+    changed_ |= telegram->read_value(collectorTempMin_    , 4, 1);
+    changed_ |= telegram->read_value(solarPumpMode_       , 5, 1);
+    changed_ |= telegram->read_value(solarPumpMinRPM_     , 6, 1);
+    changed_ |= telegram->read_value(solarPumpTurnoffDiff_, 7, 1);
+    changed_ |= telegram->read_value(solarPumpTurnonDiff_ , 8, 1);
+    changed_ |= telegram->read_value(solarPumpKick_       , 9, 1);
+    changed_ |= telegram->read_value(plainWaterMode_      , 10, 1);
+    changed_ |= telegram->read_value(doubleMatchFlow_     , 11, 1);
+}
+
+/* process_SM100ParamCfg - type 0xF9 EMS 1.0
+ * This telegram is used to inquire the min, default, max, and current values of a value that is usually read and written with another telegram ID
+ * The CS200 uses this method extensively to find out which values may be set in the SM100
+ * e.g. B0 10 F9 00 FF 02 5A 03 17 00 00 00 14 00 00 00 3C 00 00 00 5A 00 00 00 59 29 - requested with 90 B0 F9 00 11 FF 02 5A 03 AF
+ * byte 0 = 0xFF
+ * byte 1-2 = telegram ID used to write this value
+ * byte 3 = offset in telegram used to write this value
+ * byte 4 = unknown
+ * bytes 5..8 = minimum value
+ * bytes 9..12 = default value
+ * bytes 13..16 = maximum value
+ * bytes 17..20 = current value
+ *
+ * e.g. B0 0B F9 00 00 02 5A 00 00 6E
+ */
+void Solar::process_SM100ParamCfg(std::shared_ptr<const Telegram> telegram) {
+    uint16_t t_id;
+    uint8_t of;
+    int32 min,def,max,cur;
+    telegram->read_value(t_id, 1);
+    telegram->read_value(of, 3);
+    telegram->read_value(min, 5);
+    telegram->read_value(def, 9);
+    telegram->read_value(max, 13);
+    telegram->read_value(cur, 17);
+    
+    LOG_DEBUG(F("SM100ParamCfg param=0x%04X, offset=%d, min=%d, default=%d, max=%d, current=%d"),
+              t_id, of, min, def, max, cur);
+}
+    
 /*
  * SM100Monitor - type 0x0362 EMS+ - for MS/SM100 and MS/SM200
  * e.g. B0 0B FF 00 02 62 00 77 01 D4 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 00 F9 80 00 80 9E - for heat exchanger temp
@@ -400,6 +431,16 @@ void Solar::process_SM100Status2(std::shared_ptr<const Telegram> telegram) {
 }
 
 /*
+ * SM100CollectorConfig - type 0x0380 EMS+  - for SM100 and SM200
+ */
+void Solar::process_SM100CollectorConfig(std::shared_ptr<const Telegram> telegram) {
+    changed_ |= telegram->read_value(climateZone_, 0, 1);
+    changed_ |= telegram->read_value(collector1Area_, 3, 2);
+    changed_ |= telegram->read_value(collector1Type_, 5, 1);
+}
+
+
+/*
  * SM100Energy - type 0x038E EMS+ for energy readings
  * e.g. 30 00 FF 00 02 8E 00 00 00 00 00 00 06 C5 00 00 76 35
  */
@@ -435,5 +476,16 @@ void Solar::process_ISM1StatusMessage(std::shared_ptr<const Telegram> telegram) 
 void Solar::process_ISM1Set(std::shared_ptr<const Telegram> telegram) {
     changed_ |= telegram->read_value(setpoint_maxBottomTemp_, 6);
 }
+
+bool Solar::set_SM100Tank1MaxTemp(const char * value, const int8_t id) {
+    int temp;
+    if(! Helpers::value2number(value, temp)) return false;
+    tank1MaxTempCurrent_=temp;
+    unsigned char transport_temp=(unsigned char) temp;
+    // 90 30 FF 03 02 5A 59 B3
+    EMSdevice::write_command(0x35A, 0x03, &transport_temp, sizeof(transport_temp), 0);
+    return true;
+}
+    
 
 } // namespace emsesp
