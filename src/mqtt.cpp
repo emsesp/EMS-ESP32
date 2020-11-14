@@ -356,6 +356,11 @@ void Mqtt::start() {
         mqtt_enabled_            = mqttSettings.enabled;
     });
 
+    // if MQTT disabled, quit
+    if (!mqtt_enabled_) {
+        return;
+    }
+
     mqttClient_->onConnect([this](bool sessionPresent) { on_connect(); });
 
     mqttClient_->onDisconnect([this](AsyncMqttClientDisconnectReason reason) {
@@ -608,26 +613,6 @@ void Mqtt::process_queue() {
     if (mqtt_messages_.empty()) {
         return;
     }
-
-    // show queue - Debug only
-    /*
-    Serial.printf("MQTT queue:\n\r");
-    for (const auto & message : mqtt_messages_) {
-        auto content = message.content_;
-        if (content->operation == Operation::PUBLISH) {
-            // Publish messages
-            Serial.printf(" [%02d] (Pub) topic=%s payload=%s (pid %d, retry #%d)\n\r",
-                          message.id_,
-                          content->topic.c_str(),
-                          content->payload.c_str(),
-                          message.packet_id_,
-                          message.retry_count_);
-        } else {
-            // Subscribe messages
-            Serial.printf(" [%02d] (Sub) topic=%s\n\r", message.id_, content->topic.c_str());
-        }
-    }
-    */
 
     // fetch first from queue and create the full topic name
     auto mqtt_message = mqtt_messages_.front();
