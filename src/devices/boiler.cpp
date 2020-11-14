@@ -80,7 +80,7 @@ void Boiler::register_mqtt_ha_config() {
     }
 
     // Create the Master device
-    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
+    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
     doc["name"]    = F("Service Code");
     doc["uniq_id"] = F("boiler");
     doc["ic"]      = F("mdi:home-thermometer-outline");
