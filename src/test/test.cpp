@@ -27,10 +27,10 @@ namespace emsesp {
 // used with the 'test' command, under su/admin
 void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
     // switch to su
-    // shell.add_flags(CommandFlags::ADMIN);
+    shell.add_flags(CommandFlags::ADMIN);
 
     if (command == "default") {
-        run_test(shell, "boiler"); // add the default test case here
+        run_test(shell, "general"); // add the default test case here
     }
 
     if (command.empty()) {
@@ -250,7 +250,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         shell.printfln(F("Testing adding a general boiler & thermostat..."));
 
         add_device(0x08, 123); // Nefit Trendline
-        // add_device(0x18, 157); // Bosch CR100
+        add_device(0x18, 157); // Bosch CR100
 
         // add some data
         // Boiler -> Me, UBAMonitorFast(0x18), telegram: 08 00 18 00 00 02 5A 73 3D 0A 10 65 40 02 1A 80 00 01 E1 01 76 0E 3D 48 00 C9 44 02 00 (#data=25)
@@ -267,9 +267,10 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
         uart_telegram({0x98, 0x00, 0xFF, 0x00, 0x01, 0xA5, 0x00, 0xCF, 0x21, 0x2E, 0x00, 0x00, 0x2E, 0x24,
                        0x03, 0x25, 0x03, 0x03, 0x01, 0x03, 0x25, 0x00, 0xC8, 0x00, 0x00, 0x11, 0x01, 0x03});
 
+        shell.invoke_command("show devices");
         shell.invoke_command("show");
-        shell.invoke_command("publish");
-        shell.invoke_command("show mqtt");
+        // shell.invoke_command("publish");
+        // shell.invoke_command("show mqtt");
     }
 
     if (command == "fr120") {
@@ -838,6 +839,7 @@ void Test::rx_telegram(const std::vector<uint8_t> & rx_data) {
     }
     data[i] = EMSESP::rxservice_.calculate_crc(data, i);
     EMSESP::rxservice_.add(data, len + 1);
+    EMSESP::loop();
 }
 
 // simulates a telegram straight from UART, but without the CRC which is added automatically
@@ -851,7 +853,7 @@ void Test::uart_telegram(const std::vector<uint8_t> & rx_data) {
     }
     data[i] = EMSESP::rxservice_.calculate_crc(data, i);
     EMSESP::incoming_telegram(data, i + 1);
-    // EMSESP::rxservice_.loop();
+    EMSESP::loop();
 }
 
 // takes raw string, assuming it contains the CRC. This is what is output from 'watch raw'
@@ -889,7 +891,7 @@ void Test::uart_telegram_withCRC(const char * rx_data) {
     }
 
     EMSESP::incoming_telegram(data, count + 1);
-    // EMSESP::rxservice_.loop();
+    EMSESP::loop();
 }
 
 // takes raw string, adds CRC to end
@@ -929,7 +931,7 @@ void Test::uart_telegram(const char * rx_data) {
     data[count + 1] = EMSESP::rxservice_.calculate_crc(data, count + 1); // add CRC
 
     EMSESP::incoming_telegram(data, count + 2);
-    // EMSESP::rxservice_.loop();
+    EMSESP::loop();
 }
 
 // Sends version telegram. Version is hardcoded to 1.0
