@@ -64,6 +64,7 @@ uint16_t EMSESP::publish_id_               = 0;
 bool     EMSESP::tap_water_active_         = false; // for when Boiler states we having running warm water. used in Shower()
 uint32_t EMSESP::last_fetch_               = 0;
 uint8_t  EMSESP::publish_all_idx_          = 0;
+uint8_t  EMSESP::unique_id_count_          = 0;
 
 // for a specific EMS device go and request data values
 // or if device_id is 0 it will fetch from all our known and active devices
@@ -215,9 +216,8 @@ void EMSESP::show_ems(uuid::console::Shell & shell) {
         shell.printfln(F("  #tx fails (after %d retries): %d"), TxService::MAXIMUM_TX_RETRIES, txservice_.telegram_fail_count());
         shell.printfln(F("  Rx line quality: %d%%"), rxservice_.quality());
         shell.printfln(F("  Tx line quality: %d%%"), txservice_.quality());
+        shell.println();
     }
-
-    shell.println();
 
     // Rx queue
     auto rx_telegrams = rxservice_.queue();
@@ -694,7 +694,7 @@ void EMSESP::show_devices(uuid::console::Shell & shell) {
         // shell.printf(F("[factory ID: %d] "), device_class.first);
         for (const auto & emsdevice : emsdevices) {
             if ((emsdevice) && (emsdevice->device_type() == device_class.first)) {
-                shell.printf(F("%s: %s"), emsdevice->device_type_name().c_str(), emsdevice->to_string().c_str());
+                shell.printf(F("(%d) %s: %s"), emsdevice->unique_id(), emsdevice->device_type_name().c_str(), emsdevice->to_string().c_str());
                 if ((emsdevice->device_type() == EMSdevice::DeviceType::THERMOSTAT) && (emsdevice->device_id() == actual_master_thermostat())) {
                     shell.printf(F(" ** master device **"));
                 }
@@ -772,6 +772,7 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
     auto flags       = device_p->flags;
     LOG_DEBUG(F("Adding new device %s (device ID 0x%02X, product ID %d, version %s)"), name.c_str(), device_id, product_id, version.c_str());
     emsdevices.push_back(EMSFactory::add(device_type, device_id, product_id, version, name, flags, brand));
+    emsdevices.back()->unique_id(++unique_id_count_);
 
     fetch_device_values(device_id); // go and fetch its data
 
@@ -981,12 +982,12 @@ void EMSESP::loop() {
     }
 
     system_.loop();       // does LED and checks system health, and syslog service
+    rxservice_.loop();    // process any incoming Rx telegrams
     shower_.loop();       // check for shower on/off
     dallassensor_.loop(); // this will also send out via MQTT
     publish_all_loop();
-    mqtt_.loop();         // sends out anything in the queue via MQTT
-    console_.loop();      // telnet/serial console
-    rxservice_.loop();    // process any incoming Rx telegrams
+    mqtt_.loop();    // sends out anything in the queue via MQTT
+    console_.loop(); // telnet/serial console
 
     // force a query on the EMS devices to fetch latest data at a set interval (1 min)
     if ((uuid::get_uptime() - last_fetch_ > EMS_FETCH_FREQUENCY)) {

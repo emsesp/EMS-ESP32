@@ -208,7 +208,7 @@ class EMSESP {
     static uint16_t publish_id_;
     static bool     tap_water_active_;
     static uint8_t  publish_all_idx_;
-
+    static uint8_t  unique_id_count_;
 };
 
 } // namespace emsesp
