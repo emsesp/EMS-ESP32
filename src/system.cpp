@@ -245,10 +245,10 @@ void System::upload_status(bool in_progress) {
 // checks system health and handles LED flashing wizardry
 void System::loop() {
 #ifndef EMSESP_STANDALONE
+
     if (syslog_enabled_) {
         syslog_.loop();
     }
-#endif
 
     led_monitor();  // check status and report back using the LED
     system_check(); // check system health
@@ -272,6 +272,9 @@ void System::loop() {
     }
 #endif
 #endif
+
+#endif
+
 }
 
 void System::show_mem(const char * note) {
