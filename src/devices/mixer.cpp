@@ -164,7 +164,7 @@ void Mixer::register_mqtt_ha_config() {
     }
 
     // Create the Master device
-    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
+    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
 
     char name[20];
     snprintf_P(name, sizeof(name), PSTR("Mixer %02X"), device_id() - 0x20 + 1);
@@ -192,7 +192,7 @@ void Mixer::register_mqtt_ha_config() {
 
     std::string topic(100, '\0');
     if (this->type() == Type::HC) {
-        snprintf_P(&topic[0], topic.capacity() + 1, PSTR("homeassistant/climate/ems-esp/mixer_hc%d/config"), hc_);
+        snprintf_P(&topic[0], topic.capacity() + 1, PSTR("homeassistant/sensor/ems-esp/mixer_hc%d/config"), hc_);
         Mqtt::publish_retain(topic, doc.as<JsonObject>(), true); // publish the config payload with retain flag
         char hc_name[10];
         snprintf_P(hc_name, sizeof(hc_name), PSTR("hc%d"), hc_);
@@ -202,7 +202,7 @@ void Mixer::register_mqtt_ha_config() {
         Mqtt::register_mqtt_ha_sensor(hc_name, nullptr, F_(valveStatus), this->device_type(), "valveStatus", nullptr, nullptr);
     } else {
         // WWC
-        snprintf_P(&topic[0], topic.capacity() + 1, PSTR("homeassistant/climate/ems-esp/mixer_wwc%d/config"), hc_);
+        snprintf_P(&topic[0], topic.capacity() + 1, PSTR("homeassistant/sensor/ems-esp/mixer_wwc%d/config"), hc_);
         Mqtt::publish_retain(topic, doc.as<JsonObject>(), true); // publish the config payload with retain flag
         char wwc_name[10];
         snprintf_P(wwc_name, sizeof(wwc_name), PSTR("wwc%d"), hc_);
