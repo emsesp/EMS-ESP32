@@ -8,6 +8,7 @@
 
 ### Fixed
 - mixer IPM pumpstatus
+- Mixing devices in HA were incorrectly named
 
 ### Changed
 - optimized MQTT for HA to reduce mem fragmentation issues
