@@ -39,9 +39,9 @@ bool        Mqtt::mqtt_enabled_;
 
 std::vector<Mqtt::MQTTSubFunction> Mqtt::mqtt_subfunctions_;
 
-uint16_t                           Mqtt::mqtt_publish_fails_    = 0;
+uint16_t Mqtt::mqtt_publish_fails_ = 0;
 // size_t                             Mqtt::maximum_mqtt_messages_ = Mqtt::MAX_MQTT_MESSAGES;
-uint16_t                           Mqtt::mqtt_message_id_       = 0;
+uint16_t                           Mqtt::mqtt_message_id_ = 0;
 std::list<Mqtt::QueuedMqttMessage> Mqtt::mqtt_messages_;
 char                               will_topic_[Mqtt::MQTT_TOPIC_MAX_SIZE]; // because MQTT library keeps only char pointer
 
@@ -181,7 +181,7 @@ void Mqtt::show_mqtt(uuid::console::Shell & shell) {
         return;
     }
 
-    shell.printfln(F("MQTT queue (%d messages):"), mqtt_messages_.size());
+    shell.printfln(F("MQTT queue (%d/%d messages):"), mqtt_messages_.size(), MAX_MQTT_MESSAGES);
 
     for (const auto & message : mqtt_messages_) {
         auto content = message.content_;
@@ -730,7 +730,6 @@ void Mqtt::register_mqtt_ha_binary_sensor(const __FlashStringHelper * name, cons
 
     // delay(MQTT_PUBLISH_WAIT);
     delay(50);
-
 }
 
 // HA config for a normal 'sensor' type
@@ -826,6 +825,5 @@ void Mqtt::register_mqtt_ha_sensor(const char *                prefix,
 
     // delay(MQTT_PUBLISH_WAIT); // don't flood asynctcp
     delay(50); // enough time to send the short message out
-
 }
 } // namespace emsesp
