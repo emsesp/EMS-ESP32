@@ -14,6 +14,7 @@
 - change syslog settings without reboot
 - HA-config split in smaller blocks
 - commands `fetch` and `publish [ha]` as call
+- mqtt json package size
 
 ### Removed
 - old scripts
