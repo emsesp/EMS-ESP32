@@ -110,28 +110,6 @@ void EMSESPShell::add_console_commands() {
 
     commands->add_command(ShellContext::MAIN,
                           CommandFlags::USER,
-                          flash_string_vector{F_(fetch)},
-                          [&](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
-                              shell.printfln(F("Requesting data from EMS devices"));
-                              EMSESP::fetch_device_values();
-                          });
-
-    commands->add_command(ShellContext::MAIN,
-                          CommandFlags::ADMIN,
-                          flash_string_vector{F_(publish)},
-                          flash_string_vector{F_(ha_optional)},
-                          [&](Shell & shell, const std::vector<std::string> & arguments) {
-                              if (arguments.empty()) {
-                                  EMSESP::publish_all();
-                                  shell.printfln(F("Published all data to MQTT"));
-                              } else {
-                                  EMSESP::publish_all(true);
-                                  shell.printfln(F("Published all data to MQTT, including HA configs"));
-                              }
-                          });
-
-    commands->add_command(ShellContext::MAIN,
-                          CommandFlags::USER,
                           flash_string_vector{F_(show)},
                           [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
                               shell.printfln(F("%s%sEMS-ESP version %s%s"), COLOR_BRIGHT_GREEN, COLOR_BOLD_ON, EMSESP_APP_VERSION, COLOR_RESET);
@@ -311,14 +289,6 @@ void EMSESPShell::add_console_commands() {
                               shell.printfln(F("Telnet timout is %d minutes"), value);
                           });
 #endif
-
-    commands->add_command(ShellContext::MAIN,
-                          CommandFlags::ADMIN,
-                          flash_string_vector{F_(send), F_(telegram)},
-                          flash_string_vector{F_(data_mandatory)},
-                          [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) {
-                              EMSESP::send_raw_telegram(arguments.front().c_str());
-                          });
 
     commands->add_command(ShellContext::MAIN,
                           CommandFlags::USER,

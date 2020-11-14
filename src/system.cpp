@@ -59,15 +59,31 @@ bool System::command_pin(const char * value, const int8_t id) {
     return false;
 }
 
-// send raw
+// send raw to ems
 bool System::command_send(const char * value, const int8_t id) {
     EMSESP::send_raw_telegram(value); // ignore id
     return true;
 }
 
-// publish
+// fetch device values
+bool System::command_fetch(const char * value, const int8_t id) {
+    LOG_INFO(F("Requesting data from EMS devices"));
+    EMSESP::fetch_device_values();
+    return true;
+}
+
+// mqtt publish
 bool System::command_publish(const char * value, const int8_t id) {
+    std::string ha(10, '\0');
+    if (Helpers::value2string(value, ha)) {
+        if (ha == "ha") {
+            EMSESP::publish_all(true); // includes HA
+            LOG_INFO(F("Published all data to MQTT, including HA configs"));
+            return true;
+        }
+    }
     EMSESP::publish_all(); // ignore value and id
+    LOG_INFO(F("Published all data to MQTT"));
     return true;
 }
 
@@ -172,6 +188,7 @@ void System::start() {
         Command::add(EMSdevice::DeviceType::SYSTEM, settings.ems_bus_id, F_(pin), System::command_pin);
         Command::add(EMSdevice::DeviceType::SYSTEM, settings.ems_bus_id, F_(send), System::command_send);
         Command::add(EMSdevice::DeviceType::SYSTEM, settings.ems_bus_id, F_(publish), System::command_publish);
+        Command::add(EMSdevice::DeviceType::SYSTEM, settings.ems_bus_id, F_(fetch), System::command_fetch);
         Command::add_with_json(EMSdevice::DeviceType::SYSTEM, F_(info), System::command_info);
         Command::add_with_json(EMSdevice::DeviceType::SYSTEM, F_(report), System::command_report);
     });
