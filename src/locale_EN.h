@@ -78,6 +78,7 @@ MAKE_PSTR_WORD(command)
 MAKE_PSTR_WORD(commands)
 MAKE_PSTR_WORD(info)
 MAKE_PSTR_WORD(report)
+MAKE_PSTR_WORD(test)
 
 // devices
 MAKE_PSTR_WORD(boiler)

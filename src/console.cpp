@@ -20,7 +20,9 @@
 #include "emsesp.h"
 #include "version.h"
 
+#if defined(EMSESP_TEST)
 #include "test/test.h"
+#endif
 
 namespace emsesp {
 
@@ -426,11 +428,7 @@ void EMSESPShell::add_console_commands() {
             return {};
         });
 
-    /*
-     * add all the submenu contexts...
-     */
-
-    // System
+    // System context menu
     commands->add_command(ShellContext::MAIN,
                           CommandFlags::USER,
                           flash_string_vector{F_(system)},
@@ -471,25 +469,21 @@ void Console::enter_custom_context(Shell & shell, unsigned int context) {
 
 // each custom context has the common commands like log, help, exit, su etc
 void Console::load_standard_commands(unsigned int context) {
-#if defined(EMSESP_DEBUG)
+#if defined(EMSESP_TEST)
     EMSESPShell::commands->add_command(context,
                                        CommandFlags::USER,
-                                       flash_string_vector{F("test")},
+                                       flash_string_vector{F_(test)},
                                        flash_string_vector{F_(name_optional)},
                                        [](Shell & shell, const std::vector<std::string> & arguments) {
                                            if (arguments.size() == 0) {
-                                               Test::run_test(shell, "default");
+                                               Test::run_test_shell(shell, "default");
                                            } else {
-                                               Test::run_test(shell, arguments.front());
+                                               Test::run_test_shell(shell, arguments.front());
                                            }
                                        });
-    EMSESPShell::commands->add_command(context,
-                                       CommandFlags::USER,
-                                       flash_string_vector{F("t")},
-                                       [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
-                                           Test::run_test(shell, "default");
-                                       });
 #endif
+
+
 
     EMSESPShell::commands->add_command(
         context,

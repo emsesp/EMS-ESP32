@@ -21,6 +21,10 @@
 
 #include "version.h" // firmware version of EMS-ESP
 
+#if defined(EMSESP_TEST)
+#include "test/test.h"
+#endif
+
 namespace emsesp {
 
 uuid::log::Logger System::logger_{F_(system), uuid::log::Facility::KERN};
@@ -47,7 +51,12 @@ String      System::syslog_host_;
 
 // send on/off to a gpio pin
 // value: true = HIGH, false = LOW
+// http://ems-esp/api?device=system&cmd=pin&data=1&id=2
 bool System::command_pin(const char * value, const int8_t id) {
+    if (id < 0) {
+        return false;
+    }
+
     bool v = false;
     if (Helpers::value2bool(value, v)) {
         pinMode(id, OUTPUT);
@@ -191,6 +200,10 @@ void System::start() {
         Command::add(EMSdevice::DeviceType::SYSTEM, settings.ems_bus_id, F_(fetch), System::command_fetch);
         Command::add_with_json(EMSdevice::DeviceType::SYSTEM, F_(info), System::command_info);
         Command::add_with_json(EMSdevice::DeviceType::SYSTEM, F_(report), System::command_report);
+
+#if defined(EMSESP_TEST)
+        Command::add(EMSdevice::DeviceType::SYSTEM, settings.ems_bus_id, F_(test), System::command_test);
+#endif
     });
 
 
@@ -274,7 +287,6 @@ void System::loop() {
 #endif
 
 #endif
-
 }
 
 void System::show_mem(const char * note) {
@@ -1072,5 +1084,14 @@ bool System::command_report(const char * value, const int8_t id, JsonObject & js
 
     return true;
 }
+
+#if defined(EMSESP_TEST)
+// run a test
+// e.g. http://ems-esp/api?device=system&cmd=test&data=boiler
+bool System::command_test(const char * value, const int8_t id) {
+    Test::run_test(value, id);
+    return true;
+}
+#endif
 
 } // namespace emsesp

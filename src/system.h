@@ -55,6 +55,10 @@ class System {
     static bool command_info(const char * value, const int8_t id, JsonObject & json);
     static bool command_report(const char * value, const int8_t id, JsonObject & json);
 
+#if defined(EMSESP_TEST)
+    static bool command_test(const char * value, const int8_t id);
+#endif
+
     static uint8_t free_mem();
     static void    upload_status(bool in_progress);
     static bool    upload_status();
