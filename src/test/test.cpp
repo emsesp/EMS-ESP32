@@ -269,8 +269,8 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
 
         shell.invoke_command("show devices");
         shell.invoke_command("show");
-        // shell.invoke_command("publish");
-        // shell.invoke_command("show mqtt");
+        shell.invoke_command("call system publish");
+        shell.invoke_command("show mqtt");
     }
 
     if (command == "fr120") {
