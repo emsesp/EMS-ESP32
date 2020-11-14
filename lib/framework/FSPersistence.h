@@ -66,10 +66,12 @@ class FSPersistence {
             return false;
         }
 
-        // debug added by Proddy
-        // Serial.printf("Write File: %s: ", _filePath);
-        // serializeJson(jsonDocument, Serial);
-        // Serial.println();
+// debug added by Proddy
+#if defined(EMSESP_FORCE_SERIAL)
+        Serial.printf("Write File: %s: ", _filePath);
+        serializeJson(jsonDocument, Serial);
+        Serial.println();
+#endif
 
         // serialize the data to the file
         serializeJson(jsonDocument, settingsFile);
