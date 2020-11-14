@@ -44,7 +44,7 @@ class Solar : public EMSdevice {
 
   private:
     static uuid::log::Logger logger_;
-    void                     register_mqtt_ha_config(bool force);
+    void                     register_mqtt_ha_config();
 
     int16_t  collectorTemp_          = EMS_VALUE_SHORT_NOTSET; // TS1: Temperature sensor for collector array 1
     int16_t  tankBottomTemp_         = EMS_VALUE_SHORT_NOTSET; // TS2: Temperature sensor 1 cylinder, bottom (solar thermal system)
@@ -106,6 +106,7 @@ class Solar : public EMSdevice {
     void process_SM100Status2(std::shared_ptr<const Telegram> telegram);
     void process_SM100CollectorConfig(std::shared_ptr<const Telegram> telegram);
     void process_SM100Energy(std::shared_ptr<const Telegram> telegram);
+    void process_SM100Time(std::shared_ptr<const Telegram> telegram);
 
     void process_SM100wwTemperature(std::shared_ptr<const Telegram> telegram);
     void process_SM100wwStatus(std::shared_ptr<const Telegram> telegram);

@@ -84,12 +84,12 @@ void DallasSensor::loop() {
             bus_.reset_search();
             state_ = State::SCANNING;
         } else if (time_now - last_activity_ > READ_TIMEOUT_MS) {
-            LOG_ERROR(F("Sensor read timeout"));
+            LOG_WARNING(F("Dallas sensor read timeout"));
             state_ = State::IDLE;
         }
     } else if (state_ == State::SCANNING) {
         if (time_now - last_activity_ > SCAN_TIMEOUT_MS) {
-            LOG_ERROR(F("Sensor scan timeout"));
+            LOG_ERROR(F("Dallas sensor scan timeout"));
             state_ = State::IDLE;
         } else {
             uint8_t addr[ADDR_LEN] = {0};
@@ -129,11 +129,11 @@ void DallasSensor::loop() {
                         break;
 
                     default:
-                        LOG_ERROR(F("Unknown sensor %s"), Sensor(addr).to_string().c_str());
+                        LOG_ERROR(F("Unknown dallas sensor %s"), Sensor(addr).to_string().c_str());
                         break;
                     }
                 } else {
-                    LOG_ERROR(F("Invalid sensor %s"), Sensor(addr).to_string().c_str());
+                    LOG_ERROR(F("Invalid dallas sensor %s"), Sensor(addr).to_string().c_str());
                 }
             } else {
                 if (!parasite_) {
@@ -309,7 +309,7 @@ bool DallasSensor::export_values(JsonObject & json) {
 }
 
 // send all dallas sensor values as a JSON package to MQTT
-void DallasSensor::publish_values() {
+void DallasSensor::publish_values(const bool force) {
     uint8_t num_sensors = sensors_.size();
 
     if (num_sensors == 0) {
@@ -340,7 +340,7 @@ void DallasSensor::publish_values() {
         // create the HA MQTT config
         // to e.g. homeassistant/sensor/ems-esp/dallas_28-233D-9497-0C03/config
         if (mqtt_format_ == Mqtt::Format::HA) {
-            if (!(registered_ha_[sensor_no - 1])) {
+            if (!(registered_ha_[sensor_no - 1]) || force) {
                 StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> config;
                 config["dev_cla"] = F("temperature");
 

@@ -58,13 +58,15 @@ class Thermostat : public EMSdevice {
         uint8_t heatingtype       = EMS_VALUE_UINT_NOTSET; // type of heating: 1 radiator, 2 convectors, 3 floors, 4 room supply
         uint8_t targetflowtemp    = EMS_VALUE_UINT_NOTSET;
         uint8_t summertemp        = EMS_VALUE_UINT_NOTSET;
-        uint8_t nofrosttemp       = EMS_VALUE_UINT_NOTSET;
+        int8_t  nofrosttemp       = EMS_VALUE_INT_NOTSET;  // signed -20°C to +10°C
         uint8_t designtemp        = EMS_VALUE_UINT_NOTSET; // heating curve design temp at MinExtTemp
         int8_t  offsettemp        = EMS_VALUE_INT_NOTSET;  // heating curve offest temp at roomtemp signed!
         uint8_t manualtemp        = EMS_VALUE_UINT_NOTSET;
         uint8_t summer_setmode    = EMS_VALUE_UINT_NOTSET;
         uint8_t roominfluence     = EMS_VALUE_UINT_NOTSET;
         uint8_t flowtempoffset    = EMS_VALUE_UINT_NOTSET;
+        uint8_t minflowtemp       = EMS_VALUE_UINT_NOTSET;
+        uint8_t maxflowtemp       = EMS_VALUE_UINT_NOTSET;
 
         uint8_t hc_num() const {
             return hc_num_;
@@ -86,7 +88,7 @@ class Thermostat : public EMSdevice {
         uint8_t get_mode(uint8_t flags) const;
         uint8_t get_mode_type(uint8_t flags) const;
 
-        enum Mode : uint8_t { UNKNOWN, OFF, MANUAL, AUTO, DAY, NIGHT, HEAT, NOFROST, ECO, HOLIDAY, COMFORT, OFFSET, DESIGN, SUMMER, FLOWOFFSET };
+        enum Mode : uint8_t { UNKNOWN, OFF, MANUAL, AUTO, DAY, NIGHT, HEAT, NOFROST, ECO, HOLIDAY, COMFORT, OFFSET, DESIGN, SUMMER, FLOWOFFSET, MINFLOW, MAXFLOW, ROOMINFLUENCE };
 
         // for sorting based on hc number
         friend inline bool operator<(const std::shared_ptr<HeatingCircuit> & lhs, const std::shared_ptr<HeatingCircuit> & rhs) {
@@ -131,6 +133,7 @@ class Thermostat : public EMSdevice {
     std::vector<uint16_t> set_typeids;
     std::vector<uint16_t> timer_typeids;
     std::vector<uint16_t> summer_typeids;
+    std::vector<uint16_t> curve_typeids;
 
     std::string datetime_;  // date and time stamp
     std::string errorCode_; // code from 0xA2 as string i.e. "A22(816)"
@@ -245,7 +248,7 @@ class Thermostat : public EMSdevice {
 
     void register_mqtt_ha_config();
     void register_mqtt_ha_config(uint8_t hc_num);
-    void ha_config(bool force = false);
+    bool ha_config(bool force = false);
     bool thermostat_ha_cmd(const char * message, uint8_t hc_num);
 
     void process_RCOutdoorTemp(std::shared_ptr<const Telegram> telegram);
@@ -273,6 +276,7 @@ class Thermostat : public EMSdevice {
     void process_RC300OutdoorTemp(std::shared_ptr<const Telegram> telegram);
     void process_RC300Settings(std::shared_ptr<const Telegram> telegram);
     void process_RC300Floordry(std::shared_ptr<const Telegram> telegram);
+    void process_RC300Curve(std::shared_ptr<const Telegram> telegram);
     void process_JunkersMonitor(std::shared_ptr<const Telegram> telegram);
     void process_JunkersSet(std::shared_ptr<const Telegram> telegram);
     void process_JunkersSet2(std::shared_ptr<const Telegram> telegram);
@@ -308,11 +312,14 @@ class Thermostat : public EMSdevice {
     bool set_remotetemp(const char * value, const int8_t id);
     bool set_roominfluence(const char * value, const int8_t id);
     bool set_flowtempoffset(const char * value, const int8_t id);
+    bool set_minflowtemp(const char * value, const int8_t id);
+    bool set_maxflowtemp(const char * value, const int8_t id);
 
     // set functions - these don't use the id/hc, the parameters are ignored
     bool set_wwmode(const char * value, const int8_t id);
     bool set_wwtemp(const char * value, const int8_t id);
     bool set_wwtemplow(const char * value, const int8_t id);
+    bool set_wwonetime(const char * value, const int8_t id);
     bool set_wwcircmode(const char * value, const int8_t id);
     bool set_datetime(const char * value, const int8_t id);
     bool set_minexttemp(const char * value, const int8_t id);

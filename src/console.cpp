@@ -20,7 +20,7 @@
 #include "emsesp.h"
 #include "version.h"
 
-#if defined(EMSESP_DEBUG)
+#if defined(EMSESP_TEST)
 #include "test/test.h"
 #endif
 
@@ -109,28 +109,6 @@ void EMSESPShell::add_console_commands() {
     // just in case, remove everything
     // commands->remove_context_commands(ShellContext::MAIN);
     commands->remove_all_commands();
-
-    commands->add_command(ShellContext::MAIN,
-                          CommandFlags::USER,
-                          flash_string_vector{F_(fetch)},
-                          [&](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
-                              shell.printfln(F("Requesting data from EMS devices"));
-                              EMSESP::fetch_device_values();
-                          });
-
-    commands->add_command(ShellContext::MAIN,
-                          CommandFlags::ADMIN,
-                          flash_string_vector{F_(publish)},
-                          flash_string_vector{F_(ha_optional)},
-                          [&](Shell & shell, const std::vector<std::string> & arguments) {
-                              if (arguments.empty()) {
-                                  EMSESP::publish_all();
-                                  shell.printfln(F("Published all data to MQTT"));
-                              } else {
-                                  EMSESP::publish_all(true);
-                                  shell.printfln(F("Published all data to MQTT, including HA configs"));
-                              }
-                          });
 
     commands->add_command(ShellContext::MAIN,
                           CommandFlags::USER,
@@ -302,13 +280,17 @@ void EMSESPShell::add_console_commands() {
                                   "local");
                           });
 
+#ifndef EMSESP_STANDALONE
     commands->add_command(ShellContext::MAIN,
-                          CommandFlags::ADMIN,
-                          flash_string_vector{F_(send), F_(telegram)},
-                          flash_string_vector{F_(data_mandatory)},
-                          [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) {
-                              EMSESP::send_raw_telegram(arguments.front().c_str());
+                          CommandFlags::USER,
+                          flash_string_vector{F_(set), F_(timeout)},
+                          flash_string_vector{F_(n_mandatory)},
+                          [](Shell & shell, const std::vector<std::string> & arguments) {
+                              uint16_t value = Helpers::atoint(arguments.front().c_str());
+                              telnet_.initial_idle_timeout(value * 60);
+                              shell.printfln(F("Telnet timout is %d minutes"), value);
                           });
+#endif
 
     commands->add_command(ShellContext::MAIN,
                           CommandFlags::USER,
@@ -446,11 +428,7 @@ void EMSESPShell::add_console_commands() {
             return {};
         });
 
-    /*
-     * add all the submenu contexts...
-     */
-
-    // System
+    // System context menu
     commands->add_command(ShellContext::MAIN,
                           CommandFlags::USER,
                           flash_string_vector{F_(system)},
@@ -491,33 +469,21 @@ void Console::enter_custom_context(Shell & shell, unsigned int context) {
 
 // each custom context has the common commands like log, help, exit, su etc
 void Console::load_standard_commands(unsigned int context) {
-#if defined(EMSESP_DEBUG)
+#if defined(EMSESP_TEST)
     EMSESPShell::commands->add_command(context,
                                        CommandFlags::USER,
                                        flash_string_vector{F_(test)},
                                        flash_string_vector{F_(name_optional)},
-                                       [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
+                                       [](Shell & shell, const std::vector<std::string> & arguments) {
                                            if (arguments.size() == 0) {
-                                               Test::run_test(shell, "default");
+                                               Test::run_test_shell(shell, "default");
                                            } else {
-                                               Test::run_test(shell, arguments.front());
+                                               Test::run_test_shell(shell, arguments.front());
                                            }
                                        });
 #endif
 
-#if defined(EMSESP_STANDALONE)
-    EMSESPShell::commands->add_command(context,
-                                       CommandFlags::USER,
-                                       flash_string_vector{F("t")},
-                                       flash_string_vector{F_(name_optional)},
-                                       [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
-                                           if (arguments.size() == 0) {
-                                               Test::run_test(shell, "default");
-                                           } else {
-                                               Test::run_test(shell, arguments.front());
-                                           }
-                                       });
-#endif
+
 
     EMSESPShell::commands->add_command(
         context,

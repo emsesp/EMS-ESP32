@@ -49,6 +49,7 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
             register_telegram_type(0x036A, F("SM100Status2"), false, [&](std::shared_ptr<const Telegram> t) { process_SM100Status2(t); });
             register_telegram_type(0x0380, F("SM100CollectorConfig"), true, [&](std::shared_ptr<const Telegram> t) { process_SM100CollectorConfig(t); });
             register_telegram_type(0x038E, F("SM100Energy"), true, [&](std::shared_ptr<const Telegram> t) { process_SM100Energy(t); });
+            register_telegram_type(0x0391, F("SM100Time"), true, [&](std::shared_ptr<const Telegram> t) { process_SM100Time(t); });
 
             register_mqtt_cmd(F("SM100Tank1MaxTemp"), [&](const char * value, const int8_t id) { return set_SM100Tank1MaxTemp(value, id); });
         }
@@ -83,6 +84,7 @@ void Solar::device_info_web(JsonArray & root) {
     print_value_json(root, F("energyLastHour"), nullptr, F_(energyLastHour), F_(wh), json);
     print_value_json(root, F("energyToday"), nullptr, F_(energyToday), F_(wh), json);
     print_value_json(root, F("energyTotal"), nullptr, F_(energyTotal), F_(kwh), json);
+    print_value_json(root, F("pumpWorkMin"), nullptr, F_(pumpWorkMin), F_(min), json);
 
     if (Helpers::hasValue(pumpWorkMin_)) {
         JsonObject dataElement = root.createNestedObject();
@@ -118,6 +120,7 @@ void Solar::show_values(uuid::console::Shell & shell) {
     print_value_json(shell, F("energyLastHour"), nullptr, F_(energyLastHour), F_(wh), json);
     print_value_json(shell, F("energyToday"), nullptr, F_(energyToday), F_(wh), json);
     print_value_json(shell, F("energyTotal"), nullptr, F_(energyTotal), F_(kwh), json);
+    print_value_json(shell, F("pumpWorkMin"), nullptr, F_(pumpWorkMin), F_(min), json);
 
     if (Helpers::hasValue(pumpWorkMin_)) {
         shell.printfln(F("  %s: %d days %d hours %d minutes"),
@@ -132,7 +135,10 @@ void Solar::show_values(uuid::console::Shell & shell) {
 void Solar::publish_values(JsonObject & json, bool force) {
     // handle HA first
     if (Mqtt::mqtt_format() == Mqtt::Format::HA) {
-        register_mqtt_ha_config(force);
+        if ((!mqtt_ha_config_ || force)) {
+            register_mqtt_ha_config();
+            return;
+        }
     }
 
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
@@ -147,17 +153,13 @@ void Solar::publish_values(JsonObject & json, bool force) {
 }
 
 // publish config topic for HA MQTT Discovery
-void Solar::register_mqtt_ha_config(bool force) {
-    if ((mqtt_ha_config_ && !force)) {
-        return;
-    }
-
+void Solar::register_mqtt_ha_config() {
     if (!Mqtt::connected()) {
         return;
     }
 
     // Create the Master device
-    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> doc;
+    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
     doc["name"]    = F_(EMSESP);
     doc["uniq_id"] = F_(solar);
     doc["ic"]      = F_(iconthermostat);
@@ -183,10 +185,10 @@ void Solar::register_mqtt_ha_config(bool force) {
     Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(heatExchangerTemp), this->device_type(), "heatExchangerTemp", F_(degrees), nullptr);
     Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(solarPumpModulation), this->device_type(), "solarPumpModulation", F_(percent), nullptr);
     Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(cylinderPumpModulation), this->device_type(), "cylinderPumpModulation", F_(percent), nullptr);
-    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(pumpWorkMin), this->device_type(), "pumpWorkMin", nullptr, nullptr);
-    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(energyLastHour), this->device_type(), "energyLastHour", nullptr, nullptr);
-    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(energyToday), this->device_type(), "energyToday", nullptr, nullptr);
-    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(energyTotal), this->device_type(), "energyTotal", nullptr, nullptr);
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(pumpWorkMin), this->device_type(), "pumpWorkMin", F_(min), nullptr);
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(energyLastHour), this->device_type(), "energyLastHour", F_(wh), nullptr);
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(energyToday), this->device_type(), "energyToday", F_(wh), nullptr);
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(energyTotal), this->device_type(), "energyTotal", F_(kwh), nullptr);
     Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(solarPump), this->device_type(), "solarPump", nullptr, nullptr);
     Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(valveStatus), this->device_type(), "valveStatus", nullptr, nullptr);
     Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(tankHeated), this->device_type(), "tankHeated", nullptr, nullptr);
@@ -448,6 +450,13 @@ void Solar::process_SM100Energy(std::shared_ptr<const Telegram> telegram) {
     changed_ |= telegram->read_value(energyLastHour_, 0); // last hour / 10 in Wh
     changed_ |= telegram->read_value(energyToday_, 4);    // todays in Wh
     changed_ |= telegram->read_value(energyTotal_, 8);    // total / 10 in kWh
+}
+
+/*
+ * SM100Time - type 0x0391 EMS+ for pump working time
+ */
+void Solar::process_SM100Time(std::shared_ptr<const Telegram> telegram) {
+    changed_ |= telegram->read_value(pumpWorkMin_, 1, 3);
 }
 
 /*

@@ -46,7 +46,7 @@ class Mixer : public EMSdevice {
     static uuid::log::Logger logger_;
 
     bool export_values_format(uint8_t mqtt_format, JsonObject & doc);
-    void register_mqtt_ha_config(bool force);
+    void register_mqtt_ha_config();
 
     void process_MMPLUSStatusMessage_HC(std::shared_ptr<const Telegram> telegram);
     void process_MMPLUSStatusMessage_WWC(std::shared_ptr<const Telegram> telegram);

@@ -39,9 +39,9 @@ bool        Mqtt::mqtt_enabled_;
 
 std::vector<Mqtt::MQTTSubFunction> Mqtt::mqtt_subfunctions_;
 
-uint16_t                           Mqtt::mqtt_publish_fails_    = 0;
-size_t                             Mqtt::maximum_mqtt_messages_ = Mqtt::MAX_MQTT_MESSAGES;
-uint16_t                           Mqtt::mqtt_message_id_       = 0;
+uint16_t Mqtt::mqtt_publish_fails_ = 0;
+// size_t                             Mqtt::maximum_mqtt_messages_ = Mqtt::MAX_MQTT_MESSAGES;
+uint16_t                           Mqtt::mqtt_message_id_ = 0;
 std::list<Mqtt::QueuedMqttMessage> Mqtt::mqtt_messages_;
 char                               will_topic_[Mqtt::MQTT_TOPIC_MAX_SIZE]; // because MQTT library keeps only char pointer
 
@@ -181,7 +181,7 @@ void Mqtt::show_mqtt(uuid::console::Shell & shell) {
         return;
     }
 
-    shell.printfln(F("MQTT queue (%d messages):"), mqtt_messages_.size());
+    shell.printfln(F("MQTT queue (%d/%d messages):"), mqtt_messages_.size(), MAX_MQTT_MESSAGES);
 
     for (const auto & message : mqtt_messages_) {
         auto content = message.content_;
@@ -211,14 +211,12 @@ void Mqtt::show_mqtt(uuid::console::Shell & shell) {
         }
     }
     shell.println();
-} // namespace emsesp
+}
 
-#if defined(EMSESP_DEBUG)
 // simulate receiving a MQTT message, used only for testing
 void Mqtt::incoming(const char * topic, const char * payload) {
     on_message(topic, payload, strlen(payload));
 }
-#endif
 
 // received an MQTT message that we subscribed too
 void Mqtt::on_message(const char * topic, const char * payload, size_t len) {
@@ -357,6 +355,11 @@ void Mqtt::start() {
         mqtt_format_             = mqttSettings.mqtt_format;
         mqtt_enabled_            = mqttSettings.enabled;
     });
+
+    // if MQTT disabled, quit
+    if (!mqtt_enabled_) {
+        return;
+    }
 
     mqttClient_->onConnect([this](bool sessionPresent) { on_connect(); });
 
@@ -529,7 +532,7 @@ std::shared_ptr<const MqttMessage> Mqtt::queue_message(const uint8_t operation, 
     }
 
     // if the queue is full, make room but removing the last one
-    if (mqtt_messages_.size() >= maximum_mqtt_messages_) {
+    if (mqtt_messages_.size() >= MAX_MQTT_MESSAGES) {
         mqtt_messages_.pop_front();
     }
     mqtt_messages_.emplace_back(mqtt_message_id_++, std::move(message));
@@ -611,26 +614,6 @@ void Mqtt::process_queue() {
         return;
     }
 
-    // show queue - Debug only
-    /*
-    Serial.printf("MQTT queue:\n\r");
-    for (const auto & message : mqtt_messages_) {
-        auto content = message.content_;
-        if (content->operation == Operation::PUBLISH) {
-            // Publish messages
-            Serial.printf(" [%02d] (Pub) topic=%s payload=%s (pid %d, retry #%d)\n\r",
-                          message.id_,
-                          content->topic.c_str(),
-                          content->payload.c_str(),
-                          message.packet_id_,
-                          message.retry_count_);
-        } else {
-            // Subscribe messages
-            Serial.printf(" [%02d] (Sub) topic=%s\n\r", message.id_, content->topic.c_str());
-        }
-    }
-    */
-
     // fetch first from queue and create the full topic name
     auto mqtt_message = mqtt_messages_.front();
     auto message      = mqtt_message.content_;
@@ -697,9 +680,8 @@ void Mqtt::register_mqtt_ha_binary_sensor(const __FlashStringHelper * name, cons
         return;
     }
 
-    return; // TODO
-
-    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
+    DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_SMALL);
+    // StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
 
     doc["name"]    = name;
     doc["uniq_id"] = entity;
@@ -727,11 +709,13 @@ void Mqtt::register_mqtt_ha_binary_sensor(const __FlashStringHelper * name, cons
     snprintf_P(ha_device, sizeof(ha_device), PSTR("ems-esp-%s"), EMSdevice::device_type_2_device_name(device_type).c_str());
     ids.add(ha_device);
 
+    doc.shrinkToFit();
+
     char topic[MQTT_TOPIC_MAX_SIZE];
     snprintf_P(topic, sizeof(topic), PSTR("homeassistant/binary_sensor/ems-esp/%s/config"), entity);
 
     // convert json to string and publish immediately with retain forced to true
-    char payload_text[300];
+    char payload_text[256];
     serializeJson(doc, payload_text); // convert json to string
     uint16_t packet_id = mqttClient_->publish(topic, 0, true, payload_text);
 #if defined(EMSESP_STANDALONE)
@@ -744,7 +728,8 @@ void Mqtt::register_mqtt_ha_binary_sensor(const __FlashStringHelper * name, cons
     }
 #endif
 
-    delay(MQTT_PUBLISH_WAIT);
+    // delay(MQTT_PUBLISH_WAIT);
+    delay(50);
 }
 
 // HA config for a normal 'sensor' type
@@ -765,14 +750,15 @@ void Mqtt::register_mqtt_ha_sensor(const char *                prefix,
     if (prefix != nullptr) {
         snprintf_P(new_entity, sizeof(new_entity), PSTR("%s.%s"), prefix, entity);
     } else {
-        strcpy(new_entity, entity);
+        strncpy(new_entity, entity, sizeof(new_entity));
     }
 
-    std::string device_name = EMSdevice::device_type_2_device_name(device_type);
+    char device_name[50];
+    strncpy(device_name, EMSdevice::device_type_2_device_name(device_type).c_str(), sizeof(device_name));
 
     // build unique identifier, replacing all . with _ as not to break HA
     std::string uniq(50, '\0');
-    snprintf_P(&uniq[0], uniq.capacity() + 1, PSTR("%s_%s"), device_name.c_str(), new_entity);
+    snprintf_P(&uniq[0], uniq.capacity() + 1, PSTR("%s_%s"), device_name, new_entity);
     std::replace(uniq.begin(), uniq.end(), '.', '_');
 
     // topic
@@ -782,9 +768,9 @@ void Mqtt::register_mqtt_ha_sensor(const char *                prefix,
     // state topic
     char stat_t[MQTT_TOPIC_MAX_SIZE];
     if (suffix != nullptr) {
-        snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/%s_data%s"), hostname_.c_str(), device_name.c_str(), uuid::read_flash_string(suffix).c_str());
+        snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/%s_data%s"), hostname_.c_str(), device_name, uuid::read_flash_string(suffix).c_str());
     } else {
-        snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/%s_data"), hostname_.c_str(), device_name.c_str());
+        snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/%s_data"), hostname_.c_str(), device_name);
     }
 
     // value template
@@ -793,20 +779,22 @@ void Mqtt::register_mqtt_ha_sensor(const char *                prefix,
 
     // ha device
     char ha_device[40];
-    snprintf_P(ha_device, sizeof(ha_device), PSTR("ems-esp-%s"), device_name.c_str());
+    snprintf_P(ha_device, sizeof(ha_device), PSTR("ems-esp-%s"), device_name);
 
     // name
     char new_name[50];
     if (prefix != nullptr) {
-        snprintf_P(new_name, sizeof(new_name), PSTR("%s %s %s"), device_name.c_str(), prefix, uuid::read_flash_string(name).c_str());
+        snprintf_P(new_name, sizeof(new_name), PSTR("%s %s %s"), device_name, prefix, uuid::read_flash_string(name).c_str());
     } else {
-        snprintf_P(new_name, sizeof(new_name), PSTR("%s %s"), device_name.c_str(), uuid::read_flash_string(name).c_str());
+        snprintf_P(new_name, sizeof(new_name), PSTR("%s %s"), device_name, uuid::read_flash_string(name).c_str());
     }
     new_name[0] = toupper(new_name[0]); // capitalize first letter
 
-    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
+    DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_SMALL);
+    // StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
+
     doc["name"]    = new_name;
-    doc["uniq_id"] = uniq;
+    doc["uniq_id"] = uniq.c_str();
     if (uom != nullptr) {
         doc["unit_of_meas"] = uom;
     }
@@ -819,9 +807,9 @@ void Mqtt::register_mqtt_ha_sensor(const char *                prefix,
     JsonArray  ids = dev.createNestedArray("ids");
     ids.add(ha_device);
 
+    doc.shrinkToFit();
     // convert json to string and publish immediately with retain forced to true
-    // std::string payload_text;
-    char payload_text[300];
+    char payload_text[256];
     serializeJson(doc, payload_text); // convert json to string
 
     uint16_t packet_id = mqttClient_->publish(topic, 0, true, payload_text);
@@ -836,6 +824,6 @@ void Mqtt::register_mqtt_ha_sensor(const char *                prefix,
     }
 
     // delay(MQTT_PUBLISH_WAIT); // don't flood asynctcp
+    delay(50); // enough time to send the short message out
 }
-
 } // namespace emsesp

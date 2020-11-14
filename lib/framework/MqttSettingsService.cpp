@@ -4,7 +4,6 @@
 namespace emsesp {
 class EMSESP {
   public:
-    static System       system_;
     static Mqtt         mqtt_;
     static DallasSensor dallassensor_;
 };
@@ -93,14 +92,12 @@ AsyncMqttClient * MqttSettingsService::getMqttClient() {
 }
 
 void MqttSettingsService::onMqttConnect(bool sessionPresent) {
-    /*
-  Serial.print(F("Connected to MQTT, "));
-  if (sessionPresent) {
-    Serial.println(F("with persistent session"));
-  } else {
-    Serial.println(F("without persistent session"));
-  }
-  */
+    //   Serial.print(F("Connected to MQTT, "));
+    //   if (sessionPresent) {
+    //     Serial.println(F("with persistent session"));
+    //   } else {
+    //     Serial.println(F("without persistent session"));
+    //   }
 }
 
 void MqttSettingsService::onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
@@ -116,6 +113,7 @@ void MqttSettingsService::onConfigUpdated() {
 
     // added by proddy
     // reload EMS-ESP MQTT settings
+    emsesp::EMSESP::mqtt_.start();
 }
 
 #ifdef ESP32

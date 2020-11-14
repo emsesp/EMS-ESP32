@@ -209,11 +209,21 @@ function EMSESPSettingsControllerForm(props: EMSESPSettingsControllerFormProps) 
             <Typography variant="h6" color="primary" >
                 Syslog
             </Typography>
+            <BlockFormControlLabel
+                control={
+                    <Checkbox
+                        checked={data.syslog_enabled}
+                        onChange={handleValueChange('syslog_enabled')}
+                        value="syslog_enabled"
+                    />
+                }
+                label="Enable Syslog"
+            />
             <TextValidator
                 validators={['isIPOrHostname']}
                 errorMessages={["Not a valid IP address or hostname"]}
                 name="syslog_host"
-                label="Syslog IP/Host (optional)"
+                label="Syslog IP/Host"
                 fullWidth
                 variant="outlined"
                 value={data.syslog_host}
@@ -229,12 +239,13 @@ function EMSESPSettingsControllerForm(props: EMSESPSettingsControllerFormProps) 
                 margin="normal">
                 <MenuItem value={-1}>OFF</MenuItem>
                 <MenuItem value={3}>ERR</MenuItem>
+                <MenuItem value={5}>NOTICE</MenuItem>
                 <MenuItem value={6}>INFO</MenuItem>
                 <MenuItem value={7}>DEBUG</MenuItem>
             </SelectValidator>
             <TextValidator
                 validators={['required', 'isNumber', 'minNumber:0', 'maxNumber:65535']}
-                errorMessages={['Syslog Mark is required', "Must be a number", "Must be 0 or higher (0=off)", "Max value is 65535"]}
+                errorMessages={['Syslog Mark is required', "Must be a number", "Must be 0 or higher", "Max value is 10"]}
                 name="syslog_mark_interval"
                 label="Syslog Mark Interval (seconds, 0=off)"
                 fullWidth

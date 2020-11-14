@@ -66,10 +66,7 @@ MAKE_PSTR_WORD(publish)
 MAKE_PSTR_WORD(bar)
 MAKE_PSTR_WORD(min)
 MAKE_PSTR_WORD(uA)
-
-#if defined(EMSESP_DEBUG)
-MAKE_PSTR_WORD(test)
-#endif
+MAKE_PSTR_WORD(timeout)
 
 // for commands
 MAKE_PSTR_WORD(call)
@@ -81,6 +78,7 @@ MAKE_PSTR_WORD(command)
 MAKE_PSTR_WORD(commands)
 MAKE_PSTR_WORD(info)
 MAKE_PSTR_WORD(report)
+MAKE_PSTR_WORD(test)
 
 // devices
 MAKE_PSTR_WORD(boiler)
@@ -116,7 +114,7 @@ MAKE_PSTR(bus_id_fmt, "Bus ID = %02X")
 MAKE_PSTR(watchid_optional, "[ID]")
 MAKE_PSTR(watch_format_optional, "[off | on | raw]")
 MAKE_PSTR(invalid_watch, "Invalid watch type")
-MAKE_PSTR(data_mandatory, "<\"XX XX ...\">")
+MAKE_PSTR(data_mandatory, "\"XX XX ...\"")
 MAKE_PSTR(percent, "%")
 MAKE_PSTR(degrees, "°C")
 MAKE_PSTR(asterisks, "********")
@@ -246,6 +244,8 @@ MAKE_PSTR(floordrytemp, "Floordrying temperature")
 MAKE_PSTR(wwmode, "Warm water mode")
 MAKE_PSTR(wwtemp, "Warm water high temperature")
 MAKE_PSTR(wwtemplow, "Warm water low temperature")
+MAKE_PSTR(wwextra1, "Warm water circuit 1 extra")
+MAKE_PSTR(wwextra2, "Warm water circuit 2 extra")
 MAKE_PSTR(wwcircmode, "Warm water circulation mode")
 
 // thermostat - per heating circuit
@@ -267,6 +267,8 @@ MAKE_PSTR(summertemp, "Summer temperature")
 MAKE_PSTR(summermode, "Summer mode")
 MAKE_PSTR(roominfluence, "Room influence")
 MAKE_PSTR(flowtempoffset, "Flow temperature offset")
+MAKE_PSTR(minflowtemp, "Min. flow temperature")
+MAKE_PSTR(maxflowtemp, "Max. flow temperature")
 MAKE_PSTR(mode, "Mode")
 MAKE_PSTR(modetype, "Mode type")
 

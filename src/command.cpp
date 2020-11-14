@@ -68,7 +68,9 @@ void Command::add(const uint8_t device_type, const uint8_t device_id, const __Fl
     cmdfunctions_.emplace_back(device_type, cmd, cb, nullptr);
 
     // see if we need to subscribe
-    Mqtt::register_command(device_type, device_id, cmd, cb);
+    if (Mqtt::enabled()) {
+        Mqtt::register_command(device_type, device_id, cmd, cb);
+    }
 }
 
 // add a command to the list, which does return json object as output

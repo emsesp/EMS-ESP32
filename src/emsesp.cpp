@@ -63,6 +63,7 @@ bool     EMSESP::read_next_                = false;
 uint16_t EMSESP::publish_id_               = 0;
 bool     EMSESP::tap_water_active_         = false; // for when Boiler states we having running warm water. used in Shower()
 uint32_t EMSESP::last_fetch_               = 0;
+uint8_t  EMSESP::publish_all_idx_          = 0;
 uint8_t  EMSESP::unique_id_count_          = 0;
 
 // for a specific EMS device go and request data values
@@ -215,9 +216,8 @@ void EMSESP::show_ems(uuid::console::Shell & shell) {
         shell.printfln(F("  #tx fails (after %d retries): %d"), TxService::MAXIMUM_TX_RETRIES, txservice_.telegram_fail_count());
         shell.printfln(F("  Rx line quality: %d%%"), rxservice_.quality());
         shell.printfln(F("  Tx line quality: %d%%"), txservice_.quality());
+        shell.println();
     }
-
-    shell.println();
 
     // Rx queue
     auto rx_telegrams = rxservice_.queue();
@@ -290,14 +290,58 @@ void EMSESP::show_sensor_values(uuid::console::Shell & shell) {
 
 // MQTT publish everything, immediately
 void EMSESP::publish_all(bool force) {
+    if (force) {
+        publish_all_idx_ = 1;
+        return;
+    }
     if (Mqtt::connected()) {
-        publish_device_values(EMSdevice::DeviceType::BOILER, force);
-        publish_device_values(EMSdevice::DeviceType::THERMOSTAT, force);
-        publish_device_values(EMSdevice::DeviceType::SOLAR, force);
-        publish_device_values(EMSdevice::DeviceType::MIXER, force);
+        publish_device_values(EMSdevice::DeviceType::BOILER, false);
+        publish_device_values(EMSdevice::DeviceType::THERMOSTAT, false);
+        publish_device_values(EMSdevice::DeviceType::SOLAR, false);
+        publish_device_values(EMSdevice::DeviceType::MIXER, false);
         publish_other_values();
-        publish_sensor_values(true);
+        publish_sensor_values(true, false);
         system_.send_heartbeat();
+    }
+}
+
+// on command "publish HA" loop and wait between devices for publishing all sensors
+void EMSESP::publish_all_loop() {
+    static uint32_t last = 0;
+    if (!Mqtt::connected() || !publish_all_idx_) {
+        return;
+    }
+    // every HA-sensor takes 20 ms, wait ~2 sec to finish (boiler have ~70 sensors)
+    if ((uuid::get_uptime() - last < 2000)) {
+        return;
+    }
+    last = uuid::get_uptime();
+    switch (publish_all_idx_++) {
+    case 1:
+        publish_device_values(EMSdevice::DeviceType::BOILER, true);
+        break;
+    case 2:
+        publish_device_values(EMSdevice::DeviceType::THERMOSTAT, true);
+        break;
+    case 3:
+        publish_device_values(EMSdevice::DeviceType::SOLAR, true);
+        break;
+    case 4:
+        publish_device_values(EMSdevice::DeviceType::MIXER, true);
+        break;
+    case 5:
+        publish_other_values();
+        break;
+    case 6:
+        publish_sensor_values(true, true);
+        break;
+    case 7:
+        system_.send_heartbeat();
+        break;
+    default:
+        // all finished
+        publish_all_idx_ = 0;
+        last             = 0;
     }
 }
 
@@ -305,14 +349,15 @@ void EMSESP::publish_all(bool force) {
 // special case for Mixer units, since we want to bundle all devices together into one payload
 void EMSESP::publish_device_values(uint8_t device_type, bool force) {
     if (device_type == EMSdevice::DeviceType::MIXER && Mqtt::mqtt_format() != Mqtt::Format::SINGLE) {
-        DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_LARGE);
-        JsonObject          json = doc.to<JsonObject>();
+        // DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_LARGE);
+        StaticJsonDocument<EMSESP_MAX_JSON_SIZE_LARGE> doc;
+        JsonObject                                     json = doc.to<JsonObject>();
         for (const auto & emsdevice : emsdevices) {
             if (emsdevice && (emsdevice->device_type() == device_type)) {
                 emsdevice->publish_values(json, force);
             }
         }
-        doc.shrinkToFit();
+        // doc.shrinkToFit();
         Mqtt::publish("mixer_data", doc.as<JsonObject>());
         return;
     }
@@ -335,9 +380,9 @@ void EMSESP::publish_other_values() {
     }
 }
 
-void EMSESP::publish_sensor_values(const bool force) {
-    if (dallassensor_.updated_values() || force) {
-        dallassensor_.publish_values();
+void EMSESP::publish_sensor_values(const bool time, const bool force) {
+    if (dallassensor_.updated_values() || time || force) {
+        dallassensor_.publish_values(force);
     }
 }
 
@@ -649,7 +694,7 @@ void EMSESP::show_devices(uuid::console::Shell & shell) {
         // shell.printf(F("[factory ID: %d] "), device_class.first);
         for (const auto & emsdevice : emsdevices) {
             if ((emsdevice) && (emsdevice->device_type() == device_class.first)) {
-                shell.printf(F("%s: %s"), emsdevice->device_type_name().c_str(), emsdevice->to_string().c_str());
+                shell.printf(F("(%d) %s: %s"), emsdevice->unique_id(), emsdevice->device_type_name().c_str(), emsdevice->to_string().c_str());
                 if ((emsdevice->device_type() == EMSdevice::DeviceType::THERMOSTAT) && (emsdevice->device_id() == actual_master_thermostat())) {
                     shell.printf(F(" ** master device **"));
                 }
@@ -722,17 +767,20 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
         return false; // not found
     }
 
-    std::string name = uuid::read_flash_string(device_p->name);
-    emsdevices.push_back(EMSFactory::add(device_p->device_type, device_id, device_p->product_id, version, name, device_p->flags, brand));
-    emsdevices.back()->unique_id(++unique_id_count_);
+    auto name        = uuid::read_flash_string(device_p->name);
+    auto device_type = device_p->device_type;
+    auto flags       = device_p->flags;
     LOG_DEBUG(F("Adding new device %s (device ID 0x%02X, product ID %d, version %s)"), name.c_str(), device_id, product_id, version.c_str());
+    emsdevices.push_back(EMSFactory::add(device_type, device_id, product_id, version, name, flags, brand));
+    emsdevices.back()->unique_id(++unique_id_count_);
+
     fetch_device_values(device_id); // go and fetch its data
 
     // add info command, but not for all devices
-    uint8_t device_type = device_p->device_type;
     if ((device_type == DeviceType::CONNECT) || (device_type == DeviceType::CONTROLLER) || (device_type == DeviceType::GATEWAY)) {
         return true;
     }
+
     Command::add_with_json(device_type, F_(info), [device_type](const char * value, const int8_t id, JsonObject & json) {
         return command_info(device_type, json);
     });
@@ -934,11 +982,12 @@ void EMSESP::loop() {
     }
 
     system_.loop();       // does LED and checks system health, and syslog service
+    rxservice_.loop();    // process any incoming Rx telegrams
     shower_.loop();       // check for shower on/off
     dallassensor_.loop(); // this will also send out via MQTT
-    mqtt_.loop();         // sends out anything in the queue via MQTT
-    console_.loop();      // telnet/serial console
-    rxservice_.loop();    // process any incoming Rx telegrams
+    publish_all_loop();
+    mqtt_.loop();    // sends out anything in the queue via MQTT
+    console_.loop(); // telnet/serial console
 
     // force a query on the EMS devices to fetch latest data at a set interval (1 min)
     if ((uuid::get_uptime() - last_fetch_ > EMS_FETCH_FREQUENCY)) {

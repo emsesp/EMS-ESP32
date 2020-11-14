@@ -46,24 +46,23 @@ void OTASettingsService::configureArduinoOTA() {
             emsesp::System::upload_status(false);
         });
 
-        /*
-    _arduinoOTA->onProgress([](unsigned int progress, unsigned int total) {
-      Serial.printf_P(PSTR("Progress: %u%%\r\n"), (progress / (total / 100)));
-    });
-    _arduinoOTA->onError([](ota_error_t error) {
-      Serial.printf("Error[%u]: ", error);
-      if (error == OTA_AUTH_ERROR)
-        Serial.println(F("Auth Failed"));
-      else if (error == OTA_BEGIN_ERROR)
-        Serial.println(F("Begin Failed"));
-      else if (error == OTA_CONNECT_ERROR)
-        Serial.println(F("Connect Failed"));
-      else if (error == OTA_RECEIVE_ERROR)
-        Serial.println(F("Receive Failed"));
-      else if (error == OTA_END_ERROR)
-        Serial.println(F("End Failed"));
-    });
-    */
+        // _arduinoOTA->onProgress([](unsigned int progress, unsigned int total) {
+        //   Serial.printf_P(PSTR("Progress: %u%%\r\n"), (progress / (total / 100)));
+        // });
+        // _arduinoOTA->onError([](ota_error_t error) {
+        //   Serial.printf("Error[%u]: ", error);
+        //   if (error == OTA_AUTH_ERROR)
+        //     Serial.println(F("Auth Failed"));
+        //   else if (error == OTA_BEGIN_ERROR)
+        //     Serial.println(F("Begin Failed"));
+        //   else if (error == OTA_CONNECT_ERROR)
+        //     Serial.println(F("Connect Failed"));
+        //   else if (error == OTA_RECEIVE_ERROR)
+        //     Serial.println(F("Receive Failed"));
+        //   else if (error == OTA_END_ERROR)
+        //     Serial.println(F("End Failed"));
+        // });
+
         _arduinoOTA->begin();
     }
 }

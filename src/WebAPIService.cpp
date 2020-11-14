@@ -71,7 +71,7 @@ void WebAPIService::webAPIService(AsyncWebServerRequest * request) {
         id = "-1";
     }
 
-    DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_LARGE);
+    DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_DYN);
     JsonObject          json = doc.to<JsonObject>();
     bool                ok   = false;
 
@@ -98,10 +98,10 @@ void WebAPIService::webAPIService(AsyncWebServerRequest * request) {
                cmd.c_str(),
                data.c_str(),
                id.c_str(),
-               ok ? F("OK") : F("Invalid"));
+               ok ? PSTR("OK") : PSTR("Invalid"));
     EMSESP::logger().info(debug.c_str());
     if (json.size()) {
-        char buffer2[EMSESP_MAX_JSON_SIZE_LARGE];
+        char buffer2[EMSESP_MAX_JSON_SIZE_DYN];
         serializeJson(doc, buffer2);
         EMSESP::logger().info("json (max 255 chars): %s", buffer2);
     }
@@ -110,7 +110,7 @@ void WebAPIService::webAPIService(AsyncWebServerRequest * request) {
     // if we have returned data in JSON format, send this to the WEB
     if (json.size()) {
         doc.shrinkToFit();
-        char buffer[EMSESP_MAX_JSON_SIZE_LARGE];
+        char buffer[EMSESP_MAX_JSON_SIZE_DYN];
         serializeJsonPretty(doc, buffer);
         request->send(200, "text/plain", buffer);
     } else {

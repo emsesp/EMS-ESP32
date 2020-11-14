@@ -63,7 +63,7 @@ class EMSESP {
 
     static void publish_device_values(uint8_t device_type, bool force = false);
     static void publish_other_values();
-    static void publish_sensor_values(const bool force = false);
+    static void publish_sensor_values(const bool time, const bool force = false);
     static void publish_all(bool force = false);
 
 #ifdef EMSESP_STANDALONE
@@ -184,6 +184,7 @@ class EMSESP {
     static void process_UBADevices(std::shared_ptr<const Telegram> telegram);
     static void process_version(std::shared_ptr<const Telegram> telegram);
     static void publish_response(std::shared_ptr<const Telegram> telegram);
+    static void publish_all_loop();
 
     static bool command_info(uint8_t device_type, JsonObject & json);
 
@@ -206,6 +207,7 @@ class EMSESP {
     static bool     read_next_;
     static uint16_t publish_id_;
     static bool     tap_water_active_;
+    static uint8_t  publish_all_idx_;
     static uint8_t  unique_id_count_;
 };
 

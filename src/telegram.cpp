@@ -429,6 +429,11 @@ void TxService::add(const uint8_t  operation,
 // format is EMS 1.0 (src, dest, type_id, offset, data)
 // length is the length of the whole telegram data, excluding the CRC
 void TxService::add(uint8_t operation, const uint8_t * data, const uint8_t length, const bool front) {
+    // check length
+    if (length < 5) {
+        return;
+    }
+
     // build header. src, dest and offset have fixed positions
     uint8_t src    = data[0];
     uint8_t dest   = data[1];

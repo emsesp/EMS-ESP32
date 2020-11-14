@@ -9,7 +9,7 @@ import { AuthenticationContext, Me } from './AuthenticationContext';
 import FullScreenLoading from '../components/FullScreenLoading';
 import { withFeatures, WithFeaturesProps } from '../features/FeaturesContext';
 
-export const decodeMeJWT = (accessToken: string): Me => jwtDecode(accessToken);
+export const decodeMeJWT = (accessToken: string): Me => jwtDecode(accessToken) as Me;
 
 interface AuthenticationWrapperState {
   context: AuthenticationContext;
@@ -59,7 +59,7 @@ class AuthenticationWrapper extends React.Component<AuthenticationWrapperProps, 
   }
 
   refresh = () => {
-    // proddy removed
+    // commented out, always need security - proddy
     // if (!this.props.features.security) {
     //   this.setState({ initialized: true, context: { ...this.state.context, me: { admin: true, username: "admin" } } });
     //   return;

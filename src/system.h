@@ -50,8 +50,14 @@ class System {
 
     static bool command_pin(const char * value, const int8_t id);
     static bool command_send(const char * value, const int8_t id);
+    static bool command_publish(const char * value, const int8_t id);
+    static bool command_fetch(const char * value, const int8_t id);
     static bool command_info(const char * value, const int8_t id, JsonObject & json);
     static bool command_report(const char * value, const int8_t id, JsonObject & json);
+
+#if defined(EMSESP_TEST)
+    static bool command_test(const char * value, const int8_t id);
+#endif
 
     static uint8_t free_mem();
     static void    upload_status(bool in_progress);
@@ -59,9 +65,9 @@ class System {
     static void    show_mem(const char * note);
     static void    set_led();
     static void    init();
+    static void    syslog_init();
 
     bool check_upgrade();
-    void syslog_init();
     void send_heartbeat();
 
     static std::string hostname() {
@@ -108,12 +114,13 @@ class System {
     static std::string hostname_;
 
     // settings
-    static bool    hide_led_;
-    uint8_t        syslog_level_;
-    uint32_t       syslog_mark_interval_;
-    String         syslog_host_;
-    static uint8_t led_gpio_;
-    static bool    analog_enabled_;
+    static bool     hide_led_;
+    static bool     syslog_enabled_;
+    static int8_t   syslog_level_;
+    static uint32_t syslog_mark_interval_;
+    static String   syslog_host_;
+    static uint8_t  led_gpio_;
+    static bool     analog_enabled_;
 };
 
 } // namespace emsesp
