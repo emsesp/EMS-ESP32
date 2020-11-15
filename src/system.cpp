@@ -1089,8 +1089,7 @@ bool System::command_report(const char * value, const int8_t id, JsonObject & js
 // run a test
 // e.g. http://ems-esp/api?device=system&cmd=test&data=boiler
 bool System::command_test(const char * value, const int8_t id) {
-    Test::run_test(value, id);
-    return true;
+    return (Test::run_test(value, id));
 }
 #endif
 
