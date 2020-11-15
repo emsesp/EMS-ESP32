@@ -41,6 +41,7 @@ std::vector<Mqtt::MQTTSubFunction> Mqtt::mqtt_subfunctions_;
 
 uint16_t                           Mqtt::mqtt_publish_fails_ = 0;
 bool                               Mqtt::connecting_         = false;
+uint8_t                            Mqtt::connectcount_       = 0;
 uint16_t                           Mqtt::mqtt_message_id_    = 0;
 std::list<Mqtt::QueuedMqttMessage> Mqtt::mqtt_messages_;
 char                               will_topic_[Mqtt::MQTT_TOPIC_MAX_SIZE]; // because MQTT library keeps only char pointer
@@ -109,6 +110,7 @@ void Mqtt::resubscribe() {
     }
 
     for (const auto & mqtt_subfunction : mqtt_subfunctions_) {
+        LOG_INFO("got %s", mqtt_subfunction.topic_.c_str()); // TODO
         queue_subscribe_message(mqtt_subfunction.topic_);
     }
 }
@@ -469,27 +471,33 @@ void Mqtt::on_connect() {
     }
 
     connecting_ = true;
+    connectcount_++;
+
+    // first time to connect
+    if (connectcount_ == 1) {
+        // send info topic appended with the version information as JSON
+        StaticJsonDocument<90> doc;
+        doc["event"]   = "start";
+        doc["version"] = EMSESP_APP_VERSION;
+#ifndef EMSESP_STANDALONE
+        doc["ip"] = WiFi.localIP().toString();
+#endif
+        publish(F_(info), doc.as<JsonObject>());
+
+        // create the EMS-ESP device in HA, which is MQTT retained
+        if (mqtt_format() == Format::HA) {
+            ha_status();
+        }
+
+        publish_retain(F("status"), "online", true); // say we're alive to the Last Will topic, with retain on
+    } else {
+        // we doing a re-connect from a TCP break
+        // only re-subscribe again to all MQTT topics
+        resubscribe();
+    }
 
     LOG_INFO(F("MQTT connected"));
-
-    // send info topic appended with the version information as JSON
-    StaticJsonDocument<90> doc;
-    doc["event"]   = "start";
-    doc["version"] = EMSESP_APP_VERSION;
-#ifndef EMSESP_STANDALONE
-    doc["ip"] = WiFi.localIP().toString();
-#endif
-    publish(F_(info), doc.as<JsonObject>());
-
-    publish_retain(F("status"), "online", true); // say we're alive to the Last Will topic, with retain on
-
     reset_publish_fails(); // reset fail count to 0
-
-    resubscribe(); // in case this is a reconnect, re-subscribe again to all MQTT topics
-
-    if (mqtt_format() == Format::HA) {
-        ha_status(); // create a device in HA
-    }
 }
 
 // Home Assistant Discovery - the main master Device

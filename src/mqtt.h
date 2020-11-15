@@ -218,6 +218,7 @@ class Mqtt {
 
     static bool     connecting_;
     static uint16_t mqtt_publish_fails_;
+    static uint8_t  connectcount_;
 
     // settings, copied over
     static std::string hostname_;
