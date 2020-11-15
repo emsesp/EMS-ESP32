@@ -285,6 +285,7 @@ void Solar::process_SM10Monitor(std::shared_ptr<const Telegram> telegram) {
 
 /*
  * process_SM100SystemConfig - type 0x0358 EMS+ - for MS/SM100 and MS/SM200
+ * e.g. B0 0B FF 00 02 58 FF 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 FF 00 FF 01 00 00
  */
 void Solar::process_SM100SystemConfig(std::shared_ptr<const Telegram> telegram) {
     changed_ |= telegram->read_value(heatTransferSystem_  , 5, 1);
@@ -296,6 +297,7 @@ void Solar::process_SM100SystemConfig(std::shared_ptr<const Telegram> telegram) 
 
 /*
  * process_SM100SolarCircuitConfig - type 0x035A EMS+ - for MS/SM100 and MS/SM200
+ * e.g. B0 0B FF 00 02 5A 64 05 00 58 14 01 01 32 64 00 00 00 5A 0C
  */
 void Solar::process_SM100SolarCircuitConfig(std::shared_ptr<const Telegram> telegram) {
     changed_ |= telegram->read_value(collectorTempMax_    , 0, 1);
@@ -434,6 +436,7 @@ void Solar::process_SM100Status2(std::shared_ptr<const Telegram> telegram) {
 
 /*
  * SM100CollectorConfig - type 0x0380 EMS+  - for SM100 and SM200
+ * e.g. B0 0B FF 00 02 80 50 64 00 00 29 01 00 00 01
  */
 void Solar::process_SM100CollectorConfig(std::shared_ptr<const Telegram> telegram) {
     changed_ |= telegram->read_value(climateZone_, 0, 1);
@@ -487,12 +490,12 @@ void Solar::process_ISM1Set(std::shared_ptr<const Telegram> telegram) {
 }
 
 bool Solar::set_SM100Tank1MaxTemp(const char * value, const int8_t id) {
-    int temp;
-    if(! Helpers::value2number(value, temp)) return false;
-    tank1MaxTempCurrent_=temp;
-    unsigned char transport_temp=(unsigned char) temp;
+    int temperature;
+    if(! Helpers::value2number(value, temperature)) return false;
+    tank1MaxTempCurrent_=temperature;
+    uint8_t data=(uint8_t) temperature;
     // 90 30 FF 03 02 5A 59 B3
-    EMSdevice::write_command(0x35A, 0x03, &transport_temp, sizeof(transport_temp), 0);
+    EMSdevice::write_command(0x35A, 0x03, &data, sizeof(data), 0);
     return true;
 }
     
