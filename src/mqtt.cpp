@@ -103,14 +103,13 @@ void Mqtt::subscribe(const std::string & topic, mqtt_subfunction_p cb) {
     subscribe(0, topic, cb); // no device_id needed, if generic to EMS-ESP
 }
 
-// resubscribe to all MQTT topics again
+// resubscribe to all MQTT topics
 void Mqtt::resubscribe() {
     if (mqtt_subfunctions_.empty()) {
         return;
     }
 
     for (const auto & mqtt_subfunction : mqtt_subfunctions_) {
-        LOG_INFO("got %s", mqtt_subfunction.topic_.c_str()); // TODO
         queue_subscribe_message(mqtt_subfunction.topic_);
     }
 }
