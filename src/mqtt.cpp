@@ -654,9 +654,10 @@ void Mqtt::process_queue() {
     // else try and publish it
     uint16_t packet_id =
         mqttClient_->publish(message->topic.c_str(), mqtt_qos_, message->retain, message->payload.c_str(), message->payload.size(), false, mqtt_message.id_);
-    LOG_DEBUG(F("Publishing topic %s (#%02d, attempt #%d, size %d, pid %d)"),
+    LOG_DEBUG(F("Publishing topic %s (#%02d, retain=%d, try#%d, size %d, pid %d)"),
               message->topic.c_str(),
               mqtt_message.id_,
+              message->retain,
               mqtt_message.retry_count_ + 1,
               message->payload.size(),
               packet_id);
@@ -821,4 +822,5 @@ void Mqtt::register_mqtt_ha_sensor(const char *                prefix,
 
     delay(50); // enough time to send the short message out
 }
+
 } // namespace emsesp
