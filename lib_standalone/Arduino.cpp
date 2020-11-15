@@ -41,7 +41,7 @@ int main(int argc __attribute__((unused)), char * argv[] __attribute__((unused))
     memset(__output_level, 0, sizeof(__output_level));
 
     setup();
-    // loop(); // run once
+    loop(); // run once
 
     static unsigned long __cycles = 0;
 
