@@ -55,6 +55,30 @@ bool Test::run_test(const char * command, int8_t id) {
         return true;
     }
 
+    if (strcmp(command, "general2") == 0) {
+        EMSESP::logger().info(F("Testing GB072/RC310..."));
+
+        add_device(0x08, 123); // GB072
+        add_device(0x10, 158); // RC310
+
+        // add some data
+        // Boiler -> Me, UBAMonitorFast(0x18), telegram: 08 00 18 00 00 02 5A 73 3D 0A 10 65 40 02 1A 80 00 01 E1 01 76 0E 3D 48 00 C9 44 02 00 (#data=25)
+        uart_telegram({0x08, 0x00, 0x18, 0x00, 0x00, 0x02, 0x5A, 0x73, 0x3D, 0x0A, 0x10, 0x65, 0x40, 0x02, 0x1A,
+                       0x80, 0x00, 0x01, 0xE1, 0x01, 0x76, 0x0E, 0x3D, 0x48, 0x00, 0xC9, 0x44, 0x02, 0x00});
+
+        // Boiler -> Thermostat, UBAParameterWW(0x33), telegram: 08 97 33 00 23 24 (#data=2)
+        uart_telegram({0x08, 0x90, 0x33, 0x00, 0x23, 0x24});
+
+        // Boiler -> Me, UBAParameterWW(0x33), telegram: 08 0B 33 00 08 FF 34 FB 00 28 00 00 46 00 FF FF 00 (#data=13)
+        uart_telegram({0x08, 0x0B, 0x33, 0x00, 0x08, 0xFF, 0x34, 0xFB, 0x00, 0x28, 0x00, 0x00, 0x46, 0x00, 0xFF, 0xFF, 0x00});
+
+        // Thermostat 0x2A5 for HC1
+        uart_telegram({0x10, 00, 0xFF, 00, 01,   0xA5, 0x80, 00, 01, 0x30, 0x28, 00, 0x30, 0x28, 01, 0x54,
+                       03,   03, 01,   01, 0x54, 02,   0xA8, 00, 00, 0x11, 01,   03, 0xFF, 0xFF, 00});
+
+        return true;
+    }
+
     if (strcmp(command, "gateway") == 0) {
         EMSESP::logger().info(F("Testing gateway..."));
 
@@ -66,7 +90,7 @@ bool Test::run_test(const char * command, int8_t id) {
         rx_telegram({0x08, 0x00, 0x07, 0x00, 0x09, 01, 00, 00, 00, 00, 00, 00, 01, 00, 00, 00, 00});
 
         // add thermostat - Thermostat: RC300/RC310/Moduline 3000/CW400/Sense II (DeviceID:0x10, ProductID:158, Version:03.03) ** master device **
-        add_device(0x10, 158); // Nefit Trendline
+        add_device(0x10, 158); // RC310
 
         // simulate incoming telegram
         // Thermostat(0x10) -> 48(0x48), ?(0x26B), data: 6B 08 4F 00 00 00 02 00 00 00 02 00 03 00 03 00 03
@@ -77,7 +101,7 @@ bool Test::run_test(const char * command, int8_t id) {
 
     if (strcmp(command, "boiler") == 0) {
         EMSESP::logger().info(F("Testing boiler..."));
-        add_device(0x08, 123); // Nefit Trendline // TODO
+        add_device(0x08, 123); // Nefit Trendline
 
         // UBAuptime
         uart_telegram({0x08, 0x0B, 0x14, 00, 0x3C, 0x1F, 0xAC, 0x70});
