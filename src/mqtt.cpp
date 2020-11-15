@@ -719,7 +719,7 @@ void Mqtt::register_mqtt_ha_binary_sensor(const __FlashStringHelper * name, cons
     snprintf_P(topic, sizeof(topic), PSTR("homeassistant/binary_sensor/ems-esp/%s/config"), entity);
 
     // queue MQTT publish
-    publish(topic, doc.as<JsonObject>());
+    publish_retain(topic, doc.as<JsonObject>(), true);
 }
 
 // HA config for a normal 'sensor' type

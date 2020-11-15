@@ -38,7 +38,7 @@
 
 using uuid::console::Shell;
 
-#define EMSESP_MAX_JSON_SIZE_HA_CONFIG 256 // for small HA config payloads
+#define EMSESP_MAX_JSON_SIZE_HA_CONFIG 384 // for small HA config payloads
 #define EMSESP_MAX_JSON_SIZE_SMALL 384     // for smaller json docs when using StaticJsonDocument
 #define EMSESP_MAX_JSON_SIZE_MEDIUM 768    // for medium json docs from ems devices, when using StaticJsonDocument
 #define EMSESP_MAX_JSON_SIZE_LARGE 1024    // for large json docs from ems devices, like boiler or thermostat data. Using StaticJsonDocument
