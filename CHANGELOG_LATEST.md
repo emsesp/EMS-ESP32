@@ -3,7 +3,7 @@
 ### Added
 - function keys in editor: cursor, del, home, end. F1=help, F2=show, and other shortcuts
 - SM100 pump working time and energy units
-- heating curve parameters for RC300
+- heating curve parameters for RC300 (fixed)
 - `wwonetime` for RC300 thermostat
 
 ### Fixed
