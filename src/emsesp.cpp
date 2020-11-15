@@ -985,9 +985,9 @@ void EMSESP::loop() {
     rxservice_.loop();    // process any incoming Rx telegrams
     shower_.loop();       // check for shower on/off
     dallassensor_.loop(); // this will also send out via MQTT
-    publish_all_loop();
-    mqtt_.loop();    // sends out anything in the queue via MQTT
-    console_.loop(); // telnet/serial console
+    publish_all_loop();   // See which topics need publishing to MQTT and queue them
+    mqtt_.loop();         // sends out anything in the MQTT queue
+    console_.loop();      // telnet/serial console
 
     // force a query on the EMS devices to fetch latest data at a set interval (1 min)
     if ((uuid::get_uptime() - last_fetch_ > EMS_FETCH_FREQUENCY)) {
