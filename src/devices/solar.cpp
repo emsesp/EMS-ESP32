@@ -328,7 +328,7 @@ void Solar::process_SM100SolarCircuitConfig(std::shared_ptr<const Telegram> tele
 void Solar::process_SM100ParamCfg(std::shared_ptr<const Telegram> telegram) {
     uint16_t t_id;
     uint8_t of;
-    int32 min,def,max,cur;
+    int32_t min,def,max,cur;
     telegram->read_value(t_id, 1);
     telegram->read_value(of, 3);
     telegram->read_value(min, 5);
