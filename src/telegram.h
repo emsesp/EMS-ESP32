@@ -74,6 +74,7 @@ class Telegram {
     enum Operation : uint8_t {
         NONE = 0,
         RX,
+        RX_READ,
         TX_RAW,
         TX_READ,
         TX_WRITE,

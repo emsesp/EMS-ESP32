@@ -471,7 +471,7 @@ std::string EMSESP::pretty_telegram(std::shared_ptr<const Telegram> telegram) {
         type_name = read_flash_string(F("?"));
     }
 
-    if (telegram->dest & 0x80) {
+    if (telegram->operation == Telegram::Operation::RX_READ) {
         direction = read_flash_string(F("<-"));
     } else {
         direction = read_flash_string(F("->"));
