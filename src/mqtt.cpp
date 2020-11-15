@@ -39,9 +39,9 @@ bool        Mqtt::mqtt_enabled_;
 
 std::vector<Mqtt::MQTTSubFunction> Mqtt::mqtt_subfunctions_;
 
-uint16_t Mqtt::mqtt_publish_fails_ = 0;
-// size_t                             Mqtt::maximum_mqtt_messages_ = Mqtt::MAX_MQTT_MESSAGES;
-uint16_t                           Mqtt::mqtt_message_id_ = 0;
+uint16_t                           Mqtt::mqtt_publish_fails_ = 0;
+bool                               Mqtt::connecting_         = false;
+uint16_t                           Mqtt::mqtt_message_id_    = 0;
 std::list<Mqtt::QueuedMqttMessage> Mqtt::mqtt_messages_;
 char                               will_topic_[Mqtt::MQTT_TOPIC_MAX_SIZE]; // because MQTT library keeps only char pointer
 
@@ -364,6 +364,7 @@ void Mqtt::start() {
     mqttClient_->onConnect([this](bool sessionPresent) { on_connect(); });
 
     mqttClient_->onDisconnect([this](AsyncMqttClientDisconnectReason reason) {
+        connecting_ = false;
         if (reason == AsyncMqttClientDisconnectReason::TCP_DISCONNECTED) {
             LOG_INFO(F("MQTT disconnected: TCP"));
         }
@@ -463,6 +464,14 @@ void Mqtt::set_format(uint8_t mqtt_format) {
 
 // MQTT onConnect - when a connect is established
 void Mqtt::on_connect() {
+    if (connecting_) {
+        return;
+    }
+
+    connecting_ = true;
+
+    LOG_INFO(F("MQTT connected"));
+
     // send info topic appended with the version information as JSON
     StaticJsonDocument<90> doc;
     doc["event"]   = "start";
@@ -481,8 +490,6 @@ void Mqtt::on_connect() {
     if (mqtt_format() == Format::HA) {
         ha_status(); // create a device in HA
     }
-
-    LOG_INFO(F("MQTT connected"));
 }
 
 // Home Assistant Discovery - the main master Device
