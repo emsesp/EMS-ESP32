@@ -17,6 +17,9 @@
 - HA-config split in smaller blocks
 - commands `fetch` and `publish [ha]` as call
 - mqtt json package sizes
+- renamed the command system info (which showed settings) to `settings`
+- renamed the command system report (Which dumped debug info) to `info`
+- Changing settings on web restarts selected services only
 
 ### Removed
 - old shell and python build scripts
