@@ -99,6 +99,25 @@ bool Test::run_test(const char * command, int8_t id) {
         return true;
     }
 
+    if (strcmp(command, "mixer") == 0) {
+        EMSESP::logger().info(F("Testing mixer..."));
+
+        // add controller
+        add_device(0x09, 114);
+
+        add_device(0x28, 160); // MM100, WWC
+        add_device(0x29, 161); // MM200, WWC
+        add_device(0x20, 160); // MM100
+
+        // WWC1 on 0x29
+        uart_telegram({0xA9, 0x00, 0xFF, 0x00, 0x02, 0x32, 0x02, 0x6C, 0x00, 0x3C, 0x00, 0x3C, 0x3C, 0x46, 0x02, 0x03, 0x03, 0x00, 0x3C});
+
+        // WWC2 on 0x28
+        uart_telegram({0xA8, 0x00, 0xFF, 0x00, 0x02, 0x31, 0x02, 0x35, 0x00, 0x3C, 0x00, 0x3C, 0x3C, 0x46, 0x02, 0x03, 0x03, 0x00, 0x3C});
+
+        return true;
+    }
+
     if (strcmp(command, "boiler") == 0) {
         EMSESP::logger().info(F("Testing boiler..."));
         add_device(0x08, 123); // Nefit Trendline
@@ -166,7 +185,7 @@ bool Test::run_test(const char * command, int8_t id) {
 }
 
 // used with the 'test' command, under su/admin
-void Test::run_test_shell(uuid::console::Shell & shell, const std::string & command) {
+void Test::run_test(uuid::console::Shell & shell, const std::string & command) {
     // switch to su
     shell.add_flags(CommandFlags::ADMIN);
 
@@ -831,18 +850,7 @@ void Test::run_test_shell(uuid::console::Shell & shell, const std::string & comm
 
         EMSESP::rxservice_.ems_mask(EMSbus::EMS_MASK_BUDERUS);
 
-        // add controller
-        add_device(0x09, 114);
-
-        add_device(0x28, 160); // MM100, WWC
-        add_device(0x29, 161); // MM200, WWC
-        add_device(0x20, 160); // MM100
-
-        // WWC1 on 0x29
-        uart_telegram({0xA9, 0x00, 0xFF, 0x00, 0x02, 0x32, 0x02, 0x6C, 0x00, 0x3C, 0x00, 0x3C, 0x3C, 0x46, 0x02, 0x03, 0x03, 0x00, 0x3C});
-
-        // WWC2 on 0x28
-        uart_telegram({0xA8, 0x00, 0xFF, 0x00, 0x02, 0x31, 0x02, 0x35, 0x00, 0x3C, 0x00, 0x3C, 0x3C, 0x46, 0x02, 0x03, 0x03, 0x00, 0x3C});
+        run_test("mixer");
 
         // check for error "No telegram type handler found for ID 0x255 (src 0x20)"
         uart_telegram({0xA0, 0x00, 0xFF, 0x00, 0x01, 0x55, 0x00, 0x1A});

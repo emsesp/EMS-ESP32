@@ -40,7 +40,7 @@ namespace emsesp {
 
 class Test {
   public:
-    static void run_test_shell(uuid::console::Shell & shell, const std::string & command);
+    static void run_test(uuid::console::Shell & shell, const std::string & command);
     static bool run_test(const char * command, int8_t id = 0);
     static void dummy_mqtt_commands(const char * message);
     static void rx_telegram(const std::vector<uint8_t> & data);
