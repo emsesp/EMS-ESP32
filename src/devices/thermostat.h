@@ -88,7 +88,26 @@ class Thermostat : public EMSdevice {
         uint8_t get_mode(uint8_t flags) const;
         uint8_t get_mode_type(uint8_t flags) const;
 
-        enum Mode : uint8_t { UNKNOWN, OFF, MANUAL, AUTO, DAY, NIGHT, HEAT, NOFROST, ECO, HOLIDAY, COMFORT, OFFSET, DESIGN, SUMMER, FLOWOFFSET, MINFLOW, MAXFLOW, ROOMINFLUENCE };
+        enum Mode : uint8_t {
+            UNKNOWN,
+            OFF,
+            MANUAL,
+            AUTO,
+            DAY,
+            NIGHT,
+            HEAT,
+            NOFROST,
+            ECO,
+            HOLIDAY,
+            COMFORT,
+            OFFSET,
+            DESIGN,
+            SUMMER,
+            FLOWOFFSET,
+            MINFLOW,
+            MAXFLOW,
+            ROOMINFLUENCE
+        };
 
         // for sorting based on hc number
         friend inline bool operator<(const std::shared_ptr<HeatingCircuit> & lhs, const std::shared_ptr<HeatingCircuit> & rhs) {

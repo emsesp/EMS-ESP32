@@ -143,11 +143,11 @@ void Boiler::register_mqtt_ha_config() {
 // create the config topics for Home Assistant MQTT Discovery
 // for each of the ww elements
 void Boiler::register_mqtt_ha_config_ww() {
-
     if (!Mqtt::connected()) {
         return;
     }
-   // ww
+
+    // ww
     Mqtt::register_mqtt_ha_sensor(nullptr, F_(mqtt_suffix_ww), F_(wWSelTemp), this->device_type(), "wWSelTemp", F_(degrees), F_(iconcruise));
     Mqtt::register_mqtt_ha_sensor(nullptr, F_(mqtt_suffix_ww), F_(wWSetTemp), this->device_type(), "wWSetTemp", F_(degrees), F_(icontemperature));
     Mqtt::register_mqtt_ha_sensor(nullptr, F_(mqtt_suffix_ww), F_(wWDisinfectionTemp), this->device_type(), "wWDisinfectionTemp", F_(degrees), F_(icontemperature));
