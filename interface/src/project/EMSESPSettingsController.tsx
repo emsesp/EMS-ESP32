@@ -192,19 +192,8 @@ function EMSESPSettingsControllerForm(props: EMSESPSettingsControllerFormProps) 
                         value="api_enabled"
                     />
                 }
-                label="Enable WEB API (for write commands)"
+                label="Allow WEB API to write commands"
             />
-            <SelectValidator name="bool_format"
-                label="Boolean Format"
-                value={data.bool_format}
-                fullWidth
-                variant="outlined"
-                onChange={handleValueChange('bool_format')}
-                margin="normal">
-                <MenuItem value={1}>on/off</MenuItem>
-                <MenuItem value={2}>true/false</MenuItem>
-                <MenuItem value={3}>1/0</MenuItem>
-            </SelectValidator>
             <br></br>
             <Typography variant="h6" color="primary" >
                 Syslog
@@ -269,6 +258,21 @@ function EMSESPSettingsControllerForm(props: EMSESPSettingsControllerFormProps) 
                 }
                 label="Enable ADC"
             />
+            <br></br>
+            <Typography variant="h6" color="primary" >
+                Other
+            </Typography>
+            <SelectValidator name="bool_format"
+                label="Boolean Format"
+                value={data.bool_format}
+                fullWidth
+                variant="outlined"
+                onChange={handleValueChange('bool_format')}
+                margin="normal">
+                <MenuItem value={1}>on/off</MenuItem>
+                <MenuItem value={2}>true/false</MenuItem>
+                <MenuItem value={3}>1/0</MenuItem>
+            </SelectValidator>
             <br></br>
             <FormActions>
                 <FormButton startIcon={<SaveIcon />} variant="contained" color="primary" type="submit">
