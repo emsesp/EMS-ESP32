@@ -12,7 +12,7 @@
 - mixer devices in HA were incorrectly named
 
 ### Changed
-- optimized MQTT for HA to reduce mem fragmentation issues
+- optimized MQTT for HA to reduce heap fragmentation issues
 - change syslog settings without reboot
 - HA-config split in smaller blocks
 - commands `fetch` and `publish [ha]` as call
@@ -20,4 +20,3 @@
 
 ### Removed
 - old shell and python build scripts
-
