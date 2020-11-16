@@ -1043,7 +1043,6 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & json
         node["api_enabled"]       = Helpers::render_boolean(s, settings.api_enabled);
         node["bool_format"]       = settings.bool_format;
         node["analog_enabled"]    = Helpers::render_boolean(s, settings.analog_enabled);
-        // node["mqtt_enabled"]    = Helpers::render_boolean(s, settings.; // TODO
     });
 
     node = json.createNestedObject("Status");

@@ -62,7 +62,6 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     settings.tx_gpio = root["tx_gpio"] | EMSESP_DEFAULT_TX_GPIO;
     snprintf_P(&crc_after[0], crc_after.capacity() + 1, PSTR("%d%d%d"), settings.tx_mode, settings.rx_gpio, settings.tx_gpio);
     if (crc_before != crc_after) {
-        Serial.printf("UART CHANGED (%s) (%s)\n\r", crc_before.c_str(), crc_after.c_str());
         add_flags(ChangeFlags::UART);
     }
 
