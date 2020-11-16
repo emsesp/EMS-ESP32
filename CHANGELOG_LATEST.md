@@ -19,7 +19,7 @@
 - mqtt json package sizes
 - renamed the command system info (which showed settings) to `settings`
 - renamed the command system report (Which dumped debug info) to `info`
-- Changing settings on web restarts selected services only
+- Changing settings via web restarts only selected services
 
 ### Removed
 - old shell and python build scripts
