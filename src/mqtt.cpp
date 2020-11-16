@@ -695,6 +695,8 @@ void Mqtt::register_mqtt_ha_binary_sensor(const __FlashStringHelper * name, cons
         return;
     }
 
+    return;
+
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_HA_CONFIG> doc;
 
     doc["name"]    = name;
@@ -789,7 +791,7 @@ void Mqtt::register_mqtt_ha_sensor(const char *                prefix,
     }
     new_name[0] = toupper(new_name[0]); // capitalize first letter
 
-    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_HA_CONFIG> doc;
+    DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_HA_CONFIG);
 
     doc["name"]    = new_name;
     doc["uniq_id"] = uniq.c_str();
@@ -806,10 +808,9 @@ void Mqtt::register_mqtt_ha_sensor(const char *                prefix,
     ids.add(ha_device);
 
     // convert json to string and publish immediately with retain forced to true
-    char payload_text[EMSESP_MAX_JSON_SIZE_HA_CONFIG];
+    std::string payload_text;
     serializeJson(doc, payload_text); // convert json to string
-
-    uint16_t packet_id = mqttClient_->publish(topic, 0, true, payload_text);
+    uint16_t packet_id = mqttClient_->publish(topic, 0, true, payload_text.c_str());
     if (!packet_id) {
         LOG_ERROR(F("Failed to publish topic %s"), topic);
     } else {
