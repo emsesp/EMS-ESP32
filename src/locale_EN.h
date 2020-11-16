@@ -19,7 +19,6 @@
 // common words
 MAKE_PSTR_WORD(exit)
 MAKE_PSTR_WORD(help)
-MAKE_PSTR_WORD(settings)
 MAKE_PSTR_WORD(log)
 MAKE_PSTR_WORD(logout)
 MAKE_PSTR_WORD(enabled)
@@ -77,8 +76,8 @@ MAKE_PSTR_WORD(data)
 MAKE_PSTR_WORD(command)
 MAKE_PSTR_WORD(commands)
 MAKE_PSTR_WORD(info)
-MAKE_PSTR_WORD(report)
 MAKE_PSTR_WORD(test)
+MAKE_PSTR_WORD(settings)
 
 // devices
 MAKE_PSTR_WORD(boiler)

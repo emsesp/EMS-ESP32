@@ -9,8 +9,8 @@ import StarIcon from "@material-ui/icons/Star";
 import ImportExportIcon from "@material-ui/icons/ImportExport";
 import BugReportIcon from "@material-ui/icons/BugReportTwoTone";
 
+export const WebAPISystemSettings = window.location.origin + "/api?device=system&cmd=settings";
 export const WebAPISystemInfo = window.location.origin + "/api?device=system&cmd=info";
-export const WebAPISystemReport = window.location.origin + "/api?device=system&cmd=report";
 
 class EMSESPHelp extends Component {
 
@@ -52,7 +52,7 @@ class EMSESPHelp extends Component {
                             <ImportExportIcon />
                         </ListItemAvatar>
                         <ListItemText>
-                            To export your system settings <Link target="_blank" href={WebAPISystemInfo} color="primary">{'click here'}</Link>
+                            To list your system settings <Link target="_blank" href={WebAPISystemSettings} color="primary">{'click here'}</Link>
                         </ListItemText>
                     </ListItem>
 
@@ -62,7 +62,7 @@ class EMSESPHelp extends Component {
                             <BugReportIcon />
                         </ListItemAvatar>
                         <ListItemText>
-                            To create a report of the current EMS-ESP status (for troubleshooting) <Link target="_blank" href={WebAPISystemReport} color="primary">{'click here'}</Link>
+                            To create a report of the current EMS-ESP status <Link target="_blank" href={WebAPISystemInfo} color="primary">{'click here'}</Link>
                         </ListItemText>
                     </ListItem>
 

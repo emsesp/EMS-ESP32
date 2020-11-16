@@ -53,7 +53,7 @@ class System {
     static bool command_publish(const char * value, const int8_t id);
     static bool command_fetch(const char * value, const int8_t id);
     static bool command_info(const char * value, const int8_t id, JsonObject & json);
-    static bool command_report(const char * value, const int8_t id, JsonObject & json);
+    static bool command_settings(const char * value, const int8_t id, JsonObject & json);
 
 #if defined(EMSESP_TEST)
     static bool command_test(const char * value, const int8_t id);
