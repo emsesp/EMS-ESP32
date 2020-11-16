@@ -35,7 +35,6 @@ uuid::syslog::SyslogService System::syslog_;
 
 // init statics
 uint32_t    System::heap_start_     = 0;
-int         System::reset_counter_  = 0;
 bool        System::upload_status_  = false;
 bool        System::hide_led_       = false;
 uint8_t     System::led_gpio_       = 0;
@@ -43,11 +42,6 @@ uint16_t    System::analog_         = 0;
 bool        System::analog_enabled_ = false;
 bool        System::syslog_enabled_ = false;
 std::string System::hostname_;
-int8_t      System::syslog_level_         = -1;
-uint32_t    System::syslog_mark_interval_ = 0;
-String      System::syslog_host_;
-
-
 
 // send on/off to a gpio pin
 // value: true = HIGH, false = LOW
@@ -91,6 +85,7 @@ bool System::command_publish(const char * value, const int8_t id) {
             return true;
         }
     }
+
     EMSESP::publish_all(); // ignore value and id
     LOG_INFO(F("Publishing all data to MQTT"));
     return true;
@@ -147,6 +142,10 @@ uint8_t System::free_mem() {
 }
 
 void System::syslog_init() {
+    int8_t   syslog_level_;
+    uint32_t syslog_mark_interval_;
+    String   syslog_host_;
+
     // fetch settings
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
         syslog_enabled_       = settings.syslog_enabled;
@@ -156,24 +155,26 @@ void System::syslog_init() {
     });
 
 #ifndef EMSESP_STANDALONE
+
+    // check for empty hostname
+    IPAddress addr;
+    if (!addr.fromString(syslog_host_.c_str())) {
+        syslog_enabled_ = false;
+    }
+
     if (!syslog_enabled_) {
-        syslog_.log_level((uuid::log::Level)-1);
-        syslog_.mark_interval(0);
-        syslog_.destination((IPAddress)((uint32_t)0));
+        // syslog_.log_level((uuid::log::Level)-1); // in case service is still running, this flushes the queue
         return;
     }
 
-    syslog_.start(); // syslog service re-start
-
-    // configure syslog
-    IPAddress addr;
-    if (!addr.fromString(syslog_host_.c_str())) {
-        addr = (uint32_t)0;
-    }
+    // start & configure syslog
+    syslog_.start();
     syslog_.log_level((uuid::log::Level)syslog_level_);
     syslog_.mark_interval(syslog_mark_interval_);
     syslog_.destination(addr);
     EMSESP::esp8266React.getWiFiSettingsService()->read([&](WiFiSettings & wifiSettings) { syslog_.hostname(wifiSettings.hostname.c_str()); });
+
+    EMSESP::logger().info(F("Syslog started"));
 #endif
 }
 
@@ -206,19 +207,23 @@ void System::start() {
 #endif
     });
 
-
     init();
 }
 
-// init stuff. This is called when settings are changed in the web
-void System::init() {
-    set_led(); // init LED
-
+void System::other_init() {
     // set the boolean format used for rendering booleans
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
         Helpers::bool_format(settings.bool_format);
         analog_enabled_ = settings.analog_enabled;
     });
+}
+
+// init stuff. This is called when settings are changed in the web
+void System::init() {
+    led_init(); // init LED
+
+    other_init();
+
     syslog_init(); // init SysLog
 
     EMSESP::esp8266React.getWiFiSettingsService()->read([&](WiFiSettings & settings) { hostname(settings.hostname.c_str()); });
@@ -227,7 +232,7 @@ void System::init() {
 }
 
 // set the LED to on or off when in normal operating mode
-void System::set_led() {
+void System::led_init() {
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
         hide_led_ = settings.hide_led;
         led_gpio_ = settings.led_gpio;
