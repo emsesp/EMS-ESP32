@@ -162,8 +162,11 @@ void System::syslog_init() {
         syslog_enabled_ = false;
     }
 
+    // in case service is still running, this flushes the queue - https://github.com/proddy/EMS-ESP/issues/496
     if (!syslog_enabled_) {
-        // syslog_.log_level((uuid::log::Level)-1); // in case service is still running, this flushes the queue
+        syslog_.log_level((uuid::log::Level)-1);
+        syslog_.mark_interval(0);
+        syslog_.destination((IPAddress)((uint32_t)0));
         return;
     }
 
