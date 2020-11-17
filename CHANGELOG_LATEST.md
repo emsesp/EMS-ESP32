@@ -7,6 +7,7 @@
 - `wwonetime` for RC300 thermostat
 - expose test framework via api (#611)
 - SysLog has enable/disable flag in WebUI
+- Add solar configuration telegrams (#616) [thanks @hpanther]
 
 ### Fixed
 - mixer IPM pumpstatus
