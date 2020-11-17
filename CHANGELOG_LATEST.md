@@ -6,6 +6,7 @@
 - heating curve parameters for RC300
 - `wwonetime` for RC300 thermostat
 - expose test framework via api (#611)
+- SysLog has enable/disable flag in WebUI
 
 ### Fixed
 - mixer IPM pumpstatus
@@ -20,6 +21,7 @@
 - renamed the command system info (which showed settings) to `settings`
 - renamed the command system report (Which dumped debug info) to `info`
 - Changing settings via web restarts only selected services
+- renamed pio targets (esp8266-ci and esp32-ci for GitHub CI)
 
 ### Removed
 - old shell and python build scripts
