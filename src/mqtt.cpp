@@ -706,11 +706,11 @@ void Mqtt::register_mqtt_ha_binary_sensor(const __FlashStringHelper * name, cons
 
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
         if (settings.bool_format == BOOL_FORMAT_ONOFF) {
-            doc[F("payload_on")]  = F("on");
-            doc[F("payload_off")] = F("off");
+            doc[F("payload_on")]  = "on";
+            doc[F("payload_off")] = "off";
         } else if (settings.bool_format == BOOL_FORMAT_TRUEFALSE) {
-            doc[F("payload_on")]  = F("true");
-            doc[F("payload_off")] = F("false");
+            doc[F("payload_on")]  = "true";
+            doc[F("payload_off")] = "false";
         } else {
             doc[F("payload_on")]  = "1";
             doc[F("payload_off")] = "0";
@@ -792,7 +792,7 @@ void Mqtt::register_mqtt_ha_sensor(const char *                prefix,
     DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_HA_CONFIG);
 
     doc["name"]    = new_name;
-    doc["uniq_id"] = uniq.c_str();
+    doc["uniq_id"] = uniq;
     if (uom != nullptr) {
         doc["unit_of_meas"] = uom;
     }
