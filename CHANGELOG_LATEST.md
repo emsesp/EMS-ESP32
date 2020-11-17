@@ -12,6 +12,7 @@
 ### Fixed
 - mixer IPM pumpstatus
 - mixer devices in HA were incorrectly named
+- Prevent HA MQTT config messages for thermostat that has no 'currtemp' (#582)
 
 ### Changed
 - optimized MQTT for HA to reduce heap fragmentation issues
