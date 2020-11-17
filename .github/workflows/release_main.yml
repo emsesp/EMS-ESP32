@@ -36,8 +36,8 @@ jobs:
 
       - name: Build images
         run: |
-          platformio run -e esp8266
-          platformio run -e esp32
+          platformio run -e esp8266-ci
+          platformio run -e esp32-ci
           
       - name: Changelog
         run: cat RELEASENOTES.md CHANGELOG_LATEST.md > BODY.txt 
