@@ -691,6 +691,8 @@ bool Thermostat::ha_config(bool force) {
     if (!Mqtt::connected()) {
         return false;
     }
+
+    // if force, reset registered flag for main controller and all heating circuits
     if (force) {
         for (const auto & hc : heating_circuits_) {
             hc->ha_registered(false);
@@ -698,16 +700,20 @@ bool Thermostat::ha_config(bool force) {
         ha_registered(false);
     }
 
+    // set up the main controller
     if (!ha_registered()) {
         register_mqtt_ha_config();
         ha_registered(true);
         return false;
     }
 
-    // check to see which heating circuits need publishing
+    // check to see which heating circuits need to be added as HA climate components
+    // but only if it's active and there is a real value for the current room temperature (https://github.com/proddy/EMS-ESP/issues/582)
     for (const auto & hc : heating_circuits_) {
         if (hc->is_active() && !hc->ha_registered()) {
-            register_mqtt_ha_config(hc->hc_num());
+            if (Helpers::hasValue(hc->curr_roomTemp)) {
+                register_mqtt_ha_config(hc->hc_num());
+            }
             hc->ha_registered(true);
             return false;
         }
@@ -828,7 +834,7 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::sha
 }
 
 // publish config topic for HA MQTT Discovery for main thermostat values
-// homeassistant/climate/ems-esp/thermostat/config
+// homeassistant/sensor/ems-esp/thermostat/config
 void Thermostat::register_mqtt_ha_config() {
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
     doc["uniq_id"] = F("thermostat");
