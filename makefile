@@ -1,3 +1,7 @@
+#
+# GNUMakefile for EMS-ESP
+# (c) 2020 Paul Derbyshire
+#
 NUMJOBS=${NUMJOBS:-" -j4 "}
 MAKEFLAGS+="j "
 #----------------------------------------------------------------------
@@ -136,4 +140,3 @@ help:
 	@echo $(OUTPUT)
 
 -include $(DEPS)
-
