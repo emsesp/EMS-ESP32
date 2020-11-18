@@ -602,7 +602,11 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
         if ((watch_id_ == WATCH_ID_NONE) || (telegram->type_id == watch_id_)
             || ((watch_id_ < 0x80) && ((telegram->src == watch_id_) || (telegram->dest == watch_id_)))) {
             LOG_NOTICE(pretty_telegram(telegram).c_str());
+        } else {
+            LOG_TRACE(pretty_telegram(telegram).c_str());
         }
+    } else {
+        LOG_TRACE(pretty_telegram(telegram).c_str());
     }
 
     // only process broadcast telegrams or ones sent to us on request
@@ -644,6 +648,9 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
 
     if (!found) {
         LOG_DEBUG(F("No telegram type handler found for ID 0x%02X (src 0x%02X)"), telegram->type_id, telegram->src);
+        if (watch() == WATCH_UNKNOWN) {
+            LOG_NOTICE(pretty_telegram(telegram).c_str());
+        }
     }
 
     return found;

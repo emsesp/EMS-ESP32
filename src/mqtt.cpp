@@ -789,8 +789,11 @@ void Mqtt::register_mqtt_ha_sensor(const char *                prefix,
     }
     new_name[0] = toupper(new_name[0]); // capitalize first letter
 
+#if defined(ESP32)
+    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_HA_CONFIG> doc;
+#else
     DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_HA_CONFIG);
-
+#endif
     doc["name"]    = new_name;
     doc["uniq_id"] = uniq;
     if (uom != nullptr) {
@@ -805,9 +808,14 @@ void Mqtt::register_mqtt_ha_sensor(const char *                prefix,
     JsonArray  ids = dev.createNestedArray("ids");
     ids.add(ha_device);
 
+#if defined(ESP32)
+    // queue MQTT publish
+    publish_retain(topic, doc.as<JsonObject>(), true);
+#else
     // convert json to string and publish immediately with retain forced to true
     std::string payload_text;
     serializeJson(doc, payload_text); // convert json to string
+
     uint16_t packet_id = mqttClient_->publish(topic, 0, true, payload_text.c_str());
     if (!packet_id) {
         LOG_ERROR(F("Failed to publish topic %s"), topic);
@@ -820,6 +828,7 @@ void Mqtt::register_mqtt_ha_sensor(const char *                prefix,
     }
 
     delay(50); // enough time to send the short message out
+#endif
 }
 
 } // namespace emsesp
