@@ -139,6 +139,7 @@ MAKE_PSTR(heatingActive, "Heating active")
 MAKE_PSTR(tapwaterActive, "Warm water/DHW active")
 MAKE_PSTR(serviceCode, "Service code")
 MAKE_PSTR(serviceCodeNumber, "Service code number")
+MAKE_PSTR(lastCode, "Last error")
 MAKE_PSTR(wWSelTemp, "Warm water selected temperature")
 MAKE_PSTR(wWSetTemp, "Warm water set temperature")
 MAKE_PSTR(wWDisinfectionTemp, "Warm water disinfection temperature")
@@ -274,6 +275,11 @@ MAKE_PSTR(modetype, "Mode type")
 // heat pump
 MAKE_PSTR(airHumidity, "Relative air humidity")
 MAKE_PSTR(dewTemperature, "Dew point temperature")
+
+// other
+MAKE_PSTR(activated, "Switch activated")
+MAKE_PSTR(status, "Switch status")
+
 
 // Home Assistant icons
 MAKE_PSTR(icontemperature, "mdi:coolant-temperature")
