@@ -97,7 +97,7 @@ void Heatpump::register_mqtt_ha_config() {
     }
 
     // Create the Master device
-    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
+    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_HA_CONFIG> doc;
     doc["name"]    = F_(EMSESP);
     doc["uniq_id"] = F_(heatpump);
     doc["ic"]      = F_(iconheatpump);
