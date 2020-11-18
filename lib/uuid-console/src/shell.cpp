@@ -262,9 +262,9 @@ void Shell::loop_normal() {
                 } else if (esc_ == 20) { // F9
                     set_command_str(F("call system info"));
                 } else if (esc_ == 21) { // F10
-                    set_command_str(F("call system report"));
+                    set_command_str(F("call system settings"));
                 } else if (esc_ == 23) { // F11
-                    line_buffer_ = read_flash_string(F("send telegram \"0B \""));
+                    line_buffer_ = read_flash_string(F("call send \"0B \""));
                     cursor_ = 1;
                 } else if (esc_ == 24) { // F12
                     set_command_str(F("log debug; watch raw"));
@@ -395,9 +395,9 @@ void Shell::loop_delay() {
 
         function_copy(*this);
 
-        if (running()) {
-            display_prompt();
-        }
+        // if (running()) {
+        //     display_prompt();
+        // }
 
         idle_time_ = uuid::get_uptime_ms();
     }
@@ -425,9 +425,9 @@ void Shell::loop_blocking() {
             stop();
         }
 
-        if (running()) {
-            display_prompt();
-        }
+        // if (running()) {
+        //     display_prompt();
+        // }
 
         idle_time_ = uuid::get_uptime_ms();
     }
@@ -496,7 +496,7 @@ void Shell::maximum_command_line_length(size_t length) {
 void Shell::process_command() {
     if (line_buffer_.empty()) {
         println();
-	return;
+        return;
     }
     line_old_ = line_buffer_;
     while (!line_buffer_.empty()) {
@@ -568,9 +568,9 @@ void Shell::process_password(bool completed) {
     function_copy(*this, completed, line_buffer_);
     line_buffer_.clear();
 
-    if (running()) {
-        display_prompt();
-    }
+    // if (running()) {
+    //     display_prompt();
+    // }
 }
 
 void Shell::invoke_command(const std::string & line) {
