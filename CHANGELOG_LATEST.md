@@ -9,7 +9,7 @@
 - SysLog has enable/disable flag in WebUI
 - Add solar configuration telegrams (#616) [thanks @hpanther]
 - `log trace` shows decoded telegrams, `watch unknown` for only unknown telegrams
-- WM10 switch
+- WM10 switch telegrams
 
 ### Fixed
 - mixer IPM pumpstatus
