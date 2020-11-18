@@ -1602,9 +1602,9 @@ void Thermostat::process_RCErrorMessage(std::shared_ptr<const Telegram> telegram
     if (telegram->message_data[4] & 0x80) { // valid date
         char     code[3];
         uint16_t codeNo;
-        code[0]  = telegram->message_data[0];
-        code[1]  = telegram->message_data[1];
-        code[2]  = 0;
+        code[0] = telegram->message_data[0];
+        code[1] = telegram->message_data[1];
+        code[2] = 0;
         telegram->read_value(codeNo, 2);
         uint16_t year  = (telegram->message_data[4] & 0x7F) + 2000;
         uint8_t  month = telegram->message_data[5];

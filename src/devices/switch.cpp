@@ -75,7 +75,6 @@ void Switch::publish_values(JsonObject & json, bool force) {
 
 // export values to JSON
 bool Switch::export_values(JsonObject & json) {
-
     if (Helpers::hasValue(flowTemp_)) {
         char s[7];
         json["activated"] = Helpers::render_value(s, activated_, EMS_VALUE_BOOL);
@@ -148,12 +147,12 @@ void Switch::register_mqtt_ha_config() {
 }
 
 // message 0x9B switch on/off
-void Switch::process_WM10SetMessage(std::shared_ptr<const Telegram> telegram){
+void Switch::process_WM10SetMessage(std::shared_ptr<const Telegram> telegram) {
     changed_ |= telegram->read_value(activated_, 0);
 }
 
-// message 0x9C holds flowtemp and unknown statusvalue
-void Switch::process_WM10MonitorMessage(std::shared_ptr<const Telegram> telegram){
+// message 0x9C holds flowtemp and unknown status value
+void Switch::process_WM10MonitorMessage(std::shared_ptr<const Telegram> telegram) {
     changed_ |= telegram->read_value(flowTemp_, 0); // is * 10
     changed_ |= telegram->read_value(status_, 2);
 }

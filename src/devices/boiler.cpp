@@ -185,7 +185,6 @@ void Boiler::register_mqtt_ha_config_ww() {
 // send stuff to the Web UI
 void Boiler::device_info_web(JsonArray & root) {
     // fetch the values into a JSON document
-    // DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_LARGE);
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_LARGE> doc;
     JsonObject                                     json = doc.to<JsonObject>();
     if (!export_values_main(json)) {
@@ -234,6 +233,7 @@ void Boiler::device_info_web(JsonArray & root) {
     if (!export_values_ww(json)) { // append ww values
         return;
     }
+
     // ww
     print_value_json(root, F("wWSelTemp"), nullptr, F_(wWSelTemp), F_(degrees), json);
     print_value_json(root, F("wWSetTemp"), nullptr, F_(wWSetTemp), F_(degrees), json);
@@ -679,13 +679,11 @@ void Boiler::show_values(uuid::console::Shell & shell) {
     EMSdevice::show_values(shell); // for showing the header
 
     // fetch the values into a JSON document
-    // DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_LARGE);
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_LARGE> doc;
     JsonObject                                     json = doc.to<JsonObject>();
     if (!export_values_main(json)) {
         return; // empty
     }
-    // doc.shrinkToFit();
 
     print_value_json(shell, F("heatingActive"), nullptr, F_(heatingActive), nullptr, json);
     print_value_json(shell, F("tapwaterActive"), nullptr, F_(tapwaterActive), nullptr, json);
@@ -1045,9 +1043,9 @@ void Boiler::process_UBAErrorMessage(std::shared_ptr<const Telegram> telegram) {
     if (telegram->message_data[4] & 0x80) { // valid date
         char     code[3];
         uint16_t codeNo;
-        code[0]  = telegram->message_data[0];
-        code[1]  = telegram->message_data[1];
-        code[2]  = 0;
+        code[0] = telegram->message_data[0];
+        code[1] = telegram->message_data[1];
+        code[2] = 0;
         telegram->read_value(codeNo, 2);
         uint16_t year  = (telegram->message_data[4] & 0x7F) + 2000;
         uint8_t  month = telegram->message_data[5];
