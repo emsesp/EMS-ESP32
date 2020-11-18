@@ -140,9 +140,9 @@ void Switch::register_mqtt_ha_config() {
     ids.add("ems-esp-switch");
 
     Mqtt::publish_retain(F("homeassistant/sensor/ems-esp/switch/config"), doc.as<JsonObject>(), true); // publish the config payload with retain flag
-    Mqtt::register_mqtt_ha_sensor(PSTR("switch"), nullptr, F_(flowTemp), this->device_type(), "activated", nullptr, nullptr);
-    Mqtt::register_mqtt_ha_sensor(PSTR("switch"), nullptr, F_(flowTemp), this->device_type(), "flowTemp", F_(degrees), F_(icontemperature));
-    Mqtt::register_mqtt_ha_sensor(PSTR("switch"), nullptr, F_(flowTemp), this->device_type(), "status", nullptr, nullptr);
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(activated), this->device_type(), "activated", nullptr, nullptr);
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(flowTemp), this->device_type(), "flowTemp", F_(degrees), F_(icontemperature));
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(status), this->device_type(), "status", nullptr, nullptr);
 
     mqtt_ha_config_ = true; // done
 }

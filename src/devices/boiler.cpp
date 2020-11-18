@@ -1040,7 +1040,6 @@ void Boiler::process_UBAMaintenanceStatus(std::shared_ptr<const Telegram> telegr
 }
 
 // 0x10, 0x11
-// not yet implemented
 void Boiler::process_UBAErrorMessage(std::shared_ptr<const Telegram> telegram) {
     // data: displaycode(2), errornumber(2), year, month, hour, day, minute, duration(2), src-addr
     if (telegram->message_data[4] & 0x80) { // valid date
@@ -1430,7 +1429,7 @@ bool Boiler::set_reset(const char * value, const int8_t id) {
     if (v == false) {
         return false;
     }
-    LOG_INFO(F("reseting boiler"));
+    LOG_INFO(F("restarting boiler"));
     write_command(0x05, 0x08, 0xFF);
 
     return true;

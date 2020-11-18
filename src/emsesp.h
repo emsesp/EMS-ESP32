@@ -116,7 +116,7 @@ class EMSESP {
         return (!(dallassensor_.sensors().empty()));
     }
 
-    enum Watch : uint8_t { WATCH_OFF, WATCH_ON, WATCH_RAW };
+    enum Watch : uint8_t { WATCH_OFF, WATCH_ON, WATCH_RAW, WATCH_UNKNOWN };
     static void     watch_id(uint16_t id);
     static uint16_t watch_id() {
         return watch_id_;
