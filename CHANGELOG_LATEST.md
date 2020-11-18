@@ -8,6 +8,7 @@
 - expose test framework via api (#611)
 - SysLog has enable/disable flag in WebUI
 - Add solar configuration telegrams (#616) [thanks @hpanther]
+- log trace shows decoded telegrams, watch 0xFF for unknown telegrams
 
 ### Fixed
 - mixer IPM pumpstatus
