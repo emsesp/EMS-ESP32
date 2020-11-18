@@ -39,7 +39,7 @@
 using uuid::console::Shell;
 
 #define EMSESP_MAX_JSON_SIZE_HA_CONFIG 384 // for small HA config payloads
-#define EMSESP_MAX_JSON_SIZE_SMALL 384     // for smaller json docs when using StaticJsonDocument
+#define EMSESP_MAX_JSON_SIZE_SMALL 256     // for smaller json docs when using StaticJsonDocument
 #define EMSESP_MAX_JSON_SIZE_MEDIUM 768    // for medium json docs from ems devices, when using StaticJsonDocument
 #define EMSESP_MAX_JSON_SIZE_LARGE 1024    // for large json docs from ems devices, like boiler or thermostat data. Using StaticJsonDocument
 #define EMSESP_MAX_JSON_SIZE_DYN 2048      // for large json docs from web. Using DynamicJsonDocument
@@ -176,6 +176,8 @@ class Mqtt {
 
 #if defined(EMSESP_STANDALONE)
     static constexpr size_t MAX_MQTT_MESSAGES = 70; // size of queue
+#elif defined(ESP32)
+    static constexpr size_t MAX_MQTT_MESSAGES = 100; // size of queue
 #else
     static constexpr size_t MAX_MQTT_MESSAGES = 20; // size of queue
 #endif
