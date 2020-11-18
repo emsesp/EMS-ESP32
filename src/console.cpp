@@ -307,11 +307,11 @@ void EMSESPShell::add_console_commands() {
                                       emsesp::EMSESP::watch(EMSESP::WATCH_ON); // on
                                   } else if (arguments[0] == read_flash_string(F_(off))) {
                                       emsesp::EMSESP::watch(EMSESP::WATCH_OFF); // off
-                                  } else if (emsesp::EMSESP::watch() == EMSESP::WATCH_OFF) {
-                                      shell.printfln(F_(invalid_watch));
-                                      return;
                                   } else {
                                       watch_id = Helpers::hextoint(arguments[0].c_str());
+                                      if ((emsesp::EMSESP::watch() == EMSESP::WATCH_OFF) && watch_id) {
+                                          emsesp::EMSESP::watch(EMSESP::WATCH_ON); // on
+                                      }
                                   }
 
                                   if (arguments.size() == 2) {
@@ -380,7 +380,7 @@ void EMSESPShell::add_console_commands() {
                 return;
             }
 
-            DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_LARGE);
+            DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_DYN);
             JsonObject          json = doc.to<JsonObject>();
 
             bool ok = false;
