@@ -1624,7 +1624,11 @@ bool Thermostat::set_minexttemp(const char * value, const int8_t id) {
     }
 
     LOG_INFO(F("Setting min external temperature to %d"), mt);
-    write_command(EMS_TYPE_IBASettings, 5, mt, EMS_TYPE_IBASettings);
+    if ((this->model() == EMS_DEVICE_FLAG_RC300) || (this->model() == EMS_DEVICE_FLAG_RC100)) {
+        write_command(0x240, 10, mt, 0x240);
+    } else {
+        write_command(EMS_TYPE_IBASettings, 5, mt, EMS_TYPE_IBASettings);
+    }
 
     return true;
 }
@@ -2204,6 +2208,7 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
             offset          = 2;
             set_typeid      = summer_typeids[hc->hc_num() - 1];
             validate_typeid = set_typeid;
+            factor          = 1;
             break;
         case HeatingCircuit::Mode::DESIGN:
             set_typeid      = summer_typeids[hc->hc_num() - 1];
