@@ -590,8 +590,8 @@ void EMSESP::process_version(std::shared_ptr<const Telegram> telegram) {
 // We also check for common telgram types, like the Version(0x02)
 // returns false if there are none found
 bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
-    // if watching...
-    if (telegram->type_id == read_id_) {
+    // if watching or reading...
+    if ((telegram->type_id == read_id_) && (telegram->dest == txservice_.ems_bus_id())) {
         LOG_NOTICE(pretty_telegram(telegram).c_str());
         publish_response(telegram);
         if (!read_next_) {
