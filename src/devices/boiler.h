@@ -96,7 +96,7 @@ class Boiler : public EMSdevice {
     uint8_t  curBurnPow_        = EMS_VALUE_UINT_NOTSET;   // Burner current power %
     uint16_t flameCurr_         = EMS_VALUE_USHORT_NOTSET; // Flame current in micro amps
     uint8_t  sysPress_          = EMS_VALUE_UINT_NOTSET;   // System pressure
-    char     serviceCode_[3]    = {'\0'};                  // 2 character status/service code
+    char     serviceCode_[4]    = {'\0'};                  // 3 character status/service code
     uint16_t serviceCodeNumber_ = EMS_VALUE_USHORT_NOTSET; // error/service code
     uint8_t  boilerState_       = EMS_VALUE_UINT_NOTSET;   // Boiler state flag
     char     lastCode_[30]      = {'\0'};
