@@ -775,6 +775,9 @@ void Boiler::show_values(uuid::console::Shell & shell) {
  * Values will always be posted first time as heatingActive_ and tapwaterActive_ will have values EMS_VALUE_BOOL_NOTSET
  */
 void Boiler::check_active() {
+    if  (!Helpers::hasValue(boilerState_)) {
+        return;
+    }
     bool    b;
     uint8_t val;
 
@@ -896,25 +899,39 @@ void Boiler::process_UBAMonitorWW(std::shared_ptr<const Telegram> telegram) {
 
 /*
  * UBAMonitorFastPlus - type 0xE4 - central heating monitor EMS+
- * Still to figure out are: serviceCode, retTemp, sysPress
+ * Still to figure out are: retTemp, sysPress
+ * temperatures at 7 and 23 always identical
+ * 88 00 E4 00 00 2D 2D 00 00 C9 34 02 21 64 3D 05 02 01 DE 00 00 00 00 03 62 14 00 02 21 00 00 33
+ * 88 00 E4 23 00 00 00 00 00 2B 2B 83
  */
 void Boiler::process_UBAMonitorFastPlus(std::shared_ptr<const Telegram> telegram) {
     changed_ |= telegram->read_value(selFlowTemp_, 6);
     changed_ |= telegram->read_bitvalue(burnGas_, 11, 0);
+    // changed_ |= telegram->read_bitvalue(heatPump_, 11, 1); // heating active? see SlowPlus
     changed_ |= telegram->read_bitvalue(wWHeat_, 11, 2);
     changed_ |= telegram->read_value(curBurnPow_, 10);
     changed_ |= telegram->read_value(selBurnPow_, 9);
     changed_ |= telegram->read_value(curFlowTemp_, 7);
     changed_ |= telegram->read_value(flameCurr_, 19);
 
-    // read the service code / installation status as appears on the display
-    if ((telegram->message_length > 4) && (telegram->offset == 0)) {
-        changed_ |= telegram->read_value(serviceCode_[0], 4);
-        changed_ |= telegram->read_value(serviceCode_[1], 5);
-        serviceCode_[2] = '\0';
+    //changed_ |= telegram->read_value(temperatur_, 13); unknown temperature
+
+    // read 3 char service code / installation status as appears on the display
+    if ((telegram->message_length > 3) && (telegram->offset == 0)) {
+        changed_ |= telegram->read_value(serviceCode_[0], 1);
+        changed_ |= telegram->read_value(serviceCode_[1], 2);
+        changed_ |= telegram->read_value(serviceCode_[2], 3);
+        serviceCode_[3] = '\0';
     }
+    changed_ |= telegram->read_value(serviceCodeNumber_, 4);
 
     // at this point do a quick check to see if the hot water or heating is active
+    uint8_t state = 0;
+    telegram->read_value(state, 11);
+    boilerState_ = state & 0x01 ? 0x80 : 0;
+    boilerState_ |= state & 0x02 ? 0x01 : 0;
+    boilerState_ |= state & 0x04 ? 0x02 : 0;
+
     check_active();
 }
 
@@ -938,6 +955,7 @@ void Boiler::process_UBAMonitorSlow(std::shared_ptr<const Telegram> telegram) {
 
 /*
  * UBAMonitorSlowPlus2 - type 0xE3
+ * 88 00 E3 00 04 00 00 00 00 01 00 00 00 00 00 02 22 2B 64 46 01 00 00 61
  */
 void Boiler::process_UBAMonitorSlowPlus2(std::shared_ptr<const Telegram> telegram) {
     changed_ |= telegram->read_value(pumpMod2_, 13); // Heat Pump Modulation
@@ -955,10 +973,12 @@ void Boiler::process_UBAMonitorSlowPlus(std::shared_ptr<const Telegram> telegram
     changed_ |= telegram->read_value(burnWorkMin_, 13, 3); // force to 3 bytes
     changed_ |= telegram->read_value(heatWorkMin_, 19, 3); // force to 3 bytes
     changed_ |= telegram->read_value(pumpMod_, 25);
+    // temperature measurements at 4, and  6, see #620
 }
 
 /*
  * UBAParametersPlus - type 0xe6
+ * 88 0B E6 00 01 46 00 00 46 0A 00 01 06 FA 0A 01 02 64 01 00 00 1E 00 3C 01 00 00 00 01 00 9A
  */
 void Boiler::process_UBAParametersPlus(std::shared_ptr<const Telegram> telegram) {
     changed_ |= telegram->read_value(heatingActivated_, 0);
