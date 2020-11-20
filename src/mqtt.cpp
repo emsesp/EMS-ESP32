@@ -503,7 +503,7 @@ void Mqtt::on_connect() {
 // homeassistant/sensor/ems-esp/status/config
 // all the values from the heartbeat payload will be added as attributes to the entity state
 void Mqtt::ha_status() {
-    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
+    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_HA_CONFIG> doc;
 
     doc["name"]        = F("EMS-ESP status");
     doc["uniq_id"]     = F("status");
