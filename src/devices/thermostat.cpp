@@ -623,7 +623,11 @@ bool Thermostat::export_values_hc(uint8_t mqtt_format, JsonObject & rootThermost
 
             // Offset temperature
             if (Helpers::hasValue(hc->offsettemp)) {
-                dataThermostat["offsettemp"] = hc->offsettemp / 2;
+                if (flags == EMSdevice::EMS_DEVICE_FLAG_RC300 || flags == EMSdevice::EMS_DEVICE_FLAG_RC100) {
+                    dataThermostat["offsettemp"] = hc->offsettemp;
+                } else {
+                    dataThermostat["offsettemp"] = hc->offsettemp / 2;
+                }
             }
 
             // Design temperature
@@ -846,6 +850,15 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::sha
 
     if (set_typeids.size()) {
         toggle_fetch(set_typeids[hc_num - 1], toggle_);
+    }
+    if (summer_typeids.size()) {
+        toggle_fetch(summer_typeids[hc_num - 1], toggle_);
+    }
+    if (curve_typeids.size()) {
+        toggle_fetch(curve_typeids[hc_num - 1], toggle_);
+    }
+    if (timer_typeids.size()) {
+        toggle_fetch(timer_typeids[hc_num - 1], toggle_);
     }
 
     return heating_circuits_.back(); // even after sorting, this should still point back to the newly created HC
