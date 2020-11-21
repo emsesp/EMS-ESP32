@@ -15,7 +15,7 @@
 - mixer IPM pumpstatus
 - mixer devices in HA were incorrectly named
 - Prevent HA MQTT config messages for thermostat that has no 'currtemp' (#582)
-- serviceCodeNumber, 3-char serviceCode and heating_active for newer ems+ boilers
+- serviceCodeNumber, 3-char serviceCode, exhausttemp and heating_active for newer ems+ boilers
 
 ### Changed
 - optimized MQTT for HA to reduce heap fragmentation issues
