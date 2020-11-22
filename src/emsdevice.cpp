@@ -332,7 +332,7 @@ bool EMSdevice::handle_telegram(std::shared_ptr<const Telegram> telegram) {
                 return false;
             }
 
-            EMSESP::logger().debug(F("Received %s"), uuid::read_flash_string(tf.telegram_type_name_).c_str());
+            // EMSESP::logger().debug(F("Received %s"), uuid::read_flash_string(tf.telegram_type_name_).c_str());
             tf.process_function_(telegram);
             return true;
         }

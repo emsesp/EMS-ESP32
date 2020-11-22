@@ -27,6 +27,8 @@
 - renamed the command system report (Which dumped debug info) to `info`
 - Changing settings via web restarts only selected services
 - renamed pio targets (esp8266-ci and esp32-ci for GitHub CI)
+- telnet default settings `log info`, timeout 60 min
+- `log debug` not showing telegram names, use `log trace` or `watch on` to show the telegrams
 
 ### Removed
 - old shell and python build scripts
