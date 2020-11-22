@@ -21,6 +21,9 @@ SOURCES   := src lib_standalone lib/uuid-common/src lib/uuid-console/src lib/uui
 INCLUDES  := lib/ArduinoJson/src lib_standalone lib/uuid-common/src lib/uuid-console/src lib/uuid-log/src lib/uuid-telnet/src lib/uuid-syslog/src src/devices src
 LIBRARIES := 
 
+CPPCHECK = cppcheck
+CHECKFLAGS = -q
+
 #----------------------------------------------------------------------
 # Languages Standard
 #----------------------------------------------------------------------
@@ -110,7 +113,7 @@ COMPILE.cpp = $(CXX) $(CXX_STANDARD) $(CXXFLAGS) $(DEPFLAGS) -c $< -o $@
 #----------------------------------------------------------------------
 # Targets
 #----------------------------------------------------------------------
-all: $(OUTPUT)
+all: cppcheck.out.xml $(OUTPUT)
 
 $(OUTPUT): $(OBJS)
 	@mkdir -p $(@D)
@@ -129,11 +132,14 @@ $(BUILD)/%.o: %.s
 	@mkdir -p $(@D)
 	$(COMPILE.s)
 
+cppcheck.out.xml: $(SOURCES)
+	$(CPPCHECK) $(CHECKFLAGS) $^ --xml >$@
+
 run: $(OUTPUT)
 	@$<
 
 clean:
-	@$(RM) -r $(BUILD) $(OUTPUT)
+	@$(RM) -r $(BUILD) $(OUTPUT) cppcheck.out.xml
 
 help:
 	@echo available targets: all run clean
