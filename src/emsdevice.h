@@ -255,18 +255,18 @@ class EMSdevice {
     static constexpr uint8_t EMS_DEVICE_FLAG_IPM    = 3;
 
     // Thermostats
-    static constexpr uint8_t EMS_DEVICE_FLAG_NO_WRITE  = (1 << 7); // last bit
-    static constexpr uint8_t EMS_DEVICE_FLAG_EASY      = 1;
-    static constexpr uint8_t EMS_DEVICE_FLAG_RC10      = 2;
-    static constexpr uint8_t EMS_DEVICE_FLAG_RC20      = 3;
-    static constexpr uint8_t EMS_DEVICE_FLAG_RC20_2    = 4; // Variation on RC20, Older, like ES72?
-    static constexpr uint8_t EMS_DEVICE_FLAG_RC30_1    = 5; // variation on RC30, Newer?
-    static constexpr uint8_t EMS_DEVICE_FLAG_RC30      = 6;
-    static constexpr uint8_t EMS_DEVICE_FLAG_RC35      = 7;
-    static constexpr uint8_t EMS_DEVICE_FLAG_RC300     = 8;
-    static constexpr uint8_t EMS_DEVICE_FLAG_RC100     = 9;
-    static constexpr uint8_t EMS_DEVICE_FLAG_JUNKERS   = 10;
-    static constexpr uint8_t EMS_DEVICE_FLAG_JUNKERS_2 = (1 << 6); // 6th bit set if older models, like FR120, FR100
+    static constexpr uint8_t EMS_DEVICE_FLAG_NO_WRITE    = (1 << 7); // last bit
+    static constexpr uint8_t EMS_DEVICE_FLAG_JUNKERS_OLD = (1 << 6); // 6th bit set if older models, like FR120, FR100
+    static constexpr uint8_t EMS_DEVICE_FLAG_EASY        = 1;
+    static constexpr uint8_t EMS_DEVICE_FLAG_RC10        = 2;
+    static constexpr uint8_t EMS_DEVICE_FLAG_RC20        = 3;
+    static constexpr uint8_t EMS_DEVICE_FLAG_RC20_2      = 4; // Variation on RC20, Older, like ES72?
+    static constexpr uint8_t EMS_DEVICE_FLAG_RC30_1      = 5; // variation on RC30, Newer?
+    static constexpr uint8_t EMS_DEVICE_FLAG_RC30        = 6;
+    static constexpr uint8_t EMS_DEVICE_FLAG_RC35        = 7;
+    static constexpr uint8_t EMS_DEVICE_FLAG_RC300       = 8;
+    static constexpr uint8_t EMS_DEVICE_FLAG_RC100       = 9;
+    static constexpr uint8_t EMS_DEVICE_FLAG_JUNKERS     = 10;
 
   private:
     uint8_t     unique_id_;
