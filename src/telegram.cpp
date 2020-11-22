@@ -508,6 +508,10 @@ void TxService::read_request(const uint16_t type_id, const uint8_t dest, const u
 
 // Send a raw telegram to the bus, telegram is a text string of hex values
 void TxService::send_raw(const char * telegram_data) {
+    if (telegram_data == nullptr) {
+        return;
+    }
+
     // since the telegram data is a const, make a copy. add 1 to grab the \0 EOS
     char telegram[EMS_MAX_TELEGRAM_LENGTH * 3];
     for (uint8_t i = 0; i < strlen(telegram_data); i++) {
