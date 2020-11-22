@@ -33,11 +33,11 @@ bool Command::call(const uint8_t device_type, const char * cmd, const char * val
 #ifdef EMSESP_DEBUG
     std::string dname = EMSdevice::device_type_2_device_name(device_type);
     if (value == nullptr) {
-        LOG_DEBUG(F("[DEBUG] Calling command %s in %s"), cmd, dname.c_str());
+        LOG_DEBUG(F("[DEBUG] Calling %s command %s"), dname.c_str(), cmd);
     } else if (id == -1) {
-        LOG_DEBUG(F("[DEBUG] Calling command %s, value %s, id is default in %s"), cmd, value, dname.c_str());
+        LOG_DEBUG(F("[DEBUG] Calling %s command %s, value %s, id is default"), dname.c_str(), cmd, value);
     } else {
-        LOG_DEBUG(F("[DEBUG] Calling command %s, value %s, id is %d in %s"), cmd, value, id, dname.c_str());
+        LOG_DEBUG(F("[DEBUG] Calling %s command %s, value %s, id is %d in %s"), dname.c_str(), cmd, value, id);
     }
 #endif
     bool ok = false;
@@ -46,6 +46,7 @@ bool Command::call(const uint8_t device_type, const char * cmd, const char * val
             if (cf.device_type_ == device_type) {
                 // find a matching command and call it
                 if (uuid::read_flash_string(cf.cmd_) == cmd) {
+                    // see if we this function wants to send its result to a json doc
                     if (cf.cmdfunction_json_) {
                         // check if json object is empty, if so quit
                         if (json.isNull()) {
