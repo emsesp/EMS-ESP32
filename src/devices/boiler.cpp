@@ -928,7 +928,7 @@ void Boiler::process_UBAMonitorFastPlus(std::shared_ptr<const Telegram> telegram
     // at this point do a quick check to see if the hot water or heating is active
     uint8_t state = 0;
     telegram->read_value(state, 11);
-    boilerState_ = state & 0x01 ? 0x80 : 0;
+    boilerState_ = state & 0x01 ? 0x08 : 0;
     boilerState_ |= state & 0x02 ? 0x01 : 0;
     boilerState_ |= state & 0x04 ? 0x02 : 0;
 
