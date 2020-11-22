@@ -187,30 +187,30 @@ void Mixer::register_mqtt_ha_config() {
     JsonObject dev = doc.createNestedObject("dev");
     dev["name"]    = F("EMS-ESP Mixer");
     dev["sw"]      = EMSESP_APP_VERSION;
-    dev["mf"]      = this->brand_to_string();
+    dev["mf"]      = brand_to_string();
     dev["mdl"]     = this->name();
     JsonArray ids  = dev.createNestedArray("ids");
     ids.add("ems-esp-mixer");
 
     std::string topic(100, '\0');
-    if (this->type() == Type::HC) {
+    if (type() == Type::HC) {
         snprintf_P(&topic[0], topic.capacity() + 1, PSTR("homeassistant/sensor/ems-esp/mixer_hc%d/config"), hc_);
         Mqtt::publish_retain(topic, doc.as<JsonObject>(), true); // publish the config payload with retain flag
         char hc_name[10];
         snprintf_P(hc_name, sizeof(hc_name), PSTR("hc%d"), hc_);
-        Mqtt::register_mqtt_ha_sensor(hc_name, nullptr, F_(flowTemp), this->device_type(), "flowTemp", F_(degrees), F_(icontemperature));
-        Mqtt::register_mqtt_ha_sensor(hc_name, nullptr, F_(flowSetTemp), this->device_type(), "flowSetTemp", F_(degrees), F_(icontemperature));
-        Mqtt::register_mqtt_ha_sensor(hc_name, nullptr, F_(pumpStatus), this->device_type(), "pumpStatus", nullptr, nullptr);
-        Mqtt::register_mqtt_ha_sensor(hc_name, nullptr, F_(valveStatus), this->device_type(), "valveStatus", nullptr, nullptr);
+        Mqtt::register_mqtt_ha_sensor(hc_name, nullptr, F_(flowTemp), device_type(), "flowTemp", F_(degrees), F_(icontemperature));
+        Mqtt::register_mqtt_ha_sensor(hc_name, nullptr, F_(flowSetTemp), device_type(), "flowSetTemp", F_(degrees), F_(icontemperature));
+        Mqtt::register_mqtt_ha_sensor(hc_name, nullptr, F_(pumpStatus), device_type(), "pumpStatus", nullptr, nullptr);
+        Mqtt::register_mqtt_ha_sensor(hc_name, nullptr, F_(valveStatus), device_type(), "valveStatus", nullptr, nullptr);
     } else {
         // WWC
         snprintf_P(&topic[0], topic.capacity() + 1, PSTR("homeassistant/sensor/ems-esp/mixer_wwc%d/config"), hc_);
         Mqtt::publish_retain(topic, doc.as<JsonObject>(), true); // publish the config payload with retain flag
         char wwc_name[10];
         snprintf_P(wwc_name, sizeof(wwc_name), PSTR("wwc%d"), hc_);
-        Mqtt::register_mqtt_ha_sensor(wwc_name, nullptr, F_(wwTemp), this->device_type(), "wwTemp", F_(degrees), F_(icontemperature));
-        Mqtt::register_mqtt_ha_sensor(wwc_name, nullptr, F_(pumpStatus), this->device_type(), "pumpStatus", nullptr, nullptr);
-        Mqtt::register_mqtt_ha_sensor(wwc_name, nullptr, F_(tempStatus), this->device_type(), "tempStatus", nullptr, nullptr);
+        Mqtt::register_mqtt_ha_sensor(wwc_name, nullptr, F_(wwTemp), device_type(), "wwTemp", F_(degrees), F_(icontemperature));
+        Mqtt::register_mqtt_ha_sensor(wwc_name, nullptr, F_(pumpStatus), device_type(), "pumpStatus", nullptr, nullptr);
+        Mqtt::register_mqtt_ha_sensor(wwc_name, nullptr, F_(tempStatus), device_type(), "tempStatus", nullptr, nullptr);
     }
 
     mqtt_ha_config_ = true; // done
@@ -224,14 +224,14 @@ bool Mixer::export_values(JsonObject & json) {
 // returns false if empty
 bool Mixer::export_values_format(uint8_t mqtt_format, JsonObject & json) {
     // check if there is data for the mixer unit
-    if (this->type() == Type::NONE) {
+    if (type() == Type::NONE) {
         return 0;
     }
 
     JsonObject json_hc;
     char       hc_name[10]; // hc{1-4}
 
-    if (this->type() == Type::HC) {
+    if (type() == Type::HC) {
         snprintf_P(hc_name, sizeof(hc_name), PSTR("hc%d"), hc_);
         if (mqtt_format == Mqtt::Format::SINGLE) {
             json_hc      = json;

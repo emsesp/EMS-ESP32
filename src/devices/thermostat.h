@@ -85,8 +85,8 @@ class Thermostat : public EMSdevice {
             return Helpers::hasValue(setpoint_roomTemp);
         }
 
-        uint8_t get_mode(uint8_t flags) const;
-        uint8_t get_mode_type(uint8_t flags) const;
+        uint8_t get_mode(uint8_t model) const;
+        uint8_t get_mode_type(uint8_t model) const;
 
         enum Mode : uint8_t {
             UNKNOWN,
@@ -142,9 +142,9 @@ class Thermostat : public EMSdevice {
         ha_registered_ = b;
     }
 
-    // specific thermostat characteristics, stripping the last 4 bits
+    // specific thermostat characteristics, stripping the top 4 bits
     inline uint8_t model() const {
-        return (this->flags() & 0x0F);
+        return (flags() & 0x0F);
     }
 
     // each thermostat has a list of heating controller type IDs for reading and writing

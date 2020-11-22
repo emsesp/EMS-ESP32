@@ -284,16 +284,16 @@ char * EMSdevice::show_telegram_handlers(char * result) {
 
 // list all the mqtt handlers for this device
 void EMSdevice::show_mqtt_handlers(uuid::console::Shell & shell) {
-    Mqtt::show_topic_handlers(shell, this->device_type_);
+    Mqtt::show_topic_handlers(shell, device_type_);
 }
 
 void EMSdevice::register_mqtt_topic(const std::string & topic, mqtt_subfunction_p f) {
-    Mqtt::subscribe(this->device_type_, topic, f);
+    Mqtt::subscribe(device_type_, topic, f);
 }
 
 // add command to library
 void EMSdevice::register_mqtt_cmd(const __FlashStringHelper * cmd, cmdfunction_p f) {
-    Command::add(this->device_type_, this->device_id_, cmd, f);
+    Command::add(device_type_, device_id_, cmd, f);
 }
 
 // register a call back function for a specific telegram type
@@ -342,17 +342,17 @@ bool EMSdevice::handle_telegram(std::shared_ptr<const Telegram> telegram) {
 
 // send Tx write with a data block
 void EMSdevice::write_command(const uint16_t type_id, const uint8_t offset, uint8_t * message_data, const uint8_t message_length, const uint16_t validate_typeid) {
-    EMSESP::send_write_request(type_id, this->device_id(), offset, message_data, message_length, validate_typeid);
+    EMSESP::send_write_request(type_id, device_id(), offset, message_data, message_length, validate_typeid);
 }
 
 // send Tx write with a single value
 void EMSdevice::write_command(const uint16_t type_id, const uint8_t offset, const uint8_t value, const uint16_t validate_typeid) {
-    EMSESP::send_write_request(type_id, this->device_id(), offset, value, validate_typeid);
+    EMSESP::send_write_request(type_id, device_id(), offset, value, validate_typeid);
 }
 
 // send Tx write with a single value, with no post validation
 void EMSdevice::write_command(const uint16_t type_id, const uint8_t offset, const uint8_t value) {
-    EMSESP::send_write_request(type_id, this->device_id(), offset, value, 0);
+    EMSESP::send_write_request(type_id, device_id(), offset, value, 0);
 }
 
 // send Tx read command to the device

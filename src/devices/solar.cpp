@@ -172,27 +172,27 @@ void Solar::register_mqtt_ha_config() {
     JsonObject dev = doc.createNestedObject("dev");
     dev["name"]    = F("EMS-ESP Solar");
     dev["sw"]      = EMSESP_APP_VERSION;
-    dev["mf"]      = this->brand_to_string();
-    dev["mdl"]     = this->name();
+    dev["mf"]      = brand_to_string();
+    dev["mdl"]     = name();
     JsonArray ids  = dev.createNestedArray("ids");
     ids.add("ems-esp-solar");
     Mqtt::publish_retain(F("homeassistant/sensor/ems-esp/solar/config"), doc.as<JsonObject>(), true); // publish the config payload with retain flag
 
-    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(collectorTemp), this->device_type(), "collectorTemp", F_(degrees), nullptr);
-    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(tankBottomTemp), this->device_type(), "tankBottomTemp", F_(degrees), nullptr);
-    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(tankBottomTemp2), this->device_type(), "tankBottomTemp2", F_(degrees), nullptr);
-    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(tank1MaxTempCurrent), this->device_type(), "tank1MaxTempCurrent", F_(degrees), nullptr);
-    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(heatExchangerTemp), this->device_type(), "heatExchangerTemp", F_(degrees), nullptr);
-    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(solarPumpModulation), this->device_type(), "solarPumpModulation", F_(percent), nullptr);
-    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(cylinderPumpModulation), this->device_type(), "cylinderPumpModulation", F_(percent), nullptr);
-    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(pumpWorkMin), this->device_type(), "pumpWorkMin", F_(min), nullptr);
-    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(energyLastHour), this->device_type(), "energyLastHour", F_(wh), nullptr);
-    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(energyToday), this->device_type(), "energyToday", F_(wh), nullptr);
-    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(energyTotal), this->device_type(), "energyTotal", F_(kwh), nullptr);
-    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(solarPump), this->device_type(), "solarPump", nullptr, nullptr);
-    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(valveStatus), this->device_type(), "valveStatus", nullptr, nullptr);
-    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(tankHeated), this->device_type(), "tankHeated", nullptr, nullptr);
-    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(collectorShutdown), this->device_type(), "collectorShutdown", nullptr, nullptr);
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(collectorTemp), device_type(), "collectorTemp", F_(degrees), nullptr);
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(tankBottomTemp), device_type(), "tankBottomTemp", F_(degrees), nullptr);
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(tankBottomTemp2), device_type(), "tankBottomTemp2", F_(degrees), nullptr);
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(tank1MaxTempCurrent), device_type(), "tank1MaxTempCurrent", F_(degrees), nullptr);
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(heatExchangerTemp), device_type(), "heatExchangerTemp", F_(degrees), nullptr);
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(solarPumpModulation), device_type(), "solarPumpModulation", F_(percent), nullptr);
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(cylinderPumpModulation), device_type(), "cylinderPumpModulation", F_(percent), nullptr);
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(pumpWorkMin), device_type(), "pumpWorkMin", F_(min), nullptr);
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(energyLastHour), device_type(), "energyLastHour", F_(wh), nullptr);
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(energyToday), device_type(), "energyToday", F_(wh), nullptr);
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(energyTotal), device_type(), "energyTotal", F_(kwh), nullptr);
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(solarPump), device_type(), "solarPump", nullptr, nullptr);
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(valveStatus), device_type(), "valveStatus", nullptr, nullptr);
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(tankHeated), device_type(), "tankHeated", nullptr, nullptr);
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(collectorShutdown), device_type(), "collectorShutdown", nullptr, nullptr);
 
     mqtt_ha_config_ = true; // done
 }
