@@ -22,7 +22,7 @@ INCLUDES  := lib/ArduinoJson/src lib_standalone lib/uuid-common/src lib/uuid-con
 LIBRARIES := 
 
 CPPCHECK = cppcheck
-CHECKFLAGS = -q
+CHECKFLAGS = -q --force --std=c++11
 
 #----------------------------------------------------------------------
 # Languages Standard
@@ -113,7 +113,7 @@ COMPILE.cpp = $(CXX) $(CXX_STANDARD) $(CXXFLAGS) $(DEPFLAGS) -c $< -o $@
 #----------------------------------------------------------------------
 # Targets
 #----------------------------------------------------------------------
-all: cppcheck.out.xml $(OUTPUT)
+all: $(OUTPUT)
 
 $(OUTPUT): $(OBJS)
 	@mkdir -p $(@D)
@@ -132,14 +132,14 @@ $(BUILD)/%.o: %.s
 	@mkdir -p $(@D)
 	$(COMPILE.s)
 
-cppcheck.out.xml: $(SOURCES)
-	$(CPPCHECK) $(CHECKFLAGS) $^ --xml >$@
+cppcheck: $(SOURCES)
+	$(CPPCHECK) $(CHECKFLAGS) $^
 
 run: $(OUTPUT)
 	@$<
 
 clean:
-	@$(RM) -r $(BUILD) $(OUTPUT) cppcheck.out.xml
+	@$(RM) -r $(BUILD) $(OUTPUT)
 
 help:
 	@echo available targets: all run clean
