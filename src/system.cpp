@@ -438,13 +438,14 @@ int8_t System::wifi_quality() {
     if (WiFi.status() != WL_CONNECTED) {
         return -1;
     }
-    int dBm = WiFi.RSSI();
+    int32_t dBm = WiFi.RSSI();
 #else
-    int8_t dBm = -70;
+    int32_t dBm = -70;
 #endif
     if (dBm <= -100) {
         return 0;
     }
+
     if (dBm >= -50) {
         return 100;
     }
