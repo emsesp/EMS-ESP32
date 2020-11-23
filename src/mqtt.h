@@ -219,6 +219,7 @@ class Mqtt {
     uint32_t last_publish_sensor_     = 0;
 
     static bool     connecting_;
+    static bool     initialized_;
     static uint16_t mqtt_publish_fails_;
     static uint8_t  connectcount_;
 
