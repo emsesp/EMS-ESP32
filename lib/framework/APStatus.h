@@ -20,12 +20,12 @@
 #define AP_STATUS_SERVICE_PATH "/rest/apStatus"
 
 class APStatus {
- public:
-  APStatus(AsyncWebServer* server, SecurityManager* securityManager, APSettingsService* apSettingsService);
+  public:
+    APStatus(AsyncWebServer * server, SecurityManager * securityManager, APSettingsService * apSettingsService);
 
- private:
-  APSettingsService* _apSettingsService;
-  void apStatus(AsyncWebServerRequest* request);
+  private:
+    APSettingsService * _apSettingsService;
+    void                apStatus(AsyncWebServerRequest * request);
 };
 
-#endif  // end APStatus_h
+#endif // end APStatus_h

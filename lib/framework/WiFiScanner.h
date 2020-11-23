@@ -20,16 +20,16 @@
 #define MAX_WIFI_SCANNER_SIZE 1024
 
 class WiFiScanner {
- public:
-  WiFiScanner(AsyncWebServer* server, SecurityManager* securityManager);
+  public:
+    WiFiScanner(AsyncWebServer * server, SecurityManager * securityManager);
 
- private:
-  void scanNetworks(AsyncWebServerRequest* request);
-  void listNetworks(AsyncWebServerRequest* request);
+  private:
+    void scanNetworks(AsyncWebServerRequest * request);
+    void listNetworks(AsyncWebServerRequest * request);
 
 #ifdef ESP8266
-  uint8_t convertEncryptionType(uint8_t encryptionType);
+    uint8_t convertEncryptionType(uint8_t encryptionType);
 #endif
 };
 
-#endif  // end WiFiScanner_h
+#endif // end WiFiScanner_h

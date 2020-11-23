@@ -15,17 +15,17 @@
 #define RESTART_SERVICE_PATH "/rest/restart"
 
 class RestartService {
- public:
-  RestartService(AsyncWebServer* server, SecurityManager* securityManager);
+  public:
+    RestartService(AsyncWebServer * server, SecurityManager * securityManager);
 
-  static void restartNow() {
-    WiFi.disconnect(true);
-    delay(500);
-    ESP.restart();
-  }
+    static void restartNow() {
+        WiFi.disconnect(true);
+        delay(500);
+        ESP.restart();
+    }
 
- private:
-  void restart(AsyncWebServerRequest* request);
+  private:
+    void restart(AsyncWebServerRequest * request);
 };
 
-#endif  // end RestartService_h
+#endif // end RestartService_h

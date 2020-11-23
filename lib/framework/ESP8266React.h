@@ -34,84 +34,84 @@
 #endif
 
 class ESP8266React {
- public:
-  ESP8266React(AsyncWebServer* server, FS* fs);
+  public:
+    ESP8266React(AsyncWebServer * server, FS * fs);
 
-  void begin();
-  void loop();
+    void begin();
+    void loop();
 
-  SecurityManager* getSecurityManager() {
-    return &_securitySettingsService;
-  }
+    SecurityManager * getSecurityManager() {
+        return &_securitySettingsService;
+    }
 
 #if FT_ENABLED(FT_SECURITY)
-  StatefulService<SecuritySettings>* getSecuritySettingsService() {
-    return &_securitySettingsService;
-  }
+    StatefulService<SecuritySettings> * getSecuritySettingsService() {
+        return &_securitySettingsService;
+    }
 #endif
 
-  StatefulService<WiFiSettings>* getWiFiSettingsService() {
-    return &_wifiSettingsService;
-  }
+    StatefulService<WiFiSettings> * getWiFiSettingsService() {
+        return &_wifiSettingsService;
+    }
 
-  StatefulService<APSettings>* getAPSettingsService() {
-    return &_apSettingsService;
-  }
+    StatefulService<APSettings> * getAPSettingsService() {
+        return &_apSettingsService;
+    }
 
 #if FT_ENABLED(FT_NTP)
-  StatefulService<NTPSettings>* getNTPSettingsService() {
-    return &_ntpSettingsService;
-  }
+    StatefulService<NTPSettings> * getNTPSettingsService() {
+        return &_ntpSettingsService;
+    }
 #endif
 
 #if FT_ENABLED(FT_OTA)
-  StatefulService<OTASettings>* getOTASettingsService() {
-    return &_otaSettingsService;
-  }
+    StatefulService<OTASettings> * getOTASettingsService() {
+        return &_otaSettingsService;
+    }
 #endif
 
 #if FT_ENABLED(FT_MQTT)
-  StatefulService<MqttSettings>* getMqttSettingsService() {
-    return &_mqttSettingsService;
-  }
+    StatefulService<MqttSettings> * getMqttSettingsService() {
+        return &_mqttSettingsService;
+    }
 
-  AsyncMqttClient* getMqttClient() {
-    return _mqttSettingsService.getMqttClient();
-  }
+    AsyncMqttClient * getMqttClient() {
+        return _mqttSettingsService.getMqttClient();
+    }
 #endif
 
-  void factoryReset() {
-    _factoryResetService.factoryReset();
-  }
+    void factoryReset() {
+        _factoryResetService.factoryReset();
+    }
 
- private:
-  FeaturesService _featureService;
-  SecuritySettingsService _securitySettingsService;
-  WiFiSettingsService _wifiSettingsService;
-  WiFiScanner _wifiScanner;
-  WiFiStatus _wifiStatus;
-  APSettingsService _apSettingsService;
-  APStatus _apStatus;
+  private:
+    FeaturesService         _featureService;
+    SecuritySettingsService _securitySettingsService;
+    WiFiSettingsService     _wifiSettingsService;
+    WiFiScanner             _wifiScanner;
+    WiFiStatus              _wifiStatus;
+    APSettingsService       _apSettingsService;
+    APStatus                _apStatus;
 #if FT_ENABLED(FT_NTP)
-  NTPSettingsService _ntpSettingsService;
-  NTPStatus _ntpStatus;
+    NTPSettingsService _ntpSettingsService;
+    NTPStatus          _ntpStatus;
 #endif
 #if FT_ENABLED(FT_OTA)
-  OTASettingsService _otaSettingsService;
+    OTASettingsService _otaSettingsService;
 #endif
 #if FT_ENABLED(FT_UPLOAD_FIRMWARE)
-  UploadFirmwareService _uploadFirmwareService;
+    UploadFirmwareService _uploadFirmwareService;
 #endif
 #if FT_ENABLED(FT_MQTT)
-  MqttSettingsService _mqttSettingsService;
-  MqttStatus _mqttStatus;
+    MqttSettingsService _mqttSettingsService;
+    MqttStatus          _mqttStatus;
 #endif
 #if FT_ENABLED(FT_SECURITY)
-  AuthenticationService _authenticationService;
+    AuthenticationService _authenticationService;
 #endif
-  RestartService _restartService;
-  FactoryResetService _factoryResetService;
-  SystemStatus _systemStatus;
+    RestartService      _restartService;
+    FactoryResetService _factoryResetService;
+    SystemStatus        _systemStatus;
 };
 
 #endif

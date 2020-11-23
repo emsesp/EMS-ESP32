@@ -34,51 +34,51 @@
 #define TIME_PATH "/rest/time"
 
 class NTPSettings {
- public:
-  bool enabled;
-  String tzLabel;
-  String tzFormat;
-  String server;
+  public:
+    bool   enabled;
+    String tzLabel;
+    String tzFormat;
+    String server;
 
-  static void read(NTPSettings& settings, JsonObject& root) {
-    root["enabled"] = settings.enabled;
-    root["server"] = settings.server;
-    root["tz_label"] = settings.tzLabel;
-    root["tz_format"] = settings.tzFormat;
-  }
+    static void read(NTPSettings & settings, JsonObject & root) {
+        root["enabled"]   = settings.enabled;
+        root["server"]    = settings.server;
+        root["tz_label"]  = settings.tzLabel;
+        root["tz_format"] = settings.tzFormat;
+    }
 
-  static StateUpdateResult update(JsonObject& root, NTPSettings& settings) {
-    settings.enabled = root["enabled"] | FACTORY_NTP_ENABLED;
-    settings.server = root["server"] | FACTORY_NTP_SERVER;
-    settings.tzLabel = root["tz_label"] | FACTORY_NTP_TIME_ZONE_LABEL;
-    settings.tzFormat = root["tz_format"] | FACTORY_NTP_TIME_ZONE_FORMAT;
-    return StateUpdateResult::CHANGED;
-  }
+    static StateUpdateResult update(JsonObject & root, NTPSettings & settings) {
+        settings.enabled  = root["enabled"] | FACTORY_NTP_ENABLED;
+        settings.server   = root["server"] | FACTORY_NTP_SERVER;
+        settings.tzLabel  = root["tz_label"] | FACTORY_NTP_TIME_ZONE_LABEL;
+        settings.tzFormat = root["tz_format"] | FACTORY_NTP_TIME_ZONE_FORMAT;
+        return StateUpdateResult::CHANGED;
+    }
 };
 
 class NTPSettingsService : public StatefulService<NTPSettings> {
- public:
-  NTPSettingsService(AsyncWebServer* server, FS* fs, SecurityManager* securityManager);
+  public:
+    NTPSettingsService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager);
 
-  void begin();
+    void begin();
 
- private:
-  HttpEndpoint<NTPSettings> _httpEndpoint;
-  FSPersistence<NTPSettings> _fsPersistence;
-  AsyncCallbackJsonWebHandler _timeHandler;
+  private:
+    HttpEndpoint<NTPSettings>   _httpEndpoint;
+    FSPersistence<NTPSettings>  _fsPersistence;
+    AsyncCallbackJsonWebHandler _timeHandler;
 
 #ifdef ESP32
-  void onStationModeGotIP(WiFiEvent_t event, WiFiEventInfo_t info);
-  void onStationModeDisconnected(WiFiEvent_t event, WiFiEventInfo_t info);
+    void onStationModeGotIP(WiFiEvent_t event, WiFiEventInfo_t info);
+    void onStationModeDisconnected(WiFiEvent_t event, WiFiEventInfo_t info);
 #elif defined(ESP8266)
-  WiFiEventHandler _onStationModeDisconnectedHandler;
-  WiFiEventHandler _onStationModeGotIPHandler;
+    WiFiEventHandler _onStationModeDisconnectedHandler;
+    WiFiEventHandler _onStationModeGotIPHandler;
 
-  void onStationModeGotIP(const WiFiEventStationModeGotIP& event);
-  void onStationModeDisconnected(const WiFiEventStationModeDisconnected& event);
+    void onStationModeGotIP(const WiFiEventStationModeGotIP & event);
+    void onStationModeDisconnected(const WiFiEventStationModeDisconnected & event);
 #endif
-  void configureNTP();
-  void configureTime(AsyncWebServerRequest* request, JsonVariant& json);
+    void configureNTP();
+    void configureTime(AsyncWebServerRequest * request, JsonVariant & json);
 };
 
-#endif  // end NTPSettingsService_h
+#endif // end NTPSettingsService_h

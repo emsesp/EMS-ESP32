@@ -4,14 +4,14 @@
 #include <Arduino.h>
 
 class ESPUtils {
- public:
-  static String defaultDeviceValue(String prefix = "") {
+  public:
+    static String defaultDeviceValue(String prefix = "") {
 #ifdef ESP32
-    return prefix + String((unsigned long)ESP.getEfuseMac(), HEX);
+        return prefix + String((unsigned long)ESP.getEfuseMac(), HEX);
 #elif defined(ESP8266)
-    return prefix + String(ESP.getChipId(), HEX);
+        return prefix + String(ESP.getChipId(), HEX);
 #endif
-  }
+    }
 };
 
-#endif  // end ESPUtils
+#endif // end ESPUtils

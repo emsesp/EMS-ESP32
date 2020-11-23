@@ -1,42 +1,42 @@
 #include <FeaturesService.h>
 
-FeaturesService::FeaturesService(AsyncWebServer* server) {
-  server->on(FEATURES_SERVICE_PATH, HTTP_GET, std::bind(&FeaturesService::features, this, std::placeholders::_1));
+FeaturesService::FeaturesService(AsyncWebServer * server) {
+    server->on(FEATURES_SERVICE_PATH, HTTP_GET, std::bind(&FeaturesService::features, this, std::placeholders::_1));
 }
 
-void FeaturesService::features(AsyncWebServerRequest* request) {
-  AsyncJsonResponse* response = new AsyncJsonResponse(false, MAX_FEATURES_SIZE);
-  JsonObject root = response->getRoot();
+void FeaturesService::features(AsyncWebServerRequest * request) {
+    AsyncJsonResponse * response = new AsyncJsonResponse(false, MAX_FEATURES_SIZE);
+    JsonObject          root     = response->getRoot();
 #if FT_ENABLED(FT_PROJECT)
-  root["project"] = true;
+    root["project"] = true;
 #else
-  root["project"] = false;
+    root["project"]         = false;
 #endif
 #if FT_ENABLED(FT_SECURITY)
-  root["security"] = true;
+    root["security"] = true;
 #else
-  root["security"] = false;
+    root["security"]        = false;
 #endif
 #if FT_ENABLED(FT_MQTT)
-  root["mqtt"] = true;
+    root["mqtt"] = true;
 #else
-  root["mqtt"] = false;
+    root["mqtt"]            = false;
 #endif
 #if FT_ENABLED(FT_NTP)
-  root["ntp"] = true;
+    root["ntp"] = true;
 #else
-  root["ntp"] = false;
+    root["ntp"]             = false;
 #endif
 #if FT_ENABLED(FT_OTA)
-  root["ota"] = true;
+    root["ota"] = true;
 #else
-  root["ota"] = false;
+    root["ota"]             = false;
 #endif
 #if FT_ENABLED(FT_UPLOAD_FIRMWARE)
-  root["upload_firmware"] = true;
+    root["upload_firmware"] = true;
 #else
-  root["upload_firmware"] = false;
+    root["upload_firmware"] = false;
 #endif
-  response->setLength();
-  request->send(response);
+    response->setLength();
+    request->send(response);
 }

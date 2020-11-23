@@ -74,7 +74,7 @@ void WiFiSettingsService::manageSTA() {
             // configure for static IP
             WiFi.config(_state.localIP, _state.gatewayIP, _state.subnetMask, _state.dnsIP1, _state.dnsIP2);
         } else {
-           // configure for DHCP
+            // configure for DHCP
 #ifdef ESP32
             WiFi.config(INADDR_NONE, INADDR_NONE, INADDR_NONE);
 #elif defined(ESP8266)

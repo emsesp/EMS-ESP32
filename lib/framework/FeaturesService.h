@@ -19,11 +19,11 @@
 #define FEATURES_SERVICE_PATH "/rest/features"
 
 class FeaturesService {
- public:
-  FeaturesService(AsyncWebServer* server);
+  public:
+    FeaturesService(AsyncWebServer * server);
 
- private:
-  void features(AsyncWebServerRequest* request);
+  private:
+    void features(AsyncWebServerRequest * request);
 };
 
 #endif
