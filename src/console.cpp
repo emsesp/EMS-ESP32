@@ -46,14 +46,14 @@ EMSESPShell::EMSESPShell()
 }
 
 void EMSESPShell::started() {
-    logger().log(LogLevel::INFO, LogFacility::CONSOLE, F("User session opened on console %s"), console_name().c_str());
+    logger().log(LogLevel::DEBUG, LogFacility::CONSOLE, F("User session opened on console %s"), console_name().c_str());
 }
 
 void EMSESPShell::stopped() {
     if (has_flags(CommandFlags::ADMIN)) {
-        logger().log(LogLevel::INFO, LogFacility::AUTH, F("su session closed on console %s"), console_name().c_str());
+        logger().log(LogLevel::DEBUG, LogFacility::AUTH, F("su session closed on console %s"), console_name().c_str());
     }
-    logger().log(LogLevel::INFO, LogFacility::CONSOLE, F("User session closed on console %s"), console_name().c_str());
+    logger().log(LogLevel::DEBUG, LogFacility::CONSOLE, F("User session closed on console %s"), console_name().c_str());
 
     // remove all custom contexts
     commands->remove_all_commands();
@@ -381,7 +381,7 @@ void EMSESPShell::add_console_commands() {
             }
 
             const char * cmd = arguments[1].c_str();
-            if (!Command::find_command(device_type, cmd)) {
+            if (Command::find_command(device_type, cmd) == nullptr) {
                 shell.print(F("Unknown command. Available commands are: "));
                 Command::show(shell, device_type);
                 return;
@@ -488,9 +488,12 @@ void Console::load_standard_commands(unsigned int context) {
                                                Test::run_test(shell, arguments.front());
                                            }
                                        });
+#if defined(EMSESP_STANDALONE)
+    EMSESPShell::commands->add_command(context, CommandFlags::USER, flash_string_vector{F("t")}, [](Shell & shell, const std::vector<std::string> & arguments) {
+        Test::run_test(shell, "default");
+    });
 #endif
-
-
+#endif
 
     EMSESPShell::commands->add_command(
         context,
