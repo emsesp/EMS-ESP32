@@ -13,7 +13,7 @@ import SaveIcon from '@material-ui/icons/Save';
 import PersonAddIcon from '@material-ui/icons/PersonAdd';
 
 import { withAuthenticatedContext, AuthenticatedContextProps } from '../authentication';
-import { RestFormProps, FormActions, FormButton } from '../components';
+import { RestFormProps, FormActions, FormButton, extractEventValue } from '../components';
 
 import UserForm from './UserForm';
 import { SecuritySettings, User } from './types';
@@ -93,12 +93,8 @@ class ManageUsersForm extends React.Component<ManageUsersFormProps, ManageUsersF
   };
 
   handleUserValueChange = (name: keyof User) => (event: React.ChangeEvent<HTMLInputElement>) => {
-    this.setState({ user: { ...this.state.user!, [name]: event.target.value } });
+    this.setState({ user: { ...this.state.user!, [name]: extractEventValue(event) } });
   };
-
-  handleUserCheckboxChange = (name: keyof User) => (event: React.ChangeEvent<HTMLInputElement>) => {
-    this.setState({ user: { ...this.state.user!, [name]: event.target.checked } });
-  }
 
   onSubmit = () => {
     this.props.saveData();
