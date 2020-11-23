@@ -16,6 +16,7 @@
 - mixer devices in HA were incorrectly named
 - Prevent HA MQTT config messages for thermostat that has no 'currtemp' (#582)
 - serviceCodeNumber, 3-char serviceCode, exhausttemp and heating_active for newer ems+ boilers
+- prevent MQTT publish messages from sending twice
 
 ### Changed
 - optimized MQTT for HA to reduce heap fragmentation issues
