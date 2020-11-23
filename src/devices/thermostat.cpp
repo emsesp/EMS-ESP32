@@ -353,7 +353,7 @@ void Thermostat::publish_values(JsonObject & json, bool force) {
         return;
     }
 
-    // see if we have already registered this with HA MQTT Discovery, if not send the config
+    // see if we have already registered this with HA MQTT Discovery, if not send the config first
     if (Mqtt::mqtt_format() == Mqtt::Format::HA) {
         if (!ha_config(force)) {
             return;
@@ -726,7 +726,6 @@ bool Thermostat::ha_config(bool force) {
     if (!ha_registered()) {
         register_mqtt_ha_config();
         ha_registered(true);
-        return false;
     }
 
     // check to see which heating circuits need to be added as HA climate components
@@ -735,11 +734,11 @@ bool Thermostat::ha_config(bool force) {
         if (hc->is_active() && !hc->ha_registered()) {
             if (Helpers::hasValue(hc->curr_roomTemp)) {
                 register_mqtt_ha_config(hc->hc_num());
+                hc->ha_registered(true);
             }
-            hc->ha_registered(true);
-            return false;
         }
     }
+
     return true;
 }
 
@@ -937,9 +936,9 @@ void Thermostat::register_mqtt_ha_config(uint8_t hc_num) {
     doc["mode_cmd_t"]  = str3;
     doc["temp_cmd_t"]  = str3;
     doc["~"]           = System::hostname(); // ems-esp
-    doc["mode_stat_t"] = F("~/thermostat_data");
-    doc["temp_stat_t"] = F("~/thermostat_data");
-    doc["curr_temp_t"] = F("~/thermostat_data");
+    doc["mode_stat_t"] = "~/thermostat_data";
+    doc["temp_stat_t"] = "~/thermostat_data";
+    doc["curr_temp_t"] = "~/thermostat_data";
 
     char mode_str[30];
     snprintf_P(mode_str, sizeof(mode_str), PSTR("{{value_json.hc%d.mode}}"), hc_num);
@@ -953,30 +952,29 @@ void Thermostat::register_mqtt_ha_config(uint8_t hc_num) {
     snprintf_P(currtemp_str, sizeof(currtemp_str), PSTR("{{value_json.hc%d.currtemp}}"), hc_num);
     doc["curr_temp_tpl"] = currtemp_str;
 
-    doc["min_temp"]  = F("5");
-    doc["max_temp"]  = F("30");
-    doc["temp_step"] = F("0.5");
+    doc["min_temp"]  = "5";
+    doc["max_temp"]  = "30";
+    doc["temp_step"] = "0.5";
 
     // the HA climate component only responds to auto, heat and off
-    JsonArray modes = doc.createNestedArray(F("modes"));
-    modes.add(F("auto"));
-    modes.add(F("heat"));
-    modes.add(F("off"));
+    JsonArray modes = doc.createNestedArray("modes");
+    modes.add("auto");
+    modes.add("heat");
+    modes.add("off");
 
     JsonObject dev = doc.createNestedObject("dev");
-    dev["name"]    = F("EMS-ESP Thermostat");
+    dev["name"]    = "EMS-ESP Thermostat";
     dev["sw"]      = EMSESP_APP_VERSION;
     dev["mf"]      = brand_to_string();
     dev["mdl"]     = name();
     JsonArray ids  = dev.createNestedArray("ids");
-    ids.add(F("ems-esp-thermostat"));
+    ids.add("ems-esp-thermostat");
 
     std::string topic(100, '\0');
     snprintf_P(&topic[0], topic.capacity() + 1, PSTR("homeassistant/climate/ems-esp/thermostat_hc%d/config"), hc_num);
     Mqtt::publish_retain(topic, doc.as<JsonObject>(), true); // publish the config payload with retain flag
 
-    // enable the thermostat topic to take both mode strings and floats
-    // for each of the heating circuits
+    // enable the a special "thermostat_hc<n>" topic to take both mode strings and floats for each of the heating circuits
     std::string topic2(100, '\0');
     snprintf_P(&topic2[0], topic2.capacity() + 1, PSTR("thermostat_hc%d"), hc_num);
     register_mqtt_topic(topic2, [=](const char * m) { return thermostat_ha_cmd(m, hc_num); });
@@ -991,8 +989,7 @@ void Thermostat::register_mqtt_ha_config(uint8_t hc_num) {
     Mqtt::register_mqtt_ha_sensor(hc_name, nullptr, F_(seltemp), device_type(), "seltemp", F_(degrees), F_(icontemperature));
     Mqtt::register_mqtt_ha_sensor(hc_name, nullptr, F_(currtemp), device_type(), "currtemp", F_(degrees), F_(icontemperature));
 
-    uint8_t model = this->model();
-    switch (model) {
+    switch (this->model()) {
     case EMS_DEVICE_FLAG_RC100:
     case EMS_DEVICE_FLAG_RC300:
         Mqtt::register_mqtt_ha_sensor(hc_name, nullptr, F_(modetype), device_type(), "modetype", nullptr, nullptr);
@@ -1316,7 +1313,7 @@ void Thermostat::process_RC35wwSettings(std::shared_ptr<const Telegram> telegram
     changed_ |= telegram->read_value(wwCircMode_, 3); // 0 off, 1-on, 2-auto
 }
 
-// type 0x6F - FR10/FR50/FR100 Junkers
+// type 0x6F - FR10/FR50/FR100/FR110/FR120 Junkers
 void Thermostat::process_JunkersMonitor(std::shared_ptr<const Telegram> telegram) {
     // ignore single byte telegram messages
     if (telegram->message_length <= 1) {
