@@ -292,7 +292,7 @@ void Mixer::process_MMPLUSStatusMessage_HC(std::shared_ptr<const Telegram> teleg
     hc_ = telegram->type_id - 0x02D7 + 1;           // determine which circuit this is
     changed_ |= telegram->read_value(flowTemp_, 3); // is * 10
     changed_ |= telegram->read_value(flowSetTemp_, 5);
-    changed_ |= telegram->read_bitvalue(pumpStatus_, 2, 0);
+    changed_ |= telegram->read_bitvalue(pumpStatus_, 0, 0);
     changed_ |= telegram->read_value(status_, 2); // valve status
 }
 
