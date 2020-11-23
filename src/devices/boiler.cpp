@@ -775,7 +775,7 @@ void Boiler::show_values(uuid::console::Shell & shell) {
  * Values will always be posted first time as heatingActive_ and tapwaterActive_ will have values EMS_VALUE_BOOL_NOTSET
  */
 void Boiler::check_active() {
-    if  (!Helpers::hasValue(boilerState_)) {
+    if (!Helpers::hasValue(boilerState_)) {
         return;
     }
     bool    b;

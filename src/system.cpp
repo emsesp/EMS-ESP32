@@ -753,7 +753,7 @@ bool System::check_upgrade() {
     bool                     failed = false;
     File                     file;
     JsonObject               network, general, mqtt, custom_settings;
-    StaticJsonDocument<1024> doc;
+    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_LARGE> doc;
 
     // open the system settings:
     // {

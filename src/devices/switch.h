@@ -49,12 +49,11 @@ class Switch : public EMSdevice {
     void process_WM10MonitorMessage(std::shared_ptr<const Telegram> telegram);
     void register_mqtt_ha_config();
 
-    uint16_t flowTemp_   = EMS_VALUE_USHORT_NOTSET;
-    uint8_t  status_     = EMS_VALUE_UINT_NOTSET;
-    uint8_t  activated_  = EMS_VALUE_BOOL_NOTSET;
-    bool changed_        = false;
-    bool mqtt_ha_config_ = false; // for HA MQTT Discovery
-
+    uint16_t flowTemp_       = EMS_VALUE_USHORT_NOTSET;
+    uint8_t  status_         = EMS_VALUE_UINT_NOTSET;
+    uint8_t  activated_      = EMS_VALUE_BOOL_NOTSET;
+    bool     changed_        = false;
+    bool     mqtt_ha_config_ = false; // for HA MQTT Discovery
 };
 
 } // namespace emsesp

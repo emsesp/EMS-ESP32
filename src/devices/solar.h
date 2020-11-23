@@ -67,29 +67,29 @@ class Solar : public EMSdevice {
     uint8_t userFlag_         = EMS_VALUE_BOOL_NOTSET;
 
     // telegram 0x0358
-    uint8_t heatTransferSystem_     = EMS_VALUE_UINT_NOTSET; // Umladesystem, 00=no
-    uint8_t externalTank_           = EMS_VALUE_UINT_NOTSET; // Heat exchanger, 00=no
-    uint8_t thermalDisinfect_       = EMS_VALUE_UINT_NOTSET; // Daily heatup for disinfection, 00=no
-    uint8_t heatMetering_           = EMS_VALUE_UINT_NOTSET; // Wärmemengenzählung, 00=no
-    uint8_t solarIsEnabled_         = EMS_VALUE_UINT_NOTSET; // System enable, 00=no
-    
+    uint8_t heatTransferSystem_ = EMS_VALUE_UINT_NOTSET; // Umladesystem, 00=no
+    uint8_t externalTank_       = EMS_VALUE_UINT_NOTSET; // Heat exchanger, 00=no
+    uint8_t thermalDisinfect_   = EMS_VALUE_UINT_NOTSET; // Daily heatup for disinfection, 00=no
+    uint8_t heatMetering_       = EMS_VALUE_UINT_NOTSET; // Wärmemengenzählung, 00=no
+    uint8_t solarIsEnabled_     = EMS_VALUE_UINT_NOTSET; // System enable, 00=no
+
     // telegram 0x035A
-    uint8_t collectorTempMax_       = EMS_VALUE_UINT_NOTSET; // maximum allowable temperature for collector
-    uint8_t tank1MaxTempCurrent_    = EMS_VALUE_UINT_NOTSET; // Current value for max tank temp
-    uint8_t collectorTempMin_       = EMS_VALUE_UINT_NOTSET; // minimum allowable temperature for collector
-    uint8_t solarPumpMode_          = EMS_VALUE_UINT_NOTSET; // 00=off, 01=PWM, 02=10V
-    uint8_t solarPumpMinRPM_        = EMS_VALUE_UINT_NOTSET; // minimum RPM setting, *5 %
-    uint8_t solarPumpTurnoffDiff_   = EMS_VALUE_UINT_NOTSET; // solar pump turnoff collector/tank diff
-    uint8_t solarPumpTurnonDiff_    = EMS_VALUE_UINT_NOTSET; // solar pump turnon collector/tank diff
-    uint8_t solarPumpKick_          = EMS_VALUE_UINT_NOTSET; // pump kick for vacuum collector, 00=off
-    uint8_t plainWaterMode_         = EMS_VALUE_UINT_NOTSET; // system does not use antifreeze, 00=off
-    uint8_t doubleMatchFlow_        = EMS_VALUE_UINT_NOTSET; // double Match Flow, 00=off
-    
+    uint8_t collectorTempMax_     = EMS_VALUE_UINT_NOTSET; // maximum allowable temperature for collector
+    uint8_t tank1MaxTempCurrent_  = EMS_VALUE_UINT_NOTSET; // Current value for max tank temp
+    uint8_t collectorTempMin_     = EMS_VALUE_UINT_NOTSET; // minimum allowable temperature for collector
+    uint8_t solarPumpMode_        = EMS_VALUE_UINT_NOTSET; // 00=off, 01=PWM, 02=10V
+    uint8_t solarPumpMinRPM_      = EMS_VALUE_UINT_NOTSET; // minimum RPM setting, *5 %
+    uint8_t solarPumpTurnoffDiff_ = EMS_VALUE_UINT_NOTSET; // solar pump turnoff collector/tank diff
+    uint8_t solarPumpTurnonDiff_  = EMS_VALUE_UINT_NOTSET; // solar pump turnon collector/tank diff
+    uint8_t solarPumpKick_        = EMS_VALUE_UINT_NOTSET; // pump kick for vacuum collector, 00=off
+    uint8_t plainWaterMode_       = EMS_VALUE_UINT_NOTSET; // system does not use antifreeze, 00=off
+    uint8_t doubleMatchFlow_      = EMS_VALUE_UINT_NOTSET; // double Match Flow, 00=off
+
     // telegram 0x380
-    uint8_t climateZone_            = EMS_VALUE_UINT_NOTSET; // climate zone identifier
-    uint16_t collector1Area_        = EMS_VALUE_USHORT_NOTSET;// Area of collector field 1
-    uint8_t collector1Type_         = EMS_VALUE_UINT_NOTSET; // Type of collector field 1, 01=flat, 02=vacuum
-    
+    uint8_t  climateZone_    = EMS_VALUE_UINT_NOTSET;   // climate zone identifier
+    uint16_t collector1Area_ = EMS_VALUE_USHORT_NOTSET; // Area of collector field 1
+    uint8_t  collector1Type_ = EMS_VALUE_UINT_NOTSET;   // Type of collector field 1, 01=flat, 02=vacuum
+
     bool changed_        = false;
     bool mqtt_ha_config_ = false; // for HA MQTT Discovery
 
@@ -114,8 +114,8 @@ class Solar : public EMSdevice {
 
     void process_ISM1StatusMessage(std::shared_ptr<const Telegram> telegram);
     void process_ISM1Set(std::shared_ptr<const Telegram> telegram);
-    
-    
+
+
     bool set_SM100Tank1MaxTemp(const char * value, const int8_t id);
 };
 
