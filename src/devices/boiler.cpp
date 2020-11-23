@@ -736,6 +736,8 @@ void Boiler::show_values(uuid::console::Shell & shell) {
         shell.println();
         return;
     }
+
+    // ww
     print_value_json(shell, F("wWSelTemp"), nullptr, F_(wWSelTemp), F_(degrees), json);
     print_value_json(shell, F("wWSetTemp"), nullptr, F_(wWSetTemp), F_(degrees), json);
     print_value_json(shell, F("wWDisinfectionTemp"), nullptr, F_(wWDisinfectionTemp), F_(degrees), json);

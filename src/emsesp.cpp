@@ -108,9 +108,9 @@ void EMSESP::scan_devices() {
 * we send to right device and match all reads to 0x18
 */
 uint8_t EMSESP::check_master_device(const uint8_t device_id, const uint16_t type_id, const bool read) {
-    uint16_t mon_id[4] = {0x02A5, 0x02A6, 0x02A7, 0x02A8};
-    uint16_t set_id[4] = {0x02B9, 0x02BA, 0x02BB, 0x02BC};
     if (actual_master_thermostat_ == 0x18) {
+        uint16_t mon_id[4] = {0x02A5, 0x02A6, 0x02A7, 0x02A8};
+        uint16_t set_id[4] = {0x02B9, 0x02BA, 0x02BB, 0x02BC};
         for (uint8_t i = 0; i < 4; i++) {
             if (type_id == mon_id[i] || type_id == set_id[i]) {
                 if (read) {
@@ -121,6 +121,7 @@ uint8_t EMSESP::check_master_device(const uint8_t device_id, const uint16_t type
             }
         }
     }
+
     return device_id;
 }
 

@@ -34,8 +34,8 @@ Switch::Switch(uint8_t device_type, uint8_t device_id, uint8_t product_id, const
     register_telegram_type(0x9B, F("WM10SetMessage"), false, [&](std::shared_ptr<const Telegram> t) { process_WM10SetMessage(t); });
 }
 
+// fetch the values into a JSON document for display in the web
 void Switch::device_info_web(JsonArray & root) {
-    // fetch the values into a JSON document
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
     JsonObject                                     json = doc.to<JsonObject>();
     if (export_values(json)) {
@@ -47,8 +47,6 @@ void Switch::device_info_web(JsonArray & root) {
 
 // display all values into the shell console
 void Switch::show_values(uuid::console::Shell & shell) {
-    // EMSdevice::show_values(shell); // always call this to show header
-    // fetch the values into a JSON document
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
     JsonObject                                     json = doc.to<JsonObject>();
     if (export_values(json)) {
@@ -66,6 +64,7 @@ void Switch::publish_values(JsonObject & json, bool force) {
             return;
         }
     }
+
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
     JsonObject                                     json_data = doc.to<JsonObject>();
     if (export_values(json_data)) {

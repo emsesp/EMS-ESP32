@@ -413,7 +413,7 @@ void EMSdevice::print_value_json(uuid::console::Shell &      shell,
     shell.println();
 }
 
-// print value to shell from the json doc into a name/value pair
+// create json key/value pair
 void EMSdevice::print_value_json(JsonArray &                 root,
                                  const __FlashStringHelper * key,
                                  const __FlashStringHelper * prefix,

@@ -434,14 +434,13 @@ void System::led_monitor() {
 //  Low quality: 30% ~= -85dBm
 //  Unusable quality: 8% ~= -96dBm
 int8_t System::wifi_quality() {
-#ifndef EMSESP_STANDALONE
+#ifdef EMSESP_STANDALONE
+    return 100;
+#else
     if (WiFi.status() != WL_CONNECTED) {
         return -1;
     }
     int32_t dBm = WiFi.RSSI();
-#else
-    int32_t dBm = -70;
-#endif
     if (dBm <= -100) {
         return 0;
     }
@@ -450,6 +449,7 @@ int8_t System::wifi_quality() {
         return 100;
     }
     return 2 * (dBm + 100);
+#endif
 }
 
 // print users to console
@@ -750,9 +750,9 @@ bool System::check_upgrade() {
 
     Serial.begin(115200);
 
-    bool                     failed = false;
-    File                     file;
-    JsonObject               network, general, mqtt, custom_settings;
+    bool                                           failed = false;
+    File                                           file;
+    JsonObject                                     network, general, mqtt, custom_settings;
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_LARGE> doc;
 
     // open the system settings:

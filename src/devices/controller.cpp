@@ -33,7 +33,7 @@ void Controller::device_info_web(JsonArray & root) {
 
 // display all values into the shell console
 void Controller::show_values(uuid::console::Shell & shell) {
-    // EMSdevice::show_values(shell); // always call this to show header
+    EMSdevice::show_values(shell); // always call this to show header
 }
 
 // publish values via MQTT

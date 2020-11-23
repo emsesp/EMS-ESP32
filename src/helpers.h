@@ -40,7 +40,7 @@ class Helpers {
     static char * render_value(char * result, const int16_t value, const uint8_t format);
     static char * render_value(char * result, const char * value, uint8_t format);
     static char * render_boolean(char * result, bool value);
-    static char * render_enum(char * result, const std::vector<const __FlashStringHelper *> value, const uint8_t no);
+    static char * render_enum(char * result, const std::vector<const __FlashStringHelper *> & value, const uint8_t no);
 
     static char *      hextoa(char * result, const uint8_t value);
     static std::string data_to_hex(const uint8_t * data, const uint8_t length);
@@ -63,7 +63,7 @@ class Helpers {
     static bool value2float(const char * v, float & value);
     static bool value2bool(const char * v, bool & value);
     static bool value2string(const char * v, std::string & value);
-    static bool value2enum(const char * v, uint8_t & value, const std::vector<const __FlashStringHelper *> strs);
+    static bool value2enum(const char * v, uint8_t & value, const std::vector<const __FlashStringHelper *> & strs);
 
     static void bool_format(uint8_t bool_format) {
         bool_format_ = bool_format;
