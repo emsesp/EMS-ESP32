@@ -83,7 +83,8 @@ void EMSESP::fetch_device_values(const uint8_t device_id) {
 
 // clears list of recognized devices
 void EMSESP::clear_all_devices() {
-    emsdevices.clear(); // remove entries, but doesn't delete actual devices
+    // temporary removed: clearing the list causes a crash, the associated commands and mqtt should also be removed.
+    // emsdevices.clear(); // remove entries, but doesn't delete actual devices
 }
 
 // return number of devices of a known type
