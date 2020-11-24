@@ -3,7 +3,7 @@
 ### Added
 - function keys in editor: cursor, del, home, end. F1=help, F2=show, and other shortcuts
 - SM100 pump working time and energy units
-- heating curve parameters for RC300
+- heating curve parameters and commands for RC300
 - `wwonetime` for RC300 thermostat
 - expose test framework via api (#611)
 - SysLog has enable/disable flag in WebUI
