@@ -41,7 +41,6 @@ bool                  EMSuart::sending_ = false;
 // Important: must not use ICACHE_FLASH_ATTR
 //
 void ICACHE_RAM_ATTR EMSuart::emsuart_rx_intr_handler(void * para) {
-    static uint8_t uart_buffer[EMS_MAXBUFFERSIZE + 2];
 
     if (USIS(EMSUART_UART) & ((1 << UIBD))) { // BREAK detection = End of EMS data block
         USC0(EMSUART_UART) &= ~(1 << UCBRK);  // reset tx-brk
@@ -49,8 +48,9 @@ void ICACHE_RAM_ATTR EMSuart::emsuart_rx_intr_handler(void * para) {
             drop_next_rx = true;              // we have trash in buffer
         }
 
-        USIC(EMSUART_UART)    = (1 << UIBD); // INT clear the BREAK detect interrupt
-        static uint8_t length = 0;
+        USIC(EMSUART_UART) = (1 << UIBD); // INT clear the BREAK detect interrupt
+        uint8_t length     = 0;
+        uint8_t uart_buffer[EMS_MAXBUFFERSIZE + 2];
 
         while ((USS(EMSUART_UART) >> USRXC) & 0x0FF) { // read fifo into buffer
             uint8_t rx = USF(EMSUART_UART);
