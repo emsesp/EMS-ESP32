@@ -65,7 +65,7 @@ bool Command::call(const uint8_t device_type, const char * cmd, const char * val
 #endif
 
     auto cf = find_command(device_type, cmd);
-    if ((cf == nullptr) || (!cf->cmdfunction_json_)) {
+    if (cf == nullptr) {
         return false; // command not found or not json
     }
 
@@ -75,7 +75,11 @@ bool Command::call(const uint8_t device_type, const char * cmd, const char * val
         return false;
     }
 
-    return ((cf->cmdfunction_json_)(value, id, json));
+    if (!cf->cmdfunction_json_) {
+        return ((cf->cmdfunction_)(value, id));
+    } else {
+        return ((cf->cmdfunction_json_)(value, id, json));
+    }
 }
 
 // add a command to the list, which does not return json
