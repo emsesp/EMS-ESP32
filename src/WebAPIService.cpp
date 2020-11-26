@@ -109,7 +109,7 @@ void WebAPIService::webAPIService(AsyncWebServerRequest * request) {
 
     // if we have returned data in JSON format, send this to the WEB
     if (json.size()) {
-        doc.shrinkToFit();
+        // doc.shrinkToFit();
         char buffer[EMSESP_MAX_JSON_SIZE_DYN];
         serializeJsonPretty(doc, buffer);
         request->send(200, "text/plain", buffer);
