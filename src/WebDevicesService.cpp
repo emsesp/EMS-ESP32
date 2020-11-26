@@ -45,7 +45,7 @@ void WebDevicesService::scan_devices(AsyncWebServerRequest * request) {
 }
 
 void WebDevicesService::all_devices(AsyncWebServerRequest * request) {
-    AsyncJsonResponse * response = new AsyncJsonResponse(false, MAX_EMSESP_DEVICE_SIZE);
+    AsyncJsonResponse * response = new AsyncJsonResponse(false, EMSESP_MAX_JSON_SIZE_LARGE_DYN);
     JsonObject          root     = response->getRoot();
 
     JsonArray devices = root.createNestedArray("devices");
@@ -80,7 +80,7 @@ void WebDevicesService::all_devices(AsyncWebServerRequest * request) {
 
 void WebDevicesService::device_data(AsyncWebServerRequest * request, JsonVariant & json) {
     if (json.is<JsonObject>()) {
-        AsyncJsonResponse * response = new AsyncJsonResponse(false, MAX_EMSESP_DEVICE_SIZE);
+        AsyncJsonResponse * response = new AsyncJsonResponse(false, EMSESP_MAX_JSON_SIZE_LARGE_DYN);
 #ifndef EMSESP_STANDALONE
         uint8_t id = json["id"]; // get id from selected table row
         EMSESP::device_info_web(id, (JsonObject &)response->getRoot());
