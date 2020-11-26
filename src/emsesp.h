@@ -52,6 +52,13 @@
 
 #define WATCH_ID_NONE 0 // no watch id set
 
+#define EMSESP_MAX_JSON_SIZE_HA_CONFIG 384  // for small HA config payloads
+#define EMSESP_MAX_JSON_SIZE_SMALL 256      // for smaller json docs when using StaticJsonDocument
+#define EMSESP_MAX_JSON_SIZE_MEDIUM 768     // for medium json docs from ems devices, when using StaticJsonDocument
+#define EMSESP_MAX_JSON_SIZE_LARGE 1024     // for large json docs from ems devices, like boiler or thermostat data. Using StaticJsonDocument
+#define EMSESP_MAX_JSON_SIZE_DYN 2048       // for large json docs from web. Using DynamicJsonDocument
+#define EMSESP_MAX_JSON_SIZE_LARGE_DYN 4098 // for very large json docs. Using DynamicJsonDocument
+
 namespace emsesp {
 
 class Shower; // forward declaration for compiler
