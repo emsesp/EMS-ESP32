@@ -2,25 +2,25 @@
 .vscode
 
 # build
-/build/
+build/
 .clang_complete
 .gcc-flags.json
+cppcheck.out.xml
+debug.log
 
 # platformio
 .pio
 pio_local.ini
+.VSCodeCounter/
 
 # OS specific
 .DS_Store
 *Thumbs.db
 
 # project specfic
-/scripts/stackdmp.txt
+scripts/stackdmp.txt
 emsesp
-firmware
-/data/www/
-/lib/framework/WWWData.h
-/interface/build/
-/interface/node_modules/
-.VSCodeCounter/
-cppcheck.out.xml
+data/www/
+lib/framework/WWWData.h
+interface/build/
+interface/node_modules/
