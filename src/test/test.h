@@ -38,6 +38,8 @@
 
 namespace emsesp {
 
+#define EMSESP_TEST_DEFAULT "boiler"
+
 class Test {
   public:
     static void run_test(uuid::console::Shell & shell, const std::string & command);

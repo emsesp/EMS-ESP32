@@ -125,6 +125,13 @@ bool Test::run_test(const char * command, int8_t id) {
         // UBAuptime
         uart_telegram({0x08, 0x0B, 0x14, 00, 0x3C, 0x1F, 0xAC, 0x70});
 
+        // Boiler -> Me, UBAMonitorFast(0x18), telegram: 08 00 18 00 00 02 5A 73 3D 0A 10 65 40 02 1A 80 00 01 E1 01 76 0E 3D 48 00 C9 44 02 00 (#data=25)
+        uart_telegram({0x08, 0x00, 0x18, 0x00, 0x00, 0x02, 0x5A, 0x73, 0x3D, 0x0A, 0x10, 0x65, 0x40, 0x02, 0x1A,
+                       0x80, 0x00, 0x01, 0xE1, 0x01, 0x76, 0x0E, 0x3D, 0x48, 0x00, 0xC9, 0x44, 0x02, 0x00});
+
+        // Boiler -> Me, UBAParameterWW(0x33), telegram: 08 0B 33 00 08 FF 34 FB 00 28 00 00 46 00 FF FF 00 (#data=13)
+        uart_telegram({0x08, 0x0B, 0x33, 0x00, 0x08, 0xFF, 0x34, 0xFB, 0x00, 0x28, 0x00, 0x00, 0x46, 0x00, 0xFF, 0xFF, 0x00});
+
         return true;
     }
 
@@ -192,7 +199,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
 
     std::string command(20, '\0');
     if ((cmd.empty()) || (cmd == "default")) {
-        command = "thermostat";
+        command = EMSESP_TEST_DEFAULT;
     } else {
         command = cmd;
     }
@@ -226,6 +233,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         uint16_t test3u = EMS_VALUE_USHORT_NOTSET;
         int16_t  test4u = EMS_VALUE_SHORT_NOTSET;
 
+        /*
         EMSdevice::print_value(shell, 2, F("Selected flow temperature1"), test1, F_(degrees));             // 12
         EMSdevice::print_value(shell, 2, F("Selected flow temperature2"), test2, F_(degrees));             // -12
         EMSdevice::print_value(shell, 2, F("Selected flow temperature3"), test3, F_(degrees), 10);         // 45.6
@@ -246,7 +254,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         EMSdevice::print_value(shell, 2, F("Selected flow temperature4u"), test4u, F_(degrees), 10);
         EMSdevice::print_value(shell, 2, F("Selected flow temperature5u"), test5u, F_(degrees), EMS_VALUE_BOOL);
         EMSdevice::print_value(shell, 2, F("Selected flow temperature6u"), test6u, F_(degrees), 100);
-
+*/
         shell.println();
 
         // check read_value to make sure it handles all the data type correctly
@@ -390,7 +398,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         shell.printfln(F("Testing boiler..."));
         run_test("boiler");
         shell.invoke_command("show");
-        shell.invoke_command("call boiler info");
+        // shell.invoke_command("call boiler info");
     }
 
     if (command == "fr120") {
