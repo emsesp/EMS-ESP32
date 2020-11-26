@@ -30,6 +30,7 @@
 - renamed pio targets (esp8266-ci and esp32-ci for GitHub CI)
 - telnet default settings `log info`, timeout 60 min
 - `log debug` not showing telegram names, use `log trace` or `watch on` to show the telegrams
+- optimized how console and web display device data ([#632](https://github.com/proddy/EMS-ESP/issues/632))
 
 ### Removed
 - old shell and python build scripts
