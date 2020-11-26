@@ -476,7 +476,7 @@ void Mqtt::on_connect() {
     if (connectcount_ == 1) {
         // send info topic appended with the version information as JSON
         StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
-        doc["event"]   = "start";
+        doc["event"]   = FJSON("start");
         doc["version"] = EMSESP_APP_VERSION;
 #ifndef EMSESP_STANDALONE
         doc["ip"] = WiFi.localIP().toString();
@@ -505,20 +505,20 @@ void Mqtt::on_connect() {
 void Mqtt::ha_status() {
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_HA_CONFIG> doc;
 
-    doc["name"]        = F("EMS-ESP status");
-    doc["uniq_id"]     = F("status");
+    doc["name"]        = FJSON("EMS-ESP status");
+    doc["uniq_id"]     = FJSON("status");
     doc["~"]           = System::hostname(); // ems-esp
-    doc["avty_t"]      = F("~/status");
-    doc["json_attr_t"] = F("~/heartbeat");
-    doc["stat_t"]      = F("~/heartbeat");
-    doc["val_tpl"]     = F("{{value_json['status']}}");
-    doc["ic"]          = F("mdi:home-thermometer-outline");
+    doc["avty_t"]      = FJSON("~/status");
+    doc["json_attr_t"] = FJSON("~/heartbeat");
+    doc["stat_t"]      = FJSON("~/heartbeat");
+    doc["val_tpl"]     = FJSON("{{value_json['status']}}");
+    doc["ic"]          = FJSON("mdi:home-thermometer-outline");
 
     JsonObject dev = doc.createNestedObject("dev");
-    dev["name"]    = F("EMS-ESP");
+    dev["name"]    = FJSON("EMS-ESP");
     dev["sw"]      = EMSESP_APP_VERSION;
-    dev["mf"]      = F("proddy");
-    dev["mdl"]     = F("EMS-ESP");
+    dev["mf"]      = FJSON("proddy");
+    dev["mdl"]     = FJSON("EMS-ESP");
     JsonArray ids  = dev.createNestedArray("ids");
     ids.add("ems-esp");
 
@@ -706,14 +706,14 @@ void Mqtt::register_mqtt_ha_binary_sensor(const __FlashStringHelper * name, cons
 
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
         if (settings.bool_format == BOOL_FORMAT_ONOFF) {
-            doc[F("payload_on")]  = "on";
-            doc[F("payload_off")] = "off";
+            doc[F("payload_on")]  = FJSON("on");
+            doc[F("payload_off")] = FJSON("off");
         } else if (settings.bool_format == BOOL_FORMAT_TRUEFALSE) {
-            doc[F("payload_on")]  = "true";
-            doc[F("payload_off")] = "false";
+            doc[F("payload_on")]  = FJSON("true");
+            doc[F("payload_off")] = FJSON("false");
         } else {
-            doc[F("payload_on")]  = "1";
-            doc[F("payload_off")] = "0";
+            doc[F("payload_on")]  = FJSON("1");
+            doc[F("payload_off")] = FJSON("0");
         }
     });
 

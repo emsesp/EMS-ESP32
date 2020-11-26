@@ -308,7 +308,7 @@ void System::show_mem(const char * note) {
 // send periodic MQTT message with system information
 void System::send_heartbeat() {
     // don't send heartbeat if WiFi is not connected
-    int rssi = wifi_quality();
+    int8_t rssi = wifi_quality();
     if (rssi == -1) {
         return;
     }
@@ -323,11 +323,11 @@ void System::send_heartbeat() {
 
     uint8_t ems_status = EMSESP::bus_status();
     if (ems_status == EMSESP::BUS_STATUS_TX_ERRORS) {
-        doc["status"] = "txerror";
+        doc["status"] = FJSON("txerror");
     } else if (ems_status == EMSESP::BUS_STATUS_CONNECTED) {
-        doc["status"] = "connected";
+        doc["status"] = FJSON("connected");
     } else {
-        doc["status"] = "disconnected";
+        doc["status"] = FJSON("disconnected");
     }
 
     doc["rssi"]       = rssi;

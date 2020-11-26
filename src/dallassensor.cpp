@@ -342,13 +342,13 @@ void DallasSensor::publish_values(const bool force) {
         if (mqtt_format_ == Mqtt::Format::HA) {
             if (!(registered_ha_[sensor_no - 1]) || force) {
                 StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> config;
-                config["dev_cla"] = F("temperature");
+                config["dev_cla"] = FJSON("temperature");
 
                 char stat_t[50];
                 snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/dallassensor_data"), System::hostname().c_str());
                 config["stat_t"] = stat_t;
 
-                config["unit_of_meas"] = F("°C");
+                config["unit_of_meas"] = FJSON("°C");
 
                 char str[50];
                 snprintf_P(str, sizeof(str), PSTR("{{value_json.sensor%d.temp}}"), sensor_no);
@@ -375,7 +375,7 @@ void DallasSensor::publish_values(const bool force) {
         sensor_no++; // increment sensor count
     }
 
-    doc.shrinkToFit();
+    // doc.shrinkToFit();
     Mqtt::publish(F("dallassensor_data"), doc.as<JsonObject>());
 }
 

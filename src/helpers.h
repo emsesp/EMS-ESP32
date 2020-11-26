@@ -28,6 +28,9 @@
 #define BOOL_FORMAT_TRUEFALSE 2
 #define BOOL_FORMAT_NUMBERS 3
 
+// #define FJSON(x) x
+#define FJSON(x) F(x)
+
 namespace emsesp {
 
 class Helpers {
