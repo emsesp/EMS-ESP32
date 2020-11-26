@@ -208,11 +208,6 @@ std::string EMSdevice::to_string_short() const {
     return str;
 }
 
-// prints the header for the section
-void EMSdevice::show_values(uuid::console::Shell & shell) {
-    shell.printfln(F("%s: %s"), device_type_name().c_str(), to_string().c_str());
-}
-
 // for each telegram that has the fetch value set (true) do a read request
 void EMSdevice::fetch_values() {
     EMSESP::logger().debug(F("Fetching values for device ID 0x%02X"), device_id());
@@ -360,79 +355,25 @@ void EMSdevice::read_command(const uint16_t type_id) {
     EMSESP::send_read_request(type_id, device_id());
 }
 
-// prints a string value to the console
-void EMSdevice::print_value(uuid::console::Shell & shell, uint8_t padding, const __FlashStringHelper * name, const __FlashStringHelper * value) {
-    print_value(shell, padding, name, uuid::read_flash_string(value).c_str());
-}
-
-// print string value, value is not in flash
-void EMSdevice::print_value(uuid::console::Shell & shell, uint8_t padding, const __FlashStringHelper * name, const char * value) {
-    uint8_t i = padding;
-    while (i-- > 0) {
-        shell.print(F_(1space));
-    }
-
-    shell.printfln(PSTR("%s: %s"), uuid::read_flash_string(name).c_str(), value);
-}
-
-// print value to shell from the json doc
-void EMSdevice::print_value_json(uuid::console::Shell &      shell,
-                                 const __FlashStringHelper * key,
-                                 const __FlashStringHelper * prefix,
-                                 const __FlashStringHelper * name,
-                                 const __FlashStringHelper * suffix,
-                                 JsonObject &                json) {
-    JsonVariant data = json[uuid::read_flash_string(key)];
-    if (data == nullptr) {
-        return; // doesn't exist
-    }
-
-    if (prefix != nullptr) {
-        shell.printf(PSTR("  %s%s: "), uuid::read_flash_string(prefix).c_str(), uuid::read_flash_string(name).c_str());
-    } else {
-        shell.printf(PSTR("  %s: "), uuid::read_flash_string(name).c_str());
-    }
-
-    if (data.is<char *>()) {
-        shell.printf(PSTR("%s"), data.as<char *>());
-    } else if (data.is<int>()) {
-        shell.printf(PSTR("%d"), data.as<int>());
-    } else if (data.is<float>()) {
-        char data_str[10];
-        shell.printf(PSTR("%s"), Helpers::render_value(data_str, (float)data.as<float>(), 1));
-    } else if (data.is<bool>()) {
-        char data_str[10];
-        shell.printf(PSTR("%s"), Helpers::render_boolean(data_str, data.as<bool>()));
-    }
-
-    if (suffix != nullptr) {
-        shell.print(' ');
-        shell.print(uuid::read_flash_string(suffix).c_str());
-    }
-
-    shell.println();
-}
-
 // create json key/value pair
-void EMSdevice::print_value_json(JsonArray &                 root,
-                                 const __FlashStringHelper * key,
-                                 const __FlashStringHelper * prefix,
-                                 const __FlashStringHelper * name,
-                                 const __FlashStringHelper * suffix,
-                                 JsonObject &                json) {
+void EMSdevice::create_value_json(JsonArray &                 root,
+                                  const __FlashStringHelper * key,
+                                  const __FlashStringHelper * prefix,
+                                  const __FlashStringHelper * name,
+                                  const __FlashStringHelper * suffix,
+                                  JsonObject &                json) {
     JsonVariant data = json[uuid::read_flash_string(key)];
     if (data == nullptr) {
         return; // doesn't exist
     }
 
-    JsonObject dataElement = root.createNestedObject();
     // add prefix to name
     if (prefix != nullptr) {
         char name_text[100];
         snprintf_P(name_text, sizeof(name_text), PSTR("%s%s"), uuid::read_flash_string(prefix).c_str(), uuid::read_flash_string(name).c_str());
-        dataElement["n"] = name_text;
+        root.add(name_text);
     } else {
-        dataElement["n"] = name;
+        root.add(name);
     }
 
     // convert to string and add the suffix, this is to save space when sending to the web as json
@@ -444,7 +385,7 @@ void EMSdevice::print_value_json(JsonArray &                 root,
         suffix_string = " " + uuid::read_flash_string(suffix);
     }
 
-    char data_string[20];
+    char data_string[40];
     if (data.is<char *>()) {
         snprintf_P(data_string, sizeof(data_string), PSTR("%s%s"), data.as<char *>(), suffix_string.c_str());
     } else if (data.is<int>()) {
@@ -457,7 +398,7 @@ void EMSdevice::print_value_json(JsonArray &                 root,
         snprintf_P(data_string, sizeof(data_string), PSTR("%s%s"), Helpers::render_boolean(s, data.as<bool>()), suffix_string.c_str());
     }
 
-    dataElement["v"] = data_string;
+    root.add(data_string);
 }
 
 } // namespace emsesp

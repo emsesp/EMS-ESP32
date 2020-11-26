@@ -72,15 +72,15 @@ void Mixer::device_info_web(JsonArray & root) {
     char prefix_str[10];
     if (type() == Type::HC) {
         snprintf_P(prefix_str, sizeof(prefix_str), PSTR("(hc %d) "), hc_);
-        print_value_json(root, F("flowTemp"), FPSTR(prefix_str), F_(flowTemp), F_(degrees), json);
-        print_value_json(root, F("flowSetTemp"), FPSTR(prefix_str), F_(flowSetTemp), F_(degrees), json);
-        print_value_json(root, F("pumpStatus"), FPSTR(prefix_str), F_(pumpStatus), nullptr, json);
-        print_value_json(root, F("valveStatus"), FPSTR(prefix_str), F_(valveStatus), F_(percent), json);
+        create_value_json(root, F("flowTemp"), FPSTR(prefix_str), F_(flowTemp), F_(degrees), json);
+        create_value_json(root, F("flowSetTemp"), FPSTR(prefix_str), F_(flowSetTemp), F_(degrees), json);
+        create_value_json(root, F("pumpStatus"), FPSTR(prefix_str), F_(pumpStatus), nullptr, json);
+        create_value_json(root, F("valveStatus"), FPSTR(prefix_str), F_(valveStatus), F_(percent), json);
     } else {
         snprintf_P(prefix_str, sizeof(prefix_str), PSTR("(wwc %d) "), hc_);
-        print_value_json(root, F("wwTemp"), FPSTR(prefix_str), F_(wwTemp), F_(degrees), json);
-        print_value_json(root, F("pumpStatus"), FPSTR(prefix_str), F_(pumpStatus), nullptr, json);
-        print_value_json(root, F("tempStatus"), FPSTR(prefix_str), F_(tempStatus), nullptr, json);
+        create_value_json(root, F("wwTemp"), FPSTR(prefix_str), F_(wwTemp), F_(degrees), json);
+        create_value_json(root, F("pumpStatus"), FPSTR(prefix_str), F_(pumpStatus), nullptr, json);
+        create_value_json(root, F("tempStatus"), FPSTR(prefix_str), F_(tempStatus), nullptr, json);
     }
 }
 
@@ -91,38 +91,6 @@ bool Mixer::updated_values() {
         return true;
     }
     return false;
-}
-
-// display all values into the shell console
-void Mixer::show_values(uuid::console::Shell & shell) {
-    EMSdevice::show_values(shell); // always call this to show header
-
-    if (type() == Type::NONE) {
-        return; // don't have any values yet
-    }
-
-    // fetch the values into a JSON document
-    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
-    JsonObject                                     json = doc.to<JsonObject>();
-
-    if (!export_values_format(Mqtt::Format::SINGLE, json)) {
-        return; // empty
-    }
-
-    if (type() == Type::HC) {
-        shell.printfln(F_(hc), hc_);
-        print_value_json(shell, F("flowTemp"), F_(2spaces), F_(flowTemp), F_(degrees), json);
-        print_value_json(shell, F("flowSetTemp"), F_(2spaces), F_(flowSetTemp), F_(degrees), json);
-        print_value_json(shell, F("pumpStatus"), F_(2spaces), F_(pumpStatus), nullptr, json);
-        print_value_json(shell, F("valveStatus"), F_(2spaces), F_(valveStatus), F_(percent), json);
-    } else {
-        shell.printfln(F_(ww_hc), hc_);
-        print_value_json(shell, F("wwTemp"), F_(2spaces), F_(wwTemp), F_(degrees), json);
-        print_value_json(shell, F("pumpStatus"), F_(2spaces), F_(pumpStatus), nullptr, json);
-        print_value_json(shell, F("tempStatus"), F_(2spaces), F_(tempStatus), nullptr, json);
-    }
-
-    shell.println();
 }
 
 // publish values via MQTT
@@ -176,16 +144,16 @@ void Mixer::register_mqtt_ha_config() {
     snprintf_P(uniq_id, sizeof(uniq_id), PSTR("mixer%02X"), device_id() - 0x20 + 1);
     doc["uniq_id"] = uniq_id;
 
-    doc["ic"] = F("mdi:home-thermometer-outline");
+    doc["ic"] = FJSON("mdi:home-thermometer-outline");
 
     char stat_t[50];
     snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/mixer_data"), System::hostname().c_str());
     doc["stat_t"] = stat_t;
 
-    doc["val_tpl"] = F("{{value_json.type}}"); // HA needs a single value. We take the type which is wwc or hc
+    doc["val_tpl"] = FJSON("{{value_json.type}}"); // HA needs a single value. We take the type which is wwc or hc
 
     JsonObject dev = doc.createNestedObject("dev");
-    dev["name"]    = F("EMS-ESP Mixer");
+    dev["name"]    = FJSON("EMS-ESP Mixer");
     dev["sw"]      = EMSESP_APP_VERSION;
     dev["mf"]      = brand_to_string();
     dev["mdl"]     = this->name();
@@ -235,10 +203,10 @@ bool Mixer::export_values_format(uint8_t mqtt_format, JsonObject & json) {
         snprintf_P(hc_name, sizeof(hc_name), PSTR("hc%d"), hc_);
         if (mqtt_format == Mqtt::Format::SINGLE) {
             json_hc      = json;
-            json["type"] = F("hc");
+            json["type"] = FJSON("hc");
         } else if (mqtt_format == Mqtt::Format::HA) {
             json_hc         = json.createNestedObject(hc_name);
-            json_hc["type"] = F("hc");
+            json_hc["type"] = FJSON("hc");
         } else {
             json_hc = json.createNestedObject(hc_name);
         }
@@ -263,10 +231,10 @@ bool Mixer::export_values_format(uint8_t mqtt_format, JsonObject & json) {
     snprintf_P(hc_name, sizeof(hc_name), PSTR("wwc%d"), hc_);
     if (mqtt_format == Mqtt::Format::SINGLE) {
         json_hc      = json;
-        json["type"] = F("wwc");
+        json["type"] = FJSON("wwc");
     } else if (mqtt_format == Mqtt::Format::HA) {
         json_hc         = json.createNestedObject(hc_name);
-        json_hc["type"] = F("wwc");
+        json_hc["type"] = FJSON("wwc");
     } else {
         json_hc = json.createNestedObject(hc_name);
     }

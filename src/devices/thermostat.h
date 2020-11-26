@@ -121,7 +121,6 @@ class Thermostat : public EMSdevice {
 
     static std::string mode_tostring(uint8_t mode);
 
-    virtual void show_values(uuid::console::Shell & shell);
     virtual void publish_values(JsonObject & json, bool force);
     virtual bool export_values(JsonObject & json);
     virtual void device_info_web(JsonArray & root);

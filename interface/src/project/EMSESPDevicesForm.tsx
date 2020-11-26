@@ -35,6 +35,7 @@ import { RestFormProps, FormButton } from "../components";
 import { EMSESPDevices, EMSESPDeviceData, Device } from "./EMSESPtypes";
 
 import { ENDPOINT_ROOT } from "../api";
+
 export const SCANDEVICES_ENDPOINT = ENDPOINT_ROOT + "scanDevices";
 export const DEVICE_DATA_ENDPOINT = ENDPOINT_ROOT + "deviceData";
 
@@ -80,7 +81,7 @@ function formatTemp(t: string) {
 class EMSESPDevicesForm extends Component<
   EMSESPDevicesFormProps,
   EMSESPDevicesFormState
-> {
+  > {
   state: EMSESPDevicesFormState = {
     confirmScanDevices: false,
     processing: false,
@@ -149,8 +150,8 @@ class EMSESPDevicesForm extends Component<
                   <TableCell align="center">
                     0x
                     {("00" + device.deviceid.toString(16).toUpperCase()).slice(
-                      -2
-                    )}
+                    -2
+                  )}
                   </TableCell>
                   <TableCell align="center">{device.productid}</TableCell>
                   <TableCell align="center">{device.version}</TableCell>
@@ -340,26 +341,30 @@ class EMSESPDevicesForm extends Component<
             >
               <TableHead></TableHead>
               <TableBody>
-                {deviceData.deviceData.map((deviceData) => (
-                  <TableRow key={deviceData.n}>
-                    <TableCell component="th" scope="row">
-                      {deviceData.n}
-                    </TableCell>
-                    <TableCell align="right">{deviceData.v}</TableCell>
-                  </TableRow>
-                ))}
+                {deviceData.deviceData.map((item, i) => {
+                  if (i % 2) {
+                    return null;
+                  } else {
+                    return (
+                      <TableRow key={i}>
+                        <TableCell component="th" scope="row">{deviceData.deviceData[i]}</TableCell>
+                        <TableCell align="right">{deviceData.deviceData[i + 1]}</TableCell>
+                      </TableRow>
+                    );
+                  }
+                })}
               </TableBody>
             </Table>
           </TableContainer>
         )}
         {this.noDeviceData() && (
-          <Box color="warning.main" p={0} mt={0} mb={0}>
-            <Typography variant="body1">
-              <i>No data available for this device</i>
-            </Typography>
-          </Box>
+            <Box color="warning.main" p={0} mt={0} mb={0}>
+              <Typography variant="body1">
+                <i>No data available for this device</i>
+              </Typography>
+            </Box>
         )}
-      </Fragment>
+      </Fragment >
     );
   }
 

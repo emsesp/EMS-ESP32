@@ -39,20 +39,9 @@ void Switch::device_info_web(JsonArray & root) {
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
     JsonObject                                     json = doc.to<JsonObject>();
     if (export_values(json)) {
-        print_value_json(root, F("activated"), nullptr, F_(activated), nullptr, json);
-        print_value_json(root, F("flowTemp"), nullptr, F_(flowTemp), F_(degrees), json);
-        print_value_json(root, F("status"), nullptr, F_(status), nullptr, json);
-    }
-}
-
-// display all values into the shell console
-void Switch::show_values(uuid::console::Shell & shell) {
-    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
-    JsonObject                                     json = doc.to<JsonObject>();
-    if (export_values(json)) {
-        print_value_json(shell, F("activated"), nullptr, F_(activated), nullptr, json);
-        print_value_json(shell, F("flowTemp"), F_(2spaces), F_(flowTemp), F_(degrees), json);
-        print_value_json(shell, F("status"), nullptr, F_(status), nullptr, json);
+        create_value_json(root, F("activated"), nullptr, F_(activated), nullptr, json);
+        create_value_json(root, F("flowTemp"), nullptr, F_(flowTemp), F_(degrees), json);
+        create_value_json(root, F("status"), nullptr, F_(status), nullptr, json);
     }
 }
 
@@ -121,16 +110,16 @@ void Switch::register_mqtt_ha_config() {
     snprintf_P(uniq_id, sizeof(uniq_id), PSTR("switch"));
     doc["uniq_id"] = uniq_id;
 
-    doc["ic"] = F("mdi:home-thermometer-outline");
+    doc["ic"] = FJSON("mdi:home-thermometer-outline");
 
     char stat_t[50];
     snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/switch_data"), System::hostname().c_str());
     doc["stat_t"] = stat_t;
 
-    doc["val_tpl"] = F("{{value_json.type}}"); // HA needs a single value. We take the type which is wwc or hc
+    doc["val_tpl"] = FJSON("{{value_json.type}}"); // HA needs a single value. We take the type which is wwc or hc
 
     JsonObject dev = doc.createNestedObject("dev");
-    dev["name"]    = F("EMS-ESP Switch");
+    dev["name"]    = FJSON("EMS-ESP Switch");
     dev["sw"]      = EMSESP_APP_VERSION;
     dev["mf"]      = brand_to_string();
     dev["mdl"]     = this->name();

@@ -31,11 +31,6 @@ Gateway::Gateway(uint8_t device_type, uint8_t device_id, uint8_t product_id, con
 void Gateway::device_info_web(JsonArray & root) {
 }
 
-// display all values into the shell console
-void Gateway::show_values(uuid::console::Shell & shell) {
-    EMSdevice::show_values(shell); // always call this to show header
-}
-
 // publish values via MQTT
 void Gateway::publish_values(JsonObject & json, bool force) {
 }

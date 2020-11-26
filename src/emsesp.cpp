@@ -264,11 +264,26 @@ void EMSESP::show_device_values(uuid::console::Shell & shell) {
         return;
     }
 
+    DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_LARGE_DYN);
+
     // do this in the order of factory classes to keep a consistent order when displaying
     for (const auto & device_class : EMSFactory::device_handlers()) {
         for (const auto & emsdevice : emsdevices) {
             if ((emsdevice) && (emsdevice->device_type() == device_class.first)) {
-                emsdevice->show_values(shell);
+                // print header
+                shell.printfln(F("%s: %s"), emsdevice->device_type_name().c_str(), emsdevice->to_string().c_str());
+
+                doc.clear(); // clear so we can re-use for each device
+                JsonArray root = doc.to<JsonArray>();
+                emsdevice->device_info_web(root); // create array
+
+                // iterate values and print to shell
+                uint8_t key_value = 0;
+                for (const JsonVariant & value : root) {
+                    shell.printf((++key_value & 1) ? "  %s: " : "%s\r\n", value.as<const char *>());
+                }
+
+                shell.println();
             }
         }
     }
@@ -358,7 +373,6 @@ void EMSESP::publish_device_values(uint8_t device_type, bool force) {
                 emsdevice->publish_values(json, force);
             }
         }
-        // doc.shrinkToFit();
         Mqtt::publish("mixer_data", doc.as<JsonObject>());
         return;
     }
@@ -663,7 +677,7 @@ void EMSESP::device_info_web(const uint8_t unique_id, JsonObject & root) {
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice) {
             if (emsdevice->unique_id() == unique_id) {
-                root["deviceName"] = emsdevice->to_string_short(); // can;t use c_str() because of scope
+                root["deviceName"] = emsdevice->to_string_short(); // can't use c_str() because of scope
                 JsonArray data     = root.createNestedArray("deviceData");
                 emsdevice->device_info_web(data);
                 return;

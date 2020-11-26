@@ -54,13 +54,7 @@ export interface EMSESPDevices {
   sensors: Sensor[];
 }
 
-export interface DeviceData {
-  n: string;
-  v: string;
-}
-
 export interface EMSESPDeviceData {
   deviceName: string;
-  deviceData: DeviceData[];
+  deviceData: string[];
 }
-

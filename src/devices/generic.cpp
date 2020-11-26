@@ -31,11 +31,6 @@ Generic::Generic(uint8_t device_type, uint8_t device_id, uint8_t product_id, con
 void Generic::device_info_web(JsonArray & root) {
 }
 
-// display all values into the shell console
-void Generic::show_values(uuid::console::Shell & shell) {
-    EMSdevice::show_values(shell); // always call this to show header
-}
-
 // publish values via MQTT
 void Generic::publish_values(JsonObject & json, bool force) {
 }

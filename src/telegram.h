@@ -40,6 +40,8 @@ static constexpr uint8_t EMS_VALUE_BOOL     = 0xFF; // used to mark that somethi
 static constexpr uint8_t EMS_VALUE_BOOL_OFF = 0x00; // boolean false
 static constexpr uint8_t EMS_VALUE_BOOL_ON  = 0x01; // boolean true. True can be 0x01 or 0xFF sometimes
 
+static constexpr uint8_t EMS_VALUE_TIME = 0xFD; // for converting uint32 to time strings
+
 static constexpr uint8_t  EMS_VALUE_BOOL_NOTSET   = 0xFE;       // random number for booleans, that's not 0, 1 or FF
 static constexpr uint8_t  EMS_VALUE_UINT_NOTSET   = 0xFF;       // for 8-bit unsigned ints/bytes
 static constexpr int8_t   EMS_VALUE_INT_NOTSET    = 0x7F;       // for signed 8-bit ints/bytes
