@@ -97,11 +97,10 @@ char * Helpers::itoa(char * result, int32_t value, const uint8_t base) {
     }
 
     *ptr-- = '\0';
-    char tmp_char;
     while (ptr1 < ptr) {
-        tmp_char = *ptr;
-        *ptr--   = *ptr1;
-        *ptr1++  = tmp_char;
+        char tmp_char = *ptr;
+        *ptr--        = *ptr1;
+        *ptr1++       = tmp_char;
     }
 
     return result;
@@ -133,14 +132,16 @@ char * Helpers::render_boolean(char * result, bool value) {
     } else {
         strlcpy(result, value ? "1" : "0", 2);
     }
+
     return result;
 }
 
 // depending on format render a number or a string
-char * Helpers::render_enum(char * result, const std::vector<const __FlashStringHelper *> &value, const uint8_t no) {
+char * Helpers::render_enum(char * result, const std::vector<const __FlashStringHelper *> & value, const uint8_t no) {
     if (no >= value.size()) {
         return nullptr; // out of bounds
     }
+
     strcpy(result, uuid::read_flash_string(value[no]).c_str());
     if (bool_format() == BOOL_FORMAT_TRUEFALSE) {
         if (no == 0 && uuid::read_flash_string(value[0]) == "off") {
@@ -151,6 +152,7 @@ char * Helpers::render_enum(char * result, const std::vector<const __FlashString
     } else if (bool_format() == BOOL_FORMAT_NUMBERS) {
         itoa(result, no);
     }
+
     return result;
 }
 
@@ -271,6 +273,7 @@ char * Helpers::render_value(char * result, const uint16_t value, const uint8_t 
     if (!hasValue(value)) {
         return nullptr;
     }
+
     return (render_value(result, (int16_t)value, format)); // use same code, force it to a signed int
 }
 
@@ -279,6 +282,7 @@ char * Helpers::render_value(char * result, const int8_t value, const uint8_t fo
     if (!hasValue(value)) {
         return nullptr;
     }
+
     return (render_value(result, (int16_t)value, format)); // use same code, force it to a signed int
 }
 
@@ -288,23 +292,30 @@ char * Helpers::render_value(char * result, const uint32_t value, const uint8_t 
         return nullptr;
     }
 
-    char s[20];
     result[0] = '\0';
+
+    // check if we're converted from minutes to a time
+    if (format == EMS_VALUE_TIME) {
+        snprintf_P(result, 40, PSTR("%d days %d hrs %d mins"), (value / 1440), ((value % 1440) / 60), (value % 60));
+        return result;
+    }
+
+    char s[20];
 
 #ifndef EMSESP_STANDALONE
     if (!format) {
-        strlcat(result, ltoa(value, s, 10), 20); // format is 0
+        strlcpy(result, ltoa(value, s, 10), 20); // format is 0
     } else {
-        strlcat(result, ltoa(value / format, s, 10), 20);
+        strlcpy(result, ltoa(value / format, s, 10), 20);
         strlcat(result, ".", 20);
         strlcat(result, ltoa(value % format, s, 10), 20);
     }
 
 #else
     if (!format) {
-        strlcat(result, ultostr(s, value, 10), 20); // format is 0
+        strlcpy(result, ultostr(s, value, 10), 20); // format is 0
     } else {
-        strncat(result, ultostr(s, value / format, 10), 20);
+        strncpy(result, ultostr(s, value / format, 10), 20);
         strlcat(result, ".", 20);
         strncat(result, ultostr(s, value % format, 10), 20);
     }
@@ -460,7 +471,7 @@ bool Helpers::value2bool(const char * v, bool & value) {
 }
 
 // checks to see if a string is member of a vector and return the index, also allow true/false for on/off
-bool Helpers::value2enum(const char * v, uint8_t & value, const std::vector<const __FlashStringHelper *> &strs) {
+bool Helpers::value2enum(const char * v, uint8_t & value, const std::vector<const __FlashStringHelper *> & strs) {
     if ((v == nullptr) || (strlen(v) == 0)) {
         return false;
     }
