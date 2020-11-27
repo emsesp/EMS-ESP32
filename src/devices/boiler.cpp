@@ -51,6 +51,8 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     register_telegram_type(0xE6, F("UBAParametersPlus"), true, [&](std::shared_ptr<const Telegram> t) { process_UBAParametersPlus(t); });
     register_telegram_type(0xE9, F("UBADHWStatus"), false, [&](std::shared_ptr<const Telegram> t) { process_UBADHWStatus(t); });
     register_telegram_type(0xEA, F("UBAParameterWWPlus"), true, [&](std::shared_ptr<const Telegram> t) { process_UBAParameterWWPlus(t); });
+    register_telegram_type(0x494, F("UBAEnergySupplied"), false, [&](std::shared_ptr<const Telegram> t) { process_UBAEnergySupplied(t); });
+    register_telegram_type(0x495, F("UBAInformation"), false, [&](std::shared_ptr<const Telegram> t) { process_UBAInformation(t); });
 
     // MQTT commands for boiler topic
     register_mqtt_cmd(F("comfort"), [&](const char * value, const int8_t id) { return set_warmwater_mode(value, id); });
@@ -141,6 +143,26 @@ void Boiler::register_mqtt_ha_config() {
     Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(burnWorkMin), device_type(), "burnWorkMin", F_(min), nullptr);
     Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(heatWorkMin), device_type(), "heatWorkMin", F_(min), nullptr);
     Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(UBAuptime), device_type(), "UBAuptime", F_(min), nullptr);
+    // information
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(upTimeControl), device_type(), "upTimeControl", F_(min), nullptr);
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(upTimeCompHeating), device_type(), "upTimeCompHeating", F_(min), nullptr);
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(upTimeCompCooling), device_type(), "upTimeCompCooling", F_(min), nullptr);
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(upTimeCompWw), device_type(), "upTimeCompWw", F_(min), nullptr);
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(heatingStarts), device_type(), "heatingStarts", nullptr, nullptr);
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(coolingStarts), device_type(), "coolingStarts_", nullptr, nullptr);
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(wWStarts2), device_type(), "wWStarts2", nullptr, nullptr);
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(nrgConsTotal), device_type(), "nrgConsTotal", F_(kwh), nullptr);
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(auxElecHeatNrgConsTotal), device_type(), "auxElecHeatNrgConsTotal_", F_(kwh), nullptr);
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(auxElecHeatNrgConsHeating), device_type(), "auxElecHeatNrgConsHeating", F_(kwh), nullptr);
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(auxElecHeatNrgConsDHW), device_type(), "auxElecHeatNrgConsDHW", F_(kwh), nullptr);
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(nrgConsCompTotal), device_type(), "nrgConsCompTotal", F_(kwh), nullptr);
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(nrgConsCompHeating), device_type(), "nrgConsCompHeating", F_(kwh), nullptr);
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(nrgConsCompWw), device_type(), "nrgConsCompWw", F_(kwh), nullptr);
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(nrgConsCompCooling), device_type(), "nrgConsCompCooling", F_(kwh), nullptr);
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(nrgSuppTotal), device_type(), "nrgSuppTotal_", F_(kwh), nullptr);
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(nrgSuppHeating), device_type(), "nrgSuppHeating", F_(kwh), nullptr);
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(nrgSuppWw), device_type(), "nrgSuppWw", F_(kwh), nullptr);
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(nrgSuppCooling), device_type(), "nrgSuppCooling", F_(kwh), nullptr);
     mqtt_ha_config_ = true; // done
 }
 
@@ -187,7 +209,7 @@ void Boiler::device_info_web(JsonArray & root) {
     // fetch the values into a JSON document
     StaticJsonDocument<EMSESP_MAX_JSON_SIZE_LARGE> doc;
     JsonObject                                     json = doc.to<JsonObject>();
-    if (!export_values_main(json)) {
+    if (!export_values_main(json, true)) {
         return; // empty
     }
 
@@ -225,16 +247,33 @@ void Boiler::device_info_web(JsonArray & root) {
     create_value_json(root, F("setFlowTemp"), nullptr, F_(setFlowTemp), F_(degrees), json);
     create_value_json(root, F("setBurnPow"), nullptr, F_(setBurnPow), F_(percent), json);
     create_value_json(root, F("burnStarts"), nullptr, F_(burnStarts), nullptr, json);
-    create_value_json(root, F("burnWorkMin"), nullptr, F_(burnWorkMin), F_(min), json);
-    create_value_json(root, F("heatWorkMin"), nullptr, F_(heatWorkMin), F_(min), json);
-    create_value_json(root, F("UBAuptime"), nullptr, F_(UBAuptime), F_(min), json);
+    create_value_json(root, F("burnWorkMin"), nullptr, F_(burnWorkMin), nullptr, json);
+    create_value_json(root, F("heatWorkMin"), nullptr, F_(heatWorkMin), nullptr, json);
+    create_value_json(root, F("UBAuptime"), nullptr, F_(UBAuptime), nullptr, json);
 
-    create_value_json(root, F("burnWorkMintxt"), nullptr, F_(burnWorkMintxt), nullptr, json);
-    create_value_json(root, F("heatWorkMintxt"), nullptr, F_(heatWorkMintxt), nullptr, json);
-    create_value_json(root, F("UBAuptimetxt"), nullptr, F_(UBAuptimetxt), nullptr, json);
+    // information
+    create_value_json(root, F("upTimeControl"), nullptr, F_(upTimeControl), nullptr, json);
+    create_value_json(root, F("upTimeCompHeating"), nullptr, F_(upTimeCompHeating), nullptr, json);
+    create_value_json(root, F("upTimeCompCooling"), nullptr, F_(upTimeCompCooling), nullptr, json);
+    create_value_json(root, F("upTimeCompWw"), nullptr, F_(upTimeCompWw), nullptr, json);
+    create_value_json(root, F("heatingStarts"), nullptr, F_(heatingStarts), nullptr, json);
+    create_value_json(root, F("coolingStarts"), nullptr, F_(coolingStarts), nullptr, json);
+    create_value_json(root, F("wWStarts2"), nullptr, F_(wWStarts2), nullptr, json);
+    create_value_json(root, F("nrgConsTotal"), nullptr, F_(nrgConsTotal), F_(kwh), json);
+    create_value_json(root, F("auxElecHeatNrgConsTotal"), nullptr, F_(auxElecHeatNrgConsTotal), F_(kwh), json);
+    create_value_json(root, F("auxElecHeatNrgConsHeating"), nullptr, F_(auxElecHeatNrgConsHeating), F_(kwh), json);
+    create_value_json(root, F("auxElecHeatNrgConsDHW"), nullptr, F_(auxElecHeatNrgConsDHW), F_(kwh), json);
+    create_value_json(root, F("nrgConsCompTotal"), nullptr, F_(nrgConsCompTotal), F_(kwh), json);
+    create_value_json(root, F("nrgConsCompHeating"), nullptr, F_(nrgConsCompHeating), F_(kwh), json);
+    create_value_json(root, F("nrgConsCompWw"), nullptr, F_(nrgConsCompWw), F_(kwh), json);
+    create_value_json(root, F("nrgConsCoolingTotal"), nullptr, F_(nrgConsCompCooling), F_(kwh), json);
+    create_value_json(root, F("nrgSuppTotal"), nullptr, F_(nrgSuppTotal), F_(kwh), json);
+    create_value_json(root, F("nrgSuppHeating"), nullptr, F_(nrgSuppHeating), F_(kwh), json);
+    create_value_json(root, F("nrgSuppWw"), nullptr, F_(nrgSuppWw), F_(kwh), json);
+    create_value_json(root, F("nrgSuppCooling"), nullptr, F_(nrgSuppCooling), F_(kwh), json);
 
     doc.clear();
-    if (!export_values_ww(json)) { // append ww values
+    if (!export_values_ww(json, true)) { // append ww values
         return;
     }
 
@@ -265,9 +304,7 @@ void Boiler::device_info_web(JsonArray & root) {
     create_value_json(root, F("wwMixTemperature"), nullptr, F_(wwMixTemperature), F_(degrees), json);
     create_value_json(root, F("wwBufferTemperature"), nullptr, F_(wwBufferTemperature), F_(degrees), json);
     create_value_json(root, F("wWStarts"), nullptr, F_(wWStarts), nullptr, json);
-    create_value_json(root, F("wWWorkM"), nullptr, F_(wWWorkM), F_(min), json);
-
-    create_value_json(root, F("wWWorkMtxt"), nullptr, F_(wWWorkMtxt), nullptr, json);
+    create_value_json(root, F("wWWorkM"), nullptr, F_(wWWorkM), nullptr, json);
 }
 
 bool Boiler::export_values(JsonObject & json) {
@@ -280,7 +317,7 @@ bool Boiler::export_values(JsonObject & json) {
 
 // creates JSON doc from values
 // returns false if empty
-bool Boiler::export_values_ww(JsonObject & json) {
+bool Boiler::export_values_ww(JsonObject & json, const bool textformat) {
     char s[10]; // for formatting strings
 
     // Warm Water comfort setting
@@ -439,9 +476,12 @@ bool Boiler::export_values_ww(JsonObject & json) {
 
     // Warm Water active time
     if (Helpers::hasValue(wWWorkM_)) {
-        json["wWWorkM"] = wWWorkM_;
-        char slong[40];
-        json["wWWorkMtxt"] = Helpers::render_value(slong, wWWorkM_, EMS_VALUE_TIME); // Warm Water active time (full text)
+        if (textformat) {
+            char slong[40];
+            json["wWWorkM"] = Helpers::render_value(slong, wWWorkM_, EMS_VALUE_TIME); // Warm Water active time (full text)
+        } else {
+            json["wWWorkM"] = wWWorkM_;
+        }
     }
 
     return (json.size());
@@ -449,7 +489,7 @@ bool Boiler::export_values_ww(JsonObject & json) {
 
 // creates JSON doc from values
 // returns false if empty
-bool Boiler::export_values_main(JsonObject & json) {
+bool Boiler::export_values_main(JsonObject & json, const bool textformat) {
     char s[10]; // for formatting strings
 
     // Hot tap water bool
@@ -614,23 +654,32 @@ bool Boiler::export_values_main(JsonObject & json) {
 
     // Total burner operating time
     if (Helpers::hasValue(burnWorkMin_)) {
-        json["burnWorkMin"] = burnWorkMin_;
-        char slong[40];
-        json["burnWorkMintxt"] = Helpers::render_value(slong, burnWorkMin_, EMS_VALUE_TIME);
+        if (textformat) {
+            char slong[40];
+            json["burnWorkMin"] = Helpers::render_value(slong, burnWorkMin_, EMS_VALUE_TIME);
+        } else {
+            json["burnWorkMin"] = burnWorkMin_;
+        }
     }
 
     // Total heat operating time
     if (Helpers::hasValue(heatWorkMin_)) {
-        json["heatWorkMin"] = heatWorkMin_;
-        char slong[40];
-        json["heatWorkMintxt"] = Helpers::render_value(slong, heatWorkMin_, EMS_VALUE_TIME);
+        if (textformat) {
+            char slong[40];
+            json["heatWorkMin"] = Helpers::render_value(slong, heatWorkMin_, EMS_VALUE_TIME);
+        } else {
+            json["heatWorkMin"] = heatWorkMin_;
+        }
     }
 
     // Total UBA working time
     if (Helpers::hasValue(UBAuptime_)) {
-        json["UBAuptime"] = UBAuptime_;
-        char slong[40];
-        json["UBAuptimetxt"] = Helpers::render_value(slong, UBAuptime_, EMS_VALUE_TIME);
+        if (textformat) {
+            char slong[40];
+            json["UBAuptime"] = Helpers::render_value(slong, UBAuptime_, EMS_VALUE_TIME);
+        } else {
+            json["UBAuptime"] = UBAuptime_;
+        }
     }
 
     // Service Code & Service Code Number
@@ -641,6 +690,121 @@ bool Boiler::export_values_main(JsonObject & json) {
 
     if (lastCode_[0] != '\0') {
         json["lastCode"] = lastCode_;
+    }
+
+    // Total heat operating time
+    if (Helpers::hasValue(upTimeControl_)) {
+        if (textformat) {
+            char slong[40];
+            json["upTimeControl"] = Helpers::render_value(slong, upTimeControl_, EMS_VALUE_TIME);
+        } else {
+            json["upTimeControl"] = upTimeControl_;
+        }
+    }
+
+    // Operating time compressor heating
+    if (Helpers::hasValue(upTimeCompHeating_)) {
+        if (textformat) {
+            char slong[40];
+            json["upTimeCompHeating"] = Helpers::render_value(slong, upTimeCompHeating_, EMS_VALUE_TIME);
+        } else {
+            json["upTimeCompHeating"] = upTimeCompHeating_;
+        }
+    }
+
+    // Operating time compressor cooling
+    if (Helpers::hasValue(upTimeCompCooling_)) {
+        if (textformat) {
+            char slong[40];
+            json["upTimeCompCooling"] = Helpers::render_value(slong, upTimeCompCooling_, EMS_VALUE_TIME);
+        } else {
+            json["upTimeCompCooling"] = upTimeCompCooling_;
+        }
+    }
+
+    // Operating time compressor warm water
+    if (Helpers::hasValue(upTimeCompWw_)) {
+        if (textformat) {
+            char slong[40];
+            json["upTimeCompWw"] = Helpers::render_value(slong, upTimeCompWw_, EMS_VALUE_TIME);
+        } else {
+            json["upTimeCompWw"] = upTimeCompWw_;
+        }
+    }
+
+    // Number of heating starts
+    if (Helpers::hasValue(heatingStarts_)) {
+        json["heatingStarts"] = heatingStarts_;
+    }
+
+    // Number of cooling starts
+    if (Helpers::hasValue(coolingStarts_)) {
+        json["coolingStarts"] = coolingStarts_;
+    }
+
+    // Number of warm water starts
+    if (Helpers::hasValue(wWStarts2_)) {
+        json["wWStarts2"] = wWStarts2_;
+    }
+
+    // Total energy consumption
+    if (Helpers::hasValue(nrgConsTotal_)) {
+        json["nrgConsTotal"] = nrgConsTotal_;
+    }
+
+    // Auxiliary electrical heater energy total
+    if (Helpers::hasValue(auxElecHeatNrgConsTotal_)) {
+        json["auxElecHeatNrgConsTotal"] = auxElecHeatNrgConsTotal_;
+    }
+
+    // Auxiliary electrical heater energy heating
+    if (Helpers::hasValue(auxElecHeatNrgConsHeating_)) {
+        json["auxElecHeatNrgConsHeating"] = auxElecHeatNrgConsHeating_;
+    }
+
+    // Auxiliary electrical heater energy DHW
+    if (Helpers::hasValue(auxElecHeatNrgConsDHW_)) {
+        json["auxElecHeatNrgConsDHW"] = auxElecHeatNrgConsDHW_;
+    }
+
+    // Energy consumption compressor total
+    if (Helpers::hasValue(nrgConsCompTotal_)) {
+        json["nrgConsCompTotal"] = nrgConsCompTotal_;
+    }
+
+    // Energy consumption compressor heating
+    if (Helpers::hasValue(nrgConsCompHeating_)) {
+        json["nrgConsCompHeating"] = nrgConsCompHeating_;
+    }
+
+    // Energy consumption compressor warm water
+    if (Helpers::hasValue(nrgConsCompWw_)) {
+        json["nrgConsCompWw"] = nrgConsCompWw_;
+    }
+
+    // Energy consumption compressor cooling
+    if (Helpers::hasValue(nrgConsCompCooling_)) {
+        json["nrgConsCompCooling"] = nrgConsCompCooling_;
+    }
+
+    // Total energy supplied
+    if (Helpers::hasValue(nrgSuppTotal_)) {
+        json["nrgSuppTotal"] = nrgSuppTotal_;
+    }
+
+     // Total energy heating
+    if (Helpers::hasValue(nrgSuppHeating_)) {
+        json["nrgSuppHeating"] = nrgSuppHeating_;
+    }
+
+     // Total energy warm water
+    if (Helpers::hasValue(nrgSuppWw_)) {
+        json["nrgSuppWw"] = nrgSuppWw_;
+    }
+
+     // Total energy cooling
+    if (Helpers::hasValue(nrgSuppCooling_)) {
+        json["nrgSuppCooling"] = nrgSuppCooling_;
     }
 
     return (json.size());
@@ -676,7 +840,7 @@ void Boiler::publish_values(JsonObject & json, bool force) {
     }
 
     // send out heating and tapwater status
-    check_active();
+    check_active(force);
 }
 
 // called after a process command is called, to check values and see if we need to force an MQTT publish
@@ -693,7 +857,7 @@ bool Boiler::updated_values() {
  * If a value has changed, post it immediately to MQTT so we get real time data
  * Values will always be posted first time as heatingActive_ and tapwaterActive_ will have values EMS_VALUE_BOOL_NOTSET
  */
-void Boiler::check_active() {
+void Boiler::check_active(const bool force) {
     if (!Helpers::hasValue(boilerState_)) {
         return;
     }
@@ -703,7 +867,7 @@ void Boiler::check_active() {
     // check if heating is active, bits 2 and 4 must be set
     b   = ((boilerState_ & 0x09) == 0x09);
     val = b ? EMS_VALUE_BOOL_ON : EMS_VALUE_BOOL_OFF;
-    if (heatingActive_ != val) {
+    if (heatingActive_ != val || force) {
         heatingActive_ = val;
         char s[7];
         Mqtt::publish(F("heating_active"), Helpers::render_boolean(s, b));
@@ -712,7 +876,7 @@ void Boiler::check_active() {
     // check if tap water is active, bits 1 and 4 must be set
     b   = ((boilerState_ & 0x0A) == 0x0A);
     val = b ? EMS_VALUE_BOOL_ON : EMS_VALUE_BOOL_OFF;
-    if (tapwaterActive_ != val) {
+    if (tapwaterActive_ != val || force ) {
         tapwaterActive_ = val;
         char s[7];
         Mqtt::publish(F("tapwater_active"), Helpers::render_boolean(s, b));
@@ -941,6 +1105,51 @@ void Boiler::process_UBADHWStatus(std::shared_ptr<const Telegram> telegram) {
     // changed_ |= telegram->read_value(wWActivated_, 20); // Activated is in 0xEA, this is something other 0/100%
     changed_ |= telegram->read_value(wWSelTemp_, 10);
     changed_ |= telegram->read_value(wWDisinfectionTemp_, 9);
+}
+
+/*
+ * UBAInformation - type 0x495
+ * all values 32 bit
+ * 08 0B FF 00 03 95 01 01 AB 83 00 27 78 EB 00 84 FA 39 FF FF FF 00 00 53 7D 8D 00 00 0F 04 1C
+ * 08 00 FF 00 03 95 01 01 AB 83 00 27 78 EB 00 84 FA 39 FF FF FF 00 00 53 7D 8D 00 00 0F 04 63
+ * 08 00 FF 18 03 95 00 00 05 84 00 00 07 22 FF FF FF FF 00 00 02 5C 00 00 03 C0 00 00 01 98 64
+ * 08 00 FF 30 03 95 00 00 00 D4 FF FF FF FF 00 00 1C 70 FF FF FF FF 00 00 20 30 00 00 0E 06 FB
+ * 08 00 FF 48 03 95 00 00 06 C0 00 00 07 66 FF FF FF FF 2E
+ */
+void Boiler::process_UBAInformation(std::shared_ptr<const Telegram> telegram) {
+    changed_ |= telegram->read_value(upTimeControl_, 0);
+    changed_ |= telegram->read_value(upTimeCompHeating_, 8);
+    changed_ |= telegram->read_value(upTimeCompCooling_, 16);
+    changed_ |= telegram->read_value(upTimeCompWw_, 4);
+
+    changed_ |= telegram->read_value(heatingStarts_, 28);
+    changed_ |= telegram->read_value(coolingStarts_, 36);
+    changed_ |= telegram->read_value(wWStarts2_, 24);
+
+    changed_ |= telegram->read_value(nrgConsTotal_, 64);
+
+    changed_ |= telegram->read_value(auxElecHeatNrgConsTotal_, 40);
+    changed_ |= telegram->read_value(auxElecHeatNrgConsHeating_, 48);
+    changed_ |= telegram->read_value(auxElecHeatNrgConsDHW_, 44);
+
+    changed_ |= telegram->read_value(nrgConsCompTotal_, 56);
+    changed_ |= telegram->read_value(nrgConsCompHeating_, 68);
+    changed_ |= telegram->read_value(nrgConsCompWw_, 72);
+    changed_ |= telegram->read_value(nrgConsCompCooling_, 76);
+}
+
+/*
+ * UBAEnergy - type 0x494
+ * Energy-values all 32bit
+ * 08 00 FF 00 03 94 03 31 21 59 00 00 7C 70 00 00 15 B8 00 00 40 E3 00 00 27 23 FF FF FF FF EA
+ * 08 00 FF 18 03 94 FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF 00 00 00 00 00 00 00 00 00 7E
+ * 08 00 FF 31 03 94 00 00 00 00 00 00 00 38
+ */
+void Boiler::process_UBAEnergySupplied(std::shared_ptr<const Telegram> telegram) {
+    changed_ |= telegram->read_value(nrgSuppTotal_, 4);
+    changed_ |= telegram->read_value(nrgSuppHeating_, 12);
+    changed_ |= telegram->read_value(nrgSuppWw_, 8);
+    changed_ |= telegram->read_value(nrgSuppCooling_, 16);
 }
 
 // 0x2A - MC10Status

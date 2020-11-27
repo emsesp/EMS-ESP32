@@ -263,7 +263,7 @@ class RxService : public EMSbus {
 
 class TxService : public EMSbus {
   public:
-    static constexpr size_t  MAX_TX_TELEGRAMS = 20; // size of Tx queue
+    static constexpr size_t  MAX_TX_TELEGRAMS = 30; // size of Tx queue
     static constexpr uint8_t TX_WRITE_FAIL    = 4;  // EMS return code for fail
     static constexpr uint8_t TX_WRITE_SUCCESS = 1;  // EMS return code for success
 

@@ -48,9 +48,9 @@ class Boiler : public EMSdevice {
 
     void register_mqtt_ha_config();
     void register_mqtt_ha_config_ww();
-    void check_active();
-    bool export_values_main(JsonObject & doc);
-    bool export_values_ww(JsonObject & doc);
+    void check_active(const bool force = false);
+    bool export_values_main(JsonObject & doc, const bool textformat = false);
+    bool export_values_ww(JsonObject & doc, const bool textformat = false);
 
     bool changed_           = false;
     bool mqtt_ha_config_    = false; // HA MQTT Discovery
@@ -63,6 +63,8 @@ class Boiler : public EMSdevice {
     static constexpr uint8_t EMS_TYPE_UBAParameters      = 0x16;
     static constexpr uint8_t EMS_TYPE_UBAParametersPlus  = 0xE6;
     static constexpr uint8_t EMS_TYPE_UBAParameterWWPlus = 0xEA;
+    static constexpr uint16_t EMS_TYPE_UBAInfomration    = 0x495;
+    static constexpr uint16_t EMS_TYPE_UBAEnergySupplied = 0x494;
 
     static constexpr uint8_t EMS_BOILER_SELFLOWTEMP_HEATING = 20; // was originally 70, changed to 30 for issue #193, then to 20 with issue #344
 
@@ -151,6 +153,29 @@ class Boiler : public EMSdevice {
     uint8_t heatingActive_  = EMS_VALUE_BOOL_NOTSET; // Central heating is on/off
     uint8_t pumpMod2_       = EMS_VALUE_UINT_NOTSET; // heatpump modulation from 0xE3 (heatpumps)
 
+    // UBAInformation
+    uint32_t upTimeControl_             = EMS_VALUE_ULONG_NOTSET; // Operating time control
+    uint32_t upTimeCompHeating_         = EMS_VALUE_ULONG_NOTSET; // Operating time compressor heating
+    uint32_t upTimeCompCooling_         = EMS_VALUE_ULONG_NOTSET; // Operating time compressor cooling
+    uint32_t upTimeCompWw_              = EMS_VALUE_ULONG_NOTSET; // Operating time compressor warm water
+    uint32_t heatingStarts_             = EMS_VALUE_ULONG_NOTSET; // Heating starts (control)
+    uint32_t coolingStarts_             = EMS_VALUE_ULONG_NOTSET; // Cooling  starts (control)
+    uint32_t wWStarts2_                 = EMS_VALUE_ULONG_NOTSET; // Warm water starts (control)
+    uint32_t nrgConsTotal_              = EMS_VALUE_ULONG_NOTSET; // Energy consumption total
+    uint32_t auxElecHeatNrgConsTotal_   = EMS_VALUE_ULONG_NOTSET; // Auxiliary electrical heater energy consumption total
+    uint32_t auxElecHeatNrgConsHeating_ = EMS_VALUE_ULONG_NOTSET; // Auxiliary electrical heater energy consumption heating
+    uint32_t auxElecHeatNrgConsDHW_     = EMS_VALUE_ULONG_NOTSET; // Auxiliary electrical heater energ consumption DHW
+    uint32_t nrgConsCompTotal_          = EMS_VALUE_ULONG_NOTSET; // Energy consumption compressor total
+    uint32_t nrgConsCompHeating_        = EMS_VALUE_ULONG_NOTSET; // Energy consumption compressor heating
+    uint32_t nrgConsCompWw_             = EMS_VALUE_ULONG_NOTSET; // Energy consumption compressor warm water
+    uint32_t nrgConsCompCooling_        = EMS_VALUE_ULONG_NOTSET; // Energy consumption compressor cooling
+
+    // UBAEnergySupplied
+    uint32_t nrgSuppTotal_   = EMS_VALUE_ULONG_NOTSET; // Energy supplied total
+    uint32_t nrgSuppHeating_ = EMS_VALUE_ULONG_NOTSET; // Energy supplied heating
+    uint32_t nrgSuppWw_      = EMS_VALUE_ULONG_NOTSET; // Energy supplied warm water
+    uint32_t nrgSuppCooling_ = EMS_VALUE_ULONG_NOTSET; // Energy supplied cooling
+
     void process_UBAParameterWW(std::shared_ptr<const Telegram> telegram);
     void process_UBAMonitorFast(std::shared_ptr<const Telegram> telegram);
     void process_UBATotalUptime(std::shared_ptr<const Telegram> telegram);
@@ -170,6 +195,8 @@ class Boiler : public EMSdevice {
     void process_UBAMaintenanceData(std::shared_ptr<const Telegram> telegram);
     void process_UBAErrorMessage(std::shared_ptr<const Telegram> telegram);
     void process_UBADHWStatus(std::shared_ptr<const Telegram> telegram);
+    void process_UBAInformation(std::shared_ptr<const Telegram> telegram);
+    void process_UBAEnergySupplied(std::shared_ptr<const Telegram> telegram);
 
     // commands - none of these use the additional id parameter
     bool set_warmwater_mode(const char * value, const int8_t id);
