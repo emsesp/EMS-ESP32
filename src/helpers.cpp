@@ -294,9 +294,9 @@ char * Helpers::render_value(char * result, const uint32_t value, const uint8_t 
 
     result[0] = '\0';
 
-    // check if we're converted from minutes to a time
+    // check if we're converting from minutes to a time string
     if (format == EMS_VALUE_TIME) {
-        snprintf_P(result, 40, PSTR("%d days %d hrs %d mins"), (value / 1440), ((value % 1440) / 60), (value % 60));
+        snprintf_P(result, 40, PSTR("%d days %d hours %d minutes"), (value / 1440), ((value % 1440) / 60), (value % 60));
         return result;
     }
 
