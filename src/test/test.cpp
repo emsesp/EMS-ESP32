@@ -724,6 +724,9 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
 
         EMSESP::mqtt_.incoming("ems-esp/system", "{\"cmd\":\"info\"}"); // this should fail
 
+        EMSESP::mqtt_.incoming("ems-esp/thermostat", "{\"cmd\":\"temp\",\"data\":23.45}"); // this should work just fine
+        EMSESP::mqtt_.incoming("ems-esp/thermostat", "{\"cmd\":\"TeMP\",\"data\":23.45}"); // test mix cased cmd
+
         EMSESP::mqtt_.incoming("ems-esp/thermostat_hc1", "20");
 
         shell.invoke_command("call thermostat wwmode");      // should do nothing
