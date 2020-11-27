@@ -792,17 +792,17 @@ bool Boiler::export_values_main(JsonObject & json, const bool textformat) {
         json["nrgSuppTotal"] = nrgSuppTotal_;
     }
 
-     // Total energy heating
+    // Total energy heating
     if (Helpers::hasValue(nrgSuppHeating_)) {
         json["nrgSuppHeating"] = nrgSuppHeating_;
     }
 
-     // Total energy warm water
+    // Total energy warm water
     if (Helpers::hasValue(nrgSuppWw_)) {
         json["nrgSuppWw"] = nrgSuppWw_;
     }
 
-     // Total energy cooling
+    // Total energy cooling
     if (Helpers::hasValue(nrgSuppCooling_)) {
         json["nrgSuppCooling"] = nrgSuppCooling_;
     }
@@ -876,7 +876,7 @@ void Boiler::check_active(const bool force) {
     // check if tap water is active, bits 1 and 4 must be set
     b   = ((boilerState_ & 0x0A) == 0x0A);
     val = b ? EMS_VALUE_BOOL_ON : EMS_VALUE_BOOL_OFF;
-    if (tapwaterActive_ != val || force ) {
+    if (tapwaterActive_ != val || force) {
         tapwaterActive_ = val;
         char s[7];
         Mqtt::publish(F("tapwater_active"), Helpers::render_boolean(s, b));

@@ -56,15 +56,15 @@ class Boiler : public EMSdevice {
     bool mqtt_ha_config_    = false; // HA MQTT Discovery
     bool mqtt_ha_config_ww_ = false; // HA MQTT Discovery
 
-    static constexpr uint8_t EMS_TYPE_UBAParameterWW     = 0x33;
-    static constexpr uint8_t EMS_TYPE_UBAFunctionTest    = 0x1D;
-    static constexpr uint8_t EMS_TYPE_UBAFlags           = 0x35;
-    static constexpr uint8_t EMS_TYPE_UBASetPoints       = 0x1A;
-    static constexpr uint8_t EMS_TYPE_UBAParameters      = 0x16;
-    static constexpr uint8_t EMS_TYPE_UBAParametersPlus  = 0xE6;
-    static constexpr uint8_t EMS_TYPE_UBAParameterWWPlus = 0xEA;
-    static constexpr uint16_t EMS_TYPE_UBAInfomration    = 0x495;
-    static constexpr uint16_t EMS_TYPE_UBAEnergySupplied = 0x494;
+    static constexpr uint8_t  EMS_TYPE_UBAParameterWW     = 0x33;
+    static constexpr uint8_t  EMS_TYPE_UBAFunctionTest    = 0x1D;
+    static constexpr uint8_t  EMS_TYPE_UBAFlags           = 0x35;
+    static constexpr uint8_t  EMS_TYPE_UBASetPoints       = 0x1A;
+    static constexpr uint8_t  EMS_TYPE_UBAParameters      = 0x16;
+    static constexpr uint8_t  EMS_TYPE_UBAParametersPlus  = 0xE6;
+    static constexpr uint8_t  EMS_TYPE_UBAParameterWWPlus = 0xEA;
+    static constexpr uint16_t EMS_TYPE_UBAInfomration     = 0x495;
+    static constexpr uint16_t EMS_TYPE_UBAEnergySupplied  = 0x494;
 
     static constexpr uint8_t EMS_BOILER_SELFLOWTEMP_HEATING = 20; // was originally 70, changed to 30 for issue #193, then to 20 with issue #344
 
