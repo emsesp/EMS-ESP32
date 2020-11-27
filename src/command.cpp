@@ -30,6 +30,11 @@ std::vector<Command::CmdFunction> Command::cmdfunctions_;
 // id may be used to represent a heating circuit for example
 // returns false if error or not found
 bool Command::call(const uint8_t device_type, const char * cmd, const char * value, const int8_t id) {
+    auto cf = find_command(device_type, cmd);
+    if ((cf == nullptr) || (cf->cmdfunction_json_)) {
+        return false; // command not found, or requires a json
+    }
+
 #ifdef EMSESP_DEBUG
     std::string dname = EMSdevice::device_type_2_device_name(device_type);
     if (value == nullptr) {
@@ -40,11 +45,6 @@ bool Command::call(const uint8_t device_type, const char * cmd, const char * val
         LOG_DEBUG(F("[DEBUG] Calling %s command %s, value %s, id is %d"), dname.c_str(), cmd, value, id);
     }
 #endif
-
-    auto cf = find_command(device_type, cmd);
-    if ((cf == nullptr) || (cf->cmdfunction_json_)) {
-        return false; // command not found, or requires a json
-    }
 
     return ((cf->cmdfunction_)(value, id));
 }
@@ -53,6 +53,11 @@ bool Command::call(const uint8_t device_type, const char * cmd, const char * val
 // id may be used to represent a heating circuit for example
 // returns false if error or not found
 bool Command::call(const uint8_t device_type, const char * cmd, const char * value, const int8_t id, JsonObject & json) {
+    auto cf = find_command(device_type, cmd);
+    if (cf == nullptr) {
+        return false; // command not found or not json
+    }
+
 #ifdef EMSESP_DEBUG
     std::string dname = EMSdevice::device_type_2_device_name(device_type);
     if (value == nullptr) {
@@ -63,11 +68,6 @@ bool Command::call(const uint8_t device_type, const char * cmd, const char * val
         LOG_DEBUG(F("[DEBUG] Calling %s command %s, value %s, id is %d"), dname.c_str(), cmd, value, id);
     }
 #endif
-
-    auto cf = find_command(device_type, cmd);
-    if (cf == nullptr) {
-        return false; // command not found or not json
-    }
 
     // check if json object is empty, if so quit
     if (json.isNull()) {
@@ -108,13 +108,20 @@ Command::CmdFunction * Command::find_command(const uint8_t device_type, const ch
         return nullptr;
     }
 
+    // convert cmd to lowercase and compare
+    char lowerCmd[20];
+    strlcpy(lowerCmd, cmd, sizeof(lowerCmd));
+    for (char * p = lowerCmd; *p; p++) {
+        *p = tolower(*p);
+    }
+
     for (auto & cf : cmdfunctions_) {
-        if (!strcmp_P(cmd, reinterpret_cast<PGM_P>(cf.cmd_)) && (cf.device_type_ == device_type)) {
+        if (!strcmp_P(lowerCmd, reinterpret_cast<PGM_P>(cf.cmd_)) && (cf.device_type_ == device_type)) {
             return &cf;
         }
     }
 
-    return nullptr; // not found
+    return nullptr; // command not found
 }
 
 // output list of all commands to console for a specific DeviceType
