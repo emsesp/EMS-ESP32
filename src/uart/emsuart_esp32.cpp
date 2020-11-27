@@ -57,12 +57,11 @@ void EMSuart::emsuart_recvTask(void * para) {
  * UART interrupt, on break read the fifo and put the whole telegram to ringbuffer
  */
 void IRAM_ATTR EMSuart::emsuart_rx_intr_handler(void * para) {
-    static uint8_t rxbuf[EMS_MAXBUFFERSIZE];
-    static uint8_t length;
     portENTER_CRITICAL(&mux);
     if (EMS_UART.int_st.brk_det) {
         EMS_UART.int_clr.brk_det = 1; // clear flag
-        length                   = 0;
+        uint8_t rxbuf[EMS_MAXBUFFERSIZE];
+        uint8_t length = 0;
         while (EMS_UART.status.rxfifo_cnt) {
             uint8_t rx = EMS_UART.fifo.rw_byte; // read all bytes from fifo
             if (length < EMS_MAXBUFFERSIZE) {
