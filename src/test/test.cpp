@@ -216,47 +216,6 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
     if (command == "render") {
         shell.printfln(F("Testing render..."));
 
-        uint8_t  test1 = 12;
-        int8_t   test2 = -12;
-        uint16_t test3 = 456;
-        int16_t  test4 = -456;
-        uint8_t  test5 = 1; // bool = on
-        uint32_t test6 = 305419896;
-        float    test7 = 89.43;
-
-        uint8_t test1u = EMS_VALUE_UINT_NOTSET;
-        int8_t  test2u = EMS_VALUE_INT_NOTSET;
-
-        uint8_t  test5u = EMS_VALUE_BOOL_NOTSET;
-        uint32_t test6u = EMS_VALUE_ULONG_NOTSET;
-
-        uint16_t test3u = EMS_VALUE_USHORT_NOTSET;
-        int16_t  test4u = EMS_VALUE_SHORT_NOTSET;
-
-        /*
-        EMSdevice::print_value(shell, 2, F("Selected flow temperature1"), test1, F_(degrees));             // 12
-        EMSdevice::print_value(shell, 2, F("Selected flow temperature2"), test2, F_(degrees));             // -12
-        EMSdevice::print_value(shell, 2, F("Selected flow temperature3"), test3, F_(degrees), 10);         // 45.6
-        EMSdevice::print_value(shell, 2, F("Selected flow temperature4"), test4, F_(degrees), 10);         // -45.6
-        EMSdevice::print_value(shell, 2, F("Selected flow temperature5"), test5, nullptr, EMS_VALUE_BOOL); // on
-        EMSdevice::print_value(shell, 2, F("Selected flow temperature6"), test6, F_(degrees));             //
-        EMSdevice::print_value(shell, 2, F("Selected flow temperature7"), test7, F_(degrees), 2);          // 89.43
-        EMSdevice::print_value(shell, 2, F("Warm Water comfort setting"), F("Intelligent"));
-        char s[100];
-        strcpy(s, "Not very intelligent");
-        EMSdevice::print_value(shell, 2, F("Warm Water comfort setting2"), s);
-
-        shell.println();
-
-        EMSdevice::print_value(shell, 2, F("Selected flow temperature1u"), test1u, F_(degrees));
-        EMSdevice::print_value(shell, 2, F("Selected flow temperature2u"), test2u, F_(degrees));
-        EMSdevice::print_value(shell, 2, F("Selected flow temperature3u"), test3u, F_(degrees), 10);
-        EMSdevice::print_value(shell, 2, F("Selected flow temperature4u"), test4u, F_(degrees), 10);
-        EMSdevice::print_value(shell, 2, F("Selected flow temperature5u"), test5u, F_(degrees), EMS_VALUE_BOOL);
-        EMSdevice::print_value(shell, 2, F("Selected flow temperature6u"), test6u, F_(degrees), 100);
-*/
-        shell.println();
-
         // check read_value to make sure it handles all the data type correctly
         uint8_t message_data[] = {1, 2, 3, 4, 5, 6, 7, 8, 9}; // message_length is 9
         auto    telegram       = std::make_shared<Telegram>(Telegram::Operation::RX, 0x10, 0x11, 0x1234, 0, message_data, sizeof(message_data));
