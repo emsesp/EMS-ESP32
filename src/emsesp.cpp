@@ -677,8 +677,8 @@ void EMSESP::device_info_web(const uint8_t unique_id, JsonObject & root) {
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice) {
             if (emsdevice->unique_id() == unique_id) {
-                root["deviceName"] = emsdevice->to_string_short(); // can't use c_str() because of scope
-                JsonArray data     = root.createNestedArray("deviceData");
+                root["name"] = emsdevice->to_string_short(); // can't use c_str() because of scope
+                JsonArray data     = root.createNestedArray("data");
                 emsdevice->device_info_web(data);
                 return;
             }
@@ -741,7 +741,7 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice) {
             if (emsdevice->is_device_id(device_id)) {
-                LOG_DEBUG(F("Updating details on already existing device ID 0x%02X"), device_id);
+                LOG_DEBUG(F("Updating details for already active device ID 0x%02X"), device_id);
                 emsdevice->product_id(product_id);
                 emsdevice->version(version);
                 // only set brand if it doesn't already exist

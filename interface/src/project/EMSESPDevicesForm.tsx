@@ -96,7 +96,7 @@ class EMSESPDevicesForm extends Component<
   };
 
   noDeviceData = () => {
-    return (this.state.deviceData?.deviceData || []).length === 0;
+    return (this.state.deviceData?.data || []).length === 0;
   };
 
   createDeviceItems() {
@@ -330,7 +330,7 @@ class EMSESPDevicesForm extends Component<
         <p></p>
         <Box bgcolor="info.main" p={1} mt={1} mb={1}>
           <Typography variant="body1" color="initial">
-            {deviceData.deviceName}
+            {deviceData.name}
           </Typography>
         </Box>
         {!this.noDeviceData() && (
@@ -341,14 +341,14 @@ class EMSESPDevicesForm extends Component<
             >
               <TableHead></TableHead>
               <TableBody>
-                {deviceData.deviceData.map((item, i) => {
+                {deviceData.data.map((item, i) => {
                   if (i % 2) {
                     return null;
                   } else {
                     return (
                       <TableRow key={i}>
-                        <TableCell component="th" scope="row">{deviceData.deviceData[i]}</TableCell>
-                        <TableCell align="right">{deviceData.deviceData[i + 1]}</TableCell>
+                        <TableCell component="th" scope="row">{deviceData.data[i]}</TableCell>
+                        <TableCell align="right">{deviceData.data[i + 1]}</TableCell>
                       </TableRow>
                     );
                   }
