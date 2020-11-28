@@ -6,7 +6,7 @@
 [![release-date](https://img.shields.io/github/release-date/proddy/EMS-ESP.svg?label=Released)](https://github.com/proddy/EMS-ESP/commits/master)
 [![license](https://img.shields.io/github/license/proddy/EMS-ESP.svg)](LICENSE)
 ![Build Firmware](https://github.com/proddy/EMS-ESP/workflows/Build%20Firmware/badge.svg?branch=dev)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/b8880625bdf841d4adb2829732030887)](https://app.codacy.com/app/proddy/EMS-ESP?utm_source=github.com&utm_medium=referral&utm_content=proddy/EMS-ESP&utm_campaign=Badge_Grade_Settings)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/a37be4d45e5f47749b6e356c8e738a80)](https://www.codacy.com/gh/proddy/EMS-ESP/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=proddy/EMS-ESP&amp;utm_campaign=Badge_Grade)
 [![downloads](https://img.shields.io/github/downloads/proddy/EMS-ESP/total.svg)](https://github.com/proddy/EMS-ESP/releases)
 [![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/proddy/EMS-ESP.svg)](http://isitmaintained.com/project/proddy/EMS-ESP "Average time to resolve an issue")
 [![Percentage of issues still open](http://isitmaintained.com/badge/open/proddy/EMS-ESP.svg)](http://isitmaintained.com/project/proddy/EMS-ESP "Percentage of issues still open")
@@ -82,17 +82,18 @@ If you're looking for support on **EMS-ESP** there are some options available:
 ## **Contributing**
 
 You can contribute to EMS-ESP by
-- providing Pull Requests (Features, Fixes, suggestions).
-- testing new released features and report issues on your EMS equipment.
-- contributing to missing [Documentation](https://emsesp.github.io/docs).
+- providing Pull Requests (Features, Fixes, suggestions)
+- testing new released features and report issues on your EMS equipment
+- contributing to missing [Documentation](https://emsesp.github.io/docs)
 
 ## **Credits**
 
 A shout out to the people helping EMS-ESP get to where it is today...
 - **@MichaelDvP** for all his amazing contributions and patience. Specifically for the improved uart library, thermostat and mixer logic.
 - **@BBQKees** for his endless testing and building the awesome circuit boards
-- **@susisstrolch** for writing a first working version of the EMS bridge circuit which I used to design EMS-ESP version 0.1 back in August 2017
-- plus everyone else providing suggestions, PRs and the odd donation that keep us motivated. Thanks!
+- **@rjwats** for his [esp8266-react](https://github.com/rjwats/esp8266-react) framework that provides the new Web UI
+- **@nomis** for his core [console](https://github.com/nomis/mcu-uuid-console), telnet and syslog core libraries  
+- plus everyone else providing suggestions, PRs and the odd donation that keeps this project open source. Thanks!
 
 ## **License**
 
