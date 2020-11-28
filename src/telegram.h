@@ -223,10 +223,6 @@ class RxService : public EMSbus {
         return telegram_error_count_;
     }
 
-    void increment_telegram_error_count() {
-        telegram_error_count_++;
-    }
-
     uint8_t quality() const {
         if (telegram_error_count_ == 0) {
             return 100; // all good, 100%
