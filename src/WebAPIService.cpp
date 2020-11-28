@@ -93,23 +93,22 @@ void WebAPIService::webAPIService(AsyncWebServerRequest * request) {
     std::string debug(200, '\0');
     snprintf_P(&debug[0],
                debug.capacity() + 1,
-               PSTR("API: device=%s cmd=%s data=%s id=%s [%s]"),
+               PSTR("[DEBUG] API: device=%s cmd=%s data=%s id=%s [%s]"),
                device.c_str(),
                cmd.c_str(),
                data.c_str(),
                id.c_str(),
                ok ? PSTR("OK") : PSTR("Invalid"));
-    EMSESP::logger().info(debug.c_str());
+    EMSESP::logger().debug(debug.c_str());
     if (json.size()) {
         char buffer2[EMSESP_MAX_JSON_SIZE_DYN];
         serializeJson(doc, buffer2);
-        EMSESP::logger().info("json (max 255 chars): %s", buffer2);
+        EMSESP::logger().debug("json (max 255 chars): %s", buffer2);
     }
 #endif
 
     // if we have returned data in JSON format, send this to the WEB
     if (json.size()) {
-        // doc.shrinkToFit();
         char buffer[EMSESP_MAX_JSON_SIZE_DYN];
         serializeJsonPretty(doc, buffer);
         request->send(200, "text/plain", buffer);

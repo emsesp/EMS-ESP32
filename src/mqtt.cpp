@@ -681,7 +681,7 @@ void Mqtt::process_queue() {
     if (mqtt_qos_ != 0) {
         mqtt_messages_.front().packet_id_ = packet_id;
 #if defined(EMSESP_DEBUG)
-        LOG_DEBUG(F("Setting packetID for ACK to %d"), packet_id);
+        LOG_DEBUG(F("[DEBUG] Setting packetID for ACK to %d"), packet_id);
 #endif
         return;
     }
@@ -821,9 +821,9 @@ void Mqtt::register_mqtt_ha_sensor(const char *                prefix,
         LOG_ERROR(F("Failed to publish topic %s"), topic);
     } else {
 #if defined(EMSESP_STANDALONE)
-        LOG_DEBUG(F("Publishing topic=%s, payload=%s"), topic, payload_text.c_str());
+        LOG_DEBUG(F("[DEBUG] Publishing topic=%s, payload=%s"), topic, payload_text.c_str());
 #else
-        LOG_DEBUG(F("Publishing topic %s"), topic);
+        LOG_DEBUG(F("[DEBUG] Publishing topic %s"), topic);
 #endif
     }
 

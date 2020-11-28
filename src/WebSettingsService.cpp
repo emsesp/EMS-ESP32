@@ -138,32 +138,26 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
 // either via the Web UI or via the Console
 void WebSettingsService::onUpdate() {
     if (WebSettings::has_flags(WebSettings::ChangeFlags::SHOWER)) {
-        // EMSESP::logger().info(F("shower changed!"));
         EMSESP::shower_.start();
     }
 
     if (WebSettings::has_flags(WebSettings::ChangeFlags::DALLAS)) {
-        // EMSESP::logger().info(F("dallas changed!"));
         EMSESP::dallassensor_.start();
     }
 
     if (WebSettings::has_flags(WebSettings::ChangeFlags::UART)) {
-        // EMSESP::logger().info(F("uart changed!"));
         EMSESP::init_tx();
     }
 
     if (WebSettings::has_flags(WebSettings::ChangeFlags::SYSLOG)) {
-        // EMSESP::logger().info(F("syslog changed!"));
         System::syslog_init();
     }
 
     if (WebSettings::has_flags(WebSettings::ChangeFlags::OTHER)) {
-        // EMSESP::logger().info(F("other changed!"));
         System::other_init();
     }
 
     if (WebSettings::has_flags(WebSettings::ChangeFlags::LED)) {
-        // EMSESP::logger().info(F("led changed!"));
         System::led_init();
     }
 }

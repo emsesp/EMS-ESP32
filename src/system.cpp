@@ -93,7 +93,7 @@ bool System::command_publish(const char * value, const int8_t id) {
 
 // restart EMS-ESP
 void System::restart() {
-    LOG_NOTICE(F("Restarting system..."));
+    LOG_INFO(F("Restarting system..."));
     Shell::loop_all();
     delay(1000); // wait a second
 #if defined(ESP8266)
@@ -105,7 +105,7 @@ void System::restart() {
 
 // saves all settings
 void System::wifi_reconnect() {
-    LOG_NOTICE(F("The wifi will reconnect..."));
+    LOG_INFO(F("The wifi will reconnect..."));
     Shell::loop_all();
     delay(1000);                                                                // wait a second
     EMSESP::webSettingsService.save();                                          // local settings

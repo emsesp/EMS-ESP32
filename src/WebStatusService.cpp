@@ -40,18 +40,18 @@ WebStatusService::WebStatusService(AsyncWebServer * server, SecurityManager * se
 
 #ifdef ESP32
 void WebStatusService::onStationModeDisconnected(WiFiEvent_t event, WiFiEventInfo_t info) {
-    EMSESP::logger().debug(F("WiFi Disconnected. Reason code=%d"), info.disconnected.reason);
+    EMSESP::logger().info(F("WiFi Disconnected. Reason code=%d"), info.disconnected.reason);
 }
 void WebStatusService::onStationModeGotIP(WiFiEvent_t event, WiFiEventInfo_t info) {
-    EMSESP::logger().debug(F("WiFi Connected with IP=%s, hostname=%s"), WiFi.localIP().toString().c_str(), WiFi.getHostname());
+    EMSESP::logger().info(F("WiFi Connected with IP=%s, hostname=%s"), WiFi.localIP().toString().c_str(), WiFi.getHostname());
     EMSESP::system_.send_heartbeat(); // send out heartbeat MQTT as soon as we have a connection
 }
 #elif defined(ESP8266)
 void WebStatusService::onStationModeDisconnected(const WiFiEventStationModeDisconnected & event) {
-    EMSESP::logger().debug(F("WiFi Disconnected. Reason code=%d"), event.reason);
+    EMSESP::logger().info(F("WiFi Disconnected. Reason code=%d"), event.reason);
 }
 void WebStatusService::onStationModeGotIP(const WiFiEventStationModeGotIP & event) {
-    EMSESP::logger().debug(F("WiFi Connected with IP=%s, hostname=%s"), event.ip.toString().c_str(), WiFi.hostname().c_str());
+    EMSESP::logger().info(F("WiFi Connected with IP=%s, hostname=%s"), event.ip.toString().c_str(), WiFi.hostname().c_str());
     EMSESP::system_.send_heartbeat(); // send out heartbeat MQTT as soon as we have a connection
 }
 #endif
