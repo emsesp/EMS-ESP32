@@ -387,7 +387,7 @@ void EMSESPShell::add_console_commands() {
                 return;
             }
 
-            DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_DYN);
+            DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_MEDIUM_DYN);
             JsonObject          json = doc.to<JsonObject>();
 
             bool ok = false;

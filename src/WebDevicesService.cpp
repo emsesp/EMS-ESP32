@@ -45,7 +45,7 @@ void WebDevicesService::scan_devices(AsyncWebServerRequest * request) {
 }
 
 void WebDevicesService::all_devices(AsyncWebServerRequest * request) {
-    AsyncJsonResponse * response = new AsyncJsonResponse(false, EMSESP_MAX_JSON_SIZE_LARGE_DYN);
+    AsyncJsonResponse * response = new AsyncJsonResponse(false, EMSESP_MAX_JSON_SIZE_LARGE);
     JsonObject          root     = response->getRoot();
 
     JsonArray devices = root.createNestedArray("devices");

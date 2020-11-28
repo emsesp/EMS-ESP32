@@ -25,7 +25,6 @@
 #include <SecurityManager.h>
 #include <AsyncMqttClient.h>
 
-#define MAX_EMSESP_STATUS_SIZE 1024
 #define EMSESP_STATUS_SERVICE_PATH "/rest/emsespStatus"
 
 namespace emsesp {

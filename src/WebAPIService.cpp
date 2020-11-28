@@ -71,7 +71,7 @@ void WebAPIService::webAPIService(AsyncWebServerRequest * request) {
         id = "-1";
     }
 
-    DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_DYN);
+    DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_MEDIUM_DYN);
     JsonObject          json = doc.to<JsonObject>();
     bool                ok   = false;
 
@@ -109,9 +109,9 @@ void WebAPIService::webAPIService(AsyncWebServerRequest * request) {
 
     // if we have returned data in JSON format, send this to the WEB
     if (json.size()) {
-        char buffer[EMSESP_MAX_JSON_SIZE_DYN];
+        std::string buffer;
         serializeJsonPretty(doc, buffer);
-        request->send(200, "text/plain", buffer);
+        request->send(200, "text/plain", buffer.c_str());
     } else {
         request->send(200, "text/plain", ok ? F("OK") : F("Invalid"));
     }
