@@ -110,7 +110,7 @@ function EMSESPSettingsControllerForm(props: EMSESPSettingsControllerFormProps) 
             </Typography>
             <TextValidator
                 validators={['required', 'isNumber', 'minNumber:0', 'maxNumber:40']}
-                errorMessages={['Dallas GPIO is required', "Must be a number", "Must be 0 or higher", "Max value is 255"]}
+                errorMessages={['Dallas GPIO is required', "Must be a number", "Must be 0 or higher", "Max value is 40"]}
                 name="dallas_gpio"
                 label="Dallas GPIO pin (0=none)"
                 fullWidth
