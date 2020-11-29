@@ -487,13 +487,13 @@ void Mqtt::on_connect() {
         if (mqtt_format() == Format::HA) {
             ha_status();
         }
-
-        publish_retain(F("status"), "online", true); // say we're alive to the Last Will topic, with retain on
     } else {
         // we doing a re-connect from a TCP break
         // only re-subscribe again to all MQTT topics
         resubscribe();
     }
+
+    publish_retain(F("status"), "online", true); // say we're alive to the Last Will topic, with retain on
 
     LOG_INFO(F("MQTT connected"));
     reset_publish_fails(); // reset fail count to 0
@@ -522,7 +522,7 @@ void Mqtt::ha_status() {
     JsonArray ids  = dev.createNestedArray("ids");
     ids.add("ems-esp");
 
-    Mqtt::publish_retain(F("homeassistant/sensor/ems-esp/status/config"), doc.as<JsonObject>(), true); // publish the config payload with retain flag
+    Mqtt::publish_ha(F("homeassistant/sensor/ems-esp/status/config"), doc.as<JsonObject>()); // publish the config payload with retain flag
 }
 
 // add sub or pub task to the queue.
@@ -603,13 +603,6 @@ void Mqtt::publish_retain(const __FlashStringHelper * topic, const std::string &
 
 // publish json doc, only if its not empty, using the retain flag
 void Mqtt::publish_retain(const std::string & topic, const JsonObject & payload, bool retain) {
-    /*
-    // for HA, empty payload will remove the previous config
-    if (retain == true) {
-        publish(topic);
-    }
-    */
-
     if (enabled() && payload.size()) {
         std::string payload_text;
         serializeJson(payload, payload_text); // convert json to string
@@ -619,6 +612,54 @@ void Mqtt::publish_retain(const std::string & topic, const JsonObject & payload,
 
 void Mqtt::publish_retain(const __FlashStringHelper * topic, const JsonObject & payload, bool retain) {
     publish_retain(uuid::read_flash_string(topic), payload, retain);
+}
+
+void Mqtt::publish_ha(const __FlashStringHelper * topic, const JsonObject & payload) {
+    publish_ha(uuid::read_flash_string(topic), payload);
+}
+
+// publish a Home Assistant config topic and payload, with retain flag off.
+// for ESP32 its added to the queue, for ESP8266 is sent immediatelty
+void Mqtt::publish_ha(const std::string & topic, const JsonObject & payload) {
+    if (!enabled() || !payload.size()) {
+        return;
+    }
+
+    // empty payload will remove the previous config
+    // publish(topic);
+
+    std::string payload_text;
+    payload_text.reserve(measureJson(payload) + 1);
+    serializeJson(payload, payload_text); // convert json to string
+
+#if defined(EMSESP_STANDALONE)
+    LOG_DEBUG(F("Publishing HA topic=%s, payload=%s"), topic, payload_text.c_str());
+#else
+    LOG_DEBUG(F("Publishing HA topic %s"), topic.c_str());
+#endif
+
+#if defined(ESP32)
+    bool queued = true; // queue MQTT publish
+#else
+    bool queued = false; //  publish immediately
+#endif
+
+    // if MQTT is not connected, then we have to queue the msg until the MQTT is online
+    if (!connected()) {
+        queued = true; // override
+    }
+
+    if (queued) {
+        queue_publish_message(topic, payload_text, true); // with retain true
+        return;
+    }
+
+    // send immediately and then wait a while
+    if (!mqttClient_->publish(topic.c_str(), 0, true, payload_text.c_str())) {
+        LOG_ERROR(F("Failed to publish topic %s"), topic.c_str());
+    }
+
+    delay(MQTT_HA_PUBLISH_DELAY); // enough time to send the short message out
 }
 
 // take top from queue and perform the publish or subscribe action
@@ -695,7 +736,8 @@ void Mqtt::register_mqtt_ha_binary_sensor(const __FlashStringHelper * name, cons
         return;
     }
 
-    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_HA_CONFIG> doc;
+    // StaticJsonDocument<EMSESP_MAX_JSON_SIZE_HA_CONFIG> doc;
+    DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_HA_CONFIG);
 
     doc["name"]    = name;
     doc["uniq_id"] = entity;
@@ -726,8 +768,7 @@ void Mqtt::register_mqtt_ha_binary_sensor(const __FlashStringHelper * name, cons
     char topic[MQTT_TOPIC_MAX_SIZE];
     snprintf_P(topic, sizeof(topic), PSTR("homeassistant/binary_sensor/ems-esp/%s/config"), entity);
 
-    // queue MQTT publish
-    publish_retain(topic, doc.as<JsonObject>(), true);
+    publish_ha(topic, doc.as<JsonObject>());
 }
 
 // HA config for a normal 'sensor' type
@@ -743,6 +784,9 @@ void Mqtt::register_mqtt_ha_sensor(const char *                prefix,
     if (mqtt_format() != Format::HA) {
         return;
     }
+
+    // StaticJsonDocument<EMSESP_MAX_JSON_SIZE_HA_CONFIG> doc;
+    DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_HA_CONFIG);
 
     // create entity by prefixing any given prefix
     char new_entity[50];
@@ -789,11 +833,6 @@ void Mqtt::register_mqtt_ha_sensor(const char *                prefix,
     }
     new_name[0] = toupper(new_name[0]); // capitalize first letter
 
-#if defined(ESP32)
-    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_HA_CONFIG> doc;
-#else
-    DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_HA_CONFIG);
-#endif
     doc["name"]    = new_name;
     doc["uniq_id"] = uniq;
     if (uom != nullptr) {
@@ -804,31 +843,12 @@ void Mqtt::register_mqtt_ha_sensor(const char *                prefix,
     if (icon != nullptr) {
         doc["ic"] = icon;
     }
+
     JsonObject dev = doc.createNestedObject("dev");
     JsonArray  ids = dev.createNestedArray("ids");
     ids.add(ha_device);
 
-#if defined(ESP32)
-    // queue MQTT publish
-    publish_retain(topic, doc.as<JsonObject>(), true);
-#else
-    // convert json to string and publish immediately with retain forced to true
-    std::string payload_text;
-    serializeJson(doc, payload_text); // convert json to string
-
-    uint16_t packet_id = mqttClient_->publish(topic, 0, true, payload_text.c_str());
-    if (!packet_id) {
-        LOG_ERROR(F("Failed to publish topic %s"), topic);
-    } else {
-#if defined(EMSESP_STANDALONE)
-        LOG_DEBUG(F("[DEBUG] Publishing topic=%s, payload=%s"), topic, payload_text.c_str());
-#else
-        LOG_DEBUG(F("[DEBUG] Publishing topic %s"), topic);
-#endif
-    }
-
-    delay(50); // enough time to send the short message out
-#endif
+    publish_ha(topic, doc.as<JsonObject>());
 }
 
 } // namespace emsesp

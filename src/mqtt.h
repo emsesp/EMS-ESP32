@@ -38,6 +38,8 @@
 
 using uuid::console::Shell;
 
+#define MQTT_HA_PUBLISH_DELAY 50
+
 namespace emsesp {
 
 using mqtt_subfunction_p = std::function<bool(const char * message)>;
@@ -95,6 +97,8 @@ class Mqtt {
     static void publish_retain(const std::string & topic, const JsonObject & payload, bool retain);
     static void publish_retain(const __FlashStringHelper * topic, const std::string & payload, bool retain);
     static void publish_retain(const __FlashStringHelper * topic, const JsonObject & payload, bool retain);
+    static void publish_ha(const std::string & topic, const JsonObject & payload);
+    static void publish_ha(const __FlashStringHelper * topic, const JsonObject & payload);
 
     static void register_mqtt_ha_binary_sensor(const __FlashStringHelper * name, const uint8_t device_type, const char * entity);
     static void register_mqtt_ha_sensor(const char *                prefix,
