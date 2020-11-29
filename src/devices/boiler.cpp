@@ -103,7 +103,7 @@ void Boiler::register_mqtt_ha_config() {
     dev["mdl"]     = name();
     JsonArray ids  = dev.createNestedArray("ids");
     ids.add("ems-esp-boiler");
-    Mqtt::publish_retain(F("homeassistant/sensor/ems-esp/boiler/config"), doc.as<JsonObject>(), true); // publish the config payload with retain flag
+    Mqtt::publish_ha(F("homeassistant/sensor/ems-esp/boiler/config"), doc.as<JsonObject>()); // publish the config payload with retain flag
 
     Mqtt::register_mqtt_ha_binary_sensor(F_(tapwaterActive), device_type(), "tapwater_active");
     Mqtt::register_mqtt_ha_binary_sensor(F_(heatingActive), device_type(), "heating_active");

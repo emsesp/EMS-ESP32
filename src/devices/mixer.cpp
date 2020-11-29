@@ -163,7 +163,7 @@ void Mixer::register_mqtt_ha_config() {
     std::string topic(100, '\0');
     if (type() == Type::HC) {
         snprintf_P(&topic[0], topic.capacity() + 1, PSTR("homeassistant/sensor/ems-esp/mixer_hc%d/config"), hc_);
-        Mqtt::publish_retain(topic, doc.as<JsonObject>(), true); // publish the config payload with retain flag
+        Mqtt::publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
         char hc_name[10];
         snprintf_P(hc_name, sizeof(hc_name), PSTR("hc%d"), hc_);
         Mqtt::register_mqtt_ha_sensor(hc_name, nullptr, F_(flowTemp), device_type(), "flowTemp", F_(degrees), F_(icontemperature));
@@ -173,7 +173,7 @@ void Mixer::register_mqtt_ha_config() {
     } else {
         // WWC
         snprintf_P(&topic[0], topic.capacity() + 1, PSTR("homeassistant/sensor/ems-esp/mixer_wwc%d/config"), hc_);
-        Mqtt::publish_retain(topic, doc.as<JsonObject>(), true); // publish the config payload with retain flag
+        Mqtt::publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
         char wwc_name[10];
         snprintf_P(wwc_name, sizeof(wwc_name), PSTR("wwc%d"), hc_);
         Mqtt::register_mqtt_ha_sensor(wwc_name, nullptr, F_(wwTemp), device_type(), "wwTemp", F_(degrees), F_(icontemperature));

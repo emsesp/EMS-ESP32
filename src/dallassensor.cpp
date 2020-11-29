@@ -151,7 +151,7 @@ void DallasSensor::loop() {
                     scancnt_ = 0;
                 } else if (scancnt_ == -2) { // startup
                     firstscan_ = sensors_.size();
-                    LOG_DEBUG(F("First scan found %d dallassensor(s). Adding them."), firstscan_);
+                    LOG_DEBUG(F("Adding %d dallassensor(s) from first scan"), firstscan_);
                 } else if ((scancnt_ <= 0) && (firstscan_ != sensors_.size())) { // check 2 times for no change of sensor #
                     scancnt_ = -3;
                     sensors_.clear(); // restart scaning and clear to get correct numbering
@@ -367,7 +367,7 @@ void DallasSensor::publish_values(const bool force) {
 
                 std::string topic(100, '\0');
                 snprintf_P(&topic[0], 100, PSTR("homeassistant/sensor/ems-esp/dallas_%s/config"), sensor.to_string().c_str());
-                Mqtt::publish_retain(topic, config.as<JsonObject>(), true); // publish the config payload with retain flag
+                Mqtt::publish_ha(topic, config.as<JsonObject>());
 
                 registered_ha_[sensor_no - 1] = true;
             }
