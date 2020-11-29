@@ -82,7 +82,7 @@ function EMSESPSettingsControllerForm(props: EMSESPSettingsControllerFormProps) 
             </SelectValidator>
             <TextValidator
                 validators={['required', 'isNumber', 'minNumber:0', 'maxNumber:40']}
-                errorMessages={['Rx GPIO is required', "Must be a number", "Must be 0 or higher", "Max value is 255"]}
+                errorMessages={['Rx GPIO is required', "Must be a number", "Must be 0 or higher", "Max value is 40"]}
                 name="rx_gpio"
                 label="Rx GPIO pin"
                 fullWidth
@@ -94,7 +94,7 @@ function EMSESPSettingsControllerForm(props: EMSESPSettingsControllerFormProps) 
             />
             <TextValidator
                 validators={['required', 'isNumber', 'minNumber:0', 'maxNumber:40']}
-                errorMessages={['Tx GPIO is required', "Must be a number", "Must be 0 or higher", "Max value is 255"]}
+                errorMessages={['Tx GPIO is required', "Must be a number", "Must be 0 or higher", "Max value is 40"]}
                 name="tx_gpio"
                 label="Tx GPIO pin"
                 fullWidth
@@ -136,7 +136,7 @@ function EMSESPSettingsControllerForm(props: EMSESPSettingsControllerFormProps) 
             </Typography>
             <TextValidator
                 validators={['required', 'isNumber', 'minNumber:0', 'maxNumber:40']}
-                errorMessages={['LED GPIO is required', "Must be a number", "Must be 0 or higher", "Max value is 255"]}
+                errorMessages={['LED GPIO is required', "Must be a number", "Must be 0 or higher", "Max value is 40"]}
                 name="led_gpio"
                 label="LED GPIO pin (0=none)"
                 fullWidth
