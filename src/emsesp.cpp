@@ -264,7 +264,7 @@ void EMSESP::show_device_values(uuid::console::Shell & shell) {
         return;
     }
 
-    DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_LARGE_DYN);
+    DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_MAX_DYN);
 
     // do this in the order of factory classes to keep a consistent order when displaying
     for (const auto & device_class : EMSFactory::device_handlers()) {
@@ -677,8 +677,8 @@ void EMSESP::device_info_web(const uint8_t unique_id, JsonObject & root) {
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice) {
             if (emsdevice->unique_id() == unique_id) {
-                root["name"] = emsdevice->to_string_short(); // can't use c_str() because of scope
-                JsonArray data     = root.createNestedArray("data");
+                root["name"]   = emsdevice->to_string_short(); // can't use c_str() because of scope
+                JsonArray data = root.createNestedArray("data");
                 emsdevice->device_info_web(data);
                 return;
             }

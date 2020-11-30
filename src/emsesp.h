@@ -58,6 +58,7 @@
 #define EMSESP_MAX_JSON_SIZE_LARGE 1024      // for large json docs from ems devices, like boiler or thermostat data, using StaticJsonDocument
 #define EMSESP_MAX_JSON_SIZE_MEDIUM_DYN 1024 // for large json docs, using DynamicJsonDocument
 #define EMSESP_MAX_JSON_SIZE_LARGE_DYN 2048  // for very large json docs, using DynamicJsonDocument
+#define EMSESP_MAX_JSON_SIZE_MAX_DYN 4096    // for very very large json docs, using DynamicJsonDocument
 
 namespace emsesp {
 

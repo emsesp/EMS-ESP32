@@ -57,7 +57,7 @@ void WebStatusService::onStationModeGotIP(const WiFiEventStationModeGotIP & even
 #endif
 
 void WebStatusService::webStatusService(AsyncWebServerRequest * request) {
-    AsyncJsonResponse * response = new AsyncJsonResponse(false, EMSESP_MAX_JSON_SIZE_LARGE);
+    AsyncJsonResponse * response = new AsyncJsonResponse(false, EMSESP_MAX_JSON_SIZE_MEDIUM_DYN);
     JsonObject          root     = response->getRoot();
 
     root["status"]      = EMSESP::bus_status(); // 0, 1 or 2
