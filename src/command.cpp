@@ -84,6 +84,10 @@ bool Command::call(const uint8_t device_type, const char * cmd, const char * val
 
 // add a command to the list, which does not return json
 void Command::add(const uint8_t device_type, const uint8_t device_id, const __FlashStringHelper * cmd, cmdfunction_p cb) {
+    // if the command already exists for that device type don't add it
+    if (find_command(device_type, uuid::read_flash_string(cmd).c_str()) != nullptr) {
+        return;
+    }
     cmdfunctions_.emplace_back(device_type, cmd, cb, nullptr);
 
     // see if we need to subscribe
