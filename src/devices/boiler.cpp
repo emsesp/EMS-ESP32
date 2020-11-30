@@ -76,6 +76,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
 
     EMSESP::send_read_request(0x10, device_id); // read last errorcode on start (only published on errors)
     EMSESP::send_read_request(0x11, device_id); // read last errorcode on start (only published on errors)
+    EMSESP::send_read_request(0x15, device_id); // read maintenace data on start (only published on change)
 }
 
 // create the config topics for Home Assistant MQTT Discovery
@@ -163,6 +164,9 @@ void Boiler::register_mqtt_ha_config() {
     Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(nrgSuppHeating), device_type(), "nrgSuppHeating", F_(kwh), nullptr);
     Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(nrgSuppWw), device_type(), "nrgSuppWw", F_(kwh), nullptr);
     Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(nrgSuppCooling), device_type(), "nrgSuppCooling", F_(kwh), nullptr);
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(maintenanceType), device_type(), "maintenanceType", nullptr, nullptr);
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(maintenanceTime), device_type(), "maintenanceTime", F_(hours), nullptr);
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(maintenanceDate), device_type(), "maintenanceDate", nullptr, nullptr);
     mqtt_ha_config_ = true; // done
 }
 
@@ -271,6 +275,9 @@ void Boiler::device_info_web(JsonArray & root) {
     create_value_json(root, F("nrgSuppHeating"), nullptr, F_(nrgSuppHeating), F_(kwh), json);
     create_value_json(root, F("nrgSuppWw"), nullptr, F_(nrgSuppWw), F_(kwh), json);
     create_value_json(root, F("nrgSuppCooling"), nullptr, F_(nrgSuppCooling), F_(kwh), json);
+    create_value_json(root, F("maintenanceType"), nullptr, F_(maintenanceType), nullptr, json);
+    create_value_json(root, F("maintenanceTime"), nullptr, F_(maintenanceTime), F_(hours), json);
+    create_value_json(root, F("maintenanceDate"), nullptr, F_(maintenanceDate), nullptr, json);
 
     doc.clear();
     if (!export_values_ww(json, true)) { // append ww values
@@ -696,9 +703,9 @@ bool Boiler::export_values_main(JsonObject & json, const bool textformat) {
     if (Helpers::hasValue(upTimeControl_)) {
         if (textformat) {
             char slong[40];
-            json["upTimeControl"] = Helpers::render_value(slong, upTimeControl_, EMS_VALUE_TIME);
+            json["upTimeControl"] = Helpers::render_value(slong, upTimeControl_ / 60, EMS_VALUE_TIME);
         } else {
-            json["upTimeControl"] = upTimeControl_;
+            json["upTimeControl"] = upTimeControl_ / 60;
         }
     }
 
@@ -706,9 +713,9 @@ bool Boiler::export_values_main(JsonObject & json, const bool textformat) {
     if (Helpers::hasValue(upTimeCompHeating_)) {
         if (textformat) {
             char slong[40];
-            json["upTimeCompHeating"] = Helpers::render_value(slong, upTimeCompHeating_, EMS_VALUE_TIME);
+            json["upTimeCompHeating"] = Helpers::render_value(slong, upTimeCompHeating_ / 60, EMS_VALUE_TIME);
         } else {
-            json["upTimeCompHeating"] = upTimeCompHeating_;
+            json["upTimeCompHeating"] = upTimeCompHeating_ / 60;
         }
     }
 
@@ -716,9 +723,9 @@ bool Boiler::export_values_main(JsonObject & json, const bool textformat) {
     if (Helpers::hasValue(upTimeCompCooling_)) {
         if (textformat) {
             char slong[40];
-            json["upTimeCompCooling"] = Helpers::render_value(slong, upTimeCompCooling_, EMS_VALUE_TIME);
+            json["upTimeCompCooling"] = Helpers::render_value(slong, upTimeCompCooling_ / 60, EMS_VALUE_TIME);
         } else {
-            json["upTimeCompCooling"] = upTimeCompCooling_;
+            json["upTimeCompCooling"] = upTimeCompCooling_ / 60;
         }
     }
 
@@ -726,9 +733,9 @@ bool Boiler::export_values_main(JsonObject & json, const bool textformat) {
     if (Helpers::hasValue(upTimeCompWw_)) {
         if (textformat) {
             char slong[40];
-            json["upTimeCompWw"] = Helpers::render_value(slong, upTimeCompWw_, EMS_VALUE_TIME);
+            json["upTimeCompWw"] = Helpers::render_value(slong, upTimeCompWw_ / 60, EMS_VALUE_TIME);
         } else {
-            json["upTimeCompWw"] = upTimeCompWw_;
+            json["upTimeCompWw"] = upTimeCompWw_ / 60;
         }
     }
 
@@ -805,6 +812,16 @@ bool Boiler::export_values_main(JsonObject & json, const bool textformat) {
     // Total energy cooling
     if (Helpers::hasValue(nrgSuppCooling_)) {
         json["nrgSuppCooling"] = nrgSuppCooling_;
+    }
+
+    if (Helpers::hasValue(maintenanceType_)) {
+        // char s[7];
+        // json["maintenanceType"] = Helpers::render_enum(s, {F("off"), F("Time"), F("Date")}, maintenanceType_);
+        if (maintenanceType_ == 1) {
+            json["maintenanceTime"] = maintenanceTime_ * 100;
+        } else if (maintenanceType_ == 2) {
+            json["maintenanceDate"] = maintenanceDate_;
+        }
     }
 
     return (json.size());
@@ -1184,8 +1201,10 @@ void Boiler::process_UBAFlags(std::shared_ptr<const Telegram> telegram) {
 
 // 0x1C
 // not yet implemented
-void Boiler::process_UBAMaintenanceStatus(std::shared_ptr<const Telegram> telegram) {
-    // first byte: Maintenance due (0 = no, 3 = yes, due to operating hours, 8 = yes, due to date)
+// 08 00 1C 94 0B 0A 1D 31 08 00 80 00 00 00 -> message for 29.11.2020
+// 08 00 1C 94 0B 0A 1D 31 00 00 00 00 00 00 -> message reset
+ void Boiler::process_UBAMaintenanceStatus(std::shared_ptr<const Telegram> telegram) {
+    // 5. byte: Maintenance due (0 = no, 3 = yes, due to operating hours, 8 = yes, due to date)
 }
 
 #pragma GCC diagnostic pop
@@ -1217,9 +1236,13 @@ void Boiler::process_UBAErrorMessage(std::shared_ptr<const Telegram> telegram) {
 // 0x15
 void Boiler::process_UBAMaintenanceData(std::shared_ptr<const Telegram> telegram) {
     // first byte: Maintenance messages (0 = none, 1 = by operating hours, 2 = by date)
-    // I see a value of 3 in the 1st byte when the boiler is booted, so probably a flag
-    if (telegram->message_data[0] == 3) {
-        LOG_WARNING(F("Boiler has booted."));
+    telegram->read_value(maintenanceType_, 0);
+    telegram->read_value(maintenanceTime_, 1);
+    uint8_t  day   = telegram->message_data[2];
+    uint8_t  month = telegram->message_data[3];
+    uint8_t  year  = telegram->message_data[4];
+    if (day > 0 && month > 0 && year > 0) {
+        snprintf_P(maintenanceDate_,sizeof(maintenanceDate_),PSTR("%02d.%02d.%04d"),day,month,year + 2000);
     }
 }
 

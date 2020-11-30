@@ -64,6 +64,7 @@ MAKE_PSTR_WORD(pin)
 MAKE_PSTR_WORD(publish)
 MAKE_PSTR_WORD(bar)
 MAKE_PSTR_WORD(min)
+MAKE_PSTR_WORD(hours)
 MAKE_PSTR_WORD(uA)
 MAKE_PSTR_WORD(timeout)
 
@@ -219,6 +220,10 @@ MAKE_PSTR(nrgSuppTotal, "Energy supplied total")
 MAKE_PSTR(nrgSuppHeating, "Energy supplied heating")
 MAKE_PSTR(nrgSuppWw, "Energy supplied warm water")
 MAKE_PSTR(nrgSuppCooling, "Energy supplied cooling")
+MAKE_PSTR(maintenanceType, "Type of maintenace")
+MAKE_PSTR(maintenanceTime, "Next maintenace in")
+MAKE_PSTR(maintenanceDate, "Next maintenace on")
+
 // solar
 MAKE_PSTR(collectorTemp, "Collector temperature (TS1)")
 MAKE_PSTR(tankBottomTemp, "Bottom temperature (TS2)")

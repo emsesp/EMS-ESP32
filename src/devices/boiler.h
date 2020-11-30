@@ -176,6 +176,12 @@ class Boiler : public EMSdevice {
     uint32_t nrgSuppWw_      = EMS_VALUE_ULONG_NOTSET; // Energy supplied warm water
     uint32_t nrgSuppCooling_ = EMS_VALUE_ULONG_NOTSET; // Energy supplied cooling
 
+    // _UBAMaintenanceData
+    uint8_t maintenanceType_     = EMS_VALUE_UINT_NOTSET;
+    uint8_t maintenanceTime_     = EMS_VALUE_UINT_NOTSET;
+    char    maintenanceDate_[12] = {'\0'};
+
+
     void process_UBAParameterWW(std::shared_ptr<const Telegram> telegram);
     void process_UBAMonitorFast(std::shared_ptr<const Telegram> telegram);
     void process_UBATotalUptime(std::shared_ptr<const Telegram> telegram);
