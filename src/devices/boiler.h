@@ -177,6 +177,7 @@ class Boiler : public EMSdevice {
     uint32_t nrgSuppCooling_ = EMS_VALUE_ULONG_NOTSET; // Energy supplied cooling
 
     // _UBAMaintenanceData
+    uint8_t maintenanceMessage_  = EMS_VALUE_UINT_NOTSET;
     uint8_t maintenanceType_     = EMS_VALUE_UINT_NOTSET;
     uint8_t maintenanceTime_     = EMS_VALUE_UINT_NOTSET;
     char    maintenanceDate_[12] = {'\0'};
@@ -223,6 +224,7 @@ class Boiler : public EMSdevice {
     bool set_burn_period(const char * value, const int8_t id);
     bool set_pump_delay(const char * value, const int8_t id);
     bool set_reset(const char * value, const int8_t id);
+    bool set_maintenance(const char * value, const int8_t id);
 };
 
 } // namespace emsesp

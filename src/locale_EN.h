@@ -220,9 +220,10 @@ MAKE_PSTR(nrgSuppTotal, "Energy supplied total")
 MAKE_PSTR(nrgSuppHeating, "Energy supplied heating")
 MAKE_PSTR(nrgSuppWw, "Energy supplied warm water")
 MAKE_PSTR(nrgSuppCooling, "Energy supplied cooling")
-MAKE_PSTR(maintenanceType, "Type of maintenace")
-MAKE_PSTR(maintenanceTime, "Next maintenace in")
-MAKE_PSTR(maintenanceDate, "Next maintenace on")
+MAKE_PSTR(maintenanceMessage, "Maintenance message")
+MAKE_PSTR(maintenance, "Scheduled maintenance")
+MAKE_PSTR(maintenanceTime, "Next maintenance in")
+MAKE_PSTR(maintenanceDate, "Next maintenance on")
 
 // solar
 MAKE_PSTR(collectorTemp, "Collector temperature (TS1)")
