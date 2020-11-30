@@ -103,7 +103,7 @@ void WebAPIService::webAPIService(AsyncWebServerRequest * request) {
     if (json.size()) {
         std::string buffer2;
         serializeJson(doc, buffer2);
-        EMSESP::logger().debug("json (max 255 chars): %s", buffer2);
+        EMSESP::logger().debug("json (max 255 chars): %s", buffer2.c_str());
     }
 #endif
 

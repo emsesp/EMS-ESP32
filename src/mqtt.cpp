@@ -633,7 +633,7 @@ void Mqtt::publish_ha(const std::string & topic, const JsonObject & payload) {
     serializeJson(payload, payload_text); // convert json to string
 
 #if defined(EMSESP_STANDALONE)
-    LOG_DEBUG(F("Publishing HA topic=%s, payload=%s"), topic, payload_text.c_str());
+    LOG_DEBUG(F("Publishing HA topic=%s, payload=%s"), topic.c_str(), payload_text.c_str());
 #else
     LOG_DEBUG(F("Publishing HA topic %s"), topic.c_str());
 #endif
