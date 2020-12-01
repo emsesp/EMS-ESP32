@@ -17,7 +17,7 @@ assignees: ''
 *You can now remove this line and the above ones. Text in italic is meant to be replaced by your own words. If any of the sections below are not relevant to the issue (for instance, the screenshots) then you can delete them.*
 
 **Bug description**
-*A clear and concise description of what the bug is.*
+*A clear and concise description of what the bug is. Mention which EMS-ESP version you're using.*
 
 **Steps to reproduce**
 *Steps to reproduce the behavior.*
