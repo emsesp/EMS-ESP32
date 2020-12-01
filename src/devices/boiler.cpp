@@ -73,6 +73,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     register_mqtt_cmd(F("burnperiod"), [&](const char * value, const int8_t id) { return set_burn_period(value, id); });
     register_mqtt_cmd(F("pumpdelay"), [&](const char * value, const int8_t id) { return set_pump_delay(value, id); });
     register_mqtt_cmd(F("reset"), [&](const char * value, const int8_t id) { return set_reset(value, id); });
+    register_mqtt_cmd(F("maintenance"), [&](const char * value, const int8_t id) { return set_maintenance(value, id); });
 
     EMSESP::send_read_request(0x10, device_id); // read last errorcode on start (only published on errors)
     EMSESP::send_read_request(0x11, device_id); // read last errorcode on start (only published on errors)
@@ -164,7 +165,8 @@ void Boiler::register_mqtt_ha_config() {
     Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(nrgSuppHeating), device_type(), "nrgSuppHeating", F_(kwh), nullptr);
     Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(nrgSuppWw), device_type(), "nrgSuppWw", F_(kwh), nullptr);
     Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(nrgSuppCooling), device_type(), "nrgSuppCooling", F_(kwh), nullptr);
-    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(maintenanceType), device_type(), "maintenanceType", nullptr, nullptr);
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(maintenanceMessage), device_type(), "maintenanceMessage", nullptr, nullptr);
+    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(maintenance), device_type(), "maintenance", nullptr, nullptr);
     Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(maintenanceTime), device_type(), "maintenanceTime", F_(hours), nullptr);
     Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(maintenanceDate), device_type(), "maintenanceDate", nullptr, nullptr);
     mqtt_ha_config_ = true; // done
@@ -275,7 +277,8 @@ void Boiler::device_info_web(JsonArray & root) {
     create_value_json(root, F("nrgSuppHeating"), nullptr, F_(nrgSuppHeating), F_(kwh), json);
     create_value_json(root, F("nrgSuppWw"), nullptr, F_(nrgSuppWw), F_(kwh), json);
     create_value_json(root, F("nrgSuppCooling"), nullptr, F_(nrgSuppCooling), F_(kwh), json);
-    create_value_json(root, F("maintenanceType"), nullptr, F_(maintenanceType), nullptr, json);
+    create_value_json(root, F("maintenanceMessage"), nullptr, F_(maintenanceMessage), nullptr, json);
+    create_value_json(root, F("maintenance"), nullptr, F_(maintenance), nullptr, json);
     create_value_json(root, F("maintenanceTime"), nullptr, F_(maintenanceTime), F_(hours), json);
     create_value_json(root, F("maintenanceDate"), nullptr, F_(maintenanceDate), nullptr, json);
 
@@ -814,10 +817,16 @@ bool Boiler::export_values_main(JsonObject & json, const bool textformat) {
         json["nrgSuppCooling"] = nrgSuppCooling_;
     }
 
+    if (Helpers::hasValue(maintenanceMessage_) && maintenanceMessage_ > 0) {
+        char s[5];
+        snprintf_P(s, sizeof(s), PSTR("H%02d"), maintenanceMessage_);
+        json["maintenanceMessage"] = s;
+    }
+
     if (Helpers::hasValue(maintenanceType_)) {
-        // char s[7];
-        // json["maintenanceType"] = Helpers::render_enum(s, {F("off"), F("Time"), F("Date")}, maintenanceType_);
-        if (maintenanceType_ == 1) {
+        if (maintenanceType_ == 0) {
+            json["maintenance"] = FJSON("off");
+        } else if (maintenanceType_ == 1) {
             json["maintenanceTime"] = maintenanceTime_ * 100;
         } else if (maintenanceType_ == 2) {
             json["maintenanceDate"] = maintenanceDate_;
@@ -1199,15 +1208,15 @@ void Boiler::process_UBASetPoints(std::shared_ptr<const Telegram> telegram) {
 void Boiler::process_UBAFlags(std::shared_ptr<const Telegram> telegram) {
 }
 
+#pragma GCC diagnostic pop
+
 // 0x1C
-// not yet implemented
 // 08 00 1C 94 0B 0A 1D 31 08 00 80 00 00 00 -> message for 29.11.2020
 // 08 00 1C 94 0B 0A 1D 31 00 00 00 00 00 00 -> message reset
  void Boiler::process_UBAMaintenanceStatus(std::shared_ptr<const Telegram> telegram) {
     // 5. byte: Maintenance due (0 = no, 3 = yes, due to operating hours, 8 = yes, due to date)
+    changed_ |= telegram->read_value(maintenanceMessage_,5);
 }
-
-#pragma GCC diagnostic pop
 
 // 0x10, 0x11
 void Boiler::process_UBAErrorMessage(std::shared_ptr<const Telegram> telegram) {
@@ -1601,8 +1610,45 @@ bool Boiler::set_reset(const char * value, const int8_t id) {
     if (v == false) {
         return false;
     }
-    LOG_INFO(F("restarting boiler"));
-    write_command(0x05, 0x08, 0xFF);
+    LOG_INFO(F("Reset boiler maintenance message"));
+    write_command(0x05, 0x08, 0xFF, 0x1C);
+
+    return true;
+}
+
+//maintenance
+bool Boiler::set_maintenance(const char * value, const int8_t id) {
+    if (strlen(value) == 10) { // date
+        uint8_t day   = (value[0] - '0') * 10 + (value[1] - '0');
+        uint8_t month = (value[3] - '0') * 10 + (value[4] - '0');
+        uint8_t year  = (Helpers::atoint(&value[6]) - 2000);
+        if (day > 0 && day < 32 && month > 0 && month < 13 && year > 19) {
+            LOG_INFO(F("Setting maintenance to %02d.%02d.%04d"), day, month, year + 2000);
+            write_command(0x15, 2, day);
+            write_command(0x15, 3, month);
+            write_command(0x15, 4, year);
+            write_command(0x15, 0, 2, 0x15);
+        } else {
+            LOG_WARNING(F("Setting maintenance: wrong format %d.%d.%d"), day, month, year + 2000);
+            return false;
+        }
+        return true;
+    }
+
+   int hrs;
+   if (!Helpers::value2number(value, hrs)) {
+       LOG_WARNING(F("Setting maintenance: wrong format"));
+       return false;
+    }
+
+    if (hrs == 0) {
+        LOG_INFO(F("Setting maintenance off"));
+        write_command(0x15, 0, 0, 0x15);    // off
+    } else {
+        LOG_INFO(F("Setting maintenance in %d hours"), hrs);
+        write_command(0x15, 1, (uint8_t)(hrs / 100));
+        write_command(0x15, 0, 1, 0x15);
+    }
 
     return true;
 }

@@ -10,7 +10,8 @@
 - Add solar configuration telegrams (#616) [thanks @hpanther]
 - `log trace` shows decoded telegrams, `watch unknown` for only unknown telegrams
 - WM10 switch telegrams
-- boiler information (#633) and maintenance
+- boiler information (#633)
+- maintenance message and command
 
 ### Fixed
 - mixer IPM pumpstatus
