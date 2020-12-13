@@ -27,10 +27,6 @@ void Shower::start() {
         shower_timer_ = settings.shower_timer;
         shower_alert_ = settings.shower_alert;
     });
-
-    if (Mqtt::enabled()) {
-        send_mqtt_stat(false); // send first MQTT publish
-    }
 }
 
 void Shower::loop() {
@@ -100,14 +96,26 @@ void Shower::send_mqtt_stat(bool state) {
         return;
     }
 
-    // if we're in HA mode make sure we've first sent out the HA MQTT Discovery config topic
-    if ((Mqtt::mqtt_format() == Mqtt::Format::HA) && (!ha_config_)) {
-        Mqtt::register_mqtt_ha_binary_sensor(F("Shower Active"), EMSdevice::DeviceType::BOILER, "shower_active");
-        ha_config_ = true;
-    }
-
     char s[7];
     Mqtt::publish(F("shower_active"), Helpers::render_boolean(s, state));
+
+    // if we're in HA mode make sure we've first sent out the HA MQTT Discovery config topic
+    if ((Mqtt::ha_enabled()) && (!ha_configdone_)) {
+        ha_configdone_ = true;
+
+        StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> doc;
+        doc["name"]    = FJSON("Shower Active");
+        doc["uniq_id"] = FJSON("shower_active");
+        doc["~"]       = System::hostname(); // default ems-esp
+        doc["stat_t"]  = FJSON("~/shower_active");
+        JsonObject dev = doc.createNestedObject("dev");
+        JsonArray  ids = dev.createNestedArray("ids");
+        ids.add("ems-esp");
+
+        char topic[100];
+        snprintf_P(topic, sizeof(topic), PSTR("homeassistant/binary_sensor/%s/shower_active/config"), System::hostname().c_str());
+        Mqtt::publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
+    }
 }
 
 // turn back on the hot water for the shower
@@ -134,7 +142,7 @@ void Shower::shower_alert_start() {
 // Publish shower data
 // returns true if added to MQTT queue went ok
 void Shower::publish_values() {
-    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
+    StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> doc;
 
     char s[50];
     doc["shower_timer"] = Helpers::render_boolean(s, shower_timer_);

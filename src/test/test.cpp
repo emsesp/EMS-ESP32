@@ -105,8 +105,8 @@ bool Test::run_test(const char * command, int8_t id) {
         // add controller
         add_device(0x09, 114);
 
-        add_device(0x28, 160); // MM100, WWC
-        add_device(0x29, 161); // MM200, WWC
+        add_device(0x28, 160); // MM100
+        add_device(0x29, 161); // MM200
         add_device(0x20, 160); // MM100
 
         // WWC1 on 0x29
@@ -114,6 +114,9 @@ bool Test::run_test(const char * command, int8_t id) {
 
         // WWC2 on 0x28
         uart_telegram({0xA8, 0x00, 0xFF, 0x00, 0x02, 0x31, 0x02, 0x35, 0x00, 0x3C, 0x00, 0x3C, 0x3C, 0x46, 0x02, 0x03, 0x03, 0x00, 0x3C});
+
+        // HC1 on 0x20
+        uart_telegram({0xA0, 00, 0xFF, 00, 01, 0xD7, 00, 00, 00, 0x80, 00, 00, 00, 00, 03, 0xC5});
 
         return true;
     }
@@ -149,28 +152,26 @@ bool Test::run_test(const char * command, int8_t id) {
 
     if (strcmp(command, "solar") == 0) {
         EMSESP::logger().info(F("Testing solar..."));
-        EMSESP::rxservice_.ems_mask(EMSbus::EMS_MASK_BUDERUS);
 
         add_device(0x30, 163); // SM100
 
         // SM100Monitor - type 0x0362 EMS+ - for SM100 and SM200
-        // B0 0B FF 00 02 62 00 44 02 7A 80 00 80 00 80 00 80 00 80 00 80 00 00 7C 80 00 80 00 80 00 80
-        rx_telegram({0xB0, 0x0B, 0xFF, 00, 0x02, 0x62, 00, 0x44, 0x02, 0x7A, 0x80, 00, 0x80, 0x00, 0x80, 00,
-                     0x80, 00,   0x80, 00, 0x80, 00,   00, 0x7C, 0x80, 00,   0x80, 00, 0x80, 00,   0x80});
+        uart_telegram({0xB0, 0x0B, 0xFF, 00, 0x02, 0x62, 00, 0x44, 0x02, 0x7A, 0x80, 00, 0x80, 0x00, 0x80, 00,
+                       0x80, 00,   0x80, 00, 0x80, 00,   00, 0x7C, 0x80, 00,   0x80, 00, 0x80, 00,   0x80});
 
-        rx_telegram({0xB0, 0x0B, 0xFF, 0x00, 0x02, 0x62, 0x01, 0x44, 0x03, 0x30, 0x80, 00, 0x80, 00, 0x80, 00,
-                     0x80, 00,   0x80, 00,   0x80, 00,   0x80, 00,   0x80, 00,   0x80, 00, 0x80, 00, 0x80, 0x33});
+        uart_telegram({0xB0, 0x0B, 0xFF, 0x00, 0x02, 0x62, 0x01, 0x44, 0x03, 0x30, 0x80, 00, 0x80, 00, 0x80, 00,
+                       0x80, 00,   0x80, 00,   0x80, 00,   0x80, 00,   0x80, 00,   0x80, 00, 0x80, 00, 0x80, 0x33});
 
-        rx_telegram({0xB0, 00, 0xFF, 0x18, 02, 0x62, 0x80, 00, 0xB8});
+        uart_telegram({0xB0, 00, 0xFF, 0x18, 02, 0x62, 0x80, 00, 0xB8});
 
-        EMSESP::send_raw_telegram("B0 00 FF 18 02 62 80 00 B8");
+        uart_telegram("30 00 FF 00 02 64 00 00 00 04 00 00 FF 00 00 1E 0B 09 64 00 00 00 00"); // SM100 modulation
 
         return true;
     }
 
     if (strcmp(command, "heatpump") == 0) {
         EMSESP::logger().info(F("Testing heatpump..."));
-        EMSESP::rxservice_.ems_mask(EMSbus::EMS_MASK_BUDERUS);
+
         add_device(0x38, 200); // Enviline module
         add_device(0x10, 192); // FW120 thermostat
 
@@ -189,13 +190,12 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
     // switch to su
     shell.add_flags(CommandFlags::ADMIN);
 
-    // change MQTT format
-    EMSESP::esp8266React.getMqttSettingsService()->updateWithoutPropagation([&](MqttSettings & mqttSettings) {
-        // mqttSettings.mqtt_format = Mqtt::Format::SINGLE;
-        // mqttSettings.mqtt_format = Mqtt::Format::NESTED;
-        mqttSettings.mqtt_format = Mqtt::Format::HA;
-        return StateUpdateResult::CHANGED;
-    });
+    // init stuff
+    Mqtt::ha_enabled(true);
+    Mqtt::dallas_format(1);
+    Mqtt::ha_climate_format(1);
+    EMSESP::rxservice_.ems_mask(EMSbus::EMS_MASK_BUDERUS);
+    emsesp::EMSESP::watch(EMSESP::Watch::WATCH_RAW); // raw
 
     std::string command(20, '\0');
     if ((cmd.empty()) || (cmd == "default")) {
@@ -272,8 +272,6 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
 
     if (command == "devices") {
         shell.printfln(F("Testing devices..."));
-
-        EMSESP::rxservice_.ems_mask(EMSbus::EMS_MASK_BUDERUS); // this is important otherwise nothing will be picked up!
 
         // A fake response - UBADevices(0x07)
         rx_telegram({0x08, 0x00, 0x07, 0x00, 0x0B, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00});
@@ -355,19 +353,58 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         uart_telegram({0x98, 0x00, 0x06, 0x00, 0x00, 0x03, 0x04, 0x0C, 0x02, 0x33, 0x06, 00, 00, 00, 00, 00, 00});
 
         shell.invoke_command("show");
+        shell.invoke_command("call boiler info");
 
-        StaticJsonDocument<500> doc;
-        JsonObject              root = doc.to<JsonObject>();
-        EMSESP::device_info_web(2, root); // show thermostat. use 1 for boiler
-        serializeJsonPretty(doc, shell);
+        // test call
+        DynamicJsonDocument doc(EMSESP_JSON_SIZE_XLARGE_DYN);
+        JsonObject          json = doc.to<JsonObject>();
+        (void)emsesp::Command::call(EMSdevice::DeviceType::BOILER, "info", nullptr, -1, json);
+// bool has_data = emsesp::Command::call(EMSdevice::DeviceType::SYSTEM, "test", "boiler", -1, json);
+#if defined(EMSESP_STANDALONE)
+        Serial.print(COLOR_BRIGHT_MAGENTA);
+        if (json.size() != 0) {
+            serializeJson(doc, Serial);
+        }
         shell.println();
+        Serial.print(COLOR_RESET);
+#endif
+
+        for (const auto & emsdevice : EMSESP::emsdevices) {
+            if (emsdevice) {
+                if (emsdevice->unique_id() == 1) {
+                    DynamicJsonDocument doc(EMSESP_JSON_SIZE_XLARGE_DYN);
+
+                    JsonObject root = doc.to<JsonObject>();
+                    emsdevice->generate_values_json_web(root);
+
+#if defined(EMSESP_STANDALONE)
+                    Serial.print(COLOR_BRIGHT_MAGENTA);
+                    Serial.print("memoryUsage=");
+                    Serial.print(doc.memoryUsage());
+                    Serial.println();
+                    Serial.print("measureMsgPack=");
+                    Serial.print(measureMsgPack(doc));
+                    Serial.println();
+                    Serial.print("measureJson=");
+                    Serial.print(measureJson(doc));
+                    Serial.println();
+                    serializeJson(doc, Serial);
+                    Serial.print(COLOR_RESET);
+                    Serial.println();
+#endif
+                }
+            }
+        }
+        return;
     }
 
     if (command == "boiler") {
         shell.printfln(F("Testing boiler..."));
         run_test("boiler");
         shell.invoke_command("show");
-        // shell.invoke_command("call boiler info");
+        shell.invoke_command("call boiler info");
+        shell.invoke_command("call system publish");
+        shell.invoke_command("show mqtt");
     }
 
     if (command == "fr120") {
@@ -408,11 +445,14 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
     if (command == "solar") {
         shell.printfln(F("Testing Solar"));
         run_test("solar");
-        uart_telegram("30 00 FF 0A 02 6A 04");                                                 // SM100 pump on  1
-        uart_telegram("30 00 FF 00 02 64 00 00 00 04 00 00 FF 00 00 1E 0B 09 64 00 00 00 00"); // SM100 modulation
+
+        uart_telegram("30 00 FF 0A 02 6A 04"); // SM100 pump on (1)
         EMSESP::show_device_values(shell);
-        uart_telegram("30 00 FF 0A 02 6A 03"); // SM100 pump off  0
+        uart_telegram("30 00 FF 0A 02 6A 03"); // SM100 pump off (0)
         EMSESP::show_device_values(shell);
+        shell.invoke_command("call system publish");
+
+        // EMSESP::send_raw_telegram("B0 00 FF 18 02 62 80 00 B8");
     }
 
     if (command == "heatpump") {
@@ -424,8 +464,6 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
 
     if (command == "solar200") {
         shell.printfln(F("Testing Solar SM200"));
-
-        EMSESP::rxservice_.ems_mask(EMSbus::EMS_MASK_BUDERUS);
 
         add_device(0x30, 164); // SM200
 
@@ -451,10 +489,6 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
 
     if (command == "km") {
         shell.printfln(F("Testing KM200 Gateway"));
-
-        emsesp::EMSESP::watch(EMSESP::Watch::WATCH_RAW); // raw
-
-        EMSESP::rxservice_.ems_mask(EMSbus::EMS_MASK_BUDERUS);
 
         add_device(0x10, 158); // RC300
         add_device(0x48, 189); // KM200
@@ -513,10 +547,6 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
 
     if (command == "cr100") {
         shell.printfln(F("Testing CR100"));
-
-        emsesp::EMSESP::watch(EMSESP::Watch::WATCH_RAW); // raw
-
-        EMSESP::rxservice_.ems_mask(EMSbus::EMS_MASK_HT3); // switch to junkers
 
         add_device(0x18, 157); // Bosch CR100 - https://github.com/proddy/EMS-ESP/issues/355
 
@@ -821,16 +851,6 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
 
     if (command == "mixer") {
         shell.printfln(F("Testing Mixer..."));
-
-        // change MQTT format
-        EMSESP::esp8266React.getMqttSettingsService()->updateWithoutPropagation([&](MqttSettings & mqttSettings) {
-            // mqttSettings.mqtt_format = Mqtt::Format::SINGLE;
-            // mqttSettings.mqtt_format = Mqtt::Format::NESTED;
-            mqttSettings.mqtt_format = Mqtt::Format::HA;
-            return StateUpdateResult::CHANGED;
-        });
-
-        EMSESP::rxservice_.ems_mask(EMSbus::EMS_MASK_BUDERUS);
 
         run_test("mixer");
 

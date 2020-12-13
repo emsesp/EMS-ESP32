@@ -28,21 +28,9 @@ Generic::Generic(uint8_t device_type, uint8_t device_id, uint8_t product_id, con
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
 }
 
-void Generic::device_info_web(JsonArray & root) {
-}
-
-// publish values via MQTT
-void Generic::publish_values(JsonObject & json, bool force) {
-}
-
-// export values to JSON
-bool Generic::export_values(JsonObject & json) {
-    return true;
-}
-
-// check to see if values have been updated
-bool Generic::updated_values() {
-    return false;
+// publish HA config
+bool Generic::publish_ha_config() {
+     return true;
 }
 
 } // namespace emsesp

@@ -36,23 +36,17 @@ class Switch : public EMSdevice {
   public:
     Switch(uint8_t device_type, uint8_t device_id, uint8_t product_id, const std::string & version, const std::string & name, uint8_t flags, uint8_t brand);
 
-    virtual void publish_values(JsonObject & json, bool force);
-    virtual bool export_values(JsonObject & json);
-    virtual void device_info_web(JsonArray & root);
-    virtual bool updated_values();
+    virtual bool publish_ha_config();
 
   private:
     static uuid::log::Logger logger_;
 
     void process_WM10SetMessage(std::shared_ptr<const Telegram> telegram);
     void process_WM10MonitorMessage(std::shared_ptr<const Telegram> telegram);
-    void register_mqtt_ha_config();
 
-    uint16_t flowTemp_       = EMS_VALUE_USHORT_NOTSET;
-    uint8_t  status_         = EMS_VALUE_UINT_NOTSET;
-    uint8_t  activated_      = EMS_VALUE_BOOL_NOTSET;
-    bool     changed_        = false;
-    bool     mqtt_ha_config_ = false; // for HA MQTT Discovery
+    uint16_t flowTemp_;
+    uint8_t  status_;
+    uint8_t  activated_;
 };
 
 } // namespace emsesp

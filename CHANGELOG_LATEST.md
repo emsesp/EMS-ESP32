@@ -12,6 +12,7 @@
 - WM10 switch telegrams
 - boiler information (#633)
 - maintenance message and command
+- thermostat program, reducemode, controlmode
 
 ### Fixed
 - mixer IPM pumpstatus

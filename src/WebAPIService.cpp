@@ -28,7 +28,7 @@ WebAPIService::WebAPIService(AsyncWebServer * server) {
     server->on(EMSESP_API_SERVICE_PATH, HTTP_GET, std::bind(&WebAPIService::webAPIService, this, std::placeholders::_1));
 }
 
-// http://ems-esp/api?device=boiler&cmd=wwtemp&data=20&id=1
+// e.g. http://ems-esp/api?device=boiler&cmd=wwtemp&data=20&id=1
 void WebAPIService::webAPIService(AsyncWebServerRequest * request) {
     // see if the API is enabled
     bool api_enabled;
@@ -71,9 +71,9 @@ void WebAPIService::webAPIService(AsyncWebServerRequest * request) {
         id = "-1";
     }
 
-    DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_MEDIUM_DYN);
-    JsonObject          json = doc.to<JsonObject>();
-    bool                ok   = false;
+    DynamicJsonDocument doc(EMSESP_JSON_SIZE_LARGE_DYN);
+    JsonObject          json     = doc.to<JsonObject>();
+    bool                ok       = false;
 
     // execute the command
     if (data.isEmpty()) {
@@ -82,39 +82,20 @@ void WebAPIService::webAPIService(AsyncWebServerRequest * request) {
         if (api_enabled) {
             // we only allow commands with parameters if the API is enabled
             ok = Command::call(device_type, cmd.c_str(), data.c_str(), id.toInt(), json); // has cmd, data and id
+            if (ok && json.size()) {
+                // send json output back to web
+                std::string buffer;
+                serializeJsonPretty(doc, buffer);
+                request->send(200, "text/plain", buffer.c_str());
+                return;
+            }
         } else {
             request->send(401, "text/plain", F("Unauthorized"));
             return;
         }
     }
 
-// debug
-#if defined(EMSESP_DEBUG)
-    std::string debug(200, '\0');
-    snprintf_P(&debug[0],
-               debug.capacity() + 1,
-               PSTR("[DEBUG] API: device=%s cmd=%s data=%s id=%s [%s]"),
-               device.c_str(),
-               cmd.c_str(),
-               data.c_str(),
-               id.c_str(),
-               ok ? PSTR("OK") : PSTR("Invalid"));
-    EMSESP::logger().debug(debug.c_str());
-    if (json.size()) {
-        std::string buffer2;
-        serializeJson(doc, buffer2);
-        EMSESP::logger().debug("json (max 255 chars): %s", buffer2.c_str());
-    }
-#endif
-
-    // if we have returned data in JSON format, send this to the WEB
-    if (json.size()) {
-        std::string buffer;
-        serializeJsonPretty(doc, buffer);
-        request->send(200, "text/plain", buffer.c_str());
-    } else {
-        request->send(200, "text/plain", ok ? F("OK") : F("Invalid"));
-    }
+    request->send(200, "text/plain", ok ? F("OK") : F("Invalid"));
 }
 
 } // namespace emsesp

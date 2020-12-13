@@ -50,15 +50,22 @@
 #include "roomcontrol.h"
 #include "command.h"
 
+#include "devices/boiler.h"
+
 #define WATCH_ID_NONE 0 // no watch id set
 
-#define EMSESP_MAX_JSON_SIZE_HA_CONFIG 384   // for small HA config payloads, using StaticJsonDocument
-#define EMSESP_MAX_JSON_SIZE_SMALL 256       // for smaller json docs, using StaticJsonDocument
-#define EMSESP_MAX_JSON_SIZE_MEDIUM 768      // for medium json docs from ems devices, using StaticJsonDocument
-#define EMSESP_MAX_JSON_SIZE_LARGE 1024      // for large json docs from ems devices, like boiler or thermostat data, using StaticJsonDocument
-#define EMSESP_MAX_JSON_SIZE_MEDIUM_DYN 1024 // for large json docs, using DynamicJsonDocument
-#define EMSESP_MAX_JSON_SIZE_LARGE_DYN 2048  // for very large json docs, using DynamicJsonDocument
-#define EMSESP_MAX_JSON_SIZE_MAX_DYN 4096    // for very very large json docs, using DynamicJsonDocument
+#define EMSESP_JSON_SIZE_HA_CONFIG 768   // for HA config payloads, using StaticJsonDocument
+#define EMSESP_JSON_SIZE_SMALL 256       // for smaller json docs, using StaticJsonDocument
+#define EMSESP_JSON_SIZE_MEDIUM 768      // for medium json docs from ems devices, using StaticJsonDocument
+#define EMSESP_JSON_SIZE_LARGE 1024      // for large json docs from ems devices, like boiler or thermostat data, using StaticJsonDocument
+#define EMSESP_JSON_SIZE_MEDIUM_DYN 1024 // for large json docs, using DynamicJsonDocument
+#define EMSESP_JSON_SIZE_LARGE_DYN 2048  // for very large json docs, using DynamicJsonDocument
+
+#if defined(EMSESP_STANDALONE)
+#define EMSESP_JSON_SIZE_XLARGE_DYN 7000 // for very very large json docs, using DynamicJsonDocument
+#else
+#define EMSESP_JSON_SIZE_XLARGE_DYN 4096 // for very very large json docs, using DynamicJsonDocument
+#endif
 
 namespace emsesp {
 
@@ -69,7 +76,7 @@ class EMSESP {
     static void start();
     static void loop();
 
-    static void publish_device_values(uint8_t device_type, bool force = false);
+    static void publish_device_values(uint8_t device_type);
     static void publish_other_values();
     static void publish_sensor_values(const bool time, const bool force = false);
     static void publish_all(bool force = false);
@@ -97,8 +104,6 @@ class EMSESP {
 
     static void send_raw_telegram(const char * data);
     static bool device_exists(const uint8_t device_id);
-
-    static void device_info_web(const uint8_t unique_id, JsonObject & root);
 
     static uint8_t count_devices(const uint8_t device_type);
 
@@ -193,7 +198,6 @@ class EMSESP {
     static void process_version(std::shared_ptr<const Telegram> telegram);
     static void publish_response(std::shared_ptr<const Telegram> telegram);
     static void publish_all_loop();
-
     static bool command_info(uint8_t device_type, JsonObject & json);
 
     static constexpr uint32_t EMS_FETCH_FREQUENCY = 60000; // check every minute
@@ -205,7 +209,6 @@ class EMSESP {
         const __FlashStringHelper * name;
         uint8_t                     flags;
     };
-
     static std::vector<Device_record> device_library_;
 
     static uint8_t  actual_master_thermostat_;

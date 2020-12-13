@@ -342,13 +342,13 @@ class EMSESPDevicesForm extends Component<
               <TableHead></TableHead>
               <TableBody>
                 {deviceData.data.map((item, i) => {
-                  if (i % 2) {
+                  if (i % 3) {
                     return null;
                   } else {
                     return (
                       <TableRow key={i}>
-                        <TableCell component="th" scope="row">{deviceData.data[i]}</TableCell>
-                        <TableCell align="right">{deviceData.data[i + 1]}</TableCell>
+                        <TableCell component="th" scope="row">{deviceData.data[i+2]}</TableCell>
+                        <TableCell align="right">{deviceData.data[i]}{deviceData.data[i + 1]}</TableCell>
                       </TableRow>
                     );
                   }

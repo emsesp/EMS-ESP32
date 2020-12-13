@@ -28,21 +28,9 @@ Connect::Connect(uint8_t device_type, uint8_t device_id, uint8_t product_id, con
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
 }
 
-void Connect::device_info_web(JsonArray & root) {
-}
-
-// publish values via MQTT
-void Connect::publish_values(JsonObject & json, bool force) {
-}
-
-// export values to JSON
-bool Connect::export_values(JsonObject & json) {
+// publish HA config
+bool Connect::publish_ha_config() {
     return true;
-}
-
-// check to see if values have been updated
-bool Connect::updated_values() {
-    return false;
 }
 
 } // namespace emsesp

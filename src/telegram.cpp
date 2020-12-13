@@ -73,6 +73,7 @@ Telegram::Telegram(const uint8_t   operation,
     , offset(offset)
     , message_length(message_length) {
     // copy complete telegram data over, preventing buffer overflow
+    // faster than using std::move()
     for (uint8_t i = 0; ((i < message_length) && (i < EMS_MAX_TELEGRAM_MESSAGE_LENGTH)); i++) {
         message_data[i] = data[i];
     }

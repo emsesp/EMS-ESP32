@@ -32,92 +32,30 @@ Switch::Switch(uint8_t device_type, uint8_t device_id, uint8_t product_id, const
 
     register_telegram_type(0x9C, F("WM10MonitorMessage"), false, [&](std::shared_ptr<const Telegram> t) { process_WM10MonitorMessage(t); });
     register_telegram_type(0x9B, F("WM10SetMessage"), false, [&](std::shared_ptr<const Telegram> t) { process_WM10SetMessage(t); });
+
+    std::string empty("");
+    register_device_value(empty, &activated_, DeviceValueType::BOOL, {}, F("activated"), F("Activated"), DeviceValueUOM::NONE);
+    register_device_value(
+        empty, &flowTemp_, DeviceValueType::USHORT, flash_string_vector{F("10")}, F("flowTemp"), F("Current flow temperature"), DeviceValueUOM::DEGREES);
+    register_device_value(empty, &status_, DeviceValueType::INT, {}, F("status"), F("Status"), DeviceValueUOM::NONE);
 }
 
-// fetch the values into a JSON document for display in the web
-void Switch::device_info_web(JsonArray & root) {
-    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
-    JsonObject                                     json = doc.to<JsonObject>();
-    if (export_values(json)) {
-        create_value_json(root, F("activated"), nullptr, F_(activated), nullptr, json);
-        create_value_json(root, F("flowTemp"), nullptr, F_(flowTemp), F_(degrees), json);
-        create_value_json(root, F("status"), nullptr, F_(status), nullptr, json);
-    }
-}
-
-// publish values via MQTT
-void Switch::publish_values(JsonObject & json, bool force) {
-    if (Mqtt::mqtt_format() == Mqtt::Format::HA) {
-        if (!mqtt_ha_config_ || force) {
-            register_mqtt_ha_config();
-            return;
-        }
-    }
-
-    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
-    JsonObject                                     json_data = doc.to<JsonObject>();
-    if (export_values(json_data)) {
-        Mqtt::publish(F("switch_data"), doc.as<JsonObject>());
-    }
-}
-
-// export values to JSON
-bool Switch::export_values(JsonObject & json) {
-    if (Helpers::hasValue(flowTemp_)) {
-        char s[7];
-        json["activated"] = Helpers::render_value(s, activated_, EMS_VALUE_BOOL);
-    }
-
-    if (Helpers::hasValue(flowTemp_)) {
-        json["flowTemp"] = (float)flowTemp_ / 10;
-    }
-
-    if (Helpers::hasValue(flowTemp_)) {
-        json["status"] = status_;
-    }
-
-    return true;
-}
-
-// check to see if values have been updated
-bool Switch::updated_values() {
-    if (changed_) {
-        changed_ = false;
-        return true;
-    }
-    return false;
-}
-
-// publish config topic for HA MQTT Discovery
-void Switch::register_mqtt_ha_config() {
-    if (!Mqtt::connected()) {
-        return;
-    }
-
-    // if we don't have valid values for this HC don't add it ever again
+// publish HA config
+bool Switch::publish_ha_config() {
+    // if we don't have valid values don't add it ever again
     if (!Helpers::hasValue(flowTemp_)) {
-        return;
+        return false;
     }
 
-    // Create the Master device
-    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_HA_CONFIG> doc;
-
-    char name[10];
-    snprintf_P(name, sizeof(name), PSTR("Switch"));
-    doc["name"] = name;
-
-    char uniq_id[10];
-    snprintf_P(uniq_id, sizeof(uniq_id), PSTR("switch"));
-    doc["uniq_id"] = uniq_id;
-
-    doc["ic"] = FJSON("mdi:home-thermometer-outline");
+    StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> doc;
+    doc["uniq_id"] = F_(switch);
 
     char stat_t[50];
     snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/switch_data"), System::hostname().c_str());
     doc["stat_t"] = stat_t;
 
+    doc["name"]    = FJSON("Type");
     doc["val_tpl"] = FJSON("{{value_json.type}}"); // HA needs a single value. We take the type which is wwc or hc
-
     JsonObject dev = doc.createNestedObject("dev");
     dev["name"]    = FJSON("EMS-ESP Switch");
     dev["sw"]      = EMSESP_APP_VERSION;
@@ -126,24 +64,22 @@ void Switch::register_mqtt_ha_config() {
     JsonArray ids  = dev.createNestedArray("ids");
     ids.add("ems-esp-switch");
 
-    Mqtt::publish_ha(F("homeassistant/sensor/ems-esp/switch/config"), doc.as<JsonObject>()); // publish the config payload with retain flag
+    char topic[100];
+    snprintf_P(topic, sizeof(topic), PSTR("homeassistant/sensor/%s/switch/config"), System::hostname().c_str());
+    Mqtt::publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
 
-    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(activated), device_type(), "activated", nullptr, nullptr);
-    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(flowTemp), device_type(), "flowTemp", F_(degrees), F_(icontemperature));
-    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(status), device_type(), "status", nullptr, nullptr);
-
-    mqtt_ha_config_ = true; // done
+    return true;
 }
 
 // message 0x9B switch on/off
 void Switch::process_WM10SetMessage(std::shared_ptr<const Telegram> telegram) {
-    changed_ |= telegram->read_value(activated_, 0);
+    has_update(telegram->read_value(activated_, 0));
 }
 
 // message 0x9C holds flowtemp and unknown status value
 void Switch::process_WM10MonitorMessage(std::shared_ptr<const Telegram> telegram) {
-    changed_ |= telegram->read_value(flowTemp_, 0); // is * 10
-    changed_ |= telegram->read_value(status_, 2);
+    has_update(telegram->read_value(flowTemp_, 0)); // is * 10
+    has_update(telegram->read_value(status_, 2));
 }
 
 } // namespace emsesp

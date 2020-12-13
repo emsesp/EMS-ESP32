@@ -106,17 +106,6 @@ class MqttSettingsForm extends React.Component<MqttSettingsFormProps> {
           onChange={handleValueChange('max_topic_length')}
           margin="normal"
         />
-        <SelectValidator name="mqtt_format"
-          label="Format"
-          value={data.mqtt_format}
-          fullWidth
-          variant="outlined"
-          onChange={handleValueChange('mqtt_format')}
-          margin="normal">
-          <MenuItem value={1}>Single</MenuItem>
-          <MenuItem value={2}>Nested</MenuItem>
-          <MenuItem value={3}>Home Assistant</MenuItem>
-        </SelectValidator>
         <SelectValidator name="mqtt_qos"
           label="QoS"
           value={data.mqtt_qos}
@@ -148,6 +137,43 @@ class MqttSettingsForm extends React.Component<MqttSettingsFormProps> {
           }
           label="Retain Flag"
         />
+        <br></br>
+        <Typography variant="h6" color="primary" >
+          Formatting
+        </Typography>
+        <SelectValidator name="dallas_format"
+          label="Dallas Sensor Payload Grouping"
+          value={data.dallas_format}
+          fullWidth
+          variant="outlined"
+          onChange={handleValueChange('dallas_format')}
+          margin="normal">
+          <MenuItem value={1}>by Sensor ID</MenuItem>
+          <MenuItem value={2}>by Number</MenuItem>
+        </SelectValidator>
+        <BlockFormControlLabel
+          control={
+            <Checkbox
+              checked={data.ha_enabled}
+              onChange={handleValueChange('ha_enabled')}
+              value="ha_enabled"
+            />
+          }
+          label="Home Assistant MQTT Discovery"
+        />
+        { data.ha_enabled &&
+          <SelectValidator name="ha_climate_format"
+            label="Thermostat Room Temperature"
+            value={data.ha_climate_format}
+            fullWidth
+            variant="outlined"
+            onChange={handleValueChange('ha_climate_format')}
+            margin="normal">
+            <MenuItem value={1}>use Current temperature (default)</MenuItem>
+            <MenuItem value={2}>use Setpoint temperature</MenuItem>
+            <MenuItem value={3}>Fix to 0</MenuItem>
+          </SelectValidator>
+        }
         <br></br>
         <Typography variant="h6" color="primary" >
           Publish Intervals

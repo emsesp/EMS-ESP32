@@ -31,66 +31,23 @@ Heatpump::Heatpump(uint8_t device_type, uint8_t device_id, uint8_t product_id, c
     // telegram handlers
     register_telegram_type(0x042B, F("HP1"), true, [&](std::shared_ptr<const Telegram> t) { process_HPMonitor1(t); });
     register_telegram_type(0x047B, F("HP2"), true, [&](std::shared_ptr<const Telegram> t) { process_HPMonitor2(t); });
+
+    std::string empty("");
+    register_device_value(empty, &airHumidity_, DeviceValueType::UINT, flash_string_vector{F("2")}, F("airHumidity"), F("Relative air humidity"), DeviceValueUOM::NONE);
+    register_device_value(empty, &dewTemperature_, DeviceValueType::UINT, {}, F("dewTemperature"), F("Dew point temperature"), DeviceValueUOM::NONE);
 }
 
-// creates JSON doc from values
-// returns false if empty
-bool Heatpump::export_values(JsonObject & json) {
-    if (Helpers::hasValue(airHumidity_)) {
-        json["airHumidity"] = (float)airHumidity_ / 2;
-    }
-
-    if (Helpers::hasValue(dewTemperature_)) {
-        json["dewTemperature"] = dewTemperature_;
-    }
-
-    return json.size();
-}
-
-void Heatpump::device_info_web(JsonArray & root) {
-    // fetch the values into a JSON document
-    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
-    JsonObject                                     json = doc.to<JsonObject>();
-    if (!export_values(json)) {
-        return; // empty
-    }
-
-    create_value_json(root, F("airHumidity"), nullptr, F_(airHumidity), F_(percent), json);
-    create_value_json(root, F("dewTemperature"), nullptr, F_(dewTemperature), F_(degrees), json);
-}
-
-// publish values via MQTT
-void Heatpump::publish_values(JsonObject & json, bool force) {
-    // handle HA first
-    if (Mqtt::mqtt_format() == Mqtt::Format::HA) {
-        if (!mqtt_ha_config_ || force) {
-            register_mqtt_ha_config();
-            return;
-        }
-    }
-
-    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
-    JsonObject                                     json_data = doc.to<JsonObject>();
-    if (export_values(json_data)) {
-        Mqtt::publish(F("heatpump_data"), doc.as<JsonObject>());
-    }
-}
-
-void Heatpump::register_mqtt_ha_config() {
-    if (!Mqtt::connected()) {
-        return;
-    }
-
-    // Create the Master device
-    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_HA_CONFIG> doc;
-    doc["name"]    = F_(EMSESP);
+// publish HA config
+bool Heatpump::publish_ha_config() {
+    StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> doc;
     doc["uniq_id"] = F_(heatpump);
-    doc["ic"]      = F_(iconheatpump);
+    doc["ic"]      = F_(iconvalve);
 
     char stat_t[50];
     snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/heatpump_data"), System::hostname().c_str());
     doc["stat_t"] = stat_t;
 
+    doc["name"]    = FJSON("Humidity");
     doc["val_tpl"] = FJSON("{{value_json.airHumidity}}");
 
     JsonObject dev = doc.createNestedObject("dev");
@@ -100,21 +57,12 @@ void Heatpump::register_mqtt_ha_config() {
     dev["mdl"]     = this->name();
     JsonArray ids  = dev.createNestedArray("ids");
     ids.add("ems-esp-heatpump");
-    Mqtt::publish_ha(F("homeassistant/sensor/ems-esp/heatpump/config"), doc.as<JsonObject>()); // publish the config payload with retain flag
 
-    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(airHumidity), device_type(), "airHumidity", F_(percent), nullptr);
-    Mqtt::register_mqtt_ha_sensor(nullptr, nullptr, F_(dewTemperature), device_type(), "dewTemperature", F_(degrees), nullptr);
+    char topic[100];
+    snprintf_P(topic, sizeof(topic), PSTR("homeassistant/sensor/%s/heatpump/config"), System::hostname().c_str());
+    Mqtt::publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
 
-    mqtt_ha_config_ = true; // done
-}
-
-// check to see if values have been updated
-bool Heatpump::updated_values() {
-    if (changed_) {
-        changed_ = false;
-        return true;
-    }
-    return false;
+    return true;
 }
 
 /*
@@ -122,8 +70,8 @@ bool Heatpump::updated_values() {
  * e.g. "38 10 FF 00 03 7B 08 24 00 4B"
  */
 void Heatpump::process_HPMonitor2(std::shared_ptr<const Telegram> telegram) {
-    changed_ |= telegram->read_value(dewTemperature_, 0);
-    changed_ |= telegram->read_value(airHumidity_, 1);
+    has_update(telegram->read_value(dewTemperature_, 0));
+    has_update(telegram->read_value(airHumidity_, 1));
 }
 
 #pragma GCC diagnostic push

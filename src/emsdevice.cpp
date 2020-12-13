@@ -21,6 +21,32 @@
 
 namespace emsesp {
 
+// mapping of UOM, to match order in DeviceValueUOM enum
+static const __FlashStringHelper * DeviceValueUOM_s[(uint8_t)10] __attribute__((__aligned__(sizeof(int)))) PROGMEM = {
+
+    F_(degrees),
+    F_(percent),
+    F_(lmin),
+    F_(kwh),
+    F_(wh),
+    F_(hours),
+    F_(minutes),
+    F_(ua),
+    F_(bar)
+
+};
+
+const __FlashStringHelper * EMSdevice::uom_to_string(uint8_t uom) {
+    if (uom == DeviceValueUOM::NONE) {
+        return nullptr;
+    }
+    return DeviceValueUOM_s[uom];
+}
+
+const std::vector<EMSdevice::DeviceValue> EMSdevice::devicevalues() const {
+    return devicevalues_;
+}
+
 std::string EMSdevice::brand_to_string() const {
     switch (brand_) {
     case EMSdevice::Brand::BOSCH:
@@ -276,7 +302,6 @@ char * EMSdevice::show_telegram_handlers(char * result) {
     return result;
 }
 
-
 // list all the mqtt handlers for this device
 void EMSdevice::show_mqtt_handlers(uuid::console::Shell & shell) {
     Mqtt::show_topic_handlers(shell, device_type_);
@@ -294,6 +319,317 @@ void EMSdevice::register_mqtt_cmd(const __FlashStringHelper * cmd, cmdfunction_p
 // register a call back function for a specific telegram type
 void EMSdevice::register_telegram_type(const uint16_t telegram_type_id, const __FlashStringHelper * telegram_type_name, bool fetch, process_function_p f) {
     telegram_functions_.emplace_back(telegram_type_id, telegram_type_name, fetch, f);
+}
+
+// add to device value library
+// arguments are:
+//  tag: to be used to group mqtt together, either as separate topics as a nested object
+//  value: pointer to the value from the .h file
+//  type: one of DeviceValueType
+//  options: options for enum or a divider for int (e.g. F("10"))
+//  short_name: used in Mqtt as keys
+//  full name: used in Web and Console
+//  uom: unit of measure from DeviceValueUOM
+//  icon (optional): the HA mdi icon to use, from locale_*.h file
+void EMSdevice::register_device_value(std::string &               tag,
+                                      void *                      value_p,
+                                      uint8_t                     type,
+                                      const flash_string_vector & options,
+                                      const __FlashStringHelper * short_name,
+                                      const __FlashStringHelper * full_name,
+                                      uint8_t                     uom,
+                                      const __FlashStringHelper * icon) {
+    // init the value depending on it's type
+    if (type == DeviceValueType::TEXT) {
+        *(char *)(value_p) = {'\0'};
+    } else if (type == DeviceValueType::INT) {
+        *(int8_t *)(value_p) = EMS_VALUE_INT_NOTSET;
+    } else if (type == DeviceValueType::SHORT) {
+        *(int16_t *)(value_p) = EMS_VALUE_SHORT_NOTSET;
+    } else if (type == DeviceValueType::USHORT) {
+        *(uint16_t *)(value_p) = EMS_VALUE_USHORT_NOTSET;
+    } else if ((type == DeviceValueType::ULONG) || (type == DeviceValueType::TIME)) {
+        *(uint32_t *)(value_p) = EMS_VALUE_ULONG_NOTSET;
+    } else {
+        // enums, uint8_t, bool behave as uint8_t
+        *(uint8_t *)(value_p) = EMS_VALUE_UINT_NOTSET;
+    }
+
+    // add to our library
+    devicevalues_.emplace_back(device_type_, tag, value_p, type, options, short_name, full_name, uom, icon);
+}
+
+// looks up the uom (suffix) for a given key from the device value table
+std::string EMSdevice::get_value_uom(const char * key) {
+    // the key may have a suffix at the start which is between brackets. remove it.
+    char new_key[80];
+    strncpy(new_key, key, sizeof(new_key));
+    char * p = new_key;
+    if (key[0] == '(') {
+        while ((*p++ != ')') && (*p != '\0'))
+            ;
+        p++;
+    }
+
+    for (const auto & dv : devicevalues_) {
+        if (dv.full_name != nullptr) {
+            if (uuid::read_flash_string(dv.full_name) == p) {
+                // ignore TIME since "minutes" is already included
+                if ((dv.uom == DeviceValueUOM::NONE) || (dv.uom == DeviceValueUOM::MINUTES)) {
+                    break;
+                }
+                return uuid::read_flash_string(EMSdevice::uom_to_string(dv.uom));
+            }
+        }
+    }
+
+    return {}; // not found
+}
+
+// prepare array of device values, as 3 elements serialized (name, value, uom) in array to send to Web UI
+// returns number of elements
+bool EMSdevice::generate_values_json_web(JsonObject & json) {
+    json["name"]   = to_string_short();
+    JsonArray data = json.createNestedArray("data");
+
+    uint8_t num_elements = 0;
+    for (const auto & dv : devicevalues_) {
+        // ignore if full_name empty
+        if (dv.full_name != nullptr) {
+            // handle Booleans (true, false)
+            if ((dv.type == DeviceValueType::BOOL) && Helpers::hasValue(*(uint8_t *)(dv.value_p), EMS_VALUE_BOOL)) {
+                // see if we have options for the bool's
+                if (dv.options.size() == 2) {
+                    data.add(*(uint8_t *)(dv.value_p) ? dv.options[0] : dv.options[1]);
+                } else {
+                    // see how to render the value depending on the setting
+                    if (Helpers::bool_format() == BOOL_FORMAT_ONOFF) {
+                        // on or off as strings
+                        data.add(*(uint8_t *)(dv.value_p) ? F_(on) : F_(off));
+                    } else if (Helpers::bool_format() == BOOL_FORMAT_TRUEFALSE) {
+                        // true or false values (not strings)
+                        data.add((bool)(*(uint8_t *)(dv.value_p)) ? true : false);
+                    } else {
+                        // 1 or 0
+                        data.add((uint8_t)(*(uint8_t *)(dv.value_p)) ? 1 : 0);
+                    }
+                }
+            }
+
+            // handle TEXT strings
+            else if ((dv.type == DeviceValueType::TEXT) && (Helpers::hasValue((char *)(dv.value_p)))) {
+                data.add((char *)(dv.value_p));
+            }
+
+            // handle ENUMs
+            else if ((dv.type == DeviceValueType::ENUM) && Helpers::hasValue(*(uint8_t *)(dv.value_p))) {
+                if (*(uint8_t *)(dv.value_p) < dv.options.size()) {
+                    data.add(dv.options[*(uint8_t *)(dv.value_p)]);
+                }
+            }
+
+            else {
+                // handle Integers and Floats
+                // If a divider is specified, do the division to 2 decimals places and send back as double/float
+                // otherwise force as an integer whole
+                // the nested if's is necessary due to the way the ArduinoJson templates are pre-processed by the compiler
+                uint8_t divider = (dv.options.size() == 1) ? Helpers::atoint(uuid::read_flash_string(dv.options[0]).c_str()) : 0;
+
+                // INT
+                if ((dv.type == DeviceValueType::INT) && Helpers::hasValue(*(int8_t *)(dv.value_p))) {
+                    if (divider) {
+                        data.add(Helpers::round2(*(int8_t *)(dv.value_p), divider));
+                    } else {
+                        data.add(*(int8_t *)(dv.value_p));
+                    }
+                } else if ((dv.type == DeviceValueType::UINT) && Helpers::hasValue(*(uint8_t *)(dv.value_p))) {
+                    if (divider) {
+                        data.add(Helpers::round2(*(uint8_t *)(dv.value_p), divider));
+                    } else {
+                        data.add(*(uint8_t *)(dv.value_p));
+                    }
+                } else if ((dv.type == DeviceValueType::SHORT) && Helpers::hasValue(*(int16_t *)(dv.value_p))) {
+                    if (divider) {
+                        data.add(Helpers::round2(*(int16_t *)(dv.value_p), divider));
+                    } else {
+                        data.add(*(int16_t *)(dv.value_p));
+                    }
+                } else if ((dv.type == DeviceValueType::USHORT) && Helpers::hasValue(*(uint16_t *)(dv.value_p))) {
+                    if (divider) {
+                        data.add(Helpers::round2(*(uint16_t *)(dv.value_p), divider));
+                    } else {
+                        data.add(*(uint16_t *)(dv.value_p));
+                    }
+                } else if ((dv.type == DeviceValueType::ULONG) && Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
+                    if (divider) {
+                        data.add(Helpers::round2(*(uint32_t *)(dv.value_p), divider));
+                    } else {
+                        data.add(*(uint32_t *)(dv.value_p));
+                    }
+                } else if ((dv.type == DeviceValueType::TIME) && Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
+                    uint32_t time_value = *(uint32_t *)(dv.value_p);
+                    time_value          = (divider) ? time_value / divider : time_value; // sometimes we need to divide by 60
+                    char time_s[40];
+                    snprintf_P(time_s, 40, PSTR("%d days %d hours %d minutes"), (time_value / 1440), ((time_value % 1440) / 60), (time_value % 60));
+                    data.add(time_s);
+                }
+            }
+
+            // check if we've added a data element by comparing the size
+            // then add the remaining elements
+            uint8_t sz = data.size();
+            if (sz > num_elements) {
+                // add the unit of measure (uom)
+                if (dv.uom == DeviceValueUOM::MINUTES) {
+                    data.add(nullptr);
+                } else {
+                    data.add(uom_to_string(dv.uom));
+                }
+
+                // add name, prefixing the tag if it exists
+                // if we're a boiler, ignore the tag
+                if (dv.tag.empty() || (device_type_ == DeviceType::BOILER)) {
+                    data.add(dv.full_name);
+                } else {
+                    char name[50];
+                    snprintf_P(name, sizeof(name), "(%s) %s", dv.tag.c_str(), uuid::read_flash_string(dv.full_name).c_str());
+                    data.add(name);
+                }
+                num_elements = sz + 2;
+            }
+        }
+    }
+
+    return (num_elements != 0);
+}
+
+// For each value in the device create the json object pair and add it to given json
+// return false if empty
+bool EMSdevice::generate_values_json(JsonObject & root, const std::string & tag_filter, const bool verbose) {
+    bool        has_value = false; // to see if we've added a value. it's faster than doing a json.size() at the end
+    std::string old_tag(40, '\0');
+    JsonObject  json = root;
+
+    for (const auto & dv : devicevalues_) {
+        // only show if tag is either empty or matches a value, and don't show if full_name is empty unless we're outputing for mqtt payloads
+        if (((tag_filter.empty()) || (tag_filter == dv.tag)) && (dv.full_name != nullptr || !verbose)) {
+            bool have_tag = (!dv.tag.empty() && (dv.device_type != DeviceType::BOILER));
+            char name[80];
+            if (verbose) {
+                // prefix the tag in brackets, unless it's Boiler because we're naughty and use tag for the MQTT topic
+                if (have_tag) {
+                    snprintf_P(name, 80, "(%s) %s", dv.tag.c_str(), uuid::read_flash_string(dv.full_name).c_str());
+                } else {
+                    strcpy(name, uuid::read_flash_string(dv.full_name).c_str()); // use full name
+                }
+            } else {
+                strcpy(name, uuid::read_flash_string(dv.short_name).c_str()); // use short name
+
+                // if we have a tag, and its different to the last one create a nested object
+                if (have_tag && (dv.tag != old_tag)) {
+                    old_tag = dv.tag;
+                    json    = root.createNestedObject(dv.tag);
+                }
+            }
+
+            // handle Booleans (true, false)
+            if ((dv.type == DeviceValueType::BOOL) && Helpers::hasValue(*(uint8_t *)(dv.value_p), EMS_VALUE_BOOL)) {
+                // see if we have options for the bool's
+                if (dv.options.size() == 2) {
+                    json[name] = *(uint8_t *)(dv.value_p) ? dv.options[0] : dv.options[1];
+                    has_value  = true;
+                } else {
+                    // see how to render the value depending on the setting
+                    if (Helpers::bool_format() == BOOL_FORMAT_ONOFF) {
+                        // on or off as strings
+                        json[name] = *(uint8_t *)(dv.value_p) ? F_(on) : F_(off);
+                        has_value  = true;
+                    } else if (Helpers::bool_format() == BOOL_FORMAT_TRUEFALSE) {
+                        // true or false values (not strings)
+                        json[name] = (bool)(*(uint8_t *)(dv.value_p)) ? true : false;
+                        has_value  = true;
+                    } else {
+                        // 1 or 0
+                        json[name] = (uint8_t)(*(uint8_t *)(dv.value_p)) ? 1 : 0;
+                        has_value  = true;
+                    }
+                }
+            }
+
+            // handle TEXT strings
+            else if ((dv.type == DeviceValueType::TEXT) && (Helpers::hasValue((char *)(dv.value_p)))) {
+                json[name] = (char *)(dv.value_p);
+                has_value  = true;
+            }
+
+            // handle ENUMs
+            else if ((dv.type == DeviceValueType::ENUM) && Helpers::hasValue(*(uint8_t *)(dv.value_p))) {
+                if (*(uint8_t *)(dv.value_p) < dv.options.size()) {
+                    json[name] = dv.options[*(uint8_t *)(dv.value_p)];
+                    has_value  = true;
+                }
+            }
+
+            // handle Integers and Floats
+            else {
+                // If a divider is specified, do the division to 2 decimals places and send back as double/float
+                // otherwise force as an integer whole
+                // the nested if's is necessary due to the way the ArduinoJson templates are pre-processed by the compiler
+                uint8_t divider = (dv.options.size() == 1) ? Helpers::atoint(uuid::read_flash_string(dv.options[0]).c_str()) : 0;
+
+                // INT
+                if ((dv.type == DeviceValueType::INT) && Helpers::hasValue(*(int8_t *)(dv.value_p))) {
+                    if (divider) {
+                        json[name] = Helpers::round2(*(int8_t *)(dv.value_p), divider);
+                    } else {
+                        json[name] = *(int8_t *)(dv.value_p);
+                    }
+                    has_value = true;
+                } else if ((dv.type == DeviceValueType::UINT) && Helpers::hasValue(*(uint8_t *)(dv.value_p))) {
+                    if (divider) {
+                        json[name] = Helpers::round2(*(uint8_t *)(dv.value_p), divider);
+                    } else {
+                        json[name] = *(uint8_t *)(dv.value_p);
+                    }
+                    has_value = true;
+                } else if ((dv.type == DeviceValueType::SHORT) && Helpers::hasValue(*(int16_t *)(dv.value_p))) {
+                    if (divider) {
+                        json[name] = Helpers::round2(*(int16_t *)(dv.value_p), divider);
+                    } else {
+                        json[name] = *(int16_t *)(dv.value_p);
+                    }
+                    has_value = true;
+                } else if ((dv.type == DeviceValueType::USHORT) && Helpers::hasValue(*(uint16_t *)(dv.value_p))) {
+                    if (divider) {
+                        json[name] = Helpers::round2(*(uint16_t *)(dv.value_p), divider);
+                    } else {
+                        json[name] = *(uint16_t *)(dv.value_p);
+                    }
+                    has_value = true;
+                } else if ((dv.type == DeviceValueType::ULONG) && Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
+                    if (divider) {
+                        json[name] = Helpers::round2(*(uint32_t *)(dv.value_p), divider);
+                    } else {
+                        json[name] = *(uint32_t *)(dv.value_p);
+                    }
+                    has_value = true;
+                } else if ((dv.type == DeviceValueType::TIME) && Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
+                    uint32_t time_value = *(uint32_t *)(dv.value_p);
+                    time_value          = (divider) ? time_value / divider : time_value; // sometimes we need to divide by 60
+                    if (verbose) {
+                        char time_s[40];
+                        snprintf_P(time_s, sizeof(time_s), PSTR("%d days %d hours %d minutes"), (time_value / 1440), ((time_value % 1440) / 60), (time_value % 60));
+                        json[name] = time_s;
+                    } else {
+                        json[name] = time_value;
+                    }
+                    has_value = true;
+                }
+            }
+        }
+    }
+
+    return has_value;
 }
 
 // return the name of the telegram type
@@ -352,52 +688,6 @@ void EMSdevice::write_command(const uint16_t type_id, const uint8_t offset, cons
 // send Tx read command to the device
 void EMSdevice::read_command(const uint16_t type_id) {
     EMSESP::send_read_request(type_id, device_id());
-}
-
-// create json key/value pair
-void EMSdevice::create_value_json(JsonArray &                 root,
-                                  const __FlashStringHelper * key,
-                                  const __FlashStringHelper * prefix,
-                                  const __FlashStringHelper * name,
-                                  const __FlashStringHelper * suffix,
-                                  JsonObject &                json) {
-    JsonVariant data = json[uuid::read_flash_string(key)];
-    if (data == nullptr) {
-        return; // doesn't exist
-    }
-
-    // add prefix to name
-    if (prefix != nullptr) {
-        char name_text[100];
-        snprintf_P(name_text, sizeof(name_text), PSTR("%s%s"), uuid::read_flash_string(prefix).c_str(), uuid::read_flash_string(name).c_str());
-        root.add(name_text);
-    } else {
-        root.add(name);
-    }
-
-    // convert to string and add the suffix, this is to save space when sending to the web as json
-    // which is why we use n and v instead of name and value
-    std::string suffix_string(10, '\0');
-    if (suffix == nullptr) {
-        suffix_string = "";
-    } else {
-        suffix_string = " " + uuid::read_flash_string(suffix);
-    }
-
-    char data_string[40];
-    if (data.is<char *>()) {
-        snprintf_P(data_string, sizeof(data_string), PSTR("%s%s"), data.as<char *>(), suffix_string.c_str());
-    } else if (data.is<int>()) {
-        snprintf_P(data_string, sizeof(data_string), PSTR("%d%s"), data.as<int>(), suffix_string.c_str());
-    } else if (data.is<float>()) {
-        char s[10];
-        snprintf_P(data_string, sizeof(data_string), PSTR("%s%s"), Helpers::render_value(s, (float)data.as<float>(), 1), suffix_string.c_str());
-    } else if (data.is<bool>()) {
-        char s[10];
-        snprintf_P(data_string, sizeof(data_string), PSTR("%s%s"), Helpers::render_boolean(s, data.as<bool>()), suffix_string.c_str());
-    }
-
-    root.add(data_string);
 }
 
 } // namespace emsesp

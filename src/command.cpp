@@ -26,7 +26,7 @@ uuid::log::Logger Command::logger_{F_(command), uuid::log::Facility::DAEMON};
 
 std::vector<Command::CmdFunction> Command::cmdfunctions_;
 
-// calls a command, context is the device_type
+// calls a command
 // id may be used to represent a heating circuit for example
 // returns false if error or not found
 bool Command::call(const uint8_t device_type, const char * cmd, const char * value, const int8_t id) {
@@ -49,7 +49,7 @@ bool Command::call(const uint8_t device_type, const char * cmd, const char * val
     return ((cf->cmdfunction_)(value, id));
 }
 
-// calls a command, context is the device_type. Takes a json object for output.
+// calls a command. Takes a json object for output.
 // id may be used to represent a heating circuit for example
 // returns false if error or not found
 bool Command::call(const uint8_t device_type, const char * cmd, const char * value, const int8_t id, JsonObject & json) {
@@ -92,7 +92,7 @@ void Command::add(const uint8_t device_type, const uint8_t device_id, const __Fl
 
     // see if we need to subscribe
     if (Mqtt::enabled()) {
-        Mqtt::register_command(device_type, device_id, cmd, cb);
+        Mqtt::register_command(device_type, cmd, cb);
     }
 }
 

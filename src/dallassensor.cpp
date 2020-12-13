@@ -54,7 +54,7 @@ void DallasSensor::reload() {
         parasite_    = settings.dallas_parasite;
     });
 
-    if (Mqtt::mqtt_format() == Mqtt::Format::HA) {
+    if (Mqtt::ha_enabled()) {
         for (uint8_t i = 0; i < MAX_SENSORS; registered_ha_[i++] = false)
             ;
     }
@@ -282,14 +282,10 @@ bool DallasSensor::updated_values() {
     return false;
 }
 
-bool DallasSensor::command_info(const char * value, const int8_t id, JsonObject & json) {
-    return (export_values(json));
-}
-
 // creates JSON doc from values
 // returns false if empty
 // e.g. dallassensor_data = {"sensor1":{"id":"28-EA41-9497-0E03-5F","temp":23.30},"sensor2":{"id":"28-233D-9497-0C03-8B","temp":24.0}}
-bool DallasSensor::export_values(JsonObject & json) {
+bool DallasSensor::command_info(const char * value, const int8_t id, JsonObject & json) {
     if (sensors_.size() == 0) {
         return false;
     }
@@ -317,18 +313,20 @@ void DallasSensor::publish_values(const bool force) {
     }
 
     DynamicJsonDocument doc(100 * num_sensors);
-    uint8_t             sensor_no    = 1;
-    uint8_t             mqtt_format_ = Mqtt::mqtt_format();
+    uint8_t             sensor_no = 1;
+
+    // dallas format is overriden when using Home Assistant
+    uint8_t dallas_format = Mqtt::ha_enabled() ? Mqtt::Dallas_Format::SENSORID : Mqtt::dallas_format();
 
     for (const auto & sensor : sensors_) {
         char sensorID[10]; // sensor{1-n}
         snprintf_P(sensorID, 10, PSTR("sensor%d"), sensor_no);
-        if (mqtt_format_ == Mqtt::Format::SINGLE) {
+        if (dallas_format == Mqtt::Dallas_Format::NUMBER) {
             // e.g. dallassensor_data = {"28-EA41-9497-0E03":23.3,"28-233D-9497-0C03":24.0}
             if (Helpers::hasValue(sensor.temperature_c)) {
                 doc[sensor.to_string()] = (float)(sensor.temperature_c) / 10;
             }
-        } else {
+        } else if (dallas_format == Mqtt::Dallas_Format::SENSORID) {
             // e.g. dallassensor_data = {"sensor1":{"id":"28-EA41-9497-0E03","temp":23.3},"sensor2":{"id":"28-233D-9497-0C03","temp":24.0}}
             JsonObject dataSensor = doc.createNestedObject(sensorID);
             dataSensor["id"]      = sensor.to_string();
@@ -339,9 +337,9 @@ void DallasSensor::publish_values(const bool force) {
 
         // create the HA MQTT config
         // to e.g. homeassistant/sensor/ems-esp/dallas_28-233D-9497-0C03/config
-        if (mqtt_format_ == Mqtt::Format::HA) {
+        if (Mqtt::ha_enabled()) {
             if (!(registered_ha_[sensor_no - 1]) || force) {
-                StaticJsonDocument<EMSESP_MAX_JSON_SIZE_MEDIUM> config;
+                StaticJsonDocument<EMSESP_JSON_SIZE_MEDIUM> config;
                 config["dev_cla"] = FJSON("temperature");
 
                 char stat_t[50];
@@ -365,8 +363,8 @@ void DallasSensor::publish_values(const bool force) {
                 JsonArray  ids = dev.createNestedArray("ids");
                 ids.add("ems-esp");
 
-                std::string topic(100, '\0');
-                snprintf_P(&topic[0], 100, PSTR("homeassistant/sensor/ems-esp/dallas_%s/config"), sensor.to_string().c_str());
+                char topic[100];
+                snprintf_P(topic, sizeof(topic), PSTR("homeassistant/sensor/%s/dallas_%s/config"), System::hostname().c_str(), sensor.to_string().c_str());
                 Mqtt::publish_ha(topic, config.as<JsonObject>());
 
                 registered_ha_[sensor_no - 1] = true;

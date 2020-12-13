@@ -36,21 +36,13 @@ class Heatpump : public EMSdevice {
   public:
     Heatpump(uint8_t device_type, uint8_t device_id, uint8_t product_id, const std::string & version, const std::string & name, uint8_t flags, uint8_t brand);
 
-    virtual void publish_values(JsonObject & json, bool force);
-    virtual bool export_values(JsonObject & json);
-    virtual void device_info_web(JsonArray & root);
-    virtual bool updated_values();
+    virtual bool publish_ha_config();
 
   private:
     static uuid::log::Logger logger_;
 
-    void register_mqtt_ha_config();
-
-    uint8_t airHumidity_    = EMS_VALUE_UINT_NOTSET;
-    uint8_t dewTemperature_ = EMS_VALUE_UINT_NOTSET;
-
-    bool changed_        = false;
-    bool mqtt_ha_config_ = false; // for HA MQTT Discovery
+    uint8_t airHumidity_;
+    uint8_t dewTemperature_;
 
     void process_HPMonitor1(std::shared_ptr<const Telegram> telegram);
     void process_HPMonitor2(std::shared_ptr<const Telegram> telegram);

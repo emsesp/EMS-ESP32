@@ -16,6 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+// compare_flash_string added by Proddy
+
 #ifndef UUID_COMMON_H_
 #define UUID_COMMON_H_
 
@@ -31,6 +33,21 @@
  * - <a href="https://mcu-uuid-common.readthedocs.io/">Documentation</a>
  */
 namespace uuid {
+
+/**
+ * String compare two flash strings
+ *
+ * The flash string must be stored with appropriate alignment for
+ * reading it on the platform.
+ *
+ * @param[in] a Pointer to string stored in flash.
+ * @param[in] b Pointer to string stored in flash.
+ * @param[in] n optional max length
+ * @return 0 for match, otherwise diff
+ * @since 1.0.0
+ */
+int compare_flash_string(const __FlashStringHelper * a, const __FlashStringHelper * b);
+int compare_flash_string(const __FlashStringHelper * a, const __FlashStringHelper * b, size_t n);
 
 /**
  * Read a string from flash and convert it to a std::string.

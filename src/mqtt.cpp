@@ -32,10 +32,12 @@ uint32_t    Mqtt::publish_time_boiler_;
 uint32_t    Mqtt::publish_time_thermostat_;
 uint32_t    Mqtt::publish_time_solar_;
 uint32_t    Mqtt::publish_time_mixer_;
-uint32_t    Mqtt::publish_time_other_;
 uint32_t    Mqtt::publish_time_sensor_;
-uint8_t     Mqtt::mqtt_format_;
+uint32_t    Mqtt::publish_time_other_;
 bool        Mqtt::mqtt_enabled_;
+uint8_t     Mqtt::dallas_format_;
+uint8_t     Mqtt::ha_climate_format_;
+bool        Mqtt::ha_enabled_;
 
 std::vector<Mqtt::MQTTSubFunction> Mqtt::mqtt_subfunctions_;
 
@@ -84,7 +86,7 @@ void Mqtt::subscribe(const uint8_t device_type, const std::string & topic, mqtt_
 }
 
 // subscribe to the command topic if it doesn't exist yet
-void Mqtt::register_command(const uint8_t device_type, const uint8_t device_id, const __FlashStringHelper * cmd, cmdfunction_p cb) {
+void Mqtt::register_command(const uint8_t device_type, const __FlashStringHelper * cmd, cmdfunction_p cb) {
     std::string cmd_topic = EMSdevice::device_type_2_device_name(device_type);
 
     bool exists = false;
@@ -147,11 +149,6 @@ void Mqtt::loop() {
     if (publish_time_mixer_ && (currentMillis - last_publish_mixer_ > publish_time_mixer_)) {
         last_publish_mixer_ = currentMillis;
         EMSESP::publish_device_values(EMSdevice::DeviceType::MIXER);
-    }
-
-    if (publish_time_other_ && (currentMillis - last_publish_other_ > publish_time_other_)) {
-        last_publish_other_ = currentMillis;
-        EMSESP::publish_other_values();
     }
 
     if (currentMillis - last_publish_sensor_ > publish_time_sensor_) {
@@ -249,8 +246,8 @@ void Mqtt::on_message(const char * topic, const char * payload, size_t len) {
             }
 
             // empty function. It's a command then. Find the command from the json and call it directly.
-            StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
-            DeserializationError                           error = deserializeJson(doc, message);
+            StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> doc;
+            DeserializationError                       error = deserializeJson(doc, message);
             if (error) {
                 LOG_ERROR(F("MQTT error: payload %s, error %s"), message, error.c_str());
                 return;
@@ -356,8 +353,10 @@ void Mqtt::start() {
         publish_time_sensor_     = mqttSettings.publish_time_sensor * 1000;
         mqtt_qos_                = mqttSettings.mqtt_qos;
         mqtt_retain_             = mqttSettings.mqtt_retain;
-        mqtt_format_             = mqttSettings.mqtt_format;
         mqtt_enabled_            = mqttSettings.enabled;
+        ha_enabled_              = mqttSettings.ha_enabled;
+        ha_climate_format_       = mqttSettings.ha_climate_format;
+        dallas_format_           = mqttSettings.dallas_format;
     });
 
     // if MQTT disabled, quit
@@ -406,6 +405,10 @@ void Mqtt::start() {
 
     // create space for command buffer, to avoid heap memory fragmentation
     mqtt_subfunctions_.reserve(10);
+
+#if defined(EMSESP_STANDALONE)
+    on_connect(); // simulate an MQTT connection
+#endif
 }
 
 void Mqtt::set_publish_time_boiler(uint16_t publish_time) {
@@ -455,19 +458,8 @@ bool Mqtt::get_publish_onchange(uint8_t device_type) {
     return false;
 }
 
-void Mqtt::set_qos(uint8_t mqtt_qos) {
-    mqtt_qos_ = mqtt_qos;
-}
-
-void Mqtt::set_retain(bool mqtt_retain) {
-    mqtt_retain_ = mqtt_retain;
-}
-
-void Mqtt::set_format(uint8_t mqtt_format) {
-    mqtt_format_ = mqtt_format;
-}
-
-// MQTT onConnect - when a connect is established
+// MQTT onConnect - when an MQTT connect is established
+// send out some inital MQTT messages
 void Mqtt::on_connect() {
     if (connecting_) {
         return;
@@ -479,7 +471,7 @@ void Mqtt::on_connect() {
     // first time to connect
     if (connectcount_ == 1) {
         // send info topic appended with the version information as JSON
-        StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
+        StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> doc;
         doc["event"]   = FJSON("start");
         doc["version"] = EMSESP_APP_VERSION;
 #ifndef EMSESP_STANDALONE
@@ -488,9 +480,14 @@ void Mqtt::on_connect() {
         publish(F_(info), doc.as<JsonObject>());
 
         // create the EMS-ESP device in HA, which is MQTT retained
-        if (mqtt_format() == Format::HA) {
+        if (ha_enabled()) {
             ha_status();
         }
+
+        // send initial MQTT messages for some of our services
+        EMSESP::shower_.send_mqtt_stat(false); // Send shower_activated as false
+        EMSESP::system_.send_heartbeat();      // send heatbeat
+
     } else {
         // we doing a re-connect from a TCP break
         // only re-subscribe again to all MQTT topics
@@ -504,19 +501,18 @@ void Mqtt::on_connect() {
 }
 
 // Home Assistant Discovery - the main master Device
-// homeassistant/sensor/ems-esp/status/config
+// e.g. homeassistant/sensor/ems-esp/status/config
 // all the values from the heartbeat payload will be added as attributes to the entity state
 void Mqtt::ha_status() {
-    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_HA_CONFIG> doc;
+    StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> doc;
 
-    doc["name"]        = FJSON("EMS-ESP status");
-    doc["uniq_id"]     = FJSON("status");
-    doc["~"]           = System::hostname(); // ems-esp
-    doc["avty_t"]      = FJSON("~/status");
+    doc["uniq_id"] = FJSON("status");
+    doc["~"]       = System::hostname(); // default ems-esp
+    // doc["avty_t"]      = FJSON("~/status");
     doc["json_attr_t"] = FJSON("~/heartbeat");
     doc["stat_t"]      = FJSON("~/heartbeat");
+    doc["name"]        = FJSON("EMS-ESP status");
     doc["val_tpl"]     = FJSON("{{value_json['status']}}");
-    doc["ic"]          = FJSON("mdi:home-thermometer-outline");
 
     JsonObject dev = doc.createNestedObject("dev");
     dev["name"]    = FJSON("EMS-ESP");
@@ -526,7 +522,9 @@ void Mqtt::ha_status() {
     JsonArray ids  = dev.createNestedArray("ids");
     ids.add("ems-esp");
 
-    Mqtt::publish_ha(F("homeassistant/sensor/ems-esp/status/config"), doc.as<JsonObject>()); // publish the config payload with retain flag
+    char topic[100];
+    snprintf_P(topic, sizeof(topic), PSTR("homeassistant/sensor/%s/status/config"), System::hostname().c_str());
+    Mqtt::publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
 }
 
 // add sub or pub task to the queue.
@@ -560,7 +558,7 @@ std::shared_ptr<const MqttMessage> Mqtt::queue_message(const uint8_t operation, 
 
 // add MQTT message to queue, payload is a string
 std::shared_ptr<const MqttMessage> Mqtt::queue_publish_message(const std::string & topic, const std::string & payload, bool retain) {
-    if (!enabled() || !connected()) {
+    if (!enabled() || !connecting_) {
         return nullptr;
     };
     return queue_message(Operation::PUBLISH, topic, payload, retain);
@@ -625,7 +623,7 @@ void Mqtt::publish_ha(const __FlashStringHelper * topic, const JsonObject & payl
 // publish a Home Assistant config topic and payload, with retain flag off.
 // for ESP32 its added to the queue, for ESP8266 is sent immediatelty
 void Mqtt::publish_ha(const std::string & topic, const JsonObject & payload) {
-    if (!enabled() || !payload.size()) {
+    if (!enabled()) {
         return;
     }
 
@@ -638,20 +636,14 @@ void Mqtt::publish_ha(const std::string & topic, const JsonObject & payload) {
 
 #if defined(EMSESP_STANDALONE)
     LOG_DEBUG(F("Publishing HA topic=%s, payload=%s"), topic.c_str(), payload_text.c_str());
-#else
-    LOG_DEBUG(F("Publishing HA topic %s"), topic.c_str());
 #endif
 
-#if defined(ESP32)
-    bool queued = true; // queue MQTT publish
-#else
-    bool queued = false; //  publish immediately
+#if defined(EMSESP_DEBUG)
+    LOG_DEBUG(F("[debug] Publishing HA topic=%s, payload=%s"), topic.c_str(), payload_text.c_str());
 #endif
 
-    // if MQTT is not connected, then we have to queue the msg until the MQTT is online
-    if (!connected()) {
-        queued = true; // override
-    }
+    // queue messages if the MQTT connection is not yet established. to ensure we don't miss messages
+    bool queued = !connected();
 
     if (queued) {
         queue_publish_message(topic, payload_text, true); // with retain true
@@ -661,6 +653,7 @@ void Mqtt::publish_ha(const std::string & topic, const JsonObject & payload) {
     // send immediately and then wait a while
     if (!mqttClient_->publish(topic.c_str(), 0, true, payload_text.c_str())) {
         LOG_ERROR(F("Failed to publish topic %s"), topic.c_str());
+        mqtt_publish_fails_++; // increment failure counter
     }
 
     delay(MQTT_HA_PUBLISH_DELAY); // enough time to send the short message out
@@ -734,95 +727,57 @@ void Mqtt::process_queue() {
     mqtt_messages_.pop_front(); // remove the message from the queue
 }
 
-// HA config for a binary_sensor
-void Mqtt::register_mqtt_ha_binary_sensor(const __FlashStringHelper * name, const uint8_t device_type, const char * entity) {
-    if (mqtt_format() != Format::HA) {
-        return;
-    }
-
-    // StaticJsonDocument<EMSESP_MAX_JSON_SIZE_HA_CONFIG> doc;
-    DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_HA_CONFIG);
-
-    doc["name"]    = name;
-    doc["uniq_id"] = entity;
-
-    char state_t[50];
-    snprintf_P(state_t, sizeof(state_t), PSTR("%s/%s"), hostname_.c_str(), entity);
-    doc["stat_t"] = state_t;
-
-    EMSESP::webSettingsService.read([&](WebSettings & settings) {
-        if (settings.bool_format == BOOL_FORMAT_ONOFF) {
-            doc[F("payload_on")]  = FJSON("on");
-            doc[F("payload_off")] = FJSON("off");
-        } else if (settings.bool_format == BOOL_FORMAT_TRUEFALSE) {
-            doc[F("payload_on")]  = FJSON("true");
-            doc[F("payload_off")] = FJSON("false");
-        } else {
-            doc[F("payload_on")]  = FJSON("1");
-            doc[F("payload_off")] = FJSON("0");
-        }
-    });
-
-    JsonObject dev = doc.createNestedObject("dev");
-    JsonArray  ids = dev.createNestedArray("ids");
-    char       ha_device[40];
-    snprintf_P(ha_device, sizeof(ha_device), PSTR("ems-esp-%s"), EMSdevice::device_type_2_device_name(device_type).c_str());
-    ids.add(ha_device);
-
-    char topic[MQTT_TOPIC_MAX_SIZE];
-    snprintf_P(topic, sizeof(topic), PSTR("homeassistant/binary_sensor/ems-esp/%s/config"), entity);
-
-    publish_ha(topic, doc.as<JsonObject>());
-}
-
-// HA config for a normal 'sensor' type
-// entity must match the key/value pair in the _data topic
+// HA config for a sensor and binary_sensor entity
+// entity must match the key/value pair in the *_data topic
 // some string copying here into chars, it looks messy but does help with heap fragmentation issues
-void Mqtt::register_mqtt_ha_sensor(const char *                prefix,
-                                   const __FlashStringHelper * suffix,
+void Mqtt::register_mqtt_ha_sensor(uint8_t                     type, // device value type
+                                   const char *                prefix,
                                    const __FlashStringHelper * name,
                                    const uint8_t               device_type,
-                                   const char *                entity,
-                                   const __FlashStringHelper * uom,
+                                   const __FlashStringHelper * entity,
+                                   const uint8_t               uom,
                                    const __FlashStringHelper * icon) {
-    if (mqtt_format() != Format::HA) {
+    // ignore if name (fullname) is empty
+    if (name == nullptr) {
         return;
     }
 
-    // StaticJsonDocument<EMSESP_MAX_JSON_SIZE_HA_CONFIG> doc;
-    DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_HA_CONFIG);
+    // DynamicJsonDocument doc(EMSESP_JSON_SIZE_HA_CONFIG);
+    StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> doc; // TODO see if this crashes ESP8266?
 
-    // create entity by prefixing any given prefix
+    bool have_prefix = ((prefix[0] != '\0') && (device_type != EMSdevice::DeviceType::BOILER));
+
+    // create entity by inserting any given prefix
+    // we ignore the prefix (tag) if BOILER
     char new_entity[50];
-    if (prefix != nullptr) {
-        snprintf_P(new_entity, sizeof(new_entity), PSTR("%s.%s"), prefix, entity);
+    // special case for boiler - don't use the prefix
+    if (have_prefix) {
+        snprintf_P(new_entity, sizeof(new_entity), PSTR("%s.%s"), prefix, uuid::read_flash_string(entity).c_str());
     } else {
-        strncpy(new_entity, entity, sizeof(new_entity));
+        snprintf_P(new_entity, sizeof(new_entity), PSTR("%s"), uuid::read_flash_string(entity).c_str());
     }
 
+    // device name
     char device_name[50];
     strncpy(device_name, EMSdevice::device_type_2_device_name(device_type).c_str(), sizeof(device_name));
 
-    // build unique identifier, replacing all . with _ as not to break HA
+    // build unique identifier which will be used in the topic
+    // and replacing all . with _ as not to break HA
     std::string uniq(50, '\0');
     snprintf_P(&uniq[0], uniq.capacity() + 1, PSTR("%s_%s"), device_name, new_entity);
     std::replace(uniq.begin(), uniq.end(), '.', '_');
 
     // topic
     char topic[MQTT_TOPIC_MAX_SIZE];
-    snprintf_P(topic, sizeof(topic), PSTR("homeassistant/sensor/ems-esp/%s/config"), uniq.c_str());
 
     // state topic
+    // if its a boiler we use the tag
     char stat_t[MQTT_TOPIC_MAX_SIZE];
-    if (suffix != nullptr) {
-        snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/%s_data%s"), hostname_.c_str(), device_name, uuid::read_flash_string(suffix).c_str());
+    if (device_type == EMSdevice::DeviceType::BOILER) {
+        snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/%s"), hostname_.c_str(), prefix);
     } else {
         snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/%s_data"), hostname_.c_str(), device_name);
     }
-
-    // value template
-    char val_tpl[50];
-    snprintf_P(val_tpl, sizeof(val_tpl), PSTR("{{value_json.%s}}"), new_entity);
 
     // ha device
     char ha_device[40];
@@ -830,7 +785,7 @@ void Mqtt::register_mqtt_ha_sensor(const char *                prefix,
 
     // name
     char new_name[50];
-    if (prefix != nullptr) {
+    if (have_prefix) {
         snprintf_P(new_name, sizeof(new_name), PSTR("%s %s %s"), device_name, prefix, uuid::read_flash_string(name).c_str());
     } else {
         snprintf_P(new_name, sizeof(new_name), PSTR("%s %s"), device_name, uuid::read_flash_string(name).c_str());
@@ -839,13 +794,55 @@ void Mqtt::register_mqtt_ha_sensor(const char *                prefix,
 
     doc["name"]    = new_name;
     doc["uniq_id"] = uniq;
-    if (uom != nullptr) {
-        doc["unit_of_meas"] = uom;
-    }
     doc["stat_t"]  = stat_t;
-    doc["val_tpl"] = val_tpl;
-    if (icon != nullptr) {
-        doc["ic"] = icon;
+
+    // look at the device value type
+    if (type != DeviceValueType::BOOL) {
+        //
+        // normal HA sensor
+        //
+
+        // topic
+        snprintf_P(topic, sizeof(topic), PSTR("homeassistant/sensor/%s/%s/config"), System::hostname().c_str(), uniq.c_str());
+
+        // value template
+        char val_tpl[50];
+        snprintf_P(val_tpl, sizeof(val_tpl), PSTR("{{value_json.%s}}"), new_entity);
+        doc["val_tpl"] = val_tpl;
+
+        // unit of measure
+        if (uom != DeviceValueUOM::NONE) {
+            doc["unit_of_meas"] = EMSdevice::uom_to_string(uom);
+        }
+
+        // if there was no icon supplied, resort to the default one
+        if (icon == nullptr) {
+            switch (uom) {
+            case DeviceValueUOM::DEGREES:
+                doc["ic"] = F_(icontemperature);
+                break;
+            case DeviceValueUOM::PERCENT:
+                doc["ic"] = F_(iconpercent);
+                break;
+            case DeviceValueUOM::NONE:
+            default:
+                break;
+            }
+        } else {
+            doc["ic"] = icon; // must be prefixed with mdi:
+        }
+    } else {
+        //
+        // binary sensor
+        //
+        snprintf_P(topic, sizeof(topic), PSTR("homeassistant/binary_sensor/%s/%s/config"), System::hostname().c_str(), uniq.c_str());
+
+        // boolean
+        EMSESP::webSettingsService.read([&](WebSettings & settings) {
+            char result[10];
+            doc[F("payload_on")]  = Helpers::render_boolean(result, true);
+            doc[F("payload_off")] = Helpers::render_boolean(result, false);
+        });
     }
 
     JsonObject dev = doc.createNestedObject("dev");

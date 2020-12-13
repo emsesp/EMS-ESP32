@@ -63,11 +63,11 @@ class System {
     static void    upload_status(bool in_progress);
     static bool    upload_status();
     static void    show_mem(const char * note);
-
-    static void init();
-    static void led_init();
-    static void syslog_init();
-    static void other_init();
+    void           reset_system_check();
+    static void    init();
+    static void    led_init();
+    static void    syslog_init();
+    static void    other_init();
 
     bool check_upgrade();
     void send_heartbeat();
@@ -106,9 +106,10 @@ class System {
     static void   wifi_reconnect();
     static int8_t wifi_quality();
 
-    bool     system_healthy_  = false;
-    uint32_t led_flash_speed_ = LED_WARNING_BLINK_FAST; // default boot flashes quickly
-    uint32_t last_heartbeat_  = 0;
+    bool     system_healthy_    = false;
+    uint32_t led_flash_speed_   = LED_WARNING_BLINK_FAST; // default boot flashes quickly
+    uint32_t last_heartbeat_    = 0;
+    uint32_t last_system_check_ = 0;
 
     static bool     upload_status_; // true if we're in the middle of a OTA firmware upload
     static uint32_t heap_start_;

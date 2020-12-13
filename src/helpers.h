@@ -20,18 +20,17 @@
 #define EMSESP_HELPERS_H
 
 #include <Arduino.h>
-#include <uuid/common.h>
 
 #include "telegram.h" // for EMS_VALUE_* settings
 
-#define BOOL_FORMAT_ONOFF 1
-#define BOOL_FORMAT_TRUEFALSE 2
-#define BOOL_FORMAT_NUMBERS 3
+enum { BOOL_FORMAT_ONOFF = 1, BOOL_FORMAT_TRUEFALSE, BOOL_FORMAT_NUMBERS }; // matches Web UI settings
 
 // #define FJSON(x) x
 #define FJSON(x) F(x)
 
 namespace emsesp {
+
+using flash_string_vector = std::vector<const __FlashStringHelper *>;
 
 class Helpers {
   public:
@@ -43,7 +42,6 @@ class Helpers {
     static char * render_value(char * result, const int16_t value, const uint8_t format);
     static char * render_value(char * result, const char * value, uint8_t format);
     static char * render_boolean(char * result, bool value);
-    static char * render_enum(char * result, const std::vector<const __FlashStringHelper *> & value, const uint8_t no);
 
     static char *      hextoa(char * result, const uint8_t value);
     static std::string data_to_hex(const uint8_t * data, const uint8_t length);
@@ -53,7 +51,7 @@ class Helpers {
     static uint32_t    hextoint(const char * hex);
     static uint16_t    atoint(const char * value);
     static bool        check_abs(const int32_t i);
-    static double      round2(double value);
+    static double      round2(double value, const uint8_t divider);
     static std::string toLower(std::string const & s);
 
     static bool hasValue(const uint8_t & v, const uint8_t isBool = 0);
@@ -61,12 +59,13 @@ class Helpers {
     static bool hasValue(const int16_t & v);
     static bool hasValue(const uint16_t & v);
     static bool hasValue(const uint32_t & v);
+    static bool hasValue(char * v);
 
     static bool value2number(const char * v, int & value);
     static bool value2float(const char * v, float & value);
     static bool value2bool(const char * v, bool & value);
     static bool value2string(const char * v, std::string & value);
-    static bool value2enum(const char * v, uint8_t & value, const std::vector<const __FlashStringHelper *> & strs);
+    static bool value2enum(const char * v, uint8_t & value, const flash_string_vector & strs);
 
     static void bool_format(uint8_t bool_format) {
         bool_format_ = bool_format;

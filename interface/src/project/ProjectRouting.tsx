@@ -3,7 +3,7 @@ import { Redirect, Switch } from 'react-router';
 
 import { AuthenticatedRoute } from '../authentication';
 
-import EMSESP from './EMSESP';
+import EMSESPDashboard from './EMSESPDashboard';
 import EMSESPSettings from './EMSESPSettings';
 
 class ProjectRouting extends Component {
@@ -11,9 +11,9 @@ class ProjectRouting extends Component {
   render() {
     return (
       <Switch>
-        <AuthenticatedRoute exact path="/ems-esp/status/*" component={EMSESP} />
+        <AuthenticatedRoute exact path="/ems-esp/status/*" component={EMSESPDashboard} />
         <AuthenticatedRoute exact path="/ems-esp/settings" component={EMSESPSettings} />
-        <AuthenticatedRoute exact path="/ems-esp/*" component={EMSESP} />
+        <AuthenticatedRoute exact path="/ems-esp/*" component={EMSESPDashboard} />
         {
           /*
           * The redirect below caters for the default project route and redirecting invalid paths.

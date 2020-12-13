@@ -136,28 +136,8 @@ char * Helpers::render_boolean(char * result, bool value) {
     return result;
 }
 
-// depending on format render a number or a string
-char * Helpers::render_enum(char * result, const std::vector<const __FlashStringHelper *> & value, const uint8_t no) {
-    if (no >= value.size()) {
-        return nullptr; // out of bounds
-    }
-
-    strcpy(result, uuid::read_flash_string(value[no]).c_str());
-    if (bool_format() == BOOL_FORMAT_TRUEFALSE) {
-        if (no == 0 && uuid::read_flash_string(value[0]) == "off") {
-            strlcpy(result, "false", 7);
-        } else if (no == 1 && uuid::read_flash_string(value[1]) == "on") {
-            strlcpy(result, "true", 6);
-        }
-    } else if (bool_format() == BOOL_FORMAT_NUMBERS) {
-        itoa(result, no);
-    }
-
-    return result;
-}
-
 // render for native char strings
-char * Helpers::render_value(char * result, const char * value, uint8_t format) {
+char * Helpers::render_value(char * result, const char * value, uint8_t format __attribute__((unused))) {
     strcpy(result, value);
     return result;
 }
@@ -293,13 +273,6 @@ char * Helpers::render_value(char * result, const uint32_t value, const uint8_t 
     }
 
     result[0] = '\0';
-
-    // check if we're converting from minutes to a time string
-    if (format == EMS_VALUE_TIME) {
-        snprintf_P(result, 40, PSTR("%d days %d hours %d minutes"), (value / 1440), ((value % 1440) / 60), (value % 60));
-        return result;
-    }
-
     char s[20];
 
 #ifndef EMSESP_STANDALONE
@@ -378,8 +351,8 @@ uint16_t Helpers::atoint(const char * value) {
 
 // rounds a number to 2 decimal places
 // example: round2(3.14159) -> 3.14
-double Helpers::round2(double value) {
-    return (int)(value * 100 + 0.5) / 100.0;
+double Helpers::round2(double value, const uint8_t divider) {
+    return (int)((value / divider) * 100 + 0.5) / 100.0;
 }
 
 bool Helpers::check_abs(const int32_t i) {
@@ -396,6 +369,14 @@ bool Helpers::hasValue(const uint8_t & v, const uint8_t isBool) {
 
 bool Helpers::hasValue(const int8_t & v) {
     return (v != EMS_VALUE_INT_NOTSET);
+}
+
+bool Helpers::hasValue(char * v) {
+    if ((v == nullptr) || (strlen(v) == 0)) {
+        return false;
+    }
+
+    return (v[0] != '\0');
 }
 
 // for short these are typically 0x8300, 0x7D00 and sometimes 0x8000
@@ -471,7 +452,7 @@ bool Helpers::value2bool(const char * v, bool & value) {
 }
 
 // checks to see if a string is member of a vector and return the index, also allow true/false for on/off
-bool Helpers::value2enum(const char * v, uint8_t & value, const std::vector<const __FlashStringHelper *> & strs) {
+bool Helpers::value2enum(const char * v, uint8_t & value, const flash_string_vector & strs) {
     if ((v == nullptr) || (strlen(v) == 0)) {
         return false;
     }
@@ -484,5 +465,8 @@ bool Helpers::value2enum(const char * v, uint8_t & value, const std::vector<cons
     }
     return false;
 }
+
+
+
 
 } // namespace emsesp

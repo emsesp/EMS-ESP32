@@ -13,22 +13,27 @@
 
 class DummySettings {
   public:
-    uint8_t  tx_mode                 = 1;
-    uint8_t  ems_bus_id              = 0x0B;
-    bool     syslog_enabled          = false;
-    int8_t   syslog_level            = 3; // uuid::log::Level
-    uint32_t syslog_mark_interval    = 0;
-    String   syslog_host             = "192.168.1.4";
-    uint8_t  master_thermostat       = 0;
-    bool     shower_timer            = false;
-    bool     shower_alert            = false;
-    bool     hide_led                = false;
-    bool     api_enabled             = true;
-    uint16_t publish_time            = 10; // seconds
-    uint8_t  mqtt_format             = 3;  // 1=single, 2=nested, 3=ha, 4=custom
-    uint8_t  mqtt_qos                = 0;
-    bool     mqtt_retain             = false;
-    bool     enabled                 = true; // MQTT
+    uint8_t  tx_mode              = 1;
+    uint8_t  ems_bus_id           = 0x0B;
+    bool     syslog_enabled       = false;
+    int8_t   syslog_level         = 3; // uuid::log::Level
+    uint32_t syslog_mark_interval = 0;
+    String   syslog_host          = "192.168.1.4";
+    uint8_t  master_thermostat    = 0;
+    bool     shower_timer         = true;
+    bool     shower_alert         = false;
+    bool     hide_led             = false;
+    bool     api_enabled          = true;
+
+    // MQTT
+    uint16_t publish_time      = 10; // seconds
+    uint8_t  mqtt_qos          = 0;
+    bool     mqtt_retain       = false;
+    bool     enabled           = true;
+    uint8_t  dallas_format     = 1;
+    uint8_t  ha_climate_format = 1;
+    bool     ha_enabled        = false;
+
     String   hostname                = "ems-esp";
     String   jwtSecret               = "ems-esp";
     String   ssid                    = "ems-esp";

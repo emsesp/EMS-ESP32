@@ -44,7 +44,7 @@ void WebStatusService::onStationModeDisconnected(WiFiEvent_t event, WiFiEventInf
 }
 void WebStatusService::onStationModeGotIP(WiFiEvent_t event, WiFiEventInfo_t info) {
     EMSESP::logger().info(F("WiFi Connected with IP=%s, hostname=%s"), WiFi.localIP().toString().c_str(), WiFi.getHostname());
-    EMSESP::system_.send_heartbeat(); // send out heartbeat MQTT as soon as we have a connection
+    EMSESP::system_.reset_system_check(); // send out heartbeat MQTT as soon as we have a connection
 }
 #elif defined(ESP8266)
 void WebStatusService::onStationModeDisconnected(const WiFiEventStationModeDisconnected & event) {
@@ -52,12 +52,12 @@ void WebStatusService::onStationModeDisconnected(const WiFiEventStationModeDisco
 }
 void WebStatusService::onStationModeGotIP(const WiFiEventStationModeGotIP & event) {
     EMSESP::logger().info(F("WiFi Connected with IP=%s, hostname=%s"), event.ip.toString().c_str(), WiFi.hostname().c_str());
-    EMSESP::system_.send_heartbeat(); // send out heartbeat MQTT as soon as we have a connection
+    EMSESP::system_.reset_system_check(); // send out heartbeat MQTT as soon as we have a connection
 }
 #endif
 
 void WebStatusService::webStatusService(AsyncWebServerRequest * request) {
-    AsyncJsonResponse * response = new AsyncJsonResponse(false, EMSESP_MAX_JSON_SIZE_MEDIUM_DYN);
+    AsyncJsonResponse * response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_MEDIUM_DYN);
     JsonObject          root     = response->getRoot();
 
     root["status"]      = EMSESP::bus_status(); // 0, 1 or 2

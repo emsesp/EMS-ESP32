@@ -40,44 +40,43 @@ class Thermostat : public EMSdevice {
     Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_id, const std::string & version, const std::string & name, uint8_t flags, uint8_t brand);
     class HeatingCircuit {
       public:
-        HeatingCircuit(const uint8_t hc_num)
+        HeatingCircuit(const uint8_t hc_num, const uint8_t model)
             : hc_num_(hc_num)
-            , ha_registered_(false) {
+            , model_(model) {
         }
         ~HeatingCircuit() = default;
 
-        int16_t setpoint_roomTemp = EMS_VALUE_SHORT_NOTSET;
-        int16_t curr_roomTemp     = EMS_VALUE_SHORT_NOTSET;
-        uint8_t mode              = EMS_VALUE_UINT_NOTSET;
-        uint8_t mode_type         = EMS_VALUE_UINT_NOTSET;
-        uint8_t summer_mode       = EMS_VALUE_UINT_NOTSET;
-        uint8_t holiday_mode      = EMS_VALUE_UINT_NOTSET;
-        uint8_t daytemp           = EMS_VALUE_UINT_NOTSET;
-        uint8_t nighttemp         = EMS_VALUE_UINT_NOTSET;
-        uint8_t holidaytemp       = EMS_VALUE_UINT_NOTSET;
-        uint8_t heatingtype       = EMS_VALUE_UINT_NOTSET; // type of heating: 1 radiator, 2 convectors, 3 floors, 4 room supply
-        uint8_t targetflowtemp    = EMS_VALUE_UINT_NOTSET;
-        uint8_t summertemp        = EMS_VALUE_UINT_NOTSET;
-        int8_t  nofrosttemp       = EMS_VALUE_INT_NOTSET;  // signed -20°C to +10°C
-        uint8_t designtemp        = EMS_VALUE_UINT_NOTSET; // heating curve design temp at MinExtTemp
-        int8_t  offsettemp        = EMS_VALUE_INT_NOTSET;  // heating curve offest temp at roomtemp signed!
-        uint8_t manualtemp        = EMS_VALUE_UINT_NOTSET;
-        uint8_t summer_setmode    = EMS_VALUE_UINT_NOTSET;
-        uint8_t roominfluence     = EMS_VALUE_UINT_NOTSET;
-        uint8_t flowtempoffset    = EMS_VALUE_UINT_NOTSET;
-        uint8_t minflowtemp       = EMS_VALUE_UINT_NOTSET;
-        uint8_t maxflowtemp       = EMS_VALUE_UINT_NOTSET;
+        int16_t setpoint_roomTemp;
+        int16_t curr_roomTemp;
+        uint8_t mode;
+        uint8_t modetype;
+        uint8_t summermode;
+        uint8_t holidaymode;
+        uint8_t daytemp;
+        uint8_t nighttemp;
+        uint8_t holidaytemp;
+        uint8_t heatingtype; // type of heating: 1 radiator, 2 convectors, 3 floors, 4 room supply
+        uint8_t targetflowtemp;
+        uint8_t summertemp;
+        int8_t  nofrosttemp; // signed -20°C to +10°C
+        uint8_t designtemp;  // heating curve design temp at MinExtTemp
+        int8_t  offsettemp;  // heating curve offest temp at roomtemp signed!
+        uint8_t manualtemp;
+        uint8_t summer_setmode;
+        uint8_t roominfluence;
+        uint8_t flowtempoffset;
+        uint8_t minflowtemp;
+        uint8_t maxflowtemp;
+        uint8_t reducemode;
+        uint8_t program;
+        uint8_t controlmode;
 
         uint8_t hc_num() const {
             return hc_num_;
         }
 
-        bool ha_registered() const {
-            return ha_registered_;
-        }
-
-        void ha_registered(bool b) {
-            ha_registered_ = b;
+        uint8_t get_model() const {
+            return model_;
         }
 
         // determines if the heating circuit is actually present and has data
@@ -85,11 +84,10 @@ class Thermostat : public EMSdevice {
             return Helpers::hasValue(setpoint_roomTemp);
         }
 
-        uint8_t get_mode(uint8_t model) const;
-        uint8_t get_mode_type(uint8_t model) const;
+        uint8_t get_mode() const;
+        uint8_t get_mode_type() const;
 
         enum Mode : uint8_t {
-            UNKNOWN,
             OFF,
             MANUAL,
             AUTO,
@@ -106,7 +104,8 @@ class Thermostat : public EMSdevice {
             FLOWOFFSET,
             MINFLOW,
             MAXFLOW,
-            ROOMINFLUENCE
+            ROOMINFLUENCE,
+            UNKNOWN
         };
 
         // for sorting based on hc number
@@ -115,31 +114,21 @@ class Thermostat : public EMSdevice {
         }
 
       private:
-        uint8_t hc_num_;        // heating circuit number 1..10
-        bool    ha_registered_; // whether it has been registered for HA MQTT Discovery
+        uint8_t hc_num_; // heating circuit number 1..10
+        uint8_t model_;  // the model type
     };
 
     static std::string mode_tostring(uint8_t mode);
 
-    virtual void publish_values(JsonObject & json, bool force);
-    virtual bool export_values(JsonObject & json);
-    virtual void device_info_web(JsonArray & root);
-    virtual bool updated_values();
+    virtual bool publish_ha_config();
 
   private:
     static uuid::log::Logger logger_;
 
     void add_commands();
-    bool export_values_main(JsonObject & doc);
-    bool export_values_hc(uint8_t mqtt_format, JsonObject & doc);
 
-    bool ha_registered() const {
-        return ha_registered_;
-    }
-
-    void ha_registered(bool b) {
-        ha_registered_ = b;
-    }
+    void register_device_values();
+    void register_device_values(uint8_t hc_num);
 
     // specific thermostat characteristics, stripping the top 4 bits
     inline uint8_t model() const {
@@ -153,39 +142,37 @@ class Thermostat : public EMSdevice {
     std::vector<uint16_t> summer_typeids;
     std::vector<uint16_t> curve_typeids;
 
-    std::string datetime_;  // date and time stamp
-    std::string errorCode_; // code from 0xA2 as string i.e. "A22(816)"
-
-    bool changed_       = false;
-    bool ha_registered_ = false;
+    char dateTime_[25];  // date and time stamp
+    char errorCode_[15]; // code from 0xA2 as string i.e. "A22(816)"
 
     // Installation parameters
-    uint8_t ibaMainDisplay_ =
-        EMS_VALUE_UINT_NOTSET; // display on Thermostat: 0 int temp, 1 int setpoint, 2 ext temp, 3 burner temp, 4 ww temp, 5 functioning mode, 6 time, 7 data, 9 smoke temp
-    uint8_t ibaLanguage_          = EMS_VALUE_UINT_NOTSET; // language on Thermostat: 0 german, 1 dutch, 2 french, 3 italian
-    int8_t  ibaCalIntTemperature_ = EMS_VALUE_INT_NOTSET;  // offset int. temperature sensor, by * 0.1 Kelvin (-5.0 to 5.0K)
-    int8_t  ibaMinExtTemperature_ = EMS_VALUE_INT_NOTSET;  // min ext temp for heating curve, in deg., 0xF6=-10, 0x0 = 0, 0xFF=-1
-    uint8_t ibaBuildingType_      = EMS_VALUE_UINT_NOTSET; // building type: 0 = light, 1 = medium, 2 = heavy
-    uint8_t ibaClockOffset_       = EMS_VALUE_UINT_NOTSET; // offset (in sec) to clock, 0xff = -1 s, 0x02 = 2 s
+    uint8_t ibaMainDisplay_; // display on Thermostat: 0 int temp, 1 int setpoint, 2 ext temp, 3 burner temp, 4 ww temp, 5 functioning mode, 6 time, 7 data, 9 smoke temp
+    uint8_t ibaLanguage_;          // language on Thermostat: 0 german, 1 dutch, 2 french, 3 italian
+    int8_t  ibaCalIntTemperature_; // offset int. temperature sensor, by * 0.1 Kelvin (-5.0 to 5.0K)
+    int8_t  ibaMinExtTemperature_; // min ext temp for heating curve, in deg., 0xF6=-10, 0x0 = 0, 0xFF=-1
+    uint8_t ibaBuildingType_;      // building type: 0 = light, 1 = medium, 2 = heavy
+    uint8_t ibaClockOffset_;       // offset (in sec) to clock, 0xff = -1 s, 0x02 = 2 s
 
-    uint16_t errorNumber_        = EMS_VALUE_USHORT_NOTSET;
-    char     lastCode_[30]       = {'\0'};
-    int8_t   dampedoutdoortemp_  = EMS_VALUE_INT_NOTSET;
-    uint16_t tempsensor1_        = EMS_VALUE_USHORT_NOTSET;
-    uint16_t tempsensor2_        = EMS_VALUE_USHORT_NOTSET;
-    int16_t  dampedoutdoortemp2_ = EMS_VALUE_SHORT_NOTSET;
-    uint8_t  floordrystatus_     = EMS_VALUE_UINT_NOTSET;
-    uint8_t  floordrytemp_       = EMS_VALUE_UINT_NOTSET;
+    uint16_t errorNumber_;
+    char     lastCode_[30];
+    int8_t   dampedoutdoortemp_;
+    uint16_t tempsensor1_;
+    uint16_t tempsensor2_;
+    int16_t  dampedoutdoortemp2_;
+    uint8_t  floordrystatus_;
+    uint8_t  floordrytemp_;
 
-    uint8_t wwExtra1_   = EMS_VALUE_UINT_NOTSET; // wwExtra active for wwSystem 1
-    uint8_t wwExtra2_   = EMS_VALUE_UINT_NOTSET;
-    uint8_t wwMode_     = EMS_VALUE_UINT_NOTSET;
-    uint8_t wwCircPump_ = EMS_VALUE_UINT_NOTSET;
-    uint8_t wwCircMode_ = EMS_VALUE_UINT_NOTSET;
-    uint8_t wwTemp_     = EMS_VALUE_UINT_NOTSET;
-    uint8_t wwTempLow_  = EMS_VALUE_UINT_NOTSET;
+    uint8_t wwExtra1_; // wwExtra active for wwSystem 1
+    uint8_t wwExtra2_;
+    uint8_t wwMode_;
+    uint8_t wwCircPump_;
+    uint8_t wwCircMode_;
+    uint8_t wwTemp_;
+    uint8_t wwTempLow_;
 
     std::vector<std::shared_ptr<HeatingCircuit>> heating_circuits_; // each thermostat can have multiple heating circuits
+
+    uint8_t zero_value_ = 0; // for fixing current room temperature to 0 for HA
 
     // Generic Types
     static constexpr uint16_t EMS_TYPE_RCTime        = 0x06; // time
@@ -266,9 +253,9 @@ class Thermostat : public EMSdevice {
     std::shared_ptr<Thermostat::HeatingCircuit> heating_circuit(std::shared_ptr<const Telegram> telegram);
     std::shared_ptr<Thermostat::HeatingCircuit> heating_circuit(const uint8_t hc_num);
 
-    void register_mqtt_ha_config();
-    void register_mqtt_ha_config(uint8_t hc_num);
-    bool ha_config(bool force = false);
+    void register_mqtt_ha_config_hc(uint8_t hc_num);
+    void register_device_values_hc(std::shared_ptr<emsesp::Thermostat::HeatingCircuit> hc);
+
     bool thermostat_ha_cmd(const char * message, uint8_t hc_num);
 
     void process_RCOutdoorTemp(std::shared_ptr<const Telegram> telegram);
@@ -279,6 +266,7 @@ class Thermostat : public EMSdevice {
     void process_RC35wwSettings(std::shared_ptr<const Telegram> telegram);
     void process_RC35Monitor(std::shared_ptr<const Telegram> telegram);
     void process_RC35Set(std::shared_ptr<const Telegram> telegram);
+    void process_RC35Timer(std::shared_ptr<const Telegram> telegram);
     void process_RC30Monitor(std::shared_ptr<const Telegram> telegram);
     void process_RC30Set(std::shared_ptr<const Telegram> telegram);
     void process_RC20Monitor(std::shared_ptr<const Telegram> telegram);
@@ -335,6 +323,9 @@ class Thermostat : public EMSdevice {
     bool set_flowtempoffset(const char * value, const int8_t id);
     bool set_minflowtemp(const char * value, const int8_t id);
     bool set_maxflowtemp(const char * value, const int8_t id);
+    bool set_reducemode(const char * value, const int8_t id);
+    bool set_program(const char * value, const int8_t id);
+    bool set_controlmode(const char * value, const int8_t id);
 
     // set functions - these don't use the id/hc, the parameters are ignored
     bool set_wwmode(const char * value, const int8_t id);

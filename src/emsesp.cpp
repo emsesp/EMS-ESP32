@@ -41,7 +41,7 @@ WebAPIService     EMSESP::webAPIService     = WebAPIService(&webServer);
 using DeviceFlags = emsesp::EMSdevice;
 using DeviceType  = emsesp::EMSdevice::DeviceType;
 std::vector<std::unique_ptr<EMSdevice>>    EMSESP::emsdevices;      // array of all the detected EMS devices
-std::vector<emsesp::EMSESP::Device_record> EMSESP::device_library_; // libary of all our known EMS devices so far
+std::vector<emsesp::EMSESP::Device_record> EMSESP::device_library_; // library of all our known EMS devices so far
 
 uuid::log::Logger EMSESP::logger_{F_(emsesp), uuid::log::Facility::KERN};
 
@@ -256,15 +256,13 @@ void EMSESP::show_ems(uuid::console::Shell & shell) {
     shell.println();
 }
 
-// show EMS device values
+// show EMS device values to the shell console
 void EMSESP::show_device_values(uuid::console::Shell & shell) {
     if (emsdevices.empty()) {
         shell.printfln(F("No EMS devices detected. Try using 'scan devices' from the ems menu."));
         shell.println();
         return;
     }
-
-    DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_MAX_DYN);
 
     // do this in the order of factory classes to keep a consistent order when displaying
     for (const auto & device_class : EMSFactory::device_handlers()) {
@@ -273,16 +271,40 @@ void EMSESP::show_device_values(uuid::console::Shell & shell) {
                 // print header
                 shell.printfln(F("%s: %s"), emsdevice->device_type_name().c_str(), emsdevice->to_string().c_str());
 
-                doc.clear(); // clear so we can re-use for each device
-                JsonArray root = doc.to<JsonArray>();
-                emsdevice->device_info_web(root); // create array
+                DynamicJsonDocument doc(EMSESP_JSON_SIZE_XLARGE_DYN); // use max size
+                JsonObject          json = doc.to<JsonObject>();
+                emsdevice->generate_values_json(json, "", true); // verbose mode
 
-                // iterate values and print to shell
-                uint8_t key_value = 0;
-                for (const JsonVariant & value : root) {
-                    shell.printf((++key_value & 1) ? "  %s: " : "%s\r\n", value.as<const char *>());
+                // print line
+                uint8_t id = 0;
+                for (JsonPair p : json) {
+                    const char * key = p.key().c_str();
+                    shell.printf("  %s: ", key);
+                    JsonVariant data = p.value();
+                    shell.print(COLOR_BRIGHT_GREEN);
+                    if (data.is<char *>()) {
+                        shell.print(data.as<char *>());
+                    } else if (data.is<int>()) {
+                        shell.print(data.as<int>());
+                    } else if (data.is<float>()) {
+                        char s[10];
+                        shell.print(Helpers::render_value(s, (float)data.as<float>(), 1));
+                    } else if (data.is<bool>()) {
+                        char s[10];
+                        shell.print(Helpers::render_boolean(s, data.as<bool>()));
+                    }
+
+                    // if there is a uom print it
+                    std::string uom = emsdevice->get_value_uom(key);
+                    if (!uom.empty()) {
+                        shell.print(' ');
+                        shell.print(uom);
+                    }
+
+                    shell.print(COLOR_RESET);
+                    shell.println();
+                    id++;
                 }
-
                 shell.println();
             }
         }
@@ -311,12 +333,12 @@ void EMSESP::publish_all(bool force) {
         return;
     }
     if (Mqtt::connected()) {
-        publish_device_values(EMSdevice::DeviceType::BOILER, false);
-        publish_device_values(EMSdevice::DeviceType::THERMOSTAT, false);
-        publish_device_values(EMSdevice::DeviceType::SOLAR, false);
-        publish_device_values(EMSdevice::DeviceType::MIXER, false);
+        publish_device_values(EMSdevice::DeviceType::BOILER);
+        publish_device_values(EMSdevice::DeviceType::THERMOSTAT);
+        publish_device_values(EMSdevice::DeviceType::SOLAR);
+        publish_device_values(EMSdevice::DeviceType::MIXER);
         publish_other_values();
-        publish_sensor_values(true, false);
+        publish_sensor_values(true);
         system_.send_heartbeat();
     }
 }
@@ -327,29 +349,31 @@ void EMSESP::publish_all_loop() {
     if (!Mqtt::connected() || !publish_all_idx_) {
         return;
     }
-    // every HA-sensor takes 20 ms, wait ~2 sec to finish (boiler have ~70 sensors)
+
+    // every HA-sensor takes 20 ms, wait ~2 sec to finish (boiler has ~70 sensors)
     if ((uuid::get_uptime() - last < 2000)) {
         return;
     }
+
     last = uuid::get_uptime();
     switch (publish_all_idx_++) {
     case 1:
-        publish_device_values(EMSdevice::DeviceType::BOILER, true);
+        publish_device_values(EMSdevice::DeviceType::BOILER);
         break;
     case 2:
-        publish_device_values(EMSdevice::DeviceType::THERMOSTAT, true);
+        publish_device_values(EMSdevice::DeviceType::THERMOSTAT);
         break;
     case 3:
-        publish_device_values(EMSdevice::DeviceType::SOLAR, true);
+        publish_device_values(EMSdevice::DeviceType::SOLAR);
         break;
     case 4:
-        publish_device_values(EMSdevice::DeviceType::MIXER, true);
+        publish_device_values(EMSdevice::DeviceType::MIXER);
         break;
     case 5:
         publish_other_values();
         break;
     case 6:
-        publish_sensor_values(true, true);
+        publish_sensor_values(true);
         break;
     case 7:
         system_.send_heartbeat();
@@ -362,37 +386,61 @@ void EMSESP::publish_all_loop() {
 }
 
 // create json doc for the devices values and add to MQTT publish queue
-// special case for Mixer units, since we want to bundle all devices together into one payload
-void EMSESP::publish_device_values(uint8_t device_type, bool force) {
-    if (device_type == EMSdevice::DeviceType::MIXER && Mqtt::mqtt_format() != Mqtt::Format::SINGLE) {
-        // DynamicJsonDocument doc(EMSESP_MAX_JSON_SIZE_LARGE);
-        StaticJsonDocument<EMSESP_MAX_JSON_SIZE_LARGE> doc;
-        JsonObject                                     json = doc.to<JsonObject>();
-        for (const auto & emsdevice : emsdevices) {
-            if (emsdevice && (emsdevice->device_type() == device_type)) {
-                emsdevice->publish_values(json, force);
-            }
-        }
-        Mqtt::publish("mixer_data", doc.as<JsonObject>());
-        return;
-    }
+void EMSESP::publish_device_values(uint8_t device_type) {
+    DynamicJsonDocument doc(EMSESP_JSON_SIZE_XLARGE_DYN); // use max size
+    JsonObject          json      = doc.to<JsonObject>();
+    bool                has_value = false;
 
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice && (emsdevice->device_type() == device_type)) {
-            JsonObject dummy;
-            emsdevice->publish_values(dummy, force);
+            // if we're using HA and it's not already done, send the config topics first. only do this once
+            if (Mqtt::ha_enabled() && (!emsdevice->ha_config_done())) {
+                // create the configs for each value as a sensor
+                for (const auto & dv : emsdevice->devicevalues()) {
+                    if (dv.device_type == device_type) {
+                        Mqtt::register_mqtt_ha_sensor(dv.type, dv.tag.c_str(), dv.full_name, device_type, dv.short_name, dv.uom, dv.icon);
+                    }
+                }
+
+                // create HA device
+                // if this is done early, it may fail for some reason
+                emsdevice->ha_config_done(emsdevice->publish_ha_config());
+            }
+
+            // if its a boiler, generate json for each group and publish it
+            if (device_type == DeviceType::BOILER) {
+                emsdevice->generate_values_json(json, "boiler_data");
+                Mqtt::publish("boiler_data", json);
+                json.clear();
+                emsdevice->generate_values_json(json, "boiler_data_ww");
+                Mqtt::publish("boiler_data_ww", json);
+                json.clear();
+                emsdevice->generate_values_json(json, "boiler_data_info");
+                Mqtt::publish("boiler_data_info", json);
+                return;
+            }
+
+            // for all other devices add the values to the json, without verbose mode
+            has_value |= emsdevice->generate_values_json(json, "");
         }
     }
+
+    // if there is nothing to publish, exit
+    if (!has_value) {
+        return;
+    }
+
+    // publish it under a single topic
+    char topic[20];
+    snprintf_P(topic, sizeof(topic), PSTR("%s_data"), EMSdevice::device_type_2_device_name(device_type).c_str());
+
+    Mqtt::publish(topic, json);
 }
 
+// call the devices that don't need special attention
 void EMSESP::publish_other_values() {
-    for (const auto & emsdevice : emsdevices) {
-        if (emsdevice && (emsdevice->device_type() != EMSdevice::DeviceType::BOILER) && (emsdevice->device_type() != EMSdevice::DeviceType::THERMOSTAT)
-            && (emsdevice->device_type() != EMSdevice::DeviceType::SOLAR) && (emsdevice->device_type() != EMSdevice::DeviceType::MIXER)) {
-            JsonObject dummy;
-            emsdevice->publish_values(dummy);
-        }
-    }
+    publish_device_values(EMSdevice::DeviceType::SWITCH);
+    publish_device_values(EMSdevice::DeviceType::HEATPUMP);
 }
 
 void EMSESP::publish_sensor_values(const bool time, const bool force) {
@@ -407,7 +455,7 @@ void EMSESP::publish_response(std::shared_ptr<const Telegram> telegram) {
         return;
     }
 
-    StaticJsonDocument<EMSESP_MAX_JSON_SIZE_SMALL> doc;
+    StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> doc;
 
     char buffer[100];
     doc["src"]    = Helpers::hextoa(buffer, telegram->src);
@@ -641,7 +689,7 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
     // match device_id and type_id
     // calls the associated process function for that EMS device
     // returns false if the device_id doesn't recognize it
-    // after the telegram has been processed, call the updated_values() function to see if we need to force an MQTT publish
+    // after the telegram has been processed, call see if there have been values changed and we need to do a MQTT publish
     bool found = false;
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice) {
@@ -649,10 +697,11 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
                 found = emsdevice->handle_telegram(telegram);
                 // if we correctly processes the telegram follow up with sending it via MQTT if needed
                 if (found && Mqtt::connected()) {
-                    if ((mqtt_.get_publish_onchange(emsdevice->device_type()) && emsdevice->updated_values()) || telegram->type_id == publish_id_) {
+                    if ((mqtt_.get_publish_onchange(emsdevice->device_type()) && emsdevice->has_update()) || telegram->type_id == publish_id_) {
                         if (telegram->type_id == publish_id_) {
                             publish_id_ = 0;
                         }
+                        emsdevice->has_update(false);                    // reset flag
                         publish_device_values(emsdevice->device_type()); // publish to MQTT if we explicitly have too
                     }
                 }
@@ -669,21 +718,6 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
     }
 
     return found;
-}
-
-// calls the device handler's function to populate a json doc with device info
-// to be used in the Web UI. The unique_id is the unique record ID from the Web table to identify which device to load
-void EMSESP::device_info_web(const uint8_t unique_id, JsonObject & root) {
-    for (const auto & emsdevice : emsdevices) {
-        if (emsdevice) {
-            if (emsdevice->unique_id() == unique_id) {
-                root["name"]   = emsdevice->to_string_short(); // can't use c_str() because of scope
-                JsonArray data = root.createNestedArray("data");
-                emsdevice->device_info_web(data);
-                return;
-            }
-        }
-    }
 }
 
 // return true if we have this device already registered
@@ -813,14 +847,14 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
 // export all values to info command
 // value and id are ignored
 bool EMSESP::command_info(uint8_t device_type, JsonObject & json) {
-    bool ok = false;
+    bool has_value = false;
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice && (emsdevice->device_type() == device_type)) {
-            ok |= emsdevice->export_values(json);
+            has_value |= emsdevice->generate_values_json(json, "", true); // verbose mode
         }
     }
 
-    return ok;
+    return has_value;
 }
 
 // send a read request, passing it into to the Tx Service, with offset
@@ -972,8 +1006,8 @@ void EMSESP::start() {
         webSettingsService.begin(); // load EMS-ESP specific settings
     }
 
-    // Load our library of known devices. Names are stored in Flash mem.
-    device_library_.reserve(80);
+    // Load our library of known devices into stack mem. Names are stored in Flash mem.
+    // device_library_.reserve(80);
     device_library_ = {
 #include "device_library.h"
     };
@@ -985,13 +1019,8 @@ void EMSESP::start() {
     dallassensor_.start(); // dallas external sensors
     webServer.begin();     // start web server
 
-    emsdevices.reserve(5); // reserve space for initially 5 devices to avoid mem
-
+    emsdevices.reserve(5); // reserve space for initially 5 devices to avoid mem frag issues
     LOG_INFO(F("EMS Device library loaded with %d records"), device_library_.size());
-
-#if defined(EMSESP_STANDALONE)
-    mqtt_.on_connect(); // simulate an MQTT connection
-#endif
 }
 
 // main loop calling all services

@@ -188,9 +188,11 @@ void MqttSettings::read(MqttSettings & settings, JsonObject & root) {
     root["publish_time_mixer"]      = settings.publish_time_mixer;
     root["publish_time_other"]      = settings.publish_time_other;
     root["publish_time_sensor"]     = settings.publish_time_sensor;
-    root["mqtt_format"]             = settings.mqtt_format;
     root["mqtt_qos"]                = settings.mqtt_qos;
     root["mqtt_retain"]             = settings.mqtt_retain;
+    root["dallas_format"]           = settings.dallas_format;
+    root["ha_climate_format"]       = settings.ha_climate_format;
+    root["ha_enabled"]              = settings.ha_enabled;
 }
 
 StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & settings) {
@@ -205,6 +207,8 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
     newSettings.keepAlive      = root["keep_alive"] | FACTORY_MQTT_KEEP_ALIVE;
     newSettings.cleanSession   = root["clean_session"] | FACTORY_MQTT_CLEAN_SESSION;
     newSettings.maxTopicLength = root["max_topic_length"] | FACTORY_MQTT_MAX_TOPIC_LENGTH;
+    newSettings.mqtt_qos       = root["mqtt_qos"] | EMSESP_DEFAULT_MQTT_QOS;
+    newSettings.mqtt_retain    = root["mqtt_retain"] | EMSESP_DEFAULT_MQTT_RETAIN;
 
     newSettings.publish_time_boiler     = root["publish_time_boiler"] | EMSESP_DEFAULT_PUBLISH_TIME;
     newSettings.publish_time_thermostat = root["publish_time_thermostat"] | EMSESP_DEFAULT_PUBLISH_TIME;
@@ -212,16 +216,25 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
     newSettings.publish_time_mixer      = root["publish_time_mixer"] | EMSESP_DEFAULT_PUBLISH_TIME;
     newSettings.publish_time_other      = root["publish_time_other"] | EMSESP_DEFAULT_PUBLISH_TIME;
     newSettings.publish_time_sensor     = root["publish_time_sensor"] | EMSESP_DEFAULT_PUBLISH_TIME;
-    newSettings.mqtt_format             = root["mqtt_format"] | EMSESP_DEFAULT_MQTT_FORMAT;
-    newSettings.mqtt_qos                = root["mqtt_qos"] | EMSESP_DEFAULT_MQTT_QOS;
-    newSettings.mqtt_retain             = root["mqtt_retain"] | EMSESP_DEFAULT_MQTT_RETAIN;
+
+    newSettings.dallas_format     = root["dallas_format"] | EMSESP_DEFAULT_DALLAS_FORMAT;
+    newSettings.ha_climate_format = root["ha_climate_format"] | EMSESP_DEFAULT_HA_CLIMATE_FORMAT;
+    newSettings.ha_enabled        = root["ha_enabled"] | EMSESP_DEFAULT_HA_ENABLED;
 
     if (newSettings.mqtt_qos != settings.mqtt_qos) {
         emsesp::EMSESP::mqtt_.set_qos(newSettings.mqtt_qos);
     }
 
-    if (newSettings.mqtt_format != settings.mqtt_format) {
-        emsesp::EMSESP::mqtt_.set_format(newSettings.mqtt_format);
+    if (newSettings.dallas_format != settings.dallas_format) {
+        emsesp::EMSESP::mqtt_.dallas_format(newSettings.dallas_format);
+    }
+
+    if (newSettings.ha_climate_format != settings.ha_climate_format) {
+        emsesp::EMSESP::mqtt_.ha_climate_format(newSettings.ha_climate_format);
+    }
+
+    if (newSettings.ha_enabled != settings.ha_enabled) {
+        emsesp::EMSESP::mqtt_.ha_enabled(newSettings.ha_enabled);
     }
 
     if (newSettings.mqtt_retain != settings.mqtt_retain) {

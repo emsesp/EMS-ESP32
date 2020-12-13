@@ -45,7 +45,7 @@ void WebDevicesService::scan_devices(AsyncWebServerRequest * request) {
 }
 
 void WebDevicesService::all_devices(AsyncWebServerRequest * request) {
-    AsyncJsonResponse * response = new AsyncJsonResponse(false, EMSESP_MAX_JSON_SIZE_LARGE_DYN);
+    AsyncJsonResponse * response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_LARGE_DYN);
     JsonObject          root     = response->getRoot();
 
     JsonArray devices = root.createNestedArray("devices");
@@ -78,19 +78,28 @@ void WebDevicesService::all_devices(AsyncWebServerRequest * request) {
     request->send(response);
 }
 
+// The unique_id is the unique record ID from the Web table to identify which device to load
 void WebDevicesService::device_data(AsyncWebServerRequest * request, JsonVariant & json) {
     if (json.is<JsonObject>()) {
-        AsyncJsonResponse * response = new AsyncJsonResponse(false, EMSESP_MAX_JSON_SIZE_MAX_DYN);
+        AsyncJsonResponse * response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_XLARGE_DYN);
+        for (const auto & emsdevice : EMSESP::emsdevices) {
+            if (emsdevice) {
+                if (emsdevice->unique_id() == json["id"]) {
 #ifndef EMSESP_STANDALONE
-        uint8_t id = json["id"]; // get id from selected table row
-        EMSESP::device_info_web(id, (JsonObject &)response->getRoot());
+                    JsonObject root = response->getRoot();
+                    emsdevice->generate_values_json_web(root);
 #endif
-        response->setLength();
-        request->send(response);
-    } else {
-        AsyncWebServerResponse * response = request->beginResponse(200);
-        request->send(response);
+                    response->setLength();
+                    request->send(response);
+                    return;
+                }
+            }
+        }
     }
+
+    // invalid
+    AsyncWebServerResponse * response = request->beginResponse(200);
+    request->send(response);
 }
 
 } // namespace emsesp

@@ -71,14 +71,12 @@ class Mqtt {
     void set_publish_time_mixer(uint16_t publish_time);
     void set_publish_time_other(uint16_t publish_time);
     void set_publish_time_sensor(uint16_t publish_time);
-    void set_qos(uint8_t mqtt_qos);
-    void set_retain(bool mqtt_retain);
-    void set_format(uint8_t mqtt_format);
     bool get_publish_onchange(uint8_t device_type);
 
     enum Operation { PUBLISH, SUBSCRIBE };
 
-    enum Format : uint8_t { NONE = 0, SINGLE, NESTED, HA };
+    enum Dallas_Format : uint8_t { SENSORID = 1, NUMBER };
+    enum HA_Climate_Format : uint8_t { CURRENT = 1, SETPOINT, ZERO };
 
     static constexpr uint8_t MQTT_TOPIC_MAX_SIZE = 128; // note this should really match the user setting in mqttSettings.maxTopicLength
 
@@ -100,15 +98,14 @@ class Mqtt {
     static void publish_ha(const std::string & topic, const JsonObject & payload);
     static void publish_ha(const __FlashStringHelper * topic, const JsonObject & payload);
 
-    static void register_mqtt_ha_binary_sensor(const __FlashStringHelper * name, const uint8_t device_type, const char * entity);
-    static void register_mqtt_ha_sensor(const char *                prefix,
-                                        const __FlashStringHelper * suffix,
+    static void register_mqtt_ha_sensor(uint8_t                     type,
+                                        const char *                prefix,
                                         const __FlashStringHelper * name,
                                         const uint8_t               device_type,
-                                        const char *                entity,
-                                        const __FlashStringHelper * uom,
+                                        const __FlashStringHelper * entity,
+                                        const uint8_t               uom,
                                         const __FlashStringHelper * icon);
-    static void register_command(const uint8_t device_type, const uint8_t device_id, const __FlashStringHelper * cmd, cmdfunction_p cb);
+    static void register_command(const uint8_t device_type, const __FlashStringHelper * cmd, cmdfunction_p cb);
 
     static void show_topic_handlers(uuid::console::Shell & shell, const uint8_t device_type);
     static void show_mqtt(uuid::console::Shell & shell);
@@ -129,6 +126,10 @@ class Mqtt {
 #endif
     }
 
+    static AsyncMqttClient * client() {
+        return mqttClient_;
+    }
+
     static bool enabled() {
         return mqtt_enabled_;
     }
@@ -141,12 +142,36 @@ class Mqtt {
         mqtt_publish_fails_ = 0;
     }
 
-    static uint8_t mqtt_format() {
-        return mqtt_format_;
+    static uint8_t ha_climate_format() {
+        return ha_climate_format_;
     }
 
-    static AsyncMqttClient * client() {
-        return mqttClient_;
+    static uint8_t dallas_format() {
+        return dallas_format_;
+    }
+
+    static bool ha_enabled() {
+        return ha_enabled_;
+    }
+
+    static void ha_climate_format(uint8_t ha_climate_format) {
+        ha_climate_format_ = ha_climate_format;
+    }
+
+    static void dallas_format(uint8_t dallas_format) {
+        dallas_format_ = dallas_format;
+    }
+
+    static void ha_enabled(bool ha_enabled) {
+        ha_enabled_ = ha_enabled;
+    }
+
+    void set_qos(uint8_t mqtt_qos) {
+        mqtt_qos_ = mqtt_qos;
+    }
+
+    void set_retain(bool mqtt_retain) {
+        mqtt_retain_ = mqtt_retain;
     }
 
   private:
@@ -232,8 +257,10 @@ class Mqtt {
     static uint32_t    publish_time_mixer_;
     static uint32_t    publish_time_other_;
     static uint32_t    publish_time_sensor_;
-    static uint8_t     mqtt_format_;
     static bool        mqtt_enabled_;
+    static uint8_t     dallas_format_;
+    static uint8_t     ha_climate_format_;
+    static bool        ha_enabled_;
 };
 
 } // namespace emsesp

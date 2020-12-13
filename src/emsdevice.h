@@ -30,9 +30,42 @@
 
 namespace emsesp {
 
+enum DeviceValueType : uint8_t {
+    BOOL,
+    INT,
+    UINT,
+    SHORT,
+    USHORT,
+    ULONG,
+    TIME, // same as ULONG
+    ENUM,
+    TEXT
+
+};
+
+// Unit Of Measurement mapping
+enum DeviceValueUOM : uint8_t {
+    DEGREES,
+    PERCENT,
+    LMIN,
+    KWH,
+    WH,
+    HOURS,
+    MINUTES,
+    UA,
+    BAR,
+    NONE
+
+};
+
 class EMSdevice {
   public:
+    virtual ~EMSdevice() = default; // destructor of base class must always be virtual because it's a polymorphic class
+
     static constexpr uint8_t EMS_DEVICES_MAX_TELEGRAMS = 20;
+
+    // virtual functions overrules by derived classes
+    virtual bool publish_ha_config() = 0;
 
     // device_type defines which derived class to use, e.g. BOILER, THERMOSTAT etc..
     EMSdevice(uint8_t device_type, uint8_t device_id, uint8_t product_id, const std::string & version, const std::string & name, uint8_t flags, uint8_t brand)
@@ -45,8 +78,6 @@ class EMSdevice {
         , brand_(brand) {
     }
 
-    virtual ~EMSdevice() = default; // destructor of base class must always be virtual because it's a polymorphic class
-
     inline uint8_t device_id() const {
         return device_id_;
     }
@@ -54,6 +85,8 @@ class EMSdevice {
     std::string        device_type_name() const;
     static std::string device_type_2_device_name(const uint8_t device_type);
     static uint8_t     device_name_2_device_type(const char * topic);
+
+    static const __FlashStringHelper * uom_to_string(uint8_t uom);
 
     inline uint8_t product_id() const {
         return product_id_;
@@ -117,6 +150,14 @@ class EMSdevice {
         unique_id_ = unique_id;
     }
 
+    inline bool has_update() const {
+        return has_update_;
+    }
+
+    inline void has_update(bool has_update) {
+        has_update_ |= has_update;
+    }
+
     std::string    brand_to_string() const;
     static uint8_t decode_brand(uint8_t value);
 
@@ -131,6 +172,19 @@ class EMSdevice {
     void register_telegram_type(const uint16_t telegram_type_id, const __FlashStringHelper * telegram_type_name, bool fetch, process_function_p cb);
     bool handle_telegram(std::shared_ptr<const Telegram> telegram);
 
+    std::string get_value_uom(const char * key);
+    bool        generate_values_json(JsonObject & json, const std::string & tag_filter, const bool verbose = false);
+    bool        generate_values_json_web(JsonObject & json);
+
+    void register_device_value(std::string &               tag,
+                               void *                      value_p,
+                               uint8_t                     type,
+                               const flash_string_vector & options,
+                               const __FlashStringHelper * short_name,
+                               const __FlashStringHelper * full_name,
+                               uint8_t                     uom,
+                               const __FlashStringHelper * icon = nullptr);
+
     void write_command(const uint16_t type_id, const uint8_t offset, uint8_t * message_data, const uint8_t message_length, const uint16_t validate_typeid);
     void write_command(const uint16_t type_id, const uint8_t offset, const uint8_t value, const uint16_t validate_typeid);
     void write_command(const uint16_t type_id, const uint8_t offset, const uint8_t value);
@@ -138,12 +192,6 @@ class EMSdevice {
 
     void register_mqtt_topic(const std::string & topic, mqtt_subfunction_p f);
     void register_mqtt_cmd(const __FlashStringHelper * cmd, cmdfunction_p f);
-
-    // virtual functions overrules by derived classes
-    virtual void publish_values(JsonObject & json, bool force = false) = 0;
-    virtual bool export_values(JsonObject & json)                      = 0;
-    virtual bool updated_values()                                      = 0;
-    virtual void device_info_web(JsonArray & root)                     = 0;
 
     std::string telegram_type_name(std::shared_ptr<const Telegram> telegram);
 
@@ -155,12 +203,13 @@ class EMSdevice {
         telegram_functions_.reserve(n);
     }
 
-    static void create_value_json(JsonArray &                 root,
-                                  const __FlashStringHelper * key,
-                                  const __FlashStringHelper * prefix,
-                                  const __FlashStringHelper * name,
-                                  const __FlashStringHelper * suffix,
-                                  JsonObject &                json);
+    bool ha_config_done() const {
+        return ha_config_done_;
+    }
+
+    void ha_config_done(const bool v) {
+        ha_config_done_ = v;
+    }
 
     enum Brand : uint8_t {
         NO_BRAND = 0, // 0
@@ -214,13 +263,46 @@ class EMSdevice {
     static constexpr uint8_t EMS_DEVICE_FLAG_EASY        = 1;
     static constexpr uint8_t EMS_DEVICE_FLAG_RC10        = 2;
     static constexpr uint8_t EMS_DEVICE_FLAG_RC20        = 3;
-    static constexpr uint8_t EMS_DEVICE_FLAG_RC20_2      = 4; // Variation on RC20, Older, like ES72?
-    static constexpr uint8_t EMS_DEVICE_FLAG_RC30_1      = 5; // variation on RC30, Newer?
+    static constexpr uint8_t EMS_DEVICE_FLAG_RC20_2      = 4; // Variation on RC20, Older, like ES72
+    static constexpr uint8_t EMS_DEVICE_FLAG_RC30_1      = 5; // variation on RC30, Newer models
     static constexpr uint8_t EMS_DEVICE_FLAG_RC30        = 6;
     static constexpr uint8_t EMS_DEVICE_FLAG_RC35        = 7;
     static constexpr uint8_t EMS_DEVICE_FLAG_RC300       = 8;
     static constexpr uint8_t EMS_DEVICE_FLAG_RC100       = 9;
     static constexpr uint8_t EMS_DEVICE_FLAG_JUNKERS     = 10;
+
+    struct DeviceValue {
+        uint8_t                     device_type; // EMSdevice::DeviceType
+        const std::string           tag;         // MQTT topic or ID
+        void *                      value_p;     // pointer to variable of any type
+        uint8_t                     type;        // DeviceValueType::*
+        const flash_string_vector   options;     // list of options for ENUM, or divider
+        const __FlashStringHelper * short_name;  // used in MQTT
+        const __FlashStringHelper * full_name;   // used in Web and Console
+        uint8_t                     uom;         // DeviceValueUOM::*
+        const __FlashStringHelper * icon;        // HA icon
+
+        DeviceValue(uint8_t                     device_type,
+                    const std::string &         tag,
+                    void *                      value_p,
+                    uint8_t                     type,
+                    const flash_string_vector   options,
+                    const __FlashStringHelper * short_name,
+                    const __FlashStringHelper * full_name,
+                    uint8_t                     uom,
+                    const __FlashStringHelper * icon)
+            : device_type(device_type)
+            , tag(tag)
+            , value_p(value_p)
+            , type(type)
+            , options(options)
+            , short_name(short_name)
+            , full_name(full_name)
+            , uom(uom)
+            , icon(icon) {
+        }
+    };
+    const std::vector<DeviceValue> devicevalues() const;
 
   private:
     uint8_t     unique_id_;
@@ -231,6 +313,9 @@ class EMSdevice {
     std::string name_; // the long name for the EMS model
     uint8_t     flags_ = 0;
     uint8_t     brand_ = Brand::NO_BRAND;
+
+    bool ha_config_done_ = false;
+    bool has_update_     = false;
 
     struct TelegramFunction {
         uint16_t                    telegram_type_id_;   // it's type_id
@@ -246,6 +331,8 @@ class EMSdevice {
         }
     };
     std::vector<TelegramFunction> telegram_functions_; // each EMS device has its own set of registered telegram types
+
+    std::vector<DeviceValue> devicevalues_;
 };
 
 } // namespace emsesp

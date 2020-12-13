@@ -186,6 +186,9 @@ uint16_t EMSuart::transmit(const uint8_t * buf, const uint8_t len) {
     if (len == 0 || len >= EMS_MAXBUFFERSIZE) {
         return EMS_TX_STATUS_ERR;
     }
+    if (tx_mode_ == 0) {
+        return EMS_TX_STATUS_OK;
+    }
 
     if (tx_mode_ > 5) { // timer controlled modes
         for (uint8_t i = 0; i < len; i++) {

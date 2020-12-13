@@ -41,7 +41,6 @@ bool                  EMSuart::sending_ = false;
 // Important: must not use ICACHE_FLASH_ATTR
 //
 void ICACHE_RAM_ATTR EMSuart::emsuart_rx_intr_handler(void * para) {
-
     if (USIS(EMSUART_UART) & ((1 << UIBD))) { // BREAK detection = End of EMS data block
         USC0(EMSUART_UART) &= ~(1 << UCBRK);  // reset tx-brk
         if (sending_) {                       // irq tx_mode is interrupted by <brk>, should never happen
@@ -232,6 +231,9 @@ void ICACHE_FLASH_ATTR EMSuart::send_poll(uint8_t data) {
 uint16_t ICACHE_FLASH_ATTR EMSuart::transmit(uint8_t * buf, uint8_t len) {
     if (len == 0 || len >= EMS_MAXBUFFERSIZE) {
         return EMS_TX_STATUS_ERR; // nothing or to much to send
+    }
+    if (tx_mode_ == 0) {
+        return EMS_TX_STATUS_OK;
     }
 
     // timer controlled modes with extra delay

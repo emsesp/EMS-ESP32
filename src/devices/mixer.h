@@ -36,16 +36,10 @@ class Mixer : public EMSdevice {
   public:
     Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const std::string & version, const std::string & name, uint8_t flags, uint8_t brand);
 
-    virtual void publish_values(JsonObject & json, bool force);
-    virtual bool export_values(JsonObject & json);
-    virtual void device_info_web(JsonArray & root);
-    virtual bool updated_values();
+    virtual bool publish_ha_config();
 
   private:
     static uuid::log::Logger logger_;
-
-    bool export_values_format(uint8_t mqtt_format, JsonObject & doc);
-    void register_mqtt_ha_config();
 
     void process_MMPLUSStatusMessage_HC(std::shared_ptr<const Telegram> telegram);
     void process_MMPLUSStatusMessage_WWC(std::shared_ptr<const Telegram> telegram);
@@ -60,25 +54,15 @@ class Mixer : public EMSdevice {
         WWC // warm water circuit
     };
 
-    Type type() const {
-        return type_;
-    }
-
-    void type(Type new_type) {
-        type_ = new_type;
-    }
-
   private:
-    uint16_t hc_          = EMS_VALUE_USHORT_NOTSET;
-    uint16_t flowTemp_    = EMS_VALUE_USHORT_NOTSET;
-    uint8_t  pumpStatus_  = EMS_VALUE_UINT_NOTSET;
-    int8_t   status_      = EMS_VALUE_INT_NOTSET;
-    uint8_t  flowSetTemp_ = EMS_VALUE_UINT_NOTSET;
+    uint16_t flowTemp_;
+    uint8_t  pumpStatus_;
+    int8_t   status_;
+    uint8_t  flowSetTemp_;
 
-    Type type_ = Type::NONE;
-
-    bool changed_        = false;
-    bool mqtt_ha_config_ = false; // for HA MQTT Discovery
+    void     register_values(const Type type, const uint16_t hc);
+    Type     type_ = Type::NONE;
+    uint16_t hc_   = EMS_VALUE_USHORT_NOTSET;
 };
 
 } // namespace emsesp
