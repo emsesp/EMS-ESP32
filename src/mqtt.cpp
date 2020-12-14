@@ -731,7 +731,7 @@ void Mqtt::process_queue() {
 // entity must match the key/value pair in the *_data topic
 // some string copying here into chars, it looks messy but does help with heap fragmentation issues
 void Mqtt::register_mqtt_ha_sensor(uint8_t                     type, // device value type
-                                   const char *                prefix,
+                                   uint8_t                     tag,
                                    const __FlashStringHelper * name,
                                    const uint8_t               device_type,
                                    const __FlashStringHelper * entity,
@@ -745,10 +745,13 @@ void Mqtt::register_mqtt_ha_sensor(uint8_t                     type, // device v
     // DynamicJsonDocument doc(EMSESP_JSON_SIZE_HA_CONFIG);
     StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> doc; // TODO see if this crashes ESP8266?
 
+    // TODO fix prefix
+    char prefix[10] = "test"; // TODO remove!
+
     bool have_prefix = ((prefix[0] != '\0') && (device_type != EMSdevice::DeviceType::BOILER));
 
     // create entity by inserting any given prefix
-    // we ignore the prefix (tag) if BOILER
+    // we ignore the tag if BOILER
     char new_entity[50];
     // special case for boiler - don't use the prefix
     if (have_prefix) {

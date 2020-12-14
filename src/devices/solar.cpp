@@ -60,54 +60,81 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
         register_telegram_type(0x0101, F("ISM1Set"), false, [&](std::shared_ptr<const Telegram> t) { process_ISM1Set(t); });
     }
 
-    std::string empty("");
-
     // special case for a device_id with 0x2A where it's not actual a solar module
     if (device_id == 0x2A) {
-        register_device_value(empty, &type_, DeviceValueType::TEXT, {}, F("type"), F("Type"), DeviceValueUOM::NONE);
+        register_device_value(DeviceValueTAG::TAG_NONE, &type_, DeviceValueType::TEXT, {}, F("type"), F("Type"), DeviceValueUOM::NONE);
         strncpy(type_, "warm water circuit", sizeof(type_));
     }
 
-    register_device_value(empty,
+    register_device_value(DeviceValueTAG::TAG_NONE,
                           &collectorTemp_,
                           DeviceValueType::SHORT,
                           flash_string_vector{F("10")},
                           F("collectorTemp"),
                           F("Collector temperature (TS1)"),
                           DeviceValueUOM::DEGREES);
-    register_device_value(empty,
+    register_device_value(DeviceValueTAG::TAG_NONE,
                           &tankBottomTemp_,
                           DeviceValueType::SHORT,
                           flash_string_vector{F("10")},
                           F("tankBottomTemp"),
                           F("Bottom temperature (TS2)"),
                           DeviceValueUOM::DEGREES);
-    register_device_value(empty,
+    register_device_value(DeviceValueTAG::TAG_NONE,
                           &tankBottomTemp2_,
                           DeviceValueType::SHORT,
                           flash_string_vector{F("10")},
                           F("tankBottomTemp2"),
                           F("Bottom temperature (TS5)"),
                           DeviceValueUOM::DEGREES);
+    register_device_value(DeviceValueTAG::TAG_NONE,
+                          &heatExchangerTemp_,
+                          DeviceValueType::SHORT,
+                          {F("10")},
+                          F("heatExchangerTemp"),
+                          F("Heat exchanger temperature (TS6)"),
+                          DeviceValueUOM::DEGREES);
+
+    register_device_value(DeviceValueTAG::TAG_NONE,
+                          &tank1MaxTempCurrent_,
+                          DeviceValueType::UINT,
+                          {},
+                          F("tank1MaxTempCurrent"),
+                          F("Maximum Tank temperature"),
+                          DeviceValueUOM::NONE);
+    register_device_value(DeviceValueTAG::TAG_NONE,
+                          &solarPumpModulation_,
+                          DeviceValueType::UINT,
+                          {},
+                          F("solarPumpModulation"),
+                          F("Solar pump modulation (PS1)"),
+                          DeviceValueUOM::PERCENT);
     register_device_value(
-        empty, &heatExchangerTemp_, DeviceValueType::SHORT, {F("10")}, F("heatExchangerTemp"), F("Heat exchanger temperature (TS6)"), DeviceValueUOM::DEGREES);
+        DeviceValueTAG::TAG_NONE, &cylinderPumpModulation_, DeviceValueType::UINT, {}, F("cylinderPumpModulation"), F("Cylinder pump modulation (PS5)"), DeviceValueUOM::PERCENT);
 
-    register_device_value(empty, &tank1MaxTempCurrent_, DeviceValueType::UINT, {}, F("tank1MaxTempCurrent"), F("Maximum Tank temperature"), DeviceValueUOM::NONE);
-    register_device_value(empty, &solarPumpModulation_, DeviceValueType::UINT, {}, F("solarPumpModulation"), F("Solar pump modulation (PS1)"), DeviceValueUOM::PERCENT);
+    register_device_value(DeviceValueTAG::TAG_NONE, &solarPump_, DeviceValueType::BOOL, {}, F("solarPump"), F("Solar pump (PS1) active"), DeviceValueUOM::NONE);
+    register_device_value(DeviceValueTAG::TAG_NONE, &valveStatus_, DeviceValueType::BOOL, {}, F("valveStatus"), F("Valve status"), DeviceValueUOM::NONE);
+    register_device_value(DeviceValueTAG::TAG_NONE, &tankHeated_, DeviceValueType::BOOL, {}, F("tankHeated"), F("Tank heated"), DeviceValueUOM::NONE);
     register_device_value(
-        empty, &cylinderPumpModulation_, DeviceValueType::UINT, {}, F("cylinderPumpModulation"), F("Cylinder pump modulation (PS5)"), DeviceValueUOM::PERCENT);
+        DeviceValueTAG::TAG_NONE, &collectorShutdown_, DeviceValueType::BOOL, {}, F("collectorShutdown"), F("Collector shutdown"), DeviceValueUOM::NONE);
 
-    register_device_value(empty, &solarPump_, DeviceValueType::BOOL, {}, F("solarPump"), F("Solar pump (PS1) active"), DeviceValueUOM::NONE);
-    register_device_value(empty, &valveStatus_, DeviceValueType::BOOL, {}, F("valveStatus"), F("Valve status"), DeviceValueUOM::NONE);
-    register_device_value(empty, &tankHeated_, DeviceValueType::BOOL, {}, F("tankHeated"), F("Tank heated"), DeviceValueUOM::NONE);
-    register_device_value(empty, &collectorShutdown_, DeviceValueType::BOOL, {}, F("collectorShutdown"), F("Collector shutdown"), DeviceValueUOM::NONE);
+    register_device_value(DeviceValueTAG::TAG_NONE, &pumpWorkMin_, DeviceValueType::TIME, {}, F("pumpWorkMin"), F("Pump working time"), DeviceValueUOM::MINUTES);
 
-    register_device_value(empty, &pumpWorkMin_, DeviceValueType::TIME, {}, F("pumpWorkMin"), F("Pump working time"), DeviceValueUOM::MINUTES);
-
-    register_device_value(
-        empty, &energyLastHour_, DeviceValueType::ULONG, flash_string_vector{F("10")}, F("energyLastHour"), F("Energy last hour"), DeviceValueUOM::WH);
-    register_device_value(empty, &energyTotal_, DeviceValueType::ULONG, flash_string_vector{F("10")}, F("energyTotal"), F("Energy total"), DeviceValueUOM::KWH);
-    register_device_value(empty, &energyToday_, DeviceValueType::ULONG, {}, F("energyToday"), F("Energy today"), DeviceValueUOM::WH);
+    register_device_value(DeviceValueTAG::TAG_NONE,
+                          &energyLastHour_,
+                          DeviceValueType::ULONG,
+                          flash_string_vector{F("10")},
+                          F("energyLastHour"),
+                          F("Energy last hour"),
+                          DeviceValueUOM::WH);
+    register_device_value(DeviceValueTAG::TAG_NONE,
+                          &energyTotal_,
+                          DeviceValueType::ULONG,
+                          flash_string_vector{F("10")},
+                          F("energyTotal"),
+                          F("Energy total"),
+                          DeviceValueUOM::KWH);
+    register_device_value(DeviceValueTAG::TAG_NONE, &energyToday_, DeviceValueType::ULONG, {}, F("energyToday"), F("Energy today"), DeviceValueUOM::WH);
 }
 
 // publish HA config
