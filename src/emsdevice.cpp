@@ -23,7 +23,6 @@ namespace emsesp {
 
 // mapping of UOM, to match order in DeviceValueUOM enum emsdevice.h
 // must be an int of 4 bytes, 32bit aligned
-// TODO see if its easier to use const strings here
 static const __FlashStringHelper * DeviceValueUOM_s[] __attribute__((__aligned__(sizeof(int)))) PROGMEM = {
 
     F_(degrees),
@@ -67,7 +66,7 @@ const std::string EMSdevice::tag_to_string(uint8_t tag) {
     if (tag == DeviceValueTAG::TAG_NONE) {
         return std::string{};
     }
-    return uuid::read_flash_string(DeviceValueTAG_s[tag]);
+    return uuid::read_flash_string(DeviceValueTAG_s[tag - 1]); // offset by 1 to account for NONE
 }
 
 const std::vector<EMSdevice::DeviceValue> EMSdevice::devicevalues() const {
@@ -532,8 +531,6 @@ bool EMSdevice::generate_values_json_web(JsonObject & json) {
 
 // For each value in the device create the json object pair and add it to given json
 // return false if empty
-
-// TODO fix tag_filter!
 bool EMSdevice::generate_values_json(JsonObject & root, const uint8_t tag_filter, const bool verbose) {
     bool       has_value = false; // to see if we've added a value. it's faster than doing a json.size() at the end
     uint8_t    old_tag   = 255;
