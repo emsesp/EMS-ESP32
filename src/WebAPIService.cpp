@@ -71,7 +71,7 @@ void WebAPIService::webAPIService(AsyncWebServerRequest * request) {
         id = "-1";
     }
 
-    DynamicJsonDocument doc(EMSESP_JSON_SIZE_LARGE_DYN);
+    DynamicJsonDocument doc(EMSESP_JSON_SIZE_XLARGE_DYN);
     JsonObject          json     = doc.to<JsonObject>();
     bool                ok       = false;
 
@@ -82,19 +82,18 @@ void WebAPIService::webAPIService(AsyncWebServerRequest * request) {
         if (api_enabled) {
             // we only allow commands with parameters if the API is enabled
             ok = Command::call(device_type, cmd.c_str(), data.c_str(), id.toInt(), json); // has cmd, data and id
-            if (ok && json.size()) {
-                // send json output back to web
-                std::string buffer;
-                serializeJsonPretty(doc, buffer);
-                request->send(200, "text/plain", buffer.c_str());
-                return;
-            }
         } else {
             request->send(401, "text/plain", F("Unauthorized"));
             return;
         }
     }
-
+    if (ok && json.size()) {
+        // send json output back to web
+        std::string buffer;
+        serializeJsonPretty(doc, buffer);
+        request->send(200, "text/plain", buffer.c_str());
+        return;
+    }
     request->send(200, "text/plain", ok ? F("OK") : F("Invalid"));
 }
 

@@ -1557,20 +1557,17 @@ bool Thermostat::set_program(const char * value, const int8_t id) {
         return false;
     }
 
-    if (set < 0 || set > 11) {
+    if (model() == EMS_DEVICE_FLAG_RC20_2 && set > 0 && set < 10) {
+        write_command(set_typeids[hc->hc_num() - 1], 11, set, set_typeids[hc->hc_num() - 1]);
+    } else if ((model() == EMS_DEVICE_FLAG_RC35 || model() == EMS_DEVICE_FLAG_RC30_1) && set < 11) {
+        write_command(timer_typeids[hc->hc_num() - 1], 84, set, timer_typeids[hc->hc_num() - 1]);
+    } else if ((model() == EMS_DEVICE_FLAG_RC300 || model() == EMS_DEVICE_FLAG_RC100) && (set == 1 || set == 2)) {
+        write_command(set_typeids[hc->hc_num() - 1], 11, set, set_typeids[hc->hc_num() - 1]);
+    } else {
         LOG_WARNING(F("Setting program: Invalid number"));
         return false;
     }
-
     LOG_INFO(F("Setting program to %d for heating circuit %d"), set, hc->hc_num());
-    if (model() == EMS_DEVICE_FLAG_RC20_2 && set > 0 && set < 10) {
-        write_command(set_typeids[hc->hc_num() - 1], 11, set, set_typeids[hc->hc_num() - 1]);
-    } else if ((model() == EMS_DEVICE_FLAG_RC35) || (model() == EMS_DEVICE_FLAG_RC30_1)) {
-        write_command(timer_typeids[hc->hc_num() - 1], 84, set, timer_typeids[hc->hc_num() - 1]);
-    } else if ((model() == EMS_DEVICE_FLAG_RC300 || model() == EMS_DEVICE_FLAG_RC100) && (set == 0 || set == 1)) {
-        write_command(set_typeids[hc->hc_num() - 1], 11, set, set_typeids[hc->hc_num() - 1]);
-    }
-
     return true;
 }
 
@@ -2217,7 +2214,7 @@ void Thermostat::register_device_values_hc(std::shared_ptr<emsesp::Thermostat::H
         register_device_value(hc_name, &hc->roominfluence, DeviceValueType::UINT, {}, F("roominfluence"), F("Room influence"), DeviceValueUOM::NONE);
         register_device_value(hc_name, &hc->nofrosttemp, DeviceValueType::INT, {}, F("nofrosttemp"), F("Nofrost temperature"), DeviceValueUOM::DEGREES);
         register_device_value(hc_name, &hc->targetflowtemp, DeviceValueType::UINT, {}, F("targetflowtemp"), F("Target flow temperature"), DeviceValueUOM::DEGREES);
-        register_device_value(hc_name, &hc->heatingtype, DeviceValueType::UINT, {}, F("heatingtype"), F("Heating type"), DeviceValueUOM::NONE);
+        register_device_value(hc_name, &hc->heatingtype, DeviceValueType::ENUM, {F("off"), F("radiator"), F("convector"), F("floor")}, F("heatingtype"), F("Heating type"), DeviceValueUOM::NONE);
         register_device_value(hc_name,
                               &hc->summer_setmode,
                               DeviceValueType::ENUM,
@@ -2265,7 +2262,7 @@ void Thermostat::register_device_values_hc(std::shared_ptr<emsesp::Thermostat::H
         register_device_value(hc_name, &hc->minflowtemp, DeviceValueType::UINT, {}, F("minflowtemp"), F("Min flow temperature"), DeviceValueUOM::DEGREES);
         register_device_value(hc_name, &hc->maxflowtemp, DeviceValueType::UINT, {}, F("maxflowtemp"), F("Max flow temperature"), DeviceValueUOM::DEGREES);
         register_device_value(hc_name, &hc->flowtempoffset, DeviceValueType::UINT, {}, F("flowtempoffset"), F("Flow temperature offset"), DeviceValueUOM::DEGREES);
-        register_device_value(hc_name, &hc->heatingtype, DeviceValueType::UINT, {}, F("heatingtype"), F("Heating type"), DeviceValueUOM::NONE);
+        register_device_value(hc_name, &hc->heatingtype, DeviceValueType::ENUM, {F("off"), F("radiator"), F("convector"), F("floor")}, F("heatingtype"), F("Heating type"), DeviceValueUOM::NONE);
         register_device_value(hc_name,
                               &hc->reducemode,
                               DeviceValueType::ENUM,

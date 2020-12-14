@@ -32,6 +32,7 @@ std::vector<Command::CmdFunction> Command::cmdfunctions_;
 bool Command::call(const uint8_t device_type, const char * cmd, const char * value, const int8_t id) {
     auto cf = find_command(device_type, cmd);
     if ((cf == nullptr) || (cf->cmdfunction_json_)) {
+        LOG_WARNING(F("Command %s not found"), cmd);
         return false; // command not found, or requires a json
     }
 
@@ -55,6 +56,7 @@ bool Command::call(const uint8_t device_type, const char * cmd, const char * val
 bool Command::call(const uint8_t device_type, const char * cmd, const char * value, const int8_t id, JsonObject & json) {
     auto cf = find_command(device_type, cmd);
     if (cf == nullptr) {
+        LOG_WARNING(F("Command %s not found"), cmd);
         return false; // command not found or not json
     }
 

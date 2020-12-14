@@ -66,6 +66,7 @@
 #else
 #define EMSESP_JSON_SIZE_XLARGE_DYN 4096 // for very very large json docs, using DynamicJsonDocument
 #endif
+#define EMSESP_JSON_SIZE_XXLARGE_DYN 5120 // for very very large json docs, using DynamicJsonDocument
 
 namespace emsesp {
 
@@ -159,6 +160,14 @@ class EMSESP {
         tap_water_active_ = tap_water_active;
     }
 
+    static bool trace_raw() {
+        return trace_raw_;
+    }
+
+    static void trace_raw(bool set) {
+        trace_raw_ = set;
+    }
+
     static void fetch_device_values(const uint8_t device_id = 0);
 
     static bool add_device(const uint8_t device_id, const uint8_t product_id, std::string & version, const uint8_t brand);
@@ -220,6 +229,8 @@ class EMSESP {
     static bool     tap_water_active_;
     static uint8_t  publish_all_idx_;
     static uint8_t  unique_id_count_;
+    static bool     trace_raw_;
+    static uint64_t tx_delay_;
 };
 
 } // namespace emsesp

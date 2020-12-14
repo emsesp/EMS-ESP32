@@ -65,6 +65,8 @@ bool     EMSESP::tap_water_active_         = false; // for when Boiler states we
 uint32_t EMSESP::last_fetch_               = 0;
 uint8_t  EMSESP::publish_all_idx_          = 0;
 uint8_t  EMSESP::unique_id_count_          = 0;
+bool     EMSESP::trace_raw_                = false;
+uint64_t EMSESP::tx_delay_                 = 0;
 
 // for a specific EMS device go and request data values
 // or if device_id is 0 it will fetch from all our known and active devices
@@ -145,7 +147,8 @@ void EMSESP::watch_id(uint16_t watch_id) {
 void EMSESP::init_tx() {
     uint8_t tx_mode;
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
-        tx_mode = settings.tx_mode;
+        tx_mode   = settings.tx_mode;
+        tx_delay_ = settings.tx_delay * 1000;
 
 #ifndef EMSESP_FORCE_SERIAL
         EMSuart::stop();
@@ -665,10 +668,10 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
         if ((watch_id_ == WATCH_ID_NONE) || (telegram->type_id == watch_id_)
             || ((watch_id_ < 0x80) && ((telegram->src == watch_id_) || (telegram->dest == watch_id_)))) {
             LOG_NOTICE(pretty_telegram(telegram).c_str());
-        } else {
+        } else if (!trace_raw_) {
             LOG_TRACE(pretty_telegram(telegram).c_str());
         }
-    } else {
+    } else if (!trace_raw_) {
         LOG_TRACE(pretty_telegram(telegram).c_str());
     }
 
@@ -941,8 +944,9 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
                 tx_successful = true;
                 // if telegram is longer read next part with offset + 25 for ems+
                 if (length == 32) {
-                    txservice_.read_next_tx();
-                    read_next_ = true;
+                    if (txservice_.read_next_tx() == read_id_) {
+                        read_next_ = true;
+                    }
                 }
             }
         }
@@ -956,7 +960,18 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
 
     // check for poll
     if (length == 1) {
-        EMSbus::last_bus_activity(uuid::get_uptime()); // set the flag indication the EMS bus is active
+        static uint64_t delayed_tx_start_ = 0;
+        if (!rxservice_.bus_connected() && (tx_delay_ > 0)) {
+            delayed_tx_start_ = uuid::get_uptime_ms();
+            LOG_DEBUG(F("Tx delay started"));
+        }
+        if ((first_value ^ 0x80 ^ rxservice_.ems_mask()) == txservice_.ems_bus_id()) {
+            EMSbus::last_bus_activity(uuid::get_uptime()); // set the flag indication the EMS bus is active
+        }
+        // first send delayed after connect
+        if ((uuid::get_uptime_ms() - delayed_tx_start_) < tx_delay_) {
+            return;
+       }
 
 #ifdef EMSESP_UART_DEBUG
         char s[4];

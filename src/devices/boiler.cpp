@@ -121,7 +121,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     register_device_value(boiler_data_ww,
                           &wWCircPumpMode_,
                           DeviceValueType::ENUM,
-                          flash_string_vector{F("1x3min"), F("2x3min"), F("3x3min"), F("4x3min"), F("5x3min"), F("6x3min"), F("continuos")},
+                          flash_string_vector{F("off"), F("1x3min"), F("2x3min"), F("3x3min"), F("4x3min"), F("5x3min"), F("6x3min"), F("continuos")},
                           F("wWCircPumpMode"),
                           F("Warm water circulation pump freq"),
                           DeviceValueUOM::NONE);
@@ -484,10 +484,11 @@ void Boiler::process_UBAMonitorWW(std::shared_ptr<const Telegram> telegram) {
 
 /*
  * UBAMonitorFastPlus - type 0xE4 - central heating monitor EMS+
- * Still to figure out are: retTemp, sysPress
  * temperatures at 7 and 23 always identical
- * 88 00 E4 00 00 2D 2D 00 00 C9 34 02 21 64 3D 05 02 01 DE 00 00 00 00 03 62 14 00 02 21 00 00 33
- * 88 00 E4 23 00 00 00 00 00 2B 2B 83
++ * Bosch Logamax Plus GB122: issue #620
++ * 88 00 E4 00 00 2D 2D 00 00 C9 34 02 21 64 3D 05 02 01 DE 00 00 00 00 03 62 14 00 02 21 00 00 00 00 00 00 00 2B 2B 83
++ * GB125/Logamatic MC110: issue #650: add retTemp & sysPress
++ * 08 00 E4 00 10 20 2D 48 00 C8 38 02 37 3C 27 03 00 00 00 00 00 01 7B 01 8F 11 00 02 37 80 00 02 1B 80 00 7F FF 80 00
  */
 void Boiler::process_UBAMonitorFastPlus(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram->read_value(selFlowTemp_, 6));
@@ -498,8 +499,11 @@ void Boiler::process_UBAMonitorFastPlus(std::shared_ptr<const Telegram> telegram
     has_update(telegram->read_value(selBurnPow_, 9));
     has_update(telegram->read_value(curFlowTemp_, 7));
     has_update(telegram->read_value(flameCurr_, 19));
+    has_update(telegram->read_value(retTemp_, 17)); // can be 0 if no sensor, handled in export_values
+    has_update(telegram->read_value(sysPress_, 21));
 
-    //has_update(telegram->read_value(temperatur_, 13)); unknown temperature
+    //has_update(telegram->read_value(temperatur_, 13)); // unknown temperature
+    //has_update(telegram->read_value(temperatur_, 27)); // unknown temperature
 
     // read 3 char service code / installation status as appears on the display
     if ((telegram->message_length > 3) && (telegram->offset == 0)) {
