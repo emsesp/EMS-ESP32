@@ -351,6 +351,10 @@ class EMSdevice {
     };
     const std::vector<DeviceValue> devicevalues() const;
 
+    void init_devicevalues(uint8_t size) {
+        devicevalues_.reserve(size);
+    }
+
   private:
     uint8_t     unique_id_;
     uint8_t     device_type_ = DeviceType::SYSTEM;

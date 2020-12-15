@@ -192,6 +192,10 @@ void System::start() {
 #endif
     }
 
+#if defined(EMSESP_DEBUG)
+    show_mem("Startup");
+#endif
+
     // print boot message
     EMSESP::esp8266React.getWiFiSettingsService()->read(
         [&](WiFiSettings & wifiSettings) { LOG_INFO(F("System %s booted (EMS-ESP version %s)"), wifiSettings.hostname.c_str(), EMSESP_APP_VERSION); });
@@ -300,7 +304,19 @@ void System::loop() {
 void System::show_mem(const char * note) {
 #if defined(ESP8266)
 #if defined(EMSESP_DEBUG)
-    LOG_INFO(F("(%s) Free heap: %d%% (%lu), frag:%u%%"), note, free_mem(), (unsigned long)ESP.getFreeHeap(), ESP.getHeapFragmentation());
+    static uint32_t old_free_heap = 0;
+    static uint8_t  old_heap_frag = 0;
+    uint32_t        free_heap     = ESP.getFreeHeap();
+    uint8_t         heap_frag     = ESP.getHeapFragmentation();
+    LOG_INFO(F("(%s) Free heap: %d%% (%lu) (~%lu), frag:%d%% (~%d)"),
+             note,
+             free_mem(),
+             free_heap,
+             (uint32_t)abs(free_heap - old_free_heap),
+             heap_frag,
+             (uint8_t)abs(heap_frag - old_heap_frag));
+    old_free_heap = free_heap;
+    old_heap_frag = heap_frag;
 #endif
 #endif
 }

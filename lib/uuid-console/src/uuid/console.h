@@ -892,7 +892,7 @@ class Shell : public std::enable_shared_from_this<Shell>, public uuid::log::Hand
 	 * @since 0.1.0
 	 */
     size_t vprintf(const __FlashStringHelper * format, va_list ap);
-    void set_command_str(const __FlashStringHelper * str);
+    void   set_command_str(const __FlashStringHelper * str);
 
     static const uuid::log::Logger          logger_; /*!< uuid::log::Logger instance for shells. @since 0.1.0 */
     static std::set<std::shared_ptr<Shell>> shells_; /*!< Registered running shells to be executed. @since 0.1.0 */

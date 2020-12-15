@@ -758,6 +758,24 @@ void EMSESP::show_devices(uuid::console::Shell & shell) {
                 emsdevice->show_telegram_handlers(shell);
                 // emsdevice->show_mqtt_handlers(shell);
                 shell.println();
+
+#if defined(EMSESP_DEBUG)
+                // TODO debug stuff - count size of objects
+                size_t  total_s = 0;
+                uint8_t count   = 0;
+                for (const auto & dv : emsdevice->devicevalues()) {
+                    size_t s = sizeof(dv);
+                    if (dv.full_name) {
+                        shell.printfln("[%s] %d", uuid::read_flash_string(dv.full_name).c_str(), s);
+                    } else {
+                        shell.printfln("[%s]* %d", uuid::read_flash_string(dv.short_name).c_str(), s);
+                    }
+                    total_s += s;
+                    count++;
+                }
+                shell.printfln("Total size of %d elements: %d", count, total_s);
+                shell.println();
+#endif
             }
         }
     }
@@ -785,7 +803,7 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
                 // find the name and flags in our database
                 for (const auto & device : device_library_) {
                     if (device.product_id == product_id) {
-                        emsdevice->name(uuid::read_flash_string(device.name));
+                        emsdevice->name(std::move(uuid::read_flash_string(device.name)));
                         emsdevice->add_flags(device.flags);
                     }
                 }
