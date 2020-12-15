@@ -81,7 +81,7 @@ void WebDevicesService::all_devices(AsyncWebServerRequest * request) {
 // The unique_id is the unique record ID from the Web table to identify which device to load
 void WebDevicesService::device_data(AsyncWebServerRequest * request, JsonVariant & json) {
     if (json.is<JsonObject>()) {
-        AsyncJsonResponse * response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_XLARGE_DYN);
+        AsyncJsonResponse * response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_XXLARGE_DYN);
         for (const auto & emsdevice : EMSESP::emsdevices) {
             if (emsdevice) {
                 if (emsdevice->unique_id() == json["id"]) {

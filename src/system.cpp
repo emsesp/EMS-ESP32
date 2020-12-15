@@ -414,9 +414,11 @@ void System::system_check() {
 
         // not healthy if bus not connected
         if (!EMSbus::bus_connected()) {
+            if (system_healthy_) {
+                LOG_ERROR(F("Error: No connection to the EMS bus"));
+            }
             system_healthy_ = false;
             set_led_speed(LED_WARNING_BLINK); // flash every 1/2 second from now on
-            // LOG_ERROR(F("Error: No connection to the EMS bus"));
         } else {
             // if it was unhealthy but now we're better, make sure the LED is solid again cos we've been healed
             if (!system_healthy_) {

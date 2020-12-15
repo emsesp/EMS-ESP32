@@ -197,7 +197,11 @@ void RxService::add(uint8_t * data, uint8_t length) {
         if ((trace_watch_id == WATCH_ID_NONE) || (type_id == trace_watch_id)
             || ((trace_watch_id < 0x80) && ((src == trace_watch_id) || (dest == trace_watch_id)))) {
             LOG_NOTICE(F("Rx: %s"), Helpers::data_to_hex(data, length).c_str());
+        } else if (EMSESP::trace_raw()) {
+            LOG_TRACE(F("Rx: %s"), Helpers::data_to_hex(data, length).c_str());
         }
+    } else if (EMSESP::trace_raw()) {
+        LOG_TRACE(F("Rx: %s"), Helpers::data_to_hex(data, length).c_str());
     }
 
 #ifdef EMSESP_DEBUG
@@ -577,10 +581,11 @@ void TxService::retry_tx(const uint8_t operation, const uint8_t * data, const ui
     tx_telegrams_.emplace_front(tx_telegram_id_++, std::move(telegram_last_), true);
 }
 
-void TxService::read_next_tx() {
+uint16_t TxService::read_next_tx() {
     // add to the top of the queue
     uint8_t message_data[1] = {EMS_MAX_TELEGRAM_LENGTH}; // request all data, 32 bytes
     add(Telegram::Operation::TX_READ, telegram_last_->dest, telegram_last_->type_id, telegram_last_->offset + 25, message_data, 1, true);
+    return telegram_last_->type_id;
 }
 
 // checks if a telegram is sent to us matches the last Tx request
