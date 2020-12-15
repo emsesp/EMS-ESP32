@@ -21,8 +21,9 @@
 
 namespace emsesp {
 
-// mapping of UOM, to match order in DeviceValueUOM enum
-static const __FlashStringHelper * DeviceValueUOM_s[(uint8_t)10] __attribute__((__aligned__(sizeof(int)))) PROGMEM = {
+// mapping of UOM, to match order in DeviceValueUOM enum emsdevice.h
+// must be an int of 4 bytes, 32bit aligned
+static const __FlashStringHelper * DeviceValueUOM_s[] __attribute__((__aligned__(sizeof(int)))) PROGMEM = {
 
     F_(degrees),
     F_(percent),
@@ -36,11 +37,36 @@ static const __FlashStringHelper * DeviceValueUOM_s[(uint8_t)10] __attribute__((
 
 };
 
-const __FlashStringHelper * EMSdevice::uom_to_string(uint8_t uom) {
+// mapping of TAGs, to match order in DeviceValueTAG enum in emsdevice.h
+// must be an int of 4 bytes, 32bit aligned
+static const __FlashStringHelper * const DeviceValueTAG_s[] PROGMEM = {
+
+    F_(tag_boiler_data),
+    F_(tag_boiler_data_ww),
+    F_(tag_boiler_data_info),
+    F_(tag_hc1),
+    F_(tag_hc2),
+    F_(tag_hc3),
+    F_(tag_hc4),
+    F_(tag_wwc1),
+    F_(tag_wwc2),
+    F_(tag_wwc3),
+    F_(tag_wwc4)
+
+};
+
+const std::string EMSdevice::uom_to_string(uint8_t uom) {
     if (uom == DeviceValueUOM::NONE) {
-        return nullptr;
+        return std::string{};
     }
-    return DeviceValueUOM_s[uom];
+    return uuid::read_flash_string(DeviceValueUOM_s[uom]);
+}
+
+const std::string EMSdevice::tag_to_string(uint8_t tag) {
+    if (tag == DeviceValueTAG::TAG_NONE) {
+        return std::string{};
+    }
+    return uuid::read_flash_string(DeviceValueTAG_s[tag - 1]); // offset by 1 to account for NONE
 }
 
 const std::vector<EMSdevice::DeviceValue> EMSdevice::devicevalues() const {
@@ -331,7 +357,7 @@ void EMSdevice::register_telegram_type(const uint16_t telegram_type_id, const __
 //  full name: used in Web and Console
 //  uom: unit of measure from DeviceValueUOM
 //  icon (optional): the HA mdi icon to use, from locale_*.h file
-void EMSdevice::register_device_value(std::string &               tag,
+void EMSdevice::register_device_value(uint8_t                     tag,
                                       void *                      value_p,
                                       uint8_t                     type,
                                       const flash_string_vector & options,
@@ -378,12 +404,12 @@ std::string EMSdevice::get_value_uom(const char * key) {
                 if ((dv.uom == DeviceValueUOM::NONE) || (dv.uom == DeviceValueUOM::MINUTES)) {
                     break;
                 }
-                return uuid::read_flash_string(EMSdevice::uom_to_string(dv.uom));
+                return EMSdevice::uom_to_string(dv.uom);
             }
         }
     }
 
-    return {}; // not found
+    return std::string{}; // not found
 }
 
 // prepare array of device values, as 3 elements serialized (name, value, uom) in array to send to Web UI
@@ -488,11 +514,11 @@ bool EMSdevice::generate_values_json_web(JsonObject & json) {
 
                 // add name, prefixing the tag if it exists
                 // if we're a boiler, ignore the tag
-                if (dv.tag.empty() || (device_type_ == DeviceType::BOILER)) {
+                if ((dv.tag == DeviceValueTAG::TAG_NONE) || (device_type_ == DeviceType::BOILER)) {
                     data.add(dv.full_name);
                 } else {
                     char name[50];
-                    snprintf_P(name, sizeof(name), "(%s) %s", dv.tag.c_str(), uuid::read_flash_string(dv.full_name).c_str());
+                    snprintf_P(name, sizeof(name), "(%s) %s", tag_to_string(dv.tag).c_str(), uuid::read_flash_string(dv.full_name).c_str());
                     data.add(name);
                 }
                 num_elements = sz + 2;
@@ -505,20 +531,20 @@ bool EMSdevice::generate_values_json_web(JsonObject & json) {
 
 // For each value in the device create the json object pair and add it to given json
 // return false if empty
-bool EMSdevice::generate_values_json(JsonObject & root, const std::string & tag_filter, const bool verbose) {
-    bool        has_value = false; // to see if we've added a value. it's faster than doing a json.size() at the end
-    std::string old_tag(40, '\0');
-    JsonObject  json = root;
+bool EMSdevice::generate_values_json(JsonObject & root, const uint8_t tag_filter, const bool verbose) {
+    bool       has_value = false; // to see if we've added a value. it's faster than doing a json.size() at the end
+    uint8_t    old_tag   = 255;
+    JsonObject json      = root;
 
     for (const auto & dv : devicevalues_) {
         // only show if tag is either empty or matches a value, and don't show if full_name is empty unless we're outputing for mqtt payloads
-        if (((tag_filter.empty()) || (tag_filter == dv.tag)) && (dv.full_name != nullptr || !verbose)) {
-            bool have_tag = (!dv.tag.empty() && (dv.device_type != DeviceType::BOILER));
+        if (((tag_filter == DeviceValueTAG::TAG_NONE) || (tag_filter == dv.tag)) && (dv.full_name != nullptr || !verbose)) {
+            bool have_tag = ((dv.tag != DeviceValueTAG::TAG_NONE) && (dv.device_type != DeviceType::BOILER));
             char name[80];
             if (verbose) {
                 // prefix the tag in brackets, unless it's Boiler because we're naughty and use tag for the MQTT topic
                 if (have_tag) {
-                    snprintf_P(name, 80, "(%s) %s", dv.tag.c_str(), uuid::read_flash_string(dv.full_name).c_str());
+                    snprintf_P(name, 80, "(%s) %s", tag_to_string(dv.tag).c_str(), uuid::read_flash_string(dv.full_name).c_str());
                 } else {
                     strcpy(name, uuid::read_flash_string(dv.full_name).c_str()); // use full name
                 }
@@ -528,7 +554,7 @@ bool EMSdevice::generate_values_json(JsonObject & root, const std::string & tag_
                 // if we have a tag, and its different to the last one create a nested object
                 if (have_tag && (dv.tag != old_tag)) {
                     old_tag = dv.tag;
-                    json    = root.createNestedObject(dv.tag);
+                    json    = root.createNestedObject(tag_to_string(dv.tag));
                 }
             }
 

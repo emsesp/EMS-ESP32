@@ -99,7 +99,7 @@ class Mqtt {
     static void publish_ha(const __FlashStringHelper * topic, const JsonObject & payload);
 
     static void register_mqtt_ha_sensor(uint8_t                     type,
-                                        const char *                prefix,
+                                        uint8_t                     tag,
                                         const __FlashStringHelper * name,
                                         const uint8_t               device_type,
                                         const __FlashStringHelper * entity,

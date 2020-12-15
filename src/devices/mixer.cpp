@@ -66,14 +66,18 @@ void Mixer::register_values(const Type type, uint16_t hc) {
     hc_   = hc + 1;
     type_ = type;
 
-    std::string prefix(10, '\0');
-    snprintf_P(&prefix[0], sizeof(prefix), PSTR("%s%d"), (type_ == Type::HC) ? "hc" : "wwc", hc + 1);
+    // with hc<n> or wwc<n>
+    uint8_t tag = DeviceValueTAG::TAG_NONE;
+    if (type_ == Type::HC) {
+        tag = DeviceValueTAG::TAG_HC1 + hc - 1;
+    } else {
+        tag = DeviceValueTAG::TAG_WWC1 + hc - 1;
+    }
 
-    register_device_value(
-        prefix, &flowTemp_, DeviceValueType::USHORT, flash_string_vector{F("10")}, F("flowTemp"), F("Current flow temperature"), DeviceValueUOM::DEGREES);
-    register_device_value(prefix, &flowSetTemp_, DeviceValueType::UINT, {}, F("flowSetTemp"), F("Setpoint flow temperature"), DeviceValueUOM::DEGREES);
-    register_device_value(prefix, &pumpStatus_, DeviceValueType::BOOL, {}, F("pumpStatus"), F("Pump/Valve status"), DeviceValueUOM::NONE);
-    register_device_value(prefix, &status_, DeviceValueType::INT, {}, F("status"), F("Current status"), DeviceValueUOM::NONE);
+    register_device_value(tag, &flowTemp_, DeviceValueType::USHORT, flash_string_vector{F("10")}, F("flowTemp"), F("Current flow temperature"), DeviceValueUOM::DEGREES);
+    register_device_value(tag, &flowSetTemp_, DeviceValueType::UINT, {}, F("flowSetTemp"), F("Setpoint flow temperature"), DeviceValueUOM::DEGREES);
+    register_device_value(tag, &pumpStatus_, DeviceValueType::BOOL, {}, F("pumpStatus"), F("Pump/Valve status"), DeviceValueUOM::NONE);
+    register_device_value(tag, &status_, DeviceValueType::INT, {}, F("status"), F("Current status"), DeviceValueUOM::NONE);
 }
 
 

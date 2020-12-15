@@ -276,7 +276,7 @@ void EMSESP::show_device_values(uuid::console::Shell & shell) {
 
                 DynamicJsonDocument doc(EMSESP_JSON_SIZE_XLARGE_DYN); // use max size
                 JsonObject          json = doc.to<JsonObject>();
-                emsdevice->generate_values_json(json, "", true); // verbose mode
+                emsdevice->generate_values_json(json, DeviceValueTAG::TAG_NONE, true); // verbose mode
 
                 // print line
                 uint8_t id = 0;
@@ -401,7 +401,7 @@ void EMSESP::publish_device_values(uint8_t device_type) {
                 // create the configs for each value as a sensor
                 for (const auto & dv : emsdevice->devicevalues()) {
                     if (dv.device_type == device_type) {
-                        Mqtt::register_mqtt_ha_sensor(dv.type, dv.tag.c_str(), dv.full_name, device_type, dv.short_name, dv.uom, dv.icon);
+                        Mqtt::register_mqtt_ha_sensor(dv.type, dv.tag, dv.full_name, device_type, dv.short_name, dv.uom, dv.icon);
                     }
                 }
 
@@ -412,19 +412,19 @@ void EMSESP::publish_device_values(uint8_t device_type) {
 
             // if its a boiler, generate json for each group and publish it
             if (device_type == DeviceType::BOILER) {
-                emsdevice->generate_values_json(json, "boiler_data");
+                emsdevice->generate_values_json(json, DeviceValueTAG::TAG_BOILER_DATA);
                 Mqtt::publish("boiler_data", json);
                 json.clear();
-                emsdevice->generate_values_json(json, "boiler_data_ww");
+                emsdevice->generate_values_json(json, DeviceValueTAG::TAG_BOILER_DATA_WW);
                 Mqtt::publish("boiler_data_ww", json);
                 json.clear();
-                emsdevice->generate_values_json(json, "boiler_data_info");
+                emsdevice->generate_values_json(json, DeviceValueTAG::TAG_BOILER_DATA_INFO);
                 Mqtt::publish("boiler_data_info", json);
                 return;
             }
 
             // for all other devices add the values to the json, without verbose mode
-            has_value |= emsdevice->generate_values_json(json, "");
+            has_value |= emsdevice->generate_values_json(json, DeviceValueTAG::TAG_NONE);
         }
     }
 
@@ -761,6 +761,24 @@ void EMSESP::show_devices(uuid::console::Shell & shell) {
                 emsdevice->show_telegram_handlers(shell);
                 // emsdevice->show_mqtt_handlers(shell);
                 shell.println();
+
+#if defined(EMSESP_DEBUG)
+                // TODO debug stuff - count size of objects
+                size_t  total_s = 0;
+                uint8_t count   = 0;
+                for (const auto & dv : emsdevice->devicevalues()) {
+                    size_t s = sizeof(dv);
+                    if (dv.full_name) {
+                        shell.printfln("[%s] %d", uuid::read_flash_string(dv.full_name).c_str(), s);
+                    } else {
+                        shell.printfln("[%s]* %d", uuid::read_flash_string(dv.short_name).c_str(), s);
+                    }
+                    total_s += s;
+                    count++;
+                }
+                shell.printfln("Total size of %d elements: %d", count, total_s);
+                shell.println();
+#endif
             }
         }
     }
@@ -788,7 +806,7 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
                 // find the name and flags in our database
                 for (const auto & device : device_library_) {
                     if (device.product_id == product_id) {
-                        emsdevice->name(uuid::read_flash_string(device.name));
+                        emsdevice->name(std::move(uuid::read_flash_string(device.name)));
                         emsdevice->add_flags(device.flags);
                     }
                 }
@@ -853,7 +871,7 @@ bool EMSESP::command_info(uint8_t device_type, JsonObject & json) {
     bool has_value = false;
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice && (emsdevice->device_type() == device_type)) {
-            has_value |= emsdevice->generate_values_json(json, "", true); // verbose mode
+            has_value |= emsdevice->generate_values_json(json, DeviceValueTAG::TAG_NONE, true); // verbose mode
         }
     }
 

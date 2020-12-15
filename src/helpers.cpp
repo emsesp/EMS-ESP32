@@ -422,7 +422,7 @@ std::string Helpers::toLower(std::string const & s) {
 // checks if we can convert a char string to a lowercase string
 bool Helpers::value2string(const char * v, std::string & value) {
     if ((v == nullptr) || (strlen(v) == 0)) {
-        value = {};
+        value = std::string{};
         return false;
     }
     value = toLower(v);

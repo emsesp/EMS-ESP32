@@ -729,7 +729,7 @@ void Mqtt::process_queue() {
 // entity must match the key/value pair in the *_data topic
 // some string copying here into chars, it looks messy but does help with heap fragmentation issues
 void Mqtt::register_mqtt_ha_sensor(uint8_t                     type, // device value type
-                                   const char *                prefix,
+                                   uint8_t                     tag,
                                    const __FlashStringHelper * name,
                                    const uint8_t               device_type,
                                    const __FlashStringHelper * entity,
@@ -743,14 +743,14 @@ void Mqtt::register_mqtt_ha_sensor(uint8_t                     type, // device v
     // DynamicJsonDocument doc(EMSESP_JSON_SIZE_HA_CONFIG);
     StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> doc; // TODO see if this crashes ESP8266?
 
-    bool have_prefix = ((prefix[0] != '\0') && (device_type != EMSdevice::DeviceType::BOILER));
+    bool have_prefix = ((tag != DeviceValueTAG::TAG_NONE) && (device_type != EMSdevice::DeviceType::BOILER));
 
     // create entity by inserting any given prefix
-    // we ignore the prefix (tag) if BOILER
+    // we ignore the tag if BOILER
     char new_entity[50];
     // special case for boiler - don't use the prefix
     if (have_prefix) {
-        snprintf_P(new_entity, sizeof(new_entity), PSTR("%s.%s"), prefix, uuid::read_flash_string(entity).c_str());
+        snprintf_P(new_entity, sizeof(new_entity), PSTR("%s.%s"), EMSdevice::tag_to_string(tag).c_str(), uuid::read_flash_string(entity).c_str());
     } else {
         snprintf_P(new_entity, sizeof(new_entity), PSTR("%s"), uuid::read_flash_string(entity).c_str());
     }
@@ -764,35 +764,29 @@ void Mqtt::register_mqtt_ha_sensor(uint8_t                     type, // device v
     std::string uniq(50, '\0');
     snprintf_P(&uniq[0], uniq.capacity() + 1, PSTR("%s_%s"), device_name, new_entity);
     std::replace(uniq.begin(), uniq.end(), '.', '_');
-
-    // topic
-    char topic[MQTT_TOPIC_MAX_SIZE];
+    doc["uniq_id"] = uniq;
 
     // state topic
     // if its a boiler we use the tag
     char stat_t[MQTT_TOPIC_MAX_SIZE];
     if (device_type == EMSdevice::DeviceType::BOILER) {
-        snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/%s"), hostname_.c_str(), prefix);
+        snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/%s"), hostname_.c_str(), EMSdevice::tag_to_string(tag).c_str());
     } else {
         snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/%s_data"), hostname_.c_str(), device_name);
     }
-
-    // ha device
-    char ha_device[40];
-    snprintf_P(ha_device, sizeof(ha_device), PSTR("ems-esp-%s"), device_name);
+    doc["stat_t"] = stat_t;
 
     // name
     char new_name[50];
     if (have_prefix) {
-        snprintf_P(new_name, sizeof(new_name), PSTR("%s %s %s"), device_name, prefix, uuid::read_flash_string(name).c_str());
+        snprintf_P(new_name, sizeof(new_name), PSTR("%s %s %s"), device_name, EMSdevice::tag_to_string(tag).c_str(), uuid::read_flash_string(name).c_str());
     } else {
         snprintf_P(new_name, sizeof(new_name), PSTR("%s %s"), device_name, uuid::read_flash_string(name).c_str());
     }
     new_name[0] = toupper(new_name[0]); // capitalize first letter
+    doc["name"] = new_name;
 
-    doc["name"]    = new_name;
-    doc["uniq_id"] = uniq;
-    doc["stat_t"]  = stat_t;
+    char topic[MQTT_TOPIC_MAX_SIZE]; // reserved for topic
 
     // look at the device value type
     if (type != DeviceValueType::BOOL) {
@@ -845,6 +839,10 @@ void Mqtt::register_mqtt_ha_sensor(uint8_t                     type, // device v
 
     JsonObject dev = doc.createNestedObject("dev");
     JsonArray  ids = dev.createNestedArray("ids");
+
+    // ha device
+    char ha_device[40];
+    snprintf_P(ha_device, sizeof(ha_device), PSTR("ems-esp-%s"), device_name);
     ids.add(ha_device);
 
     publish_ha(topic, doc.as<JsonObject>());

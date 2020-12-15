@@ -30,6 +30,14 @@
 
 namespace emsesp {
 
+// Home Assistant icons (https://materialdesignicons.com/)
+MAKE_PSTR(icontemperature, "mdi:temperature-celsius")
+MAKE_PSTR(iconpercent, "mdi:percent-outline")
+MAKE_PSTR(iconfire, "mdi:fire")
+MAKE_PSTR(iconfan, "mdi:fan")
+MAKE_PSTR(iconflame, "mdi:flash")
+MAKE_PSTR(iconvalve, "mdi:valve")
+
 enum DeviceValueType : uint8_t {
     BOOL,
     INT,
@@ -37,13 +45,23 @@ enum DeviceValueType : uint8_t {
     SHORT,
     USHORT,
     ULONG,
-    TIME, // same as ULONG
+    TIME, // same as ULONG (32 bits)
     ENUM,
     TEXT
 
 };
 
-// Unit Of Measurement mapping
+// Unit Of Measurement mapping - maps to DeviceValueUOM_s in emsdevice.cpp
+// uom - also used with HA
+MAKE_PSTR(percent, "%")
+MAKE_PSTR(degrees, "°C")
+MAKE_PSTR(kwh, "kWh")
+MAKE_PSTR(wh, "Wh")
+MAKE_PSTR(bar, "bar")
+MAKE_PSTR(minutes, "minutes")
+MAKE_PSTR(hours, "hours")
+MAKE_PSTR(ua, "uA")
+MAKE_PSTR(lmin, "l/min")
 enum DeviceValueUOM : uint8_t {
     DEGREES,
     PERCENT,
@@ -55,6 +73,34 @@ enum DeviceValueUOM : uint8_t {
     UA,
     BAR,
     NONE
+
+};
+
+// TAG mapping - maps to DeviceValueTAG_s in emsdevice.cpp
+MAKE_PSTR(tag_boiler_data, "boiler_data")
+MAKE_PSTR(tag_boiler_data_ww, "boiler_data_ww")
+MAKE_PSTR(tag_boiler_data_info, "boiler_data_info")
+MAKE_PSTR(tag_hc1, "hc1")
+MAKE_PSTR(tag_hc2, "hc2")
+MAKE_PSTR(tag_hc3, "hc3")
+MAKE_PSTR(tag_hc4, "hc4")
+MAKE_PSTR(tag_wwc1, "wwc1")
+MAKE_PSTR(tag_wwc2, "wwc2")
+MAKE_PSTR(tag_wwc3, "wwc3")
+MAKE_PSTR(tag_wwc4, "wwc4")
+enum DeviceValueTAG : uint8_t {
+    TAG_NONE = 0,
+    TAG_BOILER_DATA,
+    TAG_BOILER_DATA_WW,
+    TAG_BOILER_DATA_INFO,
+    TAG_HC1,
+    TAG_HC2,
+    TAG_HC3,
+    TAG_HC4,
+    TAG_WWC1,
+    TAG_WWC2,
+    TAG_WWC3,
+    TAG_WWC4
 
 };
 
@@ -86,7 +132,8 @@ class EMSdevice {
     static std::string device_type_2_device_name(const uint8_t device_type);
     static uint8_t     device_name_2_device_type(const char * topic);
 
-    static const __FlashStringHelper * uom_to_string(uint8_t uom);
+    static const std::string uom_to_string(uint8_t uom);
+    static const std::string tag_to_string(uint8_t tag);
 
     inline uint8_t product_id() const {
         return product_id_;
@@ -173,10 +220,10 @@ class EMSdevice {
     bool handle_telegram(std::shared_ptr<const Telegram> telegram);
 
     std::string get_value_uom(const char * key);
-    bool        generate_values_json(JsonObject & json, const std::string & tag_filter, const bool verbose = false);
+    bool        generate_values_json(JsonObject & json, const uint8_t tag_filter, const bool verbose = false);
     bool        generate_values_json_web(JsonObject & json);
 
-    void register_device_value(std::string &               tag,
+    void register_device_value(uint8_t                     tag,
                                void *                      value_p,
                                uint8_t                     type,
                                const flash_string_vector & options,
@@ -273,7 +320,7 @@ class EMSdevice {
 
     struct DeviceValue {
         uint8_t                     device_type; // EMSdevice::DeviceType
-        const std::string           tag;         // MQTT topic or ID
+        uint8_t                     tag;         // DeviceValueTAG::*
         void *                      value_p;     // pointer to variable of any type
         uint8_t                     type;        // DeviceValueType::*
         const flash_string_vector   options;     // list of options for ENUM, or divider
@@ -283,7 +330,7 @@ class EMSdevice {
         const __FlashStringHelper * icon;        // HA icon
 
         DeviceValue(uint8_t                     device_type,
-                    const std::string &         tag,
+                    uint8_t                     tag,
                     void *                      value_p,
                     uint8_t                     type,
                     const flash_string_vector   options,
@@ -303,6 +350,10 @@ class EMSdevice {
         }
     };
     const std::vector<DeviceValue> devicevalues() const;
+
+    void init_devicevalues(uint8_t size) {
+        devicevalues_.reserve(size);
+    }
 
   private:
     uint8_t     unique_id_;
