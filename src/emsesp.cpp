@@ -989,7 +989,7 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
         // first send delayed after connect
         if ((uuid::get_uptime_ms() - delayed_tx_start_) < tx_delay_) {
             return;
-       }
+        }
 
 #ifdef EMSESP_UART_DEBUG
         char s[4];
