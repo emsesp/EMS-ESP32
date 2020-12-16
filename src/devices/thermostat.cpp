@@ -1043,7 +1043,7 @@ bool Thermostat::set_calinttemp(const char * value, const int8_t id) {
         return false;
     }
 
-    LOG_INFO(F("Calibrating internal temperature to %d.%d"), ct / 10, ct < 0 ? -ct % 10 : ct % 10);
+    LOG_INFO(F("Calibrating internal temperature to %d.%d C"), ct / 10, ct < 0 ? -ct % 10 : ct % 10);
     write_command(EMS_TYPE_IBASettings, 2, ct, EMS_TYPE_IBASettings);
 
     return true;
@@ -1120,8 +1120,8 @@ bool Thermostat::set_language(const char * value, const int8_t id) {
 
 // Set the control-mode for hc 0-off, 1-RC20, 2-RC3x
 bool Thermostat::set_control(const char * value, const int8_t id) {
-    int ctrl = 0;
-    if (!Helpers::value2number(value, ctrl)) {
+    uint8_t ctrl = 0;
+    if (!Helpers::value2enum(value, ctrl, {F("off"), F("rc20"), F("rc3x")})) {
         LOG_WARNING(F("Set control: Invalid value"));
         return false;
     }
@@ -1167,7 +1167,7 @@ bool Thermostat::set_wwtemp(const char * value, const int8_t id) {
         LOG_WARNING(F("Set warm water high temperature: Invalid value"));
         return false;
     }
-    LOG_INFO(F("Setting warm water high temperature to %d"), t);
+    LOG_INFO(F("Setting warm water high temperature to %d C"), t);
     write_command(0x031B, 0, t, 0x031B);
     return true;
 }
@@ -1179,7 +1179,7 @@ bool Thermostat::set_wwtemplow(const char * value, const int8_t id) {
         LOG_WARNING(F("Set warm water low temperature: Invalid value"));
         return false;
     }
-    LOG_INFO(F("Setting warm water low temperature to %d"), t);
+    LOG_INFO(F("Setting warm water low temperature to %d C"), t);
     write_command(0x031B, 1, t, 0x031B);
     return true;
 }

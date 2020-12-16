@@ -10,7 +10,7 @@
 - Add solar configuration telegrams (#616) [thanks @hpanther]
 - `log trace` shows decoded telegrams, `watch unknown` for only unknown telegrams
 - WM10 switch telegrams
-- boiler information (#633)
+- boiler information (#633), pumpmod min/max commands
 - maintenance message and command
 - thermostat program, reducemode, controlmode
 

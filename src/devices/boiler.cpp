@@ -82,6 +82,8 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     register_mqtt_cmd(F("pumpdelay"), [&](const char * value, const int8_t id) { return set_pump_delay(value, id); });
     // register_mqtt_cmd(F("reset"), [&](const char * value, const int8_t id) { return set_reset(value, id); });
     register_mqtt_cmd(F("maintenance"), [&](const char * value, const int8_t id) { return set_maintenance(value, id); });
+    register_mqtt_cmd(F("pumpmodmax"), [&](const char * value, const int8_t id) { return set_max_pump(value, id); });
+    register_mqtt_cmd(F("pumpmodmin"), [&](const char * value, const int8_t id) { return set_min_pump(value, id); });
 
     System::show_mem("after mqtt cmd reg"); // TODO remove debug
 
@@ -743,6 +745,8 @@ void Boiler::process_UBAParametersPlus(std::shared_ptr<const Telegram> telegram)
     has_update(telegram->read_value(boilHystOff_, 8));
     has_update(telegram->read_value(boilHystOn_, 9));
     has_update(telegram->read_value(burnMinPeriod_, 10));
+    // changed_ |= telegram->read_value(pumpModMax_, 13); // guess
+    // changed_ |= telegram->read_value(pumpModMin_, 14); // guess
 }
 
 // 0xEA
@@ -973,7 +977,7 @@ bool Boiler::set_heating_temp(const char * value, const int8_t id) {
         return false;
     }
 
-    LOG_INFO(F("Setting boiler heating temperature to "), v);
+    LOG_INFO(F("Setting boiler heating temperature to %d C"), v);
     if (get_toggle_fetch(EMS_TYPE_UBAParametersPlus)) {
         write_command(EMS_TYPE_UBAParametersPlus, 1, v, EMS_TYPE_UBAParametersPlus);
     } else {
@@ -991,7 +995,7 @@ bool Boiler::set_min_power(const char * value, const int8_t id) {
         return false;
     }
 
-    LOG_INFO(F("Setting boiler min power to "), v);
+    LOG_INFO(F("Setting boiler min power to %d %%"), v);
     if (get_toggle_fetch(EMS_TYPE_UBAParametersPlus)) {
         write_command(EMS_TYPE_UBAParametersPlus, 7, v, EMS_TYPE_UBAParametersPlus);
     } else {
@@ -1009,11 +1013,47 @@ bool Boiler::set_max_power(const char * value, const int8_t id) {
         return false;
     }
 
-    LOG_INFO(F("Setting boiler max power to %d C"), v);
+    LOG_INFO(F("Setting boiler max power to %d %%"), v);
     if (get_toggle_fetch(EMS_TYPE_UBAParametersPlus)) {
         write_command(EMS_TYPE_UBAParametersPlus, 6, v, EMS_TYPE_UBAParametersPlus);
     } else {
         write_command(EMS_TYPE_UBAParameters, 2, v, EMS_TYPE_UBAParameters);
+    }
+
+    return true;
+}
+
+// set min pump modulation
+bool Boiler::set_min_pump(const char * value, const int8_t id) {
+    int v = 0;
+    if (!Helpers::value2number(value, v)) {
+        LOG_WARNING(F("Set pump min: Invalid value"));
+        return false;
+    }
+
+    LOG_INFO(F("Setting pump min to %d %%"), v);
+    if (get_toggle_fetch(EMS_TYPE_UBAParametersPlus)) {
+        write_command(EMS_TYPE_UBAParametersPlus, 14, v, EMS_TYPE_UBAParametersPlus);
+    } else {
+        write_command(EMS_TYPE_UBAParameters, 10, v, EMS_TYPE_UBAParameters);
+    }
+
+    return true;
+}
+
+// set max pump modulation
+bool Boiler::set_max_pump(const char * value, const int8_t id) {
+    int v = 0;
+    if (!Helpers::value2number(value, v)) {
+        LOG_WARNING(F("Set pump max: Invalid value"));
+        return false;
+    }
+
+    LOG_INFO(F("Setting pump max to %d %%"), v);
+    if (get_toggle_fetch(EMS_TYPE_UBAParametersPlus)) {
+        write_command(EMS_TYPE_UBAParametersPlus, 13, v, EMS_TYPE_UBAParametersPlus);
+    } else {
+        write_command(EMS_TYPE_UBAParameters, 9, v, EMS_TYPE_UBAParameters);
     }
 
     return true;
