@@ -56,7 +56,7 @@ void WiFiSettingsService::reconfigureWiFiConnection() {
 
 void WiFiSettingsService::loop() {
     unsigned long currentMillis = millis();
-    if (!_lastConnectionAttempt || (unsigned long)(currentMillis - _lastConnectionAttempt) >= WIFI_RECONNECTION_DELAY) {
+    if (!_lastConnectionAttempt || (uint32_t)(currentMillis - _lastConnectionAttempt) >= WIFI_RECONNECTION_DELAY) {
         _lastConnectionAttempt = currentMillis;
         manageSTA();
     }

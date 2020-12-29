@@ -130,17 +130,6 @@ void System::format(uuid::console::Shell & shell) {
     System::restart();
 }
 
-// return free heap mem as a percentage
-uint8_t System::free_mem() {
-#ifndef EMSESP_STANDALONE
-    uint32_t free_memory = ESP.getFreeHeap();
-#else
-    uint32_t free_memory = 1000;
-#endif
-
-    return (100 * free_memory / heap_start_);
-}
-
 void System::syslog_init() {
     int8_t   syslog_level_;
     uint32_t syslog_mark_interval_;
@@ -182,14 +171,10 @@ void System::syslog_init() {
 }
 
 // first call. Sets memory and starts up the UART Serial bridge
-void System::start() {
-    // set the inital free mem
+void System::start(uint32_t heap_start) {
+    // set the inital free mem, only on first boot
     if (heap_start_ < 2) {
-#ifndef EMSESP_STANDALONE
-        heap_start_ = ESP.getFreeHeap();
-#else
-        heap_start_ = 2000;
-#endif
+        heap_start_ = heap_start;
     }
 
 #if defined(EMSESP_DEBUG)
@@ -202,15 +187,15 @@ void System::start() {
 
     // these commands respond to the topic "system" and take a payload like {cmd:"", data:"", id:""}
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
-        Command::add(EMSdevice::DeviceType::SYSTEM, settings.ems_bus_id, F_(pin), System::command_pin);
-        Command::add(EMSdevice::DeviceType::SYSTEM, settings.ems_bus_id, F_(send), System::command_send);
-        Command::add(EMSdevice::DeviceType::SYSTEM, settings.ems_bus_id, F_(publish), System::command_publish);
-        Command::add(EMSdevice::DeviceType::SYSTEM, settings.ems_bus_id, F_(fetch), System::command_fetch);
+        Command::add(EMSdevice::DeviceType::SYSTEM, F_(pin), System::command_pin);
+        Command::add(EMSdevice::DeviceType::SYSTEM, F_(send), System::command_send);
+        Command::add(EMSdevice::DeviceType::SYSTEM, F_(publish), System::command_publish);
+        Command::add(EMSdevice::DeviceType::SYSTEM, F_(fetch), System::command_fetch);
         Command::add_with_json(EMSdevice::DeviceType::SYSTEM, F_(info), System::command_info);
         Command::add_with_json(EMSdevice::DeviceType::SYSTEM, F_(settings), System::command_settings);
 
 #if defined(EMSESP_TEST)
-        Command::add(EMSdevice::DeviceType::SYSTEM, settings.ems_bus_id, F_(test), System::command_test);
+        Command::add(EMSdevice::DeviceType::SYSTEM, F_(test), System::command_test);
 #endif
     });
 
@@ -308,13 +293,12 @@ void System::show_mem(const char * note) {
     static uint8_t  old_heap_frag = 0;
     uint32_t        free_heap     = ESP.getFreeHeap();
     uint8_t         heap_frag     = ESP.getHeapFragmentation();
-    LOG_INFO(F("(%s) Free heap: %d%% (%lu) (~%lu), frag:%d%% (~%d)"),
+    LOG_INFO(F("(%s) Free heap: %lu (~%lu), frag:%d%% (~%d)"),
              note,
-             free_mem(),
              free_heap,
-             (uint32_t)abs(free_heap - old_free_heap),
+             (uint32_t)Helpers::abs(free_heap - old_free_heap),
              heap_frag,
-             (uint8_t)abs(heap_frag - old_heap_frag));
+             (uint8_t)Helpers::abs(heap_frag - old_heap_frag));
     old_free_heap = free_heap;
     old_heap_frag = heap_frag;
 #endif
@@ -328,8 +312,6 @@ void System::send_heartbeat() {
     if (rssi == -1) {
         return;
     }
-
-    uint32_t free_memory = free_mem();
 
 #if defined(ESP8266)
     uint8_t frag_memory = ESP.getHeapFragmentation();
@@ -352,8 +334,8 @@ void System::send_heartbeat() {
     doc["mqttfails"]  = Mqtt::publish_fails();
     doc["txfails"]    = EMSESP::txservice_.telegram_fail_count();
     doc["rxfails"]    = EMSESP::rxservice_.telegram_error_count();
-    doc["freemem"]    = free_memory;
 #if defined(ESP8266)
+    doc["freemem"] = ESP.getFreeHeap();
     doc["fragmem"] = frag_memory;
 #endif
     if (analog_enabled_) {
@@ -508,12 +490,11 @@ void System::show_system(uuid::console::Shell & shell) {
     shell.printfln(F("CPU frequency: %u MHz"), ESP.getCpuFreqMHz());
 #endif
     shell.printfln(F("Sketch size:   %u bytes (%u bytes free)"), ESP.getSketchSize(), ESP.getFreeSketchSpace());
-    shell.printfln(F("Free heap:                %lu bytes"), (unsigned long)ESP.getFreeHeap());
-    shell.printfln(F("Free mem:                 %d  %%"), free_mem());
+    shell.printfln(F("Free heap:                %lu bytes"), (uint32_t)ESP.getFreeHeap());
 #if defined(ESP8266)
     shell.printfln(F("Heap fragmentation:       %u %%"), ESP.getHeapFragmentation());
-    shell.printfln(F("Maximum free block size:  %lu bytes"), (unsigned long)ESP.getMaxFreeBlockSize());
-    shell.printfln(F("Free continuations stack: %lu bytes"), (unsigned long)ESP.getFreeContStack());
+    shell.printfln(F("Maximum free block size:  %lu bytes"), (uint32_t)ESP.getMaxFreeBlockSize());
+    shell.printfln(F("Free continuations stack: %lu bytes"), (uint32_t)ESP.getFreeContStack());
 #endif
     shell.println();
 
@@ -734,10 +715,10 @@ void System::console_commands(Shell & shell, unsigned int context) {
     Console::enter_custom_context(shell, context);
 }
 
-// upgrade from previous versions of EMS-ESP, based on SPIFFS on an ESP8266
+// upgrade from previous versions of EMS-ESP
 // returns true if an upgrade was done
-// the logic is bit abnormal (loading both filesystems and testing) but this was the only way I could get it to work reliably
 bool System::check_upgrade() {
+    /*
 #if defined(ESP8266)
     LittleFSConfig l_cfg;
     l_cfg.setAutoFormat(false);
@@ -923,6 +904,8 @@ bool System::check_upgrade() {
 #else
     return false;
 #endif
+*/
+    return false;
 }
 
 // export all settings to JSON text
@@ -1033,8 +1016,8 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & json
 
     node["version"] = EMSESP_APP_VERSION;
     node["uptime"]  = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
-    node["freemem"] = free_mem();
 #if defined(ESP8266)
+    node["freemem"] = ESP.getFreeHeap();
     node["fragmem"] = ESP.getHeapFragmentation();
 #endif
 

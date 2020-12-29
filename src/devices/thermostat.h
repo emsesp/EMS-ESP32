@@ -19,19 +19,7 @@
 #ifndef EMSESP_THERMOSTAT_H
 #define EMSESP_THERMOSTAT_H
 
-#include <Arduino.h>
-#include <ArduinoJson.h>
-
-#include <uuid/log.h>
-
-#include "emsdevice.h"
-#include "telegram.h"
 #include "emsesp.h"
-#include "helpers.h"
-#include "mqtt.h"
-
-#include <vector>
-#include <time.h>
 
 namespace emsesp {
 

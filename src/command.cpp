@@ -24,7 +24,11 @@ namespace emsesp {
 
 uuid::log::Logger Command::logger_{F_(command), uuid::log::Facility::DAEMON};
 
-std::vector<Command::CmdFunction> Command::cmdfunctions_;
+static emsesp::array<Command::CmdFunction> cmdfunctions_(90, 255, 16); // reserve space for 90 commands
+
+emsesp::array<Command::CmdFunction> * Command::commands() {
+    return &cmdfunctions_;
+}
 
 // calls a command
 // id may be used to represent a heating circuit for example
@@ -85,12 +89,19 @@ bool Command::call(const uint8_t device_type, const char * cmd, const char * val
 }
 
 // add a command to the list, which does not return json
-void Command::add(const uint8_t device_type, const uint8_t device_id, const __FlashStringHelper * cmd, cmdfunction_p cb) {
+void Command::add(const uint8_t device_type, const __FlashStringHelper * cmd, cmdfunction_p cb) {
     // if the command already exists for that device type don't add it
     if (find_command(device_type, uuid::read_flash_string(cmd).c_str()) != nullptr) {
         return;
     }
-    cmdfunctions_.emplace_back(device_type, cmd, cb, nullptr);
+
+    CmdFunction cf;
+    cf.cmd_              = cmd;
+    cf.device_type_      = device_type;
+    cf.cmdfunction_json_ = nullptr; // empty
+    cf.cmdfunction_      = cb;
+    cmdfunctions_.push(cf);
+    // cmdfunctions_.emplace_back(device_type, cmd, cb, nullptr);
 
     // see if we need to subscribe
     if (Mqtt::enabled()) {
@@ -105,7 +116,14 @@ void Command::add_with_json(const uint8_t device_type, const __FlashStringHelper
         return;
     }
 
-    cmdfunctions_.emplace_back(device_type, cmd, nullptr, cb); // add command
+    CmdFunction cf;
+    cf.cmd_              = cmd;
+    cf.device_type_      = device_type;
+    cf.cmdfunction_json_ = cb;
+    cf.cmdfunction_      = nullptr; // empty
+    cmdfunctions_.push(cf);
+
+    // cmdfunctions_.emplace_back(device_type, cmd, nullptr, cb); // add command
 }
 
 // see if a command exists for that device type
@@ -132,11 +150,11 @@ Command::CmdFunction * Command::find_command(const uint8_t device_type, const ch
 
 // output list of all commands to console for a specific DeviceType
 void Command::show(uuid::console::Shell & shell, uint8_t device_type) {
-    if (commands().empty()) {
+    if (cmdfunctions_.empty()) {
         shell.println(F("No commands"));
     }
 
-    for (const auto & cf : Command::commands()) {
+    for (const auto & cf : cmdfunctions_) {
         if (cf.device_type_ == device_type) {
             shell.printf("%s ", uuid::read_flash_string(cf.cmd_).c_str());
         }
@@ -162,7 +180,7 @@ bool Command::device_has_commands(const uint8_t device_type) {
     for (const auto & emsdevice : EMSESP::emsdevices) {
         if ((emsdevice) && (emsdevice->device_type() == device_type)) {
             // device found, now see if it has any commands
-            for (const auto & cf : Command::commands()) {
+            for (const auto & cf : cmdfunctions_) {
                 if (cf.device_type_ == device_type) {
                     return true;
                 }

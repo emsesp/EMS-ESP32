@@ -401,10 +401,11 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
     if (command == "boiler") {
         shell.printfln(F("Testing boiler..."));
         run_test("boiler");
+        shell.invoke_command("show devices");
         shell.invoke_command("show");
-        shell.invoke_command("call boiler info");
-        shell.invoke_command("call system publish");
-        shell.invoke_command("show mqtt");
+        // shell.invoke_command("call boiler info");
+        // shell.invoke_command("call system publish");
+        // shell.invoke_command("show mqtt");
     }
 
     if (command == "fr120") {
@@ -558,7 +559,6 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         uart_telegram("98 00 FF 00 01 A5 00 CF 21 2E 00 00 2E 24 03 25 03 03 01 03 25 00 C8 00 00 11 01 03");            // without CRC
         uart_telegram_withCRC("98 00 FF 00 01 A6 00 CF 21 2E 00 00 2E 24 03 25 03 03 01 03 25 00 C8 00 00 11 01 03 6B"); // with CRC
 
-        EMSESP::txservice_.flush_tx_queue();
         shell.loop_all();
         EMSESP::show_device_values(shell);
 
@@ -638,8 +638,6 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
     if (command == "tx") {
         shell.printfln(F("Testing Tx..."));
 
-        EMSESP::txservice_.flush_tx_queue();
-
         // TX queue example - Me -> Thermostat, (0x91), telegram: 0B 17 91 05 44 45 46 47 (#data=4)
         uint8_t t11[] = {0x44, 0x45, 0x46, 0x47};
         EMSESP::txservice_.add(Telegram::Operation::TX_RAW, 0x17, 0x91, 0x05, t11, sizeof(t11));
@@ -672,15 +670,10 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         for (uint8_t i = 0; i < 10; i++) {
             EMSESP::txservice_.send(); // send it to UART
         }
-
-        EMSESP::txservice_.flush_tx_queue();
     }
 
     if (command == "poll") {
         shell.printfln(F("Testing Poll..."));
-
-        // check if sending works when a poll comes in, with retries
-        EMSESP::txservice_.flush_tx_queue();
 
         // simulate sending a read request
         // uint8_t t16[] = {0x44, 0x45, 0x46, 0x47}; // Me -> Thermostat, (0x91), telegram: 0B 17 91 05 44 45 46 47 (#data=4)
@@ -702,8 +695,6 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         uint8_t t2[] = {0x21, 0x22};
         EMSESP::send_write_request(0x91, 0x17, 0x00, t2, sizeof(t2), 0);
         EMSESP::show_ems(shell);
-
-        EMSESP::txservice_.flush_tx_queue();
     }
 
     if (command == "cmd") {
@@ -759,10 +750,6 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         char boiler_topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
         char thermostat_topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
         char system_topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
-
-        // test publish and adding to queue
-        EMSESP::txservice_.flush_tx_queue();
-
         EMSESP::EMSESP::mqtt_.publish("boiler", "test me");
         Mqtt::show_mqtt(shell); // show queue
 
@@ -816,7 +803,6 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         EMSESP::incoming_telegram(poll, 1);
 
         EMSESP::show_ems(shell);
-        EMSESP::txservice_.flush_tx_queue();
     }
 
     if (command == "rx2") {

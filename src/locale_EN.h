@@ -16,6 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#pragma once
+
 // common words
 MAKE_PSTR_WORD(exit)
 MAKE_PSTR_WORD(help)
@@ -125,3 +127,38 @@ MAKE_PSTR(new_password_prompt1, "Enter new password: ")
 MAKE_PSTR(new_password_prompt2, "Retype new password: ")
 MAKE_PSTR(password_prompt, "Password: ")
 MAKE_PSTR(unset, "<unset>")
+
+MAKE_PSTR_WORD(2);
+MAKE_PSTR_WORD(10);
+MAKE_PSTR_WORD(100);
+MAKE_PSTR_WORD(60);
+
+MAKE_PSTR_LIST(div2, F_(2))
+MAKE_PSTR_LIST(div10, F_(10))
+MAKE_PSTR_LIST(div100, F_(100))
+MAKE_PSTR_LIST(div60, F_(60))
+
+MAKE_PSTR_WORD(time)
+MAKE_PSTR_WORD(date)
+MAKE_PSTR_WORD(1x3min)
+MAKE_PSTR_WORD(2x3min)
+MAKE_PSTR_WORD(3x3min)
+MAKE_PSTR_WORD(4x3min)
+MAKE_PSTR_WORD(5x3min)
+MAKE_PSTR_WORD(6x3min)
+MAKE_PSTR_WORD(continuos);
+MAKE_PSTR(3wayvalve, "3-way valve")
+MAKE_PSTR(chargepump, "charge pump")
+MAKE_PSTR_WORD(hot)
+MAKE_PSTR_WORD(eco)
+MAKE_PSTR_WORD(intelligent)
+MAKE_PSTR_WORD(flow)
+MAKE_PSTR_WORD(buffer)
+MAKE_PSTR(bufferedflow, "buffered flow")
+MAKE_PSTR(layeredbuffer, "layered buffer")
+
+MAKE_PSTR_LIST(enum_off_time_date, F_(off), F_(time), F_(date))
+MAKE_PSTR_LIST(enum_freq, F_(off), F_(1x3min), F_(2x3min), F_(3x3min), F_(4x3min), F_(5x3min), F_(6x3min), F_(continuos))
+MAKE_PSTR_LIST(enum_charge, F_(3wayvalve), F_(chargepump))
+MAKE_PSTR_LIST(enum_comfort, F_(hot), F_(eco), F_(intelligent))
+MAKE_PSTR_LIST(enum_flow, F_(off), F_(flow), F_(bufferedflow), F_(buffer), F_(layeredbuffer))

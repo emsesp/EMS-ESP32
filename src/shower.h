@@ -19,16 +19,7 @@
 #ifndef EMSESP_SHOWER_H
 #define EMSESP_SHOWER_H
 
-#include <Arduino.h>
-#include <ArduinoJson.h>
-
-#include "helpers.h"
-#include "console.h"
-#include "mqtt.h"
-#include "telegram.h"
 #include "emsesp.h"
-
-#include <uuid/log.h>
 
 namespace emsesp {
 

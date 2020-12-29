@@ -16,7 +16,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "WebDevicesService.h"
 #include "emsesp.h"
 
 namespace emsesp {

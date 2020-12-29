@@ -70,7 +70,11 @@ void NTPSettingsService::configureTime(AsyncWebServerRequest * request, JsonVari
     if (!sntp_enabled() && json.is<JsonObject>()) {
         String    timeUtc = json["time_utc"];
         struct tm tm      = {0};
-        char *    s       = strptime(timeUtc.c_str(), "%Y-%m-%dT%H:%M:%SZ", &tm);
+
+        // TODO fix strptime, which is not included in xtensa
+        // char * s = strptime(timeUtc.c_str(), "%Y-%m-%dT%H:%M:%SZ", &tm);
+
+        char * s = nullptr;
         if (s != nullptr) {
             time_t         time = mktime(&tm);
             struct timeval now  = {.tv_sec = time};
@@ -80,6 +84,7 @@ void NTPSettingsService::configureTime(AsyncWebServerRequest * request, JsonVari
             return;
         }
     }
+
     AsyncWebServerResponse * response = request->beginResponse(400);
     request->send(response);
 }

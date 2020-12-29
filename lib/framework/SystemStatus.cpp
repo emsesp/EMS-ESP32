@@ -7,8 +7,6 @@ SystemStatus::SystemStatus(AsyncWebServer * server, SecurityManager * securityMa
 }
 
 void SystemStatus::systemStatus(AsyncWebServerRequest * request) {
-    uint8_t free_mem_percent = emsesp::System::free_mem(); // added by proddy
-
     AsyncJsonResponse * response = new AsyncJsonResponse(false, MAX_ESP_STATUS_SIZE);
     JsonObject          root     = response->getRoot();
 #ifdef ESP32
@@ -40,8 +38,7 @@ void SystemStatus::systemStatus(AsyncWebServerRequest * request) {
     root["fs_used"]  = fs_info.usedBytes;
 #endif
 
-    root["uptime"]   = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3); // proddy added
-    root["free_mem"] = free_mem_percent;                                         // proddy added
+    root["uptime"] = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3); // proddy added
 
     response->setLength();
     request->send(response);

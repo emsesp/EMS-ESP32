@@ -87,7 +87,7 @@
 #include <uuid/common.h>
 #include <uuid/log.h>
 
-static const char __pstr__logger_name[] __attribute__((__aligned__(sizeof(int)))) PROGMEM = "syslog";
+static const char __pstr__logger_name[] __attribute__((__aligned__(sizeof(uint32_t)))) PROGMEM = "syslog";
 
 namespace uuid {
 
@@ -413,7 +413,7 @@ bool SyslogService::transmit(const QueuedLogMessage & message) {
                       tm.tm_hour,
                       tm.tm_min,
                       tm.tm_sec,
-                      (unsigned long)message.time_.tv_usec);
+                      (uint32_t)message.time_.tv_usec);
     } else {
         udp_.print('-');
     }

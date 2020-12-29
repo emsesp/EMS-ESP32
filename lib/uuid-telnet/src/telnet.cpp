@@ -59,7 +59,7 @@
 #endif
 #endif
 
-static const char __pstr__logger_name[] __attribute__((__aligned__(sizeof(int)))) PROGMEM = "telnet";
+static const char __pstr__logger_name[] __attribute__((__aligned__(sizeof(uint32_t)))) PROGMEM = "telnet";
 
 namespace uuid {
 

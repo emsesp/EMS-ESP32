@@ -94,17 +94,6 @@ class SystemStatusForm extends Component<SystemStatusFormProps, SystemStatusForm
               </ListItem>
             </Fragment>)
         }
-        <ListItem>
-          <ListItemAvatar>
-            <Avatar>
-              <BatteryUnknownIcon />
-            </Avatar>
-          </ListItemAvatar>
-          <ListItemText
-            primary="Free System Memory"
-            secondary={data.free_mem + "%"}
-          />
-        </ListItem>
         <Divider variant="inset" component="li" />
         <ListItem >
           <ListItemAvatar>

@@ -30,7 +30,7 @@ namespace uuid {
 
 namespace console {
 
-static const char       __pstr__logger_name[] __attribute__((__aligned__(sizeof(int)))) PROGMEM = "shell";
+static const char       __pstr__logger_name[] __attribute__((__aligned__(sizeof(uint32_t)))) PROGMEM = "shell";
 const uuid::log::Logger Shell::logger_{reinterpret_cast<const __FlashStringHelper *>(__pstr__logger_name), uuid::log::Facility::LPR};
 
 Shell::QueuedLogMessage::QueuedLogMessage(unsigned long id, std::shared_ptr<uuid::log::Message> && content)

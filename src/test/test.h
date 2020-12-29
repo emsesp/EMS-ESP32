@@ -21,21 +21,7 @@
 #ifndef EMSESP_TEST_H
 #define EMSESP_TEST_H
 
-#include <Arduino.h>
-
-#include <vector>
-#include <string>
-
-#include <uuid/common.h>
-#include <uuid/console.h>
-#include <uuid/log.h>
-
-#include "emsdevice.h"
-#include "emsfactory.h"
-#include "telegram.h"
-#include "mqtt.h"
 #include "emsesp.h"
-#include "command.h"
 
 namespace emsesp {
 

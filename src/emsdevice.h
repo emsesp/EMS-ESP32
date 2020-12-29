@@ -23,6 +23,7 @@
 #include <vector>
 #include <functional>
 
+#include "containers.h"
 #include "emsfactory.h"
 #include "telegram.h"
 #include "mqtt.h"
@@ -212,10 +213,13 @@ class EMSdevice {
     std::string to_string_short() const;
 
     void   show_telegram_handlers(uuid::console::Shell & shell);
+    void   show_device_values(uuid::console::Shell & shell);
     char * show_telegram_handlers(char * result);
     void   show_mqtt_handlers(uuid::console::Shell & shell);
 
     using process_function_p = std::function<void(std::shared_ptr<const Telegram>)>;
+    // using process_function_p = void (*)(std::shared_ptr<const Telegram>);
+
     void register_telegram_type(const uint16_t telegram_type_id, const __FlashStringHelper * telegram_type_name, bool fetch, process_function_p cb);
     bool handle_telegram(std::shared_ptr<const Telegram> telegram);
 
@@ -223,14 +227,13 @@ class EMSdevice {
     bool        generate_values_json(JsonObject & json, const uint8_t tag_filter, const bool verbose = false);
     bool        generate_values_json_web(JsonObject & json);
 
-    void register_device_value(uint8_t                     tag,
-                               void *                      value_p,
-                               uint8_t                     type,
-                               const flash_string_vector & options,
-                               const __FlashStringHelper * short_name,
-                               const __FlashStringHelper * full_name,
-                               uint8_t                     uom,
-                               const __FlashStringHelper * icon = nullptr);
+    void register_device_value(uint8_t                             tag,
+                               void *                              value_p,
+                               uint8_t                             type,
+                               const __FlashStringHelper * const * options,
+                               const __FlashStringHelper *         short_name,
+                               const __FlashStringHelper *         full_name,
+                               uint8_t                             uom);
 
     void write_command(const uint16_t type_id, const uint8_t offset, uint8_t * message_data, const uint8_t message_length, const uint16_t validate_typeid);
     void write_command(const uint16_t type_id, const uint8_t offset, const uint8_t value, const uint16_t validate_typeid);
@@ -240,15 +243,13 @@ class EMSdevice {
     void register_mqtt_topic(const std::string & topic, mqtt_subfunction_p f);
     void register_mqtt_cmd(const __FlashStringHelper * cmd, cmdfunction_p f);
 
+    void publish_mqtt_ha_sensor();
+
     std::string telegram_type_name(std::shared_ptr<const Telegram> telegram);
 
     void fetch_values();
     void toggle_fetch(uint16_t telegram_id, bool toggle);
     bool get_toggle_fetch(uint16_t telegram_id);
-
-    void reserve_mem(size_t n) {
-        telegram_functions_.reserve(n);
-    }
 
     bool ha_config_done() const {
         return ha_config_done_;
@@ -318,41 +319,14 @@ class EMSdevice {
     static constexpr uint8_t EMS_DEVICE_FLAG_RC100       = 9;
     static constexpr uint8_t EMS_DEVICE_FLAG_JUNKERS     = 10;
 
-    struct DeviceValue {
-        uint8_t                     device_type; // EMSdevice::DeviceType
-        uint8_t                     tag;         // DeviceValueTAG::*
-        void *                      value_p;     // pointer to variable of any type
-        uint8_t                     type;        // DeviceValueType::*
-        const flash_string_vector   options;     // list of options for ENUM, or divider
-        const __FlashStringHelper * short_name;  // used in MQTT
-        const __FlashStringHelper * full_name;   // used in Web and Console
-        uint8_t                     uom;         // DeviceValueUOM::*
-        const __FlashStringHelper * icon;        // HA icon
+    void reserve_device_values(uint8_t elements) {
+        static auto dv_ = emsesp::array<DeviceValue>(elements, 255, 16);
+        devicevalues_   = &dv_;
+    }
 
-        DeviceValue(uint8_t                     device_type,
-                    uint8_t                     tag,
-                    void *                      value_p,
-                    uint8_t                     type,
-                    const flash_string_vector   options,
-                    const __FlashStringHelper * short_name,
-                    const __FlashStringHelper * full_name,
-                    uint8_t                     uom,
-                    const __FlashStringHelper * icon)
-            : device_type(device_type)
-            , tag(tag)
-            , value_p(value_p)
-            , type(type)
-            , options(options)
-            , short_name(short_name)
-            , full_name(full_name)
-            , uom(uom)
-            , icon(icon) {
-        }
-    };
-    const std::vector<DeviceValue> devicevalues() const;
-
-    void init_devicevalues(uint8_t size) {
-        devicevalues_.reserve(size);
+    void reserve_telgram_functions(uint8_t elements) {
+        static auto tf_     = emsesp::array<TelegramFunction>(elements, 255, 16);
+        telegram_functions_ = &tf_;
     }
 
   private:
@@ -373,17 +347,21 @@ class EMSdevice {
         const __FlashStringHelper * telegram_type_name_; // e.g. RC20Message
         bool                        fetch_;              // if this type_id be queried automatically
         process_function_p          process_function_;
-
-        TelegramFunction(uint16_t telegram_type_id, const __FlashStringHelper * telegram_type_name, bool fetch, process_function_p process_function)
-            : telegram_type_id_(telegram_type_id)
-            , telegram_type_name_(telegram_type_name)
-            , fetch_(fetch)
-            , process_function_(process_function) {
-        }
     };
-    std::vector<TelegramFunction> telegram_functions_; // each EMS device has its own set of registered telegram types
+    emsesp::array<TelegramFunction> * telegram_functions_; // each EMS device has its own set of registered telegram types
 
-    std::vector<DeviceValue> devicevalues_;
+    struct DeviceValue {
+        uint8_t                             device_type;  // EMSdevice::DeviceType
+        uint8_t                             tag;          // DeviceValueTAG::*
+        void *                              value_p;      // pointer to variable of any type
+        uint8_t                             type;         // DeviceValueType::*
+        const __FlashStringHelper * const * options;      // options as a flash char array
+        uint8_t                             options_size; // # options in the char array, calculated
+        const __FlashStringHelper *         short_name;   // used in MQTT
+        const __FlashStringHelper *         full_name;    // used in Web and Console
+        uint8_t                             uom;          // DeviceValueUOM::*
+    };
+    emsesp::array<DeviceValue> * devicevalues_;
 };
 
 } // namespace emsesp

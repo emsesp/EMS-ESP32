@@ -24,6 +24,7 @@ namespace emsesp {
 
 AsyncMqttClient * Mqtt::mqttClient_;
 
+
 // static parameters we make global
 std::string Mqtt::hostname_;
 uint8_t     Mqtt::mqtt_qos_;
@@ -39,15 +40,16 @@ uint8_t     Mqtt::dallas_format_;
 uint8_t     Mqtt::ha_climate_format_;
 bool        Mqtt::ha_enabled_;
 
+static emsesp::queue<Mqtt::QueuedMqttMessage> mqtt_messages_ = emsesp::queue<Mqtt::QueuedMqttMessage>(MAX_MQTT_MESSAGES);
+
 std::vector<Mqtt::MQTTSubFunction> Mqtt::mqtt_subfunctions_;
 
-uint16_t                           Mqtt::mqtt_publish_fails_ = 0;
-bool                               Mqtt::connecting_         = false;
-bool                               Mqtt::initialized_        = false;
-uint8_t                            Mqtt::connectcount_       = 0;
-uint16_t                           Mqtt::mqtt_message_id_    = 0;
-std::list<Mqtt::QueuedMqttMessage> Mqtt::mqtt_messages_;
-char                               will_topic_[Mqtt::MQTT_TOPIC_MAX_SIZE]; // because MQTT library keeps only char pointer
+uint16_t Mqtt::mqtt_publish_fails_ = 0;
+bool     Mqtt::connecting_         = false;
+bool     Mqtt::initialized_        = false;
+uint8_t  Mqtt::connectcount_       = 0;
+uint16_t Mqtt::mqtt_message_id_    = 0;
+char     will_topic_[Mqtt::MQTT_TOPIC_MAX_SIZE]; // because MQTT library keeps only char pointer
 
 uuid::log::Logger Mqtt::logger_{F_(mqtt), uuid::log::Facility::DAEMON};
 
@@ -506,17 +508,17 @@ void Mqtt::ha_status() {
 
     doc["uniq_id"] = FJSON("status");
     doc["~"]       = System::hostname(); // default ems-esp
-    // doc["avty_t"]      = FJSON("~/status");
+    // doc["avty_t"]      = FJSON("~/status"); // commented out, as it causes errors in HA sometimes
     doc["json_attr_t"] = FJSON("~/heartbeat");
     doc["stat_t"]      = FJSON("~/heartbeat");
     doc["name"]        = FJSON("EMS-ESP status");
     doc["val_tpl"]     = FJSON("{{value_json['status']}}");
 
     JsonObject dev = doc.createNestedObject("dev");
-    dev["name"]    = FJSON("EMS-ESP");
+    dev["name"]    = F_(EMSESP); // "EMS-ESP"
     dev["sw"]      = EMSESP_APP_VERSION;
     dev["mf"]      = FJSON("proddy");
-    dev["mdl"]     = FJSON("EMS-ESP");
+    dev["mdl"]     = F_(EMSESP); // "EMS-ESP"
     JsonArray ids  = dev.createNestedArray("ids");
     ids.add("ems-esp");
 
@@ -545,11 +547,12 @@ std::shared_ptr<const MqttMessage> Mqtt::queue_message(const uint8_t operation, 
         message = std::make_shared<MqttMessage>(operation, full_topic, payload, retain);
     }
 
-    // if the queue is full, make room but removing the last one
-    if (mqtt_messages_.size() >= MAX_MQTT_MESSAGES) {
-        mqtt_messages_.pop_front();
-    }
-    mqtt_messages_.emplace_back(mqtt_message_id_++, std::move(message));
+    QueuedMqttMessage qmm;
+    qmm.content_     = std::move(message);
+    qmm.retry_count_ = 0;
+    qmm.packet_id_   = 0;
+    qmm.id_          = mqtt_message_id_++;
+    mqtt_messages_.push_back(qmm);
 
     return mqtt_messages_.back().content_; // this is because the message has been moved
 }
@@ -706,7 +709,8 @@ void Mqtt::process_queue() {
             mqtt_messages_.pop_front(); // delete
             return;
         } else {
-            mqtt_messages_.front().retry_count_++;
+            // update the record
+            mqtt_messages_.front_p()->retry_count_++;
             LOG_DEBUG(F("Failed to publish to %s. Trying again, #%d"), message->topic.c_str(), mqtt_message.retry_count_ + 1);
             return; // leave on queue for next time so it gets republished
         }
@@ -715,7 +719,7 @@ void Mqtt::process_queue() {
     // if we have ACK set with QOS 1 or 2, leave on queue and let the ACK process remove it
     // but add the packet_id so we can check it later
     if (mqtt_qos_ != 0) {
-        mqtt_messages_.front().packet_id_ = packet_id;
+        mqtt_messages_.front_p()->packet_id_ = packet_id;
 #if defined(EMSESP_DEBUG)
         LOG_DEBUG(F("[DEBUG] Setting packetID for ACK to %d"), packet_id);
 #endif
@@ -733,15 +737,13 @@ void Mqtt::register_mqtt_ha_sensor(uint8_t                     type, // device v
                                    const __FlashStringHelper * name,
                                    const uint8_t               device_type,
                                    const __FlashStringHelper * entity,
-                                   const uint8_t               uom,
-                                   const __FlashStringHelper * icon) {
+                                   const uint8_t               uom) {
     // ignore if name (fullname) is empty
     if (name == nullptr) {
         return;
     }
 
-    // DynamicJsonDocument doc(EMSESP_JSON_SIZE_HA_CONFIG);
-    StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> doc; // TODO see if this crashes ESP8266?
+    DynamicJsonDocument doc(EMSESP_JSON_SIZE_HA_CONFIG);
 
     bool have_prefix = ((tag != DeviceValueTAG::TAG_NONE) && (device_type != EMSdevice::DeviceType::BOILER));
 
@@ -791,7 +793,7 @@ void Mqtt::register_mqtt_ha_sensor(uint8_t                     type, // device v
     // look at the device value type
     if (type != DeviceValueType::BOOL) {
         //
-        // normal HA sensor
+        // normal HA sensor, not a boolean one
         //
 
         // topic
@@ -807,21 +809,17 @@ void Mqtt::register_mqtt_ha_sensor(uint8_t                     type, // device v
             doc["unit_of_meas"] = EMSdevice::uom_to_string(uom);
         }
 
-        // if there was no icon supplied, resort to the default one
-        if (icon == nullptr) {
-            switch (uom) {
-            case DeviceValueUOM::DEGREES:
-                doc["ic"] = F_(icontemperature);
-                break;
-            case DeviceValueUOM::PERCENT:
-                doc["ic"] = F_(iconpercent);
-                break;
-            case DeviceValueUOM::NONE:
-            default:
-                break;
-            }
-        } else {
-            doc["ic"] = icon; // must be prefixed with mdi:
+        // map the HA icon
+        switch (uom) {
+        case DeviceValueUOM::DEGREES:
+            doc["ic"] = F_(icontemperature);
+            break;
+        case DeviceValueUOM::PERCENT:
+            doc["ic"] = F_(iconpercent);
+            break;
+        case DeviceValueUOM::NONE:
+        default:
+            break;
         }
     } else {
         //

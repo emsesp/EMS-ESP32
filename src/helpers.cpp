@@ -355,8 +355,9 @@ double Helpers::round2(double value, const uint8_t divider) {
     return (int)((value / divider) * 100 + 0.5) / 100.0;
 }
 
-bool Helpers::check_abs(const int32_t i) {
-    return ((i < 0 ? -i : i) != 0xFFFFFF);
+// abs of a signed 32-bit integer
+uint32_t Helpers::abs(const int32_t i) {
+    return (i < 0 ? -i : i);
 }
 
 // for booleans, use isBool true (EMS_VALUE_BOOL)
@@ -465,8 +466,6 @@ bool Helpers::value2enum(const char * v, uint8_t & value, const flash_string_vec
     }
     return false;
 }
-
-
 
 
 } // namespace emsesp

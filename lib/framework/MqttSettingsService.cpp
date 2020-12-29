@@ -61,7 +61,7 @@ void MqttSettingsService::begin() {
 }
 
 void MqttSettingsService::loop() {
-    if (_reconfigureMqtt || (_disconnectedAt && (unsigned long)(uuid::get_uptime() - _disconnectedAt) >= MQTT_RECONNECTION_DELAY)) {
+    if (_reconfigureMqtt || (_disconnectedAt && (uint32_t)(uuid::get_uptime() - _disconnectedAt) >= MQTT_RECONNECTION_DELAY)) {
         // reconfigure MQTT client
         configureMqtt();
 

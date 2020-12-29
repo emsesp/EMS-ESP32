@@ -38,7 +38,17 @@
 
 using uuid::console::Shell;
 
+// time between HA publishes
 #define MQTT_HA_PUBLISH_DELAY 50
+
+// size of queue
+#if defined(EMSESP_STANDALONE)
+#define MAX_MQTT_MESSAGES 70
+#elif defined(ESP32)
+#define MAX_MQTT_MESSAGES 100
+#else
+#define MAX_MQTT_MESSAGES 20
+#endif
 
 namespace emsesp {
 
@@ -103,8 +113,7 @@ class Mqtt {
                                         const __FlashStringHelper * name,
                                         const uint8_t               device_type,
                                         const __FlashStringHelper * entity,
-                                        const uint8_t               uom,
-                                        const __FlashStringHelper * icon);
+                                        const uint8_t               uom);
     static void register_command(const uint8_t device_type, const __FlashStringHelper * cmd, cmdfunction_p cb);
 
     static void show_topic_handlers(uuid::console::Shell & shell, const uint8_t device_type);
@@ -174,36 +183,18 @@ class Mqtt {
         mqtt_retain_ = mqtt_retain;
     }
 
+    struct QueuedMqttMessage {
+        uint16_t                           id_;
+        std::shared_ptr<const MqttMessage> content_;
+        uint8_t                            retry_count_;
+        uint16_t                           packet_id_;
+    };
+
   private:
     static uuid::log::Logger logger_;
 
-    class QueuedMqttMessage {
-      public:
-        const uint16_t                           id_;
-        const std::shared_ptr<const MqttMessage> content_;
-        uint8_t                                  retry_count_;
-        uint16_t                                 packet_id_;
-
-        ~QueuedMqttMessage() = default;
-        QueuedMqttMessage(uint16_t id, std::shared_ptr<MqttMessage> && content)
-            : id_(id)
-            , content_(std::move(content)) {
-            retry_count_ = 0;
-            packet_id_   = 0;
-        }
-    };
-    static std::list<QueuedMqttMessage> mqtt_messages_;
-
     static AsyncMqttClient * mqttClient_;
     static uint16_t          mqtt_message_id_;
-
-#if defined(EMSESP_STANDALONE)
-    static constexpr size_t MAX_MQTT_MESSAGES = 70; // size of queue
-#elif defined(ESP32)
-    static constexpr size_t MAX_MQTT_MESSAGES = 100; // size of queue
-#else
-    static constexpr size_t MAX_MQTT_MESSAGES = 20; // size of queue
-#endif
 
     static constexpr uint32_t MQTT_PUBLISH_WAIT      = 200; // delay between sending publishes, to account for large payloads
     static constexpr uint8_t  MQTT_PUBLISH_MAX_RETRY = 3;   // max retries for giving up on publishing
@@ -261,7 +252,7 @@ class Mqtt {
     static uint8_t     dallas_format_;
     static uint8_t     ha_climate_format_;
     static bool        ha_enabled_;
-};
+}; // namespace emsesp
 
 } // namespace emsesp
 

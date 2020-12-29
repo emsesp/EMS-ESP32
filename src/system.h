@@ -39,7 +39,7 @@ namespace emsesp {
 
 class System {
   public:
-    void start();
+    void start(uint32_t heap_start);
     void loop();
 
     // commands
@@ -59,7 +59,6 @@ class System {
     static bool command_test(const char * value, const int8_t id);
 #endif
 
-    static uint8_t free_mem();
     static void    upload_status(bool in_progress);
     static bool    upload_status();
     static void    show_mem(const char * note);

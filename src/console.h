@@ -46,9 +46,11 @@ using uuid::log::Level;
 
 // clang-format off
 // strings stored 32 bit aligned on ESP8266/ESP32
-#define MAKE_PSTR(string_name, string_literal) static const char __pstr__##string_name[] __attribute__((__aligned__(sizeof(int)))) PROGMEM = string_literal;
+#define MAKE_PSTR(string_name, string_literal) static const char __pstr__##string_name[] __attribute__((__aligned__(sizeof(uint32_t)))) PROGMEM = string_literal;
 #define MAKE_PSTR_WORD(string_name) MAKE_PSTR(string_name, #string_name)
 #define F_(string_name) FPSTR(__pstr__##string_name)
+#define MAKE_PSTR_LIST(list_name, ...) static const __FlashStringHelper * const __pstr__##list_name[] PROGMEM = {__VA_ARGS__, nullptr};
+#define FL_(list_name) (__pstr__##list_name)
 // clang-format on
 
 // localizations
@@ -58,7 +60,7 @@ using uuid::log::Level;
 #undef LOCAL
 #endif
 
-static constexpr uint32_t INVALID_PASSWORD_DELAY_MS = 3000;
+static constexpr uint32_t INVALID_PASSWORD_DELAY_MS = 2000;
 
 namespace emsesp {
 

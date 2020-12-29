@@ -53,6 +53,7 @@ Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
     if (flags == EMSdevice::EMS_DEVICE_FLAG_IPM) {
         register_telegram_type(0x010C, F("IPMSetMessage"), false, [&](std::shared_ptr<const Telegram> t) { process_IPMStatusMessage(t); });
     }
+
 }
 
 
@@ -74,10 +75,10 @@ void Mixer::register_values(const Type type, uint16_t hc) {
         tag = DeviceValueTAG::TAG_WWC1 + hc - 1;
     }
 
-    register_device_value(tag, &flowTemp_, DeviceValueType::USHORT, flash_string_vector{F("10")}, F("flowTemp"), F("Current flow temperature"), DeviceValueUOM::DEGREES);
-    register_device_value(tag, &flowSetTemp_, DeviceValueType::UINT, {}, F("flowSetTemp"), F("Setpoint flow temperature"), DeviceValueUOM::DEGREES);
-    register_device_value(tag, &pumpStatus_, DeviceValueType::BOOL, {}, F("pumpStatus"), F("Pump/Valve status"), DeviceValueUOM::NONE);
-    register_device_value(tag, &status_, DeviceValueType::INT, {}, F("status"), F("Current status"), DeviceValueUOM::NONE);
+    register_device_value(tag, &flowTemp_, DeviceValueType::USHORT, FL_(div10), F("flowTemp"), F("Current flow temperature"), DeviceValueUOM::DEGREES);
+    register_device_value(tag, &flowSetTemp_, DeviceValueType::UINT, nullptr, F("flowSetTemp"), F("Setpoint flow temperature"), DeviceValueUOM::DEGREES);
+    register_device_value(tag, &pumpStatus_, DeviceValueType::BOOL, nullptr, F("pumpStatus"), F("Pump/Valve status"), DeviceValueUOM::NONE);
+    register_device_value(tag, &status_, DeviceValueType::INT, nullptr, F("status"), F("Current status"), DeviceValueUOM::NONE);
 }
 
 

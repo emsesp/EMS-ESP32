@@ -20,6 +20,12 @@
 
 namespace emsesp {
 
+#if defined(EMSESP_STANDALONE)
+uint32_t heap_start = 0;
+#else
+uint32_t           heap_start = ESP.getFreeHeap(); // get initial available heap memory
+#endif
+
 AsyncWebServer webServer(80);
 
 #if defined(ESP32)
@@ -38,10 +44,11 @@ WebStatusService  EMSESP::webStatusService  = WebStatusService(&webServer, EMSES
 WebDevicesService EMSESP::webDevicesService = WebDevicesService(&webServer, EMSESP::esp8266React.getSecurityManager());
 WebAPIService     EMSESP::webAPIService     = WebAPIService(&webServer);
 
-using DeviceFlags = emsesp::EMSdevice;
-using DeviceType  = emsesp::EMSdevice::DeviceType;
+using DeviceFlags = EMSdevice;
+using DeviceType  = EMSdevice::DeviceType;
+
 std::vector<std::unique_ptr<EMSdevice>>    EMSESP::emsdevices;      // array of all the detected EMS devices
-std::vector<emsesp::EMSESP::Device_record> EMSESP::device_library_; // library of all our known EMS devices so far
+std::vector<emsesp::EMSESP::Device_record> EMSESP::device_library_; // library of all our known EMS devices, in heap
 
 uuid::log::Logger EMSESP::logger_{F_(emsesp), uuid::log::Facility::KERN};
 
@@ -410,16 +417,7 @@ void EMSESP::publish_device_values(uint8_t device_type) {
         if (emsdevice && (emsdevice->device_type() == device_type)) {
             // if we're using HA and it's not already done, send the config topics first. only do this once
             if (Mqtt::ha_enabled() && (!emsdevice->ha_config_done())) {
-                // create the configs for each value as a sensor
-                for (const auto & dv : emsdevice->devicevalues()) {
-                    if (dv.device_type == device_type) {
-                        Mqtt::register_mqtt_ha_sensor(dv.type, dv.tag, dv.full_name, device_type, dv.short_name, dv.uom, dv.icon);
-                    }
-                }
-
-                // create HA device
-                // if this is done early, it may fail for some reason
-                emsdevice->ha_config_done(emsdevice->publish_ha_config());
+                emsdevice->publish_mqtt_ha_sensor(); // create the configs for each value as a sensor
             }
 
             // if its a boiler, generate json for each group and publish it
@@ -771,26 +769,14 @@ void EMSESP::show_devices(uuid::console::Shell & shell) {
                 }
                 shell.println();
                 emsdevice->show_telegram_handlers(shell);
-                // emsdevice->show_mqtt_handlers(shell);
-                shell.println();
 
-#if defined(EMSESP_DEBUG)
-                // TODO debug stuff - count size of objects
-                size_t  total_s = 0;
-                uint8_t count   = 0;
-                for (const auto & dv : emsdevice->devicevalues()) {
-                    size_t s = sizeof(dv);
-                    if (dv.full_name) {
-                        shell.printfln("[%s] %d", uuid::read_flash_string(dv.full_name).c_str(), s);
-                    } else {
-                        shell.printfln("[%s]* %d", uuid::read_flash_string(dv.short_name).c_str(), s);
-                    }
-                    total_s += s;
-                    count++;
-                }
-                shell.printfln("Total size of %d elements: %d", count, total_s);
+#if defined EMSESP_DEBUG
+                emsdevice->show_mqtt_handlers(shell);
                 shell.println();
+                emsdevice->show_device_values(shell);
 #endif
+
+                shell.println();
             }
         }
     }
@@ -1039,33 +1025,55 @@ void EMSESP::send_raw_telegram(const char * data) {
 // start all the core services
 // the services must be loaded in the correct order
 void EMSESP::start() {
-    // see if we need to migrate from previous versions
-    if (!system_.check_upgrade()) {
+    // start the file system. We use LittleFS for ESP8266.
 #ifdef ESP32
-        SPIFFS.begin(true);
+    SPIFFS.begin(true);
 #elif defined(ESP8266)
-        LittleFS.begin();
+    LittleFS.begin();
 #endif
 
-        esp8266React.begin();       // loads system settings (wifi, mqtt, etc)
-        webSettingsService.begin(); // load EMS-ESP specific settings
-    }
+    esp8266React.begin();       // loads system settings (wifi, mqtt, etc)
+    webSettingsService.begin(); // load EMS-ESP specific settings
 
-    // Load our library of known devices into stack mem. Names are stored in Flash mem.
-    // device_library_.reserve(80);
+    system_.check_upgrade(); // do any upgrades
+
+#if defined(EMSESP_DEBUG)
+#ifndef EMSESP_STANDALONE
+    uint32_t tbefore = ESP.getFreeHeap();
+#endif
+#endif
+
+    // Load our library of known devices into stack mem. Names are stored in Flash memory
+    // Still it takes up about 960bytes
+    device_library_.reserve(80);
     device_library_ = {
 #include "device_library.h"
     };
 
-    console_.start();      // telnet and serial console
-    mqtt_.start();         // mqtt init
-    system_.start();       // starts syslog, uart, sets version, initializes LED. Requires pre-loaded settings.
-    shower_.start();       // initialize shower timer and shower alert
-    dallassensor_.start(); // dallas external sensors
-    webServer.begin();     // start web server
+#if defined(EMSESP_DEBUG)
+#ifndef EMSESP_STANDALONE
+    uint32_t tafter = ESP.getFreeHeap();
+#endif
+#endif
 
-    emsdevices.reserve(5); // reserve space for initially 5 devices to avoid mem frag issues
+    console_.start();          // telnet and serial console
+    mqtt_.start();             // mqtt init
+    system_.start(heap_start); // starts syslog, uart, sets version, initializes LED. Requires pre-loaded settings.
+    shower_.start();           // initialize shower timer and shower alert
+    dallassensor_.start();     // dallas external sensors
+    webServer.begin();         // start web server
+
+    // emsdevices.reserve(5); // reserve space for initially 5 devices to avoid mem frag issues
+
     LOG_INFO(F("EMS Device library loaded with %d records"), device_library_.size());
+
+#if defined(EMSESP_DEBUG)
+#ifndef EMSESP_STANDALONE
+    LOG_INFO(F("Used %d mem for devices"), tbefore - tafter);
+    System::show_mem("after start()");
+#endif
+#endif
+
 }
 
 // main loop calling all services

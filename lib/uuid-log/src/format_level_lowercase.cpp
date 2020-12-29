@@ -26,19 +26,19 @@ namespace uuid {
 
 namespace log {
 
-static constexpr const char * pstr_level_lowercase_off __attribute__((__aligned__(sizeof(int)))) PROGMEM     = "off";
-static constexpr const char * pstr_level_lowercase_emerg __attribute__((__aligned__(sizeof(int)))) PROGMEM   = "emerg";
-static constexpr const char * pstr_level_lowercase_crit __attribute__((__aligned__(sizeof(int)))) PROGMEM    = "crit";
-static constexpr const char * pstr_level_lowercase_alert __attribute__((__aligned__(sizeof(int)))) PROGMEM   = "alert";
-static constexpr const char * pstr_level_lowercase_err __attribute__((__aligned__(sizeof(int)))) PROGMEM     = "err";
-static constexpr const char * pstr_level_lowercase_warning __attribute__((__aligned__(sizeof(int)))) PROGMEM = "warning";
-static constexpr const char * pstr_level_lowercase_notice __attribute__((__aligned__(sizeof(int)))) PROGMEM  = "notice";
-static constexpr const char * pstr_level_lowercase_info __attribute__((__aligned__(sizeof(int)))) PROGMEM    = "info";
-static constexpr const char * pstr_level_lowercase_debug __attribute__((__aligned__(sizeof(int)))) PROGMEM   = "debug";
-static constexpr const char * pstr_level_lowercase_trace __attribute__((__aligned__(sizeof(int)))) PROGMEM   = "trace";
-static constexpr const char * pstr_level_lowercase_all __attribute__((__aligned__(sizeof(int)))) PROGMEM     = "all";
+static constexpr const char * pstr_level_lowercase_off __attribute__((__aligned__(sizeof(uint32_t)))) PROGMEM     = "off";
+static constexpr const char * pstr_level_lowercase_emerg __attribute__((__aligned__(sizeof(uint32_t)))) PROGMEM   = "emerg";
+static constexpr const char * pstr_level_lowercase_crit __attribute__((__aligned__(sizeof(uint32_t)))) PROGMEM    = "crit";
+static constexpr const char * pstr_level_lowercase_alert __attribute__((__aligned__(sizeof(uint32_t)))) PROGMEM   = "alert";
+static constexpr const char * pstr_level_lowercase_err __attribute__((__aligned__(sizeof(uint32_t)))) PROGMEM     = "err";
+static constexpr const char * pstr_level_lowercase_warning __attribute__((__aligned__(sizeof(uint32_t)))) PROGMEM = "warning";
+static constexpr const char * pstr_level_lowercase_notice __attribute__((__aligned__(sizeof(uint32_t)))) PROGMEM  = "notice";
+static constexpr const char * pstr_level_lowercase_info __attribute__((__aligned__(sizeof(uint32_t)))) PROGMEM    = "info";
+static constexpr const char * pstr_level_lowercase_debug __attribute__((__aligned__(sizeof(uint32_t)))) PROGMEM   = "debug";
+static constexpr const char * pstr_level_lowercase_trace __attribute__((__aligned__(sizeof(uint32_t)))) PROGMEM   = "trace";
+static constexpr const char * pstr_level_lowercase_all __attribute__((__aligned__(sizeof(uint32_t)))) PROGMEM     = "all";
 
-static const __FlashStringHelper * log_level_lowercase[(int)Level::ALL - (int)Level::OFF + 1] __attribute__((__aligned__(sizeof(int))))
+static const __FlashStringHelper * log_level_lowercase[(int)Level::ALL - (int)Level::OFF + 1] __attribute__((__aligned__(sizeof(uint32_t))))
 PROGMEM = {reinterpret_cast<const __FlashStringHelper *>(pstr_level_lowercase_off),
            reinterpret_cast<const __FlashStringHelper *>(pstr_level_lowercase_emerg),
            reinterpret_cast<const __FlashStringHelper *>(pstr_level_lowercase_crit),

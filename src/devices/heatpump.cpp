@@ -32,8 +32,11 @@ Heatpump::Heatpump(uint8_t device_type, uint8_t device_id, uint8_t product_id, c
     register_telegram_type(0x042B, F("HP1"), true, [&](std::shared_ptr<const Telegram> t) { process_HPMonitor1(t); });
     register_telegram_type(0x047B, F("HP2"), true, [&](std::shared_ptr<const Telegram> t) { process_HPMonitor2(t); });
 
-    register_device_value(DeviceValueTAG::TAG_NONE, &airHumidity_, DeviceValueType::UINT, flash_string_vector{F("2")}, F("airHumidity"), F("Relative air humidity"), DeviceValueUOM::NONE);
-    register_device_value(DeviceValueTAG::TAG_NONE, &dewTemperature_, DeviceValueType::UINT, {}, F("dewTemperature"), F("Dew point temperature"), DeviceValueUOM::NONE);
+    // device values
+    register_device_value(
+        DeviceValueTAG::TAG_NONE, &airHumidity_, DeviceValueType::UINT, FL_(div2), F("airHumidity"), F("Relative air humidity"), DeviceValueUOM::NONE);
+    register_device_value(
+        DeviceValueTAG::TAG_NONE, &dewTemperature_, DeviceValueType::UINT, nullptr, F("dewTemperature"), F("Dew point temperature"), DeviceValueUOM::NONE);
 }
 
 // publish HA config

@@ -19,16 +19,7 @@
 #ifndef EMSESP_HEATPUMP_H
 #define EMSESP_HEATPUMP_H
 
-#include <Arduino.h>
-#include <ArduinoJson.h>
-
-#include <uuid/log.h>
-
-#include "emsdevice.h"
 #include "emsesp.h"
-#include "telegram.h"
-#include "helpers.h"
-#include "mqtt.h"
 
 namespace emsesp {
 

@@ -23,7 +23,7 @@ namespace emsesp {
 
 // mapping of UOM, to match order in DeviceValueUOM enum emsdevice.h
 // must be an int of 4 bytes, 32bit aligned
-static const __FlashStringHelper * DeviceValueUOM_s[] __attribute__((__aligned__(sizeof(int)))) PROGMEM = {
+static const __FlashStringHelper * DeviceValueUOM_s[] __attribute__((__aligned__(sizeof(uint32_t)))) PROGMEM = {
 
     F_(degrees),
     F_(percent),
@@ -67,10 +67,6 @@ const std::string EMSdevice::tag_to_string(uint8_t tag) {
         return std::string{};
     }
     return uuid::read_flash_string(DeviceValueTAG_s[tag - 1]); // offset by 1 to account for NONE
-}
-
-const std::vector<EMSdevice::DeviceValue> EMSdevice::devicevalues() const {
-    return devicevalues_;
 }
 
 std::string EMSdevice::brand_to_string() const {
@@ -264,7 +260,7 @@ std::string EMSdevice::to_string_short() const {
 void EMSdevice::fetch_values() {
     EMSESP::logger().debug(F("Fetching values for device ID 0x%02X"), device_id());
 
-    for (const auto & tf : telegram_functions_) {
+    for (const auto & tf : *telegram_functions_) {
         if (tf.fetch_) {
             read_command(tf.telegram_type_id_);
         }
@@ -275,7 +271,7 @@ void EMSdevice::fetch_values() {
 void EMSdevice::toggle_fetch(uint16_t telegram_id, bool toggle) {
     EMSESP::logger().debug(F("Toggling fetch for device ID 0x%02X, telegram ID 0x%02X to %d"), device_id(), telegram_id, toggle);
 
-    for (auto & tf : telegram_functions_) {
+    for (auto & tf : *telegram_functions_) {
         if (tf.telegram_type_id_ == telegram_id) {
             tf.fetch_ = toggle;
         }
@@ -284,7 +280,7 @@ void EMSdevice::toggle_fetch(uint16_t telegram_id, bool toggle) {
 
 // get status of automatic fetch for a telegram id
 bool EMSdevice::get_toggle_fetch(uint16_t telegram_id) {
-    for (auto & tf : telegram_functions_) {
+    for (auto & tf : *telegram_functions_) {
         if (tf.telegram_type_id_ == telegram_id) {
             return tf.fetch_;
         }
@@ -292,15 +288,33 @@ bool EMSdevice::get_toggle_fetch(uint16_t telegram_id) {
     return false;
 }
 
+// list device values
+void EMSdevice::show_device_values(uuid::console::Shell & shell) {
+    size_t  total_s = 0;
+    uint8_t count   = 0;
+    for (const auto & dv : *devicevalues_) {
+        size_t s = sizeof(dv);
+        if (dv.full_name) {
+            shell.printfln("[%s] %d", uuid::read_flash_string(dv.full_name).c_str(), s);
+        } else {
+            shell.printfln("[%s]* %d", uuid::read_flash_string(dv.short_name).c_str(), s);
+        }
+        total_s += s;
+        count++;
+    }
+    shell.printfln("Total size of %d elements: %d", count, total_s);
+    shell.println();
+}
+
 
 // list all the telegram type IDs for this device
 void EMSdevice::show_telegram_handlers(uuid::console::Shell & shell) {
-    if (telegram_functions_.size() == 0) {
+    if (telegram_functions_->size() == 0) {
         return;
     }
 
     shell.printf(F(" This %s will respond to telegram type IDs: "), device_type_name().c_str());
-    for (const auto & tf : telegram_functions_) {
+    for (const auto & tf : *telegram_functions_) {
         shell.printf(F("0x%02X "), tf.telegram_type_id_);
     }
     shell.println();
@@ -308,16 +322,17 @@ void EMSdevice::show_telegram_handlers(uuid::console::Shell & shell) {
 
 // list all the telegram type IDs for this device, outputting to a string (max size 200)
 char * EMSdevice::show_telegram_handlers(char * result) {
+    uint8_t size = telegram_functions_->size();
+
     strlcpy(result, "", 200);
 
-    if (telegram_functions_.size() == 0) {
+    if (!size) {
         return result;
     }
 
     char    str[10];
-    uint8_t i    = 0;
-    size_t  size = telegram_functions_.size();
-    for (const auto & tf : telegram_functions_) {
+    uint8_t i = 0;
+    for (const auto & tf : *telegram_functions_) {
         snprintf_P(str, sizeof(str), PSTR("0x%02X"), tf.telegram_type_id_);
         strlcat(result, str, 200);
         if (++i < size) {
@@ -339,12 +354,26 @@ void EMSdevice::register_mqtt_topic(const std::string & topic, mqtt_subfunction_
 
 // add command to library
 void EMSdevice::register_mqtt_cmd(const __FlashStringHelper * cmd, cmdfunction_p f) {
-    Command::add(device_type_, device_id_, cmd, f);
+    Command::add(device_type_, cmd, f);
 }
 
 // register a call back function for a specific telegram type
 void EMSdevice::register_telegram_type(const uint16_t telegram_type_id, const __FlashStringHelper * telegram_type_name, bool fetch, process_function_p f) {
-    telegram_functions_.emplace_back(telegram_type_id, telegram_type_name, fetch, f);
+    TelegramFunction tf;
+    tf.fetch_              = fetch;
+    tf.process_function_   = f;
+    tf.telegram_type_id_   = telegram_type_id;
+    tf.telegram_type_name_ = telegram_type_name;
+    telegram_functions_->push(tf);
+
+    //     TelegramFunction(uint16_t telegram_type_id, const __FlashStringHelper * telegram_type_name, bool fetch, process_function_p process_function)
+    //         : telegram_type_id_(telegram_type_id)
+    //         , telegram_type_name_(telegram_type_name)
+    //         , fetch_(fetch)
+    //         , process_function_(process_function) {
+    //     }
+
+    // telegram_functions_.emplace_back(telegram_type_id, telegram_type_name, fetch, f);
 }
 
 // add to device value library
@@ -357,14 +386,13 @@ void EMSdevice::register_telegram_type(const uint16_t telegram_type_id, const __
 //  full name: used in Web and Console
 //  uom: unit of measure from DeviceValueUOM
 //  icon (optional): the HA mdi icon to use, from locale_*.h file
-void EMSdevice::register_device_value(uint8_t                     tag,
-                                      void *                      value_p,
-                                      uint8_t                     type,
-                                      const flash_string_vector & options,
-                                      const __FlashStringHelper * short_name,
-                                      const __FlashStringHelper * full_name,
-                                      uint8_t                     uom,
-                                      const __FlashStringHelper * icon) {
+void EMSdevice::register_device_value(uint8_t                             tag,
+                                      void *                              value_p,
+                                      uint8_t                             type,
+                                      const __FlashStringHelper * const * options,
+                                      const __FlashStringHelper *         short_name,
+                                      const __FlashStringHelper *         full_name,
+                                      uint8_t                             uom) {
     // init the value depending on it's type
     if (type == DeviceValueType::TEXT) {
         *(char *)(value_p) = {'\0'};
@@ -382,7 +410,26 @@ void EMSdevice::register_device_value(uint8_t                     tag,
     }
 
     // add to our library
-    devicevalues_.emplace_back(device_type_, tag, value_p, type, options, short_name, full_name, uom, icon);
+    DeviceValue dv;
+    dv.device_type = device_type_;
+    dv.tag         = tag;
+    dv.value_p     = value_p;
+    dv.type        = type;
+    dv.short_name  = short_name;
+    dv.full_name   = full_name;
+    dv.uom         = uom;
+
+    dv.options      = options;
+    dv.options_size = 0;
+    // count #options
+    if (options != nullptr) {
+        uint8_t i = 0;
+        while (options[i++]) {
+            dv.options_size++;
+        };
+    }
+
+    devicevalues_->push(dv);
 }
 
 // looks up the uom (suffix) for a given key from the device value table
@@ -397,7 +444,10 @@ std::string EMSdevice::get_value_uom(const char * key) {
         p++;
     }
 
-    for (const auto & dv : devicevalues_) {
+    // find the key (p) in the name
+    // because the new container is not multi-threaded can't use the iterator
+    for (uint8_t i = 0; i < devicevalues_->size(); i++) {
+        auto dv = (*devicevalues_)[i];
         if (dv.full_name != nullptr) {
             if (uuid::read_flash_string(dv.full_name) == p) {
                 // ignore TIME since "minutes" is already included
@@ -419,13 +469,16 @@ bool EMSdevice::generate_values_json_web(JsonObject & json) {
     JsonArray data = json.createNestedArray("data");
 
     uint8_t num_elements = 0;
-    for (const auto & dv : devicevalues_) {
+    for (uint8_t i = 0; i < devicevalues_->size(); i++) {
+        auto dv = (*devicevalues_)[i];
+
+        // for (const auto & dv : devicevalues()) {
         // ignore if full_name empty
         if (dv.full_name != nullptr) {
             // handle Booleans (true, false)
             if ((dv.type == DeviceValueType::BOOL) && Helpers::hasValue(*(uint8_t *)(dv.value_p), EMS_VALUE_BOOL)) {
                 // see if we have options for the bool's
-                if (dv.options.size() == 2) {
+                if (dv.options_size == 2) {
                     data.add(*(uint8_t *)(dv.value_p) ? dv.options[0] : dv.options[1]);
                 } else {
                     // see how to render the value depending on the setting
@@ -449,7 +502,7 @@ bool EMSdevice::generate_values_json_web(JsonObject & json) {
 
             // handle ENUMs
             else if ((dv.type == DeviceValueType::ENUM) && Helpers::hasValue(*(uint8_t *)(dv.value_p))) {
-                if (*(uint8_t *)(dv.value_p) < dv.options.size()) {
+                if (*(uint8_t *)(dv.value_p) < dv.options_size) {
                     data.add(dv.options[*(uint8_t *)(dv.value_p)]);
                 }
             }
@@ -459,7 +512,7 @@ bool EMSdevice::generate_values_json_web(JsonObject & json) {
                 // If a divider is specified, do the division to 2 decimals places and send back as double/float
                 // otherwise force as an integer whole
                 // the nested if's is necessary due to the way the ArduinoJson templates are pre-processed by the compiler
-                uint8_t divider = (dv.options.size() == 1) ? Helpers::atoint(uuid::read_flash_string(dv.options[0]).c_str()) : 0;
+                uint8_t divider = ((dv.options_size) == 1) ? Helpers::atoint(uuid::read_flash_string(dv.options[0]).c_str()) : 0;
 
                 // INT
                 if ((dv.type == DeviceValueType::INT) && Helpers::hasValue(*(int8_t *)(dv.value_p))) {
@@ -536,7 +589,9 @@ bool EMSdevice::generate_values_json(JsonObject & root, const uint8_t tag_filter
     uint8_t    old_tag   = 255;
     JsonObject json      = root;
 
-    for (const auto & dv : devicevalues_) {
+    for (uint8_t i = 0; i < devicevalues_->size(); i++) {
+        auto dv = (*devicevalues_)[i];
+        // for (const auto & dv : devicevalues()) {
         // only show if tag is either empty or matches a value, and don't show if full_name is empty unless we're outputing for mqtt payloads
         if (((tag_filter == DeviceValueTAG::TAG_NONE) || (tag_filter == dv.tag)) && (dv.full_name != nullptr || !verbose)) {
             bool have_tag = ((dv.tag != DeviceValueTAG::TAG_NONE) && (dv.device_type != DeviceType::BOILER));
@@ -561,7 +616,7 @@ bool EMSdevice::generate_values_json(JsonObject & root, const uint8_t tag_filter
             // handle Booleans (true, false)
             if ((dv.type == DeviceValueType::BOOL) && Helpers::hasValue(*(uint8_t *)(dv.value_p), EMS_VALUE_BOOL)) {
                 // see if we have options for the bool's
-                if (dv.options.size() == 2) {
+                if (dv.options_size == 2) {
                     json[name] = *(uint8_t *)(dv.value_p) ? dv.options[0] : dv.options[1];
                     has_value  = true;
                 } else {
@@ -590,7 +645,7 @@ bool EMSdevice::generate_values_json(JsonObject & root, const uint8_t tag_filter
 
             // handle ENUMs
             else if ((dv.type == DeviceValueType::ENUM) && Helpers::hasValue(*(uint8_t *)(dv.value_p))) {
-                if (*(uint8_t *)(dv.value_p) < dv.options.size()) {
+                if (*(uint8_t *)(dv.value_p) < dv.options_size) {
                     json[name] = dv.options[*(uint8_t *)(dv.value_p)];
                     has_value  = true;
                 }
@@ -601,7 +656,7 @@ bool EMSdevice::generate_values_json(JsonObject & root, const uint8_t tag_filter
                 // If a divider is specified, do the division to 2 decimals places and send back as double/float
                 // otherwise force as an integer whole
                 // the nested if's is necessary due to the way the ArduinoJson templates are pre-processed by the compiler
-                uint8_t divider = (dv.options.size() == 1) ? Helpers::atoint(uuid::read_flash_string(dv.options[0]).c_str()) : 0;
+                uint8_t divider = (dv.options_size == 1) ? Helpers::atoint(uuid::read_flash_string(dv.options[0]).c_str()) : 0;
 
                 // INT
                 if ((dv.type == DeviceValueType::INT) && Helpers::hasValue(*(int8_t *)(dv.value_p))) {
@@ -658,6 +713,17 @@ bool EMSdevice::generate_values_json(JsonObject & root, const uint8_t tag_filter
     return has_value;
 }
 
+// create the Home Assistant configs for each value as a sensor
+void EMSdevice::publish_mqtt_ha_sensor() {
+    for (const auto & dv : *devicevalues_) {
+        Mqtt::register_mqtt_ha_sensor(dv.type, dv.tag, dv.full_name, device_type_, dv.short_name, dv.uom);
+    }
+
+    // publish it
+    bool ok = publish_ha_config();
+    ha_config_done(ok); // see if it worked
+}
+
 // return the name of the telegram type
 std::string EMSdevice::telegram_type_name(std::shared_ptr<const Telegram> telegram) {
     // see if it's one of the common ones, like Version
@@ -667,7 +733,7 @@ std::string EMSdevice::telegram_type_name(std::shared_ptr<const Telegram> telegr
         return read_flash_string(F("UBADevices"));
     }
 
-    for (const auto & tf : telegram_functions_) {
+    for (const auto & tf : *telegram_functions_) {
         if ((tf.telegram_type_id_ == telegram->type_id) && (telegram->type_id != 0xFF)) {
             return uuid::read_flash_string(tf.telegram_type_name_);
         }
@@ -679,7 +745,7 @@ std::string EMSdevice::telegram_type_name(std::shared_ptr<const Telegram> telegr
 // take a telegram_type_id and call the matching handler
 // return true if match found
 bool EMSdevice::handle_telegram(std::shared_ptr<const Telegram> telegram) {
-    for (const auto & tf : telegram_functions_) {
+    for (const auto & tf : *telegram_functions_) {
         if (tf.telegram_type_id_ == telegram->type_id) {
             // if the data block is empty, assume that this telegram is not recognized by the bus master
             // so remove it from the automatic fetch list
@@ -689,7 +755,10 @@ bool EMSdevice::handle_telegram(std::shared_ptr<const Telegram> telegram) {
                 return false;
             }
 
-            tf.process_function_(telegram);
+            if (telegram->message_length > 0) {
+                tf.process_function_(telegram);
+            }
+
             return true;
         }
     }

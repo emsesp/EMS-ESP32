@@ -16,11 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "WebAPIService.h"
 #include "emsesp.h"
-#include "command.h"
-#include "emsdevice.h"
-#include "system.h"
 
 namespace emsesp {
 

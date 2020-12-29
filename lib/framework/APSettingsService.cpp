@@ -21,7 +21,7 @@ void APSettingsService::reconfigureAP() {
 
 void APSettingsService::loop() {
     unsigned long currentMillis = uuid::get_uptime();
-    unsigned long manageElapsed = (unsigned long)(currentMillis - _lastManaged);
+    unsigned long manageElapsed = (uint32_t)(currentMillis - _lastManaged);
     if (manageElapsed >= MANAGE_NETWORK_DELAY) {
         _lastManaged = currentMillis;
         manageAP();
