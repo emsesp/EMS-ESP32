@@ -208,8 +208,6 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
 
     System::show_mem("after device value reg");
 
-    return; // TODO early exit for memory profiling on ESP8266
-
     // ww - boiler_data_ww topic
     register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW,
                           &wWSelTemp_,
