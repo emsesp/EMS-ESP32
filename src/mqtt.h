@@ -183,12 +183,30 @@ class Mqtt {
         mqtt_retain_ = mqtt_retain;
     }
 
+    /*
     struct QueuedMqttMessage {
         uint16_t                           id_;
         std::shared_ptr<const MqttMessage> content_;
         uint8_t                            retry_count_;
         uint16_t                           packet_id_;
     };
+    */
+
+    struct QueuedMqttMessage {
+        const uint16_t                           id_;
+        const std::shared_ptr<const MqttMessage> content_;
+        uint8_t                                  retry_count_;
+        uint16_t                                 packet_id_;
+
+        ~QueuedMqttMessage() = default;
+        QueuedMqttMessage(uint16_t id, std::shared_ptr<MqttMessage> && content)
+            : id_(id)
+            , content_(std::move(content)) {
+            retry_count_ = 0;
+            packet_id_   = 0;
+        }
+    };
+    static std::list<QueuedMqttMessage> mqtt_messages_;
 
   private:
     static uuid::log::Logger logger_;
@@ -252,7 +270,7 @@ class Mqtt {
     static uint8_t     dallas_format_;
     static uint8_t     ha_climate_format_;
     static bool        ha_enabled_;
-}; // namespace emsesp
+};
 
 } // namespace emsesp
 

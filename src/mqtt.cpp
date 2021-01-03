@@ -24,7 +24,6 @@ namespace emsesp {
 
 AsyncMqttClient * Mqtt::mqttClient_;
 
-
 // static parameters we make global
 std::string Mqtt::hostname_;
 uint8_t     Mqtt::mqtt_qos_;
@@ -40,7 +39,8 @@ uint8_t     Mqtt::dallas_format_;
 uint8_t     Mqtt::ha_climate_format_;
 bool        Mqtt::ha_enabled_;
 
-static emsesp::queue<Mqtt::QueuedMqttMessage> mqtt_messages_ = emsesp::queue<Mqtt::QueuedMqttMessage>(MAX_MQTT_MESSAGES);
+// static emsesp::queue<Mqtt::QueuedMqttMessage> mqtt_messages_ = emsesp::queue<Mqtt::QueuedMqttMessage>(MAX_MQTT_MESSAGES);
+std::list<Mqtt::QueuedMqttMessage> Mqtt::mqtt_messages_;
 
 std::vector<Mqtt::MQTTSubFunction> Mqtt::mqtt_subfunctions_;
 
@@ -547,12 +547,20 @@ std::shared_ptr<const MqttMessage> Mqtt::queue_message(const uint8_t operation, 
         message = std::make_shared<MqttMessage>(operation, full_topic, payload, retain);
     }
 
+    // if the queue is full, make room but removing the last one
+    if (mqtt_messages_.size() >= MAX_MQTT_MESSAGES) {
+        mqtt_messages_.pop_front();
+    }
+    mqtt_messages_.emplace_back(mqtt_message_id_++, std::move(message));
+
+    /*
     QueuedMqttMessage qmm;
     qmm.content_     = std::move(message);
     qmm.retry_count_ = 0;
     qmm.packet_id_   = 0;
     qmm.id_          = mqtt_message_id_++;
     mqtt_messages_.push_back(qmm);
+    */
 
     return mqtt_messages_.back().content_; // this is because the message has been moved
 }
@@ -710,7 +718,8 @@ void Mqtt::process_queue() {
             return;
         } else {
             // update the record
-            mqtt_messages_.front_p()->retry_count_++;
+            // mqtt_messages_.front_p()->retry_count_++;
+            mqtt_messages_.front().retry_count_++;
             LOG_DEBUG(F("Failed to publish to %s. Trying again, #%d"), message->topic.c_str(), mqtt_message.retry_count_ + 1);
             return; // leave on queue for next time so it gets republished
         }
@@ -719,7 +728,8 @@ void Mqtt::process_queue() {
     // if we have ACK set with QOS 1 or 2, leave on queue and let the ACK process remove it
     // but add the packet_id so we can check it later
     if (mqtt_qos_ != 0) {
-        mqtt_messages_.front_p()->packet_id_ = packet_id;
+        // mqtt_messages_.front_p()->packet_id_ = packet_id;
+        mqtt_messages_.front().packet_id_ = packet_id;
 #if defined(EMSESP_DEBUG)
         LOG_DEBUG(F("[DEBUG] Setting packetID for ACK to %d"), packet_id);
 #endif

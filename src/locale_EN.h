@@ -138,6 +138,8 @@ MAKE_PSTR_LIST(div10, F_(10))
 MAKE_PSTR_LIST(div100, F_(100))
 MAKE_PSTR_LIST(div60, F_(60))
 
+
+// boiler
 MAKE_PSTR_WORD(time)
 MAKE_PSTR_WORD(date)
 MAKE_PSTR_WORD(1x3min)
@@ -157,8 +159,91 @@ MAKE_PSTR_WORD(buffer)
 MAKE_PSTR(bufferedflow, "buffered flow")
 MAKE_PSTR(layeredbuffer, "layered buffer")
 
+// boiler lists
 MAKE_PSTR_LIST(enum_off_time_date, F_(off), F_(time), F_(date))
 MAKE_PSTR_LIST(enum_freq, F_(off), F_(1x3min), F_(2x3min), F_(3x3min), F_(4x3min), F_(5x3min), F_(6x3min), F_(continuos))
 MAKE_PSTR_LIST(enum_charge, F_(3wayvalve), F_(chargepump))
 MAKE_PSTR_LIST(enum_comfort, F_(hot), F_(eco), F_(intelligent))
 MAKE_PSTR_LIST(enum_flow, F_(off), F_(flow), F_(bufferedflow), F_(buffer), F_(layeredbuffer))
+
+// thermostat
+MAKE_PSTR_WORD(light)
+MAKE_PSTR_WORD(medium)
+MAKE_PSTR_WORD(heavy)
+MAKE_PSTR_WORD(own_prog)
+MAKE_PSTR(blank, "")
+MAKE_PSTR_WORD(start)
+MAKE_PSTR_WORD(heat)
+MAKE_PSTR_WORD(hold)
+MAKE_PSTR_WORD(cool)
+MAKE_PSTR_WORD(end)
+MAKE_PSTR_WORD(German)
+MAKE_PSTR_WORD(Dutch)
+MAKE_PSTR_WORD(French)
+MAKE_PSTR_WORD(Italian)
+MAKE_PSTR_WORD(high)
+MAKE_PSTR_WORD(low)
+MAKE_PSTR(internal_temperature, "internal temperature")
+MAKE_PSTR(internal_setpoint, "internal setpoint")
+MAKE_PSTR(external_temperature, "external temperature")
+MAKE_PSTR(burner_temperature, "burner temperature")
+MAKE_PSTR(WW_temperature, "WW temperature")
+MAKE_PSTR(functioning_mode, "functioning mode")
+MAKE_PSTR(smoke_temperature, "smoke temperature")
+MAKE_PSTR_WORD(radiator)
+MAKE_PSTR_WORD(convector)
+MAKE_PSTR_WORD(floor)
+MAKE_PSTR_WORD(summer)
+MAKE_PSTR_WORD(winter)
+MAKE_PSTR_WORD(outdoor)
+MAKE_PSTR_WORD(MPC)
+MAKE_PSTR_WORD(room)
+MAKE_PSTR_WORD(power)
+MAKE_PSTR_WORD(constant)
+MAKE_PSTR_WORD(simple)
+MAKE_PSTR_WORD(nofrost)
+MAKE_PSTR_WORD(comfort)
+MAKE_PSTR_WORD(manual)
+MAKE_PSTR_WORD(night)
+MAKE_PSTR_WORD(day)
+MAKE_PSTR_WORD(holiday)
+MAKE_PSTR_WORD(reduce)
+
+// thermostat lists
+MAKE_PSTR_LIST(enum_ibaMainDisplay,
+               F_(internal_temperature),
+               F_(internal_setpoint),
+               F_(external_temperature),
+               F_(burner_temperature),
+               F_(WW_temperature),
+               F_(functioning_mode),
+               F_(time),
+               F_(date),
+               F_(smoke_temperature))
+MAKE_PSTR_LIST(enum_ibaLanguage, F_(German), F_(Dutch), F_(French), F_(Italian))
+MAKE_PSTR_LIST(enum_floordrystatus, F_(off), F_(start), F_(heat), F_(hold), F_(cool), F_(end))
+MAKE_PSTR_LIST(enum_ibaBuildingType, F_(blank), F_(light), F_(medium), F_(heavy))
+MAKE_PSTR_LIST(enum_wwMode, F_(off), F_(low), F_(high), F_(auto), F_(own_prog))
+MAKE_PSTR_LIST(enum_wwCircMode, F_(off), F_(on), F_(auto), F_(own_prog))
+MAKE_PSTR_LIST(enum_ibaBuildingType2, F_(light), F_(medium), F_(heavy))
+MAKE_PSTR_LIST(enum_wwMode2, F_(off), F_(on), F_(auto))
+MAKE_PSTR_LIST(enum_wwCircMode2, F_(off), F_(on), F_(auto))
+MAKE_PSTR_LIST(enum_heatingtype, F_(off), F_(radiator), F_(convector), F_(floor))
+MAKE_PSTR_LIST(enum_summermode, F_(summer), F_(auto), F_(winter))
+
+MAKE_PSTR_LIST(enum_mode, F_(manual), F_(auto))
+MAKE_PSTR_LIST(enum_mode2, F_(off), F_(manual), F_(auto))
+MAKE_PSTR_LIST(enum_mode3, F_(night), F_(day), F_(auto))
+MAKE_PSTR_LIST(enum_mode4, F_(manual), F_(auto), F_(holiday))
+
+MAKE_PSTR_LIST(enum_modetype, F_(eco), F_(comfort))
+MAKE_PSTR_LIST(enum_modetype2, F_(day))
+MAKE_PSTR_LIST(enum_modetype3, F_(night), F_(day))
+MAKE_PSTR_LIST(enum_modetype4, F_(heat), F_(eco), F_(nofrost))
+
+MAKE_PSTR_LIST(enum_reducemode, F_(nofrost), F_(reduce), F_(room), F_(outdoor))
+
+MAKE_PSTR_LIST(enum_controlmode, F_(off), F_(outdoor), F_(simple), F_(MPC), F_(room), F_(power), F_(constant))
+MAKE_PSTR_LIST(enum_controlmode2, F_(outdoor), F_(room))
+
+MAKE_PSTR_LIST(enum_hamode, F_(off), F_(heat), F_(auto), F_(heat), F_(off), F_(heat), F_(auto), F_(auto), F_(auto), F_(auto))

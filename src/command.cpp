@@ -24,11 +24,15 @@ namespace emsesp {
 
 uuid::log::Logger Command::logger_{F_(command), uuid::log::Facility::DAEMON};
 
+std::vector<Command::CmdFunction> Command::cmdfunctions_;
+
+/*
 static emsesp::array<Command::CmdFunction> cmdfunctions_(90, 255, 16); // reserve space for 90 commands
 
 emsesp::array<Command::CmdFunction> * Command::commands() {
     return &cmdfunctions_;
 }
+*/
 
 // calls a command
 // id may be used to represent a heating circuit for example
@@ -95,13 +99,15 @@ void Command::add(const uint8_t device_type, const __FlashStringHelper * cmd, cm
         return;
     }
 
+    /*
     CmdFunction cf;
     cf.cmd_              = cmd;
     cf.device_type_      = device_type;
     cf.cmdfunction_json_ = nullptr; // empty
     cf.cmdfunction_      = cb;
     cmdfunctions_.push(cf);
-    // cmdfunctions_.emplace_back(device_type, cmd, cb, nullptr);
+    */
+    cmdfunctions_.emplace_back(device_type, cmd, cb, nullptr);
 
     // see if we need to subscribe
     if (Mqtt::enabled()) {
@@ -116,14 +122,16 @@ void Command::add_with_json(const uint8_t device_type, const __FlashStringHelper
         return;
     }
 
+    /*
     CmdFunction cf;
     cf.cmd_              = cmd;
     cf.device_type_      = device_type;
     cf.cmdfunction_json_ = cb;
     cf.cmdfunction_      = nullptr; // empty
     cmdfunctions_.push(cf);
+    */
 
-    // cmdfunctions_.emplace_back(device_type, cmd, nullptr, cb); // add command
+    cmdfunctions_.emplace_back(device_type, cmd, nullptr, cb); // add command
 }
 
 // see if a command exists for that device type

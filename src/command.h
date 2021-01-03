@@ -26,7 +26,7 @@
 #include <vector>
 #include <functional>
 
-#include "containers.h"
+// #include "containers.h"
 
 #include "console.h"
 
@@ -46,9 +46,20 @@ class Command {
         const __FlashStringHelper * cmd_;
         cmdfunction_p               cmdfunction_;
         cmdfunction_json_p          cmdfunction_json_;
+
+        CmdFunction(const uint8_t device_type, const __FlashStringHelper * cmd, cmdfunction_p cmdfunction, cmdfunction_json_p cmdfunction_json)
+            : device_type_(device_type)
+            , cmd_(cmd)
+            , cmdfunction_(cmdfunction)
+            , cmdfunction_json_(cmdfunction_json) {
+        }
     };
 
-    static emsesp::array<Command::CmdFunction> * commands();
+    static std::vector<CmdFunction> commands() {
+        return cmdfunctions_;
+    }
+
+    // static emsesp::array<Command::CmdFunction> * commands();
 
     static bool                   call(const uint8_t device_type, const char * cmd, const char * value, const int8_t id, JsonObject & json);
     static bool                   call(const uint8_t device_type, const char * cmd, const char * value, const int8_t id);
@@ -63,6 +74,8 @@ class Command {
 
   private:
     static uuid::log::Logger logger_;
+
+    static std::vector<CmdFunction> cmdfunctions_; // list of commands
 };
 
 } // namespace emsesp

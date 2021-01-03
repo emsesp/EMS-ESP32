@@ -273,7 +273,7 @@ void System::loop() {
         send_heartbeat();
     }
 
-#if defined(ESP8266)
+#ifndef EMSESP_STANDALONE
 #if defined(EMSESP_DEBUG)
     static uint32_t last_memcheck_ = 0;
     if (currentMillis - last_memcheck_ > 5000) { // 5 seconds

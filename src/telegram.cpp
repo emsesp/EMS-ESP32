@@ -126,11 +126,19 @@ std::string Telegram::to_string_message() const {
 
 // checks if we have an Rx telegram that needs processing
 void RxService::loop() {
+    /*
     while (!rx_telegrams_.empty()) {
         auto telegram = rx_telegrams_.pop().telegram_;
         (void)EMSESP::process_telegram(telegram); // further process the telegram
         increment_telegram_count();               // increase rx count
-        // rx_telegrams_.pop_front();                // remove it from the queue
+    }
+    */
+
+    while (!rx_telegrams_.empty()) {
+        auto telegram = rx_telegrams_.front().telegram_;
+        (void)EMSESP::process_telegram(telegram); // further process the telegram
+        increment_telegram_count();               // increase rx count
+        rx_telegrams_.pop_front();                // remove it from the queue
     }
 }
 
@@ -217,10 +225,22 @@ void RxService::add(uint8_t * data, uint8_t length) {
     // if we receive a hc2.. telegram from 0x19.. match it to master_thermostat if master is 0x18
     src = EMSESP::check_master_device(src, type_id, true);
 
+    // create the telegram
+    auto telegram = std::make_shared<Telegram>(operation, src, dest, type_id, offset, message_data, message_length);
+
+    // check if queue is full, if so remove top item to make space
+    if (rx_telegrams_.size() >= MAX_RX_TELEGRAMS) {
+        rx_telegrams_.pop_front();
+    }
+
+    rx_telegrams_.emplace_back(rx_telegram_id_++, std::move(telegram)); // add to queue
+
+    /*
     QueuedRxTelegram qrxt;
     qrxt.telegram_ = std::make_shared<Telegram>(operation, src, dest, type_id, offset, message_data, message_length);
     qrxt.id_       = rx_telegram_id_++;
     rx_telegrams_.push(qrxt);
+    */
 }
 
 // start and initialize Tx
@@ -264,13 +284,16 @@ void TxService::send() {
         return;
     }
 
-    // get the Telegram, also removes from queue
-    auto telegram = tx_telegrams_.pop();
+    // auto telegram = tx_telegrams_.pop();    // get the Telegram, also removes from queue
 
     // if we're in read-only mode (tx_mode 0) forget the Tx call
     if (tx_mode() != 0) {
-        send_telegram(telegram);
+        // send_telegram(telegram);
+        send_telegram(tx_telegrams_.front());
     }
+
+    // auto telegram = tx_telegrams_.pop();
+    tx_telegrams_.pop_front(); // remove the telegram from the queue
 }
 
 // process a Tx telegram
@@ -387,6 +410,32 @@ void TxService::send_telegram(const uint8_t * data, const uint8_t length) {
     }
 }
 
+void TxService::add(const uint8_t  operation,
+                    const uint8_t  dest,
+                    const uint16_t type_id,
+                    const uint8_t  offset,
+                    uint8_t *      message_data,
+                    const uint8_t  message_length,
+                    const bool     front) {
+    auto telegram = std::make_shared<Telegram>(operation, ems_bus_id(), dest, type_id, offset, message_data, message_length);
+
+#ifdef EMSESP_DEBUG
+    LOG_DEBUG(F("[DEBUG] New Tx [#%d] telegram, length %d"), tx_telegram_id_, message_length);
+#endif
+
+    // if the queue is full, make room but removing the last one
+    if (tx_telegrams_.size() >= MAX_TX_TELEGRAMS) {
+        tx_telegrams_.pop_front();
+    }
+
+    if (front) {
+        tx_telegrams_.emplace_front(tx_telegram_id_++, std::move(telegram), false); // add to back of queue
+    } else {
+        tx_telegrams_.emplace_back(tx_telegram_id_++, std::move(telegram), false); // add to back of queue
+    }
+}
+
+/*
 // builds a Tx telegram and adds to queue
 // given some details like the destination, type, offset and message block
 void TxService::add(const uint8_t  operation,
@@ -411,6 +460,7 @@ void TxService::add(const uint8_t  operation,
         tx_telegrams_.push_back(qtxt); // add to back of queue
     }
 }
+*/
 
 // builds a Tx telegram and adds to queue
 // this is used by the retry() function to put the last failed Tx back into the queue
@@ -467,19 +517,31 @@ void TxService::add(uint8_t operation, const uint8_t * data, const uint8_t lengt
         EMSESP::set_read_id(type_id);
     }
 
+    auto telegram = std::make_shared<Telegram>(operation, src, dest, type_id, offset, message_data, message_length); // operation is TX_WRITE or TX_READ
+
+    // if the queue is full, make room but removing the last one
+    if (tx_telegrams_.size() >= MAX_TX_TELEGRAMS) {
+        tx_telegrams_.pop_front();
+    }
+
 #ifdef EMSESP_DEBUG
     LOG_DEBUG(F("[DEBUG] New Tx [#%d] telegram, length %d"), tx_telegram_id_, message_length);
 #endif
 
+    /*
     QueuedTxTelegram qtxt;
     qtxt.id_       = tx_telegram_id_++;
     qtxt.retry_    = false;
     qtxt.telegram_ = std::make_shared<Telegram>(operation, ems_bus_id(), dest, type_id, offset, message_data, message_length);
+    */
 
     if (front) {
-        tx_telegrams_.push_front(qtxt); // add to front of queue
+        // tx_telegrams_.push_front(qtxt); // add to front of queue
+        tx_telegrams_.emplace_front(tx_telegram_id_++, std::move(telegram), false); // add to back of queue
+
     } else {
-        tx_telegrams_.push_back(qtxt); // add to back of queue
+        // tx_telegrams_.push_back(qtxt); // add to back of queue
+        tx_telegrams_.emplace_back(tx_telegram_id_++, std::move(telegram), false); // add to back of queue
     }
 }
 
@@ -554,11 +616,20 @@ void TxService::retry_tx(const uint8_t operation, const uint8_t * data, const ui
               Helpers::data_to_hex(data, length).c_str());
 #endif
 
+    // add to the top of the queue
+    if (tx_telegrams_.size() >= MAX_TX_TELEGRAMS) {
+        tx_telegrams_.pop_back();
+    }
+
+    tx_telegrams_.emplace_front(tx_telegram_id_++, std::move(telegram_last_), true);
+
+    /*
     QueuedTxTelegram qtxt;
     qtxt.id_       = tx_telegram_id_++;
     qtxt.retry_    = true; // this time it is a retry
     qtxt.telegram_ = telegram_last_;
     tx_telegrams_.push_front(qtxt); // add to front of queue
+    */
 }
 
 uint16_t TxService::read_next_tx() {
