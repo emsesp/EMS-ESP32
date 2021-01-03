@@ -71,10 +71,7 @@ void NTPSettingsService::configureTime(AsyncWebServerRequest * request, JsonVari
         String    timeUtc = json["time_utc"];
         struct tm tm      = {0};
 
-        // TODO fix strptime, which is not included in xtensa
-        // char * s = strptime(timeUtc.c_str(), "%Y-%m-%dT%H:%M:%SZ", &tm);
-
-        char * s = nullptr;
+        char * s = strptime(timeUtc.c_str(), "%Y-%m-%dT%H:%M:%SZ", &tm);
         if (s != nullptr) {
             time_t         time = mktime(&tm);
             struct timeval now  = {.tv_sec = time};
