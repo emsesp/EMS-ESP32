@@ -425,9 +425,9 @@ void Shell::loop_blocking() {
             stop();
         }
 
-        // if (running()) {
-        //     display_prompt();
-        // }
+        if (running()) {
+            display_prompt();
+        }
 
         idle_time_ = uuid::get_uptime_ms();
     }
