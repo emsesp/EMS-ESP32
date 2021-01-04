@@ -288,7 +288,6 @@ void System::loop() {
 
 void System::show_mem(const char * note) {
 #if defined(ESP8266)
-#if defined(EMSESP_DEBUG)
     static uint32_t old_free_heap = 0;
     static uint8_t  old_heap_frag = 0;
     uint32_t        free_heap     = ESP.getFreeHeap();
@@ -301,7 +300,11 @@ void System::show_mem(const char * note) {
              (uint8_t)Helpers::abs(heap_frag - old_heap_frag));
     old_free_heap = free_heap;
     old_heap_frag = heap_frag;
-#endif
+#elif defined(ESP32)
+    static uint32_t old_free_heap = 0;
+    uint32_t        free_heap     = ESP.getFreeHeap();
+    LOG_INFO(F("(%s) Free heap: %lu (~%lu)"), note, free_heap, (uint32_t)Helpers::abs(free_heap - old_free_heap));
+    old_free_heap = free_heap;
 #endif
 }
 
@@ -334,8 +337,10 @@ void System::send_heartbeat() {
     doc["mqttfails"]  = Mqtt::publish_fails();
     doc["txfails"]    = EMSESP::txservice_.telegram_fail_count();
     doc["rxfails"]    = EMSESP::rxservice_.telegram_error_count();
-#if defined(ESP8266)
+#ifndef EMSESP_STANDALONE
     doc["freemem"] = ESP.getFreeHeap();
+#endif
+#if defined(ESP8266)
     doc["fragmem"] = frag_memory;
 #endif
     if (analog_enabled_) {
