@@ -63,6 +63,7 @@ class SystemStatusForm extends Component<SystemStatusFormProps, SystemStatusForm
           </ListItemAvatar>
           <ListItemText primary="System Uptime" secondary={data.uptime} />
         </ListItem>
+        <Divider variant="inset" component="li" />
         <ListItem >
           <ListItemAvatar>
             <Avatar>
