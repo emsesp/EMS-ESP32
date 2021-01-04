@@ -568,9 +568,9 @@ void Shell::process_password(bool completed) {
     function_copy(*this, completed, line_buffer_);
     line_buffer_.clear();
 
-    // if (running()) {
-    //     display_prompt();
-    // }
+    if (running()) {
+        display_prompt();
+    }
 }
 
 void Shell::invoke_command(const std::string & line) {
