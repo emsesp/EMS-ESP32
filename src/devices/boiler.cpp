@@ -561,7 +561,17 @@ void Boiler::check_active(const bool force) {
     }
 
     // check if tap water is active, bits 1 and 4 must be set
-    b   = ((boilerState_ & 0x0A) == 0x0A);
+    // also check if there is a flowsensor and flow-type
+    static bool flowsensor = false;
+    if (Helpers::hasValue(wWCurFlow_) && (wWCurFlow_ > 0) && (wWType_ == 1)) {
+        flowsensor = true;
+    }
+    if (flowsensor) {
+        b = ((wWCurFlow_ > 0) && ((boilerState_ & 0x0A) == 0x0A));
+    } else {
+        b = ((boilerState_ & 0x0A) == 0x0A);
+    }
+
     val = b ? EMS_VALUE_BOOL_ON : EMS_VALUE_BOOL_OFF;
     if (tapwaterActive_ != val || force) {
         tapwaterActive_ = val;
