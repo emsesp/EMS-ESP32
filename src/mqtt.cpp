@@ -337,30 +337,33 @@ void Mqtt::on_publish(uint16_t packetId) {
     mqtt_messages_.pop_front(); // always remove from queue, regardless if there was a successful ACK
 }
 
+// called when MQTT settings have changed via the Web forms
+void Mqtt::reset_mqtt() {
+    if (!mqttClient_) {
+        return;
+    }
+
+    if (mqttClient_->connected()) {
+        mqttClient_->disconnect(); // force a disconnect
+    }
+}
+
 void Mqtt::start() {
     mqttClient_ = EMSESP::esp8266React.getMqttClient();
 
     // get the hostname, which we'll use to prefix to all topics
     EMSESP::esp8266React.getWiFiSettingsService()->read([&](WiFiSettings & wifiSettings) { hostname_ = wifiSettings.hostname.c_str(); });
 
-    // fetch MQTT settings
+    // fetch MQTT settings, to see if MQTT is enabled
     EMSESP::esp8266React.getMqttSettingsService()->read([&](MqttSettings & mqttSettings) {
-        publish_time_boiler_     = mqttSettings.publish_time_boiler * 1000; // convert to milliseconds
-        publish_time_thermostat_ = mqttSettings.publish_time_thermostat * 1000;
-        publish_time_solar_      = mqttSettings.publish_time_solar * 1000;
-        publish_time_mixer_      = mqttSettings.publish_time_mixer * 1000;
-        publish_time_other_      = mqttSettings.publish_time_other * 1000;
-        publish_time_sensor_     = mqttSettings.publish_time_sensor * 1000;
-        mqtt_qos_                = mqttSettings.mqtt_qos;
-        mqtt_retain_             = mqttSettings.mqtt_retain;
-        mqtt_enabled_            = mqttSettings.enabled;
-        ha_enabled_              = mqttSettings.ha_enabled;
-        ha_climate_format_       = mqttSettings.ha_climate_format;
-        dallas_format_           = mqttSettings.dallas_format;
+        mqtt_enabled_ = mqttSettings.enabled;
+        if (!mqtt_enabled_) {
+            return; // quit, not using MQTT
+        }
     });
 
-    // if MQTT disabled, quit
-    if (!mqtt_enabled_ || initialized_) {
+    // if already initialized, don't do it again
+    if (initialized_) {
         return;
     }
     initialized_ = true;
@@ -468,6 +471,24 @@ void Mqtt::on_connect() {
     connecting_ = true;
     connectcount_++;
 
+    /*
+    // fetch MQTT settings
+    EMSESP::esp8266React.getMqttSettingsService()->read([&](MqttSettings & mqttSettings) {
+        publish_time_boiler_     = mqttSettings.publish_time_boiler * 1000; // convert to milliseconds
+        publish_time_thermostat_ = mqttSettings.publish_time_thermostat * 1000;
+        publish_time_solar_      = mqttSettings.publish_time_solar * 1000;
+        publish_time_mixer_      = mqttSettings.publish_time_mixer * 1000;
+        publish_time_other_      = mqttSettings.publish_time_other * 1000;
+        publish_time_sensor_     = mqttSettings.publish_time_sensor * 1000;
+        mqtt_qos_                = mqttSettings.mqtt_qos;
+        mqtt_retain_             = mqttSettings.mqtt_retain;
+        mqtt_enabled_            = mqttSettings.enabled;
+        ha_enabled_              = mqttSettings.ha_enabled;
+        ha_climate_format_       = mqttSettings.ha_climate_format;
+        dallas_format_           = mqttSettings.dallas_format;
+    });
+    */
+
     // first time to connect
     if (connectcount_ == 1) {
         // send info topic appended with the version information as JSON
@@ -496,8 +517,9 @@ void Mqtt::on_connect() {
 
     publish_retain(F("status"), "online", true); // say we're alive to the Last Will topic, with retain on
 
+    mqtt_publish_fails_ = 0; // reset fail count to 0
+
     LOG_INFO(F("MQTT connected"));
-    reset_publish_fails(); // reset fail count to 0
 }
 
 // Home Assistant Discovery - the main master Device
