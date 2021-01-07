@@ -94,18 +94,6 @@ class MqttSettingsForm extends React.Component<MqttSettingsFormProps> {
           onChange={handleValueChange('keep_alive')}
           margin="normal"
         />
-        <TextValidator
-          validators={['required', 'isNumber', 'minNumber:1', 'maxNumber:65535']}
-          errorMessages={['Max topic length is required', "Must be a number", "Must be greater than 0", "Max value is 65535"]}
-          name="max_topic_length"
-          label="Max Topic Length"
-          fullWidth
-          variant="outlined"
-          value={data.max_topic_length}
-          type="number"
-          onChange={handleValueChange('max_topic_length')}
-          margin="normal"
-        />
         <SelectValidator name="mqtt_qos"
           label="QoS"
           value={data.mqtt_qos}
