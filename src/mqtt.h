@@ -147,9 +147,7 @@ class Mqtt {
         return mqtt_publish_fails_;
     }
 
-    static void reset_publish_fails() {
-        mqtt_publish_fails_ = 0;
-    }
+    static void reset_mqtt();
 
     static uint8_t ha_climate_format() {
         return ha_climate_format_;
