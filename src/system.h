@@ -22,6 +22,12 @@
 #include <Arduino.h>
 #include <ArduinoJson.h>
 
+#if defined(ESP32)
+#include "driver/adc.h"
+#include <esp_wifi.h>
+#include <esp_bt.h>
+#endif
+
 #include "helpers.h"
 #include "console.h"
 #include "mqtt.h"
@@ -59,14 +65,14 @@ class System {
     static bool command_test(const char * value, const int8_t id);
 #endif
 
-    static void    upload_status(bool in_progress);
-    static bool    upload_status();
-    static void    show_mem(const char * note);
-    void           reset_system_check();
-    static void    init();
-    static void    led_init();
-    static void    syslog_init();
-    static void    other_init();
+    static void upload_status(bool in_progress);
+    static bool upload_status();
+    static void show_mem(const char * note);
+    void        init_wifi();
+    static void init();
+    static void led_init();
+    static void syslog_init();
+    static void other_init();
 
     bool check_upgrade();
     void send_heartbeat();
