@@ -105,7 +105,7 @@ void System::restart() {
 
 // saves all settings
 void System::wifi_reconnect() {
-    LOG_INFO(F("The wifi will reconnect..."));
+    LOG_INFO(F("Wifi reconnecting..."));
     Shell::loop_all();
     delay(1000);                                                                // wait a second
     EMSESP::webSettingsService.save();                                          // local settings
@@ -219,6 +219,20 @@ void System::init() {
     syslog_init(); // init SysLog
 
     EMSESP::esp8266React.getWiFiSettingsService()->read([&](WiFiSettings & settings) { hostname(settings.hostname.c_str()); });
+
+// TODO power options
+#if defined(ESP32)
+    // setCpuFrequencyMhz(160); // default is 240
+
+    // disable bluetooth
+    btStop();
+    esp_bt_controller_disable();
+
+    // turn off ADC to save power if not needed
+    if (!analog_enabled_) {
+        adc_power_off();
+    }
+#endif
 
     EMSESP::init_tx(); // start UART
 }
@@ -335,8 +349,11 @@ void System::send_heartbeat() {
     doc["uptime"]     = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
     doc["uptime_sec"] = uuid::get_uptime_sec();
     doc["mqttfails"]  = Mqtt::publish_fails();
-    doc["txfails"]    = EMSESP::txservice_.telegram_fail_count();
+    doc["rxsent"]     = EMSESP::rxservice_.telegram_count();
     doc["rxfails"]    = EMSESP::rxservice_.telegram_error_count();
+    doc["txread"]     = EMSESP::txservice_.telegram_read_count();
+    doc["txwrite"]    = EMSESP::txservice_.telegram_write_count();
+    doc["txfails"]    = EMSESP::txservice_.telegram_fail_count();
 #ifndef EMSESP_STANDALONE
     doc["freemem"] = ESP.getFreeHeap();
 #endif
@@ -381,9 +398,32 @@ void System::set_led_speed(uint32_t speed) {
     led_monitor();
 }
 
-void System::reset_system_check() {
+void System::init_wifi() {
     last_system_check_ = 0; // force the LED to go from fast flash to pulse
     send_heartbeat();
+
+#if defined(ESP32)
+    // TODO wifi tx power
+    /*
+    WIFI_POWER_19_5dBm = 78,// 19.5dBm
+    WIFI_POWER_19dBm = 76,// 19dBm
+    WIFI_POWER_18_5dBm = 74,// 18.5dBm
+    WIFI_POWER_17dBm = 68,// 17dBm
+    WIFI_POWER_15dBm = 60,// 15dBm
+    WIFI_POWER_13dBm = 52,// 13dBm
+    WIFI_POWER_11dBm = 44,// 11dBm
+    WIFI_POWER_8_5dBm = 34,// 8.5dBm
+    WIFI_POWER_7dBm = 28,// 7dBm
+    WIFI_POWER_5dBm = 20,// 5dBm
+    WIFI_POWER_2dBm = 8,// 2dBm
+    WIFI_POWER_MINUS_1dBm = -4// -1dBm
+    */
+    // wifi_power_t a1 = WiFi.getTxPower();
+    // // bool         ok = WiFi.setTxPower(WIFI_POWER_17dBm);
+    // bool         ok = true;
+    // wifi_power_t a2 = WiFi.getTxPower();
+    // LOG_INFO("Wifi Tx power was %d, is now %d, ok=%s", a1, a2, ok ? "ok" : "failed");
+#endif
 }
 
 // check health of system, done every few seconds
@@ -832,7 +872,6 @@ bool System::check_upgrade() {
                     mqttSettings.enabled        = mqtt["enabled"];
                     mqttSettings.keepAlive      = FACTORY_MQTT_KEEP_ALIVE;
                     mqttSettings.cleanSession   = FACTORY_MQTT_CLEAN_SESSION;
-                    mqttSettings.maxTopicLength = FACTORY_MQTT_MAX_TOPIC_LENGTH;
 
                     return StateUpdateResult::CHANGED;
                 },
@@ -954,7 +993,6 @@ bool System::command_settings(const char * value, const int8_t id, JsonObject & 
         node["client_id"]               = settings.clientId;
         node["keep_alive"]              = settings.keepAlive;
         node["clean_session"]           = Helpers::render_boolean(s, settings.cleanSession);
-        node["max_topic_length"]        = settings.maxTopicLength;
         node["publish_time_boiler"]     = settings.publish_time_boiler;
         node["publish_time_thermostat"] = settings.publish_time_thermostat;
         node["publish_time_solar"]      = settings.publish_time_solar;
