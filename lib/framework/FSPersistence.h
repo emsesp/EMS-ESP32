@@ -30,11 +30,11 @@ class FSPersistence {
             DynamicJsonDocument  jsonDocument = DynamicJsonDocument(_bufferSize);
             DeserializationError error        = deserializeJson(jsonDocument, settingsFile);
             if (error == DeserializationError::Ok && jsonDocument.is<JsonObject>()) {
-                jsonDocument.shrinkToFit(); // added by proddy
+                // jsonDocument.shrinkToFit(); // added by proddy
                 JsonObject jsonObject = jsonDocument.as<JsonObject>();
 
 // debug added by Proddy
-#if defined(EMSESP_FORCE_SERIAL)
+#if defined(EMSESP_FORCE_SERIAL) || defined(ESP32)
                 Serial.printf("Read File: %s: ", _filePath);
                 serializeJson(jsonDocument, Serial);
                 Serial.println();
@@ -67,7 +67,7 @@ class FSPersistence {
         }
 
 // debug added by Proddy
-#if defined(EMSESP_FORCE_SERIAL)
+#if defined(EMSESP_FORCE_SERIAL) || defined(ESP32)
         Serial.printf("Write File: %s: ", _filePath);
         serializeJson(jsonDocument, Serial);
         Serial.println();
