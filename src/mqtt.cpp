@@ -196,19 +196,10 @@ void Mqtt::show_mqtt(uuid::console::Shell & shell) {
                 if (message.packet_id_ == 0) {
                     shell.printfln(F(" [%02d] (Pub) topic=%s payload=%s"), message.id_, content->topic.c_str(), content->payload.c_str());
                 } else {
-                    shell.printfln(F(" [%02d] (Pub) topic=%s payload=%s (pid %d)"),
-                                   message.id_,
-                                   content->topic.c_str(),
-                                   content->payload.c_str(),
-                                   message.packet_id_);
+                    shell.printfln(F(" [%02d] (Pub) topic=%s payload=%s (pid %d)"), message.id_, content->topic.c_str(), content->payload.c_str(), message.packet_id_);
                 }
             } else {
-                shell.printfln(F(" [%02d] (Pub) topic=%s payload=%s (pid %d, retry #%d)"),
-                               message.id_,
-                               content->topic.c_str(),
-                               content->payload.c_str(),
-                               message.packet_id_,
-                               message.retry_count_);
+                shell.printfln(F(" [%02d] (Pub) topic=%s payload=%s (pid %d, retry #%d)"), message.id_, content->topic.c_str(), content->payload.c_str(), message.packet_id_, message.retry_count_);
             }
         } else {
             // Subscribe messages
@@ -296,10 +287,7 @@ void Mqtt::on_message(const char * topic, const char * payload, size_t len) {
 
 // print all the topics related to a specific device type
 void Mqtt::show_topic_handlers(uuid::console::Shell & shell, const uint8_t device_type) {
-    if (std::count_if(mqtt_subfunctions_.cbegin(),
-                      mqtt_subfunctions_.cend(),
-                      [=](MQTTSubFunction const & mqtt_subfunction) { return device_type == mqtt_subfunction.device_type_; })
-        == 0) {
+    if (std::count_if(mqtt_subfunctions_.cbegin(), mqtt_subfunctions_.cend(), [=](MQTTSubFunction const & mqtt_subfunction) { return device_type == mqtt_subfunction.device_type_; }) == 0) {
         return;
     }
 
@@ -344,7 +332,7 @@ void Mqtt::reset_mqtt() {
     }
 
     if (mqttClient_->connected()) {
-        mqttClient_->disconnect(); // force a disconnect
+        mqttClient_->disconnect(true); // force a disconnect
     }
 }
 
@@ -513,6 +501,7 @@ void Mqtt::on_connect() {
         // we doing a re-connect from a TCP break
         // only re-subscribe again to all MQTT topics
         resubscribe();
+        EMSESP::reset_mqtt_ha(); // re-create all HA devices if there are any
     }
 
     publish_retain(F("status"), "online", true); // say we're alive to the Last Will topic, with retain on
@@ -721,15 +710,8 @@ void Mqtt::process_queue() {
     }
 
     // else try and publish it
-    uint16_t packet_id =
-        mqttClient_->publish(message->topic.c_str(), mqtt_qos_, message->retain, message->payload.c_str(), message->payload.size(), false, mqtt_message.id_);
-    LOG_DEBUG(F("Publishing topic %s (#%02d, retain=%d, try#%d, size %d, pid %d)"),
-              message->topic.c_str(),
-              mqtt_message.id_,
-              message->retain,
-              mqtt_message.retry_count_ + 1,
-              message->payload.size(),
-              packet_id);
+    uint16_t packet_id = mqttClient_->publish(message->topic.c_str(), mqtt_qos_, message->retain, message->payload.c_str(), message->payload.size(), false, mqtt_message.id_);
+    LOG_DEBUG(F("Publishing topic %s (#%02d, retain=%d, try#%d, size %d, pid %d)"), message->topic.c_str(), mqtt_message.id_, message->retain, mqtt_message.retry_count_ + 1, message->payload.size(), packet_id);
 
     if (packet_id == 0) {
         // it failed. if we retried n times, give up. remove from queue

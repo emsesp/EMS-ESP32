@@ -407,6 +407,17 @@ void EMSESP::publish_all_loop() {
     }
 }
 
+// force HA to re-create all the devices
+void EMSESP::reset_mqtt_ha() {
+    if (!Mqtt::ha_enabled()) {
+        return;
+    }
+
+    for (const auto & emsdevice : emsdevices) {
+        emsdevice->ha_config_done(false);
+    }
+}
+
 // create json doc for the devices values and add to MQTT publish queue
 void EMSESP::publish_device_values(uint8_t device_type) {
     DynamicJsonDocument doc(EMSESP_JSON_SIZE_XLARGE_DYN); // use max size
@@ -675,8 +686,7 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
         }
         read_next_ = false;
     } else if (watch() == WATCH_ON) {
-        if ((watch_id_ == WATCH_ID_NONE) || (telegram->type_id == watch_id_)
-            || ((watch_id_ < 0x80) && ((telegram->src == watch_id_) || (telegram->dest == watch_id_)))) {
+        if ((watch_id_ == WATCH_ID_NONE) || (telegram->type_id == watch_id_) || ((watch_id_ < 0x80) && ((telegram->src == watch_id_) || (telegram->dest == watch_id_)))) {
             LOG_NOTICE(pretty_telegram(telegram).c_str());
         } else if (!trace_raw_) {
             LOG_TRACE(pretty_telegram(telegram).c_str());
@@ -837,8 +847,7 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
     if (device_p == nullptr) {
         LOG_NOTICE(F("Unrecognized EMS device (device ID 0x%02X, product ID %d). Please report on GitHub."), device_id, product_id);
         std::string name("unknown");
-        emsdevices.push_back(
-            EMSFactory::add(DeviceType::GENERIC, device_id, product_id, version, name, DeviceFlags::EMS_DEVICE_FLAG_NONE, EMSdevice::Brand::NO_BRAND));
+        emsdevices.push_back(EMSFactory::add(DeviceType::GENERIC, device_id, product_id, version, name, DeviceFlags::EMS_DEVICE_FLAG_NONE, EMSdevice::Brand::NO_BRAND));
         return false; // not found
     }
 
@@ -856,9 +865,7 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
         return true;
     }
 
-    Command::add_with_json(device_type, F_(info), [device_type](const char * value, const int8_t id, JsonObject & json) {
-        return command_info(device_type, json);
-    });
+    Command::add_with_json(device_type, F_(info), [device_type](const char * value, const int8_t id, JsonObject & json) { return command_info(device_type, json); });
 
     return true;
 }
@@ -887,12 +894,7 @@ void EMSESP::send_read_request(const uint16_t type_id, const uint8_t dest) {
 }
 
 // sends write request
-void EMSESP::send_write_request(const uint16_t type_id,
-                                const uint8_t  dest,
-                                const uint8_t  offset,
-                                uint8_t *      message_data,
-                                const uint8_t  message_length,
-                                const uint16_t validate_typeid) {
+void EMSESP::send_write_request(const uint16_t type_id, const uint8_t dest, const uint8_t offset, uint8_t * message_data, const uint8_t message_length, const uint16_t validate_typeid) {
     txservice_.add(Telegram::Operation::TX_WRITE, dest, type_id, offset, message_data, message_length);
 
     txservice_.set_post_send_query(validate_typeid); // store which type_id to send Tx read after a write

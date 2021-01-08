@@ -41,8 +41,7 @@ MqttSettingsService::MqttSettingsService(AsyncWebServer * server, FS * fs, Secur
     , _disconnectReason(AsyncMqttClientDisconnectReason::TCP_DISCONNECTED)
     , _mqttClient() {
 #ifdef ESP32
-    WiFi.onEvent(std::bind(&MqttSettingsService::onStationModeDisconnected, this, std::placeholders::_1, std::placeholders::_2),
-                 WiFiEvent_t::SYSTEM_EVENT_STA_DISCONNECTED);
+    WiFi.onEvent(std::bind(&MqttSettingsService::onStationModeDisconnected, this, std::placeholders::_1, std::placeholders::_2), WiFiEvent_t::SYSTEM_EVENT_STA_DISCONNECTED);
     WiFi.onEvent(std::bind(&MqttSettingsService::onStationModeGotIP, this, std::placeholders::_1, std::placeholders::_2), WiFiEvent_t::SYSTEM_EVENT_STA_GOT_IP);
 #elif defined(ESP8266)
     _onStationModeDisconnectedHandler = WiFi.onStationModeDisconnected(std::bind(&MqttSettingsService::onStationModeDisconnected, this, std::placeholders::_1));
@@ -155,8 +154,7 @@ void MqttSettingsService::configureMqtt() {
         // Serial.println(F("Connecting to MQTT..."));
         _mqttClient.setServer(retainCstr(_state.host.c_str(), &_retainedHost), _state.port);
         if (_state.username.length() > 0) {
-            _mqttClient.setCredentials(retainCstr(_state.username.c_str(), &_retainedUsername),
-                                       retainCstr(_state.password.length() > 0 ? _state.password.c_str() : nullptr, &_retainedPassword));
+            _mqttClient.setCredentials(retainCstr(_state.username.c_str(), &_retainedUsername), retainCstr(_state.password.length() > 0 ? _state.password.c_str() : nullptr, &_retainedPassword));
         } else {
             _mqttClient.setCredentials(retainCstr(nullptr, &_retainedUsername), retainCstr(nullptr, &_retainedPassword));
         }

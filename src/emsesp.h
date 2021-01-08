@@ -83,6 +83,7 @@ class EMSESP {
     static void publish_other_values();
     static void publish_sensor_values(const bool time, const bool force = false);
     static void publish_all(bool force = false);
+    static void reset_mqtt_ha();
 
 #ifdef EMSESP_STANDALONE
     static void run_test(uuid::console::Shell & shell, const std::string & command); // only for testing
@@ -96,12 +97,7 @@ class EMSESP {
 
     static void send_read_request(const uint16_t type_id, const uint8_t dest);
     static void send_read_request(const uint16_t type_id, const uint8_t dest, const uint8_t offset);
-    static void send_write_request(const uint16_t type_id,
-                                   const uint8_t  dest,
-                                   const uint8_t  offset,
-                                   uint8_t *      message_data,
-                                   const uint8_t  message_length,
-                                   const uint16_t validate_typeid);
+    static void send_write_request(const uint16_t type_id, const uint8_t dest, const uint8_t offset, uint8_t * message_data, const uint8_t message_length, const uint16_t validate_typeid);
     static void send_write_request(const uint16_t type_id, const uint8_t dest, const uint8_t offset, const uint8_t value);
     static void send_write_request(const uint16_t type_id, const uint8_t dest, const uint8_t offset, const uint8_t value, const uint16_t validate_typeid);
 
