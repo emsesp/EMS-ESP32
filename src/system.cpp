@@ -220,7 +220,6 @@ void System::init() {
 
     EMSESP::esp8266React.getWiFiSettingsService()->read([&](WiFiSettings & settings) { hostname(settings.hostname.c_str()); });
 
-// TODO power options
 #if defined(ESP32)
     // setCpuFrequencyMhz(160); // default is 240
 

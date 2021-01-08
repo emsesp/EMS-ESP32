@@ -38,8 +38,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
     // or if its the master thermostat we defined
     // see https://github.com/proddy/EMS-ESP/issues/362#issuecomment-629628161
     if ((master_thermostat == device_id)
-        || ((master_thermostat == EMSESP_DEFAULT_MASTER_THERMOSTAT) && (device_id < 0x19)
-            && ((actual_master_thermostat == EMSESP_DEFAULT_MASTER_THERMOSTAT) || (device_id < actual_master_thermostat)))) {
+        || ((master_thermostat == EMSESP_DEFAULT_MASTER_THERMOSTAT) && (device_id < 0x19) && ((actual_master_thermostat == EMSESP_DEFAULT_MASTER_THERMOSTAT) || (device_id < actual_master_thermostat)))) {
         EMSESP::actual_master_thermostat(device_id);
         actual_master_thermostat = device_id;
         reserve_telgram_functions(25); // reserve some space for the telegram registries, to avoid memory fragmentation
@@ -1893,10 +1892,7 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
     // if we know what to send and to where, go and do it
     if (offset != -1) {
         char s[10];
-        LOG_INFO(F("Setting thermostat temperature to %s for heating circuit %d, mode %s"),
-                 Helpers::render_value(s, temperature, 2),
-                 hc->hc_num(),
-                 mode_tostring(mode).c_str());
+        LOG_INFO(F("Setting thermostat temperature to %s for heating circuit %d, mode %s"), Helpers::render_value(s, temperature, 2), hc->hc_num(), mode_tostring(mode).c_str());
 
         // add the write command to the Tx queue. value is *2
         // post validate is the corresponding monitor or set type IDs as they can differ per model
@@ -2070,107 +2066,43 @@ void Thermostat::register_device_values() {
     uint8_t model = this->model();
 
     // Common for all thermostats
-    register_device_value(DeviceValueTAG::TAG_NONE, &dateTime_, DeviceValueType::TEXT, nullptr, F("dateTime"), F("Date/Time"), DeviceValueUOM::NONE);
-    register_device_value(DeviceValueTAG::TAG_NONE, &errorCode_, DeviceValueType::TEXT, nullptr, F("errorCode"), F("Error code"), DeviceValueUOM::NONE);
-    register_device_value(DeviceValueTAG::TAG_NONE, &lastCode_, DeviceValueType::TEXT, nullptr, F("lastCode"), F("Last error"), DeviceValueUOM::NONE);
-    register_device_value(DeviceValueTAG::TAG_NONE, &wwTemp_, DeviceValueType::UINT, nullptr, F("wwTemp"), F("Warm water high temperature"), DeviceValueUOM::DEGREES);
-    register_device_value(
-        DeviceValueTAG::TAG_NONE, &wwTempLow_, DeviceValueType::UINT, nullptr, F("wwTempLow"), F("Warm water low temperature"), DeviceValueUOM::DEGREES);
-    register_device_value(DeviceValueTAG::TAG_NONE, &wwExtra1_, DeviceValueType::UINT, nullptr, F("wwExtra1"), F("Warm water circuit 1 extra"), DeviceValueUOM::DEGREES);
-    register_device_value(DeviceValueTAG::TAG_NONE, &wwExtra2_, DeviceValueType::UINT, nullptr, F("wwExtra2"), F("Warm water circuit 2 extra"), DeviceValueUOM::DEGREES);
-    register_device_value(
-        DeviceValueTAG::TAG_NONE, &tempsensor1_, DeviceValueType::USHORT, FL_(div10), F("inttemp1"), F("Temperature sensor 1"), DeviceValueUOM::DEGREES);
-    register_device_value(
-        DeviceValueTAG::TAG_NONE, &tempsensor2_, DeviceValueType::USHORT, FL_(div10), F("inttemp2"), F("Temperature sensor 2"), DeviceValueUOM::DEGREES);
-    register_device_value(DeviceValueTAG::TAG_NONE,
-                          &ibaCalIntTemperature_,
-                          DeviceValueType::INT,
-                          FL_(div2),
-                          F("intoffset"),
-                          F("Offset int. temperature"),
-                          DeviceValueUOM::DEGREES);
-    register_device_value(DeviceValueTAG::TAG_NONE,
-                          &ibaMinExtTemperature_,
-                          DeviceValueType::INT,
-                          nullptr,
-                          F("minexttemp"),
-                          F("Min ext. temperature"),
+    register_device_value(TAG_NONE, &dateTime_, DeviceValueType::TEXT, nullptr, F("dateTime"), F("Date/Time"), DeviceValueUOM::NONE);
+    register_device_value(TAG_NONE, &errorCode_, DeviceValueType::TEXT, nullptr, F("errorCode"), F("Error code"), DeviceValueUOM::NONE);
+    register_device_value(TAG_NONE, &lastCode_, DeviceValueType::TEXT, nullptr, F("lastCode"), F("Last error"), DeviceValueUOM::NONE);
+    register_device_value(TAG_NONE, &wwTemp_, DeviceValueType::UINT, nullptr, F("wwTemp"), F("Warm water high temperature"), DeviceValueUOM::DEGREES);
+    register_device_value(TAG_NONE, &wwTempLow_, DeviceValueType::UINT, nullptr, F("wwTempLow"), F("Warm water low temperature"), DeviceValueUOM::DEGREES);
+    register_device_value(TAG_NONE, &wwExtra1_, DeviceValueType::UINT, nullptr, F("wwExtra1"), F("Warm water circuit 1 extra"), DeviceValueUOM::DEGREES);
+    register_device_value(TAG_NONE, &wwExtra2_, DeviceValueType::UINT, nullptr, F("wwExtra2"), F("Warm water circuit 2 extra"), DeviceValueUOM::DEGREES);
+    register_device_value(TAG_NONE, &tempsensor1_, DeviceValueType::USHORT, FL_(div10), F("inttemp1"), F("Temperature sensor 1"), DeviceValueUOM::DEGREES);
+    register_device_value(TAG_NONE, &tempsensor2_, DeviceValueType::USHORT, FL_(div10), F("inttemp2"), F("Temperature sensor 2"), DeviceValueUOM::DEGREES);
+    register_device_value(TAG_NONE, &ibaCalIntTemperature_, DeviceValueType::INT, FL_(div2), F("intoffset"), F("Offset int. temperature"), DeviceValueUOM::DEGREES);
+    register_device_value(TAG_NONE, &ibaMinExtTemperature_, DeviceValueType::INT, nullptr, F("minexttemp"), F("Min ext. temperature"),
                           DeviceValueUOM::DEGREES); // min ext temp for heating curve, in deg.
 
     // RC30 only
     if (model == EMSdevice::EMS_DEVICE_FLAG_RC30_1) {
-        register_device_value(DeviceValueTAG::TAG_NONE,
-                              &ibaMainDisplay_,
-                              DeviceValueType::ENUM,
-                              FL_(enum_ibaMainDisplay),
-                              F("ibaMainDisplay"),
-                              F("Display"),
-                              DeviceValueUOM::NONE);
-        register_device_value(
-            DeviceValueTAG::TAG_NONE, &ibaLanguage_, DeviceValueType::ENUM, FL_(enum_ibaLanguage), F("ibaLanguage"), F("Language"), DeviceValueUOM::NONE);
-        register_device_value(DeviceValueTAG::TAG_NONE,
-                              &ibaClockOffset_,
-                              DeviceValueType::UINT,
-                              nullptr,
-                              F("ibaClockOffset"),
-                              F("Clock offset"),
+        register_device_value(TAG_NONE, &ibaMainDisplay_, DeviceValueType::ENUM, FL_(enum_ibaMainDisplay), F("ibaMainDisplay"), F("Display"), DeviceValueUOM::NONE);
+        register_device_value(TAG_NONE, &ibaLanguage_, DeviceValueType::ENUM, FL_(enum_ibaLanguage), F("ibaLanguage"), F("Language"), DeviceValueUOM::NONE);
+        register_device_value(TAG_NONE, &ibaClockOffset_, DeviceValueType::UINT, nullptr, F("ibaClockOffset"), F("Clock offset"),
                               DeviceValueUOM::NONE); // offset (in sec) to clock, 0xff=-1s, 0x02=2s
     }
 
     // RC300 and RC100
     if (model == EMS_DEVICE_FLAG_RC300 || model == EMS_DEVICE_FLAG_RC100) {
-        register_device_value(DeviceValueTAG::TAG_NONE,
-                              &floordrystatus_,
-                              DeviceValueType::ENUM,
-                              FL_(enum_floordrystatus),
-                              F("floordry"),
-                              F("Floor drying"),
-                              DeviceValueUOM::NONE);
-        register_device_value(DeviceValueTAG::TAG_NONE,
-                              &dampedoutdoortemp2_,
-                              DeviceValueType::SHORT,
-                              FL_(div10),
-                              F("dampedtemp"),
-                              F("Damped outdoor temperature"),
-                              DeviceValueUOM::DEGREES);
-        register_device_value(DeviceValueTAG::TAG_NONE,
-                              &floordrytemp_,
-                              DeviceValueType::UINT,
-                              nullptr,
-                              F("floordrytemp"),
-                              F("Floor drying temperature"),
-                              DeviceValueUOM::DEGREES);
-        register_device_value(
-            DeviceValueTAG::TAG_NONE, &ibaBuildingType_, DeviceValueType::ENUM, FL_(enum_ibaBuildingType), F("building"), F("Building"), DeviceValueUOM::NONE);
-        register_device_value(DeviceValueTAG::TAG_NONE, &wwMode_, DeviceValueType::ENUM, FL_(enum_wwMode), F("wwmode"), F("Warm water mode"), DeviceValueUOM::NONE);
-        register_device_value(DeviceValueTAG::TAG_NONE,
-                              &wwCircMode_,
-                              DeviceValueType::ENUM,
-                              FL_(enum_wwCircMode),
-                              F("wwcircmode"),
-                              F("Warm water circulation mode"),
-                              DeviceValueUOM::NONE);
+        register_device_value(TAG_NONE, &floordrystatus_, DeviceValueType::ENUM, FL_(enum_floordrystatus), F("floordry"), F("Floor drying"), DeviceValueUOM::NONE);
+        register_device_value(TAG_NONE, &dampedoutdoortemp2_, DeviceValueType::SHORT, FL_(div10), F("dampedtemp"), F("Damped outdoor temperature"), DeviceValueUOM::DEGREES);
+        register_device_value(TAG_NONE, &floordrytemp_, DeviceValueType::UINT, nullptr, F("floordrytemp"), F("Floor drying temperature"), DeviceValueUOM::DEGREES);
+        register_device_value(TAG_NONE, &ibaBuildingType_, DeviceValueType::ENUM, FL_(enum_ibaBuildingType), F("building"), F("Building"), DeviceValueUOM::NONE);
+        register_device_value(TAG_NONE, &wwMode_, DeviceValueType::ENUM, FL_(enum_wwMode), F("wwmode"), F("Warm water mode"), DeviceValueUOM::NONE);
+        register_device_value(TAG_NONE, &wwCircMode_, DeviceValueType::ENUM, FL_(enum_wwCircMode), F("wwcircmode"), F("Warm water circulation mode"), DeviceValueUOM::NONE);
     }
 
     // RC30 and RC35
     if (model == EMS_DEVICE_FLAG_RC35 || model == EMS_DEVICE_FLAG_RC30_1) {
-        register_device_value(DeviceValueTAG::TAG_NONE,
-                              &dampedoutdoortemp_,
-                              DeviceValueType::SHORT,
-                              nullptr,
-                              F("dampedtemp"),
-                              F("Damped outdoor temperature"),
-                              DeviceValueUOM::DEGREES);
-        register_device_value(
-            DeviceValueTAG::TAG_NONE, &ibaBuildingType_, DeviceValueType::ENUM, FL_(enum_ibaBuildingType2), F("building"), F("Building"), DeviceValueUOM::NONE);
-        register_device_value(DeviceValueTAG::TAG_NONE, &wwMode_, DeviceValueType::ENUM, FL_(enum_wwMode2), F("wwmode"), F("Warm water mode"), DeviceValueUOM::NONE);
-        register_device_value(DeviceValueTAG::TAG_NONE,
-                              &wwCircMode_,
-                              DeviceValueType::ENUM,
-                              FL_(enum_wwCircMode2),
-                              F("wwcircmode"),
-                              F("Warm water circulation mode"),
-                              DeviceValueUOM::NONE);
+        register_device_value(TAG_NONE, &dampedoutdoortemp_, DeviceValueType::SHORT, nullptr, F("dampedtemp"), F("Damped outdoor temperature"), DeviceValueUOM::DEGREES);
+        register_device_value(TAG_NONE, &ibaBuildingType_, DeviceValueType::ENUM, FL_(enum_ibaBuildingType2), F("building"), F("Building"), DeviceValueUOM::NONE);
+        register_device_value(TAG_NONE, &wwMode_, DeviceValueType::ENUM, FL_(enum_wwMode2), F("wwmode"), F("Warm water mode"), DeviceValueUOM::NONE);
+        register_device_value(TAG_NONE, &wwCircMode_, DeviceValueType::ENUM, FL_(enum_wwCircMode2), F("wwcircmode"), F("Warm water circulation mode"), DeviceValueUOM::NONE);
     }
 }
 
@@ -2179,7 +2111,7 @@ void Thermostat::register_device_values_hc(std::shared_ptr<emsesp::Thermostat::H
     uint8_t model = hc->get_model();
 
     // heating circuit
-    uint8_t tag = DeviceValueTAG::TAG_HC1 + hc->hc_num() - 1;
+    uint8_t tag = TAG_HC1 + hc->hc_num() - 1;
 
     // different logic on how temperature values are stored, depending on model
     const __FlashStringHelper * const * setpoint_temp_divider;
@@ -2195,8 +2127,7 @@ void Thermostat::register_device_values_hc(std::shared_ptr<emsesp::Thermostat::H
         setpoint_temp_divider = FL_(div2);
         curr_temp_divider     = FL_(div10);
     }
-    register_device_value(
-        tag, &hc->setpoint_roomTemp, DeviceValueType::SHORT, setpoint_temp_divider, F("seltemp"), F("Setpoint room temperature"), DeviceValueUOM::DEGREES);
+    register_device_value(tag, &hc->setpoint_roomTemp, DeviceValueType::SHORT, setpoint_temp_divider, F("seltemp"), F("Setpoint room temperature"), DeviceValueUOM::DEGREES);
     register_device_value(tag, &hc->curr_roomTemp, DeviceValueType::SHORT, curr_temp_divider, F("currtemp"), F("Current room temperature"), DeviceValueUOM::DEGREES);
 
     // special handling for Home Assistant
@@ -2206,13 +2137,7 @@ void Thermostat::register_device_values_hc(std::shared_ptr<emsesp::Thermostat::H
         if (option == Mqtt::HA_Climate_Format::CURRENT) {
             register_device_value(tag, &hc->curr_roomTemp, DeviceValueType::SHORT, curr_temp_divider, F("hatemp"), nullptr, DeviceValueUOM::DEGREES);
         } else if (option == Mqtt::HA_Climate_Format::SETPOINT) {
-            register_device_value(tag,
-                                  &hc->setpoint_roomTemp,
-                                  DeviceValueType::SHORT,
-                                  setpoint_temp_divider,
-                                  F("hatemp"),
-                                  F("HA current room temperature"),
-                                  DeviceValueUOM::DEGREES);
+            register_device_value(tag, &hc->setpoint_roomTemp, DeviceValueType::SHORT, setpoint_temp_divider, F("hatemp"), F("HA current room temperature"), DeviceValueUOM::DEGREES);
         } else if (option == Mqtt::HA_Climate_Format::ZERO) {
             register_device_value(tag, &zero_value_, DeviceValueType::UINT, nullptr, F("hatemp"), nullptr, DeviceValueUOM::DEGREES);
         }

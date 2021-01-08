@@ -34,10 +34,9 @@ Switch::Switch(uint8_t device_type, uint8_t device_id, uint8_t product_id, const
     register_telegram_type(0x9D, F("WM10SetMessage"), false, [&](std::shared_ptr<const Telegram> t) { process_WM10SetMessage(t); });
     register_telegram_type(0x1E, F("WM10TempMessage"), false, [&](std::shared_ptr<const Telegram> t) { process_WM10TempMessage(t); });
 
-    register_device_value(DeviceValueTAG::TAG_NONE, &activated_, DeviceValueType::BOOL, nullptr, F("activated"), F("Activated"), DeviceValueUOM::NONE);
-    register_device_value(
-        DeviceValueTAG::TAG_NONE, &flowTemp_, DeviceValueType::USHORT, FL_(div10), F("flowTemp"), F("Current flow temperature"), DeviceValueUOM::DEGREES);
-    register_device_value(DeviceValueTAG::TAG_NONE, &status_, DeviceValueType::INT, nullptr, F("status"), F("Status"), DeviceValueUOM::NONE);
+    register_device_value(TAG_NONE, &activated_, DeviceValueType::BOOL, nullptr, F("activated"), F("Activated"), DeviceValueUOM::NONE);
+    register_device_value(TAG_NONE, &flowTemp_, DeviceValueType::USHORT, FL_(div10), F("flowTemp"), F("Current flow temperature"), DeviceValueUOM::DEGREES);
+    register_device_value(TAG_NONE, &status_, DeviceValueType::INT, nullptr, F("status"), F("Status"), DeviceValueUOM::NONE);
 }
 
 // publish HA config

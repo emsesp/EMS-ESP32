@@ -30,7 +30,7 @@ Gateway::Gateway(uint8_t device_type, uint8_t device_id, uint8_t product_id, con
 
 // publish HA config
 bool Gateway::publish_ha_config() {
-     return true;
+    return true;
 }
 
 } // namespace emsesp

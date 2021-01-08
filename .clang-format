@@ -2,7 +2,7 @@ Language: Cpp
 BasedOnStyle: LLVM
 UseTab: Never
 IndentWidth: 4
-ColumnLimit: 160
+ColumnLimit: 220
 TabWidth: 4
 #BreakBeforeBraces: Custom
 BraceWrapping:

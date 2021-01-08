@@ -751,14 +751,13 @@ bool EMSdevice::generate_values_json(JsonObject & root, const uint8_t tag_filter
     return has_value;
 }
 
-// create the Home Assistant configs for each value as a sensor
+// create the Home Assistant configs for each value
 void EMSdevice::publish_mqtt_ha_sensor() {
     // for (const auto & dv : *devicevalues_) {
     for (const auto & dv : devicevalues_) {
         Mqtt::register_mqtt_ha_sensor(dv.type, dv.tag, dv.full_name, device_type_, dv.short_name, dv.uom);
     }
 
-    // publish it
     bool ok = publish_ha_config();
     ha_config_done(ok); // see if it worked
 }

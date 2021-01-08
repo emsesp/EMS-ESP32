@@ -56,9 +56,12 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     register_telegram_type(0x494, F("UBAEnergySupplied"), false, [&](std::shared_ptr<const Telegram> t) { process_UBAEnergySupplied(t); });
     register_telegram_type(0x495, F("UBAInformation"), false, [&](std::shared_ptr<const Telegram> t) { process_UBAInformation(t); });
 
-    EMSESP::send_read_request(0x10, device_id); // read last errorcode on start (only published on errors)
-    EMSESP::send_read_request(0x11, device_id); // read last errorcode on start (only published on errors)
-    EMSESP::send_read_request(0x15, device_id); // read maintenace data on start (only published on change)
+    EMSESP::send_read_request(0x10,
+                              device_id); // read last errorcode on start (only published on errors)
+    EMSESP::send_read_request(0x11,
+                              device_id); // read last errorcode on start (only published on errors)
+    EMSESP::send_read_request(0x15,
+                              device_id); // read maintenace data on start (only published on change)
 
     System::show_mem("after telegram type reg");
 
@@ -91,428 +94,102 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     reserve_device_values(50);
 
     // main - boiler_data topic
-    register_device_value(
-        DeviceValueTAG::TAG_BOILER_DATA, &heatingActive_, DeviceValueType::BOOL, nullptr, F("heatingActive"), F("Heating active"), DeviceValueUOM::NONE);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA,
-                          &tapwaterActive_,
-                          DeviceValueType::BOOL,
-                          nullptr,
-                          F("tapwaterActive"),
-                          F("Warm water/DHW active"),
-                          DeviceValueUOM::NONE);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA,
-                          &selFlowTemp_,
-                          DeviceValueType::UINT,
-                          nullptr,
-                          F("selFlowTemp"),
-                          F("Selected flow temperature"),
-                          DeviceValueUOM::DEGREES);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA,
-                          &selBurnPow_,
-                          DeviceValueType::UINT,
-                          nullptr,
-                          F("selBurnPow"),
-                          F("Burner selected max power"),
-                          DeviceValueUOM::PERCENT);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA, &pumpMod_, DeviceValueType::UINT, nullptr, F("pumpMod"), F("Pump modulation"), DeviceValueUOM::PERCENT);
-    register_device_value(
-        DeviceValueTAG::TAG_BOILER_DATA, &pumpMod2_, DeviceValueType::UINT, nullptr, F("pumpMod2"), F("Heat pump modulation"), DeviceValueUOM::PERCENT);
+    register_device_value(TAG_BOILER_DATA, &heatingActive_, DeviceValueType::BOOL, nullptr, F("heatingActive"), F("Heating active"), DeviceValueUOM::NONE);
+    register_device_value(TAG_BOILER_DATA, &tapwaterActive_, DeviceValueType::BOOL, nullptr, F("tapwaterActive"), F("Warm water/DHW active"), DeviceValueUOM::NONE);
+    register_device_value(TAG_BOILER_DATA, &selFlowTemp_, DeviceValueType::UINT, nullptr, F("selFlowTemp"), F("Selected flow temperature"), DeviceValueUOM::DEGREES);
+    register_device_value(TAG_BOILER_DATA, &selBurnPow_, DeviceValueType::UINT, nullptr, F("selBurnPow"), F("Burner selected max power"), DeviceValueUOM::PERCENT);
+    register_device_value(TAG_BOILER_DATA, &pumpMod_, DeviceValueType::UINT, nullptr, F("pumpMod"), F("Pump modulation"), DeviceValueUOM::PERCENT);
+    register_device_value(TAG_BOILER_DATA, &pumpMod2_, DeviceValueType::UINT, nullptr, F("pumpMod2"), F("Heat pump modulation"), DeviceValueUOM::PERCENT);
 
     register_device_value(TAG_BOILER_DATA, &outdoorTemp_, DeviceValueType::SHORT, FL_(div10), F("outdoorTemp"), F("Outside temperature"), DeviceValueUOM::DEGREES);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA,
-                          &curFlowTemp_,
-                          DeviceValueType::USHORT,
-                          FL_(div10),
-                          F("curFlowTemp"),
-                          F("Current flow temperature"),
-                          DeviceValueUOM::DEGREES);
-    register_device_value(
-        DeviceValueTAG::TAG_BOILER_DATA, &retTemp_, DeviceValueType::USHORT, FL_(div10), F("retTemp"), F("Return temperature"), DeviceValueUOM::DEGREES);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA,
-                          &switchTemp_,
-                          DeviceValueType::USHORT,
-                          FL_(div10),
-                          F("switchTemp"),
-                          F("Mixing switch temperature"),
-                          DeviceValueUOM::DEGREES);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA, &sysPress_, DeviceValueType::UINT, FL_(div10), F("sysPress"), F("System pressure"), DeviceValueUOM::BAR);
+    register_device_value(TAG_BOILER_DATA, &curFlowTemp_, DeviceValueType::USHORT, FL_(div10), F("curFlowTemp"), F("Current flow temperature"), DeviceValueUOM::DEGREES);
+    register_device_value(TAG_BOILER_DATA, &retTemp_, DeviceValueType::USHORT, FL_(div10), F("retTemp"), F("Return temperature"), DeviceValueUOM::DEGREES);
+    register_device_value(TAG_BOILER_DATA, &switchTemp_, DeviceValueType::USHORT, FL_(div10), F("switchTemp"), F("Mixing switch temperature"), DeviceValueUOM::DEGREES);
+    register_device_value(TAG_BOILER_DATA, &sysPress_, DeviceValueType::UINT, FL_(div10), F("sysPress"), F("System pressure"), DeviceValueUOM::BAR);
     register_device_value(TAG_BOILER_DATA, &boilTemp_, DeviceValueType::USHORT, FL_(div10), F("boilTemp"), F("Max boiler temperature"), DeviceValueUOM::DEGREES);
     register_device_value(TAG_BOILER_DATA, &exhaustTemp_, DeviceValueType::USHORT, FL_(div10), F("exhaustTemp"), F("Exhaust temperature"), DeviceValueUOM::DEGREES);
 
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA, &burnGas_, DeviceValueType::BOOL, nullptr, F("burnGas"), F("Gas"), DeviceValueUOM::NONE);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA, &flameCurr_, DeviceValueType::USHORT, FL_(div10), F("flameCurr"), F("Flame current"), DeviceValueUOM::UA);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA, &heatPump_, DeviceValueType::BOOL, nullptr, F("heatPump"), F("Heat pump"), DeviceValueUOM::NONE);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA, &fanWork_, DeviceValueType::BOOL, nullptr, F("fanWork"), F("Fan"), DeviceValueUOM::NONE);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA, &ignWork_, DeviceValueType::BOOL, nullptr, F("ignWork"), F("Ignition"), DeviceValueUOM::NONE);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA,
-                          &heatingActivated_,
-                          DeviceValueType::BOOL,
-                          nullptr,
-                          F("heatingActivated"),
-                          F("Heating activated"),
-                          DeviceValueUOM::NONE);
-    register_device_value(
-        DeviceValueTAG::TAG_BOILER_DATA, &heatingTemp_, DeviceValueType::UINT, nullptr, F("heatingTemp"), F("Heating temperature"), DeviceValueUOM::DEGREES);
-    register_device_value(
-        DeviceValueTAG::TAG_BOILER_DATA, &pumpModMax_, DeviceValueType::UINT, nullptr, F("pumpModMax"), F("Burner pump max power"), DeviceValueUOM::PERCENT);
-    register_device_value(
-        DeviceValueTAG::TAG_BOILER_DATA, &pumpModMin_, DeviceValueType::UINT, nullptr, F("pumpModMin"), F("Burner pump min power"), DeviceValueUOM::PERCENT);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA, &pumpDelay_, DeviceValueType::UINT, nullptr, F("pumpDelay"), F("Pump delay"), DeviceValueUOM::MINUTES);
-    register_device_value(
-        DeviceValueTAG::TAG_BOILER_DATA, &burnMinPeriod_, DeviceValueType::UINT, nullptr, F("burnMinPeriod"), F("Burner min period"), DeviceValueUOM::MINUTES);
-    register_device_value(
-        DeviceValueTAG::TAG_BOILER_DATA, &burnMinPower_, DeviceValueType::UINT, nullptr, F("burnMinPower"), F("Burner min power"), DeviceValueUOM::PERCENT);
-    register_device_value(
-        DeviceValueTAG::TAG_BOILER_DATA, &burnMaxPower_, DeviceValueType::UINT, nullptr, F("burnMaxPower"), F("Burner max power"), DeviceValueUOM::PERCENT);
-    register_device_value(
-        DeviceValueTAG::TAG_BOILER_DATA, &boilHystOn_, DeviceValueType::INT, nullptr, F("boilHystOn"), F("Hysteresis on temperature"), DeviceValueUOM::DEGREES);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA,
-                          &boilHystOff_,
-                          DeviceValueType::INT,
-                          nullptr,
-                          F("boilHystOff"),
-                          F("Hysteresis off temperature"),
-                          DeviceValueUOM::DEGREES);
-    register_device_value(
-        DeviceValueTAG::TAG_BOILER_DATA, &setFlowTemp_, DeviceValueType::UINT, nullptr, F("setFlowTemp"), F("Set flow temperature"), DeviceValueUOM::DEGREES);
-    register_device_value(
-        DeviceValueTAG::TAG_BOILER_DATA, &setBurnPow_, DeviceValueType::UINT, nullptr, F("setBurnPow"), F("Burner set power"), DeviceValueUOM::PERCENT);
-    register_device_value(
-        DeviceValueTAG::TAG_BOILER_DATA, &curBurnPow_, DeviceValueType::UINT, nullptr, F("curBurnPow"), F("Burner current power"), DeviceValueUOM::PERCENT);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA, &burnStarts_, DeviceValueType::ULONG, nullptr, F("burnStarts"), F("Burner # starts"), DeviceValueUOM::NONE);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA,
-                          &burnWorkMin_,
-                          DeviceValueType::TIME,
-                          nullptr,
-                          F("burnWorkMin"),
-                          F("Total burner operating time"),
-                          DeviceValueUOM::MINUTES);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA,
-                          &heatWorkMin_,
-                          DeviceValueType::TIME,
-                          nullptr,
-                          F("heatWorkMin"),
-                          F("Total heat operating time"),
-                          DeviceValueUOM::MINUTES);
-    register_device_value(
-        DeviceValueTAG::TAG_BOILER_DATA, &UBAuptime_, DeviceValueType::TIME, nullptr, F("UBAuptime"), F("Total UBA operating time"), DeviceValueUOM::MINUTES);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA, &lastCode_, DeviceValueType::TEXT, nullptr, F("lastCode"), F("Last error code"), DeviceValueUOM::NONE);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA, &serviceCode_, DeviceValueType::TEXT, nullptr, F("serviceCode"), F("Service code"), DeviceValueUOM::NONE);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA,
-                          &serviceCodeNumber_,
-                          DeviceValueType::USHORT,
-                          nullptr,
-                          F("serviceCodeNumber"),
-                          F("Service code number"),
-                          DeviceValueUOM::NONE);
+    register_device_value(TAG_BOILER_DATA, &burnGas_, DeviceValueType::BOOL, nullptr, F("burnGas"), F("Gas"), DeviceValueUOM::NONE);
+    register_device_value(TAG_BOILER_DATA, &flameCurr_, DeviceValueType::USHORT, FL_(div10), F("flameCurr"), F("Flame current"), DeviceValueUOM::UA);
+    register_device_value(TAG_BOILER_DATA, &heatPump_, DeviceValueType::BOOL, nullptr, F("heatPump"), F("Heat pump"), DeviceValueUOM::NONE);
+    register_device_value(TAG_BOILER_DATA, &fanWork_, DeviceValueType::BOOL, nullptr, F("fanWork"), F("Fan"), DeviceValueUOM::NONE);
+    register_device_value(TAG_BOILER_DATA, &ignWork_, DeviceValueType::BOOL, nullptr, F("ignWork"), F("Ignition"), DeviceValueUOM::NONE);
+    register_device_value(TAG_BOILER_DATA, &heatingActivated_, DeviceValueType::BOOL, nullptr, F("heatingActivated"), F("Heating activated"), DeviceValueUOM::NONE);
+    register_device_value(TAG_BOILER_DATA, &heatingTemp_, DeviceValueType::UINT, nullptr, F("heatingTemp"), F("Heating temperature"), DeviceValueUOM::DEGREES);
+    register_device_value(TAG_BOILER_DATA, &pumpModMax_, DeviceValueType::UINT, nullptr, F("pumpModMax"), F("Burner pump max power"), DeviceValueUOM::PERCENT);
+    register_device_value(TAG_BOILER_DATA, &pumpModMin_, DeviceValueType::UINT, nullptr, F("pumpModMin"), F("Burner pump min power"), DeviceValueUOM::PERCENT);
+    register_device_value(TAG_BOILER_DATA, &pumpDelay_, DeviceValueType::UINT, nullptr, F("pumpDelay"), F("Pump delay"), DeviceValueUOM::MINUTES);
+    register_device_value(TAG_BOILER_DATA, &burnMinPeriod_, DeviceValueType::UINT, nullptr, F("burnMinPeriod"), F("Burner min period"), DeviceValueUOM::MINUTES);
+    register_device_value(TAG_BOILER_DATA, &burnMinPower_, DeviceValueType::UINT, nullptr, F("burnMinPower"), F("Burner min power"), DeviceValueUOM::PERCENT);
+    register_device_value(TAG_BOILER_DATA, &burnMaxPower_, DeviceValueType::UINT, nullptr, F("burnMaxPower"), F("Burner max power"), DeviceValueUOM::PERCENT);
+    register_device_value(TAG_BOILER_DATA, &boilHystOn_, DeviceValueType::INT, nullptr, F("boilHystOn"), F("Hysteresis on temperature"), DeviceValueUOM::DEGREES);
+    register_device_value(TAG_BOILER_DATA, &boilHystOff_, DeviceValueType::INT, nullptr, F("boilHystOff"), F("Hysteresis off temperature"), DeviceValueUOM::DEGREES);
+    register_device_value(TAG_BOILER_DATA, &setFlowTemp_, DeviceValueType::UINT, nullptr, F("setFlowTemp"), F("Set flow temperature"), DeviceValueUOM::DEGREES);
+    register_device_value(TAG_BOILER_DATA, &setBurnPow_, DeviceValueType::UINT, nullptr, F("setBurnPow"), F("Burner set power"), DeviceValueUOM::PERCENT);
+    register_device_value(TAG_BOILER_DATA, &curBurnPow_, DeviceValueType::UINT, nullptr, F("curBurnPow"), F("Burner current power"), DeviceValueUOM::PERCENT);
+    register_device_value(TAG_BOILER_DATA, &burnStarts_, DeviceValueType::ULONG, nullptr, F("burnStarts"), F("Burner # starts"), DeviceValueUOM::NONE);
+    register_device_value(TAG_BOILER_DATA, &burnWorkMin_, DeviceValueType::TIME, nullptr, F("burnWorkMin"), F("Total burner operating time"), DeviceValueUOM::MINUTES);
+    register_device_value(TAG_BOILER_DATA, &heatWorkMin_, DeviceValueType::TIME, nullptr, F("heatWorkMin"), F("Total heat operating time"), DeviceValueUOM::MINUTES);
+    register_device_value(TAG_BOILER_DATA, &UBAuptime_, DeviceValueType::TIME, nullptr, F("UBAuptime"), F("Total UBA operating time"), DeviceValueUOM::MINUTES);
+    register_device_value(TAG_BOILER_DATA, &lastCode_, DeviceValueType::TEXT, nullptr, F("lastCode"), F("Last error code"), DeviceValueUOM::NONE);
+    register_device_value(TAG_BOILER_DATA, &serviceCode_, DeviceValueType::TEXT, nullptr, F("serviceCode"), F("Service code"), DeviceValueUOM::NONE);
+    register_device_value(TAG_BOILER_DATA, &serviceCodeNumber_, DeviceValueType::USHORT, nullptr, F("serviceCodeNumber"), F("Service code number"), DeviceValueUOM::NONE);
 
     System::show_mem("after device value reg");
 
     // ww - boiler_data_ww topic
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW,
-                          &wWSelTemp_,
-                          DeviceValueType::UINT,
-                          nullptr,
-                          F("wWSelTemp"),
-                          F("Warm Water selected temperature"),
-                          DeviceValueUOM::DEGREES);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW,
-                          &wWSetTemp_,
-                          DeviceValueType::UINT,
-                          nullptr,
-                          F("wWSetTemp"),
-                          F("Warm water set temperature"),
-                          DeviceValueUOM::DEGREES);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW, &wWType_, DeviceValueType::ENUM, FL_(enum_flow), F("wWType"), F("Warm water type"), DeviceValueUOM::NONE);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW,
-                          &wWComfort_,
-                          DeviceValueType::ENUM,
-                          FL_(enum_comfort),
-                          F("wWComfort"),
-                          F("Warm water comfort"),
-                          DeviceValueUOM::NONE);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW,
-                          &wWCircPump_,
-                          DeviceValueType::BOOL,
-                          nullptr,
-                          F("wWCircPump"),
-                          F("Warm water circulation pump available"),
-                          DeviceValueUOM::NONE);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW,
-                          &wWChargeType_,
-                          DeviceValueType::BOOL,
-                          FL_(enum_charge),
-                          F("wWChargeType"),
-                          F("Warm Water charging type"),
-                          DeviceValueUOM::NONE);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW,
-                          &wWDisinfectionTemp_,
-                          DeviceValueType::UINT,
-                          nullptr,
-                          F("wWDisinfectionTemp"),
-                          F("Warm Water disinfection temperature"),
-                          DeviceValueUOM::DEGREES);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW,
-                          &wWCircPumpMode_,
-                          DeviceValueType::ENUM,
-                          FL_(enum_freq),
-                          F("wWCircPumpMode"),
-                          F("Warm water circulation pump freq"),
-                          DeviceValueUOM::NONE);
-    register_device_value(
-        DeviceValueTAG::TAG_BOILER_DATA_WW, &wWCirc_, DeviceValueType::BOOL, nullptr, F("wWCirc"), F("Warm Water circulation active"), DeviceValueUOM::NONE);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW,
-                          &wWCurTemp_,
-                          DeviceValueType::USHORT,
-                          FL_(div10),
-                          F("wWCurTemp"),
-                          F("Warm Water current temperature (intern)"),
-                          DeviceValueUOM::DEGREES);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW,
-                          &wWCurTemp2_,
-                          DeviceValueType::USHORT,
-                          FL_(div10),
-                          F("wWCurTemp2"),
-                          F("Warm Water current temperature (extern)"),
-                          DeviceValueUOM::DEGREES);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW,
-                          &wWCurFlow_,
-                          DeviceValueType::UINT,
-                          FL_(div10),
-                          F("wWCurFlow"),
-                          F("Warm Water current tap water flow"),
-                          DeviceValueUOM::LMIN);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW,
-                          &wwStorageTemp1_,
-                          DeviceValueType::USHORT,
-                          FL_(div10),
-                          F("wwStorageTemp1"),
-                          F("Warm water storage temperature (intern)"),
-                          DeviceValueUOM::DEGREES);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW,
-                          &wwStorageTemp2_,
-                          DeviceValueType::USHORT,
-                          FL_(div10),
-                          F("wwStorageTemp2"),
-                          F("Warm water storage temperature (extern)"),
-                          DeviceValueUOM::DEGREES);
-    register_device_value(
-        DeviceValueTAG::TAG_BOILER_DATA_WW, &wWActivated_, DeviceValueType::BOOL, nullptr, F("wWActivated"), F("Warm Water activated"), DeviceValueUOM::NONE);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW,
-                          &wWOneTime_,
-                          DeviceValueType::BOOL,
-                          nullptr,
-                          F("wWOneTime"),
-                          F("Warm Water one time charging"),
-                          DeviceValueUOM::NONE);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW,
-                          &wWDisinfecting_,
-                          DeviceValueType::BOOL,
-                          nullptr,
-                          F("wWDisinfecting"),
-                          F("Warm Water disinfecting"),
-                          DeviceValueUOM::NONE);
-    register_device_value(
-        DeviceValueTAG::TAG_BOILER_DATA_WW, &wWCharging_, DeviceValueType::BOOL, nullptr, F("wWCharging"), F("Warm Water charging"), DeviceValueUOM::NONE);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW,
-                          &wWRecharging_,
-                          DeviceValueType::BOOL,
-                          nullptr,
-                          F("wWRecharging"),
-                          F("Warm Water recharging"),
-                          DeviceValueUOM::NONE);
-    register_device_value(
-        DeviceValueTAG::TAG_BOILER_DATA_WW, &wWTempOK_, DeviceValueType::BOOL, nullptr, F("wWTempOK"), F("Warm Water temperature ok"), DeviceValueUOM::NONE);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW, &wWActive_, DeviceValueType::BOOL, nullptr, F("wWActive"), F("Warm Water active"), DeviceValueUOM::NONE);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW, &wWHeat_, DeviceValueType::BOOL, nullptr, F("wWHeat"), F("Warm Water heating"), DeviceValueUOM::NONE);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW,
-                          &wWSetPumpPower_,
-                          DeviceValueType::UINT,
-                          nullptr,
-                          F("wWSetPumpPower"),
-                          F("Warm Water pump set power"),
-                          DeviceValueUOM::PERCENT);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW,
-                          &wwMixTemperature_,
-                          DeviceValueType::USHORT,
-                          nullptr,
-                          F("wwMixTemperature"),
-                          F("Warm Water mix temperature"),
-                          DeviceValueUOM::DEGREES);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW,
-                          &wwBufferTemperature_,
-                          DeviceValueType::USHORT,
-                          nullptr,
-                          F("wwBufferTemperature"),
-                          F("Warm Water buffer boiler temperature"),
-                          DeviceValueUOM::DEGREES);
-    register_device_value(
-        DeviceValueTAG::TAG_BOILER_DATA_WW, &wWStarts_, DeviceValueType::ULONG, nullptr, F("wWStarts"), F("Warm Water # starts"), DeviceValueUOM::NONE);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW,
-                          &wWStarts2_,
-                          DeviceValueType::ULONG,
-                          nullptr,
-                          F("wWStarts2"),
-                          F("Warm Water # starts (control)"),
-                          DeviceValueUOM::NONE);
-    register_device_value(
-        DeviceValueTAG::TAG_BOILER_DATA_WW, &wWWorkM_, DeviceValueType::TIME, nullptr, F("wWWorkM"), F("Warm Water active time"), DeviceValueUOM::MINUTES);
+    register_device_value(TAG_BOILER_DATA_WW, &wWSelTemp_, DeviceValueType::UINT, nullptr, F("wWSelTemp"), F("Warm Water selected temperature"), DeviceValueUOM::DEGREES);
+    register_device_value(TAG_BOILER_DATA_WW, &wWSetTemp_, DeviceValueType::UINT, nullptr, F("wWSetTemp"), F("Warm water set temperature"), DeviceValueUOM::DEGREES);
+    register_device_value(TAG_BOILER_DATA_WW, &wWType_, DeviceValueType::ENUM, FL_(enum_flow), F("wWType"), F("Warm water type"), DeviceValueUOM::NONE);
+    register_device_value(TAG_BOILER_DATA_WW, &wWComfort_, DeviceValueType::ENUM, FL_(enum_comfort), F("wWComfort"), F("Warm water comfort"), DeviceValueUOM::NONE);
+    register_device_value(TAG_BOILER_DATA_WW, &wWCircPump_, DeviceValueType::BOOL, nullptr, F("wWCircPump"), F("Warm water circulation pump available"), DeviceValueUOM::NONE);
+    register_device_value(TAG_BOILER_DATA_WW, &wWChargeType_, DeviceValueType::BOOL, FL_(enum_charge), F("wWChargeType"), F("Warm Water charging type"), DeviceValueUOM::NONE);
+    register_device_value(TAG_BOILER_DATA_WW, &wWDisinfectionTemp_, DeviceValueType::UINT, nullptr, F("wWDisinfectionTemp"), F("Warm Water disinfection temperature"), DeviceValueUOM::DEGREES);
+    register_device_value(TAG_BOILER_DATA_WW, &wWCircPumpMode_, DeviceValueType::ENUM, FL_(enum_freq), F("wWCircPumpMode"), F("Warm water circulation pump freq"), DeviceValueUOM::NONE);
+    register_device_value(TAG_BOILER_DATA_WW, &wWCirc_, DeviceValueType::BOOL, nullptr, F("wWCirc"), F("Warm Water circulation active"), DeviceValueUOM::NONE);
+    register_device_value(TAG_BOILER_DATA_WW, &wWCurTemp_, DeviceValueType::USHORT, FL_(div10), F("wWCurTemp"), F("Warm Water current temperature (intern)"), DeviceValueUOM::DEGREES);
+    register_device_value(TAG_BOILER_DATA_WW, &wWCurTemp2_, DeviceValueType::USHORT, FL_(div10), F("wWCurTemp2"), F("Warm Water current temperature (extern)"), DeviceValueUOM::DEGREES);
+    register_device_value(TAG_BOILER_DATA_WW, &wWCurFlow_, DeviceValueType::UINT, FL_(div10), F("wWCurFlow"), F("Warm Water current tap water flow"), DeviceValueUOM::LMIN);
+    register_device_value(TAG_BOILER_DATA_WW, &wwStorageTemp1_, DeviceValueType::USHORT, FL_(div10), F("wwStorageTemp1"), F("Warm water storage temperature (intern)"), DeviceValueUOM::DEGREES);
+    register_device_value(TAG_BOILER_DATA_WW, &wwStorageTemp2_, DeviceValueType::USHORT, FL_(div10), F("wwStorageTemp2"), F("Warm water storage temperature (extern)"), DeviceValueUOM::DEGREES);
+    register_device_value(TAG_BOILER_DATA_WW, &wWActivated_, DeviceValueType::BOOL, nullptr, F("wWActivated"), F("Warm Water activated"), DeviceValueUOM::NONE);
+    register_device_value(TAG_BOILER_DATA_WW, &wWOneTime_, DeviceValueType::BOOL, nullptr, F("wWOneTime"), F("Warm Water one time charging"), DeviceValueUOM::NONE);
+    register_device_value(TAG_BOILER_DATA_WW, &wWDisinfecting_, DeviceValueType::BOOL, nullptr, F("wWDisinfecting"), F("Warm Water disinfecting"), DeviceValueUOM::NONE);
+    register_device_value(TAG_BOILER_DATA_WW, &wWCharging_, DeviceValueType::BOOL, nullptr, F("wWCharging"), F("Warm Water charging"), DeviceValueUOM::NONE);
+    register_device_value(TAG_BOILER_DATA_WW, &wWRecharging_, DeviceValueType::BOOL, nullptr, F("wWRecharging"), F("Warm Water recharging"), DeviceValueUOM::NONE);
+    register_device_value(TAG_BOILER_DATA_WW, &wWTempOK_, DeviceValueType::BOOL, nullptr, F("wWTempOK"), F("Warm Water temperature ok"), DeviceValueUOM::NONE);
+    register_device_value(TAG_BOILER_DATA_WW, &wWActive_, DeviceValueType::BOOL, nullptr, F("wWActive"), F("Warm Water active"), DeviceValueUOM::NONE);
+    register_device_value(TAG_BOILER_DATA_WW, &wWHeat_, DeviceValueType::BOOL, nullptr, F("wWHeat"), F("Warm Water heating"), DeviceValueUOM::NONE);
+    register_device_value(TAG_BOILER_DATA_WW, &wWSetPumpPower_, DeviceValueType::UINT, nullptr, F("wWSetPumpPower"), F("Warm Water pump set power"), DeviceValueUOM::PERCENT);
+    register_device_value(TAG_BOILER_DATA_WW, &wwMixTemperature_, DeviceValueType::USHORT, nullptr, F("wwMixTemperature"), F("Warm Water mix temperature"), DeviceValueUOM::DEGREES);
+    register_device_value(TAG_BOILER_DATA_WW, &wwBufferTemperature_, DeviceValueType::USHORT, nullptr, F("wwBufferTemperature"), F("Warm Water buffer boiler temperature"), DeviceValueUOM::DEGREES);
+    register_device_value(TAG_BOILER_DATA_WW, &wWStarts_, DeviceValueType::ULONG, nullptr, F("wWStarts"), F("Warm Water # starts"), DeviceValueUOM::NONE);
+    register_device_value(TAG_BOILER_DATA_WW, &wWStarts2_, DeviceValueType::ULONG, nullptr, F("wWStarts2"), F("Warm Water # starts (control)"), DeviceValueUOM::NONE);
+    register_device_value(TAG_BOILER_DATA_WW, &wWWorkM_, DeviceValueType::TIME, nullptr, F("wWWorkM"), F("Warm Water active time"), DeviceValueUOM::MINUTES);
 
     // info - boiler_data_info topic
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA_INFO,
-                          &upTimeControl_,
-                          DeviceValueType::TIME,
-                          FL_(div60),
-                          F("upTimeControl"),
-                          F("Operating time total heat"),
-                          DeviceValueUOM::MINUTES);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA_INFO,
-                          &upTimeCompHeating_,
-                          DeviceValueType::TIME,
-                          FL_(div60),
-                          F("upTimeCompHeating"),
-                          F("Operating time compressor heating"),
-                          DeviceValueUOM::MINUTES);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA_INFO,
-                          &upTimeCompCooling_,
-                          DeviceValueType::TIME,
-                          FL_(div60),
-                          F("upTimeCompCooling"),
-                          F("Operating time compressor cooling"),
-                          DeviceValueUOM::MINUTES);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA_INFO,
-                          &upTimeCompWw_,
-                          DeviceValueType::TIME,
-                          FL_(div60),
-                          F("upTimeCompWw"),
-                          F("Operating time compressor warm water"),
-                          DeviceValueUOM::MINUTES);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA_INFO,
-                          &heatingStarts_,
-                          DeviceValueType::ULONG,
-                          nullptr,
-                          F("heatingStarts"),
-                          F("# heating starts (control)"),
-                          DeviceValueUOM::NONE);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA_INFO,
-                          &coolingStarts_,
-                          DeviceValueType::ULONG,
-                          nullptr,
-                          F("coolingStarts"),
-                          F("# cooling starts (control)"),
-                          DeviceValueUOM::NONE);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA_INFO,
-                          &nrgConsTotal_,
-                          DeviceValueType::ULONG,
-                          nullptr,
-                          F("nrgConsTotal"),
-                          F("Total energy consumption"),
-                          DeviceValueUOM::NONE);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA_INFO,
-                          &nrgConsCompTotal_,
-                          DeviceValueType::ULONG,
-                          nullptr,
-                          F("nrgConsCompTotal"),
-                          F("Energy consumption compressor total"),
-                          DeviceValueUOM::NONE);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA_INFO,
-                          &nrgConsCompHeating_,
-                          DeviceValueType::ULONG,
-                          nullptr,
-                          F("nrgConsCompHeating"),
-                          F("Energy consumption compressor heating"),
-                          DeviceValueUOM::NONE);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA_INFO,
-                          &nrgConsCompWw_,
-                          DeviceValueType::ULONG,
-                          nullptr,
-                          F("nrgConsCompWw"),
-                          F("Energy consumption compressor warm water"),
-                          DeviceValueUOM::NONE);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA_INFO,
-                          &nrgConsCompCooling_,
-                          DeviceValueType::ULONG,
-                          nullptr,
-                          F("nrgConsCompCooling"),
-                          F("Energy consumption compressor cooling"),
-                          DeviceValueUOM::NONE);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA_INFO,
-                          &nrgSuppTotal_,
-                          DeviceValueType::ULONG,
-                          nullptr,
-                          F("nrgSuppTotal"),
-                          F("Total energy supplied"),
-                          DeviceValueUOM::NONE);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA_INFO,
-                          &nrgSuppHeating_,
-                          DeviceValueType::ULONG,
-                          nullptr,
-                          F("nrgSuppHeating"),
-                          F("Total energy supplied heating"),
-                          DeviceValueUOM::NONE);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA_INFO,
-                          &nrgSuppWw_,
-                          DeviceValueType::ULONG,
-                          nullptr,
-                          F("nrgSuppWw"),
-                          F("Total energy warm supplied warm water"),
-                          DeviceValueUOM::NONE);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA_INFO,
-                          &nrgSuppCooling_,
-                          DeviceValueType::ULONG,
-                          nullptr,
-                          F("nrgSuppCooling"),
-                          F("Total energy supplied cooling"),
-                          DeviceValueUOM::NONE);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA_INFO,
-                          &auxElecHeatNrgConsTotal_,
-                          DeviceValueType::ULONG,
-                          nullptr,
-                          F("auxElecHeatNrgConsTotal"),
-                          F("Auxiliary electrical heater energy consumption total"),
-                          DeviceValueUOM::NONE);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA_INFO,
-                          &auxElecHeatNrgConsHeating_,
-                          DeviceValueType::ULONG,
-                          nullptr,
-                          F("auxElecHeatNrgConsHeating"),
-                          F("Auxiliary electrical heater energy consumption heating"),
-                          DeviceValueUOM::NONE);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA_INFO,
-                          &auxElecHeatNrgConsDHW_,
-                          DeviceValueType::ULONG,
-                          nullptr,
-                          F("auxElecHeatNrgConsDHW"),
-                          F("Auxiliary electrical heater energy consumption DHW"),
-                          DeviceValueUOM::NONE);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA_INFO,
-                          &maintenanceMessage_,
-                          DeviceValueType::TEXT,
-                          nullptr,
-                          F("maintenanceMessage"),
-                          F("Maintenance message"),
-                          DeviceValueUOM::NONE);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA_INFO,
-                          &maintenanceDate_,
-                          DeviceValueType::TEXT,
-                          nullptr,
-                          F("maintenanceDate"),
-                          F("Maintenance set date"),
-                          DeviceValueUOM::NONE);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA_INFO,
-                          &maintenanceType_,
-                          DeviceValueType::ENUM,
-                          FL_(enum_off_time_date),
-                          F("maintenanceType"),
-                          F("Scheduled maintenance"),
-                          DeviceValueUOM::NONE);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA_INFO,
-                          &maintenanceTime_,
-                          DeviceValueType::UINT,
-                          nullptr,
-                          F("maintenanceTime"),
-                          F("Maintenance set time"),
-                          DeviceValueUOM::NONE);
+    register_device_value(TAG_BOILER_DATA_INFO, &upTimeControl_, DeviceValueType::TIME, FL_(div60), F("upTimeControl"), F("Operating time total heat"), DeviceValueUOM::MINUTES);
+    register_device_value(TAG_BOILER_DATA_INFO, &upTimeCompHeating_, DeviceValueType::TIME, FL_(div60), F("upTimeCompHeating"), F("Operating time compressor heating"), DeviceValueUOM::MINUTES);
+    register_device_value(TAG_BOILER_DATA_INFO, &upTimeCompCooling_, DeviceValueType::TIME, FL_(div60), F("upTimeCompCooling"), F("Operating time compressor cooling"), DeviceValueUOM::MINUTES);
+    register_device_value(TAG_BOILER_DATA_INFO, &upTimeCompWw_, DeviceValueType::TIME, FL_(div60), F("upTimeCompWw"), F("Operating time compressor warm water"), DeviceValueUOM::MINUTES);
+    register_device_value(TAG_BOILER_DATA_INFO, &heatingStarts_, DeviceValueType::ULONG, nullptr, F("heatingStarts"), F("# heating starts (control)"), DeviceValueUOM::NONE);
+    register_device_value(TAG_BOILER_DATA_INFO, &coolingStarts_, DeviceValueType::ULONG, nullptr, F("coolingStarts"), F("# cooling starts (control)"), DeviceValueUOM::NONE);
+    register_device_value(TAG_BOILER_DATA_INFO, &nrgConsTotal_, DeviceValueType::ULONG, nullptr, F("nrgConsTotal"), F("Total energy consumption"), DeviceValueUOM::NONE);
+    register_device_value(TAG_BOILER_DATA_INFO, &nrgConsCompTotal_, DeviceValueType::ULONG, nullptr, F("nrgConsCompTotal"), F("Energy consumption compressor total"), DeviceValueUOM::NONE);
+    register_device_value(TAG_BOILER_DATA_INFO, &nrgConsCompHeating_, DeviceValueType::ULONG, nullptr, F("nrgConsCompHeating"), F("Energy consumption compressor heating"), DeviceValueUOM::NONE);
+    register_device_value(TAG_BOILER_DATA_INFO, &nrgConsCompWw_, DeviceValueType::ULONG, nullptr, F("nrgConsCompWw"), F("Energy consumption compressor warm water"), DeviceValueUOM::NONE);
+    register_device_value(TAG_BOILER_DATA_INFO, &nrgConsCompCooling_, DeviceValueType::ULONG, nullptr, F("nrgConsCompCooling"), F("Energy consumption compressor cooling"), DeviceValueUOM::NONE);
+    register_device_value(TAG_BOILER_DATA_INFO, &nrgSuppTotal_, DeviceValueType::ULONG, nullptr, F("nrgSuppTotal"), F("Total energy supplied"), DeviceValueUOM::NONE);
+    register_device_value(TAG_BOILER_DATA_INFO, &nrgSuppHeating_, DeviceValueType::ULONG, nullptr, F("nrgSuppHeating"), F("Total energy supplied heating"), DeviceValueUOM::NONE);
+    register_device_value(TAG_BOILER_DATA_INFO, &nrgSuppWw_, DeviceValueType::ULONG, nullptr, F("nrgSuppWw"), F("Total energy warm supplied warm water"), DeviceValueUOM::NONE);
+    register_device_value(TAG_BOILER_DATA_INFO, &nrgSuppCooling_, DeviceValueType::ULONG, nullptr, F("nrgSuppCooling"), F("Total energy supplied cooling"), DeviceValueUOM::NONE);
+    register_device_value(TAG_BOILER_DATA_INFO, &auxElecHeatNrgConsTotal_, DeviceValueType::ULONG, nullptr, F("auxElecHeatNrgConsTotal"), F("Auxiliary electrical heater energy consumption total"), DeviceValueUOM::NONE);
+    register_device_value(TAG_BOILER_DATA_INFO, &auxElecHeatNrgConsHeating_, DeviceValueType::ULONG, nullptr, F("auxElecHeatNrgConsHeating"), F("Auxiliary electrical heater energy consumption heating"), DeviceValueUOM::NONE);
+    register_device_value(TAG_BOILER_DATA_INFO, &auxElecHeatNrgConsDHW_, DeviceValueType::ULONG, nullptr, F("auxElecHeatNrgConsDHW"), F("Auxiliary electrical heater energy consumption DHW"), DeviceValueUOM::NONE);
+    register_device_value(TAG_BOILER_DATA_INFO, &maintenanceMessage_, DeviceValueType::TEXT, nullptr, F("maintenanceMessage"), F("Maintenance message"), DeviceValueUOM::NONE);
+    register_device_value(TAG_BOILER_DATA_INFO, &maintenanceDate_, DeviceValueType::TEXT, nullptr, F("maintenanceDate"), F("Maintenance set date"), DeviceValueUOM::NONE);
+    register_device_value(TAG_BOILER_DATA_INFO, &maintenanceType_, DeviceValueType::ENUM, FL_(enum_off_time_date), F("maintenanceType"), F("Scheduled maintenance"), DeviceValueUOM::NONE);
+    register_device_value(TAG_BOILER_DATA_INFO, &maintenanceTime_, DeviceValueType::UINT, nullptr, F("maintenanceTime"), F("Maintenance set time"), DeviceValueUOM::NONE);
 }
 
 // publish HA config
@@ -536,7 +213,8 @@ bool Boiler::publish_ha_config() {
 
     char topic[100];
     snprintf_P(topic, sizeof(topic), PSTR("homeassistant/sensor/%s/boiler/config"), System::hostname().c_str());
-    Mqtt::publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
+    Mqtt::publish_ha(topic,
+                     doc.as<JsonObject>()); // publish the config payload with retain flag
 
     return true;
 }
@@ -583,10 +261,12 @@ void Boiler::check_active(const bool force) {
 
 // 0x33
 void Boiler::process_UBAParameterWW(std::shared_ptr<const Telegram> telegram) {
-    has_update(telegram->read_value(wWActivated_, 1));    // 0xFF means on
-    has_update(telegram->read_value(wWCircPump_, 6));     // 0xFF means on
-    has_update(telegram->read_value(wWCircPumpMode_, 7)); // 1=1x3min... 6=6x3min, 7=continuous
-    has_update(telegram->read_value(wWChargeType_, 10));  // 0 = charge pump, 0xff = 3-way valve
+    has_update(telegram->read_value(wWActivated_, 1)); // 0xFF means on
+    has_update(telegram->read_value(wWCircPump_, 6));  // 0xFF means on
+    has_update(telegram->read_value(wWCircPumpMode_,
+                                    7)); // 1=1x3min... 6=6x3min, 7=continuous
+    has_update(telegram->read_value(wWChargeType_,
+                                    10)); // 0 = charge pump, 0xff = 3-way valve
     has_update(telegram->read_value(wWSelTemp_, 2));
     has_update(telegram->read_value(wWDisinfectionTemp_, 8));
 
@@ -619,8 +299,9 @@ void Boiler::process_UBAMonitorFast(std::shared_ptr<const Telegram> telegram) {
 
     // warm water storage sensors (if present)
     // wwStorageTemp2 is also used by some brands as the boiler temperature - see https://github.com/proddy/EMS-ESP/issues/206
-    has_update(telegram->read_value(wwStorageTemp1_, 9));  // 0x8300 if not available
-    has_update(telegram->read_value(wwStorageTemp2_, 11)); // 0x8000 if not available - this is boiler temp
+    has_update(telegram->read_value(wwStorageTemp1_, 9)); // 0x8300 if not available
+    has_update(telegram->read_value(wwStorageTemp2_,
+                                    11)); // 0x8000 if not available - this is boiler temp
 
     has_update(telegram->read_value(retTemp_, 13));
     has_update(telegram->read_value(flameCurr_, 15));
@@ -703,7 +384,8 @@ void Boiler::process_UBAMonitorFastPlus(std::shared_ptr<const Telegram> telegram
     has_update(telegram->read_value(selBurnPow_, 9));
     has_update(telegram->read_value(curFlowTemp_, 7));
     has_update(telegram->read_value(flameCurr_, 19));
-    has_update(telegram->read_value(retTemp_, 17)); // can be 0 if no sensor, handled in export_values
+    has_update(telegram->read_value(retTemp_,
+                                    17)); // can be 0 if no sensor, handled in export_values
     has_update(telegram->read_value(sysPress_, 21));
 
     //has_update(telegram->read_value(temperatur_, 13)); // unknown temperature
@@ -740,7 +422,8 @@ void Boiler::process_UBAMonitorSlow(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram->read_value(outdoorTemp_, 0));
     has_update(telegram->read_value(boilTemp_, 2));
     has_update(telegram->read_value(exhaustTemp_, 4));
-    has_update(telegram->read_value(switchTemp_, 25)); // only if there is a mixer module present
+    has_update(telegram->read_value(switchTemp_,
+                                    25)); // only if there is a mixer module present
     has_update(telegram->read_value(pumpMod_, 9));
     has_update(telegram->read_value(burnStarts_, 10, 3));  // force to 3 bytes
     has_update(telegram->read_value(burnWorkMin_, 13, 3)); // force to 3 bytes
@@ -791,9 +474,10 @@ void Boiler::process_UBAParametersPlus(std::shared_ptr<const Telegram> telegram)
 
 // 0xEA
 void Boiler::process_UBAParameterWWPlus(std::shared_ptr<const Telegram> telegram) {
-    has_update(telegram->read_value(wWActivated_, 5));     // 0x01 means on
-    has_update(telegram->read_value(wWCircPump_, 10));     // 0x01 means yes
-    has_update(telegram->read_value(wWCircPumpMode_, 11)); // 1=1x3min... 6=6x3min, 7=continuous
+    has_update(telegram->read_value(wWActivated_, 5)); // 0x01 means on
+    has_update(telegram->read_value(wWCircPump_, 10)); // 0x01 means yes
+    has_update(telegram->read_value(wWCircPumpMode_,
+                                    11)); // 1=1x3min... 6=6x3min, 7=continuous
     // has_update(telegram->read_value(wWDisinfectTemp_, 12)); // settings, status in E9
     // has_update(telegram->read_value(wWSelTemp_, 6));        // settings, status in E9
 }
@@ -882,7 +566,8 @@ void Boiler::process_UBAOutdoorTemp(std::shared_ptr<const Telegram> telegram) {
 
 // UBASetPoint 0x1A
 void Boiler::process_UBASetPoints(std::shared_ptr<const Telegram> telegram) {
-    has_update(telegram->read_value(setFlowTemp_, 0));    // boiler set temp from thermostat
+    has_update(telegram->read_value(setFlowTemp_,
+                                    0));                  // boiler set temp from thermostat
     has_update(telegram->read_value(setBurnPow_, 1));     // max json power in %
     has_update(telegram->read_value(wWSetPumpPower_, 2)); // ww pump speed/power?
 }
@@ -973,8 +658,9 @@ bool Boiler::set_warmwater_temp(const char * value, const int8_t id) {
     if (get_toggle_fetch(EMS_TYPE_UBAParametersPlus)) {
         write_command(EMS_TYPE_UBAParameterWWPlus, 6, v, EMS_TYPE_UBAParameterWWPlus);
     } else {
-        write_command(EMS_TYPE_UBAParameterWW, 2, v, EMS_TYPE_UBAParameterWW); // read seltemp back
-        write_command(EMS_TYPE_UBAFlags, 3, v, 0x34);                          // for i9000, see #397, read setTemp
+        write_command(EMS_TYPE_UBAParameterWW, 2, v,
+                      EMS_TYPE_UBAParameterWW);       // read seltemp back
+        write_command(EMS_TYPE_UBAFlags, 3, v, 0x34); // for i9000, see #397, read setTemp
     }
 
     return true;
@@ -1278,7 +964,8 @@ bool Boiler::set_warmwater_onetime(const char * value, const int8_t id) {
 
     LOG_INFO(F("Setting warm water OneTime loading %s"), v ? "on" : "off");
     if (get_toggle_fetch(EMS_TYPE_UBAParameterWWPlus)) {
-        write_command(EMS_TYPE_UBAFlags, 0, (v ? 0x22 : 0x02), 0xE9); // not sure if this is in flags
+        write_command(EMS_TYPE_UBAFlags, 0, (v ? 0x22 : 0x02),
+                      0xE9); // not sure if this is in flags
     } else {
         write_command(EMS_TYPE_UBAFlags, 0, (v ? 0x22 : 0x02), 0x34);
     }
@@ -1297,7 +984,8 @@ bool Boiler::set_warmwater_circulation(const char * value, const int8_t id) {
 
     LOG_INFO(F("Setting warm water circulation %s"), v ? "on" : "off");
     if (get_toggle_fetch(EMS_TYPE_UBAParameterWWPlus)) {
-        write_command(EMS_TYPE_UBAFlags, 1, (v ? 0x22 : 0x02), 0xE9); // not sure if this is in flags
+        write_command(EMS_TYPE_UBAFlags, 1, (v ? 0x22 : 0x02),
+                      0xE9); // not sure if this is in flags
     } else {
         write_command(EMS_TYPE_UBAFlags, 1, (v ? 0x22 : 0x02), 0x34);
     }

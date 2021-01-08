@@ -31,14 +31,10 @@ Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
     if (flags == EMSdevice::EMS_DEVICE_FLAG_MMPLUS) {
         if (device_id <= 0x27) {
             // telegram handlers 0x20 - 0x27 for HC
-            register_telegram_type(device_id - 0x20 + 0x02D7, F("MMPLUSStatusMessage_HC"), true, [&](std::shared_ptr<const Telegram> t) {
-                process_MMPLUSStatusMessage_HC(t);
-            });
+            register_telegram_type(device_id - 0x20 + 0x02D7, F("MMPLUSStatusMessage_HC"), true, [&](std::shared_ptr<const Telegram> t) { process_MMPLUSStatusMessage_HC(t); });
         } else {
             // telegram handlers for warm water/DHW 0x28, 0x29
-            register_telegram_type(device_id - 0x28 + 0x0331, F("MMPLUSStatusMessage_WWC"), true, [&](std::shared_ptr<const Telegram> t) {
-                process_MMPLUSStatusMessage_WWC(t);
-            });
+            register_telegram_type(device_id - 0x28 + 0x0331, F("MMPLUSStatusMessage_WWC"), true, [&](std::shared_ptr<const Telegram> t) { process_MMPLUSStatusMessage_WWC(t); });
         }
     }
 
@@ -53,7 +49,6 @@ Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
     if (flags == EMSdevice::EMS_DEVICE_FLAG_IPM) {
         register_telegram_type(0x010C, F("IPMSetMessage"), false, [&](std::shared_ptr<const Telegram> t) { process_IPMStatusMessage(t); });
     }
-
 }
 
 
@@ -68,11 +63,11 @@ void Mixer::register_values(const Type type, uint16_t hc) {
     type_ = type;
 
     // with hc<n> or wwc<n>
-    uint8_t tag = DeviceValueTAG::TAG_NONE;
+    uint8_t tag = TAG_NONE;
     if (type_ == Type::HC) {
-        tag = DeviceValueTAG::TAG_HC1 + hc - 1;
+        tag = TAG_HC1 + hc - 1;
     } else {
-        tag = DeviceValueTAG::TAG_WWC1 + hc - 1;
+        tag = TAG_WWC1 + hc - 1;
     }
 
     register_device_value(tag, &flowTemp_, DeviceValueType::USHORT, FL_(div10), F("flowTemp"), F("Current flow temperature"), DeviceValueUOM::DEGREES);
