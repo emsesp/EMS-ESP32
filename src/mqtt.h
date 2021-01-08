@@ -24,7 +24,7 @@
 
 #include <string>
 #include <vector>
-#include <list>
+#include <deque>
 #include <functional>
 
 #include <AsyncMqttClient.h>
@@ -108,12 +108,7 @@ class Mqtt {
     static void publish_ha(const std::string & topic, const JsonObject & payload);
     static void publish_ha(const __FlashStringHelper * topic, const JsonObject & payload);
 
-    static void register_mqtt_ha_sensor(uint8_t                     type,
-                                        uint8_t                     tag,
-                                        const __FlashStringHelper * name,
-                                        const uint8_t               device_type,
-                                        const __FlashStringHelper * entity,
-                                        const uint8_t               uom);
+    static void register_mqtt_ha_sensor(uint8_t type, uint8_t tag, const __FlashStringHelper * name, const uint8_t device_type, const __FlashStringHelper * entity, const uint8_t uom);
     static void register_command(const uint8_t device_type, const __FlashStringHelper * cmd, cmdfunction_p cb);
 
     static void show_topic_handlers(uuid::console::Shell & shell, const uint8_t device_type);
@@ -204,7 +199,7 @@ class Mqtt {
             packet_id_   = 0;
         }
     };
-    static std::list<QueuedMqttMessage> mqtt_messages_;
+    static std::deque<QueuedMqttMessage> mqtt_messages_;
 
   private:
     static uuid::log::Logger logger_;

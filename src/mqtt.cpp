@@ -40,7 +40,7 @@ uint8_t     Mqtt::ha_climate_format_;
 bool        Mqtt::ha_enabled_;
 
 // static emsesp::queue<Mqtt::QueuedMqttMessage> mqtt_messages_ = emsesp::queue<Mqtt::QueuedMqttMessage>(MAX_MQTT_MESSAGES);
-std::list<Mqtt::QueuedMqttMessage> Mqtt::mqtt_messages_;
+std::deque<Mqtt::QueuedMqttMessage> Mqtt::mqtt_messages_;
 
 std::vector<Mqtt::MQTTSubFunction> Mqtt::mqtt_subfunctions_;
 

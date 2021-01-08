@@ -20,6 +20,7 @@
 #define EMSESP_TELEGRAM_H
 
 #include <string>
+#include <deque>
 
 // UART drivers
 #if defined(ESP8266)
@@ -57,13 +58,7 @@ namespace emsesp {
 
 class Telegram {
   public:
-    Telegram(const uint8_t   operation,
-             const uint8_t   src,
-             const uint8_t   dest,
-             const uint16_t  type_id,
-             const uint8_t   offset,
-             const uint8_t * message_data,
-             const uint8_t   message_length);
+    Telegram(const uint8_t operation, const uint8_t src, const uint8_t dest, const uint16_t type_id, const uint8_t offset, const uint8_t * message_data, const uint8_t message_length);
     ~Telegram() = default;
 
     const uint8_t  operation; // is Operation mode
@@ -242,7 +237,7 @@ class RxService : public EMSbus {
         }
     };
 
-    const std::list<QueuedRxTelegram> queue() const {
+    const std::deque<QueuedRxTelegram> queue() const {
         return rx_telegrams_;
     }
 
@@ -264,7 +259,7 @@ class RxService : public EMSbus {
     uint32_t                        telegram_count_       = 0; // # Rx received
     uint32_t                        telegram_error_count_ = 0; // # Rx CRC errors
     std::shared_ptr<const Telegram> rx_telegram;               // the incoming Rx telegram
-    std::list<QueuedRxTelegram>     rx_telegrams_;             // the Rx Queue
+    std::deque<QueuedRxTelegram>    rx_telegrams_;             // the Rx Queue
     // emsesp::queue<QueuedRxTelegram> rx_telegrams_ = emsesp::queue<QueuedRxTelegram>(MAX_RX_TELEGRAMS); // the Rx Queue
 };
 
@@ -278,13 +273,7 @@ class TxService : public EMSbus {
 
     void     start();
     void     send();
-    void     add(const uint8_t  operation,
-                 const uint8_t  dest,
-                 const uint16_t type_id,
-                 const uint8_t  offset,
-                 uint8_t *      message_data,
-                 const uint8_t  message_length,
-                 const bool     front = false);
+    void     add(const uint8_t operation, const uint8_t dest, const uint16_t type_id, const uint8_t offset, uint8_t * message_data, const uint8_t message_length, const bool front = false);
     void     add(const uint8_t operation, const uint8_t * data, const uint8_t length, const bool front = false);
     void     read_request(const uint16_t type_id, const uint8_t dest, const uint8_t offset = 0);
     void     send_raw(const char * telegram_data);
@@ -366,7 +355,7 @@ class TxService : public EMSbus {
         }
     };
 
-    const std::list<QueuedTxTelegram> queue() const {
+    const std::deque<QueuedTxTelegram> queue() const {
         return tx_telegrams_;
     }
 
@@ -389,7 +378,7 @@ class TxService : public EMSbus {
 #endif
 
   private:
-    std::list<QueuedTxTelegram> tx_telegrams_; // the Tx queue
+    std::deque<QueuedTxTelegram> tx_telegrams_; // the Tx queue
     // emsesp::queue<QueuedTxTelegram> tx_telegrams_ = emsesp::queue<QueuedTxTelegram>(MAX_TX_TELEGRAMS); // the Tx Queue
 
     uint32_t telegram_read_count_  = 0; // # Tx successful reads
