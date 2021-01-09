@@ -32,7 +32,7 @@ class DummySettings {
     bool     enabled           = true;
     uint8_t  dallas_format     = 1;
     uint8_t  ha_climate_format = 1;
-    bool     ha_enabled        = false;
+    bool     ha_enabled        = true;
 
     String   hostname                = "ems-esp";
     String   jwtSecret               = "ems-esp";
