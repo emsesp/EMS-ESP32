@@ -396,10 +396,6 @@ void Mqtt::start() {
 
     // create space for command buffer, to avoid heap memory fragmentation
     mqtt_subfunctions_.reserve(10);
-
-#if defined(EMSESP_STANDALONE)
-    on_connect(); // simulate an MQTT connection
-#endif
 }
 
 void Mqtt::set_publish_time_boiler(uint16_t publish_time) {
@@ -456,10 +452,11 @@ void Mqtt::on_connect() {
         return;
     }
 
+    LOG_INFO(F("MQTT connected"));
+
     connecting_ = true;
     connectcount_++;
 
-    /*
     // fetch MQTT settings
     EMSESP::esp8266React.getMqttSettingsService()->read([&](MqttSettings & mqttSettings) {
         publish_time_boiler_     = mqttSettings.publish_time_boiler * 1000; // convert to milliseconds
@@ -475,7 +472,6 @@ void Mqtt::on_connect() {
         ha_climate_format_       = mqttSettings.ha_climate_format;
         dallas_format_           = mqttSettings.dallas_format;
     });
-    */
 
     // first time to connect
     if (connectcount_ == 1) {
@@ -507,17 +503,15 @@ void Mqtt::on_connect() {
     publish_retain(F("status"), "online", true); // say we're alive to the Last Will topic, with retain on
 
     mqtt_publish_fails_ = 0; // reset fail count to 0
-
-    LOG_INFO(F("MQTT connected"));
 }
 
-// Home Assistant Discovery - the main master Device
+// Home Assistant Discovery - the main master Device called EMS-ESP
 // e.g. homeassistant/sensor/ems-esp/status/config
 // all the values from the heartbeat payload will be added as attributes to the entity state
 void Mqtt::ha_status() {
     StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> doc;
 
-    doc["uniq_id"] = FJSON("status");
+    doc["uniq_id"] = FJSON("ems-esp-system");
     doc["~"]       = System::hostname(); // default ems-esp
     // doc["avty_t"]      = FJSON("~/status"); // commented out, as it causes errors in HA sometimes
     doc["json_attr_t"] = FJSON("~/heartbeat");
@@ -531,11 +525,23 @@ void Mqtt::ha_status() {
     dev["mf"]      = FJSON("proddy");
     dev["mdl"]     = F_(EMSESP); // "EMS-ESP"
     JsonArray ids  = dev.createNestedArray("ids");
-    ids.add("ems-esp");
+    ids.add("ems-esp-system");
 
     char topic[100];
-    snprintf_P(topic, sizeof(topic), PSTR("homeassistant/sensor/%s/status/config"), System::hostname().c_str());
+    snprintf_P(topic, sizeof(topic), PSTR("homeassistant/sensor/%s/system/config"), System::hostname().c_str());
     Mqtt::publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
+
+    // create the sensors
+    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_NONE, F("free heap memory"), EMSdevice::DeviceType::SYSTEM, F("rssi"), DeviceValueUOM::NONE);
+    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_NONE, F("Uptime"), EMSdevice::DeviceType::SYSTEM, F("uptime"), DeviceValueUOM::NONE);
+    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_NONE, F("Uptime (sec)"), EMSdevice::DeviceType::SYSTEM, F("uptime_sec"), DeviceValueUOM::NONE);
+    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_NONE, F("free heap memory"), EMSdevice::DeviceType::SYSTEM, F("freemem"), DeviceValueUOM::NONE);
+    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_NONE, F("# Failed MQTT publishes"), EMSdevice::DeviceType::SYSTEM, F("mqttfails"), DeviceValueUOM::NONE);
+    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_NONE, F("# Rx Sent"), EMSdevice::DeviceType::SYSTEM, F("rxsent"), DeviceValueUOM::NONE);
+    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_NONE, F("# Rx Fails"), EMSdevice::DeviceType::SYSTEM, F("rxfails"), DeviceValueUOM::NONE);
+    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_NONE, F("# Tx Reads"), EMSdevice::DeviceType::SYSTEM, F("txread"), DeviceValueUOM::NONE);
+    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_NONE, F("# Tx Writes"), EMSdevice::DeviceType::SYSTEM, F("txwrite"), DeviceValueUOM::NONE);
+    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_NONE, F("# Tx Fails"), EMSdevice::DeviceType::SYSTEM, F("txfails"), DeviceValueUOM::NONE);
 }
 
 // add sub or pub task to the queue.
@@ -656,9 +662,7 @@ void Mqtt::publish_ha(const std::string & topic, const JsonObject & payload) {
 
 #if defined(EMSESP_STANDALONE)
     LOG_DEBUG(F("Publishing HA topic=%s, payload=%s"), topic.c_str(), payload_text.c_str());
-#endif
-
-#if defined(EMSESP_DEBUG)
+#elif defined(EMSESP_DEBUG)
     LOG_DEBUG(F("[debug] Publishing HA topic=%s, payload=%s"), topic.c_str(), payload_text.c_str());
 #endif
 
@@ -745,13 +749,18 @@ void Mqtt::process_queue() {
 
 // HA config for a sensor and binary_sensor entity
 // entity must match the key/value pair in the *_data topic
-// some string copying here into chars, it looks messy but does help with heap fragmentation issues
-void Mqtt::register_mqtt_ha_sensor(uint8_t                     type, // device value type
-                                   uint8_t                     tag,
-                                   const __FlashStringHelper * name,
-                                   const uint8_t               device_type,
-                                   const __FlashStringHelper * entity,
-                                   const uint8_t               uom) {
+// e.g. homeassistant/sensor/ems-esp32/thermostat_hc1_seltemp/config
+// with:
+// {"uniq_id":"thermostat_hc1_seltemp","stat_t":"ems-esp32/thermostat_data","name":"Thermostat hc1 Setpoint room temperature",
+//  "val_tpl":"{{value_json.hc1.seltemp}}","unit_of_meas":"°C","ic":"mdi:temperature-celsius","dev":{"ids":["ems-esp-thermostat"]}}
+//
+// note: some string copying here into chars, it looks messy but does help with heap fragmentation issues
+void Mqtt::publish_mqtt_ha_sensor(uint8_t                     type, // EMSdevice::DeviceValueType
+                                  uint8_t                     tag,
+                                  const __FlashStringHelper * name,
+                                  const uint8_t               device_type, // EMSdevice::DeviceType
+                                  const __FlashStringHelper * entity,
+                                  const uint8_t               uom) {
     // ignore if name (fullname) is empty
     if (name == nullptr) {
         return;
@@ -759,12 +768,12 @@ void Mqtt::register_mqtt_ha_sensor(uint8_t                     type, // device v
 
     DynamicJsonDocument doc(EMSESP_JSON_SIZE_HA_CONFIG);
 
+    // special case for boiler - don't use the prefix
     bool have_prefix = ((tag != DeviceValueTAG::TAG_NONE) && (device_type != EMSdevice::DeviceType::BOILER));
 
     // create entity by inserting any given prefix
     // we ignore the tag if BOILER
     char new_entity[50];
-    // special case for boiler - don't use the prefix
     if (have_prefix) {
         snprintf_P(new_entity, sizeof(new_entity), PSTR("%s.%s"), EMSdevice::tag_to_string(tag).c_str(), uuid::read_flash_string(entity).c_str());
     } else {
@@ -787,6 +796,8 @@ void Mqtt::register_mqtt_ha_sensor(uint8_t                     type, // device v
     char stat_t[MQTT_TOPIC_MAX_SIZE];
     if (device_type == EMSdevice::DeviceType::BOILER) {
         snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/%s"), hostname_.c_str(), EMSdevice::tag_to_string(tag).c_str());
+    } else if (device_type == EMSdevice::DeviceType::SYSTEM) {
+        snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/heartbeat"), hostname_.c_str());
     } else {
         snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/%s_data"), hostname_.c_str(), device_name);
     }
