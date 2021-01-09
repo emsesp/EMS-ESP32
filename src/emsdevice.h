@@ -227,13 +227,7 @@ class EMSdevice {
     bool        generate_values_json(JsonObject & json, const uint8_t tag_filter, const bool verbose = false);
     bool        generate_values_json_web(JsonObject & json);
 
-    void register_device_value(uint8_t                             tag,
-                               void *                              value_p,
-                               uint8_t                             type,
-                               const __FlashStringHelper * const * options,
-                               const __FlashStringHelper *         short_name,
-                               const __FlashStringHelper *         full_name,
-                               uint8_t                             uom);
+    void register_device_value(uint8_t tag, void * value_p, uint8_t type, const __FlashStringHelper * const * options, const __FlashStringHelper * short_name, const __FlashStringHelper * full_name, uint8_t uom);
 
     void write_command(const uint16_t type_id, const uint8_t offset, uint8_t * message_data, const uint8_t message_length, const uint16_t validate_typeid);
     void write_command(const uint16_t type_id, const uint8_t offset, const uint8_t value, const uint16_t validate_typeid);
