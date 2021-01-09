@@ -1065,7 +1065,7 @@ void EMSESP::start() {
     dallassensor_.start();     // dallas external sensors
     webServer.begin();         // start web server
 
-    // emsdevices.reserve(5); // reserve space for initially 5 devices to avoid mem frag issues
+    emsdevices.reserve(5); // reserve space for initially 5 devices to avoid mem frag issues
 
     LOG_INFO(F("EMS Device library loaded with %d records"), device_library_.size());
 
@@ -1074,6 +1074,10 @@ void EMSESP::start() {
     LOG_INFO(F("Used %d mem for devices"), tbefore - tafter);
     System::show_mem("after start()");
 #endif
+#endif
+
+#if defined(EMSESP_STANDALONE)
+    Mqtt::on_connect(); // simulate an MQTT connection
 #endif
 }
 
