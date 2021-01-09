@@ -96,6 +96,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     // main - boiler_data topic
     register_device_value(TAG_BOILER_DATA, &heatingActive_, DeviceValueType::BOOL, nullptr, F("heatingActive"), F("Heating active"), DeviceValueUOM::NONE);
     register_device_value(TAG_BOILER_DATA, &tapwaterActive_, DeviceValueType::BOOL, nullptr, F("tapwaterActive"), F("Warm water/DHW active"), DeviceValueUOM::NONE);
+    
     register_device_value(TAG_BOILER_DATA, &selFlowTemp_, DeviceValueType::UINT, nullptr, F("selFlowTemp"), F("Selected flow temperature"), DeviceValueUOM::DEGREES);
     register_device_value(TAG_BOILER_DATA, &selBurnPow_, DeviceValueType::UINT, nullptr, F("selBurnPow"), F("Burner selected max power"), DeviceValueUOM::PERCENT);
     register_device_value(TAG_BOILER_DATA, &pumpMod_, DeviceValueType::UINT, nullptr, F("pumpMod"), F("Pump modulation"), DeviceValueUOM::PERCENT);
