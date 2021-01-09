@@ -236,14 +236,7 @@ std::string EMSdevice::to_string() const {
     if (brand_ == Brand::NO_BRAND) {
         snprintf_P(&str[0], str.capacity() + 1, PSTR("%s (DeviceID:0x%02X, ProductID:%d, Version:%s)"), name_.c_str(), device_id_, product_id_, version_.c_str());
     } else {
-        snprintf_P(&str[0],
-                   str.capacity() + 1,
-                   PSTR("%s %s (DeviceID:0x%02X ProductID:%d, Version:%s)"),
-                   brand_to_string().c_str(),
-                   name_.c_str(),
-                   device_id_,
-                   product_id_,
-                   version_.c_str());
+        snprintf_P(&str[0], str.capacity() + 1, PSTR("%s %s (DeviceID:0x%02X ProductID:%d, Version:%s)"), brand_to_string().c_str(), name_.c_str(), device_id_, product_id_, version_.c_str());
     }
 
     return str;
@@ -393,13 +386,7 @@ void EMSdevice::register_telegram_type(const uint16_t telegram_type_id, const __
 //  full name: used in Web and Console
 //  uom: unit of measure from DeviceValueUOM
 //  icon (optional): the HA mdi icon to use, from locale_*.h file
-void EMSdevice::register_device_value(uint8_t                             tag,
-                                      void *                              value_p,
-                                      uint8_t                             type,
-                                      const __FlashStringHelper * const * options,
-                                      const __FlashStringHelper *         short_name,
-                                      const __FlashStringHelper *         full_name,
-                                      uint8_t                             uom) {
+void EMSdevice::register_device_value(uint8_t tag, void * value_p, uint8_t type, const __FlashStringHelper * const * options, const __FlashStringHelper * short_name, const __FlashStringHelper * full_name, uint8_t uom) {
     // init the value depending on it's type
     if (type == DeviceValueType::TEXT) {
         *(char *)(value_p) = {'\0'};
@@ -752,10 +739,11 @@ bool EMSdevice::generate_values_json(JsonObject & root, const uint8_t tag_filter
 }
 
 // create the Home Assistant configs for each value
+// this is called when an MQTT publish is done via an EMS Device, and only done once
 void EMSdevice::publish_mqtt_ha_sensor() {
     // for (const auto & dv : *devicevalues_) {
     for (const auto & dv : devicevalues_) {
-        Mqtt::register_mqtt_ha_sensor(dv.type, dv.tag, dv.full_name, device_type_, dv.short_name, dv.uom);
+        Mqtt::publish_mqtt_ha_sensor(dv.type, dv.tag, dv.full_name, device_type_, dv.short_name, dv.uom);
     }
 
     bool ok = publish_ha_config();
