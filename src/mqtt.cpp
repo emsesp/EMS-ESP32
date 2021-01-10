@@ -532,10 +532,10 @@ void Mqtt::ha_status() {
     Mqtt::publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
 
     // create the sensors
-    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_NONE, F("free heap memory"), EMSdevice::DeviceType::SYSTEM, F("rssi"), DeviceValueUOM::NONE);
+    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_NONE, F("Wifi strength"), EMSdevice::DeviceType::SYSTEM, F("rssi"), DeviceValueUOM::NONE);
     publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_NONE, F("Uptime"), EMSdevice::DeviceType::SYSTEM, F("uptime"), DeviceValueUOM::NONE);
     publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_NONE, F("Uptime (sec)"), EMSdevice::DeviceType::SYSTEM, F("uptime_sec"), DeviceValueUOM::NONE);
-    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_NONE, F("free heap memory"), EMSdevice::DeviceType::SYSTEM, F("freemem"), DeviceValueUOM::NONE);
+    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_NONE, F("Free heap memory"), EMSdevice::DeviceType::SYSTEM, F("freemem"), DeviceValueUOM::NONE);
     publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_NONE, F("# Failed MQTT publishes"), EMSdevice::DeviceType::SYSTEM, F("mqttfails"), DeviceValueUOM::NONE);
     publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_NONE, F("# Rx Sent"), EMSdevice::DeviceType::SYSTEM, F("rxsent"), DeviceValueUOM::NONE);
     publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_NONE, F("# Rx Fails"), EMSdevice::DeviceType::SYSTEM, F("rxfails"), DeviceValueUOM::NONE);
@@ -813,28 +813,32 @@ void Mqtt::publish_mqtt_ha_sensor(uint8_t                     type, // EMSdevice
     new_name[0] = toupper(new_name[0]); // capitalize first letter
     doc["name"] = new_name;
 
+    // value template
+    char val_tpl[50];
+    snprintf_P(val_tpl, sizeof(val_tpl), PSTR("{{value_json.%s}}"), new_entity);
+    doc["val_tpl"] = val_tpl;
+
     char topic[MQTT_TOPIC_MAX_SIZE]; // reserved for topic
 
     // look at the device value type
-    if (type != DeviceValueType::BOOL) {
-        //
+    if (type == DeviceValueType::BOOL) {
+        // binary sensor
+        snprintf_P(topic, sizeof(topic), PSTR("homeassistant/binary_sensor/%s/%s/config"), System::hostname().c_str(), uniq.c_str()); // topic
+
+        // how to render boolean
+        EMSESP::webSettingsService.read([&](WebSettings & settings) {
+            char result[10];
+            doc[F("payload_on")]  = Helpers::render_boolean(result, true);
+            doc[F("payload_off")] = Helpers::render_boolean(result, false);
+        });
+    } else {
         // normal HA sensor, not a boolean one
-        //
+        snprintf_P(topic, sizeof(topic), PSTR("homeassistant/sensor/%s/%s/config"), System::hostname().c_str(), uniq.c_str()); // topic
 
-        // topic
-        snprintf_P(topic, sizeof(topic), PSTR("homeassistant/sensor/%s/%s/config"), System::hostname().c_str(), uniq.c_str());
-
-        // value template
-        char val_tpl[50];
-        snprintf_P(val_tpl, sizeof(val_tpl), PSTR("{{value_json.%s}}"), new_entity);
-        doc["val_tpl"] = val_tpl;
-
-        // unit of measure
+        // unit of measure and map the HA icon
         if (uom != DeviceValueUOM::NONE) {
             doc["unit_of_meas"] = EMSdevice::uom_to_string(uom);
         }
-
-        // map the HA icon
         switch (uom) {
         case DeviceValueUOM::DEGREES:
             doc["ic"] = F_(icontemperature);
@@ -846,25 +850,12 @@ void Mqtt::publish_mqtt_ha_sensor(uint8_t                     type, // EMSdevice
         default:
             break;
         }
-    } else {
-        //
-        // binary sensor
-        //
-        snprintf_P(topic, sizeof(topic), PSTR("homeassistant/binary_sensor/%s/%s/config"), System::hostname().c_str(), uniq.c_str());
-
-        // boolean
-        EMSESP::webSettingsService.read([&](WebSettings & settings) {
-            char result[10];
-            doc[F("payload_on")]  = Helpers::render_boolean(result, true);
-            doc[F("payload_off")] = Helpers::render_boolean(result, false);
-        });
     }
 
     JsonObject dev = doc.createNestedObject("dev");
-    JsonArray  ids = dev.createNestedArray("ids");
 
-    // ha device
-    char ha_device[40];
+    JsonArray ids = dev.createNestedArray("ids");
+    char      ha_device[40];
     snprintf_P(ha_device, sizeof(ha_device), PSTR("ems-esp-%s"), device_name);
     ids.add(ha_device);
 
