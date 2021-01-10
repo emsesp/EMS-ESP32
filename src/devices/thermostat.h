@@ -94,6 +94,7 @@ class Thermostat : public EMSdevice {
             MAXFLOW,
             ROOMINFLUENCE,
             UNKNOWN
+
         };
 
         // for sorting based on hc number
@@ -130,19 +131,21 @@ class Thermostat : public EMSdevice {
     std::vector<uint16_t> summer_typeids;
     std::vector<uint16_t> curve_typeids;
 
-    char dateTime_[25];  // date and time stamp
-    char errorCode_[15]; // code from 0xA2 as string i.e. "A22(816)"
+    // standard for all thermostats
+    char     status_[20];    // online or offline
+    char     dateTime_[25];  // date and time stamp
+    char     errorCode_[15]; // code from 0xA2 as string i.e. "A22(816)"
+    uint16_t errorNumber_;   // used internally to build error code
+    char     lastCode_[30];
 
     // Installation parameters
-    uint8_t ibaMainDisplay_; // display on Thermostat: 0 int temp, 1 int setpoint, 2 ext temp, 3 burner temp, 4 ww temp, 5 functioning mode, 6 time, 7 data, 9 smoke temp
+    uint8_t ibaMainDisplay_;       // display on Thermostat: 0 int temp, 1 int setpoint, 2 ext temp, 3 burner temp, 4 ww temp, 5 functioning mode, 6 time, 7 data, 9 smoke temp
     uint8_t ibaLanguage_;          // language on Thermostat: 0 german, 1 dutch, 2 french, 3 italian
     int8_t  ibaCalIntTemperature_; // offset int. temperature sensor, by * 0.1 Kelvin (-5.0 to 5.0K)
     int8_t  ibaMinExtTemperature_; // min ext temp for heating curve, in deg., 0xF6=-10, 0x0 = 0, 0xFF=-1
     uint8_t ibaBuildingType_;      // building type: 0 = light, 1 = medium, 2 = heavy
     uint8_t ibaClockOffset_;       // offset (in sec) to clock, 0xff = -1 s, 0x02 = 2 s
 
-    uint16_t errorNumber_;
-    char     lastCode_[30];
     int8_t   dampedoutdoortemp_;
     uint16_t tempsensor1_;
     uint16_t tempsensor2_;
