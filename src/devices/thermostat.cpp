@@ -162,6 +162,8 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
         return; // don't fetch data if more than 1 thermostat
     }
 
+    strlcpy(status_, "offline", sizeof(status_));
+
     //
     // this next section is only for the master thermostat....
     //
@@ -186,7 +188,7 @@ bool Thermostat::publish_ha_config() {
     doc["stat_t"] = stat_t;
 
     doc["name"]    = FJSON("Thermostat Status");
-    doc["val_tpl"] = FJSON("{{value_json.errorcode}}"); // default value - must have one, so we use errorcode
+    doc["val_tpl"] = FJSON("{{value_json.status}}");
     JsonObject dev = doc.createNestedObject("dev");
     dev["name"]    = FJSON("EMS-ESP Thermostat");
     dev["sw"]      = EMSESP_APP_VERSION;
@@ -296,6 +298,15 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::sha
         if (heating_circuit->hc_num() == hc_num) {
             return heating_circuit;
         }
+    }
+
+    /*
+     * at this point we have discovered a new heating circuit
+     */
+
+    // if it's the first set the status flag
+    if (heating_circuits_.size() == 0) {
+        strlcpy(status_, "online", sizeof(status_));
     }
 
     // create a new heating circuit object
@@ -2066,6 +2077,7 @@ void Thermostat::register_device_values() {
     uint8_t model = this->model();
 
     // Common for all thermostats
+    register_device_value(TAG_NONE, &status_, DeviceValueType::TEXT, nullptr, F("status"), F("Status"), DeviceValueUOM::NONE);
     register_device_value(TAG_NONE, &dateTime_, DeviceValueType::TEXT, nullptr, F("dateTime"), F("Date/Time"), DeviceValueUOM::NONE);
     register_device_value(TAG_NONE, &errorCode_, DeviceValueType::TEXT, nullptr, F("errorCode"), F("Error code"), DeviceValueUOM::NONE);
     register_device_value(TAG_NONE, &lastCode_, DeviceValueType::TEXT, nullptr, F("lastCode"), F("Last error"), DeviceValueUOM::NONE);
