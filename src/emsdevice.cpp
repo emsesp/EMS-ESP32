@@ -288,7 +288,7 @@ bool EMSdevice::get_toggle_fetch(uint16_t telegram_id) {
     return false;
 }
 
-// list device values
+// list device values, only for EMSESP_DEBUG mode
 void EMSdevice::show_device_values(uuid::console::Shell & shell) {
     size_t  total_s = 0;
     uint8_t count   = 0;
