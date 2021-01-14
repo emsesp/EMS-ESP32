@@ -30,8 +30,6 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
 
     reserve_telgram_functions(25); // reserve some space for the telegram registries, to avoid memory fragmentation
 
-    System::show_mem("starting boiler regs");
-
     // the telegram handlers...
     register_telegram_type(0x10, F("UBAErrorMessage1"), false, [&](std::shared_ptr<const Telegram> t) { process_UBAErrorMessage(t); });
     register_telegram_type(0x11, F("UBAErrorMessage2"), false, [&](std::shared_ptr<const Telegram> t) { process_UBAErrorMessage(t); });
@@ -63,8 +61,6 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     EMSESP::send_read_request(0x15,
                               device_id); // read maintenace data on start (only published on change)
 
-    System::show_mem("after telegram type reg");
-
     // MQTT commands for boiler topic
     register_mqtt_cmd(F("comfort"), [&](const char * value, const int8_t id) { return set_warmwater_mode(value, id); });
     register_mqtt_cmd(F("wwactivated"), [&](const char * value, const int8_t id) { return set_warmwater_activated(value, id); });
@@ -88,15 +84,13 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     register_mqtt_cmd(F("pumpmodmin"), [&](const char * value, const int8_t id) { return set_min_pump(value, id); });
     // register_mqtt_cmd(F("reset"), [&](const char * value, const int8_t id) { return set_reset(value, id); });
 
-    System::show_mem("after mqtt cmd reg");
-
     // add values
     reserve_device_values(50);
 
     // main - boiler_data topic
     register_device_value(TAG_BOILER_DATA, &heatingActive_, DeviceValueType::BOOL, nullptr, F("heatingActive"), F("Heating active"), DeviceValueUOM::NONE);
     register_device_value(TAG_BOILER_DATA, &tapwaterActive_, DeviceValueType::BOOL, nullptr, F("tapwaterActive"), F("Warm water/DHW active"), DeviceValueUOM::NONE);
-    
+
     register_device_value(TAG_BOILER_DATA, &selFlowTemp_, DeviceValueType::UINT, nullptr, F("selFlowTemp"), F("Selected flow temperature"), DeviceValueUOM::DEGREES);
     register_device_value(TAG_BOILER_DATA, &selBurnPow_, DeviceValueType::UINT, nullptr, F("selBurnPow"), F("Burner selected max power"), DeviceValueUOM::PERCENT);
     register_device_value(TAG_BOILER_DATA, &pumpMod_, DeviceValueType::UINT, nullptr, F("pumpMod"), F("Pump modulation"), DeviceValueUOM::PERCENT);
@@ -135,8 +129,6 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     register_device_value(TAG_BOILER_DATA, &lastCode_, DeviceValueType::TEXT, nullptr, F("lastCode"), F("Last error code"), DeviceValueUOM::NONE);
     register_device_value(TAG_BOILER_DATA, &serviceCode_, DeviceValueType::TEXT, nullptr, F("serviceCode"), F("Service code"), DeviceValueUOM::NONE);
     register_device_value(TAG_BOILER_DATA, &serviceCodeNumber_, DeviceValueType::USHORT, nullptr, F("serviceCodeNumber"), F("Service code number"), DeviceValueUOM::NONE);
-
-    System::show_mem("after device value reg");
 
     // ww - boiler_data_ww topic
     register_device_value(TAG_BOILER_DATA_WW, &wWSelTemp_, DeviceValueType::UINT, nullptr, F("wWSelTemp"), F("Warm Water selected temperature"), DeviceValueUOM::DEGREES);
