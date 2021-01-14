@@ -1,1 +1,1 @@
-#define EMSESP_APP_VERSION "2.3.0b0"
+#define EMSESP_APP_VERSION "3.0.0b0"
