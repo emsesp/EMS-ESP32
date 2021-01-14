@@ -39,6 +39,7 @@ class WebStatusService {
 #ifdef ESP32
     static void onStationModeDisconnected(WiFiEvent_t event, WiFiEventInfo_t info);
     static void onStationModeGotIP(WiFiEvent_t event, WiFiEventInfo_t info);
+
 #elif defined(ESP8266)
     WiFiEventHandler _onStationModeDisconnectedHandler;
     WiFiEventHandler _onStationModeGotIPHandler;
