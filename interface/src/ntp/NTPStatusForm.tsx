@@ -1,5 +1,4 @@
 import React, { Component, Fragment } from 'react';
-import moment from 'moment';
 
 import { WithTheme, withTheme } from '@material-ui/core/styles';
 import { Avatar, Divider, List, ListItem, ListItemAvatar, ListItemText, Button } from '@material-ui/core';
@@ -14,7 +13,7 @@ import RefreshIcon from '@material-ui/icons/Refresh';
 
 import { RestFormProps, FormButton, HighlightAvatar } from '../components';
 import { isNtpActive, ntpStatusHighlight, ntpStatus } from './NTPStatus';
-import { formatIsoDateTime, formatLocalDateTime } from './TimeFormat';
+import { formatDuration, formatDateTime, formatLocalDateTimeNow, formatLocalDateTime } from './TimeFormat';
 import { NTPStatus, Time } from './types';
 import { redirectingAuthorizedFetch, withAuthenticatedContext, AuthenticatedContextProps } from '../authentication';
 import { TIME_ENDPOINT } from '../api';
@@ -43,30 +42,21 @@ class NTPStatusForm extends Component<NTPStatusFormProps, NTPStatusFormState> {
   }
 
   openSetTime = () => {
-    this.setState({ localTime: formatLocalDateTime(moment()), settingTime: true, });
+    this.setState({ localTime: formatLocalDateTimeNow(), settingTime: true, });
   }
 
   closeSetTime = () => {
     this.setState({ settingTime: false });
   }
 
-  createAdjustedTime = (): Time => {
-    const currentLocalTime = moment(this.props.data.time_local);
-    const newLocalTime = moment(this.state.localTime);
-    newLocalTime.subtract(currentLocalTime.utcOffset())
-    newLocalTime.milliseconds(0);
-    newLocalTime.utc();
-    return {
-      time_utc: newLocalTime.format()
-    }
-  }
+  createTime = (): Time => ({ local_time: formatLocalDateTime(this.state.localTime) });
 
   configureTime = () => {
     this.setState({ processing: true });
     redirectingAuthorizedFetch(TIME_ENDPOINT,
       {
         method: 'POST',
-        body: JSON.stringify(this.createAdjustedTime()),
+        body: JSON.stringify(this.createTime()),
         headers: {
           'Content-Type': 'application/json'
         }
@@ -153,7 +143,7 @@ class NTPStatusForm extends Component<NTPStatusFormProps, NTPStatusFormState> {
                 <AccessTimeIcon />
               </Avatar>
             </ListItemAvatar>
-            <ListItemText primary="Local Time" secondary={formatIsoDateTime(data.time_local)} />
+            <ListItemText primary="Local Time" secondary={formatDateTime(data.local_time)} />
           </ListItem>
           <Divider variant="inset" component="li" />
           <ListItem>
@@ -162,7 +152,7 @@ class NTPStatusForm extends Component<NTPStatusFormProps, NTPStatusFormState> {
                 <SwapVerticalCircleIcon />
               </Avatar>
             </ListItemAvatar>
-            <ListItemText primary="UTC Time" secondary={formatIsoDateTime(data.time_utc)} />
+            <ListItemText primary="UTC Time" secondary={formatDateTime(data.utc_time)} />
           </ListItem>
           <Divider variant="inset" component="li" />
           <ListItem>
@@ -171,7 +161,7 @@ class NTPStatusForm extends Component<NTPStatusFormProps, NTPStatusFormState> {
                 <AvTimerIcon />
               </Avatar>
             </ListItemAvatar>
-            <ListItemText primary="Uptime" secondary={moment.duration(data.uptime, 'seconds').humanize()} />
+            <ListItemText primary="Uptime" secondary={formatDuration(data.uptime)} />
           </ListItem>
           <Divider variant="inset" component="li" />
         </List>

@@ -1,15 +1,26 @@
 #include <NTPStatus.h>
 
 NTPStatus::NTPStatus(AsyncWebServer * server, SecurityManager * securityManager) {
-    server->on(NTP_STATUS_SERVICE_PATH,
-               HTTP_GET,
-               securityManager->wrapRequest(std::bind(&NTPStatus::ntpStatus, this, std::placeholders::_1), AuthenticationPredicates::IS_AUTHENTICATED));
+    server->on(NTP_STATUS_SERVICE_PATH, HTTP_GET, securityManager->wrapRequest(std::bind(&NTPStatus::ntpStatus, this, std::placeholders::_1), AuthenticationPredicates::IS_AUTHENTICATED));
 }
 
-String toISOString(tm * time, bool incOffset) {
+/*
+ * Formats the time using the format provided.
+ *
+ * Uses a 25 byte buffer, large enough to fit an ISO time string with offset.
+ */
+String formatTime(tm * time, const char * format) {
     char time_string[25];
-    strftime(time_string, 25, incOffset ? "%FT%T%z" : "%FT%TZ", time);
+    strftime(time_string, 25, format, time);
     return String(time_string);
+}
+
+String toUTCTimeString(tm * time) {
+    return formatTime(time, "%FT%TZ");
+}
+
+String toLocalTimeString(tm * time) {
+    return formatTime(time, "%FT%T");
 }
 
 void NTPStatus::ntpStatus(AsyncWebServerRequest * request) {
@@ -23,10 +34,10 @@ void NTPStatus::ntpStatus(AsyncWebServerRequest * request) {
     root["status"] = sntp_enabled() ? 1 : 0;
 
     // the current time in UTC
-    root["time_utc"] = toISOString(gmtime(&now), false);
+    root["utc_time"] = toUTCTimeString(gmtime(&now));
 
     // local time as ISO String with TZ
-    root["time_local"] = toISOString(localtime(&now), true);
+    root["local_time"] = toLocalTimeString(localtime(&now));
 
     // the sntp server name
     root["server"] = sntp_getservername(0);

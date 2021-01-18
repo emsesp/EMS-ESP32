@@ -9,12 +9,13 @@ import { MenuAppBar } from '../components';
 import NetworkStatusController from './NetworkStatusController';
 import NetworkSettingsController from './NetworkSettingsController';
 import WiFiNetworkScanner from './WiFiNetworkScanner';
-import { NetworkConnectionContext } from './NetworkConnectionContext';
+import { NetworkConnectionContext, NetworkConnectionContextValue } from './NetworkConnectionContext';
+
 import { WiFiNetwork } from './types';
 
 type NetworkConnectionProps = AuthenticatedContextProps & RouteComponentProps;
 
-class NetworkConnection extends Component<NetworkConnectionProps, NetworkConnectionContext> {
+class NetworkConnection extends Component<NetworkConnectionProps, NetworkConnectionContextValue> {
 
   constructor(props: NetworkConnectionProps) {
     super(props);

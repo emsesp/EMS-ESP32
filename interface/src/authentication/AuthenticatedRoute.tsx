@@ -3,7 +3,7 @@ import { Redirect, Route, RouteProps, RouteComponentProps } from "react-router-d
 import { withSnackbar, WithSnackbarProps } from 'notistack';
 
 import * as Authentication from './Authentication';
-import { withAuthenticationContext, AuthenticationContextProps, AuthenticatedContext } from './AuthenticationContext';
+import { withAuthenticationContext, AuthenticationContextProps, AuthenticatedContext, AuthenticatedContextValue } from './AuthenticationContext';
 
 type ChildComponent = React.ComponentType<RouteComponentProps<any>> | React.ComponentType<any>;
 
@@ -21,7 +21,7 @@ export class AuthenticatedRoute extends React.Component<AuthenticatedRouteProps>
     const renderComponent: RenderComponent = (props) => {
       if (authenticationContext.me) {
         return (
-          <AuthenticatedContext.Provider value={authenticationContext as AuthenticatedContext}>
+          <AuthenticatedContext.Provider value={authenticationContext as AuthenticatedContextValue}>
             <Component {...props} />
           </AuthenticatedContext.Provider>
         );

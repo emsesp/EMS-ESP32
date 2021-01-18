@@ -14,7 +14,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import { RestFormProps, PasswordValidator, BlockFormControlLabel, FormActions, FormButton } from '../components';
 import { isIP, isHostname, optional } from '../validators';
 
-import { NetworkConnectionContext } from './NetworkConnectionContext';
+import { NetworkConnectionContext, NetworkConnectionContextValue } from './NetworkConnectionContext';
 import { isNetworkOpen, networkSecurityMode } from './WiFiSecurityModes';
 import { NetworkSettings } from './types';
 
@@ -25,7 +25,7 @@ class NetworkSettingsForm extends React.Component<NetworkStatusFormProps> {
   static contextType = NetworkConnectionContext;
   context!: React.ContextType<typeof NetworkConnectionContext>;
 
-  constructor(props: NetworkStatusFormProps, context: NetworkConnectionContext) {
+  constructor(props: NetworkStatusFormProps, context: NetworkConnectionContextValue) {
     super(props);
 
     const { selectedNetwork } = context;

@@ -5,14 +5,14 @@ import jwtDecode from 'jwt-decode';
 import history from '../history'
 import { VERIFY_AUTHORIZATION_ENDPOINT } from '../api';
 import { ACCESS_TOKEN, authorizedFetch, getStorage } from './Authentication';
-import { AuthenticationContext, Me } from './AuthenticationContext';
+import { AuthenticationContext, AuthenticationContextValue, Me } from './AuthenticationContext';
 import FullScreenLoading from '../components/FullScreenLoading';
 import { withFeatures, WithFeaturesProps } from '../features/FeaturesContext';
 
 export const decodeMeJWT = (accessToken: string): Me => jwtDecode(accessToken) as Me;
 
 interface AuthenticationWrapperState {
-  context: AuthenticationContext;
+  context: AuthenticationContextValue;
   initialized: boolean;
 }
 

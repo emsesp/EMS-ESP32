@@ -11,16 +11,18 @@ debug.log
 # platformio
 .pio
 pio_local.ini
-.VSCodeCounter/
+/.VSCodeCounter
 
 # OS specific
 .DS_Store
 *Thumbs.db
 
 # project specfic
-scripts/stackdmp.txt
+/scripts/stackdmp.txt
 emsesp
-data/www/
-lib/framework/WWWData.h
-interface/build/
-interface/node_modules/
+/data/www
+/lib/framework/WWWData.h
+/interface/build
+/interface/node_modules
+/interface/.eslintcache
+

@@ -6,20 +6,20 @@ export interface Me {
   version: string; // proddy added
 }
 
-export interface AuthenticationContext {
+export interface AuthenticationContextValue {
   refresh: () => void;
   signIn: (accessToken: string) => void;
   signOut: () => void;
   me?: Me;
 }
 
-const AuthenticationContextDefaultValue = {} as AuthenticationContext
+const AuthenticationContextDefaultValue = {} as AuthenticationContextValue
 export const AuthenticationContext = React.createContext(
   AuthenticationContextDefaultValue
 );
 
 export interface AuthenticationContextProps {
-  authenticationContext: AuthenticationContext;
+  authenticationContext: AuthenticationContextValue;
 }
 
 export function withAuthenticationContext<T extends AuthenticationContextProps>(Component: React.ComponentType<T>) {
@@ -34,17 +34,17 @@ export function withAuthenticationContext<T extends AuthenticationContextProps>(
   };
 }
 
-export interface AuthenticatedContext extends AuthenticationContext {
+export interface AuthenticatedContextValue extends AuthenticationContextValue {
   me: Me;
 }
 
-const AuthenticatedContextDefaultValue = {} as AuthenticatedContext
+const AuthenticatedContextDefaultValue = {} as AuthenticatedContextValue
 export const AuthenticatedContext = React.createContext(
   AuthenticatedContextDefaultValue
 );
 
 export interface AuthenticatedContextProps {
-  authenticatedContext: AuthenticatedContext;
+  authenticatedContext: AuthenticatedContextValue;
 }
 
 export function withAuthenticatedContext<T extends AuthenticatedContextProps>(Component: React.ComponentType<T>) {

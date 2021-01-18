@@ -1,3 +1,4 @@
+  
 export enum NTPSyncStatus {
   NTP_INACTIVE = 0,
   NTP_ACTIVE = 1
@@ -5,8 +6,8 @@ export enum NTPSyncStatus {
 
 export interface NTPStatus {
   status: NTPSyncStatus;
-  time_utc: string;
-  time_local: string;
+  utc_time: string;
+  local_time: string;
   server: string;
   uptime: number;
 }
@@ -19,5 +20,5 @@ export interface NTPSettings {
 }
 
 export interface Time {
-  time_utc: string;
+  local_time: string;
 }
