@@ -1,10 +1,11 @@
-export enum WiFiConnectionStatus {
+export enum NetworkConnectionStatus {
   WIFI_STATUS_IDLE = 0,
   WIFI_STATUS_NO_SSID_AVAIL = 1,
   WIFI_STATUS_CONNECTED = 3,
   WIFI_STATUS_CONNECT_FAILED = 4,
   WIFI_STATUS_CONNECTION_LOST = 5,
   WIFI_STATUS_DISCONNECTED = 6,
+  ETHERNET_STATUS_CONNECTED = 10,
   WIFI_STATUS_NO_SHIELD = 255
 }
 
@@ -17,8 +18,8 @@ export enum WiFiEncryptionType {
   WIFI_AUTH_WPA2_ENTERPRISE = 5
 }
 
-export interface WiFiStatus {
-  status: WiFiConnectionStatus;
+export interface NetworkStatus {
+  status: NetworkConnectionStatus;
   local_ip: string;
   mac_address: string;
   rssi: number;
@@ -31,10 +32,11 @@ export interface WiFiStatus {
   dns_ip_2: string;
 }
 
-export interface WiFiSettings {
+export interface NetworkSettings {
   ssid: string;
   password: string;
   hostname: string;
+  ethernet_profile: number;
   static_ip_config: boolean;
   local_ip?: string;
   gateway_ip?: string;

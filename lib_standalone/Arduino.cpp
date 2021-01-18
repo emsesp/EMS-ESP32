@@ -21,7 +21,12 @@
 
 #include <string>
 
+#include <Network.h>
+
 NativeConsole Serial;
+
+ETHClass  ETH;
+WiFiClass WiFi;
 
 /* millis() on C++ native could be
 for non-Arduino

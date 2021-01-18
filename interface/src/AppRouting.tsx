@@ -8,7 +8,7 @@ import AuthenticatedRoute from './authentication/AuthenticatedRoute';
 
 import SignIn from './SignIn';
 import ProjectRouting from './project/ProjectRouting';
-import WiFiConnection from './wifi/WiFiConnection';
+import NetworkConnection from './network/NetworkConnection';
 import AccessPoint from './ap/AccessPoint';
 import NetworkTime from './ntp/NetworkTime';
 import Security from './security/Security';
@@ -19,8 +19,7 @@ import Mqtt from './mqtt/Mqtt';
 import { withFeatures, WithFeaturesProps } from './features/FeaturesContext';
 import { Features } from './features/types';
 
-export const getDefaultRoute = (features: Features) => features.project ? `/${PROJECT_PATH}/` : "/wifi/";
-
+export const getDefaultRoute = (features: Features) => features.project ? `/${PROJECT_PATH}/` : "/network/";
 class AppRouting extends Component<WithFeaturesProps> {
 
   componentDidMount() {
@@ -38,10 +37,10 @@ class AppRouting extends Component<WithFeaturesProps> {
           {features.project && (
             <AuthenticatedRoute exact path={`/${PROJECT_PATH}/*`} component={ProjectRouting} />
           )}
-          <AuthenticatedRoute exact path="/wifi/*" component={WiFiConnection} />
+          <AuthenticatedRoute exact path="/network/*" component={NetworkConnection} />
           <AuthenticatedRoute exact path="/ap/*" component={AccessPoint} />
           {features.ntp && (
-          <AuthenticatedRoute exact path="/ntp/*" component={NetworkTime} />
+            <AuthenticatedRoute exact path="/ntp/*" component={NetworkTime} />
           )}
           {features.mqtt && (
             <AuthenticatedRoute exact path="/mqtt/*" component={Mqtt} />

@@ -5,11 +5,8 @@
 #include <FSPersistence.h>
 
 #include <time.h>
-#ifdef ESP32
 #include <lwip/apps/sntp.h>
-#elif defined(ESP8266)
-#include <sntp.h>
-#endif
+#include <ETH.h>
 
 #ifndef FACTORY_NTP_ENABLED
 #define FACTORY_NTP_ENABLED true
@@ -67,16 +64,8 @@ class NTPSettingsService : public StatefulService<NTPSettings> {
     FSPersistence<NTPSettings>  _fsPersistence;
     AsyncCallbackJsonWebHandler _timeHandler;
 
-#ifdef ESP32
-    void onStationModeGotIP(WiFiEvent_t event, WiFiEventInfo_t info);
-    void onStationModeDisconnected(WiFiEvent_t event, WiFiEventInfo_t info);
-#elif defined(ESP8266)
-    WiFiEventHandler _onStationModeDisconnectedHandler;
-    WiFiEventHandler _onStationModeGotIPHandler;
-
-    void onStationModeGotIP(const WiFiEventStationModeGotIP & event);
-    void onStationModeDisconnected(const WiFiEventStationModeDisconnected & event);
-#endif
+    bool connected_ = false;
+    void WiFiEvent(WiFiEvent_t event);
     void configureNTP();
     void configureTime(AsyncWebServerRequest * request, JsonVariant & json);
 };

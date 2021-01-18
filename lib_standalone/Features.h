@@ -33,5 +33,4 @@
 #define FT_UPLOAD_FIRMWARE 0
 #endif
 
-
 #endif

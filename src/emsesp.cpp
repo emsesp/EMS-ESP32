@@ -31,9 +31,6 @@ AsyncWebServer webServer(80);
 #if defined(ESP32)
 ESP8266React       EMSESP::esp8266React(&webServer, &SPIFFS);
 WebSettingsService EMSESP::webSettingsService = WebSettingsService(&webServer, &SPIFFS, EMSESP::esp8266React.getSecurityManager());
-#elif defined(ESP8266)
-ESP8266React       EMSESP::esp8266React(&webServer, &LittleFS);
-WebSettingsService EMSESP::webSettingsService = WebSettingsService(&webServer, &LittleFS, EMSESP::esp8266React.getSecurityManager());
 #elif defined(EMSESP_STANDALONE)
 FS                 dummyFS;
 ESP8266React       EMSESP::esp8266React(&webServer, &dummyFS);
@@ -1027,11 +1024,9 @@ void EMSESP::send_raw_telegram(const char * data) {
 // start all the core services
 // the services must be loaded in the correct order
 void EMSESP::start() {
-    // start the file system. We use LittleFS for ESP8266.
-#ifdef ESP32
+// start the file system
+#ifndef EMSESP_STANDALONE
     SPIFFS.begin(true);
-#elif defined(ESP8266)
-    LittleFS.begin();
 #endif
 
     esp8266React.begin();       // loads system settings (wifi, mqtt, etc)
@@ -1039,24 +1034,10 @@ void EMSESP::start() {
 
     system_.check_upgrade(); // do any upgrades
 
-#if defined(EMSESP_DEBUG)
-#ifndef EMSESP_STANDALONE
-    uint32_t tbefore = ESP.getFreeHeap();
-#endif
-#endif
-
-    // Load our library of known devices into stack mem. Names are stored in Flash memory
-    // Still it takes up about 960bytes
-    device_library_.reserve(80);
+    // Load our library of known devices into stack mem. Names are stored in Flash memory (take about 960bytes)
     device_library_ = {
 #include "device_library.h"
     };
-
-#if defined(EMSESP_DEBUG)
-#ifndef EMSESP_STANDALONE
-    uint32_t tafter = ESP.getFreeHeap();
-#endif
-#endif
 
     console_.start();          // telnet and serial console
     mqtt_.start();             // mqtt init
@@ -1068,13 +1049,6 @@ void EMSESP::start() {
     emsdevices.reserve(5); // reserve space for initially 5 devices to avoid mem frag issues
 
     LOG_INFO(F("EMS Device library loaded with %d records"), device_library_.size());
-
-#if defined(EMSESP_DEBUG)
-#ifndef EMSESP_STANDALONE
-    LOG_INFO(F("Used %d mem for devices"), tbefore - tafter);
-    System::show_mem("after start()");
-#endif
-#endif
 
 #if defined(EMSESP_STANDALONE)
     Mqtt::on_connect(); // simulate an MQTT connection

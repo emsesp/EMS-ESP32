@@ -34,18 +34,9 @@ class WebStatusService {
     WebStatusService(AsyncWebServer * server, SecurityManager * securityManager);
 
   private:
+    bool connected_ = false;
     void webStatusService(AsyncWebServerRequest * request);
-
-#ifdef ESP32
-    static void onStationModeDisconnected(WiFiEvent_t event, WiFiEventInfo_t info);
-    static void onStationModeGotIP(WiFiEvent_t event, WiFiEventInfo_t info);
-
-#elif defined(ESP8266)
-    WiFiEventHandler _onStationModeDisconnectedHandler;
-    WiFiEventHandler _onStationModeGotIPHandler;
-    static void      onStationModeDisconnected(const WiFiEventStationModeDisconnected & event);
-    static void      onStationModeGotIP(const WiFiEventStationModeGotIP & event);
-#endif
+    void WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info);
 };
 
 } // namespace emsesp

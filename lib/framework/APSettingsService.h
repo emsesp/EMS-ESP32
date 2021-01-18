@@ -7,8 +7,10 @@
 
 #include <DNSServer.h>
 #include <IPAddress.h>
-#include <uuid/common.h>
 
+#include <ETH.h>
+
+#include <uuid/common.h>
 
 #define MANAGE_NETWORK_DELAY 10000
 
@@ -111,7 +113,7 @@ class APSettingsService : public StatefulService<APSettings> {
     // for the captive portal
     DNSServer * _dnsServer;
 
-    // for the mangement delay loop
+    // for the management delay loop
     volatile unsigned long _lastManaged;
     volatile boolean       _reconfigureAp;
 

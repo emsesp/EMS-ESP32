@@ -6,14 +6,11 @@ import { List, ListItem, ListItemAvatar, ListItemText } from '@material-ui/core'
 import DevicesIcon from '@material-ui/icons/Devices';
 import MemoryIcon from '@material-ui/icons/Memory';
 import ShowChartIcon from '@material-ui/icons/ShowChart';
-import SdStorageIcon from '@material-ui/icons/SdStorage';
 import FolderIcon from '@material-ui/icons/Folder';
-import DataUsageIcon from '@material-ui/icons/DataUsage';
 import AppsIcon from '@material-ui/icons/Apps';
 import PowerSettingsNewIcon from '@material-ui/icons/PowerSettingsNew';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import SettingsBackupRestoreIcon from '@material-ui/icons/SettingsBackupRestore';
-import BatteryUnknownIcon from "@material-ui/icons/BatteryUnknown";
 import TimerIcon from "@material-ui/icons/Timer";
 
 import { redirectingAuthorizedFetch, AuthenticatedContextProps, withAuthenticatedContext } from '../authentication';
@@ -95,24 +92,6 @@ class SystemStatusForm extends Component<SystemStatusFormProps, SystemStatusForm
               </ListItem>
             </Fragment>)
         }
-        <Divider variant="inset" component="li" />
-        <ListItem >
-          <ListItemAvatar>
-            <Avatar>
-              <DataUsageIcon />
-            </Avatar>
-          </ListItemAvatar>
-          <ListItemText primary="Sketch (Size / Free)" secondary={formatNumber(data.sketch_size) + ' / ' + formatNumber(data.free_sketch_space) + ' bytes'} />
-        </ListItem>
-        <Divider variant="inset" component="li" />
-        <ListItem >
-          <ListItemAvatar>
-            <Avatar>
-              <SdStorageIcon />
-            </Avatar>
-          </ListItemAvatar>
-          <ListItemText primary="Flash Chip (Size / Speed)" secondary={formatNumber(data.flash_chip_size) + ' bytes / ' + (data.flash_chip_speed / 1000000).toFixed(0) + ' MHz'} />
-        </ListItem>
         <Divider variant="inset" component="li" />
         <ListItem >
           <ListItemAvatar>

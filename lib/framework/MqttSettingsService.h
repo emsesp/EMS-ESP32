@@ -140,16 +140,8 @@ class MqttSettingsService : public StatefulService<MqttSettings> {
     // the MQTT client instance
     AsyncMqttClient _mqttClient;
 
-#ifdef ESP32
     void onStationModeGotIP(WiFiEvent_t event, WiFiEventInfo_t info);
     void onStationModeDisconnected(WiFiEvent_t event, WiFiEventInfo_t info);
-#elif defined(ESP8266)
-    WiFiEventHandler _onStationModeDisconnectedHandler;
-    WiFiEventHandler _onStationModeGotIPHandler;
-    void             onStationModeGotIP(const WiFiEventStationModeGotIP & event);
-    void             onStationModeDisconnected(const WiFiEventStationModeDisconnected & event);
-#endif
-
     void onMqttConnect(bool sessionPresent);
     void onMqttDisconnect(AsyncMqttClientDisconnectReason reason);
     void configureMqtt();

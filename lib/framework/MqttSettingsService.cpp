@@ -40,13 +40,8 @@ MqttSettingsService::MqttSettingsService(AsyncWebServer * server, FS * fs, Secur
     , _disconnectedAt(0)
     , _disconnectReason(AsyncMqttClientDisconnectReason::TCP_DISCONNECTED)
     , _mqttClient() {
-#ifdef ESP32
     WiFi.onEvent(std::bind(&MqttSettingsService::onStationModeDisconnected, this, std::placeholders::_1, std::placeholders::_2), WiFiEvent_t::SYSTEM_EVENT_STA_DISCONNECTED);
     WiFi.onEvent(std::bind(&MqttSettingsService::onStationModeGotIP, this, std::placeholders::_1, std::placeholders::_2), WiFiEvent_t::SYSTEM_EVENT_STA_GOT_IP);
-#elif defined(ESP8266)
-    _onStationModeDisconnectedHandler = WiFi.onStationModeDisconnected(std::bind(&MqttSettingsService::onStationModeDisconnected, this, std::placeholders::_1));
-    _onStationModeGotIPHandler        = WiFi.onStationModeGotIP(std::bind(&MqttSettingsService::onStationModeGotIP, this, std::placeholders::_1));
-#endif
     _mqttClient.onConnect(std::bind(&MqttSettingsService::onMqttConnect, this, std::placeholders::_1));
     _mqttClient.onDisconnect(std::bind(&MqttSettingsService::onMqttDisconnect, this, std::placeholders::_1));
     addUpdateHandler([&](const String & originId) { onConfigUpdated(); }, false);

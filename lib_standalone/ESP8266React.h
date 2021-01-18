@@ -10,6 +10,7 @@
 #include <SecurityManager.h>
 #include <SecuritySettingsService.h>
 #include <StatefulService.h>
+#include <Network.h>
 
 class DummySettings {
   public:
@@ -44,6 +45,7 @@ class DummySettings {
     String   staticIPConfig          = "";
     String   dnsIP1                  = "";
     String   dnsIP2                  = "";
+    uint8_t  ethernet_profile        = 0;
     uint16_t publish_time_boiler     = 10;
     uint16_t publish_time_thermostat = 10;
     uint16_t publish_time_solar      = 10;
@@ -66,11 +68,9 @@ class DummySettingsService : public StatefulService<DummySettings> {
 
     void begin();
     void loop();
-
-  private:
 };
 
-#define WiFiSettings DummySettings
+#define NetworkSettings DummySettings
 #define SecuritySettings DummySettings
 #define MqttSettings DummySettings
 
@@ -91,7 +91,7 @@ class ESP8266React {
         return _mqttClient;
     }
 
-    StatefulService<DummySettings> * getWiFiSettingsService() {
+    StatefulService<DummySettings> * getNetworkSettingsService() {
         return &_settings;
     }
 
@@ -113,10 +113,7 @@ class ESP8266React {
 class EMSESPSettingsService {
   public:
     EMSESPSettingsService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager);
-
     void begin();
-
-  private:
 };
 
 class JsonUtils {

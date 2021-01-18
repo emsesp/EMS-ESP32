@@ -3,13 +3,9 @@
 
 #include <Arduino.h>
 
-#ifdef ESP32
 #include <AsyncTCP.h>
 #include <WiFi.h>
-#elif defined(ESP8266)
-#include <ESP8266WiFi.h>
-#include <ESPAsyncTCP.h>
-#endif
+#include <ETH.h>
 
 #include <FeaturesService.h>
 #include <APSettingsService.h>
@@ -26,8 +22,8 @@
 #include <SecuritySettingsService.h>
 #include <SystemStatus.h>
 #include <WiFiScanner.h>
-#include <WiFiSettingsService.h>
-#include <WiFiStatus.h>
+#include <NetworkSettingsService.h>
+#include <NetworkStatus.h>
 
 #ifdef PROGMEM_WWW
 #include <WWWData.h>
@@ -44,33 +40,26 @@ class ESP8266React {
         return &_securitySettingsService;
     }
 
-#if FT_ENABLED(FT_SECURITY)
     StatefulService<SecuritySettings> * getSecuritySettingsService() {
         return &_securitySettingsService;
     }
-#endif
 
-    StatefulService<WiFiSettings> * getWiFiSettingsService() {
-        return &_wifiSettingsService;
+    StatefulService<NetworkSettings> * getNetworkSettingsService() {
+        return &_networkSettingsService;
     }
 
     StatefulService<APSettings> * getAPSettingsService() {
         return &_apSettingsService;
     }
 
-#if FT_ENABLED(FT_NTP)
     StatefulService<NTPSettings> * getNTPSettingsService() {
         return &_ntpSettingsService;
     }
-#endif
 
-#if FT_ENABLED(FT_OTA)
     StatefulService<OTASettings> * getOTASettingsService() {
         return &_otaSettingsService;
     }
-#endif
 
-#if FT_ENABLED(FT_MQTT)
     StatefulService<MqttSettings> * getMqttSettingsService() {
         return &_mqttSettingsService;
     }
@@ -78,7 +67,6 @@ class ESP8266React {
     AsyncMqttClient * getMqttClient() {
         return _mqttSettingsService.getMqttClient();
     }
-#endif
 
     void factoryReset() {
         _factoryResetService.factoryReset();
@@ -87,31 +75,21 @@ class ESP8266React {
   private:
     FeaturesService         _featureService;
     SecuritySettingsService _securitySettingsService;
-    WiFiSettingsService     _wifiSettingsService;
+    NetworkSettingsService  _networkSettingsService;
     WiFiScanner             _wifiScanner;
-    WiFiStatus              _wifiStatus;
+    NetworkStatus           _networkStatus;
     APSettingsService       _apSettingsService;
     APStatus                _apStatus;
-#if FT_ENABLED(FT_NTP)
-    NTPSettingsService _ntpSettingsService;
-    NTPStatus          _ntpStatus;
-#endif
-#if FT_ENABLED(FT_OTA)
-    OTASettingsService _otaSettingsService;
-#endif
-#if FT_ENABLED(FT_UPLOAD_FIRMWARE)
-    UploadFirmwareService _uploadFirmwareService;
-#endif
-#if FT_ENABLED(FT_MQTT)
-    MqttSettingsService _mqttSettingsService;
-    MqttStatus          _mqttStatus;
-#endif
-#if FT_ENABLED(FT_SECURITY)
-    AuthenticationService _authenticationService;
-#endif
-    RestartService      _restartService;
-    FactoryResetService _factoryResetService;
-    SystemStatus        _systemStatus;
+    NTPSettingsService      _ntpSettingsService;
+    NTPStatus               _ntpStatus;
+    OTASettingsService      _otaSettingsService;
+    UploadFirmwareService   _uploadFirmwareService;
+    MqttSettingsService     _mqttSettingsService;
+    MqttStatus              _mqttStatus;
+    AuthenticationService   _authenticationService;
+    RestartService          _restartService;
+    FactoryResetService     _factoryResetService;
+    SystemStatus            _systemStatus;
 };
 
 #endif

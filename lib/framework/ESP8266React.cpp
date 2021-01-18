@@ -3,35 +3,19 @@
 ESP8266React::ESP8266React(AsyncWebServer * server, FS * fs)
     : _featureService(server)
     , _securitySettingsService(server, fs)
-    , _wifiSettingsService(server, fs, &_securitySettingsService)
+    , _networkSettingsService(server, fs, &_securitySettingsService)
     , _wifiScanner(server, &_securitySettingsService)
-    , _wifiStatus(server, &_securitySettingsService)
+    , _networkStatus(server, &_securitySettingsService)
     , _apSettingsService(server, fs, &_securitySettingsService)
     , _apStatus(server, &_securitySettingsService, &_apSettingsService)
-    ,
-#if FT_ENABLED(FT_NTP)
-    _ntpSettingsService(server, fs, &_securitySettingsService)
+    , _ntpSettingsService(server, fs, &_securitySettingsService)
     , _ntpStatus(server, &_securitySettingsService)
-    ,
-#endif
-#if FT_ENABLED(FT_OTA)
-    _otaSettingsService(server, fs, &_securitySettingsService)
-    ,
-#endif
-#if FT_ENABLED(FT_UPLOAD_FIRMWARE)
-    _uploadFirmwareService(server, &_securitySettingsService)
-    ,
-#endif
-#if FT_ENABLED(FT_MQTT)
-    _mqttSettingsService(server, fs, &_securitySettingsService)
+    , _otaSettingsService(server, fs, &_securitySettingsService)
+    , _uploadFirmwareService(server, &_securitySettingsService)
+    , _mqttSettingsService(server, fs, &_securitySettingsService)
     , _mqttStatus(server, &_mqttSettingsService, &_securitySettingsService)
-    ,
-#endif
-#if FT_ENABLED(FT_SECURITY)
-    _authenticationService(server, &_securitySettingsService)
-    ,
-#endif
-    _restartService(server, &_securitySettingsService)
+    , _authenticationService(server, &_securitySettingsService)
+    , _restartService(server, &_securitySettingsService)
     , _factoryResetService(server, fs, &_securitySettingsService)
     , _systemStatus(server, &_securitySettingsService) {
 #ifdef PROGMEM_WWW
@@ -91,29 +75,17 @@ ESP8266React::ESP8266React(AsyncWebServer * server, FS * fs)
 }
 
 void ESP8266React::begin() {
-    _wifiSettingsService.begin();
+    _networkSettingsService.begin();
     _apSettingsService.begin();
-#if FT_ENABLED(FT_NTP)
     _ntpSettingsService.begin();
-#endif
-#if FT_ENABLED(FT_OTA)
     _otaSettingsService.begin();
-#endif
-#if FT_ENABLED(FT_MQTT)
     _mqttSettingsService.begin();
-#endif
-#if FT_ENABLED(FT_SECURITY)
     _securitySettingsService.begin();
-#endif
 }
 
 void ESP8266React::loop() {
-    _wifiSettingsService.loop();
+    _networkSettingsService.loop();
     _apSettingsService.loop();
-#if FT_ENABLED(FT_OTA)
     _otaSettingsService.loop();
-#endif
-#if FT_ENABLED(FT_MQTT)
     _mqttSettingsService.loop();
-#endif
 }

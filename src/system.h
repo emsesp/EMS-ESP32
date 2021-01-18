@@ -68,7 +68,7 @@ class System {
     static void upload_status(bool in_progress);
     static bool upload_status();
     static void show_mem(const char * note);
-    void        init_wifi();
+    void        init_network();
     static void init();
     static void led_init();
     static void syslog_init();

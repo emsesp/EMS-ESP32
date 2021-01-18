@@ -8,7 +8,7 @@ import LockIcon from '@material-ui/icons/Lock';
 import LockOpenIcon from '@material-ui/icons/LockOpen';
 
 import { isNetworkOpen, networkSecurityMode } from './WiFiSecurityModes';
-import { WiFiConnectionContext } from './WiFiConnectionContext';
+import { NetworkConnectionContext } from './NetworkConnectionContext';
 import { WiFiNetwork, WiFiNetworkList } from './types';
 
 interface WiFiNetworkSelectorProps {
@@ -17,8 +17,8 @@ interface WiFiNetworkSelectorProps {
 
 class WiFiNetworkSelector extends Component<WiFiNetworkSelectorProps> {
 
-  static contextType = WiFiConnectionContext;
-  context!: React.ContextType<typeof WiFiConnectionContext>;
+  static contextType = NetworkConnectionContext;
+  context!: React.ContextType<typeof NetworkConnectionContext>;
 
   renderNetwork = (network: WiFiNetwork) => {
     return (

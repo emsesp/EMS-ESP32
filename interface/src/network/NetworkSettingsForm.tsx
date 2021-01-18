@@ -1,5 +1,5 @@
 import React, { Fragment } from 'react';
-import { TextValidator, ValidatorForm } from 'react-material-ui-form-validator';
+import { TextValidator, SelectValidator, ValidatorForm } from 'react-material-ui-form-validator';
 
 import { Checkbox, List, ListItem, ListItemText, ListItemAvatar, ListItemSecondaryAction } from '@material-ui/core';
 
@@ -9,33 +9,35 @@ import LockIcon from '@material-ui/icons/Lock';
 import LockOpenIcon from '@material-ui/icons/LockOpen';
 import DeleteIcon from '@material-ui/icons/Delete';
 import SaveIcon from '@material-ui/icons/Save';
+import MenuItem from '@material-ui/core/MenuItem';
 
 import { RestFormProps, PasswordValidator, BlockFormControlLabel, FormActions, FormButton } from '../components';
 import { isIP, isHostname, optional } from '../validators';
 
-import { WiFiConnectionContext } from './WiFiConnectionContext';
+import { NetworkConnectionContext } from './NetworkConnectionContext';
 import { isNetworkOpen, networkSecurityMode } from './WiFiSecurityModes';
-import { WiFiSettings } from './types';
+import { NetworkSettings } from './types';
 
-type WiFiStatusFormProps = RestFormProps<WiFiSettings>;
+type NetworkStatusFormProps = RestFormProps<NetworkSettings>;
 
-class WiFiSettingsForm extends React.Component<WiFiStatusFormProps> {
+class NetworkSettingsForm extends React.Component<NetworkStatusFormProps> {
 
-  static contextType = WiFiConnectionContext;
-  context!: React.ContextType<typeof WiFiConnectionContext>;
+  static contextType = NetworkConnectionContext;
+  context!: React.ContextType<typeof NetworkConnectionContext>;
 
-  constructor(props: WiFiStatusFormProps, context: WiFiConnectionContext) {
+  constructor(props: NetworkStatusFormProps, context: NetworkConnectionContext) {
     super(props);
 
     const { selectedNetwork } = context;
     if (selectedNetwork) {
-      const wifiSettings: WiFiSettings = {
+      const networkSettings: NetworkSettings = {
         ssid: selectedNetwork.ssid,
         password: "",
         hostname: props.data.hostname,
+        ethernet_profile: 0,
         static_ip_config: false,
       }
-      props.setData(wifiSettings);
+      props.setData(networkSettings);
     }
   }
 
@@ -58,7 +60,7 @@ class WiFiSettingsForm extends React.Component<WiFiStatusFormProps> {
     const { selectedNetwork, deselectNetwork } = this.context;
     const { data, handleValueChange, saveData } = this.props;
     return (
-      <ValidatorForm onSubmit={saveData} ref="WiFiSettingsForm">
+      <ValidatorForm onSubmit={saveData} ref="NetworkSettingsForm">
         {
           selectedNetwork ?
             <List>
@@ -117,6 +119,17 @@ class WiFiSettingsForm extends React.Component<WiFiStatusFormProps> {
           onChange={handleValueChange('hostname')}
           margin="normal"
         />
+        <SelectValidator name="ems_bus_id"
+          label="Ethernet Profile"
+          value={data.ethernet_profile}
+          fullWidth
+          variant="outlined"
+          onChange={handleValueChange('ethernet_profile')}
+          margin="normal">
+          <MenuItem value={0}>None (wifi only)</MenuItem>
+          <MenuItem value={1}>Profile 1 (LAN8720)</MenuItem>
+          <MenuItem value={2}>Profile 2 (TLK110)</MenuItem>
+        </SelectValidator>
         <BlockFormControlLabel
           control={
             <Checkbox
@@ -197,4 +210,4 @@ class WiFiSettingsForm extends React.Component<WiFiStatusFormProps> {
   }
 }
 
-export default WiFiSettingsForm;
+export default NetworkSettingsForm;

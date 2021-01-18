@@ -11,14 +11,14 @@ import DeviceHubIcon from '@material-ui/icons/DeviceHub';
 import RefreshIcon from '@material-ui/icons/Refresh';
 
 import { RestFormProps, FormActions, FormButton, HighlightAvatar } from '../components';
-import { wifiStatus, wifiStatusHighlight, isConnected } from './WiFiStatus';
-import { WiFiStatus } from './types';
+import { networkStatus, networkStatusHighlight, isConnected, isWiFi } from './NetworkStatus';
+import { NetworkStatus } from './types';
 
-type WiFiStatusFormProps = RestFormProps<WiFiStatus> & WithTheme;
+type NetworkStatusFormProps = RestFormProps<NetworkStatus> & WithTheme;
 
-class WiFiStatusForm extends Component<WiFiStatusFormProps> {
+class NetworkStatusForm extends Component<NetworkStatusFormProps> {
 
-  dnsServers(status: WiFiStatus) {
+  dnsServers(status: NetworkStatus) {
     if (!status.dns_ip_1) {
       return "none";
     }
@@ -31,15 +31,15 @@ class WiFiStatusForm extends Component<WiFiStatusFormProps> {
       <Fragment>
         <ListItem>
           <ListItemAvatar>
-            <HighlightAvatar color={wifiStatusHighlight(data, theme)}>
+            <HighlightAvatar color={networkStatusHighlight(data, theme)}>
               <WifiIcon />
             </HighlightAvatar>
           </ListItemAvatar>
-          <ListItemText primary="Status" secondary={wifiStatus(data)} />
+          <ListItemText primary="Status" secondary={networkStatus(data)} />
         </ListItem>
         <Divider variant="inset" component="li" />
         {
-          isConnected(data) &&
+          isWiFi(data) &&
           <Fragment>
             <ListItem>
               <ListItemAvatar>
@@ -50,6 +50,10 @@ class WiFiStatusForm extends Component<WiFiStatusFormProps> {
               <ListItemText primary="SSID" secondary={data.ssid} />
             </ListItem>
             <Divider variant="inset" component="li" />
+          </Fragment>
+        }
+        { isConnected(data) &&
+          <Fragment>
             <ListItem>
               <ListItemAvatar>
                 <Avatar>IP</Avatar>
@@ -114,4 +118,4 @@ class WiFiStatusForm extends Component<WiFiStatusFormProps> {
 
 }
 
-export default withTheme(WiFiStatusForm);
+export default withTheme(NetworkStatusForm);

@@ -53,10 +53,10 @@ int  digitalRead(uint8_t pin);
 
 #define PROGMEM
 #define PGM_P const char *
-#define PSTR(s)                                                                                                                                                \
-    (__extension__({                                                                                                                                           \
-        static const char __c[] = (s);                                                                                                                         \
-        &__c[0];                                                                                                                                               \
+#define PSTR(s)                                                                                                                                                                                                            \
+    (__extension__({                                                                                                                                                                                                       \
+        static const char __c[] = (s);                                                                                                                                                                                     \
+        &__c[0];                                                                                                                                                                                                           \
     }))
 
 class __FlashStringHelper;
@@ -193,7 +193,11 @@ class NativeConsole : public Stream {
     unsigned char peek_data_;
 };
 
+#include <Network.h>
+
 extern NativeConsole Serial;
+extern ETHClass  ETH;
+extern WiFiClass WiFi;
 
 unsigned long millis();
 

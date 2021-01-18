@@ -56,7 +56,6 @@ inline bool operator==(const std::string & lhs, const ::String & rhs) {
     return lhs == rhs.c_str();
 }
 
-
 size_t strlcpy(char * __restrict dst, const char * __restrict src, size_t dsize);
 size_t strlcat(char * dst, const char * src, size_t siz);
 

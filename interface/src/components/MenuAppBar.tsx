@@ -144,11 +144,11 @@ class MenuAppBar extends React.Component<MenuAppBarProps, MenuAppBarState> {
         )}
         
         <List>
-          <ListItem to='/wifi/' selected={path.startsWith('/wifi/')} button component={Link}>
+          <ListItem to='/network/' selected={path.startsWith('/network/')} button component={Link}>
             <ListItemIcon>
               <WifiIcon />
             </ListItemIcon>
-            <ListItemText primary="WiFi Connection" />
+            <ListItemText primary="Network Connection" />
           </ListItem>
           <ListItem to='/ap/' selected={path.startsWith('/ap/')} button component={Link}>
             <ListItemIcon>

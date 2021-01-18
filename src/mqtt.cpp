@@ -340,7 +340,7 @@ void Mqtt::start() {
     mqttClient_ = EMSESP::esp8266React.getMqttClient();
 
     // get the hostname, which we'll use to prefix to all topics
-    EMSESP::esp8266React.getWiFiSettingsService()->read([&](WiFiSettings & wifiSettings) { hostname_ = wifiSettings.hostname.c_str(); });
+    EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) { hostname_ = networkSettings.hostname.c_str(); });
 
     // fetch MQTT settings, to see if MQTT is enabled
     EMSESP::esp8266React.getMqttSettingsService()->read([&](MqttSettings & mqttSettings) {

@@ -22,38 +22,80 @@ namespace emsesp {
 
 WebStatusService::WebStatusService(AsyncWebServer * server, SecurityManager * securityManager) {
     // rest endpoint for web page
-    server->on(EMSESP_STATUS_SERVICE_PATH,
-               HTTP_GET,
-               securityManager->wrapRequest(std::bind(&WebStatusService::webStatusService, this, std::placeholders::_1),
-                                            AuthenticationPredicates::IS_AUTHENTICATED));
-
-// trigger on wifi connects/disconnects
-#ifdef ESP32
-    WiFi.onEvent(onStationModeDisconnected, WiFiEvent_t::SYSTEM_EVENT_STA_DISCONNECTED);
-    WiFi.onEvent(onStationModeGotIP, WiFiEvent_t::SYSTEM_EVENT_STA_GOT_IP);
-#elif defined(ESP8266)
-    _onStationModeDisconnectedHandler = WiFi.onStationModeDisconnected(onStationModeDisconnected);
-    _onStationModeGotIPHandler        = WiFi.onStationModeGotIP(onStationModeGotIP);
-#endif
+    server->on(EMSESP_STATUS_SERVICE_PATH, HTTP_GET, securityManager->wrapRequest(std::bind(&WebStatusService::webStatusService, this, std::placeholders::_1), AuthenticationPredicates::IS_AUTHENTICATED));
+    WiFi.onEvent(std::bind(&WebStatusService::WiFiEvent, this, std::placeholders::_1, std::placeholders::_2));
 }
 
-#ifdef ESP32
-void WebStatusService::onStationModeDisconnected(WiFiEvent_t event, WiFiEventInfo_t info) {
-    EMSESP::logger().info(F("WiFi Disconnected. Reason code=%d"), info.disconnected.reason);
-}
-void WebStatusService::onStationModeGotIP(WiFiEvent_t event, WiFiEventInfo_t info) {
-    EMSESP::logger().info(F("WiFi Connected with IP=%s, hostname=%s"), WiFi.localIP().toString().c_str(), WiFi.getHostname());
-    EMSESP::system_.init_wifi(); // send out heartbeat MQTT as soon as we have a connection
-}
-#elif defined(ESP8266)
-void WebStatusService::onStationModeDisconnected(const WiFiEventStationModeDisconnected & event) {
-    EMSESP::logger().info(F("WiFi Disconnected. Reason code=%d"), event.reason);
-}
-void WebStatusService::onStationModeGotIP(const WiFiEventStationModeGotIP & event) {
-    EMSESP::logger().info(F("WiFi Connected with IP=%s, hostname=%s"), event.ip.toString().c_str(), WiFi.hostname().c_str());
-    EMSESP::system_.init_wifi(); // send out heartbeat MQTT as soon as we have a connection
-}
+// handles both WiFI and Ethernet
+void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
+    switch (event) {
+    case SYSTEM_EVENT_STA_DISCONNECTED:
+        EMSESP::logger().info(F("WiFi Disconnected. Reason code=%d"), info.disconnected.reason);
+
+        break;
+
+    case SYSTEM_EVENT_STA_GOT_IP:
+#ifndef EMSESP_STANDALONE
+        EMSESP::logger().info(F("WiFi Connected with IP=%s, hostname=%s"), WiFi.localIP().toString().c_str(), WiFi.getHostname());
 #endif
+
+        // Lower WiFi tx power to free up current for bus-powered
+        /*
+    WIFI_POWER_19_5dBm = 78,// 19.5dBm <-- default
+    WIFI_POWER_19dBm = 76,// 19dBm
+    WIFI_POWER_18_5dBm = 74,// 18.5dBm
+    WIFI_POWER_17dBm = 68,// 17dBm
+    WIFI_POWER_15dBm = 60,// 15dBm
+    WIFI_POWER_13dBm = 52,// 13dBm
+    WIFI_POWER_11dBm = 44,// 11dBm
+    WIFI_POWER_8_5dBm = 34,// 8.5dBm
+    WIFI_POWER_7dBm = 28,// 7dBm
+    WIFI_POWER_5dBm = 20,// 5dBm
+    WIFI_POWER_2dBm = 8,// 2dBm
+    WIFI_POWER_MINUS_1dBm = -4// -1dBm
+    */
+
+        /*
+        wifi_power_t a1 = WiFi.getTxPower();
+        // bool         ok = WiFi.setTxPower(WIFI_POWER_17dBm); // lower power
+        bool         ok = WiFi.setTxPower(WIFI_POWER_19_5dBm);
+        wifi_power_t a2 = WiFi.getTxPower();
+        LOG_INFO("Adjusting Wifi Tx power from %d to %d (%s)", a1, a2, ok ? "ok" : "failed");
+        */
+
+        EMSESP::system_.init_network(); // send out heartbeat MQTT as soon as we have a connection
+        break;
+
+    case SYSTEM_EVENT_ETH_START:
+        EMSESP::logger().info(F("Ethernet Started"));
+        ETH.setHostname(emsesp::System::hostname().c_str());
+        break;
+
+    case SYSTEM_EVENT_ETH_GOT_IP:
+        // prevent double calls
+        if (!connected_) {
+#ifndef EMSESP_STANDALONE
+            EMSESP::logger().info(F("Ethernet Connected with IP=%s, speed %d Mbps"), ETH.localIP().toString().c_str(), ETH.linkSpeed());
+#endif
+            EMSESP::system_.init_network(); // send out heartbeat MQTT as soon as we have a connection
+            connected_ = true;
+        }
+        break;
+
+    case SYSTEM_EVENT_ETH_DISCONNECTED:
+        EMSESP::logger().info(F("Ethernet Disconnected"));
+        connected_ = false;
+        break;
+
+    case SYSTEM_EVENT_ETH_STOP:
+        EMSESP::logger().info(F("Ethernet Stopped"));
+        connected_ = false;
+        break;
+
+    default:
+        break;
+    }
+}
 
 void WebStatusService::webStatusService(AsyncWebServerRequest * request) {
     AsyncJsonResponse * response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_MEDIUM_DYN);

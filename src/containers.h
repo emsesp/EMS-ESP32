@@ -20,6 +20,7 @@
  * Lightweight queue & array
  * Based ideas from https://github.com/muwerk/ustd
  * Limits to max 255 entries
+ * Was used in testing with ESP8266 to overcome heap memory issues - no longer used
  */
 
 #ifndef EMSESP_CONTAINERS_H

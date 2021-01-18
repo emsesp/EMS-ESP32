@@ -107,9 +107,9 @@ void System::restart() {
 void System::wifi_reconnect() {
     LOG_INFO(F("Wifi reconnecting..."));
     Shell::loop_all();
-    delay(1000);                                                                // wait a second
-    EMSESP::webSettingsService.save();                                          // local settings
-    EMSESP::esp8266React.getWiFiSettingsService()->callUpdateHandlers("local"); // in case we've changed ssid or password
+    delay(1000);                                                                   // wait a second
+    EMSESP::webSettingsService.save();                                             // local settings
+    EMSESP::esp8266React.getNetworkSettingsService()->callUpdateHandlers("local"); // in case we've changed ssid or password
 }
 
 // format fs
@@ -164,7 +164,7 @@ void System::syslog_init() {
     syslog_.log_level((uuid::log::Level)syslog_level_);
     syslog_.mark_interval(syslog_mark_interval_);
     syslog_.destination(addr);
-    EMSESP::esp8266React.getWiFiSettingsService()->read([&](WiFiSettings & wifiSettings) { syslog_.hostname(wifiSettings.hostname.c_str()); });
+    EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) { syslog_.hostname(networkSettings.hostname.c_str()); });
 
     EMSESP::logger().info(F("Syslog started"));
 #endif
@@ -182,7 +182,7 @@ void System::start(uint32_t heap_start) {
 #endif
 
     // print boot message
-    EMSESP::esp8266React.getWiFiSettingsService()->read([&](WiFiSettings & wifiSettings) { LOG_INFO(F("System %s booted (EMS-ESP version %s)"), wifiSettings.hostname.c_str(), EMSESP_APP_VERSION); });
+    EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) { LOG_INFO(F("System %s booted (EMS-ESP version %s)"), networkSettings.hostname.c_str(), EMSESP_APP_VERSION); });
 
     // these commands respond to the topic "system" and take a payload like {cmd:"", data:"", id:""}
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
@@ -198,6 +198,42 @@ void System::start(uint32_t heap_start) {
 #endif
     });
 
+    // check ethernet profile, if we're using exclusive Ethernet then disabled wifi and AP/captive portal
+    uint8_t ethernet_profile;
+    EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & settings) { ethernet_profile = settings.ethernet_profile; });
+
+#ifndef EMSESP_STANDALONE
+    uint8_t          phy_addr   = 0;                  // I²C-address of Ethernet PHY (0 or 1 for LAN8720, 31 for TLK110)
+    int              power      = -1;                 // Pin# of the enable signal for the external crystal oscillator (-1 to disable for internal APLL source)
+    int              mdc        = 23;                 // Pin# of the I²C clock signal for the Ethernet PHY
+    int              mdio       = 18;                 // Pin# of the I²C IO signal for the Ethernet PHY
+    eth_phy_type_t   type       = ETH_PHY_LAN8720;    // Type of the Ethernet PHY (LAN8720 or TLK110)
+    eth_clock_mode_t clock_mode = ETH_CLOCK_GPIO0_IN; // ETH_CLOCK_GPIO0_IN or ETH_CLOCK_GPIO0_OUT, ETH_CLOCK_GPIO16_OUT, ETH_CLOCK_GPIO17_OUT for 50Hz inverted clock
+
+    // see if we can start it using default settings
+    if (!ETH.begin(phy_addr, power, mdc, mdio, type, clock_mode)) {
+        // it failed. Now try again based on profile. 0 is the same as 1. 2 is for TLK110
+        if (ethernet_profile == 2) {
+            if (ETH.begin(31, power, mdc, mdio, ETH_PHY_TLK110, clock_mode)) {
+                EMSESP::esp8266React.getNetworkSettingsService()->update(
+                    [&](NetworkSettings & settings) {
+                        settings.ssid == ""; // remove SSID
+                        return StateUpdateResult::CHANGED;
+                    },
+                    "local");
+
+                EMSESP::esp8266React.getAPSettingsService()->update(
+                    [&](APSettings & settings) {
+                        settings.provisionMode = AP_MODE_NEVER;
+                        return StateUpdateResult::CHANGED;
+                    },
+                    "local");
+            }
+        }
+    }
+#endif
+
+    // continue with init'ing services
     init();
 }
 
@@ -217,9 +253,9 @@ void System::init() {
 
     syslog_init(); // init SysLog
 
-    EMSESP::esp8266React.getWiFiSettingsService()->read([&](WiFiSettings & settings) { hostname(settings.hostname.c_str()); });
+    EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & settings) { hostname(settings.hostname.c_str()); });
 
-#if defined(ESP32)
+#ifndef EMSESP_STANDALONE
     // setCpuFrequencyMhz(160); // default is 240
 
     // disable bluetooth
@@ -288,7 +324,7 @@ void System::loop() {
 #ifndef EMSESP_STANDALONE
 #if defined(EMSESP_DEBUG)
     static uint32_t last_memcheck_ = 0;
-    if (currentMillis - last_memcheck_ > 5000) { // 5 seconds
+    if (currentMillis - last_memcheck_ > 10000) { // 10 seconds
         last_memcheck_ = currentMillis;
         show_mem("core");
     }
@@ -391,32 +427,9 @@ void System::set_led_speed(uint32_t speed) {
     led_monitor();
 }
 
-void System::init_wifi() {
+void System::init_network() {
     last_system_check_ = 0; // force the LED to go from fast flash to pulse
     send_heartbeat();
-
-#if defined(ESP32)
-    // TODO wifi tx power
-    /*
-    WIFI_POWER_19_5dBm = 78,// 19.5dBm
-    WIFI_POWER_19dBm = 76,// 19dBm
-    WIFI_POWER_18_5dBm = 74,// 18.5dBm
-    WIFI_POWER_17dBm = 68,// 17dBm
-    WIFI_POWER_15dBm = 60,// 15dBm
-    WIFI_POWER_13dBm = 52,// 13dBm
-    WIFI_POWER_11dBm = 44,// 11dBm
-    WIFI_POWER_8_5dBm = 34,// 8.5dBm
-    WIFI_POWER_7dBm = 28,// 7dBm
-    WIFI_POWER_5dBm = 20,// 5dBm
-    WIFI_POWER_2dBm = 8,// 2dBm
-    WIFI_POWER_MINUS_1dBm = -4// -1dBm
-    */
-    // wifi_power_t a1 = WiFi.getTxPower();
-    // // bool         ok = WiFi.setTxPower(WIFI_POWER_17dBm);
-    // bool         ok = true;
-    // wifi_power_t a2 = WiFi.getTxPower();
-    // LOG_INFO("Wifi Tx power was %d, is now %d, ok=%s", a1, a2, ok ? "ok" : "failed");
-#endif
 }
 
 // check health of system, done every few seconds
@@ -512,28 +525,9 @@ void System::show_system(uuid::console::Shell & shell) {
     shell.printfln(F("Uptime:        %s"), uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3).c_str());
 
 #ifndef EMSESP_STANDALONE
-#if defined(ESP8266)
-    shell.printfln(F("Chip ID:       0x%08x"), ESP.getChipId());
-    shell.printfln(F("SDK version:   %s"), ESP.getSdkVersion());
-    shell.printfln(F("Core version:  %s"), ESP.getCoreVersion().c_str());
-    shell.printfln(F("Full version:  %s"), ESP.getFullVersion().c_str());
-    shell.printfln(F("Boot version:  %u"), ESP.getBootVersion());
-    shell.printfln(F("Boot mode:     %u"), ESP.getBootMode());
-    shell.printfln(F("CPU frequency: %u MHz"), ESP.getCpuFreqMHz());
-    shell.printfln(F("Flash chip:    0x%08X (%u bytes)"), ESP.getFlashChipId(), ESP.getFlashChipRealSize());
-    shell.printfln(F("Reset reason:  %s"), ESP.getResetReason().c_str());
-    shell.printfln(F("Reset info:    %s"), ESP.getResetInfo().c_str());
-#elif defined(ESP32)
     shell.printfln(F("SDK version:   %s"), ESP.getSdkVersion());
     shell.printfln(F("CPU frequency: %u MHz"), ESP.getCpuFreqMHz());
-#endif
-    shell.printfln(F("Sketch size:   %u bytes (%u bytes free)"), ESP.getSketchSize(), ESP.getFreeSketchSpace());
     shell.printfln(F("Free heap:                %lu bytes"), (uint32_t)ESP.getFreeHeap());
-#if defined(ESP8266)
-    shell.printfln(F("Heap fragmentation:       %u %%"), ESP.getHeapFragmentation());
-    shell.printfln(F("Maximum free block size:  %lu bytes"), (uint32_t)ESP.getMaxFreeBlockSize());
-    shell.printfln(F("Free continuations stack: %lu bytes"), (uint32_t)ESP.getFreeContStack());
-#endif
     shell.println();
 
     switch (WiFi.status()) {
@@ -555,12 +549,7 @@ void System::show_system(uuid::console::Shell & shell) {
         shell.printfln(F("BSSID: %s"), WiFi.BSSIDstr().c_str());
         shell.printfln(F("RSSI: %d dBm (%d %%)"), WiFi.RSSI(), wifi_quality());
         shell.printfln(F("MAC address: %s"), WiFi.macAddress().c_str());
-
-#if defined(ESP8266)
-        shell.printfln(F("Hostname: %s"), WiFi.hostname().c_str());
-#elif defined(ESP32)
         shell.printfln(F("Hostname: %s"), WiFi.getHostname());
-#endif
         shell.printfln(F("IPv4 address: %s/%s"), uuid::printable_to_string(WiFi.localIP()).c_str(), uuid::printable_to_string(WiFi.subnetMask()).c_str());
         shell.printfln(F("IPv4 gateway: %s"), uuid::printable_to_string(WiFi.gatewayIP()).c_str());
         shell.printfln(F("IPv4 nameserver: %s"), uuid::printable_to_string(WiFi.dnsIP()).c_str());
@@ -582,6 +571,20 @@ void System::show_system(uuid::console::Shell & shell) {
     default:
         shell.printfln(F("WiFi: Unknown"));
         break;
+    }
+
+    shell.println();
+
+    // show Ethernet
+    if (ETH.linkUp()) {
+        shell.printfln(F("Ethernet: Connected"));
+        shell.printfln(F("MAC address: %s"), ETH.macAddress().c_str());
+        shell.printfln(F("Hostname: %s"), ETH.getHostname());
+        shell.printfln(F("IPv4 address: %s/%s"), uuid::printable_to_string(ETH.localIP()).c_str(), uuid::printable_to_string(ETH.subnetMask()).c_str());
+        shell.printfln(F("IPv4 gateway: %s"), uuid::printable_to_string(ETH.gatewayIP()).c_str());
+        shell.printfln(F("IPv4 nameserver: %s"), uuid::printable_to_string(ETH.dnsIP()).c_str());
+    } else {
+        shell.printfln(F("Ethernet: disconnected"));
     }
 
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
@@ -658,15 +661,15 @@ void System::console_commands(Shell & shell, unsigned int context) {
 
     EMSESPShell::commands->add_command(ShellContext::SYSTEM,
                                        CommandFlags::ADMIN,
-                                       flash_string_vector{F_(set), F_(wifi), F_(hostname)},
+                                       flash_string_vector{F_(set), F_(hostname)},
                                        flash_string_vector{F_(name_mandatory)},
                                        [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) {
-                                           shell.println("The wifi connection will be reset...");
+                                           shell.println("The network connection will be reset...");
                                            Shell::loop_all();
                                            delay(1000); // wait a second
-                                           EMSESP::esp8266React.getWiFiSettingsService()->update(
-                                               [&](WiFiSettings & wifiSettings) {
-                                                   wifiSettings.hostname = arguments.front().c_str();
+                                           EMSESP::esp8266React.getNetworkSettingsService()->update(
+                                               [&](NetworkSettings & networkSettings) {
+                                                   networkSettings.hostname = arguments.front().c_str();
                                                    return StateUpdateResult::CHANGED;
                                                },
                                                "local");
@@ -677,8 +680,8 @@ void System::console_commands(Shell & shell, unsigned int context) {
                                        flash_string_vector{F_(set), F_(wifi), F_(ssid)},
                                        flash_string_vector{F_(name_mandatory)},
                                        [](Shell & shell, const std::vector<std::string> & arguments) {
-                                           EMSESP::esp8266React.getWiFiSettingsService()->updateWithoutPropagation([&](WiFiSettings & wifiSettings) {
-                                               wifiSettings.ssid = arguments.front().c_str();
+                                           EMSESP::esp8266React.getNetworkSettingsService()->updateWithoutPropagation([&](NetworkSettings & networkSettings) {
+                                               networkSettings.ssid = arguments.front().c_str();
                                                return StateUpdateResult::CHANGED;
                                            });
                                            shell.println("Use `wifi reconnect` to apply the new settings");
@@ -690,8 +693,8 @@ void System::console_commands(Shell & shell, unsigned int context) {
                 shell.enter_password(F_(new_password_prompt2), [password1](Shell & shell, bool completed, const std::string & password2) {
                     if (completed) {
                         if (password1 == password2) {
-                            EMSESP::esp8266React.getWiFiSettingsService()->updateWithoutPropagation([&](WiFiSettings & wifiSettings) {
-                                wifiSettings.password = password2.c_str();
+                            EMSESP::esp8266React.getNetworkSettingsService()->updateWithoutPropagation([&](NetworkSettings & networkSettings) {
+                                networkSettings.password = password2.c_str();
                                 return StateUpdateResult::CHANGED;
                             });
                             shell.println("Use `wifi reconnect` to apply the new settings");
@@ -705,16 +708,16 @@ void System::console_commands(Shell & shell, unsigned int context) {
     });
 
     EMSESPShell::commands->add_command(ShellContext::SYSTEM, CommandFlags::USER, flash_string_vector{F_(set)}, [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
-        EMSESP::esp8266React.getWiFiSettingsService()->read([&](WiFiSettings & wifiSettings) {
+        EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
             shell.print(F(" "));
-            shell.printfln(F_(hostname_fmt), wifiSettings.hostname.isEmpty() ? uuid::read_flash_string(F_(unset)).c_str() : wifiSettings.hostname.c_str());
+            shell.printfln(F_(hostname_fmt), networkSettings.hostname.isEmpty() ? uuid::read_flash_string(F_(unset)).c_str() : networkSettings.hostname.c_str());
         });
 
-        EMSESP::esp8266React.getWiFiSettingsService()->read([&](WiFiSettings & wifiSettings) {
+        EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
             shell.print(F(" "));
-            shell.printfln(F_(wifi_ssid_fmt), wifiSettings.ssid.isEmpty() ? uuid::read_flash_string(F_(unset)).c_str() : wifiSettings.ssid.c_str());
+            shell.printfln(F_(wifi_ssid_fmt), networkSettings.ssid.isEmpty() ? uuid::read_flash_string(F_(unset)).c_str() : networkSettings.ssid.c_str());
             shell.print(F(" "));
-            shell.printfln(F_(wifi_password_fmt), wifiSettings.ssid.isEmpty() ? F_(unset) : F_(asterisks));
+            shell.printfln(F_(wifi_password_fmt), networkSettings.ssid.isEmpty() ? F_(unset) : F_(asterisks));
         });
     });
 
@@ -802,17 +805,17 @@ bool System::check_upgrade() {
             EMSESP::esp8266React.begin();
             EMSESP::webSettingsService.begin();
 
-            EMSESP::esp8266React.getWiFiSettingsService()->update(
-                [&](WiFiSettings & wifiSettings) {
-                    wifiSettings.hostname = general["hostname"] | FACTORY_WIFI_HOSTNAME;
-                    wifiSettings.ssid     = network["ssid"] | FACTORY_WIFI_SSID;
-                    wifiSettings.password = network["password"] | FACTORY_WIFI_PASSWORD;
+            EMSESP::esp8266React.getNetworkSettingsService()->update(
+                [&](NetworkSettings & networkSettings) {
+                    networkSettings.hostname = general["hostname"] | FACTORY_WIFI_HOSTNAME;
+                    networkSettings.ssid     = network["ssid"] | FACTORY_WIFI_SSID;
+                    networkSettings.password = network["password"] | FACTORY_WIFI_PASSWORD;
 
-                    wifiSettings.staticIPConfig = false;
-                    JsonUtils::readIP(network, "staticip", wifiSettings.localIP);
-                    JsonUtils::readIP(network, "dnsip", wifiSettings.dnsIP1);
-                    JsonUtils::readIP(network, "gatewayip", wifiSettings.gatewayIP);
-                    JsonUtils::readIP(network, "nmask", wifiSettings.subnetMask);
+                    networkSettings.staticIPConfig = false;
+                    JsonUtils::readIP(network, "staticip", networkSettings.localIP);
+                    JsonUtils::readIP(network, "dnsip", networkSettings.dnsIP1);
+                    JsonUtils::readIP(network, "gatewayip", networkSettings.gatewayIP);
+                    JsonUtils::readIP(network, "nmask", networkSettings.subnetMask);
 
                     return StateUpdateResult::CHANGED;
                 },
@@ -922,7 +925,7 @@ bool System::check_upgrade() {
 // e.g. http://ems-esp/api?device=system&cmd=settings
 // value and id are ignored
 bool System::command_settings(const char * value, const int8_t id, JsonObject & json) {
-    EMSESP::esp8266React.getWiFiSettingsService()->read([&](WiFiSettings & settings) {
+    EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & settings) {
         JsonObject node = json.createNestedObject("WIFI");
         node["ssid"]    = settings.ssid;
         // node["password"]         = settings.password;
