@@ -96,8 +96,8 @@ void Shower::send_mqtt_stat(bool state) {
         return;
     }
 
-    char s[7];
-    Mqtt::publish(F("shower_active"), Helpers::render_boolean(s, state));
+    // char s[7];
+    // Mqtt::publish(F("shower_active"), Helpers::render_boolean(s, state));
 
     // if we're in HA mode make sure we've first sent out the HA MQTT Discovery config topic
     if ((Mqtt::ha_enabled()) && (!ha_configdone_)) {
