@@ -27,6 +27,8 @@ void Shower::start() {
         shower_timer_ = settings.shower_timer;
         shower_alert_ = settings.shower_alert;
     });
+
+    send_mqtt_stat(false);
 }
 
 void Shower::loop() {
