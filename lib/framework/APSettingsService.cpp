@@ -21,7 +21,7 @@ void APSettingsService::reconfigureAP() {
 
 void APSettingsService::loop() {
     // if we have an ETH connection, quit
-    if (ETH.linkUp()) {
+    if (emsesp::System::ethernet_connected()) {
         return;
     }
     unsigned long currentMillis = uuid::get_uptime();

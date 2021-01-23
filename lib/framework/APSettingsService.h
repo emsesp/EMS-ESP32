@@ -8,9 +8,9 @@
 #include <DNSServer.h>
 #include <IPAddress.h>
 
-#include <ETH.h>
-
 #include <uuid/common.h>
+
+#include "../../src/system.h" // proddy added
 
 #define MANAGE_NETWORK_DELAY 10000
 
@@ -59,8 +59,7 @@ class APSettings {
     IPAddress subnetMask;
 
     bool operator==(const APSettings & settings) const {
-        return provisionMode == settings.provisionMode && ssid == settings.ssid && password == settings.password && localIP == settings.localIP
-               && gatewayIP == settings.gatewayIP && subnetMask == settings.subnetMask;
+        return provisionMode == settings.provisionMode && ssid == settings.ssid && password == settings.password && localIP == settings.localIP && gatewayIP == settings.gatewayIP && subnetMask == settings.subnetMask;
     }
 
     static void read(APSettings & settings, JsonObject & root) {

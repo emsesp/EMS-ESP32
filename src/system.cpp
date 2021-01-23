@@ -42,6 +42,7 @@ uint16_t    System::analog_         = 0;
 bool        System::analog_enabled_ = false;
 bool        System::syslog_enabled_ = false;
 std::string System::hostname_;
+bool        System::ethernet_connected_ = false;
 
 // send on/off to a gpio pin
 // value: true = HIGH, false = LOW
@@ -181,8 +182,11 @@ void System::start(uint32_t heap_start) {
     show_mem("Startup");
 #endif
 
-    // print boot message
-    EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) { LOG_INFO(F("System %s booted (EMS-ESP version %s)"), networkSettings.hostname.c_str(), EMSESP_APP_VERSION); });
+    uint8_t ethernet_profile;
+    EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
+        LOG_INFO(F("System %s booted (EMS-ESP version %s)"), networkSettings.hostname.c_str(), EMSESP_APP_VERSION); // print boot message
+        ethernet_profile = networkSettings.ethernet_profile;
+    });
 
     // these commands respond to the topic "system" and take a payload like {cmd:"", data:"", id:""}
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
@@ -198,43 +202,57 @@ void System::start(uint32_t heap_start) {
 #endif
     });
 
+    // start other services first
+    init();
+
     // check ethernet profile, if we're using exclusive Ethernet then disabled wifi and AP/captive portal
-    uint8_t ethernet_profile;
-    EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & settings) { ethernet_profile = settings.ethernet_profile; });
+    if (ethernet_profile == 0) {
+        return;
+    }
+
+    uint8_t          phy_addr;   // I²C-address of Ethernet PHY (0 or 1 for LAN8720, 31 for TLK110)
+    int              power;      // Pin# of the enable signal for the external crystal oscillator (-1 to disable for internal APLL source)
+    int              mdc;        // Pin# of the I²C clock signal for the Ethernet PHY
+    int              mdio;       // Pin# of the I²C IO signal for the Ethernet PHY
+    eth_phy_type_t   type;       // Type of the Ethernet PHY (LAN8720 or TLK110)
+    eth_clock_mode_t clock_mode; // ETH_CLOCK_GPIO0_IN or ETH_CLOCK_GPIO0_OUT, ETH_CLOCK_GPIO16_OUT, ETH_CLOCK_GPIO17_OUT for 50Hz inverted clock
+
+    if (ethernet_profile == 1) {
+        // LAN8720
+        phy_addr   = 0;
+        power      = -1;
+        mdc        = 23;
+        mdio       = 18;
+        type       = ETH_PHY_LAN8720;
+        clock_mode = ETH_CLOCK_GPIO0_IN;
+    } else if (ethernet_profile == 2) {
+        // TLK110
+        phy_addr   = 31;
+        power      = -1;
+        mdc        = 23;
+        mdio       = 18;
+        type       = ETH_PHY_TLK110;
+        clock_mode = ETH_CLOCK_GPIO0_IN;
+    }
 
 #ifndef EMSESP_STANDALONE
-    uint8_t          phy_addr   = 0;                  // I²C-address of Ethernet PHY (0 or 1 for LAN8720, 31 for TLK110)
-    int              power      = -1;                 // Pin# of the enable signal for the external crystal oscillator (-1 to disable for internal APLL source)
-    int              mdc        = 23;                 // Pin# of the I²C clock signal for the Ethernet PHY
-    int              mdio       = 18;                 // Pin# of the I²C IO signal for the Ethernet PHY
-    eth_phy_type_t   type       = ETH_PHY_LAN8720;    // Type of the Ethernet PHY (LAN8720 or TLK110)
-    eth_clock_mode_t clock_mode = ETH_CLOCK_GPIO0_IN; // ETH_CLOCK_GPIO0_IN or ETH_CLOCK_GPIO0_OUT, ETH_CLOCK_GPIO16_OUT, ETH_CLOCK_GPIO17_OUT for 50Hz inverted clock
+    if (ETH.begin(phy_addr, power, mdc, mdio, type, clock_mode)) {
+        // disable ssid and AP
+        EMSESP::esp8266React.getNetworkSettingsService()->update(
+            [&](NetworkSettings & settings) {
+                settings.ssid == ""; // remove SSID
+                return StateUpdateResult::CHANGED;
+            },
+            "local");
 
-    // see if we can start it using default settings
-    if (!ETH.begin(phy_addr, power, mdc, mdio, type, clock_mode)) {
-        // it failed. Now try again based on profile. 0 is the same as 1. 2 is for TLK110
-        if (ethernet_profile == 2) {
-            if (ETH.begin(31, power, mdc, mdio, ETH_PHY_TLK110, clock_mode)) {
-                EMSESP::esp8266React.getNetworkSettingsService()->update(
-                    [&](NetworkSettings & settings) {
-                        settings.ssid == ""; // remove SSID
-                        return StateUpdateResult::CHANGED;
-                    },
-                    "local");
-
-                EMSESP::esp8266React.getAPSettingsService()->update(
-                    [&](APSettings & settings) {
-                        settings.provisionMode = AP_MODE_NEVER;
-                        return StateUpdateResult::CHANGED;
-                    },
-                    "local");
-            }
-        }
+        EMSESP::esp8266React.getAPSettingsService()->update(
+            [&](APSettings & settings) {
+                settings.provisionMode = AP_MODE_NEVER;
+                return StateUpdateResult::CHANGED;
+            },
+            "local");
     }
 #endif
-
-    // continue with init'ing services
-    init();
 }
 
 void System::other_init() {
@@ -576,7 +594,7 @@ void System::show_system(uuid::console::Shell & shell) {
     shell.println();
 
     // show Ethernet
-    if (ETH.linkUp()) {
+    if (ethernet_connected()) {
         shell.printfln(F("Ethernet: Connected"));
         shell.printfln(F("MAC address: %s"), ETH.macAddress().c_str());
         shell.printfln(F("Hostname: %s"), ETH.getHostname());

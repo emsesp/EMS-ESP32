@@ -8,7 +8,7 @@ void NetworkStatus::networkStatus(AsyncWebServerRequest * request) {
     AsyncJsonResponse * response = new AsyncJsonResponse(false, MAX_NETWORK_STATUS_SIZE);
     JsonObject          root     = response->getRoot();
 
-    bool        ethernet_connected = ETH.linkUp();
+    bool        ethernet_connected = emsesp::System::ethernet_connected();
     wl_status_t wifi_status        = WiFi.status();
 
     // see if Ethernet is connected
@@ -36,7 +36,7 @@ void NetworkStatus::networkStatus(AsyncWebServerRequest * request) {
         if (dnsIP2 != INADDR_NONE) {
             root["dns_ip_2"] = dnsIP2.toString();
         }
-    } else if (ETH.linkUp()) {
+    } else if (ethernet_connected) {
         // Ethernet
         root["local_ip"]    = ETH.localIP().toString();
         root["mac_address"] = ETH.macAddress();

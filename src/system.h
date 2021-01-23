@@ -22,18 +22,16 @@
 #include <Arduino.h>
 #include <ArduinoJson.h>
 
-#if defined(ESP32)
-#include "driver/adc.h"
-#include <esp_wifi.h>
-#include <esp_bt.h>
-#endif
-
 #include "helpers.h"
 #include "console.h"
 #include "mqtt.h"
 #include "telegram.h"
 
 #ifndef EMSESP_STANDALONE
+#include "driver/adc.h"
+#include <esp_wifi.h>
+#include <esp_bt.h>
+#include <ETH.h>
 #include <uuid/syslog.h>
 #endif
 
@@ -85,6 +83,14 @@ class System {
         hostname_ = hostname;
     }
 
+    static bool ethernet_connected() {
+        return ethernet_connected_;
+    }
+
+    static void ethernet_connected(bool b) {
+        ethernet_connected_ = b;
+    }
+
   private:
     static uuid::log::Logger logger_;
 
@@ -119,6 +125,7 @@ class System {
     static bool     upload_status_; // true if we're in the middle of a OTA firmware upload
     static uint32_t heap_start_;
     static uint16_t analog_;
+    static bool     ethernet_connected_;
 
     // settings
     static std::string hostname_;

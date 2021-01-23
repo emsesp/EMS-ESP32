@@ -2,8 +2,9 @@
 #define NetworkStatus_h
 
 #include <WiFi.h>
-#include <ETH.h>
 #include <AsyncTCP.h>
+
+#include "../../src/system.h" // proddy added
 
 #include <ArduinoJson.h>
 #include <AsyncJson.h>

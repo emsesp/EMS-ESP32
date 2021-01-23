@@ -6,7 +6,6 @@
 
 #include <time.h>
 #include <lwip/apps/sntp.h>
-#include <ETH.h>
 
 #ifndef FACTORY_NTP_ENABLED
 #define FACTORY_NTP_ENABLED true

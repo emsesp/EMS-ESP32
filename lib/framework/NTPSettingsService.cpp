@@ -34,8 +34,6 @@ void NTPSettingsService::WiFiEvent(WiFiEvent_t event) {
         configureNTP();
         break;
 
-
-
     default:
         break;
     }

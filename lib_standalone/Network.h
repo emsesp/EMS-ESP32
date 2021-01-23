@@ -11,6 +11,15 @@
 #define WIFI_AP_STA WIFI_MODE_APSTA
 
 typedef enum {
+    ETH_CLOCK_GPIO0_IN   = 0, /*!< RMII clock input to GPIO0 */
+    ETH_CLOCK_GPIO0_OUT  = 1, /*!< RMII clock output from GPIO0 */
+    ETH_CLOCK_GPIO16_OUT = 2, /*!< RMII clock output from GPIO16 */
+    ETH_CLOCK_GPIO17_OUT = 3  /*!< RMII clock output from GPIO17 */
+} eth_clock_mode_t;
+
+typedef enum { ETH_PHY_LAN8720, ETH_PHY_TLK110, ETH_PHY_MAX } eth_phy_type_t;
+
+typedef enum {
     SYSTEM_EVENT_WIFI_READY = 0,         /**< ESP32 WiFi ready */
     SYSTEM_EVENT_SCAN_DONE,              /**< ESP32 finish scanning AP */
     SYSTEM_EVENT_STA_START,              /**< ESP32 station start */
@@ -159,7 +168,7 @@ class WiFiClass {
 
 class ETHClass {
   public:
-    bool begin() {
+    bool begin(uint8_t phy_addr, int power, int mdc, int mdio, eth_phy_type_t type, eth_clock_mode_t clock_mode) {
         return false;
     };
 

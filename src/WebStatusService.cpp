@@ -73,23 +73,23 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
 
     case SYSTEM_EVENT_ETH_GOT_IP:
         // prevent double calls
-        if (!connected_) {
+        if (!System::ethernet_connected()) {
 #ifndef EMSESP_STANDALONE
             EMSESP::logger().info(F("Ethernet Connected with IP=%s, speed %d Mbps"), ETH.localIP().toString().c_str(), ETH.linkSpeed());
 #endif
             EMSESP::system_.init_network(); // send out heartbeat MQTT as soon as we have a connection
-            connected_ = true;
+            System::ethernet_connected(true);
         }
         break;
 
     case SYSTEM_EVENT_ETH_DISCONNECTED:
         EMSESP::logger().info(F("Ethernet Disconnected"));
-        connected_ = false;
+        System::ethernet_connected(false);
         break;
 
     case SYSTEM_EVENT_ETH_STOP:
         EMSESP::logger().info(F("Ethernet Stopped"));
-        connected_ = false;
+        System::ethernet_connected(false);
         break;
 
     default:

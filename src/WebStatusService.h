@@ -34,7 +34,6 @@ class WebStatusService {
     WebStatusService(AsyncWebServer * server, SecurityManager * securityManager);
 
   private:
-    bool connected_ = false;
     void webStatusService(AsyncWebServerRequest * request);
     void WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info);
 };
