@@ -88,7 +88,7 @@ class Mqtt {
     enum Dallas_Format : uint8_t { SENSORID = 1, NUMBER };
     enum HA_Climate_Format : uint8_t { CURRENT = 1, SETPOINT, ZERO };
 
-    static constexpr uint8_t MQTT_TOPIC_MAX_SIZE = 128; // note this should really match the user setting in mqttSettings.maxTopicLength
+    static constexpr uint8_t MQTT_TOPIC_MAX_SIZE = FACTORY_MQTT_MAX_TOPIC_LENGTH; // note this should really match the user setting in mqttSettings.maxTopicLength
 
     static void on_connect();
 
@@ -136,6 +136,10 @@ class Mqtt {
 
     static bool enabled() {
         return mqtt_enabled_;
+    }
+
+    static std::string base() {
+        return mqtt_base_;
     }
 
     static uint32_t publish_fails() {
@@ -249,7 +253,7 @@ class Mqtt {
     static uint8_t  connectcount_;
 
     // settings, copied over
-    static std::string hostname_;
+    static std::string mqtt_base_;
     static uint8_t     mqtt_qos_;
     static bool        mqtt_retain_;
     static uint32_t    publish_time_;

@@ -25,7 +25,7 @@ namespace emsesp {
 AsyncMqttClient * Mqtt::mqttClient_;
 
 // static parameters we make global
-std::string Mqtt::hostname_;
+std::string Mqtt::mqtt_base_;
 uint8_t     Mqtt::mqtt_qos_;
 bool        Mqtt::mqtt_retain_;
 uint32_t    Mqtt::publish_time_boiler_;
@@ -339,12 +339,10 @@ void Mqtt::reset_mqtt() {
 void Mqtt::start() {
     mqttClient_ = EMSESP::esp8266React.getMqttClient();
 
-    // get the hostname, which we'll use to prefix to all topics
-    EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) { hostname_ = networkSettings.hostname.c_str(); });
-
     // fetch MQTT settings, to see if MQTT is enabled
     EMSESP::esp8266React.getMqttSettingsService()->read([&](MqttSettings & mqttSettings) {
         mqtt_enabled_ = mqttSettings.enabled;
+        mqtt_base_    = mqttSettings.base.c_str();
         if (!mqtt_enabled_) {
             return; // quit, not using MQTT
         }
@@ -377,11 +375,9 @@ void Mqtt::start() {
         }
     });
 
-    // create will_topic with the hostname prefixed. It has to be static because asyncmqttclient destroys the reference
+    // create will_topic with the base prefixed. It has to be static because asyncmqttclient destroys the reference
     static char will_topic[MQTT_TOPIC_MAX_SIZE];
-    strlcpy(will_topic, hostname_.c_str(), MQTT_TOPIC_MAX_SIZE);
-    strlcat(will_topic, "/", MQTT_TOPIC_MAX_SIZE);
-    strlcat(will_topic, "status", MQTT_TOPIC_MAX_SIZE);
+    snprintf_P(will_topic, MQTT_TOPIC_MAX_SIZE, PSTR("%s/status"), mqtt_base_.c_str());
     mqttClient_->setWill(will_topic, 1, true, "offline"); // with qos 1, retain true
 
     mqttClient_->onMessage([this](char * topic, char * payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) {
@@ -512,7 +508,7 @@ void Mqtt::ha_status() {
     StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> doc;
 
     doc["uniq_id"] = FJSON("ems-esp-system");
-    doc["~"]       = System::hostname(); // default ems-esp
+    doc["~"]       = mqtt_base_; // default ems-esp
     // doc["avty_t"]      = FJSON("~/status"); // commented out, as it causes errors in HA sometimes
     // doc["json_attr_t"] = FJSON("~/heartbeat"); // store also as HA attributes
     doc["stat_t"]      = FJSON("~/heartbeat");
@@ -527,8 +523,8 @@ void Mqtt::ha_status() {
     JsonArray ids  = dev.createNestedArray("ids");
     ids.add("ems-esp-system");
 
-    char topic[100];
-    snprintf_P(topic, sizeof(topic), PSTR("homeassistant/sensor/%s/system/config"), System::hostname().c_str());
+    char topic[MQTT_TOPIC_MAX_SIZE];
+    snprintf_P(topic, sizeof(topic), PSTR("homeassistant/sensor/%s/system/config"), mqtt_base_.c_str());
     Mqtt::publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
 
     // create the sensors
@@ -545,22 +541,22 @@ void Mqtt::ha_status() {
 }
 
 // add sub or pub task to the queue.
-// a fully-qualified topic is created by prefixing the hostname, unless it's HA
+// a fully-qualified topic is created by prefixing the base, unless it's HA
 // returns a pointer to the message created
 std::shared_ptr<const MqttMessage> Mqtt::queue_message(const uint8_t operation, const std::string & topic, const std::string & payload, bool retain) {
     if (topic.empty()) {
         return nullptr;
     }
 
-    // take the topic and prefix the hostname, unless its for HA
+    // take the topic and prefix the base, unless its for HA
     std::shared_ptr<MqttMessage> message;
     if ((strncmp(topic.c_str(), "homeassistant/", 13) == 0)) {
         // leave topic as it is
         message = std::make_shared<MqttMessage>(operation, topic, payload, retain);
     } else {
-        // prefix the hostname
-        std::string full_topic(100, '\0');
-        snprintf_P(&full_topic[0], full_topic.capacity() + 1, PSTR("%s/%s"), hostname_.c_str(), topic.c_str());
+        // prefix the base
+        std::string full_topic(MQTT_TOPIC_MAX_SIZE, '\0');
+        snprintf_P(&full_topic[0], full_topic.capacity() + 1, PSTR("%s/%s"), mqtt_base_.c_str(), topic.c_str());
         message = std::make_shared<MqttMessage>(operation, full_topic, payload, retain);
     }
 
@@ -795,11 +791,11 @@ void Mqtt::publish_mqtt_ha_sensor(uint8_t                     type, // EMSdevice
     // if its a boiler we use the tag
     char stat_t[MQTT_TOPIC_MAX_SIZE];
     if (device_type == EMSdevice::DeviceType::BOILER) {
-        snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/%s"), hostname_.c_str(), EMSdevice::tag_to_string(tag).c_str());
+        snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/%s"), mqtt_base_.c_str(), EMSdevice::tag_to_string(tag).c_str());
     } else if (device_type == EMSdevice::DeviceType::SYSTEM) {
-        snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/heartbeat"), hostname_.c_str());
+        snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/heartbeat"), mqtt_base_.c_str());
     } else {
-        snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/%s_data"), hostname_.c_str(), device_name);
+        snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/%s_data"), mqtt_base_.c_str(), device_name);
     }
     doc["stat_t"] = stat_t;
 
@@ -823,7 +819,7 @@ void Mqtt::publish_mqtt_ha_sensor(uint8_t                     type, // EMSdevice
     // look at the device value type
     if (type == DeviceValueType::BOOL) {
         // binary sensor
-        snprintf_P(topic, sizeof(topic), PSTR("homeassistant/binary_sensor/%s/%s/config"), System::hostname().c_str(), uniq.c_str()); // topic
+        snprintf_P(topic, sizeof(topic), PSTR("homeassistant/binary_sensor/%s/%s/config"), mqtt_base_.c_str(), uniq.c_str()); // topic
 
         // how to render boolean
         EMSESP::webSettingsService.read([&](WebSettings & settings) {
@@ -833,7 +829,7 @@ void Mqtt::publish_mqtt_ha_sensor(uint8_t                     type, // EMSdevice
         });
     } else {
         // normal HA sensor, not a boolean one
-        snprintf_P(topic, sizeof(topic), PSTR("homeassistant/sensor/%s/%s/config"), System::hostname().c_str(), uniq.c_str()); // topic
+        snprintf_P(topic, sizeof(topic), PSTR("homeassistant/sensor/%s/%s/config"), mqtt_base_.c_str(), uniq.c_str()); // topic
 
         // unit of measure and map the HA icon
         if (uom != DeviceValueUOM::NONE) {

@@ -441,8 +441,10 @@ void EMSESP::publish_device_values(uint8_t device_type) {
                 return;
             }
 
-            // for all other devices add the values to the json, without verbose mode
-            has_value |= emsdevice->generate_values_json(json, DeviceValueTAG::TAG_NONE);
+            if ((device_type != DeviceType::THERMOSTAT) || (emsdevice->device_id() == EMSESP::actual_master_thermostat())) {
+                // for all other devices add the values to the json, without verbose mode
+                has_value |= emsdevice->generate_values_json(json, DeviceValueTAG::TAG_NONE);
+            }
         }
     }
 
@@ -862,18 +864,19 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
         return true;
     }
 
-    Command::add_with_json(device_type, F_(info), [device_type](const char * value, const int8_t id, JsonObject & json) { return command_info(device_type, json); });
+    Command::add_with_json(device_type, F_(info), [device_type](const char * value, const int8_t id, JsonObject & json) { return command_info(device_type, json, id); });
 
     return true;
 }
 
 // export all values to info command
 // value and id are ignored
-bool EMSESP::command_info(uint8_t device_type, JsonObject & json) {
+bool EMSESP::command_info(uint8_t device_type, JsonObject & json, const int8_t id) {
     bool has_value = false;
     for (const auto & emsdevice : emsdevices) {
-        if (emsdevice && (emsdevice->device_type() == device_type)) {
-            has_value |= emsdevice->generate_values_json(json, DeviceValueTAG::TAG_NONE, true); // verbose mode
+        if (emsdevice && (emsdevice->device_type() == device_type) &&
+            ((device_type != DeviceType::THERMOSTAT) || (emsdevice->device_id() == EMSESP::actual_master_thermostat()))) {
+            has_value |= emsdevice->generate_values_json(json, DeviceValueTAG::TAG_NONE, (id != 0)); // verbose mode
         }
     }
 

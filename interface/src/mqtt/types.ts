@@ -21,6 +21,7 @@ export interface MqttSettings {
   enabled: boolean;
   host: string;
   port: number;
+  base: string;
   username: string;
   password: string;
   client_id: string;

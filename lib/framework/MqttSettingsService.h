@@ -29,6 +29,10 @@
 #define FACTORY_MQTT_PORT 1883
 #endif
 
+#ifndef FACTORY_MQTT_BASE
+#define FACTORY_MQTT_BASE "ems-esp"
+#endif
+
 #ifndef FACTORY_MQTT_USERNAME
 #define FACTORY_MQTT_USERNAME ""
 #endif
@@ -73,6 +77,7 @@ class MqttSettings {
     bool     enabled;
     String   host;
     uint16_t port;
+    String   base;
 
     // username and password
     String username;

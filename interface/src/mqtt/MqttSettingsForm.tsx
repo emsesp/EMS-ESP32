@@ -6,7 +6,7 @@ import SaveIcon from '@material-ui/icons/Save';
 import MenuItem from '@material-ui/core/MenuItem';
 
 import { RestFormProps, FormActions, FormButton, BlockFormControlLabel, PasswordValidator } from '../components';
-import { isIP, isHostname, or } from '../validators';
+import { isIP, isHostname, or, isPath } from '../validators';
 
 import { MqttSettings } from './types';
 
@@ -16,6 +16,7 @@ class MqttSettingsForm extends React.Component<MqttSettingsFormProps> {
 
   componentDidMount() {
     ValidatorForm.addValidationRule('isIPOrHostname', or(isIP, isHostname));
+    ValidatorForm.addValidationRule('isPath', isPath);
   }
 
   render() {
@@ -53,6 +54,17 @@ class MqttSettingsForm extends React.Component<MqttSettingsFormProps> {
           value={data.port}
           type="number"
           onChange={handleValueChange('port')}
+          margin="normal"
+        />
+        <TextValidator
+          validators={['required', 'isPath']}
+          errorMessages={['Base is required', "Not a valid Path"]}
+          name="base"
+          label="Base"
+          fullWidth
+          variant="outlined"
+          value={data.base}
+          onChange={handleValueChange('base')}
           margin="normal"
         />
         <TextField

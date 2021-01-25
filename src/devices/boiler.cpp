@@ -190,8 +190,8 @@ bool Boiler::publish_ha_config() {
     StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> doc;
     doc["uniq_id"] = F_(boiler);
 
-    char stat_t[50];
-    snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/boiler_data"), System::hostname().c_str());
+    char stat_t[Mqtt::MQTT_TOPIC_MAX_SIZE];
+    snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/boiler_data"), Mqtt::base().c_str());
     doc["stat_t"] = stat_t;
 
     doc["name"]    = FJSON("Service Code");
@@ -204,8 +204,8 @@ bool Boiler::publish_ha_config() {
     JsonArray ids  = dev.createNestedArray("ids");
     ids.add("ems-esp-boiler");
 
-    char topic[100];
-    snprintf_P(topic, sizeof(topic), PSTR("homeassistant/sensor/%s/boiler/config"), System::hostname().c_str());
+    char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
+    snprintf_P(topic, sizeof(topic), PSTR("homeassistant/sensor/%s/boiler/config"), Mqtt::base().c_str());
     Mqtt::publish_ha(topic,
                      doc.as<JsonObject>()); // publish the config payload with retain flag
 
@@ -304,7 +304,9 @@ void Boiler::process_UBAMonitorFast(std::shared_ptr<const Telegram> telegram) {
 
     // read the service code / installation status as appears on the display
     if ((telegram->message_length > 18) && (telegram->offset == 0)) {
+        serviceCode_[0] = (serviceCode_[0] == '~') ? 0xF0 : serviceCode_[0];
         has_update(telegram->read_value(serviceCode_[0], 18));
+        serviceCode_[0] = (serviceCode_[0] == 0xF0) ? '~' : serviceCode_[0];
         has_update(telegram->read_value(serviceCode_[1], 19));
         serviceCode_[2] = '\0'; // null terminate string
     }
@@ -386,7 +388,9 @@ void Boiler::process_UBAMonitorFastPlus(std::shared_ptr<const Telegram> telegram
 
     // read 3 char service code / installation status as appears on the display
     if ((telegram->message_length > 3) && (telegram->offset == 0)) {
+        serviceCode_[0] = (serviceCode_[0] == '~') ? 0xF0 : serviceCode_[0];
         has_update(telegram->read_value(serviceCode_[0], 1));
+        serviceCode_[0] = (serviceCode_[0] == 0xF0) ? '~' : serviceCode_[0];
         has_update(telegram->read_value(serviceCode_[1], 2));
         has_update(telegram->read_value(serviceCode_[2], 3));
         serviceCode_[3] = '\0';

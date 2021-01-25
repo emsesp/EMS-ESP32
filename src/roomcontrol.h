@@ -32,11 +32,17 @@ class Roomctrl {
   private:
     static constexpr uint8_t  ADDR          = 0x18;
     static constexpr uint32_t SEND_INTERVAL = 60000; // 1 minute
+    static constexpr uint8_t  HCS           = 4;     // max 4 heating circuits
 
     static void version(uint8_t addr, uint8_t dst);
     static void unknown(uint8_t addr, uint8_t dst, uint8_t type, uint8_t offset);
     static void temperature(uint8_t addr, uint8_t dst);
     static void nack_write();
+
+    static bool     switch_off_[HCS];
+    static uint32_t rc_time_[HCS];
+    static int16_t  remotetemp_[HCS];
+
 };
 
 } // namespace emsesp

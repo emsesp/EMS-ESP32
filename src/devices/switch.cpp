@@ -49,8 +49,8 @@ bool Switch::publish_ha_config() {
     StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> doc;
     doc["uniq_id"] = F_(switch);
 
-    char stat_t[50];
-    snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/switch_data"), System::hostname().c_str());
+    char stat_t[Mqtt::MQTT_TOPIC_MAX_SIZE];
+    snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/switch_data"), Mqtt::base().c_str());
     doc["stat_t"] = stat_t;
 
     doc["name"]    = FJSON("Type");
@@ -63,8 +63,8 @@ bool Switch::publish_ha_config() {
     JsonArray ids  = dev.createNestedArray("ids");
     ids.add("ems-esp-switch");
 
-    char topic[100];
-    snprintf_P(topic, sizeof(topic), PSTR("homeassistant/sensor/%s/switch/config"), System::hostname().c_str());
+    char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
+    snprintf_P(topic, sizeof(topic), PSTR("homeassistant/sensor/%s/switch/config"), Mqtt::base().c_str());
     Mqtt::publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
 
     return true;

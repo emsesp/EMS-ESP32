@@ -64,6 +64,10 @@ class DallasSensor {
 
     const std::vector<Sensor> sensors() const;
 
+    uint32_t fails() {
+      return sensorfails_;
+    }
+
   private:
     static constexpr uint8_t MAX_SENSORS = 20;
 
@@ -110,11 +114,12 @@ class DallasSensor {
 
     bool registered_ha_[MAX_SENSORS];
 
-    int8_t  scancnt_     = -3;
-    uint8_t firstscan_   = 0;
-    uint8_t dallas_gpio_ = 0;
-    bool    parasite_    = false;
-    bool    changed_     = false;
+    int8_t   scancnt_     = -3;
+    uint8_t  firstscan_   = 0;
+    uint8_t  dallas_gpio_ = 0;
+    bool     parasite_    = false;
+    bool     changed_     = false;
+    uint32_t sensorfails_ = 0;
 };
 
 } // namespace emsesp

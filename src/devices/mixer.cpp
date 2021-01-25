@@ -49,33 +49,25 @@ Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
     if (flags == EMSdevice::EMS_DEVICE_FLAG_IPM) {
         register_telegram_type(0x010C, F("IPMSetMessage"), false, [&](std::shared_ptr<const Telegram> t) { process_IPMStatusMessage(t); });
     }
-}
 
-
-// register values, depending on type (hc or wwc)
-void Mixer::register_values(const Type type, uint16_t hc) {
-    if (type == Type::NONE) {
-        return; // already done
-    }
-
-    // store the heating circuit and type
-    hc_   = hc + 1;
-    type_ = type;
-
-    // with hc<n> or wwc<n>
-    uint8_t tag = TAG_NONE;
-    if (type_ == Type::HC) {
-        tag = TAG_HC1 + hc - 1;
+    // register the device values and set hc_ and type_
+    if (device_id <= 0x27) {
+        type_       = Type::HC;
+        hc_         = device_id - 0x20 + 1;
+        uint8_t tag = TAG_HC1 + hc_ -  1;
+        register_device_value(tag, &flowSetTemp_, DeviceValueType::UINT, nullptr, F("flowSetTemp"), F("Setpoint flow temperature"), DeviceValueUOM::DEGREES);
+        register_device_value(tag, &flowTemp_, DeviceValueType::USHORT, FL_(div10), F("flowTemp"), F("Current flow temperature"), DeviceValueUOM::DEGREES);
+        register_device_value(tag, &pumpStatus_, DeviceValueType::BOOL, nullptr, F("pumpStatus"), F("Pump status"), DeviceValueUOM::NONE);
+        register_device_value(tag, &status_, DeviceValueType::INT, nullptr, F("status"), F("Valve status"), DeviceValueUOM::PERCENT);
     } else {
-        tag = TAG_WWC1 + hc - 1;
+        type_       = Type::WWC;
+        hc_         = device_id - 0x28 + 1;
+        uint8_t tag = TAG_WWC1 + hc_ - 1;
+        register_device_value(tag, &flowTemp_, DeviceValueType::USHORT, FL_(div10), F("flowTemp"), F("Current flow temperature"), DeviceValueUOM::DEGREES);
+        register_device_value(tag, &pumpStatus_, DeviceValueType::BOOL, nullptr, F("pumpStatus"), F("Pump/Valve status"), DeviceValueUOM::NONE);
+        register_device_value(tag, &status_, DeviceValueType::INT, nullptr, F("status"), F("Current status"), DeviceValueUOM::NONE);
     }
-
-    register_device_value(tag, &flowTemp_, DeviceValueType::USHORT, FL_(div10), F("flowTemp"), F("Current flow temperature"), DeviceValueUOM::DEGREES);
-    register_device_value(tag, &flowSetTemp_, DeviceValueType::UINT, nullptr, F("flowSetTemp"), F("Setpoint flow temperature"), DeviceValueUOM::DEGREES);
-    register_device_value(tag, &pumpStatus_, DeviceValueType::BOOL, nullptr, F("pumpStatus"), F("Pump/Valve status"), DeviceValueUOM::NONE);
-    register_device_value(tag, &status_, DeviceValueType::INT, nullptr, F("status"), F("Current status"), DeviceValueUOM::NONE);
 }
-
 
 // publish HA config
 bool Mixer::publish_ha_config() {
@@ -90,8 +82,8 @@ bool Mixer::publish_ha_config() {
     snprintf_P(uniq_id, sizeof(uniq_id), PSTR("Mixer%02X"), device_id() - 0x20 + 1);
     doc["uniq_id"] = uniq_id;
 
-    char stat_t[50];
-    snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/mixer_data"), System::hostname().c_str());
+    char stat_t[Mqtt::MQTT_TOPIC_MAX_SIZE];
+    snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/mixer_data"), Mqtt::base().c_str());
     doc["stat_t"] = stat_t;
 
     char name[20];
@@ -108,11 +100,11 @@ bool Mixer::publish_ha_config() {
     ids.add("ems-esp-mixer");
 
     // determine the topic, if its HC and WWC. This is determined by the incoming telegram types.
-    std::string topic(100, '\0');
+    std::string topic(Mqtt::MQTT_TOPIC_MAX_SIZE, '\0');
     if (type_ == Type::HC) {
-        snprintf_P(&topic[0], topic.capacity() + 1, PSTR("homeassistant/sensor/%s/mixer_hc%d/config"), System::hostname().c_str(), hc_);
+        snprintf_P(&topic[0], topic.capacity() + 1, PSTR("homeassistant/sensor/%s/mixer_hc%d/config"), Mqtt::base().c_str(), hc_);
     } else {
-        snprintf_P(&topic[0], topic.capacity() + 1, PSTR("homeassistant/sensor/%s/mixer_wwc%d/config"), System::hostname().c_str(), hc_); // WWC
+        snprintf_P(&topic[0], topic.capacity() + 1, PSTR("homeassistant/sensor/%s/mixer_wwc%d/config"), Mqtt::base().c_str(), hc_); // WWC
     }
 
     Mqtt::publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
@@ -124,7 +116,6 @@ bool Mixer::publish_ha_config() {
 // e.g.  A0 00 FF 00 01 D7 00 00 00 80 00 00 00 00 03 C5
 //       A0 0B FF 00 01 D7 00 00 00 80 00 00 00 00 03 80
 void Mixer::process_MMPLUSStatusMessage_HC(std::shared_ptr<const Telegram> telegram) {
-    register_values(Type::HC, telegram->type_id - 0x02D7);
     has_update(telegram->read_value(flowTemp_, 3)); // is * 10
     has_update(telegram->read_value(flowSetTemp_, 5));
     has_update(telegram->read_bitvalue(pumpStatus_, 0, 0));
@@ -135,7 +126,6 @@ void Mixer::process_MMPLUSStatusMessage_HC(std::shared_ptr<const Telegram> teleg
 // e.g. A9 00 FF 00 02 32 02 6C 00 3C 00 3C 3C 46 02 03 03 00 3C // on 0x28
 //      A8 00 FF 00 02 31 02 35 00 3C 00 3C 3C 46 02 03 03 00 3C // in 0x29
 void Mixer::process_MMPLUSStatusMessage_WWC(std::shared_ptr<const Telegram> telegram) {
-    register_values(Type::WWC, telegram->type_id - 0x0331);
     has_update(telegram->read_value(flowTemp_, 0)); // is * 10
     has_update(telegram->read_bitvalue(pumpStatus_, 2, 0));
     has_update(telegram->read_value(status_, 11)); // temp status
@@ -145,8 +135,6 @@ void Mixer::process_MMPLUSStatusMessage_WWC(std::shared_ptr<const Telegram> tele
 // e.g.  A0 00 FF 00 00 0C 01 00 00 00 00 00 54
 //       A1 00 FF 00 00 0C 02 04 00 01 1D 00 82
 void Mixer::process_IPMStatusMessage(std::shared_ptr<const Telegram> telegram) {
-    register_values(Type::HC, device_id() - 0x20);
-
     // check if circuit is active, 0-off, 1-unmixed, 2-mixed
     uint8_t ismixed = 0;
     telegram->read_value(ismixed, 0);
@@ -171,7 +159,6 @@ void Mixer::process_MMStatusMessage(std::shared_ptr<const Telegram> telegram) {
     // the heating circuit is determine by which device_id it is, 0x20 - 0x23
     // 0x21 is position 2. 0x20 is typically reserved for the WM10 switch module
     // see https://github.com/proddy/EMS-ESP/issues/270 and https://github.com/proddy/EMS-ESP/issues/386#issuecomment-629610918
-    register_values(Type::HC, device_id() - 0x20);
 
     has_update(telegram->read_value(flowTemp_, 1));         // is * 10
     has_update(telegram->read_bitvalue(pumpStatus_, 3, 2)); // is 0 or 0x64 (100%), check only bit 2
@@ -185,7 +172,6 @@ void Mixer::process_MMStatusMessage(std::shared_ptr<const Telegram> telegram) {
 // Mixer on a MM10 - 0xAA
 // e.g. Thermostat -> Mixer Module, type 0xAA, telegram: 10 21 AA 00 FF 0C 0A 11 0A 32 xx
 void Mixer::process_MMConfigMessage(std::shared_ptr<const Telegram> telegram) {
-    register_values(Type::HC, device_id() - 0x20);
     // pos 0: active FF = on
     // pos 1: valve runtime 0C = 120 sec in units of 10 sec
 }
@@ -193,7 +179,6 @@ void Mixer::process_MMConfigMessage(std::shared_ptr<const Telegram> telegram) {
 // Mixer on a MM10 - 0xAC
 // e.g. Thermostat -> Mixer Module, type 0xAC, telegram: 10 21 AC 00 1E 64 01 AB
 void Mixer::process_MMSetMessage(std::shared_ptr<const Telegram> telegram) {
-    register_values(Type::HC, device_id() - 0x20);
     // pos 0: flowtemp setpoint 1E = 30°C
     // pos 1: position in %
 }

@@ -125,14 +125,18 @@ void DallasSensor::loop() {
                                 sensors_.back().read          = true;
                                 changed_                      = true;
                             }
+                        } else {
+                            sensorfails_++;
                         }
                         break;
 
                     default:
+                        sensorfails_++;
                         LOG_ERROR(F("Unknown dallas sensor %s"), Sensor(addr).to_string().c_str());
                         break;
                     }
                 } else {
+                    sensorfails_++;
                     LOG_ERROR(F("Invalid dallas sensor %s"), Sensor(addr).to_string().c_str());
                 }
             } else {

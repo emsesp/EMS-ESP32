@@ -95,8 +95,8 @@ bool Solar::publish_ha_config() {
     doc["name"]    = FJSON("Solar Status");
     doc["uniq_id"] = F_(solar);
 
-    char stat_t[50];
-    snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/solar_data"), System::hostname().c_str());
+    char stat_t[Mqtt::MQTT_TOPIC_MAX_SIZE];
+    snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/solar_data"), Mqtt::base().c_str());
     doc["stat_t"] = stat_t;
 
     doc["val_tpl"] = FJSON("{{value_json.solarPump}}");
@@ -108,8 +108,8 @@ bool Solar::publish_ha_config() {
     JsonArray ids  = dev.createNestedArray("ids");
     ids.add("ems-esp-solar");
 
-    char topic[100];
-    snprintf_P(topic, sizeof(topic), PSTR("homeassistant/sensor/%s/solar/config"), System::hostname().c_str());
+    char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
+    snprintf_P(topic, sizeof(topic), PSTR("homeassistant/sensor/%s/solar/config"), Mqtt::base().c_str());
     Mqtt::publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
 
     return true;

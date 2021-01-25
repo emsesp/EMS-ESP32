@@ -151,23 +151,24 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
         }
     }
 
-    // register device values for common values (not heating circuit)
-    register_device_values();
-
     // reserve some memory for the heating circuits (max 4 to start with)
     heating_circuits_.reserve(4);
+
+    strlcpy(status_, "offline", sizeof(status_));
 
     if (actual_master_thermostat != device_id) {
         LOG_DEBUG(F("Adding new thermostat with device ID 0x%02X"), device_id);
         return; // don't fetch data if more than 1 thermostat
     }
 
-    strlcpy(status_, "offline", sizeof(status_));
-
     //
     // this next section is only for the master thermostat....
     //
     LOG_DEBUG(F("Adding new thermostat with device ID 0x%02X (as master)"), device_id);
+
+    // register device values for common values (not heating circuit)
+    register_device_values();
+
     add_commands();
 
     // only for for the master-thermostat, go a query all the heating circuits. This is only done once.
@@ -183,8 +184,8 @@ bool Thermostat::publish_ha_config() {
     StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> doc;
     doc["uniq_id"] = F_(thermostat);
 
-    char stat_t[50];
-    snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/thermostat_data"), System::hostname().c_str());
+    char stat_t[Mqtt::MQTT_TOPIC_MAX_SIZE];
+    snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/thermostat_data"), Mqtt::base().c_str());
     doc["stat_t"] = stat_t;
 
     doc["name"]    = FJSON("Thermostat Status");
@@ -197,8 +198,8 @@ bool Thermostat::publish_ha_config() {
     JsonArray ids  = dev.createNestedArray("ids");
     ids.add("ems-esp-thermostat");
 
-    char topic[100];
-    snprintf_P(topic, sizeof(topic), PSTR("homeassistant/sensor/%s/thermostat/config"), System::hostname().c_str());
+    char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
+    snprintf_P(topic, sizeof(topic), PSTR("homeassistant/sensor/%s/thermostat/config"), Mqtt::base().c_str());
     Mqtt::publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
 
     return true;
@@ -230,6 +231,7 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(const ui
 // returns pointer to the HeatingCircuit or nullptr if it can't be found
 // if its a new one, the object will be created and also the fetch flags set
 std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::shared_ptr<const Telegram> telegram) {
+
     // look through the Monitor and Set arrays to see if there is a match
     uint8_t hc_num  = 0;
     bool    toggle_ = false;
@@ -362,7 +364,7 @@ void Thermostat::register_mqtt_ha_config_hc(uint8_t hc_num) {
     doc["uniq_id"]     = str2;
     doc["mode_cmd_t"]  = str3;
     doc["temp_cmd_t"]  = str3;
-    doc["~"]           = System::hostname(); // ems-esp
+    doc["~"]           = Mqtt::base(); // ems-esp
     doc["mode_stat_t"] = FJSON("~/thermostat_data");
     doc["temp_stat_t"] = FJSON("~/thermostat_data");
     doc["curr_temp_t"] = FJSON("~/thermostat_data");
@@ -397,8 +399,8 @@ void Thermostat::register_mqtt_ha_config_hc(uint8_t hc_num) {
     JsonArray ids  = dev.createNestedArray("ids");
     ids.add("ems-esp-thermostat");
 
-    char topic[100];
-    snprintf_P(topic, sizeof(topic), PSTR("homeassistant/climate/%s/thermostat_hc%d/config"), System::hostname().c_str(), hc_num);
+    char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
+    snprintf_P(topic, sizeof(topic), PSTR("homeassistant/climate/%s/thermostat_hc%d/config"), Mqtt::base().c_str(), hc_num);
     Mqtt::publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
 
     // enable the a special "thermostat_hc<n>" topic to take both mode strings and floats for each of the heating circuits
@@ -2088,9 +2090,6 @@ void Thermostat::register_device_values() {
         register_device_value(TAG_NONE, &ibaLanguage_, DeviceValueType::ENUM, FL_(enum_ibaLanguage), F("ibaLanguage"), F("Language"), DeviceValueUOM::NONE);
         register_device_value(TAG_NONE, &ibaClockOffset_, DeviceValueType::UINT, nullptr, F("ibaClockOffset"), F("Clock offset"),
                               DeviceValueUOM::NONE); // offset (in sec) to clock, 0xff=-1s, 0x02=2s
-        register_device_value(TAG_NONE, &ibaCalIntTemperature_, DeviceValueType::INT, FL_(div2), F("intoffset"), F("Offset int. temperature"), DeviceValueUOM::DEGREES);
-        register_device_value(TAG_NONE, &ibaMinExtTemperature_, DeviceValueType::INT, nullptr, F("minexttemp"), F("Min ext. temperature"),
-                              DeviceValueUOM::DEGREES); // min ext temp for heating curve, in deg.
     }
 
     // RC300 and RC100
@@ -2109,9 +2108,12 @@ void Thermostat::register_device_values() {
 
     // RC30 and RC35
     if (model == EMS_DEVICE_FLAG_RC35 || model == EMS_DEVICE_FLAG_RC30_1) {
+        register_device_value(TAG_NONE, &ibaCalIntTemperature_, DeviceValueType::INT, FL_(div2), F("intoffset"), F("Offset int. temperature"), DeviceValueUOM::DEGREES);
+        register_device_value(TAG_NONE, &ibaMinExtTemperature_, DeviceValueType::INT, nullptr, F("minexttemp"), F("Min ext. temperature"),
+                              DeviceValueUOM::DEGREES); // min ext temp for heating curve, in deg.
         register_device_value(TAG_NONE, &tempsensor1_, DeviceValueType::USHORT, FL_(div10), F("inttemp1"), F("Temperature sensor 1"), DeviceValueUOM::DEGREES);
         register_device_value(TAG_NONE, &tempsensor2_, DeviceValueType::USHORT, FL_(div10), F("inttemp2"), F("Temperature sensor 2"), DeviceValueUOM::DEGREES);
-        register_device_value(TAG_NONE, &dampedoutdoortemp_, DeviceValueType::SHORT, nullptr, F("dampedtemp"), F("Damped outdoor temperature"), DeviceValueUOM::DEGREES);
+        register_device_value(TAG_NONE, &dampedoutdoortemp_, DeviceValueType::INT, nullptr, F("dampedtemp"), F("Damped outdoor temperature"), DeviceValueUOM::DEGREES);
         register_device_value(TAG_NONE, &ibaBuildingType_, DeviceValueType::ENUM, FL_(enum_ibaBuildingType2), F("building"), F("Building"), DeviceValueUOM::NONE);
         register_device_value(TAG_NONE, &wwMode_, DeviceValueType::ENUM, FL_(enum_wwMode2), F("wwmode"), F("Warm water mode"), DeviceValueUOM::NONE);
         register_device_value(TAG_NONE, &wwCircMode_, DeviceValueType::ENUM, FL_(enum_wwCircMode2), F("wwcircmode"), F("Warm water circulation mode"), DeviceValueUOM::NONE);
@@ -2141,6 +2143,10 @@ void Thermostat::register_device_values_hc(std::shared_ptr<emsesp::Thermostat::H
     }
     register_device_value(tag, &hc->setpoint_roomTemp, DeviceValueType::SHORT, setpoint_temp_divider, F("seltemp"), F("Setpoint room temperature"), DeviceValueUOM::DEGREES);
     register_device_value(tag, &hc->curr_roomTemp, DeviceValueType::SHORT, curr_temp_divider, F("currtemp"), F("Current room temperature"), DeviceValueUOM::DEGREES);
+
+    if (device_id() != EMSESP::actual_master_thermostat()) {
+        return;
+    }
 
     // special handling for Home Assistant
     // we create special values called hatemp and hamode, which have empty fullnames so not shown in the web or console

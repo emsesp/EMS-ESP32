@@ -167,6 +167,7 @@ void MqttSettings::read(MqttSettings & settings, JsonObject & root) {
     root["enabled"]          = settings.enabled;
     root["host"]             = settings.host;
     root["port"]             = settings.port;
+    root["base"]             = settings.base;
     root["username"]         = settings.username;
     root["password"]         = settings.password;
     root["client_id"]        = settings.clientId;
@@ -195,6 +196,7 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
     newSettings.enabled        = root["enabled"] | FACTORY_MQTT_ENABLED;
     newSettings.host           = root["host"] | FACTORY_MQTT_HOST;
     newSettings.port           = root["port"] | FACTORY_MQTT_PORT;
+    newSettings.base           = root["base"] | FACTORY_MQTT_BASE;
     newSettings.username       = root["username"] | FACTORY_MQTT_USERNAME;
     newSettings.password       = root["password"] | FACTORY_MQTT_PASSWORD;
     newSettings.clientId       = root["client_id"] | FACTORY_MQTT_CLIENT_ID;
