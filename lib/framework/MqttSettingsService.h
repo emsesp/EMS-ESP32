@@ -8,10 +8,6 @@
 #include <ESPUtils.h>
 #include <uuid/common.h>
 
-#include "../../src/system.h"
-#include "../../src/mqtt.h"
-#include "../../src/dallassensor.h"
-
 #define MQTT_RECONNECTION_DELAY 1000
 
 #define MQTT_SETTINGS_FILE "/config/mqttSettings.json"
@@ -70,6 +66,10 @@ static String generateClientId() {
 #define EMSESP_DEFAULT_MQTT_RETAIN false
 #define EMSESP_DEFAULT_HA_ENABLED false
 #define EMSESP_DEFAULT_PUBLISH_TIME 10
+
+#include "../../src/system.h"
+#include "../../src/mqtt.h"
+#include "../../src/dallassensor.h"
 
 class MqttSettings {
   public:

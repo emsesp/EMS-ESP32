@@ -27,13 +27,14 @@ class DummySettings {
     bool     api_enabled          = true;
 
     // MQTT
-    uint16_t publish_time      = 10; // seconds
-    uint8_t  mqtt_qos          = 0;
-    bool     mqtt_retain       = false;
-    bool     enabled           = true;
-    uint8_t  dallas_format     = 1;
-    uint8_t  ha_climate_format = 1;
-    bool     ha_enabled        = true;
+    uint16_t    publish_time      = 10; // seconds
+    uint8_t     mqtt_qos          = 0;
+    bool        mqtt_retain       = false;
+    bool        enabled           = true;
+    uint8_t     dallas_format     = 1;
+    uint8_t     ha_climate_format = 1;
+    bool        ha_enabled        = true;
+    std::string base              = "ems-esp";
 
     String   hostname                = "ems-esp";
     String   jwtSecret               = "ems-esp";
@@ -53,6 +54,8 @@ class DummySettings {
     uint16_t publish_time_other      = 10;
     uint16_t publish_time_sensor     = 10;
     uint8_t  bool_format             = 1; // on off
+
+#define FACTORY_MQTT_MAX_TOPIC_LENGTH 128
 
     static void read(DummySettings & settings, JsonObject & root){};
     static void read(DummySettings & settings){};
