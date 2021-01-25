@@ -65,7 +65,7 @@ class DallasSensor {
     const std::vector<Sensor> sensors() const;
 
     uint32_t fails() {
-      return sensorfails_;
+        return sensorfails_;
     }
 
   private:

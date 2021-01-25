@@ -42,9 +42,7 @@ void DallasSensor::start() {
 #endif
 
     // API call
-    Command::add_with_json(EMSdevice::DeviceType::DALLASSENSOR, F_(info), [&](const char * value, const int8_t id, JsonObject & json) {
-        return command_info(value, id, json);
-    });
+    Command::add_with_json(EMSdevice::DeviceType::DALLASSENSOR, F_(info), [&](const char * value, const int8_t id, JsonObject & json) { return command_info(value, id, json); });
 }
 
 // load the MQTT settings
@@ -252,13 +250,11 @@ const std::vector<DallasSensor::Sensor> DallasSensor::sensors() const {
 
 // skip crc from id.
 DallasSensor::Sensor::Sensor(const uint8_t addr[])
-    : id_(((uint64_t)addr[0] << 48) | ((uint64_t)addr[1] << 40) | ((uint64_t)addr[2] << 32) | ((uint64_t)addr[3] << 24) | ((uint64_t)addr[4] << 16)
-          | ((uint64_t)addr[5] << 8) | ((uint64_t)addr[6])) {
+    : id_(((uint64_t)addr[0] << 48) | ((uint64_t)addr[1] << 40) | ((uint64_t)addr[2] << 32) | ((uint64_t)addr[3] << 24) | ((uint64_t)addr[4] << 16) | ((uint64_t)addr[5] << 8) | ((uint64_t)addr[6])) {
 }
 
 uint64_t DallasSensor::get_id(const uint8_t addr[]) {
-    return (((uint64_t)addr[0] << 48) | ((uint64_t)addr[1] << 40) | ((uint64_t)addr[2] << 32) | ((uint64_t)addr[3] << 24) | ((uint64_t)addr[4] << 16)
-            | ((uint64_t)addr[5] << 8) | ((uint64_t)addr[6]));
+    return (((uint64_t)addr[0] << 48) | ((uint64_t)addr[1] << 40) | ((uint64_t)addr[2] << 32) | ((uint64_t)addr[3] << 24) | ((uint64_t)addr[4] << 16) | ((uint64_t)addr[5] << 8) | ((uint64_t)addr[6]));
 }
 
 uint64_t DallasSensor::Sensor::id() const {
@@ -267,13 +263,7 @@ uint64_t DallasSensor::Sensor::id() const {
 
 std::string DallasSensor::Sensor::to_string() const {
     std::string str(20, '\0');
-    snprintf_P(&str[0],
-               str.capacity() + 1,
-               PSTR("%02X-%04X-%04X-%04X"),
-               (unsigned int)(id_ >> 48) & 0xFF,
-               (unsigned int)(id_ >> 32) & 0xFFFF,
-               (unsigned int)(id_ >> 16) & 0xFFFF,
-               (unsigned int)(id_)&0xFFFF);
+    snprintf_P(&str[0], str.capacity() + 1, PSTR("%02X-%04X-%04X-%04X"), (unsigned int)(id_ >> 48) & 0xFF, (unsigned int)(id_ >> 32) & 0xFFFF, (unsigned int)(id_ >> 16) & 0xFFFF, (unsigned int)(id_)&0xFFFF);
     return str;
 }
 

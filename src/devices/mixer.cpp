@@ -54,7 +54,7 @@ Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
     if (device_id <= 0x27) {
         type_       = Type::HC;
         hc_         = device_id - 0x20 + 1;
-        uint8_t tag = TAG_HC1 + hc_ -  1;
+        uint8_t tag = TAG_HC1 + hc_ - 1;
         register_device_value(tag, &flowSetTemp_, DeviceValueType::UINT, nullptr, F("flowSetTemp"), F("Setpoint flow temperature"), DeviceValueUOM::DEGREES);
         register_device_value(tag, &flowTemp_, DeviceValueType::USHORT, FL_(div10), F("flowTemp"), F("Current flow temperature"), DeviceValueUOM::DEGREES);
         register_device_value(tag, &pumpStatus_, DeviceValueType::BOOL, nullptr, F("pumpStatus"), F("Pump status"), DeviceValueUOM::NONE);

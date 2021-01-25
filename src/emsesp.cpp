@@ -874,8 +874,7 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
 bool EMSESP::command_info(uint8_t device_type, JsonObject & json, const int8_t id) {
     bool has_value = false;
     for (const auto & emsdevice : emsdevices) {
-        if (emsdevice && (emsdevice->device_type() == device_type) &&
-            ((device_type != DeviceType::THERMOSTAT) || (emsdevice->device_id() == EMSESP::actual_master_thermostat()))) {
+        if (emsdevice && (emsdevice->device_type() == device_type) && ((device_type != DeviceType::THERMOSTAT) || (emsdevice->device_id() == EMSESP::actual_master_thermostat()))) {
             has_value |= emsdevice->generate_values_json(json, DeviceValueTAG::TAG_NONE, (id != 0)); // verbose mode
         }
     }

@@ -42,7 +42,6 @@ class Roomctrl {
     static bool     switch_off_[HCS];
     static uint32_t rc_time_[HCS];
     static int16_t  remotetemp_[HCS];
-
 };
 
 } // namespace emsesp

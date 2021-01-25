@@ -9,8 +9,7 @@ See https://github.com/proddy/EMS-ESP/issues/632
 
 ### Fixed
 - telegrams matched to masterthermostat 0x18
-- multible roomcontrollers
-
+- multiple roomcontrollers
 
 ### Changed
 - split `show values` in smaller packages (edited)
