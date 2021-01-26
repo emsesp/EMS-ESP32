@@ -337,7 +337,7 @@ void DallasSensor::publish_values(const bool force) {
                 config["dev_cla"] = FJSON("temperature");
 
                 char stat_t[50];
-                snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/dallassensor_data"), System::hostname().c_str());
+                snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/dallassensor_data"), Mqtt::base().c_str());
                 config["stat_t"] = stat_t;
 
                 config["unit_of_meas"] = FJSON("°C");
@@ -358,7 +358,7 @@ void DallasSensor::publish_values(const bool force) {
                 ids.add("ems-esp");
 
                 char topic[100];
-                snprintf_P(topic, sizeof(topic), PSTR("homeassistant/sensor/%s/dallas_%s/config"), System::hostname().c_str(), sensor.to_string().c_str());
+                snprintf_P(topic, sizeof(topic), PSTR("homeassistant/sensor/%s/dallas_%s/config"), Mqtt::base().c_str(), sensor.to_string().c_str());
                 Mqtt::publish_ha(topic, config.as<JsonObject>());
 
                 registered_ha_[sensor_no - 1] = true;
