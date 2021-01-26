@@ -1,6 +1,6 @@
 # ![logo](media/EMS-ESP_logo_dark.png)
 
-**EMS-ESP** is an open-source firmware for the Espressif ESP8266 and ESP32 microcontroller that communicates with **EMS** (Energy Management System) based equipment from manufacturers like Bosch, Buderus, Nefit, Junkers, Worcester and Sieger.
+**EMS-ESP** is an open-source firmware for the Espressif ESP32 microcontroller that communicates with **EMS** (Energy Management System) based equipment from manufacturers like Bosch, Buderus, Nefit, Junkers, Worcester and Sieger.
 
 [![version](https://img.shields.io/github/release/proddy/EMS-ESP.svg?label=Latest%20Release)](https://github.com/proddy/EMS-ESP/blob/main/CHANGELOG.md)
 [![release-date](https://img.shields.io/github/release-date/proddy/EMS-ESP.svg?label=Released)](https://github.com/proddy/EMS-ESP/commits/master)
@@ -27,7 +27,6 @@ Note, EMS-ESP requires a small hardware circuit that can convert the EMS bus dat
 
 ## **Features**
 
-- Compatible with both ESP8266 and ESP32
 - A multi-user secure web interface to change settings and monitor the data
 - A console, accessible via Serial and Telnet for more monitoring
 - Native support for Home Assistant via [MQTT Discovery](https://www.home-assistant.io/docs/mqtt/discovery/)
