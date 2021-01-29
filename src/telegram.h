@@ -376,6 +376,7 @@ class TxService : public EMSbus {
 #else
     static constexpr uint8_t MAXIMUM_TX_RETRIES = 3;
 #endif
+    static constexpr uint32_t POST_SEND_DELAY = 2000;
 
   private:
     std::deque<QueuedTxTelegram> tx_telegrams_; // the Tx queue
@@ -387,7 +388,8 @@ class TxService : public EMSbus {
 
     std::shared_ptr<Telegram> telegram_last_;
     uint16_t                  telegram_last_post_send_query_; // which type ID to query after a successful send, to read back the values just written
-    uint8_t                   retry_count_ = 0;               // count for # Tx retries
+    uint8_t                   retry_count_  = 0;              // count for # Tx retries
+    uint32_t                  delayed_send_ = 0;              // manage delay for post send query
 
     uint8_t tx_telegram_id_ = 0; // queue counter
 

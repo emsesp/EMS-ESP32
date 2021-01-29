@@ -278,11 +278,12 @@ void TxService::send() {
         return;
     }
 
-    // if there's nothing in the queue to transmit, send back a poll and quit
-    if (tx_telegrams_.empty()) {
+    // if there's nothing in the queue to transmit or sending should be delayed, send back a poll and quit
+    if (tx_telegrams_.empty() || (delayed_send_ && uuid::get_uptime() < (delayed_send_ + POST_SEND_DELAY))) {
         send_poll();
         return;
     }
+    delayed_send_ = 0;
 
     // auto telegram = tx_telegrams_.pop();    // get the Telegram, also removes from queue
 
@@ -662,7 +663,9 @@ uint16_t TxService::post_send_query() {
         // read_request(telegram_last_post_send_query_, dest, 0); // no offset
         LOG_DEBUG(F("Sending post validate read, type ID 0x%02X to dest 0x%02X"), post_typeid, dest);
         set_post_send_query(0); // reset
-    }
+        // delay the request if we have a different type_id for post_send_query
+        delayed_send_ = (this->telegram_last_->type_id == post_typeid) ? 0 : uuid::get_uptime();
+     }
 
     return post_typeid;
 }
