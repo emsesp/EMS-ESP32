@@ -95,6 +95,9 @@ class DallasSensor {
     static constexpr uint8_t CMD_CONVERT_TEMP    = 0x44;
     static constexpr uint8_t CMD_READ_SCRATCHPAD = 0xBE;
 
+    static constexpr int8_t  SCAN_START  = -3;
+    static constexpr int8_t  SCAN_MAX    = 5;
+
     static uuid::log::Logger logger_;
 
 #ifndef EMSESP_STANDALONE
@@ -114,12 +117,13 @@ class DallasSensor {
 
     bool registered_ha_[MAX_SENSORS];
 
-    int8_t   scancnt_     = -3;
+    int8_t   scancnt_     = SCAN_START;
     uint8_t  firstscan_   = 0;
     uint8_t  dallas_gpio_ = 0;
     bool     parasite_    = false;
     bool     changed_     = false;
     uint32_t sensorfails_ = 0;
+    int8_t   scanretry_   = 0;
 };
 
 } // namespace emsesp
