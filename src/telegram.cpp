@@ -664,7 +664,7 @@ uint16_t TxService::post_send_query() {
         set_post_send_query(0); // reset
         // delay the request if we have a different type_id for post_send_query
         delayed_send_ = (this->telegram_last_->type_id == post_typeid) ? 0 : (uuid::get_uptime() + POST_SEND_DELAY);
-     }
+    }
 
     return post_typeid;
 }

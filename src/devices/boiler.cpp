@@ -1070,7 +1070,7 @@ bool Boiler::set_maintenance(const char * value, const int8_t id) {
         uint8_t year  = (uint8_t)(Helpers::atoint(&value[6]) - 2000);
         if (day > 0 && day < 32 && month > 0 && month < 13) {
             LOG_INFO(F("Setting maintenance date to %02d.%02d.%04d"), day, month, year + 2000);
-            uint8_t data[5] = {2, (uint8_t)(maintenanceTime_/100), day, month, year};
+            uint8_t data[5] = {2, (uint8_t)(maintenanceTime_ / 100), day, month, year};
             write_command(0x15, 0, data, 5, 0x15);
         } else {
             LOG_WARNING(F("Setting maintenance: wrong format %d.%d.%d"), day, month, year + 2000);
