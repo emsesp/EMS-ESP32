@@ -94,11 +94,13 @@ void DallasSensor::loop() {
         } else if (time_now - last_activity_ > READ_TIMEOUT_MS) {
             LOG_WARNING(F("Dallas sensor read timeout"));
             state_ = State::IDLE;
+            sensorfails_++;
         }
     } else if (state_ == State::SCANNING) {
         if (time_now - last_activity_ > SCAN_TIMEOUT_MS) {
             LOG_ERROR(F("Dallas sensor scan timeout"));
             state_ = State::IDLE;
+            sensorfails_++;
         } else {
             uint8_t addr[ADDR_LEN] = {0};
 
