@@ -140,7 +140,7 @@ class Boiler : public EMSdevice {
     char     maintenanceMessage_[4];
     char     maintenanceDate_[12];
     uint8_t  maintenanceType_;
-    uint8_t  maintenanceTime_;
+    uint16_t maintenanceTime_;
 
     void process_UBAParameterWW(std::shared_ptr<const Telegram> telegram);
     void process_UBAMonitorFast(std::shared_ptr<const Telegram> telegram);

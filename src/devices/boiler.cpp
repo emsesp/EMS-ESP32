@@ -182,7 +182,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     register_device_value(TAG_BOILER_DATA_INFO, &maintenanceMessage_, DeviceValueType::TEXT, nullptr, F("maintenanceMessage"), F("Maintenance message"), DeviceValueUOM::NONE);
     register_device_value(TAG_BOILER_DATA_INFO, &maintenanceDate_, DeviceValueType::TEXT, nullptr, F("maintenanceDate"), F("Maintenance set date"), DeviceValueUOM::NONE);
     register_device_value(TAG_BOILER_DATA_INFO, &maintenanceType_, DeviceValueType::ENUM, FL_(enum_off_time_date), F("maintenanceType"), F("Scheduled maintenance"), DeviceValueUOM::NONE);
-    register_device_value(TAG_BOILER_DATA_INFO, &maintenanceTime_, DeviceValueType::UINT, nullptr, F("maintenanceTime"), F("Maintenance set time"), DeviceValueUOM::NONE);
+    register_device_value(TAG_BOILER_DATA_INFO, &maintenanceTime_, DeviceValueType::UINT, nullptr, F("maintenanceTime"), F("Maintenance set time"), DeviceValueUOM::HOURS);
 }
 
 // publish HA config
@@ -581,7 +581,7 @@ void Boiler::process_UBAFlags(std::shared_ptr<const Telegram> telegram) {
 // 08 00 1C 94 0B 0A 1D 31 00 00 00 00 00 00 -> message reset
 void Boiler::process_UBAMaintenanceStatus(std::shared_ptr<const Telegram> telegram) {
     // 5. byte: Maintenance due (0 = no, 3 = yes, due to operating hours, 8 = yes, due to date)
-    uint8_t message_code;
+    uint8_t message_code = maintenanceMessage_[2] - '0';
     has_update(telegram->read_value(message_code, 5));
 
     // ignore if 0, which means all is ok
@@ -626,18 +626,18 @@ void Boiler::process_UBAMaintenanceData(std::shared_ptr<const Telegram> telegram
     }
     // first byte: Maintenance messages (0 = none, 1 = by operating hours, 2 = by date)
 
-    telegram->read_value(maintenanceType_, 0);
+    has_update(telegram->read_value(maintenanceType_, 0));
 
     if (maintenanceType_ == 1) {
-        // time only
-        telegram->read_value(maintenanceTime_, 1);
+        // time only, single byte * 100
+        telegram->read_value(maintenanceTime_, 1, 1);
         maintenanceTime_ = maintenanceTime_ * 100;
     } else if (maintenanceType_ == 2) {
         // date only
         uint8_t day   = telegram->message_data[2];
         uint8_t month = telegram->message_data[3];
         uint8_t year  = telegram->message_data[4];
-        if (day > 0 && month > 0 && year > 0) {
+        if (day > 0 && month > 0) {
             snprintf_P(maintenanceDate_, sizeof(maintenanceDate_), PSTR("%02d.%02d.%04d"), day, month, year + 2000);
         }
     }
@@ -1063,16 +1063,15 @@ bool Boiler::set_maintenance(const char * value, const int8_t id) {
             return true;
         }
     }
+
     if (strlen(value) == 10) { // date
         uint8_t day   = (value[0] - '0') * 10 + (value[1] - '0');
         uint8_t month = (value[3] - '0') * 10 + (value[4] - '0');
-        uint8_t year  = (Helpers::atoint(&value[6]) - 2000);
-        if (day > 0 && day < 32 && month > 0 && month < 13 && year > 19) {
-            LOG_INFO(F("Setting maintenance to %02d.%02d.%04d"), day, month, year + 2000);
-            write_command(0x15, 2, day);
-            write_command(0x15, 3, month);
-            write_command(0x15, 4, year);
-            write_command(0x15, 0, 2, 0x15);
+        uint8_t year  = (uint8_t)(Helpers::atoint(&value[6]) - 2000);
+        if (day > 0 && day < 32 && month > 0 && month < 13) {
+            LOG_INFO(F("Setting maintenance date to %02d.%02d.%04d"), day, month, year + 2000);
+            uint8_t data[5] = {2, (uint8_t)(maintenanceTime_/100), day, month, year};
+            write_command(0x15, 0, data, 5, 0x15);
         } else {
             LOG_WARNING(F("Setting maintenance: wrong format %d.%d.%d"), day, month, year + 2000);
             return false;
@@ -1081,21 +1080,24 @@ bool Boiler::set_maintenance(const char * value, const int8_t id) {
     }
 
     int hrs;
-    if (!Helpers::value2number(value, hrs)) {
-        LOG_WARNING(F("Setting maintenance: wrong format"));
-        return false;
+    if (Helpers::value2number(value, hrs)) {
+        if (hrs > 99 && hrs < 25600) {
+            LOG_INFO(F("Setting maintenance time %d hours"), hrs);
+            uint8_t data[2] = {1, (uint8_t)(hrs / 100)};
+            write_command(0x15, 0, data, 2, 0x15);
+            return true;
+        }
     }
 
-    if (hrs == 0) {
-        LOG_INFO(F("Setting maintenance off"));
-        write_command(0x15, 0, 0, 0x15); // off
-    } else {
-        LOG_INFO(F("Setting maintenance in %d hours"), hrs);
-        write_command(0x15, 1, (uint8_t)(hrs / 100));
-        write_command(0x15, 0, 1, 0x15);
+    uint8_t num;
+    if (Helpers::value2enum(value, num, {F("off"), F("time"), F("date")})) {
+        LOG_INFO(F("Setting maintenance type to %s"), value);
+        write_command(0x15, 0, num, 0x15);
+        return true;
     }
 
-    return true;
+    LOG_WARNING(F("Setting maintenance: wrong format"));
+    return false;
 }
 
 } // namespace emsesp
