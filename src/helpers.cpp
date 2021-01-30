@@ -321,6 +321,10 @@ std::string Helpers::data_to_hex(const uint8_t * data, const uint8_t length) {
 // works with only positive numbers
 uint32_t Helpers::hextoint(const char * hex) {
     uint32_t val = 0;
+    // skip leading '0x'
+    if (hex[0] == '0' && hex[1] == 'x') {
+        hex += 2;
+    }
     while (*hex) {
         // get current character then increment
         char byte = *hex++;
@@ -460,7 +464,7 @@ bool Helpers::value2enum(const char * v, uint8_t & value, const flash_string_vec
     std::string str = toLower(v);
     for (value = 0; value < strs.size(); value++) {
         std::string str1 = uuid::read_flash_string(strs[value]);
-        if ((str1 == "off" && str == "false") || (str1 == "on" && str == "true") || (str == str1) || (v[0] == '0' + value)) {
+        if ((str1 == "off" && str == "false") || (str1 == "on" && str == "true") || (str == str1) || (v[0] == ('0' + value) && v[1] == '\0')) {
             return true;
         }
     }
