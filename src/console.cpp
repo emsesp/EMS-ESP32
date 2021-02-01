@@ -312,9 +312,9 @@ void EMSESPShell::add_console_commands() {
                                       watch_id = WATCH_ID_NONE;
                                   } else {
                                       watch_id = Helpers::hextoint(arguments[0].c_str());
-                                      if ((emsesp::EMSESP::watch() == EMSESP::WATCH_OFF) && watch_id) {
+                                      if (watch_id && ((emsesp::EMSESP::watch() == EMSESP::WATCH_OFF) || (emsesp::EMSESP::watch() == EMSESP::WATCH_UNKNOWN))) {
                                           emsesp::EMSESP::watch(EMSESP::WATCH_ON); // on
-                                      } else if ((emsesp::EMSESP::watch() == EMSESP::WATCH_UNKNOWN) || !watch_id) {
+                                      } else if (!watch_id) {
                                           return;
                                       }
                                   }
@@ -334,8 +334,9 @@ void EMSESPShell::add_console_commands() {
                               }
 
                               // if logging is off, the watch won't show anything, show force it back to NOTICE
-                              if (!shell.logger().enabled(Level::NOTICE)) {
+                              if (shell.log_level() < Level::NOTICE) {
                                   shell.log_level(Level::NOTICE);
+                                  shell.printfln(F("Force log level to notice"));
                               }
 
                               if (watch == EMSESP::WATCH_ON) {
@@ -403,6 +404,7 @@ void EMSESPShell::add_console_commands() {
             }
 
             if (ok && json.size()) {
+                doc.shrinkToFit();
                 serializeJsonPretty(doc, shell);
                 shell.println();
             }
