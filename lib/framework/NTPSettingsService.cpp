@@ -52,10 +52,9 @@ void NTPSettingsService::configureNTP() {
 
 void NTPSettingsService::configureTime(AsyncWebServerRequest * request, JsonVariant & json) {
     if (!sntp_enabled() && json.is<JsonObject>()) {
-        String    timeUtc = json["time_utc"];
-        struct tm tm      = {0};
-
-        char * s = strptime(timeUtc.c_str(), "%Y-%m-%dT%H:%M:%SZ", &tm);
+        struct tm tm        = {0};
+        String    timeLocal = json["local_time"];
+        char *    s         = strptime(timeLocal.c_str(), "%Y-%m-%dT%H:%M:%S", &tm);
         if (s != nullptr) {
             time_t         time = mktime(&tm);
             struct timeval now  = {.tv_sec = time};
@@ -65,7 +64,6 @@ void NTPSettingsService::configureTime(AsyncWebServerRequest * request, JsonVari
             return;
         }
     }
-
     AsyncWebServerResponse * response = request->beginResponse(400);
     request->send(response);
 }

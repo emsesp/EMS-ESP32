@@ -13,7 +13,7 @@ import RefreshIcon from '@material-ui/icons/Refresh';
 
 import { RestFormProps, FormButton, HighlightAvatar } from '../components';
 import { isNtpActive, ntpStatusHighlight, ntpStatus } from './NTPStatus';
-import { formatDuration, formatDateTime, formatLocalDateTimeNow, formatLocalDateTime } from './TimeFormat';
+import { formatDuration, formatDateTime, formatLocalDateTime } from './TimeFormat';
 import { NTPStatus, Time } from './types';
 import { redirectingAuthorizedFetch, withAuthenticatedContext, AuthenticatedContextProps } from '../authentication';
 import { TIME_ENDPOINT } from '../api';
@@ -38,18 +38,27 @@ class NTPStatusForm extends Component<NTPStatusFormProps, NTPStatusFormState> {
   }
 
   updateLocalTime = (event: React.ChangeEvent<HTMLInputElement>) => {
-    this.setState({ localTime: event.target.value });
+    this.setState({
+      localTime: event.target.value
+    });
   }
 
   openSetTime = () => {
-    this.setState({ localTime: formatLocalDateTimeNow(), settingTime: true, });
+    this.setState({
+      localTime: formatLocalDateTime(new Date()),
+      settingTime: true
+    });
   }
 
   closeSetTime = () => {
-    this.setState({ settingTime: false });
+    this.setState({
+      settingTime: false
+    });
   }
 
-  createTime = (): Time => ({ local_time: formatLocalDateTime(this.state.localTime) });
+  createTime = (): Time => ({
+    local_time: formatLocalDateTime(new Date(this.state.localTime))
+  });
 
   configureTime = () => {
     this.setState({ processing: true });

@@ -36,14 +36,14 @@ void NTPStatus::ntpStatus(AsyncWebServerRequest * request) {
     // the current time in UTC
     root["utc_time"] = toUTCTimeString(gmtime(&now));
 
-    // local time as ISO String with TZ
+    // local time with offset
     root["local_time"] = toLocalTimeString(localtime(&now));
 
     // the sntp server name
     root["server"] = sntp_getservername(0);
 
     // device uptime in seconds
-    root["uptime"] = uuid::get_uptime() / 1000;
+    root["uptime"] = millis() / 1000;
 
     response->setLength();
     request->send(response);
