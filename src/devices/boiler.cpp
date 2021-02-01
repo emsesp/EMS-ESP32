@@ -182,7 +182,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     register_device_value(TAG_BOILER_DATA_INFO, &maintenanceMessage_, DeviceValueType::TEXT, nullptr, F("maintenanceMessage"), F("Maintenance message"), DeviceValueUOM::NONE);
     register_device_value(TAG_BOILER_DATA_INFO, &maintenanceDate_, DeviceValueType::TEXT, nullptr, F("maintenanceDate"), F("Maintenance set date"), DeviceValueUOM::NONE);
     register_device_value(TAG_BOILER_DATA_INFO, &maintenanceType_, DeviceValueType::ENUM, FL_(enum_off_time_date), F("maintenanceType"), F("Scheduled maintenance"), DeviceValueUOM::NONE);
-    register_device_value(TAG_BOILER_DATA_INFO, &maintenanceTime_, DeviceValueType::UINT, nullptr, F("maintenanceTime"), F("Maintenance set time"), DeviceValueUOM::HOURS);
+    register_device_value(TAG_BOILER_DATA_INFO, &maintenanceTime_, DeviceValueType::USHORT, nullptr, F("maintenanceTime"), F("Maintenance set time"), DeviceValueUOM::HOURS);
 }
 
 // publish HA config
