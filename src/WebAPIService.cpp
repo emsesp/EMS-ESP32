@@ -85,6 +85,7 @@ void WebAPIService::webAPIService(AsyncWebServerRequest * request) {
     }
     if (ok && json.size()) {
         // send json output back to web
+        doc.shrinkToFit();
         std::string buffer;
         serializeJsonPretty(doc, buffer);
         request->send(200, "text/plain", buffer.c_str());
