@@ -396,8 +396,13 @@ void EMSESPShell::add_console_commands() {
                 // no value specified, just the cmd
                 ok = Command::call(device_type, cmd, nullptr, -1, json);
             } else if (arguments.size() == 3) {
-                // has a value but no id
-                ok = Command::call(device_type, cmd, arguments.back().c_str(), -1, json);
+                if (strncmp(cmd, "info", 4) == 0) {
+                    // info has a id but no value
+                    ok = Command::call(device_type, cmd, nullptr, atoi(arguments.back().c_str()), json);
+                } else {
+                    // has a value but no id
+                    ok = Command::call(device_type, cmd, arguments.back().c_str(), -1, json);
+                }
             } else {
                 // use value, which could be an id or hc
                 ok = Command::call(device_type, cmd, arguments[2].c_str(), atoi(arguments[3].c_str()), json);

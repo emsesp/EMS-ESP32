@@ -6,6 +6,8 @@ See https://github.com/proddy/EMS-ESP/issues/632
 - Power settings for ESP32
 - Rx and Tx counts to Heartbeat MQTT payload
 - Ethernet support (ESP32)
+- id to info command to show only a heatingcircuit
+- add sending devices that are not listed to 0x07
 
 ### Fixed
 - telegrams matched to masterthermostat 0x18

@@ -699,12 +699,17 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
         return false;
     }
 
+    // remember if we first get scan results from UBADevices
+    static bool first_scan_done_ = false;
     // check for common types, like the Version(0x02)
     if (telegram->type_id == EMSdevice::EMS_TYPE_VERSION) {
         process_version(telegram);
         return true;
     } else if (telegram->type_id == EMSdevice::EMS_TYPE_UBADevices) {
         process_UBADevices(telegram);
+        if (telegram->dest == EMSbus::ems_bus_id()) {
+            first_scan_done_ = true;
+        }
         return true;
     }
 
@@ -712,11 +717,13 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
     // calls the associated process function for that EMS device
     // returns false if the device_id doesn't recognize it
     // after the telegram has been processed, call see if there have been values changed and we need to do a MQTT publish
-    bool found = false;
+    bool found       = false;
+    bool knowndevice = false;
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice) {
             if (emsdevice->is_device_id(telegram->src)) {
-                found = emsdevice->handle_telegram(telegram);
+                knowndevice = true;
+                found       = emsdevice->handle_telegram(telegram);
                 // if we correctly processes the telegram follow up with sending it via MQTT if needed
                 if (found && Mqtt::connected()) {
                     if ((mqtt_.get_publish_onchange(emsdevice->device_type()) && emsdevice->has_update()) || telegram->type_id == publish_id_) {
@@ -736,6 +743,9 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
         LOG_DEBUG(F("No telegram type handler found for ID 0x%02X (src 0x%02X)"), telegram->type_id, telegram->src);
         if (watch() == WATCH_UNKNOWN) {
             LOG_NOTICE(pretty_telegram(telegram).c_str());
+        }
+        if (first_scan_done_ && !knowndevice && (telegram->src != EMSbus::ems_bus_id()) && (telegram->src != 0x0B) && (telegram->src != 0x0C) && (telegram->src != 0x0D)) {
+            send_read_request(EMSdevice::EMS_TYPE_VERSION, telegram->src);
         }
     }
 
@@ -872,10 +882,16 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
 // export all values to info command
 // value and id are ignored
 bool EMSESP::command_info(uint8_t device_type, JsonObject & json, const int8_t id) {
-    bool has_value = false;
+    bool    has_value = false;
+    uint8_t tag       = DeviceValueTAG::TAG_NONE;
+    if (id >= 1 && id <= 4) {
+        tag = DeviceValueTAG::TAG_HC1 + id - 1;
+    } else if (id >= 9 && id <= 10) {
+        tag = DeviceValueTAG::TAG_WWC1 + id - 9;
+    }
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice && (emsdevice->device_type() == device_type) && ((device_type != DeviceType::THERMOSTAT) || (emsdevice->device_id() == EMSESP::actual_master_thermostat()))) {
-            has_value |= emsdevice->generate_values_json(json, DeviceValueTAG::TAG_NONE, (id != 0)); // verbose mode
+            has_value |= emsdevice->generate_values_json(json, tag, (id == -1)); // verbose mode only for default
         }
     }
 
