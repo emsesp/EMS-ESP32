@@ -322,7 +322,7 @@ void DallasSensor::publish_values(const bool force) {
     uint8_t             sensor_no = 1;
 
     // dallas format is overriden when using Home Assistant
-    uint8_t dallas_format = Mqtt::ha_enabled() ? Mqtt::Dallas_Format::SENSORID : Mqtt::dallas_format();
+    uint8_t dallas_format = Mqtt::ha_enabled() ? Mqtt::Dallas_Format::NUMBER : Mqtt::dallas_format();
 
     for (const auto & sensor : sensors_) {
         char sensorID[10]; // sensor{1-n}
