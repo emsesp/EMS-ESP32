@@ -78,6 +78,13 @@ function formatTemp(t: string) {
   return t + " °C";
 }
 
+  function formatUnit(u: string) {
+  if (u == null) {
+    return u;
+  }
+  return " " + u;
+}
+
 class EMSESPDevicesForm extends Component<
   EMSESPDevicesFormProps,
   EMSESPDevicesFormState
@@ -347,8 +354,8 @@ class EMSESPDevicesForm extends Component<
                   } else {
                     return (
                       <TableRow key={i}>
-                        <TableCell component="th" scope="row">{deviceData.data[i+2]}</TableCell>
-                        <TableCell align="right">{deviceData.data[i]}{deviceData.data[i + 1]}</TableCell>
+                        <TableCell component="th" scope="row">{deviceData.data[i + 2]}</TableCell>
+                        <TableCell align="right">{deviceData.data[i]}{formatUnit(deviceData.data[i + 1])}</TableCell>
                       </TableRow>
                     );
                   }
