@@ -1026,7 +1026,7 @@ bool Boiler::set_warmwater_circulation_mode(const char * value, const int8_t id)
         } else {
             return false;
         }
-        write_command(EMS_TYPE_UBAParameterWW, 6, v, EMS_TYPE_UBAParameterWW);
+        write_command(EMS_TYPE_UBAParameterWW, 7, v, EMS_TYPE_UBAParameterWW);
     }
 
     return true;
