@@ -1018,14 +1018,18 @@ bool Boiler::set_warmwater_circulation_mode(const char * value, const int8_t id)
         return false;
     }
 
-    if (get_toggle_fetch(EMS_TYPE_UBAParameterWW)) {
-        if (v < 7) {
-            LOG_INFO(F("Setting warm water circulation mode %dx3min"), v);
-        } else if (v == 7) {
-            LOG_INFO(F("Setting warm water circulation mode continuos"));
-        } else {
-            return false;
-        }
+    if (v < 7) {
+        LOG_INFO(F("Setting warm water circulation mode %dx3min"), v);
+    } else if (v == 7) {
+        LOG_INFO(F("Setting warm water circulation mode continuos"));
+    } else {
+        LOG_WARNING(F("Set warm water circulation mode: Invalid value"));
+        return false;
+    }
+
+    if (get_toggle_fetch(EMS_TYPE_UBAParameterWWPlus)) {
+        write_command(EMS_TYPE_UBAParameterWWPlus, 11, v, EMS_TYPE_UBAParameterWWPlus);
+    } else {
         write_command(EMS_TYPE_UBAParameterWW, 7, v, EMS_TYPE_UBAParameterWW);
     }
 
