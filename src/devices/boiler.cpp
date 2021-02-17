@@ -494,7 +494,7 @@ void Boiler::process_UBADHWStatus(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram->read_bitvalue(wWCharging_, 12, 4));
     has_update(telegram->read_bitvalue(wWRecharging_, 13, 4));
     has_update(telegram->read_bitvalue(wWTempOK_, 13, 5));
-    has_update(telegram->read_bitvalue(wWCircPump_, 13, 2));
+    has_update(telegram->read_bitvalue(wWCirc_, 13, 2));
 
     // has_update(telegram->read_value(wWActivated_, 20)); // Activated is in 0xEA, this is something other 0/100%
     has_update(telegram->read_value(wWSelTemp_, 10));
