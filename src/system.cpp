@@ -125,7 +125,7 @@ void System::format(uuid::console::Shell & shell) {
 #if defined(ESP8266)
     LittleFS.format();
 #elif defined(ESP32)
-    SPIFFS.format();
+    LITTLEFS.format();
 #endif
 
     System::restart();
@@ -339,6 +339,7 @@ void System::loop() {
         send_heartbeat();
     }
 
+    /*
 #ifndef EMSESP_STANDALONE
 #if defined(EMSESP_DEBUG)
     static uint32_t last_memcheck_ = 0;
@@ -348,6 +349,7 @@ void System::loop() {
     }
 #endif
 #endif
+*/
 
 #endif
 }
@@ -374,6 +376,11 @@ void System::send_heartbeat() {
     // don't send heartbeat if WiFi is not connected
     int8_t rssi = wifi_quality();
     if (rssi == -1) {
+        return;
+    }
+
+    // don't send if we're connecting to MQTT
+    if (Mqtt::is_connecting()) {
         return;
     }
 
@@ -703,7 +710,7 @@ void System::console_commands(Shell & shell, unsigned int context) {
                                                networkSettings.ssid = arguments.front().c_str();
                                                return StateUpdateResult::CHANGED;
                                            });
-                                           shell.println("Use `wifi reconnect` to apply the new settings");
+                                           shell.println("Use `wifi reconnect` to save the new settings");
                                        });
 
     EMSESPShell::commands->add_command(ShellContext::SYSTEM, CommandFlags::ADMIN, flash_string_vector{F_(set), F_(wifi), F_(password)}, [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
@@ -716,7 +723,7 @@ void System::console_commands(Shell & shell, unsigned int context) {
                                 networkSettings.password = password2.c_str();
                                 return StateUpdateResult::CHANGED;
                             });
-                            shell.println("Use `wifi reconnect` to apply the new settings");
+                            shell.println("Use `wifi reconnect` to save the new settings");
                         } else {
                             shell.println(F("Passwords do not match"));
                         }
@@ -748,195 +755,9 @@ void System::console_commands(Shell & shell, unsigned int context) {
     Console::enter_custom_context(shell, context);
 }
 
-// upgrade from previous versions of EMS-ESP
+// upgrade from previous versions of EMS-ESP (ESP8266)
 // returns true if an upgrade was done
 bool System::check_upgrade() {
-    /*
-#if defined(ESP8266)
-    LittleFSConfig l_cfg;
-    l_cfg.setAutoFormat(false);
-    LittleFS.setConfig(l_cfg); // do not auto format if it can't find LittleFS
-    if (LittleFS.begin()) {
-#if defined(EMSESP_FORCE_SERIAL)
-        Serial.begin(115200);
-        Serial.println(F("FS is already LittleFS"));
-        Serial.end();
-#endif
-        return false;
-    }
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-
-    SPIFFSConfig cfg;
-    cfg.setAutoFormat(false); // prevent formatting when opening SPIFFS filesystem
-    SPIFFS.setConfig(cfg);
-    if (!SPIFFS.begin()) {
-#if defined(EMSESP_FORCE_SERIAL)
-        Serial.begin(115200);
-        Serial.println(F("No old SPIFFS found!"));
-        Serial.end();
-#endif
-        // if there is neither SPIFFS or LittleFS we can assume the ESP8266 has been erased
-        l_cfg.setAutoFormat(true); // reset to normal behaviour
-        LittleFS.setConfig(l_cfg);
-        return false;
-    }
-
-    Serial.begin(115200);
-
-    bool                                       failed = false;
-    File                                       file;
-    JsonObject                                 network, general, mqtt, custom_settings;
-    StaticJsonDocument<EMSESP_JSON_SIZE_LARGE> doc;
-
-    // open the system settings:
-    // {
-    // "command":"configfile",
-    // "network":{"ssid":"xxxx","password":"yyyy","wmode":1,"staticip":null,"gatewayip":null,"nmask":null,"dnsip":null},
-    // "general":{"password":"admin","serial":false,"hostname":"ems-esp","log_events":false,"log_ip":null,"version":"1.9.5"},
-    // "mqtt":{"enabled":false,"heartbeat":false,"ip":null,"user":null,"port":1883,"qos":0,"keepalive":60,"retain":false,"password":null,"base":null,"nestedjson":false},
-    // "ntp":{"server":"pool.ntp.org","interval":720,"enabled":false,"timezone":2}
-    // }
-    file = SPIFFS.open("/myesp.json", "r");
-    if (!file) {
-        Serial.println(F("Unable to read the system config file"));
-        failed = true;
-    } else {
-        DeserializationError error = deserializeJson(doc, file);
-        if (error) {
-            Serial.printf(PSTR("Error. Failed to deserialize system json, error %s\n"), error.c_str());
-            failed = true;
-        } else {
-            Serial.println(F("Migrating settings from EMS-ESP v1.9..."));
-#if defined(EMSESP_DEBUG)
-            serializeJson(doc, Serial);
-            Serial.println();
-#endif
-            network = doc["network"];
-            general = doc["general"];
-            mqtt    = doc["mqtt"];
-
-            // start up LittleFS. If it doesn't exist it will format it
-            l_cfg.setAutoFormat(true);
-            LittleFS.setConfig(l_cfg);
-            LittleFS.begin();
-            EMSESP::esp8266React.begin();
-            EMSESP::webSettingsService.begin();
-
-            EMSESP::esp8266React.getNetworkSettingsService()->update(
-                [&](NetworkSettings & networkSettings) {
-                    networkSettings.hostname = general["hostname"] | FACTORY_WIFI_HOSTNAME;
-                    networkSettings.ssid     = network["ssid"] | FACTORY_WIFI_SSID;
-                    networkSettings.password = network["password"] | FACTORY_WIFI_PASSWORD;
-
-                    networkSettings.staticIPConfig = false;
-                    JsonUtils::readIP(network, "staticip", networkSettings.localIP);
-                    JsonUtils::readIP(network, "dnsip", networkSettings.dnsIP1);
-                    JsonUtils::readIP(network, "gatewayip", networkSettings.gatewayIP);
-                    JsonUtils::readIP(network, "nmask", networkSettings.subnetMask);
-
-                    return StateUpdateResult::CHANGED;
-                },
-                "local");
-
-            EMSESP::esp8266React.getSecuritySettingsService()->update(
-                [&](SecuritySettings & securitySettings) {
-                    securitySettings.jwtSecret = general["password"] | FACTORY_JWT_SECRET;
-
-                    return StateUpdateResult::CHANGED;
-                },
-                "local");
-
-            EMSESP::esp8266React.getMqttSettingsService()->update(
-                [&](MqttSettings & mqttSettings) {
-                    mqttSettings.host           = mqtt["ip"] | FACTORY_MQTT_HOST;
-                    mqttSettings.mqtt_qos       = mqtt["qos"] | 0;
-                    mqttSettings.mqtt_retain    = mqtt["retain"];
-                    mqttSettings.username       = mqtt["user"] | "";
-                    mqttSettings.password       = mqtt["password"] | "";
-                    mqttSettings.port           = mqtt["port"] | FACTORY_MQTT_PORT;
-                    mqttSettings.clientId       = FACTORY_MQTT_CLIENT_ID;
-                    mqttSettings.enabled        = mqtt["enabled"];
-                    mqttSettings.keepAlive      = FACTORY_MQTT_KEEP_ALIVE;
-                    mqttSettings.cleanSession   = FACTORY_MQTT_CLEAN_SESSION;
-
-                    return StateUpdateResult::CHANGED;
-                },
-                "local");
-        }
-    }
-    file.close();
-
-    if (failed) {
-        Serial.println(F("Failed to read system config. Quitting."));
-        SPIFFS.end();
-        Serial.end();
-        return false;
-    }
-
-    // open the custom settings file next:
-    // {
-    // "command":"custom_configfile",
-    // "settings":{"led":true,"led_gpio":2,"dallas_gpio":14,"dallas_parasite":false,"listen_mode":false,"shower_timer":false,"shower_alert":false,"publish_time":0,"tx_mode":1,"bus_id":11,"master_thermostat":0,"known_devices":""}
-    // }
-    doc.clear();
-    failed = false;
-    file   = SPIFFS.open("/customconfig.json", "r");
-    if (!file) {
-        Serial.println(F("Unable to read custom config file"));
-        failed = true;
-    } else {
-        DeserializationError error = deserializeJson(doc, file);
-        if (error) {
-            Serial.printf(PSTR("Error. Failed to deserialize custom json, error %s\n"), error.c_str());
-            failed = true;
-        } else {
-            custom_settings = doc["settings"];
-            EMSESP::webSettingsService.update(
-                [&](WebSettings & settings) {
-                    settings.tx_mode              = custom_settings["tx_mode"] | EMSESP_DEFAULT_TX_MODE;
-                    settings.shower_alert         = custom_settings["shower_alert"] | EMSESP_DEFAULT_SHOWER_ALERT;
-                    settings.shower_timer         = custom_settings["shower_timer"] | EMSESP_DEFAULT_SHOWER_TIMER;
-                    settings.master_thermostat    = custom_settings["master_thermostat"] | EMSESP_DEFAULT_MASTER_THERMOSTAT;
-                    settings.ems_bus_id           = custom_settings["bus_id"] | EMSESP_DEFAULT_EMS_BUS_ID;
-                    settings.syslog_enabled       = false;
-                    settings.syslog_host          = EMSESP_DEFAULT_SYSLOG_HOST;
-                    settings.syslog_level         = EMSESP_DEFAULT_SYSLOG_LEVEL;
-                    settings.syslog_mark_interval = EMSESP_DEFAULT_SYSLOG_MARK_INTERVAL;
-                    settings.dallas_gpio          = custom_settings["dallas_gpio"] | EMSESP_DEFAULT_DALLAS_GPIO;
-                    settings.dallas_parasite      = custom_settings["dallas_parasite"] | EMSESP_DEFAULT_DALLAS_PARASITE;
-                    settings.led_gpio             = custom_settings["led_gpio"] | EMSESP_DEFAULT_LED_GPIO;
-                    settings.analog_enabled       = EMSESP_DEFAULT_ANALOG_ENABLED;
-
-                    return StateUpdateResult::CHANGED;
-                },
-                "local");
-        }
-    }
-    file.close();
-
-    SPIFFS.end();
-
-    if (failed) {
-        Serial.println(F("Failed to read custom config. Quitting."));
-        Serial.end();
-        return false;
-    }
-
-#pragma GCC diagnostic pop
-
-    Serial.println(F("Restarting..."));
-    Serial.flush();
-    delay(1000);
-    Serial.end();
-    delay(1000);
-    restart();
-    return true; // will never get here
-#else
-    return false;
-#endif
-*/
     return false;
 }
 

@@ -28,13 +28,13 @@ uint32_t           heap_start = ESP.getFreeHeap(); // get initial available heap
 
 AsyncWebServer webServer(80);
 
-#if defined(ESP32)
-ESP8266React       EMSESP::esp8266React(&webServer, &SPIFFS);
-WebSettingsService EMSESP::webSettingsService = WebSettingsService(&webServer, &SPIFFS, EMSESP::esp8266React.getSecurityManager());
-#elif defined(EMSESP_STANDALONE)
+#if defined(EMSESP_STANDALONE)
 FS                 dummyFS;
 ESP8266React       EMSESP::esp8266React(&webServer, &dummyFS);
 WebSettingsService EMSESP::webSettingsService = WebSettingsService(&webServer, &dummyFS, EMSESP::esp8266React.getSecurityManager());
+#else
+ESP8266React       EMSESP::esp8266React(&webServer, &LITTLEFS);
+WebSettingsService EMSESP::webSettingsService = WebSettingsService(&webServer, &LITTLEFS, EMSESP::esp8266React.getSecurityManager());
 #endif
 
 WebStatusService  EMSESP::webStatusService  = WebStatusService(&webServer, EMSESP::esp8266React.getSecurityManager());
@@ -166,10 +166,8 @@ void EMSESP::init_tx() {
         tx_mode   = settings.tx_mode;
         tx_delay_ = settings.tx_delay * 1000;
 
-#ifndef EMSESP_FORCE_SERIAL
         EMSuart::stop();
         EMSuart::start(tx_mode, settings.rx_gpio, settings.tx_gpio);
-#endif
     });
 
     txservice_.start(); // sends out request to EMS bus for all devices
@@ -1042,9 +1040,15 @@ void EMSESP::send_raw_telegram(const char * data) {
 // start all the core services
 // the services must be loaded in the correct order
 void EMSESP::start() {
+    Serial.begin(115200);
+    Serial.println();
+
 // start the file system
 #ifndef EMSESP_STANDALONE
-    SPIFFS.begin(true);
+    if (!LITTLEFS.begin(true)) {
+        Serial.println("LITTLEFS Mount Failed");
+        return;
+    }
 #endif
 
     esp8266React.begin();       // loads system settings (wifi, mqtt, etc)
