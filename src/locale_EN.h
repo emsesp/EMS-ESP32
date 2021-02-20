@@ -19,6 +19,7 @@
 #pragma once
 
 // common words
+MAKE_PSTR_WORD(debug)
 MAKE_PSTR_WORD(exit)
 MAKE_PSTR_WORD(help)
 MAKE_PSTR_WORD(log)
