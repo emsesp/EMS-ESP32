@@ -499,6 +499,15 @@ void Mqtt::on_connect() {
     publish_retain(F("status"), "online", true); // say we're alive to the Last Will topic, with retain on
 
     mqtt_publish_fails_ = 0; // reset fail count to 0
+
+    /*
+    // for debugging only
+    LOG_INFO("Queue size: %d", mqtt_messages_.size());
+    for (const auto & message : mqtt_messages_) {
+        auto content = message.content_;
+        LOG_INFO(F(" [%02d] (%d) topic=%s payload=%s"), message.id_, content->operation, content->topic.c_str(), content->payload.c_str());
+    }
+    */
 }
 
 // Home Assistant Discovery - the main master Device called EMS-ESP
@@ -560,6 +569,8 @@ std::shared_ptr<const MqttMessage> Mqtt::queue_message(const uint8_t operation, 
         message = std::make_shared<MqttMessage>(operation, full_topic, payload, retain);
     }
 
+    // LOG_INFO("Added to queue: %s %s", message->topic.c_str(), message->payload.c_str()); // debugging only
+
     // if the queue is full, make room but removing the last one
     if (mqtt_messages_.size() >= MAX_MQTT_MESSAGES) {
         mqtt_messages_.pop_front();
@@ -580,7 +591,7 @@ std::shared_ptr<const MqttMessage> Mqtt::queue_message(const uint8_t operation, 
 
 // add MQTT message to queue, payload is a string
 std::shared_ptr<const MqttMessage> Mqtt::queue_publish_message(const std::string & topic, const std::string & payload, bool retain) {
-    if (!enabled() || !connecting_) {
+    if (!enabled()) {
         return nullptr;
     };
     return queue_message(Operation::PUBLISH, topic, payload, retain);

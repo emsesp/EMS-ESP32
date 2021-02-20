@@ -14,6 +14,7 @@ See https://github.com/proddy/EMS-ESP/issues/632
 - multiple roomcontrollers
 - readback after write with delay (give ems-devices time to set the value)
 - Thermostat ES72/RC20 device 66 to command-set RC20_2
+- MQTT payloads not adding to queue when MQTT is re-connecting (fixes #369)
 
 ### Changed
 - split `show values` in smaller packages (edited)
@@ -21,6 +22,7 @@ See https://github.com/proddy/EMS-ESP/issues/632
 - check flowsensor for `tap_water_active`
 - mqtt prefixed with `Base`
 - count Dallas sensor fails
+- switch from SPIFFS to LITTLEFS
 
 ### Removed
 
