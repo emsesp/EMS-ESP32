@@ -18,7 +18,6 @@ ESP8266React::ESP8266React(AsyncWebServer * server, FS * fs)
     , _restartService(server, &_securitySettingsService)
     , _factoryResetService(server, fs, &_securitySettingsService)
     , _systemStatus(server, &_securitySettingsService) {
-#ifdef PROGMEM_WWW
     // Serve static resources from PROGMEM
     WWWData::registerRoutes([server, this](const String & uri, const String & contentType, const uint8_t * content, size_t len) {
         ArRequestHandlerFunction requestHandler = [contentType, content, len](AsyncWebServerRequest * request) {
@@ -41,30 +40,6 @@ ESP8266React::ESP8266React(AsyncWebServer * server, FS * fs)
             });
         }
     });
-#else
-    // Serve static resources from /www/
-    server->serveStatic("/js/", *fs, "/www/js/");
-    server->serveStatic("/css/", *fs, "/www/css/");
-    server->serveStatic("/fonts/", *fs, "/www/fonts/");
-    server->serveStatic("/app/", *fs, "/www/app/");
-    server->serveStatic("/favicon.ico", *fs, "/www/favicon.ico");
-    // Serving all other get requests with "/www/index.htm"
-    // OPTIONS get a straight up 200 response
-    server->onNotFound([](AsyncWebServerRequest * request) {
-        if (request->method() == HTTP_GET) {
-#ifdef ESP32
-            request->send(SPIFFS, "/www/index.html");
-#else
-            request->send(LittleFS, "/www/index.html"); // added
-#endif
-
-        } else if (request->method() == HTTP_OPTIONS) {
-            request->send(200);
-        } else {
-            request->send(404);
-        }
-    });
-#endif
 
 // Disable CORS if required
 #if defined(ENABLE_CORS)
