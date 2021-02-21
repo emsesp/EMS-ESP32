@@ -1,8 +1,8 @@
-name: Release Main
+name: Release Stable ESP8266
 
 on:
   workflow_dispatch:
-    branches: [ main ]
+    branches: [ stable_esp8266 ]
 
 jobs:
         
@@ -37,7 +37,6 @@ jobs:
       - name: Build images
         run: |
           platformio run -e esp8266-ci
-          platformio run -e esp32-ci
           
       - name: Changelog
         run: cat RELEASENOTES.md CHANGELOG_LATEST.md > BODY.txt 
@@ -46,7 +45,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           body_path: BODY.txt
-          name: EMS-ESP v${{steps.fetch_version.outputs.s}}
+          name: EMS-ESP v${{steps.fetch_version.outputs.s}} (ESP8266)
           tag_name: v${{steps.fetch_version.outputs.s}}
           prerelease: false
           files: |
