@@ -444,7 +444,7 @@ bool Mqtt::get_publish_onchange(uint8_t device_type) {
 // MQTT onConnect - when an MQTT connect is established
 // send out some inital MQTT messages
 void Mqtt::on_connect() {
-    if (connecting_) {
+    if (connecting_) { // prevent duplicating connections
         return;
     }
 

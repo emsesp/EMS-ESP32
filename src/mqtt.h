@@ -138,10 +138,6 @@ class Mqtt {
         return mqtt_enabled_;
     }
 
-    static bool is_connecting() {
-        return connecting_;
-    }
-
     static std::string base() {
         return mqtt_base_;
     }
