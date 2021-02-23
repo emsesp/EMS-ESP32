@@ -143,8 +143,8 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     register_device_value(TAG_BOILER_DATA_WW, &wWCurTemp_, DeviceValueType::USHORT, FL_(div10), F("wWCurTemp"), F("Warm Water current temperature (intern)"), DeviceValueUOM::DEGREES);
     register_device_value(TAG_BOILER_DATA_WW, &wWCurTemp2_, DeviceValueType::USHORT, FL_(div10), F("wWCurTemp2"), F("Warm Water current temperature (extern)"), DeviceValueUOM::DEGREES);
     register_device_value(TAG_BOILER_DATA_WW, &wWCurFlow_, DeviceValueType::UINT, FL_(div10), F("wWCurFlow"), F("Warm Water current tap water flow"), DeviceValueUOM::LMIN);
-    register_device_value(TAG_BOILER_DATA_WW, &wwStorageTemp1_, DeviceValueType::USHORT, FL_(div10), F("wwStorageTemp1"), F("Warm water storage temperature (intern)"), DeviceValueUOM::DEGREES);
-    register_device_value(TAG_BOILER_DATA_WW, &wwStorageTemp2_, DeviceValueType::USHORT, FL_(div10), F("wwStorageTemp2"), F("Warm water storage temperature (extern)"), DeviceValueUOM::DEGREES);
+    register_device_value(TAG_BOILER_DATA_WW, &wWStorageTemp1_, DeviceValueType::USHORT, FL_(div10), F("wWStorageTemp1"), F("Warm water storage temperature (intern)"), DeviceValueUOM::DEGREES);
+    register_device_value(TAG_BOILER_DATA_WW, &wWStorageTemp2_, DeviceValueType::USHORT, FL_(div10), F("wWStorageTemp2"), F("Warm water storage temperature (extern)"), DeviceValueUOM::DEGREES);
     register_device_value(TAG_BOILER_DATA_WW, &wWActivated_, DeviceValueType::BOOL, nullptr, F("wWActivated"), F("Warm Water activated"), DeviceValueUOM::NONE);
     register_device_value(TAG_BOILER_DATA_WW, &wWOneTime_, DeviceValueType::BOOL, nullptr, F("wWOneTime"), F("Warm Water one time charging"), DeviceValueUOM::NONE);
     register_device_value(TAG_BOILER_DATA_WW, &wWDisinfecting_, DeviceValueType::BOOL, nullptr, F("wWDisinfecting"), F("Warm Water disinfecting"), DeviceValueUOM::NONE);
@@ -154,8 +154,8 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     register_device_value(TAG_BOILER_DATA_WW, &wWActive_, DeviceValueType::BOOL, nullptr, F("wWActive"), F("Warm Water active"), DeviceValueUOM::NONE);
     register_device_value(TAG_BOILER_DATA_WW, &wWHeat_, DeviceValueType::BOOL, nullptr, F("wWHeat"), F("Warm Water heating"), DeviceValueUOM::NONE);
     register_device_value(TAG_BOILER_DATA_WW, &wWSetPumpPower_, DeviceValueType::UINT, nullptr, F("wWSetPumpPower"), F("Warm Water pump set power"), DeviceValueUOM::PERCENT);
-    register_device_value(TAG_BOILER_DATA_WW, &wwMixTemperature_, DeviceValueType::USHORT, nullptr, F("wwMixTemperature"), F("Warm Water mix temperature"), DeviceValueUOM::DEGREES);
-    register_device_value(TAG_BOILER_DATA_WW, &wwBufferTemperature_, DeviceValueType::USHORT, nullptr, F("wwBufferTemperature"), F("Warm Water buffer boiler temperature"), DeviceValueUOM::DEGREES);
+    register_device_value(TAG_BOILER_DATA_WW, &mixerTemp_, DeviceValueType::USHORT, FL_(div10), F("mixerTemp"), F("Mixer temperature"), DeviceValueUOM::DEGREES);
+    register_device_value(TAG_BOILER_DATA_WW, &tankMiddleTemp_, DeviceValueType::USHORT, FL_(div10), F("tankMiddleTemp"), F("Tank middle temperature (TS3)"), DeviceValueUOM::DEGREES);
     register_device_value(TAG_BOILER_DATA_WW, &wWStarts_, DeviceValueType::ULONG, nullptr, F("wWStarts"), F("Warm Water # starts"), DeviceValueUOM::NONE);
     register_device_value(TAG_BOILER_DATA_WW, &wWStarts2_, DeviceValueType::ULONG, nullptr, F("wWStarts2"), F("Warm Water # starts (control)"), DeviceValueUOM::NONE);
     register_device_value(TAG_BOILER_DATA_WW, &wWWorkM_, DeviceValueType::TIME, nullptr, F("wWWorkM"), F("Warm Water active time"), DeviceValueUOM::MINUTES);
@@ -291,9 +291,9 @@ void Boiler::process_UBAMonitorFast(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram->read_bitvalue(wWCirc_, 7, 7));
 
     // warm water storage sensors (if present)
-    // wwStorageTemp2 is also used by some brands as the boiler temperature - see https://github.com/proddy/EMS-ESP/issues/206
-    has_update(telegram->read_value(wwStorageTemp1_, 9)); // 0x8300 if not available
-    has_update(telegram->read_value(wwStorageTemp2_,
+    // wWStorageTemp2 is also used by some brands as the boiler temperature - see https://github.com/proddy/EMS-ESP/issues/206
+    has_update(telegram->read_value(wWStorageTemp1_, 9)); // 0x8300 if not available
+    has_update(telegram->read_value(wWStorageTemp2_,
                                     11)); // 0x8000 if not available - this is boiler temp
 
     has_update(telegram->read_value(retTemp_, 13));
@@ -550,8 +550,8 @@ void Boiler::process_UBAEnergySupplied(std::shared_ptr<const Telegram> telegram)
 // e.g. 88 00 2A 00 00 00 00 00 00 00 00 00 D2 00 00 80 00 00 01 08 80 00 02 47 00
 // see https://github.com/proddy/EMS-ESP/issues/397
 void Boiler::process_MC10Status(std::shared_ptr<const Telegram> telegram) {
-    has_update(telegram->read_value(wwMixTemperature_, 14));
-    has_update(telegram->read_value(wwBufferTemperature_, 18));
+    has_update(telegram->read_value(mixerTemp_, 14));
+    has_update(telegram->read_value(tankMiddleTemp_, 18));
 }
 
 /*

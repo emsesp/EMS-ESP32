@@ -953,6 +953,7 @@ void Test::add_device(uint8_t device_id, uint8_t product_id) {
     uart_telegram({device_id, EMSESP_DEFAULT_EMS_BUS_ID, EMSdevice::EMS_TYPE_VERSION, 0, product_id, 1, 0});
 }
 
+#ifndef EMSESP_STANDALONE
 void Test::listDir(fs::FS & fs, const char * dirname, uint8_t levels) {
     Serial.printf("Listing directory: %s\r\n", dirname);
 
@@ -983,6 +984,7 @@ void Test::listDir(fs::FS & fs, const char * dirname, uint8_t levels) {
         file = root.openNextFile();
     }
 }
+#endif
 
 void Test::debug(uuid::console::Shell & shell, const std::string & cmd) {
     // shell.add_flags(CommandFlags::ADMIN); // switch to su
@@ -994,9 +996,11 @@ void Test::debug(uuid::console::Shell & shell, const std::string & cmd) {
         command = cmd;
     }
 
+#ifndef EMSESP_STANDALONE
     if (command == "ls") {
         listDir(LITTLEFS, "/", 3);
     }
+#endif
 }
 
 } // namespace emsesp

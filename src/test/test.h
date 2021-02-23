@@ -45,7 +45,9 @@ class Test {
     static void debug(uuid::console::Shell & shell, const std::string & command);
 
   private:
+#ifndef EMSESP_STANDALONE
     static void listDir(fs::FS & fs, const char * dirname, uint8_t levels);
+#endif
 };
 
 } // namespace emsesp

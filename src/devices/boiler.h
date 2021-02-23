@@ -61,22 +61,23 @@ class Boiler : public EMSdevice {
     uint16_t wWCurTemp_;          // Warm Water current temperature
     uint16_t wWCurTemp2_;         // Warm Water current temperature storage
     uint8_t  wWCurFlow_;          // Warm Water current flow temp in l/min
-    uint16_t wwStorageTemp1_;     // warm water storage temp 1
-    uint16_t wwStorageTemp2_;     // warm water storage temp 2
+    uint16_t wWStorageTemp1_;     // warm water storage temp 1
+    uint16_t wWStorageTemp2_;     // warm water storage temp 2
     uint8_t  wWActivated_;        // Warm Water activated
     uint8_t  wWOneTime_;          // Warm Water one time function on/off
     uint8_t  wWDisinfecting_;     // Warm Water disinfection on/off
     uint8_t  wWCharging_;         // Warm Water charging on/off
     uint8_t  wWRecharging_;       // Warm Water recharge on/off
     uint8_t  wWTempOK_;           // Warm Water temperature ok on/off
-    uint8_t  wWActive_;
-    uint8_t  wWHeat_;              // 3-way valve on WW
-    uint8_t  wWSetPumpPower_;      // ww pump speed/power?
-    uint16_t wwMixTemperature_;    // mixing temperature
-    uint16_t wwBufferTemperature_; // buffertemperature
-    uint32_t wWStarts_;            // Warm Water # starts
-    uint32_t wWStarts2_;           // Warm water starts (control)
-    uint32_t wWWorkM_;             // Warm Water # minutes
+    uint8_t  wWActive_;           //
+    uint8_t  wWHeat_;             // 3-way valve on WW
+    uint8_t  wWSetPumpPower_;     // ww pump speed/power?
+    uint32_t wWStarts_;           // Warm Water # starts
+    uint32_t wWStarts2_;          // Warm water starts (control)
+    uint32_t wWWorkM_;            // Warm Water # minutes
+
+    uint16_t mixerTemp_;      // mixing temperature
+    uint16_t tankMiddleTemp_; // Tank middle temperature (TS3)
 
     // main
     uint8_t  heatingActive_;    // Central heating is on/off

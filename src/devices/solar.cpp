@@ -69,8 +69,8 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
     }
 
     register_device_value(TAG_NONE, &collectorTemp_, DeviceValueType::SHORT, FL_(div10), F("collectorTemp"), F("Collector temperature (TS1)"), DeviceValueUOM::DEGREES);
-    register_device_value(TAG_NONE, &tankBottomTemp_, DeviceValueType::SHORT, FL_(div10), F("tankBottomTemp"), F("Bottom temperature (TS2)"), DeviceValueUOM::DEGREES);
-    register_device_value(TAG_NONE, &tankBottomTemp2_, DeviceValueType::SHORT, FL_(div10), F("tankBottomTemp2"), F("Bottom temperature (TS5)"), DeviceValueUOM::DEGREES);
+    register_device_value(TAG_NONE, &tankBottomTemp_, DeviceValueType::SHORT, FL_(div10), F("tankBottomTemp"), F("Tank Bottom temperature (TS2)"), DeviceValueUOM::DEGREES);
+    register_device_value(TAG_NONE, &tankBottomTemp2_, DeviceValueType::SHORT, FL_(div10), F("tankBottomTemp2"), F("Tank Bottom temperature (TS5)"), DeviceValueUOM::DEGREES);
     register_device_value(TAG_NONE, &heatExchangerTemp_, DeviceValueType::SHORT, FL_(div10), F("heatExchangerTemp"), F("Heat exchanger temperature (TS6)"), DeviceValueUOM::DEGREES);
 
     register_device_value(TAG_NONE, &tank1MaxTempCurrent_, DeviceValueType::UINT, nullptr, F("tank1MaxTempCurrent"), F("Maximum Tank temperature"), DeviceValueUOM::NONE);
@@ -118,7 +118,7 @@ bool Solar::publish_ha_config() {
 // SM10Monitor - type 0x97
 void Solar::process_SM10Monitor(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram->read_value(collectorTemp_, 2));       // collector temp from SM10, is *10
-    has_update(telegram->read_value(tankBottomTemp_, 5));      // bottom temp from SM10, is *10
+    has_update(telegram->read_value(tankBottomTemp_, 5));      // tank bottom temp from SM10, is *10
     has_update(telegram->read_value(solarPumpModulation_, 4)); // modulation solar pump
     has_update(telegram->read_bitvalue(solarPump_, 7, 1));
     has_update(telegram->read_value(pumpWorkMin_, 8, 3));
@@ -187,7 +187,7 @@ void Solar::process_SM100ParamCfg(std::shared_ptr<const Telegram> telegram) {
  * e.g. B0 0B FF 00 02 62 00 77 01 D4 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 00 F9 80 00 80 9E - for heat exchanger temp
  * e.g, 30 00 FF 00 02 62 01 AC
  *      30 00 FF 18 02 62 80 00
- *      30 00 FF 00 02 62 01 A1 - for bottom temps
+ *      30 00 FF 00 02 62 01 A1 - for tank bottom temps
  * bytes 0+1 = TS1 Temperature sensor for collector
  * bytes 2+3 = TS2 Temperature sensor 1 cylinder, bottom
  * bytes 16+17 = TS5 Temperature sensor 2 cylinder, bottom, or swimming pool
@@ -308,7 +308,7 @@ void Solar::process_SM100Time(std::shared_ptr<const Telegram> telegram) {
  */
 void Solar::process_ISM1StatusMessage(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram->read_value(collectorTemp_, 4));  // Collector Temperature
-    has_update(telegram->read_value(tankBottomTemp_, 6)); // Temperature Bottom of Solar Boiler
+    has_update(telegram->read_value(tankBottomTemp_, 6)); // Temperature Bottom of Solar Boiler tank
     uint16_t Wh = 0xFFFF;
     has_update(telegram->read_value(Wh, 2)); // Solar Energy produced in last hour only ushort, is not * 10
 

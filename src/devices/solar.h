@@ -33,8 +33,8 @@ class Solar : public EMSdevice {
     static uuid::log::Logger logger_;
 
     int16_t  collectorTemp_;          // TS1: Temperature sensor for collector array 1
-    int16_t  tankBottomTemp_;         // TS2: Temperature sensor 1 cylinder, bottom (solar thermal system)
-    int16_t  tankBottomTemp2_;        // TS5: Temperature sensor 2 cylinder, bottom, or swimming pool (solar thermal system)
+    int16_t  tankBottomTemp_;         // TS2: Temperature sensor 1 cylinder, bottom tank (solar thermal system)
+    int16_t  tankBottomTemp2_;        // TS5: Temperature sensor 2 cylinder, bottom tank, or swimming pool (solar thermal system)
     int16_t  heatExchangerTemp_;      // TS6: Heat exchanger temperature sensor
     uint8_t  solarPumpModulation_;    // PS1: modulation solar pump
     uint8_t  cylinderPumpModulation_; // PS5: modulation cylinder pump
