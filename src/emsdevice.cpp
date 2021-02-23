@@ -499,10 +499,10 @@ bool EMSdevice::generate_values_json_web(JsonObject & json) {
                     data.add(*(uint8_t *)(dv.value_p) ? dv.options[0] : dv.options[1]);
                 } else {
                     // see how to render the value depending on the setting
-                    if (Helpers::bool_format() == BOOL_FORMAT_ONOFF) {
+                    if (Mqtt::bool_format() == BOOL_FORMAT_ONOFF) {
                         // on or off as strings
                         data.add(*(uint8_t *)(dv.value_p) ? F_(on) : F_(off));
-                    } else if (Helpers::bool_format() == BOOL_FORMAT_TRUEFALSE) {
+                    } else if (Mqtt::bool_format() == BOOL_FORMAT_TRUEFALSE) {
                         // true or false values (not strings)
                         data.add((bool)(*(uint8_t *)(dv.value_p)) ? true : false);
                     } else {
@@ -645,11 +645,11 @@ bool EMSdevice::generate_values_json(JsonObject & root, const uint8_t tag_filter
                     has_value  = true;
                 } else {
                     // see how to render the value depending on the setting
-                    if (Helpers::bool_format() == BOOL_FORMAT_ONOFF) {
+                    if (Mqtt::bool_format() == BOOL_FORMAT_ONOFF) {
                         // on or off as strings
                         json[name] = *(uint8_t *)(dv.value_p) ? F_(on) : F_(off);
                         has_value  = true;
-                    } else if (Helpers::bool_format() == BOOL_FORMAT_TRUEFALSE) {
+                    } else if (Mqtt::bool_format() == BOOL_FORMAT_TRUEFALSE) {
                         // true or false values (not strings)
                         json[name] = (bool)(*(uint8_t *)(dv.value_p)) ? true : false;
                         has_value  = true;

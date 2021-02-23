@@ -36,6 +36,7 @@ uint32_t    Mqtt::publish_time_sensor_;
 uint32_t    Mqtt::publish_time_other_;
 bool        Mqtt::mqtt_enabled_;
 uint8_t     Mqtt::dallas_format_;
+uint8_t     Mqtt::bool_format_;
 uint8_t     Mqtt::ha_climate_format_;
 bool        Mqtt::ha_enabled_;
 
@@ -467,6 +468,7 @@ void Mqtt::on_connect() {
         ha_enabled_              = mqttSettings.ha_enabled;
         ha_climate_format_       = mqttSettings.ha_climate_format;
         dallas_format_           = mqttSettings.dallas_format;
+        bool_format_             = mqttSettings.bool_format;
     });
 
     // first time to connect

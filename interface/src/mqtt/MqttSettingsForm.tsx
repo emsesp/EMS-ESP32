@@ -151,6 +151,17 @@ class MqttSettingsForm extends React.Component<MqttSettingsFormProps> {
           <MenuItem value={1}>by Sensor ID</MenuItem>
           <MenuItem value={2}>by Number</MenuItem>
         </SelectValidator>
+        <SelectValidator name="bool_format"
+          label="Boolean Format"
+          value={data.bool_format}
+          fullWidth
+          variant="outlined"
+          onChange={handleValueChange('bool_format')}
+          margin="normal">
+          <MenuItem value={1}>on/off</MenuItem>
+          <MenuItem value={2}>true/false</MenuItem>
+          <MenuItem value={3}>1/0</MenuItem>
+        </SelectValidator>
         <BlockFormControlLabel
           control={
             <Checkbox

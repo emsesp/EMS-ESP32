@@ -47,7 +47,6 @@ void WebSettings::read(WebSettings & settings, JsonObject & root) {
     root["led_gpio"]             = settings.led_gpio;
     root["hide_led"]             = settings.hide_led;
     root["api_enabled"]          = settings.api_enabled;
-    root["bool_format"]          = settings.bool_format;
     root["analog_enabled"]       = settings.analog_enabled;
 }
 
@@ -93,10 +92,9 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     }
 
     // other
-    snprintf_P(&crc_before[0], crc_before.capacity() + 1, PSTR("%d%d"), settings.bool_format, settings.analog_enabled);
-    settings.bool_format    = root["bool_format"] | EMSESP_DEFAULT_BOOL_FORMAT;
+    snprintf_P(&crc_before[0], crc_before.capacity() + 1, PSTR("%d"), settings.analog_enabled);
     settings.analog_enabled = root["analog_enabled"] | EMSESP_DEFAULT_ANALOG_ENABLED;
-    snprintf_P(&crc_after[0], crc_after.capacity() + 1, PSTR("%d%d"), settings.bool_format, settings.analog_enabled);
+    snprintf_P(&crc_after[0], crc_after.capacity() + 1, PSTR("%d"), settings.analog_enabled);
     if (crc_before != crc_after) {
         add_flags(ChangeFlags::OTHER);
     }

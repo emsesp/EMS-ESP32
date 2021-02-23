@@ -60,6 +60,8 @@ static String generateClientId() {
 #define FACTORY_MQTT_MAX_TOPIC_LENGTH 128
 #endif
 
+
+#define EMSESP_DEFAULT_BOOL_FORMAT 1     // on/off
 #define EMSESP_DEFAULT_DALLAS_FORMAT 1     // sensorid
 #define EMSESP_DEFAULT_HA_CLIMATE_FORMAT 1 // current temp
 #define EMSESP_DEFAULT_MQTT_QOS 0
@@ -101,6 +103,7 @@ class MqttSettings {
     uint8_t  mqtt_qos;
     bool     mqtt_retain;
     uint8_t  dallas_format;
+    uint8_t  bool_format;
     uint8_t  ha_climate_format;
     bool     ha_enabled;
 

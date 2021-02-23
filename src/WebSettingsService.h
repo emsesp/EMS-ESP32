@@ -89,7 +89,6 @@ class WebSettings {
     uint8_t  led_gpio;
     bool     hide_led;
     bool     api_enabled;
-    uint8_t  bool_format;
     bool     analog_enabled;
 
     static void              read(WebSettings & settings, JsonObject & root);

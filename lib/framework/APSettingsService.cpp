@@ -46,7 +46,7 @@ void APSettingsService::manageAP() {
 }
 
 void APSettingsService::startAP() {
-    Serial.println(F("Starting software access point"));
+    // Serial.println(F("Starting software access point"));
     WiFi.softAPConfig(_state.localIP, _state.gatewayIP, _state.subnetMask);
     WiFi.softAP(_state.ssid.c_str(), _state.password.c_str());
     if (!_dnsServer) {
@@ -65,7 +65,7 @@ void APSettingsService::stopAP() {
         delete _dnsServer;
         _dnsServer = nullptr;
     }
-    Serial.println(F("Stopping software access point"));
+    // Serial.println(F("Stopping software access point"));
     WiFi.softAPdisconnect(true);
 }
 

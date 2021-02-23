@@ -50,6 +50,8 @@ using uuid::console::Shell;
 #define MAX_MQTT_MESSAGES 20
 #endif
 
+enum { BOOL_FORMAT_ONOFF = 1, BOOL_FORMAT_TRUEFALSE, BOOL_FORMAT_10 }; // matches Web UI settings
+
 namespace emsesp {
 
 using mqtt_subfunction_p = std::function<bool(const char * message)>;
@@ -154,6 +156,10 @@ class Mqtt {
 
     static uint8_t dallas_format() {
         return dallas_format_;
+    }
+
+    static uint8_t bool_format() {
+        return bool_format_;
     }
 
     static bool ha_enabled() {
@@ -265,6 +271,7 @@ class Mqtt {
     static uint32_t    publish_time_sensor_;
     static bool        mqtt_enabled_;
     static uint8_t     dallas_format_;
+    static uint8_t     bool_format_;
     static uint8_t     ha_climate_format_;
     static bool        ha_enabled_;
 };

@@ -185,6 +185,7 @@ void MqttSettings::read(MqttSettings & settings, JsonObject & root) {
     root["mqtt_qos"]                = settings.mqtt_qos;
     root["mqtt_retain"]             = settings.mqtt_retain;
     root["dallas_format"]           = settings.dallas_format;
+    root["bool_format"]             = settings.bool_format;
     root["ha_climate_format"]       = settings.ha_climate_format;
     root["ha_enabled"]              = settings.ha_enabled;
 }
@@ -214,6 +215,7 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
     newSettings.publish_time_sensor     = root["publish_time_sensor"] | EMSESP_DEFAULT_PUBLISH_TIME;
 
     newSettings.dallas_format     = root["dallas_format"] | EMSESP_DEFAULT_DALLAS_FORMAT;
+    newSettings.bool_format       = root["bool_format"] | EMSESP_DEFAULT_BOOL_FORMAT;
     newSettings.ha_climate_format = root["ha_climate_format"] | EMSESP_DEFAULT_HA_CLIMATE_FORMAT;
     newSettings.ha_enabled        = root["ha_enabled"] | EMSESP_DEFAULT_HA_ENABLED;
 
