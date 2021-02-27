@@ -39,6 +39,7 @@ class Switch : public EMSdevice {
     uint16_t flowTemp_;
     uint8_t  status_;
     uint8_t  activated_;
+    uint8_t  id_;
 };
 
 } // namespace emsesp

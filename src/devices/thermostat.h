@@ -132,6 +132,7 @@ class Thermostat : public EMSdevice {
     std::vector<uint16_t> curve_typeids;
 
     // standard for all thermostats
+    uint8_t  id_;            // product id
     char     status_[20];    // online or offline
     char     dateTime_[25];  // date and time stamp
     char     errorCode_[15]; // code from 0xA2 as string i.e. "A22(816)"

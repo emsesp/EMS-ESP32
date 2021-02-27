@@ -76,7 +76,8 @@ class Solar : public EMSdevice {
     uint16_t collector1Area_; // Area of collector field 1
     uint8_t  collector1Type_; // Type of collector field 1, 01=flat, 02=vacuum
 
-    char type_[20]; // Solar of WWC
+    char    type_[20]; // Solar of WWC
+    uint8_t id_;
 
     void process_SM10Monitor(std::shared_ptr<const Telegram> telegram);
     void process_SM100SystemConfig(std::shared_ptr<const Telegram> telegram);

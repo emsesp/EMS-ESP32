@@ -34,9 +34,12 @@ Switch::Switch(uint8_t device_type, uint8_t device_id, uint8_t product_id, const
     register_telegram_type(0x9D, F("WM10SetMessage"), false, [&](std::shared_ptr<const Telegram> t) { process_WM10SetMessage(t); });
     register_telegram_type(0x1E, F("WM10TempMessage"), false, [&](std::shared_ptr<const Telegram> t) { process_WM10TempMessage(t); });
 
-    register_device_value(TAG_NONE, &activated_, DeviceValueType::BOOL, nullptr, F("activated"), F("Activated"), DeviceValueUOM::NONE);
+    register_device_value(TAG_NONE, &activated_, DeviceValueType::BOOL, nullptr, F("activated"), F("Activated"));
     register_device_value(TAG_NONE, &flowTemp_, DeviceValueType::USHORT, FL_(div10), F("flowTemp"), F("Current flow temperature"), DeviceValueUOM::DEGREES);
-    register_device_value(TAG_NONE, &status_, DeviceValueType::INT, nullptr, F("status"), F("Status"), DeviceValueUOM::NONE);
+    register_device_value(TAG_NONE, &status_, DeviceValueType::INT, nullptr, F("status"), F("Status"));
+
+    register_device_value(TAG_NONE, &id_, DeviceValueType::UINT, nullptr, F("id"), nullptr); // empty full name to prevent being shown in web or console
+    id_ = product_id;
 }
 
 // publish HA config
@@ -53,8 +56,8 @@ bool Switch::publish_ha_config() {
     snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/switch_data"), Mqtt::base().c_str());
     doc["stat_t"] = stat_t;
 
-    doc["name"]    = FJSON("Type");
-    doc["val_tpl"] = FJSON("{{value_json.type}}"); // HA needs a single value. We take the type which is wwc or hc
+    doc["name"]    = FJSON("ID");
+    doc["val_tpl"] = FJSON("{{value_json.id}}");
     JsonObject dev = doc.createNestedObject("dev");
     dev["name"]    = FJSON("EMS-ESP Switch");
     dev["sw"]      = EMSESP_APP_VERSION;

@@ -57,16 +57,19 @@ Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
         uint8_t tag = TAG_HC1 + hc_ - 1;
         register_device_value(tag, &flowSetTemp_, DeviceValueType::UINT, nullptr, F("flowSetTemp"), F("Setpoint flow temperature"), DeviceValueUOM::DEGREES);
         register_device_value(tag, &flowTemp_, DeviceValueType::USHORT, FL_(div10), F("flowTemp"), F("Current flow temperature"), DeviceValueUOM::DEGREES);
-        register_device_value(tag, &pumpStatus_, DeviceValueType::BOOL, nullptr, F("pumpStatus"), F("Pump status"), DeviceValueUOM::NONE);
+        register_device_value(tag, &pumpStatus_, DeviceValueType::BOOL, nullptr, F("pumpStatus"), F("Pump status"));
         register_device_value(tag, &status_, DeviceValueType::INT, nullptr, F("status"), F("Valve status"), DeviceValueUOM::PERCENT);
     } else {
         type_       = Type::WWC;
         hc_         = device_id - 0x28 + 1;
         uint8_t tag = TAG_WWC1 + hc_ - 1;
         register_device_value(tag, &flowTemp_, DeviceValueType::USHORT, FL_(div10), F("flowTemp"), F("Current flow temperature"), DeviceValueUOM::DEGREES);
-        register_device_value(tag, &pumpStatus_, DeviceValueType::BOOL, nullptr, F("pumpStatus"), F("Pump/Valve status"), DeviceValueUOM::NONE);
-        register_device_value(tag, &status_, DeviceValueType::INT, nullptr, F("status"), F("Current status"), DeviceValueUOM::NONE);
+        register_device_value(tag, &pumpStatus_, DeviceValueType::BOOL, nullptr, F("pumpStatus"), F("Pump/Valve status"));
+        register_device_value(tag, &status_, DeviceValueType::INT, nullptr, F("status"), F("Current status"));
     }
+
+    register_device_value(TAG_NONE, &id_, DeviceValueType::UINT, nullptr, F("id"), nullptr); // empty full name to prevent being shown in web or console
+    id_ = product_id;
 }
 
 // publish HA config
@@ -87,10 +90,10 @@ bool Mixer::publish_ha_config() {
     doc["stat_t"] = stat_t;
 
     char name[20];
-    snprintf_P(name, sizeof(name), PSTR("Mixer %02X Type"), device_id() - 0x20 + 1);
+    snprintf_P(name, sizeof(name), PSTR("Mixer %02X"), device_id() - 0x20 + 1);
     doc["name"] = name;
 
-    doc["val_tpl"] = FJSON("{{value_json.type}}"); // HA needs a single value. We take the type which is wwc or hc
+    doc["val_tpl"] = FJSON("{{value_json.id}}");
     JsonObject dev = doc.createNestedObject("dev");
     dev["name"]    = FJSON("EMS-ESP Mixer");
     dev["sw"]      = EMSESP_APP_VERSION;
@@ -145,7 +148,7 @@ void Mixer::process_IPMStatusMessage(std::shared_ptr<const Telegram> telegram) {
     // do we have a mixed circuit
     if (ismixed == 2) {
         has_update(telegram->read_value(flowTemp_, 3)); // is * 10
-        has_update(telegram->read_value(status_, 2)); // valve status
+        has_update(telegram->read_value(status_, 2));   // valve status
     }
 
     has_update(telegram->read_bitvalue(pumpStatus_, 1, 0)); // pump is also in unmixed circuits

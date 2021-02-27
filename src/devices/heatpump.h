@@ -34,6 +34,7 @@ class Heatpump : public EMSdevice {
 
     uint8_t airHumidity_;
     uint8_t dewTemperature_;
+    uint8_t id_;
 
     void process_HPMonitor1(std::shared_ptr<const Telegram> telegram);
     void process_HPMonitor2(std::shared_ptr<const Telegram> telegram);

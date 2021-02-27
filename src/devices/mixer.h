@@ -53,6 +53,7 @@ class Mixer : public EMSdevice {
 
     Type     type_ = Type::NONE;
     uint16_t hc_   = EMS_VALUE_USHORT_NOTSET;
+    uint8_t  id_;
 };
 
 } // namespace emsesp

@@ -33,8 +33,11 @@ Heatpump::Heatpump(uint8_t device_type, uint8_t device_id, uint8_t product_id, c
     register_telegram_type(0x047B, F("HP2"), true, [&](std::shared_ptr<const Telegram> t) { process_HPMonitor2(t); });
 
     // device values
-    register_device_value(TAG_NONE, &airHumidity_, DeviceValueType::UINT, FL_(div2), F("airHumidity"), F("Relative air humidity"), DeviceValueUOM::NONE);
-    register_device_value(TAG_NONE, &dewTemperature_, DeviceValueType::UINT, nullptr, F("dewTemperature"), F("Dew point temperature"), DeviceValueUOM::NONE);
+    register_device_value(TAG_NONE, &id_, DeviceValueType::UINT, nullptr, F("id"), nullptr); // empty full name to prevent being shown in web or console
+    register_device_value(TAG_NONE, &airHumidity_, DeviceValueType::UINT, FL_(div2), F("airHumidity"), F("Relative air humidity"));
+    register_device_value(TAG_NONE, &dewTemperature_, DeviceValueType::UINT, nullptr, F("dewTemperature"), F("Dew point temperature"));
+
+    id_ = product_id;
 }
 
 // publish HA config
@@ -47,9 +50,8 @@ bool Heatpump::publish_ha_config() {
     snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/heatpump_data"), Mqtt::base().c_str());
     doc["stat_t"] = stat_t;
 
-    doc["name"]    = FJSON("Humidity");
-    doc["val_tpl"] = FJSON("{{value_json.airHumidity}}");
-
+    doc["name"]    = FJSON("ID");
+    doc["val_tpl"] = FJSON("{{value_json.id}}");
     JsonObject dev = doc.createNestedObject("dev");
     dev["name"]    = FJSON("EMS-ESP Heat Pump");
     dev["sw"]      = EMSESP_APP_VERSION;

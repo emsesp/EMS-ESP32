@@ -64,23 +64,26 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
 
     // special case for a device_id with 0x2A where it's not actual a solar module
     if (device_id == 0x2A) {
-        register_device_value(TAG_NONE, &type_, DeviceValueType::TEXT, nullptr, F("type"), F("Type"), DeviceValueUOM::NONE);
+        register_device_value(TAG_NONE, &type_, DeviceValueType::TEXT, nullptr, F("type"), F("Type"));
         strncpy(type_, "warm water circuit", sizeof(type_));
     }
+
+    register_device_value(TAG_NONE, &id_, DeviceValueType::UINT, nullptr, F("id"), nullptr); // empty full name to prevent being shown in web or console
+    id_ = product_id;
 
     register_device_value(TAG_NONE, &collectorTemp_, DeviceValueType::SHORT, FL_(div10), F("collectorTemp"), F("Collector temperature (TS1)"), DeviceValueUOM::DEGREES);
     register_device_value(TAG_NONE, &tankBottomTemp_, DeviceValueType::SHORT, FL_(div10), F("tankBottomTemp"), F("Tank Bottom temperature (TS2)"), DeviceValueUOM::DEGREES);
     register_device_value(TAG_NONE, &tankBottomTemp2_, DeviceValueType::SHORT, FL_(div10), F("tankBottomTemp2"), F("Tank Bottom temperature (TS5)"), DeviceValueUOM::DEGREES);
     register_device_value(TAG_NONE, &heatExchangerTemp_, DeviceValueType::SHORT, FL_(div10), F("heatExchangerTemp"), F("Heat exchanger temperature (TS6)"), DeviceValueUOM::DEGREES);
 
-    register_device_value(TAG_NONE, &tank1MaxTempCurrent_, DeviceValueType::UINT, nullptr, F("tank1MaxTempCurrent"), F("Maximum Tank temperature"), DeviceValueUOM::NONE);
+    register_device_value(TAG_NONE, &tank1MaxTempCurrent_, DeviceValueType::UINT, nullptr, F("tank1MaxTempCurrent"), F("Maximum Tank temperature"));
     register_device_value(TAG_NONE, &solarPumpModulation_, DeviceValueType::UINT, nullptr, F("solarPumpModulation"), F("Solar pump modulation (PS1)"), DeviceValueUOM::PERCENT);
     register_device_value(TAG_NONE, &cylinderPumpModulation_, DeviceValueType::UINT, nullptr, F("cylinderPumpModulation"), F("Cylinder pump modulation (PS5)"), DeviceValueUOM::PERCENT);
 
-    register_device_value(TAG_NONE, &solarPump_, DeviceValueType::BOOL, nullptr, F("solarPump"), F("Solar pump (PS1) active"), DeviceValueUOM::NONE);
-    register_device_value(TAG_NONE, &valveStatus_, DeviceValueType::BOOL, nullptr, F("valveStatus"), F("Valve status"), DeviceValueUOM::NONE);
-    register_device_value(TAG_NONE, &tankHeated_, DeviceValueType::BOOL, nullptr, F("tankHeated"), F("Tank heated"), DeviceValueUOM::NONE);
-    register_device_value(TAG_NONE, &collectorShutdown_, DeviceValueType::BOOL, nullptr, F("collectorShutdown"), F("Collector shutdown"), DeviceValueUOM::NONE);
+    register_device_value(TAG_NONE, &solarPump_, DeviceValueType::BOOL, nullptr, F("solarPump"), F("Solar pump (PS1) active"));
+    register_device_value(TAG_NONE, &valveStatus_, DeviceValueType::BOOL, nullptr, F("valveStatus"), F("Valve status"));
+    register_device_value(TAG_NONE, &tankHeated_, DeviceValueType::BOOL, nullptr, F("tankHeated"), F("Tank heated"));
+    register_device_value(TAG_NONE, &collectorShutdown_, DeviceValueType::BOOL, nullptr, F("collectorShutdown"), F("Collector shutdown"));
 
     register_device_value(TAG_NONE, &pumpWorkMin_, DeviceValueType::TIME, nullptr, F("pumpWorkMin"), F("Pump working time"), DeviceValueUOM::MINUTES);
 
@@ -92,14 +95,14 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
 // publish HA config
 bool Solar::publish_ha_config() {
     StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> doc;
-    doc["name"]    = FJSON("Solar Status");
+    doc["name"]    = FJSON("ID");
     doc["uniq_id"] = F_(solar);
 
     char stat_t[Mqtt::MQTT_TOPIC_MAX_SIZE];
     snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/solar_data"), Mqtt::base().c_str());
     doc["stat_t"] = stat_t;
 
-    doc["val_tpl"] = FJSON("{{value_json.solarPump}}");
+    doc["val_tpl"] = FJSON("{{value_json.id}}");
     JsonObject dev = doc.createNestedObject("dev");
     dev["name"]    = FJSON("EMS-ESP Solar");
     dev["sw"]      = EMSESP_APP_VERSION;
