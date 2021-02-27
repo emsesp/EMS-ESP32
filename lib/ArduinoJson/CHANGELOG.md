@@ -1,6 +1,65 @@
 ArduinoJson: change log
 =======================
 
+HEAD
+----
+
+* Removed support for `char` values, see below (issue #1498)
+* `deserializeJson()` leaves `\uXXXX` unchanged instead of returning `NotSupported`
+* `deserializeMsgPack()` inserts `null` instead of returning `NotSupported`
+* Removed `DeserializationError::NotSupported`
+* Added `JsonVariant::is<JsonArrayConst/JsonObjectConst>()` (issue #1412)
+* Added `JsonVariant::is<JsonVariant/JsonVariantConst>()` (issue #1412)
+* Changed `JsonVariantConst::is<JsonArray/JsonObject>()` to return `false` (issue #1412)
+
+> ### BREAKING CHANGES
+>
+> We cannot cast a `JsonVariant` to a `char` anymore, so the following will break:
+> ```c++
+> char age = doc["age"];  //  error: no matching function for call to 'variantAs(VariantData*&)'
+> ```
+> Instead, you must use another integral type, such as `int8_t`:
+> ```c++
+> int8_t age = doc["age"];  // OK
+> ```
+>
+> Similarly, we cannot assign from a `char` anymore, so the following will break:
+> ```c++
+> char age;
+> doc["age"] = age;  // error: no matching function for call to 'VariantRef::set(const char&)'
+> ```
+> Instead, you must use another integral type, such as `int8_t`:
+> ```c++
+> int8_t age;
+> doc["age"] = age;  // OK
+> ```
+>
+> On a different topic, `DeserializationError::NotSupported` has been removed.
+> Instead of returning this error:
+>
+> * `deserializeJson()` leaves `\uXXXX` unchanged (only when `ARDUINOJSON_DECODE_UNICODE` is `0`)
+> * `deserializeMsgPack()` replaces unsupported values with `null`s
+>
+> Lastly, a very minor change conserns `JsonVariantConst::is<T>()`.
+> It used to return `true` for `JsonArray` and `JsonOject`, but now it returns `false`.
+> Instead, you must use `JsonArrayConst` and `JsonObjectConst`.
+
+v6.17.3 (2021-02-15)
+-------
+
+* Made `JsonDocument`'s destructor protected (issue #1480)
+* Added missing calls to `client.stop()` in `JsonHttpClient.ino` (issue #1485)
+* Fixed error `expected ')' before 'char'` when `isdigit()` is a macro (issue #1487)
+* Fixed error `definition of implicit copy constructor is deprecated` on Clang 10
+* PlatformIO: set framework compatibility to `*` (PR #1490 by @maxgerhardt)
+
+v6.17.2 (2020-11-14)
+-------
+
+* Fixed invalid conversion error in `operator|(JsonVariant, char*)` (issue #1432)
+* Changed the default value of `ARDUINOJSON_ENABLE_PROGMEM` (issue #1433).
+  It now checks that the `pgm_read_XXX` macros are defined before enabling `PROGMEM`.
+
 v6.17.1 (2020-11-07)
 -------
 

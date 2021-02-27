@@ -1,5 +1,5 @@
 // ArduinoJson - arduinojson.org
-// Copyright Benoit Blanchon 2014-2020
+// Copyright Benoit Blanchon 2014-2021
 // MIT License
 
 #pragma once
@@ -13,6 +13,7 @@
 #include <ArduinoJson/Strings/StringAdapters.hpp>
 #include <ArduinoJson/Variant/VariantAs.hpp>
 #include <ArduinoJson/Variant/VariantFunctions.hpp>
+#include <ArduinoJson/Variant/VariantIs.hpp>
 #include <ArduinoJson/Variant/VariantOperators.hpp>
 #include <ArduinoJson/Variant/VariantRef.hpp>
 #include <ArduinoJson/Variant/VariantShortcuts.hpp>
@@ -28,85 +29,9 @@ class ObjectRef;
 template <typename TData>
 class VariantRefBase : public VariantTag {
  public:
-  // Tells wether the variant has the specified type.
-  // Returns true if the variant has type type T, false otherwise.
-  //
-  // bool is<char>() const;
-  // bool is<signed char>() const;
-  // bool is<signed short>() const;
-  // bool is<signed int>() const;
-  // bool is<signed long>() const;
-  // bool is<unsigned char>() const;
-  // bool is<unsigned short>() const;
-  // bool is<unsigned int>() const;
-  // bool is<unsigned long>() const;
   template <typename T>
-  FORCE_INLINE
-      typename enable_if<is_integral<T>::value && !is_same<bool, T>::value,
-                         bool>::type
-      is() const {
-    return variantIsInteger<T>(_data);
-  }
-  //
-  // bool is<double>() const;
-  // bool is<float>() const;
-  template <typename T>
-  FORCE_INLINE typename enable_if<is_floating_point<T>::value, bool>::type is()
-      const {
-    return variantIsFloat(_data);
-  }
-  //
-  // bool is<bool>() const
-  template <typename T>
-  FORCE_INLINE typename enable_if<is_same<T, bool>::value, bool>::type is()
-      const {
-    return variantIsBoolean(_data);
-  }
-  //
-  // bool is<const char*>() const;
-  // bool is<char*>() const;
-  // bool is<std::string>() const;
-  // bool is<String>() const;
-  template <typename T>
-  FORCE_INLINE typename enable_if<is_same<T, const char *>::value ||
-                                      is_same<T, char *>::value ||
-                                      IsWriteableString<T>::value,
-                                  bool>::type
-  is() const {
-    return variantIsString(_data);
-  }
-  //
-  // bool is<ArrayRef> const;
-  // bool is<const ArrayRef> const;
-  template <typename T>
-  FORCE_INLINE typename enable_if<
-      is_same<typename remove_const<T>::type, ArrayRef>::value, bool>::type
-  is() const {
-    return variantIsArray(_data);
-  }
-  //
-  // bool is<ObjectRef> const;
-  // bool is<const ObjectRef> const;
-  template <typename T>
-  FORCE_INLINE typename enable_if<
-      is_same<typename remove_const<T>::type, ObjectRef>::value, bool>::type
-  is() const {
-    return variantIsObject(_data);
-  }
-#if ARDUINOJSON_HAS_NULLPTR
-  //
-  // bool is<nullptr_t> const;
-  template <typename T>
-  FORCE_INLINE
-      typename enable_if<is_same<T, decltype(nullptr)>::value, bool>::type
-      is() const {
-    return variantIsNull(_data);
-  }
-#endif
-  // bool is<enum>() const;
-  template <typename T>
-  FORCE_INLINE typename enable_if<is_enum<T>::value, bool>::type is() const {
-    return variantIsInteger<int>(_data);
+  FORCE_INLINE bool is() const {
+    return variantIs<T>(_data);
   }
 
   FORCE_INLINE bool isNull() const {
@@ -186,8 +111,9 @@ class VariantRef : public VariantRefBase<VariantData>,
   // set(unsigned long)
   template <typename T>
   FORCE_INLINE bool set(
-      T value, typename enable_if<is_integral<T>::value &&
-                                  !is_same<bool, T>::value>::type * = 0) const {
+      T value,
+      typename enable_if<is_integral<T>::value && !is_same<bool, T>::value &&
+                         !is_same<char, T>::value>::type * = 0) const {
     return variantSetInteger<T>(_data, value);
   }
 
@@ -251,6 +177,20 @@ class VariantRef : public VariantRefBase<VariantData>,
 
   template <typename T>
   FORCE_INLINE typename VariantAs<T>::type as() const {
+    /********************************************************************
+     **                THIS IS NOT A BUG IN THE LIBRARY                **
+     **                --------------------------------                **
+     **  Get a compilation error pointing here?                        **
+     **  It doesn't mean the error *is* here.                          **
+     **  Often, it's because you try to extract the wrong value type.  **
+     **                                                                **
+     **  For example:                                                  **
+     **    char* name = doc["name"];                                   **
+     **    char age = doc["age"];                                      **
+     **  Instead, use:                                                 **
+     **    const char* name = doc["name"];                             **
+     **    int8_t age = doc["age"];                                    **
+     ********************************************************************/
     return variantAs<typename VariantAs<T>::type>(_data, _pool);
   }
 

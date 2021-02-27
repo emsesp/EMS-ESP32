@@ -1,5 +1,5 @@
 // ArduinoJson - arduinojson.org
-// Copyright Benoit Blanchon 2014-2020
+// Copyright Benoit Blanchon 2014-2021
 // MIT License
 
 #pragma once
@@ -172,7 +172,8 @@
 #endif  // ARDUINO
 
 #ifndef ARDUINOJSON_ENABLE_PROGMEM
-#ifdef PROGMEM
+#if defined(PROGMEM) && defined(pgm_read_byte) && defined(pgm_read_dword) && \
+    defined(pgm_read_ptr) && defined(pgm_read_float)
 #define ARDUINOJSON_ENABLE_PROGMEM 1
 #else
 #define ARDUINOJSON_ENABLE_PROGMEM 0
