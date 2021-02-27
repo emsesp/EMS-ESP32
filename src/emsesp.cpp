@@ -274,6 +274,7 @@ void EMSESP::show_ems(uuid::console::Shell & shell) {
 }
 
 // show EMS device values to the shell console
+// this is the only time generate_values_json is called in verbose mode (set to true)
 void EMSESP::show_device_values(uuid::console::Shell & shell) {
     if (emsdevices.empty()) {
         shell.printfln(F("No EMS devices detected. Try using 'scan devices' from the ems menu."));
@@ -415,6 +416,7 @@ void EMSESP::reset_mqtt_ha() {
 }
 
 // create json doc for the devices values and add to MQTT publish queue
+// generate_values_json is called without verbose mode (defaults to false)
 void EMSESP::publish_device_values(uint8_t device_type) {
     DynamicJsonDocument doc(EMSESP_JSON_SIZE_XLARGE_DYN); // use max size
     JsonObject          json      = doc.to<JsonObject>();
@@ -441,7 +443,7 @@ void EMSESP::publish_device_values(uint8_t device_type) {
             }
 
             if ((device_type != DeviceType::THERMOSTAT) || (emsdevice->device_id() == EMSESP::actual_master_thermostat())) {
-                // for all other devices add the values to the json, without verbose mode
+                // for all other devices add the values to the json
                 has_value |= emsdevice->generate_values_json(json, DeviceValueTAG::TAG_NONE);
             }
         }
@@ -879,7 +881,7 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
 }
 
 // export all values to info command
-// value and id are ignored
+// value is ignored here
 bool EMSESP::command_info(uint8_t device_type, JsonObject & json, const int8_t id) {
     bool    has_value = false;
     uint8_t tag       = DeviceValueTAG::TAG_NONE;

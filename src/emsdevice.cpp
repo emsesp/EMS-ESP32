@@ -538,6 +538,7 @@ bool EMSdevice::generate_values_json_web(JsonObject & json) {
 
 // For each value in the device create the json object pair and add it to given json
 // return false if empty
+// this is used to create both the MQTT payloads and Console messages
 bool EMSdevice::generate_values_json(JsonObject & root, const uint8_t tag_filter, const bool verbose) {
     bool       has_value = false; // to see if we've added a value. it's faster than doing a json.size() at the end
     uint8_t    old_tag   = 255;
@@ -573,7 +574,8 @@ bool EMSdevice::generate_values_json(JsonObject & root, const uint8_t tag_filter
                     has_value  = true;
                 } else {
                     // see how to render the value depending on the setting
-                    if (Mqtt::bool_format() == BOOL_FORMAT_ONOFF) {
+                    // when in verbose mode (i.e. outout is Console) we always use on and off
+                    if ((Mqtt::bool_format() == BOOL_FORMAT_ONOFF) || verbose) {
                         // on or off as strings
                         json[name] = *(uint8_t *)(dv.value_p) ? F_(on) : F_(off);
                         has_value  = true;
