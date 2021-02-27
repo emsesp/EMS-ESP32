@@ -257,7 +257,6 @@ std::string EMSdevice::to_string_short() const {
 void EMSdevice::fetch_values() {
     EMSESP::logger().debug(F("Fetching values for device ID 0x%02X"), device_id());
 
-    // for (const auto & tf : *telegram_functions_) {
     for (const auto & tf : telegram_functions_) {
         if (tf.fetch_) {
             read_command(tf.telegram_type_id_);
@@ -270,7 +269,6 @@ void EMSdevice::toggle_fetch(uint16_t telegram_id, bool toggle) {
     EMSESP::logger().debug(F("Toggling fetch for device ID 0x%02X, telegram ID 0x%02X to %d"), device_id(), telegram_id, toggle);
 
     for (auto & tf : telegram_functions_) {
-        // for (auto & tf : *telegram_functions_) {
         if (tf.telegram_type_id_ == telegram_id) {
             tf.fetch_ = toggle;
         }
@@ -280,7 +278,6 @@ void EMSdevice::toggle_fetch(uint16_t telegram_id, bool toggle) {
 // get status of automatic fetch for a telegram id
 bool EMSdevice::get_toggle_fetch(uint16_t telegram_id) {
     for (auto & tf : telegram_functions_) {
-        // for (auto & tf : *telegram_functions_) {
         if (tf.telegram_type_id_ == telegram_id) {
             return tf.fetch_;
         }
@@ -292,7 +289,6 @@ bool EMSdevice::get_toggle_fetch(uint16_t telegram_id) {
 void EMSdevice::show_device_values(uuid::console::Shell & shell) {
     size_t  total_s = 0;
     uint8_t count   = 0;
-    // for (const auto & dv : *devicevalues_) {
     for (const auto & dv : devicevalues_) {
         size_t s = sizeof(dv);
         if (dv.full_name) {
@@ -310,14 +306,12 @@ void EMSdevice::show_device_values(uuid::console::Shell & shell) {
 
 // list all the telegram type IDs for this device
 void EMSdevice::show_telegram_handlers(uuid::console::Shell & shell) {
-    // if (telegram_functions_->size() == 0) {
     if (telegram_functions_.size() == 0) {
         return;
     }
 
     shell.printf(F(" This %s will respond to telegram type IDs: "), device_type_name().c_str());
     for (const auto & tf : telegram_functions_) {
-        // for (const auto & tf : *telegram_functions_) {
         shell.printf(F("0x%02X "), tf.telegram_type_id_);
     }
     shell.println();
@@ -325,7 +319,6 @@ void EMSdevice::show_telegram_handlers(uuid::console::Shell & shell) {
 
 // list all the telegram type IDs for this device, outputting to a string (max size 200)
 char * EMSdevice::show_telegram_handlers(char * result) {
-    // uint8_t size = telegram_functions_->size();
     uint8_t size = telegram_functions_.size();
 
     strlcpy(result, "", 200);
@@ -364,15 +357,6 @@ void EMSdevice::register_mqtt_cmd(const __FlashStringHelper * cmd, cmdfunction_p
 
 // register a call back function for a specific telegram type
 void EMSdevice::register_telegram_type(const uint16_t telegram_type_id, const __FlashStringHelper * telegram_type_name, bool fetch, process_function_p f) {
-    /*
-    TelegramFunction tf;
-    tf.fetch_              = fetch;
-    tf.process_function_   = f;
-    tf.telegram_type_id_   = telegram_type_id;
-    tf.telegram_type_name_ = telegram_type_name;
-    telegram_functions_->push(tf);
-*/
-
     telegram_functions_.emplace_back(telegram_type_id, telegram_type_name, fetch, f);
 }
 
@@ -403,31 +387,6 @@ void EMSdevice::register_device_value(uint8_t tag, void * value_p, uint8_t type,
         *(uint8_t *)(value_p) = EMS_VALUE_UINT_NOTSET;
     }
 
-    // add to our library
-
-    /*
-    DeviceValue dv;
-    dv.device_type = device_type_;
-    dv.tag         = tag;
-    dv.value_p     = value_p;
-    dv.type        = type;
-    dv.short_name  = short_name;
-    dv.full_name   = full_name;
-    dv.uom         = uom;
-
-    dv.options      = options;
-    dv.options_size = 0;
-    // count #options
-    if (options != nullptr) {
-        uint8_t i = 0;
-        while (options[i++]) {
-            dv.options_size++;
-        };
-    }
-
-    devicevalues_->push(dv);
-    */
-
     // count #options
     uint8_t options_size = 0;
     if (options != nullptr) {
@@ -453,12 +412,7 @@ std::string EMSdevice::get_value_uom(const char * key) {
     }
 
     // find the key (p) in the name
-    //
     for (const auto & dv : devicevalues_) {
-        /*
-    for (uint8_t i = 0; i < devicevalues_->size(); i++) { // because the new container is not multi-threaded can't use the iterator
-        auto dv = (*devicevalues_)[i];
-        */
         if (dv.full_name != nullptr) {
             if (uuid::read_flash_string(dv.full_name) == p) {
                 // ignore TIME since "minutes" is already included
@@ -482,33 +436,16 @@ bool EMSdevice::generate_values_json_web(JsonObject & json) {
     uint8_t num_elements = 0;
 
     for (const auto & dv : devicevalues_) {
-        /*
-    for (uint8_t i = 0; i < devicevalues_->size(); i++) {
-        auto dv = (*devicevalues_)[i];
-        */
-
-        // for (const auto & dv : devicevalues()) {
         // ignore if full_name empty
         if (dv.full_name != nullptr) {
             // handle Booleans (true, false)
             if ((dv.type == DeviceValueType::BOOL) && Helpers::hasValue(*(uint8_t *)(dv.value_p), EMS_VALUE_BOOL)) {
                 // see if we have options for the bool's
                 if (dv.options_size == 2) {
-                    // if (dv.options_size == 2) {
-
                     data.add(*(uint8_t *)(dv.value_p) ? dv.options[0] : dv.options[1]);
                 } else {
-                    // see how to render the value depending on the setting
-                    if (Mqtt::bool_format() == BOOL_FORMAT_ONOFF) {
-                        // on or off as strings
-                        data.add(*(uint8_t *)(dv.value_p) ? F_(on) : F_(off));
-                    } else if (Mqtt::bool_format() == BOOL_FORMAT_TRUEFALSE) {
-                        // true or false values (not strings)
-                        data.add((bool)(*(uint8_t *)(dv.value_p)) ? true : false);
-                    } else {
-                        // 1 or 0
-                        data.add((uint8_t)(*(uint8_t *)(dv.value_p)) ? 1 : 0);
-                    }
+                    // always render booleans as on or off
+                    data.add(*(uint8_t *)(dv.value_p) ? F_(on) : F_(off));
                 }
             }
 
@@ -519,7 +456,6 @@ bool EMSdevice::generate_values_json_web(JsonObject & json) {
 
             // handle ENUMs
             else if ((dv.type == DeviceValueType::ENUM) && Helpers::hasValue(*(uint8_t *)(dv.value_p))) {
-                // if (*(uint8_t *)(dv.value_p) < dv.options_size) {
                 if (*(uint8_t *)(dv.value_p) < dv.options_size) {
                     data.add(dv.options[*(uint8_t *)(dv.value_p)]);
                 }
@@ -530,7 +466,6 @@ bool EMSdevice::generate_values_json_web(JsonObject & json) {
                 // If a divider is specified, do the division to 2 decimals places and send back as double/float
                 // otherwise force as an integer whole
                 // the nested if's is necessary due to the way the ArduinoJson templates are pre-processed by the compiler
-                // uint8_t divider = ((dv.options_size) == 1) ? Helpers::atoint(uuid::read_flash_string(dv.options[0]).c_str()) : 0;
                 uint8_t divider = (dv.options_size == 1) ? Helpers::atoint(uuid::read_flash_string(dv.options[0]).c_str()) : 0;
 
                 // INT
@@ -609,12 +544,6 @@ bool EMSdevice::generate_values_json(JsonObject & root, const uint8_t tag_filter
     JsonObject json      = root;
 
     for (const auto & dv : devicevalues_) {
-        /*
-        for (uint8_t i = 0; i < devicevalues_->size(); i++) {
-        auto dv = (*devicevalues_)[i];
-        */
-
-        // for (const auto & dv : devicevalues()) {
         // only show if tag is either empty or matches a value, and don't show if full_name is empty unless we're outputing for mqtt payloads
         if (((tag_filter == DeviceValueTAG::TAG_NONE) || (tag_filter == dv.tag)) && (dv.full_name != nullptr || !verbose)) {
             bool have_tag = ((dv.tag != DeviceValueTAG::TAG_NONE) && (dv.device_type != DeviceType::BOILER));
@@ -639,7 +568,6 @@ bool EMSdevice::generate_values_json(JsonObject & root, const uint8_t tag_filter
             // handle Booleans (true, false)
             if ((dv.type == DeviceValueType::BOOL) && Helpers::hasValue(*(uint8_t *)(dv.value_p), EMS_VALUE_BOOL)) {
                 // see if we have options for the bool's
-                // if (dv.options_size == 2) {
                 if (dv.options_size == 2) {
                     json[name] = *(uint8_t *)(dv.value_p) ? dv.options[0] : dv.options[1];
                     has_value  = true;
@@ -649,12 +577,16 @@ bool EMSdevice::generate_values_json(JsonObject & root, const uint8_t tag_filter
                         // on or off as strings
                         json[name] = *(uint8_t *)(dv.value_p) ? F_(on) : F_(off);
                         has_value  = true;
+                    } else if (Mqtt::bool_format() == BOOL_FORMAT_ONOFF_CAP) {
+                        // on or off as strings
+                        json[name] = *(uint8_t *)(dv.value_p) ? F_(ON) : F_(OFF);
+                        has_value  = true;
                     } else if (Mqtt::bool_format() == BOOL_FORMAT_TRUEFALSE) {
-                        // true or false values (not strings)
+                        // true or false values (as real booleans, not strings)
                         json[name] = (bool)(*(uint8_t *)(dv.value_p)) ? true : false;
                         has_value  = true;
                     } else {
-                        // 1 or 0
+                        // numerical 1 or 0
                         json[name] = (uint8_t)(*(uint8_t *)(dv.value_p)) ? 1 : 0;
                         has_value  = true;
                     }
@@ -669,7 +601,6 @@ bool EMSdevice::generate_values_json(JsonObject & root, const uint8_t tag_filter
 
             // handle ENUMs
             else if ((dv.type == DeviceValueType::ENUM) && Helpers::hasValue(*(uint8_t *)(dv.value_p))) {
-                // if (*(uint8_t *)(dv.value_p) < dv.options_size) {
                 if (*(uint8_t *)(dv.value_p) < dv.options_size) {
                     json[name] = dv.options[*(uint8_t *)(dv.value_p)];
                     has_value  = true;
@@ -741,7 +672,6 @@ bool EMSdevice::generate_values_json(JsonObject & root, const uint8_t tag_filter
 // create the Home Assistant configs for each value
 // this is called when an MQTT publish is done via an EMS Device, and only done once
 void EMSdevice::publish_mqtt_ha_sensor() {
-    // for (const auto & dv : *devicevalues_) {
     for (const auto & dv : devicevalues_) {
         Mqtt::publish_mqtt_ha_sensor(dv.type, dv.tag, dv.full_name, device_type_, dv.short_name, dv.uom);
     }

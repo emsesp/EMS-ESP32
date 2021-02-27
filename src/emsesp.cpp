@@ -308,7 +308,8 @@ void EMSESP::show_device_values(uuid::console::Shell & shell) {
                         shell.print(Helpers::render_value(s, (float)data.as<float>(), 1));
                     } else if (data.is<bool>()) {
                         char s[10];
-                        shell.print(Helpers::render_boolean(s, data.as<bool>()));
+                        // shell.print(Helpers::render_boolean(s, data.as<bool>()));
+                        shell.print(data.as<bool>() ? F_(on) : F_(off));
                     }
 
                     // if there is a uom print it
@@ -1100,7 +1101,7 @@ void EMSESP::loop() {
         fetch_device_values();
     }
 
-    delay(1); // helps telnet catch up
+    // delay(1); // helps telnet catch up. don't think its needed in ESP32 3.1.0
 }
 
 } // namespace emsesp
