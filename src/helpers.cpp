@@ -127,6 +127,8 @@ char * Helpers::render_boolean(char * result, bool value) {
     uint8_t bool_format_ = Mqtt::bool_format();
     if (bool_format_ == BOOL_FORMAT_ONOFF) {
         strlcpy(result, value ? "on" : "off", 5);
+    } else if (bool_format_ == BOOL_FORMAT_ONOFF_CAP) {
+        strlcpy(result, value ? "ON" : "OFF", 5);
     } else if (bool_format_ == BOOL_FORMAT_TRUEFALSE) {
         strlcpy(result, value ? "true" : "false", 7);
     } else {

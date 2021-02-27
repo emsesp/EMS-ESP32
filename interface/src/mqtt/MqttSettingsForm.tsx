@@ -158,9 +158,10 @@ class MqttSettingsForm extends React.Component<MqttSettingsFormProps> {
           variant="outlined"
           onChange={handleValueChange('bool_format')}
           margin="normal">
-          <MenuItem value={1}>on/off</MenuItem>
+          <MenuItem value={1}>"on"/"off"</MenuItem>
           <MenuItem value={2}>true/false</MenuItem>
           <MenuItem value={3}>1/0</MenuItem>
+          <MenuItem value={4}>"ON"/"OFF"</MenuItem>
         </SelectValidator>
         <BlockFormControlLabel
           control={

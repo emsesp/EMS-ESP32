@@ -30,6 +30,8 @@ MAKE_PSTR_WORD(set)
 MAKE_PSTR_WORD(show)
 MAKE_PSTR_WORD(on)
 MAKE_PSTR_WORD(off)
+MAKE_PSTR_WORD(ON)
+MAKE_PSTR_WORD(OFF)
 MAKE_PSTR_WORD(su)
 MAKE_PSTR_WORD(name)
 MAKE_PSTR_WORD(auto)
@@ -211,16 +213,7 @@ MAKE_PSTR_WORD(holiday)
 MAKE_PSTR_WORD(reduce)
 
 // thermostat lists
-MAKE_PSTR_LIST(enum_ibaMainDisplay,
-               F_(internal_temperature),
-               F_(internal_setpoint),
-               F_(external_temperature),
-               F_(burner_temperature),
-               F_(WW_temperature),
-               F_(functioning_mode),
-               F_(time),
-               F_(date),
-               F_(smoke_temperature))
+MAKE_PSTR_LIST(enum_ibaMainDisplay, F_(internal_temperature), F_(internal_setpoint), F_(external_temperature), F_(burner_temperature), F_(WW_temperature), F_(functioning_mode), F_(time), F_(date), F_(smoke_temperature))
 MAKE_PSTR_LIST(enum_ibaLanguage, F_(German), F_(Dutch), F_(French), F_(Italian))
 MAKE_PSTR_LIST(enum_floordrystatus, F_(off), F_(start), F_(heat), F_(hold), F_(cool), F_(end))
 MAKE_PSTR_LIST(enum_ibaBuildingType, F_(blank), F_(light), F_(medium), F_(heavy))

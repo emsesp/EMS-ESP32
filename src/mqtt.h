@@ -44,7 +44,7 @@ using uuid::console::Shell;
 // size of queue
 #define MAX_MQTT_MESSAGES 100
 
-enum { BOOL_FORMAT_ONOFF = 1, BOOL_FORMAT_TRUEFALSE, BOOL_FORMAT_10 }; // matches Web UI settings
+enum { BOOL_FORMAT_ONOFF = 1, BOOL_FORMAT_TRUEFALSE, BOOL_FORMAT_10, BOOL_FORMAT_ONOFF_CAP }; // matches Web UI settings
 
 namespace emsesp {
 
