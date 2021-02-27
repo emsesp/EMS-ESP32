@@ -42,7 +42,7 @@ using uuid::console::Shell;
 #define MQTT_HA_PUBLISH_DELAY 50
 
 // size of queue
-#define MAX_MQTT_MESSAGES 100
+#define MAX_MQTT_MESSAGES 200
 
 enum { BOOL_FORMAT_ONOFF = 1, BOOL_FORMAT_TRUEFALSE, BOOL_FORMAT_10, BOOL_FORMAT_ONOFF_CAP }; // matches Web UI settings
 
