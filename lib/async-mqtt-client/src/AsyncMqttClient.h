@@ -3,4 +3,4 @@
 
 #include "AsyncMqttClient.hpp"
 
-#endif // SRC_ASYNCMQTTCLIENT_H_
+#endif  // SRC_ASYNCMQTTCLIENT_H_

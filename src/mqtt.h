@@ -42,13 +42,7 @@ using uuid::console::Shell;
 #define MQTT_HA_PUBLISH_DELAY 50
 
 // size of queue
-#if defined(EMSESP_STANDALONE)
-#define MAX_MQTT_MESSAGES 70
-#elif defined(ESP32)
 #define MAX_MQTT_MESSAGES 100
-#else
-#define MAX_MQTT_MESSAGES 20
-#endif
 
 enum { BOOL_FORMAT_ONOFF = 1, BOOL_FORMAT_TRUEFALSE, BOOL_FORMAT_10 }; // matches Web UI settings
 

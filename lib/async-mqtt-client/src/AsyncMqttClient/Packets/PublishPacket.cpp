@@ -16,8 +16,7 @@ PublishPacket::PublishPacket(ParsingInformation* parsingInformation, OnMessageIn
 , _packetIdMsb(0)
 , _packetId(0)
 , _payloadLength(0)
-, _payloadBytesRead(0)
-, _ptempbuff(0) {
+, _payloadBytesRead(0) {
     _dup = _parsingInformation->packetFlags & HeaderFlag.PUBLISH_DUP;
     _retain = _parsingInformation->packetFlags & HeaderFlag.PUBLISH_RETAIN;
     char qosMasked = _parsingInformation->packetFlags & 0x06;
@@ -79,36 +78,14 @@ void PublishPacket::_preparePayloadHandling(uint32_t payloadLength) {
 
 void PublishPacket::parsePayload(char* data, size_t len, size_t* currentBytePosition) {
   size_t remainToRead = len - (*currentBytePosition);
-  if (_payloadBytesRead + remainToRead > _payloadLength)
-    remainToRead = _payloadLength - _payloadBytesRead;
-  if (!_ignore) {
-    if (remainToRead < _payloadLength) {
-      if (!_ptempbuff) {
-        _ptempbuff = new char[_payloadLength + 1];
-        if (_ptempbuff == nullptr) {
-          _ignore = true;
-          return;
-        }
-        memset(_ptempbuff, 0, _payloadLength + 1);
-        memcpy(&_ptempbuff[_payloadBytesRead], &data[(*currentBytePosition)], remainToRead);
-      } else {
-        memcpy(&_ptempbuff[_payloadBytesRead], &data[(*currentBytePosition)], remainToRead);
-        if ((_payloadBytesRead + remainToRead) == _payloadLength) {
-          _dataCallback(_parsingInformation->topicBuffer, _ptempbuff, _qos, _dup, _retain, _payloadLength, 0, _payloadLength, _packetId);
-          delete[] _ptempbuff;
-          _ptempbuff = NULL;
-        }
-      }
-    } else {
-      _dataCallback(_parsingInformation->topicBuffer, &data[(*currentBytePosition)], _qos, _dup, _retain, remainToRead, _payloadBytesRead, _payloadLength, _packetId);
-    }
-  }
+  if (_payloadBytesRead + remainToRead > _payloadLength) remainToRead = _payloadLength - _payloadBytesRead;
+
+  if (!_ignore) _dataCallback(_parsingInformation->topicBuffer, data + (*currentBytePosition), _qos, _dup, _retain, remainToRead, _payloadBytesRead, _payloadLength, _packetId);
   _payloadBytesRead += remainToRead;
   (*currentBytePosition) += remainToRead;
 
   if (_payloadBytesRead == _payloadLength) {
     _parsingInformation->bufferState = BufferState::NONE;
-    if (!_ignore)
-      _completeCallback(_packetId, _qos);
+    if (!_ignore) _completeCallback(_packetId, _qos);
   }
 }

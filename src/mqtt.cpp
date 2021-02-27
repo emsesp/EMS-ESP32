@@ -656,7 +656,6 @@ void Mqtt::publish_ha(const __FlashStringHelper * topic, const JsonObject & payl
 }
 
 // publish a Home Assistant config topic and payload, with retain flag off.
-// for ESP32 its added to the queue, for ESP8266 is sent immediatelty
 void Mqtt::publish_ha(const std::string & topic, const JsonObject & payload) {
     if (!enabled()) {
         return;
@@ -676,20 +675,7 @@ void Mqtt::publish_ha(const std::string & topic, const JsonObject & payload) {
 #endif
 
     // queue messages if the MQTT connection is not yet established. to ensure we don't miss messages
-    bool queued = !connected();
-
-    if (queued) {
-        queue_publish_message(topic, payload_text, true); // with retain true
-        return;
-    }
-
-    // send immediately and then wait a while
-    if (!mqttClient_->publish(topic.c_str(), 0, true, payload_text.c_str())) {
-        LOG_ERROR(F("Failed to publish topic %s"), topic.c_str());
-        mqtt_publish_fails_++; // increment failure counter
-    }
-
-    delay(MQTT_HA_PUBLISH_DELAY); // enough time to send the short message out
+    queue_publish_message(topic, payload_text, true); // with retain true
 }
 
 // take top from queue and perform the publish or subscribe action
