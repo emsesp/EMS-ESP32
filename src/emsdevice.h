@@ -23,7 +23,6 @@
 #include <vector>
 #include <functional>
 
-// #include "containers.h"
 #include "emsfactory.h"
 #include "telegram.h"
 #include "mqtt.h"
@@ -218,7 +217,6 @@ class EMSdevice {
     void   show_mqtt_handlers(uuid::console::Shell & shell);
 
     using process_function_p = std::function<void(std::shared_ptr<const Telegram>)>;
-    // using process_function_p = void (*)(std::shared_ptr<const Telegram>);
 
     void register_telegram_type(const uint16_t telegram_type_id, const __FlashStringHelper * telegram_type_name, bool fetch, process_function_p cb);
     bool handle_telegram(std::shared_ptr<const Telegram> telegram);
@@ -315,14 +313,10 @@ class EMSdevice {
 
     void reserve_device_values(uint8_t elements) {
         devicevalues_.reserve(elements);
-        // static auto dv_ = emsesp::array<DeviceValue>(elements, 255, 16);
-        // devicevalues_   = &dv_;
     }
 
     void reserve_telgram_functions(uint8_t elements) {
         telegram_functions_.reserve(elements);
-        // static auto tf_     = emsesp::array<TelegramFunction>(elements, 255, 16);
-        // telegram_functions_ = &tf_;
     }
 
   private:
@@ -351,7 +345,6 @@ class EMSdevice {
             , process_function_(process_function) {
         }
     };
-    // emsesp::array<TelegramFunction> * telegram_functions_; // each EMS device has its own set of registered telegram types
 
     struct DeviceValue {
         uint8_t                             device_type;  // EMSdevice::DeviceType
@@ -392,7 +385,6 @@ class EMSdevice {
 
     std::vector<TelegramFunction> telegram_functions_; // each EMS device has its own set of registered telegram types
 
-    // emsesp::array<DeviceValue> * devicevalues_;
     std::vector<DeviceValue> devicevalues_;
 };
 

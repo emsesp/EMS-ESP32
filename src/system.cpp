@@ -97,7 +97,9 @@ void System::restart() {
     LOG_INFO(F("Restarting system..."));
     Shell::loop_all();
     delay(1000); // wait a second
+#ifndef EMSESP_STANDALONE
     ESP.restart();
+#endif
 }
 
 // saves all settings
@@ -118,7 +120,9 @@ void System::format(uuid::console::Shell & shell) {
 
     EMSuart::stop();
 
+#ifndef EMSESP_STANDALONE
     LITTLEFS.format();
+#endif
 
     System::restart();
 }
@@ -344,10 +348,12 @@ void System::loop() {
 }
 
 void System::show_mem(const char * note) {
+#ifndef EMSESP_STANDALONE
     static uint32_t old_free_heap = 0;
     uint32_t        free_heap     = ESP.getFreeHeap();
     LOG_INFO(F("(%s) Free heap: %lu (~%lu)"), note, free_heap, (uint32_t)Helpers::abs(free_heap - old_free_heap));
     old_free_heap = free_heap;
+#endif
 }
 
 // send periodic MQTT message with system information
