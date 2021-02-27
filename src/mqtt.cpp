@@ -539,16 +539,16 @@ void Mqtt::ha_status() {
     Mqtt::publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
 
     // create the sensors
-    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_NONE, F("Wifi strength"), EMSdevice::DeviceType::SYSTEM, F("rssi"), DeviceValueUOM::NONE);
-    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_NONE, F("Uptime"), EMSdevice::DeviceType::SYSTEM, F("uptime"), DeviceValueUOM::NONE);
-    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_NONE, F("Uptime (sec)"), EMSdevice::DeviceType::SYSTEM, F("uptime_sec"), DeviceValueUOM::NONE);
-    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_NONE, F("Free heap memory"), EMSdevice::DeviceType::SYSTEM, F("freemem"), DeviceValueUOM::NONE);
-    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_NONE, F("# Failed MQTT publishes"), EMSdevice::DeviceType::SYSTEM, F("mqttfails"), DeviceValueUOM::NONE);
-    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_NONE, F("# Rx Sent"), EMSdevice::DeviceType::SYSTEM, F("rxsent"), DeviceValueUOM::NONE);
-    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_NONE, F("# Rx Fails"), EMSdevice::DeviceType::SYSTEM, F("rxfails"), DeviceValueUOM::NONE);
-    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_NONE, F("# Tx Reads"), EMSdevice::DeviceType::SYSTEM, F("txread"), DeviceValueUOM::NONE);
-    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_NONE, F("# Tx Writes"), EMSdevice::DeviceType::SYSTEM, F("txwrite"), DeviceValueUOM::NONE);
-    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_NONE, F("# Tx Fails"), EMSdevice::DeviceType::SYSTEM, F("txfails"), DeviceValueUOM::NONE);
+    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_NONE, F("Wifi strength"), EMSdevice::DeviceType::SYSTEM, F("rssi"));
+    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_NONE, F("Uptime"), EMSdevice::DeviceType::SYSTEM, F("uptime"));
+    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_NONE, F("Uptime (sec)"), EMSdevice::DeviceType::SYSTEM, F("uptime_sec"));
+    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_NONE, F("Free heap memory"), EMSdevice::DeviceType::SYSTEM, F("freemem"));
+    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_NONE, F("# Failed MQTT publishes"), EMSdevice::DeviceType::SYSTEM, F("mqttfails"));
+    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_NONE, F("# Rx Sent"), EMSdevice::DeviceType::SYSTEM, F("rxsent"));
+    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_NONE, F("# Rx Fails"), EMSdevice::DeviceType::SYSTEM, F("rxfails"));
+    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_NONE, F("# Tx Reads"), EMSdevice::DeviceType::SYSTEM, F("txread"));
+    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_NONE, F("# Tx Writes"), EMSdevice::DeviceType::SYSTEM, F("txwrite"));
+    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_NONE, F("# Tx Fails"), EMSdevice::DeviceType::SYSTEM, F("txfails"));
 }
 
 // add sub or pub task to the queue.
@@ -755,7 +755,7 @@ void Mqtt::publish_mqtt_ha_sensor(uint8_t                     type, // EMSdevice
                                   const __FlashStringHelper * name,
                                   const uint8_t               device_type, // EMSdevice::DeviceType
                                   const __FlashStringHelper * entity,
-                                  const uint8_t               uom) {
+                                  const uint8_t               uom) { // DeviceValueUOM (0=NONE)
     // ignore if name (fullname) is empty
     if (name == nullptr) {
         return;

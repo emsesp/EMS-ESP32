@@ -52,6 +52,7 @@ enum DeviceValueType : uint8_t {
 };
 
 // Unit Of Measurement mapping - maps to DeviceValueUOM_s in emsdevice.cpp
+// sequence is important!
 // uom - also used with HA
 MAKE_PSTR(percent, "%")
 MAKE_PSTR(degrees, "°C")
@@ -63,6 +64,7 @@ MAKE_PSTR(hours, "hours")
 MAKE_PSTR(ua, "uA")
 MAKE_PSTR(lmin, "l/min")
 enum DeviceValueUOM : uint8_t {
+    NONE = 0,
     DEGREES,
     PERCENT,
     LMIN,
@@ -71,8 +73,7 @@ enum DeviceValueUOM : uint8_t {
     HOURS,
     MINUTES,
     UA,
-    BAR,
-    NONE
+    BAR
 
 };
 
@@ -212,7 +213,7 @@ class EMSdevice {
     std::string to_string_short() const;
 
     void   show_telegram_handlers(uuid::console::Shell & shell);
-    void   show_device_values(uuid::console::Shell & shell);
+    void   show_device_values_debug(uuid::console::Shell & shell);
     char * show_telegram_handlers(char * result);
     void   show_mqtt_handlers(uuid::console::Shell & shell);
 
@@ -225,7 +226,13 @@ class EMSdevice {
     bool        generate_values_json(JsonObject & json, const uint8_t tag_filter, const bool verbose = false);
     bool        generate_values_json_web(JsonObject & json);
 
-    void register_device_value(uint8_t tag, void * value_p, uint8_t type, const __FlashStringHelper * const * options, const __FlashStringHelper * short_name, const __FlashStringHelper * full_name, uint8_t uom);
+    void register_device_value(uint8_t                             tag,
+                               void *                              value_p,
+                               uint8_t                             type,
+                               const __FlashStringHelper * const * options,
+                               const __FlashStringHelper *         short_name,
+                               const __FlashStringHelper *         full_name,
+                               uint8_t                             uom = DeviceValueUOM::NONE);
 
     void write_command(const uint16_t type_id, const uint8_t offset, uint8_t * message_data, const uint8_t message_length, const uint16_t validate_typeid);
     void write_command(const uint16_t type_id, const uint8_t offset, const uint8_t value, const uint16_t validate_typeid);

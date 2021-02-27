@@ -104,7 +104,7 @@ class Mqtt {
     static void publish_ha(const std::string & topic, const JsonObject & payload);
     static void publish_ha(const __FlashStringHelper * topic, const JsonObject & payload);
 
-    static void publish_mqtt_ha_sensor(uint8_t type, uint8_t tag, const __FlashStringHelper * name, const uint8_t device_type, const __FlashStringHelper * entity, const uint8_t uom);
+    static void publish_mqtt_ha_sensor(uint8_t type, uint8_t tag, const __FlashStringHelper * name, const uint8_t device_type, const __FlashStringHelper * entity, const uint8_t uom = 0);
     static void register_command(const uint8_t device_type, const __FlashStringHelper * cmd, cmdfunction_p cb);
 
     static void show_topic_handlers(uuid::console::Shell & shell, const uint8_t device_type);
@@ -211,7 +211,7 @@ class Mqtt {
     static AsyncMqttClient * mqttClient_;
     static uint16_t          mqtt_message_id_;
 
-    static constexpr uint32_t MQTT_PUBLISH_WAIT      = 200; // delay between sending publishes, to account for large payloads
+    static constexpr uint32_t MQTT_PUBLISH_WAIT      = 100; // delay between sending publishes, to account for large payloads
     static constexpr uint8_t  MQTT_PUBLISH_MAX_RETRY = 3;   // max retries for giving up on publishing
 
     static std::shared_ptr<const MqttMessage> queue_message(const uint8_t operation, const std::string & topic, const std::string & payload, bool retain);

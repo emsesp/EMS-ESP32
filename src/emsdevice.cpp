@@ -59,7 +59,7 @@ const std::string EMSdevice::uom_to_string(uint8_t uom) {
     if (uom == DeviceValueUOM::NONE) {
         return std::string{};
     }
-    return uuid::read_flash_string(DeviceValueUOM_s[uom]);
+    return uuid::read_flash_string(DeviceValueUOM_s[uom - 1]); // offset by 1 to account for NONE
 }
 
 const std::string EMSdevice::tag_to_string(uint8_t tag) {
@@ -286,7 +286,7 @@ bool EMSdevice::get_toggle_fetch(uint16_t telegram_id) {
 }
 
 // list device values, only for EMSESP_DEBUG mode
-void EMSdevice::show_device_values(uuid::console::Shell & shell) {
+void EMSdevice::show_device_values_debug(uuid::console::Shell & shell) {
     size_t  total_s = 0;
     uint8_t count   = 0;
     for (const auto & dv : devicevalues_) {
@@ -367,9 +367,8 @@ void EMSdevice::register_telegram_type(const uint16_t telegram_type_id, const __
 //  type: one of DeviceValueType
 //  options: options for enum or a divider for int (e.g. F("10"))
 //  short_name: used in Mqtt as keys
-//  full name: used in Web and Console
+//  full name: used in Web and Console unless empty (nullptr)
 //  uom: unit of measure from DeviceValueUOM
-//  icon (optional): the HA mdi icon to use, from locale_*.h file
 void EMSdevice::register_device_value(uint8_t tag, void * value_p, uint8_t type, const __FlashStringHelper * const * options, const __FlashStringHelper * short_name, const __FlashStringHelper * full_name, uint8_t uom) {
     // init the value depending on it's type
     if (type == DeviceValueType::TEXT) {
@@ -383,8 +382,7 @@ void EMSdevice::register_device_value(uint8_t tag, void * value_p, uint8_t type,
     } else if ((type == DeviceValueType::ULONG) || (type == DeviceValueType::TIME)) {
         *(uint32_t *)(value_p) = EMS_VALUE_ULONG_NOTSET;
     } else {
-        // enums, uint8_t, bool behave as uint8_t
-        *(uint8_t *)(value_p) = EMS_VALUE_UINT_NOTSET;
+        *(uint8_t *)(value_p) = EMS_VALUE_UINT_NOTSET; // enums, uint8_t, bool behave as uint8_t
     }
 
     // count #options
