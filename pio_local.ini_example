@@ -1,16 +1,14 @@
 [env]
-upload_port = COM3
+upload_protocol = espota
+upload_flags = 
+  --port=8266
+  --auth=ems-esp-neo
+upload_port = 10.10.10.101
 
 [common]
 ; debug_flags = -DENABLE_CORS -DEMSESP_TEST
 ; debug_flags = -DEMSESP_DEBUG -DEMSESP_TEST
 debug_flags = -DEMSESP_TEST
-
-upload_protocol = espota
-upload_flags = 
-  --port=8266
-  --auth=ems-esp-neo
-upload_port = ems-esp.local
 
 [env:esp32]
 monitor_filters = esp32_exception_decoder
