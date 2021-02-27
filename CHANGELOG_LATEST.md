@@ -8,6 +8,8 @@ See https://github.com/proddy/EMS-ESP/issues/632
 - Ethernet support (ESP32)
 - id to info command to show only a heatingcircuit
 - add sending devices that are not listed to 0x07
+- extra MQTT boolean option for "ON" and "OFF"
+- Support for chunked MQTT payloads to allow large data sets > 2kb
 
 ### Fixed
 - telegrams matched to masterthermostat 0x18
@@ -23,6 +25,10 @@ See https://github.com/proddy/EMS-ESP/issues/632
 - mqtt prefixed with `Base`
 - count Dallas sensor fails
 - switch from SPIFFS to LITTLEFS
+- Added ID to MQTT payloads which is the Device's product ID and used in HA to identify a unique HA device
+- Increased MQTT buffer and reduced wait time between publishes
+- Updated to the latest ArduinoJson library
+- **Breaking Change** new ESP32 partition side to allow for smoother OTA and fallback
 
 ### Removed
 
