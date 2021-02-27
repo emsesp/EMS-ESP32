@@ -1,10 +1,10 @@
 [env]
-; upload_port = COM3
+upload_port = COM3
 
 [common]
-; debug_flags = -DENABLE_CORS -DEMSESP_DEBUG -DEMSESP_TEST
-debug_flags = -DEMSESP_DEBUG -DEMSESP_TEST
-; debug_flags = -DEMSESP_TEST
+; debug_flags = -DENABLE_CORS -DEMSESP_TEST
+; debug_flags = -DEMSESP_DEBUG -DEMSESP_TEST
+debug_flags = -DEMSESP_TEST
 
 upload_protocol = espota
 upload_flags = 
@@ -17,5 +17,5 @@ monitor_filters = esp32_exception_decoder
 debug_tool = esp-prog
 debug_init_break = tbreak setup
 extra_scripts =
-;  pre:scripts/build_interface.py
-  scripts/rename_fw.py
+  ; pre:scripts/build_interface.py
+  ; scripts/rename_fw.py
