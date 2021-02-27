@@ -793,7 +793,7 @@ void EMSESP::show_devices(uuid::console::Shell & shell) {
 #if defined(EMSESP_DEBUG)
                 emsdevice->show_mqtt_handlers(shell);
                 shell.println();
-                emsdevice->show_device_values(shell);
+                emsdevice->show_device_values_debug(shell);
 #endif
 
                 shell.println();
