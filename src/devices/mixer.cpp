@@ -55,6 +55,7 @@ Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
         type_       = Type::HC;
         hc_         = device_id - 0x20 + 1;
         uint8_t tag = TAG_HC1 + hc_ - 1;
+        register_device_value(tag, &id_, DeviceValueType::UINT, nullptr, F("id"), nullptr); // empty full name to prevent being shown in web or console
         register_device_value(tag, &flowSetTemp_, DeviceValueType::UINT, nullptr, F("flowSetTemp"), F("Setpoint flow temperature"), DeviceValueUOM::DEGREES);
         register_device_value(tag, &flowTemp_, DeviceValueType::USHORT, FL_(div10), F("flowTemp"), F("Current flow temperature"), DeviceValueUOM::DEGREES);
         register_device_value(tag, &pumpStatus_, DeviceValueType::BOOL, nullptr, F("pumpStatus"), F("Pump status"));
@@ -63,12 +64,12 @@ Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
         type_       = Type::WWC;
         hc_         = device_id - 0x28 + 1;
         uint8_t tag = TAG_WWC1 + hc_ - 1;
+        register_device_value(tag, &id_, DeviceValueType::UINT, nullptr, F("id"), nullptr); // empty full name to prevent being shown in web or console
         register_device_value(tag, &flowTemp_, DeviceValueType::USHORT, FL_(div10), F("flowTemp"), F("Current flow temperature"), DeviceValueUOM::DEGREES);
         register_device_value(tag, &pumpStatus_, DeviceValueType::BOOL, nullptr, F("pumpStatus"), F("Pump/Valve status"));
         register_device_value(tag, &status_, DeviceValueType::INT, nullptr, F("status"), F("Current status"));
     }
 
-    register_device_value(TAG_NONE, &id_, DeviceValueType::UINT, nullptr, F("id"), nullptr); // empty full name to prevent being shown in web or console
     id_ = product_id;
 }
 
