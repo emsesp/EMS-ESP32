@@ -97,11 +97,7 @@ void System::restart() {
     LOG_INFO(F("Restarting system..."));
     Shell::loop_all();
     delay(1000); // wait a second
-#if defined(ESP8266)
-    ESP.reset();
-#elif defined(ESP32)
     ESP.restart();
-#endif
 }
 
 // saves all settings
@@ -122,11 +118,7 @@ void System::format(uuid::console::Shell & shell) {
 
     EMSuart::stop();
 
-#if defined(ESP8266)
-    LittleFS.format();
-#elif defined(ESP32)
     LITTLEFS.format();
-#endif
 
     System::restart();
 }
@@ -257,9 +249,7 @@ void System::start(uint32_t heap_start) {
 
 void System::other_init() {
     // set the boolean format used for rendering booleans
-    EMSESP::webSettingsService.read([&](WebSettings & settings) {
-        analog_enabled_ = settings.analog_enabled;
-    });
+    EMSESP::webSettingsService.read([&](WebSettings & settings) { analog_enabled_ = settings.analog_enabled; });
 }
 
 // init stuff. This is called when settings are changed in the web
@@ -354,20 +344,10 @@ void System::loop() {
 }
 
 void System::show_mem(const char * note) {
-#if defined(ESP8266)
-    static uint32_t old_free_heap = 0;
-    static uint8_t  old_heap_frag = 0;
-    uint32_t        free_heap     = ESP.getFreeHeap();
-    uint8_t         heap_frag     = ESP.getHeapFragmentation();
-    LOG_INFO(F("(%s) Free heap: %lu (~%lu), frag:%d%% (~%d)"), note, free_heap, (uint32_t)Helpers::abs(free_heap - old_free_heap), heap_frag, (uint8_t)Helpers::abs(heap_frag - old_heap_frag));
-    old_free_heap = free_heap;
-    old_heap_frag = heap_frag;
-#elif defined(ESP32)
     static uint32_t old_free_heap = 0;
     uint32_t        free_heap     = ESP.getFreeHeap();
     LOG_INFO(F("(%s) Free heap: %lu (~%lu)"), note, free_heap, (uint32_t)Helpers::abs(free_heap - old_free_heap));
     old_free_heap = free_heap;
-#endif
 }
 
 // send periodic MQTT message with system information
@@ -381,10 +361,6 @@ void System::send_heartbeat() {
     if (rssi == -1) {
         return;
     }
-
-#if defined(ESP8266)
-    uint8_t frag_memory = ESP.getHeapFragmentation();
-#endif
 
     StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> doc;
 
@@ -410,9 +386,7 @@ void System::send_heartbeat() {
 #ifndef EMSESP_STANDALONE
     doc["freemem"] = ESP.getFreeHeap();
 #endif
-#if defined(ESP8266)
-    doc["fragmem"] = frag_memory;
-#endif
+
     if (analog_enabled_) {
         doc["adc"] = analog_;
     }
@@ -426,9 +400,7 @@ void System::measure_analog() {
 
     if (!measure_last_ || (uint32_t)(uuid::get_uptime() - measure_last_) >= SYSTEM_MEASURE_ANALOG_INTERVAL) {
         measure_last_ = uuid::get_uptime();
-#if defined(ESP8266)
-        uint16_t a = analogRead(A0);
-#elif defined(ESP32)
+#if defined(ESP32)
         uint16_t a = analogRead(36);
 #else
         uint16_t a = 0; // standalone
@@ -480,6 +452,7 @@ void System::system_check() {
             // if it was unhealthy but now we're better, make sure the LED is solid again cos we've been healed
             if (!system_healthy_) {
                 system_healthy_ = true;
+                send_heartbeat();
                 if (led_gpio_) {
                     digitalWrite(led_gpio_, hide_led_ ? !LED_ON : LED_ON); // LED on, for ever
                 }
@@ -708,7 +681,7 @@ void System::console_commands(Shell & shell, unsigned int context) {
                                                networkSettings.ssid = arguments.front().c_str();
                                                return StateUpdateResult::CHANGED;
                                            });
-                                           shell.println("Use `wifi reconnect` to save the new settings");
+                                           shell.println("Use `wifi reconnect` to save and apply the new settings");
                                        });
 
     EMSESPShell::commands->add_command(ShellContext::SYSTEM, CommandFlags::ADMIN, flash_string_vector{F_(set), F_(wifi), F_(password)}, [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
@@ -721,7 +694,7 @@ void System::console_commands(Shell & shell, unsigned int context) {
                                 networkSettings.password = password2.c_str();
                                 return StateUpdateResult::CHANGED;
                             });
-                            shell.println("Use `wifi reconnect` to save the new settings");
+                            shell.println("Use `wifi reconnect` to save and apply the new settings");
                         } else {
                             shell.println(F("Passwords do not match"));
                         }
@@ -753,7 +726,7 @@ void System::console_commands(Shell & shell, unsigned int context) {
     Console::enter_custom_context(shell, context);
 }
 
-// upgrade from previous versions of EMS-ESP (ESP8266)
+// upgrade from previous versions of EMS-ESP
 // returns true if an upgrade was done
 bool System::check_upgrade() {
     return false;
@@ -764,8 +737,8 @@ bool System::check_upgrade() {
 // value and id are ignored
 bool System::command_settings(const char * value, const int8_t id, JsonObject & json) {
     EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & settings) {
-        JsonObject node = json.createNestedObject("WIFI");
-        node["ssid"]    = settings.ssid;
+        JsonObject node          = json.createNestedObject("WIFI");
+        node["ssid"]             = settings.ssid;
         node["hostname"]         = settings.hostname;
         node["static_ip_config"] = settings.staticIPConfig;
         JsonUtils::writeIP(node, "local_ip", settings.localIP);
@@ -780,9 +753,9 @@ bool System::command_settings(const char * value, const int8_t id, JsonObject & 
         JsonObject node        = json.createNestedObject("AP");
         node["provision_mode"] = settings.provisionMode;
         node["ssid"]           = settings.ssid;
-        node["local_ip"]    = settings.localIP.toString();
-        node["gateway_ip"]  = settings.gatewayIP.toString();
-        node["subnet_mask"] = settings.subnetMask.toString();
+        node["local_ip"]       = settings.localIP.toString();
+        node["gateway_ip"]     = settings.gatewayIP.toString();
+        node["subnet_mask"]    = settings.subnetMask.toString();
     });
 #endif
 
@@ -860,10 +833,6 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & json
 
     node["version"] = EMSESP_APP_VERSION;
     node["uptime"]  = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
-#if defined(ESP8266)
-    node["freemem"] = ESP.getFreeHeap();
-    node["fragmem"] = ESP.getHeapFragmentation();
-#endif
 
     node = json.createNestedObject("Status");
 

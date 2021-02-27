@@ -76,11 +76,7 @@ void EMSESPShell::display_banner() {
 
     if (console_hostname_.empty()) {
         console_hostname_.resize(16, '\0');
-#if defined(ESP8266)
-        snprintf_P(&console_hostname_[0], console_hostname_.capacity() + 1, PSTR("esp8266"));
-#else
-        snprintf_P(&console_hostname_[0], console_hostname_.capacity() + 1, PSTR("esp32"));
-#endif
+        snprintf_P(&console_hostname_[0], console_hostname_.capacity() + 1, PSTR("ems-esp"));
     }
 
     // load the list of commands
@@ -648,13 +644,7 @@ void Console::loop() {
     telnet_.loop();
 #endif
 
-#if defined(ESP8266)
-    if (!EMSuart::sending()) {
-        Shell::loop_all();
-    }
-#else
     Shell::loop_all();
-#endif
 }
 
 } // namespace emsesp

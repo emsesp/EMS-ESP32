@@ -23,9 +23,7 @@
 #include <deque>
 
 // UART drivers
-#if defined(ESP8266)
-#include "uart/emsuart_esp8266.h"
-#elif defined(ESP32)
+#if defined(ESP32)
 #include "uart/emsuart_esp32.h"
 #elif defined(EMSESP_STANDALONE)
 #include <emsuart_standalone.h>

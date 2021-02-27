@@ -49,12 +49,7 @@
 #define EMSESP_DEFAULT_ANALOG_ENABLED false
 
 // Default GPIO PIN definitions
-#if defined(ESP8266)
-#define EMSESP_DEFAULT_RX_GPIO 13     // UART0, swapped
-#define EMSESP_DEFAULT_TX_GPIO 15     // UART0, swapped
-#define EMSESP_DEFAULT_DALLAS_GPIO 14 // D5
-#define EMSESP_DEFAULT_LED_GPIO 2     // onboard LED
-#elif defined(ESP32)
+#if defined(ESP32)
 #define EMSESP_DEFAULT_RX_GPIO 23     // D7 on Wemos D1-32, OR 17 for UART2 on Lolin D32
 #define EMSESP_DEFAULT_TX_GPIO 5      // D8 on Wemos D1-32, OR 16 for UART2 on Lolin D32
 #define EMSESP_DEFAULT_DALLAS_GPIO 18 // 18 on Wemos D1-32, 14 on LOLIN D32
