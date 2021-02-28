@@ -194,7 +194,7 @@ void System::start(uint32_t heap_start) {
         Command::add_with_json(EMSdevice::DeviceType::SYSTEM, F_(settings), System::command_settings);
 
 #if defined(EMSESP_TEST)
-        Command::add(EMSdevice::DeviceType::SYSTEM, F_(test), System::command_test);
+        Command::add(EMSdevice::DeviceType::SYSTEM, F("test"), System::command_test);
 #endif
     });
 

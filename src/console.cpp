@@ -444,13 +444,17 @@ void Console::enter_custom_context(Shell & shell, unsigned int context) {
 // each custom context has the common commands like log, help, exit, su etc
 void Console::load_standard_commands(unsigned int context) {
 #if defined(EMSESP_TEST)
-    EMSESPShell::commands->add_command(context, CommandFlags::USER, flash_string_vector{F_(test)}, flash_string_vector{F_(name_optional)}, [](Shell & shell, const std::vector<std::string> & arguments) {
+    EMSESPShell::commands->add_command(context, CommandFlags::USER, flash_string_vector{F("test")}, flash_string_vector{F_(name_optional)}, [](Shell & shell, const std::vector<std::string> & arguments) {
         if (arguments.size() == 0) {
             Test::run_test(shell, "default");
         } else {
             Test::run_test(shell, arguments.front());
         }
     });
+#endif
+
+#if defined(EMSESP_STANDALONE)
+    EMSESPShell::commands->add_command(context, CommandFlags::USER, flash_string_vector{F("t")}, [](Shell & shell, const std::vector<std::string> & arguments) { Test::run_test(shell, "default"); });
 #endif
 
 #if defined(EMSESP_DEBUG)

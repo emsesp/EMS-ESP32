@@ -78,7 +78,6 @@ MAKE_PSTR_WORD(data)
 MAKE_PSTR_WORD(command)
 MAKE_PSTR_WORD(commands)
 MAKE_PSTR_WORD(info)
-MAKE_PSTR_WORD(test)
 MAKE_PSTR_WORD(settings)
 
 // devices
