@@ -711,6 +711,29 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         shell.invoke_command("call system pin 1 true");
     }
 
+    if (command == "mqtt2") {
+        shell.printfln(F("Testing MQTT large payloads..."));
+
+        DynamicJsonDocument doc(EMSESP_JSON_SIZE_XXLARGE_DYN);
+
+        char key[6];
+        char value[6];
+
+        // fit it up, to its limit of the Json buffer (which is about 169 records)
+        for (uint8_t i = 0; i < 200; i++) {
+            snprintf_P(key, 7, PSTR("key%03d"), i);
+            snprintf_P(value, 7, PSTR("val%03d"), i);
+            doc[key] = value;
+        }
+        doc.shrinkToFit();
+        JsonObject jo = doc.as<JsonObject>();
+        shell.printfln(F("Size of JSON payload = %d"), jo.memoryUsage());
+        shell.printfln(F("Length of JSON payload = %d"), measureJson(jo));
+
+        Mqtt::publish("test", jo);
+        Mqtt::show_mqtt(shell); // show queue
+    }
+
     if (command == "mqtt") {
         shell.printfln(F("Testing MQTT..."));
 
