@@ -36,13 +36,7 @@
 #define EMSESP_DEFAULT_MASTER_THERMOSTAT 0 // not set
 #define EMSESP_DEFAULT_SHOWER_TIMER false
 #define EMSESP_DEFAULT_SHOWER_ALERT false
-
-#if defined(ESP32)
 #define EMSESP_DEFAULT_HIDE_LED true
-#else
-#define EMSESP_DEFAULT_HIDE_LED false
-#endif
-
 #define EMSESP_DEFAULT_DALLAS_PARASITE false
 #define EMSESP_DEFAULT_API_ENABLED false // turn off, because its insecure
 #define EMSESP_DEFAULT_BOOL_FORMAT 1     // on/off
@@ -54,12 +48,14 @@
 #define EMSESP_DEFAULT_TX_GPIO 5      // D8 on Wemos D1-32, OR 16 for UART2 on Lolin D32
 #define EMSESP_DEFAULT_DALLAS_GPIO 18 // 18 on Wemos D1-32, 14 on LOLIN D32
 #define EMSESP_DEFAULT_LED_GPIO 2     // 2 on Wemos D1-32, 5 on LOLIN D32
+#define EMSESP_DEFAULT_PBUTTON_GPIO 0 // default GPIO is 0 (off)
 #else
 // for standalone
 #define EMSESP_DEFAULT_RX_GPIO 0
 #define EMSESP_DEFAULT_TX_GPIO 0
 #define EMSESP_DEFAULT_DALLAS_GPIO 0
 #define EMSESP_DEFAULT_LED_GPIO 0
+#define EMSESP_DEFAULT_PBUTTON_GPIO 0
 #endif
 
 namespace emsesp {
@@ -85,6 +81,7 @@ class WebSettings {
     bool     hide_led;
     bool     api_enabled;
     bool     analog_enabled;
+    uint8_t  pbutton_gpio;
 
     static void              read(WebSettings & settings, JsonObject & root);
     static StateUpdateResult update(JsonObject & root, WebSettings & settings);
@@ -94,10 +91,11 @@ class WebSettings {
         NONE   = 0,
         UART   = (1 << 0),
         SYSLOG = (1 << 1),
-        OTHER  = (1 << 2),
+        ADC    = (1 << 2),
         DALLAS = (1 << 3),
         SHOWER = (1 << 4),
-        LED    = (1 << 5)
+        LED    = (1 << 5),
+        BUTTON = (1 << 6)
 
     };
 

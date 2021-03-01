@@ -19,8 +19,6 @@
 #include "system.h"
 #include "emsesp.h" // for send_raw_telegram() command
 
-#include "version.h" // firmware version of EMS-ESP
-
 #if defined(EMSESP_TEST)
 #include "test/test.h"
 #endif
@@ -34,15 +32,8 @@ uuid::syslog::SyslogService System::syslog_;
 #endif
 
 // init statics
-uint32_t    System::heap_start_     = 1; // avoid using 0 to divide-by-zero later
-bool        System::upload_status_  = false;
-bool        System::hide_led_       = false;
-uint8_t     System::led_gpio_       = 0;
-uint16_t    System::analog_         = 0;
-bool        System::analog_enabled_ = false;
-bool        System::syslog_enabled_ = false;
-std::string System::hostname_;
-bool        System::ethernet_connected_ = false;
+uint32_t System::heap_start_ = 1; // avoid using 0 to divide-by-zero later
+PButton  System::myPButton_;
 
 // send on/off to a gpio pin
 // value: true = HIGH, false = LOW
@@ -106,6 +97,7 @@ void System::restart() {
 void System::wifi_reconnect() {
     LOG_INFO(F("Wifi reconnecting..."));
     Shell::loop_all();
+    EMSESP::console_.loop();
     delay(1000);                                                                   // wait a second
     EMSESP::webSettingsService.save();                                             // local settings
     EMSESP::esp8266React.getNetworkSettingsService()->callUpdateHandlers("local"); // in case we've changed ssid or password
@@ -127,21 +119,12 @@ void System::format(uuid::console::Shell & shell) {
     System::restart();
 }
 
-void System::syslog_init() {
-    int8_t   syslog_level_;
-    uint32_t syslog_mark_interval_;
-    String   syslog_host_;
-
-    // fetch settings
-    EMSESP::webSettingsService.read([&](WebSettings & settings) {
-        syslog_enabled_       = settings.syslog_enabled;
-        syslog_level_         = settings.syslog_level;
-        syslog_mark_interval_ = settings.syslog_mark_interval;
-        syslog_host_          = settings.syslog_host;
-    });
+void System::syslog_init(bool refresh) {
+    if (refresh) {
+        get_settings();
+    }
 
 #ifndef EMSESP_STANDALONE
-
     // check for empty hostname
     IPAddress addr;
     if (!addr.fromString(syslog_host_.c_str())) {
@@ -161,137 +144,150 @@ void System::syslog_init() {
     syslog_.log_level((uuid::log::Level)syslog_level_);
     syslog_.mark_interval(syslog_mark_interval_);
     syslog_.destination(addr);
-    EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) { syslog_.hostname(networkSettings.hostname.c_str()); });
+    syslog_.hostname(hostname_.c_str());
 
     EMSESP::logger().info(F("Syslog started"));
 #endif
 }
 
+// read all the settings from the config files and store locally
+void System::get_settings() {
+    EMSESP::webSettingsService.read([&](WebSettings & settings) {
+        // BUTTON
+        pbutton_gpio_ = settings.pbutton_gpio;
+
+        // ADC
+        analog_enabled_ = settings.analog_enabled;
+
+        // SYSLOG
+        syslog_enabled_       = settings.syslog_enabled;
+        syslog_level_         = settings.syslog_level;
+        syslog_mark_interval_ = settings.syslog_mark_interval;
+        syslog_host_          = settings.syslog_host;
+
+        // LED
+        hide_led_ = settings.hide_led;
+        led_gpio_ = settings.led_gpio;
+    });
+
+    EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
+        hostname(networkSettings.hostname.c_str());
+        LOG_INFO(F("System %s booted (EMS-ESP version %s)"), networkSettings.hostname.c_str(), EMSESP_APP_VERSION); // print boot message
+        ethernet_profile_ = networkSettings.ethernet_profile;
+    });
+}
+
 // first call. Sets memory and starts up the UART Serial bridge
 void System::start(uint32_t heap_start) {
+#if defined(EMSESP_DEBUG)
+    show_mem("Startup");
+#endif
+
     // set the inital free mem, only on first boot
     if (heap_start_ < 2) {
         heap_start_ = heap_start;
     }
 
-#if defined(EMSESP_DEBUG)
-    show_mem("Startup");
-#endif
+    // load in all the settings first
+    get_settings();
 
-    uint8_t ethernet_profile;
-    EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
-        LOG_INFO(F("System %s booted (EMS-ESP version %s)"), networkSettings.hostname.c_str(), EMSESP_APP_VERSION); // print boot message
-        ethernet_profile = networkSettings.ethernet_profile;
-    });
-
-    // these commands respond to the topic "system" and take a payload like {cmd:"", data:"", id:""}
-    EMSESP::webSettingsService.read([&](WebSettings & settings) {
-        Command::add(EMSdevice::DeviceType::SYSTEM, F_(pin), System::command_pin);
-        Command::add(EMSdevice::DeviceType::SYSTEM, F_(send), System::command_send);
-        Command::add(EMSdevice::DeviceType::SYSTEM, F_(publish), System::command_publish);
-        Command::add(EMSdevice::DeviceType::SYSTEM, F_(fetch), System::command_fetch);
-        Command::add_with_json(EMSdevice::DeviceType::SYSTEM, F_(info), System::command_info);
-        Command::add_with_json(EMSdevice::DeviceType::SYSTEM, F_(settings), System::command_settings);
-
-#if defined(EMSESP_TEST)
-        Command::add(EMSdevice::DeviceType::SYSTEM, F("test"), System::command_test);
-#endif
-    });
-
-    // start other services first
-    init();
-
-    // check ethernet profile, if we're using exclusive Ethernet then disabled wifi and AP/captive portal
-    if (ethernet_profile == 0) {
-        return;
-    }
-
-    uint8_t          phy_addr;   // I²C-address of Ethernet PHY (0 or 1 for LAN8720, 31 for TLK110)
-    int              power;      // Pin# of the enable signal for the external crystal oscillator (-1 to disable for internal APLL source)
-    int              mdc;        // Pin# of the I²C clock signal for the Ethernet PHY
-    int              mdio;       // Pin# of the I²C IO signal for the Ethernet PHY
-    eth_phy_type_t   type;       // Type of the Ethernet PHY (LAN8720 or TLK110)
-    eth_clock_mode_t clock_mode; // ETH_CLOCK_GPIO0_IN or ETH_CLOCK_GPIO0_OUT, ETH_CLOCK_GPIO16_OUT, ETH_CLOCK_GPIO17_OUT for 50Hz inverted clock
-
-    if (ethernet_profile == 1) {
-        // LAN8720
-        phy_addr   = 0;
-        power      = -1;
-        mdc        = 23;
-        mdio       = 18;
-        type       = ETH_PHY_LAN8720;
-        clock_mode = ETH_CLOCK_GPIO0_IN;
-    } else if (ethernet_profile == 2) {
-        // TLK110
-        phy_addr   = 31;
-        power      = -1;
-        mdc        = 23;
-        mdio       = 18;
-        type       = ETH_PHY_TLK110;
-        clock_mode = ETH_CLOCK_GPIO0_IN;
-    }
-
-#ifndef EMSESP_STANDALONE
-    if (ETH.begin(phy_addr, power, mdc, mdio, type, clock_mode)) {
-        // disable ssid and AP
-        EMSESP::esp8266React.getNetworkSettingsService()->update(
-            [&](NetworkSettings & settings) {
-                settings.ssid == ""; // remove SSID
-                return StateUpdateResult::CHANGED;
-            },
-            "local");
-
-        EMSESP::esp8266React.getAPSettingsService()->update(
-            [&](APSettings & settings) {
-                settings.provisionMode = AP_MODE_NEVER;
-                return StateUpdateResult::CHANGED;
-            },
-            "local");
-    }
-#endif
+    commands_init();    // console & api commands
+    button_init(false); // the special button
+    led_init(false);    // init LED
+    syslog_init(false); // init SysLog
+    adc_init(false);    // analog ADC
+    network_init();     // network
+    EMSESP::init_tx();  // start UART
 }
 
-void System::other_init() {
-    // set the boolean format used for rendering booleans
-    EMSESP::webSettingsService.read([&](WebSettings & settings) { analog_enabled_ = settings.analog_enabled; });
-}
-
-// init stuff. This is called when settings are changed in the web
-void System::init() {
-    led_init(); // init LED
-
-    other_init(); // boolean format and analog setting
-
-    syslog_init(); // init SysLog
-
-    EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & settings) { hostname(settings.hostname.c_str()); });
-
+// adc and bluetooth
+void System::adc_init(bool refresh) {
+    if (refresh) {
+        get_settings();
+    }
 #ifndef EMSESP_STANDALONE
     // setCpuFrequencyMhz(160); // default is 240
 
     // disable bluetooth
     btStop();
     esp_bt_controller_disable();
-
-    // turn off ADC to save power if not needed
     if (!analog_enabled_) {
-        adc_power_off();
+        adc_power_off(); // turn off ADC to save power if not needed
     }
 #endif
+}
 
-    EMSESP::init_tx(); // start UART
+// button single click
+void System::button_OnClick(PButton & b) {
+    LOG_DEBUG(F("Button pressed - single click"));
+}
+
+// button double click
+void System::button_OnDblClick(PButton & b) {
+    LOG_DEBUG(F("Button pressed - double click - reconnect"));
+    EMSESP::system_.wifi_reconnect();
+}
+
+// button long press
+void System::button_OnLongPress(PButton & b) {
+    LOG_DEBUG(F("Button pressed - long press"));
+}
+
+// button indefinite press
+void System::button_OnVLongPress(PButton & b) {
+    LOG_DEBUG(F("Button pressed - very long press"));
+    LOG_WARNING(F("Performing factory reset..."));
+    EMSESP::console_.loop();
+
+#ifndef EMSESP_STANDALONE
+    // remove all files under config
+    File root = LITTLEFS.open(FS_CONFIG_DIRECTORY);
+    File file;
+    Serial.printf("Removing files: ", file.name());
+    while (file = root.openNextFile()) {
+        Serial.printf("%s ", file.name());
+        LITTLEFS.remove(file.name());
+    }
+    Serial.println();
+
+    // restart
+    WiFi.disconnect(true);
+    delay(500);
+    ESP.restart();
+#endif
+}
+
+// push button
+void System::button_init(bool refresh) {
+    if (refresh) {
+        get_settings();
+    }
+
+    if (pbutton_gpio_) {
+        if (!myPButton_.init(pbutton_gpio_, HIGH)) {
+            LOG_INFO(F("External multi-functional button not detected"));
+        } else {
+            LOG_INFO(F("External multi-functional button enabled"));
+        }
+
+
+        myPButton_.onClick(BUTTON_Debounce, button_OnClick);
+        myPButton_.onDblClick(BUTTON_DblClickDelay, button_OnDblClick);
+        myPButton_.onLongPress(BUTTON_LongPressDelay, button_OnLongPress);
+        myPButton_.onVLongPress(BUTTON_VLongPressDelay, button_OnVLongPress);
+    }
 }
 
 // set the LED to on or off when in normal operating mode
-void System::led_init() {
-    EMSESP::webSettingsService.read([&](WebSettings & settings) {
-        hide_led_ = settings.hide_led;
-        led_gpio_ = settings.led_gpio;
-        if (led_gpio_) {
-            pinMode(led_gpio_, OUTPUT);                            // 0 means disabled
-            digitalWrite(led_gpio_, hide_led_ ? !LED_ON : LED_ON); // LED on, for ever
-        }
-    });
+void System::led_init(bool refresh) {
+    if (refresh) {
+        get_settings();
+    }
+
+    if (led_gpio_) {
+        pinMode(led_gpio_, OUTPUT);                            // 0 means disabled
+        digitalWrite(led_gpio_, hide_led_ ? !LED_ON : LED_ON); // LED on, for ever
+    }
 }
 
 // returns true if OTA is uploading
@@ -314,6 +310,7 @@ void System::upload_status(bool in_progress) {
 // checks system health and handles LED flashing wizardry
 void System::loop() {
 #ifndef EMSESP_STANDALONE
+    myPButton_.check(); // check button press
 
     if (syslog_enabled_) {
         syslog_.loop();
@@ -429,7 +426,57 @@ void System::set_led_speed(uint32_t speed) {
     led_monitor();
 }
 
-void System::init_network() {
+// initializes network
+void System::network_init() {
+    // check ethernet profile, if we're using exclusive Ethernet then disabled wifi and AP/captive portal
+    if (ethernet_profile_ == 0) {
+        return;
+    }
+
+    uint8_t          phy_addr;   // I²C-address of Ethernet PHY (0 or 1 for LAN8720, 31 for TLK110)
+    int              power;      // Pin# of the enable signal for the external crystal oscillator (-1 to disable for internal APLL source)
+    int              mdc;        // Pin# of the I²C clock signal for the Ethernet PHY
+    int              mdio;       // Pin# of the I²C IO signal for the Ethernet PHY
+    eth_phy_type_t   type;       // Type of the Ethernet PHY (LAN8720 or TLK110)
+    eth_clock_mode_t clock_mode; // ETH_CLOCK_GPIO0_IN or ETH_CLOCK_GPIO0_OUT, ETH_CLOCK_GPIO16_OUT, ETH_CLOCK_GPIO17_OUT for 50Hz inverted clock
+
+    if (ethernet_profile_ == 1) {
+        // LAN8720
+        phy_addr   = 0;
+        power      = -1;
+        mdc        = 23;
+        mdio       = 18;
+        type       = ETH_PHY_LAN8720;
+        clock_mode = ETH_CLOCK_GPIO0_IN;
+    } else if (ethernet_profile_ == 2) {
+        // TLK110
+        phy_addr   = 31;
+        power      = -1;
+        mdc        = 23;
+        mdio       = 18;
+        type       = ETH_PHY_TLK110;
+        clock_mode = ETH_CLOCK_GPIO0_IN;
+    }
+
+#ifndef EMSESP_STANDALONE
+    if (ETH.begin(phy_addr, power, mdc, mdio, type, clock_mode)) {
+        // disable ssid and AP
+        EMSESP::esp8266React.getNetworkSettingsService()->update(
+            [&](NetworkSettings & settings) {
+                settings.ssid == ""; // remove SSID
+                return StateUpdateResult::CHANGED;
+            },
+            "local");
+
+        EMSESP::esp8266React.getAPSettingsService()->update(
+            [&](APSettings & settings) {
+                settings.provisionMode = AP_MODE_NEVER;
+                return StateUpdateResult::CHANGED;
+            },
+            "local");
+    }
+#endif
+
     last_system_check_ = 0; // force the LED to go from fast flash to pulse
     send_heartbeat();
 }
@@ -465,6 +512,20 @@ void System::system_check() {
             }
         }
     }
+}
+
+// commands - takes static function pointers
+void System::commands_init() {
+    // these commands respond to the topic "system" and take a payload like {cmd:"", data:"", id:""}
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(pin), System::command_pin);
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(send), System::command_send);
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(publish), System::command_publish);
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(fetch), System::command_fetch);
+    Command::add_with_json(EMSdevice::DeviceType::SYSTEM, F_(info), System::command_info);
+    Command::add_with_json(EMSdevice::DeviceType::SYSTEM, F_(settings), System::command_settings);
+#if defined(EMSESP_TEST)
+    Command::add(EMSdevice::DeviceType::SYSTEM, F("test"), System::command_test);
+#endif
 }
 
 // flashes the LED
@@ -579,7 +640,7 @@ void System::show_system(uuid::console::Shell & shell) {
     shell.println();
 
     // show Ethernet
-    if (ethernet_connected()) {
+    if (ethernet_connected_) {
         shell.printfln(F("Ethernet: Connected"));
         shell.printfln(F("MAC address: %s"), ETH.macAddress().c_str());
         shell.printfln(F("Hostname: %s"), ETH.getHostname());
@@ -590,21 +651,18 @@ void System::show_system(uuid::console::Shell & shell) {
         shell.printfln(F("Ethernet: disconnected"));
     }
 
-    EMSESP::webSettingsService.read([&](WebSettings & settings) {
-        shell.println();
-
-        if (!settings.syslog_enabled) {
-            shell.printfln(F("Syslog: disabled"));
-        } else {
-            shell.printfln(F("Syslog:"));
-            shell.print(F(" "));
-            shell.printfln(F_(host_fmt), !settings.syslog_host.isEmpty() ? settings.syslog_host.c_str() : uuid::read_flash_string(F_(unset)).c_str());
-            shell.print(F(" "));
-            shell.printfln(F_(log_level_fmt), uuid::log::format_level_lowercase(static_cast<uuid::log::Level>(settings.syslog_level)));
-            shell.print(F(" "));
-            shell.printfln(F_(mark_interval_fmt), settings.syslog_mark_interval);
-        }
-    });
+    shell.println();
+    if (!syslog_enabled_) {
+        shell.printfln(F("Syslog: disabled"));
+    } else {
+        shell.printfln(F("Syslog:"));
+        shell.print(F(" "));
+        shell.printfln(F_(host_fmt), !syslog_host_.isEmpty() ? syslog_host_.c_str() : uuid::read_flash_string(F_(unset)).c_str());
+        shell.print(F(" "));
+        shell.printfln(F_(log_level_fmt), uuid::log::format_level_lowercase(static_cast<uuid::log::Level>(syslog_level_)));
+        shell.print(F(" "));
+        shell.printfln(F_(mark_interval_fmt), syslog_mark_interval_);
+    }
 
 #endif
 }
@@ -614,19 +672,19 @@ void System::console_commands(Shell & shell, unsigned int context) {
     EMSESPShell::commands->add_command(ShellContext::SYSTEM,
                                        CommandFlags::ADMIN,
                                        flash_string_vector{F_(restart)},
-                                       [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments __attribute__((unused))) { restart(); });
+                                       [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments __attribute__((unused))) { EMSESP::system_.restart(); });
 
     EMSESPShell::commands->add_command(ShellContext::SYSTEM,
                                        CommandFlags::ADMIN,
                                        flash_string_vector{F_(wifi), F_(reconnect)},
-                                       [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments __attribute__((unused))) { wifi_reconnect(); });
+                                       [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments __attribute__((unused))) { EMSESP::system_.wifi_reconnect(); });
 
     EMSESPShell::commands->add_command(ShellContext::SYSTEM, CommandFlags::ADMIN, flash_string_vector{F_(format)}, [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
         shell.enter_password(F_(password_prompt), [=](Shell & shell, bool completed, const std::string & password) {
             if (completed) {
                 EMSESP::esp8266React.getSecuritySettingsService()->read([&](SecuritySettings & securitySettings) {
                     if (securitySettings.jwtSecret.equals(password.c_str())) {
-                        format(shell);
+                        EMSESP::system_.format(shell);
                     } else {
                         shell.println(F("incorrect password"));
                     }
@@ -658,7 +716,7 @@ void System::console_commands(Shell & shell, unsigned int context) {
     });
 
     EMSESPShell::commands->add_command(ShellContext::SYSTEM, CommandFlags::USER, flash_string_vector{F_(show)}, [=](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
-        show_system(shell);
+        EMSESP::system_.show_system(shell);
         shell.println();
     });
 
@@ -725,7 +783,7 @@ void System::console_commands(Shell & shell, unsigned int context) {
     });
 
     EMSESPShell::commands->add_command(ShellContext::SYSTEM, CommandFlags::ADMIN, flash_string_vector{F_(show), F_(users)}, [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
-        System::show_users(shell);
+        EMSESP::system_.show_users(shell);
     });
 
     // enter the context
@@ -825,6 +883,7 @@ bool System::command_settings(const char * value, const int8_t id, JsonObject & 
         node["hide_led"]             = settings.hide_led;
         node["api_enabled"]          = settings.api_enabled;
         node["analog_enabled"]       = settings.analog_enabled;
+        node["pbutton_gpio"]         = settings.pbutton_gpio;
     });
 
     return true;
@@ -893,5 +952,6 @@ bool System::command_test(const char * value, const int8_t id) {
     return true;
 }
 #endif
+
 
 } // namespace emsesp

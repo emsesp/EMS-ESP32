@@ -118,6 +118,22 @@ function EMSESPSettingsControllerForm(props: EMSESPSettingsControllerFormProps) 
             />
             <br></br>
             <Typography variant="h6" color="primary" >
+                External Button
+            </Typography>
+            <TextValidator
+                validators={['required', 'isNumber', 'minNumber:0', 'maxNumber:40']}
+                errorMessages={['Button GPIO is required', "Must be a number", "Must be 0 or higher", "Max value is 40"]}
+                name="pbutton_gpio"
+                label="Button GPIO pin (0=none)"
+                fullWidth
+                variant="outlined"
+                value={data.pbutton_gpio}
+                type="number"
+                onChange={handleValueChange('pbutton_gpio')}
+                margin="normal"
+            />
+            <br></br>
+            <Typography variant="h6" color="primary" >
                 Dallas Sensor
             </Typography>
             <TextValidator
