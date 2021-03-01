@@ -8,9 +8,7 @@
 #include <DNSServer.h>
 #include <IPAddress.h>
 
-#include <uuid/common.h>
-
-#include "../../src/system.h" // proddy added
+#include <uuid/common.h> // proddy added for get_uptime()
 
 #define MANAGE_NETWORK_DELAY 10000
 

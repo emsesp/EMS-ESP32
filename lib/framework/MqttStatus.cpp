@@ -1,5 +1,7 @@
 #include <MqttStatus.h>
 
+#include "../../src/emsesp_stub.hpp" // proddy added
+
 MqttStatus::MqttStatus(AsyncWebServer * server, MqttSettingsService * mqttSettingsService, SecurityManager * securityManager)
     : _mqttSettingsService(mqttSettingsService) {
     server->on(MQTT_STATUS_SERVICE_PATH,

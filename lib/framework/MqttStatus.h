@@ -9,8 +9,6 @@
 #include <ESPAsyncTCP.h>
 #endif
 
-#include "../../src/mqtt.h" // proddy added
-
 #include <MqttSettingsService.h>
 #include <ArduinoJson.h>
 #include <AsyncJson.h>

@@ -1,5 +1,7 @@
 #include <APSettingsService.h>
 
+#include "../../src/emsesp_stub.hpp" // proddy added
+
 APSettingsService::APSettingsService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager)
     : _httpEndpoint(APSettings::read, APSettings::update, this, server, AP_SETTINGS_SERVICE_PATH, securityManager)
     , _fsPersistence(APSettings::read, APSettings::update, this, fs, AP_SETTINGS_FILE)
@@ -21,7 +23,7 @@ void APSettingsService::reconfigureAP() {
 
 void APSettingsService::loop() {
     // if we have an ETH connection, quit
-    if (emsesp::System::ethernet_connected()) {
+    if (emsesp::EMSESP::system_.ethernet_connected()) {
         return;
     }
     unsigned long currentMillis = uuid::get_uptime();
@@ -51,8 +53,8 @@ void APSettingsService::startAP() {
     WiFi.softAP(_state.ssid.c_str(), _state.password.c_str());
     if (!_dnsServer) {
         IPAddress apIp = WiFi.softAPIP();
-        Serial.print(F("Starting captive portal on "));
-        Serial.println(apIp);
+        // Serial.print(F("Starting captive portal on "));
+        // Serial.println(apIp);
         _dnsServer = new DNSServer;
         _dnsServer->start(DNS_PORT, "*", apIp);
     }
@@ -60,7 +62,7 @@ void APSettingsService::startAP() {
 
 void APSettingsService::stopAP() {
     if (_dnsServer) {
-        Serial.println(F("Stopping captive portal"));
+        // Serial.println(F("Stopping captive portal"));
         _dnsServer->stop();
         delete _dnsServer;
         _dnsServer = nullptr;

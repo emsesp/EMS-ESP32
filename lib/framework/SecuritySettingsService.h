@@ -6,8 +6,6 @@
 #include <HttpEndpoint.h>
 #include <FSPersistence.h>
 
-#include "../../src/version.h" // added by proddy
-
 #ifndef FACTORY_ADMIN_USERNAME
 #define FACTORY_ADMIN_USERNAME "admin"
 #endif

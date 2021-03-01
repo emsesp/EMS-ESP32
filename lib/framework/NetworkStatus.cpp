@@ -1,5 +1,7 @@
 #include <NetworkStatus.h>
 
+#include "../../src/emsesp_stub.hpp" // proddy added
+
 NetworkStatus::NetworkStatus(AsyncWebServer * server, SecurityManager * securityManager) {
     server->on(NETWORK_STATUS_SERVICE_PATH, HTTP_GET, securityManager->wrapRequest(std::bind(&NetworkStatus::networkStatus, this, std::placeholders::_1), AuthenticationPredicates::IS_AUTHENTICATED));
 }
@@ -8,7 +10,7 @@ void NetworkStatus::networkStatus(AsyncWebServerRequest * request) {
     AsyncJsonResponse * response = new AsyncJsonResponse(false, MAX_NETWORK_STATUS_SIZE);
     JsonObject          root     = response->getRoot();
 
-    bool        ethernet_connected = emsesp::System::ethernet_connected();
+    bool        ethernet_connected = emsesp::EMSESP::system_.ethernet_connected();
     wl_status_t wifi_status        = WiFi.status();
 
     // see if Ethernet is connected

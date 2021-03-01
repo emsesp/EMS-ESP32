@@ -4,7 +4,7 @@
 #include <WiFi.h>
 #include <AsyncTCP.h>
 
-#include "../../src/system.h" // proddy added
+#include <ETH.h>
 
 #include <ArduinoJson.h>
 #include <AsyncJson.h>

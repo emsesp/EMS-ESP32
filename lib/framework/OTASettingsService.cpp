@@ -1,5 +1,7 @@
 #include <OTASettingsService.h>
 
+#include "../../src/emsesp_stub.hpp" // proddy added
+
 OTASettingsService::OTASettingsService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager)
     : _httpEndpoint(OTASettings::read, OTASettings::update, this, server, OTA_SETTINGS_SERVICE_PATH, securityManager)
     , _fsPersistence(OTASettings::read, OTASettings::update, this, fs, OTA_SETTINGS_FILE)
@@ -39,11 +41,11 @@ void OTASettingsService::configureArduinoOTA() {
 
         _arduinoOTA->onStart([]() {
             // Serial.println(F("Starting"));
-            emsesp::System::upload_status(true);
+            emsesp::EMSESP::system_.upload_status(true);
         });
         _arduinoOTA->onEnd([]() {
             // Serial.println(F("\r\nEnd"));
-            emsesp::System::upload_status(false);
+            emsesp::EMSESP::system_.upload_status(false);
         });
 
         // _arduinoOTA->onProgress([](unsigned int progress, unsigned int total) {

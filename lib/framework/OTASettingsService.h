@@ -13,8 +13,6 @@
 #include <ArduinoOTA.h>
 #include <WiFiUdp.h>
 
-#include "../../src/system.h" // proddy added
-
 #ifndef FACTORY_OTA_PORT
 #define FACTORY_OTA_PORT 8266
 #endif

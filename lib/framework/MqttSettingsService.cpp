@@ -1,13 +1,6 @@
 #include <MqttSettingsService.h>
 
-// forward declarators
-namespace emsesp {
-class EMSESP {
-  public:
-    static Mqtt         mqtt_;
-    static DallasSensor dallassensor_;
-};
-} // namespace emsesp
+#include "../../src/emsesp_stub.hpp" // proddy added
 
 /**
  * Retains a copy of the cstr provided in the pointer provided using dynamic allocation.

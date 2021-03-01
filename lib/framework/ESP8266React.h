@@ -5,7 +5,6 @@
 
 #include <AsyncTCP.h>
 #include <WiFi.h>
-#include <ETH.h>
 
 #include <FeaturesService.h>
 #include <APSettingsService.h>
@@ -25,9 +24,7 @@
 #include <NetworkSettingsService.h>
 #include <NetworkStatus.h>
 
-#ifdef PROGMEM_WWW
 #include <WWWData.h>
-#endif
 
 class ESP8266React {
   public:
