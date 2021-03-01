@@ -10,6 +10,7 @@ See https://github.com/proddy/EMS-ESP/issues/632
 - add sending devices that are not listed to 0x07
 - extra MQTT boolean option for "ON" and "OFF"
 - Support for chunked MQTT payloads to allow large data sets > 2kb
+- External Button support (#708) for resetting to factory defaults and other actions
 
 ### Fixed
 - telegrams matched to masterthermostat 0x18
