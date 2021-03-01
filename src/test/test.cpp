@@ -188,7 +188,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
     Mqtt::dallas_format(1);
     Mqtt::ha_climate_format(1);
     EMSESP::rxservice_.ems_mask(EMSbus::EMS_MASK_BUDERUS);
-    emsesp::EMSESP::watch(EMSESP::Watch::WATCH_RAW); // raw
+    EMSESP::watch(EMSESP::Watch::WATCH_RAW); // raw
 
     std::string command(20, '\0');
     if ((cmd.empty()) || (cmd == "default")) {

@@ -95,8 +95,8 @@ class DallasSensor {
     static constexpr uint8_t CMD_CONVERT_TEMP    = 0x44;
     static constexpr uint8_t CMD_READ_SCRATCHPAD = 0xBE;
 
-    static constexpr int8_t  SCAN_START  = -3;
-    static constexpr int8_t  SCAN_MAX    = 5;
+    static constexpr int8_t SCAN_START = -3;
+    static constexpr int8_t SCAN_MAX   = 5;
 
     static uuid::log::Logger logger_;
 

@@ -108,14 +108,14 @@ void Shower::send_mqtt_stat(bool state) {
         StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> doc;
         doc["name"]    = FJSON("Shower Active");
         doc["uniq_id"] = FJSON("shower_active");
-        doc["~"]       = System::hostname(); // default ems-esp
+        doc["~"]       = EMSESP::system_.hostname(); // default ems-esp
         doc["stat_t"]  = FJSON("~/shower_active");
         JsonObject dev = doc.createNestedObject("dev");
         JsonArray  ids = dev.createNestedArray("ids");
         ids.add("ems-esp");
 
         char topic[100];
-        snprintf_P(topic, sizeof(topic), PSTR("homeassistant/binary_sensor/%s/shower_active/config"), System::hostname().c_str());
+        snprintf_P(topic, sizeof(topic), PSTR("homeassistant/binary_sensor/%s/shower_active/config"), EMSESP::system_.hostname().c_str());
         Mqtt::publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
     }
 }

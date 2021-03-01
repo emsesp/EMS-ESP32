@@ -15,7 +15,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 #ifndef EMSESP_EMSESP_H
 #define EMSESP_EMSESP_H
 
@@ -35,6 +34,7 @@
 #endif
 
 #include <ESP8266React.h>
+
 #include "WebStatusService.h"
 #include "WebDevicesService.h"
 #include "WebSettingsService.h"
@@ -50,8 +50,7 @@
 #include "shower.h"
 #include "roomcontrol.h"
 #include "command.h"
-
-#include "devices/boiler.h"
+#include "version.h"
 
 #define WATCH_ID_NONE 0 // no watch id set
 

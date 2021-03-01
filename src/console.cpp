@@ -83,11 +83,11 @@ void EMSESPShell::display_banner() {
     add_console_commands();
 
     // turn off watch, unless is test mode
-    emsesp::EMSESP::watch_id(WATCH_ID_NONE);
+    EMSESP::watch_id(WATCH_ID_NONE);
 #if defined(EMSESP_STANDALONE)
-    emsesp::EMSESP::watch(EMSESP::WATCH_ON);
+    EMSESP::watch(EMSESP::WATCH_ON);
 #else
-    emsesp::EMSESP::watch(EMSESP::WATCH_OFF);
+    EMSESP::watch(EMSESP::WATCH_OFF);
 #endif
 }
 
@@ -266,18 +266,18 @@ void EMSESPShell::add_console_commands() {
                               if (!arguments.empty()) {
                                   // get raw/pretty
                                   if (arguments[0] == read_flash_string(F_(raw))) {
-                                      emsesp::EMSESP::watch(EMSESP::WATCH_RAW); // raw
+                                      EMSESP::watch(EMSESP::WATCH_RAW); // raw
                                   } else if (arguments[0] == read_flash_string(F_(on))) {
-                                      emsesp::EMSESP::watch(EMSESP::WATCH_ON); // on
+                                      EMSESP::watch(EMSESP::WATCH_ON); // on
                                   } else if (arguments[0] == read_flash_string(F_(off))) {
-                                      emsesp::EMSESP::watch(EMSESP::WATCH_OFF); // off
+                                      EMSESP::watch(EMSESP::WATCH_OFF); // off
                                   } else if (arguments[0] == read_flash_string(F_(unknown))) {
-                                      emsesp::EMSESP::watch(EMSESP::WATCH_UNKNOWN); // unknown
+                                      EMSESP::watch(EMSESP::WATCH_UNKNOWN); // unknown
                                       watch_id = WATCH_ID_NONE;
                                   } else {
                                       watch_id = Helpers::hextoint(arguments[0].c_str());
-                                      if (watch_id && ((emsesp::EMSESP::watch() == EMSESP::WATCH_OFF) || (emsesp::EMSESP::watch() == EMSESP::WATCH_UNKNOWN))) {
-                                          emsesp::EMSESP::watch(EMSESP::WATCH_ON); // on
+                                      if (watch_id && ((EMSESP::watch() == EMSESP::WATCH_OFF) || (EMSESP::watch() == EMSESP::WATCH_UNKNOWN))) {
+                                          EMSESP::watch(EMSESP::WATCH_ON); // on
                                       } else if (!watch_id) {
                                           return;
                                       }
@@ -288,10 +288,10 @@ void EMSESPShell::add_console_commands() {
                                       watch_id = Helpers::hextoint(arguments[1].c_str());
                                   }
 
-                                  emsesp::EMSESP::watch_id(watch_id);
+                                  EMSESP::watch_id(watch_id);
                               }
 
-                              uint8_t watch = emsesp::EMSESP::watch();
+                              uint8_t watch = EMSESP::watch();
                               if (watch == EMSESP::WATCH_OFF) {
                                   shell.printfln(F("Watching telegrams is off"));
                                   return;
@@ -311,7 +311,7 @@ void EMSESPShell::add_console_commands() {
                                   shell.printfln(F("Watching unknown telegrams")); // WATCH_UNKNOWN
                               }
 
-                              watch_id = emsesp::EMSESP::watch_id();
+                              watch_id = EMSESP::watch_id();
                               if (watch_id > 0x80) {
                                   shell.printfln(F("Filtering only telegrams that match a telegram type of 0x%02X"), watch_id);
                               } else if (watch_id != WATCH_ID_NONE) {
@@ -637,7 +637,7 @@ void Console::start() {
 #endif
 
     // turn watch off in case it was still set in the last session
-    // emsesp::EMSESP::watch(EMSESP::WATCH_OFF);
+    // EMSESP::watch(EMSESP::WATCH_OFF);
 }
 
 // handles telnet sync and logging to console

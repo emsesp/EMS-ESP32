@@ -22,9 +22,6 @@ def buildWeb():
         wwwPath = Path("../data/www")
         if wwwPath.exists() and wwwPath.is_dir():
             rmtree(wwwPath)        
-        if not flagExists("PROGMEM_WWW"):
-            print("Copying interface to data directory")
-            copytree(buildPath, wwwPath)
     finally:
         chdir("..")
 
