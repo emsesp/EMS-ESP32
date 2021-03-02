@@ -10,7 +10,7 @@ PubAckOutPacket::PubAckOutPacket(PendingAck pendingAck) {
   _packetId = pendingAck.packetId;
   _data[2] = pendingAck.packetId >> 8;
   _data[3] = pendingAck.packetId & 0xFF;
-  _released = false;
+  // _released = false;
   if (packetType() == AsyncMqttClientInternals::PacketType.PUBREL ||
       packetType() == AsyncMqttClientInternals::PacketType.PUBREC) {
     _released = false;
