@@ -34,7 +34,7 @@ class EMSESPHelp extends Component {
                             <CommentIcon />
                         </ListItemAvatar>
                         <ListItemText>
-                            For live community chat join our <Link href="https://discord.gg/rqegzSrK" color="primary">{'Discord'}&nbsp;server</Link>
+                            For live community chat join our <Link href="https://discord.gg/3J3GgnzpyT" color="primary">{'Discord'}&nbsp;server</Link>
                         </ListItemText>
                     </ListItem>
 
