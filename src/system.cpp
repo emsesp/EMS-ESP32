@@ -236,24 +236,15 @@ void System::button_OnLongPress(PButton & b) {
 // button indefinite press
 void System::button_OnVLongPress(PButton & b) {
     LOG_DEBUG(F("Button pressed - very long press"));
+#ifndef EMSESP_STANDALONE
     LOG_WARNING(F("Performing factory reset..."));
     EMSESP::console_.loop();
 
-#ifndef EMSESP_STANDALONE
-    // remove all files under config
-    File root = LITTLEFS.open(FS_CONFIG_DIRECTORY);
-    File file;
-    Serial.printf("Removing files: ", file.name());
-    while (file = root.openNextFile()) {
-        Serial.printf("%s ", file.name());
-        LITTLEFS.remove(file.name());
-    }
-    Serial.println();
+#ifdef EMSESP_TEST
+    Test::listDir(LITTLEFS, FS_CONFIG_DIRECTORY, 3);
+#endif
 
-    // restart
-    WiFi.disconnect(true);
-    delay(500);
-    ESP.restart();
+    EMSESP::esp8266React.factoryReset();
 #endif
 }
 
@@ -265,16 +256,16 @@ void System::button_init(bool refresh) {
 
     // Allow 0 for Boot-button on NodeMCU-32s?
     // if (pbutton_gpio_) {
-        if (!myPButton_.init(pbutton_gpio_, HIGH)) {
-            LOG_INFO(F("External multi-functional button not detected"));
-        } else {
-            LOG_INFO(F("External multi-functional button enabled"));
-        }
+    if (!myPButton_.init(pbutton_gpio_, HIGH)) {
+        LOG_INFO(F("External multi-functional button not detected"));
+    } else {
+        LOG_INFO(F("External multi-functional button enabled"));
+    }
 
-        myPButton_.onClick(BUTTON_Debounce, button_OnClick);
-        myPButton_.onDblClick(BUTTON_DblClickDelay, button_OnDblClick);
-        myPButton_.onLongPress(BUTTON_LongPressDelay, button_OnLongPress);
-        myPButton_.onVLongPress(BUTTON_VLongPressDelay, button_OnVLongPress);
+    myPButton_.onClick(BUTTON_Debounce, button_OnClick);
+    myPButton_.onDblClick(BUTTON_DblClickDelay, button_OnDblClick);
+    myPButton_.onLongPress(BUTTON_LongPressDelay, button_OnLongPress);
+    myPButton_.onVLongPress(BUTTON_VLongPressDelay, button_OnVLongPress);
     // }
 }
 

@@ -2,16 +2,14 @@
 
 using namespace std::placeholders;
 
-FactoryResetService::FactoryResetService(AsyncWebServer* server, FS* fs, SecurityManager* securityManager) : fs(fs) {
-  server->on(FACTORY_RESET_SERVICE_PATH,
-             HTTP_POST,
-             securityManager->wrapRequest(std::bind(&FactoryResetService::handleRequest, this, _1),
-                                          AuthenticationPredicates::IS_ADMIN));
+FactoryResetService::FactoryResetService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager)
+    : fs(fs) {
+    server->on(FACTORY_RESET_SERVICE_PATH, HTTP_POST, securityManager->wrapRequest(std::bind(&FactoryResetService::handleRequest, this, _1), AuthenticationPredicates::IS_ADMIN));
 }
 
-void FactoryResetService::handleRequest(AsyncWebServerRequest* request) {
-  request->onDisconnect(std::bind(&FactoryResetService::factoryReset, this));
-  request->send(200);
+void FactoryResetService::handleRequest(AsyncWebServerRequest * request) {
+    request->onDisconnect(std::bind(&FactoryResetService::factoryReset, this));
+    request->send(200);
 }
 
 /**
@@ -19,19 +17,25 @@ void FactoryResetService::handleRequest(AsyncWebServerRequest* request) {
  */
 void FactoryResetService::factoryReset() {
 #ifdef ESP32
-  File root = fs->open(FS_CONFIG_DIRECTORY);
-  File file;
-  while (file = root.openNextFile()) {
-    fs->remove(file.name());
-  }
+    /* 
+   * Based on LITTLEFS. Modified by proddy
+   * Could be replaced with fs.rmdir(FS_CONFIG_DIRECTORY) in IDF 4.2
+   */
+    File root = fs->open(FS_CONFIG_DIRECTORY);
+    File file;
+    while (file = root.openNextFile()) {
+        char * pathStr = strdup(file.name());
+        file.close();
+        fs->remove(pathStr);
+    }
 #elif defined(ESP8266)
-  Dir configDirectory = fs->openDir(FS_CONFIG_DIRECTORY);
-  while (configDirectory.next()) {
-    String path = FS_CONFIG_DIRECTORY;
-    path.concat("/");
-    path.concat(configDirectory.fileName());
-    fs->remove(path);
-  }
+    Dir configDirectory = fs->openDir(FS_CONFIG_DIRECTORY);
+    while (configDirectory.next()) {
+        String path = FS_CONFIG_DIRECTORY;
+        path.concat("/");
+        path.concat(configDirectory.fileName());
+        fs->remove(path);
+    }
 #endif
-  RestartService::restartNow();
+    RestartService::restartNow();
 }

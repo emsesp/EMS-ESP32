@@ -978,6 +978,7 @@ void Test::add_device(uint8_t device_id, uint8_t product_id) {
 
 #ifndef EMSESP_STANDALONE
 void Test::listDir(fs::FS & fs, const char * dirname, uint8_t levels) {
+    Serial.println();
     Serial.printf("Listing directory: %s\r\n", dirname);
 
     File root = fs.open(dirname);
