@@ -490,8 +490,8 @@ void Boiler::process_UBADHWStatus(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram->read_value(wWCurTemp_, 1));
     has_update(telegram->read_value(wWCurTemp2_, 3));
 
-    has_update(telegram->read_value(wWWorkM_, 17, 3));  // force to 3 bytes
-    has_update(telegram->read_value(wWStarts_, 14, 3)); // force to 3 bytes
+    has_update(telegram->read_value(wWWorkM_, 14, 3));  // force to 3 bytes
+    has_update(telegram->read_value(wWStarts_, 17, 3)); // force to 3 bytes
 
     has_update(telegram->read_bitvalue(wWOneTime_, 12, 2));
     has_update(telegram->read_bitvalue(wWDisinfecting_, 12, 3));
