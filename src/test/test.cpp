@@ -622,11 +622,11 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
 
         // TX queue example - Me -> Thermostat, (0x91), telegram: 0B 17 91 05 44 45 46 47 (#data=4)
         uint8_t t11[] = {0x44, 0x45, 0x46, 0x47};
-        EMSESP::txservice_.add(Telegram::Operation::TX_RAW, 0x17, 0x91, 0x05, t11, sizeof(t11));
+        EMSESP::txservice_.add(Telegram::Operation::TX_RAW, 0x17, 0x91, 0x05, t11, sizeof(t11), 0);
 
         // TX - raw example test
         uint8_t t12[] = {0x10, 0x08, 0x63, 0x04, 0x64};
-        EMSESP::txservice_.add(Telegram::Operation::TX_RAW, t12, sizeof(t12));
+        EMSESP::txservice_.add(Telegram::Operation::TX_RAW, t12, sizeof(t12), 0);
 
         // TX - sending raw string
         EMSESP::txservice_.send_raw("10 08 63 03 64 65 66");
@@ -640,7 +640,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
 
         // TX - send EMS+
         const uint8_t t13[] = {0x90, 0x0B, 0xFF, 00, 01, 0xBA, 00, 0x2E, 0x2A, 0x26, 0x1E, 0x03, 00, 0xFF, 0xFF, 05, 0x2A, 01, 0xE1, 0x20, 0x01, 0x0F, 05, 0x2A};
-        EMSESP::txservice_.add(Telegram::Operation::TX_RAW, t13, sizeof(t13));
+        EMSESP::txservice_.add(Telegram::Operation::TX_RAW, t13, sizeof(t13), 0);
 
         // EMS+ Junkers read request
         EMSESP::send_read_request(0x16F, 0x10);
@@ -658,7 +658,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
 
         // simulate sending a read request
         // uint8_t t16[] = {0x44, 0x45, 0x46, 0x47}; // Me -> Thermostat, (0x91), telegram: 0B 17 91 05 44 45 46 47 (#data=4)
-        // EMSESP::txservice_.add(Telegram::Operation::TX_RAW, 0x17, 0x91, 0x05, t16, sizeof(t16));
+        // EMSESP::txservice_.add(Telegram::Operation::TX_RAW, 0x17, 0x91, 0x05, t16, sizeof(t16), 0);
         EMSESP::send_read_request(0x91, 0x17);
         // EMSESP::txservice_.show_tx_queue();
 

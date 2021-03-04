@@ -364,17 +364,13 @@ void EMSESP::publish_all(bool force) {
 
 // on command "publish HA" loop and wait between devices for publishing all sensors
 void EMSESP::publish_all_loop() {
-    static uint32_t last = 0;
     if (!Mqtt::connected() || !publish_all_idx_) {
         return;
     }
-
-    // every HA-sensor takes 20 ms, wait ~2 sec to finish (boiler has ~70 sensors)
-    if ((uuid::get_uptime() - last < 2000)) {
+    // wait for free queue before sending next message, v3 queues HA-messages
+    if (!Mqtt::is_empty()) {
         return;
     }
-
-    last = uuid::get_uptime();
     switch (publish_all_idx_++) {
     case 1:
         publish_device_values(EMSdevice::DeviceType::BOILER);
@@ -400,7 +396,6 @@ void EMSESP::publish_all_loop() {
     default:
         // all finished
         publish_all_idx_ = 0;
-        last             = 0;
     }
 }
 
@@ -727,7 +722,8 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
                 found       = emsdevice->handle_telegram(telegram);
                 // if we correctly processes the telegram follow up with sending it via MQTT if needed
                 if (found && Mqtt::connected()) {
-                    if ((mqtt_.get_publish_onchange(emsdevice->device_type()) && emsdevice->has_update()) || telegram->type_id == publish_id_) {
+                    if ((mqtt_.get_publish_onchange(emsdevice->device_type()) && emsdevice->has_update())
+                         || (telegram->type_id == publish_id_ && telegram->dest == txservice_.ems_bus_id())) {
                         if (telegram->type_id == publish_id_) {
                             publish_id_ = 0;
                         }
@@ -911,9 +907,7 @@ void EMSESP::send_read_request(const uint16_t type_id, const uint8_t dest) {
 
 // sends write request
 void EMSESP::send_write_request(const uint16_t type_id, const uint8_t dest, const uint8_t offset, uint8_t * message_data, const uint8_t message_length, const uint16_t validate_typeid) {
-    txservice_.add(Telegram::Operation::TX_WRITE, dest, type_id, offset, message_data, message_length, true);
-
-    txservice_.set_post_send_query(validate_typeid); // store which type_id to send Tx read after a write
+    txservice_.add(Telegram::Operation::TX_WRITE, dest, type_id, offset, message_data, message_length, validate_typeid, true);
 }
 
 void EMSESP::send_write_request(const uint16_t type_id, const uint8_t dest, const uint8_t offset, const uint8_t value) {
