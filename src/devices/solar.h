@@ -44,7 +44,7 @@ class Solar : public EMSdevice {
     uint32_t energyLastHour_;
     uint32_t energyToday_;
     uint32_t energyTotal_;
-    uint32_t pumpWorkMin_; // Total solar pump operating time
+    uint32_t pumpWorkTime_; // Total solar pump operating time
     uint8_t  tankHeated_;
     uint8_t  collectorShutdown_; // Collector shutdown on/off
 
@@ -60,9 +60,9 @@ class Solar : public EMSdevice {
     uint8_t solarIsEnabled_;     // System enable, 00=no
 
     // telegram 0x035A
-    uint8_t collectorTempMax_;     // maximum allowable temperature for collector
-    uint8_t tank1MaxTempCurrent_;  // Current value for max tank temp
-    uint8_t collectorTempMin_;     // minimum allowable temperature for collector
+    uint8_t collectorMaxTemp_;     // maximum allowed collectorTemp array 1
+    uint8_t tankBottomMaxTemp_;    // Current value for max tank temp
+    uint8_t collectorMinTemp_;     // minimum allowed collectorTemp array 1
     uint8_t solarPumpMode_;        // 00=off, 01=PWM, 02=10V
     uint8_t solarPumpMinRPM_;      // minimum RPM setting, *5 %
     uint8_t solarPumpTurnoffDiff_; // solar pump turnoff collector/tank diff
@@ -102,7 +102,7 @@ class Solar : public EMSdevice {
     void process_ISM1Set(std::shared_ptr<const Telegram> telegram);
 
 
-    bool set_SM100Tank1MaxTemp(const char * value, const int8_t id);
+    bool set_SM100TankBottomMaxTemp(const char * value, const int8_t id);
 };
 
 } // namespace emsesp

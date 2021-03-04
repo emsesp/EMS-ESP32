@@ -35,7 +35,7 @@ Switch::Switch(uint8_t device_type, uint8_t device_id, uint8_t product_id, const
     register_telegram_type(0x1E, F("WM10TempMessage"), false, [&](std::shared_ptr<const Telegram> t) { process_WM10TempMessage(t); });
 
     register_device_value(TAG_NONE, &activated_, DeviceValueType::BOOL, nullptr, F("activated"), F("Activated"));
-    register_device_value(TAG_NONE, &flowTemp_, DeviceValueType::USHORT, FL_(div10), F("flowTemp"), F("Current flow temperature"), DeviceValueUOM::DEGREES);
+    register_device_value(TAG_NONE, &flowTempHc_, DeviceValueType::USHORT, FL_(div10), F("flowTempHc"), F("Flow temperature in assigned hc (TC1)"), DeviceValueUOM::DEGREES);
     register_device_value(TAG_NONE, &status_, DeviceValueType::INT, nullptr, F("status"), F("Status"));
 
     register_device_value(TAG_NONE, &id_, DeviceValueType::UINT, nullptr, F("id"), nullptr); // empty full name to prevent being shown in web or console
@@ -45,7 +45,7 @@ Switch::Switch(uint8_t device_type, uint8_t device_id, uint8_t product_id, const
 // publish HA config
 bool Switch::publish_ha_config() {
     // if we don't have valid values don't add it ever again
-    if (!Helpers::hasValue(flowTemp_)) {
+    if (!Helpers::hasValue(flowTempHc_)) {
         return false;
     }
 
@@ -82,7 +82,7 @@ void Switch::process_WM10SetMessage(std::shared_ptr<const Telegram> telegram) {
 // message 0x9C holds flowtemp and unknown status value
 // Switch(0x11) -> All(0x00), ?(0x9C), data: 01 BA 00 01 00
 void Switch::process_WM10MonitorMessage(std::shared_ptr<const Telegram> telegram) {
-    has_update(telegram->read_value(flowTemp_, 0)); // is * 10
+    has_update(telegram->read_value(flowTempHc_, 0)); // is * 10
     has_update(telegram->read_value(status_, 2));
     // has_update(telegram->read_value(status2_, 3)); // unknown
 }
@@ -90,7 +90,7 @@ void Switch::process_WM10MonitorMessage(std::shared_ptr<const Telegram> telegram
 // message 0x1E flow temperature, same as in 9C, published often, republished also by boiler UBAFast 0x18
 // Switch(0x11) -> Boiler(0x08), ?(0x1E), data: 01 BA
 void Switch::process_WM10TempMessage(std::shared_ptr<const Telegram> telegram) {
-    has_update(telegram->read_value(flowTemp_, 0)); // is * 10
+    has_update(telegram->read_value(flowTempHc_, 0)); // is * 10
 }
 
 } // namespace emsesp

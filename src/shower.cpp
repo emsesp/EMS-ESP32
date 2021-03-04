@@ -108,7 +108,7 @@ void Shower::send_mqtt_stat(bool state) {
         StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> doc;
         doc["name"]    = FJSON("Shower Active");
         doc["uniq_id"] = FJSON("shower_active");
-        doc["~"]       = EMSESP::system_.hostname(); // default ems-esp
+        doc["~"]       = Mqtt::base(); // default ems-esp
         doc["stat_t"]  = FJSON("~/shower_active");
         JsonObject dev = doc.createNestedObject("dev");
         JsonArray  ids = dev.createNestedArray("ids");
@@ -152,11 +152,7 @@ void Shower::publish_values() {
 
     // only publish shower duration if there is a value
     if (duration_ > SHOWER_MIN_DURATION) {
-        char buffer[16] = {0};
-        strlcpy(s, Helpers::itoa(buffer, (uint8_t)((duration_ / (1000 * 60)) % 60), 10), 50);
-        strlcat(s, " minutes and ", 50);
-        strlcat(s, Helpers::itoa(buffer, (uint8_t)((duration_ / 1000) % 60), 10), 50);
-        strlcat(s, " seconds", 50);
+        snprintf_P(s, 50, PSTR("%d minutes and %d seconds"), (uint8_t)(duration_ / 60000), (uint8_t)((duration_ / 1000) % 60));
         doc["duration"] = s;
     }
 

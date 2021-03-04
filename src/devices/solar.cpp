@@ -51,7 +51,7 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
             register_telegram_type(0x038E, F("SM100Energy"), true, [&](std::shared_ptr<const Telegram> t) { process_SM100Energy(t); });
             register_telegram_type(0x0391, F("SM100Time"), true, [&](std::shared_ptr<const Telegram> t) { process_SM100Time(t); });
 
-            register_mqtt_cmd(F("SM100Tank1MaxTemp"), [&](const char * value, const int8_t id) { return set_SM100Tank1MaxTemp(value, id); });
+            register_mqtt_cmd(F("SM100TankBottomMaxTemp"), [&](const char * value, const int8_t id) { return set_SM100TankBottomMaxTemp(value, id); });
         }
     }
 
@@ -72,20 +72,20 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
     id_ = product_id;
 
     register_device_value(TAG_NONE, &collectorTemp_, DeviceValueType::SHORT, FL_(div10), F("collectorTemp"), F("Collector temperature (TS1)"), DeviceValueUOM::DEGREES);
-    register_device_value(TAG_NONE, &tankBottomTemp_, DeviceValueType::SHORT, FL_(div10), F("tankBottomTemp"), F("Tank Bottom temperature (TS2)"), DeviceValueUOM::DEGREES);
-    register_device_value(TAG_NONE, &tankBottomTemp2_, DeviceValueType::SHORT, FL_(div10), F("tankBottomTemp2"), F("Tank Bottom temperature (TS5)"), DeviceValueUOM::DEGREES);
+    register_device_value(TAG_NONE, &tankBottomTemp_, DeviceValueType::SHORT, FL_(div10), F("tankBottomTemp"), F("Tank bottom temperature (TS2)"), DeviceValueUOM::DEGREES);
+    register_device_value(TAG_NONE, &tankBottomTemp2_, DeviceValueType::SHORT, FL_(div10), F("tank2BottomTemp"), F("Second tank bottom temperature (TS5)"), DeviceValueUOM::DEGREES);
     register_device_value(TAG_NONE, &heatExchangerTemp_, DeviceValueType::SHORT, FL_(div10), F("heatExchangerTemp"), F("Heat exchanger temperature (TS6)"), DeviceValueUOM::DEGREES);
 
-    register_device_value(TAG_NONE, &tank1MaxTempCurrent_, DeviceValueType::UINT, nullptr, F("tank1MaxTempCurrent"), F("Maximum Tank temperature"));
-    register_device_value(TAG_NONE, &solarPumpModulation_, DeviceValueType::UINT, nullptr, F("solarPumpModulation"), F("Solar pump modulation (PS1)"), DeviceValueUOM::PERCENT);
+    register_device_value(TAG_NONE, &tankBottomMaxTemp_, DeviceValueType::UINT, nullptr, F("tank1MaxTempCurrent"), F("Maximum tank temperature"), DeviceValueUOM::DEGREES);
+    register_device_value(TAG_NONE, &solarPumpModulation_, DeviceValueType::UINT, nullptr, F("solarPumpModulation"), F("Pump modulation (PS1)"), DeviceValueUOM::PERCENT);
     register_device_value(TAG_NONE, &cylinderPumpModulation_, DeviceValueType::UINT, nullptr, F("cylinderPumpModulation"), F("Cylinder pump modulation (PS5)"), DeviceValueUOM::PERCENT);
 
-    register_device_value(TAG_NONE, &solarPump_, DeviceValueType::BOOL, nullptr, F("solarPump"), F("Solar pump (PS1) active"));
+    register_device_value(TAG_NONE, &solarPump_, DeviceValueType::BOOL, nullptr, F("solarPump"), F("Pump (PS1)"), DeviceValueUOM::PUMP);
     register_device_value(TAG_NONE, &valveStatus_, DeviceValueType::BOOL, nullptr, F("valveStatus"), F("Valve status"));
     register_device_value(TAG_NONE, &tankHeated_, DeviceValueType::BOOL, nullptr, F("tankHeated"), F("Tank heated"));
     register_device_value(TAG_NONE, &collectorShutdown_, DeviceValueType::BOOL, nullptr, F("collectorShutdown"), F("Collector shutdown"));
 
-    register_device_value(TAG_NONE, &pumpWorkMin_, DeviceValueType::TIME, nullptr, F("pumpWorkMin"), F("Pump working time"), DeviceValueUOM::MINUTES);
+    register_device_value(TAG_NONE, &pumpWorkTime_, DeviceValueType::TIME, nullptr, F("pumpWorkTime"), F("Pump working time"), DeviceValueUOM::MINUTES);
 
     register_device_value(TAG_NONE, &energyLastHour_, DeviceValueType::ULONG, FL_(div10), F("energyLastHour"), F("Energy last hour"), DeviceValueUOM::WH);
     register_device_value(TAG_NONE, &energyTotal_, DeviceValueType::ULONG, FL_(div10), F("energyTotal"), F("Energy total"), DeviceValueUOM::KWH);
@@ -124,7 +124,7 @@ void Solar::process_SM10Monitor(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram->read_value(tankBottomTemp_, 5));      // tank bottom temp from SM10, is *10
     has_update(telegram->read_value(solarPumpModulation_, 4)); // modulation solar pump
     has_update(telegram->read_bitvalue(solarPump_, 7, 1));
-    has_update(telegram->read_value(pumpWorkMin_, 8, 3));
+    has_update(telegram->read_value(pumpWorkTime_, 8, 3));
 }
 
 /*
@@ -144,9 +144,9 @@ void Solar::process_SM100SystemConfig(std::shared_ptr<const Telegram> telegram) 
  * e.g. B0 0B FF 00 02 5A 64 05 00 58 14 01 01 32 64 00 00 00 5A 0C
  */
 void Solar::process_SM100SolarCircuitConfig(std::shared_ptr<const Telegram> telegram) {
-    has_update(telegram->read_value(collectorTempMax_, 0, 1));
-    has_update(telegram->read_value(tank1MaxTempCurrent_, 3, 1));
-    has_update(telegram->read_value(collectorTempMin_, 4, 1));
+    has_update(telegram->read_value(collectorMaxTemp_, 0, 1));
+    has_update(telegram->read_value(tankBottomMaxTemp_, 3, 1));
+    has_update(telegram->read_value(collectorMinTemp_, 4, 1));
     has_update(telegram->read_value(solarPumpMode_, 5, 1));
     has_update(telegram->read_value(solarPumpMinRPM_, 6, 1));
     has_update(telegram->read_value(solarPumpTurnoffDiff_, 7, 1));
@@ -302,7 +302,7 @@ void Solar::process_SM100Energy(std::shared_ptr<const Telegram> telegram) {
  * SM100Time - type 0x0391 EMS+ for pump working time
  */
 void Solar::process_SM100Time(std::shared_ptr<const Telegram> telegram) {
-    has_update(telegram->read_value(pumpWorkMin_, 1, 3));
+    has_update(telegram->read_value(pumpWorkTime_, 1, 3));
 }
 
 /*
@@ -320,7 +320,7 @@ void Solar::process_ISM1StatusMessage(std::shared_ptr<const Telegram> telegram) 
     }
 
     has_update(telegram->read_bitvalue(solarPump_, 8, 0));         // PS1 Solar pump on (1) or off (0)
-    has_update(telegram->read_value(pumpWorkMin_, 10, 3));         // force to 3 bytes
+    has_update(telegram->read_value(pumpWorkTime_, 10, 3));         // force to 3 bytes
     has_update(telegram->read_bitvalue(collectorShutdown_, 9, 0)); // collector shutdown on/off
     has_update(telegram->read_bitvalue(tankHeated_, 9, 2));        // tank full
 }
@@ -333,7 +333,7 @@ void Solar::process_ISM1Set(std::shared_ptr<const Telegram> telegram) {
 }
 
 // set temperature for tank
-bool Solar::set_SM100Tank1MaxTemp(const char * value, const int8_t id) {
+bool Solar::set_SM100TankBottomMaxTemp(const char * value, const int8_t id) {
     int temperature;
     if (!Helpers::value2number(value, temperature)) {
         return false;

@@ -85,8 +85,8 @@ class Boiler : public EMSdevice {
     uint8_t  tapwaterActive_;   // Hot tap water is on/off
     uint8_t  selFlowTemp_;      // Selected flow temperature
     uint8_t  selBurnPow_;       // Burner max power %
-    uint8_t  pumpMod2_;         // heatpump modulation from 0xE3 (heatpumps)
-    uint8_t  pumpMod_;          // Pump modulation %
+    uint8_t  heatingPump2Mod_;  // heatpump modulation from 0xE3 (heatpumps)
+    uint8_t  heatingPumpMod_;   // Pump modulation %
     int16_t  outdoorTemp_;      // Outside temperature
     uint16_t curFlowTemp_;      // Current flow temperature
     uint16_t retTemp_;          // Return temperature
@@ -96,7 +96,7 @@ class Boiler : public EMSdevice {
     uint16_t exhaustTemp_;      // Exhaust temperature
     uint8_t  burnGas_;          // Gas on/off
     uint16_t flameCurr_;        // Flame current in micro amps
-    uint8_t  heatPump_;         // Boiler pump on/off
+    uint8_t  heatingPump_;      // Boiler heating pump on/off
     uint8_t  fanWork_;          // Fan on/off
     uint8_t  ignWork_;          // Ignition on/off
     uint8_t  heatingActivated_; // Heating activated on the boiler

@@ -159,8 +159,8 @@ class Thermostat : public EMSdevice {
     uint8_t wwMode_;
     uint8_t wwCircPump_;
     uint8_t wwCircMode_;
-    uint8_t wwTemp_;
-    uint8_t wwTempLow_;
+    uint8_t wwSetTemp_;
+    uint8_t wwSetTempLow_;
 
     std::vector<std::shared_ptr<HeatingCircuit>> heating_circuits_; // each thermostat can have multiple heating circuits
 
@@ -287,7 +287,6 @@ class Thermostat : public EMSdevice {
     bool set_mode_n(const uint8_t mode, const uint8_t hc_num);
 
     bool set_temperature_value(const char * value, const int8_t id, const uint8_t mode);
-    bool set_temperature(const float temperature, const std::string & mode, const uint8_t hc_num);
     bool set_temperature(const float temperature, const uint8_t mode, const uint8_t hc_num);
 
     // set functions - these use the id/hc

@@ -36,7 +36,7 @@ class Switch : public EMSdevice {
     void process_WM10MonitorMessage(std::shared_ptr<const Telegram> telegram);
     void process_WM10TempMessage(std::shared_ptr<const Telegram> telegram);
 
-    uint16_t flowTemp_;
+    uint16_t flowTempHc_;
     uint8_t  status_;
     uint8_t  activated_;
     uint8_t  id_;

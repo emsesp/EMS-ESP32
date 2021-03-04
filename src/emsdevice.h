@@ -31,12 +31,14 @@
 namespace emsesp {
 
 // Home Assistant icons (https://materialdesignicons.com/)
-MAKE_PSTR(icontemperature, "mdi:temperature-celsius")
+// MAKE_PSTR(icontemperature, "mdi:temperature-celsius")
+MAKE_PSTR(icontemperature, "mdi:coolant-temperature")
 MAKE_PSTR(iconpercent, "mdi:percent-outline")
 MAKE_PSTR(iconfire, "mdi:fire")
 MAKE_PSTR(iconfan, "mdi:fan")
 MAKE_PSTR(iconflame, "mdi:flash")
 MAKE_PSTR(iconvalve, "mdi:valve")
+MAKE_PSTR(iconpump, "mdi:pump")
 
 enum DeviceValueType : uint8_t {
     BOOL,
@@ -73,8 +75,8 @@ enum DeviceValueUOM : uint8_t {
     HOURS,
     MINUTES,
     UA,
-    BAR
-
+    BAR,
+    PUMP
 };
 
 // TAG mapping - maps to DeviceValueTAG_s in emsdevice.cpp

@@ -56,7 +56,7 @@ static const __FlashStringHelper * const DeviceValueTAG_s[] PROGMEM = {
 };
 
 const std::string EMSdevice::uom_to_string(uint8_t uom) {
-    if (uom == DeviceValueUOM::NONE) {
+    if (uom == DeviceValueUOM::NONE || uom >= DeviceValueUOM::PUMP) {
         return std::string{};
     }
     return uuid::read_flash_string(DeviceValueUOM_s[uom - 1]); // offset by 1 to account for NONE
@@ -602,7 +602,11 @@ bool EMSdevice::generate_values_json(JsonObject & root, const uint8_t tag_filter
             // handle ENUMs
             else if ((dv.type == DeviceValueType::ENUM) && Helpers::hasValue(*(uint8_t *)(dv.value_p))) {
                 if (*(uint8_t *)(dv.value_p) < dv.options_size) {
-                    json[name] = dv.options[*(uint8_t *)(dv.value_p)];
+                    if (Mqtt::bool_format() == BOOL_FORMAT_10) {
+                        json[name] = (uint8_t)(*(uint8_t *)(dv.value_p));
+                    } else {
+                        json[name] = dv.options[*(uint8_t *)(dv.value_p)];
+                    }
                     has_value  = true;
                 }
             }
