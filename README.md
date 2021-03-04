@@ -2,11 +2,12 @@
 
 **EMS-ESP** is an open-source firmware for the Espressif microcontroller that communicates with **EMS** (Energy Management System) based equipment from manufacturers like Bosch, Buderus, Nefit, Junkers, Worcester and Sieger.
 
-This is the EMS32 version.
+This is the ESP32 version.
 
 
 [![license](https://img.shields.io/github/license/proddy/EMS-ESP.svg)](LICENSE)
-[![gitter](https://img.shields.io/gitter/room/EMS-ESP/EMS-ESP.svg)](https://gitter.im/EMS-ESP/community)
+[![chat](https://img.shields.io/discord/816637840644505620.svg?style=flat-square&color=blueviolet)](https://discord.gg/rqegzSrK)
+
 
 If you like **EMS-ESP**, please give it a star, or fork it and contribute!
 
@@ -64,7 +65,7 @@ If you're looking for support on **EMS-ESP** there are some options available:
 
 ### Support Community
 
-* [EMS-ESP Support Chat](https://gitter.im/EMS-ESP/community#): For support, troubleshooting and general questions. You have better chances to get fast answers from members of the community
+* [Discord Server](https://discord.gg/rqegzSrK): For support, troubleshooting and general questions. You have better chances to get fast answers from members of the community
 * [Search in Issues](https://github.com/proddy/EMS-ESP/issues): You might find an answer to your question by searching current or closed issues
 
 ### Developer's Community

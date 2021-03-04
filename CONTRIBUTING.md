@@ -16,7 +16,7 @@ This document describes rules that are in effect for this repository, meant for 
 
 1. Opening an issue means that a problem exists in the code and should be addressed by the project contributors.
 2. When opening an issue, it is required to fill out the presented template. The requested information is important! If the template is ignored or insufficient info about the issue is provided, the issue may be closed.
-3. Questions of type "How do I..." or "Can you please help me with..." or "Can EMS-ESP do..." are better directed to the support channel in Gitter.
+3. Questions of type "How do I..." or "Can you please help me with..." or "Can EMS-ESP do..." are better directed to the support channel on Discord.
 4. Issues about topics already handled in the documentation will be closed in a similar manner.
 5. Issues for unmerged PRs will be closed. If there is an issue with a PR, the explanation should be added to the PR itself.
 6. Issues with accompanied investigation that shows the root of the problem should be given priority.

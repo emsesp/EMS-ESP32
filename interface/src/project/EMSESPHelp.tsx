@@ -34,7 +34,7 @@ class EMSESPHelp extends Component {
                             <CommentIcon />
                         </ListItemAvatar>
                         <ListItemText>
-                            For live community chat visit our <Link href="https://gitter.im/EMS-ESP/community#" color="primary">{'Gitter'}&nbsp;channel</Link>
+                            For live community chat join our <Link href="https://discord.gg/rqegzSrK" color="primary">{'Discord'}&nbsp;server</Link>
                         </ListItemText>
                     </ListItem>
 
