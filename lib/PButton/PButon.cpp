@@ -136,13 +136,13 @@ bool PButton::check(void) {
         dblClickWaiting_ = false;
     }
 
-    // added code: raise OnLongPress event when only when the button is released
+    // added code: raise OnLongPress event when the button is released
     if (state_ == pullMode_ && longPressHappened_ && !vLongPressHappened_) {
         resultEvent        = 3;
         longPressHappened_ = false;
     }
 
-    // added code: raise OnLongPress event when only when the button is released
+    // added code: raise OnVLongPress event when the button is released, only for pin 0
     if (state_ == pullMode_ && vLongPressHappened_) {
         resultEvent        = 4;
         vLongPressHappened_ = false;
@@ -164,7 +164,10 @@ bool PButton::check(void) {
         // Trigger "long" hold
         if ((millisRes - downTime_) >= VLongPressDelay_) {
             if (vLongPressHappened_ == false) {
-                // resultEvent         = 4;
+                // raise OnVLongPress, only for pin 0 wait for release
+                if (pin_) {
+                    resultEvent = 4;
+                }
                 vLongPressHappened_ = true;
                 // longPressHappened_ = false;
             }
