@@ -29,6 +29,7 @@ See https://github.com/proddy/EMS-ESP/issues/632
 - Added ID to MQTT payloads which is the Device's product ID and used in HA to identify a unique HA device
 - Increased MQTT buffer and reduced wait time between publishes
 - Updated to the latest ArduinoJson library
+- some names of mqtt-tags like in v2.2.1
 - **Breaking Change** new ESP32 partition side to allow for smoother OTA and fallback
 
 ### Removed
