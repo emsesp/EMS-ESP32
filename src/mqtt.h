@@ -180,6 +180,10 @@ class Mqtt {
         mqtt_retain_ = mqtt_retain;
     }
 
+    static bool is_empty() {
+         return mqtt_messages_.empty();
+    }
+
     /*
     struct QueuedMqttMessage {
         uint16_t                           id_;
@@ -226,13 +230,11 @@ class Mqtt {
     struct MQTTSubFunction {
         uint8_t            device_type_;      // which device type, from DeviceType::
         const std::string  topic_;            // short topic name
-        const std::string  full_topic_;       // the fully qualified topic name, usually with the hostname prefixed
         mqtt_subfunction_p mqtt_subfunction_; // can be empty
 
-        MQTTSubFunction(uint8_t device_type, const std::string && topic, const std::string && full_topic, mqtt_subfunction_p mqtt_subfunction)
+        MQTTSubFunction(uint8_t device_type, const std::string && topic, mqtt_subfunction_p mqtt_subfunction)
             : device_type_(device_type)
             , topic_(topic)
-            , full_topic_(full_topic)
             , mqtt_subfunction_(mqtt_subfunction) {
         }
     };
