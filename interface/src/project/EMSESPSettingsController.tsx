@@ -124,7 +124,7 @@ function EMSESPSettingsControllerForm(props: EMSESPSettingsControllerFormProps) 
                 validators={['required', 'isNumber', 'minNumber:0', 'maxNumber:40']}
                 errorMessages={['Button GPIO is required', "Must be a number", "Must be 0 or higher", "Max value is 40"]}
                 name="pbutton_gpio"
-                label="Button GPIO pin (0=none)"
+                label="Button GPIO pin"
                 fullWidth
                 variant="outlined"
                 value={data.pbutton_gpio}
