@@ -361,7 +361,7 @@ void DallasSensor::publish_values(const bool force) {
 
                 char str[50];
                 if (dallas_format == Mqtt::Dallas_Format::SENSORID) {
-                    snprintf_P(str, sizeof(str), PSTR("{{value_json.%s}}"), sensor.to_string().c_str());
+                    snprintf_P(str, sizeof(str), PSTR("{{value_json['%s']}}"), sensor.to_string().c_str());
                 } else {
                     snprintf_P(str, sizeof(str), PSTR("{{value_json.sensor%d.temp}}"), sensor_no);
                 }
