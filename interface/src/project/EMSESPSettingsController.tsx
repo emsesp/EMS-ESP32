@@ -55,18 +55,19 @@ function EMSESPSettingsControllerForm(props: EMSESPSettingsControllerFormProps) 
             <Typography variant="h6" color="primary" >
                 EMS Bus
             </Typography>
-            <TextValidator
-                validators={['required', 'isNumber', 'minNumber:0', 'maxNumber:255']}
-                errorMessages={['TX mode is required', "Must be a number", "Must be 0 or higher", "Max value is 255"]}
-                name="tx_mode"
-                label="Tx Mode (0=off)"
+            <SelectValidator name="tx_mode"
+                label="Tx Mode"
+                value={data.tx_mode}
                 fullWidth
                 variant="outlined"
-                value={data.tx_mode}
-                type="number"
                 onChange={handleValueChange('tx_mode')}
-                margin="normal"
-            />
+                margin="normal">
+                <MenuItem value={0}>0 - Off</MenuItem>
+                <MenuItem value={1}>1 - Default</MenuItem>
+                <MenuItem value={2}>2 - EMS+</MenuItem>
+                <MenuItem value={3}>3 - HT3</MenuItem>
+                <MenuItem value={4}>4 - Hardware</MenuItem>
+            </SelectValidator>
             <SelectValidator name="ems_bus_id"
                 label="Bus ID"
                 value={data.ems_bus_id}
