@@ -39,6 +39,7 @@ MAKE_PSTR(iconfan, "mdi:fan")
 MAKE_PSTR(iconflame, "mdi:flash")
 MAKE_PSTR(iconvalve, "mdi:valve")
 MAKE_PSTR(iconpump, "mdi:pump")
+MAKE_PSTR(iconheatpump, "mdi:water-pump")
 
 enum DeviceValueType : uint8_t {
     BOOL,
