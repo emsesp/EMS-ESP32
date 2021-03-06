@@ -93,7 +93,7 @@ void Shower::loop() {
 }
 
 // send status of shower to MQTT
-void Shower::send_mqtt_stat(bool state) {
+void Shower::send_mqtt_stat(bool state, bool force) {
     if (!shower_timer_ && !shower_alert_) {
         return;
     }
@@ -102,7 +102,7 @@ void Shower::send_mqtt_stat(bool state) {
     Mqtt::publish(F("shower_active"), Helpers::render_boolean(s, state)); // https://github.com/proddy/EMS-ESP/issues/369
 
     // if we're in HA mode make sure we've first sent out the HA MQTT Discovery config topic
-    if ((Mqtt::ha_enabled()) && (!ha_configdone_)) {
+    if ((Mqtt::ha_enabled()) && (!ha_configdone_ || force)) {
         ha_configdone_ = true;
 
         StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> doc;
@@ -115,7 +115,7 @@ void Shower::send_mqtt_stat(bool state) {
         ids.add("ems-esp");
 
         char topic[100];
-        snprintf_P(topic, sizeof(topic), PSTR("homeassistant/binary_sensor/%s/shower_active/config"), EMSESP::system_.hostname().c_str());
+        snprintf_P(topic, sizeof(topic), PSTR("homeassistant/binary_sensor/%s/shower_active/config"), Mqtt::base().c_str());
         Mqtt::publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
     }
 }
@@ -146,12 +146,23 @@ void Shower::shower_alert_start() {
 void Shower::publish_values() {
     StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> doc;
 
-    char s[50];
-    doc["shower_timer"] = Helpers::render_boolean(s, shower_timer_);
-    doc["shower_alert"] = Helpers::render_boolean(s, shower_alert_);
+    if (Mqtt::bool_format() == BOOL_FORMAT_ONOFF) {
+        doc["shower_timer"] = shower_timer_ ? "on" : "off";
+        doc["shower_alert"] = shower_alert_ ? "on" : "off";
+    } else if (Mqtt::bool_format() == BOOL_FORMAT_ONOFF_CAP) {
+        doc["shower_timer"] = shower_timer_ ? "ON" : "OFF";
+        doc["shower_alert"] = shower_alert_ ? "ON" : "OFF";
+    } else if (Mqtt::bool_format() == BOOL_FORMAT_TRUEFALSE) {
+        doc["shower_timer"] = shower_timer_;
+        doc["shower_alert"] = shower_alert_;
+    } else {
+        doc["shower_timer"] = shower_timer_ ? 1 : 0;
+        doc["shower_alert"] = shower_alert_ ? 1 : 0;
+    }
 
     // only publish shower duration if there is a value
     if (duration_ > SHOWER_MIN_DURATION) {
+        char s[50];
         snprintf_P(s, 50, PSTR("%d minutes and %d seconds"), (uint8_t)(duration_ / 60000), (uint8_t)((duration_ / 1000) % 60));
         doc["duration"] = s;
     }

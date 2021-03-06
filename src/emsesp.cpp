@@ -392,7 +392,11 @@ void EMSESP::publish_all_loop() {
         publish_sensor_values(true, true);
         break;
     case 7:
+        if (Mqtt::ha_enabled()) {
+            Mqtt::ha_status();
+        }
         system_.send_heartbeat();
+        shower_.send_mqtt_stat(false, true);
         break;
     default:
         // all finished
@@ -409,6 +413,7 @@ void EMSESP::reset_mqtt_ha() {
     for (const auto & emsdevice : emsdevices) {
         emsdevice->ha_config_done(false);
     }
+    dallassensor_.reload();
 }
 
 // create json doc for the devices values and add to MQTT publish queue

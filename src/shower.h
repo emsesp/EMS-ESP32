@@ -28,7 +28,7 @@ class Shower {
     void start();
     void loop();
 
-    void send_mqtt_stat(bool state);
+    void send_mqtt_stat(bool state, bool force = false);
 
     bool shower_alert() const {
         return shower_alert_;
