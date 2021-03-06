@@ -113,7 +113,7 @@ class MqttSettingsForm extends React.Component<MqttSettingsFormProps> {
           variant="outlined"
           onChange={handleValueChange('mqtt_qos')}
           margin="normal">
-          <MenuItem value={0}>0</MenuItem>
+          <MenuItem value={0}>0 (default)</MenuItem>
           <MenuItem value={1}>1</MenuItem>
           <MenuItem value={2}>2</MenuItem>
         </SelectValidator>
