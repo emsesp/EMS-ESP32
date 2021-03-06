@@ -152,27 +152,27 @@ void Mqtt::loop() {
         EMSESP::publish_device_values(EMSdevice::DeviceType::BOILER);
     } else
 
-    if (publish_time_thermostat_ && (currentMillis - last_publish_thermostat_ > publish_time_thermostat_)) {
+        if (publish_time_thermostat_ && (currentMillis - last_publish_thermostat_ > publish_time_thermostat_)) {
         last_publish_thermostat_ = (currentMillis / publish_time_thermostat_) * publish_time_thermostat_;
         EMSESP::publish_device_values(EMSdevice::DeviceType::THERMOSTAT);
     } else
 
-    if (publish_time_solar_ && (currentMillis - last_publish_solar_ > publish_time_solar_)) {
+        if (publish_time_solar_ && (currentMillis - last_publish_solar_ > publish_time_solar_)) {
         last_publish_solar_ = (currentMillis / publish_time_solar_) * publish_time_solar_;
         EMSESP::publish_device_values(EMSdevice::DeviceType::SOLAR);
     } else
 
-    if (publish_time_mixer_ && (currentMillis - last_publish_mixer_ > publish_time_mixer_)) {
+        if (publish_time_mixer_ && (currentMillis - last_publish_mixer_ > publish_time_mixer_)) {
         last_publish_mixer_ = (currentMillis / publish_time_mixer_) * publish_time_mixer_;
         EMSESP::publish_device_values(EMSdevice::DeviceType::MIXER);
     } else
 
-    if (publish_time_other_ && (currentMillis - last_publish_other_ > publish_time_other_)) {
+        if (publish_time_other_ && (currentMillis - last_publish_other_ > publish_time_other_)) {
         last_publish_other_ = (currentMillis / publish_time_other_) * publish_time_other_;
         EMSESP::publish_other_values();
     } else
 
-    if (publish_time_sensor_ && (currentMillis - last_publish_sensor_ > publish_time_sensor_)) {
+        if (publish_time_sensor_ && (currentMillis - last_publish_sensor_ > publish_time_sensor_)) {
         last_publish_sensor_ = (currentMillis / publish_time_sensor_) * publish_time_sensor_;
         EMSESP::publish_sensor_values(true);
     }
@@ -372,7 +372,7 @@ void Mqtt::start() {
     // fetch MQTT settings, to see if MQTT is enabled
     EMSESP::esp8266React.getMqttSettingsService()->read([&](MqttSettings & mqttSettings) {
         mqtt_enabled_ = mqttSettings.enabled;
-        mqtt_base_    = mqttSettings.base.c_str();
+        mqtt_base_    = mqttSettings.base.c_str(); // Convert String to std::string
         if (!mqtt_enabled_) {
             return; // quit, not using MQTT
         }
@@ -511,29 +511,29 @@ void Mqtt::on_connect() {
         bool_format_             = mqttSettings.bool_format;
     });
 
-        // send info topic appended with the version information as JSON
-        StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> doc;
+    // send info topic appended with the version information as JSON
+    StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> doc;
     // first time to connect
     if (connectcount_ == 1) {
-        doc["event"]   = FJSON("start");
+        doc["event"] = FJSON("start");
     } else {
-        doc["event"]   = FJSON("reconnect");
+        doc["event"] = FJSON("reconnect");
     }
 
-        doc["version"] = EMSESP_APP_VERSION;
+    doc["version"] = EMSESP_APP_VERSION;
 #ifndef EMSESP_STANDALONE
-        doc["ip"] = WiFi.localIP().toString();
+    doc["ip"] = WiFi.localIP().toString();
 #endif
-        publish(F_(info), doc.as<JsonObject>());
+    publish(F_(info), doc.as<JsonObject>());
 
-        // create the EMS-ESP device in HA, which is MQTT retained
-        if (ha_enabled()) {
-            ha_status();
-        }
+    // create the EMS-ESP device in HA, which is MQTT retained
+    if (ha_enabled()) {
+        ha_status();
+    }
 
-        // send initial MQTT messages for some of our services
-        EMSESP::shower_.send_mqtt_stat(false); // Send shower_activated as false
-        EMSESP::system_.send_heartbeat();      // send heatbeat
+    // send initial MQTT messages for some of our services
+    EMSESP::shower_.send_mqtt_stat(false); // Send shower_activated as false
+    EMSESP::system_.send_heartbeat();      // send heatbeat
 
     // } else {
     if (connectcount_ > 1) {
@@ -577,7 +577,7 @@ void Mqtt::ha_status() {
     dev["mf"]      = FJSON("proddy");
     dev["mdl"]     = F_(EMSESP); // "EMS-ESP"
     JsonArray ids  = dev.createNestedArray("ids");
-    ids.add("ems-esp-system");
+    ids.add("ems-esp");
 
     char topic[MQTT_TOPIC_MAX_SIZE];
     snprintf_P(topic, sizeof(topic), PSTR("homeassistant/sensor/%s/system/config"), mqtt_base_.c_str());
@@ -822,15 +822,17 @@ void Mqtt::publish_mqtt_ha_sensor(uint8_t                     type, // EMSdevice
     std::replace(uniq.begin(), uniq.end(), '.', '_');
     doc["uniq_id"] = uniq;
 
+    doc["~"] = mqtt_base_;
+
     // state topic
     // if its a boiler we use the tag
     char stat_t[MQTT_TOPIC_MAX_SIZE];
     if (device_type == EMSdevice::DeviceType::BOILER) {
-        snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/%s"), mqtt_base_.c_str(), EMSdevice::tag_to_string(tag).c_str());
+        snprintf_P(stat_t, sizeof(stat_t), PSTR("~/%s"), EMSdevice::tag_to_string(tag).c_str());
     } else if (device_type == EMSdevice::DeviceType::SYSTEM) {
-        snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/heartbeat"), mqtt_base_.c_str());
+        snprintf_P(stat_t, sizeof(stat_t), PSTR("~/heartbeat"));
     } else {
-        snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/%s_data"), mqtt_base_.c_str(), device_name);
+        snprintf_P(stat_t, sizeof(stat_t), PSTR("~/%s_data"), device_name);
     }
     doc["stat_t"] = stat_t;
 
@@ -889,9 +891,15 @@ void Mqtt::publish_mqtt_ha_sensor(uint8_t                     type, // EMSdevice
     JsonObject dev = doc.createNestedObject("dev");
 
     JsonArray ids = dev.createNestedArray("ids");
-    char      ha_device[40];
-    snprintf_P(ha_device, sizeof(ha_device), PSTR("ems-esp-%s"), device_name);
-    ids.add(ha_device);
+
+    // for System commands we'll use the ID EMS-ESP
+    if (device_type == EMSdevice::DeviceType::SYSTEM) {
+        ids.add("ems-esp");
+    } else {
+        char ha_device[40];
+        snprintf_P(ha_device, sizeof(ha_device), PSTR("ems-esp-%s"), device_name);
+        ids.add(ha_device);
+    }
 
     publish_ha(topic, doc.as<JsonObject>());
 }
