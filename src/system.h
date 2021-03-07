@@ -65,12 +65,14 @@ class System {
     bool upload_status();
     void show_mem(const char * note);
     void get_settings();
+
     void led_init(bool refresh);
     void syslog_init(bool refresh);
     void adc_init(bool refresh);
-    void network_init();
-    void commands_init();
+    void network_init(bool refresh);
     void button_init(bool refresh);
+    void commands_init();
+
     bool check_upgrade();
     void send_heartbeat();
 

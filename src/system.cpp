@@ -191,13 +191,14 @@ void System::start(uint32_t heap_start) {
     // load in all the settings first
     get_settings();
 
-    commands_init();    // console & api commands
-    led_init(false);    // init LED
-    adc_init(false);    // analog ADC
-    syslog_init(false); // init SysLog
-    button_init(false); // the special button
-    network_init();     // network
-    EMSESP::init_tx();  // start UART
+    commands_init();     // console & api commands
+    led_init(false);     // init LED
+    adc_init(false);     // analog ADC
+    syslog_init(false);  // init SysLog
+    button_init(false);  // the special button
+    network_init(false); // network
+
+    EMSESP::init_tx(); // start UART
 }
 
 // adc and bluetooth
@@ -418,8 +419,13 @@ void System::set_led_speed(uint32_t speed) {
 }
 
 // initializes network
-void System::network_init() {
-    // check ethernet profile, if we're using exclusive Ethernet then disabled wifi and AP/captive portal
+void System::network_init(bool refresh) {
+    if (refresh) {
+        get_settings();
+    }
+
+    // check ethernet profile
+    // ethernet uses lots of additional memory so we only start it when it's explicitly set in the config
     if (ethernet_profile_ == 0) {
         return;
     }
@@ -451,7 +457,7 @@ void System::network_init() {
 
 #ifndef EMSESP_STANDALONE
     if (ETH.begin(phy_addr, power, mdc, mdio, type, clock_mode)) {
-        // disable ssid and AP
+        // disable ssid and AP when using Ethernet
         EMSESP::esp8266React.getNetworkSettingsService()->update(
             [&](NetworkSettings & settings) {
                 settings.ssid == ""; // remove SSID
@@ -506,8 +512,8 @@ void System::system_check() {
 }
 
 // commands - takes static function pointers
+// these commands respond to the topic "system" and take a payload like {cmd:"", data:"", id:""}
 void System::commands_init() {
-    // these commands respond to the topic "system" and take a payload like {cmd:"", data:"", id:""}
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(pin), System::command_pin);
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(send), System::command_send);
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(publish), System::command_publish);
@@ -759,17 +765,40 @@ void System::console_commands(Shell & shell, unsigned int context) {
         });
     });
 
+    EMSESPShell::commands->add_command(
+        ShellContext::SYSTEM,
+        CommandFlags::ADMIN,
+        flash_string_vector{F_(set), F_(ethernet)},
+        flash_string_vector{F_(n_mandatory)},
+        [](Shell & shell, const std::vector<std::string> & arguments) {
+            uint8_t n = Helpers::hextoint(arguments.front().c_str());
+            if (n <= 2) {
+                EMSESP::esp8266React.getNetworkSettingsService()->update(
+                    [&](NetworkSettings & networkSettings) {
+                        networkSettings.ethernet_profile = n;
+                        shell.printfln(F_(ethernet_option_fmt), networkSettings.ethernet_profile);
+                        return StateUpdateResult::CHANGED;
+                    },
+                    "local");
+                EMSESP::system_.network_init(true);
+            } else {
+                shell.println(F("Must be 0, 1 or 2"));
+            }
+        },
+        [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments __attribute__((unused))) -> const std::vector<std::string> {
+            return std::vector<std::string>{read_flash_string(F("0")), read_flash_string(F("1")), read_flash_string(F("2"))};
+        });
+
     EMSESPShell::commands->add_command(ShellContext::SYSTEM, CommandFlags::USER, flash_string_vector{F_(set)}, [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
         EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
             shell.print(F(" "));
             shell.printfln(F_(hostname_fmt), networkSettings.hostname.isEmpty() ? uuid::read_flash_string(F_(unset)).c_str() : networkSettings.hostname.c_str());
-        });
-
-        EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
             shell.print(F(" "));
             shell.printfln(F_(wifi_ssid_fmt), networkSettings.ssid.isEmpty() ? uuid::read_flash_string(F_(unset)).c_str() : networkSettings.ssid.c_str());
             shell.print(F(" "));
             shell.printfln(F_(wifi_password_fmt), networkSettings.ssid.isEmpty() ? F_(unset) : F_(asterisks));
+            shell.print(F(" "));
+            shell.printfln(F_(ethernet_option_fmt), networkSettings.ethernet_profile);
         });
     });
 
