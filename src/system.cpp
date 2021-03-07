@@ -177,6 +177,33 @@ void System::get_settings() {
     });
 }
 
+// adjust WiFi settings
+// this for problem solving mesh and connection issues, and also get EMS bus-powered more stable by lowering power
+void System::wifi_tweak() {
+#if defined(EMSESP_WIFI_TWEAK)
+    // Default Tx Power is 80 = 20dBm <-- default
+    // WIFI_POWER_19_5dBm = 78,// 19.5dBm
+    // WIFI_POWER_19dBm = 76,// 19dBm
+    // WIFI_POWER_18_5dBm = 74,// 18.5dBm
+    // WIFI_POWER_17dBm = 68,// 17dBm
+    // WIFI_POWER_15dBm = 60,// 15dBm
+    // WIFI_POWER_13dBm = 52,// 13dBm
+    // WIFI_POWER_11dBm = 44,// 11dBm
+    // WIFI_POWER_8_5dBm = 34,// 8.5dBm
+    // WIFI_POWER_7dBm = 28,// 7dBm
+    // WIFI_POWER_5dBm = 20,// 5dBm
+    // WIFI_POWER_2dBm = 8,// 2dBm
+    // WIFI_POWER_MINUS_1dBm = -4// -1dBm
+    wifi_power_t p1  = WiFi.getTxPower();
+    bool         pok = WiFi.setTxPower(WIFI_POWER_19_5dBm);
+    wifi_power_t p2  = WiFi.getTxPower();
+    bool         s1  = WiFi.getSleep();
+    WiFi.setSleep(false); // turn off sleep - WIFI_PS_NONE
+    bool s2 = WiFi.getSleep();
+    LOG_INFO(F("Adjusting Wifi - Tx power %d->%d, Sleep %d->%d"), p1, p2, s1, s2);
+#endif
+}
+
 // first call. Sets memory and starts up the UART Serial bridge
 void System::start(uint32_t heap_start) {
 #if defined(EMSESP_DEBUG)

@@ -31,36 +31,13 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
     switch (event) {
     case SYSTEM_EVENT_STA_DISCONNECTED:
         EMSESP::logger().info(F("WiFi Disconnected. Reason code=%d"), info.disconnected.reason);
-
         break;
 
     case SYSTEM_EVENT_STA_GOT_IP:
 #ifndef EMSESP_STANDALONE
         EMSESP::logger().info(F("WiFi Connected with IP=%s, hostname=%s"), WiFi.localIP().toString().c_str(), WiFi.getHostname());
 #endif
-
-        /*
-
-        // Lower WiFi tx power to free up current for bus-powered
-        // WIFI_POWER_19_5dBm = 78,// 19.5dBm <-- default
-        // WIFI_POWER_19dBm = 76,// 19dBm
-        // WIFI_POWER_18_5dBm = 74,// 18.5dBm
-        // WIFI_POWER_17dBm = 68,// 17dBm
-        // WIFI_POWER_15dBm = 60,// 15dBm
-        // WIFI_POWER_13dBm = 52,// 13dBm
-        // WIFI_POWER_11dBm = 44,// 11dBm
-        // WIFI_POWER_8_5dBm = 34,// 8.5dBm
-        // WIFI_POWER_7dBm = 28,// 7dBm
-        // WIFI_POWER_5dBm = 20,// 5dBm
-        // WIFI_POWER_2dBm = 8,// 2dBm
-        // WIFI_POWER_MINUS_1dBm = -4// -1dBm
-
-        wifi_power_t a1 = WiFi.getTxPower();
-        bool         ok = WiFi.setTxPower(WIFI_POWER_19_5dBm);
-        wifi_power_t a2 = WiFi.getTxPower();
-        LOG_INFO("Adjusting Wifi Tx power from %d to %d (%s)", a1, a2, ok ? "ok" : "failed");
-*/
-
+        EMSESP::system_.wifi_tweak();
         EMSESP::system_.send_heartbeat();
         break;
 

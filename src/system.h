@@ -65,6 +65,7 @@ class System {
     bool upload_status();
     void show_mem(const char * note);
     void get_settings();
+    void wifi_tweak();
 
     void led_init(bool refresh);
     void syslog_init(bool refresh);
