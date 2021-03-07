@@ -421,6 +421,9 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         EMSESP::mqtt_.incoming("ems-esp/thermostat_hc1", "heat");
         EMSESP::mqtt_.incoming("ems-esp/thermostat_hc2", "28.8");
         EMSESP::mqtt_.incoming("ems-esp/thermostat", "{\"cmd\":\"temp\",\"id\":2,\"data\":22}");
+
+        EMSESP::mqtt_.incoming("ems-esp/thermostat_hc3", "{\"cmd\":\"offsettemp\",\"data\":-3}");
+        EMSESP::mqtt_.incoming("ems-esp/thermostat_hc3", "{\"cmd\":\"temp\",\"data\":-3}");
     }
 
     if (command == "tc100") {

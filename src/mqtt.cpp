@@ -249,14 +249,17 @@ void Mqtt::on_message(const char * fulltopic, const char * payload, size_t len) 
     // see if we have this topic in our subscription list, then call its callback handler
     for (const auto & mf : mqtt_subfunctions_) {
         if (strcmp(topic, mf.topic_.c_str()) == 0) {
+            // if we have call back function then call it
+            // otherwise proceed as process as a command
             if (mf.mqtt_subfunction_) {
-                // matching function, call it. If it returns true keep quit
-                if ((mf.mqtt_subfunction_)(message)) {
-                    return; // function executed successfully
+                if (!(mf.mqtt_subfunction_)(message)) {
+                    LOG_ERROR(F("MQTT error: invalid payload %s for this topic %s"), message, topic);
                 }
+                return;
             }
 
-            // empty function. It's a command then. Find the command from the json and call it directly.
+            // It's a command then with the payload being JSON like {"cmd":"<cmd>", "data":<data>, "id":<n>}
+            // Find the command from the json and call it directly
             StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> doc;
             DeserializationError                       error = deserializeJson(doc, message);
             if (error) {
