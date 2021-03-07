@@ -19,6 +19,7 @@ See https://github.com/proddy/EMS-ESP/issues/632
 - readback after write with delay (give ems-devices time to set the value)
 - Thermostat ES72/RC20 device 66 to command-set RC20_2
 - MQTT payloads not adding to queue when MQTT is re-connecting (fixes #369)
+- fix for HA topics with invalid command formats - #728
 
 ### Changed
 - split `show values` in smaller packages (edited)
