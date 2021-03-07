@@ -11,6 +11,7 @@ See https://github.com/proddy/EMS-ESP/issues/632
 - extra MQTT boolean option for "ON" and "OFF"
 - Support for chunked MQTT payloads to allow large data sets > 2kb
 - External Button support (#708) for resetting to factory defaults and other actions
+- new console set command in `system`, `set ethernet <profile>` for quickly enabling cabled ethernet connections without using the captive wifi portal
 
 ### Fixed
 - telegrams matched to masterthermostat 0x18
