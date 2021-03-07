@@ -61,7 +61,7 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
         LOG_INFO("Adjusting Wifi Tx power from %d to %d (%s)", a1, a2, ok ? "ok" : "failed");
 */
 
-        EMSESP::system_.network_init(); // send out heartbeat MQTT as soon as we have a connection
+        EMSESP::system_.send_heartbeat();
         break;
 
     case SYSTEM_EVENT_ETH_START:
@@ -75,7 +75,7 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
 #ifndef EMSESP_STANDALONE
             EMSESP::logger().info(F("Ethernet Connected with IP=%s, speed %d Mbps"), ETH.localIP().toString().c_str(), ETH.linkSpeed());
 #endif
-            EMSESP::system_.network_init(); // send out heartbeat MQTT as soon as we have a connection
+            EMSESP::system_.send_heartbeat();
             EMSESP::system_.ethernet_connected(true);
         }
         break;
