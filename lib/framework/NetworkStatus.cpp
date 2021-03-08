@@ -46,10 +46,10 @@ void NetworkStatus::networkStatus(AsyncWebServerRequest * request) {
         root["gateway_ip"]  = ETH.gatewayIP().toString();
         IPAddress dnsIP1    = ETH.dnsIP(0);
         IPAddress dnsIP2    = ETH.dnsIP(1);
-        if (dnsIP1 != INADDR_NONE) {
+        if (IPUtils::isSet(dnsIP1)) {
             root["dns_ip_1"] = dnsIP1.toString();
         }
-        if (dnsIP2 != INADDR_NONE) {
+        if (IPUtils::isSet(dnsIP2)) {
             root["dns_ip_2"] = dnsIP2.toString();
         }
     }

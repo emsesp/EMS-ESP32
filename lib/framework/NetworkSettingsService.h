@@ -71,7 +71,7 @@ class NetworkSettings {
         JsonUtils::readIP(root, "dns_ip_2", settings.dnsIP2);
 
         // Swap around the dns servers if 2 is populated but 1 is not
-        if (settings.dnsIP1 == (IPAddress)INADDR_NONE && settings.dnsIP2 != INADDR_NONE) {
+        if (IPUtils::isNotSet(settings.dnsIP1) && IPUtils::isSet(settings.dnsIP2)) {
             settings.dnsIP1 = settings.dnsIP2;
             settings.dnsIP2 = INADDR_NONE;
         }
@@ -79,7 +79,7 @@ class NetworkSettings {
         // Turning off static ip config if we don't meet the minimum requirements
         // of ipAddress, gateway and subnet. This may change to static ip only
         // as sensible defaults can be assumed for gateway and subnet
-        if (settings.staticIPConfig && (settings.localIP == (IPAddress)INADDR_NONE || settings.gatewayIP == (IPAddress)INADDR_NONE || settings.subnetMask == (IPAddress)INADDR_NONE)) {
+        if (settings.staticIPConfig && (IPUtils::isNotSet(settings.localIP) || IPUtils::isNotSet(settings.gatewayIP) || IPUtils::isNotSet(settings.subnetMask))) {
             settings.staticIPConfig = false;
         }
 
