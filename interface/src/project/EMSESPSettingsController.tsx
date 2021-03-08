@@ -8,7 +8,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import { ENDPOINT_ROOT } from '../api';
 import { restController, RestControllerProps, RestFormLoader, RestFormProps, FormActions, FormButton, BlockFormControlLabel, SectionContent } from '../components';
 
-import { isIP, isHostname, or, optional } from '../validators';
+import { isIP, optional } from '../validators';
 
 import { EMSESPSettings } from './EMSESPtypes';
 
@@ -19,7 +19,7 @@ type EMSESPSettingsControllerProps = RestControllerProps<EMSESPSettings>;
 class EMSESPSettingsController extends Component<EMSESPSettingsControllerProps> {
 
     componentDidMount() {
-        ValidatorForm.addValidationRule('isIPOrHostname', optional(or(isIP, isHostname)));
+        ValidatorForm.addValidationRule('isOptionalIP', optional(isIP));
         this.props.loadData();
     }
 
@@ -238,10 +238,10 @@ function EMSESPSettingsControllerForm(props: EMSESPSettingsControllerFormProps) 
                 label="Enable Syslog"
             />
             <TextValidator
-                validators={['isIPOrHostname']}
-                errorMessages={["Not a valid IP address or hostname"]}
+                validators={['isOptionalIP']}
+                errorMessages={["Not a valid IP address"]}
                 name="syslog_host"
-                label="Syslog IP/Host"
+                label="Syslog IP"
                 fullWidth
                 variant="outlined"
                 value={data.syslog_host}
