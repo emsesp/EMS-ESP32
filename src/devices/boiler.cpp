@@ -465,8 +465,8 @@ void Boiler::process_UBAMonitorSlowPlus(std::shared_ptr<const Telegram> telegram
 void Boiler::process_UBAParametersPlus(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram->read_value(heatingActivated_, 0));
     has_update(telegram->read_value(heatingTemp_, 1));
-    has_update(telegram->read_value(burnMaxPower_, 6));
-    has_update(telegram->read_value(burnMinPower_, 7));
+    has_update(telegram->read_value(burnMaxPower_, 4));
+    has_update(telegram->read_value(burnMinPower_, 5));
     has_update(telegram->read_value(boilHystOff_, 8));
     has_update(telegram->read_value(boilHystOn_, 9));
     has_update(telegram->read_value(burnMinPeriod_, 10));
@@ -730,7 +730,7 @@ bool Boiler::set_min_power(const char * value, const int8_t id) {
 
     LOG_INFO(F("Setting boiler min power to %d %%"), v);
     if (get_toggle_fetch(EMS_TYPE_UBAParametersPlus)) {
-        write_command(EMS_TYPE_UBAParametersPlus, 7, v, EMS_TYPE_UBAParametersPlus);
+        write_command(EMS_TYPE_UBAParametersPlus, 5, v, EMS_TYPE_UBAParametersPlus);
     } else {
         write_command(EMS_TYPE_UBAParameters, 3, v, EMS_TYPE_UBAParameters);
     }
@@ -748,7 +748,7 @@ bool Boiler::set_max_power(const char * value, const int8_t id) {
 
     LOG_INFO(F("Setting boiler max power to %d %%"), v);
     if (get_toggle_fetch(EMS_TYPE_UBAParametersPlus)) {
-        write_command(EMS_TYPE_UBAParametersPlus, 6, v, EMS_TYPE_UBAParametersPlus);
+        write_command(EMS_TYPE_UBAParametersPlus, 4, v, EMS_TYPE_UBAParametersPlus);
     } else {
         write_command(EMS_TYPE_UBAParameters, 2, v, EMS_TYPE_UBAParameters);
     }
