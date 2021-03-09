@@ -174,12 +174,14 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
     for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
         EMSESP::send_read_request(monitor_typeids[i], device_id);
     }
+
     // HA will report an error in the climate component if it doesn't have the setpoint temp, current temperatures and the mode (e.g. auto)
     // The mode always comes later (1 minute) so we force a read request to suppress HA errors.
-    // I remember having this in before, but we removed it and can't remember why?
+    // https://github.com/proddy/EMS-ESP/commit/9d5bd11d268a61bbba8dcabacdb96db48b8829ac#commitcomment-48028642
     for (uint8_t i = 0; i < set_typeids.size(); i++) {
         EMSESP::send_read_request(set_typeids[i], device_id);
     }
+
     EMSESP::send_read_request(0x12, device_id); // read last error (only published on errors)
 }
 
@@ -238,7 +240,7 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::sha
     // look through the Monitor and Set arrays to see if there is a match
     uint8_t hc_num  = 0;
     bool    toggle_ = false;
-    // search set message types
+    // search monitor message types
     for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
         if (monitor_typeids[i] == telegram->type_id) {
             hc_num  = i + 1;
@@ -247,7 +249,7 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::sha
         }
     }
 
-    // not found, search status message types
+    // not found, search status message/set types
     if (hc_num == 0) {
         for (uint8_t i = 0; i < set_typeids.size(); i++) {
             if (set_typeids[i] == telegram->type_id) {
@@ -303,6 +305,11 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::sha
         if (heating_circuit->hc_num() == hc_num) {
             return heating_circuit;
         }
+    }
+
+    // register new heatingcircuits only on active monitor telegrams
+    if (!toggle_) {
+        return nullptr;
     }
 
     /*
