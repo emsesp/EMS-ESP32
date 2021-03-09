@@ -13,6 +13,7 @@
 - Support for chunked MQTT payloads to allow large data sets > 2kb
 - External Button support (#708) for resetting to factory defaults and other actions
 - new console set command in `system`, `set ethernet <profile>` for quickly enabling cabled ethernet connections without using the captive wifi portal
+- Added in MQTT nested mode, for thermostat and mixer, like we had in v2
 
 ### Fixed
 - telegrams matched to masterthermostat 0x18
