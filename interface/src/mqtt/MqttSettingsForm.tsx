@@ -141,6 +141,16 @@ class MqttSettingsForm extends React.Component<MqttSettingsFormProps> {
         <Typography variant="h6" color="primary" >
           Formatting
         </Typography>
+        <BlockFormControlLabel
+          control={
+            <Checkbox
+              checked={data.nested_format}
+              onChange={handleValueChange('nested_format')}
+              value="nested_format"
+            />
+          }
+          label="Nested format (Thermostat & Mixer only)"
+        />
         <SelectValidator name="dallas_format"
           label="Dallas Sensor Payload Grouping"
           value={data.dallas_format}

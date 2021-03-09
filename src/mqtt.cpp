@@ -39,6 +39,7 @@ uint8_t     Mqtt::dallas_format_;
 uint8_t     Mqtt::bool_format_;
 uint8_t     Mqtt::ha_climate_format_;
 bool        Mqtt::ha_enabled_;
+bool        Mqtt::nested_format_;
 
 std::deque<Mqtt::QueuedMqttMessage> Mqtt::mqtt_messages_;
 std::vector<Mqtt::MQTTSubFunction>  Mqtt::mqtt_subfunctions_;
@@ -512,6 +513,7 @@ void Mqtt::on_connect() {
         ha_climate_format_       = mqttSettings.ha_climate_format;
         dallas_format_           = mqttSettings.dallas_format;
         bool_format_             = mqttSettings.bool_format;
+        nested_format_           = mqttSettings.nested_format;
     });
 
     // send info topic appended with the version information as JSON
@@ -862,19 +864,10 @@ void Mqtt::publish_mqtt_ha_sensor(uint8_t                     type, // EMSdevice
         snprintf_P(topic, sizeof(topic), PSTR("homeassistant/binary_sensor/%s/%s/config"), mqtt_base_.c_str(), uniq.c_str()); // topic
 
         // how to render boolean
-        if (bool_format_ == BOOL_FORMAT_ONOFF) {
-            doc[F("payload_on")]  = FJSON("on");
-            doc[F("payload_off")] = FJSON("off");
-        } else if (bool_format_ == BOOL_FORMAT_ONOFF_CAP) {
-            doc[F("payload_on")]  = FJSON("ON");
-            doc[F("payload_off")] = FJSON("OFF");
-        } else if (bool_format_ == BOOL_FORMAT_TRUEFALSE) {
-            doc[F("payload_on")]  = true;
-            doc[F("payload_off")] = false;
-        } else {
-            doc[F("payload_on")]  = 1;
-            doc[F("payload_off")] = 0;
-        }
+        // HA only accepts String values
+        char result[10];
+        doc[F("payload_on")]  = Helpers::render_boolean(result, true);
+        doc[F("payload_off")] = Helpers::render_boolean(result, false);
     } else {
         // normal HA sensor, not a boolean one
         snprintf_P(topic, sizeof(topic), PSTR("homeassistant/sensor/%s/%s/config"), mqtt_base_.c_str(), uniq.c_str()); // topic

@@ -156,6 +156,10 @@ class Mqtt {
         return bool_format_;
     }
 
+    static bool nested_format() {
+        return nested_format_;
+    }
+
     static bool ha_enabled() {
         return ha_enabled_;
     }
@@ -181,17 +185,8 @@ class Mqtt {
     }
 
     static bool is_empty() {
-         return mqtt_messages_.empty();
+        return mqtt_messages_.empty();
     }
-
-    /*
-    struct QueuedMqttMessage {
-        uint16_t                           id_;
-        std::shared_ptr<const MqttMessage> content_;
-        uint8_t                            retry_count_;
-        uint16_t                           packet_id_;
-    };
-    */
 
     struct QueuedMqttMessage {
         const uint16_t                           id_;
@@ -270,6 +265,7 @@ class Mqtt {
     static uint8_t     bool_format_;
     static uint8_t     ha_climate_format_;
     static bool        ha_enabled_;
+    static bool        nested_format_;
 };
 
 } // namespace emsesp

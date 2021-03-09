@@ -149,7 +149,7 @@ void Mixer::process_IPMStatusMessage(std::shared_ptr<const Telegram> telegram) {
     // do we have a mixed circuit
     if (ismixed == 2) {
         has_update(telegram->read_value(flowTempHc_, 3)); // is * 10
-        has_update(telegram->read_value(status_, 2));   // valve status
+        has_update(telegram->read_value(status_, 2));     // valve status
     }
 
     has_update(telegram->read_bitvalue(pumpStatus_, 1, 0)); // pump is also in unmixed circuits
@@ -164,7 +164,7 @@ void Mixer::process_MMStatusMessage(std::shared_ptr<const Telegram> telegram) {
     // 0x21 is position 2. 0x20 is typically reserved for the WM10 switch module
     // see https://github.com/proddy/EMS-ESP/issues/270 and https://github.com/proddy/EMS-ESP/issues/386#issuecomment-629610918
 
-    has_update(telegram->read_value(flowTempHc_, 1));         // is * 10
+    has_update(telegram->read_value(flowTempHc_, 1));       // is * 10
     has_update(telegram->read_bitvalue(pumpStatus_, 3, 2)); // is 0 or 0x64 (100%), check only bit 2
     has_update(telegram->read_value(flowSetTemp_, 0));
     has_update(telegram->read_value(status_, 4)); // valve status -100 to 100

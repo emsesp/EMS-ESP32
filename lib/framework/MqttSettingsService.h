@@ -68,6 +68,7 @@ static String generateClientId() {
 #define EMSESP_DEFAULT_MQTT_RETAIN false
 #define EMSESP_DEFAULT_HA_ENABLED false
 #define EMSESP_DEFAULT_PUBLISH_TIME 10
+#define EMSESP_DEFAULT_NESTED_FORMAT true
 
 class MqttSettings {
   public:
@@ -102,6 +103,7 @@ class MqttSettings {
     uint8_t  bool_format;
     uint8_t  ha_climate_format;
     bool     ha_enabled;
+    bool     nested_format;
 
     static void              read(MqttSettings & settings, JsonObject & root);
     static StateUpdateResult update(JsonObject & root, MqttSettings & settings);
