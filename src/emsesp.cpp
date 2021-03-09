@@ -423,8 +423,7 @@ void EMSESP::publish_device_values(uint8_t device_type) {
     JsonObject          json         = doc.to<JsonObject>();
     bool                need_publish = false;
 
-    bool nested = true; // TODO nested - get value from web settings
-    // bool nested = false; // TODO nested - get value from web settings
+    bool nested = Mqtt::nested_format();
 
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice && (emsdevice->device_type() == device_type)) {
