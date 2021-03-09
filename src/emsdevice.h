@@ -66,24 +66,12 @@ MAKE_PSTR(minutes, "minutes")
 MAKE_PSTR(hours, "hours")
 MAKE_PSTR(ua, "uA")
 MAKE_PSTR(lmin, "l/min")
-enum DeviceValueUOM : uint8_t {
-    NONE = 0,
-    DEGREES,
-    PERCENT,
-    LMIN,
-    KWH,
-    WH,
-    HOURS,
-    MINUTES,
-    UA,
-    BAR,
-    PUMP
-};
+enum DeviceValueUOM : uint8_t { NONE = 0, DEGREES, PERCENT, LMIN, KWH, WH, HOURS, MINUTES, UA, BAR, PUMP };
 
 // TAG mapping - maps to DeviceValueTAG_s in emsdevice.cpp
-MAKE_PSTR(tag_boiler_data, "boiler_data")
-MAKE_PSTR(tag_boiler_data_ww, "boiler_data_ww")
-MAKE_PSTR(tag_boiler_data_info, "boiler_data_info")
+MAKE_PSTR(tag_boiler_data, "boiler")
+MAKE_PSTR(tag_boiler_data_ww, "warm water")
+MAKE_PSTR(tag_boiler_data_info, "info")
 MAKE_PSTR(tag_hc1, "hc1")
 MAKE_PSTR(tag_hc2, "hc2")
 MAKE_PSTR(tag_hc3, "hc3")
@@ -226,7 +214,7 @@ class EMSdevice {
     bool handle_telegram(std::shared_ptr<const Telegram> telegram);
 
     std::string get_value_uom(const char * key);
-    bool        generate_values_json(JsonObject & json, const uint8_t tag_filter, const bool verbose = false);
+    bool        generate_values_json(JsonObject & json, const uint8_t tag_filter, const bool nested, const bool console = false);
     bool        generate_values_json_web(JsonObject & json);
 
     void register_device_value(uint8_t                             tag,

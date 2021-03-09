@@ -536,18 +536,23 @@ bool EMSdevice::generate_values_json_web(JsonObject & json) {
 
 // For each value in the device create the json object pair and add it to given json
 // return false if empty
-// this is used to create both the MQTT payloads and Console messages
-bool EMSdevice::generate_values_json(JsonObject & root, const uint8_t tag_filter, const bool verbose) {
+// this is used to create both the MQTT payloads and Console messages (console = true)
+bool EMSdevice::generate_values_json(JsonObject & root, const uint8_t tag_filter, const bool nested, const bool console) {
     bool       has_value = false; // to see if we've added a value. it's faster than doing a json.size() at the end
-    uint8_t    old_tag   = 255;
+    uint8_t    old_tag   = 255;   // NAN
     JsonObject json      = root;
 
     for (const auto & dv : devicevalues_) {
-        // only show if tag is either empty or matches a value, and don't show if full_name is empty unless we're outputing for mqtt payloads
-        if (((tag_filter == DeviceValueTAG::TAG_NONE) || (tag_filter == dv.tag)) && (dv.full_name != nullptr || !verbose)) {
-            bool have_tag = ((dv.tag != DeviceValueTAG::TAG_NONE) && (dv.device_type != DeviceType::BOILER));
+        // only show if tag is either empty (TAG_NONE) or matches a value
+        // and don't show if full_name is empty unless we're outputing for mqtt payloads
+        // for nested we use all values
+        if (((nested) || tag_filter == DeviceValueTAG::TAG_NONE || (tag_filter == dv.tag)) && (dv.full_name != nullptr || !console)) {
+            bool have_tag = (dv.tag != tag_filter);
+
+            // EMSESP::logger().info(F("**HERE: console=%d nested=%d tag_filter=%d tag=%d type=%d short=%s"), console, nested, tag_filter, dv.tag, dv.type, uuid::read_flash_string(dv.short_name).c_str());
+
             char name[80];
-            if (verbose) {
+            if (console) {
                 // prefix the tag in brackets, unless it's Boiler because we're naughty and use tag for the MQTT topic
                 if (have_tag) {
                     snprintf_P(name, 80, "(%s) %s", tag_to_string(dv.tag).c_str(), uuid::read_flash_string(dv.full_name).c_str());
@@ -558,9 +563,11 @@ bool EMSdevice::generate_values_json(JsonObject & root, const uint8_t tag_filter
                 strcpy(name, uuid::read_flash_string(dv.short_name).c_str()); // use short name
 
                 // if we have a tag, and its different to the last one create a nested object
-                if (have_tag && (dv.tag != old_tag)) {
+                if (dv.tag != old_tag) {
                     old_tag = dv.tag;
-                    json    = root.createNestedObject(tag_to_string(dv.tag));
+                    if (nested && have_tag) {
+                        json = root.createNestedObject(tag_to_string(dv.tag));
+                    }
                 }
             }
 
@@ -572,8 +579,8 @@ bool EMSdevice::generate_values_json(JsonObject & root, const uint8_t tag_filter
                     has_value  = true;
                 } else {
                     // see how to render the value depending on the setting
-                    // when in verbose mode (i.e. outout is Console) we always use on and off
-                    if ((Mqtt::bool_format() == BOOL_FORMAT_ONOFF) || verbose) {
+                    // when in console mode we always use on and off
+                    if ((Mqtt::bool_format() == BOOL_FORMAT_ONOFF) || console) {
                         // on or off as strings
                         json[name] = *(uint8_t *)(dv.value_p) ? F_(on) : F_(off);
                         has_value  = true;
@@ -607,7 +614,7 @@ bool EMSdevice::generate_values_json(JsonObject & root, const uint8_t tag_filter
                     } else {
                         json[name] = dv.options[*(uint8_t *)(dv.value_p)];
                     }
-                    has_value  = true;
+                    has_value = true;
                 }
             }
 
@@ -657,7 +664,7 @@ bool EMSdevice::generate_values_json(JsonObject & root, const uint8_t tag_filter
                 } else if ((dv.type == DeviceValueType::TIME) && Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
                     uint32_t time_value = *(uint32_t *)(dv.value_p);
                     time_value          = (divider) ? time_value / divider : time_value; // sometimes we need to divide by 60
-                    if (verbose) {
+                    if (console) {
                         char time_s[40];
                         snprintf_P(time_s, sizeof(time_s), PSTR("%d days %d hours %d minutes"), (time_value / 1440), ((time_value % 1440) / 60), (time_value % 60));
                         json[name] = time_s;
@@ -669,6 +676,11 @@ bool EMSdevice::generate_values_json(JsonObject & root, const uint8_t tag_filter
             }
         }
     }
+
+    // for debugging
+    // char dump[2000];
+    // serializeJson(root, dump);
+    // EMSESP::logger().info(F("**json root: %s"), dump);
 
     return has_value;
 }

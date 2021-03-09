@@ -135,6 +135,7 @@ bool Test::run_test(const char * command, int8_t id) {
 
     if (strcmp(command, "thermostat") == 0) {
         EMSESP::logger().info(F("Testing thermostat..."));
+
         add_device(0x10, 192); // FW120
 
         // HC1 - 3
@@ -411,19 +412,33 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         shell.invoke_command("show devices");
     }
 
+    if (command == "mqtt_nested") {
+        shell.printfln(F("Testing nested MQTT"));
+        Mqtt::ha_enabled(false); // turn off HA Discovery
+
+        run_test("boiler");
+        run_test("thermostat");
+        run_test("solar");
+        run_test("mixer");
+
+        shell.invoke_command("call system publish");
+        shell.invoke_command("show mqtt");
+    }
+
     if (command == "thermostat") {
         shell.printfln(F("Testing adding a thermostat FW120..."));
+
         run_test("thermostat");
         shell.invoke_command("show");
         shell.invoke_command("call system publish");
-        shell.invoke_command("show mqtt");
 
         EMSESP::mqtt_.incoming("ems-esp/thermostat_hc1", "heat");
         EMSESP::mqtt_.incoming("ems-esp/thermostat_hc2", "28.8");
         EMSESP::mqtt_.incoming("ems-esp/thermostat", "{\"cmd\":\"temp\",\"id\":2,\"data\":22}");
-
         EMSESP::mqtt_.incoming("ems-esp/thermostat_hc3", "{\"cmd\":\"offsettemp\",\"data\":-3}");
         EMSESP::mqtt_.incoming("ems-esp/thermostat_hc3", "{\"cmd\":\"temp\",\"data\":-3}");
+
+        shell.invoke_command("show mqtt");
     }
 
     if (command == "tc100") {
@@ -440,7 +455,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         shell.printfln(F("Testing Solar"));
         run_test("solar");
 
-        uart_telegram("30 00 FF 0A 02 6A 04"); // SM100 pump on (1)
+        uart_telegram("30 00 FF 0A 02 6A 04"); // SM100 pump on (1)sh
         EMSESP::show_device_values(shell);
         uart_telegram("30 00 FF 0A 02 6A 03"); // SM100 pump off (0)
         EMSESP::show_device_values(shell);
