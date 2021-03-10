@@ -155,8 +155,8 @@ class NetworkSettingsForm extends React.Component<NetworkStatusFormProps> {
               margin="normal"
             />
             <TextValidator
-              validators={['required', 'isIP']}
-              errorMessages={['Gateway IP is required', 'Must be an IP address']}
+              validators={['isOptionalIP']}
+              errorMessages={['Must be an IP address']}
               name="gateway_ip"
               label="Gateway"
               fullWidth

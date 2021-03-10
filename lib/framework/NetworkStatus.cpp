@@ -29,9 +29,13 @@ void NetworkStatus::networkStatus(AsyncWebServerRequest * request) {
         root["bssid"]       = WiFi.BSSIDstr();
         root["channel"]     = WiFi.channel();
         root["subnet_mask"] = WiFi.subnetMask().toString();
-        root["gateway_ip"]  = WiFi.gatewayIP().toString();
-        IPAddress dnsIP1    = WiFi.dnsIP(0);
-        IPAddress dnsIP2    = WiFi.dnsIP(1);
+
+        if (WiFi.gatewayIP() != INADDR_NONE) {
+            root["gateway_ip"] = WiFi.gatewayIP().toString();
+        }
+
+        IPAddress dnsIP1 = WiFi.dnsIP(0);
+        IPAddress dnsIP2 = WiFi.dnsIP(1);
         if (dnsIP1 != INADDR_NONE) {
             root["dns_ip_1"] = dnsIP1.toString();
         }
