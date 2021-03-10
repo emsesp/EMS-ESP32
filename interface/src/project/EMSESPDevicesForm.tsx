@@ -221,7 +221,7 @@ class EMSESPDevicesForm extends Component<
         {this.noSensors() && (
           <Box color="warning.main" p={0} mt={0} mb={0}>
             <Typography variant="body1">
-              <i>There are no external temperature sensors connected</i>
+              <i>no external temperature sensors were detected</i>
             </Typography>
           </Box>
         )}
