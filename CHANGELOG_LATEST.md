@@ -14,6 +14,7 @@
 - External Button support (#708) for resetting to factory defaults and other actions
 - new console set command in `system`, `set ethernet <profile>` for quickly enabling cabled ethernet connections without using the captive wifi portal
 - Added in MQTT nested mode, for thermostat and mixer, like we had in v2
+- Boiler GB172i (product-id 210) (3.0.0b6)
 
 ### Fixed
 - telegrams matched to masterthermostat 0x18
@@ -22,6 +23,7 @@
 - Thermostat ES72/RC20 device 66 to command-set RC20_2
 - MQTT payloads not adding to queue when MQTT is re-connecting (fixes #369)
 - fix for HA topics with invalid command formats (#728)
+- wrong position of values #723, #732
 
 ### Changed
 - changed how telegram parameters are rendered for mqtt, console and web (#632)
