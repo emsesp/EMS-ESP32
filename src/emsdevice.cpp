@@ -41,6 +41,7 @@ static const __FlashStringHelper * DeviceValueUOM_s[] __attribute__((__aligned__
 // must be an int of 4 bytes, 32bit aligned
 static const __FlashStringHelper * const DeviceValueTAG_s[] PROGMEM = {
 
+    F_(tag_none),
     F_(tag_boiler_data),
     F_(tag_boiler_data_ww),
     F_(tag_boiler_data_info),
@@ -64,10 +65,7 @@ const std::string EMSdevice::uom_to_string(uint8_t uom) {
 }
 
 const std::string EMSdevice::tag_to_string(uint8_t tag) {
-    if (tag == DeviceValueTAG::TAG_NONE) {
-        return std::string{};
-    }
-    return uuid::read_flash_string(DeviceValueTAG_s[tag - 1]); // offset by 1 to account for NONE
+    return uuid::read_flash_string(DeviceValueTAG_s[tag]);
 }
 
 const std::vector<EMSdevice::DeviceValue> EMSdevice::devicevalues() const {
@@ -519,8 +517,7 @@ bool EMSdevice::generate_values_json_web(JsonObject & json) {
                 }
 
                 // add name, prefixing the tag if it exists
-                // if we're a boiler, ignore the tag
-                if ((dv.tag == DeviceValueTAG::TAG_NONE) || (device_type_ == DeviceType::BOILER)) {
+                if ((dv.tag == DeviceValueTAG::TAG_NONE) || tag_to_string(dv.tag).empty()) {
                     data.add(dv.full_name);
                 } else {
                     char name[50];

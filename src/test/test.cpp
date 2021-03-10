@@ -325,35 +325,15 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
     if (command == "web") {
         shell.printfln(F("Testing Web..."));
 
-        add_device(0x08, 123); // Nefit Trendline
-        add_device(0x18, 157); // Bosch CR100
-
-        // add some data
-        // Boiler -> Me, UBAMonitorFast(0x18), telegram: 08 00 18 00 00 02 5A 73 3D 0A 10 65 40 02 1A 80 00 01 E1 01 76 0E 3D 48 00 C9 44 02 00 (#data=25)
-        uart_telegram({0x08, 0x00, 0x18, 0x00, 0x00, 0x02, 0x5A, 0x73, 0x3D, 0x0A, 0x10, 0x65, 0x40, 0x02, 0x1A, 0x80, 0x00, 0x01, 0xE1, 0x01, 0x76, 0x0E, 0x3D, 0x48, 0x00, 0xC9, 0x44, 0x02, 0x00});
-
-        // Boiler -> Thermostat, UBAParameterWW(0x33), telegram: 08 97 33 00 23 24 (#data=2)
-        uart_telegram({0x08, 0x98, 0x33, 0x00, 0x23, 0x24});
-
-        // Boiler -> Me, UBAParameterWW(0x33), telegram: 08 0B 33 00 08 FF 34 FB 00 28 00 00 46 00 FF FF 00 (#data=13)
-        uart_telegram({0x08, 0x0B, 0x33, 0x00, 0x08, 0xFF, 0x34, 0xFB, 0x00, 0x28, 0x00, 0x00, 0x46, 0x00, 0xFF, 0xFF, 0x00});
-
-        // Thermostat RCPLUSStatusMessage_HC1(0x01A5)
-        uart_telegram({0x98, 0x00, 0xFF, 0x00, 0x01, 0xA5, 0x00, 0xCF, 0x21, 0x2E, 0x00, 0x00, 0x2E, 0x24, 0x03, 0x25, 0x03, 0x03, 0x01, 0x03, 0x25, 0x00, 0xC8, 0x00, 0x00, 0x11, 0x01, 0x03});
-
-        // time
-        uart_telegram({0x98, 0x00, 0x06, 0x00, 0x00, 0x03, 0x04, 0x0C, 0x02, 0x33, 0x06, 00, 00, 00, 00, 00, 00});
-
-        shell.invoke_command("show");
-        shell.invoke_command("call boiler info");
+        run_test("boiler");
+        run_test("thermostat");
 
         // test call
         DynamicJsonDocument doc(EMSESP_JSON_SIZE_XLARGE_DYN);
         JsonObject          json = doc.to<JsonObject>();
         (void)emsesp::Command::call(EMSdevice::DeviceType::BOILER, "info", nullptr, -1, json);
-// bool has_data = emsesp::Command::call(EMSdevice::DeviceType::SYSTEM, "test", "boiler", -1, json);
 #if defined(EMSESP_STANDALONE)
-        Serial.print(COLOR_BRIGHT_MAGENTA);
+        Serial.print(COLOR_YELLOW);
         if (json.size() != 0) {
             serializeJson(doc, Serial);
         }
@@ -363,28 +343,24 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
 
         for (const auto & emsdevice : EMSESP::emsdevices) {
             if (emsdevice) {
-                if (emsdevice->unique_id() == 1) {
-                    DynamicJsonDocument doc(EMSESP_JSON_SIZE_XLARGE_DYN);
+                DynamicJsonDocument doc(EMSESP_JSON_SIZE_XLARGE_DYN);
 
-                    JsonObject root = doc.to<JsonObject>();
-                    emsdevice->generate_values_json_web(root);
+                JsonObject root = doc.to<JsonObject>();
+                emsdevice->generate_values_json_web(root);
 
 #if defined(EMSESP_STANDALONE)
-                    Serial.print(COLOR_BRIGHT_MAGENTA);
-                    Serial.print("memoryUsage=");
-                    Serial.print(doc.memoryUsage());
-                    Serial.println();
-                    Serial.print("measureMsgPack=");
-                    Serial.print(measureMsgPack(doc));
-                    Serial.println();
-                    Serial.print("measureJson=");
-                    Serial.print(measureJson(doc));
-                    Serial.println();
-                    serializeJson(doc, Serial);
-                    Serial.print(COLOR_RESET);
-                    Serial.println();
+                Serial.print(COLOR_BRIGHT_MAGENTA);
+                serializeJson(doc, Serial);
+                Serial.println();
+                Serial.print("** memoryUsage=");
+                Serial.print(doc.memoryUsage());
+                Serial.print(" measureMsgPack=");
+                Serial.print(measureMsgPack(doc));
+                Serial.print(" measureJson=");
+                Serial.print(measureJson(doc));
+                Serial.println(" **");
+                Serial.print(COLOR_RESET);
 #endif
-                }
             }
         }
         return;
