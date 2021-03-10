@@ -160,6 +160,10 @@ class Mqtt {
         return nested_format_;
     }
 
+    static void nested_format(bool nested_format) {
+        nested_format_ = nested_format;
+    }
+
     static bool ha_enabled() {
         return ha_enabled_;
     }

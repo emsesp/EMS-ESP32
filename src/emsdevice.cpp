@@ -44,6 +44,7 @@ static const __FlashStringHelper * const DeviceValueTAG_s[] PROGMEM = {
     F_(tag_boiler_data),
     F_(tag_boiler_data_ww),
     F_(tag_boiler_data_info),
+    F_(tag_thermostat_data),
     F_(tag_hc1),
     F_(tag_hc2),
     F_(tag_hc3),
@@ -547,7 +548,8 @@ bool EMSdevice::generate_values_json(JsonObject & root, const uint8_t tag_filter
         // and don't show if full_name is empty unless we're outputing for mqtt payloads
         // for nested we use all values
         if (((nested) || tag_filter == DeviceValueTAG::TAG_NONE || (tag_filter == dv.tag)) && (dv.full_name != nullptr || !console)) {
-            bool have_tag = (dv.tag != tag_filter);
+            // we have a tag if it matches the filter given, and that the tag name is not empty/""
+            bool have_tag = ((dv.tag != tag_filter) && !tag_to_string(dv.tag).empty());
 
             // EMSESP::logger().info(F("**HERE: console=%d nested=%d tag_filter=%d tag=%d type=%d short=%s"), console, nested, tag_filter, dv.tag, dv.type, uuid::read_flash_string(dv.short_name).c_str());
 

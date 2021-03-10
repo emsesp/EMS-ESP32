@@ -414,13 +414,19 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
 
     if (command == "mqtt_nested") {
         shell.printfln(F("Testing nested MQTT"));
-        Mqtt::ha_enabled(false); // turn off HA Discovery
+        Mqtt::ha_enabled(false); // turn off HA Discovery to stop the chatter
 
         run_test("boiler");
         run_test("thermostat");
         run_test("solar");
         run_test("mixer");
 
+        // first with nested
+        Mqtt::nested_format(true);
+        shell.invoke_command("call system publish");
+
+        // then without nested
+        Mqtt::nested_format(false);
         shell.invoke_command("call system publish");
         shell.invoke_command("show mqtt");
     }

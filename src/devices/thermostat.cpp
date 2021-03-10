@@ -2042,43 +2042,48 @@ void Thermostat::register_device_values() {
     uint8_t model = this->model();
 
     // Common for all thermostats
-    register_device_value(TAG_NONE, &id_, DeviceValueType::UINT, nullptr, F("id"), nullptr); // empty full name to prevent being shown in web or console
-    register_device_value(TAG_NONE, &dateTime_, DeviceValueType::TEXT, nullptr, F("dateTime"), F("date/time"));
-    register_device_value(TAG_NONE, &errorCode_, DeviceValueType::TEXT, nullptr, F("errorCode"), F("error code"));
-    register_device_value(TAG_NONE, &lastCode_, DeviceValueType::TEXT, nullptr, F("lastCode"), F("last error"));
+    register_device_value(TAG_THERMOSTAT_DATA, &id_, DeviceValueType::UINT, nullptr, F("id"), nullptr); // empty full name to prevent being shown in web or console
+    register_device_value(TAG_THERMOSTAT_DATA, &dateTime_, DeviceValueType::TEXT, nullptr, F("dateTime"), F("date/time"));
+    register_device_value(TAG_THERMOSTAT_DATA, &errorCode_, DeviceValueType::TEXT, nullptr, F("errorCode"), F("error code"));
+    register_device_value(TAG_THERMOSTAT_DATA, &lastCode_, DeviceValueType::TEXT, nullptr, F("lastCode"), F("last error"));
 
     // RC30 only
     if (model == EMSdevice::EMS_DEVICE_FLAG_RC30_1) {
-        register_device_value(TAG_NONE, &ibaMainDisplay_, DeviceValueType::ENUM, FL_(enum_ibaMainDisplay), F("display"), F("display"));
-        register_device_value(TAG_NONE, &ibaLanguage_, DeviceValueType::ENUM, FL_(enum_ibaLanguage), F("language"), F("language"));
-        register_device_value(TAG_NONE, &ibaClockOffset_, DeviceValueType::UINT, nullptr, F("offsetclock"), F("clock offset")); // offset (in sec) to clock, 0xff=-1s, 0x02=2s
+        register_device_value(TAG_THERMOSTAT_DATA, &ibaMainDisplay_, DeviceValueType::ENUM, FL_(enum_ibaMainDisplay), F("display"), F("display"));
+        register_device_value(TAG_THERMOSTAT_DATA, &ibaLanguage_, DeviceValueType::ENUM, FL_(enum_ibaLanguage), F("language"), F("language"));
+        register_device_value(TAG_THERMOSTAT_DATA, &ibaClockOffset_, DeviceValueType::UINT, nullptr, F("offsetclock"), F("clock offset")); // offset (in sec) to clock, 0xff=-1s, 0x02=2s
     }
 
     // RC300 and RC100
     if (model == EMS_DEVICE_FLAG_RC300 || model == EMS_DEVICE_FLAG_RC100) {
-        register_device_value(TAG_NONE, &floordrystatus_, DeviceValueType::ENUM, FL_(enum_floordrystatus), F("floordry"), F("floor drying"));
-        register_device_value(TAG_NONE, &dampedoutdoortemp2_, DeviceValueType::SHORT, FL_(div10), F("dampedoutdoortemp"), F("damped outdoor temperature"), DeviceValueUOM::DEGREES);
-        register_device_value(TAG_NONE, &floordrytemp_, DeviceValueType::UINT, nullptr, F("floordrytemp"), F("floor drying temperature"), DeviceValueUOM::DEGREES);
-        register_device_value(TAG_NONE, &ibaBuildingType_, DeviceValueType::ENUM, FL_(enum_ibaBuildingType), F("building"), F("building"));
-        register_device_value(TAG_NONE, &wwSetTemp_, DeviceValueType::UINT, nullptr, F("wwsettemp"), F("warm water set temperature"), DeviceValueUOM::DEGREES);
-        register_device_value(TAG_NONE, &wwMode_, DeviceValueType::ENUM, FL_(enum_wwMode), F("wwmode"), F("warm water mode"));
-        register_device_value(TAG_NONE, &wwSetTempLow_, DeviceValueType::UINT, nullptr, F("wwsettemplow"), F("warm water set temperature low"), DeviceValueUOM::DEGREES);
-        register_device_value(TAG_NONE, &wwCircMode_, DeviceValueType::ENUM, FL_(enum_wwCircMode), F("wwcircmode"), F("warm water circulation mode"));
-        register_device_value(TAG_NONE, &wwExtra1_, DeviceValueType::UINT, nullptr, F("wwextra1"), F("warm water circuit 1 extra"), DeviceValueUOM::DEGREES);
-        register_device_value(TAG_NONE, &wwExtra2_, DeviceValueType::UINT, nullptr, F("wwextra2"), F("warm water circuit 2 extra"), DeviceValueUOM::DEGREES);
+        register_device_value(TAG_THERMOSTAT_DATA, &floordrystatus_, DeviceValueType::ENUM, FL_(enum_floordrystatus), F("floordry"), F("floor drying"));
+        register_device_value(TAG_THERMOSTAT_DATA, &dampedoutdoortemp2_, DeviceValueType::SHORT, FL_(div10), F("dampedoutdoortemp"), F("damped outdoor temperature"), DeviceValueUOM::DEGREES);
+        register_device_value(TAG_THERMOSTAT_DATA, &floordrytemp_, DeviceValueType::UINT, nullptr, F("floordrytemp"), F("floor drying temperature"), DeviceValueUOM::DEGREES);
+        register_device_value(TAG_THERMOSTAT_DATA, &ibaBuildingType_, DeviceValueType::ENUM, FL_(enum_ibaBuildingType), F("building"), F("building"));
+        register_device_value(TAG_THERMOSTAT_DATA, &wwSetTemp_, DeviceValueType::UINT, nullptr, F("wwsettemp"), F("warm water set temperature"), DeviceValueUOM::DEGREES);
+        register_device_value(TAG_THERMOSTAT_DATA, &wwMode_, DeviceValueType::ENUM, FL_(enum_wwMode), F("wwmode"), F("warm water mode"));
+        register_device_value(TAG_THERMOSTAT_DATA, &wwSetTempLow_, DeviceValueType::UINT, nullptr, F("wwsettemplow"), F("warm water set temperature low"), DeviceValueUOM::DEGREES);
+        register_device_value(TAG_THERMOSTAT_DATA, &wwCircMode_, DeviceValueType::ENUM, FL_(enum_wwCircMode), F("wwcircmode"), F("warm water circulation mode"));
+        register_device_value(TAG_THERMOSTAT_DATA, &wwExtra1_, DeviceValueType::UINT, nullptr, F("wwextra1"), F("warm water circuit 1 extra"), DeviceValueUOM::DEGREES);
+        register_device_value(TAG_THERMOSTAT_DATA, &wwExtra2_, DeviceValueType::UINT, nullptr, F("wwextra2"), F("warm water circuit 2 extra"), DeviceValueUOM::DEGREES);
     }
 
     // RC30 and RC35
     if (model == EMS_DEVICE_FLAG_RC35 || model == EMS_DEVICE_FLAG_RC30_1) {
-        register_device_value(TAG_NONE, &ibaCalIntTemperature_, DeviceValueType::INT, FL_(div2), F("intoffset"), F("offset internal temperature"), DeviceValueUOM::DEGREES);
-        register_device_value(TAG_NONE, &ibaMinExtTemperature_, DeviceValueType::INT, nullptr, F("minexttemp"), F("min external temperature"),
+        register_device_value(TAG_THERMOSTAT_DATA, &ibaCalIntTemperature_, DeviceValueType::INT, FL_(div2), F("intoffset"), F("offset internal temperature"), DeviceValueUOM::DEGREES);
+        register_device_value(TAG_THERMOSTAT_DATA,
+                              &ibaMinExtTemperature_,
+                              DeviceValueType::INT,
+                              nullptr,
+                              F("minexttemp"),
+                              F("min external temperature"),
                               DeviceValueUOM::DEGREES); // min ext temp for heating curve, in deg.
-        register_device_value(TAG_NONE, &tempsensor1_, DeviceValueType::USHORT, FL_(div10), F("inttemp1"), F("temperature sensor 1"), DeviceValueUOM::DEGREES);
-        register_device_value(TAG_NONE, &tempsensor2_, DeviceValueType::USHORT, FL_(div10), F("inttemp2"), F("temperature sensor 2"), DeviceValueUOM::DEGREES);
-        register_device_value(TAG_NONE, &dampedoutdoortemp_, DeviceValueType::INT, nullptr, F("dampedtemp"), F("damped outdoor temperature"), DeviceValueUOM::DEGREES);
-        register_device_value(TAG_NONE, &ibaBuildingType_, DeviceValueType::ENUM, FL_(enum_ibaBuildingType2), F("building"), F("building"));
-        register_device_value(TAG_NONE, &wwMode_, DeviceValueType::ENUM, FL_(enum_wwMode2), F("wwmode"), F("warm water mode"));
-        register_device_value(TAG_NONE, &wwCircMode_, DeviceValueType::ENUM, FL_(enum_wwCircMode2), F("wwcircmode"), F("warm water circulation mode"));
+        register_device_value(TAG_THERMOSTAT_DATA, &tempsensor1_, DeviceValueType::USHORT, FL_(div10), F("inttemp1"), F("temperature sensor 1"), DeviceValueUOM::DEGREES);
+        register_device_value(TAG_THERMOSTAT_DATA, &tempsensor2_, DeviceValueType::USHORT, FL_(div10), F("inttemp2"), F("temperature sensor 2"), DeviceValueUOM::DEGREES);
+        register_device_value(TAG_THERMOSTAT_DATA, &dampedoutdoortemp_, DeviceValueType::INT, nullptr, F("dampedtemp"), F("damped outdoor temperature"), DeviceValueUOM::DEGREES);
+        register_device_value(TAG_THERMOSTAT_DATA, &ibaBuildingType_, DeviceValueType::ENUM, FL_(enum_ibaBuildingType2), F("building"), F("building"));
+        register_device_value(TAG_THERMOSTAT_DATA, &wwMode_, DeviceValueType::ENUM, FL_(enum_wwMode2), F("wwmode"), F("warm water mode"));
+        register_device_value(TAG_THERMOSTAT_DATA, &wwCircMode_, DeviceValueType::ENUM, FL_(enum_wwCircMode2), F("wwcircmode"), F("warm water circulation mode"));
     }
 }
 

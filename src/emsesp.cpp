@@ -452,7 +452,7 @@ void EMSESP::publish_device_values(uint8_t device_type) {
                     if (nested) {
                         need_publish |= emsdevice->generate_values_json(json, DeviceValueTAG::TAG_NONE, true); // nested
                     } else {
-                        emsdevice->generate_values_json(json, DeviceValueTAG::TAG_NONE, false); // not nested
+                        emsdevice->generate_values_json(json, DeviceValueTAG::TAG_THERMOSTAT_DATA, false); // not nested
                         Mqtt::publish("thermostat_data", json);
                         json.clear();
 
