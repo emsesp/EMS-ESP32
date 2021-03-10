@@ -1,6 +1,6 @@
-import React, { Fragment } from 'react';
-import { SingleUpload } from '../components';
-import { Box } from '@material-ui/core';
+import React, { Fragment } from "react";
+import { SingleUpload } from "../components";
+import { Box } from "@material-ui/core";
 
 interface UploadFirmwareFormProps {
   uploading: boolean;
@@ -10,7 +10,6 @@ interface UploadFirmwareFormProps {
 }
 
 class UploadFirmwareForm extends React.Component<UploadFirmwareFormProps> {
-
   handleDrop = (files: File[]) => {
     const file = files[0];
     if (file) {
@@ -23,13 +22,20 @@ class UploadFirmwareForm extends React.Component<UploadFirmwareFormProps> {
     return (
       <Fragment>
         <Box py={2}>
-          Upload a new firmware file (.bin or .bin.gz) below to replace the existing firmware.
+          Upload a new firmware file (.bin or .bin.gz) below to replace the
+          existing firmware.
+          <p></p>This can take up to a minute. Wait until you see "Activating
+          new Firmware" and EMS-ESP will automatically restart.
         </Box>
-        <SingleUpload accept="application/octet-stream" onDrop={this.handleDrop} uploading={uploading} progress={progress} onCancel={onCancel} />
+        <SingleUpload
+          onDrop={this.handleDrop}
+          uploading={uploading}
+          progress={progress}
+          onCancel={onCancel}
+        />
       </Fragment>
     );
   }
-
 }
 
 export default UploadFirmwareForm;
