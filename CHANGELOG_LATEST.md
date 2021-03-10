@@ -24,6 +24,7 @@
 - MQTT payloads not adding to queue when MQTT is re-connecting (fixes #369)
 - fix for HA topics with invalid command formats (#728)
 - wrong position of values #723, #732
+- OTA Upload via Web on OSX
 
 ### Changed
 - changed how telegram parameters are rendered for mqtt, console and web (#632)
@@ -38,6 +39,7 @@
 - Updated to the latest ArduinoJson library
 - some names of mqtt-tags like in v2.2.1
 - new ESP32 partition side to allow for smoother OTA and fallback
+- Network Gateway IP is optional ([#682](https://github.com/proddy/EMS-ESP/issues/682))
 
 ### Removed
 
