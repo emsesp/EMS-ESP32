@@ -204,20 +204,27 @@ void Mqtt::show_mqtt(uuid::console::Shell & shell) {
 
     for (const auto & message : mqtt_messages_) {
         auto content = message.content_;
+        char topic[MQTT_TOPIC_MAX_SIZE];
+        if ((strncmp(content->topic.c_str(), "homeassistant/", 13) != 0)) {
+            snprintf_P(topic, sizeof(topic), PSTR("%s/%s"), Mqtt::base().c_str(), content->topic.c_str());
+        } else {
+            snprintf_P(topic, sizeof(topic), PSTR("%s"), content->topic.c_str());
+        }
+
         if (content->operation == Operation::PUBLISH) {
             // Publish messages
             if (message.retry_count_ == 0) {
                 if (message.packet_id_ == 0) {
-                    shell.printfln(F(" [%02d] (Pub) topic=%s payload=%s"), message.id_, content->topic.c_str(), content->payload.c_str());
+                    shell.printfln(F(" [%02d] (Pub) topic=%s payload=%s"), message.id_, topic, content->payload.c_str());
                 } else {
-                    shell.printfln(F(" [%02d] (Pub) topic=%s payload=%s (pid %d)"), message.id_, content->topic.c_str(), content->payload.c_str(), message.packet_id_);
+                    shell.printfln(F(" [%02d] (Pub) topic=%s payload=%s (pid %d)"), message.id_, topic, content->payload.c_str(), message.packet_id_);
                 }
             } else {
-                shell.printfln(F(" [%02d] (Pub) topic=%s payload=%s (pid %d, retry #%d)"), message.id_, content->topic.c_str(), content->payload.c_str(), message.packet_id_, message.retry_count_);
+                shell.printfln(F(" [%02d] (Pub) topic=%s payload=%s (pid %d, retry #%d)"), message.id_, topic, content->payload.c_str(), message.packet_id_, message.retry_count_);
             }
         } else {
             // Subscribe messages
-            shell.printfln(F(" [%02d] (Sub) topic=%s"), message.id_, content->topic.c_str());
+            shell.printfln(F(" [%02d] (Sub) topic=%s"), message.id_, topic);
         }
     }
     shell.println();
@@ -370,17 +377,36 @@ void Mqtt::reset_mqtt() {
     }
 }
 
+void Mqtt::load_settings() {
+    EMSESP::esp8266React.getMqttSettingsService()->read([&](MqttSettings & mqttSettings) {
+        mqtt_base_         = mqttSettings.base.c_str(); // Convert String to std::string
+        mqtt_qos_          = mqttSettings.mqtt_qos;
+        mqtt_retain_       = mqttSettings.mqtt_retain;
+        mqtt_enabled_      = mqttSettings.enabled;
+        ha_enabled_        = mqttSettings.ha_enabled;
+        ha_climate_format_ = mqttSettings.ha_climate_format;
+        dallas_format_     = mqttSettings.dallas_format;
+        bool_format_       = mqttSettings.bool_format;
+        nested_format_     = mqttSettings.nested_format;
+
+        // convert to milliseconds
+        publish_time_boiler_     = mqttSettings.publish_time_boiler * 1000;
+        publish_time_thermostat_ = mqttSettings.publish_time_thermostat * 1000;
+        publish_time_solar_      = mqttSettings.publish_time_solar * 1000;
+        publish_time_mixer_      = mqttSettings.publish_time_mixer * 1000;
+        publish_time_other_      = mqttSettings.publish_time_other * 1000;
+        publish_time_sensor_     = mqttSettings.publish_time_sensor * 1000;
+    });
+}
+
 void Mqtt::start() {
     mqttClient_ = EMSESP::esp8266React.getMqttClient();
 
-    // fetch MQTT settings, to see if MQTT is enabled
-    EMSESP::esp8266React.getMqttSettingsService()->read([&](MqttSettings & mqttSettings) {
-        mqtt_enabled_ = mqttSettings.enabled;
-        mqtt_base_    = mqttSettings.base.c_str(); // Convert String to std::string
-        if (!mqtt_enabled_) {
-            return; // quit, not using MQTT
-        }
-    });
+    load_settings(); // fetch MQTT settings
+
+    if (!mqtt_enabled_) {
+        return; // quit, not using MQTT
+    }
 
     // if already initialized, don't do it again
     if (initialized_) {
@@ -498,23 +524,7 @@ void Mqtt::on_connect() {
     connecting_ = true;
     connectcount_++;
 
-    // fetch MQTT settings
-    EMSESP::esp8266React.getMqttSettingsService()->read([&](MqttSettings & mqttSettings) {
-        publish_time_boiler_     = mqttSettings.publish_time_boiler * 1000; // convert to milliseconds
-        publish_time_thermostat_ = mqttSettings.publish_time_thermostat * 1000;
-        publish_time_solar_      = mqttSettings.publish_time_solar * 1000;
-        publish_time_mixer_      = mqttSettings.publish_time_mixer * 1000;
-        publish_time_other_      = mqttSettings.publish_time_other * 1000;
-        publish_time_sensor_     = mqttSettings.publish_time_sensor * 1000;
-        mqtt_qos_                = mqttSettings.mqtt_qos;
-        mqtt_retain_             = mqttSettings.mqtt_retain;
-        mqtt_enabled_            = mqttSettings.enabled;
-        ha_enabled_              = mqttSettings.ha_enabled;
-        ha_climate_format_       = mqttSettings.ha_climate_format;
-        dallas_format_           = mqttSettings.dallas_format;
-        bool_format_             = mqttSettings.bool_format;
-        nested_format_           = mqttSettings.nested_format;
-    });
+    load_settings(); // reload MQTT settings - in case they have changes
 
     // send info topic appended with the version information as JSON
     StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> doc;
@@ -589,16 +599,16 @@ void Mqtt::ha_status() {
     Mqtt::publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
 
     // create the sensors
-    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_NONE, F("Wifi strength"), EMSdevice::DeviceType::SYSTEM, F("rssi"));
-    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_NONE, F("Uptime"), EMSdevice::DeviceType::SYSTEM, F("uptime"));
-    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_NONE, F("Uptime (sec)"), EMSdevice::DeviceType::SYSTEM, F("uptime_sec"));
-    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_NONE, F("Free heap memory"), EMSdevice::DeviceType::SYSTEM, F("freemem"));
-    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_NONE, F("# Failed MQTT publishes"), EMSdevice::DeviceType::SYSTEM, F("mqttfails"));
-    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_NONE, F("# Rx Sent"), EMSdevice::DeviceType::SYSTEM, F("rxsent"));
-    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_NONE, F("# Rx Fails"), EMSdevice::DeviceType::SYSTEM, F("rxfails"));
-    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_NONE, F("# Tx Reads"), EMSdevice::DeviceType::SYSTEM, F("txread"));
-    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_NONE, F("# Tx Writes"), EMSdevice::DeviceType::SYSTEM, F("txwrite"));
-    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_NONE, F("# Tx Fails"), EMSdevice::DeviceType::SYSTEM, F("txfails"));
+    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_SYSTEM_DATA, F("Wifi strength"), EMSdevice::DeviceType::SYSTEM, F("rssi"));
+    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_SYSTEM_DATA, F("Uptime"), EMSdevice::DeviceType::SYSTEM, F("uptime"));
+    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_SYSTEM_DATA, F("Uptime (sec)"), EMSdevice::DeviceType::SYSTEM, F("uptime_sec"));
+    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_SYSTEM_DATA, F("Free heap memory"), EMSdevice::DeviceType::SYSTEM, F("freemem"));
+    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_SYSTEM_DATA, F("# Failed MQTT publishes"), EMSdevice::DeviceType::SYSTEM, F("mqttfails"));
+    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_SYSTEM_DATA, F("# Rx Sent"), EMSdevice::DeviceType::SYSTEM, F("rxsent"));
+    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_SYSTEM_DATA, F("# Rx Fails"), EMSdevice::DeviceType::SYSTEM, F("rxfails"));
+    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_SYSTEM_DATA, F("# Tx Reads"), EMSdevice::DeviceType::SYSTEM, F("txread"));
+    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_SYSTEM_DATA, F("# Tx Writes"), EMSdevice::DeviceType::SYSTEM, F("txwrite"));
+    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_SYSTEM_DATA, F("# Tx Fails"), EMSdevice::DeviceType::SYSTEM, F("txfails"));
 }
 
 // add sub or pub task to the queue.
@@ -792,11 +802,11 @@ void Mqtt::process_queue() {
 //
 // note: some string copying here into chars, it looks messy but does help with heap fragmentation issues
 void Mqtt::publish_mqtt_ha_sensor(uint8_t                     type, // EMSdevice::DeviceValueType
-                                  uint8_t                     tag,
+                                  uint8_t                     tag,  // EMSdevice::DeviceValueTAG
                                   const __FlashStringHelper * name,
                                   const uint8_t               device_type, // EMSdevice::DeviceType
                                   const __FlashStringHelper * entity,
-                                  const uint8_t               uom) { // DeviceValueUOM (0=NONE)
+                                  const uint8_t               uom) { // EMSdevice::DeviceValueUOM (0=NONE)
     // ignore if name (fullname) is empty
     if (name == nullptr) {
         return;
@@ -804,13 +814,12 @@ void Mqtt::publish_mqtt_ha_sensor(uint8_t                     type, // EMSdevice
 
     DynamicJsonDocument doc(EMSESP_JSON_SIZE_HA_CONFIG);
 
-    // special case for boiler - don't use the prefix
-    bool have_prefix = ((tag != DeviceValueTAG::TAG_NONE) && (device_type != EMSdevice::DeviceType::BOILER));
+    bool have_tag  = !EMSdevice::tag_to_string(tag).empty() && (device_type != EMSdevice::DeviceType::BOILER); // ignore boiler
+    bool is_nested = nested_format_ || (device_type == EMSdevice::DeviceType::BOILER);                         // boiler never uses nested
 
-    // create entity by inserting any given prefix
-    // we ignore the tag if BOILER
+    // create entity by add the tag if present, seperating with a .
     char new_entity[50];
-    if (have_prefix) {
+    if (have_tag) {
         snprintf_P(new_entity, sizeof(new_entity), PSTR("%s.%s"), EMSdevice::tag_to_string(tag).c_str(), uuid::read_flash_string(entity).c_str());
     } else {
         snprintf_P(new_entity, sizeof(new_entity), PSTR("%s"), uuid::read_flash_string(entity).c_str());
@@ -830,28 +839,13 @@ void Mqtt::publish_mqtt_ha_sensor(uint8_t                     type, // EMSdevice
     doc["~"] = mqtt_base_;
 
     // state topic
-    // if its a boiler we use the tag
     char stat_t[MQTT_TOPIC_MAX_SIZE];
-    if (device_type == EMSdevice::DeviceType::BOILER) {
-        if (tag == DeviceValueTAG::TAG_BOILER_DATA) {
-            snprintf_P(stat_t, sizeof(stat_t), PSTR("~/boiler_data"));
-        } else if (tag == DeviceValueTAG::TAG_BOILER_DATA_WW) {
-            snprintf_P(stat_t, sizeof(stat_t), PSTR("~/boiler_data_ww"));
-        } else {
-            snprintf_P(stat_t, sizeof(stat_t), PSTR("~/boiler_data_info"));
-        }
-     } else if (device_type == EMSdevice::DeviceType::SYSTEM) {
-        snprintf_P(stat_t, sizeof(stat_t), PSTR("~/heartbeat"));
-    } else if (nested_format_ || !have_prefix) {
-        snprintf_P(stat_t, sizeof(stat_t), PSTR("~/%s_data"), device_name);
-    } else {
-        snprintf_P(stat_t, sizeof(stat_t), PSTR("~/%s_data_%s"), device_name, EMSdevice::tag_to_string(tag).c_str());
-    }
+    snprintf_P(stat_t, sizeof(stat_t), PSTR("~/%s"), tag_to_topic(device_type, tag).c_str());
     doc["stat_t"] = stat_t;
 
     // name
-    char new_name[50];
-    if (have_prefix) {
+    char new_name[80];
+    if (have_tag) {
         snprintf_P(new_name, sizeof(new_name), PSTR("%s %s %s"), device_name, EMSdevice::tag_to_string(tag).c_str(), uuid::read_flash_string(name).c_str());
     } else {
         snprintf_P(new_name, sizeof(new_name), PSTR("%s %s"), device_name, uuid::read_flash_string(name).c_str());
@@ -861,22 +855,21 @@ void Mqtt::publish_mqtt_ha_sensor(uint8_t                     type, // EMSdevice
 
     // value template
     char val_tpl[50];
-    if (nested_format_) {
+    if (is_nested) {
         snprintf_P(val_tpl, sizeof(val_tpl), PSTR("{{value_json.%s}}"), new_entity);
     } else {
         snprintf_P(val_tpl, sizeof(val_tpl), PSTR("{{value_json.%s}}"), uuid::read_flash_string(entity).c_str());
     }
     doc["val_tpl"] = val_tpl;
 
-    char topic[MQTT_TOPIC_MAX_SIZE]; // reserved for topic
+    char topic[MQTT_TOPIC_MAX_SIZE];
 
     // look at the device value type
     if (type == DeviceValueType::BOOL) {
         // binary sensor
         snprintf_P(topic, sizeof(topic), PSTR("homeassistant/binary_sensor/%s/%s/config"), mqtt_base_.c_str(), uniq.c_str()); // topic
 
-        // how to render boolean
-        // HA only accepts String values
+        // how to render boolean. HA only accepts String values
         char result[10];
         doc[F("payload_on")]  = Helpers::render_boolean(result, true);
         doc[F("payload_off")] = Helpers::render_boolean(result, false);
@@ -905,8 +898,7 @@ void Mqtt::publish_mqtt_ha_sensor(uint8_t                     type, // EMSdevice
     }
 
     JsonObject dev = doc.createNestedObject("dev");
-
-    JsonArray ids = dev.createNestedArray("ids");
+    JsonArray  ids = dev.createNestedArray("ids");
 
     // for System commands we'll use the ID EMS-ESP
     if (device_type == EMSdevice::DeviceType::SYSTEM) {
@@ -919,5 +911,22 @@ void Mqtt::publish_mqtt_ha_sensor(uint8_t                     type, // EMSdevice
 
     publish_ha(topic, doc.as<JsonObject>());
 }
+
+// based on the device and tag, create the MQTT topic name (without the basename)
+// differs based on whether MQTT nested is enabled
+// tag = EMSdevice::DeviceValueTAG
+const std::string Mqtt::tag_to_topic(uint8_t device_type, uint8_t tag) {
+    if (device_type == EMSdevice::DeviceType::SYSTEM) {
+        return EMSdevice::tag_to_mqtt(tag);
+    }
+
+    // if there is a tag add it
+    if ((EMSdevice::tag_to_mqtt(tag).empty()) || (nested_format_ && (device_type != EMSdevice::DeviceType::BOILER))) {
+        return EMSdevice::device_type_2_device_name(device_type) + "_data";
+    } else {
+        return EMSdevice::device_type_2_device_name(device_type) + "_data_" + EMSdevice::tag_to_mqtt(tag);
+    }
+}
+
 
 } // namespace emsesp

@@ -36,7 +36,6 @@ class Boiler : public EMSdevice {
 
     uint8_t boilerState_ = EMS_VALUE_UINT_NOTSET; // Boiler state flag - FOR INTERNAL USE
 
-    static constexpr uint8_t  EMS_TYPE_UBASettingsWW      = 0x26;
     static constexpr uint8_t  EMS_TYPE_UBAParameterWW     = 0x33;
     static constexpr uint8_t  EMS_TYPE_UBAFunctionTest    = 0x1D;
     static constexpr uint8_t  EMS_TYPE_UBAFlags           = 0x35;
@@ -74,9 +73,8 @@ class Boiler : public EMSdevice {
     uint8_t  wWHeat_;             // 3-way valve on WW
     uint8_t  wWSetPumpPower_;     // ww pump speed/power?
     uint8_t  wWFlowTempOffset_;   // Boiler offset for ww heating
-    uint8_t  wWMaxPower_;         // Warm Water maximum power
     uint32_t wWStarts_;           // Warm Water # starts
-    uint32_t wWStarts2_;          // Warm water starts (control)
+    uint32_t wWStarts2_;          // Warm water control starts
     uint32_t wWWorkM_;            // Warm Water # minutes
 
     uint16_t mixerTemp_;      // mixing temperature
@@ -128,8 +126,8 @@ class Boiler : public EMSdevice {
     uint32_t upTimeCompHeating_;         // Operating time compressor heating
     uint32_t upTimeCompCooling_;         // Operating time compressor cooling
     uint32_t upTimeCompWw_;              // Operating time compressor warm water
-    uint32_t heatingStarts_;             // Heating starts (control)
-    uint32_t coolingStarts_;             // Cooling  starts (control)
+    uint32_t heatingStarts_;             // Heating control starts
+    uint32_t coolingStarts_;             // Cooling control starts
     uint32_t nrgConsTotal_;              // Energy consumption total
     uint32_t nrgConsCompTotal_;          // Energy consumption compressor total
     uint32_t nrgConsCompHeating_;        // Energy consumption compressor heating
@@ -169,7 +167,6 @@ class Boiler : public EMSdevice {
     void process_UBAInformation(std::shared_ptr<const Telegram> telegram);
     void process_UBAEnergySupplied(std::shared_ptr<const Telegram> telegram);
     void process_CascadeMessage(std::shared_ptr<const Telegram> telegram);
-    void process_UBASettingsWW(std::shared_ptr<const Telegram> telegram);
 
     // commands - none of these use the additional id parameter
     bool set_warmwater_mode(const char * value, const int8_t id);
@@ -180,7 +177,6 @@ class Boiler : public EMSdevice {
     bool set_warmwater_circulation_pump(const char * value, const int8_t id);
     bool set_warmwater_circulation_mode(const char * value, const int8_t id);
     bool set_warmwater_temp(const char * value, const int8_t id);
-    bool set_warmwater_maxpower(const char * value, const int8_t id);
     bool set_wWFlowTempOffset(const char * value, const int8_t id);
     bool set_flow_temp(const char * value, const int8_t id);
     bool set_heating_activated(const char * value, const int8_t id);

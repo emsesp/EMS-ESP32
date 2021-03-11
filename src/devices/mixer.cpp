@@ -87,7 +87,7 @@ bool Mixer::publish_ha_config() {
     doc["uniq_id"] = uniq_id;
 
     char stat_t[Mqtt::MQTT_TOPIC_MAX_SIZE];
-    snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/mixer_data"), Mqtt::base().c_str());
+    snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/%s"), Mqtt::base().c_str(), Mqtt::tag_to_topic(device_type(), DeviceValueTAG::TAG_NONE).c_str());
     doc["stat_t"] = stat_t;
 
     char name[20];

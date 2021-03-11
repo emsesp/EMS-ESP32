@@ -191,7 +191,7 @@ bool Thermostat::publish_ha_config() {
     doc["uniq_id"] = F_(thermostat);
 
     char stat_t[Mqtt::MQTT_TOPIC_MAX_SIZE];
-    snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/thermostat_data"), Mqtt::base().c_str());
+    snprintf_P(stat_t, sizeof(stat_t), PSTR("%s/%s"), Mqtt::base().c_str(), Mqtt::tag_to_topic(device_type(), DeviceValueTAG::TAG_NONE).c_str());
     doc["stat_t"] = stat_t;
 
     doc["name"]    = FJSON("ID");
@@ -369,28 +369,41 @@ void Thermostat::register_mqtt_ha_config_hc(uint8_t hc_num) {
 
     char str3[25];
     snprintf_P(str3, sizeof(str3), PSTR("~/%s"), str2);
-    doc["mode_cmd_t"]  = str3;
-    doc["temp_cmd_t"]  = str3;
-    doc["name"]        = str1;
-    doc["uniq_id"]     = str2;
-    doc["mode_cmd_t"]  = str3;
-    doc["temp_cmd_t"]  = str3;
-    doc["~"]           = Mqtt::base(); // ems-esp
-    doc["mode_stat_t"] = FJSON("~/thermostat_data");
-    doc["temp_stat_t"] = FJSON("~/thermostat_data");
-    doc["curr_temp_t"] = FJSON("~/thermostat_data");
+    doc["mode_cmd_t"] = str3;
+    doc["temp_cmd_t"] = str3;
+    doc["name"]       = str1;
+    doc["uniq_id"]    = str2;
+    doc["mode_cmd_t"] = str3;
+    doc["temp_cmd_t"] = str3;
+    doc["~"]          = Mqtt::base(); // ems-esp
 
-    char mode_str[30];
-    snprintf_P(mode_str, sizeof(mode_str), PSTR("{{value_json.hc%d.hamode}}"), hc_num);
-    doc["mode_stat_tpl"] = mode_str;
+    char topic_t[80];
+    if (Mqtt::nested_format()) {
+        snprintf_P(topic_t, sizeof(topic_t), PSTR("~/%s"), Mqtt::tag_to_topic(EMSdevice::DeviceType::THERMOSTAT, DeviceValueTAG::TAG_NONE).c_str());
 
-    char seltemp_str[30];
-    snprintf_P(seltemp_str, sizeof(seltemp_str), PSTR("{{value_json.hc%d.seltemp}}"), hc_num);
-    doc["temp_stat_tpl"] = seltemp_str;
+        char mode_str_tpl[40];
+        snprintf_P(mode_str_tpl, sizeof(mode_str_tpl), PSTR("{{value_json.hc%d.hamode}}"), hc_num);
+        doc["mode_stat_tpl"] = mode_str_tpl;
 
-    char currtemp_str[30];
-    snprintf_P(currtemp_str, sizeof(currtemp_str), PSTR("{{value_json.hc%d.hatemp}}"), hc_num);
-    doc["curr_temp_tpl"] = currtemp_str;
+        char seltemp_str[30];
+        snprintf_P(seltemp_str, sizeof(seltemp_str), PSTR("{{value_json.hc%d.seltemp}}"), hc_num);
+        doc["temp_stat_tpl"] = seltemp_str;
+
+        char currtemp_str[30];
+        snprintf_P(currtemp_str, sizeof(currtemp_str), PSTR("{{value_json.hc%d.hatemp}}"), hc_num);
+        doc["curr_temp_tpl"] = currtemp_str;
+
+
+    } else {
+        snprintf_P(topic_t, sizeof(topic_t), PSTR("~/%s"), Mqtt::tag_to_topic(EMSdevice::DeviceType::THERMOSTAT, DeviceValueTAG::TAG_HC1 + hc_num - 1).c_str());
+
+        doc["mode_stat_tpl"] = FJSON("{{value_json.hamode}}");
+        doc["temp_stat_tpl"] = FJSON("{{value_json.seltemp}}");
+        doc["curr_temp_tpl"] = FJSON("{{value_json.hatemp}}");
+    }
+    doc["mode_stat_t"] = topic_t;
+    doc["temp_stat_t"] = topic_t;
+    doc["curr_temp_t"] = topic_t;
 
     doc["min_temp"]  = FJSON("5");
     doc["max_temp"]  = FJSON("30");

@@ -69,14 +69,12 @@ MAKE_PSTR(lmin, "l/min")
 enum DeviceValueUOM : uint8_t { NONE = 0, DEGREES, PERCENT, LMIN, KWH, WH, HOURS, MINUTES, UA, BAR, PUMP };
 
 // TAG mapping - maps to DeviceValueTAG_s in emsdevice.cpp
-MAKE_PSTR(tag_none, "")  // use empty string if want to suppress showing tags
-// MAKE_PSTR(tag_boiler_data, "boiler")
-// MAKE_PSTR(tag_boiler_data_ww, "warm water")
-// MAKE_PSTR(tag_boiler_data_info, "info")
+// use empty string if want to suppress showing tags
+MAKE_PSTR(tag_none, "")
+MAKE_PSTR(tag_system_data, "")
 MAKE_PSTR(tag_boiler_data, "")
-MAKE_PSTR(tag_boiler_data_ww, "")
-MAKE_PSTR(tag_boiler_data_info, "")
-MAKE_PSTR(tag_thermostat_data, "") // use empty string if want to suppress showing tags
+MAKE_PSTR(tag_boiler_data_ww, "warm water")
+MAKE_PSTR(tag_thermostat_data, "")
 MAKE_PSTR(tag_hc1, "hc1")
 MAKE_PSTR(tag_hc2, "hc2")
 MAKE_PSTR(tag_hc3, "hc3")
@@ -85,11 +83,17 @@ MAKE_PSTR(tag_wwc1, "wwc1")
 MAKE_PSTR(tag_wwc2, "wwc2")
 MAKE_PSTR(tag_wwc3, "wwc3")
 MAKE_PSTR(tag_wwc4, "wwc4")
+
+// MQTT topic names
+MAKE_PSTR(tag_system_data_mqtt, "heartbeat")
+MAKE_PSTR(tag_boiler_data_mqtt, "")
+MAKE_PSTR(tag_boiler_data_ww_mqtt, "ww")
+
 enum DeviceValueTAG : uint8_t {
     TAG_NONE = 0, // wild card
+    TAG_SYSTEM_DATA,
     TAG_BOILER_DATA,
     TAG_BOILER_DATA_WW,
-    TAG_BOILER_DATA_INFO,
     TAG_THERMOSTAT_DATA,
     TAG_HC1,
     TAG_HC2,
@@ -132,6 +136,7 @@ class EMSdevice {
 
     static const std::string uom_to_string(uint8_t uom);
     static const std::string tag_to_string(uint8_t tag);
+    static const std::string tag_to_mqtt(uint8_t tag);
 
     inline uint8_t product_id() const {
         return product_id_;

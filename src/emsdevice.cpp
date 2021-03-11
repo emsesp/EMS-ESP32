@@ -41,31 +41,54 @@ static const __FlashStringHelper * DeviceValueUOM_s[] __attribute__((__aligned__
 // must be an int of 4 bytes, 32bit aligned
 static const __FlashStringHelper * const DeviceValueTAG_s[] PROGMEM = {
 
-    F_(tag_none),
-    F_(tag_boiler_data),
-    F_(tag_boiler_data_ww),
-    F_(tag_boiler_data_info),
-    F_(tag_thermostat_data),
-    F_(tag_hc1),
-    F_(tag_hc2),
-    F_(tag_hc3),
-    F_(tag_hc4),
-    F_(tag_wwc1),
-    F_(tag_wwc2),
-    F_(tag_wwc3),
-    F_(tag_wwc4)
+    F_(tag_none),            // ""
+    F_(tag_system_data),     // ""
+    F_(tag_boiler_data),     // ""
+    F_(tag_boiler_data_ww),  // "warm water"
+    F_(tag_thermostat_data), // ""
+    F_(tag_hc1),             // "hc1"
+    F_(tag_hc2),             // "hc2"
+    F_(tag_hc3),             // "hc3"
+    F_(tag_hc4),             // "hc4"
+    F_(tag_wwc1),            // "wwc1"
+    F_(tag_wwc2),            // "Wwc2"
+    F_(tag_wwc3),            // "wwc3"
+    F_(tag_wwc4)             // "wwc4"
 
 };
+
+// MQTT topics derived from tags
+static const __FlashStringHelper * const DeviceValueTAG_mqtt[] PROGMEM = {
+
+    F_(tag_none),                // ""
+    F_(tag_system_data_mqtt),    // "heartbeat"
+    F_(tag_boiler_data_mqtt),    // ""
+    F_(tag_boiler_data_ww_mqtt), // "ww"
+    F_(tag_thermostat_data),     // ""
+    F_(tag_hc1),                 // "hc1"
+    F_(tag_hc2),                 // "hc2"
+    F_(tag_hc3),                 // "hc3"
+    F_(tag_hc4),                 // "hc4"
+    F_(tag_wwc1),                // "wwc1"
+    F_(tag_wwc2),                // "Wwc2"
+    F_(tag_wwc3),                // "wwc3"
+    F_(tag_wwc4)                 // "wwc4"
+
+};
+
+const std::string EMSdevice::tag_to_string(uint8_t tag) {
+    return uuid::read_flash_string(DeviceValueTAG_s[tag]);
+}
+
+const std::string EMSdevice::tag_to_mqtt(uint8_t tag) {
+    return uuid::read_flash_string(DeviceValueTAG_mqtt[tag]);
+}
 
 const std::string EMSdevice::uom_to_string(uint8_t uom) {
     if (uom == DeviceValueUOM::NONE || uom >= DeviceValueUOM::PUMP) {
         return std::string{};
     }
     return uuid::read_flash_string(DeviceValueUOM_s[uom - 1]); // offset by 1 to account for NONE
-}
-
-const std::string EMSdevice::tag_to_string(uint8_t tag) {
-    return uuid::read_flash_string(DeviceValueTAG_s[tag]);
 }
 
 const std::vector<EMSdevice::DeviceValue> EMSdevice::devicevalues() const {

@@ -71,6 +71,8 @@ class Mqtt {
     void loop();
     void start();
 
+    static void load_settings();
+
     void set_publish_time_boiler(uint16_t publish_time);
     void set_publish_time_thermostat(uint16_t publish_time);
     void set_publish_time_solar(uint16_t publish_time);
@@ -192,6 +194,8 @@ class Mqtt {
         return mqtt_messages_.empty();
     }
 
+    static const std::string tag_to_topic(uint8_t device_type, uint8_t tag);
+
     struct QueuedMqttMessage {
         const uint16_t                           id_;
         const std::shared_ptr<const MqttMessage> content_;
@@ -207,6 +211,7 @@ class Mqtt {
         }
     };
     static std::deque<QueuedMqttMessage> mqtt_messages_;
+
 
   private:
     static uuid::log::Logger logger_;

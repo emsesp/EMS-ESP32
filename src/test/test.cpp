@@ -388,6 +388,21 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         shell.invoke_command("show devices");
     }
 
+    if (command == "ha") {
+        shell.printfln(F("Testing HA discovery"));
+        Mqtt::ha_enabled(true);
+        // Mqtt::nested_format(true);
+        Mqtt::nested_format(false);
+
+        // run_test("boiler");
+        run_test("thermostat");
+        // run_test("solar");
+        // run_test("mixer");
+
+        shell.invoke_command("call system publish");
+        shell.invoke_command("show mqtt");
+    }
+
     if (command == "mqtt_nested") {
         shell.printfln(F("Testing nested MQTT"));
         Mqtt::ha_enabled(false); // turn off HA Discovery to stop the chatter
