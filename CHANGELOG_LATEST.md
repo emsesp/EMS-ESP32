@@ -14,7 +14,8 @@
 - External Button support (#708) for resetting to factory defaults and other actions
 - new console set command in `system`, `set ethernet <profile>` for quickly enabling cabled ethernet connections without using the captive wifi portal
 - Added in MQTT nested mode, for thermostat and mixer, like we had in v2
-- Boiler GB172i (product-id 210) (3.0.0b6)
+- Cascade MC400 (product-id 210) (3.0.0b6)
+- values for wwMaxPower, wwFlowtempOffset
 
 ### Fixed
 - telegrams matched to masterthermostat 0x18
