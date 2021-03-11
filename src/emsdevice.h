@@ -282,7 +282,9 @@ class EMSdevice {
     };
 
     // static device IDs
-    static constexpr uint8_t EMS_DEVICE_ID_BOILER = 0x08; // fixed device_id for Master Boiler/UBA
+    static constexpr uint8_t EMS_DEVICE_ID_BOILER   = 0x08; // fixed device_id for Master Boiler/UBA
+    static constexpr uint8_t EMS_DEVICE_ID_BOILER_1 = 0x70; // fixed device_id for 1st. Cascade Boiler/UBA
+    static constexpr uint8_t EMS_DEVICE_ID_BOILER_F = 0x7F; // fixed device_id for last Cascade Boiler/UBA
 
     // generic type IDs
     static constexpr uint16_t EMS_TYPE_VERSION    = 0x02; // type ID for Version information. Generic across all EMS devices.

@@ -28,6 +28,24 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
     LOG_DEBUG(F("Adding new Boiler with device ID 0x%02X"), device_id);
 
+    // cascaded heatingsources, add some values with new tags later
+    if (device_id != EMSdevice::EMS_DEVICE_ID_BOILER) {
+        // uint8_t hs = device_id - EMSdevice::EMS_DEVICE_ID_BOILER_1; // heating source number
+        // Runtime of each heatingsource in 6DC, ff
+        // register_telegram_type(0x6DC + hs, F("CascadeMessage"), false, [&](std::shared_ptr<const Telegram> t) { process_CascadeMessage(t); });
+        // selBurnpower in D2 and E4
+        // register_telegram_type(0xD2, F("CascadePowerMessage"), false, [&](std::shared_ptr<const Telegram> t) { process_CascadePowerMessage(t); });
+        // idividual Flowtemps and powervalues for each heatingsource in E4
+        // register_telegram_type(0xE4, F("UBAMonitorFastPlus"), false, [&](std::shared_ptr<const Telegram> t) { process_UBAMonitorFastPlus(t); });
+
+        // register_device_value(TAG_HS1 + hs, &selFlowTemp_, DeviceValueType::UINT, nullptr, F("selFlowTemp"), F("selected flow temperature"), DeviceValueUOM::DEGREES);
+        // register_device_value(TAG_HS1 + hs, &selBurnPow_, DeviceValueType::UINT, nullptr, F("selBurnPow"), F("burner selected max power"), DeviceValueUOM::PERCENT);
+        // register_device_value(TAG_HS1 + hs, &curFlowTemp_, DeviceValueType::USHORT, FL_(div10), F("curFlowTemp"), F("current flow temperature"), DeviceValueUOM::DEGREES);
+        // register_device_value(TAG_HS1 + hs, &curBurnPow_, DeviceValueType::UINT, nullptr, F("curBurnPow"), F("burner current power"), DeviceValueUOM::PERCENT);
+        return;
+    }
+    // register values for master boiler/cascade module
+
     reserve_telgram_functions(25); // reserve some space for the telegram registries, to avoid memory fragmentation
 
     // the telegram handlers...
@@ -67,6 +85,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     register_mqtt_cmd(F("comfort"), [&](const char * value, const int8_t id) { return set_warmwater_mode(value, id); });
     register_mqtt_cmd(F("wwactivated"), [&](const char * value, const int8_t id) { return set_warmwater_activated(value, id); });
     register_mqtt_cmd(F("wwtapactivated"), [&](const char * value, const int8_t id) { return set_tapwarmwater_activated(value, id); });
+    register_mqtt_cmd(F("wwflowtempoffset"), [&](const char * value, const int8_t id) { return set_wWFlowTempOffset(value, id); });
     register_mqtt_cmd(F("wwonetime"), [&](const char * value, const int8_t id) { return set_warmwater_onetime(value, id); });
     register_mqtt_cmd(F("wwcircpump"), [&](const char * value, const int8_t id) { return set_warmwater_circulation_pump(value, id); });
     register_mqtt_cmd(F("wwcirculation"), [&](const char * value, const int8_t id) { return set_warmwater_circulation(value, id); });
@@ -140,6 +159,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     register_device_value(TAG_BOILER_DATA_WW, &wWSetTemp_, DeviceValueType::UINT, nullptr, F("wWSetTemp"), F("set temperature"), DeviceValueUOM::DEGREES);
     register_device_value(TAG_BOILER_DATA_WW, &wWType_, DeviceValueType::ENUM, FL_(enum_flow), F("wWType"), F("type"));
     register_device_value(TAG_BOILER_DATA_WW, &wWComfort_, DeviceValueType::ENUM, FL_(enum_comfort), F("wWComfort"), F("comfort"));
+    register_device_value(TAG_BOILER_DATA_WW, &wWFlowTempOffset_, DeviceValueType::UINT, nullptr, F("wWFlowTempOffset"), F("flow offset temperature"));
     register_device_value(TAG_BOILER_DATA_WW, &wWCircPump_, DeviceValueType::BOOL, nullptr, F("wWCircPump"), F("circulation pump available"));
     register_device_value(TAG_BOILER_DATA_WW, &wWChargeType_, DeviceValueType::BOOL, FL_(enum_charge), F("wWChargeType"), F("charging type"));
     register_device_value(TAG_BOILER_DATA_WW, &wWDisinfectionTemp_, DeviceValueType::UINT, nullptr, F("wWDisinfectionTemp"), F("disinfection temperature"), DeviceValueUOM::DEGREES);
@@ -267,6 +287,7 @@ void Boiler::process_UBAParameterWW(std::shared_ptr<const Telegram> telegram) {
                                     10)); // 0 = charge pump, 0xff = 3-way valve
     has_update(telegram->read_value(wWSelTemp_, 2));
     has_update(telegram->read_value(wWDisinfectionTemp_, 8));
+    has_update(telegram->read_value(wWFlowTempOffset_, 5));
 
     telegram->read_value(wWComfort_, 9);
     if (wWComfort_ == 0x00) {
@@ -331,7 +352,8 @@ void Boiler::process_UBATotalUptime(std::shared_ptr<const Telegram> telegram) {
 
 /*
  * UBAParameters - type 0x16
- */
+ * data: FF 5A 64 00 0A FA 0F 02 06 64 64 02 08 F8 0F 0F 0F 0F 1E 05 04 09 09 00 28 00 3C
+*/
 void Boiler::process_UBAParameters(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram->read_value(heatingActivated_, 0));
     has_update(telegram->read_value(heatingTemp_, 1));
@@ -460,7 +482,11 @@ void Boiler::process_UBAMonitorSlowPlus(std::shared_ptr<const Telegram> telegram
 
 /*
  * UBAParametersPlus - type 0xe6
+ * parameters originaly taken from
+ * https://github.com/Th3M3/buderus_ems-wiki/blob/master/Einstellungen%20des%20Regelger%C3%A4ts%20MC110.md
  * 88 0B E6 00 01 46 00 00 46 0A 00 01 06 FA 0A 01 02 64 01 00 00 1E 00 3C 01 00 00 00 01 00 9A
+ * from: issue #732
+ *       data: 01 50 1E 5A 46 12 64 00 06 FA 3C 03 05 64 00 00 00 28 00 41 03 00 00 00 00 00 00 00 00 00
  */
 void Boiler::process_UBAParametersPlus(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram->read_value(heatingActivated_, 0));
@@ -470,8 +496,10 @@ void Boiler::process_UBAParametersPlus(std::shared_ptr<const Telegram> telegram)
     has_update(telegram->read_value(boilHystOff_, 8));
     has_update(telegram->read_value(boilHystOn_, 9));
     has_update(telegram->read_value(burnMinPeriod_, 10));
-    // changed_ |= telegram->read_value(pumpModMax_, 13); // guess
-    // changed_ |= telegram->read_value(pumpModMin_, 14); // guess
+    // has_update(telegram->read_value(pumpType_, 11));   // guess, RC300 manual: powercontroled, pressurcontrolled 1-4?
+    // has_update(telegram->read_value(pumpDelay_, 12));  // guess
+    // has_update(telegram->read_value(pumpModMax_, 13)); // guess
+    // has_update(telegram->read_value(pumpModMin_, 14)); // guess
 }
 
 // 0xEA
@@ -575,6 +603,17 @@ void Boiler::process_UBASetPoints(std::shared_ptr<const Telegram> telegram) {
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
+
+// 0x6DC, ff for cascaded heatsources (hs)
+// not implemented yet, see #739
+void Boiler::process_CascadeMessage(std::shared_ptr<const Telegram> telegram) {
+    uint8_t hs = telegram->dest - EMSdevice::EMS_DEVICE_ID_BOILER_1;
+    // uint8_t  hsActivated;
+    // uint32_t hsRuntime;
+    // has_update(telegram->read_value(hsActivated, 0));
+    // has_update(telegram->read_value(hsRuntime, 3));
+}
+
 // 0x35 - not yet implemented
 void Boiler::process_UBAFlags(std::shared_ptr<const Telegram> telegram) {
 }
@@ -667,6 +706,20 @@ bool Boiler::set_warmwater_temp(const char * value, const int8_t id) {
     return true;
 }
 
+// Set the warm water flow temperature offset 0x33
+bool Boiler::set_wWFlowTempOffset(const char * value, const int8_t id) {
+    int v = 0;
+    if (!Helpers::value2number(value, v)) {
+        LOG_WARNING(F("Set boiler warm water flow temperature offset: Invalid value"));
+        return false;
+     }
+
+    LOG_INFO(F("Setting boiler warm water flow temperature offset to %d C"), v);
+    write_command(EMS_TYPE_UBAParameterWW, 5, v, EMS_TYPE_UBAParameterWW);
+
+    return true;
+}
+
 // flow temp
 bool Boiler::set_flow_temp(const char * value, const int8_t id) {
     int v = 0;
@@ -684,7 +737,7 @@ bool Boiler::set_flow_temp(const char * value, const int8_t id) {
     return true;
 }
 
-// set min boiler output
+// set heating activated
 bool Boiler::set_heating_activated(const char * value, const int8_t id) {
     bool v = false;
     if (!Helpers::value2bool(value, v)) {
@@ -738,7 +791,7 @@ bool Boiler::set_min_power(const char * value, const int8_t id) {
     return true;
 }
 
-// set max temp
+// set max boiler output
 bool Boiler::set_max_power(const char * value, const int8_t id) {
     int v = 0;
     if (!Helpers::value2number(value, v)) {

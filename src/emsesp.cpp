@@ -878,7 +878,8 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, std::
             // sometimes boilers share the same product id as controllers
             // so only add boilers if the device_id is 0x08, which is fixed for EMS
             if (device.device_type == DeviceType::BOILER) {
-                if (device_id == EMSdevice::EMS_DEVICE_ID_BOILER) {
+                if (device_id == EMSdevice::EMS_DEVICE_ID_BOILER ||
+                    (device_id >= EMSdevice::EMS_DEVICE_ID_BOILER_1 && device_id <= EMSdevice::EMS_DEVICE_ID_BOILER_F)) {
                     device_p = &device;
                     break;
                 }
@@ -932,7 +933,7 @@ bool EMSESP::command_info(uint8_t device_type, JsonObject & json, const int8_t i
 
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice && (emsdevice->device_type() == device_type) && ((device_type != DeviceType::THERMOSTAT) || (emsdevice->device_id() == EMSESP::actual_master_thermostat()))) {
-            has_value |= emsdevice->generate_values_json(json, tag, (id == -1), true); // console & nested
+            has_value |= emsdevice->generate_values_json(json, tag, true, (id == -1)); // nested, console as default
         }
     }
 

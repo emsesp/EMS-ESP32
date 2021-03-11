@@ -72,6 +72,7 @@ class Boiler : public EMSdevice {
     uint8_t  wWActive_;           //
     uint8_t  wWHeat_;             // 3-way valve on WW
     uint8_t  wWSetPumpPower_;     // ww pump speed/power?
+    uint8_t  wWFlowTempOffset_;   // Boiler offset for ww heating
     uint32_t wWStarts_;           // Warm Water # starts
     uint32_t wWStarts2_;          // Warm water starts (control)
     uint32_t wWWorkM_;            // Warm Water # minutes
@@ -165,6 +166,7 @@ class Boiler : public EMSdevice {
     void process_UBADHWStatus(std::shared_ptr<const Telegram> telegram);
     void process_UBAInformation(std::shared_ptr<const Telegram> telegram);
     void process_UBAEnergySupplied(std::shared_ptr<const Telegram> telegram);
+    void process_CascadeMessage(std::shared_ptr<const Telegram> telegram);
 
     // commands - none of these use the additional id parameter
     bool set_warmwater_mode(const char * value, const int8_t id);
@@ -175,6 +177,7 @@ class Boiler : public EMSdevice {
     bool set_warmwater_circulation_pump(const char * value, const int8_t id);
     bool set_warmwater_circulation_mode(const char * value, const int8_t id);
     bool set_warmwater_temp(const char * value, const int8_t id);
+    bool set_wWFlowTempOffset(const char * value, const int8_t id);
     bool set_flow_temp(const char * value, const int8_t id);
     bool set_heating_activated(const char * value, const int8_t id);
     bool set_heating_temp(const char * value, const int8_t id);

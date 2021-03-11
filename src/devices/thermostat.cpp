@@ -831,6 +831,7 @@ void Thermostat::process_RC300WWtemp(std::shared_ptr<const Telegram> telegram) {
 }
 
 // type 02F5
+// RC300WWmode(0x2F5), data: 01 FF 04 00 00 00 08 05 00 08 04 00 00 00 00 00 00 00 00 00 01
 void Thermostat::process_RC300WWmode(std::shared_ptr<const Telegram> telegram) {
     // circulation pump see: https://github.com/Th3M3/buderus_ems-wiki/blob/master/Einstellungen%20der%20Bedieneinheit%20RC310.md
     has_update(telegram->read_value(wwCircPump_, 1)); // FF=off, 0=on ?
@@ -840,6 +841,7 @@ void Thermostat::process_RC300WWmode(std::shared_ptr<const Telegram> telegram) {
 }
 
 // types 0x31D and 0x31E
+// RC300WWmode2(0x31D), data: 00 00 09 07
 void Thermostat::process_RC300WWmode2(std::shared_ptr<const Telegram> telegram) {
     // 0x31D for WW system 1, 0x31E for WW system 2
     // pos 1 = holiday mode
@@ -2080,7 +2082,7 @@ void Thermostat::register_device_values() {
                               DeviceValueUOM::DEGREES); // min ext temp for heating curve, in deg.
         register_device_value(TAG_THERMOSTAT_DATA, &tempsensor1_, DeviceValueType::USHORT, FL_(div10), F("inttemp1"), F("temperature sensor 1"), DeviceValueUOM::DEGREES);
         register_device_value(TAG_THERMOSTAT_DATA, &tempsensor2_, DeviceValueType::USHORT, FL_(div10), F("inttemp2"), F("temperature sensor 2"), DeviceValueUOM::DEGREES);
-        register_device_value(TAG_THERMOSTAT_DATA, &dampedoutdoortemp_, DeviceValueType::INT, nullptr, F("dampedtemp"), F("damped outdoor temperature"), DeviceValueUOM::DEGREES);
+        register_device_value(TAG_THERMOSTAT_DATA, &dampedoutdoortemp_, DeviceValueType::INT, nullptr, F("dampedoutdoortemp"), F("damped outdoor temperature"), DeviceValueUOM::DEGREES);
         register_device_value(TAG_THERMOSTAT_DATA, &ibaBuildingType_, DeviceValueType::ENUM, FL_(enum_ibaBuildingType2), F("building"), F("building"));
         register_device_value(TAG_THERMOSTAT_DATA, &wwMode_, DeviceValueType::ENUM, FL_(enum_wwMode2), F("wwmode"), F("warm water mode"));
         register_device_value(TAG_THERMOSTAT_DATA, &wwCircMode_, DeviceValueType::ENUM, FL_(enum_wwCircMode2), F("wwcircmode"), F("warm water circulation mode"));
