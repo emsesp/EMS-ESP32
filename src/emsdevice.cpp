@@ -42,7 +42,7 @@ static const __FlashStringHelper * DeviceValueUOM_s[] __attribute__((__aligned__
 static const __FlashStringHelper * const DeviceValueTAG_s[] PROGMEM = {
 
     F_(tag_none),            // ""
-    F_(tag_system_data),     // ""
+    F_(tag_heartbeat),       // ""
     F_(tag_boiler_data),     // ""
     F_(tag_boiler_data_ww),  // "warm water"
     F_(tag_thermostat_data), // ""
@@ -61,7 +61,7 @@ static const __FlashStringHelper * const DeviceValueTAG_s[] PROGMEM = {
 static const __FlashStringHelper * const DeviceValueTAG_mqtt[] PROGMEM = {
 
     F_(tag_none),                // ""
-    F_(tag_system_data_mqtt),    // "heartbeat"
+    F_(tag_heartbeat_mqtt),      // "heartbeat"
     F_(tag_boiler_data_mqtt),    // ""
     F_(tag_boiler_data_ww_mqtt), // "ww"
     F_(tag_thermostat_data),     // ""
