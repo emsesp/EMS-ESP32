@@ -587,7 +587,7 @@ bool EMSdevice::generate_values_json(JsonObject & root, const uint8_t tag_filter
                 // if we have a tag, and its different to the last one create a nested object
                 if (dv.tag != old_tag) {
                     old_tag = dv.tag;
-                    if (nested && have_tag) {
+                    if (nested && have_tag && dv.tag >= DeviceValueTAG::TAG_HC1) { // no nests for boiler tags
                         json = root.createNestedObject(tag_to_string(dv.tag));
                     }
                 }
