@@ -17,6 +17,7 @@
 - Cascade MC400 (product-id 210) (3.0.0b6)
 - values for wwMaxPower, wwFlowtempOffset
 - RC300 `thermostat temp -1` to clear temporary setpoint in auto mode
+- Syslog port selectable (#744)
 
 ### Fixed
 - telegrams matched to masterthermostat 0x18
