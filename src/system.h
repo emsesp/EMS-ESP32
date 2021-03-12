@@ -148,6 +148,7 @@ class System {
     int8_t      syslog_level_;
     uint32_t    syslog_mark_interval_;
     String      syslog_host_;
+    uint16_t    syslog_port_;
 };
 
 } // namespace emsesp

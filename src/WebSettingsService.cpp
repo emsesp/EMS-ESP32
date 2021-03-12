@@ -37,6 +37,7 @@ void WebSettings::read(WebSettings & settings, JsonObject & root) {
     root["trace_raw"]            = settings.trace_raw;
     root["syslog_mark_interval"] = settings.syslog_mark_interval;
     root["syslog_host"]          = settings.syslog_host;
+    root["syslog_port"]          = settings.syslog_port;
     root["master_thermostat"]    = settings.master_thermostat;
     root["shower_timer"]         = settings.shower_timer;
     root["shower_alert"]         = settings.shower_alert;
@@ -73,9 +74,10 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     settings.syslog_level         = root["syslog_level"] | EMSESP_DEFAULT_SYSLOG_LEVEL;
     settings.syslog_mark_interval = root["syslog_mark_interval"] | EMSESP_DEFAULT_SYSLOG_MARK_INTERVAL;
     settings.syslog_host          = root["syslog_host"] | EMSESP_DEFAULT_SYSLOG_HOST;
+    settings.syslog_port          = root["syslog_port"] | EMSESP_DEFAULT_SYSLOG_PORT;
     settings.trace_raw            = root["trace_raw"] | EMSESP_DEFAULT_TRACELOG_RAW;
     EMSESP::trace_raw(settings.trace_raw);
-    snprintf_P(&crc_after[0], crc_after.capacity() + 1, PSTR("%d%d%d%s"), settings.syslog_enabled, settings.syslog_level, settings.syslog_mark_interval, settings.syslog_host.c_str());
+    snprintf_P(&crc_after[0], crc_after.capacity() + 1, PSTR("%d%d%d%d%s"), settings.syslog_enabled, settings.syslog_level, settings.syslog_mark_interval, settings.syslog_port, settings.syslog_host.c_str());
     if (crc_before != crc_after) {
         add_flags(ChangeFlags::SYSLOG);
     }

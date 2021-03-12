@@ -32,6 +32,7 @@
 #define EMSESP_DEFAULT_SYSLOG_LEVEL 3 // ERR
 #define EMSESP_DEFAULT_SYSLOG_MARK_INTERVAL 0
 #define EMSESP_DEFAULT_SYSLOG_HOST ""
+#define EMSESP_DEFAULT_SYSLOG_PORT 514
 #define EMSESP_DEFAULT_TRACELOG_RAW false
 #define EMSESP_DEFAULT_MASTER_THERMOSTAT 0 // not set
 #define EMSESP_DEFAULT_SHOWER_TIMER false
@@ -72,6 +73,7 @@ class WebSettings {
     int8_t   syslog_level; // uuid::log::Level
     uint32_t syslog_mark_interval;
     String   syslog_host;
+    uint16_t syslog_port;
     bool     trace_raw;
     uint8_t  rx_gpio;
     uint8_t  tx_gpio;

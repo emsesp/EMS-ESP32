@@ -699,11 +699,6 @@ bool EMSdevice::generate_values_json(JsonObject & root, const uint8_t tag_filter
         }
     }
 
-    // for debugging
-    // char dump[2000];
-    // serializeJson(root, dump);
-    // EMSESP::logger().info(F("**json root: %s"), dump);
-
     return has_value;
 }
 

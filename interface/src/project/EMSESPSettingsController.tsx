@@ -248,6 +248,18 @@ function EMSESPSettingsControllerForm(props: EMSESPSettingsControllerFormProps) 
                 onChange={handleValueChange('syslog_host')}
                 margin="normal"
             />
+            <TextValidator
+                validators={['required', 'isNumber', 'minNumber:0', 'maxNumber:65535']}
+                errorMessages={['Port is required', "Must be a number", "Must be greater than 0 ", "Max value is 65535"]}
+                name="syslog_port"
+                label="Syslog Port (default 514)"
+                fullWidth
+                variant="outlined"
+                value={data.syslog_port}
+                type="number"
+                onChange={handleValueChange('syslog_port')}
+                margin="normal"
+            />
             <SelectValidator name="syslog_level"
                 label="Syslog Log Level"
                 value={data.syslog_level}

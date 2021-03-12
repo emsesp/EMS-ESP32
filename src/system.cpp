@@ -143,7 +143,7 @@ void System::syslog_init(bool refresh) {
     syslog_.start();
     syslog_.log_level((uuid::log::Level)syslog_level_);
     syslog_.mark_interval(syslog_mark_interval_);
-    syslog_.destination(addr);
+    syslog_.destination(addr, syslog_port_);
     syslog_.hostname(hostname_.c_str());
 
     EMSESP::logger().info(F("Syslog started"));
@@ -164,6 +164,7 @@ void System::get_settings() {
         syslog_level_         = settings.syslog_level;
         syslog_mark_interval_ = settings.syslog_mark_interval;
         syslog_host_          = settings.syslog_host;
+        syslog_port_          = settings.syslog_port;
 
         // LED
         hide_led_ = settings.hide_led;
@@ -194,10 +195,10 @@ void System::wifi_tweak() {
     // WIFI_POWER_5dBm = 20,// 5dBm
     // WIFI_POWER_2dBm = 8,// 2dBm
     // WIFI_POWER_MINUS_1dBm = -4// -1dBm
-    wifi_power_t p1  = WiFi.getTxPower();
-    (void) WiFi.setTxPower(WIFI_POWER_19_5dBm);
-    wifi_power_t p2  = WiFi.getTxPower();
-    bool         s1  = WiFi.getSleep();
+    wifi_power_t p1 = WiFi.getTxPower();
+    (void)WiFi.setTxPower(WIFI_POWER_19_5dBm);
+    wifi_power_t p2 = WiFi.getTxPower();
+    bool         s1 = WiFi.getSleep();
     WiFi.setSleep(false); // turn off sleep - WIFI_PS_NONE
     bool s2 = WiFi.getSleep();
     LOG_INFO(F("Adjusting Wifi - Tx power %d->%d, Sleep %d->%d"), p1, p2, s1, s2);
@@ -683,6 +684,8 @@ void System::show_system(uuid::console::Shell & shell) {
         shell.print(F(" "));
         shell.printfln(F_(host_fmt), !syslog_host_.isEmpty() ? syslog_host_.c_str() : uuid::read_flash_string(F_(unset)).c_str());
         shell.print(F(" "));
+        shell.printfln(F_(port_fmt), syslog_port_);
+        shell.print(F(" "));
         shell.printfln(F_(log_level_fmt), uuid::log::format_level_lowercase(static_cast<uuid::log::Level>(syslog_level_)));
         shell.print(F(" "));
         shell.printfln(F_(mark_interval_fmt), syslog_mark_interval_);
@@ -919,6 +922,7 @@ bool System::command_settings(const char * value, const int8_t id, JsonObject & 
         node["syslog_level"]         = settings.syslog_level;
         node["syslog_mark_interval"] = settings.syslog_mark_interval;
         node["syslog_host"]          = settings.syslog_host;
+        node["syslog_port"]          = settings.syslog_port;
         node["master_thermostat"]    = settings.master_thermostat;
         node["shower_timer"]         = settings.shower_timer;
         node["shower_alert"]         = settings.shower_alert;
