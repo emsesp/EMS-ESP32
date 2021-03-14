@@ -57,3 +57,5 @@ jobs:
           prerelease: true
           files: |
             CHANGELOG_LATEST.md
+            ./build/firmware/*.*
+
