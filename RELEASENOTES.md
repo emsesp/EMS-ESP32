@@ -1,4 +1,4 @@
-# ![logo](https://github.com/proddy/EMS-ESP/blob/esp32_dev/media/EMS-ESP_logo_dark.png)
+# ![logo](https://github.com/emsesp/EMS-ESP32/blob/main/media/EMS-ESP_logo_dark.png)
 
 # Firmware Installation
 
