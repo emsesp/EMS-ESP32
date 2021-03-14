@@ -7,7 +7,7 @@ assignees: ''
 
 ---
 
-*Before creating a new feature request please check that you have searched the existing [issues](https://github.com/proddy/EMS-ESP/issues) (both open and closed)*
+*Before creating a new feature request please check that you have searched the existing [issues](https://github.com/emsesp/EMS-ESP32/issues) (both open and closed)*
 
 *Completing this template will help developers and contributors evaluating the feature. If the information provided is not enough the issue will likely be closed.*
 

@@ -43,7 +43,7 @@ class EMSESPHelp extends Component {
                             <GitHubIcon />
                         </ListItemAvatar>
                         <ListItemText>
-                            To report an issue or feature request go to <Link href="https://github.com/proddy/EMS-ESP/issues/new/choose" color="primary">{'click here'}</Link>
+                            To report an issue or feature request go to <Link href="https://github.com/emsesp/EMS-ESP32/issues/new/choose" color="primary">{'click here'}</Link>
                         </ListItemText>
                     </ListItem>
 

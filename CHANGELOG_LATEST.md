@@ -42,7 +42,7 @@
 - Updated to the latest ArduinoJson library
 - some names of mqtt-tags like in v2.2.1
 - new ESP32 partition side to allow for smoother OTA and fallback
-- Network Gateway IP is optional ([#682](https://github.com/proddy/EMS-ESP/issues/682))
+- Network Gateway IP is optional (#682)
 - moved to a new GitHub repo https://github.com/emsesp/EMS-ESP32
 ### Removed
 
