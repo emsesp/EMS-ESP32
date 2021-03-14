@@ -7,7 +7,7 @@ This is the firmware for the ESP32.
 [![version](https://img.shields.io/github/release/emsesp/EMS-ESP32.svg?label=Latest%20Release)](https://github.com/emsesp/EMS-ESP32/blob/main/CHANGELOG.md)
 [![release-date](https://img.shields.io/github/release-date/emsesp/EMS-ESP32.svg?label=Released)](https://github.com/emsesp/EMS-ESP32/commits/main)
 [![license](https://img.shields.io/github/license/emsesp/EMS-ESP32.svg)](LICENSE)
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/76ce919e25494cdeab827a6525666be0)](https://www.codacy.com/gh/emsesp/EMS-ESP32/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=emsesp/EMS-ESP&amp;utm_campaign=Badge_Grade)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/9441142f49424ef891e8f5251866ee6b)](https://www.codacy.com/gh/emsesp/EMS-ESP32/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=emsesp/EMS-ESP32&amp;utm_campaign=Badge_Grade)
 [![downloads](https://img.shields.io/github/downloads/emsesp/EMS-ESP32/total.svg)](https://github.com/emsesp/EMS-ESP32/releases)
 [![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/emsesp/EMS-ESP32.svg)](http://isitmaintained.com/project/emsesp/EMS-ESP32 "Average time to resolve an issue")
 [![Percentage of issues still open](http://isitmaintained.com/badge/open/emsesp/EMS-ESP32.svg)](http://isitmaintained.com/project/emsesp/EMS-ESP32 "Percentage of issues still open")
