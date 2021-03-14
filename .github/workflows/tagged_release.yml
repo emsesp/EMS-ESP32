@@ -1,0 +1,56 @@
+name: "tagged-release"
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  tagged-release:
+
+    name: "Tagged Release"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v2
+
+      - name: Get build variables
+        id: build_info
+        run: |
+          version=`grep -E '^#define EMSESP_APP_VERSION' ./src/version.h | awk -F'"' '{print $2}'`
+          echo "::set-output name=version::$version"
+          platform=`grep -E '^#define EMSESP_PLATFORM' ./src/version.h | awk -F'"' '{print $2}'`
+          echo "::set-output name=platform::$platform"
+
+      - name: Compile locally
+        run: make
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+
+      - name: Install pio
+        run: |
+          python -m pip install --upgrade pip
+          pip install -U platformio
+          platformio upgrade
+          platformio update
+
+      - name: Build web
+        run: |
+          cd interface
+          npm install
+          npm run build
+
+      - name: Build firmware
+        run: |
+          platformio run -e ci
+
+      - name: Release
+        uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          prerelease: false
+          files: |
+            CHANGELOG.md
+            ./build/firmware/*.*

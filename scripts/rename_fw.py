@@ -1,16 +1,18 @@
-Import('env', "projenv")
+Import("env")
 import os
 import re
 import shutil
-import gzip
 
 OUTPUT_DIR = "build{}".format(os.path.sep)
 
 def bin_copy(source, target, env):
 
-    # get the EMS-ESP version
+    # get the build info
     bag = {}
-    exprs = [(re.compile(r'^#define EMSESP_APP_VERSION\s+"(\S+)"'), 'app_version')]
+    exprs = [
+    (re.compile(r'^#define EMSESP_APP_VERSION\s+"(\S+)"'), 'app_version'),
+    (re.compile(r'^#define EMSESP_PLATFORM\s+"(\S+)"'), 'platform'),
+    ]
     with open('./src/version.h', 'r') as f:
         for l in f.readlines():
             for expr, var in exprs:
@@ -18,33 +20,43 @@ def bin_copy(source, target, env):
                 if m and len(m.groups()) > 0:
                     bag[var] = m.group(1)
 
-    # esp8266 or esp32
-    platform = "esp" + env['PIOPLATFORM'].strip("espressif")
+    app_version = bag.get('app_version')
+    platform = bag.get("platform")
 
-    # if using the pio build directory, use str(target[0]).split(os.path.sep)[2]
-    variant = "EMS-ESP-" + bag.get('app_version').replace(".", "_") + "-" + platform
+    # print(env.Dump())
+    # my_flags = env.ParseFlags(env['BUILD_FLAGS'])
+    # defines = {k: v for (k, v) in my_flags.get("CPPDEFINES")}
+    # print(my_flags)
+    # print((my_flags.get("CPPDEFINES"))
+
+    # alternatively take platfrom from the pio target
+    # platform = str(target[0]).split(os.path.sep)[2]
+
+    print("app version: "+app_version)
+    print("platform: "+platform)
+
+    # convert . to _ so Windows doesn't complain
+    variant = "EMS-ESP-" +  app_version.replace(".", "_") + "-" + platform
     
-    # create string with location and file names based on variant
-    bin_file = "{}firmware{}{}.bin".format(OUTPUT_DIR, os.path.sep, variant)
-    gzip_file = "{}firmware{}{}.bin.gz".format(OUTPUT_DIR, os.path.sep, variant)
-
-    # check if firmware directory and target subdirectories (esp8266/esp32) exist and create if necessary
+    # check if output directories exist and create if necessary
     if not os.path.isdir(OUTPUT_DIR):
         os.mkdir(OUTPUT_DIR)
+
     for d in ['firmware']:
         if not os.path.isdir("{}{}".format(OUTPUT_DIR, d)):
             os.mkdir("{}{}".format(OUTPUT_DIR, d))
 
-    # copy firmware.bin to new name and in the build/firmware folder, delete if already exists
-    if os.path.isfile(bin_file): os.remove(bin_file)
+    # create string with location and file names based on variant
+    bin_file = "{}firmware{}{}.bin".format(OUTPUT_DIR, os.path.sep, variant)
+
+    # check if new target files exist and remove if necessary
+    for f in [bin_file]:
+        if os.path.isfile(f):
+            os.remove(f)
+
+    print("renaming file to "+bin_file)
+
+    # copy firmware.bin to firmware/<variant>.bin
     shutil.copy(str(target[0]), bin_file)
-
-    # create the gzip'd version
-    if os.path.isfile(gzip_file): os.remove(gzip_file)
-    with open(bin_file, "rb") as fp:
-         with gzip.open(gzip_file, "wb", compresslevel = 9) as f:
-             shutil.copyfileobj(fp, f)
-
-    print("Built firmwares: "+ bin_file + ", " + gzip_file)
 
 env.AddPostAction("$BUILD_DIR/${PROGNAME}.bin", [bin_copy])
