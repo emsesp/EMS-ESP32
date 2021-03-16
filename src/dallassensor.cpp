@@ -379,8 +379,11 @@ void DallasSensor::publish_values(const bool force) {
                 config["uniq_id"] = str;
 
                 JsonObject dev = config.createNestedObject("dev");
+                dev["name"]    = FJSON("EMS-ESP Dallas");               // Global name for device (all Dallas sensors, avoids using the very first name for the group)
+                dev["mf"]      = FJSON("Dallas");                       // Manufacturer (avoids the ugly <unknown> in HA)
+                dev["mdl"]     = FJSON("1Wire");                        // Model (avoids the ugly <unknown> in HA)
                 JsonArray  ids = dev.createNestedArray("ids");
-                ids.add("ems-esp");
+                ids.add("ems-esp-dallas");                              // Different ids as the other portions of the EMS-ESP
 
                 char topic[100];
                 if (dallas_format == Mqtt::Dallas_Format::SENSORID) {

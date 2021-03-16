@@ -16,6 +16,7 @@ pio_local.ini
 # OS specific
 .DS_Store
 *Thumbs.db
+.directory
 
 # project specfic
 /scripts/stackdmp.txt
@@ -25,4 +26,6 @@ emsesp
 /interface/build
 /interface/node_modules
 /interface/.eslintcache
-
+# /interface/package-lock.json # this file will be modified by npm! What can we do here?
+package-lock.json
+package.json
