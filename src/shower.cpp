@@ -1,5 +1,5 @@
 /*
- * EMS-ESP - https://github.com/proddy/EMS-ESP
+ * EMS-ESP - https://github.com/emsesp/EMS-ESP
  * Copyright 2020  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
@@ -99,7 +99,7 @@ void Shower::send_mqtt_stat(bool state, bool force) {
     }
 
     char s[7];
-    Mqtt::publish(F("shower_active"), Helpers::render_boolean(s, state)); // https://github.com/proddy/EMS-ESP/issues/369
+    Mqtt::publish(F("shower_active"), Helpers::render_boolean(s, state)); // https://github.com/emsesp/EMS-ESP/issues/369
 
     // if we're in HA mode make sure we've first sent out the HA MQTT Discovery config topic
     if ((Mqtt::ha_enabled()) && (!ha_configdone_ || force)) {

@@ -56,5 +56,6 @@ jobs:
           automatic_release_tag: "latest"
           prerelease: true
           files: |
-            CHANGELOG_DEV.md
+            CHANGELOG_LATEST.md
             ./build/firmware/*.*
+

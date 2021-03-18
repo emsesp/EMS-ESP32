@@ -44,7 +44,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - renamed pio targets (esp8266-ci and esp32-ci for GitHub CI)
 - telnet default settings `log info`, timeout 60 min
 - `log debug` not showing telegram names, use `log trace` or `watch on` to show the telegrams
-- optimized how console and web display device data ([#632](https://github.com/proddy/EMS-ESP/issues/632))
+- optimized how console and web display device data ([#632](https://github.com/emsesp/EMS-ESP/issues/632))
 
 ### Removed
 - old shell and python build scripts
@@ -154,7 +154,7 @@ See README.me for more details.
 - Support writing to Junkers FR100 thermostats
 - Support writing to RC100, Moduline 1000/1010 thermostats
 - MM10 Mixing module support (thanks @MichaelDvP)
-- MM200 warm water circuits (https://github.com/proddy/EMS-ESP/pull/315)
+- MM200 warm water circuits (https://github.com/emsesp/EMS-ESP/pull/315)
 - Support for Moduline 200 and Sieger ES72 thermostats
 - First implementation of writing to generic Junker Thermostats (thanks @Neonox31)
 - Added model type (Buderus, Sieger, Junkers, Nefit, Bosch, Worcester) to device names
@@ -166,7 +166,7 @@ See README.me for more details.
 - Added features to WW messages (0x33, 0x34) to improve WW monitoring. (PR#338 by @ypaindaveine)
 - Added mixing log and stub for EMS type 0xAC (PR#338 by @ypaindaveine)
 - Added Thermostat retrieving settings (0xA5) (validated on RC30N) with MQTT support (thanks Yves @ypaindaveine. See #352)
-- Merged with PR https://github.com/proddy/EMS-ESP/pull/366 from @MichaelDvP fixing RC20 and MM50
+- Merged with PR https://github.com/emsesp/EMS-ESP/pull/366 from @MichaelDvP fixing RC20 and MM50
 
 ### Fixed
 - set boiler warm water temp on Junkers/Bosch HT3
@@ -193,7 +193,7 @@ There are breaking changes in this release. See `publish_time` below and make su
 ### Added
 
 - Added `publish_always` forcing MQTT topics to be always sent regardless if the data hasn't changed
-- Support for DHW once (OneTime water) heating command via MQTT [issue 195](https://github.com/proddy/EMS-ESP/issues/195)
+- Support for DHW once (OneTime water) heating command via MQTT [issue 195](https://github.com/emsesp/EMS-ESP/issues/195)
 - Added scripts to automatically build firmware images on every Commit/Pull and nightly builds using TravisCI
 - Added option to WebUI to also download the latest development build
 - Added build scripts for automated CI with TravisCI
@@ -267,7 +267,7 @@ There are breaking changes in this release. See `publish_time` below and make su
 - External dallas sensor values sent in MQTT payload as float values and not strings
 - All MQTT topics for the Thermostat have the Heating Circuit appended (e.g. `thermostat_data1`). This includes the commands.
 - Shower timer and shower alert and not MQTT published at boot up
-- Heating Active logic change to use Selected Flow Temp of min 30 instead of 70 (https://github.com/proddy/EMS-ESP/issues/193)
+- Heating Active logic change to use Selected Flow Temp of min 30 instead of 70 (https://github.com/emsesp/EMS-ESP/issues/193)
 - Cleaned up Telnet messages during bootup to only show key information.
 
 ### Removed
@@ -278,7 +278,7 @@ There are breaking changes in this release. See `publish_time` below and make su
 
 ### Added
 
-- Support for multiple Heating Circuits - https://github.com/proddy/EMS-ESP/issues/162
+- Support for multiple Heating Circuits - https://github.com/emsesp/EMS-ESP/issues/162
 - new `mqttlog` command also shows which MQTT topics it is subscribed too
 - Optimized event log loading in web and added integrity checks on all config and log files during boot
 - `autodetect quick` for detecting known devices from our database list
@@ -286,7 +286,7 @@ There are breaking changes in this release. See `publish_time` below and make su
 
 ### Fixed
 
-- fixed zero values (0.0) for setpoint temperature with the RC35 thermostat when in Auto mode - https://github.com/proddy/EMS-ESP/issues/180
+- fixed zero values (0.0) for setpoint temperature with the RC35 thermostat when in Auto mode - https://github.com/emsesp/EMS-ESP/issues/180
 - added check for corrupted event log, which could happen due to SPIFFS writing while UART is active
 - made Junkers work again (broke in 1.9.0)
 
@@ -370,13 +370,13 @@ There are breaking changes in this release. See `publish_time` below and make su
 - EMS+ core support (thanks too @gl3nni3 for doing the first research)
 - MQTT 'restart' topic to reboot ESP (thanks @balk77)
 - Support for multiple thermostat heating circuits like the HC1/HC2 on a RC35, also via MQTT (thanks @lobocobra)
-- `boiler flowtemp` command to set the flow temperature [(issue 59)](https://github.com/proddy/EMS-ESP/issues/59)
+- `boiler flowtemp` command to set the flow temperature [(issue 59)](https://github.com/emsesp/EMS-ESP/issues/59)
 - added a test harness to try out response to various telegrams (test command)
 - `tx_delay` setting for circuits where we needed to slow down Tx transmission
 - new boiler: Nefit proline hrc 24 cw4 thermostat and Nefit Enviline heatpump
 - new boiler: Buderus Logamax plus
-- new thermostat: Buderus RC300 and RC310 thermostats, read-only [(issue 37)](https://github.com/proddy/EMS-ESP/issues/37)
-- new thermostat: Junkers FR10, read-only [(issue 98)](https://github.com/proddy/EMS-ESP/issues/98)
+- new thermostat: Buderus RC300 and RC310 thermostats, read-only [(issue 37)](https://github.com/emsesp/EMS-ESP/issues/37)
+- new thermostat: Junkers FR10, read-only [(issue 98)](https://github.com/emsesp/EMS-ESP/issues/98)
 - new devices: Buderus Web Gateway KM200, Buderus Solar Module SM100
 
 ### Changed
@@ -393,9 +393,9 @@ There are breaking changes in this release. See `publish_time` below and make su
 - `crash` command to see stack of last system crash, with .py files to track stack dump (compile with `-DCRASH`)
 - publish dallas external temp sensors to MQTT (thanks @JewelZB)
 - shower timer and shower alert options available via set commands
-- added support for warm water modes Hot, Comfort and Intelligent [(issue 67)](https://github.com/proddy/EMS-ESP/issues/67)
+- added support for warm water modes Hot, Comfort and Intelligent [(issue 67)](https://github.com/emsesp/EMS-ESP/issues/67)
 - added `set publish_time` to set how often to force a publish of MQTT
-- support for SM10 Solar Module including MQTT [(issue 77)](https://github.com/proddy/EMS-ESP/issues/77)
+- support for SM10 Solar Module including MQTT [(issue 77)](https://github.com/emsesp/EMS-ESP/issues/77)
 - `refresh` command to force a fetch of all known data from the connected EMS devices
 
 ### Fixed
@@ -412,7 +412,7 @@ There are breaking changes in this release. See `publish_time` below and make su
 - `test_mode` renamed to `silent_mode`
 - `set wifi` replaced with `set wifi_ssid` and `set wifi_password` to allow values with spaces
 - EMS values are stored in the raw format and only converted to strings when displayed or published, removing the need for parsing floats
-- All floating point temperatures are to one decimal place [(issue 79)](https://github.com/proddy/EMS-ESP/issues/79)
+- All floating point temperatures are to one decimal place [(issue 79)](https://github.com/emsesp/EMS-ESP/issues/79)
 
 ## [1.5.6] 2019-03-09
 
@@ -462,7 +462,7 @@ There are breaking changes in this release. See `publish_time` below and make su
 
 ### Added
 
-- Improved MQTT LWT (Last Will Testament). Uses payload called 'online' and 'offline'. See https://github.com/proddy/EMS-ESP/issues/57
+- Improved MQTT LWT (Last Will Testament). Uses payload called 'online' and 'offline'. See https://github.com/emsesp/EMS-ESP/issues/57
 - Added ESP32 support to MyESP library
 - Added Bosch Easy thermostat, Buderus Logamax U122
 - Support for changing boiler wwtemp via MQTT (merge #58 from egrekov). thanks!
@@ -479,7 +479,7 @@ There are breaking changes in this release. See `publish_time` below and make su
 
 ### Added
 
-- Added incoming MQTT "TOPIC_BOILER_WWACTIVATED" to set the warm water on/off. Payload is 1 or 0. See [issue](https://github.com/proddy/EMS-ESP/issues/46#issuecomment-460375689).
+- Added incoming MQTT "TOPIC_BOILER_WWACTIVATED" to set the warm water on/off. Payload is 1 or 0. See [issue](https://github.com/emsesp/EMS-ESP/issues/46#issuecomment-460375689).
 - Added the list of all MQTT topics to the README file
 
 ## [1.5.1] 2019-02-03
@@ -541,7 +541,7 @@ There are breaking changes in this release. See `publish_time` below and make su
 
 ### Fixed
 
-- Handle thermostats that don't have builtin temperature sensors when showing current temperature (https://github.com/proddy/EMS-ESP/issues/18#issuecomment-451012963)
+- Handle thermostats that don't have builtin temperature sensors when showing current temperature (https://github.com/emsesp/EMS-ESP/issues/18#issuecomment-451012963)
 
 ### Changed
 
@@ -572,14 +572,14 @@ There are breaking changes in this release. See `publish_time` below and make su
 ### Added
 
 - MQTT keep alive, last will testament and other settings all configurable in my_config.h
-- RC35: MQTT day/night/auto mode; sets setpoint temperature in type 0x3D depends on current night/day Mode (@SpaceTeddy) [#33](https://github.com/proddy/EMS-ESP/pull/33)
+- RC35: MQTT day/night/auto mode; sets setpoint temperature in type 0x3D depends on current night/day Mode (@SpaceTeddy) [#33](https://github.com/emsesp/EMS-ESP/pull/33)
 
 ## [1.3.0] 2019-01-09
 
 ### Changed
 
 - Renamed project from EMS-ESP-Boiler to EMS-ESP since it's kinda EMS generic now
-- Support for RC20RF and RFM20 (https://github.com/proddy/EMS-ESP/issues/18)
+- Support for RC20RF and RFM20 (https://github.com/emsesp/EMS-ESP/issues/18)
 - Moved all EMS device information into a separate file `ems_devices.h` so no longer need to touch `ems.h`
 - Telnet commands can be strings now and output is suspended when typing
 
@@ -598,9 +598,9 @@ There are breaking changes in this release. See `publish_time` below and make su
 
 ### Changed
 
-- Scanning known EMS Devices now ignores duplicates (https://github.com/proddy/EMS-ESP/pull/30)
+- Scanning known EMS Devices now ignores duplicates (https://github.com/emsesp/EMS-ESP/pull/30)
 - ServiceCode stored as a two byte char
-- Support for RC20RF and RFM20 (https://github.com/proddy/EMS-ESP/issues/18)
+- Support for RC20RF and RFM20 (https://github.com/emsesp/EMS-ESP/issues/18)
 
 ## [1.2.3] 2019-01-03
 
@@ -608,23 +608,23 @@ There are breaking changes in this release. See `publish_time` below and make su
 
 - Can now hardcode Boiler and Thermostat types in my_config.h to bypass auto-detection
 - Fixed MQTT subscribing to Heating and Hot Water active topics
-- Fixed for listening to incoming MQTT topics (https://github.com/proddy/EMS-ESP/issues/27)
-- Fixed handling of current temperature on an RC35-type thermostat that doesn't have a sensor (https://github.com/proddy/EMS-ESP/issues/18)
+- Fixed for listening to incoming MQTT topics (https://github.com/emsesp/EMS-ESP/issues/27)
+- Fixed handling of current temperature on an RC35-type thermostat that doesn't have a sensor (https://github.com/emsesp/EMS-ESP/issues/18)
 
 ## [1.2.2] 2019-01-02
 
 ### Fixed
 
-- Issues in 1.2.1 (see https://github.com/proddy/EMS-ESP/issues/25)
+- Issues in 1.2.1 (see https://github.com/emsesp/EMS-ESP/issues/25)
 - Logic for determining if there is activity on the EMS bus and using the onboard LEDs properly
 
 ## [1.2.1] 2019-01-02
 
 ### Fixed
 
-- Only process broadcast messages if the offset (byte 4) is 0. (https://github.com/proddy/EMS-ESP/issues/23)
+- Only process broadcast messages if the offset (byte 4) is 0. (https://github.com/emsesp/EMS-ESP/issues/23)
 - Improved checking for duplicate sent Tx telegrams by comparing CRCs
-- Removed distinguishing between noise on the line and corrupt telegrams (https://github.com/proddy/EMS-ESP/issues/24)
+- Removed distinguishing between noise on the line and corrupt telegrams (https://github.com/emsesp/EMS-ESP/issues/24)
 
 ## [1.2.0] 2019-01-01
 
@@ -644,7 +644,7 @@ There are breaking changes in this release. See `publish_time` below and make su
 - Fetch UBATotalUptimeMessage from Boiler to get total working minutes
 - Added check to see if bus is connected. Shown in stats page
 - If no Wifi connection can be made, start up as a WiFi Access Point (AP)
-- Report out service codes and water-flow [pull-request](https://github.com/proddy/EMS-ESP/pull/20/files). Thanks @Bonusbartus
+- Report out service codes and water-flow [pull-request](https://github.com/emsesp/EMS-ESP/pull/20/files). Thanks @Bonusbartus
 
 ### Changed
 
@@ -673,16 +673,16 @@ There are breaking changes in this release. See `publish_time` below and make su
 
 - Fixed handling of negative floating point values (like outdoor temp)
 - Fixed handling of auto & manual mode on an RC30
-- [Fixed condition where all telegram types were processed, instead of only broadcasts or our own reads](https://github.com/proddy/EMS-ESP/issues/15)
+- [Fixed condition where all telegram types were processed, instead of only broadcasts or our own reads](https://github.com/emsesp/EMS-ESP/issues/15)
 
 ### Added
 
 - Created this CHANGELOG.md file!
-- [Added support for the Nefit Easy thermostat, reading of temperature values only](https://github.com/proddy/EMS-ESP/issues/9) - note *read only* (big thanks @**kroon040** for lending me an Easy device) 
-- [Added support for RC35/Moduline 400](https://github.com/proddy/EMS-ESP/issues/14) - *read only*
-- [New raw logging mode for logging](https://github.com/proddy/EMS-ESP/issues/11)
-- [New 'r'command to send raw data to EMS](https://github.com/proddy/EMS-ESP/issues/11)
-- [Added MQTT messages for hot water on and heating on](https://github.com/proddy/EMS-ESP/issues/10)
+- [Added support for the Nefit Easy thermostat, reading of temperature values only](https://github.com/emsesp/EMS-ESP/issues/9) - note *read only* (big thanks @**kroon040** for lending me an Easy device) 
+- [Added support for RC35/Moduline 400](https://github.com/emsesp/EMS-ESP/issues/14) - *read only*
+- [New raw logging mode for logging](https://github.com/emsesp/EMS-ESP/issues/11)
+- [New 'r'command to send raw data to EMS](https://github.com/emsesp/EMS-ESP/issues/11)
+- [Added MQTT messages for hot water on and heating on](https://github.com/emsesp/EMS-ESP/issues/10)
 - Implemented FIFO circular buffer queue for up to 20 Tx messages (Q command to show queue)
 - Toggle Tx transmission via telnet (use 'X' command)
 - Show thermostat type in help stats (use 's' command)
