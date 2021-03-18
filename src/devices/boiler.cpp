@@ -1,5 +1,5 @@
 /*
- * EMS-ESP - https://github.com/proddy/EMS-ESP
+ * EMS-ESP - https://github.com/emsesp/EMS-ESP
  * Copyright 2020  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
@@ -311,7 +311,7 @@ void Boiler::process_UBAMonitorFast(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram->read_bitvalue(wWCirc_, 7, 7));
 
     // warm water storage sensors (if present)
-    // wWStorageTemp2 is also used by some brands as the boiler temperature - see https://github.com/proddy/EMS-ESP/issues/206
+    // wWStorageTemp2 is also used by some brands as the boiler temperature - see https://github.com/emsesp/EMS-ESP/issues/206
     has_update(telegram->read_value(wWStorageTemp1_, 9));  // 0x8300 if not available
     has_update(telegram->read_value(wWStorageTemp2_, 11)); // 0x8000 if not available - this is boiler temp
 
@@ -580,7 +580,7 @@ void Boiler::process_UBAEnergySupplied(std::shared_ptr<const Telegram> telegram)
 
 // 0x2A - MC10Status
 // e.g. 88 00 2A 00 00 00 00 00 00 00 00 00 D2 00 00 80 00 00 01 08 80 00 02 47 00
-// see https://github.com/proddy/EMS-ESP/issues/397
+// see https://github.com/emsesp/EMS-ESP/issues/397
 void Boiler::process_MC10Status(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram->read_value(mixerTemp_, 14));
     has_update(telegram->read_value(tankMiddleTemp_, 18));
@@ -967,7 +967,7 @@ bool Boiler::set_warmwater_activated(const char * value, const int8_t id) {
 
     LOG_INFO(F("Setting boiler warm water active %s"), v ? "on" : "off");
 
-    // https://github.com/proddy/EMS-ESP/issues/268
+    // https://github.com/emsesp/EMS-ESP/issues/268
     uint8_t n;
     if (EMSbus::is_ht3()) {
         n = (v ? 0x08 : 0x00); // 0x08 is on, 0x00 is off
@@ -1020,7 +1020,7 @@ bool Boiler::set_tapwarmwater_activated(const char * value, const int8_t id) {
 
 // Activate / De-activate One Time warm water 0x35
 // true = on, false = off
-// See also https://github.com/proddy/EMS-ESP/issues/341#issuecomment-596245458 for Junkers
+// See also https://github.com/emsesp/EMS-ESP/issues/341#issuecomment-596245458 for Junkers
 bool Boiler::set_warmwater_onetime(const char * value, const int8_t id) {
     bool v = false;
     if (!Helpers::value2bool(value, v)) {

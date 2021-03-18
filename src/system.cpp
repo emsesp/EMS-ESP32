@@ -1,5 +1,5 @@
 /*
- * EMS-ESP - https://github.com/proddy/EMS-ESP
+ * EMS-ESP - https://github.com/emsesp/EMS-ESP
  * Copyright 2020  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
@@ -131,7 +131,7 @@ void System::syslog_init(bool refresh) {
         syslog_enabled_ = false;
     }
 
-    // in case service is still running, this flushes the queue - https://github.com/proddy/EMS-ESP/issues/496
+    // in case service is still running, this flushes the queue - https://github.com/emsesp/EMS-ESP/issues/496
     if (!syslog_enabled_) {
         syslog_.log_level((uuid::log::Level)-1);
         syslog_.mark_interval(0);

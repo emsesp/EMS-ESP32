@@ -1,6 +1,6 @@
 
 /*
- * EMS-ESP - https://github.com/proddy/EMS-ESP
+ * EMS-ESP - https://github.com/emsesp/EMS-ESP
  * Copyright 2020  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
@@ -442,7 +442,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         shell.printfln(F("Testing adding a TC100 thermostat to the EMS bus..."));
 
         // add a thermostat
-        add_device(0x18, 202); // Bosch TC100 - https://github.com/proddy/EMS-ESP/issues/474
+        add_device(0x18, 202); // Bosch TC100 - https://github.com/emsesp/EMS-ESP/issues/474
 
         // 0x0A
         uart_telegram({0x98, 0x0B, 0x0A, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00});
@@ -497,7 +497,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         add_device(0x10, 158); // RC300
         add_device(0x48, 189); // KM200
 
-        // see https://github.com/proddy/EMS-ESP/issues/390
+        // see https://github.com/emsesp/EMS-ESP/issues/390
 
         uart_telegram_withCRC("90 48 FF 04 01 A6 5C");
         uart_telegram_withCRC("90 48 FF 00 01 A6 4C");
@@ -552,7 +552,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
     if (command == "cr100") {
         shell.printfln(F("Testing CR100"));
 
-        add_device(0x18, 157); // Bosch CR100 - https://github.com/proddy/EMS-ESP/issues/355
+        add_device(0x18, 157); // Bosch CR100 - https://github.com/emsesp/EMS-ESP/issues/355
 
         // RCPLUSStatusMessage_HC1(0x01A5)
         // 98 00 FF 00 01 A5 00 CF 21 2E 00 00 2E 24 03 25 03 03 01 03 25 00 C8 00 00 11 01 03 (no CRC)
@@ -756,7 +756,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         add_device(0x08, 123); // Nefit Trendline
 
         // add a thermostat
-        add_device(0x18, 157); // Bosch CR100 - https://github.com/proddy/EMS-ESP/issues/355
+        add_device(0x18, 157); // Bosch CR100 - https://github.com/emsesp/EMS-ESP/issues/355
 
         // RCPLUSStatusMessage_HC1(0x01A5) - HC1
         uart_telegram({0x98, 0x00, 0xFF, 0x00, 0x01, 0xA5, 0x00, 0xCF, 0x21, 0x2E, 0x00, 0x00, 0x2E, 0x24, 0x03, 0x25, 0x03, 0x03, 0x01, 0x03, 0x25, 0x00, 0xC8, 0x00, 0x00, 0x11, 0x01, 0x03});
@@ -829,7 +829,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         uart_telegram({0x1B, 0x5B, 0xFD, 0x2D, 0x9E, 0x3A, 0xB6, 0xE5, 0x02, 0x20, 0x33, 0x30, 0x32, 0x3A, 0x20, 0x5B, 0x73, 0xFF, 0xFF, 0xCB, 0xDF, 0xB7, 0xA7, 0xB5, 0x67, 0x77, 0x77, 0xE4, 0xFF, 0xFD, 0x77, 0xFF});
     }
 
-    // https://github.com/proddy/EMS-ESP/issues/380#issuecomment-633663007
+    // https://github.com/emsesp/EMS-ESP/issues/380#issuecomment-633663007
     if (command == "rx3") {
         shell.printfln(F("Testing rx3..."));
 

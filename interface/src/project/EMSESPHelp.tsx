@@ -71,7 +71,7 @@ class EMSESPHelp extends Component {
                 <Box bgcolor="info.main" border={1} p={3} mt={1} mb={0}>
                     <Typography variant="h6">
                         EMS-ESP is free and open-source.
-                        <br></br>Please consider supporting this project by giving it a <StarIcon style={{ color: '#fdff3a' }} /> on our <Link href="https://github.com/proddy/EMS-ESP" color="primary">{'GitHub page'}</Link>.
+                        <br></br>Please consider supporting this project by giving it a <StarIcon style={{ color: '#fdff3a' }} /> on our <Link href="https://github.com/emsesp/EMS-ESP32" color="primary">{'GitHub page'}</Link>.
                     </Typography>
                 </Box>
                 <br></br>

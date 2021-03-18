@@ -1,5 +1,5 @@
 /*
- * EMS-ESP - https://github.com/proddy/EMS-ESP
+ * EMS-ESP - https://github.com/emsesp/EMS-ESP
  * Copyright 2020  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
@@ -36,7 +36,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
 
     // if we're on auto mode, register this thermostat if it has a device id of 0x10, 0x17 or 0x18
     // or if its the master thermostat we defined
-    // see https://github.com/proddy/EMS-ESP/issues/362#issuecomment-629628161
+    // see https://github.com/emsesp/EMS-ESP/issues/362#issuecomment-629628161
     if ((master_thermostat == device_id)
         || ((master_thermostat == EMSESP_DEFAULT_MASTER_THERMOSTAT) && (device_id < 0x19) && ((actual_master_thermostat == EMSESP_DEFAULT_MASTER_THERMOSTAT) || (device_id < actual_master_thermostat)))) {
         EMSESP::actual_master_thermostat(device_id);
@@ -177,7 +177,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
 
     // HA will report an error in the climate component if it doesn't have the setpoint temp, current temperatures and the mode (e.g. auto)
     // The mode always comes later (1 minute) so we force a read request to suppress HA errors.
-    // https://github.com/proddy/EMS-ESP/commit/9d5bd11d268a61bbba8dcabacdb96db48b8829ac#commitcomment-48028642
+    // https://github.com/emsesp/EMS-ESP/commit/9d5bd11d268a61bbba8dcabacdb96db48b8829ac#commitcomment-48028642
     for (uint8_t i = 0; i < set_typeids.size(); i++) {
         EMSESP::send_read_request(set_typeids[i], device_id);
     }
@@ -618,7 +618,7 @@ void Thermostat::process_RC20Monitor_2(std::shared_ptr<const Telegram> telegram)
 }
 
 // 0xAD - for reading the mode from the RC20/ES72 thermostat (0x17)
-// see https://github.com/proddy/EMS-ESP/issues/334#issuecomment-611698259
+// see https://github.com/emsesp/EMS-ESP/issues/334#issuecomment-611698259
 // offset: 01-nighttemp, 02-daytemp, 03-mode, 0B-program(1-9), 0D-setpoint_roomtemp(temporary)
 void Thermostat::process_RC20Set_2(std::shared_ptr<const Telegram> telegram) {
     std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
@@ -765,7 +765,7 @@ void Thermostat::process_RC300Monitor(std::shared_ptr<const Telegram> telegram) 
     // if manual, take the current setpoint temp at pos 6
     // if auto, take the next setpoint temp at pos 7
     // pos 3 is the current target temp and sometimes can be 0
-    // see https://github.com/proddy/EMS-ESP/issues/256#issuecomment-585171426
+    // see https://github.com/emsesp/EMS-ESP/issues/256#issuecomment-585171426
     // pos 3 actual setpoint (optimized), i.e. changes with temporary change, summer/holiday-modes
     // pos 6 actual setpoint according to programmed changes eco/comfort
     // pos 7 next setpoint in the future, time to next setpoint in pos 8/9
@@ -909,7 +909,7 @@ void Thermostat::process_RC30Set(std::shared_ptr<const Telegram> telegram) {
 void Thermostat::process_RC35Monitor(std::shared_ptr<const Telegram> telegram) {
     // exit if the 15th byte (second from last) is 0x00, which I think is calculated flow setpoint temperature
     // with weather controlled RC35s this value is >=5, otherwise can be zero and our setpoint temps will be incorrect
-    // see https://github.com/proddy/EMS-ESP/issues/373#issuecomment-627907301
+    // see https://github.com/emsesp/EMS-ESP/issues/373#issuecomment-627907301
     if (telegram->offset > 0 || telegram->message_length < 15) {
         return;
     }
@@ -1816,7 +1816,7 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
                 } else if (mode_ == HeatingCircuit::Mode::DAY) {
                     offset = EMS_OFFSET_RC35Set_temp_day;
                 } else {
-                    offset = EMS_OFFSET_RC35Set_seltemp; // https://github.com/proddy/EMS-ESP/issues/310
+                    offset = EMS_OFFSET_RC35Set_seltemp; // https://github.com/emsesp/EMS-ESP/issues/310
                 }
             } else {
                 uint8_t modetype = hc->get_mode_type();
@@ -1827,7 +1827,7 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
 
     } else if (model == EMS_DEVICE_FLAG_JUNKERS) {
         // figure out if we have older or new thermostats, Heating Circuits on 0x65 or 0x79
-        // see https://github.com/proddy/EMS-ESP/issues/335#issuecomment-593324716)
+        // see https://github.com/emsesp/EMS-ESP/issues/335#issuecomment-593324716)
         bool old_junkers = (has_flags(EMS_DEVICE_FLAG_JUNKERS_OLD));
         if (!old_junkers) {
             switch (mode) {

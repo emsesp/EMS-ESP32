@@ -1,5 +1,5 @@
 /*
- * EMS-ESP - https://github.com/proddy/EMS-ESP
+ * EMS-ESP - https://github.com/emsesp/EMS-ESP
  * Copyright 2020  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
@@ -158,11 +158,11 @@ void Mixer::process_IPMStatusMessage(std::shared_ptr<const Telegram> telegram) {
 
 // Mixer on a MM10 - 0xAB
 // e.g. Mixer Module -> All, type 0xAB, telegram: 21 00 AB 00 2D 01 BE 64 04 01 00 (CRC=15) #data=7
-// see also https://github.com/proddy/EMS-ESP/issues/386
+// see also https://github.com/emsesp/EMS-ESP/issues/386
 void Mixer::process_MMStatusMessage(std::shared_ptr<const Telegram> telegram) {
     // the heating circuit is determine by which device_id it is, 0x20 - 0x23
     // 0x21 is position 2. 0x20 is typically reserved for the WM10 switch module
-    // see https://github.com/proddy/EMS-ESP/issues/270 and https://github.com/proddy/EMS-ESP/issues/386#issuecomment-629610918
+    // see https://github.com/emsesp/EMS-ESP/issues/270 and https://github.com/emsesp/EMS-ESP/issues/386#issuecomment-629610918
 
     has_update(telegram->read_value(flowTempHc_, 1));       // is * 10
     has_update(telegram->read_bitvalue(pumpStatus_, 3, 2)); // is 0 or 0x64 (100%), check only bit 2

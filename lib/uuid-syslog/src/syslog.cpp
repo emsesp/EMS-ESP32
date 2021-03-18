@@ -388,7 +388,7 @@ bool SyslogService::can_transmit() {
 
 bool SyslogService::transmit(const QueuedLogMessage & message) {
     /*
-    // modifications by Proddy. From https://github.com/proddy/EMS-ESP/issues/395#issuecomment-640053528
+    // modifications by Proddy. From https://github.com/emsesp/EMS-ESP/issues/395#issuecomment-640053528
     struct tm tm;
 
     tm.tm_year = 0;
