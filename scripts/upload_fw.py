@@ -10,9 +10,9 @@ def upload(source, target, env):
     platform = "esp" + env['PIOPLATFORM'].strip("espressif")
 
     if platform == 'esp8266':
-        call(["cmd.exe", "/c", "C:\\Users\\Paul\\OneDrive\\Desktop\\com8266.bat"])
+        call(["cmd.exe", "/c", "C:\\Users\\Paul\\Desktop\\ems-esp8266.bat"])
     
     if platform == 'esp32':
-        call(["cmd.exe", "/c", "C:\\Users\\Paul\\OneDrive\\Desktop\\com32.bat"])
+        call(["cmd.exe", "/c", "C:\\Users\\Paul\\Desktop\\ems-esp32.bat"])
 
 env.AddPostAction("$BUILD_DIR/${PROGNAME}.bin", [upload])
