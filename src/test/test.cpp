@@ -21,8 +21,6 @@
 
 #include "test.h"
 
-// create some fake test data
-
 namespace emsesp {
 
 // no shell
@@ -368,12 +366,22 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
 
     if (command == "boiler") {
         shell.printfln(F("Testing boiler..."));
+        Mqtt::ha_enabled(false);
+        Mqtt::nested_format(true);
+
         run_test("boiler");
         shell.invoke_command("show devices");
         shell.invoke_command("show");
-        // shell.invoke_command("call boiler info");
-        // shell.invoke_command("call system publish");
-        // shell.invoke_command("show mqtt");
+        shell.invoke_command("call boiler info");
+        shell.invoke_command("call system publish");
+
+        EMSESP::mqtt_.incoming("ems-esp/boiler/wwonetime", "1");
+        EMSESP::mqtt_.incoming("ems-esp/boiler/wwonetime", "0");
+        EMSESP::mqtt_.incoming("ems-esp/boiler/heatingtemp", "24");
+        EMSESP::mqtt_.incoming("ems-esp/boiler/wwonetime", "test"); // should fail
+        EMSESP::mqtt_.incoming("ems-esp/boiler", "{\"cmd\":\"flowtemp\",\"id\":0,\"data\":22}");
+
+        shell.invoke_command("show mqtt");
     }
 
     if (command == "fr120") {

@@ -30,9 +30,9 @@ namespace emsesp {
 // #define EMSESP_TEST_DEFAULT "mixer"
 // #define EMSESP_TEST_DEFAULT "web"
 // #define EMSESP_TEST_DEFAULT "general"
-// #define EMSESP_TEST_DEFAULT "boiler"
+#define EMSESP_TEST_DEFAULT "boiler"
 // #define EMSESP_TEST_DEFAULT "mqtt2"
-#define EMSESP_TEST_DEFAULT "mqtt_nested"
+// #define EMSESP_TEST_DEFAULT "mqtt_nested"
 // #define EMSESP_TEST_DEFAULT "ha"
 
 class Test {

@@ -64,11 +64,11 @@ void Mqtt::subscribe(const uint8_t device_type, const std::string & topic, mqtt_
     if (!mqtt_subfunctions_.empty()) {
         for (auto & mqtt_subfunction : mqtt_subfunctions_) {
             if ((mqtt_subfunction.device_type_ == device_type) && (strcmp(mqtt_subfunction.topic_.c_str(), topic.c_str()) == 0)) {
-                // add the function, in case its not there
+                // add the function (in case its not there) and quit because it already exists
                 if (cb) {
                     mqtt_subfunction.mqtt_subfunction_ = cb;
                 }
-                return; // it exists, exit
+                return;
             }
         }
     }
@@ -89,8 +89,9 @@ void Mqtt::subscribe(const uint8_t device_type, const std::string & topic, mqtt_
 
 // subscribe to the command topic if it doesn't exist yet
 void Mqtt::register_command(const uint8_t device_type, const __FlashStringHelper * cmd, cmdfunction_p cb) {
-    std::string cmd_topic = EMSdevice::device_type_2_device_name(device_type);
+    std::string cmd_topic = EMSdevice::device_type_2_device_name(device_type); // thermostat, boiler, etc...
 
+    // see if we have already a handler for the device type (boiler, thermostat). If not add it
     bool exists = false;
     if (!mqtt_subfunctions_.empty()) {
         for (const auto & mqtt_subfunction : mqtt_subfunctions_) {
@@ -101,15 +102,21 @@ void Mqtt::register_command(const uint8_t device_type, const __FlashStringHelper
     }
 
     if (!exists) {
-        Mqtt::subscribe(device_type, cmd_topic, nullptr); // use an empty function handler to signal this is a command function
+        Mqtt::subscribe(device_type, cmd_topic, nullptr); // use an empty function handler to signal this is a command function only (e.g. ems-esp/boiler)
+        LOG_DEBUG(F("Registering MQTT cmd %s with topic %s"), uuid::read_flash_string(cmd).c_str(), EMSdevice::device_type_2_device_name(device_type).c_str());
     }
 
-    LOG_DEBUG(F("Registering MQTT cmd %s with topic %s"), uuid::read_flash_string(cmd).c_str(), EMSdevice::device_type_2_device_name(device_type).c_str());
+    // register the individual commands too (e.g. ems-esp/boiler/wwonetime)
+    // https://github.com/emsesp/EMS-ESP32/issues/31
+    std::string topic(100, '\0');
+    topic = cmd_topic + "/" + uuid::read_flash_string(cmd);
+    Mqtt::subscribe(device_type, topic, nullptr);
 }
 
-// subscribe to an MQTT topic, and store the associated callback function. For generic functions not tied to a specific device
+// subscribe to an MQTT topic, and store the associated callback function
+// For generic functions not tied to a specific device
 void Mqtt::subscribe(const std::string & topic, mqtt_subfunction_p cb) {
-    subscribe(0, topic, cb); // no device_id needed, if generic to EMS-ESP
+    subscribe(0, topic, cb); // no device_id needed if generic to EMS-ESP
 }
 
 // resubscribe to all MQTT topics
@@ -189,7 +196,7 @@ void Mqtt::show_mqtt(uuid::console::Shell & shell) {
     // show subscriptions
     shell.printfln(F("MQTT topic subscriptions:"));
     for (const auto & mqtt_subfunction : mqtt_subfunctions_) {
-        shell.printfln(F(" %s/%s"), mqtt_base_.c_str(), mqtt_subfunction.topic_.c_str());
+        shell.printfln(F(" %s/%s (%s)"), mqtt_base_.c_str(), mqtt_subfunction.topic_.c_str(), EMSdevice::device_type_2_device_name(mqtt_subfunction.device_type_).c_str());
     }
     shell.println();
 
@@ -266,6 +273,20 @@ void Mqtt::on_message(const char * fulltopic, const char * payload, size_t len) 
                 return;
             }
 
+            // check if it's not json, then try and extract the command from the topic name
+            if (message[0] != '{') {
+                char * cmd_only = strrchr(topic, '/');
+                if (cmd_only == NULL) {
+                    return; // invalid topic name
+                }
+                cmd_only++; // skip the /
+                // LOG_INFO(F("devicetype= %d, topic = %s, cmd = %s, message =  %s"), mf.device_type_, topic, cmd_only, message);
+                if (!Command::call(mf.device_type_, cmd_only, message)) {
+                    LOG_ERROR(F("No matching cmd (%s) in topic %s, or invalid data"), cmd_only, topic);
+                }
+                return;
+            }
+
             // It's a command then with the payload being JSON like {"cmd":"<cmd>", "data":<data>, "id":<n>}
             // Find the command from the json and call it directly
             StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> doc;
@@ -305,7 +326,7 @@ void Mqtt::on_message(const char * fulltopic, const char * payload, size_t len) 
             }
 
             if (!cmd_known) {
-                LOG_ERROR(F("No matching cmd (%s), invalid data or command failed"), command);
+                LOG_ERROR(F("No matching cmd (%s) or invalid data"), command);
             }
 
             return;
