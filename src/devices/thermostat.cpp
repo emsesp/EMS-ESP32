@@ -44,18 +44,18 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
         reserve_telgram_functions(25); // reserve some space for the telegram registries, to avoid memory fragmentation
 
         // common telegram handlers
-        register_telegram_type(EMS_TYPE_RCOutdoorTemp, F("RCOutdoorTemp"), false, [&](std::shared_ptr<const Telegram> t) { process_RCOutdoorTemp(t); });
-        register_telegram_type(EMS_TYPE_RCTime, F("RCTime"), false, [&](std::shared_ptr<const Telegram> t) { process_RCTime(t); });
-        register_telegram_type(0xA2, F("RCError"), false, [&](std::shared_ptr<const Telegram> t) { process_RCError(t); });
-        register_telegram_type(0x12, F("RCErrorMessage"), false, [&](std::shared_ptr<const Telegram> t) { process_RCErrorMessage(t); });
+        register_telegram_type(EMS_TYPE_RCOutdoorTemp, F("RCOutdoorTemp"), false, MAKE_PF_CB(process_RCOutdoorTemp));
+        register_telegram_type(EMS_TYPE_RCTime, F("RCTime"), false, MAKE_PF_CB(process_RCTime));
+        register_telegram_type(0xA2, F("RCError"), false, MAKE_PF_CB(process_RCError));
+        register_telegram_type(0x12, F("RCErrorMessage"), false, MAKE_PF_CB(process_RCErrorMessage));
     }
     // RC10
     if (model == EMSdevice::EMS_DEVICE_FLAG_RC10) {
         monitor_typeids = {0xB1};
         set_typeids     = {0xB0};
         for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
-            register_telegram_type(monitor_typeids[i], F("RC10Monitor"), false, [&](std::shared_ptr<const Telegram> t) { process_RC10Monitor(t); });
-            register_telegram_type(set_typeids[i], F("RC10Set"), false, [&](std::shared_ptr<const Telegram> t) { process_RC10Set(t); });
+            register_telegram_type(monitor_typeids[i], F("RC10Monitor"), false, MAKE_PF_CB(process_RC10Monitor));
+            register_telegram_type(set_typeids[i], F("RC10Set"), false, MAKE_PF_CB(process_RC10Set));
         }
 
         // RC35
@@ -64,12 +64,12 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
         set_typeids     = {0x3D, 0x47, 0x51, 0x5B};
         timer_typeids   = {0x3F, 0x49, 0x53, 0x5D};
         for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
-            register_telegram_type(monitor_typeids[i], F("RC35Monitor"), false, [&](std::shared_ptr<const Telegram> t) { process_RC35Monitor(t); });
-            register_telegram_type(set_typeids[i], F("RC35Set"), false, [&](std::shared_ptr<const Telegram> t) { process_RC35Set(t); });
-            register_telegram_type(timer_typeids[i], F("RC35Timer"), false, [&](std::shared_ptr<const Telegram> t) { process_RC35Timer(t); });
+            register_telegram_type(monitor_typeids[i], F("RC35Monitor"), false, MAKE_PF_CB(process_RC35Monitor));
+            register_telegram_type(set_typeids[i], F("RC35Set"), false, MAKE_PF_CB(process_RC35Set));
+            register_telegram_type(timer_typeids[i], F("RC35Timer"), false, MAKE_PF_CB(process_RC35Timer));
         }
-        register_telegram_type(EMS_TYPE_IBASettings, F("IBASettings"), true, [&](std::shared_ptr<const Telegram> t) { process_IBASettings(t); });
-        register_telegram_type(EMS_TYPE_wwSettings, F("WWSettings"), true, [&](std::shared_ptr<const Telegram> t) { process_RC35wwSettings(t); });
+        register_telegram_type(EMS_TYPE_IBASettings, F("IBASettings"), true, MAKE_PF_CB(process_IBASettings));
+        register_telegram_type(EMS_TYPE_wwSettings, F("WWSettings"), true, MAKE_PF_CB(process_RC35wwSettings));
 
         // RC20
     } else if (model == EMSdevice::EMS_DEVICE_FLAG_RC20) {
@@ -77,11 +77,11 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
         set_typeids     = {0xA8};
         if (actual_master_thermostat == device_id) {
             for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
-                register_telegram_type(monitor_typeids[i], F("RC20Monitor"), false, [&](std::shared_ptr<const Telegram> t) { process_RC20Monitor(t); });
-                register_telegram_type(set_typeids[i], F("RC20Set"), false, [&](std::shared_ptr<const Telegram> t) { process_RC20Set(t); });
+                register_telegram_type(monitor_typeids[i], F("RC20Monitor"), false, MAKE_PF_CB(process_RC20Monitor));
+                register_telegram_type(set_typeids[i], F("RC20Set"), false, MAKE_PF_CB(process_RC20Set));
             }
         } else {
-            register_telegram_type(0xAF, F("RC20Remote"), false, [&](std::shared_ptr<const Telegram> t) { process_RC20Remote(t); });
+            register_telegram_type(0xAF, F("RC20Remote"), false, MAKE_PF_CB(process_RC20Remote));
         }
         // RC20 newer
     } else if (model == EMSdevice::EMS_DEVICE_FLAG_RC20_2) {
@@ -89,26 +89,26 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
         set_typeids     = {0xAD};
         if (actual_master_thermostat == device_id) {
             for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
-                register_telegram_type(monitor_typeids[i], F("RC20Monitor"), false, [&](std::shared_ptr<const Telegram> t) { process_RC20Monitor_2(t); });
-                register_telegram_type(set_typeids[i], F("RC20Set"), false, [&](std::shared_ptr<const Telegram> t) { process_RC20Set_2(t); });
+                register_telegram_type(monitor_typeids[i], F("RC20Monitor"), false, MAKE_PF_CB(process_RC20Monitor_2));
+                register_telegram_type(set_typeids[i], F("RC20Set"), false, MAKE_PF_CB(process_RC20Set_2));
             }
         } else {
-            register_telegram_type(0xAF, F("RC20Remote"), false, [&](std::shared_ptr<const Telegram> t) { process_RC20Remote(t); });
+            register_telegram_type(0xAF, F("RC20Remote"), false, MAKE_PF_CB(process_RC20Remote));
         }
         // RC30
     } else if (model == EMSdevice::EMS_DEVICE_FLAG_RC30) {
         monitor_typeids = {0x41};
         set_typeids     = {0xA7};
         for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
-            register_telegram_type(monitor_typeids[i], F("RC30Monitor"), false, [&](std::shared_ptr<const Telegram> t) { process_RC30Monitor(t); });
-            register_telegram_type(set_typeids[i], F("RC30Set"), false, [&](std::shared_ptr<const Telegram> t) { process_RC30Set(t); });
+            register_telegram_type(monitor_typeids[i], F("RC30Monitor"), false, MAKE_PF_CB(process_RC30Monitor));
+            register_telegram_type(set_typeids[i], F("RC30Set"), false, MAKE_PF_CB(process_RC30Set));
         }
 
         // EASY
     } else if (model == EMSdevice::EMS_DEVICE_FLAG_EASY) {
         monitor_typeids = {0x0A};
         set_typeids     = {};
-        register_telegram_type(monitor_typeids[0], F("EasyMonitor"), true, [&](std::shared_ptr<const Telegram> t) { process_EasyMonitor(t); });
+        register_telegram_type(monitor_typeids[0], F("EasyMonitor"), true, MAKE_PF_CB(process_EasyMonitor));
 
         // RC300/RC100
     } else if ((model == EMSdevice::EMS_DEVICE_FLAG_RC300) || (model == EMSdevice::EMS_DEVICE_FLAG_RC100)) {
@@ -117,36 +117,36 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
         summer_typeids  = {0x02AF, 0x02B0, 0x02B1, 0x02B2};
         curve_typeids   = {0x029B, 0x029C, 0x029D, 0x029E};
         for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
-            register_telegram_type(monitor_typeids[i], F("RC300Monitor"), false, [&](std::shared_ptr<const Telegram> t) { process_RC300Monitor(t); });
-            register_telegram_type(set_typeids[i], F("RC300Set"), false, [&](std::shared_ptr<const Telegram> t) { process_RC300Set(t); });
-            register_telegram_type(summer_typeids[i], F("RC300Summer"), false, [&](std::shared_ptr<const Telegram> t) { process_RC300Summer(t); });
-            register_telegram_type(curve_typeids[i], F("RC300Curves"), false, [&](std::shared_ptr<const Telegram> t) { process_RC300Curve(t); });
+            register_telegram_type(monitor_typeids[i], F("RC300Monitor"), false, MAKE_PF_CB(process_RC300Monitor));
+            register_telegram_type(set_typeids[i], F("RC300Set"), false, MAKE_PF_CB(process_RC300Set));
+            register_telegram_type(summer_typeids[i], F("RC300Summer"), false, MAKE_PF_CB(process_RC300Summer));
+            register_telegram_type(curve_typeids[i], F("RC300Curves"), false, MAKE_PF_CB(process_RC300Curve));
         }
-        register_telegram_type(0x2F5, F("RC300WWmode"), true, [&](std::shared_ptr<const Telegram> t) { process_RC300WWmode(t); });
-        register_telegram_type(0x31B, F("RC300WWtemp"), true, [&](std::shared_ptr<const Telegram> t) { process_RC300WWtemp(t); });
-        register_telegram_type(0x31D, F("RC300WWmode2"), false, [&](std::shared_ptr<const Telegram> t) { process_RC300WWmode2(t); });
-        register_telegram_type(0x31E, F("RC300WWmode2"), false, [&](std::shared_ptr<const Telegram> t) { process_RC300WWmode2(t); });
-        register_telegram_type(0x23A, F("RC300OutdoorTemp"), true, [&](std::shared_ptr<const Telegram> t) { process_RC300OutdoorTemp(t); });
-        register_telegram_type(0x267, F("RC300Floordry"), false, [&](std::shared_ptr<const Telegram> t) { process_RC300Floordry(t); });
-        register_telegram_type(0x240, F("RC300Settings"), true, [&](std::shared_ptr<const Telegram> t) { process_RC300Settings(t); });
+        register_telegram_type(0x2F5, F("RC300WWmode"), true, MAKE_PF_CB(process_RC300WWmode));
+        register_telegram_type(0x31B, F("RC300WWtemp"), true, MAKE_PF_CB(process_RC300WWtemp));
+        register_telegram_type(0x31D, F("RC300WWmode2"), false, MAKE_PF_CB(process_RC300WWmode2));
+        register_telegram_type(0x31E, F("RC300WWmode2"), false, MAKE_PF_CB(process_RC300WWmode2));
+        register_telegram_type(0x23A, F("RC300OutdoorTemp"), true, MAKE_PF_CB(process_RC300OutdoorTemp));
+        register_telegram_type(0x267, F("RC300Floordry"), false, MAKE_PF_CB(process_RC300Floordry));
+        register_telegram_type(0x240, F("RC300Settings"), true, MAKE_PF_CB(process_RC300Settings));
 
         // JUNKERS/HT3
     } else if (model == EMSdevice::EMS_DEVICE_FLAG_JUNKERS) {
         monitor_typeids = {0x016F, 0x0170, 0x0171, 0x0172};
         for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
-            register_telegram_type(monitor_typeids[i], F("JunkersMonitor"), false, [&](std::shared_ptr<const Telegram> t) { process_JunkersMonitor(t); });
+            register_telegram_type(monitor_typeids[i], F("JunkersMonitor"), false, MAKE_PF_CB(process_JunkersMonitor));
         }
 
         if (has_flags(EMS_DEVICE_FLAG_JUNKERS_OLD)) {
             // FR120, FR100
             set_typeids = {0x0179, 0x017A, 0x017B, 0x017C};
             for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
-                register_telegram_type(set_typeids[i], F("JunkersSet"), false, [&](std::shared_ptr<const Telegram> t) { process_JunkersSet2(t); });
+                register_telegram_type(set_typeids[i], F("JunkersSet"), false, MAKE_PF_CB(process_JunkersSet2));
             }
         } else {
             set_typeids = {0x0165, 0x0166, 0x0167, 0x0168};
             for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
-                register_telegram_type(set_typeids[i], F("JunkersSet"), false, [&](std::shared_ptr<const Telegram> t) { process_JunkersSet(t); });
+                register_telegram_type(set_typeids[i], F("JunkersSet"), false, MAKE_PF_CB(process_JunkersSet));
             }
         }
     }
@@ -1986,74 +1986,74 @@ void Thermostat::add_commands() {
     }
 
     // common to all thermostats
-    register_mqtt_cmd(F("temp"), [&](const char * value, const int8_t id) { return set_temp(value, id); });
-    register_mqtt_cmd(F("mode"), [&](const char * value, const int8_t id) { return set_mode(value, id); });
-    register_mqtt_cmd(F("datetime"), [&](const char * value, const int8_t id) { return set_datetime(value, id); });
+    register_mqtt_cmd(F("temp"), MAKE_CF_CB(set_temp));
+    register_mqtt_cmd(F("mode"), MAKE_CF_CB(set_mode));
+    register_mqtt_cmd(F("datetime"), MAKE_CF_CB(set_datetime));
 
     switch (model()) {
     case EMS_DEVICE_FLAG_RC100:
     case EMS_DEVICE_FLAG_RC300:
-        register_mqtt_cmd(F("manualtemp"), [&](const char * value, const int8_t id) { return set_manualtemp(value, id); });
-        register_mqtt_cmd(F("ecotemp"), [&](const char * value, const int8_t id) { return set_ecotemp(value, id); });
-        register_mqtt_cmd(F("comforttemp"), [&](const char * value, const int8_t id) { return set_comforttemp(value, id); });
-        register_mqtt_cmd(F("summermode"), [&](const char * value, const int8_t id) { return set_summermode(value, id); });
-        register_mqtt_cmd(F("summertemp"), [&](const char * value, const int8_t id) { return set_summertemp(value, id); });
-        register_mqtt_cmd(F("wwmode"), [&](const char * value, const int8_t id) { return set_wwmode(value, id); });
-        register_mqtt_cmd(F("wwsettemp"), [&](const char * value, const int8_t id) { return set_wwtemp(value, id); });
-        register_mqtt_cmd(F("wwsettemplow"), [&](const char * value, const int8_t id) { return set_wwtemplow(value, id); });
-        register_mqtt_cmd(F("wwonetime"), [&](const char * value, const int8_t id) { return set_wwonetime(value, id); });
-        register_mqtt_cmd(F("wwcircmode"), [&](const char * value, const int8_t id) { return set_wwcircmode(value, id); });
-        register_mqtt_cmd(F("building"), [&](const char * value, const int8_t id) { return set_building(value, id); });
-        register_mqtt_cmd(F("nofrosttemp"), [&](const char * value, const int8_t id) { return set_nofrosttemp(value, id); });
-        register_mqtt_cmd(F("designtemp"), [&](const char * value, const int8_t id) { return set_designtemp(value, id); });
-        register_mqtt_cmd(F("offsettemp"), [&](const char * value, const int8_t id) { return set_offsettemp(value, id); });
-        register_mqtt_cmd(F("minflowtemp"), [&](const char * value, const int8_t id) { return set_minflowtemp(value, id); });
-        register_mqtt_cmd(F("maxflowtemp"), [&](const char * value, const int8_t id) { return set_maxflowtemp(value, id); });
-        register_mqtt_cmd(F("minexttemp"), [&](const char * value, const int8_t id) { return set_minexttemp(value, id); });
-        register_mqtt_cmd(F("roominfluence"), [&](const char * value, const int8_t id) { return set_roominfluence(value, id); });
-        register_mqtt_cmd(F("program"), [&](const char * value, const int8_t id) { return set_program(value, id); });
-        register_mqtt_cmd(F("controlmode"), [&](const char * value, const int8_t id) { return set_controlmode(value, id); });
+        register_mqtt_cmd(F("manualtemp"), MAKE_CF_CB(set_manualtemp));
+        register_mqtt_cmd(F("ecotemp"), MAKE_CF_CB(set_ecotemp));
+        register_mqtt_cmd(F("comforttemp"), MAKE_CF_CB(set_comforttemp));
+        register_mqtt_cmd(F("summermode"), MAKE_CF_CB(set_summermode));
+        register_mqtt_cmd(F("summertemp"), MAKE_CF_CB(set_summertemp));
+        register_mqtt_cmd(F("wwmode"), MAKE_CF_CB(set_wwmode));
+        register_mqtt_cmd(F("wwsettemp"), MAKE_CF_CB(set_wwtemp));
+        register_mqtt_cmd(F("wwsettemplow"), MAKE_CF_CB(set_wwtemplow));
+        register_mqtt_cmd(F("wwonetime"), MAKE_CF_CB(set_wwonetime));
+        register_mqtt_cmd(F("wwcircmode"), MAKE_CF_CB(set_wwcircmode));
+        register_mqtt_cmd(F("building"), MAKE_CF_CB(set_building));
+        register_mqtt_cmd(F("nofrosttemp"), MAKE_CF_CB(set_nofrosttemp));
+        register_mqtt_cmd(F("designtemp"), MAKE_CF_CB(set_designtemp));
+        register_mqtt_cmd(F("offsettemp"), MAKE_CF_CB(set_offsettemp));
+        register_mqtt_cmd(F("minflowtemp"), MAKE_CF_CB(set_minflowtemp));
+        register_mqtt_cmd(F("maxflowtemp"), MAKE_CF_CB(set_maxflowtemp));
+        register_mqtt_cmd(F("minexttemp"), MAKE_CF_CB(set_minexttemp));
+        register_mqtt_cmd(F("roominfluence"), MAKE_CF_CB(set_roominfluence));
+        register_mqtt_cmd(F("program"), MAKE_CF_CB(set_program));
+        register_mqtt_cmd(F("controlmode"), MAKE_CF_CB(set_controlmode));
         break;
     case EMS_DEVICE_FLAG_RC20_2:
-        register_mqtt_cmd(F("nighttemp"), [&](const char * value, const int8_t id) { return set_nighttemp(value, id); });
-        register_mqtt_cmd(F("daytemp"), [&](const char * value, const int8_t id) { return set_daytemp(value, id); });
-        register_mqtt_cmd(F("program"), [&](const char * value, const int8_t id) { return set_program(value, id); });
+        register_mqtt_cmd(F("nighttemp"), MAKE_CF_CB(set_nighttemp));
+        register_mqtt_cmd(F("daytemp"), MAKE_CF_CB(set_daytemp));
+        register_mqtt_cmd(F("program"), MAKE_CF_CB(set_program));
         break;
     case EMS_DEVICE_FLAG_RC30_1: // only RC30_1
-        register_mqtt_cmd(F("clockoffset"), [&](const char * value, const int8_t id) { return set_clockoffset(value, id); });
-        register_mqtt_cmd(F("language"), [&](const char * value, const int8_t id) { return set_language(value, id); });
-        register_mqtt_cmd(F("display"), [&](const char * value, const int8_t id) { return set_display(value, id); });
+        register_mqtt_cmd(F("clockoffset"), MAKE_CF_CB(set_clockoffset));
+        register_mqtt_cmd(F("language"), MAKE_CF_CB(set_language));
+        register_mqtt_cmd(F("display"), MAKE_CF_CB(set_display));
         break;
     case EMS_DEVICE_FLAG_RC35: // RC30 and RC35
-        register_mqtt_cmd(F("nighttemp"), [&](const char * value, const int8_t id) { return set_nighttemp(value, id); });
-        register_mqtt_cmd(F("daytemp"), [&](const char * value, const int8_t id) { return set_daytemp(value, id); });
-        register_mqtt_cmd(F("nofrosttemp"), [&](const char * value, const int8_t id) { return set_nofrosttemp(value, id); });
-        register_mqtt_cmd(F("remotetemp"), [&](const char * value, const int8_t id) { return set_remotetemp(value, id); });
-        register_mqtt_cmd(F("minexttemp"), [&](const char * value, const int8_t id) { return set_minexttemp(value, id); });
-        register_mqtt_cmd(F("calinttemp"), [&](const char * value, const int8_t id) { return set_calinttemp(value, id); });
-        register_mqtt_cmd(F("building"), [&](const char * value, const int8_t id) { return set_building(value, id); });
-        register_mqtt_cmd(F("control"), [&](const char * value, const int8_t id) { return set_control(value, id); });
-        register_mqtt_cmd(F("pause"), [&](const char * value, const int8_t id) { return set_pause(value, id); });
-        register_mqtt_cmd(F("party"), [&](const char * value, const int8_t id) { return set_party(value, id); });
-        register_mqtt_cmd(F("holiday"), [&](const char * value, const int8_t id) { return set_holiday(value, id); });
-        register_mqtt_cmd(F("summertemp"), [&](const char * value, const int8_t id) { return set_summertemp(value, id); });
-        register_mqtt_cmd(F("designtemp"), [&](const char * value, const int8_t id) { return set_designtemp(value, id); });
-        register_mqtt_cmd(F("offsettemp"), [&](const char * value, const int8_t id) { return set_offsettemp(value, id); });
-        register_mqtt_cmd(F("holidaytemp"), [&](const char * value, const int8_t id) { return set_holidaytemp(value, id); });
-        register_mqtt_cmd(F("wwmode"), [&](const char * value, const int8_t id) { return set_wwmode(value, id); });
-        register_mqtt_cmd(F("wwcircmode"), [&](const char * value, const int8_t id) { return set_wwcircmode(value, id); });
-        register_mqtt_cmd(F("roominfluence"), [&](const char * value, const int8_t id) { return set_roominfluence(value, id); });
-        register_mqtt_cmd(F("flowtempoffset"), [&](const char * value, const int8_t id) { return set_flowtempoffset(value, id); });
-        register_mqtt_cmd(F("minflowtemp"), [&](const char * value, const int8_t id) { return set_minflowtemp(value, id); });
-        register_mqtt_cmd(F("maxflowtemp"), [&](const char * value, const int8_t id) { return set_maxflowtemp(value, id); });
-        register_mqtt_cmd(F("reducemode"), [&](const char * value, const int8_t id) { return set_reducemode(value, id); });
-        register_mqtt_cmd(F("program"), [&](const char * value, const int8_t id) { return set_program(value, id); });
-        register_mqtt_cmd(F("controlmode"), [&](const char * value, const int8_t id) { return set_controlmode(value, id); });
+        register_mqtt_cmd(F("nighttemp"), MAKE_CF_CB(set_nighttemp));
+        register_mqtt_cmd(F("daytemp"), MAKE_CF_CB(set_daytemp));
+        register_mqtt_cmd(F("nofrosttemp"), MAKE_CF_CB(set_nofrosttemp));
+        register_mqtt_cmd(F("remotetemp"), MAKE_CF_CB(set_remotetemp));
+        register_mqtt_cmd(F("minexttemp"), MAKE_CF_CB(set_minexttemp));
+        register_mqtt_cmd(F("calinttemp"), MAKE_CF_CB(set_calinttemp));
+        register_mqtt_cmd(F("building"), MAKE_CF_CB(set_building));
+        register_mqtt_cmd(F("control"), MAKE_CF_CB(set_control));
+        register_mqtt_cmd(F("pause"), MAKE_CF_CB(set_pause));
+        register_mqtt_cmd(F("party"), MAKE_CF_CB(set_party));
+        register_mqtt_cmd(F("holiday"), MAKE_CF_CB(set_holiday));
+        register_mqtt_cmd(F("summertemp"), MAKE_CF_CB(set_summertemp));
+        register_mqtt_cmd(F("designtemp"), MAKE_CF_CB(set_designtemp));
+        register_mqtt_cmd(F("offsettemp"), MAKE_CF_CB(set_offsettemp));
+        register_mqtt_cmd(F("holidaytemp"), MAKE_CF_CB(set_holidaytemp));
+        register_mqtt_cmd(F("wwmode"), MAKE_CF_CB(set_wwmode));
+        register_mqtt_cmd(F("wwcircmode"), MAKE_CF_CB(set_wwcircmode));
+        register_mqtt_cmd(F("roominfluence"), MAKE_CF_CB(set_roominfluence));
+        register_mqtt_cmd(F("flowtempoffset"), MAKE_CF_CB(set_flowtempoffset));
+        register_mqtt_cmd(F("minflowtemp"), MAKE_CF_CB(set_minflowtemp));
+        register_mqtt_cmd(F("maxflowtemp"), MAKE_CF_CB(set_maxflowtemp));
+        register_mqtt_cmd(F("reducemode"), MAKE_CF_CB(set_reducemode));
+        register_mqtt_cmd(F("program"), MAKE_CF_CB(set_program));
+        register_mqtt_cmd(F("controlmode"), MAKE_CF_CB(set_controlmode));
         break;
     case EMS_DEVICE_FLAG_JUNKERS:
-        register_mqtt_cmd(F("nofrosttemp"), [&](const char * value, const int8_t id) { return set_nofrosttemp(value, id); });
-        register_mqtt_cmd(F("ecotemp"), [&](const char * value, const int8_t id) { return set_ecotemp(value, id); });
-        register_mqtt_cmd(F("heattemp"), [&](const char * value, const int8_t id) { return set_heattemp(value, id); });
+        register_mqtt_cmd(F("nofrosttemp"), MAKE_CF_CB(set_nofrosttemp));
+        register_mqtt_cmd(F("ecotemp"), MAKE_CF_CB(set_ecotemp));
+        register_mqtt_cmd(F("heattemp"), MAKE_CF_CB(set_heattemp));
         break;
     default:
         break;

@@ -30,9 +30,9 @@ Switch::Switch(uint8_t device_type, uint8_t device_id, uint8_t product_id, const
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
     LOG_DEBUG(F("Adding new Switch with device ID 0x%02X"), device_id);
 
-    register_telegram_type(0x9C, F("WM10MonitorMessage"), false, [&](std::shared_ptr<const Telegram> t) { process_WM10MonitorMessage(t); });
-    register_telegram_type(0x9D, F("WM10SetMessage"), false, [&](std::shared_ptr<const Telegram> t) { process_WM10SetMessage(t); });
-    register_telegram_type(0x1E, F("WM10TempMessage"), false, [&](std::shared_ptr<const Telegram> t) { process_WM10TempMessage(t); });
+    register_telegram_type(0x9C, F("WM10MonitorMessage"), false, MAKE_PF_CB(process_WM10MonitorMessage));
+    register_telegram_type(0x9D, F("WM10SetMessage"), false, MAKE_PF_CB(process_WM10SetMessage));
+    register_telegram_type(0x1E, F("WM10TempMessage"), false, MAKE_PF_CB(process_WM10TempMessage));
 
     register_device_value(TAG_NONE, &activated_, DeviceValueType::BOOL, nullptr, F("activated"), F("activated"));
     register_device_value(TAG_NONE, &flowTempHc_, DeviceValueType::USHORT, FL_(div10), F("flowTempHc"), F("flow temperature in assigned hc (TC1)"), DeviceValueUOM::DEGREES);
