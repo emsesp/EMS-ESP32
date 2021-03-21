@@ -26,8 +26,6 @@
 #include <vector>
 #include <functional>
 
-// #include "containers.h"
-
 #include "console.h"
 
 #include <uuid/log.h>
@@ -59,10 +57,8 @@ class Command {
         return cmdfunctions_;
     }
 
-    // static emsesp::array<Command::CmdFunction> * commands();
-
     static bool                   call(const uint8_t device_type, const char * cmd, const char * value, const int8_t id, JsonObject & json);
-    static bool                   call(const uint8_t device_type, const char * cmd, const char * value, const int8_t id);
+    static bool                   call(const uint8_t device_type, const char * cmd, const char * value, const int8_t id = 0);
     static void                   add(const uint8_t device_type, const __FlashStringHelper * cmd, cmdfunction_p cb);
     static void                   add_with_json(const uint8_t device_type, const __FlashStringHelper * cmd, cmdfunction_json_p cb);
     static void                   show_all(uuid::console::Shell & shell);

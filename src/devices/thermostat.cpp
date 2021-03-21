@@ -448,9 +448,9 @@ bool Thermostat::thermostat_ha_cmd(const char * message, uint8_t hc_num) {
         return false;
     }
 
-    // check for mode first
+    // check for mode first, which is a string
     if (!set_mode(message, hc_num)) {
-        // handle as a numerical temperature value
+        // otherwise handle as a numerical temperature value and set the setpoint temp
         float f = strtof((char *)message, 0);
         set_temperature(f, HeatingCircuit::Mode::AUTO, hc_num);
     }

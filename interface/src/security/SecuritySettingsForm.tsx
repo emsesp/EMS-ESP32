@@ -35,7 +35,7 @@ class SecuritySettingsForm extends React.Component<SecuritySettingsFormProps> {
         />
         <Box bgcolor="primary.main" color="primary.contrastText" p={2} mt={2} mb={2}>
           <Typography variant="body1">
-            The Super User password is used to sign authentication tokens and also the Console's `su` password. If you modify this all users will be signed out.
+            The Super User password is used to sign authentication tokens and is also the Console's `su` password. If you modify this all users will be signed out.
           </Typography>
         </Box>
         <FormActions>
