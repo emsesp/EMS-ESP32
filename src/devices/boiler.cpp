@@ -96,6 +96,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     register_mqtt_cmd(F("maintenance"), MAKE_CF_CB(set_maintenance));
     register_mqtt_cmd(F("pumpmodmax"), MAKE_CF_CB(set_max_pump));
     register_mqtt_cmd(F("pumpmodmin"), MAKE_CF_CB(set_min_pump));
+    register_mqtt_cmd(F("reset"), MAKE_CF_CB(set_reset));
 
     // add values
     reserve_device_values(50);
@@ -1099,6 +1100,7 @@ bool Boiler::set_warmwater_circulation_mode(const char * value, const int8_t id)
 
     return true;
 }
+
 // Reset command
 // 0 & 1        Reset-Mode (Manuel, others)
 // 8            reset maintenance message Hxx
