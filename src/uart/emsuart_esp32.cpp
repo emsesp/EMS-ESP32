@@ -67,8 +67,10 @@ void IRAM_ATTR EMSuart::emsuart_rx_intr_handler(void * para) {
                 drop_next_rx_ = true; // we have a overflow
             }
         }
-        if (rxbuf[length - 1]) { // check if last byte is break
-            length++;
+        if (length > 0 && length < EMS_MAXBUFFERSIZE) {
+            if (rxbuf[length - 1]) { // check if last byte is break
+                length++;
+            }
         }
         if ((!drop_next_rx_) && ((length == 2) || (length > 4))) {
             int baseType = 0;
