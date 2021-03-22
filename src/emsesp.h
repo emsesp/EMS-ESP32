@@ -63,7 +63,7 @@
 #define EMSESP_JSON_SIZE_XLARGE_DYN 4096  // for very very large json docs, using DynamicJsonDocument
 #define EMSESP_JSON_SIZE_XXLARGE_DYN 5120 // for extra very very large json docs, using DynamicJsonDocument
 
-// helpers for call back functions
+// helpers for callback functions
 #define MAKE_PF_CB(__f) [&](std::shared_ptr<const Telegram> t) { __f(t); }                  // for process function callbacks to register_telegram_type()
 #define MAKE_CF_CB(__f) [&](const char * value, const int8_t id) { return __f(value, id); } // for command function callbacks to register_mqtt_cmd()
 

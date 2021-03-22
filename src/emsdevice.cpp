@@ -352,7 +352,6 @@ char * EMSdevice::show_telegram_handlers(char * result) {
 
     char    str[10];
     uint8_t i = 0;
-    // for (const auto & tf : *telegram_functions_) {
     for (const auto & tf : telegram_functions_) {
         snprintf_P(str, sizeof(str), PSTR("0x%02X"), tf.telegram_type_id_);
         strlcat(result, str, 200);
@@ -571,8 +570,6 @@ bool EMSdevice::generate_values_json(JsonObject & root, const uint8_t tag_filter
         if (((nested) || tag_filter == DeviceValueTAG::TAG_NONE || (tag_filter == dv.tag)) && (dv.full_name != nullptr || !console)) {
             // we have a tag if it matches the filter given, and that the tag name is not empty/""
             bool have_tag = ((dv.tag != tag_filter) && !tag_to_string(dv.tag).empty());
-
-            // EMSESP::logger().info(F("**HERE: console=%d nested=%d tag_filter=%d tag=%d type=%d short=%s"), console, nested, tag_filter, dv.tag, dv.type, uuid::read_flash_string(dv.short_name).c_str());
 
             char name[80];
             if (console) {

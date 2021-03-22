@@ -486,7 +486,7 @@ void EMSESP::publish_device_values(uint8_t device_type) {
 
     // publish it under a single topic, only if we have data to publish
     if (need_publish) {
-        char topic[20];
+        char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
         snprintf_P(topic, sizeof(topic), PSTR("%s_data"), EMSdevice::device_type_2_device_name(device_type).c_str());
         Mqtt::publish(topic, json);
     }
@@ -688,7 +688,7 @@ void EMSESP::process_version(std::shared_ptr<const Telegram> telegram) {
     uint8_t product_id = telegram->message_data[offset]; // product ID
 
     // get version as XX.XX
-    std::string version(5, '\0');
+    std::string version(6, '\0');
     snprintf_P(&version[0], version.capacity() + 1, PSTR("%02d.%02d"), telegram->message_data[offset + 1], telegram->message_data[offset + 2]);
 
     // some devices store the protocol type (HT3, Buderus) in the last byte
