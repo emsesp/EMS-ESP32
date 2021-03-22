@@ -489,6 +489,8 @@ void System::network_init(bool refresh) {
         mdio       = 18;
         type       = ETH_PHY_TLK110;
         clock_mode = ETH_CLOCK_GPIO0_IN;
+    } else {
+        return; // invalid combi
     }
 
 #ifndef EMSESP_STANDALONE
