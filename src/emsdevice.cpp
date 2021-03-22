@@ -53,7 +53,23 @@ static const __FlashStringHelper * const DeviceValueTAG_s[] PROGMEM = {
     F_(tag_wwc1),            // "wwc1"
     F_(tag_wwc2),            // "Wwc2"
     F_(tag_wwc3),            // "wwc3"
-    F_(tag_wwc4)             // "wwc4"
+    F_(tag_wwc4),            // "wwc4"
+    F_(tag_hs1),             // "hs1"
+    F_(tag_hs2),             // "hs2"
+    F_(tag_hs3),             // "hs3"
+    F_(tag_hs4),             // "hs4"
+    F_(tag_hs5),             // "hs5"
+    F_(tag_hs6),             // "hs6"
+    F_(tag_hs7),             // "hs7"
+    F_(tag_hs8),             // "hs8"
+    F_(tag_hs9),             // "hs9"
+    F_(tag_hs10),            // "hs10"
+    F_(tag_hs11),            // "hs11"
+    F_(tag_hs12),            // "hs12"
+    F_(tag_hs13),            // "hs13"
+    F_(tag_hs14),            // "hs14"
+    F_(tag_hs15),            // "hs15"
+    F_(tag_hs16)             // "hs16"
 
 };
 
@@ -72,7 +88,23 @@ static const __FlashStringHelper * const DeviceValueTAG_mqtt[] PROGMEM = {
     F_(tag_wwc1),                // "wwc1"
     F_(tag_wwc2),                // "Wwc2"
     F_(tag_wwc3),                // "wwc3"
-    F_(tag_wwc4)                 // "wwc4"
+    F_(tag_wwc4),                // "wwc4"
+    F_(tag_hs1),                 // "hs1"
+    F_(tag_hs2),                 // "hs2"
+    F_(tag_hs3),                 // "hs3"
+    F_(tag_hs4),                 // "hs4"
+    F_(tag_hs5),                 // "hs5"
+    F_(tag_hs6),                 // "hs6"
+    F_(tag_hs7),                 // "hs7"
+    F_(tag_hs8),                 // "hs8"
+    F_(tag_hs9),                 // "hs9"
+    F_(tag_hs10),                // "hs10"
+    F_(tag_hs11),                // "hs11"
+    F_(tag_hs12),                // "hs12"
+    F_(tag_hs13),                // "hs13"
+    F_(tag_hs14),                // "hs14"
+    F_(tag_hs15),                // "hs15"
+    F_(tag_hs16)                 // "hs16"
 
 };
 
@@ -373,8 +405,8 @@ void EMSdevice::register_mqtt_topic(const std::string & topic, mqtt_subfunction_
 }
 
 // add command to library
-void EMSdevice::register_mqtt_cmd(const __FlashStringHelper * cmd, cmdfunction_p f) {
-    Command::add(device_type_, cmd, f);
+void EMSdevice::register_mqtt_cmd(const __FlashStringHelper * cmd, cmdfunction_p f, uint8_t flag) {
+    Command::add(device_type_, cmd, f, flag);
 }
 
 // register a call back function for a specific telegram type

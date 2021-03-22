@@ -104,6 +104,7 @@ class MqttSettings {
     uint8_t  ha_climate_format;
     bool     ha_enabled;
     bool     nested_format;
+    uint8_t  subscribes;
 
     static void              read(MqttSettings & settings, JsonObject & root);
     static StateUpdateResult update(JsonObject & root, MqttSettings & settings);

@@ -40,6 +40,7 @@ uint8_t     Mqtt::bool_format_;
 uint8_t     Mqtt::ha_climate_format_;
 bool        Mqtt::ha_enabled_;
 bool        Mqtt::nested_format_;
+uint8_t     Mqtt::subscribes_;
 
 std::deque<Mqtt::QueuedMqttMessage> Mqtt::mqtt_messages_;
 std::vector<Mqtt::MQTTSubFunction>  Mqtt::mqtt_subfunctions_;
@@ -83,12 +84,12 @@ void Mqtt::subscribe(const uint8_t device_type, const std::string & topic, mqtt_
     }
 
     // register in our libary with the callback function.
-    // We store both the original topic and the fully-qualified one
+    // We store the original topic without base
     mqtt_subfunctions_.emplace_back(device_type, std::move(topic), std::move(cb));
 }
 
 // subscribe to the command topic if it doesn't exist yet
-void Mqtt::register_command(const uint8_t device_type, const __FlashStringHelper * cmd, cmdfunction_p cb) {
+void Mqtt::register_command(const uint8_t device_type, const __FlashStringHelper * cmd, cmdfunction_p cb, uint8_t flag) {
     std::string cmd_topic = EMSdevice::device_type_2_device_name(device_type); // thermostat, boiler, etc...
 
     // see if we have already a handler for the device type (boiler, thermostat). If not add it
@@ -106,12 +107,28 @@ void Mqtt::register_command(const uint8_t device_type, const __FlashStringHelper
         LOG_DEBUG(F("Registering MQTT cmd %s with topic %s"), uuid::read_flash_string(cmd).c_str(), EMSdevice::device_type_2_device_name(device_type).c_str());
     }
 
+    // only general device topics
+    if (subscribes_ == 0) {
+        return;
+    }
+
     // register the individual commands too (e.g. ems-esp/boiler/wwonetime)
     // https://github.com/emsesp/EMS-ESP32/issues/31
     if (device_type != EMSdevice::DeviceType::SYSTEM) {
         std::string topic(MQTT_TOPIC_MAX_SIZE, '\0');
-        topic = cmd_topic + "/" + uuid::read_flash_string(cmd);
-        Mqtt::subscribe(device_type, topic, nullptr);
+        if (subscribes_ == 2 && flag == MqttSubFlag::FLAG_HC) {
+            topic = cmd_topic + "/hc1/" + uuid::read_flash_string(cmd);
+            queue_subscribe_message(topic);
+            topic = cmd_topic + "/hc2/" + uuid::read_flash_string(cmd);
+            queue_subscribe_message(topic);
+            topic = cmd_topic + "/hc3/" + uuid::read_flash_string(cmd);
+            queue_subscribe_message(topic);
+            topic = cmd_topic + "/hc4/" + uuid::read_flash_string(cmd);
+            queue_subscribe_message(topic);
+        } else {
+            topic = cmd_topic + "/" + uuid::read_flash_string(cmd);
+            queue_subscribe_message(topic);
+        }
     }
 }
 
@@ -257,6 +274,12 @@ void Mqtt::on_message(const char * fulltopic, const char * payload, size_t len) 
     char topic[100];
     strlcpy(topic, &fulltopic[1 + strlen(mqtt_base_.c_str())], 100);
 
+    // strip the topic substrings
+    char * topic_end = strchr(topic,'/');
+    if (topic_end != nullptr) {
+        topic_end[0] = '\0';
+    }
+
     // convert payload to a null-terminated char string
     char message[len + 2];
     strlcpy(message, payload, len + 1);
@@ -277,14 +300,22 @@ void Mqtt::on_message(const char * fulltopic, const char * payload, size_t len) 
 
             // check if it's not json, then try and extract the command from the topic name
             if (message[0] != '{') {
-                char * cmd_only = strrchr(topic, '/');
+                // get topic with substrings again
+                strlcpy(topic, &fulltopic[1 + strlen(mqtt_base_.c_str())], 100);
+                char * cmd_only = strchr(topic, '/');
                 if (cmd_only == NULL) {
                     return; // invalid topic name
                 }
                 cmd_only++; // skip the /
-                // LOG_INFO(F("devicetype= %d, topic = %s, cmd = %s, message =  %s"), mf.device_type_, topic, cmd_only, message);
-                if (!Command::call(mf.device_type_, cmd_only, message)) {
-                    LOG_ERROR(F("No matching cmd (%s) in topic %s, or invalid data"), cmd_only, topic);
+                int8_t id = -1;
+                // check for hcx/ prefix
+                if (cmd_only[0] == 'h' && cmd_only[1] == 'c' && cmd_only[3] == '/') {
+                    id = cmd_only[2] - '0';
+                    cmd_only += 4;
+                }
+                // LOG_INFO(F("devicetype= %d, topic = %s, cmd = %s, message =  %s, id = %d"), mf.device_type_, topic, cmd_only, message, id);
+                if (!Command::call(mf.device_type_, cmd_only, message, id)) {
+                    LOG_ERROR(F("No matching cmd (%s) in topic %s, id %d, or invalid data"), cmd_only, topic, id);
                 }
                 return;
             }
@@ -411,6 +442,7 @@ void Mqtt::load_settings() {
         dallas_format_     = mqttSettings.dallas_format;
         bool_format_       = mqttSettings.bool_format;
         nested_format_     = mqttSettings.nested_format;
+        subscribes_        = mqttSettings.subscribes;
 
         // convert to milliseconds
         publish_time_boiler_     = mqttSettings.publish_time_boiler * 1000;
@@ -573,7 +605,6 @@ void Mqtt::on_connect() {
     EMSESP::shower_.send_mqtt_stat(false); // Send shower_activated as false
     EMSESP::system_.send_heartbeat();      // send heatbeat
 
-    // } else {
     if (connectcount_ > 1) {
         // we doing a re-connect from a TCP break
         // only re-subscribe again to all MQTT topics

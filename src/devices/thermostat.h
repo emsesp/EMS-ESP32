@@ -315,6 +315,7 @@ class Thermostat : public EMSdevice {
     bool set_minflowtemp(const char * value, const int8_t id);
     bool set_maxflowtemp(const char * value, const int8_t id);
     bool set_reducemode(const char * value, const int8_t id);
+    bool set_switchtime(const char * value, const int8_t id);
     bool set_program(const char * value, const int8_t id);
     bool set_controlmode(const char * value, const int8_t id);
 
