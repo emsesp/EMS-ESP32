@@ -37,6 +37,7 @@ class DummySettings {
     uint8_t     ha_climate_format = 1;
     bool        ha_enabled        = true;
     std::string base              = "ems-esp";
+    uint8_t     subscribes        = 0;
 
     String   hostname                = "ems-esp";
     String   jwtSecret               = "ems-esp";
