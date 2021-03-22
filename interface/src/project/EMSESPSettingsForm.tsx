@@ -7,7 +7,6 @@ import MenuItem from '@material-ui/core/MenuItem';
 
 import Grid from '@material-ui/core/Grid';
 
-
 import { RestFormProps, FormActions, FormButton, BlockFormControlLabel } from '../components';
 
 import { isIP, optional } from '../validators';
@@ -22,20 +21,13 @@ class EMSESPSettingsForm extends React.Component<EMSESPSettingsFormProps> {
         ValidatorForm.addValidationRule('isOptionalIP', optional(isIP));
     }
 
-    /*
-    handleSliderChange = (name: keyof LedSettings) => (event: React.ChangeEvent<{}>, value: number | number[]) => {
-        const { setData } = this.props;
-        setData({ ...this.props.data!, [name]: value });
-      } 
-      */
-
     render() {
         const { data, saveData, handleValueChange } = this.props;
         return (
             <ValidatorForm onSubmit={saveData}>
                 <Box bgcolor="info.main" p={2} mt={2} mb={2}>
                     <Typography variant="body1">
-                        Modify any EMS-ESP settings on this page. For help go to the <Link target="_blank" href="https://emsesp.github.io/docs/#/Configure-firmware32?id=ems-esp-settings" color="primary">{'wiki'}</Link>.
+                        Modify any of the EMS-ESP settings here. For help visit the <Link target="_blank" href="https://emsesp.github.io/docs/#/Configure-firmware32?id=ems-esp-settings" color="primary">{'wiki'}</Link>.
                     </Typography>
                 </Box>
 
