@@ -20,6 +20,7 @@ export interface EMSESPSettings {
   analog_enabled: boolean;
   pbutton_gpio: number;
   trace_raw: boolean;
+  board_profile: number;
 }
 
 export enum busConnectionStatus {

@@ -50,6 +50,7 @@ void WebSettings::read(WebSettings & settings, JsonObject & root) {
     root["api_enabled"]          = settings.api_enabled;
     root["analog_enabled"]       = settings.analog_enabled;
     root["pbutton_gpio"]         = settings.pbutton_gpio;
+    root["board_profile"]        = settings.board_profile;
 }
 
 StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings) {
@@ -131,6 +132,9 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
 
     // doesn't need any follow-up actions
     settings.api_enabled = root["api_enabled"] | EMSESP_DEFAULT_API_ENABLED;
+
+    // board profiles
+    settings.board_profile = root["board_profile"] | EMSESP_DEFAULT_BOARD_PROFILE;
 
     return StateUpdateResult::CHANGED;
 }

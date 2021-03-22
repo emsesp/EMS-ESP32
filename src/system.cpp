@@ -169,12 +169,14 @@ void System::get_settings() {
         // LED
         hide_led_ = settings.hide_led;
         led_gpio_ = settings.led_gpio;
+
+        // BOARD profile
+        board_profile_ = settings.board_profile;
     });
 
     EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
         hostname(networkSettings.hostname.c_str());
         LOG_INFO(F("System %s booted (EMS-ESP version %s)"), networkSettings.hostname.c_str(), EMSESP_APP_VERSION); // print boot message
-        ethernet_profile_ = networkSettings.ethernet_profile;
     });
 }
 
@@ -284,7 +286,6 @@ void System::button_init(bool refresh) {
     }
 
     // Allow 0 for Boot-button on NodeMCU-32s?
-    // if (pbutton_gpio_) {
     if (!myPButton_.init(pbutton_gpio_, HIGH)) {
         LOG_INFO(F("External multi-functional button not detected"));
     } else {
@@ -295,7 +296,6 @@ void System::button_init(bool refresh) {
     myPButton_.onDblClick(BUTTON_DblClickDelay, button_OnDblClick);
     myPButton_.onLongPress(BUTTON_LongPressDelay, button_OnLongPress);
     myPButton_.onVLongPress(BUTTON_VLongPressDelay, button_OnVLongPress);
-    // }
 }
 
 // set the LED to on or off when in normal operating mode
@@ -454,7 +454,7 @@ void System::network_init(bool refresh) {
 
     // check ethernet profile
     // ethernet uses lots of additional memory so we only start it when it's explicitly set in the config
-    if (ethernet_profile_ == 0) {
+    if (board_profile_ == 0) {
         return;
     }
 
@@ -465,7 +465,7 @@ void System::network_init(bool refresh) {
     eth_phy_type_t   type;       // Type of the Ethernet PHY (LAN8720 or TLK110)
     eth_clock_mode_t clock_mode; // ETH_CLOCK_GPIO0_IN or ETH_CLOCK_GPIO0_OUT, ETH_CLOCK_GPIO16_OUT, ETH_CLOCK_GPIO17_OUT for 50Hz inverted clock
 
-    if (ethernet_profile_ == 1) {
+    if (board_profile_ == 1) {
         // LAN8720
         phy_addr   = 0;
         power      = -1;
@@ -473,7 +473,7 @@ void System::network_init(bool refresh) {
         mdio       = 18;
         type       = ETH_PHY_LAN8720;
         clock_mode = ETH_CLOCK_GPIO0_IN;
-    } else if (ethernet_profile_ == 2) {
+    } else if (board_profile_ == 2) {
         // TLK110
         phy_addr   = 31;
         power      = -1;
@@ -803,10 +803,10 @@ void System::console_commands(Shell & shell, unsigned int context) {
         [](Shell & shell, const std::vector<std::string> & arguments) {
             uint8_t n = Helpers::hextoint(arguments.front().c_str());
             if (n <= 2) {
-                EMSESP::esp8266React.getNetworkSettingsService()->update(
-                    [&](NetworkSettings & networkSettings) {
-                        networkSettings.ethernet_profile = n;
-                        shell.printfln(F_(ethernet_option_fmt), networkSettings.ethernet_profile);
+                EMSESP::webSettingsService.update(
+                    [&](WebSettings & settings) {
+                        settings.board_profile = n;
+                        shell.printfln(F_(ethernet_option_fmt), n);
                         return StateUpdateResult::CHANGED;
                     },
                     "local");
@@ -827,8 +827,6 @@ void System::console_commands(Shell & shell, unsigned int context) {
             shell.printfln(F_(wifi_ssid_fmt), networkSettings.ssid.isEmpty() ? uuid::read_flash_string(F_(unset)).c_str() : networkSettings.ssid.c_str());
             shell.print(F(" "));
             shell.printfln(F_(wifi_password_fmt), networkSettings.ssid.isEmpty() ? F_(unset) : F_(asterisks));
-            shell.print(F(" "));
-            shell.printfln(F_(ethernet_option_fmt), networkSettings.ethernet_profile);
         });
     });
 

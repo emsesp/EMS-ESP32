@@ -36,7 +36,6 @@ export interface NetworkSettings {
   ssid: string;
   password: string;
   hostname: string;
-  ethernet_profile: number;
   static_ip_config: boolean;
   local_ip?: string;
   gateway_ip?: string;

@@ -143,7 +143,7 @@ class System {
     uint8_t     led_gpio_;
     bool        syslog_enabled_;
     bool        analog_enabled_;
-    uint8_t     ethernet_profile_;
+    uint8_t     board_profile_;
     uint8_t     pbutton_gpio_;
     int8_t      syslog_level_;
     uint32_t    syslog_mark_interval_;

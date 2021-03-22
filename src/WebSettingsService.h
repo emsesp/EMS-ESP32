@@ -42,6 +42,7 @@
 #define EMSESP_DEFAULT_API_ENABLED false // turn off, because its insecure
 #define EMSESP_DEFAULT_BOOL_FORMAT 1     // on/off
 #define EMSESP_DEFAULT_ANALOG_ENABLED false
+#define EMSESP_DEFAULT_BOARD_PROFILE 0 // default ESP32
 
 // Default GPIO PIN definitions
 #if defined(ESP32)
@@ -84,6 +85,7 @@ class WebSettings {
     bool     api_enabled;
     bool     analog_enabled;
     uint8_t  pbutton_gpio;
+    uint8_t  board_profile;
 
     static void              read(WebSettings & settings, JsonObject & root);
     static StateUpdateResult update(JsonObject & root, WebSettings & settings);

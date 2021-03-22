@@ -1,5 +1,5 @@
 import React, { Fragment } from 'react';
-import { TextValidator, SelectValidator, ValidatorForm } from 'react-material-ui-form-validator';
+import { TextValidator, ValidatorForm } from 'react-material-ui-form-validator';
 
 import { Checkbox, List, ListItem, ListItemText, ListItemAvatar, ListItemSecondaryAction } from '@material-ui/core';
 
@@ -9,7 +9,6 @@ import LockIcon from '@material-ui/icons/Lock';
 import LockOpenIcon from '@material-ui/icons/LockOpen';
 import DeleteIcon from '@material-ui/icons/Delete';
 import SaveIcon from '@material-ui/icons/Save';
-import MenuItem from '@material-ui/core/MenuItem';
 
 import { RestFormProps, PasswordValidator, BlockFormControlLabel, FormActions, FormButton } from '../components';
 import { isIP, isHostname, optional } from '../validators';
@@ -34,7 +33,6 @@ class NetworkSettingsForm extends React.Component<NetworkStatusFormProps> {
         ssid: selectedNetwork.ssid,
         password: "",
         hostname: props.data.hostname,
-        ethernet_profile: 0,
         static_ip_config: false,
       }
       props.setData(networkSettings);
@@ -119,17 +117,6 @@ class NetworkSettingsForm extends React.Component<NetworkStatusFormProps> {
           onChange={handleValueChange('hostname')}
           margin="normal"
         />
-        <SelectValidator name="ems_bus_id"
-          label="Ethernet Profile"
-          value={data.ethernet_profile}
-          fullWidth
-          variant="outlined"
-          onChange={handleValueChange('ethernet_profile')}
-          margin="normal">
-          <MenuItem value={0}>None (wifi only)</MenuItem>
-          <MenuItem value={1}>Profile 1 (LAN8720)</MenuItem>
-          <MenuItem value={2}>Profile 2 (TLK110)</MenuItem>
-        </SelectValidator>
         <BlockFormControlLabel
           control={
             <Checkbox

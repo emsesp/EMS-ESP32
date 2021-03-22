@@ -31,7 +31,6 @@ class NetworkSettings {
     String  password;
     String  hostname;
     bool    staticIPConfig;
-    uint8_t ethernet_profile;
 
     // optional configuration for static IP address
     IPAddress localIP;
@@ -46,7 +45,6 @@ class NetworkSettings {
         root["password"]         = settings.password;
         root["hostname"]         = settings.hostname;
         root["static_ip_config"] = settings.staticIPConfig;
-        root["ethernet_profile"] = settings.ethernet_profile;
 
         // extended settings
         JsonUtils::writeIP(root, "local_ip", settings.localIP);
@@ -61,7 +59,6 @@ class NetworkSettings {
         settings.password         = root["password"] | FACTORY_WIFI_PASSWORD;
         settings.hostname         = root["hostname"] | FACTORY_WIFI_HOSTNAME;
         settings.staticIPConfig   = root["static_ip_config"] | false;
-        settings.ethernet_profile = root["ethernet_profile"] | 0; // no ethernet
 
         // extended settings
         JsonUtils::readIP(root, "local_ip", settings.localIP);
