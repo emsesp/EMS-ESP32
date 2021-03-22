@@ -452,6 +452,9 @@ void System::network_init(bool refresh) {
         get_settings();
     }
 
+    last_system_check_ = 0; // force the LED to go from fast flash to pulse
+    send_heartbeat();
+
     // check board profile for those which use ethernet (id > 10)
     // ethernet uses lots of additional memory so we only start it when it's explicitly set in the config
     if (board_profile_ < 10) {
@@ -493,9 +496,11 @@ void System::network_init(bool refresh) {
         return; // invalid combi
     }
 
+    bool have_ethernet = ETH.begin(phy_addr, power, mdc, mdio, type, clock_mode);
+
+    // disable ssid and AP when using Ethernet
+    if (have_ethernet) {
 #ifndef EMSESP_STANDALONE
-    if (ETH.begin(phy_addr, power, mdc, mdio, type, clock_mode)) {
-        // disable ssid and AP when using Ethernet
         EMSESP::esp8266React.getNetworkSettingsService()->update(
             [&](NetworkSettings & settings) {
                 settings.ssid == ""; // remove SSID
@@ -509,11 +514,8 @@ void System::network_init(bool refresh) {
                 return StateUpdateResult::CHANGED;
             },
             "local");
-    }
 #endif
-
-    last_system_check_ = 0; // force the LED to go from fast flash to pulse
-    send_heartbeat();
+    }
 }
 
 // check health of system, done every few seconds
