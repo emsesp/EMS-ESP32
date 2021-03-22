@@ -14,10 +14,11 @@
 - External Button support (#708) for resetting to factory defaults and other actions
 - new console set command in `system`, `set ethernet <profile>` for quickly enabling cabled ethernet connections without using the captive wifi portal
 - Added in MQTT nested mode, for thermostat and mixer, like we had back in v2
-- Cascade MC400 (product-id 210) (3.0.0b6)
+- Cascade MC400 (product-id 210) (3.0.0b6), power values for heating sources (3.0.1b1)
 - values for wwMaxPower, wwFlowtempOffset
 - RC300 `thermostat temp -1` to clear temporary setpoint in auto mode
 - Syslog port selectable (#744)
+- individual mqtt commands (#31)
 
 ### Fixed
 - telegrams matched to masterthermostat 0x18
@@ -44,5 +45,6 @@
 - new ESP32 partition side to allow for smoother OTA and fallback
 - Network Gateway IP is optional (#682)emsesp/EMS-ESP
 - moved to a new GitHub repo https://github.com/emsesp/EMS-ESP32
+
 ### Removed
 
