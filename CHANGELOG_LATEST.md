@@ -19,7 +19,7 @@
 - RC300 `thermostat temp -1` to clear temporary setpoint in auto mode
 - syslog port selectable (#744)
 - individual mqtt commands (#31)
-- Board Profiles (#11)
+- board Profiles (#11)
 
 ### Fixed
 - telegrams matched to masterthermostat 0x18

@@ -153,13 +153,13 @@ void System::syslog_init(bool refresh) {
 // read all the settings from the config files and store locally
 void System::get_settings() {
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
-        // BUTTON
+        // Button
         pbutton_gpio_ = settings.pbutton_gpio;
 
         // ADC
         analog_enabled_ = settings.analog_enabled;
 
-        // SYSLOG
+        // Syslog
         syslog_enabled_       = settings.syslog_enabled;
         syslog_level_         = settings.syslog_level;
         syslog_mark_interval_ = settings.syslog_mark_interval;
@@ -170,7 +170,7 @@ void System::get_settings() {
         hide_led_ = settings.hide_led;
         led_gpio_ = settings.led_gpio;
 
-        // BOARD profile
+        // Board profile
         board_profile_ = settings.board_profile;
     });
 
@@ -452,9 +452,9 @@ void System::network_init(bool refresh) {
         get_settings();
     }
 
-    // check ethernet profile
+    // check board profile for those which use ethernet (id > 10)
     // ethernet uses lots of additional memory so we only start it when it's explicitly set in the config
-    if (board_profile_ == 0) {
+    if (board_profile_ < 10) {
         return;
     }
 
@@ -465,16 +465,24 @@ void System::network_init(bool refresh) {
     eth_phy_type_t   type;       // Type of the Ethernet PHY (LAN8720 or TLK110)
     eth_clock_mode_t clock_mode; // ETH_CLOCK_GPIO0_IN or ETH_CLOCK_GPIO0_OUT, ETH_CLOCK_GPIO16_OUT, ETH_CLOCK_GPIO17_OUT for 50Hz inverted clock
 
-    if (board_profile_ == 1) {
-        // LAN8720
+    if (board_profile_ == 10) {
+        // Gateway E32 (LAN8720)
+        phy_addr   = 1;
+        power      = 16;
+        mdc        = 23;
+        mdio       = 18;
+        type       = ETH_PHY_LAN8720;
+        clock_mode = ETH_CLOCK_GPIO0_IN;
+    } else if (board_profile_ == 11) {
+        // Olimex ESP32-EVB-EA (LAN8720)
         phy_addr   = 0;
         power      = -1;
         mdc        = 23;
         mdio       = 18;
         type       = ETH_PHY_LAN8720;
         clock_mode = ETH_CLOCK_GPIO0_IN;
-    } else if (board_profile_ == 2) {
-        // TLK110
+    } else if (board_profile_ == 12) {
+        // Ethernet (TLK110)
         phy_addr   = 31;
         power      = -1;
         mdc        = 23;

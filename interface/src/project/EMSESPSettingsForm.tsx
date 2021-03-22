@@ -103,11 +103,12 @@ class EMSESPSettingsForm extends React.Component<EMSESPSettingsFormProps> {
                     onChange={handleValueChange('board_profile')}
                     margin="normal">
                     <MenuItem value={1}>Gateway S32</MenuItem>
-                    <MenuItem value={2}>Gateway E32 (LAN8720)</MenuItem>
-                    <MenuItem value={3}>NodeMCU 32S</MenuItem>
-                    <MenuItem value={4}>Lolin D32</MenuItem>
-                    <MenuItem value={5}>Olimex ESP32 Gateway (LAN8720)</MenuItem>
-                    <MenuItem value={6}>Ethernet (TLK110)</MenuItem>
+                    <MenuItem value={2}>NodeMCU 32S</MenuItem>
+                    <MenuItem value={3}>Lolin D32</MenuItem>
+                    <MenuItem value={4}>Wemos Mini D1-32</MenuItem>
+                    <MenuItem value={10}>Gateway E32 (LAN8720)</MenuItem>
+                    <MenuItem value={11}>Olimex ESP32-EVB-EA (LAN8720)</MenuItem>
+                    <MenuItem value={12}>Ethernet (TLK110)</MenuItem>
                     <MenuItem value={0}>Custom...</MenuItem>
                 </SelectValidator>
 
