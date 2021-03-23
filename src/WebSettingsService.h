@@ -93,15 +93,21 @@ class WebSettings {
     enum ChangeFlags : uint8_t {
 
         NONE   = 0,
-        UART   = (1 << 0),
-        SYSLOG = (1 << 1),
-        ADC    = (1 << 2),
-        DALLAS = (1 << 3),
-        SHOWER = (1 << 4),
-        LED    = (1 << 5),
-        BUTTON = (1 << 6)
+        UART   = (1 << 0), // 1
+        SYSLOG = (1 << 1), // 2
+        ADC    = (1 << 2), // 4
+        DALLAS = (1 << 3), // 8
+        SHOWER = (1 << 4), // 16
+        LED    = (1 << 5), // 32
+        BUTTON = (1 << 6)  // 64
 
     };
+
+    static void check_flag(int prev_v, int new_v, uint8_t flag) {
+        if (prev_v != new_v) {
+            add_flags(flag);
+        }
+    }
 
     static void add_flags(uint8_t flags) {
         flags_ |= flags;
@@ -113,6 +119,10 @@ class WebSettings {
 
     static void reset_flags() {
         flags_ = ChangeFlags::NONE;
+    }
+
+    static uint8_t get_flags() {
+        return flags_;
     }
 
   private:

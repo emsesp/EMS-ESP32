@@ -54,77 +54,87 @@ void WebSettings::read(WebSettings & settings, JsonObject & root) {
 }
 
 StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings) {
-    std::string crc_before(40, '\0');
-    std::string crc_after(40, '\0');
+    int prev;
     reset_flags();
 
     // tx_mode, rx and tx pins
-    snprintf_P(&crc_before[0], crc_before.capacity() + 1, PSTR("%d%d%d"), settings.tx_mode, settings.rx_gpio, settings.tx_gpio);
-    settings.tx_mode  = root["tx_mode"] | EMSESP_DEFAULT_TX_MODE;
+    prev             = settings.tx_mode;
+    settings.tx_mode = root["tx_mode"] | EMSESP_DEFAULT_TX_MODE;
+    check_flag(prev, settings.tx_mode, ChangeFlags::UART);
+    prev              = settings.tx_delay;
     settings.tx_delay = root["tx_delay"] | EMSESP_DEFAULT_TX_DELAY;
-    settings.rx_gpio  = root["rx_gpio"] | EMSESP_DEFAULT_RX_GPIO;
-    settings.tx_gpio  = root["tx_gpio"] | EMSESP_DEFAULT_TX_GPIO;
-    snprintf_P(&crc_after[0], crc_after.capacity() + 1, PSTR("%d%d%d"), settings.tx_mode, settings.rx_gpio, settings.tx_gpio);
-    if (crc_before != crc_after) {
-        add_flags(ChangeFlags::UART);
-    }
+    check_flag(prev, settings.tx_delay, ChangeFlags::UART);
+    prev             = settings.rx_gpio;
+    settings.rx_gpio = root["rx_gpio"] | EMSESP_DEFAULT_RX_GPIO;
+    check_flag(prev, settings.rx_gpio, ChangeFlags::UART);
+    prev             = settings.tx_gpio;
+    settings.tx_gpio = root["tx_gpio"] | EMSESP_DEFAULT_TX_GPIO;
+    check_flag(prev, settings.tx_gpio, ChangeFlags::UART);
 
     // syslog
-    snprintf_P(&crc_before[0], crc_before.capacity() + 1, PSTR("%d%d%d%s"), settings.syslog_enabled, settings.syslog_level, settings.syslog_mark_interval, settings.syslog_host.c_str());
-    settings.syslog_enabled       = root["syslog_enabled"] | EMSESP_DEFAULT_SYSLOG_ENABLED;
-    settings.syslog_level         = root["syslog_level"] | EMSESP_DEFAULT_SYSLOG_LEVEL;
+    prev                    = settings.syslog_enabled;
+    settings.syslog_enabled = root["syslog_enabled"] | EMSESP_DEFAULT_SYSLOG_ENABLED;
+    check_flag(prev, settings.syslog_enabled, ChangeFlags::SYSLOG);
+
+    prev                  = settings.syslog_level;
+    settings.syslog_level = root["syslog_level"] | EMSESP_DEFAULT_SYSLOG_LEVEL;
+    check_flag(prev, settings.syslog_level, ChangeFlags::SYSLOG);
+
+    prev                          = settings.syslog_mark_interval;
     settings.syslog_mark_interval = root["syslog_mark_interval"] | EMSESP_DEFAULT_SYSLOG_MARK_INTERVAL;
-    settings.syslog_host          = root["syslog_host"] | EMSESP_DEFAULT_SYSLOG_HOST;
-    settings.syslog_port          = root["syslog_port"] | EMSESP_DEFAULT_SYSLOG_PORT;
-    settings.trace_raw            = root["trace_raw"] | EMSESP_DEFAULT_TRACELOG_RAW;
-    EMSESP::trace_raw(settings.trace_raw);
-    snprintf_P(&crc_after[0], crc_after.capacity() + 1, PSTR("%d%d%d%d%s"), settings.syslog_enabled, settings.syslog_level, settings.syslog_mark_interval, settings.syslog_port, settings.syslog_host.c_str());
-    if (crc_before != crc_after) {
+    check_flag(prev, settings.syslog_mark_interval, ChangeFlags::SYSLOG);
+
+    String old_syslog_host = settings.syslog_host;
+    settings.syslog_host   = root["syslog_host"] | EMSESP_DEFAULT_SYSLOG_HOST;
+
+#ifndef EMSESP_STANDALONE
+    if (old_syslog_host.equals(settings.syslog_host)) {
         add_flags(ChangeFlags::SYSLOG);
     }
+#endif
+
+    prev                 = settings.syslog_port;
+    settings.syslog_port = root["syslog_port"] | EMSESP_DEFAULT_SYSLOG_PORT;
+    check_flag(prev, settings.syslog_port, ChangeFlags::SYSLOG);
+
+    prev               = settings.trace_raw;
+    settings.trace_raw = root["trace_raw"] | EMSESP_DEFAULT_TRACELOG_RAW;
+    check_flag(prev, settings.trace_raw, ChangeFlags::SYSLOG);
+    EMSESP::trace_raw(settings.trace_raw);
 
     // adc
-    snprintf_P(&crc_before[0], crc_before.capacity() + 1, PSTR("%d"), settings.analog_enabled);
+    prev                    = settings.analog_enabled;
     settings.analog_enabled = root["analog_enabled"] | EMSESP_DEFAULT_ANALOG_ENABLED;
-    snprintf_P(&crc_after[0], crc_after.capacity() + 1, PSTR("%d"), settings.analog_enabled);
-    if (crc_before != crc_after) {
-        add_flags(ChangeFlags::ADC);
-    }
+    check_flag(prev, settings.analog_enabled, ChangeFlags::ADC);
 
     // button
-    snprintf_P(&crc_before[0], crc_before.capacity() + 1, PSTR("%d"), settings.pbutton_gpio);
+    prev                  = settings.pbutton_gpio;
     settings.pbutton_gpio = root["pbutton_gpio"] | EMSESP_DEFAULT_PBUTTON_GPIO;
-    snprintf_P(&crc_after[0], crc_after.capacity() + 1, PSTR("%d"), settings.pbutton_gpio);
-    if (crc_before != crc_after) {
-        add_flags(ChangeFlags::BUTTON);
-    }
+    check_flag(prev, settings.pbutton_gpio, ChangeFlags::BUTTON);
 
     // dallas
-    snprintf_P(&crc_before[0], crc_before.capacity() + 1, PSTR("%d%d"), settings.dallas_gpio, settings.dallas_parasite);
-    settings.dallas_gpio     = root["dallas_gpio"] | EMSESP_DEFAULT_DALLAS_GPIO;
+    prev                 = settings.dallas_gpio;
+    settings.dallas_gpio = root["dallas_gpio"] | EMSESP_DEFAULT_DALLAS_GPIO;
+    check_flag(prev, settings.dallas_gpio, ChangeFlags::DALLAS);
+    prev                     = settings.dallas_parasite;
     settings.dallas_parasite = root["dallas_parasite"] | EMSESP_DEFAULT_DALLAS_PARASITE;
-    snprintf_P(&crc_after[0], crc_after.capacity() + 1, PSTR("%d%d"), settings.dallas_gpio, settings.dallas_parasite);
-    if (crc_before != crc_after) {
-        add_flags(ChangeFlags::DALLAS);
-    }
+    check_flag(prev, settings.dallas_parasite, ChangeFlags::DALLAS);
 
     // shower
-    snprintf_P(&crc_before[0], crc_before.capacity() + 1, PSTR("%d%d"), settings.shower_timer, settings.shower_alert);
+    prev                  = settings.shower_timer;
     settings.shower_timer = root["shower_timer"] | EMSESP_DEFAULT_SHOWER_TIMER;
+    check_flag(prev, settings.shower_timer, ChangeFlags::SHOWER);
+    prev                  = settings.shower_alert;
     settings.shower_alert = root["shower_alert"] | EMSESP_DEFAULT_SHOWER_ALERT;
-    snprintf_P(&crc_after[0], crc_after.capacity() + 1, PSTR("%d%d"), settings.shower_timer, settings.shower_alert);
-    if (crc_before != crc_after) {
-        add_flags(ChangeFlags::SHOWER);
-    }
+    check_flag(prev, settings.shower_alert, ChangeFlags::SHOWER);
 
     // led
-    snprintf_P(&crc_before[0], crc_before.capacity() + 1, PSTR("%d%d"), settings.led_gpio, settings.hide_led);
+    prev              = settings.led_gpio;
     settings.led_gpio = root["led_gpio"] | EMSESP_DEFAULT_LED_GPIO;
+    check_flag(prev, settings.led_gpio, ChangeFlags::LED);
+    prev              = settings.hide_led;
     settings.hide_led = root["hide_led"] | EMSESP_DEFAULT_HIDE_LED;
-    snprintf_P(&crc_after[0], crc_after.capacity() + 1, PSTR("%d%d"), settings.led_gpio, settings.hide_led);
-    if (crc_before != crc_after) {
-        add_flags(ChangeFlags::LED);
-    }
+    check_flag(prev, settings.hide_led, ChangeFlags::LED);
 
     // these both need reboots to be applied
     settings.ems_bus_id        = root["ems_bus_id"] | EMSESP_DEFAULT_EMS_BUS_ID;
@@ -151,7 +161,7 @@ void WebSettingsService::onUpdate() {
     }
 
     if (WebSettings::has_flags(WebSettings::ChangeFlags::UART)) {
-        EMSESP::init_tx();
+        EMSESP::init_uart();
     }
 
     if (WebSettings::has_flags(WebSettings::ChangeFlags::SYSLOG)) {
