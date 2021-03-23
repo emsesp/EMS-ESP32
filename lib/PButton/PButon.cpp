@@ -28,9 +28,9 @@ PButton::PButton() {
     LongPressDelay_  = 750;  // Hold period for a long press event (in ms)
     VLongPressDelay_ = 3000; // Hold period for a very long press event (in ms)
 
-    cb_onClick = nullptr;
-    cb_onDblClick = nullptr;
-    cb_onLongPress = nullptr;
+    cb_onClick      = nullptr;
+    cb_onDblClick   = nullptr;
+    cb_onLongPress  = nullptr;
     cb_onVLongPress = nullptr;
 
     // Initialization of variables
@@ -144,7 +144,7 @@ bool PButton::check(void) {
 
     // added code: raise OnVLongPress event when the button is released, only for pin 0
     if (state_ == pullMode_ && vLongPressHappened_) {
-        resultEvent        = 4;
+        resultEvent         = 4;
         vLongPressHappened_ = false;
         longPressHappened_  = false;
     }

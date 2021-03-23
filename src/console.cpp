@@ -300,7 +300,7 @@ void EMSESPShell::add_console_commands() {
                               // if logging is off, the watch won't show anything, show force it back to NOTICE
                               if (shell.log_level() < Level::NOTICE) {
                                   shell.log_level(Level::NOTICE);
-                                  shell.printfln(F("Force log level to notice"));
+                                  shell.printfln(F("Setting log level to Notice"));
                               }
 
                               if (watch == EMSESP::WATCH_ON) {

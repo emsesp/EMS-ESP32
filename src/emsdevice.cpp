@@ -409,7 +409,7 @@ void EMSdevice::register_mqtt_cmd(const __FlashStringHelper * cmd, cmdfunction_p
     Command::add(device_type_, cmd, f, flag);
 }
 
-// register a call back function for a specific telegram type
+// register a callback function for a specific telegram type
 void EMSdevice::register_telegram_type(const uint16_t telegram_type_id, const __FlashStringHelper * telegram_type_name, bool fetch, process_function_p f) {
     telegram_functions_.emplace_back(telegram_type_id, telegram_type_name, fetch, f);
 }
