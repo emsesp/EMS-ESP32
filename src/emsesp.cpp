@@ -157,18 +157,27 @@ void EMSESP::watch_id(uint16_t watch_id) {
     watch_id_ = watch_id;
 }
 
-// change the tx_mode
 // resets all counters and bumps the UART
 // this is called when the tx_mode is persisted in the FS either via Web UI or the console
-void EMSESP::init_tx() {
+void EMSESP::init_uart() {
     uint8_t tx_mode;
+    uint8_t rx_gpio;
+    uint8_t tx_gpio;
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
         tx_mode   = settings.tx_mode;
         tx_delay_ = settings.tx_delay * 1000;
-
-        EMSuart::stop();
-        EMSuart::start(tx_mode, settings.rx_gpio, settings.tx_gpio);
+        rx_gpio   = settings.rx_gpio;
+        tx_gpio   = settings.tx_gpio;
     });
+
+    EMSuart::stop();
+
+    // don't start UART if we have invalid GPIOs
+    if (System::is_valid_gpio(rx_gpio) && System::is_valid_gpio(tx_gpio)) {
+        EMSuart::start(tx_mode, rx_gpio, tx_gpio); // start UART
+    } else {
+        LOG_WARNING(F("Invalid UART Rx/Tx GPIOs. Check config."));
+    }
 
     txservice_.start(); // sends out request to EMS bus for all devices
 
@@ -1115,25 +1124,24 @@ void EMSESP::start() {
 // main loop calling all services
 void EMSESP::loop() {
     esp8266React.loop(); // web
+    system_.loop();      // does LED and checks system health, and syslog service
 
     // if we're doing an OTA upload, skip MQTT and EMS
-    if (system_.upload_status()) {
-        return;
+    if (!system_.upload_status()) {
+        rxservice_.loop();    // process any incoming Rx telegrams
+        shower_.loop();       // check for shower on/off
+        dallassensor_.loop(); // read dallas sensor temperatures
+        publish_all_loop();   // with HA messages in parts to avoid flooding the mqtt queue
+        mqtt_.loop();         // sends out anything in the MQTT queue
+
+        // force a query on the EMS devices to fetch latest data at a set interval (1 min)
+        if ((uuid::get_uptime() - last_fetch_ > EMS_FETCH_FREQUENCY)) {
+            last_fetch_ = uuid::get_uptime();
+            fetch_device_values();
+        }
     }
 
-    system_.loop();       // does LED and checks system health, and syslog service
-    rxservice_.loop();    // process any incoming Rx telegrams
-    shower_.loop();       // check for shower on/off
-    dallassensor_.loop(); // read dallas sensor temperatures
-    publish_all_loop();   // with HA messages in parts to avoid flooding the mqtt queue
-    mqtt_.loop();         // sends out anything in the MQTT queue
-    console_.loop();      // telnet/serial console
-
-    // force a query on the EMS devices to fetch latest data at a set interval (1 min)
-    if ((uuid::get_uptime() - last_fetch_ > EMS_FETCH_FREQUENCY)) {
-        last_fetch_ = uuid::get_uptime();
-        fetch_device_values();
-    }
+    console_.loop(); // telnet/serial console
 
     // delay(1); // helps telnet catch up. don't think its needed in ESP32 3.1.0
 }
