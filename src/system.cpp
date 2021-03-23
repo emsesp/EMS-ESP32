@@ -173,11 +173,6 @@ void System::get_settings() {
         // Board profile
         board_profile_ = settings.board_profile;
     });
-
-    EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
-        hostname(networkSettings.hostname.c_str());
-        LOG_INFO(F("System %s booted (EMS-ESP version %s)"), networkSettings.hostname.c_str(), EMSESP_APP_VERSION); // print boot message
-    });
 }
 
 // adjust WiFi settings
@@ -207,6 +202,17 @@ void System::wifi_tweak() {
 #endif
 }
 
+// check for valid ESP32 pins
+// 1, 6-11, 12, 14 & 15 are not allowed
+// we allow 0 (since its pulled high)
+// See https://diyprojects.io/esp32-how-to-use-gpio-digital-io-arduino-code/#.YFpVEq9KhjG
+bool System::is_valid_gpio(uint8_t pin) {
+    if ((pin == 1) || (pin >= 6 && pin <= 12) || (pin >= 14 && pin <= 15)) {
+        return false; // bad
+    }
+    return true;
+}
+
 // first call. Sets memory and starts up the UART Serial bridge
 void System::start(uint32_t heap_start) {
 #if defined(EMSESP_DEBUG)
@@ -221,6 +227,11 @@ void System::start(uint32_t heap_start) {
     // load in all the settings first
     get_settings();
 
+    EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
+        hostname(networkSettings.hostname.c_str());
+        LOG_INFO(F("System %s booted (EMS-ESP version %s)"), networkSettings.hostname.c_str(), EMSESP_APP_VERSION); // print boot message
+    });
+
     commands_init();     // console & api commands
     led_init(false);     // init LED
     adc_init(false);     // analog ADC
@@ -228,7 +239,7 @@ void System::start(uint32_t heap_start) {
     button_init(false);  // the special button
     network_init(false); // network
 
-    EMSESP::init_tx(); // start UART
+    EMSESP::init_uart(); // start UART
 }
 
 // adc and bluetooth
@@ -285,11 +296,14 @@ void System::button_init(bool refresh) {
         get_settings();
     }
 
-    // Allow 0 for Boot-button on NodeMCU-32s?
-    if (!myPButton_.init(pbutton_gpio_, HIGH)) {
-        LOG_INFO(F("External multi-functional button not detected"));
+    if (is_valid_gpio(pbutton_gpio_)) {
+        if (!myPButton_.init(pbutton_gpio_, HIGH)) {
+            LOG_INFO(F("External multi-functional button not detected"));
+        } else {
+            LOG_INFO(F("External multi-functional button enabled"));
+        }
     } else {
-        LOG_INFO(F("External multi-functional button enabled"));
+        LOG_WARNING(F("Invalid button GPIO. Check config."));
     }
 
     myPButton_.onClick(BUTTON_Debounce, button_OnClick);

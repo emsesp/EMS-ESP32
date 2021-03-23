@@ -74,6 +74,8 @@ class System {
     void button_init(bool refresh);
     void commands_init();
 
+    static bool is_valid_gpio(uint8_t pin);
+
     bool check_upgrade();
     void send_heartbeat();
 
