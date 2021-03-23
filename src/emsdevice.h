@@ -140,9 +140,10 @@ enum DeviceValueTAG : uint8_t {
 
 // mqtt flags for command subscriptions
 enum MqttSubFlag : uint8_t {
-    FLAG_NONE = 0,
+    FLAG_NORMAL = 0,
     FLAG_HC,
-    FLAG_WWC
+    FLAG_WWC,
+    FLAG_NOSUB
 };
 
 class EMSdevice {

@@ -400,7 +400,7 @@ void System::send_heartbeat() {
     doc["uptime"]      = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
     doc["uptime_sec"]  = uuid::get_uptime_sec();
     doc["mqttfails"]   = Mqtt::publish_fails();
-    doc["rxsent"]      = EMSESP::rxservice_.telegram_count();
+    doc["rxreceived"]  = EMSESP::rxservice_.telegram_count();
     doc["rxfails"]     = EMSESP::rxservice_.telegram_error_count();
     doc["txread"]      = EMSESP::txservice_.telegram_read_count();
     doc["txwrite"]     = EMSESP::txservice_.telegram_write_count();
@@ -553,8 +553,9 @@ void System::system_check() {
 
 // commands - takes static function pointers
 // these commands respond to the topic "system" and take a payload like {cmd:"", data:"", id:""}
+// no individual subsribe for pin command because id is needed
 void System::commands_init() {
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(pin), System::command_pin);
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(pin), System::command_pin, MqttSubFlag::FLAG_NOSUB);
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(send), System::command_send);
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(publish), System::command_publish);
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(fetch), System::command_fetch);

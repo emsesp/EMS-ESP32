@@ -91,7 +91,7 @@ void Command::add(const uint8_t device_type, const __FlashStringHelper * cmd, cm
         return;
     }
 
-    cmdfunctions_.emplace_back(device_type, cmd, cb, nullptr);
+    cmdfunctions_.emplace_back(device_type, flag, cmd, cb, nullptr);
 
     // see if we need to subscribe
     if (Mqtt::enabled()) {
@@ -106,7 +106,7 @@ void Command::add_with_json(const uint8_t device_type, const __FlashStringHelper
         return;
     }
 
-    cmdfunctions_.emplace_back(device_type, cmd, nullptr, cb); // add command
+    cmdfunctions_.emplace_back(device_type, MqttSubFlag::FLAG_NOSUB, cmd, nullptr, cb); // add command
 }
 
 // see if a command exists for that device type

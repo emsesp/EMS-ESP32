@@ -41,12 +41,14 @@ class Command {
   public:
     struct CmdFunction {
         uint8_t                     device_type_; // DeviceType::
+        uint8_t                     flag_;
         const __FlashStringHelper * cmd_;
         cmdfunction_p               cmdfunction_;
         cmdfunction_json_p          cmdfunction_json_;
 
-        CmdFunction(const uint8_t device_type, const __FlashStringHelper * cmd, cmdfunction_p cmdfunction, cmdfunction_json_p cmdfunction_json)
+        CmdFunction(const uint8_t device_type, const uint8_t flag, const __FlashStringHelper * cmd, cmdfunction_p cmdfunction, cmdfunction_json_p cmdfunction_json)
             : device_type_(device_type)
+            , flag_(flag)
             , cmd_(cmd)
             , cmdfunction_(cmdfunction)
             , cmdfunction_json_(cmdfunction_json) {
