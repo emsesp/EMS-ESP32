@@ -39,7 +39,7 @@ PButton  System::myPButton_;
 // value: true = HIGH, false = LOW
 // e.g. http://ems-esp/api?device=system&cmd=pin&data=1&id=2
 bool System::command_pin(const char * value, const int8_t id) {
-    if (id < 0) {
+    if (!is_valid_gpio(id)) {
         return false;
     }
 
@@ -198,17 +198,18 @@ void System::wifi_tweak() {
     bool         s1 = WiFi.getSleep();
     WiFi.setSleep(false); // turn off sleep - WIFI_PS_NONE
     bool s2 = WiFi.getSleep();
-    LOG_INFO(F("Adjusting Wifi - Tx power %d->%d, Sleep %d->%d"), p1, p2, s1, s2);
+    LOG_DEBUG(F("Adjusting WiFi - Tx power %d->%d, Sleep %d->%d"), p1, p2, s1, s2);
 #endif
 }
 
-// check for valid ESP32 pins
-// 1, 6-11, 12, 14 & 15 are not allowed
-// we allow 0 (since its pulled high)
+// check for valid ESP32 pins. This is very dependent on which ESP32 board is being used.
+// Typically you can't use 1, 6-11 (SPI flash), 12, 14 & 15, 20, 24 and 28-31
+// we allow 0 as it has a special function on the NodeMCU apparently
 // See https://diyprojects.io/esp32-how-to-use-gpio-digital-io-arduino-code/#.YFpVEq9KhjG
+// and https://nodemcu.readthedocs.io/en/dev-esp32/modules/gpio/
 bool System::is_valid_gpio(uint8_t pin) {
-    if ((pin == 1) || (pin >= 6 && pin <= 12) || (pin >= 14 && pin <= 15)) {
-        return false; // bad
+    if ((pin == 1) || (pin >= 6 && pin <= 12) || (pin >= 14 && pin <= 15) || (pin == 20) || (pin == 24) || (pin >= 28 && pin <= 31)) {
+        return false; // bad pin
     }
     return true;
 }
@@ -318,9 +319,9 @@ void System::led_init(bool refresh) {
         get_settings();
     }
 
-    if (led_gpio_) {
+    if ((led_gpio_ != 0) && is_valid_gpio(led_gpio_)) {
         pinMode(led_gpio_, OUTPUT);                            // 0 means disabled
-        digitalWrite(led_gpio_, hide_led_ ? !LED_ON : LED_ON); // LED on, for ever
+        digitalWrite(led_gpio_, hide_led_ ? !LED_ON : LED_ON); // LED on, forever
     }
 }
 
