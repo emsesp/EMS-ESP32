@@ -52,6 +52,7 @@ class Helpers {
     static uint32_t    abs(const int32_t i);
     static double      round2(double value, const uint8_t divider);
     static std::string toLower(std::string const & s);
+    static std::string toUpper(std::string const & s);
 
     static bool hasValue(const uint8_t & v, const uint8_t isBool = 0);
     static bool hasValue(const int8_t & v);

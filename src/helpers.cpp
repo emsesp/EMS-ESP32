@@ -432,6 +432,12 @@ std::string Helpers::toLower(std::string const & s) {
     return lc;
 }
 
+std::string Helpers::toUpper(std::string const & s) {
+    std::string lc = s;
+    std::transform(lc.begin(), lc.end(), lc.begin(), [](unsigned char c) { return std::toupper(c); });
+    return lc;
+}
+
 // checks if we can convert a char string to a lowercase string
 bool Helpers::value2string(const char * v, std::string & value) {
     if ((v == nullptr) || (strlen(v) == 0)) {
