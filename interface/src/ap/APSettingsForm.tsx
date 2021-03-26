@@ -30,7 +30,7 @@ class APSettingsForm extends React.Component<APSettingsFormProps> {
           onChange={handleValueChange('provision_mode')}
           margin="normal">
           <MenuItem value={APProvisionMode.AP_MODE_ALWAYS}>Always</MenuItem>
-          <MenuItem value={APProvisionMode.AP_MODE_DISCONNECTED}>When WiFi Disconnected</MenuItem>
+          <MenuItem value={APProvisionMode.AP_MODE_DISCONNECTED}>When Network Disconnected</MenuItem>
           <MenuItem value={APProvisionMode.AP_NEVER}>Never</MenuItem>
         </SelectValidator>
         {
