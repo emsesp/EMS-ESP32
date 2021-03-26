@@ -322,7 +322,7 @@ void System::led_init(bool refresh) {
     }
 
     if ((led_gpio_ != 0) && is_valid_gpio(led_gpio_)) {
-        pinMode(led_gpio_, OUTPUT);                            // 0 means disabled
+        pinMode(led_gpio_, OUTPUT); // 0 means disabled
         digitalWrite(led_gpio_, hide_led_ ? !LED_ON : LED_ON);
     }
 }
@@ -1039,15 +1039,16 @@ bool System::command_test(const char * value, const int8_t id) {
 #endif
 
 // takes a board profile and populates a data array with GPIO configurations
+// data = led, dallas, rx, tx, button
 bool System::load_board_profile(std::vector<uint8_t> & data, const std::string & board_profile) {
     if (board_profile == "S32") {
         data = {2, 3, 23, 5, 0}; // Gateway S32
     } else if (board_profile == "E32") {
         data = {2, 4, 5, 17, 33}; // Gateway E32
     } else if (board_profile == "MT-ET") {
-        data = {2, 4, 23, 5, 0}; // MT-ET Live D1 Mini
+        data = {2, 18, 23, 5, 0}; // MT-ET Live D1 Mini
     } else if (board_profile == "NODEMCU") {
-        data = {2, 4, 23, 5, 0}; // NodeMCU 32S
+        data = {2, 18, 23, 5, 0}; // NodeMCU 32S
     } else if (board_profile == "LOLIN") {
         data = {2, 14, 17, 16, 0}; // Lolin D32
     } else if (board_profile == "WEMOS") {
