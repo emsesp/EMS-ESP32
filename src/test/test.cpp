@@ -364,6 +364,15 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         return;
     }
 
+    if (command == "board_profile") {
+        shell.printfln(F("Testing board profile..."));
+
+        shell.invoke_command("system");
+        shell.invoke_command("set board_profile wemos");
+        shell.invoke_command("exit");
+        shell.invoke_command("call system settings");
+    }
+
     if (command == "boiler") {
         shell.printfln(F("Testing boiler..."));
         Mqtt::ha_enabled(false);
@@ -375,11 +384,17 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         shell.invoke_command("call boiler info");
         shell.invoke_command("call system publish");
 
+        // test all permutations
         EMSESP::mqtt_.incoming("ems-esp/boiler/wwonetime", "1");
         EMSESP::mqtt_.incoming("ems-esp/boiler/wwonetime", "0");
+        EMSESP::mqtt_.incoming("ems-esp/boiler/wwonetime", "on");
         EMSESP::mqtt_.incoming("ems-esp/boiler/heatingtemp", "24");
         EMSESP::mqtt_.incoming("ems-esp/boiler/wwonetime", "test"); // should fail
         EMSESP::mqtt_.incoming("ems-esp/boiler", "{\"cmd\":\"flowtemp\",\"id\":0,\"data\":22}");
+        EMSESP::mqtt_.incoming("ems-esp/boiler", "{\"cmd\":\"wwonetime\",\"id\":0,\"data\":1}");
+        EMSESP::mqtt_.incoming("ems-esp/boiler", "{\"cmd\":\"wwonetime\",\"id\":0,\"data\":\"off\"}");
+        EMSESP::mqtt_.incoming("ems-esp/boiler", "{\"cmd\":\"wwonetime\",\"hc\":1,\"data\":\"on\"}");
+        EMSESP::mqtt_.incoming("ems-esp/boiler", "{\"cmd\":\"wwonetime\",\"data\":\"on\",\"hc\":1}");
 
         shell.invoke_command("show mqtt");
     }
