@@ -280,7 +280,6 @@ class EMSESPDevicesForm extends Component<EMSESPDevicesFormProps, EMSESPDevicesF
       .then((response) => {
         if (response.status === 200) {
           return response.json();
-          // this.setState({ errorMessage: undefined }, this.props.loadData);
         }
         throw Error("Unexpected response code: " + response.status);
       })
