@@ -7,19 +7,80 @@ import MenuItem from '@material-ui/core/MenuItem';
 
 import Grid from '@material-ui/core/Grid';
 
+import { redirectingAuthorizedFetch, withAuthenticatedContext, AuthenticatedContextProps } from "../authentication";
+
 import { RestFormProps, FormActions, FormButton, BlockFormControlLabel } from '../components';
 
 import { isIP, optional } from '../validators';
 
 import { EMSESPSettings } from './EMSESPtypes';
 
-type EMSESPSettingsFormProps = RestFormProps<EMSESPSettings> & WithWidthProps;
+import { boardProfileSelectItems } from './EMSESPBoardProfiles';
+
+import { ENDPOINT_ROOT } from "../api";
+export const BOARD_PROFILE_ENDPOINT = ENDPOINT_ROOT + "boardProfile";
+
+type EMSESPSettingsFormProps = RestFormProps<EMSESPSettings> & AuthenticatedContextProps & WithWidthProps;
+
+interface EMSESPSettingsFormState {
+    processing: boolean;
+}
 
 class EMSESPSettingsForm extends React.Component<EMSESPSettingsFormProps> {
+
+    state: EMSESPSettingsFormState = {
+        processing: false
+    }
 
     componentDidMount() {
         ValidatorForm.addValidationRule('isOptionalIP', optional(isIP));
     }
+
+    changeBoardProfile = (event: React.ChangeEvent<HTMLSelectElement>) => {
+        const { data, setData } = this.props;
+        setData({
+            ...data,
+            board_profile: event.target.value
+        });
+
+        if (event.target.value === "CUSTOM")
+            return;
+
+        this.setState({ processing: true });
+        redirectingAuthorizedFetch(BOARD_PROFILE_ENDPOINT, {
+            method: "POST",
+            body: JSON.stringify({ code: event.target.value }),
+            headers: {
+                "Content-Type": "application/json",
+            },
+        })
+            .then((response) => {
+                if (response.status === 200) {
+                    return response.json();
+                }
+                throw Error("Unexpected response code: " + response.status);
+            })
+            .then((json) => {
+                this.props.enqueueSnackbar("Profile loaded", { variant: 'success' });
+                setData({
+                    ...data,
+                    led_gpio: json.led_gpio,
+                    dallas_gpio: json.dallas_gpio,
+                    rx_gpio: json.rx_gpio,
+                    tx_gpio: json.tx_gpio,
+                    pbutton_gpio: json.pbutton_gpio,
+                    board_profile: event.target.value
+                });
+                this.setState({ processing: false });
+            })
+            .catch((error) => {
+                this.props.enqueueSnackbar(
+                    error.message || "Problem fetching board profile",
+                    { variant: "warning" }
+                );
+                this.setState({ processing: false });
+            });
+    };
 
     render() {
         const { data, saveData, handleValueChange } = this.props;
@@ -27,7 +88,7 @@ class EMSESPSettingsForm extends React.Component<EMSESPSettingsFormProps> {
             <ValidatorForm onSubmit={saveData}>
                 <Box bgcolor="info.main" p={2} mt={2} mb={2}>
                     <Typography variant="body1">
-                        Modify any of the EMS-ESP settings here. For help visit the <Link target="_blank" href="https://emsesp.github.io/docs/#/Configure-firmware32?id=ems-esp-settings" color="primary">{'wiki'}</Link>.
+                        Modify any of the EMS-ESP settings here. For help refer to the <Link target="_blank" href="https://emsesp.github.io/docs/#/Configure-firmware32?id=ems-esp-settings" color="primary">{'online documentation'}</Link>.
                     </Typography>
                 </Box>
 
@@ -37,7 +98,6 @@ class EMSESPSettingsForm extends React.Component<EMSESPSettingsFormProps> {
                 </Typography>
 
                 <Grid container spacing={1} direction="row" justify="flex-start" alignItems="flex-start">
-
                     <Grid item xs={5}>
                         <SelectValidator name="tx_mode"
                             label="Tx Mode"
@@ -91,7 +151,7 @@ class EMSESPSettingsForm extends React.Component<EMSESPSettingsFormProps> {
 
                 <Box color="warning.main" p={0} mt={0} mb={0}>
                     <Typography variant="body2">
-                        <i>Choose from a pre-configured board layout to automatically set the GPIO pins</i>
+                        <i>Select a pre-configured board layout to automatically set the GPIO pins, or set your own custom configuration</i>
                     </Typography>
                 </Box>
 
@@ -100,25 +160,18 @@ class EMSESPSettingsForm extends React.Component<EMSESPSettingsFormProps> {
                     value={data.board_profile}
                     fullWidth
                     variant="outlined"
-                    onChange={handleValueChange('board_profile')}
+                    onChange={this.changeBoardProfile}
                     margin="normal">
-                    <MenuItem value={1}>Gateway S32</MenuItem>
-                    <MenuItem value={2}>NodeMCU 32S</MenuItem>
-                    <MenuItem value={3}>Lolin D32</MenuItem>
-                    <MenuItem value={4}>Wemos Mini D1-32</MenuItem>
-                    <MenuItem value={10}>Gateway E32 (LAN8720)</MenuItem>
-                    <MenuItem value={11}>Olimex ESP32-EVB-EA (LAN8720)</MenuItem>
-                    <MenuItem value={12}>Ethernet (TLK110)</MenuItem>
-                    <MenuItem value={0}>Custom...</MenuItem>
+                    {boardProfileSelectItems()}
+                    <MenuItem key={"CUSTOM"} value={"CUSTOM"}>Custom...</MenuItem>
                 </SelectValidator>
 
-                { (data.board_profile === 0) &&
-
+                { (data.board_profile === "CUSTOM") &&
                     <Grid container spacing={1} direction="row" justify="flex-start" alignItems="flex-start">
                         <Grid item xs={4}>
                             <TextValidator
-                                validators={['required', 'isNumber', 'minNumber:0', 'maxNumber:40']}
-                                errorMessages={['Rx GPIO is required', "Must be a number", "Must be 0 or higher", "Max value is 40"]}
+                                validators={['required', 'isNumber', 'minNumber:0', 'maxNumber:40', 'matchRegexp:^((?!6|7|8|9|10|11|12|14|15|20|24|28|29|30|31)[0-9]*)$']}
+                                errorMessages={['GPIO is required', "Must be a number", "Must be 0 or higher", "Max value is 40", "Not a valid GPIO"]}
                                 name="rx_gpio"
                                 label="Rx GPIO"
                                 fullWidth
@@ -131,8 +184,8 @@ class EMSESPSettingsForm extends React.Component<EMSESPSettingsFormProps> {
                         </Grid>
                         <Grid item xs={4}>
                             <TextValidator
-                                validators={['required', 'isNumber', 'minNumber:0', 'maxNumber:40']}
-                                errorMessages={['Tx GPIO is required', "Must be a number", "Must be 0 or higher", "Max value is 40"]}
+                                validators={['required', 'isNumber', 'minNumber:0', 'maxNumber:40', 'matchRegexp:^((?!6|7|8|9|10|11|12|14|15|20|24|28|29|30|31)[0-9]*)$']}
+                                errorMessages={['GPIO is required', "Must be a number", "Must be 0 or higher", "Max value is 40", "Not a valid GPIO"]}
                                 name="tx_gpio"
                                 label="Tx GPIO"
                                 fullWidth
@@ -145,8 +198,8 @@ class EMSESPSettingsForm extends React.Component<EMSESPSettingsFormProps> {
                         </Grid>
                         <Grid item xs={4}>
                             <TextValidator
-                                validators={['required', 'isNumber', 'minNumber:0', 'maxNumber:40']}
-                                errorMessages={['Button GPIO is required', "Must be a number", "Must be 0 or higher", "Max value is 40"]}
+                                validators={['required', 'isNumber', 'minNumber:0', 'maxNumber:40', 'matchRegexp:^((?!6|7|8|9|10|11|12|14|15|20|24|28|29|30|31)[0-9]*)$']}
+                                errorMessages={['GPIO is required', "Must be a number", "Must be 0 or higher", "Max value is 40", "Not a valid GPIO"]}
                                 name="pbutton_gpio"
                                 label="Button GPIO"
                                 fullWidth
@@ -159,8 +212,8 @@ class EMSESPSettingsForm extends React.Component<EMSESPSettingsFormProps> {
                         </Grid>
                         <Grid item xs={4}>
                             <TextValidator
-                                validators={['required', 'isNumber', 'minNumber:0', 'maxNumber:40']}
-                                errorMessages={['Dallas GPIO is required', "Must be a number", "Must be 0 or higher", "Max value is 40"]}
+                                validators={['required', 'isNumber', 'minNumber:0', 'maxNumber:40', 'matchRegexp:^((?!6|7|8|9|10|11|12|14|15|20|24|28|29|30|31)[0-9]*)$']}
+                                errorMessages={['GPIO is required', "Must be a number", "Must be 0 or higher", "Max value is 40", "Not a valid GPIO"]}
                                 name="dallas_gpio"
                                 label="Dallas GPIO (0=none)"
                                 fullWidth
@@ -173,8 +226,8 @@ class EMSESPSettingsForm extends React.Component<EMSESPSettingsFormProps> {
                         </Grid>
                         <Grid item xs={4}>
                             <TextValidator
-                                validators={['required', 'isNumber', 'minNumber:0', 'maxNumber:40']}
-                                errorMessages={['LED GPIO is required', "Must be a number", "Must be 0 or higher", "Max value is 40"]}
+                                validators={['required', 'isNumber', 'minNumber:0', 'maxNumber:40', 'matchRegexp:^((?!6|7|8|9|10|11|12|14|15|20|24|28|29|30|31)[0-9]*)$']}
+                                errorMessages={['GPIO is required', "Must be a number", "Must be 0 or higher", "Max value is 40", "Not a valid GPIO"]}
                                 name="led_gpio"
                                 label="LED GPIO (0=none)"
                                 fullWidth
@@ -214,7 +267,7 @@ class EMSESPSettingsForm extends React.Component<EMSESPSettingsFormProps> {
                                 value="hide_led"
                             />
                         }
-                        label="Invert LED"
+                        label = "Hide LED"
                     />
                 }
 
@@ -361,4 +414,4 @@ class EMSESPSettingsForm extends React.Component<EMSESPSettingsFormProps> {
 
 }
 
-export default withWidth()(EMSESPSettingsForm);
+export default withAuthenticatedContext(withWidth()(EMSESPSettingsForm));

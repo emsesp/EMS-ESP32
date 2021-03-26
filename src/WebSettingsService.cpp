@@ -22,9 +22,16 @@ namespace emsesp {
 
 uint8_t WebSettings::flags_;
 
+using namespace std::placeholders; // for `_1` etc
+
 WebSettingsService::WebSettingsService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager)
     : _httpEndpoint(WebSettings::read, WebSettings::update, this, server, EMSESP_SETTINGS_SERVICE_PATH, securityManager)
-    , _fsPersistence(WebSettings::read, WebSettings::update, this, fs, EMSESP_SETTINGS_FILE) {
+    , _fsPersistence(WebSettings::read, WebSettings::update, this, fs, EMSESP_SETTINGS_FILE)
+    , _boardProfileHandler(EMSESP_BOARD_PROFILE_SERVICE_PATH, securityManager->wrapCallback(std::bind(&WebSettingsService::board_profile, this, _1, _2), AuthenticationPredicates::IS_ADMIN)) {
+    _boardProfileHandler.setMethod(HTTP_POST);
+    _boardProfileHandler.setMaxContentLength(256);
+    server->addHandler(&_boardProfileHandler);
+
     addUpdateHandler([&](const String & originId) { onUpdate(); }, false);
 }
 
@@ -187,6 +194,37 @@ void WebSettingsService::begin() {
 
 void WebSettingsService::save() {
     _fsPersistence.writeToFS();
+}
+
+// build the json profile to send back
+void WebSettingsService::board_profile(AsyncWebServerRequest * request, JsonVariant & json) {
+    if (json.is<JsonObject>()) {
+        AsyncJsonResponse * response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_MEDIUM);
+        JsonObject          root     = response->getRoot();
+        if (json.containsKey("code")) {
+            String               board_profile = json["code"];
+            std::vector<uint8_t> data; // led, dallas, rx, tx, button
+            // check for valid board
+            if (System::load_board_profile(data, board_profile.c_str())) {
+                root["led_gpio"]     = data[0];
+                root["dallas_gpio"]  = data[1];
+                root["rx_gpio"]      = data[2];
+                root["tx_gpio"]      = data[3];
+                root["pbutton_gpio"] = data[4];
+            } else {
+                AsyncWebServerResponse * response = request->beginResponse(200);
+                request->send(response);
+                return;
+            }
+
+            response->setLength();
+            request->send(response);
+            return;
+        }
+    }
+
+    AsyncWebServerResponse * response = request->beginResponse(200);
+    request->send(response);
 }
 
 } // namespace emsesp

@@ -24,6 +24,7 @@
 
 #define EMSESP_SETTINGS_FILE "/config/emsespSettings.json"
 #define EMSESP_SETTINGS_SERVICE_PATH "/rest/emsespSettings"
+#define EMSESP_BOARD_PROFILE_SERVICE_PATH "/rest/boardProfile"
 
 #define EMSESP_DEFAULT_TX_MODE 1       // EMS1.0
 #define EMSESP_DEFAULT_TX_DELAY 0      // no delay
@@ -42,7 +43,7 @@
 #define EMSESP_DEFAULT_API_ENABLED false // turn off, because its insecure
 #define EMSESP_DEFAULT_BOOL_FORMAT 1     // on/off
 #define EMSESP_DEFAULT_ANALOG_ENABLED false
-#define EMSESP_DEFAULT_BOARD_PROFILE 0 // default ESP32
+#define EMSESP_DEFAULT_BOARD_PROFILE "S32"
 
 // Default GPIO PIN definitions
 #if defined(ESP32)
@@ -85,7 +86,7 @@ class WebSettings {
     bool     api_enabled;
     bool     analog_enabled;
     uint8_t  pbutton_gpio;
-    uint8_t  board_profile;
+    String   board_profile;
 
     static void              read(WebSettings & settings, JsonObject & root);
     static StateUpdateResult update(JsonObject & root, WebSettings & settings);
@@ -137,8 +138,11 @@ class WebSettingsService : public StatefulService<WebSettings> {
     void save();
 
   private:
-    HttpEndpoint<WebSettings>  _httpEndpoint;
-    FSPersistence<WebSettings> _fsPersistence;
+    HttpEndpoint<WebSettings>   _httpEndpoint;
+    FSPersistence<WebSettings>  _fsPersistence;
+    AsyncCallbackJsonWebHandler _boardProfileHandler;
+
+    void board_profile(AsyncWebServerRequest * request, JsonVariant & json);
 
     void onUpdate();
 };

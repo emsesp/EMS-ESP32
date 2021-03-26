@@ -203,12 +203,12 @@ void System::wifi_tweak() {
 }
 
 // check for valid ESP32 pins. This is very dependent on which ESP32 board is being used.
-// Typically you can't use 1, 6-11 (SPI flash), 12, 14 & 15, 20, 24 and 28-31
+// Typically you can't use 1, 6-11, 12, 14, 15, 20, 24, 28-31 and 40+
 // we allow 0 as it has a special function on the NodeMCU apparently
 // See https://diyprojects.io/esp32-how-to-use-gpio-digital-io-arduino-code/#.YFpVEq9KhjG
 // and https://nodemcu.readthedocs.io/en/dev-esp32/modules/gpio/
 bool System::is_valid_gpio(uint8_t pin) {
-    if ((pin == 1) || (pin >= 6 && pin <= 12) || (pin >= 14 && pin <= 15) || (pin == 20) || (pin == 24) || (pin >= 28 && pin <= 31)) {
+    if ((pin == 1) || (pin >= 6 && pin <= 12) || (pin >= 14 && pin <= 15) || (pin == 20) || (pin == 24) || (pin >= 28 && pin <= 31) || (pin > 40)) {
         return false; // bad pin
     }
     return true;
@@ -232,6 +232,8 @@ void System::start(uint32_t heap_start) {
         hostname(networkSettings.hostname.c_str());
         LOG_INFO(F("System %s booted (EMS-ESP version %s)"), networkSettings.hostname.c_str(), EMSESP_APP_VERSION); // print boot message
     });
+
+    LOG_INFO("Loaded Board profile: %s", board_profile_.c_str());
 
     commands_init();     // console & api commands
     led_init(false);     // init LED
@@ -321,7 +323,7 @@ void System::led_init(bool refresh) {
 
     if ((led_gpio_ != 0) && is_valid_gpio(led_gpio_)) {
         pinMode(led_gpio_, OUTPUT);                            // 0 means disabled
-        digitalWrite(led_gpio_, hide_led_ ? !LED_ON : LED_ON); // LED on, forever
+        digitalWrite(led_gpio_, hide_led_ ? !LED_ON : LED_ON);
     }
 }
 
@@ -470,6 +472,8 @@ void System::network_init(bool refresh) {
     last_system_check_ = 0; // force the LED to go from fast flash to pulse
     send_heartbeat();
 
+    /*
+
     // check board profile for those which use ethernet (id > 10)
     // ethernet uses lots of additional memory so we only start it when it's explicitly set in the config
     if (board_profile_ < 10) {
@@ -531,6 +535,7 @@ void System::network_init(bool refresh) {
             "local");
 #endif
     }
+    */
 }
 
 // check health of system, done every few seconds
@@ -559,7 +564,7 @@ void System::system_check() {
                 system_healthy_ = true;
                 send_heartbeat();
                 if (led_gpio_) {
-                    digitalWrite(led_gpio_, hide_led_ ? !LED_ON : LED_ON); // LED on, for ever
+                    digitalWrite(led_gpio_, hide_led_ ? !LED_ON : LED_ON);
                 }
             }
         }
@@ -568,7 +573,7 @@ void System::system_check() {
 
 // commands - takes static function pointers
 // these commands respond to the topic "system" and take a payload like {cmd:"", data:"", id:""}
-// no individual subsribe for pin command because id is needed
+// no individual subscribe for pin command because id is needed
 void System::commands_init() {
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(pin), System::command_pin, MqttSubFlag::FLAG_NOSUB);
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(send), System::command_send);
@@ -779,7 +784,7 @@ void System::console_commands(Shell & shell, unsigned int context) {
                                        CommandFlags::ADMIN,
                                        flash_string_vector{F_(set), F_(hostname)},
                                        flash_string_vector{F_(name_mandatory)},
-                                       [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) {
+                                       [](Shell & shell, const std::vector<std::string> & arguments) {
                                            shell.println("The network connection will be reset...");
                                            Shell::loop_all();
                                            delay(1000); // wait a second
@@ -823,39 +828,41 @@ void System::console_commands(Shell & shell, unsigned int context) {
         });
     });
 
-    EMSESPShell::commands->add_command(
-        ShellContext::SYSTEM,
-        CommandFlags::ADMIN,
-        flash_string_vector{F_(set), F_(ethernet)},
-        flash_string_vector{F_(n_mandatory)},
-        [](Shell & shell, const std::vector<std::string> & arguments) {
-            uint8_t n = Helpers::hextoint(arguments.front().c_str());
-            if (n <= 2) {
-                EMSESP::webSettingsService.update(
-                    [&](WebSettings & settings) {
-                        settings.board_profile = n;
-                        shell.printfln(F_(ethernet_option_fmt), n);
-                        return StateUpdateResult::CHANGED;
-                    },
-                    "local");
-                EMSESP::system_.network_init(true);
-            } else {
-                shell.println(F("Must be 0, 1 or 2"));
-            }
-        },
-        [](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments __attribute__((unused))) -> const std::vector<std::string> {
-            return std::vector<std::string>{read_flash_string(F("0")), read_flash_string(F("1")), read_flash_string(F("2"))};
-        });
+    EMSESPShell::commands->add_command(ShellContext::SYSTEM,
+                                       CommandFlags::ADMIN,
+                                       flash_string_vector{F_(set), F_(board_profile)},
+                                       flash_string_vector{F_(name_mandatory)},
+                                       [](Shell & shell, const std::vector<std::string> & arguments) {
+                                           // check for valid profile
+                                           std::vector<uint8_t> data; // led, dallas, rx, tx, button
+                                           std::string          board_profile = Helpers::toUpper(arguments.front());
+                                           if (!load_board_profile(data, board_profile)) {
+                                               shell.println(F("Invalid board profile"));
+                                               return;
+                                           }
+                                           shell.printfln("Loaded board profile %s with %d,%d,%d,%d,%d", board_profile.c_str(), data[0], data[1], data[2], data[3], data[4]);
+                                           EMSESP::webSettingsService.update(
+                                               [&](WebSettings & settings) {
+                                                   settings.board_profile = board_profile.c_str();
+                                                   settings.led_gpio      = data[0];
+                                                   settings.dallas_gpio   = data[1];
+                                                   settings.rx_gpio       = data[2];
+                                                   settings.tx_gpio       = data[3];
+                                                   settings.pbutton_gpio  = data[4];
+                                                   return StateUpdateResult::CHANGED;
+                                               },
+                                               "local");
+                                           shell.printfln("Loaded board profile %s with %d,%d,%d,%d,%d", board_profile.c_str(), data[0], data[1], data[2], data[3], data[4]);
+                                           EMSESP::system_.network_init(true);
+                                       });
 
     EMSESPShell::commands->add_command(ShellContext::SYSTEM, CommandFlags::USER, flash_string_vector{F_(set)}, [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
         EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
-            shell.print(F(" "));
             shell.printfln(F_(hostname_fmt), networkSettings.hostname.isEmpty() ? uuid::read_flash_string(F_(unset)).c_str() : networkSettings.hostname.c_str());
-            shell.print(F(" "));
             shell.printfln(F_(wifi_ssid_fmt), networkSettings.ssid.isEmpty() ? uuid::read_flash_string(F_(unset)).c_str() : networkSettings.ssid.c_str());
-            shell.print(F(" "));
             shell.printfln(F_(wifi_password_fmt), networkSettings.ssid.isEmpty() ? F_(unset) : F_(asterisks));
         });
+        EMSESP::webSettingsService.read([&](WebSettings & settings) { shell.printfln(F_(board_profile_fmt), settings.board_profile.c_str()); });
     });
 
     EMSESPShell::commands->add_command(ShellContext::SYSTEM, CommandFlags::ADMIN, flash_string_vector{F_(show), F_(users)}, [](Shell & shell, const std::vector<std::string> & arguments __attribute__((unused))) {
@@ -961,6 +968,7 @@ bool System::command_settings(const char * value, const int8_t id, JsonObject & 
         node["api_enabled"]          = settings.api_enabled;
         node["analog_enabled"]       = settings.analog_enabled;
         node["pbutton_gpio"]         = settings.pbutton_gpio;
+        node["board_profile"]        = settings.board_profile;
     });
 
     return true;
@@ -1030,5 +1038,29 @@ bool System::command_test(const char * value, const int8_t id) {
 }
 #endif
 
+// takes a board profile and populates a data array with GPIO configurations
+bool System::load_board_profile(std::vector<uint8_t> & data, const std::string & board_profile) {
+    if (board_profile == "S32") {
+        data = {2, 3, 23, 5, 0}; // Gateway S32
+    } else if (board_profile == "E32") {
+        data = {2, 4, 5, 17, 33}; // Gateway E32
+    } else if (board_profile == "MT-ET") {
+        data = {2, 4, 23, 5, 0}; // MT-ET Live D1 Mini
+    } else if (board_profile == "NODEMCU") {
+        data = {2, 4, 23, 5, 0}; // NodeMCU 32S
+    } else if (board_profile == "LOLIN") {
+        data = {2, 14, 17, 16, 0}; // Lolin D32
+    } else if (board_profile == "WEMOS") {
+        data = {2, 14, 17, 16, 0}; // Wemos Mini D1-32
+    } else if (board_profile == "OLIMEX") {
+        data = {32, 4, 5, 17, 34}; // Olimex ESP32-EVB-EA
+    } else if (board_profile == "TLK110") {
+        data = {2, 4, 5, 17, 33}; // Ethernet (TLK110)
+    } else {
+        return false;
+    }
+
+    return true;
+}
 
 } // namespace emsesp

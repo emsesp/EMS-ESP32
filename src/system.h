@@ -76,6 +76,8 @@ class System {
 
     static bool is_valid_gpio(uint8_t pin);
 
+    static bool load_board_profile(std::vector<uint8_t> & data, const std::string & board_profile);
+
     bool check_upgrade();
     void send_heartbeat();
 
@@ -115,7 +117,7 @@ class System {
     static constexpr uint32_t LED_WARNING_BLINK_FAST         = 100;   // flash quickly for boot up sequence
     static constexpr uint32_t SYSTEM_HEARTBEAT_INTERVAL      = 60000; // in milliseconds, how often the MQTT heartbeat is sent (1 min)
     static constexpr uint32_t SYSTEM_MEASURE_ANALOG_INTERVAL = 500;
-    static constexpr uint8_t  LED_ON                         = LOW; // internal LED
+    static constexpr uint8_t  LED_ON                         = HIGH; // LED
 
 #ifndef EMSESP_STANDALONE
     static uuid::syslog::SyslogService syslog_;
@@ -145,7 +147,7 @@ class System {
     uint8_t     led_gpio_;
     bool        syslog_enabled_;
     bool        analog_enabled_;
-    uint8_t     board_profile_;
+    String      board_profile_;
     uint8_t     pbutton_gpio_;
     int8_t      syslog_level_;
     uint32_t    syslog_mark_interval_;

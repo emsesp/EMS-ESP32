@@ -46,6 +46,6 @@
 - new ESP32 partition side to allow for smoother OTA and fallback
 - network Gateway IP is optional (#682)emsesp/EMS-ESP
 - moved to a new GitHub repo https://github.com/emsesp/EMS-ESP32
-
+- Invert LED changed to Hide LED
 ### Removed
 - Shower Alert (disabled for now)

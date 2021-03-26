@@ -49,7 +49,7 @@ class DummySettings {
     String   staticIPConfig          = "";
     String   dnsIP1                  = "";
     String   dnsIP2                  = "";
-    uint8_t  board_profile           = 0;
+    String   board_profile           = "CUSTOM";
     uint16_t publish_time_boiler     = 10;
     uint16_t publish_time_thermostat = 10;
     uint16_t publish_time_solar      = 10;
