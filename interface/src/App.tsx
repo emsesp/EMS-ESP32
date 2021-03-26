@@ -28,7 +28,7 @@ class App extends Component {
   render() {
     return (
       <CustomMuiTheme>
-        <SnackbarProvider maxSnack={3} anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+        <SnackbarProvider autoHideDuration={3000} maxSnack={3} anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
           ref={this.notistackRef}
           action={(key) => (
             <IconButton onClick={this.onClickDismiss(key)} size="small">
