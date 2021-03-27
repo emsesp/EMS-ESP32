@@ -470,11 +470,9 @@ void System::network_init(bool refresh) {
     last_system_check_ = 0; // force the LED to go from fast flash to pulse
     send_heartbeat();
 
-    /*
-
-    // check board profile for those which use ethernet (id > 10)
+    // check board profile for those which use ethernet
     // ethernet uses lots of additional memory so we only start it when it's explicitly set in the config
-    if (board_profile_ < 10) {
+    if (!board_profile_.equals("E32") && !board_profile_.equals("TLK110") && !board_profile_.equals("LAN8720") && !board_profile_.equals("OLIMEX")) {
         return;
     }
 
@@ -485,7 +483,7 @@ void System::network_init(bool refresh) {
     eth_phy_type_t   type;       // Type of the Ethernet PHY (LAN8720 or TLK110)
     eth_clock_mode_t clock_mode; // ETH_CLOCK_GPIO0_IN or ETH_CLOCK_GPIO0_OUT, ETH_CLOCK_GPIO16_OUT, ETH_CLOCK_GPIO17_OUT for 50Hz inverted clock
 
-    if (board_profile_ == 10) {
+    if (board_profile_.equals("E32") || board_profile_.equals("LAN8720")) {
         // Gateway E32 (LAN8720)
         phy_addr   = 1;
         power      = 16;
@@ -493,15 +491,15 @@ void System::network_init(bool refresh) {
         mdio       = 18;
         type       = ETH_PHY_LAN8720;
         clock_mode = ETH_CLOCK_GPIO0_IN;
-    } else if (board_profile_ == 11) {
-        // Olimex ESP32-EVB-EA (LAN8720)
+    } else if (board_profile_.equals("OLIMEX")) {
+        // Olimex ESP32-EVB (LAN8720)
         phy_addr   = 0;
         power      = -1;
         mdc        = 23;
         mdio       = 18;
         type       = ETH_PHY_LAN8720;
         clock_mode = ETH_CLOCK_GPIO0_IN;
-    } else if (board_profile_ == 12) {
+    } else if (board_profile_.equals("TLK110")) {
         // Ethernet (TLK110)
         phy_addr   = 31;
         power      = -1;
@@ -533,7 +531,6 @@ void System::network_init(bool refresh) {
             "local");
 #endif
     }
-    */
 }
 
 // check health of system, done every few seconds
@@ -1047,13 +1044,15 @@ bool System::load_board_profile(std::vector<uint8_t> & data, const std::string &
     } else if (board_profile == "NODEMCU") {
         data = {2, 18, 23, 5, 0}; // NodeMCU 32S
     } else if (board_profile == "LOLIN") {
-        data = {2, 14, 17, 16, 0}; // Lolin D32
+        data = {2, 18, 17, 16, 0}; // Lolin D32
     } else if (board_profile == "WEMOS") {
-        data = {2, 14, 17, 16, 0}; // Wemos Mini D1-32
+        data = {2, 18, 17, 16, 0}; // Wemos Mini D1 ESP32
     } else if (board_profile == "OLIMEX") {
-        data = {32, 4, 5, 17, 34}; // Olimex ESP32-EVB-EA
+        data = {0, 4, 5, 17, 34}; // Olimex ESP32-EVB
     } else if (board_profile == "TLK110") {
-        data = {2, 4, 5, 17, 33}; // Ethernet (TLK110)
+        data = {2, 4, 5, 17, 33}; // Generic Ethernet (TLK110)
+    } else if (board_profile == "LAN8720") {
+        data = {2, 4, 5, 17, 33}; // Generic Ethernet (LAN8720)
     } else {
         data = {EMSESP_DEFAULT_LED_GPIO, EMSESP_DEFAULT_DALLAS_GPIO, EMSESP_DEFAULT_RX_GPIO, EMSESP_DEFAULT_TX_GPIO, EMSESP_DEFAULT_PBUTTON_GPIO};
         return false;
