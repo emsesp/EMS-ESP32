@@ -511,26 +511,8 @@ void System::network_init(bool refresh) {
         return; // invalid combi
     }
 
-    bool have_ethernet = ETH.begin(phy_addr, power, mdc, mdio, type, clock_mode);
-
-    // disable ssid and AP when using Ethernet
-    if (have_ethernet) {
-#ifndef EMSESP_STANDALONE
-        EMSESP::esp8266React.getNetworkSettingsService()->update(
-            [&](NetworkSettings & settings) {
-                settings.ssid == ""; // remove SSID
-                return StateUpdateResult::CHANGED;
-            },
-            "local");
-
-        EMSESP::esp8266React.getAPSettingsService()->update(
-            [&](APSettings & settings) {
-                settings.provisionMode = AP_MODE_NEVER;
-                return StateUpdateResult::CHANGED;
-            },
-            "local");
-#endif
-    }
+    // bool have_ethernet = ETH.begin(phy_addr, power, mdc, mdio, type, clock_mode);
+    (void)ETH.begin(phy_addr, power, mdc, mdio, type, clock_mode);
 }
 
 // check health of system, done every few seconds
@@ -539,7 +521,7 @@ void System::system_check() {
         last_system_check_ = uuid::get_uptime();
 
 #ifndef EMSESP_STANDALONE
-        if (WiFi.status() != WL_CONNECTED) {
+        if (!ethernet_connected() && (WiFi.status() != WL_CONNECTED)) {
             set_led_speed(LED_WARNING_BLINK_FAST);
             system_healthy_ = false;
             return;
@@ -876,8 +858,13 @@ bool System::check_upgrade() {
 // e.g. http://ems-esp/api?device=system&cmd=settings
 // value and id are ignored
 bool System::command_settings(const char * value, const int8_t id, JsonObject & json) {
+    JsonObject node;
+
+    node            = json.createNestedObject("System");
+    node["version"] = EMSESP_APP_VERSION;
+
     EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & settings) {
-        JsonObject node          = json.createNestedObject("WIFI");
+        node                     = json.createNestedObject("WIFI");
         node["ssid"]             = settings.ssid;
         node["hostname"]         = settings.hostname;
         node["static_ip_config"] = settings.staticIPConfig;
@@ -890,7 +877,7 @@ bool System::command_settings(const char * value, const int8_t id, JsonObject & 
 
 #ifndef EMSESP_STANDALONE
     EMSESP::esp8266React.getAPSettingsService()->read([&](APSettings & settings) {
-        JsonObject node        = json.createNestedObject("AP");
+        node                   = json.createNestedObject("AP");
         node["provision_mode"] = settings.provisionMode;
         node["ssid"]           = settings.ssid;
         node["local_ip"]       = settings.localIP.toString();
@@ -900,7 +887,7 @@ bool System::command_settings(const char * value, const int8_t id, JsonObject & 
 #endif
 
     EMSESP::esp8266React.getMqttSettingsService()->read([&](MqttSettings & settings) {
-        JsonObject node = json.createNestedObject("MQTT");
+        node            = json.createNestedObject("MQTT");
         node["enabled"] = settings.enabled;
 #ifndef EMSESP_STANDALONE
         node["host"]          = settings.host;
@@ -926,7 +913,7 @@ bool System::command_settings(const char * value, const int8_t id, JsonObject & 
 
 #ifndef EMSESP_STANDALONE
     EMSESP::esp8266React.getNTPSettingsService()->read([&](NTPSettings & settings) {
-        JsonObject node   = json.createNestedObject("NTP");
+        node              = json.createNestedObject("NTP");
         node["enabled"]   = settings.enabled;
         node["server"]    = settings.server;
         node["tz_label"]  = settings.tzLabel;
@@ -934,14 +921,14 @@ bool System::command_settings(const char * value, const int8_t id, JsonObject & 
     });
 
     EMSESP::esp8266React.getOTASettingsService()->read([&](OTASettings & settings) {
-        JsonObject node = json.createNestedObject("OTA");
+        node            = json.createNestedObject("OTA");
         node["enabled"] = settings.enabled;
         node["port"]    = settings.port;
     });
 #endif
 
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
-        JsonObject node              = json.createNestedObject("Settings");
+        node                         = json.createNestedObject("Settings");
         node["tx_mode"]              = settings.tx_mode;
         node["ems_bus_id"]           = settings.ems_bus_id;
         node["syslog_enabled"]       = settings.syslog_enabled;
@@ -1033,7 +1020,7 @@ bool System::command_test(const char * value, const int8_t id) {
 
 // takes a board profile and populates a data array with GPIO configurations
 // data = led, dallas, rx, tx, button
-// returns false if profile is not found, and uses default
+// returns false if profile is not found
 bool System::load_board_profile(std::vector<uint8_t> & data, const std::string & board_profile) {
     if (board_profile == "S32") {
         data = {2, 3, 23, 5, 0}; // Gateway S32
@@ -1055,7 +1042,7 @@ bool System::load_board_profile(std::vector<uint8_t> & data, const std::string &
         data = {2, 4, 5, 17, 33}; // Generic Ethernet (LAN8720)
     } else {
         data = {EMSESP_DEFAULT_LED_GPIO, EMSESP_DEFAULT_DALLAS_GPIO, EMSESP_DEFAULT_RX_GPIO, EMSESP_DEFAULT_TX_GPIO, EMSESP_DEFAULT_PBUTTON_GPIO};
-        return false;
+        return (board_profile == "CUSTOM");
     }
 
     return true;
