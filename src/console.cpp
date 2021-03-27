@@ -65,7 +65,7 @@ void EMSESPShell::display_banner() {
     println();
     printfln(F("┌──────────────────────────────────────┐"));
     printfln(F("│ %sEMS-ESP version %-10s%s           │"), COLOR_BOLD_ON, EMSESP_APP_VERSION, COLOR_BOLD_OFF);
-    printfln(F("│ %s%shttps://github.com/emsesp/EMS-ESP%s    │"), COLOR_BRIGHT_GREEN, COLOR_UNDERLINE, COLOR_RESET);
+    printfln(F("│ %s%shttps://github.com/emsesp/EMS-ESP32%s  │"), COLOR_BRIGHT_GREEN, COLOR_UNDERLINE, COLOR_RESET);
     printfln(F("│                                      │"));
     printfln(F("│ type %shelp%s to show available commands │"), COLOR_UNDERLINE, COLOR_RESET);
     printfln(F("└──────────────────────────────────────┘"));
