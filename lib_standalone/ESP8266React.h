@@ -28,16 +28,16 @@ class DummySettings {
     bool     api_enabled          = true;
 
     // MQTT
-    uint16_t    publish_time      = 10; // seconds
-    uint8_t     mqtt_qos          = 0;
-    bool        mqtt_retain       = false;
-    bool        enabled           = true;
-    uint8_t     dallas_format     = 1;
-    bool        nested_format     = true;
-    uint8_t     ha_climate_format = 1;
-    bool        ha_enabled        = true;
-    std::string base              = "ems-esp";
-    uint8_t     subscribes        = 0;
+    uint16_t publish_time      = 10; // seconds
+    uint8_t  mqtt_qos          = 0;
+    bool     mqtt_retain       = false;
+    bool     enabled           = true;
+    uint8_t  dallas_format     = 1;
+    bool     nested_format     = true;
+    uint8_t  ha_climate_format = 1;
+    bool     ha_enabled        = true;
+    String   base              = "ems-esp";
+    uint8_t  subscribes        = 0;
 
     String   hostname                = "ems-esp";
     String   jwtSecret               = "ems-esp";
