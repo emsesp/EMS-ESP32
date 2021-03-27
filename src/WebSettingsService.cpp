@@ -62,17 +62,13 @@ void WebSettings::read(WebSettings & settings, JsonObject & root) {
 
 // call on initialization and also when settings are updated via web or console
 StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings) {
-    // set or load board profile
-    settings.board_profile = root["board_profile"] | EMSESP_DEFAULT_BOARD_PROFILE;
-
     // load default GPIO configuration based on board profile
     std::vector<uint8_t> data; // led, dallas, rx, tx, button
+    settings.board_profile = root["board_profile"] | EMSESP_DEFAULT_BOARD_PROFILE;
     if (!System::load_board_profile(data, settings.board_profile.c_str())) {
-        // invalid board configuration, override the default in case it has been misspelled
-        if (!settings.board_profile.equals("CUSTOM")) {
-            settings.board_profile = "S32";
-        }
+        settings.board_profile = "S32"; // invalid board configuration, override the default in case it has been misspelled
     }
+
     uint8_t default_led_gpio     = data[0];
     uint8_t default_dallas_gpio  = data[1];
     uint8_t default_rx_gpio      = data[2];
