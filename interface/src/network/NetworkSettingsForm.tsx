@@ -84,7 +84,7 @@ class NetworkSettingsForm extends React.Component<NetworkStatusFormProps> {
               validators={['matchRegexp:^.{0,32}$']}
               errorMessages={['SSID must be 32 characters or less']}
               name="ssid"
-              label="SSID"
+              label="SSID (leave blank to disable WiFi)"
               fullWidth
               variant="outlined"
               value={data.ssid}
