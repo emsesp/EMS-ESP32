@@ -10,10 +10,11 @@ export const BOARD_PROFILES: BoardProfiles = {
     "NODEMCU": "NodeMCU 32S",
     "MT-ET": "MT-ET Live D1 Mini",
     "LOLIN": "Lolin D32",
-    "WEMOS": "Wemos Mini D1-32",
+    "WEMOS": "Wemos Mini D1 ESP32",
     "E32": "Gateway E32",
-    "OLIMEX": "Olimex ESP32-EVB-EA",
-    "TLK110": "Ethernet (TLK110)"
+    "OLIMEX": "Olimex ESP32-EVB",
+    "TLK110": "Generic Ethernet (TLK110)",
+    "LAN8720": "Generic Ethernet (LAN8720)"
 }
 
 export function boardProfileSelectItems() {
