@@ -76,7 +76,6 @@ class MqttSettings {
     bool     enabled;
     String   host;
     uint16_t port;
-    String   base;
 
     // username and password
     String username;
@@ -91,6 +90,7 @@ class MqttSettings {
     uint16_t maxTopicLength;
 
     // proddy EMS-ESP specific
+    String   base;
     uint16_t publish_time_boiler;
     uint16_t publish_time_thermostat;
     uint16_t publish_time_solar;
