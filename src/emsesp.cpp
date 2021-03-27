@@ -1090,13 +1090,12 @@ void EMSESP::start() {
 // start the file system
 #ifndef EMSESP_STANDALONE
     if (!LITTLEFS.begin(true)) {
-        Serial.println("LITTLEFS Mount Failed");
+        Serial.println("LITTLEFS Mount Failed. EMS-ESP stopped.");
         return;
     }
 #endif
 
-    esp8266React.begin();       // loads system settings (wifi, mqtt, etc)
-    webSettingsService.begin(); // load EMS-ESP specific settings
+    esp8266React.begin(); // loads system settings (wifi, mqtt, etc)
 
     system_.check_upgrade(); // do any upgrades
 
@@ -1105,7 +1104,10 @@ void EMSESP::start() {
 #include "device_library.h"
     };
 
-    console_.start();          // telnet and serial console
+    console_.start(); // telnet and serial console
+
+    webSettingsService.begin(); // load EMS-ESP specific settings, like GPIO configurations
+
     mqtt_.start();             // mqtt init
     system_.start(heap_start); // starts syslog, uart, sets version, initializes LED. Requires pre-loaded settings.
     shower_.start();           // initialize shower timer and shower alert

@@ -43,23 +43,17 @@
 #define EMSESP_DEFAULT_API_ENABLED false // turn off, because its insecure
 #define EMSESP_DEFAULT_BOOL_FORMAT 1     // on/off
 #define EMSESP_DEFAULT_ANALOG_ENABLED false
-#define EMSESP_DEFAULT_BOARD_PROFILE "S32"
 
-// Default GPIO PIN definitions
-#if defined(ESP32)
-#define EMSESP_DEFAULT_RX_GPIO 23     // D7 on Wemos D1-32, OR 17 for UART2 on Lolin D32
-#define EMSESP_DEFAULT_TX_GPIO 5      // D8 on Wemos D1-32, OR 16 for UART2 on Lolin D32
-#define EMSESP_DEFAULT_DALLAS_GPIO 18 // 18 on Wemos D1-32, 14 on LOLIN D32
-#define EMSESP_DEFAULT_LED_GPIO 2     // 2 on Wemos D1-32, 5 on LOLIN D32
-#define EMSESP_DEFAULT_PBUTTON_GPIO 0 // default GPIO is 0 (off)
-#else
-// for standalone
-#define EMSESP_DEFAULT_RX_GPIO 0
-#define EMSESP_DEFAULT_TX_GPIO 0
-#define EMSESP_DEFAULT_DALLAS_GPIO 0
-#define EMSESP_DEFAULT_LED_GPIO 0
-#define EMSESP_DEFAULT_PBUTTON_GPIO 0
+#ifndef EMSESP_DEFAULT_BOARD_PROFILE
+#define EMSESP_DEFAULT_BOARD_PROFILE "S32" // Gateway S32
 #endif
+
+// Default GPIO PIN definitions - based on Wemos/Nodemcu
+#define EMSESP_DEFAULT_RX_GPIO 23 // D7
+#define EMSESP_DEFAULT_TX_GPIO 5  // D8
+#define EMSESP_DEFAULT_DALLAS_GPIO 18
+#define EMSESP_DEFAULT_LED_GPIO 2
+#define EMSESP_DEFAULT_PBUTTON_GPIO 0
 
 namespace emsesp {
 

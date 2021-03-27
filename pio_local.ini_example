@@ -1,3 +1,6 @@
+; example custom platformio.ini file for EMS-ESP
+;
+
 [env]
 upload_protocol = espota
 upload_flags = 
@@ -8,7 +11,7 @@ upload_port = 10.10.10.101
 [common]
 ; debug_flags = -DENABLE_CORS -DEMSESP_TEST
 ; debug_flags = -DEMSESP_DEBUG -DEMSESP_TEST
-debug_flags = -DEMSESP_TEST
+; debug_flags = -DEMSESP_DEFAULT_BOARD_PROFILE=\"LOLIN\"
 
 [env:esp32]
 monitor_filters = esp32_exception_decoder

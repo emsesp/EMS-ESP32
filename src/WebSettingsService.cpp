@@ -60,7 +60,28 @@ void WebSettings::read(WebSettings & settings, JsonObject & root) {
     root["board_profile"]        = settings.board_profile;
 }
 
+// call on initialization and also when settings are updated via web or console
 StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings) {
+    // set or load board profile
+    settings.board_profile = root["board_profile"] | EMSESP_DEFAULT_BOARD_PROFILE;
+
+    // load default GPIO configuration based on board profile
+    std::vector<uint8_t> data; // led, dallas, rx, tx, button
+    if (!System::load_board_profile(data, settings.board_profile.c_str())) {
+        // invalid board configuration, override the default in case it has been misspelled
+        settings.board_profile = "S32";
+    }
+    uint8_t default_led_gpio     = data[0];
+    uint8_t default_dallas_gpio  = data[1];
+    uint8_t default_rx_gpio      = data[2];
+    uint8_t default_tx_gpio      = data[3];
+    uint8_t default_pbutton_gpio = data[4];
+
+    // check to see if we have a settings file, if not it's a fresh install
+    if (!root.size()) {
+        EMSESP::logger().info(F("Initializing configuration with board profile %s"), settings.board_profile.c_str());
+    }
+
     int prev;
     reset_flags();
 
@@ -72,10 +93,10 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     settings.tx_delay = root["tx_delay"] | EMSESP_DEFAULT_TX_DELAY;
     check_flag(prev, settings.tx_delay, ChangeFlags::UART);
     prev             = settings.rx_gpio;
-    settings.rx_gpio = root["rx_gpio"] | EMSESP_DEFAULT_RX_GPIO;
+    settings.rx_gpio = root["rx_gpio"] | default_rx_gpio;
     check_flag(prev, settings.rx_gpio, ChangeFlags::UART);
     prev             = settings.tx_gpio;
-    settings.tx_gpio = root["tx_gpio"] | EMSESP_DEFAULT_TX_GPIO;
+    settings.tx_gpio = root["tx_gpio"] | default_tx_gpio;
     check_flag(prev, settings.tx_gpio, ChangeFlags::UART);
 
     // syslog
@@ -93,12 +114,9 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
 
     String old_syslog_host = settings.syslog_host;
     settings.syslog_host   = root["syslog_host"] | EMSESP_DEFAULT_SYSLOG_HOST;
-
-#ifndef EMSESP_STANDALONE
-    if (old_syslog_host.equals(settings.syslog_host)) {
+    if (old_syslog_host.equals(settings.syslog_host.c_str())) {
         add_flags(ChangeFlags::SYSLOG);
     }
-#endif
 
     prev                 = settings.syslog_port;
     settings.syslog_port = root["syslog_port"] | EMSESP_DEFAULT_SYSLOG_PORT;
@@ -116,12 +134,12 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
 
     // button
     prev                  = settings.pbutton_gpio;
-    settings.pbutton_gpio = root["pbutton_gpio"] | EMSESP_DEFAULT_PBUTTON_GPIO;
+    settings.pbutton_gpio = root["pbutton_gpio"] | default_pbutton_gpio;
     check_flag(prev, settings.pbutton_gpio, ChangeFlags::BUTTON);
 
     // dallas
     prev                 = settings.dallas_gpio;
-    settings.dallas_gpio = root["dallas_gpio"] | EMSESP_DEFAULT_DALLAS_GPIO;
+    settings.dallas_gpio = root["dallas_gpio"] | default_dallas_gpio;
     check_flag(prev, settings.dallas_gpio, ChangeFlags::DALLAS);
     prev                     = settings.dallas_parasite;
     settings.dallas_parasite = root["dallas_parasite"] | EMSESP_DEFAULT_DALLAS_PARASITE;
@@ -137,7 +155,7 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
 
     // led
     prev              = settings.led_gpio;
-    settings.led_gpio = root["led_gpio"] | EMSESP_DEFAULT_LED_GPIO;
+    settings.led_gpio = root["led_gpio"] | default_led_gpio;
     check_flag(prev, settings.led_gpio, ChangeFlags::LED);
     prev              = settings.hide_led;
     settings.hide_led = root["hide_led"] | EMSESP_DEFAULT_HIDE_LED;
@@ -149,9 +167,6 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
 
     // doesn't need any follow-up actions
     settings.api_enabled = root["api_enabled"] | EMSESP_DEFAULT_API_ENABLED;
-
-    // board profiles
-    settings.board_profile = root["board_profile"] | EMSESP_DEFAULT_BOARD_PROFILE;
 
     return StateUpdateResult::CHANGED;
 }

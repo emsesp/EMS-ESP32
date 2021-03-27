@@ -615,7 +615,7 @@ std::string EMSESPStreamConsole::console_name() {
 // Log order is off, err, warning, notice, info, debug, trace, all
 void Console::start() {
     shell = std::make_shared<EMSESPStreamConsole>(Serial, true);
-    shell->maximum_log_messages(100); // default is 50
+    shell->maximum_log_messages(100); // default was 50
     shell->start();
 
 #if defined(EMSESP_DEBUG)
@@ -623,8 +623,7 @@ void Console::start() {
 #endif
 
 #if defined(EMSESP_STANDALONE)
-    // always start in su/admin mode when running tests
-    shell->add_flags(CommandFlags::ADMIN);
+    shell->add_flags(CommandFlags::ADMIN); // always start in su/admin mode when running tests
 #endif
 
 // start the telnet service
