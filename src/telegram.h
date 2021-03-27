@@ -218,7 +218,11 @@ class RxService : public EMSbus {
         if (telegram_error_count_ == 0) {
             return 100; // all good, 100%
         }
+        if (telegram_error_count_ >= telegram_count_) {
+            return 100;
+        }
         uint8_t q = ((float)telegram_error_count_ / telegram_count_ * 100);
+
         return (q <= EMS_BUS_QUALITY_RX_THRESHOLD ? 100 : 100 - q);
     }
 
@@ -307,6 +311,9 @@ class TxService : public EMSbus {
     uint8_t quality() const {
         if (telegram_fail_count_ == 0) {
             return 100; // all good, 100%
+        }
+        if (telegram_fail_count_ >= telegram_read_count_) {
+            return 100;
         }
         return (100 - (uint8_t)(((float)telegram_fail_count_ / telegram_read_count_ * 100)));
     }

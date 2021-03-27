@@ -196,19 +196,21 @@ uint8_t EMSESP::bus_status() {
     // check if we have Tx issues.
     uint32_t total_sent = txservice_.telegram_read_count() + txservice_.telegram_write_count();
 
-    // nothing sent successfully, also no errors - must be ok
+    // nothing sent and also no errors - must be ok
     if ((total_sent == 0) && (txservice_.telegram_fail_count() == 0)) {
         return BUS_STATUS_CONNECTED;
     }
 
-    // nothing sent successfully, but have Tx errors
+    // nothing sent, but have Tx errors
     if ((total_sent == 0) && (txservice_.telegram_fail_count() != 0)) {
         return BUS_STATUS_TX_ERRORS;
     }
 
-    // Tx Failure rate > 5%
-    if (((txservice_.telegram_fail_count() * 100) / total_sent) > EMSbus::EMS_TX_ERROR_LIMIT) {
-        return BUS_STATUS_TX_ERRORS;
+    // Tx Failure rate > 10%
+    if (txservice_.telegram_fail_count() < total_sent) {
+        if (((txservice_.telegram_fail_count() * 100) / total_sent) > EMSbus::EMS_TX_ERROR_LIMIT) {
+            return BUS_STATUS_TX_ERRORS;
+        }
     }
 
     return BUS_STATUS_CONNECTED;
