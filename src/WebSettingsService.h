@@ -38,7 +38,7 @@
 #define EMSESP_DEFAULT_MASTER_THERMOSTAT 0 // not set
 #define EMSESP_DEFAULT_SHOWER_TIMER false
 #define EMSESP_DEFAULT_SHOWER_ALERT false
-#define EMSESP_DEFAULT_HIDE_LED true
+#define EMSESP_DEFAULT_HIDE_LED false
 #define EMSESP_DEFAULT_DALLAS_PARASITE false
 #define EMSESP_DEFAULT_API_ENABLED false // turn off, because its insecure
 #define EMSESP_DEFAULT_BOOL_FORMAT 1     // on/off
