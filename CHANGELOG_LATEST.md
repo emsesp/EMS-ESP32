@@ -30,6 +30,7 @@
 - fix for HA topics with invalid command formats (#728)
 - wrong position of values #723, #732
 - OTA Upload via Web on OSX
+- Rx and Tx quality % would sometimes show > 100
 
 ### Changed
 - changed how telegram parameters are rendered for mqtt, console and web (#632)
@@ -46,6 +47,9 @@
 - new ESP32 partition side to allow for smoother OTA and fallback
 - network Gateway IP is optional (#682)emsesp/EMS-ESP
 - moved to a new GitHub repo https://github.com/emsesp/EMS-ESP32
-- Invert LED changed to Hide LED
+- invert LED changed to Hide LED. Default is off.
+- renamed Scan Network to Scan WiFi Network
+- added version to cmd=settings
+- Allow both WiFi and Ethernet together
 ### Removed
 - Shower Alert (disabled for now)
