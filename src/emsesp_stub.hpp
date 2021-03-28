@@ -18,19 +18,21 @@
 #ifndef EMSESP_EMSESP_STUB_H
 #define EMSESP_EMSESP_STUB_H
 
-// forward declarator
-// used to bind EMS-ESP functions to external frameworks
 #include "system.h"
 #include "mqtt.h"
 #include "dallassensor.h"
 #include "version.h"
 
+// forward declarators
+// used to bind EMS-ESP functions to external frameworks
 namespace emsesp {
 class EMSESP {
   public:
     static Mqtt         mqtt_;
     static System       system_;
     static DallasSensor dallassensor_;
+
+    static uuid::log::Logger logger();
 };
 
 } // namespace emsesp
