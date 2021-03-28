@@ -1,9 +1,7 @@
 # Changelog
 
-## **Important Breaking Changes**
- - >3.0.0b2 uses a new filesystem. During upgrading all settings will be erased and not migrated.
+## Added
 
-### Added
 - power settings, disabling BLE and turning off Wifi sleep
 - Rx and Tx counts to Heartbeat MQTT payload
 - ethernet support
@@ -21,7 +19,8 @@
 - individual mqtt commands (#31)
 - board Profiles (#11)
 
-### Fixed
+## Fixed
+
 - telegrams matched to masterthermostat 0x18
 - multiple roomcontrollers
 - readback after write with delay (give ems-devices time to set the value)
@@ -32,7 +31,8 @@
 - OTA Upload via Web on OSX
 - Rx and Tx quality % would sometimes show > 100
 
-### Changed
+## Changed
+
 - changed how telegram parameters are rendered for mqtt, console and web (#632)
 - split `show values` in smaller packages (edited)
 - extended length of IP/hostname from 32 to 48 chars (#676)
@@ -50,6 +50,8 @@
 - invert LED changed to Hide LED. Default is off.
 - renamed Scan Network to Scan WiFi Network
 - added version to cmd=settings
-- Allow both WiFi and Ethernet together
-### Removed
+- Allow both WiFi and Ethernet together, fall back to AP when Ethernet disconnects
+
+## Removed
+
 - Shower Alert (disabled for now)
