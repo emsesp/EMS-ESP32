@@ -191,9 +191,7 @@ class EMSESP {
     static WebDevicesService  webDevicesService;
     static WebAPIService      webAPIService;
 
-    static uuid::log::Logger logger() {
-        return logger_;
-    }
+    static uuid::log::Logger logger();
 
   private:
     EMSESP() = delete;

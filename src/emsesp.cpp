@@ -48,6 +48,9 @@ std::vector<std::unique_ptr<EMSdevice>> EMSESP::emsdevices;      // array of all
 std::vector<EMSESP::Device_record>      EMSESP::device_library_; // library of all our known EMS devices, in heap
 
 uuid::log::Logger EMSESP::logger_{F_(emsesp), uuid::log::Facility::KERN};
+uuid::log::Logger EMSESP::logger() {
+    return logger_;
+}
 
 // The services
 RxService    EMSESP::rxservice_;    // incoming Telegram Rx handler
