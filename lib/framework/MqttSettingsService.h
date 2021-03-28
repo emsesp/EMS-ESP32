@@ -41,11 +41,7 @@
 #ifndef FACTORY_MQTT_CLIENT_ID
 #define FACTORY_MQTT_CLIENT_ID generateClientId()
 static String generateClientId() {
-#ifdef ESP32
     return ESPUtils::defaultDeviceValue("esp32-");
-#elif defined(ESP8266)
-    return ESPUtils::defaultDeviceValue("esp8266-");
-#endif
 }
 #endif
 
@@ -148,8 +144,7 @@ class MqttSettingsService : public StatefulService<MqttSettings> {
     // the MQTT client instance
     AsyncMqttClient _mqttClient;
 
-    void onStationModeGotIP(WiFiEvent_t event, WiFiEventInfo_t info);
-    void onStationModeDisconnected(WiFiEvent_t event, WiFiEventInfo_t info);
+    void WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info);
     void onMqttConnect(bool sessionPresent);
     void onMqttDisconnect(AsyncMqttClientDisconnectReason reason);
     void configureMqtt();

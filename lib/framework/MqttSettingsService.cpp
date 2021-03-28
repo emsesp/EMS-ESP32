@@ -2,6 +2,8 @@
 
 #include "../../src/emsesp_stub.hpp" // proddy added
 
+using namespace std::placeholders; // for `_1` etc
+
 /**
  * Retains a copy of the cstr provided in the pointer provided using dynamic allocation.
  *
@@ -33,10 +35,9 @@ MqttSettingsService::MqttSettingsService(AsyncWebServer * server, FS * fs, Secur
     , _disconnectedAt(0)
     , _disconnectReason(AsyncMqttClientDisconnectReason::TCP_DISCONNECTED)
     , _mqttClient() {
-    WiFi.onEvent(std::bind(&MqttSettingsService::onStationModeDisconnected, this, std::placeholders::_1, std::placeholders::_2), WiFiEvent_t::SYSTEM_EVENT_STA_DISCONNECTED);
-    WiFi.onEvent(std::bind(&MqttSettingsService::onStationModeGotIP, this, std::placeholders::_1, std::placeholders::_2), WiFiEvent_t::SYSTEM_EVENT_STA_GOT_IP);
-    _mqttClient.onConnect(std::bind(&MqttSettingsService::onMqttConnect, this, std::placeholders::_1));
-    _mqttClient.onDisconnect(std::bind(&MqttSettingsService::onMqttDisconnect, this, std::placeholders::_1));
+    WiFi.onEvent(std::bind(&MqttSettingsService::WiFiEvent, this, _1, _2));
+    _mqttClient.onConnect(std::bind(&MqttSettingsService::onMqttConnect, this, _1));
+    _mqttClient.onDisconnect(std::bind(&MqttSettingsService::onMqttDisconnect, this, _1));
     addUpdateHandler([&](const String & originId) { onConfigUpdated(); }, false);
 }
 
@@ -79,17 +80,11 @@ AsyncMqttClient * MqttSettingsService::getMqttClient() {
 }
 
 void MqttSettingsService::onMqttConnect(bool sessionPresent) {
-    //   Serial.print(F("Connected to MQTT, "));
-    //   if (sessionPresent) {
-    //     Serial.println(F("with persistent session"));
-    //   } else {
-    //     Serial.println(F("without persistent session"));
-    //   }
+    // emsesp::EMSESP::logger().info(F("Connected to MQTT, %s"), (sessionPresent) ? F("with persistent session") : F("without persistent session"));
 }
 
 void MqttSettingsService::onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
-    // Serial.print(F("Disconnected from MQTT reason: "));
-    // Serial.println((uint8_t)reason);
+    // emsesp::EMSESP::logger().info(F("Disconnected from MQTT reason: %s"), (uint8_t)reason);
     _disconnectReason = reason;
     _disconnectedAt   = uuid::get_uptime();
 }
@@ -99,46 +94,38 @@ void MqttSettingsService::onConfigUpdated() {
     _disconnectedAt  = 0;
 
     // added by proddy
-    // reload EMS-ESP MQTT settings
-    emsesp::EMSESP::mqtt_.start();
+    emsesp::EMSESP::mqtt_.start(); // reload EMS-ESP MQTT settings
 }
 
-#ifdef ESP32
-void MqttSettingsService::onStationModeGotIP(WiFiEvent_t event, WiFiEventInfo_t info) {
-    if (_state.enabled) {
-        // Serial.println(F("WiFi connection dropped, starting MQTT client."));
-        onConfigUpdated();
-    }
-}
+void MqttSettingsService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
+    switch (event) {
+    case SYSTEM_EVENT_STA_GOT_IP:
+    case SYSTEM_EVENT_ETH_GOT_IP:
+        if (_state.enabled) {
+            // emsesp::EMSESP::logger().info(F("Network connection found, starting MQTT client"));
+            onConfigUpdated();
+        }
+        break;
 
-void MqttSettingsService::onStationModeDisconnected(WiFiEvent_t event, WiFiEventInfo_t info) {
-    if (_state.enabled) {
-        // Serial.println(F("WiFi connection dropped, stopping MQTT client."));
-        onConfigUpdated();
-    }
-}
-#elif defined(ESP8266)
-void MqttSettingsService::onStationModeGotIP(const WiFiEventStationModeGotIP & event) {
-    if (_state.enabled) {
-        // Serial.println(F("WiFi connection dropped, starting MQTT client."));
-        onConfigUpdated();
-    }
-}
+    case SYSTEM_EVENT_STA_DISCONNECTED:
+    case SYSTEM_EVENT_ETH_DISCONNECTED:
+        if (_state.enabled) {
+            // emsesp::EMSESP::logger().info(F("Network connection dropped, stopping MQTT client"));
+            onConfigUpdated();
+        }
+        break;
 
-void MqttSettingsService::onStationModeDisconnected(const WiFiEventStationModeDisconnected & event) {
-    if (_state.enabled) {
-        // Serial.println(F("WiFi connection dropped, stopping MQTT client."));
-        onConfigUpdated();
+    default:
+        break;
     }
 }
-#endif
 
 void MqttSettingsService::configureMqtt() {
     // disconnect if currently connected
     _mqttClient.disconnect();
 
     // only connect if WiFi is connected and MQTT is enabled
-    if (_state.enabled && WiFi.isConnected()) {
+    if (_state.enabled && (WiFi.isConnected() || ETH.linkUp())) {
         // Serial.println(F("Connecting to MQTT..."));
         _mqttClient.setServer(retainCstr(_state.host.c_str(), &_retainedHost), _state.port);
         if (_state.username.length() > 0) {
@@ -153,7 +140,7 @@ void MqttSettingsService::configureMqtt() {
         _mqttClient.connect();
     }
 
-    emsesp::EMSESP::dallassensor_.reload();
+    emsesp::EMSESP::dallassensor_.reload(); // added by Proddy for EMS-ESP
 }
 
 void MqttSettings::read(MqttSettings & settings, JsonObject & root) {
