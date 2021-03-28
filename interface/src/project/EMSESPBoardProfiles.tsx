@@ -6,12 +6,11 @@ type BoardProfiles = {
 };
 
 export const BOARD_PROFILES: BoardProfiles = {
-    "S32": "Gateway S32",
+    "S32": "BBQKees Gateway S32",
+    "E32": "BBQKees Gateway E32",
     "NODEMCU": "NodeMCU 32S",
     "MT-ET": "MT-ET Live D1 Mini",
     "LOLIN": "Lolin D32",
-    "WEMOS": "Wemos Mini D1 ESP32",
-    "E32": "Gateway E32",
     "OLIMEX": "Olimex ESP32-EVB",
     "TLK110": "Generic Ethernet (TLK110)",
     "LAN8720": "Generic Ethernet (LAN8720)"
