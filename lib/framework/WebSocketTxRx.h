@@ -10,6 +10,8 @@
 #define WEB_SOCKET_ORIGIN "websocket"
 #define WEB_SOCKET_ORIGIN_CLIENT_ID_PREFIX "websocket:"
 
+using namespace std::placeholders; // for `_1` etc
+
 template <class T>
 class WebSocketConnector {
   protected:
@@ -18,27 +20,15 @@ class WebSocketConnector {
     AsyncWebSocket       _webSocket;
     size_t               _bufferSize;
 
-    WebSocketConnector(StatefulService<T> *    statefulService,
-                       AsyncWebServer *        server,
-                       const char *            webSocketPath,
-                       SecurityManager *       securityManager,
-                       AuthenticationPredicate authenticationPredicate,
-                       size_t                  bufferSize)
+    WebSocketConnector(StatefulService<T> * statefulService, AsyncWebServer * server, const char * webSocketPath, SecurityManager * securityManager, AuthenticationPredicate authenticationPredicate, size_t bufferSize)
         : _statefulService(statefulService)
         , _server(server)
         , _webSocket(webSocketPath)
         , _bufferSize(bufferSize) {
         _webSocket.setFilter(securityManager->filterRequest(authenticationPredicate));
-        _webSocket.onEvent(std::bind(&WebSocketConnector::onWSEvent,
-                                     this,
-                                     std::placeholders::_1,
-                                     std::placeholders::_2,
-                                     std::placeholders::_3,
-                                     std::placeholders::_4,
-                                     std::placeholders::_5,
-                                     std::placeholders::_6));
+        _webSocket.onEvent(std::bind(&WebSocketConnector::onWSEvent, this, _1, _2, _3, _4, _5, _6));
         _server->addHandler(&_webSocket);
-        _server->on(webSocketPath, HTTP_GET, std::bind(&WebSocketConnector::forbidden, this, std::placeholders::_1));
+        _server->on(webSocketPath, HTTP_GET, std::bind(&WebSocketConnector::forbidden, this, _1));
     }
 
     WebSocketConnector(StatefulService<T> * statefulService, AsyncWebServer * server, const char * webSocketPath, size_t bufferSize)
@@ -46,14 +36,7 @@ class WebSocketConnector {
         , _server(server)
         , _webSocket(webSocketPath)
         , _bufferSize(bufferSize) {
-        _webSocket.onEvent(std::bind(&WebSocketConnector::onWSEvent,
-                                     this,
-                                     std::placeholders::_1,
-                                     std::placeholders::_2,
-                                     std::placeholders::_3,
-                                     std::placeholders::_4,
-                                     std::placeholders::_5,
-                                     std::placeholders::_6));
+        _webSocket.onEvent(std::bind(&WebSocketConnector::onWSEvent, this, _1, _2, _3, _4, _5, _6));
         _server->addHandler(&_webSocket);
     }
 
@@ -84,11 +67,7 @@ class WebSocketTx : virtual public WebSocketConnector<T> {
         WebSocketConnector<T>::_statefulService->addUpdateHandler([&](const String & originId) { transmitData(nullptr, originId); }, false);
     }
 
-    WebSocketTx(JsonStateReader<T>   stateReader,
-                StatefulService<T> * statefulService,
-                AsyncWebServer *     server,
-                const char *         webSocketPath,
-                size_t               bufferSize = DEFAULT_BUFFER_SIZE)
+    WebSocketTx(JsonStateReader<T> stateReader, StatefulService<T> * statefulService, AsyncWebServer * server, const char * webSocketPath, size_t bufferSize = DEFAULT_BUFFER_SIZE)
         : WebSocketConnector<T>(statefulService, server, webSocketPath, bufferSize)
         , _stateReader(stateReader) {
         WebSocketConnector<T>::_statefulService->addUpdateHandler([&](const String & originId) { transmitData(nullptr, originId); }, false);
@@ -161,11 +140,7 @@ class WebSocketRx : virtual public WebSocketConnector<T> {
         , _stateUpdater(stateUpdater) {
     }
 
-    WebSocketRx(JsonStateUpdater<T>  stateUpdater,
-                StatefulService<T> * statefulService,
-                AsyncWebServer *     server,
-                const char *         webSocketPath,
-                size_t               bufferSize = DEFAULT_BUFFER_SIZE)
+    WebSocketRx(JsonStateUpdater<T> stateUpdater, StatefulService<T> * statefulService, AsyncWebServer * server, const char * webSocketPath, size_t bufferSize = DEFAULT_BUFFER_SIZE)
         : WebSocketConnector<T>(statefulService, server, webSocketPath, bufferSize)
         , _stateUpdater(stateUpdater) {
     }
@@ -207,12 +182,7 @@ class WebSocketTxRx : public WebSocketTx<T>, public WebSocketRx<T> {
         , WebSocketRx<T>(stateUpdater, statefulService, server, webSocketPath, securityManager, authenticationPredicate, bufferSize) {
     }
 
-    WebSocketTxRx(JsonStateReader<T>   stateReader,
-                  JsonStateUpdater<T>  stateUpdater,
-                  StatefulService<T> * statefulService,
-                  AsyncWebServer *     server,
-                  const char *         webSocketPath,
-                  size_t               bufferSize = DEFAULT_BUFFER_SIZE)
+    WebSocketTxRx(JsonStateReader<T> stateReader, JsonStateUpdater<T> stateUpdater, StatefulService<T> * statefulService, AsyncWebServer * server, const char * webSocketPath, size_t bufferSize = DEFAULT_BUFFER_SIZE)
         : WebSocketConnector<T>(statefulService, server, webSocketPath, bufferSize)
         , WebSocketTx<T>(stateReader, statefulService, server, webSocketPath, bufferSize)
         , WebSocketRx<T>(stateUpdater, statefulService, server, webSocketPath, bufferSize) {

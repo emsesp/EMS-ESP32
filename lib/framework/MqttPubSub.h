@@ -4,6 +4,8 @@
 #include <StatefulService.h>
 #include <AsyncMqttClient.h>
 
+using namespace std::placeholders; // for `_1` etc
+
 #define MQTT_ORIGIN_ID "mqtt"
 
 template <class T>
@@ -31,11 +33,7 @@ class MqttConnector {
 template <class T>
 class MqttPub : virtual public MqttConnector<T> {
   public:
-    MqttPub(JsonStateReader<T>   stateReader,
-            StatefulService<T> * statefulService,
-            AsyncMqttClient *    mqttClient,
-            const String &       pubTopic   = "",
-            size_t               bufferSize = DEFAULT_BUFFER_SIZE)
+    MqttPub(JsonStateReader<T> stateReader, StatefulService<T> * statefulService, AsyncMqttClient * mqttClient, const String & pubTopic = "", size_t bufferSize = DEFAULT_BUFFER_SIZE)
         : MqttConnector<T>(statefulService, mqttClient, bufferSize)
         , _stateReader(stateReader)
         , _pubTopic(pubTopic) {
@@ -76,22 +74,11 @@ class MqttPub : virtual public MqttConnector<T> {
 template <class T>
 class MqttSub : virtual public MqttConnector<T> {
   public:
-    MqttSub(JsonStateUpdater<T>  stateUpdater,
-            StatefulService<T> * statefulService,
-            AsyncMqttClient *    mqttClient,
-            const String &       subTopic   = "",
-            size_t               bufferSize = DEFAULT_BUFFER_SIZE)
+    MqttSub(JsonStateUpdater<T> stateUpdater, StatefulService<T> * statefulService, AsyncMqttClient * mqttClient, const String & subTopic = "", size_t bufferSize = DEFAULT_BUFFER_SIZE)
         : MqttConnector<T>(statefulService, mqttClient, bufferSize)
         , _stateUpdater(stateUpdater)
         , _subTopic(subTopic) {
-        MqttConnector<T>::_mqttClient->onMessage(std::bind(&MqttSub::onMqttMessage,
-                                                           this,
-                                                           std::placeholders::_1,
-                                                           std::placeholders::_2,
-                                                           std::placeholders::_3,
-                                                           std::placeholders::_4,
-                                                           std::placeholders::_5,
-                                                           std::placeholders::_6));
+        MqttConnector<T>::_mqttClient->onMessage(std::bind(&MqttSub::onMqttMessage, this, _1, _2, _3, _4, _5, _6));
     }
 
     void setSubTopic(const String & subTopic) {

@@ -11,6 +11,8 @@
 
 #define HTTP_ENDPOINT_ORIGIN_ID "http"
 
+using namespace std::placeholders; // for `_1` etc
+
 template <class T>
 class HttpGetEndpoint {
   public:
@@ -24,20 +26,14 @@ class HttpGetEndpoint {
         : _stateReader(stateReader)
         , _statefulService(statefulService)
         , _bufferSize(bufferSize) {
-        server->on(servicePath.c_str(),
-                   HTTP_GET,
-                   securityManager->wrapRequest(std::bind(&HttpGetEndpoint::fetchSettings, this, std::placeholders::_1), authenticationPredicate));
+        server->on(servicePath.c_str(), HTTP_GET, securityManager->wrapRequest(std::bind(&HttpGetEndpoint::fetchSettings, this, _1), authenticationPredicate));
     }
 
-    HttpGetEndpoint(JsonStateReader<T>   stateReader,
-                    StatefulService<T> * statefulService,
-                    AsyncWebServer *     server,
-                    const String &       servicePath,
-                    size_t               bufferSize = DEFAULT_BUFFER_SIZE)
+    HttpGetEndpoint(JsonStateReader<T> stateReader, StatefulService<T> * statefulService, AsyncWebServer * server, const String & servicePath, size_t bufferSize = DEFAULT_BUFFER_SIZE)
         : _stateReader(stateReader)
         , _statefulService(statefulService)
         , _bufferSize(bufferSize) {
-        server->on(servicePath.c_str(), HTTP_GET, std::bind(&HttpGetEndpoint::fetchSettings, this, std::placeholders::_1));
+        server->on(servicePath.c_str(), HTTP_GET, std::bind(&HttpGetEndpoint::fetchSettings, this, _1));
     }
 
   protected:
@@ -69,25 +65,17 @@ class HttpPostEndpoint {
         : _stateReader(stateReader)
         , _stateUpdater(stateUpdater)
         , _statefulService(statefulService)
-        , _updateHandler(servicePath,
-                         securityManager->wrapCallback(std::bind(&HttpPostEndpoint::updateSettings, this, std::placeholders::_1, std::placeholders::_2),
-                                                       authenticationPredicate),
-                         bufferSize)
+        , _updateHandler(servicePath, securityManager->wrapCallback(std::bind(&HttpPostEndpoint::updateSettings, this, _1, _2), authenticationPredicate), bufferSize)
         , _bufferSize(bufferSize) {
         _updateHandler.setMethod(HTTP_POST);
         server->addHandler(&_updateHandler);
     }
 
-    HttpPostEndpoint(JsonStateReader<T>   stateReader,
-                     JsonStateUpdater<T>  stateUpdater,
-                     StatefulService<T> * statefulService,
-                     AsyncWebServer *     server,
-                     const String &       servicePath,
-                     size_t               bufferSize = DEFAULT_BUFFER_SIZE)
+    HttpPostEndpoint(JsonStateReader<T> stateReader, JsonStateUpdater<T> stateUpdater, StatefulService<T> * statefulService, AsyncWebServer * server, const String & servicePath, size_t bufferSize = DEFAULT_BUFFER_SIZE)
         : _stateReader(stateReader)
         , _stateUpdater(stateUpdater)
         , _statefulService(statefulService)
-        , _updateHandler(servicePath, std::bind(&HttpPostEndpoint::updateSettings, this, std::placeholders::_1, std::placeholders::_2), bufferSize)
+        , _updateHandler(servicePath, std::bind(&HttpPostEndpoint::updateSettings, this, _1, _2), bufferSize)
         , _bufferSize(bufferSize) {
         _updateHandler.setMethod(HTTP_POST);
         server->addHandler(&_updateHandler);
@@ -137,12 +125,7 @@ class HttpEndpoint : public HttpGetEndpoint<T>, public HttpPostEndpoint<T> {
         , HttpPostEndpoint<T>(stateReader, stateUpdater, statefulService, server, servicePath, securityManager, authenticationPredicate, bufferSize) {
     }
 
-    HttpEndpoint(JsonStateReader<T>   stateReader,
-                 JsonStateUpdater<T>  stateUpdater,
-                 StatefulService<T> * statefulService,
-                 AsyncWebServer *     server,
-                 const String &       servicePath,
-                 size_t               bufferSize = DEFAULT_BUFFER_SIZE)
+    HttpEndpoint(JsonStateReader<T> stateReader, JsonStateUpdater<T> stateUpdater, StatefulService<T> * statefulService, AsyncWebServer * server, const String & servicePath, size_t bufferSize = DEFAULT_BUFFER_SIZE)
         : HttpGetEndpoint<T>(stateReader, statefulService, server, servicePath, bufferSize)
         , HttpPostEndpoint<T>(stateReader, stateUpdater, statefulService, server, servicePath, bufferSize) {
     }

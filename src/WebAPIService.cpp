@@ -18,10 +18,12 @@
 
 #include "emsesp.h"
 
+using namespace std::placeholders; // for `_1` etc
+
 namespace emsesp {
 
 WebAPIService::WebAPIService(AsyncWebServer * server) {
-    server->on(EMSESP_API_SERVICE_PATH, HTTP_GET, std::bind(&WebAPIService::webAPIService, this, std::placeholders::_1));
+    server->on(EMSESP_API_SERVICE_PATH, HTTP_GET, std::bind(&WebAPIService::webAPIService, this, _1));
 }
 
 // e.g. http://ems-esp/api?device=boiler&cmd=wwtemp&data=20&id=1
@@ -68,8 +70,8 @@ void WebAPIService::webAPIService(AsyncWebServerRequest * request) {
     }
 
     DynamicJsonDocument doc(EMSESP_JSON_SIZE_XLARGE_DYN);
-    JsonObject          json     = doc.to<JsonObject>();
-    bool                ok       = false;
+    JsonObject          json = doc.to<JsonObject>();
+    bool                ok   = false;
 
     // execute the command
     if (data.isEmpty()) {

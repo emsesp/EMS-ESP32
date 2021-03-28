@@ -57,7 +57,7 @@ class OTASettingsService : public StatefulService<OTASettings> {
     ArduinoOTAClass *          _arduinoOTA;
 
     void configureArduinoOTA();
-    void onStationModeGotIP(WiFiEvent_t event, WiFiEventInfo_t info);
+    void WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info);
 };
 
 #endif // end OTASettingsService_h

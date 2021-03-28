@@ -2,11 +2,13 @@
 
 #include "../../src/emsesp_stub.hpp" // proddy added
 
+using namespace std::placeholders; // for `_1` etc
+
 OTASettingsService::OTASettingsService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager)
     : _httpEndpoint(OTASettings::read, OTASettings::update, this, server, OTA_SETTINGS_SERVICE_PATH, securityManager)
     , _fsPersistence(OTASettings::read, OTASettings::update, this, fs, OTA_SETTINGS_FILE)
     , _arduinoOTA(nullptr) {
-    WiFi.onEvent(std::bind(&OTASettingsService::onStationModeGotIP, this, std::placeholders::_1, std::placeholders::_2), WiFiEvent_t::SYSTEM_EVENT_STA_GOT_IP);
+    WiFi.onEvent(std::bind(&OTASettingsService::WiFiEvent, this, _1, _2));
     addUpdateHandler([&](const String & originId) { configureArduinoOTA(); }, false);
 }
 
@@ -23,12 +25,11 @@ void OTASettingsService::loop() {
 
 void OTASettingsService::configureArduinoOTA() {
     if (_arduinoOTA) {
-#ifdef ESP32
         _arduinoOTA->end();
-#endif
         delete _arduinoOTA;
         _arduinoOTA = nullptr;
     }
+
     if (_state.enabled) {
         _arduinoOTA = new ArduinoOTAClass;
         _arduinoOTA->setPort(_state.port);
@@ -62,6 +63,13 @@ void OTASettingsService::configureArduinoOTA() {
     }
 }
 
-void OTASettingsService::onStationModeGotIP(WiFiEvent_t event, WiFiEventInfo_t info) {
-    configureArduinoOTA();
+void OTASettingsService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
+    switch (event) {
+    case SYSTEM_EVENT_STA_GOT_IP:
+    case SYSTEM_EVENT_ETH_GOT_IP:
+        configureArduinoOTA();
+        break;
+    default:
+        break;
+    }
 }

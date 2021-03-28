@@ -1,7 +1,9 @@
 #include <FeaturesService.h>
 
+using namespace std::placeholders; // for `_1` etc
+
 FeaturesService::FeaturesService(AsyncWebServer * server) {
-    server->on(FEATURES_SERVICE_PATH, HTTP_GET, std::bind(&FeaturesService::features, this, std::placeholders::_1));
+    server->on(FEATURES_SERVICE_PATH, HTTP_GET, std::bind(&FeaturesService::features, this, _1));
 }
 
 void FeaturesService::features(AsyncWebServerRequest * request) {
