@@ -160,7 +160,7 @@ void Mqtt::resubscribe() {
 
 // Main MQTT loop - sends out top item on publish queue
 void Mqtt::loop() {
-    // exit if MQTT is not enabled or if there is no WIFI
+    // exit if MQTT is not enabled or if there is no network connection
     if (!connected()) {
         return;
     }
@@ -589,7 +589,7 @@ bool Mqtt::get_publish_onchange(uint8_t device_type) {
 // MQTT onConnect - when an MQTT connect is established
 // send out some inital MQTT messages
 void Mqtt::on_connect() {
-    if (connecting_) { // prevent duplicating connections
+    if (connecting_) { // prevent duplicated connections
         return;
     }
 
@@ -611,7 +611,11 @@ void Mqtt::on_connect() {
 
     doc["version"] = EMSESP_APP_VERSION;
 #ifndef EMSESP_STANDALONE
-    doc["ip"] = WiFi.localIP().toString();
+    if (ETH.linkUp()) {
+        doc["ip"] = ETH.localIP().toString();
+    } else {
+        doc["ip"] = WiFi.localIP().toString();
+    }
 #endif
     publish(F_(info), doc.as<JsonObject>());
 
@@ -672,7 +676,7 @@ void Mqtt::ha_status() {
     Mqtt::publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
 
     // create the sensors
-    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("Wifi strength"), EMSdevice::DeviceType::SYSTEM, F("rssi"));
+    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("WiFi strength"), EMSdevice::DeviceType::SYSTEM, F("rssi"));
     publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("Uptime"), EMSdevice::DeviceType::SYSTEM, F("uptime"));
     publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("Uptime (sec)"), EMSdevice::DeviceType::SYSTEM, F("uptime_sec"));
     publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("Free heap memory"), EMSdevice::DeviceType::SYSTEM, F("freemem"));
