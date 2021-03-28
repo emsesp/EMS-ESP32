@@ -1,5 +1,7 @@
 #include <NTPSettingsService.h>
 
+#include "../../src/emsesp_stub.hpp" // proddy added
+
 NTPSettingsService::NTPSettingsService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager)
     : _httpEndpoint(NTPSettings::read, NTPSettings::update, this, server, NTP_SETTINGS_SERVICE_PATH, securityManager)
     , _fsPersistence(NTPSettings::read, NTPSettings::update, this, fs, NTP_SETTINGS_FILE)
@@ -22,14 +24,14 @@ void NTPSettingsService::begin() {
 void NTPSettingsService::WiFiEvent(WiFiEvent_t event) {
     switch (event) {
     case SYSTEM_EVENT_STA_DISCONNECTED:
-        // Serial.println(F("WiFi connection dropped, stopping NTP."));
+        emsesp::EMSESP::logger().info(F("WiFi connection dropped, stopping NTP"));
         connected_ = false;
         configureNTP();
         break;
 
     case SYSTEM_EVENT_STA_GOT_IP:
     case SYSTEM_EVENT_ETH_GOT_IP:
-        // Serial.println(F("Got IP address, starting NTP Synchronization"));
+        emsesp::EMSESP::logger().info(F("Got IP address, starting NTP synchronization"));
         connected_ = true;
         configureNTP();
         break;
@@ -41,7 +43,7 @@ void NTPSettingsService::WiFiEvent(WiFiEvent_t event) {
 
 void NTPSettingsService::configureNTP() {
     if (connected_ && _state.enabled) {
-        // Serial.println(F("Starting NTP..."));
+        emsesp::EMSESP::logger().info(F("Starting NTP..."));
         configTzTime(_state.tzFormat.c_str(), _state.server.c_str());
     } else {
         setenv("TZ", _state.tzFormat.c_str(), 1);
