@@ -275,7 +275,7 @@ class Mqtt {
     static uint8_t     ha_climate_format_;
     static bool        ha_enabled_;
     static bool        nested_format_;
-    static uint8_t     subscribes_;
+    static uint8_t     subscribe_format_;
 };
 
 } // namespace emsesp
