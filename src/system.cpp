@@ -236,9 +236,9 @@ void System::start(uint32_t heap_start) {
     commands_init();     // console & api commands
     led_init(false);     // init LED
     adc_init(false);     // analog ADC
-    syslog_init(false);  // init SysLog
     button_init(false);  // the special button
     network_init(false); // network
+    syslog_init(false);  // init SysLog, must start after network
 
     EMSESP::init_uart(); // start UART
 }
