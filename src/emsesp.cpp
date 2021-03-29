@@ -593,9 +593,11 @@ std::string EMSESP::pretty_telegram(std::shared_ptr<const Telegram> telegram) {
         dest_name = device_tostring(dest);
     }
 
-    // check for global/common types like Version
+    // check for global/common types like Version & UBADevices
     if (telegram->type_id == EMSdevice::EMS_TYPE_VERSION) {
         type_name = read_flash_string(F("Version"));
+    } else if (telegram->type_id == EMSdevice::EMS_TYPE_UBADevices) {
+        type_name = read_flash_string(F("UBADevices"));
     }
 
     // if we don't know the type show
@@ -1112,12 +1114,11 @@ void EMSESP::start() {
     console_.start(); // telnet and serial console
 
     webSettingsService.begin(); // load EMS-ESP specific settings, like GPIO configurations
-
-    mqtt_.start();             // mqtt init
-    system_.start(heap_start); // starts syslog, uart, sets version, initializes LED
-    shower_.start();           // initialize shower timer and shower alert
-    dallassensor_.start();     // dallas external sensors
-    webServer.begin();         // start web server
+    mqtt_.start();              // mqtt init
+    system_.start(heap_start);  // starts commands, led, adc, button, network, syslog & uart
+    shower_.start();            // initialize shower timer and shower alert
+    dallassensor_.start();      // dallas external sensors
+    webServer.begin();          // start web server
 
     emsdevices.reserve(5); // reserve space for initially 5 devices to avoid mem frag issues
 
