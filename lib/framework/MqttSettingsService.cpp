@@ -125,8 +125,7 @@ void MqttSettingsService::configureMqtt() {
     _mqttClient.disconnect();
 
     // only connect if WiFi is connected and MQTT is enabled
-    if (_state.enabled && (WiFi.isConnected() || ETH.linkUp())) {
-        // Serial.println(F("Connecting to MQTT..."));
+    if (_state.enabled && emsesp::EMSESP::system_.network_connected()) {
         _mqttClient.setServer(retainCstr(_state.host.c_str(), &_retainedHost), _state.port);
         if (_state.username.length() > 0) {
             _mqttClient.setCredentials(retainCstr(_state.username.c_str(), &_retainedUsername), retainCstr(_state.password.length() > 0 ? _state.password.c_str() : nullptr, &_retainedPassword));

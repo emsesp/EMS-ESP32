@@ -611,7 +611,7 @@ void Mqtt::on_connect() {
 
     doc["version"] = EMSESP_APP_VERSION;
 #ifndef EMSESP_STANDALONE
-    if (ETH.linkUp()) {
+    if (EMSESP::system_.ethernet_connected()) {
         doc["ip"] = ETH.localIP().toString();
     } else {
         doc["ip"] = WiFi.localIP().toString();

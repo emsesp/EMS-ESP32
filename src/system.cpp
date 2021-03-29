@@ -119,19 +119,29 @@ void System::format(uuid::console::Shell & shell) {
     System::restart();
 }
 
+void System::syslog_start() {
+    if (syslog_enabled_) {
+#ifndef EMSESP_STANDALONE
+        syslog_.start();
+#endif
+        EMSESP::logger().info(F("Starting Syslog"));
+    }
+}
+
 void System::syslog_init(bool refresh) {
     if (refresh) {
         get_settings();
     }
 
 #ifndef EMSESP_STANDALONE
-    // check for empty hostname
+    // check for empty or invalid hostname
     IPAddress addr;
     if (!addr.fromString(syslog_host_.c_str())) {
         syslog_enabled_ = false;
     }
 
-    // in case service is still running, this flushes the queue - https://github.com/emsesp/EMS-ESP/issues/496
+    // in case service is still running, this flushes the queue
+    // https://github.com/emsesp/EMS-ESP/issues/496
     if (!syslog_enabled_) {
         syslog_.log_level((uuid::log::Level)-1);
         syslog_.mark_interval(0);
@@ -140,13 +150,10 @@ void System::syslog_init(bool refresh) {
     }
 
     // start & configure syslog
-    syslog_.start();
     syslog_.log_level((uuid::log::Level)syslog_level_);
     syslog_.mark_interval(syslog_mark_interval_);
     syslog_.destination(addr, syslog_port_);
-    syslog_.hostname(hostname_.c_str());
-
-    EMSESP::logger().info(F("Syslog started"));
+    syslog_.hostname(hostname().c_str());
 #endif
 }
 
@@ -229,7 +236,7 @@ void System::start(uint32_t heap_start) {
     get_settings();
 
     EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
-        hostname(networkSettings.hostname.c_str());
+        hostname(networkSettings.hostname.c_str());                                                                  // sets the hostname
         LOG_INFO(F("System %s booted (EMS-ESP version %s) "), networkSettings.hostname.c_str(), EMSESP_APP_VERSION); // print boot message
     });
 
@@ -238,7 +245,7 @@ void System::start(uint32_t heap_start) {
     adc_init(false);     // analog ADC
     button_init(false);  // the special button
     network_init(false); // network
-    syslog_init(false);  // init SysLog, must start after network
+    syslog_init(false);  // init SysLog
 
     EMSESP::init_uart(); // start UART
 }
@@ -484,7 +491,7 @@ void System::network_init(bool refresh) {
     eth_clock_mode_t clock_mode; // ETH_CLOCK_GPIO0_IN or ETH_CLOCK_GPIO0_OUT, ETH_CLOCK_GPIO16_OUT, ETH_CLOCK_GPIO17_OUT for 50Hz inverted clock
 
     if (board_profile_.equals("E32") || board_profile_.equals("LAN8720")) {
-        // Gateway E32 (LAN8720)
+        // BBQKees Gateway E32 (LAN8720)
         phy_addr   = 1;
         power      = 16;
         mdc        = 23;

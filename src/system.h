@@ -66,6 +66,9 @@ class System {
     void show_mem(const char * note);
     void get_settings();
     void wifi_tweak();
+    void syslog_start();
+    bool check_upgrade();
+    void send_heartbeat();
 
     void led_init(bool refresh);
     void syslog_init(bool refresh);
@@ -75,11 +78,7 @@ class System {
     void commands_init();
 
     static bool is_valid_gpio(uint8_t pin);
-
     static bool load_board_profile(std::vector<uint8_t> & data, const std::string & board_profile);
-
-    bool check_upgrade();
-    void send_heartbeat();
 
     std::string hostname() {
         return hostname_;
@@ -95,6 +94,14 @@ class System {
 
     void ethernet_connected(bool b) {
         ethernet_connected_ = b;
+    }
+
+    bool network_connected() {
+#ifndef EMSESP_STANDALONE
+        return (ethernet_connected_ || WiFi.isConnected());
+#else
+        return true;
+#endif
     }
 
   private:
@@ -133,16 +140,16 @@ class System {
     void   wifi_reconnect();
     int8_t wifi_quality();
 
-    bool     system_healthy_    = false;
-    uint32_t led_flash_speed_   = LED_WARNING_BLINK_FAST; // default boot flashes quickly
-    uint32_t last_heartbeat_    = 0;
-    uint32_t last_system_check_ = 0;
-    bool     upload_status_     = false; // true if we're in the middle of a OTA firmware upload
-    bool     ethernet_connected_;
+    bool     system_healthy_     = false;
+    uint32_t led_flash_speed_    = LED_WARNING_BLINK_FAST; // default boot flashes quickly
+    uint32_t last_heartbeat_     = 0;
+    uint32_t last_system_check_  = 0;
+    bool     upload_status_      = false; // true if we're in the middle of a OTA firmware upload
+    bool     ethernet_connected_ = false;
     uint16_t analog_;
 
     // settings
-    std::string hostname_;
+    std::string hostname_ = "ems-esp";
     bool        hide_led_;
     uint8_t     led_gpio_;
     bool        syslog_enabled_;
