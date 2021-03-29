@@ -34,7 +34,7 @@ void NTPSettingsService::WiFiEvent(WiFiEvent_t event) {
 
     case SYSTEM_EVENT_STA_GOT_IP:
     case SYSTEM_EVENT_ETH_GOT_IP:
-        emsesp::EMSESP::logger().info(F("Got IP address, starting NTP synchronization"));
+        // emsesp::EMSESP::logger().info(F("Got IP address, starting NTP synchronization"));
         connected_ = true;
         configureNTP();
         break;
