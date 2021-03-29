@@ -1100,11 +1100,11 @@ void EMSESP::start() {
     }
 #endif
 
-    esp8266React.begin(); // loads system settings (wifi, mqtt, etc)
+    esp8266React.begin(); // loads system settings (network, mqtt, etc)
 
-    system_.check_upgrade(); // do any upgrades
+    system_.check_upgrade(); // do any system upgrades
 
-    // Load our library of known devices into stack mem. Names are stored in Flash memory (take about 960bytes)
+    // Load our library of known devices into stack mem. Names are stored in Flash memory (takes up about 1kb)
     device_library_ = {
 #include "device_library.h"
     };
@@ -1114,7 +1114,7 @@ void EMSESP::start() {
     webSettingsService.begin(); // load EMS-ESP specific settings, like GPIO configurations
 
     mqtt_.start();             // mqtt init
-    system_.start(heap_start); // starts syslog, uart, sets version, initializes LED. Requires pre-loaded settings.
+    system_.start(heap_start); // starts syslog, uart, sets version, initializes LED
     shower_.start();           // initialize shower timer and shower alert
     dallassensor_.start();     // dallas external sensors
     webServer.begin();         // start web server
