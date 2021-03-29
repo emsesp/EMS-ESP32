@@ -67,6 +67,8 @@ static String generateClientId() {
 #define EMSESP_DEFAULT_NESTED_FORMAT true
 #define EMSESP_DEFAULT_SUBSCRIBE_FORMAT 0
 
+#define EMSESP_DEFAULT_BOARD_PROFILE "S32"
+
 class MqttSettings {
   public:
     // host and port - if enabled

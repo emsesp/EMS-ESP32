@@ -46,7 +46,7 @@ void NTPSettingsService::WiFiEvent(WiFiEvent_t event) {
 
 void NTPSettingsService::configureNTP() {
     if (connected_ && _state.enabled) {
-        emsesp::EMSESP::logger().info(F("Starting NTP..."));
+        emsesp::EMSESP::logger().info(F("Starting NTP"));
         configTzTime(_state.tzFormat.c_str(), _state.server.c_str());
     } else {
         setenv("TZ", _state.tzFormat.c_str(), 1);

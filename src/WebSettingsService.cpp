@@ -66,7 +66,7 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     std::vector<uint8_t> data; // led, dallas, rx, tx, button
     settings.board_profile = root["board_profile"] | EMSESP_DEFAULT_BOARD_PROFILE;
     if (!System::load_board_profile(data, settings.board_profile.c_str())) {
-        settings.board_profile = "S32"; // invalid board configuration, override the default in case it has been misspelled
+        settings.board_profile = EMSESP_DEFAULT_BOARD_PROFILE; // invalid board configuration, override the default in case it has been misspelled
     }
 
     uint8_t default_led_gpio     = data[0];
@@ -186,6 +186,7 @@ void WebSettingsService::onUpdate() {
 
     if (WebSettings::has_flags(WebSettings::ChangeFlags::SYSLOG)) {
         EMSESP::system_.syslog_init(true); // reload settings
+        EMSESP::system_.syslog_start();    // re-start (or stop)
     }
 
     if (WebSettings::has_flags(WebSettings::ChangeFlags::ADC)) {

@@ -45,7 +45,7 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
         break;
 
     case SYSTEM_EVENT_ETH_START:
-        EMSESP::logger().info(F("Ethernet Started"));
+        EMSESP::logger().info(F("Ethernet initialized"));
         ETH.setHostname(EMSESP::system_.hostname().c_str());
         break;
 
