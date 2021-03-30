@@ -376,7 +376,7 @@ void Mqtt::on_message(const char * fulltopic, const char * payload, size_t len) 
             } else if (data.isNull()) {
                 DynamicJsonDocument resp(EMSESP_JSON_SIZE_XLARGE_DYN);
                 JsonObject          json = resp.to<JsonObject>();
-                cmd_known = Command::call(mf.device_type_, command, "", n, json);
+                cmd_known                = Command::call(mf.device_type_, command, "", n, json);
                 if (cmd_known && json.size()) {
                     Mqtt::publish(F("response"), resp.as<JsonObject>());
                 }

@@ -162,7 +162,6 @@ void Mixer::process_IPMStatusMessage(std::shared_ptr<const Telegram> telegram) {
 // Mixer IPM - 0x001E Temperature Message in unmixed circuits
 // in unmixed circuits FlowTemp in 10C is zero, this is the measured flowtemp in header
 void Mixer::process_IPMTempMessage(std::shared_ptr<const Telegram> telegram) {
-
     has_update(telegram->read_value(flowTempVf_, 0)); // TC1, is * 10
 }
 

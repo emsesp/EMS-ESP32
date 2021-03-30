@@ -1343,8 +1343,8 @@ bool Thermostat::set_pause(const char * value, const int8_t id) {
 
 // set partymode in hours
 bool Thermostat::set_party(const char * value, const int8_t id) {
-    uint8_t hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
-    std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(hc_num);
+    uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
+    std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
     if (hc == nullptr) {
         LOG_WARNING(F("Set party: Heating Circuit %d not found or activated for device ID 0x%02X"), hc_num, device_id());
         return false;
