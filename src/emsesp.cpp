@@ -322,8 +322,6 @@ void EMSESP::show_device_values(uuid::console::Shell & shell) {
                         char s[10];
                         shell.print(Helpers::render_value(s, (float)data.as<float>(), 1));
                     } else if (data.is<bool>()) {
-                        char s[10];
-                        // shell.print(Helpers::render_boolean(s, data.as<bool>()));
                         shell.print(data.as<bool>() ? F_(on) : F_(off));
                     }
 
