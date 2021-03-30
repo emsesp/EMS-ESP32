@@ -22,7 +22,6 @@ namespace uuid {
 
 void loop() {
     set_uptime(); // added by proddy
-    get_uptime_ms();
 }
 
 } // namespace uuid
