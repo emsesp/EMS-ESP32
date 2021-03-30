@@ -236,8 +236,8 @@ void System::start(uint32_t heap_start) {
     get_settings();
 
     EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
-        hostname(networkSettings.hostname.c_str());                                                                  // sets the hostname
-        LOG_INFO(F("System %s booted (EMS-ESP version %s) "), networkSettings.hostname.c_str(), EMSESP_APP_VERSION); // print boot message
+        hostname(networkSettings.hostname.c_str()); // sets the hostname
+        LOG_INFO(F("System name: %s"), hostname().c_str());
     });
 
     commands_init();     // console & api commands
@@ -258,12 +258,14 @@ void System::adc_init(bool refresh) {
 #ifndef EMSESP_STANDALONE
     // setCpuFrequencyMhz(160); // default is 240
 
-    // disable bluetooth
+    // disable bluetooth & ADC
+    /*
     btStop();
     esp_bt_controller_disable();
     if (!analog_enabled_) {
-        adc_power_off(); // turn off ADC to save power if not needed
+        adc_power_release(); // turn off ADC to save power if not needed
     }
+    */
 #endif
 }
 
