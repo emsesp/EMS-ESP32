@@ -279,7 +279,7 @@ class EMSdevice {
     void write_command(const uint16_t type_id, const uint8_t offset, uint8_t * message_data, const uint8_t message_length, const uint16_t validate_typeid);
     void write_command(const uint16_t type_id, const uint8_t offset, const uint8_t value, const uint16_t validate_typeid);
     void write_command(const uint16_t type_id, const uint8_t offset, const uint8_t value);
-    void read_command(const uint16_t type_id);
+    void read_command(const uint16_t type_id, uint8_t offset = 0, uint8_t length = 0);
 
     void register_mqtt_topic(const std::string & topic, mqtt_subfunction_p f);
     void register_mqtt_cmd(const __FlashStringHelper * cmd, cmdfunction_p f, uint8_t flag = 0);

@@ -800,8 +800,8 @@ void EMSdevice::write_command(const uint16_t type_id, const uint8_t offset, cons
 }
 
 // send Tx read command to the device
-void EMSdevice::read_command(const uint16_t type_id) {
-    EMSESP::send_read_request(type_id, device_id());
+void EMSdevice::read_command(const uint16_t type_id, const uint8_t offset, const uint8_t length) {
+    EMSESP::send_read_request(type_id, device_id(), offset, length);
 }
 
 } // namespace emsesp

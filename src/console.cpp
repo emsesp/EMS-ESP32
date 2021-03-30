@@ -222,12 +222,16 @@ void EMSESPShell::add_console_commands() {
                           [=](Shell & shell __attribute__((unused)), const std::vector<std::string> & arguments) {
                               uint8_t  device_id = Helpers::hextoint(arguments.front().c_str());
                               uint16_t type_id   = Helpers::hextoint(arguments[1].c_str());
-                              EMSESP::set_read_id(type_id);
-                              if (arguments.size() == 3) {
+                              if (arguments.size() == 4) {
+                                  uint16_t offset = Helpers::hextoint(arguments[2].c_str());
+                                  uint8_t  length = Helpers::hextoint(arguments.back().c_str());
+                                  EMSESP::send_read_request(type_id, device_id, offset, length);
+                              } else if (arguments.size() == 3) {
                                   uint16_t offset = Helpers::hextoint(arguments.back().c_str());
-                                  EMSESP::send_read_request(type_id, device_id, offset);
+                                  EMSESP::send_read_request(type_id, device_id, offset, EMS_MAX_TELEGRAM_LENGTH);
                               } else {
-                                  EMSESP::send_read_request(type_id, device_id);
+                                  // send with length to send immediatly and trigger publish read_id
+                                  EMSESP::send_read_request(type_id, device_id, 0, EMS_MAX_TELEGRAM_LENGTH);
                               }
                           });
 
