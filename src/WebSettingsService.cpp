@@ -75,9 +75,13 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     uint8_t default_tx_gpio      = data[3];
     uint8_t default_pbutton_gpio = data[4];
 
+    EMSESP::logger().info(F("EMS-ESP version %s"), EMSESP_APP_VERSION);
+
     // check to see if we have a settings file, if not it's a fresh install
     if (!root.size()) {
         EMSESP::logger().info(F("Initializing configuration with board profile %s"), settings.board_profile.c_str());
+    } else {
+        EMSESP::logger().info(F("Using configuration from board profile %s"), settings.board_profile.c_str());
     }
 
     int prev;
