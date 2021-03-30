@@ -626,7 +626,7 @@ bool EMSdevice::generate_values_json(JsonObject & root, const uint8_t tag_filter
             // handle Booleans (true, false)
             if ((dv.type == DeviceValueType::BOOL) && Helpers::hasValue(*(uint8_t *)(dv.value_p), EMS_VALUE_BOOL)) {
                 // see if we have options for the bool's
-                if (dv.options_size == 2) {
+                if (dv.options_size == 2 && Mqtt::bool_format() != BOOL_FORMAT_10) {
                     json[name] = *(uint8_t *)(dv.value_p) ? dv.options[0] : dv.options[1];
                     has_value  = true;
                 } else {
