@@ -1249,7 +1249,6 @@ bool Thermostat::set_wwonetime(const char * value, const int8_t id) {
         LOG_WARNING(F("Set warm water onetime: Invalid value"));
         return false;
     }
-    char s[7];
     LOG_INFO(F("Setting warm water onetime to %s"), b ? F_(on) : F_(off));
     write_command(0x02F5, 11, b ? 0xFF : 0x00, 0x031D);
     return true;
@@ -1394,7 +1393,7 @@ bool Thermostat::set_datetime(const char * value, const int8_t id) {
         data[5] = (dt[6] - '0') * 10 + (dt[7] - '0');                          // sec
         data[6] = (dt[20] - '0');                                              // day of week
         data[7] = (dt[22] - '0') + 2;                                          // DST and flag
-        LOG_INFO(F("Date and time: %02d.%02d.2%03d-%02d:%02d:%02d"),data[3], data[1], data[0], data[2], data[4], data[5]);
+        LOG_INFO(F("Date and time: %02d.%02d.2%03d-%02d:%02d:%02d"), data[3], data[1], data[0], data[2], data[4], data[5]);
     }
 
     LOG_INFO(F("Setting date and time"));
