@@ -51,6 +51,7 @@
 - renamed Scan Network to Scan WiFi Network
 - added version to cmd=settings
 - Allow both WiFi and Ethernet together, fall back to AP when Ethernet disconnects
+- moved mqtt-topics and texts to local_EN, all topics lower case
 
 ## Removed
 
