@@ -40,6 +40,7 @@ PButton  System::myPButton_;
 // e.g. http://ems-esp/api?device=system&cmd=pin&data=1&id=2
 bool System::command_pin(const char * value, const int8_t id) {
     if (!is_valid_gpio(id)) {
+        LOG_INFO(F("invalid GPIO number"));
         return false;
     }
 
@@ -69,11 +70,29 @@ bool System::command_fetch(const char * value, const int8_t id) {
 
 // mqtt publish
 bool System::command_publish(const char * value, const int8_t id) {
-    std::string ha(10, '\0');
+    std::string ha(14, '\0');
     if (Helpers::value2string(value, ha)) {
         if (ha == "ha") {
             EMSESP::publish_all(true); // includes HA
             LOG_INFO(F("Publishing all data to MQTT, including HA configs"));
+            return true;
+        } else if (ha == "boiler") {
+            EMSESP::publish_device_values(EMSdevice::DeviceType::BOILER);
+            return true;
+        } else if (ha == "thermostat") {
+            EMSESP::publish_device_values(EMSdevice::DeviceType::THERMOSTAT);
+            return true;
+        } else if (ha == "solar") {
+            EMSESP::publish_device_values(EMSdevice::DeviceType::SOLAR);
+            return true;
+        } else if (ha == "mixer") {
+            EMSESP::publish_device_values(EMSdevice::DeviceType::MIXER);
+            return true;
+        } else if (ha == "other") {
+            EMSESP::publish_other_values();
+            return true;
+        } else if (ha == "dallassensor") {
+            EMSESP::publish_sensor_values(true);
             return true;
         }
     }
@@ -999,7 +1018,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & json
         node["#read requests sent"]   = EMSESP::txservice_.telegram_read_count();
         node["#write requests sent"]  = EMSESP::txservice_.telegram_write_count();
         node["#incomplete telegrams"] = EMSESP::rxservice_.telegram_error_count();
-        node["#tx fails"]             = TxService::MAXIMUM_TX_RETRIES, EMSESP::txservice_.telegram_fail_count();
+        node["#tx fails"]             = EMSESP::txservice_.telegram_fail_count();
         node["rx line quality"]       = EMSESP::rxservice_.quality();
         node["tx line quality"]       = EMSESP::txservice_.quality();
         node["#MQTT publish fails"]   = Mqtt::publish_fails();

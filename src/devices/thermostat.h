@@ -58,6 +58,7 @@ class Thermostat : public EMSdevice {
         uint8_t reducemode;
         uint8_t program;
         uint8_t controlmode;
+        uint8_t control;
 
         uint8_t hc_num() const {
             return hc_num_;

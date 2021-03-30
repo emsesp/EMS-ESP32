@@ -276,10 +276,16 @@ class EMSdevice {
                                const __FlashStringHelper *         full_name,
                                uint8_t                             uom = DeviceValueUOM::NONE);
 
+    void register_device_value(uint8_t                             tag,
+                               void *                              value_p,
+                               uint8_t                             type,
+                               const __FlashStringHelper * const * options,
+                               const __FlashStringHelper * const * name,
+                               uint8_t                             uom = DeviceValueUOM::NONE);
     void write_command(const uint16_t type_id, const uint8_t offset, uint8_t * message_data, const uint8_t message_length, const uint16_t validate_typeid);
     void write_command(const uint16_t type_id, const uint8_t offset, const uint8_t value, const uint16_t validate_typeid);
     void write_command(const uint16_t type_id, const uint8_t offset, const uint8_t value);
-    void read_command(const uint16_t type_id);
+    void read_command(const uint16_t type_id, uint8_t offset = 0, uint8_t length = 0);
 
     void register_mqtt_topic(const std::string & topic, mqtt_subfunction_p f);
     void register_mqtt_cmd(const __FlashStringHelper * cmd, cmdfunction_p f, uint8_t flag = 0);
@@ -337,6 +343,9 @@ class EMSdevice {
 
     // device flags: The lower 4 bits hold the unique identifier, the upper 4 bits are used for specific flags
     static constexpr uint8_t EMS_DEVICE_FLAG_NONE = 0;
+
+    // Boiler
+    static constexpr uint8_t EMS_DEVICE_FLAG_EMS = 1;
 
     // Solar Module
     static constexpr uint8_t EMS_DEVICE_FLAG_SM10  = 1;

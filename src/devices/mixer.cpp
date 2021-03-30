@@ -58,19 +58,19 @@ Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
         hc_         = device_id - 0x20 + 1;
         uint8_t tag = TAG_HC1 + hc_ - 1;
         register_device_value(tag, &id_, DeviceValueType::UINT, nullptr, F("id"), nullptr); // empty full name to prevent being shown in web or console
-        register_device_value(tag, &flowSetTemp_, DeviceValueType::UINT, nullptr, F("flowSetTemp"), F("setpoint flow temperature"), DeviceValueUOM::DEGREES);
-        register_device_value(tag, &flowTempHc_, DeviceValueType::USHORT, FL_(div10), F("flowTempHc"), F("flow temperature in assigned hc (TC1)"), DeviceValueUOM::DEGREES);
-        register_device_value(tag, &pumpStatus_, DeviceValueType::BOOL, nullptr, F("pumpStatus"), F("pump status in assigned hc (PC1)"), DeviceValueUOM::PUMP);
-        register_device_value(tag, &status_, DeviceValueType::INT, nullptr, F("valveStatus"), F("mixing valve actuator in assigned hc (VC1)"), DeviceValueUOM::PERCENT);
-        register_device_value(tag, &flowTempVf_, DeviceValueType::USHORT, FL_(div10), F("flowTempVf"), F("flow temperature in header (T0/Vf)"), DeviceValueUOM::DEGREES);
+        register_device_value(tag, &flowSetTemp_, DeviceValueType::UINT, nullptr, FL_(flowSetTemp), DeviceValueUOM::DEGREES);
+        register_device_value(tag, &flowTempHc_, DeviceValueType::USHORT, FL_(div10), FL_(flowTempHc), DeviceValueUOM::DEGREES);
+        register_device_value(tag, &pumpStatus_, DeviceValueType::BOOL, nullptr, FL_(pumpStatus), DeviceValueUOM::PUMP);
+        register_device_value(tag, &status_, DeviceValueType::INT, nullptr, FL_(mixerStatus), DeviceValueUOM::PERCENT);
+        register_device_value(tag, &flowTempVf_, DeviceValueType::USHORT, FL_(div10), FL_(flowTempVf), DeviceValueUOM::DEGREES);
     } else {
         type_       = Type::WWC;
         hc_         = device_id - 0x28 + 1;
         uint8_t tag = TAG_WWC1 + hc_ - 1;
         register_device_value(tag, &id_, DeviceValueType::UINT, nullptr, F("id"), nullptr); // empty full name to prevent being shown in web or console
-        register_device_value(tag, &flowTempHc_, DeviceValueType::USHORT, FL_(div10), F("wwTemp"), F("current warm water temperature"), DeviceValueUOM::DEGREES);
-        register_device_value(tag, &pumpStatus_, DeviceValueType::BOOL, nullptr, F("pumpStatus"), F("pump status in assigned hc (PC1)"), DeviceValueUOM::PUMP);
-        register_device_value(tag, &status_, DeviceValueType::INT, nullptr, F("tempStatus"), F("temperature switch in assigned hc (MC1)"));
+        register_device_value(tag, &flowTempHc_, DeviceValueType::USHORT, FL_(div10), FL_(wwTemp), DeviceValueUOM::DEGREES);
+        register_device_value(tag, &pumpStatus_, DeviceValueType::BOOL, nullptr, FL_(pumpStatus), DeviceValueUOM::PUMP);
+        register_device_value(tag, &status_, DeviceValueType::INT, nullptr, FL_(tempStatus));
     }
 
     id_ = product_id;

@@ -451,6 +451,10 @@ void EMSdevice::register_device_value(uint8_t tag, void * value_p, uint8_t type,
     devicevalues_.emplace_back(device_type_, tag, value_p, type, options, options_size, short_name, full_name, uom);
 }
 
+void EMSdevice::register_device_value(uint8_t tag, void * value_p, uint8_t type, const __FlashStringHelper * const * options, const __FlashStringHelper * const * name, uint8_t uom) {
+    register_device_value(tag, value_p, type, options, name[0], name[1], uom);
+}
+
 // looks up the uom (suffix) for a given key from the device value table
 std::string EMSdevice::get_value_uom(const char * key) {
     // the key may have a suffix at the start which is between brackets. remove it.
@@ -626,7 +630,7 @@ bool EMSdevice::generate_values_json(JsonObject & root, const uint8_t tag_filter
             // handle Booleans (true, false)
             if ((dv.type == DeviceValueType::BOOL) && Helpers::hasValue(*(uint8_t *)(dv.value_p), EMS_VALUE_BOOL)) {
                 // see if we have options for the bool's
-                if (dv.options_size == 2) {
+                if (dv.options_size == 2 && Mqtt::bool_format() != BOOL_FORMAT_10) {
                     json[name] = *(uint8_t *)(dv.value_p) ? dv.options[0] : dv.options[1];
                     has_value  = true;
                 } else {
@@ -800,8 +804,8 @@ void EMSdevice::write_command(const uint16_t type_id, const uint8_t offset, cons
 }
 
 // send Tx read command to the device
-void EMSdevice::read_command(const uint16_t type_id) {
-    EMSESP::send_read_request(type_id, device_id());
+void EMSdevice::read_command(const uint16_t type_id, const uint8_t offset, const uint8_t length) {
+    EMSESP::send_read_request(type_id, device_id(), offset, length);
 }
 
 } // namespace emsesp
