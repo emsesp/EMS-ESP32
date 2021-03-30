@@ -31,7 +31,7 @@ uint32_t get_uptime_sec() {
 }
 
 uint64_t get_uptime_ms() {
-    return now_millis;;
+    return now_millis;
 }
 
 void set_uptime() {
