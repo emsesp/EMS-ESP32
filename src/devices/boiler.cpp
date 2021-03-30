@@ -28,20 +28,20 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
     LOG_DEBUG(F("Adding new Boiler with device ID 0x%02X"), device_id);
 
-    // cascaded heatingsources, add some values with new tags later
+    // cascaded heatingsources, only some values per individual heatsource (hs)
     if (device_id != EMSdevice::EMS_DEVICE_ID_BOILER) {
-        // uint8_t hs = device_id - EMSdevice::EMS_DEVICE_ID_BOILER_1; // heating source number
-        // Runtime of each heatingsource in 6DC, ff
-        // register_telegram_type(0x6DC + hs, F("CascadeMessage"), false, [&](std::shared_ptr<const Telegram> t) { process_CascadeMessage(t); });
+        uint8_t hs = device_id - EMSdevice::EMS_DEVICE_ID_BOILER_1; // heating source id, count from 0
+        // Runtime of each heatingsource in 0x06DC, ff
+        register_telegram_type(0x6DC + hs, F("CascadeMessage"), false, MAKE_PF_CB(process_CascadeMessage));
+        register_device_value(TAG_HS1 + hs, &burnWorkMin_, DeviceValueType::TIME, nullptr, F("burnWorkMin"), F("total burner operating time"), DeviceValueUOM::MINUTES);
         // selBurnpower in D2 and E4
-        // register_telegram_type(0xD2, F("CascadePowerMessage"), false, [&](std::shared_ptr<const Telegram> t) { process_CascadePowerMessage(t); });
-        // idividual Flowtemps and powervalues for each heatingsource in E4
-        // register_telegram_type(0xE4, F("UBAMonitorFastPlus"), false, [&](std::shared_ptr<const Telegram> t) { process_UBAMonitorFastPlus(t); });
-
-        // register_device_value(TAG_HS1 + hs, &selFlowTemp_, DeviceValueType::UINT, nullptr, F("selFlowTemp"), F("selected flow temperature"), DeviceValueUOM::DEGREES);
-        // register_device_value(TAG_HS1 + hs, &selBurnPow_, DeviceValueType::UINT, nullptr, F("selBurnPow"), F("burner selected max power"), DeviceValueUOM::PERCENT);
-        // register_device_value(TAG_HS1 + hs, &curFlowTemp_, DeviceValueType::USHORT, FL_(div10), F("curFlowTemp"), F("current flow temperature"), DeviceValueUOM::DEGREES);
-        // register_device_value(TAG_HS1 + hs, &curBurnPow_, DeviceValueType::UINT, nullptr, F("curBurnPow"), F("burner current power"), DeviceValueUOM::PERCENT);
+        // register_telegram_type(0xD2, F("CascadePowerMessage"), false, MAKE_PF_CB(process_CascadePowerMessage));
+        // individual Flowtemps and powervalues for each heatingsource in E4
+        register_telegram_type(0xE4, F("UBAMonitorFastPlus"), false, MAKE_PF_CB(process_UBAMonitorFastPlus));
+        register_device_value(TAG_HS1 + hs, &selFlowTemp_, DeviceValueType::UINT, nullptr, F("selFlowTemp"), F("selected flow temperature"), DeviceValueUOM::DEGREES);
+        register_device_value(TAG_HS1 + hs, &selBurnPow_, DeviceValueType::UINT, nullptr, F("selBurnPow"), F("burner selected max power"), DeviceValueUOM::PERCENT);
+        register_device_value(TAG_HS1 + hs, &curFlowTemp_, DeviceValueType::USHORT, FL_(div10), F("curFlowTemp"), F("current flow temperature"), DeviceValueUOM::DEGREES);
+        register_device_value(TAG_HS1 + hs, &curBurnPow_, DeviceValueType::UINT, nullptr, F("curBurnPow"), F("burner current power"), DeviceValueUOM::PERCENT);
         return;
     }
     // register values for master boiler/cascade module
@@ -49,59 +49,54 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     reserve_telgram_functions(25); // reserve some space for the telegram registries, to avoid memory fragmentation
 
     // the telegram handlers...
-    register_telegram_type(0x10, F("UBAErrorMessage1"), false, [&](std::shared_ptr<const Telegram> t) { process_UBAErrorMessage(t); });
-    register_telegram_type(0x11, F("UBAErrorMessage2"), false, [&](std::shared_ptr<const Telegram> t) { process_UBAErrorMessage(t); });
-    register_telegram_type(0x14, F("UBATotalUptime"), true, [&](std::shared_ptr<const Telegram> t) { process_UBATotalUptime(t); });
-    register_telegram_type(0x15, F("UBAMaintenanceData"), false, [&](std::shared_ptr<const Telegram> t) { process_UBAMaintenanceData(t); });
-    register_telegram_type(0x16, F("UBAParameters"), true, [&](std::shared_ptr<const Telegram> t) { process_UBAParameters(t); });
-    register_telegram_type(0x18, F("UBAMonitorFast"), false, [&](std::shared_ptr<const Telegram> t) { process_UBAMonitorFast(t); });
-    register_telegram_type(0x19, F("UBAMonitorSlow"), true, [&](std::shared_ptr<const Telegram> t) { process_UBAMonitorSlow(t); });
-    register_telegram_type(0x1A, F("UBASetPoints"), false, [&](std::shared_ptr<const Telegram> t) { process_UBASetPoints(t); });
-    register_telegram_type(0x1C, F("UBAMaintenanceStatus"), false, [&](std::shared_ptr<const Telegram> t) { process_UBAMaintenanceStatus(t); });
-    register_telegram_type(0x26, F("UBASettingsWW"), true, [&](std::shared_ptr<const Telegram> t) { process_UBASettingsWW(t); });
-    register_telegram_type(0x2A, F("MC10Status"), false, [&](std::shared_ptr<const Telegram> t) { process_MC10Status(t); });
-    register_telegram_type(0x33, F("UBAParameterWW"), true, [&](std::shared_ptr<const Telegram> t) { process_UBAParameterWW(t); });
-    register_telegram_type(0x34, F("UBAMonitorWW"), false, [&](std::shared_ptr<const Telegram> t) { process_UBAMonitorWW(t); });
-    register_telegram_type(0x35, F("UBAFlags"), false, [&](std::shared_ptr<const Telegram> t) { process_UBAFlags(t); });
-    register_telegram_type(0xD1, F("UBAOutdoorTemp"), false, [&](std::shared_ptr<const Telegram> t) { process_UBAOutdoorTemp(t); });
-    register_telegram_type(0xE3, F("UBAMonitorSlowPlus"), false, [&](std::shared_ptr<const Telegram> t) { process_UBAMonitorSlowPlus2(t); });
-    register_telegram_type(0xE4, F("UBAMonitorFastPlus"), false, [&](std::shared_ptr<const Telegram> t) { process_UBAMonitorFastPlus(t); });
-    register_telegram_type(0xE5, F("UBAMonitorSlowPlus"), false, [&](std::shared_ptr<const Telegram> t) { process_UBAMonitorSlowPlus(t); });
-    register_telegram_type(0xE6, F("UBAParametersPlus"), true, [&](std::shared_ptr<const Telegram> t) { process_UBAParametersPlus(t); });
-    register_telegram_type(0xE9, F("UBADHWStatus"), false, [&](std::shared_ptr<const Telegram> t) { process_UBADHWStatus(t); });
-    register_telegram_type(0xEA, F("UBAParameterWWPlus"), true, [&](std::shared_ptr<const Telegram> t) { process_UBAParameterWWPlus(t); });
-    register_telegram_type(0x494, F("UBAEnergySupplied"), false, [&](std::shared_ptr<const Telegram> t) { process_UBAEnergySupplied(t); });
-    register_telegram_type(0x495, F("UBAInformation"), false, [&](std::shared_ptr<const Telegram> t) { process_UBAInformation(t); });
-
-    EMSESP::send_read_request(0x10, device_id); // read last errorcode on start (only published on errors)
-    EMSESP::send_read_request(0x11, device_id); // read last errorcode on start (only published on errors)
-    EMSESP::send_read_request(0x15, device_id); // read maintenace data on start (only published on change)
-    EMSESP::send_read_request(0x1C, device_id); // read maintenace status on start (only published on change)
+    register_telegram_type(0x10, F("UBAErrorMessage1"), false, MAKE_PF_CB(process_UBAErrorMessage));
+    register_telegram_type(0x11, F("UBAErrorMessage2"), false, MAKE_PF_CB(process_UBAErrorMessage));
+    register_telegram_type(0x14, F("UBATotalUptime"), true, MAKE_PF_CB(process_UBATotalUptime));
+    register_telegram_type(0x15, F("UBAMaintenanceData"), false, MAKE_PF_CB(process_UBAMaintenanceData));
+    register_telegram_type(0x16, F("UBAParameters"), true, MAKE_PF_CB(process_UBAParameters));
+    register_telegram_type(0x18, F("UBAMonitorFast"), false, MAKE_PF_CB(process_UBAMonitorFast));
+    register_telegram_type(0x19, F("UBAMonitorSlow"), true, MAKE_PF_CB(process_UBAMonitorSlow));
+    register_telegram_type(0x1A, F("UBASetPoints"), false, MAKE_PF_CB(process_UBASetPoints));
+    register_telegram_type(0x1C, F("UBAMaintenanceStatus"), false, MAKE_PF_CB(process_UBAMaintenanceStatus));
+    register_telegram_type(0x26, F("UBASettingsWW"), true, MAKE_PF_CB(process_UBASettingsWW));
+    register_telegram_type(0x2A, F("MC10Status"), false, MAKE_PF_CB(process_MC10Status));
+    register_telegram_type(0x33, F("UBAParameterWW"), true, MAKE_PF_CB(process_UBAParameterWW));
+    register_telegram_type(0x34, F("UBAMonitorWW"), false, MAKE_PF_CB(process_UBAMonitorWW));
+    register_telegram_type(0x35, F("UBAFlags"), false, MAKE_PF_CB(process_UBAFlags));
+    register_telegram_type(0xD1, F("UBAOutdoorTemp"), false, MAKE_PF_CB(process_UBAOutdoorTemp));
+    register_telegram_type(0xE3, F("UBAMonitorSlowPlus"), false, MAKE_PF_CB(process_UBAMonitorSlowPlus2));
+    register_telegram_type(0xE4, F("UBAMonitorFastPlus"), false, MAKE_PF_CB(process_UBAMonitorFastPlus));
+    register_telegram_type(0xE5, F("UBAMonitorSlowPlus"), false, MAKE_PF_CB(process_UBAMonitorSlowPlus));
+    register_telegram_type(0xE6, F("UBAParametersPlus"), true, MAKE_PF_CB(process_UBAParametersPlus));
+    register_telegram_type(0xE9, F("UBADHWStatus"), false, MAKE_PF_CB(process_UBADHWStatus));
+    register_telegram_type(0xEA, F("UBAParameterWWPlus"), true, MAKE_PF_CB(process_UBAParameterWWPlus));
+    register_telegram_type(0x494, F("UBAEnergySupplied"), false, MAKE_PF_CB(process_UBAEnergySupplied));
+    register_telegram_type(0x495, F("UBAInformation"), false, MAKE_PF_CB(process_UBAInformation));
 
     // MQTT commands for boiler topic
-    register_mqtt_cmd(F("comfort"), [&](const char * value, const int8_t id) { return set_warmwater_mode(value, id); });
-    register_mqtt_cmd(F("wwactivated"), [&](const char * value, const int8_t id) { return set_warmwater_activated(value, id); });
-    register_mqtt_cmd(F("wwtapactivated"), [&](const char * value, const int8_t id) { return set_tapwarmwater_activated(value, id); });
-    register_mqtt_cmd(F("wwflowtempoffset"), [&](const char * value, const int8_t id) { return set_wWFlowTempOffset(value, id); });
-    register_mqtt_cmd(F("wwmaxpower"), [&](const char * value, const int8_t id) { return set_warmwater_maxpower(value, id); });
-    register_mqtt_cmd(F("wwonetime"), [&](const char * value, const int8_t id) { return set_warmwater_onetime(value, id); });
-    register_mqtt_cmd(F("wwcircpump"), [&](const char * value, const int8_t id) { return set_warmwater_circulation_pump(value, id); });
-    register_mqtt_cmd(F("wwcirculation"), [&](const char * value, const int8_t id) { return set_warmwater_circulation(value, id); });
-    register_mqtt_cmd(F("wwcircmode"), [&](const char * value, const int8_t id) { return set_warmwater_circulation_mode(value, id); });
-    register_mqtt_cmd(F("flowtemp"), [&](const char * value, const int8_t id) { return set_flow_temp(value, id); });
-    register_mqtt_cmd(F("wwsettemp"), [&](const char * value, const int8_t id) { return set_warmwater_temp(value, id); });
-    register_mqtt_cmd(F("heatingactivated"), [&](const char * value, const int8_t id) { return set_heating_activated(value, id); });
-    register_mqtt_cmd(F("heatingtemp"), [&](const char * value, const int8_t id) { return set_heating_temp(value, id); });
-    register_mqtt_cmd(F("burnmaxpower"), [&](const char * value, const int8_t id) { return set_max_power(value, id); });
-    register_mqtt_cmd(F("burnminpower"), [&](const char * value, const int8_t id) { return set_min_power(value, id); });
-    register_mqtt_cmd(F("boilhyston"), [&](const char * value, const int8_t id) { return set_hyst_on(value, id); });
-    register_mqtt_cmd(F("boilhystoff"), [&](const char * value, const int8_t id) { return set_hyst_off(value, id); });
-    register_mqtt_cmd(F("burnperiod"), [&](const char * value, const int8_t id) { return set_burn_period(value, id); });
-    register_mqtt_cmd(F("pumpdelay"), [&](const char * value, const int8_t id) { return set_pump_delay(value, id); });
-    register_mqtt_cmd(F("maintenance"), [&](const char * value, const int8_t id) { return set_maintenance(value, id); });
-    register_mqtt_cmd(F("pumpmodmax"), [&](const char * value, const int8_t id) { return set_max_pump(value, id); });
-    register_mqtt_cmd(F("pumpmodmin"), [&](const char * value, const int8_t id) { return set_min_pump(value, id); });
-    // register_mqtt_cmd(F("reset"), [&](const char * value, const int8_t id) { return set_reset(value, id); });
+    register_mqtt_cmd(F("comfort"), MAKE_CF_CB(set_warmwater_mode));
+    register_mqtt_cmd(F("wwactivated"), MAKE_CF_CB(set_warmwater_activated));
+    register_mqtt_cmd(F("wwtapactivated"), MAKE_CF_CB(set_tapwarmwater_activated));
+    register_mqtt_cmd(F("wwflowtempoffset"), MAKE_CF_CB(set_wWFlowTempOffset));
+    register_mqtt_cmd(F("wwmaxpower"), MAKE_CF_CB(set_warmwater_maxpower));
+    register_mqtt_cmd(F("wwonetime"), MAKE_CF_CB(set_warmwater_onetime));
+    register_mqtt_cmd(F("wwcircpump"), MAKE_CF_CB(set_warmwater_circulation_pump));
+    register_mqtt_cmd(F("wwcirculation"), MAKE_CF_CB(set_warmwater_circulation));
+    register_mqtt_cmd(F("wwcircmode"), MAKE_CF_CB(set_warmwater_circulation_mode));
+    register_mqtt_cmd(F("flowtemp"), MAKE_CF_CB(set_flow_temp));
+    register_mqtt_cmd(F("wwsettemp"), MAKE_CF_CB(set_warmwater_temp));
+    register_mqtt_cmd(F("heatingactivated"), MAKE_CF_CB(set_heating_activated));
+    register_mqtt_cmd(F("heatingtemp"), MAKE_CF_CB(set_heating_temp));
+    register_mqtt_cmd(F("burnmaxpower"), MAKE_CF_CB(set_max_power));
+    register_mqtt_cmd(F("burnminpower"), MAKE_CF_CB(set_min_power));
+    register_mqtt_cmd(F("boilhyston"), MAKE_CF_CB(set_hyst_on));
+    register_mqtt_cmd(F("boilhystoff"), MAKE_CF_CB(set_hyst_off));
+    register_mqtt_cmd(F("burnperiod"), MAKE_CF_CB(set_burn_period));
+    register_mqtt_cmd(F("pumpdelay"), MAKE_CF_CB(set_pump_delay));
+    register_mqtt_cmd(F("maintenance"), MAKE_CF_CB(set_maintenance));
+    register_mqtt_cmd(F("pumpmodmax"), MAKE_CF_CB(set_max_pump));
+    register_mqtt_cmd(F("pumpmodmin"), MAKE_CF_CB(set_min_pump));
+    register_mqtt_cmd(F("reset"), MAKE_CF_CB(set_reset));
 
     // add values
     reserve_device_values(50);
@@ -178,12 +173,12 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     register_device_value(TAG_BOILER_DATA_WW, &wWSetTemp_, DeviceValueType::UINT, nullptr, F("wWSetTemp"), F("set temperature"), DeviceValueUOM::DEGREES);
     register_device_value(TAG_BOILER_DATA_WW, &wWType_, DeviceValueType::ENUM, FL_(enum_flow), F("wWType"), F("type"));
     register_device_value(TAG_BOILER_DATA_WW, &wWComfort_, DeviceValueType::ENUM, FL_(enum_comfort), F("wWComfort"), F("comfort"));
-    register_device_value(TAG_BOILER_DATA_WW, &wWFlowTempOffset_, DeviceValueType::UINT, nullptr, F("wWFlowTempOffset"), F("flow offset temperature"));
+    register_device_value(TAG_BOILER_DATA_WW, &wWFlowTempOffset_, DeviceValueType::UINT, nullptr, F("wWFlowTempOffset"), F("flow temperature offset"));
     register_device_value(TAG_BOILER_DATA_WW, &wWMaxPower_, DeviceValueType::UINT, nullptr, F("wWMaxPower"), F("max power"), DeviceValueUOM::PERCENT);
     register_device_value(TAG_BOILER_DATA_WW, &wWCircPump_, DeviceValueType::BOOL, nullptr, F("wWCircPump"), F("circulation pump available"));
     register_device_value(TAG_BOILER_DATA_WW, &wWChargeType_, DeviceValueType::BOOL, FL_(enum_charge), F("wWChargeType"), F("charging type"));
     register_device_value(TAG_BOILER_DATA_WW, &wWDisinfectionTemp_, DeviceValueType::UINT, nullptr, F("wWDisinfectionTemp"), F("disinfection temperature"), DeviceValueUOM::DEGREES);
-    register_device_value(TAG_BOILER_DATA_WW, &wWCircPumpMode_, DeviceValueType::ENUM, FL_(enum_freq), F("wWCircPumpMode"), F("circulation pump freq"));
+    register_device_value(TAG_BOILER_DATA_WW, &wWCircMode_, DeviceValueType::ENUM, FL_(enum_freq), F("wWCircMode"), F("circulation pump freq"));
     register_device_value(TAG_BOILER_DATA_WW, &wWCirc_, DeviceValueType::BOOL, nullptr, F("wWCirc"), F("circulation active"));
     register_device_value(TAG_BOILER_DATA_WW, &wWCurTemp_, DeviceValueType::USHORT, FL_(div10), F("wWCurTemp"), F("current intern temperature"), DeviceValueUOM::DEGREES);
     register_device_value(TAG_BOILER_DATA_WW, &wWCurTemp2_, DeviceValueType::USHORT, FL_(div10), F("wWCurTemp2"), F("current extern temperature"), DeviceValueUOM::DEGREES);
@@ -204,6 +199,12 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     register_device_value(TAG_BOILER_DATA_WW, &wWStarts_, DeviceValueType::ULONG, nullptr, F("wWStarts"), F("# starts"));
     register_device_value(TAG_BOILER_DATA_WW, &wWStarts2_, DeviceValueType::ULONG, nullptr, F("wWStarts2"), F("# control starts"));
     register_device_value(TAG_BOILER_DATA_WW, &wWWorkM_, DeviceValueType::TIME, nullptr, F("wWWorkM"), F("active time"), DeviceValueUOM::MINUTES);
+
+    // fetch some initial data
+    EMSESP::send_read_request(0x10, device_id); // read last errorcode on start (only published on errors)
+    EMSESP::send_read_request(0x11, device_id); // read last errorcode on start (only published on errors)
+    EMSESP::send_read_request(0x15, device_id); // read maintenace data on start (only published on change)
+    EMSESP::send_read_request(0x1C, device_id); // read maintenace status on start (only published on change)
 }
 
 // publish HA config
@@ -227,8 +228,7 @@ bool Boiler::publish_ha_config() {
 
     char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
     snprintf_P(topic, sizeof(topic), PSTR("homeassistant/sensor/%s/boiler/config"), Mqtt::base().c_str());
-    Mqtt::publish_ha(topic,
-                     doc.as<JsonObject>()); // publish the config payload with retain flag
+    Mqtt::publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
 
     return true;
 }
@@ -277,7 +277,7 @@ void Boiler::check_active(const bool force) {
 void Boiler::process_UBAParameterWW(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram->read_value(wWActivated_, 1));    // 0xFF means on
     has_update(telegram->read_value(wWCircPump_, 6));     // 0xFF means on
-    has_update(telegram->read_value(wWCircPumpMode_, 7)); // 1=1x3min 6=6x3min 7=continuous
+    has_update(telegram->read_value(wWCircMode_, 7));     // 1=1x3min 6=6x3min 7=continuous
     has_update(telegram->read_value(wWChargeType_, 10));  // 0 = charge pump, 0xff = 3-way valve
     has_update(telegram->read_value(wWSelTemp_, 2));
     has_update(telegram->read_value(wWDisinfectionTemp_, 8));
@@ -506,7 +506,7 @@ void Boiler::process_UBAParametersPlus(std::shared_ptr<const Telegram> telegram)
 void Boiler::process_UBAParameterWWPlus(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram->read_value(wWActivated_, 5));     // 0x01 means on
     has_update(telegram->read_value(wWCircPump_, 10));     // 0x01 means yes
-    has_update(telegram->read_value(wWCircPumpMode_, 11)); // 1=1x3min... 6=6x3min, 7=continuous
+    has_update(telegram->read_value(wWCircMode_, 11));     // 1=1x3min... 6=6x3min, 7=continuous
     // has_update(telegram->read_value(wWDisinfectTemp_, 12)); // settings, status in E9
     // has_update(telegram->read_value(wWSelTemp_, 6));        // settings, status in E9
 }
@@ -601,18 +601,16 @@ void Boiler::process_UBASetPoints(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram->read_value(wWSetPumpPower_, 2)); // ww pump speed/power?
 }
 
+// 0x6DC, ff for cascaded heatsources (hs)
+void Boiler::process_CascadeMessage(std::shared_ptr<const Telegram> telegram) {
+    // uint8_t  hsActivated;
+    // has_update(telegram->read_value(hsActivated, 0));
+    telegram->read_value(burnWorkMin_, 3); // this is in seconds
+    burnWorkMin_ /= 60;
+}
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-
-// 0x6DC, ff for cascaded heatsources (hs)
-// not implemented yet, see #739
-void Boiler::process_CascadeMessage(std::shared_ptr<const Telegram> telegram) {
-    uint8_t hs = telegram->dest - EMSdevice::EMS_DEVICE_ID_BOILER_1;
-    // uint8_t  hsActivated;
-    // uint32_t hsRuntime;
-    // has_update(telegram->read_value(hsActivated, 0));
-    // has_update(telegram->read_value(hsRuntime, 3));
-}
 
 // 0x35 - not yet implemented
 void Boiler::process_UBAFlags(std::shared_ptr<const Telegram> telegram) {
@@ -1102,6 +1100,7 @@ bool Boiler::set_warmwater_circulation_mode(const char * value, const int8_t id)
 
     return true;
 }
+
 // Reset command
 // 0 & 1        Reset-Mode (Manuel, others)
 // 8            reset maintenance message Hxx

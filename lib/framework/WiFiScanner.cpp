@@ -1,8 +1,10 @@
 #include <WiFiScanner.h>
 
+using namespace std::placeholders; // for `_1` etc
+
 WiFiScanner::WiFiScanner(AsyncWebServer * server, SecurityManager * securityManager) {
-    server->on(SCAN_NETWORKS_SERVICE_PATH, HTTP_GET, securityManager->wrapRequest(std::bind(&WiFiScanner::scanNetworks, this, std::placeholders::_1), AuthenticationPredicates::IS_ADMIN));
-    server->on(LIST_NETWORKS_SERVICE_PATH, HTTP_GET, securityManager->wrapRequest(std::bind(&WiFiScanner::listNetworks, this, std::placeholders::_1), AuthenticationPredicates::IS_ADMIN));
+    server->on(SCAN_NETWORKS_SERVICE_PATH, HTTP_GET, securityManager->wrapRequest(std::bind(&WiFiScanner::scanNetworks, this, _1), AuthenticationPredicates::IS_ADMIN));
+    server->on(LIST_NETWORKS_SERVICE_PATH, HTTP_GET, securityManager->wrapRequest(std::bind(&WiFiScanner::listNetworks, this, _1), AuthenticationPredicates::IS_ADMIN));
 };
 
 void WiFiScanner::scanNetworks(AsyncWebServerRequest * request) {

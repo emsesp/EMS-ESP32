@@ -28,15 +28,16 @@ class DummySettings {
     bool     api_enabled          = true;
 
     // MQTT
-    uint16_t    publish_time      = 10; // seconds
-    uint8_t     mqtt_qos          = 0;
-    bool        mqtt_retain       = false;
-    bool        enabled           = true;
-    uint8_t     dallas_format     = 1;
-    bool        nested_format     = true;
-    uint8_t     ha_climate_format = 1;
-    bool        ha_enabled        = true;
-    std::string base              = "ems-esp";
+    uint16_t publish_time      = 10; // seconds
+    uint8_t  mqtt_qos          = 0;
+    bool     mqtt_retain       = false;
+    bool     enabled           = true;
+    uint8_t  dallas_format     = 1;
+    bool     nested_format     = true;
+    uint8_t  ha_climate_format = 1;
+    bool     ha_enabled        = true;
+    String   base              = "ems-esp";
+    uint8_t  subscribe_format  = 0;
 
     String   hostname                = "ems-esp";
     String   jwtSecret               = "ems-esp";
@@ -48,7 +49,7 @@ class DummySettings {
     String   staticIPConfig          = "";
     String   dnsIP1                  = "";
     String   dnsIP2                  = "";
-    uint8_t  ethernet_profile        = 0;
+    String   board_profile           = "CUSTOM";
     uint16_t publish_time_boiler     = 10;
     uint16_t publish_time_thermostat = 10;
     uint16_t publish_time_solar      = 10;

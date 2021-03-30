@@ -26,8 +26,6 @@
 #include <vector>
 #include <functional>
 
-// #include "containers.h"
-
 #include "console.h"
 
 #include <uuid/log.h>
@@ -43,12 +41,14 @@ class Command {
   public:
     struct CmdFunction {
         uint8_t                     device_type_; // DeviceType::
+        uint8_t                     flag_;
         const __FlashStringHelper * cmd_;
         cmdfunction_p               cmdfunction_;
         cmdfunction_json_p          cmdfunction_json_;
 
-        CmdFunction(const uint8_t device_type, const __FlashStringHelper * cmd, cmdfunction_p cmdfunction, cmdfunction_json_p cmdfunction_json)
+        CmdFunction(const uint8_t device_type, const uint8_t flag, const __FlashStringHelper * cmd, cmdfunction_p cmdfunction, cmdfunction_json_p cmdfunction_json)
             : device_type_(device_type)
+            , flag_(flag)
             , cmd_(cmd)
             , cmdfunction_(cmdfunction)
             , cmdfunction_json_(cmdfunction_json) {
@@ -59,11 +59,9 @@ class Command {
         return cmdfunctions_;
     }
 
-    // static emsesp::array<Command::CmdFunction> * commands();
-
     static bool                   call(const uint8_t device_type, const char * cmd, const char * value, const int8_t id, JsonObject & json);
-    static bool                   call(const uint8_t device_type, const char * cmd, const char * value, const int8_t id);
-    static void                   add(const uint8_t device_type, const __FlashStringHelper * cmd, cmdfunction_p cb);
+    static bool                   call(const uint8_t device_type, const char * cmd, const char * value, const int8_t id = 0);
+    static void                   add(const uint8_t device_type, const __FlashStringHelper * cmd, cmdfunction_p cb, uint8_t flag = 0);
     static void                   add_with_json(const uint8_t device_type, const __FlashStringHelper * cmd, cmdfunction_json_p cb);
     static void                   show_all(uuid::console::Shell & shell);
     static Command::CmdFunction * find_command(const uint8_t device_type, const char * cmd);

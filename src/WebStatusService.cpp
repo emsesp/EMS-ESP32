@@ -18,12 +18,14 @@
 
 #include "emsesp.h"
 
+using namespace std::placeholders; // for `_1` etc
+
 namespace emsesp {
 
 WebStatusService::WebStatusService(AsyncWebServer * server, SecurityManager * securityManager) {
     // rest endpoint for web page
-    server->on(EMSESP_STATUS_SERVICE_PATH, HTTP_GET, securityManager->wrapRequest(std::bind(&WebStatusService::webStatusService, this, std::placeholders::_1), AuthenticationPredicates::IS_AUTHENTICATED));
-    WiFi.onEvent(std::bind(&WebStatusService::WiFiEvent, this, std::placeholders::_1, std::placeholders::_2));
+    server->on(EMSESP_STATUS_SERVICE_PATH, HTTP_GET, securityManager->wrapRequest(std::bind(&WebStatusService::webStatusService, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
+    WiFi.onEvent(std::bind(&WebStatusService::WiFiEvent, this, _1, _2));
 }
 
 // handles both WiFI and Ethernet
@@ -39,10 +41,11 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
 #endif
         EMSESP::system_.wifi_tweak();
         EMSESP::system_.send_heartbeat();
+        EMSESP::system_.syslog_start();
         break;
 
     case SYSTEM_EVENT_ETH_START:
-        EMSESP::logger().info(F("Ethernet Started"));
+        EMSESP::logger().info(F("Ethernet initialized"));
         ETH.setHostname(EMSESP::system_.hostname().c_str());
         break;
 
@@ -53,6 +56,7 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
             EMSESP::logger().info(F("Ethernet Connected with IP=%s, speed %d Mbps"), ETH.localIP().toString().c_str(), ETH.linkSpeed());
 #endif
             EMSESP::system_.send_heartbeat();
+            EMSESP::system_.syslog_start();
             EMSESP::system_.ethernet_connected(true);
         }
         break;

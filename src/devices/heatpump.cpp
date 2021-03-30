@@ -29,8 +29,8 @@ Heatpump::Heatpump(uint8_t device_type, uint8_t device_id, uint8_t product_id, c
     LOG_DEBUG(F("Adding new Heat Pump module with device ID 0x%02X"), device_id);
 
     // telegram handlers
-    register_telegram_type(0x042B, F("HP1"), true, [&](std::shared_ptr<const Telegram> t) { process_HPMonitor1(t); });
-    register_telegram_type(0x047B, F("HP2"), true, [&](std::shared_ptr<const Telegram> t) { process_HPMonitor2(t); });
+    register_telegram_type(0x042B, F("HP1"), true, MAKE_PF_CB(process_HPMonitor1));
+    register_telegram_type(0x047B, F("HP2"), true, MAKE_PF_CB(process_HPMonitor2));
 
     // device values
     register_device_value(TAG_NONE, &id_, DeviceValueType::UINT, nullptr, F("id"), nullptr); // empty full name to prevent being shown in web or console

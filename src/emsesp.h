@@ -63,6 +63,10 @@
 #define EMSESP_JSON_SIZE_XLARGE_DYN 4096  // for very very large json docs, using DynamicJsonDocument
 #define EMSESP_JSON_SIZE_XXLARGE_DYN 5120 // for extra very very large json docs, using DynamicJsonDocument
 
+// helpers for callback functions
+#define MAKE_PF_CB(__f) [&](std::shared_ptr<const Telegram> t) { __f(t); }                  // for process function callbacks to register_telegram_type()
+#define MAKE_CF_CB(__f) [&](const char * value, const int8_t id) { return __f(value, id); } // for command function callbacks to register_mqtt_cmd()
+
 namespace emsesp {
 
 class Shower; // forward declaration for compiler
@@ -109,7 +113,7 @@ class EMSESP {
     static void show_devices(uuid::console::Shell & shell);
     static void show_ems(uuid::console::Shell & shell);
 
-    static void init_tx();
+    static void init_uart();
 
     static void incoming_telegram(uint8_t * data, const uint8_t length);
 
@@ -187,9 +191,7 @@ class EMSESP {
     static WebDevicesService  webDevicesService;
     static WebAPIService      webAPIService;
 
-    static uuid::log::Logger logger() {
-        return logger_;
-    }
+    static uuid::log::Logger logger();
 
   private:
     EMSESP() = delete;

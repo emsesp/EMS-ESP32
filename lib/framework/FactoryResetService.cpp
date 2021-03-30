@@ -16,7 +16,6 @@ void FactoryResetService::handleRequest(AsyncWebServerRequest * request) {
  * Delete function assumes that all files are stored flat, within the config directory.
  */
 void FactoryResetService::factoryReset() {
-#ifdef ESP32
     /* 
    * Based on LITTLEFS. Modified by proddy
    * Could be replaced with fs.rmdir(FS_CONFIG_DIRECTORY) in IDF 4.2
@@ -28,14 +27,5 @@ void FactoryResetService::factoryReset() {
         file.close();
         fs->remove(pathStr);
     }
-#elif defined(ESP8266)
-    Dir configDirectory = fs->openDir(FS_CONFIG_DIRECTORY);
-    while (configDirectory.next()) {
-        String path = FS_CONFIG_DIRECTORY;
-        path.concat("/");
-        path.concat(configDirectory.fileName());
-        fs->remove(path);
-    }
-#endif
     RestartService::restartNow();
 }

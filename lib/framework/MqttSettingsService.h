@@ -41,11 +41,7 @@
 #ifndef FACTORY_MQTT_CLIENT_ID
 #define FACTORY_MQTT_CLIENT_ID generateClientId()
 static String generateClientId() {
-#ifdef ESP32
     return ESPUtils::defaultDeviceValue("esp32-");
-#elif defined(ESP8266)
-    return ESPUtils::defaultDeviceValue("esp8266-");
-#endif
 }
 #endif
 
@@ -69,6 +65,9 @@ static String generateClientId() {
 #define EMSESP_DEFAULT_HA_ENABLED false
 #define EMSESP_DEFAULT_PUBLISH_TIME 10
 #define EMSESP_DEFAULT_NESTED_FORMAT true
+#define EMSESP_DEFAULT_SUBSCRIBE_FORMAT 0
+
+#define EMSESP_DEFAULT_BOARD_PROFILE "S32"
 
 class MqttSettings {
   public:
@@ -76,7 +75,6 @@ class MqttSettings {
     bool     enabled;
     String   host;
     uint16_t port;
-    String   base;
 
     // username and password
     String username;
@@ -91,6 +89,7 @@ class MqttSettings {
     uint16_t maxTopicLength;
 
     // proddy EMS-ESP specific
+    String   base;
     uint16_t publish_time_boiler;
     uint16_t publish_time_thermostat;
     uint16_t publish_time_solar;
@@ -104,6 +103,7 @@ class MqttSettings {
     uint8_t  ha_climate_format;
     bool     ha_enabled;
     bool     nested_format;
+    uint8_t  subscribe_format;
 
     static void              read(MqttSettings & settings, JsonObject & root);
     static StateUpdateResult update(JsonObject & root, MqttSettings & settings);
@@ -146,8 +146,7 @@ class MqttSettingsService : public StatefulService<MqttSettings> {
     // the MQTT client instance
     AsyncMqttClient _mqttClient;
 
-    void onStationModeGotIP(WiFiEvent_t event, WiFiEventInfo_t info);
-    void onStationModeDisconnected(WiFiEvent_t event, WiFiEventInfo_t info);
+    void WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info);
     void onMqttConnect(bool sessionPresent);
     void onMqttDisconnect(AsyncMqttClientDisconnectReason reason);
     void configureMqtt();

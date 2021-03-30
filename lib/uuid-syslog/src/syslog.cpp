@@ -19,12 +19,10 @@
 #include "uuid/syslog.h"
 
 #include <Arduino.h>
-#ifdef ARDUINO_ARCH_ESP8266
-#include <ESP8266WiFi.h>
-#else
 #include <WiFi.h>
-#endif
 #include <WiFiUdp.h>
+
+#include "../../../src/emsesp.h"
 
 #ifndef UUID_SYSLOG_HAVE_GETTIMEOFDAY
 #if defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32)
@@ -191,7 +189,8 @@ void SyslogService::mark_interval(unsigned long interval) {
 SyslogService::QueuedLogMessage::QueuedLogMessage(unsigned long id, std::shared_ptr<uuid::log::Message> && content)
     : id_(id)
     , content_(std::move(content)) {
-    if (time_good_ || WiFi.status() == WL_CONNECTED) {
+    // Added by proddy - check for Ethernet too. This assumes the network has already started.
+    if (time_good_ || emsesp::EMSESP::system_.network_connected()) {
 #if UUID_SYSLOG_HAVE_GETTIMEOFDAY
         if (gettimeofday(&time_, nullptr) != 0) {
             time_.tv_sec = (time_t)-1;
@@ -269,8 +268,8 @@ bool SyslogService::can_transmit() {
     }
 #endif
 
-    if (WiFi.status() != WL_CONNECTED) {
-        return false;
+    if (!emsesp::EMSESP::system_.network_connected()) {
+        return false; // added by proddy. Check Ethernet
     }
 
     const uint64_t now           = uuid::get_uptime_ms();

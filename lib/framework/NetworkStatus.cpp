@@ -2,8 +2,10 @@
 
 #include "../../src/emsesp_stub.hpp" // proddy added
 
+using namespace std::placeholders; // for `_1` etc
+
 NetworkStatus::NetworkStatus(AsyncWebServer * server, SecurityManager * securityManager) {
-    server->on(NETWORK_STATUS_SERVICE_PATH, HTTP_GET, securityManager->wrapRequest(std::bind(&NetworkStatus::networkStatus, this, std::placeholders::_1), AuthenticationPredicates::IS_AUTHENTICATED));
+    server->on(NETWORK_STATUS_SERVICE_PATH, HTTP_GET, securityManager->wrapRequest(std::bind(&NetworkStatus::networkStatus, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
 }
 
 void NetworkStatus::networkStatus(AsyncWebServerRequest * request) {

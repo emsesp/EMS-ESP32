@@ -6,10 +6,8 @@
 
 #include <list>
 #include <functional>
-#ifdef ESP32
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
-#endif
 
 #ifndef DEFAULT_BUFFER_SIZE
 #define DEFAULT_BUFFER_SIZE 1024
@@ -45,16 +43,10 @@ template <class T>
 class StatefulService {
   public:
     template <typename... Args>
-#ifdef ESP32
     StatefulService(Args &&... args)
         : _state(std::forward<Args>(args)...)
         , _accessMutex(xSemaphoreCreateRecursiveMutex()) {
     }
-#else
-    StatefulService(Args &&... args)
-        : _state(std::forward<Args>(args)...) {
-    }
-#endif
 
     update_handler_id_t addUpdateHandler(StateUpdateCallback cb, bool allowRemove = true) {
         if (!cb) {
@@ -131,21 +123,15 @@ class StatefulService {
     T _state;
 
     inline void beginTransaction() {
-#ifdef ESP32
         xSemaphoreTakeRecursive(_accessMutex, portMAX_DELAY);
-#endif
     }
 
     inline void endTransaction() {
-#ifdef ESP32
         xSemaphoreGiveRecursive(_accessMutex);
-#endif
     }
 
   private:
-#ifdef ESP32
-    SemaphoreHandle_t _accessMutex;
-#endif
+    SemaphoreHandle_t                   _accessMutex;
     std::list<StateUpdateHandlerInfo_t> _updateHandlers;
 };
 

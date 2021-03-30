@@ -1,13 +1,15 @@
 #include <SystemStatus.h>
 
+using namespace std::placeholders; // for `_1` etc
+
 SystemStatus::SystemStatus(AsyncWebServer * server, SecurityManager * securityManager) {
-    server->on(SYSTEM_STATUS_SERVICE_PATH, HTTP_GET, securityManager->wrapRequest(std::bind(&SystemStatus::systemStatus, this, std::placeholders::_1), AuthenticationPredicates::IS_AUTHENTICATED));
+    server->on(SYSTEM_STATUS_SERVICE_PATH, HTTP_GET, securityManager->wrapRequest(std::bind(&SystemStatus::systemStatus, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
 }
 
 void SystemStatus::systemStatus(AsyncWebServerRequest * request) {
     AsyncJsonResponse * response = new AsyncJsonResponse(false, MAX_ESP_STATUS_SIZE);
     JsonObject          root     = response->getRoot();
-    root["esp_platform"]         = "esp32";
+    root["esp_platform"]         = "ESP32";
     root["max_alloc_heap"]       = ESP.getMaxAllocHeap();
     root["psram_size"]           = ESP.getPsramSize();
     root["free_psram"]           = ESP.getFreePsram();

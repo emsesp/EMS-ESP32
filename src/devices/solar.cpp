@@ -30,34 +30,34 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
 
     // telegram handlers
     if (flags == EMSdevice::EMS_DEVICE_FLAG_SM10) {
-        register_telegram_type(0x0097, F("SM10Monitor"), true, [&](std::shared_ptr<const Telegram> t) { process_SM10Monitor(t); });
+        register_telegram_type(0x0097, F("SM10Monitor"), true, MAKE_PF_CB(process_SM10Monitor));
     }
 
     if (flags == EMSdevice::EMS_DEVICE_FLAG_SM100) {
         if (device_id == 0x2A) {
-            register_telegram_type(0x07D6, F("SM100wwTemperature"), false, [&](std::shared_ptr<const Telegram> t) { process_SM100wwTemperature(t); });
-            register_telegram_type(0x07AA, F("SM100wwStatus"), false, [&](std::shared_ptr<const Telegram> t) { process_SM100wwStatus(t); });
-            register_telegram_type(0x07AB, F("SM100wwCommand"), false, [&](std::shared_ptr<const Telegram> t) { process_SM100wwCommand(t); });
+            register_telegram_type(0x07D6, F("SM100wwTemperature"), false, MAKE_PF_CB(process_SM100wwTemperature));
+            register_telegram_type(0x07AA, F("SM100wwStatus"), false, MAKE_PF_CB(process_SM100wwStatus));
+            register_telegram_type(0x07AB, F("SM100wwCommand"), false, MAKE_PF_CB(process_SM100wwCommand));
         } else {
-            register_telegram_type(0xF9, F("ParamCfg"), false, [&](std::shared_ptr<const Telegram> t) { process_SM100ParamCfg(t); });
-            register_telegram_type(0x0358, F("SM100SystemConfig"), true, [&](std::shared_ptr<const Telegram> t) { process_SM100SystemConfig(t); });
-            register_telegram_type(0x035A, F("SM100SolarCircuitConfig"), true, [&](std::shared_ptr<const Telegram> t) { process_SM100SolarCircuitConfig(t); });
-            register_telegram_type(0x0362, F("SM100Monitor"), true, [&](std::shared_ptr<const Telegram> t) { process_SM100Monitor(t); });
-            register_telegram_type(0x0363, F("SM100Monitor2"), true, [&](std::shared_ptr<const Telegram> t) { process_SM100Monitor2(t); });
-            register_telegram_type(0x0366, F("SM100Config"), true, [&](std::shared_ptr<const Telegram> t) { process_SM100Config(t); });
-            register_telegram_type(0x0364, F("SM100Status"), false, [&](std::shared_ptr<const Telegram> t) { process_SM100Status(t); });
-            register_telegram_type(0x036A, F("SM100Status2"), false, [&](std::shared_ptr<const Telegram> t) { process_SM100Status2(t); });
-            register_telegram_type(0x0380, F("SM100CollectorConfig"), true, [&](std::shared_ptr<const Telegram> t) { process_SM100CollectorConfig(t); });
-            register_telegram_type(0x038E, F("SM100Energy"), true, [&](std::shared_ptr<const Telegram> t) { process_SM100Energy(t); });
-            register_telegram_type(0x0391, F("SM100Time"), true, [&](std::shared_ptr<const Telegram> t) { process_SM100Time(t); });
+            register_telegram_type(0xF9, F("ParamCfg"), false, MAKE_PF_CB(process_SM100ParamCfg));
+            register_telegram_type(0x0358, F("SM100SystemConfig"), true, MAKE_PF_CB(process_SM100SystemConfig));
+            register_telegram_type(0x035A, F("SM100SolarCircuitConfig"), true, MAKE_PF_CB(process_SM100SolarCircuitConfig));
+            register_telegram_type(0x0362, F("SM100Monitor"), true, MAKE_PF_CB(process_SM100Monitor));
+            register_telegram_type(0x0363, F("SM100Monitor2"), true, MAKE_PF_CB(process_SM100Monitor2));
+            register_telegram_type(0x0366, F("SM100Config"), true, MAKE_PF_CB(process_SM100Config));
+            register_telegram_type(0x0364, F("SM100Status"), false, MAKE_PF_CB(process_SM100Status));
+            register_telegram_type(0x036A, F("SM100Status2"), false, MAKE_PF_CB(process_SM100Status2));
+            register_telegram_type(0x0380, F("SM100CollectorConfig"), true, MAKE_PF_CB(process_SM100CollectorConfig));
+            register_telegram_type(0x038E, F("SM100Energy"), true, MAKE_PF_CB(process_SM100Energy));
+            register_telegram_type(0x0391, F("SM100Time"), true, MAKE_PF_CB(process_SM100Time));
 
-            register_mqtt_cmd(F("SM100TankBottomMaxTemp"), [&](const char * value, const int8_t id) { return set_SM100TankBottomMaxTemp(value, id); });
+            register_mqtt_cmd(F("SM100TankBottomMaxTemp"), MAKE_CF_CB(set_SM100TankBottomMaxTemp));
         }
     }
 
     if (flags == EMSdevice::EMS_DEVICE_FLAG_ISM) {
-        register_telegram_type(0x0103, F("ISM1StatusMessage"), true, [&](std::shared_ptr<const Telegram> t) { process_ISM1StatusMessage(t); });
-        register_telegram_type(0x0101, F("ISM1Set"), false, [&](std::shared_ptr<const Telegram> t) { process_ISM1Set(t); });
+        register_telegram_type(0x0103, F("ISM1StatusMessage"), true, MAKE_PF_CB(process_ISM1StatusMessage));
+        register_telegram_type(0x0101, F("ISM1Set"), false, MAKE_PF_CB(process_ISM1Set));
     }
 
     // device values...

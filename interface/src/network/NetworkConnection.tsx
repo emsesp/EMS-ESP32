@@ -45,7 +45,7 @@ class NetworkConnection extends Component<NetworkConnectionProps, NetworkConnect
         <MenuAppBar sectionTitle="Network Connection">
           <Tabs value={this.props.match.url} onChange={this.handleTabChange} variant="fullWidth">
             <Tab value="/network/status" label="Network Status" />
-            <Tab value="/network/scan" label="Scan Networks" disabled={!authenticatedContext.me.admin} />
+            <Tab value="/network/scan" label="Scan WiFi Networks" disabled={!authenticatedContext.me.admin} />
             <Tab value="/network/settings" label="Network Settings" disabled={!authenticatedContext.me.admin} />
           </Tabs>
           <Switch>

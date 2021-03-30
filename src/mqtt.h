@@ -107,7 +107,7 @@ class Mqtt {
     static void publish_ha(const __FlashStringHelper * topic, const JsonObject & payload);
 
     static void publish_mqtt_ha_sensor(uint8_t type, uint8_t tag, const __FlashStringHelper * name, const uint8_t device_type, const __FlashStringHelper * entity, const uint8_t uom = 0);
-    static void register_command(const uint8_t device_type, const __FlashStringHelper * cmd, cmdfunction_p cb);
+    static void register_command(const uint8_t device_type, const __FlashStringHelper * cmd, cmdfunction_p cb, uint8_t tag = 0);
 
     static void show_topic_handlers(uuid::console::Shell & shell, const uint8_t device_type);
     static void show_mqtt(uuid::console::Shell & shell);
@@ -275,6 +275,7 @@ class Mqtt {
     static uint8_t     ha_climate_format_;
     static bool        ha_enabled_;
     static bool        nested_format_;
+    static uint8_t     subscribe_format_;
 };
 
 } // namespace emsesp

@@ -1,12 +1,9 @@
 # Changelog
 
-### Added
+## Added
 
+## Fixed
 
-### Fixed
+## Changed
 
-
-### Changed
-
-### Removed
-
+## Removed

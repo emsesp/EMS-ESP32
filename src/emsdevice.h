@@ -83,6 +83,22 @@ MAKE_PSTR(tag_wwc1, "wwc1")
 MAKE_PSTR(tag_wwc2, "wwc2")
 MAKE_PSTR(tag_wwc3, "wwc3")
 MAKE_PSTR(tag_wwc4, "wwc4")
+MAKE_PSTR(tag_hs1, "hs1")
+MAKE_PSTR(tag_hs2, "hs2")
+MAKE_PSTR(tag_hs3, "hs3")
+MAKE_PSTR(tag_hs4, "hs4")
+MAKE_PSTR(tag_hs5, "hs5")
+MAKE_PSTR(tag_hs6, "hs6")
+MAKE_PSTR(tag_hs7, "hs7")
+MAKE_PSTR(tag_hs8, "hs8")
+MAKE_PSTR(tag_hs9, "hs9")
+MAKE_PSTR(tag_hs10, "hs10")
+MAKE_PSTR(tag_hs11, "hs11")
+MAKE_PSTR(tag_hs12, "hs12")
+MAKE_PSTR(tag_hs13, "hs13")
+MAKE_PSTR(tag_hs14, "hs14")
+MAKE_PSTR(tag_hs15, "hs15")
+MAKE_PSTR(tag_hs16, "hs16")
 
 // MQTT topic names
 MAKE_PSTR(tag_heartbeat_mqtt, "heartbeat")
@@ -102,8 +118,32 @@ enum DeviceValueTAG : uint8_t {
     TAG_WWC1,
     TAG_WWC2,
     TAG_WWC3,
-    TAG_WWC4
+    TAG_WWC4,
+    TAG_HS1,
+    TAG_HS2,
+    TAG_HS3,
+    TAG_HS4,
+    TAG_HS5,
+    TAG_HS6,
+    TAG_HS7,
+    TAG_HS8,
+    TAG_HS9,
+    TAG_HS10,
+    TAG_HS11,
+    TAG_HS12,
+    TAG_HS13,
+    TAG_HS14,
+    TAG_HS15,
+    TAG_HS16
 
+};
+
+// mqtt flags for command subscriptions
+enum MqttSubFlag : uint8_t {
+    FLAG_NORMAL = 0,
+    FLAG_HC,
+    FLAG_WWC,
+    FLAG_NOSUB
 };
 
 class EMSdevice {
@@ -242,7 +282,7 @@ class EMSdevice {
     void read_command(const uint16_t type_id);
 
     void register_mqtt_topic(const std::string & topic, mqtt_subfunction_p f);
-    void register_mqtt_cmd(const __FlashStringHelper * cmd, cmdfunction_p f);
+    void register_mqtt_cmd(const __FlashStringHelper * cmd, cmdfunction_p f, uint8_t flag = 0);
 
     void publish_mqtt_ha_sensor();
 

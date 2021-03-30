@@ -24,6 +24,7 @@
 
 #define EMSESP_SETTINGS_FILE "/config/emsespSettings.json"
 #define EMSESP_SETTINGS_SERVICE_PATH "/rest/emsespSettings"
+#define EMSESP_BOARD_PROFILE_SERVICE_PATH "/rest/boardProfile"
 
 #define EMSESP_DEFAULT_TX_MODE 1       // EMS1.0
 #define EMSESP_DEFAULT_TX_DELAY 0      // no delay
@@ -37,27 +38,22 @@
 #define EMSESP_DEFAULT_MASTER_THERMOSTAT 0 // not set
 #define EMSESP_DEFAULT_SHOWER_TIMER false
 #define EMSESP_DEFAULT_SHOWER_ALERT false
-#define EMSESP_DEFAULT_HIDE_LED true
+#define EMSESP_DEFAULT_HIDE_LED false
 #define EMSESP_DEFAULT_DALLAS_PARASITE false
 #define EMSESP_DEFAULT_API_ENABLED false // turn off, because its insecure
 #define EMSESP_DEFAULT_BOOL_FORMAT 1     // on/off
 #define EMSESP_DEFAULT_ANALOG_ENABLED false
 
-// Default GPIO PIN definitions
-#if defined(ESP32)
-#define EMSESP_DEFAULT_RX_GPIO 23     // D7 on Wemos D1-32, OR 17 for UART2 on Lolin D32
-#define EMSESP_DEFAULT_TX_GPIO 5      // D8 on Wemos D1-32, OR 16 for UART2 on Lolin D32
-#define EMSESP_DEFAULT_DALLAS_GPIO 18 // 18 on Wemos D1-32, 14 on LOLIN D32
-#define EMSESP_DEFAULT_LED_GPIO 2     // 2 on Wemos D1-32, 5 on LOLIN D32
-#define EMSESP_DEFAULT_PBUTTON_GPIO 0 // default GPIO is 0 (off)
-#else
-// for standalone
-#define EMSESP_DEFAULT_RX_GPIO 0
-#define EMSESP_DEFAULT_TX_GPIO 0
-#define EMSESP_DEFAULT_DALLAS_GPIO 0
-#define EMSESP_DEFAULT_LED_GPIO 0
-#define EMSESP_DEFAULT_PBUTTON_GPIO 0
+#ifndef EMSESP_DEFAULT_BOARD_PROFILE
+#define EMSESP_DEFAULT_BOARD_PROFILE "S32" // Gateway S32
 #endif
+
+// Default GPIO PIN definitions - based on Wemos/Nodemcu
+#define EMSESP_DEFAULT_RX_GPIO 23 // D7
+#define EMSESP_DEFAULT_TX_GPIO 5  // D8
+#define EMSESP_DEFAULT_DALLAS_GPIO 18
+#define EMSESP_DEFAULT_LED_GPIO 2
+#define EMSESP_DEFAULT_PBUTTON_GPIO 0
 
 namespace emsesp {
 
@@ -84,6 +80,7 @@ class WebSettings {
     bool     api_enabled;
     bool     analog_enabled;
     uint8_t  pbutton_gpio;
+    String   board_profile;
 
     static void              read(WebSettings & settings, JsonObject & root);
     static StateUpdateResult update(JsonObject & root, WebSettings & settings);
@@ -91,15 +88,21 @@ class WebSettings {
     enum ChangeFlags : uint8_t {
 
         NONE   = 0,
-        UART   = (1 << 0),
-        SYSLOG = (1 << 1),
-        ADC    = (1 << 2),
-        DALLAS = (1 << 3),
-        SHOWER = (1 << 4),
-        LED    = (1 << 5),
-        BUTTON = (1 << 6)
+        UART   = (1 << 0), // 1
+        SYSLOG = (1 << 1), // 2
+        ADC    = (1 << 2), // 4
+        DALLAS = (1 << 3), // 8
+        SHOWER = (1 << 4), // 16
+        LED    = (1 << 5), // 32
+        BUTTON = (1 << 6)  // 64
 
     };
+
+    static void check_flag(int prev_v, int new_v, uint8_t flag) {
+        if (prev_v != new_v) {
+            add_flags(flag);
+        }
+    }
 
     static void add_flags(uint8_t flags) {
         flags_ |= flags;
@@ -111,6 +114,10 @@ class WebSettings {
 
     static void reset_flags() {
         flags_ = ChangeFlags::NONE;
+    }
+
+    static uint8_t get_flags() {
+        return flags_;
     }
 
   private:
@@ -125,8 +132,11 @@ class WebSettingsService : public StatefulService<WebSettings> {
     void save();
 
   private:
-    HttpEndpoint<WebSettings>  _httpEndpoint;
-    FSPersistence<WebSettings> _fsPersistence;
+    HttpEndpoint<WebSettings>   _httpEndpoint;
+    FSPersistence<WebSettings>  _fsPersistence;
+    AsyncCallbackJsonWebHandler _boardProfileHandler;
+
+    void board_profile(AsyncWebServerRequest * request, JsonVariant & json);
 
     void onUpdate();
 };

@@ -1,5 +1,7 @@
 #include <NetworkSettingsService.h>
 
+using namespace std::placeholders; // for `_1` etc
+
 NetworkSettingsService::NetworkSettingsService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager)
     : _httpEndpoint(NetworkSettings::read, NetworkSettings::update, this, server, NETWORK_SETTINGS_SERVICE_PATH, securityManager)
     , _fsPersistence(NetworkSettings::read, NetworkSettings::update, this, fs, NETWORK_SETTINGS_FILE)
@@ -17,7 +19,7 @@ NetworkSettingsService::NetworkSettingsService(AsyncWebServer * server, FS * fs,
     WiFi.mode(WIFI_MODE_MAX);
     WiFi.mode(WIFI_MODE_NULL);
 
-    WiFi.onEvent(std::bind(&NetworkSettingsService::WiFiEvent, this, std::placeholders::_1));
+    WiFi.onEvent(std::bind(&NetworkSettingsService::WiFiEvent, this, _1));
 
     addUpdateHandler([&](const String & originId) { reconfigureWiFiConnection(); }, false);
 }

@@ -48,6 +48,9 @@ std::vector<std::unique_ptr<EMSdevice>> EMSESP::emsdevices;      // array of all
 std::vector<EMSESP::Device_record>      EMSESP::device_library_; // library of all our known EMS devices, in heap
 
 uuid::log::Logger EMSESP::logger_{F_(emsesp), uuid::log::Facility::KERN};
+uuid::log::Logger EMSESP::logger() {
+    return logger_;
+}
 
 // The services
 RxService    EMSESP::rxservice_;    // incoming Telegram Rx handler
@@ -157,18 +160,27 @@ void EMSESP::watch_id(uint16_t watch_id) {
     watch_id_ = watch_id;
 }
 
-// change the tx_mode
 // resets all counters and bumps the UART
 // this is called when the tx_mode is persisted in the FS either via Web UI or the console
-void EMSESP::init_tx() {
+void EMSESP::init_uart() {
     uint8_t tx_mode;
+    uint8_t rx_gpio;
+    uint8_t tx_gpio;
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
         tx_mode   = settings.tx_mode;
         tx_delay_ = settings.tx_delay * 1000;
-
-        EMSuart::stop();
-        EMSuart::start(tx_mode, settings.rx_gpio, settings.tx_gpio);
+        rx_gpio   = settings.rx_gpio;
+        tx_gpio   = settings.tx_gpio;
     });
+
+    EMSuart::stop();
+
+    // don't start UART if we have invalid GPIOs
+    if (System::is_valid_gpio(rx_gpio) && System::is_valid_gpio(tx_gpio)) {
+        EMSuart::start(tx_mode, rx_gpio, tx_gpio); // start UART
+    } else {
+        LOG_WARNING(F("Invalid UART Rx/Tx GPIOs. Check config."));
+    }
 
     txservice_.start(); // sends out request to EMS bus for all devices
 
@@ -187,19 +199,21 @@ uint8_t EMSESP::bus_status() {
     // check if we have Tx issues.
     uint32_t total_sent = txservice_.telegram_read_count() + txservice_.telegram_write_count();
 
-    // nothing sent successfully, also no errors - must be ok
+    // nothing sent and also no errors - must be ok
     if ((total_sent == 0) && (txservice_.telegram_fail_count() == 0)) {
         return BUS_STATUS_CONNECTED;
     }
 
-    // nothing sent successfully, but have Tx errors
+    // nothing sent, but have Tx errors
     if ((total_sent == 0) && (txservice_.telegram_fail_count() != 0)) {
         return BUS_STATUS_TX_ERRORS;
     }
 
-    // Tx Failure rate > 5%
-    if (((txservice_.telegram_fail_count() * 100) / total_sent) > EMSbus::EMS_TX_ERROR_LIMIT) {
-        return BUS_STATUS_TX_ERRORS;
+    // Tx Failure rate > 10%
+    if (txservice_.telegram_fail_count() < total_sent) {
+        if (((txservice_.telegram_fail_count() * 100) / total_sent) > EMSbus::EMS_TX_ERROR_LIMIT) {
+            return BUS_STATUS_TX_ERRORS;
+        }
     }
 
     return BUS_STATUS_CONNECTED;
@@ -308,8 +322,6 @@ void EMSESP::show_device_values(uuid::console::Shell & shell) {
                         char s[10];
                         shell.print(Helpers::render_value(s, (float)data.as<float>(), 1));
                     } else if (data.is<bool>()) {
-                        char s[10];
-                        // shell.print(Helpers::render_boolean(s, data.as<bool>()));
                         shell.print(data.as<bool>() ? F_(on) : F_(off));
                     }
 
@@ -486,7 +498,7 @@ void EMSESP::publish_device_values(uint8_t device_type) {
 
     // publish it under a single topic, only if we have data to publish
     if (need_publish) {
-        char topic[20];
+        char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
         snprintf_P(topic, sizeof(topic), PSTR("%s_data"), EMSdevice::device_type_2_device_name(device_type).c_str());
         Mqtt::publish(topic, json);
     }
@@ -579,9 +591,11 @@ std::string EMSESP::pretty_telegram(std::shared_ptr<const Telegram> telegram) {
         dest_name = device_tostring(dest);
     }
 
-    // check for global/common types like Version
+    // check for global/common types like Version & UBADevices
     if (telegram->type_id == EMSdevice::EMS_TYPE_VERSION) {
         type_name = read_flash_string(F("Version"));
+    } else if (telegram->type_id == EMSdevice::EMS_TYPE_UBADevices) {
+        type_name = read_flash_string(F("UBADevices"));
     }
 
     // if we don't know the type show
@@ -688,7 +702,7 @@ void EMSESP::process_version(std::shared_ptr<const Telegram> telegram) {
     uint8_t product_id = telegram->message_data[offset]; // product ID
 
     // get version as XX.XX
-    std::string version(5, '\0');
+    std::string version(6, '\0');
     snprintf_P(&version[0], version.capacity() + 1, PSTR("%02d.%02d"), telegram->message_data[offset + 1], telegram->message_data[offset + 2]);
 
     // some devices store the protocol type (HT3, Buderus) in the last byte
@@ -824,7 +838,7 @@ void EMSESP::show_devices(uuid::console::Shell & shell) {
 #if defined(EMSESP_DEBUG)
                 emsdevice->show_mqtt_handlers(shell);
                 shell.println();
-                emsdevice->show_device_values_debug(shell);
+                // emsdevice->show_device_values_debug(shell);
 #endif
 
                 shell.println();
@@ -1081,27 +1095,28 @@ void EMSESP::start() {
 // start the file system
 #ifndef EMSESP_STANDALONE
     if (!LITTLEFS.begin(true)) {
-        Serial.println("LITTLEFS Mount Failed");
+        Serial.println("LITTLEFS Mount Failed. EMS-ESP stopped.");
         return;
     }
 #endif
 
-    esp8266React.begin();       // loads system settings (wifi, mqtt, etc)
-    webSettingsService.begin(); // load EMS-ESP specific settings
+    esp8266React.begin(); // loads system settings (network, mqtt, etc)
 
-    system_.check_upgrade(); // do any upgrades
+    system_.check_upgrade(); // do any system upgrades
 
-    // Load our library of known devices into stack mem. Names are stored in Flash memory (take about 960bytes)
+    // Load our library of known devices into stack mem. Names are stored in Flash memory (takes up about 1kb)
     device_library_ = {
 #include "device_library.h"
     };
 
-    console_.start();          // telnet and serial console
-    mqtt_.start();             // mqtt init
-    system_.start(heap_start); // starts syslog, uart, sets version, initializes LED. Requires pre-loaded settings.
-    shower_.start();           // initialize shower timer and shower alert
-    dallassensor_.start();     // dallas external sensors
-    webServer.begin();         // start web server
+    console_.start(); // telnet and serial console
+
+    webSettingsService.begin(); // load EMS-ESP specific settings, like GPIO configurations
+    mqtt_.start();              // mqtt init
+    system_.start(heap_start);  // starts commands, led, adc, button, network, syslog & uart
+    shower_.start();            // initialize shower timer and shower alert
+    dallassensor_.start();      // dallas external sensors
+    webServer.begin();          // start web server
 
     emsdevices.reserve(5); // reserve space for initially 5 devices to avoid mem frag issues
 
@@ -1115,25 +1130,24 @@ void EMSESP::start() {
 // main loop calling all services
 void EMSESP::loop() {
     esp8266React.loop(); // web
+    system_.loop();      // does LED and checks system health, and syslog service
 
     // if we're doing an OTA upload, skip MQTT and EMS
-    if (system_.upload_status()) {
-        return;
+    if (!system_.upload_status()) {
+        rxservice_.loop();    // process any incoming Rx telegrams
+        shower_.loop();       // check for shower on/off
+        dallassensor_.loop(); // read dallas sensor temperatures
+        publish_all_loop();   // with HA messages in parts to avoid flooding the mqtt queue
+        mqtt_.loop();         // sends out anything in the MQTT queue
+
+        // force a query on the EMS devices to fetch latest data at a set interval (1 min)
+        if ((uuid::get_uptime() - last_fetch_ > EMS_FETCH_FREQUENCY)) {
+            last_fetch_ = uuid::get_uptime();
+            fetch_device_values();
+        }
     }
 
-    system_.loop();       // does LED and checks system health, and syslog service
-    rxservice_.loop();    // process any incoming Rx telegrams
-    shower_.loop();       // check for shower on/off
-    dallassensor_.loop(); // read dallas sensor temperatures
-    publish_all_loop();   // with HA messages in parts to avoid flooding the mqtt queue
-    mqtt_.loop();         // sends out anything in the MQTT queue
-    console_.loop();      // telnet/serial console
-
-    // force a query on the EMS devices to fetch latest data at a set interval (1 min)
-    if ((uuid::get_uptime() - last_fetch_ > EMS_FETCH_FREQUENCY)) {
-        last_fetch_ = uuid::get_uptime();
-        fetch_device_values();
-    }
+    console_.loop(); // telnet/serial console
 
     // delay(1); // helps telnet catch up. don't think its needed in ESP32 3.1.0
 }

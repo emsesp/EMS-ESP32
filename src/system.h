@@ -66,6 +66,9 @@ class System {
     void show_mem(const char * note);
     void get_settings();
     void wifi_tweak();
+    void syslog_start();
+    bool check_upgrade();
+    void send_heartbeat();
 
     void led_init(bool refresh);
     void syslog_init(bool refresh);
@@ -74,8 +77,8 @@ class System {
     void button_init(bool refresh);
     void commands_init();
 
-    bool check_upgrade();
-    void send_heartbeat();
+    static bool is_valid_gpio(uint8_t pin);
+    static bool load_board_profile(std::vector<uint8_t> & data, const std::string & board_profile);
 
     std::string hostname() {
         return hostname_;
@@ -91,6 +94,14 @@ class System {
 
     void ethernet_connected(bool b) {
         ethernet_connected_ = b;
+    }
+
+    bool network_connected() {
+#ifndef EMSESP_STANDALONE
+        return (ethernet_connected_ || WiFi.isConnected());
+#else
+        return true;
+#endif
     }
 
   private:
@@ -113,7 +124,7 @@ class System {
     static constexpr uint32_t LED_WARNING_BLINK_FAST         = 100;   // flash quickly for boot up sequence
     static constexpr uint32_t SYSTEM_HEARTBEAT_INTERVAL      = 60000; // in milliseconds, how often the MQTT heartbeat is sent (1 min)
     static constexpr uint32_t SYSTEM_MEASURE_ANALOG_INTERVAL = 500;
-    static constexpr uint8_t  LED_ON                         = LOW; // internal LED
+    static constexpr uint8_t  LED_ON                         = HIGH; // LED
 
 #ifndef EMSESP_STANDALONE
     static uuid::syslog::SyslogService syslog_;
@@ -129,21 +140,21 @@ class System {
     void   wifi_reconnect();
     int8_t wifi_quality();
 
-    bool     system_healthy_    = false;
-    uint32_t led_flash_speed_   = LED_WARNING_BLINK_FAST; // default boot flashes quickly
-    uint32_t last_heartbeat_    = 0;
-    uint32_t last_system_check_ = 0;
-    bool     upload_status_     = false; // true if we're in the middle of a OTA firmware upload
-    bool     ethernet_connected_;
+    bool     system_healthy_     = false;
+    uint32_t led_flash_speed_    = LED_WARNING_BLINK_FAST; // default boot flashes quickly
+    uint32_t last_heartbeat_     = 0;
+    uint32_t last_system_check_  = 0;
+    bool     upload_status_      = false; // true if we're in the middle of a OTA firmware upload
+    bool     ethernet_connected_ = false;
     uint16_t analog_;
 
     // settings
-    std::string hostname_;
+    std::string hostname_ = "ems-esp";
     bool        hide_led_;
     uint8_t     led_gpio_;
     bool        syslog_enabled_;
     bool        analog_enabled_;
-    uint8_t     ethernet_profile_;
+    String      board_profile_;
     uint8_t     pbutton_gpio_;
     int8_t      syslog_level_;
     uint32_t    syslog_mark_interval_;

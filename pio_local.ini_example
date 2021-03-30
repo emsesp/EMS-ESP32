@@ -1,3 +1,5 @@
+; example custom platformio.ini file for EMS-ESP
+
 [env]
 upload_protocol = espota
 upload_flags = 
@@ -6,9 +8,9 @@ upload_flags =
 upload_port = 10.10.10.101
 
 [common]
-; debug_flags = -DENABLE_CORS -DEMSESP_TEST
-; debug_flags = -DEMSESP_DEBUG -DEMSESP_TEST
-debug_flags = -DEMSESP_TEST
+; options are EMSESP_DEBUG EMSESP_UART_DEBUG EMSESP_TEST ENABLE_CORS DEMSESP_DEFAULT_BOARD_PROFILE
+; debug_flags = -DENABLE_CORS -DEMSESP_DEBUG -DEMSESP_TEST -DCORS_ORIGIN=\"http://localhost:3000\" 
+; debug_flags = -DEMSESP_DEFAULT_BOARD_PROFILE=\"NODEMCU\"
 
 [env:esp32]
 monitor_filters = esp32_exception_decoder
@@ -16,4 +18,5 @@ debug_tool = esp-prog
 debug_init_break = tbreak setup
 extra_scripts =
   ; pre:scripts/build_interface.py
-  ; scripts/rename_fw.py
+  ; scripts/upload_fw.py
+

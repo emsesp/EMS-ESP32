@@ -65,7 +65,7 @@ void EMSESPShell::display_banner() {
     println();
     printfln(F("┌──────────────────────────────────────┐"));
     printfln(F("│ %sEMS-ESP version %-10s%s           │"), COLOR_BOLD_ON, EMSESP_APP_VERSION, COLOR_BOLD_OFF);
-    printfln(F("│ %s%shttps://github.com/emsesp/EMS-ESP%s    │"), COLOR_BRIGHT_GREEN, COLOR_UNDERLINE, COLOR_RESET);
+    printfln(F("│ %s%shttps://github.com/emsesp/EMS-ESP32%s  │"), COLOR_BRIGHT_GREEN, COLOR_UNDERLINE, COLOR_RESET);
     printfln(F("│                                      │"));
     printfln(F("│ type %shelp%s to show available commands │"), COLOR_UNDERLINE, COLOR_RESET);
     printfln(F("└──────────────────────────────────────┘"));
@@ -300,7 +300,7 @@ void EMSESPShell::add_console_commands() {
                               // if logging is off, the watch won't show anything, show force it back to NOTICE
                               if (shell.log_level() < Level::NOTICE) {
                                   shell.log_level(Level::NOTICE);
-                                  shell.printfln(F("Force log level to notice"));
+                                  shell.printfln(F("Setting log level to Notice"));
                               }
 
                               if (watch == EMSESP::WATCH_ON) {
@@ -615,7 +615,7 @@ std::string EMSESPStreamConsole::console_name() {
 // Log order is off, err, warning, notice, info, debug, trace, all
 void Console::start() {
     shell = std::make_shared<EMSESPStreamConsole>(Serial, true);
-    shell->maximum_log_messages(100); // default is 50
+    shell->maximum_log_messages(100); // default was 50
     shell->start();
 
 #if defined(EMSESP_DEBUG)
@@ -623,8 +623,7 @@ void Console::start() {
 #endif
 
 #if defined(EMSESP_STANDALONE)
-    // always start in su/admin mode when running tests
-    shell->add_flags(CommandFlags::ADMIN);
+    shell->add_flags(CommandFlags::ADMIN); // always start in su/admin mode when running tests
 #endif
 
 // start the telnet service

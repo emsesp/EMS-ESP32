@@ -57,7 +57,7 @@ class Boiler : public EMSdevice {
     uint8_t  wWCircPump_;         // Warm Water circulation pump available
     uint8_t  wWChargeType_;       // Warm Water charge type (pump or 3-way-valve)
     uint8_t  wWDisinfectionTemp_; // Warm Water disinfection temperature to prevent infection
-    uint8_t  wWCircPumpMode_;     // Warm Water circulation pump mode
+    uint8_t  wWCircMode_;         // Warm Water circulation pump mode
     uint8_t  wWCirc_;             // Circulation on/off
     uint16_t wWCurTemp_;          // Warm Water current temperature
     uint16_t wWCurTemp2_;         // Warm Water current temperature storage

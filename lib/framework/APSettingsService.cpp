@@ -22,22 +22,20 @@ void APSettingsService::reconfigureAP() {
 }
 
 void APSettingsService::loop() {
-    // if we have an ETH connection, quit
-    if (emsesp::EMSESP::system_.ethernet_connected()) {
-        return;
-    }
     unsigned long currentMillis = uuid::get_uptime();
     unsigned long manageElapsed = (uint32_t)(currentMillis - _lastManaged);
     if (manageElapsed >= MANAGE_NETWORK_DELAY) {
         _lastManaged = currentMillis;
         manageAP();
     }
+
     handleDNS();
 }
 
 void APSettingsService::manageAP() {
-    WiFiMode_t currentWiFiMode = WiFi.getMode();
-    if (_state.provisionMode == AP_MODE_ALWAYS || (_state.provisionMode == AP_MODE_DISCONNECTED && WiFi.status() != WL_CONNECTED)) {
+    WiFiMode_t currentWiFiMode   = WiFi.getMode();
+    bool       network_connected = (emsesp::EMSESP::system_.ethernet_connected() || (WiFi.status() == WL_CONNECTED));
+    if (_state.provisionMode == AP_MODE_ALWAYS || (_state.provisionMode == AP_MODE_DISCONNECTED && !network_connected)) {
         if (_reconfigureAp || currentWiFiMode == WIFI_OFF || currentWiFiMode == WIFI_STA) {
             startAP();
         }
@@ -48,13 +46,11 @@ void APSettingsService::manageAP() {
 }
 
 void APSettingsService::startAP() {
-    // Serial.println(F("Starting software access point"));
     WiFi.softAPConfig(_state.localIP, _state.gatewayIP, _state.subnetMask);
     WiFi.softAP(_state.ssid.c_str(), _state.password.c_str());
     if (!_dnsServer) {
         IPAddress apIp = WiFi.softAPIP();
-        // Serial.print(F("Starting captive portal on "));
-        // Serial.println(apIp);
+        emsesp::EMSESP::logger().info(F("Starting Access Point with captive portal on %s"), apIp.toString().c_str());
         _dnsServer = new DNSServer;
         _dnsServer->start(DNS_PORT, "*", apIp);
     }
@@ -62,12 +58,11 @@ void APSettingsService::startAP() {
 
 void APSettingsService::stopAP() {
     if (_dnsServer) {
-        // Serial.println(F("Stopping captive portal"));
+        emsesp::EMSESP::logger().info(F("Stopping Access Point"));
         _dnsServer->stop();
         delete _dnsServer;
         _dnsServer = nullptr;
     }
-    // Serial.println(F("Stopping software access point"));
     WiFi.softAPdisconnect(true);
 }
 

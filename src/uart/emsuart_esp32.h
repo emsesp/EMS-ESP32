@@ -46,10 +46,10 @@
 #define EMS_TXMODE_HW 4
 
 // LEGACY
-#define EMSUART_TX_BIT_TIME 104                             // bit time @9600 baud
+#define EMSUART_TX_BIT_TIME 104 // bit time @9600 baud
 
 // EMS 1.0
-#define EMSUART_TX_BUSY_WAIT (EMSUART_TX_BIT_TIME / 8)                       // 13
+#define EMSUART_TX_BUSY_WAIT (EMSUART_TX_BIT_TIME / 8) // 13
 #define EMSUART_TX_TIMEOUT (20 * EMSUART_TX_BIT_TIME / EMSUART_TX_BUSY_WAIT)
 #define EMSUART_TX_BRK_EMS (EMSUART_TX_BIT_TIME * 10)
 

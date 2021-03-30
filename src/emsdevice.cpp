@@ -53,7 +53,23 @@ static const __FlashStringHelper * const DeviceValueTAG_s[] PROGMEM = {
     F_(tag_wwc1),            // "wwc1"
     F_(tag_wwc2),            // "Wwc2"
     F_(tag_wwc3),            // "wwc3"
-    F_(tag_wwc4)             // "wwc4"
+    F_(tag_wwc4),            // "wwc4"
+    F_(tag_hs1),             // "hs1"
+    F_(tag_hs2),             // "hs2"
+    F_(tag_hs3),             // "hs3"
+    F_(tag_hs4),             // "hs4"
+    F_(tag_hs5),             // "hs5"
+    F_(tag_hs6),             // "hs6"
+    F_(tag_hs7),             // "hs7"
+    F_(tag_hs8),             // "hs8"
+    F_(tag_hs9),             // "hs9"
+    F_(tag_hs10),            // "hs10"
+    F_(tag_hs11),            // "hs11"
+    F_(tag_hs12),            // "hs12"
+    F_(tag_hs13),            // "hs13"
+    F_(tag_hs14),            // "hs14"
+    F_(tag_hs15),            // "hs15"
+    F_(tag_hs16)             // "hs16"
 
 };
 
@@ -72,7 +88,23 @@ static const __FlashStringHelper * const DeviceValueTAG_mqtt[] PROGMEM = {
     F_(tag_wwc1),                // "wwc1"
     F_(tag_wwc2),                // "Wwc2"
     F_(tag_wwc3),                // "wwc3"
-    F_(tag_wwc4)                 // "wwc4"
+    F_(tag_wwc4),                // "wwc4"
+    F_(tag_hs1),                 // "hs1"
+    F_(tag_hs2),                 // "hs2"
+    F_(tag_hs3),                 // "hs3"
+    F_(tag_hs4),                 // "hs4"
+    F_(tag_hs5),                 // "hs5"
+    F_(tag_hs6),                 // "hs6"
+    F_(tag_hs7),                 // "hs7"
+    F_(tag_hs8),                 // "hs8"
+    F_(tag_hs9),                 // "hs9"
+    F_(tag_hs10),                // "hs10"
+    F_(tag_hs11),                // "hs11"
+    F_(tag_hs12),                // "hs12"
+    F_(tag_hs13),                // "hs13"
+    F_(tag_hs14),                // "hs14"
+    F_(tag_hs15),                // "hs15"
+    F_(tag_hs16)                 // "hs16"
 
 };
 
@@ -124,7 +156,7 @@ std::string EMSdevice::brand_to_string() const {
     return std::string{};
 }
 
-// returns the name of the MQTT topic to use for a specific device
+// returns the name of the MQTT topic to use for a specific device, without the base
 std::string EMSdevice::device_type_2_device_name(const uint8_t device_type) {
     switch (device_type) {
     case DeviceType::SYSTEM:
@@ -308,6 +340,7 @@ bool EMSdevice::get_toggle_fetch(uint16_t telegram_id) {
 }
 
 // list device values, only for EMSESP_DEBUG mode
+#if defined(EMSESP_DEBUG)
 void EMSdevice::show_device_values_debug(uuid::console::Shell & shell) {
     size_t  total_s = 0;
     uint8_t count   = 0;
@@ -324,7 +357,7 @@ void EMSdevice::show_device_values_debug(uuid::console::Shell & shell) {
     shell.printfln("Total size of %d elements: %d", count, total_s);
     shell.println();
 }
-
+#endif
 
 // list all the telegram type IDs for this device
 void EMSdevice::show_telegram_handlers(uuid::console::Shell & shell) {
@@ -351,7 +384,6 @@ char * EMSdevice::show_telegram_handlers(char * result) {
 
     char    str[10];
     uint8_t i = 0;
-    // for (const auto & tf : *telegram_functions_) {
     for (const auto & tf : telegram_functions_) {
         snprintf_P(str, sizeof(str), PSTR("0x%02X"), tf.telegram_type_id_);
         strlcat(result, str, 200);
@@ -373,11 +405,11 @@ void EMSdevice::register_mqtt_topic(const std::string & topic, mqtt_subfunction_
 }
 
 // add command to library
-void EMSdevice::register_mqtt_cmd(const __FlashStringHelper * cmd, cmdfunction_p f) {
-    Command::add(device_type_, cmd, f);
+void EMSdevice::register_mqtt_cmd(const __FlashStringHelper * cmd, cmdfunction_p f, uint8_t flag) {
+    Command::add(device_type_, cmd, f, flag);
 }
 
-// register a call back function for a specific telegram type
+// register a callback function for a specific telegram type
 void EMSdevice::register_telegram_type(const uint16_t telegram_type_id, const __FlashStringHelper * telegram_type_name, bool fetch, process_function_p f) {
     telegram_functions_.emplace_back(telegram_type_id, telegram_type_name, fetch, f);
 }
@@ -570,8 +602,6 @@ bool EMSdevice::generate_values_json(JsonObject & root, const uint8_t tag_filter
         if (((nested) || tag_filter == DeviceValueTAG::TAG_NONE || (tag_filter == dv.tag)) && (dv.full_name != nullptr || !console)) {
             // we have a tag if it matches the filter given, and that the tag name is not empty/""
             bool have_tag = ((dv.tag != tag_filter) && !tag_to_string(dv.tag).empty());
-
-            // EMSESP::logger().info(F("**HERE: console=%d nested=%d tag_filter=%d tag=%d type=%d short=%s"), console, nested, tag_filter, dv.tag, dv.type, uuid::read_flash_string(dv.short_name).c_str());
 
             char name[80];
             if (console) {

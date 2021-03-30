@@ -31,23 +31,25 @@ Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
     if (flags == EMSdevice::EMS_DEVICE_FLAG_MMPLUS) {
         if (device_id <= 0x27) {
             // telegram handlers 0x20 - 0x27 for HC
-            register_telegram_type(device_id - 0x20 + 0x02D7, F("MMPLUSStatusMessage_HC"), true, [&](std::shared_ptr<const Telegram> t) { process_MMPLUSStatusMessage_HC(t); });
+            register_telegram_type(device_id - 0x20 + 0x02D7, F("MMPLUSStatusMessage_HC"), true, MAKE_PF_CB(process_MMPLUSStatusMessage_HC));
         } else {
             // telegram handlers for warm water/DHW 0x28, 0x29
-            register_telegram_type(device_id - 0x28 + 0x0331, F("MMPLUSStatusMessage_WWC"), true, [&](std::shared_ptr<const Telegram> t) { process_MMPLUSStatusMessage_WWC(t); });
+            register_telegram_type(device_id - 0x28 + 0x0331, F("MMPLUSStatusMessage_WWC"), true, MAKE_PF_CB(process_MMPLUSStatusMessage_WWC));
         }
     }
 
     // EMS 1.0
     if (flags == EMSdevice::EMS_DEVICE_FLAG_MM10) {
-        register_telegram_type(0x00AA, F("MMConfigMessage"), false, [&](std::shared_ptr<const Telegram> t) { process_MMConfigMessage(t); });
-        register_telegram_type(0x00AB, F("MMStatusMessage"), true, [&](std::shared_ptr<const Telegram> t) { process_MMStatusMessage(t); });
-        register_telegram_type(0x00AC, F("MMSetMessage"), false, [&](std::shared_ptr<const Telegram> t) { process_MMSetMessage(t); });
+        register_telegram_type(0x00AA, F("MMConfigMessage"), false, MAKE_PF_CB(process_MMConfigMessage));
+        register_telegram_type(0x00AB, F("MMStatusMessage"), true, MAKE_PF_CB(process_MMStatusMessage));
+        register_telegram_type(0x00AC, F("MMSetMessage"), false, MAKE_PF_CB(process_MMSetMessage));
     }
 
     // HT3
     if (flags == EMSdevice::EMS_DEVICE_FLAG_IPM) {
-        register_telegram_type(0x010C, F("IPMSetMessage"), false, [&](std::shared_ptr<const Telegram> t) { process_IPMStatusMessage(t); });
+        register_telegram_type(0x010C, F("IPMStatusMessage"), false, MAKE_PF_CB(process_IPMStatusMessage));
+        register_telegram_type(0x001E, F("IPMTempMessage"), false, MAKE_PF_CB(process_IPMTempMessage));
+        // register_telegram_type(0x0023, F("IPMSetMessage"), false, MAKE_PF_CB(process_IPMSetMessage));
     }
 
     // register the device values and set hc_ and type_
@@ -60,6 +62,7 @@ Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
         register_device_value(tag, &flowTempHc_, DeviceValueType::USHORT, FL_(div10), F("flowTempHc"), F("flow temperature in assigned hc (TC1)"), DeviceValueUOM::DEGREES);
         register_device_value(tag, &pumpStatus_, DeviceValueType::BOOL, nullptr, F("pumpStatus"), F("pump status in assigned hc (PC1)"), DeviceValueUOM::PUMP);
         register_device_value(tag, &status_, DeviceValueType::INT, nullptr, F("valveStatus"), F("mixing valve actuator in assigned hc (VC1)"), DeviceValueUOM::PERCENT);
+        register_device_value(tag, &flowTempVf_, DeviceValueType::USHORT, FL_(div10), F("flowTempVf"), F("flow temperature in header (T0/Vf)"), DeviceValueUOM::DEGREES);
     } else {
         type_       = Type::WWC;
         hc_         = device_id - 0x28 + 1;
@@ -135,7 +138,7 @@ void Mixer::process_MMPLUSStatusMessage_WWC(std::shared_ptr<const Telegram> tele
     has_update(telegram->read_value(status_, 11)); // temp status
 }
 
-// Mixer IMP - 0x010C
+// Mixer IPM - 0x010C
 // e.g.  A0 00 FF 00 00 0C 01 00 00 00 00 00 54
 //       A1 00 FF 00 00 0C 02 04 00 01 1D 00 82
 void Mixer::process_IPMStatusMessage(std::shared_ptr<const Telegram> telegram) {
@@ -154,6 +157,13 @@ void Mixer::process_IPMStatusMessage(std::shared_ptr<const Telegram> telegram) {
 
     has_update(telegram->read_bitvalue(pumpStatus_, 1, 0)); // pump is also in unmixed circuits
     has_update(telegram->read_value(flowSetTemp_, 5));      // flowSettemp is also in unmixed circuits, see #711
+}
+
+// Mixer IPM - 0x001E Temperature Message in unmixed circuits
+// in unmixed circuits FlowTemp in 10C is zero, this is the measured flowtemp in header
+void Mixer::process_IPMTempMessage(std::shared_ptr<const Telegram> telegram) {
+
+    has_update(telegram->read_value(flowTempVf_, 0)); // TC1, is * 10
 }
 
 // Mixer on a MM10 - 0xAB
@@ -185,6 +195,12 @@ void Mixer::process_MMConfigMessage(std::shared_ptr<const Telegram> telegram) {
 void Mixer::process_MMSetMessage(std::shared_ptr<const Telegram> telegram) {
     // pos 0: flowtemp setpoint 1E = 30°C
     // pos 1: position in %
+}
+
+// Thermostat(0x10) -> Mixer(0x21), ?(0x23), data: 1A 64 00 90 21 23 00 1A 64 00 89
+void Mixer::process_IPMSetMessage(std::shared_ptr<const Telegram> telegram) {
+    // pos 0: flowtemp setpoint 1A = 26°C
+    // pos 1: position in %?
 }
 
 #pragma GCC diagnostic pop

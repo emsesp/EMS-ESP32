@@ -30,7 +30,7 @@ class FSPersistence {
 
 // debug added by Proddy
 #if defined(EMSESP_DEBUG)
-                Serial.printf("Read File: %s: ", _filePath);
+                Serial.printf("Reading file: %s: ", _filePath);
                 serializeJson(jsonDocument, Serial);
                 Serial.println();
 #endif
@@ -63,7 +63,7 @@ class FSPersistence {
 
 // debug added by Proddy
 #if defined(EMSESP_DEBUG)
-        Serial.printf("Write File: %s: ", _filePath);
+        Serial.printf("Writing to file: %s: ", _filePath);
         serializeJson(jsonDocument, Serial);
         Serial.println();
 #endif

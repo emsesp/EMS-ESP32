@@ -2,40 +2,19 @@ import React, { Component, Fragment } from "react";
 import { withStyles, Theme, createStyles } from "@material-ui/core/styles";
 
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  TableContainer,
-  withWidth,
-  WithWidthProps,
-  isWidthDown,
-  Button,
-  Tooltip,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Box,
-  Dialog,
-  Typography,
+  Table, TableBody, TableCell, TableHead, TableRow, TableContainer, withWidth, WithWidthProps, isWidthDown,
+  Button, Tooltip, DialogTitle, DialogContent, DialogActions, Box, Dialog, Typography
 } from "@material-ui/core";
 
 import RefreshIcon from "@material-ui/icons/Refresh";
 import ListIcon from "@material-ui/icons/List";
 
-import {
-  redirectingAuthorizedFetch,
-  withAuthenticatedContext,
-  AuthenticatedContextProps,
-} from "../authentication";
-
+import { redirectingAuthorizedFetch, withAuthenticatedContext, AuthenticatedContextProps } from "../authentication";
 import { RestFormProps, FormButton } from "../components";
 
 import { EMSESPDevices, EMSESPDeviceData, Device } from "./EMSESPtypes";
 
 import { ENDPOINT_ROOT } from "../api";
-
 export const SCANDEVICES_ENDPOINT = ENDPOINT_ROOT + "scanDevices";
 export const DEVICE_DATA_ENDPOINT = ENDPOINT_ROOT + "deviceData";
 
@@ -73,22 +52,19 @@ type EMSESPDevicesFormProps = RestFormProps<EMSESPDevices> &
 
 function formatTemp(t: string) {
   if (t == null) {
-    return "(not available)";
+    return "n/a";
   }
   return t + " °C";
 }
 
-  function formatUnit(u: string) {
+function formatUnit(u: string) {
   if (u == null) {
     return u;
   }
   return " " + u;
 }
 
-class EMSESPDevicesForm extends Component<
-  EMSESPDevicesFormProps,
-  EMSESPDevicesFormState
-  > {
+class EMSESPDevicesForm extends Component<EMSESPDevicesFormProps, EMSESPDevicesFormState> {
   state: EMSESPDevicesFormState = {
     confirmScanDevices: false,
     processing: false,
@@ -106,7 +82,7 @@ class EMSESPDevicesForm extends Component<
     return (this.state.deviceData?.data || []).length === 0;
   };
 
-  createDeviceItems() {
+  renderDeviceItems() {
     const { width, data } = this.props;
     return (
       <TableContainer>
@@ -186,7 +162,7 @@ class EMSESPDevicesForm extends Component<
     );
   }
 
-  createSensorItems() {
+  renderSensorItems() {
     const { data } = this.props;
     return (
       <TableContainer>
@@ -304,7 +280,6 @@ class EMSESPDevicesForm extends Component<
       .then((response) => {
         if (response.status === 200) {
           return response.json();
-          // this.setState({ errorMessage: undefined }, this.props.loadData);
         }
         throw Error("Unexpected response code: " + response.status);
       })
@@ -365,11 +340,11 @@ class EMSESPDevicesForm extends Component<
           </TableContainer>
         )}
         {this.noDeviceData() && (
-            <Box color="warning.main" p={0} mt={0} mb={0}>
-              <Typography variant="body1">
-                <i>No data available for this device</i>
-              </Typography>
-            </Box>
+          <Box color="warning.main" p={0} mt={0} mb={0}>
+            <Typography variant="body1">
+              <i>No data available for this device</i>
+            </Typography>
+          </Box>
         )}
       </Fragment >
     );
@@ -379,9 +354,9 @@ class EMSESPDevicesForm extends Component<
     return (
       <Fragment>
         <br></br>
-        {this.createDeviceItems()}
+        {this.renderDeviceItems()}
         {this.renderDeviceData()}
-        {this.createSensorItems()}
+        {this.renderSensorItems()}
         <br></br>
         <Box display="flex" flexWrap="wrap">
           <Box flexGrow={1} padding={1}>
