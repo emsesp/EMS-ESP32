@@ -123,7 +123,7 @@ Command::CmdFunction * Command::find_command(const uint8_t device_type, const ch
     }
 
     for (auto & cf : cmdfunctions_) {
-        if (!strcmp_P(lowerCmd, reinterpret_cast<PGM_P>(cf.cmd_)) && (cf.device_type_ == device_type)) {
+        if (!strcmp(lowerCmd, Helpers::toLower(uuid::read_flash_string(cf.cmd_)).c_str()) && (cf.device_type_ == device_type)) {
             return &cf;
         }
     }
