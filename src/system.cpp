@@ -404,9 +404,12 @@ void System::send_heartbeat() {
         return;
     }
 
-    int8_t rssi = wifi_quality();
-    if (rssi == -1) {
-        return;
+    int8_t rssi;
+    if (!ethernet_connected_) {
+        rssi = wifi_quality();
+        if (rssi == -1) {
+            return;
+        }
     }
 
     StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> doc;
@@ -420,7 +423,9 @@ void System::send_heartbeat() {
         doc["status"] = FJSON("disconnected");
     }
 
-    doc["rssi"]        = rssi;
+    if (!ethernet_connected_) {
+        doc["rssi"] = rssi;
+    }
     doc["uptime"]      = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
     doc["uptime_sec"]  = uuid::get_uptime_sec();
     doc["mqttfails"]   = Mqtt::publish_fails();
