@@ -255,8 +255,8 @@ void System::start(uint32_t heap_start) {
     get_settings();
 
     EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
-        hostname(networkSettings.hostname.c_str());                                                                  // sets the hostname
-        LOG_INFO(F("System %s booted (EMS-ESP version %s) "), networkSettings.hostname.c_str(), EMSESP_APP_VERSION); // print boot message
+        hostname(networkSettings.hostname.c_str()); // sets the hostname
+        LOG_INFO(F("System name: %s"), hostname().c_str());
     });
 
     commands_init();     // console & api commands
@@ -277,12 +277,14 @@ void System::adc_init(bool refresh) {
 #ifndef EMSESP_STANDALONE
     // setCpuFrequencyMhz(160); // default is 240
 
-    // disable bluetooth
+    // disable bluetooth & ADC
+    /*
     btStop();
     esp_bt_controller_disable();
     if (!analog_enabled_) {
-        adc_power_off(); // turn off ADC to save power if not needed
+        adc_power_release(); // turn off ADC to save power if not needed
     }
+    */
 #endif
 }
 
@@ -421,9 +423,12 @@ void System::send_heartbeat() {
         return;
     }
 
-    int8_t rssi = wifi_quality();
-    if (rssi == -1) {
-        return;
+    int8_t rssi;
+    if (!ethernet_connected_) {
+        rssi = wifi_quality();
+        if (rssi == -1) {
+            return;
+        }
     }
 
     StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> doc;
@@ -437,7 +442,9 @@ void System::send_heartbeat() {
         doc["status"] = FJSON("disconnected");
     }
 
-    doc["rssi"]        = rssi;
+    if (!ethernet_connected_) {
+        doc["rssi"] = rssi;
+    }
     doc["uptime"]      = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
     doc["uptime_sec"]  = uuid::get_uptime_sec();
     doc["mqttfails"]   = Mqtt::publish_fails();
