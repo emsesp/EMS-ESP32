@@ -451,6 +451,10 @@ void EMSdevice::register_device_value(uint8_t tag, void * value_p, uint8_t type,
     devicevalues_.emplace_back(device_type_, tag, value_p, type, options, options_size, short_name, full_name, uom);
 }
 
+void EMSdevice::register_device_value(uint8_t tag, void * value_p, uint8_t type, const __FlashStringHelper * const * options, const __FlashStringHelper * const * name, uint8_t uom) {
+    register_device_value(tag, value_p, type, options, name[0], name[1], uom);
+}
+
 // looks up the uom (suffix) for a given key from the device value table
 std::string EMSdevice::get_value_uom(const char * key) {
     // the key may have a suffix at the start which is between brackets. remove it.

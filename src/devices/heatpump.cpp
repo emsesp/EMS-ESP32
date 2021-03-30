@@ -34,8 +34,8 @@ Heatpump::Heatpump(uint8_t device_type, uint8_t device_id, uint8_t product_id, c
 
     // device values
     register_device_value(TAG_NONE, &id_, DeviceValueType::UINT, nullptr, F("id"), nullptr); // empty full name to prevent being shown in web or console
-    register_device_value(TAG_NONE, &airHumidity_, DeviceValueType::UINT, FL_(div2), F("airHumidity"), F("relative air humidity"));
-    register_device_value(TAG_NONE, &dewTemperature_, DeviceValueType::UINT, nullptr, F("dewTemperature"), F("dew point temperature"));
+    register_device_value(TAG_NONE, &airHumidity_, DeviceValueType::UINT, FL_(div2), FL_(airHumidity), DeviceValueUOM::PERCENT);
+    register_device_value(TAG_NONE, &dewTemperature_, DeviceValueType::UINT, nullptr, FL_(dewTemperature), DeviceValueUOM::DEGREES);
 
     id_ = product_id;
 }

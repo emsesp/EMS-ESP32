@@ -34,11 +34,10 @@ Switch::Switch(uint8_t device_type, uint8_t device_id, uint8_t product_id, const
     register_telegram_type(0x9D, F("WM10SetMessage"), false, MAKE_PF_CB(process_WM10SetMessage));
     register_telegram_type(0x1E, F("WM10TempMessage"), false, MAKE_PF_CB(process_WM10TempMessage));
 
-    register_device_value(TAG_NONE, &activated_, DeviceValueType::BOOL, nullptr, F("activated"), F("activated"));
-    register_device_value(TAG_NONE, &flowTempHc_, DeviceValueType::USHORT, FL_(div10), F("flowTempHc"), F("flow temperature in assigned hc (TC1)"), DeviceValueUOM::DEGREES);
-    register_device_value(TAG_NONE, &status_, DeviceValueType::INT, nullptr, F("status"), F("status"));
-
     register_device_value(TAG_NONE, &id_, DeviceValueType::UINT, nullptr, F("id"), nullptr); // empty full name to prevent being shown in web or console
+    register_device_value(TAG_NONE, &activated_, DeviceValueType::BOOL, nullptr, FL_(activated));
+    register_device_value(TAG_NONE, &flowTempHc_, DeviceValueType::USHORT, FL_(div10), FL_(flowTempHc), DeviceValueUOM::DEGREES);
+    register_device_value(TAG_NONE, &status_, DeviceValueType::INT, nullptr, FL_(status));
     id_ = product_id;
 }
 
