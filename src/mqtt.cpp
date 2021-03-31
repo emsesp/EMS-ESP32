@@ -681,16 +681,17 @@ void Mqtt::ha_status() {
     Mqtt::publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
 
     // create the sensors
+    // must match the MQTT payload keys
     publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("WiFi strength"), EMSdevice::DeviceType::SYSTEM, F("rssi"));
     publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("Uptime"), EMSdevice::DeviceType::SYSTEM, F("uptime"));
     publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("Uptime (sec)"), EMSdevice::DeviceType::SYSTEM, F("uptime_sec"));
-    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("Free heap memory"), EMSdevice::DeviceType::SYSTEM, F("freemem"));
-    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("# Failed MQTT publishes"), EMSdevice::DeviceType::SYSTEM, F("mqttfails"));
-    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("# Rx Sent"), EMSdevice::DeviceType::SYSTEM, F("rxsent"));
-    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("# Rx Fails"), EMSdevice::DeviceType::SYSTEM, F("rxfails"));
-    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("# Tx Reads"), EMSdevice::DeviceType::SYSTEM, F("txread"));
-    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("# Tx Writes"), EMSdevice::DeviceType::SYSTEM, F("txwrite"));
-    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("# Tx Fails"), EMSdevice::DeviceType::SYSTEM, F("txfails"));
+    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("Free memory"), EMSdevice::DeviceType::SYSTEM, F("freemem"));
+    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("# MQTT fails"), EMSdevice::DeviceType::SYSTEM, F("mqttfails"));
+    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("# Rx received"), EMSdevice::DeviceType::SYSTEM, F("rxreceived"));
+    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("# Rx fails"), EMSdevice::DeviceType::SYSTEM, F("rxfails"));
+    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("# Tx reads"), EMSdevice::DeviceType::SYSTEM, F("txread"));
+    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("# Tx writes"), EMSdevice::DeviceType::SYSTEM, F("txwrite"));
+    publish_mqtt_ha_sensor(DeviceValueType::INT, DeviceValueTAG::TAG_HEARTBEAT, F("# Tx fails"), EMSdevice::DeviceType::SYSTEM, F("txfails"));
 }
 
 // add sub or pub task to the queue.
@@ -838,7 +839,7 @@ void Mqtt::process_queue() {
     // it will have a real packet ID
     if (mqtt_message.packet_id_ > 0) {
 #if defined(EMSESP_DEBUG)
-        LOG_DEBUG(F("[DEBUG] Waitig for QOS-ACK"));
+        LOG_DEBUG(F("[DEBUG] Waiting for QOS-ACK"));
 #endif
         return;
     }
