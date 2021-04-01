@@ -1,3 +1,10 @@
+const express = require('express');
+const path = require('path');
+const bodyParser = require("body-parser");
+
+const app = express();
+const port = process.env.PORT || 3080;
+
 const ENDPOINT_ROOT = "/rest/";
 
 const FEATURES_ENDPOINT = ENDPOINT_ROOT + "features";
@@ -26,14 +33,10 @@ const TIME_ENDPOINT = ENDPOINT_ROOT + "time";
 // EMS-ESP Project specific
 const EMSESP_SETTINGS_ENDPOINT = ENDPOINT_ROOT + "emsespSettings";
 const EMSESP_ALLDEVICES_ENDPOINT = ENDPOINT_ROOT + "allDevices";
+const EMSESP_SCANDEVICES_ENDPOINT = ENDPOINT_ROOT + "scanDevices";
 const EMSESP_DEVICEDATA_ENDPOINT = ENDPOINT_ROOT + "deviceData";
 const EMSESP_STATUS_ENDPOINT = ENDPOINT_ROOT + "emsespStatus";
-
-const express = require('express');
-const path = require('path');
-const app = express(),
-    bodyParser = require("body-parser");
-const port = process.env.PORT || 3080;
+const EMSESP_BOARDPROFILE_ENDPOINT = ENDPOINT_ROOT + "boardProfile";
 
 app.use(bodyParser.json());
 
@@ -89,6 +92,10 @@ app.get(NETWORK_SETTINGS_ENDPOINT, (req, res) => {
     });
 });
 
+app.post(NETWORK_SETTINGS_ENDPOINT, (req, res) => {
+    res.json({});
+});
+
 app.get(LIST_NETWORKS_ENDPOINT, (req, res) => {
     res.json({
         "networks": [
@@ -121,10 +128,18 @@ app.get(AP_STATUS_ENDPOINT, (req, res) => {
     });
 });
 
+app.post(AP_SETTINGS_ENDPOINT, (req, res) => {
+    res.json({});
+});
+
 app.get(OTA_SETTINGS_ENDPOINT, (req, res) => {
     res.json({
         "enabled": true, "port": 8266, "password": "ems-esp-neo"
     });
+});
+
+app.post(OTA_SETTINGS_ENDPOINT, (req, res) => {
+    res.json({});
 });
 
 app.get(MQTT_SETTINGS_ENDPOINT, (req, res) => {
@@ -137,6 +152,10 @@ app.get(MQTT_SETTINGS_ENDPOINT, (req, res) => {
     });
 });
 
+app.post(MQTT_SETTINGS_ENDPOINT, (req, res) => {
+    res.json({});
+});
+
 app.get(MQTT_STATUS_ENDPOINT, (req, res) => {
     res.json({
         "enabled": true, "connected": true, "client_id": "ems-esp32", "disconnect_reason": 0, "mqtt_fails": 0
@@ -147,6 +166,10 @@ app.get(NTP_SETTINGS_ENDPOINT, (req, res) => {
     res.json({
         "enabled": true, "server": "time.google.com", "tz_label": "Europe/Amsterdam", "tz_format": "CET-1CEST,M3.5.0,M10.5.0/3"
     });
+});
+
+app.post(NTP_SETTINGS_ENDPOINT, (req, res) => {
+    res.json({});
 });
 
 app.get(NTP_STATUS_ENDPOINT, (req, res) => {
@@ -168,6 +191,12 @@ app.get(SECURITY_SETTINGS_ENDPOINT, (req, res) => {
         "jwt_secret": "naughty!", "users": [{ "username": "admin", "password": "admin", "admin": true }, { "username": "guest", "password": "guest", "admin": false }]
     });
 });
+
+app.post(SECURITY_SETTINGS_ENDPOINT, (req, res) => {
+    res.json({});
+});
+
+// EMS-ESP Project stuff
 
 app.get(EMSESP_SETTINGS_ENDPOINT, (req, res) => {
     res.json({
@@ -240,5 +269,76 @@ app.post(EMSESP_DEVICEDATA_ENDPOINT, (req, res) => {
 
 });
 
+app.post(EMSESP_BOARDPROFILE_ENDPOINT, (req, res) => {
+    const board_profile = req.body.code;
+
+    const data = {
+        led_gpio: 1,
+        dallas_gpio: 2,
+        rx_gpio: 3,
+        tx_gpio: 4,
+        pbutton_gpio: 5
+    };
+
+    if (board_profile == "S32") { // BBQKees Gateway S32
+        data.led_gpio = 2;
+        data.dallas_gpio = 3;
+        data.rx_gpio = 23;
+        data.tx_gpio = 5;
+        data.pbutton_gpio = 0;
+    } else if (board_profile == "E32") { // BBQKees Gateway E32
+        data.led_gpio = 2;
+        data.dallas_gpio = 4;
+        data.rx_gpio = 5;
+        data.tx_gpio = 17;
+        data.pbutton_gpio = 33;
+    } else if (board_profile == "MT-ET") { // MT-ET Live D1 Mini
+        data.led_gpio = 2;
+        data.dallas_gpio = 18;
+        data.rx_gpio = 23;
+        data.tx_gpio = 5;
+        data.pbutton_gpio = 0;
+    } else if (board_profile == "NODEMCU") { // NodeMCU 32S
+        data.led_gpio = 2;
+        data.dallas_gpio = 18;
+        data.rx_gpio = 23;
+        data.tx_gpio = 5;
+        data.pbutton_gpio = 0;
+    } else if (board_profile == "LOLIN") {// Lolin D32
+        data.led_gpio = 2;
+        data.dallas_gpio = 18;
+        data.rx_gpio = 17;
+        data.tx_gpio = 16;
+        data.pbutton_gpio = 0;
+    } else if (board_profile == "OLIMEX") {// Olimex ESP32-EVB (uses U1TXD/U1RXD/BUTTON, no LED or Dallas)
+        data.led_gpio = 0;
+        data.dallas_gpio = 0;
+        data.rx_gpio = 36;
+        data.tx_gpio = 4;
+        data.pbutton_gpio = 34;
+        // data = { 0, 0, 36, 4, 34};
+    } else if (board_profile == "TLK110") {// Generic Ethernet (TLK110)
+        data.led_gpio = 2;
+        data.dallas_gpio = 4;
+        data.rx_gpio = 5;
+        data.tx_gpio = 17;
+        data.pbutton_gpio = 33;
+    } else if (board_profile == "LAN8720") {// Generic Ethernet (LAN8720)
+        data.led_gpio = 2;
+        data.dallas_gpio = 4;
+        data.rx_gpio = 5;
+        data.tx_gpio = 17;
+        data.pbutton_gpio = 33;
+    }
+
+    res.json(data);
+
+});
+
+app.post(EMSESP_SETTINGS_ENDPOINT, (req, res) => {
+    res.json({});
+});
+
 app.listen(port);
-console.log(`Mock Server listening on port ${port}`);
+
+console.log(`Mock API Server is up and running at: http://localhost:${port}`);
