@@ -1,0 +1,16 @@
+{
+    "name": "api",
+    "version": "1.0.0",
+    "description": "mock api for EMS-ESP",
+    "main": "server.js",
+    "scripts": {
+        "dev": "nodemon ./server.js localhost 3080",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "proddy",
+    "license": "ISC",
+    "dependencies": {
+        "express": "^4.17.1",
+        "nodemon": "^2.0.4"
+    }
+}

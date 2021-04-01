@@ -23,6 +23,6 @@ emsesp
 /data/www
 /lib/framework/WWWData.h
 /interface/build
-/interface/node_modules
+node_modules
 /interface/.eslintcache
 
