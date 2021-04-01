@@ -51,8 +51,8 @@
     ]
   },
   "devDependencies": {
+    "concurrently": "^4.1.0",
     "http-proxy-middleware": "^0.19.1",
-    "react-app-rewired": "^2.1.8",
-    "concurrently": "^4.1.0"
+    "react-app-rewired": "^2.1.8"
   }
 }
