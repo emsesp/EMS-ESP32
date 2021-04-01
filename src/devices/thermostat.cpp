@@ -1145,26 +1145,27 @@ bool Thermostat::set_remotetemp(const char * value, const int8_t id) {
 // 0xA5 - Set the building settings
 bool Thermostat::set_building(const char * value, const int8_t id) {
     uint8_t bd = 0;
-    if (!Helpers::value2enum(value, bd, {F("light"), F("medium"), F("heavy")})) {
-        LOG_WARNING(F("Set building: Invalid value"));
-        return false;
-    }
-
-    LOG_INFO(F("Setting building to %s"), value);
-
     if ((model() == EMS_DEVICE_FLAG_RC300) || (model() == EMS_DEVICE_FLAG_RC100)) {
-        write_command(0x240, 9, bd + 1, 0x240);
+        if (Helpers::value2enum(value, bd, FL_(enum_ibaBuildingType))) {
+            LOG_INFO(F("Setting building to %s"), value);
+            write_command(0x240, 9, bd , 0x240);
+            return true;
+        }
     } else {
-        write_command(EMS_TYPE_IBASettings, 6, bd, EMS_TYPE_IBASettings);
+        if (Helpers::value2enum(value, bd, FL_(enum_ibaBuildingType2))) {
+            LOG_INFO(F("Setting building to %s"), value);
+            write_command(EMS_TYPE_IBASettings, 6, bd, EMS_TYPE_IBASettings);
+            return true;
+        }
     }
-
-    return true;
+    LOG_WARNING(F("Set building: Invalid value"));
+    return false;
 }
 
 // 0xA5 Set the language settings
 bool Thermostat::set_language(const char * value, const int8_t id) {
     uint8_t lg = 0;
-    if (!Helpers::value2enum(value, lg, {F("german"), F("dutch"), F("french"), F("italian")})) {
+    if (!Helpers::value2enum(value, lg, FL_(enum_ibaLanguage))) {
         LOG_WARNING(F("Set language: Invalid value"));
         return false;
     }
@@ -1178,7 +1179,7 @@ bool Thermostat::set_language(const char * value, const int8_t id) {
 // Set the control-mode for hc 0-off, 1-RC20, 2-RC3x
 bool Thermostat::set_control(const char * value, const int8_t id) {
     uint8_t ctrl = 0;
-    if (!Helpers::value2enum(value, ctrl, {F("off"), F("rc20"), F("rc3x")})) {
+    if (!Helpers::value2enum(value, ctrl, FL_(enum_control))) {
         LOG_WARNING(F("Set control: Invalid value"));
         return false;
     }
@@ -1200,14 +1201,14 @@ bool Thermostat::set_wwmode(const char * value, const int8_t id) {
     uint8_t set = 0xFF;
 
     if ((model() == EMS_DEVICE_FLAG_RC300) || (model() == EMS_DEVICE_FLAG_RC100)) {
-        if (!Helpers::value2enum(value, set, {F("off"), F("low"), F("high"), F("auto"), F("own")})) {
+        if (!Helpers::value2enum(value, set, FL_(enum_wwMode))) {
             LOG_WARNING(F("Set warm water mode: Invalid mode"));
             return false;
         }
         LOG_INFO(F("Setting warm water mode to %s"), value);
         write_command(0x02F5, 2, set, 0x02F5);
     } else {
-        if (!Helpers::value2enum(value, set, {F("off"), F("on"), F("auto")})) {
+        if (!Helpers::value2enum(value, set, FL_(enum_wwMode2))) {
             LOG_WARNING(F("Set warm water mode: Invalid mode"));
             return false;
         }
@@ -1259,7 +1260,7 @@ bool Thermostat::set_wwcircmode(const char * value, const int8_t id) {
     uint8_t set = 0xFF;
 
     if ((model() == EMS_DEVICE_FLAG_RC300) || (model() == EMS_DEVICE_FLAG_RC100)) {
-        if (!Helpers::value2enum(value, set, {F("off"), F("on"), F("auto"), F("own")})) {
+        if (!Helpers::value2enum(value, set, FL_(enum_wwCircMode))) {
             LOG_WARNING(F("Set warm water circulation mode: Invalid mode"));
             return false;
         }
@@ -1267,7 +1268,7 @@ bool Thermostat::set_wwcircmode(const char * value, const int8_t id) {
         write_command(0x02F5, 3, set, 0x02F5);
         return true;
     }
-    if (!Helpers::value2enum(value, set, {F("off"), F("on"), F("auto")})) {
+    if (!Helpers::value2enum(value, set, FL_(enum_wwCircMode2))) {
         LOG_WARNING(F("Set warm water circulation mode: Invalid mode"));
         return false;
     }
@@ -1565,7 +1566,7 @@ bool Thermostat::set_summermode(const char * value, const int8_t id) {
         return false;
     }
     uint8_t set = 0xFF;
-    if (!Helpers::value2enum(value, set, {F("summer"), F("auto"), F("winter")})) {
+    if (!Helpers::value2enum(value, set, FL_(enum_summermode))) {
         LOG_WARNING(F("Setting summer mode: Invalid mode"));
         return false;
     }
@@ -1583,7 +1584,7 @@ bool Thermostat::set_reducemode(const char * value, const int8_t id) {
         return false;
     }
     uint8_t set = 0xFF;
-    if (!Helpers::value2enum(value, set, {F("nofrost"), F("reduce"), F("room"), F("outdoor")})) {
+    if (!Helpers::value2enum(value, set, FL_(enum_reducemode))) {
         LOG_WARNING(F("Setting reduce mode: Invalid mode"));
         return false;
     }
@@ -1602,13 +1603,13 @@ bool Thermostat::set_controlmode(const char * value, const int8_t id) {
     }
     uint8_t set = 0xFF;
     if (model() == EMS_DEVICE_FLAG_RC300 || model() == EMS_DEVICE_FLAG_RC100) {
-        if (Helpers::value2enum(value, set, {F("off"), F("outdoor"), F("simple"), F("MPC"), F("room"), F("power"), F("const")})) {
+        if (Helpers::value2enum(value, set, FL_(enum_controlmode))) {
             LOG_INFO(F("Setting control mode to %d for heating circuit %d"), set, hc->hc_num());
             write_command(curve_typeids[hc->hc_num() - 1], 0, set, curve_typeids[hc->hc_num() - 1]);
             return true;
         }
     } else if (model() == EMS_DEVICE_FLAG_RC35 || model() == EMS_DEVICE_FLAG_RC30_1) {
-        if (Helpers::value2enum(value, set, {F("outdoor"), F("room")})) {
+        if (Helpers::value2enum(value, set, FL_(enum_controlmode2))) {
             LOG_INFO(F("Setting control mode to %d for heating circuit %d"), set, hc->hc_num());
             write_command(set_typeids[hc->hc_num() - 1], 33, set, set_typeids[hc->hc_num() - 1]);
             return true;

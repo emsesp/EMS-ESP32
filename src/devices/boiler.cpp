@@ -246,7 +246,7 @@ void Boiler::check_active(const bool force) {
     if (heatingActive_ != val || force) {
         heatingActive_ = val;
         char s[7];
-        Mqtt::publish(F("heating_active"), Helpers::render_boolean(s, b));
+        Mqtt::publish(F_(heating_active), Helpers::render_boolean(s, b));
     }
 
     // check if tap water is active, bits 1 and 4 must be set
@@ -265,7 +265,7 @@ void Boiler::check_active(const bool force) {
     if (tapwaterActive_ != val || force) {
         tapwaterActive_ = val;
         char s[7];
-        Mqtt::publish(F("tapwater_active"), Helpers::render_boolean(s, b));
+        Mqtt::publish(F_(tapwater_active), Helpers::render_boolean(s, b));
         EMSESP::tap_water_active(b); // let EMS-ESP know, used in the Shower class
     }
 }
@@ -933,7 +933,7 @@ bool Boiler::set_pump_delay(const char * value, const int8_t id) {
 // on a RC35 it's by EMSESP::send_write_request(0x37, 0x10, 2, &set, 1, 0); (set is 1,2,3) 1=hot, 2=eco, 3=intelligent
 bool Boiler::set_warmwater_mode(const char * value, const int8_t id) {
     uint8_t set;
-    if (!Helpers::value2enum(value, set, {F("hot"), F("eco"), F("intelligent")})) {
+    if (!Helpers::value2enum(value, set, FL_(enum_comfort))) {
         LOG_WARNING(F("Set boiler warm water mode: Invalid value"));
         return false;
     }
@@ -1114,11 +1114,11 @@ bool Boiler::set_reset(const char * value, const int8_t id) {
         return false;
     }
 
-    if (s == "maintenance") {
+    if (s == Helpers::toLower(uuid::read_flash_string(F_(maintenance)))) {
         LOG_INFO(F("Reset boiler maintenance message"));
         write_command(0x05, 0x08, 0xFF, 0x1C);
         return true;
-    } else if (s == "error") {
+    } else if (s == Helpers::toLower(uuid::read_flash_string(F_(error)))) {
         LOG_INFO(F("Reset boiler error message"));
         write_command(0x05, 0x00, 0x5A); // error reset
         return true;
@@ -1130,7 +1130,7 @@ bool Boiler::set_reset(const char * value, const int8_t id) {
 bool Boiler::set_maintenance(const char * value, const int8_t id) {
     std::string s(12, '\0');
     if (Helpers::value2string(value, s)) {
-        if (s == "reset") {
+        if (s == Helpers::toLower(uuid::read_flash_string(F_(reset)))) {
             LOG_INFO(F("Reset boiler maintenance message"));
             write_command(0x05, 0x08, 0xFF, 0x1C);
             return true;
@@ -1163,7 +1163,7 @@ bool Boiler::set_maintenance(const char * value, const int8_t id) {
     }
 
     uint8_t num;
-    if (Helpers::value2enum(value, num, {F("off"), F("time"), F("date")})) {
+    if (Helpers::value2enum(value, num, FL_(enum_off_time_date))) {
         LOG_INFO(F("Setting maintenance type to %s"), value);
         write_command(0x15, 0, num, 0x15);
         return true;

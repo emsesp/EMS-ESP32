@@ -257,7 +257,11 @@ MAKE_PSTR_LIST(enum_hamode, F_(off), F_(heat), F_(auto), F_(heat), F_(off), F_(h
 //extra commands
 MAKE_PSTR(wwtapactivated, "wwtapactivated")
 MAKE_PSTR(maintenance, "maintenance")
+MAKE_PSTR(error, "error")
 MAKE_PSTR(reset, "reset")
+// single mqtt topics
+MAKE_PSTR(heating_active, "heating_active")
+MAKE_PSTR(tapwater_active, "tapwater_active")
 // mqtt, commands and text
 // MAKE_PSTR_LIST(id, F("id"), F("id"))
 MAKE_PSTR_LIST(burnPeriod, F("burnperiod"), F("min burner periode"))

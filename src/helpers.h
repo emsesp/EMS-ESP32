@@ -65,7 +65,7 @@ class Helpers {
     static bool value2float(const char * v, float & value);
     static bool value2bool(const char * v, bool & value);
     static bool value2string(const char * v, std::string & value);
-    static bool value2enum(const char * v, uint8_t & value, const flash_string_vector & strs);
+    static bool value2enum(const char * v, uint8_t & value, const __FlashStringHelper * const * strs);
 
 #ifdef EMSESP_STANDALONE
     static char * ultostr(char * ptr, uint32_t value, const uint8_t base);
