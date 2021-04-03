@@ -13,6 +13,7 @@
     "@types/react-router": "^5.1.12",
     "@types/react-router-dom": "^5.1.6",
     "compression-webpack-plugin": "^4.0.0",
+    "express": "^4.17.1",
     "jwt-decode": "^3.1.2",
     "lodash": "^4.17.21",
     "mime-types": "^2.1.29",
@@ -34,7 +35,7 @@
     "start": "react-app-rewired start",
     "build": "react-app-rewired build",
     "eject": "react-scripts eject",
-    "mock-api": "node ../mock-api/server.js",
+    "mock-api": "nodemon ../mock-api/server.js",
     "dev": "run-p start mock-api"
   },
   "eslintConfig": {
@@ -55,6 +56,7 @@
   "devDependencies": {
     "concurrently": "^6.0.0",
     "http-proxy-middleware": "^0.19.1",
+    "nodemon": "^2.0.4",
     "npm-run-all": "^4.1.5",
     "react-app-rewired": "^2.1.8"
   }

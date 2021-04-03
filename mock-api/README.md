@@ -1,9 +1,17 @@
 
 (https://github.com/emsesp/EMS-ESP32/issues/41)
 
-When developing and testing the web interface, it's handy not to bother with reflashing an ESP32 each time. The idea is to mimic the ESP using a mock/stub server that responds to HTTP POST and GET requests. 
+When developing and testing the web interface, it's handy not to bother with re-flashing an ESP32 each time. The idea is to mimic the ESP using a mock/stub server that responds to the REST (HTTP POST & GET) and WebSocket calls. 
 
-Currently a first draft at this is in the `ft_mockapi` branch. To run it do
+To set it up it do
+```sh
+% cd mock-api
+% npm install
+% cd interface
+% npm install
+```
+
+and to run it
 ```sh
 % cd interface
 % npm run dev
