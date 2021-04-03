@@ -17,4 +17,13 @@ and to run it
 % npm run dev
 ```
 
-The hardcoded data is limited at the moment and can be easily extended by changing the file `/mock-api/server.js`
+## Notes
+
+- It's for local development only
+- `src/.env.development` is no longer required
+- CORS is removed, also the build flag
+- new file `interface/src/setupProxy.js`
+- new files `mock-api/server.js` with the hardcoded data. Requires its own npm packages for express
+
+## ToDo
+- add filter rule to prevent from exposing yourself to malicious attacks when running the dev server(https://medium.com/webpack/webpack-dev-server-middleware-security-issues-1489d950874a)
