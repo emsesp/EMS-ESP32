@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if defined(EMSESP_TEST)
+#if defined(EMSESP_DEBUG)
 
 #ifndef EMSESP_TEST_H
 #define EMSESP_TEST_H
@@ -25,16 +25,16 @@
 
 namespace emsesp {
 
-// #define EMSESP_TEST_DEFAULT "thermostat"
-// #define EMSESP_TEST_DEFAULT "solar"
-// #define EMSESP_TEST_DEFAULT "mixer"
-// #define EMSESP_TEST_DEFAULT "web"
-// #define EMSESP_TEST_DEFAULT "general"
-// #define EMSESP_TEST_DEFAULT "boiler"
-// #define EMSESP_TEST_DEFAULT "mqtt2"
-// #define EMSESP_TEST_DEFAULT "mqtt_nested"
-// #define EMSESP_TEST_DEFAULT "ha"
-#define EMSESP_TEST_DEFAULT "board_profile"
+// #define EMSESP_DEBUG_DEFAULT "thermostat"
+// #define EMSESP_DEBUG_DEFAULT "solar"
+// #define EMSESP_DEBUG_DEFAULT "mixer"
+// #define EMSESP_DEBUG_DEFAULT "web"
+// #define EMSESP_DEBUG_DEFAULT "general"
+// #define EMSESP_DEBUG_DEFAULT "boiler"
+// #define EMSESP_DEBUG_DEFAULT "mqtt2"
+// #define EMSESP_DEBUG_DEFAULT "mqtt_nested"
+// #define EMSESP_DEBUG_DEFAULT "ha"
+#define EMSESP_DEBUG_DEFAULT "board_profile"
 
 class Test {
   public:

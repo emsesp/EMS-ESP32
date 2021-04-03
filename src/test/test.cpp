@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if defined(EMSESP_TEST)
+#if defined(EMSESP_DEBUG)
 
 #include "test.h"
 
@@ -191,7 +191,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
 
     std::string command(20, '\0');
     if ((cmd.empty()) || (cmd == "default")) {
-        command = EMSESP_TEST_DEFAULT;
+        command = EMSESP_DEBUG_DEFAULT;
     } else {
         command = cmd;
     }

@@ -8,9 +8,9 @@ upload_flags =
 upload_port = 10.10.10.101
 
 [common]
-; options are EMSESP_DEBUG EMSESP_UART_DEBUG EMSESP_TEST DEMSESP_DEFAULT_BOARD_PROFILE
-; debug_flags = -DEMSESP_DEBUG -DEMSESP_TEST
-; debug_flags = -DEMSESP_DEFAULT_BOARD_PROFILE=\"NODEMCU\"
+; options are EMSESP_DEBUG EMSESP_UART_DEBUG EMSESP_DEBUG_SENSOR
+; plus all the settings in default_settings.h, e.g. -DEMSESP_DEFAULT_BOARD_PROFILE=\"NODEMCU\"
+; debug_flags = -DEMSESP_DEBUG
 
 [env:esp32]
 monitor_filters = esp32_exception_decoder

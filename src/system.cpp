@@ -19,7 +19,7 @@
 #include "system.h"
 #include "emsesp.h" // for send_raw_telegram() command
 
-#if defined(EMSESP_TEST)
+#if defined(EMSESP_DEBUG)
 #include "test/test.h"
 #endif
 
@@ -311,7 +311,7 @@ void System::button_OnVLongPress(PButton & b) {
     LOG_WARNING(F("Performing factory reset..."));
     EMSESP::console_.loop();
 
-#ifdef EMSESP_TEST
+#ifdef EMSESP_DEBUG
     Test::listDir(LITTLEFS, FS_CONFIG_DIRECTORY, 3);
 #endif
 
@@ -591,7 +591,7 @@ void System::commands_init() {
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(fetch), System::command_fetch);
     Command::add_with_json(EMSdevice::DeviceType::SYSTEM, F_(info), System::command_info);
     Command::add_with_json(EMSdevice::DeviceType::SYSTEM, F_(settings), System::command_settings);
-#if defined(EMSESP_TEST)
+#if defined(EMSESP_DEBUG)
     Command::add(EMSdevice::DeviceType::SYSTEM, F("test"), System::command_test);
 #endif
 }
@@ -1043,7 +1043,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & json
     return true;
 }
 
-#if defined(EMSESP_TEST)
+#if defined(EMSESP_DEBUG)
 // run a test, e.g. http://ems-esp/api?device=system&cmd=test&data=boiler
 bool System::command_test(const char * value, const int8_t id) {
     Test::run_test(value, id);
