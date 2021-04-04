@@ -72,7 +72,7 @@ const mqtt_settings = {
     "client_id": "ems-esp32", "keep_alive": 60, "clean_session": true, "max_topic_length": 128,
     "publish_time_boiler": 10, "publish_time_thermostat": 10, "publish_time_solar": 10, "publish_time_mixer": 10,
     "publish_time_other": 10, "publish_time_sensor": 10, "mqtt_qos": 0, "mqtt_retain": false, "dallas_format": 1,
-    "bool_format": 1, "ha_climate_format": 1, "ha_enabled": true, "nested_format": true, "subscribe_format": 0
+    "bool_format": 1, "ha_climate_format": 1, "ha_enabled": true, "nested_format": 1, "subscribe_format": 0
 };
 const mqtt_status = {
     "enabled": true, "connected": true, "client_id": "ems-esp32", "disconnect_reason": 0, "mqtt_fails": 0

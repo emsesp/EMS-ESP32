@@ -376,7 +376,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
     if (command == "boiler") {
         shell.printfln(F("Testing boiler..."));
         Mqtt::ha_enabled(false);
-        Mqtt::nested_format(true);
+        Mqtt::nested_format(1);
 
         run_test("boiler");
         shell.invoke_command("show devices");
@@ -414,8 +414,8 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
     if (command == "ha") {
         shell.printfln(F("Testing HA discovery"));
         Mqtt::ha_enabled(true);
-        // Mqtt::nested_format(true);
-        Mqtt::nested_format(false);
+        // Mqtt::nested_format(1);
+        Mqtt::nested_format(2);
 
         // run_test("boiler");
         run_test("thermostat");
@@ -436,11 +436,11 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         run_test("mixer");
 
         // first with nested
-        Mqtt::nested_format(true);
+        Mqtt::nested_format(1);
         shell.invoke_command("call system publish");
 
         // then without nested
-        Mqtt::nested_format(false);
+        Mqtt::nested_format(2);
         shell.invoke_command("call system publish");
         shell.invoke_command("show mqtt");
     }

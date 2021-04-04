@@ -376,7 +376,7 @@ void Thermostat::register_mqtt_ha_config_hc(uint8_t hc_num) {
     doc["~"]          = Mqtt::base(); // ems-esp
 
     char topic_t[Mqtt::MQTT_TOPIC_MAX_SIZE];
-    if (Mqtt::nested_format()) {
+    if (Mqtt::nested_format() == 1) {
         snprintf_P(topic_t, sizeof(topic_t), PSTR("~/%s"), Mqtt::tag_to_topic(EMSdevice::DeviceType::THERMOSTAT, DeviceValueTAG::TAG_NONE).c_str());
 
         char mode_str_tpl[40];
@@ -1148,7 +1148,7 @@ bool Thermostat::set_building(const char * value, const int8_t id) {
     if ((model() == EMS_DEVICE_FLAG_RC300) || (model() == EMS_DEVICE_FLAG_RC100)) {
         if (Helpers::value2enum(value, bd, FL_(enum_ibaBuildingType))) {
             LOG_INFO(F("Setting building to %s"), value);
-            write_command(0x240, 9, bd , 0x240);
+            write_command(0x240, 9, bd, 0x240);
             return true;
         }
     } else {

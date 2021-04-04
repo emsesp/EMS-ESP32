@@ -158,11 +158,11 @@ class Mqtt {
         return bool_format_;
     }
 
-    static bool nested_format() {
+    static uint8_t nested_format() {
         return nested_format_;
     }
 
-    static void nested_format(bool nested_format) {
+    static void nested_format(uint8_t nested_format) {
         nested_format_ = nested_format;
     }
 
@@ -274,7 +274,7 @@ class Mqtt {
     static uint8_t     bool_format_;
     static uint8_t     ha_climate_format_;
     static bool        ha_enabled_;
-    static bool        nested_format_;
+    static uint8_t     nested_format_;
     static uint8_t     subscribe_format_;
 };
 

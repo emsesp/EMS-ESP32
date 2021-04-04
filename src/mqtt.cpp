@@ -39,7 +39,7 @@ uint8_t     Mqtt::dallas_format_;
 uint8_t     Mqtt::bool_format_;
 uint8_t     Mqtt::ha_climate_format_;
 bool        Mqtt::ha_enabled_;
-bool        Mqtt::nested_format_;
+uint8_t     Mqtt::nested_format_;
 uint8_t     Mqtt::subscribe_format_;
 
 std::deque<Mqtt::QueuedMqttMessage> Mqtt::mqtt_messages_;
@@ -898,7 +898,7 @@ void Mqtt::publish_mqtt_ha_sensor(uint8_t                     type, // EMSdevice
     DynamicJsonDocument doc(EMSESP_JSON_SIZE_HA_CONFIG);
 
     bool have_tag  = !EMSdevice::tag_to_string(tag).empty() && (device_type != EMSdevice::DeviceType::BOILER); // ignore boiler
-    bool is_nested = nested_format_ || (device_type == EMSdevice::DeviceType::BOILER);                         // boiler never uses nested
+    bool is_nested = (nested_format_ == 1) || (device_type == EMSdevice::DeviceType::BOILER);                         // boiler never uses nested
 
     // create entity by add the tag if present, seperating with a .
     char new_entity[50];
@@ -1005,7 +1005,7 @@ const std::string Mqtt::tag_to_topic(uint8_t device_type, uint8_t tag) {
     }
 
     // if there is a tag add it
-    if ((EMSdevice::tag_to_mqtt(tag).empty()) || (nested_format_ && (device_type != EMSdevice::DeviceType::BOILER))) {
+    if ((EMSdevice::tag_to_mqtt(tag).empty()) || ((nested_format_ == 1) && (device_type != EMSdevice::DeviceType::BOILER))) {
         return EMSdevice::device_type_2_device_name(device_type) + "_data";
     } else {
         return EMSdevice::device_type_2_device_name(device_type) + "_data_" + EMSdevice::tag_to_mqtt(tag);
