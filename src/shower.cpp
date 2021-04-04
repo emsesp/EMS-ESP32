@@ -83,12 +83,19 @@ void Shower::loop() {
                 }
 
                 // reset everything
-                timer_start_ = 0;
-                timer_pause_ = 0;
-                shower_on_   = false;
-                shower_alert_stop();
+                timer_start_       = 0;
+                timer_pause_       = 0;
+                shower_on_         = false;
+                doing_cold_shot_   = false;
+                alert_timer_start_ = 0;
             }
         }
+        return;
+    }
+
+    // at this point we're in the shower cold shot (doing_cold_shot_ == true)
+    // keep repeating until the time is up
+    if ((time_now - alert_timer_start_) > SHOWER_COLDSHOT_DURATION) {
     }
 }
 
@@ -124,20 +131,17 @@ void Shower::send_mqtt_stat(bool state, bool force) {
 void Shower::shower_alert_stop() {
     if (doing_cold_shot_) {
         LOG_DEBUG(F("Shower Alert stopped"));
-        // Boiler::set_tapwarmwater_activated(true);
+        Command::call(EMSdevice::DeviceType::BOILER, "wwtapactivated", "true");
         doing_cold_shot_ = false;
-        // showerColdShotStopTimer.detach(); // disable the timer
     }
 }
-
 // turn off hot water to send a shot of cold
 void Shower::shower_alert_start() {
     if (shower_alert_) {
-        LOG_DEBUG(F("Shower Alert started!"));
-        // Boiler::set_tapwarmwater_activated(false);
-        doing_cold_shot_ = true;
-        // start the timer for n seconds which will reset the water back to hot
-        // showerColdShotStopTimer.attach(SHOWER_COLDSHOT_DURATION, _showerColdShotStop);
+        LOG_DEBUG(F("Shower Alert started"));
+        Command::call(EMSdevice::DeviceType::BOILER, "wwtapactivated", "false");
+        doing_cold_shot_   = true;
+        alert_timer_start_ = uuid::get_uptime(); // timer starts now
     }
 }
 

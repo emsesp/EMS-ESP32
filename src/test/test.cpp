@@ -399,6 +399,17 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd) {
         shell.invoke_command("show mqtt");
     }
 
+    if (command == "shower_alert") {
+        shell.printfln(F("Testing Shower Alert..."));
+
+        run_test("boiler");
+
+        DynamicJsonDocument doc(EMSESP_JSON_SIZE_LARGE_DYN);
+        JsonObject          json = doc.to<JsonObject>();
+        // device type, command, data
+        Command::call(EMSdevice::DeviceType::BOILER, "wwtapactivated", "false");
+    }
+
     if (command == "fr120") {
         shell.printfln(F("Testing adding a thermostat FR120..."));
 
