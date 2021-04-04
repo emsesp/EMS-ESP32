@@ -1,13 +1,22 @@
-import { Theme } from '@material-ui/core';
-import { NetworkStatus, NetworkConnectionStatus } from './types';
+import { Theme } from "@material-ui/core";
+import { NetworkStatus, NetworkConnectionStatus } from "./types";
 
 export const isConnected = ({ status }: NetworkStatus) => {
-  return ((status === NetworkConnectionStatus.WIFI_STATUS_CONNECTED) || (status === NetworkConnectionStatus.ETHERNET_STATUS_CONNECTED));
-}
+  return (
+    status === NetworkConnectionStatus.WIFI_STATUS_CONNECTED ||
+    status === NetworkConnectionStatus.ETHERNET_STATUS_CONNECTED
+  );
+};
 
-export const isWiFi = ({ status }: NetworkStatus) => (status === NetworkConnectionStatus.WIFI_STATUS_CONNECTED)
+export const isWiFi = ({ status }: NetworkStatus) =>
+  status === NetworkConnectionStatus.WIFI_STATUS_CONNECTED;
+export const isEthernet = ({ status }: NetworkStatus) =>
+  status === NetworkConnectionStatus.ETHERNET_STATUS_CONNECTED;
 
-export const networkStatusHighlight = ({ status }: NetworkStatus, theme: Theme) => {
+export const networkStatusHighlight = (
+  { status }: NetworkStatus,
+  theme: Theme
+) => {
   switch (status) {
     case NetworkConnectionStatus.WIFI_STATUS_IDLE:
     case NetworkConnectionStatus.WIFI_STATUS_DISCONNECTED:
@@ -22,7 +31,7 @@ export const networkStatusHighlight = ({ status }: NetworkStatus, theme: Theme) 
     default:
       return theme.palette.warning.main;
   }
-}
+};
 
 export const networkStatus = ({ status }: NetworkStatus) => {
   switch (status) {
@@ -45,4 +54,4 @@ export const networkStatus = ({ status }: NetworkStatus) => {
     default:
       return "Unknown";
   }
-}
+};

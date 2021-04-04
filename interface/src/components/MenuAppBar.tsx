@@ -8,7 +8,7 @@ import { Card, CardContent, CardActions } from '@material-ui/core';
 
 import { withStyles, createStyles, Theme, WithTheme, WithStyles, withTheme } from '@material-ui/core/styles';
 
-import WifiIcon from '@material-ui/icons/Wifi';
+import SettingsEthernetIcon from '@material-ui/icons/SettingsEthernet';
 import SettingsIcon from '@material-ui/icons/Settings';
 import AccessTimeIcon from '@material-ui/icons/AccessTime';
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
@@ -146,7 +146,7 @@ class MenuAppBar extends React.Component<MenuAppBarProps, MenuAppBarState> {
         <List>
           <ListItem to='/network/' selected={path.startsWith('/network/')} button component={Link}>
             <ListItemIcon>
-              <WifiIcon />
+              <SettingsEthernetIcon />
             </ListItemIcon>
             <ListItemText primary="Network Connection" />
           </ListItem>
