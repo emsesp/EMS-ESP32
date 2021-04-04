@@ -35,7 +35,7 @@
     "start": "react-app-rewired start",
     "build": "react-app-rewired build",
     "eject": "react-scripts eject",
-    "mock-api": "nodemon ../mock-api/server.js",
+    "mock-api": "nodemon --watch ../mock-api ../mock-api/server.js",
     "dev": "run-p start mock-api"
   },
   "eslintConfig": {
