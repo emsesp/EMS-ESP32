@@ -17,6 +17,6 @@ monitor_filters = esp32_exception_decoder
 debug_tool = esp-prog
 debug_init_break = tbreak setup
 extra_scripts =
+  ; to prevent the web UI from building each time, comment out this next line
   ; pre:scripts/build_interface.py
-  ; scripts/upload_fw.py
 
