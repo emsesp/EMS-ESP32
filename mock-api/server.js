@@ -137,11 +137,11 @@ const emsesp_status = {
 const emsesp_devicedata_1 = {
     "name": "Thermostat: RC20/Moduline 300",
     "data": [
-        "16:28:21 01/04/2021", "", "date/time", "",
+        "16:28:21 01/04/2021", "", "date/time", "datetime",
         "(0)", "", "error code", "",
-        15, "°C", "(hc1) setpoint room temperature", "",
+        15, "°C", "(hc1) setpoint room temperature", "temp",
         20.5, "°C", "(hc1) current room temperature", "",
-        "auto", "", "(hc1) mode", ""
+        "auto", "", "(hc1) mode", "mode"
     ]
 };
 const emsesp_devicedata_2 = {
@@ -269,7 +269,7 @@ app.post(WRITE_VALUE_ENDPOINT, (req, res) => {
 
     console.log(devicevalue);
 
-    res.json(200);
+    res.sendStatus(200);
 });
 
 app.post(EMSESP_BOARDPROFILE_ENDPOINT, (req, res) => {
