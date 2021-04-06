@@ -122,9 +122,7 @@ class ManageUsersForm extends React.Component<ManageUsersFormProps, ManageUsersF
                     {user.username}
                   </TableCell>
                   <TableCell align="center">
-                    {
-                      user.admin ? <CheckIcon /> : <CloseIcon />
-                    }
+                    {user.admin ? <CheckIcon /> : <CloseIcon />}
                   </TableCell>
                   <TableCell align="center">
                     <IconButton size="small" aria-label="Delete" onClick={() => this.removeUser(user)}>

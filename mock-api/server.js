@@ -119,13 +119,13 @@ const emsesp_settings = {
 };
 const emsesp_alldevices = {
     "devices": [{
-        "id": 1, "type": "Thermostat", "brand": "---", "name": "RC20/Moduline 300",
+        "id": 1, "type": "Thermostat", "brand": "", "name": "RC20/Moduline 300",
         "deviceid": 23, "productid": 77, "version": "03.03"
     }, {
         "id": 2, "type": "Boiler", "brand": "Nefit", "name": "GBx72/Trendline/Cerapur/Greenstar Si/27i",
         "deviceid": 8, "productid": 123, "version": "06.01"
     }, {
-        "id": 3, "type": "Controller", "brand": "---", "name": "BC10",
+        "id": 3, "type": "Controller", "brand": "", "name": "BC10",
         "deviceid": 9, "productid": 190, "version": "01.03"
     }],
     "sensors": []

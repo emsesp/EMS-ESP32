@@ -8,6 +8,8 @@ import {
 
 import RefreshIcon from "@material-ui/icons/Refresh";
 import ListIcon from "@material-ui/icons/List";
+import IconButton from '@material-ui/core/IconButton';
+import EditIcon from '@material-ui/icons/Edit';
 
 import { redirectingAuthorizedFetch, withAuthenticatedContext, AuthenticatedContextProps } from "../authentication";
 import { RestFormProps, FormButton } from "../components";
@@ -44,11 +46,10 @@ interface EMSESPDevicesFormState {
   confirmScanDevices: boolean;
   processing: boolean;
   deviceData?: EMSESPDeviceData;
+  selectedDevice?: number;
 }
 
-type EMSESPDevicesFormProps = RestFormProps<EMSESPDevices> &
-  AuthenticatedContextProps &
-  WithWidthProps;
+type EMSESPDevicesFormProps = RestFormProps<EMSESPDevices> & AuthenticatedContextProps & WithWidthProps;
 
 function formatTemp(t: string) {
   if (t == null) {
@@ -67,8 +68,19 @@ function formatUnit(u: string) {
 class EMSESPDevicesForm extends Component<EMSESPDevicesFormProps, EMSESPDevicesFormState> {
   state: EMSESPDevicesFormState = {
     confirmScanDevices: false,
-    processing: false,
+    processing: false
   };
+
+  sendCommand = (i: any) => {
+    const name = this.state.deviceData?.data[i+2];
+    const value = this.state.deviceData?.data[i];
+    const deviceType = this.state.selectedDevice;
+    console.log("type: " + deviceType + " name: " + name + " value: " + value);
+
+    // this.setState({
+    //   user: undefined
+    // });
+  }
 
   noDevices = () => {
     return this.props.data.devices.length === 0;
@@ -95,50 +107,26 @@ class EMSESPDevicesForm extends Component<EMSESPDevicesFormProps, EMSESPDevicesF
             size="small"
             padding={isWidthDown("xs", width!) ? "none" : "default"}
           >
-            <TableHead>
-              <TableRow>
-                <StyledTableCell>Type</StyledTableCell>
-                <StyledTableCell align="center">Brand</StyledTableCell>
-                <StyledTableCell align="center">Model</StyledTableCell>
-                <StyledTableCell align="center">Device ID</StyledTableCell>
-                <StyledTableCell align="center">Product ID</StyledTableCell>
-                <StyledTableCell align="center">Version</StyledTableCell>
-                <StyledTableCell></StyledTableCell>
-              </TableRow>
-            </TableHead>
             <TableBody>
               {data.devices.sort(compareDevices).map((device) => (
                 <TableRow
                   hover
                   key={device.id}
-                  onClick={() => this.handleRowClick(device.id)}
+                  onClick={() => this.handleRowClick(device)}
                 >
-                  <TableCell component="th" scope="row">
+                  <TableCell>
                     <Tooltip
-                      title="click for details..."
-                      arrow
-                      placement="right-end"
+                      title={"DeviceID:0x" + ("00" + device.deviceid.toString(16).toUpperCase()).slice(-2) + " ProductID:" + device.productid + " Version:" + device.version}
+                      arrow placement="right-end"
                     >
                       <Button
-                        startIcon={<ListIcon />}
-                        size="small"
-                        variant="outlined"
+                        startIcon={<ListIcon />} size="small" variant="outlined"
                       >
                         {device.type}
                       </Button>
                     </Tooltip>
                   </TableCell>
-                  <TableCell align="center">{device.brand}</TableCell>
-                  <TableCell align="center">{device.name}</TableCell>
-                  <TableCell align="center">
-                    0x
-                    {("00" + device.deviceid.toString(16).toUpperCase()).slice(
-                    -2
-                  )}
-                  </TableCell>
-                  <TableCell align="center">{device.productid}</TableCell>
-                  <TableCell align="center">{device.version}</TableCell>
-                  <TableCell></TableCell>
+                  <TableCell>{device.brand + " " + device.name} </TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -148,13 +136,10 @@ class EMSESPDevicesForm extends Component<EMSESPDevicesFormProps, EMSESPDevicesF
           <Box
             bgcolor="error.main"
             color="error.contrastText"
-            p={2}
-            mt={2}
-            mb={2}
+            p={2} mt={2} mb={2}
           >
             <Typography variant="body1">
-              No EMS devices found. Check the connections and for possible Tx
-              errors.
+              No EMS devices found. Check the connections and for possible Tx errors.
             </Typography>
           </Box>
         )}
@@ -213,8 +198,7 @@ class EMSESPDevicesForm extends Component<EMSESPDevicesFormProps, EMSESPDevicesF
       >
         <DialogTitle>Confirm Scan Devices</DialogTitle>
         <DialogContent dividers>
-          Are you sure you want to initiate a scan on the EMS bus for all new
-          devices?
+          Are you sure you want to initiate a scan on the EMS bus for all new devices?
         </DialogContent>
         <DialogActions>
           <Button
@@ -268,11 +252,11 @@ class EMSESPDevicesForm extends Component<EMSESPDevicesFormProps, EMSESPDevicesF
       });
   };
 
-  handleRowClick = (id: any) => {
-    this.setState({ deviceData: undefined });
+  handleRowClick = (device: any) => {
+    this.setState({ selectedDevice: device.id, deviceData: undefined });
     redirectingAuthorizedFetch(DEVICE_DATA_ENDPOINT, {
       method: "POST",
-      body: JSON.stringify({ id: id }),
+      body: JSON.stringify({ id: device.id }),
       headers: {
         "Content-Type": "application/json",
       },
@@ -321,16 +305,23 @@ class EMSESPDevicesForm extends Component<EMSESPDevicesFormProps, EMSESPDevicesF
               size="small"
               padding={isWidthDown("xs", width!) ? "none" : "default"}
             >
-              <TableHead></TableHead>
+              <TableHead>
+              </TableHead>
               <TableBody>
                 {deviceData.data.map((item, i) => {
                   if (i % 3) {
                     return null;
                   } else {
                     return (
-                      <TableRow key={i}>
-                        <TableCell component="th" scope="row">{deviceData.data[i + 2]}</TableCell>
-                        <TableCell align="right">{deviceData.data[i]}{formatUnit(deviceData.data[i + 1])}</TableCell>
+                      <TableRow hover key={i}>
+                        <TableCell padding="checkbox" style={{ width: 18 }} >
+                          <IconButton edge="start" size="small" aria-label="Edit" 
+                          onClick={() => this.sendCommand(i)}>
+                            <EditIcon fontSize="small"/>
+                          </IconButton>
+                        </TableCell>
+                        <TableCell padding="none" component="th" scope="row">{deviceData.data[i + 2]}</TableCell>
+                        <TableCell padding="none" align="right">{deviceData.data[i]}{formatUnit(deviceData.data[i + 1])}</TableCell>
                       </TableRow>
                     );
                   }
