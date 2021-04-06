@@ -55,14 +55,15 @@ bool Command::call(const uint8_t device_type, const char * cmd, const char * val
 // id may be used to represent a heating circuit for example
 // returns false if error or not found
 bool Command::call(const uint8_t device_type, const char * cmd, const char * value, const int8_t id, JsonObject & json) {
+    std::string dname = EMSdevice::device_type_2_device_name(device_type);
+
     auto cf = find_command(device_type, cmd);
     if (cf == nullptr) {
-        LOG_WARNING(F("Command %s not found"), cmd);
+        LOG_WARNING(F("Command %s on %s not found"), cmd, dname.c_str());
         return false; // command not found or not json
     }
 
 #ifdef EMSESP_DEBUG
-    std::string dname = EMSdevice::device_type_2_device_name(device_type);
     if (value == nullptr) {
         LOG_DEBUG(F("[DEBUG] Calling %s command %s"), dname.c_str(), cmd);
     } else if (id == -1) {
