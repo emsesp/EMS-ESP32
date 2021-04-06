@@ -598,8 +598,7 @@ void Boiler::process_UBAOutdoorTemp(std::shared_ptr<const Telegram> telegram) {
 
 // UBASetPoint 0x1A
 void Boiler::process_UBASetPoints(std::shared_ptr<const Telegram> telegram) {
-    has_update(telegram->read_value(setFlowTemp_,
-                                    0));                  // boiler set temp from thermostat
+    has_update(telegram->read_value(setFlowTemp_, 0));    // boiler set temp from thermostat
     has_update(telegram->read_value(setBurnPow_, 1));     // max json power in %
     has_update(telegram->read_value(wWSetPumpPower_, 2)); // ww pump speed/power?
 }
@@ -618,6 +617,7 @@ void Boiler::process_CascadeMessage(std::shared_ptr<const Telegram> telegram) {
 // 0x35 - not yet implemented
 void Boiler::process_UBAFlags(std::shared_ptr<const Telegram> telegram) {
 }
+
 #pragma GCC diagnostic pop
 
 // 0x1C
