@@ -423,7 +423,14 @@ void EMSdevice::register_telegram_type(const uint16_t telegram_type_id, const __
 //  short_name: used in Mqtt as keys
 //  full name: used in Web and Console unless empty (nullptr)
 //  uom: unit of measure from DeviceValueUOM
-void EMSdevice::register_device_value(uint8_t tag, void * value_p, uint8_t type, const __FlashStringHelper * const * options, const __FlashStringHelper * short_name, const __FlashStringHelper * full_name, uint8_t uom) {
+void EMSdevice::register_device_value(uint8_t                             tag,
+                                      void *                              value_p,
+                                      uint8_t                             type,
+                                      const __FlashStringHelper * const * options,
+                                      const __FlashStringHelper *         short_name,
+                                      const __FlashStringHelper *         full_name,
+                                      uint8_t                             uom,
+                                      bool                                has_cmd) {
     // init the value depending on it's type
     if (type == DeviceValueType::TEXT) {
         *(char *)(value_p) = {'\0'};
@@ -448,11 +455,11 @@ void EMSdevice::register_device_value(uint8_t tag, void * value_p, uint8_t type,
         };
     }
 
-    devicevalues_.emplace_back(device_type_, tag, value_p, type, options, options_size, short_name, full_name, uom);
+    devicevalues_.emplace_back(device_type_, tag, value_p, type, options, options_size, short_name, full_name, uom, has_cmd);
 }
 
-void EMSdevice::register_device_value(uint8_t tag, void * value_p, uint8_t type, const __FlashStringHelper * const * options, const __FlashStringHelper * const * name, uint8_t uom) {
-    register_device_value(tag, value_p, type, options, name[0], name[1], uom);
+void EMSdevice::register_device_value(uint8_t tag, void * value_p, uint8_t type, const __FlashStringHelper * const * options, const __FlashStringHelper * const * name, uint8_t uom, bool has_cmd) {
+    register_device_value(tag, value_p, type, options, name[0], name[1], uom, has_cmd);
 }
 
 // looks up the uom (suffix) for a given key from the device value table
@@ -570,7 +577,7 @@ bool EMSdevice::generate_values_json_web(JsonObject & json) {
             if (sz > num_elements) {
                 // add the unit of measure (uom)
                 if (dv.uom == DeviceValueUOM::MINUTES) {
-                    data.add(nullptr);
+                    data.add(nullptr); // use null for time/date
                 } else {
                     data.add(uom_to_string(dv.uom));
                 }
@@ -583,7 +590,15 @@ bool EMSdevice::generate_values_json_web(JsonObject & json) {
                     snprintf_P(name, sizeof(name), "(%s) %s", tag_to_string(dv.tag).c_str(), uuid::read_flash_string(dv.full_name).c_str());
                     data.add(name);
                 }
-                num_elements = sz + 2;
+
+                // add the name of the Command function if it exists
+                if (dv.has_cmd) {
+                    data.add(dv.short_name);
+                } else {
+                    data.add("");
+                }
+
+                num_elements = sz + 3; // increase count by 3
             }
         }
     }

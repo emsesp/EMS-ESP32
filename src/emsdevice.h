@@ -269,9 +269,10 @@ class EMSdevice {
                                const __FlashStringHelper * const * options,
                                const __FlashStringHelper *         short_name,
                                const __FlashStringHelper *         full_name,
-                               uint8_t                             uom = DeviceValueUOM::NONE);
+                               uint8_t                             uom,
+                               bool                                has_cmd = false);
+    void register_device_value(uint8_t tag, void * value_p, uint8_t type, const __FlashStringHelper * const * options, const __FlashStringHelper * const * name, uint8_t uom, bool has_cmd = false);
 
-    void register_device_value(uint8_t tag, void * value_p, uint8_t type, const __FlashStringHelper * const * options, const __FlashStringHelper * const * name, uint8_t uom = DeviceValueUOM::NONE);
     void write_command(const uint16_t type_id, const uint8_t offset, uint8_t * message_data, const uint8_t message_length, const uint16_t validate_typeid);
     void write_command(const uint16_t type_id, const uint8_t offset, const uint8_t value, const uint16_t validate_typeid);
     void write_command(const uint16_t type_id, const uint8_t offset, const uint8_t value);
@@ -406,6 +407,7 @@ class EMSdevice {
         const __FlashStringHelper *         short_name;   // used in MQTT
         const __FlashStringHelper *         full_name;    // used in Web and Console
         uint8_t                             uom;          // DeviceValueUOM::*
+        bool                                has_cmd;      // true if there is a Console/MQTT command which matches the short_name
 
         DeviceValue(uint8_t                             device_type,
                     uint8_t                             tag,
@@ -415,7 +417,8 @@ class EMSdevice {
                     uint8_t                             options_size,
                     const __FlashStringHelper *         short_name,
                     const __FlashStringHelper *         full_name,
-                    uint8_t                             uom)
+                    uint8_t                             uom,
+                    bool                                has_cmd)
             : device_type(device_type)
             , tag(tag)
             , value_p(value_p)
@@ -424,7 +427,8 @@ class EMSdevice {
             , options_size(options_size)
             , short_name(short_name)
             , full_name(full_name)
-            , uom(uom) {
+            , uom(uom)
+            , has_cmd(has_cmd) {
         }
     };
     const std::vector<DeviceValue> devicevalues() const;

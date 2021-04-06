@@ -254,16 +254,17 @@ MAKE_PSTR_LIST(enum_hamode, F_(off), F_(heat), F_(auto), F_(heat), F_(off), F_(h
  */
 
 // Boiler
-//extra commands
+// extra commands
 MAKE_PSTR(wwtapactivated, "wwtapactivated")
 MAKE_PSTR(maintenance, "maintenance")
 MAKE_PSTR(error, "error")
 MAKE_PSTR(reset, "reset")
+
 // single mqtt topics
 MAKE_PSTR(heating_active, "heating_active")
 MAKE_PSTR(tapwater_active, "tapwater_active")
+
 // mqtt, commands and text
-// MAKE_PSTR_LIST(id, F("id"), F("id"))
 MAKE_PSTR_LIST(burnPeriod, F("burnperiod"), F("min burner periode"))
 MAKE_PSTR_LIST(heatingActive, F("heatingactive"), F("heating active"))
 MAKE_PSTR_LIST(tapwaterActive, F("tapwateractive"), F("warm water active"))
@@ -332,7 +333,7 @@ MAKE_PSTR_LIST(wWSetTemp, F("wwsettemp"), F("set temperature"))
 MAKE_PSTR_LIST(wWType, F("wwtype"), F("type"))
 MAKE_PSTR_LIST(wWComfort, F("wwcomfort"), F("comfort"))
 MAKE_PSTR_LIST(wWFlowTempOffset, F("wwFlowtempoffset"), F("flow temperature offset"))
-MAKE_PSTR_LIST(wWMaxPower, F("wwMaxpower"), F("max power"))
+MAKE_PSTR_LIST(wWMaxPower, F("wwmaxpower"), F("max power"))
 MAKE_PSTR_LIST(wWCircPump, F("wwcircpump"), F("circulation pump available"))
 MAKE_PSTR_LIST(wWChargeType, F("wwchargetype"), F("charging type"))
 MAKE_PSTR_LIST(wWDisinfectionTemp, F("wwdisinfectiontemp"), F("disinfection temperature"))
@@ -344,18 +345,18 @@ MAKE_PSTR_LIST(wWCurFlow, F("wwcurflow"), F("current tap water flow"))
 MAKE_PSTR_LIST(wWStorageTemp1, F("wwstoragetemp1"), F("storage intern temperature"))
 MAKE_PSTR_LIST(wWStorageTemp2, F("wwstoragetemp2"), F("storage extern temperature"))
 MAKE_PSTR_LIST(wWActivated, F("wwactivated"), F("activated"))
-MAKE_PSTR_LIST(wWOneTime, F("wwOnetime"), F("one time charging"))
+MAKE_PSTR_LIST(wWOneTime, F("wwonetime"), F("one time charging"))
 MAKE_PSTR_LIST(wWDisinfecting, F("wwdisinfecting"), F("disinfecting"))
 MAKE_PSTR_LIST(wWCharging, F("wwcharging"), F("charging"))
 MAKE_PSTR_LIST(wWRecharging, F("wwrecharging"), F("recharging"))
 MAKE_PSTR_LIST(wWTempOK, F("wwtempok"), F("temperature ok"))
 MAKE_PSTR_LIST(wWActive, F("wwactive"), F("active"))
 MAKE_PSTR_LIST(wWHeat, F("wwHeat"), F("heating"))
-MAKE_PSTR_LIST(wWSetPumpPower, F("wWSetPumpPower"), F("pump set power"))
+MAKE_PSTR_LIST(wWSetPumpPower, F("wwsetpumppower"), F("pump set power"))
 MAKE_PSTR_LIST(mixerTemp, F("mixerTemp"), F("mixer temperature"))
-MAKE_PSTR_LIST(tankMiddleTemp, F("tankMiddleTemp"), F("tank middle temperature (TS3)"))
-MAKE_PSTR_LIST(wWStarts, F("wwStarts"), F("# starts"))
-MAKE_PSTR_LIST(wWStarts2, F("wwStarts2"), F("# control starts"))
+MAKE_PSTR_LIST(tankMiddleTemp, F("tankmiddletemp"), F("tank middle temperature (TS3)"))
+MAKE_PSTR_LIST(wWStarts, F("wwstarts"), F("# starts"))
+MAKE_PSTR_LIST(wWStarts2, F("wwstarts2"), F("# control starts"))
 MAKE_PSTR_LIST(wWWorkM, F("wwworkm"), F("active time"))
 
 //thermostat
@@ -387,7 +388,6 @@ MAKE_PSTR_LIST(floordrytemp, F("floordrytemp"), F("floor drying temperature"))
 MAKE_PSTR_LIST(wwMode, F("wwmode"), F("warm water mode"))
 MAKE_PSTR_LIST(wwSetTemp, F("wwsettemp"), F("warm water set temperature"))
 MAKE_PSTR_LIST(wwSetTempLow, F("wwsettemplow"), F("warm water set temperature low"))
-// MAKE_PSTR_LIST(wwCircMode, F("wwcircmode"), F("warm water circulation mode"))
 MAKE_PSTR_LIST(wwExtra1, F("wwextra1"), F("warm water circuit 1 extra"))
 MAKE_PSTR_LIST(wwExtra2, F("wwextra2"), F("warm water circuit 2 extra"))
 
@@ -436,30 +436,28 @@ MAKE_PSTR_LIST(flowTempVf, F("flowtempvf"), F("flow temperature in header (T0/Vf
 
 MAKE_PSTR_LIST(tempStatus, F("tempstatus"), F("temperature switch in assigned hc (MC1)"))
 MAKE_PSTR_LIST(wwTemp, F("wwtemp"), F("current warm water temperature"))
-// MAKE_PSTR_LIST(mixertype, F("type"), F("type"))
 
 // solar
-MAKE_PSTR_LIST(collectorTemp, F("collectorTemp"), F("collector temperature (TS1)"))
-MAKE_PSTR_LIST(tankBottomTemp, F("tankBottomTemp"), F("tank bottom temperature (TS2)"))
-MAKE_PSTR_LIST(tank2BottomTemp, F("tank2BottomTemp"), F("second tank bottom temperature (TS5)"))
-MAKE_PSTR_LIST(heatExchangerTemp, F("heatExchangerTemp"), F("heat exchanger temperature (TS6)"))
+MAKE_PSTR_LIST(collectorTemp, F("collectortemp"), F("collector temperature (TS1)"))
+MAKE_PSTR_LIST(tankBottomTemp, F("tankbottomtemp"), F("tank bottom temperature (TS2)"))
+MAKE_PSTR_LIST(tank2BottomTemp, F("tank2bottomtemp"), F("second tank bottom temperature (TS5)"))
+MAKE_PSTR_LIST(heatExchangerTemp, F("heatexchangertemp"), F("heat exchanger temperature (TS6)"))
 
-MAKE_PSTR_LIST(tankMaxTemp, F("tankMaxTemp"), F("maximum tank temperature"))
-MAKE_PSTR_LIST(solarPumpModulation, F("solarPumpModulation"), F("pump modulation (PS1)"))
-MAKE_PSTR_LIST(cylinderPumpModulation, F("cylinderPumpModulation"), F("cylinder pump modulation (PS5)"))
+MAKE_PSTR_LIST(tankMaxTemp, F("tankmaxtemp"), F("maximum tank temperature"))
+MAKE_PSTR_LIST(solarPumpModulation, F("solarpumpmodulation"), F("pump modulation (PS1)"))
+MAKE_PSTR_LIST(cylinderPumpModulation, F("cylinderpumpmodulation"), F("cylinder pump modulation (PS5)"))
 
-MAKE_PSTR_LIST(solarPump, F("solarPump"), F("pump (PS1)"))
-MAKE_PSTR_LIST(valveStatus, F("valveStatus"), F("valve status"))
-MAKE_PSTR_LIST(tankHeated, F("tankHeated"), F("tank heated"))
-MAKE_PSTR_LIST(collectorShutdown, F("collectorShutdown"), F("collector shutdown"))
+MAKE_PSTR_LIST(solarPump, F("solarpump"), F("pump (PS1)"))
+MAKE_PSTR_LIST(valveStatus, F("valvestatus"), F("valve status"))
+MAKE_PSTR_LIST(tankHeated, F("tankheated"), F("tank heated"))
+MAKE_PSTR_LIST(collectorShutdown, F("collectorshutdown"), F("collector shutdown"))
 
-MAKE_PSTR_LIST(pumpWorkTime, F("pumpWorkTime"), F("pump working time"))
+MAKE_PSTR_LIST(pumpWorkTime, F("pumpWorktime"), F("pump working time"))
 
-MAKE_PSTR_LIST(energyLastHour, F("energyLastHour"), F("energy last hour"))
-MAKE_PSTR_LIST(energyTotal, F("energyTotal"), F("energy total"))
-MAKE_PSTR_LIST(energyToday, F("energyToday"), F("energy today"))
+MAKE_PSTR_LIST(energyLastHour, F("energylasthour"), F("energy last hour"))
+MAKE_PSTR_LIST(energyTotal, F("energytotal"), F("energy total"))
+MAKE_PSTR_LIST(energyToday, F("energytoday"), F("energy today"))
 
 // switch
 MAKE_PSTR_LIST(activated, F("activated"), F("activated"))
-// MAKE_PSTR_LIST(flowTempHc, F("flowTempHc"), F("flow temperature in assigned hc (TC1)"))
 MAKE_PSTR_LIST(status, F("status"), F("status"))

@@ -110,6 +110,7 @@ const EMSESP_SCANDEVICES_ENDPOINT = ENDPOINT_ROOT + "scanDevices";
 const EMSESP_DEVICEDATA_ENDPOINT = ENDPOINT_ROOT + "deviceData";
 const EMSESP_STATUS_ENDPOINT = ENDPOINT_ROOT + "emsespStatus";
 const EMSESP_BOARDPROFILE_ENDPOINT = ENDPOINT_ROOT + "boardProfile";
+const WRITE_VALUE_ENDPOINT = ENDPOINT_ROOT + "writeValue";
 const emsesp_settings = {
     "tx_mode": 1, "tx_delay": 0, "ems_bus_id": 11, "syslog_enabled": false, "syslog_level": 3,
     "trace_raw": false, "syslog_mark_interval": 0, "syslog_host": "192.168.1.4", "syslog_port": 514,
@@ -134,33 +135,78 @@ const emsesp_status = {
     "status": 0, "rx_received": 344, "tx_sent": 104, "rx_quality": 100, "tx_quality": 100
 };
 const emsesp_devicedata_1 = {
-    "name": "Thermostat: RC20/Moduline 300", "data": ["16:28:21 01/04/2021", "", "date/time",
-        "(0)", "", "error code", 15, "°C", "(hc1) setpoint room temperature", 20.5, "°C",
-        "(hc1) current room temperature", "auto", "", "(hc1) mode"]
+    "name": "Thermostat: RC20/Moduline 300",
+    "data": [
+        "16:28:21 01/04/2021", "", "date/time", "",
+        "(0)", "", "error code", "",
+        15, "°C", "(hc1) setpoint room temperature", "",
+        20.5, "°C", "(hc1) current room temperature", "",
+        "auto", "", "(hc1) mode", ""
+    ]
 };
 const emsesp_devicedata_2 = {
-    "name": "Boiler: Nefit GBx72/Trendline/Cerapur/Greenstar Si/27i", "data": ["off", "", "heating active", "off", "",
-        "warm water active", 5, "°C", "selected flow temperature", 0, "%", "burner selected max power", 0, "%",
-        "heating pump modulation", 42.7, "°C", "current flow temperature", 39, "°C", "return temperature", 1.2,
-        "bar", "system pressure", 45.3, "°C", "max boiler temperature", "off", "", "gas", 0, "uA", "flame current",
-        "off", "", "heating pump", "off", "", "fan", "off", "", "ignition", "on", "", "heating activated", 75, "°C",
-        "heating temperature", 90, "%", "burner pump max power", 55, "%", "burner pump min power", 1, null, "pump delay",
-        10, null, "burner min period", 0, "%", "burner min power", 75, "%", "burner max power", -6, "°C", "hysteresis on temperature", 6,
-        "°C", "hysteresis off temperature", 0, "%", "burner current power", 295740, "", "burner # starts", "344 days 2 hours 8 minutes",
-        null, "total burner operating time", "279 days 11 hours 55 minutes", null, "total heat operating time",
-        "2946 days 19 hours 8 minutes", null, "total UBA operating time", "1C(210) 06.06.2020 12:07", "",
-        "last error code", "0H", "", "service code", 203, "", "service code number", "01.01.2012", "",
-        "maintenance set date", "off", "", "maintenance scheduled", 6000, "hours", "maintenance set time", 60, "°C",
-        "(warm water) selected temperature", 62, "°C", "(warm water) set temperature", "flow", "", "(warm water) type", "hot",
-        "", "(warm water) comfort", 40, "", "(warm water) flow temperature offset", 100, "%", "(warm water) max power", "off",
-        "", "(warm water) circulation pump available", "3-way valve", "", "(warm water) charging type", 70, "°C",
-        "(warm water) disinfection temperature", "off", "", "(warm water) circulation pump freq", "off", "",
-        "(warm water) circulation active", 34.7, "°C", "(warm water) current intern temperature", 0, "l/min",
-        "(warm water) current tap water flow", 34.6, "°C", "(warm water) storage intern temperature", "on", "",
-        "(warm water) activated", "off", "", "(warm water) one time charging", "off", "",
-        "(warm water) disinfecting", "off", "", "(warm water) charging", "off", "", "(warm water) recharging", "on", "",
-        "(warm water) temperature ok", "off", "", "(warm water) active", "on", "", "(warm water) heating", 262387, "",
-        "(warm water) # starts", "64 days 14 hours 13 minutes", null, "(warm water) active time"]
+    "name": "Boiler: Nefit GBx72/Trendline/Cerapur/Greenstar Si/27i",
+    "data": [
+        "off", "", "heating active", "",
+        "off", "", "warm water active", "",
+        5, "°C", "selected flow temperature", "selflowtemp",
+        0, "%", "burner selected max power", "",
+        0, "%", "heating pump modulation", "",
+        42.7, "°C", "current flow temperature", "",
+        39, "°C", "return temperature", "",
+        1.2, "bar", "system pressure", "",
+        45.3, "°C", "max boiler temperature", "",
+        "off", "", "gas", "",
+        0, "uA", "flame current", "",
+        "off", "", "heating pump", "",
+        "off", "", "fan", "",
+        "off", "", "ignition", "",
+        "on", "", "heating activated", "",
+        75, "°C", "heating temperature", "",
+        90, "%", "burner pump max power", "",
+        55, "%", "burner pump min power", "",
+        1, null, "pump delay", "",
+        10, null, "burner min period", "",
+        0, "%", "burner min power", "",
+        75, "%", "burner max power", "",
+        -6, "°C", "hysteresis on temperature", "",
+        6, "°C", "hysteresis off temperature", "",
+        0, "%", "burner current power", "",
+        295740, "", "burner # starts", "",
+        "344 days 2 hours 8 minutes", null, "total burner operating time", "",
+        "279 days 11 hours 55 minutes", null, "total heat operating time", "",
+        "2946 days 19 hours 8 minutes", null, "total UBA operating time", "",
+        "1C(210) 06.06.2020 12:07", "", "last error code", "",
+        "0H", "", "service code", "",
+        203, "", "service code number", "",
+        "01.01.2012", "", "maintenance set date", "",
+        "off", "", "maintenance scheduled", "",
+        6000, "hours", "maintenance set time", "",
+        60, "°C", "(warm water) selected temperature", "",
+        62, "°C", "(warm water) set temperature", "",
+        "flow", "", "(warm water) type", "",
+        "hot", "", "(warm water) comfort", "",
+        40, "", "(warm water) flow temperature offset", "",
+        100, "%", "(warm water) max power", "",
+        "off", "", "(warm water) circulation pump available", "",
+        "3-way valve", "", "(warm water) charging type", "",
+        70, "°C", "(warm water) disinfection temperature", "",
+        "off", "", "(warm water) circulation pump freq", "",
+        "off", "", "(warm water) circulation active", "",
+        34.7, "°C", "(warm water) current intern temperature", "",
+        0, "l/min", "(warm water) current tap water flow", "",
+        34.6, "°C", "(warm water) storage intern temperature", "",
+        "on", "", "(warm water) activated", "",
+        "off", "", "(warm water) one time charging", "",
+        "off", "", "(warm water) disinfecting", "",
+        "off", "", "(warm water) charging", "",
+        "off", "", "(warm water) recharging", "",
+        "on", "", "(warm water) temperature ok", "",
+        "off", "", "(warm water) active", "",
+        "on", "", "(warm water) heating", "",
+        262387, "", "(warm water) # starts", "",
+        "64 days 14 hours 13 minutes", null, "(warm water) active time", ""
+    ]
 };
 
 
@@ -206,6 +252,7 @@ app.post(SIGN_IN_ENDPOINT, (req, res) => { res.json(signin); });
 app.get(EMSESP_SETTINGS_ENDPOINT, (req, res) => { res.json(emsesp_settings); });
 app.post(EMSESP_SETTINGS_ENDPOINT, (req, res) => { res.json(emsesp_settings); });
 app.get(EMSESP_ALLDEVICES_ENDPOINT, (req, res) => { res.json(emsesp_alldevices); });
+app.post(EMSESP_SCANDEVICES_ENDPOINT, (req, res) => { res.sendStatus(200); });
 app.get(EMSESP_STATUS_ENDPOINT, (req, res) => { res.json(emsesp_status); });
 app.post(EMSESP_DEVICEDATA_ENDPOINT, (req, res) => {
     const id = req.body.id;
@@ -216,6 +263,15 @@ app.post(EMSESP_DEVICEDATA_ENDPOINT, (req, res) => {
         res.json(emsesp_devicedata_2);
     }
 });
+
+app.post(WRITE_VALUE_ENDPOINT, (req, res) => {
+    const devicevalue = req.body.devicevalue;
+
+    console.log(devicevalue);
+
+    res.json(200);
+});
+
 app.post(EMSESP_BOARDPROFILE_ENDPOINT, (req, res) => {
     const board_profile = req.body.code;
 

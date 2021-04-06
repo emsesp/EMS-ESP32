@@ -64,11 +64,11 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
 
     // special case for a device_id with 0x2A where it's not actual a solar module
     if (device_id == 0x2A) {
-        register_device_value(TAG_NONE, &type_, DeviceValueType::TEXT, nullptr, F("type"), F("type"));
+        register_device_value(TAG_NONE, &type_, DeviceValueType::TEXT, nullptr, F("type"), F("type"), DeviceValueUOM::NONE);
         strncpy(type_, "warm water circuit", sizeof(type_));
     }
 
-    register_device_value(TAG_NONE, &id_, DeviceValueType::UINT, nullptr, F("id"), nullptr); // empty full name to prevent being shown in web or console
+    register_device_value(TAG_NONE, &id_, DeviceValueType::UINT, nullptr, F("id"), nullptr, DeviceValueUOM::NONE); // empty full name to prevent being shown in web or console
     id_ = product_id;
 
     register_device_value(TAG_NONE, &collectorTemp_, DeviceValueType::SHORT, FL_(div10), FL_(collectorTemp), DeviceValueUOM::DEGREES);
@@ -76,14 +76,14 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
     register_device_value(TAG_NONE, &tankBottomTemp2_, DeviceValueType::SHORT, FL_(div10), FL_(tank2BottomTemp), DeviceValueUOM::DEGREES);
     register_device_value(TAG_NONE, &heatExchangerTemp_, DeviceValueType::SHORT, FL_(div10), FL_(heatExchangerTemp), DeviceValueUOM::DEGREES);
 
-    register_device_value(TAG_NONE, &tankBottomMaxTemp_, DeviceValueType::UINT, nullptr, FL_(tankMaxTemp), DeviceValueUOM::DEGREES);
+    register_device_value(TAG_NONE, &tankBottomMaxTemp_, DeviceValueType::UINT, nullptr, FL_(tankMaxTemp), DeviceValueUOM::DEGREES, true);
     register_device_value(TAG_NONE, &solarPumpModulation_, DeviceValueType::UINT, nullptr, FL_(solarPumpModulation), DeviceValueUOM::PERCENT);
     register_device_value(TAG_NONE, &cylinderPumpModulation_, DeviceValueType::UINT, nullptr, FL_(cylinderPumpModulation), DeviceValueUOM::PERCENT);
 
     register_device_value(TAG_NONE, &solarPump_, DeviceValueType::BOOL, nullptr, FL_(solarPump), DeviceValueUOM::PUMP);
-    register_device_value(TAG_NONE, &valveStatus_, DeviceValueType::BOOL, nullptr, FL_(valveStatus));
-    register_device_value(TAG_NONE, &tankHeated_, DeviceValueType::BOOL, nullptr, FL_(tankHeated));
-    register_device_value(TAG_NONE, &collectorShutdown_, DeviceValueType::BOOL, nullptr, FL_(collectorShutdown));
+    register_device_value(TAG_NONE, &valveStatus_, DeviceValueType::BOOL, nullptr, FL_(valveStatus), DeviceValueUOM::NONE);
+    register_device_value(TAG_NONE, &tankHeated_, DeviceValueType::BOOL, nullptr, FL_(tankHeated), DeviceValueUOM::NONE);
+    register_device_value(TAG_NONE, &collectorShutdown_, DeviceValueType::BOOL, nullptr, FL_(collectorShutdown), DeviceValueUOM::NONE);
 
     register_device_value(TAG_NONE, &pumpWorkTime_, DeviceValueType::TIME, nullptr, FL_(pumpWorkTime), DeviceValueUOM::MINUTES);
 

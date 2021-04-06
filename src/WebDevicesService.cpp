@@ -23,14 +23,18 @@ namespace emsesp {
 using namespace std::placeholders; // for `_1` etc
 
 WebDevicesService::WebDevicesService(AsyncWebServer * server, SecurityManager * securityManager)
-    : _device_dataHandler(DEVICE_DATA_SERVICE_PATH, securityManager->wrapCallback(std::bind(&WebDevicesService::device_data, this, _1, _2), AuthenticationPredicates::IS_AUTHENTICATED)) {
+    : _device_dataHandler(DEVICE_DATA_SERVICE_PATH, securityManager->wrapCallback(std::bind(&WebDevicesService::device_data, this, _1, _2), AuthenticationPredicates::IS_AUTHENTICATED))
+    , _writevalue_dataHandler(WRITE_VALUE_SERVICE_PATH, securityManager->wrapCallback(std::bind(&WebDevicesService::write_value, this, _1, _2), AuthenticationPredicates::IS_AUTHENTICATED)) {
     server->on(EMSESP_DEVICES_SERVICE_PATH, HTTP_GET, securityManager->wrapRequest(std::bind(&WebDevicesService::all_devices, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
-
     server->on(SCAN_DEVICES_SERVICE_PATH, HTTP_GET, securityManager->wrapRequest(std::bind(&WebDevicesService::scan_devices, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
 
     _device_dataHandler.setMethod(HTTP_POST);
     _device_dataHandler.setMaxContentLength(256);
     server->addHandler(&_device_dataHandler);
+
+    _writevalue_dataHandler.setMethod(HTTP_POST);
+    _writevalue_dataHandler.setMaxContentLength(256);
+    server->addHandler(&_writevalue_dataHandler);
 }
 
 void WebDevicesService::scan_devices(AsyncWebServerRequest * request) {
@@ -94,6 +98,44 @@ void WebDevicesService::device_data(AsyncWebServerRequest * request, JsonVariant
     // invalid
     AsyncWebServerResponse * response = request->beginResponse(200);
     request->send(response);
+}
+
+void WebDevicesService::write_value(AsyncWebServerRequest * request, JsonVariant & json) {
+    if (json.is<JsonObject>()) {
+        JsonObject dv = json["devicevalue"];
+
+        // using the unique ID from the web find the real device type
+        for (const auto & emsdevice : EMSESP::emsdevices) {
+            if (emsdevice) {
+                if (emsdevice->unique_id() == dv["id"].as<int>()) {
+                    const char * cmd         = dv["cmd"];
+                    uint8_t      device_type = emsdevice->device_type();
+                    bool         ok          = false;
+                    char         s[10];
+                    // the data could be in any format, but we need string
+                    JsonVariant data = dv["data"];
+                    if (data.is<char *>()) {
+                        ok = Command::call(device_type, cmd, data.as<const char *>());
+                    } else if (data.is<int>()) {
+                        ok = Command::call(device_type, cmd, Helpers::render_value(s, data.as<int16_t>(), 0));
+                    } else if (data.is<float>()) {
+                        ok = Command::call(device_type, cmd, Helpers::render_value(s, (float)data.as<float>(), 1));
+                    } else if (data.is<bool>()) {
+                        ok = Command::call(device_type, cmd, data.as<bool>() ? "true" : "false");
+                    }
+
+                    if (ok) {
+                        AsyncWebServerResponse * response = request->beginResponse(200); // OK
+                        request->send(response);
+                    }
+                    return; // found device, quit
+                }
+            }
+        }
+
+        AsyncWebServerResponse * response = request->beginResponse(204); // no content error
+        request->send(response);
+    }
 }
 
 } // namespace emsesp
