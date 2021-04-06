@@ -2,7 +2,6 @@
 #define AuthenticationService_H_
 
 #include <Features.h>
-#include <AsyncJson.h>
 #include <ESPAsyncWebServer.h>
 #include <SecurityManager.h>
 

@@ -4,9 +4,8 @@
 #include <Features.h>
 
 #include <WiFi.h>
-#include <AsyncTCP.h>
 #include <ArduinoJson.h>
-#include <AsyncJson.h>
+#include <AsyncJson.h> // TODO needed for AsyncJsonResponse
 #include <ESPAsyncWebServer.h>
 
 #define MAX_FEATURES_SIZE 256

@@ -5,7 +5,6 @@
 
 #include <Update.h>
 #include <WiFi.h>
-#include <AsyncTCP.h>
 
 #include <ESPAsyncWebServer.h>
 #include <SecurityManager.h>
