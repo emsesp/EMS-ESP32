@@ -359,14 +359,13 @@ MAKE_PSTR_LIST(wWStarts, F("wwstarts"), F("# starts"))
 MAKE_PSTR_LIST(wWStarts2, F("wwstarts2"), F("# control starts"))
 MAKE_PSTR_LIST(wWWorkM, F("wwworkm"), F("active time"))
 
-//thermostat
+// thermostat
 // extra commands
 MAKE_PSTR(remoteTemp, "remotetemp")
 MAKE_PSTR(pause, "pause")
 MAKE_PSTR(party, "party")
 MAKE_PSTR(switchtime, "switchtime")
 MAKE_PSTR(temp, "temp")
-
 
 MAKE_PSTR_LIST(dateTime, F("datetime"), F("date/time"))
 MAKE_PSTR_LIST(errorCode, F("errorcode"), F("error code"))
@@ -391,7 +390,7 @@ MAKE_PSTR_LIST(wwSetTempLow, F("wwsettemplow"), F("warm water set temperature lo
 MAKE_PSTR_LIST(wwExtra1, F("wwextra1"), F("warm water circuit 1 extra"))
 MAKE_PSTR_LIST(wwExtra2, F("wwextra2"), F("warm water circuit 2 extra"))
 
-MAKE_PSTR_LIST(setpoint_roomTemp, F("seltemp"), F("setpoint room temperature"))
+MAKE_PSTR_LIST(setpoint_roomTemp, F("seltemp"), F("selected room temperature"))
 MAKE_PSTR_LIST(curr_roomTemp, F("currtemp"), F("current room temperature"))
 
 MAKE_PSTR_LIST(mode, F("mode"), F("mode"))
