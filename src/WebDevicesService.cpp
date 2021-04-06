@@ -100,7 +100,16 @@ void WebDevicesService::device_data(AsyncWebServerRequest * request, JsonVariant
     request->send(response);
 }
 
+// takes a command and its data value from a specific Device, from the Web
 void WebDevicesService::write_value(AsyncWebServerRequest * request, JsonVariant & json) {
+    // only issue commands if the API is enabled
+    EMSESP::webSettingsService.read([&](WebSettings & settings) {
+        if (!settings.api_enabled) {
+            request->send(403); // forbidden error
+            return;
+        }
+    });
+
     if (json.is<JsonObject>()) {
         JsonObject dv = json["devicevalue"];
 
@@ -125,16 +134,14 @@ void WebDevicesService::write_value(AsyncWebServerRequest * request, JsonVariant
                     }
 
                     if (ok) {
-                        AsyncWebServerResponse * response = request->beginResponse(200); // OK
-                        request->send(response);
+                        request->send(200);
                     }
                     return; // found device, quit
                 }
             }
         }
 
-        AsyncWebServerResponse * response = request->beginResponse(204); // no content error
-        request->send(response);
+        request->send(204); // no content error
     }
 }
 
