@@ -98,14 +98,14 @@ class EMSESPDevicesForm extends Component<EMSESPDevicesFormProps, EMSESPDevicesF
     })
       .then((response) => {
         if (response.status === 200) {
-          this.props.enqueueSnackbar("Write command sent", { variant: "success" });
-          return;
-        }
-        if (response.status === 204) {
+          this.props.enqueueSnackbar("Write command sent to device", { variant: "success" });
+        } else if (response.status === 204) {
           this.props.enqueueSnackbar("Write command failed", { variant: "error" });
-          return;
+        } else if (response.status === 403) {
+          this.props.enqueueSnackbar("Write access denied", { variant: "error" });
+        } else {
+          throw Error("Unexpected response code: " + response.status);
         }
-        throw Error("Unexpected response code: " + response.status);
       })
       .catch((error) => {
         this.props.enqueueSnackbar(
