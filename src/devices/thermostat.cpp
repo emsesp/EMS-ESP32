@@ -2049,12 +2049,10 @@ void Thermostat::add_commands() {
         return;
     }
 
-    // common to all thermostats
-    register_mqtt_cmd(F_(temp), MAKE_CF_CB(set_temp), FLAG_HC);
+    // common to all thermostats (like temp and mode)
+    register_mqtt_cmd(F_(temp), MAKE_CF_CB(set_temp), FLAG_HC);    // for backwards compatibility
+    register_mqtt_cmd(MQTT_TOPIC(setpoint_roomTemp), MAKE_CF_CB(set_temp), FLAG_HC); // new naming
     register_mqtt_cmd(MQTT_TOPIC(mode), MAKE_CF_CB(set_mode), FLAG_HC);
-    if (model() == EMS_DEVICE_FLAG_RC35) { // section is together with RC30
-        register_mqtt_cmd(MQTT_TOPIC(dateTime), MAKE_CF_CB(set_datetime));
-    }
 
     switch (model()) {
     case EMS_DEVICE_FLAG_RC100:
@@ -2091,6 +2089,7 @@ void Thermostat::add_commands() {
         register_mqtt_cmd(MQTT_TOPIC(ibaLanguage), MAKE_CF_CB(set_language));
         register_mqtt_cmd(MQTT_TOPIC(ibaMainDisplay), MAKE_CF_CB(set_display));
     case EMS_DEVICE_FLAG_RC35: // RC30 and RC35
+        register_mqtt_cmd(MQTT_TOPIC(dateTime), MAKE_CF_CB(set_datetime));
         register_mqtt_cmd(MQTT_TOPIC(nighttemp), MAKE_CF_CB(set_nighttemp), FLAG_HC);
         register_mqtt_cmd(MQTT_TOPIC(daytemp), MAKE_CF_CB(set_daytemp), FLAG_HC);
         register_mqtt_cmd(MQTT_TOPIC(nofrosttemp), MAKE_CF_CB(set_nofrosttemp), FLAG_HC);
