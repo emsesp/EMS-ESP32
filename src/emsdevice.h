@@ -279,7 +279,7 @@ class EMSdevice {
     void read_command(const uint16_t type_id, uint8_t offset = 0, uint8_t length = 0);
 
     void register_mqtt_topic(const std::string & topic, mqtt_subfunction_p f);
-    void register_mqtt_cmd(const __FlashStringHelper * cmd, cmdfunction_p f, uint8_t flag = 0);
+    void register_cmd(const __FlashStringHelper * cmd, cmdfunction_p f, uint8_t flag = 0);
 
     void publish_mqtt_ha_sensor();
 
@@ -354,8 +354,8 @@ class EMSdevice {
     static constexpr uint8_t EMS_DEVICE_FLAG_EASY        = 1;
     static constexpr uint8_t EMS_DEVICE_FLAG_RC10        = 2;
     static constexpr uint8_t EMS_DEVICE_FLAG_RC20        = 3;
-    static constexpr uint8_t EMS_DEVICE_FLAG_RC20_2      = 4; // Variation on RC20, Older, like ES72
-    static constexpr uint8_t EMS_DEVICE_FLAG_RC30_1      = 5; // variation on RC30, Newer models
+    static constexpr uint8_t EMS_DEVICE_FLAG_RC20_N      = 4; // Variation on RC20, Older, like ES72
+    static constexpr uint8_t EMS_DEVICE_FLAG_RC30_N      = 5; // variation on RC30, Newer models
     static constexpr uint8_t EMS_DEVICE_FLAG_RC30        = 6;
     static constexpr uint8_t EMS_DEVICE_FLAG_RC35        = 7;
     static constexpr uint8_t EMS_DEVICE_FLAG_RC300       = 8;

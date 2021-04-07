@@ -73,29 +73,29 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     register_telegram_type(0x495, F("UBAInformation"), false, MAKE_PF_CB(process_UBAInformation));
 
     // MQTT commands for boiler topic
-    register_mqtt_cmd(MQTT_TOPIC(wWComfort), MAKE_CF_CB(set_warmwater_mode));
-    register_mqtt_cmd(MQTT_TOPIC(wWActivated), MAKE_CF_CB(set_warmwater_activated));
-    register_mqtt_cmd(F_(wwtapactivated), MAKE_CF_CB(set_tapwarmwater_activated));
-    register_mqtt_cmd(MQTT_TOPIC(wWFlowTempOffset), MAKE_CF_CB(set_wWFlowTempOffset));
-    register_mqtt_cmd(MQTT_TOPIC(wWMaxPower), MAKE_CF_CB(set_warmwater_maxpower));
-    register_mqtt_cmd(MQTT_TOPIC(wWOneTime), MAKE_CF_CB(set_warmwater_onetime));
-    register_mqtt_cmd(MQTT_TOPIC(wWCircPump), MAKE_CF_CB(set_warmwater_circulation_pump));
-    register_mqtt_cmd(MQTT_TOPIC(wWCirc), MAKE_CF_CB(set_warmwater_circulation));
-    register_mqtt_cmd(MQTT_TOPIC(wWCircMode), MAKE_CF_CB(set_warmwater_circulation_mode));
-    register_mqtt_cmd(MQTT_TOPIC(selFlowTemp), MAKE_CF_CB(set_flow_temp));
-    register_mqtt_cmd(MQTT_TOPIC(wWSetTemp), MAKE_CF_CB(set_warmwater_temp));
-    register_mqtt_cmd(MQTT_TOPIC(heatingActivated), MAKE_CF_CB(set_heating_activated));
-    register_mqtt_cmd(MQTT_TOPIC(heatingTemp), MAKE_CF_CB(set_heating_temp));
-    register_mqtt_cmd(MQTT_TOPIC(burnMaxPower), MAKE_CF_CB(set_max_power));
-    register_mqtt_cmd(MQTT_TOPIC(burnMinPower), MAKE_CF_CB(set_min_power));
-    register_mqtt_cmd(MQTT_TOPIC(boilHystOn), MAKE_CF_CB(set_hyst_on));
-    register_mqtt_cmd(MQTT_TOPIC(boilHystOff), MAKE_CF_CB(set_hyst_off));
-    register_mqtt_cmd(MQTT_TOPIC(burnPeriod), MAKE_CF_CB(set_burn_period));
-    register_mqtt_cmd(MQTT_TOPIC(pumpDelay), MAKE_CF_CB(set_pump_delay));
-    register_mqtt_cmd(F_(maintenance), MAKE_CF_CB(set_maintenance));
-    register_mqtt_cmd(MQTT_TOPIC(pumpModMax), MAKE_CF_CB(set_max_pump));
-    register_mqtt_cmd(MQTT_TOPIC(pumpModMin), MAKE_CF_CB(set_min_pump));
-    register_mqtt_cmd(F_(reset), MAKE_CF_CB(set_reset));
+    register_cmd(MQTT_TOPIC(wWComfort), MAKE_CF_CB(set_warmwater_mode));
+    register_cmd(MQTT_TOPIC(wWActivated), MAKE_CF_CB(set_warmwater_activated));
+    register_cmd(F_(wwtapactivated), MAKE_CF_CB(set_tapwarmwater_activated));
+    register_cmd(MQTT_TOPIC(wWFlowTempOffset), MAKE_CF_CB(set_wWFlowTempOffset));
+    register_cmd(MQTT_TOPIC(wWMaxPower), MAKE_CF_CB(set_warmwater_maxpower));
+    register_cmd(MQTT_TOPIC(wWOneTime), MAKE_CF_CB(set_warmwater_onetime));
+    register_cmd(MQTT_TOPIC(wWCircPump), MAKE_CF_CB(set_warmwater_circulation_pump));
+    register_cmd(MQTT_TOPIC(wWCirc), MAKE_CF_CB(set_warmwater_circulation));
+    register_cmd(MQTT_TOPIC(wWCircMode), MAKE_CF_CB(set_warmwater_circulation_mode));
+    register_cmd(MQTT_TOPIC(selFlowTemp), MAKE_CF_CB(set_flow_temp));
+    register_cmd(MQTT_TOPIC(wWSetTemp), MAKE_CF_CB(set_warmwater_temp));
+    register_cmd(MQTT_TOPIC(heatingActivated), MAKE_CF_CB(set_heating_activated));
+    register_cmd(MQTT_TOPIC(heatingTemp), MAKE_CF_CB(set_heating_temp));
+    register_cmd(MQTT_TOPIC(burnMaxPower), MAKE_CF_CB(set_max_power));
+    register_cmd(MQTT_TOPIC(burnMinPower), MAKE_CF_CB(set_min_power));
+    register_cmd(MQTT_TOPIC(boilHystOn), MAKE_CF_CB(set_hyst_on));
+    register_cmd(MQTT_TOPIC(boilHystOff), MAKE_CF_CB(set_hyst_off));
+    register_cmd(MQTT_TOPIC(burnPeriod), MAKE_CF_CB(set_burn_period));
+    register_cmd(MQTT_TOPIC(pumpDelay), MAKE_CF_CB(set_pump_delay));
+    register_cmd(F_(maintenance), MAKE_CF_CB(set_maintenance));
+    register_cmd(MQTT_TOPIC(pumpModMax), MAKE_CF_CB(set_max_pump));
+    register_cmd(MQTT_TOPIC(pumpModMin), MAKE_CF_CB(set_min_pump));
+    register_cmd(F_(reset), MAKE_CF_CB(set_reset));
     // add values
     reserve_device_values(50);
 

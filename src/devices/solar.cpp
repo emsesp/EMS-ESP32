@@ -51,7 +51,7 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
             register_telegram_type(0x038E, F("SM100Energy"), true, MAKE_PF_CB(process_SM100Energy));
             register_telegram_type(0x0391, F("SM100Time"), true, MAKE_PF_CB(process_SM100Time));
 
-            register_mqtt_cmd(F("SM100TankBottomMaxTemp"), MAKE_CF_CB(set_SM100TankBottomMaxTemp));
+            register_cmd(F("SM100TankBottomMaxTemp"), MAKE_CF_CB(set_SM100TankBottomMaxTemp));
         }
     }
 

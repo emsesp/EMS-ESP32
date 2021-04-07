@@ -59,7 +59,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
         }
 
         // RC35
-    } else if ((model == EMSdevice::EMS_DEVICE_FLAG_RC35) || (model == EMSdevice::EMS_DEVICE_FLAG_RC30_1)) {
+    } else if ((model == EMSdevice::EMS_DEVICE_FLAG_RC35) || (model == EMSdevice::EMS_DEVICE_FLAG_RC30_N)) {
         monitor_typeids = {0x3E, 0x48, 0x52, 0x5C};
         set_typeids     = {0x3D, 0x47, 0x51, 0x5B};
         timer_typeids   = {0x3F, 0x49, 0x53, 0x5D};
@@ -84,7 +84,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
             register_telegram_type(0xAF, F("RC20Remote"), false, MAKE_PF_CB(process_RC20Remote));
         }
         // RC20 newer
-    } else if (model == EMSdevice::EMS_DEVICE_FLAG_RC20_2) {
+    } else if (model == EMSdevice::EMS_DEVICE_FLAG_RC20_N) {
         monitor_typeids = {0xAE};
         set_typeids     = {0xAD};
         if (actual_master_thermostat == device_id) {
@@ -513,7 +513,7 @@ uint8_t Thermostat::HeatingCircuit::get_mode_type() const {
         } else if (modetype == 1) {
             return HeatingCircuit::Mode::NOFROST;
         }
-    } else if ((model == EMS_DEVICE_FLAG_RC35) || (model == EMS_DEVICE_FLAG_RC30_1)) {
+    } else if ((model == EMS_DEVICE_FLAG_RC35) || (model == EMS_DEVICE_FLAG_RC30_N)) {
         if (modetype == 0) {
             return HeatingCircuit::Mode::NIGHT;
         } else if (modetype == 1) {
@@ -1503,7 +1503,7 @@ bool Thermostat::set_mode_n(const uint8_t mode, const uint8_t hc_num) {
         offset          = EMS_OFFSET_RC20Set_mode;
         validate_typeid = set_typeids[hc_p];
         break;
-    case EMSdevice::EMS_DEVICE_FLAG_RC20_2: // ES72
+    case EMSdevice::EMS_DEVICE_FLAG_RC20_N: // ES72
         offset          = EMS_OFFSET_RC20_2_Set_mode;
         validate_typeid = set_typeids[hc_p];
         break;
@@ -1512,7 +1512,7 @@ bool Thermostat::set_mode_n(const uint8_t mode, const uint8_t hc_num) {
         validate_typeid = set_typeids[hc_p];
         break;
     case EMSdevice::EMS_DEVICE_FLAG_RC35:
-    case EMSdevice::EMS_DEVICE_FLAG_RC30_1:
+    case EMSdevice::EMS_DEVICE_FLAG_RC30_N:
         offset          = EMS_OFFSET_RC35Set_mode;
         validate_typeid = set_typeids[hc_p];
         break;
@@ -1608,7 +1608,7 @@ bool Thermostat::set_controlmode(const char * value, const int8_t id) {
             write_command(curve_typeids[hc->hc_num() - 1], 0, set, curve_typeids[hc->hc_num() - 1]);
             return true;
         }
-    } else if (model() == EMS_DEVICE_FLAG_RC35 || model() == EMS_DEVICE_FLAG_RC30_1) {
+    } else if (model() == EMS_DEVICE_FLAG_RC35 || model() == EMS_DEVICE_FLAG_RC30_N) {
         if (Helpers::value2enum(value, set, FL_(enum_controlmode2))) {
             LOG_INFO(F("Setting control mode to %d for heating circuit %d"), set, hc->hc_num());
             write_command(set_typeids[hc->hc_num() - 1], 33, set, set_typeids[hc->hc_num() - 1]);
@@ -1658,7 +1658,7 @@ bool Thermostat::set_switchtime(const char * value, const int8_t id) {
         return false;
     }
 
-    if ((model() == EMS_DEVICE_FLAG_RC35 || model() == EMS_DEVICE_FLAG_RC30_1)) {
+    if ((model() == EMS_DEVICE_FLAG_RC35 || model() == EMS_DEVICE_FLAG_RC30_N)) {
         write_command(timer_typeids[hc->hc_num() - 1], no * 2, (uint8_t *)&data, 2, timer_typeids[hc->hc_num() - 1]);
     } else {
         LOG_WARNING(F("Setting switchtime: thermostat not supported"));
@@ -1687,9 +1687,9 @@ bool Thermostat::set_program(const char * value, const int8_t id) {
         return false;
     }
 
-    if (model() == EMS_DEVICE_FLAG_RC20_2 && set > 0 && set < 10) {
+    if (model() == EMS_DEVICE_FLAG_RC20_N && set > 0 && set < 10) {
         write_command(set_typeids[hc->hc_num() - 1], 11, set, set_typeids[hc->hc_num() - 1]);
-    } else if ((model() == EMS_DEVICE_FLAG_RC35 || model() == EMS_DEVICE_FLAG_RC30_1) && set < 11) {
+    } else if ((model() == EMS_DEVICE_FLAG_RC35 || model() == EMS_DEVICE_FLAG_RC30_N) && set < 11) {
         write_command(timer_typeids[hc->hc_num() - 1], 84, set, timer_typeids[hc->hc_num() - 1]);
     } else if ((model() == EMS_DEVICE_FLAG_RC300 || model() == EMS_DEVICE_FLAG_RC100) && (set == 1 || set == 2)) {
         write_command(set_typeids[hc->hc_num() - 1], 11, set, set_typeids[hc->hc_num() - 1]);
@@ -1804,7 +1804,7 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
             break;
         }
 
-    } else if (model == EMS_DEVICE_FLAG_RC20_2) {
+    } else if (model == EMS_DEVICE_FLAG_RC20_N) {
         switch (mode) {
         case HeatingCircuit::Mode::NIGHT: // change the night temp
             offset = EMS_OFFSET_RC20_2_Set_temp_night;
@@ -1819,7 +1819,7 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
             break;
         }
 
-    } else if ((model == EMS_DEVICE_FLAG_RC35) || (model == EMS_DEVICE_FLAG_RC30_1)) {
+    } else if ((model == EMS_DEVICE_FLAG_RC35) || (model == EMS_DEVICE_FLAG_RC30_N)) {
         validate_typeid = set_typeids[hc->hc_num() - 1];
         switch (mode) {
         case HeatingCircuit::Mode::NIGHT: // change the night temp
@@ -2050,77 +2050,77 @@ void Thermostat::add_commands() {
     }
 
     // common to all thermostats (like temp and mode)
-    register_mqtt_cmd(F_(temp), MAKE_CF_CB(set_temp), FLAG_HC);    // for backwards compatibility
-    register_mqtt_cmd(MQTT_TOPIC(setpoint_roomTemp), MAKE_CF_CB(set_temp), FLAG_HC); // new naming
-    register_mqtt_cmd(MQTT_TOPIC(mode), MAKE_CF_CB(set_mode), FLAG_HC);
+    register_cmd(F_(temp), MAKE_CF_CB(set_temp), FLAG_HC);                      // for backwards compatibility
+    register_cmd(MQTT_TOPIC(setpoint_roomTemp), MAKE_CF_CB(set_temp), FLAG_HC); // new naming
+    register_cmd(MQTT_TOPIC(mode), MAKE_CF_CB(set_mode), FLAG_HC);
 
     switch (model()) {
     case EMS_DEVICE_FLAG_RC100:
     case EMS_DEVICE_FLAG_RC300:
-        register_mqtt_cmd(MQTT_TOPIC(dateTime), MAKE_CF_CB(set_datetime));
-        register_mqtt_cmd(MQTT_TOPIC(manualtemp), MAKE_CF_CB(set_manualtemp), FLAG_HC);
-        register_mqtt_cmd(MQTT_TOPIC(ecotemp), MAKE_CF_CB(set_ecotemp), FLAG_HC);
-        register_mqtt_cmd(MQTT_TOPIC(comforttemp), MAKE_CF_CB(set_comforttemp), FLAG_HC);
-        register_mqtt_cmd(MQTT_TOPIC(summermode), MAKE_CF_CB(set_summermode), FLAG_HC);
-        register_mqtt_cmd(MQTT_TOPIC(summertemp), MAKE_CF_CB(set_summertemp), FLAG_HC);
-        register_mqtt_cmd(MQTT_TOPIC(wwMode), MAKE_CF_CB(set_wwmode));
-        register_mqtt_cmd(MQTT_TOPIC(wwSetTemp), MAKE_CF_CB(set_wwtemp));
-        register_mqtt_cmd(MQTT_TOPIC(wwSetTempLow), MAKE_CF_CB(set_wwtemplow));
-        register_mqtt_cmd(MQTT_TOPIC(wWOneTime), MAKE_CF_CB(set_wwonetime));
-        register_mqtt_cmd(MQTT_TOPIC(wWCircMode), MAKE_CF_CB(set_wwcircmode));
-        register_mqtt_cmd(MQTT_TOPIC(ibaBuildingType), MAKE_CF_CB(set_building));
-        register_mqtt_cmd(MQTT_TOPIC(nofrosttemp), MAKE_CF_CB(set_nofrosttemp), FLAG_HC);
-        register_mqtt_cmd(MQTT_TOPIC(designtemp), MAKE_CF_CB(set_designtemp), FLAG_HC);
-        register_mqtt_cmd(MQTT_TOPIC(offsettemp), MAKE_CF_CB(set_offsettemp), FLAG_HC);
-        register_mqtt_cmd(MQTT_TOPIC(minflowtemp), MAKE_CF_CB(set_minflowtemp), FLAG_HC);
-        register_mqtt_cmd(MQTT_TOPIC(maxflowtemp), MAKE_CF_CB(set_maxflowtemp), FLAG_HC);
-        register_mqtt_cmd(MQTT_TOPIC(ibaMinExtTemperature), MAKE_CF_CB(set_minexttemp));
-        register_mqtt_cmd(MQTT_TOPIC(roominfluence), MAKE_CF_CB(set_roominfluence), FLAG_HC);
-        register_mqtt_cmd(MQTT_TOPIC(program), MAKE_CF_CB(set_program), FLAG_HC);
-        register_mqtt_cmd(MQTT_TOPIC(controlmode), MAKE_CF_CB(set_controlmode), FLAG_HC);
+        register_cmd(MQTT_TOPIC(dateTime), MAKE_CF_CB(set_datetime));
+        register_cmd(MQTT_TOPIC(manualtemp), MAKE_CF_CB(set_manualtemp), FLAG_HC);
+        register_cmd(MQTT_TOPIC(ecotemp), MAKE_CF_CB(set_ecotemp), FLAG_HC);
+        register_cmd(MQTT_TOPIC(comforttemp), MAKE_CF_CB(set_comforttemp), FLAG_HC);
+        register_cmd(MQTT_TOPIC(summermode), MAKE_CF_CB(set_summermode), FLAG_HC);
+        register_cmd(MQTT_TOPIC(summertemp), MAKE_CF_CB(set_summertemp), FLAG_HC);
+        register_cmd(MQTT_TOPIC(wwMode), MAKE_CF_CB(set_wwmode));
+        register_cmd(MQTT_TOPIC(wwSetTemp), MAKE_CF_CB(set_wwtemp));
+        register_cmd(MQTT_TOPIC(wwSetTempLow), MAKE_CF_CB(set_wwtemplow));
+        register_cmd(MQTT_TOPIC(wWOneTime), MAKE_CF_CB(set_wwonetime));
+        register_cmd(MQTT_TOPIC(wWCircMode), MAKE_CF_CB(set_wwcircmode));
+        register_cmd(MQTT_TOPIC(ibaBuildingType), MAKE_CF_CB(set_building));
+        register_cmd(MQTT_TOPIC(nofrosttemp), MAKE_CF_CB(set_nofrosttemp), FLAG_HC);
+        register_cmd(MQTT_TOPIC(designtemp), MAKE_CF_CB(set_designtemp), FLAG_HC);
+        register_cmd(MQTT_TOPIC(offsettemp), MAKE_CF_CB(set_offsettemp), FLAG_HC);
+        register_cmd(MQTT_TOPIC(minflowtemp), MAKE_CF_CB(set_minflowtemp), FLAG_HC);
+        register_cmd(MQTT_TOPIC(maxflowtemp), MAKE_CF_CB(set_maxflowtemp), FLAG_HC);
+        register_cmd(MQTT_TOPIC(ibaMinExtTemperature), MAKE_CF_CB(set_minexttemp));
+        register_cmd(MQTT_TOPIC(roominfluence), MAKE_CF_CB(set_roominfluence), FLAG_HC);
+        register_cmd(MQTT_TOPIC(program), MAKE_CF_CB(set_program), FLAG_HC);
+        register_cmd(MQTT_TOPIC(controlmode), MAKE_CF_CB(set_controlmode), FLAG_HC);
         break;
-    case EMS_DEVICE_FLAG_RC20_2:
-        register_mqtt_cmd(MQTT_TOPIC(nighttemp), MAKE_CF_CB(set_nighttemp));
-        register_mqtt_cmd(MQTT_TOPIC(daytemp), MAKE_CF_CB(set_daytemp));
-        register_mqtt_cmd(MQTT_TOPIC(program), MAKE_CF_CB(set_program));
+    case EMS_DEVICE_FLAG_RC20_N:
+        register_cmd(MQTT_TOPIC(nighttemp), MAKE_CF_CB(set_nighttemp));
+        register_cmd(MQTT_TOPIC(daytemp), MAKE_CF_CB(set_daytemp));
+        register_cmd(MQTT_TOPIC(program), MAKE_CF_CB(set_program));
         break;
-    case EMS_DEVICE_FLAG_RC30_1: // only RC30_1
-        register_mqtt_cmd(MQTT_TOPIC(ibaClockOffset), MAKE_CF_CB(set_clockoffset));
-        register_mqtt_cmd(MQTT_TOPIC(ibaLanguage), MAKE_CF_CB(set_language));
-        register_mqtt_cmd(MQTT_TOPIC(ibaMainDisplay), MAKE_CF_CB(set_display));
+    case EMS_DEVICE_FLAG_RC30_N: // only RC30_1
+        register_cmd(MQTT_TOPIC(ibaClockOffset), MAKE_CF_CB(set_clockoffset));
+        register_cmd(MQTT_TOPIC(ibaLanguage), MAKE_CF_CB(set_language));
+        register_cmd(MQTT_TOPIC(ibaMainDisplay), MAKE_CF_CB(set_display));
     case EMS_DEVICE_FLAG_RC35: // RC30 and RC35
-        register_mqtt_cmd(MQTT_TOPIC(dateTime), MAKE_CF_CB(set_datetime));
-        register_mqtt_cmd(MQTT_TOPIC(nighttemp), MAKE_CF_CB(set_nighttemp), FLAG_HC);
-        register_mqtt_cmd(MQTT_TOPIC(daytemp), MAKE_CF_CB(set_daytemp), FLAG_HC);
-        register_mqtt_cmd(MQTT_TOPIC(nofrosttemp), MAKE_CF_CB(set_nofrosttemp), FLAG_HC);
-        register_mqtt_cmd(F_(remoteTemp), MAKE_CF_CB(set_remotetemp), FLAG_HC);
-        register_mqtt_cmd(MQTT_TOPIC(ibaMinExtTemperature), MAKE_CF_CB(set_minexttemp));
-        register_mqtt_cmd(MQTT_TOPIC(ibaCalIntTemperature), MAKE_CF_CB(set_calinttemp));
-        register_mqtt_cmd(MQTT_TOPIC(ibaBuildingType), MAKE_CF_CB(set_building));
-        register_mqtt_cmd(MQTT_TOPIC(control), MAKE_CF_CB(set_control), FLAG_HC);
-        register_mqtt_cmd(F_(pause), MAKE_CF_CB(set_pause), FLAG_HC);
-        register_mqtt_cmd(F_(party), MAKE_CF_CB(set_party), FLAG_HC);
-        register_mqtt_cmd(F_(holiday), MAKE_CF_CB(set_holiday), FLAG_HC);
-        register_mqtt_cmd(MQTT_TOPIC(summertemp), MAKE_CF_CB(set_summertemp), FLAG_HC);
-        register_mqtt_cmd(MQTT_TOPIC(designtemp), MAKE_CF_CB(set_designtemp), FLAG_HC);
-        register_mqtt_cmd(MQTT_TOPIC(offsettemp), MAKE_CF_CB(set_offsettemp), FLAG_HC);
-        register_mqtt_cmd(MQTT_TOPIC(holidaytemp), MAKE_CF_CB(set_holidaytemp), FLAG_HC);
-        register_mqtt_cmd(MQTT_TOPIC(wwMode), MAKE_CF_CB(set_wwmode));
-        register_mqtt_cmd(MQTT_TOPIC(wWCircMode), MAKE_CF_CB(set_wwcircmode));
-        register_mqtt_cmd(MQTT_TOPIC(roominfluence), MAKE_CF_CB(set_roominfluence), FLAG_HC);
-        register_mqtt_cmd(MQTT_TOPIC(flowtempoffset), MAKE_CF_CB(set_flowtempoffset), FLAG_HC);
-        register_mqtt_cmd(MQTT_TOPIC(minflowtemp), MAKE_CF_CB(set_minflowtemp), FLAG_HC);
-        register_mqtt_cmd(MQTT_TOPIC(maxflowtemp), MAKE_CF_CB(set_maxflowtemp), FLAG_HC);
-        register_mqtt_cmd(MQTT_TOPIC(reducemode), MAKE_CF_CB(set_reducemode), FLAG_HC);
-        register_mqtt_cmd(MQTT_TOPIC(program), MAKE_CF_CB(set_program), FLAG_HC);
-        register_mqtt_cmd(F_(switchtime), MAKE_CF_CB(set_switchtime), FLAG_HC);
-        register_mqtt_cmd(MQTT_TOPIC(controlmode), MAKE_CF_CB(set_controlmode), FLAG_HC);
+        register_cmd(MQTT_TOPIC(dateTime), MAKE_CF_CB(set_datetime));
+        register_cmd(MQTT_TOPIC(nighttemp), MAKE_CF_CB(set_nighttemp), FLAG_HC);
+        register_cmd(MQTT_TOPIC(daytemp), MAKE_CF_CB(set_daytemp), FLAG_HC);
+        register_cmd(MQTT_TOPIC(nofrosttemp), MAKE_CF_CB(set_nofrosttemp), FLAG_HC);
+        register_cmd(F_(remoteTemp), MAKE_CF_CB(set_remotetemp), FLAG_HC);
+        register_cmd(MQTT_TOPIC(ibaMinExtTemperature), MAKE_CF_CB(set_minexttemp));
+        register_cmd(MQTT_TOPIC(ibaCalIntTemperature), MAKE_CF_CB(set_calinttemp));
+        register_cmd(MQTT_TOPIC(ibaBuildingType), MAKE_CF_CB(set_building));
+        register_cmd(MQTT_TOPIC(control), MAKE_CF_CB(set_control), FLAG_HC);
+        register_cmd(F_(pause), MAKE_CF_CB(set_pause), FLAG_HC);
+        register_cmd(F_(party), MAKE_CF_CB(set_party), FLAG_HC);
+        register_cmd(F_(holiday), MAKE_CF_CB(set_holiday), FLAG_HC);
+        register_cmd(MQTT_TOPIC(summertemp), MAKE_CF_CB(set_summertemp), FLAG_HC);
+        register_cmd(MQTT_TOPIC(designtemp), MAKE_CF_CB(set_designtemp), FLAG_HC);
+        register_cmd(MQTT_TOPIC(offsettemp), MAKE_CF_CB(set_offsettemp), FLAG_HC);
+        register_cmd(MQTT_TOPIC(holidaytemp), MAKE_CF_CB(set_holidaytemp), FLAG_HC);
+        register_cmd(MQTT_TOPIC(wwMode), MAKE_CF_CB(set_wwmode));
+        register_cmd(MQTT_TOPIC(wWCircMode), MAKE_CF_CB(set_wwcircmode));
+        register_cmd(MQTT_TOPIC(roominfluence), MAKE_CF_CB(set_roominfluence), FLAG_HC);
+        register_cmd(MQTT_TOPIC(flowtempoffset), MAKE_CF_CB(set_flowtempoffset), FLAG_HC);
+        register_cmd(MQTT_TOPIC(minflowtemp), MAKE_CF_CB(set_minflowtemp), FLAG_HC);
+        register_cmd(MQTT_TOPIC(maxflowtemp), MAKE_CF_CB(set_maxflowtemp), FLAG_HC);
+        register_cmd(MQTT_TOPIC(reducemode), MAKE_CF_CB(set_reducemode), FLAG_HC);
+        register_cmd(MQTT_TOPIC(program), MAKE_CF_CB(set_program), FLAG_HC);
+        register_cmd(F_(switchtime), MAKE_CF_CB(set_switchtime), FLAG_HC);
+        register_cmd(MQTT_TOPIC(controlmode), MAKE_CF_CB(set_controlmode), FLAG_HC);
         break;
     case EMS_DEVICE_FLAG_JUNKERS:
-        register_mqtt_cmd(MQTT_TOPIC(dateTime), MAKE_CF_CB(set_datetime));
-        register_mqtt_cmd(MQTT_TOPIC(nofrosttemp), MAKE_CF_CB(set_nofrosttemp), FLAG_HC);
-        register_mqtt_cmd(MQTT_TOPIC(ecotemp), MAKE_CF_CB(set_ecotemp), FLAG_HC);
-        register_mqtt_cmd(MQTT_TOPIC(heattemp), MAKE_CF_CB(set_heattemp), FLAG_HC);
+        register_cmd(MQTT_TOPIC(dateTime), MAKE_CF_CB(set_datetime));
+        register_cmd(MQTT_TOPIC(nofrosttemp), MAKE_CF_CB(set_nofrosttemp), FLAG_HC);
+        register_cmd(MQTT_TOPIC(ecotemp), MAKE_CF_CB(set_ecotemp), FLAG_HC);
+        register_cmd(MQTT_TOPIC(heattemp), MAKE_CF_CB(set_heattemp), FLAG_HC);
         break;
     default:
         break;
@@ -2128,24 +2128,17 @@ void Thermostat::add_commands() {
 }
 
 // register main device values, top level for all thermostats (excluding heating circuits)
+// as these are done in void Thermostat::register_device_values_hc()
 void Thermostat::register_device_values() {
-    uint8_t model = this->model();
-
     // Common for all thermostats
     register_device_value(TAG_THERMOSTAT_DATA, &id_, DeviceValueType::UINT, nullptr, F("id"), nullptr, DeviceValueUOM::NONE); // empty full name to prevent being shown in web or console
-    register_device_value(TAG_THERMOSTAT_DATA, &dateTime_, DeviceValueType::TEXT, nullptr, FL_(dateTime), DeviceValueUOM::NONE, true);
     register_device_value(TAG_THERMOSTAT_DATA, &errorCode_, DeviceValueType::TEXT, nullptr, FL_(errorCode), DeviceValueUOM::NONE);
     register_device_value(TAG_THERMOSTAT_DATA, &lastCode_, DeviceValueType::TEXT, nullptr, FL_(lastCode), DeviceValueUOM::NONE);
 
-    // RC30 only
-    if (model == EMSdevice::EMS_DEVICE_FLAG_RC30_1) {
-        register_device_value(TAG_THERMOSTAT_DATA, &ibaMainDisplay_, DeviceValueType::ENUM, FL_(enum_ibaMainDisplay), FL_(ibaMainDisplay), DeviceValueUOM::NONE);
-        register_device_value(TAG_THERMOSTAT_DATA, &ibaLanguage_, DeviceValueType::ENUM, FL_(enum_ibaLanguage), FL_(ibaLanguage), DeviceValueUOM::NONE);
-        register_device_value(TAG_THERMOSTAT_DATA, &ibaClockOffset_, DeviceValueType::UINT, nullptr, FL_(ibaClockOffset), DeviceValueUOM::NONE); // offset (in sec) to clock, 0xff=-1s, 0x02=2s
-    }
-
-    // RC300 and RC100
-    if (model == EMS_DEVICE_FLAG_RC300 || model == EMS_DEVICE_FLAG_RC100) {
+    switch (this->model()) {
+    case EMS_DEVICE_FLAG_RC100:
+    case EMS_DEVICE_FLAG_RC300:
+        register_device_value(TAG_THERMOSTAT_DATA, &dateTime_, DeviceValueType::TEXT, nullptr, FL_(dateTime), DeviceValueUOM::NONE, true);
         register_device_value(TAG_THERMOSTAT_DATA, &floordrystatus_, DeviceValueType::ENUM, FL_(enum_floordrystatus), FL_(floordrystatus), DeviceValueUOM::NONE);
         register_device_value(TAG_THERMOSTAT_DATA, &dampedoutdoortemp2_, DeviceValueType::SHORT, FL_(div10), FL_(dampedoutdoortemp), DeviceValueUOM::DEGREES);
         register_device_value(TAG_THERMOSTAT_DATA, &floordrytemp_, DeviceValueType::UINT, nullptr, FL_(floordrytemp), DeviceValueUOM::DEGREES);
@@ -2156,10 +2149,19 @@ void Thermostat::register_device_values() {
         register_device_value(TAG_THERMOSTAT_DATA, &wwCircMode_, DeviceValueType::ENUM, FL_(enum_wwCircMode), FL_(wWCircMode), DeviceValueUOM::NONE, true);
         register_device_value(TAG_THERMOSTAT_DATA, &wwExtra1_, DeviceValueType::UINT, nullptr, FL_(wwExtra1), DeviceValueUOM::DEGREES);
         register_device_value(TAG_THERMOSTAT_DATA, &wwExtra2_, DeviceValueType::UINT, nullptr, FL_(wwExtra2), DeviceValueUOM::DEGREES);
-    }
-
-    // RC30 and RC35
-    if (model == EMS_DEVICE_FLAG_RC35 || model == EMS_DEVICE_FLAG_RC30_1) {
+        break;
+    case EMS_DEVICE_FLAG_RC20_N:
+    case EMS_DEVICE_FLAG_RC20:
+        register_device_value(TAG_THERMOSTAT_DATA, &dateTime_, DeviceValueType::TEXT, nullptr, FL_(dateTime), DeviceValueUOM::NONE, false); // can't set datetime
+        break;
+    case EMS_DEVICE_FLAG_RC30_N: // only RC30_1
+        register_device_value(TAG_THERMOSTAT_DATA, &dateTime_, DeviceValueType::TEXT, nullptr, FL_(dateTime), DeviceValueUOM::NONE, true);
+        register_device_value(TAG_THERMOSTAT_DATA, &ibaMainDisplay_, DeviceValueType::ENUM, FL_(enum_ibaMainDisplay), FL_(ibaMainDisplay), DeviceValueUOM::NONE);
+        register_device_value(TAG_THERMOSTAT_DATA, &ibaLanguage_, DeviceValueType::ENUM, FL_(enum_ibaLanguage), FL_(ibaLanguage), DeviceValueUOM::NONE);
+        register_device_value(TAG_THERMOSTAT_DATA, &ibaClockOffset_, DeviceValueType::UINT, nullptr, FL_(ibaClockOffset), DeviceValueUOM::NONE); // offset (in sec) to clock, 0xff=-1s, 0x02=2s
+        break;
+    case EMS_DEVICE_FLAG_RC35: // RC30 and RC35
+        register_device_value(TAG_THERMOSTAT_DATA, &dateTime_, DeviceValueType::TEXT, nullptr, FL_(dateTime), DeviceValueUOM::NONE, true);
         register_device_value(TAG_THERMOSTAT_DATA, &ibaCalIntTemperature_, DeviceValueType::INT, FL_(div2), FL_(ibaCalIntTemperature), DeviceValueUOM::DEGREES, true);
         register_device_value(TAG_THERMOSTAT_DATA, &ibaMinExtTemperature_, DeviceValueType::INT, nullptr, FL_(ibaMinExtTemperature), DeviceValueUOM::DEGREES, true);
         register_device_value(TAG_THERMOSTAT_DATA, &tempsensor1_, DeviceValueType::USHORT, FL_(div10), FL_(tempsensor1), DeviceValueUOM::DEGREES);
@@ -2168,6 +2170,12 @@ void Thermostat::register_device_values() {
         register_device_value(TAG_THERMOSTAT_DATA, &ibaBuildingType_, DeviceValueType::ENUM, FL_(enum_ibaBuildingType2), FL_(ibaBuildingType), DeviceValueUOM::NONE, true);
         register_device_value(TAG_THERMOSTAT_DATA, &wwMode_, DeviceValueType::ENUM, FL_(enum_wwMode2), FL_(wwMode), DeviceValueUOM::NONE, true);
         register_device_value(TAG_THERMOSTAT_DATA, &wwCircMode_, DeviceValueType::ENUM, FL_(enum_wwCircMode2), FL_(wWCircMode), DeviceValueUOM::NONE, true);
+        break;
+    case EMS_DEVICE_FLAG_JUNKERS:
+        register_device_value(TAG_THERMOSTAT_DATA, &dateTime_, DeviceValueType::TEXT, nullptr, FL_(dateTime), DeviceValueUOM::NONE, true);
+        break;
+    default:
+        break;
     }
 }
 
@@ -2242,7 +2250,7 @@ void Thermostat::register_device_values_hc(std::shared_ptr<emsesp::Thermostat::H
         register_device_value(tag, &hc->mode, DeviceValueType::ENUM, FL_(enum_mode2), FL_(mode), DeviceValueUOM::NONE, true);
     }
 
-    if (model == EMS_DEVICE_FLAG_RC20_2) {
+    if (model == EMS_DEVICE_FLAG_RC20_N) {
         register_device_value(tag, &hc->mode, DeviceValueType::ENUM, FL_(enum_mode2), FL_(mode), DeviceValueUOM::NONE, true);
         register_device_value(tag, &hc->modetype, DeviceValueType::ENUM, FL_(enum_modetype2), FL_(modetype), DeviceValueUOM::NONE);
         register_device_value(tag, &hc->daytemp, DeviceValueType::UINT, FL_(div2), FL_(daytemp), DeviceValueUOM::DEGREES, true);
@@ -2250,7 +2258,7 @@ void Thermostat::register_device_values_hc(std::shared_ptr<emsesp::Thermostat::H
         register_device_value(tag, &hc->program, DeviceValueType::UINT, nullptr, FL_(program), DeviceValueUOM::NONE, true);
     }
 
-    if (model == EMS_DEVICE_FLAG_RC35 || model == EMS_DEVICE_FLAG_RC30_1) {
+    if (model == EMS_DEVICE_FLAG_RC35 || model == EMS_DEVICE_FLAG_RC30_N) {
         register_device_value(tag, &hc->mode, DeviceValueType::ENUM, FL_(enum_mode3), FL_(mode), DeviceValueUOM::NONE, true);
         register_device_value(tag, &hc->modetype, DeviceValueType::ENUM, FL_(enum_modetype3), FL_(modetype), DeviceValueUOM::NONE);
         register_device_value(tag, &hc->daytemp, DeviceValueType::UINT, FL_(div2), FL_(daytemp), DeviceValueUOM::DEGREES, true);
