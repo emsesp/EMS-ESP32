@@ -458,8 +458,15 @@ void EMSdevice::register_device_value(uint8_t                             tag,
     devicevalues_.emplace_back(device_type_, tag, value_p, type, options, options_size, short_name, full_name, uom, has_cmd);
 }
 
-void EMSdevice::register_device_value(uint8_t tag, void * value_p, uint8_t type, const __FlashStringHelper * const * options, const __FlashStringHelper * const * name, uint8_t uom, bool has_cmd) {
-    register_device_value(tag, value_p, type, options, name[0], name[1], uom, has_cmd);
+void EMSdevice::register_device_value(uint8_t tag, void * value_p, uint8_t type, const __FlashStringHelper * const * options, const __FlashStringHelper * const * name, uint8_t uom, cmdfunction_p f) {
+    register_device_value(tag, value_p, type, options, name[0], name[1], uom, (f != nullptr));
+    if (f != nullptr) {
+        if (tag >= TAG_HC1 && tag <= TAG_HC4) {
+            Command::add(device_type_, name[0], f, FLAG_HC);
+        } else {
+            Command::add(device_type_, name[0], f, 0);
+        }
+    }
 }
 
 // looks up the uom (suffix) for a given key from the device value table

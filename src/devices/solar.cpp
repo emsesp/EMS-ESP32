@@ -50,8 +50,6 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
             register_telegram_type(0x0380, F("SM100CollectorConfig"), true, MAKE_PF_CB(process_SM100CollectorConfig));
             register_telegram_type(0x038E, F("SM100Energy"), true, MAKE_PF_CB(process_SM100Energy));
             register_telegram_type(0x0391, F("SM100Time"), true, MAKE_PF_CB(process_SM100Time));
-
-            register_cmd(F("SM100TankBottomMaxTemp"), MAKE_CF_CB(set_SM100TankBottomMaxTemp));
         }
     }
 
@@ -76,7 +74,7 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const s
     register_device_value(TAG_NONE, &tankBottomTemp2_, DeviceValueType::SHORT, FL_(div10), FL_(tank2BottomTemp), DeviceValueUOM::DEGREES);
     register_device_value(TAG_NONE, &heatExchangerTemp_, DeviceValueType::SHORT, FL_(div10), FL_(heatExchangerTemp), DeviceValueUOM::DEGREES);
 
-    register_device_value(TAG_NONE, &tankBottomMaxTemp_, DeviceValueType::UINT, nullptr, FL_(tankMaxTemp), DeviceValueUOM::DEGREES, true);
+    register_device_value(TAG_NONE, &tankBottomMaxTemp_, DeviceValueType::UINT, nullptr, FL_(tankMaxTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_SM100TankBottomMaxTemp));
     register_device_value(TAG_NONE, &solarPumpModulation_, DeviceValueType::UINT, nullptr, FL_(solarPumpModulation), DeviceValueUOM::PERCENT);
     register_device_value(TAG_NONE, &cylinderPumpModulation_, DeviceValueType::UINT, nullptr, FL_(cylinderPumpModulation), DeviceValueUOM::PERCENT);
 
