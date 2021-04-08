@@ -317,6 +317,7 @@ class EMSESPDevicesForm extends Component<EMSESPDevicesFormProps, EMSESPDevicesF
   renderDeviceData() {
     const { deviceData } = this.state;
     const { width } = this.props;
+    const me = this.props.authenticatedContext.me;
 
     if (this.noDevices()) {
       return;
@@ -350,7 +351,7 @@ class EMSESPDevicesForm extends Component<EMSESPDevicesFormProps, EMSESPDevicesF
                     return (
                       <TableRow hover key={i}>
                         <TableCell padding="checkbox" style={{ width: 18 }} >
-                          {deviceData.data[i + 3] && (
+                          {deviceData.data[i + 3] && me.admin && (
                             <IconButton edge="start" size="small" aria-label="Edit"
                               onClick={() => this.sendCommand(i)}>
                               <EditIcon fontSize="small" />
