@@ -31,7 +31,7 @@ class ValueForm extends React.Component<ValueFormProps> {
         return (
             <ValidatorForm onSubmit={onDoneEditing} ref={this.formRef}>
                 <Dialog  maxWidth="xs" onClose={onCancelEditing} aria-labelledby="user-form-dialog-title" open>
-                    <DialogTitle id="user-form-dialog-title">Modify the {devicevalue.name}</DialogTitle>
+                    <DialogTitle id="user-form-dialog-title">Change the {devicevalue.name}</DialogTitle>
                     <DialogContent dividers>
                         <TextValidator
                             validators={['required']}
@@ -46,7 +46,7 @@ class ValueForm extends React.Component<ValueFormProps> {
                         />
                         <Box color="warning.main" p={1} pl={0} pr={0} mt={0} mb={0}>
                             <Typography variant="body2">
-                                <i>Note: It may take a few seconds before the change is visible. If nothing happens check the logs.</i>
+                                <i>Note: it may take a few seconds before the change is visible. If nothing happens check the logs.</i>
                             </Typography>
                         </Box>
                     </DialogContent>

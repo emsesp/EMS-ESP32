@@ -36,6 +36,16 @@ const StyledTableCell = withStyles((theme: Theme) =>
   })
 )(TableCell);
 
+const CustomTooltip = withStyles((theme: Theme) => ({
+  tooltip: {
+    backgroundColor: theme.palette.secondary.main,
+    color: 'white',
+    boxShadow: theme.shadows[1],
+    fontSize: 11,
+    border: '1px solid #dadde9',
+  },
+}))(Tooltip);
+
 function compareDevices(a: Device, b: Device) {
   if (a.type < b.type) {
     return -1;
@@ -162,14 +172,14 @@ class EMSESPDevicesForm extends Component<EMSESPDevicesFormProps, EMSESPDevicesF
               {data.devices.sort(compareDevices).map((device) => (
                 <TableRow hover key={device.id} onClick={() => this.handleRowClick(device)}>
                   <TableCell>
-                    <Tooltip
+                    <CustomTooltip
                       title={"DeviceID:0x" + ("00" + device.deviceid.toString(16).toUpperCase()).slice(-2) + " ProductID:" + device.productid + " Version:" + device.version}
-                      arrow placement="right-end"
+                      placement="right-end"
                     >
                       <Button startIcon={<ListIcon />} size="small" variant="outlined">
                         {device.type}
                       </Button>
-                    </Tooltip>
+                    </CustomTooltip>
                   </TableCell>
                   <TableCell>{device.brand + " " + device.name} </TableCell>
                 </TableRow>
@@ -352,10 +362,13 @@ class EMSESPDevicesForm extends Component<EMSESPDevicesFormProps, EMSESPDevicesF
                       <TableRow hover key={i}>
                         <TableCell padding="checkbox" style={{ width: 18 }} >
                           {deviceData.data[i + 3] && me.admin && (
-                            <IconButton edge="start" size="small" aria-label="Edit"
-                              onClick={() => this.sendCommand(i)}>
-                              <EditIcon fontSize="small" />
-                            </IconButton>
+                            <CustomTooltip title="change value" placement="left-end"
+                            >
+                              <IconButton edge="start" size="small" aria-label="Edit"
+                                onClick={() => this.sendCommand(i)}>
+                                <EditIcon color="primary" fontSize="small" />
+                              </IconButton>
+                            </CustomTooltip>
                           )}
                         </TableCell>
                         <TableCell padding="none" component="th" scope="row">{deviceData.data[i + 2]}</TableCell>
