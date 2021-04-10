@@ -9,7 +9,7 @@ const fs = require('fs');
 
 module.exports = function override(config, env) {
   if (env === "production") {
-    // rename the ouput file, we need it's path to be short, for SPIFFS
+    // rename the output file, we need it's path to be short for LittleFS
     config.output.filename = 'js/[id].[chunkhash:4].js';
     config.output.chunkFilename = 'js/[id].[chunkhash:4].js';
 
