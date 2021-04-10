@@ -141,6 +141,9 @@ enum DeviceValueTAG : uint8_t {
 // mqtt flags for command subscriptions
 enum MqttSubFlag : uint8_t { FLAG_NORMAL = 0, FLAG_HC, FLAG_WWC, FLAG_NOSUB };
 
+// mqtt-HA flags
+enum DeviceValueHA : uint8_t { HA_NONE = 0, HA_VALUE, HA_DONE};
+
 class EMSdevice {
   public:
     virtual ~EMSdevice() = default; // destructor of base class must always be virtual because it's a polymorphic class
@@ -407,6 +410,7 @@ class EMSdevice {
         const __FlashStringHelper *         short_name;   // used in MQTT
         const __FlashStringHelper *         full_name;    // used in Web and Console
         uint8_t                             uom;          // DeviceValueUOM::*
+        uint8_t                             ha;           // DevcieValueHA::
         bool                                has_cmd;      // true if there is a Console/MQTT command which matches the short_name
 
         DeviceValue(uint8_t                             device_type,
@@ -418,6 +422,7 @@ class EMSdevice {
                     const __FlashStringHelper *         short_name,
                     const __FlashStringHelper *         full_name,
                     uint8_t                             uom,
+                    uint8_t                             ha,
                     bool                                has_cmd)
             : device_type(device_type)
             , tag(tag)
@@ -428,6 +433,7 @@ class EMSdevice {
             , short_name(short_name)
             , full_name(full_name)
             , uom(uom)
+            , ha(ha)
             , has_cmd(has_cmd) {
         }
     };

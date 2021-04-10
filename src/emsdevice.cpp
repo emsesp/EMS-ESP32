@@ -455,7 +455,7 @@ void EMSdevice::register_device_value(uint8_t                             tag,
         };
     }
 
-    devicevalues_.emplace_back(device_type_, tag, value_p, type, options, options_size, short_name, full_name, uom, has_cmd);
+    devicevalues_.emplace_back(device_type_, tag, value_p, type, options, options_size, short_name, full_name, uom, 0, has_cmd);
 }
 
 void EMSdevice::register_device_value(uint8_t tag, void * value_p, uint8_t type, const __FlashStringHelper * const * options, const __FlashStringHelper * const * name, uint8_t uom, cmdfunction_p f) {
@@ -617,11 +617,12 @@ bool EMSdevice::generate_values_json_web(JsonObject & json) {
 // return false if empty
 // this is used to create both the MQTT payloads and Console messages (console = true)
 bool EMSdevice::generate_values_json(JsonObject & root, const uint8_t tag_filter, const bool nested, const bool console) {
-    bool       has_value = false; // to see if we've added a value. it's faster than doing a json.size() at the end
-    uint8_t    old_tag   = 255;   // NAN
-    JsonObject json      = root;
+    bool       has_values = false; // to see if we've added a value. it's faster than doing a json.size() at the end
+    uint8_t    old_tag    = 255;   // NAN
+    JsonObject json       = root;
 
-    for (const auto & dv : devicevalues_) {
+    for (auto & dv : devicevalues_) {
+        bool has_value = false;
         // only show if tag is either empty (TAG_NONE) or matches a value
         // and don't show if full_name is empty unless we're outputing for mqtt payloads
         // for nested we use all values
@@ -753,20 +754,24 @@ bool EMSdevice::generate_values_json(JsonObject & root, const uint8_t tag_filter
                 }
             }
         }
+        dv.ha      |= has_value ? DeviceValueHA::HA_VALUE : DeviceValueHA::HA_NONE;
+        has_values |= has_value;
     }
 
-    return has_value;
+    return has_values;
 }
 
 // create the Home Assistant configs for each value
-// this is called when an MQTT publish is done via an EMS Device, and only done once
+// this is called when an MQTT publish is done via an EMS Device
 void EMSdevice::publish_mqtt_ha_sensor() {
-    for (const auto & dv : devicevalues_) {
-        Mqtt::publish_mqtt_ha_sensor(dv.type, dv.tag, dv.full_name, device_type_, dv.short_name, dv.uom);
+    for (auto & dv : devicevalues_) {
+        if (dv.ha == DeviceValueHA::HA_VALUE) {
+            Mqtt::publish_mqtt_ha_sensor(dv.type, dv.tag, dv.full_name, device_type_, dv.short_name, dv.uom);
+            dv.ha |= DeviceValueHA::HA_DONE;
+        }
     }
-
-    bool ok = publish_ha_config();
-    ha_config_done(ok); // see if it worked
+    // bool ok = publish_ha_config();
+    // ha_config_done(ok); // see if it worked
 }
 
 // return the name of the telegram type
