@@ -423,7 +423,7 @@ void EMSESP::reset_mqtt_ha() {
     }
 
     for (const auto & emsdevice : emsdevices) {
-        emsdevice->ha_config_done(false);
+        emsdevice->ha_config_clear();
     }
     dallassensor_.reload();
 }

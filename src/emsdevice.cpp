@@ -770,8 +770,17 @@ void EMSdevice::publish_mqtt_ha_sensor() {
             dv.ha |= DeviceValueHA::HA_DONE;
         }
     }
-    // bool ok = publish_ha_config();
-    // ha_config_done(ok); // see if it worked
+    if (!ha_config_done()) {
+        bool ok = publish_ha_config();
+        ha_config_done(ok); // see if it worked
+    }
+}
+
+void EMSdevice::ha_config_clear() {
+    for (auto & dv : devicevalues_) {
+        dv.ha &= ~DeviceValueHA::HA_DONE;
+    }
+    ha_config_done(false);
 }
 
 // return the name of the telegram type

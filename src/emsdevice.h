@@ -300,6 +300,8 @@ class EMSdevice {
         ha_config_done_ = v;
     }
 
+    void ha_config_clear();
+
     enum Brand : uint8_t {
         NO_BRAND = 0, // 0
         BOSCH,        // 1
