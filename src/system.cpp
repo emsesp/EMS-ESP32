@@ -142,6 +142,7 @@ void System::syslog_start() {
     if (syslog_enabled_) {
 #ifndef EMSESP_STANDALONE
         syslog_.start();
+        syslog_.log_level((uuid::log::Level)syslog_level_);
 #endif
         EMSESP::logger().info(F("Starting Syslog"));
     }
